@@ -780,7 +780,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll->LineBreak();
    ll->SetFontSize(8);
    ll->Insert("                 ");
-   ll->Insert(_("This software is provied 'as is' and without any express or implied"));
+   ll->Insert(_("This software is provied 'as is' and without any expressed or implied"));
    ll->LineBreak();
    ll->Insert("                 ");
    ll->Insert(_("warranties, including, without limitation, the implied warranties"));

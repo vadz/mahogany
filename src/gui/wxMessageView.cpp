@@ -639,7 +639,7 @@ wxMessageView::Find(const wxString &what)
                       _("Find string in message"),
                       _("   Find:"),
                       this,
-                      "MsgVi      ewFindString", "")
+                      "MsgViewFindString", "")
           || strutil_isempty(m_FindString))
          return true;
    }
