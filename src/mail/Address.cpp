@@ -268,7 +268,11 @@ operator==(const AddressList_obj& addrList1, const AddressList_obj& addrList2)
 // global functions
 // ----------------------------------------------------------------------------
 
-bool ContainsOwnAddress(const String& str, Profile *profile)
+bool
+ContainsOwnAddress(const String& str,
+                   Profile *profile,
+                   OwnAddressKind kind,
+                   String *own)
 {
    // get the list of our own addresses
    String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
@@ -280,12 +284,15 @@ bool ContainsOwnAddress(const String& str, Profile *profile)
 
    wxArrayString addresses = strutil_restore_array(returnAddrs);
 
-   // and also add the mailing list addresses because we consider them to be
-   // "own" as well -- after all we're probably subscribed to them
-   wxArrayString addressesML = strutil_restore_array(
-                                 READ_CONFIG(profile, MP_LIST_ADDRESSES)
-                               );
-   WX_APPEND_ARRAY(addresses, addressesML);
+   if ( kind == OwnAddress_To )
+   {
+      // if we're interested in "own receipient" addresses, add the mailing
+      // list addresses because we normally do get mail from them
+      wxArrayString addressesML = strutil_restore_array(
+                                    READ_CONFIG(profile, MP_LIST_ADDRESSES)
+                                  );
+      WX_APPEND_ARRAY(addresses, addressesML);
+   }
 
    const size_t count = addresses.GetCount();
 
@@ -320,6 +327,9 @@ bool ContainsOwnAddress(const String& str, Profile *profile)
          if ( addr->GetMailbox().Matches(mailbox) &&
                   addr->GetDomain().Matches(domain) )
          {
+            if ( own )
+               *own = addresses[n];
+
             return true;
          }
       }

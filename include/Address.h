@@ -152,8 +152,34 @@ END_DECLARE_AUTOPTR();
 extern bool operator==(const AddressList_obj& addrList1,
                        const AddressList_obj& addrList2);
 
-/// check whether the given string contains at least one of our own addresses
-extern bool ContainsOwnAddress(const String& str, Profile *profile);
+/// Values for ContainsOwnAddress() last parameter
+enum OwnAddressKind
+{
+   /// The addresses the user uses for "From:"
+   OwnAddress_From,
+
+   /// The addresses which can reach this user (this includes MLs, ...)
+   OwnAddress_To,
+
+   /// End of enum marker
+   OwnAddress_Max
+};
+
+/**
+   Check whether the given string contains at least one of our own addresses.
+
+   Check if the given address apepars in list of our own addresses, as defined
+   by kind parameter.
+
+   @param str the address to check
+   @param profile to get the own addresses from
+   @param kind of the "own" addresses to check
+   @param own the address which did match, if any
+ */
+extern bool ContainsOwnAddress(const String& str,
+                               Profile *profile,
+                               OwnAddressKind kind = OwnAddress_To,
+                               String *own = NULL);
 
 /// Modifies <mailto:(.*)> to <$1> and removes other <[a-z]+:.*> parts
 extern String FilterAddressList(const String& original);
