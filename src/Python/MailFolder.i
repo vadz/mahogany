@@ -211,11 +211,6 @@ public:
    /// Count number of recent messages.
    virtual unsigned long CountRecentMessages(void);
 
-   /** Count number of new messages but only if a listing is
-       available, returns UID_ILLEGAL otherwise.
-   */
-   virtual unsigned long CountNewMessagesQuick(void);
-
    /** Check whether mailbox has changed. */
    virtual void Ping(void);
 

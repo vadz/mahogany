@@ -435,27 +435,6 @@ static PyObject *_wrap_MailFolder_CountRecentMessages(PyObject *self, PyObject *
     return _resultobj;
 }
 
-#define MailFolder_CountNewMessagesQuick(_swigobj)  (_swigobj->CountNewMessagesQuick())
-static PyObject *_wrap_MailFolder_CountNewMessagesQuick(PyObject *self, PyObject *args) {
-    PyObject * _resultobj;
-    unsigned long  _result;
-    MailFolder * _arg0;
-    char * _argc0 = 0;
-
-    self = self;
-    if(!PyArg_ParseTuple(args,"s:MailFolder_CountNewMessagesQuick",&_argc0)) 
-        return NULL;
-    if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MailFolder_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MailFolder_CountNewMessagesQuick. Expected _MailFolder_p.");
-        return NULL;
-        }
-    }
-    _result = (unsigned long )MailFolder_CountNewMessagesQuick(_arg0);
-    _resultobj = Py_BuildValue("l",_result);
-    return _resultobj;
-}
-
 #define MailFolder_Ping(_swigobj)  (_swigobj->Ping())
 static PyObject *_wrap_MailFolder_Ping(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
@@ -2231,7 +2210,6 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "MailFolder_DeleteMessage", _wrap_MailFolder_DeleteMessage, 1 },
 	 { "MailFolder_GetMessage", _wrap_MailFolder_GetMessage, 1 },
 	 { "MailFolder_Ping", _wrap_MailFolder_Ping, 1 },
-	 { "MailFolder_CountNewMessagesQuick", _wrap_MailFolder_CountNewMessagesQuick, 1 },
 	 { "MailFolder_CountRecentMessages", _wrap_MailFolder_CountRecentMessages, 1 },
 	 { "MailFolder_CountNewMessages", _wrap_MailFolder_CountNewMessages, 1 },
 	 { "MailFolder_CountMessages", _wrap_MailFolder_CountMessages, 1 },

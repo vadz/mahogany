@@ -42,9 +42,6 @@ class MailFolderPtr(MObjectRCPtr):
     def CountRecentMessages(self):
         val = MailFolderc.MailFolder_CountRecentMessages(self.this)
         return val
-    def CountNewMessagesQuick(self):
-        val = MailFolderc.MailFolder_CountNewMessagesQuick(self.this)
-        return val
     def Ping(self):
         val = MailFolderc.MailFolder_Ping(self.this)
         return val
