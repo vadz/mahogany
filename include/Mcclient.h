@@ -21,7 +21,8 @@ extern "C"
 #     include <nntp.h>
 #     include <misc.h>
 #   undef private   
-
+// stupid c-client lib redefines utime() in an incompatible way
+#   undef utime
 }
 
 #endif  //MCCLIENT_H

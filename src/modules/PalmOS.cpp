@@ -72,7 +72,7 @@ class PalmBook;
 
 
 // to prevent a warning from linux headers
-#define __STRICT_ANSI__
+//#define __STRICT_ANSI__
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
