@@ -36,6 +36,13 @@
 #include "mail/FolderPool.h"
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// our debugging trace mask
+#define TRACE_MFPOOL "mfpool"
+
+// ----------------------------------------------------------------------------
 // global module variables
 // ----------------------------------------------------------------------------
 
@@ -200,6 +207,8 @@ MFPool::Add(MFDriver *driver,
    CHECK_RET( !conn, "MFPool::Add(): folder already in the pool" );
 
    pool->connections.push_back(new MFConnection(mf, spec));
+
+   wxLogTrace(TRACE_MFPOOL, "Added '%s' to the pool.", mf->GetName().c_str());
 }
 
 /* static */
@@ -243,6 +252,9 @@ bool MFPool::Remove(MailFolder *mf)
       {
          if ( i->mf == mf )
          {
+            wxLogTrace(TRACE_MFPOOL, "Removing '%s' from the pool.",
+                       mf->GetName().c_str());
+
             pool->connections.erase(i);
 
             // there can be only one node containing this folder so stop here
@@ -257,6 +269,8 @@ bool MFPool::Remove(MailFolder *mf)
 /* static */
 void MFPool::DeleteAll()
 {
+   wxLogTrace(TRACE_MFPOOL, "Clearing the pool.");
+
    for ( MFClassPoolList::iterator pool = gs_pool.begin();
          pool != gs_pool.end();
          ++pool )
