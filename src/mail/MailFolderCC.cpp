@@ -1517,10 +1517,16 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             break;
          }
 
-         if ( encoding == wxFONTENCODING_SYSTEM )
+         if ( encoding != wxFONTENCODING_SYSTEM )
          {
-            encoding = wxFontMapper::Get()->CharsetToEncoding(csName);
+            // this is a bug (well, missing feature) in Mahogany but so far
+            // I've never seen this happen -- in principle, it is, of course,
+            // possible
+            wxLogDebug(_T("This header contains encoded words with different ")
+                       _T("encodings and won't be rendered correctly."));
          }
+
+         encoding = wxFontMapper::Get()->CharsetToEncoding(csName);
 
          // get the encoding in RFC 2047 sense
          enum
@@ -1616,6 +1622,38 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             }
 
             text = (char *)rfc822_qprint(start, lenEncWord, &len);
+         }
+
+         // normally we leave the (8 bit) string as is and remember its
+         // encoding so that we may choose the font for displaying it
+         // correctly, but in case of UTF-7/8 we really need to transform it
+         // here as we don't have any UTF-7/8 fonts, so we should display a
+         // different string
+         if ( encoding == wxFONTENCODING_UTF7 ||
+                  encoding == wxFONTENCODING_UTF8 )
+         {
+            // the wide string can have at most as many chars as the narrow one
+            wxWCharBuffer wbuf(len);
+            len = (encoding == wxFONTENCODING_UTF7 ? (wxMBConv *)&wxConvUTF7
+                                                   : (wxMBConv *)&wxConvUTF8)->
+                     MB2WC(wbuf.data(), text, len);
+
+            // this also means that we have enough space in the old string
+            // now...
+            const wchar_t *pw = wbuf;
+            char *p = text;
+            for ( size_t n = 0; n < len; n++, pw++ )
+            {
+               // throw away all non ASCII chars, we have no hope of showing
+               // them correctly anyhow
+               //
+               // do keep 8 bit chars with high bit set as they're the same as
+               // iso8859-1
+               *p++ = *pw > UCHAR_MAX ? '?' : *pw;
+            }
+
+            // we have thrown anything else out above
+            encoding = wxFONTENCODING_ISO8859_1;
          }
 
          out += String(text, (size_t)len);
