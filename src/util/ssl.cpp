@@ -107,6 +107,8 @@ SSL_DEF( int, SSL_CIPHER_get_bits, (SSL_CIPHER *c, int *alg_bits), (c,alg_bits) 
 SSL_DEF( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s), (s) );
 SSL_DEF( int, SSL_get_fd, (SSL *s), (s) );
 SSL_DEF( int, SSL_set_fd, (SSL *s, int fd), (s, fd) );
+SSL_DEF( int, SSL_get_error, (SSL *s, int ret_code) );
+SSL_DEF( X509 *, SSL_get_peer_certificate, (SSL *s) );
 
 SSL_DEF_VOID( RAND_seed, (const void *buf,int num), (buf, num) );
 SSL_DEF( BIO *, BIO_new_socket, (int sock, int close_flag), (sock, close_flag) );
@@ -134,14 +136,8 @@ SSL_DEF( char *, X509_NAME_oneline, (X509_NAME *a,char *buf,int size), (a,buf,si
 SSL_DEF( int, SSL_shutdown, (SSL *s), (s) );
 SSL_DEF_VOID( SSL_CTX_free, (SSL_CTX *ctx), (ctx) );
 SSL_DEF( RSA *, RSA_generate_key, (int bits, unsigned long e,void (*cb)(int,int,void *),void *cb_arg), (bits,e,cb,cb_arg) );
-
-#   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
-SSL_DEF(SSL_METHOD *, SSLv3_client_method, (void), () );
-#   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
 SSL_DEF(int, TLSv1_client_method, (void), () );
-#   else
 SSL_DEF(SSL_METHOD *, SSLv23_client_method, (void), () );
-#   endif
 
 #undef SSL_DEF
 
@@ -195,13 +191,10 @@ bool InitSSL(void) /* FIXME: MT */
    SSL_LOOKUP(SSL_CIPHER_get_bits);
    SSL_LOOKUP(SSL_get_fd);
    SSL_LOOKUP(SSL_set_fd);
-#if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
-   SSL_LOOKUP(SSLv3_client_method );
-#elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
+   SSL_LOOKUP(SSL_get_error);
+   SSL_LOOKUP(SSL_get_peer_certificate);
    SSL_LOOKUP(TLSv1_client_method );
-#else
    SSL_LOOKUP(SSLv23_client_method );
-#endif
 
    gs_SSL_available =
    gs_SSL_loaded = true;
