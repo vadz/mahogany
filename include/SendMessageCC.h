@@ -10,8 +10,8 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SENDMESSAGECC_H
-#define SENDMESSAGECC_H
+#ifndef _SENDMESSAGECC_H
+#define _SENDMESSAGECC_H
 
 #ifdef   __GNUG__
 #   pragma interface "SendMessageCC.h"
@@ -305,5 +305,5 @@ private:
    friend class Rfc822OutputRedirector;
 };
 
+#endif // _SENDMESSAGECC_H
 
-#endif

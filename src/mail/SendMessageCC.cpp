@@ -126,11 +126,27 @@ enum MimeEncoding
 #define TRACE_SEND   _T("send")
 
 // ----------------------------------------------------------------------------
-// prototypes
+// private functions
 // ----------------------------------------------------------------------------
 
 static long write_stream_output(void *, char *);
 static long write_str_output(void *, char *);
+
+static inline
+bool IsAddressHeader(const String& name)
+{
+   return name == _T("TO") || name == _T("CC") || name == _T("BCC");
+}
+
+static inline
+bool HeaderCanBeSetByUser(const String& name)
+{
+   return name != _T("MIME-VERSION") &&
+          name != _T("CONTENT-TYPE") &&
+          name != _T("CONTENT-DISPOSITION") &&
+          name != _T("CONTENT-TRANSFER-ENCODING") &&
+          name != _T("MESSAGE-ID");
+}
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -475,11 +491,10 @@ SendMessageCC::InitFromMsg(const Message *message)
 
    InitBody();
 
-   SetSubject(message->Subject());
+   // set the headers not supported by AddHeaderEntry()
 
    // VZ: I'm not sure at all about what exactly we're trying to do here so
-   //     this is almost surely wrong - but the old code was even more wrong
-   //     than the current one! (FIXME)
+   //     this is almost surely wrong (FIXME)
    AddressList_obj addrListReplyTo(message->GetAddressList(MAT_REPLYTO));
    Address *addrReplyTo = addrListReplyTo ? addrListReplyTo->GetFirst() : NULL;
 
@@ -529,6 +544,19 @@ SendMessageCC::InitFromMsg(const Message *message)
          FAIL_MSG(_T("unknown protocol"));
    }
 
+   // next deal with the remaining headers
+   String name,
+          value,
+          nameUpper;
+   HeaderIterator hdrIter = message->GetHeaderIterator();
+   while ( hdrIter.GetNext(&name, &value) )
+   {
+      nameUpper = name.Upper();
+      if ( !IsAddressHeader(nameUpper) && HeaderCanBeSetByUser(nameUpper) )
+         AddHeaderEntry(name, value);
+   }
+
+   // finally fill the body with the message contents
    const int count = message->CountParts();
    for(int i = 0; i < count; i++)
    {
@@ -548,36 +576,6 @@ SendMessageCC::InitFromMsg(const Message *message)
          &plist
       );
    }
-
-   String header = message->GetHeader();
-   String headerLine;
-   const wxChar *cptr = header;
-   String name, value;
-   do
-   {
-      while(*cptr && *cptr != '\r' && *cptr != '\n')
-         headerLine << *cptr++;
-      while(*cptr == '\r' || *cptr == '\n')
-         cptr ++;
-      if(*cptr == ' ' || *cptr == '\t') // continue
-      {
-         while(*cptr == ' ' || *cptr == '\t')
-            cptr++;
-         continue;
-      }
-      // end of this line
-      name = headerLine.BeforeFirst(':').Lower();
-      value = headerLine.AfterFirst(':');
-      if ( name != _T("date") &&
-           name != _T("from") &&
-           name != _T("message-id") &&
-           name != _T("mime-version") &&
-           name != _T("content-type") &&
-           name != _T("content-disposition") &&
-           name != _T("content-transfer-encoding") )
-         AddHeaderEntry(name, value);
-      headerLine = _T("");
-   } while ( *cptr && *cptr != '\012' );
 }
 
 SendMessageCC::~SendMessageCC()
@@ -1138,28 +1136,20 @@ SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
 
    strutil_delwhitespace(name);
 
-   if (name == _T("TO"))
-      ; //TODO: Fix this?SetAddresses(*value);
-   else if(name == _T("CC"))
-      ; //SetAddresses("",*value);
-   else if(name == _T("BCC"))
-      ; //SetAddresses("","",*value);
-   else if ( name == _T("MIME-VERSION") ||
-             name == _T("CONTENT-TYPE") ||
-             name == _T("CONTENT-DISPOSITION") ||
-             name == _T("CONTENT-TRANSFER-ENCODING") ||
-             name == _T("MESSAGE-ID") )
+   if ( IsAddressHeader(name) )
+   {
+      FAIL_MSG( _T("Address headers not supported here, use SetFrom() &c!") );
+   }
+   else if ( !HeaderCanBeSetByUser(name) )
    {
       ERRORMESSAGE((_("The value of the header '%s' cannot be modified."),
-                    name.c_str()));
-
-      return;
+                    nameIn.c_str()));
    }
    else if ( name == _T("SUBJECT") )
    {
       SetSubject(value);
    }
-   else // any other headers
+   else // all the other headers
    {
       MessageHeadersList::iterator i = FindHeaderEntry(name);
       if ( i != m_extraHeaders.end() )
