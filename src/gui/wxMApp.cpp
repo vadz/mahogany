@@ -479,14 +479,10 @@ wxMApp::OnInit()
 #endif // wxUSE_POSTSCRIPT
 
       // start a timer to autosave the profile entries
-      long delay = READ_APPCONFIG(MP_AUTOSAVEDELAY)*1000;
-      if ( delay > 0 )
-         gs_timerAutoSave.Start(delay);
+      StartTimer(Timer_Autosave);
 
       // start another timer to poll for new mail:
-      delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY)*1000;
-      if ( delay > 0 )
-         gs_timerMailCollection.Start(delay);
+      StartTimer(Timer_PollIncoming);
 
       // restore the normal behaviour (see the comments above)
       SetExitOnFrameDelete(TRUE);
@@ -516,8 +512,8 @@ int wxMApp::OnRun()
 int wxMApp::OnExit()
 {
    // disable timers for autosave and mail collection, won't need them any more
-   gs_timerAutoSave.Stop();
-   gs_timerMailCollection.Stop();
+   StopTimer(Timer_Autosave);
+   StopTimer(Timer_PollIncoming);
 
 #if wxUSE_POSTSCRIPT
    // save our preferred printer settings
@@ -628,4 +624,58 @@ wxMApp::Help(int id, wxWindow *parent)
       }
       break;
    }
+}
+
+// ----------------------------------------------------------------------------
+// timer stuff
+// ----------------------------------------------------------------------------
+
+bool wxMApp::StartTimer(Timer timer)
+{
+   long delay;
+
+   switch ( timer )
+   {
+      case Timer_Autosave:
+         delay = READ_APPCONFIG(MP_AUTOSAVEDELAY)*1000;
+
+         return (delay == 0) || gs_timerAutoSave.Start(delay);
+
+      case Timer_PollIncoming:
+         delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY)*1000;
+
+         return (delay == 0) || gs_timerMailCollection.Start(delay);
+
+      case Timer_PingFolder:
+         // TODO!!!
+         return true;
+
+      default:
+         wxFAIL_MSG("attempt to start an unknown timer");
+         return false;
+   }
+}
+
+bool wxMApp::StopTimer(Timer timer)
+{
+   switch ( timer )
+   {
+      case Timer_Autosave:
+         gs_timerAutoSave.Stop();
+         break;
+
+      case Timer_PollIncoming:
+         gs_timerMailCollection.Stop();
+         break;
+
+      case Timer_PingFolder:
+         // TODO!!!
+         break;
+
+      default:
+         wxFAIL_MSG("attempt to stop an unknown timer");
+         return false;
+   }
+
+   return true;
 }

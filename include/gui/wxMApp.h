@@ -39,6 +39,9 @@ public:
    virtual void OnFatalException() { OnAbnormalTermination(); }
    virtual void OnAbnormalTermination();
 
+   virtual bool StartTimer(Timer timer);
+   virtual bool StopTimer(Timer timer);
+
    // override this to return true only if all frames can close
    virtual bool CanClose() const;
 

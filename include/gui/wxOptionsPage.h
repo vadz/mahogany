@@ -217,6 +217,11 @@ public:
    void OnModifyFolder(wxCommandEvent&);
    void OnDeleteFolder(wxCommandEvent&);
 
+protected:
+   // remember the old values for the global timers settings in these vars
+   long m_nIncomingDelay,
+        m_nPingDelay;
+
 private:
    DECLARE_EVENT_TABLE()
 };

@@ -587,6 +587,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
+
    // python
 #ifdef USE_PYTHON
    CONFIG_NONE(),
@@ -1297,6 +1298,7 @@ wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
 bool wxOptionsPageFolders::TransferDataToWindow()
 {
    bool bRc = wxOptionsPage::TransferDataToWindow();
+
    if ( bRc ) {
       // we add the folder opened in the main frame to the list of folders
       // opened on startup if it's not yet among them
@@ -1306,6 +1308,9 @@ bool wxOptionsPageFolders::TransferDataToWindow()
       if ( n == -1 ) {
          listbox->Append(strMain);
       }
+
+      m_nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
+      m_nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
    }
 
    return bRc;
@@ -1322,7 +1327,34 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
       listbox->Delete(n);
    }
 
-   return wxOptionsPage::TransferDataFromWindow();
+   bool rc = wxOptionsPage::TransferDataFromWindow();
+   if ( rc )
+   {
+      long nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY),
+           nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
+
+      if ( nIncomingDelay != m_nIncomingDelay )
+      {
+         wxLogDebug("Restarting timer for polling incoming folders");
+
+         rc = mApplication->RestartTimer(MAppBase::Timer_PollIncoming);
+      }
+
+      if ( rc && (nPingDelay != m_nPingDelay) )
+      {
+         wxLogDebug("Restarting timer for pinging folders");
+
+         rc = mApplication->RestartTimer(MAppBase::Timer_PingFolder);
+      }
+
+      if ( !rc )
+      {
+         wxLogError(_("Failed to restart the timers, please change the "
+                      "delay to a valid value"));
+      }
+   }
+
+   return rc;
 }
 
 void wxOptionsPageFolders::OnNewFolder(wxCommandEvent& event)

@@ -83,7 +83,7 @@ public:
       It also checks whether any MailFolders are in critical sections
       and will prompt the user whether to ignore this or not.
       @return true if it is ok to exit the application
-      
+
    */
    virtual bool CanClose(void) const;
 
@@ -165,7 +165,21 @@ public:
    void AddKeepOpenFolder(const String name);
    /// Remove folder from list of folders to keep open:, true on success
    bool RemoveKeepOpenFolder(const String name);
-   
+
+   /// the application maintains several global timers
+   enum Timer
+   {
+      Timer_Autosave,
+      Timer_PollIncoming,
+      Timer_PingFolder,
+   };
+
+   virtual bool StartTimer(Timer timer) = 0;
+   virtual bool StopTimer(Timer timer) = 0;
+
+   bool RestartTimer(Timer timer)
+      { return StopTimer(timer) && StartTimer(timer); }
+
 protected:
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
@@ -207,7 +221,7 @@ protected:
    class MailCollector *m_MailCollector;
    /// registration seed for EventManager
    void *m_eventReg;
-   
+
    /// list of frames to not ask again in CanClose()
    ArrayFrames *m_framesOkToClose;
 };
