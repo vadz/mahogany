@@ -355,7 +355,7 @@ then
   autoconf && \
 	./configure \
 	$SHAREDFLAG \
-	--with-gtk \
+	--with-gtk --disable-joystick \
 	$DEBUGOPTS \
 	--prefix=$WXPREFIX \
 	--disable-optimise >config.output && \
