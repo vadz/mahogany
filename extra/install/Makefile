@@ -16,7 +16,7 @@ install:
 	set -e; for i in $(SUB_DIRS); do  $(MAKE) -C $$i ; done
 	$(INSTALL) -d $(DATADIR)/afm
 	$(INSTALL_DATA) afm/*.afm $(DATADIR)/afm
-	$(INSTALL_DATA) newmail.wav $(DATADIR)
+	$(INSTALL_DATA) newmail.wav kylemail.wav $(DATADIR)
 #	$(INSTALL_DATA) mailcap $(DATADIR)
 	$(INSTALL_DATA) M.conf $(DATADIR)
 
