@@ -124,6 +124,8 @@ public:
    // get the index of the selected item in the listbox
    int GetSelection() const { return m_listbox->GetSelection(); }
 
+   virtual bool TransferDataToWindow();
+
    // control ids
    enum
    {
@@ -473,9 +475,16 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_listbox->SetConstraints(c);
 
-   m_listbox->SetFocus();
-
    SetDefaultSize(5*wBtn, 10*hBtn);
+}
+
+bool wxAdbExpandDialog::TransferDataToWindow()
+{
+   m_listbox->SetFocus();
+   if ( m_listbox->GetCount() )
+      m_listbox->Select(0);
+
+   return true;
 }
 
 void wxAdbExpandDialog::OnBtnMore(wxCommandEvent& event)
