@@ -932,11 +932,17 @@ SendMessageCC::Send(void)
             if ( written == msgText.Length() )
             {
                String command;
-               command.Printf(
-                  "cat \"%s\" | %s",
-                  filename, m_SendmailCmd.c_str());
-               success = (wxExecute(command) == 0);
-               wxRemove(filename);
+               command.Printf("%s < '%s'; exec /bin/rm -f '%s'",
+                              m_SendmailCmd.c_str(),
+                              filename, filename);
+               // HORRIBLE HACK: this should be `const char *' but wxExecute's
+               // prototype doesn't allow it...
+               char *argv[4];
+               argv[0] = (char *)"/bin/sh";
+               argv[1] = (char *)"-c";
+               argv[2] = (char *)command.c_str();
+               argv[3] = 0;  // NULL
+               success = (wxExecute(argv) != 0);
             }
          }
       }
