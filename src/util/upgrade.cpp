@@ -738,12 +738,17 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
       "\n"
       "This wizard will help you to setup the most\n"
       "important settings needed to successfully use\n"
-      "the program. You don't need to specify everything\n"
-      "here - it can also be done later by opening the\n"
-      "'Options' dialog - but if you do fill the, you\n"
-      "should be able to start the program immediately.\n"
+      "the program. You don't need to specify all of\n"
+      "them here and now - you can always change all\n"
+      "the program options later from the \"Preferences\"\n"
+      "dialog accessible via the \"Edit\" menu.\n"
       "\n"
-      "If you decide to not use the dialog, just check\n"
+      "However, the wizard may be helpful to setup a\n"
+      "working default configuration and we advise you\n"
+      "to complete it, especially if you are new to\n"
+      "Mahogany.\n"
+      "\n"
+      "If you still decide to not use it, just check\n"
       "the box below or press [Cancel] at any moment."
                                          ));
 
@@ -1593,12 +1598,28 @@ bool RunInstallWizard()
    // case we assume he is so advanced that he doesn't need this stuff)
    if ( wizardDone )
    {
+      MProgressInfo proginfo(NULL, _("Sending the test message..."));
+
+      // send a test message unless disabled
+      //
+      // NB: we can't send email if we don't have SMTP server configured
+      if ( gs_installWizardData.sendTestMsg &&
+            !gs_installWizardData.smtp.empty() )
+      {
+         VerifyEMailSendingWorks();
+      }
+
+      // and create the welcome message in the new mail folder
       MFolder_obj folderMain(mainFolderName);
 
       MailFolder *mf = MailFolder::OpenFolder(folderMain);
 
       if ( mf )
       {
+         // this might take a long time if the new mail folder already exists
+         // and has a lot of messages
+         proginfo.SetLabel(_("Creating the welcome message..."));
+
          // make the lines short enough to ensure they're not wrapped with the
          // default line wrap setting (60 columns)
          String msgFmt =
@@ -1742,8 +1763,6 @@ UpgradeFromNone()
 #ifdef USE_WIZARD // new code which uses the configuration wizard
    (void)RunInstallWizard();
 
-   // we can't send email if we don't have SMTP server configured
-   if ( gs_installWizardData.sendTestMsg && !gs_installWizardData.smtp.empty() )
 #else // old code which didn't use the setup wizard
    wxLog *log = wxLog::GetActiveTarget();
    if ( log ) {
@@ -1754,9 +1773,6 @@ UpgradeFromNone()
    }
    ShowOptionsDialog();
 #endif // USE_WIZARD/!USE_WIZARD
-   {
-      VerifyEMailSendingWorks();
-   }
 
    return true;
 }
