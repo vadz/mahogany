@@ -324,6 +324,14 @@ ProfileBase::CreateGlobalConfig(const String & filename)
    return new wxConfigProfile(filename);
 }
 
+ProfileBase *
+ProfileBase::CreateFolderProfile(const String & iClassName,
+                                 ProfileBase const *parent)
+{
+   return Profile::CreateFolderProfile(iClassName,parent);
+}
+
+
 String
 ProfileBase::readEntry(const String & key,
                        const char *defaultvalue) const
