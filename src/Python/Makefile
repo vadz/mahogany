@@ -15,14 +15,20 @@ OBJECTS    = $(CPPTARGETS:.cpp=.o) $(CPPSRC:.cpp=.o)
 
 all:	$(OBJECTS)
 
-swiglib.cpp: swiglib.i
-	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
-
 .PHONY: mkswig all
 
 include ../../makerules 
 include ../../makeopts
 include .depend
+
+ifdef USE_SWIG
+swiglib.cpp: swiglib.i
+	$(SWIG) $(SWIGFLAGS_LIBSWIG) -o $(ODIR)/$@ $<
+else
+swiglib.cpp: swiglib.i
+	touch $(ODIR)/$@ 
+endif
+
 
 install:
 	$(INSTALL) -d $(DATADIR)/scripts

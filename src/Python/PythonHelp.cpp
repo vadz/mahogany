@@ -34,6 +34,8 @@ extern "C"
    void SWIG_MakePtr(char *_c, const void *_ptr, char *type);
 }
 
+// *KB* FIXME This code should no longer be needed!
+#if 0
 // we assume that we always have libswigpy
 #ifndef HAVE_SWIGLIB
 extern "C"
@@ -66,6 +68,7 @@ SWIG_MakePtr(char *_c, const void *_ptr, char *type)
 }
 }
 #endif // HAVE_SWIGLIB
+#endif
 
 int
 PythonCallback(const char *name, int def, void *obj, const char *classname,

@@ -20,6 +20,7 @@ ODIR=.
 
 # this will be set or unset
 @MAKE_USE_PYTHON@
+@MAKE_USE_SWIG@
 
 # canonical host
 CANONICAL_HOST=@host@
@@ -42,9 +43,15 @@ CXXCPP = @CXXCPP@
 CPPFLAGS =@CPPFLAGS@
 
 # SWIG
+ifdef USE_SWIG
 SWIG = @SWIG@
-SWIGFLAGS = -c++ -python -shadow -dhtml
-# -c is added in makerules
+SWIGFLAGS = -c++ -python -shadow -dhtml -c
+SWIGFLAGS_LIBSWIG = -c++ -python -shadow 
+else
+SWIG= echo
+SWIGFLAGS=
+SWIGFLAGS_LIBSWIG=
+endif
 
 # other stuff
 RM = rm -f

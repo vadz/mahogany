@@ -290,6 +290,7 @@ dnl check for python ( a bit lengthy thanks to its stupid installation)
 dnl --------------------------------------------------------------------------
 
 MAKE_USE_PYTHON=
+MAKE_USE_SWIG=
 PYTHON_LIBS=
 if test "$USE_PYTHON" = 1 ; then
    M_CHECK_MYHEADER(Python.h,
@@ -334,9 +335,14 @@ if test "$USE_PYTHON" = 1 ; then
          )
        ]
    )
-   AC_PATH_PROG(SWIG,swig,echo)
+   AC_PATH_PROG(SWIG,swig)
+   if test "x$SWIG" != "x"
+   then
+	MAKE_USE_SWIG="USE_SWIG=yes"
+   fi
 fi
 AC_SUBST(MAKE_USE_PYTHON)
+AC_SUBST(MAKE_USE_SWIG)
 
 
 dnl --------------------------------------------------------------------------
