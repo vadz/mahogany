@@ -258,7 +258,7 @@ MFolder *MFolder::Create(const String& fullname, Type type)
    CHECK( folder, NULL, "Get() must succeed if Create() succeeded!" );
 
    ProfileBase *profile = ProfileBase::CreateProfile(folder->GetFullName());
-   CHECK( profile != NULL, NULL, "panic in MFolder: no app profile" );
+   CHECK( profile != NULL, NULL, "panic in MFolder: no profile" );
    profile->writeEntry(MP_FOLDER_TYPE, type);
    profile->DecRef();
 
@@ -350,7 +350,7 @@ String MFolderFromProfile::GetName() const
 FolderType MFolderFromProfile::GetType() const
 {
    ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK( profile != NULL, FolderInvalid, "panic in MFolder: no app profile" );
+   CHECK( profile != NULL, FolderInvalid, "panic in MFolder: no profile" );
    FolderType t = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
    profile->DecRef();
    return t;
@@ -359,7 +359,7 @@ FolderType MFolderFromProfile::GetType() const
 String MFolderFromProfile::GetComment() const
 {
    ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK( profile != NULL, "", "panic in MFolder: no app profile" );
+   CHECK( profile != NULL, "", "panic in MFolder: no profile" );
    String str = READ_CONFIG(profile, MP_FOLDER_COMMENT);
    profile->DecRef();
    return str;
@@ -368,7 +368,7 @@ String MFolderFromProfile::GetComment() const
 void MFolderFromProfile::SetComment(const String& comment)
 {
    ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK_RET( profile != NULL, "panic in MFolder: no app profile" );
+   CHECK_RET( profile != NULL, "panic in MFolder: no profile" );
    String str = READ_CONFIG(profile, MP_FOLDER_COMMENT);
    profile->writeEntry(MP_FOLDER_COMMENT, comment);
    profile->DecRef();
@@ -377,7 +377,7 @@ void MFolderFromProfile::SetComment(const String& comment)
 unsigned int MFolderFromProfile::GetFlags() const
 {
    ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK( profile != NULL, FolderInvalid, "panic in MFolder: no app profile" );
+   CHECK( profile != NULL, FolderInvalid, "panic in MFolder: no profile" );
    unsigned int f = (unsigned int)READ_CONFIG(profile, MP_FOLDER_FLAGS);
    profile->DecRef();
    return f;
@@ -386,7 +386,7 @@ unsigned int MFolderFromProfile::GetFlags() const
 void MFolderFromProfile::SetFlags(unsigned int flags)
 {
    ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK_RET( profile != NULL, "panic in MFolder: no app profile" );
+   CHECK_RET( profile != NULL, "panic in MFolder: no profile" );
    String str = READ_CONFIG(profile, MP_FOLDER_COMMENT);
    profile->writeEntry(MP_FOLDER_FLAGS, flags);
    profile->DecRef();
@@ -394,67 +394,65 @@ void MFolderFromProfile::SetFlags(unsigned int flags)
 
 size_t MFolderFromProfile::GetSubfolderCount() const
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
-   // enumerate all groups
-   String name;
-   long dummy;
-   size_t count = 0;
-
-   bool cont = profile->GetFirstGroup(name, dummy);
-   while ( cont )
+   class CountTraversal : public MFolderTraversal
    {
-      // check that it's a folder - this is the reason why we can't call
-      // GetGroupCount() directly
-      {
-         ProfilePathChanger changePath2(profile, name);
-         if ( READ_CONFIG(profile, MP_PROFILE_TYPE) ==
-                  ProfileBase::PT_FolderProfile )
-         {
-            count++;
-         }
-      }
+   public:
+      CountTraversal(const MFolderFromProfile *folder) : MFolderTraversal(*folder)
+         { m_count = 0; }
 
-      cont = profile->GetNextGroup(name, dummy);
-   }
+      virtual bool OnVisitFolder(const wxString& /* folderName */)
+         { m_count++; return TRUE; }
 
-   profile->DecRef();
-   return count;
+      size_t GetCount() const { return m_count; }
+
+   private:
+      size_t m_count;
+   } count(this);
+
+   // traverse but don't recurse into subfolders
+   count.Traverse(FALSE);
+
+   return count.GetCount();
 }
 
 MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
-
-   // count until the group we need by enumerating them
-   wxString name;
-   long dummy;
-   bool cont = profile->GetFirstGroup(name, dummy);
-   for ( cont = profile->GetFirstGroup(name, dummy);
-         cont;
-         cont = profile->GetNextGroup(name, dummy) )
+   class IndexTraversal : public MFolderTraversal
    {
-      // check that it's a folder - this is the reason why we can't call
-      // GetGroupCount() directly
+   public:
+      IndexTraversal(const MFolderFromProfile *folder, size_t count)
+         : MFolderTraversal(*folder) { m_count = count; }
+
+      virtual bool OnVisitFolder(const wxString& folderName)
       {
-         ProfilePathChanger changePath2(profile, name);
-         if ( READ_CONFIG(profile, MP_PROFILE_TYPE) !=
-                  ProfileBase::PT_FolderProfile )
+         if ( m_count-- == 0 )
          {
-            // skip "n--" - it doesn't count as a folder
-            continue;
+            // found, stop traversing the tree
+            m_folderName = folderName;
+
+            return FALSE;
          }
+
+         return TRUE;
       }
 
-      if ( n-- == 0 )
-         break;
+      const wxString& GetName() const { return m_folderName; }
+
+   private:
+      size_t   m_count;
+      wxString m_folderName;
+   } index(this, n);
+
+   // don't recurse into subfolders
+   if ( index.Traverse(FALSE) )
+   {
+      FAIL_MSG( "invalid index in MFolderFromProfile::GetSubfolder()" );
+
+      return NULL;
    }
+   //else: not all folders traversed, i.e. the right one found
 
-   CHECK( cont, NULL, "invalid subfolder index" );
-
-   profile->DecRef();
-   return Get(GetSubFolderFullName(name));
+   return Get(GetSubFolderFullName(index.GetName()));
 }
 
 MFolder *MFolderFromProfile::GetSubfolder(const String& name) const
@@ -492,7 +490,7 @@ void MFolderFromProfile::Delete()
 
    // Get parent profile:
    ProfileBase *profile = ProfileBase::CreateProfile(m_folderName.BeforeLast('/'));
-   CHECK_RET( profile != NULL, "panic in MFolder: no app profile" );
+   CHECK_RET( profile != NULL, "panic in MFolder: no profile" );
    profile->DeleteGroup(GetName());
    profile->DecRef();
 
@@ -531,7 +529,7 @@ bool MFolderFromProfile::Rename(const String& newName)
 
 
    ProfileBase *profile = ProfileBase::CreateProfile(path);
-   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
+   CHECK( profile != NULL, FALSE, "panic in MFolder: no profile" );
    if ( profile->Rename(name, newName) )
    {
       m_folderName = newFullName;
@@ -582,4 +580,73 @@ void MFolderCache::Remove(MFolder *folder)
 
    ms_aFolderNames.Remove((size_t)index);
    ms_aFolders.Remove((size_t)index);
+}
+
+// ----------------------------------------------------------------------------
+// MFolderTraversal
+// ----------------------------------------------------------------------------
+
+MFolderTraversal::MFolderTraversal(const MFolder& folderStart)
+{
+   m_folderName = folderStart.GetFullName();
+}
+
+bool MFolderTraversal::Traverse(bool recurse)
+{
+   return DoTraverse(m_folderName, recurse);
+}
+
+// returns TRUE if all folders were visited or FALSE if traversal was aborted
+bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
+{
+   ProfileBase *profile = ProfileBase::CreateProfile(start);
+   CHECK( profile != NULL, FALSE, "panic in MFolderTraversal: no profile" );
+
+   // return code
+   bool rc = TRUE;
+
+   // enumerate all groups
+   String name;
+   long dummy;
+
+   bool cont = profile->GetFirstGroup(name, dummy);
+   while ( cont )
+   {
+      // check that it's a folder - this is the reason why we can't call
+      // GetGroupCount() directly
+      {
+         ProfilePathChanger changePath2(profile, name);
+         if ( READ_CONFIG(profile, MP_PROFILE_TYPE) ==
+                  ProfileBase::PT_FolderProfile )
+         {
+            // if this folder has children recurse into them (if we should)
+            if ( recurse )
+            {
+               String fullname(start);
+               if ( !fullname.IsEmpty() )
+                  fullname += '/';
+               fullname += name;
+
+               rc = DoTraverse(fullname, TRUE);
+            }
+
+            if ( !OnVisitFolder(name) )
+            {
+               rc = FALSE;
+            }
+
+            if ( !rc )
+            {
+               // don't return because profile->DecRef() should be done
+               break;
+            }
+         }
+      }
+
+      cont = profile->GetNextGroup(name, dummy);
+   }
+
+   profile->DecRef();
+
+   return rc;
 }

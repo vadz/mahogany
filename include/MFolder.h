@@ -120,19 +120,33 @@ protected:
    MFolder& operator=(const MFolder&);
 };
 
-/*
 // ----------------------------------------------------------------------------
-// a special derivation of ProfilePathChanger which prepends the root of
-// folder branch in the profile tree to the path
+// A simple class which allows to traverse all subfolders of the given folder:
+// any useful action should be done in OnVisitFolder() virtual function
 // ----------------------------------------------------------------------------
-class FolderPathChanger : public ProfilePathChanger
+
+// FIXME this class currently works only with folders stored in the profiles
+class MFolderTraversal
 {
 public:
-   FolderPathChanger(ProfileBase *profile, const String& path)
-      : ProfilePathChanger(profile, wxString(M_FOLDER_CONFIG_SECTION) + path)
-      {
-      }
+   /// give the folder from which to start to the ctor
+   MFolderTraversal(const MFolder& folderStart);
+
+   /// traverse the tree, OnVisitFolder() will be called for each subfolder
+   bool Traverse(bool recurse = TRUE);
+
+   /// return FALSE from here to stop tree traversal, TRUE to continue
+   virtual bool OnVisitFolder(const wxString& folderName) = 0;
+
+   /// virtual dtor for the base class
+   virtual ~MFolderTraversal() { }
+
+private:
+   /// recursive function used by Traverse()
+   bool DoTraverse(const wxString& start, bool recurse);
+
+   /// the (full) name of the start folder
+   wxString m_folderName;
 };
-*/
 
 #endif // _MFOLDER_H
