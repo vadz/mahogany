@@ -836,7 +836,7 @@ wxMApp::Help(int id, wxWindow *parent)
       helpfile += "doc";
 #else // Windows
       m_HelpController = new wxHtmlHelpController;
-      helpfile += "doc/html/Manual.hhp";
+      helpfile += "doc/HtmlHlp/Manual.hhp";
 #endif // Unix/Windows
 
       // initialise the help system
