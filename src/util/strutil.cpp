@@ -18,6 +18,11 @@
 #   include "kbList.h"
 #endif
 
+#ifdef OS_UNIX
+#   include <pwd.h>
+#   include <sys/types.h>
+#endif
+
 void
 strutil_getstrline(istream &istr, String &str)
 {
@@ -414,9 +419,18 @@ strutil_expandpath(const String &ipath)
       {
          String user =
             strutil_before(String(path.c_str()+1),DIR_SEPARATOR);
-         // FIXME: crode fix, should use getpwent()
-         // up... - but do we really need that?
-         path << "/home/" << user << DIR_SEPARATOR
+         struct passwd *entry;
+         do
+         {
+            entry = getpwent(void);
+            if(entry && entry->pw_name == user)
+               break;
+         }while(entry);
+         if(entry)
+            path << entry->pw_dir;
+         else
+            path << "/home/" << user;
+         path << DIR_SEPARATOR
               << strutil_after(String(path.c_str()+1),DIR_SEPARATOR);
          return path;
       }
