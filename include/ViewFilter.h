@@ -193,7 +193,7 @@ public:
          { return new cname(msgView, next, state); }                       \
                                                                            \
       MMODULE_DEFINE();                                                    \
-      DEFAULT_ENTRY_FUNC;                                                  \
+      DEFAULT_ENTRY_FUNC                                                   \
    };                                                                      \
    MMODULE_BEGIN_IMPLEMENT(cname##Factory, _T(#cname),                     \
                            VIEW_FILTER_INTERFACE, desc, _T("1.00"))        \
