@@ -980,6 +980,11 @@ void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
    if ( insMode == Insert_Replace )
    {
       m_textControl->SetValue(text);
+
+#if wxCHECK_VERSION(2, 5, 1)
+      // we want our IsModified() to return true when new text is added
+      m_textControl->MarkDirty();
+#endif
    }
    else // Insert_Append
    {
