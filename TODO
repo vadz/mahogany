@@ -8,6 +8,12 @@ $Id$
     just continue to remove bugs from this list as they are 
     fixed.
 
+************ bugs
+
+1. INBOX msg # not decremented when message is moved by filters
+2. test 2fish
+3. bug with 2ble opening?
+
 ************ optimize
 
 ************ possible cclient improvements (from reading PINE sources)

@@ -279,6 +279,13 @@ public:
        @return true on success
    */
    static bool DeleteFolder(const MFolder *mfolder);
+
+   /** Clear the folder, i.e. delete all messages in it
+
+       @return the number of message deleted or -1 on error
+   */
+   static long ClearFolder(const MFolder *folder);
+
    /**
          Creates a mailbox profile and checks the settings to be
          sensible.

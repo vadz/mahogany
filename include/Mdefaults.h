@@ -933,7 +933,7 @@ enum MFolderIndex
 /// reopen the last opened folder in the main frame
 #define   MP_REOPENLASTFOLDER_D 1
 /// name of folder to open in mainframe
-#define   MP_MAINFOLDER_D        "INBOX"
+#define   MP_MAINFOLDER_D        ""
 /// path for Python
 #define   MP_PYTHONPATH_D         M_EMPTYSTRING
 #ifdef OS_WIN

@@ -7,16 +7,24 @@
  *                                                                  *
  *******************************************************************/
 
-#include "Mpch.h"
-#include "Mcommon.h"
+// ============================================================================
+// interface
+// ============================================================================
 
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
+#include "Mpch.h"
 
 #ifndef   USE_PCH
-#   include "strutil.h"
-#   include "kbList.h"
+#  include "Mcommon.h"
+#  include "strutil.h"
+#  include "kbList.h"
+
+#  include <ctype.h>
+#  include <stdio.h>
+#  include <string.h>
 #endif
 
 #include "Mdefaults.h"
@@ -29,6 +37,17 @@
 #endif
 
 #include <wx/textfile.h>  // just for strutil_enforceNativeCRLF()
+
+// ----------------------------------------------------------------------------
+// local functions
+// ----------------------------------------------------------------------------
+
+static String strutil_encrypt_tf(const String& cleartext);
+static String strutil_decrypt_tf(const String& cleartext);
+
+// ============================================================================
+// implementation
+// ============================================================================
 
 void
 strutil_getstrline(istream &istr, String &str)
@@ -722,14 +741,13 @@ static bool strutil_has_twofish = false;
 static void
 setup_twofish(void)
 {
-   if(gs_GlobalPassword.Length() == 0)
+   if ( gs_GlobalPassword.empty() )
    {
-#if 0
       MDialog_Message(
          _("Mahogany uses a global password to protect sensitive\n"
            "information in your configuration files.\n\n"
            "The next dialog will ask you for your global password.\n"
-           "If you have not previously chosen one, please choose one\n"
+           "If you have not previously chosen one, please do it\n"
            "now, otherwise enter the one you chose previously.\n\n"
            "If you do not want to use a global password, just cancel\n"
            "the next dialog.\n\n"
@@ -737,7 +755,7 @@ setup_twofish(void)
          NULL,
          _("Global Password"),
          GetPersMsgBoxName(M_MSGBOX_EXPLAIN_GLOBALPASSWD));
-#endif
+
       bool retry;
       do
       {
@@ -745,16 +763,40 @@ setup_twofish(void)
                    _("Global Password:"),
                    _("Please enter the global password:"),
                    NULL,NULL,NULL,TRUE);
-         wxString testdata =
-            strutil_decrypt(READ_APPCONFIG(MP_CRYPT_TESTDATA));
-         if(testdata != "TESTDATA")
+
+         if ( gs_GlobalPassword.empty() )
          {
-            retry = MDialog_YesNoDialog(_("The password is wrong.\nDo you want to try again?"),
-                                        NULL, MDIALOG_YESNOTITLE, true);
+            // cancelled, don't insist
+            return;
          }
-         else
-            retry = FALSE;
-      }while(retry);
+
+         // TODO: ask to confirm it?
+
+         wxString testdata = READ_APPCONFIG(MP_CRYPT_TESTDATA);
+         if ( testdata.empty() )
+         {
+            // we hadn't used the global password before
+            mApplication->GetProfile()->writeEntry(MP_CRYPT_TESTDATA,
+                  strutil_encrypt_tf("TESTDATA"));
+
+            break;
+         }
+
+         if ( strutil_decrypt(testdata) == "TESTDATA" )
+         {
+            // correct password
+            break;
+         }
+
+         retry = MDialog_YesNoDialog
+                 (
+                  _("The password is wrong.\nDo you want to try again?"),
+                  NULL,
+                  MDIALOG_YESNOTITLE,
+                  true
+                 );
+
+      } while( retry );
    }
 }
 
@@ -762,13 +804,13 @@ setup_twofish(void)
  * All encrypted data is hex numbers. To distinguish between strong
  * and weak data, we prefix the strong encryption with a '-'.
  */
-String
+static String
 strutil_encrypt_tf(const String &original)
 {
    setup_twofish();
    CryptData input(original);
    CryptData output;
-   int rc = TwoFishCrypt(1,128,gs_GlobalPassword, &input,&output);
+   int rc = TwoFishCrypt(1, 128, gs_GlobalPassword, &input ,&output);
    if(rc)
    {
       String tmp = output.ToHex();
@@ -779,7 +821,7 @@ strutil_encrypt_tf(const String &original)
    return "";
 }
 
-String
+static String
 strutil_decrypt_tf(const String &original)
 {
    if(! strutil_has_twofish)

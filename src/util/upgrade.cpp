@@ -836,7 +836,7 @@ InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
    panel->CreateButton(_("&Import..."), NULL);
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 void InstallWizardImportPage::OnImportButton(wxCommandEvent& event)
@@ -866,7 +866,7 @@ InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
    m_name = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
    m_email = panel->CreateTextWithLabel(labels[1], widthMax, m_name);
 
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 // InstallWizardServersPage
@@ -902,7 +902,7 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
    m_smtp = panel->CreateTextWithLabel(labels[2], widthMax, m_imap);
    m_nntp = panel->CreateTextWithLabel(labels[3], widthMax, m_smtp);
 
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 // InstallWizardDialUpPage
@@ -951,7 +951,7 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    m_disconnect = panel->CreateTextWithLabel(labels[1], widthMax, m_connect);
 #endif // platform
 
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 // InstallWizardOperationsPage
@@ -1088,7 +1088,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
                                                widthMax, text6);
 #endif // USE_PYTHON
 
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 #ifdef USE_HELPERS_PAGE
@@ -1165,7 +1165,7 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
       m_checkboxSendTestMsg = NULL;
    }
 
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 bool InstallWizardFinalPage::TransferDataToWindow()

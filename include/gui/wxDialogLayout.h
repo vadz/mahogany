@@ -461,19 +461,8 @@ public:
    }
 
    // forces a call to layout() to get everything nicely laid out
-   virtual bool Layout()
-   {
-       // be careful not to do a recursive call here
-       return m_canvas ? m_canvas->Layout() : wxPanel::Layout();
-   }
+   virtual bool Layout() { return DoLayout(GetClientSize()); }
 
-   // this forces a re-calculation of the panel:
-   void ForceLayout()
-      {
-         int x,y;
-         GetClientSize(&x,&y);
-         SetClientSize(x,y); // provoke OnSize event
-      }
    // show or hide the vertical scrollbar depending on whether there is enough
    // place or not
    void RefreshScrollbar(const wxSize& size);
@@ -535,6 +524,9 @@ private:
 
    // event handlers
    void OnSize(wxSizeEvent& event);
+
+   // actually layout the children *and* refresh the scrollbar too
+   bool DoLayout(const wxSize& size);
 
    // the canvas on which all controls are created
    wxScrolledWindow *m_canvas;

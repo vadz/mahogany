@@ -29,7 +29,6 @@
 
 #include  "MailFolderCmn.h"
 #include  "FolderView.h"
-#include  "MFolder.h"
 
 #include  <wx/fontenc.h>
 
@@ -133,7 +132,9 @@ public:
    /** Phyically deletes this folder.
        @return true on success
    */
-   static bool DeleteFolder(const class MFolder *mfolder);
+   static bool DeleteFolder(const MFolder *mfolder);
+
+   static long ClearFolder(const MFolder *folder);
 
    /// return the directory of the newsspool:
    static String GetNewsSpool(void);
@@ -190,6 +191,7 @@ public:
    virtual bool SetSequenceFlag(String const &sequence,
                                 int flag,
                                 bool set = true);
+
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence of uids
        @param flag flag to be set, e.g. "\\Deleted"
@@ -509,6 +511,25 @@ protected:
 
    /// Build the sequence string from the array of message uids
    static String BuildSequence(const UIdArray& messages);
+
+   /** Ask the user for login/password if needed and return them. If we already
+       have them in the corresponding variables, don't do anything but just
+       return true.
+
+       @param name the name of the folder
+       @param type the type of the folder
+       @param flags the flags of the folder
+       @param login a non NULL pointer to the variable containing username
+       @param password a non NULL pointer to the variable containing password
+       @param didAsk a pointer (may be NULL) set to true if dlg was shown
+       @return true if the password is either not needed or was entered
+   */
+   static bool AskPasswordIfNeeded(const String& name,
+                                   FolderType type,
+                                   int flags,
+                                   String *login,
+                                   String *password,
+                                   bool *didAsk = NULL);
 
    /// A Mutex to control access to this folder.
    MMutex *m_Mutex;

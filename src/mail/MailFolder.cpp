@@ -37,6 +37,7 @@
 #include "MDialogs.h" // for MDialog_FolderChoose
 
 #include "Mdefaults.h"
+#include "MFolder.h"
 
 #include "Message.h"
 #include "MailFolder.h"
@@ -456,6 +457,17 @@ MailFolder::DeleteFolder(const MFolder *mfolder)
 
    // for now there is only one implementation to call:
    return MailFolderCC::DeleteFolder(mfolder);
+}
+
+/* static */
+long
+MailFolder::ClearFolder(const MFolder *folder)
+{
+   if ( !Init() )
+      return -1;
+
+   // for now there is only one implementation to call:
+   return MailFolderCC::ClearFolder(folder);
 }
 
 /* static */

@@ -905,7 +905,7 @@ wxOneFilterDialog::TransferDataToWindow()
       c->height.AsIs();
       m_msgCantEdit->SetConstraints(c);
 
-      m_Panel->ForceLayout();
+      m_Panel->Layout();
       Layout();
 
       m_textProgram->SetValue(m_FilterData->GetProgram());

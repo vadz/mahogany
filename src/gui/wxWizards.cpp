@@ -354,7 +354,7 @@ MWizard_ImportFolders_ChoicePage::MWizard_ImportFolders_ChoicePage(MWizard *wiza
       m_checkMH->SetValue(TRUE);
    }
 
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 MWizardPageId MWizard_ImportFolders_ChoicePage::GetNextPageId() const
@@ -429,7 +429,7 @@ MWizard_ImportFolders_MHPage::MWizard_ImportFolders_MHPage(MWizard *wizard)
    m_textTop->SetValue(MailFolderCC::InitializeMH());
    m_checkAll->SetValue(TRUE);
 
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 bool MWizard_ImportFolders_MHPage::TransferDataFromWindow()
@@ -543,7 +543,7 @@ MWizard_CreateFolder_WelcomePage::MWizard_CreateFolder_WelcomePage(MWizard *wiza
 
    m_checkNoWizard = panel->CreateCheckBox(labels[0], maxwidth, NULL);
 
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 MWizardPageId MWizard_CreateFolder_WelcomePage::GetNextPageId() const
@@ -620,7 +620,7 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
    ASSERT_MSG( m_TypeCtrl->GetCount() == FOLDERTYPE_MAX,
                "forgot to update something" );
 
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 MWizardPageId
@@ -842,7 +842,7 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
          ;
    }
 
-   panel->ForceLayout();
+   panel->Layout();
 }
 
 bool

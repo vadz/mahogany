@@ -318,7 +318,9 @@ protected:
    void DoFolderOpen();
 
    void DoFolderCreate();
+   void DoFolderRename();
    void DoFolderDelete(bool removeOnly = TRUE);
+   void DoFolderClear();
    void DoFolderClose();
 
    void DoBrowseSubfolders();
@@ -607,6 +609,11 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
       menu->Enable(WXMENU_FOLDER_CLOSE, !isGroup);
    }
 
+   if ( menu->FindItem(WXMENU_FOLDER_CLEAR) )
+   {
+      menu->Enable(WXMENU_FOLDER_CLEAR, !isGroup);
+   }
+
    // browsing subfolders only makes sense if we have any and not for the
    // simple groups which can contain anything - so browsing is impossible
    bool mayHaveSubfolders =
@@ -753,7 +760,7 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
    if ( folder->GetFlags() & MF_FLAGS_DONTDELETE )
    {
       wxLogError(_("The folder '%s' is used by Mahogany and cannot be deleted"),
-                 folder->GetName().c_str());
+                 folder->GetFullName().c_str());
       return FALSE;
    }
 
@@ -779,7 +786,7 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
       {
          msg.Printf(_("Do you really want to delete folder '%s' and all of its\n"
                       "subfolders? All messages contained in them will be "
-                      "permanently lost!"), folder->GetName().c_str());
+                      "permanently lost!"), folder->GetFullName().c_str());
       }
    }
    else
@@ -788,14 +795,14 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
       {
          configPath = "ConfirmFolderDelete";
          msg.Printf(_("Do you really want to remove folder '%s'?"),
-                    folder->GetName().c_str());
+                    folder->GetFullName().c_str());
       }
       else // remove and delete
       {
          configPath = "ConfirmFolderPhysDelete";
          msg.Printf(_("Do you really want to delete folder '%s' with\n"
                       "all the messages contained in it?"),
-                    folder->GetName().c_str());
+                    folder->GetFullName().c_str());
       }
    }
 
@@ -819,7 +826,7 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
          if ( !ok )
          {
             wxLogError(_("Failed to physically delete folder '%s'."),
-                       folder->GetName().c_str());
+                       folder->GetFullName().c_str());
          }
       }
 
@@ -859,6 +866,47 @@ bool wxFolderTree::OnRename(MFolder *folder, const String& folderNewName)
    }
 
    return folder->Rename(folderNewName);
+}
+
+void wxFolderTree::OnClear(MFolder *folder)
+{
+   wxString fullname = folder->GetFullName();
+
+   wxString msg;
+   msg.Printf(_("Are you sure you want to delete all messages from the\n"
+                "folder '%s'?\n"
+                "\n"
+                "Warning: it will be impossible to undelete them!"),
+                fullname.c_str());
+
+   wxWindow *parent = m_tree->wxWindow::GetParent();
+
+   // this dialog is not disablable!
+   if ( !MDialog_YesNoDialog
+         (
+            msg,
+            parent,
+            _("Please confirm"),
+            FALSE /* 'no' default */
+         ) )
+   {
+      wxLogStatus(GetFrame(parent), _("No messages were deleted."));
+   }
+   else
+   {
+      long n = MailFolder::ClearFolder(folder);
+      if ( n < 0 )
+      {
+         wxLogError(_("Failed to delete messages from folder '%s'."),
+                    fullname.c_str());
+      }
+      else
+      {
+         wxLogStatus(GetFrame(parent),
+                     _("%lu messages were deleted from folder '%s'."),
+                     (unsigned long)n, fullname.c_str());
+      }
+   }
 }
 
 bool wxFolderTree::OnClose(MFolder *folder)
@@ -1378,6 +1426,45 @@ void wxFolderTreeImpl::DoFolderCreate()
    //else: cancelled by user
 }
 
+void wxFolderTreeImpl::DoFolderRename()
+{
+   MFolder *folder = m_sink->GetSelection();
+   if ( !folder )
+   {
+      wxLogError(_("Please select the folder to rename first."));
+   }
+   else
+   {
+      wxFrame *frame = GetFrame(this);
+      wxString folderName = folder->GetName();
+
+      folderName = wxGetTextFromUser
+                   (
+                     wxString::Format
+                     (
+                       _("Enter the new folder name for '%s'"),
+                       folderName.c_str()
+                     ),
+                     _("Mahogany - rename folder"),
+                     folderName,
+                     frame
+                   );
+
+      if ( !folderName )
+      {
+         wxLogStatus(frame, _("Folder renaming cancelled."));
+      }
+      else // we have got the new name
+      {
+         // try to rename (the text will be changed in MEvent handler
+         // if OnRename() succeeds)
+         (void)m_sink->OnRename(folder, folderName);
+      }
+
+      folder->DecRef();
+   }
+}
+
 void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
 {
    MFolder *folder = m_sink->GetSelection();
@@ -1409,6 +1496,19 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
    }
 
    folder->DecRef();
+}
+
+void wxFolderTreeImpl::DoFolderClear()
+{
+   MFolder_obj folder = m_sink->GetSelection();
+   if ( !folder )
+   {
+      wxLogError(_("Please select the folder to clear first."));
+
+      return;
+   }
+
+   m_sink->OnClear(folder);
 }
 
 void wxFolderTreeImpl::DoFolderClose()
@@ -1722,48 +1822,16 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
          DoFolderDelete(FALSE);
          break;
 
+      case WXMENU_FOLDER_CLEAR:
+         DoFolderClear();
+         break;
+
       case FolderMenu::Remove:
          DoFolderDelete();
          break;
 
       case FolderMenu::Rename:
-         {
-            MFolder *folder = m_sink->GetSelection();
-            if ( !folder )
-            {
-               wxLogError(_("Please select the folder to rename first."));
-            }
-            else
-            {
-               wxFrame *frame = GetFrame(this);
-               wxString folderName = folder->GetName();
-
-               folderName = wxGetTextFromUser
-                            (
-                              wxString::Format
-                              (
-                                _("Enter the new folder name for '%s'"),
-                                folderName.c_str()
-                              ),
-                              _("Mahogany - rename folder"),
-                              folderName,
-                              frame
-                            );
-
-               if ( !folderName )
-               {
-                  wxLogStatus(frame, _("Folder renaming cancelled."));
-               }
-               else // we have got the new name
-               {
-                  // try to rename (the text will be changed in MEvent handler
-                  // if OnRename() succeeds)
-                  (void)m_sink->OnRename(folder, folderName);
-               }
-
-               folder->DecRef();
-            }
-         }
+         DoFolderRename();
          break;
 
       case FolderMenu::Close:
@@ -1783,6 +1851,9 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
          break;
 
       default:
+         // we're now called from wxManFrame msg processing code so it's
+         // possible for us to be called for another event - ignore silently
+         //
          //FAIL_MSG("unexpected menu command in wxFolderTree");
          return FALSE;
    }

@@ -10,10 +10,13 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-/* TODO: several things are still unclear...
+/* TODO: several things are still unclear ("+" means "solved now")
 
-   1. is mm_status() ever called? we never use mail_status(), but maybe
+  +1. is mm_status() ever called? we never use mail_status(), but maybe
       cclient does this internally?
+
+      we do call mail_status() now ourselves and we will do it in the future to
+      update the number of msgs regularly, so it is needed
 
   +2. mm_expunged() definitely shouldn't rebuild the entire listing (by
       callling RequestUpdate) but should just remove the expunged entries from
@@ -260,10 +263,14 @@ extern "C"
 #endif
 };
 
-typedef void (*mm_list_handler)(MAILSTREAM * stream,
+typedef void (*mm_list_handler)(MAILSTREAM *stream,
                                 char delim,
-                                String  name,
+                                String name,
                                 long  attrib);
+
+typedef void (*mm_status_handler)(MAILSTREAM *stream,
+                                  const char *mailbox,
+                                  MAILSTATUS *status);
 
 // ----------------------------------------------------------------------------
 // globals
@@ -274,6 +281,9 @@ static CCStreamCleaner *gs_CCStreamCleaner = NULL;
 
 /// handler for temporarily redirected mm_list calls
 static mm_list_handler gs_mmListRedirect = NULL;
+
+/// handler for temporarily redirected mm_status calls
+static mm_status_handler gs_mmStatusRedirect = NULL;
 
 // a variable telling c-client to shut up
 static bool mm_ignore_errors = false;
@@ -486,6 +496,48 @@ public:
       gs_mmListRedirect = NULL;
    }
 };
+
+// temporarily redirect mm_status callbacks and only remember the info they
+// provide in the given MAILSTATUS object instead of performing the usual
+// processing
+class MMStatusRedirector
+{
+public:
+   MMStatusRedirector(const String& mailbox, MAILSTATUS *mailstatus)
+   {
+      ms_mailstatus = mailstatus;
+      memset(ms_mailstatus, 0, sizeof(*ms_mailstatus));
+      ms_mailbox = mailbox;
+
+      gs_mmStatusRedirect = MMStatusRedirectorHandler;
+   }
+
+   ~MMStatusRedirector()
+   {
+      gs_mmStatusRedirect = NULL;
+
+      ms_mailstatus = NULL;
+      // ms_mailbox.clear(); -- unneeded
+   }
+
+private:
+   static String ms_mailbox;
+   static MAILSTATUS *ms_mailstatus;
+
+   static void MMStatusRedirectorHandler(MAILSTREAM * /* stream */,
+                                         const char *name,
+                                         MAILSTATUS *mailstatus)
+   {
+      // we can get the status events from other mailboxes, ignore them
+      if ( strcmp(ms_mailbox, name) == 0 )
+      {
+         memcpy(ms_mailstatus, mailstatus, sizeof(*ms_mailstatus));
+      }
+   }
+};
+
+String MMStatusRedirector::ms_mailbox;
+MAILSTATUS *MMStatusRedirector::ms_mailstatus = NULL;
 
 // ----------------------------------------------------------------------------
 // ReadProgressInfo: create an instance of this object to start showing progress
@@ -1123,9 +1175,6 @@ MailFolderCC::Create(int typeAndFlags)
    m_SearchMessagesFound = NULL;
    m_folderType = type;
 
-   if( !FolderTypeHasUserName(type) )
-      m_Login = ""; // empty login for these types
-
    m_Mutex = new MMutex;
    m_PingReopenSemaphore = new MMutex;
    m_InListingRebuild = new MMutex;
@@ -1181,6 +1230,38 @@ MailFolderCC::~MailFolderCC()
    SafeDecRef(m_Profile);
 }
 
+/* static */
+bool MailFolderCC::AskPasswordIfNeeded(const String& name,
+                                       FolderType type,
+                                       int flags,
+                                       String *login,
+                                       String *password,
+                                       bool *didAsk)
+{
+   CHECK( login && password, false, "can't be NULL here" );
+
+   if ( FolderTypeHasUserName(type)
+        && !(flags & MF_FLAGS_ANON)
+        && (login->empty() || password->empty()) )
+   {
+      if ( !MDialog_GetPassword(name, login, password) )
+      {
+         ERRORMESSAGE((_("Cannot access this folder without a password.")));
+
+         mApplication->SetLastError(M_ERROR_AUTH);
+
+         return false;
+      }
+
+      // remember that the password was entered interactively and propose to
+      // remember it if it really works later
+      if ( didAsk )
+         *didAsk = true;
+   }
+
+   return true;
+}
+
 /*
   This gets called with a folder path as its name, NOT with a symbolic
   folder/profile name.
@@ -1208,7 +1289,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    String mboxpath = MailFolder::GetImapSpec(type, flags, name, server, login);
 
    //FIXME: This should somehow be done in MailFolder.cpp
-   MailFolderCC *mf = FindFolder(mboxpath,login);
+   MailFolderCC *mf = FindFolder(mboxpath, login);
    if(mf)
    {
       mf->IncRef();
@@ -1216,28 +1297,19 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       return mf;
    }
 
-   bool userEnteredPwd = false;
-   String password = passwordGiven;
-
    // ask the password for the folders which need it but for which it hadn't
    // been specified during creation
-   if ( FolderTypeHasUserName( (FolderType) GetFolderType(typeAndFlags))
-        && ((GetFolderFlags(typeAndFlags) & MF_FLAGS_ANON) == 0)
-        && (login.empty() || password.empty())
-      )
+   bool userEnteredPwd = false;
+   String password = passwordGiven;
+   if ( !AskPasswordIfNeeded(symname,
+                             GetFolderType(typeAndFlags),
+                             GetFolderFlags(typeAndFlags),
+                             &login,
+                             &password,
+                             &userEnteredPwd) )
    {
-      if ( !MDialog_GetPassword(symname, &login, &password) )
-      {
-         ERRORMESSAGE((_("Cannot access this folder without a password.")));
-
-         mApplication->SetLastError(M_ERROR_CANCEL);
-
-         return NULL; // cannot open it
-      }
-
-      // remember that the password was entered interactively and propose to
-      // remember it if it really works
-      userEnteredPwd = true;
+      // can't continue
+      return NULL;
    }
 
    mf = new MailFolderCC(typeAndFlags, mboxpath, profile, server, login, password);
@@ -2850,6 +2922,8 @@ MailFolderCC::GetMessageUID(unsigned long msgno) const
 /* static */
 String MailFolderCC::BuildSequence(const UIdArray& messages)
 {
+   // TODO: generate 1:5 instead of 1,2,3,4,5!
+
    String sequence;
    size_t n = messages.GetCount();
    for ( size_t i = 0; i < n; i++ )
@@ -2875,16 +2949,10 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
                      1, this, this->GetClassName(),
                      GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
    {
-      if(set)
-         mail_setflag_full(m_MailStream,
-                           (char *)sequence.c_str(),
-                           (char *)flags.c_str(),
-                           ST_UID);
-      else
-         mail_clearflag_full(m_MailStream,
-                        (char *)sequence.c_str(),
-                        (char *)flags.c_str(),
-                        ST_UID);
+      mail_flag(m_MailStream,
+                (char *)sequence.c_str(),
+                (char *)flags.c_str(),
+                ST_UID | (set ? ST_SET : 0));
    }
    //else: blocked by python callback
 
@@ -3706,15 +3774,11 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET( mf, "number of messages changed in unknown mail folder" );
 
-   // we can call ExpungeMessages() from FilterNewMailAndUpdate() which results
-   // in mm_exists() (after messages are expunged) but we should not reset do
-   // anything in this case as the listing is already up to date - just ignore
-   // it (FIXME: and what if really new mail arrives in the meanwhile? will we
-   // lose it completely or just have to wait for next ping?)
-   if ( mf->m_InFilterCode->IsLocked() )
-   {
-      return;
-   }
+   // be careful to avoid infinite recursion or other troubles when called from
+   // ExpungeMessages() called from FilterNewMailAndUpdate() above: in this
+   // case we don't need to do much as the listing was just rebuilt anyhow, but
+   // we still need to update the number of messages in the folder status cache
+   bool insideFilterCode = mf->m_InFilterCode->IsLocked();
 
    // normally msgno should never be less than m_nMessages because we adjust
    // the latter in mm_expunged immediately when a message is expunged and so
@@ -3730,30 +3794,32 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    // added
    if ( msgno != mf->m_msgnoMax )
    {
-      // invalidate the cache - this is awfully inefficient but we don't know
-
-      mf->m_msgnoMax = msgno;
-
-      // new message(s) arrived, we need to reapply the filters
-      mf->m_GotNewMessages = true;
-
-      // rebuild the listing completely
-      //
-      // TODO: should just add new messages to it!
-      if ( mf->m_Listing )
+      if ( !insideFilterCode )
       {
-         mf->m_Listing->DecRef();
-         mf->m_Listing = NULL;
+         // number of msgs must be always in sync
+         mf->m_msgnoMax = msgno;
 
-         // no need to send event about deleted messages as the listing is
-         // going to be regenerated anyhow
+         // new message(s) arrived, we need to reapply the filters
+         mf->m_GotNewMessages = true;
+
+         // rebuild the listing completely
          //
-         // moreover, the indices become invalid now as they were for the old
-         // listing
-         if ( mf->m_expungedIndices )
+         // TODO: should just add new messages to it!
+         if ( mf->m_Listing )
          {
-            delete mf->m_expungedIndices;
-            mf->m_expungedIndices = NULL;
+            mf->m_Listing->DecRef();
+            mf->m_Listing = NULL;
+
+            // no need to send event about deleted messages as the listing is
+            // going to be regenerated anyhow
+            //
+            // moreover, the indices become invalid now as they were for the
+            // old listing
+            if ( mf->m_expungedIndices )
+            {
+               delete mf->m_expungedIndices;
+               mf->m_expungedIndices = NULL;
+            }
          }
       }
    }
@@ -3788,13 +3854,27 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
       }
    }
 
-   // don't request update if we are only half opened: this will cause another
-   // attempt to open the folder (which will fail because it can't be opened)
-   // and so lead to an infinite loop - besides it's plainly not needed as we
-   // don't have any messages in a half open folder anyhow
-   if ( stream && !stream->halfopen )
+   // never request update from inside the filter code
+   if ( insideFilterCode )
    {
-      mf->RequestUpdate();
+      // we need to delete m_expungedIndices here: normally it is done by
+      // RequestUpdate() but we don't call it in this case
+      if ( mf->m_expungedIndices )
+      {
+         delete mf->m_expungedIndices;
+         mf->m_expungedIndices = NULL;
+      }
+   }
+   else // not inside filter code
+   {
+      // don't request update if we are only half opened: this will cause
+      // another attempt to open the folder (which will fail because it can't
+      // be opened) and so lead to an infinite loop - besides it's plainly not
+      // needed as we don't have any messages in a half open folder anyhow
+      if ( stream && !stream->halfopen )
+      {
+         mf->RequestUpdate();
+      }
    }
 }
 
@@ -3816,23 +3896,29 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
       size_t idx = hil->GetIdxFromMsgno(msgno);
       CHECK_RET( idx < mf->m_nMessages, "invalid msgno in mm_expunged()" );
 
-      // we shouldn't send the expunge event if we're expunging messages while
-      // filtering them: the reason is that the messages are not
-      // sorted/threaded at this moment yet (and the ones we expunge will never
-      // be) so the indices would become invalid very soon - and, besides,
-      // there is really no need for this event as the lsiting is being rebuilt
-      // anyhow and so the GUI code will get a folder update event
-      if ( !mf->m_InFilterCode->IsLocked() )
+      if ( !mf->m_expungedIndices )
       {
-         if ( !mf->m_expungedIndices )
-         {
-            // create a new array
-            mf->m_expungedIndices = new wxArrayInt;
-         }
-
-         // add the msgno to the list of expunged messages
-         mf->m_expungedIndices->Add(hil->GetPosFromIdx(idx));
+         // create a new array
+         mf->m_expungedIndices = new wxArrayInt;
       }
+
+      // add the msgno to the list of expunged messages
+      int msgnoExp;
+      if ( mf->m_InFilterCode->IsLocked() )
+      {
+         // we don't need the real msgno as it won't be used in mm_exists()
+         // anyhow (see code and comment there), but we do need to have the
+         // correct number of elements in m_expungedIndices array to update the
+         // total number of messages properly, so add a dummy element
+         msgnoExp = 0;
+      }
+      else // not in filter code
+      {
+         // find the msgno which we expunged
+         msgnoExp = hil->GetPosFromIdx(idx);
+      }
+
+      mf->m_expungedIndices->Add(msgnoExp);
 
       // remove it now (do it after calling GetPosFromIdx() above or the
       // position would be wrong!)
@@ -3939,7 +4025,7 @@ MailFolderCC::mm_lsub(MAILSTREAM * stream,
 */
 void
 MailFolderCC::mm_status(MAILSTREAM *stream,
-                        String  mailbox ,
+                        String mailbox ,
                         MAILSTATUS *status)
 {
    MailFolderCC *mf = LookupObject(stream, mailbox);
@@ -4094,8 +4180,11 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
                        char *pwd,
                        long /* trial */)
 {
-   strcpy(user,MF_user.c_str());
-   strcpy(pwd,MF_pwd.c_str());
+   // normally this shouldn't happen
+   ASSERT_MSG( !MF_user.empty(), "no username in mm_login()?" );
+
+   strcpy(user, MF_user.c_str());
+   strcpy(pwd, MF_pwd.c_str());
 }
 
 /* static */
@@ -4475,6 +4564,105 @@ char MailFolderCC::GetFolderDelimiter() const
 }
 
 // ----------------------------------------------------------------------------
+// clear folder
+// ----------------------------------------------------------------------------
+
+/* static */
+long
+MailFolderCC::ClearFolder(const MFolder *mfolder)
+{
+   FolderType type = mfolder->GetType();
+   int flags = mfolder->GetFlags();
+   String login = mfolder->GetLogin(),
+          password = mfolder->GetPassword(),
+          fullname = mfolder->GetFullName();
+   String mboxpath = MailFolder::GetImapSpec(type,
+                                             flags,
+                                             mfolder->GetPath(),
+                                             mfolder->GetServer(),
+                                             login);
+
+   // if this folder is opened, use its stream - and also notify about message
+   // deletion
+   MAILSTREAM *stream;
+   unsigned long nmsgs;
+   CCCallbackDisabler *noCCC;
+
+   MailFolderCC *mf = FindFolder(mboxpath, login);
+   if ( mf )
+   {
+      stream = mf->m_MailStream;
+      nmsgs = mf->m_msgnoMax;
+      noCCC = NULL;
+   }
+   else // this folder is not opened
+   {
+      if ( !AskPasswordIfNeeded(fullname,
+                                type, flags, &login, &password ) )
+      {
+         return false;
+      }
+
+      SetLoginData(login, password);
+
+      // we don't want any notifications
+      noCCC = new CCCallbackDisabler;
+
+      // open the folder: although we don't need to do it to get its status, we
+      // have to do it anyhow below, so better do it right now
+      stream = mail_open(NIL, (char *)mboxpath.c_str(),
+                         mm_show_debug ? OP_DEBUG : NIL);
+
+      if ( !stream )
+      {
+         wxLogError(_("Impossible to open folder '%s'"), fullname.c_str());
+
+         delete noCCC;
+
+         return false;
+      }
+
+      // get the number of messages (only)
+      MAILSTATUS mailstatus;
+      MMStatusRedirector statusRedir(stream->mailbox, &mailstatus);
+      mail_status(stream, stream->mailbox, SA_MESSAGES);
+      nmsgs = mailstatus.messages;
+   }
+
+   if ( nmsgs > 0 )
+   {
+      String seq;
+      seq << "1:" << nmsgs;
+
+      // now mark them all as deleted
+      mail_flag(stream, (char *)seq.c_str(), "\\DELETED", ST_SET);
+
+      // and expunge
+      if ( mf )
+      {
+         mf->ExpungeMessages();
+
+         // no "mf->DecRef()" because FindFolder() doesn't IncRef() it
+      }
+      else // folder is not opened, just expunge quietly
+      {
+         mail_expunge(stream);
+
+         // we need to update the status manually in this case
+         MailFolderStatus status;
+         // all other members are already set to 0
+         status.total = 0;
+         MfStatusCache::Get()->UpdateStatus(fullname, status);
+      }
+   }
+   //else: no messages to delete
+
+   delete noCCC;
+
+   return nmsgs;
+}
+
+// ----------------------------------------------------------------------------
 // delete folder
 // ----------------------------------------------------------------------------
 
@@ -4482,37 +4670,27 @@ char MailFolderCC::GetFolderDelimiter() const
 bool
 MailFolderCC::DeleteFolder(const MFolder *mfolder)
 {
-   String mboxpath = MailFolder::GetImapSpec(mfolder->GetType(),
-                                             mfolder->GetFlags(),
-                                             mfolder->GetPath(),
-                                             mfolder->GetServer(),
-                                             mfolder->GetLogin());
+   FolderType type = mfolder->GetType();
+   int flags = mfolder->GetFlags();
+   String login = mfolder->GetLogin(),
+          password = mfolder->GetPassword();
 
-   String password = mfolder->GetPassword();
-   if ( FolderTypeHasUserName(mfolder->GetType())
-        && ((mfolder->GetFlags() & MF_FLAGS_ANON) == 0)
-        && (password.Length() == 0)
-      )
+   if ( !AskPasswordIfNeeded(mfolder->GetFullName(),
+                             type, flags, &login, &password ) )
    {
-      String prompt;
-      prompt.Printf(_("Please enter the password for folder '%s':"),
-                    mfolder->GetName().c_str());
-      if(! MInputBox(&password,
-                     _("Password required"),
-                     prompt, NULL,
-                     NULL,NULL, true))
-      {
-          ERRORMESSAGE((_("Cannot access this folder without a password.")));
-          mApplication->SetLastError(M_ERROR_AUTH);
-          return FALSE;
-      }
+      return false;
    }
 
+   String mboxpath = MailFolder::GetImapSpec(type,
+                                             flags,
+                                             mfolder->GetPath(),
+                                             mfolder->GetServer(),
+                                             login);
+
    MCclientLocker lock;
-   SetLoginData(mfolder->GetLogin(), password);
-   bool rc = mail_delete(NIL, (char *) mboxpath.c_str()) != NIL;
-   lock.Unlock();
-   return rc;
+   SetLoginData(login, password);
+
+   return mail_delete(NIL, (char *) mboxpath.c_str()) != NIL;
 }
 
 // ----------------------------------------------------------------------------
@@ -4554,6 +4732,7 @@ MailFolderCC::HasInferiors(const String &imapSpec,
    gs_HasInferiorsFlag = -1;
 
    MAILSTREAM *mailStream = mail_open(NIL, (char *)imapSpec.c_str(),
+                                      (mm_show_debug ? OP_DEBUG : NIL) |
                                       OP_HALFOPEN);
 
    if(mailStream != NIL)
@@ -4832,7 +5011,12 @@ mm_exists(MAILSTREAM *stream, unsigned long msgno)
 void
 mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
-   if ( !mm_disable_callbacks )
+   // allow redirected callbacks even while all others are disabled
+   if ( gs_mmStatusRedirect )
+   {
+      gs_mmStatusRedirect(stream, mailbox, status);
+   }
+   else if ( !mm_disable_callbacks )
    {
       TRACE_CALLBACK1(mm_status, "%s", mailbox);
 
@@ -4874,14 +5058,14 @@ mm_dlog(char *str)
 void
 mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 {
-   if ( !mm_disable_callbacks )
-   {
-      TRACE_CALLBACK_NOSTREAM_5(mm_login, "%s %s@%s:%ld, try #%ld",
-                                mb->service, mb->user, mb->host, mb->port,
-                                trial);
+   // don't test for mm_disable_callbacks here, we can be called even while
+   // other callbacks are disabled (example is call to mail_open() in
+   // ClearFolder())
+   TRACE_CALLBACK_NOSTREAM_5(mm_login, "%s %s@%s:%ld, try #%ld",
+                             mb->service, mb->user, mb->host, mb->port,
+                             trial);
 
-      MailFolderCC::mm_login(mb, user, pwd, trial);
-   }
+   MailFolderCC::mm_login(mb, user, pwd, trial);
 }
 
 void

@@ -166,7 +166,10 @@ wxPDialog::wxPDialog(const wxString& profileKey,
 
 wxPDialog::~wxPDialog()
 {
-   if ( !m_profileKey.IsEmpty() )
+   // save the dialog position if we can and if the dialog wasn't dismissed by
+   // Esc/Cancel - this indicates that the user doesn't want to remember
+   // anything at all!
+   if ( !m_profileKey.IsEmpty() && GetReturnCode() != wxID_CANCEL )
    {
       wxMFrame::SavePosition(m_profileKey, this);
    }
@@ -258,11 +261,24 @@ void wxEnhancedPanel::OnSize(wxSizeEvent& event)
    }
 #endif // wxGTK
 
-   // first lay out the controls or RefreshScrollbar() won't work properly
-   Layout();
-   RefreshScrollbar(event.GetSize());
+   // lay out the controls and update the scrollbar
+   DoLayout(event.GetSize());
 
    // don't call Skip() as we already did what wxPanel::OnSize() does
+}
+
+bool wxEnhancedPanel::DoLayout(const wxSize& size)
+{
+   // be careful not to do a recursive call here as we're called from our
+   // Layout()!
+   bool ok = m_canvas ? m_canvas->Layout() : wxPanel::Layout();
+   if ( ok )
+   {
+      RefreshScrollbar(size);
+   }
+   //else: can it really fail?
+
+   return ok;
 }
 
 void wxEnhancedPanel::RefreshScrollbar(const wxSize& size)
@@ -938,7 +954,7 @@ void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
          heightInitital = height;
       }
 
-      SetSize(width, heightInitital);
+      SetClientSize(width, heightInitital);
 
       Centre(wxCENTER_FRAME | wxBOTH);
    }

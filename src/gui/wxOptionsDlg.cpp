@@ -1679,10 +1679,10 @@ void wxOptionsPage::UpdateUI()
                // only enable if the text control has something
                bEnable = !text->GetValue().IsEmpty();
             }
-         }
 
-         if ( inverseMeaning )
-            bEnable = !bEnable;
+            if ( inverseMeaning )
+               bEnable = !bEnable;
+         }
 
          control->Enable(bEnable);
 
