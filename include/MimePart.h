@@ -82,6 +82,9 @@ enum MimeXferEncoding
 class MimePart
 {
 public:
+   /// Virtual dtor for the base class
+   virtual ~MimePart() { }
+
    /** @name Navigation through the MIME tree
 
        MIME structure of the message is a tree where the nodes are parts of
