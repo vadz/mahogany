@@ -144,7 +144,7 @@ public:
 
    /// clear the virtual folder
    static long ClearFolder(const MFolder *folder);
-   
+
    /// return full folder spec including the login name
    static String GetFullImapSpec(const MFolder *folder, const String& login);
 
@@ -154,7 +154,8 @@ protected:
    virtual bool DoCountMessages(MailFolderStatus *status) const;
 
    /// common part of SetMessageFlag and SetSequenceFlag
-   virtual bool DoSetMessageFlag(unsigned long uid,
+   virtual bool DoSetMessageFlag(SequenceKind kind,
+                                 unsigned long uid,
                                  int flag,
                                  bool set = true);
 
@@ -168,13 +169,19 @@ protected:
       MailFolder *mf;
 
       /// the UID of this message in that folder
-      UIdType uid;
+      UIdType uidPhys;
+
+      /// the UID of this message in this folder
+      UIdType uidVirt;
 
       /// the flags of the message in this folder (not original one)
       int flags;
 
-      Msg(MailFolder *mf_, UIdType uid_, int flags_)
-         : mf(mf_), uid(uid_), flags(flags_) { mf->IncRef(); }
+      Msg(MailFolder *mf_, UIdType uidPhys_, UIdType uidVirt_, int flags_)
+         : mf(mf_), uidPhys(uidPhys_), uidVirt(uidVirt_), flags(flags_)
+      {
+         mf->IncRef();
+      }
 
       ~Msg() { mf->DecRef(); }
    };
@@ -183,7 +190,7 @@ protected:
 
    /// the array of messages in the folder
    MsgArray m_messages;
-   
+
    //@}
 
    /** @name folder properties */
@@ -194,6 +201,9 @@ protected:
 
    /// the mode we're opened in (Normal or ReadOnly)
    OpenMode m_openMode;
+
+   /// the highest UID we have assigned so far
+   UIdType m_uidLast;
 
    //@}
 
@@ -211,8 +221,7 @@ protected:
    Msg *GetMsgFromMsgno(MsgnoType msgno) const;
 
    /// get the Msg corresponding to the given UID or NULL
-   Msg *MailFolderVirt::GetMsgFromUID(UIdType uid) const
-      { return GetMsgFromMsgno(uid); }
+   Msg *MailFolderVirt::GetMsgFromUID(UIdType uid) const;
 
    /// add a new message (takes ownership of it)
    void AddMsg(Msg *msg);

@@ -83,6 +83,9 @@ MailFolderVirt::MailFolderVirt(const MFolder *folder, OpenMode openmode)
               : m_folder((MFolder *)folder), m_openMode(openmode)
 {
    m_folder->IncRef();
+
+   // no messages so far
+   m_uidLast = 0;
 }
 
 MailFolderVirt::~MailFolderVirt()
@@ -233,7 +236,7 @@ Profile *MailFolderVirt::GetProfile() const
    if ( profile )
    {
       // for compatibility reasons we return profile not IncRef()'d so
-      // compensate for one done by MFolder::GetProfile()
+      // compensate for IncRef() done by MFolder::GetProfile()
       profile->DecRef();
    }
 
@@ -252,6 +255,22 @@ MailFolderVirt::Msg *MailFolderVirt::GetMsgFromMsgno(MsgnoType msgno) const
           "invalid msgno in MailFolderVirt" );
 
    return m_messages[(size_t)msgno];
+}
+
+MailFolderVirt::Msg *MailFolderVirt::GetMsgFromUID(UIdType uid) const
+{
+   MsgCookie cookie;
+   for ( Msg *msg = GetFirstMsg(cookie); msg; msg = GetNextMsg(cookie) )
+   {
+      if ( msg->uidVirt == uid )
+      {
+         return msg;
+      }
+   }
+
+   FAIL_MSG( "no message with such UID in the virtual folder" );
+
+   return NULL;
 }
 
 void MailFolderVirt::AddMsg(MailFolderVirt::Msg *msg)
@@ -356,7 +375,7 @@ MailFolderVirt::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
       HeaderInfoList_obj hil = msg->mf->GetHeaders();
 
       HeaderInfo * const hiDst = headers[count++];
-      const HeaderInfo * const hiSrc = hil->GetEntryUId(msg->uid);
+      const HeaderInfo * const hiSrc = hil->GetEntryUId(msg->uidPhys);
       if ( !hiSrc )
       {
          FAIL_MSG( "failed to get header info in virtual folder" );
@@ -367,10 +386,8 @@ MailFolderVirt::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
 
       // override some fields:
 
-      // UID must refer to this folder, not the other one (notice that count
-      // is already incremented, as it should be -- UIDs == msgnos start
-      // from 1, not 0)
-      hiDst->m_UId = count;
+      // UID must refer to this folder, not the other one
+      hiDst->m_UId = msg->uidVirt;
 
       // and we maintain our own, independent flags
       hiDst->m_Status = msg->flags;
@@ -475,8 +492,17 @@ bool MailFolderVirt::DoCountMessages(MailFolderStatus *status) const
 
 MsgnoType MailFolderVirt::GetMsgnoFromUID(UIdType uid) const
 {
-   // UIDs are the same as msgnos for us for now...
-   return uid;
+   MsgnoType n = 1;
+   MsgCookie cookie;
+   for ( Msg *msg = GetFirstMsg(cookie); msg; msg = GetNextMsg(cookie), n++ )
+   {
+      if ( msg->uidVirt == uid )
+      {
+         return n;
+      }
+   }
+
+   return MSGNO_ILLEGAL;
 }
 
 // ----------------------------------------------------------------------------
@@ -500,7 +526,7 @@ Message *MailFolderVirt::GetMessage(unsigned long uid)
    if ( !msg )
       return NULL;
 
-   Message *message = msg->mf->GetMessage(msg->uid);
+   Message *message = msg->mf->GetMessage(msg->uidPhys);
    if ( !message )
       return NULL;
 
@@ -510,7 +536,7 @@ Message *MailFolderVirt::GetMessage(unsigned long uid)
 bool
 MailFolderVirt::SetMessageFlag(unsigned long uid, int flag, bool set)
 {
-   if ( !DoSetMessageFlag(uid, flag, set) )
+   if ( !DoSetMessageFlag(SEQ_UID, uid, flag, set) )
       return false;
 
    SendMsgStatusChangeEvent();
@@ -519,9 +545,12 @@ MailFolderVirt::SetMessageFlag(unsigned long uid, int flag, bool set)
 }
 
 bool
-MailFolderVirt::DoSetMessageFlag(unsigned long uid, int flag, bool set)
+MailFolderVirt::DoSetMessageFlag(SequenceKind kind,
+                                 unsigned long uid,
+                                 int flag,
+                                 bool set)
 {
-   Msg *msg = GetMsgFromUID(uid);
+   Msg *msg = kind == SEQ_MSGNO ? GetMsgFromMsgno(uid) : GetMsgFromUID(uid);
 
    if ( !msg )
       return false;
@@ -534,7 +563,8 @@ MailFolderVirt::DoSetMessageFlag(unsigned long uid, int flag, bool set)
       return true;
    }
 
-   const MsgnoType msgno = uid; // UID == msgno here
+   const MsgnoType msgno = kind == SEQ_MSGNO ? uid : GetMsgnoFromUID(uid);
+   CHECK( msgno != MSGNO_ILLEGAL, false, "SetMessageFlag: invalid UID" );
 
    HeaderInfoList_obj headers = GetHeaders();
    CHECK( headers, false, "SetMessageFlag: couldn't get headers" );
@@ -566,13 +596,12 @@ MailFolderVirt::SetSequenceFlag(SequenceKind kind,
 {
    bool rc = true;
 
-   // we ignore sequence kind here because msgnos == UIDs for us
    size_t cookie;
    for ( UIdType n = seq.GetFirst(cookie);
          n != UID_ILLEGAL;
          n = seq.GetNext(n, cookie) )
    {
-      if ( !SetMessageFlag(n, flag, set) )
+      if ( !DoSetMessageFlag(kind, n, flag, set) )
          rc = false;
    }
 
@@ -591,12 +620,13 @@ bool MailFolderVirt::AppendMessage(const Message& msg)
    if ( !hil )
       return false;
 
-   UIdType uid = msg.GetUId();
-   const HeaderInfo *hi = hil->GetEntryUId(uid);
+   UIdType uidPhys = msg.GetUId();
+   const HeaderInfo *hi = hil->GetEntryUId(uidPhys);
    if ( !hi )
       return false;
 
-   AddMsg(new Msg(mf, uid, hi->GetStatus()));
+   // use the new UID for the new message
+   AddMsg(new Msg(mf, uidPhys, ++m_uidLast, hi->GetStatus()));
 
    return true;
 }
@@ -651,9 +681,7 @@ MailFolderVirt::SearchByFlag(MessageStatus flag,
          // don't care whether it is or not
          if ( !(msg->flags & MSG_STAT_DELETED) || !(flags & SEARCH_UNDELETED) )
          {
-            // we don't care whether we're searching for UIDs or msgnos as they
-            // are one and the same for us
-            results->Add(n);
+            results->Add(flags & SEARCH_UID ? msg->uidVirt : n);
          }
       }
    }
