@@ -62,6 +62,7 @@ public:
    /// header fields we may show in the composer (not all of them are shown!)
    enum AddressField
    {
+      Field_From,
       Field_To,
       Field_Subject,
       Field_Cc,
@@ -221,6 +222,9 @@ public:
       /// for button
    void OnExpand(wxCommandEvent &event);
 
+      /// for identity combo
+   void OnIdentChange(wxCommandEvent& event);
+
       /// called when external editor terminates
    void OnExtEditorTerm(wxProcessEvent& event);
    //@}
@@ -308,12 +312,18 @@ protected:
    /// Launch the external editor
    bool StartExternalEditor();
 
+   /// Set the default value for the "From" header (if we have it)
+   void SetFrom();
+
 private:
    /// a profile
    Profile * m_Profile;
    /// the name of the class
    String m_name;
 
+   /// the initial from/reply-to address
+   String m_from;
+   
    /// the panel
    wxPanel *m_panel;
 

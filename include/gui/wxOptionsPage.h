@@ -266,6 +266,7 @@ public:
                         FieldInfoArray aFields,
                         ConfigValuesArray aDefaults,
                         size_t nFields,
+                        size_t nOffset = 0,
                         int helpID = -1,
                         int image = -1);
 };
@@ -285,13 +286,15 @@ struct wxOptionsPageDesc
                      int helpId_,
                      const wxOptionsPage::FieldInfo *aFields_,
                      ConfigValuesArray aDefaults_,
-                     size_t nFields_)
+                     size_t nFields_,
+                     size_t nOffset_ = 0)
       : title(title_),
         image(image_),
         helpId(helpId_),
         aFields(aFields_),
         aDefaults(aDefaults_),
-        nFields(nFields_)
+        nFields(nFields_),
+        nOffset(nOffset_)
    {
    }
 
@@ -303,7 +306,7 @@ struct wxOptionsPageDesc
    // the fields description
    const wxOptionsPage::FieldInfo *aFields;
    ConfigValuesArray aDefaults;
-   size_t nFields;
+   size_t nFields, nOffset;
 };
 
 // ----------------------------------------------------------------------------

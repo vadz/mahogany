@@ -356,7 +356,7 @@ public:
 
    virtual bool IsAncestor(Profile *profile) const;
 
-   static const char * GetRootPath(void)
+   virtual const char * GetRootPath(void) const
       {
          return gs_RootPath_Profile;
       }
@@ -407,7 +407,7 @@ public:
    static Profile * CreateIdentity(const String &name)
       { return new Identity(name); }
    
-   static const char * GetRootPath(void)
+   virtual const char * GetRootPath(void) const
       {
          return gs_RootPath_Identity;
       }
@@ -591,6 +591,7 @@ ProfileImpl::ClearIdentity(void)
 {
    PCHECK();
    if(m_Identity) m_Identity->DecRef();
+   m_Identity = NULL;
 }
 
 String

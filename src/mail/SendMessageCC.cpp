@@ -97,13 +97,12 @@ SendMessageCC::Create(Protocol protocol,
 
    CHECK_RET(prof,"SendMessageCC::Create() requires profile");
 
-   m_FromPersonal = prof->readEntry(MP_PERSONALNAME,MP_PERSONALNAME_D);
-   m_FromAddress = prof->readEntry(MP_USERNAME, MP_USERNAME_D);
-   m_FromAddress << '@' << prof->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
+   m_FromPersonal = READ_CONFIG(prof, MP_PERSONALNAME);
+   m_FromAddress = READ_CONFIG(prof, MP_USERNAME);
+   m_FromAddress << '@' << READ_CONFIG(prof, MP_HOSTNAME);
 
    m_ReturnAddress = m_FromAddress;
-   m_ReplyTo = prof->readEntry(MP_RETURN_ADDRESS,
-                               MP_RETURN_ADDRESS_D);
+   m_ReplyTo = READ_CONFIG(prof, MP_RETURN_ADDRESS);
 
    if(READ_CONFIG(prof,MP_COMPOSE_USE_XFACE) != 0)
       m_XFaceFile = prof->readEntry(MP_COMPOSE_XFACE_FILE,"");

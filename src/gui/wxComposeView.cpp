@@ -64,6 +64,7 @@
 #include "gui/wxllist.h"
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"
+#include "gui/wxIdentityCombo.h"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxComposeView.h"
 
@@ -564,6 +565,9 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
 
    // button notifications
    EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
+
+   // identity combo notification
+   EVT_COMBOBOX(IDC_IDENT_COMBO, wxComposeView::OnIdentChange)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)
@@ -1291,14 +1295,19 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    c = new wxLayoutConstraints;
    c->left.SameAs(m_panel, wxLeft, LAYOUT_MARGIN);
    c->right.SameAs(m_panel, wxRight, LAYOUT_MARGIN);
-   c->top.SameAs(m_panel, wxTop, LAYOUT_MARGIN);
+   c->top.SameAs(m_panel, wxTop);
    box->SetConstraints(c);
 
    // layout the labels and text fields: label at the left of the field
    bool bDoShow[Field_Max];
+
+   // "From" is only shown to advanced users
+   bDoShow[Field_From] = READ_CONFIG(m_Profile, MP_USERLEVEL) >= M_USERLEVEL_ADVANCED;
+
+   // To and subject always there
    bDoShow[Field_To] =
-   bDoShow[Field_Subject] = TRUE;  // To and subject always there
-   if(m_mode == Mode_SMTP)
+   bDoShow[Field_Subject] = TRUE;
+   if( m_mode == Mode_SMTP )
    {
       bDoShow[Field_Cc] = READ_CONFIG(m_Profile, MP_SHOWCC) != 0;
       bDoShow[Field_Bcc] = READ_CONFIG(m_Profile, MP_SHOWBCC) != 0;
@@ -1310,6 +1319,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    // first determine the longest label caption
    const char *aszLabels[Field_Max];
 
+   aszLabels[Field_From]    = _("From:");
    aszLabels[Field_To]      = (m_mode == Mode_SMTP) ?  _("To:") : _("Newsgroups:");
    aszLabels[Field_Subject] = _("Subject:");
    aszLabels[Field_Cc]      = _("CC:");
@@ -1356,24 +1366,46 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
             c->top.Below(last, LAYOUT_MARGIN);
          else
             c->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
-         if ( n == Field_To ) {
-            // the [Expand] button
-            wxButton *btnExpand = new wxButton(m_panel, IDB_EXPAND, _("Expand"));
+
+         // for some header fields we create helper controls
+         wxControl *ctrlExtra;
+         if ( n == Field_From )
+         {
+            // add the identity combobox
+            ctrlExtra = CreateIdentCombo(m_panel);
+         }
+         else if ( n == Field_To )
+         {
+            // add the extra [Expand] button
+            ctrlExtra = new wxButton(m_panel, IDB_EXPAND, _("Expand"));
+#if wxUSE_TOOLTIPS
+            ctrlExtra->SetToolTip(_("Expand the address using address books"));
+#endif // tooltips
+         }
+         else
+         {
+            ctrlExtra = (wxControl *)NULL;
+         }
+
+         if ( ctrlExtra )
+         {
             wxLayoutConstraints *c2 = new wxLayoutConstraints;
-            c2->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
+            if ( last )
+               c2->top.Below(last, LAYOUT_MARGIN);
+            else
+               c2->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
             c2->right.SameAs(box, wxRight, LAYOUT_MARGIN);
             c2->width.AsIs();
             c2->height.AsIs();
-            btnExpand->SetConstraints(c2);
+            ctrlExtra->SetConstraints(c2);
 
-#if wxUSE_TOOLTIPS
-            btnExpand->SetToolTip(_("Expand the address using address books"));
-#endif // tooltips
-
-            c->right.LeftOf(btnExpand, LAYOUT_MARGIN);
+            c->right.LeftOf(ctrlExtra, LAYOUT_MARGIN);
          }
          else
+         {
             c->right.SameAs(box, wxRight, LAYOUT_MARGIN);
+         }
+
          c->height.AsIs();
          m_txtFields[n]->SetConstraints(c);
 
@@ -1415,6 +1447,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    // -----------------------
 
    // set def values for the headers
+   SetFrom();
    if(m_txtFields[Field_To])
       m_txtFields[Field_To]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
    if(m_txtFields[Field_Cc])
@@ -1504,6 +1537,27 @@ wxComposeView::~wxComposeView()
 // ----------------------------------------------------------------------------
 // wxComposeView callbacks
 // ----------------------------------------------------------------------------
+
+// use the newly specified identity
+void
+wxComposeView::OnIdentChange(wxCommandEvent& event)
+{
+   wxString ident = event.GetString();
+   if ( ident != m_Profile->GetIdentity() )
+   {
+      if ( event.GetInt() == 0 )
+      {
+         // first one is always the default identity
+         m_Profile->ClearIdentity();
+      }
+      else
+      {
+         m_Profile->SetIdentity(ident);
+      }
+
+      SetFrom();
+   }
+}
 
 // expand (using the address books) the value of the last active text zone
 void
@@ -2148,6 +2202,14 @@ wxComposeView::Send(bool schedule)
          break;
    }
 
+   String from = GetHeaderValue(Field_From);
+   if ( from && from != m_from )
+   {
+      msg->SetFrom(from,
+                   "" /* don't change the personal name */,
+                   from /* return address */);
+   }
+
    if( schedule )
    {
       MModule_Calendar *calmod =
@@ -2192,6 +2254,18 @@ wxComposeView::AddHeaderEntry(const String &entry,
 // simple GUI accessors
 // -----------------------------------------------------------------------------
 
+/// sets From field using the current profile
+void
+wxComposeView::SetFrom()
+{
+   if ( m_txtFields[Field_From] )
+   {
+      // FIXME this is incorrect, may be MP_RETURN_ADDRESS too (?)
+      m_from = READ_CONFIG(m_Profile, MP_RETURN_ADDRESS);
+
+      m_txtFields[Field_From]->SetValue(m_from);
+   }
+}
 
 /// sets To field
 void

@@ -78,6 +78,7 @@
 #include "gui/wxFolderTree.h"
 #include "gui/wxFolderView.h"
 #include "gui/wxDialogLayout.h"
+#include "gui/wxIdentityCombo.h"
 
 #include "sysutil.h"    // for sysutil_compare_filenames
 
@@ -2826,3 +2827,36 @@ bool MDialog_GetSelectionsInOrder(const wxString& message,
 
    return dlg.ShowModal() == wxID_OK && dlg.HasChanges();
 }
+
+// ----------------------------------------------------------------------------
+// ident combo stuff
+// ----------------------------------------------------------------------------
+
+extern wxComboBox *CreateIdentCombo(wxWindow *parent)
+{
+   wxArrayString identities = Profile::GetAllIdentities();
+   size_t count = identities.GetCount();
+   if ( !count )
+      return (wxComboBox *)NULL;
+
+   // first one is always the default identity, i.e. no identity at all
+   wxString *choices = new wxString[count + 1];
+   choices[0] = _("Default");
+   for ( size_t n = 0; n < count; n++ )
+   {
+      choices[n + 1] = identities[n];
+   }
+
+   wxComboBox *combo = new wxComboBox(
+                                       parent,
+                                       IDC_IDENT_COMBO,
+                                       wxEmptyString, // value
+                                       wxDefaultPosition, wxDefaultSize,
+                                       count + 1, choices,
+                                       wxCB_READONLY
+                                      );
+   delete [] choices;
+
+   return combo;
+}
+

@@ -360,9 +360,9 @@ public:
 
    // notifications from the notebook pages
       // something important change
-   void SetDoTest() { SetDirty(); m_bTest = TRUE; }
+   virtual void SetDoTest() { SetDirty(); m_bTest = TRUE; }
       // some setting changed, but won't take effect until restart
-   void SetGiveRestartWarning() { m_bRestartWarning = TRUE; }
+   virtual void SetGiveRestartWarning() { m_bRestartWarning = TRUE; }
 
    // override base class functions
    virtual void CreateNotebook(wxPanel *panel);
@@ -482,14 +482,20 @@ public:
       // dialog, but not all of them
       CreatePagesDesc();
       SetPagesDesc(m_nPages, m_aPages);
-   }
 
-   virtual wxControl *CreateControlsAbove(wxPanel *panel);
+      SetTitle(wxString::Format(_("Settings for identity '%s'"), m_identity.c_str()));
+   }
 
    virtual ~wxIdentityOptionsDialog()
    {
       delete [] m_aPages;
    }
+
+   // editing identities shouldn't give warning about "important programs
+   // settings were changed" as the only really important ones are the global
+   // ones
+   virtual void SetDoTest() { SetDirty(); } // TODO: might do something here
+   virtual void SetGiveRestartWarning() { }
 
 private:
    // create our pages desc: do it dynamically because they may depend on the
@@ -1376,6 +1382,12 @@ bool wxOptionsPage::TransferDataToWindow()
    long lValue = 0;
    for ( size_t n = m_nFirst; n < m_nLast; n++ )
    {
+      if ( strcmp(m_aDefaults[n].name, "none") == 0 )
+      {
+         // it doesn't have any associated value
+         continue;
+      }
+
       if ( m_aDefaults[n].IsNumeric() )
       {
          lValue = m_Profile->readEntry(m_aDefaults[n].name,
@@ -1462,10 +1474,10 @@ bool wxOptionsPage::TransferDataToWindow()
       }
       break;
 
-      case Field_Message:
       case Field_SubDlg:      // these settings will be read later
          break;
 
+      case Field_Message:
       default:
          wxFAIL_MSG("unexpected field type");
       }
@@ -1587,9 +1599,12 @@ wxOptionsPageDynamic::wxOptionsPageDynamic(wxNotebook *parent,
                                            FieldInfoArray aFields,
                                            ConfigValuesArray aDefaults,
                                            size_t nFields,
+                                           size_t nOffset,
                                            int helpId,
                                            int image)
-                     : wxOptionsPage(aFields, aDefaults, 0, nFields,
+                     : wxOptionsPage(aFields - nOffset,
+                                     aDefaults - nOffset,
+                                     nOffset, nOffset + nFields,
                                      parent, title, profile, helpId, image)
 {
 }
@@ -2234,6 +2249,7 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
                                                             desc.aFields,
                                                             desc.aDefaults,
                                                             desc.nFields,
+                                                            desc.nOffset,
                                                             desc.helpId,
                                                             n  // image index
                                                            );
@@ -2314,60 +2330,36 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 
 void wxIdentityOptionsDialog::CreatePagesDesc()
 {
+   size_t nOffset;
    m_nPages = 2;
    m_aPages = new wxOptionsPageDesc[2];
 
    // identity page
+   nOffset = ConfigField_IdentFirst + 1;
    m_aPages[0] = wxOptionsPageDesc
    (
       _("Identity"),
       wxOptionsNotebook::ms_aszImages[OptionsPage_Ident],
       MH_OPAGE_IDENT,
-      wxOptionsPageStandard::ms_aFields + ConfigField_IdentFirst + 1,
-      wxOptionsPageStandard::ms_aConfigDefaults + ConfigField_IdentFirst + 1,
-      ConfigField_IdentLast - ConfigField_IdentFirst
+      wxOptionsPageStandard::ms_aFields + nOffset,
+      wxOptionsPageStandard::ms_aConfigDefaults + nOffset,
+      ConfigField_IdentLast - ConfigField_IdentFirst,
+      nOffset
    );
 
    // network page
+   nOffset = ConfigField_NetworkFirst + 1;
    m_aPages[1] = wxOptionsPageDesc
    (
       _("Network"),
       wxOptionsNotebook::ms_aszImages[OptionsPage_Network],
       MH_OPAGE_NETWORK,
-      wxOptionsPageStandard::ms_aFields + ConfigField_NetworkFirst + 1,
-      wxOptionsPageStandard::ms_aConfigDefaults + ConfigField_NetworkFirst + 1,
-      ConfigField_NetworkLast - ConfigField_NetworkFirst
+      wxOptionsPageStandard::ms_aFields + nOffset,
+      wxOptionsPageStandard::ms_aConfigDefaults + nOffset,
+      ConfigField_NetworkLast - ConfigField_NetworkFirst,
+      nOffset
    );
 };
-
-wxControl *wxIdentityOptionsDialog::CreateControlsAbove(wxPanel *panel)
-{
-   wxLayoutConstraints *c;
-
-   c = new wxLayoutConstraints;
-   c->left.SameAs(panel, wxLeft, LAYOUT_X_MARGIN);
-   c->top.SameAs(panel, wxTop, LAYOUT_Y_MARGIN);
-   c->width.AsIs();
-   c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(panel, -1, _("Folder Name: "),
-                                           wxDefaultPosition, wxDefaultSize,
-                                           wxALIGN_RIGHT);
-   pLabel->SetConstraints(c);
-
-   wxTextCtrl *pText = new wxTextCtrl(panel, -1,
-                                      m_identity,
-                                      wxDefaultPosition, wxDefaultSize,
-                                      wxTE_READONLY);
-
-   c = new wxLayoutConstraints;
-   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
-   c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
-   c->top.SameAs(panel, wxTop, LAYOUT_Y_MARGIN);
-   c->height.AsIs();
-   pText->SetConstraints(c);
-
-   return pText;
-}
 
 // ----------------------------------------------------------------------------
 // wxRestoreDefaultsDialog implementation
