@@ -46,7 +46,7 @@
 // ----------------------------------------------------------------------------
 
 // tree element
-class wxFolderTreeNode
+class wxFolderTreeNode : public wxTreeItemData
 {
 public:
    // the ctor creates the element and inserts it in the tree
@@ -69,7 +69,6 @@ public:
 
    MFolder          *GetFolder() const { return m_folder; }
    wxFolderTreeNode *GetParent() const { return m_parent; }
-   long              GetId()     const { return m_id;     }
 
 private:
    // not implemented
@@ -79,7 +78,6 @@ private:
    MFolder *m_folder;            // the folder we represent
 
    wxFolderTreeNode *m_parent;   // the parent node (may be NULL)
-   long              m_id;       // our id in the tree
 
    bool m_wasExpanded;
 };
@@ -277,19 +275,6 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    m_folder = folder;
    m_wasExpanded = false;
 
-   // add to the tree
-   bool isRoot = folder->GetType() == MFolder::Root;
-
-   wxTreeItem item;
-   item.m_mask = wxTREE_MASK_TEXT          |
-                 wxTREE_MASK_CHILDREN      |
-                 wxTREE_MASK_DATA          |
-                 wxTREE_MASK_IMAGE         |
-                 wxTREE_MASK_SELECTED_IMAGE;
-   item.m_text = isRoot ? wxString(_("All folders")) : folder->GetName();
-   item.m_children = TRUE;
-   item.m_data = (long)this;
-
    // each folder type has its own icon
    static const struct
    {
@@ -306,35 +291,47 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    };
 
    MFolder::Type type = folder->GetType();
-   item.m_image = -1;
+   int image = -1;
 
    size_t n;
    for ( n = 0; n < WXSIZEOF(FolderIcons); n++ )
    {
       if ( type == FolderIcons[n].type )
       {
-         item.m_image = FolderIcons[n].icon;
+         image = FolderIcons[n].icon;
          break;
       }
    }
 
    ASSERT_MSG( n < WXSIZEOF(FolderIcons), "no icon for this folder type" );
 
-   item.m_selectedImage = item.m_image;
-   m_id = tree->InsertItem(isRoot ? 0 : GetParent()->GetId(), item);
+   // add this item to the tree
+   if ( folder->GetType() == MFolder::Root )
+   {
+      SetId(tree->AddRoot(wxString(_("All folders")), image, image, this));
+   }
+   else
+   {
+      SetId(tree->AppendItem(GetParent()->GetId(), folder->GetName(),
+                             image, image, this));
+   }
+
+   // allow the user to expand us even though we don't have any children yet
+   tree->SetItemHasChildren(GetId());
 }
 
 void wxFolderTreeNode::DeleteChildren(wxTreeCtrl *tree)
 {
    // delete all children
-   long id = tree->GetNextItem(m_id, wxTREE_NEXT_CHILD);
-   while ( id != 0 )
+   long cookie;
+   wxTreeItemId id = tree->GetFirstChild(GetId(), cookie);
+   while ( id.IsOk() )
    {
       wxFolderTreeNode *child = (wxFolderTreeNode *)tree->GetItemData(id);
       child->DeleteChildren(tree);
       delete child;
 
-      id = tree->GetNextItem(id, wxTREE_NEXT_NEXT);
+      id = tree->GetNextChild(GetId(), cookie);
    }
 }
 
@@ -438,8 +435,8 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
 {
    ASSERT_MSG( event.GetEventObject() == this, "got other treectrls event?" );
 
-   wxTreeItem& item = event.m_item;
-   wxFolderTreeNode *parent = (wxFolderTreeNode *)item.m_data;
+   wxTreeItemId itemId = event.GetItem();
+   wxFolderTreeNode *parent = (wxFolderTreeNode *)GetItemData(itemId);
 
    if ( parent->WasExpanded() )
    {
@@ -459,9 +456,7 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
    // button from this node
    if ( nSubfolders == 0 )
    {
-      item.m_mask = wxTREE_MASK_CHILDREN;
-      item.m_children = 0;
-      SetItem(item);
+      SetItemHasChildren(itemId, FALSE);
    }
 }
 
@@ -469,7 +464,8 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
 {
    ASSERT_MSG( event.GetEventObject() == this, "got other treectrls event?" );
 
-   wxFolderTreeNode *newCurrent = (wxFolderTreeNode *)event.m_item.m_data;
+   wxTreeItemId itemId = event.GetItem();
+   wxFolderTreeNode *newCurrent = (wxFolderTreeNode *)GetItemData(itemId);
 
    MFolder *oldsel = m_current ? m_current->GetFolder() : NULL,
            *newsel = newCurrent ? newCurrent->GetFolder() : NULL;

@@ -54,6 +54,7 @@
 #include <wx/treectrl.h>
 #include <wx/toolbar.h>
 #include <wx/file.h>
+#include <wx/imaglist.h>
 
 #include <wx/persctrl.h>
 
@@ -145,13 +146,13 @@ enum TreeElement
 //     several functions which should be virtual are not: we do the dispatching
 //     ourselves which allows us to save 4*sizeof(void *) bytes for each item
 //     (the size a virtual table for this class would have had)
-class AdbTreeElement
+class AdbTreeElement : public wxTreeItemData
 {
 public:
   AdbTreeElement(TreeElement kind,
                  const wxString& name,
                  AdbTreeNode *parent) : m_name(name)
-    { m_parent = parent; m_idItem = -1; m_kind = kind; }
+    { m_parent = parent; m_kind = kind; }
   virtual ~AdbTreeElement() { }
 
   // accessors
@@ -159,8 +160,6 @@ public:
   AdbTreeNode *GetParent() const { return m_parent; }
   wxString GetFullName() const;
   wxString GetPath() const;
-
-  long GetId() const { return m_idItem; }
 
     // what kind of item are we?
   bool IsRoot() const { return m_kind == TreeElement_Root; }
@@ -181,7 +180,6 @@ public:
 
 protected:
   TreeElement     m_kind;         // what kind of item we are
-  long            m_idItem;       // id of our item in the tree control
   wxString        m_name;         // the name which is the same as label
   AdbTreeNode    *m_parent;       // the group which contains us
 };
@@ -215,8 +213,8 @@ public:
     // the id of the last subgroup (or wxTREE_INSERT_LAST)
     // we need it to be able to insert a new subgroup after the last one, not
     // after all entries (i.e. we want to sort subgroups first)
-  void SetLastGroupId(long id) { m_idLastGroup = id; }
-  long GetLastGroupId() const { return m_idLastGroup; }
+  void SetLastGroupId(const wxTreeItemId& id) { m_idLastGroup = id; }
+  const wxTreeItemId& GetLastGroupId() const { return m_idLastGroup; }
 
     // return the string of the form "in the group <foo>" or "at the root
     // level of the addressbook <bar>" for diagnostic messages
@@ -272,7 +270,7 @@ protected:
   bool           m_bWasExpanded;
   ArrayEntries   m_children;
 
-  long           m_idLastGroup;
+  wxTreeItemId   m_idLastGroup;
 
   AdbEntryGroup *m_pGroup;
 };
@@ -610,7 +608,7 @@ private:
   bool MoveSelection(const wxString& strEntry);
 
   // set tree item's icon according to it's state
-  void SetTreeItemIcon(const wxTreeItem& item, wxAdbTree::ImageListImage icon);
+  void SetTreeItemIcon(const wxTreeItemId& id, wxAdbTree::ImageListImage icon);
 
   // add the new entry/subgroup at the current position to the tree
   void AddNewTreeElement(AdbTreeElement *element);
@@ -661,7 +659,7 @@ private:
   // tree data
   // ---------
   AdbTreeRoot        *m_root;    // the parent of all ADB entries
-  AdbTreeElement *m_current; // item currently edited (never NULL)
+  AdbTreeElement     *m_current; // item currently edited (never NULL)
 
   // cut&paste data
   // --------------
@@ -955,6 +953,10 @@ BEGIN_EVENT_TABLE(wxAdbEMailPage, wxAdbPage)
   EVT_BUTTON(AdbPage_BtnModify, wxAdbEMailPage::OnModifyEMail)
   EVT_BUTTON(AdbPage_BtnDelete, wxAdbEMailPage::OnDeleteEMail)
 END_EVENT_TABLE()
+
+// ----------------------------------------------------------------------------
+// functions
+// ----------------------------------------------------------------------------
 
 // =============================================================================
 // implementation
@@ -1262,7 +1264,7 @@ void wxAdbEditFrame::RestoreSettings2()
       // ExpandBranch won't expand the group itself
       wxASSERT( current->IsGroup() );
 
-      m_treeAdb->ExpandItem(current->GetId());
+      m_treeAdb->Expand(current->GetId());
     }
   }
 
@@ -1319,7 +1321,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
                              const char *szProvName)
 {
   // check that we don't already have it
-  if ( m_astrAdb.Index(strPath) != -1 ) {
+  if ( m_astrAdb.Index(strPath) != NOT_FOUND ) {
     wxLogError(_("The address book '%s' is already opened."), strPath.c_str());
 
     return FALSE;
@@ -1340,12 +1342,8 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
 
   // make sure the root can be expanded
   if ( m_root->GetChildrenCount() == 1 ) {
-    // had no children before and might have m_children = 0
-    wxTreeItem item;
-    item.m_itemId = m_root->GetId();
-    item.m_mask = wxTREE_MASK_CHILDREN;
-    item.m_children = 1;
-    m_treeAdb->SetItem(item);
+    // had no children before and might have had m_children = 0
+    m_treeAdb->SetItemHasChildren(m_root->GetId());
   }
 
   // currently, we always succeed because even if the file doesn't exist
@@ -1369,14 +1367,7 @@ void wxAdbEditFrame::AddNewTreeElement(AdbTreeElement *element)
   //else: will be added when it's expanded for the first time
 
   // ensure that it may be expanded
-  if ( parent->GetChildrenCount() == 1 ) {
-    // had no children before and might have m_children = 0
-    wxTreeItem item;
-    item.m_itemId = parent->GetId();
-    item.m_mask = wxTREE_MASK_CHILDREN;
-    item.m_children = 1;
-    m_treeAdb->SetItem(item);
-  }
+  m_treeAdb->SetItemHasChildren(parent->GetId());
 }
 
 void wxAdbEditFrame::DoCreateNode()
@@ -1486,7 +1477,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
   m_current = parent;
 
   // remove from the tree
-  m_treeAdb->DeleteItem(lId);
+  m_treeAdb->Delete(lId);
 
   strWhat[0u] = toupper(strWhat[0u]);
   wxLogStatus(this, _("%s '%s' deleted."), strWhat.c_str(), strName.c_str());
@@ -1781,11 +1772,7 @@ void wxAdbEditFrame::DoShowAdbProperties()
   wxADBPropertiesDialog dlg(this, book);
   if ( dlg.ShowModal() == wxID_OK ) {
     // update the tree label (it may have been changed)
-    wxTreeItem item;
-    item.m_itemId = book->GetId();
-    item.m_mask = wxTREE_MASK_TEXT;
-    item.m_text = book->GetAdbName();
-    m_treeAdb->SetItem(item);
+    m_treeAdb->SetItemText(book->GetId(), book->GetAdbName());
   }
 }
 
@@ -1855,7 +1842,9 @@ void wxAdbEditFrame::OnHelp(wxCommandEvent&)
 
 void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
 {
-  m_current = (AdbTreeElement *)event.m_item.m_data;
+  wxTreeItemId id = event.GetItem();
+  AdbTreeNode *m_current = (AdbTreeNode *)m_treeAdb->GetItemData(id);
+
   if ( m_current->IsGroup() ) {
     SetStatusText("", 1);
   }
@@ -1868,33 +1857,35 @@ void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
   UpdateNotebook();
 }
 
-void wxAdbEditFrame::SetTreeItemIcon(const wxTreeItem& item,
+void wxAdbEditFrame::SetTreeItemIcon(const wxTreeItemId& id,
                                      wxAdbTree::ImageListImage icon)
 {
-  AdbTreeNode *parent = (AdbTreeNode *)item.m_data;
+  AdbTreeNode *parent = (AdbTreeNode *)m_treeAdb->GetItemData(id);
   wxASSERT( parent->IsGroup() ); // items can't be expanded/collapsed
 
   // don't change icons for the root entry and address books
   if ( parent->IsRoot() || parent->GetParent()->IsRoot() )
     return;
 
-  m_treeAdb->SetItemImage(item.m_itemId, icon, icon);
+  m_treeAdb->SetItemImage(id, icon);
+  m_treeAdb->SetItemSelectedImage(id, icon);
 }
 
 void wxAdbEditFrame::OnTreeCollapse(wxTreeEvent& event)
 {
-  SetTreeItemIcon(event.m_item, wxAdbTree::Closed);
+  SetTreeItemIcon(event.GetItem(), wxAdbTree::Closed);
 }
 
 void wxAdbEditFrame::OnTreeExpand(wxTreeEvent& event)
 {
-  SetTreeItemIcon(event.m_item, wxAdbTree::Opened);
+  SetTreeItemIcon(event.GetItem(), wxAdbTree::Opened);
 }
 
 void wxAdbEditFrame::OnTreeExpanding(wxTreeEvent& event)
 {
-  wxTreeItem& item = event.m_item;
-  AdbTreeNode *parent = (AdbTreeNode *)item.m_data;
+  wxTreeItemId id = event.GetItem();
+  AdbTreeNode *parent = (AdbTreeNode *)m_treeAdb->GetItemData(id);
+
   wxASSERT( parent->IsGroup() ); // items can't be expanded
 
   if ( parent->WasExpanded() )
@@ -1902,9 +1893,7 @@ void wxAdbEditFrame::OnTreeExpanding(wxTreeEvent& event)
 
   if ( !parent->ExpandFirstTime(*m_treeAdb) ) {
     // if this group has no entries don't put [+] near it
-    item.m_mask = wxTREE_MASK_CHILDREN;
-    item.m_children = 0;
-    m_treeAdb->SetItem(item);
+    m_treeAdb->SetItemHasChildren(parent->GetId(), FALSE);
 
     wxLogStatus(this, _("This group doesn't have any entries"));
   }
@@ -2024,7 +2013,7 @@ AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
       // we can safely cast it to AdbTreeNode
       AdbTreeNode *curGroup = (AdbTreeNode *)current;
       if ( !curGroup->WasExpanded() )
-        m_treeAdb->ExpandItem(current->GetId());
+        m_treeAdb->Expand(current->GetId());
       current = curGroup->FindChild(aComponents[n]);
       if ( current == NULL ) {
         wxLogError(_("No entry '%s':\n'%s' doesn't have entry/subgroup '%s'."),
@@ -2073,7 +2062,7 @@ void wxAdbEditFrame::SetMinSize()
 
 bool wxAdbEditFrame::SaveExpandedBranches(AdbTreeNode *group)
 {
-  if ( m_treeAdb->IsItemExpanded(group->GetId()) ) {
+  if ( m_treeAdb->IsExpanded(group->GetId()) ) {
     // recursively save the expanded branches of our children
     bool bHasExpandedChild = FALSE;
     size_t nChildren = group->GetChildrenCount();
@@ -3146,49 +3135,46 @@ void AdbTreeElement::ClearDirtyFlag()
 
 void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
 {
-  wxTreeItem item;
-  item.m_mask = wxTREE_MASK_TEXT          |
-                wxTREE_MASK_CHILDREN      |
-                wxTREE_MASK_DATA          |
-                wxTREE_MASK_IMAGE         |
-                wxTREE_MASK_SELECTED_IMAGE;
-  item.m_text = IsRoot() ? wxString(_("Address Books")) : GetName();
-  item.m_children = IsGroup();
-  item.m_data = (long)this;
-
+  int image = -1;
   switch ( m_kind )
   {
     case TreeElement_Entry:
-       item.m_image = wxAdbTree::Address;
+       image = wxAdbTree::Address;
        break;
 
     case TreeElement_Group:
-       item.m_image = wxAdbTree::Closed;
+       image = wxAdbTree::Closed;
        break;
 
     case TreeElement_Book:
-       item.m_image = wxAdbTree::Book;
+       image = wxAdbTree::Book;
        break;
 
     case TreeElement_Root:
-       item.m_image = wxAdbTree::Library;
+       image = wxAdbTree::Library;
        break;
 
     default:
        wxFAIL_MSG("unknown tree element type");
   }
-  item.m_selectedImage = item.m_image;
 
   if ( IsRoot() ) {
-    m_idItem = tree.InsertItem(0 /* at the top */, item);
+    SetId(tree.AddRoot(wxString(_("Address Books")), image, image, this));
+    tree.SetItemHasChildren(GetId());
   }
   else {
-    long where = IsGroup() ? m_parent->GetLastGroupId()
-                           : (long)wxTREE_INSERT_LAST;
-    m_idItem = tree.InsertItem(m_parent->GetId(), item, where);
+    // we want to have all the groups before all the items
+    if ( IsGroup() ) {
+      SetId(tree.InsertItem(m_parent->GetId(), m_parent->GetLastGroupId(),
+                            GetName(), image, image, this));
+      m_parent->SetLastGroupId(GetId());
+    }
+    else {
+      // it's an item, insert it in the end
+      SetId(tree.AppendItem(m_parent->GetId(), GetName(), image, image, this));
+    }
 
-    if ( IsGroup() )
-      m_parent->SetLastGroupId(m_idItem);
+    tree.SetItemHasChildren(GetId(), IsGroup());
   }
 }
 
