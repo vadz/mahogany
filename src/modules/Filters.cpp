@@ -1944,7 +1944,7 @@ ParserImpl::AddBuiltinFunctions(void)
    DefineFunction("text", func_text);
    DefineFunction("delete", func_delete);
    DefineFunction("copy", func_copytofolder);
-   DefineFunction("move", func_copytofolder);
+   DefineFunction("move", func_movetofolder);
    DefineFunction("date", func_date);
    DefineFunction("size", func_size);
    DefineFunction("now", func_now);
