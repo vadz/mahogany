@@ -110,7 +110,7 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
    {
       mApplication->GetProfile()->writeEntry(MP_NNTPHOST, value);
       wxLogMessage(_("Imported NNTP host setting from %s: %s."),
-                   value.c_str(), "XFMail");
+                   "XFMail", value.c_str());
    }
    else if ( var == "nntpuser" )
    {
@@ -185,6 +185,35 @@ bool MXFMailImporter::ImportFolders()
    }
 
    // FIXME: should parse .xfmailrc from here to find maildir value
+   // FIXED
+
+   wxString filenamerc = GetXFMailDir() + ".xfmailrc";
+   wxTextFile filerc(filenamerc);
+   if ( filerc.Open() )
+   {
+
+    size_t nLines = filerc.GetLineCount();
+    for ( size_t nLine = 0; nLine < nLines; nLine++ )
+    {
+       const wxString& line = filerc[nLine];
+
+       int nEq = line.Find('=');
+       if ( nEq == wxNOT_FOUND )
+       {
+          wxLogDebug("%s(%u): missing '=' sign.", filenamerc.c_str(), nLine + 1);
+
+          // skip line
+          continue;
+       }
+
+       wxString var(line, (size_t)nEq), value = line.c_str() + nEq + 1;
+       if ( var == "maildir" && !!value )
+       {
+          ImportSetting(filenamerc, nLine + 1, var, value);
+       }
+    }
+   }
+
    if ( !m_mailDir )
       m_mailDir = wxExpandEnvVars("$HOME/Mail");
 
@@ -293,7 +322,7 @@ bool MXFMailImporter::ImportFolders()
 
    if ( !nImported )
    {
-      wxLogError(_("%s folder import failed."), "XFMail");
+      wxLogError(_("%s %s folder import failed."), "XFMail", m_mailDir.c_str());
 
       return FALSE;
    }
