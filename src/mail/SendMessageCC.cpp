@@ -1246,6 +1246,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
          //    2. why do we use ENC7BIT for TYPEMESSAGE?
          bdy->nested.msg = mail_newmsg();
          bdy->encoding = ENC7BIT;
+         break;
 
       case TYPETEXT:
          // if the actual message text is in 7 bit, avoid encoding it even if
