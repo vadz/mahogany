@@ -15,6 +15,15 @@ $Id$
 		later say that there are M-N new messages :-(
 9		changing properties for IMAP folder (auto-collect)
 		occasionally dumps core on [OK] click
+9		Is POP collection broken if compiled without python?
+		(seems highly unlikely, can find no connection)
+
+8		Calling events asynchronously can lead to the default
+		object being reset in MailFolderCC
+		streamConnectionList. For threaded operation this will
+		be solved with the mutex, but how can we fix it for
+		non-threaded M? 
+
 7	KB	skip all unprocessed character events in folderview
 		and messageview to make menu accelerators work
 7 gtk	VZ?	message boxes have broken icons under wxGTK
@@ -50,7 +59,7 @@ $Id$
 * PRI	WHO	DESCRIPTION
 *********************************************************************
 
-9	KB	Write ASMailFolder API for subscription management.
+9	KB	Change/Finish ASMailFolder API for subscription management.
 		---> FINISH THE WXFOLDERVIEW WITH ASYNC CODE!!!
 		---> Add a "find text in folder" method, too, trivial.
 

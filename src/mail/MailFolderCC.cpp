@@ -576,8 +576,8 @@ MailFolderCC::PingReopen(void) const
       return false;  // or would true be better?
    }
 
-   MailFolderCC *t = (MailFolderCC *)this; // we need to change a few
-   // things
+   // just to circumvene the "const":
+   MailFolderCC *t = (MailFolderCC *)this;
    
    t->m_PingReopenSemaphore = true;
    bool rc = true;
@@ -1217,9 +1217,17 @@ void
 MailFolderCC::SetDefaultObj(bool setit) const
 {
    if(setit)
+   {
+      CHECK_RET(streamListDefaultObj == NULL,
+                "conflicting mail folder default object access (trying to override non-NULL)!");
       streamListDefaultObj = (MailFolderCC *)this;
+   }
    else
+   {
+      CHECK_RET(streamListDefaultObj == this,
+                "conflicting mail folder default object access (trying to re-set to NULL)!");
       streamListDefaultObj = NULL;
+   }
 }
 
 
@@ -1279,8 +1287,8 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
                       long  attrib)
 {
    MailFolderCC *mf = LookupObject(stream);
-   ASSERT(mf);
-   ASSERT(mf->m_FolderListing);
+   CHECK_RET(mf,"NULL mailfolder");
+   CHECK_RET(mf->FolderListing,"NULL mailfolder listing");
    mf->m_FolderListing->SetDelimiter(delim);
    mf->m_FolderListing->Add(new FolderListingEntryCC(name, attrib));
 }
@@ -1299,8 +1307,8 @@ MailFolderCC::mm_lsub(MAILSTREAM * stream,
                       long  attrib)
 {
    MailFolderCC *mf = LookupObject(stream);
-   ASSERT(mf);
-   ASSERT(mf->m_FolderListing);
+   CHECK_RET(mf,"NULL mailfolder");
+   CHECK_RET(mf->FolderListing,"NULL mailfolder listing");
    mf->m_FolderListing->SetDelimiter(delim);
    mf->m_FolderListing->Add(new FolderListingEntryCC(name, attrib));
 }
@@ -1527,7 +1535,7 @@ MailFolderCC::ProcessEventQueue(void)
             message.
          */
          MailFolderCC *mf = LookupObject(evptr->m_stream);
-         ASSERT(mf);
+         CHECK_RET(mf,"NULL mailfolder");
          // Find the listing entry for this message:
          unsigned long uid = mail_uid(evptr->m_stream, evptr->m_args[0].m_ulong);
          const HeaderInfo *hi;
@@ -1549,7 +1557,7 @@ MailFolderCC::ProcessEventQueue(void)
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT(mf);
-         mf->RequestUpdate();  // Queues an Update event.
+         if(mf) mf->RequestUpdate();  // Queues an Update event.
          break;
       }
       /* The Update event is not caused by c-client callbacks but
@@ -1559,7 +1567,7 @@ MailFolderCC::ProcessEventQueue(void)
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT(mf);
-         if(mf->UpdateNeeded())  // only call it once
+         if(mf && mf->UpdateNeeded())  // only call it once
             mf->BuildListing();
          break;
       }

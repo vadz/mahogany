@@ -63,6 +63,7 @@ install: M
 	$(RM) -f $(BINDIR)/M $(DATADIR)/bin/M
 	$(INSTALL) -d $(BINDIR)
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)
+	$(RM) $(BINDIR)/mahogany
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)/mahogany
 	$(INSTALL) -d $(DATADIR)/icons
 	for i in icons/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons; done
