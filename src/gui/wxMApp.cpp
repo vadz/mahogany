@@ -751,8 +751,6 @@ wxMApp::OnInit()
    wxInitAllImageHandlers();
    wxFileSystem::AddHandler(new wxMemoryFSHandler);
 
-   m_IconManager = new wxIconManager();
-
    m_PrintData = new wxPrintData;
    m_PageSetupData = new wxPageSetupDialogData;
 
@@ -1529,6 +1527,17 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
    UpdateStatusBar(field+1, TRUE);
    ASSERT(m_topLevelFrame->GetStatusBar());
    m_topLevelFrame->GetStatusBar()->SetStatusText(msg, field);
+}
+
+wxIconManager *wxMApp::GetIconManager(void) const
+{
+    if ( !m_IconManager )
+    {
+        // const_cast
+        ((wxMApp *)this)->m_IconManager = new wxIconManager;
+    }
+
+    return m_IconManager;
 }
 
 // ----------------------------------------------------------------------------

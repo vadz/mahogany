@@ -146,27 +146,22 @@ public:
    /** return the global directory
        @return the path to the global M data files
    */
-   const String & GetGlobalDir(void) const { return m_globalDir; }
+   const String& GetGlobalDir(void) const { return m_globalDir; }
 
    /** return the local path
        @return the path to the local user's M data directory
    */
-   const String & GetLocalDir(void) const { return m_localDir; }
+   const String& GetLocalDir(void) const { return m_localDir; }
 
    /** get the directory containing the files from our source tree: it is the
        global dir if it's set or ${top_srcdir} otherwise
    */
    String GetDataDir() const;
 
-   /** sets the local path: for use by routines in upgrade.cpp only!
-       @param path is the full path to the user M directory
-   */
-   void SetLocalDir(const String& path) { m_localDir = path; }
-
    /** Get a pointer to the list of known Mime types.
        @return the wxMimeTypesManager reference
    */
-   wxMimeTypesManager& GetMimeManager(void) const { return *m_mimeManager; }
+   wxMimeTypesManager& GetMimeManager(void) const;
 
    /** Get this object's profile, not reference counted.
        @return a pointer to the profile.
@@ -345,16 +340,18 @@ protected:
 
    /// sets up the class handling dial up networking
    virtual void SetupOnlineManager(void) = 0;
-   /** Checks some global configuration settings and makes sure they
-       have sensible values. Especially important when M is run for
-       the first time.
 
-       @return true if the application is being run for the first time
-   */
-   bool VerifySettings(void);
+   /**
+     Initializes the value of the global and local directories returned by
+     GetGlobalDir() and GetLocalDir(). The global directory is the installation
+     directory of the program containing the system-wide configuration files
+     while the local directory is a user-specific one (i.e. $HOME/.M under
+     Unix)
 
-   /// if the global dir doesn't exist, ask the user for it
-   void InitGlobalDir();
+     If the global dir doesn't exist, ask the user for it as we really need
+     one.
+    */
+   void InitDirectories();
 
    // global variables stored in the application object
    // -------------------------------------------------

@@ -417,46 +417,51 @@ wxIconManager::FreeImage(char **cpptr)
 // ----------------------------------------------------------------------------
 wxIconManager::wxIconManager(wxString sub_dir)
 {
-   m_iconList = NULL;
+   m_iconList = new IconDataList;
+
+   m_GlobalDir << mApplication->GetDataDir() << DIR_SEPARATOR << "icons";
+   m_LocalDir << mApplication->GetLocalDir() << DIR_SEPARATOR << "icons";
 
    if(sub_dir == "default" || sub_dir == _("default"))
-      sub_dir = "";
+      sub_dir.clear();
    SetSubDirectory(sub_dir);
+
    m_unknownIcon = wxIcon(unknown_xpm);
 }
 
 
 wxIconManager::~wxIconManager()
 {
-   if(m_iconList)
-      delete m_iconList;
+   delete m_iconList;
 }
 
 void
 wxIconManager::SetSubDirectory(wxString subDir)
 {
-   // We cannot do this in the constructor as the global dir might not
-   // be set yet.
-   if(mApplication && ! m_GlobalDir.Length())
-   {
-      m_GlobalDir << mApplication->GetDataDir() << DIR_SEPARATOR << "icons";
-      m_LocalDir << mApplication->GetLocalDir() << DIR_SEPARATOR << "icons";
-   }
-
    /* If nothing changed, we don't do anything: */
-   if(! m_iconList
-      || subDir != m_SubDir)
+   if ( subDir != m_SubDir )
    {
       /* If we change the directory, we should also discard all old icons
          to get the maximum effect. */
-      if(m_iconList)
-         delete m_iconList;
+      delete m_iconList;
       m_iconList = new IconDataList();
 
-      m_SubDir = DIR_SEPARATOR + subDir;
-      if(! wxDirExists(m_GlobalDir+m_SubDir)
-         && ! wxDirExists(m_LocalDir+m_SubDir))
-         m_SubDir = ""; // save ourselves some time when searching
+      if ( subDir.empty() )
+      {
+         m_SubDir.clear();
+      }
+      else
+      {
+         m_SubDir = DIR_SEPARATOR + subDir;
+
+         if ( !wxDirExists(m_GlobalDir + m_SubDir) &&
+               !wxDirExists(m_LocalDir + m_SubDir) )
+         {
+            // save ourselves some time when searching - we don't risk to find
+            // anything in non-existent directories anyhow
+            m_SubDir.clear();
+         }
+      }
 
       // Always add the built-in icons:
       //

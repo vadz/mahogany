@@ -122,7 +122,6 @@ extern const MOption MP_USEOUTGOINGFOLDER;
 extern const MOption MP_USEPYTHON;
 extern const MOption MP_USERDIR;
 extern const MOption MP_USERNAME;
-extern const MOption MP_USER_MDIR;
 extern const MOption MP_USE_OUTBOX;
 extern const MOption MP_USE_TRASH_FOLDER;
 extern const MOption MP_VERSION;
@@ -2841,39 +2840,6 @@ VerifyEMailSendingWorks(void)
    }
 }
 
-static
-void VerifyUserDir(void)
-{
-   String userdir = READ_APPCONFIG(MP_USERDIR);
-   if ( !userdir )
-   {
-      Profile *profile = mApplication->GetProfile();
-#if defined(OS_UNIX)
-      userdir = getenv("HOME");
-      userdir << DIR_SEPARATOR << READ_APPCONFIG_TEXT(MP_USER_MDIR);
-#elif defined(OS_WIN)
-      // take the directory of the program
-      char szFileName[MAX_PATH];
-      if ( !GetModuleFileName(NULL, szFileName, WXSIZEOF(szFileName)) )
-      {
-         wxLogError(_("Cannot find your Mahogany directory, please specify it "
-                      "in the options dialog."));
-      }
-      else
-      {
-         wxSplitPath(szFileName, &userdir, NULL, NULL);
-      }
-#else
-#     error "Don't know how to find local dir under this OS"
-#endif // OS
-
-      // save it for the next runs
-      profile->writeEntry(MP_USERDIR, userdir);
-   }
-
-   mApplication->SetLocalDir(userdir);
-}
-
 /**
   Create a folder in the folder tree - just a convenient wrapper around
   CreateFolderTreeEntry()
@@ -3035,9 +3001,6 @@ void SetupMinimalConfig(void)
    {
       profile->writeEntry(MP_PERSONALNAME, wxGetUserName());
    }
-
-   // this is normally already done, but better be safe
-   VerifyUserDir();
 
    // now that we have the local dir, we can set up a default mail folder dir
    String str = READ_APPCONFIG(MP_MBOXDIR);
@@ -3439,10 +3402,6 @@ CheckConfiguration(void)
          return FALSE;
       }
    }
-
-   // this is vital: we must have the local directory to read address books
-   // and other M files from it
-   VerifyUserDir();
 
    bool firstRun = READ_APPCONFIG_BOOL(MP_FIRSTRUN);
    if ( firstRun != 0 )

@@ -95,6 +95,8 @@ extern const MOption MP_TRASH_FOLDER;
 extern const MOption MP_USEPYTHON;
 extern const MOption MP_USE_OUTBOX;
 extern const MOption MP_USE_TRASH_FOLDER;
+extern const MOption MP_USERDIR;
+extern const MOption MP_USER_MDIR;
 
 #ifdef OS_UNIX
 extern const MOption MP_ETCPATH;
@@ -174,17 +176,6 @@ MAppBase::~MAppBase()
    mApplication = NULL;
 }
 
-/* The code in VerifySettings somehow overlaps with the purpose of
-   upgrade.cpp where we set up the INBOX profile and possibly other
-   things. I just can't be bothered now, but this should go there,
-   too.
-*/
-bool
-MAppBase::VerifySettings(void)
-{
-   return CheckConfiguration();
-}
-
 bool
 MAppBase::OnStartup()
 {
@@ -252,10 +243,8 @@ MAppBase::OnStartup()
             msg += _("This has been fixed now, the directory is no longer writable for others.");
          else
          {
-            String tmp;
-            tmp.Printf(_("The attempt to make the directory unwritable for others has failed.\n(%s)"),
+            msg << String::Format(_("The attempt to make the directory unwritable for others has failed.\n(%s)"),
                        strerror(errno));
-            msg << tmp;
          }
          wxLogError(msg);
       }
@@ -289,10 +278,8 @@ MAppBase::OnStartup()
             msg += _("This has been fixed now, the file is no longer readable for others.");
          else
          {
-            String tmp;
-            tmp.Printf(_("The attempt to make the file unreadable for others has failed.\n(%s)"),
+            msg << String::Format(_("The attempt to make the file unreadable for others has failed.\n(%s)"),
                        strerror(errno));
-            msg << tmp;
          }
          wxLogError(msg);
       }
@@ -323,11 +310,8 @@ MAppBase::OnStartup()
    wxPControls::SetSettingsPath("/Settings/");
 
    // find our directories
-   // --------------------
+   InitDirectories();
 
-   InitGlobalDir();
-
-   String tmp;
 #ifdef USE_ICON_SUBDIRS
    // KB: we no longer use different subdirs:
    // We need to set this before wxWindows has a chance to process
@@ -338,9 +322,7 @@ MAppBase::OnStartup()
       if(idx < sizeof gs_IconSubDirs)
          GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
    }
-#endif
-   // cause it to re-read our global dir
-   GetIconManager()->SetSubDirectory("");
+#endif // USE_ICON_SUBDIRS
 
    // do it first to avoid any interactive stuff from popping up if configured
    // to start up in the unattended mode
@@ -357,7 +339,8 @@ MAppBase::OnStartup()
 
    // verify (and upgrade if needed) our settings
    // -------------------------------------------
-   if ( !VerifySettings() )
+
+   if ( !CheckConfiguration() )
    {
       ERRORMESSAGE((_("Program execution aborted.")));
 
@@ -370,36 +353,25 @@ MAppBase::OnStartup()
    mail_parameters((MAILSTREAM *)NULL, SET_HOMEDIR, (void *)wxGetHomeDir(&strHome));
 #endif // OS_WIN
 
-   // Initialise mailcap/mime.types managing subsystem.
-   m_mimeManager = new wxMimeTypesManager();
-
-#if 0 // we don't provide any mailcaps so far
-   // attempt to load the extra information supplied with M:
-
-   if(wxFileExists(GetGlobalDir()+"/mailcap"))
-      m_mimeManager->ReadMailcap(GetGlobalDir()+"/mailcap");
-   if(wxFileExists(GetGlobalDir()+"/mime.types"))
-      m_mimeManager->ReadMimeTypes(GetGlobalDir()+"/mime.types");
-#endif // 0
-
    // must be done before using the network
    SetupOnlineManager();
 
    // extend path for commands, look in M's dirs first
-   tmp = "PATH=";
-   tmp << GetLocalDir() << "/scripts" << PATH_SEPARATOR
+   String pathEnv;
+   pathEnv << "PATH="
+       << GetLocalDir() << "/scripts" << PATH_SEPARATOR
        << GetDataDir() << "/scripts";
 
    const char *path = getenv("PATH");
    if ( path )
-      tmp << PATH_SEPARATOR << path;
+      pathEnv << PATH_SEPARATOR << path;
 
    // on some systems putenv() takes "char *", cast silents the warnings but
    // should be harmless otherwise
-   putenv((char *)tmp.c_str());
+   putenv((char *)pathEnv.c_str());
 
    // initialise python interpreter
-#  ifdef  USE_PYTHON
+#ifdef  USE_PYTHON
    // having the same error message each time M is started is annoying, so
    // give the user a possibility to disable it
    if ( READ_CONFIG(m_profile, MP_USEPYTHON) && ! InitPython() )
@@ -418,7 +390,7 @@ MAppBase::OnStartup()
          m_profile->writeEntry(MP_USEPYTHON, FALSE);
       }
    }
-#  endif //USE_PYTHON
+#endif //USE_PYTHON
 
    // load any modules requested: notice that this must be done as soon as
    // possible as filters module is already used by the folder opening code
@@ -802,8 +774,23 @@ MAppBase::OnMEvent(MEventData& event)
 }
 
 void
-MAppBase::InitGlobalDir()
+MAppBase::InitDirectories()
 {
+   // first the local one
+   m_localDir = READ_APPCONFIG_TEXT(MP_USERDIR);
+   if ( m_localDir.empty() )
+   {
+      m_localDir = wxGetHomeDir();
+
+#if defined(OS_UNIX)
+      m_localDir << DIR_SEPARATOR << READ_APPCONFIG_TEXT(MP_USER_MDIR);
+#endif // OS
+
+      // save it for the next runs
+      m_profile->writeEntry(MP_USERDIR, m_localDir);
+   }
+
+   // and now the global
    m_globalDir = READ_APPCONFIG_TEXT(MP_GLOBALDIR);
    if ( m_globalDir.empty() || !PathFinder::IsDir(m_globalDir) )
    {
@@ -1140,7 +1127,11 @@ extern "C"
          mApplication->FatalError(message);
       }
    }
-};
+}
+
+// ----------------------------------------------------------------------------
+// MAppBase various accessors
+// ----------------------------------------------------------------------------
 
 String MAppBase::GetDataDir() const
 {
@@ -1159,5 +1150,26 @@ String MAppBase::GetDataDir() const
    }
 
    return dir;
+}
+
+wxMimeTypesManager& MAppBase::GetMimeManager(void) const
+{
+    if ( !m_mimeManager )
+    {
+        // const_cast
+        ((MAppBase *)this)->m_mimeManager = new wxMimeTypesManager;
+
+#if 0 // we don't provide any mailcaps so far
+        // attempt to load the extra information supplied with M:
+
+        if(wxFileExists(GetGlobalDir()+"/mailcap"))
+            m_mimeManager->ReadMailcap(GetGlobalDir()+"/mailcap");
+        if(wxFileExists(GetGlobalDir()+"/mime.types"))
+            m_mimeManager->ReadMimeTypes(GetGlobalDir()+"/mime.types");
+#endif // 0
+
+    }
+
+    return *m_mimeManager;
 }
 

@@ -92,7 +92,7 @@ public:
    virtual void Help(int id, wxWindow *parent = NULL);
 
    /// return a pointer to the IconManager:
-   wxIconManager *GetIconManager(void) const { return m_IconManager; }
+   wxIconManager *GetIconManager(void) const;
 
    /// Destructor
    ~wxMApp();
@@ -171,6 +171,7 @@ private:
 
    /// an iconmanager instance
    wxIconManager *m_IconManager;
+
    /// a help controller instance
    wxHelpControllerBase *m_HelpController;
 
