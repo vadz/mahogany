@@ -791,7 +791,7 @@ wxMApp::OnInit()
             default:
                const wxLanguageInfo *info = wxLocale::GetLanguageInfo(lang);
                if ( info )
-                  locale = info->Description;
+                  locale = info->CanonicalName;
                else
                   locale.Printf(_("unknown language (%d)"), lang);
 
