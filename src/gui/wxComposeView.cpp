@@ -1560,7 +1560,21 @@ wxComposeView::OnMenuCommand(int id)
    switch(id)
    {
    case WXMENU_COMPOSE_INSERTFILE:
-      InsertFile();
+      {
+         wxArrayString filenames;
+         size_t nFiles = wxPFilesSelector(filenames, "MsgInsert",
+                                          _("Please choose files to insert."),
+                                          NULL, "dead.letter", NULL,
+                                          _(wxALL_FILES),
+                                          wxOPEN |
+                                          wxHIDE_READONLY |
+                                          wxFILE_MUST_EXIST,
+                                          this);
+         for ( size_t n = 0; n < nFiles; n++ )
+         {
+            InsertFile(filenames[n]);
+         }
+      }
       break;
 
 
@@ -1906,29 +1920,15 @@ wxComposeView::InsertData(char *data,
 void
 wxComposeView::InsertFile(const char *fileName, const char *mimetype)
 {
+   CHECK_RET( !strutil_isempty(fileName), "filename can't be empty" );
+
    MimeContent
       *mc = new MimeContent();
-
-   String filename(fileName);
-   if( strutil_isempty(filename) )
-   {
-      filename = wxPFileSelector("MsgInsert",
-                                 _("Please choose a file to insert."),
-                                 NULL, "dead.letter", NULL,
-                                 _(wxALL_FILES),
-                                 wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
-                                 this);
-
-      if( !filename )
-      {
-         // empty string means it was cancelled by user
-         return;
-      }
-   }
 
    // if there is a slash after the dot, it is not extension (otherwise it
    // might be not an extension too, but consider that it is - how can we
    // decide otherwise?)
+   String filename(fileName);
    String strExt = filename.AfterLast('.');
    if ( strExt == filename || strchr(strExt, '/') )
       strExt.Empty();
