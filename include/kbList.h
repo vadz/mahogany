@@ -125,7 +125,7 @@ public: \
       } \
 }
 
-#ifdef   MCONFIG_H
+#ifdef MCONFIG_H
 /// define the most commonly used list type once:
 KBLIST_DEFINE(kbStringList, String);
 #endif
