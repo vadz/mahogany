@@ -727,7 +727,7 @@ void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& event)
    wxASSERT_MSG( !!m_name, "shouldn't try to delete" );
 
    String msg;
-   msg.Printf(_("Do you realyl want to delete the template '%s'?"),
+   msg.Printf(_("Do you really want to delete the template '%s'?"),
               m_name.c_str());
    if ( MDialog_YesNoDialog(msg, this,
                             MDIALOG_YESNOTITLE, false, "DeleteTemplate") )
