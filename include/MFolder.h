@@ -369,6 +369,19 @@ private:
 class MFolderTraversal
 {
 public:
+   /// how to traverse the tree?
+   enum RecurseMode
+   {
+      /// don't recurse at all
+      Recurse_No,
+
+      /// depth first post order traversal (first children, then parent)
+      Recurse_ChildrenFirst,
+
+      /// pre order traversal (first parent, then children)
+      Recurse_ParentFirst
+   };
+
    /// traverse starting from the root folder (i.e. everything)
    MFolderTraversal();
 
@@ -376,7 +389,8 @@ public:
    MFolderTraversal(const MFolder& folderStart);
 
    /// traverse the tree, OnVisitFolder() will be called for each subfolder
-   bool Traverse(bool recurse = TRUE);
+   bool Traverse(RecurseMode mode = Recurse_ChildrenFirst)
+      { return DoTraverse(m_folderName, mode); }
 
    /// return FALSE from here to stop tree traversal, TRUE to continue
    virtual bool OnVisitFolder(const wxString& folderName) = 0;
@@ -384,9 +398,13 @@ public:
    /// virtual dtor for the base class
    virtual ~MFolderTraversal() { }
 
+   // this overload is old and deprecated, for backwards compatibility only
+   bool Traverse(bool recurse)
+      { return Traverse(recurse ? Recurse_ChildrenFirst : Recurse_No); }
+
 private:
    /// recursive function used by Traverse()
-   bool DoTraverse(const wxString& start, bool recurse);
+   bool DoTraverse(const wxString& start, RecurseMode mode);
 
    /// the (full) name of the start folder
    wxString m_folderName;

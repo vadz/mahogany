@@ -1280,13 +1280,8 @@ MFolderTraversal::MFolderTraversal(const MFolder& folderStart)
    m_folderName = folderStart.GetFullName();
 }
 
-bool MFolderTraversal::Traverse(bool recurse)
-{
-   return DoTraverse(m_folderName, recurse);
-}
-
 // returns true if all folders were visited or false if traversal was aborted
-bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
+bool MFolderTraversal::DoTraverse(const wxString& start, RecurseMode mode)
 {
    Profile_obj profile(start);
    CHECK( profile, false, _T("panic in MFolderTraversal: no profile") );
@@ -1300,25 +1295,33 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
       rootName += '/';
    //else: there should be no leading slash
 
-   bool cont = profile->GetFirstGroup(name, dummy);
-   while ( cont )
+   for ( bool cont = profile->GetFirstGroup(name, dummy);
+         cont;
+         cont = profile->GetNextGroup(name, dummy) )
    {
       wxString fullname(rootName);
       fullname += name;
 
-      // if this folder has children recurse into them (if we should)
-      if ( recurse )
+      // traverse the children before/after the parent or not at all depending
+      // on the mode
+      if ( mode != Recurse_ChildrenFirst )
       {
-         if ( !DoTraverse(fullname, true) )
+         // we traverse the parent first or only the parent
+         if ( !OnVisitFolder(fullname) )
+            return false;
+
+         if ( mode == Recurse_No )
+            continue;
+      }
+
+      if ( !DoTraverse(fullname, mode) )
+         return false;
+
+      if ( mode == Recurse_ChildrenFirst )
+      {
+         if ( !OnVisitFolder(fullname) )
             return false;
       }
-
-      if ( !OnVisitFolder(fullname) )
-      {
-         return false;
-      }
-
-      cont = profile->GetNextGroup(name, dummy);
    }
 
    return true;
