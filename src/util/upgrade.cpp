@@ -598,9 +598,10 @@ SetupInitialConfig(void)
    if(host.Length() == 0)
       mApplication->GetProfile()->writeEntry(MP_HOSTNAME,wxGetFullHostName());
    
-   (void)VerifyInbox();
    mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent"));
    mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, _("New Mail"));
+
+   (void)VerifyInbox();
 
 #if 0
 #if defined ( USE_PYTHON )
