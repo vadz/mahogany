@@ -71,8 +71,6 @@ static size_t GetBrowseButtonWidth(wxWindow *win);
 // event tables
 // -----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxNotebookDialog, wxDialog)
-
 BEGIN_EVENT_TABLE(wxNotebookDialog, wxDialog)
    EVT_BUTTON(M_WXID_HELP, wxNotebookDialog::OnHelp)
    EVT_BUTTON(wxID_OK,     wxNotebookDialog::OnOK)
@@ -80,12 +78,19 @@ BEGIN_EVENT_TABLE(wxNotebookDialog, wxDialog)
    EVT_BUTTON(wxID_CANCEL, wxNotebookDialog::OnCancel)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxNotebookPageBase, wxPanel)
+BEGIN_EVENT_TABLE(wxEnhancedPanel, wxPanel)
+   EVT_SIZE(wxEnhancedPanel::OnSize)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxNotebookPageBase, wxEnhancedPanel)
    EVT_TEXT    (-1, wxNotebookPageBase::OnChange)
    EVT_CHECKBOX(-1, wxNotebookPageBase::OnChange)
    EVT_RADIOBOX(-1, wxNotebookPageBase::OnChange)
    EVT_COMBOBOX(-1, wxNotebookPageBase::OnChange)
 END_EVENT_TABLE()
+
+IMPLEMENT_DYNAMIC_CLASS(wxManuallyLaidOutDialog, wxDialog)
+IMPLEMENT_ABSTRACT_CLASS(wxNotebookDialog, wxManuallyLaidOutDialog)
 
 // ----------------------------------------------------------------------------
 // global functions
@@ -182,6 +187,42 @@ wxNotebookWithImages::~wxNotebookWithImages()
 // wxEnhancedPanel
 // ----------------------------------------------------------------------------
 
+wxEnhancedPanel::wxEnhancedPanel(wxWindow *parent)
+               : wxPanel(parent, -1), m_canvas(NULL)
+{
+   m_canvas = new wxScrolledWindow(this);
+}
+
+void wxEnhancedPanel::OnSize(wxSizeEvent& event)
+{
+   if ( m_canvas )
+   {
+      wxManuallyLaidOutDialog *dlg = GET_PARENT_OF_CLASS(this,
+                                                         wxManuallyLaidOutDialog);
+      if ( dlg )
+      {
+         m_sizeMin = dlg->GetMinimalSize();
+      }
+
+      if ( m_sizeMin.y != 0 )
+      {
+         static const int nPageSize = 10;
+         int y = m_sizeMin.y - 4*dlg->GetButtonSize().y;
+
+         m_canvas->SetScrollbars(0, nPageSize, 0, y/nPageSize);
+         m_canvas->EnableScrolling(FALSE, TRUE);
+      }
+      else
+      {
+         m_canvas->EnableScrolling(FALSE, FALSE);
+      }
+
+      m_canvas->SetSize(event.GetSize());
+
+      m_canvas->Layout();
+   }
+}
+
 // the top item is positioned near the top of the page, the others are
 // positioned from top to bottom, i.e. under the last one
 void wxEnhancedPanel::SetTopConstraint(wxLayoutConstraints *c,
@@ -189,7 +230,7 @@ void wxEnhancedPanel::SetTopConstraint(wxLayoutConstraints *c,
                                           size_t extraSpace)
 {
    if ( last == NULL )
-      c->top.SameAs(this, wxTop, 2*LAYOUT_Y_MARGIN + extraSpace);
+      c->top.SameAs(m_canvas, wxTop, 2*LAYOUT_Y_MARGIN + extraSpace);
    else {
       size_t margin = LAYOUT_Y_MARGIN;
       if ( last->IsKindOf(CLASSINFO(wxListBox)) ) {
@@ -219,11 +260,11 @@ wxEnhancedPanel::CreateEntryWithButton(const char *label,
    switch ( kind )
    {
       case FileBtn:
-         btn = new wxFileBrowseButton(text, this);
+         btn = new wxFileBrowseButton(text, m_canvas);
          break;
 
       case ColorBtn:
-         btn = new wxColorBrowseButton(text, this);
+         btn = new wxColorBrowseButton(text, m_canvas);
          break;
 
       default:
@@ -234,7 +275,7 @@ wxEnhancedPanel::CreateEntryWithButton(const char *label,
    wxLayoutConstraints *c = new wxLayoutConstraints;
    c->centreY.SameAs(text, wxCentreY);
    c->left.RightOf(text, LAYOUT_X_MARGIN);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->right.SameAs(m_canvas, wxRight, LAYOUT_X_MARGIN);
    c->height.SameAs(text, wxHeight);
    btn->SetConstraints(c);
 
@@ -256,15 +297,15 @@ wxStaticBitmap *wxEnhancedPanel::CreateIconEntry(const char *label,
    wxLayoutConstraints *c;
 
    // create controls
-   wxStaticBitmap *bitmap = new wxStaticBitmap(this, -1, wxNullBitmap);
-   wxStaticText *pLabel = new wxStaticText(this, -1, label,
+   wxStaticBitmap *bitmap = new wxStaticBitmap(m_canvas, -1, wxNullBitmap);
+   wxStaticText *pLabel = new wxStaticText(m_canvas, -1, label,
                                            wxDefaultPosition, wxDefaultSize,
                                            wxALIGN_RIGHT);
 
    // for the label
    c = new wxLayoutConstraints;
    c->centreY.SameAs(bitmap, wxCentreY);
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->left.SameAs(m_canvas, wxLeft, LAYOUT_X_MARGIN);
    c->width.Absolute(widthMax);
    c->height.AsIs();
    pLabel->SetConstraints(c);
@@ -304,11 +345,11 @@ wxTextCtrl *wxEnhancedPanel::CreateTextWithLabel(const char *label,
 
    // for the label
    c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->left.SameAs(m_canvas, wxLeft, LAYOUT_X_MARGIN);
    SetTopConstraint(c, last, 3); // FIXME shouldn't hardcode this!
    c->width.Absolute(widthMax);
    c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(this, -1, label,
+   wxStaticText *pLabel = new wxStaticText(m_canvas, -1, label,
                                            wxDefaultPosition, wxDefaultSize,
                                            wxALIGN_RIGHT);
    pLabel->SetConstraints(c);
@@ -317,9 +358,9 @@ wxTextCtrl *wxEnhancedPanel::CreateTextWithLabel(const char *label,
    c = new wxLayoutConstraints;
    c->centreY.SameAs(pLabel, wxCentreY);
    c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN + nRightMargin);
+   c->right.SameAs(m_canvas, wxRight, LAYOUT_X_MARGIN + nRightMargin);
    c->height.AsIs();
-   wxTextCtrl *pText = new wxTextCtrl(this, -1, "",wxDefaultPosition,
+   wxTextCtrl *pText = new wxTextCtrl(m_canvas, -1, "",wxDefaultPosition,
                                       wxDefaultSize, style);
    pText->SetConstraints(c);
 
@@ -333,11 +374,11 @@ wxStaticText *wxEnhancedPanel::CreateMessage(const char *label,
    wxLayoutConstraints *c;
 
    c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->left.SameAs(m_canvas, wxLeft, LAYOUT_X_MARGIN);
    SetTopConstraint(c, last);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->right.SameAs(m_canvas, wxRight, LAYOUT_X_MARGIN);
    c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(this, -1, label,
+   wxStaticText *pLabel = new wxStaticText(m_canvas, -1, label,
                                            wxDefaultPosition, wxDefaultSize,
                                            wxALIGN_LEFT);
    pLabel->SetConstraints(c);
@@ -352,9 +393,9 @@ wxButton *wxEnhancedPanel::CreateButton(const wxString& labelAndId,
    wxLayoutConstraints *c;
 
    c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->left.SameAs(m_canvas, wxLeft, LAYOUT_X_MARGIN);
    SetTopConstraint(c, last);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->right.SameAs(m_canvas, wxRight, LAYOUT_X_MARGIN);
    c->height.AsIs();
 
    // split the label into the real label and the button id
@@ -364,7 +405,7 @@ wxButton *wxEnhancedPanel::CreateButton(const wxString& labelAndId,
    if ( !strId || !sscanf(strId, "%d", &id) )
       id = -1;
 
-   wxButton *btn = new wxButton(this, id, label);
+   wxButton *btn = new wxButton(m_canvas, id, label);
    btn->SetConstraints(c);
 
    return btn;
@@ -381,14 +422,14 @@ wxCheckBox *wxEnhancedPanel::CreateCheckBox(const char *label,
       widthCheck = AdjustCharHeight(GetCharHeight()) + 1;
    }
 
-   wxCheckBox *checkbox = new wxCheckBox(this, -1, label,
+   wxCheckBox *checkbox = new wxCheckBox(m_canvas, -1, label,
                                          wxDefaultPosition, wxDefaultSize,
                                          wxALIGN_RIGHT);
 
    wxLayoutConstraints *c = new wxLayoutConstraints;
    SetTopConstraint(c, last);
    c->width.AsIs();
-   c->right.SameAs(this, wxLeft, -(int)(2*LAYOUT_X_MARGIN + widthMax
+   c->right.SameAs(m_canvas, wxLeft, -(int)(2*LAYOUT_X_MARGIN + widthMax
                                         + widthCheck));
    c->height.AsIs();
 
@@ -408,7 +449,7 @@ wxRadioBox *wxEnhancedPanel::CreateActionChoice(const char *label,
    // for the radiobox
    c = new wxLayoutConstraints;
    SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
-   c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN + widthMax );
+   c->left.SameAs(m_canvas, wxLeft, 2*LAYOUT_X_MARGIN + widthMax );
    c->width.AsIs();
    c->height.AsIs();
 
@@ -419,7 +460,7 @@ wxRadioBox *wxEnhancedPanel::CreateActionChoice(const char *label,
    choices[0] = _("No");
    choices[1] = _("Ask");
    choices[2] = _("Yes");
-   wxRadioBox *radiobox = new wxRadioBox(this, -1, "",
+   wxRadioBox *radiobox = new wxRadioBox(m_canvas, -1, "",
                                          wxDefaultPosition, wxDefaultSize,
                                          3,
                                          choices,
@@ -429,11 +470,11 @@ wxRadioBox *wxEnhancedPanel::CreateActionChoice(const char *label,
 
    // for the label
    c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->left.SameAs(m_canvas, wxLeft, LAYOUT_X_MARGIN);
    c->centreY.SameAs(radiobox, wxCentreY);
    c->width.Absolute(widthMax);
    c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(this, -1, label,
+   wxStaticText *pLabel = new wxStaticText(m_canvas, -1, label,
                                            wxDefaultPosition, wxDefaultSize,
                                            wxALIGN_RIGHT);
    pLabel->SetConstraints(c);
@@ -469,11 +510,11 @@ wxComboBox *wxEnhancedPanel::CreateComboBox(const char *label,
 
    // for the label
    c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->left.SameAs(m_canvas, wxLeft, LAYOUT_X_MARGIN);
    SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
    c->width.Absolute(widthMax);
    c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(this, -1, choices[0],
+   wxStaticText *pLabel = new wxStaticText(m_canvas, -1, choices[0],
                                            wxDefaultPosition, wxDefaultSize,
                                            wxALIGN_RIGHT);
    pLabel->SetConstraints(c);
@@ -483,9 +524,9 @@ wxComboBox *wxEnhancedPanel::CreateComboBox(const char *label,
 
    c->centreY.SameAs(pLabel, wxCentreY);
    c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN + nRightMargin);
+   c->right.SameAs(m_canvas, wxRight, LAYOUT_X_MARGIN + nRightMargin);
    c->height.AsIs();
-   wxComboBox *combobox = new wxComboBox(this, -1, "",
+   wxComboBox *combobox = new wxComboBox(m_canvas, -1, "",
                                          wxDefaultPosition, wxDefaultSize,
                                          n-1,
                                          choices+1,
@@ -496,6 +537,13 @@ wxComboBox *wxEnhancedPanel::CreateComboBox(const char *label,
    return combobox;
 }
 
+wxTextCtrl *wxEnhancedPanel::CreateColorEntry(const char *label,
+                                              long widthMax,
+                                              wxControl *last)
+{
+   return CreateEntryWithButton(label, widthMax, last, ColorBtn);
+}
+
 // create a listbox and the buttons to work with it
 // NB: we consider that there is only one listbox (at most) per page, so
 //     the button ids are always the same
@@ -503,14 +551,14 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
                                             wxControl *last)
 {
    // a box around all this stuff
-   wxStaticBox *box = new wxStaticBox(this, -1, label);
+   wxStaticBox *box = new wxStaticBox(m_canvas, -1, label);
 
    wxLayoutConstraints *c;
    c = new wxLayoutConstraints;
    SetTopConstraint(c, last);
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->height.PercentOf(this, wxHeight, 50);
+   c->left.SameAs(m_canvas, wxLeft, LAYOUT_X_MARGIN);
+   c->right.SameAs(m_canvas, wxRight, LAYOUT_X_MARGIN);
+   c->height.PercentOf(m_canvas, wxHeight, 50);
    box->SetConstraints(c);
 
    // the buttons vertically on the right of listbox
@@ -541,12 +589,12 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
       c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
       c->width.Absolute(widthMax);
       c->height.AsIs();
-      button = new wxButton(this, wxOptionsPage_BtnNew + nBtn, labels[nBtn]);
+      button = new wxButton(m_canvas, wxOptionsPage_BtnNew + nBtn, labels[nBtn]);
       button->SetConstraints(c);
    }
 
    // and the listbox itself
-   wxListBox *listbox = new wxListBox(this, -1);
+   wxListBox *listbox = new wxListBox(m_canvas, -1);
    c = new wxLayoutConstraints;
    c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, LAYOUT_X_MARGIN);
@@ -639,14 +687,31 @@ void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
 {
    if ( !LastSizeRestored() )
    {
-      SetSize(width, height);
+      int heightScreen = (9*wxGetDisplaySize().y) / 10;
+      int heightInitital;
+      if ( height > heightScreen )
+      {
+         // don't create dialogs taller than the screen
+         heightInitital = heightScreen;
+      }
+      else
+      {
+         heightInitital = height;
+      }
+
+      SetSize(width, heightInitital);
 
       Centre(wxCENTER_FRAME | wxBOTH);
    }
 
    if ( setAsMinimalSizeToo )
    {
-      SetSizeHints(width, height);
+      // do allow making the dialog smaller because the height might be too
+      // big for the screen - but still set some minimal height to prevent it
+      // from being shrunk to nothing at all
+      SetSizeHints(width, 10*hBtn);
+
+      m_sizeMin = wxSize(width, height);
    }
 }
 

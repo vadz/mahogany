@@ -79,6 +79,12 @@ public:
                            const wxString& title = "",
                            const wxString& profileKey = "");
 
+   // get the minimal size previously set by SetDefaultSize()
+   const wxSize& GetMinimalSize() const { return m_sizeMin; }
+
+   // get the buttons size
+   wxSize GetButtonSize() const { return wxSize(wBtn, hBtn); }
+
 protected:
    // set the diaqlog size if it wasn't restored from profile
    void SetDefaultSize(int width, int height,
@@ -94,6 +100,12 @@ protected:
    // for us (we allow direct access to them for derived classes for
    // compatibility with existing code)
    int hBtn, wBtn;
+
+private:
+   // the minimal size (only if SetDefaultSize() was called)
+   wxSize m_sizeMin;
+
+   DECLARE_DYNAMIC_CLASS(wxManuallyLaidOutDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -236,16 +248,15 @@ protected:
 };
 
 // ----------------------------------------------------------------------------
-// this class just groups together some handy layout/control creation functions
+// A panel class which has some useful functions for control creation and which
+// supports (vertical only so far) scrolling which makes it useful for the large
+// dialogs.
 // ----------------------------------------------------------------------------
 
 class wxEnhancedPanel : public wxPanel
 {
 public:
-   wxEnhancedPanel(wxWindow *parent) : wxPanel(parent, -1)
-   {
-      SetAutoLayout(TRUE);
-   }
+   wxEnhancedPanel(wxWindow *parent);
 
    // all these functions create the corresponding control and position it
    // below the "last" which may be NULL in which case the new control is put
@@ -301,10 +312,7 @@ public:
       // another entry with a browse button
    wxTextCtrl *CreateColorEntry(const char *label,
                                 long widthMax,
-                                wxControl *last)
-   {
-      return CreateEntryWithButton(label, widthMax, last, ColorBtn);
-   }
+                                wxControl *last);
 
       // creates a static bitmap with a label and a browse button
    wxStaticBitmap *CreateIconEntry(const char *label,
@@ -339,6 +347,19 @@ private:
                                      wxControl *last,
                                      BtnKind kind,
                                      wxTextBrowseButton **ppButton = NULL);
+
+   // event handlers
+   void OnSize(wxSizeEvent& event);
+
+   // the canvas on which all controls are created
+   wxScrolledWindow *m_canvas;
+
+   // the minimal size of the page when we still don't need scrollbars: to use
+   // this, we should live in wxManuallyLaidOutDialog whose
+   // SetDefaultSize()method had been called (then it will be the same size)
+   wxSize m_sizeMin;
+
+   DECLARE_EVENT_TABLE()
 };
 
 // ----------------------------------------------------------------------------

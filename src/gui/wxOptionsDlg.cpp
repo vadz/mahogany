@@ -389,7 +389,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("The following fields are used as default values for the\n"
                   "corresponding server names. You may set them independently\n"
                   "for each folder as well, overriding the values specified "
-                  "here"),                         Field_Message, -1.                        },
+                  "here"),                         Field_Message, -1,                        },
    { gettext_noop("&POP server"),                  Field_Text,    -1,                        },
    { gettext_noop("&IMAP server"),                 Field_Text,    -1,                        },
    { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -1,           },
@@ -1636,7 +1636,7 @@ wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(ProfileBase *profile,
    }
 
    // set the initial and minimal size
-   SetDefaultSize(4*wBtn, 10*hBtn);
+   SetDefaultSize(4*wBtn, 10*hBtn, FALSE /* not minimal size */);
 }
 
 bool wxRestoreDefaultsDialog::TransferDataFromWindow()
