@@ -447,7 +447,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          else
             m_FolderView->UpdateSelectionInfo();
          break;
-#if 0 //these are now shortcuts in Message menu
+#if 1 //these should be shortcuts in Message menu, but for now I revert back
       case 'G':
       case 'R':
          m_FolderView->GetFolder()->ReplyMessages(
@@ -462,7 +462,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             &selections, MailFolder::Params(), GetFrame(this), m_FolderView);
          MoveFocus(newFocus);
          break;
-#endif //0
+#endif //1
       case 'O':
          m_FolderView->OpenMessages(selections);
          MoveFocus(newFocus);
