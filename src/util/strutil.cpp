@@ -330,3 +330,17 @@ strutil_findurl(String &str, String &url)
    str = cptr;
    return before;
 }
+
+String
+strutil_getfilename(const String& path)
+{
+  const char *pc = path;
+  const char *pLast1 = strrchr(pc, '/');
+  const char *pLast2 = strrchr(pc, '\\');
+  uint nPos1 = pLast1 ? pLast1 - pc : 0;
+  uint nPos2 = pLast2 ? pLast2 - pc : 0;
+  if ( nPos2 > nPos1 )
+    nPos1 = nPos2;
+
+  return path.Right(path.Len() - nPos1 - 1);
+}

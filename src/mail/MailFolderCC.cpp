@@ -159,7 +159,7 @@ MailFolderCC::Create(String const & iname)
       if(strutil_isempty(filename)) // assume we are a file
       {
          SetType(MF_FILE);
-         if(iname[0] != DIR_SEPARATOR)
+         if( !IsAbsPath(iname) )
          {
             String tmp;
             tmp = READ_CONFIG(profile,MP_MBOXDIR);

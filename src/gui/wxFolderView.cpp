@@ -170,9 +170,6 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    wxCHECK_RET(mailFolder, "can't open folder in wxFolderView ctor" );
    initialised = mailFolder->IsInitialised();
    
-   if(! initialised)
-      return;
-
    int x,y;
    parent->GetClientSize(&x, &y);
 
@@ -189,9 +186,8 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    if(m_NumOfMessages > 0)
    {
       m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
-      PreviewMessage(0);
+      // the callback will preview the (just) selected message
    }
-
 }
 
 void
@@ -239,6 +235,8 @@ wxFolderView::Update(void)
       selected = (i <= m_NumOfMessages) ?m_FolderCtrl->IsSelected(n) : false;
       m_FolderCtrl->SetEntry(i,status, sender, subject, date, size);
       m_FolderCtrl->Select(i,selected);
+
+      delete mptr;
    }
    m_NumOfMessages = n;
    m_UpdateSemaphore = false;
@@ -337,6 +335,8 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
       mv = GLOBAL_NEW wxMessageViewFrame(mailFolder,selections[i]+1,
                                          this);
       mv->SetTitle(title);
+
+      delete mptr;
    }
 }
 
@@ -491,9 +491,13 @@ BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
 END_EVENT_TABLE()
 
 wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
-                 : MFrame(folderName, parent)
+                 : MFrame(strutil_getfilename(folderName), parent)
 {
    VAR(folderName);
+
+   wxString strTitle;
+   strTitle.Printf(_("Folder '%s'"), folderName.c_str());
+   SetTitle(strTitle);
 
    // menu
    m_FolderView = NULL;
@@ -530,10 +534,17 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
    TB_AddTool(m_ToolBar, "tb_help", WXMENU_HELP_ABOUT, "Help");
    m_ToolBar->AddSeparator();
    TB_AddTool(m_ToolBar, "tb_exit", WXMENU_FILE_EXIT, "Exit M");
+
+#	 ifdef OS_WIN
+		  m_ToolBar->CreateTools();
+#	 endif // Windows
 #endif
 
    m_FolderView = new wxFolderView(folderName,this);
-   Show(true);
+   if ( m_FolderView->IsInitialised() )
+      Show(true);
+   else
+      Close(true);
 }
    
 void

@@ -244,23 +244,14 @@ public: \
          /* the cast is needed for MS VC++ 5.0 */ \
          { return (type *)((kbList::iterator *)this)->operator*() ; } \
    }; \
-   inline name(bool ownsEntriesFlag = FALSE) \
+   inline name(bool ownsEntriesFlag = TRUE) \
       : kbList(ownsEntriesFlag) {} \
-   \
-   inline void push_back(type *element) \
-      { kbList::push_back((void *)element); } \
-   \
-   inline void push_front(type *element) \
-      { kbList::push_front((void *)element); } \
    \
    inline type *pop_back(void) \
       { return (type *) kbList::pop_back(); } \
    \
    inline type *pop_front(void) \
       { return (type *) kbList::pop_front(); } \
-   \
-   inline void insert(iterator & i, type *element) \
-      { kbList::insert(i, (void *) element); } \
    \
    inline void erase(iterator & i) \
       { kbList::erase(i); } \
@@ -280,15 +271,12 @@ public: \
       { \
          next = first->next; \
          if(ownsEntries) \
-            delete typecast(first->element); \
+            delete (type *)first->element; \
          delete first; \
          first = next; \
       } \
    } \
-   private: \
-   inline type * typecast(void *ptr) \
-      { return (type *) ptr; } \
-   }
+}
 
 #ifdef   MCONFIG_H
 /// define the most commonly used list type once:

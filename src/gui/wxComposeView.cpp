@@ -150,6 +150,10 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    m_ToolBar->AddSeparator();
    TB_AddTool(m_ToolBar, "tb_exit", WXMENU_FILE_EXIT, "Exit M");
 
+   #ifdef OS_WIN
+      m_ToolBar->CreateTools();
+   #endif // Windows
+
    CreateStatusBar();
 
    // create the child controls

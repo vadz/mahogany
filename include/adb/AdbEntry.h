@@ -78,15 +78,22 @@ enum AdbField
   AdbField_Max = AdbField_O_AddrPageLast
 };
 
-// where Lookup() should look for a match
-enum AdbLookup
+// where AdbEntry::Matches() should look for a match
+enum
 {
-  AdbLookup_Alias         = 0x0001,
+  AdbLookup_NickName      = 0x0001,
   AdbLookup_FullName      = 0x0002,
   AdbLookup_Organization  = 0x0004,
   AdbLookup_EMail         = 0x0008,
   AdbLookup_HomePage      = 0x0010,
   AdbLookup_Everywhere    = 0xffff
+};
+
+// how should it do it
+enum
+{
+  AdbLookup_CaseSensitive = 0x0001,
+  AdbLookup_Substring     = 0x0002, // match "foo" as "*foo*"
 };
 
 // ============================================================================
@@ -138,8 +145,8 @@ public:
   virtual void ClearDirty() = 0;
 
   // other operations
-    /// check whether we match the given string
-  virtual bool Matches(const char *str, AdbLookup where) = 0;
+    /// check whether we match the given string (see AdbLookup_xxx constants)
+  virtual bool Matches(const char *str, int where, int how) = 0;
 };
 
 /**

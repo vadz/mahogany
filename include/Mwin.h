@@ -17,4 +17,6 @@
 // @@@@ wxGetHomeDir
 #define wxGetHomeDir(pszBuf)  strcpy(pszBuf, "c:\\")
 
+#define IsAbsPath(path) wxIsAbsolutePath(path)
+
 #endif

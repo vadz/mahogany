@@ -14,4 +14,7 @@
 /// separating directories in a search path
 #define	PATH_SEPARATOR	':'
 
+// under Unix it's quite simple
+#define IsAbsPath(path)    (((const char *)path)[0] == '/')
+
 #endif

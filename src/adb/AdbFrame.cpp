@@ -93,9 +93,10 @@ TODO: (+ in first column means done)
 + 11. find/find next
 + 12. save expanded tree branches
   13. d&d would be nice (if supported under wxGTK)
-  14. case (in)sensitive match, take into account m_bFindWild option, make
-      the toolbar button work like "Find Next" if "Find" was done, sort
-      the find results from top to bottom
++ 14. case (in)sensitive match, take into account find options, make
+      the toolbar button work like "Find Next" if "Find" was done, 
+  15. sort the find results from top to bottom
+  16. prompts should have a real history and not only remember the last value
 
   @@PERS indicates the things that should be persistent (default values for
          the controls &c) but are not yet
@@ -167,7 +168,7 @@ public:
 
   long GetId() const { return m_idItem; }
 
-    //  what kind of item are we?
+    // what kind of item are we?
   bool IsRoot() const { return m_kind == TreeElement_Root; }
   bool IsBook() const { return m_kind == TreeElement_Book; }
     // group is anything that can contain entries, not just TreeElement_Group
@@ -260,6 +261,20 @@ public:
   AdbEntryGroup *AdbGroup() const { return m_pGroup; }
 
 protected:
+  // this function will create our associated ADB group if it's not done yet
+  void EnsureHasGroup()
+  {
+    // check that we have an associated ADB group, but notice that the book
+    // itself is the same as the root group and the root doesn't have any
+    // associated ADB data structure
+    if ( (m_pGroup == NULL) && !IsRoot() && !IsBook() ) {
+      wxASSERT( IsGroup() );
+
+      // create our AdbEntryGroup
+      m_pGroup = GetParent()->AdbGroup()->GetGroup(m_name);
+    }
+  }
+
   bool           m_bWasExpanded;
   ArrayEntries   m_children;
 
@@ -438,25 +453,19 @@ private:
 class wxADBFindDialog : public wxDialog
 {
 public:
-  wxADBFindDialog(wxWindow *parent, const wxString& strWhat, int where,
-                  bool bCase, bool bWild);
+  // if the dialog is not cancelled, it will store the new values in where and
+  // how parameters and also update the text in text control
+  wxADBFindDialog(wxWindow *parent, wxTextCtrl *text, int *where, int *how);
 
-  // accessors (to be used after call to ShowModal)
-  const wxString& GetFindWhat() const { return m_strWhat; }
-  int             GetFindWhere() const { return m_where; }
-  bool            GetCaseSensitive() const { return m_bCase; }
-  bool            GetWildCards() const { return m_bWild; }
-  
   // base class virtuals implemented
   virtual bool TransferDataToWindow();
   virtual bool TransferDataFromWindow();
 
 private:
   // data
-  wxString  m_strWhat;
-  int       m_where;
-  bool      m_bCase,
-            m_bWild;
+  wxTextCtrl *m_text;
+  int        *m_where,
+             *m_how;
 
   // controls
   wxCheckBox *m_checkNick,
@@ -465,7 +474,7 @@ private:
              *m_checkEMail,
              *m_checkWWW,
              *m_checkCase,
-             *m_checkWild;
+             *m_checkSub;
   wxTextCtrl *m_textWhat;
 };
 
@@ -680,11 +689,11 @@ private:
   int m_nFindIndex;
     // the last "Find" argument
   wxString m_strFind;
-    // where to search?
-  int m_lookup; // see AdbLookup_xxx constants
-    // search options
-  bool m_bFindCase,     // case sensitive?
-       m_bFindWild;     // '*' and '?' metacharacters?
+    // where and how to search (see AdbLookup_xxx constants)?
+  int m_FindWhere,
+      m_FindHow;
+    // was any search already done?
+  bool m_bFindDone;
 
   // persistent data
   // ---------------
@@ -999,6 +1008,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   m_toolbar = NULL;
   m_clipboard = NULL;
   m_pImageList = NULL;
+  m_bFindDone = FALSE;
 
   // create our menu
   // ---------------
@@ -1028,7 +1038,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
       { "delete", WXMENU_ADBEDIT_DELETE,  "Delete"                  },
       { "undo",   WXMENU_ADBEDIT_UNDO,    "Undo"                    },
       { "",       -1,                     ""                        },
-      { "lookup", WXMENU_ADBFIND_FIND,    "Find"                    },
+      { "lookup", WXMENU_ADBFIND_NEXT,    "Find next"               },
       { "",       -1,                     ""                        },
       { "help",   WXMENU_HELP_HELP,       "Help"                    }
     };
@@ -1201,8 +1211,7 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     ConfigName_LastSearch,
     ConfigName_LastPage,
     ConfigName_LastLookup,
-    ConfigName_FindCase,
-    ConfigName_FindWild
+    ConfigName_FindOptions,
   };
 
   static const char *aszConfigNames[] =
@@ -1217,9 +1226,8 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     "TreeSelection",
     "LastSearch",
     "LastPage",
-    "Lookup",
-    "FindCase",
-    "FindWild"
+    "FindWhere",
+    "FindOptions"
   };
 
   #define TRANSFER_STRING(var, i)           \
@@ -1257,10 +1265,8 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
 
   TRANSFER_INT(m_bLastNewWasGroup, ConfigName_LastNewWasGroup);
   TRANSFER_INT(m_nLastPage, ConfigName_LastPage);
-  TRANSFER_INT(m_lookup, ConfigName_LastLookup);
-
-  TRANSFER_BOOL(m_bFindCase, ConfigName_FindCase);
-  TRANSFER_BOOL(m_bFindWild, ConfigName_FindWild);
+  TRANSFER_INT(m_FindWhere, ConfigName_LastLookup);
+  TRANSFER_INT(m_FindHow, ConfigName_FindOptions);
 
   TRANSFER_ARRAY(m_astrAdb, ConfigName_AddressBooks);
   TRANSFER_ARRAY(m_astrProviders, ConfigName_AddressBookProviders);
@@ -1293,9 +1299,9 @@ void wxAdbEditFrame::RestoreSettings1()
 {
   TransferSettings(FALSE /* load */);
 
-  if ( m_lookup == 0 ) {
+  if ( m_FindWhere == 0 ) {
     // look at least somewhere...
-    m_lookup = AdbLookup_Alias;
+    m_FindWhere = AdbLookup_NickName;
   }
 
   // now, m_astrAdb contains all previously opened ADBs: then copy the ones
@@ -1464,7 +1470,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
     item.m_itemId = m_root->GetId();
     item.m_mask = wxTREE_MASK_CHILDREN;
     item.m_children = 1;
-//FIXME    m_treeAdb->SetItem(item);
+    m_treeAdb->SetItem(item);
   }
 
   // currently, we always succeed because even if the file doesn't exist
@@ -1494,7 +1500,7 @@ void wxAdbEditFrame::AddNewTreeElement(AdbTreeElement *element)
     item.m_itemId = parent->GetId();
     item.m_mask = wxTREE_MASK_CHILDREN;
     item.m_children = 1;
-//FIXME    m_treeAdb->SetItem(item);
+    m_treeAdb->SetItem(item);
   }
 }
 
@@ -1518,7 +1524,7 @@ ask_name:
   {
     wxADBCreateDialog dlg(this, m_strLastNewEntry, m_bLastNewWasGroup != 0);
     if ( dlg.ShowModal() != wxID_OK ) {
-      wxLogStatus(_("New entry creation cancelled."));
+      wxLogStatus(this, _("New entry creation cancelled."));
 
       return;
     }
@@ -1552,8 +1558,8 @@ ask_name:
   // add to the tree
   AddNewTreeElement(element);
 
-  wxLogStatus(_("Created new %s '%s' %s."),
-               strWhat.c_str(), m_strLastNewEntry.c_str(), strWhere.c_str());
+  wxLogStatus(this, _("Created new %s '%s' %s."),
+              strWhat.c_str(), m_strLastNewEntry.c_str(), strWhere.c_str());
 }
 
 void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
@@ -1592,7 +1598,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
         static const long style = wxYES_NO|wxICON_QUESTION|wxCENTRE;
       #endif
       if ( wxMessageBox(msg, _("Confirm"), style) != wxYES ) {
-        wxLogStatus(_("Cancelled: '%s' not deleted."),
+        wxLogStatus(this, _("Cancelled: '%s' not deleted."),
                     m_current->GetName().c_str());
         return;
       }
@@ -1608,7 +1614,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
   m_treeAdb->DeleteItem(lId);
 
   strWhat[0u] = toupper(strWhat[0u]);
-  wxLogStatus(_("%s '%s' deleted."), strWhat.c_str(), strName.c_str());
+  wxLogStatus(this, _("%s '%s' deleted."), strWhat.c_str(), strName.c_str());
 }
 
 void wxAdbEditFrame::DoRenameNode()
@@ -1625,13 +1631,11 @@ void wxAdbEditFrame::AdvanceToNextFound()
     if ( m_nFindIndex == -1 ) {
       // called for the first time (for this search)
       m_nFindIndex = 0;
-      wxString str;
-      str.Printf(_("Search for '%s' found %d entries."),
+      wxLogStatus(this, _("Search for '%s' found %d entries."),
                   m_strFind.c_str(), nCount);
-      SetStatusText(str);
     }
     else if ( (uint)++m_nFindIndex == nCount ) {
-      wxLogStatus(_("Search wrapped to the beginning."));
+      wxLogStatus(this, _("Search wrapped to the beginning."));
       m_nFindIndex = 0;
     }
 
@@ -1646,6 +1650,7 @@ void wxAdbEditFrame::DoFind()
   m_nFindIndex = -1;
   m_strFind = m_textKey->GetValue();
   DoFind(m_strFind, m_root);
+  m_bFindDone = TRUE;
   AdvanceToNextFound();
 }
 
@@ -1668,7 +1673,7 @@ void wxAdbEditFrame::DoFind(const char *szFindWhat, AdbTreeNode *root)
     else {
       AdbEntry *pEntry = ((AdbTreeEntry *)current)->GetAdbEntry();
 
-      if ( pEntry->Matches(szFindWhat, (AdbLookup)m_lookup) ) {
+      if ( pEntry->Matches(szFindWhat, m_FindWhere, m_FindHow) ) {
         m_aFindResults.Add(current->GetFullName());
       }
 
@@ -1686,7 +1691,7 @@ void wxAdbEditFrame::DoUndoChanges()
   // the Lock() done by GetData() compensated with Unlock() in SetData()
   m_notebook->SetData(GetEntry());
 
-  wxLogStatus(_("Changes to '%s' undone"), m_current->GetName().c_str());
+  wxLogStatus(this, _("Changes to '%s' undone"), m_current->GetName().c_str());
 }
 
 // dispatch menu or toolbar command
@@ -1755,20 +1760,21 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
       DoPaste();
       break;
 
+    case WXMENU_ADBFIND_NEXT:
+      // if a search was already done, advance to the next match, otherwise
+      // do the same thing as "Find" would have done
+      if ( m_bFindDone ) {
+        AdvanceToNextFound();
+        break;
+      }
+      //else: fall through
+
     case WXMENU_ADBFIND_FIND:
       {
-        wxADBFindDialog dlg(this, m_textKey->GetValue(), m_lookup,
-                            m_bFindCase, m_bFindWild);
-        if ( dlg.ShowModal() == wxID_OK ) {
-          m_textKey->SetValue(dlg.GetFindWhat());
-          m_lookup = dlg.GetFindWhere();
+        wxADBFindDialog dlg(this, m_textKey, &m_FindWhere, &m_FindHow);
+        if ( dlg.ShowModal() == wxID_OK )
           DoFind();
-        }
       }
-      break;
-
-    case WXMENU_ADBFIND_NEXT:
-      AdvanceToNextFound();
       break;
 
     default:
@@ -1903,7 +1909,7 @@ void wxAdbEditFrame::DoShowAdbProperties()
     item.m_itemId = book->GetId();
     item.m_mask = wxTREE_MASK_TEXT;
     item.m_text = book->GetAdbName();
-//FIXME    m_treeAdb->SetItem(item);
+    m_treeAdb->SetItem(item);
   }
 }
 
@@ -2002,7 +2008,7 @@ void wxAdbEditFrame::SetTreeItemIcon(const wxTreeItem& item,
   if ( parent->IsRoot() || parent->GetParent()->IsRoot() )
     return;
 
-//FIXME  m_treeAdb->SetItemImage(item.m_itemId, icon, icon);
+  m_treeAdb->SetItemImage(item.m_itemId, icon, icon);
 }
 
 void wxAdbEditFrame::OnTreeCollapse(wxTreeEvent& event)
@@ -2028,9 +2034,9 @@ void wxAdbEditFrame::OnTreeExpanding(wxTreeEvent& event)
     // if this group has no entries don't put [+] near it
     item.m_mask = wxTREE_MASK_CHILDREN;
     item.m_children = 0;
-//FIXME    m_treeAdb->SetItem(item);
+    m_treeAdb->SetItem(item);
 
-    wxLogStatus(_("This group doesn't have any entries"));
+    wxLogStatus(this, _("This group doesn't have any entries"));
   }
 }
 
@@ -2154,7 +2160,7 @@ bool wxAdbEditFrame::MoveSelection(const wxString& strEntry)
   AdbTreeElement *current = ExpandBranch(strEntry);
   if ( current != NULL ) {
     m_treeAdb->SetFocus();
-//FIXME    m_treeAdb->SelectItem(current->GetId());
+    m_treeAdb->SelectItem(current->GetId());
     return TRUE;
   }
   else
@@ -2164,16 +2170,12 @@ bool wxAdbEditFrame::MoveSelection(const wxString& strEntry)
 // calculate the minimal size of the frame and set it
 void wxAdbEditFrame::SetMinSize()
 {
-  // all buttons have the same size
+  // all buttons have the same size and we use them as length unit
   int widthBtn, heightBtn;
   m_btnCancel->GetClientSize(&widthBtn, &heightBtn);
 
-  int widthText, heightText;
-  m_textKey->GetClientSize(&widthText, &heightText);
-
-  // width: leave enough place for 3 buttons and the tree control
-  // height: @@
-//FIXME  SetSizeHints(7*widthBtn, 20*heightBtn);
+  // @@ this is completely arbitrary
+  SetSizeHints(7*widthBtn, 22*heightBtn);
 }
 
 bool wxAdbEditFrame::SaveExpandedBranches(AdbTreeNode *group)
@@ -2224,29 +2226,26 @@ wxAdbEditFrame::~wxAdbEditFrame()
 // wxADBFindDialog dialog
 // ----------------------------------------------------------------------------
 wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
-                                 const wxString& strWhat,
-                                 int where,
-                                 bool bCase,
-                                 bool bWild)
-   : wxDialog(parent, -1, _("Find address book entry"),
-              wxDefaultPosition,
-              wxDefaultSize,
-              wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
-     m_strWhat(strWhat)
+                                 wxTextCtrl *text,
+                                 int *where,
+                                 int *how)
+               : wxDialog(parent, -1, _("Find address book entry"),
+                          wxDefaultPosition,
+                          wxDefaultSize,
+                          wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
 {
   // init member vars
   // ----------------
 
-  if ( where == 0 ) {
+  m_text = text;
+
+  m_where = where;
+  if ( *m_where == 0 ) {
     // must look at least _somewhere_
-    m_where = AdbLookup_Alias;
-  }
-  else {
-    m_where = (AdbLookup)where;
+    *m_where = AdbLookup_NickName;
   }
 
-  m_bCase = bCase;
-  m_bWild = bWild;
+  m_how = how;
 
   // determine dialog size
   // ---------------------
@@ -2295,7 +2294,7 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   m_checkCase = new wxCheckBox(this, -1, "&Case senstivie",
                                wxPoint(x + LAYOUT_X_MARGIN, y),
                                wxSize(widthChk, heightLabel));
-  m_checkWild = new wxCheckBox(this, -1, "No &wildcards",
+  m_checkSub = new wxCheckBox(this, -1, "&Substring search",
                                wxPoint(widthChk + 3*LAYOUT_X_MARGIN, y),
                                wxSize(widthChk, heightLabel));
   
@@ -2345,45 +2344,48 @@ bool wxADBFindDialog::TransferDataToWindow()
 {
   // select all text in the edit, so that pressing any alphanumeric key
   // will clear it
-  m_textWhat->SetValue(m_strWhat);
+  m_textWhat->SetValue(m_text->GetValue());
   m_textWhat->SetSelection(-1, -1);
 
   // set the checkboxes
-  m_checkNick->SetValue((m_where & AdbLookup_Alias) != 0);
-  m_checkFull->SetValue((m_where & AdbLookup_FullName) != 0);
-  m_checkOrg->SetValue((m_where & AdbLookup_Organization) != 0);
-  m_checkEMail->SetValue((m_where & AdbLookup_EMail) != 0);
-  m_checkWWW->SetValue((m_where & AdbLookup_HomePage) != 0);
+  m_checkNick->SetValue((*m_where & AdbLookup_NickName) != 0);
+  m_checkFull->SetValue((*m_where & AdbLookup_FullName) != 0);
+  m_checkOrg->SetValue((*m_where & AdbLookup_Organization) != 0);
+  m_checkEMail->SetValue((*m_where & AdbLookup_EMail) != 0);
+  m_checkWWW->SetValue((*m_where & AdbLookup_HomePage) != 0);
 
-  m_checkCase->SetValue(m_bCase);
-  m_checkWild->SetValue(!m_bWild);
+  m_checkCase->SetValue((*m_how & AdbLookup_CaseSensitive) != 0);
+  m_checkSub->SetValue((*m_how & AdbLookup_Substring) != 0);
 
   return TRUE;
 }
 
 bool wxADBFindDialog::TransferDataFromWindow()
 {
-  m_strWhat = m_textWhat->GetValue();
+  *m_how = 0;
+  if ( m_checkCase->GetValue() )
+    *m_how |= AdbLookup_CaseSensitive;
+  if ( m_checkSub->GetValue() )
+    *m_how |= AdbLookup_Substring;
 
-  m_bCase = m_checkCase->GetValue();
-  m_bWild = !m_checkWild->GetValue();
-
-  m_where = 0;
+  *m_where = 0;
   if ( m_checkNick->GetValue() )
-    m_where |= AdbLookup_Alias;
+    *m_where |= AdbLookup_NickName;
   if ( m_checkFull->GetValue() )
-    m_where |= AdbLookup_FullName ;
+    *m_where |= AdbLookup_FullName ;
   if ( m_checkOrg->GetValue() )
-    m_where |= AdbLookup_Organization;
+    *m_where |= AdbLookup_Organization;
   if ( m_checkEMail->GetValue() )
-    m_where |= AdbLookup_EMail;
+    *m_where |= AdbLookup_EMail;
   if ( m_checkWWW->GetValue() )
-    m_where |= AdbLookup_HomePage;
+    *m_where |= AdbLookup_HomePage;
 
-  if ( m_where == 0 ) {
+  if ( *m_where == 0 ) {
     wxLogError(_("Please specify where to search!"));
     return FALSE;
   }
+
+  m_text->SetValue(m_textWhat->GetValue());
 
   return TRUE;
 }
@@ -2750,7 +2752,12 @@ void wxAdbNotebook::SaveChanges()
       ((wxAdbPage *)GetPage(n))->SaveChanges(*m_pAdbEntry);
     }
 
-    wxLogStatus(_("Entry '%s' saved."), m_pTreeEntry->GetName().c_str());
+    wxString str;
+    m_pAdbEntry->GetField(AdbField_NickName, &str);
+    if ( m_bDirty ) {
+      wxLogStatus((wxFrame *)this->GetGrandParent(),
+                  _("Entry '%s' saved."), str.c_str());
+    }
   }
 }
 
@@ -3357,15 +3364,7 @@ void AdbTreeNode::LoadChildren()
   if ( !m_children.IsEmpty() )
     return;
 
-  // check that we have an associated ADB group, but notice that the book itself 
-  // is the same as the root group and the root doesn't have any associated ADB
-  // data structure
-  if ( (m_pGroup == NULL) && !IsRoot() && !IsBook() ) {
-    wxASSERT( IsGroup() );
-
-    // create our AdbEntryGroup
-    m_pGroup = GetParent()->AdbGroup()->GetGroup(m_name);
-  }
+  EnsureHasGroup();
 
   wxCHECK_RET( m_pGroup, "AdbTreeNode without associated AdbEntryGroup" );
 
@@ -3404,6 +3403,8 @@ AdbTreeElement *AdbTreeNode::CreateChild(const wxString& name, bool bGroup)
 
   wxString strWhat = wxGetTranslation(bGroup ? "Group" : "Entry");
 
+  EnsureHasGroup();
+
   // first check that it doesn't already exist
   if ( m_pGroup->Exists(name) ) {
     wxLogError(_("%s '%s' already exists in this group."),
@@ -3441,6 +3442,8 @@ AdbTreeElement *AdbTreeNode::CreateChild(const wxString& name, bool bGroup)
 
 void AdbTreeNode::DeleteChild(AdbTreeElement *child)
 {
+  EnsureHasGroup();
+
   m_children.Remove(child);
   if ( !child->IsBook() ) {
     if ( child->IsGroup() )

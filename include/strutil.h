@@ -170,6 +170,9 @@ String strutil_matchurl(const char *string);
 String
 strutil_findurl(String &str, String &url);
 
+/// extracts the last path component from a path
+String strutil_getfilename(const String& path);
+
 /// checks a character to be a valid part of an URL
 #define strutil_isurlchar(c) \
    (isalnum(c)  || c == '.' || c == '/' || c == ':' \

@@ -92,7 +92,7 @@ public:
 /// macro to call common base class debugging function
 #	define	CBDEBUG()	CommonBase::Debug()
 #	ifndef NDEBUG
-#		define	VAR(x)		cerr << #x << " = " << x << endl;
+#		define	VAR(x)		wxLogTrace(#x " = %s", x)
 #	endif
 #else
 // empty definition

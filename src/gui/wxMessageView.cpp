@@ -247,7 +247,7 @@ wxMessageView::Update(void)
    wxLayoutList &llist = GetLayoutList();
    wxLayoutObjectBase *obj = NULL;
 
-   GetLayoutList().SetEditable(true);
+   llist.SetEditable(true);
 
    String
       fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR),
@@ -339,14 +339,13 @@ wxMessageView::Update(void)
 #endif
       // insert text:
       if(t == TYPETEXT
-         || (t == TYPEMESSAGE && m_Profile->readEntry(MP_RFC822_IS_TEXT,MP_RFC822_IS_TEXT_D)))
+         || (t == TYPEMESSAGE && READ_CONFIG(m_Profile, MP_RFC822_IS_TEXT)))
       {
          cptr = mailMessage->GetPartContent(i);
          if(cptr == NULL)
             continue; // error ?
          llist.LineBreak();
-         if(m_Profile->readEntry(MP_HIGHLIGHT_URLS,
-                                 MP_HIGHLIGHT_URLS_D))
+         if( READ_CONFIG(m_Profile, MP_HIGHLIGHT_URLS) )
          {
             tmp = cptr;
             String url;
@@ -363,9 +362,9 @@ wxMessageView::Update(void)
                   ci->url = url;
                   obj = new wxLayoutObjectText(url);
                   obj->SetUserData(ci);
-                  llist.SetFontColour("BLUE");
+                  llist.SetFontColour("BLUE");  // @@PERS
                   llist.Insert(obj);
-                  llist.SetFontColour("BLACK");
+                  llist.SetFontColour("BLACK"); // @@PERS
                }
             }while(! strutil_isempty(tmp));
             lastObjectWasIcon = false;
@@ -403,7 +402,7 @@ wxMessageView::Update(void)
    }
 
    llist.LineBreak();
-   GetLayoutList().SetEditable(false);
+   llist.SetEditable(false);
    Refresh();
    UpdateScrollbars();
 }

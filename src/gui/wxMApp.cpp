@@ -54,8 +54,8 @@
 class wxMLogWindow : public wxLogWindow
 {
 public:
-   // ctor (it creates the frame hidden)
-   wxMLogWindow(const char *szTitle) : wxLogWindow(szTitle, FALSE) { }
+   // ctor (creates the frame hidden)
+   wxMLogWindow(wxFrame *pParent, const char *szTitle);
 
    // override base class virtual to implement saving the frame position
    virtual void OnFrameDelete(wxFrame *frame);
@@ -68,6 +68,15 @@ public:
 // ----------------------------------------------------------------------------
 // wxMLogWindow
 // ----------------------------------------------------------------------------
+wxMLogWindow::wxMLogWindow(wxFrame *pParent, const char *szTitle)
+            : wxLogWindow(pParent, szTitle, FALSE)
+{
+  int x, y, w, h;
+  wxMFrame::RestorePosition(LOG_FRAME_SECTION, &x, &y, &w, &h);
+  GetFrame()->SetSize(x, y, w, h);
+  Show();
+}
+
 void wxMLogWindow::OnFrameDelete(wxFrame *frame)
 {
    wxMFrame::SavePosition(LOG_FRAME_SECTION, frame);
@@ -96,17 +105,12 @@ wxFrame *
 #endif
 wxMApp::OnInit()
 {
-   // first of all, create the log
-   wxLogWindow *log = new wxMLogWindow(_("M Activity Log"));
-
    m_IconManager = new wxIconManager();
 
    if ( OnStartup() ) {
-      // now that we have config, restore the log frame position and show it
-      int x, y, w, h;
-      wxMFrame::RestorePosition(LOG_FRAME_SECTION, &x, &y, &w, &h);
-      log->GetFrame()->SetSize(x, y, w, h);
-      log->Show();
+      // now we can create the log window
+      wxLogWindow *log = new wxMLogWindow(m_topLevelFrame,
+                                          _("M Activity Log"));
 
       // we want it to be above the log frame
 #ifdef OS_WIN 
@@ -145,11 +149,10 @@ int wxMApp::OnExit()
  
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
-#ifdef OS_WIN
-   free(myusername());
+   free(sysinbox());
    free(myhomedir());
-#endif
-   
+   free(myusername());
+
    return 0;
 }
 

@@ -10,10 +10,23 @@
 #   pragma implementation "wxlparser.h"
 #endif
 
-#include   "wxllist.h"
-#include   "wxlparser.h"
+#include "Mpch.h"
+
+#include "gui/wxllist.h"
+#include "gui/wxlparser.h"
 
 #define   BASE_SIZE 12
+
+inline static bool EndOfLine(const char *p)
+{
+   // in addition to Unix EOL convention we also (but not instead) understand
+   // the DOS one under Windows
+   return
+#ifdef OS_WIN
+      ((*p == '\r') && (*(p + 1) == '\n')) ||
+#endif
+      (*p == '\n');
+}
 
 void wxLayoutImportText(wxLayoutList &list, String const &str)
 {
@@ -23,15 +36,23 @@ void wxLayoutImportText(wxLayoutList &list, String const &str)
    
    for(;;)
    {
-      begin = cptr++;
-      while(*cptr && *cptr != '\n')
+      begin = cptr;
+      while( *cptr && !EndOfLine(cptr) )
          cptr++;
       backup = *cptr;
       *cptr = '\0';
       list.Insert(begin);
       *cptr = backup;
-      if(backup == '\n')
+
+      // check if it's the end of this line
+#ifdef OS_WIN
+      if ( backup == '\r' && *(cptr + 1) == '\n' ) {
+         cptr++;  // skip '\r'
+#else //Unix
+      if ( backup == '\n' )
+#endif
          list.LineBreak();
+      }
       else if(backup == '\0') // reached end of string
          break;
       cptr++;

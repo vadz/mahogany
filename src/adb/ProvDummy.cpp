@@ -77,7 +77,7 @@ public:
     { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }
   virtual void ClearExtraEMails();
 
-  virtual bool Matches(const char *str, AdbLookup where);
+  virtual bool Matches(const char *str, int where, int how);
 
   // an easier to use GetName()
   const char *GetName() const { return m_astrFields[0]; }
@@ -263,7 +263,7 @@ void DummyEntry::ClearExtraEMails()
 { 
 }
 
-bool DummyEntry::Matches(const char *what, AdbLookup where)
+bool DummyEntry::Matches(const char *what, int where, int how)
 {
   return FALSE;
 }

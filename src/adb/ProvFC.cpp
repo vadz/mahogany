@@ -89,7 +89,7 @@ class FCEntry : public AdbEntry
 {
 public:
   // ctor
-  FCEntry(FCEntryGroup *pGroup, const String& strName);
+  FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew = FALSE);
 
   // implement interface methods
     // AdbEntry
@@ -108,7 +108,7 @@ public:
     { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }
   virtual void ClearExtraEMails();
 
-  virtual bool Matches(const char *str, AdbLookup where);
+  virtual bool Matches(const char *str, int where, int how);
 
   // pack/unpack data: we store it as a colon delimited list of values, but
   // it's too slow to modify it in place, so we unpack it to an array of
@@ -125,6 +125,9 @@ public:
   // get path to our entry in config file
   wxString GetPath() const;
 
+  // if it's not, we will be deleted, so it really must be something fatal
+  bool IsOk() const { return m_pGroup != NULL; }
+
   MOBJECT_DEBUG
 
 private:
@@ -135,7 +138,7 @@ private:
 
   bool m_bDirty;              // dirty flag
 
-  FCEntryGroup *m_pGroup;     // the group which contains us (NULL for root)
+  FCEntryGroup *m_pGroup;     // the group which contains us (never NULL)
 };
 
 // our AdbEntryGroup implementation: it maps on a wxFileConfig group
@@ -144,7 +147,8 @@ class FCEntryGroup : public AdbEntryGroup
 public:
   // ctors
     // the normal one
-  FCEntryGroup(FCEntryGroup *pParent, const wxString& strName);
+  FCEntryGroup(FCEntryGroup *pParent, const wxString& strName,
+               bool bNew = FALSE);
     // this one is only used for the root group
   FCEntryGroup(wxFileConfig *pConfig);
 
@@ -176,6 +180,9 @@ public:
 
   // set the path corresponding to this group
   void SetOurPath() const { GetConfig()->SetPath(GetPath()); }
+
+  // if it's not, we will be deleted, so it really must be something fatal
+  bool IsOk() const { return m_pConfig != NULL; }
 
   MOBJECT_DEBUG
 
@@ -276,14 +283,26 @@ IMPLEMENET_ADB_PROVIDER(FCDataProvider, TRUE, "Native format", Name_File);
 // FCEntry
 // ----------------------------------------------------------------------------
 
-FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName)
+FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew)
 {
   m_pGroup = pGroup;
   m_astrFields.Add(strName);
 
-  wxString strValue;
-  pGroup->GetConfig()->Read(&strValue, GetPath());
-  Load(strValue);
+  if ( bNew ) {
+    // force the creation of our entry by writing something (writing empty
+    // string will be ignored)
+    if ( !pGroup->GetConfig()->Write(GetPath(), ":") ) {
+      // also if it fails it means that something is wrong and this entry
+      // can't be created, so be sure that our IsOk() will return FALSE
+      m_pGroup = NULL;
+    }
+  }
+  else {
+    // we already exist in the config file, load our value
+    wxString strValue;
+    pGroup->GetConfig()->Read(&strValue, GetPath());
+    Load(strValue);
+  }
 
   m_bDirty = FALSE;
 }
@@ -340,42 +359,55 @@ void FCEntry::ClearExtraEMails()
   //else: don't set dirty flag if it didn't change anything
 }
 
-bool FCEntry::Matches(const char *what, AdbLookup where)
+bool FCEntry::Matches(const char *szWhat, int where, int how)
 {
-  if ( where & AdbLookup_Alias ) {
-    if ( m_astrFields[AdbField_NickName].Matches(what) )
-      return TRUE;
-  }
+  wxString strWhat;
 
-  if ( where & AdbLookup_FullName ) {
-    if ( m_astrFields.Count() > AdbField_FullName &&
-         m_astrFields[AdbField_FullName].Matches(what) )
-      return TRUE;
-  }
+  // substring lookup looks for a part of the string, otherwise the entire
+  // string should be matched by the pattern
+  if ( how & AdbLookup_Substring )
+    strWhat << '*' << szWhat << '*';
+  else
+    strWhat = szWhat;
 
-  if ( where & AdbLookup_Organization ) {
-    if ( m_astrFields.Count() > AdbField_Organization &&
-         m_astrFields[AdbField_Organization].Matches(what) )
-      return TRUE;
-  }
+  // if the search is not case sensitive, transform everything to lower case
+  if ( how & AdbLookup_CaseSensitive )
+    strWhat.MakeLower();
 
+  wxString strField;
+
+  #define CHECK_MATCH(field)                                        \
+    if ( where & AdbLookup_##field ) {                              \
+      strField = m_astrFields[AdbField_##field];                    \
+      if ( how & AdbLookup_CaseSensitive )                          \
+        strField.MakeLower();                                       \
+      if ( strField.Matches(strWhat) )                              \
+        return TRUE;                                                \
+    }
+
+  CHECK_MATCH(NickName);
+  CHECK_MATCH(FullName);
+  CHECK_MATCH(Organization);
+  CHECK_MATCH(HomePage);
+
+  // special case: we have to look in _all_ e-mail addresses
+  // NB: this search is always case insensitive, because e-mail addresses are
   if ( where & AdbLookup_EMail ) {
-    if ( m_astrFields.Count() > AdbField_EMail &&
-         m_astrFields[AdbField_EMail].Matches(what) )
-      return TRUE;
+    if ( m_astrFields.Count() > AdbField_EMail ) {
+      strField = m_astrFields[AdbField_EMail];
+      strField.MakeLower();
+      if ( strField.Matches(strWhat) )
+        return TRUE;
+    }
 
     // look in additional email addresses too
     uint nCount = m_astrEmails.Count();
     for ( uint n = 0; n < nCount; n++ ) {
-      if ( m_astrEmails[n].Matches(what) )
+      strField = m_astrEmails[n];
+      strField.MakeLower();
+      if ( strField.Matches(strWhat) )
         return TRUE;
     }
-  }
-
-  if ( where & AdbLookup_HomePage ) {
-    if ( m_astrFields.Count() > AdbField_HomePage &&
-         m_astrFields[AdbField_HomePage].Matches(what) )
-      return TRUE;
   }
 
   return FALSE;
@@ -527,11 +559,22 @@ FCEntryGroup::FCEntryGroup(wxFileConfig *pConfig)
   m_pParent = NULL;
 }
 
-FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent, const wxString& strName)
+FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent,
+                           const wxString& strName,
+                           bool bNew)
             : m_strName(strName)
 {
   m_pConfig = pParent->GetConfig();
   m_pParent = pParent;
+
+  if ( bNew ) {
+    // force creation of the group
+    if ( !m_pConfig->Write(GetPath(), "") ) {
+      // something went wrong, don't create this group, the next line ensures
+      // that IsOk() will return FALSE
+      m_pConfig = NULL;
+    }
+  }
 }
 
 FCEntryGroup::~FCEntryGroup()
@@ -591,27 +634,52 @@ uint FCEntryGroup::GetGroupNames(wxArrayString& aNames) const
 
 AdbEntry *FCEntryGroup::GetEntry(const String& name) const
 {
-  return new FCEntry((FCEntryGroup *)this, name);
+  FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name);
+  if ( !pEntry->IsOk() ) {
+    pEntry->Unlock();
+    pEntry = NULL;
+  }
+
+  return pEntry;
 }
 
 bool FCEntryGroup::Exists(const String& path) const
 {
+  SetOurPath();
   return GetConfig()->Exists(path);
 }
 
 AdbEntryGroup *FCEntryGroup::GetGroup(const String& name) const
 {
-  return new FCEntryGroup((FCEntryGroup *)this, name);
+  FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name);
+  if ( !pGroup->IsOk() ) {
+    pGroup->Unlock();
+    pGroup = NULL;
+  }
+
+  return pGroup;
 }
 
-AdbEntry *FCEntryGroup::CreateEntry(const String& strName)
+AdbEntry *FCEntryGroup::CreateEntry(const String& name)
 {
-  return GetEntry(strName);
+  FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name, TRUE /* new */);
+  if ( !pEntry->IsOk() ) {
+    pEntry->Unlock();
+    pEntry = NULL;
+  }
+
+  return pEntry;
 }
 
-AdbEntryGroup *FCEntryGroup::CreateGroup(const String& strName)
+AdbEntryGroup *FCEntryGroup::CreateGroup(const String& name)
 {
-  return GetGroup(strName);
+  FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name, TRUE);
+  if ( !pGroup->IsOk() ) {
+    pGroup->Unlock();
+    pGroup = NULL;
+  }
+
+  return pGroup;
 }
 
 void FCEntryGroup::DeleteEntry(const String& strName)
@@ -638,15 +706,7 @@ AdbEntry *FCEntryGroup::FindEntry(const char *szName)
 FCBook::FCBook(const String& filename)
       : m_strFile(filename)
 {
-  // find the last '/' or '\\' - both are accepted
-  const char *pc = m_strFile;
-  const char *pLast1 = strrchr(pc, '/');
-  const char *pLast2 = strrchr(pc, '\\');
-  uint nPos1 = pLast1 ? pLast1 - pc : 0;
-  uint nPos2 = pLast2 ? pLast2 - pc : 0;
-  if ( nPos2 > nPos1 )
-    nPos1 = nPos2;
-  m_strFileName = m_strFile.Right(m_strFile.Len() - nPos1 - 1).Left('.');
+  m_strFileName = strutil_getfilename(m_strFile).Left('.');
 
   // we must load the file here because we need the ADB's name and description
   m_pConfig = new wxFileConfig(m_strFile, wxGetEmptyString());
