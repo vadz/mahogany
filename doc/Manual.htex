@@ -786,6 +786,10 @@ is outlawed in some dictatorical countries. If your copy of Mahogany
 supports SSL, tick this box to access a secure IMAP/POP/NNTP server.
 Must be supported by the server side, too. It will ensure that your
 communication with the server is encrypted and safe from eavesdropping.
+For this to work, the user might also need to open the preference dialog, and,
+in the \textbf{Misc} tab, fill-out the boxes labeled ``Path where to find
+shared libssl'' and ``Path where to find shared libcrypto''.
+Linux users must also see the SSL section of the FAQ.
 \item \textbf{Anonymous access}\\
 This marks the folder as anonymous, such as for anonymous IMAP access,
 telling Mahogany that no user name or password are required to access
@@ -1996,6 +2000,24 @@ object is a \texttt{MailFolder}, the object must either be used as
 or a tuple holding several values.
 \end{enumerate}
 
+\subsection{SSL does not work}
+\textit{I went to the preferences menu, in the "Miscellaneous" tab, and made
+sure the pathnames of libcrypto and libssl where correct. I Went to the acces
+tab of my mail folder preferences and enabled SSL. However, when I try to open
+that folder, it fails and the log window talks about being unable to load
+libssl.}
+
+Under Linux, this is due to a combination of factors, fixing one of them is
+enough to fix the problem. Versions of libssl.so older than 0.9.6 require
+libcrypto to be explicitly loaded beforehand. Updating to version 0.9.6 or
+newer fixes the problem. Versions of libwx\_gtk older than or equal to 2.2.0
+load shared libraries in such a way that, eventhough M loads libcrypto,
+libssl still fails to load. Upgrading libwx\_gtk to a later version will fix
+the problem. Finaly, if all else fails, starting M with the command:
+\texttt{LD\_PRELOAD=/usr/lib/libcrypto.so M} will fix the problem as well.
+If the second solution is used, the pathname of libcrypto must be set
+properly. Otherwise it is better to leave it blank.
+
 \subsection{Namespaces}
 
 To avoid repeatedly typing in the name of the module (\texttt{MailFolder}
@@ -2540,8 +2562,25 @@ as root), then remove {*}cache{*} and try again. Again, if something
 fails, look at config.log.
 \end{enumerate}
 
-\section{Other Problems / Questions}
+\subsection{SSL does not work}
+\textit{I went to the preferences menu, in the "Miscellaneous" tab, and made
+sure the pathnames of libcrypto and libssl where correct. I Went to the acces
+tab of my mail folder preferences and enabled SSL. However, when I try to open
+that folder, it fails and the log window talks about being unable to load
+libssl.}
 
+Under Linux, this is due to a combination of factors, fixing one of them is
+enough to fix the problem. Versions of libssl.so older than 0.9.6 require
+libcrypto to be explicitly loaded beforehand. Updating to version 0.9.6 or
+newer fixes the problem. Versions of libwx\_gtk older than or equal to 2.2.0
+load shared libraries in such a way that, eventhough M loads libcrypto,
+libssl still fails to load. Upgrading libwx\_gtk to a later version will fix
+the problem. Finaly, if all else fails, starting M with the command:
+\texttt{LD\_PRELOAD=/usr/lib/libcrypto.so M} will fix the problem as well.
+If the second solution is used, the pathname of libcrypto must be set
+properly. Otherwise it is better to leave it blank.
+
+\section{Other Problems / Questions}
 
 \subsection{The Preferences Dialog does not show up properly}
 
