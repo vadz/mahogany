@@ -33,6 +33,11 @@ $Id$
   + wxMDialogs completely broken as it is now
   + who cleans up CPYSTR() generated strings?
 
+- add support for popping window open and reading a folder of one's choice
+  (for being controlled from xbiff like programs)
+  idea: read from ~/.M/control whenever being sent a certain signal,
+        execute that text as a python script
+
 - make saving of window positions optional
 
 - configure: USE_WXCONFIG does not get defined!
