@@ -19,6 +19,8 @@
 
 #include "MailFolder.h"         // for MailFolderStatus
 
+#include "MEvent.h"
+
 #include <wx/dynarray.h>
 
 WX_DEFINE_ARRAY(MailFolderStatus *, MfStatusArray);
@@ -31,7 +33,7 @@ WX_DEFINE_ARRAY(MailFolderStatus *, MfStatusArray);
 // tree)
 // ----------------------------------------------------------------------------
 
-class MfStatusCache
+class MfStatusCache : public MEventReceiver
 {
 public:
    // this is a singleton class and this function is the only way to access it
@@ -64,6 +66,9 @@ protected:
    // and protected dtor - CleanUp() should be called instead
    virtual ~MfStatusCache();
 
+   // implement MEventReceiver pure virtual to process folder rename events
+   virtual bool OnMEvent(MEventData& event);
+
    // get the full cache file name
    String GetFileName() const;
 
@@ -82,6 +87,9 @@ private:
 
    // the data for the folders above
    MfStatusArray m_folderData;
+
+   // the MEventManager cookie
+   void *m_evtmanHandle;
 
    // the dirty flag, i.e. has anything changed since we were last saved?
    bool m_isDirty;

@@ -106,16 +106,45 @@ MfStatusCache::MfStatusCache()
 {
    Load(GetFileName());
 
+   // register for folder rename events
+   m_evtmanHandle = MEventManager::Register(*this, MEventId_FolderTreeChange);
+
    // no changes yet
    m_isDirty = false;
 }
 
 MfStatusCache::~MfStatusCache()
 {
+   if ( m_evtmanHandle )
+   {
+      MEventManager::Deregister(m_evtmanHandle);
+   }
+
    Save(GetFileName());
 
    // delete the elements too
    WX_CLEAR_ARRAY(m_folderData);
+}
+
+// ----------------------------------------------------------------------------
+// MfStatusCache event processing
+// ----------------------------------------------------------------------------
+
+bool MfStatusCache::OnMEvent(MEventData& ev)
+{
+   MEventFolderTreeChangeData& event = (MEventFolderTreeChangeData&)ev;
+   if ( event.GetChangeKind() == MEventFolderTreeChangeData::Rename )
+   {
+      // keep the status cache entry for the old folder
+      int index = m_folderNames.Index(event.GetFolderFullName());
+      if ( index != wxNOT_FOUND )
+      {
+         m_folderNames[index] = event.GetNewFolderName();
+      }
+   }
+
+   // continue with the event processing
+   return true;
 }
 
 // ----------------------------------------------------------------------------
