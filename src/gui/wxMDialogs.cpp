@@ -511,7 +511,10 @@ wxPEP_Folder::OnEvent(wxCommandEvent& event)
    case M_WXID_PEP_OK:
       UpdateProfile();
    case M_WXID_PEP_CANCEL:
-      m_Parent->Close();
+      if(m_Parent->IsKindOf(CLASSINFO(wxDialog)))
+         ((wxDialog *)m_Parent)->EndModal(wxID_CANCEL);
+      else
+         m_Parent->Close();
       break;
    case M_WXID_PEP_UNDO:
       UpdatePanel();
@@ -635,6 +638,31 @@ MDialog_FolderProfile(MWindow *parent, ProfileBase *profile)
    frame->Show(TRUE);
 }
 
+
+
+// better looking wxTextEntryDialog
+class MFolderCreateDialog : public wxDialog
+{
+public:
+   MFolderCreateDialog(wxWindow *parent, ProfileBase *profile);
+
+private:
+   wxPEP_Folder *m_pep;
+};
+
+MFolderCreateDialog::MFolderCreateDialog(wxWindow *parent,
+                                         ProfileBase *profile)
+   : wxDialog(parent, -1, _("M - Folder Creation/Definition"),
+              wxDefaultPosition,
+              wxDefaultSize,
+              wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL) 
+{
+   wxPEP_Folder *m_pep = new wxPEP_Folder(profile,this);
+
+   Centre(wxCENTER_FRAME | wxBOTH);
+   Fit();
+}
+
 void
 MDialog_FolderCreate(MWindow *parent)
 {
@@ -649,14 +677,7 @@ MDialog_FolderCreate(MWindow *parent)
       return;
 
    ProfileBase *profile = new Profile(name, NULL);
-
-   wxDialog *dlg = new wxDialog(parent, -1, _("M - Folder Profile Settings"),
-                             wxDefaultPosition,
-                             wxDefaultSize,
-                             wxDIALOG_MODAL);
-
-   (void) new wxPEP_Folder(profile,dlg);
-   dlg->Fit();
+   wxDialog *dlg = new MFolderCreateDialog(parent,profile);
    dlg->ShowModal();
    delete profile;
 }

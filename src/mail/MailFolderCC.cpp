@@ -106,7 +106,15 @@ MailFolderCC::OpenFolder(String const &name)
          return (*i)->folder;
       }
    // not found:
-   return new MailFolderCC(name);
+   MailFolderCC *mf =  new MailFolderCC(name);
+   if(mf && mf->IsInitialised())
+      return mf;
+   else
+   {
+      if(mf)
+         mf->Close();
+   }
+   return NULL;
 }
 
 void
@@ -123,7 +131,8 @@ MailFolderCC::Close(void)
             delete conn;
 
             streamList.erase(i);
-            mail_close(mailstream);
+            if(mailstream)
+               mail_close(mailstream);
             RemoveFromMap(mailstream);
             delete this;
          }

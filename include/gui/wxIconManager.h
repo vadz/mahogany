@@ -70,7 +70,7 @@ public:
        @param iconName  the name of the icon
        @return the wxIcon
    */
-   wxIcon &GetIcon(String const &iconName);
+   wxIcon GetIcon(String const &iconName);
 
    /** Add a name/icon pair to the list
        @param iconName the name for the icon
@@ -82,7 +82,7 @@ public:
        for th bitmap in resources first and then calls GetIcon
        @param bmpName the name of the bitmap
    */
-   wxBitmap &GetBitmap(const String& bmpName);
+   wxBitmap GetBitmap(const String& bmpName);
 };
 
 #endif

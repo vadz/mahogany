@@ -168,11 +168,11 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    
    mailFolder = MailFolderCC::OpenFolder(folderName);
    wxCHECK_RET(mailFolder, "can't open folder in wxFolderView ctor" );
+
    initialised = mailFolder->IsInitialised();
-   
    int x,y;
    parent->GetClientSize(&x, &y);
-
+   
    m_SplitterWindow = new wxSplitterWindow(parent,-1,wxDefaultPosition,wxSize(x,y),wxSP_3D,wxSP_BORDER);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
    m_MessagePreview = new wxMessageView(this,m_SplitterWindow,"MessagePreview");
@@ -186,7 +186,7 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    if(m_NumOfMessages > 0)
    {
       m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
-      // the callback will preview the (just) selected message
+      // t   he callback will preview the (just) selected message
    }
 }
 

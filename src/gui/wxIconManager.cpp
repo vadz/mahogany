@@ -95,13 +95,13 @@ wxIconManager::~wxIconManager()
    delete m_iconList;
 }
 
-wxBitmap &
+wxBitmap
 wxIconManager::GetBitmap(const String& bmpName)
 {
 #  ifdef    OS_WIN
    {
       // look in the ressources
-      wxBitmap &bmp =wxBitmap(bmpName);
+      wxBitmap bmp(bmpName);
       if ( bmp.Ok() )
          return bmp;
 //      else
@@ -126,7 +126,7 @@ wxIconManager::GetBitmap(const String& bmpName)
   time anyway.
 */
 
-wxIcon &
+wxIcon 
 wxIconManager::GetIcon(String const &_iconName)
 {
    IconDataList::iterator i;
@@ -224,7 +224,7 @@ void
 wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
 {
    // load icon
-   wxIcon & icon = wxIcon(data);
+   wxIcon icon = wxIcon(data);
    if ( !icon.Ok() )
    {
 //      delete icon;
