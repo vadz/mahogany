@@ -128,13 +128,13 @@ TrailerFilter::DoProcess(String& text,
             return;
          }
       }
-      else // not a delimiter line
+
+      // if we get here, it was not a delimiter line
+      //
+      // rewind to its beginning
+      while ( *pc != '\n' && pc > start )
       {
-         // rewind to its beginning
-         while ( *pc != '\n' && pc > start )
-         {
-            pc--;
-         }
+         pc--;
       }
 
       if ( pc <= start )
