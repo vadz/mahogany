@@ -371,6 +371,23 @@ public:
                                             const wxString& url,
                                             wxString *redirect) const;
 
+
+   // provide access to some wxHtmlWindow protected methods
+   void Copy()
+   {
+#if wxCHECK_VERSION(2, 5, 1)
+      CopySelection();
+#endif
+   }
+   wxString GetSelection()
+   {
+#if wxCHECK_VERSION(2, 5, 1)
+      return SelectionToText();
+#else
+      return wxEmptyString;
+#endif
+   }
+
 private:
    // get the clickable info previousy stored by StoreClickable()
    ClickableInfo *GetClickable(const String& url) const;
@@ -605,6 +622,7 @@ bool HtmlViewer::Find(const String& /* text */)
 
 bool HtmlViewer::FindAgain()
 {
+   // TODO
    wxLogError(_("Sorry, searching is not implemented in the HTML viewer yet"));
 
    return false;
@@ -612,13 +630,12 @@ bool HtmlViewer::FindAgain()
 
 void HtmlViewer::Copy()
 {
-   // TODO
+   m_window->Copy();
 }
 
 String HtmlViewer::GetSelection() const
 {
-   // TODO
-   return "";
+   return m_window->GetSelection();
 }
 
 // ----------------------------------------------------------------------------
@@ -795,7 +812,7 @@ void HtmlViewer::StartHeaders()
 
    // map the font family into HTML font face name
    //
-   // FIXME: use <font face="...">
+   // TODO: use <font face="...">
    if ( font.IsFixedWidth() )
    {
       m_htmlText << "<tt>";
