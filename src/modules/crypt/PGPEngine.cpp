@@ -530,6 +530,12 @@ PGPEngine::ExecCommand(const String& options,
                }
 
             }
+            else if ( code == _T("BADARMOR") )
+            {
+               status = BAD_ARGUMENT_ERROR;
+               wxLogWarning(_("The PGP message is malformed, "
+                              "processing aborted."));
+            }
             else if ( code == _T("EXPSIG") || code == _T("EXPKEYSIG") )
             {
                status = SIGNATURE_EXPIRED_ERROR;
