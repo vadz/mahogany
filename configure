@@ -566,7 +566,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.296 2003/10/12 22:03:36 nerijus Exp 
+# From configure.in Id: configure.in,v 1.297 2003/12/18 23:43:20 vadz Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -891,7 +891,7 @@ else
   if eval "test \"`echo '$''{'m_cv_USE_PYTHON'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  m_cv_USE_PYTHON='none'
+  m_cv_USE_PYTHON='1'
 fi
 fi
 USE_PYTHON="$m_cv_USE_PYTHON"

@@ -112,7 +112,7 @@ M_OVERRIDES(strict,strict compiler options,USE_STRICT,0,
 M_OVERRIDES(nls,i18n support,USE_I18N,1,
 --disable-nls           no internationalization support)
 
-M_OVERRIDES(python,Python scripting,USE_PYTHON,none,
+M_OVERRIDES(python,Python scripting,USE_PYTHON,1,
 --with-python=xxx       one of none/static/dynamic)
 
 case "$USE_PYTHON" in
