@@ -103,14 +103,21 @@
 #define M_USERLEVEL_WIZARD 3L
 //@}
 
-/** @name Levels of  interaction, do something or not? */
+/** @name Levels of  interaction, do something or not?
+
+    NB: these values can't be changed as they are written to (and read from)
+        the profile and so this would create a compatibility problem
+ */
 //@{
-/// never do this action
-#define   M_ACTION_NEVER   0
-/// ask user if he wants it
-#define   M_ACTION_PROMPT   1
-/// don't ask user, do it
-#define   M_ACTION_ALWAYS   2
+enum
+{
+   /// never do this action
+   M_ACTION_NEVER,
+   /// ask user if he wants it
+   M_ACTION_PROMPT,
+   /// don't ask user, do it
+   M_ACTION_ALWAYS
+};
 //@}
 
 /// the positions of the standard folders in the tree
@@ -489,8 +496,8 @@ enum MFolderIndex
 /// a regex to detect signature
 #define MP_REPLY_SIG_SEPARATOR "SigSeparator"
 #endif
-// include the original message in the reply [always,never,ask]
-#define MP_COMPOSE_REPLY_INSERT_ORIG "ReplyQuoteInsert" 
+/// include the original message in the reply [no,ask,yes]
+#define MP_REPLY_QUOTE_ORIG "ReplyQuoteInsert" 
 
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE   "UseXFaces"
@@ -1203,8 +1210,8 @@ enum MFolderIndex
 /// a regex to detect signature
 #define MP_REPLY_SIG_SEPARATOR_D "((_____*)|(-- ?))"
 #endif
-// include the original message in the reply [Never,Always,Ask]
-#define MP_COMPOSE_REPLY_INSERT_ORIG_D 2l
+/// include the original message in the reply [no,ask,yes]
+#define MP_REPLY_QUOTE_ORIG_D M_ACTION_ALWAYS
 
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE_D   1
@@ -1561,8 +1568,8 @@ enum MFolderIndex
 #define   MP_OUTGOINGFOLDER_D  "" // obsolete
 /// Show all message headers?
 #define   MP_SHOWHEADERS_D         0l
-/// Autocollect email addresses? 0=no 1=ask 2=always
-#define   MP_AUTOCOLLECT_D         2l
+/// Autocollect email addresses?
+#define   MP_AUTOCOLLECT_D     M_ACTION_ALWAYS
 /// Name of the address books for autocollected addresses
 #define   MP_AUTOCOLLECT_ADB_D    "autocollect.adb"
 /// Autocollect entries with names only?

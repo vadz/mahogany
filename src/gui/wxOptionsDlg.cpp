@@ -176,11 +176,11 @@ enum ConfigFields
    ConfigField_WrapAuto,
    ConfigField_ReplyString,
    ConfigField_ReplyCollapse,
+   ConfigField_ReplyQuoteOrig,
    ConfigField_ReplyCharacters,
    ConfigField_ReplyUseSenderInitials,
    ConfigField_ReplyQuoteEmpty,
-   ConfigField_ReplyQuoteInsert,
-   ConfigField_DetectSig,
+   ConfigField_ReplyDetectSig,
 #if wxUSE_REGEX
    ConfigField_ReplySigSeparatorHelp,
    ConfigField_ReplySigSeparator,
@@ -822,20 +822,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
    { gettext_noop("Co&llapse reply markers"
                   ":no:collapse:collapse & count"),Field_Combo,   -1,                        },
-   { gettext_noop("Reply prefi&x"),                Field_Text,    -1,                        },
+   { gettext_noop("Quote &original message in reply"), Field_Action,   -1,                        },
+   { gettext_noop("Reply prefi&x"),                Field_Text, ConfigField_ReplyQuoteOrig,                        },
    { gettext_noop("Prepend &sender initials"),     Field_Bool,    ConfigField_ReplyCharacters,                        },
    { gettext_noop("&Quote empty lines too"),       Field_Bool |
                                                    Field_Advanced,    ConfigField_ReplyCharacters,                        },
-   { gettext_noop("&Insert original message when quoting"
-                  ":Always:Never:Ask"),Field_Combo,   -1,                        }, 
-
-   { gettext_noop("Detect and remove signature when replying"),       Field_Bool |
-                                                   Field_Advanced,    -1 ,                        },
+   { gettext_noop("Detect and remove &signature when replying"),
+                                                   Field_Bool | Field_Advanced, ConfigField_ReplyQuoteOrig, },
 #if wxUSE_REGEX
    { gettext_noop("This regular expression is used to detect the beginning\n"
                   "of the signature of the message replied to."),
-                                                   Field_Message | Field_Advanced, ConfigField_DetectSig },
-   { gettext_noop("Signature separator"),          Field_Text | Field_Advanced,    ConfigField_DetectSig,     },
+                                                   Field_Message | Field_Advanced, ConfigField_ReplyDetectSig  },
+   { gettext_noop("Signature separator"),          Field_Text | Field_Advanced,    ConfigField_ReplyDetectSig, },
 #endif // wxUSE_REGEX
 
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
@@ -1250,10 +1248,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AUTOMATIC_WORDWRAP),
    CONFIG_ENTRY(MP_REPLY_PREFIX),
    CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
+   CONFIG_ENTRY(MP_REPLY_QUOTE_ORIG),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_SENDER),
    CONFIG_ENTRY(MP_REPLY_QUOTE_EMPTY),
-   CONFIG_ENTRY(MP_COMPOSE_REPLY_INSERT_ORIG), 
    CONFIG_ENTRY(MP_REPLY_DETECT_SIG),
 #if wxUSE_REGEX
    CONFIG_NONE(),

@@ -461,36 +461,46 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
 
       case WXMENU_MSG_REPLY:
       case WXMENU_MSG_FOLLOWUP:
+         if ( templ != MessageTemplate_None )
          {
+            int quoteRule = READ_CONFIG(m_asmf->GetProfile(),
+                                        MP_REPLY_QUOTE_ORIG);
 
-           Profile *m_profile = mApplication->GetProfile();
-           m_profile->IncRef();
+            if ( quoteRule == M_ACTION_PROMPT )
+            {
+               String msg;
+               msg.Printf(_("Do you want to include the original message "
+                            "text in your %s?"),
+                          cmd == WXMENU_MSG_FOLLOWUP ? _("follow up")
+                                                     : _("reply"));
 
-           int quoteRule = READ_CONFIG(m_profile, MP_COMPOSE_REPLY_INSERT_ORIG);
-           
-           m_profile->DecRef();
-           
-           if (( quoteRule == 1 ) ||         // if the rule is never
-               ( quoteRule == 2 &&           // or the answer was no
-                 !MDialog_YesNoDialog(_("Insert the original message?")) ))
-             {
-               templ = MessageTemplate_None;
-             }
-   
+               if ( !MDialog_YesNoDialog(msg, GetFrame()) )
+               {
+                  quoteRule = M_ACTION_NEVER;
+               }
+            }
 
-
-            int flags = cmd == WXMENU_MSG_FOLLOWUP ? MailFolder::REPLY_FOLLOWUP
-                                                   : 0;
-
-            m_TicketList->Add(m_asmf->ReplyMessages
-                                      (
-                                       &messages,
-                                       MailFolder::Params(templ, flags),
-                                       GetFrame(),
-                                       this
-                                      )
-                             );
+            // disable the template if we don't want to quote the original
+            // message
+            if ( quoteRule == M_ACTION_NEVER )
+            {
+               // can't just empty it because wxComposeView::DoInitText() would
+               // use the default for it then
+               templ = "$cursor";
+            }
          }
+
+         m_TicketList->Add(m_asmf->ReplyMessages
+                                   (
+                                    &messages,
+                                    MailFolder::Params(templ,
+                                       cmd == WXMENU_MSG_FOLLOWUP
+                                          ? MailFolder::REPLY_FOLLOWUP
+                                          : 0),
+                                    GetFrame(),
+                                    this
+                                   )
+                          );
          break;
 
       case WXMENU_MSG_FORWARD:
