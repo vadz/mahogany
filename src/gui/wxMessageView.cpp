@@ -977,9 +977,18 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
                   return;
                }
 
+               String comments, date, subject;
+               mailMessage->GetHeaderLine(MSG_HEADER_DATE, date);
+               mailMessage->GetHeaderLine(MSG_HEADER_SUBJECT, subject);
+
+               comments.Printf(_("Autocollected address from message "
+                                 "with subject '%s', received at %s."),
+                               subject.c_str(), date.c_str());
+
                entry->SetField(AdbField_NickName, entryname);
                entry->SetField(AdbField_FullName, entryname);
                entry->SetField(AdbField_EMail, email);
+               entry->SetField(AdbField_Comments, comments);
                entry->DecRef();
 
                wxLogStatus(GetFrame(this),

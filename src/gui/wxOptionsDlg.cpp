@@ -65,7 +65,7 @@ enum ConfigFields
    ConfigField_PersonalName,
    ConfigField_IdentLast = ConfigField_PersonalName,
 
-  // compose
+   // compose
    ConfigField_ComposeFirst = ConfigField_IdentLast,
    ConfigField_FromLabel,
    ConfigField_ToLabel,
@@ -91,7 +91,7 @@ enum ConfigFields
    ConfigField_FoldersLast = ConfigField_MainFolder,
 
 #ifdef USE_PYTHON
-  // python
+   // python
    ConfigField_PythonFirst = ConfigField_FoldersLast,
    ConfigField_EnablePython,
    ConfigField_PythonPath,
@@ -106,7 +106,7 @@ enum ConfigFields
    ConfigField_PythonLast = ConfigField_FoldersLast,
 #endif // USE_PYTHON
 
-  // other options
+   // other options
    ConfigField_OthersFirst = ConfigField_PythonLast,
    ConfigField_ShowLog,
    ConfigField_Splash,
@@ -116,7 +116,7 @@ enum ConfigFields
    ConfigField_DateFormat,
    ConfigField_OthersLast = ConfigField_DateFormat,
 
-  // the end
+   // the end
    ConfigField_Max
 };
 
@@ -155,11 +155,11 @@ enum
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
 
-
-
+// -----------------------------------------------------------------------------
 // a button which is associated with a text control and which allows shows
 // the file selection dialog and puts the filename chosen by the user into
 // this text control
+// -----------------------------------------------------------------------------
 class wxBrowseButton : public wxButton
 {
 public:
@@ -252,8 +252,46 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// -----------------------------------------------------------------------------
+// base class for an option and folder properties pages, provides handy layout
+// functions for creating properly aligned controls
+// -----------------------------------------------------------------------------
+class wxOptionsPageBase : public wxPanel
+{
+public:
+   wxOptionsPageBase(wxNotebook *parent) : wxPanel(parent, -1) { }
 
-class wxOptionsPage : public wxPanel
+protected:
+   // get the parent frame
+   wxOptionsDialog *GetDialog() const;
+
+   void SetTopConstraint(wxLayoutConstraints *c, wxControl *last);
+
+   // all these functions create the corresponding control and position it
+   // below the "last" which may be NULL in which case the new control is put
+   // just below the panel top.
+   //
+   // widthMax parameter is the max width of the labels and is used to align
+   // labels/text entries.
+   wxListBox  *CreateListbox(const char *label, wxControl *last);
+   wxCheckBox *CreateCheckBox(const char *label, long widthMax,
+                              wxControl *last);
+      // nRightMargin is the distance to the right edge of the panel to leave
+      // (0 means deafult)
+   wxTextCtrl *CreateTextWithLabel(const char *label, long widthMax,
+                                   wxControl *last,
+                                   size_t nRightMargin = 0);
+      // if ppButton != NULL, it's filled with the pointer to the ">>" browse
+      // button created by this function
+   wxTextCtrl *CreateFileEntry(const char *label, long widthMax,
+                               wxControl *last,
+                               wxBrowseButton **ppButton = NULL);
+};
+
+// -----------------------------------------------------------------------------
+// a page containing thecontrols to change the values of profile entries
+// -----------------------------------------------------------------------------
+class wxOptionsPage : public wxOptionsPageBase
 {
 public:
    enum FieldType
@@ -298,22 +336,10 @@ public:
    void Refresh();
 
 protected:
-   // get the parent frame
-   wxOptionsDialog *GetDialog() const;
-
-   void SetTopConstraint(wxLayoutConstraints *c, wxControl *last);
-
-   wxListBox  *CreateListbox(const char *label, wxControl *last);
-   wxCheckBox *CreateCheckBox(const char *label, long w, wxControl *last);
-   wxTextCtrl *CreateTextWithLabel(const char *label, long w, wxControl *last,
-                                   size_t nRightMargin = 0);
-   wxTextCtrl *CreateFileEntry(const char *label, long w, wxControl *last);
-
-   void        CreateControls();
+   void CreateControls();
 
    // range of our controls in ms_aFields
-   size_t        m_nFirst,
-      m_nLast;
+   size_t m_nFirst, m_nLast;
 
    // we need a pointer to the profile to write to
    ProfileBase *m_Profile;
@@ -336,7 +362,7 @@ private:
    ArrayControls m_aControls;
 
    DECLARE_EVENT_TABLE()
-      };
+};
 
 class wxOptionsPageCompose : public wxOptionsPage
 {
@@ -415,9 +441,9 @@ BEGIN_EVENT_TABLE(wxOptionsDialog, wxDialog)
    EVT_BUTTON(wxID_OK,     wxOptionsDialog::OnOK)
    EVT_BUTTON(wxID_APPLY,  wxOptionsDialog::OnApply)
    EVT_BUTTON(wxID_CANCEL, wxOptionsDialog::OnCancel)
-   END_EVENT_TABLE()
+END_EVENT_TABLE()
 
-   BEGIN_EVENT_TABLE(wxOptionsPage, wxPanel)
+BEGIN_EVENT_TABLE(wxOptionsPage, wxPanel)
    // NB: we assume that the only buttons we have are browse buttons
    EVT_BUTTON(-1, wxOptionsPage::OnBrowse)
 
@@ -432,7 +458,7 @@ BEGIN_EVENT_TABLE(wxOptionsDialog, wxDialog)
    EVT_BUTTON(wxOptionsPage_BtnDelete, wxOptionsPageFolders::OnDeleteFolder)
 
    EVT_IDLE(wxOptionsPageFolders::OnIdle)
-   END_EVENT_TABLE()
+END_EVENT_TABLE()
 
 // ============================================================================
 // data: both of these arrays *must* be in sync with ConfigFields enum!
@@ -469,7 +495,7 @@ BEGIN_EVENT_TABLE(wxOptionsDialog, wxDialog)
    { "&Signature file",              Field_File,    ConfigField_Signature      },
    { "Use signature se&parator",     Field_Bool,    ConfigField_Signature      },
    { "Us&e XFace",                   Field_Bool,    -1,                        },
-   { "&XFace file",                  Field_File,    ConfigField_XFace},
+   { "&XFace file",                  Field_File,    ConfigField_XFace          },
 
    // folders
    { "Folders to open on &startup",  Field_List,    -1,                        },
@@ -645,13 +671,14 @@ wxFolderOpenPanel::TranferDataFromWindow(void)
 //----------------------------------------------------------------------------
 // A panel for defining a new Folder
 //----------------------------------------------------------------------------
-class wxFolderPropertiesPage : public wxPanel
+class wxFolderPropertiesPage : public wxOptionsPageBase
 {
 public:
    wxFolderPropertiesPage(wxNotebook *notebook, ProfileBase *profile);
 
    virtual bool TransferDataToWindow(void);
    virtual bool TransferDataFromWindow(void);
+
    /// update controls
    void UpdateUI(void);
    void OnEvent(wxCommandEvent& event);
@@ -713,15 +740,19 @@ wxFolderPropertiesPage::MakeTextCtrl(wxString const &label, wxWindow *last)
    return t;
 }
 
-
-wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *nb,
+wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                                ProfileBase *p)
-   : wxPanel(nb, -1)
+                      : wxOptionsPageBase(notebook)
 {
-   m_notebook = nb;
+   // init members
+   // ------------
+   m_notebook = notebook;
    m_profile = p;
 
    wxLayoutConstraints *c;
+   
+   // create controls
+   // ---------------
    
    // radiobox of folder type
    wxString radioChoices[5];
@@ -730,49 +761,83 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *nb,
    radioChoices[2] = _("POP3");
    radioChoices[3] = _("IMAP");
    radioChoices[4] = _("Newsgroup");
+
    m_radio = new wxRadioBox(this,-1,_("Folder Type"),
-                            wxDefaultPosition,wxDefaultSize,
-                            5, radioChoices,3,wxRA_HORIZONTAL);
+                            wxDefaultPosition, wxDefaultSize,
+                            5, radioChoices,
+                            3, wxRA_HORIZONTAL);
 
    c = new wxLayoutConstraints();
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
+   c->top.SameAs(this, wxTop, 2*LAYOUT_Y_MARGIN);
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->bottom.AsIs();
+   c->height.AsIs();
    m_radio->SetConstraints(c);
 
-   m_login = MakeTextCtrl(_("User name"), m_radio);
-   m_password = MakeTextCtrl(_("Passsword"),m_login);
-   m_path = MakeTextCtrl(_("Filename"), m_password);
-   m_server = MakeTextCtrl(_("Server"), m_path);
-   m_newsgroup = MakeTextCtrl(_("Newsgroup"), m_server);
+   // text entries
+   enum
+   {
+      Label_Login,
+      Label_Password,
+      Label_Path,
+      Label_Server,
+      Label_Newsgroup,
+      Label_Max
+   };
 
+   wxString labels[Label_Max];
+   labels[Label_Login] = _("User name: ");
+   labels[Label_Password] = _("Password: ");
+   labels[Label_Path] = _("File name: ");
+   labels[Label_Server] = _("Server: ");
+   labels[Label_Newsgroup] = _("Newsgroup: ");
 
-   wxStaticText *l = new wxStaticText(this, -1, _("Filename"),
-                                      wxDefaultPosition,
-                                      wxDefaultSize, wxALIGN_RIGHT);
+   // determine the longest label
+   wxClientDC dc(this);
+   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+   long width, widthMax = 0;
+   for ( size_t n = 0; n < WXSIZEOF(labels); n++ ) {
+      dc.GetTextExtent(labels[n], &width, NULL);
+      if ( width > widthMax )
+         widthMax = width;
+   }
+
+   m_login = CreateTextWithLabel(labels[Label_Login], widthMax, m_radio);
+   m_password = CreateTextWithLabel(labels[Label_Password], widthMax, m_login);
+   m_path = CreateTextWithLabel(labels[Label_Path], widthMax, m_password);
+   m_server = CreateTextWithLabel(labels[Label_Server], widthMax, m_path);
+   m_newsgroup = CreateTextWithLabel(labels[Label_Newsgroup], widthMax, m_server);
+   CreateFileEntry(labels[Label_Path], widthMax, m_newsgroup, &m_browsePath);
+
+#if 0
+   wxStaticText *labelFilename = new wxStaticText(this, -1,
+                                                  labels[Label_Path],
+                                                  wxDefaultPosition,
+                                                  wxDefaultSize,
+                                                  wxALIGN_RIGHT);
    c = new wxLayoutConstraints;
    c->top.SameAs(m_newsgroup, wxBottom, LAYOUT_Y_MARGIN);
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   c->width.Absolute(100);
+   c->width.Absolute(widthMax);
    c->height.AsIs();
-   l->SetConstraints(c);
+   labelFilename->SetConstraints(c);
 
-   wxTextCtrl *t = new wxTextCtrl(this, -1, "");
+   wxTextCtrl *textFilename = new wxTextCtrl(this, -1, "");
    c = new wxLayoutConstraints;
-   c->top.SameAs(l, wxTop);
-   c->left.RightOf(l, LAYOUT_X_MARGIN);
-   c->right.AsIs();
+   c->top.SameAs(labelFilename, wxTop);
+   c->left.RightOf(labelFilename, LAYOUT_X_MARGIN);
+   c->right.SameAs(this, wxRight, 5*LAYOUT_X_MARGIN);
    c->height.AsIs();
-   t->SetConstraints(c);
+   textFilename->SetConstraints(c);
 
-   m_browsePath = new wxBrowseButton(t,this);
+   m_browsePath = new wxBrowseButton(textFilename, this);
    c = new wxLayoutConstraints;
-   c->top.SameAs(l, wxTop);
-   c->left.RightOf(t, LAYOUT_X_MARGIN);
+   c->top.SameAs(labelFilename, wxTop);
+   c->left.RightOf(textFilename, LAYOUT_X_MARGIN);
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->height.AsIs();
+   c->height.SameAs(textFilename, wxHeight);
    m_browsePath->SetConstraints(c);
+#endif
 
    SetAutoLayout(TRUE);
 }
@@ -857,32 +922,14 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    return true;
 }
 
-
-wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
-                             const char *title,
-                             ProfileBase *profile,
-                             size_t nFirst,
-                             size_t nLast)
-             : wxPanel(notebook, -1)
-{
-   int image = notebook->GetPageCount();
-
-   notebook->AddPage(this, title, FALSE /* don't select */, image);
-
-   m_Profile = profile;
-
-   // see enum ConfigFields for "+1"
-   m_nFirst = nFirst + 1;
-   m_nLast = nLast + 1;
-
-   CreateControls();
-
-   SetAutoLayout(TRUE);
-}
+// ----------------------------------------------------------------------------
+// wxOptionsPageBase
+// ----------------------------------------------------------------------------
 
 // the top item is positioned near the top of the page, the others are
 // positioned from top to bottom, i.e. under the last one
-void wxOptionsPage::SetTopConstraint(wxLayoutConstraints *c, wxControl *last)
+void wxOptionsPageBase::SetTopConstraint(wxLayoutConstraints *c,
+                                         wxControl *last)
 {
    if ( last == NULL )
       c->top.SameAs(this, wxTop, 2*LAYOUT_Y_MARGIN);
@@ -897,9 +944,10 @@ void wxOptionsPage::SetTopConstraint(wxLayoutConstraints *c, wxControl *last)
    }
 }
 
-wxTextCtrl *wxOptionsPage::CreateFileEntry(const char *label,
-                                           long widthMax,
-                                           wxControl *last)
+wxTextCtrl *wxOptionsPageBase::CreateFileEntry(const char *label,
+                                               long widthMax,
+                                               wxControl *last,
+                                               wxBrowseButton **ppButton)
 {
    static size_t widthBtn = 0;
    if ( widthBtn == 0 ) {
@@ -912,7 +960,7 @@ wxTextCtrl *wxOptionsPage::CreateFileEntry(const char *label,
                                           widthBtn + 2*LAYOUT_X_MARGIN);
 
    // and also create a button for browsing for file
-   wxButton *btn = new wxBrowseButton(text, this);
+   wxBrowseButton *btn = new wxBrowseButton(text, this);
    wxLayoutConstraints *c = new wxLayoutConstraints;
    SetTopConstraint(c, last);
    c->left.RightOf(text, LAYOUT_X_MARGIN);
@@ -920,12 +968,17 @@ wxTextCtrl *wxOptionsPage::CreateFileEntry(const char *label,
    c->height.SameAs(text, wxHeight);
    btn->SetConstraints(c);
 
+   if ( ppButton )
+   {
+      *ppButton = btn;
+   }
+
    return text;
 }
 
 // create a single-line text control with a label
-wxTextCtrl *wxOptionsPage::CreateTextWithLabel(const char *label,
-                                               long widthMax,
+wxTextCtrl *wxOptionsPageBase::CreateTextWithLabel(const char *label,
+                                                   long widthMax,
                                                wxControl *last,
                                                size_t nRightMargin)
 {
@@ -955,9 +1008,9 @@ wxTextCtrl *wxOptionsPage::CreateTextWithLabel(const char *label,
 }
 
 // create a checkbox
-wxCheckBox *wxOptionsPage::CreateCheckBox(const char *label,
-                                          long widthMax,
-                                          wxControl *last)
+wxCheckBox *wxOptionsPageBase::CreateCheckBox(const char *label,
+                                              long widthMax,
+                                              wxControl *last)
 {
    static size_t widthCheck = 0;
    if ( widthCheck == 0 ) {
@@ -984,7 +1037,8 @@ wxCheckBox *wxOptionsPage::CreateCheckBox(const char *label,
 // create a listbox and the buttons to work with it
 // NB: we consider that there is only one listbox (at most) per page, so
 //     the button ids are always the same
-wxListBox *wxOptionsPage::CreateListbox(const char *label, wxControl *last)
+wxListBox *wxOptionsPageBase::CreateListbox(const char *label,
+                                            wxControl *last)
 {
    // a box around all this stuff
    wxStaticBox *box = new wxStaticBox(this, -1, label);
@@ -1041,6 +1095,45 @@ wxListBox *wxOptionsPage::CreateListbox(const char *label, wxControl *last)
    listbox->SetConstraints(c);
 
    return listbox;
+}
+
+wxOptionsDialog *wxOptionsPageBase::GetDialog() const
+{
+   // find the frame we're in
+   wxWindow *win = GetParent();
+   while ( win && !win->IsKindOf(CLASSINFO(wxDialog)) ) {
+      win = win->GetParent();
+   }
+
+   wxASSERT( win != NULL );  // we must have a parent frame!
+
+   return (wxOptionsDialog *)win;
+}
+
+// ----------------------------------------------------------------------------
+// wxOptionsPage
+// ----------------------------------------------------------------------------
+
+wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
+                             const char *title,
+                             ProfileBase *profile,
+                             size_t nFirst,
+                             size_t nLast)
+             : wxOptionsPageBase(notebook)
+{
+   int image = notebook->GetPageCount();
+
+   notebook->AddPage(this, title, FALSE /* don't select */, image);
+
+   m_Profile = profile;
+
+   // see enum ConfigFields for "+1"
+   m_nFirst = nFirst + 1;
+   m_nLast = nLast + 1;
+
+   CreateControls();
+
+   SetAutoLayout(TRUE);
 }
 
 void wxOptionsPage::CreateControls()
@@ -1104,19 +1197,6 @@ void wxOptionsPage::CreateControls()
 
       m_aControls.Add(last);
    }
-}
-
-wxOptionsDialog *wxOptionsPage::GetDialog() const
-{
-   // find the frame we're in
-   wxWindow *win = GetParent();
-   while ( win && !win->IsKindOf(CLASSINFO(wxDialog)) ) {
-      win = win->GetParent();
-   }
-
-   wxASSERT( win != NULL );  // we must have a parent frame!
-
-   return (wxOptionsDialog *)win;
 }
 
 void wxOptionsPage::OnBrowse(wxCommandEvent& event)
@@ -1554,9 +1634,9 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent,
    int hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
        wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
 
-   // these are more or less arbitrary numbers
+   // FIXME these are more or less arbitrary numbers
    const int wDlg = 6*wBtn;
-   const int hDlg = 19*hBtn;
+   const int hDlg = 23*hBtn;
    wxWindow::SetSize(wDlg, hDlg);
 
    wxWindow *last;

@@ -8,9 +8,6 @@ $Id$
 
 - toggle header display menu entry
 
-- fix Adb auto-collection
-  + auto-collection needs testing, better lookup  -- doesn't work yet
-  
 - wxLayout mouse clicks don't work, for two reasons:
      1. event ids are not the ones expected, easy to fix
      2. for some reasons ProcessEvents() does not call any event handler...why?
@@ -61,10 +58,6 @@ KB: Vadim, could you check the following ADB-wxOptionsDlg please?
     shows the folder view, for example
   + session management
   + KEYBOARD BINDINGS AND TAB TRAVERSAL (!!IMPORTANT!!)
-
-- Expand in ComposeView is broken: should insert "Formatted_Name <EMail>" and
-  must not treat the whole To: as a single name but properly parse it. How can
-  we expand CC/BCC fields?
 
 - Python
   + fix Python problems -- what's wrong? No idea why Setup.py doesn't work.
@@ -127,5 +120,3 @@ expansions.
 
 - font mess (wxGTK)
 - constraints
-
-
