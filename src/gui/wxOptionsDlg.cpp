@@ -202,6 +202,7 @@ enum ConfigFields
    ConfigField_NewMailHelpAppWide,
    ConfigField_NewMailHelpFolder,
    ConfigField_NewMailConfigFilters,
+   ConfigField_NewMailTreatAsJunkFolder,
    ConfigField_NewMailCollect,
    ConfigField_NewMailCollectToFolder,
    ConfigField_NewMailLeaveOnServer,
@@ -1074,6 +1075,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
    { gettext_noop("Configure &filters..."),        Field_SubDlg |
                                                    Field_NotApp, -1 },
+   { gettext_noop("Treat as junk mail folder"),    Field_Bool, -1 },
    { gettext_noop("&Collect new mail from this folder"),
                                                    Field_Bool | Field_NotApp,
                                                    -1 },
@@ -1779,6 +1781,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // new mail handling help (for the app)
    CONFIG_NONE(), // new mail handling help (for the folder)
    CONFIG_NONE(), // configure filters
+   CONFIG_ENTRY(MP_TREAT_AS_JUNK_MAIL_FOLDER),
 
    CONFIG_NONE(), // collect mail (MF_FLAGS_INCOMING)
    CONFIG_ENTRY(MP_NEWMAIL_FOLDER),

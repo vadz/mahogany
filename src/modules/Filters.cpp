@@ -60,6 +60,7 @@ class MOption;
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_WHITE_LIST;
+extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 
 // ----------------------------------------------------------------------------
 // global variables
@@ -207,10 +208,8 @@ public:
       Expunge  = 4
    };
 
-   // implement the base class pure virtuals
+   // implement the base class pure virtual
    virtual int Apply(MailFolder *folder, UIdArray& msgs);
-
-   virtual bool ContainsSpamTest();
 
    static FilterRule * Create(const String &filterrule,
                               MInterface *minterface,
@@ -344,10 +343,6 @@ private:
         m_hasHdrLineFunc,
         m_hasHeaderFunc;
 
-   // Cache for ContainsSpamTest
-   bool m_spamTestValid;
-   bool m_spamTest;
-
    friend class FilterRuleApply;
 
    GCC_DTOR_WARN_OFF
@@ -472,10 +467,15 @@ private:
 
    void CreateProgressDialog();
    bool GetMessage();
+   void GetSenderSubject(String &from,String &subject);
+   bool TreatAsJunk();
+   String CreditsCommon();
+   String CreditsForDialog();
+   String CreditsForStatusBar();
+   String ResultsMessage();
    bool UpdateProgressDialog();
    void HeaderCacheHints();
    bool Evaluate();
-   bool ProgressResults();
    bool ProgressCopy();
    bool CopyToOneFolder();
    void CollectForDelete();
@@ -504,10 +504,6 @@ private:
    // Index of actual message in m_messageList
    size_t m_idx;
 
-   // the text for the progress dialog (verbose) and for the log (terse)
-   String m_textPD,
-          m_textLog;
-
    // Result of evaluating filter
    Value m_retval;
 };
@@ -525,31 +521,12 @@ public:
    virtual const Value Evaluate(void) const = 0;
    virtual String ToString(void) const
       { return Evaluate().ToString(); }
-   virtual const SyntaxNode *GetChild(size_t /* order */) const { return NULL; }
-   virtual const SyntaxNode *GetNext() const { return NULL; }
-   virtual bool IsFunctionCall() const { return false; }
 #ifdef DEBUG
    virtual String Debug(void) const = 0;
 #endif
 private:
    MOBJECT_NAME(SyntaxNode)
 };
-
-// TreeIterator-compatible wrapper around SyntaxNode
-class SyntaxNodeIteratorDriver
-{
-public:
-   typedef const SyntaxNode *Type;
-
-   const SyntaxNode *GetChild(const SyntaxNode *actual,size_t child)
-      { return actual->GetChild(child); }
-   const SyntaxNode *GetNext(const SyntaxNode *actual)
-      { return actual->GetNext(); }
-   bool IsNull(const SyntaxNode *actual) { return actual == NULL; }
-};
-
-// SyntaxNodeIterator walks all nodes deriving from SyntaxNode
-DECLARE_TREE_ITERATOR(SyntaxNodeIterator,SyntaxNodeIteratorDriver);
 
 class SequentialEval : public SyntaxNode
 {
@@ -574,9 +551,6 @@ public:
          // tail recursion, so no add'l stack frame
          return m_Next->Evaluate();
       }
-   virtual const SyntaxNode *GetChild(size_t order) const
-      { return order == 0 ? m_Rule : NULL; }
-   virtual const SyntaxNode *GetNext() const { return m_Next; }
 
 protected:
    const SyntaxNode *m_Rule,
@@ -681,8 +655,6 @@ public:
          return s;
       }
 #endif
-   virtual const SyntaxNode *GetChild(size_t order) const
-      { return order == 0 ? m_Sn : NULL; }
 private:
    const SyntaxNode *m_Sn;
    MOBJECT_NAME(Negation)
@@ -709,8 +681,6 @@ public:
          return s;
       }
 #endif
-   virtual const SyntaxNode *GetChild(size_t order) const
-      { return order == 0 ? m_Sn : NULL; }
 private:
    const SyntaxNode *m_Sn;
    MOBJECT_NAME(Negative)
@@ -815,10 +785,6 @@ public:
          return String("FunctionCall(") + m_fd->GetName() + String(")");
       }
 #endif
-   virtual const SyntaxNode *GetChild(size_t order) const
-      { return order < m_args->Count() ? m_args->GetArg(order) : NULL; }
-   String Name() const { return m_fd->GetName(); }
-   virtual bool IsFunctionCall() const { return true; }
 private:
    const FunctionDefinition *m_fd;
    ArgList *m_args;
@@ -863,16 +829,6 @@ public:
          return s;
       }
 #endif
-   virtual const SyntaxNode *GetChild(size_t order) const
-   {
-      switch(order)
-      {
-      case 0: return m_Cond;
-      case 1: return m_Left;
-      case 2: return m_Right;
-      }
-      return NULL;
-   }
 
 private:
    const SyntaxNode *m_Cond, *m_Left, *m_Right;
@@ -904,15 +860,6 @@ public:
          return s;
       }
 #endif
-   virtual const SyntaxNode *GetChild(size_t order) const
-   {
-      switch(order)
-      {
-      case 0: return m_Left;
-      case 1: return m_Right;
-      }
-      return NULL;
-   }
 protected:
    const SyntaxNode *m_Left, *m_Right;
    MOBJECT_NAME(Expression)
@@ -1076,16 +1023,6 @@ public:
          return s;
       }
 #endif
-   virtual const SyntaxNode *GetChild(size_t order) const
-   {
-      switch(order)
-      {
-      case 0: return m_Condition;
-      case 1: return m_IfBlock;
-      case 2: return m_ElseBlock;
-      }
-      return NULL;
-   }
 private:
    const SyntaxNode *m_Condition, *m_IfBlock, *m_ElseBlock;
    MOBJECT_NAME(IfElse)
@@ -3320,28 +3257,6 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
    return rc;
 }
 
-bool
-FilterRuleImpl::ContainsSpamTest()
-{
-   // Member m_Program is initialized in constructor and it is not
-   // modified afterwards. That means we can easily cache our results.
-   if( !m_spamTestValid )
-   {
-      m_spamTest = false;
-      for( SyntaxNodeIterator each(m_Program); !each.End(); ++each )
-      {
-         const SyntaxNode *node = each.Actual();
-         if( node->IsFunctionCall() )
-         {
-            const FunctionCall *call = (const FunctionCall *)node;
-            m_spamTest = m_spamTest || (call && call->Name() == "isspam");
-         }
-      }
-   }
-
-   return m_spamTest;
-}
-
 FilterRuleImpl::FilterRuleImpl(const String &filterrule,
                                MInterface *minterface,
                                MModule_Filters *mod)
@@ -3362,8 +3277,6 @@ FilterRuleImpl::FilterRuleImpl(const String &filterrule,
    m_MessageUId = UID_ILLEGAL;
    m_MailMessage = NULL;
    m_MailFolder = NULL;
-   m_spamTestValid = false;
-   m_spamTest = false;
 }
 
 FilterRuleImpl::~FilterRuleImpl()
@@ -3467,13 +3380,6 @@ FilterRuleApply::LoopEvaluate()
          continue;
       }
 
-      if ( !UpdateProgressDialog() )
-      {
-         m_parent->m_MailMessage->DecRef();
-
-         break;
-      }
-
       HeaderCacheHints();
 
       if ( !Evaluate() )
@@ -3481,10 +3387,14 @@ FilterRuleApply::LoopEvaluate()
          allOk = false;
       }
 
-      if ( !ProgressResults() )
+      if ( !UpdateProgressDialog() )
       {
+         m_parent->m_MailMessage->DecRef();
+
          break;
       }
+
+      m_parent->m_MailMessage->DecRef();
    }
 
    return allOk;
@@ -3588,76 +3498,6 @@ FilterRuleApply::GetMessage()
    return true;
 }
 
-bool
-FilterRuleApply::UpdateProgressDialog()
-{
-   // update the GUI
-
-   // TODO: make the format of the string inside the parentheses
-   //       configurable
-
-   String subject = MailFolder::DecodeHeader(
-      m_parent->m_MailMessage->Subject());
-   String from = MailFolder::DecodeHeader(m_parent->m_MailMessage->From());
-
-   // VZ: disabled this test as it is (almost) always true
-#if 0
-   if( m_parent->ContainsSpamTest() )
-   {
-      subject = from = _("(hidden in spam filter)");
-   }
-#endif
-
-   m_textLog.Printf(_("Filtering message %u/%u"),
-      m_idx + 1, m_msgs.GetCount());
-
-   // make a multiline label for the progress dialog and a more concise
-   // one for the status bar
-   m_textPD.clear();
-   if ( m_pd )
-   {
-      m_textPD << m_textLog << '\n'
-             << _("From: ") << from << '\n'
-             << _("Subject: ") << subject;
-   }
-
-   m_textLog << " (";
-
-   if ( !from.empty() )
-   {
-      m_textLog << _("from ") << from << ' ';
-   }
-
-   if ( !subject.empty() )
-   {
-      m_textLog << _("about '") << subject << '\'';
-   }
-   else
-   {
-      m_textLog << _("without subject");
-   }
-
-   m_textLog << ')';
-
-   // and use both of them
-   if ( m_pd )
-   {
-      if ( !m_pd->Update(m_idx, m_textPD) )
-      {
-         // cancelled by user
-         return false;
-      }
-   }
-   else // no progress dialog
-   {
-      // don't pass it as the first argument because the string might
-      // contain '%' characters!
-      wxLogStatus("%s", m_textLog.c_str());
-   }
-
-   return true;
-}
-
 void
 FilterRuleApply::HeaderCacheHints()
 {
@@ -3705,17 +3545,96 @@ FilterRuleApply::Evaluate()
       m_doExpunge = true;
    }
 
-   m_parent->m_MailMessage->DecRef();
-
    return m_retval.IsNumber();
 }
 
-bool
-FilterRuleApply::ProgressResults()
+void FilterRuleApply::GetSenderSubject(String &from,String &subject)
 {
-   // and show the result in the progress dialog
-   String textExtra = " - ";
+   subject = MailFolder::DecodeHeader(m_parent->m_MailMessage->Subject());
+   from = MailFolder::DecodeHeader(m_parent->m_MailMessage->From());
+}
 
+bool FilterRuleApply::TreatAsJunk()
+{
+   if ( m_parent->m_copiedTo.empty() )
+      return false;
+   RefCounter<MFolder> folder(MFolder::Get(m_parent->m_copiedTo));
+   CHECK( folder, false, _T("Copied to null folder?") );
+   RefCounter<Profile> profile(folder->GetProfile());
+   return READ_CONFIG_BOOL(profile,MP_TREAT_AS_JUNK_MAIL_FOLDER);
+}
+
+String FilterRuleApply::CreditsCommon()
+{
+   String common;
+   common.Printf(_("Filtering message %u/%u"),
+      m_idx + 1, m_msgs.GetCount());
+   return common;
+}
+
+String FilterRuleApply::CreditsForDialog()
+{
+   // TODO: make the format of the string inside the parentheses
+   //       configurable
+
+   String textPD;
+   
+   if( m_pd )
+   {
+      textPD = CreditsCommon();
+   
+      // make a multiline label for the progress dialog and a more concise
+      // one for the status bar
+      if( !TreatAsJunk() )
+      {
+         String from;
+         String subject;
+         GetSenderSubject(from,subject);
+
+         textPD << _T('\n') << _("From: ") << from
+            << _T('\n') << _("Subject: ") << subject;
+      }
+   }
+   
+   return textPD;
+}
+
+String FilterRuleApply::CreditsForStatusBar()
+{
+   String textLog = CreditsCommon();
+   
+   if( !TreatAsJunk() )
+   {
+      String from;
+      String subject;
+      GetSenderSubject(from,subject);
+   
+      textLog << " (";
+
+      if ( !from.empty() )
+      {
+         textLog << _("from ") << from << ' ';
+      }
+   
+      if ( !subject.empty() )
+      {
+         textLog << _("about '") << subject << '\'';
+      }
+      else
+      {
+         textLog << _("without subject");
+      }
+
+      textLog << ')';
+   }
+   
+   return textLog;
+}
+
+String FilterRuleApply::ResultsMessage()
+{
+   String textExtra;
+   
    if ( !m_retval.IsNumber() )
    {
       textExtra << _("error!");
@@ -3751,12 +3670,31 @@ FilterRuleApply::ProgressResults()
          textExtra << _("done");
       }
    }
+   
+   return textExtra;
+}
 
-   m_textLog += textExtra;
+bool
+FilterRuleApply::UpdateProgressDialog()
+{
+   // update the GUI
+
+   // the text for the progress dialog (verbose) and for the log (terse)
+   String textPD = CreditsForDialog();
+   String textLog = CreditsForStatusBar();
+   
+   // and show the result in the progress dialog
+   String textExtra = ResultsMessage();
+   
+   textLog += _T(" - ") + textExtra;
 
    if ( m_pd )
    {
-      if ( !m_pd->Update(m_idx, m_textPD + textExtra) )
+      if( !TreatAsJunk() )
+         textPD += _T(" - ");
+      textPD += textExtra;
+      
+      if ( !m_pd->Update(m_idx, textPD) )
       {
          // cancelled by user
          return false;
@@ -3767,12 +3705,12 @@ FilterRuleApply::ProgressResults()
       //
       // NB: textLog may contain '%'s itself, so don't let it be
       //     interpreted as a format string
-      wxLogGeneric(M_LOG_WINONLY, "%s", m_textLog.c_str());
+      wxLogGeneric(M_LOG_WINONLY, "%s", textLog.c_str());
    }
    else // no progress dialog
    {
       // see comment above
-      wxLogStatus("%s", m_textLog.c_str());
+      wxLogStatus("%s", textLog.c_str());
    }
 
    return true;

@@ -70,9 +70,6 @@ public:
    */
    virtual int Apply(MailFolder *folder, UIdArray& msgs) = 0;
 
-   // Hide subjects while filtering spam
-   virtual bool ContainsSpamTest() = 0;
-
    MOBJECT_NAME(FilterRule)
 };
 

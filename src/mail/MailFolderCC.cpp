@@ -671,23 +671,19 @@ public:
       {
          MGuiLocker locker;
 
-         String from = entry.GetFrom();
-         String subject = entry.GetSubject();
-         
-         if( FilterNewMailContext::IsInStack() )
-         {
-            RefCounter<FilterRule> filter(FilterNewMailContext::GetFilter());
-            if( filter->ContainsSpamTest() )
-            {
-               subject = from = _("(hidden in spam filter)");
-            }
-         }
-
          // construct the label
          String label;
-         label << m_msgProgress << '\n'
-               << _("From: ") << from << '\n'
-               << _("Subject: ") << subject;
+         label << m_msgProgress << _T('\n');
+         
+         // Don't show subject/sender if the mail is going to be filtered.
+         // There may be heaps of spam and whatever garbage. It's
+         // unnecessary anyway, because headers are downloaded faster
+         // than user can see them.
+         if( !FilterNewMailContext::IsInStack() )
+         {
+            label << _T('\n') << _("From: ") << entry.GetFrom() << _T('\n')
+               << _("Subject: ") << entry.GetSubject();
+         }
 
          if ( !m_progdlg->Update(m_nRetrieved, label) )
          {

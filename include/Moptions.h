@@ -421,6 +421,7 @@ extern const MOption MP_AWAY_REMEMBER;
 extern const MOption MP_AWAY_STATUS;
 extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 extern const MOption MP_WHITE_LIST;
+extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 
 // ----------------------------------------------------------------------------
 // the option names
@@ -1251,6 +1252,9 @@ extern const MOption MP_WHITE_LIST;
 
 /// name of addressbook to use in whitelist spam filter
 #define MP_WHITE_LIST_NAME "WhiteList"
+
+/// treat mail in this folder as junk mail
+#define MP_TREAT_AS_JUNK_MAIL_FOLDER_NAME "TreatAsJunkMailFolder"
 
 //@}
 
@@ -2271,6 +2275,9 @@ extern const MOption MP_WHITE_LIST;
 
 /// name of addressbook to use in whitelist spam filter
 #define MP_WHITE_LIST_DEFVAL "whitelist.adb"
+
+/// treat mail in this folder as junk mail
+#define MP_TREAT_AS_JUNK_MAIL_FOLDER_DEFVAL 0L
 
 //@}
 
