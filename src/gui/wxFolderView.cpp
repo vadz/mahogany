@@ -173,19 +173,25 @@ public:
    wxFolderListCtrl(wxWindow *parent, wxFolderView *fv);
    virtual ~wxFolderListCtrl();
 
-   // set the listing to use
+   /// set the listing to use
    void SetListing(HeaderInfoList *listing);
 
-   // get the number of items we show
+   /// called when the number of items in the listing changes
+   void UpdateListing(HeaderInfoList *headers);
+
+   /// do we have headers at all?
+   bool HasHeaders() const { return m_headers != NULL; }
+
+   /// get the number of items we show
    size_t GetHeadersCount() const { return m_headers ? m_headers->Count() : 0; }
 
-   // invlaidate the cached header(s)
+   /// invlaidate the cached header(s)
    void InvalidateCache();
 
-   // create the columns using order in m_columns and widths from profile
+   /// create the columns using order in m_columns and widths from profile
    void CreateColumns();
 
-   // return the string containing ':' separated columns widths
+   /// return the string containing ':' separated columns widths
    String GetWidths() const;
 
    /// select the item currently focused
@@ -312,6 +318,9 @@ protected:
    {
       m_selIsUnique = GetUniqueSelection() != -1;
    }
+
+   /// update the number of items in the list control
+   void UpdateItemCount() { SetItemCount(GetHeadersCount()); }
 
    /// do we have a folder opened?
    bool HasFolder() const { return m_FolderView->GetFolder() != NULL; }
@@ -1335,8 +1344,26 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 }
 
 // ----------------------------------------------------------------------------
-// header info
+// wxFolderListCtrl header info
 // ----------------------------------------------------------------------------
+
+void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
+{
+   if ( headers == m_headers )
+   {
+      CHECK_RET( headers, "wxFolderListCtrl::UpdateListing: NULL listing" );
+
+      // we don't need it
+      headers->DecRef();
+
+      // just show the new items
+      UpdateItemCount();
+   }
+   else // new listing
+   {
+      SetListing(headers);
+   }
+}
 
 void wxFolderListCtrl::InvalidateCache()
 {
@@ -1359,7 +1386,7 @@ void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
 
    m_headers = listing;
 
-   SetItemCount(GetHeadersCount());
+   UpdateItemCount();
 
    // we'll crash if we use it after the listing changed!
    ASSERT_MSG( !m_hiCached, "should be reset" );
@@ -2173,8 +2200,9 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
                                   m_settings.size,
                                   m_settings.columns);
       m_FolderCtrl->DeleteAllItems();
-      m_nDeleted = 0;
-      Update();
+
+      if ( m_ASMailFolder )
+         Update();
    }
 
    m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
@@ -2187,10 +2215,9 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 void
 wxFolderView::Update()
 {
-   if ( !m_ASMailFolder )
-      return;
+   CHECK_RET( m_MailFolder, "wxFolderView::Update(): no folder" );
 
-   m_FolderCtrl->SetListing(m_ASMailFolder->GetHeaders());
+   m_FolderCtrl->UpdateListing(m_MailFolder->GetHeaders());
 
    m_nDeleted = m_MailFolder->CountDeletedMessages();
 
@@ -3429,6 +3456,13 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    if ( event.GetFolder() != m_MailFolder )
       return;
 
+   // deal with the special case when we get the expunge notification before
+   // we had a chance to show the headers at all - in this case just don't
+   // process it as we don't need update (we need full refresh which will be
+   // done soon)
+   if ( !m_FolderCtrl->HasHeaders() )
+      return;
+
    // if we had exactly one message selected before, we want to keep the
    // selection after expunging
    bool hadUniqueSelection = m_FolderCtrl->GetUniqueSelection() != -1;
@@ -3440,15 +3474,18 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    size_t n,
           count = event.GetCount();
 
+   HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+
    wxArrayLong itemsDeleted;
    itemsDeleted.Alloc(count);
    for ( n = 0; n < count; n++ )
    {
-      long item = event.GetItem(n);
+      // we need to get the display position from the msgnos we're given
+      long item = hil->GetPosFromIdx(hil->GetIdxFromMsgno(event.GetItem(n)));
 
       // we can't use m_FolderCtrl->GetUIdFromIndex(item) here because the item
       // is not in the headers any more, so we use indices instead of UIDs even
-      // if it is less simple
+      // if it is less simple (we have to add n to adjust for index offset)
       if ( !previewDeleted && (item + (long)n == m_itemPreviewed) )
       {
          previewDeleted = true;
@@ -3508,6 +3545,10 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
          const HeaderInfo *hi = event.GetHeaderInfo();
          int status = hi->GetStatus();
 
+         // FIXME: we must decrement m_nDeleted if the message became
+         //        undeleted, but how to do it if we don't have the previous
+         //        message status here?
+
          if ( status & MailFolder::MSG_STAT_DELETED )
          {
             // remember that we have another deleted message
@@ -3516,7 +3557,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
 
          m_FolderCtrl->RefreshItem(index);
 
-         // TODO: should also do it only once, after all status changes
+         // TODO: should do it only once, after all status changes
          UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
       }
       //else: this can happen if we didn't have to update the control yet, just
