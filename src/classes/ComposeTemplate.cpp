@@ -887,6 +887,9 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
    }
    else
    {
+      // headers need to be decoded before showing them to the user
+      bool isHeader = true;
+
       String name = Name.Lower();
       switch ( GetOriginalHeader(name) )
       {
@@ -903,14 +906,11 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             break;
 
          case OriginalHeader_ReplyTo:
-            {
-               String dummy;
-               *value = m_msg->Address(dummy, MAT_REPLYTO);
-            }
+            m_msg->Address(*value, MAT_REPLYTO);
             break;
 
          case OriginalHeader_To:
-            (void)m_msg->GetHeaderLine("To", *value);
+            m_msg->Address(*value, MAT_TO);
             break;
 
          case OriginalHeader_PersonalName:
@@ -930,6 +930,8 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             break;
 
          default:
+            isHeader = false;
+
             // it isn't a variable which maps directly onto header, check the
             // others
             if ( name == "text" || name == "quote" )
@@ -988,6 +990,16 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                return FALSE;
             }
       }
+
+      if ( isHeader )
+      {
+         // we show the decoded headers to the user and then encode them back
+         // when sending the messages
+         //
+         // FIXME: of course, this means that we lose the additional encoding
+         //        info
+         *value = MailFolder::DecodeHeader(*value);
+      }
    }
 
    return TRUE;
@@ -1014,6 +1026,8 @@ String VarExpander::GetReplyPrefix() const
          // no from address? try to find anything else
          m_msg->Address(name, MAT_REPLYTO);
       }
+
+      name = MailFolder::DecodeHeader(name);
 
       // it's (quite) common to have quotes around the personal
       // part of the address, remove them if so
