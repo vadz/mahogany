@@ -22,8 +22,6 @@ clean:
 dep depend: 
 
 all:
-	$(MAKE) -C .. msgcat
-	$(MAKE) mergecat
 	$(MAKE) mo-files
 
 
@@ -33,6 +31,7 @@ install:
 	for i in $(FILES_MO); do $(INSTALL) -d $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES; $(INSTALL_DATA) $$i $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES/M.mo; done
 
 mergecat:
+	$(MAKE) -C .. msgcat
 	cp ../messages.po messages_po
 	msgmerge messages_po extra_po -o tmp.po && mv tmp.po message_po
 	for i in $(FILES_PO); do msgmerge $$i messages_po -o tmp.po && mv tmp.po $$i; done

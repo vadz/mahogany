@@ -227,26 +227,27 @@ wxFolderListCtrl::SetEntry(long index,
 void
 wxFolderView::SetFolder(MailFolder *mf)
 {
+   // this shows what's happening:
+   m_MessagePreview->Clear();
+   m_FolderCtrl->Clear();
+
    if(m_MailFolder)  // clean up old folder
    {
-      if(m_MailFolder) // close old mailfolder
+      m_timer->Stop();
+      delete m_timer;
+      m_MailFolder->RegisterView(this,false);
+      
+      // mark messages as seen
+      if(m_NumOfMessages > 0)
       {
-         m_timer->Stop();
-         delete m_timer;
-         m_MailFolder->RegisterView(this,false);
-         
-         // mark messages as seen
-         if(m_NumOfMessages > 0)
-         {
-            String sequence;
-            if(m_NumOfMessages > 1)
-               sequence.Printf("%d:%ld", 1, (long)m_NumOfMessages);
-            else
-               sequence = "1";
-            m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_UNREAD, false);
-         }
-         m_MailFolder->DecRef();
+         String sequence;
+         if(m_NumOfMessages > 1)
+            sequence.Printf("%d:%ld", 1, (long)m_NumOfMessages);
+         else
+            sequence = "1";
+         m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_UNREAD, false);
       }
+      m_MailFolder->DecRef();
       m_Profile->DecRef(); 
    }
    m_NumOfMessages = 0; // At the beginning there was nothing.
@@ -256,7 +257,11 @@ wxFolderView::SetFolder(MailFolder *mf)
    m_timer = NULL;
    m_Profile = ProfileBase::CreateProfile("FolderView",
                                           m_MailFolder ?
-                                          m_MailFolder->GetProfile() : NULL);
+                                          m_MailFolder->GetProfile() :
+                                          NULL);
+   m_MessagePreview->SetParentProfile(m_Profile);
+   m_MessagePreview->Clear(); // again, to reflect profile changes
+
    if(m_MailFolder)
    {
       m_MailFolder->IncRef();  // make sure it doesn't go away
@@ -296,7 +301,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_SplitterWindow = new wxPSplitterWindow("FolderSplit", m_Parent, -1,
                                             wxDefaultPosition, wxSize(x,y),
                                             wxSP_3D|wxSP_BORDER);
-   m_MessagePreview = new wxMessageView(this,m_SplitterWindow,"MessagePreview");
+   m_MessagePreview = new wxMessageView(this,m_SplitterWindow);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview, y/3);
    m_SplitterWindow->SetMinimumPaneSize(0);
@@ -388,6 +393,9 @@ wxFolderView::Update(void)
 void
 wxFolderView::OpenFolder(String const &profilename)
 {
+   // show loading of new folder by clearing everything
+   m_FolderCtrl->Clear();
+   m_MessagePreview->Clear();
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,profilename);
    SetFolder(mf);
 }

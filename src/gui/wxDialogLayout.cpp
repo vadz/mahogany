@@ -25,6 +25,7 @@
 #   include   "MApplication.h"
 #   include   "Profile.h"
 #   include   "guidef.h"
+#   include   "strutil.h"
 #endif
 
 #include   <wx/log.h>
@@ -40,6 +41,7 @@
 #include   <wx/listbox.h>
 #include   <wx/checkbox.h>
 #include   <wx/radiobox.h>
+#include   <wx/combobox.h>
 #include   <wx/statbox.h>
 
 #include   "gui/wxIconManager.h"
@@ -301,6 +303,62 @@ wxRadioBox *wxNotebookPageBase::CreateActionChoice(const char *label,
    radiobox->SetConstraints(c);
 
    return radiobox;
+}
+
+// create a combobox
+wxComboBox *wxNotebookPageBase::CreateComboBox(const char *label,
+                                               long widthMax,
+                                               wxControl *last,
+                                               size_t nRightMargin)
+{
+   // split the "label" into the real label and the choices:
+   kbStringList tlist;
+   char *buf = strutil_strdup(label);
+   strutil_tokenise(buf, ":", tlist);
+   delete [] buf;
+
+   size_t n = tlist.size(); // number of elements
+   wxString *choices = new wxString[n];  // refcounted, so having a local var should
+   // be fine
+   wxString *sptr;
+   size_t i = 0;
+   for(i = 0; i < n; i++)
+   {
+      sptr = tlist.pop_front();
+      choices[i] = *sptr;
+      delete sptr;
+   }
+   // the real choices start at 1, 0 is the label
+   
+   wxLayoutConstraints *c;
+
+   // for the label
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   wxStaticText *pLabel = new wxStaticText(this, -1, choices[0],
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_RIGHT);
+   pLabel->SetConstraints(c);
+
+   // for the combobox
+   c = new wxLayoutConstraints;
+
+   c->centreY.SameAs(pLabel, wxCentreY);
+   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN + nRightMargin);
+   c->height.AsIs();
+   wxComboBox *combobox = new wxComboBox(this, -1, "",
+                                         wxDefaultPosition, wxDefaultSize,
+                                         n-1,
+                                         choices+1,
+                                         wxCB_DROPDOWN|wxCB_READONLY);
+
+   combobox->SetConstraints(c);
+   delete [] choices;
+   return combobox;
 }
 
 // create a listbox and the buttons to work with it

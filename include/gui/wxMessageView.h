@@ -1,16 +1,16 @@
 /*-*- c++ -*-********************************************************
  * wxMessageView.h: a window displaying a mail message              *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$     *
+ * $Id$
  *******************************************************************/
 
 #ifndef WXMESSAGEVIEW_H
 #define WXMESSAGEVIEW_H
 
 #ifdef __GNUG__
-   #pragma interface "wxMessageView.h"
+#   pragma interface "wxMessageView.h"
 #endif
 
 #include "MessageView.h"
@@ -44,34 +44,30 @@ public:
    /** quasi-Constructor
        @param fv a folder view which handles some actions for us
        @param parent parent window
-       @param iname  name of windowclass
    */
    void Create(wxFolderView *fv,
-               wxWindow *parent = NULL,
-               const String &iname = wxString("MessageView"));
+               wxWindow *parent = NULL);
 
    /** Constructor
        @param fv a folder view which handles some actions for us
        @param parent parent window
-       @param iname  name of windowclass
    */
    wxMessageView(wxFolderView *fv,
-                 wxWindow *parent = NULL,
-                 const String &iname = String("MessageView")
-                 );
+                 wxWindow *parent = NULL);
 
    /** Constructor
        @param folder the mailfolder
        @param num    number of message (0 based)
-       @param iname  name of windowclass
        @param parent parent window
    */
    wxMessageView(MailFolder *folder,
                  long num,
                  wxFolderView *fv,
-                 wxWindow  *parent = NULL,
-                 const String &iname = String("MessageView")
-      );
+                 wxWindow  *parent = NULL);
+   
+   /// Tell it a new parent profile - in case folder changed.
+   void SetParentProfile(ProfileBase *profile);
+   
    /// Destructor
    ~wxMessageView();
 
@@ -113,6 +109,14 @@ public:
    /// for use by wxMessageViewFrame, to be removed after
    /// OnCommandEvent() is cleaned up:
    wxFolderView *GetFolderView(void) { return m_FolderView; }
+
+   /// Clear the window.
+   void Clear(void)
+      {
+         wxLayoutWindow::Clear(m_ProfileValues.font, m_ProfileValues.size,
+                               m_ProfileValues.style, m_ProfileValues.weight,
+                               0, m_ProfileValues.fg, m_ProfileValues.bg);
+      }
 private:
    /// the parent window
    wxWindow   *m_Parent;
@@ -126,8 +130,6 @@ private:
    wxFolderView *m_FolderView;
    /// the message part selected for MIME display
    int      mimeDisplayPart;
-   /// do we want to display all header lines?
-   bool m_showHeaders;
    /// this can hold an xface
    XFace   *xface;
    /// and the xpm for it
@@ -157,6 +159,36 @@ protected:
    /// exitcode != 0
    bool RunProcess(const String& command);
 
+   /// All values read from the profile
+   struct
+   {
+      /// Background and foreground colours.
+      String bg, fg;
+      /// font attributes
+      int font, size, style, weight;
+      /// show headers?
+      bool showHeaders;
+      /// show forwarded messages as text?
+      bool rfc822isText;
+      /// highlight URLs?
+      bool highlightURLs;
+      /// inline graphics?
+      bool inlineGFX;
+      /// URL viewer
+      String browser;
+      /// Is URL viewer of the netscape variety?
+      bool browserIsNS;
+      /// Autocollect email addresses?
+      int autocollect;
+      /// Autocollect only email addresses with complete name?
+      int autocollectNamed;
+      /// Name of the ADB book to use for autocollect.
+      String autoCollectBookName;
+      /// Where to find AFM files.
+      String afmpath;
+      /// Show XFaces?
+      bool showFaces;
+   } m_ProfileValues;
 private:
    /// array of process info for all external viewers we have launched
    ArrayProcessInfo m_processes;

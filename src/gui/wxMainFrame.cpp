@@ -189,9 +189,8 @@ wxMainFrame::OpenFolder(MFolder *folder)
       // we want save the full folder name in m_folderName 
       ASSERT( folder->GetFullName() == m_folderName );
       m_FolderView->OpenFolder(folder->GetFullName().c_str()+1);
-   }
-   else
-      m_FolderView->SetFolder(NULL);
+      folder->DecRef(); // done with it
+  }
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
    // only add the msg menu once   
    if ( !s_hasMsgMenu )

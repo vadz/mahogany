@@ -151,7 +151,11 @@ enum ConfigFields
    ConfigField_OpenOnClick,
    ConfigField_DateFormat,
    ConfigField_ShowNewMail,
-   ConfigField_OthersLast = ConfigField_ShowNewMail,
+#ifdef OS_UNIX
+   ConfigField_AFMPath,
+#endif
+   ConfigField_TestCombo,
+   ConfigField_OthersLast = ConfigField_TestCombo,
 
    // the end
    ConfigField_Max
@@ -363,6 +367,11 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Click folder to open"),        Field_Bool,    -1                     },
    { gettext_noop("&Format for the date"),         Field_Text,    -1                     },
    { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
+#ifdef OS_UNIX
+   { gettext_noop("&Path where to find AFM files"), Field_Text,    -1                     },
+#endif
+   { gettext_noop("Does this combobox work?:yes:no:I don't know:maybe:never"),
+     Field_Combo,    -1                     },
 };
 
 // @@@ ugly, ugly, ugly... config settings should be living in an array from
@@ -449,6 +458,10 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_OPEN_ON_CLICK),
    CONFIG_ENTRY(MP_DATE_FMT),
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
+#ifdef OS_UNIX
+   CONFIG_ENTRY(MP_AFMPATH),
+#endif
+   CONFIG_ENTRY(MP_TESTENTRY),
 };
 
 #undef CONFIG_ENTRY
@@ -523,6 +536,10 @@ void wxOptionsPage::CreateControls()
                                    last);
          break;
 
+      case Field_Combo:
+         last = CreateComboBox(_(ms_aFields[n].label), widthMax,
+                               last);
+         break;
       case Field_Number:
          // fall through -- for now they're the same as text
       case Field_Text:
@@ -729,6 +746,10 @@ bool wxOptionsPage::TransferDataToWindow()
          wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
          ((wxRadioBox *)control)->SetSelection(lValue);
          break;
+      case Field_Combo:
+         wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
+         ((wxComboBox *)control)->SetSelection(lValue);
+         break;
       case Field_List:
          wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
          wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
@@ -805,6 +826,12 @@ bool wxOptionsPage::TransferDataFromWindow()
          wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
 
          lValue = ((wxRadioBox *)control)->GetSelection();
+         break;
+      case Field_Combo:
+         wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+         wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
+
+         lValue = ((wxComboBox *)control)->GetSelection();
          break;
       case Field_List:
          wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );

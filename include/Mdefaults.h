@@ -365,6 +365,8 @@
 #define   MP_FLC_SIZECOL   "ColumnSize"
 //@}
 //@}
+/// an entry used for testing
+#define MP_TESTENTRY      "TestEntry"
 //@}
 
 /** @name default values of configuration entries */
@@ -410,7 +412,7 @@
 /// the name of the M directory
 #define   MP_USER_MDIR_D         ".M"
 /// the path where to find .afm files
-#define   MP_AFMPATH_D "/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
+#define   MP_AFMPATH_D M_BASEDIR "/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
 /// the path to the /etc directories (configuration files)
 #define   MP_ETCPATH_D "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc"
 /// the path to the m directory
@@ -674,6 +676,8 @@
 #  define   MP_DEFAULT_SAVE_WILDCARD_D   "*.*"
 #  define   MP_DEFAULT_LOAD_WILDCARD_D   "*.*"
 #endif
+/// an entry used for testing
+#define MP_TESTENTRY_D      0L
 //@}
 
 /** @name other defines used in M */

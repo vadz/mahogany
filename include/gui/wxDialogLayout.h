@@ -25,6 +25,7 @@ class wxCheckBox;
 class wxFileBrowseButton;
 class wxStaticText;
 class wxRadioBox;
+class wxComboBox;
 // -----------------------------------------------------------------------------
 // classes
 // -----------------------------------------------------------------------------
@@ -169,6 +170,12 @@ protected:
    wxStaticText *CreateMessage(const char *label,
                              wxControl *last);
 
+   // A ComboBox, the entries are taken from the label string which 
+   // is composed as: "LABEL:entry1:entry2:entry3:...."
+   wxComboBox *CreateComboBox(const char *label,
+                              long widthMax,
+                              wxControl *last,
+                              size_t nRightMargin = 0);
    // if ppButton != NULL, it's filled with the pointer to the ">>" browse
       // button created by this function
    wxTextCtrl *CreateFileEntry(const char *label, long widthMax,

@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * wxMessageView.cc : a wxWindows look at a message                 *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998, 1999 by Karsten Ballüder (Ballueder@usa.net)           *
  *                                                                  *
- * $Id$        *
+ * $Id$
  *******************************************************************/
 
 // ============================================================================
@@ -292,7 +292,7 @@ BEGIN_EVENT_TABLE(wxMessageView, wxLayoutWindow)
 END_EVENT_TABLE()
 
 void
-wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
+wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 {
    mailMessage = NULL;
    mimeDisplayPart = 0;
@@ -307,32 +307,61 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
 
    SetBackgroundColour( wxColour("White") );
 
-   m_Profile = ProfileBase::CreateProfile(iname, fv ? fv->GetProfile() : NULL);
+   
+   SetParentProfile(fv ? fv->GetProfile() : NULL);
 }
 
 
-wxMessageView::wxMessageView(wxFolderView *fv, wxWindow *parent, const String &iname)
+wxMessageView::wxMessageView(wxFolderView *fv, wxWindow *parent)
    : wxLayoutWindow(parent)
 {
    m_folder = NULL;
-   Create(fv,parent,iname);
+   m_Profile = NULL;
+   Create(fv,parent);
    Show(TRUE);
 }
 
 wxMessageView::wxMessageView(MailFolder *folder,
                              long num,
                              wxFolderView *fv,
-                             wxWindow *parent,
-                             const String &iname)
+                             wxWindow *parent)
    : wxLayoutWindow(parent)
 {
    m_folder = folder;
-   Create(fv,parent,iname);
+   Create(fv,parent);
    ShowMessage(folder,num);
    Show(TRUE);
 }
 
+/// Tell it a new parent profile - in case folder changed.
+void
+wxMessageView::SetParentProfile(ProfileBase *profile)
+{
+   if(m_Profile) m_Profile->DecRef();
+   m_Profile = ProfileBase::CreateProfile("MessageView", profile);
 
+   // We also use this to set all values to be read to speed things up:
+   m_ProfileValues.fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR);
+   m_ProfileValues.bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
+
+   m_ProfileValues.font = READ_CONFIG(m_Profile,MP_FTEXT_FONT);
+   m_ProfileValues.size = READ_CONFIG(m_Profile,MP_FTEXT_SIZE);
+   m_ProfileValues.style = READ_CONFIG(m_Profile,MP_FTEXT_STYLE);
+   m_ProfileValues.weight = READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT);
+
+   m_ProfileValues.showHeaders = (bool)READ_CONFIG(m_Profile,MP_SHOWHEADERS);
+   m_ProfileValues.rfc822isText = (bool)READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT);
+   m_ProfileValues.highlightURLs = (bool)READ_CONFIG(m_Profile,MP_HIGHLIGHT_URLS);
+   m_ProfileValues.inlineGFX = READ_CONFIG(m_Profile, MP_INLINE_GFX);
+   m_ProfileValues.browser = READ_CONFIG(m_Profile, MP_BROWSER);
+   m_ProfileValues.browserIsNS = (bool) READ_CONFIG(m_Profile, MP_BROWSER_ISNS);
+   m_ProfileValues.autocollect =  READ_CONFIG(profile, MP_AUTOCOLLECT);
+   m_ProfileValues.autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
+   m_ProfileValues.autoCollectBookName = READ_CONFIG(profile, MP_AUTOCOLLECT_ADB);
+   m_ProfileValues.afmpath = READ_APPCONFIG(MP_AFMPATH);
+   m_ProfileValues.showFaces = (bool) READ_CONFIG(profile, MP_SHOW_XFACES);
+}
+   
 void
 wxMessageView::Update(void)
 {
@@ -348,21 +377,9 @@ wxMessageView::Update(void)
 
    llist.SetEditable(true);
 
-   String
-      fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR),
-      bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
-
-   Clear(READ_CONFIG(m_Profile,MP_FTEXT_FONT),
-         READ_CONFIG(m_Profile,MP_FTEXT_SIZE),
-         READ_CONFIG(m_Profile,MP_FTEXT_STYLE),
-         READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT),
-         0,
-         fg.c_str(),bg.c_str());
-
-   m_showHeaders = READ_CONFIG(m_Profile,MP_SHOWHEADERS) != 0;
-
+   Clear();
    // if wanted, display all header lines
-   if(m_showHeaders)
+   if(m_ProfileValues.showHeaders)
    {
       String tmp = mailMessage->GetHeader();
       wxLayoutImportText(llist,tmp);
@@ -372,7 +389,7 @@ wxMessageView::Update(void)
 #ifdef HAVE_XFACES
    // need real XPM support in windows
 #ifndef OS_WIN
-   if(m_Profile->readEntry(MP_SHOW_XFACES, MP_SHOW_XFACES_D))
+   if(m_ProfileValues.showFaces)
    {
       mailMessage->GetHeaderLine("X-Face", tmp);
       if(tmp.length() > 2)   //\r\n
@@ -442,13 +459,13 @@ wxMessageView::Update(void)
       // insert text:
       if ( (t == Message::MSG_TYPETEXT) ||
            (t == Message::MSG_TYPEMESSAGE &&
-            READ_CONFIG(m_Profile, MP_RFC822_IS_TEXT)) )
+            m_ProfileValues.rfc822isText) )
       {
          cptr = mailMessage->GetPartContent(i);
          if(cptr == NULL)
             continue; // error ?
          llist.LineBreak();
-         if( READ_CONFIG(m_Profile, MP_HIGHLIGHT_URLS) )
+         if( m_ProfileValues.highlightURLs )
          {
             tmp = cptr;
             String url;
@@ -477,7 +494,7 @@ wxMessageView::Update(void)
       else // insert an icon
       {
          wxBitmap icn;
-         if(t == Message::MSG_TYPEIMAGE && READ_CONFIG(m_Profile, MP_INLINE_GFX))
+         if(t == Message::MSG_TYPEIMAGE && m_ProfileValues.inlineGFX)
          {
             char *filename = wxGetTempFileName("Mtemp");
             MimeSave(i,filename);
@@ -574,16 +591,13 @@ wxMessageView::~wxMessageView()
       delete info;
    }
 
-   if(mailMessage)
-      mailMessage->DecRef();
-   if(xface)
-      delete xface;
-   if(xfaceXpm)
-      wxIconManager::FreeImage(xfaceXpm);
+   if(mailMessage) mailMessage->DecRef();
+   if(xface) delete xface;
+   if(xfaceXpm) wxIconManager::FreeImage(xfaceXpm);
+   if(m_Profile) m_Profile->DecRef();
 
    wxDELETE(m_MimePopup);
 
-   m_Profile->DecRef();
 }
 
 // show information about an attachment
@@ -920,8 +934,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                break;
             }
             bool bOk;
-            String cmd = READ_CONFIG(m_Profile, MP_BROWSER);
-            if ( cmd.IsEmpty() )
+            if ( m_ProfileValues.browser.IsEmpty() )
             {
 #ifdef OS_WIN
                bOk = (int)ShellExecute(NULL, "open", ci->GetUrl(),
@@ -944,12 +957,9 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                      "AskUrlBrowser"
                      )
                   )
-               {
                   ShowOptionsDialog();
-                  cmd = READ_CONFIG(m_Profile, MP_BROWSER);
-               }
 
-               if ( cmd.IsEmpty() )
+               if ( m_ProfileValues.browser.IsEmpty() )
                {
                   wxLogError(_("No command configured to view URLs."));
                   bOk = FALSE;
@@ -962,7 +972,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                wxString command;
                bOk = false;
 #ifdef OS_UNIX
-               if(READ_CONFIG(m_Profile, MP_BROWSER_ISNS)) // try re-loading first
+               if(m_ProfileValues.browserIsNS) // try re-loading first
                {
                   wxString lockfile;
                   wxGetHomeDir(&lockfile);
@@ -973,7 +983,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                      // non-existing location      if(wxFileExists(lockfile))
                   {
                      command = "";
-                     command << cmd << " -remote openURL(" << ci->GetUrl() << ")";
+                     command << m_ProfileValues.browser << " -remote openURL(" << ci->GetUrl() << ")";
 
                      bOk = RunProcess(command);
                   }
@@ -982,7 +992,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                // either not netscape or ns isn't running or we have non-UNIX
                if(! bOk)
                {
-                  command = cmd;
+                  command = m_ProfileValues.browser;
                   command << ' ' << ci->GetUrl();
 
                   wxString errmsg;
@@ -1083,11 +1093,11 @@ wxMessageView::DoMenuCommand(int id)
       break;
    case WXMENU_MSG_TOGGLEHEADERS:
       {
-         if(m_showHeaders)
-            m_showHeaders = false;
+         if(m_ProfileValues.showHeaders)
+            m_ProfileValues.showHeaders = false;
          else
-            m_showHeaders = true;
-         m_Profile->writeEntry(MP_SHOWHEADERS, m_showHeaders);
+            m_ProfileValues.showHeaders = true;
+         m_Profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
          Update();
       }
       break;
@@ -1111,9 +1121,7 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
    m_seqno = num;
 
    /* FIXME for now it's here, should go somewhere else: */
-   ProfileBase *profile = folder->GetProfile();
-   int autocollect = READ_CONFIG(profile, MP_AUTOCOLLECT);
-   if ( autocollect )
+   if ( m_ProfileValues.autocollect )
    {
       String name;
       String email = mailMessage->Address(name, MAT_REPLYTO);
@@ -1130,7 +1138,7 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
          // if there is no name and we want to autocollect such addresses
          // (it's a global option), take the first part of the e-mail address
          // for the name
-         if ( !READ_APPCONFIG(MP_AUTOCOLLECT_NAMED) )
+         if ( ! m_ProfileValues.autocollectNamed )
          {
             // will return the whole string if '@' not found - ok
             name = email.BeforeFirst('@');
@@ -1149,16 +1157,14 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
 
          // and also explicitly load autocollect book - it might have not been
          // loaded by LoadAll(), yet we want to search in it too
-         String autoCollectBookName = READ_CONFIG(profile, MP_AUTOCOLLECT_ADB);
-
          // won't recreate it if it already exists
-         AdbBook *autocollectbook = manager->CreateBook(autoCollectBookName);
+         AdbBook *autocollectbook = manager->CreateBook(m_ProfileValues.autoCollectBookName);
 
          if ( !autocollectbook )
          {
             wxLogError(_("Failed to create the address book '%s' "
                          "for autocollected e-mail addresses."),
-                       autoCollectBookName.c_str());
+                       m_ProfileValues.autoCollectBookName.c_str());
 
             // TODO ask the user if he wants to disable autocollec?
          }
@@ -1183,7 +1189,7 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
             else // no such address, no such name - create a new entry
             {
                // the value is either 1 or 2, if 1 we have to ask
-               bool askUser = autocollect == 1;
+               bool askUser = m_ProfileValues.autocollect == 1;
                if (
                   !askUser ||
                   MDialog_YesNoDialog(_("Add new e-mail entry to database?"),
@@ -1203,7 +1209,7 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
                   {
                      wxLogError(_("Couldn't create an entry in the address "
                                   "book '%s' for autocollected address."),
-                                autoCollectBookName.c_str());
+                                m_ProfileValues.autoCollectBookName.c_str());
 
                      // TODO ask the user if he wants to disable autocollec?
 
@@ -1282,18 +1288,14 @@ wxMessageView::Print(void)
 #else
    bool found;
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-   //    set AFM path (recursive!)
+
+   //    set AFM path
    PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
-   pf.AddPaths(mApplication->GetGlobalDir(), true);
+   pf.AddPaths(m_ProfileValues.afmpath, false);
    pf.AddPaths(mApplication->GetLocalDir(), true);
    String afmpath = pf.FindDirFile("Cour.afm", &found);
-   if(! found) // be brutal
-   {
-      pf.AddPaths(READ_APPCONFIG(MP_AFMPATH), true);
-      afmpath = pf.FindDirFile("Cour.afm", &found);
-   }
    if(found)
-      wxSetAFMPath((char *) afmpath.c_str());
+      wxSetAFMPath(afmpath);
 #endif
    wxPrinter printer;
    wxLayoutPrintout printout(GetLayoutList(),_("M: Printout"));
@@ -1312,7 +1314,7 @@ wxMessageView::PrintPreview(void)
 #else
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
    //    set AFM path (recursive!)
-   PathFinder pf(READ_APPCONFIG(MP_AFMPATH), true);
+   PathFinder pf(m_ProfileValues.afmpath, true);
    pf.AddPaths(mApplication->GetGlobalDir(), true);
    pf.AddPaths(mApplication->GetLocalDir(), true);
    String afmpath = pf.FindDirFile("Cour.afm");

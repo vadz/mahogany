@@ -1323,18 +1323,13 @@ wxComposeView::Print(void)
 #else
    bool found;
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-   //    set AFM path (recursive!)
+   //    set AFM path
    PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
-   pf.AddPaths(mApplication->GetGlobalDir(), true);
+   pf.AddPaths(READ_CONFIG(m_Profile,MP_AFMPATH), false);
    pf.AddPaths(mApplication->GetLocalDir(), true);
    String afmpath = pf.FindDirFile("Cour.afm", &found);
-   if(! found) // be brutal
-   {
-      pf.AddPaths(READ_APPCONFIG(MP_AFMPATH), true);
-      afmpath = pf.FindDirFile("Cour.afm", &found);
-   }
    if(found)
-      wxSetAFMPath((char *) afmpath.c_str());
+      wxSetAFMPath(afmpath);
 #endif
    wxPrinter printer;
    wxLayoutPrintout printout(m_LayoutWindow->GetLayoutList(),_("M: Printout"));

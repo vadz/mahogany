@@ -14,11 +14,8 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
-wxFolderView:
-- clear MessageView, for this:
-- modify wxMessageView to only temporarily use Profile when needed, so 
-  it doesn't stay with the old folderview profile
-
+- ADB lookups take to long, delay in switching between messages, add a 
+  "message/collect address" menu and keyboard binding
 - suspected bug in LoadImageXpm in wxIconmanager leading to crashes
 - make wxFolderView::Update() a bit more intelligent. Clicking on
   unread mails changes the flags and therefore resets selection.
@@ -419,6 +416,11 @@ classes in the hierarchy.
  - Profile readEntry() needs interface extension to allow a boolean success
    value, remove hacks like 17 or "illegal value"!
  - POP3: loading all message contents(why?) and twice(why?)
+ wxFolderView:
+ - clear MessageView, for this:
+ - modify wxMessageView to only temporarily use Profile when needed, so 
+   it doesn't stay with the old folderview profile
+
 
 
  vi: set si tw=80:
