@@ -33,17 +33,15 @@
 #   include "MFrame.h"
 #   include "gui/wxMFrame.h"
 
+#   include "wx/file.h"
+#   include "wx/textfile.h"
+#   include "wx/fileconf.h"
 #   include "Profile.h"
 
 #   include "MApplication.h"
 #   include "gui/wxMApp.h"
 #endif
 
-#ifdef  USE_WXCONFIG
-#  include "wx/file.h"
-#  include "wx/textfile.h"
-#  include "wx/fileconf.h"
-#endif
 
 #include "Mdefaults.h"
 
@@ -160,7 +158,7 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
                       (strutil_isempty(rc) ? (String(szDefault == NULL
                                                     ? "null" : szDefault)
                                              + " (default)")
-                                           : rc.c_str());
+                                           : rc);
       DBGLOG(Str(dbgtmp));
 #  endif
 

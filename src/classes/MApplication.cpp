@@ -20,9 +20,15 @@
 // ----------------------------------------------------------------------------
 #include "Mpch.h"
 
+
 #ifndef   USE_PCH
 #  include   "Mcommon.h"
 #  include   "strutil.h"
+
+#   include  <wx/file.h>
+#   include  <wx/textfile.h>
+#   include  <wx/config.h>
+#   include  <wx/fileconf.h>
 #  include   "Profile.h"
 #  include   "MimeList.h"
 #  include   "MimeTypes.h"
@@ -43,16 +49,11 @@
 #include "gui/wxMainFrame.h"
 
 #include "MDialogs.h"
+#include  "gui/wxOptionsDlg.h"
 
-#include "gui/wxOptionsDlg.h"
 
 #include "Mversion.h"
 
-#ifdef USE_WXCONFIG
-#  include  <wx/file.h>
-#  include  <wx/textfile.h>
-#  include  <wx/fileconf.h>
-#endif
 
 #ifdef OS_UNIX
 #  include  <unistd.h>
@@ -102,7 +103,8 @@ MAppBase::VerifySettings(void)
       if( strutil_isempty(READ_APPCONFIG(MC_USERDIR)) )
       {
          wxString strHome;
-         wxGetHomeDir(&strHome);
+//FIXME         wxGetHomeDir(&strHome);
+         strHome = getenv("HOME");
          strHome << DIR_SEPARATOR << READ_APPCONFIG(MC_USER_MDIR);
          Profile::GetAppConfig()->WRITE_ENTRY(MC_USERDIR, strHome);
       }
@@ -138,7 +140,6 @@ MAppBase::OnStartup()
    // -------------------------
    m_cfManager = new ConfigFileManager;
 
-#  ifdef USE_WXCONFIG
       String strConfFile;
 #     ifdef OS_UNIX
          strConfFile = wxFileConfig::GetLocalFileName(M_APPLICATIONNAME);
@@ -162,14 +163,6 @@ MAppBase::OnStartup()
 #     endif // Unix
 
       m_profile = GLOBAL_NEW Profile(strConfFile);
-#  else
-      // FIXME @@@@ config file location?
-      m_profile = GLOBAL_NEW Profile(M_APPLICATIONNAME);
-
-      //  activate recording of configuration entries
-      if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
-         Profile::GetAppConfig()->recordDefaults(TRUE);
-#  endif
 
 #  ifndef OS_WIN
       // set the default path for configuration entries

@@ -18,7 +18,13 @@
 #   include   <string.h>
 #   include   "strutil.h"
 #   include   "Mdefaults.h"
+
+#   include  <wx/file.h>
+#   include  <wx/textfile.h>
+#   include  <wx/config.h>
+#   include  <wx/fileconf.h>
 #   include   "Profile.h"
+
 #   include   "MApplication.h"
 #endif
 

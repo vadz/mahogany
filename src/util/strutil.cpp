@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$               *
+ * $Id$
  *                                                                  *
  *******************************************************************/
 
@@ -15,6 +15,7 @@
 
 #ifndef   USE_PCH
 #   include "strutil.h"
+#   include "kbList.h"
 #endif
 
 void
