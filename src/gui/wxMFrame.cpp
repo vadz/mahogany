@@ -220,199 +220,280 @@ wxMFrame::OnMenuCommand(int id)
 
    switch(id)
    {
-   case WXMENU_FILE_CLOSE:
-      Close();
-      break;
+      case WXMENU_FILE_CLOSE:
+         Close();
+         break;
 
-   case WXMENU_FILE_COMPOSE_WITH_TEMPLATE:
-   case WXMENU_FILE_COMPOSE:
-      {
-         wxString templ;
-         if ( id == WXMENU_FILE_COMPOSE_WITH_TEMPLATE )
+      case WXMENU_FILE_COMPOSE_WITH_TEMPLATE:
+      case WXMENU_FILE_COMPOSE:
          {
-            templ = ChooseTemplateFor(MessageTemplate_NewMessage, this);
+            wxString templ;
+            if ( id == WXMENU_FILE_COMPOSE_WITH_TEMPLATE )
+            {
+               templ = ChooseTemplateFor(MessageTemplate_NewMessage, this);
+            }
+
+            wxComposeView *composeView = wxComposeView::CreateNewMessage(templ, this);
+            composeView->InitText();
+            composeView->Show();
          }
+         break;
 
-         wxComposeView *composeView = wxComposeView::CreateNewMessage(templ, this);
-         composeView->InitText();
-         composeView->Show();
-      }
-      break;
+      case WXMENU_FILE_SEND_OUTBOX:
+         mApplication->SendOutbox();
+         break;
 
-   case WXMENU_FILE_SEND_OUTBOX:
-      mApplication->SendOutbox();
-      break;
+      case WXMENU_FILE_POST:
+         {
+            wxComposeView *composeView = wxComposeView::CreateNewArticle(this);
+            composeView->InitText();
+            composeView->Show();
+         }
+         break;
 
-   case WXMENU_FILE_POST:
-      {
-         wxComposeView *composeView = wxComposeView::CreateNewArticle(this);
-         composeView->InitText();
-         composeView->Show();
-      }
-      break;
-
-   case WXMENU_FILE_COLLECT:
-      //MEventManager::Send( new MEventPingData );
-      mApplication->GetMailCollector()->Collect();
-      break;
+      case WXMENU_FILE_COLLECT:
+         //MEventManager::Send( new MEventPingData );
+         mApplication->GetMailCollector()->Collect();
+         break;
 
 #ifdef USE_PYTHON
-   case WXMENU_FILE_SCRIPT:
-   {
-      String
-         path,
-         filename;
-
-      path << mApplication->GetGlobalDir() << DIR_SEPARATOR << "scripts";
-      filename = MDialog_FileRequester(_("Please select a Python script to run."),
-                                       this,
-                                       path, filename,
-                                       "py", "*.py",
-                                       false,
-                                       NULL /* profile */);
-      if(! strutil_isempty(filename))
+      case WXMENU_FILE_SCRIPT:
       {
-         FILE *file = fopen(filename,"rb");
-         if(file)
+         String
+            path,
+            filename;
+
+         path << mApplication->GetGlobalDir() << DIR_SEPARATOR << "scripts";
+         filename = MDialog_FileRequester(_("Please select a Python script to run."),
+                                          this,
+                                          path, filename,
+                                          "py", "*.py",
+                                          false,
+                                          NULL /* profile */);
+         if(! strutil_isempty(filename))
          {
-            PyH_RunScript(file,filename);
-            fclose(file);
+            FILE *file = fopen(filename,"rb");
+            if(file)
+            {
+               PyH_RunScript(file,filename);
+               fclose(file);
+            }
          }
+         //else: cancelled by user
       }
-      //else: cancelled by user
-   }
-   break;
+      break;
 #endif   // USE_PYTHON
 
-   case WXMENU_FILE_EXIT:
-      wxYield(); // just to flush MEvent queues for safety
-      if ( CanClose() )
+      case WXMENU_FILE_EXIT:
+         wxYield(); // just to flush MEvent queues for safety
+         if ( CanClose() )
+         {
+            // this frame has been already asked whether it wants to exit, so
+            // don't ask it again
+            mApplication->AddToFramesOkToClose(this);
+
+            // exit the application if other frames don't object
+            mApplication->Exit();
+         }
+         break;
+
+      case WXMENU_FILE_IMPORT:
+         ShowImportDialog(this);
+         break;
+
+      case WXMENU_EDIT_ADB:
+         ShowAdbFrame(this);
+         break;
+      case WXMENU_EDIT_PREF:
+         ShowOptionsDialog(this);
+         break;
+      case WXMENU_EDIT_FILTERS:
       {
-         // this frame has been already asked whether it wants to exit, so
-         // don't ask it again
-         mApplication->AddToFramesOkToClose(this);
-
-         // exit the application if other frames don't object
-         mApplication->Exit();
+         (void) ConfigureFilterRules(mApplication->GetProfile(), this);
+         break;
       }
-      break;
+      case WXMENU_EDIT_MODULES:
+         ShowModulesDialog(this);
+         break;
+      case WXMENU_EDIT_TEMPLATES:
+         EditTemplates(this);
+         break;
 
-   case WXMENU_FILE_IMPORT:
-      ShowImportDialog(this);
-      break;
+      case WXMENU_EDIT_RESTORE_PREF:
+         (void)ShowRestoreDefaultsDialog(mApplication->GetProfile(), this);
+         break;
+      case WXMENU_EDIT_SAVE_PREF:
+         {
+            // FIXME any proper way to flush all profiles at once?
+            wxConfigBase *config = mApplication->GetProfile()->GetConfig();
+            bool ok = config != NULL;
+            if ( ok )
+               ok = config->Flush();
 
-   case WXMENU_EDIT_ADB:
-      ShowAdbFrame(this);
-      break;
-   case WXMENU_EDIT_PREF:
-      ShowOptionsDialog(this);
-      break;
-   case WXMENU_EDIT_FILTERS:
-   {
-      (void) ConfigureFilterRules(mApplication->GetProfile(), this);
-      break;
-   }
-   case WXMENU_EDIT_MODULES:
-      ShowModulesDialog(this);
-      break;
-   case WXMENU_EDIT_TEMPLATES:
-      EditTemplates(this);
-      break;
+            if ( ok )
+               wxLogStatus(this, _("Program preferences successfully saved."));
+            else
+               ERRORMESSAGE((_("Couldn't save preferences.")));
+         }
+         break;
 
-   case WXMENU_EDIT_RESTORE_PREF:
-      (void)ShowRestoreDefaultsDialog(mApplication->GetProfile(), this);
-      break;
-   case WXMENU_EDIT_SAVE_PREF:
-      {
-         // FIXME any proper way to flush all profiles at once?
-         wxConfigBase *config = mApplication->GetProfile()->GetConfig();
-         bool ok = config != NULL;
-         if ( ok )
-            ok = config->Flush();
+      case WXMENU_HELP_ABOUT:
+         MDialog_AboutDialog(this, false /* don't timeout */);
+         break;
 
-         if ( ok )
-            wxLogStatus(this, _("Program preferences successfully saved."));
-         else
-            ERRORMESSAGE((_("Couldn't save preferences.")));
-      }
-      break;
+      case WXMENU_HELP_TIP:
+         MDialog_ShowTip(this);
+         break;
 
-   case WXMENU_HELP_ABOUT:
-      MDialog_AboutDialog(this, false /* don't timeout */);
-      break;
+      case WXMENU_HELP_CONTEXT:
+         MDialog_Message(_("Help not implemented for current context, yet."),this,_("Sorry"));
+         break;
 
-   case WXMENU_HELP_TIP:
-      MDialog_ShowTip(this);
-      break;
+      case WXMENU_HELP_CONTENTS:
+         mApplication->Help(MH_CONTENTS,this);
+         break;
 
-   case WXMENU_HELP_CONTEXT:
-      MDialog_Message(_("Help not implemented for current context, yet."),this,_("Sorry"));
-      break;
+      case WXMENU_HELP_RELEASE_NOTES:
+         mApplication->Help(MH_RELEASE_NOTES,this);
+         break;
 
-   case WXMENU_HELP_CONTENTS:
-      mApplication->Help(MH_CONTENTS,this);
-      break;
+      case WXMENU_HELP_FAQ:
+         mApplication->Help(MH_FAQ,this);
+         break;
 
-   case WXMENU_HELP_RELEASE_NOTES:
-      mApplication->Help(MH_RELEASE_NOTES,this);
-      break;
+      case WXMENU_HELP_SEARCH:
+         mApplication->Help(MH_SEARCH,this);
+         break;
 
-   case WXMENU_HELP_FAQ:
-      mApplication->Help(MH_FAQ,this);
-      break;
-
-   case WXMENU_HELP_SEARCH:
-      mApplication->Help(MH_SEARCH,this);
-      break;
-
-   case WXMENU_HELP_COPYRIGHT:
-      mApplication->Help(MH_COPYRIGHT,this);
-      break;
+      case WXMENU_HELP_COPYRIGHT:
+         mApplication->Help(MH_COPYRIGHT,this);
+         break;
 
 #ifdef DEBUG
-   case WXMENU_HELP_WIZARD:
-      {
-         extern bool RunInstallWizard();
+      case WXMENU_HELP_WIZARD:
+         {
+            extern bool RunInstallWizard();
 
-         wxLogStatus("Running installation wizard...");
+            wxLogStatus("Running installation wizard...");
 
-         wxLogMessage("Wizard returned %s",
-                       RunInstallWizard() ? "true" : "false");
-      }
-      break;
-#endif
+            wxLogMessage("Wizard returned %s",
+                          RunInstallWizard() ? "true" : "false");
+         }
+         break;
+#endif // DEBUG
 
-      // printing:
-   case WXMENU_FILE_PRINT_SETUP:
-      OnPrintSetup();
-      break;
-//   case WXMENU_FILE_PAGE_SETUP:
-//      OnPageSetup();
-//      break;
+         // printing:
+      case WXMENU_FILE_PRINT_SETUP:
+         OnPrintSetup();
+         break;
+   //   case WXMENU_FILE_PAGE_SETUP:
+   //      OnPageSetup();
+   //      break;
 #ifdef USE_PS_PRINTING
-   case WXMENU_FILE_PRINT_SETUP_PS:
-      OnPrintSetup();
-      break;
+      case WXMENU_FILE_PRINT_SETUP_PS:
+         OnPrintSetup();
+         break;
 #endif
-//   case WXMENU_FILE_PAGE_SETUP_PS:
-//      OnPageSetup();
-//      break;
-   case WXMENU_FILE_NET_ON:
-      mApplication->GoOnline();
-      break;
-   case WXMENU_FILE_NET_OFF:
-      if(mApplication->CheckOutbox())
-      {
-         if ( MDialog_YesNoDialog(
-         _("You have outgoing messages queued.\n"
-           "Do you want to send them before going offline?"),
-         this,
-         MDIALOG_YESNOTITLE,
-         TRUE /* yes default */, "GoOfflineSendFirst") )
-            mApplication->SendOutbox();
-      }
-      mApplication->GoOffline();
-      break;
+   //   case WXMENU_FILE_PAGE_SETUP_PS:
+   //      OnPageSetup();
+   //      break;
+      case WXMENU_FILE_NET_ON:
+         mApplication->GoOnline();
+         break;
+      case WXMENU_FILE_NET_OFF:
+         if(mApplication->CheckOutbox())
+         {
+            if ( MDialog_YesNoDialog(
+            _("You have outgoing messages queued.\n"
+              "Do you want to send them before going offline?"),
+            this,
+            MDIALOG_YESNOTITLE,
+            TRUE /* yes default */, "GoOfflineSendFirst") )
+               mApplication->SendOutbox();
+         }
+         mApplication->GoOffline();
+         break;
+
+         // create a new identity and edit it
+      case WXMENU_FILE_IDENT_ADD:
+         {
+            wxString ident;
+            if ( MInputBox(&ident,
+                           _("Mahogany: Create new identity"),
+                           _("Enter the identity name:"),
+                           this,
+                           "NewIdentity") )
+            {
+               ShowIdentityDialog(ident, this);
+            }
+         }
+         break;
+
+         // change the current identity
+      case WXMENU_FILE_IDENT_CHANGE:
+         {
+            wxArrayString identities = Profile::GetAllIdentities();
+            if ( identities.IsEmpty() )
+            {
+               wxLogError(_("There are no existing identities to choose from.\n"
+                            "Please create an identity first."));
+            }
+            else
+            {
+               int rc = MDialog_GetSelection
+                        (
+                         _("Select the new identity"),
+                         MDIALOG_YESNOTITLE,
+                         identities,
+                         this
+                        );
+               if ( rc != -1 )
+               {
+                  wxString ident = identities[(size_t)rc];
+                  mApplication->GetProfile()->writeEntry(MP_CURRENT_IDENTITY,
+                                                         ident);
+
+                  // TODO: should update everything (all options might have
+                  //       changed)
+               }
+               //else: cancelled
+            }
+         }
+         break;
+
+         // edit the current identity parameters
+      case WXMENU_FILE_IDENT_EDIT:
+         {
+            wxString ident = READ_APPCONFIG(MP_CURRENT_IDENTITY);
+            if ( !ident )
+            {
+               // if there is no current identity, choose any among the
+               // existing ones
+               wxArrayString identities = Profile::GetAllIdentities();
+               if ( identities.IsEmpty() )
+               {
+                  wxLogError(_("There are no existing identities to edit.\n"
+                               "Please create an identity first."));
+               }
+               else
+               {
+                  int rc = MDialog_GetSelection
+                           (
+                            _("Which identity would you like to edit?"),
+                            MDIALOG_YESNOTITLE,
+                            identities,
+                            this
+                           );
+                  if ( rc != -1 )
+                     ident = identities[(size_t)rc];
+                  //else: cancelled
+               }
+            }
+
+            if ( !!ident )
+               ShowIdentityDialog(ident, this);
+         }
+         break;
    }
 }
 

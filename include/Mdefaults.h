@@ -316,8 +316,10 @@
 //@{
 /// The Profile Type.
 #define   MP_PROFILE_TYPE      "ProfileType"
+/// the current user identity
+#define   MP_CURRENT_IDENTITY  "Identity"
 /// the user's full name
-#define   MP_PERSONALNAME         "PersonalName"
+#define   MP_PERSONALNAME     "PersonalName"
 /// the user's qualification
 #define   MP_USERLEVEL        "Userlevel"
 /// the username/login
@@ -811,6 +813,8 @@
 //@}
 /// the user's full name
 #define   MP_PERSONALNAME_D      M_EMPTYSTRING
+/// the current user identity
+#define   MP_CURRENT_IDENTITY_D M_EMPTYSTRING
 /// the user's qualification (see M_USERLEVEL_XXX)
 #define   MP_USERLEVEL_D        M_USERLEVEL_NOVICE
 /// the username/login

@@ -2540,6 +2540,29 @@ bool ShowLicenseDialog(wxWindow *parent)
 }
 
 // ----------------------------------------------------------------------------
+// MDialog_GetSelection
+// ----------------------------------------------------------------------------
+
+int MDialog_GetSelection(const wxString& message,
+                         const wxString& caption,
+                         const wxArrayString& choices,
+                         wxWindow *parent)
+{
+   size_t count = choices.GetCount();
+   wxString *aChoices = new wxString[count];
+   for ( size_t n = 0; n < count; n++ )
+   {
+      aChoices[n] = choices[n];
+   }
+
+   int rc = wxGetSingleChoiceIndex(message, caption, count, aChoices, parent);
+
+   delete [] aChoices;
+
+   return rc;
+}
+
+// ----------------------------------------------------------------------------
 // MDialog_GetSelections() stuff
 // ----------------------------------------------------------------------------
 

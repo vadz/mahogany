@@ -317,6 +317,19 @@ extern "C"
 #endif
 
 /**
+  Propose the user to choose one of the strings in the choices array, returns
+  the index of the string chosen or -1 if the dialog was cancelled.
+
+  @param choices is the array of strings to choose from
+  @param parent is the parent window
+  @return the index of the selected item or -1
+*/
+int MDialog_GetSelection(const wxString& message,
+                         const wxString& caption,
+                         const wxArrayString& choices,
+                         wxWindow *parent = NULL);
+
+/**
   Propose the user to choose one or several of the strings in the choices
   array, returns the number of strings chosen.
 

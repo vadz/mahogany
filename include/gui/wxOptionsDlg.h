@@ -51,14 +51,23 @@ extern void ShowOptionsDialog(wxFrame *parent = NULL,
                               OptionsPage page = OptionsPage_Default);
 
 /// creates and shows the edit identity dialog
-extern void ShowIdentityDialog(wxFrame *parent = NULL);
+extern void ShowIdentityDialog(const wxString& ident, wxFrame *parent = NULL);
 
 /// creates and shows the dialog allowing to restore default settings
-extern bool ShowRestoreDefaultsDialog(Profile *profile, wxFrame *parent);
+extern bool ShowRestoreDefaultsDialog(Profile *profile, wxFrame *parent = NULL);
 
-/// creates and shows the options dialog with the given options page
-extern void ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
+/// creates and shows the options dialog with several custom options page
+extern void ShowCustomOptionsDialog(size_t nPages,
+                                    const wxOptionsPageDesc *pageDesc,
                                     Profile *profile = NULL,
                                     wxFrame *parent = NULL);
+
+/// creates and shows the options dialog with the given (single) options page
+inline void ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
+                                    Profile *profile = NULL,
+                                    wxFrame *parent = NULL)
+{
+   ShowCustomOptionsDialog(1, &pageDesc, profile, parent);
+}
 
 #endif  //_WXOPTIONSDLG_H

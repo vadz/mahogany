@@ -184,6 +184,9 @@ public:
    /// Discard changes from suspended mode.
    virtual void Discard(void) = 0;
 
+   /// return the array containing the names of all existing identities
+   static wxArrayString GetAllIdentities();
+
    /// Set the identity to be used for this profile
    virtual void SetIdentity(const String & idName) = 0;
    /// Unset the identity set by SetIdentity
@@ -275,6 +278,7 @@ private:
 //       // path automatically restored here
 //    }
 // ----------------------------------------------------------------------------
+
 class ProfilePathChanger
 {
 public:
@@ -294,7 +298,9 @@ private:
 // ----------------------------------------------------------------------------
 // two handy functions for savings/restoring arrays of strings to/from config
 // ----------------------------------------------------------------------------
+
 void SaveArray(Profile *conf, const wxArrayString& astr, const String & key);
 void RestoreArray(Profile * conf, wxArrayString& astr, const String & key);
+
 //@}
 #endif // PROFILE_H

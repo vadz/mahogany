@@ -377,6 +377,27 @@ ProfileImpl::GetIdentity(void) const
    return m_Identity ? m_Identity->GetName() : String("");
 }
 
+wxArrayString Profile::GetAllIdentities()
+{
+   wxArrayString identities;
+
+   wxString oldpath = ms_GlobalConfig->GetPath();
+   ms_GlobalConfig->SetPath(M_IDENTITY_CONFIG_SECTION);
+
+   long index;
+   wxString name;
+   bool cont = ms_GlobalConfig->GetFirstGroup(name, index);
+   while ( cont )
+   {
+      identities.Add(name);
+
+      cont = ms_GlobalConfig->GetNextGroup(name, index);
+   }
+
+   ms_GlobalConfig->SetPath(oldpath);
+
+   return identities;
+}
 
 // ----------------------------------------------------------------------------
 // Profile
@@ -506,8 +527,9 @@ Profile::readEntry(const String & key,
 ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent,
                  const String & root)
 {
-   m_ProfileName = ( Parent && Parent->GetName().Length()) ?
-      ( Parent->GetName() + '/' ) : root ;
+   m_ProfileName = ( Parent && Parent->GetName().Length())
+                     ? ( Parent->GetName() + '/' )
+                     : root;
    if(iName.Length())
       m_ProfileName << '/' << iName;
    m_IsEmpty = false;
@@ -515,7 +537,7 @@ ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent,
    m_Identity = NULL;
 
    String id = readEntry(MP_PROFILE_IDENTITY, MP_PROFILE_IDENTITY_D);
-   if(id[0])
+   if ( id.length() )
       SetIdentity(id);
 }
 
@@ -966,3 +988,4 @@ bool ProfileImpl::IsAncestor(Profile *profile) const
 
    return true;
 }
+

@@ -76,10 +76,12 @@
 // ----------------------------------------------------------------------------
 
 // first and last are shifted by -1, i.e. the range of fields for the page Foo
-// is from ConfigField_FooFirst + 1 to ConfigField_FooLast inclusive.
+// is from ConfigField_FooFirst + 1 to ConfigField_FooLast inclusive - this is
+// more convenient as the number of entries in a page is then just Last - First
+// without any +1.
 //
-// only the wxOptionsPage ctor knows about it, so if this is (for some reason)
-// changed, it would be the only place to change.
+// only the wxOptionsPage ctor and ms_aIdentityPages depend on this, so if this
+// is (for some reason) changed, it would be the only places to change.
 //
 // if you modify this enum, you must modify the data below too (search for
 // DONT_FORGET_TO_MODIFY to find it)
@@ -98,6 +100,7 @@ enum ConfigFields
    ConfigField_VCardHelp,
    ConfigField_UseVCard,
    ConfigField_VCardFile,
+   ConfigField_UserLevelHelp,
    ConfigField_UserLevel,
    ConfigField_IdentLast = ConfigField_UserLevel,
 
@@ -299,7 +302,7 @@ class wxOptionsNotebook : public wxNotebookWithImages
 {
 public:
    // icon names
-   static const char *s_aszImages[];
+   static const char *ms_aszImages[];
 
    wxOptionsNotebook(wxWindow *parent);
 
@@ -312,14 +315,19 @@ class wxCustomOptionsNotebook : public wxNotebookWithImages
 {
 public:
    wxCustomOptionsNotebook(wxWindow *parent,
-                           const wxOptionsPageDesc& pageDesc,
+                           size_t nPages,
+                           const wxOptionsPageDesc *pageDesc,
+                           const wxString& configForNotebook,
                            Profile *profile);
 
-private:
-   const char **GetImagesArray(const char *iconName);
+   virtual ~wxCustomOptionsNotebook() { delete [] m_aImages; }
 
-   // the image name and NULL
-   const char *m_aImages[2];
+private:
+   // this method creates and fills m_aImages and returns it
+   const char **GetImagesArray(size_t nPages, const wxOptionsPageDesc *pageDesc);
+
+   // the images names and NULL
+   const char **m_aImages;
 };
 
 // -----------------------------------------------------------------------------
@@ -329,7 +337,7 @@ private:
 class wxOptionsDialog : public wxNotebookDialog
 {
 public:
-   wxOptionsDialog(wxFrame *parent);
+   wxOptionsDialog(wxFrame *parent, const wxString& configKey = "OptionsDlg");
 
    ~wxOptionsDialog();
 
@@ -370,30 +378,117 @@ private:
 class wxCustomOptionsDialog : public wxOptionsDialog
 {
 public:
-   wxCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
+   // minimal ctor, use SetPagesDesc() and SetProfile() later
+   wxCustomOptionsDialog(wxFrame *parent,
+                         const wxString& configForDialog = "CustomOptions",
+                         const wxString& configForNotebook = "CustomNotebook")
+      : wxOptionsDialog(parent, configForDialog),
+        m_configForNotebook(configForNotebook)
+   {
+      SetProfile(NULL);
+      SetPagesDesc(0, NULL);
+   }
+
+   // full ctor specifying everything we need
+   wxCustomOptionsDialog(size_t nPages,
+                         const wxOptionsPageDesc *pageDesc,
                          Profile *profile,
-                         wxFrame *parent)
-      : wxOptionsDialog(parent), m_pageDesc(pageDesc)
-      {
-         m_profile = profile;
-         SafeIncRef(m_profile);
-      }
-   ~wxCustomOptionsDialog()
-      {
-         SafeDecRef(m_profile);
-      }
+                         wxFrame *parent,
+                         const wxString& configForDialog = "CustomOptions",
+                         const wxString& configForNotebook = "CustomNotebook")
+      : wxOptionsDialog(parent, configForDialog),
+        m_configForNotebook(configForNotebook)
+   {
+      m_profile = profile;
+      SafeIncRef(m_profile);
+
+      SetPagesDesc(nPages, pageDesc);
+   }
+
+   // delayed initializetion: use these methods for an object constructed with
+   // the first ctor
+   void SetPagesDesc(size_t nPages, const wxOptionsPageDesc *pageDesc)
+   {
+      m_nPages = nPages;
+      m_pageDesc = pageDesc;
+   }
+
+   void SetProfile(Profile *profile)
+   {
+      m_profile = profile;
+      SafeIncRef(m_profile);
+   }
+
+   // dtor
+   virtual ~wxCustomOptionsDialog()
+   {
+      SafeDecRef(m_profile);
+   }
+
+   // overloaded base class virtual
    virtual void CreateNotebook(wxPanel *panel)
    {
-      m_notebook = new wxCustomOptionsNotebook(this, m_pageDesc, m_profile);
+      m_notebook = new wxCustomOptionsNotebook(this,
+                                               m_nPages,
+                                               m_pageDesc,
+                                               m_configForNotebook,
+                                               m_profile);
    }
 
 private:
-   // the description of the page we show
-   const wxOptionsPageDesc& m_pageDesc;
+   // the number and descriptions of the pages we show
+   size_t m_nPages;
+   const wxOptionsPageDesc *m_pageDesc;
+
    // the profile
    Profile *m_profile;
+
+   // the config key where notebook will remember its last page
+   wxString m_configForNotebook;
 };
 
+// an identity edit dialog: works with settings in an identity profile, same as
+// wxOptionsDialog otherwise
+class wxIdentityOptionsDialog : public wxCustomOptionsDialog
+{
+public:
+   wxIdentityOptionsDialog(const wxString& identity, wxFrame *parent)
+      : wxCustomOptionsDialog(parent, "IdentDlg", "IdentNotebook"),
+        m_identity(identity)
+   {
+      // use the identity profile
+      Profile *profile = Profile::CreateIdentity(identity);
+      SetProfile(profile);
+      profile->DecRef();   // SetProfile() will hold on it
+
+      // set the pages descriptions: we use the standard pages of the options
+      // dialog, but not all of them
+      CreatePagesDesc();
+      SetPagesDesc(m_nPages, m_aPages);
+   }
+
+   virtual wxControl *CreateControlsAbove(wxPanel *panel);
+
+   virtual ~wxIdentityOptionsDialog()
+   {
+      delete [] m_aPages;
+   }
+
+private:
+   // create our pages desc: do it dynamically because they may depend on the
+   // user level (which can change) in the future
+   void CreatePagesDesc();
+
+   // the identity which we edit
+   wxString m_identity;
+
+   // the array of descriptions of our pages
+   size_t m_nPages;
+   wxOptionsPageDesc *m_aPages;
+};
+
+// another dialog (not for options this one) which allows to restore the
+// previously changed settings
 class wxRestoreDefaultsDialog : public wxProfileSettingsEditDialog
 {
 public:
@@ -474,6 +569,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
       "book entry in the vCard format."), Field_Message, -1 },
    { gettext_noop("Attach a v&Card to outgoing messages"), Field_Bool,    -1,                        },
    { gettext_noop("&vCard file"),                  Field_File, ConfigField_UseVCard,                        },
+   { gettext_noop("Some more rarely used and less obvious program\n"
+                  "features are only accessible in the so-called\n"
+                  "`advanced' user mode which may be set here."),
+                                                   Field_Message,   -1,                        },
    { gettext_noop("User &level:novice:advanced"),  Field_Combo,   -1,                        },
 
    // network
@@ -515,13 +614,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Command to &deactivate network"), Field_Text, ConfigField_DialUpSupport},
 #endif // platform
    { gettext_noop("The following timeout value is used for TCP connections to\n"
-                  "remote mail or news servers."), Field_Message, -1 },
-   { gettext_noop("&Open timeout (in seconds)"),  Field_Number,    -1,                        },
+                  "remote mail or news servers."), Field_Message | Field_Advanced, -1 },
+   { gettext_noop("&Open timeout (in seconds)"),  Field_Number | Field_Advanced,    -1,                        },
 #ifdef USE_TCP_TIMEOUTS
-   { gettext_noop("&Read timeout"),                Field_Number,    -1,                        },
-   { gettext_noop("&Write timeout"),               Field_Number,    -1,                        },
-   { gettext_noop("&Close timeout"),               Field_Number,    -1,                        },
-   { gettext_noop("&rsh timeout"),                 Field_Number,    -1,                        },
+   { gettext_noop("&Read timeout"),                Field_Number | Field_Advanced,    -1,                        },
+   { gettext_noop("&Write timeout"),               Field_Number | Field_Advanced,    -1,                        },
+   { gettext_noop("&Close timeout"),               Field_Number | Field_Advanced,    -1,                        },
+   { gettext_noop("&rsh timeout"),                 Field_Number | Field_Advanced,    -1,                        },
 #endif // USE_TCP_TIMEOUTS
 
    // compose
@@ -711,6 +810,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_USEVCARD),
    CONFIG_ENTRY(MP_VCARD),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_USERLEVEL),
 
    // network
@@ -921,9 +1021,18 @@ void wxOptionsPage::CreateControls()
 {
    size_t n;
 
+   // soem fields are only shown in 'advanced' mode, so check if we're in it
+   bool isAdvanced = READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED;
+
    // first determine the longest label
    wxArrayString aLabels;
    for ( n = m_nFirst; n < m_nLast; n++ ) {
+      if ( !isAdvanced && (GetFieldFlags(n) & Field_Advanced) )
+      {
+         // skip this one
+         continue;
+      }
+
       // do it only for text control labels
       switch ( GetFieldType(n) ) {
          case Field_Passwd:
@@ -952,6 +1061,16 @@ void wxOptionsPage::CreateControls()
    int styleText = wxALIGN_RIGHT;
    wxControl *last = NULL; // last control created
    for ( n = m_nFirst; n < m_nLast; n++ ) {
+      FieldFlags flags = GetFieldFlags(n);
+      if ( !isAdvanced && (flags & Field_Advanced) )
+      {
+         // skip this one
+         m_aControls.Add(NULL);
+         m_aDirtyFlags.Add(false);
+
+         continue;
+      }
+
       switch ( GetFieldType(n) ) {
          case Field_File:
             last = CreateFileEntry(_(m_aFields[n].label), widthMax, last);
@@ -1035,7 +1154,6 @@ void wxOptionsPage::CreateControls()
 
       wxCHECK_RET( last, "control creation failed" );
 
-      FieldFlags flags = GetFieldFlags(n);
       if ( flags & Field_Vital )
          m_aVitalControls.Add(last);
       if ( flags & Field_Restart )
@@ -1200,6 +1318,9 @@ bool wxOptionsPage::TransferDataToWindow()
       }
 
       wxControl *control = GetControl(n);
+      if ( !control )
+         continue;
+
       switch ( GetFieldType(n) ) {
          case Field_Text:
          case Field_Number:
@@ -1296,6 +1417,9 @@ bool wxOptionsPage::TransferDataFromWindow()
          continue;
 
       wxControl *control = GetControl(n);
+      if ( !control )
+         continue;
+
       switch ( GetFieldType(n) )
       {
          case Field_Passwd:
@@ -1376,7 +1500,7 @@ bool wxOptionsPage::TransferDataFromWindow()
       }
    }
 
-   // TODO life is easy if we don't check for errors...
+   // TODO life is easy as we don't check for errors...
    return TRUE;
 }
 
@@ -1883,8 +2007,8 @@ void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
 // wxOptionsDialog
 // ----------------------------------------------------------------------------
 
-wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
-               : wxNotebookDialog(parent, _("Program options"), "OptionsDlg")
+wxOptionsDialog::wxOptionsDialog(wxFrame *parent, const wxString& configKey)
+               : wxNotebookDialog(parent, _("Program options"), configKey)
 {
 }
 
@@ -1966,42 +2090,57 @@ wxOptionsDialog::~wxOptionsDialog()
 wxCustomOptionsNotebook::wxCustomOptionsNotebook
                          (
                           wxWindow *parent,
-                          const wxOptionsPageDesc& pageDesc,
+                          size_t nPages,
+                          const wxOptionsPageDesc *pageDesc,
+                          const wxString& configForNotebook,
                           Profile *profile
                          )
                        : wxNotebookWithImages(
-                                              "CustomNotebook",
+                                              configForNotebook,
                                               parent,
-                                              GetImagesArray(pageDesc.image)
+                                              GetImagesArray(nPages, pageDesc)
                                              )
 {
-   if(profile)
+   // use the global profile by default
+   if ( profile )
       profile->IncRef();
    else
       profile = Profile::CreateProfile("");
 
 
-   // the page ctor will add it to the notebook
-   wxOptionsPageDynamic *page = new wxOptionsPageDynamic(
-                                                         this,
-                                                         pageDesc.title,
-                                                         profile,
-                                                         pageDesc.aFields,
-                                                         pageDesc.aDefaults,
-                                                         pageDesc.nFields,
-                                                         pageDesc.helpId,
-                                                         0  // image index
-                                                        );
-   page->Layout();
+   for ( size_t n = 0; n < nPages; n++ )
+   {
+      // the page ctor will add it to the notebook
+      const wxOptionsPageDesc& desc = pageDesc[n];
+      wxOptionsPageDynamic *page = new wxOptionsPageDynamic(
+                                                            this,
+                                                            desc.title,
+                                                            profile,
+                                                            desc.aFields,
+                                                            desc.aDefaults,
+                                                            desc.nFields,
+                                                            desc.helpId,
+                                                            n  // image index
+                                                           );
+      page->Layout();
+   }
 
    profile->DecRef();
 }
 
 // return the array which should be passed to wxNotebookWithImages ctor
-const char **wxCustomOptionsNotebook::GetImagesArray(const char *iconName)
+const char **
+wxCustomOptionsNotebook::GetImagesArray(size_t nPages,
+                                        const wxOptionsPageDesc *pageDesc)
 {
-   m_aImages[0] = iconName;
-   m_aImages[1] = NULL;
+   m_aImages = new const char *[nPages + 1];
+
+   for ( size_t n = 0; n < nPages; n++ )
+   {
+      m_aImages[n] = pageDesc[n].image;
+   }
+
+   m_aImages[nPages] = NULL;
 
    return m_aImages;
 }
@@ -2011,7 +2150,7 @@ const char **wxCustomOptionsNotebook::GetImagesArray(const char *iconName)
 // ----------------------------------------------------------------------------
 
 // should be in sync with the enum OptionsPage in wxOptionsDlg.h!
-const char *wxOptionsNotebook::s_aszImages[] =
+const char *wxOptionsNotebook::ms_aszImages[] =
 {
    "ident",
    "network",
@@ -2029,10 +2168,10 @@ const char *wxOptionsNotebook::s_aszImages[] =
 
 // create the control and add pages too
 wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
-                 : wxNotebookWithImages("OptionsNotebook", parent, s_aszImages)
+                 : wxNotebookWithImages("OptionsNotebook", parent, ms_aszImages)
 {
    // don't forget to update both the array above and the enum!
-   wxASSERT( WXSIZEOF(s_aszImages) == OptionsPage_Max + 1);
+   wxASSERT( WXSIZEOF(ms_aszImages) == OptionsPage_Max + 1);
 
    Profile *profile = GetProfile();
 
@@ -2050,6 +2189,67 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    new wxOptionsPageOthers(this, profile);
 
    profile->DecRef();
+}
+
+// ----------------------------------------------------------------------------
+// wxIdentityOptionsDialog
+// ----------------------------------------------------------------------------
+
+void wxIdentityOptionsDialog::CreatePagesDesc()
+{
+   m_nPages = 2;
+   m_aPages = new wxOptionsPageDesc[2];
+
+   // identity page
+   m_aPages[0] = wxOptionsPageDesc
+   (
+      _("Identity"),
+      wxOptionsNotebook::ms_aszImages[OptionsPage_Ident],
+      MH_OPAGE_IDENT,
+      wxOptionsPageStandard::ms_aFields + ConfigField_IdentFirst + 1,
+      wxOptionsPageStandard::ms_aConfigDefaults + ConfigField_IdentFirst + 1,
+      ConfigField_IdentLast - ConfigField_IdentFirst
+   );
+
+   // network page
+   m_aPages[1] = wxOptionsPageDesc
+   (
+      _("Network"),
+      wxOptionsNotebook::ms_aszImages[OptionsPage_Network],
+      MH_OPAGE_NETWORK,
+      wxOptionsPageStandard::ms_aFields + ConfigField_NetworkFirst + 1,
+      wxOptionsPageStandard::ms_aConfigDefaults + ConfigField_NetworkFirst + 1,
+      ConfigField_NetworkLast - ConfigField_NetworkFirst
+   );
+};
+
+wxControl *wxIdentityOptionsDialog::CreateControlsAbove(wxPanel *panel)
+{
+   wxLayoutConstraints *c;
+
+   c = new wxLayoutConstraints;
+   c->left.SameAs(panel, wxLeft, LAYOUT_X_MARGIN);
+   c->top.SameAs(panel, wxTop, LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   wxStaticText *pLabel = new wxStaticText(panel, -1, _("Folder Name: "),
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_RIGHT);
+   pLabel->SetConstraints(c);
+
+   wxTextCtrl *pText = new wxTextCtrl(panel, -1,
+                                      m_identity,
+                                      wxDefaultPosition, wxDefaultSize,
+                                      wxTE_READONLY);
+
+   c = new wxLayoutConstraints;
+   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
+   c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
+   c->top.SameAs(panel, wxTop, LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   pText->SetConstraints(c);
+
+   return pText;
 }
 
 // ----------------------------------------------------------------------------
@@ -2165,17 +2365,23 @@ bool ShowRestoreDefaultsDialog(Profile *profile, wxFrame *parent)
    return dlg.HasChanges();
 }
 
-void ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
+void ShowCustomOptionsDialog(size_t nPages,
+                             const wxOptionsPageDesc *pageDesc,
                              Profile *profile,
                              wxFrame *parent)
 {
-   wxCustomOptionsDialog dlg(pageDesc, profile, parent);
+   wxCustomOptionsDialog dlg(nPages, pageDesc, profile, parent);
    dlg.CreateAllControls();
    dlg.Layout();
 
    (void)dlg.ShowModal();
 }
 
-void ShowIdentityDialog(wxFrame *parent)
+void ShowIdentityDialog(const wxString& identity, wxFrame *parent)
 {
+   wxIdentityOptionsDialog dlg(identity, parent);
+   dlg.CreateAllControls();
+   dlg.Layout();
+
+   (void)dlg.ShowModal();
 }

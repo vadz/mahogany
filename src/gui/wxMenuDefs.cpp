@@ -224,13 +224,18 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tShift-Ctrl-S"), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network\tCtrl-U"),
-     gettext_noop("Activate dial-up networking")        , FALSE },
-   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down Network\tCtrl-D"),
-     gettext_noop("Shutdown dial-up networking")        , FALSE },
+   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network\tCtrl-U"), gettext_noop("Activate dial-up networking")        , FALSE },
+   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down Network\tCtrl-D"), gettext_noop("Shutdown dial-up networking")        , FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_IMPORT,   gettext_noop("&Import..."),  gettext_noop("Import settings from another e-mail program")        , FALSE },
+   { WXMENU_SUBMENU,       gettext_noop("&Identity"), "", FALSE },
+      { WXMENU_FILE_IDENT_ADD, gettext_noop("&Add..."),  gettext_noop("Create a new identity")        , FALSE },
+      { WXMENU_FILE_IDENT_CHANGE, gettext_noop("&Change..."), gettext_noop("Change the current identity")        , FALSE },
+      { WXMENU_FILE_IDENT_EDIT, gettext_noop("&Edit..."),  gettext_noop("Edit the current identity parameters")        , FALSE },
+   { WXMENU_SUBMENU,       "", "", FALSE },
+
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_FILE_IMPORT,   gettext_noop("I&mport..."),  gettext_noop("Import settings from another e-mail program")        , FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window\tCtrl-W"),     gettext_noop("Close this window")        , FALSE },

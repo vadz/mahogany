@@ -100,6 +100,7 @@ public:
    {
       Field_Vital   = 0x10000000, // vital setting, test after change
       Field_Restart = 0x20000000, // will only take effect during next run
+      Field_Advanced= 0x40000000, // don't show this field in novice mode
       Field_Flags   = 0xf0000000  // bit mask selecting the flags
    };
 
@@ -270,13 +271,33 @@ public:
 // around separately
 struct wxOptionsPageDesc
 {
+   wxOptionsPageDesc()
+   {
+      nFields = 0;
+   }
+
+   wxOptionsPageDesc(const char *title_,
+                     const char *image_,
+                     int helpId_,
+                     const wxOptionsPage::FieldInfo *aFields_,
+                     ConfigValuesArray aDefaults_,
+                     size_t nFields_)
+      : title(title_),
+        image(image_),
+        helpId(helpId_),
+        aFields(aFields_),
+        aDefaults(aDefaults_),
+        nFields(nFields_)
+   {
+   }
+
    String title;        // the page title in the notebook
    String image;        // image
 
    int helpId;
 
    // the fields description
-   wxOptionsPage::FieldInfo *aFields;
+   const wxOptionsPage::FieldInfo *aFields;
    ConfigValuesArray aDefaults;
    size_t nFields;
 };
