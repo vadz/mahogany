@@ -3219,7 +3219,11 @@ MsgnoArray *MailFolderCC::DoSearch(struct search_program *pgm,
    MailFolderCC *self = (MailFolderCC *)this; // const_cast
    self->m_SearchMessagesFound = new UIdArray;
 
-   mail_search_full(m_MailStream, NIL, pgm, ccSearchFlags);
+   // never prefetch the results as we often want to just count them
+   //
+   // prefetching messages may also result in unwanted reentrancies so it's
+   // safer to avoid it
+   mail_search_full(m_MailStream, NIL, pgm, ccSearchFlags | SE_NOPREFETCH);
 
    CHECK( m_SearchMessagesFound, NULL, "who deleted m_SearchMessagesFound?" );
 
@@ -3232,7 +3236,7 @@ MsgnoArray *MailFolderCC::DoSearch(struct search_program *pgm,
 unsigned long
 MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
 {
-   MsgnoArray *searchResults = DoSearch(pgm, SE_FREE | SE_NOPREFETCH);
+   MsgnoArray *searchResults = DoSearch(pgm, SE_FREE);
 
    unsigned long count;
    if ( searchResults )
