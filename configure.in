@@ -186,6 +186,7 @@ dnl Here we disable support for exceptions if the compiler is gcc and
 dnl new enough to support it.
 dnl
 AC_PATH_PROG(GREP, grep)
+CXXFLAGS_PYCODE="$CXXFLAGS"
 if test "$GCC" = "yes"
 then
 	dnl first, for gcc set our own debug flags
@@ -195,7 +196,7 @@ then
 	dnl now check for exception disabling
 	AC_MSG_CHECKING(for gcc with 2.8 style options)
 	CFLAGS="$CFLAGS -DCC_GCC -Wall "
-	CXXFLAGS="$CXXFLAGS -DCC_GCC -Wall -Werror"
+	CXXFLAGS="$CXXFLAGS -DCC_GCC -Wall"
 	newgcc=
 	dnl is it gcc 2.8 or newer?
 	$CXX -v 2>&1 | $GREP 2.8 >/dev/null
@@ -213,7 +214,10 @@ then
 	else
 		AC_MSG_RESULT(no)
 	fi
+	CXXFLAGS_PYCODE="$CXXFLAGS -DCC_GCC -Wall"
+	CXXFLAGS="$CXXFLAGS -Werror"
 fi
+AC_SUBST(CXXFLAGS_PYCODE)
 
 dnl --------------------------------------------------------------------------
 dnl add our extra directories to the search path

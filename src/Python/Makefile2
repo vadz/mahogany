@@ -28,6 +28,8 @@ include .depend
 
 CPPFLAGS:=$(CPPFLAGS) -DSWIG_GLOBAL
 
+CXXFLAGS:=$(CXXFLAGS_PYCODE)
+
 ifdef USE_SWIG
 swiglib.cpp: swiglib.i
 	$(SWIG) $(SWIGFLAGS_LIBSWIG) -o $(ODIR)/$@ $<

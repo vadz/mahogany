@@ -1416,7 +1416,7 @@ String
 MailFolderCC::DebugDump() const
 {
    String str = MObjectRC::DebugDump();
-   str << "mailbox '" << m_MailboxPath << "' of type " << m_folderType;
+   str << "mailbox '" << m_MailboxPath << "' of type " << (int) m_folderType;
 
    return str;
 }
