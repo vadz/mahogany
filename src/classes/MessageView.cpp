@@ -2443,12 +2443,14 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
          lockfile += ".netscape/lock";
          struct stat statbuf;
 
-         if(lstat(lockfile.c_str(), &statbuf) == 0)
-         // cannot use wxFileExists, because it's a link pointing to a
-         // non-existing location      if(wxFileExists(lockfile))
+         // cannot use wxFileExists here, because it's a link pointing to a
+         // non-existing location!
+         if ( lstat(lockfile.c_str(), &statbuf) == 0 )
          {
+            // we should quote the URL because otherwise Netscape barfs if it
+            // contains a comma
             command << m_ProfileValues.browser
-                    << " -remote openURL(" << url;
+                    << " -remote openURL(\"" << url << '"';
             if ( inNewWindow )
             {
                command << ",new-window)";
