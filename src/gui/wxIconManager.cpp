@@ -55,7 +55,7 @@ wxIconManager::wxIconManager()
 
    AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
    AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
-   unknownIcon = new wxIcon(unknown_xpm);
+   unknownIcon = new wxIcon(unknown_xpm,-1,-1);
 }
 
 
@@ -145,8 +145,7 @@ wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
    IconData id;
 
    id.iconName = iconName;
-
-   id.iconPtr = GLOBAL_NEW wxIcon(data);
+   id.iconPtr = GLOBAL_NEW wxIcon(data,-1,-1);
    iconList->push_front(&id);
 }
 

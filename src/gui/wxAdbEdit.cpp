@@ -6,7 +6,11 @@
  * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.9  1998/07/11 19:13:24  KB
+ * wxMessageView works
+ *
  * Revision 1.8  1998/06/22 22:38:28  VZ
+ *
  * wxAdbEditFrame now uses wxNotebook (and works)
  *
  * Revision 1.7  1998/06/05 16:56:16  VZ
@@ -143,7 +147,7 @@ public:
    wxTextCtrl *LayoutTextWithLabel(const char *szLabel, wxTextCtrl *top);
 
    // put a row of buttons in the bottom right corner
-   void wxAdbEditPanel::LayoutButtons(uint nButtons, wxButton *aButtons[]);
+   void LayoutButtons(uint nButtons, wxButton *aButtons[]);
 
    DECLARE_EVENT_TABLE()
 };

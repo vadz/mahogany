@@ -6,6 +6,9 @@
  * $Id$               *
  *                                                                  *
  * $Log$
+ * Revision 1.9  1998/07/11 19:13:32  KB
+ * wxMessageView works
+ *
  * Revision 1.8  1998/07/08 19:17:50  KB
  * Several fixes for mail display.
  *
@@ -309,12 +312,10 @@ strutil_matchurl(const char *string)
    const char * cptr = string;
 
 
-   // this is wrong (strncmp >= 0), broken )why?) and inefficient!
-#warning FIXME
    for(i = 0; urlnames[i]; i++)
       if(strcmp(string,urlnames[i]) >= 0) // found
       {
-         while(*cptr && ! isspace(cptr))
+         while(*cptr && ! isspace(*cptr))
          {
             url += *cptr;
             cptr++;
@@ -322,4 +323,30 @@ strutil_matchurl(const char *string)
          return url;
       }
    return String("");
+}
+
+String
+strutil_findurl(wxString &str, wxString &url)
+{
+   int i;
+   String before = "";
+   const char *cptr = str.c_str();;
+
+   url = "";
+   while(*cptr)
+   {
+      for(i = 0; urlnames[i]; i++)
+      {
+         if(strncmp(cptr,urlnames[i],strlen(urlnames[i])) == 0)
+         {
+            while(*cptr && !isspace(*cptr) && *cptr != '>')
+               url += *cptr++;
+            str = cptr;
+            return before;
+         }
+      }
+      before += *cptr++;
+   }
+   str = cptr;
+   return before;
 }

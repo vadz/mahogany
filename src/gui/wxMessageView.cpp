@@ -44,7 +44,6 @@
 #include "XFace.h"
 
 #include "gui/wxFontManager.h"
-#undef   T      //FIXME: bugfix for STL list
 #include "gui/wxIconManager.h"
 #include "gui/wxFText.h"
 #include "gui/wxMessageView.h"
@@ -54,7 +53,7 @@
 #include   <gui/wxlparser.h>
 
 #include <ctype.h>  // for isspace
- 
+
 // @@@@ for testing only
 #ifndef USE_PCH
    extern "C"
@@ -63,7 +62,15 @@
    }
 #  include <MessageCC.h>
 #endif //USE_PCH
-   
+
+// for clickable objects
+struct ClickableInfo
+{
+   enum { CI_ICON, CI_URL } type;
+   int id;
+   String url;
+};
+
 #if !USE_WXWINDOWS2
   static void popup_callback(wxMenu& menu, wxCommandEvent& ev);
 #endif // wxWin 1/2
@@ -207,6 +214,7 @@ wxMessageView::Create(const String &iname, wxWindow *parent)
   m_LWindow = new wxLayoutWindow(this);
   m_LWindow->SetEventId(WXMENU_LAYOUT_CLICK);
   m_LWindow->SetFocus();
+  m_LWindow->SetBackgroundColour( wxColour("White") ); 
   initialised = true;
 }
 
@@ -246,6 +254,8 @@ wxMessageView::Update(void)
    String tmp,from,url;
    bool   lastObjectWasIcon = false; // a flag
 
+   ClickableInfo *ci;
+   
    wxLayoutList &llist = m_LWindow->GetLayoutList();
    wxLayoutObjectBase *obj = NULL;
 
@@ -276,7 +286,7 @@ wxMessageView::Update(void)
        xface->CreateFromXFace(tmp.c_str());
        if(xface->CreateXpm(&xfaceXpm))
        {
-          llist.Insert(new wxLayoutObjectIcon(new wxIcon(xfaceXpm)));
+          llist.Insert(new wxLayoutObjectIcon(new wxIcon(xfaceXpm,-1,-1)));
           llist.LineBreak();
        }
      }
@@ -322,57 +332,59 @@ wxMessageView::Update(void)
             folder->GetProfile()->readEntry(MP_HIGHLIGHT_URLS,
                                             MP_HIGHLIGHT_URLS_D))
          {
-            // check for urls and highlight them:
-            tmp = "";
-            while(*cptr)
+            tmp = cptr;
+            String url;
+            String before;
+
+            do
             {
-               url = strutil_matchurl(cptr);
+               before =  strutil_findurl(tmp,url);
+               wxLayoutImportText(llist,before);
                if(!strutil_isempty(url))
                {
-                  if(tmp.length())
-                     wxLayoutImportText(llist,tmp);
-
+                  obj->SetUserData(ci); // gets freed by list
+                  ci = new ClickableInfo;
+                  ci->type = ClickableInfo::CI_URL;
+                  ci->url = url;
+                  obj = new wxLayoutObjectText(url);
+                  obj->SetUserData(ci);
                   llist.SetFontColour("BLUE");
-                  llist.Insert(url);
+                  llist.Insert(obj);
                   llist.SetFontColour("BLACK");
-                  cptr += url.length();
-                  tmp = "";
                }
-               else
-                  tmp += *cptr++;
-            }
-            if(tmp.length())
-               llist.Insert(tmp);
+            }while(! strutil_isempty(tmp));
             lastObjectWasIcon = false;
          }
-         else // insert an icon
+      }
+      else // insert an icon
+      {
+         wxIcon *icn;
+         if(t == TYPEIMAGE
+            && folder->GetProfile()
+            && folder->GetProfile()->readEntry(MP_INLINE_GFX,MP_INLINE_GFX_D))
          {
-            wxIcon *icn;
-            if(t == TYPEIMAGE
-               && folder->GetProfile()
-               && folder->GetProfile()->readEntry(MP_INLINE_GFX,MP_INLINE_GFX_D))
-            {
-               char *filename = wxGetTempFileName("Mtemp");
-               MimeSave(i,filename);
-               icn = new wxIcon();
-               if(icn->LoadFile(filename,0))
-                  obj = new wxLayoutObjectIcon(icn);
-               else
-               {
-                  delete icn;
-                  icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
-               }
-               wxRemoveFile(filename);
-            }
+            char *filename = wxGetTempFileName("Mtemp");
+            MimeSave(i,filename);
+            icn = new wxIcon();
+            if(icn->LoadFile(filename,0))
+               obj = new wxLayoutObjectIcon(icn);
             else
+            {
+               delete icn;
                icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
-            obj = new wxLayoutObjectIcon(icn);
-            int *num = new int;
-            *num = i;
-            obj->SetUserData(num); // gets freed by list
-            llist.Insert(obj);
-            lastObjectWasIcon = true;
+            }
+            wxRemoveFile(filename);
          }
+         else
+            icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
+         obj = new wxLayoutObjectIcon(icn);
+
+         ci = new ClickableInfo;
+         ci->type = ClickableInfo::CI_ICON;
+         ci->id = i;
+         obj->SetUserData(ci); // gets freed by list
+         llist.Insert(obj);
+         lastObjectWasIcon = true;
       }
    }
 
@@ -424,114 +436,6 @@ wxMessageView::~wxMessageView()
       GLOBAL_DELETE [] xfaceXpm;
    if(m_MimePopup)
       delete m_MimePopup;
-}
-
-
-void
-wxMessageView::ProcessMouse(wxMouseEvent &event)
-{
-#if 0
-   int x,y;
-  FTObject const * obj;
-
-  if(event.RightDown())
-  {
-    #if USE_WXWINDOWS2
-      x = y = 0; // @@@@ ViewStart?  
-      obj = ftoList->FindClickable(event.GetX() - x, event.GetY() - y);
-    #else
-      ftCanvas->ViewStart(&x,&y);
-      obj = ftoList->FindClickable(event.x - x, event.y - y);
-    #endif
-    if(obj)
-    {
-      if(obj->GetType() == LI_ICON)
-      {
-        String command, flags;
-        // mime type is stored after 1. semicolon:
-        // "IMG SRC="mimetype";mimetype;# of section"
-        String type = obj->GetText();
-        char *buf = strutil_strdup(type);
-        char *token = strtok(buf,";");
-        token = strtok(NULL,";");
-        if(!token) abort(); // e.g. a X-Face
-        type = token;
-        token = strtok(NULL,";");
-        if(!token) abort(); 
-        mimeDisplayPart = atoi(token); // remember section to use it in
-        GLOBAL_DELETE [] buf;
-#if	USE_WXWINDOWS2
-          // @@@@ PopupMenu?
-#else
-          PopupMenu(popupMenu, event.x - x, event.y - y);
-#endif
-      }
-      else if (obj->GetType() == LI_URL)
-      {
-        String cmd;
-        if(folder)
-          cmd = READ_CONFIG(folder->GetProfile(), MP_BROWSER);
-        else
-          cmd = READ_APPCONFIG(MP_BROWSER);
-        cmd += ' '; 
-        cmd += obj->GetText();
-#if 0
-        wxExecute(WXCPTR cmd.c_str());   //FIXME: wxExecute() doesn't exist!
-#else
-        system(cmd.c_str());
-#endif
-      }
-    }
-  }
-  // else do nothing
-#endif
-}
-
-
-void
-wxMessageView::Print(void)
-{
-
-   m_LWindow->Print();
-   
-   // old stuff
-#if 0
-   
-#ifdef  OS_UNIX
-    // set AFM path (recursive!)
-    PathFinder pf(READ_APPCONFIG(MC_AFMPATH), true);
-    pf.AddPaths(mApplication.GetGlobalDir(), true);
-    pf.AddPaths(mApplication.GetLocalDir(), true);
-
-    String afmpath = pf.FindDirFile("Cour.afm");
-    wxSetAFMPath((char *) afmpath.c_str());
-
-    wxDC *dc = GLOBAL_NEW wxPostScriptDC("", TRUE, this);
-
-    if (dc && dc->Ok() && dc->StartDoc((char *)_("Printing message...")))
-    {
-      dc->SetUserScale(1.0, 1.0);
-#if	USE_WXWINDOWS2
-        // @@@@ ScaleGDIClasses
-#else  // wxWin 1
-      dc->ScaleGDIClasses(TRUE);
-#endif // wxWin 1/2
-
-      ftoList->SetDC(dc,true); // enable pageing!
-      ftoList->ReCalculateLines();
-      ftoList->Draw();
-      dc->EndDoc();
-    }
-    GLOBAL_DELETE dc;
-    #if USE_WXWINDOWS2
-      // @@@@ GetDC()?
-    #else  // wxWin 1
-      ftoList->SetDC(ftCanvas->GetDC());
-    #endif // wxWin 1/2ftoList->ReCalculateLines();
-  #else
-    // FIXME TODO: printing for Windows
-#endif
-#endif
 }
 
 void
@@ -678,22 +582,43 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 void
 wxMessageView::OnCommandEvent(wxCommandEvent &event)
 {
+   ClickableInfo *ci;
+   
    if(event.GetId() == WXMENU_LAYOUT_CLICK)
    {
       wxLayoutObjectBase *obj;
       cerr << "Received click event!" << endl;
       obj = (wxLayoutObjectBase *)event.GetClientData();
-      if(obj->GetUserData())
+      ci = (ClickableInfo *)obj->GetUserData();
+      if(ci)
       {
-         int x,y;
-         GetPosition(&x,&y);
-         int partno = *(int *)(obj->GetUserData());
-         wxPoint pos = m_LWindow->GetClickPosition();
-         pos.x += x; pos.y += y;
-         if(m_MimePopup)
-            delete m_MimePopup;
-         m_MimePopup = new MimeDialog(this,pos,partno);
-         m_MimePopup->Show(true);
+         switch(ci->type)
+         {
+         case ClickableInfo::CI_ICON:
+         {
+            int x,y;
+            GetPosition(&x,&y);
+            wxPoint pos = m_LWindow->GetClickPosition();
+            pos.x += x; pos.y += y;
+            if(m_MimePopup)
+               delete m_MimePopup;
+            m_MimePopup = new MimeDialog(this,pos,ci->id);
+            m_MimePopup->Show(true);
+            break;
+         }
+         case ClickableInfo::CI_URL:
+         {
+            String cmd;
+            if(folder)
+               cmd = READ_CONFIG(folder->GetProfile(), MP_BROWSER);
+            else
+               cmd = READ_APPCONFIG(MP_BROWSER);
+            cmd += ' '; 
+            cmd += ci->url;
+            wxExecute(cmd);
+            break;
+         }
+         }
       }
    }
    else
@@ -707,7 +632,7 @@ wxMessageView::OnMenuCommand(int id)
    switch(id)
    {
    case WXMENU_MSG_PRINT:
-      Print();
+      //Print();
       break;
    case WXMENU_MSG_REPLY:
       //Reply();
@@ -745,3 +670,49 @@ wxMessageViewPanel::OnCommand(wxWindow &win, wxCommandEvent &event)
    wxPanel::OnCommand(win,event);
    cerr << "OnCommand" << endl;
 }
+
+void
+wxMessageView::Print(void)
+{
+
+   m_LWindow->Print();
+
+   // old stuff
+#if 0
+
+#ifdef  OS_UNIX
+    // set AFM path (recursive!)
+    PathFinder pf(READ_APPCONFIG(MC_AFMPATH), true);
+    pf.AddPaths(mApplication.GetGlobalDir(), true);
+    pf.AddPaths(mApplication.GetLocalDir(), true);
+
+    String afmpath = pf.FindDirFile("Cour.afm");
+    wxSetAFMPath((char *) afmpath.c_str());
+
+    wxDC *dc = GLOBAL_NEW wxPostScriptDC("", TRUE, this);
+
+    if (dc && dc->Ok() && dc->StartDoc((char *)_("Printing message...")))
+    {
+      dc->SetUserScale(1.0, 1.0);
+#if     USE_WXWINDOWS2
+        // @@@@ ScaleGDIClasses
+#else  // wxWin 1
+      dc->ScaleGDIClasses(TRUE);
+#endif // wxWin 1/2
+
+      ftoList->SetDC(dc,true); // enable pageing!
+      ftoList->ReCalculateLines();
+      ftoList->Draw();
+      dc->EndDoc();
+    }
+    GLOBAL_DELETE dc;
+    #if USE_WXWINDOWS2
+      // @@@@ GetDC()?
+    #else  // wxWin 1
+      ftoList->SetDC(ftCanvas->GetDC());
+    #endif // wxWin 1/2ftoList->ReCalculateLines();
+  #else
+      // FIXME TODO: printing for Windows
+#endif
+#endif
+} 

@@ -147,7 +147,7 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    SetAutoLayout(TRUE);
 
    // Panel itself (fills all the frame client area)
-   m_panel = new wxPanel(this, -1);
+   m_panel = new wxPanel(this, -1,-1);
    c = new wxLayoutConstraints;
    c->top.SameAs(this, wxTop);
    c->left.SameAs(this, wxLeft);

@@ -6,6 +6,9 @@
  * $Id$                *
  *                                                                  *
  * $Log$
+ * Revision 1.14  1998/07/11 19:13:18  KB
+ * wxMessageView works
+ *
  * Revision 1.13  1998/07/08 19:17:43  KB
  * Several fixes for mail display.
  *
@@ -206,6 +209,15 @@ void strutil_tokenise(char *string, const char *delim, kbStringList &tlist);
     @return either the url or an empty string
   */
 String strutil_matchurl(const char *string);
+
+/** Checks string for next URL
+    @param str the string to examine
+    @param url where to store the url
+    @return the component of the string before url, sets str to part
+    after url
+  */
+String
+strutil_findurl(wxString &str, wxString &url);
 
 #ifndef     HAVE_STRSEP
 char * strsep(char **stringp, const char *delim);

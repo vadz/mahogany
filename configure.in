@@ -388,9 +388,9 @@ if test "$USE_WXGTK" = 1; then
       WX_LINK="$ac_path_to_link -lwx_gtk"
       WX_SLINK="$ac_pure_path_to_link/libwx_gtk.a"
       WX_INCLUDE="$ac_path_to_include/wxWindows/include $ac_path_to_include/wxWindows/setup/${OSTYPE}"
-      WX_DEFS=-D__GTK__
+      WX_DEFS=-D__WXGTK__
       AC_MSG_RESULT(yes)
-      WX_DEFS=-D__GTK__
+      WX_DEFS=-D__WXGTK__
     else
       AC_MSG_RESULT(no)
     fi

@@ -6,7 +6,11 @@
  * $Id$           *
  ********************************************************************
  * $Log$
+ * Revision 1.9  1998/07/11 19:13:17  KB
+ * wxMessageView works
+ *
  * Revision 1.8  1998/06/22 22:32:18  VZ
+ *
  * miscellaneous fixes for Windows compilation
  *
  * Revision 1.7  1998/06/14 12:23:59  KB
@@ -75,9 +79,7 @@ struct StreamConnection
    MAILSTREAM   const *stream;
    /// name of the MailFolderCC object
    String name;
-   
-   IMPLEMENT_DUMMY_COMPARE_OPERATORS(StreamConnection)
-      };
+};
 
 KBLIST_DEFINE(StreamConnectionList, StreamConnection);
 KBLIST_DEFINE(FolderViewList, FolderViewBase);
@@ -104,7 +106,7 @@ public:
    static MailFolderCC* OpenFolder(String const &name);
    
    /** closes a mail folder in a save way.
-   */
+          */
    void Close(void);
 
    /// default destructor

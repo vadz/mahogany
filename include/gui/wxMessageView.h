@@ -133,11 +133,6 @@ private:
    /// the MIME popup
    wxDialog *m_MimePopup;
    
-   /**@name The interface to its canvas. */
-   //@{
-   /// Process a Mouse Event.
-   void   ProcessMouse(wxMouseEvent &event);
-   //@}
 protected:
    friend class MimeDialog;
    /// displays information about the currently selected MIME content
