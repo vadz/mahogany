@@ -89,13 +89,11 @@ wxMSW bugs:
 
 - document python callback behaviour for incoming folders, possibly do 
   testing for callback results in CollectOneFolder!!
-- add closing delay for sentmail folder to avoid reopening it each time
-- add SIGSEGV handler for safe exit, to attempt and safe things
 - add configure option for python path
 - before doing ping, change to logging for window only and restore(!)
   old settings(!) afterwards to suppress error messages for closed POP
   folders
-- when sending message failed, don't make it readonly but rebuild it
+- when sending message failed, don't make composeview readonly but rebuild it
   after editing
 - change main frame icon when new mail in mainframe folder
 - searching in messageview
@@ -113,39 +111,23 @@ wxMSW bugs:
   content is int.
 - MFolderDialog: TransferFromWindow return false ignored when asked
   for password
-= wxLayout:
-  - fix horiz scrollbar size
-  - update rectangle (needs support in wxllist and wxWindows)
-  - fix(simplify) cursor size calculation
-  - font optimisations(!)
-  - copy/cut/selections
-  - occasionally wraps lines wongly (twice) (fixed now?)
-  - UNDO
-  later:
-    - DragNDrop (waiting for wxGTK/gtk1.2 & GNOME 1.0 / Debian Slink)
-    - cut&paste (paste is there but broken in wxGTK)
-  done:
-    x- reset scrollbars on Clear()
-    x- add setting of background colour and/or image
-    x- composeview: after inserting text (reply), update scrollbars
-    x- fix initial scrollbar sizes --> seems ok, what exactly is wrong?
-    L- delete in empty line doesn't work
 
 - do not redraw messageview if the message is the one currently being
   shown (DONE, better:)
   -- option to keep wxLayoutList around for reuse?
-
 - when inserting filetype of unknown MIME type, prompt for it
 - speed up copy mail to folder by cusing c-client functionality
 - wxComposeView: if replying, only mark message as answered if reply
   got sent --> difficult
-- possibly have a MIME types editor (similar to netscape's?)
 - if time permits: vcard-import
 - use mm_critical() and delay application exit if necessary
 - add "double click to open" profile option support to folder list ctrl
 
 **************** end of KB priorities :-) *********************
 
+- add closing delay for sentmail folder to avoid reopening it each time
+- add SIGSEGV handler for safe exit, to attempt and safe things
+- add option to set Reply-To: header from To: header of incoming mail
 - change of settings in the msg view section of the options dlg should generate
   an event which would propagete to all open msg views.
 - make [Apply] work too!
@@ -159,8 +141,8 @@ wxMSW bugs:
    ==> code commented out in MailFolderCC.cpp
 
  - easy to implement but useful feature: "check for new mail now"
-
-- delete temporary files (esp. from image conversion!)
+ - possibly have a MIME types editor (similar to netscape's?)
+ - delete temporary files (esp. from image conversion!)
   - easy: add support for email-to-fax gateway at www.tpc.int and
     their coverpage
 
