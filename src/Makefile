@@ -104,7 +104,7 @@ $(BUNDLE)/Resources/M.rsrc: $(SOURCEDIR)/macosx/M.rsrc
 	@$(INSTALL) -d `dirname $@`
 	@cp $< $@
 
-$(BUNDLE)/Resources/M.icns: $(SOURCEDIR)/macosx/Info.plist.in
+$(BUNDLE)/Resources/M.icns: $(SOURCEDIR)/macosx/M.icns
 	@$(INSTALL) -d `dirname $@`
 	@cp $< $@
 
