@@ -31,7 +31,6 @@
 #  include   "Mdefaults.h"
 #  include   "MApplication.h"
 #  include   "MPython.h"
-#   include  "MFolder.h"
 #  include   <wx/dynarray.h>
 #endif   // USE_PCH
 
@@ -40,9 +39,9 @@
 #   include "MModule.h"
 #endif
 
-
 #include <errno.h>
 
+#include "MFolder.h"
 #include "FolderView.h"
 #include "MailFolder.h"
 #include "MailCollector.h"
@@ -252,9 +251,6 @@ MAppBase::VerifySettings(void)
 
    return true;
 }
-
-
-
 
 /// only used to find list of folders to keep open at all times
 class KeepOpenFolderTraversal : public MFolderTraversal
