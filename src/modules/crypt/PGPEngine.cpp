@@ -716,7 +716,10 @@ PGPEngine::DoExecCommand(const String& options,
       }
    }
 
-   ASSERT_MSG( status != MAX_ERROR, _T("GNUPG didn't return the status?") );
+   // Removing this assert:
+   // There is at least one case (signature not detached) where GPG does not output
+   // any line beginning with "[GNUPG:] ". So we can't rely on getting one.
+   //ASSERT_MSG( status != MAX_ERROR, _T("GNUPG didn't return the status?") );
 
    // we must wait until the process terminates because its termination handler
    // access process object which is going to be destroyed when we exit this
@@ -775,11 +778,15 @@ PGPEngine::ExecCommand(const String& options,
             default:
                wxLogWarning(_("Importing public key failed for unknown "
                               "reason."));
+               status = NONEXISTING_KEY_ERROR;
+               messageOut = messageIn;
                break;
 
             case NO_DATA_ERROR:
                wxLogWarning(_("Public key not found on the key server \"%s\"."),
                             keyserver.c_str());
+               status = NONEXISTING_KEY_ERROR;
+               messageOut = messageIn;
                break;
 
             case OK:
