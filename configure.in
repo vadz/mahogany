@@ -568,7 +568,7 @@ case "$USE_SSL" in
 	dnl anything, but if it doesn't then add it
 	case "$USE_SSL" in
 	/*/include) ssl_inc="$USE_SSL" ;;
-	/*)	ssl_inc="$USE_SSL $USE_SSL/include" ;;
+	/*)	ssl_inc="$USE_SSL/include" ;;
 	*)	ssl_inc="$prefix/include" ;;
 	esac
 
@@ -1351,7 +1351,6 @@ AC_OUTPUT_COMMANDS(
 		done
 		;;
 	esac
-	sh .src/makeversion.in
 ],
 src="$srcdir" SRC="$SOURCEDIR" OBJ="$BUILDDIR"
 DIR="$DIR"
