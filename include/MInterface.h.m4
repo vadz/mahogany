@@ -170,6 +170,11 @@ virtual bool contains_own_address (
 virtual void RemoveModule (MModuleCommon * module ) = 0;
 
 
+protected:
+
+virtual ~MInterface() { }
+
+
 /* The following line is the end of the MInterface interface definition. */
 
 };

@@ -13,6 +13,8 @@ class PREFIX
 {
 public:
 $2
+protected:
+virtual ~PREFIX`()' { }
 };')
 
 define(STRING, const wxChar *)
