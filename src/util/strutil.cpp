@@ -1000,7 +1000,13 @@ strutil_decrypt(const String &original)
    if(original[0] == '-')
       return strutil_decrypt_tf(original);
 
-   CHECK(original.Length() % 4 == 0, "", "Decrypt function called with illegal string.");
+   // the encrypted string always has a length divisible by 4
+   if ( original.length() % 4 )
+   {
+      wxLogWarning(_("Decrypt function called with illegal string."));
+
+      return "";
+   }
 
    String
       tmpstr,
