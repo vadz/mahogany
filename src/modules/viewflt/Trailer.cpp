@@ -99,7 +99,7 @@ TrailerFilter::DoProcess(String& text,
          }
 
          // did we find a delimiter line?
-         if ( lenDel >= 60 )
+         if ( lenDel >= 40 )
          {
             // yes, but it may start either at pc or at pc + 1
             if ( *pc == '\n' )
