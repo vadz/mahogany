@@ -481,6 +481,7 @@ URLDetector::URLDetector()
    addNewKeyword("https://");
    addNewKeyword("mailto://");
    addNewKeyword("ftp://");
+   addNewKeyword("sftp://");
    addNewKeyword("file://");
    // addNewKeyword("ftps:"); -- does anyone really uses this?
 
