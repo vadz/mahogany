@@ -22,6 +22,8 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+#   include "guidef.h"                  // for GetFrame
+#   include "gui/wxMApp.h"              // for wxMApp
 
 #   include <wx/textctrl.h>
 #endif // USE_PCH
@@ -56,7 +58,7 @@ class wxTextEasyPrinting : public wxHtmlEasyPrinting
 {
 public:
    wxTextEasyPrinting(const wxString& name, wxWindow *parent = NULL)
-      : wxHtmlEasyPrinting(name, parent) { }
+      : wxHtmlEasyPrinting(name, GetFrame(parent)) { }
 
    bool Print(wxTextCtrl *text) { return PrintText(ControlToHtml(text)); }
    bool Preview(wxTextCtrl *text) { return PreviewText(ControlToHtml(text)); }

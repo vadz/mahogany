@@ -2784,7 +2784,7 @@ static Value func_subject(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
       return Value("");
-   Message_obj msg = p->GetMessage();
+   Message_obj msg(p->GetMessage());
    if(! msg)
       return Value("");
 
