@@ -33,12 +33,11 @@
 #include <wx/textfile.h>
 
 // ----------------------------------------------------------------------------
-// Implementation of the MInterface 
+// Implementation of the MInterface
 // ----------------------------------------------------------------------------
 
 #include "MInterface.h"
 #include "MInterface.cpp"
-
 
 // ----------------------------------------------------------------------------
 // Actual MModule code
@@ -109,7 +108,7 @@ public:
    /// Create an MModuleImpl from a Dll handle
    static MModule *Create(wxDllType);
 #endif
-   
+
    /// Returns the Module's name as used in LoadModule().
    virtual const char * GetName(void)
       { return m_GetName ? (*m_GetName)() : _("unknown"); }
@@ -147,7 +146,7 @@ private:
 #ifdef USE_MODULES_STATIC
    MModule_InitModuleFuncType m_Init;
    MModule_UnLoadModuleFuncType m_Unload;
-   
+
    MModuleImpl(MModule_InitModuleFuncType init,
                MModule_GetNameFuncType gn,
                MModule_GetInterfaceFuncType gi,
@@ -175,7 +174,7 @@ MModuleImpl::Create(wxDllType dll)
 {
    MModule_InitModuleFuncType
       initModuleFunc = (MModule_InitModuleFuncType)
-      wxDllLoader::GetSymbol(dll, "InitMModule"); 
+      wxDllLoader::GetSymbol(dll, "InitMModule");
    if(! initModuleFunc)
    {
       wxDllLoader::UnloadLibrary(dll);
@@ -196,15 +195,15 @@ MModuleImpl::MModuleImpl(wxDllType dll)
 {
    m_Dll = dll;
    m_GetName = (MModule_GetNameFuncType)
-      wxDllLoader::GetSymbol(dll, "GetName"); 
+      wxDllLoader::GetSymbol(dll, "GetName");
    m_GetInterface = (MModule_GetInterfaceFuncType)
-      wxDllLoader::GetSymbol(dll, "GetInterface"); 
+      wxDllLoader::GetSymbol(dll, "GetInterface");
    m_GetDescription  = (MModule_GetDescriptionFuncType)
-      wxDllLoader::GetSymbol(dll, "GetDescription"); 
+      wxDllLoader::GetSymbol(dll, "GetDescription");
    m_GetVersion = (MModule_GetVersionFuncType)
-      wxDllLoader::GetSymbol(dll, "GetModuleVersion"); 
+      wxDllLoader::GetSymbol(dll, "GetModuleVersion");
    m_GetMVersion = (MModule_GetMVersionFuncType)
-      wxDllLoader::GetSymbol(dll, "GetMVersion"); 
+      wxDllLoader::GetSymbol(dll, "GetMVersion");
 }
 #endif
 
@@ -215,7 +214,7 @@ MModuleImpl::~MModuleImpl()
 #else
    MModule_UnLoadModuleFuncType
       unLoadModuleFunc = (MModule_UnLoadModuleFuncType)
-      wxDllLoader::GetSymbol(m_Dll, "UnLoadMModule"); 
+      wxDllLoader::GetSymbol(m_Dll, "UnLoadMModule");
 #endif
    ASSERT(unLoadModuleFunc);
    if(! unLoadModuleFunc)
@@ -234,7 +233,7 @@ MModuleImpl::~MModuleImpl()
          GetModuleList()->erase(i);
 #ifdef DEBUG
          found = true;
-#endif  
+#endif
          break;
       }
    ASSERT(found == true);
@@ -262,9 +261,9 @@ MModule *FindModule(const String & name)
             return (**i).m_Module;
          else
             return NULL;
-      }
 #endif
-            
+      }
+
    return NULL; // not found
 }
 
@@ -504,7 +503,7 @@ MModuleListing *MModule::GetListing(void)
    return listing;
 #else
    kbStringList modules;
-   
+
    const int nDirs = 3;
    wxString
       pathname,
@@ -519,7 +518,7 @@ MModuleListing *MModule::GetListing(void)
            << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
    dirs[2] = mApplication->GetLocalDir();
    dirs[2] << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-   
+
    /// First, build list of all .mmd files:
    for(int i = 0; i < nDirs ; i++)
    {
@@ -531,7 +530,7 @@ MModuleListing *MModule::GetListing(void)
             while(filename.Length())
             {
                modules.push_back(new // without ".mmd" :
-                                 String(filename.Mid(0,filename.Length()-4))); 
+                                 String(filename.Mid(0,filename.Length()-4)));
                filename = wxFindNextFile();
             }
          }
