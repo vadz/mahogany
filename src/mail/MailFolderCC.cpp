@@ -427,13 +427,11 @@ public:
          // instead we risk to spend some (long) time applying filters and the
          // window won't be repainted before we finish, so force window redraw
          // right now
-#ifdef OS_WIN
          wxFrame *frame = mApplication->TopLevelFrame();
          if ( frame )
          {
-            ::UpdateWindow(GetHwndOf(frame));
+            frame->Update();
          }
-#endif // OS_WIN
       }
    }
 
