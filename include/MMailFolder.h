@@ -179,7 +179,7 @@ public:
    virtual unsigned long CountNewMessagesQuick(void) const;
 
    /** Check whether mailbox has changed. */
-   virtual void Ping(void);
+   virtual bool Ping(void);
 
    /** get the message with unique id uid
        @param uid message uid
