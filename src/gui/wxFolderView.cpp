@@ -223,6 +223,8 @@ wxFolderListCtrl::Clear(void)
    int x,y;
    GetClientSize(&x,&y);
 
+   SaveWidths();
+
    DeleteAllItems();
    DeleteAllColumns();
 
@@ -231,9 +233,10 @@ wxFolderListCtrl::Clear(void)
       for(int c = 0; c < WXFLC_NUMENTRIES; c++)
          for (int i = 0; i < WXFLC_NUMENTRIES; i++)
             if(m_columns[i] == c)
-               InsertColumn( c, _(wxFLC_ColumnNames[i]),
-                             wxLIST_FORMAT_LEFT);
+               InsertColumn( c, _(wxFLC_ColumnNames[i]), wxLIST_FORMAT_LEFT);
    }
+
+   RestoreWidths();
 }
 
 void

@@ -85,6 +85,16 @@ enum
 #define LAYOUT_MARGIN LAYOUT_X_MARGIN
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// return TRUE if the field should have address expansion
+static inline bool IsAddressField(size_t field)
+{
+   return field != wxComposeView::Field_Subject;
+}
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -159,6 +169,10 @@ public:
       m_id = id;
       m_lastWasTab = FALSE;
    }
+
+   // expand the text in the control using the address book(s): returns FALSE
+   // if no expansion took place
+   bool DoExpand();
 
    // callbacks
    void OnChar(wxKeyEvent& event);
@@ -279,88 +293,98 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
       // the entry
       m_lastWasTab = TRUE;
 
-      // try to expand the last component
-      String text = GetValue();
-      if ( text.IsEmpty() )
+      if ( DoExpand() )
       {
-         // don't do anything
-         event.Skip();
-
+         // don't call event.Skip()
          return;
       }
-
-      // find the starting position of the last address in the address list
-      size_t nLastAddr;
-      for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
-      {
-         char c = text[nLastAddr];
-         if ( isspace(c) || (c == ',') || (c == ';') )
-            break;
-      }
-
-      if ( nLastAddr > 0 )
-      {
-         // move beyond the ' ', ',' or ';' which stopped the scan
-         nLastAddr++;
-      }
-
-      wxArrayString expansions;
-      if ( AdbExpand(expansions, text.c_str() + nLastAddr, m_composeView) )
-      {
-         // find the end of the previous address
-         size_t nPrevAddrEnd;
-         if ( nLastAddr > 0 )
-         {
-            // undo "++" above
-            nLastAddr--;
-         }
-
-         for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
-         {
-            char c = text[nPrevAddrEnd];
-            if ( !isspace(c) && (c != ',') && (c != ';') )
-               break;
-         }
-
-         // take what was there before...
-
-         if ( nPrevAddrEnd > 0 )
-         {
-            // skip last character
-            nPrevAddrEnd++;
-         }
-         //else: the expanded string started at the very beginning
-
-         wxString newText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
-         if ( !newText.IsEmpty() )
-         {
-            // there was something before, add separator
-            newText += CANONIC_ADDRESS_SEPARATOR;
-         }
-
-         // ... and and the replacement string(s)
-         size_t nExpCount = expansions.GetCount();
-         for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
-         {
-            if ( nExp > 0 )
-               newText += CANONIC_ADDRESS_SEPARATOR;
-
-            newText += expansions[nExp];
-         }
-
-         SetValue(newText);
-         SetInsertionPointEnd();
-      }
-      //else
-      //  don't change the text
    }
    else
    {
       m_lastWasTab = FALSE;
-
-      // let the text control process it normally
-      event.Skip();
    }
+
+   // let the text control process it normally
+   event.Skip();
+}
+
+bool wxAddressTextCtrl::DoExpand()
+{
+   // try to expand the last component
+   String text = GetValue();
+   text.Trim(FALSE); // trim spaces from both sides
+   text.Trim(TRUE);
+
+   if ( text.IsEmpty() )
+   {
+      // don't do anything
+      wxLogStatus(m_composeView,
+                  _("Nothing to expand - please enter something."));
+
+      return FALSE;
+   }
+
+   // find the starting position of the last address in the address list
+   size_t nLastAddr;
+   for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
+   {
+      char c = text[nLastAddr];
+      if ( isspace(c) || (c == ',') || (c == ';') )
+         break;
+   }
+
+   if ( nLastAddr > 0 )
+   {
+      // move beyond the ' ', ',' or ';' which stopped the scan
+      nLastAddr++;
+   }
+
+   wxArrayString expansions;
+   if ( AdbExpand(expansions, text.c_str() + nLastAddr, m_composeView) )
+   {
+      // find the end of the previous address
+      size_t nPrevAddrEnd;
+      if ( nLastAddr > 0 )
+      {
+         // undo "++" above
+         nLastAddr--;
+      }
+
+      for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
+      {
+         char c = text[nPrevAddrEnd];
+         if ( !isspace(c) && (c != ',') && (c != ';') )
+         {
+            // this character is a part of previous string, leave it there
+            nPrevAddrEnd++;
+
+            break;
+         }
+      }
+
+      // take what was there before...
+      wxString newText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
+      if ( !newText.IsEmpty() )
+      {
+         // there was something before, add separator
+         newText += CANONIC_ADDRESS_SEPARATOR;
+      }
+
+      // ... and and the replacement string(s)
+      size_t nExpCount = expansions.GetCount();
+      for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
+      {
+         if ( nExp > 0 )
+            newText += CANONIC_ADDRESS_SEPARATOR;
+
+         newText += expansions[nExp];
+      }
+
+      SetValue(newText);
+      SetInsertionPointEnd();
+   }
+
+   return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -445,7 +469,7 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    // layout the labels and text fields: label at the left of the field
    bool bDoShow[Field_Max];
    bDoShow[Field_To] =
-      bDoShow[Field_Subject] = TRUE;  // To and subject always there
+   bDoShow[Field_Subject] = TRUE;  // To and subject always there
    bDoShow[Field_Cc] = READ_CONFIG(m_Profile, MP_SHOWCC) != 0;
    bDoShow[Field_Bcc] = READ_CONFIG(m_Profile, MP_SHOWBCC) != 0;
 
@@ -478,10 +502,7 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    {
       if ( bDoShow[n] )
       {
-         // FIXME there might be other fields where we'd like to complete with
-         // TABs - so we probably need some flag to distinguish them from the
-         // others
-         if ( n !=  Field_Subject ) {
+         if ( IsAddressField(n) ) {
             m_txtFields[n] = new wxAddressTextCtrl(this, (AddressField)n,
                                                    m_panel);
          }
@@ -720,81 +741,9 @@ wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
       m_fieldLast = Field_To;
    }
 
-   String what = Str(m_txtFields[m_fieldLast]->GetValue());
-   if ( what.IsEmpty() )
-   {
-     wxLogStatus(this, _("Nothing to expand - please enter something."));
+   wxCHECK_RET( IsAddressField(m_fieldLast), "no expansion for this field" );
 
-     return;
-   }
-
-   // split the text into entries: they may be separated by commas, semicolons
-   // or just whitespace (any amount of whitespace counts as one separator)
-   wxArrayString addresses;
-   String current;
-   for ( const char *pc = what; ; pc++ )
-   {
-      switch ( *pc )
-      {
-         case ' ':
-         case '\t':
-            if ( current.IsEmpty() )
-            {
-               // repeated space, ignore
-               continue;
-            }
-            // fall through, it's a separator
-
-         case ',':
-         case ';':
-         case '\0':
-            addresses.Add(current);
-            if ( *pc == '\0' )
-            {
-               // will exit the loop
-               break;
-            }
-
-            current.Empty();
-            continue;
-
-         default:
-            // normal character
-            current += *pc;
-            continue;
-      }
-
-      break;
-   }
-
-   // expand all entries (TODO: some may be already expanded??)
-   String total;
-   size_t nEntries = addresses.Count();
-   for ( size_t n = 0; n < nEntries; n++ )
-   {
-      if ( n > 0 )
-         total += CANONIC_ADDRESS_SEPARATOR;
-
-      wxArrayString expansions;
-      if ( !AdbExpand(expansions, addresses[n], this) )
-      {
-         // expansion failed, leave as is
-         total += addresses[n];
-      }
-      else
-      {
-         // replace with expanded address(es)
-         size_t nExpCount = expansions.GetCount();
-         for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
-         {
-            if ( nExp > 0 )
-               total += CANONIC_ADDRESS_SEPARATOR;
-            total += expansions[nExp];
-         }
-      }
-   }
-
-   m_txtFields[m_fieldLast]->SetValue(total);
+   (void)((wxAddressTextCtrl *)m_txtFields[m_fieldLast])->DoExpand();
 }
 
 bool
@@ -1123,7 +1072,7 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
    // might be not an extension too, but consider that it is - how can we
    // decide otherwise?)
    String strExt = filename.AfterLast('.');
-   if ( strchr(strExt, '/') )
+   if ( strExt == filename || strchr(strExt, '/') )
       strExt.Empty();
 
    String strMimeType;
@@ -1355,6 +1304,17 @@ wxComposeView::Print(void)
 bool
 wxComposeView::IsReadyToSend() const
 {
+   // verify that the external editor has terminated
+   if ( m_procExtEdit )
+   {
+      // we don't give the user a choice because it will later leave us with
+      // an orphan ext editor process and it's easier this way
+      wxLogError(_("The external editor is still opened, please close "
+                   "it before sending the message."));
+
+      return false;
+   }
+
    // verify that the network is configured
    bool networkSettingsOk = false;
    while ( !networkSettingsOk )

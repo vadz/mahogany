@@ -87,10 +87,13 @@ public:
         // default: need to use Set() functions later
     wxPHelper() { }
         // the 'path' parameter may be either an absolute path or a relative
-        // path, in which case it will go under wxPControls::GetSettingsPath().
+        // path, in which case it will go under wxPControls::GetSettingsPath()
+        // + prefix.
         // If the config object is not given the global application one is
         // used instead.
-    wxPHelper(const wxString& path, wxConfigBase *config = NULL);
+    wxPHelper(const wxString& path,
+              const wxString& prefix,
+              wxConfigBase *config = NULL);
         // dtor automatically restores the path if not done yet
     ~wxPHelper();
 
@@ -100,7 +103,7 @@ public:
         // set the config object to use (must be !NULL)
     void SetConfig(wxConfigBase *config) { m_config = config; }
         // set the path to use (either absolute or relative)
-    void SetPath(const wxString& path) { m_path = path; }
+    void SetPath(const wxString& path, const wxString& prefix);
 
     // operations
         // change path to the place where we will write our values, returns
@@ -109,9 +112,12 @@ public:
         // restore the old path (also done implicitly in dtor)
     void RestorePath();
 
+    // get the key name
+    const wxString& GetKey() const { return m_key; }
+
 private:
     bool          m_pathRestored;
-    wxString      m_path, m_oldPath;
+    wxString      m_key, m_path, m_oldPath;
     wxConfigBase *m_config;
 };
 
@@ -130,22 +136,45 @@ wxString wxPControls::ms_pathPrefix = "";
 // wxPHelper
 // ----------------------------------------------------------------------------
 
-wxPHelper::wxPHelper(const wxString& path, wxConfigBase *config)
-         : m_path(path)
+wxPHelper::wxPHelper(const wxString& path,
+                     const wxString& prefix,
+                     wxConfigBase *config)
 {
-    m_config = config;
+    SetConfig(config);
+    SetPath(path, prefix);
+
+    m_pathRestored = TRUE;  // it's not changed yet...
+}
+
+void wxPHelper::SetPath(const wxString& path, const wxString& prefix)
+{
+    wxCHECK_RET( !path.IsEmpty(), "empty path in persistent ctrl code" );
+
+    wxString strKey, strPath = path.BeforeLast('/');
+    if ( !strPath ) {
+        strPath.Empty();
+        strKey = path;
+    }
+    else {
+        strKey = path.AfterLast('/');
+    }
 
     // don't prepend settings path to the absolute paths
-    if ( path[0u] != '/' ) {
+    if ( path[0u] == '/' ) {
+        // absolute path given, ignore prefix and global settings path and
+        // use it as "is"
+        m_path = strPath;
+        m_key = strKey;
+    }
+    else {
         m_path = wxPControls::GetSettingsPath();
         if ( m_path.IsEmpty() || (m_path.Last() != '/') ) {
             m_path += '/';
         }
+
+        m_path << prefix << '/' << strPath;
+        m_key = strKey;
     }
-
-    m_path += path;
-
-    m_pathRestored = TRUE;  // it's not changed yet...
 }
 
 wxPHelper::~wxPHelper()
@@ -165,18 +194,7 @@ bool wxPHelper::ChangePath()
     wxCHECK_MSG( m_config, FALSE, "can't change path without config!" );
 
     m_oldPath = m_config->GetPath();
-    wxString path;
-
-    // don't prepend settings path to the absolute paths
-    if ( m_path[0u] != '/' ) {
-        path = wxPControls::GetSettingsPath();
-        if ( path.IsEmpty() || (path.Last() != '/') ) {
-            path += '/';
-        }
-    }
-
-    path += m_path;
-    m_config->SetPath(path);
+    m_config->SetPath(m_path);
 
     m_pathRestored = FALSE;
 
@@ -200,7 +218,7 @@ void wxPHelper::RestorePath()
 // ----------------------------------------------------------------------------
 
 // the key where we store our last selected page
-const char *wxPNotebook::ms_pageKey = "Page";
+const char *wxPNotebook::ms_path = "NotebookPages";
 
 wxPNotebook::wxPNotebook()
 {
@@ -218,7 +236,7 @@ wxPNotebook::wxPNotebook(const wxString& configPath,
           : wxNotebook(parent, id, pos, size, style)
 {
     m_bFirstTime = true;
-    m_persist = new wxPHelper(configPath, config);
+    m_persist = new wxPHelper(configPath, ms_path, config);
 }
 
 bool wxPNotebook::Create(const wxString& configPath,
@@ -230,7 +248,7 @@ bool wxPNotebook::Create(const wxString& configPath,
                          wxConfigBase *config)
 {
    m_persist->SetConfig(config);
-   m_persist->SetPath(configPath);
+   m_persist->SetPath(configPath, ms_path);
 
    return wxNotebook::Create(parent, id, pos, size, style);
 }
@@ -238,7 +256,7 @@ bool wxPNotebook::Create(const wxString& configPath,
 void wxPNotebook::RestorePage()
 {
     if ( m_persist->ChangePath() ) {
-        int nPage = (int)m_persist->GetConfig()->Read(ms_pageKey, 0l);
+        int nPage = (int)m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
         if ( (nPage > 0) && (nPage < GetPageCount()) ) {
             SetSelection(nPage);
         }
@@ -255,7 +273,7 @@ wxPNotebook::~wxPNotebook()
 {
     if ( m_persist->ChangePath() ) {
         int nSelection = GetSelection();
-        m_persist->GetConfig()->Write(ms_pageKey, (long)nSelection);
+        m_persist->GetConfig()->Write(m_persist->GetKey(), (long)nSelection);
     }
     //else: couldn't change path, probably because there is no config object.
 
@@ -284,7 +302,7 @@ void wxPNotebook::SetConfigObject(wxConfigBase *config)
 
 void wxPNotebook::SetConfigPath(const wxString& path)
 {
-    m_persist->SetPath(path);
+    m_persist->SetPath(path, ms_path);
 }
 
 // ----------------------------------------------------------------------------
@@ -310,7 +328,7 @@ wxPTextEntry::wxPTextEntry(const wxString& configPath,
                            wxConfigBase *config)
            : wxComboBox(parent, id, value, pos, size, style)
 {
-    m_persist = new wxPHelper(configPath, config);
+    m_persist = new wxPHelper(configPath, "", config);
     m_countSaveMax = ms_countSaveDefault;
 
     RestoreStrings();
@@ -333,7 +351,7 @@ bool wxPTextEntry::Create(const wxString& configPath,
                           wxConfigBase *config)
 {
    m_persist->SetConfig(config);
-   m_persist->SetPath(configPath);
+   m_persist->SetPath(configPath, "");
 
    if ( wxComboBox::Create(parent, id, value, pos, size, style) ) {
        RestoreStrings();
@@ -414,14 +432,14 @@ void wxPTextEntry::SetConfigObject(wxConfigBase *config)
 
 void wxPTextEntry::SetConfigPath(const wxString& path)
 {
-    m_persist->SetPath(path);
+    m_persist->SetPath(path, "");
 }
 
 // ----------------------------------------------------------------------------
 // wxPSplitterWindow
 // ----------------------------------------------------------------------------
 
-const char *wxPSplitterWindow::ms_sashKey = "Sash";
+const char *wxPSplitterWindow::ms_path = "SashPositions";
 
 wxPSplitterWindow::wxPSplitterWindow()
 {
@@ -439,7 +457,7 @@ wxPSplitterWindow::wxPSplitterWindow(const wxString& configPath,
 {
     m_wasSplit = FALSE;
    
-    m_persist = new wxPHelper(configPath, config);
+    m_persist = new wxPHelper(configPath, ms_path, config);
 }
 
 bool wxPSplitterWindow::Create(const wxString& configPath,
@@ -453,7 +471,7 @@ bool wxPSplitterWindow::Create(const wxString& configPath,
    m_wasSplit = FALSE;
    
    m_persist->SetConfig(config);
-   m_persist->SetPath(configPath);
+   m_persist->SetPath(configPath, ms_path);
 
    return wxSplitterWindow::Create(parent, id, pos, size, style);
 }
@@ -470,7 +488,7 @@ void wxPSplitterWindow::SavePosition()
     // only store the position if we're split
     if ( m_wasSplit && m_persist->ChangePath() ) {
         wxConfigBase *config = m_persist->GetConfig();
-        config->Write(ms_sashKey, (long)GetSashPosition());
+        config->Write(m_persist->GetKey(), (long)GetSashPosition());
 
         m_persist->RestorePath();
     }
@@ -479,7 +497,8 @@ void wxPSplitterWindow::SavePosition()
 int wxPSplitterWindow::GetStoredPosition(int defaultPos) const
 {
     if ( m_persist->ChangePath() ) {
-        int pos = m_persist->GetConfig()->Read(ms_sashKey, defaultPos);
+        wxConfigBase *config = m_persist->GetConfig();
+        int pos = config->Read(m_persist->GetKey(), defaultPos);
 
         m_persist->RestorePath();
 
@@ -541,14 +560,14 @@ void wxPSplitterWindow::SetConfigObject(wxConfigBase *config)
 
 void wxPSplitterWindow::SetConfigPath(const wxString& path)
 {
-    m_persist->SetPath(path);
+    m_persist->SetPath(path, ms_path);
 }
 
 // ----------------------------------------------------------------------------
 // wxPListBox
 // ----------------------------------------------------------------------------
 
-const char *wxPListCtrl::ms_listctrlKey = "ListCtrl";
+const char *wxPListCtrl::ms_path = "ListCtrlColumns";
 
 // default ctor
 wxPListCtrl::wxPListCtrl()
@@ -569,7 +588,7 @@ wxPListCtrl::wxPListCtrl(const wxString& configPath,
            : wxListCtrl(parent, id, pos, size, style, validator)
 {
     m_bFirstTime = true;
-    m_persist = new wxPHelper(configPath, config);
+    m_persist = new wxPHelper(configPath, ms_path, config);
 }
 
 // pseudo ctor
@@ -583,7 +602,7 @@ bool wxPListCtrl::Create(const wxString& configPath,
                          wxConfigBase *config)
 {
    m_persist->SetConfig(config);
-   m_persist->SetPath(configPath);
+   m_persist->SetPath(configPath, ms_path);
 
    return wxListCtrl::Create(parent, id, pos, size, style, validator);
 }
@@ -605,7 +624,7 @@ void wxPListCtrl::SetConfigObject(wxConfigBase *config)
 // set the path to use (either absolute or relative)
 void wxPListCtrl::SetConfigPath(const wxString& path)
 {
-    m_persist->SetPath(path);
+    m_persist->SetPath(path, ms_path);
 }
 
 // first time our OnSize() is called we restore the page: there is no other
@@ -627,7 +646,7 @@ void wxPListCtrl::OnSize(wxSizeEvent& event)
 void wxPListCtrl::RestoreWidths()
 {
     if ( m_persist->ChangePath() ) {
-        wxString str = m_persist->GetConfig()->Read(ms_listctrlKey);
+        wxString str = m_persist->GetConfig()->Read(m_persist->GetKey());
         if ( !str.IsEmpty() )
         {
             int countCol = GetColumnCount();
@@ -682,7 +701,7 @@ void wxPListCtrl::SaveWidths()
 
     if ( m_persist->ChangePath() ) {
         wxConfigBase *config = m_persist->GetConfig();
-        config->Write(ms_listctrlKey, str);
+        config->Write(m_persist->GetKey(), str);
 
         m_persist->RestorePath();
     }
@@ -934,21 +953,7 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
     }
 }
 
-// get the path to use for message box settings
-static void wxPMessageBoxHelper(const wxString& configPath,
-                                wxString& ourPath,
-                                wxString& ourValue)
-{
-    wxASSERT_MSG( ourPath.IsEmpty(), "should be passed in an empty string" );
-
-    if ( configPath[0u] != '/' ) {
-        // prepend some common prefix
-        ourPath = "Messages/";
-    }
-
-    ourPath += configPath.BeforeLast('/');
-    ourValue = configPath.AfterLast('/');
-}
+static const char *gs_MessageBoxPath = "MessageBox";
 
 int wxPMessageBox(const wxString& configPath,
                   const wxString& message,
@@ -957,11 +962,10 @@ int wxPMessageBox(const wxString& configPath,
                   wxWindow *parent,
                   wxConfigBase *config)
 {
-    wxString ourPath, configValue;
-    wxPMessageBoxHelper(configPath, ourPath, configValue);
-
-    wxPHelper persist(ourPath, config);
+    wxPHelper persist(configPath, gs_MessageBoxPath, config);
     persist.ChangePath();
+
+    wxString configValue = persist.GetKey();
 
     long rc; // return code
 
@@ -990,11 +994,9 @@ int wxPMessageBox(const wxString& configPath,
 
 bool wxPMessageBoxEnabled(const wxString& configPath, wxConfigBase *config)
 {
-    wxString ourPath, configValue;
-    wxPMessageBoxHelper(configPath, ourPath, configValue);
-
-    wxPHelper persist(ourPath, config);
+    wxPHelper persist(configPath, gs_MessageBoxPath, config);
     persist.ChangePath();
+    wxString configValue = persist.GetKey();
 
     // if config was NULL, wxPHelper already has the global one
     config = persist.GetConfig();
@@ -1004,11 +1006,9 @@ bool wxPMessageBoxEnabled(const wxString& configPath, wxConfigBase *config)
 
 void wxPMessageBoxEnable(const wxString& configPath, wxConfigBase *config)
 {
-    wxString ourPath, configValue;
-    wxPMessageBoxHelper(configPath, ourPath, configValue);
-
-    wxPHelper persist(ourPath, config);
+    wxPHelper persist(configPath, gs_MessageBoxPath, config);
     persist.ChangePath();
+    wxString configValue = persist.GetKey();
 
     // if config was NULL, wxPHelper already has the global one
     config = persist.GetConfig();
@@ -1055,7 +1055,7 @@ wxString wxPFileSelector(const wxString& configPath,
     wxPFileSelectorHelper(configPath, ourPath, configValueFile);
     configValuePath << configValueFile << "Path";
 
-    wxPHelper persist(ourPath, config);
+    wxPHelper persist(ourPath, "", config);
     persist.ChangePath();
 
     // if config was NULL, wxPHelper already has the global one

@@ -149,7 +149,6 @@ $Id$
 
 
 (Windows)
- - list ctrl resizing columns doesn't propagate the event to the app
  - memory leaks (run Purify on it)
  - options dlg layout looks ugly (radiobox is way too big)
  - in folder create/properties dialog there is missing UpdateUI() right
@@ -182,6 +181,12 @@ $Id$
   - MT-problem: rfc822_extraheaders()
 
 - add "Send Digest"
+
+- detect one's own messages (i.e. mark "Myself" in "From:" or, as XFMail
+  does, mark "To: ..." in "From:" column for them) and optionally suppress them
+  completely.
+
+- configurable ReplyString
 
 - wxLayout:
   + cut&paste, different cursor for focus/no focus

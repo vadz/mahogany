@@ -54,10 +54,13 @@ private:
 
     1. The first one is the path where the control should save/look for the
        configuration info, in general a descriptive name of the control is
-       probably enough. By default, the prefix returned by
-       wxPControls::GetSettingsPath() is prepended to this parameter if it
-       doesn't start with a backslash, so you can choose another location for
-       all this stuff with wxPControls::SetSettingsPath().
+       probably enough. By default, the full path for theconfig entry is
+       constructed by combining the prefix returned by wxPControls::
+       GetSettingsPath() with the class specific part (e.g. "NotebookPages")
+       and then appending this parameter to it. But if the path starts with
+       a backslash, it's used as is so you can store the information anywhere
+       (but if you only want to change the common prefix which is the root for
+       all wxPControl entries you may just use wxPControls::SetSettingsPath)
 
     2. The last one is the config object to use, by default the global
        application one will be used which is the easiest (and so recommended)
@@ -107,7 +110,7 @@ public:
     void OnSize(wxSizeEvent& event);
 
 protected:
-    static const char *ms_pageKey;
+    static const char *ms_path;
 
     void RestorePage();
 
@@ -232,7 +235,7 @@ protected:
 
 private:
     // the config key where we store the sash position
-    static const char *ms_sashKey;
+    static const char *ms_path;
 };
 
 // ----------------------------------------------------------------------------
@@ -277,17 +280,20 @@ public:
         // when we're resized the first time we restore our page
     void OnSize(wxSizeEvent& event);
 
-protected:
-    // retrieve the column widths from config
+    // as an exception, these functions are public in this class to account
+    // for situations when the list ctrl columns are deleted and then
+    // recreated
+       // retrieve the column widths from config
     void RestoreWidths();
-    // save the column widths to config
+       // save the column widths to config
     void SaveWidths();
 
+protected:
     bool       m_bFirstTime;  // FIXME hack used in OnSize()
     wxPHelper *m_persist;
 
 private:
-    static const char *ms_listctrlKey;
+    static const char *ms_path;
 
     DECLARE_EVENT_TABLE()
 };
