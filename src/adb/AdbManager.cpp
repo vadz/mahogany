@@ -20,13 +20,14 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include "Mcommon.h"
-#   include "Profile.h"
-#   include "MApplication.h"
-#endif // USE_PCH
+#  include "Mcommon.h"
+#  include "Profile.h"
+#  include "MApplication.h"
 
-#include <wx/log.h>
-#include <wx/dynarray.h>
+#  include <wx/log.h>
+#  include <wx/config.h>
+#  include <wx/dynarray.h>
+#endif // USE_PCH
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
@@ -405,7 +406,10 @@ AdbBook *AdbManager::GetBook(size_t n) const
 // the time to do it right now...
 void AdbManager::LoadAll()
 {
-   Profile * conf = Profile::CreateProfile("AdbEditor");
+  wxConfigBase *conf = mApplication->GetProfile()->GetConfig();
+  wxString path;
+  path << '/' << ADB_CONFIG_PATH;
+  conf->SetPath(path);
 
   wxArrayString astrAdb, astrProv;
   RestoreArray(conf, astrAdb, "AddressBooks");
@@ -432,7 +436,6 @@ void AdbManager::LoadAll()
 
     SafeDecRef(pProvider);
   }
-  conf->DecRef();
 }
 
 void AdbManager::ClearCache()
