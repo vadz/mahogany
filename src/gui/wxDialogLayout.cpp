@@ -139,7 +139,7 @@ IMPLEMENT_ABSTRACT_CLASS(wxOptionsEditDialog, wxManuallyLaidOutDialog)
 long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win)
 {
    wxClientDC dc(win);
-   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+   dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
    long width, widthMax = 0;
 
    size_t nCount = labels.Count();
@@ -272,7 +272,6 @@ wxRadioBox *CreateRadioBox(wxWindow *parent,
    // split the "label" into the real label and the choices:
    wxString label = labelFull;
    wxArrayString choices = SplitLabelWithChoices(&label);
-   wxString *strings = choices.GetStringArray();
 
    wxLayoutConstraints *c;
 
@@ -295,10 +294,8 @@ wxRadioBox *CreateRadioBox(wxWindow *parent,
    //       a dirty hack
    wxRadioBox *radiobox = new wxRadioBox(parent, -1, _T(""),
                                          wxDefaultPosition, wxDefaultSize,
-                                         choices.GetCount(), strings,
+                                         choices,
                                          1, wxRA_SPECIFY_ROWS);
-
-   delete [] strings;
 
    radiobox->SetConstraints(c);
 
@@ -850,7 +847,6 @@ wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
    // split the "label" into the real label and the choices:
    wxString label = labelFull;
    wxArrayString choices = SplitLabelWithChoices(&label);
-   wxString *strings = choices.GetStringArray();
 
    wxLayoutConstraints *c;
 
@@ -878,19 +874,18 @@ wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
    {
       combobox = new wxComboBox(GetCanvas(), -1, _T(""),
                                 wxDefaultPosition, wxDefaultSize,
-                                choices.GetCount(), strings,
+                                choices,
                                 wxCB_DROPDOWN | wxCB_READONLY);
    }
    else
    {
       combobox = new wxChoice(GetCanvas(), -1,
                               wxDefaultPosition, wxDefaultSize,
-                              choices.GetCount(), strings);
+                              choices);
    }
 
 
    combobox->SetConstraints(c);
-   delete [] strings;
 
    return combobox;
 }

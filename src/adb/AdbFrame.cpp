@@ -1576,7 +1576,7 @@ void wxAdbEditFrame::LayoutButtons(wxPanel *panel,
 
   // first determine the longest button caption
   wxClientDC dc(this);
-  dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+  dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
   long width, widthMax = 0;
   for ( n = 0; n < nButtons; n++ ) {
     dc.GetTextExtent(aButtons[n]->GetLabel(), &width, NULL);
@@ -2480,7 +2480,7 @@ void wxAdbEditFrame::SetTreeItemIcon(const wxTreeItemId& id,
     return;
 
   m_treeAdb->SetItemImage(id, icon);
-  m_treeAdb->SetItemSelectedImage(id, icon);
+  m_treeAdb->SetItemImage(id, icon, wxTreeItemIcon_Selected);
 }
 
 void wxAdbEditFrame::OnTreeCollapse(wxTreeEvent& event)
@@ -2781,7 +2781,7 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   const wxChar *label = _("Find &what:");
   long widthLabel, heightLabel;
   wxClientDC dc(this);
-  dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+  dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
   dc.GetTextExtent(label, &widthLabel, &heightLabel);
 
   size_t heightText = TEXT_HEIGHT_FROM_LABEL(heightLabel);
@@ -2936,7 +2936,7 @@ wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
   // layout
   long widthLabel, heightLabel;
   wxClientDC dc(this);
-  dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+  dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
   dc.GetTextExtent(label, &widthLabel, &heightLabel);
 
   size_t widthText = widthLabel,
@@ -3041,7 +3041,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
 
   // first determine the longest label
   wxClientDC dc(this);
-  dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+  dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
   long widthLabel, heightLabel = 0, widthLabelMax = 0;
   for ( n = 0; n < WXSIZEOF(labels); n++ ) {
     labelsT[n] = wxGetTranslation(labels[n]);
@@ -3570,7 +3570,7 @@ wxListBox *wxAdbPage::CreateListBox(const wxChar *label, wxControl *last)
   // determine the longest button label
   size_t nBtn;
   wxClientDC dc(this);
-  dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+  dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
   long width, widthMax = 0;
   for ( nBtn = 0; nBtn < WXSIZEOF(aszLabels); nBtn++ ) {
     aszLabelsT[nBtn] = wxGetTranslation(aszLabels[nBtn]);
@@ -3632,7 +3632,7 @@ void wxAdbPage::LayoutControls(size_t nCount,
 
   // first determine the longest label
   wxClientDC dc(this);
-  dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+  dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
   long width, widthMax = 0;
   for ( n = 0; n < nCount; n++ ) {
     // do it only for text control labels

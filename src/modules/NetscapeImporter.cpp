@@ -920,7 +920,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
          {
            subFolder->SetTreeIndex(10);   // popsition folder after system folders
            folderList.Add(subFolder);
-           fileList.Remove(i);      // this one has been created, remove from filelist
+           fileList.RemoveAt(i);      // this one has been created, remove from filelist
            wxLogMessage(_("NOTE: >>>>>> Created 'AAA Misc' folder to contain the msgs currently in group folder %s."),
                         dirFldName.c_str());
          }

@@ -471,7 +471,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
   // layout
   long widthLabel, heightLabel;
   wxClientDC dc(this);
-  dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+  dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
   dc.GetTextExtent(strPrompt, &widthLabel, &heightLabel);
 
   long heightBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
@@ -3120,7 +3120,7 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
 
 #ifdef __WXMSW__
    m_frame->SetBackgroundColour(wxSystemSettings::
-                                GetSystemColour(wxSYS_COLOUR_BTNFACE));
+                                GetColour(wxSYS_COLOUR_BTNFACE));
 
    m_frame->EnableCloseButton(FALSE);
 #endif // __WXMSW__

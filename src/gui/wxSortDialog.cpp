@@ -123,7 +123,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                                              MH_DIALOG_SORTING);
 
    wxClientDC dc(this);
-   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+   dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
    long width, widthMax = 0;
 
    // see the comment near sortCriteria definition
