@@ -265,6 +265,8 @@ private:
       SpamOptionManagerBody *m_container;
       size_t m_index;
    };
+
+   friend class SpamOptionManagerBody::Iterator;
 };
 
 const SpamOptionManagerBody::PickMember SpamOptionManagerBody::ms_members[] =
