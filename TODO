@@ -9,7 +9,7 @@ $Id$
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
     + check printing example
   + scroll to cursor
-
+  + cut&paste, different cursor ofr focus/no focus
 
 - Profile/wxMDialogs
   + fix usage of readEntry to use String objects
