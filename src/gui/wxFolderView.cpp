@@ -1782,7 +1782,7 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 
    // constructing the menu may take a long time
    MBeginBusyCursor();
-   m_menu->Insert(0, WXMENU_POPUP_FOLDER_MENU, _("&Quick move"),
+   m_menu->Insert(0, WXMENU_POPUP_FOLDER_MENU, _("Qu&ick move"),
                   m_menuFolders->GetMenu());
    MEndBusyCursor();
 
