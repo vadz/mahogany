@@ -44,7 +44,12 @@ def GetUserName():
 ####################################################################
 
 def Minit():
-    msg = "Welcome, " + GetUserName() + ", to the wonderful world of M/Python integration!"
+    msg = "Welcome, " + GetUserName() + \
+          ", to the wonderful world of M/Python integration!\n" + \
+          "\n" + \
+          "You can disable Python in the \"Edit|Preferences...\" dialog\n" + \
+          "or edit Minit.py script to do something else in this startup\n" + \
+          "callback when you get tired of seeing this message."
     MDialogs.Message(msg)
 
 ####################################################################
