@@ -49,6 +49,7 @@
 
 #include "Composer.h"
 #include "Message.h"
+#include "Address.h"
 
 class MPersMsgBox;
 
@@ -1051,7 +1052,12 @@ MailFolder::ReplyMessage(Message *msg,
    {
       String to;
       msg->GetHeaderLine(_T("To"), to);
-      cv->SetFrom(to);
+
+      String from;
+      if ( ContainsOwnAddress(to, profile, OwnAddress_From, &from) )
+      {
+         cv->SetFrom(from);
+      }
    }
 
    cv->InitText(msg, params.msgview);
