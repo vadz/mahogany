@@ -56,12 +56,16 @@
 // constants
 // ----------------------------------------------------------------------------
 
-// control ids for wxFiltersDialog
+// control ids
 enum
 {
-   Button_Add = 0,
+   // for wxFiltersDialog
+   Button_Add = 100,
    Button_Delete,
    Button_Edit,
+
+   // for wxOneFilterDialog
+   Text_Program = 200
 };
 
 // the config entries under[Filters/N]
@@ -216,6 +220,7 @@ public:
    // event handlers
    void OnUpdateUI(wxUpdateUIEvent& event);
    void OnButton(wxCommandEvent& event);
+   void OnTextUpdate(wxCommandEvent& event);
 
 protected:
    void AddOneControl();
@@ -226,6 +231,9 @@ protected:
    // true if we have a simple (expressed with dialog controls) filter
    bool m_isSimple;
 
+   // true until the end of TransferDataToWindow()
+   bool m_initializing;
+
    // the new and original data describing the filter
    MFilterDesc *m_FilterData;
    MFilterDesc  m_OriginalFilterData;
@@ -234,12 +242,14 @@ protected:
    wxButton *m_ButtonLess,
             *m_ButtonMore;
 
+   wxStaticText *m_IfMessage,
+                *m_DoThis,
+                *m_msgCantEdit;
+
    // controls containing data
    wxTextCtrl *m_NameCtrl;
-   wxStaticText *m_IfMessage, *m_DoThis;
-   wxString  m_Name;
-   size_t   m_nControls;
 
+   size_t      m_nControls;
    class OneCritControl *m_CritControl[MAX_CONTROLS];
    class OneActionControl *m_ActionControl;
 
@@ -254,6 +264,7 @@ private:
 BEGIN_EVENT_TABLE(wxOneFilterDialog, wxManuallyLaidOutDialog)
    EVT_BUTTON(-1, wxOneFilterDialog::OnButton)
    EVT_UPDATE_UI(-1, wxOneFilterDialog::OnUpdateUI)
+   EVT_TEXT(Text_Program, wxOneFilterDialog::OnTextUpdate)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -301,6 +312,15 @@ public:
    static wxString TranslateToString(wxString & criterium);
 
    void UpdateUI();
+   void Disable()
+   {
+      m_Not->Disable();
+      m_Type->Disable();
+      m_Argument->Disable();
+      m_Where->Disable();
+      if ( m_Logical )
+         m_Logical->Disable();
+   }
 
    /// layout the current controls under the window *last
    void LayoutControls(wxWindow **last);
@@ -579,7 +599,22 @@ public:
    String GetArgument() const { return m_Argument->GetValue(); }
 
    void UpdateUI(void);
-   void LayoutControls(wxWindow **last);
+   void Hide()
+   {
+      m_Type->Hide();
+      m_Argument->Hide();
+      m_Button->Hide();
+   }
+   void Disable()
+   {
+      m_Type->Disable();
+      m_Argument->Disable();
+      m_Button->Disable();
+   }
+
+   void LayoutControls(wxWindow **last,
+                       int leftMargin = 8*LAYOUT_X_MARGIN,
+                       int rightMargin = 2*LAYOUT_X_MARGIN);
 
    /// translate a storage string into a proper rule
    static wxString TranslateToString(wxString & action);
@@ -668,18 +703,20 @@ OneActionControl::OneActionControl(wxWindow *parent)
 }
 
 void
-OneActionControl::LayoutControls(wxWindow **last)
+OneActionControl::LayoutControls(wxWindow **last,
+                                 int leftMargin,
+                                 int rightMargin)
 {
    wxLayoutConstraints *c = new wxLayoutConstraints;
 
-   c->left.SameAs(m_Parent, wxLeft, 8*LAYOUT_X_MARGIN);
+   c->left.SameAs(m_Parent, wxLeft, leftMargin);
    c->top.Below(*last, 2*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
    m_Type->SetConstraints(c);
 
    c = new wxLayoutConstraints;
-   c->right.SameAs(m_Parent, wxRight, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(m_Parent, wxRight, rightMargin);
    c->width.AsIs();
    c->top.SameAs(m_Type, wxTop, 0);
    c->height.AsIs();
@@ -736,6 +773,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
                                            "OneFilterDialog")
 {
    m_isSimple = true;
+   m_initializing = true;
    m_nControls = 0;
    m_FilterData = fd;
    SetDefaultSize(480, 280, TRUE );
@@ -769,7 +807,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
       m_NameCtrl->Disable();
 
    // the control allowing to edit directly the filter program
-   m_textProgram = new wxTextCtrl(this, -1,
+   m_textProgram = new wxTextCtrl(this, Text_Program,
                                   "",
                                   wxDefaultPosition, wxDefaultSize,
                                   wxTE_MULTILINE);
@@ -789,64 +827,68 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_Panel->SetConstraints(c);
    m_Panel->SetAutoLayout(TRUE);
 
+   m_OriginalFilterData = *m_FilterData;
+
    wxWindow *canvas = m_Panel->GetCanvas();
-
-   m_IfMessage = new wxStaticText(canvas,-1,_("If Message..."));
-
-   m_DoThis = new wxStaticText(canvas,-1,_("Then do this:"));
    m_ActionControl = new OneActionControl(canvas);
-
+   m_IfMessage = new wxStaticText(canvas, -1, _("If message..."));
+   m_DoThis = new wxStaticText(canvas, -1, _("Then do this:"));
    m_ButtonMore = new wxButton(canvas, -1, _(wxOneFButtonLabels[0]));
    m_ButtonLess = new wxButton(canvas, -1, _(wxOneFButtonLabels[1]));
 
-   m_OriginalFilterData = *m_FilterData;
+   SetDefaultSize(8*wBtn, 5*hBtn);
 }
 
 void
 wxOneFilterDialog::LayoutControls()
 {
-   wxWindow *last = NULL;
-   wxLayoutConstraints *c = new wxLayoutConstraints;
+   wxLayoutConstraints *c;
+   wxWindow *canvas = m_Panel->GetCanvas();
 
-   c->left.SameAs(m_Panel->GetCanvas(), wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(m_Panel->GetCanvas(), wxTop, 2*LAYOUT_Y_MARGIN);
-   c->width.AsIs();
-   c->height.AsIs();
-   m_IfMessage->SetConstraints(c);
-
-   last = m_IfMessage;
-
-   for(size_t idx = 0; idx < m_nControls; idx++)
+   if ( m_isSimple )
    {
-      m_CritControl[idx]->LayoutControls(&last);
+      wxWindow *last = NULL;
+
+      c = new wxLayoutConstraints;
+      c->left.SameAs(canvas, wxLeft, 2*LAYOUT_X_MARGIN);
+      c->top.SameAs(canvas, wxTop, 2*LAYOUT_Y_MARGIN);
+      c->width.AsIs();
+      c->height.AsIs();
+      m_IfMessage->SetConstraints(c);
+
+      last = m_IfMessage;
+      for ( size_t idx = 0; idx < m_nControls; idx++ )
+      {
+         m_CritControl[idx]->LayoutControls(&last);
+      }
+
+      c = new wxLayoutConstraints();
+      c->left.SameAs(canvas, wxLeft, 2*LAYOUT_X_MARGIN);
+      c->top.Below(last, 2*LAYOUT_Y_MARGIN);
+      c->width.AsIs();
+      c->height.AsIs();
+      m_DoThis->SetConstraints(c);
+
+      last = m_DoThis;
+      m_ActionControl->LayoutControls(&last);
+
+      c = new wxLayoutConstraints;
+      c->left.SameAs(canvas, wxLeft, 2*LAYOUT_X_MARGIN);
+      c->top.Below(last, 2*LAYOUT_Y_MARGIN);
+      c->width.Absolute(wBtn);
+      c->height.AsIs();
+      m_ButtonMore->SetConstraints(c);
+
+      c = new wxLayoutConstraints;
+      c->left.RightOf(m_ButtonMore, 2*LAYOUT_X_MARGIN);
+      c->top.Below(last, 2*LAYOUT_Y_MARGIN);
+      c->width.Absolute(wBtn);
+      c->height.AsIs();
+      m_ButtonLess->SetConstraints(c);
+
+      m_Panel->ForceLayout();
+      Layout();
    }
-
-   c = new wxLayoutConstraints();
-   c->left.SameAs(m_Panel->GetCanvas(), wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.Below(last, 2*LAYOUT_Y_MARGIN);
-   c->width.AsIs();
-   c->height.AsIs();
-   m_DoThis->SetConstraints(c);
-
-   last = m_DoThis;
-   m_ActionControl->LayoutControls(&last);
-
-   c = new wxLayoutConstraints;
-   c->left.SameAs(m_Panel->GetCanvas(), wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.Below(last, 2*LAYOUT_Y_MARGIN);
-   c->width.Absolute(wBtn);
-   c->height.AsIs();
-   m_ButtonMore->SetConstraints(c);
-
-   c = new wxLayoutConstraints;
-   c->left.RightOf(m_ButtonMore, 2*LAYOUT_X_MARGIN);
-   c->top.Below(last, 2*LAYOUT_Y_MARGIN);
-   c->width.Absolute(wBtn);
-   c->height.AsIs();
-   m_ButtonLess->SetConstraints(c);
-
-   m_Panel->ForceLayout();
-   Layout();
 }
 
 void
@@ -857,7 +899,6 @@ wxOneFilterDialog::AddOneControl()
    m_CritControl[m_nControls] = new OneCritControl(m_Panel->GetCanvas(),
                                                    m_nControls == 0);
    m_nControls++;
-   LayoutControls();
 }
 
 
@@ -867,21 +908,47 @@ wxOneFilterDialog::RemoveOneControl()
    ASSERT(m_nControls > 1);
    m_nControls--;
    delete m_CritControl[m_nControls];
-   LayoutControls();
 }
 
 void
 wxOneFilterDialog::OnUpdateUI(wxUpdateUIEvent& event)
 {
-   for(size_t idx = 0; idx < m_nControls; idx++)
+   if ( m_isSimple )
    {
-      m_CritControl[idx]->UpdateUI();
+      for ( size_t idx = 0; idx < m_nControls; idx++ )
+      {
+         m_CritControl[idx]->UpdateUI();
+      }
+
+      m_ActionControl->UpdateUI();
+      m_ButtonLess->Enable(m_nControls > 1);
+      m_ButtonMore->Enable(m_nControls < MAX_CONTROLS);
    }
-   m_ActionControl->UpdateUI();
-   m_ButtonLess->Enable(m_nControls > 1);
-   m_ButtonMore->Enable(m_nControls < MAX_CONTROLS);
-   FindWindow(wxID_OK)->Enable(
-      (m_NameCtrl->GetValue().Length() !=0) );
+
+   FindWindow(wxID_OK)->Enable( m_NameCtrl->GetValue().Length() != 0 );
+}
+
+void
+wxOneFilterDialog::OnTextUpdate(wxCommandEvent& event)
+{
+   // catches the case of SetValue() from TransferDataToWindow()
+   if ( m_initializing )
+   {
+      return;
+   }
+
+   // disable all the other controls
+   for ( size_t idx = 0; idx < m_nControls; idx++ )
+   {
+      m_CritControl[idx]->Disable();
+   }
+
+   m_ActionControl->Disable();
+   m_ButtonLess->Disable();
+   m_ButtonMore->Disable();
+
+   // and set the flag telling us to use the program text and not the controls
+   m_isSimple = false;
 }
 
 void
@@ -898,7 +965,11 @@ wxOneFilterDialog::OnButton(wxCommandEvent &event)
    else
    {
       event.Skip();
+
+      return;
    }
+
+   LayoutControls();
 }
 
 bool
@@ -918,16 +989,38 @@ wxOneFilterDialog::TransferDataToWindow()
 
       m_ActionControl->SetValues(*settings);
 
-      LayoutControls();
-
       // show the program text too
       m_textProgram->SetValue(settings->WriteRule());
-
       settings->DecRef();
+
+      m_initializing = false;
+
+      LayoutControls();
    }
    else if ( !m_FilterData->IsEmpty() )
    {
+      m_ActionControl->Hide();
+      m_ButtonMore->Hide();
+      m_ButtonLess->Hide();
+      m_IfMessage->Hide();
+      m_DoThis->Hide();
+
       m_isSimple = false;
+      m_initializing = false;
+
+      wxWindow *canvas = m_Panel->GetCanvas();
+      m_msgCantEdit = new wxStaticText(canvas, -1,
+                                       _("This filter rule can only be "
+                                         "edited directly."));
+      wxLayoutConstraints *c = new wxLayoutConstraints;
+      c->centreY.SameAs(canvas, wxCentreY);
+      c->centreX.SameAs(canvas, wxCentreX);
+      c->width.AsIs();
+      c->height.AsIs();
+      m_msgCantEdit->SetConstraints(c);
+
+      m_Panel->ForceLayout();
+      Layout();
 
       m_textProgram->SetValue(m_FilterData->GetProgram());
    }
@@ -1319,6 +1412,165 @@ bool wxFolderFiltersDialog::TransferDataFromWindow()
 }
 
 // ----------------------------------------------------------------------------
+// wxQuickFilterDialog
+// ----------------------------------------------------------------------------
+
+class wxQuickFilterDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxQuickFilterDialog(MFolder *folder,
+                       const String& from,
+                       const String& subject,
+                       wxWindow *parent);
+
+   virtual ~wxQuickFilterDialog();
+
+   virtual bool TransferDataFromWindow();
+
+private:
+   // GUI controls
+   wxCheckBox *m_checkSubj,
+              *m_checkFrom;
+   wxTextCtrl *m_textSubj,
+              *m_textFrom;
+
+   OneActionControl *m_action;
+
+   MFolder *m_folder;
+};
+
+wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
+                                         const String& from,
+                                         const String& subject,
+                                         wxWindow *parent)
+                   : wxManuallyLaidOutDialog(parent,
+                                             _("Create quick filter"),
+                                             "QuickFilter")
+{
+   m_folder = folder;
+   m_folder->IncRef();
+
+   wxLayoutConstraints *c;
+
+   wxStaticBox *box = CreateStdButtonsAndBox("");
+
+   wxStaticText *msg = new wxStaticText
+                           (
+                            this, -1,
+                            _("Apply this filter only if ...")
+                           );
+
+   c = new wxLayoutConstraints;
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   msg->SetConstraints(c);
+
+   wxArrayString labels;
+   labels.Add(_("the message was sent from"));
+   labels.Add(_("the message subject contains"));
+   long widthMax = GetMaxLabelWidth(labels, this) + 4*LAYOUT_X_MARGIN;
+
+   m_textFrom = new wxTextCtrl(this, -1, from);
+   c = new wxLayoutConstraints;
+   c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN + widthMax + LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   m_textFrom->SetConstraints(c);
+
+   m_checkFrom = new wxCheckBox(this, -1, labels[0]);
+   c = new wxLayoutConstraints;
+   c->centreY.SameAs(m_textFrom, wxCentreY);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   m_checkFrom->SetConstraints(c);
+
+   m_textSubj = new wxTextCtrl(this, -1, subject);
+   c = new wxLayoutConstraints;
+   c->top.Below(m_textFrom, LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN + widthMax + LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   m_textSubj->SetConstraints(c);
+
+   m_checkSubj = new wxCheckBox(this, -1, labels[1]);
+   c = new wxLayoutConstraints;
+   c->centreY.SameAs(m_textSubj, wxCentreY);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   m_checkSubj->SetConstraints(c);
+
+   m_action = new OneActionControl(this);
+
+   wxWindow *last = m_checkSubj;
+   m_action->LayoutControls(&last, 2*LAYOUT_X_MARGIN, 3*LAYOUT_X_MARGIN);
+
+   SetDefaultSize(4*wBtn, 4*hBtn);
+}
+
+bool wxQuickFilterDialog::TransferDataFromWindow()
+{
+   MFDialogSettings *settings = NULL;
+   String name,
+          from = m_textFrom->GetValue(),
+          subj = m_textSubj->GetValue();
+
+   if ( m_checkFrom->GetValue() && !!from )
+   {
+      if ( !settings )
+         settings = MFDialogSettings::Create();
+
+      settings->AddTest(ORC_L_And, false, ORC_T_Contains, ORC_W_From, from);
+
+      if ( !!name )
+         name << ' ';
+      name << _("from ") << from;
+   }
+   if ( m_checkSubj->GetValue() && !!subj )
+   {
+      if ( !settings )
+         settings = MFDialogSettings::Create();
+
+      settings->AddTest(ORC_L_And, false, ORC_T_Contains, ORC_W_Subject, subj);
+
+      if ( !!name )
+         name << ' ';
+      name << _("subject ") << subj;
+   }
+
+   if ( !settings )
+   {
+      MDialog_ErrorMessage(_("Please specify either subject or address "
+                             "to create the filter."), this);
+
+      return false;
+   }
+
+   settings->SetAction(m_action->GetAction(), m_action->GetArgument());
+
+   name.Prepend(_("quick filter "));
+
+   MFilter_obj filter(name);
+   MFilterDesc fd;
+   fd.SetName(name);
+   fd.Set(settings);
+   filter->Set(fd);
+
+   m_folder->AddFilter(name);
+
+   return true;
+}
+
+wxQuickFilterDialog::~wxQuickFilterDialog()
+{
+   m_folder->DecRef();
+}
+
+// ----------------------------------------------------------------------------
 // exported function
 // ----------------------------------------------------------------------------
 
@@ -1342,6 +1594,15 @@ bool ConfigureFilter(MFilterDesc *filterDesc,
 {
    wxOneFilterDialog dlg(filterDesc, parent);
    return dlg.ShowModal() == wxID_OK && dlg.HasChanges();
+}
+
+extern bool CreateQuickFilter(MFolder *folder,
+                              const String& from,
+                              const String& subject,
+                              wxWindow *parent)
+{
+   wxQuickFilterDialog dlg(folder, from, subject, parent);
+   return dlg.ShowModal() == wxID_OK;
 }
 
 extern

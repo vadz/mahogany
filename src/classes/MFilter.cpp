@@ -471,13 +471,15 @@ public:
    virtual void Set(const MFilterDesc& fd)
    {
       m_Name = fd.GetName();
+      SafeDecRef(m_Settings);
       if ( fd.IsSimple() )
       {
-         SafeDecRef(m_Settings);
          m_Settings = (MFDialogSettingsImpl *)fd.GetSettings();
+         m_Rule.clear();
       }
       else
       {
+         m_Settings = NULL;
          m_Rule = fd.GetProgram();
       }
 
@@ -495,7 +497,8 @@ protected:
          m_Profile = p;
          m_Name = p->readEntry("Name", "");
          m_SettingsStr = p->readEntry("Settings", "");
-         m_Rule = p->readEntry("Rule", "");
+         if ( !m_SettingsStr )
+            m_Rule = p->readEntry("Rule", "");
          m_Settings = NULL;
          m_dirty = false;
       }
@@ -507,9 +510,14 @@ protected:
             // write the values to the profile
             m_Profile->writeEntry("Name", m_Name);
             if ( m_Settings )
+            {
                m_Profile->writeEntry("Settings", m_Settings->WriteSettings());
+            }
             else
+            {
+               m_Profile->DeleteEntry("Settings");
                m_Profile->writeEntry("Rule", m_Rule);
+            }
          }
 
          SafeDecRef(m_Settings);

@@ -1602,8 +1602,12 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
 
    case WXMENU_MSG_QUICK_FILTER:
-      // create a filter for the currently selected message
-      FAIL_MSG("TODO");
+      GetSelections(selections);
+      if ( selections.Count() > 0 )
+      {
+         // create a filter for the (first of) currently selected message(s)
+         m_TicketList->Add(m_ASMailFolder->GetMessage(selections[0], this));
+      }
       break;
 
    case WXMENU_MSG_FILTER:
@@ -2114,6 +2118,21 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
       case ASMailFolder::Op_ForwardMessages:
       case ASMailFolder::Op_DeleteMessages:
       case ASMailFolder::Op_UnDeleteMessages:
+         break;
+
+      case ASMailFolder::Op_GetMessage:
+         // so far we only use GetMessage() when processing
+         // WXMENU_MSG_QUICK_FILTER
+         {
+            Message *msg = ((ASMailFolder::ResultMessage *)result)->GetMessage();
+            if ( msg )
+            {
+               MFolder_obj folder(m_folderName);
+
+               CreateQuickFilter(folder, msg->From(), msg->Subject(), m_FolderCtrl);
+               msg->DecRef();
+            }
+         }
          break;
 
       default:

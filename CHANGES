@@ -1,6 +1,7 @@
 (next release) on (date of next release)
 06.07.00 VZ: almost complete rewrite of (user visible aspects of) filter code,
-             there are now several dialogs for filter editing
+             there are now several dialogs for filter editing,
+             also added "Quick filter" dialog
 05.07.00 VZ: made sending a test message during installation optional
 04.07.00 VZ: added "reverse order" checkboxes to sort dialog, made possible to
              reverse sort by arrival order

@@ -43,6 +43,12 @@ extern bool ConfigureFiltersForFolder(MFolder *folder, wxWindow *parent = NULL);
 extern bool ConfigureFilter(MFilterDesc *filterDesc,
                             wxWindow *parent = NULL);
 
+/// allows to create a filter from the subject/from values
+extern bool CreateQuickFilter(MFolder *folder,
+                              const String& from,
+                              const String& subject,
+                              wxWindow *parent = NULL);
+
 /// write the filter to the given profile
 extern
 bool SaveSimpleFilter(Profile *profile,
