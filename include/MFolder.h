@@ -169,6 +169,12 @@ public:
       /// folder class: cclient or virtual currently, default "" == cclient
    virtual String GetClass() const = 0;
 
+      /// set the folder file format (only for MF_FILE folders)
+   virtual void SetFileMboxFormat(FileMailboxFormat format) = 0;
+
+      /// get the folder file format (only for MF_FILE folders)
+   virtual FileMailboxFormat GetFileMboxFormat() const = 0;
+
       /**
         the icon index for this folder or -1 if there is no specific icon
         associated to it (the icon index should be used to pass it to

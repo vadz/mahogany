@@ -55,6 +55,7 @@ WX_DEFINE_ARRAY(MFolder *, wxArrayFolder);
 
 extern const MOption MP_FOLDER_CLASS;
 extern const MOption MP_FOLDER_COMMENT;
+extern const MOption MP_FOLDER_FILE_DRIVER;
 extern const MOption MP_FOLDER_FILTERS;
 extern const MOption MP_FOLDER_ICON;
 extern const MOption MP_FOLDER_ICON_D;
@@ -106,6 +107,8 @@ public:
       m_type = type;
       m_flags = 0;
 
+      m_format = FileMbox_Max;
+
       m_profile = profile ? profile : mApplication->GetProfile();
       m_profile->IncRef();
    }
@@ -145,6 +148,12 @@ public:
    virtual String GetPassword() const { return m_password; }
    virtual void SetAuthInfo(const String& login, const String& password)
       { m_login = login; m_password = password; }
+
+   virtual void SetFileMboxFormat(FileMailboxFormat format)
+   {
+      m_format = format;
+   }
+   virtual FileMailboxFormat GetFileMboxFormat() const { return m_format; }
 
    virtual String GetName() const { return m_fullname.AfterLast('/'); }
    virtual wxString GetFullName() const { return m_fullname; }
@@ -197,6 +206,8 @@ private:
 
    int m_flags;
 
+   FileMailboxFormat m_format;
+
    Profile *m_profile;
 };
 
@@ -247,6 +258,9 @@ public:
    virtual String GetLogin() const;
    virtual String GetPassword() const;
    virtual void SetAuthInfo(const String& login, const String& password);
+
+   virtual void SetFileMboxFormat(FileMailboxFormat format);
+   virtual FileMailboxFormat GetFileMboxFormat() const;
 
    virtual String GetName() const;
    virtual wxString GetFullName() const { return m_folderName; }
@@ -752,6 +766,16 @@ MFolderFromProfile::SetAuthInfo(const String& login, const String& password)
 {
    m_profile->writeEntry(MP_FOLDER_LOGIN, login);
    m_profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(password));
+}
+
+void MFolderFromProfile::SetFileMboxFormat(FileMailboxFormat format)
+{
+   m_profile->writeEntry(MP_FOLDER_FILE_DRIVER, format);
+}
+
+FileMailboxFormat MFolderFromProfile::GetFileMboxFormat() const
+{
+   return (FileMailboxFormat)(long)READ_CONFIG(m_profile, MP_FOLDER_FILE_DRIVER);
 }
 
 MFolderType MFolderFromProfile::GetType() const
