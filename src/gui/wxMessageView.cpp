@@ -205,11 +205,7 @@ public:
       Append(WXMENU_MIME_INFO, _("&Info..."));
       AppendSeparator();
       Append(WXMENU_MIME_OPEN, _("&Open"));
-
-#if 0 // TODO
       Append(WXMENU_MIME_OPEN_WITH, _("Open &with..."));
-#endif // 0
-
       Append(WXMENU_MIME_SAVE, _("&Save..."));
       Append(WXMENU_MIME_VIEW_AS_TEXT, _("&View as text..."));
    }
@@ -329,6 +325,10 @@ MimePopup::OnCommandEvent(wxCommandEvent &event)
 
       case WXMENU_MIME_OPEN:
          m_MessageView->MimeHandle(m_PartNo);
+         break;
+
+      case WXMENU_MIME_OPEN_WITH:
+         m_MessageView->MimeOpenWith(m_PartNo);
          break;
 
       case WXMENU_MIME_VIEW_AS_TEXT:
@@ -1374,7 +1374,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    if ( wxMimeTypesManager::IsOfType(mimetype, "MESSAGE/*") )
    {
 #if 0
-      // It´s a pity, but creating a MessageCC from a string doesn´t
+      // It's a pity, but creating a MessageCC from a string doesn't
       // quite work yet. :-(
       unsigned long len;
       char const *content = m_mailMessage->GetPartContent(mimeDisplayPart, &len);
@@ -1439,11 +1439,14 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       filename = wxGetTempFileName("Mtemp"),
       filename2 = "";
 
-   // get the standard extension for such files
    wxString ext;
-   if ( fileType != NULL ) {
+   wxSplitPath(filenameOrig, NULL, NULL, &ext);
+   // get the standard extension for such files if there is no real one
+   if ( fileType != NULL && !ext)
+   {
       wxArrayString exts;
-      if ( fileType->GetExtensions(exts) && exts.GetCount() ) {
+      if ( fileType->GetExtensions(exts) && exts.GetCount() )
+      {
          ext = exts[0u];
       }
    }
@@ -1592,6 +1595,98 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       }
    }
 }
+
+void
+wxMessageView::MimeOpenWith(int mimeDisplayPart)
+{
+   // we'll need this filename later
+   wxString filenameOrig = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
+
+   String mimetype = m_mailMessage->GetPartMimeType(mimeDisplayPart);
+   wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
+
+   wxFileType *fileType = NULL;
+   fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
+
+   String filename = wxGetTempFileName("Mtemp");
+
+   wxString ext;
+   wxSplitPath(filenameOrig, NULL, NULL, &ext);
+   // get the standard extension for such files if there is no real one
+   if ( fileType != NULL && !ext )
+   {
+      wxArrayString exts;
+      if ( fileType->GetExtensions(exts) && exts.GetCount() )
+      {
+         ext = exts[0u];
+      }
+   }
+
+   // under Windows some programs will do different things depending on the
+   // extensions of the input file (case in point: WinZip), so try to choose a
+   // correct one
+   wxString path, name, extOld;
+   wxSplitPath(filename, &path, &name, &extOld);
+   if ( extOld != ext )
+   {
+      // Windows creates the temp file even if we didn't use it yet
+      if ( !wxRemoveFile(filename) )
+      {
+         wxLogDebug("Warning: stale temp file '%s' will be left.",
+                    filename.c_str());
+      }
+
+      filename = path + wxFILE_SEP_PATH + name;
+      filename << '.' << ext;
+   }
+
+   MailMessageParameters params(filename, mimetype,
+                                m_mailMessage, mimeDisplayPart);
+
+   String command;
+   // ask the user for the command to use
+   String prompt;
+   prompt.Printf(_("Please enter the command to handle '%s' data:"),
+                 mimetype.c_str());
+   if ( !MInputBox(&command, _("Open with"), prompt,
+                   this, "MimeHandler") )
+   {
+      // cancelled by user
+      return;
+   }
+
+   if ( command.IsEmpty() )
+   {
+      wxLogWarning(_("Do not know how to handle data of type '%s'."),
+                   mimetype.c_str());
+   }
+   else
+   {
+      // the command must contain exactly one '%s' format specificator!
+      String specs = strutil_extract_formatspec(command);
+      if ( specs.IsEmpty() )
+      {
+         // at least the filename should be there!
+         command += " %s";
+      }
+
+      // do expand it
+      command = wxFileType::ExpandCommand(command, params);
+
+   }
+
+   if ( ! command.IsEmpty() )
+   {
+      if ( MimeSave(mimeDisplayPart,filename) )
+      {
+         wxString errmsg;
+         errmsg.Printf(_("Error opening attachment: command '%s' failed"),
+                       command.c_str());
+         (void)LaunchProcess(command, errmsg, filename);
+      }
+   }
+}
+
 
 bool
 wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)

@@ -205,6 +205,9 @@ protected:
    /// handles the currently selected MIME content
    void MimeHandle(int num);
 
+   /// "Opens With..." attachment
+   void MimeOpenWith(int num);
+
    /// saves the currently selected MIME content
    bool MimeSave(int num, const char *filename = NULL);
 
