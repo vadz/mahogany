@@ -182,7 +182,7 @@ protected:
    void Update();
 
    /// forget the currently shown folder
-   void Clear();
+   void Clear(bool keepTheViewer = false);
 
    /// set the folder to show, can't be NULL (unlike in SetFolder)
    void ShowFolder(MailFolder *mf);

@@ -342,13 +342,6 @@ protected:
 
    //@}
 
-   /**
-      Default viewer creation: we must always have at least this viewer
-      available even if no others can be found (they live in modules). This is
-      also the viewer we use when there is no folder selected
-   */
-   virtual MessageViewer *CreateDefaultViewer() const = 0;
-
 private:
    /** @name Preview data */
    //@{
@@ -565,6 +558,16 @@ private:
 
    /// create the viewer we'll use
    void CreateViewer(wxWindow *parent);
+
+   /// set the viewer (may be NULL, then CreateDefaultViewer() is used)
+   void SetViewer(MessageViewer *viewer, wxWindow *parent);
+
+   /**
+      Default viewer creation: we must always have at least this viewer
+      available even if no others can be found (they live in modules). This is
+      also the viewer we use when there is no folder selected
+   */
+   virtual MessageViewer *CreateDefaultViewer() const = 0;
 
    /// the viewer we use
    MessageViewer *m_viewer;

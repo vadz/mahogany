@@ -415,12 +415,30 @@ size_t MessageView::GetAllAvailableViewers(wxArrayString *names,
 }
 
 void
+MessageView::SetViewer(MessageViewer *viewer, wxWindow *parent)
+{
+   if ( !viewer )
+   {
+      // having a dummy viewer which simply doesn't do anything is
+      // simpler/cleaner than inserting "if ( m_viewer )" checks everywhere
+      viewer = CreateDefaultViewer();
+
+      ASSERT_MSG( viewer, "must have default viewer, will crash without it!" );
+   }
+
+   viewer->Create(this, parent);
+
+   OnViewerChange(m_viewer, viewer);
+   if ( m_viewer )
+      delete m_viewer;
+
+   m_viewer = viewer;
+}
+
+void
 MessageView::CreateViewer(wxWindow *parent)
 {
-   // we'll delete it below, after calling OnViewerChange()
-   MessageViewer *viewerOld = m_viewer;
-
-   m_viewer = NULL;
+   MessageViewer *viewer = NULL;
 
    MModuleListing *listing =
       MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
@@ -469,31 +487,14 @@ MessageView::CreateViewer(wxWindow *parent)
 
       if ( viewerFactory )
       {
-         m_viewer = ((MessageViewerFactory *)viewerFactory)->Create();
+         viewer = ((MessageViewerFactory *)viewerFactory)->Create();
          viewerFactory->DecRef();
       }
 
       listing->DecRef();
    }
 
-   if ( !m_viewer )
-   {
-      // create a dummy viewer to avoid crashing when accessing m_viewer
-      // pointer: it may seem strange to do it like this but consider that it
-      // really is never supposed to happen and it is easier to just check for
-      // it once here than to insert "if ( m_viewer )" tests everywhere
-      m_viewer = CreateDefaultViewer();
-
-      ASSERT_MSG( m_viewer, "must have default viewer, will crash without it!" );
-   }
-
-   m_viewer->Create(this, parent);
-
-   OnViewerChange(viewerOld, m_viewer);
-   if ( viewerOld )
-   {
-      delete viewerOld;
-   }
+   SetViewer(viewer, parent);
 }
 
 MessageView::~MessageView()
@@ -2584,9 +2585,17 @@ MessageView::SetFolder(ASMailFolder *asmf)
    if ( m_asyncFolder )
       m_asyncFolder->IncRef();
 
-   // use the settings for this folder now (or, on the contrary, revert to the
-   // default ones if we don't have any folder any more)
-   UpdateProfileValues();
+   if ( m_asyncFolder )
+   {
+      // use the settings for this folder now 
+      UpdateProfileValues();
+   }
+   else // no folder
+   {
+      // on the contrary, revert to the default ones if we don't have any
+      // folder any more
+      SetViewer(NULL, GetWindow()->GetParent());
+   }
 
    ResetUserEncoding();
 }

@@ -922,12 +922,16 @@ void wxFolderMsgWindow::SetViewerWindow(wxWindow *winViewerNew)
    }
    else // we didn't have any viewer window before
    {
-      Profile_obj profile(m_folderView->GetFolderProfile());
-
-      if ( READ_CONFIG(profile, MP_MSGVIEW_SHOWBAR) )
+      if ( m_folderView->GetFolder() )
       {
-         CreateViewerBar();
+         Profile_obj profile(m_folderView->GetFolderProfile());
+
+         if ( READ_CONFIG(profile, MP_MSGVIEW_SHOWBAR) )
+         {
+            CreateViewerBar();
+         }
       }
+      //else: don't create the viewer bar if we don't have any folder
    }
 
    m_winViewer = winViewerNew;
@@ -1069,10 +1073,22 @@ void wxFolderMsgWindow::UpdateOptions()
       return;
    }
 
-   Profile_obj profile(m_folderView->GetFolderProfile());
+   bool hasBar = m_winBar != NULL;
+   bool toggleBar;
+   if ( m_folderView->GetFolder() )
+   {
+      Profile_obj profile(m_folderView->GetFolderProfile());
 
-   // folder options have changed, do we need to update?
-   if ( READ_CONFIG_BOOL(profile, MP_MSGVIEW_SHOWBAR) != (m_winBar != NULL) )
+      // folder options have changed, do we need to update?
+      toggleBar = READ_CONFIG_BOOL(profile, MP_MSGVIEW_SHOWBAR) != hasBar;
+   }
+   else // no folder
+   {
+      // hide the viewer bar only if we show it
+      toggleBar = hasBar;
+   }
+
+   if ( toggleBar )
    {
       if ( m_winBar )
          DeleteViewerBar();
@@ -1082,7 +1098,7 @@ void wxFolderMsgWindow::UpdateOptions()
       Resize();
    }
 
-   // also update the selection
+   // also update the selection in the choice control
    if ( m_winBar )
    {
       UpdateViewerBar();
@@ -3142,7 +3158,7 @@ wxFolderView::Update()
 }
 
 void
-wxFolderView::Clear()
+wxFolderView::Clear(bool keepTheViewer)
 {
    // really clear the GUI
    m_FolderCtrl->DeleteAllItems();
@@ -3197,6 +3213,12 @@ wxFolderView::Clear()
       m_ASMailFolder = NULL;
 
       m_msgCmdProc->SetFolder(NULL);
+
+      if ( !keepTheViewer && m_MessagePreview )
+      {
+         m_MessagePreview->SetFolder(NULL);
+         m_MessageWindow->UpdateOptions();
+      }
    }
    //else: no old folder
 
@@ -3278,7 +3300,10 @@ wxFolderView::SetFolder(MailFolder *mf)
       mf->IncRef();
    }
 
-   Clear();
+   // keep the viewer (by passing true to Clear()) only if we're going to open
+   // a new folder soon: this avoids flicker but still ensures that we close
+   // the current viewer if we are not going to open any folder
+   Clear(mf != NULL);
 
    if ( mf )
    {
