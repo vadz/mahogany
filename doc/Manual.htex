@@ -1672,7 +1672,7 @@ the program to use this for some of the settings. Like that, you can
 share the program settings no matter from where you run Mahogany and
 you do not need to manually adjust both configurations.
 
-To use this option, first create a mailbox on an IMAP server. Do not
+To use this option, first create a folder on an IMAP server. Do not
 use a POP3 server, as the program cannot store information via POP3,
 IMAP is required for this to work. Then, activate the {}``Sync options
 with remote server{}'' setting and choose which settings you wish
@@ -2602,9 +2602,9 @@ box and continue collecting all mail from there and move it to the
 Follow the rules for setting up POP3 access\ref{POP3} but set the
 folder type to be {}``IMAP folder{}''. Then enter the name of your
 IMAP server, your username and password (or leave it empty to be asked
-later) for that server and, optionally, the path to the mailbox on
+later) for that server and, optionally, the path to the folder on
 the IMAP server. You can leave the path empty, and it will use the
-default mailbox (INBOX).
+default folder (INBOX).
 
 If you want to access many IMAP folders on the same server, or a directory
 there, you can create foldertree entries representing the IMAP server

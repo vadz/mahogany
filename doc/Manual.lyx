@@ -4379,13 +4379,13 @@ Mahogany can automatically save a subset of its configuration settings in
  systems, e.g.
  if sometimes from the office and some other times from home over a dialup
  link.
- In this case, you can save some settings in a special IMAP folder and
- tell the program to use this for some of the settings.
+ In this case, you can save some settings in a special IMAP folder and tell
+ the program to use this for some of the settings.
  Like that, you can share the program settings no matter from where you
  run Mahogany and you do not need to manually adjust both configurations.
 \layout Standard
 
-To use this option, first create a mailbox on an IMAP server.
+To use this option, first create a folder on an IMAP server.
  Do not use a POP3 server, as the program cannot store information via POP3,
  IMAP is required for this to work.
  Then, activate the 
@@ -4405,7 +4405,7 @@ Sync options with remote server
 Sync Filter Rules
 \series default 
 : This keeps the global list of all filter rules synchronised via the IMAP
- mailbox.
+ folder.
  Very useful if you want to use the same set of filter rules no matter where
  you run Mahogany.
 \layout Itemize
@@ -6769,8 +6769,8 @@ IMAP folder
 .
  Then enter the name of your IMAP server, your username and password (or
  leave it empty to be asked later) for that server and, optionally, the
- path to the mailbox on the IMAP server.
- You can leave the path empty, and it will use the default mailbox (INBOX).
+ path to the folder on the IMAP server.
+ You can leave the path empty, and it will use the default folder (INBOX).
 \layout Standard
 
 If you want to access many IMAP folders on the same server, or a directory
