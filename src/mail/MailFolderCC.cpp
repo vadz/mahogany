@@ -1351,10 +1351,10 @@ MailFolderCC::Ping(void)
             // where to we move the mails?
             String newMailFolder = READ_CONFIG(m_Profile,
                                                MP_NEWMAIL_FOLDER);
-            if(! SaveMessages(&selections,
-                              newMailFolder,
-                              true /* isProfile */,
-                              false /* update count */))
+            if(SaveMessages(&selections,
+                            newMailFolder,
+                            true /* isProfile */,
+                            false /* update count */))
             {
                DeleteMessages(&selections);
                ExpungeMessages();
@@ -1451,18 +1451,17 @@ MailFolderCC::UnLock(void) const
 
 
 bool
-MailFolderCC::AppendMessage(String const &msg)
+MailFolderCC::AppendMessage(String const &msg, bool update)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    STRING str;
 
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
-   ProcessEventQueue();
+   if(update) ProcessEventQueue();
 
-   bool rc = ( mail_append(
-      m_MailStream, (char *)m_ImapSpec.c_str(), &str)
-               != 0);
+   bool rc = mail_append(
+      m_MailStream, (char *)m_ImapSpec.c_str(), &str);
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
    else
@@ -1484,13 +1483,16 @@ MailFolderCC::AppendMessage(String const &msg)
       (void) ApplyFilterRules(uidarr);
 #endif
    }
-   ProcessEventQueue();
-   ApplyFilterRules(TRUE);
+   if(update)
+   {
+     ProcessEventQueue();
+     ApplyFilterRules(TRUE);
+   }
    return rc;
 }
 
 bool
-MailFolderCC::AppendMessage(Message const &msg)
+MailFolderCC::AppendMessage(Message const &msg, bool update)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
