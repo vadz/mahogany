@@ -61,6 +61,7 @@
 #include <wx/process.h>
 #include <wx/mimetype.h>
 #include <wx/tokenzr.h>
+#include <wx/textbuf.h>
 
 #include "wx/persctrl.h"
 
