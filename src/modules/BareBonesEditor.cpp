@@ -834,7 +834,6 @@ unsigned long BareBonesEditor::ComputeHash() const
 void BareBonesEditor::Clear()
 {
    m_textControl->Clear();
-   m_textControl->DiscardEdits();
 }
 
 void BareBonesEditor::Enable(bool enable)
