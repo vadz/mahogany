@@ -10,12 +10,6 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
-   TODO
-
-   1. Renaming
- */
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -193,6 +187,7 @@ public:
 
    void OnTreeExpanding(wxTreeEvent&);
    void OnTreeSelect(wxTreeEvent&);
+   void OnBeginLabelEdit(wxTreeEvent&);
    void OnEndLabelEdit(wxTreeEvent&);
 
    // event processing function
@@ -393,9 +388,10 @@ private:
 BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxPTreeCtrl)
    // don't specify the control id - we shouldn't get any other tree events
    // (except our owns) anyhow
-   EVT_TREE_SEL_CHANGED(-1,    wxFolderTreeImpl::OnTreeSelect)
-   EVT_TREE_ITEM_EXPANDING(-1, wxFolderTreeImpl::OnTreeExpanding)
-   EVT_TREE_END_LABEL_EDIT(-1, wxFolderTreeImpl::OnEndLabelEdit)
+   EVT_TREE_SEL_CHANGED(-1,      wxFolderTreeImpl::OnTreeSelect)
+   EVT_TREE_ITEM_EXPANDING(-1,   wxFolderTreeImpl::OnTreeExpanding)
+   EVT_TREE_BEGIN_LABEL_EDIT(-1, wxFolderTreeImpl::OnBeginLabelEdit)
+   EVT_TREE_END_LABEL_EDIT(-1,   wxFolderTreeImpl::OnEndLabelEdit)
 
    EVT_LEFT_DCLICK(wxFolderTreeImpl::OnDoubleClickHandler)
    EVT_RIGHT_DOWN(wxFolderTreeImpl::OnRightDown)
@@ -814,6 +810,10 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
       {
          // init the menu
          (*menu)->Check(FolderMenu::ShowHidden, ShowHiddenFolders());
+
+         // TODO we should allow "renaming" the root folder, i.e. changing the
+         //      default 'All folders' label for it
+         (*menu)->Enable(FolderMenu::Rename, FALSE);
       }
       else
       {
@@ -831,6 +831,9 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
          // all folders may be removed from the tree, but only some of them
          // can be physically deleted as well
          (*menu)->Enable(FolderMenu::Delete, CanDeleteFolderOfType(folderType));
+
+         // the INBOX can't be renamed
+         (*menu)->Enable(FolderMenu::Rename, folderType != MF_INBOX);
       }
 
       PopupMenu(*menu, pos.x, pos.y);
@@ -958,6 +961,29 @@ void wxFolderTreeImpl::DoToggleHidden()
    mApplication->GetProfile()->writeEntry(MP_SHOW_HIDDEN_FOLDERS, m_showHidden);
 
    ReopenBranch(GetRootItem());
+}
+
+void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
+{
+   bool allow; // should we allow renaming this item?
+
+   MFolder *folder = m_sink->GetSelection();
+   if ( !folder )
+   {
+      wxFAIL_MSG( "how can we edit a label without folder?" );
+
+      allow = false;
+   }
+   else
+   {
+      FolderType type = folder->GetType();
+      allow = type != MF_ROOT && type != MF_INBOX;
+
+      folder->DecRef();
+   }
+
+   if ( !allow )
+      event.Veto();
 }
 
 void wxFolderTreeImpl::OnEndLabelEdit(wxTreeEvent& event)
@@ -1178,14 +1204,9 @@ void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
                }
                else // we have got the new name
                {
-                  // try to rename
-                  if ( m_sink->OnRename(folder, folderName) )
-                  {
-                     // update the label in the tree too
-                     wxTreeItemId id = wxTreeCtrl::GetSelection();
-                     SetItemText(id, folderName);
-                  }
-                  //else: renaming failed
+                  // try to rename (the text will be changed in MEvent handler
+                  // if OnRename() succeeds)
+                  (void)m_sink->OnRename(folder, folderName);
                }
 
                folder->DecRef();
@@ -1282,36 +1303,49 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       String folderName = event.GetFolderFullName();
       MEventFolderTreeChangeData::ChangeKind kind = event.GetChangeKind();
 
-      // refresh the branch of the tree with the parent of the folder which
-      // changed for all usual events or this folder itself for CreateUnder
-      // events (which are sent when (possibly) multiple folders were created
-      // under the common parent)
-      String parentName = kind == MEventFolderTreeChangeData::CreateUnder
-                          ? folderName
-                          : folderName.BeforeLast('/');
-
-      // recreate the branch
-      wxTreeItemId parent = GetTreeItemFromName(parentName);
-
-      CHECK(parent.IsOk(), TRUE, "no such item in the tree??");
-
-      ReopenBranch(parent);
-
-      if ( kind == MEventFolderTreeChangeData::CreateUnder )
+      if ( kind == MEventFolderTreeChangeData::Rename )
       {
-         // always expand the folder in this case, even if it wasn't expanded
-         // before
-         Expand(parent);
-      }
-
-      if ( kind == MEventFolderTreeChangeData::Delete )
-      {
-         // if the deleted folder was either the tree ctrl selection or was
-         // opened (these 2 folders may be different), refresh
-         if ( folderName == m_openFolderName ||
-              folderName == m_selectedFolderName )
+         // just rename the item in the tree - if it's not already done as it
+         // would be in the case of in-place label editing
+         wxTreeItemId item = GetTreeItemFromName(folderName);
+         if ( item.IsOk() )
          {
-            SelectItem(GetRootItem());
+            SetItemText(item, event.GetNewFolderName());
+         }
+      }
+      else
+      {
+         // refresh the branch of the tree with the parent of the folder which
+         // changed for all usual events or this folder itself for CreateUnder
+         // events (which are sent when (possibly) multiple folders were
+         // created under the common parent)
+         String parentName = kind == MEventFolderTreeChangeData::CreateUnder
+                             ? folderName
+                             : folderName.BeforeLast('/');
+
+         // recreate the branch
+         wxTreeItemId parent = GetTreeItemFromName(parentName);
+
+         CHECK(parent.IsOk(), TRUE, "no such item in the tree??");
+
+         ReopenBranch(parent);
+
+         if ( kind == MEventFolderTreeChangeData::CreateUnder )
+         {
+            // always expand the folder in this case, even if it wasn't
+            // expanded before
+            Expand(parent);
+         }
+
+         if ( kind == MEventFolderTreeChangeData::Delete )
+         {
+            // if the deleted folder was either the tree ctrl selection or was
+            // opened (these 2 folders may be different), refresh
+            if ( folderName == m_openFolderName ||
+                 folderName == m_selectedFolderName )
+            {
+               SelectItem(GetRootItem());
+            }
          }
       }
    }

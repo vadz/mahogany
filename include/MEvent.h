@@ -128,7 +128,7 @@ public:
                      unsigned long n,
                      unsigned long *messageIDs);
    ~MEventNewMailData();
-   
+
    /**@name accessors */
    //@{
    /// get the number of new messages
@@ -230,7 +230,7 @@ public:
    // ctor
    MEventOptionsChangeData(class ProfileBase *profile,
                            ChangeKind what);
-   
+
    // what happened?
    ChangeKind GetChangeKind() const { return m_what; }
 
@@ -246,7 +246,7 @@ public:
    bool IsAllowed() const { return !m_vetoed; }
 
    // dtor releases profile
-   virtual ~MEventOptionsChangeData(); 
+   virtual ~MEventOptionsChangeData();
 
 private:
    class ProfileBase *m_profile;
@@ -271,8 +271,12 @@ public:
       CreateUnder // some folders were created under folder "fullname"
    };
 
-   MEventFolderTreeChangeData(const String& fullname, ChangeKind what)
-      : MEventData(MEventId_FolderTreeChange), m_fullname(fullname)
+   MEventFolderTreeChangeData(const String& fullname,
+                              ChangeKind what,
+                              const String& newname = "")
+      : MEventData(MEventId_FolderTreeChange),
+        m_fullname(fullname),
+        m_newname(newname)
       {
          m_what = what;
       }
@@ -280,11 +284,15 @@ public:
    /// get the fullname of the folder
    const String& GetFolderFullName() const { return m_fullname; }
 
+   /// get the new folder name (for Rename operation only)
+   const String& GetNewFolderName() const { return m_newname; }
+
    /// get the kind of the operation which just happened
    ChangeKind GetChangeKind() const { return m_what; }
 
 private:
-   String      m_fullname;
+   String      m_fullname,
+               m_newname;
    ChangeKind  m_what;
 };
 
@@ -308,7 +316,7 @@ public:
       {
          m_ResultData->IncRef();
          return ( ASMailFolder::Result *) m_ResultData;
-      } 
+      }
 private:
    MObjectRC  *m_ResultData;
 };
@@ -318,7 +326,7 @@ private:
 // Derive from this class to be able to process events.
 // ----------------------------------------------------------------------------
 
-class MEventReceiver 
+class MEventReceiver
 {
 public:
    // override this method to process the events:
@@ -360,6 +368,7 @@ public:
 
    /// Temporarily suspend (enable/disable) event dispatching:
    static void Suspend(bool suspended = TRUE);
+
 protected:
    /// Dispatches a single event.
    static void Dispatch(MEventData * data);

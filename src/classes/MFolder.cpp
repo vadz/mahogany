@@ -703,6 +703,13 @@ bool MFolderFromProfile::Rename(const String& newName)
    CHECK( profile, FALSE, "panic in MFolder: no profile" );
    if ( profile->Rename(name, newName) )
    {
+      // notify everybody about the change of the folder name
+      MEventManager::Send(
+         new MEventFolderTreeChangeData(m_folderName,
+                                        MEventFolderTreeChangeData::Rename,
+                                        newFullName)
+         );
+
       m_folderName = newFullName;
 
       return TRUE;
