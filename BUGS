@@ -22,10 +22,7 @@ $Id$
 0012  KB MIME popup at wrong position again
 0013  KB Copying message to other folder sometimes only writes
          headers, no content.
-0009  KB Sending messages with XFace can cause segfault. Thought to be 
-         fixed, but persistent.
 0014  KB Sometimes program doesn't react to Exit button/menu. 
-0015  KB Sometimes help isn't found, why?
 
 *****************************************************************************
 ** Fixed, to be tested                                                     **
@@ -39,3 +36,5 @@ $Id$
 0002  KB lock file checking for INBOX:
          needs to check for xxx.lock.* not just xxx.lock !
 0004  KB help fails to find copyright
+0009  KB Sending messages with XFace can cause segfault. Thought to be 
+         fixed, but persistent.
