@@ -2,7 +2,7 @@ File:		build_win.txt
 Summary:	contains instructions for building Mahogany under MS Windows
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	12.01.02
+Last modified:	15.06.03
 Version:	the information in this file applies to the cvs sources
 
 0. Requirments
@@ -13,9 +13,9 @@ a) a compiler: currently, the only supported compiler for building Mahogany is
    in building using another compiler (mingw32, BC++) please contact me and I
    will try to help you
 
-b) cvs client: you need to have daily access to Mahogany (and so far wxWindows)
-   source tree, and the cvs is the only way to keep up to date. The precompiled
-   cvs binaries for Win32 can be found at http://www.cyclic.com.
+b) cvs client: you need to have daily access to Mahogany (and sometimes
+   wxWindows) source tree, and the cvs is the only way to keep up to date. The
+   precompiled cvs binaries for Win32 can be found at http://www.cyclic.com/
 
 c) GNU m4 from cygwin tools: this is not an absolute requirment, however you
    will not be able to compile *.mid (Mahogany Interface Description) files if
@@ -23,7 +23,6 @@ c) GNU m4 from cygwin tools: this is not an absolute requirment, however you
    cvs. If you do have m4, set the environment variable M4 to contain its full
    path (or just m4 if it is in your PATH), otherwise it won't be used.
 
-d) OpenSSL library from http://www.openssl.org/ for SSL support [optional]
 
 1. wxWindows
 ------------
@@ -31,36 +30,16 @@ d) OpenSSL library from http://www.openssl.org/ for SSL support [optional]
    Mahogany depends on wxWindows and prior to compiling Mahogany you need to
 build the wxMSW library.
 
-a) Instructions for Mahogany up to and including version 0.63
-
-   Do *not* follow the standard build instructions included into wxWindows
-distribution. For historical reasons I am using my own project file to build
-wxWindows version used by Mahogany: it is included in Mahogany cvs and is
-called wxWindows.dsp. You should move this file to the directory where you
-installed wxWindows. You will also need to copy extra\scripts\wxmsw_setup.h to
-include\wx\msw\setup.h of your wxWindows installation. Notice that this is
-mandatory, do *not* try to build wxWindows using other settings unless you know
-what you are doing or you are sure to run into trouble.
-
-   Also, please set the environment variable "wx" to contain the location of
-the directory where wxWindows is installed: e.g., "d:\progs\libs\wxWindows".
-
-   Finally, a note about cvs access: currently, you must use "-r WX_2_2_BRANCH"
-switch when you do "cvs co" or "cvs up" wxWindows for the first time to get the
-files from 2.2 branch. It is not necessary to specify this switch subsequently.
-
-b) Instructions for Mahogany after version 0.63
-
-   You will need the latest cvs sources of the development branch of wxMSW (it
-is also the main one, so you will get it by default if you do "cvs co", however
-don't forget to "cvs up -A" if you had previously used "cvs up -r
-WX_2_2_BRANCH" as described above).
+   You may use either wxMSW 2.4.1 release (latest 2.4 release as of the time
+of this writing, if a newer one is available, do use it) or the latest
+wxWindows sources from cvs HEAD which usually provide more functionality.
 
    Mahogany now uses the standard wxWindows project files so just build
 wxWindows using the provided src/wxWindows.dsp project. You will need to point
 MSDEV to this file when you open M.dsw workspace for the first time. You also
 should build wxWindows with the standard include\wx\msw\setup.h instead of
 the file extra\scripts\wxmsw_setup.h which had to be used previously.
+
 
 2. Build process
 ----------------
@@ -77,36 +56,16 @@ projects contained in this workspace if they are not loaded yet:
               file location (in Mahogany directory) when asked
 
     Note that after building everything (successfully) once, you may unload all
-the projects except "M" - this will speed up workspace opening/closing. But if
-you do it, be careful to load them all before rebuilding everything -
+the projects except "M" -- this will speed up workspace opening/closing. But if
+you do it, be careful to load them all before rebuilding everything --
 otherwise, dependencies will not be handled correctly.
 
     Finally, just build everything. Before running M.exe, copy the file
 versit.dll produced when building versit project into the root Mahogany
 directory (or elsewhere in your PATH).
 
-3. SSL support
---------------
 
-    To build Mahogany with the SSL support, first download and install
-(following the included in the distribution instructions) OpenSSL library.
-After building it you should have the SSL headers under inc32 directory and SSL
-libraries (libeay32.dll and ssleay32.dll) under out32dll. Then:
-
-a) copy inc32/openssl somewhere into your compilers include path (if nothing
-   else comes to mind, M/include/openssl is a possible choice)
-
-b) edit M/include/config_nt.h and replace the line "#undef USE_SSL" with
-   "#define USE_SSL 1"
-
-c) build as explained in the previous section
-
-d) copy the libeay32.dll and ssleay32.dll somewhere into your PATH or,
-   alternatively and maybe better, run the program and enter the full paths to
-   the DLLs into the corresponding entries in the last page ("Misc") of the
-   preferences dialog.
-
-4. Common problems
+3. Common problems
 ------------------
 
 Visual C++ 5.0 doesn't understand environment variables in the project
@@ -119,4 +78,4 @@ src/wx/vcard/vcc.c-yacc to vcc.c.
 If you get problem with PROIO_yywrap being multiply defined in wxWindows,
 comment out the 2nd definition of this function in src/common/y_tab.c.
 
-vi: ts=8 nolist nocin:
+vi: ts=8 nolist nocin ai:
