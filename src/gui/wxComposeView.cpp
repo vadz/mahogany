@@ -2715,7 +2715,8 @@ wxComposeView::InsertFileAsText(const String& filename,
    }
 
    // insert the text in the beginning of the message replacing the old
-   // text if asked for this
+   // text if asked for this, otherwise just append it at the end
+   wxLayoutList *listNonTextObjects = NULL;
    if ( replaceFirstTextPart )
    {
       // VZ: I don't know why exactly does this happen but exporting text and
@@ -2740,41 +2741,27 @@ wxComposeView::InsertFileAsText(const String& filename,
       // text object, but possibly several text objects and line break
       // objects, so now we must delete them and then recreate the new ones...
 
-      wxLayoutList * layoutList = m_LayoutWindow->GetLayoutList();
-      wxLayoutList * other_list = new wxLayoutList;
+      wxLayoutList *layoutList = m_LayoutWindow->GetLayoutList();
       wxLayoutObject *obj;
       wxLayoutExportStatus status(layoutList);
       wxLayoutExportObject *exp;
       while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_OBJECTS)) != NULL )
       {
-         // ignore WXLO_EXPORT_EMPTYLINE:
-         if(exp->type == WXLO_EXPORT_OBJECT)
+         if ( exp->type == WXLO_EXPORT_OBJECT )
          {
             obj = exp->content.object;
-            switch(obj->GetType())
+            if ( obj->GetType() == WXLO_TYPE_ICON )
             {
-            case WXLO_TYPE_TEXT:
-               ; //    do nothing
-               break;
-            case WXLO_TYPE_ICON:
-               other_list->Insert(obj->Copy());
-               break;
-            default:
-               ; // cmd    objects get ignored
+               if ( !listNonTextObjects )
+                  listNonTextObjects = new wxLayoutList;
+
+               listNonTextObjects->Insert(obj->Copy());
             }
+            //else: ignore text and cmd objects
          }
          delete exp;
       }
       layoutList->Empty();
-      //now we move the non-text objects back:
-      wxLayoutExportStatus status2(other_list);
-      while((exp = wxLayoutExport( &status2,
-                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
-         if(exp->type == WXLO_EXPORT_EMPTYLINE)
-            layoutList->LineBreak();
-         else
-            layoutList->Insert(exp->content.object->Copy());
-      delete other_list;
    }
 
    // now insert the new text
@@ -2784,6 +2771,22 @@ wxComposeView::InsertFileAsText(const String& filename,
    m_LayoutWindow->SetDirty();
    m_LayoutWindow->Refresh();
    delete [] text;
+
+   // and insert the non-text objects back if we had removed them
+   if ( listNonTextObjects )
+   {
+      wxLayoutList *layoutList = m_LayoutWindow->GetLayoutList();
+      wxLayoutExportObject *exp;
+      wxLayoutExportStatus status2(listNonTextObjects);
+      while((exp = wxLayoutExport( &status2,
+                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
+         if(exp->type == WXLO_EXPORT_EMPTYLINE)
+            layoutList->LineBreak();
+         else
+            layoutList->Insert(exp->content.object->Copy());
+      delete listNonTextObjects;
+   }
+
    return true;
 }
 
