@@ -748,6 +748,9 @@ wxMessageView::Update(void)
             obj->SetUserData(ci); // gets freed by list
             ci->DecRef();
             llist->Insert(obj);
+            // add extra whitespace so lines with multiple icons can
+            // be broken:
+            llist->Insert(" ");
          }
          lastObjectWasIcon = true;
       }
