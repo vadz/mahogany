@@ -218,7 +218,7 @@ private:
        A real module would store the MInterface pointer for later
        reference and check if everything is set up properly.
    */
-   PalmOSModule(MInterface *interface);
+   PalmOSModule(MInterface *minterface);
 
    ~PalmOSModule();
 
@@ -441,7 +441,7 @@ MMODULE_END_IMPLEMENT(PalmOSModule)
 
 MModule *
 PalmOSModule::Init(int version_major, int version_minor,
-                   int version_release, MInterface *interface,
+                   int version_release, MInterface *minterface,
                    int *errorCode)
 {
    if(! MMODULE_SAME_VERSION(version_major, version_minor,
@@ -451,7 +451,7 @@ PalmOSModule::Init(int version_major, int version_minor,
       return NULL;
    }
 
-   return new PalmOSModule(interface);
+   return new PalmOSModule();
 }
 
 

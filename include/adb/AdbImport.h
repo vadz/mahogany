@@ -61,11 +61,9 @@ class AdbImporter : public AdbImporterBase
 {
 public:
    // dynamic creation helpers
-#ifdef USE_ADB_MODULES
-   AdbImporter(MInterface *minterface) : AdbImporterBase(minterface) { }
-#else // !USE_ADB_MODULES
+#ifndef USE_ADB_MODULES
    typedef AdbImporter *(*Constructor)();
-#endif // USE_ADB_MODULES/!USE_ADB_MODULES
+#endif // !USE_ADB_MODULES
 
    // list holding information about all ADB importers we have
    struct AdbImporterInfo
@@ -173,7 +171,7 @@ private:
                         int version_release, MInterface *minterface,       \
                         int *errorCode)                                    \
    {                                                                       \
-      return new cname(minterface);                                        \
+      return new cname();                                                  \
    }
 
 #else // !USE_ADB_MODULES

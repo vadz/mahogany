@@ -43,8 +43,6 @@
 class AdbXFMailImporter : public AdbImporter
 {
 public:
-   AdbXFMailImporter(MInterface *minterface) : AdbImporter(minterface) { }
-
    // implement base class pure virtuals
    virtual String GetDefaultFilename() const;
    virtual bool CanImport(const String& filename);

@@ -46,8 +46,6 @@ extern void wxSplitPath(wxArrayString&, const wxChar *);
 class AdbPineImporter : public AdbImporter
 {
 public:
-   AdbPineImporter(MInterface *minterface) : AdbImporter(minterface) { }
-
    // implement base class pure virtuals
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);

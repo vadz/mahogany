@@ -48,8 +48,6 @@ static const size_t lenAlias = 5;   // strlen("alias")
 class AdbMailrcImporter : public AdbImporter
 {
 public:
-   AdbMailrcImporter(MInterface *minterface) : AdbImporter(minterface) { }
-
    // implement base class pure virtuals
    virtual String GetDefaultFilename() const;
    virtual bool CanImport(const String& filename);

@@ -54,6 +54,7 @@ public:
    AdbTextImporter(char delimiter);
 
    // implement base class pure virtuals
+   virtual String GetDefaultFilename() const { return ""; }
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);
    virtual size_t GetEntryNames(const String& path,
@@ -110,8 +111,15 @@ public:
 // macros for dynamic importer creation
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ADB_IMPORTER(AdbCSVImporter, gettext_noop("Comma separated values"));
-IMPLEMENT_ADB_IMPORTER(AdbTABImporter, gettext_noop("TAB separated values"));
+IMPLEMENT_ADB_IMPORTER(AdbCSVImporter,
+                       gettext_noop("Comma separated text format address book import module"),
+                       gettext_noop("Comma separated values"),
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
+
+IMPLEMENT_ADB_IMPORTER(AdbTABImporter,
+                       gettext_noop("TAB separated text format address book import module"),
+                       gettext_noop("TAB separated values"),
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // AdbTextImporter

@@ -76,8 +76,6 @@
 class AdbEudoraImporter : public AdbImporter
 {
 public:
-   AdbEudoraImporter(MInterface *minterface) : AdbImporter(minterface) { }
-
    // implement base class pure virtuals
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);

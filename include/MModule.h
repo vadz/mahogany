@@ -139,7 +139,10 @@ class MModuleCommon
 {
 public:
    /// ctor sets the ref count to 1 to make the object alive
-   MModuleCommon(MInterface *mint) { m_nRef = 1; m_MInterface = mint; }
+   MModuleCommon() { m_nRef = 1; m_MInterface = NULL; }
+
+   /// MInterface pointer must be set immediately after construction
+   void SetMInterface(MInterface *minterface) { m_MInterface = minterface; }
 
    virtual void IncRef() { m_nRef++; }
    virtual bool DecRef() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
@@ -167,8 +170,6 @@ inline void SafeDecRef(MModuleCommon *p) { if ( p != NULL ) p->DecRef(); }
 class MModule : public MModuleCommon
 {
 public:
-   MModule(MInterface *minterface) : MModuleCommon(minterface) { }
-
    /** MModule interface, this needs to be implemented by the actual modules. */
    //@{
    /// Returns the Module's name as used in LoadModule().
@@ -320,9 +321,12 @@ extern "C" \
          return NULL; \
       } \
       \
-      return ClassName::Init(version_major,  version_minor, \
+      MModule *module = ClassName::Init(version_major,  version_minor, \
                              version_release, \
                              minterface , errorCode);\
+      if ( module ) \
+         module->SetMInterface(minterface); \
+      return module; \
    }\
 } \
 MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version); \

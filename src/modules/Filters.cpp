@@ -61,15 +61,15 @@ public:
    */
    virtual int Apply(class MailFolder *folder, UIdArray msgs) const;
    static FilterRule * Create(const String &filterrule,
-                              MInterface *interface, MModule_Filters *mod)
-      { return new FilterRuleImpl(filterrule, interface, mod); }
+                              MInterface *minterface, MModule_Filters *mod)
+      { return new FilterRuleImpl(filterrule, minterface, mod); }
 #ifdef DEBUG
    void Debug(void);
 #endif
 
 protected:
    FilterRuleImpl(const String &filterrule,
-                  MInterface *interface,
+                  MInterface *minterface,
                   MModule_Filters *fmodule);
    ~FilterRuleImpl();
    /// common code for the two Apply() functions
@@ -250,7 +250,7 @@ public:
    /** Constructor function, returns a valid Parser object.
        @param input the input string holding the text to parse
    */
-   static Parser * Create(const String &input, MInterface *interface);
+   static Parser * Create(const String &input, MInterface *minterface);
 
    virtual MInterface * GetInterface(void) = 0;
    MOBJECT_NAME(Parser)
@@ -265,8 +265,8 @@ class Parser_obj
 {
 public:
    // ctor & dtor
-   Parser_obj(const String& program, MInterface *interface)
-      { m_Parser = Parser::Create(program, interface); }
+   Parser_obj(const String& program, MInterface *minterface)
+      { m_Parser = Parser::Create(program, minterface); }
    ~Parser_obj()
       { SafeDecRef(m_Parser); }
    // provide access to the real thing via operator->
@@ -416,7 +416,7 @@ protected:
       { return m_Input[m_Position]; }
    inline const char CharInc(void)
       { return m_Input[m_Position++]; }
-   ParserImpl(const String &input, MInterface *interface);
+   ParserImpl(const String &input, MInterface *minterface);
    ~ParserImpl();
 
    void AddBuiltinFunctions(void);
@@ -995,11 +995,11 @@ Parser::Create(const String &input, MInterface *i)
 }
 
 
-ParserImpl::ParserImpl(const String &input, MInterface *interface)
+ParserImpl::ParserImpl(const String &input, MInterface *minterface)
 {
    m_Input = input;
    Rewind();
-   m_MInterface = interface;
+   m_MInterface = minterface;
    m_FunctionList = new FunctionList(false); // must clean up manually
    m_MailFolder = NULL;
    m_MessageUId = UID_ILLEGAL;
@@ -2257,12 +2257,12 @@ FilterRuleImpl::ApplyCommonCode(class MailFolder *mf,
 }
 
 FilterRuleImpl::FilterRuleImpl(const String &filterrule,
-                               MInterface *interface,
+                               MInterface *minterface,
                                MModule_Filters *mod
    )
 {
    m_FilterModule = mod;
-   m_Parser = Parser::Create(filterrule, interface);
+   m_Parser = Parser::Create(filterrule, minterface);
    m_Program = m_Parser->Parse();
    ASSERT(mod);
    // we cannot allow the module to disappear while we exist
@@ -2366,13 +2366,13 @@ MModule_FiltersImpl::GetFilter(const String &filterrule) const
 /* static */
 MModule *
 MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
-                      MInterface *interface, int *errorCode)
+                      MInterface *minterface, int *errorCode)
 {
    if(! MMODULE_SAME_VERSION(vmajor, vminor, vrelease))
    {
       if(errorCode) *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
       return NULL;
    }
-   return new MModule_FiltersImpl(interface);
+   return new MModule_FiltersImpl();
 }
 

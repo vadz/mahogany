@@ -63,7 +63,7 @@ MModule *
 DummyModule::Init(int version_major, int version_minor, int version_release,
                   MInterface *minterface, int *errorCode)
 {
-   return new DummyModule(minterface);
+   return new DummyModule();
 }
 
 
