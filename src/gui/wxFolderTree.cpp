@@ -1844,7 +1844,11 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
          Expand(current);
       }
 
+#if wxCHECK_VERSION(2, 5, 0)
       wxTreeItemIdValue cookie;
+#else
+      long cookie;
+#endif
       wxTreeItemId child = GetFirstChild(current, cookie);
       while ( child.IsOk() )
       {
@@ -2101,7 +2105,11 @@ wxTreeItemId wxFolderTreeImpl::GetNextItem(wxTreeItemId id, bool next) const
    // garbage in, garbage out
    CHECK( id.IsOk(), id, _T("invalid tree item in GetNextItem") );
 
+#if wxCHECK_VERSION(2, 5, 0)
    wxTreeItemIdValue cookie;
+#else
+   long cookie;
+#endif
    wxTreeItemId idNext;
 
    if ( next )
@@ -2889,7 +2897,11 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
 
                // insert the new folder at the right place
                int pos = 0;
+#if wxCHECK_VERSION(2, 5, 0)
                wxTreeItemIdValue cookie;
+#else
+               long cookie;
+#endif
                wxTreeItemId item = GetFirstChild(parent, cookie);
                while ( item.IsOk() )
                {
