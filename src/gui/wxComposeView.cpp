@@ -1925,9 +1925,12 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
 
    rcpt->InitControls(value, rt);
 
-   m_rcptExtra.Add(rcpt);
+   // insert the control in the beginning, like this the controls inserted
+   // later stay visible even if the controls added earlier might be scrolled
+   // off
+   m_rcptExtra.Insert(rcpt, 0);
 
-   m_sizerRcpts->Add(sizerRcpt, 0, wxALL | wxEXPAND, LAYOUT_MARGIN / 2);
+   m_sizerRcpts->Prepend(sizerRcpt, 0, wxALL | wxEXPAND, LAYOUT_MARGIN / 2);
    m_sizerRcpts->Layout();
    m_panelRecipients->RefreshScrollbar(m_panelRecipients->GetClientSize());
 }
