@@ -3644,6 +3644,15 @@ wxFolderView::ShowFolder(MailFolder *mf)
    // For now, let it process the event if there is any and if not, update
    // manually
    MEventManager::DispatchPending();
+
+   // the connection to the folder might have been lost in the meanwhile
+   mf = GetMailFolder();
+   if ( !mf )
+      return;
+
+   mf->DecRef();
+
+   // need to update?
    if ( GetHeadersCount() == 0 )
    {
       Update();
