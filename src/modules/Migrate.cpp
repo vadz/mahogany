@@ -1270,7 +1270,7 @@ MigrateWizardProgressPage::MigrateWizardProgressPage(MigrateWizard *parent)
 
    sizer->Add(0, 2*LAYOUT_Y_MARGIN);
 
-   m_labelFolder = new wxStaticText(this, -1, _(""));
+   m_labelFolder = new wxStaticText(this, -1, _T(""));
    sizer->Add(m_labelFolder, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
    m_gaugeFolder = new wxGauge(this, -1, Data().countFolders,
@@ -1278,7 +1278,7 @@ MigrateWizardProgressPage::MigrateWizardProgressPage(MigrateWizard *parent)
                                wxGA_HORIZONTAL | wxGA_SMOOTH);
    sizer->Add(m_gaugeFolder, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
-   m_labelMsg = new wxStaticText(this, -1, _(""));
+   m_labelMsg = new wxStaticText(this, -1, _T(""));
    sizer->Add(m_labelMsg, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
    m_gaugeMsg = new wxGauge(this, -1, 0, // range will be set later

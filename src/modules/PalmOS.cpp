@@ -852,7 +852,7 @@ PalmOSModule::Disconnect(void)
       }
    }
 
-   StatusMessage(_(""));
+   StatusMessage(_T(""));
 }
 
 // ----------------------------------------------------------------------------

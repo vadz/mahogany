@@ -21,8 +21,8 @@
 #include "Mpch.h"
 
 #ifdef USE_PYTHON
-#    include  "Mcallbacks.h"		// Python fix for MCB_* declares
-#endif	//USE_PYTHON
+#    include  "Mcallbacks.h"  // Python fix for MCB_* declares
+#endif //USE_PYTHON
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
@@ -1232,7 +1232,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced,
                                                   -ConfigField_ComposePreview },
 
-   { gettext_noop(""),                             Field_Message, -1},
+   { "",                                           Field_Message, -1},
    { gettext_noop("Show \"&From\" field"),         Field_Bool |
                                                    Field_Advanced,  -1},
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
