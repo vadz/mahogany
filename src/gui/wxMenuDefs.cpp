@@ -90,8 +90,8 @@ static const TbarItemInfo g_aToolBarData[] =
    // folder and message view frames
    { "tb_next_unread",   WXMENU_MSG_NEXT_UNREAD,gettext_noop("Select next unread message") },
    { "tb_mail",          WXMENU_MSG_OPEN,      gettext_noop("Open message")      },
-   { "tb_mail_forward",  WXMENU_MSG_FORWARD,   gettext_noop("Forward message")   },
    { "tb_mail_reply",    WXMENU_MSG_REPLY,     gettext_noop("Reply to message")  },
+   { "tb_mail_forward",  WXMENU_MSG_FORWARD,   gettext_noop("Forward message")   },
    { "tb_print",         WXMENU_MSG_PRINT,     gettext_noop("Print message")     },
    { "tb_trash",         WXMENU_MSG_DELETE,    gettext_noop("Delete message")    },
 
