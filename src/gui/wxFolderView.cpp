@@ -1509,7 +1509,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    // do create the control
    Create(parent, M_WXID_FOLDERVIEW_LISTCTRL,
-          wxDefaultPosition, parent->GetClientSize(),
+          wxDefaultPosition, wxDefaultSize,
           wxLC_REPORT | wxLC_VIRTUAL | wxNO_BORDER);
 
    // add the images to use for the columns
