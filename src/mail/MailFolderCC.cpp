@@ -1284,6 +1284,7 @@ MailFolderCC::AppendMessage(String const &msg)
       /// somewhere straightaway
       UIdArray uidarr;
       uidarr.Add(m_MailStream->uid_last+1);
+      ProcessEventQueue();
       (void) ApplyFilterRules(uidarr);
    }
    ProcessEventQueue();
