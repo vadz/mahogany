@@ -1725,11 +1725,18 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       m_folderType = (FolderType)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
    }
 
-   if ( (m_folderType == Inbox) && m_isCreating )
+   if ( (m_folderType == MF_INBOX) && m_isCreating )
    {
       FAIL_MSG("how did we manage to create an INBOX folder?");
 
       m_folderType = (FolderType)MP_LAST_CREATED_FOLDER_TYPE_D;
+   }
+
+   if ( m_folderType == MF_INBOX )
+   {
+      // we don't have any special properties for INBOX, so just treat it as
+      // file folder
+      m_folderType = MF_FILE;
    }
 
    // init the dialog controls
@@ -1756,7 +1763,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    FolderType folderType = GetCurrentFolderType();
 
    // it's impossible to create INBOX folder
-   CHECK( !m_dlgCreate || folderType != Inbox, false,
+   CHECK( !m_dlgCreate || folderType != MF_INBOX, false,
           "Ok button should be disabled" );
 
    // 0th step: verify if the settings are self-consistent
