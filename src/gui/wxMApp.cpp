@@ -272,7 +272,6 @@ private:
    bool m_isOnline;
 };
 
-
 // ----------------------------------------------------------------------------
 // wxMApp
 // ----------------------------------------------------------------------------
@@ -1044,8 +1043,10 @@ wxMApp::UpdateOnlineDisplay(void)
          mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
 //    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
       }
+#ifdef USE_STATUSBARICON
       wxMStatusBar *sbar = (wxMStatusBar *) m_topLevelFrame->GetStatusBar();
       sbar->UpdateOnlineStatus(true, online);
+#endif
    }
 }
 

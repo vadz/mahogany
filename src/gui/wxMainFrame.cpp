@@ -237,7 +237,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    SetTitle(M_TOPLEVELFRAME_TITLE);
 
 
-
+#ifdef USE_STATUSBARICON
    {
       wxStatusBar *sbar = ((wxMApp *)mApplication)->CreateStatusBar(this);
       // copied from wxWindows framecmn.cpp:
@@ -250,6 +250,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
       SetStatusBar(sbar);
       PositionStatusBar();
    }
+#else
+   CreateStatusBar();
+#endif
    
    AddFileMenu();
    AddEditMenu();

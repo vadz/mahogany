@@ -25,6 +25,12 @@ class WXDLLEXPORT wxHelpController;
 class WXDLLEXPORT wxPrintData;
 class wxIconManager;
 
+/// Define this to have an online status icon in the statusbar
+#ifdef DEBUG
+#   define USE_STATUSBARICON 
+#endif
+
+
 // ----------------------------------------------------------------------------
 // wxMApp
 // ----------------------------------------------------------------------------
