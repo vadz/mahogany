@@ -815,7 +815,7 @@ Right now let us just give some examples of the typical configurations:
 POP3 folders locally so go to the {}``New Mail{}'' page and select
 {}``Collect new mail from this folder{}''. This will move all new
 mail from the POP3 server to the {}``New Mail{}'' folder. If you
-want to copy it instead just check the {}``Leave mail on this server{}''
+want to copy it instead just check the {}``Leave mail in this folder{}''
 checkbox as well. Finally, if you want Mahogany to check the POP3
 folder for the updates automatically please check the {}``Permanently
 monitor this folder{}'' checkbox and change the polling interval
@@ -3116,4 +3116,14 @@ Index=1
 Index=100
 
 then Inbox and Mahogany will appear first and Junk last in the tree.
+
+
+\subsection{How can I {}``leave messages on server{}'' (POP3)?}
+
+Typical POP3 server: normally, the new mail is downloaded from the
+POP3 folders locally so go to the {}``New Mail{}'' page in folder
+properties and select {}``Collect new mail from this folder{}''.
+This will move all new mail from the POP3 server to the {}``New Mail{}''
+folder. If you want to copy it instead (leave messages on server)
+just check the {}``Leave mail in this folder{}'' checkbox as well.
 \end{document}

@@ -1507,7 +1507,7 @@ New Mail
 \begin_inset Quotes eld
 \end_inset 
 
-Leave mail on this server
+Leave mail in this folder
 \begin_inset Quotes erd
 \end_inset 
 
@@ -7813,4 +7813,54 @@ Index=100
 
 \series medium 
 then Inbox and Mahogany will appear first and Junk last in the tree.
+\layout Subsection
+
+How can I 
+\begin_inset Quotes eld
+\end_inset 
+
+leave messages on server
+\begin_inset Quotes erd
+\end_inset 
+
+ (POP3)?
+\layout Standard
+
+Typical POP3 server: normally, the new mail is downloaded from the POP3
+ folders locally so go to the 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ page in folder properties and select 
+\begin_inset Quotes eld
+\end_inset 
+
+Collect new mail from this folder
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ This will move all new mail from the POP3 server to the 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ folder.
+ If you want to copy it instead (leave messages on server) just check the
+ 
+\begin_inset Quotes eld
+\end_inset 
+
+Leave mail in this folder
+\begin_inset Quotes erd
+\end_inset 
+
+ checkbox as well.
 \the_end
