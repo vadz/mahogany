@@ -521,9 +521,9 @@ MMODULE_BEGIN_IMPLEMENT(PalmOSModule,
                         "HandheldSynchronise",
                         "PalmOS module",
                         "0.00")
-   MMODULE_PROP(description,
+   MMODULE_PROP("description",
                 _("This module provides PalmOS connectivity"))
-   MMODULE_PROP(author, "Karsten Ballüder <karsten@phy.hw.ac.uk>")
+   MMODULE_PROP("author", "Karsten Ballüder <karsten@phy.hw.ac.uk>")
 MMODULE_END_IMPLEMENT(PalmOSModule)
 
 
