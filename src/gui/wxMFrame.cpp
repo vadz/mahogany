@@ -118,7 +118,7 @@ bool wxMFrame::RestorePosition(const char *name,
 }
 
 wxMFrame::wxMFrame(const String &name, wxWindow *parent)
-        : MFrameBase(iname)
+        : MFrameBase(name)
 {
    m_initialised = false;
    Create(name, parent);
