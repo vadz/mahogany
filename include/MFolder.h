@@ -100,9 +100,6 @@ public:
    /// folder type can't be changed once it's created
    virtual FolderType GetType() const = 0;
 
-   /// Does the folder need a working network to be accessed?
-   virtual bool NeedsNetwork(void) const = 0;
-
       /// the icon index for this folder or -1 if there is no specific icon
       /// associated to it (the icon index should be used to pass it to
       /// GetFolderIconName())
@@ -145,8 +142,8 @@ public:
       /// can this folder have a login/password?
    bool MayHaveLogin() const { return FolderTypeHasUserName(GetType()); }
 
-      /// does this folder need net connection?
-   bool NeedsNetwork() const { return FolderNeedsNetwork(GetType(), GetFlags()); }
+      /// does this folder need net connection to be accessed?
+   virtual bool NeedsNetwork(void) const = 0;
    //@}
 
    /**@name Filters */
