@@ -679,6 +679,8 @@ PGPEngine::DoExecCommand(const String& options,
                       code == _T("BEGIN_DECRYPTION") ||
                       code == _T("END_DECRYPTION") ||
                       code == _T("GOT_IT") ||
+                      code == _T("SIGEXPIRED") || // we will give a warning
+                      code == _T("KEYEXPIRED") || // when we get EXPKEYSIG
                       code == _T("IMPORT_OK") ||
                       code == _T("IMPORT_RES") )
             {
