@@ -55,7 +55,7 @@ Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
 [Files]
 
 ; --- EXEs and DLLs
-Source: "Release\M.EXE"; DestDir: "{app}"
+Source: "Release\M.EXE"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
 
 ; do we need to include VC++ run time?
