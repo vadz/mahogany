@@ -1809,6 +1809,11 @@ wxComposeView::Send(void)
                      p->name = "FILENAME";
                      p->value = wxFileNameFromPath(filename);
                      dlist.push_back(p);
+                     // some mailers want "NAME":
+                     p = new MessageParameter;
+                     p->name = "NAME";
+                     p->value = wxFileNameFromPath(filename);
+                     dlist.push_back(p);
 
                      msg->AddPart
                         (
