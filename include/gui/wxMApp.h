@@ -59,7 +59,7 @@ public:
    ~wxMApp();
 
    /// get a reference to the print data
-   wxPrintData &GetPrintData(void) { return m_PrintData; }
+   wxPrintDialogData &GetPrintDialogData(void) { return m_PrintDialogData; }
 
 private:
    /// an iconmanager instance
@@ -69,7 +69,7 @@ private:
    /// a locale for translation
    class wxLocale *m_Locale;
    /// data for printing:
-   wxPrintData    m_PrintData;
+   wxPrintDialogData    m_PrintDialogData;
 };
 
 // ----------------------------------------------------------------------------
