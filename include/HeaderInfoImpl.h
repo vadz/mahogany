@@ -229,9 +229,6 @@ private:
    /// should we reverse the order of messages in the folder?
    bool m_reverseOrder;
 
-   /// were the tables built with a reversed criterion
-   bool m_reversedTables;
-
    /// if true, don't free the msgno table as it's the same as thread/sort
    bool m_dontFreeMsgnos;
 

@@ -544,7 +544,6 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    m_firstSort = true;
 
    m_reverseOrder = false;
-   m_reversedTables = false;
    m_mustRebuildTables = false;
 }
 
@@ -1641,17 +1640,12 @@ bool HeaderInfoListImpl::Sort()
             m_sortParams.sortOrder &= ~1;
          }
 
-         if ( m_mf->SortMessages(m_tableSort, m_sortParams) )
+         bool ok = m_mf->SortMessages(m_tableSort, m_sortParams);
+         if ( ok )
          {
             DUMP_TABLE(m_tableSort,
                        ("after sorting with sort order %08lx",
                         m_sortParams.sortOrder));
-         }
-         else // sort failed
-         {
-            FreeSortData();
-
-            return false;
          }
 
          if ( m_reverseOrder )
@@ -1661,7 +1655,13 @@ bool HeaderInfoListImpl::Sort()
             m_sortParams.sortOrder = sortOrderOld;
          }
 
-         m_reversedTables = IsSortCritReversed(m_sortParams.sortOrder);
+         if ( !ok )
+         {
+            // sort failed
+            FreeSortData();
+
+            return false;
+         }
    }
 
    return true;
@@ -1700,10 +1700,10 @@ bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
    bool canReverseOnly = false;
 
    // is the sort order the same (up to reversal if there is only one sort
-   // criterium)?
+   // criterium and unless we use threading)?
    long sortOrder = sortParams.sortOrder;
    if ( sortOrder == m_sortParams.sortOrder ||
-         (!GetSortNextCriterium(sortOrder) &&
+         (!IsThreading() && !GetSortNextCriterium(sortOrder) &&
           (sortOrder & ~1) == (m_sortParams.sortOrder & ~1)) )
    {
       if ( !UsesSenderForSorting(sortOrder) )
@@ -1725,14 +1725,8 @@ bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
 
    if ( canReverseOnly )
    {
-      if ( IsThreading() )
-      {
-         // don't use !m_reverseOrder in the RHS because it is always set to false
-         // if we're threading messages
-         m_reverseOrder = (IsSortCritReversed(m_sortParams.sortOrder) != m_reversedTables);
-      } else {
-         m_reverseOrder = ! m_reverseOrder;
-      }
+      // reversing order without threads is easy
+      m_reverseOrder = !m_reverseOrder;
    }
    else
    {
