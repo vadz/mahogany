@@ -310,6 +310,7 @@ CalendarFrame::CalendarFrame(CalendarModule *module, wxWindow *parent)
    m_Module = module;
    m_MInterface = module->GetMInterface();
    m_Profile = m_MInterface->CreateModuleProfile(MODULE_NAME);
+   m_Folder = NULL;
 
    AddFileMenu();
    AddHelpMenu();
