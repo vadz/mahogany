@@ -9,6 +9,7 @@
 Release 0.65 'Claire' ???, 2003
 -------------------------------
 
+30.03.03 VZ: speed up of header retrieval for POP and IMAP
 29.03.03 VZ: allow setting From and Fcc headers from the composer templates
 08.03.03 VZ: added (START)TLS support for POP/IMAP/SMTP/NNTP
 16.02.03 VZ: automatically retrieve PGP public keys from keyserver
