@@ -30,15 +30,16 @@ extern const MOption MP_PYTHONPATH;
 extern const MOption MP_USEPYTHON;
 
 // the module initialisations
+
 extern "C"
 {
-   void initMStringc();
-   void initMProfilec();
-   void initMailFolderc();
-   void initMAppBasec();
-   void initMessagec();
-   void initMObjectc();
+   void init_MString();
+   void init_MObject();
 };
+//   void init_MProfile();
+//   void init_MailFolder();
+//   void init_MAppBase();
+//   void init_Message();
 
 
 /// used by PythonHelp.cc helper functions
@@ -134,12 +135,12 @@ InitPython(void)
       return true; // it is not an error to have it disabled
 
    // initialise the modules
-   initMStringc();
-   initMProfilec();
-   initMailFolderc();
-   initMAppBasec();
-   initMessagec();
-   initMObjectc();
+   init_MString();
+   //init_MProfile();
+   //init_MailFolder();
+   //init_MAppBase();
+   //init_Message();
+   init_MObject();
 
    // the return code
    bool rc = TRUE;
