@@ -2383,7 +2383,7 @@ wxGlobalPasswdDialog::TransferDataFromWindow()
 
 
    wxString oldPw = strutil_getpasswd();
-   bool oldUseCrypt = READ_CONFIG(p, MP_CRYPTALGO);
+   bool oldUseCrypt = READ_CONFIG(p, MP_CRYPTALGO) != 0;
 
    bool newUseCrypt = m_UseGlobalPassword->GetValue();
    wxString newPw = "";
@@ -3206,7 +3206,7 @@ public:
          }
       }
 
-      return wxChoice::Delete(index);
+      wxChoice::Delete(index);
    }
 
    virtual int DoAppend(const wxString& item)

@@ -1508,7 +1508,7 @@ MailFolderCC::AppendMessage(String const &msg, bool update)
    if(update) ProcessEventQueue();
 
    bool rc = mail_append(
-      m_MailStream, (char *)m_ImapSpec.c_str(), &str);
+      m_MailStream, (char *)m_ImapSpec.c_str(), &str) != 0;
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
    else
@@ -1738,7 +1738,7 @@ MailFolderCC::GetHeaders(void) const
       {
          /* Suppress recursion from changes caused by filter code. */
          that->m_ListingFrozen = TRUE;
-         bool changed = that->ApplyFilterRules(true);
+         bool changed = that->ApplyFilterRules(true) != 0;
          if(changed)
          {
             that->m_ListingFrozen = FALSE;

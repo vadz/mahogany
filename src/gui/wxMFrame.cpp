@@ -89,7 +89,8 @@ bool wxMFrame::RestorePosition(const char *name,
       *y = pConf->Read(MP_YPOS,MP_YPOS_D);
       *w = pConf->Read(MP_WIDTH, MP_WIDTH_D);
       *h = pConf->Read(MP_HEIGHT, MP_HEIGHT_D);
-      if(i) *i= pConf->Read(MP_ICONISED, MP_ICONISED_D);
+      if(i)
+          *i = pConf->Read(MP_ICONISED, MP_ICONISED_D) != 0;
 
       // assume that if one entry existed, then the other existed too
       return pConf->HasEntry(MP_XPOS);

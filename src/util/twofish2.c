@@ -33,6 +33,10 @@
 #define	ZERO_KEY	1
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4090)
+#pragma warning(disable: 4022)
+#endif /* Visual C++ */
 
 #ifdef USE_ASM
 extern	int	useAsm;				/* ok to use ASM code? */

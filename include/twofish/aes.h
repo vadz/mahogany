@@ -147,8 +147,6 @@ int	reKey(keyInstance *key);	/* do key schedule using modified key.keyDwords */
 int TableOp(int op);
 
 
-#define		CONST				/* helpful C++ syntax sugar, NOP for ANSI C */
-
 #if BLOCK_SIZE == 128			/* optimize block copies */
 #define		Copy1(d,s,N)	((DWORD *)(d))[N] = ((DWORD *)(s))[N]
 #define		BlockCopy(d,s)	{ Copy1(d,s,0);Copy1(d,s,1);Copy1(d,s,2);Copy1(d,s,3); }

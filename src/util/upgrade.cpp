@@ -61,6 +61,8 @@
 #include "gui/wxDialogLayout.h"
 #include "gui/wxFolderTree.h"
 
+#include "Mpers.h"
+
 #include "MImport.h"
 #include "Mupgrade.h"
 

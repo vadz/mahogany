@@ -17,9 +17,11 @@
 #ifndef   USE_PCH
 #   include "strutil.h"
 #   include "kbList.h"
-#   include "MDialogs.h"
-#   include "Mpers.h"
 #endif
+
+#include "Mdefaults.h"
+#include "MDialogs.h"
+#include "Mpers.h"
 
 #ifdef OS_UNIX
 #   include <pwd.h>

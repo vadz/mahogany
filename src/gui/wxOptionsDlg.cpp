@@ -55,6 +55,7 @@
 
 #include "wx/persctrl.h"
 
+#include "Mpers.h"
 #include "MDialogs.h"
 #include "Mdefaults.h"
 #include "Mupgrade.h"
@@ -656,13 +657,21 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "here"),                         Field_Message, -1,                        },
    { gettext_noop("&POP server"),                  Field_Text,    -1,                        },
    { gettext_noop("&IMAP server"),                 Field_Text,    -1,                        },
-   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -ConfigField_UseSendmail,           },
+   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,
+#ifdef OS_UNIX
+                                                   -ConfigField_UseSendmail,
+#endif
+   },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,
    },
    { gettext_noop("Some SMTP or NNTP servers require a user Id or login.\n"
                   "Leave these fields empty unless told to set it up by your ISP."),
      Field_Message, -1,                        },
-   { gettext_noop("SMTP server &user ID"),         Field_Text,   -ConfigField_UseSendmail,           },
+   { gettext_noop("SMTP server &user ID"),         Field_Text,
+#ifdef OS_UNIX
+                                                   -ConfigField_UseSendmail,
+#endif
+   },
    { gettext_noop("SMTP server pa&ssword"),        Field_Passwd, ConfigField_MailServerLogin,           },
    { gettext_noop("NNTP server user &ID"),         Field_Text,   -1,           },
    { gettext_noop("NNTP server pass&word"),        Field_Passwd, ConfigField_NewsServerLogin,           },
