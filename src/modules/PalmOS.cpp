@@ -18,6 +18,8 @@
 #   include "MDialogs.h"
 #   include "strutil.h"
 #   include "Mdefaults.h"
+#   include "gui/wxMenuDefs.h"
+#   include "MMainFrame.h"
 #endif
 
 #ifdef USE_PISOCK
@@ -33,6 +35,8 @@
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxOptionsPage.h"
+
+#include <wx/menu.h>
 
 class PalmBook;
 #ifdef EXPERIMENTAL
@@ -185,11 +189,11 @@ class PalmOSModule : public MModule
    /** Override the Entry() function to allow Main() and Config()
        functions. */
    virtual int Entry(int arg, ...);
-   void Synchronise(PalmBook *p_Book);
+   void Synchronise(PalmBook *pBook);
    void Configure(void);
    MMODULE_DEFINE(PalmOSModule)
 
-private:
+      private:
    /** PalmOS constructor.
        As the class has no usable interface, this doesn´t do much, but 
        it displays a small dialog to say hello.
@@ -198,7 +202,8 @@ private:
    */
    PalmOSModule(MInterface *interface);
    ~PalmOSModule();
-   
+
+   bool ProcessMenuEvent(int id);
    bool Connect(void);
    void Disconnect(void);
    friend class PiConnection;
@@ -207,8 +212,10 @@ private:
    
    void GetConfig(void);
 
-   void GetAddresses(PalmBook *p_Book);
- 
+   void SyncAddresses(PalmBook *pBook);
+   void GetAddresses(PalmBook *pBook);
+
+   void SyncMail(void);
    void SendEMails(void);
    void StoreEMails(void);
 
@@ -222,25 +229,25 @@ private:
       { m_MInterface->Message(msg,NULL,"PalmOS module"); wxYield(); }
    inline void StatusMessage(const String &msg)
       { m_MInterface->StatusMessage(msg);wxYield();}
-   MInterface * m_MInterface;
+MInterface * m_MInterface;
 
 private:
 
 #if EXPERIMENTAL
-   int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
-   void RemoveFromList(char *name, char **list, int max);
+int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
+void RemoveFromList(char *name, char **list, int max);
 #endif
 
-   int m_PiSocket;
-   int m_MailDB;
-   int m_AddrDB;
-   ProfileBase *m_Profile;
+int m_PiSocket;
+int m_MailDB;
+int m_AddrDB;
+ProfileBase *m_Profile;
 
-   int m_Dispose;
-   bool m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
-   String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
-   int m_Speed;
-   class wxDeviceLock *m_Lock;
+int m_Dispose;
+bool m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
+String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
+int m_Speed;
+class wxDeviceLock *m_Lock;
 };
 
 /// small helper class
@@ -254,27 +261,57 @@ private:
 };
 
 
+bool
+PalmOSModule::ProcessMenuEvent(int id)
+{
+   switch(id)
+   {
+   case WXMENU_MODULES_PALMOS_SYNC:
+      Synchronise(NULL);
+      return TRUE;
+   case WXMENU_MODULES_PALMOS_BACKUP:
+      Backup();
+      return TRUE;
+   case WXMENU_MODULES_PALMOS_RESTORE:
+      return TRUE;
+   case WXMENU_MODULES_PALMOS_INSTALL:
+      return TRUE;
+   case WXMENU_MODULES_PALMOS_CONFIG:
+      Configure();
+      return TRUE;
+   default:
+      return FALSE;
+   }
+}
+
 int
 PalmOSModule::Entry(int arg, ...)
 {
    switch(arg)
    {
       // GetFlags():
-   case 0:
+   case MMOD_FUNC_GETFLAGS:
       return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
 
       // Main():
-   case 1:
+   case MMOD_FUNC_MAIN:
       Synchronise(NULL);
       return 0;
 
       // Configure():
-   case 2:
+   case MMOD_FUNC_CONFIG:
       Configure();
       return 0;
-
-      // module specific functions:
-      // MMOD_FUNC_USER : Synchronise ADB
+   case MMOD_FUNC_MENUEVENT:
+   {
+      va_list ap;
+      va_start(ap, arg);
+      int id = va_arg(ap, int);
+      va_end(ap);
+      return ProcessMenuEvent(id);
+   }
+   // module specific functions:
+   // MMOD_FUNC_USER : Synchronise ADB
    case MMOD_FUNC_USER:
    {
       va_list ap;
@@ -334,7 +371,7 @@ MMODULE_IMPLEMENT(PalmOSModule,
 ///------------------------------
 
 /* static */
-MModule *
+   MModule *
 PalmOSModule::Init(int version_major, int version_minor, 
                    int version_release, MInterface *interface,
                    int *errorCode)
@@ -355,6 +392,21 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
    m_PiSocket = -1;
    m_Profile = NULL;
    m_Lock = NULL;
+
+   wxMenu * palmOsMenu = new wxMenu;
+   palmOsMenu->Append(WXMENU_MODULES_PALMOS_SYNC, _("Synchronise"));
+   palmOsMenu->Break();
+   palmOsMenu->Append(WXMENU_MODULES_PALMOS_BACKUP, _("Backup"));
+   palmOsMenu->Append(WXMENU_MODULES_PALMOS_RESTORE, _("Restore"));
+   palmOsMenu->Append(WXMENU_MODULES_PALMOS_INSTALL, _("Install"));
+   palmOsMenu->Break();
+   palmOsMenu->Append(WXMENU_MODULES_PALMOS_CONFIG, _("Configure"));
+
+   MAppBase *mapp = minterface->GetMApplication();
+   ((wxMainFrame *)mapp->TopLevelFrame())->AddModulesMenu(_("PalmOS Module"),
+                                        _("Functionality to interact with your PalmOS based palmtop."),
+                                        palmOsMenu,
+                                        -1);
 }
 
 PalmOSModule::~PalmOSModule()
@@ -370,6 +422,8 @@ PalmOSModule::Connect(void)
 {
    if(m_PiSocket == -1)
    {
+      GetConfig();
+      
       struct pi_sockaddr addr;
       struct PilotUser pilotUser;
       int rc;
@@ -470,51 +524,57 @@ PalmOSModule::Disconnect(void)
    }
 }
 
-void PalmOSModule::Synchronise(PalmBook *p_Book)
+void PalmOSModule::SyncMail(void)
 {
-  // TODO: add option to skip question 
-  if(m_MInterface->YesNoDialog(_("Do you want synchronise with your PalmOS device?")))
-  {
-     GetConfig();
-     PiConnection conn(this);
-     if(! IsConnected())
-     {
-        m_Profile->DecRef();
-        m_Profile=NULL;
-        return;
-     }
-
-     if(m_SyncMail)
-     {
-        SendEMails();
-        StoreEMails();
+   PiConnection conn(this);
+   if( IsConnected())
+   {
+      SendEMails();
+      StoreEMails();
+      // here we close the opened database
+      if (m_MailDB) 
+         dlp_CloseDB(m_PiSocket, m_MailDB);
         
-        // here we close the opened database
-        if (m_MailDB) {
-            dlp_CloseDB(m_PiSocket, m_MailDB);
-        }
-     }
+   }
+}
 
-     if(m_SyncAddr)
-     {
-        GetAddresses(p_Book);
-        
-        // close the database again
-        if (m_AddrDB) {
-            dlp_CloseDB(m_PiSocket, m_AddrDB);
-        }
-     }
-
+void PalmOSModule::SyncAddresses(PalmBook *pBook)
+{
+   PiConnection conn(this);
+   if( IsConnected() )
+   {
+      GetAddresses(pBook);
+      
+      // close the database again
+      if (m_AddrDB) 
+         dlp_CloseDB(m_PiSocket, m_AddrDB);
+   }
+}
+ 
+void PalmOSModule::Synchronise(PalmBook *pBook)
+{
+   // TODO: add option to skip question 
+   if(m_MInterface->YesNoDialog(_("Do you want synchronise with your PalmOS device?")))
+   {
+      PiConnection conn(this);
+      if(! IsConnected())
+         return;
+      
+      if(m_SyncMail)
+         SyncMail();
+     
+      if(m_SyncAddr)
+         SyncAddresses(pBook);
+     
 #ifdef EXPERIMENTAL
-     if(m_Backup)
-     {
-        Backup();
-     }
+      if(m_Backup)
+      {
+         Backup();
+      }
 #endif
-     Disconnect();
-     m_Profile->DecRef();
-     m_Profile=NULL;
-  }
+      m_Profile->DecRef();
+      m_Profile=NULL;
+   }
 }
 
 
@@ -522,49 +582,53 @@ void PalmOSModule::Synchronise(PalmBook *p_Book)
 /* Protect = and / in filenames */
 static void protect_name(char *d, char *s)
 {
-    while(*s) {
+   while(*s) {
       switch(*s) {
-          case '/': *(d++) = '=';
-                    *(d++) = '2';
-                    *(d++) = 'F';
-                    break;
-          case '=': *(d++) = '=';
-                    *(d++) = '3';
-                    *(d++) = 'D';
-                    break;
-          case '\x0A':
-                    *(d++) = '=';
-                    *(d++) = '0';
-                    *(d++) = 'A';
-                    break;
-          case '\x0D': 
-                    *(d++) = '=';
-                    *(d++) = '0';
-                    *(d++) = 'D';
-                    break;
-          default: *(d++) = *s;
+      case '/': *(d++) = '=';
+         *(d++) = '2';
+         *(d++) = 'F';
+         break;
+      case '=': *(d++) = '=';
+         *(d++) = '3';
+         *(d++) = 'D';
+         break;
+      case '\x0A':
+         *(d++) = '=';
+         *(d++) = '0';
+         *(d++) = 'A';
+         break;
+      case '\x0D': 
+         *(d++) = '=';
+         *(d++) = '0';
+         *(d++) = 'D';
+         break;
+      default: *(d++) = *s;
       }
       s++;
-    }
-    *d = '\0';
+   }
+   *d = '\0';
 }
 
 void
 PalmOSModule::RemoveFromList(char *name, char **list, int max)
 {
-  int i;
+   int i;
 
-  for (i = 0; i < max; i++) {
-    if (list[i] != NULL && strcmp(name, list[i]) == 0) {
-      free(list[i]);
-      list[i] = NULL;
-    }
-  }
+   for (i = 0; i < max; i++) {
+      if (list[i] != NULL && strcmp(name, list[i]) == 0) {
+         free(list[i]);
+         list[i] = NULL;
+      }
+   }
 }
 
 void
 PalmOSModule::Backup(void) 
 {
+   PiConnection conn(this);
+   if( ! IsConnected())
+      return;
+
    /* This is a first attempt to add backup functionality to Mahogany. It
    ** is currently not ready for daily-use but shouldn´t put any danger to
    ** your data either as it currently only reads from but does not write
@@ -600,10 +664,10 @@ PalmOSModule::Backup(void)
 
          if (!orig_files) {
             ofile_len += 256;
-            orig_files = malloc(sizeof(char*) * ofile_len);
+            orig_files = (char **) malloc(sizeof(char*) * ofile_len);
          } else if (ofile_total >= ofile_len) {
             ofile_len += 256;
-            orig_files = realloc(orig_files, sizeof(char*) * ofile_len);
+            orig_files = (char **) realloc(orig_files, sizeof(char*) * ofile_len);
          }
 
          sprintf(name, "%s/%s", dirname, dirent->d_name);
@@ -677,13 +741,13 @@ PalmOSModule::Backup(void)
    // All files are backed up now. 
    if (orig_files) {
       for (i = 0; i < ofile_total; i++)
-        if (orig_files[i] != NULL) {
-          if (removeDeleted)
-             unlink(orig_files[i]);
-          free(orig_files[i]);
-        }
+         if (orig_files[i] != NULL) {
+            if (removeDeleted)
+               unlink(orig_files[i]);
+            free(orig_files[i]);
+         }
       if (orig_files)
-        free(orig_files);
+         free(orig_files);
    }
    
    
@@ -702,16 +766,16 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
    PalmEntryGroup *rootGroup;
 
 /*   
-   if (!palmbook) {
-      AdbManager_obj adbManager;
-      adbManager->LoadAll();
+     if (!palmbook) {
+     AdbManager_obj adbManager;
+     adbManager->LoadAll();
       
-      // There is no PalmBook, create a new one if possible
-      palmbook = (PalmBook *)adbManager->CreateBook((String)"PalmOS Addressbook");
+     // There is no PalmBook, create a new one if possible
+     palmbook = (PalmBook *)adbManager->CreateBook((String)"PalmOS Addressbook");
 */      
-      if (!palmbook) {
-        return;
-      }
+   if (!palmbook) {
+      return;
+   }
 
    /* Open the Address database, store access handle in db */
    if(dlp_OpenDB(m_PiSocket, 0, 0x80|0x40, "AddressDB", &m_AddrDB) < 0) {
@@ -737,226 +801,226 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
 int 
 PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_TopGroup)
 {
-  struct Address a;
-  char buf[0xffff];
-  int category, attribute;
-  int addrCount;
+   struct Address a;
+   char buf[0xffff];
+   int category, attribute;
+   int addrCount;
 
-  // the categories of the Palm addressbook
-  struct CategoryAppInfo cats = aai->category;
+   // the categories of the Palm addressbook
+   struct CategoryAppInfo cats = aai->category;
 
-  // we create our own PalmEntryGroup for each used category  
-  PalmEntryGroup** catGroups = new PalmEntryGroup*[16];
+   // we create our own PalmEntryGroup for each used category  
+   PalmEntryGroup** catGroups = new PalmEntryGroup*[16];
 
-  // check which category to create and do so
-  for (int i = 0; i<16; i++)
-    if (cats.name[i][0] != 0x0)
-      catGroups[i] = (PalmEntryGroup*)p_TopGroup->CreateGroup(cats.name[i]);
+   // check which category to create and do so
+   for (int i = 0; i<16; i++)
+      if (cats.name[i][0] != 0x0)
+         catGroups[i] = (PalmEntryGroup*)p_TopGroup->CreateGroup(cats.name[i]);
 
-  // read every single address
-  dlp_ReadOpenDBInfo(m_PiSocket, db, &addrCount);
+   // read every single address
+   dlp_ReadOpenDBInfo(m_PiSocket, db, &addrCount);
   
-  /* TODO
-  ** addrCount does now contain the number of addresses we are going
-  ** to read. This should make it possible to display a statusbar
-  ** so the user can see the progress of the db import.
-  */
+   /* TODO
+   ** addrCount does now contain the number of addresses we are going
+   ** to read. This should make it possible to display a statusbar
+   ** so the user can see the progress of the db import.
+   */
   
-  int l, j;
-  for(int i = 0;
-     (j = dlp_ReadRecordByIndex(m_PiSocket, db, i, (unsigned char *)buf, 0, &l, &attribute, &category)) >= 0;
-      i++)
-  {
-    // to which category/EntryGroup does this entry belong?
-    PalmEntryGroup* p_Group = catGroups[category];
+   int l, j;
+   for(int i = 0;
+       (j = dlp_ReadRecordByIndex(m_PiSocket, db, i, (unsigned char *)buf, 0, &l, &attribute, &category)) >= 0;
+       i++)
+   {
+      // to which category/EntryGroup does this entry belong?
+      PalmEntryGroup* p_Group = catGroups[category];
 
-    // ignore deleted addresses    
-    if (attribute & dlpRecAttrDeleted)
-      continue;
+      // ignore deleted addresses    
+      if (attribute & dlpRecAttrDeleted)
+         continue;
 
-    unpack_Address(&a, (unsigned char *)buf, l);
+      unpack_Address(&a, (unsigned char *)buf, l);
 
-    // create Name for entry
-    String e_name = a.entry[0];                 // familyname
+      // create Name for entry
+      String e_name = a.entry[0];                 // familyname
 
-    if (a.entry[1] != NULL) {
-        if (e_name == "")
+      if (a.entry[1] != NULL) {
+         if (e_name == "")
             e_name = a.entry[1];
-        else 
+         else 
             e_name = (String)a.entry[1] + ' ' + (String)a.entry[0];
-    }
+      }
 
-    if (e_name == "")
-        e_name = a.entry[2];                    // company
+      if (e_name == "")
+         e_name = a.entry[2];                    // company
 
-    // create new entry ...
-    PalmEntry *p_Entry = new PalmEntry(p_Group, e_name);
+      // create new entry ...
+      PalmEntry *p_Entry = new PalmEntry(p_Group, e_name);
 
-    if (!p_Entry)
-        return -1;
+      if (!p_Entry)
+         return -1;
 
-    // ... and fill it
-    p_Entry->Load(a);
+      // ... and fill it
+      p_Entry->Load(a);
     
-    // add entry
-    p_Group->AddEntry(p_Entry);
-  }
+      // add entry
+      p_Group->AddEntry(p_Entry);
+   }
   
-  // everything worked fine
-  return 0;
+   // everything worked fine
+   return 0;
 }
 #endif
 
 void
 PalmOSModule::SendEMails(void)
 {
-  unsigned char buffer[0xffff];
-  struct MailAppInfo tai;
-  struct MailSyncPref mSPrefs;
-  struct MailSignaturePref sigPrefs;
+   unsigned char buffer[0xffff];
+   struct MailAppInfo tai;
+   struct MailSyncPref mSPrefs;
+   struct MailSignaturePref sigPrefs;
   
-  memset(&tai, '\0', sizeof(struct MailAppInfo));
-  memset(&mSPrefs, '\0', sizeof(struct MailSyncPref));
+   memset(&tai, '\0', sizeof(struct MailAppInfo));
+   memset(&mSPrefs, '\0', sizeof(struct MailSyncPref));
       
       
-  /* Open the Mail database, store access handle in db */
-  if(dlp_OpenDB(m_PiSocket, 0, 0x80|0x40, "MailDB", &m_MailDB) < 0)
-  {
-     ErrorMessage(_("Unable to open MailDB"));
-     dlp_AddSyncLogEntry(m_PiSocket, (char *)_("Unable to open MailDB.\n"));
-     return;
-  }
+   /* Open the Mail database, store access handle in db */
+   if(dlp_OpenDB(m_PiSocket, 0, 0x80|0x40, "MailDB", &m_MailDB) < 0)
+   {
+      ErrorMessage(_("Unable to open MailDB"));
+      dlp_AddSyncLogEntry(m_PiSocket, (char *)_("Unable to open MailDB.\n"));
+      return;
+   }
   
-  dlp_ReadAppBlock(m_PiSocket, m_MailDB, 0, buffer, 0xffff);
-  unpack_MailAppInfo(&tai, buffer, 0xffff);
+   dlp_ReadAppBlock(m_PiSocket, m_MailDB, 0, buffer, 0xffff);
+   unpack_MailAppInfo(&tai, buffer, 0xffff);
   
-  mSPrefs.syncType = 0;
-  mSPrefs.getHigh = 0;
-  mSPrefs.getContaining = 0;
-  mSPrefs.truncate = 8*1024;
-  mSPrefs.filterTo = 0;
-  mSPrefs.filterFrom = 0;
-  mSPrefs.filterSubject = 0;
+   mSPrefs.syncType = 0;
+   mSPrefs.getHigh = 0;
+   mSPrefs.getContaining = 0;
+   mSPrefs.truncate = 8*1024;
+   mSPrefs.filterTo = 0;
+   mSPrefs.filterFrom = 0;
+   mSPrefs.filterSubject = 0;
   
-  if (pi_version(m_PiSocket) > 0x0100)
-  {
-     if (dlp_ReadAppPreference(m_PiSocket, makelong("mail"), 1, 1, 0xffff,
-                               buffer, 0, 0)>=0)
-     {
-        StatusMessage("Got local backup mail preferences\n"); /* 2 for remote prefs */
-        unpack_MailSyncPref(&mSPrefs, buffer, 0xffff);
-     }
-     else
-    {
-       Message("Unable to get mail preferences, trying current\n");
-       if (dlp_ReadAppPreference(m_PiSocket, makelong("mail"), 1, 1, 0xffff,
-                                 buffer, 0, 0)>=0)
-       {
-          Message("Got local current mail preferences\n"); /* 2 for remote prefs */
-          unpack_MailSyncPref(&mSPrefs, buffer, 0xffff);
-       }
-       else
-          Message("Couldn't get any mail preferences.\n");
-    }
+   if (pi_version(m_PiSocket) > 0x0100)
+   {
+      if (dlp_ReadAppPreference(m_PiSocket, makelong("mail"), 1, 1, 0xffff,
+                                buffer, 0, 0)>=0)
+      {
+         StatusMessage("Got local backup mail preferences\n"); /* 2 for remote prefs */
+         unpack_MailSyncPref(&mSPrefs, buffer, 0xffff);
+      }
+      else
+      {
+         Message("Unable to get mail preferences, trying current\n");
+         if (dlp_ReadAppPreference(m_PiSocket, makelong("mail"), 1, 1, 0xffff,
+                                   buffer, 0, 0)>=0)
+         {
+            Message("Got local current mail preferences\n"); /* 2 for remote prefs */
+            unpack_MailSyncPref(&mSPrefs, buffer, 0xffff);
+         }
+         else
+            Message("Couldn't get any mail preferences.\n");
+      }
     
-     if (dlp_ReadAppPreference(m_PiSocket, makelong("mail"), 3, 1, 0xffff,
-                               buffer, 0, 0)>0)
-     {
-        unpack_MailSignaturePref(&sigPrefs, buffer, 0xffff);
-     }
+      if (dlp_ReadAppPreference(m_PiSocket, makelong("mail"), 3, 1, 0xffff,
+                                buffer, 0, 0)>0)
+      {
+         unpack_MailSignaturePref(&sigPrefs, buffer, 0xffff);
+      }
 
-  }
+   }
 
 #if 0
-  String msg;
-  msg.Printf(
-     "Local Prefs: Sync=%d, High=%d, getc=%d, trunc=%d, to=|%s|, from=|%s|, subj=|%s|\n",
-     mSPrefs.syncType, mSPrefs.getHigh, mSPrefs.getContaining,
-     mSPrefs.truncate, mSPrefs.filterTo ? mSPrefs.filterTo : "<none>", 
-     mSPrefs.filterFrom ? mSPrefs.filterFrom : "<none>",
-     mSPrefs.filterSubject ? mSPrefs.filterSubject : "<none>");
-  Message(msg);
+   String msg;
+   msg.Printf(
+      "Local Prefs: Sync=%d, High=%d, getc=%d, trunc=%d, to=|%s|, from=|%s|, subj=|%s|\n",
+      mSPrefs.syncType, mSPrefs.getHigh, mSPrefs.getContaining,
+      mSPrefs.truncate, mSPrefs.filterTo ? mSPrefs.filterTo : "<none>", 
+      mSPrefs.filterFrom ? mSPrefs.filterFrom : "<none>",
+      mSPrefs.filterSubject ? mSPrefs.filterSubject : "<none>");
+   Message(msg);
   
-  msg.Printf("Signature: |%s|\n\n", sigPrefs.signature ? sigPrefs.signature : "<None>");
-  Message(msg);
+   msg.Printf("Signature: |%s|\n\n", sigPrefs.signature ? sigPrefs.signature : "<None>");
+   Message(msg);
 #endif
 
-  /**
-   **
-   ** Check outbox of pilot and send messages out:
-   **
-   **/
-  struct Mail mail;
-  int attr;
-  int size, len;
-  recordid_t id;
-  int numMessages = 0;
-  int numMessagesTransferred = 0;
+   /**
+    **
+    ** Check outbox of pilot and send messages out:
+    **
+    **/
+   struct Mail mail;
+   int attr;
+   int size, len;
+   recordid_t id;
+   int numMessages = 0;
+   int numMessagesTransferred = 0;
   
-  for(int i = 0; ; i++, numMessages++)
-  {
-     len = dlp_ReadNextRecInCategory(m_PiSocket, m_MailDB, 1, buffer, &id, 0, &size, 
-                                     &attr);
+   for(int i = 0; ; i++, numMessages++)
+   {
+      len = dlp_ReadNextRecInCategory(m_PiSocket, m_MailDB, 1, buffer, &id, 0, &size, 
+                                      &attr);
 
-     if(len < 0 ) break; // No more messages, we are done!
+      if(len < 0 ) break; // No more messages, we are done!
 
-     if(   ( attr & dlpRecAttrDeleted)
-           || ( attr & dlpRecAttrArchived) )
-        continue; // skip deleted records
-     unpack_Mail(&mail, buffer, len);
+      if(   ( attr & dlpRecAttrDeleted)
+            || ( attr & dlpRecAttrArchived) )
+         continue; // skip deleted records
+      unpack_Mail(&mail, buffer, len);
 
-     SendMessageCC *smsg = m_MInterface->CreateSendMessageCC(m_Profile,Prot_SMTP);
-     smsg->SetSubject(mail.subject);
-     smsg->SetAddresses(mail.to, mail.cc, mail.bcc);
-     if(mail.replyTo)
-        smsg->AddHeaderEntry("Reply-To",mail.replyTo);
-     if(mail.sentTo)
-        smsg->AddHeaderEntry("Sent-To",mail.sentTo);
-     smsg->AddPart(Message::MSG_TYPETEXT,
-                   mail.body, strlen(mail.body));
-     if(smsg->SendOrQueue())
-     {
-        String msg;
-        msg.Printf(_("Transferred message %d: \"%s\" for \"%s\"."),
-                   ++numMessagesTransferred,
-                   mail.subject, mail.to);
-        StatusMessage(msg);
-        switch(m_Dispose)
-        {
-        case DISPOSE_KEEP:
-           // do nothing
-           break;
-        case DISPOSE_DELETE:
-           dlp_DeleteRecord(m_PiSocket, m_MailDB, 0, id);
-           break;
-        case DISPOSE_FILE:
-        default:
+      SendMessageCC *smsg = m_MInterface->CreateSendMessageCC(m_Profile,Prot_SMTP);
+      smsg->SetSubject(mail.subject);
+      smsg->SetAddresses(mail.to, mail.cc, mail.bcc);
+      if(mail.replyTo)
+         smsg->AddHeaderEntry("Reply-To",mail.replyTo);
+      if(mail.sentTo)
+         smsg->AddHeaderEntry("Sent-To",mail.sentTo);
+      smsg->AddPart(Message::MSG_TYPETEXT,
+                    mail.body, strlen(mail.body));
+      if(smsg->SendOrQueue())
+      {
+         String msg;
+         msg.Printf(_("Transferred message %d: \"%s\" for \"%s\"."),
+                    ++numMessagesTransferred,
+                    mail.subject, mail.to);
+         StatusMessage(msg);
+         switch(m_Dispose)
+         {
+         case DISPOSE_KEEP:
+            // do nothing
+            break;
+         case DISPOSE_DELETE:
+            dlp_DeleteRecord(m_PiSocket, m_MailDB, 0, id);
+            break;
+         case DISPOSE_FILE:
+         default:
             /* Rewrite into Filed category */
 	    dlp_WriteRecord(m_PiSocket, m_MailDB, attr, id, 3, buffer, size, 0);
-        }
-     }
-     else
-     {
-        String tmpstr;
-        tmpstr.Printf(_("Failed to transfer message\n\"%s\"\nfor \"%s\"."),
-                   mail.subject, mail.to);
-        ErrorMessage(tmpstr);
-     }
-     free_Mail(&mail);
-     delete smsg;
-  }
-  if(numMessages)
-  {
-     String tmpstr;
-     tmpstr.Printf(_("Transferred %d/%d messages."),
-                numMessagesTransferred, numMessages);
-     dlp_AddSyncLogEntry(m_PiSocket, (char *)tmpstr.c_str());
-     StatusMessage(tmpstr);
-  }
-  if(! numMessages)
-  {
-     StatusMessage(_("No messages found in PalmOS-Outbox."));
-  }
+         }
+      }
+      else
+      {
+         String tmpstr;
+         tmpstr.Printf(_("Failed to transfer message\n\"%s\"\nfor \"%s\"."),
+                       mail.subject, mail.to);
+         ErrorMessage(tmpstr);
+      }
+      free_Mail(&mail);
+      delete smsg;
+   }
+   if(numMessages)
+   {
+      String tmpstr;
+      tmpstr.Printf(_("Transferred %d/%d messages."),
+                    numMessagesTransferred, numMessages);
+      dlp_AddSyncLogEntry(m_PiSocket, (char *)tmpstr.c_str());
+      StatusMessage(tmpstr);
+   }
+   if(! numMessages)
+   {
+      StatusMessage(_("No messages found in PalmOS-Outbox."));
+   }
 }
 
 
@@ -1007,8 +1071,8 @@ PalmOSModule::StoreEMails(void)
          {
             String tmpstr;
             tmpstr.Printf(_("Skipping deleted message %lu/%lu"),
-                       (unsigned long)(i+1),
-                       (unsigned long)(hil->Count()));
+                          (unsigned long)(i+1),
+                          (unsigned long)(hil->Count()));
             StatusMessage(tmpstr);
          }
          else
@@ -1028,9 +1092,9 @@ PalmOSModule::StoreEMails(void)
             ASSERT(msg);
             String tmpstr;
             tmpstr.Printf( _("Storing message %lu/%lu: %s"),
-                         (unsigned long)(i+1),
-                         (unsigned long)(hil->Count()),
-                         msg->Subject().c_str());
+                           (unsigned long)(i+1),
+                           (unsigned long)(hil->Count()),
+                           msg->Subject().c_str());
             StatusMessage(tmpstr);
             String content;
             msg->GetHeaderLine("From",content);
@@ -1076,9 +1140,9 @@ PalmOSModule::StoreEMails(void)
             {
                String tmpstr;
                tmpstr.Printf( _("Could not store message %lu/%lu: %s"),
-                            (unsigned long)(i+1),
-                            (unsigned long)(hil->Count()),
-                            msg->Subject().c_str());
+                              (unsigned long)(i+1),
+                              (unsigned long)(hil->Count()),
+                              msg->Subject().c_str());
                ErrorMessage(tmpstr);
                count++;
             }
@@ -1092,8 +1156,8 @@ PalmOSModule::StoreEMails(void)
       {
          String tmpstr;
          tmpstr.Printf(_("Stored %lu/%lu messages on PalmOS device."),
-                    (unsigned long) count,
-                    (unsigned long) hil->Count());
+                       (unsigned long) count,
+                       (unsigned long) hil->Count());
          StatusMessage((tmpstr));
       }
       SafeDecRef(hil);
@@ -1146,19 +1210,19 @@ protected:
       m_OldPalmBox; 
    int m_OldDispose;
    DECLARE_EVENT_TABLE()
-};
+      };
 
 BEGIN_EVENT_TABLE(wxPalmOSDialog, wxOptionsPageSubdialog)
 //   EVT_BUTTON(-1, wxPalmOSDialog::OnButton)
 //   EVT_CHECKBOX(-1, wxPalmOSDialog::OnButton)
-END_EVENT_TABLE()
+   END_EVENT_TABLE()
 
 
-wxPalmOSDialog::wxPalmOSDialog(ProfileBase *profile,
-                               wxWindow *parent)
-   : wxOptionsPageSubdialog(profile,parent,
-                            _("PalmOS module"),
-                            "Modules/PalmOS/ConfDialog")
+   wxPalmOSDialog::wxPalmOSDialog(ProfileBase *profile,
+                                  wxWindow *parent)
+      : wxOptionsPageSubdialog(profile,parent,
+                               _("PalmOS module"),
+                               "Modules/PalmOS/ConfDialog")
 {
    wxStaticBox *box = CreateStdButtonsAndBox(_("PalmOS"), FALSE,
                                              MH_MODULES_PALMOS_CONFIG);
@@ -1264,7 +1328,7 @@ wxPalmOSDialog::wxPalmOSDialog(ProfileBase *profile,
    static const size_t NUM_SPDVALUES  = WXSIZEOF(spdValues);
 
    m_Speed = new wxChoice(this, -1, wxDefaultPosition,
-                            wxDefaultSize, NUM_SPDVALUES,spdValues);
+                          wxDefaultSize, NUM_SPDVALUES,spdValues);
    c = new wxLayoutConstraints;
    c->left.RightOf(devLabel, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
@@ -1373,12 +1437,12 @@ static
 struct wxOptionsPageDesc  gs_OptionsPageDesc = 
 {
    gettext_noop("PalmOS module preferences"),
-      "",// image
-      MH_MODULES_PALMOS_CONFIG,
-      // the fields description
-      gs_FieldInfos,
-      gs_ConfigValues,
-      WXSIZEOF(gs_FieldInfos)
+   "",// image
+   MH_MODULES_PALMOS_CONFIG,
+   // the fields description
+   gs_FieldInfos,
+   gs_ConfigValues,
+   WXSIZEOF(gs_FieldInfos)
 };
 
 void

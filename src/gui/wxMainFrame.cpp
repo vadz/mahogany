@@ -153,10 +153,10 @@ wxModulePopup::wxModulePopup()
 void
 wxModulePopup::OnCommandEvent(wxCommandEvent &event)
 {
-   if(event.GetId() < 0) // wxGTK menu title (how stupid!)
-      return;
-
    size_t id = (size_t) event.GetId();
+
+   if(id < 0) // wxGTK menu title (how stupid!)
+      return;
 
    id = id-WXMENU_POPUP_MODULES_OFFS;
    if(id < m_CountModules)
@@ -248,6 +248,8 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    menuBar->Enable(WXMENU_EDIT_CUT, FALSE);
    menuBar->Enable(WXMENU_EDIT_PASTE, FALSE);
 
+   m_ModulesMenu = NULL;
+   
    int x,y;
    GetClientSize(&x, &y);
 
@@ -442,7 +444,14 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 {
    int id = event.GetId();
 
+   // is it a module generated entry?
+   if(id >= WXMENU_MODULES_BEGIN && id < WXMENU_MODULES_END)
+   {
+      ProcessModulesMenu(id);
+      return;
+   }
 
+   // do we want the modules popup?
    if(id == WXMENU_MODULES)
    {
       if(m_ModulePopup)
@@ -492,3 +501,73 @@ wxMainFrame::~wxMainFrame()
    // save the last opened folder
    mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, m_folderName);
 }
+
+void
+wxMainFrame::MakeModulesMenu(void)
+{
+   wxMenuBar *menuBar = GetMenuBar();
+   if(! m_ModulesMenu)
+   {
+      // create the modules menu:
+      m_ModulesMenu = new wxMenu();
+      int pos = menuBar->GetMenuCount();
+      wxASSERT(pos  > 1);
+      // pos is the Help menu, so insert at pos-1:
+      menuBar->Insert(pos-1, m_ModulesMenu, _("&Plugins"));
+   }
+}
+
+/// Appends the menu for a module to the menubar
+void
+wxMainFrame::AddModulesMenu(const char *name,
+                            const char *help,
+                            class wxMenu *submenu,
+                            int id)
+{
+   wxASSERT(submenu);
+   MakeModulesMenu();
+   if(id == -1)
+      id = NewControlId();
+   m_ModulesMenu->Append(id, name, submenu, help);
+}
+   
+
+/// Appends the menu entry for a module to the modules menu
+void
+wxMainFrame::AddModulesMenu(const char *name,
+                            const char *help,
+                            int id)
+{
+   MakeModulesMenu();
+   m_ModulesMenu->Append(id, name, help);
+}
+
+/// Passes a menu id to modules for reacting to it.
+bool
+wxMainFrame::ProcessModulesMenu(int id)
+{
+#ifndef USE_MODULES
+   return FALSE;
+#else
+   if(id < WXMENU_MODULES_BEGIN || id > WXMENU_MODULES_END)
+      return FALSE;
+
+   MModuleListing *listing = MModule::ListLoadedModules();
+   MModule *mptr = NULL;
+   for(size_t i = 0; i < listing->Count(); i++)
+   {
+      mptr = (*listing)[i].GetModule();
+      if(mptr->Entry(MMOD_FUNC_MENUEVENT, id) )
+      {
+         listing->DecRef();
+         mptr->DecRef();
+         return TRUE;
+      }
+      mptr->DecRef();
+   }
+   listing->DecRef();
+   return FALSE;
+#endif
+}
+
+

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MMainFrame.h : application's main frame                          *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *
@@ -26,6 +26,17 @@ public:
    
    /// virtual destructor
    virtual ~MainFrameBase() {};
+
+      /// Appends the menu for a module to the menubar
+   virtual void AddModulesMenu(const char *name,
+                               const char *help,
+                               class wxMenu *submenu,
+                               int id = -1) = 0;
+
+   /// Appends the menu entry for a module to the modules menu
+   virtual void AddModulesMenu(const char *name,
+                               const char *help,
+                               int id) = 0;
 
 };
 

@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * wxMainFrame.h: a basic window class                              *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
- * $Id$            *
+ * $Id$
  *******************************************************************/
 #ifndef  WXMAINFRAME_H
 #define  WXMAINFRAME_H
@@ -45,6 +45,21 @@ public:
    /// if needed
    void UpdateToolBar(void);
 
+
+   /// Appends the menu for a module to the menubar
+   virtual void AddModulesMenu(const char *name,
+                               const char *help,
+                               class wxMenu *submenu,
+                               int id = -1);
+
+   /// Appends the menu entry for a module to the modules menu
+   virtual void AddModulesMenu(const char *name,
+                               const char *help,
+                               int id);
+
+   /// Passes a menu id to modules for reacting to it.
+   bool ProcessModulesMenu(int id);
+
    /// Returns the name of the currently open folder:
    wxString GetFolderName(void) const { return m_folderName; }
 protected:
@@ -62,7 +77,10 @@ protected:
    /// the name of the currently opened folder (empty if none)
    String m_folderName;
 
+   /// the module extension menu if it is set
+   class wxMenu *m_ModulesMenu;
 private:
+   void MakeModulesMenu(void);
    DECLARE_EVENT_TABLE()
 };
 

@@ -89,6 +89,11 @@ public:
    */
    virtual bool CanClose(void) const;
 
+   /// Returns the main frame.
+   virtual class MainFrameBase *GetMainFrame(void)
+      { return (MainFrameBase *)m_topLevelFrame; }
+
+
    /** add a frame to the list of frames which were already asked whether it
        was ok to close them and returned true - this prevents them from being
        asked the second time

@@ -63,6 +63,7 @@ public:
 
    /// override wxWindows default icons
    virtual wxIcon GetStdIcon(int which) const;
+
    /// OnIdle() handler to process Mahogany-specific MEvents which are 
    // asynchronous.
    void OnIdle(wxIdleEvent &event);
