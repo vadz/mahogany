@@ -150,6 +150,7 @@ const wxChar * ORC_T_Names[] =
    _T("score() < "),        // ORC_T_ScoreBelow
    _T("istome()"),          // ORC_T_IsToMe
    _T("hasflag("),          // ORC_T_HasFlag
+   _T("isfromme()"),        // ORC_T_IsFromMe
    NULL
 };
 
@@ -185,7 +186,8 @@ static unsigned char ORC_T_Flags[] =
 #endif
    ORC_F_NeedsArg,                     // ORC_T_ScoreBelow
    0,                                  // ORC_T_IsToMe
-   ORC_F_NeedsArg                      // ORC_T_HasFlag
+   ORC_F_NeedsArg,                     // ORC_T_HasFlag
+   0                                   // ORC_T_IsFromMe
 };
 
 bool FilterTestNeedsArgument(MFDialogTest test)

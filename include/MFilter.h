@@ -56,6 +56,7 @@ enum MFDialogTest
    ORC_T_ScoreBelow,       //                         less
    ORC_T_IsToMe,           // the message is addressed to one of my addresses
    ORC_T_HasFlag,          // flag is set for message
+   ORC_T_IsFromMe,         // the message from one of my addresses
    ORC_T_Max
 };
 

@@ -152,6 +152,7 @@ wxString ORC_Types[] =
    gettext_noop("Score above"),         // ORC_T_ScoreAbove
    gettext_noop("Score below"),         // ORC_T_ScoreBelow
    gettext_noop("Sent to me"),          // ORC_T_IsToMe
+   gettext_noop("Sent from me"),        // ORC_T_IsFromMe
    gettext_noop("Flag is Set")          // ORC_T_HasFlag
 };
 
@@ -180,6 +181,7 @@ MFDialogTest ORC_T_Swap[] =
    ORC_T_ScoreAbove,
    ORC_T_ScoreBelow,
    ORC_T_IsToMe,
+   ORC_T_IsFromMe,
    ORC_T_HasFlag
 };
 ENUM_fromSelect(MFDialogTest, ORC_T_Swap, ORC_TypesCountS, ORC_T_Always)
