@@ -153,7 +153,18 @@ MessageCC::GetHeaderLine(const String &line, String &value)
                                   &slist,
                                   NIL,FT_UID);
    value = rc;
-   value = strutil_after(value,':');
+   char *val = strutil_strdup(rc);
+   // trim off trailing newlines/crs
+   if(strlen(rc))
+   {
+      char *cptr  = val + strlen(rc)-1;
+      while(*cptr == '\n' || *cptr == '\r')
+         cptr--;
+      cptr++;
+      *cptr = '\0';
+   }
+   value = strutil_after(val,':');
+   delete [] val;
    strutil_delwhitespace(value);
    delete [] slist.text.data;
    MailFolderCC::ProcessEventQueue();

@@ -563,15 +563,15 @@ SendMessageCC::~SendMessageCC()
 
    rfc822_setextraheaders(NULL,NULL);
 
-   int j;
-   for(j = 0; m_headerNames[j] ; j++)
+   if(m_headerNames)
    {
-      delete [] (char *)m_headerNames[j];
-      delete [] (char *)m_headerValues[j];
+      delete [] m_headerNames;
+      delete [] m_headerValues;
+      for(int j = 0; m_headerNames[j] ; j++)
+      {
+         delete [] (char *)m_headerNames[j];
+         delete [] (char *)m_headerValues[j];
+      }
    }
-
-   if(m_headerNames)  delete [] m_headerNames;
-   if(m_headerValues) delete [] m_headerValues;
-
    profile->DecRef();
 }

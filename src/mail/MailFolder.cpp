@@ -294,14 +294,16 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
       cv->SetAddresses(email);
       cv->SetSubject(READ_CONFIG(GetProfile(), MP_REPLY_PREFIX)
                      + msg->Subject());
+      String messageid;
+      msg->GetHeaderLine("Message-Id", messageid);
       String references;
       msg->GetHeaderLine("References", references);
-      references = references.AfterFirst(':');
-      cv->AddHeaderEntry("References:",references);
-      String messageid;
-      msg->GetHeaderLine("Message-ID", messageid);
-      messageid = messageid.AfterFirst(':');
-      cv->AddHeaderEntry("In-Reply-To:",messageid);
+      strutil_delwhitespace(references);
+      if(references.Length() > 0)
+         references << ", ";
+      references << messageid;
+      cv->AddHeaderEntry("In-Reply-To",messageid);
+      cv->AddHeaderEntry("References",references);
       
       SafeDecRef(msg);
       wxString seq;
