@@ -6,14 +6,19 @@ This should serve as somethink like a contact database.
 ** This is currently incomplete! Don't be offended if you don't
    appear here, I'm contantly adding entries. KB
 
-Idea, Concept, Main Author
+Idea, Concept, Original author
 	Karsten Ballüder <karsten@phy.hw.ac.uk>
 
-Windows Port, ADB, other major contributions
-	Vadim Zeitlin
+Windows Port, Addressbook, major contributions
+	Vadim Zeitlin <Vadim.zeitlin@dptmaths.ens-cachan.fr>
 
 MacOS Port
 	Neill Cox <neillc@ingenious.com.au>
+	Ujwal Sathyam <ujwal@llnl.gov>
+	Paul Provost <provost@VirtualPrototypes.ca>
+
+GDB/PGP/encryption support
+	Carlos Henrique Bauer <bauer@atlas.unisinos.br>
 
 
 Translations
@@ -21,25 +26,53 @@ Translations
 
 
 Brazilian-Portuguese
-
+	Carlos Henrique Bauer <bauer@atlas.unisinos.br>
+	Daniel Wraith <aragao@cjf.gov.br>
 Czech
 
 Dutch
 	Arthur Muller <muller@cybercomm.nl>
+Finnish
+	Lauri Jutila <ljuti@hangar.keskiespoo.net>
 French
 	Vadim Zeitlin <Vadim.zeitlin@dptmaths.ens-cachan.fr>
 German
 	Karsten Ballüder <karsten@phy.hw.ac.uk>
+Greek
+	George Diamantopoulos <nvon@freemail.gr>
+
 Italian
 	Antonio Franzese <antonio@franzese.com>
 Malaysian
 	Hamka Hj Suleiman <hamkasu@pd.jaring.my>
+Norwegian
+	Ståle Johansen <s.a.johansen@usit.uio.no>
+
 Spanish
 
+Swedish
+	Jacob Norda <jacobnorda@hotmail.com>
+
+
+Beta-Testing:
+=============
+
+Michela Tonioni <michela@tonioni.freeserve.co.uk>
 
 
 wxWindows itself:
 =================
 
-Lots of contributors, including
-Julian Smart, Robert Röbling, Vadim Zeitlin, Stefan Csomor, Karsten Ballüder,....
+Plenty of contributors, including
+
+Julian Smart
+Robert Röbling
+Vadim Zeitlin
+Stefan Csomor
+Karsten Ballüder
+.... 
+
+c-client library:
+=================
+
+Mark Crispin <MRC@cac.washington.edu>
