@@ -2886,6 +2886,45 @@ bool MDialog_GetSelectionsInOrder(const wxString& message,
 // ident combo stuff
 // ----------------------------------------------------------------------------
 
+class wxIdentCombo;
+WX_DEFINE_ARRAY(wxIdentCombo *, wxIdentComboArray);
+
+class wxIdentCombo : public wxChoice
+{
+public:
+   wxIdentCombo(wxWindow *parent, size_t count, const wxString choices[])
+      : wxChoice(parent, IDC_IDENT_COMBO,
+                 wxDefaultPosition, wxDefaultSize,
+                 count, choices)
+   {
+      ms_allIdentCombos.Add(this);
+   }
+
+   virtual ~wxIdentCombo()
+   {
+      ms_allIdentCombos.Remove(this);
+   }
+
+   virtual int DoAppend(const wxString& item)
+   {
+      // sync all other combos with this one
+      size_t count = ms_allIdentCombos.GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         if ( ms_allIdentCombos[n] != this )
+         {
+            ms_allIdentCombos[n]->Append(item);
+         }
+      }
+
+      return wxChoice::DoAppend(item);
+   }
+
+private:
+   // the array of all existing identity comboboxes
+   static wxIdentComboArray ms_allIdentCombos;
+};
+
 extern wxChoice *CreateIdentCombo(wxWindow *parent)
 {
    wxArrayString identities = Profile::GetAllIdentities();
@@ -2901,12 +2940,7 @@ extern wxChoice *CreateIdentCombo(wxWindow *parent)
       choices[n + 1] = identities[n];
    }
 
-   wxChoice *combo = new wxChoice(
-                                    parent,
-                                    IDC_IDENT_COMBO,
-                                    wxDefaultPosition, wxDefaultSize,
-                                    count + 1, choices
-                                 );
+   wxChoice *combo = new wxIdentCombo(parent, count + 1, choices);
    delete [] choices;
 
    wxString identity = READ_APPCONFIG(MP_CURRENT_IDENTITY);

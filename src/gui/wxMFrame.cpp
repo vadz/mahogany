@@ -443,6 +443,14 @@ wxMFrame::OnMenuCommand(int id)
                            "NewIdentity") )
             {
                ShowIdentityDialog(ident, this);
+
+               // update the identity combo in the toolbar if any
+               wxWindow *win = GetToolBar()->FindWindow(IDC_IDENT_COMBO);
+               if ( win )
+               {
+                  wxChoice *combo = wxDynamicCast(win, wxChoice);
+                  combo->Append(ident);
+               }
             }
          }
          break;
