@@ -252,6 +252,8 @@
 #define   MP_OUTGOINGFOLDER      "SentMailFolder"
 /// Show all message headers?
 #define   MP_SHOWHEADERS         "ShowHeaders"
+/// Autocollect email addresses? 0=no 1=ask 2=always
+#define   MP_AUTOCOLLECT         "AutoCollect"
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
 //@{
@@ -479,6 +481,8 @@
 #define   MP_OUTGOINGFOLDER_D  "SentMail"
 /// Show all message headers?
 #define   MP_SHOWHEADERS_D         0
+/// Autocollect email addresses? 0=no 1=ask 2=always
+#define   MP_AUTOCOLLECT_D         2
 
 /** @name for folder list ctrls: ratios of the width to use for
     columns */

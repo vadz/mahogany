@@ -21,11 +21,7 @@ dep depend:
 
 doc:
 	$(DOCHTML) *.h
-	$(DOCTEX) *.h
-
-#$(MKDIR) $(DOCDIR)/$(CWD)
-#$(DXX) $(DXXHFLAGS) docxx.h #$(HDR)
-#$(DXX) $(DXXTFLAGS) docxx.h #$(HDR)
+#	$(DOCTEX) *.h
 
 doc2:
 	for i in *.h ; do $(DXX) -f -k -u -k $(DXXTBL) -H -t -o $(BUILDDIR)/doc/classes/$$i.tex $$i ; done

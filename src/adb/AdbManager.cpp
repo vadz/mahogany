@@ -37,10 +37,6 @@
 // types
 // ----------------------------------------------------------------------------
 
-// arrays
-WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
-WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
-
 // cache: we store pointers to all already created ADBs here (it means that
 // once created they're not deleted until the next call to ClearCache)
 static ArrayAdbBooks gs_cache;

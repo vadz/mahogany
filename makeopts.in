@@ -35,6 +35,7 @@ DOCHTML=@DOCHTML@
 DOCTEX=@DOCTEX@
 LATEX=@LATEX@
 DVIPS=@DVIPS@
+LATEX2HTML=@LATEX2HTML@ -local_icons
 
 # compiler stuff
 CC = @CC@

@@ -21,7 +21,7 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-
+#  include "MHelp.h"
 #  include "strutil.h"
 #  include "guidef.h"
 
@@ -64,6 +64,9 @@
 
 #include <wx/dynarray.h>
 #include <wx/mimetype.h>
+
+#include "adb/AdbManager.h"
+#include "adb/AdbBook.h"
 
 #include <ctype.h>  // for isspace
 
@@ -269,12 +272,58 @@ wxMessageView::wxMessageView(MailFolder *ifolder,
    Create(fv,parent,iname);
    ShowMessage(folder,num);
 
-   String
-      email, name;
-   email = mailMessage->Address(name,MAT_FROM);
-#if 0 // @@@@ FIXME
-   mApplication.GetAdb()->UpdateEntry(email, name);
+   /* FIXMEfor now it's here, should go somewhere else: */
+   ProfileBase *profile = ifolder->GetProfile();
+   if(READ_CONFIG(profile,MP_AUTOCOLLECT))
+   {
+      String
+         email, name;
+      email = mailMessage->Address(name,MAT_FROM);
+
+      AdbManager *manager = AdbManager::Get();
+      manager->LoadAll();
+      AdbBook *book = manager->CreateBook("autocollect");
+      ArrayAdbEntries matches;
+      //FIXME: how can I lookup email or name??
+      if( AdbLookup(matches, email,
+                    AdbLookup_FullName |
+                    AdbLookup_EMail,
+                    0, // not substring, not case sensitive,
+                    NULL // search all books
+         ))
+      {
+         //found:
+#if 0
+         size_t count = matches.Count();
+         for(size_t n = 0; n < count; n++)
+         {
+            AdbEntry *entry = matches[n];
+            // hmm...
+         }
 #endif
+      }
+      else
+      {
+         // the value is either 1 or 2, if 1 we have to ask
+         if(READ_CONFIG(profile,MP_AUTOCOLLECT) == 2 ||
+            MDialog_YesNoDialog(
+               _("Add new e-mail entry to database?"),
+               this))
+         {
+            // not found, add entry
+            wxString entryname = name;
+            for(size_t n = 0; n < name.length(); n++)
+               if(isspace(name[n])) name[n] = '_';
+            AdbEntry *entry = book->CreateEntry(entryname);
+            wxCHECK_RET( entry,
+                         _("Error creating autocollect ADB entry!") );
+
+            entry->SetField(AdbField_NickName, entryname);
+            entry->SetField(AdbField_FullName, entryname);
+            entry->SetField(AdbField_EMail, email);
+         }
+      }
+   }
    Show(TRUE);
 }
 
@@ -964,8 +1013,10 @@ wxMessageViewFrame::OnCommandEvent(wxCommandEvent &event)
       case WXMENU_LAYOUT_DBLCLICK:
          m_MessageView->OnMouseEvent(event);
          break;
-
-      default:
+   case WXMENU_HELP_CONTEXT:
+      mApplication->Help(MH_MESSAGE_VIEW, this);
+      break;
+   default:
          wxMFrame::OnCommandEvent(event);
    }
 }

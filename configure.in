@@ -345,14 +345,6 @@ fi
 AC_SUBST(MAKE_USE_PYTHON)
 AC_SUBST(MAKE_USE_SWIG)
 
-MAKE_HAVE_SGMLTOOLS=
-AC_PATH_PROG(SGML2HTML,sgml2html)
-if test "x$SGML2HTML" != "x"
-then
-  MAKE_HAVE_SGMLTOOLS="HAVE_SGMLTOOLS=yes"
-fi
-
-
 dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
@@ -473,7 +465,7 @@ AC_SUBST(DOCTEX)
 dnl check for latex/dvips
 
 AC_PATH_PROG(LATEX,latex)
-AC_PATH_PROG(dvips,dvips)
+AC_PATH_PROG(DVIPS,dvips)
 if test "x$LATEX" = x -o "x$DVIPS" = x
 then
 	LATEX="echo \"No latex available.\""
@@ -481,6 +473,25 @@ then
 	AC_SUBST(LATEX)
 	AC_SUBST(DVIPS)
 fi
+
+MAKE_HAVE_SGMLTOOLS=
+AC_PATH_PROG(SGML2HTML,sgml2html)
+if test "x$SGML2HTML" != "x"
+then
+  MAKE_HAVE_SGMLTOOLS="HAVE_SGMLTOOLS=yes"
+fi
+AC_SUBST(MAKE_HAVE_SGMLTOOLS)
+
+MAKE_HAVE_LATEX2HTML=
+LATEX2HTML="echo \"No doc generator(html) available.\""
+AC_PATH_PROG(LATEX2HTML,latex2html)
+if test "x$LATEX2HTML" != "x"
+then
+  MAKE_HAVE_SGMLTOOLS="HAVE_LATEX2HTML=yes"
+fi
+AC_SUBST(MAKE_HAVE_LATEX2HTML)
+AC_SUBST(LATEX2HTML)
+
 
 dnl --------------------------------------------------------------------------
 dnl final settings, concatenation of args, etc

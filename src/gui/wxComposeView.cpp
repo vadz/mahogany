@@ -74,8 +74,8 @@ enum
 // ----------------------------------------------------------------------------
 // other types
 // ----------------------------------------------------------------------------
-WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
-WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
+//WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
+//X_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
 
 // ----------------------------------------------------------------------------
 // event tables &c
@@ -489,7 +489,8 @@ wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
    }
 
    ArrayAdbEntries aEntries;
-   if ( AdbLookup(aEntries, what) ) {
+   if ( AdbLookup(aEntries, what) )
+   {
      int rc = MDialog_AdbLookupList(aEntries, this);
 
      if ( rc != -1 ) {

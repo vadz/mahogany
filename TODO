@@ -9,16 +9,14 @@ $Id$
 - wxLayout mouse clicks don't work, for two reasons:
      1. event ids are not the ones expected, easy to fix
      2. for some reasons ProcessEvents() does not call any event handler...why?
-
 - wxLayout: --- working on this, KB ---
   + cut&paste, different cursor for focus/no focus
 
+- auto-collection needs testing, better lookup  -- doesn't work yet
 - reply/forward buttons for messageview/folderview
 - update FolderView if mailbox has shrunk  (which callback gets called?)
 - New Mail indicator
 - Check for new mail button
-
-
 
 
 - folders should remember whether they were opened on program shutdown and
@@ -51,8 +49,6 @@ KB: Vadim, could you check the following ADB-wxOptionsDlg please?
   + Preferences editor should mail oneself for test (MAppBase::VerifySettings)
 
 - UI things
-  + message-related commands should be disabled if there is no selection
-    (already works in standalone folder view, but not for main frame)
   + we should somehow merge the toolbars into the main frame toolbar if it
     shows the folder view, for example
   + session management

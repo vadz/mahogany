@@ -16,7 +16,7 @@
 	$(CXX) -shared $< -lswigpy -o $(ODIR)/$@
 
 %.dvi: %.tex
-	$(LATEX) $<
+	$(LATEX) $< ; $(LATEX) $< ; $(LATEX) $<
 
 %.ps: %.dvi
 	$(DVIPS) $< -o $@

@@ -20,8 +20,15 @@
 // forward declaration for classes we use
 class AdbBook;
 class AdbDataProvider;
-class ArrayAdbEntries;
-class ArrayAdbBooks;
+//KB: at least the Entries array is needed for using the Lookup
+//    function.
+//class ArrayAdbEntries;
+//class ArrayAdbBooks;
+
+// arrays
+WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
+WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
+
 
 /**
   A book corresponds to a physical medium (disk file, database...), the 
