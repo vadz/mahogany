@@ -168,6 +168,7 @@ public:
          {
             SetItemState(newFocus, wxLIST_STATE_FOCUSED,
                          wxLIST_STATE_FOCUSED);
+            EnsureVisible(newFocus);
             m_FolderView->UpdateSelectionInfo();
          }
       }
@@ -1339,7 +1340,10 @@ wxFolderView::Update(HeaderInfoList *listing)
       hi = (*listing)[i];
       SetEntry(listing, i);
       if(hi->GetUId() == m_FocusedUId)
+      {
          foundFocus = true;
+	 focusedIndex = i;
+      }
    }
    if(! foundFocus) // old focused UId is gone, so we use the list
       // index instead
@@ -1348,6 +1352,9 @@ wxFolderView::Update(HeaderInfoList *listing)
                                     wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
 
    UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
+
+   if(focusedIndex != -1)
+	m_FolderCtrl->EnsureVisible(focusedIndex);
 
 #ifdef __WXMSW__
    m_FolderCtrl->Show();
