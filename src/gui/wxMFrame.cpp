@@ -117,30 +117,35 @@ bool wxMFrame::RestorePosition(const char *name,
    }
 }
 
-wxMFrame::wxMFrame(const String &iname, wxWindow *parent)
+wxMFrame::wxMFrame(const String &name, wxWindow *parent)
         : MFrameBase(iname)
 {
    m_initialised = false;
-   Create(iname,parent);
+   Create(name, parent);
 }
 
 void
-wxMFrame::Create(const String &iname, wxWindow *parent)
+wxMFrame::Create(const String &name, wxWindow *parent)
 {
    wxCHECK_RET( !m_initialised, "wxMFrame created twice" );
 
-   SetName(Str(iname));
+   SetName(name);
 
-   const char *name = MFrameBase::GetName();
    int xpos, ypos, width, height;
    bool startIconised, startMaximised;
-   RestorePosition(name, &xpos, &ypos, &width, &height,
+   RestorePosition(MFrameBase::GetName(), &xpos, &ypos, &width, &height,
                    &startIconised, &startMaximised);
 
-   SetIcon(ICON("MFrame"));
-
    // use name as default title
-   wxFrame::Create(parent, -1, name, wxPoint(xpos, ypos), wxSize(width,height));
+   if ( !wxFrame::Create(parent, -1, name,
+                         wxPoint(xpos, ypos), wxSize(width,height)) )
+   {
+      wxFAIL_MSG( "Failed to create a frame!" );
+
+      return;
+   }
+
+   SetIcon(ICON("MFrame"));
 
    // no "else": a frame can be maximized and iconized, meaning that it will
    // become maximized when restored
