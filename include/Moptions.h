@@ -344,7 +344,7 @@ extern const MOption MP_USE_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAIL_PLAY_SOUND;
 extern const MOption MP_NEWMAIL_SOUND_FILE;
-#ifdef OS_UNIX
+#if defined(OS_UNIX) || defined(__CYGWIN__)
 extern const MOption MP_NEWMAIL_SOUND_PROGRAM;
 #endif // OS_UNIX
 extern const MOption MP_SHOW_NEWMAILMSG;
@@ -1059,7 +1059,7 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_NEWMAIL_PLAY_SOUND_NAME "NewMailPlaySound"
 /// which sound to play?
 #define MP_NEWMAIL_SOUND_FILE_NAME "NewMailSound"
-#ifdef OS_UNIX
+#if defined(OS_UNIX) || defined(__CYGWIN__)
 /// the program to use to play this sound
 #define MP_NEWMAIL_SOUND_PROGRAM_NAME "NewMailSoundProg"
 #endif // OS_UNIX
@@ -2010,9 +2010,13 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_NEWMAILCOMMAND_DEFVAL   M_EMPTYSTRING
 
 /// play a sound on new mail?
+#ifdef __CYGWIN__
+#define MP_NEWMAIL_PLAY_SOUND_DEFVAL 0l
+#else
 #define MP_NEWMAIL_PLAY_SOUND_DEFVAL 1l
+#endif // cygwin
 
-#ifdef OS_UNIX
+#if defined(OS_UNIX) || defined(__CYGWIN__)
 /// which sound to play?
 #define MP_NEWMAIL_SOUND_FILE_DEFVAL M_BASEDIR "/newmail.wav"
 /// the program to use to play this sound

@@ -232,7 +232,7 @@ enum ConfigFields
    ConfigField_NewMailSoundHelp,
    ConfigField_NewMailPlaySound,
    ConfigField_NewMailSoundFile,
-#ifdef OS_UNIX
+#if defined(OS_UNIX) || defined(__CYGWIN__)
    ConfigField_NewMailSoundProgram,
 #endif // OS_UNIX
    ConfigField_NewMailNotify,
@@ -1081,7 +1081,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Message,    -1 },
    { gettext_noop("Play a &sound on new mail"),    Field_Bool,    -1 },
    { gettext_noop("Sound &file"),                  Field_File,    ConfigField_NewMailPlaySound },
-#ifdef OS_UNIX
+#if defined(OS_UNIX) || defined(__CYGWIN__)
    { gettext_noop("&Program to play the sound"),   Field_File,    ConfigField_NewMailPlaySound },
 #endif // OS_UNIX
 
