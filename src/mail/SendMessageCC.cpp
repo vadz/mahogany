@@ -140,6 +140,21 @@ SendMessageCC::SetHeaderEncoding(wxFontEncoding enc)
 String
 SendMessageCC::EncodeHeader(const String& header)
 {
+   // only encode the strings which contain the characters unallowed in RFC
+   // 822 headers (FIXME should we quote RFC 822 specials? probably too...)
+   const char *p;
+   for ( p = header.c_str(); *p; p++ )
+   {
+      if ( *p < 32 || *p > 127 )
+         break;
+   }
+
+   if ( !*p )
+   {
+      // string has only 7bit chars, don't encode
+      return header;
+   }
+
    // get the encoding in RFC 2047 sense
    enum
    {
