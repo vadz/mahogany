@@ -3839,13 +3839,17 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 
 // this is called when the status of one message changes
 void
-wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
+wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
 {
    MailFolder_obj mf = GetMailFolder();
 
    if ( event.GetFolder() == mf )
    {
-      size_t index = event.GetIndex();
+      HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+
+      CHECK_RET( hil, "no headers but msg status changed?" );
+
+      size_t index = hil->GetPosFromIdx(event.GetIndex());
       if ( index < (size_t)m_FolderCtrl->GetItemCount() )
       {
          const HeaderInfo *hi = event.GetHeaderInfo();

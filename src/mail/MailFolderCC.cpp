@@ -3473,8 +3473,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
          wxLogTrace(TRACE_MF_EVENTS, "Sending MsgStatus event for folder '%s'",
                     GetName().c_str());
 
-         size_t pos = headers->GetPosFromIdx(idx);
-         MEventManager::Send(new MEventMsgStatusData(this, pos, *hi));
+         MEventManager::Send(new MEventMsgStatusData(this, idx, *hi));
       }
    }
    //else: flags didn't really change
