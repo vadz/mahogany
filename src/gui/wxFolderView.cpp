@@ -4054,7 +4054,12 @@ wxFolderViewFrame::Create(MFolder *folder,
       frame = new wxFolderViewFrame(folder->GetFullName(), parent);
 
    wxFolderView *fv = wxFolderView::Create(frame);
-   if ( !fv->OpenFolder(folder, openmode) )
+
+   // doesn't make sense to half open we're going to view
+   ASSERT_MSG( openmode != MailFolder::HalfOpen,
+               "invalid open mode in wxFolderViewFrame::Create" );
+
+   if ( !fv->OpenFolder(folder, openmode == MailFolder::ReadOnly) )
    {
       delete fv;
       delete frame;
