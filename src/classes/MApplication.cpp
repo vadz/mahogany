@@ -140,7 +140,6 @@ MAppBase::MAppBase()
    m_topLevelFrame = NULL;
    m_framesOkToClose = NULL;
    m_MailCollector = NULL;
-   m_KeepOpenFolders = new MailFolderList;
    m_profile = NULL;
    m_DialupSupport = FALSE;
 
@@ -166,32 +165,6 @@ MAppBase::VerifySettings(void)
 {
    return CheckConfiguration();
 }
-
-/// only used to find list of folders to keep open at all times
-class KeepOpenFolderTraversal : public MFolderTraversal
-{
-public:
-   KeepOpenFolderTraversal(MailFolderList *list)
-      : MFolderTraversal(*(m_folder = MFolder::Get("")))
-      { m_list = list; }
-   ~KeepOpenFolderTraversal()
-      { m_folder->DecRef(); }
-   bool OnVisitFolder(const wxString& folderName)
-      {
-         MFolder *f = MFolder::Get(folderName);
-         if(f && f->GetFlags() & MF_FLAGS_KEEPOPEN)
-         {
-            wxLogDebug("Found folder to keep open'%s'.", folderName.c_str());
-            m_list->push_back( new MailFolderEntry(folderName) );
-         }
-         if(f)f->DecRef();
-         return true;
-      }
-private:
-   MailFolderList *m_list;
-   MFolder *m_folder;
-};
-
 
 bool
 MAppBase::OnStartup()
@@ -461,13 +434,6 @@ MAppBase::OnStartup()
       }
    }
 
-   KeepOpenFolderTraversal t(m_KeepOpenFolders);
-
-   if(! t.Traverse(true))
-   {
-      ERRORMESSAGE((_("Cannot build list of folders to keep open.")));
-   }
-
    // initialise collector object for incoming mails
    // ----------------------------------------------
 
@@ -505,40 +471,6 @@ MAppBase::OnStartup()
 }
 
 void
-MAppBase::AddKeepOpenFolder(const String name)
-{
-   bool alreadyThere = false;
-   MailFolderList::iterator i;
-   for(i = m_KeepOpenFolders->begin();
-       i != m_KeepOpenFolders->end();
-       i++)
-      if(name == (**i).GetName())
-      {
-         alreadyThere = true;
-         break;
-      }
-   if(! alreadyThere)
-      m_KeepOpenFolders->push_back( new MailFolderEntry(name) );
-}
-
-bool
-MAppBase::RemoveKeepOpenFolder(const String name)
-{
-   MailFolderList::iterator i;
-   for(i = m_KeepOpenFolders->begin();
-       i != m_KeepOpenFolders->end();
-       i++)
-      if(name == (**i).GetName())
-      {
-         m_KeepOpenFolders->erase(i);
-         return true;
-      }
-   return false;
-}
-
-
-
-void
 MAppBase::OnAbnormalTermination()
 {
 }
@@ -573,7 +505,6 @@ MAppBase::OnShutDown()
 
     if (m_MailCollector)
       m_MailCollector->DecRef();
-   delete m_KeepOpenFolders;
 
    // clean up
    MEventManager::DispatchPending();

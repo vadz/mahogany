@@ -2031,6 +2031,35 @@ MailFolderCC::ExpungeMessages(void)
 // Counting messages
 // ----------------------------------------------------------------------------
 
+// msg status info
+//
+// NB: name MessageStatus is already taken by MailFolder
+struct MsgStatus
+{
+   bool recent;
+   bool unseen;
+   bool newmsgs;
+   bool flagged;
+   bool searched;
+};
+
+// is this message recent/new/unseen/...?
+static MsgStatus AnalyzeStatus(int stat)
+{
+   MsgStatus status;
+
+   // deal with recent and new (== recent and !seen)
+   status.recent = (stat & MailFolder::MSG_STAT_RECENT) != 0;
+   status.unseen = !(stat & MailFolder::MSG_STAT_SEEN);
+   status.newmsgs = status.recent && status.unseen;
+
+   // and also count flagged and searched messages
+   status.flagged = (stat & MailFolder::MSG_STAT_FLAGGED) != 0;
+   status.searched = (stat & MailFolder::MSG_STAT_SEARCHED ) != 0;
+
+   return status;
+}
+
 // are we asked to count recent messages in WantRecent()?
 static bool WantRecent(int mask, int value)
 {
@@ -2059,6 +2088,10 @@ MailFolderCC::CountMessages(int mask, int value) const
    }
    else // general case or we asked for recent messages and we don't have them
    {
+      wxLogTrace("count",
+                 "Counting all messages with given mask in '%s' (%lu all)",
+                 GetName().c_str(), m_nMessages);
+
       // FIXME there should probably be a much more efficient way (using
       //       mail_search()?) to do it
       numOfMessages = 0;
@@ -2082,6 +2115,18 @@ bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
 {
    CHECK( status, false, "NULL pointer in CountInterestingMessages" );
 
+   // do we already have the number of messages?
+   if ( m_status.IsValid() )
+   {
+      // do at least a simple consistency check
+      ASSERT_MSG( m_status.total == m_nMessages,
+                  "caching of number of messages broken" );
+
+      *status = m_status;
+
+      return true;
+   }
+
    status->Init();
 
    HeaderInfoList_obj hil = GetHeaders();
@@ -2092,6 +2137,10 @@ bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
       return false;
    }
 
+   wxLogTrace("count",
+              "Counting all interesting messages in '%s' (%lu all)",
+              GetName().c_str(), m_nMessages);
+
    status->total = m_nMessages;
    for ( size_t idx = 0; idx < m_nMessages; idx++ )
    {
@@ -2101,28 +2150,23 @@ bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
       if ( stat & MSG_STAT_DELETED )
          continue;
 
-      // deal with recent and new (== recent and !seen)
-      int isRecent = stat & MSG_STAT_RECENT ? 1 : 0;
-      if ( !(stat & MSG_STAT_SEEN) )
-      {
-         status->unseen++;
+      MsgStatus msgStat = AnalyzeStatus(stat);
 
-         if ( isRecent )
-            status->newmsgs++;
-      }
+      #define INC_NUM_OF(what)   if ( msgStat.what ) status->what++
 
-      status->recent += isRecent;
+      INC_NUM_OF(recent);
+      INC_NUM_OF(unseen);
+      INC_NUM_OF(newmsgs);
+      INC_NUM_OF(flagged);
+      INC_NUM_OF(searched);
 
-      // and also count flagged and searched messages
-      if ( stat & MSG_STAT_FLAGGED )
-         status->flagged++;
-
-      if ( stat & MSG_STAT_SEARCHED )
-         status->searched++;
+      #undef INC_NUM_OF
    }
 
-   // cache the number of recent messages
-   ((MailFolderCC *)this)->m_nRecent = status->recent;
+   // cache the number of messages
+   MailFolderCC *self = (MailFolderCC *)this; // const_cast
+   self->m_status = *status;
+   self->m_nRecent = status->recent;
 
    return status->newmsgs ||
           status->recent ||
@@ -2154,8 +2198,7 @@ MailFolderCC::GetMessage(unsigned long uid)
 
    CHECK( uidValid, NULL, "invalid UID in GetMessage" );
 
-   MessageCC *m = MessageCC::CreateMessageCC(this, uid);
-   return m;
+   return MessageCC::CreateMessageCC(this, uid);
 }
 
 UIdArray *
@@ -2577,6 +2620,10 @@ void MailFolderCC::FilterNewMailIfNeeded()
    // states)
    if ( m_GotNewMessages )
    {
+      // we don't want to process any events while we're filtering mail as
+      // there can be a lot of them and all of them can be processed later
+      MEventManagerSuspender suspendEvents;
+
       MLocker lockFilters(m_InFilterCode);
 
       // filter code returns true if something might have changed
@@ -3133,6 +3180,10 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
       {
          mf->m_Listing->DecRef();
          mf->m_Listing = NULL;
+
+         // invalidate it as the number of messages changed and we don't have
+         // the status of the new message(s) here unfortunately
+         mf->m_status.total = UID_ILLEGAL;
       }
    }
    else // the messages were expunged
@@ -3396,8 +3447,17 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
 
       mf->m_Listing->Remove(idx);
 
+      ASSERT_MSG( mf->m_nMessages > 0,
+                  "expunged a message when we don't have any?" );
+
       mf->m_nMessages--;
       mf->m_msgnoMax--;
+
+      // it is not necessary to update the other m_status fields because they
+      // were already updated when the message was deleted, but this one must
+      // be kept in sync
+      if ( mf->m_status.IsValid() )
+         mf->m_status.total--;
    }
    //else: no need to do anything right now
 }
@@ -3514,10 +3574,47 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
    size_t idx = hil->GetIdxFromMsgno(msgno);
    HeaderInfo *hi = hil->GetItemByIndex(idx);
 
+   // this should never happen - we must have this message somewhere!
+   CHECK_RET( hi, "no HeaderInfo in mm_flags" );
+
    MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
-   int status = GetMsgStatus(elt);
-   if ( status != hi->GetStatus() )
+   int status = GetMsgStatus(elt),
+       statusOld = hi->GetStatus();
+   if ( status != statusOld )
    {
+      // update the cached message number
+      if ( m_status.IsValid() )
+      {
+         bool wasDeleted = (statusOld & MSG_STAT_DELETED) != 0,
+              isDeleted = (status & MSG_STAT_DELETED) != 0;
+
+         MsgStatus msgStatusOld = AnalyzeStatus(statusOld),
+                   msgStatus = AnalyzeStatus(status);
+
+         // we consider that a message has some flag only if it is not deleted
+         // (which is discussable at least for flagged and searched flags
+         // although, OTOH, why flag a deleted message?)
+
+         #define UPDATE_NUM_OF(what)   \
+            if ( (!isDeleted && msgStatus.what) && \
+                 (wasDeleted || !msgStatusOld.what) ) \
+               m_status.what++; \
+            else if ( (!wasDeleted && msgStatusOld.what) && \
+                      (isDeleted || !msgStatus.what) ) \
+               if ( m_status.what > 0 ) \
+                  m_status.what--; \
+               else \
+                  FAIL_MSG( "error in msg status change logic" )
+
+         UPDATE_NUM_OF(recent);
+         UPDATE_NUM_OF(unseen);
+         UPDATE_NUM_OF(newmsgs);
+         UPDATE_NUM_OF(flagged);
+         UPDATE_NUM_OF(searched);
+
+         #undef UPDATE_NUM_OF
+      }
+
       ((HeaderInfoImpl *)hi)->m_Status = status;
 
       // tell all interested that status changed

@@ -185,8 +185,14 @@ public:
    void Focus(long index)
       { SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED); }
 
-   /// if nofocused == true the focused entry will not be substituted
-   /// for an empty list of selections
+   /// get the next selected item after the given one (use -1 to start)
+   long GetNextSelected(long item) const
+      { return GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED); }
+
+   /**
+     if nofocused == true the focused entry will not be substituted
+     for an empty list of selections
+   */
    int GetSelections(UIdArray &selections, bool nofocused = false) const;
 
    /// get the UID and, optionally, the index of the focused item
@@ -603,6 +609,22 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             // don't move focus
             newFocus = -1;
          }
+         else // no trash, the message stays here
+         {
+            // if we had exactly one selected message and we delete it, the
+            // message should be unselected to either preview the next message
+            // immediately or allow previewing it simply by pressing space on
+            // the keyboard - if we don't unselect it, we can't preview the
+            // next message as the preview is only shown when we select the
+            // first message...
+            long item = GetNextSelected(-1);
+            if ( item != -1 && GetNextSelected(item) == -1 )
+            {
+               // there is exactly one item selected, unselect it
+               Select(item, false);
+            }
+         }
+
          break;
 
       case 'U': // undelete
@@ -770,43 +792,47 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 
 void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 {
-   // there is exactly one item with the focus on  it:
+   // there is exactly one item with the focus on it
    long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-   wxASSERT(focused != -1); // testing for wxGTK bug
-   // in this case we operate on the highlighted  message
-   HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-   if(hil)
+
+   // this would be a wxWin bug
+   CHECK_RET( focused != -1, "activated unfocused item?" );
+
+   // show the focused message
+   HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
+   CHECK_RET(hil, "no header listing in wxFolderListCtrl");
+
+   const HeaderInfo *hi =hil[focused];
+   if ( hi )
    {
-      const HeaderInfo *hi =(*hil)[focused];
-      if ( hi )
+      UIdType focused_uid = hi->GetUId();
+      if ( m_PreviewOnSingleClick )
       {
-         UIdType focused_uid = hi->GetUId();
-         if(m_PreviewOnSingleClick)
-         {
-            new wxMessageViewFrame(m_FolderView->GetFolder(),
-                                   focused_uid, m_FolderView);
-         }
-         else
-            m_FolderView->PreviewMessage(focused_uid);
+         // view on double click then
+         new wxMessageViewFrame(m_FolderView->GetFolder(),
+                                focused_uid, m_FolderView);
       }
-      hil->DecRef();
+      else // preview on double click
+      {
+         m_FolderView->PreviewMessage(focused_uid);
+      }
    }
 }
 
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
    // called by RETURN press
-   HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
+   HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
    CHECK_RET(hil, "no header listing in wxFolderListCtrl");
 
-   const HeaderInfo *hi = (*hil)[event.m_itemIndex];
+   const HeaderInfo *hi = hil[event.m_itemIndex];
    CHECK_RET(hi, "no header entry in wxFolderListCtrl");
 
-   if(m_FolderView->GetPreviewUId() == hi->GetUId())
+   UIdType uid = hi->GetUId();
+   if ( m_FolderView->GetPreviewUId() == uid )
       m_FolderView->m_MessagePreview->PageDown();
    else
-      m_FolderView->PreviewMessage(hi->GetUId());
-   hil->DecRef();
+      m_FolderView->PreviewMessage(uid);
 }
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
@@ -814,15 +840,19 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
    // check if there is already a selected message, if so, don´t
    // update the message view:
    UIdArray selections;
-   if(GetSelections(selections, true) == 1 // we are the only one
-      && m_SelectionCallbacks)
+   if ( GetSelections(selections, true) != 1 )
+      return;
+
+   if ( m_SelectionCallbacks)
    {
-      HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-      const HeaderInfo *hi = (*hil)[event.m_itemIndex];
+      HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
+      const HeaderInfo *hi = hil[event.m_itemIndex];
+      CHECK_RET( hi, "no header entry in wxFolderListCtrl" );
+
       m_FolderView->UpdateSelectionInfo();
-      if(m_PreviewOnSingleClick)
+
+      if ( m_PreviewOnSingleClick )
         m_FolderView->PreviewMessage(hi->GetUId());
-      hil->DecRef();
    }
 }
 
@@ -1004,31 +1034,29 @@ wxFolderListCtrl::GetSelections(UIdArray &selections, bool nofocused) const
    if ( asmf )
    {
       long item = -1;
-      HeaderInfoList *hil = asmf->GetHeaders();
+      HeaderInfoList_obj hil = asmf->GetHeaders();
       const HeaderInfo *hi = NULL;
-      if(hil)
+      if ( hil )
       {
-         while((item = GetNextItem(item,
-                                   wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
-               != -1 && (unsigned long)item < hil->Count())
+         long count = hil->Count();
+         while( (item = GetNextSelected(item) != -1) && item < count )
          {
-            hi = (*hil)[item]; // no more ++, wxGTK changed
-            if(hi)
+            hi = hil[item];
+            if ( hi )
                selections.Add(hi->GetUId());
          }
+
          // If none is selected, use the focused entry
-         if(selections.Count() == 0 && ! nofocused)
+         if( selections.Count() == 0 && !nofocused )
          {
-            item = -1;
-            item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
-            if(item != -1 && (unsigned long)item < hil->Count())
+            item = GetFocusedItem();
+            if ( item != -1 && item < count )
             {
-               hi = (*hil)[item]; // no more ++ wxGTK semantics changed
-               if(hi)
+               hi = hil[item];
+               if ( hi )
                   selections.Add(hi->GetUId());
             }
          }
-         hil->DecRef();
       }
    }
 
@@ -1732,8 +1760,11 @@ wxFolderView::Update(HeaderInfoList *listing)
    if ( !m_ASMailFolder )
       return;
 
-   // this shouldn't happen
-   CHECK_RET( !m_UpdateSemaphore, "wxFolderView::Update() recursion" );
+   // this shouldn't happen but unfortunately it does because
+   // wxGTK::wxListCtrl::EnsureVisible() which we call from here calls
+   // wxYield() - and so bad things happen :-(
+   if ( m_UpdateSemaphore )
+      return;
 
    m_UpdateSemaphore = true;
 

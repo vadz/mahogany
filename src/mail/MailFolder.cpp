@@ -776,8 +776,25 @@ bool MailFolder::PingAllOpened(void)
 class MfCloseEntry
 {
 public:
-   MailFolderCmn * m_mf;
-   wxDateTime m_dt;
+   enum
+   {
+      // special value for MfCloseEntry() ctor delay parameter
+      NEVER_EXPIRES = INT_MAX
+   };
+
+   MfCloseEntry(MailFolderCmn *mf, int secs)
+      {
+         m_mf = mf;
+
+         m_expires = secs != NEVER_EXPIRES;
+         if ( m_expires )
+         {
+            m_dt = wxDateTime::Now();
+            m_dt.Add(wxTimeSpan::Seconds(secs));
+         }
+         //else: m_dt stays uninitialized
+      }
+
    ~MfCloseEntry()
       {
          if ( m_mf )
@@ -787,12 +804,10 @@ public:
             m_mf->RealDecRef();
          }
       }
-   MfCloseEntry(MailFolderCmn *mf, int secs)
-      {
-         m_mf = mf;
-         m_dt = wxDateTime::Now();
-         m_dt.Add(wxTimeSpan::Seconds(secs));
-      }
+
+   MailFolderCmn * m_mf;
+   wxDateTime m_dt;
+   bool m_expires;
 };
 
 KBLIST_DEFINE(MfList, MfCloseEntry);
@@ -816,11 +831,11 @@ public:
       }
    void OnTimer(void)
       {
-
          MfList::iterator i;
-         for(i = m_MfList.begin(); i != m_MfList.end();)
+         for( i = m_MfList.begin(); i != m_MfList.end();)
          {
-            if( (**i).m_dt > wxDateTime::Now() )
+            MfCloseEntry *entry = *i;
+            if ( entry->m_expires && (entry->m_dt > wxDateTime::Now()) )
                i = m_MfList.erase(i);
             else
                ++i;
@@ -851,18 +866,34 @@ MailFolderCmn::DecRef()
 {
    if ( gs_MailFolderCloser )
    {
-      int delay = READ_CONFIG(GetProfile(),MP_FOLDER_CLOSE_DELAY);
-      if ( delay > 0 &&
-            GetNRef() == 1 && // only real closes get delayed
-            IsAlive() )       // and only if the folder was opened
-                              // successfully and is still functional
+      // the folder is going to be really closed if this is the last DecRef()
+      // and we only delay closing of the folders which could be opened
+      // successfully and are atill functional
+      if ( GetNRef() == 1 && IsAlive() )
       {
-        wxLogTrace(TRACE_MF_CLOSE, "Mailfolder '%s': close delayed.",
-                   GetName().c_str());
-        Checkpoint(); // flush data immediately
-        gs_MailFolderCloser->Add(this, delay);
+         int delay;
 
-        return FALSE;
+         if ( GetFlags() & MF_FLAGS_KEEPOPEN )
+         {
+            // never close it at all
+            delay = MfCloseEntry::NEVER_EXPIRES;
+         }
+         else
+         {
+            // don't close it only if the linger delay is set
+            delay = READ_CONFIG(GetProfile(), MP_FOLDER_CLOSE_DELAY);
+         }
+
+         if ( delay > 0 )
+         {
+            wxLogTrace(TRACE_MF_CLOSE, "Mailfolder '%s': close delayed.",
+                       GetName().c_str());
+
+            Checkpoint(); // flush data immediately
+            gs_MailFolderCloser->Add(this, delay);
+         }
+
+         return FALSE;
       }
    }
 

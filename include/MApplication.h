@@ -213,11 +213,6 @@ public:
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
 
-   /// Add folder to list of folders to keep open:
-   void AddKeepOpenFolder(const String name);
-   /// Remove folder from list of folders to keep open:, true on success
-   bool RemoveKeepOpenFolder(const String name);
-
    /// the application maintains several global timers
    enum Timer
    {
@@ -335,8 +330,6 @@ protected:
    /// the last error code
    MError m_error;
 
-   /// a list of folders to keep open at all times
-   class MailFolderList *m_KeepOpenFolders;
    /// the list of all constantly open folders to check for new mail
    class MailCollector *m_MailCollector;
 

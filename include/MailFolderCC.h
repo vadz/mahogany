@@ -508,6 +508,9 @@ protected:
    /// return TRUE if it is safe to send update events to GUI right now
    bool CanSendUpdateEvents() const;
 
+   /// the cached number of interesting messages in the folder
+   MailFolderStatus m_status;
+
 public:
    /// re-read some cclient settings
    static void UpdateCClientConfig(void);

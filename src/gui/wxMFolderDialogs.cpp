@@ -410,8 +410,6 @@ protected:
 #endif
 /// the initial value of the "is incoming" flag
    bool m_originalIncomingValue;
-   /// the initial value of the "keep open" flag
-   bool m_originalKeepOpenValue;
    /// the initial value of the "force re-open" flag
    bool m_originalForceReOpenValue;
 #ifdef USE_LOCAL_CHECKBOX
@@ -1860,8 +1858,7 @@ wxFolderPropertiesPage::SetDefaultValues()
 
    m_isIncoming->SetValue(m_originalIncomingValue);
 
-   m_originalKeepOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
-   m_keepOpen->SetValue(m_originalKeepOpenValue);
+   m_keepOpen->SetValue((flags & MF_FLAGS_KEEPOPEN) != 0);
 
    m_originalForceReOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
    m_forceReOpen->SetValue(m_originalForceReOpenValue);
@@ -2303,19 +2300,6 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          wxFAIL_MSG("can't set the isIncoming setting: no mail collector");
       }
    }
-
-   bool isKeepOpen = m_keepOpen->GetValue();
-   if ( m_originalKeepOpenValue != isKeepOpen )
-   {
-      if ( isKeepOpen )
-         mApplication->AddKeepOpenFolder(fullname);
-      else
-      {
-         VERIFY(mApplication->RemoveKeepOpenFolder(fullname),
-                "failed to reset 'keep open' property");
-      }
-   }
-   //else: nothing changed, nothing to do
 
    bool isAnonymous = m_isAnonymous->GetValue();
    if ( isAnonymous != m_originalIsAnonymous )
