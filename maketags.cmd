@@ -1,1 +1,1 @@
-@ctags.exe -R --c++-types=+px --totals --language-force=c++ -I WXDLLEXPORT src include
+@ctags.exe -R --totals -I WXDLLEXPORT src include lib
