@@ -1834,11 +1834,11 @@ extern const MOption MP_AWAY_STATUS;
 /// IMAP lookahead value
 #define MP_IMAP_LOOKAHEAD_DEFVAL 0l
 /// TCP/IP open timeout in seconds.
-#define MP_TCP_OPENTIMEOUT_DEFVAL      10l
+#define MP_TCP_OPENTIMEOUT_DEFVAL      30l
 /// TCP/IP read timeout in seconds.
-#define MP_TCP_READTIMEOUT_DEFVAL       30l
+#define MP_TCP_READTIMEOUT_DEFVAL       90l
 /// TCP/IP write timeout in seconds.
-#define  MP_TCP_WRITETIMEOUT_DEFVAL    30l
+#define  MP_TCP_WRITETIMEOUT_DEFVAL    90l
 /// TCP/IP close timeout in seconds.
 #define  MP_TCP_CLOSETIMEOUT_DEFVAL 60l
 /// rsh connection timeout in seconds.
