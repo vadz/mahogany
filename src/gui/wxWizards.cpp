@@ -655,7 +655,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
    case ET_NNTP_HIER:
       params->m_FolderType = MF_NNTP;
       params->m_FolderFlags |= MF_FLAGS_ANON; // by default
-      if(m_Type == ET_NNTP_HIER)
+      if(m_Type == ET_NNTP_HIER || m_Type == ET_NNTP_SERVER)
          params->m_FolderFlags |= MF_FLAGS_GROUP;
       break;
    case ET_NEWS:

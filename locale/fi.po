@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.21\n"
-"POT-Creation-Date: 2000-01-11 15:32-0800\n"
+"POT-Creation-Date: 2000-03-26 21:40+0100\n"
 "PO-Revision-Date: 1999-07-07 16:30+0200\n"
 "Last-Translator: Lauri Jutila <ljuti@hangar.keskiespoo.net>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
@@ -9,274 +9,30 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: Filters.cpp:359
-msgid "Parser output"
-msgstr ""
-
-#: Filters.cpp:363
-#, fuzzy
-msgid "Parser: "
-msgstr "&Salasana: "
-
-#: Filters.cpp:1053
-#, c-format
-msgid ""
-"Parse error at input position %lu:\n"
-"  %s\n"
-"%s<error> %s"
-msgstr ""
-
-#: Filters.cpp:1056
-#, fuzzy
-msgid "Parse error!"
-msgstr "Liit‰ t‰h‰n"
-
-#: Filters.cpp:1110
-msgid "Unterminated string."
-msgstr ""
-
-#: Filters.cpp:1157
-#, fuzzy
-msgid "'(' expected after 'if'."
-msgstr "Valittu kansio '%s'."
-
-#: Filters.cpp:1169
-msgid "')' expected after condition in if statement."
-msgstr ""
-
-#: Filters.cpp:1244
-#, c-format
-msgid "Functioncall expected '(' after '%s'."
-msgstr ""
-
-#: Filters.cpp:1269
-#, c-format
-msgid "Attempt to call undefined function '%s'."
-msgstr ""
-
-#: Filters.cpp:1315
-msgid "Expected Factor after negation operator."
-msgstr ""
-
-#: Filters.cpp:1335
-msgid "Expected a number or a function call."
-msgstr ""
-
-#: Filters.cpp:1371 Filters.cpp:1561
-msgid "Expected Condition after conditional operator."
-msgstr ""
-
-#: Filters.cpp:1410
-msgid "Expected expression after operator."
-msgstr ""
-
-#: Filters.cpp:1448
-msgid "Expected term after operator."
-msgstr ""
-
-#: Filters.cpp:1520
-msgid "Parse error, cannot find valid program."
-msgstr ""
-
-#: Filters.cpp:1554
-msgid "Expected Block after '{'"
-msgstr ""
-
-#: Filters.cpp:1577
-msgid "Expected ';' at end of condition."
-msgstr ""
-
-#: Filters.cpp:2178
-msgid "This plug-in provides a filtering language for Mahogany."
-msgstr ""
-
-#: PalmOS.cpp:141
-#, fuzzy, c-format
-msgid "Could not obtain lock for '/dev/%s'"
-msgstr "Moduulin '%s' lataaminen ep‰onnistui."
-
-#: PalmOS.cpp:326 PalmOS.cpp:405
-#, c-format
-msgid "Executing command ¥%s¥ returned an error code (%d)."
-msgstr ""
-
-#: PalmOS.cpp:338
-msgid "Please press HotSync button and click on OK."
-msgstr ""
-
-#: PalmOS.cpp:341
-#, fuzzy
-msgid "Cannot get connection."
-msgstr "Yhteyden avaus palvelimeen ep‰onnistui"
-
-#: PalmOS.cpp:356
-msgid "pi_bind() failed"
-msgstr ""
-
-#: PalmOS.cpp:365
-msgid "pi_listen() failed"
-msgstr ""
-
-#: PalmOS.cpp:374
-msgid "pi_accept() failed"
-msgstr ""
-
-#: PalmOS.cpp:415
-msgid "Do you want synchronise with your PalmOS device?"
-msgstr ""
-
-#: PalmOS.cpp:432
-msgid "Addressbook synchronisation not yet implemented."
-msgstr ""
-
-#: PalmOS.cpp:455
-msgid "Unable to open MailDB"
-msgstr ""
-
-#: PalmOS.cpp:456
-msgid "Unable to open MailDB.\n"
-msgstr ""
-
-#: PalmOS.cpp:546
-#, c-format
-msgid "Transferred message %d: \"%s\" for \"%s\"."
-msgstr ""
-
-#: PalmOS.cpp:567
-#, fuzzy, c-format
-msgid ""
-"Failed to transfer message\n"
-"\"%s\"\n"
-"for \"%s\"."
-msgstr "Viestin tallennus ep‰onnistui."
-
-#: PalmOS.cpp:577
-#, fuzzy, c-format
-msgid "Transferred %d/%d messages."
-msgstr "Tallennetaan %d viesti‰..."
-
-#: PalmOS.cpp:584
-msgid "No messages found in PalmOS-Outbox."
-msgstr ""
-
-#: PalmOS.cpp:602
-#, c-format
-msgid "Cannot open PalmOS synchronisation mailbox ¥%s¥"
-msgstr ""
-
-#: PalmOS.cpp:630
-#, fuzzy, c-format
-msgid "Skipping deleted message %lu/%lu"
-msgstr "Palauta viesti"
-
-#: PalmOS.cpp:651
-#, c-format
-msgid "Storing message %lu/%lu: %s"
-msgstr ""
-
-#: PalmOS.cpp:686
-#, c-format
-msgid "Could not store message %lu/%lu: %s"
-msgstr ""
-
-#: PalmOS.cpp:702
-#, c-format
-msgid "Stored %lu/%lu messages on PalmOS device."
-msgstr ""
-
-#: PalmOS.cpp:711
-#, fuzzy, c-format
-msgid "Could not obtain lock for mailbox '%s'."
-msgstr "Moduulin '%s' lataaminen ep‰onnistui."
-
-#: PalmOS.cpp:768
-msgid "PalmOS module"
-msgstr ""
-
-#: PalmOS.cpp:771
-msgid "PalmOS"
-msgstr ""
-
-#: PalmOS.cpp:776
-msgid ""
-"This module can synchronise your e-Mail and Addressbook\n"
-"contents with a PalmOS based device."
-msgstr ""
-
-#: PalmOS.cpp:785 PalmOS.cpp:977
-msgid "Synchronise Mail"
-msgstr ""
-
-#: PalmOS.cpp:795
-msgid "kept in Outbox"
-msgstr ""
-
-#: PalmOS.cpp:796
-#, fuzzy
-msgid "deleted"
-msgstr "Poista"
-
-#: PalmOS.cpp:797
-#, fuzzy
-msgid "filed"
-msgstr "Tiedosto"
-
-#: PalmOS.cpp:802
-#, fuzzy
-msgid "Sent messages will be"
-msgstr "ei viestej‰"
-
-#: PalmOS.cpp:820
-#, fuzzy
-msgid "Synchronise Addressbooks"
-msgstr "Osoitekirja"
-
-#: PalmOS.cpp:828
-#, fuzzy
-msgid "Mahogany Palm-mailbox"
-msgstr "Mahogany: Listaus"
-
-#: PalmOS.cpp:844
-msgid "Serial device"
-msgstr ""
-
-#: PalmOS.cpp:860
-msgid "Serial speed"
-msgstr ""
-
-#: PalmOS.cpp:883
-msgid "Attempt to lock device"
-msgstr ""
-
-#: PalmOS.cpp:891
-msgid "Optional script to run before opening device"
-msgstr ""
-
-#: PalmOS.cpp:907
-msgid "Optional script to run after closing device"
-msgstr ""
-
-#: PalmOS.cpp:983
-#, fuzzy
-msgid "PalmOS module preferences"
-msgstr "Muokkaa asetuksia"
-
 #: strutil.cpp:764
 msgid "Re"
 msgstr ""
 
-#: upgrade.cpp:357
+#: strutil.cpp:938
+msgid "Regular expression matching not implemented."
+msgstr ""
+
+#: upgrade.cpp:239
+msgid "You need to specify at least the SMTP server."
+msgstr ""
+
+#: upgrade.cpp:434 wxWizards.cpp:214
 #, fuzzy
 msgid "Do you really want to abort the wizard?"
 msgstr "Haluatko todella poistua Mahoganysta?"
 
-#: upgrade.cpp:365
+#: upgrade.cpp:442
 msgid ""
 "Please use the 'Options' dialog to configure\n"
 "the program before using it!"
 msgstr ""
 
-#: upgrade.cpp:424
+#: upgrade.cpp:506
 msgid ""
 "Welcome to Mahogany!\n"
 "\n"
@@ -291,92 +47,301 @@ msgid ""
 "the box below or press [Cancel] at any moment."
 msgstr ""
 
-#: upgrade.cpp:442
+#: upgrade.cpp:524
 msgid "I'm an &expert and don't need the wizard"
 msgstr ""
 
-#: upgrade.cpp:472
+#: upgrade.cpp:553
 msgid ""
 "Please specify your name and e-mail address:\n"
-"they will be used for sending the messages"
+"they will be used for sending the messages.\n"
 msgstr ""
 
-#: upgrade.cpp:479
+#: upgrade.cpp:560
 #, fuzzy
 msgid "&Personal name:"
 msgstr "&Henkilˆnimi"
 
-#: upgrade.cpp:480
+#: upgrade.cpp:561
 #, fuzzy
 msgid "&E-mail:"
 msgstr "&E-Mail"
 
-#: upgrade.cpp:497
+#: upgrade.cpp:578
 msgid ""
-"To receive e-mail, you need to have at least one\n"
-"mail server. Mail server may use POP3 or IMAP4,\n"
-"but you need only one of them (IMAP4 is better).\n"
+"You can receive e-mail from remote mail\n"
+"servers, or through the local mail spool.\n"
+"\n"
+"Mail servers may use POP3 or IMAP4 access,\n"
+"but you usually need only one of them\n"
+"(IMAP4 is much better and faster).\n"
 "\n"
 "To read Usenet discussion groups, you need to\n"
-"specify the NNTP (news) server and to be able to\n"
-"send e-mail, SMTP server is required.\n"
+"specify the NNTP (news) server and to be able\n"
+"to send e-mail, an SMTP server is required.\n"
 "\n"
 "All of these fields may be filled later as well\n"
 "(and you will be able to specify multiple servers too)"
 msgstr ""
 
-#: upgrade.cpp:512
+#: upgrade.cpp:596
 #, fuzzy
 msgid "&POP server:"
 msgstr "&POP palvelin"
 
-#: upgrade.cpp:513
+#: upgrade.cpp:597
 #, fuzzy
 msgid "&IMAP server:"
 msgstr "&IMAP palvelin"
 
-#: upgrade.cpp:514
+#: upgrade.cpp:598
 #, fuzzy
 msgid "&SMTP server:"
 msgstr "&IMAP palvelin"
 
-#: upgrade.cpp:515
+#: upgrade.cpp:599
 #, fuzzy
 msgid "&NNTP server:"
 msgstr "&POP palvelin"
 
-#: upgrade.cpp:582
+#: upgrade.cpp:620
 msgid ""
-"Congratulations! You have successfully finished configuring\n"
+"Mahogany can automatically detect if your\n"
+"network connection is online or offline.\n"
+"It can also connect and disconnect you to the\n"
+"network, but for this it needs to know which\n"
+"commands to execute to go online or offline."
+msgstr ""
+
+#: upgrade.cpp:629
+#, fuzzy
+msgid "Command to &connect:"
+msgstr "Yhteyden avaus palvelimeen ep‰onnistui"
+
+#: upgrade.cpp:630
+msgid "Command to &disconnect:"
+msgstr ""
+
+#: upgrade.cpp:652
+msgid ""
+"Mahogany can either leave all messages in\n"
+"your system mailbox or create its own\n"
+"mailbox for new mail and collect new\n"
+"messages in there. This is recommended,\n"
+"especially when collecting from remote\n"
+"servers."
+msgstr ""
+
+#: upgrade.cpp:663
+msgid "&Collect new mail:"
+msgstr ""
+
+#: upgrade.cpp:664
+msgid "Use &Trash mailbox:"
+msgstr ""
+
+#: upgrade.cpp:665
+msgid "Use &Outbox queue:"
+msgstr ""
+
+#: upgrade.cpp:666
+msgid "Use dial-up network:"
+msgstr ""
+
+#: upgrade.cpp:667
+msgid "Load PalmOS support:"
+msgstr ""
+
+#: upgrade.cpp:668
+#, fuzzy
+msgid "Enable Python:"
+msgstr "&Aktivoi Python"
+
+#: upgrade.cpp:675
+msgid ""
+"\n"
+"Mahogany has two options for deleting\n"
+"messages. You can either mark messages\n"
+"as deleted and leave them around to be\n"
+"expunged later, or you can use a Trash\n"
+"folder where to move them to."
+msgstr ""
+
+#: upgrade.cpp:686
+msgid ""
+"\n"
+"Mahogany can either send messages\n"
+"immediately or queue them and only\n"
+"send them on demand. This is especially\n"
+"recommended for dial-up networking."
+msgstr ""
+
+#: upgrade.cpp:696
+msgid ""
+"\n"
+"If you are using dial-up networking,\n"
+"Mahogany detect your connection status\n"
+"and optionally dial and hang-up."
+msgstr ""
+
+#: upgrade.cpp:705
+msgid ""
+"\n"
+"Do you have a PalmOS based handheld computer?\n"
+"Mahogany has special support build in to connect\n"
+"to these."
+msgstr ""
+
+#: upgrade.cpp:715
+msgid ""
+"\n"
+"Mahogany contains a built-in interpreter for\n"
+"the scripting language `Python'.\n"
+"This can be used to further customise and\n"
+"expand Mahogany.\n"
+"Would you like to enable it?"
+msgstr ""
+
+#: upgrade.cpp:771
+msgid ""
+"Congratulations!\n"
+"You have successfully configured\n"
 "Mahogany and may now start using it.\n"
 "\n"
-"Please remember to consult online help and the documentaion\n"
-"files included in the distribution in case of problems and,\n"
-"of course, remember about Mahogany users mailing list.\n"
+"Please remember to consult the online help\n"
+"and the documentaion files included.\n"
 "\n"
+"You may want to have a look at the\n"
+"full set of program options, too.\n"
 "\n"
+"In case of a problem, consult the help\n"
+"system and, if you cannot resolve it,\n"
+"please visit our web site at\n"
+"http://www.wxwindows.org/Mahogany/\n"
 "\n"
-"We hope you will enjoy Mahogany!\n"
+"You might also want to join the Mahogany\n"
+"mailing lists, which you can access via\n"
+"the web page.\n"
+"\n"
+"We hope you will enjoy using Mahogany!\n"
 "                    M-Team"
 msgstr ""
 
-#: upgrade.cpp:624
+#: upgrade.cpp:851
 #, fuzzy
 msgid "Mahogany Installation"
 msgstr "Mahogany: Listaus"
 
-#: upgrade.cpp:656
+#: upgrade.cpp:891
+#, c-format
+msgid ""
+"From: m-users-subscribe@egroups.com\r\n"
+"Subject: Welcome to Mahogany!\r\n"
+"Date: %s\r\n"
+"\r\n"
+"Thank you for trying Mahogany!\r\n"
+"\r\n"
+"This mail and news client is developed as an OpenSource project by a\r\n"
+"team of volunteers from around the world.\r\n"
+"If you would like to contribute to its development, you are\r\n"
+"always welcome to join in.\r\n"
+"\r\n"
+"We also rely on you to report any bugs or wishes for improvements\r\n"
+"that you may have.\r\n"
+"\r\n"
+"Please visit our web pages at http://www.wxwindows.org/Mahogany/\r\n"
+"\r\n"
+"Also, reply to this e-mail message and you will automatically be\r\n"
+"added to the mailing list of Mahogany users, where you will find\r\n"
+"other users happy to share their experiences with you and help you\r\n"
+"get started.\r\n"
+"\r\n"
+"Your Mahogany Developers Team\r\n"
+msgstr ""
+
+#: upgrade.cpp:955 upgrade.cpp:1626
+msgid "Outbox"
+msgstr ""
+
+#: upgrade.cpp:961
+#, fuzzy
+msgid "Queue of messages to be sent."
+msgstr "Viesti on l‰hetetty."
+
+#: upgrade.cpp:962
+#, fuzzy, c-format
+msgid "Could not create the outgoing mailbox '%'."
+msgstr "Olemassaolevan tiedoston katkaisu ep‰onnistui."
+
+#: upgrade.cpp:975 upgrade.cpp:1002 upgrade.cpp:1492
+msgid "Default system folder for incoming mail."
+msgstr "J‰rjestelm‰n oletuskansio saapuville viesteille."
+
+#: upgrade.cpp:976 upgrade.cpp:1003
+#, fuzzy
+msgid "Could not create INBOX mailbox."
+msgstr "Moduulin '%s' lataaminen ep‰onnistui."
+
+#: MApplication.cpp:755 upgrade.cpp:983 upgrade.cpp:1860
+msgid "New Mail"
+msgstr "Uudet viestit"
+
+#: upgrade.cpp:992
+#, fuzzy
+msgid "Mailbox in which Mahogany collects all new messages."
+msgstr "Kansio, johon Mahogany ker‰‰ kaikki uudet viestit."
+
+#: upgrade.cpp:993
+#, fuzzy, c-format
+msgid "Could not create central incoming mailbox '%s'."
+msgstr "Moduulin '%s' lataaminen ep‰onnistui."
+
+#: upgrade.cpp:1010 upgrade.cpp:1011 upgrade.cpp:1014 upgrade.cpp:1589
+msgid "Trash"
+msgstr ""
+
+#: upgrade.cpp:1015
+#, fuzzy
+msgid "Trash folder for deleted messages."
+msgstr "Ka&nsio l‰hetetyille viesteille"
+
+#: upgrade.cpp:1016
+#, fuzzy
+msgid "Could not create Trash mailbox."
+msgstr "Moduulin '%s' lataaminen ep‰onnistui."
+
+#: upgrade.cpp:1039
+msgid ""
+"This folder and its configuration settings\n"
+"are used to synchronise with your PalmOS\n"
+"based handheld computer."
+msgstr ""
+
+#: upgrade.cpp:1042
+#, fuzzy
+msgid "Could not create PalmOS mailbox."
+msgstr "Moduulin '%s' lataaminen ep‰onnistui."
+
+#: upgrade.cpp:1049
+msgid ""
+"Set up the `PalmBox' mailbox used to synchronise\n"
+"e-mail with your handheld computer.\n"
+"Please use the Plugin-menu to configure\n"
+"the PalmOS support."
+msgstr ""
+
+#: upgrade.cpp:1070
 msgid ""
 "As it seems that you are running Mahogany for the first\n"
 "time, you should probably set up some of the options\n"
 "needed by the program (especially network parameters)."
 msgstr ""
 
-#: upgrade.cpp:851
+#: upgrade.cpp:1262
 msgid "Deleted illegal folder profile: '"
 msgstr "Poistettu v‰‰r‰ kansioprofiili: '"
 
-#: upgrade.cpp:963
+#: upgrade.cpp:1374
 #, c-format
 msgid ""
 "Configuration information and program files were successfully upgraded from "
@@ -384,7 +349,7 @@ msgid ""
 msgstr ""
 "Asetustiedot ja ohjelmatiedostot p‰ivitettiin onnistuneesti versiosta '%s'."
 
-#: upgrade.cpp:967
+#: upgrade.cpp:1378
 #, c-format
 msgid ""
 "Configuration information and program files could not be upgraded from "
@@ -398,7 +363,7 @@ msgstr ""
 "On suositeltavaa ett‰ ohjelma poistetaan ja asennetaan uudelleen ennen "
 "k‰yttˆ‰."
 
-#: upgrade.cpp:982
+#: upgrade.cpp:1394
 msgid ""
 "The previously installed version of Mahogany was probably newer than this "
 "one. Cannot upgrade."
@@ -406,17 +371,18 @@ msgstr ""
 "Aikaisempi asennettu versio Mahoganysta on ehk‰ uudempi kuin t‰m‰. "
 "P‰ivityst‰ ei voida suorittaa."
 
-#: upgrade.cpp:1009
-#, c-format
+#: upgrade.cpp:1421
+#, fuzzy, c-format
 msgid ""
 "Found additional folder '%s'\n"
-"marked as central new mail folder. Ignoring it."
+"marked as central new mail folder. Ignoring it.\n"
+"New Mail folder used is '%s'."
 msgstr ""
 "Ylim‰‰r‰inen kansio '%s' lˆydetty, joka\n"
 "oli merkitty keskuskansioksi uudelle postille.\n"
 "J‰tet‰‰n huomioimatta."
 
-#: upgrade.cpp:1019
+#: upgrade.cpp:1433
 #, c-format
 msgid ""
 "Cannot auto-collect mail from the new mail folder\n"
@@ -426,7 +392,7 @@ msgstr ""
 "Saapuneen postin kansiosta '%s' ei voida ker‰t‰ postia.\n"
 "Asetustiedot korjattu."
 
-#: upgrade.cpp:1055
+#: upgrade.cpp:1469
 msgid ""
 "Normally Mahogany will automatically collect all mail\n"
 "from your system's default mail folder (INBOX,\n"
@@ -449,11 +415,11 @@ msgstr ""
 "Vahvista t‰m‰. Jos valitset No, viestisi s‰ilytet‰‰n\n"
 "INBOXissa ja joudut itse tarkistamaan kansion."
 
-#: upgrade.cpp:1066
+#: upgrade.cpp:1480
 msgid "Collect mail from INBOX?"
 msgstr "Ker‰t‰‰nkˆ viestit INBOX-kansiosta?"
 
-#: upgrade.cpp:1072
+#: upgrade.cpp:1486
 msgid ""
 "Mahogany will not automatically collect mail from your\n"
 "system's default INBOX.\n"
@@ -465,42 +431,34 @@ msgstr ""
 "Voit muuttaa t‰t‰ INBOX-kansion asetusikkunassa milloin\n"
 "tahansa."
 
-#: upgrade.cpp:1078
-msgid "Default system folder for incoming mail."
-msgstr "J‰rjestelm‰n oletuskansio saapuville viesteille."
-
-#: upgrade.cpp:1112
+#: upgrade.cpp:1526
 msgid "Folder where Mahogany will collect all new mail."
 msgstr "Kansio, johon Mahogany ker‰‰ kaikki uudet viestit."
 
-#: upgrade.cpp:1151
+#: upgrade.cpp:1565 upgrade.cpp:1639
 msgid "Folder where Mahogany will store copies of outgoing messages."
 msgstr "Kansio, johon Mahogany tallentaa kopiot l‰hetetyist‰ viesteist‰."
 
-#: upgrade.cpp:1173
+#: upgrade.cpp:1590
 #, c-format
 msgid "The name for the trash folder was empty, using default '%s'."
 msgstr ""
 
-#: upgrade.cpp:1186
+#: upgrade.cpp:1602
 #, fuzzy
 msgid "Folder where Mahogany will store deleted messages."
 msgstr "Kansio, johon Mahogany tallentaa kopiot l‰hetetyist‰ viesteist‰."
 
-#: upgrade.cpp:1211
-#, fuzzy
-msgid "Sent Mail"
-msgstr "L‰hetetyt viestit"
+#: upgrade.cpp:1627
+#, c-format
+msgid "The name for the outgoing mailbox was empty, using default '%s'."
+msgstr ""
 
-#: MApplication.cpp:837 MailCollector.cpp:255 upgrade.cpp:1212
-msgid "New Mail"
-msgstr "Uudet viestit"
-
-#: upgrade.cpp:1243
+#: upgrade.cpp:1676
 msgid "Mahogany Test Message"
 msgstr "Mahoganyn testiviesti"
 
-#: upgrade.cpp:1246
+#: upgrade.cpp:1679
 msgid ""
 "If you have received this mail, your Mahogany configuration works.\n"
 "You should also try to reply to this mail and check that your reply arrives."
@@ -510,11 +468,11 @@ msgstr ""
 "On suositeltavaa, ett‰ kokeilet vastata t‰h‰n viestiin ja tarkistat, ett‰ \n"
 "vastaus tulee perille."
 
-#: upgrade.cpp:1252
+#: upgrade.cpp:1685
 msgid "Sent email message to:\n"
 msgstr "Viesti l‰hetetty:\n"
 
-#: upgrade.cpp:1254
+#: upgrade.cpp:1687
 msgid ""
 "\n"
 "\n"
@@ -524,9 +482,36 @@ msgstr ""
 "\n"
 "Voitko tarkistaa saapuuko viesti perille."
 
-#: upgrade.cpp:1255
+#: upgrade.cpp:1688
 msgid "Testing your configuration"
 msgstr "Testaan asetuksiasi"
+
+#: upgrade.cpp:1712
+msgid ""
+"Cannot find your Mahogany directory, please specify it in the options dialog."
+msgstr ""
+"Mahoganyn hakemiston haku ep‰onnistui, m‰‰rittele hakemisto "
+"options-ikkunassa."
+
+#: upgrade.cpp:1743
+#, fuzzy
+msgid "NNTP Server"
+msgstr "&POP palvelin"
+
+#: upgrade.cpp:1756
+#, fuzzy
+msgid "IMAP Server"
+msgstr "&IMAP palvelin"
+
+#: upgrade.cpp:1769
+#, fuzzy
+msgid "POP3 Server"
+msgstr "&POP palvelin"
+
+#: upgrade.cpp:1859
+#, fuzzy
+msgid "Sent Mail"
+msgstr "L‰hetetyt viestit"
 
 #: miscutil.cpp:82
 #, c-format
@@ -598,18 +583,7 @@ msgstr ""
 "V‰ri‰ '%s' ei lˆydy, k‰ytet‰‰n oletusta.\n"
 "(tarkista asetukset)"
 
-#: MApplication.cpp:192
-msgid ""
-"Cannot find your Mahogany directory, please specify it in the options dialog."
-msgstr ""
-"Mahoganyn hakemiston haku ep‰onnistui, m‰‰rittele hakemisto "
-"options-ikkunassa."
-
-#: MApplication.cpp:240
-msgid "Failed to set up initial configuration."
-msgstr "Alkuper‰isten asetusten m‰‰ritys ep‰onnistui."
-
-#: MApplication.cpp:297
+#: MApplication.cpp:201
 msgid ""
 "You are trying to run Mahogany as the super-user (root).\n"
 "For security reasons this is not possible, please log in\n"
@@ -619,17 +593,17 @@ msgstr ""
 "Turvallisuussyist‰ t‰m‰ ei ole mahdollista. Kirjaudu\n"
 "sis‰‰n tavallisena k‰ytt‰j‰n‰ ja yrit‰ uudelleen."
 
-#: MApplication.cpp:317
+#: MApplication.cpp:221
 #, c-format
 msgid "Cannot create the directory for configuration files '%s'."
 msgstr "Hakemiston '%s' luonti asetustiedostoille ep‰onnistui."
 
-#: MApplication.cpp:322
+#: MApplication.cpp:226
 #, c-format
 msgid "Created directory '%s' for configuration files."
 msgstr "Asetustiedostojen hakemisto '%s' luotu."
 
-#: MApplication.cpp:332
+#: MApplication.cpp:236
 #, c-format
 msgid ""
 "Could not create initial empty configuration file\n"
@@ -639,7 +613,7 @@ msgstr ""
 "Tyhj‰n asetustiedoston '%s' luonti ep‰onnistui.\n"
 "%s"
 
-#: MApplication.cpp:347
+#: MApplication.cpp:251
 #, c-format
 msgid ""
 "Configuration directory '%s' was writable for other users.\n"
@@ -648,20 +622,20 @@ msgstr ""
 "Asetushakemisto '%s' on toisten k‰ytt‰jien muunneltavissa.\n"
 "Salasanat ovat saattaneet sekoittua, harkitse niiden vaihtoa.\n"
 
-#: MApplication.cpp:351
+#: MApplication.cpp:255
 msgid ""
 "This has been fixed now, the directory is no longer writable for others."
 msgstr ""
 "Asia korjattu. Hakemisto ei ole en‰‰ toisten k‰ytt‰jien muunneltavissa."
 
-#: MApplication.cpp:355
+#: MApplication.cpp:259
 #, c-format
 msgid ""
 "The attempt to make the directory unwritable for others has failed.\n"
 "(%s)"
 msgstr "Hakemiston (%s) k‰ytt‰j‰oikeuksien muutos ep‰onnistui."
 
-#: MApplication.cpp:378
+#: MApplication.cpp:282
 #, c-format
 msgid ""
 "Configuration file '%s' was readable for other users.\n"
@@ -670,18 +644,18 @@ msgstr ""
 "Asetushakemisto '%s' on toisten k‰ytt‰jien luettavissa.\n"
 "Salasanat ovat saattaneet sekoittua, harkitse niiden vaihtoa.\n"
 
-#: MApplication.cpp:382
+#: MApplication.cpp:286
 msgid "This has been fixed now, the file is no longer readable for others."
 msgstr "Asia korjattu. Hakemisto ei ole en‰‰ toisten k‰ytt‰jien luettavissa."
 
-#: MApplication.cpp:386
+#: MApplication.cpp:290
 #, c-format
 msgid ""
 "The attempt to make the file unreadable for others has failed.\n"
 "(%s)"
 msgstr "Hakemiston (%s) k‰ytt‰j‰oikeuksien muutos ep‰onnistui."
 
-#: MApplication.cpp:423
+#: MApplication.cpp:327
 #, c-format
 msgid ""
 "Cannot find global directory \"%s\" in\n"
@@ -692,27 +666,27 @@ msgstr ""
 "'%s'.\n"
 "Haluatko m‰‰ritell‰ sen paikan nyt?"
 
-#: MApplication.cpp:430
+#: MApplication.cpp:334
 msgid "Specify global directory for Mahogany"
 msgstr "M‰‰rittele Mahoganyn globaali hakemisto"
 
-#: MApplication.cpp:465
+#: MApplication.cpp:374
 msgid "Program execution aborted due to installation problems."
 msgstr ""
 "Ohjelman ajaminen keskeytettiin asennuksessa tapahtuneiden \n"
 "ongelmien vuoksi."
 
-#: MApplication.cpp:558
+#: MApplication.cpp:468
 msgid "Cannot build list of folders to keep open."
 msgstr "Avoimien kansioiden luettelon luonti ep‰onnistui."
 
-#: MApplication.cpp:678
+#: MApplication.cpp:596
 msgid ""
 "You still have messages queued to be sent.\n"
 "Do you want to send them before exiting the application?"
 msgstr ""
 
-#: MApplication.cpp:709
+#: MApplication.cpp:627
 msgid ""
 "Some folders are in critical sections and should be allowed\n"
 "to finish whatever operation is pending on them before exiting\n"
@@ -723,109 +697,109 @@ msgstr ""
 "prosessit tulisi ajaa loppuun ennen ohjelmasta poistumista.\n"
 "N‰it‰ kansioita ovat:\n"
 
-#: MApplication.cpp:714
+#: MApplication.cpp:632
 msgid "Do you want to exit anyway?"
 msgstr "Haluatko kuitenkin poistua?"
 
-#: MApplication.cpp:778
+#: MApplication.cpp:696
 #, c-format
 msgid "Could not collect mail from incoming folder '%s'."
 msgstr "Viestien keruu saapuvat-kansiosta '%s' ep‰onnistui."
 
-#: MApplication.cpp:790 MailCollector.cpp:232
+#: MApplication.cpp:708
 #, c-format
 msgid "Command '%s' (to execute on new mail reception) failed."
 msgstr "Komennon '%s' (uusien viestien vastaanottokomento) ajo ep‰onnistui."
 
-#: MApplication.cpp:820
+#: MApplication.cpp:738
 msgid "Subject: "
 msgstr "Aihe: "
 
-#: MApplication.cpp:821
+#: MApplication.cpp:739
 msgid "From: "
 msgstr "L‰hett‰j‰: "
 
-#: MApplication.cpp:823
+#: MApplication.cpp:741
 msgid "in folder '"
 msgstr "kansiossa '"
 
-#: MApplication.cpp:834
+#: MApplication.cpp:752
 #, c-format
 msgid ""
 "You have received %lu new messages\n"
 "in folder '%s'."
 msgstr "Olet saanut %lu uutta viesti‰."
 
-#: MApplication.cpp:884
+#: MApplication.cpp:816
 #, fuzzy
 msgid "Checking for queued messages..."
 msgstr "Haetaan uusia viestej‰..."
 
-#: MApplication.cpp:900 MApplication.cpp:931
+#: MApplication.cpp:841 MApplication.cpp:886
 #, fuzzy, c-format
 msgid "Cannot open outbox ¥%s¥"
 msgstr "Ei voida avata URL:‰‰ '%s'"
 
-#: MApplication.cpp:945
+#: MApplication.cpp:900
 msgid ""
 "Cannot send queued messages while dialup network is down.\n"
 "Do you want to go online now?"
 msgstr ""
 
-#: MApplication.cpp:951
+#: MApplication.cpp:906
 #, fuzzy
 msgid "Going online..."
 msgstr "Avataan kuvaa..."
 
-#: MApplication.cpp:975
+#: MApplication.cpp:935
 #, c-format
 msgid "Sending message %lu/%lu: %s"
 msgstr ""
 
-#: MApplication.cpp:990
+#: MApplication.cpp:948
 #, fuzzy, c-format
 msgid "Cannot send message ¥%s¥."
 msgstr "Viestin kirjoittaminen tiedostoon '%s' ep‰onnistui."
 
-#: MApplication.cpp:991
+#: MApplication.cpp:958
+#, c-format
+msgid "Posting article %lu/%lu: %s"
+msgstr ""
+
+#: MApplication.cpp:971
 #, fuzzy, c-format
 msgid "Cannot post article ¥%s¥."
 msgstr "Moduulin '%s' lataaminen ep‰onnistui."
 
-#: MApplication.cpp:1003
+#: MApplication.cpp:984
 #, c-format
 msgid "Sent %lu messages from outbox ¥%s¥."
 msgstr ""
-
-#: MApplication.cpp:1010
-#, fuzzy, c-format
-msgid "Could not obtain lock for outbox '%s'."
-msgstr "Moduulin '%s' lataaminen ep‰onnistui."
 
 #: XFace.cpp:196
 #, fuzzy, c-format
 msgid "Could not load XFace file '%s'."
 msgstr "Moduulin '%s' lataaminen ep‰onnistui."
 
-#: MFolder.cpp:245
+#: MFolder.cpp:304
 #, c-format
 msgid "Cannot create a folder '%s' which already exists."
 msgstr "Kansion '%s' luonti ep‰onnistui: kansio on jo olemassa."
 
-#: MFolder.cpp:360
+#: MFolder.cpp:431
 #, c-format
 msgid ""
 "Cannot create profile folder '%s' because a group with this name already "
 "exists."
 msgstr "Profiilin '%s' luonti ep‰onnistui: profiili on jo olemassa."
 
-#: MFolder.cpp:537
+#: MFolder.cpp:647
 #, c-format
 msgid "Cannot create subfolder '%s': folder with this name already exists."
 msgstr ""
 "Alakansion '%s' luonti ep‰onnistui: samanniminen kansio on jo olemassa."
 
-#: MFolder.cpp:572
+#: MFolder.cpp:682
 msgid ""
 "INBOX folder is a special folder used by the mail system and can not be "
 "renamed."
@@ -833,7 +807,7 @@ msgstr ""
 "INBOX kansio on postij‰rjestelm‰n k‰ytˆss‰ ja se ei ole nimett‰viss‰ "
 "uudelleen."
 
-#: MFolder.cpp:586
+#: MFolder.cpp:696
 #, c-format
 msgid ""
 "Cannot rename folder '%s' to '%s': the folder with the new name already "
@@ -842,25 +816,36 @@ msgstr ""
 "Kansion '%s' nimen muutos'%s' ep‰onnistui: samanniminen kansio on jo "
 "olemassa."
 
-#: MailCollector.cpp:141
+#: MFolder.cpp:841
+#, fuzzy, c-format
+msgid ""
+"Cannot create a folder '%s'.\n"
+"Maybe a folder of this name already exists?"
+msgstr ""
+"Alakansion '%s' luonti ep‰onnistui: samanniminen kansio on jo olemassa."
+
+#: MailCollector.cpp:70
+msgid "Checking for new mail..."
+msgstr "Haetaan uusia viestej‰..."
+
+#: MailCollector.cpp:72
+msgid "Checking for new mail... done."
+msgstr "Haetaan uusia viestej‰... valmis."
+
+#: MailCollector.cpp:202 MailCollector.cpp:448
 #, c-format
 msgid "Cannot open incoming folder '%s'."
 msgstr "Saapuvat-kansio '%s' avaus ep‰onnistui."
 
-#: MailCollector.cpp:160
+#: MailCollector.cpp:222
 msgid "Cannot build list of incoming mail folders."
 msgstr "Saapuvat-kansioiden luettelon luonti ep‰onnistui."
 
-#: MailCollector.cpp:200
+#: MailCollector.cpp:268
 msgid "Cannot collect mail without New Mail folder."
 msgstr "Viestej‰ ei voida ker‰t‰ ilman New Mail kansiota."
 
-#: MailCollector.cpp:250
-#, c-format
-msgid "You have %lu new messages in folder '%s'.\n"
-msgstr "Sinulla on %lu uutta viesti‰ kansiossa '%s'.\n"
-
-#: MailCollector.cpp:279
+#: MailCollector.cpp:316
 msgid ""
 "You are trying to collect mail from your central New Mail folder.\n"
 "This makes no sense. Please correct its settings."
@@ -868,33 +853,33 @@ msgstr ""
 "Yrit‰t ker‰t‰ viestej‰ New Mail keskuskansiosta.\n"
 "Se ei ole j‰rkev‰‰. Korjaa kansion asetukset."
 
-#: MailCollector.cpp:291
+#: MailCollector.cpp:324
 #, c-format
 msgid "Auto-collecting mail from incoming folder '%s'."
 msgstr "Ker‰t‰‰n viestej‰ saapuvat-kansiosta '%s'."
 
-#: MailCollector.cpp:308
+#: MailCollector.cpp:338
 msgid "From folder '"
 msgstr "Kansiosta '"
 
-#: MailCollector.cpp:314
+#: MailCollector.cpp:344
 msgid "  Subject: "
 msgstr "  Aihe: "
 
-#: MailCollector.cpp:315
+#: MailCollector.cpp:345
 msgid "  From: "
 msgstr "  L‰hett‰j‰: "
 
-#: MModule.cpp:204
+#: MModule.cpp:220
 #, fuzzy, c-format
 msgid "Cannot initialise module '%s', error code %d."
 msgstr "Moduulin '%s' lataaminen ep‰onnistui."
 
-#: MModule.cpp:415
+#: MModule.cpp:433
 msgid " (builtin)"
 msgstr ""
 
-#: MModule.cpp:537
+#: MModule.cpp:561
 #, fuzzy, c-format
 msgid "Cannot parse MMD file for module '%s'."
 msgstr "Moduulin '%s' lataaminen ep‰onnistui."
@@ -941,22 +926,25 @@ msgid ""
 "$CURSOR"
 msgstr ""
 
-#: wxMApp.cpp:242
+#: wxMApp.cpp:270
 msgid "Dial-Up network connection established."
 msgstr ""
 
-#: wxMApp.cpp:244 wxMApp.cpp:257
+#: wxMApp.cpp:272 wxMApp.cpp:285
 msgid "Information"
 msgstr "Informaatio"
 
-#: wxMApp.cpp:255
+#: wxMApp.cpp:283
 msgid "Dial-Up network shut down."
 msgstr ""
 
-#: wxMApp.cpp:288
+#: wxMApp.cpp:316
+#, fuzzy
 msgid ""
 "The application is terminating abnormally.\n"
-"Please report the bug to m-developers@makelist.com\n"
+"Please report the bug via our bugtracker at\n"
+"http://www.wxwindows.org/m-bugs\n"
+"\n"
 "Thank you!"
 msgstr ""
 "Ohjelma keskeytet‰‰n poikkeavalla tavalla.\n"
@@ -964,167 +952,179 @@ msgstr ""
 "Kiitos!"
 
 #: wxMApp.cpp:321
+#, fuzzy
+msgid "Fatal application error"
+msgstr "Poistu ohjelmasta"
+
+#: wxMApp.cpp:357
 msgid "Do you really want to exit Mahogany?"
 msgstr "Haluatko todella poistua Mahoganysta?"
 
-#: wxMApp.cpp:537
+#: wxMApp.cpp:579
 #, fuzzy
 msgid "Mahogany : Activity Log"
 msgstr "Mahogany: Toimintaloki"
 
-#: wxMApp.cpp:718
+#: wxMApp.cpp:764
 msgid "Cannot initialise help system.\n"
 msgstr "Help-j‰rjestelm‰n avaus ep‰onnistui.\n"
 
-#: wxMApp.cpp:719
+#: wxMApp.cpp:765
 msgid "Help file '"
 msgstr "Help-tiedosto '"
 
-#: wxMApp.cpp:719
+#: wxMApp.cpp:765
 msgid "' not found."
 msgstr "' ei lˆydy."
 
-#: wxMApp.cpp:740
+#: wxMApp.cpp:786
 msgid "Search for?"
 msgstr "Etsi?"
 
-#: wxMApp.cpp:741
+#: wxMApp.cpp:787
 msgid "Search help for keyword"
 msgstr "Etsi apua avainsanalla"
 
-#: wxMApp.cpp:759
+#: wxMApp.cpp:805
 #, c-format
 msgid "No help found for current context (%d)."
 msgstr "Kyseiselle asiayhteydelle ei lˆydy apua (%d)."
 
-#: wxMApp.cpp:760 wxMFrame.cpp:339
+#: wxMApp.cpp:806 wxMFrame.cpp:331
 msgid "Sorry"
 msgstr "Valitan."
 
-#: wxMApp.cpp:782
+#: wxMApp.cpp:828
 #, fuzzy, c-format
 msgid "Cannot load module '%s'."
 msgstr "Moduulin '%s' lataaminen ep‰onnistui."
 
-#: wxMApp.cpp:989
+#: wxMApp.cpp:1053
 #, fuzzy
 msgid "Online"
 msgstr " rivi‰"
 
-#: wxMApp.cpp:989
+#: wxMApp.cpp:1053
 #, fuzzy
 msgid "Offline"
 msgstr " rivi‰"
 
-#: wxMApp.cpp:1032
+#: wxMApp.cpp:1115
 msgid "Outbox empty"
 msgstr ""
 
-#: wxMApp.cpp:1034
+#: wxMApp.cpp:1117
 #, c-format
 msgid "Outbox %lu, %lu"
 msgstr ""
 
-#: wxMApp.cpp:1054
+#: wxMApp.cpp:1138
 msgid "Cannot activate auto-check for dial-up network status."
 msgstr ""
 
-#: wxMApp.cpp:1096
+#: wxMApp.cpp:1180
 msgid "Dial-up network is already online."
 msgstr ""
 
-#: wxMApp.cpp:1108
+#: wxMApp.cpp:1192
 msgid "Dial-up network is already offline."
 msgstr ""
 
-#: wxMApp.cpp:1114
+#: wxMApp.cpp:1198
 msgid "Attempt to shut down network seems to have failed."
 msgstr ""
 
-#: wxMFrame.cpp:154
+#: wxMApp.cpp:1205
+msgid ""
+"An unrecoverable internal error has occured.\n"
+"The application will shut down now. Please take\n"
+"a note of the error message and report it to\n"
+"m-developers@egroups.com\n"
+"\n"
+"Internal error message:\n"
+"\n"
+msgstr ""
+
+#: wxMApp.cpp:1210
+msgid "FATAL INTERNAL ERROR"
+msgstr ""
+
+#: wxMFrame.cpp:147
 msgid "&File"
 msgstr "&Tiedosto"
 
-#: AdbFrame.cpp:1065 wxMFrame.cpp:160
+#: AdbFrame.cpp:1095 wxMFrame.cpp:153
 msgid "&Edit"
 msgstr "&Muokkaa"
 
-#: wxDialogLayout.cpp:996 wxMFrame.cpp:166 wxMenuDefs.cpp:353
+#: wxDialogLayout.cpp:1011 wxMFrame.cpp:159 wxMenuDefs.cpp:351
 msgid "&Help"
 msgstr "&Apua"
 
-#: wxMFrame.cpp:172
+#: wxMFrame.cpp:165
 msgid "&Message"
 msgstr "&Viesti"
 
-#: wxMFrame.cpp:215
+#: wxMFrame.cpp:208
 msgid "Folder Open"
 msgstr "Avaa Kansio"
 
-#: wxMFrame.cpp:215
+#: wxMFrame.cpp:208
 msgid "Name of the folder?"
 msgstr "Kansion nimi?"
 
 #: wxMFrame.cpp:258
-msgid "Checking for new mail..."
-msgstr "Haetaan uusia viestej‰..."
-
-#: wxMFrame.cpp:260
-msgid "Checking for new mail... done."
-msgstr "Haetaan uusia viestej‰... valmis."
-
-#: wxMFrame.cpp:277
 msgid "Please select a Python script to run."
 msgstr "Valitse ajettava Python-skripti."
 
-#: wxMFrame.cpp:329
+#: wxMFrame.cpp:316
 msgid "Program preferences successfully saved."
 msgstr "Ohjelman asetukset tallennettu."
 
-#: wxMFrame.cpp:331
+#: wxMFrame.cpp:318
 msgid "Couldn't save preferences."
 msgstr "Asetuksia ei voitu tallentaa."
 
-#: wxMFrame.cpp:339
+#: wxMFrame.cpp:331
 msgid "Help not implemented for current context, yet."
 msgstr "Kyseiselle asiayhteydelle ei ole viel‰ apua."
 
-#: wxMFrame.cpp:392
+#: wxMFrame.cpp:389
 msgid ""
 "You have outgoing messages queued.\n"
 "Do you want to send them before going offline?"
 msgstr ""
 
-#: wxMFrame.cpp:414
+#: wxMFrame.cpp:410
 msgid "Mahogany Toolbar"
 msgstr "Mahogany Tyˆkalupalkki"
 
-#: wxFolderView.cpp:60 wxMDialogs.cpp:1177
+#: wxFolderView.cpp:61 wxMDialogs.cpp:1267
 msgid "Status"
 msgstr "Tila"
 
-#: wxFolderView.cpp:61 wxMDialogs.cpp:1171
+#: wxFolderView.cpp:62 wxMDialogs.cpp:1261
 msgid "Date"
 msgstr "P‰iv‰ys"
 
-#: wxFolderView.cpp:62
+#: wxFolderView.cpp:63
 msgid "Size"
 msgstr "Koko"
 
-#: wxFolderView.cpp:63
+#: wxFolderView.cpp:64
 msgid "From"
 msgstr "L‰hett‰j‰"
 
-#: wxFolderView.cpp:64 wxMDialogs.cpp:1173
+#: wxFolderView.cpp:65 wxMDialogs.cpp:1263
 msgid "Subject"
 msgstr "Aihe"
 
-#: wxFolderView.cpp:209
+#: wxFolderView.cpp:224
 #, fuzzy
-msgid "DUXCSMRFOPHVG "
+msgid "DUXCSMRFOPHG "
 msgstr "DUXCSMRFOPHV "
 
-#: wxFolderView.cpp:579
+#: wxFolderView.cpp:631
 #, fuzzy, c-format
 msgid ""
 "Mark all articles in\n"
@@ -1135,58 +1135,68 @@ msgstr ""
 "%s\n"
 "luetuiksi?"
 
-#: wxFolderView.cpp:866
+#: wxFolderTree.cpp:758 wxFolderView.cpp:983 wxFolderView.cpp:1355
 #, c-format
 msgid "Folder '%s'"
 msgstr "Kansio '%s'"
 
-#: wxFolderView.cpp:894
+#: wxFolderView.cpp:1015
 #, c-format
 msgid "The folder '%s' could not be opened, please check its settings."
 msgstr "Kansiota '%s' ei voida avata, tarkista sen asetukset."
 
-#: wxFolderView.cpp:947
+#: wxFolderView.cpp:1095
 msgid "Deleted messages were expunged"
 msgstr "Poistetut viestit tuhottu"
 
-#: wxFolderView.cpp:1146
+#: wxFolderView.cpp:1306
 #, c-format
 msgid "%d messages saved"
 msgstr "%d viesti‰ talletettu"
 
-#: wxFolderView.cpp:1148 wxFolderView.cpp:1208
+#: wxFolderView.cpp:1308 wxFolderView.cpp:1396
 msgid "Saving messages failed."
 msgstr "Viestien tallennus ep‰onnistui."
 
-#: wxFolderView.cpp:1167
+#: wxFolderView.cpp:1327
 #, c-format
 msgid "Closing folder '%s' because the underlying mail folder was deleted."
 msgstr "Kansio '%s' suljetaan, koska allaoleva kansio tuhottiin."
 
-#: wxFolderView.cpp:1205
+#: wxFolderView.cpp:1393
 #, fuzzy, c-format
 msgid "Saved %lu messages."
 msgstr "Tallennetaan %d viesti‰..."
 
-#: wxFolderView.cpp:1215
+#: wxFolderView.cpp:1403
 #, fuzzy, c-format
 msgid "Copied %lu messages."
 msgstr "ei viestej‰"
 
-#: wxFolderView.cpp:1218
+#: wxFolderView.cpp:1406
 #, fuzzy
 msgid "Copying messages failed."
 msgstr "Viestien tallennus ep‰onnistui."
 
-#: wxFolderView.cpp:1232
+#: wxFolderView.cpp:1423
 #, fuzzy, c-format
 msgid "Found %lu messages."
 msgstr "ei viestej‰"
 
-#: wxFolderView.cpp:1241
+#: wxFolderView.cpp:1432
 #, fuzzy
 msgid "No matching messages found."
 msgstr "Viestien tallennus ep‰onnistui."
+
+#: wxFolderView.cpp:1440
+#, fuzzy
+msgid "Filtering messages failed."
+msgstr "Viestien tallennus ep‰onnistui."
+
+#: wxFolderView.cpp:1442
+#, c-format
+msgid "Applied filters to %lu messages, return code %d."
+msgstr ""
 
 #: wxMessageView.cpp:190
 msgid "MIME Menu"
@@ -1196,7 +1206,7 @@ msgstr "MIME Valikko"
 msgid "&Info..."
 msgstr "&Tiedoksi..."
 
-#: wxFolderTree.cpp:242 wxMenuDefs.cpp:268 wxMessageView.cpp:199
+#: wxFolderTree.cpp:273 wxMenuDefs.cpp:262 wxMessageView.cpp:199
 msgid "&Open"
 msgstr "&Avaa"
 
@@ -1204,7 +1214,7 @@ msgstr "&Avaa"
 msgid "&Save..."
 msgstr "&Tallenna..."
 
-#: wxMessageView.cpp:431
+#: wxMessageView.cpp:460
 #, c-format
 msgid ""
 "Temporary file '%s' left because it is still in use by an external process"
@@ -1212,27 +1222,27 @@ msgstr ""
 "V‰liaikainen tiedosto '%s' s‰ilytettiin, sill‰ jokin ulkoinen prosessi "
 "k‰ytt‰‰ sit‰"
 
-#: wxMessageView.cpp:746 wxMessageView.cpp:819
+#: wxMessageView.cpp:800 wxMessageView.cpp:884
 msgid " bytes"
 msgstr " bytes"
 
-#: wxMessageView.cpp:804
+#: wxMessageView.cpp:869
 msgid "MIME type: "
 msgstr "MIME Tyyppi:"
 
-#: wxMessageView.cpp:810
+#: wxMessageView.cpp:875
 msgid "Description: "
 msgstr "Kuvaus: "
 
-#: wxMessageView.cpp:812
+#: wxMessageView.cpp:877
 msgid "Size: "
 msgstr "Koko: "
 
-#: wxMessageView.cpp:817
+#: wxMessageView.cpp:882
 msgid " lines"
 msgstr " rivi‰"
 
-#: wxMessageView.cpp:827
+#: wxMessageView.cpp:892
 msgid ""
 "\n"
 "Parameters:\n"
@@ -1240,7 +1250,7 @@ msgstr ""
 "\n"
 "Parametrit:\n"
 
-#: wxMessageView.cpp:840
+#: wxMessageView.cpp:905
 msgid ""
 "\n"
 "Disposition: "
@@ -1248,7 +1258,7 @@ msgstr ""
 "\n"
 "Luonne (?): "
 
-#: wxMessageView.cpp:843
+#: wxMessageView.cpp:908
 msgid ""
 "\n"
 "Disposition Parameters:\n"
@@ -1256,56 +1266,56 @@ msgstr ""
 "\n"
 "Luonteen parametrit (?):\n"
 
-#: wxMessageView.cpp:850
+#: wxMessageView.cpp:915
 msgid "MIME information"
 msgstr "MIME informaatio"
 
-#: wxMessageView.cpp:906 wxMessageView.cpp:1112
+#: wxMessageView.cpp:984 wxMessageView.cpp:1209
 msgid "Cannot get attachment content."
 msgstr "Liitetiedoston sis‰ltˆ‰ ei voida hakea."
 
-#: wxMessageView.cpp:1015
+#: wxMessageView.cpp:1093
 #, c-format
 msgid "Please enter the command to handle '%s' data:"
 msgstr "Anna komento k‰sitell‰ksesi '%s' tietoa:"
 
-#: wxMessageView.cpp:1017
+#: wxMessageView.cpp:1095
 msgid "Unknown MIME type"
 msgstr "Tuntematon MIME-tyyppi"
 
-#: wxMessageView.cpp:1026
+#: wxMessageView.cpp:1104
 #, c-format
 msgid "Do not know how to handle data of type '%s'."
 msgstr "Ei osaa k‰sitell‰ dataa, joka on tyyppi‰ '%s'."
 
-#: wxMessageView.cpp:1063
+#: wxMessageView.cpp:1142
 msgid "Cannot rename temporary file."
 msgstr "V‰liaikaistiedoston nime‰minen ep‰onnistui."
 
-#: wxMessageView.cpp:1070
+#: wxMessageView.cpp:1157
 #, c-format
 msgid "Error opening attachment: command '%s' failed"
 msgstr "Liitetiedoston avaus ep‰onnistui: komento '%s' pys‰htyi."
 
-#: wxMessageView.cpp:1095
+#: wxMessageView.cpp:1192
 msgid "Save attachment as:"
 msgstr "Tallenna liitetiedosto nimell‰:"
 
-#: wxMessageView.cpp:1125
+#: wxMessageView.cpp:1222
 #, c-format
 msgid "Wrote %lu bytes to file '%s'"
 msgstr "Kirjoitettu %lu bytes tiedostoon '%s'"
 
-#: wxMessageView.cpp:1134
+#: wxMessageView.cpp:1231
 msgid "Could not save the attachment."
 msgstr "Liitetiedoston tallennus ep‰onnistui."
 
-#: wxMessageView.cpp:1255
+#: wxMessageView.cpp:1352
 #, c-format
 msgid "Cannot open URL '%s'"
 msgstr "Ei voida avata URL:‰‰ '%s'"
 
-#: wxMessageView.cpp:1263
+#: wxMessageView.cpp:1360
 msgid ""
 "No command configured to view URLs.\n"
 "Would you like to choose one now?"
@@ -1313,39 +1323,39 @@ msgstr ""
 "URL:i‰ k‰sittelev‰‰ komentoa ei ole m‰‰ritelty.\n"
 "Haluatko m‰‰ritell‰ sen nyt?"
 
-#: wxMessageView.cpp:1275
+#: wxMessageView.cpp:1372
 msgid "No command configured to view URLs."
 msgstr "URL:i‰ k‰sittelev‰‰ komentoa ei ole m‰‰ritelty."
 
-#: wxMessageView.cpp:1299
+#: wxMessageView.cpp:1396
 #, c-format
 msgid "Could not launch browser: '%s' failed."
 msgstr "Selaimen k‰ynnistys pys‰htynyt: '%s' ep‰onnistui."
 
-#: wxMessageView.cpp:1312
+#: wxMessageView.cpp:1409
 #, c-format
 msgid "Couldn't launch browser: '%s' failed"
 msgstr "Selaimen k‰ynnistys pys‰htynyt: '%s' ep‰onnistui."
 
-#: wxMessageView.cpp:1321
+#: wxMessageView.cpp:1418
 #, c-format
 msgid "Opening URL '%s'... done."
 msgstr "Avataan URL '%s'... valmis."
 
-#: wxMessageView.cpp:1324
+#: wxMessageView.cpp:1421
 #, c-format
 msgid "Opening URL '%s' failed."
 msgstr "Ei voida avata URL:‰‰ '%s'."
 
-#: wxMessageView.cpp:1343
+#: wxMessageView.cpp:1440
 msgid "Failed to get the raw text of the message."
 msgstr "Viestin tekstin haku ep‰onnistui."
 
-#: wxMessageView.cpp:1347
+#: wxMessageView.cpp:1444
 msgid "Raw message text"
 msgstr "Viestiteksti"
 
-#: wxMessageView.cpp:1478
+#: wxMessageView.cpp:1576
 #, c-format
 msgid ""
 "The selected message is %u Kbytes long which is more than the current "
@@ -1357,15 +1367,15 @@ msgstr ""
 "\n"
 "Haluatko silti hakea sen?"
 
-#: AdbFrame.cpp:2702 wxMessageView.cpp:1507
+#: AdbFrame.cpp:2734 wxMessageView.cpp:1605
 msgid "unknown"
 msgstr "tuntematon"
 
-#: wxComposeView.cpp:2005 wxMessageView.cpp:1553
+#: wxComposeView.cpp:2033 wxMessageView.cpp:1651
 msgid "Mahogany: Printout"
 msgstr "Mahogany: Listaus"
 
-#: wxComposeView.cpp:2008 wxMessageView.cpp:1555
+#: wxComposeView.cpp:2037 wxMessageView.cpp:1654
 msgid ""
 "There was a problem with printing the message:\n"
 "perhaps your current printer is not set up correctly?"
@@ -1373,11 +1383,11 @@ msgstr ""
 "Viestin tulostuksessa ongelmia:\n"
 "ehk‰ tulostimesi ei ole oikein asennettu?"
 
-#: wxComposeView.cpp:2010 wxMessageView.cpp:1557
+#: wxComposeView.cpp:2039 wxMessageView.cpp:1656
 msgid "Printing"
 msgstr "Tulostetaan"
 
-#: wxMessageView.cpp:1613
+#: wxMessageView.cpp:1712
 msgid ""
 "There was a problem with showing the preview:\n"
 "perhaps your current printer is not set correctly?"
@@ -1385,180 +1395,180 @@ msgstr ""
 "Viestin esikatselu ep‰onnistui:\n"
 "ehk‰ tulostimesi ei ole oikein asennettu?"
 
-#: wxMessageView.cpp:1615
+#: wxMessageView.cpp:1714
 msgid "Previewing"
 msgstr "Avataan esikatselua varten"
 
-#: wxMessageView.cpp:1623
+#: wxMessageView.cpp:1722
 msgid "Print Preview"
 msgstr "Esikatselu"
 
-#: wxMessageView.cpp:1634 wxMessageView.cpp:1645
+#: wxMessageView.cpp:1733 wxMessageView.cpp:1744
 #, fuzzy, c-format
 msgid "Calling external viewer '%s'"
 msgstr "Avaa ulkoinen muistio"
 
-#: wxMessageView.cpp:1685
+#: wxMessageView.cpp:1784
 #, c-format
 msgid "%s (external viewer exited with non null exit code)"
 msgstr "%s (erillinen katseluohjelma lopetti)"
 
-#: wxMessageView.cpp:1723
+#: wxMessageView.cpp:1823
 #, fuzzy
 msgid " , from "
 msgstr "  L‰hett‰j‰: "
 
-#: wxComposeView.cpp:453
+#: wxComposeView.cpp:454
 msgid "Put &cursor here"
 msgstr ""
 
-#: wxComposeView.cpp:455
+#: wxComposeView.cpp:456
 #, fuzzy
 msgid "Insert &quoted text"
 msgstr "&Lis‰‰ teksti‰..."
 
-#: wxComposeView.cpp:456
+#: wxComposeView.cpp:457
 msgid "&Attach original text"
 msgstr ""
 
-#: wxComposeView.cpp:462 wxComposeView.cpp:475 wxHeadersDialogs.cpp:343
+#: wxComposeView.cpp:463 wxComposeView.cpp:476 wxHeadersDialogs.cpp:343
 msgid "&To"
 msgstr "&Vastaanottaja"
 
-#: wxComposeView.cpp:463 wxComposeView.cpp:473
+#: wxComposeView.cpp:464 wxComposeView.cpp:474
 #, fuzzy
 msgid "&Subject"
 msgstr "Aihe"
 
-#: wxComposeView.cpp:464
+#: wxComposeView.cpp:465
 #, fuzzy
 msgid "&CC"
 msgstr "CC:"
 
-#: wxComposeView.cpp:465
+#: wxComposeView.cpp:466
 #, fuzzy
 msgid "&BCC"
 msgstr "BCC:"
 
-#: wxComposeView.cpp:471
+#: wxComposeView.cpp:472
 #, fuzzy
 msgid "&Date"
 msgstr "P‰iv‰ys"
 
-#: wxComposeView.cpp:472
+#: wxComposeView.cpp:473
 #, fuzzy
 msgid "&From"
 msgstr "L‰hett‰j‰"
 
-#: wxComposeView.cpp:474
+#: wxComposeView.cpp:475
 #, fuzzy
 msgid "&Full name"
 msgstr "Koko &nimi"
 
-#: wxComposeView.cpp:476
+#: wxComposeView.cpp:477
 #, fuzzy
 msgid "&Reply to"
 msgstr "&Vastaa"
 
-#: wxComposeView.cpp:477
+#: wxComposeView.cpp:478
 #, fuzzy
 msgid "&Newsgroups"
 msgstr "Uutisryhm‰:"
 
-#: wxComposeView.cpp:483
+#: wxComposeView.cpp:484
 #, fuzzy
 msgid "&Miscellaneous"
 msgstr "Sekalainen"
 
-#: wxComposeView.cpp:486
+#: wxComposeView.cpp:487
 #, fuzzy
 msgid "Message &headers"
 msgstr "Viestin n‰yttˆ"
 
-#: wxComposeView.cpp:489
+#: wxComposeView.cpp:490
 #, fuzzy
 msgid "&Original message"
 msgstr "Tulosta viesti"
 
-#: wxComposeView.cpp:492 wxMenuDefs.cpp:300
+#: wxComposeView.cpp:493 wxMenuDefs.cpp:297
 msgid "&Insert file..."
 msgstr "&Lis‰‰ tiedosto..."
 
-#: wxComposeView.cpp:493
+#: wxComposeView.cpp:494
 #, fuzzy
 msgid "&Attach file..."
 msgstr "&Lis‰‰ tiedosto..."
 
-#: wxComposeView.cpp:494
+#: wxComposeView.cpp:495
 msgid "&Execute command..."
 msgstr ""
 
-#: wxComposeView.cpp:648
+#: wxComposeView.cpp:649
 msgid "Nothing to expand - please enter something."
 msgstr "Ei mit‰‰n laajennettavissa - kirjoita jotain."
 
-#: wxComposeView.cpp:772
+#: wxComposeView.cpp:773
 msgid "RO"
 msgstr ""
 
-#: wxComposeView.cpp:794
+#: wxComposeView.cpp:795
 msgid "Article Composition"
 msgstr "Artikkelin kirjoitus"
 
-#: wxComposeView.cpp:814
+#: wxComposeView.cpp:815
 msgid "Message Composition"
 msgstr "Viestin kirjoitus"
 
-#: wxComposeView.cpp:896
+#: wxComposeView.cpp:899
 msgid "template"
 msgstr ""
 
-#: wxComposeView.cpp:911
+#: wxComposeView.cpp:914
 msgid "There were errors in the template. Would you like to edit it now?"
 msgstr ""
 
-#: wxComposeView.cpp:949
+#: wxComposeView.cpp:952
 msgid "&Compose"
 msgstr "&Kirjoita viesti"
 
-#: wxComposeView.cpp:1008
+#: wxComposeView.cpp:1009
 msgid "To:"
 msgstr "Vastaanottaja:"
 
-#: wxComposeView.cpp:1008
+#: wxComposeView.cpp:1009
 msgid "Newsgroups:"
 msgstr "Uutisryhm‰:"
 
-#: wxComposeView.cpp:1009
+#: wxComposeView.cpp:1010
 msgid "Subject:"
 msgstr "Aihe:"
 
-#: wxComposeView.cpp:1010
+#: wxComposeView.cpp:1011
 msgid "CC:"
 msgstr "CC:"
 
-#: wxComposeView.cpp:1011
+#: wxComposeView.cpp:1012
 msgid "BCC:"
 msgstr "BCC:"
 
-#: wxComposeView.cpp:1056
+#: wxComposeView.cpp:1057
 msgid "Expand"
 msgstr "Laajenna"
 
-#: wxComposeView.cpp:1065
+#: wxComposeView.cpp:1066
 msgid "Expand the address using address books"
 msgstr "Laajenna osoite k‰ytt‰en osoitekirjaa"
 
-#: wxComposeView.cpp:1139
+#: wxComposeView.cpp:1140
 msgid "You haven't configured your signature file."
 msgstr "Et ole asettanut allekirjoitustasi."
 
-#: wxComposeView.cpp:1148
+#: wxComposeView.cpp:1149
 #, c-format
 msgid "Signature file '%s' couldn't be opened."
 msgstr "Allekirjoitusta '%s' ei voida avata."
 
-#: wxComposeView.cpp:1152
+#: wxComposeView.cpp:1153
 msgid ""
 "\n"
 "\n"
@@ -1570,132 +1580,137 @@ msgstr ""
 "Haluatko valita allekirjoituksesi nyt?\n"
 "(muuten allekirjoitusta ei k‰ytet‰)"
 
-#: wxComposeView.cpp:1158
+#: wxComposeView.cpp:1159
 msgid "Choose signature file"
 msgstr "Valitse allekirjoitus"
 
-#: wxComposeView.cpp:1199
+#: wxComposeView.cpp:1202
 #, c-format
 msgid "Your signature is %stoo long: it should not be more than %d lines."
 msgstr ""
 "Allekirjoituksesi on liian pitk‰: sen ei tulisi olla kuin %d rivi‰ pitk‰"
 
-#: wxComposeView.cpp:1201
+#: wxComposeView.cpp:1204
 msgid "way "
 msgstr "way "
 
-#: wxComposeView.cpp:1310
+#: wxComposeView.cpp:1206
+#, fuzzy
+msgid "Signature is too long"
+msgstr "Allek&irjoitus"
+
+#: wxComposeView.cpp:1320
 #, c-format
 msgid ""
 "Please terminate the external editor (PID %d) before closing this window."
 msgstr "Lopeta ulkoinen muistio (PID %d) ennen kuin suljet t‰m‰n ikkunan."
 
-#: wxComposeView.cpp:1320
+#: wxComposeView.cpp:1330
 msgid "There are unsaved changes, close anyway?"
 msgstr "Et ole tallentanut kaikkia muutoksia, sulje kuitenkin?"
 
-#: wxComposeView.cpp:1362
+#: wxComposeView.cpp:1372
 msgid "Message has been sent."
 msgstr "Viesti on l‰hetetty."
 
-#: wxComposeView.cpp:1363
+#: wxComposeView.cpp:1373
 msgid "Message sent"
 msgstr "Viesti l‰hetetty."
 
-#: wxComposeView.cpp:1382 wxComposeView.cpp:1671
+#: wxComposeView.cpp:1392 wxComposeView.cpp:1681
 msgid "Please choose a file to insert."
 msgstr "Valitse lis‰tt‰v‰ tiedosto."
 
-#: wxComposeView.cpp:1390 wxComposeView.cpp:1415
+#: wxComposeView.cpp:1400 wxComposeView.cpp:1425
 msgid "Cancelled"
 msgstr "Peruutettu"
 
-#: wxComposeView.cpp:1394
+#: wxComposeView.cpp:1404
 #, c-format
 msgid "Inserted file '%s'."
 msgstr "Tiedosto '%s' lis‰tty."
 
-#: wxComposeView.cpp:1398
+#: wxComposeView.cpp:1408
 #, c-format
 msgid "Failed to insert the text file '%s'."
 msgstr "Tekstitiedosto '%s' lis‰ys ep‰onnistui."
 
-#: MailFolder.cpp:684 wxComposeView.cpp:1407
+#: MailFolder.cpp:889 wxComposeView.cpp:1417
 msgid "Choose file to save message to"
 msgstr "Valitse tiedosto johon viesti tallennetaan"
 
-#: wxComposeView.cpp:1419
+#: wxComposeView.cpp:1429
 #, c-format
 msgid "Message text saved to file '%s'."
 msgstr "Viesti tallennettu tiedostoon '%s'."
 
-#: wxComposeView.cpp:1424
+#: wxComposeView.cpp:1434
 msgid "Failed to save the message."
 msgstr "Viestin tallennus ep‰onnistui."
 
-#: wxComposeView.cpp:1433
+#: wxComposeView.cpp:1443
 #, c-format
 msgid "External editor is already running (PID %d)"
 msgstr "Ulkoinen muistio on jo p‰‰ll‰ (PID %d)"
 
-#: wxComposeView.cpp:1452
+#: wxComposeView.cpp:1462
 msgid "External editor not configured."
 msgstr "Ulkoista muistiota ei ole m‰‰ritelty."
 
-#: wxComposeView.cpp:1460
+#: wxComposeView.cpp:1470
 msgid "Cannot create temporary file"
 msgstr "V‰liaikaisen tiedoston luonti ep‰onnistui."
 
-#: wxComposeView.cpp:1468
+#: wxComposeView.cpp:1478
 msgid "Failed to pass message to external editor."
 msgstr "Viestin siirto ulkoiselle muistiolle ep‰onnistui."
 
-#: wxComposeView.cpp:1485
+#: wxComposeView.cpp:1495
 #, c-format
 msgid "Execution of '%s' failed."
 msgstr "Komennon '%s' ajo ep‰onnistui."
 
-#: wxComposeView.cpp:1492
+#: wxComposeView.cpp:1502
 #, c-format
 msgid "Started external editor (PID %d)"
 msgstr "Ulkoinen muistio k‰ynnistetty (PID %d)"
 
-#: wxComposeView.cpp:1511
+#: wxComposeView.cpp:1521
 msgid "Would you like to change the external editor setting now?"
 msgstr "Haluatko muuttaa ulkoisen muistion asetuksia?"
 
-#: wxComposeView.cpp:1517
+#: wxComposeView.cpp:1527
 msgid "Set up external editor"
 msgstr "Asenna ulkoinen muistio"
 
-#: wxComposeView.cpp:1518
+#: wxComposeView.cpp:1528
 msgid ""
 "Enter the command name (%%s will be replaced with the name of the file):"
 msgstr "Anna komentonimi (%%s korvataan tiedostonimell‰):"
 
-#: wxComposeView.cpp:1555
+#: wxComposeView.cpp:1565
 #, fuzzy, c-format
 msgid "Added custom header '%s' to the message."
 msgstr "Muokattu otsikko '%s' lis‰ttiin viestiin."
 
-#: wxComposeView.cpp:1596
+#: wxComposeView.cpp:1606
 msgid "External editor terminated with non null exit code."
 msgstr "Ulkoinen muistio keskeytettin."
 
-#: wxComposeView.cpp:1603
+#: wxComposeView.cpp:1613
 msgid "Failed to insert back the text from external editor."
 msgstr "Tekstin siirto ulkoisesta muistiosta ep‰onnistui."
 
-#: wxComposeView.cpp:1613
+#: wxComposeView.cpp:1623
 msgid "Inserted text from external editor."
 msgstr "Teksti siirretty ulkoisesta muistiosta."
 
-#: wxComposeView.cpp:1619
+#: wxComposeView.cpp:1629
 #, c-format
 msgid "The text was left in the file '%s'."
 msgstr "Teksti j‰tettiin tiedostoon '%s'."
 
-#: wxComposeView.cpp:1710
+#: wxComposeView.cpp:1720
 #, c-format
 msgid ""
 "File '%s' seems to contain data of\n"
@@ -1703,46 +1718,46 @@ msgid ""
 "Is this correct?"
 msgstr ""
 
-#: wxComposeView.cpp:1714
+#: wxComposeView.cpp:1724
 #, fuzzy
 msgid "Content MIME type"
 msgstr "Tuntematon MIME-tyyppi"
 
-#: wxComposeView.cpp:1720
+#: wxComposeView.cpp:1730
 #, fuzzy
 msgid "MIME type"
 msgstr "MIME Tyyppi:"
 
-#: wxComposeView.cpp:1721
+#: wxComposeView.cpp:1731
 msgid "Please enter new MIME type:"
 msgstr ""
 
-#: wxComposeView.cpp:1736
+#: wxComposeView.cpp:1746
 #, c-format
 msgid "Inserted file '%s' (as '%s')"
 msgstr "Tiedosto '%s' lis‰tty (nimell‰ '%s')"
 
-#: wxComposeView.cpp:1818
+#: wxComposeView.cpp:1834
 #, c-format
 msgid "Cannot read file '%s' included in this message!"
 msgstr "Viestiss‰ olevan tiedoston '%s' luku ep‰onnistui!"
 
-#: wxComposeView.cpp:1826
+#: wxComposeView.cpp:1842
 #, c-format
 msgid "Cannot open file '%s' included in this message!"
 msgstr "Viestiss‰ olevan tiedoston '%s' luku ep‰onnistui!"
 
-#: wxComposeView.cpp:1855
+#: wxComposeView.cpp:1874
 msgid "Unknwown part type"
 msgstr "Tuntematon MIME-tyyppi"
 
-#: wxComposeView.cpp:2026
+#: wxComposeView.cpp:2055
 msgid ""
 "The external editor is still opened, please close it before sending the "
 "message."
 msgstr "Ulkoinen muistio on edelleen auki, sulje se ennen viestin l‰hetyst‰."
 
-#: wxComposeView.cpp:2040
+#: wxComposeView.cpp:2069
 msgid ""
 "The message can not be sent because the network settings are either not "
 "configured or incorrect. Would you like to change them now?"
@@ -1750,43 +1765,43 @@ msgstr ""
 "Viesti‰ ei voida l‰hett‰‰ sill‰ verkkoasetukset ovat v‰‰rin tai niit‰ ei ole "
 "tehty. Haluatko muuttaa niit‰ nyt?"
 
-#: wxComposeView.cpp:2052
+#: wxComposeView.cpp:2081
 msgid "Cannot send message - network is not configured."
 msgstr "Viestin l‰hetys ep‰onnistui - verkkoasetuksia ei ole tehty."
 
-#: wxComposeView.cpp:2067
+#: wxComposeView.cpp:2096
 msgid "Please specify at least one recipient in the \"To:\" field!"
 msgstr "M‰‰rit‰ ainakin yksi vastaanottaja!"
 
-#: wxComposeView.cpp:2079
+#: wxComposeView.cpp:2108
 msgid "The subject of your message is empty, would you like to change it?"
 msgstr "Viestill‰si ei ole aihetta, haluatko muuttaa sit‰?"
 
-#: wxComposeView.cpp:2117
+#: wxComposeView.cpp:2146
 msgid "Cannot insert text file into the message."
 msgstr "Tekstitiedoston liitt‰minen viestiin ep‰onnistui."
 
-#: wxComposeView.cpp:2202
+#: wxComposeView.cpp:2231
 #, c-format
 msgid "Cannot write message to file '%s'."
 msgstr "Viestin kirjoittaminen tiedostoon '%s' ep‰onnistui."
 
-#: wxComposeView.cpp:2509
+#: wxComposeView.cpp:2538
 #, fuzzy, c-format
 msgid "Failed to insert file '%s' into the message."
 msgstr "Tekstitiedoston liitt‰minen viestiin ep‰onnistui."
 
-#: wxComposeView.cpp:2524
+#: wxComposeView.cpp:2553
 #, fuzzy, c-format
 msgid "Failed to attach file '%s' to the message."
 msgstr "Tekstitiedoston liitt‰minen viestiin ep‰onnistui."
 
-#: wxComposeView.cpp:2559
+#: wxComposeView.cpp:2588
 #, fuzzy, c-format
 msgid "Failed to execute the command '%s'"
 msgstr "Tekstitiedosto '%s' lis‰ys ep‰onnistui."
 
-#: wxComposeView.cpp:2602
+#: wxComposeView.cpp:2631
 msgid ""
 "The variables using the original message cannot be used in this template; "
 "variable ignored."
@@ -1810,12 +1825,12 @@ msgstr "&Uusi..."
 msgid "Configure %s module..."
 msgstr "Muokkaa &otsikoita..."
 
-#: wxMainFrame.cpp:195
+#: wxMainFrame.cpp:200
 #, c-format
 msgid "Selected folder '%s'."
 msgstr "Valittu kansio '%s'."
 
-#: wxMainFrame.cpp:349
+#: wxMainFrame.cpp:353
 msgid ""
 "This folder couldn't be opened last time, do you still want to try to open "
 "it (it will probably fail again)?"
@@ -1823,14 +1838,28 @@ msgstr ""
 "T‰t‰ kansiota ei voitu avata viimeksi, haluatko yritt‰‰ avata sit‰ "
 "uudelleen? (se ei mahdollisesti onnistu)"
 
-#: wxMainFrame.cpp:357
+#: wxMainFrame.cpp:361
 msgid "Would you like to change folder settings before trying to open it?"
 msgstr "Haluatko vaihtaa kansion asetuksia ennen sen avaamista?"
 
-#: wxMainFrame.cpp:396
+#: wxMainFrame.cpp:400
 #, c-format
 msgid "Opened folder '%s'"
 msgstr "Kansio '%s' avattu"
+
+#: wxMainFrame.cpp:408
+#, fuzzy, c-format
+msgid "Opening folder '%s' cancelled."
+msgstr "Kansion '%s' uudelleenavaus ep‰onnistui."
+
+#: wxMainFrame.cpp:473
+#, fuzzy
+msgid "You must select a folder first."
+msgstr "Valitse ensiksi poistettava kansio."
+
+#: wxMainFrame.cpp:505
+msgid "&Plugins"
+msgstr ""
 
 #: wxIconManager.cpp:175
 msgid "Please wait"
@@ -1864,19 +1893,19 @@ msgstr ""
 msgid "default"
 msgstr ""
 
-#: AdbFrame.cpp:2549 AdbFrame.cpp:2669 persctrl.cpp:1192
-#: wxDialogLayout.cpp:890 wxMDialogs.cpp:360 wxMDialogs.cpp:973
-#: wxMFolderDialogs.cpp:2050
+#: AdbFrame.cpp:2581 AdbFrame.cpp:2701 persctrl.cpp:1416
+#: wxDialogLayout.cpp:903 wxDialogLayout.cpp:1020 wxMDialogs.cpp:398
+#: wxMDialogs.cpp:1057 wxMFolderDialogs.cpp:2271
 msgid "OK"
 msgstr "OK"
 
-#: AdbFrame.cpp:2553 AdbFrame.cpp:2673 persctrl.cpp:1199
-#: wxDialogLayout.cpp:899 wxMDialogs.cpp:364 wxMDialogs.cpp:963
-#: wxMFolderDialogs.cpp:2059
+#: AdbFrame.cpp:1119 AdbFrame.cpp:2585 AdbFrame.cpp:2705 persctrl.cpp:1423
+#: wxDialogLayout.cpp:912 wxDialogLayout.cpp:1029 wxMDialogs.cpp:402
+#: wxMDialogs.cpp:1047 wxMFolderDialogs.cpp:2280
 msgid "Cancel"
 msgstr "Peruuta"
 
-#: wxMDialogs.cpp:468
+#: wxMDialogs.cpp:507
 msgid ""
 "\n"
 "System error: "
@@ -1884,7 +1913,7 @@ msgstr ""
 "\n"
 "J‰rjestelm‰virhe"
 
-#: wxMDialogs.cpp:486
+#: wxMDialogs.cpp:524
 msgid ""
 "\n"
 "Exiting application..."
@@ -1892,77 +1921,41 @@ msgstr ""
 "\n"
 "Ohjelma lopetetaan..."
 
-#: wxMDialogs.cpp:650
+#: wxMDialogs.cpp:664
 msgid "Please choose an entry:"
 msgstr "Valitse kohta:"
 
-#: wxMDialogs.cpp:651
+#: wxMDialogs.cpp:665
 msgid "Expansion options"
 msgstr "Laajennusvaihtoehdot"
 
-#: wxMDialogs.cpp:787 wxModulesDlg.cpp:158
-msgid "Version: "
-msgstr "Versio: "
-
-#: wxMDialogs.cpp:793
-msgid "compiled for "
-msgstr "k‰‰nnetty "
-
-#: wxMDialogs.cpp:809
-msgid "Copyright (c) 1999 by Karsten Ball¸der"
-msgstr "Copyright (c) 1999: Karsten Ball¸der"
-
-#: wxMDialogs.cpp:814
-msgid "Written by Karsten Ball¸der"
-msgstr "Tekij‰t: Karsten Ball¸der"
-
-#: wxMDialogs.cpp:818
-msgid "and Vadim Zeitlin"
-msgstr "ja Vadim Zeitlin"
-
-#: wxMDialogs.cpp:823
-msgid "This software is provied 'as is' and without any expressed or implied"
-msgstr "This software is provided 'as is' and without any expressed or implied"
-
-#: wxMDialogs.cpp:826
-msgid "warranties, including, without limitation, the implied warranties"
-msgstr "warranties, including, without limitation, the implied warranties"
-
-#: wxMDialogs.cpp:829
-msgid "of merchantibility and fitness for a particular purpose."
-msgstr "of merchantibility and fitness for a particular purpose."
-
-#: wxMDialogs.cpp:832
-msgid "This is OpenSource(TM) software."
-msgstr "This is OpenSource(TM) Software."
-
-#: wxMDialogs.cpp:885
+#: wxMDialogs.cpp:916
 msgid "Welcome"
 msgstr "Tervetuloa"
 
-#: wxMDialogs.cpp:945
+#: wxMDialogs.cpp:1029
 msgid "Choose folder"
 msgstr "Valitse kansio"
 
-#: wxMDialogs.cpp:986 wxMFolderDialogs.cpp:2041
+#: wxMDialogs.cpp:1070 wxMFolderDialogs.cpp:2262
 #, fuzzy
 msgid "File..."
 msgstr "Tiedosto..."
 
-#: wxDialogLayout.cpp:910 wxMDialogs.cpp:995 wxMenuDefs.cpp:94
+#: wxDialogLayout.cpp:923 wxMDialogs.cpp:1079 wxMenuDefs.cpp:90
 msgid "Help"
 msgstr "Help"
 
-#: wxMDialogs.cpp:1031
+#: wxMDialogs.cpp:1115
 #, fuzzy
 msgid "Mahogany: Please choose a folder file"
 msgstr "Valitse kansio"
 
-#: wxMDialogs.cpp:1098
+#: wxMDialogs.cpp:1184
 msgid "Mahogany: folder selection"
 msgstr ""
 
-#: wxMDialogs.cpp:1099
+#: wxMDialogs.cpp:1186
 #, c-format
 msgid ""
 "Sorry, the folder '%s' already exists and corresponds to another file, "
@@ -1970,68 +1963,68 @@ msgid ""
 "file '%s'."
 msgstr ""
 
-#: wxMDialogs.cpp:1170
+#: wxMDialogs.cpp:1260
 #, fuzzy
 msgid "None"
 msgstr "Ei"
 
-#: wxMDialogs.cpp:1172
+#: wxMDialogs.cpp:1262
 msgid "Date (reverse)"
 msgstr ""
 
-#: wxMDialogs.cpp:1174
+#: wxMDialogs.cpp:1264
 #, fuzzy
 msgid "Subject (reverse)"
 msgstr "Aihe: "
 
-#: wxMDialogs.cpp:1175
+#: wxMDialogs.cpp:1265
 msgid "Author"
 msgstr ""
 
-#: wxMDialogs.cpp:1176
+#: wxMDialogs.cpp:1266
 msgid "Author (reverse)"
 msgstr ""
 
-#: wxMDialogs.cpp:1178
+#: wxMDialogs.cpp:1268
 msgid "Status (reverse)"
 msgstr ""
 
-#: wxMDialogs.cpp:1179
+#: wxMDialogs.cpp:1269
 msgid "Score"
 msgstr ""
 
-#: wxMDialogs.cpp:1180
+#: wxMDialogs.cpp:1270
 msgid "Score (reverse)"
 msgstr ""
 
-#: wxMDialogs.cpp:1189
+#: wxMDialogs.cpp:1279
 msgid "First, sort by"
 msgstr ""
 
-#: wxMDialogs.cpp:1190
+#: wxMDialogs.cpp:1280
 msgid "then, sort by"
 msgstr ""
 
-#: wxMDialogs.cpp:1214
+#: wxMDialogs.cpp:1304
 #, fuzzy
 msgid "Message sorting"
 msgstr "Viesti l‰hetetty."
 
-#: wxMDialogs.cpp:1217
+#: wxMDialogs.cpp:1307
 #, fuzzy
 msgid "Sort messages by"
 msgstr "ei viestej‰"
 
-#: wxMDialogs.cpp:1265
+#: wxMDialogs.cpp:1355
 #, fuzzy
 msgid "Thread messages"
 msgstr "ei viestej‰"
 
-#: wxMDialogs.cpp:1273
+#: wxMDialogs.cpp:1363
 msgid "Re-sort on status change"
 msgstr ""
 
-#: wxMDialogs.cpp:1318
+#: wxMDialogs.cpp:1408
 #, c-format
 msgid ""
 "You have selected message score as a sort criterium\n"
@@ -2041,162 +2034,162 @@ msgid ""
 "Otherwise all messages will have score 0."
 msgstr ""
 
-#: wxMDialogs.cpp:1374
+#: wxMDialogs.cpp:1464
 #, fuzzy
 msgid "Full Message"
 msgstr "ei viestej‰"
 
-#: wxMDialogs.cpp:1375
+#: wxMDialogs.cpp:1465
 #, fuzzy
 msgid "Message Content"
 msgstr "Viesti l‰hetetty."
 
-#: wxMDialogs.cpp:1376
+#: wxMDialogs.cpp:1466
 #, fuzzy
 msgid "Message Header"
 msgstr "Viestin n‰yttˆ"
 
-#: wxMDialogs.cpp:1377
+#: wxMDialogs.cpp:1467
 #, fuzzy
 msgid "Subject Field"
 msgstr "Aihe: "
 
-#: wxMDialogs.cpp:1378
+#: wxMDialogs.cpp:1468
 msgid "To Field"
 msgstr ""
 
-#: wxMDialogs.cpp:1379
+#: wxMDialogs.cpp:1469
 #, fuzzy
 msgid "From Field"
 msgstr "L‰hett‰j‰: "
 
-#: wxMDialogs.cpp:1380
+#: wxMDialogs.cpp:1470
 msgid "CC Field"
 msgstr ""
 
-#: wxMDialogs.cpp:1421
+#: wxMDialogs.cpp:1511
 #, fuzzy
 msgid "Search folder for messages"
 msgstr "Ka&nsio l‰hetetyille viesteille"
 
-#: wxMDialogs.cpp:1426
+#: wxMDialogs.cpp:1516
 #, fuzzy
 msgid "Message search criteria"
 msgstr "Viesti l‰hetetty."
 
-#: wxMDialogs.cpp:1434
+#: wxMDialogs.cpp:1524
 #, fuzzy
 msgid "Search for text in"
 msgstr "Etsi?"
 
-#: wxMDialogs.cpp:1452
+#: wxMDialogs.cpp:1542
 #, fuzzy
 msgid "Search for"
 msgstr "Etsi?"
 
-#: wxMDialogs.cpp:1468
+#: wxMDialogs.cpp:1558
 #, fuzzy
 msgid "Invert selection"
 msgstr "Ei valintaa"
 
-#: wxMDialogs.cpp:1528
+#: wxMDialogs.cpp:1618
 msgid "31 (Day)"
 msgstr ""
 
-#: wxMDialogs.cpp:1529
+#: wxMDialogs.cpp:1619
 msgid "Mon"
 msgstr ""
 
-#: wxMDialogs.cpp:1530
+#: wxMDialogs.cpp:1620
 msgid "Monday"
 msgstr ""
 
-#: wxMDialogs.cpp:1531
+#: wxMDialogs.cpp:1621
 msgid "12 (Month)"
 msgstr ""
 
-#: wxMDialogs.cpp:1532
+#: wxMDialogs.cpp:1622
 #, fuzzy
 msgid "Nov"
 msgstr "Ei"
 
-#: wxMDialogs.cpp:1533
+#: wxMDialogs.cpp:1623
 msgid "November"
 msgstr ""
 
-#: wxMDialogs.cpp:1534
+#: wxMDialogs.cpp:1624
 msgid "99 (year)"
 msgstr ""
 
-#: wxMDialogs.cpp:1535
+#: wxMDialogs.cpp:1625
 msgid "1999 (year)"
 msgstr ""
 
-#: wxMDialogs.cpp:1536
+#: wxMDialogs.cpp:1626
 msgid "24 (hour)"
 msgstr ""
 
-#: wxMDialogs.cpp:1537
+#: wxMDialogs.cpp:1627
 msgid "12 (hour)"
 msgstr ""
 
-#: wxMDialogs.cpp:1538
+#: wxMDialogs.cpp:1628
 msgid "am/pm"
 msgstr ""
 
-#: wxMDialogs.cpp:1539
+#: wxMDialogs.cpp:1629
 msgid "59 (minutes)"
 msgstr ""
 
-#: wxMDialogs.cpp:1540
+#: wxMDialogs.cpp:1630
 msgid "29 (seconds)"
 msgstr ""
 
-#: wxMDialogs.cpp:1541
+#: wxMDialogs.cpp:1631
 msgid "EST (timezone)"
 msgstr ""
 
-#: wxMDialogs.cpp:1542
+#: wxMDialogs.cpp:1632
 msgid "Default format including time"
 msgstr ""
 
-#: wxMDialogs.cpp:1543
+#: wxMDialogs.cpp:1633
 msgid "Default format without time"
 msgstr ""
 
-#: wxMDialogs.cpp:1580
+#: wxMDialogs.cpp:1667
 msgid "Format Specifiers:"
 msgstr ""
 
-#: wxMDialogs.cpp:1668 wxMDialogs.cpp:1673
+#: wxMDialogs.cpp:1755 wxMDialogs.cpp:1760
 msgid "Date Format"
 msgstr ""
 
-#: wxMDialogs.cpp:1682
+#: wxMDialogs.cpp:1769
 msgid ""
 "Press the right mouse button over the input field to insert format "
 "specifiers.\n"
 msgstr ""
 
-#: wxMDialogs.cpp:1700
+#: wxMDialogs.cpp:1787
 msgid "Here is how it will look like: "
 msgstr ""
 
-#: wxMDialogs.cpp:1716
+#: wxMDialogs.cpp:1803
 msgid "Display time in GMT/UST."
 msgstr ""
 
-#: wxMDialogs.cpp:1852
+#: wxMDialogs.cpp:1939
 #, fuzzy
 msgid "Choose a XFace"
 msgstr "K‰yt‰ &XFacea"
 
-#: wxMDialogs.cpp:1855
+#: wxMDialogs.cpp:1942
 #, fuzzy
 msgid "XFace"
 msgstr "K‰yt‰ &XFacea"
 
-#: wxMDialogs.cpp:1860
+#: wxMDialogs.cpp:1947
 msgid ""
 "XFaces are small images that can be included\n"
 "in your mail message to help recognise you.\n"
@@ -2207,764 +2200,1104 @@ msgid ""
 "Click on the button to change it."
 msgstr ""
 
-#: wxMDialogs.cpp:1883
+#: wxMDialogs.cpp:1970
 #, fuzzy
 msgid "Use XFace."
 msgstr "K‰yt‰ &XFacea"
 
-#: wxMDialogs.cpp:1918
+#: wxMDialogs.cpp:2005
 msgid "Please pick an image file"
 msgstr ""
 
-#: wxMDialogs.cpp:1958
+#: wxMDialogs.cpp:2045
 #, fuzzy, c-format
 msgid ""
 "Do you want to expunge all deleted messages\n"
 "in folder '%s'?"
 msgstr "Haluatko poistaa kansion '%s'?"
 
-#: wxlwindow.cpp:978
+#: wxMDialogs.cpp:2073
+#, fuzzy
+msgid "prompt for global directory if not found"
+msgstr "M‰‰rittele Mahoganyn globaali hakemisto"
+
+#: wxMDialogs.cpp:2074
+msgid "ask whether to send unset messages on exit"
+msgstr ""
+
+#: wxMDialogs.cpp:2075
+msgid "prompt before abandoning critical folders "
+msgstr ""
+
+#: wxMDialogs.cpp:2076
+msgid "ask whether to go online to send Outbox"
+msgstr ""
+
+#: wxMDialogs.cpp:2077
+msgid "propose to fix template with errors"
+msgstr ""
+
+#: wxMDialogs.cpp:2078
+msgid "ask for signature if none found"
+msgstr ""
+
+#: wxMDialogs.cpp:2079
+#, fuzzy
+msgid "propose to save message before closing"
+msgstr "Valitse tiedosto johon viesti tallennetaan"
+
+#: wxMDialogs.cpp:2080
+msgid "show notification after sending the message"
+msgstr ""
+
+#: wxMDialogs.cpp:2081
+#, fuzzy
+msgid "propose to change external editor settings if unset"
+msgstr "Haluatko muuttaa ulkoisen muistion asetuksia?"
+
+#: wxMDialogs.cpp:2082
+msgid "ask confirmation for guessed MIME types"
+msgstr ""
+
+#: wxMDialogs.cpp:2083
+msgid ""
+"propose to configure network settings before sending the message if necessary"
+msgstr ""
+
+#: wxMDialogs.cpp:2084
+msgid "ask confirmation before sending messages without subject"
+msgstr ""
+
+#: wxMDialogs.cpp:2085
+msgid "ask confirmation before removing folder from the folder tree"
+msgstr ""
+
+#: wxMDialogs.cpp:2086
+msgid "ask confirmation before deleting folder with its contents"
+msgstr ""
+
+#: wxMDialogs.cpp:2087
+msgid "ask whether to mark all articles as read before closing folder"
+msgstr ""
+
+#: wxMDialogs.cpp:2088
+msgid "show notification on dial-up network connection"
+msgstr ""
+
+#: wxMDialogs.cpp:2089
+msgid "show notification on dial-up network disconnection"
+msgstr ""
+
+#: wxMDialogs.cpp:2090
+msgid "ask confirmation before exiting the program"
+msgstr ""
+
+#: wxMDialogs.cpp:2091
+msgid "ask for the login name when opening the folder if required"
+msgstr ""
+
+#: wxMDialogs.cpp:2092
+msgid "ask for the password when opening the folder if required"
+msgstr ""
+
+#: wxMDialogs.cpp:2093
+msgid "propose to send outgoing messages before hanging up"
+msgstr ""
+
+#: wxMDialogs.cpp:2094
+msgid ""
+"warn before trying to reopen folder which couldn't be opened the last time"
+msgstr ""
+
+#: wxMDialogs.cpp:2095
+msgid ""
+"propose to change settings of a folder which couldn't be opened the last "
+"time before reopening it"
+msgstr ""
+
+#: wxMDialogs.cpp:2096
+msgid "ask for the WWW browser if it was not configured"
+msgstr ""
+
+#: wxMDialogs.cpp:2097
+msgid "propose to test new settings after changing any important ones"
+msgstr ""
+
+#: wxMDialogs.cpp:2098
+msgid "warn if some options changes don't take effect until program restart"
+msgstr ""
+
+#: wxMDialogs.cpp:2099
+msgid "propose to save changed template before closing it"
+msgstr ""
+
+#: wxMDialogs.cpp:2100
+msgid ""
+"propose to start dial up networking before trying to open a remote folder"
+msgstr ""
+
+#: wxMDialogs.cpp:2101
+msgid "warn before opening remote folder while not being online"
+msgstr ""
+
+#: wxMDialogs.cpp:2102
+msgid "ask whether to ping remote folders offline"
+msgstr ""
+
+#: wxMDialogs.cpp:2103
+msgid ""
+"show notification if the message is queued in Outbox and not sent out "
+"immediately"
+msgstr ""
+
+#: wxMDialogs.cpp:2104
+#, fuzzy
+msgid "show notification for queued messages"
+msgstr "Haetaan uusia viestej‰..."
+
+#: wxMDialogs.cpp:2105
+#, fuzzy
+msgid "show notification for sent messages"
+msgstr "Ka&nsio l‰hetetyille viesteille"
+
+#: wxMDialogs.cpp:2106
+#, fuzzy
+msgid "show succesful test message"
+msgstr "Avaa valittu viesti"
+
+#: wxMDialogs.cpp:2107
+msgid "ask for confirmation before deleing the address book entries"
+msgstr ""
+
+#: wxMDialogs.cpp:2108
+msgid "ask for confirmation before importing unreckognized address book files"
+msgstr ""
+
+#: wxMDialogs.cpp:2109
+msgid "ask for confirmation before saving address books in BBDB format"
+msgstr ""
+
+#: wxMDialogs.cpp:2110
+msgid "show explanation after creating a folder group"
+msgstr ""
+
+#: wxMDialogs.cpp:2111
+msgid "warn if signature is longer than netiquette recommends"
+msgstr ""
+
+#: wxMDialogs.cpp:2140
+#, fuzzy, c-format
+msgid "unknown (%s)"
+msgstr "tuntematon"
+
+#: wxMDialogs.cpp:2172
+#, fuzzy
+msgid "Mahogany"
+msgstr "Mahogany Tyˆkalupalkki"
+
+#: wxMDialogs.cpp:2180
+#, fuzzy
+msgid "&Settings"
+msgstr "&Kaikki asetukset"
+
+#: wxMDialogs.cpp:2184
+#, fuzzy
+msgid "Select the settings to reset"
+msgstr "Poista valitut nimikkeet"
+
+#: wxMDialogs.cpp:2204
+#, fuzzy
+msgid "Setting"
+msgstr "&Kaikki asetukset"
+
+#: wxHeadersDialogs.cpp:970 wxMDialogs.cpp:2205
+msgid "Value"
+msgstr ""
+
+#: wxMDialogs.cpp:2206
+#, fuzzy
+msgid "Folder"
+msgstr "Kansiot"
+
+#: wxMDialogs.cpp:2236
+#, fuzzy
+msgid "yes"
+msgstr " bytes"
+
+#: wxMDialogs.cpp:2241
+#, fuzzy
+msgid "no"
+msgstr "Peruuta"
+
+#: wxMDialogs.cpp:2246
+msgid "off"
+msgstr ""
+
+#: wxMDialogs.cpp:2250
+#, fuzzy
+msgid "all folders"
+msgstr "Kaikki kansiot"
+
+#: wxMDialogs.cpp:2333
+#, c-format
+msgid "Reenabled %d previously disabled message boxes."
+msgstr ""
+
+#: wxMDialogs.cpp:2340
+#, fuzzy
+msgid "No message boxes were reenabled."
+msgstr "Poistetut viestit tuhottu"
+
+#: wxMDialogs.cpp:2346
+#, fuzzy
+msgid "No message boxes have been disabled yet."
+msgstr "Viesti on l‰hetetty."
+
+#: wxMDialogs.cpp:2360
+msgid "The server presents the following certificate:\n"
+msgstr ""
+
+#: wxMDialogs.cpp:2362
+#, fuzzy
+msgid "Name : "
+msgstr "&K‰ytt‰j‰nimi: "
+
+#: wxMDialogs.cpp:2363
+msgid "Issuer : "
+msgstr ""
+
+#: wxMDialogs.cpp:2364
+msgid "Fingerprint: "
+msgstr ""
+
+#: wxMDialogs.cpp:2366
+msgid "Do you accept this certificate?"
+msgstr ""
+
+#: wxMDialogs.cpp:2368
+msgid "SSL certificate verification"
+msgstr ""
+
+#: wxMDialogs.cpp:2386
+#, fuzzy
+msgid "Mahogany Licensing Conditions"
+msgstr "Mahogany: Listaus"
+
+#: wxMDialogs.cpp:2389
+msgid "Licensing Conditions"
+msgstr ""
+
+#: wxMDialogs.cpp:2412
+#, fuzzy
+msgid "Accept"
+msgstr "Oikeus"
+
+#: wxMDialogs.cpp:2415
+#, fuzzy
+msgid "Reject"
+msgstr "Aihe"
+
+#: wxlwindow.cpp:1003
 #, c-format
 msgid "Ln:%d Col:%d"
 msgstr "Rivi:%d Kolumni:%d"
 
-#: wxlwindow.cpp:1230
+#: wxlwindow.cpp:1266
 #, fuzzy
 msgid "Find text"
 msgstr "Etsi seuraava"
 
-#: wxlwindow.cpp:1231
+#: wxlwindow.cpp:1267
 msgid "   Find:"
 msgstr "   Etsi:"
 
-#: wxlwindow.cpp:1275
+#: wxlwindow.cpp:1311
 msgid "Layout Menu"
 msgstr "Ulkoasuvalikko"
 
-#: wxlwindow.cpp:1277
+#: wxlwindow.cpp:1313
 msgid "&Larger"
 msgstr "&Suurempi"
 
-#: wxlwindow.cpp:1277
+#: wxlwindow.cpp:1313
 msgid "Switch to larger font."
 msgstr "Vaihda suurempaan kirjasimeen."
 
-#: wxlwindow.cpp:1278
+#: wxlwindow.cpp:1314
 msgid "&Smaller"
 msgstr "&Pienempi"
 
-#: wxlwindow.cpp:1278
+#: wxlwindow.cpp:1314
 msgid "Switch to smaller font."
 msgstr "Vaihda pienemp‰‰n kirjasimeen."
 
-#: wxlwindow.cpp:1280
+#: wxlwindow.cpp:1316
 msgid "&Underline"
 msgstr "&Alleviivaa"
 
-#: wxlwindow.cpp:1280
+#: wxlwindow.cpp:1316
 msgid "Underline mode."
 msgstr "Alleviivaus"
 
-#: wxlwindow.cpp:1281
+#: wxlwindow.cpp:1317
 msgid "&Bold"
 msgstr "&Lihavoitu"
 
-#: wxlwindow.cpp:1281
+#: wxlwindow.cpp:1317
 msgid "Bold mode."
 msgstr "Lihavointi"
 
-#: wxlwindow.cpp:1282
+#: wxlwindow.cpp:1318
 msgid "&Italics"
 msgstr "Kursivoitu"
 
-#: wxlwindow.cpp:1282
+#: wxlwindow.cpp:1318
 msgid "Italics mode."
 msgstr "Kursiivinen"
 
-#: wxlwindow.cpp:1284
+#: wxlwindow.cpp:1320
 msgid "&Roman"
 msgstr "&Roman"
 
-#: wxlwindow.cpp:1284
+#: wxlwindow.cpp:1320
 msgid "Switch to roman font."
 msgstr "Vaihda Roman-kirjasimeen."
 
-#: wxlwindow.cpp:1285
+#: wxlwindow.cpp:1321
 msgid "&Typewriter"
 msgstr "&Courier"
 
-#: wxlwindow.cpp:1285
+#: wxlwindow.cpp:1321
 msgid "Switch to typewriter font."
 msgstr "Vaihda Courier-kirjasimeen."
 
-#: wxlwindow.cpp:1286
+#: wxlwindow.cpp:1322
 msgid "&Sans Serif"
 msgstr "&Sans Serif"
 
-#: wxlwindow.cpp:1286
+#: wxlwindow.cpp:1322
 msgid "Switch to sans serif font."
 msgstr "Vaihda Sans Serif -kirjasimeen."
 
-#: wxMenuDefs.cpp:87 wxMenuDefs.cpp:249
+#: wxMenuDefs.cpp:83 wxMenuDefs.cpp:242
 msgid "Close this window"
 msgstr "Sulje ikkuna"
 
-#: wxMenuDefs.cpp:88
+#: wxMenuDefs.cpp:84
 msgid "Edit address book"
 msgstr "Muokkaa osoitekirjaa"
 
-#: wxMenuDefs.cpp:89
+#: wxMenuDefs.cpp:85
 msgid "Edit preferences"
 msgstr "Muokkaa asetuksia"
 
-#: wxMenuDefs.cpp:92
+#: wxMenuDefs.cpp:88
 msgid "Open folder"
 msgstr "Avaa kansio"
 
-#: wxMenuDefs.cpp:93
+#: wxMenuDefs.cpp:89
 msgid "Compose a new message"
 msgstr "Kirjoita uusi viesti"
 
-#: wxMenuDefs.cpp:95
+#: wxMenuDefs.cpp:91
 msgid "Exit the program"
 msgstr "Poistu ohjelmasta"
 
-#: wxMenuDefs.cpp:98
+#: wxMenuDefs.cpp:94
 msgid "Print"
 msgstr "Tulosta"
 
-#: wxMenuDefs.cpp:99
+#: wxMenuDefs.cpp:95
 msgid "Clear Window"
 msgstr "Tyhjenn‰ ikkuna"
 
-#: wxMenuDefs.cpp:100
+#: wxMenuDefs.cpp:96
 msgid "Insert File"
 msgstr "Lis‰‰ tiedosto"
 
-#: wxMenuDefs.cpp:101
+#: wxMenuDefs.cpp:97
 msgid "Call external editor"
 msgstr "Avaa ulkoinen muistio"
 
-#: wxMenuDefs.cpp:102
+#: wxMenuDefs.cpp:98
 msgid "Send Message"
 msgstr "L‰het‰ viesti"
 
-#: wxMenuDefs.cpp:105 wxMenuDefs.cpp:279
+#: wxMenuDefs.cpp:101 wxMenuDefs.cpp:276
 #, fuzzy
 msgid "Select next unread message"
 msgstr "Valitse kaikki viestit"
 
-#: wxMenuDefs.cpp:106
+#: wxMenuDefs.cpp:102
 msgid "Open message"
 msgstr "Avaa viesti"
 
-#: wxMenuDefs.cpp:107
+#: wxMenuDefs.cpp:103
 msgid "Forward message"
 msgstr "Forwardoi viesti"
 
-#: wxMenuDefs.cpp:108
+#: wxMenuDefs.cpp:104
 msgid "Reply to message"
 msgstr "Vastaa viestiin"
 
-#: wxMenuDefs.cpp:109
+#: wxMenuDefs.cpp:105
 msgid "Print message"
 msgstr "Tulosta viesti"
 
-#: wxMenuDefs.cpp:110
+#: wxMenuDefs.cpp:106
 msgid "Delete message"
 msgstr "Poista viesti"
 
-#: wxMenuDefs.cpp:114
+#: wxMenuDefs.cpp:110
 msgid "Create new entry"
 msgstr "Luo uusi kohta"
 
-#: wxFiltersDialog.cpp:199 wxFiltersDialog.cpp:334 wxMenuDefs.cpp:115
+#: wxFiltersDialog.cpp:546 wxFiltersDialog.cpp:943 wxMenuDefs.cpp:111
 msgid "Delete"
 msgstr "Poista"
 
-#: wxMenuDefs.cpp:116
+#: wxMenuDefs.cpp:112
 msgid "Undo"
 msgstr "Peruuta"
 
-#: wxMenuDefs.cpp:117
+#: wxMenuDefs.cpp:113
 msgid "Find next"
 msgstr "Etsi seuraava"
 
-#: wxMenuDefs.cpp:119
-msgid "Run or configure plugin modules"
-msgstr ""
-
-#: wxMenuDefs.cpp:221
-msgid "&Open Folder..."
+#: wxMenuDefs.cpp:214
+#, fuzzy
+msgid "&Open Folder...\tCtrl-O"
 msgstr "&Avaa kansio..."
 
-#: wxMenuDefs.cpp:221
+#: wxMenuDefs.cpp:214
 msgid "Open an existing message folder"
 msgstr "Avaa olemassaoleva kansio"
 
-#: wxMenuDefs.cpp:222
-msgid "&Compose Message"
-msgstr "&Kirjoita viesti"
+#: wxMenuDefs.cpp:215
+#, fuzzy
+msgid "Compose &New Message\tCtrl-N"
+msgstr "Kirjoita uusi viesti"
 
-#: wxMenuDefs.cpp:222
+#: wxMenuDefs.cpp:215
 msgid "Start a new message"
 msgstr "Aloita uusi viesti"
 
-#: wxMenuDefs.cpp:223
-msgid "Post &News Article"
+#: wxMenuDefs.cpp:216
+#, fuzzy
+msgid "Post News &Article\tCtrl-A"
 msgstr "L‰het‰ &News artikkeli"
 
-#: wxMenuDefs.cpp:223
+#: wxMenuDefs.cpp:216
 msgid "Write a news article and post it"
 msgstr "Kirjoita news artikkeli ja l‰het‰ se"
 
-#: wxMenuDefs.cpp:224
-msgid "Check &mail"
+#: wxMenuDefs.cpp:217
+#, fuzzy
+msgid "&Check mail\tCtrl-C"
 msgstr "Tarkista &viestit"
 
-#: wxMenuDefs.cpp:224
+#: wxMenuDefs.cpp:217
 msgid "Check all incoming folder for new mail and download it now"
 msgstr "Tarkista kaikki saapuvat-kansiot ja hae viestit"
 
-#: wxMenuDefs.cpp:226
+#: wxMenuDefs.cpp:219
 msgid "P&rint Setup"
 msgstr "&Tulostusasetukset"
 
-#: wxMenuDefs.cpp:226
+#: wxMenuDefs.cpp:219
 msgid "Configure printing"
 msgstr "Muokkaa tulostusasetuksia"
 
-#: wxMenuDefs.cpp:227
+#: wxMenuDefs.cpp:220
 msgid "P&age Setup"
 msgstr "&Sivun asetukset"
 
-#: wxMenuDefs.cpp:227
+#: wxMenuDefs.cpp:220
 msgid "Configure page setup"
 msgstr "Muokkaa sivun asetuksia"
 
-#: wxMenuDefs.cpp:230
+#: wxMenuDefs.cpp:223
 msgid "&Print PS Setup"
 msgstr "&Postscript asetukset"
 
-#: wxMenuDefs.cpp:230
+#: wxMenuDefs.cpp:223
 msgid "Configure PostScript printing"
 msgstr "Muokkaa PostScript asetuksia"
 
-#: wxMenuDefs.cpp:234
+#: wxMenuDefs.cpp:227
 msgid "Create &Folder..."
 msgstr "&Luo kansio..."
 
-#: wxMenuDefs.cpp:234
+#: wxMenuDefs.cpp:227
 msgid "Creates a new folder definition"
 msgstr "Luo uuden kansiom‰‰ritelm‰n"
 
-#: wxMenuDefs.cpp:238
+#: wxMenuDefs.cpp:231
 #, fuzzy
 msgid "R&un Script..."
 msgstr "&Aja skripti..."
 
-#: wxMenuDefs.cpp:238
+#: wxMenuDefs.cpp:231
 msgid "Run a simple python script"
 msgstr "Aja yksinkertainen python skripti"
 
-#: wxMenuDefs.cpp:242
+#: wxMenuDefs.cpp:235
 #, fuzzy
-msgid "&Send messages..."
+msgid "&Send messages...\tCtrl-S"
 msgstr "Tallennetaan %d viesti‰..."
 
-#: wxMenuDefs.cpp:242
+#: wxMenuDefs.cpp:235
 msgid "Sends messages still in outgoing mailbox"
 msgstr ""
 
-#: wxMenuDefs.cpp:244
-msgid "Conn&ect to Network"
+#: wxMenuDefs.cpp:237
+msgid "Conn&ect to Network\tCTRL-U"
 msgstr ""
 
-#: wxMenuDefs.cpp:245
+#: wxMenuDefs.cpp:238
 msgid "Activate dial-up networking"
 msgstr ""
 
-#: wxMenuDefs.cpp:246
-msgid "Shut&down Network"
+#: wxMenuDefs.cpp:239
+msgid "Shut&down Network\\CTRL-D"
 msgstr ""
 
-#: wxMenuDefs.cpp:247
+#: wxMenuDefs.cpp:240
 msgid "Shutdown dial-up networking"
 msgstr ""
 
-#: wxMenuDefs.cpp:249
-msgid "&Close Window"
+#: wxMenuDefs.cpp:242
+#, fuzzy
+msgid "&Close Window\tCTRL-W"
 msgstr "&Sulje ikkuna"
 
-#: wxMenuDefs.cpp:251
-msgid "E&xit"
-msgstr "&Lopeta"
+#: wxMenuDefs.cpp:244
+msgid "E&xit\tCtrl-Q"
+msgstr ""
 
-#: wxMenuDefs.cpp:251
+#: wxMenuDefs.cpp:244
 msgid "Quit the application"
 msgstr "Poistu ohjelmasta"
 
-#: wxMenuDefs.cpp:254
-msgid "C&ut"
-msgstr "&Leikkaa"
+#: wxMenuDefs.cpp:247
+msgid "C&ut\tCtrl-X"
+msgstr ""
 
-#: wxMenuDefs.cpp:254
+#: wxMenuDefs.cpp:247
 msgid "Cut selection and copy it to clipboard"
 msgstr "Leikkaa valinta ja kopioi se leikepˆyd‰lle"
 
-#: wxMenuDefs.cpp:255 wxMenuDefs.cpp:333
-msgid "&Copy"
-msgstr "&Kopioi"
+#: wxMenuDefs.cpp:248
+msgid "&Copy\tCtrl-C"
+msgstr ""
 
-#: wxMenuDefs.cpp:255
+#: wxMenuDefs.cpp:248
 msgid "Copy selection to clipboard"
 msgstr "Kopioi valinta leikepˆyd‰lle"
 
-#: wxMenuDefs.cpp:256 wxMenuDefs.cpp:334
-msgid "&Paste"
+#: wxMenuDefs.cpp:249
+#, fuzzy
+msgid "&Paste\tCtrl-V"
 msgstr "L&iit‰"
 
-#: wxMenuDefs.cpp:256
+#: wxMenuDefs.cpp:249
 msgid "Paste from clipboard"
 msgstr "Liit‰ leikepˆyd‰lt‰"
 
-#: wxMenuDefs.cpp:258
-msgid "&Address books..."
+#: wxMenuDefs.cpp:251
+#, fuzzy
+msgid "&Address books...\tCtrl-A"
 msgstr "&Osoitekirja"
 
-#: wxMenuDefs.cpp:258
+#: wxMenuDefs.cpp:251
 msgid "Edit the address book(s)"
 msgstr "Muokkaa osoitekirjaa"
 
-#: wxMenuDefs.cpp:260
-msgid "Pre&ferences..."
+#: wxMenuDefs.cpp:253
+#, fuzzy
+msgid "Pr&eferences...\tCtrl-R"
 msgstr "&Asetukset..."
 
-#: wxMenuDefs.cpp:260
+#: wxMenuDefs.cpp:253
 msgid "Change options"
 msgstr "Muuta asetuksia"
 
-#: wxMenuDefs.cpp:261
+#: wxMenuDefs.cpp:254
 #, fuzzy
-msgid "&Modules..."
+msgid "&Modules...\tCtrl-M"
 msgstr "&Uusi..."
 
-#: wxMenuDefs.cpp:261
+#: wxMenuDefs.cpp:254
 msgid "Choose which extension modules to use"
 msgstr ""
 
-#: wxMenuDefs.cpp:263
+#: wxMenuDefs.cpp:255
+msgid "&Filter Rules...\tCtrl-F"
+msgstr ""
+
+#: wxMenuDefs.cpp:255
+msgid "Edit rules for message filtering"
+msgstr ""
+
+#: wxMenuDefs.cpp:257
 msgid "&Restore defaults..."
 msgstr "Palauta alk&uper‰isasetukset..."
 
-#: wxMenuDefs.cpp:263
+#: wxMenuDefs.cpp:257
 msgid "Restore default options values"
 msgstr "Palauta alkuper‰isasetukset"
 
-#: wxMenuDefs.cpp:265
+#: wxMenuDefs.cpp:259
 msgid "&Save Preferences"
 msgstr "&Tallenna asetukset"
 
-#: wxMenuDefs.cpp:265
+#: wxMenuDefs.cpp:259
 msgid "Save options"
 msgstr "Tallenna asetukset"
 
-#: wxMenuDefs.cpp:268
+#: wxMenuDefs.cpp:262
 msgid "View selected message"
 msgstr "Avaa valittu viesti"
 
-#: wxMenuDefs.cpp:269 wxMenuDefs.cpp:304
-msgid "&Print"
+#: wxMenuDefs.cpp:263
+#, fuzzy
+msgid "&Print\tCtrl-P"
 msgstr "&Tulosta"
 
-#: wxMenuDefs.cpp:269
+#: wxMenuDefs.cpp:263
 msgid "Print this message"
 msgstr "Tulosta viesti"
 
-#: wxMenuDefs.cpp:270
+#: wxMenuDefs.cpp:264
 msgid "Print Pre&view"
 msgstr "&Esikatselu"
 
-#: wxMenuDefs.cpp:270
+#: wxMenuDefs.cpp:264
 msgid "Preview a printout of this message"
 msgstr "Esikatsele tulostettavaa viesti‰"
 
-#: wxMenuDefs.cpp:272
+#: wxMenuDefs.cpp:266
 msgid "PS-Prin&t"
 msgstr "&PS-Tulostus"
 
-#: wxMenuDefs.cpp:272
+#: wxMenuDefs.cpp:266
 msgid "Print this message as PostScript"
 msgstr "Tulosta viesti PostScript-muodossa"
 
-#: wxMenuDefs.cpp:273
+#: wxMenuDefs.cpp:267
 msgid "PS&-Print Preview"
 msgstr "PS-Esikatselu"
 
-#: wxMenuDefs.cpp:273
+#: wxMenuDefs.cpp:267
 msgid "View PostScript printout"
 msgstr "Esikatsele PostScript tulostusta"
 
-#: wxMenuDefs.cpp:275
+#: wxMenuDefs.cpp:269
 msgid "&Reply"
 msgstr "&Vastaa"
 
-#: wxMenuDefs.cpp:275
+#: wxMenuDefs.cpp:269
 msgid "Reply to this message"
 msgstr "Vastaa viestiin"
 
-#: wxMenuDefs.cpp:276
+#: wxMenuDefs.cpp:270
+msgid "Repl&y with template..."
+msgstr ""
+
+#: wxMenuDefs.cpp:270
+msgid "Reply to this message after choosing a template to use "
+msgstr ""
+
+#: wxMenuDefs.cpp:271
 msgid "&Group reply"
 msgstr "Vastaa &ryhm‰lle"
 
-#: wxMenuDefs.cpp:276
+#: wxMenuDefs.cpp:271
 #, fuzzy
 msgid "Followup/group-reply to this message"
 msgstr "Vastaa ryhm‰lle"
 
-#: wxMenuDefs.cpp:277
+#: wxMenuDefs.cpp:272
 msgid "&Forward"
 msgstr "&Eteenp‰in"
 
-#: wxMenuDefs.cpp:277
+#: wxMenuDefs.cpp:272
 msgid "Forward this message"
 msgstr "L‰het‰ viesti eteenp‰in"
 
-#: wxMenuDefs.cpp:279
+#: wxMenuDefs.cpp:273
+#, fuzzy
+msgid "Forward with &template..."
+msgstr "Muokkaa &otsikoita..."
+
+#: wxMenuDefs.cpp:273
+msgid "Forward this message after choosing a template to use "
+msgstr ""
+
+#: wxMenuDefs.cpp:274
+msgid "&Apply filter rules..."
+msgstr ""
+
+#: wxMenuDefs.cpp:274
+#, fuzzy
+msgid "Apply filter rules to selected messages"
+msgstr "Avaa valittu viesti"
+
+#: wxMenuDefs.cpp:276
 msgid "Next &unread"
 msgstr ""
 
-#: wxMenuDefs.cpp:281
+#: wxMenuDefs.cpp:278
 #, fuzzy
 msgid "Save as F&ile"
 msgstr "&Tallenna tiedostoksi"
 
-#: wxMenuDefs.cpp:282
+#: wxMenuDefs.cpp:279
 msgid "Export message to a file"
 msgstr "Tallenna viesti tiedostoon"
 
-#: wxMenuDefs.cpp:283
+#: wxMenuDefs.cpp:280
 msgid "&Copy to Folder"
 msgstr "&Kopioi kansioon"
 
-#: wxMenuDefs.cpp:283
+#: wxMenuDefs.cpp:280
 msgid "Save message to another folder"
 msgstr "Tallenna viesti toiseen kansioon"
 
-#: wxMenuDefs.cpp:284
+#: wxMenuDefs.cpp:281
 msgid "&Move to Folder"
 msgstr "&Siirr‰ kansioon"
 
-#: wxMenuDefs.cpp:284
+#: wxMenuDefs.cpp:281
 msgid "Move message to another folder"
 msgstr "Siirr‰ viesti toiseen kansioon"
 
-#: AdbFrame.cpp:1091 wxHeadersDialogs.cpp:913 wxMenuDefs.cpp:285
-#: wxMenuDefs.cpp:329
+#: AdbFrame.cpp:500 AdbFrame.cpp:1118 wxHeadersDialogs.cpp:913
+#: wxMenuDefs.cpp:282 wxMenuDefs.cpp:326
 msgid "&Delete"
 msgstr "&Poista"
 
-#: wxMenuDefs.cpp:285
+#: wxMenuDefs.cpp:282
 msgid "Delete this message"
 msgstr "Poista viesti"
 
-#: wxMenuDefs.cpp:286
+#: wxMenuDefs.cpp:283
 msgid "&Undelete"
 msgstr "Pa&lauta"
 
-#: wxMenuDefs.cpp:286
+#: wxMenuDefs.cpp:283
 msgid "Undelete message"
 msgstr "Palauta viesti"
 
-#: wxMenuDefs.cpp:287
+#: wxMenuDefs.cpp:284
 msgid "Ex&punge"
 msgstr "P&oista"
 
-#: wxFiltersDialog.cpp:202 wxMenuDefs.cpp:287
+#: wxFiltersDialog.cpp:549 wxMenuDefs.cpp:284
 msgid "Expunge"
 msgstr "Poista"
 
-#: wxMenuDefs.cpp:289
+#: wxMenuDefs.cpp:286
 msgid "Select &all"
 msgstr "&Valitse kaikki"
 
-#: wxMenuDefs.cpp:289
+#: wxMenuDefs.cpp:286
 msgid "Select all messages"
 msgstr "Valitse kaikki viestit"
 
-#: wxMenuDefs.cpp:290
+#: wxMenuDefs.cpp:287
 msgid "D&eselect all"
 msgstr "Poi&sta valinta"
 
-#: wxMenuDefs.cpp:290
+#: wxMenuDefs.cpp:287
 msgid "Unselect all messages"
 msgstr "Poista valinta viesteist‰"
 
-#: wxMenuDefs.cpp:291
+#: wxMenuDefs.cpp:288
 #, fuzzy
 msgid "&Search..."
 msgstr "&Etsi..."
 
-#: wxMenuDefs.cpp:292
+#: wxMenuDefs.cpp:289
 #, fuzzy
 msgid "Search and select messages"
 msgstr "Avaa valittu viesti"
 
-#: wxMenuDefs.cpp:294
+#: wxMenuDefs.cpp:291
 #, fuzzy
 msgid "Show &headers"
 msgstr "&N‰yt‰ otsikko"
 
-#: wxMenuDefs.cpp:294
+#: wxMenuDefs.cpp:291
 msgid "Toggle display of message header"
 msgstr "Viestiotsikon n‰yttˆ (on/off)"
 
-#: wxMenuDefs.cpp:295
+#: wxMenuDefs.cpp:292
 msgid "Show ra&w message"
 msgstr "N‰yt‰ &raaka viesti"
 
-#: wxMenuDefs.cpp:295
+#: wxMenuDefs.cpp:292
 msgid "Show the raw message text"
 msgstr "N‰yt‰ viestin raaka teksti"
 
-#: wxMenuDefs.cpp:296
+#: wxMenuDefs.cpp:293
 #, fuzzy
 msgid "Fi&nd..."
 msgstr "&Etsi..."
 
-#: wxMenuDefs.cpp:296
+#: wxMenuDefs.cpp:293
 msgid "Find text in message"
 msgstr "Etsi viestist‰"
 
-#: wxMenuDefs.cpp:300
+#: wxMenuDefs.cpp:297
 msgid "Insert a file"
 msgstr "Lis‰‰ tiedosto"
 
-#: wxMenuDefs.cpp:301
+#: wxMenuDefs.cpp:298
 msgid "&Send"
 msgstr "L&‰het‰"
 
-#: wxMenuDefs.cpp:301
+#: wxMenuDefs.cpp:298
 msgid "Send the message now"
 msgstr "L‰het‰ viesti"
 
-#: wxMenuDefs.cpp:302
+#: wxMenuDefs.cpp:299
 msgid "Send and &keep"
 msgstr "L‰&het‰ ja s‰ilyt‰"
 
-#: wxMenuDefs.cpp:303
+#: wxMenuDefs.cpp:300
 msgid "Send the message now and keep the editor open"
 msgstr "L‰het‰ viesti ja j‰t‰ muistio auki"
 
-#: wxMenuDefs.cpp:304
+#: wxMenuDefs.cpp:301
+msgid "&Print"
+msgstr "&Tulosta"
+
+#: wxMenuDefs.cpp:301
 msgid "Print the message"
 msgstr "Tulosta viesti"
 
-#: wxMenuDefs.cpp:306
+#: wxMenuDefs.cpp:303
 msgid "Save &text..."
 msgstr "&Tallenna teksti..."
 
-#: wxMenuDefs.cpp:306
+#: wxMenuDefs.cpp:303
 msgid "Save message text to file"
 msgstr "Tallenna viestin teksti tiedostoon"
 
-#: wxMenuDefs.cpp:307
+#: wxMenuDefs.cpp:304
 msgid "In&sert text..."
 msgstr "&Lis‰‰ teksti‰..."
 
-#: wxMenuDefs.cpp:307
+#: wxMenuDefs.cpp:304
 msgid "Insert text file"
 msgstr "Lis‰‰ tekstitiedosto"
 
-#: wxMenuDefs.cpp:308
+#: wxMenuDefs.cpp:305
 msgid "&Clear"
 msgstr "T&yhjenn‰"
 
-#: wxMenuDefs.cpp:308
+#: wxMenuDefs.cpp:305
 msgid "Delete message contents"
 msgstr "Poista viestin sis‰ltˆ"
 
-#: wxMenuDefs.cpp:310 wxOptionsDlg.cpp:574
+#: wxMenuDefs.cpp:307 wxOptionsDlg.cpp:612
 msgid "&External editor"
 msgstr "&Ulkoinen muistio"
 
-#: wxMenuDefs.cpp:310
+#: wxMenuDefs.cpp:307
 msgid "Invoke alternative editor"
 msgstr "Avaa ulkoinen muistio"
 
-#: wxMenuDefs.cpp:312
+#: wxMenuDefs.cpp:309
 #, fuzzy
 msgid "Custom &header..."
 msgstr "Muokattu &otsikko..."
 
-#: wxMenuDefs.cpp:312
+#: wxMenuDefs.cpp:309
 msgid "Add/edit header fields not shown on the screen"
 msgstr "Lis‰‰/muokkaa otsikkokentti‰, jotka eiv‰t n‰y ruudulla"
 
-#: AdbFrame.cpp:1090 wxMenuDefs.cpp:315
+#: AdbFrame.cpp:1117 wxMenuDefs.cpp:312
 msgid "&New..."
 msgstr "&Uusi..."
 
-#: wxMenuDefs.cpp:315
+#: wxMenuDefs.cpp:312
 msgid "Create a new address book"
 msgstr "Luo uusi osoitekirja"
 
-#: wxMenuDefs.cpp:316
+#: wxMenuDefs.cpp:313
 msgid "&Open..."
 msgstr "&Avaa..."
 
-#: wxMenuDefs.cpp:316
+#: wxMenuDefs.cpp:313
 msgid "Open an address book file"
 msgstr "Avaa osoitekirja"
 
-#: wxMenuDefs.cpp:318
+#: wxMenuDefs.cpp:315
 #, fuzzy
 msgid "&Export..."
 msgstr "&Tuo..."
 
-#: wxMenuDefs.cpp:318
+#: wxMenuDefs.cpp:315
 #, fuzzy
 msgid "Export address book data to another programs format"
 msgstr "Tuo tietoa osoitekirjasta toisen ohjelman muodossa"
 
-#: wxMenuDefs.cpp:319
+#: wxMenuDefs.cpp:316
 #, fuzzy
 msgid "&Import..."
 msgstr "&Tuo..."
 
-#: wxMenuDefs.cpp:319
+#: wxMenuDefs.cpp:316
 msgid "Import data from an address book in another programs format"
 msgstr "Tuo tietoa osoitekirjasta toisen ohjelman muodossa"
 
-#: wxMenuDefs.cpp:325
+#: wxMenuDefs.cpp:322
 msgid "&Properties..."
 msgstr "&Asetukset..."
 
-#: wxMenuDefs.cpp:325
+#: wxMenuDefs.cpp:322
 msgid "View properties of the current address book"
 msgstr "N‰yt‰ osoitekirjan asetukset"
 
-#: wxMenuDefs.cpp:328
+#: AdbFrame.cpp:499 wxMenuDefs.cpp:325
 msgid "&New entry..."
 msgstr "&Uusi nimike..."
 
-#: wxMenuDefs.cpp:328
+#: wxMenuDefs.cpp:325
 msgid "Create new entry/group"
 msgstr "Luo uusi nimike/ryhm‰"
 
-#: wxMenuDefs.cpp:329
+#: wxMenuDefs.cpp:326
 msgid "Delete the selected items"
 msgstr "Poista valitut nimikkeet"
 
-#: wxMenuDefs.cpp:330
+#: AdbFrame.cpp:501 wxMenuDefs.cpp:327
 msgid "&Rename..."
 msgstr "&Nime‰ uudelleen..."
 
-#: wxMenuDefs.cpp:330
+#: wxMenuDefs.cpp:327
 msgid "Rename the selected items"
 msgstr "Nime‰ uudelleen valitut nimikkeet"
 
-#: wxMenuDefs.cpp:332
+#: AdbFrame.cpp:503 wxMenuDefs.cpp:329
 msgid "Cu&t"
 msgstr "&Leikkaa"
 
-#: wxMenuDefs.cpp:332
+#: wxMenuDefs.cpp:329
 msgid "Copy and delete selected items"
 msgstr "Kopioi ja poista valitut nimikkeet"
 
-#: wxMenuDefs.cpp:333
+#: AdbFrame.cpp:504 wxMenuDefs.cpp:330
+msgid "&Copy"
+msgstr "&Kopioi"
+
+#: wxMenuDefs.cpp:330
 msgid "Copy selected items"
 msgstr "Kopioi valitut nimikkeet"
 
-#: wxMenuDefs.cpp:334
+#: AdbFrame.cpp:505 wxMenuDefs.cpp:331
+msgid "&Paste"
+msgstr "L&iit‰"
+
+#: wxMenuDefs.cpp:331
 msgid "Paste here"
 msgstr "Liit‰ t‰h‰n"
 
-#: wxMenuDefs.cpp:336
+#: wxMenuDefs.cpp:333
 msgid "&Undo changes"
 msgstr "&Peruuta muutokset"
 
-#: wxMenuDefs.cpp:336
+#: wxMenuDefs.cpp:333
 msgid "Undo all changes to the entry being edited"
 msgstr "Peruuta kaikki nimikkeeseen tehdyt muutokset"
 
-#: wxMenuDefs.cpp:339
+#: wxMenuDefs.cpp:336
 msgid "&Find..."
 msgstr "&Etsi..."
 
-#: wxMenuDefs.cpp:339
+#: wxMenuDefs.cpp:336
 msgid "Find entry by name or contents"
 msgstr "Etsi nimike nimen/sis‰llˆn mukaan"
 
-#: wxMenuDefs.cpp:340
+#: wxMenuDefs.cpp:337
 msgid "Find &next"
 msgstr "Etsi &seuraava"
 
-#: wxMenuDefs.cpp:340
+#: wxMenuDefs.cpp:337
 msgid "Go to the next match"
 msgstr "Liiku seuraavaan"
 
-#: wxMenuDefs.cpp:342
+#: wxMenuDefs.cpp:339
 msgid "&Go To..."
 msgstr "&Liiku..."
 
-#: wxMenuDefs.cpp:342
+#: wxMenuDefs.cpp:339
 msgid "Go to specified entry"
 msgstr "Liiku m‰‰riteltyyn nimikkeeseen"
 
-#: wxMenuDefs.cpp:345
+#: wxMenuDefs.cpp:342
 msgid "&About..."
 msgstr "&Ohjelmasta..."
 
-#: wxMenuDefs.cpp:345
+#: wxMenuDefs.cpp:342
 msgid "Displays the program information and copyright"
 msgstr "N‰ytt‰‰ tietoa ohjelmasta ja tekij‰noikeudesta"
 
-#: wxMenuDefs.cpp:346
+#: wxMenuDefs.cpp:343
+msgid "Show a &tip..."
+msgstr ""
+
+#: wxMenuDefs.cpp:343
+msgid "Show a tip about using Mahogany"
+msgstr ""
+
+#: wxMenuDefs.cpp:344
 msgid "&Release Notes..."
 msgstr "&Julkaisutietoja..."
 
-#: wxMenuDefs.cpp:346
+#: wxMenuDefs.cpp:344
 msgid "Displays notes about the current release."
 msgstr "N‰ytt‰‰ tiedot julkaisusta."
 
-#: wxMenuDefs.cpp:347
+#: wxMenuDefs.cpp:345
 msgid "&FAQ..."
 msgstr "&FAQ..."
 
-#: wxMenuDefs.cpp:347
+#: wxMenuDefs.cpp:345
 msgid "Displays the list of Frequently Asked Questions."
 msgstr "N‰ytt‰‰ listan yleisimmist‰ kysymyksist‰ (FAQ)."
 
-#: wxMenuDefs.cpp:353
+#: wxMenuDefs.cpp:351
 msgid "Help on current context..."
 msgstr "Apua kyseiseen asiaan..."
 
-#: wxMenuDefs.cpp:354
+#: wxMenuDefs.cpp:352
 msgid "Help &Contents"
 msgstr "&Sis‰llys"
 
-#: wxMenuDefs.cpp:354
+#: wxMenuDefs.cpp:352
 msgid "Contents of help system..."
 msgstr "Apuj‰rjestelm‰n sis‰llys..."
 
-#: wxMenuDefs.cpp:355
+#: wxMenuDefs.cpp:353
 msgid "&Search Help..."
 msgstr "&Etsi..."
 
-#: wxMenuDefs.cpp:355
+#: wxMenuDefs.cpp:353
 msgid "Search help system for keyword..."
 msgstr "Etsi apuj‰rjestelm‰st‰ sanan avulla..."
 
-#: wxMenuDefs.cpp:356
+#: wxMenuDefs.cpp:354
 msgid "C&opyright"
 msgstr "&Tekij‰noikeudet"
 
-#: wxMenuDefs.cpp:356
+#: wxMenuDefs.cpp:354
 msgid "Show Copyright."
 msgstr "N‰yt‰ tekij‰noikeudet"
 
-#: wxOptionsDlg.cpp:403
+#: wxOptionsDlg.cpp:428
 msgid ""
 "The user and host names are used to compose the return address, unless\n"
 "a different return address is explicitly specified."
@@ -2972,40 +3305,40 @@ msgstr ""
 "K‰ytt‰j‰- ja host-nimi‰ k‰ytet‰‰n vastausosoitteen muodostamiseen, ellei \n"
 "erillist‰ vastausosoitetta ole m‰‰ritelty."
 
-#: wxOptionsDlg.cpp:407
+#: wxOptionsDlg.cpp:432
 msgid "&Username"
 msgstr "&K‰ytt‰j‰nimi"
 
-#: wxOptionsDlg.cpp:408
+#: wxOptionsDlg.cpp:433
 msgid ""
 "The host name is also used as a default host name for local mail addresses."
 msgstr "Host-nime‰ k‰ytet‰‰n myˆs oletusarvona paikallisissa osoitteissa."
 
-#: wxOptionsDlg.cpp:411
+#: wxOptionsDlg.cpp:436
 msgid "&Hostname"
 msgstr "&Host-nimi"
 
-#: wxOptionsDlg.cpp:412
+#: wxOptionsDlg.cpp:437
 msgid "&Add this hostname if none specified"
 msgstr "&Lis‰‰ host-nimi, jos ei ole m‰‰ritelty"
 
-#: wxOptionsDlg.cpp:413
+#: wxOptionsDlg.cpp:438
 msgid "&Return/Reply address"
 msgstr "&Vastausosoite"
 
-#: wxOptionsDlg.cpp:414
+#: wxOptionsDlg.cpp:439
 msgid "Reply return address from &To: field"
 msgstr "Vastausosoite Va&staanottaja: kent‰st‰"
 
-#: wxOptionsDlg.cpp:415
+#: wxOptionsDlg.cpp:440
 msgid "&Personal name"
 msgstr "&Henkilˆnimi"
 
-#: wxOptionsDlg.cpp:416
+#: wxOptionsDlg.cpp:441
 msgid "User &level:novice:advanced"
 msgstr "K‰ytt‰j‰&taso: perus:kehittynyt"
 
-#: wxOptionsDlg.cpp:419
+#: wxOptionsDlg.cpp:444
 msgid ""
 "The following fields are used as default values for the\n"
 "corresponding server names. You may set them independently\n"
@@ -3015,23 +3348,39 @@ msgstr ""
 "Voit asettaa ne erikseen jokaiselle kansiolle, n‰in korvaten t‰ss‰ asetetut "
 "arvot."
 
-#: wxOptionsDlg.cpp:423
+#: wxOptionsDlg.cpp:448
 msgid "&POP server"
 msgstr "&POP palvelin"
 
-#: wxOptionsDlg.cpp:424
+#: wxOptionsDlg.cpp:449
 msgid "&IMAP server"
 msgstr "&IMAP palvelin"
 
-#: wxOptionsDlg.cpp:425
+#: wxOptionsDlg.cpp:450
 msgid "SMTP (&mail) server"
 msgstr "SMTP (&Mail) palvelin"
 
-#: wxOptionsDlg.cpp:426
+#: wxOptionsDlg.cpp:451
 msgid "NNTP (&news) server"
 msgstr "&NNTP (Usenet-News) palvelin"
 
-#: wxOptionsDlg.cpp:428
+#: wxOptionsDlg.cpp:454
+msgid ""
+"Mahogany can use SSL (secure sockets layer) to send\n"
+"mail or news. Tick the following boxes to activate this."
+msgstr ""
+
+#: wxOptionsDlg.cpp:457
+#, fuzzy
+msgid "POP server &uses SSL"
+msgstr "&POP palvelin"
+
+#: wxOptionsDlg.cpp:458
+#, fuzzy
+msgid "IMAP server uses &SSL"
+msgstr "&IMAP palvelin"
+
+#: wxOptionsDlg.cpp:460
 msgid ""
 "Mahogany contains support for dial-up networks and can detect if the\n"
 "network is up or not. It can also be used to connect and disconnect the\n"
@@ -3040,256 +3389,290 @@ msgid ""
 "server of your ISP. Leave it empty to use the SMTP server for this."
 msgstr ""
 
-#: wxOptionsDlg.cpp:434
+#: wxOptionsDlg.cpp:466
 msgid "&Dial-up network support"
 msgstr ""
 
-#: wxOptionsDlg.cpp:435
+#: wxOptionsDlg.cpp:467
 msgid "&Beacon host (e.g. www.yahoo.com)"
 msgstr ""
 
-#: wxOptionsDlg.cpp:436
+#: wxOptionsDlg.cpp:468
 msgid "Command to &activate network"
 msgstr ""
 
-#: wxOptionsDlg.cpp:437
+#: wxOptionsDlg.cpp:469
 msgid "Command to &deactivate network"
 msgstr ""
 
-#: wxOptionsDlg.cpp:438
+#: wxOptionsDlg.cpp:470
+#, fuzzy
 msgid ""
-"The following timeout values are used for TCP connections to\n"
-"remote mail or news servers. Their scope is global, but they\n"
-"will get set from the folder that has been opened last.\n"
+"The following timeout value is used for TCP connections to\n"
+"remote mail or news servers."
 msgstr ""
 "Seuraavia timeout-arvoja k‰ytet‰‰n TCP-yhteyksiss‰ et‰isiss‰\n"
 "posti- tai uutispalvelimissa. Niiden laajuus on globaali, mutta\n"
 "ne asetetaan kansiosta, joka on viimeksi ollut auki.\n"
 
-#: wxOptionsDlg.cpp:442
-msgid "&Open timeout"
+#: wxOptionsDlg.cpp:472
+#, fuzzy
+msgid "&Open timeout (in seconds)"
 msgstr "&Avaus timeout"
 
-#: wxOptionsDlg.cpp:443
+#: wxOptionsDlg.cpp:474
 msgid "&Read timeout"
 msgstr "&Luku timeout"
 
-#: wxOptionsDlg.cpp:444
+#: wxOptionsDlg.cpp:475
 msgid "&Write timeout"
 msgstr "&Kirjoitus timeout"
 
-#: wxOptionsDlg.cpp:445
+#: wxOptionsDlg.cpp:476
 msgid "&Close timeout"
 msgstr "&Sulje timeout"
 
-#: wxOptionsDlg.cpp:446
+#: wxOptionsDlg.cpp:477
 msgid "&rsh timeout"
 msgstr "&rsh timeout"
 
-#: wxOptionsDlg.cpp:450 wxOptionsDlg.cpp:489
+#: wxOptionsDlg.cpp:482 wxOptionsDlg.cpp:522
 msgid "Store outgoing messages and send only when asked to"
 msgstr ""
 
-#: wxOptionsDlg.cpp:452
+#: wxOptionsDlg.cpp:484
 #, fuzzy
 msgid "Folder where to store outgoing messages"
 msgstr "Kansio, johon Mahogany tallentaa kopiot l‰hetetyist‰ viesteist‰."
 
-#: wxOptionsDlg.cpp:455
+#: wxOptionsDlg.cpp:487
 msgid "Sa&ve sent messages"
 msgstr "&Tallenna l‰hetetyt viestit"
 
-#: wxOptionsDlg.cpp:456
+#: wxOptionsDlg.cpp:488
 msgid "&Folder file for sent messages"
 msgstr "Ka&nsio l‰hetetyille viesteille"
 
-#: wxOptionsDlg.cpp:458
+#: wxOptionsDlg.cpp:490
 msgid "&Wrap margin"
 msgstr "&Wrap margin"
 
-#: wxOptionsDlg.cpp:459
+#: wxOptionsDlg.cpp:491
+msgid "Wra&p lines automatically"
+msgstr ""
+
+#: wxOptionsDlg.cpp:492
 msgid "&Reply string in subject"
 msgstr "Vasta&ustunnus aihekent‰ss‰"
 
-#: wxOptionsDlg.cpp:460
+#: wxOptionsDlg.cpp:493
 msgid "Co&llapse reply markers:no:collapse:collapse & count"
 msgstr "Co&llapse reply markers:no:collapse:collapse & count"
 
-#: wxOptionsDlg.cpp:462
+#: wxOptionsDlg.cpp:495
 msgid "Quote &character"
 msgstr "Lainaus&merkki"
 
-#: wxOptionsDlg.cpp:464
+#: wxOptionsDlg.cpp:497
 msgid "&Use signature"
 msgstr "K‰&yt‰ allekirjoitusta"
 
-#: wxOptionsDlg.cpp:465
+#: wxOptionsDlg.cpp:498
 msgid "&Signature file"
 msgstr "Allek&irjoitus"
 
-#: wxOptionsDlg.cpp:466
+#: wxOptionsDlg.cpp:499
 msgid "Use signature se&parator"
 msgstr "K‰yt‰ allekirjoitus&eroitinta"
 
-#: wxOptionsDlg.cpp:467
+#: wxOptionsDlg.cpp:500
 #, fuzzy
 msgid "Configure &XFace..."
 msgstr "Muokkaa &otsikoita..."
 
-#: wxOptionsDlg.cpp:468
+#: wxOptionsDlg.cpp:501
 msgid "Mail alias substring ex&pansion"
 msgstr "Mail alias substring ex&pansion"
 
-#: wxOptionsDlg.cpp:470 wxOptionsDlg.cpp:531
+#: wxOptionsDlg.cpp:503 wxOptionsDlg.cpp:564
 msgid "Font famil&y:default:decorative:roman:script:swiss:modern:teletype"
 msgstr "&Kirjasinlaji:oletus:koriste:Roman:skripti:swiss:moderni:teletype"
 
-#: wxOptionsDlg.cpp:473 wxOptionsDlg.cpp:518 wxOptionsDlg.cpp:534
+#: wxOptionsDlg.cpp:506 wxOptionsDlg.cpp:550 wxOptionsDlg.cpp:567
 msgid "Font si&ze"
 msgstr "Kir&jasinkoko"
 
-#: wxOptionsDlg.cpp:474 wxOptionsDlg.cpp:519 wxOptionsDlg.cpp:535
+#: wxOptionsDlg.cpp:507 wxOptionsDlg.cpp:551 wxOptionsDlg.cpp:570
 msgid "Foreground c&olour"
 msgstr "Etuala&n v‰ri"
 
-#: wxOptionsDlg.cpp:475 wxOptionsDlg.cpp:520 wxOptionsDlg.cpp:536
+#: wxOptionsDlg.cpp:508 wxOptionsDlg.cpp:552
 msgid "Back&ground colour"
 msgstr "&Taka-alan v‰ri"
 
-#: wxOptionsDlg.cpp:477
+#: wxOptionsDlg.cpp:510
 msgid "Configure &headers..."
 msgstr "Muokkaa &otsikoita..."
 
-#: wxOptionsDlg.cpp:478
+#: wxOptionsDlg.cpp:511
 #, fuzzy
 msgid "Configure &templates..."
 msgstr "Muokkaa &otsikoita..."
 
-#: wxOptionsDlg.cpp:481
+#: wxOptionsDlg.cpp:514
 msgid "Folders to open on &startup"
 msgstr "&K‰ynnistyksess‰ avattavat kansiot"
 
-#: wxOptionsDlg.cpp:483
+#: wxOptionsDlg.cpp:516
 msgid "Folder opened in &main frame"
 msgstr "&P‰‰kehykseen avattava kansio"
 
-#: wxOptionsDlg.cpp:485
+#: wxOptionsDlg.cpp:518
 msgid "Poll for &new mail interval in seconds"
 msgstr "&Uusien viestien hakuaika (sekunteina)"
 
-#: wxOptionsDlg.cpp:486
+#: wxOptionsDlg.cpp:519
 msgid "&Ping/check folder interval in seconds"
 msgstr "&Ping/tarkista kansio hakuaika (sekunteina)"
 
-#: wxOptionsDlg.cpp:487
+#: wxOptionsDlg.cpp:520
 msgid "&Automatically select first message in viewer"
 msgstr "&Valitse ensimm‰inen viesti automagic"
 
-#: wxOptionsDlg.cpp:488
+#: wxOptionsDlg.cpp:521
 msgid "&Threshold for displaying progress dialog"
 msgstr "&Prosessi-ikkunan avauskynnys"
 
-#: wxOptionsDlg.cpp:491
+#: wxOptionsDlg.cpp:524
 #, fuzzy
 msgid "Folder where to store &outgoing messages"
 msgstr "Kansio, johon Mahogany tallentaa kopiot l‰hetetyist‰ viesteist‰."
 
-#: wxOptionsDlg.cpp:493
+#: wxOptionsDlg.cpp:526
 #, fuzzy
 msgid "Move &deleted messages to Trash folder"
 msgstr "Siirr‰ viesti toiseen kansioon"
 
-#: wxOptionsDlg.cpp:494
+#: wxOptionsDlg.cpp:527
 #, fuzzy
 msgid "&Trash folder name"
 msgstr "Kansion nimi"
 
-#: wxOptionsDlg.cpp:499
+#: wxOptionsDlg.cpp:532
 msgid "Python is the built-in scripting language which can be\n"
 msgstr "Python on sis‰‰nrakennettu skriptauskieli jota voidaan\n"
 
-#: wxOptionsDlg.cpp:500
+#: wxOptionsDlg.cpp:533
 msgid "used to extend Mahogany's functionality. It is not essential\n"
 msgstr "k‰ytt‰‰ laajentamaan Mahoganyn toimivuutta. Se ei ole v‰ltt‰m‰tˆn\n"
 
-#: wxOptionsDlg.cpp:501
+#: wxOptionsDlg.cpp:534
 msgid "for the program's normal operation."
 msgstr "ohjelman toimimisen kannalta."
 
-#: wxOptionsDlg.cpp:502
+#: wxOptionsDlg.cpp:535
 msgid "&Enable Python"
 msgstr "&Aktivoi Python"
 
-#: wxOptionsDlg.cpp:503
+#: wxOptionsDlg.cpp:536
 msgid "Python &Path"
 msgstr "Pythonin &polku"
 
-#: wxOptionsDlg.cpp:504
+#: wxOptionsDlg.cpp:537
 msgid "&Startup script"
 msgstr "&K‰ynnistysskripti"
 
-#: wxOptionsDlg.cpp:505
+#: wxOptionsDlg.cpp:538
 msgid "&Folder open callback"
 msgstr "&Kansion avaus (?)"
 
-#: wxOptionsDlg.cpp:506
+#: wxOptionsDlg.cpp:539
 msgid "Folder &update callback"
 msgstr "Kansion &p‰ivitys (?)"
 
-#: wxOptionsDlg.cpp:507
+#: wxOptionsDlg.cpp:540
 msgid "Folder e&xpunge callback"
 msgstr "Kansion p&oisto (?)"
 
-#: wxOptionsDlg.cpp:508
+#: wxOptionsDlg.cpp:541
 msgid "Flag &set callback"
 msgstr "Viestin &tilan asetus (?)"
 
-#: wxOptionsDlg.cpp:509
+#: wxOptionsDlg.cpp:542
 msgid "Flag &clear callback"
 msgstr "Viestin t&ilan tyhjennys (?)"
 
-#: wxOptionsDlg.cpp:513
-#, fuzzy
-msgid "&Configure filters..."
-msgstr "Muokkaa &otsikoita..."
-
-#: wxOptionsDlg.cpp:514
+#: wxOptionsDlg.cpp:546
 msgid "Preview message when &selected"
 msgstr "&Esikatsele valittu viesti"
 
-#: wxOptionsDlg.cpp:515
+#: wxOptionsDlg.cpp:547
 msgid "&Font family:default:decorative:roman:script:swiss:modern:teletype"
 msgstr "&Kirjasinlaji:oletus:koriste:Roman:skripti:swiss:moderni:teletype"
 
-#: wxOptionsDlg.cpp:521
+#: wxOptionsDlg.cpp:553
 msgid "Colour for &URLs"
 msgstr "&URLn v‰ri"
 
-#: wxOptionsDlg.cpp:522
+#: wxOptionsDlg.cpp:554
 msgid "Colour for header &names"
 msgstr "Otsikkonimien &v‰ri"
 
-#: wxOptionsDlg.cpp:523
+#: wxOptionsDlg.cpp:555
 msgid "Colour for header &values"
 msgstr "O&tsikkoarvojen v‰ri"
 
-#: wxOptionsDlg.cpp:524
+#: wxOptionsDlg.cpp:556
 msgid "&Inline graphics"
 msgstr "&Inline grafiikka"
 
-#: wxOptionsDlg.cpp:526
+#: wxOptionsDlg.cpp:557
+#, fuzzy
+msgid "Display &mail messages as text"
+msgstr "Viestiteksti"
+
+#: wxOptionsDlg.cpp:559
 msgid "Support special &fax mailers"
 msgstr "&Fax-viestimien tuki"
 
-#: wxOptionsDlg.cpp:527
+#: wxOptionsDlg.cpp:560
 msgid "&Domains sending faxes"
 msgstr "Faxeja l‰hett‰v‰t &domainit"
 
-#: wxOptionsDlg.cpp:529
+#: wxOptionsDlg.cpp:562
 msgid "The following settings are for the list of messages."
 msgstr ""
 
-#: wxOptionsDlg.cpp:537
+#: wxOptionsDlg.cpp:568
+msgid "Show only sender's name, not &e-mail"
+msgstr ""
+
+#: wxOptionsDlg.cpp:571
+#, fuzzy
+msgid "&Backgroud colour"
+msgstr "&Taka-alan v‰ri"
+
+#: wxOptionsDlg.cpp:572
+#, fuzzy
+msgid "Colour for &new message"
+msgstr "Kirjoita uusi viesti"
+
+#: wxOptionsDlg.cpp:573
+#, fuzzy
+msgid "Colour for &recent messages"
+msgstr "Ka&nsio l‰hetetyille viesteille"
+
+#: wxOptionsDlg.cpp:574
+#, fuzzy
+msgid "Colour for u&nread messages"
+msgstr "Otsikkonimien &v‰ri"
+
+#: wxOptionsDlg.cpp:575
+#, fuzzy
+msgid "Colour for &deleted messages"
+msgstr "Ka&nsio l‰hetetyille viesteille"
+
+#: wxOptionsDlg.cpp:576
 msgid ""
 "The following settings allow to limit the amount of data\n"
 "retrieved from remote server: if the message size or\n"
@@ -3301,28 +3684,28 @@ msgstr ""
 "t‰ss‰ m‰‰ritelty arvo, ohjelma kysyy ennen datasiirtoa,\n"
 "haluatko vastaanottaa."
 
-#: wxOptionsDlg.cpp:542
+#: wxOptionsDlg.cpp:581
 msgid "Maximum size of &message (in Kb)"
 msgstr "&Viestin suurin koko (KBytes)"
 
-#: wxOptionsDlg.cpp:544
+#: wxOptionsDlg.cpp:583
 msgid "Maximum &number of messages"
 msgstr "V&iestien suurin m‰‰r‰"
 
-#: wxOptionsDlg.cpp:545
+#: wxOptionsDlg.cpp:584
 msgid "Configure &headers to show..."
 msgstr "&Aseta otsikot n‰ytt‰m‰‰n..."
 
-#: wxOptionsDlg.cpp:546
+#: wxOptionsDlg.cpp:585
 #, fuzzy
 msgid "&Sort messages by..."
 msgstr "ei viestej‰"
 
-#: wxOptionsDlg.cpp:547
+#: wxOptionsDlg.cpp:586
 msgid "Configure &format for displaying dates"
 msgstr ""
 
-#: wxOptionsDlg.cpp:551
+#: wxOptionsDlg.cpp:589
 msgid ""
 "Mahogany may automatically remember all e-mail addresses in the messages "
 "you\n"
@@ -3333,19 +3716,19 @@ msgstr ""
 "osoitekirjaan. T‰t‰ kutsutaan 'automaattiseksi osoitteenkeruuksi ja t‰ll‰\n"
 "sivulla voi m‰‰ritell‰ sen tilan (on/off)."
 
-#: wxOptionsDlg.cpp:555
+#: wxOptionsDlg.cpp:593
 msgid "&Autocollect addresses"
 msgstr "&Ker‰‰ osoitteet automaattisesti"
 
-#: wxOptionsDlg.cpp:556
+#: wxOptionsDlg.cpp:594
 msgid "Address &book to use"
 msgstr "&Osoitekirjan valinta"
 
-#: wxOptionsDlg.cpp:557
+#: wxOptionsDlg.cpp:595
 msgid "Ignore addresses without &names"
 msgstr "O&hita osoitteet, joissa ei ole nimi‰"
 
-#: wxOptionsDlg.cpp:558
+#: wxOptionsDlg.cpp:596
 msgid ""
 "The following settings configure the support of the Big Brother\n"
 "addressbook (BBDB) format. This is supported only for compatibility\n"
@@ -3358,76 +3741,81 @@ msgstr ""
 "Tavallinen\n"
 "osoitekirja s‰ilyy koskemattomana, vaikka k‰ytt‰isit BBDB-tukea."
 
-#: wxOptionsDlg.cpp:562
+#: wxOptionsDlg.cpp:600
 msgid "&Ignore entries without names"
 msgstr "Oh&ita kohdat, joissa ei ole nimi‰"
 
-#: wxOptionsDlg.cpp:563
+#: wxOptionsDlg.cpp:601
 msgid "&Generate unique aliases"
 msgstr "&Luo yksilˆllisi‰ aliaksia"
 
-#: wxOptionsDlg.cpp:564
+#: wxOptionsDlg.cpp:602
 msgid "&Name for nameless entries"
 msgstr "&Nimettˆmien kohtien nimi"
 
-#: wxOptionsDlg.cpp:565
+#: wxOptionsDlg.cpp:603
 msgid "&Save on exit"
 msgstr "&Tallenna poistuessa"
 
-#: wxOptionsDlg.cpp:568
+#: wxOptionsDlg.cpp:606
 msgid "The following program will be used to open URLs embedded in messages:"
 msgstr "Seuraavaa ohjelmaa k‰ytet‰‰n avaamaan URL-osoitteita viesteiss‰:"
 
-#: wxOptionsDlg.cpp:569
+#: wxOptionsDlg.cpp:607
 msgid "Open &URLs with"
 msgstr "&Avaa URL-osoitteet"
 
-#: wxOptionsDlg.cpp:570
+#: wxOptionsDlg.cpp:608
 msgid "URL &browser is Netscape"
 msgstr "URL-selain on &Netscape"
 
-#: wxOptionsDlg.cpp:571
+#: wxOptionsDlg.cpp:609
 msgid "The following program will be used to view the online help system:"
 msgstr "Seuraavaa ohjelmaa k‰ytet‰‰n online help-j‰rjestelm‰n katseluun:"
 
-#: wxOptionsDlg.cpp:572
+#: wxOptionsDlg.cpp:610
 msgid "&Help viewer"
 msgstr "&Help-katseluohjelma"
 
-#: wxOptionsDlg.cpp:573
+#: wxOptionsDlg.cpp:611
 msgid "Help &viewer is Netscape"
 msgstr "Help-katseluohjelma on Net&Scape"
 
-#: wxOptionsDlg.cpp:576
+#: wxOptionsDlg.cpp:614
 msgid "&Image format converter"
 msgstr "&Grafiikkaformaatin muunnin"
 
-#: wxOptionsDlg.cpp:577
+#: wxOptionsDlg.cpp:615
 #, fuzzy
 msgid "Conversion &graphics format:XPM:PNG:BMP:JPG:GIF:PCX:PNM"
 msgstr "Grafiikkaformaatti:XPM:PNG:BMP:JPG"
 
-#: wxOptionsDlg.cpp:580
+#: wxOptionsDlg.cpp:618
 msgid "The following line will be executed each time new mail is received:"
 msgstr "Seuraava rivi ajetaan aina kun uusia viestej‰ otetaan vastaan:"
 
-#: wxOptionsDlg.cpp:581
+#: wxOptionsDlg.cpp:619
 msgid "&New Mail Command"
 msgstr "&New Mail komento"
 
-#: wxOptionsDlg.cpp:584
+#: wxOptionsDlg.cpp:622
 msgid "Show &log window"
 msgstr "&N‰yt‰ loki-ikkuna"
 
-#: wxOptionsDlg.cpp:585
+#: wxOptionsDlg.cpp:623
+#, fuzzy
+msgid "Show &tips at startup"
+msgstr "&Splash screen k‰ynnistyksess‰"
+
+#: wxOptionsDlg.cpp:624
 msgid "&Splash screen at startup"
 msgstr "&Splash screen k‰ynnistyksess‰"
 
-#: wxOptionsDlg.cpp:586
+#: wxOptionsDlg.cpp:625
 msgid "Splash screen &delay"
 msgstr "Splash screen viive"
 
-#: wxOptionsDlg.cpp:587
+#: wxOptionsDlg.cpp:626
 msgid ""
 "If autosave delay is not 0, the program will periodically\n"
 "save all unsaved information which reduces the risk of loss\n"
@@ -3437,55 +3825,56 @@ msgstr ""
 "kaiken tallentamattoman tiedon ajoittain. T‰m‰ v‰hent‰‰ tiedon\n"
 "h‰vi‰misen riski‰."
 
-#: wxOptionsDlg.cpp:590
+#: wxOptionsDlg.cpp:629
 msgid "&Autosave delay"
 msgstr "&Automaattisen tallennuksen viive"
 
-#: wxOptionsDlg.cpp:591
+#: wxOptionsDlg.cpp:630
 msgid "Confirm &exit"
 msgstr "&Varmista poistuminen"
 
-#: wxOptionsDlg.cpp:592
+#: wxOptionsDlg.cpp:631
 msgid "Open folder on single &click"
 msgstr "Avaa &kansio yhdell‰ klikkauksella"
 
-#: wxOptionsDlg.cpp:593
+#: wxOptionsDlg.cpp:632
+msgid "Show &hidden folders in the folder tree"
+msgstr ""
+
+#: wxOptionsDlg.cpp:633
 msgid "Show new mail &notifications"
 msgstr "&N‰yt‰ ilmoitus uusista viesteist‰"
 
-#: wxOptionsDlg.cpp:595
+#: wxOptionsDlg.cpp:635
 msgid "&Path where to find AFM files"
 msgstr "AFM-tiedostojen &polku"
 
-#: wxOptionsDlg.cpp:596
-msgid "Use &detachable tear-off menus"
-msgstr ""
-
-#: wxOptionsDlg.cpp:597
+#: wxOptionsDlg.cpp:636
 msgid "&Focus follows mouse"
 msgstr ""
 
-#: wxOptionsDlg.cpp:599
+#: wxOptionsDlg.cpp:638
 msgid "Use floating &menu-bars"
 msgstr ""
 
-#: wxOptionsDlg.cpp:600
+#: wxOptionsDlg.cpp:639
 msgid "Use floating &tool-bars"
 msgstr ""
 
-#: wxOptionsDlg.cpp:601
+#: wxOptionsDlg.cpp:640
 msgid "Tool-bars with f&lat buttons"
 msgstr ""
 
-#: wxOptionsDlg.cpp:603
-msgid "&Icon style:default:GNOME:KDE:small"
-msgstr ""
+#: wxOptionsDlg.cpp:641
+#, fuzzy
+msgid "&Reenable disabled message boxes..."
+msgstr "Tallennetaan %d viesti‰..."
 
-#: wxOptionsDlg.cpp:1261
+#: wxOptionsDlg.cpp:1312
 msgid "Compose"
 msgstr "Kirjoita"
 
-#: wxOptionsDlg.cpp:1331
+#: wxOptionsDlg.cpp:1382
 #, c-format
 msgid ""
 "You set the name of the outbox for temporarily storing messages\n"
@@ -3494,65 +3883,65 @@ msgid ""
 "only a single outbox, the value has been restored to be ¥%s¥."
 msgstr ""
 
-#: wxOptionsDlg.cpp:1349
+#: wxOptionsDlg.cpp:1400
 msgid "Message Viewer"
 msgstr "Viestin n‰yttˆ"
 
-#: wxOptionsDlg.cpp:1393
+#: wxOptionsDlg.cpp:1439
 msgid "Identity"
 msgstr "Henkilˆllisyys"
 
-#: wxOptionsDlg.cpp:1408
+#: wxOptionsDlg.cpp:1454
 msgid "Network"
 msgstr "Verkko"
 
-#: wxOptionsDlg.cpp:1425
+#: wxFiltersDialog.cpp:233 wxFiltersDialog.cpp:553 wxOptionsDlg.cpp:1471
 msgid "Python"
 msgstr "Python"
 
-#: wxOptionsDlg.cpp:1443
+#: wxOptionsDlg.cpp:1489
 #, fuzzy
 msgid "Addressbook"
 msgstr "Osoitekirja"
 
-#: wxOptionsDlg.cpp:1459
+#: wxOptionsDlg.cpp:1505
 msgid "Miscellaneous"
 msgstr "Sekalainen"
 
-#: wxOptionsDlg.cpp:1500
+#: wxOptionsDlg.cpp:1564
 msgid "Invalid delay value for autosave timer."
 msgstr "Virheellinen viivearvo automaattiselle tallennukselle."
 
-#: wxOptionsDlg.cpp:1517
+#: wxOptionsDlg.cpp:1581
 msgid "Helpers"
 msgstr "Helperit"
 
-#: wxOptionsDlg.cpp:1532
+#: wxOptionsDlg.cpp:1596
 msgid "Folders"
 msgstr "Kansiot"
 
-#: wxOptionsDlg.cpp:1596
+#: wxOptionsDlg.cpp:1660
 msgid "Failed to restart the timers, please change the delay to a valid value."
 msgstr "Ajastimien nollaus ep‰onnistui, vaihda viive kelpaavaksi arvoksi."
 
-#: wxOptionsDlg.cpp:1627
+#: wxOptionsDlg.cpp:1689
 msgid "Folders to open on startup"
 msgstr "K‰ynnistyksess‰ avattavat kansiot"
 
-#: wxOptionsDlg.cpp:1627
+#: wxOptionsDlg.cpp:1689
 msgid "Folder name"
 msgstr "Kansion nimi"
 
-#: wxOptionsDlg.cpp:1635
+#: wxOptionsDlg.cpp:1697
 #, c-format
 msgid "Folder '%s' is already present in the list, not added."
 msgstr "Kansio '%s' on jo olemassa luettelossa, ei lis‰tty."
 
-#: wxOptionsDlg.cpp:1690
+#: wxOptionsDlg.cpp:1752
 msgid "Program options"
 msgstr "Ohjelman asetukset"
 
-#: wxOptionsDlg.cpp:1713
+#: wxOptionsDlg.cpp:1775
 msgid ""
 "Some important program settings were changed.\n"
 "\n"
@@ -3562,11 +3951,11 @@ msgstr ""
 "\n"
 "Haluatko testata uudet asetukset nyt (suositeltavaa)?"
 
-#: wxOptionsDlg.cpp:1717
+#: wxOptionsDlg.cpp:1779
 msgid "Test setup?"
 msgstr "Testaa asetukset?"
 
-#: wxOptionsDlg.cpp:1735
+#: wxOptionsDlg.cpp:1797
 msgid ""
 "Some of the changes to the program options will\n"
 "only take effect when the progam will be run the\n"
@@ -3576,15 +3965,15 @@ msgstr ""
 "vasta k‰ynnist‰ess‰si ohjelman uudelleen. Ne eiv‰t\n"
 "ole voimassa viel‰ t‰ss‰ istunnossa."
 
-#: wxOptionsDlg.cpp:1864
+#: wxOptionsDlg.cpp:1931
 msgid "Restore default options"
 msgstr "Palauta alkuper‰iset asetukset"
 
-#: wxOptionsDlg.cpp:1870
+#: wxOptionsDlg.cpp:1937
 msgid "&All settings"
 msgstr "&Kaikki asetukset"
 
-#: wxOptionsDlg.cpp:1877
+#: wxOptionsDlg.cpp:1944
 msgid ""
 "Please check the settings whose values\n"
 "should be reset to the defaults."
@@ -3592,41 +3981,48 @@ msgstr ""
 "Tarkista asetukset, joiden arvot tulisi\n"
 "palauttaa oletusarvoiksi."
 
-#: wxFolderTree.cpp:239
-msgid "Folder '"
-msgstr "Kansio '"
-
-#: wxFolderTree.cpp:246
+#: wxFolderTree.cpp:278
 msgid "Create &new folder..."
 msgstr "&Luo uusi kansio..."
 
-#: wxFolderTree.cpp:247
+#: wxFolderTree.cpp:281
+#, fuzzy
+msgid "&Remove folder"
+msgstr "&Nime‰ kansio uudelleen..."
+
+#: wxFolderTree.cpp:282
 msgid "&Delete folder"
 msgstr "&Poista kansio"
 
-#: wxFolderTree.cpp:248
-msgid "&Rename folder..."
+#: wxFolderTree.cpp:284
+#, fuzzy
+msgid "Re&name folder..."
 msgstr "&Nime‰ kansio uudelleen..."
 
-#: wxFolderTree.cpp:252
+#: wxFolderTree.cpp:288
 #, fuzzy
 msgid "Browse &subfolders..."
 msgstr "Selaa kansiota"
 
-#: wxFolderTree.cpp:256
+#: wxFolderTree.cpp:294
+#, fuzzy
+msgid "Show &hidden folders"
+msgstr "&N‰yt‰ otsikko"
+
+#: wxFolderTree.cpp:298
 msgid "&Properties"
 msgstr "&Asetukset"
 
-#: wxFolderTree.cpp:487
-#, c-format
-msgid "You cannot delete the '%s' folder.\n"
-msgstr "Et voi poistaa kansiota '%s'.\n"
+#: wxFolderTree.cpp:558
+#, fuzzy, c-format
+msgid "The folder '%s' is used by Mahogany and cannot be deleted"
+msgstr "P‰‰kansiota ei voida poistaa."
 
-#: wxFolderTree.cpp:493
+#: wxFolderTree.cpp:565
 msgid "The root folder can not be deleted."
 msgstr "P‰‰kansiota ei voida poistaa."
 
-#: wxFolderTree.cpp:502
+#: wxFolderTree.cpp:577
 #, c-format
 msgid ""
 "Do you really want to delete folder '%s' and all of its\n"
@@ -3636,163 +4032,204 @@ msgstr ""
 "Haluatko poistaa kansion '%s' ja kaikki sen alakansiot?\n"
 "Poistettujen kansioiden asetukset tuhoutuvat lopullisesti!"
 
-#: wxFolderTree.cpp:509
+#: wxFolderTree.cpp:583
+#, fuzzy, c-format
+msgid ""
+"Do you really want to delete folder '%s' and all of its\n"
+"subfolders? All messages contained in them will be permanently lost!"
+msgstr ""
+"Haluatko poistaa kansion '%s' ja kaikki sen alakansiot?\n"
+"Poistettujen kansioiden asetukset tuhoutuvat lopullisesti!"
+
+#: wxFolderTree.cpp:593
 #, c-format
 msgid "Do you really want to delete folder '%s'?"
 msgstr "Haluatko poistaa kansion '%s'?"
 
-#: wxFolderTree.cpp:545
+#: wxFolderTree.cpp:599
+#, fuzzy, c-format
+msgid ""
+"Do you really want to delete folder '%s' with\n"
+"all the messages contained in it?"
+msgstr "Haluatko poistaa kansion '%s'?"
+
+#: wxFolderTree.cpp:616
+#, fuzzy
+msgid "The folder must be closed before it can be deleted."
+msgstr "P‰‰kansiota ei voida poistaa."
+
+#: wxFolderTree.cpp:624
+#, fuzzy, c-format
+msgid "Failed to physically delete folder '%s'."
+msgstr "Tekstitiedosto '%s' lis‰ys ep‰onnistui."
+
+#: wxFolderTree.cpp:664 wxFolderTree.cpp:743
 msgid "All folders"
 msgstr "Kaikki kansiot"
 
-#: wxFolderTree.cpp:720
+#: wxFolderTree.cpp:863
 msgid "Please select the folder to delete first."
 msgstr "Valitse ensiksi poistettava kansio."
 
-#: wxFolderTree.cpp:729
-#, c-format
-msgid "Folder '%s' deleted"
-msgstr "Kansio '%s' poistettu"
+#: wxFolderTree.cpp:882
+#, fuzzy, c-format
+msgid "Folder '%s' %s"
+msgstr "Kansio '%s'"
 
-#: wxFolderTree.cpp:839
+#: wxFolderTree.cpp:884
+msgid "removed from the tree"
+msgstr ""
+
+#: wxFolderTree.cpp:885
+#, fuzzy
+msgid "deleted"
+msgstr "Poista"
+
+#: wxFolderTree.cpp:1006
 msgid "Cannot open this folder."
 msgstr "Kansion avaus ep‰onnistui."
 
-#: persctrl.cpp:1182 wxDialogLayout.cpp:583
+#: persctrl.cpp:1406 wxDialogLayout.cpp:596
 msgid "No"
 msgstr "Ei"
 
-#: wxDialogLayout.cpp:584
+#: wxDialogLayout.cpp:597
 msgid "Ask"
 msgstr "Kysy"
 
-#: persctrl.cpp:1181 wxDialogLayout.cpp:585
+#: persctrl.cpp:1405 wxDialogLayout.cpp:598
 msgid "Yes"
 msgstr "Kyll‰"
 
-#: wxDialogLayout.cpp:1005
-msgid "&OK"
-msgstr "&OK"
-
-#: AdbFrame.cpp:1092 wxDialogLayout.cpp:1014
-msgid "&Cancel"
-msgstr "&Peruuta"
-
-#: wxDialogLayout.cpp:1022
+#: wxDialogLayout.cpp:1037
 msgid "&Apply"
 msgstr "&Aseta"
 
-#: wxMFolderDialogs.cpp:539
+#: wxMFolderDialogs.cpp:585
 msgid "Folder Name: "
 msgstr "Kansion nimi:"
 
-#: wxMFolderDialogs.cpp:575
+#: wxMFolderDialogs.cpp:621
 msgid "Parent folder: "
 msgstr "Yl‰kansio:"
 
-#: wxMFolderDialogs.cpp:675
+#: wxMFolderDialogs.cpp:721
 msgid "Create new folder"
 msgstr "Luo uusi kansio"
 
-#: wxMFolderDialogs.cpp:783
+#: wxMFolderDialogs.cpp:842
+#, c-format
+msgid ""
+"Sorry, international characters (like '%c') are not supported in the mailbox "
+"folder names, please don't use them."
+msgstr ""
+
+#: wxMFolderDialogs.cpp:873
 msgid "Folder properties"
 msgstr "Kansion asetukset"
 
-#: wxMFolderDialogs.cpp:824
+#: wxMFolderDialogs.cpp:914
 msgid "Access"
 msgstr "Oikeus"
 
-#: wxMFolderDialogs.cpp:852
-msgid "INBOX"
-msgstr "INBOX"
-
-#: wxMFolderDialogs.cpp:853
+#: wxMFolderDialogs.cpp:935
 msgid "File"
 msgstr "Tiedosto"
 
-#: wxMFolderDialogs.cpp:854
+#: wxMFolderDialogs.cpp:936
 msgid "POP3"
 msgstr "POP3"
 
-#: wxMFolderDialogs.cpp:855
+#: wxMFolderDialogs.cpp:937
 msgid "IMAP"
 msgstr "IMAP"
 
-#: wxMFolderDialogs.cpp:856
-msgid "NNTP"
-msgstr "NNTP"
-
-#: wxMFolderDialogs.cpp:857
+#: wxMFolderDialogs.cpp:938
 msgid "News"
 msgstr "News"
 
-#: AdbFrame.cpp:3567 wxMFolderDialogs.cpp:861
+#: AdbFrame.cpp:3656 wxMFolderDialogs.cpp:939
 msgid "Group"
 msgstr "Ryhm‰"
 
-#: wxMFolderDialogs.cpp:864
-msgid "Folder Type"
+#: wxMFolderDialogs.cpp:941
+#, fuzzy
+msgid "Folder &Type"
 msgstr "Kansiotyyppi"
 
-#: wxMFolderDialogs.cpp:903
+#: wxMFolderDialogs.cpp:983
 msgid "&User name: "
 msgstr "&K‰ytt‰j‰nimi: "
 
-#: wxMFolderDialogs.cpp:904
+#: wxMFolderDialogs.cpp:984
 msgid "&Password: "
 msgstr "&Salasana: "
 
-#: wxMFolderDialogs.cpp:905
+#: wxMFolderDialogs.cpp:985
 msgid "&File name: "
 msgstr "&Tiedostonimi: "
 
-#: wxMFolderDialogs.cpp:906
+#: wxMFolderDialogs.cpp:986
 msgid "&Server: "
 msgstr "&Palvelin: "
 
-#: wxMFolderDialogs.cpp:907
+#: wxMFolderDialogs.cpp:987
 msgid "&Mailbox: "
 msgstr "&Kansio: "
 
-#: wxMFolderDialogs.cpp:908
+#: wxMFolderDialogs.cpp:988
 msgid "&Newsgroup: "
 msgstr "&Uutisryhm‰: "
 
-#: wxMFolderDialogs.cpp:909
+#: wxMFolderDialogs.cpp:989
 msgid "&Comment: "
 msgstr "&Kommentti: "
 
-#: wxMFolderDialogs.cpp:910
+#: wxMFolderDialogs.cpp:990
 msgid "C&ollect all mail from this folder: "
 msgstr "K&er‰‰ kaikki viestit kansiosta: "
 
-#: wxMFolderDialogs.cpp:911
+#: wxMFolderDialogs.cpp:991
 msgid "&Keep folder always open: "
 msgstr "P&id‰ kansio aina avoinna: "
 
-#: wxMFolderDialogs.cpp:912
+#: wxMFolderDialogs.cpp:992
 msgid "Force &re-open on ping: "
 msgstr ""
 
-#: wxMFolderDialogs.cpp:913
-msgid "&Anonymous access: "
+#: wxMFolderDialogs.cpp:993
+#, fuzzy
+msgid "Anon&ymous access: "
 msgstr "&Anonymous oikeus: "
 
-#: wxMFolderDialogs.cpp:914
+#: wxMFolderDialogs.cpp:995
+msgid "Use &Secure Sockets Layer (SSL): "
+msgstr ""
+
+#: wxMFolderDialogs.cpp:998
 msgid "Folder can be accessed &without network "
 msgstr ""
 
-#: wxMFolderDialogs.cpp:915
+#: wxMFolderDialogs.cpp:1000
+msgid "&Hide folder in tree"
+msgstr ""
+
+#: wxMFolderDialogs.cpp:1001
+#, fuzzy
+msgid "Is &directory: "
+msgstr "&IMAP palvelin"
+
+#: wxMFolderDialogs.cpp:1002
 #, fuzzy
 msgid "Folder sub&type "
 msgstr "Kansiotyyppi"
 
-#: wxMFolderDialogs.cpp:916
+#: wxMFolderDialogs.cpp:1003
 #, fuzzy
 msgid "&Icon for this folder: "
 msgstr "Kansion kuvake:"
 
-#: wxMFolderDialogs.cpp:947
+#: wxMFolderDialogs.cpp:1048
 msgid ""
 "Tick this box if Mahogany appears to have problems updating the folder "
 "listing.\n"
@@ -3800,12 +4237,32 @@ msgid ""
 "Normally this is not needed."
 msgstr ""
 
-#: wxMFolderDialogs.cpp:957
+#: wxMFolderDialogs.cpp:1052
+msgid ""
+"For the types of folders which require user name and password check this to "
+"try to connect\n"
+"without any - this might work or fail depending on the server settings."
+msgstr ""
+
+#: wxMFolderDialogs.cpp:1057
+msgid ""
+"This will use SSL authentication and encryption\n"
+"for communication with the server."
+msgstr ""
+
+#: wxMFolderDialogs.cpp:1060
+msgid ""
+"Some folders are like directories and may only contain other folders and not "
+"the messages.\n"
+"Check this to create a folder of this kind."
+msgstr ""
+
+#: wxMFolderDialogs.cpp:1069
 #, fuzzy
 msgid "Choose folder icon"
 msgstr "Valitse kansion kuvake"
 
-#: wxMFolderDialogs.cpp:1179
+#: wxMFolderDialogs.cpp:1281
 #, fuzzy
 msgid ""
 "All the fields shown in this dialog have a slightly different\n"
@@ -3819,49 +4276,44 @@ msgstr ""
 "tyyppisille kansioille. N‰it‰ arvoja k‰ytet‰‰n oletusarvoina kaikille\n"
 "kansioille, jotka luodaan t‰m‰n ryhm‰kansion alle."
 
-#: wxMFolderDialogs.cpp:1185
+#: wxMFolderDialogs.cpp:1287
 #, fuzzy
 msgid "Group folders hint"
 msgstr "Ryhm‰kansiovihje"
 
-#: wxMFolderDialogs.cpp:1331
+#: wxMFolderDialogs.cpp:1444
 #, fuzzy
 msgid "MBOX folder"
 msgstr "Avaa kansio"
 
-#: wxMFolderDialogs.cpp:1332
+#: wxMFolderDialogs.cpp:1445
 #, fuzzy
 msgid "MH folder"
 msgstr "kansiossa '"
 
-#: wxMFolderDialogs.cpp:1339
+#: wxMFolderDialogs.cpp:1450
 #, fuzzy
-msgid "Simple group"
-msgstr "ryhm‰ss‰ '"
+msgid "NNTP group (remote server)"
+msgstr "&NNTP (Usenet-News) palvelin"
 
-#: wxMFolderDialogs.cpp:1340
-msgid "News hierarchy"
+#: wxMFolderDialogs.cpp:1451
+msgid "News group (local newsspool)"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:1341
-#, fuzzy
-msgid "IMAP directory"
-msgstr "&IMAP palvelin"
-
-#: wxMFolderDialogs.cpp:1697
+#: wxMFolderDialogs.cpp:1886
 #, fuzzy, c-format
 msgid "Impossible to create MH folder '%s'."
 msgstr "Valittu kansio '%s'."
 
-#: wxMFolderDialogs.cpp:1739
+#: wxMFolderDialogs.cpp:1938
 msgid "a login name"
 msgstr "login nimi"
 
-#: wxMFolderDialogs.cpp:1744
+#: wxMFolderDialogs.cpp:1943
 msgid "a password"
 msgstr "salasana"
 
-#: wxMFolderDialogs.cpp:1751
+#: wxMFolderDialogs.cpp:1950
 #, fuzzy, c-format
 msgid ""
 "You have not specified %s for this folder, although it requires one.\n"
@@ -3872,7 +4324,7 @@ msgstr ""
 "\n"
 "Haluatko tehd‰ sen nyt?"
 
-#: wxMFolderDialogs.cpp:1758
+#: wxMFolderDialogs.cpp:1957
 msgid ""
 "\n"
 "\n"
@@ -3886,39 +4338,39 @@ msgstr ""
 "Jos olet huolestunut turvallisuudesta, j‰t‰ kentt‰ tyhj‰ksi ja Mahogany\n"
 "kysyy sinulta salasanaa tarvittaessa."
 
-#: wxMFolderDialogs.cpp:2020
+#: wxMFolderDialogs.cpp:2241
 msgid "Please choose a folder"
 msgstr "Valitse kansio"
 
-#: wxBrowseButton.cpp:160
+#: wxBrowseButton.cpp:142
 #, fuzzy
 msgid "Please choose a directory"
 msgstr "Valitse kohta:"
 
-#: wxBrowseButton.cpp:190
+#: wxBrowseButton.cpp:172
 #, fuzzy, c-format
 msgid "Browse for a %s"
 msgstr "Selaa kansiota"
 
-#: wxBrowseButton.cpp:190
+#: wxBrowseButton.cpp:172
 #, fuzzy
 msgid "file"
 msgstr "Tiedosto"
 
-#: wxBrowseButton.cpp:191
+#: wxBrowseButton.cpp:173
 msgid "directory"
 msgstr ""
 
-#: wxBrowseButton.cpp:202
+#: wxBrowseButton.cpp:184
 msgid "Browse for folder"
 msgstr "Selaa kansiota"
 
-#: wxBrowseButton.cpp:323
+#: wxBrowseButton.cpp:304
 #, fuzzy
 msgid "Choose icon"
 msgstr "Valitse kuvake"
 
-#: wxBrowseButton.cpp:478
+#: wxBrowseButton.cpp:396
 msgid "&Current icon"
 msgstr "&Nykyinen kuvake"
 
@@ -4040,10 +4492,6 @@ msgstr "&Muokkaa"
 msgid "Name"
 msgstr ""
 
-#: wxHeadersDialogs.cpp:970
-msgid "Value"
-msgstr ""
-
 #: wxTemplateDialog.cpp:186
 #, fuzzy
 msgid "Please choose a file"
@@ -4099,243 +4547,553 @@ msgid ""
 "save it?"
 msgstr "Viestill‰si ei ole aihetta, haluatko muuttaa sit‰?"
 
-#: wxModulesDlg.cpp:75
+#: wxModulesDlg.cpp:76
 #, fuzzy
 msgid "Extension Modules Configuration"
 msgstr "Testaan asetuksiasi"
 
-#: wxModulesDlg.cpp:87
+#: wxModulesDlg.cpp:88
 msgid "Available modules"
 msgstr ""
 
-#: wxModulesDlg.cpp:92
+#: wxModulesDlg.cpp:93
 msgid ""
 "The selected modules will be loaded\n"
 "into Mahogany at the next program start."
 msgstr ""
 
-#: wxModulesDlg.cpp:156
+#: wxModulesDlg.cpp:157
 msgid "Module: "
 msgstr ""
 
-#: wxModulesDlg.cpp:157
+#: wxModulesDlg.cpp:158
 msgid "Interface: "
 msgstr ""
 
 #: wxModulesDlg.cpp:159
+msgid "Version: "
+msgstr "Versio: "
+
+#: wxModulesDlg.cpp:160
 msgid "Author: "
 msgstr ""
 
-#: wxSubfoldersDialog.cpp:147
+#: wxModulesDlg.cpp:204
+msgid ""
+"Notice: any changes to the modules settings will only\n"
+"take effect the next time you start Mahogany."
+msgstr ""
+
+#: wxSubfoldersDialog.cpp:241
 #, fuzzy, c-format
 msgid "Subfolders of folder '%s'"
 msgstr "Valittu kansio '%s'."
 
-#: wxSubfoldersDialog.cpp:152
-#, fuzzy
-msgid "Subfolders"
-msgstr "Kansiot"
-
 #: wxSubfoldersDialog.cpp:250
+#, fuzzy
+msgid "&Find: "
+msgstr "&Etsi"
+
+#: wxSubfoldersDialog.cpp:283
+#, fuzzy
+msgid "Retrieving the folder list..."
+msgstr "&Nime‰ kansio uudelleen..."
+
+#: wxSubfoldersDialog.cpp:494
+#, fuzzy
+msgid "All subfolders"
+msgstr "Kaikki kansiot"
+
+#: wxSubfoldersDialog.cpp:583
+#, fuzzy, c-format
+msgid "%u subfolders"
+msgstr "Kaikki kansiot"
+
+#: wxSubfoldersDialog.cpp:593
 #, fuzzy
 msgid "No subfolders"
 msgstr "Kaikki kansiot"
 
-#: wxFiltersDialog.cpp:135
+#: wxSubfoldersDialog.cpp:763
+#, fuzzy, c-format
+msgid "Failed to create folder '%s'."
+msgstr "Valittu kansio '%s'."
+
+#: wxSubfoldersDialog.cpp:827
+#, c-format
+msgid ""
+"Impossible to browse subfolders of folder '%s' because the folder cannot be "
+"opened."
+msgstr ""
+
+#: wxFiltersDialog.cpp:97 wxFiltersDialog.cpp:1291
+msgid "unnamed"
+msgstr ""
+
+#: wxFiltersDialog.cpp:225
+#, fuzzy
+msgid "Always"
+msgstr "way "
+
+#: wxFiltersDialog.cpp:226
 msgid "Match"
 msgstr ""
 
-#: wxFiltersDialog.cpp:135
-msgid "Match substring"
+#: wxFiltersDialog.cpp:226
+msgid "Contains"
 msgstr ""
 
-#: wxFiltersDialog.cpp:136
+#: wxFiltersDialog.cpp:227
+msgid "Match Case"
+msgstr ""
+
+#: wxFiltersDialog.cpp:227
+msgid "Contains Case"
+msgstr ""
+
+#: wxFiltersDialog.cpp:228
 msgid "Match RegExp"
 msgstr ""
 
-#: wxFiltersDialog.cpp:136
+#: wxFiltersDialog.cpp:229
 #, fuzzy
 msgid "Larger than"
 msgstr "&Suurempi"
 
-#: wxFiltersDialog.cpp:137
+#: wxFiltersDialog.cpp:229
 #, fuzzy
 msgid "Smaller than"
 msgstr "&Pienempi"
 
-#: wxFiltersDialog.cpp:137
+#: wxFiltersDialog.cpp:230
 msgid "Older than"
 msgstr ""
 
-#: wxFiltersDialog.cpp:138
+#: wxFiltersDialog.cpp:230
+#, fuzzy
+msgid "Newer than"
+msgstr "&Suurempi"
+
+#: wxFiltersDialog.cpp:231
 msgid "Is SPAM"
 msgstr ""
 
-#: wxFiltersDialog.cpp:146
+#: wxFiltersDialog.cpp:261
 #, fuzzy
 msgid "in Subject"
 msgstr "Aihe"
 
-#: wxFiltersDialog.cpp:147
+#: wxFiltersDialog.cpp:262
 #, fuzzy
 msgid "in header"
 msgstr "&N‰yt‰ otsikko"
 
-#: wxFiltersDialog.cpp:148
+#: wxFiltersDialog.cpp:263
 #, fuzzy
 msgid "in From"
 msgstr "L‰hett‰j‰"
 
-#: wxFiltersDialog.cpp:149
+#: wxFiltersDialog.cpp:264
 msgid "in body"
 msgstr ""
 
-#: wxFiltersDialog.cpp:150
+#: wxFiltersDialog.cpp:265
 #, fuzzy
 msgid "in message"
 msgstr "Tulosta viesti"
 
-#: wxFiltersDialog.cpp:151
+#: wxFiltersDialog.cpp:266
 msgid "in To"
 msgstr ""
 
-#: wxFiltersDialog.cpp:168
+#: wxFiltersDialog.cpp:274
+msgid "or"
+msgstr ""
+
+#: wxFiltersDialog.cpp:275
+#, fuzzy
+msgid "and"
+msgstr "Laajenna"
+
+#: wxFiltersDialog.cpp:308 wxFiltersDialog.cpp:313
 #, fuzzy
 msgid "Not"
 msgstr "Ei"
 
-#: wxFiltersDialog.cpp:200
+#: wxFiltersDialog.cpp:547
 #, fuzzy
 msgid "Copy to"
 msgstr "&Kopioi"
 
-#: wxFiltersDialog.cpp:201
+#: wxFiltersDialog.cpp:548
 #, fuzzy
 msgid "Move to"
 msgstr "&Siirr‰ kansioon"
 
-#: wxFiltersDialog.cpp:203
+#: wxFiltersDialog.cpp:550
 #, fuzzy
 msgid "MessageBox"
 msgstr "&Viesti"
 
-#: wxFiltersDialog.cpp:204
+#: wxFiltersDialog.cpp:551
 #, fuzzy
 msgid "Log Entry"
 msgstr "Kohta"
 
-#: wxFiltersDialog.cpp:235
+#: wxFiltersDialog.cpp:712
+#, fuzzy
+msgid "More"
+msgstr "&Uusi..."
+
+#: wxFiltersDialog.cpp:712
+#, fuzzy
+msgid "Less"
+msgstr "Oikeus"
+
+#: wxFiltersDialog.cpp:717
 msgid "Filter rule"
 msgstr ""
 
-#: wxFiltersDialog.cpp:238
+#: wxFiltersDialog.cpp:725
 msgid "Filter Rule"
 msgstr ""
 
-#: wxFiltersDialog.cpp:255
-msgid "Filter Criteria"
+#: wxFiltersDialog.cpp:749
+#, fuzzy
+msgid "If Message..."
+msgstr "&Viesti"
+
+#: wxFiltersDialog.cpp:751
+msgid "Then do this:"
 msgstr ""
 
-#: wxFiltersDialog.cpp:276
-msgid "Action Rules"
-msgstr ""
-
-#: wxFiltersDialog.cpp:334
+#: wxFiltersDialog.cpp:943
 #, fuzzy
 msgid "New"
 msgstr "News"
 
-#: wxFiltersDialog.cpp:334
+#: wxFiltersDialog.cpp:943
 #, fuzzy
 msgid "Edit"
 msgstr "&Muokkaa"
 
-#: wxFiltersDialog.cpp:335
+#: wxFiltersDialog.cpp:944
 #, fuzzy
 msgid "Up"
 msgstr "&Ylˆs"
 
-#: wxFiltersDialog.cpp:335
+#: wxFiltersDialog.cpp:944
 #, fuzzy
 msgid "Down"
 msgstr "&Alas"
 
-#: wxFiltersDialog.cpp:385
-msgid "DO NOT USE - CODE UNDER DEVELOPMENT!!! Filter rules"
-msgstr ""
-
-#: wxFiltersDialog.cpp:390
-msgid "Filter Rules"
-msgstr ""
-
-#: wxFiltersDialog.cpp:450
+#: wxFiltersDialog.cpp:1019
 #, fuzzy
-msgid "New Filter"
+msgid "Configure Filter Rules"
+msgstr "Muokkaa &otsikoita..."
+
+#: wxFiltersDialog.cpp:1036
+#, fuzzy
+msgid "Filter Rules for folder: "
+msgstr "Otsikon arvo: "
+
+#: wxFiltersDialog.cpp:1041
+msgid "Filter Rules for: "
+msgstr ""
+
+#: wxWizards.cpp:257
+#, fuzzy
+msgid "Create a Mailbox Entry"
+msgstr "Luo uusi kohta"
+
+#: wxWizards.cpp:313
+msgid ""
+"This wizard will help you to set up\n"
+"a new mailbox entry.\n"
+"This can be either for an existing\n"
+"mailbox or mail account or for a new\n"
+"mailbox that you want to create.\n"
+"\n"
+"You may also use the check box below to\n"
+"bypass the wizard and create the folder\n"
+"by manually filling in the required\n"
+"parameters (for advanced users only!)"
+msgstr ""
+
+#: wxWizards.cpp:327
+msgid "don't use the wizard"
+msgstr ""
+
+#: wxWizards.cpp:378
+msgid ""
+"A mailbox entry can represent differnt\n"
+"things: a mailbox file, remote servers\n"
+"or mailboxes, newsgroups or news hierarchies\n"
+"either locally or on a remote server.\n"
+"\n"
+"So, first you need to decide what kind\n"
+"of entry you would like to create:"
+msgstr ""
+
+#: wxWizards.cpp:389
+#, fuzzy
+msgid "Mailbox type"
+msgstr "&Kansio: "
+
+#: wxWizards.cpp:395
+msgid ""
+"Entry type:Local Mailbox File:Local MH Folder:IMAP Mailbox:POP3 Mailbox:IMAP "
+"Server:NNTP News Server:IMAP Hierarchy:NNTP News Hierarchy:NNTP "
+"Newsgroup:Local News Hierarchy:Local Newsgroup:Folder Group"
+msgstr ""
+
+#: wxWizards.cpp:448
+#, fuzzy
+msgid "Mailbox name"
+msgstr "&Kansio: "
+
+#: wxWizards.cpp:449
+#, c-format
+msgid ""
+"To access %s\n"
+"the following access parameters\n"
+"are needed:\n"
+msgstr ""
+
+#: wxWizards.cpp:468
+#, fuzzy
+msgid "an IMAP mailbox"
+msgstr "Mahogany: Listaus"
+
+#: wxWizards.cpp:476
+msgid "a POP3 mailbox"
+msgstr ""
+
+#: wxWizards.cpp:483
+#, fuzzy
+msgid "a NNTP newsgroup"
+msgstr "Uutisryhm‰:"
+
+#: wxWizards.cpp:486 wxWizards.cpp:520
+#, fuzzy
+msgid "Newsgroup"
+msgstr "Uutisryhm‰:"
+
+#: wxWizards.cpp:490
+#, fuzzy
+msgid "an IMAP server"
+msgstr "&IMAP palvelin"
+
+#: wxWizards.cpp:497
+#, fuzzy
+msgid "a NNTP newsserver"
+msgstr "&NNTP (Usenet-News) palvelin"
+
+#: wxWizards.cpp:502
+msgid "an IMAP mail hierarchy"
+msgstr ""
+
+#: wxWizards.cpp:507
+#, fuzzy
+msgid "Path on IMAP server"
+msgstr "&IMAP palvelin"
+
+#: wxWizards.cpp:511
+#, fuzzy
+msgid "a NNTP news hierarchy"
+msgstr "&NNTP (Usenet-News) palvelin"
+
+#: wxWizards.cpp:514 wxWizards.cpp:527
+#, fuzzy
+msgid "Hierarchy name"
+msgstr "&Otsikkonimi: "
+
+#: wxWizards.cpp:518
+msgid "a local newsgroup"
+msgstr ""
+
+#: wxWizards.cpp:524
+msgid "a local news hierarchy"
+msgstr ""
+
+#: wxWizards.cpp:531
+msgid "a local mailbox file"
+msgstr ""
+
+#: wxWizards.cpp:535
+msgid "a local MH mailbox"
+msgstr ""
+
+#: wxWizards.cpp:543
+msgid ""
+"A folder group is not a mailbox itself\n"
+"but simply helps you organise the tree.\n"
+"\n"
+"Its sub-entries can inherit values from\n"
+"the group, so you can fill in default\n"
+"values for the most important settings\n"
+"here, which will be inherited by all\n"
+"entries below this group.\n"
+msgstr ""
+
+#: wxWizards.cpp:561
+#, fuzzy
+msgid "Server Host"
+msgstr "&Palvelin: "
+
+#: wxWizards.cpp:562
+msgid "Your Login"
+msgstr ""
+
+#: wxWizards.cpp:563
+#, fuzzy
+msgid "Your Password"
+msgstr "salasana"
+
+#: wxWizards.cpp:565
+#, fuzzy
+msgid "Entry Name"
+msgstr "Kohta"
+
+#: wxWizards.cpp:586
+msgid ""
+"\n"
+"You also need to give your new enty\n"
+"a name to appear in the tree."
+msgstr ""
+
+#: wxWizards.cpp:620
+msgid "You have specified a password here, which is slightly unsafe.\n"
+msgstr ""
+
+#: wxWizards.cpp:621
+#, fuzzy
+msgid ""
+"\n"
+"Notice that the password will be stored in your configuration with\n"
+"very weak encryption. If you are concerned about security, leave it\n"
+"empty and Mahogany will prompt you for it whenever needed."
+msgstr ""
+"\n"
+"\n"
+"Huomaa, ett‰ salasana tallennetaan asetuksiisi hyvin heikolla salauksella.\n"
+"Jos olet huolestunut turvallisuudesta, j‰t‰ kentt‰ tyhj‰ksi ja Mahogany\n"
+"kysyy sinulta salasanaa tarvittaessa."
+
+#: wxWizards.cpp:625
+#, fuzzy
+msgid ""
+"\n"
+"Do you want to save the password anyway?"
+msgstr "Haluatko kuitenkin poistua?"
+
+#: wxWizards.cpp:687
+#, fuzzy
+msgid "New Folder"
 msgstr "Uudet viestit"
 
-#: MailFolder.cpp:199
+#: wxWizards.cpp:782
+msgid ""
+"You have now specified the basic\n"
+"parameters for the new mailbox entry.\n"
+"\n"
+"If you want to use any more advanced\n"
+"access options, you can modify the\n"
+"complete set of parameters by invoking\n"
+"the folder properties dialog. Simply\n"
+"click the right mouse button on the\n"
+"entry in the tree."
+msgstr ""
+
+#: MailFolder.cpp:242
 #, c-format
 msgid "Password for '%s':"
 msgstr "Salasana '%s':"
 
-#: MailFolder.cpp:202
+#: MailFolder.cpp:245
 msgid "Password prompt"
 msgstr "Salasanan kysely"
 
-#: MailFolder.cpp:208 MailFolderCC.cpp:682
+#: MailFolder.cpp:251 MailFolderCC.cpp:713
 msgid "Cannot access this folder without a password."
 msgstr "Kansioon p‰‰sy estetty ilman salasanaa."
 
-#: MailFolder.cpp:333
+#: MailFolder.cpp:451
 msgid "re"
 msgstr "vast"
 
-#: MailFolder.cpp:542 MailFolder.cpp:695
+#: MailFolder.cpp:667 MailFolder.cpp:900
 msgid "Could not truncate the existing file."
 msgstr "Olemassaolevan tiedoston katkaisu ep‰onnistui."
 
-#: MailFolder.cpp:554 MailFolder.cpp:631
+#: MailFolder.cpp:679 MailFolder.cpp:762 MailFolder.cpp:833
 #, c-format
 msgid "Saving %d messages..."
 msgstr "Tallennetaan %d viesti‰..."
 
-#: MailFolder.cpp:616
+#: MailFolder.cpp:744
+#, fuzzy, c-format
+msgid "Cannot save messages to folder '%s'."
+msgstr "Viestin kirjoittaminen tiedostoon '%s' ep‰onnistui."
+
+#: MailFolder.cpp:817
 #, c-format
 msgid "Cannot open folder '%s'."
 msgstr "Kansion '%s' avaus ep‰onnistui."
 
-#: MailFolder.cpp:686
+#: MailFolder.cpp:891
 msgid "All files (*.*)|*.*"
 msgstr "Kaikki tiedostot (*.*)|*.*"
 
-#: MailFolder.cpp:909
+#: MailFolder.cpp:1114
 #, fuzzy, c-format
 msgid "Threading %lu messages..."
 msgstr "Luetaan %lu viestiotsikkoa..."
 
-#: MailFolder.cpp:967
+#: MailFolder.cpp:1172
 #, fuzzy, c-format
 msgid "Threading %lu messages...done."
 msgstr "Luetaan %lu viestiotsikkoa..."
 
-#: MailFolderCC.cpp:676
+#: MailFolderCC.cpp:589
+#, c-format
+msgid "Ignoring SSL authentication for folder '%s'"
+msgstr ""
+
+#: MailFolderCC.cpp:594
+msgid "SSL authentication is not supported."
+msgstr ""
+
+#: MailFolderCC.cpp:707
 #, fuzzy, c-format
 msgid "Please enter the password for folder '%s':"
 msgstr "Anna komento k‰sitell‰ksesi '%s' tietoa:"
 
-#: MailFolderCC.cpp:678
+#: MailFolderCC.cpp:709
 #, fuzzy
-msgid "Password needed"
+msgid "Password required"
 msgstr "&Salasana: "
 
-#: MailFolderCC.cpp:693
+#: MailFolderCC.cpp:730
 #, c-format
 msgid ""
-"Dial-Up network is down.\n"
-"Do you want to try and open folder '%s' anyway?"
+"To open the folder '%s', network access is required but it is currently not "
+"available.\n"
+"Would you like to connect to the network now?"
 msgstr ""
 
-#: MailFolderCC.cpp:783
+#: MailFolderCC.cpp:744
+msgid ""
+"Opening this folder will probably fail!\n"
+"Continue anyway?"
+msgstr ""
+
+#: MailFolderCC.cpp:809 MailFolderCC.cpp:830
+#, fuzzy, c-format
+msgid "Opening mailbox %s..."
+msgstr "Avataan URL '%s'... valmis."
+
+#: MailFolderCC.cpp:874
 #, c-format
 msgid ""
 "Found lock-file:\n"
@@ -4349,7 +5107,7 @@ msgstr ""
 "Joku toinen prosessi saattaa k‰ytt‰‰ kansiota.\n"
 "Kumotaanko lukitus?"
 
-#: MailFolderCC.cpp:793
+#: MailFolderCC.cpp:884
 msgid ""
 "Could not remove lock-file.\n"
 "Other process may have terminated.\n"
@@ -4359,53 +5117,68 @@ msgstr ""
 "Toiset prosessit saattoivat pys‰hty‰.\n"
 "Yritet‰‰n jatkaa normaalisti."
 
-#: MailFolderCC.cpp:799
+#: MailFolderCC.cpp:890
 msgid "Cannot open the folder while lock-file exists."
 msgstr "Kansiota ei voida avata, sill‰ lukitustiedosto on olemassa."
 
-#: MailFolderCC.cpp:940
+#: MailFolderCC.cpp:892 MailFolderCC.cpp:971
+#, fuzzy, c-format
+msgid "Could not open mailbox %s."
+msgstr "Moduulin '%s' lataaminen ep‰onnistui."
+
+#: MailFolderCC.cpp:980
+#, fuzzy, c-format
+msgid "Mailbox %s opened."
+msgstr "Viesti l‰hetetty."
+
+#: MailFolderCC.cpp:1025
 #, c-format
 msgid ""
 "Dial-Up network is down.\n"
 "Do you want to try and check folder '%s' anyway?"
 msgstr ""
 
-#: MailFolderCC.cpp:958
+#: MailFolderCC.cpp:1043
 #, c-format
 msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
 msgstr "Viestivirta kansiolle '%s' on suljettu, yritet‰‰n uudelleenavausta."
 
-#: MailFolderCC.cpp:963
+#: MailFolderCC.cpp:1048
 #, c-format
 msgid "Re-opening closed folder '%s' failed."
 msgstr "Kansion '%s' uudelleenavaus ep‰onnistui."
 
-#: MailFolderCC.cpp:971
+#: MailFolderCC.cpp:1056
 #, c-format
 msgid "Folder '%s' is alive."
 msgstr "Kansio '%s' on hengiss‰."
 
-#: MailFolderCC.cpp:1000
+#: MailFolderCC.cpp:1085
 #, c-format
 msgid "System is offline, cannot access mailbox ¥%s¥"
 msgstr ""
 
-#: MailFolderCC.cpp:1251 MailFolderCC.cpp:1309
+#: MailFolderCC.cpp:1333
+#, fuzzy, c-format
+msgid "Cannot get listing for closed mailbox '%s'."
+msgstr "Moduulin '%s' lataaminen ep‰onnistui."
+
+#: MailFolderCC.cpp:1457 MailFolderCC.cpp:1515
 #, fuzzy, c-format
 msgid "Searching in %lu messages..."
 msgstr "Tallennetaan %d viesti‰..."
 
-#: MailFolderCC.cpp:1315
+#: MailFolderCC.cpp:1521
 #, c-format
 msgid " - %lu matches found."
 msgstr ""
 
-#: MailFolderCC.cpp:1506
+#: MailFolderCC.cpp:1733
 #, fuzzy, c-format
 msgid "How many messages to retrieve from folder '%s'?"
 msgstr "Sinulla on %lu uutta viesti‰ kansiossa '%s'.\n"
 
-#: MailFolderCC.cpp:1508
+#: MailFolderCC.cpp:1735
 #, fuzzy, c-format
 msgid ""
 "This folder contains %lu messages, which is greater than\n"
@@ -4416,48 +5189,54 @@ msgstr ""
 "Haluatko hakea vain viimeiset %lu viesti‰?\n"
 "(valitse [Ei], jos haluat hakea kaikki viestit)"
 
-#: MailFolderCC.cpp:1512
+#: MailFolderCC.cpp:1739
 #, fuzzy
 msgid "How many of them do you want to retrieve?"
 msgstr "Mink‰laisen osoitekirjan haluat luoda?"
 
-#: MailFolderCC.cpp:1533
+#: MailFolderCC.cpp:1761
 #, c-format
 msgid "Reading %lu message headers..."
 msgstr "Luetaan %lu viestiotsikkoa..."
 
-#: MailFolderCC.cpp:1647
+#: MailFolderCC.cpp:1905
 msgid "<address missing>"
 msgstr "<osoite puutteellinen>"
 
-#: MailFolderCC.cpp:1748
+#: MailFolderCC.cpp:2024
 msgid "Sorry, support for MH folders is disabled."
 msgstr ""
 
-#: MailFolderCC.cpp:1798
+#: MailFolderCC.cpp:2095
 #, c-format
 msgid ""
 "Invalid MH folder name '%s' - all MH folders should be under '%s' directory."
 msgstr ""
 
-#: MailFolderCC.cpp:2105
+#: MailFolderCC.cpp:2448
 #, c-format
 msgid "Folder '%s' : "
 msgstr "Kansio '%s' : "
 
-#: MailFolderCC.cpp:2107
+#: MailFolderCC.cpp:2450
 msgid "Folder Log: "
 msgstr "Kansioloki:"
 
-#: MailFolderCC.cpp:2110
+#: MailFolderCC.cpp:2453
 msgid ", error level: "
 msgstr ", virheraja: "
 
-#: MailFolderCC.cpp:2124
+#: MailFolderCC.cpp:2469
 msgid "c-client debug: "
 msgstr "c-client debug: "
 
-#: MailFolderCC.cpp:2612
+#: MailFolderCC.cpp:2575
+msgid ""
+"\n"
+"Last folder in a critical section was: "
+msgstr ""
+
+#: MailFolderCC.cpp:3002
 msgid ""
 "\n"
 "Attempt to re-open all folders failed."
@@ -4465,15 +5244,15 @@ msgstr ""
 "\n"
 "Kaikkien kansioiden uudelleenavaus ep‰onnistui."
 
-#: MessageCC.cpp:287 MessageCC.cpp:515
+#: MessageCC.cpp:300 MessageCC.cpp:532
 msgid "Non-existent message data."
 msgstr "Viestidataa ei ole olemassa."
 
-#: SendMessageCC.cpp:352 SendMessageCC.cpp:355
+#: SendMessageCC.cpp:346 SendMessageCC.cpp:349
 msgid " , compiled for "
 msgstr " , compiled for "
 
-#: SendMessageCC.cpp:436
+#: SendMessageCC.cpp:429
 msgid ""
 "MIME type specified without subtype and\n"
 "no default subtype for this type."
@@ -4481,152 +5260,162 @@ msgstr ""
 "MIME-tyyppi m‰‰ritelty ilman alatyyppi‰\n"
 "ja oletustyyppi‰ ei ole."
 
-#: SendMessageCC.cpp:538
+#: SendMessageCC.cpp:530
 msgid ""
 "No network connection available at present.\n"
 "Message will be queued in outbox."
 msgstr ""
 
-#: SendMessageCC.cpp:562
+#: SendMessageCC.cpp:555
 #, fuzzy, c-format
 msgid "Message queued in ¥%s¥."
 msgstr "Viesti on l‰hetetty."
 
-#: SendMessageCC.cpp:565 SendMessageCC.cpp:634
+#: SendMessageCC.cpp:558 SendMessageCC.cpp:652
 msgid "Article posted."
 msgstr "Artikkeli l‰hetetty."
 
-#: SendMessageCC.cpp:634
+#: SendMessageCC.cpp:652
 #, fuzzy
 msgid "Message sent."
 msgstr "Viesti l‰hetetty."
 
-#: SendMessageCC.cpp:641
+#: SendMessageCC.cpp:659
 #, c-format
 msgid "Failed to send - %s"
 msgstr "L‰hetys ep‰onnistui - %s."
 
-#: SendMessageCC.cpp:642
+#: SendMessageCC.cpp:660
 msgid "unknown error"
 msgstr "tuntematon virhe"
 
-#: SendMessageCC.cpp:649
+#: SendMessageCC.cpp:667
 msgid "Cannot open connection to any server"
 msgstr "Yhteyden avaus palvelimeen ep‰onnistui"
 
-#: SendMessageCC.cpp:713
+#: SendMessageCC.cpp:735
 msgid "Cannot open folder to save to:"
 msgstr "Kansion avaus tallennusta varten ep‰onnistui:"
 
-#: AdbFrame.cpp:424
+#: ASMailFolder.cpp:91 PalmOS.cpp:577
+#, fuzzy
+msgid "Cannot create thread!"
+msgstr "V‰liaikaisen tiedoston luonti ep‰onnistui."
+
+#: AdbFrame.cpp:426
 msgid "Nick &Name"
 msgstr "&Alias"
 
-#: AdbFrame.cpp:425
+#: AdbFrame.cpp:427
 msgid "F&ull Name"
 msgstr "Koko &nimi"
 
-#: AdbFrame.cpp:426
+#: AdbFrame.cpp:428
 msgid "&First Name"
 msgstr "&Etunimi"
 
-#: AdbFrame.cpp:427
+#: AdbFrame.cpp:429
 msgid "F&amily Name"
 msgstr "&Sukunimi"
 
-#: AdbFrame.cpp:428
+#: AdbFrame.cpp:430
 msgid "&Prefix"
 msgstr "&Prefix"
 
-#: AdbFrame.cpp:429
+#: AdbFrame.cpp:431
 msgid "&Title"
 msgstr "&Teht‰v‰nimike"
 
-#: AdbFrame.cpp:430
+#: AdbFrame.cpp:432
 msgid "&Organization"
 msgstr "&Organisaatio"
 
-#: AdbFrame.cpp:431
+#: AdbFrame.cpp:433
 msgid "&Birthday date"
 msgstr "&Syntym‰p‰iv‰"
 
-#: AdbFrame.cpp:432
+#: AdbFrame.cpp:434
 msgid "&Comments"
 msgstr "&Kommentit"
 
-#: AdbFrame.cpp:434
+#: AdbFrame.cpp:436
 msgid "&E-Mail"
 msgstr "&E-Mail"
 
-#: AdbFrame.cpp:435
+#: AdbFrame.cpp:437
 msgid "&Home Page"
 msgstr "&Kotisivu"
 
-#: AdbFrame.cpp:436
+#: AdbFrame.cpp:438
 msgid "&ICQ"
 msgstr "&ICQ"
 
-#: AdbFrame.cpp:437
+#: AdbFrame.cpp:439
 msgid "Prefers &HTML mail"
 msgstr "&Haluaa HTML-viestej‰"
 
-#: AdbFrame.cpp:438
+#: AdbFrame.cpp:440
 msgid "&Additional e-mail addresses"
 msgstr "&Erilliset e-mail osoitteet"
 
-#: AdbFrame.cpp:441 AdbFrame.cpp:451
+#: AdbFrame.cpp:443 AdbFrame.cpp:453
 msgid "Street &Number"
 msgstr "Ka&dun numero"
 
-#: AdbFrame.cpp:442 AdbFrame.cpp:452
+#: AdbFrame.cpp:444 AdbFrame.cpp:454
 msgid "&Street"
 msgstr "&Katu"
 
-#: AdbFrame.cpp:443 AdbFrame.cpp:453
+#: AdbFrame.cpp:445 AdbFrame.cpp:455
 msgid "&Locality"
 msgstr "&Paikkakunta"
 
-#: AdbFrame.cpp:444 AdbFrame.cpp:454
+#: AdbFrame.cpp:446 AdbFrame.cpp:456
 msgid "C&ity"
 msgstr "&Kaupunki"
 
-#: AdbFrame.cpp:445 AdbFrame.cpp:455
+#: AdbFrame.cpp:447 AdbFrame.cpp:457
 msgid "&Postcode"
 msgstr "P&ostiosoite"
 
-#: AdbFrame.cpp:446 AdbFrame.cpp:456
+#: AdbFrame.cpp:448 AdbFrame.cpp:458
 msgid "&Country"
 msgstr "&Maa"
 
-#: AdbFrame.cpp:447 AdbFrame.cpp:457
+#: AdbFrame.cpp:449 AdbFrame.cpp:459
 msgid "PO &Box"
 msgstr "P&L"
 
-#: AdbFrame.cpp:448 AdbFrame.cpp:458
+#: AdbFrame.cpp:450 AdbFrame.cpp:460
 msgid "P&hone"
 msgstr "P&uhelin"
 
-#: AdbFrame.cpp:449 AdbFrame.cpp:459
+#: AdbFrame.cpp:451 AdbFrame.cpp:461
 msgid "&Fax"
 msgstr "&Fax"
 
-#: AdbFrame.cpp:1064
+#: AdbFrame.cpp:507
+#, fuzzy
+msgid "Properties..."
+msgstr "&Asetukset..."
+
+#: AdbFrame.cpp:1094
 msgid "&Book"
 msgstr "Kir&ja"
 
-#: AdbFrame.cpp:1066
+#: AdbFrame.cpp:1096
 msgid "&Find"
 msgstr "&Etsi"
 
-#: AdbFrame.cpp:1084
+#: AdbFrame.cpp:1111
 msgid "&Lookup:"
 msgstr "&Etsi:"
 
-#: AdbFrame.cpp:1144
+#: AdbFrame.cpp:1171
 msgid "Address Book Editor"
 msgstr "Osoitekirjan muokkaus"
 
-#: AdbFrame.cpp:1291
+#: AdbFrame.cpp:1318
 #, c-format
 msgid ""
 "Address book '%s' couldn't be opened:\n"
@@ -4635,122 +5424,122 @@ msgstr ""
 "Osoitekirjaa '%s' ei voitu avata:\n"
 "kyseinen formaatti ei ole tuettu."
 
-#: AdbFrame.cpp:1311
+#: AdbFrame.cpp:1338
 msgid "Not all address books could be reopened."
 msgstr "Kaikkia osoitekirjoja ei onnistuttu avata."
 
-#: AdbFrame.cpp:1337
+#: AdbFrame.cpp:1364
 msgid "Not all tree branches could be reopened."
 msgstr "Kaikkia hakemistopuun oksia ei voitu avata."
 
-#: AdbFrame.cpp:1389
+#: AdbFrame.cpp:1416
 #, c-format
 msgid "The address book '%s' is already opened."
 msgstr "Osoitekirja '%s' on jo avoinna."
 
-#: AdbFrame.cpp:1460
+#: AdbFrame.cpp:1489
 msgid "New entry creation cancelled."
 msgstr "Uuden kohdan luonti peruutettu."
 
-#: AdbFrame.cpp:1477
+#: AdbFrame.cpp:1506
 #, c-format
 msgid "%s '%s' already exists %s."
 msgstr "%s '%s' on jo olemassa %s."
 
-#: AdbFrame.cpp:1486
+#: AdbFrame.cpp:1515
 #, c-format
 msgid "Can't create %s named '%s' %s."
 msgstr "%s luonti nimelle '%s' %s ep‰onnistui."
 
-#: AdbFrame.cpp:1494
+#: AdbFrame.cpp:1526
 #, c-format
 msgid "Created new %s '%s' %s."
 msgstr "Luotiin uusi %s '%s' %s."
 
-#: AdbFrame.cpp:1509
+#: AdbFrame.cpp:1541
 msgid "Address book"
 msgstr "Osoitekirja"
 
-#: AdbFrame.cpp:1537
+#: AdbFrame.cpp:1569
 #, c-format
 msgid "Really delete the %s '%s'?"
 msgstr "Poistetaanko %s '%s'?"
 
-#: AdbFrame.cpp:1540
+#: AdbFrame.cpp:1572
 #, fuzzy
 msgid "Address book editor"
 msgstr "Osoitekirjan muokkaus"
 
-#: AdbFrame.cpp:1543
+#: AdbFrame.cpp:1575
 #, c-format
 msgid "Cancelled: '%s' not deleted."
 msgstr "Peruutettu: '%s' ei ole poistettu."
 
-#: AdbFrame.cpp:1559
+#: AdbFrame.cpp:1591
 #, c-format
 msgid "%s '%s' deleted."
 msgstr "%d '%s' poistettu."
 
-#: AdbFrame.cpp:1571
+#: AdbFrame.cpp:1603
 #, c-format
 msgid "Cannot find any matches for '%s'."
 msgstr "Mit‰‰n '%s' vastaavaa ei lˆydetty."
 
-#: AdbFrame.cpp:1576
+#: AdbFrame.cpp:1608
 #, c-format
 msgid "Search for '%s' found %d entries."
 msgstr "Etsint‰ '%s' lˆysi %d kohtaa."
 
-#: AdbFrame.cpp:1580
+#: AdbFrame.cpp:1612
 msgid "Search wrapped to the beginning."
 msgstr "Etsint‰ aloitettu alusta."
 
-#: AdbFrame.cpp:1641
+#: AdbFrame.cpp:1673
 #, c-format
 msgid "Changes to '%s' undone"
 msgstr "Muutokset '%s' peruutettu."
 
-#: AdbFrame.cpp:1694
+#: AdbFrame.cpp:1726
 msgid "Go to entry/group"
 msgstr "Siirry kohtaan/ryhm‰‰n"
 
-#: AdbFrame.cpp:1695
+#: AdbFrame.cpp:1727
 msgid "Full entry &name:"
 msgstr "Kohdan koko &nimi:"
 
-#: AdbFrame.cpp:1790
+#: AdbFrame.cpp:1822
 msgid "Which kind of address book do you want to create?"
 msgstr "Mink‰laisen osoitekirjan haluat luoda?"
 
-#: AdbFrame.cpp:1791
+#: AdbFrame.cpp:1823
 msgid "Which kind of address book do you want to open?"
 msgstr "Mink‰laisen osoitekirjan haluat avata?"
 
-#: AdbFrame.cpp:1793
+#: AdbFrame.cpp:1825
 msgid "Creating new address book"
 msgstr "Luodaan uutta osoitekirjaa"
 
-#: AdbFrame.cpp:1794
+#: AdbFrame.cpp:1826
 msgid "Opening an address book"
 msgstr "Avataan osoitekirjaa"
 
-#: AdbFrame.cpp:1822
+#: AdbFrame.cpp:1854
 msgid "Create an address book"
 msgstr "Luo osoitekirja"
 
-#: AdbFrame.cpp:1824
+#: AdbFrame.cpp:1856
 msgid "Open an address book"
 msgstr "Avaa osoitekirja"
 
-#: AdbFrame.cpp:1840
+#: AdbFrame.cpp:1872
 msgid "Address books (*.adb)|*.adb|All files (*.*)|*.*"
 msgstr "Osoitekirjat (*.adb)|*.adb|Kaikki tiedostot (*.*)|*.*"
 
-#: AdbFrame.cpp:1854
+#: AdbFrame.cpp:1886
 msgid "Enter the address book name"
 msgstr "Anna osoitekirjan nimi"
 
-#: AdbFrame.cpp:1877
+#: AdbFrame.cpp:1908
 #, c-format
 msgid ""
 "Address book '%s' was created, but could not be flushed. It might be "
@@ -4759,26 +5548,26 @@ msgstr ""
 "Osoitekirja '%s' luotu, mutta ei voitu tyhjent‰‰.Osoitekirja saattaa olla "
 "suljettu kunnes ohjelma k‰ynnistet‰‰n uudelleen."
 
-#: AdbFrame.cpp:1899
+#: AdbFrame.cpp:1931
 msgid "Successfully exported address book data."
 msgstr ""
 
-#: AdbFrame.cpp:1903
+#: AdbFrame.cpp:1935
 #, fuzzy
 msgid "Address book export failed."
 msgstr "Osoitekirjan muokkaus"
 
-#: AdbFrame.cpp:1941
+#: AdbFrame.cpp:1973
 #, c-format
 msgid "Address book successfully imported into book '%s'."
 msgstr ""
 
-#: AdbFrame.cpp:1946
+#: AdbFrame.cpp:1978
 #, fuzzy
 msgid "Address book import abandoned."
 msgstr "Osoitekirjan muokkaus"
 
-#: AdbFrame.cpp:2007
+#: AdbFrame.cpp:2039
 #, c-format
 msgid ""
 "Cannot paste entry '%s' %s: an entry with\n"
@@ -4787,20 +5576,20 @@ msgstr ""
 "Kohtaan '%s' %s liitt‰minen ep‰onnistui:\n"
 "samanniminen kohta on olemassa."
 
-#: AdbFrame.cpp:2017
+#: AdbFrame.cpp:2049
 msgid "Cannot paste the clipboard contents here."
 msgstr "Leikepˆyd‰n sis‰llˆn liitt‰minen t‰h‰n ei onnistu."
 
-#: AdbFrame.cpp:2051
+#: AdbFrame.cpp:2083
 #, c-format
 msgid "Editing entry '%s'"
 msgstr "Muokataan kohtaa '%s'"
 
-#: AdbFrame.cpp:2096
+#: AdbFrame.cpp:2128
 msgid "This group has no entries"
 msgstr "Ryhm‰ss‰ ei ole kohtia"
 
-#: AdbFrame.cpp:2224
+#: AdbFrame.cpp:2256
 #, c-format
 msgid ""
 "No entry '%s':\n"
@@ -4809,92 +5598,92 @@ msgstr ""
 "Ei kohtaa '%s':\n"
 "'%s' ei ole kohtaa/alaryhm‰‰ '%s'"
 
-#: AdbFrame.cpp:2232
+#: AdbFrame.cpp:2264
 #, c-format
 msgid "Entry '%s' cannot have subgroup/entry '%s'!"
 msgstr "Kohta '%s' ei voi omistaa alaryhm‰‰/kohta '%s'!"
 
-#: AdbFrame.cpp:2335
+#: AdbFrame.cpp:2367
 msgid "Find address book entry"
 msgstr "Etsi osoitekirjan kohta"
 
-#: AdbFrame.cpp:2356
+#: AdbFrame.cpp:2388
 msgid "Find &what:"
 msgstr "Etsi &mit‰:"
 
-#: AdbFrame.cpp:2487
+#: AdbFrame.cpp:2519
 msgid "Please specify where to search!"
 msgstr "Tarkenna hakusi kohdetta!"
 
-#: AdbFrame.cpp:2502
+#: AdbFrame.cpp:2534
 msgid "Create a new entry/group"
 msgstr "Luo uusi kohta/ryhm‰"
 
-#: AdbFrame.cpp:2508
+#: AdbFrame.cpp:2540
 msgid "&New entry/group name:"
 msgstr "&Uusi kohdan/ryhm‰n nimi:"
 
-#: AdbFrame.cpp:2543
+#: AdbFrame.cpp:2575
 msgid "Create a &group"
 msgstr "&Luo ryhm‰"
 
-#: AdbFrame.cpp:2580
+#: AdbFrame.cpp:2612
 #, c-format
 msgid "Please specify a name for the new %s!"
 msgstr "M‰‰rittele nimi uudelle %s!"
 
-#: AdbFrame.cpp:2682
+#: AdbFrame.cpp:2714
 #, c-format
 msgid "Properties for '%s'"
 msgstr "'%s' asetukset"
 
-#: AdbFrame.cpp:2796
+#: AdbFrame.cpp:2860
 msgid "No selection"
 msgstr "Ei valintaa"
 
-#: AdbFrame.cpp:2860
+#: AdbFrame.cpp:2925
 #, c-format
 msgid "Entry '%s' saved."
 msgstr "Kohta '%s' tallennettu."
 
-#: AdbFrame.cpp:3261
+#: AdbFrame.cpp:3339
 msgid "Add another address"
 msgstr "Lis‰‰ uusi osoite"
 
-#: AdbFrame.cpp:3262 AdbFrame.cpp:3281
+#: AdbFrame.cpp:3340 AdbFrame.cpp:3359
 msgid "E-mail &address:"
 msgstr "E-Mail &osoite:"
 
-#: AdbFrame.cpp:3275
+#: AdbFrame.cpp:3353
 msgid "Please select an entry to modify it."
 msgstr "Valitse muokattava kohta."
 
-#: AdbFrame.cpp:3281
+#: AdbFrame.cpp:3359
 msgid "Modify address"
 msgstr "Muokkaa osoitetta"
 
-#: AdbFrame.cpp:3294
+#: AdbFrame.cpp:3372
 msgid "Please select an entry to delete."
 msgstr "Valitse poistettava kohta."
 
-#: AdbFrame.cpp:3384
+#: AdbFrame.cpp:3473
 msgid "Address Books"
 msgstr "Osoitekirjat"
 
-#: AdbFrame.cpp:3567
+#: AdbFrame.cpp:3656
 msgid "Entry"
 msgstr "Kohta"
 
-#: AdbFrame.cpp:3573
+#: AdbFrame.cpp:3662
 #, c-format
 msgid "%s '%s' already exists in this group."
 msgstr "%s '%s' on jo olemassa t‰ss‰ ryhm‰ss‰."
 
-#: AdbFrame.cpp:3677
+#: AdbFrame.cpp:3766
 msgid "at the root level of the addressbook '"
 msgstr "p‰‰tasolla osoitekirjassa '"
 
-#: AdbFrame.cpp:3681
+#: AdbFrame.cpp:3770
 msgid "in group '"
 msgstr "ryhm‰ss‰ '"
 
@@ -4913,7 +5702,7 @@ msgstr "'%s' laajennettu k‰ytt‰en kohtaa '%s'"
 msgid "No matches for '%s'."
 msgstr "Ei lˆytynyt: '%s'."
 
-#: AdbManager.cpp:355
+#: AdbManager.cpp:356
 #, c-format
 msgid "Can't open the address book '%s'."
 msgstr "Osoitekirjaa '%s' ei voi avata."
@@ -4996,32 +5785,32 @@ msgstr ""
 msgid "Couldn't create or write address book file '%s'."
 msgstr "Osoitekirjatiedostoa '%s' ei voitu luoda eik‰ kirjoittaa."
 
-#: ProvBbdb.cpp:464
+#: ProvBbdb.cpp:470
 #, c-format
 msgid "Bbdb::ReadListOfVectors expected ')', found '%s'"
 msgstr "Bbdb::ReadListOfVectors odotettu ')', lˆytyi: '%s'"
 
-#: ProvBbdb.cpp:665
+#: ProvBbdb.cpp:672
 #, c-format
 msgid "BBDB: file has wrong header line: '%s'"
 msgstr "BBDB: tiedostolla on v‰‰r‰ otsikkorivi: '%s'"
 
-#: ProvBbdb.cpp:672
+#: ProvBbdb.cpp:679
 #, c-format
 msgid "BBDB: file format version '%s'"
 msgstr "BBDB: tiedostoformaatin versio '%s'"
 
-#: ProvBbdb.cpp:693
+#: ProvBbdb.cpp:700
 #, c-format
 msgid "BBDB: read %d entries."
 msgstr "BBDB: %d kohtaa luettu."
 
-#: ProvBbdb.cpp:695
+#: ProvBbdb.cpp:702
 #, c-format
 msgid "BBDB: ignored %d entries with neither first nor last names."
 msgstr "BBDB: %d kohtaa ohitettu, ilman etu- tai sukunimi‰."
 
-#: ProvBbdb.cpp:723
+#: ProvBbdb.cpp:730
 #, c-format
 msgid ""
 "Save BBDB address book '%s'?\n"
@@ -5030,9 +5819,19 @@ msgstr ""
 "Tallenna BBDB osoitekirja '%s'?\n"
 "T‰m‰ voi johtaa alkuper‰isen datan tuhoutumiseen."
 
-#: ProvBbdb.cpp:726
+#: ProvBbdb.cpp:733
 msgid "BBDB"
 msgstr "BBDB"
+
+#: ProvBbdb.cpp:956
+#, fuzzy
+msgid " (Emacs BBDB addressbook)"
+msgstr "Avaa osoitekirja"
+
+#: ProvPalm.cpp:281 ProvPalm.cpp:282
+#, fuzzy
+msgid "PalmOS Addressbook"
+msgstr "Avaa osoitekirja"
 
 #: AdbImport.cpp:76
 #, fuzzy, c-format
@@ -5243,9 +6042,347 @@ msgstr ""
 msgid "Please enter specify the delimiter character!"
 msgstr "Tarkenna hakusi kohdetta!"
 
-#: persctrl.cpp:1222
+#: persctrl.cpp:1446
 msgid "Don't show this message again "
 msgstr "ƒl‰ n‰yt‰ en‰‰ t‰t‰ viesti‰ "
+
+#: PythonHelp.cpp:380
+msgid "Cannot run script: "
+msgstr "Ei voida ajaa skripti‰: "
+
+#: Filters.cpp:370
+msgid "Parser output"
+msgstr ""
+
+#: Filters.cpp:374
+#, fuzzy
+msgid "Parser: "
+msgstr "&Salasana: "
+
+#: Filters.cpp:1068
+#, c-format
+msgid ""
+"Parse error at input position %lu:\n"
+"  %s\n"
+"%s<error> %s"
+msgstr ""
+
+#: Filters.cpp:1071
+#, fuzzy
+msgid "Parse error!"
+msgstr "Liit‰ t‰h‰n"
+
+#: Filters.cpp:1125
+msgid "Unterminated string."
+msgstr ""
+
+#: Filters.cpp:1172
+#, fuzzy
+msgid "'(' expected after 'if'."
+msgstr "Valittu kansio '%s'."
+
+#: Filters.cpp:1184
+msgid "')' expected after condition in if statement."
+msgstr ""
+
+#: Filters.cpp:1230
+msgid "Expected an expression in argument list."
+msgstr ""
+
+#: Filters.cpp:1234
+msgid "Expected ',' or ')' behind argument."
+msgstr ""
+
+#: Filters.cpp:1261
+#, c-format
+msgid "Functioncall expected '(' after '%s'."
+msgstr ""
+
+#: Filters.cpp:1272
+msgid "Expected ')' at end of argument list."
+msgstr ""
+
+#: Filters.cpp:1286
+#, c-format
+msgid "Attempt to call undefined function '%s'."
+msgstr ""
+
+#: Filters.cpp:1322
+msgid "Expected ')' after expression."
+msgstr ""
+
+#: Filters.cpp:1332
+msgid "Expected Factor after negation operator."
+msgstr ""
+
+#: Filters.cpp:1352
+msgid "Expected a number or a function call."
+msgstr ""
+
+#: Filters.cpp:1388 Filters.cpp:1578
+msgid "Expected Condition after conditional operator."
+msgstr ""
+
+#: Filters.cpp:1427
+msgid "Expected expression after operator."
+msgstr ""
+
+#: Filters.cpp:1465
+msgid "Expected term after operator."
+msgstr ""
+
+#: Filters.cpp:1537
+msgid "Parse error, cannot find valid program."
+msgstr ""
+
+#: Filters.cpp:1571
+msgid "Expected Block after '{'"
+msgstr ""
+
+#: Filters.cpp:1594
+msgid "Expected ';' at end of condition."
+msgstr ""
+
+#: Filters.cpp:2358
+msgid "This plug-in provides a filtering language for Mahogany."
+msgstr ""
+
+#: PalmOS.cpp:173
+#, fuzzy, c-format
+msgid "Could not obtain lock for '/dev/%s'"
+msgstr "Moduulin '%s' lataaminen ep‰onnistui."
+
+#: PalmOS.cpp:453
+#, fuzzy
+msgid "&Synchronise"
+msgstr "Osoitekirja"
+
+#: PalmOS.cpp:455
+msgid "&Backup"
+msgstr ""
+
+#: PalmOS.cpp:456
+msgid "&Restore"
+msgstr ""
+
+#: PalmOS.cpp:457
+#, fuzzy
+msgid "&Install"
+msgstr "Kursivoitu"
+
+#: PalmOS.cpp:459
+#, fuzzy
+msgid "&Configure"
+msgstr "Muokkaa tulostusasetuksia"
+
+#: PalmOS.cpp:462
+#, fuzzy
+msgid "&PalmOS Module"
+msgstr "Muokkaa asetuksia"
+
+#: PalmOS.cpp:463
+msgid "Functionality to interact with your PalmOS based palmtop."
+msgstr ""
+
+#: PalmOS.cpp:520 PalmOS.cpp:637
+#, c-format
+msgid "Executing command ¥%s¥ returned an error code (%d)."
+msgstr ""
+
+#: PalmOS.cpp:530
+msgid "Please press HotSync button and click on OK."
+msgstr ""
+
+#: PalmOS.cpp:533 PalmOS.cpp:550 PalmOS.cpp:561 PalmOS.cpp:599
+msgid "Failed to connect to PalmOS device."
+msgstr ""
+
+#: PalmOS.cpp:674
+msgid "Do you want synchronise with your PalmOS device?"
+msgstr ""
+
+#: PalmOS.cpp:801
+#, fuzzy, c-format
+msgid "Could not access backup directory '%s'."
+msgstr "Moduulin '%s' lataaminen ep‰onnistui."
+
+#: PalmOS.cpp:828
+msgid "Palm Backup"
+msgstr ""
+
+#: PalmOS.cpp:828
+msgid "Backing up files"
+msgstr ""
+
+#: PalmOS.cpp:849
+msgid "Exiting on cancel, backup process incomplete!"
+msgstr ""
+
+#: PalmOS.cpp:884
+msgid "Unable to create file!"
+msgstr ""
+
+#: PalmOS.cpp:889
+msgid "Unable to back up database!"
+msgstr ""
+
+#: PalmOS.cpp:960
+msgid "Unable to open file!"
+msgstr ""
+
+#: PalmOS.cpp:997
+msgid "Palm Install"
+msgstr ""
+
+#: PalmOS.cpp:997
+#, fuzzy
+msgid "Installing files"
+msgstr "Lis‰‰ tiedosto"
+
+#: PalmOS.cpp:1011
+msgid "Exiting on cancel, all data not restored"
+msgstr ""
+
+#: PalmOS.cpp:1020
+msgid "Unable to open file."
+msgstr ""
+
+#: PalmOS.cpp:1057
+msgid "Couldn¥t access backup directory."
+msgstr ""
+
+#: PalmOS.cpp:1088
+#, fuzzy
+msgid "Please pick databases to install"
+msgstr "Valitse lis‰tt‰v‰ tiedosto."
+
+#: PalmOS.cpp:1131
+msgid "Unable to open AddressDB"
+msgstr ""
+
+#: PalmOS.cpp:1141
+msgid "ADB not correctly initialized!"
+msgstr ""
+
+#: PalmOS.cpp:1235
+msgid "Unable to open MailDB"
+msgstr ""
+
+#: PalmOS.cpp:1236
+msgid "Unable to open MailDB.\n"
+msgstr ""
+
+#: PalmOS.cpp:1330
+#, c-format
+msgid "Transferred message %d: \"%s\" for \"%s\"."
+msgstr ""
+
+#: PalmOS.cpp:1351
+#, fuzzy, c-format
+msgid ""
+"Failed to transfer message\n"
+"\"%s\"\n"
+"for \"%s\"."
+msgstr "Viestin tallennus ep‰onnistui."
+
+#: PalmOS.cpp:1361
+#, fuzzy, c-format
+msgid "Transferred %d/%d messages."
+msgstr "Tallennetaan %d viesti‰..."
+
+#: PalmOS.cpp:1368
+msgid "No messages found in PalmOS-Outbox."
+msgstr ""
+
+#: PalmOS.cpp:1391
+#, c-format
+msgid "Cannot open PalmOS synchronisation mailbox ¥%s¥"
+msgstr ""
+
+#: PalmOS.cpp:1419
+#, fuzzy, c-format
+msgid "Skipping deleted message %lu/%lu"
+msgstr "Palauta viesti"
+
+#: PalmOS.cpp:1440
+#, c-format
+msgid "Storing message %lu/%lu: %s"
+msgstr ""
+
+#: PalmOS.cpp:1488
+#, c-format
+msgid "Could not store message %lu/%lu: %s"
+msgstr ""
+
+#: PalmOS.cpp:1504
+#, c-format
+msgid "Stored %lu/%lu messages on PalmOS device."
+msgstr ""
+
+#: PalmOS.cpp:1513
+#, fuzzy, c-format
+msgid "Could not obtain lock for mailbox '%s'."
+msgstr "Moduulin '%s' lataaminen ep‰onnistui."
+
+#: PalmOS.cpp:1546
+msgid "Synchronise Mail"
+msgstr ""
+
+#: PalmOS.cpp:1547
+msgid "Mailbox for exchange"
+msgstr ""
+
+#: PalmOS.cpp:1548
+msgid "Mail disposal mode:keep:delete:file"
+msgstr ""
+
+#: PalmOS.cpp:1549
+#, fuzzy
+msgid "Synchronise Addressbook"
+msgstr "Osoitekirja"
+
+#: PalmOS.cpp:1550
+msgid "Always do Backup"
+msgstr ""
+
+#: PalmOS.cpp:1551
+msgid "Directory for backup files"
+msgstr ""
+
+#: PalmOS.cpp:1552
+msgid "Delete no longer existing backup files"
+msgstr ""
+
+#: PalmOS.cpp:1554
+msgid "Make incremental backup only"
+msgstr ""
+
+#: PalmOS.cpp:1555
+#, fuzzy
+msgid "Pilot device"
+msgstr "Esikatselu"
+
+#: PalmOS.cpp:1558
+msgid "Connection speed:9600:19200:38400:57600:115200"
+msgstr ""
+
+#: PalmOS.cpp:1559
+msgid "Try to lock device"
+msgstr ""
+
+#: PalmOS.cpp:1560
+msgid "Script to run before"
+msgstr ""
+
+#: PalmOS.cpp:1561
+#, fuzzy
+msgid "Script to run after"
+msgstr "Vaihda Roman-kirjasimeen."
+
+#: PalmOS.cpp:1567
+#, fuzzy
+msgid "PalmOS module preferences"
+msgstr "Muokkaa asetuksia"
 
 # MDialogs.h
 msgid "Error"
@@ -5258,14 +6395,90 @@ msgstr "J‰rjestelm‰virhe"
 msgid "Fatal Error"
 msgstr "Tuhoisa virhe"
 
+#, fuzzy
+#~ msgid "filed"
+#~ msgstr "Tiedosto"
+
+#, fuzzy
+#~ msgid "Sent messages will be"
+#~ msgstr "ei viestej‰"
+
+#~ msgid "Failed to set up initial configuration."
+#~ msgstr "Alkuper‰isten asetusten m‰‰ritys ep‰onnistui."
+
+#, fuzzy
+#~ msgid "Could not obtain lock for outbox '%s'."
+#~ msgstr "Moduulin '%s' lataaminen ep‰onnistui."
+
+#~ msgid "You have %lu new messages in folder '%s'.\n"
+#~ msgstr "Sinulla on %lu uutta viesti‰ kansiossa '%s'.\n"
+
+#~ msgid "compiled for "
+#~ msgstr "k‰‰nnetty "
+
+#~ msgid "Copyright (c) 1999 by Karsten Ball¸der"
+#~ msgstr "Copyright (c) 1999: Karsten Ball¸der"
+
+#~ msgid "Written by Karsten Ball¸der"
+#~ msgstr "Tekij‰t: Karsten Ball¸der"
+
+#~ msgid "and Vadim Zeitlin"
+#~ msgstr "ja Vadim Zeitlin"
+
+#~ msgid ""
+#~ "This software is provied 'as is' and without any expressed or implied"
+#~ msgstr ""
+#~ "This software is provided 'as is' and without any expressed or implied"
+
+#~ msgid "warranties, including, without limitation, the implied warranties"
+#~ msgstr "warranties, including, without limitation, the implied warranties"
+
+#~ msgid "of merchantibility and fitness for a particular purpose."
+#~ msgstr "of merchantibility and fitness for a particular purpose."
+
+#~ msgid "This is OpenSource(TM) software."
+#~ msgstr "This is OpenSource(TM) Software."
+
+#~ msgid "&Compose Message"
+#~ msgstr "&Kirjoita viesti"
+
+#~ msgid "E&xit"
+#~ msgstr "&Lopeta"
+
+#~ msgid "C&ut"
+#~ msgstr "&Leikkaa"
+
+#~ msgid "Folder '"
+#~ msgstr "Kansio '"
+
+#~ msgid "You cannot delete the '%s' folder.\n"
+#~ msgstr "Et voi poistaa kansiota '%s'.\n"
+
+#~ msgid "Folder '%s' deleted"
+#~ msgstr "Kansio '%s' poistettu"
+
+#~ msgid "&OK"
+#~ msgstr "&OK"
+
+#~ msgid "&Cancel"
+#~ msgstr "&Peruuta"
+
+#~ msgid "INBOX"
+#~ msgstr "INBOX"
+
+#~ msgid "NNTP"
+#~ msgstr "NNTP"
+
+#, fuzzy
+#~ msgid "Simple group"
+#~ msgstr "ryhm‰ss‰ '"
+
+#, fuzzy
+#~ msgid "Subfolders"
+#~ msgstr "Kansiot"
+
 #~ msgid "Find string in message"
 #~ msgstr "Etsi viestist‰ merkkijono"
-
-#~ msgid "Mail sent."
-#~ msgstr "Viesti l‰hetetty."
-
-#~ msgid "Cannot run script: "
-#~ msgstr "Ei voida ajaa skripti‰: "
 
 #, fuzzy
 #~ msgid "no description"
@@ -5286,10 +6499,6 @@ msgstr "Tuhoisa virhe"
 
 #~ msgid "Adressbook"
 #~ msgstr "Osoitekirja"
-
-#, fuzzy
-#~ msgid "Header name: "
-#~ msgstr "&Otsikkonimi: "
 
 #~ msgid "Select the file to import data from"
 #~ msgstr "Valitse tuotava tiedosto"

@@ -1,17 +1,24 @@
-A new release of Mahogany has been made.
+A new release of the `Mahogany' e-Mail and News client has been made.
+===================================================================== 
 
-Binaries for Debian Linux i386, Debian Linux AXP, Sun Solaris and
-source are available immediately, binaries for RedHat Linux 5.2 and
-6.0 will follow within the next two days.
+Binaries and source for a variety of Linux and Unix systems are
+available at http://www.wxwindows.org/Mahogany/
 
-Announcing Mahogany Version 0.23a 
+
+In this message:
+
+1. Announcing Mahogany Version 0.50
+2. Changes against the previous release
+
+Announcing Mahogany Version 0.50 
 ===================================================================== 
 
 Mahogany is an OpenSource(TM) cross-platform mail and news client. It
 is available for X11/Unix and MS Windows platforms, supporting a wide
 range of protocols and standards, including POP3, IMAP and full MIME
-support. Thanks to its built-in Python interpreter it can be extended
-far beyond its original functionality.
+support as well as optional security via SSL. 
+Thanks to its built-in Python interpreter it can be extended far
+beyond its original functionality.
 
 Mahogany's wealth of features and ease of use make it one of the most
 powerful clients available, providing a consistent and intuitive
@@ -21,55 +28,83 @@ It aims at supporting GNOME (and KDE for that matter) and includes an
 extendable address book system supporting hierarchical organisation of
 entries, group aliases, searching the database and easy editing, with
 support for other program`s address database formats. Currently
-Mahogany`s native format and (X)Emacs` BBDB address books are
-supported.
+Mahogany`s native format, (X)Emacs` BBDB address books and PalmOS
+address books are supported.
 
 Mahogany is being developed using the free wxWindows application
 framework, building on the GTK+ toolkit on Unix.
 
-Mahogany is constantly being tested on Linux-x86, Linux-alpha,
+Mahogany is constantly being tested on a variety of Linux system,
 Solaris-sparc and MS Windows. It should compile and work on any major
 Unix platform.
 
-CHANGES AGAINST RELEASE 0.22a / UPDATE :
+CHANGES AGAINST RELEASE 0.23a / UPDATE :
 ===================================================================== 
 
-For the Unix versions, there are few differences, minor bug fixes and
-improvements, especially in the message editor, which behaves almost
-perfectly now. The major new addition is the Windows version, built
-from the same source as the Unix one. We hope to keep both platforms
-in sync for the future, making common releases. Also, work on a MacOS
-port has left the early stages and is making progress.
+This is the long anticipated "major release" with a long list of
+improvements and new features. Key points are:
 
-- First useable, public Windows release for Windows NT/95/98.
-- All known (crash-inducing) bugs fixed.
-- Significant message editor/viewer improvements.
-- Several minor usability fixes and some significant speed-ups.
+  - Filtering rules added
+  - Proper MH/NNTP/IMAP support and subscription management
+  - PalmOS connectivity, mail/addressbook support and generic frontend
+  - HTML online help
+  - optional SSL encrypted communications
 
-DOWNLOAD 
-===================================================================== 
 
-        http://mahogany.home.dhs.org/                  
-        http://www.phy.hw.ac.uk/~karsten/Mahogany/
+ Release 0.50 is Unix-only and should be followed by a common
+ Unix and Windows Version within about four to six week. The next
+ month or so will be dedicated to updating translations and bringing
+ the Windows version back in sync.
 
-        ftp://ronnie.phy.hw.ac.uk/pub/Mahogany/   (UK, Europe)
-        ftp://ftp.gdev.net/pub/Mahogany/          (US)
+A more complete list of changes:
+
+ * Proper support for MH folders.
+ * Browsing and subscription management for IMAP and NNTP servers.
+ * A plugin module system has been created which allows to dynamically
+   load expansion modules. Existing modules (statically linked in this
+   release, but dynamically linkable) include a filtering language
+   and PalmOS support. For the future, a calendar/timeplanner plugin
+   is planned.
+ * Configurable filtering rules have been added.
+ * Message threading and configurable sort order is supported.
+ * An HTML-based help browser has been added. 
+ * Configurable date format.
+ * Handling of dial-up networking and detection of connection status.
+ * Optional user of a Trash folder.
+ * Wizard-dialogs and ``tip of the day'' dialogs added to make Mahogany
+   easier to use.
+ * Optional SSL support can be compiled in (not activated by default
+   due to US export restrictions), allowing secure access to mail and
+   news servers.
+ * PalmOS handheld connectivity: synchronise e-mails with your PalmOS
+   handheld computer and use its addressbook within Mahogany. Also,
+   backup, restore and install databases of your handheld.
+ * Bug fixes in nearly all parts of the code. Mahogany should suffer
+   much less from crashes than earlier versions. The message editor
+   behaves better and is faster.
+ * Minor GUI improvements like keyboard bindings and nicer icons. Support
+   for KDE and GNOME filetype icons.
+
 
 NEXT 
 ===================================================================== 
 
-For the next release we are currently working on the following:
+  0.51 will be a minor update, mainly to bring translations up to date 
+  and to release the version for MS-Windows. Anticipated release date
+  should be early to mid May 2000.
+  It will hopefully also include improved newsreader functionality.
 
-     completion of filtering rules/scoring code     
-     asynchoronous folder access and multi-threading
-     subscription management for NNTP/IMAP/newsspool 
-     Templates/style-sheets for message composition and flexible reply handling 
-     DND with KDE/Gnome filemanagers (now supported by wxGTK) 
-     Messages sorting, threading, scoring and searching 
- possibly also:
-     GPG/PGP support 
-     built-in HTML viewer
-     Finish the new message editor code: rich-text editing 
+  After that we plan to work on the following next:
+   
+   - test and complete multi-threading to allow network operations to
+     happen in background (almost complete)
+   - write a faster Mailbox file format (possibly using ODBC?)
+   - full HTML message editing/displaying (almost complete)
+   - full drag and drop interaction with filemanagers and between folders
+   - a calendar/timeplanner plugin, synchronised with the PalmOS support
+
+
+Please direct any queries to m-developers@egroups.com
 
 --
  Karsten Ballüder  http://Ballueder.home.dhs.org/  mailto:karste-@phy.hw.ac.uk

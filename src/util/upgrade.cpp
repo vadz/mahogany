@@ -663,9 +663,9 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    labels.Add(_("&Collect new mail:"));
    labels.Add(_("Use &Trash mailbox:"));
    labels.Add(_("Use &Outbox queue:"));
-   labels.Add(_("Use dial-up network:"));
-   labels.Add(_("Load PalmOS support:"));
-   labels.Add(_("Enable Python:"));
+   labels.Add(_("&Use dial-up network:"));
+   labels.Add(_("&Load PalmOS support:"));
+   labels.Add(_("Enable &Python:"));
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
@@ -789,7 +789,7 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
       "\n"
       "\n"
       "We hope you will enjoy using Mahogany!\n"
-      "                    M-Team"
+      "                    The M-Team"
                                      ));
 }
 
@@ -829,6 +829,8 @@ bool RunInstallWizard()
    gs_installWizardData.useOutbox = TRUE;
    gs_installWizardData.useTrash = TRUE;
    gs_installWizardData.collectAllMail = TRUE;
+   gs_installWizardData.usePython = FALSE;
+   gs_installWizardData.usePalmOs = TRUE;
    
    gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
    if(gs_installWizardData.email.Length() == 0)
@@ -1755,7 +1757,7 @@ SetupServers(void)
    mfolder = CreateFolderTreeEntry(NULL,
                                    _("IMAP Server"),
                                    MF_IMAP                   ,
-                                   MF_FLAGS_ANON|MF_FLAGS_GROUP,
+                                   MF_FLAGS_GROUP,
                                    "",
                                    FALSE);
    p = ProfileBase::CreateProfile(mfolder->GetName());

@@ -219,9 +219,16 @@ wxMFrame::OnMenuCommand(int id)
 
    case WXMENU_FILE_CREATE:
       {
-         MFolder *folder = ShowFolderCreateDialog(this);
-         if ( folder )
-            folder->DecRef();
+         wxWindow *winTop = ((wxMApp *)mApplication)->GetTopWindow();
+         bool wantsDialog;
+         MFolder *newfolder = RunCreateFolderWizard(&wantsDialog, NULL, winTop);
+         if ( wantsDialog )
+         {
+            // users wants to use the dialog directly instead of the wizard
+            newfolder = ShowFolderCreateDialog(winTop, FolderCreatePage_Default, NULL);
+         }
+         if(newfolder)
+            newfolder->DecRef();
       }
       break;
 

@@ -1,15 +1,15 @@
 $Id$
 
 --------------------------------------------------------------------
-README file for Mahogany, Release 0.23a "Polwarth IV"
+README file for Mahogany, Release 0.50 "Meadows"
 --------------------------------------------------------------------
 
 --------------------------------------------------------------------
 Issues with the current release
 --------------------------------------------------------------------
 
-Mahogany, just like wxGTK, works best with gtk 1.2.6. Both, 1.2.5
-and 1.2.7 might cause some minor problems. Please understand that
+Mahogany, just like wxGTK, works best with gtk+ 1.2.6. 
+gtk+ 1.2.7 might cause some minor problems. Please understand that
 this is not a Mahogany specific problem and that we cannot do
 anything about it. 
 
@@ -24,11 +24,6 @@ http://mahogany.home.dhs.org/
 Be not confused by references to a program called "M", which was the
 original working title for "Mahogany".
 
-
-wxGTK still exhibits a minor bug which occasionally corrupts the
-layout of complex dialogs, such as the preferences dialog in Mahogany.
-Resizing the dialog window a little with the mouse fixes the layout.
-
 --------------------------------------------------------------------
 Internet resources
 --------------------------------------------------------------------
@@ -37,25 +32,6 @@ The Mahogany web page is at:
 
 http://mahogany.home.dhs.org/
 http://www.wxwindows.org/Mahogany/
-
-
-Mahogany and wxWindows/wxGTK are available via anonymous ftp from the
-following places:
-
-UK/Europe:
-ftp://ronnie.phy.hw.ac.uk/pub/Mahogany
-ftp://ronnie.phy.hw.ac.uk/pub/wxGTK
-
-US mirror:
-
-ftp://ftp.gdev.net/pub/Mahogany
-ftp://ftp.gdev.net/pub/wxGTK
-
-
-A web frontend to the developers' cvs archive is available at:
-
-http://cvs.gdev.net/mahogany.cgi
-http://cvs.gdev.net/wxgtk.cgi
 
 The wxWindows home page is at:
 
@@ -71,43 +47,22 @@ More detailed, step for step, instructions can be found in the Manual,
 which is contained in the Mdoc.tar.gz file in the doc directory.
 You can also view it online at http://www.wxwindows.org/Mahogany/
 
+Mahogany is known to work with wxGTK 2.1.14 and should work with 2.1.15
+and 2.2.0 when they are officially released.
+
 Before you can compile Mahogany, you will need to get a copy of wxGTK and
-compile and install it. It is important, that you use a very recent copy of
-wxGTK, or the wxGTK source snapshot available from the same places where you
-get Mahogany, and configure it as detailed below. Compiling wxGTK with
-different configure switches is possible, and should generally work with
-Mahogany. However, to play it safe, stick to the options below.
+compile and install it.
 
-If using the source from CVS or the snapshot, you need to understand
-wxGTK's build system. Have a look at wxWindows/BuildCVS.txt. It's simple:
-Create a new directory under wxWindows/ to contain your build tree and
-run ../configure from in there to set up the build system. If this fails,
-because you don't have all the latest tools, change into wxWindows/testconf
-instead and run ./apply. After that go back to your build directory and
-run ../configure. Running ../configure --help first is a good idea.
+- wxGTK should be configured with the following option:
+     ./configure --with-gtk 
 
-- wxGTK should be configured with the following options:
-  (You can vary these as you like, but these are recommended.)
+  If you experience compilation problems, add the option
+  --disable-optimise     # this is also needed for gcc 2.8.0
 
-     ../configure --with-gtk 
+Doing a "make" and "make install" in the wxWindows directory should install
+the header files and libraries on your system. 
 
-For debugging, the following options should be added:
-
-	--enable-debug_flag \
-	--enable-debug_info \
-	--disable-optimise     # this is also needed for gcc 2.8.0
-
-Doing a "make" and "make install" in the wxWindows/src directory should install
-the header files and libraries on your system. You can use the --prefix= option
-when compiling wxGTK, to chose a different (default:/usr/local) installation
-location. If you install it in a non-standard location, you can make sure that
-Mahogany will find it, by linking the include/wx directory to Mahogany's
-extra/include/wx directory and all the libwx_gtk* files to Mahogany's
-extra/lib directory.  In that case, Mahogany's configure should be run 
-with the additional --without-wxconfig option.
-
-
-To compile and install Mahogany itself:
+- To compile and install Mahogany itself:
   ./configure --help
   ./configure "with your appropriate options"
   make depend
@@ -116,7 +71,7 @@ To compile and install Mahogany itself:
   make install_all
 
   If you built wxWindows with debug enabled, specify the --with-debug option
-  when configuring Mahogany.
+  when configuring Mahogany. 
 
   Depending on whether you have installed all required programs in the
   right versions, "make doc" and "make install_all" might
@@ -131,15 +86,14 @@ Also, if you change into the src directory, the additional targets
 "make static" and "make semistatic" are available, to produce binaries 
 with less dependencies on external libraries.
 
-If you want to re-compile Mahogany, it is generally sufficient to do
-this from withing the src directory, as there is hardly ever a need to 
-rebuild all the additional software in the extra/src directory.
-Runnin make from within src is much faster than doing this from the
-toplevel directory.
-
 Required software:
 
    - wxGTK, the gtk port of wxWindows
    - libgtk 1.2.x, libglib 1.2.x
+
+
+If you want to compile Mahogany with SSL support, you need to have
+OpenSSL installed first. Then you can configure Mahogany with the additional
+option --with-ssl.
 
 
