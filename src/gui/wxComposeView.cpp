@@ -1638,11 +1638,11 @@ wxComposeView::InitText(Message *msg, MessageView *msgview)
          // fall through
 
       case Message_New:
+      case Message_Forward:
          m_txtSubject->SetFocus();
          break;
 
       case Message_Reply:
-      case Message_Forward:
          m_LayoutWindow->SetFocus();
    }
 
