@@ -2848,11 +2848,7 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
       {
          // saving the messages is special, we have a separate function for
          // this as it's also done from elsewhere
-         ok = MailFolder::SaveMessageAsMBOX
-              (
-                filename,
-                String((const wxChar *)content, len)
-              );
+         ok = MailFolder::SaveMessageAsMBOX(filename, content, len);
       }
       else // not a message
       {

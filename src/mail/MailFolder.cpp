@@ -1200,9 +1200,12 @@ bool MailFolder::SetFlag(const UIdArray *sequence, int flag, bool set)
 // ----------------------------------------------------------------------------
 
 /* static */
-bool MailFolder::SaveMessageAsMBOX(const String& filename, const wxChar *content)
+bool
+MailFolder::SaveMessageAsMBOX(const String& filename,
+                              const void *content,
+                              size_t len)
 {
-   wxFile out(filename, wxFile::write);
+   wxFile out(filename, wxFile::write_append);
    bool ok = out.IsOpened();
    if ( ok )
    {
@@ -1214,7 +1217,8 @@ bool MailFolder::SaveMessageAsMBOX(const String& filename, const wxChar *content
 
       // find the from address
       static const wxChar *FROM_HEADER = _T("From: ");
-      const wxChar *p = wxStrstr(content, FROM_HEADER);
+      const wxChar *
+         p = wxStrstr(static_cast<const char *>(content), FROM_HEADER);
       if ( !p )
       {
          // this shouldn't normally happen, but if it does just make it up
@@ -1251,7 +1255,6 @@ bool MailFolder::SaveMessageAsMBOX(const String& filename, const wxChar *content
       if ( ok )
       {
          // write the body
-         size_t len = wxStrlen(content);
          ok = out.Write(content, len) == len;
       }
    }

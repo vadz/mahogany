@@ -320,11 +320,16 @@ public:
    /**
      Create a new file containing the message data in MBOX format.
 
-     @param filename the name of the file to create (*will* overwrite)
+     If the file already exists, message is appended to it.
+
+     @param filename the name of the file to create or append to
      @param contents the pointer to message contents, non NULL
+     @param len its length
      @return true if everything went ok, false on error
     */
-   static bool SaveMessageAsMBOX(const String& filename, const wxChar *contents);
+   static bool SaveMessageAsMBOX(const String& filename,
+                                 const void *contents,
+                                 size_t len);
 
    //@}
 
