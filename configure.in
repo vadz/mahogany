@@ -961,7 +961,7 @@ dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
 dnl check for wxWindows installation¤
-AM_PATH_WXCONFIG(2.5.1,wxOK=1)
+AM_PATH_WXCONFIG(2.5.2,wxOK=1)
 
 if test "$wxOK" != 1; then
    AC_MSG_ERROR([
@@ -971,7 +971,7 @@ if test "$wxOK" != 1; then
 	   Please check that wx-config is in PATH, the directory
 	   where wxWindows libraries are installed (returned by
 	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-	   equivalent variable and wxWindows version is 2.5.1 or above.
+	   equivalent variable and wxWindows version is 2.5.2 or above.
    ])
 fi
 
@@ -1217,8 +1217,8 @@ auto|Auto|AUTO|1)
 	    LDD="otool -L"
 	fi
 	echo "int main() { return 0; }" >conftest.c
-	if $CXX -o conftest $WX_LIBS conftest.c && \
-		$LDD conftest | fgrep libwx  >/dev/null
+	if $CXX -o conftest $WX_LIBS conftest.c 2>link.log >&2 && \
+		$LDD conftest | fgrep libwx 2>/dev/null >&2
 	then
 		m_cv_USE_MODULES=dynamic
 		MAKE_USE_MODULES="USE_MODULES=dynamic"
