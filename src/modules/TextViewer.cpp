@@ -539,6 +539,10 @@ void TextViewer::Create(MessageView *msgView, wxWindow *parent)
 
 void TextViewer::Clear()
 {
+   // we shouldn't have anything left over from the last message we showed
+   ASSERT_MSG( m_textToAppend.empty(), _T("forgot to call FlushText()?") );
+
+
    m_window->Clear();
 
    m_window->Freeze();
@@ -832,6 +836,8 @@ void TextViewer::EndPart()
 
 void TextViewer::EndBody()
 {
+   FlushText();
+
    m_window->SetInsertionPoint(0);
 
    Update();
