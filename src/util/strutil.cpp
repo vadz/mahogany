@@ -254,55 +254,6 @@ strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
    }
 }
 
-int
-strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
-{
-   int levels = 0;
-
-   for ( const char *c = string; *c != 0 && *c != '\n'; c++)
-   {
-      // skip white space
-      int num_white = 0;
-      while ( *c == '\t' || *c == ' ' )
-      {
-         if ( ++num_white > max_white )
-         {
-            // too much whitespace for this to be a quoted string
-            return levels;
-         }
-
-         c++;
-      }
-
-      // skip optional alphanumeric prefix
-      int num_alpha = 0;
-      while ( isalpha((unsigned char)*c) )
-      {
-         if ( ++num_alpha > max_alpha )
-         {
-            // prefix too long, not start of the quote
-            return levels;
-         }
-
-         c++;
-      }
-
-      // start of text?
-      //
-      // TODO: make the string of "quote" characters configurable
-      if ( *c != '>' && *c != '|' && *c != ')' && *c != '}' && *c != '*' )
-      {
-         // yes (according to our heuristics anyhow)
-         break;
-      }
-
-      levels++;
-   }
-
-   return levels;
-}
-
-
 String
 strutil_extract_formatspec(const char *format)
 {

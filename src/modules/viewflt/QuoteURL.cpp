@@ -67,6 +67,23 @@ static const size_t QUOTE_LEVEL_MAX = 3;
 static const size_t LEVEL_INVALID = (size_t)-1;
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+/** Count levels of quoting on the first line of passed string
+    (i.e. before the first \n). It understands standard e-mail
+    quoting methods such as ">" and "XY>"
+
+    @param string the string to check
+    @param max_white max number of white characters before quotation mark
+    @param max_alpha max number of A-Z characters before quotation mark
+    @return number of quoting levels (0 for unquoted text)
+  */
+static
+int CountQuoteLevel(const wxChar *string, int max_white, int max_alpha);
+
+
+// ----------------------------------------------------------------------------
 // QuoteURLFilter declaration
 // ----------------------------------------------------------------------------
 
@@ -116,6 +133,63 @@ protected:
       bool highlightURLs:1;
    } m_options;
 };
+
+// ============================================================================
+// CountQuoteLevel implementation
+// ============================================================================
+
+int
+CountQuoteLevel(const char *string, int max_white, int max_alpha)
+{
+   int levels = 0;
+
+   for ( const char *c = string; *c != 0 && *c != '\n'; c++)
+   {
+      // skip white space
+      int num_white = 0;
+      while ( *c == '\t' || *c == ' ' )
+      {
+         if ( ++num_white > max_white )
+         {
+            // too much whitespace for this to be a quoted string
+            return levels;
+         }
+
+         c++;
+      }
+
+      // skip optional alphanumeric prefix
+      int num_alpha = 0;
+      while ( isalpha((unsigned char)*c) )
+      {
+         if ( ++num_alpha > max_alpha )
+         {
+            // prefix too long, not start of the quote
+            return levels;
+         }
+
+         c++;
+      }
+
+      // check if we have a quoted line or not now: normally it is enough to
+      // simply check whether the first character is one of the admitted
+      // "quoting characters" but for ')' (which some people do use to quote!)
+      // we have to also check the next character as otherwise it results in
+      // too many false positives
+      //
+      // TODO: make the string of "quoting characters" configurable
+      if ( *c != '>' && *c != '|' && *c != '}' && *c != '*' &&
+            (*c != ')' || c[1] != ' ') )
+      {
+         // yes (according to our heuristics anyhow)
+         break;
+      }
+
+      levels++;
+   }
+
+   return levels;
+}
 
 // ============================================================================
 // QuoteURLFilter implementation
@@ -170,7 +244,7 @@ QuoteURLFilter::ReadOptions(Profile *profile)
 size_t
 QuoteURLFilter::GetQuotedLevel(const wxChar *text) const
 {
-   size_t qlevel = strutil_countquotinglevels
+   size_t qlevel = CountQuoteLevel
                    (
                      text,
                      m_options.quotedMaxWhitespace,
