@@ -1,10 +1,10 @@
 # Makefile for src directory
 # $Id$
 
-UTILOBJ:=util/strutil.o util/sysutil.o util/miscutil.o util/upgrade.o
-SUB_DIRS =  util classes gui mail adb wx
-MOBJS:=$(UTILOBJ) classes/*.o gui/*.o  mail/*.o adb/*.o \
-      wx/generic/*.o wx/common/*.o wx/vcard/*.o
+SUB_DIRS:= util classes gui mail adb wx
+UTILOBJ := util/strutil.o util/sysutil.o util/miscutil.o util/upgrade.o
+MOBJS   := $(UTILOBJ) classes/*.o gui/*.o  mail/*.o adb/*.o \
+	wx/generic/*.o wx/common/*.o wx/vcard/*.o
 
 include ../makeopts
 
@@ -27,12 +27,12 @@ MOBJS := $(MOBJS) util/LeakTracer.o
 endif
 
 ifeq ($(USE_MODULES),dynamic)
-all:	M modules
+all:	subdirs M modules
 else
-all:	M
+all:	subdirs M
 endif
 
-M:	subdirs modules_obj
+M:	$(MOBJS)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 
 Mdll:	libM.so
@@ -43,27 +43,23 @@ libM.so: subdirs
 
 # build the binary which is statically linked to wxGTK, dynamically to
 # everything else
-quartstatic: modules_obj
+quartstatic: subdirs
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS_STATIC)
 
 # build the binary which is statically linked to wxGTK and GTK+, dynamically
 # to everything else
-semistatic: modules_obj
+semistatic: subdirs
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(LIBS_STATIC) $(GUI_LIBS_STATIC)
 
 # build a (completely) statically linked binary
-static: modules_obj
+static: subdirs
 	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(LIBS)
 
 subdirs:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
+	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -C $$i all; done
 
 modules:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i modules; done
-	$(MAKE) -C modules modules
-
-modules_obj:
-	$(MAKE) -C modules all
+	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -C $$i modules; done
 
 doc:
 	@true
@@ -91,8 +87,8 @@ endif
 #
 install-modules:
 ifeq ($(USE_MODULES),dynamic)
-	for i in $(MODULES_DIRS); do $(MAKE) -C $$i $@ ; done
-	set -e; $(MAKE) -C modules install
+	set -e; for i in $(MODULES_DIRS); do $(MAKE) -C $$i $@ ; done
+	$(MAKE) -C modules install
 else
 	@true
 endif
@@ -102,4 +98,4 @@ msgcat:
 #	$(MAKE) -C $(BUILDDIR)/locale mergecat
 
 .PHONY:	all clean doc semistatic static allclean install msgcat \
-	subdirs install-modules modules main modules_obj
+	subdirs install-modules modules main

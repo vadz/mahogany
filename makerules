@@ -22,15 +22,6 @@ vpath %.y .src
 vpath %.cc .src
 vpath %.cpp .src
 
-%.o: %.y
-	$(YACC) $(YFLAGS) $< && mv -f y.tab.c $*.c
-	if test -f y.tab.h; then \
-	  if cmp -s y.tab.h $*.h; then rm -f y.tab.h; \
-	  else mv -f y.tab.h $*.h; fi; \
-	else :; fi
-	$(CC)  -fPIC $(CPPFLAGS) $(CFLAGS) -c $*.c
-	@rm -f $*.c
-
 ifdef USE_LIBTOOL
 # no longer used
 %.o: %.cc
@@ -57,20 +48,14 @@ endif
 
 ifdef USE_SWIG
 vpath %.i .src
-%.o: %.i
-	$(SWIG) $(SWIGFLAGS) -o $*.cpp $<
-	$(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $*.cpp
-	@rm -f $*.cpp
-%.py: %.i
-	$(SWIG) $(SWIGFLAGS) -o $@ $<
 %.cpp: %.i
+	$(SWIG) $(SWIGFLAGS) -o $@ $<
+%.py: %.i
 	$(SWIG) $(SWIGFLAGS) -o $@ $<
 else
 vpath %.cpp-swig .src
-%.o: %.cpp-swig
-	ln -s $< $*.cpp
-	$(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $*.cpp
-	@rm -f $*.cpp
+%.cpp: %.cpp-swig
+	ln -s $< $@
 vpath %.py-swig .src
 %.py: %.py-swig
 	ln -s $< $@
@@ -111,7 +96,8 @@ endif
 %.c: %.y
 	$(YACC) $(YFLAGS) $< && mv y.tab.c $@
 	if test -f y.tab.h; then \
-	if cmp -s y.tab.h $*.h; then rm -f y.tab.h; else mv y.tab.h $*.h; fi; \
+	  if cmp -s y.tab.h $*.h; then rm -f y.tab.h; \
+	  else mv y.tab.h $*.h; fi; \
 	else :; fi
 
 ifdef HAVE_SGMLTOOLS

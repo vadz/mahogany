@@ -86,12 +86,17 @@ M_OVERRIDES(ssl,SSL support,USE_SSL,1,
 --without-ssl           do not include SSL support (requires openSSL))
 
 AC_MSG_CHECKING(for install location)
+m_default_prefix=/usr
 case "$prefix" in
-NONE)	AC_CACHE_VAL(m_cv_prefix,m_cv_prefix=/usr);;
+NONE)	AC_CACHE_VAL(m_cv_prefix,m_cv_prefix=$m_default_prefix);;
 *)	m_cv_prefix=$prefix ;;
 esac
+AC_MSG_RESULT($m_cv_prefix)
+case "$m_cv_prefix" in /*) ;; *)
+	AC_MSG_WARN([--prefix=$prefix must be an absolute path name, using $m_default_prefix])
+	m_cv_prefix=$m_default_prefix
+esac
 prefix=$m_cv_prefix
-AC_MSG_RESULT($prefix)
 
 dnl save parameter settings in case stuff below aborts
 AC_CACHE_SAVE
