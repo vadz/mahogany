@@ -276,7 +276,10 @@ void MailFolderTimer::Notify(void)
       // don't ping the mailbox which we maintain artificially alive, otherwise
       // it can never close at all as pinging it may remove and add it back to
       // MfCloser thus resetting its expiration timeout
-      if ( !gs_MailFolderCloser || !gs_MailFolderCloser->HasFolder(m_mf) )
+      //
+      // but do ping it if it shouldn't close - as otherwise it indeed will!
+      if ( (m_mf->GetFlags() & MF_FLAGS_KEEPOPEN) ||
+               !gs_MailFolderCloser || !gs_MailFolderCloser->HasFolder(m_mf) )
       {
          // don't show any dialogs when doing background checks
          NonInteractiveLock noInter(m_mf, false /* !interactive */);
