@@ -286,14 +286,14 @@ extern bool InitPythonDll()
          String name = GetPythonDllBaseName(versions[nVer]);
          const String ext = wxDynamicLibrary::GetDllExt();
 
+#if defined(OS_WIN) && defined(DEBUG)
+         // debug version of M should only use debug Python version under
+         // Windows, otherwise the CRTs they use mismatch and bad things happen
+         name += _T("_d");
+#endif // OS_WIN
+
          if ( dllPython.Load(name + ext) )
             break;
-
-#ifdef OS_WIN
-         // also try debug version of the DLL
-         if ( dllPython.Load(name + _T("_d") + ext) )
-            break;
-#endif // OS_WIN
       }
    }
 
