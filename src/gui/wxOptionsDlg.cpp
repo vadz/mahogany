@@ -859,24 +859,23 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&POP server"),                  Field_Text | Field_AppWide,    -1,                        },
    { gettext_noop("&IMAP server"),                 Field_Text | Field_AppWide,    -1,                        },
 #ifdef USE_SENDMAIL
-   { gettext_noop("Use local mail transfer a&gent"), Field_Bool | Field_AppWide, -1,           },
-   { gettext_noop("Local MTA &command"), Field_Text | Field_AppWide, ConfigField_UseSendmail },
+   { gettext_noop("Use local mail transfer a&gent"), Field_Bool, -1,           },
+   { gettext_noop("Local MTA &command"), Field_Text, ConfigField_UseSendmail },
 #endif // USE_SENDMAIL
-   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_AppWide | Field_Vital,
+   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,
 #ifdef USE_SENDMAIL
                                                    -ConfigField_UseSendmail,
 #else
                                                    -1
 #endif
    },
-   { gettext_noop("NNTP (&news) server"),          Field_Text | Field_AppWide,    -1, },
+   { gettext_noop("NNTP (&news) server"),          Field_Text,    -1, },
 
    { gettext_noop("If your SMTP server supports 8BITMIME ESMTP extension\n"
                   "Mahogany may send 8 bit data without encoding it. If\n"
                   "the server doesn't support it, the data will be encoded\n"
                   "properly, so there is normally no risk in setting this "
                   "option."),                      Field_Message |
-                                                   Field_AppWide |
                                                    Field_Advanced,
 #ifdef USE_SENDMAIL
                                                   -ConfigField_UseSendmail
@@ -885,7 +884,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif
    },
    { gettext_noop("Send &8 bit data"),             Field_Bool |
-                                                   Field_AppWide |
                                                    Field_Advanced,
 #ifdef USE_SENDMAIL
                                                   -ConfigField_UseSendmail
@@ -901,35 +899,35 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
       "by your ISP as it is not usually required and may lead\n"
       "problems if specified when it is not needed."),
      Field_Message | Field_AppWide, -1,                        },
-   { gettext_noop("SMTP server &user ID"),         Field_Text | Field_AppWide,
+   { gettext_noop("SMTP server &user ID"),         Field_Text,
 #ifdef USE_SENDMAIL
                                                    -ConfigField_UseSendmail,
 #else
                                                    -1
 #endif
    },
-   { gettext_noop("SMTP server pa&ssword"),        Field_Passwd | Field_AppWide, ConfigField_MailServerLogin,           },
-   { gettext_noop("NNTP server user &ID"),         Field_Text | Field_AppWide,   -1,           },
-   { gettext_noop("NNTP server pass&word"),        Field_Passwd | Field_AppWide, ConfigField_NewsServerLogin,           },
+   { gettext_noop("SMTP server pa&ssword"),        Field_Passwd, ConfigField_MailServerLogin,           },
+   { gettext_noop("NNTP server user &ID"),         Field_Text,   -1,           },
+   { gettext_noop("NNTP server pass&word"),        Field_Passwd, ConfigField_NewsServerLogin,           },
 
-   { gettext_noop("Try to guess SMTP sender header"), Field_Bool | Field_AppWide | Field_Advanced, ConfigField_MailServerLogin,           },
-   { gettext_noop("SMTP sender header"), Field_Text | Field_AppWide | Field_Advanced, -ConfigField_GuessSender,           },
+   { gettext_noop("Try to guess SMTP sender header"), Field_Bool | Field_Advanced, ConfigField_MailServerLogin,           },
+   { gettext_noop("SMTP sender header"), Field_Text | Field_Advanced, -ConfigField_GuessSender,           },
 #ifdef USE_SSL
    { gettext_noop("Mahogany can attempt to use SSL (secure sockets layer) to send\n"
                   "mail or news. Tick the following boxes to activate this.\n"
                   "You may also have to tell Mahogany to accept unsigned (or\n"
                   "self-signed) certificates if your organization uses them."),
-                                                   Field_Message | Field_AppWide, -1 },
-   { gettext_noop("SMTP server uses SS&L"),        Field_Bool | Field_AppWide,
+                                                   Field_Message, -1 },
+   { gettext_noop("SMTP server uses SS&L"),        Field_Bool,
 #ifdef USE_SENDMAIL
                                                   -ConfigField_UseSendmail,
 #else
                                                   -1,
 #endif
    },
-   { gettext_noop("&Accept unsigned certificates for SMTP"), Field_Bool | Field_AppWide, ConfigField_SmtpServerSSL,     },
-   { gettext_noop("NNTP s&erver uses SSL"), Field_Bool | Field_AppWide,    -1,                        },
-   { gettext_noop("A&ccept unsigned certificates for NNTP"), Field_Bool | Field_AppWide, ConfigField_NntpServerSSL,     },
+   { gettext_noop("&Accept unsigned certificates for SMTP"), Field_Bool, ConfigField_SmtpServerSSL,     },
+   { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
+   { gettext_noop("A&ccept unsigned certificates for NNTP"), Field_Bool, ConfigField_NntpServerSSL,     },
 #endif // USE_SSL
 
 #ifdef USE_DIALUP
