@@ -333,14 +333,16 @@ enum ConfigFields
 #endif // USE_FONT_DESC/!USE_FONT_DESC
    ConfigField_MessageViewFGColour,
    ConfigField_MessageViewBGColour,
-   ConfigField_MessageViewUrlColour,
    ConfigField_MessageViewHeaderNamesColour,
    ConfigField_MessageViewHeaderValuesColour,
+   ConfigField_MessageViewHighlightUrls,
+   ConfigField_MessageViewUrlColour,
    ConfigField_MessageViewQuotedColourize,
-   ConfigField_MessageViewQuotedCycleColours,
+   ConfigField_MessageViewQuotedColourizeHelp,
    ConfigField_MessageViewQuotedColour1,
    ConfigField_MessageViewQuotedColour2,
    ConfigField_MessageViewQuotedColour3,
+   ConfigField_MessageViewQuotedCycleColours,
    ConfigField_MessageViewProgressHelp,
    ConfigField_MessageViewProgressThresholdSize,
    ConfigField_MessageViewProgressThresholdTime,
@@ -1212,14 +1214,20 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_FONT_DESC/!USE_FONT_DESC
    { gettext_noop("Foreground c&olour"),           Field_Color,   -1 },
    { gettext_noop("Back&ground colour"),           Field_Color,   -1 },
-   { gettext_noop("Colour for &URLs"),             Field_Color,   -1 },
    { gettext_noop("Colour for header &names"),     Field_Color,   -1 },
    { gettext_noop("Colour for header &values"),    Field_Color,   -1 },
+   { gettext_noop("&Highlight the URLs"),          Field_Bool,    -1 },
+   { gettext_noop("Colour for &URLs"),             Field_Color,   ConfigField_MessageViewHighlightUrls },
    { gettext_noop("Colourize &quoted text"),       Field_Bool,    -1 },
-   { gettext_noop("Reuse colours when too many quotation marks"),Field_Bool,    ConfigField_MessageViewQuotedColourize },
-   { gettext_noop("Colour for &1st level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
-   { gettext_noop("Colour for &2nd level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
-   { gettext_noop("Colour for &3nd level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
+   { gettext_noop("You may specify the colours for the first 3 levels of\n"
+                  "the quoted text individually. If quoting level is greater\n"
+                  "than 3, Mahogany may either reuse the last colour for\n"
+                  "the deeper levels or start over with the first colour\n"
+                  "again if you check the option below."), Field_Message, ConfigField_MessageViewQuotedColourize },
+   { gettext_noop("Colour for the &1st level"),Field_Color,   ConfigField_MessageViewQuotedColourize },
+   { gettext_noop("Colour for the &2nd level"),Field_Color,   ConfigField_MessageViewQuotedColourize },
+   { gettext_noop("Colour for the &3rd level"),Field_Color,   ConfigField_MessageViewQuotedColourize },
+   { gettext_noop("Loop over these colours"),      Field_Bool,    ConfigField_MessageViewQuotedColourize },
    { gettext_noop("A progress dialog can be shown during the message download\n"
                   "if it is bigger than the given size or takes longer than the\n"
                   "specified time (use -1 to disable progress dialog entirely)"), Field_Message, -1 },
@@ -1683,14 +1691,16 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_FONT_DESC/!USE_FONT_DESC
    CONFIG_ENTRY(MP_MVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_MVIEW_BGCOLOUR),
-   CONFIG_ENTRY(MP_MVIEW_URLCOLOUR),
    CONFIG_ENTRY(MP_MVIEW_HEADER_NAMES_COLOUR),
    CONFIG_ENTRY(MP_MVIEW_HEADER_VALUES_COLOUR),
+   CONFIG_ENTRY(MP_HIGHLIGHT_URLS),
+   CONFIG_ENTRY(MP_MVIEW_URLCOLOUR),
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOURIZE),
-   CONFIG_ENTRY(MP_MVIEW_QUOTED_CYCLE_COLOURS),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR1),
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR2),
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR3),
+   CONFIG_ENTRY(MP_MVIEW_QUOTED_CYCLE_COLOURS),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD_SIZE),
    CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD_TIME),
@@ -1913,6 +1923,8 @@ void wxOptionsPage::CreateControls()
    // first determine the longest label
    wxArrayString aLabels;
    for ( n = m_nFirst; n < m_nLast; n++ ) {
+      wxString label;
+
       int flags = GetFieldFlags(n);
 
       // don't show the global settings when editing the identity dialog and
@@ -1942,8 +1954,14 @@ void wxOptionsPage::CreateControls()
          case Field_Bool:
             // fall through: for this purpose (finding the longest label)
             // they're the same as text
-         case Field_Radio:
          case Field_Text:
+            label = _(m_aFields[n].label);
+            break;
+
+         case Field_Radio:
+            // take only the label part in consideration
+            label = _(m_aFields[n].label);
+            label = label.BeforeFirst(':');
             break;
 
          default:
@@ -1951,7 +1969,7 @@ void wxOptionsPage::CreateControls()
             continue;
       }
 
-      aLabels.Add(_(m_aFields[n].label));
+      aLabels.Add(label);
    }
 
    long widthMax = GetMaxLabelWidth(aLabels, this);
