@@ -301,7 +301,7 @@ wxLayoutObjectCmd::Layout(wxDC &dc)
 wxLayoutLine::wxLayoutLine(wxLayoutLine *prev)
 {
    m_LineNumber = 0;
-   m_Height = 0;
+   m_Width = m_Height = 0;
    m_Length = 0;
    m_Dirty = true;
    m_Previous = prev;
@@ -892,6 +892,7 @@ wxLayoutList::wxLayoutList()
 wxLayoutList::~wxLayoutList()
 {
    InternalClear();
+   m_FirstLine->DeleteLine(false);
 }
 
 void
