@@ -138,7 +138,8 @@ enum ConfigFields
    ConfigField_HostnameHelp,
    ConfigField_AddDefaultHostname,
    ConfigField_Hostname,
-   ConfigField_SetReplyFromTo,
+   ConfigField_SetFromFromToHelp,
+   ConfigField_SetFromFromTo,
    ConfigField_VCardHelp,
    ConfigField_UseVCard,
    ConfigField_VCardFile,
@@ -925,7 +926,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Message, -1 },
    { gettext_noop("&Add this suffix if none specified"), Field_Bool, -1 },
    { gettext_noop("&Domain"),                    Field_Text | Field_Vital,   ConfigField_AddDefaultHostname, },
-   { gettext_noop("Reply return address from &To: field"), Field_Bool | Field_Advanced, -1, },
+   { gettext_noop("If you use several addresses, it may be useful to\n"
+                  "set the originating address of a reply to a message\n"
+                  "sent to a given address to the same address.\n"
+                  "The option below allows to do it automatically."), Field_Message | Field_Advanced, -1, },
+   { gettext_noop("Set \"From\" header from &To: field"), Field_Bool | Field_Advanced, -1, },
    { gettext_noop(
       "You may want to attach your personal information card (vCard)\n"
       "to all outoing messages. In this case you will need to specify\n"
@@ -1771,6 +1776,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_ADD_DEFAULT_HOSTNAME),
    CONFIG_ENTRY(MP_HOSTNAME),
+   CONFIG_NONE(), // set reply from to help
    CONFIG_ENTRY(MP_SET_REPLY_FROM_TO),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_USEVCARD),
