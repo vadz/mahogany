@@ -260,6 +260,7 @@ MFolder *MFolder::Create(const String& fullname, Type type)
    ProfileBase *profile = ProfileBase::CreateProfile(folder->GetFullName());
    CHECK( profile != NULL, NULL, "panic in MFolder: no app profile" );
    profile->writeEntry(MP_FOLDER_TYPE, type);
+   profile->DecRef();
 
    return folder;
 }
