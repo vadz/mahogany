@@ -10,10 +10,10 @@
 
 %{
 #include   "Mpch.h"
-#include   "Mcommon.h"   
+#include   "Mcommon.h"
 #include   "Message.h"
 #include   "kbList.h"
-   
+
 // we don't want to export our functions as we don't build a shared library
 #if defined(__WIN32__)
 #   undef SWIGEXPORT
@@ -51,8 +51,8 @@ public:
 /**
    Message class, containing the most commonly used message headers.
    */
-class Message 
-{   
+class Message
+{
 public:
    /** get any header line
        @line name of header line
@@ -63,30 +63,30 @@ public:
    /** Get a complete header text (const char *)!!.
        @return pointer to an internal buffer
    */
-   virtual const String GetHeader(void) ;
+   virtual String GetHeader(void);
 
    /** get Subject line
        @return Subject entry
    */
-   virtual const String & Subject(void) ;
+   virtual String & Subject(void);
 
    /** get an address line
        @param name where to store personal name if available
        @param type which address
        @return address entry
    */
-   virtual const String Address(String &name,
-                                MessageAddressType type = MAT_FROM) ;
-               
+   virtual String Address(String &name,
+                                MessageAddressType type = MAT_FROM);
+
    /** get From line
        @return From entry
    */
-   virtual const String From() ;
+   virtual String From();
 
    /** get Date line
        @return Date when message was sent
    */
-   virtual const String & Date(void) ;
+   virtual const String & Date(void);
 
    /** get message text
        @return the uninterpreted message body
@@ -97,7 +97,7 @@ public:
        @return the number of body parts
    */
    virtual int CountParts(void);
-   
+
    /**@name Methods accessing individual parts of a message. */
    //@{
    /** Return the content of the part.
@@ -131,7 +131,7 @@ public:
        @return list of parameters, must be freed by caller.
    */
    virtual const MessageParameterList & GetParameters(int n = -1);
-   
+
    /** Get the list of disposition parameters for a given part.
        @param n part number, if -1, for the top level.
        @param disptype string where to store disposition type
@@ -147,7 +147,7 @@ public:
    bool ExpandParameter(MessageParameterList & list,
                         String &parameter,
                         String *value);
-   
+
    /** Query the MimeType of the content.
        @param  n part number
        @return string describing the Mime type
@@ -184,36 +184,36 @@ public:
        @param str the string to write message text to
        @param headerFlag if true, include header
    */
-   virtual void WriteToString(String &str, bool headerFlag = true) ;
+   virtual void WriteToString(String &str, bool headerFlag = true);
 
    //@}
 
    /**@name Constants (correspoding to c-client's mail.h */
    //@{
-   /** Primary body types 
+   /** Primary body types
        If you change any of these you must also change body_types in
-       rfc822.c */ 
+       rfc822.c */
    enum ContentType
    {
       /// unformatted text
       MSG_TYPETEXT = 0,
       /// multipart content
       MSG_TYPEMULTIPART = 1,
-      /// encapsulated message 
+      /// encapsulated message
       MSG_TYPEMESSAGE = 2,
-      /// application data 
+      /// application data
       MSG_TYPEAPPLICATION = 3,
-      /// audio 
+      /// audio
       MSG_TYPEAUDIO = 4,
-      /// static image 
+      /// static image
       MSG_TYPEIMAGE = 5,
-      /// video 
+      /// video
       MSG_TYPEVIDEO = 6,
-      /// model 
+      /// model
       MSG_TYPEMODEL = 7,
-      /// unknown 
+      /// unknown
       MSG_TYPEOTHER = 8,
-      /// maximum type code 
+      /// maximum type code
       MSG_TYPEMAX = 15
    };
    //@}
