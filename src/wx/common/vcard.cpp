@@ -48,7 +48,7 @@
 
 // - required by vcard parser:
 extern "C" {
-void Parse_Debug(const char *s)
+void Parse_Debug(const char * WXUNUSED_UNLESS_DEBUG(s))
 {
 #ifdef DEBUG
     wxLogDebug(s);
@@ -670,7 +670,9 @@ void wxVCard::AddPhoneNumber(const wxString& phone, int flags)
     wxVCardPhoneNumber::SetFlags(vObj, flags);
 }
 
-void wxVCard::AddEMail(const wxString& email, wxVCardEMail::Type type)
+void
+wxVCard::AddEMail(const wxString& email,
+                  wxVCardEMail::Type WXUNUSED_UNLESS_DEBUG(type))
 {
     addPropValue(m_vObj, VCEmailAddressProp, email);
 

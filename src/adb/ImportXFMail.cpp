@@ -139,8 +139,9 @@ bool AdbXFMailImporter::StartImport(const String& filename)
    return m_textfile.Open(filename);
 }
 
-size_t AdbXFMailImporter::GetEntryNames(const String& path,
-                                        wxArrayString& entries) const
+size_t
+AdbXFMailImporter::GetEntryNames(const String& WXUNUSED_UNLESS_DEBUG(path),
+                                 wxArrayString& entries) const
 {
    ASSERT_MSG( !path, _T("where did this path come from?") );
 
@@ -205,8 +206,9 @@ size_t AdbXFMailImporter::GetEntryNames(const String& path,
    return entries.GetCount();
 }
 
-size_t AdbXFMailImporter::GetGroupNames(const String& path,
-                                        wxArrayString& /* groups */) const
+size_t
+AdbXFMailImporter::GetGroupNames(const String& WXUNUSED_UNLESS_DEBUG(path),
+                                 wxArrayString& /* groups */) const
 {
    ASSERT_MSG( !path, _T("where did this path come from?") );
 

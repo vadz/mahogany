@@ -333,8 +333,9 @@ bool AdbEudoraImporter::StartImport(const String& filename)
    return m_textfile.Open(filename);
 }
 
-size_t AdbEudoraImporter::GetEntryNames(const String& path,
-                                        wxArrayString& entries) const
+size_t
+AdbEudoraImporter::GetEntryNames(const String& WXUNUSED_UNLESS_DEBUG(path),
+                                 wxArrayString& entries) const
 {
    ASSERT_MSG( !path, _T("where did this path come from?") );
 

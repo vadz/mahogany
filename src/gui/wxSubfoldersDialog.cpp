@@ -481,7 +481,10 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
    event.Skip();
 }
 
-void wxSubfoldersTree::OnListFolder(const String& spec, char delim, long attr)
+void
+wxSubfoldersTree::OnListFolder(const String& spec,
+                               char WXUNUSED_UNLESS_DEBUG(delim),
+                               long attr)
 {
    // usually, all folders will have a non NUL delimiter ('.' for news, '/'
    // for everything else), but IMAP INBOX is special and can have a NUL one

@@ -1219,7 +1219,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
    if(count > 0)
    {
       String msg;
-      msg.Printf(_("Sent %lu messages from outbox ´%s´."),
+      msg.Printf(_("Sent %lu messages from outbox \"%s\"."),
                  (unsigned long) count, mf->GetName().c_str());
       STATUSMESSAGE((msg));
    }

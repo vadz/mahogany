@@ -285,8 +285,9 @@ bool AdbMailrcImporter::StartImport(const String& filename)
    return CanImport(filename);
 }
 
-size_t AdbMailrcImporter::GetEntryNames(const String& path,
-                                        wxArrayString& entries) const
+size_t
+AdbMailrcImporter::GetEntryNames(const String& WXUNUSED_UNLESS_DEBUG(path),
+                                 wxArrayString& entries) const
 {
    ASSERT_MSG( !path, _T("where did this path come from?") );
 
