@@ -737,6 +737,7 @@ BEGIN_EVENT_TABLE(wxOptionsPageFolderView, wxOptionsPage)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxOptionsPageFolders, wxOptionsPage)
+   EVT_BUTTON(wxOptionsPage_BtnNew, wxOptionsPageFolders::OnAddFolder)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxOptionsPageSync, wxOptionsPage)
@@ -3473,6 +3474,31 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
    }
 
    return rc;
+}
+
+void wxOptionsPageFolders::OnAddFolder(wxCommandEvent& event)
+{
+   wxListBox *lbox;
+   LboxData *data;
+   if ( !GetListboxFromButtonEvent(event, &lbox, &data) )
+   {
+      return;
+   }
+
+   // show the folder selection dialog instead of using the default text entry
+   // dialog shown by the base wxOptionsPage class
+   MFolder *folder = MDialog_FolderChoose(this);
+   if ( !folder )
+   {
+      // cancelled by user
+      return;
+   }
+
+   lbox->Append(folder->GetFullName());
+
+   folder->DecRef();
+
+   wxOptionsPage::OnChangeCommon(lbox);
 }
 
 // ----------------------------------------------------------------------------

@@ -481,10 +481,7 @@ public:
 
    void OnUpdateUIBtns(wxUpdateUIEvent&);
 
-   void OnButton(wxCommandEvent&);
-   void OnNewFolder(wxCommandEvent&);
-   void OnModifyFolder(wxCommandEvent&);
-   void OnDeleteFolder(wxCommandEvent&);
+   void OnAddFolder(wxCommandEvent&);
 
 private:
    DECLARE_EVENT_TABLE()
