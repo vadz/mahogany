@@ -32,7 +32,6 @@
 #ifndef WX_PRECOMP
 #   include "wx/log.h"
 #   include "wx/intl.h"
-#   include "wx/config.h"
 
 #   include "wx/sizer.h"
 
@@ -40,7 +39,6 @@
 #   include "wx/radiobut.h"
 #   include "wx/stattext.h"
 #   include "wx/statbmp.h"
-#   include "wx/statline.h"
 
 #   include "wx/filedlg.h"
 #   include "wx/dirdlg.h"
@@ -48,6 +46,8 @@
 #endif //WX_PRECOMP
 
 #include "wx/artprov.h"
+#include "wx/config.h"
+#include "wx/statline.h"
 
 #include "wx/tokenzr.h"
 
