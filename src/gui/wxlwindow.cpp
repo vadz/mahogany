@@ -1092,6 +1092,7 @@ wxLayoutWindow::Paste(bool primary)
       else
 #endif
       {
+#if 0 //RE_ENABLE FIXME!!
          wxTextDataObject data;
          if (wxTheClipboard->IsSupported( data.GetFormat() ))
          {
@@ -1100,6 +1101,7 @@ wxLayoutWindow::Paste(bool primary)
             wxLayoutImportText( m_llist, text);
             SetDirty();
          }
+#endif
       }
       wxTheClipboard->Close();
    }
@@ -1116,6 +1118,7 @@ wxLayoutWindow::Copy(bool invalidate)
       m_llist->EndSelection();
    }
 
+#if 0 //FIXME CLIPBOARD
    wxLayoutDataObject wldo;
    wxLayoutList *llist = m_llist->GetSelection(&wldo, invalidate);
    if(! llist)
@@ -1153,7 +1156,8 @@ wxLayoutWindow::Copy(bool invalidate)
       wxTheClipboard->Close();
       return rc;
    }
-
+#endif //FIXME CLIPBOARD
+   
    return FALSE;
 }
 

@@ -2832,7 +2832,7 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
          delete exp;
       }
 
-      wxlo->SetData(string.c_str(), string.Length()+1);
+//FIXME CLIPBOARD      wxlo->SetData(string.c_str(), string.Length()+1);
    }
    return llist;
 }

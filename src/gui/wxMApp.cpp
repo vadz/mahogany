@@ -47,6 +47,7 @@
 #include <wx/cmndata.h>  // for wxPageSetupData
 #include <wx/persctrl.h> // for wxPMessageBoxEnable(d)
 #include <wx/menu.h>
+#include <wx/statusbr.h>
 
 #include "wx/dialup.h"
 
@@ -230,6 +231,13 @@ END_EVENT_TABLE()
 void
 wxMApp::OnConnected(wxDialUpEvent &event)
 {
+   m_IsOnline = TRUE;
+   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, FALSE);
+   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, TRUE);
+//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, FALSE);
+//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, TRUE);
+   m_topLevelFrame->GetStatusBar()->SetStatusText(_("Online"), 1);
+
    MDialog_Message(_("Dial-Up network connection established."),
                    m_topLevelFrame,
                    _("Information"),
@@ -239,6 +247,12 @@ wxMApp::OnConnected(wxDialUpEvent &event)
 void
 wxMApp::OnDisconnected(wxDialUpEvent &event)
 {
+   m_IsOnline = FALSE;
+   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, TRUE);
+   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
+//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, TRUE);
+//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, FALSE);
+   m_topLevelFrame->GetStatusBar()->SetStatusText(_("Offline"), 1);
    MDialog_Message(_("Dial-Up network shut down."),
                    m_topLevelFrame,
                    _("Information"),
@@ -252,6 +266,7 @@ wxMApp::wxMApp(void)
    m_CanClose = FALSE;
    m_IdleTimer = NULL;
    m_OnlineManager = NULL;
+   m_DialupSupport = FALSE;
 }
 
 wxMApp::~wxMApp()
@@ -967,6 +982,9 @@ wxMApp::SetupOnlineManager(void)
 //   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
 //   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
 
+   static int widths[2] = { -1, 80 };
+   m_topLevelFrame->GetStatusBar()->SetFieldsCount(2, widths);
+   
    String beaconhost = READ_APPCONFIG(MP_BEACONHOST);
    strutil_delwhitespace(beaconhost);
    // If no host configured, use smtp host:
@@ -980,6 +998,18 @@ wxMApp::SetupOnlineManager(void)
    m_OnlineManager->SetConnectCommand(
       READ_APPCONFIG(MP_NET_ON_COMMAND),
       READ_APPCONFIG(MP_NET_OFF_COMMAND));
+
+   if(m_DialupSupport)
+   {
+      m_IsOnline = m_OnlineManager->IsOnline();
+      bool online = IsOnline();
+      m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, !online);
+      m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, online);
+//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, !online);
+//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, online);
+      m_topLevelFrame->GetStatusBar()->SetStatusText(online ? _("Online"):_("Offline"), 1);
+   }
+
 }
 
 bool
@@ -988,7 +1018,7 @@ wxMApp::IsOnline(void)
    if(! m_DialupSupport)
       return TRUE; // no dialup--> always connected
    else
-      return m_OnlineManager->IsOnline();
+      return m_IsOnline; //m_OnlineManager->IsOnline();
 }
 
 void
@@ -996,17 +1026,11 @@ wxMApp::GoOnline(void)
 {
    if(m_OnlineManager->IsOnline())
    {
+      m_IsOnline = TRUE;
       ERRORMESSAGE((_("Dial-up network is already online.")));
       return;
    }
    m_OnlineManager->Dial();
-/*
-  if(! m_OnlineManager->IsOnline())
-   {
-      ERRORMESSAGE((_("Could not connect to network.")));
-      return;
-      }
-*/
 }
 
 void
@@ -1014,6 +1038,7 @@ wxMApp::GoOffline(void)
 {
    if(! m_OnlineManager->IsOnline())
    {
+      m_IsOnline = FALSE;
       ERRORMESSAGE((_("Dial-up network is already offline.")));
       return;
    }

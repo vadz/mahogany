@@ -123,6 +123,8 @@ private:
    class wxTimer *m_IdleTimer;
    /// online manager
    class wxDialUpManager *m_OnlineManager;
+   /// are we currently online?
+   bool m_IsOnline;
    DECLARE_EVENT_TABLE()
 };
 

@@ -8,54 +8,6 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9		exiting program does not call auto-expunge
-		functionality in main folder
-
-9	VZ	can we have *all* log messages (incl status) appear in 
-		the log window?
-
-7		selecting/deselecting only message in folder
-
-7		show headers menu entry is inverted ??
-
-7		After setting date format and closing date fmt dialog, 
-		main config dialog remains completely disabled under
-		KDE and must be closed with window-close button
-
-9		create folder group sets server name
-
-9		Option to set central new mail folder is missing -
-		changing option manually in config file does not work
-
-9	VZ	deleting groups from an ADB book messes up the book and
-		deletes other non-selected groups and entries, too
-
-9	VZ/KB	deleting entry from an ADB book can cause leak of
-
-9	KB	Fix PalmExport: 1. strip illegal characters like '
-		                2. find out why "Fax" appears
-
-4	KB	add trash
-3		Add routine to write large headers.
-
-7	KB	group reply misses additional To entries
-
-
-	VZ	"hidden" flag for folder treecontrol
-
-
-7		opening folder with password prompts twice at startup
-
-8?		changing password on remote folder while open results
-		in empty folder, but no error message, as login no
-		longer works.  (still true_??)
-
-7	VZ/KB  UPGRADE.CPP/WIZARD:
-		- add support for Outbox and Trash folders
-		 (News get stored to "OutboxName"+_(M_NEWSOUTBOX_POSTFIX)
-
-4		TABs in messages don't show (CRAC test message)
-
 6		implement temporary/fake Profile mode
 		--> add Suspend()/Discard()/Commit() methods to normal 
 		    profile which work with a temporary subgroup
@@ -82,6 +34,79 @@ $Id$
 
 	KB	properties/access shows wrong help
 	KB	properties/custom headers/more shows corrupted title
+9		exiting program does not call auto-expunge
+		functionality in main folder
+
+9	KB	Check before reopening a closed MailFolder in
+		MailCollector, some kind of MailFolder::IsOK()?
+		-->failure counter in Ping() ?
+
+9	VZ	can we have *all* log messages (incl status) appear in 
+		the log window?
+
+9	VZ	deleting groups from an ADB book messes up the book and
+		deletes other non-selected groups and entries, too
+
+9	VZ/KB	deleting entry from an ADB book can cause leak of
+
+8	VZ	ADB fails to expand "CRAC" to the entries of a group
+		with that name "CRAC", because another entry has
+		"crac" in its mail address. Should present the dialog
+		and offer a choice instead of just picking the first.
+
+9	VZ	Subfolderdialog must check for asmf == NULL
+9	VZ	Folder Properties dialog: OK disabled, Apply sometimes 
+		enabled... impossible to change settings for existing
+		folders. 
+
+8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
+
+8	VZ	MH folder name <-> path confusion in wxMFolderDialogs.cpp
+
+8	VZ	Opening NNTP folders suddenly asks for password - what 
+		happened? --> doesn't do it here, please explain how to
+		reproduce.
+
+
+5	VZ	"hidden" flag for folder treecontrol
+
+
+7	KB	selecting/deselecting only message in folder
+
+7		show headers menu entry is inverted ??
+
+7		After setting date format and closing date fmt dialog, 
+		main config dialog remains completely disabled under
+		KDE and must be closed with window-close button
+
+9		create folder group sets server name
+
+9		Option to set central new mail folder is missing -
+		changing option manually in config file does not work
+
+
+6	KB	Fix PalmExport: 1. strip illegal characters like '
+		                2. find out why "Fax" appears
+
+4	KB	add trash
+3		Add routine to write large headers.
+
+7	KB	group reply misses additional To entries
+
+
+
+7		opening folder with password prompts twice at startup
+
+8?		changing password on remote folder while open results
+		in empty folder, but no error message, as login no
+		longer works.  (still true_??)
+
+7	VZ/KB  UPGRADE.CPP/WIZARD:
+		- add support for Outbox and Trash folders
+		 (News get stored to "OutboxName"+_(M_NEWSOUTBOX_POSTFIX)
+
+4		TABs in messages don't show (CRAC test message)
+
 
 		main window hides about-splash - not nice
 		--> 2nd timer to bring it to top and run wxYield() to
@@ -105,22 +130,12 @@ $Id$
 	VZ	templates need "First Name" field
 	VZ	icons in icons-dialog are scaled --> ugly
 
-8	VZ	ADB fails to expand "CRAC" to the entries of a group
-		with that name "CRAC", because another entry has
-		"crac" in its mail address. Should present the dialog
-		and offer a choice instead of just picking the first.
 
-9	KB	Check before reopening a closed MailFolder in
-		MailCollector, some kind of MailFolder::IsOK()?
-		-->failure counter in Ping() ?
 
 5	KB	subject in embedded rfc822 messages shows filename
 		instead???
 
-4	KB	Nicer icons for some tabs and message/rfc822 and 
-		message view properties page --> rename to "Viewer?"
-		Rename "File" menu to "Messages" or "Program"?
-		Tidy up menus/toolbars.
+4	KB	Tidy up menus/toolbars.
 
 5		intelligent followup/post article when reading
 		NNTP/NEWS groups
@@ -134,22 +149,6 @@ $Id$
 		mechanism for setting custom headers. Move Vadim's
 		code to SendMessaggeCC. Introduce SendMessage??
 
-9	VZ??	Creating IMAP folders shows imap default server but
-		that value does not show up in properties afterwards.
-
-9	VZ	Subfolderdialog must check for asmf == NULL
-9	VZ	Folder Properties dialog: OK disabled, Apply sometimes 
-		enabled... impossible to change settings for existing
-		folders. 
-
-8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
-
-8	VZ	MH folder name <-> path confusion in wxMFolderDialogs.cpp
-
-8	VZ	Opening NNTP folders suddenly asks for password - what 
-		happened? --> doesn't do it here, please explain how to
-		reproduce.
-
 7		unknown folder type in config file provokes a crash => should
 		just ignore the folder!
 
@@ -158,13 +157,6 @@ $Id$
 		from toplevel window.
 
 5	VZ	the type of the last created folder not remembered any more
-
-8	VZ?     After a dialog was opened (e.g. wxModulesDialog), the
-		app won't termiante but keeps running without windows.
-
-6 gtk   RR      The force-reopen checkbox doesn't display its
-		tooltip. Does this work under MSW? A wxGTK bug?
-		VZ: yes, it's a wxGTK bug.
 
 6	VZ	All Folder create dialog pages have no HelpIDs set.
 5		File/Page Setup does nothing
@@ -184,6 +176,17 @@ $Id$
 2	KB	message searching for IMAP should use IMAP
 		functionality, document msgno usage in search sequence
 		rather than uid: returned numbers are msgnos
+
+
+
+
+
+
+6 gtk   RR      The force-reopen checkbox doesn't display its
+		tooltip. Does this work under MSW? A wxGTK bug?
+		VZ: yes, it's a wxGTK bug.
+
+
 
 *********************************************************************
 *** PROJECTS
