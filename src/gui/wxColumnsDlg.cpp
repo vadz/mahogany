@@ -305,7 +305,11 @@ bool wxFolderViewColumnsDialog::TransferDataFromWindow()
    {
       for ( size_t n = 0; n < m_countCol; n++ )
       {
-         m_widths->Add(m_spins[m_idxTrans[n]]->GetValue());
+         if ( m_checklstBox->IsChecked(n) )
+         {
+            m_widths->Add(m_spins[m_idxTrans[n]]->GetValue());
+         }
+         //else: don't return the widths for the columns which are not shown
       }
    }
 

@@ -2426,24 +2426,40 @@ void wxFolderListCtrl::SaveColWidths()
    String str = GetWidths();
    if ( str != FOLDER_LISTCTRL_WIDTHS_D && str != GetColWidths() )
    {
-      // the widths did change, so save them
-      Profile *profile = m_FolderView->GetProfile();
-      if ( !profile )
+      // check if the only difference if for the columns we don't show anyhow:
+      // this is needed to avoid always writing the widths for a folder which
+      // just doesn't show one of the columns shown by default, it would have
+      // "-1"s instead of the global values then
+      wxArrayString widthsOld = UnpackWidths(GetColWidths()),
+                    widthsNew = UnpackWidths(str);
+      size_t col;
+      for ( col = 0; col < WXFLC_NUMENTRIES; col++ )
       {
-         // we're the top pseudo folder, change the global settings
-         profile = mApplication->GetProfile();
-      }
-      else // local profile
-      {
-         if ( profile->HasEntry(FOLDER_IGNORE_WIDTHS) )
-         {
-            // we need to remove the ignore flag or the value we write wouldn't be
-            // used
-            profile->DeleteEntry(FOLDER_IGNORE_WIDTHS);
-         }
+         if ( m_columns[col] != -1 && widthsOld[col] != widthsNew[col] )
+            break;
       }
 
-      profile->writeEntry(FOLDER_LISTCTRL_WIDTHS, str);
+      if ( col < WXFLC_NUMENTRIES )
+      {
+         // the widths did change, so save them
+         Profile *profile = m_FolderView->GetProfile();
+         if ( !profile )
+         {
+            // we're the top pseudo folder, change the global settings
+            profile = mApplication->GetProfile();
+         }
+         else // local profile
+         {
+            if ( profile->HasEntry(FOLDER_IGNORE_WIDTHS) )
+            {
+               // we need to remove the ignore flag or the value we write
+               // wouldn't be used
+               profile->DeleteEntry(FOLDER_IGNORE_WIDTHS);
+            }
+         }
+
+         profile->writeEntry(FOLDER_LISTCTRL_WIDTHS, str);
+      }
    }
 }
 
@@ -5118,6 +5134,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
                     strWidthsDefNew,
                     strWidthsStandard = UnpackWidths(FOLDER_LISTCTRL_WIDTHS_D);
 
+      bool widthsChanged = false;
       for ( n = 0; n < WXFLC_NUMENTRIES; n++ )     // loop over columns
       {
          if ( columns[n] == -1 )
@@ -5131,10 +5148,16 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
             String s = String::Format("%u", widths[columns[n]]);
             strWidthsNew.Add(s);
             strWidthsDefNew.Add(s);
+
+            if ( s != strWidths[n] )
+            {
+               // write them to profile
+               widthsChanged = true;
+            }
          }
       }
 
-      if ( strWidthsNew != strWidths )
+      if ( widthsChanged )
       {
          String str = strutil_flatten_array(strWidthsNew, COLUMNS_WIDTHS_SEP);
 
