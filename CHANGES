@@ -4,8 +4,9 @@
 Release 0.61 'Hawkins'
 -------------------------------------------------------------------------------
 
-04.01.01 VZ: an option to not open the last opened folder on startup added
-04.01.01 VZ: fixed crash (debug mode only) when copying 0 length messages
+04.01.01 VZ: fixed crash when removing folders with auto collect flag set
+             an option to not open the last opened folder on startup added
+             fixed crash (debug mode only) when copying 0 length messages
 30.12.00 VZ: added an option to show TEXT/PLAIN attachments inline
 04.12.00 VZ: improvement to "folder filters" dialog: can add filters from here
 01.12.00 VZ: "system" folders are now on the top of the folder tree

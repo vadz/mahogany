@@ -657,6 +657,7 @@ public:
   void OnUpdateDelete(wxUpdateUIEvent& event);
   void OnUpdateExport(wxUpdateUIEvent& event);
   void OnUpdateExportVCard(wxUpdateUIEvent& event);
+  void OnUpdateImportVCard(wxUpdateUIEvent& event);
 
   void OnActivate(wxActivateEvent&);
 
@@ -1078,6 +1079,8 @@ BEGIN_EVENT_TABLE(wxAdbEditFrame, wxFrame)
   EVT_UPDATE_UI(WXMENU_ADBBOOK_EXPORT, wxAdbEditFrame::OnUpdateExport)
     // exporting vCard is only possible when an entry is selected
   EVT_UPDATE_UI(WXMENU_ADBBOOK_VCARD_EXPORT, wxAdbEditFrame::OnUpdateExportVCard)
+    // and importing only if we have a current group to put it under
+  EVT_UPDATE_UI(WXMENU_ADBBOOK_VCARD_IMPORT, wxAdbEditFrame::OnUpdateImportVCard)
 
   // other
     // need to intercept this to prevent default implementation to give the
@@ -2113,6 +2116,10 @@ void wxAdbEditFrame::ExportVCardEntry()
 
 bool wxAdbEditFrame::ImportVCardEntry()
 {
+  // check that we have a group to import it under
+  wxCHECK_MSG( GetCurNode() && GetCurNode()->AdbGroup(), FALSE,
+               "should be disabled as there is no current group" );
+
   // check that we have the importer for vCards
   AdbImporter *importer = AdbImporter::GetImporterByName("AdbVCardImporter");
   if ( !importer )
@@ -2397,6 +2404,11 @@ void wxAdbEditFrame::OnUpdateExport(wxUpdateUIEvent& event)
 void wxAdbEditFrame::OnUpdateExportVCard(wxUpdateUIEvent& event)
 {
   event.Enable( !m_current->IsGroup() );
+}
+
+void wxAdbEditFrame::OnUpdateImportVCard(wxUpdateUIEvent& event)
+{
+  event.Enable( m_current->IsGroup() );
 }
 
 void wxAdbEditFrame::OnActivate(wxActivateEvent& event)
