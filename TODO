@@ -101,6 +101,14 @@ DONE:
   message no longer exists. Just got a crash in Refresh().
   Add a CHECK() wherever it is called.
 - do wxImage changes affect list of available handlers, etc?
+- suppress mm_log() checkpoint completed messages
+- add URL highlight colour
+- are mail contens exported/imported in wrong order in reply?
+  attachments appear before text.
+
+- MailFolderCC: keep m_MailStream around after error and mark dead
+  stream otherwise, OR, really completely reopen the folder.
+  Like it is now, MessageCC might access it.
 
 
 CHECK:
@@ -114,28 +122,22 @@ CHECK:
 ---> done, after merging of profile code, add support for building
      list of these folders and periodically checking them.
      TEST!!!!
-- suppress mm_log() checkpoint completed messages
-- add URL highlight colour
+- When mm_log reports a "Unexpected change", do a Ping(), trying to
+  reopen the stream.
+
 
 TODO:
 
 - MFolder.i
 
-- are mail contens exported/imported in wrong order in reply?
-  attachments appear before text.
-
-- MailFolderCC: keep m_MailStream around after error and mark dead
-  stream otherwise, OR, really completely reopen the folder.
-  Like it is now, MessageCC might access it.
-
 for release:
-
-- When mm_log reports a "Unexpected change", do a Ping(), trying to
-  reopen the stream.
 
 - remove dialog box in MailFolderCC::Ping about reopening folder!!!
 - update the list of folders to poll for new mail when the folder
   properties are changed, tricky.
+  --> Just add MAppBase::AddIncomingFolder()/RemoveIncomingFolder()
+      and keep a list of the folder names and MailFolder pointers.
+      Regularly check the incoming folders for validity, i.e. Ping() them.
 
 - config panels are too small/too full, move font settings somewhere
   else, i.e. have a "layout" page?
