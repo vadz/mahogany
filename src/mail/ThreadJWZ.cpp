@@ -1561,11 +1561,18 @@ static void FlushThreadable(Threadable *t,
 
 extern void JWZThreadMessages(const ThreadParams& thrParams,
                               const HeaderInfoList *hilp,
-                              MsgnoType *indices,
-                              size_t *indents)
+                              ThreadData *thrData)
 {
+   MsgnoType *indices = thrData->m_tableThread;
+   size_t *indents = thrData->m_indents;
+
+   // reset indentation first
+   memset(indents, 0, thrData->m_count * sizeof(size_t));
+
    wxLogTrace(TRACE_JWZ, "Entering BuildDependantsWithJWZ");
    Threadable *threadableRoot = BuildThreadableList(hilp);
+
+   // FIXME: can't we just take count from thrData?
    size_t count = 0;
    Threadable *th = threadableRoot;
    for (; th != 0; th = th->getNext())
@@ -1607,6 +1614,36 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
       FlushThreadable(threadableRoot, indices, indents);
 #endif
       threadableRoot->destroy();
+
+      // compute the number of children for each message
+      //
+      // TODO: again, it surely may be done far simpler in the code above
+      for ( i = 0; i < count; i++ )
+      {
+         // our children are all messages after this one with indent
+         // strictly greater than ours
+         size_t level = indents[i];
+         size_t j;
+         for ( j = i + 1; j < count; j++ )
+         {
+            if ( indents[j] <= level )
+            {
+               // not a child any more
+               break;
+            }
+         }
+
+         // save the number of children
+         thrData->m_children[indices[i]] = j - i - 1;
+      }
+
+      // convert to msgnos from indices
+      //
+      // TODO: compute directly msgnos, not indices in the code above
+      for ( i = 0; i < count; i++ )
+      {
+         indices[i]++;
+      }
    }
    else
    {

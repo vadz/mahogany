@@ -57,6 +57,28 @@ struct ThreadParams
    bool operator!=(const ThreadParams& other) const { return !(*this == other); }
 };
 
+/// the thread data as it is stored internally
+struct ThreadData
+{
+   /// the number of messages in the arrays
+   MsgnoType m_count;
+
+   /// the translation table containing the msgnos in threaded order
+   MsgnoType *m_tableThread;
+
+   /// table containing the message indent in the thread
+   size_t *m_indents;
+
+   /// table containing the total number of children of each message
+   MsgnoType *m_children;
+
+   /// ctor reserves memory for holding info about count messages
+   ThreadData(MsgnoType count);
+
+   /// dtor frees memory
+   ~ThreadData();
+};
+
 /**
    The function which threads messages according to the JWZ algorithm
 
@@ -67,8 +89,7 @@ struct ThreadParams
  */
 extern void JWZThreadMessages(const ThreadParams& thrParams,
                               const HeaderInfoList *hil,
-                              MsgnoType *indices,
-                              size_t *indents);
+                              ThreadData *thrData);
 
 /**
    Show the dialog to configure the message threading for the folder using this

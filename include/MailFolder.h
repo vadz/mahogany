@@ -107,6 +107,7 @@ class MessageView;
 class Sequence;
 
 struct SortParams;
+struct ThreadData;
 struct ThreadParams;
 
 // ----------------------------------------------------------------------------
@@ -749,13 +750,11 @@ public:
        message: 0 for the root message in the thread, 1 for the first child and
        so on (this is the depth at which element appears in IMAP THREAD - 1).
 
-       @param msgnos where to put the threaded msgnos (must be big enough!)
-       @param indents where to put the message indents
+       @param thrData the data struct where to put results
        @param thrParams indicates how to thread the messages
        @return true on success, false if msgs couldn't be threaded
     */
-   virtual bool ThreadMessages(MsgnoType *msgnos,
-                               size_t *indents,
+   virtual bool ThreadMessages(ThreadData *thrData,
                                const ThreadParams& thrParams) = 0;
 
    //@}

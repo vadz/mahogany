@@ -99,3 +99,23 @@ bool ThreadParams::operator==(const ThreadParams& other) const
          indentIfDummyNode == other.indentIfDummyNode;
 }
 
+// ----------------------------------------------------------------------------
+// ThreadData
+// ----------------------------------------------------------------------------
+
+ThreadData::ThreadData(MsgnoType count)
+{
+   m_count = count;
+
+   m_tableThread = (MsgnoType *)malloc(count * sizeof(MsgnoType));
+   m_children = (MsgnoType *)malloc(count * sizeof(MsgnoType));
+   m_indents = (size_t *)malloc(count * sizeof(size_t));
+}
+
+ThreadData::~ThreadData()
+{
+   free(m_tableThread);
+   free(m_children);
+   free(m_indents);
+}
+

@@ -225,8 +225,7 @@ public:
    */
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
 
-   virtual bool ThreadMessages(MsgnoType *msgnos,
-                               size_t *indents,
+   virtual bool ThreadMessages(ThreadData *thrData,
                                const ThreadParams& thrParams);
 
    virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);

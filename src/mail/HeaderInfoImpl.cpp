@@ -291,11 +291,10 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
 
    // no sorting/threading yet
    m_tableSort =
-   m_tableThread =
    m_tableMsgno =
    m_tablePos = NULL;
 
-   m_indents = NULL;
+   m_thrData = NULL;
 
    m_dontFreeMsgnos = false;
 
@@ -589,10 +588,7 @@ void HeaderInfoListImpl::OnClose()
 
 size_t HeaderInfoListImpl::GetIndentation(MsgnoType pos) const
 {
-   if ( !m_indents )
-      return 0;
-
-   return m_indents[GetIdxFromPos(pos)];
+   return m_thrData ? m_thrData->m_indents[GetIdxFromPos(pos)] : 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -692,113 +688,102 @@ void HeaderInfoListImpl::BuildTables()
 
    // no, check if we need them
 
+   // sort the messages if needed and not done yet: we'll need the sort table
+   // anyhow, whether we thread messages or not
+   if ( IsSorting() && !m_tableSort )
+   {
+      Sort();
+   }
+
    if ( IsThreading() )
    {
       // first thread the messages if not done yet
-      if ( !m_tableThread )
+      if ( !m_thrData )
       {
          Thread();
       }
 
-      // FIXME: how to sort threaded messages here, i.e. how to construct
-      //        m_tableMsgno (or m_tablePos) from m_tableThread and
-      //        m_tableSort?
-#if 0
+      // don't crash below if we don't have it somehow
+      CHECK_RET( m_thrData, "where is the thread data?" );
+
+      // how to sort threaded messages here, i.e. construct m_tableMsgno and
+      // m_tablePos from m_thrData and m_tableSort
       if ( IsSorting() )
       {
+         // check it now or we'd crash in the loop below (and I don't want to
+         // put the check inside the loop obviously)
+         CHECK_RET( m_tableSort || m_reverseOrder, "how do we sort them?" );
+
          m_tableMsgno = AllocTable();
-         m_tablePos = AllocTable();
+         memset(m_tableMsgno, 0, m_count * sizeof(MsgnoType));
 
-         int *displacements = (int *)calloc(m_count * sizeof(int));
-
-         MsgnoType *tableSortPos;
-         if ( m_tableSort )
+         size_t level = 0;
+         MsgnoType countDone = 0;
+         while ( countDone < m_count )
          {
-            tableSortPos = AllocTable();
+            MsgnoType idxCur = 0;
 
-            // build the inverse table from the direct one
             for ( MsgnoType n = 0; n < m_count; n++ )
             {
-               tableSortPos[m_tableSort[n] - 1] = n;
-            }
-         }
-         else
-         {
-            // if we're sorting, we can either use an explicit sort table or
-            // reverse the normal order (or both), so if we don't have the table
-            // we must be reversing
-            ASSERT_MSG( m_reverseOrder, "how do we sort then?" );
-
-            tableSortPos = NULL;
-         }
-
-         MsgnoType parent = MSGNO_ILLEGAL;
-         for ( MsgnoType n = 0; n < m_count; n++ )
-         {
-            MsgnoType item = m_tableThread[n] - 1; // index, not msgno
-
-            // at which position should it normally appear after sorting?
-            MsgnoType posSorted;
-            if ( m_reverseOrder )
-            {
-               if ( tableSortPos )
+               MsgnoType msgno;
+               if ( m_reverseOrder )
                {
-                  // reverse the order specified by the table
-                  posSorted = m_count - 1 - tableSortPos[item];
+                  // reverse either the table order or the natural order
+                  msgno = m_tableSort ? m_tableSort[m_count - 1 - n]
+                                      : m_count - n;
                }
-               else // no table, reverse the natural message order
+               else // !reversed order
                {
-                  posSorted = m_count - 1 - item;
+                  // must have a table, otherwise how do we sort messages?
+                  msgno = m_tableSort[n];
                }
+
+               if ( m_thrData->m_indents[msgno - 1] != level )
+               {
+                  // ignore it now, we either have already seen it or will see
+                  // it later
+                  continue;
+               }
+
+               // skip the slots already taken (by messages of the lesser
+               // level)
+               while ( idxCur < m_count && m_tableMsgno[idxCur] )
+               {
+                  idxCur++;
+               }
+
+               // there must be a free slot somewhere left!
+               ASSERT_MSG( idxCur < m_count, "logic error" );
+
+               // this is the next message we have here, so put it in the first
+               // available slot in the msgno table
+               m_tableMsgno[idxCur++] = msgno;
+
+               // one more message put in place
+               countDone++;
+
+               // reserve some places for the children of this item
+               idxCur += m_thrData->m_children[msgno - 1];
             }
-            else // use the table if any
-            {
-               posSorted = tableSortPos[item];
-            }
 
-            // count the number of children of this item
-            MsgnoType m;
-            for ( m = n + 1; m < m_count; m++ )
-            {
-               if ( m_indents[m] <= m_indents[n] )
-                  break;
-            }
-
-            MsgnoType children = m - n - 1;
-
-            // put this item at the position above the one it should have
-            // normally been in so that all its children can be (later) put
-            // under it
-            displacements[n] = ;
-
-            m_tablePos[item] = posSorted - displacements[n];
+            // now process the messages at the next level (if there are any, of
+            // course)
+            level++;
          }
-
-         free(tableSortPos);
       }
       else // no sorting
-#endif // 0
       {
          // just reuse the same table
-         m_tableMsgno = m_tableThread;
+         m_tableMsgno = m_thrData->m_tableThread;
          m_dontFreeMsgnos = true;
       }
 
       // reset it as it doesn't make sense to use it with threading (thread
       // would be inverted as well and grow upwards - hardly what we want)
-      if ( m_reverseOrder )
-      {
-         m_reverseOrder = false;
-      }
+      m_reverseOrder = false;
    }
    else if ( IsSorting() )
    {
-      // sort the messages if not done yet
-      if ( !m_tableSort )
-      {
-         Sort();
-      }
-
       // don't create another table, just reuse the same one
       m_tableMsgno = m_tableSort;
       m_dontFreeMsgnos = true;
@@ -860,7 +845,7 @@ void HeaderInfoListImpl::FreeSortData()
 void HeaderInfoListImpl::Sort()
 {
    // caller must check if we need to be sorted
-   ASSERT_MSG( !m_tableMsgno && !m_tableSort && !m_reverseOrder,
+   ASSERT_MSG( !m_tableMsgno && !m_tableSort,
                "shouldn't be called again" );
 
    switch ( GetSortCrit(m_sortParams.sortOrder) )
@@ -996,30 +981,23 @@ bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
 
 void HeaderInfoListImpl::FreeThreadData()
 {
-   if ( m_tableThread )
+   if ( m_thrData )
    {
-      free(m_tableThread);
-      m_tableThread = NULL;
-   }
-
-   if ( m_indents )
-   {
-      free(m_indents);
-      m_indents = NULL;
+      delete m_thrData;
+      m_thrData = NULL;
    }
 }
 
 void HeaderInfoListImpl::Thread()
 {
    // the caller must check that we need to be threaded
-   ASSERT_MSG( !m_tableThread && IsThreading(), "shouldn't be called" );
+   ASSERT_MSG( !m_thrData && IsThreading(), "shouldn't be called" );
 
-   m_tableThread = AllocTable();
-   m_indents = (size_t *)malloc(m_count * sizeof(size_t));
+   m_thrData = new ThreadData(m_count);
 
-   if ( m_mf->ThreadMessages(m_tableThread, m_indents, m_thrParams) )
+   if ( m_mf->ThreadMessages(m_thrData, m_thrParams) )
    {
-      DUMP_TABLE(m_tableThread, ("after threading"));
+      DUMP_TABLE(m_thrData->m_tableThread, ("after threading"));
    }
    else // threading failed
    {

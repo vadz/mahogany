@@ -196,11 +196,8 @@ private:
    /// should we reverse the order of messages in the folder?
    bool m_reverseOrder;
 
-   /// the translation table containing the msgnos in threaded order
-   MsgnoType *m_tableThread;
-
-   /// table containing the message indent in the thread, NULL if !threading
-   size_t *m_indents;
+   /// the threading data, NULL if not threading
+   ThreadData *m_thrData;
 
    /// position -> msgno mapping
    MsgnoType *m_tableMsgno;

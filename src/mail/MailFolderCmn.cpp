@@ -1073,8 +1073,7 @@ MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 // MailFolderCmn threading
 // ----------------------------------------------------------------------------
 
-bool MailFolderCmn::ThreadMessages(MsgnoType *msgnos,
-                                   size_t *indents,
+bool MailFolderCmn::ThreadMessages(ThreadData *thrData,
                                    const ThreadParams& thrParams)
 {
    HeaderInfoList_obj hil = GetHeaders();
@@ -1099,20 +1098,8 @@ bool MailFolderCmn::ThreadMessages(MsgnoType *msgnos,
    // we need all headers, prefetch them
    hil->CacheMsgnos(1, count);
 
-   // reset indentation first
-   memset(indents, 0, count*sizeof(size_t));
-
    // do thread!
-   JWZThreadMessages(thrParams, hil.operator->(), msgnos, indents);
-
-   // finishing touches...
-   for ( size_t i = 0; i < count; i++ )
-   {
-      // convert to msgnos from indices
-      //
-      // TODO: compute directly msgnos, not indices in JWZThreadMessages
-      msgnos[i]++;
-   }
+   JWZThreadMessages(thrParams, hil.operator->(), thrData);
 
    if ( frame )
    {

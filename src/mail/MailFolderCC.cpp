@@ -3607,8 +3607,7 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 static void ThreadMessagesHelper(THREADNODE *thr,
                                  size_t level,
                                  MsgnoType& n,
-                                 MsgnoType *msgnos,
-                                 size_t *indents,
+                                 ThreadData *thrData,
                                  const ThreadParams& params)
 {
    while ( thr )
@@ -3626,8 +3625,8 @@ static void ThreadMessagesHelper(THREADNODE *thr,
       else // valid message
       {
          // save this message details
-         msgnos[n++] = msgno;
-         indents[msgno - 1] = level;   // -1 to convert to index
+         thrData->m_tableThread[n++] = msgno;
+         thrData->m_indents[msgno - 1] = level;   // -1 to convert to index
 
          // always indent children below
          indentChildren = 1;
@@ -3636,9 +3635,18 @@ static void ThreadMessagesHelper(THREADNODE *thr,
       // do we have subtree?
       if ( thr->next )
       {
-         // process it
+         // process it and count the number of children
+         MsgnoType nOld = n;
          ThreadMessagesHelper(thr->next, level + indentChildren, n,
-                              msgnos, indents, params);
+                              thrData, params);
+
+         ASSERT_MSG( n > nOld, "no children in a subthread?" );
+
+         thrData->m_children[msgno - 1] = n - nOld;
+      }
+      else
+      {
+         thrData->m_children[msgno - 1] = 0;
       }
 
       // pass to the next sibling
@@ -3658,8 +3666,7 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
    return thr != NULL;
 }
 
-bool MailFolderCC::ThreadMessages(MsgnoType *msgnos,
-                                  size_t *indents,
+bool MailFolderCC::ThreadMessages(ThreadData *thrData,
                                   const ThreadParams& thrParams)
 {
    CHECK( m_MailStream, false, "can't thread closed folder" );
@@ -3729,7 +3736,7 @@ bool MailFolderCC::ThreadMessages(MsgnoType *msgnos,
             // message is the depth at which it occurs in the tree while the
             // msgnos table is simply filled by the messages in traversal order
             MsgnoType n = 0;
-            ThreadMessagesHelper(thrRoot, 0, n, msgnos, indents, thrParams);
+            ThreadMessagesHelper(thrRoot, 0, n, thrData, thrParams);
 
             ASSERT_MSG( n == m_MailStream->nmsgs,
                         "error in the thread tree traversal?" );
@@ -3749,7 +3756,7 @@ bool MailFolderCC::ThreadMessages(MsgnoType *msgnos,
    }
 
    // call base class version to do local sorting
-   return MailFolderCmn::ThreadMessages(msgnos, indents, thrParams);
+   return MailFolderCmn::ThreadMessages(thrData, thrParams);
 }
 
 // ----------------------------------------------------------------------------
