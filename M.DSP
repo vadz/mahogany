@@ -1472,27 +1472,25 @@ SOURCE=.\src\Python\InitPython.cpp
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
 # PROP Exclude_From_Build 1
-# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
-# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -1503,33 +1501,25 @@ SOURCE=.\src\Python\MailFolder_swig.cpp
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
 # PROP Exclude_From_Build 1
-# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
-# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT BASE CPP /YX /Yc /Yu
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -1540,33 +1530,25 @@ SOURCE=.\src\Python\MAppBase_swig.cpp
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
 # PROP Exclude_From_Build 1
-# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
-# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT BASE CPP /YX /Yc /Yu
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -1577,33 +1559,25 @@ SOURCE=.\src\Python\Message_swig.cpp
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
 # PROP Exclude_From_Build 1
-# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
-# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT BASE CPP /YX /Yc /Yu
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -1614,33 +1588,25 @@ SOURCE=.\src\Python\MObject_swig.cpp
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
 # PROP Exclude_From_Build 1
-# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
-# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT BASE CPP /YX /Yc /Yu
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /YX /Yc /Yu
+# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -1648,91 +1614,17 @@ SOURCE=.\src\Python\MObject_swig.cpp
 # Begin Source File
 
 SOURCE=.\src\Python\MProfile_swig.cpp
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
 # PROP Exclude_From_Build 1
-# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT BASE CPP /D "USE_PCH" /YX /Yc /Yu
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MString_swig.cpp
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
 # PROP Exclude_From_Build 1
-# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT BASE CPP /D "USE_PCH" /YX /Yc /Yu
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\PythonDll.cpp
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
 # PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -1740,27 +1632,25 @@ SOURCE=.\src\Python\PythonHelp.cpp
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
 # PROP Exclude_From_Build 1
-# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
-# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -1768,37 +1658,7 @@ SOURCE=.\src\Python\PythonHelp.cpp
 # Begin Source File
 
 SOURCE=.\src\Python\swiglib_swig.cpp
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
 # PROP Exclude_From_Build 1
-# ADD CPP /D "SWIG_GLOBAL" /D "STATIC_LINKED" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
-# SUBTRACT BASE CPP /D "USE_PCH" /YX /Yc /Yu
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
-# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
-
-!ENDIF 
-
 # End Source File
 # End Group
 # Begin Group "wx"

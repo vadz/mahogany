@@ -29,6 +29,18 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name png
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name regex
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name zlib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name jpeg
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name tiff
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -45,7 +57,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "compface"=M:\wxWindows\wxWindows\src\msw\extra\src\compface\compface.dsp - Package Owner=<4>
+Project: "compface"=.\extra\src\compface\compface.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -141,7 +153,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "versit"=M:\wxWindows\wxWindows\src\msw\src\wx\vcard\versit.dsp - Package Owner=<4>
+Project: "versit"=.\src\wx\vcard\versit.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

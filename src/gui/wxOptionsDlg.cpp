@@ -178,6 +178,7 @@ enum ConfigFields
    ConfigField_ForwardString,
    ConfigField_ReplyCollapse,
    ConfigField_ReplyQuoteOrig,
+   ConfigField_ReplyQuoteSelection,
    ConfigField_ReplyCharacters,
    ConfigField_ReplyUseSenderInitials,
    ConfigField_ReplyQuoteEmpty,
@@ -825,6 +826,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Co&llapse reply markers"
                   ":no:collapse:collapse & count"),Field_Combo,   -1,                        },
    { gettext_noop("Quote &original message in reply"), Field_Action,   -1,                        },
+   { gettext_noop("Quote &selected part only"),    Field_Bool, ConfigField_ReplyQuoteOrig,                        },
    { gettext_noop("Reply prefi&x"),                Field_Text, ConfigField_ReplyQuoteOrig,                        },
    { gettext_noop("Prepend &sender initials"),     Field_Bool,    ConfigField_ReplyCharacters,                        },
    { gettext_noop("&Quote empty lines too"),       Field_Bool |
@@ -1252,6 +1254,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FORWARD_PREFIX),
    CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
    CONFIG_ENTRY(MP_REPLY_QUOTE_ORIG),
+   CONFIG_ENTRY(MP_REPLY_QUOTE_SELECTION),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_SENDER),
    CONFIG_ENTRY(MP_REPLY_QUOTE_EMPTY),
