@@ -118,7 +118,8 @@ done
 
 
 PATH=$PATH:/usr/bin:/usr/local/bin
-    
+export PATH
+
 CVS=cvs
 export CVS
 
@@ -549,13 +550,13 @@ rm -f $NAME-$VERSION/*.cache
 ###########################
 # DEBIAN
 ###########################
-if [ $DEBIAN = yes ]
+if [ "$DEBIAN" = "yes" ]
 then
   echo "##################################################################"
   echo "Building Debian package."
   echo "##################################################################"
   DEBIAN_VERSION=`cat /etc/debian_version`
-  if [ "$DEBIAN_VERSION" != "2.1" && "$DEBIAN_VERSION" != "2.0" ]
+  if [ "$DEBIAN_VERSION" != "2.1" -a "$DEBIAN_VERSION" != "2.0" ]
   then
     DEBUILD="debuild"
   else
