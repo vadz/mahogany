@@ -153,6 +153,7 @@ wxModulesDialog::InternalUpdate(size_t n)
    m_textCtrl->Clear();
    *m_textCtrl
       << _("Module: ") << (*m_Listing)[n].GetName() << '\n'
+      << _("Interface: ") << (*m_Listing)[n].GetInterface() << '\n'
       << _("Version: ") <<  (*m_Listing)[n].GetVersion() << '\n'
       << _("Author: ") <<   (*m_Listing)[n].GetAuthor() << '\n'
       << '\n'

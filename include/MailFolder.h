@@ -424,7 +424,7 @@ class HeaderInfo
 public:
    virtual const String &GetSubject(void) const = 0;
    virtual const String &GetFrom(void) const = 0;
-   virtual const String &GetDate(void) const = 0;
+   virtual time_t GetDate(void) const = 0;
    virtual const String &GetId(void) const = 0;
    virtual const String &GetReferences(void) const = 0;
    virtual UIdType GetUId(void) const = 0;
@@ -477,4 +477,19 @@ public:
    GetNextEntry(FolderListing::iterator &i) const = 0;
    virtual ~FolderListing() {}
 };
+
+/** Sort order enum for sorting message listings. */
+enum MessageSortOrder
+{
+   /// no sorting
+   MSO_NONE,
+   /// date or reverse date
+   MSO_DATE, MSO_DATE_REV,
+   MSO_SUBJECT, MSO_SUBJECT_REV,
+   MSO_AUTHOR, MSO_AUTHOR_REV,
+   MSO_STATUS, MSO_STATUS_REV,
+   MSO_SCORE, MSO_SCORE_REV,
+   MSO_THREAD, MSO_THREAD_REV
+};
+
 #endif

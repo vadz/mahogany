@@ -44,6 +44,7 @@ public:
    virtual const String &GetShortDescription(void) const = 0;
    virtual const String &GetVersion(void) const = 0;
    virtual const String &GetAuthor(void) const = 0;
+   virtual const String &GetInterface(void) const = 0;
    virtual ~MModuleListingEntry() {}
 };
 
@@ -71,6 +72,8 @@ public:
 
    /// Returns the Module's name as used in LoadModule().
    virtual const char * GetName(void) = 0;
+   /// Returns the name of the interface ABC that this module implements.
+   virtual const char * GetInterface(void) = 0;
    /// Returns a brief description of the module.
    virtual const char * GetDescription(void) = 0;
    /// Returns a textual representation of the particular version of the module.
@@ -79,9 +82,15 @@ public:
    virtual void GetMVersion(int *version_major, int *version_minor,
                             int *version_release) = 0;
 
-/** Returns a pointer to a listing of available modules. Must be
-    DecRef()'d by the caller. */
+   /** Returns a pointer to a listing of available modules. Must be
+       DecRef()'d by the caller. */
    static MModuleListing * GetListing(void);
+   /** Finds a module which provides the given interface. Only
+       searches already loaded modules.
+       @param interface name of the interface
+       @return an inc-ref'd module or NULL
+   */
+   static MModule *GetProvider(const wxString &interface);
 };
 
 
@@ -108,6 +117,10 @@ extern "C"
        @return pointer to a static buffer with the module name
    */
    typedef const char  * (* MModule_GetNameFuncType ) (void);
+   /** Function type for GetInterface() function.
+       @return pointer to a static buffer with the module name
+   */
+   typedef const char  * (* MModule_GetInterfaceFuncType ) (void);
    /** Function type for GetDescription() function.
        @return pointer to a static buffer with the module description
    */

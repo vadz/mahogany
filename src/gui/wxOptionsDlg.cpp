@@ -176,7 +176,8 @@ enum ConfigFields
    ConfigField_MessageViewMaxHeadersNum,
    ConfigField_MessageViewHeaders,
    ConfigField_MessageViewSortMessagesBy,
-   ConfigField_MessageViewLast = ConfigField_MessageViewSortMessagesBy,
+   ConfigField_MessageViewDateFormat,
+   ConfigField_MessageViewLast = ConfigField_MessageViewDateFormat,
 
    // autocollecting addresses options
    ConfigField_AdbFirst = ConfigField_MessageViewLast,
@@ -214,7 +215,6 @@ enum ConfigFields
    ConfigField_AutosaveDelay,
    ConfigField_ConfirmExit,
    ConfigField_OpenOnClick,
-   ConfigField_DateFormat,
    ConfigField_ShowNewMail,
 #ifdef OS_UNIX
    ConfigField_AFMPath,
@@ -487,7 +487,9 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
                                                    Field_Number,   -1 },
    { gettext_noop("Maximum &number of messages"),  Field_Number,   -1 },
    { gettext_noop("Configure &headers to show..."),Field_SubDlg,   -1 },
-   { gettext_noop("&Sort messages by..."),      Field_SubDlg,  -1},
+   { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
+   { gettext_noop("Configure &format for displaying dates"),         Field_SubDlg,    -1                     },
+
 
    // adb: autocollect and bbdb options
    { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
@@ -528,7 +530,6 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Autosave delay"),              Field_Number, -1                      },
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Open folder on single &click"), Field_Bool,    -1                     },
-   { gettext_noop("&Format for the date"),         Field_Text,    -1                     },
    { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Text,    -1                     },
@@ -636,6 +637,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
    CONFIG_ENTRY(MP_MSGVIEW_HEADERS),
    CONFIG_ENTRY(MP_MSGS_SORTBY),
+   CONFIG_ENTRY(MP_DATE_FMT),
 
    // autocollect
    CONFIG_NONE(),
@@ -668,7 +670,6 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AUTOSAVEDELAY),
    CONFIG_ENTRY(MP_CONFIRMEXIT),
    CONFIG_ENTRY(MP_OPEN_ON_CLICK),
-   CONFIG_ENTRY(MP_DATE_FMT),
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
@@ -1184,6 +1185,8 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
    wxObject *obj = event.GetEventObject();
    if ( obj == GetControl(ConfigField_MessageViewSortMessagesBy) )
       dirty = ConfigureSorting(m_Profile, this);
+   else if ( obj == GetControl(ConfigField_MessageViewDateFormat) )
+      dirty = ConfigureDateFormat(m_Profile, this);
    else if(obj == GetControl(ConfigField_MessageViewHeaders))
       dirty = ConfigureMsgViewHeaders(m_Profile, this);
    else

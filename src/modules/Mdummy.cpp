@@ -77,6 +77,13 @@ extern "C"
       return "Mdummy";
    }
 
+   /// Return name of the interface implemented.
+   MDLLEXPORT const char *
+   GetInterface(void)
+   {
+      return "none";
+   }
+
    /// Return a short description (one line):
    MDLLEXPORT const char *
    GetDescription(void)

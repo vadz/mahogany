@@ -526,6 +526,9 @@ wxFolderView::Update(HeaderInfoList *listing)
    
    wxBeginBusyCursor();// wxSafeYield();
 
+
+   bool   dateGMT;
+   
    n = listing->Count();
 
    // mildly annoying, but have to do it in order to prevent the generation of
@@ -534,8 +537,11 @@ wxFolderView::Update(HeaderInfoList *listing)
    {
       ProfileEnvVarSave suspend(mApplication->GetProfile(),false);
       dateFormat = READ_APPCONFIG(MP_DATE_FMT);
-
-      // should have _exactly_ 3 format specificators, otherwise can't call
+      dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT);
+      
+#if 0
+      //FIXME: check date format somehow
+     // should have _exactly_ 3 format specificators, otherwise can't call
       // Printf()!
       String specs = strutil_extract_formatspec(dateFormat);
       if ( specs != "ddd" )
@@ -554,6 +560,7 @@ wxFolderView::Update(HeaderInfoList *listing)
 
          dateFormat = MP_DATE_FMT_D;
       }
+#endif
    }
 
    if(n < m_NumOfMessages)  // messages have been deleted, start over
@@ -580,9 +587,8 @@ wxFolderView::Update(HeaderInfoList *listing)
                              MailFolder::ConvertMessageStatusToString(hi->GetStatus()),
                              hi->GetFrom(),
                              hi->GetSubject(),
-                             hi->GetDate(),
-                             strutil_ultoa(hi->GetSize())
-         );
+                             strutil_ftime(hi->GetDate(),dateFormat, dateGMT),
+                             strutil_ultoa(hi->GetSize()));
       m_FolderCtrl->Select(i,selected);
 /*FIXME!      if(i == focused)
          m_FolderCtrl->SetItemState( i, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED );

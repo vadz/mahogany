@@ -18,9 +18,11 @@
 #   include "strutil.h"
 #   include "Profile.h"
 #   include "MEvent.h"
-
+#   include "MModule.h"
 #   include <stdlib.h>
 #endif
+
+#include "modules/Scoring.h"
 
 #include "MDialogs.h" // for the password prompt...
 
@@ -701,7 +703,8 @@ MailFolderCmn::ForwardMessages(const INTARRAY *selections, MWindow *parent)
 static MMutex gs_SortListingMutex;
 
 static long gs_SortOrder = 0;
-
+static MModule_Scoring *gs_ScoreModule = NULL;
+static MailFolder * gs_MailFolder = NULL;
 
 static int CompareStatus(int stat1, int stat2, int flag)
 {
@@ -762,8 +765,22 @@ extern "C"
          case MSO_NONE:
             break;
          case MSO_DATE:
+            if(i1->GetDate() > i2->GetDate())
+               result = 1;
+            else
+               if(i1->GetDate() < i2->GetDate())
+                  result = -1;
+               else
+                  result = 0;
+            break;
          case MSO_DATE_REV:
-            ASSERT_MSG(0,"sorting by date not implemented yet");
+            if(i1->GetDate() < i2->GetDate())
+               result = 1;
+            else
+               if(i1->GetDate() > i2->GetDate())
+                  result = -1;
+               else
+                  result = 0;
             break;
          case MSO_SUBJECT:
             result = Stricmp(i1->GetSubject(), i2->GetSubject());
@@ -791,8 +808,20 @@ extern "C"
          }
          case MSO_SCORE:
          case MSO_SCORE_REV:
-            ASSERT_MSG(0,"scoring not implemented yet");
-            break;
+         {
+            int flag =
+               (criterium == MSO_SCORE_REV) ? -1 : 1;
+            long score1 = 0, score2 = 0;
+            if(gs_ScoreModule)
+            {
+               score1 = gs_ScoreModule->ScoreMessage(gs_MailFolder, i1);
+               score2 = gs_ScoreModule->ScoreMessage(gs_MailFolder, i2);
+            }
+            return score1 > score2 ?
+               flag : score2 > score1 ?
+               -flag : 0;
+         }
+         break;
          case MSO_THREAD:
          case MSO_THREAD_REV:
             ASSERT_MSG(0,"threading not implemented yet");
@@ -806,12 +835,13 @@ extern "C"
      }
 }
 
-static void SortListing(HeaderInfoList *hil, long SortOrder)
+static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
 {
    gs_SortListingMutex.Lock();
-
+   gs_MailFolder = mf;
    gs_SortOrder = SortOrder;
-   
+   gs_ScoreModule = (MModule_Scoring *)MModule::GetProvider(MMODULE_INTERFACE_SCORING);
+
    // no need to incref/decref, done in UpdateListing()
    if(hil->Count() > 1)
       qsort(hil->GetArray(),
@@ -819,6 +849,8 @@ static void SortListing(HeaderInfoList *hil, long SortOrder)
             (*hil)[0]->SizeOf(),
             ComparisonFunction);
 
+   if(gs_ScoreModule) gs_ScoreModule->DecRef();
+   gs_MailFolder = NULL;
    gs_SortListingMutex.Unlock();
 }
 
@@ -831,7 +863,7 @@ MailFolderCmn::UpdateListing(void)
 
    if(hil)
    {
-      SortListing(hil, m_Config.m_ListingSortOrder);
+      SortListing(this, hil, m_Config.m_ListingSortOrder);
 
       /* Now check whether we need to send new mail notifications: */
       if(!m_FirstListing && m_GenerateNewMailEvents
@@ -870,5 +902,6 @@ void
 MailFolderCmn::UpdateConfig(void)
 {
    m_Config.m_ListingSortOrder = READ_CONFIG(GetProfile(), MP_MSGS_SORTBY);
+   m_Config.m_ReSortOnChange = READ_CONFIG(GetProfile(), MP_MSGS_RESORT_ON_CHANGE);
 }
 

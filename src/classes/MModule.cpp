@@ -22,6 +22,7 @@
 #   include "MApplication.h"
 #   include "gui/wxMApp.h"
 #   include "kbList.h"
+#   include "strutil.h"
 #endif
 
 #include "Mversion.h"
@@ -50,6 +51,8 @@ struct ModuleEntry
 {
    /// Name under which it was loaded.
    String m_Name;
+   /// interface provided
+   String m_Interface;
    /// Module pointer.
    MModule *m_Module;
 };
@@ -68,23 +71,34 @@ public:
    
    /// Returns the Module's name as used in LoadModule().
    virtual const char * GetName(void)
-      { return (*m_GetName)(); }
+      { return m_GetName ? (*m_GetName)() : _("unknown"); }
    virtual const char * GetDescription(void)
-      { return (*m_GetDescription)(); }
+      { return m_GetDescription ? (*m_GetDescription)() : _("no description"); }
    /// Returns a textual representation of the particular version of the module.
    virtual const char * GetVersion(void)
-      { return (*m_GetVersion)(); }
+      { return m_GetVersion ? (*m_GetVersion)() : "0"; }
+   virtual const char * GetInterface(void)
+      { return m_GetInterface ? (*m_GetInterface)() : _("unknown"); }
    /// Returns the Mahogany version this module was compiled for.
    virtual void GetMVersion(int *version_major, int *version_minor,
                             int *version_release)
       {
-         (*m_GetMVersion)(version_major, version_minor, version_release);
+         if(m_GetMVersion)
+            (*m_GetMVersion)(version_major, version_minor,
+                             version_release);
+         else
+         {
+            *version_major = M_VERSION_MAJOR;
+            *version_minor = M_VERSION_MINOR;
+            *version_release = M_VERSION_RELEASE;
+         }
       }
 
 private:
    MModuleImpl(wxDllType dll);
    ~MModuleImpl();
    MModule_GetNameFuncType m_GetName;
+   MModule_GetInterfaceFuncType m_GetInterface;
    MModule_GetDescriptionFuncType m_GetDescription;
    MModule_GetVersionFuncType m_GetVersion;
    MModule_GetMVersionFuncType m_GetMVersion;
@@ -120,7 +134,9 @@ MModuleImpl::MModuleImpl(wxDllType dll)
 {
    m_Dll = dll;
    m_GetName = (MModule_GetNameFuncType)
-      wxDllLoader::GetSymbol(dll, "GetName"); ;
+      wxDllLoader::GetSymbol(dll, "GetName"); 
+   m_GetInterface = (MModule_GetInterfaceFuncType)
+      wxDllLoader::GetSymbol(dll, "GetInterface"); 
    m_GetDescription  = (MModule_GetDescriptionFuncType)
       wxDllLoader::GetSymbol(dll, "GetDescription"); 
    m_GetVersion = (MModule_GetVersionFuncType)
@@ -160,7 +176,6 @@ MModuleImpl::~MModuleImpl()
       wxDllLoader::UnloadLibrary(m_Dll);
 }
 
-
 static
 MModule *FindModule(const String & name)
 {
@@ -187,6 +202,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
    {
       ModuleEntry *me = new ModuleEntry;
       me->m_Name = name;
+      me->m_Interface = module->GetInterface();
       me->m_Module = module;
       gs_ModuleList.push_back(me);
    }
@@ -250,6 +266,25 @@ MModule::LoadModule(const String & name)
    }
 }
 
+/* static */
+MModule *
+MModule::GetProvider(const wxString &interface)
+{
+   ModuleList::iterator i;
+   for(i = gs_ModuleList.begin();
+       i != gs_ModuleList.end();
+       i++)
+      if( (**i).m_Interface == interface )
+      {
+         (**i).m_Module->IncRef();
+         return (**i).m_Module;
+      }
+   return NULL; // not found
+}
+
+
+
+
 
 /** Function to resolve main program symbols from modules.
  */
@@ -269,6 +304,8 @@ class MModuleListingEntryImpl : public MModuleListingEntry
 public:
    virtual const String &GetName(void) const
       { return m_Name; }
+   virtual const String &GetInterface(void) const
+      { return m_Interface; }
    virtual const String &GetShortDescription(void) const
       { return m_ShortDesc; }
    virtual const String &GetDescription(void) const
@@ -279,16 +316,24 @@ public:
       { return m_Author; }
 
    MModuleListingEntryImpl(const String &name = "",
+                           const String &interface = "",
                            const String &shortdesc = "",
                            const String &desc = "",
                            const String &version = "",
                            const String &author = "")
       {
-         m_Name = name; m_ShortDesc = shortdesc; m_Desc = desc;
+         m_Name = name; m_Interface = interface;
+         m_ShortDesc = shortdesc; m_Desc = desc;
          m_Version = version; m_Author = author;
+         strutil_delwhitespace(m_Name);
+         strutil_delwhitespace(m_Interface);
+         strutil_delwhitespace(m_Desc);
+         strutil_delwhitespace(m_ShortDesc);
+         strutil_delwhitespace(m_Version);
+         strutil_delwhitespace(m_Author);
       }
 private:
-   String m_Name, m_ShortDesc, m_Desc, m_Version, m_Author;
+   String m_Name, m_Interface, m_ShortDesc, m_Desc, m_Version, m_Author;
    GCC_DTOR_WARN_OFF();
 };
 
@@ -377,35 +422,39 @@ MModuleListing *MModule::GetListing(void)
         We need at least the following lines:
         Mahogany-Module-Definition"
         Name:
+        Interface:
         Version:
         Author:
       */
       else
       {
-         if(tf.GetLineCount() < 4)
+         if(tf.GetLineCount() < 5)
             errorflag = true;
          else
          {
             String first = tf[0].Mid(0,strlen(MMD_SIGNATURE));
             if(first != MMD_SIGNATURE ||
                tf[1].Mid(0,strlen("Name:")) != "Name:" ||
-               tf[2].Mid(0,strlen("Version:")) != "Version:" ||
-               tf[3].Mid(0,strlen("Author:")) != "Author:")
+               tf[2].Mid(0,strlen("Interface:")) != "Interface:" ||
+               tf[3].Mid(0,strlen("Version:")) != "Version:" ||
+               tf[4].Mid(0,strlen("Author:")) != "Author:")
                          errorflag = true;
             else
             {
                String description;
-               for(size_t l = 5; l < tf.GetLineCount(); l++)
+               for(size_t l = 6; l < tf.GetLineCount(); l++)
                   description << tf[l] << '\n';
                String name = (**it).AfterLast(DIR_SEPARATOR);
                name = name.Mid(0, filename.Length()-strlen(".mmd"));
                String tmp = tf[1].Mid(strlen("Name:")); // == short description
                MModuleListingEntryImpl entry(
-                  name, // module name   
+                  name, // module name
+
+                  tf[2].Mid(strlen("Interface:")),
                   tmp,
                   description,
-                  tf[2].Mid(strlen("Version:")),
-                  tf[3].Mid(strlen("Author:"))
+                  tf[3].Mid(strlen("Version:")),
+                  tf[4].Mid(strlen("Author:"))
                   );
                (*listing)[count++] = entry;
             }

@@ -15,6 +15,8 @@
 #  include  "Mconfig.h"
 #endif
 
+#include <time.h>
+
 class kbStringList;
 
 /**@name String class helper functions */
@@ -290,6 +292,18 @@ String strutil_encrypt(const String &original);
 */
 String strutil_decrypt(const String &original);
 
+/** Takes a time_t time value and returns either local time or GMT in
+    a string.
+    @param time time value
+    @param format format string for strftime()
+    @param gmtflag if true, return GMT
+    @return a string with the time informaton
+*/
+String strutil_ftime(time_t time, const String & format = "%c",
+                     bool gmtflag = false);
+
+
+    
 //@}
 
 //@}

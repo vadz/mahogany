@@ -714,3 +714,14 @@ strutil_expandfoldername(const String &name)
    mboxpath = strutil_expandpath(mboxpath);
    return mboxpath;
 }
+
+
+String
+strutil_ftime(time_t time, const String & format, bool gmtflag)
+{
+   struct tm *tmvalue = gmtflag ? gmtime(&time) : localtime(&time);
+
+   char buffer[256];
+   strftime(buffer, 256, format.c_str(), tmvalue);
+   return String(buffer);
+}

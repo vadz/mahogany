@@ -50,6 +50,7 @@
 #define MH_OPTIONSNOTEBOOK   4120
 #define MH_DIALOG_MODULES    4200
 #define MH_DIALOG_SORTING    4210
+#define MH_DIALOG_DATEFMT    4220
 
 #define MH_PYTHON            5000
 

@@ -193,8 +193,10 @@
 #define   MP_MAILCAP         "MailCap"
 /// the name of the mime types file
 #define   MP_MIMETYPES         "MimeTypes"
-/// the printf() format for dates
+/// the strftime() format for dates
 #define   MP_DATE_FMT         "DateFormat"
+/// display all dates as GMT?
+#define   MP_DATE_GMT         "GMTDate"
 /// show console window
 #define   MP_SHOWCONSOLE      "ShowConsole"
 /// name of address database
@@ -417,7 +419,11 @@
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS      "HighlightURL"
 /// sort criterium for folder listing
-#define MP_MSGS_SORTBY         "SortMesagesBy"
+#define MP_MSGS_SORTBY         "SortMessagesBy"
+/// re-sort messages on status change?
+#define MP_MSGS_RESORT_ON_CHANGE         "ReSortMessagesOnChange"
+/// use threading
+#define MP_MSGS_USE_THREADING  "ThreadMessages"
 /// open URLs with
 #define   MP_BROWSER         "Browser"
 /// Browser is netscape variant
@@ -592,8 +598,10 @@
 /// the name of the mime types file
 #define   MP_MIMETYPES_D         "mime.types"
 /// the label for the From: field
-/// the printf() format for dates
-#define   MP_DATE_FMT_D         "%2u.%2u.%4u"
+/// the strftime() format for dates
+#define   MP_DATE_FMT_D         "%c"
+/// display all dates as GMT?
+#define   MP_DATE_GMT_D         0l
 /// show console window
 #define   MP_SHOWCONSOLE_D      1
 /// names of folders to open at startup
@@ -813,6 +821,10 @@
 #define   MP_HIGHLIGHT_URLS_D      1
 /// sort criterium for folder listing (55=0x37 = status/subject)
 #define MP_MSGS_SORTBY_D         55l 
+/// re-sort messages on status change?
+#define MP_MSGS_RESORT_ON_CHANGE_D 1l
+/// use threading
+#define MP_MSGS_USE_THREADING_D  0l
 /// open URLs with
 #ifdef  OS_UNIX
 #  define   MP_BROWSER_D         "netscape"

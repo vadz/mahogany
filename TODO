@@ -8,6 +8,9 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9	KB	Implement functions to	enumerate profile sub-groups.
+	     !-> Is this still needed?	
+9	KB	Do we need FolderView/ComposeView profiles? 
 9	KB	When retrieving only N our of M messages, Mah. will
 		later say that there are M-N new messages :-(
 		BROKEN COMPLETELY NOW -- FIX IT!
@@ -16,8 +19,6 @@ $Id$
 9	KB	Group-reply should use old To: field, too if not
 		identical to ourselves
 9	KB	Modify mail_fetch_overview() to work backwards.
-9	KB	-> add date sorting, score sorting and threading
-                -> Do we want to re-sort on flags change?
 9	KB	ADB frame help button
 8	KB	Why is module not found at exit???
 9	KB	wxLayout editing glitches & cursor positioning bug
@@ -26,7 +27,6 @@ $Id$
 		now
 		- deleting wxllist takes ages, calling MoveLines(,-1)
 		  recursively 
-
 6	KB	Implement functions to	enumerate profile sub-groups.
 	     !-> Is this still needed?	 YES
 
@@ -73,6 +73,7 @@ $Id$
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
+		Option to start up iconified.
 
 9	KB	Change/Finish ASMailFolder API for subscription management.
 		---> Add a "find text in folder" method, too, trivial.
@@ -81,7 +82,7 @@ $Id$
 		its subgroups
 
 5	KB	forward text-only messages as text rather than rfc822
-
+4	KB	add threading
 8	VZ	make the message templates work: GUI suport for configuring them
 		and (many) more macros should be added.
 

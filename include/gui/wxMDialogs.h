@@ -261,5 +261,8 @@ void ShowModulesDialog(wxFrame *parent);
 /// Configure message/folder sorting
 extern
 bool ConfigureSorting(ProfileBase *profile, wxWindow *parent);
+/* Configuration dialog for sorting messages. */
+extern
+bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent);
 
 #endif  //WXMDIALOGS_H

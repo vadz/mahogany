@@ -32,7 +32,10 @@
 #   include "MApplication.h"
 #   include "MailFolder.h"
 #   include "Profile.h"
+#   include "MModule.h"
 #endif
+
+#include "modules/Scoring.h"
 
 #include "MHelp.h"
 
@@ -227,9 +230,14 @@ MGetNumberFromUser(const wxString& message,
                    wxWindow *parent,
                    const wxPoint& pos)
 {
+   ///FIXME: not in wxGTK at present!!!
+#if 0
    return wxGetNumberFromUser(message, prompt, caption,
                               value, min, max,
                               parent, pos);
+#else
+   return 0;
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -931,7 +939,7 @@ void MDialog_ShowText(MWindow *parent,
 
 #include "gui/wxDialogLayout.h"
 
-#define NUM_SORTLEVELS 6
+#define NUM_SORTLEVELS 5
 
 /* These must not be more than 16, as they are stored in a 4-bit
    value! They must be in sync with the enum in MailFolderCmn.h.
@@ -949,12 +957,10 @@ static wxString sortCriteria[] =
    gettext_noop("Status (reverse)"),
    gettext_noop("Score"),
    gettext_noop("Score (reverse)"),
-   gettext_noop("Thread"),
-   gettext_noop("Thread (reverse)")
 };
 
 // defining it like this makes it much more difficult to forget to update it
-static const int NUM_CRITERIA  = WXSIZEOF(sortCriteria);
+static const size_t NUM_CRITERIA  = WXSIZEOF(sortCriteria);
 
 #define NUM_LABELS 2
 static wxString labels[NUM_LABELS] =
@@ -973,10 +979,12 @@ public:
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
    bool WasChanged(void) { return m_SortOrder != m_OldSortOrder;};
-
+   
 protected:
    ProfileBase *m_Profile;
    wxChoice    *m_Choices[NUM_CRITERIA];
+   wxCheckBox  *m_UseThreading;
+   wxCheckBox  *m_ReSortOnChange;
    long         m_OldSortOrder;
    long         m_SortOrder;
 };
@@ -1035,6 +1043,21 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
       m_Choices[n]->SetConstraints(c);
    }
 
+   m_UseThreading = new wxCheckBox(this, -1, _("Thread messages"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   m_UseThreading->SetConstraints(c);
+   
+   m_ReSortOnChange = new wxCheckBox(this, -1, _("Re-sort on status change"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_UseThreading, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   m_ReSortOnChange->SetConstraints(c);
    Layout();
 }
 
@@ -1045,14 +1068,41 @@ wxMessageSortingDialog::~wxMessageSortingDialog()
 
 bool wxMessageSortingDialog::TransferDataFromWindow()
 {
+   bool uses_scoring = false;
+   int selection;
    m_SortOrder = 0;
    for( int n = NUM_SORTLEVELS-1; n >= 0; n--)
    {
       m_SortOrder <<= 4;
-      m_SortOrder += m_Choices[n]->GetSelection();
+      selection = m_Choices[n]->GetSelection();
+      if(selection == MSO_SCORE
+         || selection == MSO_SCORE_REV)
+         uses_scoring = true;
+      m_SortOrder += selection;
    }
 
    m_Profile->writeEntry(MP_MSGS_SORTBY, m_SortOrder);
+   m_Profile->writeEntry(MP_MSGS_USE_THREADING, m_UseThreading->GetValue());
+   m_Profile->writeEntry(MP_MSGS_RESORT_ON_CHANGE,
+                         m_ReSortOnChange->GetValue());
+
+   if(uses_scoring)
+   {
+      MModule *module = MModule::GetProvider(MMODULE_INTERFACE_SCORING);
+      if(module)
+         module->DecRef();
+      else
+      {
+         wxString msg;
+         msg.Printf(_("You have selected message score as a sort criterium\n"
+                      "but not loaded any scoring plugin module yet.\n"
+                      "Scoring will only work if you load an extension\n"
+                      "module providing the '%s' interface.\n"
+                      "Otherwise all messages will have score 0."),
+                    MMODULE_INTERFACE_SCORING);
+         MDialog_ErrorMessage(msg,this);
+      }
+   }
    return TRUE;
 }
 
@@ -1073,7 +1123,10 @@ bool wxMessageSortingDialog::TransferDataToWindow()
       m_Choices[n]->SetSelection(num);
       sortOrder >>= 4;
    }
-
+   m_UseThreading->SetValue(
+      READ_CONFIG(m_Profile, MP_MSGS_USE_THREADING) != 0);
+   m_UseThreading->SetValue(
+      READ_CONFIG(m_Profile, MP_MSGS_RESORT_ON_CHANGE) != 0);
    return TRUE;
 }
 
@@ -1082,6 +1135,155 @@ extern
 bool ConfigureSorting(ProfileBase *profile, wxWindow *parent)
 {
    wxMessageSortingDialog dlg(profile, parent);
+   if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
+   {
+      return TRUE;
+   }
+   else
+   {
+      return FALSE;
+   }
+}
+
+
+
+static wxString DateFormatsLabels[] =
+{
+   gettext_noop("31 (Day)"), gettext_noop("Mon"),gettext_noop("Monday"),
+   gettext_noop("12 (Month)"),gettext_noop("Nov"),gettext_noop("November"),
+   gettext_noop("99 (year)"),gettext_noop("1999 (year)"),gettext_noop("24 (hour)"),
+   gettext_noop("12 (hour)"),"am/pm", gettext_noop("59 (minutes)"),
+   gettext_noop("29 (seconds)"), "EST (timezone)",
+   gettext_noop("Default format")
+};
+
+static wxString DateFormats[] =
+{
+   "%d","%a","%A",
+   "%m","%b","%B",
+   "%y","%Y","%I",
+   "%H","%p","%M",
+   "%S","%Z",
+   "%c"
+};
+
+static const int NUM_DATE_FMTS  = WXSIZEOF(DateFormats);
+static const int NUM_DATE_FMTS_LABELS  = WXSIZEOF(DateFormatsLabels);
+
+static const int NUM_DATE_FIELDS = WXSIZEOF(DateFormats);;
+
+class wxDateTextCtrl : public wxTextCtrl
+{
+public:
+   wxDateTextCtrl(wxWindow *parent) : wxTextCtrl(parent,-1)
+      {
+         m_menu = new wxMenu;
+         m_menu->SetTitle(_("Format Specifiers:"));
+         for ( int n = 0; n < NUM_DATE_FMTS;n++ )
+            m_menu->Append(n, _(DateFormatsLabels[n]));
+      }
+   void OnRClick(wxMouseEvent& event)
+      { (void)PopupMenu(m_menu, event.GetPosition()); }
+   void OnMenu(wxCommandEvent &event)
+      {
+         ASSERT(event.GetId() >= 0 && event.GetId() < NUM_DATE_FMTS);
+         WriteText(DateFormats[event.GetId()]);
+      }
+protected:
+   wxMenu *m_menu;
+   DECLARE_EVENT_TABLE()
+      };
+
+BEGIN_EVENT_TABLE(wxDateTextCtrl, wxTextCtrl)
+   EVT_MENU(-1, wxDateTextCtrl::OnMenu)
+   EVT_RIGHT_DOWN(wxDateTextCtrl::OnRClick)
+END_EVENT_TABLE()
+
+class wxDateFmtDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxDateFmtDialog(ProfileBase *profile, wxWindow *parent);
+   ~wxDateFmtDialog() { m_Profile->DecRef(); }
+
+   // reset the selected options to their default values
+   virtual bool TransferDataFromWindow();
+   virtual bool TransferDataToWindow();
+   bool WasChanged(void) { return m_DateFmt != m_OldDateFmt;}
+protected:
+   ProfileBase *m_Profile;
+   wxString  m_DateFmt, m_OldDateFmt;
+   wxCheckBox *m_UseGMT;
+   wxTextCtrl *m_textctrl;
+};
+
+
+
+wxDateFmtDialog::wxDateFmtDialog(ProfileBase *profile, wxWindow *parent)
+   : wxManuallyLaidOutDialog(parent, _("Date Format"), "DateFormatDialog")
+{
+   wxASSERT(NUM_DATE_FMTS == NUM_DATE_FMTS_LABELS);
+
+   m_Profile = profile;
+   m_Profile->IncRef();
+   
+   SetDefaultSize(380,220);
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Date Format"), MH_DIALOG_DATEFMT);
+
+   wxLayoutConstraints *c;
+
+   wxStaticText *stattext = new wxStaticText(this, -1,
+                                             _("Press the right mouse button over the input field\n"
+                                               "to insert format specifiers.\n"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   stattext->SetConstraints(c);
+
+   m_textctrl = new wxDateTextCtrl(this);
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.Below(stattext, 2*LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   m_textctrl->SetConstraints(c);
+
+   m_UseGMT = new wxCheckBox(this, -1,_("Display time in GMT/UST."));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_textctrl, 2*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_UseGMT->SetConstraints(c);
+}
+
+
+bool
+wxDateFmtDialog::TransferDataFromWindow()
+{
+   m_DateFmt = m_textctrl->GetValue();
+   m_Profile->writeEntry(MP_DATE_FMT,m_DateFmt);
+   m_Profile->writeEntry(MP_DATE_GMT, m_UseGMT->GetValue() != 0);
+   return TRUE;
+}
+
+bool
+wxDateFmtDialog::TransferDataToWindow()
+{
+   m_DateFmt = READ_CONFIG(m_Profile, MP_DATE_FMT);
+   m_UseGMT->SetValue( READ_CONFIG(m_Profile, MP_DATE_GMT) != 0);
+   m_OldDateFmt = m_DateFmt;
+   m_textctrl->SetValue(m_DateFmt);
+   return TRUE;
+}
+
+
+/* Configuration dialog for sorting messages. */
+extern
+bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent)
+{
+   wxDateFmtDialog dlg(profile, parent);
    if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
    {
       return TRUE;

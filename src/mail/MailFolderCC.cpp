@@ -266,7 +266,7 @@ class HeaderInfoCC : public HeaderInfo
 public:
    virtual String const &GetSubject(void) const { return m_Subject; }
    virtual String const &GetFrom(void) const { return m_From; }
-   virtual String const &GetDate(void) const { return m_Date; }
+   virtual time_t GetDate(void) const { return m_Date; }
    virtual String const &GetId(void) const { return m_Id; }
    virtual unsigned long GetUId(void) const { return m_Uid; }
    virtual String const &GetReferences(void) const { return m_References; }
@@ -275,10 +275,11 @@ public:
    virtual size_t SizeOf(void) const { return sizeof(HeaderInfoCC); }
 
 protected:
-   String m_Subject, m_From, m_Date, m_Id, m_References;
+   String m_Subject, m_From, m_Id, m_References;
    int m_Status;
    unsigned long m_Size;
    unsigned long m_Uid;
+   time_t m_Date; 
    friend class MailFolderCC;
 };
 
@@ -1171,7 +1172,6 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    
    HeaderInfoCC & entry = *(HeaderInfoCC *)(*m_Listing)[m_BuildNextEntry];
 
-   char tmp[MAILTMPLEN];
    ADDRESS *adr;
 
    unsigned long msgno = mail_msgno (m_MailStream,uid);
@@ -1187,8 +1187,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 
    // DATE
    mail_parse_date (&selt,ov->date);
-   mail_date (tmp,&selt);  //FIXME: is this ok? Use our date format!
-   entry.m_Date = tmp;
+   entry.m_Date = (time_t) mail_longdate( &selt);
 
    // FROM
    /* get first from address from envelope */
@@ -1447,11 +1446,15 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
    wxLogDebug("mm_status: folder '%s', %lu messages",
               mf->m_MailboxPath.c_str(), status->messages);
 
-   if(status->flags & SA_MESSAGES)
-      mf->m_NumOfMessages  = status->messages;
-   MEventManager::Send( new MEventFolderUpdateData (mf) );
+   if(mf->m_Config.m_ReSortOnChange)
+      mf->UpdateListing(); // we need a complete new listing
+   else
+   {
+      if(status->flags & SA_MESSAGES)
+         mf->m_NumOfMessages  = status->messages;
+      MEventManager::Send( new MEventFolderUpdateData (mf) );
+   }
 }
-
 
 /** log a message
     @param str message str
