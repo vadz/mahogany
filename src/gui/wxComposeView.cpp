@@ -868,7 +868,8 @@ void EditorContentPart::SetData(void *data,
       m_FileName = filename;
    }
 
-   SetDisposition(_T("INLINE"));
+   if ( m_Disposition.empty() )
+      SetDisposition(_T("ATTACHMENT"));
 }
 
 void EditorContentPart::SetFile(const String& filename)
@@ -3554,6 +3555,8 @@ wxComposeView::InsertData(void *data,
    }
 
    EditorContentPart *mc = new EditorContentPart();
+   if ( MimeType(mt).ShouldShowInline() )
+      mc->SetDisposition(_T("INLINE"));
    mc->SetData(data, length, name, filename);
 
    DoInsertAttachment(mc, mimetype);
@@ -3595,9 +3598,7 @@ wxComposeView::InsertFile(const wxChar *fileName, const wxChar *mimetype)
 
    // by default propose to send the images and text parts inline but all the
    // rest as attachment
-   const MimeType::Primary primaryType = MimeType(strMimeType).GetPrimary();
-   props.disposition = primaryType == MimeType::TEXT ||
-                        primaryType == MimeType::IMAGE
+   props.disposition = MimeType(strMimeType).ShouldShowInline()
                         ? AttachmentProperties::Disposition_Inline
                         : AttachmentProperties::Disposition_Attachment;
    mc->SetDisposition(props.GetDisposition());
