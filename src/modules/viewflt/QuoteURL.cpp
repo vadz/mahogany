@@ -77,13 +77,21 @@ static const size_t LEVEL_INVALID = (size_t)-1;
     quoting methods such as ">" and "XY>"
 
     @param string the string to check
+    @param prev the start of previous line or NULL if start of text
     @param max_white max number of white characters before quotation mark
     @param max_alpha max number of A-Z characters before quotation mark
     @return number of quoting levels (0 for unquoted text)
   */
-static
-int CountQuoteLevel(const wxChar *string, int max_white, int max_alpha);
+static int
+CountQuoteLevel(const char *string,
+                const char *prev,
+                int max_white,
+                int max_alpha);
 
+/**
+   Check if there is only whitespace until the end of line.
+ */
+static bool IsBlankLine(const char *p);
 
 // ----------------------------------------------------------------------------
 // QuoteURLFilter declaration
@@ -154,8 +162,10 @@ protected:
    // fill m_options using the values from the given profile
    void ReadOptions(Options& options, Profile *profile);
 
-   // helpers
-   size_t GetQuotedLevel(const wxChar *text) const;
+   // get the quote level for the line (prev is for CountQuoteLevel() only)
+   size_t GetQuotedLevel(const char *line, const char *prev) const;
+
+   // get the colour for the given quote level
    wxColour GetQuoteColour(size_t qlevel) const;
 
    Options m_options;
@@ -165,49 +175,90 @@ protected:
 // CountQuoteLevel implementation
 // ============================================================================
 
-int
-CountQuoteLevel(const wxChar *string, int max_white, int max_alpha)
+bool IsBlankLine(const char *p)
 {
-   int levels = 0;
-
-   for ( const wxChar *c = string; *c != 0 && *c != '\n'; c++)
+   for ( ;; )
    {
-      // skip white space
-      int num_white = 0;
-      while ( *c == '\t' || *c == ' ' )
+      switch ( *p++ )
+      {
+         case ' ':
+         case '\t':
+         case '\r':
+            break;
+
+         case '\n':
+         case '\0':
+            return true;
+
+         default:
+            return false;
+      }
+   }
+}
+
+int
+CountQuoteLevel(const char *string,
+                const char *prev,
+                int max_white,
+                int max_alpha)
+{
+   // find the beginning of the and next line
+   const char *next = strchr(string, '\n');
+   if ( !next )
+   {
+      // it's simpler to pretend that the next line is the same as this one
+      // instead of checking for it all the time below
+      next = string;
+   }
+   else // skip '\n'
+   {
+      next++;
+   }
+
+   if ( !prev )
+   {
+      // same as above for next
+      prev = string;
+   }
+
+
+   // look at the beginning of this string and count (nested) quoting levels
+   int levels = 0;
+   for ( const char *c = string; *c != 0 && *c != '\n'; c++, prev++, next++ )
+   {
+      // skip leading white space
+      for ( int num_white = 0; *c == '\t' || *c == ' '; c++, prev++, next++  )
       {
          if ( ++num_white > max_white )
          {
             // too much whitespace for this to be a quoted string
             return levels;
          }
-
-         c++;
       }
 
       // skip optional alphanumeric prefix
-      int num_alpha = 0;
-      while ( isalpha((unsigned char)*c) )
+      for ( int num_alpha = 0; isalpha((unsigned char)*c); c++, prev++, next++ )
       {
          if ( ++num_alpha > max_alpha )
          {
             // prefix too long, not start of the quote
             return levels;
          }
-
-         c++;
       }
 
-      // check if we have a quoted line or not now: normally it is enough to
-      // simply check whether the first character is one of the admitted
-      // "quoting characters" but for ')' and '*' (which some people do use to
-      // quote!) we have to also check the next character as otherwise it
-      // results in too many false positives
+      // check if we have a quoted line or not now: we consider the line to be
+      // quoted if it starts with a special quoting character and if the
+      // next lines starts with the same prefix as well or is blank and if the
+      // previous line isn't similar to but not the same as this one (this is
+      // necessary to catch last line in a numbered list which would otherwise
+      // be considered quoted)
       //
       // TODO: make the string of "quoting characters" configurable
-      if ( *c != '>' && *c != '|' && *c != '}' &&
-            (*c != ')'  || c[1] != ' ') )
-//            ((*c != ')' && *c != '*') || c[1] != ' ') )  // '* ' still gives too many false positives
+      static const char *QUOTE_CHARS = ">|})*";
+      const size_t pos = c - string;
+      if ( !strchr(QUOTE_CHARS, *c) ||
+            (strncmp(string, next - pos, pos + 1) && !IsBlankLine(next + 1)) ||
+             (*prev == *c && strncmp(string, prev - pos, pos)) )
       {
          // not quoted (according to our heuristics anyhow)
          break;
@@ -282,11 +333,12 @@ bool QuoteURLFilter::UpdateOptions(Profile *profile)
 // ----------------------------------------------------------------------------
 
 size_t
-QuoteURLFilter::GetQuotedLevel(const wxChar *text) const
+QuoteURLFilter::GetQuotedLevel(const char *line, const char *prev) const
 {
    size_t qlevel = CountQuoteLevel
                    (
-                     text,
+                     line,
+                     prev,
                      m_options.quotedMaxWhitespace,
                      m_options.quotedMaxAlpha
                    );
@@ -366,7 +418,7 @@ QuoteURLFilter::DoProcess(String& text,
          }
          else // no preceding URL, we're really at the start of line
          {
-            level = GetQuotedLevel(before);
+            level = GetQuotedLevel(before, NULL);
          }
 
          style.SetTextColour(GetQuoteColour(level));
@@ -380,7 +432,7 @@ QuoteURLFilter::DoProcess(String& text,
             lineNext++;
 
             // calculate the quoting level for this line
-            size_t levelNew = GetQuotedLevel(lineNext);
+            size_t levelNew = GetQuotedLevel(lineNext, lineCur);
             if ( levelNew != level )
             {
                String line(lineCur, lineNext);
