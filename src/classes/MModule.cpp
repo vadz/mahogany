@@ -64,7 +64,7 @@ static wxArrayString BuildListOfModulesDirs();
 // constants
 // ----------------------------------------------------------------------------
 
-#define DLL_EXTENSION wxDllLoader::GetDllExt()
+#define DLL_EXTENSION wxDynamicLibrary::GetDllExt()
 
 #define MMD_SIGNATURE "Mahogany-Module-Definition"
 
@@ -209,8 +209,8 @@ void MModule_AddStaticModule(const char *Name,
 static
 MModule *LoadModuleInternal(const String & name, const String &pathname)
 {
-   wxDllType dll = wxDllLoader::LoadLibrary(pathname);
-   if ( !dll )
+   wxDynamicLibrary dll(pathname);
+   if ( !dll.IsLoaded() )
    {
       wxLogTrace(M_TRACE_MODULES, _T("Failed to load module '%s' from '%s'."),
                  name.c_str(), pathname.c_str());
@@ -222,8 +222,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
               name.c_str(), pathname.c_str());
 
    MModule_InitModuleFuncType initFunc =
-      (MModule_InitModuleFuncType)
-      wxDllLoader::GetSymbol(dll, MMODULE_INITMODULE_FUNCTION);
+      (MModule_InitModuleFuncType)dll.GetSymbol(MMODULE_INITMODULE_FUNCTION);
 
 
    int errorCode = 255;
@@ -242,7 +241,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
       me->m_Module = module;
       MModule_GetModulePropFuncType propFunc =
          (MModule_GetModulePropFuncType)
-         wxDllLoader::GetSymbol(dll, MMODULE_GETPROPERTY_FUNCTION);
+         dll.GetSymbol(MMODULE_GETPROPERTY_FUNCTION);
       if(propFunc)
          me->m_Interface = GetMModuleProperty((*propFunc)(),
                                               MMODULE_INTERFACE_PROP);
@@ -256,8 +255,8 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
       msg.Printf(_("Cannot initialise module '%s', error code %d."),
                  pathname.c_str(), errorCode);
       MDialog_ErrorMessage(msg);
-      wxDllLoader::UnloadLibrary(dll);
    }
+
    return module;
 }
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
@@ -706,12 +705,12 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
       {
          errorflag = true;
 
-         wxDllType dll = wxDllLoader::LoadLibrary(filename);
-         if ( dll )
+         wxDynamicLibrary dll(filename);
+         if ( dll.IsLoaded() )
          {
             MModule_GetModulePropFuncType getProps =
                (MModule_GetModulePropFuncType)
-               wxDllLoader::GetSymbol(dll, MMODULE_GETPROPERTY_FUNCTION);
+               dll.GetSymbol(MMODULE_GETPROPERTY_FUNCTION);
 
             if ( getProps )
             {
@@ -754,8 +753,6 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
                   errorflag = true;
                }
             }
-
-            wxDllLoader::UnloadLibrary(dll);
          }
 
          if ( errorflag )
