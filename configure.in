@@ -1117,7 +1117,7 @@ auto|Auto|AUTO|1)
 	fi
 	echo "int main() { return 0; }" >conftest.c
 	if $CXX -o conftest $WX_LIBS conftest.c && \
-		$(LDD) conftest | fgrep libwx  >/dev/null
+		$LDD conftest | fgrep libwx  >/dev/null
 	then
 		m_cv_USE_MODULES=dynamic
 		MAKE_USE_MODULES="USE_MODULES=dynamic"
@@ -1376,8 +1376,10 @@ AC_OUTPUT_COMMANDS(
 		;;
 	esac
 
+	# be careful to use only standard BRE features: this is why we use
+	# \{1,\} instead of + for example
 	grep "^#define M_VERSION_[MR]" $src/include/Mversion.h | \
-	    sed 's/^#define \+\(\w\+\) \+\([0-9]\+\)/\1=\2/' > makeversion
+	    sed 's/^#define \{1,\}\([A-Z_]\{1,\}\) \{1,\}\([0-9]\{1,\}\)/\1=\2/' > makeversion
 ],
 src="$srcdir" SRC="$SOURCEDIR" OBJ="$BUILDDIR"
 DIR="$DIR"
@@ -1389,8 +1391,7 @@ dnl show the configuration used
 . ./makeversion
 
 echo
-echo "Configured Mahogany " \
-     "${M_VERSION_MAJOR}.${M_VERSION_MINOR}.${M_VERSION_RELEASE} for ${host}."
+echo "Configured Mahogany ${M_VERSION_MAJOR}.${M_VERSION_MINOR}.${M_VERSION_RELEASE} for ${host}."
 echo ""
 echo "	wxWindows version used:			${WX_VERSION}"
 echo "	Debug mode:				${debug_option}"
