@@ -305,6 +305,8 @@ private:
       wxArrayString returnAddresses;
       /// the order of columns
       int columns[WXFLC_NUMENTRIES];
+      /// how to show the size
+      MessageSizeShow showSize;
    } m_settings;
 
    /// read the values from the profile into AllProfileSettings structure

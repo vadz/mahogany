@@ -41,8 +41,8 @@ public:
    virtual const String &GetReferences(void) const = 0;
    virtual UIdType GetUId(void) const = 0;
    virtual int GetStatus(void) const = 0;
-   virtual unsigned long const &GetSize(void) const = 0;
-   virtual size_t SizeOf(void) const = 0;
+   virtual unsigned long GetSize(void) const = 0;
+   virtual unsigned long GetLines(void) const = 0;
 
    /// Return the indentation level for message threading.
    virtual unsigned GetIndentation() const = 0;

@@ -17,6 +17,17 @@ class Profile;
 class ASMailFolder;
 class wxWindow;
 
+// how to show the message size in the viewer?
+enum MessageSizeShow
+{
+   MessageSize_Automatic,  // choose lines/bytes/kbytes/mbytes automatically
+   MessageSize_AutoBytes,  // always show bytes/kbytes/mbytes
+   MessageSize_Bytes,      // always show size in bytes
+   MessageSize_KBytes,     //                     Kb
+   MessageSize_MBytes,     //                     Mb
+   MessageSize_Max
+};
+
 /**
    FolderView class, a window displaying a MailFolder.
 */
@@ -46,6 +57,16 @@ public:
    /// return pointer to folder
    ASMailFolder * GetFolder(void) const { return m_ASMailFolder; }
 
+   /**
+     Returns the string containing the size as it should be shown to the user.
+
+     @param sizeBytes the size of the message in bytes
+     @param sizeLines the size of message in lines (only if text)
+     @param show how should we show the size?
+     @return string containing the text for display
+    */
+   static String SizeToString(unsigned long sizeBytes, unsigned long sizeLines,
+                              MessageSizeShow show);
 protected:
    /// the derived class should close when our folder is deleted
    virtual void OnFolderDeleteEvent(const String& folderName) = 0;

@@ -8,6 +8,17 @@ $Id$
     JUST CONTINUE TO REMOVE BUGS FROM THIS LIST AS THEY ARE 
     FIXED.
 
+************ possible cclient improvements (from reading PINE sources)
+
+1. mail_fetch_overview_x() could be made obsolete by using SET_IMAPEXTRAHEADERS
+   to tell cclient to fetch "Newsgroup" header too
+
+2. must install SET_BLOCKNOTIFY handler (it's not clear when exactly is it
+   called and with which args, so have to test it first, but it might be a
+   good place to show the busy cursor and such...)
+
+3. use SET_READPROGRESS to show reading message progress (IMAP only but still)
+
 ************ THREADING PROBLEMS:
 
 (I am keeping a list of threading problems here, which I will use for

@@ -38,8 +38,8 @@ public:
    virtual unsigned long GetUId(void) const { return m_UId; }
    virtual String const &GetReferences(void) const { return m_References; }
    virtual int GetStatus(void) const { return m_Status; }
-   virtual unsigned long const &GetSize(void) const { return m_Size; }
-   virtual size_t SizeOf(void) const { return sizeof(HeaderInfoImpl); }
+   virtual unsigned long GetSize(void) const { return m_Size; }
+   virtual unsigned long GetLines(void) const { return m_Lines; }
 
    /// Return the indentation level for message threading.
    virtual unsigned GetIndentation() const { return m_Indentation; }
@@ -83,6 +83,9 @@ protected:
 
    /// size in bytes
    unsigned long m_Size;
+
+   /// size in lines for text messages, 0 otherwise
+   unsigned long m_Lines;
 
    /// as returned by cclient
    unsigned long m_UId;

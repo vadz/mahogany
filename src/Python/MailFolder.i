@@ -477,8 +477,8 @@ public:
    virtual const String &GetReferences(void);
    virtual UIdType GetUId(void);
    virtual int GetStatus(void);
-   virtual const unsigned long &GetSize(void);
-   virtual size_t SizeOf(void);
+   virtual unsigned long GetSize(void);
+   virtual unsigned long GetLines(void);
    /// Return the indentation level for message threading.
    virtual unsigned GetIndentation();
    /// Set the indentation level for message threading.

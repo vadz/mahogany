@@ -257,6 +257,34 @@ typedef void (*mm_list_handler)(MAILSTREAM * stream,
                                 String  name,
                                 long  attrib);
 
+#ifdef USE_BLOCK_NOTIFY
+
+#include <wx/datetime.h>
+
+void *mahogany_block_notify(int reason, void *data)
+{
+   #define LOG_BLOCK_REASON(what) \
+      if ( reason == BLOCK_##what ) \
+         printf("%s: mm_blocknotify(%s, %p)\n", \
+                wxDateTime::Now().FormatTime().c_str(), #what, data); \
+      else \
+
+   LOG_BLOCK_REASON(NONE)
+   LOG_BLOCK_REASON(SENSITIVE)
+   LOG_BLOCK_REASON(NONSENSITIVE)
+   LOG_BLOCK_REASON(DNSLOOKUP)
+   LOG_BLOCK_REASON(TCPOPEN)
+   LOG_BLOCK_REASON(TCPREAD)
+   LOG_BLOCK_REASON(TCPWRITE)
+   LOG_BLOCK_REASON(TCPCLOSE)
+   LOG_BLOCK_REASON(FILELOCK)
+   printf("mm_blocknotify(UNKNOWN, %p)\n", data);
+
+   return NULL;
+}
+
+#endif // USE_BLOCK_NOTIFY
+
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
@@ -3252,6 +3280,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
 
       // all the other fields
       entry.m_Size = ov->optional.octets;
+      entry.m_Lines = ov->optional.lines;
       entry.m_Id = ov->message_id;
       entry.m_References = ov->references;
       entry.m_UId = uid;
@@ -3305,6 +3334,13 @@ MailFolderCC::CClientInit(void)
 
    // 1 try is enough, the default (3) is too slow
    mail_parameters(NULL, SET_MAXLOGINTRIALS, (void *)1);
+
+#ifdef USE_BLOCK_NOTIFY
+   mail_parameters(NULL, SET_BLOCKNOTIFY, (void *)mahogany_block_notify);
+#endif // USE_BLOCK_NOTIFY
+
+   // VZ: use this later to show IMAP reading progress
+   //mail_parameters(NULL, SET_READPROGRESS, (void *)mahogany_read_progress);
 
 #ifdef OS_UNIX
    // install our own sigpipe handler:

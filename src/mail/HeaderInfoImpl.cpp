@@ -48,6 +48,7 @@ HeaderInfo * HeaderInfoImpl::Clone() const
    hi->m_References = GetReferences();
    hi->m_Status = GetStatus();
    hi->m_Size = GetSize();
+   hi->m_Lines = GetLines();
    hi->SetIndentation(GetIndentation());
    hi->SetEncoding(GetEncoding());
    hi->m_Colour = GetColour();

@@ -142,7 +142,7 @@ public:
       else if ( name == "date" )
          *value = strutil_ftime(m_hi->GetDate(), m_dateFormat, m_dateGMT);
       else if ( name == "size" )
-         *value = m_hi->SizeOf();
+         *value = m_hi->GetSize();
       else if ( name == "score" )
          *value = m_hi->GetScore();
       else
@@ -1814,6 +1814,9 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    settings->size = READ_CONFIG(m_Profile, MP_FVIEW_FONT_SIZE);
    settings->senderOnlyNames = READ_CONFIG(m_Profile, MP_FVIEW_NAMES_ONLY) != 0;
 
+   settings->showSize =
+      (MessageSizeShow)READ_CONFIG(m_Profile, MP_FVIEW_SIZE_FORMAT);
+
    settings->replaceFromWithTo = READ_CONFIG(m_Profile, MP_FVIEW_FROM_REPLACE) != 0;
    if ( settings->replaceFromWithTo )
    {
@@ -1949,7 +1952,8 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
                           strutil_ftime(hi->GetDate(),
                                         m_settings.dateFormat,
                                         m_settings.dateGMT),
-                          strutil_ultoa(hi->GetSize()));
+                          SizeToString(hi->GetSize(), hi->GetLines(),
+                                       m_settings.showSize));
 
    if ( status & MailFolder::MSG_STAT_DELETED )
    {
@@ -3630,6 +3634,7 @@ operator==(const wxFolderView::AllProfileSettings& other) const
                 dateGMT == other.dateGMT &&
                 senderOnlyNames == other.senderOnlyNames &&
                 replaceFromWithTo == other.replaceFromWithTo &&
+                showSize == other.showSize &&
                 memcmp(columns, other.columns, sizeof(columns)) == 0;
 
    if ( equal )

@@ -254,6 +254,7 @@ enum ConfigFields
    ConfigField_MessageViewQuotedColour2,
    ConfigField_MessageViewQuotedColour3,
    ConfigField_MessageViewInlineGraphics,
+   ConfigField_MessageViewInlineGraphicsSize,
    ConfigField_MessageViewAutoDetectEncoding,
    ConfigField_MessageViewPlainIsText,
    ConfigField_MessageViewRfc822IsText,
@@ -294,6 +295,7 @@ enum ConfigFields
    ConfigField_FolderViewThreadMessages,
    ConfigField_FolderViewSortMessagesBy,
    ConfigField_FolderViewHeaders,
+   ConfigField_FolderViewSizeUnits,
    ConfigField_FolderViewStatusHelp,
    ConfigField_FolderViewUpdateStatus,
    ConfigField_FolderViewStatusBarFormat,
@@ -876,6 +878,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for &2nd level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
    { gettext_noop("Colour for &3nd level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
    { gettext_noop("&Inline graphics"),             Field_Bool,    -1 },
+   { gettext_noop("Only if their size is less than"), Field_Number, ConfigField_MessageViewInlineGraphics },
    { gettext_noop("&Autodetect font encoding"),    Field_Bool,    -1 },
    { gettext_noop("Display &text attachments inline"),Field_Bool,    -1 },
    { gettext_noop("Display &mail messages as text"),Field_Bool,    -1 },
@@ -922,6 +925,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Thread messages"),             Field_Bool,    -1},
    { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
    { gettext_noop("Configure &columns to show..."),Field_SubDlg,   -1 },
+   // combo choices must be in sync with MessageSizeShow enum values
+   { gettext_noop("Show size in &units of:automatic:autobytes:bytes:kbytes:mbytes"),
+                                                   Field_Combo,   -1 },
    { gettext_noop("You can choose to show the information about\n"
                   "the currently selected message in the status bar.\n"
                   "You can use the same macros as in the template\n"
@@ -1173,6 +1179,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR2),
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR3),
    CONFIG_ENTRY(MP_INLINE_GFX),
+   CONFIG_ENTRY(MP_INLINE_GFX_SIZE),
    CONFIG_ENTRY(MP_MSGVIEW_AUTO_ENCODING),
    CONFIG_ENTRY(MP_PLAIN_IS_TEXT),
    CONFIG_ENTRY(MP_RFC822_IS_TEXT),
@@ -1211,7 +1218,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MSGS_USE_THREADING),
    CONFIG_NONE(), // sorting subdialog
    CONFIG_NONE(), // columns subdialog
-   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FVIEW_SIZE_FORMAT),
+   CONFIG_NONE(), // status/title format help
    CONFIG_ENTRY(MP_FVIEW_STATUS_UPDATE),
    CONFIG_ENTRY(MP_FVIEW_STATUS_FMT),
 

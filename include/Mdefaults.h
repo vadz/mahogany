@@ -526,6 +526,8 @@ enum MFolderIndex
 #define   MP_SHOW_XFACES         "ShowXFaces"
 /// show graphics inline
 #define   MP_INLINE_GFX         "InlineGraphics"
+/// limit size for inline graphics
+#define   MP_INLINE_GFX_SIZE     "InlineGraphicsSize"
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS     "MsgViewHeaders"
 /// all headers we know about
@@ -623,6 +625,8 @@ enum MFolderIndex
 #define MP_MSGS_RESORT_ON_CHANGE         "ReSortMessagesOnChange"
 /// use threading
 #define MP_MSGS_USE_THREADING  "ThreadMessages"
+// how to show the size (MessageSizeShow enum value)
+#define MP_FVIEW_SIZE_FORMAT   "SizeFormat"
 /// search criterium for searching in folders
 #define MP_MSGS_SEARCH_CRIT   "SearchCriterium"
 /// search argument
@@ -1155,8 +1159,10 @@ enum MFolderIndex
 #define   MP_FORWARD_PREFIX_D      _("Forwarded message: ")
 /// show XFaces?
 #define   MP_SHOW_XFACES_D      1
-// show graphics inline
+/// show graphics inline
 #define   MP_INLINE_GFX_D       1
+/// limit size for inline graphics in Kb (0 for no limit)
+#define   MP_INLINE_GFX_SIZE_D  40
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS_D     \
           "Date:" \
@@ -1372,6 +1378,8 @@ enum MFolderIndex
 #define MP_MSGS_RESORT_ON_CHANGE_D 0l
 /// use threading
 #define MP_MSGS_USE_THREADING_D  1l
+// how to show the size (MessageSizeShow enum value)
+#define MP_FVIEW_SIZE_FORMAT_D  0l
 /// search criterium for searching in folders
 #define MP_MSGS_SEARCH_CRIT_D   0l
 /// search argument

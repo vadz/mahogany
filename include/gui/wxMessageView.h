@@ -44,7 +44,7 @@ class ASMailFolder;
   */
 
 class wxMessageView : public wxLayoutWindow,
-                      public MessageViewBase,
+                      // public MessageViewBase,
                       public MEventReceiver
 {
 public:
@@ -239,8 +239,8 @@ protected:
       bool inlinePlainText;
       /// highlight URLs?
       bool highlightURLs;
-      /// inline graphics?
-      bool inlineGFX;
+      /// max size of graphics to inline: 0 if none, -1 if not inline at all
+      long inlineGFX;
       /// URL viewer
       String browser;
       /// Is URL viewer of the netscape variety?

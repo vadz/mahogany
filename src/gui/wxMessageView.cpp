@@ -593,7 +593,13 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
    settings->inlinePlainText = READ_CONFIG(m_Profile,MP_PLAIN_IS_TEXT) != 0;
    settings->inlineRFC822 = READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT) != 0;
    settings->highlightURLs = READ_CONFIG(m_Profile,MP_HIGHLIGHT_URLS) != 0;
-   settings->inlineGFX = READ_CONFIG(m_Profile, MP_INLINE_GFX) != 0;
+
+   // we set inlineGFX to -1 if we don't inline graphics at all and to the
+   // max size limit of graphics to show inline otherwise (0 if no limit)
+   settings->inlineGFX = READ_CONFIG(m_Profile, MP_INLINE_GFX)
+                         ? READ_CONFIG(m_Profile, MP_INLINE_GFX_SIZE)
+                         : -1;
+
    settings->browser = READ_CONFIG(m_Profile, MP_BROWSER);
    settings->browserIsNS = READ_CONFIG(m_Profile, MP_BROWSER_ISNS) != 0;
    settings->autocollect =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT);
@@ -1046,7 +1052,66 @@ wxMessageView::Update(void)
             Fax message. */
       {
          wxString mimeFileName = GetFileNameForMIME(m_mailMessage, i);
-         if(t == Message::MSG_TYPEIMAGE && m_ProfileValues.inlineGFX)
+
+         bool showInline = t == Message::MSG_TYPEIMAGE;
+         if ( showInline )
+         {
+            switch ( m_ProfileValues.inlineGFX )
+            {
+               default:
+                  // check that the size of the image is less than configured
+                  // maximum
+                  if ( m_mailMessage->GetPartSize(i) >
+                        1024*(size_t)m_ProfileValues.inlineGFX )
+                  {
+                     wxString msg;
+                     msg.Printf
+                         (
+                           _("An image embedded in this message is bigger "
+                             "than the currently configured limit of %luKb.\n"
+                             "\n"
+                             "Would you still like to see it?\n"
+                             "\n"
+                             "You can change this setting in the \"Message "
+                             "View\" page of the preferences dialog to 0 if "
+                             "you want to always show the images inline."),
+                           (unsigned long)m_ProfileValues.inlineGFX
+                         );
+                           
+                     if ( MDialog_YesNoDialog
+                          (
+                           msg,
+                           GetFrame(this),
+                           MDIALOG_YESNOTITLE,
+                           false, // [No] default
+                           GetPersMsgBoxName(M_MSGBOX_GFX_NOT_INLINED)
+                          ) )
+                     {
+                        // will inline
+                        break;
+                     }
+
+                  }
+                  else
+                  {
+                     // will inline
+                     break;
+                  }
+
+                  // fall through
+
+               case -1:
+                  // never inline
+                  showInline = false;
+                  break;
+
+               case 0:
+                  // always inline
+                  break;
+            }
+         }
+
+         if ( showInline )
          {
             wxString filename = wxGetTempFileName("Mtemp");
             if(mimeFileName.Length() == 0)
@@ -1065,7 +1130,7 @@ wxMessageView::Update(void)
                                       mimeFileName.AfterLast('.'))
                   );
          }
-         else
+         else // show attachment as an icon
          {
             obj = new wxLayoutObjectIcon(
                mApplication->GetIconManager()->
@@ -1073,6 +1138,7 @@ wxMessageView::Update(void)
                                    mimeFileName.AfterLast('.'))
                );
          }
+
          ASSERT(obj);
          {
             String label;
@@ -1084,12 +1150,16 @@ wxMessageView::Update(void)
             obj->SetUserData(ci); // gets freed by list
             ci->DecRef();
             llist->LineBreak(); //add a line break before each attachment
-	    //multiple images look better alligned vertically rather than horizontally
+
+            // multiple images look better alligned vertically rather than
+            // horizontally
             llist->Insert(obj);
+
             // add extra whitespace so lines with multiple icons can
             // be broken:
             llist->Insert(" ");
          }
+
          lastObjectWasIcon = true;
       }
    }
@@ -1698,7 +1768,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                      frame,
                      MDIALOG_YESNOTITLE,
                      true,
-                     "AskUrlBrowser"
+                     GetPersMsgBoxName(M_MSGBOX_ASK_URL_BROWSER)
                      )
                   )
                   ShowOptionsDialog();

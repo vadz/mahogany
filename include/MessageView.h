@@ -10,28 +10,21 @@
 #ifndef MESSAGEVIEW_H
 #define MESSAGEVIEW_H
 
-// don't use interface for virtual base class as there is no .cc file
-// for it !
-//#ifdef __GNUG__
-//#pragma interface "MessageView.h"
-//#endif
+// there is no matching .cpp file containing pragma implementation
+#if 0 //def __GNUG__
+#pragma interface "MessageView.h"
+#endif
 
-#include   "Message.h"
-
-/**
-   MessageView class, a window displaying a Message.
-
-*/
+// ----------------------------------------------------------------------------
+// MessageViewBase should be the ABC for msg viewer classes - for now it is not
+// used
+// ----------------------------------------------------------------------------
 
 class MessageViewBase
-{   
+{
 public:
-   /// constructor
-   MessageViewBase() {}
-   /// virtual destructor
-   virtual ~MessageViewBase() {}
-   /// update the user interface
-   virtual void Update(void) = 0;
+   MessageViewBase() { }
 };
 
-#endif
+#endif // MESSAGEVIEW_H
+
