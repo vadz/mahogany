@@ -69,6 +69,8 @@
 #include "FolderView.h"
 #include "TemplateDialog.h"
 
+#include "InitPython.h"
+
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
@@ -3737,6 +3739,28 @@ wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
                                    ConfigField_PythonLast,
                                    MH_OPAGE_PYTHON)
 {
+}
+
+bool wxOptionsPagePython::TransferDataFromWindow()
+{
+   // currently we still have the old value for "Enable Python" in config
+   const bool usePythonOld = READ_CONFIG_BOOL(m_Profile, MP_USEPYTHON);
+   if ( !wxOptionsPageStandard::TransferDataFromWindow() )
+   {
+      return false;
+   }
+
+   // now we have the new one -- is it different?
+   if ( READ_CONFIG_BOOL(m_Profile, MP_USEPYTHON) != usePythonOld )
+   {
+      // yes, start/stop embedded Python interpreter
+      if ( usePythonOld )
+         FreePython();
+      else
+         InitPython();
+   }
+
+   return true;
 }
 
 #endif // USE_PYTHON

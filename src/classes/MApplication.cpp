@@ -44,6 +44,8 @@
 #include "Composer.h"         // for RestoreAll()
 #include "SendMessage.h"
 
+#include "InitPython.h"
+
 #include "gui/wxMainFrame.h"
 #include "gui/wxMDialogs.h"   // MDialog_YesNoDialog
 #include "adb/AdbManager.h"   // for AdbManager::Delete
@@ -131,16 +133,6 @@ WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
 #if defined(OS_UNIX) && !defined(OS_MAC)
    static const wxChar *MAHOGANY_DATADIR = _T("share/mahogany");
 #endif
-
-// ----------------------------------------------------------------------------
-// functions
-// ----------------------------------------------------------------------------
-
-#ifdef  USE_PYTHON
-   // only used here, defined in src/Python/InitPython.cpp
-   extern bool InitPython(void);
-   extern void FreePython(void);
-#endif //Python
 
 // ============================================================================
 // implementation
