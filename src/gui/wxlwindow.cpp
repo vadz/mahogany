@@ -168,7 +168,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
    {
       // found is only true if we are really over an object, not just
       // behind it
-      if(found && u)
+      if(found && u && ! m_Selecting)
       {
          if(!m_HandCursor)
             SetCursor(wxCURSOR_HAND);
