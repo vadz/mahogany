@@ -210,18 +210,25 @@ SendMessageCC::Create(Protocol protocol,
    m_SendmailCmd = READ_CONFIG(prof, MP_USE_SENDMAIL) ?
       READ_CONFIG(prof,MP_SENDMAILCMD) : String("");
 
-   if(protocol == Prot_SMTP)
+   if ( protocol == Prot_SMTP )
    {
       m_ServerHost = READ_CONFIG(prof, MP_SMTPHOST);
       m_UserName = READ_CONFIG(prof,MP_SMTPHOST_LOGIN);
-
       m_Password = READ_CONFIG(prof,MP_SMTPHOST_PASSWORD);
+#ifdef USE_SSL
+      m_UseSSLforSMTP = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
+      m_UseSSLUnsignedforSMTP = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL_UNSIGNED) != 0;
+#endif
    }
    else // protocol == NNTP
    {
       m_ServerHost = READ_CONFIG(prof, MP_NNTPHOST);
       m_UserName = READ_CONFIG(prof,MP_NNTPHOST_LOGIN);
       m_Password = READ_CONFIG(prof,MP_NNTPHOST_PASSWORD);
+#ifdef USE_SSL
+      m_UseSSLforNNTP = READ_CONFIG(prof, MP_NNTPHOST_USE_SSL) != 0;
+      m_UseSSLUnsignedforNNTP = READ_CONFIG(prof, MP_NNTPHOST_USE_SSL_UNSIGNED) != 0;
+#endif
    }
 
    // check that we have password if we use it
@@ -234,10 +241,6 @@ SendMessageCC::Create(Protocol protocol,
       m_Password = strutil_decrypt(m_Password);
    }
 
-#ifdef USE_SSL
-   m_UseSSLforSMTP = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
-   m_UseSSLforNNTP = READ_CONFIG(prof, MP_NNTPHOST_USE_SSL) != 0;
-#endif
 }
 
 SendMessageCC::~SendMessageCC()
@@ -1171,8 +1174,10 @@ SendMessageCC::Send(void)
 #ifdef USE_SSL
          if ( m_UseSSLforSMTP )
          {
-            STATUSMESSAGE(("Sending message via SSL..."));
+            STATUSMESSAGE((_("Sending message via SSL...")));
             service << "ssl";
+            if ( m_UseSSLUnsignedforSMTP )
+               service << "/novalidate-cert";
          }
 #endif // USE_SSL
          stream = smtp_open_full(NIL,
@@ -1189,8 +1194,10 @@ SendMessageCC::Send(void)
 #ifdef USE_SSL
          if ( m_UseSSLforNNTP )
          {
-            STATUSMESSAGE(("Posting message via SSL..."));
+            STATUSMESSAGE((_("Posting message via SSL...")));
             service << "ssl";
+            if ( m_UseSSLUnsignedforNNTP )
+               service << "/novalidate-cert";
          }
 #endif // USE_SSL
 

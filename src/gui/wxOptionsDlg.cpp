@@ -143,7 +143,9 @@ enum ConfigFields
 #ifdef USE_SSL
    ConfigField_SSLtext,
    ConfigField_SmtpServerSSL,
+   ConfigField_SmtpServerSSLUnsigned,
    ConfigField_NntpServerSSL,
+   ConfigField_NntpServerSSLUnsigned,
 #endif
    ConfigField_DialUpHelp,
    ConfigField_DialUpSupport,
@@ -776,7 +778,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "mail or news. Tick the following boxes to activate this.")
      , Field_Message, -1 },
    { gettext_noop("SMTP server uses SS&L"), Field_Bool,    -1,                        },
+   { gettext_noop("Accept unsigned (self-signed) certificates"), Field_Bool, ConfigField_SmtpServerSSL,     },
    { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
+   { gettext_noop("Accept unsigned (self-signed) certificates"), Field_Bool, ConfigField_NntpServerSSL,     },
 #endif // USE_SSL
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
@@ -1212,7 +1216,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #ifdef USE_SSL
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SMTPHOST_USE_SSL),
+   CONFIG_ENTRY(MP_SMTPHOST_USE_SSL_UNSIGNED),
    CONFIG_ENTRY(MP_NNTPHOST_USE_SSL),
+   CONFIG_ENTRY(MP_NNTPHOST_USE_SSL_UNSIGNED),
 #endif // USE_SSL
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_DIALUP_SUPPORT),

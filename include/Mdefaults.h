@@ -409,12 +409,16 @@ enum MFolderIndex
 #define   MP_NNTPHOST_PASSWORD  "NewsHostPw"
 /// use SSL?
 #define   MP_SMTPHOST_USE_SSL         "MailHostSSL"
+/// check ssl-certs for SMTP connections?
+#define   MP_SMTPHOST_USE_SSL_UNSIGNED   "MailHostSSLUnsigned"
 /// sendmail command
 #define MP_SENDMAILCMD "SendmailCmd"
 /// use sendmail?
 #define MP_USE_SENDMAIL "UseSendmail"
 /// use SSL?
 #define   MP_NNTPHOST_USE_SSL         "NewsHostSSL"
+/// check ssl-certs for NNTP connections?
+#define   MP_NNTPHOST_USE_SSL_UNSIGNED   "NewsHostSSLUnsigned"
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST      "BeaconHost"
 /// does Mahogany control dial-up networking?
@@ -1094,6 +1098,8 @@ enum MFolderIndex
 #define   MP_SMTPHOST_PASSWORD_D   ""
 /// use SSL?
 #define   MP_SMTPHOST_USE_SSL_D   0l
+/// check ssl-certs for SMTP connections?
+#define   MP_SMTPHOST_USE_SSL_UNSIGNED_D   0l
 /// sendmail command  FIXME - should be detected by configure
 #ifdef OS_LINUX
 #  define MP_SENDMAILCMD_D "/usr/sbin/sendmail -t"
@@ -1116,6 +1122,8 @@ enum MFolderIndex
 #define   MP_NNTPHOST_PASSWORD_D      ""
 /// use SSL?
 #define   MP_NNTPHOST_USE_SSL_D   0l
+/// check ssl-certs for NNTP connections?
+#define   MP_NNTPHOST_USE_SSL_UNSIGNED_D   0l
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST_D      ""
 /// does Mahogany control dial-up networking?
