@@ -776,6 +776,71 @@ the contents of a mail folder or a newsgroup. It consists of two parts:
 authors, dates, etc.
 \item The contents of the currently selected message below.
 \end{itemize}
+
+\subsubsection{Understanding the folder view}
+
+The messages are displayed in the folder view according to the curent
+sort order which may be changed either from the folder properties
+dialog (of course, it can be set independently for each folder or
+be the same for all folders at once) or by clicking on the column
+header. In the latter case, clicking on, for example, \noun{{}``Subject{}''}
+column, will sort the messages by subject if they were not sorted
+by subject already, otherwise it will sort them by subject in the
+reverse order. This allows you to sort the listing on some column
+by just clicking it and to reverse the sort order by clicking it again.
+
+Most of the columns are self explanatory. It should be mentioned that
+the date format is configurable from the folder view page of the folder
+properties dialog and you may set it to anything you like. In particular,
+some people find it very useful to show the date in GMT instead of
+the local time.
+
+The status column (which is usually the first one, although you may
+change the column order from the same page already mentioned above)
+may be empty or contain one or more flags:
+
+\begin{tabular}{|c|c|}
+\hline 
+Symbol&
+Meaning\\
+\hline
+\hline 
+{*}&
+message is flagged or important\\
+\hline 
+A&
+message was answered to\\
+\hline 
+D&
+message is marked as deleted and will disappear after expunge\\
+\hline 
+U&
+message is unread: you haven't seen its body yet\\
+\hline 
+R&
+message is recent: this is the first time you see it\\
+\hline 
+N&
+message is new: it is recent and unread\\
+\hline
+\end{tabular}
+
+Accordingly, if nothing appears in the status column, the message
+was read but wasn't deleted nor flagged and this is not the first
+time you see it. Note that not all kinds of folders support all kinds
+of flags: while IMAP servers always do, POP servers are not capable
+of storing the message flags and so all messages will always appear
+as new in them.
+
+Note that each message flag has also the corresponding colour which
+is used to highlight the message in the folder view and also to highlight
+the folder containing this message in the folder tree. These colours
+can be changed from the folder view page of the options dialog, as
+usual.
+
+
+\subsubsection{Keyboard and mouse handling}
+
 The reaction to a mouse click in the list of messages depends on the
 preferences setting {}``Preview message when selected{}``. When
 the option is selected, a single mouse click will select the message
