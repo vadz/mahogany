@@ -525,7 +525,7 @@ public:
    virtual const Value Evaluate(void) const = 0;
    virtual String ToString(void) const
       { return Evaluate().ToString(); }
-   virtual const SyntaxNode *GetChild(size_t order) const { return NULL; }
+   virtual const SyntaxNode *GetChild(size_t /* order */) const { return NULL; }
    virtual const SyntaxNode *GetNext() const { return NULL; }
    virtual bool IsFunctionCall() const { return false; }
 #ifdef DEBUG
