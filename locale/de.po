@@ -1,7 +1,7 @@
 #: PalmOS.cpp:756
 msgid ""
 msgstr ""
-"Project-Id-Version: Mahogany 0.21\n"
+"Project-Id-Version: Mahogany 0.50\n"
 "POT-Creation-Date: 2000-05-15 21:26+0100\n"
 "PO-Revision-Date: 1999-01-11 23:23+0000\n"
 "Last-Translator: Karsten Ballüder <karsten@phy.hw.ac.uk>\n"
@@ -22,7 +22,7 @@ msgstr "Regular Expressions sind nicht implementiert."
 msgid ""
 "You need to specify at the SMTP server to be able to send email, please do "
 "it!"
-msgstr "Sie müssen einen SMTP-Server angeben um e-Mails senden zu können."
+msgstr "Sie müssen einen SMTP-Server angeben, um e-Mails senden zu können."
 
 #: upgrade.cpp:488 wxWizards.cpp:226
 msgid "Do you really want to abort the wizard?"
@@ -34,7 +34,7 @@ msgid ""
 "the program before using it!"
 msgstr ""
 "Bitte verwenden sie den 'Optionen' Dialog, um\n"
-"das Programm zu konfigurieren bevor Sie es benutzen!"
+"das Programm zu konfigurieren, bevor Sie es benutzen!"
 
 #: upgrade.cpp:564
 msgid ""
@@ -116,8 +116,8 @@ msgstr ""
 "(IMAP4 ist viel besser und schneller).\n"
 "\n"
 "Um Usenet Diskussionsgruppen (News) zu lesen\n"
-"brauchen Sie einen NNTP Server, und zum Senden\n"
-"von Mail, den SMTP Server.\n"
+"brauchen Sie einen NNTP-Server, und zum Senden\n"
+"von Mail den SMTP-Server.\n"
 "\n"
 "Sie können all dies auch später einstellen, und\n"
 "dann auch mehrere Server angeben."
@@ -176,7 +176,7 @@ msgstr ""
 "Mahogany kann entweder alle Nachrichten in\n"
 "der System-Mailbox lassen oder in seiner\n"
 "eigenen Mailbox sammeln.\n"
-"Letzteres is empfohlen, insbesondere wenn\n"
+"Letzteres ist empfohlen, insbesondere wenn\n"
 "Sie mehr als einen Mailserver verwenden."
 
 #: upgrade.cpp:752
@@ -230,8 +230,8 @@ msgstr ""
 "\n"
 "Mahogany kann Mails entweder sofort\n"
 "senden oder aufheben und erst später\n"
-"senden. Letzteres ist empfohlen, be-\n"
-"sonders wenn Sie ein Modem verwenden."
+"senden. Letzteres ist insbesondere\n"
+"empfohlen, wenn Sie ein Modem verwenden."
 
 #: upgrade.cpp:785
 msgid ""
@@ -307,7 +307,7 @@ msgstr ""
 "Es lohnt sich auch, in den Options-Dialog\n"
 "zu schauen.\n"
 "\n"
-"Im Fall von Problemen, sollte die Online-\n"
+"Im Fall von Problemen sollte die Online-\n"
 "Hilfe weiterhelfen, und, wenn dies nicht\n"
 "reicht, unsere Webseiten:\n"
 "http://www.wxwindows.org/Mahogany/\n"
@@ -350,12 +350,12 @@ msgid ""
 "Your Mahogany Developers Team\n"
 msgstr ""
 "From: m-users-subscribe@egroups.com\n"
-"Subject: Willkommen zu Mahogany!\n"
+"Subject: Willkommen bei Mahogany!\n"
 "Date: %s\n"
 "\n"
 "Vielen Dank, daß Sie Mahogany ausprobieren!\n"
 "\n"
-"Dieses e-Mail und News-Programm wird als `OpenSource' Projekt von einem\n"
+"Dieses Mail und News-Programm wird als `OpenSource' Projekt von einem\n"
 "Team von Freiwilligen aus aller Welt entwickelt.\n"
 "Falls Sie an der seiner Entwicklung mithelfen möchten, sind Sie jeder-\n"
 "zeit herzlich willkommen.\n"
@@ -399,7 +399,7 @@ msgstr "Neue Nachrichten"
 
 #: upgrade.cpp:1198
 msgid "Mailbox in which Mahogany collects all new messages."
-msgstr "Mailbox wo neue Nachrichten gesammelt werden."
+msgstr "Mailbox, wo neue Nachrichten gesammelt werden."
 
 #: upgrade.cpp:1200
 #, c-format
@@ -412,7 +412,7 @@ msgstr "Abfall"
 
 #: upgrade.cpp:1212
 msgid "Trash folder for deleted messages."
-msgstr "Abfalls-ailbox für gelöschte Nachrichten"
+msgstr "Abfall-Mailbox für gelöschte Nachrichten"
 
 #: upgrade.cpp:1213
 msgid "Could not create Trash mailbox."
@@ -436,8 +436,8 @@ msgid ""
 "are used to synchronise with your PalmOS\n"
 "based handheld computer."
 msgstr ""
-"Diese Mailbox und seine Einstellungen werden\n"
-"zur Synchronisation mir Ihrem PalmOS PDA\n"
+"Diese Mailbox und ihre Einstellungen werden\n"
+"zur Synchronisation mit Ihrem PalmOS-PDA\n"
 "verwendet."
 
 #: upgrade.cpp:1271
@@ -462,8 +462,8 @@ msgid ""
 "time, you should probably set up some of the options\n"
 "needed by the program (especially network parameters)."
 msgstr ""
-"Es scheint, daß Sie M zum ersten Mal aufrufen\n"
-"Sie sollten daher zunächste die Einstellungen\n"
+"Es scheint, daß Sie M zum ersten Mal aufrufen.\n"
+"Sie sollten daher zunächst die Einstellungen\n"
 "(insbesondere die Netzwerkparameter) überprüfen."
 
 #: upgrade.cpp:1493
@@ -489,9 +489,9 @@ msgid ""
 "it."
 msgstr ""
 "Konfiguration und Programmdateien konnten nicht von Version '%s' "
-"konvertiertwerden,\n"
-"einige Einstellungen könnten verloren gegangen sein.\n"
-"Es wird empfohlen, daß Sie das Programm entfernen und neu installieren bevor "
+"konvertiert werden,\n"
+"einige Einstellungen könnten verlorengegangen sein.\n"
+"Es wird empfohlen, daß Sie das Programm entfernen und neu installieren, bevor "
 "Sie es verwenden."
 
 #: upgrade.cpp:1727
@@ -537,13 +537,13 @@ msgid ""
 "will remain in INBOX and you need to check that\n"
 "folder manually."
 msgstr ""
-"Normalerweise hold Mahogany automatisch alle neuen\n"
+"Normalerweise holt Mahogany automatisch alle neuen\n"
 "Nachrichten aus der Standardmailbox (INBOX, der System-\n"
 "Mailspool) ab und kopiert sie in eine spezielle\n"
 "`New Mail' mailbox.\n"
 "\n"
-"Sind Sie damit einverstanden? Falls Sie Nein wählen,\n"
-"werden alle neuen Nachrichten in INBOX verbleiben, und\n"
+"Sind Sie damit einverstanden? Falls Sie `Nein' wählen,\n"
+"werden alle neuen Nachrichten in INBOX verbleiben und\n"
 "Sie müssen die Mailbox selbst prüfen."
 
 #: upgrade.cpp:1811
@@ -557,7 +557,7 @@ msgid ""
 "You can change this in the INBOX folder's preferences\n"
 "dialog at any time."
 msgstr ""
-"Mahogany wird nicht automatisch alle Nachrichten aus\n"
+"Mahogany wird nicht automatisch Nachrichten aus\n"
 "der Systemmailbox INBOX abholen.\n"
 "Sie können dies jederzeit in den Einstellungen für\n"
 "die INBOX Mailbox ändern."
@@ -568,7 +568,7 @@ msgstr "Mailbox für neu eingegangene Nachrichten"
 
 #: upgrade.cpp:1896 upgrade.cpp:1970
 msgid "Folder where Mahogany will store copies of outgoing messages."
-msgstr "Mailbox in der Mahogany Kopien gesendeter Nachrichten speichert."
+msgstr "Mailbox, in der Mahogany Kopien gesendeter Nachrichten speichert."
 
 #: upgrade.cpp:1921
 #, c-format
@@ -577,7 +577,7 @@ msgstr "Der Name für die Abfall-Mailbox war leer, verwende '%s'."
 
 #: upgrade.cpp:1933
 msgid "Folder where Mahogany will store deleted messages."
-msgstr "Mailbox in der Mahogany gelöschte Nachrichten speichert."
+msgstr "Mailbox, in der Mahogany gelöschte Nachrichten speichert."
 
 #: upgrade.cpp:1958
 #, c-format
@@ -593,9 +593,9 @@ msgid ""
 "If you have received this mail, your Mahogany configuration works.\n"
 "You should also try to reply to this mail and check that your reply arrives."
 msgstr ""
-"Wenn Sie diese Mail erhalten haven, sind Ihre Mahogany Einstellungen "
+"Wenn Sie diese Mail erhalten haben, sind Ihre Mahogany Einstellungen "
 "korrekt.\n"
-"Sie sollten versuchen, auf die Mail zu antworten und prüfen ob die Antwort "
+"Sie sollten versuchen, auf die Mail zu antworten und prüfen, ob die Antwort "
 "Sie erreicht."
 
 #: upgrade.cpp:2016
@@ -621,7 +621,7 @@ msgid ""
 "Cannot find your Mahogany directory, please specify it in the options dialog."
 msgstr ""
 "Kann das Mahogany Verzeichnis nicht finden, bitte geben Sie es im "
-"Optionendialog an."
+"Optionen-Dialog an."
 
 #: upgrade.cpp:2076
 msgid "NNTP Server"
@@ -653,7 +653,7 @@ msgstr "Kann Adreßbuch '%s' zum automatischen Adreßsammeln nicht anlegen."
 #: miscutil.cpp:105
 #, c-format
 msgid "Auto collected e-mail address '%s' (added to the entry '%s')."
-msgstr "E-Mail Adresse '%s' gesammelt (in Eintrag '%s')."
+msgstr "E-Mail Adresse '%s' gesammelt (zum Eintrag '%s' hinzugefügt)."
 
 #: miscutil.cpp:117
 msgid "Add new e-mail entry to database?"
@@ -664,7 +664,7 @@ msgstr "Neue E-Mail Addresse in Datenbank aufnehmen?"
 msgid ""
 "Couldn't create an entry in the address book '%s' for autocollected address."
 msgstr ""
-"Kann  keinen automatisch gesammelten Eintrag in Adreßbuch '%s' anlegen."
+"Kann für die automatisch gesammelte Adresse keinen Eintrag in Adreßbuch '%s' anlegen."
 
 #: miscutil.cpp:167
 #, c-format
@@ -722,7 +722,7 @@ msgid ""
 msgstr ""
 "Sie versuchen, Mahogany als Superuser (root) zu benutzen.\n"
 "Aus Sicherheitsgründen ist dies nicht möglich. Bitte melden\n"
-"Sie sich als normaler Benutzer an, und versuchen es nochmal."
+"Sie sich als normaler Benutzer an, und versuchen Sie es nochmal."
 
 #: MApplication.cpp:225
 #, c-format
@@ -750,7 +750,7 @@ msgid ""
 "Configuration directory '%s' was writable for other users.\n"
 "Passwords may have been compromised, please consider changing them.\n"
 msgstr ""
-"Konfigurationsverzeichnis '%s' war schreibbar für andere Benutzer.\n"
+"Konfigurationsverzeichnis '%s' war beschreibbar für andere Benutzer.\n"
 "Ihre Paßwörter könnten gelesen worden sein, bitte ändern Sie diese falls "
 "nötig.\n"
 
@@ -759,7 +759,7 @@ msgid ""
 "This has been fixed now, the directory is no longer writable for others."
 msgstr ""
 "Dies ist nun korrigiert, das Verzeichnis ist für andere Benutzer nicht mehr "
-"schreibbar."
+"beschreibbar."
 
 #: MApplication.cpp:263
 #, c-format
@@ -777,7 +777,7 @@ msgid ""
 "Passwords may have been compromised, please consider changing them.\n"
 msgstr ""
 "Konfigurationdatei '%s' war für andere Benutzer lesbar.\n"
-"Paßwörter konnten gelesen werden, bitte ändern Sie diese falls nötig.\n"
+"Paßwörter konnten gelesen worden sein, bitte ändern Sie diese falls nötig.\n"
 
 #: MApplication.cpp:290
 msgid "This has been fixed now, the file is no longer readable for others."
@@ -789,7 +789,7 @@ msgid ""
 "The attempt to make the file unreadable for others has failed.\n"
 "(%s)"
 msgstr ""
-"Der Versuch, die Datei für andere unlesbar zu machen schlug fehl.\n"
+"Der Versuch, die Datei für andere unlesbar zu machen, schlug fehl.\n"
 "(%s)"
 
 #: MApplication.cpp:331
@@ -821,7 +821,7 @@ msgid ""
 "Do you want to send them before exiting the application?"
 msgstr ""
 "Sie haben noch Nachrichten bereit zum Senden.\n"
-"Möchten Sie diese senden, befor Sie das Programm beenden?"
+"Möchten Sie diese senden, bevor Sie das Programm beenden?"
 
 #: MApplication.cpp:645
 msgid ""
@@ -830,8 +830,8 @@ msgid ""
 "the application.\n"
 "These folders are:\n"
 msgstr ""
-"Einige Mailboxen befinden sich in kritischen Zuständen. Sie besser\n"
-"sollten abwarten, bis die Operationen auf diesen Mailboxen abge-\n"
+"Einige Mailboxen befinden sich in kritischen Zuständen. Sie sollten\n"
+"besser abwarten, bis die Operationen auf diesen Mailboxen abge-\n"
 "schlossen sind.\n"
 "Diese sind:\n"
 
@@ -887,7 +887,7 @@ msgstr ""
 
 #: MApplication.cpp:963
 msgid "Going online..."
-msgstr "Baue Verbindung ab..."
+msgstr "Baue Verbindung auf..."
 
 #: MApplication.cpp:992
 #, c-format
@@ -935,7 +935,7 @@ msgstr "Kann Konfiguration mit Namen '%s' nicht anlegen: existiert bereits."
 #, c-format
 msgid "Cannot create subfolder '%s': folder with this name already exists."
 msgstr ""
-"Kann Mailbox '%s' nicht anlegen : eine Mailbox mit diesem Namen existiert "
+"Kann Mailbox '%s' nicht anlegen: eine Mailbox mit diesem Namen existiert "
 "bereits."
 
 #: MFolder.cpp:694 MFolder.cpp:719
@@ -954,7 +954,7 @@ msgid ""
 "Maybe a folder of this name already exists?"
 msgstr ""
 "Kann Mailbox '%s' nicht anlegen. Existiert vielleicht eine Mailbox\n"
-"mit diesem Namen existiert schon?"
+"mit diesem Namen schon?"
 
 #: MailCollector.cpp:70
 msgid "Checking for new mail..."
@@ -1046,7 +1046,7 @@ msgstr "Falscher Ausrichtungswert in Zeile %d, Position %d in Datei '%s'."
 #: MessageTemplate.cpp:346
 #, c-format
 msgid "Unknown variable '%s' at line %d, position %d in the file '%s'."
-msgstr "Unbeekannte Variable '%s' in Zeile %d, Position %d in Datei '%s'."
+msgstr "Unbekannte Variable '%s' in Zeile %d, Position %d in Datei '%s'."
 
 #: MessageTemplate.cpp:547
 msgid ""
@@ -1256,11 +1256,11 @@ msgid ""
 "Do you want to send them before going offline?"
 msgstr ""
 "Noch Nachrichten bereit zum Senden.\n"
-"Möchten Sie diese Senden, befor Sie das Netzwerk abbauen?"
+"Möchten Sie diese Senden, bevor Sie das Netzwerk abbauen?"
 
 #: wxMFrame.cpp:441
 msgid "Mahogany Toolbar"
-msgstr "Mahogany Toolbar"
+msgstr "Mahogany Werkzeugleiste"
 
 #: wxFolderView.cpp:76 wxMDialogs.cpp:1334
 msgid "Status"
@@ -1310,7 +1310,7 @@ msgstr "Mailbox '%s'"
 #, c-format
 msgid "The folder '%s' could not be opened, please check its settings."
 msgstr ""
-"Die Mailbox '%s' konnte nicht geöffnet werden, bitte überprüfen Sie ihre "
+"Die Mailbox '%s' konnte nicht geöffnet werden, bitte überprüfen Sie Ihre "
 "Einstellungen."
 
 #: wxFolderView.cpp:1207
@@ -1329,7 +1329,7 @@ msgstr "Nachrichten konnten nicht gesichert werden."
 #: wxFolderView.cpp:1499
 #, c-format
 msgid "Closing folder '%s' because the underlying mail folder was deleted."
-msgstr "Schließe Mailbox '%s' weil die Mailbox gelöscht wurde."
+msgstr "Schließe Mailbox '%s', weil die Mailbox gelöscht wurde."
 
 #: wxFolderView.cpp:1635
 #, c-format
@@ -1460,7 +1460,7 @@ msgstr "Kann Nachrichtenanhang nicht erhalten."
 #: wxMessageView.cpp:1112
 #, c-format
 msgid "Please enter the command to handle '%s' data:"
-msgstr "Bitte geben Sie den Programmaufruf ein um '%s' Daten anzuzeigen:"
+msgstr "Bitte geben Sie den Programmaufruf für die Anzeige von '%s' Daten:"
 
 #: wxMessageView.cpp:1114
 msgid "Unknown MIME type"
@@ -1469,7 +1469,7 @@ msgstr "Unbekannter MIME-Typ"
 #: wxMessageView.cpp:1123
 #, c-format
 msgid "Do not know how to handle data of type '%s'."
-msgstr "Keine Information über die Behandlung von Typ '%s'."
+msgstr "Keine Information über die Behandlung von Daten des Typs '%s'."
 
 #: wxMessageView.cpp:1152
 #, c-format
