@@ -1,0 +1,335 @@
+#!/bin/sh
+# -*- text -*-
+#
+# $Id$
+# makeM_all script: Checkout, compile and package wxGTK and Mahogany.
+# Tested on:    Linux/x86: Debian/Coral, RedHat
+#               Linux/axp: Debian Slink
+#               Solaris/Sparc
+#		FreeBSD/x86
+#
+echo "####################################################################"
+echo "makeM_deb running on " `hostname` " date: " `date`
+echo "####################################################################"
+
+DOWXWIN=yes  # no or yes
+
+if [ "x$1" = "x--Monly" ] ; then
+  DOWXWIN=no
+fi
+
+PATH=$PATH:/usr/bin:/usr/local/bin
+    
+CVS=cvs
+export CVS
+
+SCP=scp
+export scp
+
+BUILDDIR=/usr/local/src/Mbuild
+export BUILDDIR
+
+WXPREFIX=/usr/local/stow/wxWindows
+export WXPREFIX
+
+MPREFIX=/usr/local
+export MPREFIX
+
+DESTDIR=/tmp/Minst
+export DESTDIR
+
+USESTABLE=no
+
+FTPLOCATION="karsten@ronnie.phy.hw.ac.uk:/usr/local/ftp/pub/Mahogany/daily"
+DOCSLOCATION="karsten@ronnie.phy.hw.ac.uk:/usr/local/ftp/pub/Mahogany/daily/Mdocs.tar.gz"
+
+WWWDIR=$HOME/WWW/Mahogany/daily
+
+MNAME=mahogany
+MVERSION=0.23a
+
+WXNAME=wxGTK
+WXVERSION=2.1.11
+
+# obtain central options file from ftp server
+$SCP $FTPLOCATION/buildoptions /tmp/makeM_deb.$$ && \
+( . /tmp/makeM_deb.$$ ; rm -f /tmp/makeM_deb.$$ )
+
+if [ -f /etc/debian_version ]
+then
+  DEBIAN=yes
+else
+  DEBIAN=no
+fi
+
+if [ -f /etc/redhat-release ]
+then
+  REDHAT=yes
+else
+  REDHAT=no
+fi
+
+CC=gcc
+CXX=gcc
+
+TMPDIR=/tmp
+export TMPDIR
+
+#################################################################################
+##
+## Host/OS specific setups
+##
+#################################################################################
+if [ `hostname` = dearg ]
+then
+  OSTYPE=SunOS
+fi
+
+if [ "$OSTYPE" = "SunOS" ]
+then
+  LD_LIBRARY_PATH=$HOME/arch/SunOS/lib:/opt/lib:/usr/openwin/lib:/usr/local/X11R5/lib:/usr/lib:/usr/ucblib:/opt/Fsfgcc/lib:/usr/dt/lib:/opt/GBxpm/lib:$HOME/bin
+  LD_LIBRARY_PATH=/opt/lib:/usr/openwin/lib:/usr/local/X11R5/lib:/usr/lib:/usr/ucblib:/opt/Fsfgcc/lib:/usr/dt/lib:/opt/GBxpm/lib:$HOME/bin:$LD_LIBRARY_PATH
+  CC=/opt/FSFgcc-2.8.0/bin/gcc
+  CXX=/opt/FSFgcc-2.8.0/bin/c++
+  LDFLAGS="$LDFLAGS -L/opt/FSFstdc++/lib -L/opt/lib -L/home/karsten/arch/SunOS/lib"
+  CPPFLAGS="-I/opt/include -I/opt/FSFstdc++/include/g++ -I/home/karsten/arch/SunOS/include -I$HOME/opt/include" # -I/scratch/karsten/Python/include/python1.5"
+  MAKE="gmake -s"
+  PATH=/usr/ucb:/sbin:/usr/openwin/bin:/usr/bin:/usr/sbin:/opt/bin:/opt/SUNWspro/bin:/opt/hostsA:/usr/ccs/bin:$PATH
+  PATH=$HOME/arch/`uname`/bin:/opt/bin:$PATH
+  BISON_SIMPLE=$HOME/arch/SunOS/lib/bison.simple 
+  BISON_HAIRY=$HOME/arch/SunOS/lib/bison.hairy 
+  export MAKE CPPFLAGS LDFLAGS CXX CC LD_LIBRARY_PATH PATH BISON_HAIRY BISON_SIMPLE
+  BUILDDIR=/home/karsten/tmp
+
+  WXPREFIX=/home/karsten/opt
+  MPREFIX=/opt
+fi
+
+if [ `hostname` = ronnie ]
+then
+	PATH=$PATH:/usr/local/bin
+fi
+
+# our experimental web server / RH box
+if [ `hostname` = web.phy.hw.ac.uk ]
+then
+  WXPREFIX=$BUILDDIR/WXOPT
+  MPREFIX=$BUILDDIR/MOPT
+fi
+
+# FreeBSD box
+if [ `hostname` = Sendero.Simon-Shapiro.ORG ]
+then
+  BUILDDIR=/home/karsten/src
+  WXPREFIX=$BUILDDIR/WXOPT
+  MPREFIX=$BUILDDIR/MOPT
+  MAKE=gmake
+  OSTYPE=FreeBSD
+  CC=/usr/local/bin/gcc295
+  CXX=$CC
+  LDFLAGS="$LDFLAGS -lreadline -lstdc++"
+  export CC CXX OSTYPE LDFLAGS
+  USESTABLE=yes
+  SCP=scp1
+  MCONFOPT=--without-opt
+fi
+
+
+if [ ! -d $BUILDDIR ] ; then  mkdir $BUILDDIR ; fi
+if [ ! -d $WXPREFIX ] ; then mkdir $WXPREFIX ; fi
+if [ ! -d $MPREFIX ] ; then mkdir $MPREFIX ; fi
+
+
+if [ "x$MAKE" = x ] ; then MAKE=make; fi
+
+CVSUSERID=KB@wxcvs.dhs.org
+
+echo "OSTYPE=$OSTYPE"
+echo "BUILDDIR=$BUILDDIR"
+echo "DEBIAN=$DEBIAN"
+echo "REDHAT=$REDHAT"
+echo "WXPREFIX=$WXPREFIX"
+echo "MPREFIX=$MPREFIX"
+echo "DESTDIR=$DESTDIR"
+echo "CVSUSERID=$CVSUSERID"
+echo "DOWXWIN=$DOWXWIN"
+
+export OSTYPE
+
+cd $BUILDDIR
+if [ $? != 0 ]
+then
+  echo "Cannot change to $BUILDDIR - exiting.";
+  exit 1
+fi
+
+echo >cvs.log
+
+OS=`uname -s`-`uname -m`
+export OS
+HOST=`hostname`.`domainname`
+
+if [ $DOWXWIN = yes ]
+then
+
+CVSROOT=":pserver:$CVSUSERID:/home/karsten/CVSSERVER/wxcvs"
+export CVSROOT
+NAME=$WXNAME
+VERSION="-$WXVERSION"
+if [ $USESTABLE = yes ]
+then
+  TAG="-rM_STABLE"
+  echo "Using stable version of wxGTK."
+else
+  TAG="-A"
+  echo "Using latest version of wxGTK."
+fi
+
+if [ ! -d wxWindows ]
+then
+  echo "wxWindows directory does not exist. Doing fresh checkout."
+  cvs checkout $TAG wxGTK >>$BUILDDIR/cvs.log 2>&1
+else
+  echo "Updating wxWindows sources."
+  (cd wxWindows && cvs update -d $TAG >>$BUILDDIR/cvs.log 2>&1)
+fi
+if [ $? -gt 1 ]
+then
+  echo "Calling CVS failed - exiting."
+  exit 2
+fi
+
+rm -f wxWindows/*.cache
+cd wxWindows && \
+autoconf && \
+	./configure \
+	--enable-threads \
+        --disable-shared \
+	--enable-static \
+        --enable-wxprintfv \
+        --enable-html \
+	--enable-controls \
+	--with-libpng \
+	--without-dnd \
+        --enable-accel \
+	--with-gtk \
+	--disable-debug_flag \
+	--disable-debug_info \
+	--prefix=$WXPREFIX \
+	--disable-optimise >config.output && \
+($MAKE -k && $MAKE -k install)
+if [ $? != 0 ]
+then
+  echo "Building wxWindows failed - skipping installation."
+fi
+
+else
+   echo "Skipping build of wxWindows."
+fi	# if $DOWXWIN
+
+
+PATH="$WXPREFIX/bin:$PATH"
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$WXPREFIX/lib   
+export LD_LIBRARY_PATH
+
+NAME=$MNAME
+VERSION=$MVERSION    
+
+CVSROOT=":pserver:$CVSUSERID:/home/karsten/CVSSERVER/mcvs"
+export CVSROOT NAME VERSION
+
+cd $BUILDDIR
+
+if [ ! -d $NAME-$VERSION ]
+then
+  echo "$NAME-$VERSION directory does not exist. Doing fresh checkout."
+  rm -rf M
+  cvs checkout M >>$BUILDDIR/cvs.log 2>&1 && \
+  mv M $NAME-$VERSION
+else
+  echo "Updating Mahogany sources."
+  (cd $NAME-$VERSION && cvs update -d $TAG >>$BUILDDIR/cvs.log 2>&1)
+fi
+if [ $? -gt 1 ]
+then
+  echo "Calling CVS failed - exiting."
+  exit 2
+fi
+
+PATH="/sbin:/usr/sbin:$PATH:$WXPREFIX/bin"
+export PATH
+
+# Docs are only generated on our master doc host "ronnie":
+if [ `hostname` != ronnie ]
+then
+  echo "Copying documentation Mdocs.tar.gz to $BUILDDIR/$NAME-$VERSION/doc"
+  $SCP $DOCSLOCATION $BUILDDIR/$NAME-$VERSION/doc
+fi
+rm -f $NAME-$VERSION/*.cache
+
+###########################
+# DEBIAN
+###########################
+if [ $DEBIAN = yes ]
+then
+  echo "Building Debian package."
+  (cd $NAME-$VERSION && build)
+  if [ $? != 0 ]
+  then
+    echo "Build of $NAME-$VERSION failed."
+  else
+    (cd $NAME-$VERSION && super debi)
+    $SCP mahogany_* $FTPLOCATION
+    #mv ${NAME}_$VERSION*deb ${NAME}_$VERSION.tar.gz  /usr/local/ftp/pub/Mahogany/daily
+    cd /usr/share/Mahogany/doc && \
+    (cp -r * $HOME/WWW/Mahogany/doc ; tar czf $WWWDIR/Mdocs.tar.gz * )
+    $SCP -r /usr/share/Mahogany/doc/* karsten@phy.hw.ac.uk:WWW/Mahogany/doc/
+    echo "Build of $NAME-$VERSION, debian, successful."
+  fi
+fi
+
+###########################
+# .tar.gz
+###########################
+echo "Building tar.gz package."
+cd $BUILDDIR
+( cd $NAME-$VERSION && ( $MAKE clean >/dev/null 2>&1 ; \
+  autoconf && ./configure --prefix=$MPREFIX $MCONFOPT>config.output && \
+  ( $MAKE depend >/dev/null 2>&1 ; $MAKE all) ))
+
+if [ $? = 0 ]
+then
+  rm -rf $DESTDIR; mkdir $DESTDIR
+  cd $NAME-$VERSION && $MAKE install DESTDIR=$DESTDIR && \
+  cd $DESTDIR && tar cvf $BUILDDIR/$NAME-$VERSION-$OSTYPE.tar * && \
+  gzip -f -9 $BUILDDIR/$NAME-$VERSION-$OSTYPE.tar
+else
+  echo "Build of $NAME-$VERSION.tar.gz, failed."
+fi
+
+#(cd $BUILDDIR; cp * $WWWDIR) 2>/dev/null
+(cd $BUILDDIR; $SCP mahogany* $FTPLOCATION) 
+
+############################
+## RedHat Linux
+############################
+if [ $REDHAT = yes ]
+then
+  echo "Building RedHat package"
+  cd $BUILDDIR && \
+  (cd $NAME-$VERSION && make allclean 2>/dev/null 2>&1 || true) && \
+#  $SCP $DOCSLOCATION $BUILDDIR/$NAME-$VERSION/doc && \
+  cp $WWWDIR/Mdocs.tar.gz $NAME-$VERSION/doc && \
+  tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
+  cp $BUILDDIR/$NAME-$VERSION/extra/scripts/M.spec /usr/src/redhat/SPECS/M.spec && \
+  cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
+  cd /usr/src/redhat/ && \
+  rpm -ba SPECS/M.spec
+  chown karsten.users RPMS/i386/$NAME*.rpm SRPMS/$NAME*.rpm
+  su -c "cp RPMS/i386/$NAME*.rpm $WWWDIR/" karsten && rm RPMS/i386/$NAME*.rpm
+  su -c "cp SRPMS/$NAME*.rpm /home/karsten/WWW/Mahogany/daily/" karsten && \
+	rm SRPMS/$NAME*.rpm
+#  $SCP RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm
+#  $SCP SRPMS/$NAME*.rpm $FTPLOCATION && \
+#	rm SRPMS/$NAME*.rpm
+fi
