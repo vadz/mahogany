@@ -1,4 +1,4 @@
-#This file was created by <karsten> Thu Jun 24 11:17:50 1999
+#This file was created by <karsten> Wed Jun 30 14:33:07 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -676,7 +676,7 @@ THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES
  
 \layout Section
 
-Introduction
+Introduction / Tutorial
 \layout Standard
 
 To get started on Mahogany, you should look at the following sections of
@@ -713,6 +713,13 @@ Obviously, the more of this manual you read, the better use you can make
  of Mahogany.
  Once the manual has grown too large, we will provide a short tutorial,
  but for now we go on coding instead.
+\layout Subsection
+
+How to set up your mail accounts
+\layout Standard
+
+** This is currently missing, see the text in the FAQ.
+ I will explain here how to set up your accounts.
 \layout Section
 
 Setting up Mahogany, its configuration files
@@ -3605,8 +3612,8 @@ begin{rawhtml}<form method=GET action="http://www.egroups.com/cgi-bin/subscribe.
 type=hidden name="listname" value="m-users BORDER=0 CELLSPACING=0 BGCOLOR="#0000
 00" ><tr><td><table BORDER=0 CELLSPACING=0 CELLPADDING=3 WIDTH="300" BGCOLOR="#F
 FFFCC" ><tr><td ALIGN=CENTER BGCOLOR="#000000"><b><fontface="arial,helvetica"><f
-ont color="#FFFFFF">Subscribe to M-users forum&nbsp;</font></font></b></td></tr>
-<tr><td>Enter your e-mail address:&nbsp;</td></tr><tr><td><input type=text
+ont color="#FFFFFF">Subscribe to M-users for1um&nbsp;</font></font></b></td></tr
+><tr><td>Enter your e-mail address:&nbsp;</td></tr><tr><td><input type=text
  name="emailaddr" value="your e-mail" size=21><input type=submit name="SubmitAct
 ion" VALUE="Subscribe"></td></tr><tr><td><a href="http://www.egroups.com/list/m-an
 nouce/">FindMail List Archive</a></td></tr><tr><td><font face="arial,helvetica">
@@ -3835,6 +3842,48 @@ The more elegan method: Create a new group in your addressbook and add the
  list of email addresses of all of its group members.
  This is more powerful, as you can easily add and remove entries to sub
  groups.
+\layout Subsection
+
+How can I set up my POP3 access (applies to IMAP, too)?
+\layout Standard
+
+
+\shape italic 
+It is not immediately apparent how to set up my POP3 server under 0.23a ,
+ can someone give me a hand, please? It appears there is no section in the
+ initial configuration utility for this.
+ 
+\layout Standard
+
+Mahogany allows you to have as many folders or mail accounts as you like.
+ That's why it doesn't ask you at the beginning.
+ To add a POP account: 
+\layout Enumerate
+
+right click on the folder tree and choose "Create Folder" 
+\layout Enumerate
+
+give the folder a name, set its type to POP and fill in the required fields,
+ such as server and login 
+\layout Enumerate
+
+Click on [OK].
+ The folder will now appear in the tree 
+\layout Enumerate
+
+Double-click on the folder to open it.
+\layout Itemize
+
+If opening fails, right click on it again and choose "Properties", make
+ sure that all settings are correct.
+ I found that occasionally some setting would not get set properly in the
+ Windows version.
+ Setting it again fixes it.
+\layout Itemize
+
+- If you want Mahogany to collect all mail from that box, you can tick that
+ checkbox and whenever Mahogany starts, it will open that box and continue
+ collecting all mail from there and move it to the "New Mail" folder.
 \layout Subsection
 
 Can I have multiple POP or IMAP accounts?
