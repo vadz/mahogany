@@ -767,7 +767,7 @@ wxComposeView::CanClose() const
 
       canClose = false;
    }
-   else if ( m_LayoutWindow && m_LayoutWindow->IsDirty() )
+   else if ( m_LayoutWindow && m_LayoutWindow->IsModified() )
    {
       // ask the user if he wants to save the changes
       canClose = MDialog_YesNoDialog
@@ -799,7 +799,7 @@ wxComposeView::OnMenuCommand(int id)
       if ( IsReadyToSend() )
       {
          if ( Send() )
-            m_LayoutWindow->ResetDirty();
+            m_LayoutWindow->SetModified(false);
          Close();
       }
       break;
@@ -1276,6 +1276,7 @@ wxComposeView::InsertText(const String &txt)
    m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(0,0));
    wxLayoutImportText(m_LayoutWindow->GetLayoutList(), txt);
    m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(0,0));
+   m_LayoutWindow->SetModified();
 }
 
 /// print the message
@@ -1467,7 +1468,7 @@ wxComposeView::InsertFileAsText(const String& filename,
 
    // now insert the new text
    wxLayoutImportText(m_LayoutWindow->GetLayoutList(), text);
-
+   m_LayoutWindow->SetModified();
    delete [] text;
 
    m_LayoutWindow->Refresh();
@@ -1502,7 +1503,7 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
          }
    }
 
-   m_LayoutWindow->ResetDirty();
+   m_LayoutWindow->SetModified(false);
 
    return true;
 }

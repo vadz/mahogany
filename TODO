@@ -16,13 +16,22 @@ $Id$
 *********************************************************************
 
 ******* Priorities for KB: ******************************
+
+TEST:
+
+  - reimplement some form of IsDirty() / HasBeenModified() for
+    wxComposeView.   TEST
+
+WXGTK:
+  - PNG library returns error for transparent PNG
+  - wxExecute() doesn't behave as expected, "xxx 'yyy'" gives "xxx" as
+    command and "'yyy'" as argument instead of "yyy"!!!
+
 - retrieve messages starting from last one
 - folderview listctrl has extra Subject column behind Size field ???
 
 = wxLayout:
   - add setting of background colour and/or image
-  - reimplement some form of IsDirty() / HasBeenModified() for
-    wxComposeView.
   - update rectangle
   - fix(simplify) cursor size calculation
   - font optimisations(?)
@@ -81,6 +90,8 @@ $Id$
 ---> simplify Profiles on separate branch
 
 - if time permits: vcard-import
+
+- support for local news spool
 **************** end of KB priorities :-) *********************
 
 - fix occasional segfault/memory corruption in MailfolderCC.cpp

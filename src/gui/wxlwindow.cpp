@@ -267,6 +267,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       }
    }
    SetDirty();
+   SetModified();
    DoPaint(true); // paint and scroll to cursor
 }
 

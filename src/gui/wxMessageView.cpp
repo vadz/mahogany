@@ -753,22 +753,26 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
 
    MailMessageParameters
       params(filename, mimetype, mailMessage, mimeDisplayPart);
-   
+
+   // We might fake a file, so we need this:
+   bool already_saved = false;
 #ifdef OS_UNIX
    /* For IMAGE/TIFF content, check whether it comes from one of the
       fax domains. If so, change the mimetype to "IMAGE/TIFF-G3" and
       proceed in the usual fashion. This allows the use of a special
       image/tiff-g3 mailcap entry. */
-   if ( wxMimeTypesManager::IsOfType(mimetype, "IMAGE/TIFF") )
+   if ( READ_CONFIG(m_Profile,MP_INCFAX_SUPPORT) &&
+        wxMimeTypesManager::IsOfType(mimetype, "IMAGE/TIFF") )
    {
       if(/*isfax*/ 1
          && MimeSave(mimeDisplayPart,filename))
       {
          // use TIFF2PS command to create a postscript file, open that 
          // one with the usual ps viewer
-         String command = READ_CONFIG(m_Profile,MP_TIFF2PS);
          filename2 = filename + ".ps";
-         command = command << ' ' << filename << " >" << filename2;
+         String command;
+         command.Printf(READ_CONFIG(m_Profile,MP_TIFF2PS),
+                        filename.c_str(), filename2.c_str());
          // we ignore the return code, because next viewer will fail
          // or succeed depending on this:
          (void) RunProcess(command);  // this produces a postscript file on success
@@ -782,17 +786,21 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
                                           mailMessage,
                                           mimeDisplayPart);
          params = new_params;
+         already_saved = true; // use this file instead!
       }
    }
 #endif
    String command;
-   if ( (fileType == NULL) || !fileType->GetOpenCommand(&command, params) ) {
+   if ( (fileType == NULL) || !fileType->GetOpenCommand(&command,
+                                                        params) )
+   {
       // unknown MIME type, ask the user for the command to use
       String prompt;
       prompt.Printf(_("Please enter the command to handle '%s' data:"),
                     mimetype.c_str());
       if ( !MInputBox(&command, _("Unknown MIME type"), prompt,
-                      this, "MimeHandler") ) {
+                      this, "MimeHandler") )
+      {
          // cancelled by user
          return;
       }
@@ -806,7 +814,8 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       {
          // the command must contain exactly one '%s' format specificator!
          String specs = strutil_extract_formatspec(command);
-         if ( specs.IsEmpty() ) {
+         if ( specs.IsEmpty() )
+         {
             // at least the filename should be there!
             command += " %s";
          }
@@ -822,51 +831,30 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    if ( fileType )
       delete fileType;
 
-   if ( command.IsEmpty() )
+   if ( ! command.IsEmpty() )
    {
-      // no command - try to handle it internally
-   }
-   else
-   {
-      // have a command to open this kind of data - so do it
-      FILE *out = fopen(filename, "wb");
-      if( !out )
+      if(already_saved || MimeSave(mimeDisplayPart,filename))
       {
-         wxLogSysError(_("Can't open temporary file"));
-         return;
-      }
-
-      unsigned long len;
-      const void *content = mailMessage->GetPartContent(mimeDisplayPart, &len);
-      bool ok = fwrite(content, 1, len, out) == len;
-      fclose(out);
-
-      if ( !ok )
-      {
-         wxLogSysError(_("Can't write data to temporary file."));
-         return;
-      }
-
 #     ifdef OS_WIN
-      // under Windows some programs will do different things depending on
-      // the extensions of the input file (case in point: WinZip), so try to
-      // choose a correct one
-      if ( !ext.IsEmpty() ) {
-         String newFilename;
-         newFilename << filename << '.' << ext;
-         if ( rename(filename, newFilename) != 0 ) {
-            wxLogSysError(_("Can't rename temporary file."));
+         // under Windows some programs will do different things depending on
+         // the extensions of the input file (case in point: WinZip), so try to
+         // choose a correct one
+         if ( !ext.IsEmpty() )
+         {
+            String newFilename;
+            newFilename << filename << '.' << ext;
+            if ( rename(filename, newFilename) != 0 )
+               wxLogSysError(_("Can't rename temporary file."));
+            else 
+               filename = newFilename;
          }
-         else {
-            filename = newFilename;
-         }
-      }
 #     endif // Win
 
-      wxString errmsg;
-      errmsg.Printf(_("Error opening attachment: command '%s' failed"),
-                    command.c_str());
-      (void)LaunchProcess(command, errmsg, filename);
+         wxString errmsg;
+         errmsg.Printf(_("Error opening attachment: command '%s' failed"),
+                       command.c_str());
+         (void)LaunchProcess(command, errmsg, filename);
+      }
    }
 }
 

@@ -1246,6 +1246,10 @@ wxLayoutList::Draw(wxDC &dc, wxPoint const &offset,
 
    Layout(dc, bottom);
    m_DefaultSetting->Draw(dc, wxPoint(0,0));
+   wxBrush *brush = new wxBrush(*m_ColourBG, wxSOLID);
+   dc.SetBrush(*brush);
+   delete brush;
+   
    while(line)
    {
       // only draw if between top and bottom:
