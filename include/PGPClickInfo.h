@@ -81,7 +81,7 @@ public:
                                            (from.empty() ? 
                                                  _T("") :
                                                  wxString::Format(
-                                                    _T(" from \"%s\"") , from.c_str()) ) ),
+                                                    _T(" from \"%s\"") , from.c_str()) ).c_str() ),
                          _T("pgpsig_good"),
                          *wxGREEN) { }
 };
@@ -95,7 +95,7 @@ public:
                                            (from.empty() ? 
                                                  _T("") :
                                                  wxString::Format(
-                                                    _T(" from \"%s\"") , from.c_str()) ) ),
+                                                    _T(" from \"%s\"") , from.c_str()) ).c_str() ),
                          _T("pgpsig_exp"),
                          wxColour(0, 255, 255)) { }
 };
@@ -109,7 +109,7 @@ public:
                                            (from.empty() ? 
                                                  _T("") :
                                                  wxString::Format(
-                                                    _T(" \"%s\"") , from.c_str()) ) ),
+                                                    _T(" \"%s\"") , from.c_str()) ).c_str() ),
                          _T("pgpsig_untrust"),
                          wxColour(255, 128, 0)) { }
 };
@@ -123,7 +123,7 @@ public:
                                            (from.empty() ? 
                                                  _T("") :
                                                  wxString::Format(
-                                                    _T(" from \"%s\"") , from.c_str()) ) ),
+                                                    _T(" from \"%s\"") , from.c_str()) ).c_str() ),
                          _T("pgpsig_bad"),
                          *wxRED) { }
 };
@@ -138,7 +138,7 @@ public:
                                            (from.empty() ? 
                                                  _T("") :
                                                  wxString::Format(
-                                                    _T(" from \"%s\"") , from.c_str()) ) ),
+                                                    _T(" from \"%s\"") , from.c_str()) ).c_str() ),
                          _T("pgpsig_bad"),
                          wxColour(145, 145, 145)) { }
 };
