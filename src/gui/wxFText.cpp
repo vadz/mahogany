@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.9  1998/05/18 17:48:39  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.8  1998/05/14 16:47:28  VZ
+ *
  * TempDC hack added: in wxWin2 creates a temporary wxClientDC each time a dc
  * is needed. This is wrapped in macros which work the same as previously in
  * wxWin1 version.
@@ -63,6 +67,7 @@
 
 #include   "gui/wxFText.h"
 
+#ifdef   USE_WXWINDOWS2
 // ----------------------------------------------------------------------------
 // FIXME @@@ dirty hack to make the code using wxWindow::GetDC() work with
 // wxWindows 2 where this method doesn't exist any more. An object of this
@@ -103,7 +108,6 @@ TempDC::TempDC(wxFTOList *p)
    }
 }
 
-#ifdef   USE_WXWINDOWS2
    #define  CREATE_DC(p)   TempDC dcTmp(p);
    #define  GET_DC         (dcTmp.GetDC())
 #else  //wxWin1
@@ -353,10 +357,10 @@ FTObject::Draw(wxFTOList & ftc, bool pageing, int *pageno) const
    switch(type)
    {
    case LI_TEXT:
-#     ifndef USE_WXWINDOWS2
-         if(!dc->IsExposed(posX, posY, posX2, posY2))
-            return;
-#     endif  
+#ifndef USE_WXWINDOWS2
+      if(!GET_DC->IsExposed(posX, posY, posX2, posY2))
+         return;
+#endif  
 
       //dc->DrawRectangle(posX,posY,posX2-posX, posY2-posY);
       if ( font == NULL ) {

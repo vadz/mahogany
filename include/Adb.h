@@ -14,7 +14,8 @@
 #endif
 
 #ifndef   USE_PCH
-#   include   <list>
+//#   include   <list>
+#   include   "kbList.h"
 #   include   <Mcommon.h>
 #   include   <CommonBase.h>
 #   include   <MFrame.h>
@@ -67,7 +68,7 @@ struct AdbTelStruct
 struct AdbEmailStruct
 {
    String   preferred;
-   std::list<String> other;
+   kbList    other;
    
    void parse(String const &in);
    void write(String &out) const;
@@ -102,20 +103,22 @@ public:
 
 
 
-typedef  STL_LIST<AdbEntry *>          AdbEntryListType;
-typedef  AdbEntryListType::iterator    AdbEntryIterator;
+typedef  kbList         AdbEntryListType;
+typedef  kbListIterator AdbEntryIterator;
 
-typedef	STL_LIST<AdbEntry *> 		AdbExpandListType;
-typedef	AdbExpandListType::iterator 	AdbExpandListIterator;
+typedef	kbList         AdbExpandListType;
+typedef	kbListIterator AdbExpandListIterator;
+
+#define   AdbEntryCast(iterator)   ((AdbEntry *)*(iterator))
 
 
 /**
    Adb: an address database class
 */
-class Adb : public CommonBase , public AdbEntryListType
-{
+class Adb : public CommonBase{
 private:
    String   fileName;
+   AdbEntryListType *list;
 public:
    /**
       Constructor.
@@ -141,6 +144,11 @@ public:
    /// initialised == there is a list of paths
    bool   IsInitialised(void) const { return true; }
 
+   AdbEntryIterator begin(void)
+      { return list->begin(); }
+   unsigned size(void)
+      { return list->size(); }
+   
    CB_DECLARE_CLASS(Adb, CommonBase);
 };
 

@@ -6,6 +6,9 @@
  * $Id$                *
  *                                                                  *
  * $Log$
+ * Revision 1.8  1998/05/18 17:48:23  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.7  1998/05/14 11:00:14  KB
  * Code cleanups and conflicts resolved.
  *
@@ -19,7 +22,7 @@
 #include  "Mpch.h"
 
 #ifndef  USE_PCH
-#  include <list>
+#  include "kbList.h"
 #endif
 
 /**@name String class helper functions */
@@ -131,6 +134,17 @@ char * strutil_strdup(const char *in);
 */
 char *strutil_strdup(String const &in);
 
+/** Duplicate a string.
+
+    @param the string to duplicate
+    @return the newly allocated string, must be deleted by caller
+*/
+/*char *strutil_strdup(String const *in)
+{
+   return in ? strutil_strdup(in->c_str()) : NULL;
+}
+*/
+
 /**
    
 void strutil_splitlist(String const &str, std::map<String,String> &table);
@@ -144,7 +158,7 @@ void strutil_splitlist(String const &str, std::map<String,String> &table);
    @param delim          character array holding the delimiters
    @param tlist          reference to an STL String list to append the tokens to
   */
-void strutil_tokenise(char *string, const char *delim, STL_LIST<String> &tlist);
+void strutil_tokenise(char *string, const char *delim, kbList &tlist);
 
 #ifndef     HAVE_STRSEP
 char * strsep(char **stringp, const char *delim);

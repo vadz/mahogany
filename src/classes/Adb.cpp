@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/18 17:48:28  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.3  1998/04/22 19:55:48  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -151,7 +154,7 @@ AdbEmailStruct::parse(String const &in)
    {
       tmp = cptr;
       strutil_delwhitespace(tmp);
-      other.push_back(tmp);
+      other.push_back(new String(tmp));
       cptr = strsep(&buf, ";");
    }
    delete [] buf2;
@@ -161,11 +164,11 @@ AdbEmailStruct::parse(String const &in)
 void
 AdbEmailStruct::write(String  &out) const
 {
-   std::list<String>::const_iterator i;
+   kbListIterator i;
 
    out = preferred;
    for(i = other.begin(); i != other.end(); i++)
-      out += String(";") + *i;
+      out += String(";") + *((String *)*i);
 }
 
 bool
@@ -243,7 +246,7 @@ AdbEntry::load(istream &istr)
             lastChangedDate.tm_isdst = 0;
          }
          else if(section == "ALIAS")
-          alias = value;
+            alias = value;
       }
    }
 
@@ -265,15 +268,15 @@ AdbEntry::save(ostream &ostr)
    if(formattedName.length() == 0)
    {
       if(structuredName.prefix.length())
-    formattedName += structuredName.prefix + String(" ");
+         formattedName += structuredName.prefix + String(" ");
       if(structuredName.first.length())
-    formattedName += structuredName.first + String(" ");
+         formattedName += structuredName.first + String(" ");
       if(structuredName.first.length())
-    formattedName += structuredName.other + String(" ");
+         formattedName += structuredName.other + String(" ");
       if(structuredName.first.length())
-    formattedName += structuredName.family + String(" ");
+         formattedName += structuredName.family + String(" ");
       if(structuredName.first.length())
-    formattedName += structuredName.suffix;
+         formattedName += structuredName.suffix;
    }
    
    ostr << "BEGIN" << endl;
@@ -338,6 +341,8 @@ Adb::Adb(String const &ifilename)
    fileName = ifilename;
    ifstream in(fileName.c_str());
 
+   list = new AdbEntryListType(true);
+   
    AdbEntry *eptr;
 
    for(;;)
@@ -345,13 +350,13 @@ Adb::Adb(String const &ifilename)
       eptr = new AdbEntry;
       if(! eptr->load(in))
       {
-    delete eptr;
-    break;
+         delete eptr;
+         break;
       }
       else
-    push_back(eptr);
+         list->push_back(eptr);
    }
-   String tmp = String("Adb: read ") + strutil_ultoa(size()) + String(" database entries.");
+   String tmp = String("Adb: read ") + strutil_ultoa(list->size()) + String(" database entries.");
    LOGMESSAGE((LOG_INFO, tmp));
 }
 
@@ -371,38 +376,38 @@ Adb::Expand(String const &name)
    strutil_toupper(b);
    len = strlen(b.c_str());
    
-   for(i = begin(); i != end(); i++)
+   for(i = list->begin(); i != list->end(); i++)
    {
-      a = (*i)->formattedName;
+      a = AdbEntryCast(i)->formattedName;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
-    goto found;
-      a = (*i)->structuredName.first;
+         goto found;
+      a = AdbEntryCast(i)->structuredName.first;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
-    goto found;
-      a = (*i)->structuredName.family;
+         goto found;
+      a = AdbEntryCast(i)->structuredName.family;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
-    goto found;
-      a = (*i)->structuredName.other;
+         goto found;
+      a = AdbEntryCast(i)->structuredName.other;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
-    goto found;
-      a = (*i)->alias;
+         goto found;
+      a = AdbEntryCast(i)->alias;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
-    goto found;
-      a = (*i)->email.preferred;
+         goto found;
+      a = AdbEntryCast(i)->email.preferred;
       if(strutil_ncmp(a,b,len))
-    goto found;
-      a = (*i)->organisation;
+         goto found;
+      a = AdbEntryCast(i)->organisation;
       if(strutil_ncmp(a,b,len))
-    goto found;
+         goto found;
       continue;
    found:
       if(foundList == NULL)
-    foundList = new AdbExpandListType;
+         foundList = new AdbExpandListType(false);// don't own entries
       foundList->push_back(*i);
    }
    return foundList;
@@ -419,20 +424,20 @@ Adb::NewEntry(void)
 void
 Adb::AddEntry(AdbEntry *eptr)
 {
-   push_back(eptr);
+   list->push_back(eptr);
 }
 
 void
 Adb::Delete(AdbEntry *eptr)
 {
    AdbEntryIterator i;
-   for(i = begin(); i != end(); i++)
+   for(i = list->begin(); i != list->end(); i++)
    {
       if(*i == eptr)
       {
-    erase(i);
-    delete eptr;
-    return;
+         list->erase(i);
+         //delete eptr; gets done by list
+         return;
       }
    }
 }
@@ -442,11 +447,12 @@ Adb::~Adb()
    AdbEntryIterator i;
    ofstream out(fileName.c_str());
 
-   for(i = begin(); i != end(); i++)
+   for(i = list->begin(); i != list->end(); i++)
    {
-      (*i)->save(out);
-      delete (*i);
+      AdbEntryCast(i)->save(out);
+      //delete AdbEntryCast(i); //gets done by list
    }
+   delete list;
 }
 
 AdbEntry *
@@ -457,9 +463,9 @@ Adb::Lookup(String const &key, MFrame *parent)
    if(list)
    {
       if(list->size() > 1)
-    return MDialog_AdbLookupList(list, parent);
+         return MDialog_AdbLookupList(list, parent);
       else
-    return *(list->begin());
+         return AdbEntryCast(list->begin());
    }
    else
       wxBell();
@@ -481,19 +487,19 @@ Adb::UpdateEntry(String email, String name, MFrame *parent)
    
    if(list)
    {
-      entry = *(list->begin());  // take the first one, should be only one
+      entry = AdbEntryCast(list->begin());  // take the first one, should be only one
       if(entry->formattedName.length() == 0)
-    entry->formattedName = name;
+         entry->formattedName = name;
       if(entry->email.preferred != email)
       {
-    String
-       msg = _("Enter the following email address as the\n" \
-          "default address for the user?\n\n");
-    msg += String(_("eMail: \"")) + email + "\"\n";
-    msg += String(_("Name:  \"")) + name + "\"\n";
+         String
+            msg = _("Enter the following email address as the\n" \
+                    "default address for the user?\n\n");
+         msg += String(_("eMail: \"")) + email + "\"\n";
+         msg += String(_("Name:  \"")) + name + "\"\n";
     
-    if(MDialog_YesNoDialog(msg.c_str(), parent, false, _("ADB entry"), true))
-       entry->email.preferred = email;
+         if(MDialog_YesNoDialog(msg.c_str(), parent, false, _("ADB entry"), true))
+            entry->email.preferred = email;
       }
    }
    else // create new entry

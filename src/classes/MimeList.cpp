@@ -1,11 +1,14 @@
 /*-*- c++ -*-********************************************************
  * MimeList.cc - a Mime handler class                               *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$              *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/18 17:48:30  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.4  1998/05/11 20:57:27  VZ
  * compiles again under Windows + new compile option USE_WXCONFIG
  *
@@ -26,29 +29,23 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma implementation "MimeList.h"
+#   pragma implementation "MimeList.h"
 #endif
 
 #include  "Mpch.h"
 #include  "Mcommon.h"
 
-#if       !USE_PCH
-  #include <strutil.h>
-
-  #include <string.h>
+#ifndef   USE_PCH
+#   include   <string.h>
+#   include   "strutil.h"
+#   include   "Mdefaults.h"
+#   include   "Profile.h"
+#   include   "MApplication.h"
 #endif
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#include   "PathFinder.h"
+#include   "MimeList.h"
 
-#include	"Mdefaults.h"
-
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
-
-#include  "MApplication.h"
 
 //IMPLEMENT_CLASS2(MimeList, CommonBase, list<MimeEntry>)
    
@@ -60,8 +57,8 @@ MimeEntry::MimeEntry(void)
 }
 
 MimeEntry::MimeEntry(String const & itype,
-		     String const & icommand,
-		     String const & iflags)
+                     String const & icommand,
+                     String const & iflags)
 {
    type = itype;
    command = icommand;
@@ -104,10 +101,11 @@ MimeEntry::Parse(String const & str)
 
 
 MimeList::MimeList(void)
+   : kbList(true) // own entries
 {
-   bool	found;
-   MimeEntry	newEntry;
-   String	tmp;
+   bool   found;
+   MimeEntry   *newEntry;
+   String   tmp;
    
    PathFinder pf(mApplication.readEntry(MC_ETCPATH,MC_ETCPATH_D));
 
@@ -122,46 +120,50 @@ MimeList::MimeList(void)
       strutil_delwhitespace(tmp);
       if(! str.eof())
       {
-         if(newEntry.Parse(tmp))
-         push_back(newEntry);
+         newEntry = new MimeEntry;
+         if(newEntry->Parse(tmp))
+            push_back(newEntry);
+         else
+            delete newEntry;
       }
    }
 }
 
 bool
 MimeList::GetCommand(String const & type,
-		     String &command, String &flags)
+                     String &command, String &flags)
 {
-   iterator	i;
+   kbListIterator
+      i;
    // look for exact match first:
    for(i = begin(); i != end(); i++)
-      if(strutil_cmp((*i).type, type))
+      if(strutil_cmp(kbListICast(MimeEntry,i)->type, type))
       {
-	 command = (*i).command;
-	 flags  = (*i).flags;
-	 return true;
+         command = kbListICast(MimeEntry,i)->command;
+         flags  = kbListICast(MimeEntry,i)->flags;
+         return true;
       }
    
    // now look for first type match only:
-   String	a,b;
+   String   a,b;
    a = strutil_before(type,'/');
 
    for(i = begin(); i != end(); i++)
    {
-      b = strutil_before((*i).type,'/');
-      if(strutil_cmp(a,b) && *strutil_after((*i).type,'/').c_str() == '*')
+      b = strutil_before(kbListICast(MimeEntry,i)->type,'/');
+      if(strutil_cmp(a,b) && *strutil_after(kbListICast(MimeEntry,i)->type,'/').c_str() == '*')
       {
-	 command = (*i).command;
-	 flags  = (*i).flags;
-	 return true;
+         command = kbListICast(MimeEntry,i)->command;
+         flags  = kbListICast(MimeEntry,i)->flags;
+         return true;
       }
    }
    return false;
 }
 
 String MimeList::ExpandCommand(String const &commandline,
-		     String const &filename,
-		     String const &mimetype)
+                               String const &filename,
+                               String const &mimetype)
 {
    String line = "";
    const char *cptr = commandline.c_str();
@@ -169,23 +171,23 @@ String MimeList::ExpandCommand(String const &commandline,
    while(*cptr)
    {
       while(*cptr && *cptr != '%')
-	 line += *cptr++;
+         line += *cptr++;
       if(*cptr == '\0')
-	 break;
+         break;
       cptr++;
       if(*cptr == 's') // insert file name
       {
-	 line += '"';
-	 line += filename;
-	 line += '"';
-	 cptr++;
+         line += '"';
+         line += filename;
+         line += '"';
+         cptr++;
       }
       else if(*cptr == 't')
       {
-	 line += '"';
-	 line += mimetype;
-	 line += '"';
-	 cptr++;
+         line += '"';
+         line += mimetype;
+         line += '"';
+         cptr++;
       }
    }
    return line;

@@ -10,24 +10,25 @@
 #define PROFILE_H
 
 #ifdef __GNUG__
-#pragma interface "Profile.h"
+#   pragma interface "Profile.h"
 #endif
 
 #ifndef  USE_PCH
-#  include  <list>
+#  include  "kbList.h"
 #endif
 
-#ifndef	USE_WXCONFIG
-#	include	"appconf.h"
+#ifndef   USE_WXCONFIG
+#   include   "appconf.h"
 #endif
 
 #ifdef   USE_WXCONFIG
 #  define   WRITE_ENTRY    Write
 #  define   FLUSH          Flush
 
-   // use built-in appconf implementation
-   typedef  wxConfig FileConfig;
-   typedef  wxConfig AppConfig;
+// use built-in appconf implementation
+typedef  wxConfig FileConfig;
+typedef  wxConfig AppConfig;
+
 #else
 #  define   WRITE_ENTRY    writeEntry
 #  define   FLUSH          flush
@@ -54,7 +55,7 @@ public:
    //@{
    /// Read a character entry.
    virtual const char *readEntry(const char *szKey, const char *szDefault =
-			 NULL) const = 0;
+                                 NULL) const = 0;
    /// Read an integer value.
    virtual int readEntry(const char *szKey, int Default = 0) const = 0;
    /// Read a bool value.
@@ -76,18 +77,19 @@ public:
 /** A structure holding name and FileConfig pointer.
    This is the element of the list.
 */
-struct	FCData
+struct   FCData
 {
-  String		fileName;
-  FileConfig	*fileConfig;
+   String   fileName;
+   FileConfig   *fileConfig;
 
-  IMPLEMENT_DUMMY_COMPARE_OPERATORS(FCData)
-};
+   IMPLEMENT_DUMMY_COMPARE_OPERATORS(FCData)
+      };
 
 /** A list of all known icons.
    @see FCData
 */
-typedef STL_LIST<FCData>	FCDataList;
+
+typedef kbList  FCDataList;
 
 class ConfigFileManager : public CommonBase
 {
@@ -95,7 +97,7 @@ class ConfigFileManager : public CommonBase
    
 public:
    /** Constructor
-   */
+     */
    ConfigFileManager();
 
    /** Destructor
@@ -133,19 +135,19 @@ public:
 class ProfileAppConfig : public ProfileBase, public CommonBase
 {
    /// The AppConfig object.
-   AppConfig	*appConfig;
+   AppConfig   *appConfig;
    /// Is Profile ready to use?
-   bool	isOk;
+   bool   isOk;
 protected:
 public:
    /** Constructor.
        @param ac The existing AppConfig object to wrap.
    */
-   #ifdef  USE_WXCONFIG
-      ProfileAppConfig() { appConfig = wxConfig::Get(); }
-   #else
-      ProfileAppConfig(AppConfig *ac) { appConfig = ac; }
-   #endif
+#ifdef  USE_WXCONFIG
+   ProfileAppConfig() { appConfig = wxConfig::Get(); }
+#else
+   ProfileAppConfig(AppConfig *ac) { appConfig = ac; }
+#endif
 
    /** Query if Profile has been initialised successfully.
        @return true = This object is considered to be always initialised.
@@ -160,45 +162,45 @@ public:
    /// Read a character entry.
    inline
    const char *readEntry(const char *szKey, const char *szDefault = NULL) const
-   {
-      DBGLOG("ProfileAppConfig::readEntry(" << szKey << ',' << szDefault << ')');
-      #ifdef   USE_WXCONFIG
+      {
+         DBGLOG("ProfileAppConfig::readEntry(" << szKey << ',' << szDefault << ')');
+#ifdef   USE_WXCONFIG
          // FIXME @@@ static buffer will be overwritten each time we're called!
          static char s_szBuffer[1024];
          wxString str;
          appConfig->Read(&str, szKey, szDefault);
          strncpy(s_szBuffer, str, SIZEOF(s_szBuffer));
          return s_szBuffer;
-      #else
+#else
          return appConfig->readEntry(szKey, szDefault);
-      #endif
-   }
+#endif
+      }
    /// Read an integer value.
    inline
    int readEntry(const char *szKey, int Default = 0) const
-   {
-      DBGLOG("ProfileAppConfig::readEntry(" << szKey << ',' << Default << ')');
-      #ifdef   USE_WXCONFIG
+      {
+         DBGLOG("ProfileAppConfig::readEntry(" << szKey << ',' << Default << ')');
+#ifdef   USE_WXCONFIG
          long lVal;
          appConfig->Read(&lVal, szKey, (long)Default);
          return (int)lVal;
-      #else
+#else
          return appConfig->readEntry(szKey, (long) Default);
-      #endif
-   }
+#endif
+      }
    /// Read a bool value.
    inline
    bool readEntry(const char *szKey, bool Default = false) const
-   {
-      DBGLOG("ProfileAppConfig::readEntry(" << szKey << ',' << Default << ')');
-      #ifdef   USE_WXCONFIG
+      {
+         DBGLOG("ProfileAppConfig::readEntry(" << szKey << ',' << Default << ')');
+#ifdef   USE_WXCONFIG
          long lVal;
          appConfig->Read(&lVal, szKey, (long)Default);
          return lVal != 0;
-      #else
+#else
          return appConfig->readEntry(szKey, (long)Default);
-      #endif
-   }
+#endif
+      }
    /// Write back the character value.
    inline
    bool writeEntry(const char *szKey, const char *szValue)
@@ -215,7 +217,7 @@ public:
    inline
    bool writeEntry(const char *szKey, bool Value)
       {
-      return appConfig->WRITE_ENTRY(szKey, (long int) Value) != 0;
+         return appConfig->WRITE_ENTRY(szKey, (long int) Value) != 0;
       }
    //@}
    CB_DECLARE_CLASS(ProfileAppConfig, CommonBase);
@@ -235,17 +237,17 @@ public:
 class Profile : public ProfileBase, public CommonBase
 {
    /// The FileConfig object.
-   FileConfig	*fileConfig;
+   FileConfig   *fileConfig;
    /// The parent profile.
    ProfileBase const *parentProfile;
    /// Name of this profile
-   String	profileName;
+   String   profileName;
    /// Is Profile ready to use?
-   bool	isOk;
+   bool   isOk;
    /** Common to all Profile objects: a manager class taking care of
        allocating the FileConfig objects.
    */
-   static ConfigFileManager	cfManager;
+   static ConfigFileManager   cfManager;
 public:
    /** Constructor.
        @param iClassName the name of this profile

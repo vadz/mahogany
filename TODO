@@ -5,9 +5,9 @@ $Id$
 
 - fix configure: it currently depends on the right order of with-wxGTK/without-wxXt
 
-- check how Python handles (wx)Strings, try some interaction
+- test/check how Python handles (wx)Strings, try some interaction
 
-- move to kbList
+- remove remaining few STL classes
 
 - doc++ dumps core when generating documentation
 
@@ -39,4 +39,6 @@ $Id$
 - LDAP
 
 - automatic (but optional) mail compactification (to save disk space)?
--
+  -> this could be done using scripts?
+
+- creation of separate index files for mail folders

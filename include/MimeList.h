@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MimeList: an persistent list of Mime mappings                    *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$               *
  *******************************************************************/
@@ -13,23 +13,23 @@
 #pragma interface "MimeList.h"
 #endif
 
-#ifndef	MIME_UNKNOWN_ICON
+#ifndef   MIME_UNKNOWN_ICON
 /// the icon to use if no other is known
-#	define	MIME_UNKNOWN_ICON	"unknown"
+#   define   MIME_UNKNOWN_ICON   "unknown"
 #endif
 
-#ifndef	MIME_UNKNOWN_COMMAND
+#ifndef   MIME_UNKNOWN_COMMAND
 /// this marks an unknown Mime command
-#	define	MIME_UNKNOWN_COMMAND	""
+#   define   MIME_UNKNOWN_COMMAND   ""
 #endif
 
-#ifndef	MIME_DEFAULT_FLAGS
+#ifndef   MIME_DEFAULT_FLAGS
 /// this marks an empty flags entry
-#	define	MIME_DEFAULT_FLAGS 	""
+#   define   MIME_DEFAULT_FLAGS    ""
 #endif
 
 #ifndef  USE_PCH
-#  include <list>
+#  include "kbList.h"
 #endif
 
 /**
@@ -39,38 +39,40 @@ class MimeEntry
 {
       
    /// type
-   String	type;
+   String   type;
    /// command to handle it
-   String	command;
+   String   command;
    /// flags settings
-   String	flags;
+   String   flags;
    friend class MimeList;
 public:
    MimeEntry();
    MimeEntry(String const & type,
-	     String const & command = MIME_UNKNOWN_COMMAND,
-	     String const & flags = MIME_DEFAULT_FLAGS);
+             String const & command = MIME_UNKNOWN_COMMAND,
+             String const & flags = MIME_DEFAULT_FLAGS);
 
    /** Create an entry from a mailcap line
        @param str the line from mailcap
        @return true if a new entry was found
    */
-   bool	Parse(String const & str);
+   bool   Parse(String const & str);
 
    IMPLEMENT_DUMMY_COMPARE_OPERATORS(MimeEntry)
-};
+      };
 
 /**
    MimeList - mapping of Mime types to icons and handlers
 */
 
-class MimeList : public STL_LIST<MimeEntry>, public CommonBase
+#define   MimeEntryCast(iterator)   ((MimeEntry *)*iterator)
+
+class MimeList : public kbList, public CommonBase
 {
 //   DECLARE_CLASS(MimeList)
    
 public:
    /** Constructor
-   */
+     */
    MimeList(void);
 
    /** Destructor
@@ -79,13 +81,13 @@ public:
    ~MimeList();
 
    /** Get command and flags for this type.
-       @param type	the type we are looking for
-       @param command	string reference where to store command
-       @param flags	string reference where to store flags
+       @param type   the type we are looking for
+       @param command   string reference where to store command
+       @param flags   string reference where to store flags
        @return true if found
    */
    bool GetCommand(String const & type, String &command, String
-		   &flags);
+                   &flags);
 
    /** Expands a command line.
        @param commandline string including %s
@@ -94,12 +96,12 @@ public:
        @return the command line
    */
    String ExpandCommand(String const &commandline,
-			String const &filename,
-			String const &mimetype = "");
+                        String const &filename,
+                        String const &mimetype = "");
    
    /// always initialised
-   bool	IsInitialised(void) const { return true; }
-   CB_DECLARE_CLASS(IconList,CommonBase);
+   bool   IsInitialised(void) const { return true; }
+   CB_DECLARE_CLASS(MimeList,CommonBase);
 };
 
 #endif

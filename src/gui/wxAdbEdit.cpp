@@ -1,12 +1,16 @@
 /*-*- c++ -*-********************************************************
- * wxAdbEdit.cc : a wxWindows look at a message                 *
+ * wxAdbEdit.cc : a wxWindows look at a message                     *
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/18 17:48:36  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.4  1998/05/15 21:59:33  VZ
+ *
  * added 4th argument (id, unused in wxWin1) to CreateButton() calls
  *
  * Revision 1.3  1998/04/22 19:56:31  KB
@@ -26,7 +30,7 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma  implementation "wxAdbEdit.h"
+#   pragma  implementation "wxAdbEdit.h"
 #endif
 
 #include "Mpch.h"
@@ -37,9 +41,8 @@
 
 #include "Mdefaults.h"
 
+#include   "kbList.h"
 #include "PathFinder.h"
-#include "MimeList.h"
-#include "MimeTypes.h"
 #include "Profile.h"
 
 #include "MApplication.h"
@@ -767,7 +770,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    panel->Show(TRUE);  
 
    if(mApplication.GetAdb()->size())
-      Load(*(mApplication.GetAdb()->begin()));
+      Load(AdbEntryCast(mApplication.GetAdb()->begin()));
    else
       New();
    
@@ -842,7 +845,7 @@ wxAdbEditFrame::Delete(void)
    if(! eptr)
       return;
    mApplication.GetAdb()->Delete(eptr);
-   Load(*(mApplication.GetAdb()->begin()));
+   Load(AdbEntryCast(mApplication.GetAdb()->begin()));
 
 }
 

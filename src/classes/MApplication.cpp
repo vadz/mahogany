@@ -6,7 +6,11 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.15  1998/05/18 17:48:29  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.14  1998/05/15 22:04:44  VZ
+ *
  * small USE_WXCONFIG-only change
  *
  * Revision 1.13  1998/05/14 11:00:15  KB
@@ -36,6 +40,7 @@
 #   include   "MimeTypes.h"
 #   include   "Mdefaults.h"
 #   include   "MApplication.h"
+#   include   "kbList.h"
 #endif
 
 
@@ -233,7 +238,7 @@ MApplication::OnInit(void)
       InitPython();
 
       ExternalScript   echo("echo \"Hello World!\"", "", "");
-      echo.Run("\"and so on\"");
+//      echo.Run("\"and so on\"");
       cout << echo.GetOutput() << endl;
 #  endif //Python
 
@@ -254,19 +259,19 @@ MApplication::OnInit(void)
 
    // Open all default mailboxes:
    char *folders = strutil_strdup(readEntry(MC_OPENFOLDERS,MC_OPENFOLDERS_D));
-   STL_LIST<String>   openFoldersList;
+   kbList openFoldersList;
    strutil_tokenise(folders,";",openFoldersList);
    GLOBAL_DELETE [] folders;
-   std::list<String>::iterator i;
+   kbListIterator i;
    for(i = openFoldersList.begin(); i != openFoldersList.end(); i++)
    {
-      if((*i).length() == 0) // empty token
+      if(kbListICast(String,i)->length() == 0) // empty token
          continue;
       
-      wxLogDebug("Opening folder '%s'...", i->c_str());
-      MailFolderCC *mf = GLOBAL_NEW MailFolderCC(*i);
+      wxLogDebug("Opening folder '%s'...", kbListICast(String,i)->c_str());
+      MailFolderCC *mf = GLOBAL_NEW MailFolderCC(*kbListICast(String,i));
       if(mf->IsInitialised())
-         (GLOBAL_NEW wxFolderView(mf, *i, topLevelFrame))->Show();
+         (GLOBAL_NEW wxFolderView(mf,kbListICast(String, i)->c_str(), topLevelFrame))->Show();
       else
          GLOBAL_DELETE mf;
    }

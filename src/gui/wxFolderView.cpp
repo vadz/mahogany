@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/18 17:48:40  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.5  1998/05/15 21:59:35  VZ
+ *
  * added 4th argument (id, unused in wxWin1) to CreateButton() calls
  *
  * Revision 1.4  1998/05/13 19:02:17  KB
@@ -253,11 +257,13 @@ wxFolderView::SaveMessages(int n, int *selections)
 
 #ifdef  USE_WXWINDOWS2
     wxString 
+   folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
+                                _("Save Message"),"",this);
 #else
     char *
-#endif
    folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
 	                                _("Save Message"),"",this);
+#endif
    MailFolderCC	*mf;
    
    if(! folderName || strlen(folderName) == 0)

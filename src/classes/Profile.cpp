@@ -3,9 +3,12 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$               *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/18 17:48:33  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.5  1998/05/14 11:00:16  KB
  * Code cleanups and conflicts resolved.
  *
@@ -25,32 +28,26 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma implementation "Profile.h"
+#   pragma implementation "Profile.h"
 #endif
 
 #include  "Mpch.h"
 #include  "Mcommon.h"
 
-#if       !USE_PCH
-#   include   <strutil.h>
+#ifndef   USE_PCH
+#   include   "strutil.h"
+#   include   "kbList.h"
+#   include "MApplication.h"
+#   include "Mdefaults.h"
+#   include "Profile.h"
 #endif
 
-#include "MFrame.h"
-#include "MLogFrame.h"
-
-#include "Mdefaults.h"
-
 #include "PathFinder.h"
-#include "MimeList.h"
-#include "MimeTypes.h"
-#include "Profile.h"
-
-#include "MApplication.h"
 
 #ifdef  USE_WXCONFIG
-#include "wx/file.h"
-#include "wx/textfile.h"
-#include "wx/fileconf.h"
+#   include "wx/file.h"
+#   include "wx/textfile.h"
+#   include "wx/fileconf.h"
 #endif
 
 /**
@@ -162,9 +159,13 @@ Profile::readEntry(const char *szKey,  int Default) const
       rc = Default;
    char
       *buf = strutil_strdup(strutil_ltoa(Default));
+   char const
+      * tmp;
    
    //DBGLOG("Profile::readEntry(" << szKey << ',' << Default << ')' << " name: " << profileName);
-   rc = atoi(readEntry(szKey,buf));
+   tmp = readEntry(szKey,buf);
+   rc = tmp ? atoi(tmp) : 0;
+   
    delete [] buf;
    //DBGLOG("Profile::readEntry() returned: " << rc);
    return rc;
@@ -208,7 +209,7 @@ ConfigFileManager::ConfigFileManager()
 
 ConfigFileManager::~ConfigFileManager()
 {
-   FCDataList::iterator i;
+   kbListIterator i;
    FileConfig *fcp;
    
 #ifdef DEBUG
@@ -216,7 +217,7 @@ ConfigFileManager::~ConfigFileManager()
 #endif
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
-      fcp = (*i).fileConfig;
+      fcp = kbListICast(FCData,i)->fileConfig;
       fcp->FLUSH();
       delete fcp;
    }
@@ -226,7 +227,7 @@ ConfigFileManager::~ConfigFileManager()
 FileConfig *
 ConfigFileManager::GetConfig(String const &fileName)
 {
-   FCDataList::iterator i;
+   kbListIterator i;
 
 #ifdef DEBUG
    cerr << "ConfigFileManager.GetConfig(" << fileName << ")" << endl;
@@ -234,40 +235,39 @@ ConfigFileManager::GetConfig(String const &fileName)
    
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
-      if((*i).fileName == fileName)
-         return (*i).fileConfig;
+      if(kbListICast(FCData,i)->fileName == fileName)
+         return kbListICast(FCData,i)->fileConfig;
    }
-   FCData   newEntry;
-   newEntry.fileName = fileName;
+   FCData   *newEntry = new FCData;
+   newEntry->fileName = fileName;
 
 #ifdef  USE_WXCONFIG
-   newEntry.fileConfig = new wxFileConfig(newEntry.fileName);
+   newEntry->fileConfig = new wxFileConfig(newEntry.fileName);
 #else
-   newEntry.fileConfig = new FileConfig;
-   newEntry.fileConfig->readFile(newEntry.fileName.c_str());
-   newEntry.fileConfig->expandVariables(M_PROFILE_VAREXPAND);
+   newEntry->fileConfig = new FileConfig;
+   newEntry->fileConfig->readFile(newEntry->fileName.c_str());
+   newEntry->fileConfig->expandVariables(M_PROFILE_VAREXPAND);
 
    //  activate recording of configuration entries
    if(mApplication.readEntry(MC_RECORDDEFAULTS,MC_RECORDDEFAULTS_D))
-      newEntry.fileConfig->recordDefaults(TRUE);
+      newEntry->fileConfig->recordDefaults(TRUE);
 #endif
 
    fcList->push_front(newEntry);
 
-
-   
-   return newEntry.fileConfig;
+   return newEntry->fileConfig;
 }
 
 #ifdef DEBUG
 void
 ConfigFileManager::Debug(void)
 {
-   FCDataList::iterator i;
+   kbListIterator i;
 
    cerr << "------ConfigFileManager------" << endl;
    for(i = fcList->begin(); i != fcList->end(); i++)
-      cerr << '"' << (*i).fileName << '"' << '\t' << (*i).fileConfig << endl;
+      cerr << '"' << kbListICast(FCData,i)->fileName << '"' << '\t'
+           << kbListICast(FCData,i)->fileConfig << endl;
    cerr << "-----------------------------" << endl;
 }
 #endif

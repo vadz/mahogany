@@ -1,17 +1,22 @@
 /*-*- c++ -*-********************************************************
  * Message class: entries for message                               *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$                *
+ *
+ * $Log$
+ * Revision 1.5  1998/05/18 17:48:18  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
+ *
  *******************************************************************/
 
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
 #ifndef  USE_PCH
-#  include  <Mcommon.h>
-#  include  <list>
+#   include  <Mcommon.h>
 #endif
 
 // ----------------------------------------------------------------------------
@@ -53,7 +58,7 @@ public:
        @return address entry
    */
    virtual const String Address(String &name,
-            MessageAddressType type = MAT_FROM)
+                                MessageAddressType type = MAT_FROM)
       const = 0;
                
    /** get From line

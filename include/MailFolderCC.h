@@ -1,12 +1,16 @@
 /*-*- c++ -*-********************************************************
  * MailFolderCC class: handling of mail folders through C-Client lib*
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$           *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/18 17:48:17  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.4  1998/05/12 12:18:54  VZ
+ *
  * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
  *
  * Revision 1.3  1998/04/22 19:54:47  KB
@@ -29,19 +33,18 @@
 #define MAILFOLDERCC_H
 
 #ifdef __GNUG__
-#pragma interface "MailFolderCC.h"
+#   pragma interface "MailFolderCC.h"
 #endif
 
-#ifndef	USE_PCH
-#  include  <list>
+#ifndef   USE_PCH
+#   include  "kbList.h"
+#   include   "MailFolder.h"
 
-#	include	"MailFolder.h"
-
-   // includes for c-client library
-   extern "C"
-   {
-#	   include	<mail.h>
-   }
+// includes for c-client library
+extern "C"
+{
+#      include   <mail.h>
+}
 #endif
 
 struct __docxxfix;
@@ -53,15 +56,15 @@ class MailFolderCC;
 /// structure to hold MailFolder pointer and associated mailstream pointer
 struct StreamConnection
 {
-  /// pointer to a MailFolderCC object
-  MailFolderCC 	*folder;
-  /// pointer to the associated MAILSTREAM
-  MAILSTREAM	const *stream;
+   /// pointer to a MailFolderCC object
+   MailFolderCC    *folder;
+   /// pointer to the associated MAILSTREAM
+   MAILSTREAM   const *stream;
 
-  IMPLEMENT_DUMMY_COMPARE_OPERATORS(StreamConnection)
-};
+   IMPLEMENT_DUMMY_COMPARE_OPERATORS(StreamConnection)
+      };
 /// map type for mapping mailstreams to objects:
-typedef	STL_LIST<StreamConnection> StreamListType;
+typedef   kbList StreamListType;
 
 /**
    MailFolder class, implemented with the C-client library.
@@ -82,7 +85,7 @@ public:
    /** creation of the object
        @param name name of the folder
    */
-   void	Create(String const & name);
+   void   Create(String const & name);
       
    /** creates an object representing a folder
        @param name name of the folder (relative name!)
@@ -99,30 +102,30 @@ public:
    //@}
 
    /// enable/disable debugging:
-   void	DoDebug(bool flag = true) { debugFlag = flag; }
+   void   DoDebug(bool flag = true) { debugFlag = flag; }
 
    CB_DECLARE_CLASS(MailFolderCC, MailFolder);
 
 protected:
    /** open an existing mailbox:
-       @param	filename the name of the "file" to open
+       @param   filename the name of the "file" to open
        */
-   bool	Open(String const & filename);
+   bool   Open(String const & filename);
 public:
 
    /** Is mailbox ok to use? Did the last operation succeed?
        @return true if everything is fine
    */
-   bool	IsOk(void) const { return okFlag; }
+   bool   IsOk(void) const { return okFlag; }
    
    /** Register a FolderViewBase derived class to be notified when
        folder contents change.
-       @param 	view the FolderView to register
-       @param	reg if false, unregister it
+       @param    view the FolderView to register
+       @param   reg if false, unregister it
    */
    void RegisterView(FolderViewBase *view, bool reg = true);
 
-  /** return a symbolic name for mail folder
+   /** return a symbolic name for mail folder
        @return the folder's name
    */
    String const & GetName(void) const;
@@ -130,7 +133,7 @@ public:
    /** get number of messages
        @return number of messages
    */
-   long		CountMessages(void) const;
+   long      CountMessages(void) const;
 
    /** get message header
        @param msgno sequence nubmer of message
@@ -139,14 +142,14 @@ public:
    class Message *GetMessage(unsigned long msgno);
 
    /** Get status of message.
-       @param 	msgno	sequence no of message
+       @param    msgno   sequence no of message
        @param size if not NULL, size in bytes gets stored here
        @param day to store day (1..31)
        @param month to store month (1..12)
        @param year to store year (19xx)
        @return flags of message
    */
-   int	GetMessageStatus(
+   int   GetMessageStatus(
       unsigned int msgno,
       unsigned long *size = NULL,
       unsigned int *day = NULL,
@@ -170,7 +173,7 @@ public:
    
    /// which type is this mailfolder?
    enum FolderType { MF_INBOX = 0, MF_FILE = 1, MF_POP = 2, MF_IMAP =
-		     3, MF_NNTP = 4 };
+                     3, MF_NNTP = 4 };
    
 private:
    /// for POP/IMAP boxes, this holds the user id for the callback
@@ -179,27 +182,27 @@ private:
    static String MF_pwd;
 
    /// a list of FolderViews to be notified when this folder changes
-   std::list<FolderViewBase *>	viewList;
+   kbList   viewList;
    
    /// which type is this mailfolder?
-   FolderType	folderType;
-   ///	mailstream associated with this folder
-   MAILSTREAM	*mailstream;
+   FolderType   folderType;
+   ///   mailstream associated with this folder
+   MAILSTREAM   *mailstream;
 
    /// is the MAILSTREAM ok or was there an error?
-   bool		okFlag;
+   bool      okFlag;
    
    /// number of messages in mailbox
-   long		numOfMessages;
+   long      numOfMessages;
 
    /// name of mailbox
-   String	symbolicName;
+   String   symbolicName;
 
    /// filename of mailbox or name describing IMAP/POP3 connection
-   String	realName;
+   String   realName;
 
    /// do we want c-client's debug messages?
-   bool	debugFlag;
+   bool   debugFlag;
 
    /** @name functions for mapping mailstreams and objects
        These functions enable the class to map incoming events from
@@ -208,22 +211,22 @@ private:
    //@{
 
    /// a pointer to the object to use as default if lookup fails
-   static MailFolderCC	*streamListDefaultObj;
+   static MailFolderCC   *streamListDefaultObj;
    
    /// mapping MAILSTREAM* to objects of this class
-   static StreamListType	streamList;
+   static StreamListType   streamList;
 
    /// has c-client library been initialised?
-   static bool	cclientInitialisedFlag;
+   static bool   cclientInitialisedFlag;
    
    /// initialise c-client library
    static void CClientInit(void);
    
    /// adds this object to Map
-   void	AddToMap(MAILSTREAM const *stream);
+   void   AddToMap(MAILSTREAM const *stream);
 
    /// remove this object from Map
-   void	RemoveFromMap(MAILSTREAM const *stream);
+   void   RemoveFromMap(MAILSTREAM const *stream);
 
    /** set the default object in Map
        @param setit if false, erase default object
@@ -236,8 +239,8 @@ private:
    //@}
    /** for use by class MessageCC
        @return MAILSTREAM of the folder
-       */
-   inline MAILSTREAM	*Stream(void) const{  return mailstream; }
+   */
+   inline MAILSTREAM   *Stream(void) const{  return mailstream; }
    friend class MessageCC;
 protected:
    void SetType(FolderType type) { folderType = type; }
@@ -246,7 +249,7 @@ public:
    /** @name common callback routines
        They all take a stram argument and the number of a message.
        Do not call them, they are only for use by the c-client library!
-       */
+   */
    //@{
 
    /// this message matches a search
@@ -267,71 +270,71 @@ public:
        @param errflg error level
        */
    static void mm_notify(MAILSTREAM *stream, char *str, long
-			 errflg);
+                         errflg);
    
    /** this mailbox name matches a listing request
        @param stream mailstream
-       @param delim	character that separates hierarchies
-       @param name 	mailbox name
-       @param attrib	mailbox attributes
+       @param delim   character that separates hierarchies
+       @param name    mailbox name
+       @param attrib   mailbox attributes
        */
    static void mm_list(MAILSTREAM *stream, char delim, char *name,
-		       long attrib);
+                       long attrib);
 
    /** matches a subscribed mailbox listing request
-       @param stream	mailstream
-       @param delim	character that separates hierarchies
-       @param name	mailbox name
-       @param attrib	mailbox attributes
+       @param stream   mailstream
+       @param delim   character that separates hierarchies
+       @param name   mailbox name
+       @param attrib   mailbox attributes
        */
    static void mm_lsub(MAILSTREAM *stream, char delim, char *name,
-		       long attrib);
+                       long attrib);
    /** status of mailbox has changed
-       @param stream	mailstream
-       @param mailbox 	mailbox name for this status
-       @param status	structure with new mailbox status
+       @param stream   mailstream
+       @param mailbox    mailbox name for this status
+       @param status   structure with new mailbox status
        */
    static void mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status);
 
    /** log a message
-       @param str	message string
-       @param errflg	error level
+       @param str   message string
+       @param errflg   error level
        */
    static void mm_log(const char *str, long errflg);
 
    /** log a debugging message
-       @param str 	message string
+       @param str    message string
        */
    static void mm_dlog(const char *str);
 
    /** get user name and password
-       @param	mb	parsed mailbox specification
-       @param	user    pointer where to return username
-       @param	pwd	pointer where to return password
-       @param 	trial	number of prior login attempts
+       @param   mb   parsed mailbox specification
+       @param   user    pointer where to return username
+       @param   pwd   pointer where to return password
+       @param    trial   number of prior login attempts
        */
    static void mm_login(NETMBX *mb, char *user, char *pwd, long trial);
 
    /** alert that c-client will run critical code
-       @param	stream	mailstream
+       @param   stream   mailstream
    */
    static void mm_critical(MAILSTREAM *stream);
 
-   /**	no longer running critical code
-	@param	stream mailstream
+   /**   no longer running critical code
+   @param   stream mailstream
      */
    static void mm_nocritical(MAILSTREAM *stream);
 
    /** unrecoverable write error on mail file
-       @param	stream	mailstream
-       @param	errcode	OS error code
-       @param	serious	non-zero: c-client cannot undo error
-       @return	abort flag: if serious error and abort non-zero: abort, else retry
+       @param   stream   mailstream
+       @param   errcode   OS error code
+       @param   serious   non-zero: c-client cannot undo error
+       @return   abort flag: if serious error and abort non-zero: abort, else retry
        */
    static long mm_diskerror(MAILSTREAM *stream, long errcode, long serious);
 
    /** program is about to crash!
-       @param	str	message string
+       @param   str   message string
        */
    static void mm_fatal(char *str);
 
@@ -345,9 +348,9 @@ public:
 class MailFolderPopCC : public MailFolderCC
 {
 private:
-   String	popHost;
-   String	popLogin;
-   String	popPassword;
+   String   popHost;
+   String   popLogin;
+   String   popPassword;
    
 public:
    MailFolderPopCC(String const & name);

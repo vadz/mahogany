@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/18 17:48:43  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.3  1998/04/22 19:56:32  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -201,10 +204,10 @@ MDialog_AdbLookupList(AdbExpandListType *adblist, MFrame *parent)
    
    for(i = adblist->begin(); i != adblist->end(); i++, idx++)
    {
-      tmp =(*i)->formattedName + String(" <")
-	 + (*i)->email.preferred.c_str() + String(">");
+      tmp =AdbEntryCast(i)->formattedName + String(" <")
+	 + AdbEntryCast(i)->email.preferred.c_str() + String(">");
       choices[idx] = strutil_strdup(tmp);
-      entries[idx] = *i;
+      entries[idx] = AdbEntryCast(i);
    }
    int w,h;
    if(parent)

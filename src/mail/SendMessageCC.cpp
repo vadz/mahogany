@@ -1,52 +1,48 @@
+/*-*- c++ -*-********************************************************
+ * SendMessageCC class: c-client implementation of a compose message*
+ *                                                                  *
+ * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ *                                                                  *
+ * $Id$ *
+ *                                                                  *
+ * $Log$
+ * Revision 1.6  1998/05/18 17:48:49  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ * *
+ *                                                                  *
+ *******************************************************************/
+
+#ifdef __GNUG__
+#   pragma implementation "SendMessageCC.h"
+#endif
+
 #include    "Mpch.h"
 
-#include    "Mcommon.h"
-
 #ifndef  USE_PCH
-#include <Profile.h>
-#include <Mdefaults.h>
-#include <strutil.h>
-#include <strings.h>
-#include <MApplication.h>
-#include <SendMessageCC.h>
-#include <MDialogs.h>
-
+#   include   "Mcommon.h"
+#   include   "kbList.h"
+#   include   "Profile.h"
+#   include   "Mdefaults.h"
+#   include   "strutil.h"
+#   include   <strings.h>
+#   include   "SendMessageCC.h"
+#   include   "MApplication.h"
+#   include   "MDialogs.h"
 // includes for c-client library
 extern "C"
 {
-#include <stdio.h>
-#include <osdep.h>
-#include <rfc822.h>
-#include <smtp.h>
-#include <nntp.h>
-#include <misc.h>
+#   include <stdio.h>
+#   include <osdep.h>
+#   include <rfc822.h>
+#   include <smtp.h>
+#   include <nntp.h>
+#   include <misc.h>
 }
-#else
-
-#include "MFrame.h"
-#include "MLogFrame.h"
-
-#include "Mdefaults.h"
-
-#include "PathFinder.h"
-#include "MimeList.h"
-#include "MimeTypes.h"
-#include "Profile.h"
-
-#include  "MApplication.h"
-
-#include  "FolderView.h"
-#include "MailFolder.h"
-#include "MailFolderCC.h"
-#include "Message.h"
-#include "MessageCC.h"
-
-#include "SendMessageCC.h"
 #endif
 
 extern "C"
 {
-   #include <misc.h>
+#include <misc.h>
 
    void rfc822_setextraheaders(const char **names, const char **values);
 }
@@ -59,14 +55,17 @@ extern "C"
 #  define   TEXT_DATA_CAST(x)    ((char *)x)
 #endif
 
+#define   StringCast(iterator)   ((String *)*i)
+
+
 SendMessageCC::SendMessageCC(ProfileBase *iprof)
 {
    Create(iprof);
 }
 
 SendMessageCC::SendMessageCC(ProfileBase *iprof, String const &subject,
-              String const &to, String const &cc,
-              String const &bcc)
+                             String const &to, String const &cc,
+                             String const &bcc)
 {
    Create(iprof, subject, to, cc, bcc);
 }
@@ -81,8 +80,8 @@ SendMessageCC::Create(ProfileBase *iprof)
       
 void
 SendMessageCC::Create(ProfileBase *iprof,
-            String const &subject,
-            String const &to, String const &cc, String const &bcc)
+                      String const &subject,
+                      String const &to, String const &cc, String const &bcc)
 {
    char  *tmp, *tmp2;
    
@@ -96,37 +95,37 @@ SendMessageCC::Create(ProfileBase *iprof,
       CPYSTR(profile->readEntry(MP_USERNAME, MP_USERNAME_D));
    env->from->host =
       CPYSTR(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
-  env->return_path = mail_newaddr ();
-  env->return_path->mailbox =
-     CPYSTR(profile->readEntry(MP_RETURN_USERNAME,
-               profile->readEntry(MP_USERNAME,MP_USERNAME_D)));
-  env->return_path->host =
-     CPYSTR(profile->readEntry(MP_RETURN_HOSTNAME,
-                profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D)));
+   env->return_path = mail_newaddr ();
+   env->return_path->mailbox =
+      CPYSTR(profile->readEntry(MP_RETURN_USERNAME,
+                                profile->readEntry(MP_USERNAME,MP_USERNAME_D)));
+   env->return_path->host =
+      CPYSTR(profile->readEntry(MP_RETURN_HOSTNAME,
+                                profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D)));
 
-  tmp = strutil_strdup(to); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
-  rfc822_parse_adrlist (&env->to,tmp,tmp2);
-  delete [] tmp; delete [] tmp2;
+   tmp = strutil_strdup(to); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+   rfc822_parse_adrlist (&env->to,tmp,tmp2);
+   delete [] tmp; delete [] tmp2;
   
-  tmp = strutil_strdup(cc);  tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
-  rfc822_parse_adrlist (&env->cc,tmp,tmp2);
-  delete [] tmp; delete [] tmp2;
+   tmp = strutil_strdup(cc);  tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+   rfc822_parse_adrlist (&env->cc,tmp,tmp2);
+   delete [] tmp; delete [] tmp2;
 
-  tmp = strutil_strdup(bcc); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
-  rfc822_parse_adrlist (&env->bcc,tmp,tmp2);
-  delete [] tmp; delete [] tmp2;
+   tmp = strutil_strdup(bcc); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+   rfc822_parse_adrlist (&env->bcc,tmp,tmp2);
+   delete [] tmp; delete [] tmp2;
 
-  env->subject = CPYSTR(subject.c_str());
-  body->type = TYPEMULTIPART;
-  body->nested.part = mail_newbody_part();
-  body->nested.part->next = NULL;
-  nextpart = body->nested.part;
-  lastpart = nextpart;
+   env->subject = CPYSTR(subject.c_str());
+   body->type = TYPEMULTIPART;
+   body->nested.part = mail_newbody_part();
+   body->nested.part->next = NULL;
+   nextpart = body->nested.part;
+   lastpart = nextpart;
 }
 
 void
 SendMessageCC::AddPart(int type, const char *buf, size_t len,
-             String const &subtype)
+                       String const &subtype)
 {
    BODY
       *bdy;
@@ -178,23 +177,20 @@ SendMessageCC::Send(void)
       *hostlist [2],
       **headerNames,
       **headerValues;
-   std::list<String>
+   kbList
       headerList;
-   std::list<String>::iterator
+   kbListIterator
       i;
    
    headers = strutil_strdup(profile->readEntry(MP_EXTRAHEADERS,MP_EXTRAHEADERS_D));
    strutil_tokenise(headers,";",headerList);
-   for(i = headerList.begin(); i != headerList.end(); i++)
-      cerr << "Header: " << *i << ": " <<
-    profile->readEntry((*i).c_str(),"") << endl;
 
    headerNames = new const char*[headerList.size()+1];
    headerValues = new const char*[headerList.size()+1];
    for(i = headerList.begin(), j = 0; i != headerList.end(); i++, j++)
    {
-      headerNames[j] = strutil_strdup(*i);
-      headerValues[j] = profile->readEntry((*i).c_str(),"");
+      headerNames[j] = strutil_strdup(StringCast(i)->c_str());
+      headerValues[j] = profile->readEntry(StringCast(i)->c_str(),"");
    }
    headerNames[j] = NULL;
    headerValues[j] = NULL;
@@ -212,11 +208,11 @@ SendMessageCC::Send(void)
    if ((stream = smtp_open ((char **)hostlist,NIL)) != 0)
    {
       if (smtp_mail (stream,"MAIL",env,body))
-    LOGMESSAGE((LOG_DEFAULT,"SMTP: MAIL [Ok]"));
+         LOGMESSAGE((LOG_DEFAULT,"SMTP: MAIL [Ok]"));
       else
       {
-    sprintf (tmpbuf, "[Failed - %s]",stream->reply);
-    ERRORMESSAGE((tmpbuf));
+         sprintf (tmpbuf, "[Failed - %s]",stream->reply);
+         ERRORMESSAGE((tmpbuf));
       }
    }
 

@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/18 17:48:48  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.5  1998/05/15 22:00:46  VZ
+ *
  * TEXT_DATA_CAST macro
  *
  * Revision 1.4  1998/05/11 20:57:36  VZ
@@ -165,13 +169,14 @@ MailFolderCC::~MailFolderCC()
 void
 MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
 {
-  std::list<FolderViewBase *>::iterator i;
+   kbListIterator
+      i;
    if(reg)
       viewList.push_front(view);
    else  
       for(i = viewList.begin(); i != viewList.end(); i++)
       {
-    if((*i) == view)
+    if(kbListICast(FolderViewBase,i) == view)
     {
        viewList.erase(i);
        return;
@@ -183,9 +188,10 @@ MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
 void
 MailFolderCC::UpdateViews(void)
 {
-   std::list<FolderViewBase *>::iterator i;
+   kbListIterator
+      i;
    for(i = viewList.begin(); i != viewList.end(); i++)
-      (*i)->Update();
+      kbListICast(FolderViewBase,i)->Update();
 }
 
 const String &
@@ -254,11 +260,14 @@ MailFolderCC::Debug(void) const
    VAR(numOfMessages);
    VAR(realName);
    DBGLOG("--list of streams and objects--");
-   StreamListType::iterator i;
+
+   kbListIterator
+      i;
+
    for(i = streamList.begin(); i != streamList.end(); i++)
    {
       sprintf(buffer,"\t%p -> %p \"%s\"",
-              (*i).stream, (*i).folder, (*i).folder->GetName().c_str());
+              kbListICast(StreamConnection,i)->stream, kbListICast(StreamConnection,i)->folder, kbListICast(StreamConnection,i)->folder->GetName().c_str());
       DBGLOG(buffer);
    }
    DBGLOG("--end of list--");
@@ -269,9 +278,9 @@ MailFolderCC::Debug(void) const
 void
 MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
 {
-   StreamListType::iterator i;
+   kbListIterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
-      if( (*i).stream == stream )
+      if( kbListICast(StreamConnection,i)->stream == stream )
       {
     streamList.erase(i);
     break;
@@ -302,9 +311,9 @@ MailFolderCC::CClientInit(void)
 void
 MailFolderCC::AddToMap(MAILSTREAM const *stream)
 {
-   StreamConnection  conn;
-   conn.folder = this;
-   conn.stream = stream;
+   StreamConnection  *conn = new StreamConnection;
+   conn->folder = this;
+   conn->stream = stream;
    streamList.push_front(conn);
 }
 
@@ -313,10 +322,10 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream)
 MailFolderCC *
 MailFolderCC::LookupObject(MAILSTREAM const *stream)
 {
-   StreamListType::iterator i;
+   kbListIterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
-      if( (*i).stream == stream )
-    return (*i).folder;
+      if( kbListICast(StreamConnection,i)->stream == stream )
+    return kbListICast(StreamConnection,i)->folder;
    if(streamListDefaultObj)
    {
       LOGMESSAGE((LOG_DEBUG, "Routing call to default mailfolder."));

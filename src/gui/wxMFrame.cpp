@@ -3,10 +3,14 @@
  *                                                                  *
  * (C) 1997, 1998 by Karsten Ballüder (Ballueder@usa.net)           *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$              *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/05/18 17:48:44  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.6  1998/05/12 12:19:03  VZ
+ *
  * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
  *
  * Revision 1.5  1998/05/11 20:57:33  VZ
@@ -29,27 +33,23 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma implementation "wxMFrame.h"
+#   pragma implementation "wxMFrame.h"
 #endif
 
 #include "Mpch.h"
 #include "Mcommon.h"
 
 #ifndef  USE_PCH
-   #include <guidef.h>
-
-   #include "MFrame.h"
-   #include "MLogFrame.h"
-
-   #include "Mdefaults.h"
-
-   #include "PathFinder.h"
-   #include "MimeList.h"
-   #include "MimeTypes.h"
-   #include "Profile.h"
-
-   #include "MApplication.h"
-
+#   include   "kbList.h"
+#   include <guidef.h>
+#   include "MFrame.h"
+#   include "MLogFrame.h"
+#   include "Mdefaults.h"
+#   include "PathFinder.h"
+#   include "MimeList.h"
+#   include "MimeTypes.h"
+#   include "Profile.h"
+#   include "MApplication.h"
 #endif
 
 // VZ: please don't change the order of headers, "Adb.h" must be the first one
@@ -65,34 +65,34 @@
 
 
 // test:
-#include	"SendMessageCC.h"
-#include	"MailFolderCC.h"
+#include   "SendMessageCC.h"
+#include   "MailFolderCC.h"
 
-#include	"gui/wxMFrame.h"
-#include	"gui/wxComposeView.h"
-#include	"gui/wxFolderView.h"
-#include	"gui/wxAdbEdit.h"
+#include   "gui/wxMFrame.h"
+#include   "gui/wxComposeView.h"
+#include   "gui/wxFolderView.h"
+#include   "gui/wxAdbEdit.h"
 
 #ifdef    OS_WIN
-  #define   MFrame_xpm    "MFrame"
+#define   MFrame_xpm    "MFrame"
 #else
-  #include	"../src/icons/MFrame.xpm"
+#include   "../src/icons/MFrame.xpm"
 #endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
 #ifdef  USE_WXWINDOWS2
-  BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
-  EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
-  EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
-  EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnMenuClose)
-  EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
-  EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
-  EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnAbout)
-  END_EVENT_TABLE()
+   BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
+   EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
+   EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
+   EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnMenuClose)
+   EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
+   EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
+   EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnAbout)
+   END_EVENT_TABLE()
 #endif
 
-wxMFrame::wxMFrame(const String &iname, wxFrame *parent)
+   wxMFrame::wxMFrame(const String &iname, wxFrame *parent)
 {
    initialised = false;
    Create(iname,parent);
@@ -124,7 +124,7 @@ wxMFrame::Create(const String &iname, wxFrame *parent)
    wxFrame::CreateFrame(parent, GetFrameName().c_str(), xpos, ypos, width, height);
    //Show(true);
 
-#if	defined(USE_WXWINDOWS2) && defined(USE_WXGTK)
+#if   defined(USE_WXWINDOWS2) && defined(USE_WXGTK)
    SetIcon(new wxIcon(MFrame_xpm,-1,-1));
 #else
    SetIcon(new wxIcon(MFrame_xpm));
@@ -147,9 +147,9 @@ wxMFrame::AddFileMenu(void)
 //   fileMenu->Append(WXMENU_FILE_TEST,(char *)_("&Test"));
    fileMenu->Append(WXMENU_FILE_OPEN,(char *)_("&Open"));
 
-   #ifdef USE_WXWINDOWS2
-      wxWindow *parent = GetParent();
-   #endif
+#ifdef USE_WXWINDOWS2
+   wxWindow *parent = GetParent();
+#endif
 
    if(parent != NULL)
       fileMenu->Append(WXMENU_FILE_CLOSE,(char *)_("&Close"));
@@ -181,7 +181,7 @@ ON_CLOSE_TYPE wxMFrame::OnClose(void)
       mApplication.Exit();
       return FALSE;
    }
-   else	// we can safely close this
+   else   // we can safely close this
       return TRUE;
 }
 
@@ -225,15 +225,15 @@ wxMFrame::OnMenuCommand(int id)
    {
    case WXMENU_FILE_OPEN:
    {
-     #ifdef USE_WXWINDOWS2
+#ifdef USE_WXWINDOWS2
       wxString
-     #else
-      char *
-     #endif
-      name = wxGetTextFromUser(_("Name of the folder?"),
-                               _("Folder Open"),
-                                 "INBOX",
-                               this);
+#else
+         char *
+#endif
+         name = wxGetTextFromUser(_("Name of the folder?"),
+                                  _("Folder Open"),
+                                  "INBOX",
+                                  this);
       if(name)
       {
          MailFolder *mf = new MailFolderCC((const char *)name);
@@ -248,11 +248,11 @@ wxMFrame::OnMenuCommand(int id)
       (void) new wxAdbEditFrame(this);
       break;
    case WXMENU_FILE_CLOSE:
-      {
-        OnClose();
-        delete this;
-        break;
-      }
+   {
+      if(OnClose())
+         delete this;
+      break;
+   }
    case WXMENU_FILE_COMPOSE:
    {
       (new wxComposeView("ComposeView", this))->Show();

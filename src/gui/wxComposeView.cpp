@@ -18,7 +18,7 @@
 #include "MLogFrame.h"
 
 #include "Mdefaults.h"
-
+#include   "kbList.h"
 #include "PathFinder.h"
 #include "MimeList.h"
 #include "MimeTypes.h"
@@ -37,6 +37,7 @@
 #include "strutil.h"
 
 #include "gui/wxFontManager.h"
+#undef T //FIXME STL list
 #include "gui/wxIconManager.h"
 #include "gui/wxFText.h"
 #include "gui/wxFTCanvas.h"

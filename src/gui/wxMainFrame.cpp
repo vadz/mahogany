@@ -3,9 +3,12 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$           *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/18 17:48:46  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.3  1998/04/30 19:12:35  VZ
  * (minor) changes needed to make it compile with wxGTK
  *
@@ -19,41 +22,41 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma	implementation "wxMainFrame.h"
+#   pragma   implementation "wxMainFrame.h"
 #endif
 
-#include	"Mpch.h"
-#include	"Mcommon.h"
+#include   "Mpch.h"
+#include   "Mcommon.h"
 
-#if       !USE_PCH
-  #include	<guidef.h>
-  #include	<gui/wxMDialogs.h>
+#if   !USE_PCH
+#   include   <guidef.h>
+#   include   <gui/wxMDialogs.h>
 #endif
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#include   "MFrame.h"
+#include   "MLogFrame.h"
 
-#include	"Mdefaults.h"
+#include   "Mdefaults.h"
 
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#include   "PathFinder.h"
+#include   "MimeList.h"
+#include   "MimeTypes.h"
+#include   "Profile.h"
 
 #include  "MApplication.h"
 
 #include  "FolderView.h"
-#include	"MailFolder.h"
-#include	"MailFolderCC.h"
+#include   "MailFolder.h"
+#include   "MailFolderCC.h"
 
-#include	"gui/wxMainFrame.h"
-#include	"gui/wxFolderView.h"
-#include	"gui/wxComposeView.h"
+#include   "gui/wxMainFrame.h"
+#include   "gui/wxFolderView.h"
+#include   "gui/wxComposeView.h"
 
 #ifdef    OS_WIN
-  #define MainFrame_xpm   "MainFrame"
+#   define MainFrame_xpm   "MainFrame"
 #else   //real XPMs
-  #include	"../src/icons/MainFrame.xpm"
+#   include   "../src/icons/MainFrame.xpm"
 #endif  //Win/Unix
 
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)

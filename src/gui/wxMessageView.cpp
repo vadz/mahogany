@@ -51,6 +51,7 @@
 #include "XFace.h"
 
 #include "gui/wxFontManager.h"
+#undef   T      //FIXME: bugfix for STL list
 #include "gui/wxIconManager.h"
 #include "gui/wxFText.h"
 #include "gui/wxMessageView.h"

@@ -3,9 +3,12 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$           *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/18 17:48:45  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.3  1998/04/30 19:12:35  VZ
  * (minor) changes needed to make it compile with wxGTK
  *
@@ -19,21 +22,15 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#	pragma implementation "wxMLogFrame.h"
+#   pragma implementation "wxMLogFrame.h"
 #endif
 
-#include	 "Mpch.h"
+#include   "Mpch.h"
 #include   "Mcommon.h"
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
-
-#include  "MApplication.h"
-
+#include   "MFrame.h"
+#include   "MLogFrame.h"
+#include   "MApplication.h"
 #include   "gui/wxMLogFrame.h"
 
 wxMLogFrame::wxMLogFrame(void)

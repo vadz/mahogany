@@ -6,6 +6,9 @@
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.2  1998/05/18 17:48:22  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.1  1998/05/13 19:01:42  KB
  * added kbList, adapted MimeTypes for it, more python, new icons
  *
@@ -35,13 +38,13 @@ struct kbListNode
 
 class kbListIterator
 {
-   kbListNode *node;
 protected:
+   kbListNode *node;
    kbListNode * Node(void);
    friend class kbList;
 public:
    kbListIterator(kbListNode *n = NULL);
-   void * operator*() const;
+   void * operator*();
    kbListIterator & operator++();
    kbListIterator & operator--();
    kbListIterator & operator++(int); //postfix
@@ -56,6 +59,13 @@ public:
    kbList(bool ownsEntriesFlag = true);
    ~kbList();
 
+   // tell list whether it owns objects:
+   void ownsObjects(bool ownsflag = true)
+      { ownsEntries = ownsflag; }
+
+   bool ownsObjects(void)
+      { return ownsEntries; }
+   
    void push_back(void *element);
    void push_front(void *element);
 
@@ -65,10 +75,13 @@ public:
    void insert(kbListIterator & i, void *element);
    void erase(kbListIterator & i);
    
-   kbListIterator begin(void);
-   kbListIterator end(void);
-   kbListIterator tail(void);
-   
+   kbListIterator begin(void) const;
+   kbListIterator end(void) const;
+   kbListIterator tail(void) const;
+
+   unsigned size(void) const;
+   bool empty(void) const
+      { return first == NULL ; }
 //   unsigned count(void);
 private:
    bool
@@ -80,4 +93,10 @@ private:
    kbList& operator=(const kbList& foo);
 };
 
+// cast an iterator to a pointer:
+#define   kbListICast(type, iterator)   ((type *)*iterator)
+
+// cast an iterator to a const pointer:
+#define   kbListIcCast(type, iterator)   ((type const *)*iterator)
+   
 #endif // KBLIST_H

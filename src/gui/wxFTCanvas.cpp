@@ -1,11 +1,14 @@
 /*-*- c++ -*-********************************************************
- * wxFTCanvas: a canvas for editing formatted text		    *
+ * wxFTCanvas: a canvas for editing formatted text                  *
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$            *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/18 17:48:38  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.5  1998/04/30 19:12:35  VZ
  * (minor) changes needed to make it compile with wxGTK
  *
@@ -26,57 +29,57 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma	implementation "wxFTCanvas.h"
+#pragma   implementation "wxFTCanvas.h"
 #endif
 
-#include	"Mpch.h"
-#include	"Mcommon.h"
+#include   "Mpch.h"
+#include   "Mcommon.h"
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#include   "MFrame.h"
+#include   "MLogFrame.h"
 
-#include	"Mdefaults.h"
-
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#include   "Mdefaults.h"
+#include   "kbList.h"
+#include   "PathFinder.h"
+#include   "MimeList.h"
+#include   "MimeTypes.h"
+#include   "Profile.h"
 
 #include  "MApplication.h"
 
-#include	"gui/wxFontManager.h"
-#include	"gui/wxIconManager.h"
+#include   "gui/wxFontManager.h"
+#include   "gui/wxIconManager.h"
 
-#include	"gui/wxFText.h"
-#include	"gui/wxFTCanvas.h"
+#include   "gui/wxFText.h"
+#include   "gui/wxFTCanvas.h"
 
 #include  <ctype.h>   // for isspace()
 
 IMPLEMENT_CLASS(wxFTCanvas, wxCanvas)
 
 
-wxFTCanvas::wxFTCanvas(wxPanel *iparent, int ix, int iy, int iwidth,
-                       int iheight, long style,
-                       ProfileBase *profile)
+   wxFTCanvas::wxFTCanvas(wxPanel *iparent, int ix, int iy, int iwidth,
+                          int iheight, long style,
+                          ProfileBase *profile)
 {
-  #if  USE_WXWINDOWS2
-    #define parent GetParent()
-    #if USE_WXGTK
-      // @@@ this will probably change in next alpha(s)
-      m_parent = iparent;
-    #else
-      SetParent(iparent);
-    #endif
+#if  USE_WXWINDOWS2
+#define parent GetParent()
+#if USE_WXGTK
+   // @@@ this will probably change in next alpha(s)
+   m_parent = iparent;
+#else
+   SetParent(iparent);
+#endif
 
-    wxCanvas::Create(parent, -1, wxPoint(ix, iy),
-                     wxSize(iwidth, iheight), style);
-  #else
-    parent = iparent;
-    wxCanvas::Create(parent, ix, iy, iwidth, iheight, style);
-  #endif
+   wxCanvas::Create(parent, -1, wxPoint(ix, iy),
+                    wxSize(iwidth, iheight), style);
+#else
+   parent = iparent;
+   wxCanvas::Create(parent, ix, iy, iwidth, iheight, style);
+#endif
 
-  ftoList = GLOBAL_NEW wxFTOList(this, profile);
-  wrapMargin = -1;
+   ftoList = GLOBAL_NEW wxFTOList(this, profile);
+   wrapMargin = -1;
 }
 
 wxFTCanvas::~wxFTCanvas()
@@ -106,44 +109,44 @@ wxFTCanvas::OnPaint(void)
 void
 wxFTCanvas::OnEvent(wxMouseEvent &event)
 {
-  if(parent)
-    #ifdef  USE_WXWINDOWS2
+   if(parent)
+#ifdef  USE_WXWINDOWS2
       // @@@@ wxWindow::OnEvent
       ;
-    #else
-      parent->OnEvent(event);
-    #endif
+#else
+   parent->OnEvent(event);
+#endif
 }
 
 void
 wxFTCanvas::Print(void)
 {
-  #ifdef  USE_WXWINDOWS2
-     // @@@@ postscript printing...
-  #else
-     // set AFM path
-     PathFinder pf(mApplication.readEntry(MC_AFMPATH,MC_AFMPATH_D),
-                   true);// recursive!
-     pf.AddPaths(mApplication.GetGlobalDir(), true);
-     pf.AddPaths(mApplication.GetLocalDir(), true);
+#ifdef  USE_WXWINDOWS2
+   // @@@@ postscript printing...
+#else
+   // set AFM path
+   PathFinder pf(mApplication.readEntry(MC_AFMPATH,MC_AFMPATH_D),
+                 true);// recursive!
+   pf.AddPaths(mApplication.GetGlobalDir(), true);
+   pf.AddPaths(mApplication.GetLocalDir(), true);
 
-     String afmpath = pf.FindDirFile("Cour.afm");
-     wxSetAFMPath((char *) afmpath.c_str());
+   String afmpath = pf.FindDirFile("Cour.afm");
+   wxSetAFMPath((char *) afmpath.c_str());
 
-     wxDC *dc = GLOBAL_NEW wxPostScriptDC(NULL, TRUE, this);
-     if (dc->Ok() && dc->StartDoc((char *)_("Printing message...")))
-     {
-       dc->SetUserScale(1.0, 1.0);
-       dc->ScaleGDIClasses(TRUE);
-       ftoList->SetDC(dc,true); // enable pageing!
-       ftoList->ReCalculateLines();
-       ftoList->Draw();
-       dc->EndDoc();
-     }
-     GLOBAL_DELETE  dc;
-     ftoList->SetCanvas(this);
-     ftoList->ReCalculateLines();
-  #endif
+   wxDC *dc = GLOBAL_NEW wxPostScriptDC(NULL, TRUE, this);
+   if (dc->Ok() && dc->StartDoc((char *)_("Printing message...")))
+   {
+      dc->SetUserScale(1.0, 1.0);
+      dc->ScaleGDIClasses(TRUE);
+      ftoList->SetDC(dc,true); // enable pageing!
+      ftoList->ReCalculateLines();
+      ftoList->Draw();
+      dc->EndDoc();
+   }
+   GLOBAL_DELETE  dc;
+   ftoList->SetCanvas(this);
+   ftoList->ReCalculateLines();
+#endif
 }
 
 void
@@ -220,31 +223,31 @@ wxFTCanvas::OnChar(wxKeyEvent &event)
       break;
    case WXK_DELETE :
       ftoList->Delete(event.ShiftDown());  // if shifted, DELETE 
-                                           // to end of line
+      // to end of line
       break;
    case WXK_BACK: // backspace
       if(ftoList->MoveCursor(-1,0))
-        ftoList->Delete();
+         ftoList->Delete();
       break;
 #if DEBUG
    case WXK_F1:
       ftoList->Debug();
       break;
-#endif	
+#endif   
    default:
       if((keyCode < 256 && keyCode >= 32) || keyCode == WXK_RETURN)
       {
-        str += (char) keyCode;
-        ftoList->InsertText(str);
-        if(wrapMargin > 0 && isspace(keyCode))
-          ftoList->Wrap(wrapMargin);
+         str += (char) keyCode;
+         ftoList->InsertText(str);
+         if(wrapMargin > 0 && isspace(keyCode))
+            ftoList->Wrap(wrapMargin);
       }
-      #if USE_WXWINDOWS2
-        // @@@ normally it's not necessary in wxWin2, but I'm not sure about it
-      #else  // wxWin 1
-        else if(parent)
-          parent->OnChar(event);
-      #endif // wxWin 1/2
+#if USE_WXWINDOWS2
+      // @@@ normally it's not necessary in wxWin2, but I'm not sure about it
+#else  // wxWin 1
+      else if(parent)
+         parent->OnChar(event);
+#endif // wxWin 1/2
       break;
    }
 }

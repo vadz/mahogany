@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/18 17:48:31  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.4  1998/05/13 19:02:10  KB
  * added kbList, adapted MimeTypes for it, more python, new icons
  *
@@ -137,12 +140,6 @@ MimeTypes::MimeTypes(void) // why? should be default : STL_LIST<MimeTEntry>()
                                           // entry as the last one
       }
    }
-   /* debugging: */
-#ifndef   DDEBUG
-   kbListIterator i;
-   for(i = begin(); i != end(); i++)
-      fprintf(stderr,"%p\n", *i);
-#endif
 }
 
 bool

@@ -1,11 +1,14 @@
 /*-*- c++ -*-********************************************************
  * PathFinder - a class for finding files or directories            *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/05/18 17:48:20  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.6  1998/05/14 09:48:28  KB
  * added IsEmpty() to strutil, minor changes
  *
@@ -36,22 +39,15 @@
 #   pragma interface "PathFinder.h"
 #endif
 
-#include   <list>
-
-#ifdef USE_PCH
-#   include	<Mcommon.h>
-#   include	<CommonBase.h>
-#endif
-
 /**@name PathFinder class for finding files */
 //@{
 
 #ifdef   OS_UNIX
 /// define a delimiter for separating paths
-#	define	PATHFINDER_DELIMITER	":"
-#	include	<unistd.h>
+#   define   PATHFINDER_DELIMITER   ":"
+#   include   <unistd.h>
 #elif   defined(OS_WIN)
-#	define	PATHFINDER_DELIMITER	";"
+#   define   PATHFINDER_DELIMITER   ";"
 # define  R_OK                  4       // access() mode
 #endif
 
@@ -62,7 +58,7 @@
 class PathFinder : public CommonBase
 {
    /// the list of absolute paths
-   STL_LIST<String> *pathList;
+   kbList *pathList;
 public:
    /**
       Constructor.
@@ -87,7 +83,7 @@ public:
        Returns the path to the file or directory or an empty string.
        @param filename without path
        @param found if non-NULL, gets set to success flag
-       @param mode	the mode to test for access()
+       @param mode   the mode to test for access()
        @return full path or an empty string
    */
    String Find(String const &filename,  bool *found = NULL, int mode = R_OK) const;
@@ -96,17 +92,17 @@ public:
        Returns the path to the file or an empty string.
        @param filename without path
        @param found if non-NULL, gets set to success flag
-       @param mode	the mode to test for access()
+       @param mode   the mode to test for access()
        @return full path or an empty string
    */
    String FindFile(String const &filename,  bool *found = NULL, int
-		   mode = R_OK) const;
+                   mode = R_OK) const;
 
    /** 
        Returns the path to the directory or an empty string.
        @param filename without path
        @param found if non-NULL, gets set to success flag
-       @param mode	the mode to test for access()
+       @param mode   the mode to test for access()
        @return full path or an empty string
    */
    String FindDir(String const &filename,  bool *found = NULL, int mode = R_OK) const;
@@ -115,7 +111,7 @@ public:
        Returns the path to the directory where the file resides or an empty string.
        @param filename without path
        @param found if non-NULL, gets set to success flag
-       @param mode	the mode to test for access()
+       @param mode   the mode to test for access()
        @return full path or an empty string
    */
    String FindDirFile(String const &filename,  bool *found = NULL, int mode = R_OK) const;
@@ -124,16 +120,16 @@ public:
       check whether pathname is a directory
       @return true if directory
    */
-   static bool	IsDir(String const &pathname);
+   static bool   IsDir(String const &pathname);
 
    /**
       check whether pathname is a file
       @return true if file
    */
-   static bool	IsFile(String const &pathname);
+   static bool   IsFile(String const &pathname);
    
    /// initialised == there is a list of paths
-   bool	IsInitialised(void) const { return ! pathList->empty(); }
+   bool   IsInitialised(void) const { return ! pathList->empty(); }
 
    CB_DECLARE_CLASS(PathFinder,CommonBase);
 };

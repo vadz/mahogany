@@ -2,16 +2,24 @@
 # $Id$
 #
 # $Log$
+# Revision 1.6  1998/05/18 17:48:27  KB
+# more list<>->kbList changes, fixes for wxXt, improved makefiles
+#
 # Revision 1.5  1998/05/02 18:31:37  KB
 # Python integration works.
 #
 #
 
 CWD = src
-SUB_DIRS = util classes gui mail Python
+SUB_DIRS = util classes gui mail
 MOBJS=util/*.o classes/*.o gui/*.o  mail/*.o # without Python
 
 include ../makeopts
+
+
+ifdef	USE_PYTHON
+SUB_DIRS += Python
+endif
 
 all: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done

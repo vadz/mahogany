@@ -6,7 +6,11 @@
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.3  1998/05/18 17:48:34  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.2  1998/05/14 16:39:31  VZ
+ *
  * fixed SIGSEGV in ~kbList if the list is empty
  *
  * Revision 1.1  1998/05/13 19:02:11  KB
@@ -49,7 +53,7 @@ kbListIterator::kbListIterator(kbListNode *n)
 }
 
 void *
-kbListIterator::operator*() const
+kbListIterator::operator*() 
 {
    return node->element;
 }
@@ -197,21 +201,31 @@ kbList::~kbList()
 }
 
 kbListIterator
-kbList::begin(void)
+kbList::begin(void) const
 {
    return kbListIterator(first);
 }
 
 kbListIterator
-kbList::tail(void)
+kbList::tail(void) const
 {
    return kbListIterator(last);
 }
 
 kbListIterator
-kbList::end(void)
+kbList::end(void) const
 {
    return kbListIterator(NULL); // the one after the last
+}
+
+unsigned
+kbList::size(void) const // inefficient
+{
+   unsigned count = 0;
+   kbListIterator i;
+   for(i = begin(); i != end(); i++, count++)
+      ;
+   return count;
 }
 
 #ifdef   KBLIST_TEST

@@ -197,6 +197,13 @@ SEARCH_INCLUDE="\
     /usr/openwin/share/include \
     "
 
+# add additional src directories:
+for p in `pwd`/extra/src/*
+do
+SEARCH_INCLUDE="$p \
+                $SEARCH_INCLUDE"
+done
+
 PWD=`pwd`
 SEARCH_INCLUDE="   \
 $PWD               \
@@ -235,6 +242,7 @@ USE_WXSTRING)
 AC_OVERRIDES(python,python,
 --with-python             use python,
 USE_PYTHON)
+
 
 dnl ###################
 dnl # checks programs #
@@ -362,7 +370,7 @@ if test "$USE_WXGTK" = 1; then
       AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
       CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
       CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-      WX_LINK="$WX_LINK $ac_path_to_link -lgtk -lgdk"
+      WX_LINK="$WX_LINK $ac_path_to_link -lgtk -lgdk -lXext"
       WX_INCLUDE="$WX_INCLUDE $ac_path_to_include/gtk"
       AC_MSG_RESULT(yes)
     else
@@ -457,6 +465,8 @@ fi
 AC_SUBST(PYTHON_LINK)
 AC_SUBST(PYTHON_INCLUDE)
 
+
+
 LIBDL_LINK=
 AC_MSG_CHECKING(for dl library)
 AC_PATH_FIND_LIBRARIES($SEARCH_LIB,dl)
@@ -486,24 +496,33 @@ AC_SUBST(LIBINTL_LINK)
 
 COMPFACE_LINK=
 AC_MSG_CHECKING(for compface library)
-AC_PATH_FIND_LIBRARIES($SEARCH_LIB,compface)
-if test "$ac_find_libraries" != "" ; then
-  AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-  CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-  COMPFACE_LINK="$ac_path_to_link -lcompface"
+AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,compface.h)
+if test "$ac_find_includes" != "" ; then
   AC_MSG_RESULT(yes)
+  COMPFACE_LINK="-lcompface"
+  AC_DEFINE(HAVE_COMPFACE_H)
 else
   AC_MSG_RESULT(no)
 fi
 AC_SUBST(COMPFACE_LINK)
 
 
+dnl extra lib dirs
+EXTRA_SRC_LIB=
+EXTRA_SRC_INC=
+for i in `pwd`/extra/src
+do
+	EXTRA_SRC_LIB="$EXTRA_SRC_LIB -L$i"
+	EXTRA_SRC_INC="$EXTRA_SRC_INC -I$i"
+done
+AC_SUBST(EXTRA_SRC_LIB)
+AC_SUBST(EXTRA_SRC_INC)
+
 dnl Checks for header files.
 AC_PATH_X
 AC_HEADER_STDC
 AC_CHECK_HEADERS(strings.h unistd.h)
 AC_CHECK_HEADERS(libintl.h)
-AC_CHECK_HEADERS(compface.h)
 AC_CHECK_HEADERS(stdlib.h)
 AC_CHECK_HEADERS(stdarg.h)
 

@@ -248,7 +248,7 @@ strsep(char **stringp, const char *delim)
 #endif
 
 void
-strutil_tokenise(char *string, const char *delim, std::list<String> &tlist)
+strutil_tokenise(char *string, const char *delim, kbList &tlist)
 {
    char *found;
    
@@ -257,6 +257,6 @@ strutil_tokenise(char *string, const char *delim, std::list<String> &tlist)
       found = strsep(&string, delim);
       if(! found)
 	 break;
-      tlist.push_back(String(found));
+      tlist.push_back(new String(found));
    }
 }

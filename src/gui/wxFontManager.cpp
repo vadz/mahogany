@@ -1,11 +1,14 @@
 /*-*- c++ -*-********************************************************
  * wxFontManager - allocating and deallocating fonts for drawing    *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$         *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/18 17:48:41  KB
+ * more list<>->kbList changes, fixes for wxXt, improved makefiles
+ *
  * Revision 1.2  1998/03/26 23:05:41  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -16,13 +19,13 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma implementation "wxFontManager.h"
+#   pragma implementation "wxFontManager.h"
 #endif
 
 #include  "Mpch.h"
-#include	"Mcommon.h"
+#include  "Mcommon.h"
 
-#include	"gui/wxFontManager.h"
+#include   "gui/wxFontManager.h"
 
 /**
    FontManager class, this class allocates and deallocates fonts for
@@ -31,48 +34,35 @@
 */
 
 
-wxFontManager::wxFontManager()
-{
-   fontList = GLOBAL_NEW std::list<FontData>;
-}
-
-
-wxFontManager::~wxFontManager()
-{
-   std::list<FontData>::iterator i;
-   for(i = fontList->begin(); i != fontList->end(); i++)
-      GLOBAL_DELETE (*i).fontPtr;
-   GLOBAL_DELETE fontList;
-}
-
 wxFont *
 wxFontManager::GetFont(int size, int family, int style, int weight,
-		       Bool underline)
+                       Bool underline)
 {
-   std::list<FontData>::iterator i;
-   
-   FontData    	*fd;
+   kbListIterator
+      i;
+   FontData
+      *fd;
 
-   for(i = fontList->begin(); i != fontList->end(); i++)
+   for(i = fontList.begin(); i != fontList.end(); i++)
    {
-      fd = &(*i);
+      fd = kbListICast(FontData,i);
       if(fd->size == size &&
-	 fd->family == family &&
-	 fd->weight == weight &&
-	 fd->style == style &&
-	 fd->underline == underline)
-	 return fd->fontPtr;
+         fd->family == family &&
+         fd->weight == weight &&
+         fd->style == style &&
+         fd->underline == underline)
+         return fd->fontPtr;
    }
 
    // not found, create:
-   FontData	newFont;
-   newFont.size = size;
-   newFont.family = family;
-   newFont.style = style;
-   newFont.weight = weight;
-   newFont.underline = underline;
-   newFont.fontPtr = GLOBAL_NEW wxFont(size,family,style,weight,underline != 0);
-   fontList->push_front(newFont);
-   return newFont.fontPtr;
+   FontData   *newFont = new FontData;
+   newFont->size = size;
+   newFont->family = family;
+   newFont->style = style;
+   newFont->weight = weight;
+   newFont->underline = underline;
+   newFont->fontPtr = GLOBAL_NEW wxFont(size,family,style,weight,underline != 0);
+   fontList.push_front(newFont);
+   return newFont->fontPtr;
 }
 
