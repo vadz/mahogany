@@ -9,22 +9,15 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
-9		New mail messages for non-"New Mail" folders don't
-		appear anymore
-
 9	KB	wxLayout:
 		- cannot type text when NUMLOCK is on
 		- speed up by only running Layout() for recalculations 
 		  rather than the full RequestUpdate()
-		- reduce the scrollbar flickering somehow
-		- editing seems a bit slow (related to scrollbar flicker?)
 		- editing leaks MObjects
 		- write editor plugin translating keysyms to actions
 		- scroll to cursor after Find()
 		- ctrl keys not recognised when CAPSLOCK is down
-		- garbage at end of messages is back
 		- add blinking cursor
-		- accents don´t work??
 		- word wrap occasionally puts space at beginning of
 		  new line
 		- add import of own clipboard format
@@ -33,6 +26,8 @@ $Id$
 		 - should show cursor only on demand
 		 - remember focused message not by index but by UID
 		   and find it again after re-sort
+
+6	KB	clear message view if message got expunged
 
 8	KB	integrate imap 4.6 and recently received patches
 
