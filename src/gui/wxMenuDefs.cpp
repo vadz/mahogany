@@ -346,7 +346,7 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // the available accelerators for this menu:
    // FJMNPQUVXZ
-   { WXMENU_LANG_DEFAULT, gettext_noop("&Default"), gettext_noop("Use the default encoding"), TRUE },
+   { WXMENU_LANG_DEFAULT, gettext_noop("De&fault"), gettext_noop("Use the default encoding"), TRUE },
    { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
    { WXMENU_LANG_ISO8859_1, gettext_noop("&Western European (ISO-8859-1)"), gettext_noop(""), TRUE },
    { WXMENU_LANG_ISO8859_2, gettext_noop("Ce&ntral European (ISO-8859-2)"), gettext_noop(""), TRUE },
@@ -364,18 +364,18 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_LANG_ISO8859_14, gettext_noop("Ce&ltic (ISO-8859-14)"), gettext_noop(""), TRUE },
    { WXMENU_LANG_ISO8859_15, gettext_noop("Western European with &Euro (ISO-8859-15)"), gettext_noop(""), TRUE },
    { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
-   { WXMENU_LANG_CP1250, gettext_noop("Windows Central European (CP 1250)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1251, gettext_noop("Windows Cyrillic (CP 1251)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1252, gettext_noop("Windows Western European (CP 1252)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1253, gettext_noop("Windows Greek (CP 1253)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1254, gettext_noop("Windows Turkish (CP 1254)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1255, gettext_noop("Windows Hebrew (CP 1255)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1256, gettext_noop("Windows Arabic (CP 1256)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1257, gettext_noop("Windows Baltic (CP 1257)"), gettext_noop(""), TRUE },
+   { WXMENU_LANG_CP1250, gettext_noop("Windows Central European (CP 125&0)"), gettext_noop(""), TRUE },
+   { WXMENU_LANG_CP1251, gettext_noop("Windows Cyrillic (CP 125&1)"), gettext_noop(""), TRUE },
+   { WXMENU_LANG_CP1252, gettext_noop("Windows Western European (CP 125&2)"), gettext_noop(""), TRUE },
+   { WXMENU_LANG_CP1253, gettext_noop("Windows Greek (CP 125&3)"), gettext_noop(""), TRUE },
+   { WXMENU_LANG_CP1254, gettext_noop("Windows Turkish (CP 125&4)"), gettext_noop(""), TRUE },
+   { WXMENU_LANG_CP1255, gettext_noop("Windows Hebrew (CP 125&5)"), gettext_noop(""), TRUE },
+   { WXMENU_LANG_CP1256, gettext_noop("Windows Arabic (CP 125&6)"), gettext_noop(""), TRUE },
+   { WXMENU_LANG_CP1257, gettext_noop("Windows Baltic (CP 125&7)"), gettext_noop(""), TRUE },
    { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
    { WXMENU_LANG_KOI8, gettext_noop("Russian (KOI&8-R)"), gettext_noop(""), TRUE },
    { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
-   { WXMENU_LANG_SET_DEFAULT, gettext_noop("&Set the default encoding..."), ""                         , FALSE },
+   { WXMENU_LANG_SET_DEFAULT, gettext_noop("&Set default encoding..."), ""                         , FALSE },
 
    // ADB book management
    { WXMENU_ADBBOOK_NEW,   gettext_noop("&New..."),           gettext_noop("Create a new address book"), FALSE },
