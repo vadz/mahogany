@@ -913,9 +913,10 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "Greg Noel, "
                    "and many others<br>"
                    "<i>The Mahogany team</i><br>"
-                   "And we couldn't have done it without wxWindows "
-                   "and their support team...<hr>"
-                   "<p>This Product includes software developed and copyright "
+                   "And we couldn't have done it without the wxWindows "
+                   "toolkit..."
+                   "<hr>"
+                   "This Product includes software developed and copyright "
                    "by the University of Washington.<br>"
 #ifdef USE_SSL
                    "<p>"
