@@ -404,7 +404,7 @@ FolderMonitorImpl::CheckNewMail(int flags)
          i != m_list.end();
          ++i )
    {
-      if ( i->GetCheckTime() < timeCur )
+      if ( (flags & Interactive) || (i->GetCheckTime() < timeCur) )
       {
          if ( !CheckOneFolder(i.operator->()) )
             rc = false;
