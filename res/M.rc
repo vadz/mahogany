@@ -65,7 +65,7 @@ adb_address	BITMAP "address.bmp"
 adb_book	BITMAP "book.bmp"
 adb_library	BITMAP "library.bmp"
 adb_closed	BITMAP "closed.bmp"
-adb_opened	BITMAP "opened.bmp"		
+adb_opened	BITMAP "opened.bmp"
 
 // ADB notebook image list (32x32)
 general		BITMAP "general.bmp"
@@ -89,6 +89,7 @@ folder_file	BITMAP "folder_file.bmp"
 folder_pop	BITMAP "folder_pop.bmp"
 folder_imap	BITMAP "folder_imap.bmp"
 folder_news	BITMAP "folder_news.bmp"
+folder_nntp	BITMAP "folder_news.bmp"
 folder_root	BITMAP "folder_root.bmp"
 
 ///////////////////////////////////////////////////////////////////////////////
