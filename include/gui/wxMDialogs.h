@@ -56,11 +56,16 @@ public:
                    wxWindow *parent = NULL,
                    bool disableParentOnly = false,
                    bool abortButton = false)
-   : wxProgressDialog(title, message, maximum, parent,
+   : wxProgressDialog(wxString("Mahogany : ") + title, message,
+                      maximum, parent, 
                       (disableParentOnly ? 0 : wxPD_APP_MODAL) |
                       (abortButton ? wxPD_CAN_ABORT : 0) |
                       wxPD_AUTO_HIDE
-                      )
+#ifdef wxPD_ESTIMATED_TIME
+//FIXME WXCOMPATIBILITY
+                      |wxPD_ESTIMATED_TIME|wxPD_ELAPSED_TIME|wxPD_REMAINING_TIME
+#endif
+      )
    {
    }
 };

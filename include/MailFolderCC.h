@@ -580,6 +580,8 @@ private:
 
    /// Is this folder in a critical c-client section?
    bool m_InCritical;
+   /// folder flags
+   int  m_FolderFlags;
    /** @name Global settings, timeouts for c-client lib */
    //@{
    /// TCP/IP open timeout in seconds.

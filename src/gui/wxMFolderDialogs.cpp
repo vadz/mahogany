@@ -26,7 +26,6 @@
 #   include "Profile.h"
 #   include "guidef.h"
 #   include "strutil.h"
-#   include <wx/wx.h>
 #endif
 
 #include <wx/dynarray.h>
@@ -35,6 +34,10 @@
 #include <wx/notebook.h>
 #include <wx/persctrl.h>
 #include <wx/statbmp.h>
+#include <wx/tooltip.h>
+#include <wx/layout.h>
+#include <wx/stattext.h>
+#include <wx/radiobox.h>
 
 #include "MDialogs.h"
 #include "MFolderDialogs.h"
@@ -270,6 +273,8 @@ protected:
    wxCheckBox *m_isIncoming;
    /// Keep it always open?
    wxCheckBox *m_keepOpen;
+   /// Force re-open on ping?
+   wxCheckBox *m_forceReOpen;
    /// Use anonymous access for this folder?
    wxCheckBox *m_isAnonymous;
    /// browse button for the icon
@@ -288,6 +293,8 @@ protected:
    bool m_originalIncomingValue;
    /// the initial value of the "keep open" flag
    bool m_originalKeepOpenValue;
+   /// the initial value of the "force re-open" flag
+   bool m_originalForceReOpenValue;
 
    /// the original value for the folder icon index (-1 if nothing special)
    int m_originalFolderIcon;
@@ -765,6 +772,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_Comment,
       Label_IsIncoming,
       Label_KeepOpen,
+      Label_ForceReOpen,
       Label_IsAnonymous,
       Label_FolderIcon,
       Label_Max
@@ -781,6 +789,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Comment: "),
       gettext_noop("C&ollect all mail from this folder: "),
       gettext_noop("&Keep folder always open: "),
+      gettext_noop("&Force re-open on ping: "),
       gettext_noop("&Anonymous access: "),
       gettext_noop("Icon for this folder: "),
    };
@@ -804,8 +813,16 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_path = CreateFileEntry(labels[Label_Path], widthMax, m_comment, &m_browsePath);
    m_isIncoming = CreateCheckBox(labels[Label_IsIncoming], widthMax, m_path);
    m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
-   m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_keepOpen);
+   m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_keepOpen);
+   m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_forceReOpen);
 
+
+   wxToolTip tip1(_("Tick this box if Mahogany appears to have problems\n"
+                    "updating the folder listing. This is needed for some\n"
+                    "broken POP3 servers.\n"
+                    "Normally this is not needed."));
+   tip1.Apply(m_forceReOpen);
+   
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
    ASSERT_MSG( dlgParent, "should have a parent dialog!" );
 
@@ -962,12 +979,14 @@ wxFolderPropertiesPage::UpdateUI(int sel)
    {
       case MF_IMAP:
          EnableTextWithLabel(m_mailboxname, TRUE); // only difference from POP
+         m_forceReOpen->Enable(TRUE);
          // fall through
 
       case MF_POP:
          EnableTextWithLabel(m_server, TRUE);
          EnableTextWithLabel(m_newsgroup, FALSE);
          EnableTextWithButton(m_path, FALSE);
+         m_forceReOpen->Enable(TRUE);
          break;
 
       case MF_NNTP:
@@ -976,6 +995,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
          EnableTextWithLabel(m_server, TRUE);
          EnableTextWithLabel(m_newsgroup, TRUE);
          EnableTextWithButton(m_path, FALSE);
+         m_forceReOpen->Enable( folderType == MF_NNTP );
          break;
 
       case MF_FILE:
@@ -985,6 +1005,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
 
          // this can not be changed for an already existing folder
          EnableTextWithButton(m_path, m_isCreating);
+         m_forceReOpen->Enable(FALSE);
          break;
 
       case MF_INBOX:
@@ -993,6 +1014,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
          EnableTextWithLabel(m_newsgroup, FALSE);
 
          EnableTextWithButton(m_path, FALSE);
+         m_forceReOpen->Enable(FALSE);
          break;
 
       case FolderGroup:
@@ -1000,6 +1022,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
          EnableTextWithLabel(m_server, TRUE);
          EnableTextWithLabel(m_newsgroup, TRUE);
          EnableTextWithButton(m_path, TRUE);
+         m_forceReOpen->Enable(TRUE);
          break;
 
       default:
@@ -1197,7 +1220,9 @@ wxFolderPropertiesPage::SetDefaultValues()
    // changes later
    m_originalKeepOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
    m_keepOpen->SetValue(m_originalKeepOpenValue);
-
+   m_originalForceReOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
+   m_forceReOpen->SetValue(m_originalForceReOpenValue);
+   
    // update the folder icon
    if ( m_isCreating )
    {
@@ -1245,6 +1270,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 
       m_isIncoming->SetValue( (folder->GetFlags() & MF_FLAGS_INCOMING) != 0 );
       m_keepOpen->SetValue( (folder->GetFlags() & MF_FLAGS_KEEPOPEN) != 0 );
+      m_forceReOpen->SetValue( (folder->GetFlags() & MF_FLAGS_REOPENONPING) != 0 );
    }
 
 #ifdef __WXMSW__
@@ -1274,6 +1300,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       flags |= MF_FLAGS_INCOMING;
    if ( m_keepOpen->GetValue() )
       flags |= MF_FLAGS_KEEPOPEN;
+   if ( m_forceReOpen->GetValue() )
+      flags |= MF_FLAGS_REOPENONPING;
 
    // check that we have the username/password
    String loginName = m_login->GetValue(),

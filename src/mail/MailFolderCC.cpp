@@ -41,8 +41,6 @@
 #define QPRINT_MIDDLEMARKER_L "?q?"
 
 
-//#define TEST_REOPEN
-
 /*
  * Small function to translate c-client status flags into ours.
  */
@@ -302,6 +300,8 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_InCritical = false;
    
    FolderType type = GetFolderType(typeAndFlags);
+   m_FolderFlags = GetFolderFlags(typeAndFlags);
+   
    SetType(type);
    m_Timer = NULL;
    
@@ -638,17 +638,19 @@ MailFolderCC::Ping(void)
    int ccl = CC_SetLogLevel(M_LOG_WINONLY);
    
    ProcessEventQueue();
-#ifdef TEST_REOPEN
-   DBGMESSAGE(("MailFolderCC::Ping() forcing close on folder %s.",
-               GetName().c_str()));
-   Close();
-#endif
+
+   // This is terribly inefficient to do, but needed for some sick
+   // POP3 servers.
+   if(m_FolderFlags && MF_FLAGS_REOPENONPING)
+   {
+      DBGMESSAGE(("MailFolderCC::Ping() forcing close on folder %s.",
+                  GetName().c_str()));
+      Close();
+   }
    
    if(PingReopen())
    {
-//      CCQuiet();
       mail_check(m_MailStream); // update flags, etc, .newsrc
-//      CCVerbose();
       ProcessEventQueue();
    }
    CC_SetLogLevel(ccl);

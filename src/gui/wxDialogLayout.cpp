@@ -633,7 +633,7 @@ void wxEnhancedPanel::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
 
    // disable the label too: this will grey it out
 
-   // NB: we assume that the control ids are consecutif
+   // NB: we assume that the control ids are consecutive
    long id = wxWindow::PrevControlId(control->GetId());
    wxWindow *win = FindWindow(id);
 

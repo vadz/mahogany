@@ -67,7 +67,8 @@ enum FolderFlags
                                     // flag
    MF_FLAGS_NEWMAILFOLDER = 0x1000, // the central new mail folder
    MF_FLAGS_DONTDELETE    = 0x2000, // forbid deletion of this folder
-   MF_FLAGS_KEEPOPEN      = 0x4000  // keep this folder open at all times
+   MF_FLAGS_KEEPOPEN      = 0x4000, // keep this folder open at all times
+   MF_FLAGS_REOPENONPING  = 0x8000  // force a close and re-open on a ping
 };
 
 // ----------------------------------------------------------------------------

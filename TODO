@@ -40,7 +40,7 @@ $Id$
 		page
 2		adb addressbook extension appears twice when new book
 		is created
-
+3	VZ?	Why doesn't the tooltip in wxMFolderDialogs.cpp work?
 5	VZ	custom headers are not inherited
 
 4 gtk	VZ	icon selector suffers from several appearance problems
@@ -72,6 +72,10 @@ $Id$
 		folder name was selected?
 		I'll then add support for that to the Copy/Move
 		Messages functions. (KB)
+6	VZ	Could you add an ADB/export function, too? A
+		"checklist" (however that thing was called) box to
+		choose the fields and their order and which separator
+		to use would be nice.
 8		Find out where Mahogany is when laying out really long 
 		text messages. How can we speed this up? Why do
 		redraws take long, too?
@@ -157,6 +161,17 @@ from 32bitsonline review:
 6	VZ	folder properties assert when trying to create a
 		subfolder under INBOX - sort of fixed because folders can't be
 		created under INBOX (or any other non group folder) any more.
+
+
+
+KB:
+I have started marking code with
+//FIXME WXCOMPATIBILITY
+if it is likely to depend on a post-release wxWindows version. Such
+code should be protected with a suitable #ifdef which should be
+removed later when wxWindows has been updated.
+
+
 
 *********************************************************************
 *** GENERAL TODO
