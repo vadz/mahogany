@@ -95,7 +95,6 @@
 
 extern const MOption MP_COMPOSE_USE_XFACE;
 extern const MOption MP_COMPOSE_XFACE_FILE;
-extern const MOption MP_CONFIRMEXIT;
 extern const MOption MP_CRYPTALGO;
 extern const MOption MP_CURRENT_IDENTITY;
 extern const MOption MP_DATE_FMT;
@@ -2480,7 +2479,8 @@ static const struct
    { "MarkRead",                 gettext_noop("ask whether to mark all articles as read before closing folder") },
    { "DialUpConnectedMsg",       gettext_noop("show notification on dial-up network connection") },
    { "DialUpDisconnectedMsg",    gettext_noop("show notification on dial-up network disconnection") },
-   { MP_CONFIRMEXIT,             gettext_noop("ask confirmation before exiting the program") },
+   // "ConfirmExit" is the same as MP_CONFIRMEXIT_NAME!
+   { "ConfirmExit",              gettext_noop("ask confirmation before exiting the program") },
    { "AskLogin",                 gettext_noop("ask for the login name when opening the folder if required") },
    { "AskPwd",                   gettext_noop("ask for the password when opening the folder if required") },
    { "GoOfflineSendFirst",       gettext_noop("propose to send outgoing messages before hanging up") },
