@@ -98,6 +98,16 @@ public:
         {
         }
 
+   ~MTempFolder()
+   {
+      if ( m_flags & MF_FLAGS_TEMPORARY )
+      {
+         // it was a temp folder created just to view an embedded message,
+         // delete it now as we don't need it any longer
+         wxRemoveFile(m_path);
+      }
+   }
+
    // trivial implementation of base class pure virtuals
    virtual String GetPath() const { return m_path; }
    virtual void SetPath(const String& path) { m_path = path; }
