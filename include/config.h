@@ -44,6 +44,9 @@
 /** Define if you have the <strings.h> header file.  */
 #define HAVE_STRINGS_H 1
 
+/* Define if you have the <stdarg.h> header file.  */
+#define HAVE_STDARG_H 1
+
 /** Define if you have the <stdlib.h> header file - required for 
     Python.h .  */
 #define HAVE_STDLIB_H 1
@@ -55,16 +58,16 @@
 #define USE_WXWINDOWS 1
 
 /** Define if you use wxWindows, version 2. */
-#define USE_WXWINDOWS2 1
+/* #undef USE_WXWINDOWS2 */
 
 /** Define if you use wxWindows, wxXt port. */
-/* #undef USE_WXXT */
+#define USE_WXXT 1
 
 /** Define if you use wxWindows, wxGTK port. */
-#define USE_WXGTK 1
+/* #undef USE_WXGTK */
 
 /** Define if you want to use wxString instead of C++ string */
-#define USE_WXSTRING 1
+/* #undef USE_WXSTRING */
 
 /** Define if you use Python. */
 #define USE_PYTHON 1
@@ -72,6 +75,14 @@
 /** Define if the C++ compiler supports prototypes (of course it
     does!) - required for Python.h */
 #define HAVE_PROTOTYPES 1
+
+/* Define if your <unistd.h> contains bad prototypes for exec*()
+   (as it does on SGI IRIX 4.x) */
+/* #undef BAD_EXEC_PROTOTYPES */
+
+/* Define if your compiler supports variable length function prototypes
+   (e.g. void fprintf(FILE *, char *, ...);) *and* <stdarg.h> */
+#define HAVE_STDARG_PROTOTYPES 1
 
 /** Define if you want to use the global Mpch.h header file (e.g. for
     precompiling headers */

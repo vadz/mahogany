@@ -52,6 +52,9 @@ CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 
+# SWIG
+SWIG = swig
+SWIGFLAGS = -c++ -python -shadow
 
 # other stuff
 RM = rm -f

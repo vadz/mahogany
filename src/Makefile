@@ -2,7 +2,7 @@
 # $Id$
 
 CWD = src
-SUB_DIRS = util classes gui mail
+SUB_DIRS = util classes gui mail Python
 
 include ../makeopts
 

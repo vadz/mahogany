@@ -187,6 +187,7 @@ MApplication::OnInit(void)
    Py_Initialize();
    PyRun_SimpleString("import sys,os");
    PyRun_SimpleString("print 'Hello,', os.environ['USER'] + '.'");
+   PyRun_SimpleString("import MApplication");
 #endif
 
    ExternalScript	echo("echo \"Hello World!\"", "", "");

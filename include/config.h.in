@@ -43,6 +43,9 @@
 /** Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
 
+/* Define if you have the <stdarg.h> header file.  */
+#undef HAVE_STDARG_H
+
 /** Define if you have the <stdlib.h> header file - required for 
     Python.h .  */
 #undef HAVE_STDLIB_H
@@ -71,6 +74,14 @@
 /** Define if the C++ compiler supports prototypes (of course it
     does!) - required for Python.h */
 #undef HAVE_PROTOTYPES
+
+/* Define if your <unistd.h> contains bad prototypes for exec*()
+   (as it does on SGI IRIX 4.x) */
+#undef BAD_EXEC_PROTOTYPES
+
+/* Define if your compiler supports variable length function prototypes
+   (e.g. void fprintf(FILE *, char *, ...);) *and* <stdarg.h> */
+#undef HAVE_STDARG_PROTOTYPES
 
 /** Define if you want to use the global Mpch.h header file (e.g. for
     precompiling headers */
