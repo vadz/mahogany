@@ -9,6 +9,7 @@ $Id$
 - SentMail folder path should be relative - broken
 - reply mail does not quote original mail but inserts junk
 - reply/forward buttons for messageview/folderview
+- Preferences editor should mail oneself for test
 
 - wxOptionsDlg: two conversions from (long) to (int) .... is that ok?
   + should have "restore defaults", would be nice to be able to do it for
