@@ -156,28 +156,11 @@ struct MigrateData
    }
 
    // add a new folder to folderNames/folderFlags arrays
-   void AddFolder(const String& path, char delim, long flags)
-   {
-      source.delimiter = delim;
+   void AddFolder(const String& path, char delim, long flags);
 
-      // check if this folder is a child of the last one and remember it
-      if ( countFolders )
-      {
-         String last = folderNames.Last();
-         if ( last.empty() || path.StartsWith(last + delim) )
-         {
-            folderFlags.Last() &= ~ASMailFolder::ATT_NOINFERIORS;
-         }
-      }
-
-      // we abuse ATT_NOINFERIORS flag here to mean not only that the folder
-      // doesn't have children but also to imply that a folder without this
-      // flag does have children (which is not true for IMAP) -- initially it's
-      // set as we don't have any children yet
-      folderNames.Add(path);
-      folderFlags.Add(flags | ASMailFolder::ATT_NOINFERIORS);
-      countFolders++;
-   }
+   // must be called at the end of folder enumeration to set the
+   // ATT_NOINFERIORS flags for the folders correctly
+   void FixFolderFlags();
 };
 
 // ----------------------------------------------------------------------------
@@ -482,6 +465,9 @@ protected:
    // enable/disable the panels according to whether we use IMAP or local file
    void EnablePanelToBeUsed();
 
+   // enable/disable the "Forward" button
+   void UpdateForwardBtnUI(bool useIMAP);
+
 private:
    wxRadioButton *m_radioIMAP,
                  *m_radioLocal;
@@ -562,6 +548,9 @@ private:
    bool CreateDstDirectory(const String& name);
 
    // process all folders
+   bool ProcessAllFolders();
+
+   // wrapper arounnd ProcessAllFolders()
    void DoMigration();
 
 
@@ -1087,6 +1076,20 @@ void MigrateWizardDstPage::EnablePanelToBeUsed()
    m_panelLocal->Enable(!useIMAP);
 }
 
+void MigrateWizardDstPage::UpdateForwardBtnUI(bool useIMAP)
+{
+   if ( useIMAP )
+   {
+      // button should be disabled if the server is not entered
+      m_panelIMAP->UpdateForwardBtnUI();
+   }
+   else // local dst
+   {
+      // button is always enabled
+      EnableButtons(MigrateWizard::Btn_Next, true);
+   }
+}
+
 void MigrateWizardDstPage::OnRadioButton(wxCommandEvent& event)
 {
    const bool useIMAP = event.GetEventObject() == m_radioIMAP;
@@ -1094,20 +1097,10 @@ void MigrateWizardDstPage::OnRadioButton(wxCommandEvent& event)
 
    EnablePanelToBeUsed();
 
-   if ( useIMAP )
-   {
-      m_radioLocal->SetValue(false);
+   UpdateForwardBtnUI(useIMAP);
 
-      // button should be disabled if the server is not entered
-      m_panelIMAP->UpdateForwardBtnUI();
-   }
-   else // local dst
-   {
-      m_radioIMAP->SetValue(false);
-
-      // button is always enabled
-      EnableButtons(MigrateWizard::Btn_Next, true);
-   }
+   // manually disable the other radiobox as we use wxRB_SINGLE
+   (useIMAP ? m_radioLocal : m_radioIMAP)->SetValue(false);
 }
 
 bool MigrateWizardDstPage::TransferDataToWindow()
@@ -1120,8 +1113,15 @@ bool MigrateWizardDstPage::TransferDataToWindow()
 
    // call TransferDataToWindow() for both panels even if only one is used at
    // any given moment
-   return m_panelIMAP->TransferDataToWindow() &&
-            m_panelLocal->TransferDataToWindow();
+   if ( !m_panelIMAP->TransferDataToWindow() ||
+            !m_panelLocal->TransferDataToWindow() )
+   {
+      return false;
+   }
+
+   UpdateForwardBtnUI(useIMAP);
+
+   return true;
 }
 
 bool MigrateWizardDstPage::TransferDataFromWindow()
@@ -1450,8 +1450,8 @@ MigrateWizardProgressPage::GetDstFolder(const String& name, int flags)
    {
       if ( !(flags & ASMailFolder::ATT_NOINFERIORS) )
       {
-         // create a subdirectory for the subfolders
-         if ( !wxMkdir(path) )
+         // create a subdirectory for the subfolders if it doesn't exist yet
+         if ( !wxPathExists(path) && !wxMkdir(path) )
          {
             wxLogWarning(_("Failed to create directory \"%s\" for folder \"%s\""),
                          path.c_str(), name.c_str());
@@ -1518,8 +1518,9 @@ bool MigrateWizardProgressPage::CreateDstDirectory(const String& name)
    }
    else // local file destination
    {
-      // create a directory
-      return wxMkdir(GetDstNameForSource(name));
+      // create a directory if it doesn't exist yet
+      const String dir = GetDstNameForSource(name);
+      return wxPathExists(dir) || wxMkdir(dir);
    }
 }
 
@@ -1534,12 +1535,22 @@ bool MigrateWizardProgressPage::ProcessOneFolder(const String& name, int flags)
       return false;
    }
 
+   // don't create the target folder if the destination is empty and has
+   // subfolders: i.e. we do create empty folders if they contain messages only
+   // but we want to avoid creating empty "folder.messages" files if we have a
+   // "folder" directory
+   if ( !(flags & ASMailFolder::ATT_NOINFERIORS) && !mf->GetMessageCount() )
+   {
+      // nothing to do
+      return true;
+   }
+
    // create the folder to save the messages to
    MFolder_obj folderDst = GetDstFolder(name, flags);
    MailFolder_obj mfDst = MailFolder::OpenFolder(folderDst);
    if ( !mfDst )
    {
-      wxLogError(_("Failed to create the targer folder \"%s\""), name.c_str());
+      wxLogError(_("Failed to create the target folder \"%s\""), name.c_str());
 
       return false;
    }
@@ -1548,9 +1559,24 @@ bool MigrateWizardProgressPage::ProcessOneFolder(const String& name, int flags)
    return CopyMessages(mf, folderDst);
 }
 
-void MigrateWizardProgressPage::DoMigration()
+bool MigrateWizardProgressPage::ProcessAllFolders()
 {
-   EnableWizardButtons(false);
+   // ensure that the directory where we're going to create our files exists
+   if ( !Data().toIMAP )
+   {
+      const String& dir = Data().dstLocal.root;
+      if ( !dir.empty() && !wxPathExists(dir) )
+      {
+         if ( !wxMkdir(dir) )
+         {
+            wxLogError(_("Can't create the directory for the mailbox files.\n"
+                         "\n"
+                         "Migration aborted"));
+
+            return false;
+         }
+      }
+   }
 
    for ( m_nFolder = 0, m_nErrors = 0;
          m_nFolder < Data().countFolders;
@@ -1561,7 +1587,7 @@ void MigrateWizardProgressPage::DoMigration()
          // cancelled
          break;
       }
-;
+
       const String& name = Data().folderNames[m_nFolder];
 
       // is this a "file" or a "directory"?
@@ -1587,11 +1613,30 @@ void MigrateWizardProgressPage::DoMigration()
       }
    }
 
-   // update the UI to show that we're done now
-   if ( m_continue )
-   {
-      m_btnAbort->Disable();
+   return true;
+}
 
+void MigrateWizardProgressPage::DoMigration()
+{
+   EnableWizardButtons(false);
+
+   bool ok = ProcessAllFolders();
+
+   // update the UI to show that we're done now
+   m_btnAbort->Disable();
+
+   m_labelFolder->Disable();
+   m_gaugeFolder->Disable();
+   m_labelMsg->Disable();
+   m_gaugeMsg->Disable();
+
+   String msg;
+   if ( !ok )
+   {
+      msg = _("Migration couldn't be done.");
+   }
+   else if ( m_continue )
+   {
       m_gaugeMsg->SetValue(m_countMessages);
       m_gaugeFolder->SetValue(Data().countFolders);
 
@@ -1606,12 +1651,16 @@ void MigrateWizardProgressPage::DoMigration()
       {
          msg = _("Completed successfully.");
       }
-
-      UpdateStatus(msg);
-
-      EnableWizardButtons(true);
    }
-   //else: cancelled
+   else // cancelled
+   {
+      msg = _("Migration aborted.");
+   }
+
+   UpdateStatus(msg);
+
+   // let the user dismiss the wizard now
+   EnableWizardButtons(true);
 
    wxWindow *btnFinish = GetParent()->FindWindow(wxID_FORWARD);
    CHECK_RET( btnFinish, _T("no \"Finish\" button?") );
@@ -1644,16 +1693,6 @@ void MigrateWizardProgressPage::OnButtonCancel(wxCommandEvent& /* event */)
                      wxYES_NO | wxICON_QUESTION | wxNO_DEFAULT) == wxYES )
    {
       m_continue = false;
-
-      m_btnAbort->Disable();
-      m_labelFolder->Disable();
-      m_gaugeFolder->Disable();
-      m_labelMsg->Disable();
-      m_gaugeMsg->Disable();
-
-      UpdateStatus(_("Migration aborted."));
-
-      EnableWizardButtons(true);
    }
 }
 
@@ -1875,6 +1914,44 @@ MigrateWizard::OnListFolder(const String& path, char delim, long flags)
 void
 MigrateWizard::OnNoMoreFolders()
 {
+   Data().FixFolderFlags();
+
    m_doneWithList = true;
+}
+
+// ----------------------------------------------------------------------------
+// MigrateData implementation
+// ----------------------------------------------------------------------------
+
+void MigrateData::AddFolder(const String& path, char delim, long flags)
+{
+   source.delimiter = delim;
+
+   // we abuse ATT_NOINFERIORS flag here to mean not only that the folder
+   // doesn't have children but also to imply that a folder without this
+   // flag does have children (which is not true for IMAP) -- initially it's
+   // set as we don't have any children yet and we correct it in
+   // FixFolderFlags() later
+   folderNames.Add(path);
+   folderFlags.Add(flags | ASMailFolder::ATT_NOINFERIORS);
+   countFolders++;
+}
+
+void MigrateData::FixFolderFlags()
+{
+   for ( int n = 0; n < countFolders; n++ )
+   {
+      // check if this folder is a child of some of the previous folders
+      String parent = folderNames[n].BeforeLast(source.delimiter);
+      if ( !parent.empty() )
+      {
+         int idx = folderNames.Index(parent);
+         if ( idx != wxNOT_FOUND )
+         {
+            // this one does have children
+            folderFlags[(size_t)idx] &= ~ASMailFolder::ATT_NOINFERIORS;
+         }
+      }
+   }
 }
 
