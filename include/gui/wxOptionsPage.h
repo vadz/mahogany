@@ -108,6 +108,7 @@ public:
       Field_Global   = 0x80000000, // no identity override for this field
       Field_AppWide  = 0x01000000, // same setting for all folders
       Field_Inverse  = 0x02000000, // invert the value (Field_Bool only)
+      Field_FileSave = Field_Inverse, // only for Field_File
       Field_NotApp   = 0x04000000, // per folder option, opposite of AppWide
       Field_Flags    = 0xff000000  // bit mask selecting the flags
    };
