@@ -1329,16 +1329,18 @@ wxFolderPropertiesPage::GetCurrentFolderType(int selRadio, int selChoice) const
 int
 wxFolderPropertiesPage::GetRadioIndexFromFolderType(FolderType type) const
 {
+   if ( type == MF_MH )
+   {
+      // the same as file
+      type = MF_FILE;
+   }
+
    switch ( type )
    {
       case Inbox:
          // fall through - this will result in returning -1 if we're not
-         // creating a folder which is an incorrect value, as it should be
-
-      case MF_MH:
-         // the same as file
-         type = MF_FILE;
-         // fall through
+         // creating a folder which is an incorrect value, as it should be, or
+         // MF_INBOX if we're viewing its properties
 
       case MF_FILE:
       case MF_POP:
@@ -1353,6 +1355,10 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(FolderType type) const
       case MF_GROUP_IMAP:
          // assume "Group" follows "News"
          return m_isCreating ? News : News + 1;
+
+      case MF_MH:
+         FAIL_MSG("unexpected folder type value");
+         // fall through
 
       default:
          return -1;

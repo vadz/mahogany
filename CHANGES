@@ -1,5 +1,7 @@
 (next release) on (date of next release)
 
+10.11.99 VZ: fixes in folder creation/properties dialogs: buttons are
+             enabled/disabled correctly
 21.10.99 KB: dialup network handling and optional Outbox added
 15.08.99 KB: wxLayout scrolls when selecting with mouse, editing bugfree(?),
              changed wxIcon/wxBitmap handling -> do icons appear again under wxMSW?
@@ -10,10 +12,10 @@
 25.07.99 KB: date format configurable, sorting configurable and complete,
              help and modal dialogs work, mailfolder update improvements,
              abort button for reading folder listings, retrieving listings
-	     from newest messages first, iconmanager supports subdirectories now
+             from newest messages first, iconmanager supports subdirectories now
 22.07.99 KB: more MailFolder tidying up, sorting works
 19.07.99 KB: tear-off menus option added
-18.07.99 KB: more async fixes, fixed some race-conditions, 
+18.07.99 KB: more async fixes, fixed some race-conditions,
              MModule dialog working
 17.07.99 KB: more async code, non-async compilation no longer supported
              scandoc now produces usable docs, MModule produces listing of modules,
@@ -48,4 +50,4 @@ Initial public release.
 
 $Id$
 
-vi: set si ts=8 sw=8 et nolist tw=80:
+vi: set si ts=8 sw=8 et tw=80:
