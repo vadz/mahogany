@@ -1494,15 +1494,13 @@ protected:
    wxChoice    *m_Choices[NUM_CRITERIA];     // sort by what?
    wxCheckBox  *m_Checkboxes[NUM_CRITERIA];  // reverse sort order?
 
-   wxCheckBox  *m_checkUseThreading;
-   wxCheckBox  *m_checkReSortOnChange;
+   wxCheckBox  *m_checkReSortOnChange;       // resort on msg status change?
 
    // dirty flag
    bool         m_wasChanged;
 
    // the dialog data
-   bool         m_UseThreading,
-                m_ReSortOnChange;
+   bool         m_ReSortOnChange;
    long         m_SortOrder;
 };
 
@@ -1569,19 +1567,11 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
       m_Choices[n]->SetConstraints(c);
    }
 
-   m_checkUseThreading = new wxCheckBox(this, -1, _("Thread messages"));
-   c = new wxLayoutConstraints;
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
-   c->height.AsIs();
-   m_checkUseThreading->SetConstraints(c);
-
    m_checkReSortOnChange = new wxCheckBox(this, -1, _("Re-sort on status change"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.Below(m_checkUseThreading, 2*LAYOUT_Y_MARGIN);
+   c->top.Below(m_Choices[n - 1], 2*LAYOUT_Y_MARGIN);
    c->height.AsIs();
    m_checkReSortOnChange->SetConstraints(c);
 
@@ -1598,7 +1588,6 @@ bool wxMessageSortingDialog::TransferDataToWindow()
 
    // remmeber the initial values
    m_SortOrder = sortOrder;
-   m_UseThreading = READ_CONFIG(GetProfile(), MP_MSGS_USE_THREADING) != 0;
    m_ReSortOnChange = READ_CONFIG(GetProfile(), MP_MSGS_RESORT_ON_CHANGE) != 0;
 
    /* Sort order is stored as 4 bits per hierarchy:
@@ -1622,7 +1611,6 @@ bool wxMessageSortingDialog::TransferDataToWindow()
       sortOrder >>= 4;
    }
 
-   m_checkUseThreading->SetValue(m_UseThreading);
    m_checkReSortOnChange->SetValue(m_ReSortOnChange);
 
    return TRUE;
@@ -1656,14 +1644,6 @@ bool wxMessageSortingDialog::TransferDataFromWindow()
       m_wasChanged = true;
 
       GetProfile()->writeEntry(MP_MSGS_SORTBY, m_SortOrder);
-   }
-
-   if ( m_checkUseThreading->GetValue() != m_UseThreading )
-   {
-      m_UseThreading = !m_UseThreading;
-      m_wasChanged = true;
-
-      GetProfile()->writeEntry(MP_MSGS_USE_THREADING, m_UseThreading);
    }
 
    if ( m_checkReSortOnChange->GetValue() != m_ReSortOnChange )

@@ -2048,6 +2048,14 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
       hilp->IncRef();
       ThreadMessages(this, hilp);
    }
+   else // reset indentation as it may have been set by threading code before
+   {
+      size_t count = hilp->Count();
+      for ( size_t i = 0; i < count; i++ )
+      {
+         (*hilp)[i]->SetIndentation(0);
+      }
+   }
 }
 
 void

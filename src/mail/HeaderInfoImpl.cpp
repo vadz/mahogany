@@ -42,6 +42,7 @@ HeaderInfo * HeaderInfoImpl::Clone() const
    hi->m_Subject = GetSubject();
    hi->m_From = GetFrom();
    hi->m_To = GetTo();
+   hi->m_NewsGroups = GetNewsgroups();
    hi->m_Date = GetDate();
    hi->m_UId = GetUId();
    hi->m_References = GetReferences();

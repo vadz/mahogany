@@ -6,6 +6,7 @@
 Release 0.63 '?'
 -------------------------------------------------------------------------------
 
+27.03.01 VZ: printing bug (page was offset and page breaks were wrong) fixed
 26.03.01 VZ: fixed search bug (wrong messages were highlighted)
 24.03.01 VZ: retrieving remotedly stored folders/identities from Win works too
 23.03.01 VZ: added explicit "Sender" setting

@@ -3187,8 +3187,11 @@ wxLayoutPrintout::ScaleDC(wxDC *dc)
 bool
 wxLayoutPrintout::OnBeginDocument(int startPage, int endPage)
 {
-   if (!wxPrintout::OnBeginDocument(startPage, endPage)) return FALSE;
+   if (!wxPrintout::OnBeginDocument(startPage, endPage))
+      return FALSE;
+
    ScaleDC(GetDC());
+
    return TRUE;
 }
 
@@ -3196,26 +3199,24 @@ bool wxLayoutPrintout::OnPrintPage(int page)
 {
    wxDC *dc = GetDC();
 
-   ScaleDC(dc);
-   
-   if (dc)
-   {
-      int top, bottom;
-      top = (page - 1)*m_PrintoutHeight;
-      bottom = top + m_PrintoutHeight; 
-
-      WXLO_DEBUG(("OnPrintPage(%d) printing from %d to %d", page, top, 
-                  bottom));
-      // SetDeviceOrigin() doesn't work here, so we need to manually
-      // translate all coordinates.
-      wxPoint translate(m_Offset.x,m_Offset.y - top);
-      m_llist->ForceTotalLayout(TRUE);  // for the first time, do all
-      m_llist->Draw(*dc, translate, top, bottom, TRUE /* clip strictly 
-                                                       */);
-      return true;
-   }
-   else
+   if (!dc)
       return false;
+
+   //ScaleDC(dc);
+   
+   int top, bottom;
+   top = (page - 1)*m_PrintoutHeight;
+   bottom = top + m_PrintoutHeight; 
+
+   WXLO_DEBUG(("OnPrintPage(%d) printing from %d to %d", page, top, bottom));
+
+   // SetDeviceOrigin() doesn't work here, so we need to manually
+   // translate all coordinates.
+   wxPoint translate(0, -top);
+   m_llist->ForceTotalLayout(TRUE);  // for the first time, do all
+   m_llist->Draw(*dc, translate, top, bottom, TRUE /* clip strictly */);
+
+   return true;
 }
 
 /*
@@ -3234,31 +3235,32 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
 #endif
 
    psdc->StartDoc(m_title);
-   // before we draw anything, me must make sure the list is properly
-   // laid out
+
+   // before we draw anything, me must make sure the list is properly laid out
    m_llist->Layout(*psdc);
 
-   float scale = ScaleDC(psdc);
+   (void)ScaleDC(psdc);
 
+   // leave margins
    psdc->GetSize(&m_PageWidth, &m_PageHeight);
 
-   // This sets a left/top origin of 15% and 5%:
-   m_Offset = wxPoint((15*m_PageWidth)/100, (5*m_PageHeight)/100);
-
    // This is the length of the printable area.
-   m_PrintoutHeight = m_PageHeight - 2*m_Offset.y;
-   m_PrintoutHeight = (int)( m_PrintoutHeight / scale); // we want to use the real paper height
+   m_PrintoutHeight = m_PageHeight;
 
-   m_NumOfPages = 1 +
-      (int)( m_llist->GetSize().y / (float)(m_PrintoutHeight));
+   // how many pages do we need to print the entire list?
+   m_NumOfPages = 1 + (int)( m_llist->GetSize().y / (float)(m_PrintoutHeight));
 
+   // return the number of pages
    *minPage = 1;
    *maxPage = m_NumOfPages;
 
+   // we print all of them
    *selPageFrom = 1;
    *selPageTo = m_NumOfPages;
+
    psdc->EndDoc();
    delete psdc;
+
    wxRemoveFile(WXLLIST_TEMPFILE);
 }
 
@@ -3266,8 +3268,6 @@ bool wxLayoutPrintout::HasPage(int pageNum)
 {
    return pageNum <= m_NumOfPages;
 }
-
-
 
 wxFont &
 wxFontCache::GetFont(int family, int size, int style, int weight,
@@ -3283,9 +3283,6 @@ wxFontCache::GetFont(int family, int size, int style, int weight,
    m_FontList.push_back(fce);
    return fce->GetFont();
 }
-
-
-
 
 /*
   Stupid wxWindows doesn't draw proper ellipses, so we comment this
@@ -3326,4 +3323,5 @@ wxLayoutPrintout::DrawHeader(wxDC &dc,
    dc.SetBrush(brush);
    dc.SetFont(font);
 }
-#endif
+#endif // 0
+

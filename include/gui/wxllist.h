@@ -1365,13 +1365,12 @@ private:
    /// Title for PS file or window.
    wxString      m_title;
    /// The real paper size.
-   int           m_PageHeight, m_PageWidth;
+   int           m_PageHeight,
+                 m_PageWidth;
    /// How much we actually print per page.
    int           m_PrintoutHeight;
    /// How many pages we need to print.
    int           m_NumOfPages;
-   /// Top left corner where we start printing.
-   wxPoint       m_Offset;
 };
 
 
