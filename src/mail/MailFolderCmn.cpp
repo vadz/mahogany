@@ -341,8 +341,10 @@ void MfCloser::Remove(MfCloseEntry *entry)
 {
    CHECK_RET( entry, "NULL entry in MfCloser::Remove" );
 
+#ifdef DEBUG
    wxLogTrace(TRACE_MF_REF, "Removing '%s' from gs_MailFolderCloser",
               entry->GetName().c_str());
+#endif // DEBUG
 
    for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end(); i++ )
    {
