@@ -935,6 +935,40 @@ static struct SortData
 // return negative number if a < b, 0 if a == b and positive number if a > b
 #define CmpNumeric(a, b) ((a)-(b))
 
+static int ComputeStatusScore(int status)
+{
+   /*
+      The idea is to make the messages appear in the order of new, important,
+      recent or unread, other, answered so the scores are assigned in a way to
+      make new appear in front of the important, but the important before the
+      ones which are just recent or unread (remember that new == recent &&
+      unread)
+   */
+   enum
+   {
+      SCORE_RECENT = 2,
+      SCORE_UNREAD = 3,
+      SCORE_IMPORTANT = 4,
+      SCORE_ANSWERED = -1
+   };
+
+   int score = 0;
+
+   if ( status & MailFolder::MSG_STAT_RECENT )
+      score += SCORE_RECENT;
+
+   if ( !(status & MailFolder::MSG_STAT_SEEN) )
+      score += SCORE_UNREAD;
+
+   if ( status & MailFolder::MSG_STAT_FLAGGED )
+      score += SCORE_IMPORTANT;
+
+   if ( status & MailFolder::MSG_STAT_ANSWERED )
+      score += SCORE_ANSWERED;
+
+   return score;
+}
+
 static int CompareStatus(int stat1, int stat2)
 {
    // deleted messages are considered to be less important than undeleted ones
@@ -948,35 +982,9 @@ static int CompareStatus(int stat1, int stat2)
       return 1;
    }
 
-   /*
-      We use a scoring system:
-
-      recent = +1
-      unseen   = +1
-      answered = -1
-
-      (by now, messages are either both deleted or neither one is)
-   */
-
-   int
-      score1 = 0,
-      score2 = 0;
-
-   if(stat1 & MailFolder::MSG_STAT_RECENT)
-      score1 += 1;
-   if( !(stat1 & MailFolder::MSG_STAT_SEEN) )
-      score1 += 1;
-   if( stat1 & MailFolder::MSG_STAT_ANSWERED )
-      score1 -= 1;
-
-   if(stat2 & MailFolder::MSG_STAT_RECENT)
-      score2 += 1;
-   if( !(stat2 & MailFolder::MSG_STAT_SEEN) )
-      score2 += 1;
-   if( stat2 & MailFolder::MSG_STAT_ANSWERED )
-      score2 -= 1;
-
-   return CmpNumeric(score1, score2);
+   // now, messages are either both deleted or neither one is -- compare
+   // according to the other status bits
+   return CmpNumeric(ComputeStatusScore(stat1), ComputeStatusScore(stat2));
 }
 
 extern "C"
