@@ -14,7 +14,7 @@ $Id$
   + add a "save as html" option, using wxLayoutWindow functionality
 
 - wxFolderView:
-   + complete ForwardMessages, add InsertData() to wxComposeView
+   + complete ForwardMessages
    + add other functionality such as undelete messages or stripMime
 
 - wxLayout:
@@ -25,6 +25,9 @@ $Id$
 
 - configure: USE_WXCONFIG does not get defined!
 
+- not all windows get closed when application exits.
+  MessageViews stay open, why?
+  
 - suppress superfluous message popup-windows (i.e. c-client status messages)
 
 - WINDOWS: how to do MIME handling?

@@ -20,6 +20,8 @@ class FolderViewBase
  public:
    /// update the user interface
    virtual void Update(void) = 0;
+   /// virtual destructor
+   virtual ~FolderViewBase() {}
 };
 
 #endif

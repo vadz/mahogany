@@ -85,6 +85,17 @@ public:
    void InsertFile(const char *filename = NULL, const char *mimetype =
    NULL, int num_mimetype = 0);
 
+   /** Insert MIME content data
+       @param data pointer to data
+       @param len length of data
+       @param mimetype mimetype to use
+       @param num_mimetype numeric mimetype
+       */
+   void InsertData(const char *data,
+                   size_t length,
+                   const char *mimetype = NULL,
+                   int num_mimetype = 0);
+
    /// sets To field
    void SetTo(const String &to);
 

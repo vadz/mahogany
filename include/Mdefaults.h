@@ -100,6 +100,8 @@
 #define   MC_ADBFILE         "AddressBook"
 /// names of folders to open at startup (semicolon separated list)
 #define   MC_OPENFOLDERS         "OpenFolders"
+/// name of folder to open in mainframe
+#define   MC_MAINFOLDER          "MainFolder"
 /// path for Python
 #define   MC_PYTHONPATH         "PythonPath"
 /// start-up script to run
@@ -253,7 +255,9 @@
 /// name of address database
 #define   MC_ADBFILE_D         "M.adb"
 /// names of folders to open at startup
-#define   MC_OPENFOLDERS_D      "INBOX"
+#define   MC_OPENFOLDERS_D      ""
+/// name of folder to open in mainframe
+#define   MC_MAINFOLDER_D        "INBOX"
 /// path for Python
 #define   MC_PYTHONPATH_D         ""
 /// start-up script to run
@@ -336,7 +340,7 @@
 /// which font to use
 #define   MP_FTEXT_FONT_D         wxTELETYPE
 /// which font size
-#define   MP_FTEXT_SIZE_D         16
+#define   MP_FTEXT_SIZE_D         14
 /// which font style
 #define   MP_FTEXT_STYLE_D      wxNORMAL
 /// which font weight

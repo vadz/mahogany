@@ -24,6 +24,7 @@ class wxMessageView;
 class wxFolderView;
 class XFace;
 class Message;
+class MailFolder;
 
 /** A wxWindows MessageView class
   */

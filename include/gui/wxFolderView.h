@@ -12,12 +12,12 @@
 #pragma interface "wxFolderView.h"
 #endif
 
-#include "Mdefaults.h"
-#include "wxMFrame.h"
-
+#include   "Mdefaults.h"
+#include   "wxMFrame.h"
+#include   "MailFolder.h"
 #include   "wxMessageView.h"
 #include   <wx/listctrl.h>
-#include    <wx/dynarray.h>
+#include   <wx/dynarray.h>
 
 class wxFolderViewPanel;
 class wxFolderView;
@@ -56,7 +56,7 @@ public:
        @param parent   the parent window
    */
    wxFolderView(String const & folderName,
-                wxMFrame *parent = NULL);
+                MWindow *parent = NULL);
    /// Destructor
    ~wxFolderView();
 
@@ -115,7 +115,8 @@ public:
    void PreviewMessage(long messageno)
       { m_MessagePreview->ShowMessage(mailFolder,messageno+1); }
    void SetSize(const int x, const int y, const int width, int height);
-
+   /// return the MWindow pointer:
+   MWindow *GetWindow(void) { return m_SplitterWindow; }
 private:
    /// is initialised?
    bool initialised;
@@ -136,7 +137,7 @@ private:
    /// a timer to update information
    wxFVTimer   *timer;
    /// its parent
-   wxMFrame *parent;
+   MWindow *parent;
    /// either a listctrl or a treectrl
    wxFolderListCtrl *m_FolderCtrl;
    /// a splitter window

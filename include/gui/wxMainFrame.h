@@ -16,6 +16,9 @@
 #   pragma interface "wxMainFrame.h"
 #endif
 
+class wxFolderView;
+class wxSplitterWindow;
+
 class wxMainTreeCtrl : public wxTreeCtrl
 {
 public:
@@ -35,15 +38,15 @@ public:
                wxFrame *parent = NULL);
    
    void OnMenuCommand(int id);
-#ifdef   USE_WXWINDOWS2
-   void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT); }
+   void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
+   void OnSize( wxSizeEvent &event );
+
    DECLARE_EVENT_TABLE()
-#endif
 private:
-#ifdef   USE_WXWINDOWS2
-   wxSplitterWindow *splitter;
-   wxMainTreeCtrl *treeCtrl;
-#endif
+   /// the splitter window holding the treectrl and folder view
+   wxSplitterWindow *m_splitter;
+   /// the folder view
+   wxFolderView     *m_FolderView;
 };
 
 #endif

@@ -96,5 +96,4 @@
 /** Define if you want to use the global Mpch.h header file (e.g. for
     precompiling headers */
 #undef USE_PCH
-
 //@}

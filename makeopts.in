@@ -94,10 +94,10 @@ BINDIR = @bindir@
 DATADIR = @datadir@/M
 
 # Directory in which to install documentation info files.
-INFODIR = @infodir@/M
+#INFODIR = @infodir@/M
 
 # where to install docs
-DOCDIR = $DATADIR/doc
+DOCDIR = @docdir@
 
 # for the dynamic linker, better than using -rpath
 LD_RUN_PATH=$(DATADIR)/bin/$(CANONICAL_HOST)
@@ -115,7 +115,7 @@ EXTRA_SRC_LIB = @EXTRA_SRC_LIB@
 
 LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
 
-DEF = $(GUI_DEFS)
+DEF = $(GUI_DEFS) -DM_BASEDIR="\"$(DATADIR)\"" -DM_DATADIR="\"$(DATADIR)/data\"" -DM_DOCDIR="\"$(DATADIR)/M/doc\""
 INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) \
       $(GUI_INCLUDE) $(PYTHON_INCLUDE) $(XPM_INCLUDE) $(EXTRA_SRC_INC)
 CFLAGS   = $(OPT) $(DBG) $(DEF) $(INC)
