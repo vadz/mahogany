@@ -81,7 +81,7 @@ inline static int GetFolderFlags(int typeAndFlags)
 /// is this a folder type for which username/password make sense?
 inline bool FolderTypeHasUserName(FolderType type)
 {
-   if ( type == POP || type == IMAP || type == News )
+   if ( type == POP || type == IMAP || type == Nntp )
       return true;
    else
       return false;
