@@ -831,7 +831,7 @@ strutil_decrypt_tf(const String &original)
    int rc = TwoFishCrypt(0, 128, wxConvertWX2MB(gs_GlobalPassword), &input,&output);
    if(rc)
    {
-      return wxChar(output.data);
+      return output.data;
    }
    return _T("");
 }
