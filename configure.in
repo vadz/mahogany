@@ -76,6 +76,9 @@ M_OVERRIDES(experimental,experimental code,USE_EXPERIMENTAL,0,
 M_OVERRIDES(threads,multi-threading,USE_THREADS,0,
 --with-threads          multi-threaded version (DOES NOT WORK))
 
+M_OVERRIDES(palm,Palm Pilot support,USE_PISOCK,0,
+--with-palm             include support for Palm Pilot)
+
 M_OVERRIDES(ccostype,c-client OS type,USE_CCOSTYPE,,
 --with-ccostype=xxx     use OS type xxx for c-client compilation)
 
@@ -921,24 +924,30 @@ esac
 dnl this must come after we checked for wxGTK and network libraries
 dnl Check if we have the pi-sock library and headers for PalmOS support.
 MAKE_PISOCKLIB=
-AC_CHECK_HEADER(pi-source.h,
- AC_CHECK_LIB(pisock, main,
-  [ AC_DEFINE(USE_PISOCK)
-    MAKE_PISOCKLIB="PISOCK_LIB:=-lpisock"
-    AC_CHECK_LIB(pisock, pi_setmaxspeed,AC_DEFINE(HAVE_PI_SETMAXSPEED),
-    AC_MSG_WARN(Your pisock library is old - some functionality will be disabled.))
-    AC_CHECK_LIB(pisock, pi_accept_to,AC_DEFINE(HAVE_PI_ACCEPT_TO),
-    AC_MSG_WARN(Your pisock library is old - some functionality will be disabled.))
-  ],
-  AC_MSG_WARN(Cannot find pisock library - support for PalmOS disabled.)
- ),
- AC_MSG_WARN(Cannot find pisock headers - support for PalmOS disabled.)
-)
+case "$USE_PISOCK" in 
+1)
+    AC_CHECK_HEADER(pi-source.h,
+     AC_CHECK_LIB(pisock, main,
+      [ AC_DEFINE(USE_PISOCK)
+	MAKE_PISOCKLIB="PISOCK_LIB:=-lpisock"
+	AC_CHECK_LIB(pisock, pi_setmaxspeed,AC_DEFINE(HAVE_PI_SETMAXSPEED),
+	AC_MSG_WARN(Your pisock library is old - some functionality will be disabled.))
+	AC_CHECK_LIB(pisock, pi_accept_to,AC_DEFINE(HAVE_PI_ACCEPT_TO),
+	AC_MSG_WARN(Your pisock library is old - some functionality will be disabled.))
+      ],
+      AC_MSG_WARN(Cannot find pisock library - support for PalmOS disabled.)
+     ),
+     AC_MSG_WARN(Cannot find pisock headers - support for PalmOS disabled.)
+    )
+    ;;
+esac
 AC_SUBST(MAKE_PISOCKLIB)
 
 dnl Check if we have libmal source in extra/src
 MAKE_HAVE_LIBMAL=
-case "$MAKE_PISOCKLIB" in '') ;; *)
+case "$MAKE_PISOCKLIB" in
+'') ;;
+*)
 	AC_MSG_CHECKING(for libmal in extra/src)
 	if test ! -d $srcdir/extra/src/libmal 
 	then	AC_MSG_RESULT(not found - no MAL synch for PalmOS)
@@ -950,7 +959,6 @@ case "$MAKE_PISOCKLIB" in '') ;; *)
 	fi
 esac
 AC_SUBST(MAKE_HAVE_LIBMAL)
-
 
 dnl --------------------------------------------------------------------------
 dnl How do we want to use modules?
