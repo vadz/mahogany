@@ -434,6 +434,24 @@ void EnableTextWithLabel(wxWindow *parent, wxTextCtrl *control, bool bEnable)
    }
 }
 
+void EnableTextWithButton(wxWindow *parent, wxTextCtrl *control, bool bEnable)
+{
+   // NB: we assume that the control ids are consecutive
+   long id = wxWindow::NextControlId(control->GetId());
+   wxWindow *win = parent->FindWindow(id);
+
+   if ( win == NULL ) {
+      wxFAIL_MSG(_T("can't find browse button for the text entry zone"));
+   }
+   else {
+      wxASSERT( win->IsKindOf(CLASSINFO(wxButton)) );
+
+      win->Enable(bEnable);
+   }
+
+   EnableTextWithLabel(parent, control, bEnable);
+}
+
 // ----------------------------------------------------------------------------
 // wxPDialog
 // ----------------------------------------------------------------------------
@@ -985,20 +1003,7 @@ wxListBox *wxEnhancedPanel::CreateListbox(const wxChar *label, wxControl *last)
 // enable/disable the text control and its label
 void wxEnhancedPanel::EnableTextWithButton(wxTextCtrl *control, bool bEnable)
 {
-   // NB: we assume that the control ids are consecutive
-   long id = wxWindow::NextControlId(control->GetId());
-   wxWindow *win = FindWindow(id);
-
-   if ( win == NULL ) {
-      wxFAIL_MSG(_T("can't find browse button for the text entry zone"));
-   }
-   else {
-      wxASSERT( win->IsKindOf(CLASSINFO(wxButton)) );
-
-      win->Enable(bEnable);
-   }
-
-   EnableTextWithLabel(control, bEnable);
+   ::EnableTextWithButton(GetCanvas(), control, bEnable);
 }
 
 // enable/disable the colour browse button and its text with label

@@ -711,8 +711,10 @@ extern wxTextCtrl *CreateFileEntry(wxWindow *parent,
                                    int flags = FileEntry_Open |
                                                FileEntry_ExistingOnly);
 
-extern void EnableTextWithLabel(wxWindow *parent,
-                                wxTextCtrl *control,
-                                bool enable);
+extern void
+EnableTextWithLabel(wxWindow *parent, wxTextCtrl *control, bool enable);
+
+extern void
+EnableTextWithButton(wxWindow *parent, wxTextCtrl *control, bool enable);
 
 #endif // _GUI_WXDIALOGLAYOUT_H
