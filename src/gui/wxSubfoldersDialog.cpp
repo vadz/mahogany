@@ -43,6 +43,7 @@
 #include "Mpers.h"
 
 #include "ASMailFolder.h"
+#include "ListReceiver.h"
 
 #include "gui/wxDialogLayout.h"
 
@@ -103,7 +104,7 @@ static void RemoveTrailingDelimiters(wxString *s, char chDel = '/')
 // which is capable of populating the tree itself by getting the list of
 // subfolders from the ASMailFolder
 class wxSubfoldersTree : public wxTreeCtrl,
-                         public MEventReceiver
+                         public ListEventReceiver
 {
 public:
    // ctor takes the root of the folder tree and the mail folder to use
@@ -122,15 +123,15 @@ public:
    // we add the items to the tree here when the user tries to expand a branch
    void OnTreeExpanding(wxTreeEvent& event);
 
-   // event processing function
-   virtual bool OnMEvent(MEventData& event);
+   // list event processing functions
+   virtual void OnListFolder(const String& path, char delim, long flags);
+
+   // called when the last folder is received
+   virtual void OnNoMoreFolders();
 
 private:
    // called when a new folder must be added
    wxTreeItemId OnNewFolder(String& name);
-
-   // called when the last folder is received
-   void OnNoMoreFolders();
 
    // insert a new item named "name" under parent if it doesn't exist yet in
    // alphabetical order; returns the id of the (new) item
@@ -138,9 +139,6 @@ private:
 
    // get the path of the item in the tree excluding the root part
    wxString GetRelativePath(wxTreeItemId id) const;
-
-   // MEventReceiver cookie for the event manager
-   void *m_regCookie;
 
    // the progress meter
    MProgressInfo *m_progressInfo;
@@ -259,7 +257,7 @@ private:
 };
 
 // event receiver for the list events
-class ListFolderEventReceiver : public MEventReceiver
+class ListFolderEventReceiver : public ListEventReceiver
 {
 public:
    ListFolderEventReceiver()
@@ -277,8 +275,9 @@ public:
    // do retrieve all folders and create them
    size_t AddAllFolders(MFolder *folder, ASMailFolder *mailFolder);
 
-   // event processing function
-   virtual bool OnMEvent(MEventData& event);
+   // list folder events processing function
+   virtual void OnListFolder(const String& path, char delim, long flags);
+   virtual void OnNoMoreFolders();
 
 private:
    // MEventReceiver cookie for the event manager
@@ -350,9 +349,6 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
    m_mailFolder->IncRef();
 
    m_reference = m_mailFolder->GetImapSpec();
-
-   m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
-   ASSERT_MSG( m_regCookie, _T("can't register with event manager"));
 
    m_progressInfo = (MProgressInfo *)NULL;
    m_chDelimiter = m_mailFolder->GetFolderDelimiter();
@@ -455,13 +451,17 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       wxBusyCursor bc;
 
       // now OnNewFolder() and OnNoMoreFolders() will be called
-      (void)m_mailFolder->ListFolders
-                          (
-                             "%",         // everything at this tree level
-                             FALSE,       // subscribed only?
-                             reference,   // path relative to the folder
-                             this         // data to pass to the callback
-                          );
+      //
+      // NB: the cast below is needed as ListEventReceiver compares the user
+      //     data in the results it gets with "this" and its this pointer is
+      //     different from our "this" as we use multiple inheritance
+      m_mailFolder->ListFolders
+                    (
+                       "%",         // everything at this tree level
+                       FALSE,       // subscribed only?
+                       reference,   // path relative to the folder
+                       (ListEventReceiver *)this  // data for the callback
+                    );
 
       // process the events from ListFolders
       do
@@ -478,109 +478,67 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
    event.Skip();
 }
 
-// needed to be able to use DECLARE_AUTOREF() macro
-typedef ASMailFolder::ResultFolderExists ASFolderExistsResult;
-DECLARE_AUTOPTR(ASFolderExistsResult);
-
-bool wxSubfoldersTree::OnMEvent(MEventData& event)
+void wxSubfoldersTree::OnListFolder(const String& spec, char delim, long attr)
 {
-   // we're only subscribed to the ASFolder events
-   CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
-          _T("unexpected event type") );
-
-   MEventASFolderResultData &data = (MEventASFolderResultData &)event;
-
-   ASFolderExistsResult_obj result((ASFolderExistsResult *)data.GetResult());
-
-   // is this message really for us?
-   if ( result->GetUserData() != this )
-   {
-      // no: continue with other event handlers
-      return TRUE;
-   }
-
-   if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
-   {
-      FAIL_MSG( _T("unexpected operation notification") );
-
-      // eat the event - it was for us but we didn't process it...
-      return FALSE;
-   }
-
    // usually, all folders will have a non NUL delimiter ('.' for news, '/'
    // for everything else), but IMAP INBOX is special and can have a NUL one
-   ASSERT_MSG( result->GetDelimiter() == m_chDelimiter ||
-               !result->GetDelimiter(),
+   ASSERT_MSG( delim == m_chDelimiter || !delim,
                _T("unexpected delimiter returned by ListFolders") );
 
-   // is it the special event which signals that there will be no more of
-   // folders?
-   wxString spec = result->GetName();
-   if ( !spec )
+   if ( m_nFoldersRetrieved > PROGRESS_THRESHOLD )
    {
-      OnNoMoreFolders();
+      // hide the tree to prevent flicker while it is being updated (it will
+      // be shown back in OnNoMoreFolders)
+      Hide();
    }
-   else // normal folder event
+
+   // we're passed a folder specification - extract the folder name from it
+   wxString name;
+   if ( spec.StartsWith(m_reference, &name) )
    {
-      if ( m_nFoldersRetrieved > PROGRESS_THRESHOLD )
+      if ( m_chDelimiter )
       {
-         // hide the tree to prevent flicker while it is being updated (it will
-         // be shown back in OnNoMoreFolders)
-         Hide();
+         if ( !!name && name[0u] == m_chDelimiter )
+         {
+            name = name.c_str() + 1;
+         }
       }
 
-      // we're passed a folder specification - extract the folder name from it
-      wxString name;
-      if ( spec.StartsWith(m_reference, &name) )
+      // ignore the folder itself and any grand children - we only want the
+      // direct children here
+      if ( !!name && (!m_chDelimiter || !strchr(name, m_chDelimiter)) )
       {
-         if ( m_chDelimiter )
+         wxTreeItemId id = OnNewFolder(name);
+         if ( id.IsOk() )
          {
-            if ( !!name && name[0u] == m_chDelimiter )
+            if ( !(attr & ASMailFolder::ATT_NOINFERIORS) )
             {
-               name = name.c_str() + 1;
+               // this node can have children too
+               SetItemHasChildren(id);
             }
-         }
 
-         // ignore the folder itself and any grand children - we only want the
-         // direct children here
-         if ( !!name && (!m_chDelimiter || !strchr(name, m_chDelimiter)) )
-         {
-            wxTreeItemId id = OnNewFolder(name);
-            if ( id.IsOk() )
+            if ( attr & ASMailFolder::ATT_NOSELECT )
             {
-               long attr = result->GetAttributes();
-               if ( !(attr & ASMailFolder::ATT_NOINFERIORS) )
-               {
-                  // this node can have children too
-                  SetItemHasChildren(id);
-               }
+               SetItemData(id, new wxTreeItemData());
+            }
 
-               if ( attr & ASMailFolder::ATT_NOSELECT )
-               {
-                  SetItemData(id, new wxTreeItemData());
-               }
-
-               // this doesn't make much sense... someone proposed to show
-               // instead the folders already existing in the tree in bold (or
-               // maybe the folders not existing in the tree) - this might be
-               // more useful (TODO?)
+            // this doesn't make much sense... someone proposed to show
+            // instead the folders already existing in the tree in bold (or
+            // maybe the folders not existing in the tree) - this might be
+            // more useful (TODO?)
 #if 0
-               if ( attr & ASMailFolder::ATT_MARKED )
-               {
-                  SetItemBold(id);
-               }
-#endif // 0
+            if ( attr & ASMailFolder::ATT_MARKED )
+            {
+               SetItemBold(id);
             }
+#endif // 0
          }
       }
-      else
-      {
-         wxLogDebug(_T("Folder specification '%s' unexpected."), spec.c_str());
-      }
    }
-
-   // we don't want anyone else to receive this message - it was for us only
-   return FALSE;
+   else
+   {
+      wxLogDebug(_T("Folder specification '%s' unexpected."), spec.c_str());
+   }
 }
 
 wxTreeItemId wxSubfoldersTree::OnNewFolder(String& name)
@@ -676,8 +634,6 @@ wxSubfoldersTree::~wxSubfoldersTree()
 {
    m_folder->DecRef();
    m_mailFolder->DecRef();
-
-   MEventManager::Deregister(m_regCookie);
 }
 
 // ----------------------------------------------------------------------------
@@ -1177,154 +1133,124 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
    return m_nFoldersRetrieved;
 }
 
-bool ListFolderEventReceiver::OnMEvent(MEventData& event)
+void
+ListFolderEventReceiver::OnNoMoreFolders()
 {
-   // we're only subscribed to the ASFolder events
-   CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
-          _T("unexpected event type") );
+   // no more folders
+   m_finished = true;
 
-   MEventASFolderResultData &data = (MEventASFolderResultData &)event;
-
-   ASFolderExistsResult_obj result((ASFolderExistsResult *)data.GetResult());
-
-   // is this message really for us?
-   if ( result->GetUserData() != this )
+   if ( m_nFoldersRetrieved )
    {
-      // no: continue with other event handlers
-      return TRUE;
+      // generate an event notifying everybody that a new folder has been
+      // created
+      MEventManager::Send(
+         new MEventFolderTreeChangeData(m_folder->GetFullName(),
+                                        MEventFolderTreeChangeData::CreateUnder)
+         );
+      MEventManager::DispatchPending();
+   }
+}
+
+void
+ListFolderEventReceiver::OnListFolder(const String& spec,
+                                      char chDelimiter,
+                                      long attr)
+{
+   // count the number of folders retrieved and show progress
+   m_nFoldersRetrieved++;
+
+   // update the progress indicator from time to time (but often in the
+   // beginning)
+   if ( (m_nFoldersRetrieved < PROGRESS_THRESHOLD) ||
+          !(m_nFoldersRetrieved % PROGRESS_THRESHOLD) )
+   {
+      m_progressInfo->SetValue(m_nFoldersRetrieved);
    }
 
-   if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
+   // we're passed a folder specification - extract the folder name from it
+   wxString name;
+   if ( spec.StartsWith(m_reference, &name) )
    {
-      FAIL_MSG( _T("unexpected operation notification") );
-
-      // eat the event - it was for us but we didn't process it...
-      return FALSE;
-   }
-
-   char chDelimiter = result->GetDelimiter();
-
-   // is it the special event which signals that there will be no more of
-   // folders?
-   wxString spec = result->GetName();
-   if ( !spec )
-   {
-      // no more folders
-      m_finished = true;
-
-      if ( m_nFoldersRetrieved )
+      // remove the leading delimiter to get a relative name
+      if ( name[0u] == chDelimiter && chDelimiter != '\0')
       {
-         // generate an event notifying everybody that a new folder has been
-         // created
-         MEventManager::Send(
-            new MEventFolderTreeChangeData(m_folder->GetFullName(),
-                                           MEventFolderTreeChangeData::CreateUnder)
-            );
-         MEventManager::DispatchPending();
+         name = name.c_str() + 1;
       }
    }
-   else // normal folder event
+
+   if ( !name.empty() )
    {
-      // count the number of folders retrieved and show progress
-      m_nFoldersRetrieved++;
+      wxString relpath = name;
+      if ( chDelimiter != '\0' )
+         name.Replace(wxString(chDelimiter), "/");
 
-      // update the progress indicator from time to time (but often in the
-      // beginning)
-      if ( (m_nFoldersRetrieved < PROGRESS_THRESHOLD) ||
-             !(m_nFoldersRetrieved % PROGRESS_THRESHOLD) )
+      MFolder *folderNew = m_folder->GetSubfolder(name);
+      if ( !folderNew )
       {
-         m_progressInfo->SetValue(m_nFoldersRetrieved);
+         // last parameter tell CreateSubfolder() to not try to create
+         // this folder - we know that it already exists
+         folderNew = m_folder->CreateSubfolder(name,
+                                               m_folder->GetType(), false);
       }
 
-      // we're passed a folder specification - extract the folder name from it
-      wxString name;
-      if ( spec.StartsWith(m_reference, &name) )
+      // note that we must set the folder flags/whatever even if it already
+      // exists as we can get first the notification for folder.subfolder
+      // and when we create it, we create the config group for folder as
+      // well but it is empty and so we have to set the params for it later
+      // when we get the notification for the folder itself
+      if ( folderNew )
       {
-         // remove the leading delimiter to get a relative name
-         if ( name[0u] == chDelimiter && chDelimiter != '\0')
+         Profile_obj profile(folderNew->GetProfile());
+
+         // check if the folder really already exists, if not - create it
+         if ( !profile->HasEntry(MP_FOLDER_PATH) )
          {
-            name = name.c_str() + 1;
-         }
-      }
-
-      if ( !name.empty() )
-      {
-         wxString relpath = name;
-         if ( chDelimiter != '\0' )
-            name.Replace(wxString(chDelimiter), "/");
-
-         MFolder *folderNew = m_folder->GetSubfolder(name);
-         if ( !folderNew )
-         {
-            // last parameter tell CreateSubfolder() to not try to create
-            // this folder - we know that it already exists
-            folderNew = m_folder->CreateSubfolder(name,
-                                                  m_folder->GetType(), false);
-         }
-
-         // note that we must set the folder flags/whatever even if it already
-         // exists as we can get first the notification for folder.subfolder
-         // and when we create it, we create the config group for folder as
-         // well but it is empty and so we have to set the params for it later
-         // when we get the notification for the folder itself
-         if ( folderNew )
-         {
-            Profile_obj profile(folderNew->GetProfile());
-
-            // check if the folder really already exists, if not - create it
-            if ( !profile->HasEntry(MP_FOLDER_PATH) )
+            int flags = m_flagsParent;
+            if ( attr & ASMailFolder::ATT_NOINFERIORS )
             {
-               int flags = m_flagsParent;
-               long attr = result->GetAttributes();
-               if ( attr & ASMailFolder::ATT_NOINFERIORS )
-               {
-                  flags &= ~MF_FLAGS_GROUP;
-               }
-               else
-               {
-                  flags |= MF_FLAGS_GROUP;
-               }
-
-               if ( attr & ASMailFolder::ATT_NOSELECT )
-               {
-                  flags |= MF_FLAGS_NOSELECT;
-               }
-               else
-               {
-                  flags &= ~MF_FLAGS_NOSELECT;
-               }
-
-               folderNew->SetFlags(flags);
-
-               String fullpath = m_folder->GetPath();
-               if ( !fullpath.empty() )
-               {
-                  // we don't want the paths to start with '/', but we want to
-                  // have it if there is something before
-                  fullpath += chDelimiter;
-               }
-
-               fullpath += relpath;
-
-               profile->writeEntry(MP_FOLDER_PATH, fullpath);
+               flags &= ~MF_FLAGS_GROUP;
             }
-            //else: folder already exists with the correct parameters
+            else
+            {
+               flags |= MF_FLAGS_GROUP;
+            }
 
-            folderNew->DecRef();
+            if ( attr & ASMailFolder::ATT_NOSELECT )
+            {
+               flags |= MF_FLAGS_NOSELECT;
+            }
+            else
+            {
+               flags &= ~MF_FLAGS_NOSELECT;
+            }
+
+            folderNew->SetFlags(flags);
+
+            String fullpath = m_folder->GetPath();
+            if ( !fullpath.empty() )
+            {
+               // we don't want the paths to start with '/', but we want to
+               // have it if there is something before
+               fullpath += chDelimiter;
+            }
+
+            fullpath += relpath;
+
+            profile->writeEntry(MP_FOLDER_PATH, fullpath);
          }
-         else
-         {
-            wxLogError(_("Failed to create the folder '%s'"), name.c_str());
-         }
+         //else: folder already exists with the correct parameters
+
+         folderNew->DecRef();
       }
       else
       {
-         wxLogDebug(_T("Folder specification '%s' unexpected."), spec.c_str());
+         wxLogError(_("Failed to create the folder '%s'"), name.c_str());
       }
    }
-
-   // we don't want anyone else to receive this message - it was for us only
-   return FALSE;
+   else
+   {
+      wxLogDebug(_T("Folder specification '%s' unexpected."), spec.c_str());
+   }
 }
 
 // ----------------------------------------------------------------------------
