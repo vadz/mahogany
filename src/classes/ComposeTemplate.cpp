@@ -543,8 +543,10 @@ static String GetReplyPrefix(Message *msg, Profile *profile)
             name = name.Mid(1, name.length() - 2);
          }
 
-         // take the first letter of each word
-         wxStringTokenizer tk(name);
+         // take the first letter of each word (include single quote in
+         // delimiters so that names like "Foo O'Bar" and "Baz d'ABC" are
+         // handled correctly)
+         wxStringTokenizer tk(name, " '-");
          while ( tk.HasMoreTokens() )
          {
             unsigned char chInitial = tk.GetNextToken()[0u];
