@@ -163,6 +163,9 @@ MAppBase::MAppBase()
 
    mApplication = this;
 
+   // uninitialized yet
+   m_debugMail = -1;
+
    ResetLastError();
 }
 
@@ -461,6 +464,9 @@ MAppBase::OnStartup()
 
       return false;
    }
+
+   // set the mail debugging flag: from now it's possible to open mail folders
+   m_debugMail = m_cmdLineOptions->debugMail;
 
    // extend path for commands, look in M's dirs first
    String pathEnv;
@@ -1245,5 +1251,12 @@ wxMimeTypesManager& MAppBase::GetMimeManager(void) const
     }
 
     return *m_mimeManager;
+}
+
+bool MAppBase::IsMailDebuggingEnabled() const
+{
+   ASSERT_MSG( m_debugMail != -1, "command line not parsed yet!" );
+
+   return m_debugMail == TRUE;
 }
 

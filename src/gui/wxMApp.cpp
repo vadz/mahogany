@@ -2006,6 +2006,7 @@ void wxMApp::ShowLog(bool doShow)
 #define OPTION_BODY        "body"
 #define OPTION_CC          "cc"
 #define OPTION_CONFIG      "config"
+#define OPTION_DEBUGMAIL   "debug"
 #define OPTION_FOLDER      "folder"
 #define OPTION_NEWSGROUP   "newsgroup"
 #define OPTION_SAFE        "safe"
@@ -2015,6 +2016,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
 {
    wxApp::OnInitCmdLine(parser);
 
+   // NB: add new options in alphabetical order
    static const wxCmdLineEntryDesc cmdLineDesc[] =
    {
       // -b or --bcc to specify the BCC headers
@@ -2047,6 +2049,14 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
          NULL,
          OPTION_CONFIG,
          gettext_noop("specify the alternative configuration file to use"),
+      },
+
+      // --debug to force mail debugging on
+      {
+         wxCMD_LINE_SWITCH,
+         NULL,
+         OPTION_DEBUGMAIL,
+         gettext_noop("enable mail subsystem debug message logging"),
       },
 
       // -f or --folder to specify the folder to open in the main frame
@@ -2128,6 +2138,7 @@ bool wxMApp::OnCmdLineParsed(wxCmdLineParser& parser)
    }
 
    m_cmdLineOptions->safe = parser.Found(OPTION_SAFE);
+   m_cmdLineOptions->debugMail = parser.Found(OPTION_DEBUGMAIL);
 
    if ( startComposer )
    {
@@ -2329,7 +2340,11 @@ bool wxMApp::CallAnother()
 #define CMD_LINE_OPTS_SEP '\1'
 
 // the version of the CmdLineOptions::ToString() format
-#define CMD_LINE_OPTS_VERSION 1.0
+#define CMD_LINE_OPTS_VERSION 1.1
+
+// the string versions of TRUE and FALSE
+#define CMD_LINE_OPTS_TRUE '1'
+#define CMD_LINE_OPTS_FALSE '0'
 
 // the positions of the individual members in the string produced by ToString()
 enum
@@ -2342,6 +2357,7 @@ enum
    CmdLineOptions_Newsgroups,
    CmdLineOptions_Subject,
    CmdLineOptions_To,
+   CmdLineOptions_DebugMail,
    CmdLineOptions_Max
 };
 
@@ -2356,7 +2372,8 @@ String CmdLineOptions::ToString() const
      << composer.cc << CMD_LINE_OPTS_SEP
      << composer.newsgroups << CMD_LINE_OPTS_SEP
      << composer.subject << CMD_LINE_OPTS_SEP
-     << composer.to;
+     << composer.to << CMD_LINE_OPTS_SEP
+     << (debugMail ? CMD_LINE_OPTS_TRUE : CMD_LINE_OPTS_FALSE);
 
    return s;
 }
@@ -2379,6 +2396,7 @@ bool CmdLineOptions::FromString(const String& s)
    composer.newsgroups = tokens[CmdLineOptions_Newsgroups];
    composer.subject = tokens[CmdLineOptions_Subject];
    composer.to = tokens[CmdLineOptions_To];
+   debugMail = tokens[CmdLineOptions_DebugMail] == CMD_LINE_OPTS_TRUE;
 
    return true;
 }

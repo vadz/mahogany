@@ -44,6 +44,9 @@ public:
    /// in safe mode, don't do anything on startup
    bool safe;
 
+   /// force mail debugging on
+   bool debugMail;
+
    /**
      @name Conversion to/from string
 

@@ -2812,7 +2812,10 @@ MailFolderCC::RemoveFromMap(void) const
 
 void MailFolderCC::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 {
-   mm_show_debug = READ_APPCONFIG_BOOL(MP_DEBUG_CCLIENT);
+   // the command line option overrides the config value
+   mm_show_debug = mApplication->IsMailDebuggingEnabled()
+                     ? true
+                     : READ_APPCONFIG_BOOL(MP_DEBUG_CCLIENT);
 
    MailFolderCmn::ReadConfig(config);
 }

@@ -364,11 +364,15 @@ public:
    /// return TRUE if the log window is currently shown
    virtual bool IsLogShown() const = 0;
 
+   /// return TRUE if mail debugging was enabled from command line
+   bool IsMailDebuggingEnabled() const;
+
    /// show or hide the log window
    virtual void ShowLog(bool doShow = TRUE) = 0;
 
    /// set the name of the file to use for logging (disable if empty)
    virtual void SetLogFile(const String& filename) = 0;
+
    //@}
 
    /** @name Thread control */
@@ -516,6 +520,13 @@ private:
      which can prevent us from working correctly) can be done here at all.
    */
    void ContinueStartup();
+
+   /**
+     The mail debugging flag: set to TRUE if the mail debugging option was
+     specified on the command line, to FALSE if it wasn't and to -1 if we
+     hadn't parsed the command line yet
+   */
+   int m_debugMail;
 };
 
 /// Report a fatal error:
