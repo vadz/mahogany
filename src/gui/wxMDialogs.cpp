@@ -1002,7 +1002,7 @@ public:
    SplashCloseTimer(class wxAboutWindow *window)
       {
          m_window = window;
-         Start(READ_APPCONFIG(MP_SPLASHDELAY)*1000);
+         Start(READ_APPCONFIG(MP_SPLASHDELAY)*1000, TRUE /* single shot */);
       }
 
    virtual void Notify();
