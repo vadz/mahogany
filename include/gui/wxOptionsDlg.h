@@ -42,6 +42,9 @@ enum OptionsPage
    OptionsPage_Adb,
    OptionsPage_Helpers,
    OptionsPage_Sync,
+#ifdef USE_TEST_PAGE
+   OptionsPage_Test,
+#endif // USE_TEST_PAGE
    OptionsPage_Misc,
    OptionsPage_Max
 };
