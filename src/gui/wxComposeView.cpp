@@ -2445,7 +2445,7 @@ GetRecipientFromControl(wxComposeView::RecipientType type,
       wxString value = rcpt->GetValue();
       if ( !value.empty() )
       {
-         list.Add(rcpt->GetValue());
+         list.Add(value);
       }
    }
 }
