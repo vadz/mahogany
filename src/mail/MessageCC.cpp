@@ -222,6 +222,9 @@ MessageCC::Address(String &name, MessageAddressType type) const
       name = String(addr->personal);
 
    name = MailFolderCC::qprint(name);
+
+   if(strchr(name, ',') || strchr(name,'<') || strchr(name,'>'))
+      name = String("\"") + name + String("\"");
    return MailFolderCC::qprint(email);
 }
 
