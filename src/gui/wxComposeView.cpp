@@ -758,7 +758,7 @@ AttachmentMenu::OnCommandEvent(wxCommandEvent &event)
             }
 
             wxString content;
-            const off_t len = file.Length();
+            const wxFileOffset len = file.Length();
             if ( file.Read(wxStringBuffer(content, len + 1), len) != len )
             {
                wxLogError(_("Failed to read attachment data."));
@@ -2835,7 +2835,8 @@ void wxComposeView::OnFirstTimeModify()
 // wxComposeView parameters setting
 // ----------------------------------------------------------------------------
 
-void wxComposeView::SetEncoding(wxFontEncoding encoding)
+void
+wxComposeView::SetEncoding(wxFontEncoding encoding, wxFontEncoding encConv)
 {
    if ( encoding == wxFONTENCODING_DEFAULT )
    {
@@ -2850,7 +2851,7 @@ void wxComposeView::SetEncoding(wxFontEncoding encoding)
    }
 
    m_encoding = encoding;
-   m_editor->SetEncoding(encoding);
+   m_editor->SetEncoding(encConv == wxFONTENCODING_SYSTEM ? encoding : encConv);
 
    // check "Default" menu item if we use the system default encoding in absence
    // of any user-configured default
@@ -2859,24 +2860,48 @@ void wxComposeView::SetEncoding(wxFontEncoding encoding)
                                              : m_encoding);
 }
 
-void wxComposeView::SetEncodingToSameAs(Message *msg)
+bool wxComposeView::SetEncodingToSameAs(const MimePart *part)
+{
+   while ( part )
+   {
+      if ( part->GetType().GetPrimary() == MimeType::TEXT )
+      {
+         wxFontEncoding enc = part->GetTextEncoding();
+         if ( enc != wxFONTENCODING_SYSTEM )
+         {
+            // Unicode parts are converted by the message viewer (from which we
+            // get our text) to another encoding, get it
+            wxFontEncoding encConv;
+            if ( enc == wxFONTENCODING_UTF7 || enc == wxFONTENCODING_UTF8 )
+            {
+               String textPart(part->GetTextContent());
+               encConv = ConvertUTFToMB(&textPart, enc);
+            }
+            else // not Unicode
+            {
+               encConv = wxFONTENCODING_SYSTEM;
+            }
+
+            SetEncoding(enc, encConv);
+            return true;
+         }
+      }
+
+      if ( SetEncodingToSameAs(part->GetNested()) )
+         return true;
+
+      part = part->GetNext();
+   }
+
+   return false;
+}
+
+void wxComposeView::SetEncodingToSameAs(const Message *msg)
 {
    CHECK_RET( msg, _T("no message in SetEncodingToSameAs") );
 
    // find the first text part with non default encoding
-   int count = msg->CountParts();
-   for ( int part = 0; part < count; part++ )
-   {
-      if ( msg->GetPartType(part) == MimeType::TEXT )
-      {
-         wxFontEncoding enc = msg->GetTextPartEncoding(part);
-         if ( enc != wxFONTENCODING_SYSTEM )
-         {
-            SetEncoding(enc);
-            break;
-         }
-      }
-   }
+   SetEncodingToSameAs(msg->GetTopMimePart());
 }
 
 void wxComposeView::EnableEditing(bool enable)

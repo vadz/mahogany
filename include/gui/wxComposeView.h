@@ -295,11 +295,17 @@ protected:
    /// InsertData() and InsertFile() helper
    void DoInsertAttachment(EditorContentPart *mc, const wxChar *mimetype);
 
-   /// set encoding to use
-   void SetEncoding(wxFontEncoding encoding);
+   /// set encoding to use and pass it on to composer (by default same one)
+   void SetEncoding(wxFontEncoding encoding,
+                    wxFontEncoding encodingEditor = wxFONTENCODING_SYSTEM);
+
+   /// set the message encoding to be equal to the encoding of this part and
+   /// its subparts, returns true if encoding was set, false if no text part
+   /// with non default encoding found
+   bool SetEncodingToSameAs(const MimePart *part);
 
    /// set the message encoding to be equal to the encoding of this msg
-   void SetEncodingToSameAs(Message *msg);
+   void SetEncodingToSameAs(const Message *msg);
 
    /// set the draft message we were started with
    void SetDraft(Message *msg);
