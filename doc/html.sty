@@ -25,7 +25,7 @@
 \ifx \htmlstyloaded\relax \endinput\else\let\htmlstyloaded\relax\fi
 \makeatletter
 
-\newcommand{\latextohtml}{\LaTeX2\texttt{HTML}}
+\providecommand{\latextohtml}{\LaTeX2\texttt{HTML}}
 
 
 %%% LINKS TO EXTERNAL DOCUMENTS
@@ -88,8 +88,8 @@
 % a figure caption.
 % Here we introduce a stub for compatibility.
 \newcommand{\htmlrule}{\protect\HTMLrule}
-\newcommand{\HTMLrule}{\@ifstar\@htmlrule\@htmlrule}
-\newcommand{\@htmlrule}[1]{}
+\newcommand{\HTMLrule}{\@ifstar\htmlrulestar\htmlrulestar}
+\newcommand{\htmlrulestar}[1]{}
 
 % This command adds information within the <BODY> ... </BODY> tag
 %
@@ -200,6 +200,11 @@
 \newenvironment{makeimage}{}{}
 
 
+% A dummy environment that can be useful to alter the order
+% in which commands are processed, in LaTeX2HTML
+\newenvironment{tex2html_deferred}{}{}
+
+
 %%% HTMLADDTONAVIGATION
 % This command appends its argument to the buttons in the navigation
 % panel. It is ignored by LaTeX.
@@ -300,6 +305,20 @@
 % end Comment.sty
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%
+% Alternative code by Robin Fairbairns, 22 September 1997
+%
+\newcommand\@gobbleenv{\let\reserved@a\@currenvir\@gobble@nv}
+\long\def\@gobble@nv#1\end#2{\def\reserved@b{#2}%
+ \ifx\reserved@a\reserved@b
+  \edef\reserved@a{\noexpand\end{\reserved@a}}%
+  \expandafter\reserved@a
+ \else
+  \expandafter\@gobble@nv
+ \fi}
+
+\renewcommand{\excludecomment}[1]{%
+    \csname newenvironment\endcsname{#1}{\@gobbleenv}{}}
 
 %%% RAW HTML 
 % 
@@ -399,7 +418,7 @@
 % Eg. \htmlrule[left, 15, 5pt, "none", NOSHADE] produces
 % <BR CLEAR="left"><HR NOSHADE SIZE="15">.
 % Renew the necessary part.
-\renewcommand{\@htmlrule}[1][all]{}
+\renewcommand{\htmlrulestar}[1][all]{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -428,7 +447,11 @@
 %  HTML tags or set Perl variables during the LaTeX2HTML processing;
 %  They are intended for expert use only.
 
-\newcommand{\HTML}[2][]{}
+\newcommand{\HTMLcode}[2][]{}
+\ifx\undefined\HTML\newcommand{\HTML}[2][]{}\else
+\typeout{*** Warning: \string\HTML\space had an incompatible definition ***}%
+\typeout{*** instead use \string\HTMLcode\space for raw HTML code ***}%
+\fi 
 \newcommand{\HTMLset}[3][]{}
 \newcommand{\HTMLsetenv}[3][]{}
 
@@ -473,17 +496,37 @@
 %
 \newcommand{\startdocument}{}
 
-%
-%  These do nothing in LaTeX but for LaTeX2HTML
-%  they mark where the table of child-links and info-page 
-%  should be placed, when the user wants other than the default.
-%  The *-versions omit the preceding <BR> tag.
-%
-\newcommand{\tableofchildlinks}{\@ifstar\@tochildlinks\@tochildlinks}
-\newcommand{\@tochildlinks}{}
 
-\newcommand{\htmlinfo}{\@ifstar\@htmlinfo\@htmlinfo}
-\newcommand{\@htmlinfo}{}
+% \tableofchildlinks, \htmlinfo
+%     by Ross Moore  ---  extensions dated 27 September 1997
+%
+%  These do nothing in LaTeX but for LaTeX2HTML they mark 
+%  where the table of child-links and info-page should be placed,
+%  when the user wants other than the default.
+%	\tableofchildlinks	 % put mini-TOC at this location
+%	\tableofchildlinks[off]	 % not on current page
+%	\tableofchildlinks[none] % not on current and subsequent pages
+%	\tableofchildlinks[on]   % selectively on current page
+%	\tableofchildlinks[all]  % on current and all subsequent pages
+%	\htmlinfo	 	 % put info-page at this location
+%	\htmlinfo[off]		 % no info-page in current document
+%	\htmlinfo[none]		 % no info-page in current document
+%  *-versions omit the preceding <BR> tag.
+%
+\newcommand{\tableofchildlinks}{%
+  \@ifstar\tableofchildlinksstar\tableofchildlinksstar}
+\newcommand{\tableofchildlinksstar}[1][]{}
+
+\newcommand{\htmlinfo}{\@ifstar\htmlinfostar\htmlinfostar}
+\newcommand{\htmlinfostar}[1][]{}
+
+
+%  This redefines  \begin  to allow for an optional argument
+%  which is used by LaTeX2HTML to specify `style-sheet' information
+
+\let\realLaTeX@begin=\begin
+\renewcommand{\begin}[1][]{\realLaTeX@begin}
+
 
 %
 %  Allocate a new set of section counters, which will get incremented
@@ -493,7 +536,9 @@
 
 \newcounter{lpart}
 \newcounter{lchapter}[part]
-\@ifundefined{chapter}{\newcounter{lsection}[part]}{\newcounter{lsection}[chapter]}
+\@ifundefined{c@chapter}%
+ {\let\Hchapter\relax \newcounter{lsection}[part]}%
+ {\let\Hchapter=\chapter \newcounter{lsection}[chapter]}
 \newcounter{lsubsection}[section]
 \newcounter{lsubsubsection}[subsection]
 \newcounter{lparagraph}[subsubsection]
@@ -505,7 +550,7 @@
 %  respective counters.
 %
 \let\Hpart=\part
-\let\Hchapter=\chapter
+%\let\Hchapter=\chapter
 \let\Hsection=\section
 \let\Hsubsection=\subsection
 \let\Hsubsubsection=\subsubsection
@@ -525,51 +570,60 @@
 %
 \renewcommand{\part}{\@ifstar{\stepcounter{lpart}%
   \bgroup\def\tmp{*}\H@part}{\bgroup\def\tmp{}\H@part}}
-\newcommand{\H@part}[1][]{%
+\newcommand{\H@part}[1][]{\def\tmp@a{#1}\check@align
  \expandafter\egroup\expandafter\Hpart\tmp}
 
-\ifx\Hchapter\relax\else\@ifundefined{chapter}{}{%
+\ifx\Hchapter\relax\else
  \def\chapter{\resetsections \@ifstar{\stepcounter{lchapter}%
-   \bgroup\def\tmp{*}\H@chapter}{\bgroup\def\tmp{}\H@chapter}}}\fi
-\newcommand{\H@chapter}[1][]{%
+   \bgroup\def\tmp{*}\H@chapter}{\bgroup\def\tmp{}\H@chapter}}\fi
+\newcommand{\H@chapter}[1][]{\def\tmp@a{#1}\check@align
  \expandafter\egroup\expandafter\Hchapter\tmp}
 
 \renewcommand{\section}{\resetsubsections
  \@ifstar{\stepcounter{lsection}\bgroup\def\tmp{*}%
    \H@section}{\bgroup\def\tmp{}\H@section}}
-\newcommand{\H@section}[1][]{%
+\newcommand{\H@section}[1][]{\def\tmp@a{#1}\check@align
  \expandafter\egroup\expandafter\Hsection\tmp}
 
 \renewcommand{\subsection}{\resetsubsubsections
  \@ifstar{\stepcounter{lsubsection}\bgroup\def\tmp{*}%
    \H@subsection}{\bgroup\def\tmp{}\H@subsection}}
-\newcommand{\H@subsection}[1][]{%
+\newcommand{\H@subsection}[1][]{\def\tmp@a{#1}\check@align
  \expandafter\egroup\expandafter\Hsubsection\tmp}
 
 \renewcommand{\subsubsection}{\resetparagraphs
  \@ifstar{\stepcounter{lsubsubsection}\bgroup\def\tmp{*}%
    \H@subsubsection}{\bgroup\def\tmp{}\H@subsubsection}}
-\newcommand{\H@subsubsection}[1][]{%
+\newcommand{\H@subsubsection}[1][]{\def\tmp@a{#1}\check@align
  \expandafter\egroup\expandafter\Hsubsubsection\tmp}
 
 \renewcommand{\paragraph}{\resetsubparagraphs
  \@ifstar{\stepcounter{lparagraph}\bgroup\def\tmp{*}%
    \H@paragraph}{\bgroup\def\tmp{}\H@paragraph}}
-\newcommand\H@paragraph[1][]{%
+\newcommand\H@paragraph[1][]{\def\tmp@a{#1}\check@align
  \expandafter\egroup\expandafter\Hparagraph\tmp}
 
 \renewcommand{\subparagraph}{\resetsubsubparagraphs
  \@ifstar{\stepcounter{lsubparagraph}\bgroup\def\tmp{*}%
    \H@subparagraph}{\bgroup\def\tmp{}\H@subparagraph}}
-\newcommand\H@subparagraph[1][]{%
+\newcommand\H@subparagraph[1][]{\def\tmp@a{#1}\check@align
  \expandafter\egroup\expandafter\Hsubparagraph\tmp}
 
 \ifx\Hsubsubparagraph\relax\else\@ifundefined{subsubparagraph}{}{%
 \def\subsubparagraph{%
  \@ifstar{\stepcounter{lsubsubparagraph}\bgroup\def\tmp{*}%
    \H@subsubparagraph}{\bgroup\def\tmp{}\H@subsubparagraph}}}\fi
-\newcommand\H@subsubparagraph[1][]{%
+\newcommand\H@subsubparagraph[1][]{\def\tmp@a{#1}\check@align
  \expandafter\egroup\expandafter\Hsubsubparagraph\tmp}
+
+\def\check@align{\def\empty{}\ifx\tmp@a\empty
+ \else\def\tmp@b{center}\ifx\tmp@a\tmp@b\let\tmp@a\empty
+ \else\def\tmp@b{left}\ifx\tmp@a\tmp@b\let\tmp@a\empty
+ \else\def\tmp@b{right}\ifx\tmp@a\tmp@b\let\tmp@a\empty
+ \else\expandafter\def\expandafter\tmp@a\expandafter{\expandafter[\tmp@a]}%
+ \fi\fi\fi \def\empty{}\ifx\tmp\empty\let\tmp=\tmp@a \else 
+  \expandafter\def\expandafter\tmp\expandafter{\expandafter*\tmp@a}%
+ \fi\fi}
 %
 \def\resetsections{\setcounter{section}{0}\setcounter{lsection}{0}%
  \reset@dependents{section}\resetsubsections }
@@ -695,8 +749,8 @@
 %       3)  Write an \htmlhead{section-title} command to file.ptr;
 %       4)  Inputs file.tex.
 
-
 \def\segment{\@ifstar{\@@htmls}{\@@html}}
+\def\endsegment{}
 \newcommand{\@@htmls}[1][]{\@@htmlsx{#1}}
 \newcommand{\@@html}[1][]{\@@htmlx{#1}}
 \def\@@htmlsx#1#2#3#4{\csname #3\endcsname* {#4}%
@@ -713,11 +767,44 @@
 % (The listing of Initiales see Changes)
 
 % $Log$
-% Revision 1.1  1999/05/19 13:07:31  KB
-% needed
+% Revision 1.2  1999/05/19 13:22:58  KB
+% replaced it with the correct version
 %
-% Revision 1.2  1997/07/10 06:16:42  RRM
-%      LaTeX styles, used in the v97.1 manual
+% Revision 1.2  1999/02/11 13:58:00  KB
+% added new files
+%
+% Revision 1.1.2.1  1999/02/06 15:56:10  KB
+% wxLayout fixes, new options page, changed URL handling slightly, doc updates
+%
+% Revision 1.23  1998/02/26 10:32:24  latex2html
+%  --  use \providecommand for  \latextohtml
+%  --  implemented \HTMLcode to do what \HTML did previously
+% 	\HTML still works, unless already defined by another package
+%  --  fixed problems remaining with undefined \chapter
+%  --  defined \endsegment
+%
+% Revision 1.22  1997/12/05 11:38:18  RRM
+%  --  implemented an optional argument to \begin for style-sheet info.
+%  --  modified use of an optional argument with sectioning-commands
+%
+% Revision 1.21  1997/11/05 10:28:56  RRM
+%  --  replaced redefinition of \@htmlrule with \htmlrulestar
+%
+% Revision 1.20  1997/10/28 02:15:58  RRM
+%  --  altered the way some special html-macros are defined, so that
+% 	star-variants are explicitly defined for LaTeX
+% 	 -- it is possible for these to occur within  images.tex
+% 	e.g. \htmlinfostar \htmlrulestar \tableofchildlinksstar
+%
+% Revision 1.19  1997/10/11 05:47:48  RRM
+%  --  allow the dummy {tex2html_nowrap} environment in LaTeX
+% 	use it to make its contents be evaluated in environment order
+%
+% Revision 1.18  1997/10/04 06:56:50  RRM
+%  --  uses Robin Fairbairns' code for ignored environments,
+%      replacing the previous  comment.sty  stuff.
+%  --  extensions to the \tableofchildlinks command
+%  --  extensions to the \htmlinfo command
 %
 % Revision 1.17  1997/07/08 11:23:39  RRM
 %     include value of footnote counter in .ptr files for segments
