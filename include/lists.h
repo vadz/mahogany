@@ -21,13 +21,6 @@
 
 // disable some VC++ warnings
 #ifdef _MSC_VER
-   // VZ: this shouldn't really be suppressed as it indicates a real problem:
-   //     if we declare a list of pointers, it shouldn't have operator-> and we
-   //     probably should have a separate macro for this case
-#  pragma warning(disable:4284) // return type for 'identifier::operator->' is
-                                // not a UDT or reference to a UDT. Will
-                                // produce errors if applied using infix
-                                // notation
 #  pragma warning(disable:4355) // 'this': used in base member initializer list
 #endif // Visual C++
 
@@ -310,10 +303,10 @@ public: \
       iterator(ListNode *n = NULL) : name##_common::iterator(n) {} \
       iterator(const name##_common::iterator &i) \
          : name##_common::iterator(i) {} \
-      inline type operator*(void) \
-         { return *(name##_common::iterator::operator*()); } \
+      inline value_type operator*(void) \
+         { return GetData(); } \
       inline value_type operator->(void) \
-         { return name##_common::iterator::operator*(); } \
+         { return GetData(); } \
    }; \
 }
 
@@ -336,8 +329,8 @@ public: \
       iterator(const iterator_common &i) : iterator_common(i) {} \
       inline value_type operator->(void) \
          { return GetData(); } \
-      inline type operator*(void) \
-         { return *GetData(); } \
+      inline value_type operator*(void) \
+         { return GetData(); } \
    }; \
    inline iterator erase(iterator i) \
       { \
