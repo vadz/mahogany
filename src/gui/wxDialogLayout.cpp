@@ -184,6 +184,24 @@ static void SetTopConstraint(wxWindow *parent,
    }
 }
 
+wxStaticText *
+CreateMessage(wxWindow *parent, const wxChar *label, wxControl *last)
+{
+   wxLayoutConstraints *c;
+
+   c = new wxLayoutConstraints;
+   c->left.SameAs(parent, wxLeft, LAYOUT_X_MARGIN);
+   SetTopConstraint(parent, c, last, 0);
+   c->right.SameAs(parent, wxRight, LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   wxStaticText *pLabel = new wxStaticText(parent, -1, label,
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_LEFT);
+   pLabel->SetConstraints(c);
+
+   return pLabel;
+}
+
 wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
                                 const wxChar *label,
                                 long widthMax,
@@ -679,22 +697,10 @@ wxTextCtrl *wxEnhancedPanel::CreateTextWithLabel(const wxChar *label,
 }
 
 // create just some text
-wxStaticText *wxEnhancedPanel::CreateMessage(const wxChar *label,
-                                                wxControl *last)
+wxStaticText *
+wxEnhancedPanel::CreateMessage(const wxChar *label, wxControl *last)
 {
-   wxLayoutConstraints *c;
-
-   c = new wxLayoutConstraints;
-   c->left.SameAs(GetCanvas(), wxLeft, LAYOUT_X_MARGIN);
-   SetTopConstraint(c, last);
-   c->right.SameAs(GetCanvas(), wxRight, LAYOUT_X_MARGIN);
-   c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(GetCanvas(), -1, label,
-                                           wxDefaultPosition, wxDefaultSize,
-                                           wxALIGN_LEFT);
-   pLabel->SetConstraints(c);
-
-   return pLabel;
+   return ::CreateMessage(GetCanvas(), label, last);
 }
 
 // create a button

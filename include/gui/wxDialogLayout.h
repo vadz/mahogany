@@ -671,6 +671,10 @@ extern long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win);
 
 // all these functions correspond to the wxEnhancedPanel methods except that
 // they take an additional parent parameter
+extern wxStaticText *CreateMessage(wxWindow *parent,
+                                   const wxChar *label,
+                                   wxControl *last);
+
 extern wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
                                        const wxChar *label,
                                        long widthMax,
