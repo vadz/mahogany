@@ -206,7 +206,7 @@ protected:
    void OnDoubleClick();
 
    // always opens the folder in a separate view
-   void DoFolderOpen() { m_sink->OnOpen(m_sink->GetSelection()); }
+   void DoFolderOpen();
 
    void DoFolderCreate();
    void DoFolderDelete();
@@ -293,6 +293,7 @@ private:
    //          it's not too bad
    bool     m_suppressSelectionChange;
    MFolder *m_previousFolder;
+
    /// used under unix only
    bool m_FocusFollowMode;
 
@@ -376,6 +377,7 @@ MFolder *wxFolderTree::GetSelection() const
 {
    CHECK( m_tree, NULL, "you didn't call Init()" );
 
+   // get it from the tree
    wxFolderTreeNode *node = m_tree->GetSelection();
    if ( node == NULL )
       return NULL;
@@ -685,6 +687,11 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
    return current;
 }
 
+void wxFolderTreeImpl::DoFolderOpen()
+{
+   m_sink->OnOpen(m_sink->GetSelection());
+}
+
 void wxFolderTreeImpl::DoFolderCreate()
 {
    MFolder *folderNew = m_sink->OnCreate(m_sink->GetSelection());
@@ -782,6 +789,12 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    wxFolderTreeNode *newCurrent = GetFolderTreeNode(itemId);
 
    MFolder *oldsel = m_current ? m_current->GetFolder() : NULL;
+
+   // do it now because due to use of wxYield() elsewhere, the other handlers
+   // might be called _before_ this function returns and the tree selection is
+   // updated
+   m_current = newCurrent;
+
    if ( !m_suppressSelectionChange )
    {
       MFolder *newsel = newCurrent ? newCurrent->GetFolder() : NULL;
@@ -800,7 +813,6 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
       SafeIncRef(m_previousFolder);
    }
 
-   m_current = newCurrent;
    m_selectedFolderName = m_current ? m_current->GetFolder()->GetFullName()
                                     : wxString("");
 }
