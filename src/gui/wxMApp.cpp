@@ -763,7 +763,14 @@ wxMApp::OnInit()
    //
    // it could also be a bad idea as HOME is often NFS-mounted and creating
    // locks over NFS doesn't work well/at all
-   if ( !m_snglInstChecker->Create(".mahogany.lock", "/tmp") )
+   //
+   // NB: see comments in GetIPCSocket() about using wxGetUserId()
+   if ( !m_snglInstChecker->Create
+                            (
+                              wxString::Format(".mahogany-%s.lock",
+                                               wxGetUserId().c_str()),
+                              "/tmp"
+                            ) )
    {
       // this message is in English because translations were not loaded yet as
       // the locale hadn't been set
@@ -2274,8 +2281,29 @@ extern bool EnsureAvailableTextEncoding(wxFontEncoding *enc,
 // IPC constants
 // ----------------------------------------------------------------------------
 
-#define IPC_SOCKET "/tmp/.mahogany.ipc"
 #define IPC_TOPIC  "MRemote"
+
+// ----------------------------------------------------------------------------
+// IPC functions
+// ----------------------------------------------------------------------------
+
+// return the name of the IPC socket we use -- this is only really used under
+// Unix
+static String GetIPCSocket()
+{
+   static String s_socketName;
+   if ( s_socketName.empty() )
+   {
+      // we are using wxGetUserId() to allow multiple users to run multiple
+      // copies of Mahogany, each communicating via its own socket and the name
+      // seems to be better than UID as, although it seems unlikely, we might
+      // have the same user logged in from 2 different machines sharing the
+      // same /tmp directory
+      s_socketName.Printf("/tmp/.mahogany-%s.ipc", wxGetUserId().c_str());
+   }
+
+   return s_socketName;
+}
 
 // ----------------------------------------------------------------------------
 // IPC classes
@@ -2354,7 +2382,7 @@ bool wxMApp::SetupRemoteCallServer()
    ASSERT_MSG( !m_serverIPC, "SetupRemoteCallServer() called twice?" );
 
    m_serverIPC = new MAppIPCServer;
-   if ( !m_serverIPC->Create(IPC_SOCKET) )
+   if ( !m_serverIPC->Create(GetIPCSocket()) )
    {
       delete m_serverIPC;
       m_serverIPC = NULL;
@@ -2374,7 +2402,7 @@ bool wxMApp::CallAnother()
           "we need to parse the options before doing the remote call" );
 
    wxClient client;
-   wxConnectionBase *conn = client.MakeConnection("", IPC_SOCKET, IPC_TOPIC);
+   wxConnectionBase *conn = client.MakeConnection("", GetIPCSocket(), IPC_TOPIC);
    if ( !conn )
    {
       // failed to connect to server at all
