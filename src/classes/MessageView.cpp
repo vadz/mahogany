@@ -98,6 +98,7 @@ extern const MOption MP_HIGHLIGHT_URLS;
 extern const MOption MP_INCFAX_DOMAINS;
 extern const MOption MP_INCFAX_SUPPORT;
 extern const MOption MP_INLINE_GFX;
+extern const MOption MP_INLINE_GFX_EXTERNAL;
 extern const MOption MP_INLINE_GFX_SIZE;
 extern const MOption MP_MAX_MESSAGE_SIZE;
 extern const MOption MP_MSGVIEW_AUTO_ENCODING;
@@ -354,6 +355,7 @@ MessageView::AllProfileValues::AllProfileValues()
    highlightSig = false;
 
    inlineGFX = -1;
+   showExtImages = false;
 
 #ifdef OS_UNIX
    browserIsNS =
@@ -377,6 +379,7 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           (!fontDesc.empty() || (CMP(fontFamily) && CMP(fontSize))) &&
           CMP(showHeaders) && CMP(inlineRFC822) && CMP(inlinePlainText) &&
           CMP(highlightURLs) && CMP(highlightSig) && CMP(inlineGFX) &&
+          CMP(showExtImages) &&
           (highlightURLs || CMP(UrlCol)) && (highlightSig || CMP(SigCol)) &&
           // even if these fields are different, they don't change our
           // appearance, so ignore them for the purpose of this comparison
@@ -827,7 +830,11 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    // max size limit of graphics to show inline otherwise (-1 if no limit)
    settings->inlineGFX = READ_CONFIG(profile, MP_INLINE_GFX);
    if ( settings->inlineGFX )
+   {
       settings->inlineGFX = READ_CONFIG(profile, MP_INLINE_GFX_SIZE);
+
+      settings->showExtImages = READ_CONFIG_BOOL(profile, MP_INLINE_GFX_EXTERNAL);
+   }
 
    settings->browser = READ_CONFIG_TEXT(profile, MP_BROWSER);
    settings->browserInNewWindow = READ_CONFIG_BOOL(profile, MP_BROWSER_INNW);

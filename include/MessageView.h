@@ -493,6 +493,7 @@ private:
 
       /// @name MIME options
       //@{
+
       /// show all headers?
       bool showHeaders;
 
@@ -502,11 +503,15 @@ private:
       /// inline TEXT/PLAIN attachments?
       bool inlinePlainText;
 
-      /// max size of graphics to inline: 0 if none, -1 if not inline at all
+      /// max size of inline graphics: 0 if never inline at all, -1 if no limit
       long inlineGFX;
+
+      /// follow the links to external images in the HTML messages?
+      bool showExtImages;
 
       /// Show XFaces?
       bool showFaces;
+
       //@}
 
       /// @name URL viewing

@@ -112,7 +112,8 @@ public:
    virtual bool CanInlineImages() const;
    virtual bool CanProcess(const String& mimetype) const;
 
-   // for m_window only
+   // methods used by HtmlViewerWindow only
+   bool ShouldInlineImage(const String& url) const;
    void DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
    {
       m_msgView->DoMouseCommand(id, ci, pt);
@@ -280,6 +281,10 @@ public:
    virtual void OnCellClicked(wxHtmlCell *cell, wxCoord x, wxCoord y,
                               const wxMouseEvent& event);
 
+   virtual wxHtmlOpeningStatus OnOpeningURL(wxHtmlURLType type,
+                                            const wxString& url,
+                                            wxString *redirect) const;
+
 private:
    // get the clickable info previousy stored by StoreClickable()
    ClickableInfo *GetClickable(const String& url) const;
@@ -415,6 +420,22 @@ void HtmlViewerWindow::OnCellClicked(wxHtmlCell *cell, wxCoord x, wxCoord y,
 
    // don't call the base class version, we don't want it to automatically
    // load any URLs which may be in the text!
+}
+
+wxHtmlOpeningStatus
+HtmlViewerWindow::OnOpeningURL(wxHtmlURLType type,
+                               const wxString& url,
+                               wxString *redirect) const
+{
+   if ( type == wxHTML_URL_IMAGE )
+   {
+      if ( !m_viewer->ShouldInlineImage(url) )
+      {
+         return wxHTML_BLOCK;
+      }
+   }
+
+   return wxHtmlWindow::OnOpeningURL(type, url, redirect);
 }
 
 // ============================================================================
@@ -950,9 +971,21 @@ HtmlViewer::PageUp()
 // capabilities querying
 // ----------------------------------------------------------------------------
 
+// this function is used by HtmlViewerWindow to decide if we should inline this
+// concrete image or not
+bool HtmlViewer::ShouldInlineImage(const String& url) const
+{
+   const ProfileValues& profileValues = GetOptions();
+
+   return profileValues.inlineGFX &&
+            (url.StartsWith("memory:") || profileValues.showExtImages);
+}
+
+// this is called by MessageView to ask us if, in principle, we can inline
+// images
 bool HtmlViewer::CanInlineImages() const
 {
-   // we can show images inline
+   // yes, we can
    return true;
 }
 

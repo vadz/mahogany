@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+15.02.02 VZ: added option to disable showing external images in the HTML viewer
 13.02.02 VZ: address autocollection is a lot faster now
 01.02.02 VZ: added signature highlighting in the message viewer
 01.02.02 VZ: fixed bug with viewing messages embedded in embedded messages

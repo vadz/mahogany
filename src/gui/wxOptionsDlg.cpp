@@ -348,14 +348,17 @@ enum ConfigFields
    ConfigField_MessageViewProgressHelp,
    ConfigField_MessageViewProgressThresholdSize,
    ConfigField_MessageViewProgressThresholdTime,
+   ConfigField_MessageViewInlineGraphicsHelp,
    ConfigField_MessageViewInlineGraphics,
    ConfigField_MessageViewInlineGraphicsSize,
+   ConfigField_MessageViewInlineGraphicsExternal,
    ConfigField_MessageViewAutoDetectEncoding,
    ConfigField_MessageViewPlainIsText,
    ConfigField_MessageViewRfc822IsText,
    ConfigField_ViewWrapMargin,
    ConfigField_ViewWrapAuto,
 #ifdef OS_UNIX
+   ConfigField_MessageViewFaxHelp,
    ConfigField_MessageViewFaxSupport,
    ConfigField_MessageViewFaxDomains,
    ConfigField_MessageViewFaxConverter,
@@ -1237,14 +1240,27 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "specified time (use -1 to disable progress dialog entirely)"), Field_Message, -1 },
    { gettext_noop("Dialog minimal size t&hreshold (kb)"),             Field_Number,    -1 },
    { gettext_noop("Progress dialog &delay (seconds)"),             Field_Number,    -1 },
+   { gettext_noop("Some of the Mahogany text viewers may show the images\n"
+                  "included with the message inline, i.e. directly in the\n"
+                  "viewer window.\n"
+                  "If you enable this feature, you may specify below the\n"
+                  "maximal size of an image to display inline (setting it\n"
+                  "to 0 disables image inlining, setting it to -1 means to\n"
+                  "always inline them) and also enable showing the images\n"
+                  "embedded in HTML messages even if they are are not included\n"
+                  "into the message itself (for the HTML viewer only).\n"
+                  "Be warned that this could be a potential secutiry risk!"), Field_Message,    -1 },
    { gettext_noop("Show images &inline"),             Field_Bool,    -1 },
    { gettext_noop("But only if size is less than (kb)"), Field_Number, ConfigField_MessageViewInlineGraphics },
+   { gettext_noop("&Enable showing external images"), Field_Bool,    ConfigField_MessageViewInlineGraphics },
    { gettext_noop("&Autodetect font encoding"),    Field_Bool,    -1 },
    { gettext_noop("Display &text attachments inline"),Field_Bool,    -1 },
    { gettext_noop("Display &mail messages as text"),Field_Bool,    -1 },
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
    { gettext_noop("Wra&p lines automatically"),    Field_Bool,  -1,                        },
 #ifdef OS_UNIX
+   { gettext_noop("Mahogany has built-in support for the faxes sent via eFax\n"
+                  "or a similar service, use the options below to configure it."), Field_Message,    -1 },
    { gettext_noop("Support special &fax mailers"), Field_Bool,    -1 },
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
    { gettext_noop("Conversion program for fa&xes"), Field_File,    ConfigField_MessageViewFaxSupport},
@@ -1710,14 +1726,17 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD_SIZE),
    CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD_TIME),
+   CONFIG_NONE(), // inline images help
    CONFIG_ENTRY(MP_INLINE_GFX),
    CONFIG_ENTRY(MP_INLINE_GFX_SIZE),
+   CONFIG_ENTRY(MP_INLINE_GFX_EXTERNAL),
    CONFIG_ENTRY(MP_MSGVIEW_AUTO_ENCODING),
    CONFIG_ENTRY(MP_PLAIN_IS_TEXT),
    CONFIG_ENTRY(MP_RFC822_IS_TEXT),
    CONFIG_ENTRY(MP_VIEW_WRAPMARGIN),
    CONFIG_ENTRY(MP_VIEW_AUTOMATIC_WORDWRAP),
 #ifdef OS_UNIX
+   CONFIG_NONE(), // fax help
    CONFIG_ENTRY(MP_INCFAX_SUPPORT),
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),
    CONFIG_ENTRY(MP_TIFF2PS),

@@ -227,6 +227,7 @@ extern const MOption MP_PLAIN_IS_TEXT;
 extern const MOption MP_RFC822_IS_TEXT;
 extern const MOption MP_SHOW_XFACES;
 extern const MOption MP_INLINE_GFX;
+extern const MOption MP_INLINE_GFX_EXTERNAL;
 extern const MOption MP_INLINE_GFX_SIZE;
 extern const MOption MP_MSGVIEW_SHOWBAR;
 extern const MOption MP_MSGVIEW_VIEWER;
@@ -810,6 +811,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_SHOW_XFACES_NAME         "ShowXFaces"
 /// show graphics inline
 #define   MP_INLINE_GFX_NAME         "InlineGraphics"
+/// show the external images (for HTML viewer only) too?
+#define   MP_INLINE_GFX_EXTERNAL_NAME "InlineExtGraphics"
 /// limit size for inline graphics
 #define   MP_INLINE_GFX_SIZE_NAME     "InlineGraphicsSize"
 /// show viewer bar in the message view?
@@ -1582,6 +1585,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_SHOW_XFACES_DEFVAL      1
 /// show graphics inline
 #define   MP_INLINE_GFX_DEFVAL       1
+/// show the external images (for HTML viewer only) too?
+#define   MP_INLINE_GFX_EXTERNAL_DEFVAL 0l
 /// limit size for inline graphics in Kb (-1 for no limit)
 #define   MP_INLINE_GFX_SIZE_DEFVAL  100
 /// show viewer bar in the message view?
