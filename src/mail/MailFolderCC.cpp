@@ -1280,7 +1280,12 @@ void MailFolderCC::Init()
 
 MailFolderCC::~MailFolderCC()
 {
-   Close();
+   // we don't want to call Close() if we had been closed by outside code
+   // before (this happens if the user chooses "close folder" manually)
+   if ( m_MailStream )
+   {
+      Close();
+   }
 
    // these should have been deleted before
    ASSERT(m_SearchMessagesFound == NULL);
@@ -1359,6 +1364,9 @@ bool MailFolderCC::CreateIfNeeded(Profile *profile)
                       folder->GetServer(),
                       folder->GetLogin()
                      );
+
+   wxLogTrace(TRACE_MF_CALLS, "Trying to create MailFolderCC '%s'.",
+              imapspec.c_str());
 
    // disable callbacks as we don't have the folder to redirect them to
    CCAllDisabler noCallbacks;
@@ -1511,6 +1519,8 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 
 bool MailFolderCC::HalfOpen()
 {
+   wxLogTrace(TRACE_MF_CALLS, "Half opening '%s'", GetName().c_str());
+
    MFrame *frame = GetInteractiveFrame();
    if ( frame )
    {
@@ -1606,6 +1616,8 @@ void MailFolderCC::CreateFileFolder()
 bool
 MailFolderCC::Open(void)
 {
+   wxLogTrace(TRACE_MF_CALLS, "Opening '%s'", GetName().c_str());
+
    MFrame *frame = GetInteractiveFrame();
    if ( frame )
    {
@@ -1780,6 +1792,8 @@ MailFolderCC::Open(void)
 void
 MailFolderCC::Close()
 {
+   wxLogTrace(TRACE_MF_CALLS, "Closing folder '%s'", GetName().c_str());
+
    MailFolderCmn::Close();
 
    if ( m_MailStream )
@@ -2217,6 +2231,7 @@ MailFolderCC::Checkpoint(void)
 
    wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Checkpoint() on %s.",
               GetName().c_str());
+
    if ( NeedsNetwork() && ! mApplication->IsOnline() )
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"),
@@ -2234,10 +2249,10 @@ MailFolderCC::Checkpoint(void)
 bool
 MailFolderCC::PingReopen(void)
 {
-   bool rc = false;
-
    wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::PingReopen() on Folder %s.",
               GetName().c_str());
+
+   bool rc = false;
 
    MailFolderLocker lockFolder(this);
    if ( lockFolder )
@@ -2421,6 +2436,9 @@ MailFolderCC::UpdateAfterAppend()
 bool
 MailFolderCC::AppendMessage(const String& msg)
 {
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::AppendMessage(string)",
+              GetName().c_str());
+
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    STRING str;
@@ -2442,6 +2460,9 @@ MailFolderCC::AppendMessage(const String& msg)
 bool
 MailFolderCC::AppendMessage(const Message& msg)
 {
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::AppendMessage(Message)",
+              GetName().c_str());
+
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    String date;
@@ -2497,6 +2518,9 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 
    size_t count = selections->Count();
    CHECK( count, true, "SaveMessages(): nothing to save" );
+
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SaveMessages()",
+              GetName().c_str());
 
    /*
       This is an optimisation: if both mailfolders are IMAP and on the same
@@ -2655,6 +2679,9 @@ MailFolderCC::ExpungeMessages(void)
 
    if ( PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()) )
    {
+      wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::ExpungeMessages()",
+                 GetName().c_str());
+
       mail_expunge(m_MailStream);
 
       // for some types of folders (IMAP) mm_exists() is called from
@@ -2723,6 +2750,9 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
    CHECK( status, false, "DoCountMessages: NULL pointer" );
 
    CHECK( m_MailStream, false, "DoCountMessages: folder is closed" );
+
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::DoCountMessages()",
+              GetName().c_str());
 
    status->Init();
 
