@@ -29,12 +29,8 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/intl.h"
-    #include "wx/app.h"
-    #include "wx/dynarray.h"
-    #include "wx/filefn.h"
 #endif //WX_PRECOMP
 
 #include "wx/module.h"

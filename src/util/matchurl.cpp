@@ -22,7 +22,6 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-   #include "strutil.h"
 #endif
 
 // ----------------------------------------------------------------------------

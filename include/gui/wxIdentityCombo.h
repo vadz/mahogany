@@ -13,7 +13,7 @@
 #ifndef _GUI_WXIDENTITYCOMBO_H_
 #define _GUI_WXIDENTITYCOMBO_H_
 
-class WXDLLEXPORT wxComboBox;
+class WXDLLEXPORT wxChoice;
 class WXDLLEXPORT wxWindow;
 
 /// the id of the identity combobox (always the same)

@@ -28,30 +28,15 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
-#   include "guidef.h"    // only for high-level functions
 #   include "strutil.h"
-#   include "Profile.h"
-#   include "MEvent.h"
-#   include "MModule.h"
-#   include <stdlib.h>
-#   include <errno.h>
 #endif
 
-#include <wx/dynarray.h>
 #include <wx/file.h>
 
 #include "MDialogs.h" // for MDialog_FolderChoose
 
-#include "Mdefaults.h"
-#include "MFolder.h"
-
 #include "Sequence.h"
 
-#include "Message.h"
-#include "MailFolder.h"
-
-#include "UIdArray.h"
-#include "MFStatus.h"
 #include "LogCircle.h"
 
 #include "MFPrivate.h"
@@ -61,6 +46,8 @@
 
 #include "Composer.h"
 #include "MApplication.h"
+
+class MPersMsgBox;
 
 // ----------------------------------------------------------------------------
 // options we use here

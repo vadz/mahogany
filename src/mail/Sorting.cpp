@@ -25,7 +25,6 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Profile.h"
    #include "Sorting.h"
 
    #include "strutil.h"    // for strutil_restore_array()

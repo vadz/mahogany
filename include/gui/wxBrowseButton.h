@@ -14,6 +14,11 @@
 #ifndef _GUI_WXBROWSEBUTTON_H_
 #define _GUI_WXBROWSEBUTTON_H_
 
+#ifndef USE_PCH
+#   include <wx/button.h>
+#   include <wx/textctrl.h>
+#endif
+
 // forward declaration
 class MFolder;
 class WXDLLEXPORT wxStaticBitmap;

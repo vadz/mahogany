@@ -63,36 +63,17 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "MApplication.h"
-#  include "Profile.h"
-#  include "guidef.h"
 #  include "strutil.h"
 
-#  include <wx/dynarray.h>
-#  include <wx/log.h>
 #  include <wx/layout.h>
 #  include <wx/stattext.h>
-#  include <wx/radiobox.h>
-#  include <wx/choice.h>
 #endif
 
-#include <wx/imaglist.h>
-#include <wx/notebook.h>
-#include "wx/persctrl.h"
-#include <wx/statbmp.h>
-#include <wx/tooltip.h>
-
-#include "MDialogs.h"
 #include "MFolderDialogs.h"
-#include "MailFolder.h"
 #include "MFolder.h"
 
-#include "Mdefaults.h"
-
-#include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsPage.h"
 #include "gui/wxBrowseButton.h"
-#include "gui/wxFolderTree.h"
 
 // why is this conditional?
 #define USE_LOCAL_CHECKBOX

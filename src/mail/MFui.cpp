@@ -26,7 +26,6 @@
 #include "MFStatus.h"
 
 #include "MFolder.h"
-#include "MailFolder.h"
 
 // ============================================================================
 // implementation

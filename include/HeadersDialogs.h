@@ -13,7 +13,8 @@
 #ifndef _HEADERDIALOGS_H
 #define _HEADERDIALOGS_H
 
-class wxWindow;
+class WXDLLEXPORT wxWindow;
+class Profile;
 
 /** custom header type: a custom header may be added only to mail messages,
     only to news messages or to both types. Also, the header with same name can

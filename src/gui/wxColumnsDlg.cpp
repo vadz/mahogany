@@ -23,7 +23,6 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include "wx/window.h"
    #include "wx/layout.h"
    #include "wx/statbox.h"
    #include "wx/stattext.h"

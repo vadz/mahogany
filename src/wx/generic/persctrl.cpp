@@ -30,21 +30,14 @@
 
 // wxWindows
 #ifndef WX_PRECOMP
-#   include  "wx/window.h"
-#   include  "wx/dialog.h"
-#   include  "wx/checkbox.h"
-#   include  "wx/utils.h"
 #   include  "wx/layout.h"
 #   include  "wx/button.h"
 #   include  "wx/stattext.h"
 #   include  "wx/statbmp.h"
 #   include  "wx/intl.h"
-#   include  "wx/dcclient.h"
-#   include  "wx/settings.h"
 #   include  "wx/statbox.h"
 #   include  "wx/filedlg.h"
 #   include  "wx/dirdlg.h"
-#   include  "wx/app.h"
 #   include  "wx/msgdlg.h"
 #   include  "wx/artprov.h"
 #endif //WX_PRECOMP

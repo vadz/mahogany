@@ -25,7 +25,7 @@
 #include  "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
+#   include "Mcommon.h"
 
    #include <wx/app.h>        // for wxPostEvent()
    // it includes windows.h which defines SendMessage under Windows
@@ -36,17 +36,14 @@
    #include <wx/sizer.h>
 
    #include <wx/gauge.h>
-   #include <wx/checkbox.h>
    #include <wx/radiobut.h>
    #include <wx/stattext.h>
-   #include <wx/textctrl.h>
 
    #include <wx/msgdlg.h>
 #endif // USE_PCH
 
 #include "MModule.h"
 
-#include "ASMailFolder.h"
 #include "ListReceiver.h"
 
 #include "UIdArray.h"

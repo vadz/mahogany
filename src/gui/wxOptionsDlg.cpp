@@ -22,9 +22,6 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "MApplication.h"
-#  include "Profile.h"
-#  include "guidef.h"
 #  include "MHelp.h"
 #  include "strutil.h"
 #  include "Mpers.h"
@@ -32,37 +29,17 @@
 #  include "Sorting.h"
 #  include "Threading.h"
 
-#  include <wx/dynarray.h>
-#  include <wx/checkbox.h>
-#  include <wx/listbox.h>
-#  include <wx/radiobox.h>
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
-#  include <wx/statbmp.h>
-#  include <wx/textctrl.h>
 #  include <wx/textdlg.h>  // for wxGetTextFromUser()
-
-#  include <wx/utils.h>    // for wxStripMenuCodes()
 #endif
 
-#include <wx/log.h>
-#include <wx/imaglist.h>
-#include <wx/notebook.h>
-#include <wx/confbase.h>
-
-#include <wx/menuitem.h>
 #include <wx/checklst.h>
 
 #include <wx/layout.h>
-#include <wx/dialup.h>
-
-#include "wx/persctrl.h"
 
 #include "Mpers.h"
-#include "MDialogs.h"
-#include "Mcallbacks.h"
 
-#include "Mdefaults.h"
 #include "Moptions.h"            // we need all MP_XXX for our arrays
 
 // we have to include these 3 headers just for wxOptionsPageNewMail... move it
@@ -74,8 +51,6 @@
 #include "MessageView.h" // for list of available viewers
 
 #include "gui/wxBrowseButton.h"  // for wxStaticCast(wxColorBrowseButton) only
-#include "gui/wxIconManager.h"
-#include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxOptionsPage.h"
 

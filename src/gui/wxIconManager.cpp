@@ -23,16 +23,10 @@
 #ifndef  USE_PCH
 #  include "Mcommon.h"
 #  include "strutil.h"
-#  include "gui/wxMApp.h"
-#  include "Profile.h"
-#  include "PathFinder.h"
-#  include "MApplication.h"
 #if wxCHECK_VERSION(2, 5, 0)
 #  include <wx/iconloc.h>
 #endif
 #endif
-
-#include "Mdefaults.h"
 
 #include "gui/wxIconManager.h"
 #include "MDialogs.h"

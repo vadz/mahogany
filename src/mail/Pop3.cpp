@@ -33,7 +33,6 @@ extern "C"
    #undef LOCAL         // prevent clashes with other headers
 }
 
-#include <wx/file.h>
 #include <wx/textfile.h>
 
 #include "CacheFile.h"

@@ -16,6 +16,8 @@
 // all known options
 // ----------------------------------------------------------------------------
 
+class MOption;
+
 extern const MOption MP_PROFILE_TYPE;
 extern const MOption MP_CONFIG_SOURCE_TYPE;
 extern const MOption MP_CONFIG_SOURCE_PRIO;

@@ -22,27 +22,19 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "MApplication.h"
-#  include "Profile.h"
-#  include "guidef.h"
 
-#  include <wx/cmndata.h>
 #  include <wx/statbmp.h>
-#  include <wx/dcmemory.h>
 #  include <wx/layout.h>
 #  include <wx/statbox.h>
 #  include <wx/dirdlg.h>
 #endif
 
-#include <wx/imaglist.h>
 #include <wx/colordlg.h>
 #include <wx/fontdlg.h>
 #include <wx/fontutil.h>
 
 #include "MFolder.h"
-#include "MFolderDialogs.h"
 
-#include "gui/wxIconManager.h"
 #include "gui/wxDialogLayout.h"
 
 #include "gui/wxBrowseButton.h"

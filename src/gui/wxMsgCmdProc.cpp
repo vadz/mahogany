@@ -26,17 +26,13 @@
 #ifndef USE_PCH
    #include <wx/layout.h>
    #include <wx/statbox.h>
-   #include <wx/stattext.h>
 #endif // USE_PCH
 
 #include "strutil.h"          // for strutil_uniq_array()
 #include "Collect.h"          // for InteractivelyCollectAddresses()
 
-#include "MFolder.h"
-
 #include "UIdArray.h"
 
-#include "ASMailFolder.h"
 #include "HeaderInfo.h"
 
 #include "TemplateDialog.h"
@@ -46,13 +42,7 @@
 
 #include "MsgCmdProc.h"
 
-#include "gui/wxMenuDefs.h"
-#include "MDialogs.h"         // for MDialog_ShowText
-
 #include "gui/wxDialogLayout.h"
-
-#include <wx/imaglist.h>
-#include <wx/treectrl.h>
 
 #if wxUSE_DRAG_AND_DROP
    #include "Mdnd.h"

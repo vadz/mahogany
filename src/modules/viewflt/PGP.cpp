@@ -21,14 +21,11 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
+#   include "Mcommon.h"
 #endif //USE_PCH
 
-#include "MessageView.h"
 #include "MessageViewer.h"
 #include "ViewFilter.h"
-
-#include "modules/MCrypt.h"
 
 #include "PGPClickInfo.h"
 

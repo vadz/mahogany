@@ -21,21 +21,11 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
+#   include "Mcommon.h"
 
-   #include "Profile.h"
-
-   #include "gui/wxMApp.h"
-
-   #include <wx/textctrl.h>
-   #include <wx/textbuf.h>
+#   include <wx/textbuf.h>
 #endif // USE_PCH
 
-#include <wx/dynarray.h>
-
-#include "Mdefaults.h"
-
-#include "MessageView.h"
 #include "MessageViewer.h"
 #include "ClickURL.h"
 

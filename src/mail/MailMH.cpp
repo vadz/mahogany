@@ -26,13 +26,11 @@
 
 #  include "strutil.h"
 
-#  include "ASMailFolder.h"
 #ifdef OS_WIN // cygwin and mingw
 #  include "MApplication.h" // for mApplication
 #endif
 #endif // USE_PCH
 
-#include "MailFolder.h"
 #include "MFolder.h"
 #include "MEvent.h"
 

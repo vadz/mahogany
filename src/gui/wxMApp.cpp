@@ -23,31 +23,15 @@
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
-#  include "guidef.h"
-#  include "MFrame.h"
-#  include "gui/wxMFrame.h"
-#  include "strutil.h"
-#  include "kbList.h"
-#  include "PathFinder.h"
-#  include "Profile.h"
-#  include "MApplication.h"
 #  include "gui/wxMApp.h"
-
-#  include "Mcclient.h"
-
-#  include <wx/log.h>
-#  include <wx/config.h>
-#  include <wx/generic/dcpsg.h>
-#  include <wx/thread.h>
 #endif
 
 #include <wx/msgdlg.h>   // for wxMessageBox
-#include "wx/persctrl.h" // for wxPMessageBoxEnable(d)
+#include "wx/persctrl.h"        // for wxPMessageBoxEnable
 #include <wx/ffile.h>
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 #include <wx/fs_mem.h>
-//#include <wx/fs_zip.h> // for zipped docs
 #include <wx/fs_inet.h>
 #include <wx/cmdline.h>
 
@@ -56,7 +40,6 @@
 #endif // USE_DIALUP
 
 #include <wx/fontmap.h>
-#include <wx/encconv.h>
 #include <wx/tokenzr.h>
 
 #include <wx/snglinst.h>
@@ -77,15 +60,9 @@
    #include <wx/sckipc.h>
 #endif // Windows/!Windows
 
-#include "MObject.h"
-
-#include "Mdefaults.h"
-#include "MDialogs.h"
-
 #include "MHelp.h"
 
 #include "gui/wxMainFrame.h"
-#include "gui/wxIconManager.h"
 #include "FolderMonitor.h"
 #include "MModule.h"
 #include "MThread.h"

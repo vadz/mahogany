@@ -23,27 +23,14 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "MApplication.h"
-#  include "Profile.h"
-#  include "guidef.h"
 #  include "strutil.h"
 
-#  include <wx/combobox.h>
 #  include <wx/layout.h>
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
-#  include <wx/statbmp.h>
-#  include <wx/textctrl.h>
 #  include <wx/menu.h>
-#  include <wx/listbox.h>
-#  include <wx/choicdlg.h>
 #endif
 
-#include "Mdefaults.h"
-
-#include "MessageTemplate.h"
-
-#include "MDialogs.h"
 #include "gui/wxDialogLayout.h"
 
 #include "TemplateDialog.h"

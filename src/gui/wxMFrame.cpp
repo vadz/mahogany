@@ -26,20 +26,6 @@
 #include "Mcommon.h"
 
 #ifndef  USE_PCH
-#  include "guidef.h"
-#  include "strutil.h"
-#  include "MFrame.h"
-#  include "kbList.h"
-#  include "PathFinder.h"
-#  include "Profile.h"
-#  include "Mdefaults.h"
-#  include "MApplication.h"
-#  include "gui/wxMApp.h"
-#  include "MailFolder.h"
-#  include "Message.h"
-#  include "MEvent.h"
-
-#  include <wx/confbase.h>
 #  include <wx/menu.h>
 #  include <wx/toolbar.h>
 #endif // USE_PCH
@@ -51,22 +37,16 @@
 #endif // Python
 
 #include "MHelp.h"
-#include "MFolder.h"
 
 #include "FolderMonitor.h"
 
-#include "MessageTemplate.h"
 #include "TemplateDialog.h"
 
 #include "Composer.h"
-#include "MDialogs.h"
 
-#include "MFolderDialogs.h"
-#include "MModule.h"
 #include "MImport.h"
 
 #include "gui/wxFiltersDialog.h" // for ConfigureAllFilters()
-#include "gui/wxIconManager.h"
 #include "gui/wxOptionsDlg.h"
 #include "adb/AdbFrame.h"
 #include "gui/wxMFrame.h"

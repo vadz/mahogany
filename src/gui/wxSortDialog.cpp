@@ -23,21 +23,13 @@
 
    #include "MHelp.h"
 
-   #include "guidef.h"
-
-   #include <wx/window.h>
    #include <wx/layout.h>
-
-   #include <wx/checkbox.h>
-   #include <wx/choice.h>
    #include <wx/stattext.h>
    #include <wx/statbox.h>
 #ifdef OS_WIN // cygwin and mingw
    #include <wx/settings.h>
 #endif
 #endif // USE_PCH
-
-#include "Mdefaults.h"
 
 #include "gui/wxDialogLayout.h"
 

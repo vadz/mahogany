@@ -21,12 +21,10 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
+#   include "Mcommon.h"
 #endif //USE_PCH
 
-#include "MTextStyle.h"
 #include "ViewFilter.h"
-#include "MessageView.h"
 #include "MessageViewer.h"
 
 #include "miscutil.h"         // for GetColourByName()

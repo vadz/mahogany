@@ -28,7 +28,6 @@
    #include "MEvent.h"
 #endif // USE_PCH
 
-#include <wx/file.h>
 #include <wx/textfile.h>
 
 #include "MFolder.h"

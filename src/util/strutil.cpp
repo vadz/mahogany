@@ -20,24 +20,16 @@
 #ifndef   USE_PCH
 #  include "Mcommon.h"
 #  include "strutil.h"
-#  include "kbList.h"
-
-#  include <ctype.h>
-#  include <stdio.h>
-#  include <string.h>
 #endif
 
-#include "Mdefaults.h"
 #include "MDialogs.h"
 #include "Mpers.h"
 
 #ifdef OS_UNIX
 #   include <pwd.h>
-#   include <sys/types.h>
 #endif
 
 #include <wx/textfile.h>  // just for strutil_enforceNativeCRLF()
-#include <wx/fontenc.h>
 #include <wx/regex.h>
 
 #include "Mcclient.h"
@@ -1038,11 +1030,6 @@ strutil_decrypt(const String &original)
 //************************************************************************
 //        Profile and other classes dependent functions:
 //************************************************************************
-
-#include   "Profile.h"
-#include   "Mdefaults.h"
-#include   "MApplication.h"
-#include   "MailFolder.h"   // for InitializeMH
 
 /// A small helper function to expand mailfolder names:
 String

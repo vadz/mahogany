@@ -21,13 +21,9 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#  include "MApplication.h"
 #  include "gui/wxMApp.h"
-#  include "Profile.h"
 
-#  include <wx/confbase.h>
 #  include <wx/menu.h>
-#  include <wx/textdlg.h>
 #endif // USE_PCH
 
 #include "MDialogs.h"
@@ -38,16 +34,11 @@
 
 #include "miscutil.h" // for ParseColourString()
 
-#include <wx/imaglist.h>
-#include <wx/treectrl.h>
 #include <wx/tokenzr.h>
-#include <wx/dnd.h>
 #include <wx/persctrl.h>
 
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxFolderTree.h"
-#include "gui/wxIconManager.h"
-#include "gui/wxMainFrame.h"
 
 #include "MFCache.h"
 

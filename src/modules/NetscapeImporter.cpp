@@ -32,23 +32,12 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include "MFolder.h"
-
-   #include <wx/log.h>
-   #include <wx/file.h>       // for wxFile::Exists
    #include <wx/textfile.h>
 #endif // USE_PCH
 
-#include <string.h>
-
 #include <wx/dir.h>
-#include <wx/confbase.h>      // for wxExpandEnvVars
 #include <wx/tokenzr.h>
-#include <wx/dynarray.h>
-#include <wx/hash.h>
 
-#include "adb/AdbImport.h"
-#include "adb/AdbImpExp.h"
 #include "MImport.h"
 
 // ----------------------------------------------------------------------------

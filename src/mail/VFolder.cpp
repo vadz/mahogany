@@ -27,8 +27,6 @@
 
 #ifndef USE_PCH
     #include "Mcommon.h"
-
-    #include "MFolder.h"
 #endif
 
 #include "Sequence.h"
@@ -36,7 +34,6 @@
 
 #include "MFStatus.h"
 
-#include "HeaderInfo.h"
 #include "HeaderInfoImpl.h" // we need "Impl" for ArrayHeaderInfo declaration
 
 #include "mail/Driver.h"

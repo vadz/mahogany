@@ -25,23 +25,14 @@
 #include  "Mpch.h"
 
 #ifndef  USE_PCH
-#   include "strutil.h"
-#   include "MApplication.h"
-#   include "Profile.h"
+#   include "Mcommon.h"
 #ifdef OS_WIN // cygwin and mingw
 #   include <wx/timer.h>
 #endif
 #endif // USE_PCH
 
-#include "MPython.h"
-
-#include "Mdefaults.h"
-#include "MDialogs.h"
-#include "FolderView.h"
-
 #include "UIdArray.h"
 
-#include "MFStatus.h"
 #include "MSearch.h"
 #include "LogCircle.h"
 #include "MFui.h"                      // for SizeToString
@@ -49,10 +40,6 @@
 #include "AddressCC.h"
 #include "MailFolderCC.h"
 #include "MessageCC.h"
-
-#include "MEvent.h"
-#include "ASMailFolder.h"
-#include "Mpers.h"
 
 // we need "Impl" for ArrayHeaderInfo declaration
 #include "HeaderInfoImpl.h"
@@ -69,7 +56,6 @@
 
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking and
 // wxFile::Exists() too
-#include <wx/filefn.h>
 #include <wx/file.h>
 
 // windows.h included from fontutil.h defines ERROR
@@ -81,9 +67,6 @@
 #  undef   ERROR
 #  define  ERROR (long) 2 // HACK - redefine again as in extra/src/c-client/mail.h
 #endif
-
-#include <ctype.h>      // isspace()
-#include <sys/stat.h>   // struct stat
 
 #if defined(OS_UNIX) && !defined(__CYGWIN__)
    #include <signal.h>

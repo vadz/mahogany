@@ -26,30 +26,12 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "strutil.h"
-#  include "guidef.h"
 
-#  include "PathFinder.h"
-#  include "Profile.h"
-
-#  include "MFrame.h"
-#  include "MLogFrame.h"
-
-#  include "MApplication.h"
-#  include "gui/wxMApp.h"
-#  include "gui/wxIconManager.h"
-
-#  include "wx/stattext.h"
+#  include <wx/stattext.h>
+#  include <wx/app.h>
+#  include <wx/menu.h>
 #endif //USE_PCH
 
-#include "Mdefaults.h"
-#include "MHelp.h"
-#include "Message.h"
-#include "ASMailFolder.h"
-#include "MFolder.h"
-#include "MDialogs.h"
-
-#include "MessageView.h"
 #include "MessageViewer.h"
 #include "MsgCmdProc.h"
 #include "FolderView.h"
@@ -57,20 +39,8 @@
 #include "UIdArray.h"
 
 #include "MessageTemplate.h"
-#include "Composer.h"
 
-#include "gui/wxIconManager.h"
 #include "gui/wxMessageView.h"
-#include "gui/wxllist.h"
-#include "gui/wxlwindow.h"
-#include "gui/wxlparser.h"
-#include "gui/wxOptionsDlg.h"
-
-#include <wx/dynarray.h>
-#include <wx/file.h>
-#include <wx/mimetype.h>
-#include <wx/fontmap.h>
-#include <wx/splitter.h>
 
 // ----------------------------------------------------------------------------
 // options we use here

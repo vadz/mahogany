@@ -21,16 +21,10 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "guidef.h"
 
-#  include <wx/log.h>
 #  include <wx/layout.h>
-
-#  include <wx/choice.h>
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
-#  include <wx/radiobox.h>
-
 #  include <wx/textdlg.h>
 #endif // USE_PCH
 

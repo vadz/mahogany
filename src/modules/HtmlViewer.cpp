@@ -22,25 +22,18 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
+#   include "Mcommon.h"
 
-   #include "Profile.h"
-
-   #include "gui/wxMApp.h"
+#   include "gui/wxMApp.h"
 #endif // USE_PCH
 
-#include "Mdefaults.h"
-
-#include "MessageView.h"
 #include "MessageViewer.h"
 #include "ClickURL.h"
 
-#include <wx/dynarray.h>
-
 #include <wx/fontmap.h>
 #include <wx/fs_mem.h>
-#include <wx/wxhtml.h>
-#include <wx/html/htmprint.h>
+
+#include "wx/html/m_templ.h"
 
 class HtmlViewerWindow;
 
@@ -194,9 +187,6 @@ private:
 // ----------------------------------------------------------------------------
 // HTML_Handler_META: wxHTML handler for the <meta> tag, see EncodingChanger
 // ----------------------------------------------------------------------------
-
-#include "wx/html/m_templ.h"
-#include "wx/html/htmlcell.h"
 
 TAG_HANDLER_BEGIN(META, "META" )
     TAG_HANDLER_CONSTR(META) { }

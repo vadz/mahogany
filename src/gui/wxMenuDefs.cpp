@@ -23,20 +23,14 @@
 #include "Mcommon.h"
 
 #ifndef USE_PCH
-#  include "PathFinder.h"
 
 #  include "MApplication.h"
-#  include "gui/wxMApp.h"
-
-#  include "guidef.h"
 
 #  include <wx/toolbar.h>
 #  include <wx/choice.h>
 #endif
 
 #include <wx/menu.h>
-
-#include "Mdefaults.h"
 
 #include "gui/wxIconManager.h"
 
@@ -49,6 +43,8 @@
    #define wxITEM_CHECK TRUE
    #define wxITEM_RADIO TRUE
 #endif
+
+class MOption;
 
 // ----------------------------------------------------------------------------
 // options we use here

@@ -27,16 +27,8 @@
 #include  "Mpch.h"
 
 #ifndef  USE_PCH
-   #include "MailFolder.h"
-
-   #include "Message.h"
-
-   #include "Sorting.h"
-
    #include "Mcclient.h"      // need THREADNODE
 #endif // USE_PCH
-
-#include "Mdefaults.h"
 
 #include "HeaderInfoImpl.h"
 

@@ -13,51 +13,29 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include "Mconfig.h"
 #   include "Mcommon.h"
-#   include "MDialogs.h"
-#   include "Mdefaults.h"
-#   include "gui/wxMenuDefs.h"
-#   include "MMainFrame.h"
 
 #   include <wx/stattext.h>
 #   include <wx/layout.h>
 #   include <wx/menu.h>
 #   include <wx/statusbr.h>
 #   include <wx/statbox.h>
-#ifdef __CYGWIN__
-#   include <wx/timer.h>
-#endif
 #endif
 
-#include "MModule.h"
 #include "modules/Calendar.h"
-
-#include "Mversion.h"
-#include "MInterface.h"
-#include "Message.h"
 
 #include "UIdArray.h"
 
-#include "ASMailFolder.h"
 #include "HeaderInfo.h"
-#include "Message.h"
 
-#include "SendMessage.h"
-
-#include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxOptionsPage.h"
-#include "gui/wxMDialogs.h"
 #include "gui/wxMainFrame.h"
 
 #include <wx/calctrl.h>
 #include <wx/spinbutt.h>
 #include <wx/textdlg.h>
 
-#include <wx/persctrl.h>
-
-#include "gui/wxDialogLayout.h"
 #include "MHelp.h"
 
 #if wxUSE_DRAG_AND_DROP
@@ -164,7 +142,6 @@ private:
    MOBJECT_NAME(AlarmInfo);
 };
 
-#include <wx/dynarray.h>
 WX_DEFINE_ARRAY(AlarmInfo *, AlarmList);
 
 

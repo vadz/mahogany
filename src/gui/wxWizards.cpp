@@ -22,45 +22,18 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
-#   include "Mdefaults.h"
-#   include "guidef.h"
 #   include "strutil.h"
-#   include "MFrame.h"
-#   include "MDialogs.h"
-#   include "Profile.h"
-#   include "MApplication.h"
-#   include "MailFolder.h"
-#   include "Profile.h"
-#   include "MModule.h"
-#   include "MHelp.h"
 #endif
 
-#include "MFolder.h"
 #include "Mpers.h"
 
 #include "MailFolderCC.h"
 
-#include "MHelp.h"
-#include "gui/wxMApp.h"
-#include "gui/wxMIds.h"
-
-#include "gui/wxIconManager.h"
-
-#include <wx/window.h>
-#include <wx/radiobox.h>
 #include <wx/stattext.h>
-#include <wx/statbmp.h>
-#include <wx/choice.h>
-#include <wx/textdlg.h>
-#include <wx/help.h>
 #include <wx/wizard.h>
-
-#include "MFolderDialogs.h"
 
 #include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
-
-#include <errno.h>
 
 // ----------------------------------------------------------------------------
 // options we use here

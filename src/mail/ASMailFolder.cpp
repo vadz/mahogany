@@ -15,21 +15,13 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "guidef.h"    // only for high-level functions
-#   include "strutil.h"
-#   include "Profile.h"
-#   include "MEvent.h"
-#   include "MApplication.h"
 #endif
-
-#include "Mdefaults.h"
-#include "Message.h"
 
 #include "Sequence.h"
 #include "UIdArray.h"
 
 #include "MSearch.h"
 
-#include "MailFolder.h"
 #include "ASMailFolder.h"
 #include "MailFolderCC.h"
 

@@ -14,35 +14,18 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "MApplication.h"
-#  include "gui/wxMApp.h"
 #  include "MHelp.h"
-#  include "gui/wxMIds.h"
-#  include "strutil.h"
 
-#  include <wx/defs.h>
-#  include <wx/event.h>
-#  include <wx/log.h>
-#  include <wx/control.h>
 #  include <wx/stattext.h>
-#  include <wx/listbox.h>
-#  include <wx/checkbox.h>
-#  include <wx/radiobox.h>
-#  include <wx/combobox.h>
 #  include <wx/statbox.h>
-#  include <wx/statbmp.h>
-#  include <wx/dialog.h>
 #endif // USE_PCH
 
-#include <wx/persctrl.h>
 #include <wx/checklst.h>
 #include <wx/layout.h>
 
-#include "Mdefaults.h"
 #include "Mpers.h"
 
 #include "MModule.h"
-#include "MDialogs.h"
 
 #include "gui/wxDialogLayout.h"
 

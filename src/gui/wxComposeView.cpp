@@ -34,24 +34,16 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "strutil.h"
 #  include "sysutil.h"
 
-#  include "PathFinder.h"
-#  include "Profile.h"
 #  include "MHelp.h"
-#  include "MFrame.h"
-
-#  include "MApplication.h"
-#  include "gui/wxMApp.h"
 
 #  include <wx/process.h>
 #  include <wx/sizer.h>
 #  include <wx/menu.h>
 #  include <wx/stattext.h>
-#  include <wx/textctrl.h>
 
-#  include <ctype.h>          // for isspace()
+#  include <ctype.h>            // for isspace
 #ifdef __CYGWIN__
 #  include <sys/unistd.h>     // for getpid()
 #endif
@@ -60,7 +52,6 @@
 #endif
 #endif // USE_PCH
 
-#include <wx/filename.h>
 #include <wx/file.h>
 #include <wx/ffile.h>
 #include <wx/dir.h>
@@ -74,38 +65,20 @@
 #  undef SendMessage
 #endif
 
-#include "wx/persctrl.h"
-
-#include "Mdefaults.h"
 #include "Mpers.h"
 
-#include "Address.h"
-
-#include "FolderView.h"
-#include "MailFolder.h"
-#include "Message.h"
-#include "SendMessage.h"
-
-#include "MDialogs.h"
 #include "HeadersDialogs.h"
-
-#include "gui/wxIconManager.h"
 
 #include "gui/wxIdentityCombo.h"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxComposeView.h"
 
-#include "MessageEditor.h"
-
-#include "adb/AdbEntry.h"
 #include "adb/AdbManager.h"
 
-#include "MessageTemplate.h"
 #include "TemplateDialog.h"
 #include "AttachDialog.h"
 
-#include "MModule.h"
 #include "modules/Calendar.h"
 
 // ----------------------------------------------------------------------------

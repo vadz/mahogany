@@ -13,15 +13,10 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include "Mconfig.h"
 #   include "Mcommon.h"
-#   include "MDialogs.h"
 #endif
 
 #include "MModule.h"
-
-#include "Mversion.h"
-#include "MInterface.h"
 
 ///------------------------------
 /// MModule interface:

@@ -23,7 +23,6 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-   #include "gui/wxMenuDefs.h"
    #include "MDialogs.h"
    #include "gui/wxOptionsDlg.h"
 
@@ -33,15 +32,11 @@
 #endif
 #endif //USE_PCH
 
-#include "Mdefaults.h"
-
 #include "ClickURL.h"
 #include "MessageView.h"
 
 #include "Composer.h"
 #include "Collect.h"
-
-#include "Mpers.h"
 
 #include <wx/clipbrd.h>
 

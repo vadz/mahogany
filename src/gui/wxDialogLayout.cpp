@@ -23,42 +23,20 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "MApplication.h"
-#  include "Profile.h"
-#  include "guidef.h"
 #  include "strutil.h"
 #  include "MHelp.h"
 #  include "gui/wxMIds.h"
 
-#  include <wx/log.h>
-#  include <wx/choice.h>
-#  include <wx/control.h>
-#  include <wx/dcclient.h>
 #  include <wx/layout.h>
-#  include <wx/dynarray.h>
 #  include <wx/stattext.h>
-#  include <wx/settings.h>
-#  include <wx/listbox.h>
-#  include <wx/checkbox.h>
-#  include <wx/radiobox.h>
-#  include <wx/combobox.h>
 #  include <wx/statbox.h>
 #  include <wx/statbmp.h>
 #endif
 
-#include <wx/imaglist.h>
-#include <wx/notebook.h>
-#include "wx/persctrl.h"
-
-#include "gui/wxIconManager.h"
-#include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsPage.h"
 #include "gui/wxBrowseButton.h"
 
-#include "MEvent.h"
 #include "Mupgrade.h"      // for VerifyEMailSendingWorks()
-
-#include "Mdefaults.h"
 
 // ----------------------------------------------------------------------------
 // private functions

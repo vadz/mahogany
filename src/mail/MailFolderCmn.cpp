@@ -29,32 +29,19 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "guidef.h"    // only for high-level functions
-#  include "strutil.h"
-#  include "Profile.h"
-#  include "MEvent.h"
-#  include "MApplication.h"
 
 #  include <wx/mimetype.h>
 #endif // USE_PCH
-
-#include "Mdefaults.h"
-
-#include "MPython.h"
 
 #include "Sequence.h"
 #include "UIdArray.h"
 
 #include "MSearch.h"
 
-#include "MFolder.h"
 #include "MFilter.h"
 #include "modules/Filters.h"
 
-#include "MDialogs.h"         // for MProgressDialog
-
 #include "HeaderInfo.h"
-#include "Address.h"
 
 #include "MThread.h"
 #include "MFCache.h"
@@ -65,12 +52,8 @@
 #include "MFPrivate.h"
 #include "mail/FolderPool.h"
 
-#include <wx/timer.h>
 #include <wx/datetime.h>
 #include <wx/file.h>
-#include <wx/utils.h>         // for wxExecute()
-
-#include "wx/persctrl.h"      // for wxPFileSelector
 
 // ----------------------------------------------------------------------------
 // options we use here

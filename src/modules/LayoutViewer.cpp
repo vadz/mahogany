@@ -24,20 +24,12 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
-
-   #include "Profile.h"
-
-   #include "gui/wxMApp.h"
+#   include "Mcommon.h"
 #endif // USE_PCH
 
-#include "Mdefaults.h"
-
-#include "MessageView.h"
 #include "MessageViewer.h"
 #include "ClickURL.h"
 
-#include "gui/wxllist.h"
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"
 

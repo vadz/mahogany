@@ -27,7 +27,6 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include "Profile.h"
    #include "Threading.h"
 
    #include "Mcclient.h"      // need THREADNODE

@@ -29,10 +29,7 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 
-#  include "MailFolder.h"
-
 #  include "guidef.h"
-#  include "gui/wxMenuDefs.h"    // for WXMENU_MSG_DROP_TO_FOLDER
 #endif // USE_PCH
 
 #include "MFolder.h"

@@ -39,35 +39,17 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "MApplication.h"
-#  include "Profile.h"
-#  include "guidef.h"
-#  include "MHelp.h"
 
 #  include <wx/layout.h>
-#  include <wx/menuitem.h>
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
-#  include <wx/checkbox.h>
-#  include <wx/radiobox.h>
-#  include <wx/textctrl.h>
-#  include <wx/statbmp.h>
-
-#  include <wx/utils.h>  // wxMax()
+#  include <wx/utils.h>         // for wxMax
 
 #  include "strutil.h"   // strutil_flatten_array()
 #endif
 
-#include <wx/imaglist.h>
-#include <wx/notebook.h>
 #include <wx/checklst.h>
-#include <wx/listctrl.h>
-#include "wx/persctrl.h"
 
-#include "Mdefaults.h"
-
-#include "gui/wxDialogLayout.h"
-#include "gui/wxIconManager.h"
 #include "gui/wxSelectionDlg.h"
 
 #include "HeadersDialogs.h"

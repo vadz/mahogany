@@ -13,6 +13,12 @@
 #   pragma interface "MFilter.h"
 #endif
 
+#ifndef USE_PCH
+#   include "Profile.h"
+#endif
+
+#include "MObject.h"
+
 class WXDLLEXPORT wxWindow;
 
 class FilterRule;

@@ -28,18 +28,8 @@
 #  include "Mcommon.h"
 #  include "strutil.h"
 
-#  include <wx/dynarray.h>
-
 #  include "MApplication.h"
-#  include "MDialogs.h"
-#  include "gui/wxMFrame.h"
 #endif // USE_PCH
-
-#include <wx/fontmap.h>
-
-#include "FolderView.h"
-
-#include "Mdefaults.h"
 
 #include "AddressCC.h"
 #include "MailFolderCC.h"
@@ -49,8 +39,6 @@
 #include "SendMessage.h"
 
 #include "HeaderInfo.h"
-
-#include <ctype.h>
 
 // ----------------------------------------------------------------------------
 // macros

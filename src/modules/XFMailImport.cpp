@@ -23,15 +23,10 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include "MFolder.h"
-
-   #include <wx/log.h>
-   #include <wx/file.h>       // for wxFile::Exists
    #include <wx/textfile.h>
 #endif // USE_PCH
 
 #include <wx/dir.h>
-#include <wx/confbase.h>      // for wxExpandEnvVars
 #include <wx/tokenzr.h>
 
 #include "adb/AdbImport.h"

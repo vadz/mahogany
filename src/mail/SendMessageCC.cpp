@@ -26,21 +26,12 @@
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
-#  include "Profile.h"
 #  include "strutil.h"
-#  include "strings.h"
-#  include "guidef.h"
 #endif // USE_PCH
 
-#include "Mdefaults.h"
-#include "MApplication.h"
-#include "Message.h"
 #include "MailFolderCC.h"
-#include "MFolder.h"
 
 #include "LogCircle.h"
-
-#include "MThread.h"
 
 #include "AddressCC.h"
 
@@ -56,11 +47,7 @@
 
 #include "XFace.h"
 #include "MDialogs.h"
-#include "Mpers.h"
 
-#include "gui/wxIconManager.h"
-
-#include <wx/utils.h>            // wxGetFullHostName(), wxGetProcessId()
 #include <wx/file.h>
 #include <wx/datetime.h>
 

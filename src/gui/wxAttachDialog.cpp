@@ -25,9 +25,6 @@
 
    #include <wx/layout.h>
 
-   #include <wx/textctrl.h>
-   #include <wx/radiobox.h>
-   #include <wx/checkbox.h>
    #include <wx/statbox.h>
 #endif
 

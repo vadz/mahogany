@@ -21,7 +21,7 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
+#   include "Mcommon.h"
 #endif //USE_PCH
 
 #include "ViewFilter.h"

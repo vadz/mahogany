@@ -18,22 +18,11 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-   #include "MHelp.h"
 
-   #include "Threading.h"
-
-   #include "guidef.h"
-
-   #include <wx/window.h>
    #include <wx/layout.h>
-
-   #include <wx/checkbox.h>
-   #include <wx/choice.h>
    #include <wx/stattext.h>
    #include <wx/statbox.h>
 #endif // USE_PCH
-
-#include "Mdefaults.h"
 
 #include "gui/wxDialogLayout.h"
 

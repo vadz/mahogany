@@ -28,8 +28,6 @@
 #ifndef  USE_PCH
    #include "Mcommon.h"
    #include "Message.h"
-
-   #include "strutil.h"
 #endif // USE_PCH
 
 // should be always defined now

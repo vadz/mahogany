@@ -22,20 +22,10 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
-   #include "strutil.h"
+#   include "Mcommon.h"
 
-   #include <wx/textctrl.h>
-   #include <wx/panel.h>
-   #include <wx/button.h>
-   #include <wx/sizer.h>
+#   include <wx/sizer.h>
 #endif // USE_PCH
-
-#include <wx/notebook.h>
-#include <wx/listctrl.h>
-#include <wx/imaglist.h>
-
-#include <wx/fontutil.h>      // for wxNativeFontInfo
 
 #include "Composer.h"
 #include "MessageEditor.h"

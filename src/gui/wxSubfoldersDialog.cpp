@@ -24,25 +24,16 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "MApplication.h"
-#  include "Profile.h"
-#  include "guidef.h"
-#  include "strutil.h"
 
-#  include <wx/app.h>
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
-#  include <wx/textctrl.h>
 #  include <wx/layout.h>
 #endif
 
-#include <wx/treectrl.h>
 #include <wx/tokenzr.h>
 
 #include "MFolder.h"
-#include "Mpers.h"
 
-#include "ASMailFolder.h"
 #include "ListReceiver.h"
 
 #include "gui/wxDialogLayout.h"

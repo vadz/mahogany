@@ -26,19 +26,10 @@
 
 #ifndef   USE_PCH
 #  include "Mcommon.h"
-#  include "guidef.h"
-#  include "MFrame.h"
-#  include "Mdefaults.h"
-#  include "strutil.h"
 
 #  include <wx/menu.h>
 #  include <wx/dirdlg.h>
-#  include <wx/statusbr.h>
-#  include <wx/toolbar.h>
 #endif
-
-#include "wx/persctrl.h"
-#include <wx/menuitem.h>
 
 #include "MFolder.h"
 
@@ -49,7 +40,6 @@
 
 #include "gui/wxMainFrame.h"
 #include "gui/wxMApp.h"
-#include "gui/wxIconManager.h"
 #include "gui/wxFolderView.h"
 #include "gui/wxFolderTree.h"
 
@@ -59,8 +49,6 @@
 
 #include "MHelp.h"
 #include "MDialogs.h"
-
-#include "MModule.h"
 
 // define this for future, less broken versions of wxWindows to dynamically
 // insert/remove the message menu depending on whether we have or not a folder

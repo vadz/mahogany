@@ -30,8 +30,6 @@
    #include "lists.h"
 #endif // USE_PCH
 
-#include "MFolder.h"
-
 #include "mail/Driver.h"
 #include "mail/FolderPool.h"
 

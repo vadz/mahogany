@@ -33,19 +33,8 @@
 #endif // 0
 
 #ifndef USE_PCH
-#   include   "Mcommon.h"
-#   include   "Message.h"
-#   include   "MailFolder.h"
+#   include "Mcommon.h"
 #endif
-
-#include "MModule.h"
-#include "MInterface.h"
-#include "MPython.h"
-#include "HeaderInfo.h"
-
-#include <stdlib.h>
-#include <ctype.h>
-#include <time.h>  // mktime()
 
 #include "modules/Filters.h"
 #include "MFilterLang.h"

@@ -27,10 +27,6 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 
-#  include "guidef.h"
-
-#  include <wx/checkbox.h>
-#  include <wx/listbox.h>
 #  include <wx/sizer.h>
 #  include <wx/statbmp.h>
 #  include <wx/statbox.h>
@@ -39,7 +35,6 @@
 #include <wx/datetime.h>
 #include <wx/statline.h>
 
-#include "Mpers.h"
 #include "MImport.h"
 
 // ----------------------------------------------------------------------------

@@ -14,6 +14,8 @@
 #define _MSEARCH_H_
 
 class MFolder;
+class Profile;
+class WXDLLEXPORT wxWindow;
 
 /**
   Search criterium for searching folders for certain messages.

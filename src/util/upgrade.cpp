@@ -22,12 +22,7 @@
 
 #ifndef   USE_PCH
 #  include "Mcommon.h"
-#  include "PathFinder.h"
-#  include "Profile.h"
-#  include "MApplication.h"
-#  include "strutil.h"
 #  include "Mpers.h"
-#  include "gui/wxMApp.h"  // for wxMApp::GetDialUpManager()
 
 #  include <wx/stattext.h>
 #endif  //USE_PCH
@@ -45,24 +40,15 @@
    #undef USE_DNS
 #endif // USE_DIALUP
 
-#include "Message.h"
-#include "MailFolder.h"
 #include "HeaderInfo.h"
 #include "MailFolderCC.h"
-#include "SendMessage.h"
 
-#include "Mdefaults.h"
-
-#include <wx/log.h>
-#include <wx/confbase.h>
 #include <wx/fileconf.h>
-#include <wx/sizer.h>
+#include <wx/file.h>
 
 #ifdef USE_DIALUP
    #include <wx/dialup.h>     // for IsAlwaysOnline()
 #endif // USE_DIALUP
-
-#include <wx/utils.h>         // wxGetFullHostName()
 
 #ifdef USE_DNS
    #include <wx/socket.h>     // wxIPV4address

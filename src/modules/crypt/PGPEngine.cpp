@@ -26,11 +26,8 @@
    #include "sysutil.h"
 #endif //USE_PCH
 
-#include "Mpers.h"
-
 #include "modules/MCrypt.h"
 
-#include <wx/file.h>
 #include <wx/textfile.h>
 #include <wx/process.h>
 #include <wx/txtstrm.h>

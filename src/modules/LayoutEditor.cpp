@@ -24,21 +24,14 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
-
-   #include "Profile.h"
-
-   #include "gui/wxMApp.h"
+#   include "Mcommon.h"
 #endif // USE_PCH
 
 #include <wx/fontutil.h>      // for wxNativeFontInfo
 
-#include "Mdefaults.h"
-
 #include "Composer.h"
 #include "MessageEditor.h"
 
-#include "gui/wxllist.h"
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"
 
