@@ -186,6 +186,9 @@ protected:
 
    //@}
 
+   /// access the m_TicketsToDeleteList creating it if necessary
+   void AddTicketToDelete(Ticket t);
+
 private:
    /// our folder (may be NULL)
    ASMailFolder *m_asmf;
@@ -551,9 +554,9 @@ MsgCmdProcImpl::MsgCmdProcImpl(MessageView *msgView, wxWindow *winForDnd)
    m_regASyncResult = MEventManager::Register(*this, MEventId_ASFolderResult);
 
    m_TicketList = ASTicketList::Create();
-   m_TicketsToDeleteList = ASTicketList::Create();
 
    // these are created on demand
+   m_TicketsToDeleteList = NULL;
    m_TicketsDroppedList = NULL;
    m_TicketsToEditList = NULL;
 }
@@ -578,6 +581,10 @@ MsgCmdProcImpl::~MsgCmdProcImpl()
       m_asmf->DecRef();
 }
 
+// ----------------------------------------------------------------------------
+// MsgCmdProcImpl misc operations
+// ----------------------------------------------------------------------------
+
 void MsgCmdProcImpl::SetFolder(ASMailFolder *asmf)
 {
    if ( m_asmf )
@@ -588,6 +595,18 @@ void MsgCmdProcImpl::SetFolder(ASMailFolder *asmf)
    if ( m_asmf )
       m_asmf->IncRef();
 }
+
+void MsgCmdProcImpl::AddTicketToDelete(Ticket t)
+{
+   if ( !m_TicketsToDeleteList )
+      m_TicketsToDeleteList = ASTicketList::Create();
+
+   m_TicketsToDeleteList->Add(t);
+}
+
+// ----------------------------------------------------------------------------
+// MsgCmdProcImpl command dispatcher
+// ----------------------------------------------------------------------------
 
 bool MsgCmdProcImpl::ProcessCommand(int cmd,
                                     const UIdArray& messages,
@@ -1125,7 +1144,7 @@ MsgCmdProcImpl::MoveMessagesToFolder(const UIdArray& messages, MFolder *folder)
    if ( t != ILLEGAL_TICKET )
    {
       // delete messages once they're successfully saved
-      m_TicketsToDeleteList->Add(t);
+      AddTicketToDelete(t);
    }
 }
 
@@ -1291,7 +1310,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
 
                // the message hasn't been saved yet, wait with deletion
                // until it is copied successfully
-               m_TicketsToDeleteList->Add(t);
+               AddTicketToDelete(t);
             }
 
             // also delete the messages which have been already saved
@@ -1434,7 +1453,8 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
             {
                String msg;
 
-               bool toDelete = m_TicketsToDeleteList->Contains(t);
+               bool toDelete = m_TicketsToDeleteList &&
+                                    m_TicketsToDeleteList->Contains(t);
                bool wasDropped = m_TicketsDroppedList &&
                                     m_TicketsDroppedList->Contains(t);
 
@@ -1495,7 +1515,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                      m_TicketList->Add
                      (
                         // true => expunge as well
-                        m_asmf->DeleteMessages(seq, true, this)
+                        m_asmf->DeleteOrTrashMessages(seq, this)
                      );
 
                      if ( !wasDropped )

@@ -1318,7 +1318,7 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
    if ( reallyDelete )
    {
       // delete without expunging
-      rc = DeleteMessages(selections, FALSE);
+      rc = DeleteMessages(selections, FALSE /* don't expunge */);
    }
    else // move to trash
    {
@@ -1326,7 +1326,13 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
       if ( rc )
       {
          // delete and expunge
-         rc = DeleteMessages(selections, TRUE);
+         //
+         // TODO: unset the 'DELETED' flag for the currently deleted messages
+         //       before calling DeleteMessages(selections) and set it back
+         //       afterwards: see bug 653 at
+         //
+         //       http://mahogany.sourceforge.net/cgi-bin/show_bug.cgi?id=653
+         rc = DeleteMessages(selections, TRUE /* expunge */);
       }
    }
 
