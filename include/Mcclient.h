@@ -43,16 +43,15 @@ extern "C"
    //  this is defined as a struct while we use it as a MimeType enum value
 #  undef MESSAGE
 
-   // windows.h included from osdep.h under Windows #defines all these
-#  undef   CreateDialog
-#  undef   DrawText
-#  undef   FindWindow
-#  undef   GetCharWidth
-#  undef   GetClassInfo
-#  undef   GetMessage
-#  undef   LoadAccelerators
-#  undef   SendMessage
-#  undef   StartDoc
+   // windows.h included from osdep.h under Windows #defines many symbols which
+   // conflict with our ones
+#  ifdef OS_WIN
+      // including this header will #undef most of the harm done
+#     include <wx/msw/winundef.h>
+
+      // but not all
+#     undef   SendMessage
+#  endif // OS_WIN
 
    // finally it also defines the name commonly used as C++ template parameter!
 #  undef T
