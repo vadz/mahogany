@@ -207,6 +207,9 @@ wxString ORC_Types[] =
   gettext_noop("Larger than"),
   gettext_noop("Smaller than"), gettext_noop("Older than"),
   gettext_noop("Is SPAM")
+#ifdef USE_PYTHON
+  ,gettext_noop("Is SPAM")
+#endif
 };
 
 enum ORC_Types_Enum
@@ -221,6 +224,9 @@ enum ORC_Types_Enum
    ORC_T_SmallerThan,
    ORC_T_OlderThan,
    ORC_T_IsSpam
+#ifdef USE_PYTHON
+   ,ORC_T_Python
+#endif 
 };
 
 static
@@ -283,7 +289,11 @@ OneCritControl::UpdateUI()
    int type = m_Type->GetSelection();
    m_Argument->Enable(
       !(type == ORC_T_Always
-        || type == ORC_T_IsSpam)
+        || type == ORC_T_IsSpam
+#ifdef USE_PYTHON
+        || type == ORC_T_Python
+#endif
+         )
       );
    m_Where->Enable(
       type == ORC_T_Match
@@ -352,6 +362,12 @@ OneCritControl::TranslateToString(const wxString & criterium)
       program << "contains("; break;
    case ORC_T_MatchRegEx:
       program << "matchregex("; break;
+#ifdef USE_PYTHON
+   case ORC_T_Python:
+      program << "python(";
+      needsWhere = false;
+      break;
+#endif
    case ORC_T_LargerThan:
    case ORC_T_SmallerThan:
    case ORC_T_OlderThan:
@@ -421,7 +437,10 @@ wxString OAC_Types[] =
   gettext_noop("Move to"),
   gettext_noop("Expunge"),
   gettext_noop("MessageBox"),
-  gettext_noop("Log Entry"),
+  gettext_noop("Log Entry")
+#ifdef USE_PYTHON
+  ,gettext_noop("Python")
+#endif
 };
 static
 size_t OAC_TypesCount = WXSIZEOF(OAC_Types);
@@ -434,6 +453,9 @@ enum OAC_Types_Enum
    OAC_T_Expunge,
    OAC_T_MessageBox,
    OAC_T_LogEntry
+#ifdef USE_PYTHON
+   ,OAC_T_Python
+#endif
 };
 
 void
@@ -441,7 +463,11 @@ OneActionControl::UpdateUI()
 {
    int type = m_Type->GetSelection();
    m_Argument->Enable(
-      !(type == OAC_T_Delete || type == OAC_T_Expunge)
+      !(type == OAC_T_Delete || type == OAC_T_Expunge
+#ifdef USE_PYTHON
+        || type == OAC_T_Python
+#endif
+         )
       );
 }
 
@@ -485,6 +511,10 @@ OneActionControl::TranslateToString(const wxString & action)
       program << "message("; break;
    case OAC_T_LogEntry:
       program << "log("; break;
+#ifdef USE_PYTHON
+   case OAC_T_Python:
+      program << "python("; break;
+#endif
    }
    if(needsArgument)
       program << '"' << argument << '"';

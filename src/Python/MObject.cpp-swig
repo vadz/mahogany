@@ -56,13 +56,48 @@ extern PyObject *SWIG_newvarlink(void);
 #include   "Mconfig.h"
 #include   "Mcommon.h"   
 #include   "MObject.h"
+// we don't want to export our functions as we don't build a shared library
+#undef SWIGEXPORT
+#define SWIGEXPORT(a,b) a b
+static PyObject *_wrap_SafeIncRef(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    MObjectRC * _arg0;
+    char * _argc0 = 0;
 
-// ----------------------------------------------------------------------------
-// MObject: the mother of all classes
-// ----------------------------------------------------------------------------
+    self = self;
+    if(!PyArg_ParseTuple(args,"s:SafeIncRef",&_argc0)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MObjectRC_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of SafeIncRef. Expected _MObjectRC_p.");
+        return NULL;
+        }
+    }
+    SafeIncRef(_arg0);
+    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
 
-/// the magic number
-#define   MOBJECT_MAGIC   1234567890
+static PyObject *_wrap_SafeDecRef(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    MObjectRC * _arg0;
+    char * _argc0 = 0;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"s:SafeDecRef",&_argc0)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MObjectRC_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of SafeDecRef. Expected _MObjectRC_p.");
+        return NULL;
+        }
+    }
+    SafeDecRef(_arg0);
+    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
 
 #define delete_MObject(_swigobj) (delete _swigobj)
 static PyObject *_wrap_delete_MObject(PyObject *self, PyObject *args) {
@@ -101,6 +136,18 @@ static PyObject *_wrap_MObject_MOcheck(PyObject *self, PyObject *args) {
         }
     }
     MObject_MOcheck(_arg0);
+    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
+
+static PyObject *_wrap_MObject_CheckLeaks(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,":MObject_CheckLeaks")) 
+        return NULL;
+    MObject::CheckLeaks();
     Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -188,8 +235,11 @@ static PyMethodDef MObjectcMethods[] = {
 	 { "MObjectRC_IncRef", _wrap_MObjectRC_IncRef, 1 },
 	 { "MObjectRC_CheckLeaks", _wrap_MObjectRC_CheckLeaks, 1 },
 	 { "new_MObjectRC", _wrap_new_MObjectRC, 1 },
+	 { "MObject_CheckLeaks", _wrap_MObject_CheckLeaks, 1 },
 	 { "MObject_MOcheck", _wrap_MObject_MOcheck, 1 },
 	 { "delete_MObject", _wrap_delete_MObject, 1 },
+	 { "SafeDecRef", _wrap_SafeDecRef, 1 },
+	 { "SafeIncRef", _wrap_SafeIncRef, 1 },
 	 { NULL, NULL }
 };
 static PyObject *SWIG_globals;
@@ -201,6 +251,7 @@ SWIGEXPORT(void,initMObjectc)() {
 	 SWIG_globals = SWIG_newvarlink();
 	 m = Py_InitModule("MObjectc", MObjectcMethods);
 	 d = PyModule_GetDict(m);
+	 PyDict_SetItemString(d,"MOBJECT_MAGIC", PyInt_FromLong((long) 1234567890));
 /*
  * These are the pointer type-equivalency mappings. 
  * (Used by the SWIG pointer type-checker).

@@ -475,10 +475,7 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
 extern void
 CreateMMenu(wxMenuBar *menubar, int menu_begin, int menu_end, const wxString &caption)
 {
-   int style = 0;
-   if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
-      style = wxMENU_TEAROFF;
-   wxMenu *pMenu = new wxMenu("", style);
+   wxMenu *pMenu = new wxMenu("", wxMENU_TEAROFF);
    AppendToMenu(pMenu, menu_begin+1, menu_end);
    menubar->Append(pMenu, caption);
 }

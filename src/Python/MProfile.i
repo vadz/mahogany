@@ -22,11 +22,35 @@
 class ProfileBase : public MObjectRC
 {
 public:
+
+   /** An enum explaining the possible types of profiles. In fact,
+       just a number stored as a normal profile entry which must be
+       maintained manually.
+   */
+   enum Type
+   {
+      /// No profile type specified.
+      PT_Unknown = -1,
+      /// Any profile, default argument for ListProfiles().
+      PT_Any = -1,  // PT_Unknown
+      /// This profile belongs to a folder.
+      PT_FolderProfile = 1
+   };
+
+   /// Creates the one global config object.
+   static ProfileBase * CreateGlobalConfig(const String & filename);
    /// Create a normal Profile object
-   static ProfileBase * CreateProfile(String & classname, ProfileBase *parent);
-   /// Create a global configuration profile object
-   static ProfileBase * CreateGlobalConfig(String &  filename);
-   
+   static ProfileBase * CreateProfile(const String & classname,
+                                      const ProfileBase *parent);
+   /// Create a Profile object for a plugin module
+   static ProfileBase * CreateModuleProfile(const String & classname,
+                                            const ProfileBase *parent);
+   /// Create a dummy Profile just inheriting from the top level
+   static ProfileBase * CreateEmptyProfile(const ProfileBase *parent);
+
+   /// Delete the global config object
+   static void DeleteGlobalConfig();
+
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */

@@ -5,9 +5,6 @@
  *                                                                  *
  * $Id$
  *******************************************************************/
-
-
-
 #ifndef PROFILE_H
 #define PROFILE_H
 
@@ -30,18 +27,6 @@ class kbStringList;
 //@{
 
 /// read from the global config section
-#if 0
-//FIXME!!!! Cannot verify correct global profile path settings!
-//#ifdef DEBUG
-   // assert(0) is called when the app profile path is incorrect (should never
-   // be changed by the app or must be restored until the next call of
-   // READ_APPCONFIG() if it is)
-#   define   READ_APPCONFIG(key) ( \
-               mApplication->GetProfile()->GetConfig()->GetPath() == M_PROFILE_CONFIG_SECTION ? \
-               (assert(0), mApplication->GetProfile()->readEntry(key, key##_D)) : \
-              mApplication->GetProfile()->readEntry(key, key##_D))
-//#else
-#endif
 #   define READ_APPCONFIG(key) \
       (mApplication->GetProfile()->readEntry(key, key##_D))
 //#endif
@@ -82,13 +67,13 @@ public:
    /// Creates the one global config object.
    static ProfileBase * CreateGlobalConfig(const String & filename);
    /// Create a normal Profile object
-   static ProfileBase * CreateProfile(String const & classname,
-                                      ProfileBase const *parent = NULL);
+   static ProfileBase * CreateProfile(const String & classname,
+                                      const ProfileBase *parent = NULL);
    /// Create a Profile object for a plugin module
-   static ProfileBase * CreateModuleProfile(String const & classname,
-                                            ProfileBase const *parent = NULL);
+   static ProfileBase * CreateModuleProfile(const String & classname,
+                                            const ProfileBase *parent = NULL);
    /// Create a dummy Profile just inheriting from the top level
-   static ProfileBase * CreateEmptyProfile(ProfileBase const *parent = NULL);
+   static ProfileBase * CreateEmptyProfile(const ProfileBase *parent = NULL);
 
    /// Delete the global config object
    static void DeleteGlobalConfig();
@@ -110,19 +95,19 @@ public:
    */
    //@{
    /// Read a character entry.
-   virtual String readEntry(String const & key,
-                            String const & defaultvalue = (const char*)NULL,
+   virtual String readEntry(const String & key,
+                            const String & defaultvalue = (const char*)NULL,
                             bool *found = NULL) const = 0;
    /// Read a character entry.
-   String readEntry(String const &  key,
+   String readEntry(const String &  key,
                     const char *defaultvalue = NULL,
                     bool *found = NULL) const;
    /// Read an integer value.
-   virtual long readEntry(String const & key,
+   virtual long readEntry(const String & key,
                           long defaultvalue,
                           bool *found = NULL) const = 0;
    /// Read an integer value.
-   int readEntry(String const & key,
+   int readEntry(const String & key,
                  int defaultvalue,
                  bool *found = NULL) const
       { return (int)readEntry(key, (long)defaultvalue, found); }
@@ -133,19 +118,19 @@ public:
       { return readEntry(key, (long)defaultvalue, found) != 0; }
 
    /// Write back the character value.
-   virtual bool writeEntry(String const & key, String const & Value) = 0;
+   virtual bool writeEntry(const String & key, const String & Value) = 0;
    /// Write back the int value.
-   virtual bool writeEntry(String const & key, long Value) = 0;
+   virtual bool writeEntry(const String & key, long Value) = 0;
    //@}
 
    /// return true if the entry is defined
-   virtual bool HasEntry(String const & key) const = 0;
+   virtual bool HasEntry(const String & key) const = 0;
    /// return true if the group exists
-   virtual bool HasGroup(String const & name) const = 0;
+   virtual bool HasGroup(const String & name) const = 0;
    /// delete the entry specified by path
    virtual void DeleteEntry(const String& key) = 0;
    /// delete the entry group specified by path
-   virtual void DeleteGroup(String const & path) = 0;
+   virtual void DeleteGroup(const String & path) = 0;
    /// rename a group
    virtual bool Rename(const String& oldName, const String& newName) = 0;
    /// return the name of the profile
@@ -205,7 +190,7 @@ protected:
    static wxConfigBase *ms_GlobalConfig;
 private:
    /// forbid copy construction
-   ProfileBase(ProfileBase const &);
+   ProfileBase(const ProfileBase &);
    /// forbid assignments
    ProfileBase & operator=(const ProfileBase & );
 };
@@ -249,7 +234,7 @@ private:
 class ProfileEnvVarSave
 {
 public:
-   ProfileEnvVarSave(ProfileBase const *profile, bool expand = false)
+   ProfileEnvVarSave(const ProfileBase *profile, bool expand = false)
    {
       // we don't really change it, just temporarily change its behaviour
       m_profile = (ProfileBase *)profile;
@@ -281,7 +266,7 @@ private:
 class ProfilePathChanger
 {
 public:
-   ProfilePathChanger(ProfileBase const *config, const String& path)
+   ProfilePathChanger(const ProfileBase *config, const String& path)
       {
          // we don't really change it, just temporarily change the path
          m_config = (ProfileBase *)config;
@@ -297,7 +282,7 @@ private:
 // ----------------------------------------------------------------------------
 // two handy functions for savings/restoring arrays of strings to/from config
 // ----------------------------------------------------------------------------
-void SaveArray(ProfileBase *conf, const wxArrayString& astr, String const & key);
-void RestoreArray(ProfileBase * conf, wxArrayString& astr, String const & key);
+void SaveArray(ProfileBase *conf, const wxArrayString& astr, const String & key);
+void RestoreArray(ProfileBase * conf, wxArrayString& astr, const String & key);
 //@}
 #endif // PROFILE_H

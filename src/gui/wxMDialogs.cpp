@@ -1623,10 +1623,7 @@ class wxDateTextCtrl : public wxTextCtrl
 public:
    wxDateTextCtrl(wxWindow *parent) : wxTextCtrl(parent,-1)
       {
-         int style = 0;
-         if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
-            style = wxMENU_TEAROFF;
-         m_menu = new wxMenu("", style);
+         m_menu = new wxMenu("", wxMENU_TEAROFF);
          m_menu->SetTitle(_("Format Specifiers:"));
          for ( int n = 0; n < NUM_DATE_FMTS;n++ )
             m_menu->Append(n, _(DateFormatsLabels[n]));

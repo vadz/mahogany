@@ -21,7 +21,7 @@
 %}
 
 %import MString.i
-%import Profile.i
+%import MProfile.i
 
 /**
    Message class, containing the most commonly used message headers.

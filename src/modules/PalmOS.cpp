@@ -434,6 +434,7 @@ PalmOSModule::~PalmOSModule()
 }
 
 #ifdef wxUSE_THREADS
+
 class PalmOSAcceptThread : public wxThread
 {
 public:
@@ -446,7 +447,7 @@ public:
    virtual void OnExit()
       {
          // only if we exit normally, are we interested in the result:
-         //*m_PiSocketPtr = m_NewSocket;
+         *m_PiSocketPtr = m_NewSocket;
       }
 protected:
    virtual void *Entry()
@@ -531,7 +532,11 @@ PalmOSModule::Connect(void)
       // doesn't. Ugly hack, really. KB
       PalmOSAcceptThread acceptThread(&m_PiSocket);
       acceptThread.Run();
-      wxSleep(10);
+      time_t start = time(NULL);
+      while(time(NULL)-start < 10)
+         ;
+      
+      //wxSleep(10);
       acceptThread.Kill();
 #else
       m_PiSocket = pi_accept(m_PiSocket, 0, 0);

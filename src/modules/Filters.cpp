@@ -22,6 +22,7 @@
 #include "MModule.h"
 #include "Mversion.h"
 #include "MInterface.h"
+#include "MPython.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -1861,6 +1862,7 @@ extern "C"
  * * * * * * * * * * * * * */
    static Value func_containsi(ArgList *args, Parser *p)
    {
+      ASSERT(args);
       if(args->Count() != 2)
          return 0;
       Value v1 = args->GetArg(0)->Evaluate();
@@ -1874,6 +1876,7 @@ extern "C"
 
    static Value func_contains(ArgList *args, Parser *p)
    {
+      ASSERT(args);
       if(args->Count() != 2)
          return 0;
       Value v1 = args->GetArg(0)->Evaluate();
@@ -1885,6 +1888,7 @@ extern "C"
 
    static Value func_match(ArgList *args, Parser *p)
    {
+      ASSERT(args);
       if(args->Count() != 2)
          return 0;
       Value v1 = args->GetArg(0)->Evaluate();
@@ -1896,6 +1900,7 @@ extern "C"
 
    static Value func_matchi(ArgList *args, Parser *p)
    {
+      ASSERT(args);
       if(args->Count() != 2)
          return 0;
       Value v1 = args->GetArg(0)->Evaluate();
@@ -1909,6 +1914,7 @@ extern "C"
 
    static Value func_matchregex(ArgList *args, Parser *p)
    {
+      ASSERT(args);
       if(args->Count() != 2)
          return 0;
       Value v1 = args->GetArg(0)->Evaluate();
@@ -1923,6 +1929,27 @@ extern "C"
       return rc;
    }
 
+#ifdef USE_PYTHON   
+   static Value func_python(ArgList *args, Parser *p)
+   {
+      ASSERT(args);
+      if(args->Count() != 1)
+         return 0;
+      Message * msg = p->GetMessage();
+      if(! msg) return Value("");
+      String funcName = args->GetArg(0)->Evaluate().ToString();
+
+      int result = 0;
+      bool rc = PyH_CallFunction(funcName,
+                                 "func_python",
+                                 p, "Message",
+                                 "%d", &result,
+                                 NULL);
+      msg->DecRef();
+      return rc ? (result != 0) : false;
+   }
+#endif
+   
 /* * * * * * * * * * * * * * *
  *
  * Access to message contents
@@ -2142,6 +2169,9 @@ ParserImpl::AddBuiltinFunctions(void)
    DefineFunction("now", func_now);
    DefineFunction("isspam", func_checkSpam);
    DefineFunction("expunge", func_expunge);
+#ifdef USE_PYTHON
+   DefineFunction("python", func_python);
+#endif
 }
 
 

@@ -5,6 +5,9 @@ from MObject import *
 
 from MString import *
 class ProfileBasePtr(MObjectRCPtr):
+    PT_Unknown = MProfilec.ProfileBase_PT_Unknown
+    PT_Any = MProfilec.ProfileBase_PT_Any
+    PT_FolderProfile = MProfilec.ProfileBase_PT_FolderProfile
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -49,15 +52,27 @@ class ProfileBase(ProfileBasePtr):
 
 #-------------- FUNCTION WRAPPERS ------------------
 
+def ProfileBase_CreateGlobalConfig(arg0):
+    val = MProfilec.ProfileBase_CreateGlobalConfig(arg0.this)
+    val = ProfileBasePtr(val)
+    return val
+
 def ProfileBase_CreateProfile(arg0,arg1):
     val = MProfilec.ProfileBase_CreateProfile(arg0.this,arg1.this)
     val = ProfileBasePtr(val)
     return val
 
-def ProfileBase_CreateGlobalConfig(arg0):
-    val = MProfilec.ProfileBase_CreateGlobalConfig(arg0.this)
+def ProfileBase_CreateModuleProfile(arg0,arg1):
+    val = MProfilec.ProfileBase_CreateModuleProfile(arg0.this,arg1.this)
     val = ProfileBasePtr(val)
     return val
+
+def ProfileBase_CreateEmptyProfile(arg0):
+    val = MProfilec.ProfileBase_CreateEmptyProfile(arg0.this)
+    val = ProfileBasePtr(val)
+    return val
+
+ProfileBase_DeleteGlobalConfig = MProfilec.ProfileBase_DeleteGlobalConfig
 
 
 

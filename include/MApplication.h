@@ -42,7 +42,9 @@ class ArrayFrames;
 class MAppBase : public MEventReceiver
 {
 public:
+#ifndef SWIGCODE
    MAppBase(void);
+#endif
    virtual ~MAppBase();
 
    /** create the main application window
@@ -142,12 +144,12 @@ public:
    /** return the global directory
        @return the path to the global M data files
    */
-   String const & GetGlobalDir(void) const { return m_globalDir; }
+   const String & GetGlobalDir(void) const { return m_globalDir; }
 
    /** return the local path
        @return the path to the local user's M data directory
    */
-   String const & GetLocalDir(void) const { return m_localDir; }
+   const String & GetLocalDir(void) const { return m_localDir; }
 
    /** Get a pointer to the list of known Mime types.
        @return the wxMimeTypesManager reference

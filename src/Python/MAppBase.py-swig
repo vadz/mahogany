@@ -2,10 +2,6 @@
 import MAppBasec
 
 from MString import *
-
-from MProfile import *
-
-from MObject import *
 class MAppBasePtr :
     def __init__(self,this):
         self.this = this
@@ -34,7 +30,6 @@ class MAppBasePtr :
         return val
     def GetProfile(self):
         val = MAppBasec.MAppBase_GetProfile(self.this)
-        val = ProfileBasePtr(val)
         return val
     def __repr__(self):
         return "<C MAppBase instance>"
@@ -75,8 +70,6 @@ def MDialog_FileRequester(arg0,*args):
     try: argl[3] = argl[3].this
     except: pass
     try: argl[4] = argl[4].this
-    except: pass
-    try: argl[6] = argl[6].this
     except: pass
     args = tuple(argl)
     val = apply(MAppBasec.MDialog_FileRequester,(arg0.this,)+args)
