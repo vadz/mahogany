@@ -1,0 +1,157 @@
+
+
+C++ Coding Style Guide
+
+Karsten Ballüder (Ballueder@usa.net, http://Ballueder.home.ml.org)
+
+Abstract
+
+This document is a set of notes explaining my preferred style of coding
+for C++, as it should be used throughout M in order to avoid unnecessary
+reformatting between different developers. The following guidelines
+have proven themselves to be useful during several cross-platform
+projects.
+
+1 Preprocessor Usage
+
+1.1 #define's
+
+1.1.1 features and compile time defines
+
+As most platforms use the GNU configure system to set defines, we have
+to follow its way of doing things. Therefor all defines which enable
+or disable features, should follow the following conventions:
+
+1. If they define a compile time option, they should be called USE_XXX,
+  if they define the availability of something, they should be called
+  HAVE_XXX.
+
+2. If defined, they must have the value 1. Never define it to be 0,
+  but use #undef instead.
+
+1.1.2 Operating system identifiers
+
+The source code must never reference any prdefined symbols such as
+__unix__ or __WINDOWS__. Instead, the global source configuration
+header file should check for them and define appropriate OS_XX values.
+Examples are: OS_WIN, OS_UNIX, OS_LINUX, OS_SOLARIS. Obviously, more
+than one of them can be defined at the same time, e.g. OS_UNIX and
+OS_SOLARIS. Also, OS_POSIX may be helpful. All of thes are either
+defined to 1 or undefined.
+
+1.1.3 Compiler identifiers
+
+For identifying different compilers rules analog to operating systems
+hold. I.e. there should be defines of the type CC_XXX defined. So
+far, M supports the following two compilers:
+
+* GNU gcc: CC_GCC, including egcs.
+
+* Microsoft Visual C++: CC_MSC
+
+1.2 #include's
+
+1.2.1 precompiled headers
+
+To support precompiled headers and to avoid unnecessarily compiling
+headers multiple times, one global header file Mpch.h exists and should
+be used in the following way:
+
+* On systems that support precompiled headers: it includes Mconfig.h
+  and all other header files which are used reasonably often.
+
+* On systems without precompiled headers, it only includes Mconfig.h.
+
+All source files should include Mpch.h, all header files should include
+Mconfig.h.
+
+1.3 Indentation
+
+* All preprocessor directives must start at column 0. Indentation should
+  happen between the leading hash (#) and the directive.
+
+* Indentation is by a TAB characters, or by eight spaces.
+
+* Between a #include and the file name, there should be a TAB, not
+  a space.
+
+Example:
+
+
+
+
+
+
+
+2 Naming conventions
+
+2.1 General
+
+* Do not use names starting with underscores, like _malloc or __malloc.
+
+* Class names always start with capital letters, variable names start
+  with lower case letters, i.e. MApplication is a class name, mApplication
+  is a variable name.
+
+* Do not use hungarian notation.
+
+* When using names consisting of several words, use mixed capitalisation,
+  not underscores, i.e. use MyNewClass, not My_new_class.
+
+* Avoid duplicating names of classes as variable names, i.e. MApplication
+  and mApplication, unless when there is only one instance of that
+  class, then it should be the same name, e.g. MyApp myApp;.
+
+* Use const wherever possible, both for parameters and for methods.
+
+* Try to avoid templates.
+
+3 Formatting of C/C++ code
+
+3.1 Rule of thumb
+
+Format your code like seen in Bjarne Stroustrup's The C++ Programming
+Language.
+
+3.2 braces
+
+Always put braces on a line by themselves. 
+
+Do not write code like:
+
+ 
+
+
+
+but write
+
+
+
+
+
+
+
+3.3 Use DOC++ comments
+
+It's pretty buggy, but maybe some day there will be a working version
+of it, so use it.
+
+4 Other coding issues
+
+4.1 Local data
+
+Do not define arrays as local variables, but explicitly allocate and
+deallocate them using new [] and delete []. If defined as local variables,
+they will get allocated on the stack which might overflow and produce
+wrong results without any warnings, which is difficult to detect.
+
+4.2 Use prefixes in global names
+
+When defining macros or global variable names (In some cases, this
+should also apply to class names.), use a library or application specific
+prefix to avoid conflicts with symbols defined in other libraries. 
+
+Example:
+
+Do not define a global macro such as SIZE(x), but call it mylibSIZE(x)
+or mSIZE(x).

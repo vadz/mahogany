@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sun Apr 26 16:13:19 1998
+#This file was created by <karsten> Mon Apr 27 14:40:34 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -393,6 +393,54 @@ Use DOC++ comments
 
 It's pretty buggy, but maybe some day there will be a working version of
  it, so use it.
+\layout Section
+
+Other coding issues
+\layout Subsection
+
+Local data
+\layout Standard
+
+Do not define arrays as local variables, but explicitly allocate and deallocate
+ them using 
+\family typewriter 
+new []
+\family default 
+ and 
+\family typewriter 
+delete []
+\family default 
+.
+ If defined as local variables, they will get allocated on the stack which
+ might overflow and produce wrong results without any warnings, which is
+ difficult to detect.
+\layout Subsection
+
+Use prefixes in global names
+\layout Standard
+
+When defining macros or global variable names (In some cases, this should
+ also apply to class names.), use a library or application specific prefix
+ to avoid conflicts with symbols defined in other libraries.
+ 
+\layout Standard
+
+Example:
+\layout Standard
+
+Do not define a global macro such as 
+\family typewriter 
+SIZE(x)
+\family default 
+, but call it 
+\family typewriter 
+mylibSIZE(x)
+\family default 
+ or 
+\family typewriter 
+mSIZE(x)
+\family default 
+.
 \layout Standard
 
 \the_end
