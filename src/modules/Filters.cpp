@@ -1961,10 +1961,14 @@ static bool CheckXAuthWarning(const String& value)
    if ( !pc )
       return false;
 
-   // there seems to be a common mosconfiguration problem with some LANs which
-   // results in values of X-Authentication-Warning header like
+   // there seems to be a few common misconfiguration problems which
+   // result in generation of X-Authentication-Warning headers like this
    //
-   //    smtpserver.domain.com: Host host.domain.com [ip] claimed to be host
+   //    Host host.domain.com [ip] claimed to be host
+   //
+   // or like that:
+   //
+   //    Host alias.domain.com [ip] claimed to be mail.domain.com
    //
    // which are, of course, harmless, i.e. don't mean that this is spam, so we
    // try to filter them out
@@ -1973,18 +1977,50 @@ static bool CheckXAuthWarning(const String& value)
    pc += strlen(HOST_STRING);
    pc2 += strlen(CLAIMED_STRING);
 
-   // check if they're equal
-   while ( *pc != '.' && *pc2 != '\r' )
+   // check if the host names are equal (case 1 above)
+   const char *host1 = pc,
+              *host2 = pc2;
+
+   bool hostsEqual = true;
+   while ( *host1 != '.' && *host2 != '\r' )
    {
-      if ( *pc++ != *pc2++ )
+      if ( *host1++ != *host2++ )
       {
-         // hosts don't match, so it's a serious warning
-         return true;
+         // hosts don't match
+         hostsEqual = false;
+
+         break;
       }
    }
 
    // did the host names match?
-   return *pc == '.' && *pc2 == '\r';
+   if ( hostsEqual && *host1 == '.' && *host2 == '\r' )
+   {
+      // they did, ignore this warning
+      return false;
+   }
+
+   // check if the domains match
+   const char *domain1 = strchr(pc, '.'),
+              *domain2 = strchr(pc2, '.');
+
+   if ( !domain1 || !domain2 )
+   {
+      // no domain at all -- this looks suspicious
+      return true;
+   }
+
+   while ( *domain1 != ' ' && *domain2 != '\r' )
+   {
+      if ( *domain1++ != *domain2++ )
+      {
+         // domain differ as well, seems like a valid warning
+         return true;
+      }
+   }
+
+   // did the domains match fully?
+   return *domain1 == ' ' && *domain2 == '\r';
 }
 
 // check the value of Received headers and return true if we believe they
