@@ -37,7 +37,7 @@ doc:	all
 ifdef HAVE_DOCTOOLS
 makemap: .src/wxhelp.map0 $(SUBDIRS)
 	set -e; for i in $(SUB_DIRS); \
-	do sed "s,^\([ 	-0-9]*\),\1$$i/,g" $$i/wxhelp.map; \
+	do sed "s,^\([ 	0-9-]*\),\1$$i/,g" $$i/wxhelp.map; \
 	done | sort -n -o wxhelp.map .src/wxhelp.map0 -
 else
 makemap:

@@ -60,6 +60,8 @@
 
 #include <wx/snglinst.h>
 
+#include <wx/generic/helpext.h>
+
 #if defined(OS_WIN) || defined(__CYGWIN__)
    #define wxConnection    wxDDEConnection
    #define wxServer        wxDDEServer
@@ -1290,9 +1292,9 @@ wxString wxMApp::GetHelpDir()
       helpdir += wxFILE_SEP_PATH;
 
 #ifdef OS_WIN
-   helpdir += "help";
+   helpdir += _T("help");
 #else // !Windows
-   helpdir += "doc";
+   helpdir += _T("doc");
 #endif // Windows/!Windows
 
    return helpdir;
@@ -1312,7 +1314,7 @@ bool wxMApp::InitHelp()
       // default wxHelpController everywhere as we don't have docs in all
       // possible formats, just HTML and CHM
 #ifdef OS_UNIX
-      m_HelpController = new wxHelpController;
+      m_HelpController = new wxExtHelpController;
 #else // Windows
       m_HelpController = new wxBestHelpController;
 #endif // Unix/Windows
@@ -1359,7 +1361,7 @@ bool wxMApp::InitHelp()
 
    // set help viewer options
 
-#if defined(OS_UNIX) && !wxUSE_HTML
+#if defined(OS_UNIX) // && !wxUSE_WXHTML_HELP
    ((wxExtHelpController *)m_HelpController)->SetBrowser(
       READ_APPCONFIG(MP_HELPBROWSER),
       READ_APPCONFIG(MP_HELPBROWSER_ISNS));
