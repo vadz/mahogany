@@ -1156,7 +1156,7 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
                                   wxLB_SORT);
    m_lboxFilters->SetConstraints(c);
 
-   SetDefaultSize(5*wBtn, 9*hBtn);
+   SetDefaultSize(5*wBtn, 11*hBtn);
 
    m_lboxFilters->SetFocus();
 }
