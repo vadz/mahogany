@@ -3144,8 +3144,11 @@ FUNC( int,  SSL_pending, (SSL *s) );
 FUNC( int,  SSL_library_init, (void ) );
 FUNC( void, SSL_load_error_strings, (void ) );
 FUNC( SSL_CTX *,SSL_CTX_new, (SSL_METHOD *meth) );
+FUNC( unsigned long, ERR_get_error, (void) );
+FUNC( char *, ERR_error_string, (unsigned long e, char *p));
 //extern SSL_get_cipher_bits();
 FUNC( const char *, SSL_CIPHER_get_name, (SSL_CIPHER *c) );
+FUNC( int, SSL_CIPHER_get_bits, (SSL_CIPHER *c, int *alg_bits) );
 //extern SSL_get_cipher();
 FUNC( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s) );
 #   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
@@ -3155,7 +3158,7 @@ FUNC(int, TLSv1_client_method, () );
 #   else
 FUNC(SSL_METHOD *, SSLv23_client_method, (void) );
 #   endif
-}
+
 
 SSL     * SSL_new(SSL_CTX *ctx)
 { return (*stub_SSL_new)(ctx); }
@@ -3181,6 +3184,32 @@ void	  SSL_load_error_strings(void )
 { (*stub_SSL_load_error_strings)(); }
 SSL_CTX * SSL_CTX_new(SSL_METHOD *meth)
 { return (*stub_SSL_CTX_new)(meth); }
+unsigned long ERR_get_error(void)
+{ return (*stub_ERR_get_error)(); }
+char * ERR_error_string(unsigned long e, char *p)
+{ return (*stub_ERR_error_string)(e,p); }
+const char * SSL_CIPHER_get_name(SSL_CIPHER *c)
+{ return (*stub_SSL_CIPHER_get_name)(c); }
+SSL_CIPHER * SSL_get_current_cipher(SSL *s)
+{ return (*stub_SSL_get_current_cipher)(s); }
+int SSL_CIPHER_get_bits(SSL_CIPHER *c, int *alg_bits)
+{
+  return (*stub_SSL_CIPHER_get_bits)(c,alg_bits);
+}
+
+
+#   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
+SSL_METHOD *  SSLv3_client_method(void)
+{ return (*stub_SSLv3_client_method)(); }
+#   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
+int TLSv1_client_method(void)
+{ (* stub_TLSv1_client_method)(); }
+#   else
+SSL_METHOD * SSLv23_client_method(void)
+{ return (* stub_SSLv23_client_method)(); }
+#   endif
+
+} // extern "C"
 
 #include <wx/dynlib.h>
 
@@ -3211,6 +3240,9 @@ bool InitSSL(void) /* FIXME: MT */
    LOAD(SSL_CTX_new );
    LOAD(SSL_CIPHER_get_name );
    LOAD(SSL_get_current_cipher );
+   LOAD(ERR_get_error);
+   LOAD(ERR_error_string);
+   LOAD(SSL_CIPHER_get_bits);
 #   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
    LOAD(SSLv3_client_method );
 #   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
