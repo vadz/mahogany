@@ -18,13 +18,16 @@
  */
 //@{
 
+/// X-Spam-Status: Yes header?
+#define SPAM_TEST_SPAMASSASSIN "spamassassin"
+
 /// does the subject contain too many (unencoded) 8 bit chars?
 #define SPAM_TEST_SUBJ8BIT "subj8bit"
 
 /// korean charset?
 #define SPAM_TEST_KOREAN "korean"
 
-/// suspicious X-Authentification-Warning header?
+/// suspicious X-Authentication-Warning header?
 #define SPAM_TEST_XAUTHWARN "xauthwarn"
 
 /// HTML contents at top level?

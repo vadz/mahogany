@@ -391,6 +391,7 @@ private:
 
 
    // the spam test data
+   bool m_checkSpamAssassin:1;
    bool m_check8bit:1;
    bool m_checkKorean:1;
    bool m_checkXAuthWarn:1;
@@ -608,6 +609,9 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
 // ----------------------------------------------------------------------------
 
 // spam details page options
+#define MP_SPAM_SPAM_ASSASSIN "SpamAssassin"
+#define MP_SPAM_SPAM_ASSASSIN_D 1l
+
 #define MP_SPAM_8BIT_SUBJECT "Spam8BitSubject"
 #define MP_SPAM_8BIT_SUBJECT_D 1l
 
@@ -631,6 +635,7 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
 static const ConfigValueDefault gs_SpamPageConfigValues[] =
 {
    CONFIG_NONE(),
+   CONFIG_ENTRY(MP_SPAM_SPAM_ASSASSIN),
    CONFIG_ENTRY(MP_SPAM_8BIT_SUBJECT),
    CONFIG_ENTRY(MP_SPAM_KOREAN_CSET),
    CONFIG_ENTRY(MP_SPAM_X_AUTH_WARN),
@@ -651,10 +656,11 @@ static const wxOptionsPage::FieldInfo gs_SpamPageFieldInfos[] =
                   "\n"
                   "So the message is considered to be spam if it has..."),
                   wxOptionsPage::Field_Message, -1 },
+   { gettext_noop("been tagged as spam by Spam&Assassin"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("Too many &8 bit characters in subject"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("&Korean charset"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("X-Authentification-&Warning header"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("HTML content"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("X-Authentication-&Warning header"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("&HTML content"), wxOptionsPage::Field_Bool, -1 },
 #ifdef USE_RBL
    { gettext_noop("been &blacklisted by RBL"), wxOptionsPage::Field_Bool, -1},
 #endif // USE_RBL
@@ -681,6 +687,7 @@ OneCritControl::InitSpamOptions(const String& rule)
 {
    // this is really crude but should work in common case when there is only
    // one spam test in the rule
+   m_checkSpamAssassin = strstr(rule, SPAM_TEST_SPAMASSASSIN) != 0;
    m_check8bit = strstr(rule, SPAM_TEST_SUBJ8BIT) != 0;
    m_checkKorean = strstr(rule, SPAM_TEST_KOREAN) != 0;
 
@@ -700,6 +707,7 @@ OneCritControl::ShowDetails()
    Profile *profile = mApplication->GetProfile();
 
    // transfer data to dialog
+   profile->writeEntry(MP_SPAM_SPAM_ASSASSIN, m_checkSpamAssassin);
    profile->writeEntry(MP_SPAM_8BIT_SUBJECT, m_check8bit);
    profile->writeEntry(MP_SPAM_KOREAN_CSET, m_checkKorean);
    profile->writeEntry(MP_SPAM_X_AUTH_WARN, m_checkXAuthWarn);
@@ -710,6 +718,7 @@ OneCritControl::ShowDetails()
 
    if ( ShowCustomOptionsDialog(gs_SpamPageDesc, profile, GetFrame(m_Parent)) )
    {
+      m_checkSpamAssassin = profile->readEntry(MP_SPAM_SPAM_ASSASSIN, 0l) != 0;
       m_check8bit = profile->readEntry(MP_SPAM_8BIT_SUBJECT, 0l) != 0;
       m_checkKorean = profile->readEntry(MP_SPAM_KOREAN_CSET, 0l) != 0;
       m_checkXAuthWarn = profile->readEntry(MP_SPAM_X_AUTH_WARN, 0l) != 0;
@@ -726,6 +735,7 @@ OneCritControl::ShowDetails()
    //else: cancelled
 
    // don't keep this stuff in profile, we don't use it except here
+   profile->DeleteEntry(MP_SPAM_SPAM_ASSASSIN);
    profile->DeleteEntry(MP_SPAM_8BIT_SUBJECT);
    profile->DeleteEntry(MP_SPAM_KOREAN_CSET);
    profile->DeleteEntry(MP_SPAM_X_AUTH_WARN);
@@ -750,6 +760,8 @@ OneCritControl::GetSpamTestArgument() const
 
    CHECK( m_btnSpam, s, "shouldn't be called if spam button not used" );
 
+   if ( m_checkSpamAssassin )
+      AddToSpamArgument(s, SPAM_TEST_SPAMASSASSIN);
    if ( m_check8bit )
       AddToSpamArgument(s, SPAM_TEST_SUBJ8BIT);
    if ( m_checkKorean )

@@ -1886,6 +1886,18 @@ static bool CheckMimePartForKoreanCSet(const MimePart *part)
    return false;
 }
 
+// another func_isspam() helper: check the value of X-Spam-Status
+// header and return true if we believe it indicates that this is a spam
+static bool CheckXSpamStatus(const String& value)
+{
+   // check for "^.*^X-Spam-Status: Yes+$" regex manually
+   const char *pc = strstr(value, "Yes");
+   if ( !pc )
+      return false;
+
+   return true;
+}
+
 // another func_isspam() helper: check the value of X-Authentication-Warning
 // header and return true if we believe it indicates that this is a spam
 static bool CheckXAuthWarning(const String& value)
@@ -1969,6 +1981,13 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
          // detect all Korean charsets -- and do it for all MIME parts, not
          // just the top level one
          rc = CheckMimePartForKoreanCSet(msg->GetTopMimePart());
+      }
+      else if ( test == SPAM_TEST_SPAMASSASSIN )
+      {
+         // SpamAssassin adds header "X-Spam-Status: Yes" to all (probably)
+         // detected spams
+         rc = msg->GetHeaderLine("X-Spam-Status", value) &&
+                  CheckXSpamStatus(value);
       }
       else if ( test == SPAM_TEST_XAUTHWARN )
       {
