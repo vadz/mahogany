@@ -200,7 +200,11 @@ extern void WeakRefAssign(MObjectRC *target,MObjectRC *source)
    WeakRefDecrement(target);
 }
 
-extern bool WeakRefExpired(const MObjectRC *pointer)
+extern void *WeakRefConvert(MObjectRC *pointer)
 {
-   return pointer->m_nRef == 0;
+   if( !pointer->m_nRef )
+      return NULL;
+
+   pointer->IncRef();
+   return pointer;
 }

@@ -38,7 +38,6 @@
 // trace mask for the mail folder related events
 #define TRACE_MF_EVENTS _T("mfevent")
 
-class FilterRule;
 DECLARE_REF_COUNTER(FilterRule)
 
 /**
@@ -350,18 +349,21 @@ private:
 class FilterNewMailContext
 {
 public:
-   FilterNewMailContext(FilterRule *rule)
+   FilterNewMailContext(RefCounter<FilterRule> rule)
    {
       if( !m_instance )
       {
          m_instance = this;
-         m_rule.AttachAndIncRef(rule);
+         m_rule = rule;
       }
    }
    ~FilterNewMailContext()
    {
       if( m_instance == this )
+      {
          m_instance = NULL;
+         m_rule.reset();
+      }
    }
 
    static bool IsInStack() { return m_instance != NULL; }

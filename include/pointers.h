@@ -22,7 +22,44 @@
    class. It has normal copying semantics unlike the std::auto_ptr<> as it uses
    ref counting.
 
-   @todo To be extended...
+
+   Rules:
+   
+   All newly allocated objects are passed to RefCounter constructor,
+   for example:
+   
+      RefCounter<MyClass> ref(new MyClass(x,y));
+   
+   Pointer to "this" or any other raw pointer can be converted to
+   RefCounter using Convert member, for example:
+   
+      RefCounter<MyClass> ref(RefCounter<MyClass>::convert(this));
+
+   RefCounter members must not form cycles. It should be possible to create
+   graph of classes where arrows go from classes containing RefCounter to
+   classes used as template parameter to such RefCounter. Cases, where
+   backreference to parent is needed, can be resolved using WeakRef to
+   parent. Recurrent structures should be modelled using tree container.
+
+
+   Compatibility with legacy raw pointer interfaces:
+   
+   Raw pointers are converted in one of two ways depending on
+   whether they are already IncRef-ed or not:
+   
+      // IncRef in GetProfile
+      ref.attach(x->GetProfile());
+   
+      // IncRef in Convert
+      ref.attach(RefCounter<MyClass>::convert(x->GetProfile()));
+   
+   Local RefCounter can be returned IncRef-ed using Release:
+   
+      return x.release();
+
+   Raw pointer parameters are not IncRef-ed. They are passed using Get:
+   
+      SomeFunc(x.get());
  */
 template <class T>
 class RefCounter
@@ -42,27 +79,26 @@ public:
 
 
    /**
-      Default constructor creates an uninitialized pointer.
-
+      Default constructor creates NULL pointer.
     */
-   RefCounter() { m_pointer = NULL; }
+   RefCounter() : m_pointer(NULL) {}
 
    /**
-      Constructor from a rawp ointer.
+      Constructor from a raw pointer.
 
       We take the ownership of the pointer here, i.e. we will call DecRef() on
       it.
 
       @param pointer the pointer to take ownership of, may be NULL
     */
-   explicit RefCounter(T *pointer) { m_pointer = pointer; }
+   explicit RefCounter(T *pointer) : m_pointer(pointer) {}
 
    /**
       Copy constructor.
     */
    RefCounter(const RefCounter<T>& copy)
+      : m_pointer(copy.m_pointer)
    {
-      m_pointer = copy.m_pointer;
       RefCounterIncrement(m_pointer);
    }
 
@@ -73,7 +109,11 @@ public:
       modify its argument.
     */
    RefCounter<T>& operator=(const RefCounter<T> &copy)
-      { AttachAndIncRef(copy.m_pointer); return *this; }
+   {
+      RefCounterAssign(m_pointer,copy.m_pointer);
+      m_pointer = copy.m_pointer;
+      return *this;
+   }
 
    /**
       Destructor releases the pointer possibly destroying it.
@@ -83,13 +123,13 @@ public:
    ~RefCounter() { RefCounterDecrement(m_pointer); }
 
    /// returns the stored pointer, may be @c NULL
-   T *Get() const { return m_pointer; }
+   T *get() const { return m_pointer; }
 
    /// allows use of this class as a pointer, must be non @c NULL
-   T& operator*() const { return *Get(); }
+   T& operator*() const { return *get(); }
 
    /// allows use of this class as a pointer, must be non @c NULL
-   T *operator->() const { return Get(); }
+   T *operator->() const { return get(); }
 
    /**
        Implicit, but safe, conversion to bool.
@@ -101,10 +141,27 @@ public:
     */
    operator unspecified_bool_type() const // never throws
    {
-       return m_pointer ? &RefCounter<T>::Get : NULL;
+       return m_pointer ? &RefCounter<T>::get : NULL;
    }
 
-   void Attach(T *pointer)
+   /**
+      Reset to @c NULL.
+      
+      It looks better than @c NULL assignment and it saves some cycles.
+    */
+   void reset()
+   {
+      RefCounterDecrement(m_pointer);
+      m_pointer = NULL;
+   }
+   
+   /**
+      Takes ownership of pointer.
+      
+      The caller has already called IncRef() on the pointer if it is not
+      @c NULL.
+    */
+   void attach(T *pointer)
    {
       RefCounterDecrement(m_pointer);
       m_pointer = pointer;
@@ -116,7 +173,7 @@ public:
       The caller is responsible for calling DecRef() on the returned pointer if
       it is not @c NULL.
     */
-   T *Release()
+   T *release()
    {
       T *pointer = m_pointer;
       m_pointer = NULL;
@@ -124,18 +181,16 @@ public:
       return pointer;
    }
 
-   static RefCounter<T> Convert(T *pointer)
+   /**
+      Converts raw pointer to smart pointer.
+      
+      The pointer is not manipulated in any way. Returned RefCounter
+      calls IncRef() for its own copy of the pointer.
+    */
+   static RefCounter<T> convert(T *pointer)
    {
-      RefCounter<T> result;
-      result.AttachAndIncRef(pointer);
-      return result;
-   }
-
-   /// Expects object that has not been IncRef-ed yet, don't use if possible
-   void AttachAndIncRef(T *pointer)
-   {
-      RefCounterAssign(m_pointer,pointer);
-      m_pointer = pointer;
+      RefCounterIncrement(pointer);
+      return RefCounter<T>(pointer);
    }
 
 private:
@@ -143,25 +198,50 @@ private:
 };
 
 
-// Used to resolve cyclic references. RefCounter goes in one direction
-// and WeakRef goes in the opposite direction. WeakRef (seems that it)
-// contains NULL if all RefCounter instances are gone (and the object
-// is deleted). WeakRef is a bit inefficient. That's why you should
-// always convert it to RefCounter when you want to use object it points to.
+/**
+   Weak pointer complementary to RefCounter.
+   
+   WeakRef (seems that it) contains NULL if all RefCounter instances
+   are gone. WeakRef cannot be used directly. It must be converted to
+   RefCounter first.
+   
+   WeakRef is used to resolve cyclic references. See RefCounter for details.
+   
+   WeakRef is intrusively counted weak pointer. This means that MObjectRC
+   holds not only count of RefCounter instances, but also count of WeakRef
+   instances. When all RefCounter instances are destroyed, MObjectRC
+   destructor is called, but memory is not freed. When all WeakRef instances
+   are destroyed, operator delete is called and the object finally
+   disappears. This means that memory occupied by an object is held allocated
+   until all WeakRef instances, that point to it, are destroyed or
+   overwritten. It is not wasteful, because most uses of WeakRef are for
+   parent backlinks and these should never become NULL.
+ */
 template <class T>
 class WeakRef
 {
 public:
+   /// Default constructor creates NULL pointer.
    WeakRef() : m_pointer(NULL) {}
+   
+   /// Copy constructor.
    WeakRef(const WeakRef<T> &copy)
       : m_pointer(copy.m_pointer)
-      { WeakRefIncrement(m_pointer); }
+   {
+      WeakRefIncrement(m_pointer);
+   }
+   
+   /// Destructor
    ~WeakRef() { WeakRefDecrement(m_pointer); }
 
+   /// Conversion from RefCounter to WeakRef.
    WeakRef(RefCounter<T> pointer)
       : m_pointer(pointer.Get())
-      { WeakRefIncrement(m_pointer); }
+   {
+      WeakRefIncrement(m_pointer);
+   }
 
+   /// Assignment operator.
    WeakRef<T>& operator=(const WeakRef<T> &copy)
    {
       WeakRefAssign(m_pointer,copy.m_pointer);
@@ -169,23 +249,22 @@ public:
       return *this;
    }
 
+   /// Conversion from RefCounter to already constructed WeakRef.
    WeakRef<T>& operator=(RefCounter<T> pointer)
    {
-      m_pointer = pointer.Get();
+      m_pointer = pointer.get();
       WeakRefIncrement(m_pointer);
       return *this;
    }
-
-   bool Expired() const { return WeakRefExpired(m_pointer); }
    
-   RefCounter<T> Get() const
+   /// Conversion from WeakRef to RefCounter.
+   RefCounter<T> lock() const
    {
-      RefCounter<T> result;
-      result.AttachAndIncRef(Expired() ? NULL : m_pointer);
-      return result;
+      return RefCounter<T>(WeakRefConvert(m_pointer));
    }
    
-   operator RefCounter<T>() const { return Get(); }
+   /// Implicit conversion from WeakRef to RefCounter.
+   operator RefCounter<T>() const { return lock(); }
    
 private:
    T *m_pointer;
@@ -224,8 +303,10 @@ private:
 };
 
 
-// Use instead of forward declaration to make RefCounter and WeakRef
-// instantiable without knowledge that T derives from MObjectRC.
+/**
+   Use instead of forward declaration to make RefCounter and WeakRef
+   instantiable without knowledge that T derives from MObjectRC.
+ */
 #define DECLARE_REF_COUNTER(T) \
    class T; \
    extern void RefCounterIncrement(T *pointer); \
@@ -234,11 +315,13 @@ private:
    extern void WeakRefIncrement(T *pointer); \
    extern void WeakRefDecrement(T *pointer); \
    extern void WeakRefAssign(T *target,T *source); \
-   extern bool WeakRefExpired(const T *pointer);
+   extern T *WeakRefConvert(T *pointer);
 
 
-// If DECLARE_REF_COUNTER is used anywhere, DEFINE_REF_COUNTER must be
-// put it some *.cpp file that #includes ClassName's header.
+/**
+   If DECLARE_REF_COUNTER is used anywhere, DEFINE_REF_COUNTER must be
+   put it some *.cpp file that #includes ClassName's header.
+ */
 #define DEFINE_REF_COUNTER(T) \
    extern void RefCounterIncrement(T *pointer) \
       { RefCounterIncrement(static_cast<MObjectRC *>(pointer)); } \
@@ -258,8 +341,8 @@ private:
       WeakRefAssign(static_cast<MObjectRC *>(target), \
          static_cast<MObjectRC *>(source)); \
    } \
-   extern bool WeakRefExpired(const T *pointer) \
-      { return WeakRefExpired(static_cast<const MObjectRC *>(pointer)); } \
+   extern T *WeakRefConvert(T *pointer) \
+      { return (T *)WeakRefConvert(static_cast<MObjectRC *>(pointer)); }
 
 
 #endif // M_POINTERS_H

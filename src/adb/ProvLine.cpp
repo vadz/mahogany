@@ -40,8 +40,9 @@
 // ----------------------------------------------------------------------------
 
 // fwd decl
-class LineEntry;
-class LineEntryData;
+DECLARE_REF_COUNTER(LineBook)
+DECLARE_REF_COUNTER(LineEntry)
+DECLARE_REF_COUNTER(LineEntryData)
 
 WX_DECLARE_STRING_HASH_MAP(RefCounter<LineEntryData>,LineEntryArray);
 
@@ -165,7 +166,7 @@ public:
    // AdbEntry
    
    // Don't call IncRef
-   virtual AdbEntryGroup *GetGroup() const { return m_book.Get(); }
+   virtual AdbEntryGroup *GetGroup() const { return m_book.get(); }
 
    virtual void GetFieldInternal(size_t n, String *pstr) const
       { GetField(n, pstr); }
@@ -221,6 +222,8 @@ IMPLEMENT_ADB_PROVIDER(LineDataProvider, true,
 // ----------------------------------------------------------------------------
 // LineBook
 // ----------------------------------------------------------------------------
+
+DEFINE_REF_COUNTER(LineBook)
 
 // Duplicate of FCBook::GetFullAdbPath. It should be shared somehow.
 String LineBook::GetFullAdbPath(const String& filename)
@@ -301,14 +304,14 @@ AdbEntry *LineBook::CreateEntry(const String& name)
    
    RefCounter<LineEntryData> data(new LineEntryData);
    RefCounter<LineEntry> entry(new LineEntry(
-      RefCounter<LineBook>::Convert(this),data));
+      RefCounter<LineBook>::convert(this),data));
    
    LineEntryArray::value_type pair(name,data);
    m_entries.insert(pair);
 
    m_dirty = true;
    
-   return entry.Release();
+   return entry.release();
 }
 
 void LineBook::DeleteEntry(const String& name)
@@ -330,11 +333,11 @@ AdbEntry *LineBook::FindEntry(const wxChar *name)
    RefCounter<LineEntry> entry(found->second->m_handle);
    if( !entry )
    {
-      entry.Attach(new LineEntry(
-            RefCounter<LineBook>::Convert(this),found->second));
+      entry.attach(new LineEntry(
+            RefCounter<LineBook>::convert(this),found->second));
    }
 
-   return entry.Release();
+   return entry.release();
 }
 
 bool LineBook::IsSameAs(const String& name) const
@@ -441,11 +444,13 @@ bool LineBook::ReadFromStream(istream &stream)
 // LineEntry
 // ----------------------------------------------------------------------------
 
+DEFINE_REF_COUNTER(LineEntry)
+
 LineEntry::LineEntry(RefCounter<LineBook> parent,
    RefCounter<LineEntryData> data)
    : m_book(parent), m_data(data)
 {
-   m_data->m_handle = RefCounter<LineEntry>::Convert(this);
+   m_data->m_handle = RefCounter<LineEntry>::convert(this);
 }
 
 String LineEntry::StripSpace(const String &address)
@@ -464,6 +469,8 @@ String LineEntry::StripSpace(const String &address)
 // ----------------------------------------------------------------------------
 // LineEntryData
 // ----------------------------------------------------------------------------
+
+DEFINE_REF_COUNTER(LineEntryData)
 
 void LineEntryData::GetField(size_t n, String *pstr) const
 {
@@ -544,7 +551,7 @@ AdbBook *LineDataProvider::CreateBook(const String& name)
 {
    RefCounter<LineBook> book(new LineBook(name));
    CHECK ( !book->IsBad(), NULL, _T("Cannot create LineBook") )
-   return book.Release();
+   return book.release();
 }
 
 bool LineDataProvider::TestBookAccess(const String& name, AdbTests test)

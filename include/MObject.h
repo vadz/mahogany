@@ -27,7 +27,7 @@ extern void RefCounterAssign(MObjectRC *target,MObjectRC *source);
 extern void WeakRefIncrement(MObjectRC *pointer);
 extern void WeakRefDecrement(MObjectRC *pointer);
 extern void WeakRefAssign(MObjectRC *target,MObjectRC *source);
-extern bool WeakRefExpired(const MObjectRC *pointer);
+extern void *WeakRefConvert(MObjectRC *pointer);
 
 // ----------------------------------------------------------------------------
 // MObject: the mother of all classes
@@ -208,7 +208,7 @@ private:
    friend void WeakRefIncrement(MObjectRC *pointer);
    friend void WeakRefDecrement(MObjectRC *pointer);
    friend void WeakRefAssign(MObjectRC *target,MObjectRC *source);
-   friend bool WeakRefExpired(const MObjectRC *pointer);
+   friend void *WeakRefConvert(MObjectRC *pointer);
    
    size_t m_weakRef; // Delay call to ::operator delete() while > 0
 };

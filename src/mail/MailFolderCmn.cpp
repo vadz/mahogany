@@ -1596,7 +1596,7 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
               GetName().c_str(), (unsigned long)uidsNew.GetCount());
 
    // Shut up some messages down in OverviewData::UpdateProgress
-   FilterNewMailContext context(filterRule);
+   FilterNewMailContext context(RefCounter<FilterRule>::convert(filterRule));
 
    // we're almost surely going to look at all new messages, so pre-cache them
    // all at once
