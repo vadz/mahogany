@@ -407,7 +407,8 @@ strutil_expandpath(const String &ipath)
       if(path[1u] == DIR_SEPARATOR)
       {
          path = getenv("HOME");
-         path << DIR_SEPARATOR;
+         path << path.c_str() + 1;
+         return path;
       }
       else
       {
@@ -415,10 +416,11 @@ strutil_expandpath(const String &ipath)
             strutil_before(String(path.c_str()+1),DIR_SEPARATOR);
          // FIXME: crode fix, should use getpwent()
          // up... - but do we really need that?
-         path << "/home/" << user << DIR_SEPARATOR;
+         path << "/home/" << user << DIR_SEPARATOR
+              << strutil_after(String(path.c_str()+1),DIR_SEPARATOR);
+         return path;
       }
    }
-   path << ipath;
-   
-   return path;
+   else
+      return ipath;
 }
