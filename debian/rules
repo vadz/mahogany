@@ -35,7 +35,7 @@ binary-arch: checkroot build
 	$(MAKE) -C build-debian install DESTDIR=`pwd`/debian/tmp/usr
 # Must have debmake installed for this to work. Otherwise please copy
 # /usr/bin/debstd into the debian directory and change debstd to debian/debstd
-	debstd README TODO 
+	debstd README TODO
 	dpkg-gencontrol
 	chown -R root.root debian/tmp
 	chmod -R go=rX debian/tmp
@@ -51,4 +51,4 @@ checkroot:
 	$(checkdir)
 	test root = "`whoami`"
 
-.PHONY: binary binary-arch binary-indep clean checkroot
+.PHONY: binary binary-arch binary-indep build clean checkroot
