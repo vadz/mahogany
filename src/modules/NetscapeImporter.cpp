@@ -531,11 +531,9 @@ MyHashTable::~MyHashTable()
 {
   // should delete the strings hier;
   m_tbl.BeginFind();
-  wxString *tmp = NULL;
   wxNode* node = NULL;
   while ( (node = m_tbl.Next()) != NULL )
-   if ((tmp = (wxString*)node->GetData()))
-     delete tmp;
+   delete (wxString*)node->GetData();
 
   //  m_tbl.DeleteContents(FALSE);  // just ot make sure, they are deleted
 
@@ -1254,7 +1252,7 @@ bool MNetscapeImporter::ImportFolderSettings ( MyHashTable& tbl )
 
   // if Not deliver immediately, then create an Outbox to be used
   if ( tbl.GetValue(_T("mail.deliver_immediately"), tmpBool) && ! tmpBool )
-	WriteProfileEntry(MP_OUTBOX_NAME, _T("Outbox"), _T("Outgoing mail folder"));
+	WriteProfileEntry(MP_OUTBOX_NAME, String(_T("Outbox")), _T("Outgoing mail folder"));
 
   return TRUE;
 }
@@ -1385,7 +1383,7 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const wxString& v
 
   Profile* l_Profile = mApplication->GetProfile();
 
-  if ( status = l_Profile->writeEntry( key, tmpVal) )
+  if ( (status = l_Profile->writeEntry( key, tmpVal)) == true )
    wxLogMessage(_("Imported '%s' setting from %s: %s."),
              desc.c_str(),"Netscape",tmpVal.c_str());
   else
@@ -1400,7 +1398,7 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const int val, co
 
   Profile* l_Profile = mApplication->GetProfile();
 
-  if ( status = l_Profile->writeEntry( key, val) )
+  if ( (status = l_Profile->writeEntry(key, val)) == true )
    wxLogMessage(_("Imported '%s' setting from %s: %u."),
              desc.c_str(),"Netscape",val);
   else
