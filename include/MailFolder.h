@@ -130,11 +130,15 @@ public:
          @param name name of new folder profile
          @param type type of folder
          @param flags folder flags
+         @param optional path for folder
+         @param comment optional comment for the folder
          @return false on error or true on success
    */
    static bool CreateFolder(const String &name,
                             FolderType type = MF_FILE,
-                            FolderFlags flags = MF_FLAGS_DEFAULT);
+                            int flags = MF_FLAGS_DEFAULT,
+                            const String &path = "",
+                            const String &comment = "");
 
    /** Checks if it is OK to exit the application now.
        @param which Will either be set to empty or a '\n' delimited

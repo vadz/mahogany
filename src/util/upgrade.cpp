@@ -84,9 +84,9 @@ enum InstallWizardPageId
    InstallWizard_WelcomePage,          // say hello
    InstallWizard_IdentityPage,         // ask name, e-mail
    InstallWizard_ServersPage,          // ask POP, SMTP, NNTP servers
-   InstallWizard_DialUpPage,           // set up dial-up networking
    InstallWizard_OperationsPage,       // how we want Mahogany to work
-   InstallWizard_MiscPage,             // signature, other common options
+   InstallWizard_DialUpPage,           // set up dial-up networking
+   InstallWizard_MiscPage,             // other common options
 #ifdef USE_HELPERS_PAGE
    InstallWizard_HelpersPage,          // external programs set up
 #endif // USE_HELPERS_PAGE
@@ -118,12 +118,8 @@ struct InstallWizardData
           smtp,
           nntp;
 
-   // misc page
-   bool   isSigFile;    // TRUE => signature is a filename,
-   String signature;    // FALSE => it's a signature itself
-
    // operations page:
-   int   useDialUp; // initially -1
+   int    useDialUp; // initially -1
    bool   useOutbox;
    bool   useTrash;
    bool   collectAllMail;
@@ -234,10 +230,13 @@ public:
          gs_installWizardData.imap = m_imap->GetValue();
          gs_installWizardData.smtp = m_smtp->GetValue();
          gs_installWizardData.nntp = m_nntp->GetValue();
-         return gs_installWizardData.pop.Length() > 0
-            && gs_installWizardData.imap.Length() > 0
-            && gs_installWizardData.smtp.Length() > 0
-            && gs_installWizardData.nntp.Length() > 0;
+         if(gs_installWizardData.smtp.Length() == 0)
+         {
+            wxLogError(_("You need to specify at least the SMTP server."));
+            return FALSE;
+         }
+         else
+            return TRUE;
       }
 
    virtual bool TransferDataToWindow()
@@ -363,15 +362,15 @@ BEGIN_EVENT_TABLE(InstallWizardPage, wxWizardPage)
    EVT_WIZARD_CANCEL(-1, InstallWizardPage::OnWizardCancel)
 END_EVENT_TABLE()
 
-   /** FIXME: This code is completely obsolete as the dialup code will 
-       be user-selectable on the dial-up page which must be shown if
-       useDialUp is set. */
-   
 bool InstallWizardPage::ShouldShowDialUpPage()
 {
+
+   return true;
+#if 0
+//FIXME: replace with user selection
+   
    if ( gs_installWizardData.useDialUp == -1 )
    {
-#if 0 //FIXME: replace with user selection
       wxDialUpManager *man = wxDialUpManager::Create();
 
       // if we have a LAN connection, then we don't need to configure dial-up
@@ -379,10 +378,10 @@ bool InstallWizardPage::ShouldShowDialUpPage()
       gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
 
       delete man;
-#endif
    }
 
    return gs_installWizardData.useDialUp != 0;
+#endif
 }
 
 InstallWizardPageId InstallWizardPage::GetPrevPageId() const
@@ -405,8 +404,8 @@ InstallWizardPageId InstallWizardPage::GetNextPageId() const
       // skip it
       id++;
    }
-
-   return id < InstallWizard_PagesMax ? (InstallWizardPageId)id
+   
+   return id < InstallWizard_PagesMax ? (InstallWizardPageId) id
                                       : InstallWizard_Done;
 }
 
@@ -665,7 +664,6 @@ InstallWizardHelpersPage::InstallWizardHelpersPage(wxWizard *wizard)
 InstallWizardMiscPage::InstallWizardMiscPage(wxWizard *wizard)
                      : InstallWizardPage(wizard, InstallWizard_MiscPage)
 {
-   // TODO ask for signature (either file or text)
    new wxStaticText(this, -1, "This page is under construction");
 }
 
@@ -711,6 +709,8 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
 // ----------------------------------------------------------------------------
 
 #ifdef USE_WIZARD
+static
+void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData);
 
 bool RunInstallWizard()
 {
@@ -738,7 +738,6 @@ bool RunInstallWizard()
          << '@' << READ_APPCONFIG(MP_HOSTNAME);
    }
    gs_installWizardData.name = READ_APPCONFIG(MP_PERSONALNAME);
-   
    gs_installWizardData.pop  = READ_APPCONFIG(MP_POPHOST);
    gs_installWizardData.imap = READ_APPCONFIG(MP_IMAPHOST);
    gs_installWizardData.smtp = READ_APPCONFIG(MP_SMTPHOST);
@@ -770,7 +769,9 @@ bool RunInstallWizard()
       profile->writeEntry(MP_IMAPHOST, gs_installWizardData.imap);
       profile->writeEntry(MP_SMTPHOST, gs_installWizardData.smtp);
       profile->writeEntry(MP_NNTPHOST, gs_installWizardData.nntp);
-// TODO
+
+
+      CompleteConfiguration(gs_installWizardData);
    }
 
    wizard->Destroy();
@@ -778,6 +779,81 @@ bool RunInstallWizard()
    gs_isWizardRunning = false;
 
    return true;
+}
+
+
+/** This function uses the wizard data to complete the configuration
+    as needed. It is responsible for setting up INBOX "New Mail" etc.
+
+
+    TODO: the folder flags settings etc here and in verifyinbox could
+    be combined into one function
+*/
+static
+void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
+{
+   ProfileBase * profile = mApplication->GetProfile();
+
+   // OUTBOX
+   if(gs_installWizardData.useOutbox)
+   {
+      profile->writeEntry(MP_USE_OUTBOX, 1l);
+      wxString name = READ_CONFIG(profile, MP_OUTBOX_NAME);
+      if(name.Length() == 0)
+         name = _("Outbox");
+      if(! MailFolder::CreateFolder(name, MF_FILE,
+                                    MF_FLAGS_KEEPOPEN,
+                                    name,
+                                    _("Queue of messages to be sent.")))
+         wxLogError(_("Could not create the outgoing mailbox '%'."),
+                    name.c_str());
+   }
+   
+   // INBOX/NEW MAIL
+   if(gs_installWizardData.collectAllMail)
+   {
+      // create hidden INBOX
+      if(! MailFolder::CreateFolder("INBOX",
+                                    MF_INBOX,
+                                    MF_FLAGS_INCOMING|MF_FLAGS_DONTDELETE|MF_FLAGS_HIDDEN,
+                                    "",
+                                    _("Default system folder for incoming mail.")))
+         wxLogError(_("Could not create INBOX mailbox."));
+
+
+      // Create New Mail folder:
+      wxString foldername = READ_CONFIG(profile, MP_NEWMAIL_FOLDER);
+      if(foldername.Length() == 0) // shouldn't happen unless run for the first time
+      {
+         foldername = _("New Mail");
+         profile->writeEntry(MP_NEWMAIL_FOLDER, foldername);
+      }
+      if(! MailFolder::CreateFolder(foldername,
+                                    MF_FILE,
+                                    MF_FLAGS_NEWMAILFOLDER |
+                                    MF_FLAGS_DONTDELETE |
+                                    MF_FLAGS_KEEPOPEN,
+                                    foldername,
+                                    _("Mailbox in which Mahogany collects all new messages.")))
+         wxLogError(_("Could not create central incoming mailbox '%s'."), foldername.c_str());
+   }
+   else
+   {
+      // create normal INBOX
+      if(! MailFolder::CreateFolder("INBOX",
+                                    MF_INBOX,
+                                    MF_FLAGS_DONTDELETE,
+                                    "",
+                                    _("Default system folder for incoming mail.") ) )
+         wxLogError(_("Could not create INBOX mailbox."));
+   }
+
+   // TRASH
+   if(gs_installWizardData.useTrash)
+   {
+      profile->writeEntry(MP_USE_TRASH_FOLDER, 1l);
+      // the rest is done in Update()
+   }
 }
 
 #endif // USE_WIZARD
@@ -795,11 +871,8 @@ UpgradeFromNone()
                      "needed by the program (especially network parameters)."));
       log->Flush();
    }
-
    ShowOptionsDialog();
 #endif
-
-   SetupInitialConfig();
 
    return true;
 }
@@ -1307,9 +1380,9 @@ VerifyInbox(void)
       strutil_delwhitespace(foldername);
       if(foldername.Length() == 0)
       {
+         foldername = _("Trash");
          wxLogError(_("The name for the trash folder was empty, using default '%s'."),
-                    MP_TRASH_FOLDER_D);
-         foldername = MP_TRASH_FOLDER_D;
+                    foldername.c_str());
       }
       mApplication->GetProfile()->writeEntry(MP_TRASH_FOLDER, foldername);
       ProfileBase *p = ProfileBase::CreateProfile(foldername);
@@ -1334,33 +1407,47 @@ VerifyInbox(void)
       p->writeEntry("Icon", 14l);
       p->DecRef();
    }
+
+   /*
+    * Set up the Outbox folder:
+    */
+   if( READ_APPCONFIG(MP_USE_OUTBOX) )
+   {
+      foldername = READ_APPCONFIG(MP_OUTBOX_NAME);
+      strutil_delwhitespace(foldername);
+      if(foldername.Length() == 0)
+      {
+         foldername = _("Outbox");
+         wxLogError(_("The name for the outgoing mailbox was empty, using default '%s'."),
+                    foldername.c_str());
+      }
+      mApplication->GetProfile()->writeEntry(MP_OUTBOX_NAME, foldername);
+      ProfileBase *p = ProfileBase::CreateProfile(foldername);
+      // Don't overwrite settings if entry already exists:
+      if (!  parent->HasEntry(foldername) )
+      {
+         p->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+         p->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_KEEPOPEN);
+         p->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
+         p->writeEntry(MP_FOLDER_COMMENT,
+                       _("Folder where Mahogany will store copies of outgoing messages."));
+         rc = FALSE;
+      }
+      // Make sure the flags are valid:
+      flags = READ_CONFIG(p,MP_FOLDER_TYPE);
+      oldflags = flags;
+      if(flags & MF_FLAGS_INCOMING) flags ^= MF_FLAGS_INCOMING;
+      if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
+      if(flags != oldflags)
+         p->writeEntry(MP_FOLDER_TYPE, flags);
+      // 14=Trash icon from wxFolderTree.cpp:
+      p->writeEntry("Icon", 14l);
+      p->DecRef();
+   }
+
    return rc;
 }
 
-/** Make sure we have all "vital" things set up. */
-extern bool
-SetupInitialConfig(void)
-{
-   String host = READ_APPCONFIG(MP_HOSTNAME);
-   if(host.Length() == 0)
-      mApplication->GetProfile()->writeEntry(MP_HOSTNAME,wxGetFullHostName());
-
-   mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent Mail"));
-   mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, _("New Mail"));
-
-   (void)VerifyInbox();
-
-#if 0
-#if defined ( USE_PYTHON )
-// run a python script to set up things
-   PyH_RunMScript(MSCRIPT_USER_SETUP);
-#else
-#   pragma warning "Missing functionality without Python!"
-#endif
-#endif
-
-   return true;
-}
 
 extern bool
 VerifyMailConfig(void)
@@ -1392,4 +1479,165 @@ VerifyMailConfig(void)
    MDialog_Message(msg, NULL, _("Testing your configuration"), "TestMailSent");
 
    return true; // till we know something better
+}
+
+static
+void VerifyUserDir(void)
+{
+   ProfileBase *profile = mApplication->GetProfile();
+#if defined(OS_UNIX)
+   if( strutil_isempty(READ_APPCONFIG(MP_USERDIR)) )
+   {
+      wxString strHome;
+      strHome = getenv("HOME");
+      strHome << DIR_SEPARATOR << READ_APPCONFIG(MP_USER_MDIR);
+      profile->writeEntry(MP_USERDIR, strHome);
+   }
+#elif defined(OS_WIN)
+   if ( m_localDir.IsEmpty() )
+   {
+      // take the directory of the program
+      char szFileName[MAX_PATH];
+      if ( !GetModuleFileName(NULL, szFileName, WXSIZEOF(szFileName)) )
+      {
+         wxLogError(_("Cannot find your Mahogany directory, please specify it "
+                      "in the options dialog."));
+      }
+      else
+      {
+         wxString localDir;
+         wxSplitPath(szFileName, &localDir, NULL, NULL);
+         profile->writeEntry(MP_USERDIR, localDir);
+      }
+   }
+#else
+#   error "Don't know how to find local dir under this OS"
+#endif // OS
+
+}
+
+/* Make sure we have the minimal set of things set up:
+
+   MP_USERNAME, MP_PERSONALNAME,
+   MP_USERDIR
+   MP_MBOXDIR
+   MP_HOSTNAME,
+   MP_SMTPHOST, MP_NNTPHOST, MP_IMAPHOST, MP_POPHOST
+*/
+static
+void
+SetupMinimalConfig(void)
+{
+   String str;
+   const size_t bufsize = 200;
+   char  buffer[bufsize];
+
+   ProfileBase *profile = mApplication->GetProfile();
+   
+   if( strutil_isempty(READ_APPCONFIG(MP_USERNAME)) )
+   {
+      wxGetUserId(buffer,bufsize); // contains , delimited fields of info
+      str = strutil_before(str,',');
+      profile->writeEntry(MP_USERNAME, buffer);
+   }
+   if( strutil_isempty(READ_APPCONFIG(MP_PERSONALNAME)) )
+   {
+      wxGetUserName(buffer,bufsize);
+      profile->writeEntry(MP_PERSONALNAME, buffer);
+   }
+
+   VerifyUserDir();
+   
+   // now that we have the local dir, we can set up a default mail
+   // folder dir
+   str = READ_APPCONFIG(MP_MBOXDIR);
+   if( strutil_isempty(str) )
+   {
+      str = READ_APPCONFIG(MP_USERDIR);
+      profile->writeEntry(MP_MBOXDIR, str);
+   }
+
+   if( strutil_isempty(READ_APPCONFIG(MP_HOSTNAME)) )
+   {
+      wxGetFullHostName(buffer,bufsize);
+      profile->writeEntry(MP_HOSTNAME, buffer);
+   }
+
+   if( strutil_isempty(READ_APPCONFIG(MP_NNTPHOST)) )
+   {
+      char *cptr = getenv("NNTPSERVER");
+      if(!cptr || !*cptr)
+        cptr = MP_NNTPHOST_FB;
+      profile->writeEntry(MP_NNTPHOST, cptr);
+   }
+
+   if( strutil_isempty(READ_APPCONFIG(MP_SMTPHOST)) )
+   {
+      char *cptr = getenv("SMTPSERVER");
+      if(!cptr || !*cptr)
+        cptr = MP_SMTPHOST_FB;
+      profile->writeEntry(MP_SMTPHOST, cptr);
+   }
+
+   if( strutil_isempty(READ_APPCONFIG(MP_POPHOST)) )
+   {
+      char *cptr = getenv("POPSERVER");
+      if(cptr && *cptr)
+         profile->writeEntry(MP_POPHOST, cptr);
+   }
+   if( strutil_isempty(READ_APPCONFIG(MP_IMAPHOST)) )
+   {
+      char *cptr = getenv("IMAPSERVER");
+      if(cptr && *cptr)
+         profile->writeEntry(MP_IMAPHOST, cptr);
+   }
+
+#if 0
+   
+   mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent Mail"));
+   mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, _("New Mail"));
+
+   (void)VerifyInbox();
+
+#if 0
+#if defined ( USE_PYTHON )
+// run a python script to set up things
+   PyH_RunMScript(MSCRIPT_USER_SETUP);
+#else
+#   pragma warning "Missing functionality without Python!"
+#endif
+#endif
+#endif
+
+
+
+}
+
+extern bool
+CheckConfiguration(void)
+{
+   ProfileBase *profile = mApplication->GetProfile();
+
+   if ( READ_APPCONFIG(MP_FIRSTRUN) != 0 )
+   {
+      // make sure the essential things have proper values
+      SetupMinimalConfig();
+      // next time won't be the first one any more
+      profile->writeEntry(MP_FIRSTRUN, 0);
+   }
+
+   // do we need to upgrade something?
+   String version = profile->readEntry(MP_VERSION, "");
+   if ( version != M_VERSION )
+   {
+      if ( ! Upgrade(version) )
+         return false;
+      // write the new version
+      profile->writeEntry(MP_VERSION, M_VERSION);
+   }
+
+   if ( !VerifyInbox() )
+      wxLogDebug("Evil user corrupted his profile settings - restored.");
+
+   return true;
 }

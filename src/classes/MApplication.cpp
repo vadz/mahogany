@@ -150,113 +150,11 @@ MAppBase::~MAppBase()
 bool
 MAppBase::VerifySettings(void)
 {
-   const size_t bufsize = 200;
-   char  buffer[bufsize];
+   bool rc = CheckConfiguration();
 
-   String
-      str;
-
-   str = MP_USERNAME;
-   str = m_profile->readEntry(str, MP_USERNAME_D);
-
-   if( strutil_isempty(READ_APPCONFIG(MP_USERNAME)) )
-   {
-      wxGetUserId(buffer,bufsize); // contains , delimited fields of info
-      str = strutil_before(str,',');
-      m_profile->writeEntry(MP_USERNAME, buffer);
-   }
-
-   if( strutil_isempty(READ_APPCONFIG(MP_PERSONALNAME)) )
-   {
-      wxGetUserName(buffer,bufsize);
-      m_profile->writeEntry(MP_PERSONALNAME, buffer);
-   }
-
-#if defined(OS_UNIX)
-   if( strutil_isempty(READ_APPCONFIG(MP_USERDIR)) )
-   {
-      wxString strHome;
-      strHome = getenv("HOME");
-      strHome << DIR_SEPARATOR << READ_APPCONFIG(MP_USER_MDIR);
-      m_profile->writeEntry(MP_USERDIR, strHome);
-   }
    m_localDir = wxExpandEnvVars(READ_APPCONFIG(MP_USERDIR));
-#elif defined(OS_WIN)
-   m_localDir = wxExpandEnvVars(READ_APPCONFIG(MP_USERDIR));
-   if ( m_localDir.IsEmpty() )
-   {
-      // take the directory of the program
-      char szFileName[MAX_PATH];
-      if ( !GetModuleFileName(NULL, szFileName, WXSIZEOF(szFileName)) )
-      {
-         wxLogError(_("Cannot find your Mahogany directory, please specify it "
-                      "in the options dialog."));
-      }
-      else
-      {
-         wxSplitPath(szFileName, &m_localDir, NULL, NULL);
-         m_profile->writeEntry(MP_USERDIR, m_localDir);
-      }
-   }
-#else
-#   error "Don't know how to find local dir under this OS"
-#endif // OS
 
-   // now that we have the local dir, we can set up a default mail
-   // folder dir
-   str = READ_APPCONFIG(MP_MBOXDIR);
-   if( strutil_isempty(str) )
-   {
-      str = m_localDir;
-      m_profile->writeEntry(MP_MBOXDIR, str);
-   }
-
-   if( strutil_isempty(READ_APPCONFIG(MP_HOSTNAME)) )
-   {
-      wxGetHostName(buffer,bufsize);
-      m_profile->writeEntry(MP_HOSTNAME, buffer);
-   }
-
-   if( strutil_isempty(READ_APPCONFIG(MP_NNTPHOST)) )
-   {
-      char *cptr = getenv("NNTPSERVER");
-      if(!cptr || !*cptr)
-        cptr = MP_NNTPHOST_FB;
-      m_profile->writeEntry(MP_NNTPHOST, cptr);
-   }
-
-   if( strutil_isempty(READ_APPCONFIG(MP_SMTPHOST)) )
-   {
-      char *cptr = getenv("SMTPSERVER");
-      if(!cptr || !*cptr)
-        cptr = MP_SMTPHOST_FB;
-      m_profile->writeEntry(MP_SMTPHOST, cptr);
-   }
-
-   bool bFirstRun = READ_APPCONFIG(MP_FIRSTRUN) != 0;
-   if ( bFirstRun )
-   {
-         if(! SetupInitialConfig())
-            ERRORMESSAGE((_("Failed to set up initial configuration.")));
-
-         // next time won't be the first one any more
-         m_profile->writeEntry(MP_FIRSTRUN, 0);
-   }
-
-   // do we need to upgrade something?
-   String version = m_profile->readEntry(MP_VERSION, "");
-   if ( version != M_VERSION )
-   {
-      if ( ! Upgrade(version) )
-         return false;
-      // write the new version
-      m_profile->writeEntry(MP_VERSION, M_VERSION);
-   }
-
-   if ( !VerifyInbox() )
-      wxLogDebug("Evil user corrupted his profile settings - restored.");
-
-   return true;
+   return rc;
 }
 
 /// only used to find list of folders to keep open at all times

@@ -839,11 +839,11 @@
 /// Where to store all new mail
 #define MP_NEWMAIL_FOLDER_D      "" // obsolete
 /// Which folder to use as Outbox
-#define MP_OUTBOX_NAME_D         _("Outbox")
+#define MP_OUTBOX_NAME_D         ""
 /// Use Outbox?
-#define MP_USE_OUTBOX_D            0l
+#define MP_USE_OUTBOX_D            1l
 /// Name of Trash folder?
-#define MP_TRASH_FOLDER_D      _("Trash")
+#define MP_TRASH_FOLDER_D      ""
 /// Use a trash folder?
 #define MP_USE_TRASH_FOLDER_D   1l
 /// the filename for a mailbox

@@ -29,4 +29,10 @@ extern bool VerifyMailConfig(void);
 /// Verify whether the INBOX profile exists, return false if it was created.
 extern bool VerifyInbox(void);
 
+
+/** This function verifies the complete configuration setup for
+    consistency and initialises it if required.
+*/
+extern bool CheckConfiguration(void);
+
 #endif  //M_MUPGRADE_H
