@@ -78,7 +78,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
           Movetofolder
       */
-      const char keycodes_en[] = "DUXCSMRNFOP ";
+      const char keycodes_en[] = gettext_noop("DUXCSMRNFOP ");
       const char *keycodes = _(keycodes_en);
       
       int idx = 0;
