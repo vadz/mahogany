@@ -165,6 +165,8 @@ extern const MOption MP_SET_REPLY_FROM_TO;
 extern const MOption MP_USEVCARD;
 extern const MOption MP_VCARD;
 
+extern const MOption MP_USE_FOLDER_CREATE_WIZARD;
+
 #ifdef USE_DIALUP
 
 extern const MOption MP_DIALUP_SUPPORT;
@@ -707,6 +709,9 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_USEVCARD_NAME "UseVCard"
 /// the vCard to use
 #define MP_VCARD_NAME "VCard"
+
+/// use the folder create wizard (or the dialog directly)?
+#define MP_USE_FOLDER_CREATE_WIZARD_NAME "FolderCreateWizard"
 
 #if defined(OS_WIN)
 /// the RAS connection to use
@@ -1508,6 +1513,9 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_USEVCARD_DEFVAL 0l
 /// the vCard to use
 #define MP_VCARD_DEFVAL "vcard.vcf"
+
+/// use the folder create wizard (or the dialog directly)?
+#define MP_USE_FOLDER_CREATE_WIZARD_DEFVAL 1l
 
 #ifdef USE_DIALUP
 

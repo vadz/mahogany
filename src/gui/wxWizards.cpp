@@ -74,6 +74,7 @@ extern const MOption MP_MOVE_NEWMAIL;
 extern const MOption MP_NNTPHOST;
 extern const MOption MP_POPHOST;
 extern const MOption MP_USERNAME;
+extern const MOption MP_USE_FOLDER_CREATE_WIZARD;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -578,12 +579,16 @@ public:
    virtual MWizardPageId GetPreviousPageId() const { return MWizard_PageNone; }
    virtual MWizardPageId GetNextPageId() const;
 
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
 private:
    wxCheckBox *m_checkNoWizard;
 };
 
 
-MWizard_CreateFolder_WelcomePage::MWizard_CreateFolder_WelcomePage(MWizard *wizard)
+MWizard_CreateFolder_WelcomePage::
+MWizard_CreateFolder_WelcomePage(MWizard *wizard)
    : MWizardPage(wizard, MWizard_CreateFolder_Welcome)
 {
    wxStaticText *msg = new wxStaticText(this, -1, _(
@@ -621,6 +626,30 @@ MWizardPageId MWizard_CreateFolder_WelcomePage::GetNextPageId() const
    }
 
    return MWizardPage::GetNextPageId();
+}
+
+bool MWizard_CreateFolder_WelcomePage::TransferDataToWindow()
+{
+   if ( !MWizardPage::TransferDataToWindow() )
+      return false;
+
+   // use the value of "use wizard" option to set the initial checkbox value
+   if ( !READ_APPCONFIG(MP_USE_FOLDER_CREATE_WIZARD) )
+      m_checkNoWizard->SetValue(true);
+
+   return true;
+}
+
+bool MWizard_CreateFolder_WelcomePage::TransferDataFromWindow()
+{
+   if ( !MWizardPage::TransferDataFromWindow() )
+      return false;
+
+   // save the checkbox value for the next run
+   mApplication->GetProfile()->writeEntry(MP_USE_FOLDER_CREATE_WIZARD,
+                                          !m_checkNoWizard->GetValue());
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------
