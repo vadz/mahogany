@@ -6,7 +6,7 @@ $Id$
 
 (I've sorted them a bit by "responsible person". :-) )
 
-- toggel header display menu entry
+- toggle header display menu entry
 
 - fix Adb auto-collection
   + auto-collection needs testing, better lookup  -- doesn't work yet
@@ -36,6 +36,8 @@ $Id$
 
 - DND with gmc (dead easy, see dnd example :-) )
 
+- merge messages.po with locale/*.po
+- when installing M.po files, create links to @prefix@/locale/...
 
 - Alpha:
   + editing after reply/signature in wrong place
