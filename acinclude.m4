@@ -2,7 +2,7 @@ dnl $Id$
 dnl local macro definitions for M's configure.in
 
 dnl package,message,variable,default,helpmessage
-AC_DEFUN(M_OVERRIDES,
+AC_DEFUN([M_OVERRIDES],
 [AC_MSG_CHECKING(for $2)
 define([M_FUNC], regexp([$5], [--[^-]*-], \&))dnl
 define([M_VAR],
@@ -32,7 +32,7 @@ esac])
 dnl M_CHECK_MYLIB(LIBRARY, FUNCTION, LIBPATHLIST [, ACTION-IF-FOUND 
 dnl            [, ACTION-IF-NOT-FOUND [, OTHER-LIBRARIES [, EXTRA-MSG]]]])
 
-AC_DEFUN(M_CHECK_MYLIB,
+AC_DEFUN([M_CHECK_MYLIB],
 [AC_MSG_CHECKING([for $2 in -l$1$7])
 dnl Use a cache variable name containing both the library and function name,
 dnl because the test really is for library $1 defining function $2, not
@@ -94,7 +94,7 @@ dnl		  ("checking for header")
 dnl	EXTRA-SUFFIX is the extra suffix to add to the cache variable, useful
 dnl		  when you need to check for the same header in different
 dnl		  paths (example: Python.h)
-AC_DEFUN(M_CHECK_MYHEADER,
+AC_DEFUN([M_CHECK_MYHEADER],
   [ m_safe=`echo "$1$6" | sed 'y%./+-%__p_%'`
     AC_MSG_CHECKING([for $1$5])
     AC_CACHE_VAL(m_cv_header_$m_safe,
@@ -134,7 +134,7 @@ AC_DEFUN(M_CHECK_MYHEADER,
 )
 
 dnl M_CHECK_MYHEADER_VER(HEADER-FILE, VERSION, LIBPATHLIST, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
-AC_DEFUN(M_CHECK_MYHEADER_VER,
+AC_DEFUN([M_CHECK_MYHEADER_VER],
   [ m_safe=`echo "$1_$2" | sed 'y%./+-%__p_%'`
     AC_MSG_CHECKING([for $1 ($2)])
     AC_CACHE_VAL(m_cv_header_$m_safe,
@@ -195,7 +195,7 @@ AC_DEFUN(M_CHECK_MYHEADER_VER,
 ## the same distribution terms that you use for the rest of that program.
 
 # serial 24 AM_PROG_LIBTOOL
-AC_DEFUN(AM_PROG_LIBTOOL,
+AC_DEFUN([AM_PROG_LIBTOOL],
 [AC_REQUIRE([AM_ENABLE_SHARED])dnl
 AC_REQUIRE([AM_ENABLE_STATIC])dnl
 AC_REQUIRE([AC_CANONICAL_HOST])dnl
@@ -257,7 +257,7 @@ $libtool_flags --no-verify $ac_aux_dir/ltmain.sh $host \
 # Usage: AM_ENABLE_SHARED[(DEFAULT)]
 #   Where DEFAULT is either `yes' or `no'.  If omitted, it defaults to
 #   `yes'.
-AC_DEFUN(AM_ENABLE_SHARED,
+AC_DEFUN([AM_ENABLE_SHARED],
 [define([AM_ENABLE_SHARED_DEFAULT], ifelse($1, no, no, yes))dnl
 AC_ARG_ENABLE(shared,
 changequote(<<, >>)dnl
@@ -285,18 +285,18 @@ enable_shared=AM_ENABLE_SHARED_DEFAULT)dnl
 ])
 
 # AM_DISABLE_SHARED - set the default shared flag to --disable-shared
-AC_DEFUN(AM_DISABLE_SHARED,
+AC_DEFUN([AM_DISABLE_SHARED],
 [AM_ENABLE_SHARED(no)])
 
 # AM_DISABLE_STATIC - set the default static flag to --disable-static
-AC_DEFUN(AM_DISABLE_STATIC,
+AC_DEFUN([AM_DISABLE_STATIC],
 [AM_ENABLE_STATIC(no)])
 
 # AM_ENABLE_STATIC - implement the --enable-static flag
 # Usage: AM_ENABLE_STATIC[(DEFAULT)]
 #   Where DEFAULT is either `yes' or `no'.  If omitted, it defaults to
 #   `yes'.
-AC_DEFUN(AM_ENABLE_STATIC,
+AC_DEFUN([AM_ENABLE_STATIC],
 [define([AM_ENABLE_STATIC_DEFAULT], ifelse($1, no, no, yes))dnl
 AC_ARG_ENABLE(static,
 changequote(<<, >>)dnl
@@ -325,7 +325,7 @@ enable_static=AM_ENABLE_STATIC_DEFAULT)dnl
 
 
 # AM_PROG_LD - find the path to the GNU or non-GNU linker
-AC_DEFUN(AM_PROG_LD,
+AC_DEFUN([AM_PROG_LD],
 [AC_ARG_WITH(gnu-ld,
 [  --with-gnu-ld           assume the C compiler uses GNU ld [default=no]],
 test "$withval" = no || with_gnu_ld=yes, with_gnu_ld=no)
@@ -386,7 +386,7 @@ AC_SUBST(LD)
 AM_PROG_LD_GNU
 ])
 
-AC_DEFUN(AM_PROG_LD_GNU,
+AC_DEFUN([AM_PROG_LD_GNU],
 [AC_CACHE_CHECK([if the linker ($LD) is GNU ld], ac_cv_prog_gnu_ld,
 [# I'd rather use --version here, but apparently some GNU ld's only accept -v.
 if $LD -v 2>&1 </dev/null | egrep '(GNU|with BFD)' 1>&5; then
@@ -397,7 +397,7 @@ fi])
 ])
 
 # AM_PROG_NM - find the path to a BSD-compatible name lister
-AC_DEFUN(AM_PROG_NM,
+AC_DEFUN([AM_PROG_NM],
 [AC_MSG_CHECKING([for BSD-compatible nm])
 AC_CACHE_VAL(ac_cv_path_NM,
 [case "$NM" in
