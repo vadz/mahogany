@@ -1084,7 +1084,7 @@ MailFolderCC::BuildListing(void)
                  m_NumOfMessages, m_RetrievalLimit);
       String confpath;
       confpath << m_Profile->GetName() << '/' << "RetrieveAll";
-      if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, false,
+      if ( ! MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, false,
                                confpath) )
       {
          numMessages = m_RetrievalLimit;
