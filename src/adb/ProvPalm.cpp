@@ -5,7 +5,7 @@
 // Author:      Daniel Seifert
 // Modified by:
 // Created:     15.02.00
-// CVS-ID:      $Id:
+// CVS-ID:      $Id$
 // Copyright:   (c) 2000 Daniel Seifert <dseifert@gmx.de>
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
@@ -134,6 +134,7 @@ PalmEntryGroup::PalmEntryGroup(void)
   m_pParent = NULL;
   m_strName = "Palm ADB";
   m_entries = new PalmEntryList(false);
+  m_groups  = new PalmGroupList(false);
 }
 
 PalmEntryGroup::PalmEntryGroup(PalmEntryGroup *pParent,
@@ -144,6 +145,7 @@ PalmEntryGroup::PalmEntryGroup(PalmEntryGroup *pParent,
   m_pParent = pParent;
   m_strName = strName;
   m_entries = new PalmEntryList(false);
+  m_groups  = new PalmGroupList(false);
 
   if ( bNew ) {
     // ??
@@ -171,6 +173,9 @@ size_t PalmEntryGroup::GetEntryNames(wxArrayString& aNames) const
 size_t PalmEntryGroup::GetGroupNames(wxArrayString& aNames) const
 {
   aNames.Empty();
+  PalmGroupList::iterator i;
+  for(i = m_groups->begin(); i != m_groups->end(); i++)
+     aNames.Add((**i).GetName());
   return aNames.Count();
 }
 
@@ -196,13 +201,16 @@ bool PalmEntryGroup::Exists(const String& path) const
 
 AdbEntryGroup *PalmEntryGroup::GetGroup(const String& name) const
 {
-  PalmEntryGroup *pGroup = new PalmEntryGroup((PalmEntryGroup *)this, name);
-  if (pGroup != NULL) {
-    pGroup->DecRef();
-    pGroup = NULL;
+  PalmGroupList::iterator i;
+  for(i = m_groups->begin(); i != m_groups->end(); i++)
+  {
+    if((**i).GetName() == name)
+    {
+      (**i).IncRef();
+      return *i;
+    }
   }
-
-  return pGroup;
+  return NULL;
 }
 
 void PalmEntryGroup::AddEntry(PalmEntry* p_Entry) 
@@ -227,14 +235,12 @@ AdbEntry *PalmEntryGroup::CreateEntry(const String& name)
 
 AdbEntryGroup *PalmEntryGroup::CreateGroup(const String& name)
 {
-  // there must be only one level of entries!
-//  if (m_pRoot == (PalmEntryGroup *)this)
+  if (this->m_pParent == NULL) {
+    PalmEntryGroup* p_Group = new PalmEntryGroup(this, name);
+    m_groups->push_back(p_Group);
+    return p_Group;
+  } else
     return NULL;
-    
-  // creating new groups (e.g. categories on the Palm) is 
-  // currently unsupported
-  // FIXME???
-  return NULL;
 }
 
 void PalmEntryGroup::DeleteEntry(const String& strName)
