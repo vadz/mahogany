@@ -15,10 +15,10 @@
 #include   "kbList.h"
 
 #include   "wx/wx.h"
-#include "wx/print.h"
-#include "wx/printdlg.h"
-#include "wx/generic/printps.h"
-#include "wx/generic/prntdlgg.h"
+#include   "wx/print.h"
+#include   "wx/printdlg.h"
+#include   "wx/generic/printps.h"
+#include   "wx/generic/prntdlgg.h"
 
 // skip the following defines if embedded in M application
 #ifdef   M_BASEDIR

@@ -148,6 +148,8 @@ enum FolderType
 #define   MC_SPLASHDELAY       "SplashDelay"
 /// ask user if he really wants to exit?
 #define   MC_CONFIRMEXIT       "ConfirmExit"
+/// create .profile files?
+#define   MC_CREATE_PROFILES   "CreateProfileFiles"
 /**@name For Profiles: */
 //@{
 /// the user's full name
@@ -358,6 +360,8 @@ enum FolderType
 #define MC_SPLASHDELAY_D        5000
 /// ask user if he really wants to exit?
 #define   MC_CONFIRMEXIT_D      1
+/// create .profile files?
+#define   MC_CREATE_PROFILES_D   0
 /**@name For Profiles: */
 //@{
 //@}

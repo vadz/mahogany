@@ -22,13 +22,13 @@ all:
 #	$(CXX) -shared $(MOBJS) $(LDFLAGS) -lswigpy $(NONPLIBS) -o libM.so
 #	$(LINK) -o M -L. $(LDFLAGS) -lM $(SLIBS)
 
-semistatic:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
-	$(LINK) -o M.semistatic $(LDFLAGS) $(MOBJS) $(SLIBS) 
+#semistatic:
+#	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
+#	$(LINK) -o M.semistatic $(LDFLAGS) $(MOBJS) $(SLIBS) 
 
 static:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
-	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(SLIBS) 
+	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(LIBS) -lcrypt
 
 doc:
 	$(MAKE) -C ../include $@

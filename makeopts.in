@@ -63,7 +63,7 @@ DATADIR = @datadir@/M
 DOCDIR = @datadir@/doc
 
 # for the dynamic linker, better than using -rpath
-LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/$(DATADIR)
+LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib
 
 LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
 
