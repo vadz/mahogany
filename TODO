@@ -13,6 +13,11 @@ $Id$
 *** not fixed yet:
 *********************************************************************
 
+wxGTK bug:
+
+ - listctrl can have no focused element, i.e. the assert in
+   wxFolderView.cpp:85 can be triggered
+
 VZ:
 - wxConfig does not like entries like:
   Key=Value
