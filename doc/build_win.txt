@@ -36,17 +36,9 @@ build the wxMSW library.
 
    You may use either wxMSW 2.4.1 release (latest 2.4 release as of the time
 of this writing, if a newer one is available, do use it) or the latest
-wxWindows sources from cvs HEAD which usually provide more functionality.
-
-   Mahogany now uses the standard wxWindows project files so just build
-wxWindows using the provided src/wxWindows.dsp project. You will need to point
-MSDEV to this file when you open M.dsw workspace for the first time. You also
-should build wxWindows with the standard include\wx\msw\setup.h instead of
-the file extra\scripts\wxmsw_setup.h which had to be used previously.
-
-
-b) Build process
-----------------
+wxWindows sources from cvs HEAD which usually provide more functionality. Note
+that you may use M_STABLE tag to check out the wxWindows version which is known
+to work well with Mahogany.
 
    Before building Mahogany you will need to build wxWindows. To do it, you
 should open src/wxWindows.dsw in wxWindows directory and build wxWindows
@@ -56,6 +48,10 @@ wxmsw_setup.h file instead of the standard setup.h when building if you want to
 disable all the features not needed by Mahogany but doing this is optional and
 you should revert to the standard wx/setup.h if using wxmsw_setup.h results in
 errors (it is not always up to date...).
+
+
+b) Build process
+----------------
 
    After this you can open the project workspace M.dsw in Visual C++ IDE. You
 will have to load (right click the project in the project tree, choose "Load")

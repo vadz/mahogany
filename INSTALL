@@ -1,5 +1,14 @@
+File:		build_win.txt
+Summary:	contains instructions for building Mahogany under Unix
+Audience:	Mahogany developers and end users
+Author:		Vadim Zeitlin <vadim@wxwindows.org>
+Last modified:	04.08.03
+Version:	accurate for 0.65 release
+
+
 Windows users: you shouldn't be reading this file, please refer
-               to README instead
+               to README or doc/build_win.txt instead
+
 
 The rest of this file is oriented towards Unix users and explains
 how to build the program from sources. Please note that we provide
@@ -18,8 +27,9 @@ Unix compilation instructions
 
 Required software:
 
-   - wxGTK (GTK+ port of wxWindows) 2.3.2 or above
-     (2.3.2 is the latest released version as of this writing)
+   - wxGTK (GTK+ port of wxWindows) 2.4.2 or above (note that 2.4.2
+     is not yet released as of time of this writing so you may need to use
+     wxWindows sources from cvs, see below)
 
    - GTK+ 1.2.3 or above, 1.2.10 recommended
 
@@ -39,7 +49,9 @@ In addition:
    - If you want to compile Mahogany with Python support, you need
      Python libraries and headers installed. Python 1.5x, 2.0 and
      2.1 are currently supported. You should run configure with
-     --with-python option as well.
+     --with-python option as well. Note that this is currently not
+     very useful and may even be brokwn due to lack of interest in
+     this functionality.
 
    - To build with Palm support you need pisock library and headers.
 
@@ -58,12 +70,15 @@ In addition:
 Before you can compile Mahogany, you will need to have installed
 wxWindows compiled for the GTK library (wxGTK).
 
-NOTE: there are unfortunately a few bugs in wxGTK 2.3.2 directly
-      affecting Mahogany which were fixed immediately after 2.3.2
-      release. If, by the time you are reading it, 2.3.3 is not
-      released yet please download wxWindows source distribution
-      from our download page instead of using the official 2.3.2
-      release!
+NOTE: there are unfortunately a few bugs in wxGTK 2.4.1 directly
+      affecting Mahogany which were fixed immediately after 2.4.1
+      release. If, by the time you are reading it, 2.4.2 is not
+      released yet please get a wxWindows daily snapshot or the cvs
+      sources (use "-r WX_2_4_BRANCH" to get the latest 2.4.x which
+      is the safest; but you may also get the sources from cvs HEAD
+      which would enable a few more features, in this case you may
+      want to use M_STABLE tag to get a wxWindows version known to
+      work well with Mahogany).
 
 The recommended switches for wxWindows compilation are:
 
@@ -79,9 +94,11 @@ If you get a message "cannot find wx-config" while compiling Mahogany
 you have to add /usr/local/bin to your PATH.
 
 If you cannot run Mahogany and get an error
+
     mahogany: error while loading shared libraries:
-    libwx_gtk-2.3.so: cannot open shared object file:
+    libwx_gtk-2.4.so: cannot open shared object file:
     No such file or directory
+
 you have to add /usr/local/lib to /etc/ld.so.conf and run
 /sbin/ldconfig.
 
@@ -117,3 +134,5 @@ following:
     make install_doc     # this should install the documentation and
                          # online help
 
+
+vi: ts=8 nolist nocin ai tw=68:
