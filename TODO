@@ -8,6 +8,9 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+6		make wxMApp react to options change event and call
+		SetupOnlineManager only when options change
+
 9		cannot create new file from folder create dialog (M
 		bug, not wxGTK, save-as-file works!)
 		Also: dialog: wrong handling of "all files" pattern as "*.*"

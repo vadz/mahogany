@@ -5,7 +5,7 @@
 # If you change the number of subdirectories, make sure you modify Makefile, too!
 
 CWD = wx
-SRC = pprocess.cpp
+SRC = pprocess.cpp onlnman.cpp
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 

@@ -158,6 +158,10 @@ public:
    */
    bool IsRunning() const { return m_topLevelFrame != NULL; }
 
+   virtual bool IsOnline(void) = 0;
+   virtual void GoOnline(void) = 0;
+   virtual void GoOffline(void) = 0;
+
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
 

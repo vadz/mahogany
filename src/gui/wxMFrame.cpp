@@ -365,6 +365,12 @@ wxMFrame::OnMenuCommand(int id)
 //   case WXMENU_FILE_PAGE_SETUP_PS:
 //      OnPageSetup();
 //      break;
+   case WXMENU_FILE_NET_ON:
+      mApplication->GoOnline();
+      break;
+   case WXMENU_FILE_NET_OFF:
+      mApplication->GoOffline();
+      break;
    }
 }
 

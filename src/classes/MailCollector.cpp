@@ -131,6 +131,8 @@ MailCollector::Collect(MailFolder *mf)
    bool rc = true;
 
    CHECK(m_NewMailFolder,false,_("Cannot collect mail without New Mail folder."));
+   if(! mApplication->IsOnline())
+      return false;
 
    if(mf == NULL)
    {
@@ -192,6 +194,9 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    ASSERT(mf);
    bool rc = true;
    
+   if(! mApplication->IsOnline())
+      return false;
+
    bool locked = Lock();
    if(locked) // was already locked
       return true; // not an error, just recursion avoidance

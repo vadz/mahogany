@@ -47,6 +47,7 @@
 #include <wx/cmndata.h>  // for wxPageSetupData
 #include <wx/persctrl.h> // for wxPMessageBoxEnable(d)
 
+#include "wx/onlnman.h"
 
 #include "Mdefaults.h"
 #include "MDialogs.h"
@@ -229,6 +230,7 @@ wxMApp::wxMApp(void)
    m_HelpController = NULL;
    m_CanClose = FALSE;
    m_IdleTimer = NULL;
+   m_OnlineManager = NULL;
 }
 
 wxMApp::~wxMApp()
@@ -463,7 +465,8 @@ wxMApp::OnInit()
 
    m_IconManager = new wxIconManager();
 
-
+   m_OnlineManager = wxGetOnlineManager();
+   
    // this is necessary to avoid that the app closes automatically when we're
    // run for the first time and show a modal dialog before opening the main
    // frame - if we don't do it, when the dialog (which is the last app window
@@ -548,6 +551,7 @@ wxMApp::OnInit()
          READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X),
          READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X)));
 #endif // wxUSE_POSTSCRIPT
+
 
       // create timers
       gs_timerAutoSave = new AutoSaveTimer;
@@ -639,7 +643,7 @@ int wxMApp::OnExit()
    MModule_Cleanup();
    delete m_IconManager;
    delete m_Locale;
-
+   delete m_OnlineManager;
    // FIXME this is not the best place to do it, but at least we're safe
    //       because we now that by now it's unused any more
    ProfileBase::DeleteGlobalConfig();
@@ -919,9 +923,72 @@ wxMApp::GetStdIcon(int which) const
    case wxICON_INFORMATION:
       return ICON("msg_info"); break;
    default:
-#else
-   {
-#endif
       return wxApp::GetStdIcon(which);
+   }
+#else
+   return wxApp::GetStdIcon(which);
+#endif
+}
+
+void
+wxMApp::SetupOnlineManager(void)
+{
+   ASSERT(m_OnlineManager);
+   String beaconhost = READ_APPCONFIG(MP_BEACONHOST);
+   strutil_delwhitespace(beaconhost);
+   // If no host configured, use smtp host:
+   if(beaconhost.length() > 0)
+      m_OnlineManager->SetBeaconHost(
+         beaconhost,
+         READ_APPCONFIG(MP_BEACONPORT));
+   else
+   {
+      beaconhost = READ_APPCONFIG(MP_SMTPHOST);
+      m_OnlineManager->SetBeaconHost(beaconhost, 25);
+   }
+   m_OnlineManager->SetConnectCommand(
+      READ_APPCONFIG(MP_NET_ON_COMMAND),
+      READ_APPCONFIG(MP_NET_OFF_COMMAND));
+}
+
+bool
+wxMApp::IsOnline(void)
+{
+   SetupOnlineManager();
+   return m_OnlineManager->IsOnline();
+}
+
+void
+wxMApp::GoOnline(void)
+{
+   SetupOnlineManager();
+   if(m_OnlineManager->IsOnline())
+   {
+      ERRORMESSAGE((_("Dial-up network is already online.")));
+      return;
+   }
+   m_OnlineManager->GoOnline();
+/*
+  if(! m_OnlineManager->IsOnline())
+   {
+      ERRORMESSAGE((_("Could not connect to network.")));
+      return;
+      }
+*/
+}
+
+void
+wxMApp::GoOffline(void)
+{
+   SetupOnlineManager();
+   if(! m_OnlineManager->IsOnline())
+   {
+      ERRORMESSAGE((_("Dial-up network is already offline.")));
+      return;
+   }
+   m_OnlineManager->GoOffline();
+   if( m_OnlineManager->IsOnline())
+   {
+      ERRORMESSAGE((_("Attempt to shut down network seems to have failed.")));
    }
 }

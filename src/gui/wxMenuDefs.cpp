@@ -227,9 +227,14 @@ static const MenuItemInfo g_aMenuItems[] =
 
 #ifdef USE_PYTHON
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_SCRIPT,   gettext_noop("Run &Script..."),    gettext_noop("Run a simple python script"), FALSE },
+   { WXMENU_FILE_SCRIPT,   gettext_noop("R&un Script..."),    gettext_noop("Run a simple python script"), FALSE },
 #endif // USE_PYTHON
 
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network"),
+     gettext_noop("Activate dial-up networking")        , FALSE },
+   { WXMENU_FILE_NET_OFF,   gettext_noop("&Shutdown Network"),
+     gettext_noop("Shutdown dial-up networking")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window"),     gettext_noop("Close this window")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },

@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * wxMAppl class: all GUI specific application stuff                *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-1999 by Karsten Ballüder (Balluedergmx.net)             *
  *                                                                  *
- * $Id$                 *
+ * $Id$
  *******************************************************************/
 #ifndef WXMAPP_H
 #define WXMAPP_H
@@ -84,7 +84,14 @@ public:
 
    wxHelpController *GetHelpController(void)
       { return m_HelpController; }
+
+   virtual bool IsOnline(void);
+   virtual void GoOnline(void);
+   virtual void GoOffline(void);
+   
 protected:
+
+   void SetupOnlineManager(void);
    /** Common code for ThrEnter and ThrLeave, if enter==TRUE, enter,
        otherwise leave.
    */
@@ -111,6 +118,8 @@ private:
    bool m_CanClose;
    /// timer used to call OnIdle for MEvent handling
    class wxTimer *m_IdleTimer;
+   /// online manager
+   class wxOnlineManager *m_OnlineManager;
    DECLARE_EVENT_TABLE()
 };
 
