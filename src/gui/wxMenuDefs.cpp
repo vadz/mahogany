@@ -339,11 +339,15 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_HELP_ABOUT,    gettext_noop("&About..."),         gettext_noop("Displays the program information and copyright")  , FALSE },
    { WXMENU_HELP_RELEASE_NOTES,    gettext_noop("&Release Notes..."), gettext_noop("Displays notes about the current release.")  , FALSE },
    { WXMENU_HELP_FAQ,    gettext_noop("&FAQ..."),         gettext_noop("Displays the list of Frequently Asked Questions.")  , FALSE },
+#ifdef DEBUG
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_HELP_WIZARD,   "Run &wizard",       ""                         , FALSE },
+#endif
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_HELP_CONTEXT, gettext_noop("&Help"),    gettext_noop("Help on current context..."), FALSE },
    { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents"),    gettext_noop("Contents of help system..."), FALSE },
    { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help..."),      gettext_noop("Search help system for keyword..."), FALSE },
-   { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"), gettext_noop("Show Copyright."), FALSE }
+   { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"), gettext_noop("Show Copyright."), FALSE },
 };
 
 // ============================================================================

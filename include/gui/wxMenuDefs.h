@@ -172,6 +172,10 @@ enum
    WXMENU_HELP_ABOUT,
    WXMENU_HELP_RELEASE_NOTES,
    WXMENU_HELP_FAQ,
+#ifdef DEBUG
+   WXMENU_HELP_SEP2,
+   WXMENU_HELP_WIZARD,
+#endif // debug
    WXMENU_HELP_SEP,
    WXMENU_HELP_CONTEXT,
    WXMENU_HELP_CONTENTS,
@@ -189,7 +193,7 @@ enum
    WXMENU_MIME_END,
 
    WXMENU_MODULES,
-   
+
    // mouse events on embedded objects in wxLayoutWindow
    WXMENU_LAYOUT_BEGIN,
    WXMENU_LAYOUT_LCLICK,            // left click
@@ -239,9 +243,6 @@ enum
 
    WXTBAR_MAX
 };
-
-
-   
 
 /// all frames which have toolbars
 enum wxFrameId

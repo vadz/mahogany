@@ -43,13 +43,22 @@
 #include <wx/log.h>
 #include <wx/confbase.h>
 #include <wx/utils.h>         // wxGetFullHostName()
+#include <wx/dialup.h>        // for IsAlwaysOnline()
 
-#include "gui/wxOptionsDlg.h" // for ShowOptionsDialog()
-#include "MDialogs.h"   // for CloseSplash()
+#define USE_WIZARD
+
+#ifdef USE_WIZARD
+   #include <wx/wizard.h>
+#else
+   #include "gui/wxOptionsDlg.h" // for ShowOptionsDialog()
+#endif
+
+#include "gui/wxDialogLayout.h"
+
 #include "Mupgrade.h"
 
 // ----------------------------------------------------------------------------
-// symbolic version constants
+// constants
 // ----------------------------------------------------------------------------
 
 // this enum contains only versions with incompatible changes between them
@@ -63,28 +72,593 @@ enum MVersion
    Version_Unknown   // some unrecognized version
 };
 
+#ifdef USE_WIZARD
+
+#ifndef OS_WIN
+   #define USE_HELPERS_PAGE
+#endif // OS_WIN
+
+// ids for install wizard pages
+enum InstallWizardPageId
+{
+   InstallWizard_WelcomePage,          // say hello
+   InstallWizard_IdentityPage,         // ask name, e-mail
+   InstallWizard_ServersPage,          // ask POP, SMTP, NNTP servers
+   InstallWizard_DialUpPage,           // set up dial-up networking
+   InstallWizard_MiscPage,             // signature, other common options
+#ifdef USE_HELPERS_PAGE
+   InstallWizard_HelpersPage,          // external programs set up
+#endif // USE_HELPERS_PAGE
+   InstallWizard_ImportPage,           // propose to import ADBs (and folders)
+   InstallWizard_FinalPage,            // say that everything is ok
+   InstallWizard_PagesMax,             // the number of pages
+   InstallWizard_Done = -1             // invalid page index
+};
+
+// ----------------------------------------------------------------------------
+// wizardry
+// ----------------------------------------------------------------------------
+
+static wxWizardPage *gs_wizardPages[InstallWizard_PagesMax];
+
+// the data which is collected by the wizard
+//
+// FIXME for now I just use a global - this is ugly, but I just can't find a
+//       place to stick it into right now
+struct InstallWizardData
+{
+   // identity page
+   String name;         // personal name, not login one (we can find it out)
+   String email;
+
+   // servers page
+   String pop,
+          imap,
+          smtp,
+          nntp;
+
+   // misc page
+   bool   isSigFile;    // TRUE => signature is a filename,
+   String signature;    // FALSE => it's a signature itself
+
+   // dial up page
+   bool   useDialUp;
+
+#if defined(OS_WIN)
+   String connection;
+#elif defined(OS_UNIX)
+   String dialCommand,
+          hangupCommand;
+
+   // helpers page
+   String browser;
+#endif // OS_UNIX
+} gs_installWizardData;
+
+// the base class for our wizards pages: it allows to return page ids (and not
+// the pointers themselves) from GetPrev/Next and processes [Cancel] in a
+// standard way an provides other useful functions for the derived classes
+class InstallWizardPage : public wxWizardPage
+{
+public:
+   InstallWizardPage(wxWizard *wizard, InstallWizardPageId id)
+      : wxWizardPage(wizard) { m_id = id; }
+
+   // override to return the id of the next/prev page: default versions go to
+   // the next/prev in order of InstallWizardPageIds
+   virtual InstallWizardPageId GetPrevPageId() const;
+   virtual InstallWizardPageId GetNextPageId() const;
+
+   // the dial up page should be shown only if this function returns TRUE
+   static bool ShouldShowDialUpPage();
+
+   // implement the wxWizardPage pure virtuals in terms of our ones
+   virtual wxWizardPage *GetPrev() const
+      { return GetPageById(GetPrevPageId()); }
+   virtual wxWizardPage *GetNext() const
+      { return GetPageById(GetNextPageId()); }
+
+   void OnWizardCancel(wxWizardEvent& event);
+
+protected:
+   wxWizardPage *GetPageById(InstallWizardPageId id) const;
+
+   // creates an "enhanced panel" for placing controls into under the static
+   // text (explanation)
+   wxEnhancedPanel *CreateEnhancedPanel(wxStaticText *text);
+
+private:
+   // id of this page
+   InstallWizardPageId m_id;
+
+   // true/false as usual, -1 if not tested for it yet
+   static int ms_isUsingDialUp;
+
+   DECLARE_EVENT_TABLE()
+};
+
+// first page: welcome the user, explain what goes on
+class InstallWizardWelcomePage : public InstallWizardPage
+{
+public:
+   InstallWizardWelcomePage(wxWizard *wizard);
+
+   // the next page depends on whether the user want or not to use the wizard
+   virtual InstallWizardPageId GetNextPageId() const;
+
+   virtual bool TransferDataFromWindow();
+
+private:
+   wxCheckBox *m_checkbox;
+   bool        m_useWizard;
+};
+
+// second page: ask the basic info about the user (name, e-mail)
+class InstallWizardIdentityPage : public InstallWizardPage
+{
+public:
+   InstallWizardIdentityPage(wxWizard *wizard);
+
+   virtual bool TransferDataFromWindow()
+   {
+      gs_installWizardData.name = m_name->GetValue();
+      gs_installWizardData.email = m_email->GetValue();
+
+      return TRUE;
+   }
+
+private:
+   wxTextCtrl *m_name,
+              *m_email;
+};
+
+class InstallWizardServersPage : public InstallWizardPage
+{
+public:
+   InstallWizardServersPage(wxWizard *wizard);
+
+   virtual bool TransferDataFromWindow()
+   {
+      return TRUE;
+   }
+
+private:
+   wxTextCtrl *m_pop,
+              *m_imap,
+              *m_smtp,
+              *m_nntp;
+};
+
+class InstallWizardDialUpPage : public InstallWizardPage
+{
+public:
+   InstallWizardDialUpPage(wxWizard *wizard);
+
+   virtual bool TransferDataFromWindow()
+   {
+      return TRUE;
+   }
+};
+
+#ifdef USE_HELPERS_PAGE
+
+class InstallWizardHelpersPage : public InstallWizardPage
+{
+public:
+   InstallWizardHelpersPage(wxWizard *wizard);
+
+   virtual bool TransferDataFromWindow()
+   {
+      return TRUE;
+   }
+};
+
+#endif // USE_HELPERS_PAGE
+
+class InstallWizardMiscPage : public InstallWizardPage
+{
+public:
+   InstallWizardMiscPage(wxWizard *wizard);
+
+   virtual bool TransferDataFromWindow()
+   {
+      return TRUE;
+   }
+};
+
+class InstallWizardImportPage : public InstallWizardPage
+{
+public:
+   InstallWizardImportPage(wxWizard *wizard);
+
+   virtual bool TransferDataFromWindow()
+   {
+      return TRUE;
+   }
+};
+
+class InstallWizardFinalPage : public InstallWizardPage
+{
+public:
+   InstallWizardFinalPage(wxWizard *wizard);
+};
+
+// ----------------------------------------------------------------------------
+// prototypes
+// ----------------------------------------------------------------------------
+
+// the function which runs the install wizard
+extern bool RunInstallWizard();
+
+#endif // USE_WIZARD
+
 // ============================================================================
 // implementation
 // ============================================================================
+
+#ifdef USE_WIZARD
+
+// ----------------------------------------------------------------------------
+// wizard pages code
+// ----------------------------------------------------------------------------
+
+// InstallWizardPage
+// ----------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(InstallWizardPage, wxWizardPage)
+   EVT_WIZARD_CANCEL(-1, InstallWizardPage::OnWizardCancel)
+END_EVENT_TABLE()
+
+int InstallWizardPage::ms_isUsingDialUp = -1;
+
+bool InstallWizardPage::ShouldShowDialUpPage()
+{
+   if ( ms_isUsingDialUp == -1 )
+   {
+      wxDialUpManager *man = wxDialUpManager::Create();
+
+      // if we have a LAN connection, then we don't need to configure dial-up
+      // netowrking, but if we don't, then we probably do
+      ms_isUsingDialUp = !man->IsAlwaysOnline();
+
+      delete man;
+   }
+
+   return ms_isUsingDialUp != 0;
+}
+
+InstallWizardPageId InstallWizardPage::GetPrevPageId() const
+{
+   int id = m_id - 1;
+   if ( id == InstallWizard_DialUpPage && !ShouldShowDialUpPage() )
+   {
+      // skip it
+      id--;
+   }
+
+   return id < 0 ? InstallWizard_Done : (InstallWizardPageId)id;
+}
+
+InstallWizardPageId InstallWizardPage::GetNextPageId() const
+{
+   int id = m_id + 1;
+   if ( id == InstallWizard_DialUpPage && !ShouldShowDialUpPage() )
+   {
+      // skip it
+      id++;
+   }
+
+   return id < InstallWizard_PagesMax ? (InstallWizardPageId)id
+                                      : InstallWizard_Done;
+}
+
+void InstallWizardPage::OnWizardCancel(wxWizardEvent& event)
+{
+   if ( !MDialog_YesNoDialog(_("Do you really want to abort the wizard?")) )
+   {
+      // not confirmed
+      event.Veto();
+   }
+   else
+   {
+      // wizard will be cancelled
+      wxLogMessage(_("Please use the 'Options' dialog to configure\n"
+                     "the program before using it!"));
+   }
+}
+
+wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
+{
+   if ( id == InstallWizard_Done )
+      return (wxWizardPage *)NULL;
+
+   if ( !gs_wizardPages[id] )
+   {
+#define CREATE_PAGE(id)                                              \
+      case InstallWizard_##id##Page:                              \
+         gs_wizardPages[InstallWizard_##id##Page] =               \
+            new InstallWizard##id##Page((wxWizard *)GetParent()); \
+         break
+
+      switch ( id )
+      {
+         CREATE_PAGE(Identity);
+         CREATE_PAGE(Servers);
+         CREATE_PAGE(DialUp);
+         CREATE_PAGE(Misc);
+#ifdef USE_HELPERS_PAGE
+         CREATE_PAGE(Helpers)
+#endif // USE_HELPERS_PAGE
+         CREATE_PAGE(Import);
+         CREATE_PAGE(Final);
+      }
+
+#undef CREATE_PAGE
+   }
+
+   return gs_wizardPages[id];
+}
+
+wxEnhancedPanel *InstallWizardPage::CreateEnhancedPanel(wxStaticText *text)
+{
+   wxSize sizeLabel = text->GetSize();
+   wxSize sizePage = ((wxWizard *)GetParent())->GetPageSize();
+   wxCoord y = sizeLabel.y + 2*LAYOUT_Y_MARGIN;
+
+   wxEnhancedPanel *panel = new wxEnhancedPanel(this, FALSE /* no scrolling */);
+   panel->SetSize(0, y, sizePage.x, sizePage.y - y);
+
+   panel->SetAutoLayout(TRUE);
+
+   return panel;
+}
+
+// InstallWizardWelcomePage
+// ----------------------------------------------------------------------------
+
+InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
+                        : InstallWizardPage(wizard, InstallWizard_WelcomePage)
+{
+   (void)new wxStaticText(this, -1, _(
+      "Welcome to Mahogany!\n"
+      "\n"
+      "This wizard will help you to setup the most\n"
+      "important settings needed to successfully use\n"
+      "the program. You don't need to specify everything\n"
+      "here - it can also be done later by opening the\n"
+      "'Options' dialog - but if you do fill the, you\n"
+      "should be able to start the program immediately.\n"
+      "\n"
+      "If you decide to not use the dialog, just check\n"
+      "the box below or press [Cancel] at any moment."
+                                         ));
+
+   m_useWizard = true;
+
+   m_checkbox = new wxCheckBox
+                (
+                  this, -1,
+                  _("I'm an &expert and don't need the wizard")
+                );
+
+   wxSize sizeBox = m_checkbox->GetSize(),
+          sizePage = wizard->GetPageSize();
+
+   // adjust the vertical position
+   m_checkbox->Move(-1, sizePage.y - 2*sizeBox.y);
+}
+
+bool InstallWizardWelcomePage::TransferDataFromWindow()
+{
+   m_useWizard = !m_checkbox->GetValue();
+
+   return TRUE;
+}
+
+InstallWizardPageId InstallWizardWelcomePage::GetNextPageId() const
+{
+   return m_useWizard ? InstallWizard_IdentityPage : InstallWizard_Done;
+}
+
+// InstallWizardIdentityPage
+// ----------------------------------------------------------------------------
+
+InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
+                         : InstallWizardPage(wizard, InstallWizard_IdentityPage)
+{
+   wxStaticText *text = new wxStaticText(this, -1, _(
+         "Please specify your name and e-mail address:\n"
+         "they will be used for sending the messages"
+                                     ));
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(text);
+
+   wxArrayString labels;
+   labels.Add(_("&Personal name:"));
+   labels.Add(_("&E-mail:"));
+
+   long widthMax = GetMaxLabelWidth(labels, panel);
+
+   m_name = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
+   m_email = panel->CreateTextWithLabel(labels[1], widthMax, m_name);
+
+   panel->Layout();
+}
+
+// InstallWizardServersPage
+// ----------------------------------------------------------------------------
+
+InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
+                        : InstallWizardPage(wizard, InstallWizard_ServersPage)
+{
+   wxStaticText *text = new wxStaticText(this, -1, _(
+         "To receive e-mail, you need to have at least one\n"
+         "mail server. Mail server may use POP3 or IMAP4,\n"
+         "but you need only one of them (IMAP4 is better).\n"
+         "\n"
+         "To read Usenet discussion groups, you need to\n"
+         "specify the NNTP (news) server and to be able to\n"
+         "send e-mail, SMTP server is required.\n"
+         "\n"
+         "All of these fields may be filled later as well\n"
+         "(and you will be able to specify multiple servers too)"
+                                     ));
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(text);
+
+   wxArrayString labels;
+   labels.Add(_("&POP server:"));
+   labels.Add(_("&IMAP server:"));
+   labels.Add(_("&SMTP server:"));
+   labels.Add(_("&NNTP server:"));
+
+   long widthMax = GetMaxLabelWidth(labels, panel);
+
+   m_pop = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
+   m_imap = panel->CreateTextWithLabel(labels[1], widthMax, m_pop);
+   m_smtp = panel->CreateTextWithLabel(labels[2], widthMax, m_imap);
+   m_nntp = panel->CreateTextWithLabel(labels[3], widthMax, m_smtp);
+
+   panel->Layout();
+}
+
+// InstallWizardDialUpPage
+// ----------------------------------------------------------------------------
+
+InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
+                       : InstallWizardPage(wizard, InstallWizard_DialUpPage)
+{
+   // TODO ask for the connection name under Windows and commands for Unix
+   new wxStaticText(this, -1, "This page is under construction");
+}
+
+#ifdef USE_HELPERS_PAGE
+
+// InstallWizardHelpersPage
+// ----------------------------------------------------------------------------
+
+InstallWizardHelpersPage::InstallWizardHelpersPage(wxWizard *wizard)
+                        : InstallWizardPage(wizard, InstallWizard_HelpersPage)
+{
+   // TODO ask for the web browser
+   new wxStaticText(this, -1, "This page is under construction");
+}
+
+#endif // USE_HELPERS_PAGE
+
+// InstallWizardMiscPage
+// ----------------------------------------------------------------------------
+
+InstallWizardMiscPage::InstallWizardMiscPage(wxWizard *wizard)
+                     : InstallWizardPage(wizard, InstallWizard_MiscPage)
+{
+   // TODO ask for signature (either file or text)
+   new wxStaticText(this, -1, "This page is under construction");
+}
+
+// InstallWizardImportPage
+// ----------------------------------------------------------------------------
+
+InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
+                       : InstallWizardPage(wizard, InstallWizard_ImportPage)
+{
+   // TODO autodetect all mailers installed and propose to import as much as
+   //      possible.
+   //
+   // NB: use an external function for this, this functionality should be
+   //     separate from the update module
+   new wxStaticText(this, -1, "This page is under construction");
+}
+
+// InstallWizardFinalPage
+// ----------------------------------------------------------------------------
+
+InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
+                      : InstallWizardPage(wizard, InstallWizard_FinalPage)
+{
+   (void)new wxStaticText(this, -1, _(
+      "Congratulations! You have successfully finished configuring\n"
+      "Mahogany and may now start using it.\n"
+      "\n"
+      "Please remember to consult online help and the documentaion\n"
+      "files included in the distribution in case of problems and,\n"
+      "of course, remember about Mahogany users mailing list.\n"
+      "\n"
+      "\n"
+      "\n"
+      "We hope you will enjoy Mahogany!\n"
+      "                    M-Team"
+                                     ));
+}
+
+#endif // USE_WIZARD
 
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
+#ifdef USE_WIZARD
+
+bool RunInstallWizard()
+{
+   // as we use a static array, make sure that only one install wizard is
+   // running at any time (a sensible requirment anyhow)
+   static bool gs_isWizardRunning = false;
+
+   if ( gs_isWizardRunning )
+   {
+      FAIL_MSG( "the installation wizard is already running!" );
+
+      return false;
+   }
+
+   gs_isWizardRunning = true;
+
+   wxIconManager *iconManager = mApplication->GetIconManager();
+   wxWizard *wizard = wxWizard::Create
+                      (
+                        NULL,                         // parent
+                        -1,                           // id
+                        _("Mahogany Installation"),   // title
+                        iconManager->GetBitmap("install_welcome") // def image
+                      );
+
+   // NULL the pages array
+   memset(gs_wizardPages, 0, sizeof(gs_wizardPages));
+
+   gs_wizardPages[InstallWizard_WelcomePage] = new InstallWizardWelcomePage(wizard);
+   if ( wizard->RunWizard(gs_wizardPages[InstallWizard_WelcomePage]) )
+   {
+      // transfer the wizard settings from InstallWizardData
+
+      // TODO
+   }
+
+   wizard->Destroy();
+
+   gs_isWizardRunning = false;
+
+   return true;
+}
+
+#endif // USE_WIZARD
+
 static bool
 UpgradeFromNone()
 {
+#ifdef USE_WIZARD // new code which uses the configuration wizard
+   (void)RunInstallWizard();
+#else // old code which didn't use the setup wizard
    wxLog *log = wxLog::GetActiveTarget();
    if ( log ) {
-      static const char *msg =
-         "As it seems that you are running Mahogany for the first\n"
-         "time, you should probably set up some of the options\n"
-         "needed by the program (especially network parameters).";
-      wxLogMessage(_(msg));
+      wxLogMessage(_("As it seems that you are running Mahogany for the first\n"
+                     "time, you should probably set up some of the options\n"
+                     "needed by the program (especially network parameters)."));
       log->Flush();
    }
 
    ShowOptionsDialog();
+#endif
 
    SetupInitialConfig();
 
@@ -365,9 +939,6 @@ Upgrade(const String& fromVersion)
    else
       oldVersion = Version_Unknown;
 
-   // otherwise it would hide our message box(es)
-   CloseSplash();
-
    bool success = TRUE;
    switch ( oldVersion )
    {
@@ -597,7 +1168,7 @@ SetupInitialConfig(void)
    String host = READ_APPCONFIG(MP_HOSTNAME);
    if(host.Length() == 0)
       mApplication->GetProfile()->writeEntry(MP_HOSTNAME,wxGetFullHostName());
-   
+
    mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent Mail"));
    mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, _("New Mail"));
 

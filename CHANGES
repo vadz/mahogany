@@ -1,5 +1,6 @@
 (next release) on (date of next release)
 
+14.11.99 VZ: added first-time run wizard
 10.11.99 VZ: fixes in folder creation/properties dialogs: buttons are
              enabled/disabled correctly
 21.10.99 KB: dialup network handling and optional Outbox added
