@@ -59,6 +59,8 @@ extern "C"
 
 #include "Profile.h"
 
+#include "FolderType.h"
+
 #include "MApplication.h"
 #include "gui/wxMApp.h"
 #include "gui/wxMFrame.h"

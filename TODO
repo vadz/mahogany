@@ -123,6 +123,7 @@ $Id$
  - options dlg layout looks ugly (radiobox is way too big)
  - in folder create/properties dialog there is missing UpdateUI() right
    after creation - add it somewhere
+ - kbd doesn't work in the options dialog
  - lock file checking for INBOX:
    + it does locking under Windows too, but the lock file names are different
      Testing for FOLDER.lock* now, is that fine?

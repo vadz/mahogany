@@ -15,9 +15,10 @@
 
 #ifndef USE_PCH
 #  include <wx/icon.h>
-#  include <wx/image.h>
 #  include <Mcommon.h>
 #endif  //USE_PCH
+
+#include <wx/image.h>
 
 /**
    IconManager class, this class allocates and deallocates icons for

@@ -600,7 +600,13 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll.Insert(version);
    ll.LineBreak();
    version = _("        running on: ");
+#ifdef OS_UNIX
    version += M_OSINFO;
+#else // Windows
+   // TODO put Windows version info here
+   version += "Windows";
+#endif // Unix/Windows
+
    ll.Insert(version);
    ll.LineBreak();
    ll.LineBreak();

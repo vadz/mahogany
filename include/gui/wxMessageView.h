@@ -20,11 +20,12 @@
 #ifndef USE_PCH
 #  include "gui/wxMFrame.h"
 
-#  include <wx/process.h>
 #  include <wx/dynarray.h>
 #endif
 
-struct ProcessInfo;
+#include <wx/process.h>
+
+class ProcessInfo;
 WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
 
 class wxMessageViewPanel;

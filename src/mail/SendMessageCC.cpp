@@ -185,7 +185,14 @@ SendMessageCC::Build(void)
    //always add mailer header:
    m_headerNames[h] = strutil_strdup("X-Mailer");
    String version;
-   version << "M, " << M_VERSION_STRING << _(" ,running on ") << M_OSINFO;
+
+#ifdef OS_UNIX
+   version << "M, " << M_VERSION_STRING << _(" , running on ") << M_OSINFO;
+#else // Windows
+   // TODO put Windows version info here
+   version << "M, " << M_VERSION_STRING << _(" , running on ") << "Windows";
+#endif // Unix/Windows
+
    m_headerValues[h++] = strutil_strdup(version);
    //always add reply-to header:
    tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
