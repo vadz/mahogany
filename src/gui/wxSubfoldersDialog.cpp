@@ -306,6 +306,7 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
       }
    }
 
+   wxYield(); // FIXME: is this safe?
    // we don't want anyone else to receive this message - it was for us only
    return FALSE;
 }
@@ -336,15 +337,14 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
                                                  name,
                                                  profile);
 
+
+   ///FIXME!!! needs to handle asmf == NULL  gracefully
+   ASSERT(asmf);
    wxSubscriptionDialog dlg(GetFrame(parent), folder);
 
    UserData ud = &dlg;
    (void)asmf->ListFolders
-                (
-                 "",       // host
-                 MF_MH,    // folder type
-                 name,     // start folder name
-                 "*",      // everything recursively
+                ("*",      // everything recursively
                  FALSE,    // subscribed only?
                  "",       // reference (what's this?)
                  ud

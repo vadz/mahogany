@@ -1963,16 +1963,15 @@ MailFolderCC::Subscribe(const String &host,
 
 void
 MailFolderCC::ListFolders(ASMailFolder *asmf,
-                          const String &host,
-                          FolderType protocol,
-                          const String &mailbox,
                           const String &pattern,
                           bool subscribedOnly,
                           const String &reference,
                           UserData ud,
                           Ticket ticket)
 {
-   String spec = BuildFolderSpec(host, protocol, mailbox);
+//   String spec = BuildFolderSpec(host, protocol, mailbox);
+   String spec = m_MailboxPath;
+
    spec += pattern;
 
    ASSERT(asmf);

@@ -56,6 +56,10 @@ $Id$
 		mechanism for setting custom headers. Move Vadim's
 		code to SendMessaggeCC. Introduce SendMessage??
 
+9	VZ??	Creating IMAP folders shows imap default server but
+		that value does not show up in properties afterwards.
+
+9	VZ	Subfolderdialog must check for asmf == NULL
 9	VZ	Folder Properties dialog: OK disabled, Apply sometimes 
 		enabled... impossible to change settings for existing
 		folders. 

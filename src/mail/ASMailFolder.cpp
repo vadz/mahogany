@@ -465,35 +465,25 @@ class MT_ListFolders : public MailThread
 public:
    MT_ListFolders(ASMailFolder *mf,
                   UserData ud,
-                  const String &host,
-                  FolderType protocol,
-                  const String &mailbox,
                   const String &pattern,
                   bool sub_only,
                   const String &reference)
       : MailThread(mf, ud),
-        m_Host(host),
-        m_Mailbox(mailbox),
         m_Pattern(pattern),
         m_Reference(reference)
       {
-         m_Prot = protocol;
          m_SubOnly = sub_only;
       }
 
    virtual void WorkFunction(void)
       {
          m_MailFolder->ListFolders(m_ASMailFolder,
-                                   m_Host, m_Prot,
-                                   m_Mailbox,
                                    m_Pattern,
                                    m_SubOnly,
                                    m_Reference,
                                    m_UserData, m_Ticket);
       }
 private:
-   String  m_Host, m_Mailbox;
-   FolderType m_Prot;
    String  m_Pattern;
    String  m_Reference;
    bool  m_SubOnly;
@@ -762,23 +752,16 @@ public:
                                   mailboxname, subscribe))->Start();
       }
    /** Get a listing of all mailboxes.
-       @param host the server host, or empty for local newsspool
-       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   /* static */ Ticket ListFolders(const String &host,
-                             FolderType protocol,
-                             const String &mailbox,
-                             const String &pattern,
-                             bool subscribed_only,
-                             const String &reference,
-                             UserData ud)
+   Ticket ListFolders(const String &pattern,
+                      bool subscribed_only,
+                      const String &reference,
+                      UserData ud)
    {
       return (new MT_ListFolders(this, ud,
-                                 host, protocol,
-                                 mailbox,
                                  pattern,
                                  subscribed_only,
                                  reference))->Start();
@@ -958,18 +941,13 @@ ASMailFolder::Subscribe(const String &host,
    return ASMailFolderImpl::Subscribe(host, protocol, mailboxname, subscribe, ud);
 }
 
-/* static */
 Ticket
-ASMailFolder::ListFolders(const String &host,
-                          FolderType protocol,
-                          const String &mailbox,
-                          const String &pattern,
+ASMailFolder::ListFolders(const String &pattern,
                           bool subscribed_only,
                           const String &reference,
                           UserData ud)
 {
-   return ((ASMailFolderImpl *)this)->ListFolders(host, protocol, mailbox,
-                                                  pattern,
+   return ((ASMailFolderImpl *)this)->ListFolders(pattern,
                                                   subscribed_only,
                                                   reference, ud);
 }

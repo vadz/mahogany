@@ -173,17 +173,11 @@ public:
        DO NOT USE THIS FUNCTION, BUT ASMailFolder::ListFolders instead!!!
 
        @param asmf the ASMailFolder initiating the request
-       @param host the server host, or empty for local newsspool
-       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
-       @param mailbox the name of the mailbox to start from
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
    virtual void ListFolders(class ASMailFolder *asmf,
-                            const String &host,
-                            FolderType protocol,
-                            const String &mailbox,
                             const String &pattern = "*",
                             bool subscribed_only = false,
                             const String &reference = "",

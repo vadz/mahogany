@@ -418,20 +418,15 @@ public:
                            bool subscribe = true,
                            UserData ud = 0);
    /** Get a listing of all mailboxes.
-       @param host the server host, or empty for local newsspool
-       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   /* static */ Ticket ListFolders(const String &host,
-                             FolderType protocol,
-                             const String &mailbox = "",
-                             const String &pattern = "*",
-                             bool subscribed_only = false,
-                             const String &reference = "",
-                             UserData ud = 0);
-   //@}
+   Ticket ListFolders(const String &pattern = "*",
+                      bool subscribed_only = false,
+                      const String &reference = "",
+                      UserData ud = 0);
+   //@}   
    //@}
    //@}
    /**@name Synchronous Access Functions */
