@@ -23,7 +23,7 @@ Manual.hhc: Manual.html
 	$(PERL) -w .src/makehhc.pl
 
 install: htmlhlp
-	$(INSTALL_DATA) Manual.chm Manual.hhc Manual.hhk .src/Manual.hhp Manual.html $(DOCDIR)
+	$(INSTALL_DATA) .src/Manual.chm Manual.hhc .src/Manual.hhk .src/Manual.hhp Manual.html $(DOCDIR)
 
 .src/Manual.html: Manual.html
 	cp $< $@
