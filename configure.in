@@ -433,4 +433,6 @@ fi
 AC_SUBST(DOCHTML)
 AC_SUBST(DOCTEX)
 
+dnl compface is included in M source
+LIBS="$LIBS -lcompface"
 AC_OUTPUT(makeopts)
