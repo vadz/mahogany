@@ -396,6 +396,9 @@ CCLIENT_EXTRAAUTHENTICATORS=
 CCLIENT_EXTRACFLAGS=
 EXTRACFLAGS=
 if test "$USE_SSL" = 1; then
+	AC_CHECK_LIB(c, socket,, AC_CHECK_LIB(socket,socket))
+	AC_CHECK_LIB(c, gethostname,, AC_CHECK_LIB(resolv,gethostname))
+	AC_CHECK_LIB(c, gethostbyname,, AC_CHECK_LIB(nsl,gethostbyname))
 	AC_CHECK_LIB(crypto,CRYPTO_free,
 		AC_CHECK_LIB(ssl,ssl3_connect,
 		[ 	MAKE_USESSL="USESSL=yes"
