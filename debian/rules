@@ -15,14 +15,15 @@ build:
 		(./configure --prefix=/usr) \
 	fi
 	make depend || true
+	make -C include 
 	make doc
 	# If we are on Debian Slink, we need to build a semistatic binary:
 	if test "`cat /etc/debian_version`" = "2.1" ; \
 	then \
-		( $(MAKE) all CFLAGS="-O2 -g -Wall" || true; \
+		( $(MAKE) all || true; \
 		cd src && make semistatic ) \
 	else \
-		( $(MAKE) all CFLAGS="-O2 -g -Wall" ; \
+		( $(MAKE) all ; \
 		cd src && make ) \
 	fi
 	touch build
