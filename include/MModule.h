@@ -27,6 +27,8 @@ class MInterface;
 
 #include "Mversion.h"      // for M_VERSION_MAJOR &c
 
+#include "MAtExit.h"
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -77,6 +79,9 @@ class MInterface;
 
 /// Name of the function used to retrieve info about the module
 #define MMODULE_GETPROPERTY_FUNCTION _T("GetMModuleProperties")
+
+/// Name of the function called to do module cleanup
+#define MMODULE_CLEANUP_FUNCTION _T("CleanupMModule")
 
 // ----------------------------------------------------------------------------
 // constants
@@ -295,6 +300,8 @@ extern "C"
    /** Function type for InitModule() function.
        Each module DLL must implement a function CreateMModule of this
        type which will be called to initialise it. That function must
+       return the new object representing this module.
+
        @param version_major major version number of Mahogany
        @param version_minor minor version number of Mahogany
        @param version_release release version number of Mahogany
@@ -309,14 +316,20 @@ extern "C"
                                                     class MInterface *minterface,
                                                     int *errorCode);
 
-   /** Function to retreieve info from a module DLL. A module DLL may
-       export such function, although it is not necessary if it has a
-       matching .mmd file.
+   /** Function returning information about this module.
 
        The function should return the name, description and version of the
        module as static strings (they are not freed by the called)
    */
    typedef const ModuleProperty *(* MModule_GetModulePropFuncType)(void);
+
+   /**
+      Function called to do module cleanup.
+
+      A module may not have this function in which case nothing is done when it
+      is unloaded.
+    */
+   typedef void (*MModule_CleanUpFuncType)();
 }
 //@}
 
@@ -342,8 +355,15 @@ void MModule_AddStaticModule(const wxChar *Name,
                                 Description, Version, InitMModule); \
      } \
     } gs_moduleInitializerFor##ClassName;
+
+#  define MMODULE_CLEANUP(func) MRunFunctionAtExit moduleCleanup(func);
 #else // !USE_MODULES_STATIC
-#   define MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version)
+#  define MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version)
+#  define MMODULE_CLEANUP(func) \
+   extern "C" \
+   { \
+      MDLLEXPORT void CleanupMModule() { (func)(); }
+   }
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 
 /// helper of MMODULE_BEGIN_IMPLEMENT
