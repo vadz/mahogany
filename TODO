@@ -17,15 +17,8 @@ $Id$
 
 ******* Priorities for KB: ******************************
 
-TEST:
-
-  - reimplement some form of IsDirty() / HasBeenModified() for
-    wxComposeView.   TEST
-
 WXGTK:
   - PNG library returns error for transparent PNG
-  - wxExecute() doesn't behave as expected, "xxx 'yyy'" gives "xxx" as
-    command and "'yyy'" as argument instead of "yyy"!!!
   - .mailcap should override /etc/mailcap, not other way round
   - MimeManager::ReadXXX should have returncode and not print error
     message
@@ -44,6 +37,12 @@ WXGTK:
   - DragNDrop (waiting for GNOME 1.0 / Debian Slink)
   - occasionally wraps lines wongly (twice)
   - reset scrollbars on Clear()
+
+
+- .newsrc read/write  --> should be there?!
+  For nntp folders, mark read messages as deleted. Somehow provide
+  feedback! At close, ask whether to mark all messages as read.
+  --> .newsrc does get updated! :-)
 
 - IMAP progress updates don't appear because there is too much to be
   done in wxYield()?
@@ -65,8 +64,6 @@ WXGTK:
   - have a "collect" flag
   - have a global "NewMail" folder setting and ensure its existence
     (and the one of SentFolder) in VerifySettings()
-
-- .newsrc read/write  --> should be there?!
 
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message.
