@@ -591,6 +591,8 @@ SendMessageCC::Send(void)
       tmpbuf[MAILTMPLEN];
    bool
       success = true;
+   String
+      reply;
 
    kbStringList::iterator i;
    for(i = m_FccList.begin(); i != m_FccList.end(); i++)
@@ -622,10 +624,12 @@ SendMessageCC::Send(void)
       {
       case Prot_SMTP:
          success = smtp_mail (stream,"MAIL",m_Envelope,m_Body) != 0;
+         reply = stream->reply;
          smtp_close (stream);
          break;
       case Prot_NNTP:
          success = nntp_mail (stream,m_Envelope,m_Body) != 0;
+         reply = stream->reply;
          nntp_close (stream);
          break;
       }
@@ -639,7 +643,7 @@ SendMessageCC::Send(void)
       else
       {
          sprintf (tmpbuf, _("Failed to send - %s"),
-                  (stream->reply)?stream->reply:_("unknown error"));
+                  (reply.Length() > 0) ? reply.c_str() :_("unknown error"));
          ERRORMESSAGE((tmpbuf));
          success = false;
       }
