@@ -344,7 +344,7 @@ public:
   // operations
     // flush
   bool Flush() const { return m_pBook->Flush(); }
-
+   AdbBook * GetBook() { return m_pBook; }
 protected:
   AdbBook   *m_pBook;
 };
@@ -478,7 +478,9 @@ public:
     Book,
     Address,
     Opened,
-    Closed
+    Closed,
+    PalmOSBook, // if changes from 5, must be changed in ProvPalm.h, too!
+    BbdbBook // if changes from 5, must be changed in ProvBbdb.cpp, too!
   };
 
 private:
@@ -1891,13 +1893,12 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
   AdbDataProvider *pProvider = info->CreateProvider();
 
   bool ok = OpenAdb(strAdbName, pProvider, info->szName);
-  SafeDecRef(pProvider);
 
   if ( ok ) {
      // the book is in the cache, it won't be really recreated
      AdbManager_obj adbManager;
 
-     AdbBook *book = adbManager->CreateBook(strAdbName);
+     AdbBook *book = adbManager->CreateBook(strAdbName, pProvider);
 
      if ( book ) {
         if ( !book->Flush() ) {
@@ -1912,6 +1913,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
         wxFAIL_MSG("book should be in the cache if it was created");
      }
   }
+  SafeDecRef(pProvider);
 
   return ok;
 }
@@ -2770,6 +2772,8 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
     "adb_address",
     "adb_opened",
     "adb_closed",
+    "adb_palmos",
+    "adb_bbdb"
   };
 
   wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
@@ -3417,26 +3421,37 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
   int image = -1;
   switch ( m_kind )
   {
-    case TreeElement_Entry:
-       image = wxAdbTree::Address;
-       break;
-
-    case TreeElement_Group:
-       image = wxAdbTree::Closed;
-       break;
-
-    case TreeElement_Book:
-       image = wxAdbTree::Book;
-       break;
-
-    case TreeElement_Root:
-       image = wxAdbTree::Library;
-       break;
-
-    default:
-       wxFAIL_MSG("unknown tree element type");
+  case TreeElement_Entry:
+     image = wxAdbTree::Address;
+     break;
+     
+  case TreeElement_Group:
+  {
+     AdbEntryGroup *group = ((AdbTreeNode *)this)->AdbGroup();
+     if(group)
+        image = group->GetIconId();
+     if(image == -1)
+        image = wxAdbTree::Closed;
+     break;
+  }
+  case TreeElement_Book:
+  {
+     AdbBook *book = ((AdbTreeBook *)this)->GetBook();
+     if(book)
+        image = book->GetIconId();
+     if(image == -1)
+        image = wxAdbTree::Book;
+     break;
+  }
+  case TreeElement_Root:
+     image = wxAdbTree::Library;
+     break;
+     
+  default:
+     wxFAIL_MSG("unknown tree element type");
   }
 
+  
   if ( IsRoot() ) {
     SetId(tree.AddRoot(wxString(_("Address Books")), image, image, this));
     tree.SetItemHasChildren(GetId());

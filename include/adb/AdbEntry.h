@@ -222,6 +222,11 @@ public:
   // misc
     /// description of a group is just its name
   virtual String GetDescription() const { return GetName(); }
+
+  /** Return the icon name if set. The numeric return value must be -1 
+      for the default, or an index into the image list in AdbFrame.cpp.
+  */
+  virtual int GetIconId() const { return -1; }
 };
 
 // ============================================================================

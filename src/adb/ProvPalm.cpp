@@ -64,9 +64,10 @@ PalmEntry::PalmEntry(PalmEntryGroup *pGroup, const String& strName, bool bNew = 
   m_pGroup = pGroup;
   m_astrFields.Add(strName);
 
+/*
   if (m_pGroup)
     m_pGroup->IncRef();
-
+*/
   m_bDirty = FALSE;
 }
 
@@ -74,7 +75,7 @@ PalmEntry::~PalmEntry()
 {
   if ( m_bDirty )
     Save();
-  if (m_pGroup) m_pGroup->DecRef();
+//  if (m_pGroup) m_pGroup->DecRef();
 }
 AdbEntryGroup *PalmEntry::GetGroup() const
 {
@@ -160,9 +161,12 @@ PalmEntryGroup::~PalmEntryGroup()
       (**i).DecRef();
    
    PalmGroupList::iterator j;
+   PalmEntryGroup *group = NULL;
    for(j = m_groups->begin(); j != m_groups->end(); j++)
-      (**j).DecRef();
-      
+   {
+      group = *j;
+      group->DecRef();
+   }
    delete m_entries;
    delete m_groups;
 }
@@ -358,16 +362,20 @@ bool PalmDataProvider::EnumBooks(wxArrayString& /* aNames */)
 
 bool PalmDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
-  // TODO: Test, whether the PalmOS module is available
-  return FALSE;
-
+  MModule *palmModule = MModule::GetProvider("HandheldSynchronise");
+  bool rc = palmModule != NULL;
+  SafeDecRef(palmModule);
+     
   switch ( test )
   {
-    case Test_Open:
-    case Test_OpenReadOnly:
-    case Test_Create:
-    default:
-      FAIL_MSG("invalid test in TestBookAccess");
+  case Test_Open:
+  case Test_OpenReadOnly:
+       return rc;
+  case Test_Create:
+     return FALSE;
+  default:
+     FAIL_MSG("invalid test in TestBookAccess");
+     return FALSE;
   }
 }
 

@@ -235,6 +235,10 @@ public:
 
    virtual bool IsLocal() const { return TRUE; }
    virtual bool IsReadOnly() const;
+  /** Return the icon name if set. The numeric return value must be -1 
+      for the default, or an index into the image list in AdbFrame.cpp.
+  */
+  virtual int GetIconId() const { return 6; }
 
 private:
    virtual ~BbdbBook();

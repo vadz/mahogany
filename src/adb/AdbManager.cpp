@@ -313,17 +313,18 @@ void AdbManager::Delete()
 AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
                                 String *providerName)
 {
-  // first see if we don't already have it
-  AdbBook *book = FindInCache(name);
-  if ( book ) {
-    book->IncRef();
+   AdbBook * book = NULL;
+   // first see if we don't already have it
+   book = FindInCache(name);
+   if ( book )
+   {
+      book->IncRef();
+      return book;
+   }
 
-    return book;
-  }
-
-  // no, must create a new one
-  AdbDataProvider *prov = provider;
-  if ( prov == NULL ) {
+   // no, must create a new one
+   AdbDataProvider *prov = provider;
+   if ( prov == NULL ) {
     // try to find it
     AdbDataProvider::AdbProviderInfo *info = AdbDataProvider::ms_listProviders;
     while ( info ) {

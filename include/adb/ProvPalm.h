@@ -177,6 +177,10 @@ public:
 
   virtual bool Flush();
 
+  /** Return the icon name if set. The numeric return value must be -1 
+      for the default, or an index into the image list in AdbFrame.cpp.
+  */
+  virtual int GetIconId() const { return 5; }
   MOBJECT_DEBUG(PalmBook)
 
 private:
