@@ -904,15 +904,17 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
                    "<p>"
 #endif
-                   "<b>List of contributors:</b><p>"
+                   "<b>List of contributors:</b><br>"
                    "<tt>mahogany-developers@lists.sourceforge.net</tt>:<br>"
                    "Karsten Ball&uuml;der, "
                    "Vadim Zeitlin, "
                    "Vaclav Slavik, "
                    "Daniel Seifert, "
-                   "Greg Noel "
-                   "and others<br>"
-                   "<i>The wxWindows team</i><br><hr>"
+                   "Greg Noel, "
+                   "and many others<br>"
+                   "<i>The Mahogany team</i><br>"
+                   "And we couldn't have done it without wxWindows "
+                   "and their support team...<hr>"
                    "<p>This Product includes software developed and copyright "
                    "by the University of Washington.<br>"
 #ifdef USE_SSL
@@ -924,8 +926,14 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #endif
                    "<p>"
                    "The Mahogany Team would like to acknowledge the support of "
-                   "Anthemion Software, Heriot-Watt University, Sourceforge.net, SourceGear.com, "
-                   "GDev.net, Simon Shapiro, VA Linux and SuSE GmbH."
+                   "Anthemion Software, "
+                   "Heriot-Watt University, "
+                   "SourceForge.net, "
+                   "SourceGear.com, "
+                   "GDev.net, "
+                   "Simon Shapiro, "
+                   "VA Linux, "
+                   "and SuSE GmbH."
       );
 
 
