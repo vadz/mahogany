@@ -83,7 +83,10 @@ wxFolderListCtrl::SetEntry(long index,
                            String const &date,
                            String const &size)
 {
-   InsertItem(index, status); // column 0
+   if(index <= GetItemCount())
+      SetItem(index, 0, status);
+   else
+      InsertItem(index, status); // column 0
    SetItem(index, 1, sender);
    SetItem(index, 2, date);
    SetItem(index, 3, size);
