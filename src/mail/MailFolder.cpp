@@ -37,7 +37,7 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
 
    if(i_type == MF_PROFILE)
    {
-      profile = ProfileBase::CreateProfile(i_name,parentProfile);
+      profile = ProfileBase::CreateFolderProfile(i_name,parentProfile);
       CHECK(profile, NULL, "can't create profile");   // return if it fails
 
       login = READ_CONFIG(profile, MP_POP_LOGIN);
