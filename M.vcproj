@@ -1119,6 +1119,9 @@
 					<File
 						RelativePath=".\src\modules\viewflt\Trailer.cpp">
 					</File>
+					<File
+						RelativePath=".\src\modules\viewflt\UUDecode.cpp">
+					</File>
 				</Filter>
 				<Filter
 					Name="viewers"
