@@ -2002,19 +2002,30 @@ public:
                   "Found additional folder '%s'\n"
                   "marked as central new mail folder. Ignoring it.\n"
                   "New Mail folder used is '%s'."),
-                             f->GetName().c_str(),
+                             f->GetFullName().c_str(),
                              m_NewMailFolder.c_str()));
-               f->SetFlags(f->GetFlags() & !MF_FLAGS_NEWMAILFOLDER);
+//               f->SetFlags(f->GetFlags() & !MF_FLAGS_NEWMAILFOLDER);
+               Profile *p = Profile::CreateProfile(f->GetFullName());
+	       if(p)
+               {
+                 int typeAndFlags = READ_CONFIG(p,MP_FOLDER_TYPE);
+                 FolderType type = GetFolderType(typeAndFlags);
+                 int flags = GetFolderFlags(typeAndFlags);
+                 flags ^= MF_FLAGS_NEWMAILFOLDER;
+                 p->writeEntry(MP_FOLDER_TYPE,
+                      CombineFolderTypeAndFlags(type, flags));
+                 p->DecRef();
+               }
             }
             else
             {
-               m_NewMailFolder = f->GetName();
+               m_NewMailFolder = f->GetFullName();
                if(f->GetFlags() & MF_FLAGS_INCOMING)
                {
                   ERRORMESSAGE((_("Cannot auto-collect mail from the new mail folder\n"
                                   "'%s'\n"
                                   "Corrected configuration data."),
-                                f->GetName().c_str()));
+                                f->GetFullName().c_str()));
                   f->SetFlags(f->GetFlags() & !MF_FLAGS_INCOMING);
                }
             }
@@ -2097,8 +2108,11 @@ VerifyInbox(void)
 #else
    String foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
    if(foldername.IsEmpty()) // this must not be
+   {
       foldername = _("New Mail");
-   static const long flagsNewMail = MF_FLAGS_DEFAULT;
+      mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, foldername);
+   }
+   static const long flagsNewMail = MF_FLAGS_DEFAULT|MF_FLAGS_NEWMAILFOLDER;
 #endif
    // Do we need to create the NewMailFolder?
    Profile *ibp = Profile::CreateProfile(foldername);
@@ -2115,6 +2129,7 @@ VerifyInbox(void)
 
    // Make sure the flags and type are valid
    int typeAndFlags = READ_CONFIG(ibp,MP_FOLDER_TYPE);
+   FolderType type = GetFolderType(typeAndFlags);
    int oldflags = GetFolderFlags(typeAndFlags);
    int flags = oldflags;
    if( flags & MF_FLAGS_INCOMING )
@@ -2123,7 +2138,7 @@ VerifyInbox(void)
    if( (flags != oldflags) || (GetFolderType(typeAndFlags) != MF_FILE) )
    {
       ibp->writeEntry(MP_FOLDER_TYPE,
-                      CombineFolderTypeAndFlags(MF_FILE, flags));
+                      CombineFolderTypeAndFlags(type, flags));
    }
    ibp->DecRef();
 
