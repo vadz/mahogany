@@ -34,6 +34,8 @@
 #include "Mdnd.h"
 #include "MFolderDialogs.h"
 
+#include "miscutil.h" // for ParseColourString()
+
 #include <wx/imaglist.h>
 #include <wx/treectrl.h>
 #include <wx/tokenzr.h>
@@ -136,7 +138,10 @@ public:
 
       // the folder status
    Status GetStatus() const { return m_status; }
-   void SetStatus(Status status) { m_status = status; }
+   void SetStatus(wxTreeCtrl *tree, Status status);
+
+   void OnChildStatusChange(wxTreeCtrl *tree,
+                            Status statusOld, Status statusNew);
 
 private:
    // not implemented
@@ -147,7 +152,11 @@ private:
 
    wxFolderTreeNode *m_parent;   // the parent node (may be NULL)
 
+   // status info: our own status and the number of children with new/recent
+   // messages we have
    Status m_status;
+   size_t m_countNew,
+          m_countRecent;
 
    bool m_wasExpanded;
 };
@@ -709,6 +718,8 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    m_folder = folder;
    m_wasExpanded = false;
    m_status = Folder_Normal;
+   m_countNew =
+   m_countRecent = 0;
 
    int image = GetFolderIconForDisplay(folder);
 
@@ -727,6 +738,84 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    if ( folder )
    {
       tree->SetItemHasChildren(GetId(), folder->GetSubfolderCount() != 0);
+   }
+}
+
+void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
+                                           Status statusOld, Status statusNew)
+{
+   if ( !GetParent() )
+   {
+      // never change the status of the root folder
+      return;
+   }
+
+   if ( statusOld == Folder_Normal )
+   {
+      if ( statusNew == Folder_New )
+         m_countNew++;
+      else
+         m_countRecent++;
+   }
+   else
+   {
+      if ( statusOld == Folder_New )
+      {
+         wxASSERT_MSG( m_countNew > 0, "error in status change logic" );
+
+         m_countNew--;
+      }
+      else
+      {
+         wxASSERT_MSG( m_countRecent > 0, "error in status change logic" );
+
+         m_countRecent--;
+      }
+   }
+
+   // update our own status if needed
+   SetStatus(tree, m_countNew ? Folder_New
+                              : m_countRecent ? Folder_Recent
+                                              : Folder_Normal);
+}
+
+void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree, Status status)
+{
+   // only do something if the status really changed
+   if ( GetStatus() != status )
+   {
+      // config entries names for the colours
+      static const char *colorNames[Folder_StatusMax] =
+      {
+         MP_FVIEW_FGCOLOUR,
+         MP_FVIEW_NEWCOLOUR,
+         MP_FVIEW_RECENTCOLOUR,
+      };
+
+      static const char *colorDefaults[Folder_StatusMax] =
+      {
+         MP_FVIEW_FGCOLOUR_D,
+         MP_FVIEW_NEWCOLOUR_D,
+         MP_FVIEW_RECENTCOLOUR_D,
+      };
+
+      wxString colorName = mApplication->GetProfile()
+                              ->readEntry(colorNames[status],
+                                          colorDefaults[status]);
+      wxColour col;
+      if ( !ParseColourString(colorName, &col) )
+      {
+         wxLogDebug("Invalid colour string '%s'.", colorName.c_str());
+         col = *wxBLACK;
+      }
+
+      tree->SetItemTextColour(GetId(), col);
+
+      // propagate the change to the parent: if the folder has new messages,
+      // its parent folder should be highlighted as new too
+      GetParent()->OnChildStatusChange(tree, m_status, status);
+
+      m_status = status;
    }
 }
 
@@ -1456,9 +1545,8 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       // change the folder colour depending on whether it has any recent
       // messages, any new messages or neither at all
       wxFolderTreeNode::Status status;
-      UIdType newMsgs;
-      newMsgs = folder->CountNewMessagesQuick();
-      if(newMsgs != UID_ILLEGAL && newMsgs > 0)
+      UIdType newMsgs = folder->CountNewMessagesQuick();
+      if ( newMsgs != UID_ILLEGAL && newMsgs > 0 )
       {
          status = wxFolderTreeNode::Folder_New;
       }
@@ -1472,20 +1560,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       }
 
       wxFolderTreeNode *node = GetFolderTreeNode(item);
-      if ( node->GetStatus() != status )
-      {
-         // customize
-         unsigned long colours[wxFolderTreeNode::Folder_StatusMax] =
-         {
-            0x000000,
-            0x00ff00,
-            0x0000ff,
-         };
-
-         node->SetStatus(status);
-
-         SetItemTextColour(item, wxColour(colours[status]));
-      }
+      node->SetStatus(this, status);
    }
 
    return true;
