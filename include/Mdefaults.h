@@ -814,7 +814,7 @@
 /// Which folder to use as Outbox
 #define MP_OUTBOX_NAME_D         _("Outbox")
 /// Use Outbox?
-#define MP_USE_OUTBOX_D            1l
+#define MP_USE_OUTBOX_D            0l
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// comment
