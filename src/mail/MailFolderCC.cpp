@@ -13,31 +13,26 @@
 #include  "Mpch.h"
 
 #ifndef  USE_PCH
-#  include <strutil.h>
-#  include <MApplication.h>
-#  include <MailFolderCC.h>
-#  include <MessageCC.h>
-#  include <MDialogs.h>
+#   include "strutil.h"
+#   include "MApplication.h"
+#   include "MailFolderCC.h"
+#   include "MessageCC.h"
+#   include "MDialogs.h"
 
 // includes for c-client library
 extern "C"
 {
-#  include <osdep.h>
-#  include <rfc822.h>
-#  include <smtp.h>
-#  include <nntp.h>
+#   include <osdep.h>
+#   include <rfc822.h>
+#   include <smtp.h>
+#   include <nntp.h>
 }
-
+#   include "Profile.h"
+#   include  "Mdefaults.h"
 #endif // USE_PCH
 
-#include  "Mdefaults.h"
-#include   "MPython.h"
-
+#include  "MPython.h"
 #include  "FolderView.h"
-#include  "MailFolder.h"
-#include  "MailFolderCC.h"
-#include  "Message.h"
-#include  "MessageCC.h"
 
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;

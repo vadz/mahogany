@@ -12,3 +12,4 @@ strutil.o: strutil.cpp
 
 include ../../makeopts
 include ../../makerules
+include .depend

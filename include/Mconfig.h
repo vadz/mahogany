@@ -98,7 +98,14 @@
 
 /// name of the application
 #define   M_APPLICATIONNAME   "M"
+/// name of the vendor
+#define   M_VENDORNAME   "M-Team"
 
+/// name of global config file
+#define   M_GLOBAL_CONFIG_NAME   "M.conf"
+
+/// path for etc directories
+#define   M_ETC_PATH   "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc:/opt/share/etc:/usr/local/stow/etc"
 
 #ifdef   USE_BASECLASS
 #   define   BASECLASS   CommonBase

@@ -3,25 +3,7 @@
  *                                                                  *
  * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$            *
- ********************************************************************
- * $Log$
- * Revision 1.5  1998/08/08 22:29:15  VZ
- * memory leaks and crashes and memory corruptio and ... fixes
- *
- * Revision 1.4  1998/05/24 14:47:58  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.3  1998/05/18 17:48:32  KB
- * more list<>->kbList changes, fixes for wxXt, improved makefiles
- *
- * Revision 1.2  1998/03/26 23:05:39  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:19  karsten
- * first try at a complete archive
+ * $Id$
  *
  *******************************************************************/
 

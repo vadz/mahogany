@@ -15,12 +15,12 @@
 #include "Mcommon.h"
 
 #ifndef  USE_PCH
-#  include "Profile.h"
-#  include "strutil.h"
-#  include "strings.h"
-#  include "MDialogs.h"
+#   include "Profile.h"
+#   include "strutil.h"
+#   include "strings.h"
+#   include "MDialogs.h"
 
-#  include <strings.h>
+#   include <strings.h>
 
    // includes for c-client library
    extern "C"
@@ -36,11 +36,11 @@
 
 #endif // USE_PCH
 
-#include "Mdefaults.h"
-#include "MApplication.h"
-#include "Message.h"
-#include "SendMessageCC.h"
-#include "MailFolderCC.h"
+#include   "Mdefaults.h"
+#include   "MApplication.h"
+#include   "Message.h"
+#include   "SendMessageCC.h"
+#include   "MailFolderCC.h"
 
 extern "C"
 {

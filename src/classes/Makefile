@@ -14,3 +14,4 @@ CommonBase.o:
 
 include ../../makeopts
 include ../../makerules
+include .depend

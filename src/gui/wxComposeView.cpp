@@ -32,6 +32,8 @@
 
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
+#else
+# error USE_PCH for unix?
 #endif
 
 #include "Mdefaults.h"

@@ -19,6 +19,8 @@ all:	$(OBJECTS)
 
 include ../../makerules 
 include ../../makeopts
+include .depend
+
 clean:
 	$(RM) *.o *.so *.pyc *.py *.doc $(CPPTARGETS)
 	ln -s INIT/Minit.py .

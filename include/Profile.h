@@ -22,8 +22,10 @@
 // macros
 // ----------------------------------------------------------------------------
 
-#define READ_APPCONFIG(key) (mApplication->GetProfile()->readEntry(key, key##_D))
-#define READ_CONFIG(profile, key) profile->readEntry(key, key##_D)
+#define   READ_APPCONFIG(key) (mApplication->GetProfile()->readEntry(String(key), key##_D))
+#define   READ_CONFIG(profile, key) profile->readEntry(key, key##_D)
+//#define   STRINGARG String const &
+#define   STRINGARG String
 
 // ----------------------------------------------------------------------------
 // classes
@@ -47,50 +49,45 @@ class ProfileBase : public MObject
 {
 public:
    /// Create a normal Profile object
-   static ProfileBase * CreateProfile(String const &classname, ProfileBase const *parent);
+   static ProfileBase * CreateProfile(STRINGARG classname, ProfileBase const *parent);
    /// Create a global configuration profile object
-   static ProfileBase * CreateGlobalConfig(String const & filename);
+   static ProfileBase * CreateGlobalConfig(STRINGARG  filename);
    
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */
    //@{
    /// Read a character entry.
-   virtual String readEntry(String const &key, String const
-                            &defaultvalue = (const char *)NULL) const = 0;
+   virtual String readEntry(STRINGARG key,
+                            STRINGARG defaultvalue = (const char *)NULL) const = 0;
    /// Read a character entry.
-   String readEntry(String const &key,
-                    const char *defaultvalue = NULL) const
-      {
-         String str;
-         str = readEntry(key, String(defaultvalue));
-         return str;
-      }
+   String readEntry(STRINGARG  key,
+                    const char *defaultvalue = NULL) const;
    /// Read an integer value.
-   virtual long readEntry(String const &key, long defaultvalue) const = 0;
+   virtual long readEntry(STRINGARG key, long defaultvalue) const = 0;
    /// Read an integer value.
-   virtual int readEntry(String const &key, int defaultvalue) const
+   virtual int readEntry(STRINGARG key, int defaultvalue) const
       { return (int) readEntry(key, (long)defaultvalue); }
    /// Read a bool value.
-   virtual bool readEntry(String const &key, bool defaultvalue) const = 0;
+   virtual bool readEntry(STRINGARG key, bool defaultvalue) const = 0;
    /// Write back the character value.
-   virtual bool writeEntry(String const &key, String const &Value) = 0;
+   virtual bool writeEntry(STRINGARG key, STRINGARG Value) = 0;
    /// Write back the int value.
-   virtual bool writeEntry(String const &key, long Value) = 0;
+   virtual bool writeEntry(STRINGARG key, long Value) = 0;
    /// Write back the int value.
-   virtual bool writeEntry(String const &key, int Value)
+   virtual bool writeEntry(STRINGARG key, int Value)
       { return writeEntry(key, (long)Value); }
    /// Write back the bool value.
-   virtual bool writeEntry(String const &key, bool Value) = 0;
+   virtual bool writeEntry(STRINGARG key, bool Value) = 0;
    //@}
    /// set the path within the profile,just like cd
-   virtual void   SetPath(String const &path) = 0;
+   virtual void   SetPath(STRINGARG path) = 0;
    /// query the current path
    virtual String GetPath(void) const = 0;
    /// return true if the entry is defined
-   virtual bool HasEntry(String const &key) const = 0;
+   virtual bool HasEntry(STRINGARG key) const = 0;
    /// delete the entry group specified by path
-   virtual void DeleteGroup(String const &path) = 0;
+   virtual void DeleteGroup(STRINGARG path) = 0;
    /// return the name of the profile
    virtual String GetProfileName(void) = 0;
 protected:
@@ -128,7 +125,7 @@ public:
        @param isApp if we're creating the app config
        @return the wxConfig object
    */
-   wxConfigBase *GetConfig(String const &fileName, bool isApp = FALSE);
+   wxConfigBase *GetConfig(STRINGARG fileName, bool isApp = FALSE);
 
    /// Prints a list of all entries.
    DEBUG_DEF
@@ -140,7 +137,7 @@ public:
 class ProfilePathChanger
 {
 public:
-   ProfilePathChanger(ProfileBase *config, const String& path);
+   ProfilePathChanger(ProfileBase *config, STRINGARG path);
    ~ProfilePathChanger();
 private:
    ProfileBase *m_config;
@@ -151,8 +148,8 @@ private:
 // ----------------------------------------------------------------------------
 // two handy functions for savings/restoring arrays of strings to/from config
 // ----------------------------------------------------------------------------
-void SaveArray(ProfileBase& conf, const wxArrayString& astr, String const &key);
-void RestoreArray(ProfileBase& conf, wxArrayString& astr, String const &key);
+void SaveArray(ProfileBase& conf, const wxArrayString& astr, STRINGARG key);
+void RestoreArray(ProfileBase& conf, wxArrayString& astr, STRINGARG key);
 
 
 #endif // PROFILE_H

@@ -17,3 +17,4 @@ all: $(TARGETS)
 
 include ../../makeopts
 include ../../makerules
+include .depend

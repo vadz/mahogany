@@ -27,14 +27,7 @@
 #  include "PathFinder.h"
 #  include "MimeList.h"
 #  include "MimeTypes.h"
-
-
-#   include  <wx/file.h>
-#   include  <wx/textfile.h>
-#   include  <wx/config.h>
-#   include  <wx/fileconf.h>
 #  include "Profile.h"
-
 #  include "MFrame.h"
 #  include "MApplication.h"
 #endif  // USE_PCH

@@ -92,4 +92,11 @@ bool MObject::DecRef()
    return TRUE;
 }
 
+void
+MObject::MOcheck(void) const
+{
+   wxASSERT(this);
+   wxASSERT(m_magic == MOBJECT_MAGIC);
+}
+
 #endif //DEBUG

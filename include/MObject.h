@@ -60,12 +60,8 @@ public:
   // debugging support
 #ifdef   DEBUG
     /// check validity of this object
-    void MOcheck(void) const
-       {
-          wxASSERT(this);
-          wxASSERT(m_magic == MOBJECT_MAGIC);
-       }
-
+   void MOcheck(void) const;
+   
     // call this function on program termination to check for memory leaks
     // (of course, you shouldn't allocate memory in static object's: otherwise
     // it will be reported as leaked)

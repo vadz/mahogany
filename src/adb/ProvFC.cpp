@@ -58,10 +58,7 @@
 #include <wx/dynarray.h>
 #include <wx/file.h>
 #include <wx/textfile.h>
-#include <wx/confbase.h>
-#include <wx/fileconf.h>
 #include <wx/config.h>
-
 
 #include "adb/AdbManager.h"
 #include "adb/AdbEntry.h"
