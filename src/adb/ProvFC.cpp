@@ -169,6 +169,35 @@ public:
   // if it's not, we will be deleted, so it really must be something fatal
   bool IsOk() const { return m_pConfig != NULL; }
 
+  // recursively call Inc/DecRef() on this group and all its parents: this is
+  // necessary to ensure that the group stays alive as long as it has any
+  // [grand] children
+  void IncRefRecursively()
+  {
+     FCEntryGroup *group = this;
+     do
+     {
+        // we can't use group->m_pParent after calling DecRef() on it as it
+        // might be already deleted then
+        FCEntryGroup *parent = group->m_pParent;
+        group->IncRef();
+        group = parent;
+     }
+     while ( group );
+  }
+
+  void DecRefRecursively()
+  {
+     FCEntryGroup *group = this;
+     do
+     {
+        FCEntryGroup *parent = group->m_pParent;
+        group->DecRef();
+        group = parent;
+     }
+     while ( group );
+  }
+
   MOBJECT_DEBUG(FCEntryGroup)
 
 private:
@@ -299,7 +328,8 @@ FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew)
     pGroup->GetConfig()->Read(GetPath(), &strValue);
     Load(strValue);
   }
-  if(m_pGroup) m_pGroup->IncRef();
+
+  m_pGroup->IncRefRecursively();
   m_bDirty = FALSE;
 }
 
@@ -307,7 +337,8 @@ FCEntry::~FCEntry()
 {
   if ( m_bDirty )
     Save();
-  if(m_pGroup) m_pGroup->DecRef();
+
+  m_pGroup->DecRefRecursively();
 }
 
 wxString FCEntry::GetPath() const
@@ -499,10 +530,15 @@ FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent,
       m_pConfig = NULL;
     }
   }
+
+  if ( m_pParent )
+     m_pParent->IncRefRecursively();
 }
 
 FCEntryGroup::~FCEntryGroup()
 {
+  if ( m_pParent )
+     m_pParent->DecRefRecursively();
 }
 
 wxString FCEntryGroup::GetPath() const
