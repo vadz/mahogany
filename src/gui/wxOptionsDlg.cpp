@@ -818,7 +818,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Prepend &sender initials"),     Field_Bool,    ConfigField_ReplyCharacters,                        },
    { gettext_noop("&Quote empty lines too"),       Field_Bool |
                                                    Field_Advanced,    ConfigField_ReplyCharacters,                        },
-   { gettext_noop("Detect and remove signature when replying?"),       Field_Bool |
+   { gettext_noop("Detect and remove signature when replying"),       Field_Bool |
                                                    Field_Advanced,    -1 ,                        },
 #if defined(wxUSE_REGEX)
    { gettext_noop("When replying to a message, a regex can be used to detect\n"
