@@ -7,32 +7,36 @@
  *
  *******************************************************************/
 
+/*
+   TODO: rewrite all this using wxWin classes/functions, don't
+         duplicate the code needlessly here!
+*/
+
 #ifdef __GNUG__
 #   pragma implementation "PathFinder.h"
 #endif
 
 #include  "Mpch.h"
-#include  "Mcommon.h"
 
 #ifndef   USE_PCH
-#   include   <guidef.h>
-#   include   <string.h>
-#   include   "kbList.h"
+#  include  "Mcommon.h"
+#  include   <guidef.h>
+#  include   <string.h>
+#  include   "kbList.h"
 #endif
+
+#include <sys/stat.h>
+
+#include "PathFinder.h"
+
+#include <wx/filefn.h>
+#include <wx/file.h>
 
 #if defined(OS_UNIX)
-#   include <sys/stat.h>
 #   define   ANYFILE   "/*"
 #elif defined(OS_WIN)
-#   include <sys/stat.h>
-#   define  S_ISDIR(mode)     ((mode) & _S_IFDIR)
-#   define  S_ISREG(mode)     ((mode) & _S_IFREG)
 #   define   ANYFILE   "/*.*"
 #endif
-
-#include   "PathFinder.h"
-
-#include   <wx/filefn.h>
 
 PathFinder::PathFinder(const String & ipathlist, bool recursive)
 {
@@ -180,23 +184,14 @@ PathFinder::FindDirFile(const String & filename, bool *found,
 bool
 PathFinder::IsDir(const String & pathname)
 {
-   struct stat buf;
-
-   if(stat(pathname.c_str(),&buf) == 0 && S_ISDIR(buf.st_mode))
-      return true;
-   else
-      return false;
+   return wxPathExists(pathname);
 }
 
 //static
 bool
 PathFinder::IsFile(const String & pathname)
 {
-   struct stat buf;
-   if(stat(pathname.c_str(),&buf) == 0 && S_ISREG(buf.st_mode))
-      return true;
-   else
-      return false;
+   return wxFile::Exists(pathname);
 }
 
 
