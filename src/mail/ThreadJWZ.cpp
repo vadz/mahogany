@@ -28,7 +28,8 @@
 #include "HeaderInfo.h"
 
 #if wxUSE_REGEX
-   #include <wx/regex.h>
+#include <wx/regex.h>
+//#undef wxUSE_REGEX
 #endif // wxUSE_REGEX
 
 // ----------------------------------------------------------------------------
@@ -236,18 +237,7 @@ kbStringList *Threadable::messageThreadReferences() const
    //    reference in the list will be the one given in In-Reply-To, which,
    //    when present, seems to be more reliable (no ordering problem).
    //
-   // XNOFIXME:
-   // One still standing problem is if there are conflicting References
-   // headers between messages. In this case, the winner is he first one
-   // seen by the algorithm. The problem is that the input order of the
-   // messages in the algorithm depends on the sorting options chosen by
-   // the user. Thus, the output of the algorithm depends on external
-   // factors...
-   //
-   // As In-Reply-To headers are more reliable, but carry less information
-   // (they do not allow to reconstruct threads when some messages are
-   // missing), one possible way would be to make two passes: one with
-   // only In-Reply-To, and then one with References.
+   // Each reference consists in a <...@...> form. The remaining is removed.
 
    kbStringList *tmp = new kbStringList;
    String refs = m_hi->GetReferences() + m_hi->GetInReplyTo();
@@ -328,8 +318,10 @@ String RemoveListPrefix(const String &subject)
 
 #endif // !wxUSE_REGEX
 
-// XNOFIXME: put this code in strutil.cpp when JWZ
-// becomes the default algo.
+
+#if !wxUSE_REGEX
+
+// XNOFIXME: put this code in strutil.cpp.
 //
 // Removes all occurences of Re: Re[n]: Re(n):
 // without considering the case, and remove unneeded
@@ -337,7 +329,15 @@ String RemoveListPrefix(const String &subject)
 // Reply prefixes are removed only at the start of the
 // string or just after a list prefix (i.e. [ListName]).
 //
-#if !wxUSE_REGEX
+// Returns the resulting string. replyPrefixSeen is set
+// to true if at least one occurence of 'Re: ', 'Re[n]: '
+// or 'Re(n): ' has been removed. It is set to false
+// otherwise.
+//
+// This code is much more complicated than using a regex,
+// but it is much more efficient also, at least with the
+// implementation of regex in wxWindows.
+
 String
 strutil_removeAllReplyPrefixes(const String &isubject,
                                bool &replyPrefixSeen)
@@ -461,6 +461,7 @@ strutil_removeAllReplyPrefixes(const String &isubject,
 }
 #endif // WX_HAVE_REGEX
 
+
 #if wxUSE_REGEX
 String Threadable::getSimplifiedSubject(wxRegEx *replyRemover,
                                         const String &replacementString) const
@@ -501,16 +502,19 @@ String Threadable::getSimplifiedSubject(bool removeListPrefix) const
    }
    size_t len = that->m_simplifiedSubject->Len();
    if (replyRemover->Replace(that->m_simplifiedSubject, replacementString, 1))
+      // XNOFIXME: we should have a much more complicated test, because
+      // this one gives false positives whenever a space or a list prefix
+      // is removed (e.g. the replaceement string is empty)
       that->m_isReply = (that->m_simplifiedSubject->Len() != len);
    else
       that->m_isReply = 0;
-#else // wxUSE_REGEX
+#else // !wxUSE_REGEX
    *that->m_simplifiedSubject =
       strutil_removeAllReplyPrefixes(m_hi->GetSubject(),
                                      that->m_isReply);
    if (removeListPrefix)
       *that->m_simplifiedSubject = RemoveListPrefix(*that->m_simplifiedSubject);
-#endif // wxUSE_REGEX
+#endif // wxUSE_REGEX || !wxUSE_REGEX
    return *that->m_simplifiedSubject;
 }
 
@@ -519,12 +523,17 @@ String Threadable::getSimplifiedSubject(bool removeListPrefix) const
 bool Threadable::subjectIsReply(wxRegEx *replyRemover,
                                 const String &replacementString) const
 #else
-bool Threadable::subjectIsReply(bool x) const
+bool Threadable::subjectIsReply(bool removeListPrefix) const
 #endif
 {
    Threadable *that = (Threadable *)this;    // Remove constness
-   if (that->m_simplifiedSubject == 0)
+   if (that->m_simplifiedSubject == 0) {
+#if wxUSE_REGEX
       getSimplifiedSubject(replyRemover, replacementString);
+#else
+      getSimplifiedSubject(removeListPrefix);
+#endif
+   }
    return that->m_isReply;
 }
 
@@ -541,6 +550,10 @@ static int NumberOfThreadContainers = 0;
 #endif
 
 
+//
+// XNOFIXME: the ThreadContainer objects have the same structure than
+// the Threadable objects. They should be merged.
+//
 
 class ThreadContainer {
 private:
@@ -566,25 +579,27 @@ public:
        of ThreadContainer to determine their ordering
        */
    size_t getIndex() const;
-   /** Adds a ThreadContainer to the children of the caller,
-       taking their index into account.
+   /** Adds a ThreadContainer to the children of the caller.
+       If compiled to do so, it takes into account the indexes
+       of those children so that they stay ordered.
        */
    void addAsChild(ThreadContainer *c);
 
    /** Returns true if target is a children (maybe deep in the
-       tree) of the caller.
+       tree) of the caller. If withNext == true, also scans the
+       nexts of the caller (which is usefull during the recursive
+       search, but not to be used externally)
        */
    bool findChild(ThreadContainer *target, bool withNexts = false) const;
-
-   /// Recursively reverses the order of the the caller's children
-   void reverseChildren();
 
    /** Computes and saves (in the Threadable they store) the indentation
        and the numbering of the messages
        */
    void flush(size_t &threadedIndex, size_t indent, bool indentIfDummyNode);
 
-   /// Recursively destroys a tree
+   /** Recursively destroys the tree of ThreadContainer starting at the
+       the calling object.
+       */
    void destroy();
 };
 
@@ -605,8 +620,6 @@ ThreadContainer::ThreadContainer(Threadable *th)
 inline
 ThreadContainer::~ThreadContainer()
 {
-   //if (m_threadable != NULL && m_threadable->isDummy())
-   //   delete m_threadable;
 #if defined(DEBUG)
    NumberOfThreadContainers--;
 #endif
@@ -618,7 +631,7 @@ size_t ThreadContainer::getIndex() const
    const size_t foolish = 1000000000;
    static size_t depth = 0;
    CHECK(depth < 1000, foolish,
-         "Deep recursion in ThreadContainer::getSmallestIndex()");
+      "Deep recursion in ThreadContainer::getIndex()");
    Threadable *th = getThreadable();
    if (th != 0)
       return th->getIndex();
@@ -630,7 +643,7 @@ size_t ThreadContainer::getIndex() const
          size_t index = getChild()->getIndex();
          depth--;
          CHECK(depth >= 0, foolish,
-               "Negative recursion depth in ThreadContainer::getSmallestIndex()");
+            "Negative recursion depth in ThreadContainer::getIndex()");
          return index;
       }
       else
@@ -647,6 +660,16 @@ void ThreadContainer::addAsChild(ThreadContainer *c)
    size_t cIndex = c->getThreadable()->getIndex();
    ThreadContainer *prev = 0;
    ThreadContainer *current = getChild();
+#if 0
+   // If this part is compiled, the child will be inserted at
+   // the correct position so that they all are still ordered
+   // by increasing index. This is to be used if the input of
+   // the threading algorithm is already sorted, to keep the
+   // order. Otherwise, it is completely useless as the result
+   // of the JWZ algo will anyway be combined with sorting
+   // information.
+   // BTW, it may be more efficient to do the sorting at the
+   // end instead of incrementally keeping it. Don't know...
    while (current != 0)
    {
       if (current->getIndex() > cIndex)
@@ -654,6 +677,7 @@ void ThreadContainer::addAsChild(ThreadContainer *c)
       prev = current;
       current = current->getNext();
    }
+#endif
    c->setParent(this);
    c->setNext(current);
    if (prev != 0)
@@ -687,29 +711,6 @@ bool ThreadContainer::findChild(ThreadContainer *target, bool withNexts) const
          return true;
    }
    return false;
-}
-
-
-void ThreadContainer::reverseChildren()
-{
-   static size_t depth = 0;
-   CHECK_RET(depth < 1000, "Deep recursion in ThreadContainer::reverseChildren()");
-
-   if (m_child != 0)
-   {
-      ThreadContainer *kid, *prev, *rest;
-      for (prev = 0, kid = m_child, rest = kid->getNext();
-           kid != 0;
-           prev = kid, kid = rest, rest = (rest == 0 ? 0 : rest->getNext()))
-         kid->setNext(prev);
-      m_child = prev;
-
-      depth++;
-      for (kid = m_child; kid != 0; kid = kid->getNext())
-         kid->reverseChildren();
-      depth--;
-      CHECK_RET(depth >= 0, "Negative recursion depth in ThreadContainer::reverseChildren()");
-   }
 }
 
 
@@ -777,34 +778,30 @@ private:
 
    // Options
    bool m_gatherSubjects;
-   wxRegEx *m_replyRemover;
-   String m_replacementString;
    bool m_breakThreadsOnSubjectChange;
    bool m_indentIfDummyNode;
+#if wxUSE_REGEX
+   wxRegEx *m_replyRemover;
+   String m_replacementString;
+#else
    bool m_removeListPrefixGathering;
    bool m_removeListPrefixBreaking;
+#endif
 
 public:
-   Threader()
-      : m_root(0)
-      , m_idTable(0)
-      , m_bogusIdCount(0)
-      , m_gatherSubjects(true)
-      , m_replyRemover(0)
-      , m_replacementString()
-      , m_breakThreadsOnSubjectChange(true)
-      , m_indentIfDummyNode(false)
-      , m_removeListPrefixGathering(true)
-      , m_removeListPrefixBreaking(true)
-   {}
+   // XNOFIXME: Remove this constructor
+   Threader();
 
-   ~Threader()
-   {
-      delete m_replyRemover;
-   }
+   Threader(const ThreadParams& thrParams);
+
+   ~Threader();
 
    /** Does all the job. Input is a list of messages, output
-       is a dummy root message, with all the tree under.
+       is the root of the first thread, with all the roots
+       of the other threads as next. Moreover, all the
+       Threadable objects will be filled with their threadedIndex
+       (the position where they should be displayed, starting
+       from 0) and their indentation.
 
        If shouldGatherSubjects is true, all messages that
        have the same non-empty subject will be considered
@@ -816,23 +813,16 @@ public:
    Threadable *thread(Threadable *threadableRoot);
 
    void setGatherSubjects(bool x) { m_gatherSubjects = x; }
-
+   void setBreakThreadsOnSubjectChange(bool x) { m_breakThreadsOnSubjectChange = x; }
+   void setIndentIfDummyNode(bool x) { m_indentIfDummyNode = x; }
+   
 #if wxUSE_REGEX
-   void setSimplifyingRegex(const String &x)
-   {
-      if (!m_replyRemover)
-         m_replyRemover = new wxRegEx(x);
-      else
-         m_replyRemover->Compile(x);
-   }
+   void setSimplifyingRegex(const String &x);
+   void setReplacementString(const String &x) { m_replacementString = x; }
 #else // !wxUSE_REGEX
    void setRemoveListPrefixGathering(bool x) { m_removeListPrefixGathering = x; }
    void setRemoveListPrefixBreaking(bool x) { m_removeListPrefixBreaking = x; }
 #endif // wxUSE_REGEX/!wxUSE_REGEX
-
-   void setReplacementString(const String &x) { m_replacementString = x; }
-   void setBreakThreadsOnSubjectChange(bool x) { m_breakThreadsOnSubjectChange = x; }
-   void setIndentIfDummyNodet(bool x) { m_indentIfDummyNode = x; }
 
 private:
    void buildContainer(Threadable *threadable);
@@ -851,9 +841,70 @@ private:
 };
 
 
+Threader::Threader()
+   : m_root(0)
+   , m_idTable(0)
+   , m_bogusIdCount(0)
+   , m_gatherSubjects(true)
+   , m_breakThreadsOnSubjectChange(true)
+   , m_indentIfDummyNode(false)
+#if wxUSE_REGEX
+   , m_replyRemover(0)
+   , m_replacementString()
+#else
+   , m_removeListPrefixGathering(true)
+   , m_removeListPrefixBreaking(true)
+#endif
+{}
 
 
+Threader::Threader(const ThreadParams& thrParams)
+   : m_root(0)
+   , m_idTable(0)
+   , m_bogusIdCount(0)
+   , m_gatherSubjects(thrParams.gatherSubjects)
+#if wxUSE_REGEX
+   , m_replyRemover(0)
+   , m_replacementString()
+#else
+   , m_removeListPrefixGathering(true)
+   , m_removeListPrefixBreaking(true)
+#endif
+   , m_breakThreadsOnSubjectChange(thrParams.breakThread)
+   , m_indentIfDummyNode(thrParams.indentIfDummyNode)
+{
+#if wxUSE_REGEX
+   setSimplifyingRegex(thrParams.simplifyingRegex);
+   setReplacementString(thrParams.replacementString);
+#endif
+}
 
+
+Threader::~Threader()
+{
+#if wxUSE_REGEX
+   delete m_replyRemover;
+#endif
+}
+
+
+#if wxUSE_REGEX
+void Threader::setSimplifyingRegex(const String &x)
+{
+   if (!m_replyRemover) {
+      // Create one
+      m_replyRemover = new wxRegEx(x);
+   } else {
+      // Reuse the existing one
+      m_replyRemover->Compile(x);
+   }
+}
+#endif
+
+
+//
+// Returns true if the arguement seems to be a prime number
+//
 static bool SeemsPrime(size_t n)
 {
    if (n % 2 == 0)
@@ -875,7 +926,9 @@ static bool SeemsPrime(size_t n)
    return true;
 }
 
-
+//
+// Find a (seemingly) prime number greater than n
+//
 static size_t FindPrime(size_t n)
 {
    if (n % 2 == 0)
@@ -929,6 +982,7 @@ void Threader::destroy(HASHTAB ** hTable) const
 }
 
 
+
 Threadable *Threader::thread(Threadable *threadableRoot)
 {
    if (threadableRoot == 0)
@@ -948,6 +1002,7 @@ Threadable *Threader::thread(Threadable *threadableRoot)
       VERIFY(th->getChild() == 0, "Bad input list in Threader::thread()");
       thCount++;
    }
+
    // Make an hash-table big enough to hold all the instances of
    // ThreadContainer that will be created during the run.
    // Note that some dummy containers will be created also, so
@@ -979,20 +1034,22 @@ Threadable *Threader::thread(Threadable *threadableRoot)
    // containers (i.e. first message in a thread) some children of
    // this root.
    findRootSet();
-
+   ASSERT(m_root->getNext() == 0); // root node has a next ?!
+   
    // We are finished with this hash-table
    destroy(&m_idTable);
 
    // Remove all the useless containers (e.g. those that are not
    // in the root-set, have no message, but have a child)
    pruneEmptyContainers(m_root, false);
-
-   // If asked to, gather all the messages that have the same
-   // non-empty subjet in the same thread.
-   if (m_gatherSubjects)
-      gatherSubjects();
-
    ASSERT(m_root->getNext() == 0); // root node has a next ?!
+   
+   // If asked to, gather all the messages that have the same
+   // non-empty subject in the same thread.
+   if (m_gatherSubjects) {
+      gatherSubjects();
+      ASSERT(m_root->getNext() == 0); // root node has a next ?!
+   }
 
    // Build dummy messages for the nodes that have no message.
    // Those can only appear in the root set.
@@ -1001,8 +1058,10 @@ Threadable *Threader::thread(Threadable *threadableRoot)
       if (thr->getThreadable() == 0)
          thr->setThreadable(thr->getChild()->getThreadable()->makeDummy());
 
+   wxLogTrace(TRACE_JWZ, "Entering BreakThreads");
    if (m_breakThreadsOnSubjectChange)
       breakThreads(m_root);
+   wxLogTrace(TRACE_JWZ, "Leaving BreakThreads");
 
    // Prepare the result to be returned: the root of the
    // *Threadable* tree that we will build by flushing the
@@ -1012,7 +1071,9 @@ Threadable *Threader::thread(Threadable *threadableRoot)
       : m_root->getChild()->getThreadable());
 
    // Compute the index of each message (the line it will be
-   // displayed to when threaded) and its indentation.
+   // displayed to when threaded) and its indentation. And copy
+   // the parent/child relations from ThreadContainers to the
+   // Threadable objects.
    size_t threadedIndex = 0;
    if (m_root->getChild() != 0)
       m_root->getChild()->flush(threadedIndex, 0, m_indentIfDummyNode);
@@ -1020,7 +1081,10 @@ Threadable *Threader::thread(Threadable *threadableRoot)
    // Destroy the ThreadContainer structure.
    m_root->destroy();
    delete m_root;
+
+#if defined(DEBUG)
    ASSERT(NumberOfThreadContainers == 0); // Some ThreadContainers leak
+#endif
 
    return result;
 }
@@ -1029,27 +1093,43 @@ Threadable *Threader::thread(Threadable *threadableRoot)
 
 void Threader::buildContainer(Threadable *th)
 {
+   // Look for an already existing container that would correspond
+   // to the id of this message. If this message was referenced by
+   // a previously seen message, then the corresponding container
+   // has been built.
    String id = th->messageThreadID();
    ASSERT(!id.empty());
    ThreadContainer *container = lookUp(m_idTable, id);
 
    if (container != 0)
    {
-      if (container->getThreadable() != 0)
+      // The container already exists
+      if (container->getThreadable() == 0)
       {
+         container->setThreadable(th);
+      } else {
+         // Oops, this container already has a message.
+         // This must be because we have two messages with
+         // the same id. Let's give a new id to this message,
+         // and create a container for it.
          id = String("<bogusId:") << m_bogusIdCount++ << ">";
          container = 0;
-      } else {
-         container->setThreadable(th);
       }
    }
 
    if (container == 0)
    {
+      // Create a container and store it (with id as key)
+      // in the hash-table
       container = new ThreadContainer(th);
       add(m_idTable, id, container);
    }
 
+   // Let's have a look to the references of this message.
+   // For each reference found, we will create a container
+   // (without message) if it does not exist.
+   //
+   // parentRefCont is a pointer to the last referenced container
    ThreadContainer *parentRefCont = 0;
    kbStringList *refs = th->messageThreadReferences();
    kbStringList::iterator i;
@@ -1059,57 +1139,79 @@ void Threader::buildContainer(Threadable *th)
       ThreadContainer *refCont = lookUp(m_idTable, *ref);
       if (refCont == 0)
       {
+         // No container with this id. Create one.
          refCont = new ThreadContainer();
          add(m_idTable, *ref, refCont);
       }
 
+      // If one container was found during last iteration, it must
+      // become the parent of the current one (refCont) as the two
+      // ids follow each other.
       if ((parentRefCont != 0) &&
           (refCont->getParent() == 0) &&
           (parentRefCont != refCont) &&
           !parentRefCont->findChild(refCont))
       {
+         // They are not already linked as parentRefCont being
+         // the parent of refCont. 
          if (!refCont->findChild(parentRefCont))
          {
+            // And they are not linked the other way round: do the linkage.
+            // XNOFIXME: Shouldn't we be careful about the order of the children
+            // of parentRefCont ?
+            // Not if we keep the merging with sorting *after* threading
             refCont->setParent(parentRefCont);
             refCont->setNext(parentRefCont->getChild());
             parentRefCont->setChild(refCont);
-         } else
-         {
-            // refCont should be a child of parentRefCont (because
-            // refCont is seens in the references after parentRefCont
-            // but refCont is the parent of parentRefCont.
-            // This must be because some References fields contradict
-            // each other about the order. Let's keep the first
-            // encountered.
-
-            // VZ: commenting this out to silence a warning, what did
-            //     you really mean, Xavier? (FIXME)
-            //int i = 0;
-         }
+         } 
+         // else: they are linked as refCont being a parent of parentRefCont.
+         // This must be because the references of this message contradict 
+         // those of another previous message. Let's consider the first one
+         // is the right one (minimizes work ;) )
       }
       parentRefCont = refCont;
    }
+
+   // Now, parentRefCont, if it exists, must become the parent of the
+   // current message.
    if ((parentRefCont != 0) &&
        ((parentRefCont == container) ||
-        container->findChild(parentRefCont)))
+        container->findChild(parentRefCont))) {
+      // Oops, the inverse link already exists, or we reference ourself.
+      // Anyway, parentRefCont is obviously wrong (or contradicts a previous
+      // References header).
       parentRefCont = 0;
+   }
 
+   // If container already has a parent, remove the link between container
+   // and its parent.
+   // XNOFIXME: Why ? At least we could check that this parent is not
+   // parentRefCont, no ?
+   // XNOFIXME: 
    if (container->getParent() != 0) {
-      ThreadContainer *rest, *prev;
-      for (prev = 0, rest = container->getParent()->getChild();
-           rest != 0;
-           prev = rest, rest = rest->getNext())
-         if (rest == container)
-            break;
-         ASSERT(rest != 0); // Did not find a container in parent
+      if (container->getParent() == parentRefCont) {
+         // No need to do anything. Reset parentRefCont
+         // so that nothing will be done after.
+         parentRefCont = 0;
+      } else {
+         // Find (in prev) the last children of our parent, just before us
+         ThreadContainer *rest, *prev;
+         for (prev = 0, rest = container->getParent()->getChild();
+              rest != 0;
+              prev = rest, rest = rest->getNext()) {
+            if (rest == container) break;
+         }
+         ASSERT(rest != 0); // Did not find container as a child of its parent !?
          if (prev == 0)
             container->getParent()->setChild(container->getNext());
          else
             prev->setNext(container->getNext());
          container->setNext(0);
          container->setParent(0);
+      }
    }
 
+   // Build the link between parentRefCont and its new child
    if (parentRefCont != 0)
    {
       ASSERT(!container->findChild(parentRefCont));
@@ -1117,8 +1219,8 @@ void Threader::buildContainer(Threadable *th)
       container->setNext(parentRefCont->getChild());
       parentRefCont->setChild(container);
    }
+
    delete refs;
-   //wxLogTrace(TRACE_JWZ, "Leaving Threader::buildContainer(Threadable 0x%lx)", th);
 }
 
 
@@ -1231,6 +1333,7 @@ void Threader::pruneEmptyContainers(ThreadContainer *parent,
 //
 void Threader::gatherSubjects()
 {
+   wxLogTrace(TRACE_JWZ, "Entering GatherSubjects");
    size_t count = 0;
    ThreadContainer *c = m_root->getChild();
    for (; c != 0; c = c->getNext())
@@ -1241,8 +1344,10 @@ void Threader::gatherSubjects()
    // thread) subject changes.
    HASHTAB *subjectTable = create(count*2);
 
+   wxLogTrace(TRACE_JWZ, "Entering collectSubjects");
    // Collect the subjects in all the tree
    count = collectSubjects(subjectTable, m_root, true);
+   wxLogTrace(TRACE_JWZ, "Leaving collectSubjects");
 
    if (count == 0)            // If the table is empty, we're done.
    {
@@ -1394,6 +1499,7 @@ void Threader::gatherSubjects()
    }
 
    destroy(&subjectTable);
+   wxLogTrace(TRACE_JWZ, "Leaving GatherSubjects");
 }
 
 
@@ -1614,10 +1720,29 @@ static size_t FlushThreadable(Threadable *t,
    return number;
 }
 
+
+//
+// Copy the tree structure to a THREADNODE structure
+//
+static THREADNODE* MapToThreadNode(Threadable* root) {
+   if (!root) return 0;
+   THREADNODE* thrNode = new THREADNODE;
+   if (root->isDummy()) {
+      thrNode->num = 0;
+   } else {
+      thrNode->num = root->getIndex()+1;     // +1 for getting a msgno
+   }
+   thrNode->next = MapToThreadNode(root->getChild());
+   thrNode->branch = MapToThreadNode(root->getNext());
+   return thrNode;
+}
+
+
+
 // ----------------------------------------------------------------------------
 // our public API
 // ----------------------------------------------------------------------------
-
+/*
 extern void JWZThreadMessages(const ThreadParams& thrParams,
                               const HeaderInfoList *hilp,
                               ThreadData *thrData)
@@ -1634,8 +1759,11 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
    // FIXME: can't we just take count from thrData?
    size_t count = 0;
    Threadable *th = threadableRoot;
+#ifdef DEBUG
    for (; th != 0; th = th->getNext())
-    count++;
+      count++;
+   ASSERT(count == thrData->m_count);
+#endif
    Threader *threader = new Threader;
 
    threader->setGatherSubjects(thrParams.gatherSubjects);
@@ -1643,13 +1771,14 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
    threader->setSimplifyingRegex(thrParams.simplifyingRegex);
    threader->setReplacementString(thrParams.replacementString);
 #else // !wxUSE_REGEX
-   threader->setRemoveListPrefixGathering(removeListPrefixGathering);
-   threader->setRemoveListPrefixBreaking(removeListPrefixBreaking);
+   threader->setRemoveListPrefixGathering(true);
+   threader->setRemoveListPrefixBreaking(true);
 #endif // wxUSE_REGEX
    threader->setBreakThreadsOnSubjectChange(thrParams.breakThread);
-   threader->setIndentIfDummyNodet(thrParams.indentIfDummyNode);
+   threader->setIndentIfDummyNode(thrParams.indentIfDummyNode);
 
    threadableRoot = threader->thread(threadableRoot);
+   THREADNODE* thrNode = MapToThreadNode(threadableRoot);
 
    if (threadableRoot != 0)
    {
@@ -1697,4 +1826,29 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
    delete threader;
    wxLogTrace(TRACE_JWZ, "Leaving BuildDependantsWithJWZ");
 }
+*/
+
+extern void JWZThreadMessages(const ThreadParams& thrParams,
+                              const HeaderInfoList *hilp,
+                              ThreadData *thrData)
+{
+   wxLogTrace(TRACE_JWZ, "Entering JWZThreadMessages");
+   Threadable *threadableRoot = BuildThreadableList(hilp);
+   
+   Threadable *th = threadableRoot;
+   Threader *threader = new Threader(thrParams);
+
+   // Do the work
+   threadableRoot = threader->thread(threadableRoot);
+
+   // Map to needed output format
+   thrData->m_root =  MapToThreadNode(threadableRoot);
+   
+   // Clean up
+   threadableRoot->destroy();
+   delete threadableRoot;
+   delete threader;
+   wxLogTrace(TRACE_JWZ, "Leaving JWZThreadMessages");
+}
+
 

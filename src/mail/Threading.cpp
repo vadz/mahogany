@@ -107,15 +107,28 @@ ThreadData::ThreadData(MsgnoType count)
 {
    m_count = count;
 
-   m_tableThread = (MsgnoType *)malloc(count * sizeof(MsgnoType));
-   m_children = (MsgnoType *)malloc(count * sizeof(MsgnoType));
-   m_indents = (size_t *)malloc(count * sizeof(size_t));
+   m_tableThread = new MsgnoType[count];
+   m_children = new MsgnoType[count];
+   m_indents = new size_t[count];
+   m_root = 0;
+}
+
+static void DestroyThreadNodes(THREADNODE* n) {
+   if (!n) return;
+   DestroyThreadNodes(n->next);
+   DestroyThreadNodes(n->branch);
+   delete n;
 }
 
 ThreadData::~ThreadData()
 {
-   free(m_tableThread);
-   free(m_children);
-   free(m_indents);
+   killTree();
+   delete [] m_tableThread;
+   delete [] m_children;
+   delete [] m_indents;
 }
 
+void ThreadData::killTree() {
+   DestroyThreadNodes(m_root);
+   m_root = 0;
+}

@@ -3843,8 +3843,21 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
    return thr != NULL;
 }
 
-bool MailFolderCC::ThreadMessages(ThreadData *thrData,
-                                  const ThreadParams& thrParams)
+
+//
+// Copy the tree given to us to some 'known' memory
+//
+static THREADNODE* CopyTree(THREADNODE* th) {
+   THREADNODE* thrNode = new THREADNODE;
+   thrNode->num = th->num;
+   thrNode->next = CopyTree(th->next);
+   thrNode->branch = CopyTree(th->branch);
+   return thrNode;
+}
+
+
+bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
+                                  ThreadData *thrData)
 {
    CHECK( m_MailStream, false, "can't thread closed folder" );
 
@@ -3904,14 +3917,11 @@ bool MailFolderCC::ThreadMessages(ThreadData *thrData,
 
          if ( thrRoot )
          {
-            // traverse the entire tree filling the arrays: the indent of the
-            // message is the depth at which it occurs in the tree while the
-            // msgnos table is simply filled by the messages in traversal order
-            MsgnoType n = 0;
-            ThreadMessagesHelper(thrRoot, 0, n, thrData, thrParams);
-
-            ASSERT_MSG( n == thrData->m_count,
-                        "error in the thread tree traversal?" );
+            // We copy the tree so that we can release the c-client
+            // memory right now. After that, we know that whatever
+            // the algo that was used, we can destroy the tree the
+            // same way.
+            thrData->m_root = CopyTree(thrRoot);
 
             mail_free_threadnode(&thrRoot);
 
@@ -3928,7 +3938,7 @@ bool MailFolderCC::ThreadMessages(ThreadData *thrData,
    }
 
    // call base class version to do local sorting
-   return MailFolderCmn::ThreadMessages(thrData, thrParams);
+   return MailFolderCmn::ThreadMessages(thrParams, thrData);
 }
 
 // ----------------------------------------------------------------------------

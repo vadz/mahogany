@@ -1062,8 +1062,8 @@ MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 // MailFolderCmn threading
 // ----------------------------------------------------------------------------
 
-bool MailFolderCmn::ThreadMessages(ThreadData *thrData,
-                                   const ThreadParams& thrParams)
+bool MailFolderCmn::ThreadMessages(const ThreadParams& thrParams,
+                                   ThreadData *thrData)
 {
    HeaderInfoList_obj hil = GetHeaders();
 

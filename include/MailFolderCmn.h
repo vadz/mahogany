@@ -137,8 +137,8 @@ public:
                                 const Params& params,
                                 MWindow *parent = NULL);
 
-   virtual bool ThreadMessages(ThreadData *thrData,
-                               const ThreadParams& thrParams);
+   virtual bool ThreadMessages(const ThreadParams& thrParams,
+                               ThreadData *thrData);
 
    virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);
    //@}

@@ -72,11 +72,17 @@ struct ThreadData
    /// table containing the total number of children of each message
    MsgnoType *m_children;
 
+   /// Root of the built tree
+   THREADNODE *m_root;
+   
    /// ctor reserves memory for holding info about count messages
    ThreadData(MsgnoType count);
 
    /// dtor frees memory
    ~ThreadData();
+
+   /// Kills the tree struture
+   void killTree();
 };
 
 /**
@@ -92,6 +98,15 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
                               ThreadData *thrData);
 
 /**
+   Another function which threads messages according to the JWZ algorithm
+
+   @param thrParams specifies how to thread messages
+   @param hil the headers to thread
+*/
+extern THREADNODE* JWZThreadMessages(const ThreadParams& thrParams,
+                                     const HeaderInfoList *hil);
+
+                              /**
    Show the dialog to configure the message threading for the folder using this
    profile.
 

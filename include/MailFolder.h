@@ -737,19 +737,15 @@ public:
    virtual bool SortMessages(MsgnoType *msgnos,
                              const SortParams& sortParams) = 0;
 
-   /** Thread messages: fill the passed in arrays with the threading
-       information: the first will hold the msgno permutation defined by
-       threading (which could be obtained, for example, by flattening the
-       result of IMAP THREAD) and the second will contain the indent of each
-       message: 0 for the root message in the thread, 1 for the first child and
-       so on (this is the depth at which element appears in IMAP THREAD - 1).
+   /** Thread messages: fill the tree strucure with the threading
+       information.
 
-       @param thrData the data struct where to put results
        @param thrParams indicates how to thread the messages
+       @param thrData  filled up with results
        @return true on success, false if msgs couldn't be threaded
     */
-   virtual bool ThreadMessages(ThreadData *thrData,
-                               const ThreadParams& thrParams) = 0;
+   virtual bool ThreadMessages(const ThreadParams& thrParams,
+                               ThreadData *thrData) = 0;
 
    //@}
 

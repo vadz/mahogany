@@ -44,8 +44,10 @@
 
 // define this to do some (expensive!) run-time checks for translation tables
 // consistency
-#undef DEBUG_SORTING
-//#define DEBUG_SORTING
+#ifdef DEBUG
+//#undef DEBUG_SORTING
+#define DEBUG_SORTING
+#endif
 
 #ifdef DEBUG_SORTING
    #define CHECK_TABLES() VerifyTables(m_count, m_tableMsgno, m_tablePos)
@@ -227,7 +229,7 @@ static void VerifyThreadData(const ThreadData *thrData)
 
       ASSERT_MSG( thrData->m_children[idx] == m - n - 1,
                   "inconsistent thread data" );
-   }
+   }  
 }
 
 // dump a table
@@ -655,6 +657,12 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
    // update the threading table
    if ( m_thrData )
    {
+      // The tree becomes invalid, because we don't scan it
+      // to find and remove the item corresponding to the
+      // message deleted.
+      m_thrData->killTree();
+      ASSERT(m_thrData->m_root == 0);
+
       CHECK_THREAD_DATA();
 
       DUMP_TABLE(m_thrData->m_tableThread,
@@ -1012,17 +1020,180 @@ MsgnoType HeaderInfoListImpl::GetNthSortedMsgno(MsgnoType n) const
    }
 }
 
+
+size_t* globalInvSortTable = 0;
+
+extern "C"
+{
+   static int CompareThreadNodes(const void *p1, const void *p2)
+   {
+      THREADNODE* th1 = *(THREADNODE**)p1;
+      MsgnoType msgno1 = th1->num;
+      if (msgno1 == 0) {
+         // This is a dummy node
+         ASSERT(th1->next != 0);
+         ASSERT(th1->next->num != 0);
+         msgno1 = th1->next->num;
+      }
+      size_t pos1 = globalInvSortTable[msgno1-1];
+      THREADNODE* th2 = *(THREADNODE**)p2;
+      MsgnoType msgno2 = th2->num;
+      if (msgno2 == 0) {
+         // This is a dummy node
+         ASSERT(th2->next != 0);
+         ASSERT(th2->next->num != 0);
+         msgno2 = th2->next->num;
+      }
+      size_t pos2 = globalInvSortTable[msgno2-1];
+
+      return pos1 - pos2;
+   }
+}
+
+
+static void ApplyOrdering(THREADNODE* th) {
+   if (th->next == 0) {
+      // No children to sort
+      return;
+   }
+   
+   // Count the children of this node, and sort their own children
+   size_t nbKids = 0;
+   THREADNODE* kid = th->next;
+   for (; kid; kid = kid->branch) {
+      nbKids++;
+      ApplyOrdering(kid);
+   }
+   
+   if (nbKids < 2) {
+      // no need to sort if only one child
+      return;
+   }
+   
+   // Build an array to store all the children of this node
+   THREADNODE** kids = new THREADNODE*[nbKids];
+   
+   // Store them
+   nbKids = 0;
+   for (kid = th->next; kid; kid = kid->branch) {
+      kids[nbKids++] = kid;
+   }
+   // And sort the resulting array.
+   qsort(kids, nbKids, sizeof(THREADNODE*), CompareThreadNodes);
+   
+   // Rebuild the links
+   th->next = kids[0];
+   for (size_t i = 0; i < nbKids-1; i++) {
+      kids[i]->branch = kids[i+1];
+   }
+   kids[nbKids-1]->branch = 0;
+   
+   // We're done. Clean up.
+   delete [] kids;
+}
+
+
+
+THREADNODE* ReOrderTree(THREADNODE* thrNode, MsgnoType *sortTable, 
+                        bool reverseOrder, size_t count) {
+
+   // FIXME: Have a mutex to protect the globalInvSortTable ? 
+
+   // First compute the inverse of the sort table.
+   globalInvSortTable = new size_t[count];
+   for (size_t i = 0; i < count; ++i) {
+      globalInvSortTable[sortTable[i]-1] = (reverseOrder ? count - i - 1 : i);
+   }
+   // Now use this information to reorder the children
+   // of each node. But this implies that we have a real
+   // root node, not a list, at first level. So we build
+   // a fake one here.
+   THREADNODE fakeRoot;
+   fakeRoot.branch = 0;
+   fakeRoot.next = thrNode;
+   ApplyOrdering(&fakeRoot);
+      
+   // Clean up
+   delete [] globalInvSortTable;
+   globalInvSortTable = 0;
+
+   return fakeRoot.next;
+}
+
+
+static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
+                               size_t &threadedIndex, size_t indent, bool indentIfDummyNode)
+{
+   if (node->num > 0) {
+      // This is not a dummy node
+      thrData->m_tableThread[threadedIndex++] = node->num;
+      thrData->m_indents[node->num-1] = indent;
+   }
+
+   size_t nbChildren = 0;
+   if (node->next != 0)
+   {
+      if (indentIfDummyNode)
+         nbChildren = FillThreadTables(node->next, thrData, threadedIndex, 
+                                       indent+1, indentIfDummyNode);
+      else
+         nbChildren = FillThreadTables(node->next, thrData, threadedIndex, 
+                                       indent+((node->num == 0) ? 0 : 1),
+                                       indentIfDummyNode);
+   }
+   if (node->num > 0) {
+      thrData->m_children[node->num-1] = nbChildren;
+   }
+   if (node->branch != 0)
+      nbChildren += FillThreadTables(node->branch, thrData, threadedIndex, 
+                                     indent, indentIfDummyNode);
+   return nbChildren + 1;  // + 1 for oneself
+}
+
+
+
 void HeaderInfoListImpl::CombineSortAndThread()
 {
    // don't crash below if we don't have it somehow
    CHECK_RET( m_thrData, "must be already threaded" );
 
-   // check it now or we'd crash in the loop below (and I don't want to
-   // put the check inside the loop obviously)
-   CHECK_RET( m_tableSort || m_reverseOrder, "how do we sort them?" );
+//   // check it now or we'd crash in the loop below (and I don't want to
+//   // put the check inside the loop obviously)
+//   CHECK_RET( m_tableSort || m_reverseOrder, "how do we sort them?" );
 
    // normally we're called from BuildTables() so we shouldn't have it yet
    ASSERT_MSG( !m_tableMsgno, "unexpected call to CombineSortAndThread" );
+
+#if 1
+   
+   /*
+     We have, on one side, an array of msgno sorted correctly and,
+     on the other side, a tree structure resulting from threading.
+   
+     First, we reorder the tree so that all the children of each
+     node are sorted according to the sorted array, then we map
+     the tree structure to the tables.
+     */
+   
+   if (m_tableSort)
+      m_thrData->m_root = ReOrderTree(m_thrData->m_root, m_tableSort, m_reverseOrder, m_count);
+   
+   size_t threadedIndex = 0;
+   (void)FillThreadTables(m_thrData->m_root, m_thrData, threadedIndex, 
+                          0, m_thrParams.indentIfDummyNode);
+   
+   m_tableMsgno = m_thrData->m_tableThread;
+   //m_thrData->m_tableThread = 0;
+   m_dontFreeMsgnos = true;
+   
+   m_tablePos = AllocTable();
+   for (size_t i = 0; i < m_count; ++i) {
+      m_tablePos[m_tableMsgno[i]-1] = i;
+   }
+   CHECK_TABLES();
+   CHECK_THREAD_DATA();
+
+#else
 
    // allocate the tables: we're bulding both of them on the fly here
    m_tableMsgno = AllocTable();
@@ -1207,6 +1378,8 @@ void HeaderInfoListImpl::CombineSortAndThread()
    delete [] indicesAtLevel;
    delete [] parentsAtLevel;
    delete [] tableThrInv;
+
+#endif
 }
 
 void HeaderInfoListImpl::BuildTables()
@@ -1234,24 +1407,24 @@ void HeaderInfoListImpl::BuildTables()
    if ( IsThreading() )
    {
       // first thread the messages if not done yet
-      if ( !m_thrData )
+      if ( !m_thrData || !m_thrData->m_root)
       {
          Thread();
       }
 
       // how to sort threaded messages here, i.e. construct m_tableMsgno and
       // m_tablePos from m_thrData and m_tableSort
-      if ( IsSorting() )
-      {
+      //if ( IsSorting() )
+      //{
          // create m_tableMsgno from m_tableSort and m_tableThread
          CombineSortAndThread();
-      }
-      else // no sorting
-      {
-         // just reuse the same table
-         m_tableMsgno = m_thrData->m_tableThread;
-         m_dontFreeMsgnos = true;
-      }
+      //}
+      //else // no sorting
+      //{
+      //   // just reuse the same table
+      //   m_tableMsgno = m_thrData->m_tableThread;
+      //   m_dontFreeMsgnos = true;
+      //}
 
       // reset it as it doesn't make sense to use it with threading (thread
       // would be inverted as well and grow upwards - hardly what we want)
@@ -1504,18 +1677,19 @@ void HeaderInfoListImpl::FreeThreadData()
 void HeaderInfoListImpl::Thread()
 {
    // the caller must check that we need to be threaded
-   ASSERT_MSG( !m_thrData && IsThreading(), "shouldn't be called" );
+   ASSERT_MSG( (!m_thrData || !m_thrData->m_root) && IsThreading(), "shouldn't be called" );
 
    StatusIndicator status(m_mf->GetInteractiveFrame(),
                           _("Threading %lu messages..."), m_count);
 
+   delete m_thrData;
    m_thrData = new ThreadData(m_count);
 
-   if ( m_mf->ThreadMessages(m_thrData, m_thrParams) )
+   if ( m_mf->ThreadMessages(m_thrParams, m_thrData) )
    {
-      DUMP_TABLE(m_thrData->m_tableThread, ("after threading"));
+      //DUMP_TABLE(m_thrData->m_tableThread, ("after threading"));
 
-      CHECK_THREAD_DATA();
+      //CHECK_THREAD_DATA();
    }
    else // threading failed
    {
