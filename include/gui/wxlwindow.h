@@ -209,12 +209,12 @@ public:
 
    wxPoint GetClickPosition(void) const
      { return m_ClickPosition; }
+   /// as the name says
+   void ScrollToCursor(void);
 
 protected:
    /// generic function for mouse events processing
    void OnMouse(int eventId, wxMouseEvent& event);
-   /// as the name says
-   void ScrollToCursor(void);
    /// for sending events
    wxWindow *m_Parent;
    /// Shall we send events?

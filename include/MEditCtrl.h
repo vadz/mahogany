@@ -17,6 +17,8 @@
 #include "MObject.h"
 #include "strutil.h"
 
+#include <gui/wxllist.h> // CoordType
+
 /** A small helper class holding some data.
     MimeContent holds the following:
     - a MIME type specification string
@@ -132,8 +134,43 @@ private:
    String m_Text;
    void *m_Data;
    size_t m_Len;
+   /// not implemented:
+   MimeContent(const MimeContent &);
+   MimeContent & operator=(const MimeContent &);
 };
 
+/// Mini-class implementing an XFace via MimeContent
+class MimeContentXFace : public MimeContent
+{
+public:
+   MimeContentXFace(const String &data)
+      : MimeContent ("application/x-m-mc-xface", data, UID_ILLEGAL)
+      {}
+};
+
+class FontStyle : public MObject
+{
+public:
+   FontStyle(int family = wxROMAN,
+             int size=12,
+             int style=wxNORMAL,
+             int weight=wxNORMAL,
+             int underline=0,
+             String fg="black",
+             String bg="white")
+      {
+         m_Family = family;
+         m_Size = size;
+         m_Style = style;
+         m_Weight = weight;
+         m_Underline = underline;
+         m_ColourFG = fg;
+         m_ColourBG = bg;
+      }
+   int m_Family, m_Size, m_Style, m_Weight;
+   bool m_Underline;
+   String m_ColourFG, m_ColourBG;
+};
 
 /** This class interfaces with the edit control for callbacks. */
 class MEditCtrlCbHandler : public MObject
@@ -151,9 +188,23 @@ public:
    virtual ~MEditCtrlCbHandler() {}
 };
 
+#define MEC_WXLAYOUT 1
+//#define MEC_WXEMBED  2
+
 class MEditCtrl : public MObject
 {
 public:
+   /** Create an MEditCtrl with a pointer to a callback handler for
+       interfacing and a parent window. Supported types:
+       MEC_WXLAYOUT
+   */
+   static MEditCtrl * Create(int type,
+                             MEditCtrlCbHandler *cbh, 
+                             wxWindow *parent,
+                             Profile *prof = NULL);
+
+   /// Tell it to read the configuration settings
+   virtual void ReadProfile(Profile *prof) = 0;
    /// clear the control
    virtual void Clear(void) = 0;
 
@@ -166,15 +217,29 @@ public:
    /** Set dirty flag */
    virtual void SetDirty(bool dirty = TRUE) = 0;
    virtual bool GetDirty(void) const = 0;
-   
+
+   /** Content can be inserted via three different methods:
+
+       + Append(const MimeContent &)
+         Insert arbitrary embedded/attached MIME content
+
+       + Apppend(const String &txt)
+         Insert text in text/plain
+
+       + NewLine()
+         Add a new-line.
+   */
    /** This inserts some mime content of a non-text type into the
        control. 
    */
-   virtual void Append(const MimeContent *mc) = 0;
+   virtual void Append(const MimeContent &mc) = 0;
+
    /** Bog-standard text-append to the control. Text is treated as
        "text/plain" */
    virtual void Append(const String &txt) = 0;
 
+   virtual void NewLine(void) = 0;
+   
    virtual bool Find(const wxString &needle,
                      wxPoint * fromWhere = NULL,
                      const wxString &configPath = "MsgViewFindString")
@@ -193,13 +258,62 @@ public:
    /// Copies selection to clipboard and deletes it.
    virtual bool Cut(bool privateFormat = FALSE,
                     bool usePrimary = FALSE) = 0;
+   ///    Enable or disable editing, i.e. processing of keystrokes.
+   virtual void SetEditable(bool toggle) = 0;
    //@}
 
    /// prints the currently displayed message
    virtual void Print(void) = 0;
    /// print-previews the currently displayed message
    virtual void PrintPreview(void) = 0;
+   /// moves the cursor to the new position
+   virtual void MoveCursorTo(int x, int y) const = 0;
 
+   virtual void PageUp(void) const = 0;
+   virtual void PageDown(void) const = 0;
+   
+   /**@name GUI matters */
+   //@{   
+   /// adjust the window size
+   virtual void SetSize(int x, int y) = 0;
+   virtual void SetFontStyle(const FontStyle &fs) = 0;
+   virtual void SetFocusFollowMode(bool enable) = 0;
+   /** Sets the wrap margin.
+       @param margin set this to 0 to disable it
+   */
+   virtual void SetWrapMargin(CoordType margin) = 0;
+   /** Tell window to update a wxStatusBar with UserData labels and
+       cursor positions.
+       @param bar wxStatusBar pointer
+       @param labelfield field to use in statusbar for URLs/userdata labels, or -1 to disable
+       @param cursorfield field to use for cursor position, or -1 to disable
+   */
+   virtual void SetStatusBar(class wxStatusBar *bar,
+                       int labelfield = -1,
+                       int cursorfield = -1) = 0;
+
+   /** Sets cursor visibility, visible=1, invisible=0,
+       visible-on-demand=-1, to hide it until moved.
+       @param visibility -1,0 or 1
+       @return the old visibility
+   */
+   virtual void SetCursorVisibility(int visibility = -1) = 0;
+   /**@name Formatting options */
+   //@{
+   /// set font family
+   virtual void SetFontFamily(int family) = 0;
+   /// set font size
+   virtual void SetFontSize(int size) = 0;
+   /// set font style
+   virtual void SetFontStyle(int style)  = 0;
+   /// set font weight
+   virtual void SetFontWeight(int weight) = 0;
+   /// toggle underline flag
+   virtual void SetFontUnderline(bool ul) = 0;
+   /// set font colours by colour
+   virtual void SetFontColour(wxString fg, wxString bg) = 0;
+   virtual wxPoint GetClickPosition(void) const = 0;
+   //@}
    virtual ~MEditCtrl() {}
 private:
 };

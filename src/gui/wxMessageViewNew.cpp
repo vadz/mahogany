@@ -8,7 +8,6 @@
 
 #ifdef __GNUG__
 #   pragma implementation "wxMessageView.h"
-#   pragma implementation "MEditCtrl.h"
 #endif
 
 // ============================================================================
@@ -27,8 +26,6 @@
 #  include "guidef.h"
 
 #  include "PathFinder.h"
-#  include "MimeList.h"
-#  include "MimeTypes.h"
 #  include "Profile.h"
 
 #  include "MFrame.h"
@@ -69,27 +66,6 @@
 #ifdef OS_UNIX
 #   include <sys/stat.h>
 #endif
-
-// for testing only
-#ifndef USE_PCH
-//   extern "C"
-//   {
-//#     include <rfc822.h>
-//   }
-//#  include "MessageCC.h"
-#endif //USE_PCH
-
-#define NUM_FONTS 7
-static int wxFonts[NUM_FONTS] =
-{
-  wxDEFAULT,
-  wxDECORATIVE,
-  wxROMAN,
-  wxSCRIPT,
-  wxSWISS,
-  wxMODERN,
-  wxTELETYPE
-};
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -147,41 +123,6 @@ private:
    wxProcess     *m_process;  // wxWindows process info
    int            m_pid;      // pid of the process
    MTempFileName *m_tempfile; // the temp file (or NULL if none)
-};
-
-// data associated with the clickable objects
-class ClickableInfo : public wxLayoutObject::UserData
-{
-public:
-   enum Type
-   {
-      CI_ICON,
-      CI_URL
-   };
-
-   ClickableInfo(const String& url)
-      : m_url(url)
-      { m_type = CI_URL; SetLabel(url); }
-   ClickableInfo(int id, const String &label)
-      {
-         m_id = id;
-         m_type = CI_ICON;
-         SetLabel(label);
-      }
-
-   // accessors
-   Type          GetType() const { return m_type; }
-   const String& GetUrl()  const { return m_url;  }
-   int           GetPart() const { return m_id;   }
-
-private:
-   ~ClickableInfo() {}
-   Type   m_type;
-
-   int    m_id;
-   String m_url;
-
-   GCC_DTOR_WARN_OFF
 };
 
 // the popup menu invoked by clicking on an attachment in the mail message
@@ -328,459 +269,6 @@ MailMessageParameters::GetParamValue(const wxString& name) const
    return BaseMessageParameters::GetParamValue(name);
 }
 
-
-
-
-// ----------------------------------------------------------------------------
-// wxMEditCtrl
-// ----------------------------------------------------------------------------
-
-
-class FontStyle : public MObject
-{
-public:
-   FontStyle(int family = wxROMAN,
-             int size=12,
-             int style=wxNORMAL,
-             int weight=wxNORMAL,
-             int underline=0,
-             String fg="black",
-             String bg="white")
-      {
-         m_Family = family;
-         m_Size = size;
-         m_Style = style;
-         m_Weight = weight;
-         m_Underline = underline;
-         m_ColourFG = fg;
-         m_ColourBG = bg;
-      }
-   int m_Family, m_Size, m_Style, m_Weight;
-   bool m_Underline;
-   String m_ColourFG, m_ColourBG;
-};
-
-/* Helper class to avoid double inheritance in wxMEditCtrl. This is 
-   the actual wxLayoutWindow object. Eventually it should contain no
-   extra functionality apart from linking
-   wxLayoutWindow<->wxMEditCtrl. */
-class wxMEditCtrlLWindow : public wxLayoutWindow
-{
-public:
-   wxMEditCtrlLWindow(class wxMEditCtrl *ec, wxWindow *parent)
-      : wxLayoutWindow(parent)
-      {
-         m_EC = ec;
-      }
-   ~wxMEditCtrlLWindow();
-   
-   /// intercept character events
-   void OnChar(wxKeyEvent& event);
-
-   DECLARE_EVENT_TABLE()
-private:
-   class wxMEditCtrl *m_EC;
-};
-
-
-/* Implementation of MEditCtrl using wxLayoutWindow */
-class wxMEditCtrl : public MEditCtrl
-{
-public:
-   wxMEditCtrl(MEditCtrlCbHandler *cbh,wxWindow *parent)
-      {
-         m_CbHandler = cbh;
-         // we do not clean this up as it will clean us up from GUI
-         // deletion 
-         m_LWin = new wxMEditCtrlLWindow(this,parent);
-         
-      }
-   ~wxMEditCtrl()
-      {
-         delete m_CbHandler;
-      }
-   /// clear the control
-   virtual void Clear(void)
-      {
-         wxColour fg, bg;
-         GetColourByName(&fg,m_FontStyle.m_ColourFG,"black");
-         GetColourByName(&bg,m_FontStyle.m_ColourBG,"white");
-         m_LWin->Clear(m_FontStyle.m_Family,
-                       m_FontStyle.m_Size,
-                       m_FontStyle.m_Style,
-                       m_FontStyle.m_Weight,
-                       m_FontStyle.m_Underline,
-                       &fg, &bg);
-      }
-   /** Redraws the window. */
-   virtual void RequestUpdate(void)
-      {
-         m_LWin->GetLayoutList()->ForceTotalLayout();
-         RequestUpdate();
-      }
-   /** Enable redrawing while we add content */
-   virtual void EnableAutoUpdate(bool enable = TRUE)
-      {
-         m_LWin->GetLayoutList()->SetAutoFormatting(TRUE);
-      }
-
-   /** Set dirty flag */
-   virtual void SetDirty(bool dirty = TRUE)
-      { if(dirty) m_LWin->SetDirty(); else m_LWin->ResetDirty(); }
-   virtual bool GetDirty(void) const
-      { return m_LWin->IsDirty(); }
-   
-   /** Insert some content.
-    */
-   virtual void Append(const MimeContent *mc);
-   
-   virtual void Append(const String &txt)
-      {
-         char *buf = strutil_strdup(txt);
-         wxLayoutImportText(m_LWin->GetLayoutList(),buf);
-         delete [] buf;
-         m_LWin->GetLayoutList()->LineBreak();
-      }
-
-   virtual bool Find(const wxString &needle,
-                     wxPoint * fromWhere = NULL,
-                     const wxString &configPath = "MsgViewFindString")
-      { return m_LWin->Find(needle, fromWhere, configPath); }
-
-   /**@name Clipboard interaction */
-   //@{
-   /// Pastes text from clipboard.
-   virtual void Paste(bool privateFormat = FALSE,
-                      bool usePrimarySelection = FALSE)
-      {
-         m_LWin->Paste(privateFormat, usePrimarySelection);
-      }
-   /** Copies selection to clipboard.
-       @param invalidate used internally, see wxllist.h for details
-   */
-   virtual bool Copy(bool invalidate = true,
-                     bool privateFormat = FALSE, bool primary = FALSE)
-      { return m_LWin->Copy(invalidate, privateFormat, primary); }
-   /// Copies selection to clipboard and deletes it.
-   virtual bool Cut(bool privateFormat = FALSE,
-                    bool usePrimary = FALSE)
-      { return m_LWin->Cut(privateFormat, usePrimary); }
-   //@}
-
-
-   /// prints the currently displayed message
-   virtual void Print(void);
-   /// print-previews the currently displayed message
-   virtual void PrintPreview(void);
-
-   void SetSize(int x, int y)
-      {
-         m_LWin->SetSize(x,y);
-      }
-   void SetFontStyle(const FontStyle &fs)
-      {
-         m_FontStyle = fs;
-      }
-   void SetFocusFollowMode(bool enable)
-      { m_LWin->SetFocusFollowMode(enable); }
-   
-   /** Sets the wrap margin.
-       @param margin set this to 0 to disable it
-   */
-   void SetWrapMargin(CoordType margin)
-      { m_LWin->SetWrapMargin(margin); }
-   /** Tell window to update a wxStatusBar with UserData labels and
-       cursor positions.
-       @param bar wxStatusBar pointer
-       @param labelfield field to use in statusbar for URLs/userdata labels, or -1 to disable
-       @param cursorfield field to use for cursor position, or -1 to disable
-   */
-   void SetStatusBar(class wxStatusBar *bar,
-                       int labelfield = -1,
-                       int cursorfield = -1)
-      {
-         m_LWin->SetStatusBar(bar,labelfield,cursorfield);
-      }
-
-   ///    Enable or disable editing, i.e. processing of keystrokes.
-   void SetEditable(bool toggle)
-      { m_LWin->SetEditable(toggle); SetCursorVisibility(toggle); }
-   /** Sets cursor visibility, visible=1, invisible=0,
-       visible-on-demand=-1, to hide it until moved.
-       @param visibility -1,0 or 1
-       @return the old visibility
-   */
-   inline void SetCursorVisibility(int visibility = -1)
-      { m_LWin->SetCursorVisibility(visibility); }
-
-   
-   /**@name Formatting options */
-   //@{
-   /// set font family
-   inline void SetFontFamily(int family) { m_LWin->GetLayoutList()->SetFont(family); }
-   /// set font size
-   inline void SetFontSize(int size) { m_LWin->GetLayoutList()->SetFont(-1,size); }
-   /// set font style
-   inline void SetFontStyle(int style) { m_LWin->GetLayoutList()->SetFont(-1,-1,style); }
-   /// set font weight
-   inline void SetFontWeight(int weight) { m_LWin->GetLayoutList()->SetFont(-1,-1,-1,weight); }
-   /// toggle underline flag
-   inline void SetFontUnderline(bool ul) { m_LWin->GetLayoutList()->SetFont(-1,-1,-1,-1,(int)ul); }
-   /// set font colours by colour
-   inline void SetFontColour(wxString fg, wxString bg)
-      {
-         wxColour fgc, bgc;
-         GetColourByName(&fgc, fg, m_FontStyle.m_ColourFG);
-         GetColourByName(&bgc, bg, m_FontStyle.m_ColourBG);
-         m_LWin->GetLayoutList()->SetFont(-1,-1,-1,-1,-1,&fgc,&bgc);
-      }
-   //@}
-
-   void NewLine(void) { m_LWin->GetLayoutList()->LineBreak(); }
-   wxPoint GetClickPosition(void) const
-      {
-         return m_LWin->GetClickPosition();
-      }
-   void OnMouseEvent(wxCommandEvent &event);
-protected:
-   void AppendXFace(const wxString &face);
-private:
-   wxLayoutWindow     * m_LWin;
-   MEditCtrlCbHandler * m_CbHandler;
-   FontStyle            m_FontStyle;
-};
-
-void
-wxMEditCtrl::AppendXFace(const wxString &face)
-{
-#ifdef HAVE_XFACES
-   // need real XPM support in windows
-#ifndef OS_WIN
-   char **xfaceXpm = NULL;
-   XFace *xface = new XFace();
-   xface->CreateFromXFace(face.c_str());
-   if(xface->CreateXpm(&xfaceXpm))
-   {
-      m_LWin->GetLayoutList()->Insert(new wxLayoutObjectIcon(new wxBitmap(xfaceXpm)));
-      NewLine();
-   }
-   if(xfaceXpm) wxIconManager::FreeImage(xfaceXpm);
-#endif // !Windows
-#endif // HAVE_XFACES
-}
-
-void
-wxMEditCtrl::Append(const MimeContent *mc)
-{
-   MOcheck();
-   CHECK_RET( mc, "no MimeContent to insert" );
-   if(mc->GetType() == "application/x-xface")
-   {
-      AppendXFace(mc->GetText());
-      return;
-   }
-
-   wxLayoutObject *obj = NULL;
-   wxString mimeType = mc->GetType();
-   // try to guess the correct type:
-   if(mimeType.BeforeFirst('/') == "application")
-   {
-      wxString ext = mc->GetFileName().AfterLast('.');
-      wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
-      wxFileType *ft = mimeManager.GetFileTypeFromExtension(ext);
-      if(ft)
-      {
-         wxString mt;
-         ft->GetMimeType(&mt);
-         delete ft;
-         if(wxMimeTypesManager::IsOfType(mt,"image/*")
-            || wxMimeTypesManager::IsOfType(mt,"audio/*")
-            || wxMimeTypesManager::IsOfType(mt,"video/*"))
-            mimeType = mt;
-      }
-   }
-   
-   if(wxMimeTypesManager::IsOfType(mimeType, "text/*")
-      &&
-      /* Insert text:
-         - if it is text/plain and not "attachment" or with a filename
-         - if it is rfc822 and it is configured to be displayed
-         - HTML is for now displayed as normal text
-      */
-
-      /* FIXME: the correct insertion of message text/rfc822 in either 
-         text/plain or text/rfc822 isn't done yet
-                        || (t == Message::MSG_TYPEMESSAGE
-                   && (m_ProfileValues.rfc822isText != 0)))
-      */
-      // INLINE TEXT:
-      (mc->GetFileName().Length() == 0 && mc->GetDisposition() != "attachment")
-      )
-      {
-         NewLine();
-         if( 1 ) //FIXME m_ProfileValues.highlightURLs )
-         {
-            String tmp = mc->GetText();
-            String url;
-            String before;
-            do
-            {
-               before =  strutil_findurl(tmp,url);
-               wxLayoutImportText(m_LWin->GetLayoutList(),before);
-               if(!strutil_isempty(url))
-               {
-                  ClickableInfo *ci = new ClickableInfo(url);
-                  obj = new wxLayoutObjectText(url);
-                  obj->SetUserData(ci);
-                  ci->DecRef();
-                  //m_EditCtrl->GetLList()->SetFontColour(m_ProfileValues.UrlCol);
-                  m_LWin->GetLayoutList()->Insert(obj);
-                  //m_EditCtrl->GetLList()->SetFontColour(m_ProfileValues.FgCol);
-               }
-            }
-            while( !strutil_isempty(tmp) );
-         }
-      }
-   else
-      /* This block captures all non-inlined message parts. They get
-         represented by an icon.
-         In case of image content, we check whether it might be a
-         Fax message. */
-   {
-      wxString mimeFileName = mc->GetFileName();
-      if(wxMimeTypesManager::IsOfType(mimeType, "image/*")
-         /*FIXME && m_ProfileValues.inlineGFX*/
-         )
-      {
-         wxLayoutObject *obj = NULL;
-         wxString filename = wxGetTempFileName("Mtemp");
-         if(mimeFileName.Length() == 0)
-         {
-            wxFile out(filename, wxFile::write);
-            if ( out.IsOpened() )
-            {
-               size_t written = out.Write(mc->GetData(), mc->GetSize());
-               if ( written != mc->GetSize() )
-                  return; //FIXME
-            }
-            else
-               return ; //FIXME
-         }
-         bool ok;
-         wxImage img =  wxIconManager::LoadImage(filename, &ok, true);
-         wxRemoveFile(filename);
-         if(ok)
-            obj = new wxLayoutObjectIcon(img.ConvertToBitmap());
-         else
-            obj = new wxLayoutObjectIcon(
-               mApplication->GetIconManager()->
-               GetIconFromMimeType(mc->GetType(),
-                                   mimeFileName.AfterLast('.'))
-               );
-      }
-      else
-      {
-         obj = new wxLayoutObjectIcon(
-            mApplication->GetIconManager()->
-            GetIconFromMimeType(mc->GetType(),
-                                mimeFileName.AfterLast('.'))
-            );
-      }
-
-      ASSERT(obj);
-      {
-         String label;
-         label = mimeFileName;
-         if(label.Length()) label << " : ";
-         label << mc->GetType() << ", "
-               << mc->GetSize() << _(" bytes");
-         ClickableInfo *ci = new ClickableInfo(mc->GetPartNumber(), label);
-         obj->SetUserData(ci); // gets freed by list
-         ci->DecRef();
-         m_LWin->GetLayoutList()->Insert(obj);
-         // add extra whitespace so lines with multiple icons can
-         // be broken:
-         m_LWin->GetLayoutList()->Insert(" ");
-      }
-   }
-   NewLine();
-}
-
-void
-wxMEditCtrl::OnMouseEvent(wxCommandEvent &event)
-{
-   MOcheck();
-   ClickableInfo *ci;
-   wxLayoutObject *obj = (wxLayoutObject *)event.GetClientData();
-   ci = (ClickableInfo *)obj->GetUserData();
-   if(ci)
-   {
-      switch( ci->GetType() )
-      {
-         case ClickableInfo::CI_ICON:
-         {
-            switch ( event.GetId() )
-            {
-               case WXLOWIN_MENU_RCLICK:
-                  m_CbHandler->OnMouseRight(ci->GetPart());
-                  break;
-
-               case WXLOWIN_MENU_LCLICK:
-                  // for now, do the same thing as double click: perhaps the
-                  // left button behaviour should be configurable?
-
-               case WXLOWIN_MENU_DBLCLICK:
-                  m_CbHandler->OnMouseLeft(ci->GetPart());
-                  break;
-
-               default:
-                  FAIL_MSG("unknown mouse action");
-            }
-         }
-         break;
-
-         case ClickableInfo::CI_URL:
-            m_CbHandler->OnUrl(ci->GetUrl());
-            break;
-         default:
-            FAIL_MSG("unknown embedded object type");
-      }
-   ci->DecRef();
-   }
-}
-
-BEGIN_EVENT_TABLE(wxMEditCtrlLWindow, wxLayoutWindow)
-   EVT_CHAR(wxMEditCtrlLWindow::OnChar)
-   // mouse click processing
-   EVT_MENU(WXLOWIN_MENU_RCLICK, wxMEditCtrl::OnMouseEvent)
-   EVT_MENU(WXLOWIN_MENU_LCLICK, wxMEditCtrl::OnMouseEvent)
-   EVT_MENU(WXLOWIN_MENU_DBLCLICK, wxMEditCtrl::OnMouseEvent)
-END_EVENT_TABLE()
-
-
-void
-wxMEditCtrlLWindow::OnChar(wxKeyEvent& event)
-{
-   // FIXME: this should be more intelligent, i.e. use the
-   // wxlayoutwindow key bindings:
-   if(m_WrapMargin > 0 &&
-      event.KeyCode() == 'q' || event.KeyCode() == 'Q')
-   {
-      // temporarily allow editing to enable manual word wrap:
-      SetEditable(TRUE);
-      event.Skip();
-      SetEditable(FALSE);
-      SetCursorVisibility(1);
-   }
-   else
-      event.Skip();
-}
-
-wxMEditCtrlLWindow::~wxMEditCtrlLWindow()
-{
-   delete m_EC;
-}
-   
 // ----------------------------------------------------------------------------
 // wxMessageView::AllProfileValues
 // ----------------------------------------------------------------------------
@@ -880,8 +368,9 @@ wxMessageView::wxMessageView(wxFolderView *fv, wxWindow *parent)
    wxWindow::Create(parent, -1);
    m_folder = NULL;
    m_Profile = NULL;
-   m_EditCtrl = new wxMEditCtrl(new wxMessageViewCbHandler(this),
-                                this); 
+   m_EditCtrl = MEditCtrl::Create(MEC_WXLAYOUT,
+                                  new wxMessageViewCbHandler(this),
+                                  this); 
    Create(fv,parent);
    SetAutoLayout(TRUE);
    int x,y;
@@ -899,8 +388,9 @@ wxMessageView::wxMessageView(ASMailFolder *folder,
    m_folder = folder;
    if(m_folder) m_folder->IncRef();
    m_Profile = NULL;
-   m_EditCtrl = new wxMEditCtrl(new wxMessageViewCbHandler(this),
-                                this); 
+   m_EditCtrl = MEditCtrl::Create(MEC_WXLAYOUT,
+                                  new wxMessageViewCbHandler(this),
+                                  this); 
    Create(fv,parent);
    if(folder)
       ShowMessage(folder,num);
@@ -981,6 +471,7 @@ wxMessageView::SetParentProfile(Profile *profile)
 void
 wxMessageView::UpdateProfileValues()
 {
+   m_EditCtrl->ReadProfile(m_Profile);
    ReadAllSettings(&m_ProfileValues);
 }
 
@@ -1006,10 +497,6 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
 
    #undef GET_COLOUR_FROM_PROFILE
 
-   settings->font = READ_CONFIG(m_Profile,MP_MVIEW_FONT);
-   ASSERT(settings->font >= 0 && settings->font <= NUM_FONTS);
-
-   settings->font = wxFonts[settings->font];
    settings->size = READ_CONFIG(m_Profile,MP_MVIEW_FONT_SIZE);
    settings->showHeaders = READ_CONFIG(m_Profile,MP_SHOWHEADERS) != 0;
    settings->rfc822isText = READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT) != 0;
@@ -1037,12 +524,6 @@ wxMessageView::Clear(void)
 {
    m_EditCtrl->Clear();
    m_EditCtrl->SetCursorVisibility(-1); // on demand
-   m_EditCtrl->SetFontStyle(
-      FontStyle(m_ProfileValues.font, m_ProfileValues.size,
-                (int)wxNORMAL, (int)wxNORMAL, 0,
-                m_ProfileValues.FgCol,
-                m_ProfileValues.BgCol)
-      );
    m_EditCtrl->EnableAutoUpdate(FALSE); // speeds up insertion
    // of text
    m_uid = UID_ILLEGAL;
@@ -1054,7 +535,6 @@ wxMessageView::Update(void)
    int i,n,t;
    char const * cptr;
    String tmp,from,url, mimeType, fileName, disposition;
-   bool   lastObjectWasIcon = false; // a flag
 
    Clear();
 
@@ -1074,8 +554,8 @@ wxMessageView::Update(void)
          m_mailMessage->GetHeaderLine("X-Face", tmp);
          if(tmp.Length() > 2) // \r\n
          {
-//FIXME            MimeContent mc("application/x-xface", tmp, UID_ILLEGAL);
-//FIXME            m_EditCtrl->Append(&mc);
+            MimeContentXFace xf(tmp);
+            m_EditCtrl->Append(xf);
          }
       }
    }
@@ -1115,7 +595,7 @@ wxMessageView::Update(void)
             m_EditCtrl->SetFontWeight(wxBOLD);
             m_EditCtrl->SetFontColour(m_ProfileValues.HeaderNameCol, m_ProfileValues.BgCol);
             m_EditCtrl->Append(headerName);
-
+            
             // insert the header value
             m_EditCtrl->SetFontWeight(wxNORMAL);
             m_EditCtrl->SetFontColour(m_ProfileValues.HeaderValueCol, m_ProfileValues.BgCol);
@@ -1148,26 +628,19 @@ wxMessageView::Update(void)
       cptr = m_mailMessage->GetPartContent(i, &len);
       if(cptr == NULL)
          continue; // error ?
-      /* FIXME: cptr is invalid in next loop, but shouldn't be re-used 
-         anyway. */
-      if(wxMimeTypesManager::IsOfType(mimeType,"text/*"))
-      {
-         m_EditCtrl->Append(cptr);
-//FIXME
-#if 0
-         MimeContent mc(mimeType, cptr, i);
-         //mc.MakeDataCopy(); // will disappear otherwise
-         mc.SetFileName(GetFileNameForMIME(m_mailMessage,i));
-         String disposition;
-         m_mailMessage->GetDisposition(i,&disposition);
-         mc.SetDisposition(disposition);
-         m_EditCtrl->Append(&mc);
-#endif
-      }
-      //FIXME: insert non-text types
+      m_EditCtrl->Append(cptr);
+
+      MimeContent mc(mimeType, cptr, i);
+      wxString fn = GetFileNameForMIME(m_mailMessage,i);
+      mc.SetFileName(fn);
+      String disposition;
+      m_mailMessage->GetDisposition(i,&disposition);
+      mc.SetDisposition(disposition);
+      m_EditCtrl->Append(mc);
    }
    m_EditCtrl->NewLine();
-//FIXME   m_EditCtrl->GetLList()->MoveCursorTo(wxPoint(0,0));
+
+   m_EditCtrl->MoveCursorTo(0,0);
    // we have modified the list directly, so we need to mark the
    // wxlwindow as dirty:
    m_EditCtrl->SetDirty();
@@ -1186,154 +659,6 @@ wxMessageView::Update(void)
    // for safety, this is required to set scrollbars
    m_EditCtrl->RequestUpdate();
 }
-
-
-#if 0
-      
-      strutil_tolower(mimeType);
-      fileName = GetFileNameForMIME(m_mailMessage,i);
-      (void) m_mailMessage->GetDisposition(i,&disposition);
-      strutil_tolower(disposition);
-#ifdef DEBUG
-      obj = NULL;
-#endif
-      if( t == Message::MSG_TYPEAPPLICATION) // let's guess a little
-      {
-         wxString ext = fileName.AfterLast('.');
-         wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
-         wxFileType *ft = mimeManager.GetFileTypeFromExtension(ext);
-         if(ft)
-         {
-            wxString mt;
-            ft->GetMimeType(&mt);
-            delete ft;
-            if(wxMimeTypesManager::IsOfType(mt,"image/*"))
-               t = Message::MSG_TYPEIMAGE;
-            else if(wxMimeTypesManager::IsOfType(mt,"audio/*"))
-               t = Message::MSG_TYPEAUDIO;
-            else if(wxMimeTypesManager::IsOfType(mt,"video/*"))
-               t = Message::MSG_TYPEVIDEO;
-         }
-      }
-
-      /* Insert text:
-         - if it is text/plain and not "attachment" or with a filename
-         - if it is rfc822 and it is configured to be displayed
-         - HTML is for now displayed as normal text
-      */
-      if (
-         ((fileName.Length() == 0) && (disposition != "attachment"))
-         && ( (mimeType == "text/plain" || (mimeType == "text/html")
-               || (t == Message::MSG_TYPEMESSAGE
-                   && (m_ProfileValues.rfc822isText != 0)))
-            )
-         )
-      {
-         unsigned long len;
-         cptr = m_mailMessage->GetPartContent(i, &len);
-         if(cptr == NULL)
-            continue; // error ?
-         m_EditCtrl->NewLine();
-         if( m_ProfileValues.highlightURLs )
-         {
-            tmp = cptr;
-            String url;
-            String before;
-
-            do
-            {
-               before =  strutil_findurl(tmp,url);
-               wxLayoutImportText(m_EditCtrl->GetLList(),before);
-               if(!strutil_isempty(url))
-               {
-                  ci = new ClickableInfo(url);
-                  obj = new wxLayoutObjectText(url);
-                  obj->SetUserData(ci);
-                  ci->DecRef();
-                  m_EditCtrl->GetLList()->SetFontColour(m_ProfileValues.UrlCol);
-                  m_EditCtrl->GetLList()->Insert(obj);
-                  m_EditCtrl->GetLList()->SetFontColour(m_ProfileValues.FgCol);
-               }
-            }
-            while( !strutil_isempty(tmp) );
-
-            lastObjectWasIcon = false;
-         }
-      }
-      else
-         /* This block captures all non-inlined message parts. They get
-            represented by an icon.
-            In case of image content, we check whether it might be a
-            Fax message. */
-      {
-         wxString mimeFileName = GetFileNameForMIME(m_mailMessage, i);
-         if(t == Message::MSG_TYPEIMAGE && m_ProfileValues.inlineGFX)
-         {
-            wxString filename = wxGetTempFileName("Mtemp");
-            if(mimeFileName.Length() == 0)
-               mimeFileName = GetParameter(m_mailMessage,i,"NAME");
-
-            MimeSave(i,filename);
-            bool ok;
-            wxImage img =  wxIconManager::LoadImage(filename, &ok, true);
-            wxRemoveFile(filename);
-            if(ok)
-               obj = new wxLayoutObjectIcon(img.ConvertToBitmap());
-            else
-               obj = new wxLayoutObjectIcon(
-                  mApplication->GetIconManager()->
-                  GetIconFromMimeType(m_mailMessage->GetPartMimeType(i),
-                                      mimeFileName.AfterLast('.'))
-                  );
-         }
-         else
-         {
-            obj = new wxLayoutObjectIcon(
-               mApplication->GetIconManager()->
-               GetIconFromMimeType(m_mailMessage->GetPartMimeType(i),
-                                   mimeFileName.AfterLast('.'))
-               );
-         }
-         ASSERT(obj);
-         {
-            String label;
-            label = mimeFileName;
-            if(label.Length()) label << " : ";
-            label << m_mailMessage->GetPartMimeType(i) << ", "
-                  << strutil_ultoa(m_mailMessage->GetPartSize(i, true)) << _(" bytes");
-            ci = new ClickableInfo(i, label);
-            obj->SetUserData(ci); // gets freed by list
-            ci->DecRef();
-            m_EditCtrl->GetLList()->Insert(obj);
-            // add extra whitespace so lines with multiple icons can
-            // be broken:
-            m_EditCtrl->GetLList()->Insert(" ");
-         }
-         lastObjectWasIcon = true;
-      }
-   }
-   m_EditCtrl->NewLine();
-   m_EditCtrl->GetLList()->MoveCursorTo(wxPoint(0,0));
-   // we have modified the list directly, so we need to mark the
-   // wxlwindow as dirty:
-   m_EditCtrl->SetDirty();
-   // re-enable auto-formatting, seems safer for selection
-   // highlighting, not sure if needed, though
-   m_EditCtrl->EnableAutoUpdate(FALSE); // speeds up insertion
-
-   long wrapmargin = READ_CONFIG(m_Profile, MP_WRAPMARGIN);
-   m_EditCtrl->SetWrapMargin(wrapmargin);
-   if(wrapmargin > 0 && READ_CONFIG(m_Profile, MP_AUTOMATIC_WORDWRAP) != 0)
-      m_EditCtrl->GetLList()->WrapAll(wrapmargin);
-   // yes, we allow the user to edit the buffer, in case he wants to
-   // modify it for pasting or wrap lines manually:
-   m_EditCtrl->SetEditable(FALSE);
-   m_EditCtrl->SetCursorVisibility(-1);
-   m_EditCtrl->GetLList()->ForceTotalLayout();
-   // for safety, this is required to set scrollbars
-   RequestUpdate();
-}
-#endif
 
 String
 wxMessageView::HighLightURLs(const char *input)
@@ -2103,110 +1428,6 @@ wxMessageView::ShowMessage(Message *mailMessage)
    Update();
 }
 
-
-void
-wxMEditCtrl::Print(void)
-{
-#ifdef OS_WIN
-   wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#else // Unix
-   bool found;
-   wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-
-   // set AFM path
-   PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
-   pf.AddPaths(READ_APPCONFIG(MP_AFMPATH), false);
-   pf.AddPaths(mApplication->GetLocalDir(), true);
-   String afmpath = pf.FindDirFile("Cour.afm", &found);
-   if(found)
-   {
-      ((wxMApp *)mApplication)->GetPrintData()->SetFontMetricPath(afmpath);
-      wxThePrintSetupData->SetAFMPath(afmpath);
-   }
-#endif // Win/Unix
-   wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
-   wxPrinter printer(& pdd);
-#ifndef OS_WIN
-   wxThePrintSetupData->SetAFMPath(afmpath);
-#endif
-   wxLayoutPrintout printout(m_LWin->GetLayoutList(), _("Mahogany: Printout"));
-   if ( !printer.Print(m_LWin, &printout, TRUE)
-      && ! printer.GetAbort() )
-      wxMessageBox(_("There was a problem with printing the message:\n"
-                     "perhaps your current printer is not set up correctly?"),
-                   _("Printing"), wxOK);
-   else
-      (* ((wxMApp *)mApplication)->GetPrintData())
-         = printer.GetPrintDialogData().GetPrintData();
-}
-
-// tiny class to restore and set the default zoom level
-class wxMVPreview : public wxPrintPreview
-{
-public:
-   wxMVPreview(Profile *prof,
-               wxPrintout *p1, wxPrintout *p2,
-               wxPrintDialogData *dd)
-      : wxPrintPreview(p1, p2, dd)
-      {
-         ASSERT(prof);
-         m_Profile = prof;
-         m_Profile->IncRef();
-         SetZoom(READ_CONFIG(m_Profile, MP_PRINT_PREVIEWZOOM));
-      }
-   ~wxMVPreview()
-      {
-         m_Profile->writeEntry(MP_PRINT_PREVIEWZOOM, (long) GetZoom());
-         m_Profile->DecRef();
-      }
-private:
-   Profile *m_Profile;
-};
-
-void
-wxMEditCtrl::PrintPreview(void)
-{
-#ifdef OS_WIN
-   wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#else // Unix
-   wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-   // set AFM path
-   PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
-   pf.AddPaths(READ_APPCONFIG(MP_AFMPATH), false);
-   pf.AddPaths(mApplication->GetLocalDir(), true);
-   bool found;
-   String afmpath = pf.FindDirFile("Cour.afm", &found);
-   if(found)
-      wxSetAFMPath(afmpath);
-#endif // in/Unix
-
-   // Pass two printout objects: for preview, and possible printing.
-   wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
-   wxPrintPreview *preview = new wxMVPreview(
-      mApplication->GetProfile(),
-      new wxLayoutPrintout(m_LWin->GetLayoutList()),
-      new wxLayoutPrintout(m_LWin->GetLayoutList()),
-      &pdd
-      );
-   if( !preview->Ok() )
-   {
-      wxMessageBox(_("There was a problem with showing the preview:\n"
-                     "perhaps your current printer is not set correctly?"),
-                   _("Previewing"), wxOK);
-      return;
-   }
-
-   (* ((wxMApp *)mApplication)->GetPrintData())
-      = preview->GetPrintDialogData().GetPrintData();
-
-   wxPreviewFrame *frame = new wxPreviewFrame(preview, NULL, //GetFrame(m_Parent),
-                                              _("Print Preview"),
-                                              wxPoint(100, 100), wxSize(600, 650));
-   frame->Centre(wxBOTH);
-   frame->Initialize();
-   frame->Show(TRUE);
-}
-
 bool
 wxMessageView::RunProcess(const String& command)
 {
@@ -2318,22 +1539,6 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
 }
 
 
-
-/// scroll down one page:
-void
-wxMessageView::PageDown(void)
-{
-//FIXME   m_EditCtrl->GetLList()->MoveCursorVertically(20); // FIXME: ugly hard-coded line count
-//FIXME   ScrollToCursor();
-}
-
-/// scroll up one page:
-void
-wxMessageView::PageUp(void)
-{
-//FIXME   GetLayoutList()->MoveCursorVertically(-20); // FIXME: ugly hard-coded line count
-//FIXME   ScrollToCursor();
-}
 
 // ----------------------------------------------------------------------------
 // wxMessageViewFrame

@@ -564,7 +564,7 @@ msgid ""
 msgstr ""
 "Zusätzliche Mailbox '%s' gefunden, die als\n"
 "zentrale Mailbox für neue Nachrichten markiert ist.\n"
-"Wird ignoriert."
+"Wird ignoriert. Mailbox '%s' wird verwendet."
 
 #: upgrade.cpp:1823
 #, c-format
@@ -922,7 +922,7 @@ msgstr "Sie haben %lu neue Nachrichten."
 
 #: MApplication.cpp:830
 msgid "Checking for queued messages..."
-msgstr "Suche ausgehende Nachrichten..."
+msgstr "Prüfe auf ausgehende Nachrichten..."
 
 #: MApplication.cpp:865 MApplication.cpp:921
 #, c-format
@@ -1010,11 +1010,11 @@ msgstr ""
 
 #: MailCollector.cpp:71
 msgid "Checking for new mail..."
-msgstr "Suche neue Nachrichten..."
+msgstr "Prüfe auf neue Nachrichten..."
 
 #: MailCollector.cpp:73
 msgid "Checking for new mail... done."
-msgstr "Suche neue Nachrichten...fertig."
+msgstr "Prüfe auf neue Nachrichten...fertig."
 
 #: MailCollector.cpp:209 MailCollector.cpp:462
 #, c-format
@@ -1237,12 +1237,12 @@ msgstr "getrennt"
 
 #: wxMApp.cpp:1171
 msgid "Outbox empty"
-msgstr "AM leer"
+msgstr "Ausgang leer"
 
 #: wxMApp.cpp:1173
 #, c-format
 msgid "Outbox %lu, %lu"
-msgstr "AM %lu, %lu"
+msgstr "Ausgang %lu, %lu"
 
 #: wxMApp.cpp:1194
 msgid "Cannot activate auto-check for dial-up network status."
@@ -1456,7 +1456,7 @@ msgstr "Nachrichten konnten nicht kopiert werden."
 #: wxFolderView.cpp:1844
 #, c-format
 msgid "Moved %lu messages."
-msgstr "%d Nachrichten verschoben."
+msgstr "%lu Nachrichten verschoben."
 
 #: wxFolderView.cpp:1855
 #, c-format
@@ -1488,11 +1488,11 @@ msgstr "Filter auf %lu Nachrichten angewandt, Rückgabewert %d."
 
 #: wxFolderView.cpp:2085
 msgid "All &columns:"
-msgstr ""
+msgstr "Alle &Spalten"
 
 #: wxFolderView.cpp:2086
 msgid "Choose the columns to be shown"
-msgstr ""
+msgstr "Spalten anzeigen"
 
 #: wxComposeView.cpp:491
 msgid "Put &cursor here"
@@ -5770,7 +5770,7 @@ msgstr "MIME Information"
 
 #: wxMessageView.cpp:991 wxMessageView.cpp:1201
 msgid "Cannot get attachment content."
-msgstr "Kann Nachrichtenanhang nicht erhalten."
+msgstr "Kann Nachrichtenanlage nicht bekommen."
 
 #: wxMessageView.cpp:1123
 #, c-format
@@ -7565,7 +7565,7 @@ msgstr "Konnte Datenbank '%s' nicht sichern."
 
 #: PalmOS.cpp:1139
 msgid "Checking files to install ..."
-msgstr "Suche Dateien zum installieren..."
+msgstr "Prüfe auf Dateien zum installieren..."
 
 #: PalmOS.cpp:1150
 #, c-format

@@ -24,88 +24,61 @@
 #   include  "strutil.h"
 #endif
 #include "MMailFolder.h"
+#include "HeaderInfoImpl.h"
+
+#include <wx/file.h>
+#include <wx/dynarray.h>
 
 
 #define MMAILFOLDER_MISSING() \
    ASSERT_MSG(0, "Missing MMailFolder functionality");
 
-// ----------------------------------------------------------------------
-/** This class is responsible for retrieving and writing a mail
-    message and for retrieving and writing the message cache.
-    Two implementations will exist in the end, one having cache and
-    all messages in a single mailbox file, the other one using a MH
-    style directory with a separate cache file.
-*/
-class MsgHandler : public MObject
-{
-public:
-   virtual Message * GetMessage(UIdType uid) = 0;
-   virtual bool      StoreMessage(UIdType uid) = 0;
 
-   virtual ~MsgHandler()
-      { }
-};
+/*
+  Some documentation:
 
-/** MsgHandler implementation using a one large file with index. */
-class MsgHandlerFile : public MsgHandler
-{
-public:
-   virtual Message * GetMessage(UIdType uid);
-   virtual bool      StoreMessage(UIdType uid);
-};
+  MMailFolder is our own proprietary mailfolder class, not based on
+  c-client. It only stores messages in either a single file or in an
+  MH compatible directory with a separate index file.
 
-Message *
-MsgHandlerFile::GetMessage(UIdType uid)
-{
-   MOcheck();
-   MMAILFOLDER_MISSING();
-   return NULL;
-}
+  Should be much faster.
 
-bool
-MsgHandlerFile::StoreMessage(UIdType uid)
-{
-   MOcheck();
-   MMAILFOLDER_MISSING();
-   return FALSE;
-}
-/** MsgHandler implementation using a directory of message files with a 
-    separate index file. */
-class MsgHandlerMH : public MsgHandler
-{
-public:
-   virtual Message * GetMessage(UIdType uid);
-   virtual bool      StoreMessage(UIdType uid);
-};
+  The actual "driver" is the FolderHandler class which provides functions
+  to read/write individual messages and tables of contents.
 
-Message *
-MsgHandlerMH::GetMessage(UIdType uid)
-{
-   MOcheck();
-   MMAILFOLDER_MISSING();
-   return NULL;
-}
+  FolderHandlerFile :
 
-bool
-MsgHandlerMH::StoreMessage(UIdType uid)
-{
-   MOcheck();
-   MMAILFOLDER_MISSING();
-   return FALSE;
-}
+  This class implements a single file mailbox which contains tables of
+  content (TOCs) and messages all in one.
+  TOCs are l
+  
+ */
 
-// ----------------------------------------------------------------------
+
+
+WX_DEFINE_ARRAY(HeaderInfoImpl *, HeaderInfoArray);
 
 /** This class is responsible for maintaining the mailfolder cache
-    information.
+    information. Essentially just a dynamically growing HeaderInfo
 */
 class MCache : public MObject
 {
 public:
    unsigned long CountMessages(int mask = 0, int value = 0) const;
+   /** Add this header entry to the end of the cache. Include the
+       folderData entry which
+   */
+   void AddEntry(const class HeaderInfo & hi)
+      {
+         HeaderInfoImpl *hi = new HeaderInfoImpl;
+         *hi = hi;
+         m_Array.Add(hi);
+      }
+   size_t Count(void) const { return m_Array.Count(); }
+   ~MCache()
 private:
-   /// number of messages
-   unsigned long m_Number;
+   /// The actual listing
+   HeaderInfoArray m_Array;
 };
 
 
@@ -114,12 +87,125 @@ MCache::CountMessages(int mask, int value) const
 {
    MOcheck();
    if(mask == 0 && value == 0)
-      return m_Number;
+      return m_Array.Count();
    MMAILFOLDER_MISSING();
    return 0;
 }
 
+MCache::~MCache()
+{
+   for(size_t idx = 0; idx < m_Array.Count(); idx ++)
+      delete m_Array[idx];
+}
+
 // ----------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+// ----------------------------------------------------------------------
+/** This class is responsible for retrieving and writing a mail
+    message and for retrieving and writing the message cache.
+    Two implementations will exist in the end, one having cache and
+    all messages in a single mailbox file, the other one using a MH
+    style directory with a separate cache file.
+*/
+class FolderHandler : public MObject
+{
+public:
+   /// retrieves the message with this UID
+   virtual Message * GetMessage(UIdType uid) = 0;
+   /// appends a message to the folder
+   virtual bool AppendMessage(const String &msgtext) = 0;
+
+   virtual ~FolderHandler()
+      { }
+};
+
+/** FolderHandler implementation using a one large file with index. */
+class FolderHandlerFile : public FolderHandler
+{
+public:
+   /** Constructor: takes the name of a file. */
+   FolderHandlerFile(const String fileName);
+
+   virtual Message * GetMessage(UIdType uid);
+   virtual bool AppendMessage(const String &msgtext);
+
+   ~FolderHandlerFile();
+protected:
+   /** This function reads a message listing in and appends it to our
+       MCache element.
+   */
+   bool ReadTOC(void);
+   /** Writes the table of contents to the index file.
+    */
+   
+private:
+   String m_Filename;
+   wxFile *m_File;
+   MCache *m_Cache;
+};
+
+FolderHandlerFile::FolderHandlerFile(const String &filename)
+{
+   m_Filename = filename;
+   m_File = new wxFile(m_Filename, wxFile::read::wxFile::write);
+}
+
+FolderHandlerFile::~FolderHandlerFile()
+{
+   delete m_File;
+   delete m_Cache;
+}
+
+
+bool
+FolderHandlerFile::ReadTOC(void)
+{
+   m_Cache = new MCache;
+}
+
+bool
+FolderHandlerFile::WriteTOC(void)
+{
+   
+}
+
+Message *
+FolderHandlerFile::GetMessage(UIdType uid)
+{
+   MOcheck();
+   MMAILFOLDER_MISSING();
+   return NULL;
+}
+
+bool
+FolderHandlerFile::AppendMessage(const String &msgtext)
+{
+   MOcheck();
+   MMAILFOLDER_MISSING();
+   return FALSE;
+}
+
+/** FolderHandler implementation using a directory of message files with a 
+    separate index file. */
+class FolderHandlerMH : public FolderHandler
+{
+public:
+   virtual Message * GetMessage(UIdType uid);
+   virtual bool      StoreMessage(UIdType uid);
+};
+
+
+
+// ----------------------------------------------------------------------
+
 
 
 
@@ -131,13 +217,13 @@ MMailFolder::MMailFolder(const MFolder *mfolder)
 {
    m_Cache = new MCache;
 
-   m_MsgHandler = mfolder->GetType() == MF_MFILE ?
-      new MsgHandlerFile : new MsgHandlerMH;
+   m_FolderHandler = mfolder->GetType() == MF_MFILE ?
+      new FolderHandlerFile : new FolderHandlerMH;
 }
 
 MMailFolder::~MMailFolder()
 {
-   delete m_MsgHandler;
+   delete m_FolderHandler;
    delete m_Cache;
 }
 

@@ -279,6 +279,6 @@ protected:
    /// MailFolder listing cache
    class MCache * m_Cache;
    /// IO handler for reading/writing messages
-   class MsgHandler *m_MsgHandler;
+   class FolderHandler *m_FolderHandler;
 };
 #endif

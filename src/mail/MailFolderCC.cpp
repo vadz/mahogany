@@ -52,6 +52,8 @@
 #include "ASMailFolder.h"
 #include "Mpers.h"
 
+#include "HeaderInfoImpl.h"
+
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking
 #include <wx/filefn.h>
 
@@ -84,6 +86,8 @@ static void sigpipe_handler(int)
 static const char * cclient_drivers[] =
 { "mbx", "unix", "mmdf", "tenex" };
 #define CCLIENT_MAX_DRIVER 3
+
+typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW *ov);
 
 // extended OVERVIEW struct additionally containing the destination address
 struct OVERVIEW_X : public mail_overview
@@ -462,196 +466,6 @@ static int CC_SetLogLevel(int arg)
    return ccl;
 }
 
-
-/** This class essentially maps to the c-client Overview structure,
-    which holds information for showing lists of messages.
-    The m_uid member is also used to map any access to the n-th message in
-    the folder to the correct message. I.e. when requesting
-    GetMessage(5), it will use the message with the m_uid from the 6th
-    entry in the list.
-*/
-class HeaderInfoCC : public HeaderInfo
-{
-public:
-   virtual String const &GetSubject(void) const { return m_Subject; }
-   virtual String const &GetFrom(void) const { return m_From; }
-   virtual String const &GetTo(void) const { return m_To; }
-   virtual time_t GetDate(void) const { return m_Date; }
-   virtual String const &GetId(void) const { return m_Id; }
-   virtual unsigned long GetUId(void) const { return m_Uid; }
-   virtual String const &GetReferences(void) const { return m_References; }
-   virtual int GetStatus(void) const { return m_Status; }
-   virtual unsigned long const &GetSize(void) const { return m_Size; }
-   virtual size_t SizeOf(void) const { return sizeof(HeaderInfoCC); }
-   /// Return the indentation level for message threading.
-   virtual unsigned GetIndentation() const { return m_Indentation; }
-   /// Set the indentation level for message threading.
-   virtual void SetIndentation(unsigned level) { m_Indentation = level; }
-   /// Get Colour setting (name or empty string)
-   virtual String GetColour(void) const { return m_Colour; }
-   /// Get Score setting (name or empty string)
-   virtual int GetScore(void) const { return m_Score; }
-   /// Change Score setting (default = 0)
-   virtual void AddScore(int delta) { m_Score += delta; }
-   /// Set Colour setting (name or empty string)
-   virtual void SetColour(const String &col) { m_Colour = col; }
-
-   virtual void SetEncoding(wxFontEncoding enc) { m_Encoding = enc; }
-   virtual wxFontEncoding GetEncoding() const { return m_Encoding; }
-
-   /// Assignment operator.
-   HeaderInfo & operator= (const HeaderInfo &);
-
-   HeaderInfoCC();
-protected:
-   String m_Subject, m_From, m_To, m_Id, m_References;
-   int m_Status;
-   unsigned long m_Size;
-   unsigned long m_Uid;
-   time_t m_Date;
-   unsigned m_Indentation;
-   String m_Colour;
-   int m_Score;
-   wxFontEncoding m_Encoding;
-
-   friend class MailFolderCC;
-};
-
-HeaderInfoCC::HeaderInfoCC()
-{
-   m_Indentation = 0;
-   m_Score = 0;
-   m_Encoding = wxFONTENCODING_SYSTEM;
-
-   // all other fields are filled in by the MailFolderCC when creating
-   // it
-}
-
-HeaderInfo &
-HeaderInfoCC::operator= ( const HeaderInfo &old)
-{
-   m_Subject = old.GetSubject();
-   m_From = old.GetFrom();
-   m_To = old.GetTo();
-   m_Date = old.GetDate();
-   m_Id = old.GetUId();
-   m_References = old.GetReferences();
-   m_Status = old.GetStatus();
-   m_Size = old.GetSize();
-   SetIndentation(old.GetIndentation());
-   SetEncoding(old.GetEncoding());
-
-   return *this;
-}
-
-/** This class holds a complete list of all messages in the folder. */
-class HeaderInfoListCC : public HeaderInfoList
-{
-public:
-   ///@name Interface
-   //@{
-   /// Count the number of messages in listing.
-   virtual size_t Count(void) const
-      { return m_NumEntries; }
-   /// Returns the n-th entry.
-   virtual const HeaderInfo * operator[](size_t n) const
-      {
-         // simply call non-const operator:
-         return (*(HeaderInfoListCC *)this)[n];
-      }
-   //@}
-   ///@name Implementation
-   //@{
-   /// Returns the n-th entry.
-   virtual HeaderInfo * operator[](size_t n)
-      {
-         MOcheck();
-         ASSERT(n < m_NumEntries);
-         if(n >= m_NumEntries)
-            return NULL;
-         else
-         {
-            if(m_TranslationTable)
-               return & m_Listing[ m_TranslationTable[n] ];
-            else
-               return & m_Listing[n];
-         }
-         return & m_Listing[n];
-      }
-
-   /// Returns pointer to entry with this UId
-   virtual HeaderInfo * GetEntryUId(UIdType uid)
-      {
-         MOcheck();
-         for(size_t i = 0; i < m_NumEntries; i++)
-         {
-            if( m_Listing[i].GetUId() == uid )
-               return & m_Listing[i];
-         }
-         return NULL;
-      }
-
-   /// Returns pointer to array of data:
-   virtual HeaderInfo *GetArray(void) { MOcheck(); return m_Listing; }
-
-   /// For use by folder only: corrects size downwards:
-   void SetCount(size_t newcount)
-      { MOcheck(); ASSERT(newcount <= m_NumEntries);
-      m_NumEntries = newcount; }
-   //@}
-
-   /// Returns an empty list of same size.
-   virtual HeaderInfoList *DuplicateEmpty(void) const
-      {
-         return Create(m_NumEntries);
-      }
-
-   static HeaderInfoListCC * Create(size_t n)
-      { return new HeaderInfoListCC(n); }
-   /// Swaps two elements:
-   virtual void Swap(size_t index1, size_t index2)
-      {
-         MOcheck();
-         ASSERT(index1 < m_NumEntries);
-         ASSERT(index2 < m_NumEntries);
-         HeaderInfoCC hicc;
-         hicc = m_Listing[index1];
-         m_Listing[index1] = m_Listing[index2];
-         m_Listing[index2] = hicc;
-      }
-   /** Sets a translation table re-mapping index values.
-       Will be freed in destructor.
-       @param array an array of indices or NULL to remove it.
-   */
-   virtual void SetTranslationTable(size_t array[] = NULL)
-      {
-         if(m_TranslationTable)
-            delete [] m_TranslationTable;
-         m_TranslationTable = array;
-      }
-
-protected:
-   HeaderInfoListCC(size_t n)
-      {
-         m_Listing = n == 0 ? NULL : new HeaderInfoCC[n];
-         m_NumEntries = n;
-         m_TranslationTable = NULL;
-      }
-   ~HeaderInfoListCC()
-      {
-         MOcheck();
-         if ( m_Listing ) delete [] m_Listing;
-         if ( m_TranslationTable ) delete [] m_TranslationTable;
-      }
-   /// The current listing of the folder
-   class HeaderInfoCC *m_Listing;
-   /// number of entries
-   size_t              m_NumEntries;
-   /// translation of indices
-   size_t *m_TranslationTable;
-
-   MOBJECT_DEBUG(HeaderInfoListCC)
-};
 
 
 MailFolderCC::MailFolderCC(int typeAndFlags,
@@ -1983,7 +1797,7 @@ MailFolderCC::BuildListing(void)
    }
 
    if(! m_Listing )
-      m_Listing =  HeaderInfoListCC::Create(m_nMessages);
+      m_Listing =  HeaderInfoListImpl::Create(m_nMessages);
 
    // by default, we retrieve all messages
    unsigned long numMessages = m_nMessages;
@@ -2166,7 +1980,9 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
       return 0;
    }
 
-   HeaderInfoCC & entry = *(HeaderInfoCC *)(*m_Listing)[m_BuildNextEntry];
+   HeaderInfoImpl & entry = *(HeaderInfoImpl *)(*m_Listing)[m_BuildNextEntry];
+
+   ADDRESS *adr;
 
    unsigned long msgno = mail_msgno (m_MailStream,uid);
    MESSAGECACHE *elt = mail_elt (m_MailStream,msgno);
@@ -2210,7 +2026,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
       entry.m_Size = ov->optional.octets;
       entry.m_Id = ov->message_id;
       entry.m_References = ov->references;
-      entry.m_Uid = uid;
+      entry.m_UId = uid;
 
       // set the font encoding to be used for displaying this entry
       if ( encodingSubject != encodingFrom )
@@ -2827,7 +2643,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long seqno)
    ASSERT_RET(i < m_Listing->Count());
 
    MESSAGECACHE *elt = mail_elt (m_MailStream,seqno);
-   ((HeaderInfoCC *)(*m_Listing)[i])->m_Status = GetMsgStatus(elt);
+   ((HeaderInfoImpl *)(*m_Listing)[i])->m_Status = GetMsgStatus(elt);
 
    // tell all interested that status changed
    MEventManager::Send( new MEventMsgStatusData (this, i, m_Listing) );
@@ -3496,19 +3312,3 @@ bool InitSSL(void) /* FIXME: MT */
 
 #undef SSL_LOOKUP
 #endif
-
-// ----------------------------------------------------------------------------
-// debugging support
-// ----------------------------------------------------------------------------
-
-#ifdef DEBUG
-
-String HeaderInfoListCC::DebugDump() const
-{
-   String s1 = MObjectRC::DebugDump(), s2;
-   s2.Printf("%u entries", Count());
-
-   return s1 + s2;
-}
-
-#endif // DEBUG

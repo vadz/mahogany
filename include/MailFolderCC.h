@@ -680,7 +680,7 @@ private:
    /// a profile
    Profile *m_Profile;
    /// The current listing of the folder
-   class HeaderInfoListCC *m_Listing;
+   class HeaderInfoList *m_Listing;
    /// Do we need to generate a new listing?
    bool m_NeedFreshListing;
    /// do we suppress listing udpates?

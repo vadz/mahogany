@@ -87,10 +87,10 @@ public:
    void   Update(void);
 
    /// prints the currently displayed message
-   void Print(void) { ((MEditCtrl *)m_EditCtrl)->Print(); }
+   void Print(void) { m_EditCtrl->Print(); }
 
    /// print-previews the currently displayed message
-   void PrintPreview(void) { ((MEditCtrl *)m_EditCtrl)->PrintPreview(); }
+   void PrintPreview(void) { m_EditCtrl->PrintPreview(); }
 
    /// convert string in cptr to one in which URLs are highlighted
    String HighLightURLs(const char *cptr);
@@ -139,9 +139,9 @@ public:
    void OnASFolderResultEvent(MEventASFolderResultData &event);
 
    /// scroll down one page:
-   void PageDown(void);
+   void PageDown(void) { m_EditCtrl->PageDown(); }
    /// scroll up one page:
-   void PageUp(void);
+   void PageUp(void) { m_EditCtrl->PageUp(); }
    /// intercept character events
    void OnChar(wxKeyEvent& event);
 
@@ -236,7 +236,7 @@ protected:
    void ReadAllSettings(AllProfileValues *settings);
 
 private:
-   class wxMEditCtrl *m_EditCtrl;
+   MEditCtrl *m_EditCtrl;
 
    /// array of process info for all external viewers we have launched
    ArrayProcessInfo m_processes;
