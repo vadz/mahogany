@@ -72,17 +72,6 @@ static wxArrayString BuildListOfModulesDirs();
 #define M_TRACE_MODULES "mmodule"
 
 // ----------------------------------------------------------------------------
-// force linking all our modules when using them statically, without these
-// macros they may be optimized away entirely by a smart (or dumb, depending in
-// your point of view) linker
-// ----------------------------------------------------------------------------
-
-MMODULE_USE(AdbTextImporter)
-MMODULE_USE(AdbEudoraImporter)
-MMODULE_USE(AdbPineImporter)
-MMODULE_USE(AdbMailrcImporter)
-
-// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 

@@ -331,15 +331,6 @@ void MModule_AddStaticModule(const char *Name,
 #   define MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version)
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 
-/// use this macro to force linking in a module when building statically
-#ifdef USE_MODULES_STATIC
-   #define MMODULE_USE(ClassName) \
-      extern struct MStaticModuleInitializerFor##ClassName \
-         gs_moduleInitializerFor##ClassName;
-#else
-   #define MMODULE_USE(ClassName)
-#endif
-
 /// this macro must be used inside the class declaration for any module class
 #define MMODULE_DEFINE() \
 public: \
