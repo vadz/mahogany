@@ -2,6 +2,9 @@ TODO list for M
 $Id$
 
 *** things to fix/implement next ***
+- fix date display in messageview
+- "clear" menu in ComposeView?
+- toolbar/Send button in ComposeView ?
 
 - SendMessageCC
   + add folder aliases (trivial)
