@@ -43,6 +43,7 @@ DEFAULT_USE_LIBTOOL=0
 DEFAULT_USE_DOCXX=0
 DEFAULT_USE_MODULES=static
 DEFAULT_USE_LEAKTRACER=0
+DEFAULT_USE_STRICT=0
 
 M_OVERRIDES(python,python,
 --with-python   use python scripting,
@@ -99,6 +100,10 @@ USE_CCOSTYPE)
 M_OVERRIDES(modules,modules,
 --with-modules_static    Compile plugin modules statically,
 USE_MODULES)
+
+M_OVERRIDES(strict, strict,
+--with-strict            Strict compiler flags - may not work on all systems,
+USE_STRICT)
 
 M_OVERRIDES(docxx,docxx,
 --with-doc++      use DOC++ for class documentation generation,
@@ -213,7 +218,9 @@ then
 	else
 		AC_MSG_RESULT(no)
 	fi
-	CXXFLAGS="$CXXFLAGS -Werror"
+	if test "x$USE_STRICT" != "x"; then
+		CXXFLAGS="$CXXFLAGS -Werror"
+	fi
 fi
 
 dnl --------------------------------------------------------------------------
