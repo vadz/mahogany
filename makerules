@@ -7,30 +7,51 @@ M_FLAGS_so := -shared
 M_FLAGS_ii := -E
 M_FLAGS_s := -S
 
+##############################################################################
+# Some explanations: the rules M_COMPILE_CPP/CC/CXX defined above are very
+# flexible as they allow you to define flags just for some dir1/dir2/foo.c
+# (define CFLAGS_dir1_dir2_foo_o) or for all the files in some directory
+# (define CFLAGS_dir1_dir2). Of course, the same applies to CPP/CXXFLAGS as
+# well.
+##############################################################################
+
 # common initial flags
 define M_COMPILE_CPP
-$(M_FLAGS$(subst .,_,$(suffix $@))) -fPIC $(CPPFLAGS) $(CPPFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) $(CPPFLAGS_$(subst .,_,$(subst /,_,$@)))
+$(M_FLAGS$(subst .,_,$(suffix $@))) -fPIC $(CPPFLAGS) \
+$(CPPFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) \
+$(CPPFLAGS_$(subst .,_,$(subst /,_,$@)))
 endef
 
 # common C flags
 define M_COMPILE_CC_unfiltered
-$(M_COMPILE_CPP) $(CFLAGS) $(CFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) $(CFLAGS_$(subst .,_,$(subst /,_,$@)))
+$(M_COMPILE_CPP) $(CFLAGS) \
+$(CFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) \
+$(CFLAGS_$(subst .,_,$(subst /,_,$@)))
 endef
 define M_COMPILE_CC
-$(filter-out $(FILTER_OUT$(subst /,_,$(subst /$(notdir $*),,/$*))) $(FILTER_OUT_$(subst .,_,$(subst /,_,$@))),$(M_COMPILE_CC_unfiltered)) $(FILTER_IN$(subst /,_,$(subst /$(notdir $*),,/$*))) $(FILTER_IN_$(subst .,_,$(subst /,_,$@)))
+$(filter-out $(FILTER_OUT$(subst /,_,$(subst /$(notdir $*),,/$*))) \
+$(FILTER_OUT_$(subst .,_,$(subst /,_,$@))),$(M_COMPILE_CC_unfiltered)) \
+$(FILTER_IN$(subst /,_,$(subst /$(notdir $*),,/$*))) \
+$(FILTER_IN_$(subst .,_,$(subst /,_,$@)))
 endef
 
 # common C++ flags
 define M_COMPILE_CXX_unfiltered
-$(M_COMPILE_CPP) $(CXXFLAGS) $(CXXFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) $(CXXFLAGS_$(subst .,_,$(subst /,_,$@)))
+$(M_COMPILE_CPP) $(CXXFLAGS) \
+$(CXXFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) \
+$(CXXFLAGS_$(subst .,_,$(subst /,_,$@)))
 endef
 define M_COMPILE_CXX
-$(filter-out $(FILTER_OUT$(subst /,_,$(subst /$(notdir $*),,/$*))) $(FILTER_OUT_$(subst .,_,$(subst /,_,$@))),$(M_COMPILE_CXX_unfiltered)) $(FILTER_IN$(subst /,_,$(subst /$(notdir $*),,/$*))) $(FILTER_IN_$(subst .,_,$(subst /,_,$@)))
+$(filter-out $(FILTER_OUT$(subst /,_,$(subst /$(notdir $*),,/$*))) \
+$(FILTER_OUT_$(subst .,_,$(subst /,_,$@))),$(M_COMPILE_CXX_unfiltered)) \
+$(FILTER_IN$(subst /,_,$(subst /$(notdir $*),,/$*))) \
+$(FILTER_IN_$(subst .,_,$(subst /,_,$@)))
 endef
 
 # common loader flags
 define M_LD_FLAGS
-$(LDFLAGS) $(LDFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) $(LDFLAGS_$(subst .,_,$(subst /,_,$@)))
+$(LDFLAGS) $(LDFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) \
+$(LDFLAGS_$(subst .,_,$(subst /,_,$@)))
 endef
 
 vpath %.h .src
@@ -63,16 +84,13 @@ vpath %.cpp .src
 vpath %.y .src
 %.o: %.y
 	$(YACC) $(YFLAGS) $< && mv y.tab.c $*.c
-	if test -f y.tab.h; then \
-	  if cmp -s y.tab.h $*.h; then rm -f y.tab.h; \
-	  else mv y.tab.h $*.h; fi; \
-	else :; fi
 	$(CC) -o $@ $(M_COMPILE_CC) $*.c
 	@f=$(notdir $*); test ! -f $$f.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.c,$<," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
 	@rm -f $*.c
 
+# this syntax is for exuberant ctags
 tags:
-	etags --c++ $(SRC) $(CXXSRC)
+	ctags -i mCF --lang=c++ $(SRC) $(CXXSRC) include/*.h include/*/*.h
 
 stdclean:
 	$(RM) -r *.o *.so *.a *.lo *.d .libs
