@@ -1,5 +1,5 @@
 -*- text -*-
-TODO list for M
+TODO list for Mahogany
 $Id$
 
 
@@ -11,6 +11,8 @@ $Id$
 
 9		New Mail dialog for non-collected messages shows empty 
 		subject and from
+9		changing properties for IMAP folder (auto-collect)
+		occasionally dumps core on [OK] click
 7 gtk	VZ?	message boxes have broken icons under wxGTK
 7	KB	why does Message/Find no longer work?
 7 gtk		Mahogany occasionally doesn't terminate but remains in
