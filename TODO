@@ -226,6 +226,8 @@ $Id$
 
 *** to implement in near future ***
 
+- fix non-ASCII characters in header lines (important!)
+
 - event subsystem
   + write some macros for safe casting of the event param in the handlers to
     the correct type
@@ -253,8 +255,6 @@ $Id$
 - threading of messages via MessageId/References header lines
   Follow examples in SunExpert journal.
 
-- compressed mail folders
-
 - "Power Search": search all (even compressed?) folders for a keyword
   and when found, open the folder and display the message.
 
@@ -263,9 +263,9 @@ $Id$
   them, e.g. semicolon separated as a list to a file, so one could
   parse them in scripts or whatever else.
 
-- fix non-ASCII characters in header lines
-
-- if message contains only text, don't create MIME multipart message
+- message integrity verification support
+  + PGP
+  + MD5 (see RFC-1544 for details)
 
 - REMOTE-CONTROL: add support for popping window open and reading a folder of one's choice
   (for being controlled from xbiff like programs)
@@ -281,6 +281,8 @@ $Id$
   -> this could be done using scripts?
 
 - creation of separate index files for mail folders
+
+- compressed mail folders
 
 ********************* targets for re-write **********************
 
