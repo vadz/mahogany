@@ -626,12 +626,15 @@ MAppBase::OnShutDown()
       Profile::FlushAll();
    }
 
-   // The following little hack allows us to decref and delete the
-   // global profile without triggering an assert, as this is not
-   // normally allowed.
-   Profile *p = m_profile;
-   m_profile = NULL;
-   p->DecRef();
+   if ( m_profile )
+   {
+      // The following little hack allows us to decref and delete the
+      // global profile without triggering an assert, as this is not
+      // normally allowed.
+      Profile *p = m_profile;
+      m_profile = NULL;
+      p->DecRef();
+   }
 
    if ( initialized )
    {
@@ -659,6 +662,14 @@ MAppBase::OnShutDown()
       // free python DLL: this is ok to call even if it wasn't loaded
       FreePythonDll();
 #endif // USE_PYTHON_DYNAMIC
+   }
+
+   // normally this is done in OnStartup() but if we hadn't done it there
+   // (because the app couldn't start up) do it now
+   if ( m_cmdLineOptions )
+   {
+      delete m_cmdLineOptions;
+      m_cmdLineOptions = NULL;
    }
 }
 

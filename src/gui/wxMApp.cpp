@@ -993,17 +993,18 @@ int wxMApp::OnExit()
    delete m_serverIPC;
    m_serverIPC = NULL;
 
-   // disable timers for autosave and mail collection, won't need them any more
-   StopTimer(Timer_Autosave);
-   StopTimer(Timer_PollIncoming);
+   // if one timer was created, then all of them were
+   if ( gs_timerAutoSave )
+   {
+      // delete timers
+      delete gs_timerAutoSave;
+      delete gs_timerMailCollection;
+      delete gs_timerAway;
 
-   // delete timers
-   delete gs_timerAutoSave;
-   delete gs_timerMailCollection;
-   delete gs_timerAway;
-
-   gs_timerAutoSave = NULL;
-   gs_timerMailCollection = NULL;
+      gs_timerAutoSave = NULL;
+      gs_timerMailCollection = NULL;
+      gs_timerAway = NULL;
+   }
 
    CleanUpPrintData();
 
@@ -1461,11 +1462,13 @@ bool wxMApp::StopTimer(Timer timer)
    switch ( timer )
    {
       case Timer_Autosave:
-         gs_timerAutoSave->Stop();
+         if ( gs_timerAutoSave )
+            gs_timerAutoSave->Stop();
          break;
 
       case Timer_PollIncoming:
-         gs_timerMailCollection->Stop();
+         if ( gs_timerMailCollection )
+            gs_timerMailCollection->Stop();
          break;
 
       case Timer_PingFolder:
