@@ -2163,7 +2163,7 @@ Upgrade(const String& fromVersion)
          oldVersion = Version_050;
       else if ( version == "0.60" )
          oldVersion = Version_060;
-      else if ( version == "0.61" )
+      else if ( version == "0.61" || version == "0.62" || version == "0.63" )
          oldVersion = Version_NoChange;
       else
          oldVersion = Version_Unknown;
@@ -3086,8 +3086,9 @@ CheckConfiguration(void)
    {
       CloseSplash();
 
-      if ( ! Upgrade(version) )
+      if ( !Upgrade(version) )
          return false;
+
       // write the new version
       profile->writeEntry(MP_VERSION, M_VERSION);
    }

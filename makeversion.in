@@ -3,10 +3,10 @@
 # $Id$
 
 M_VERSION_MAJOR=0
-M_VERSION_MINOR=62
+M_VERSION_MINOR=63
 M_RELEASE=0		# 0 for prerelease, 1 for release, 2 for stable
 M_PATCHLEVEL=0
-M_STRING='Mars'
+M_STRING='Saugus'
 
 case "$M_RELEASE.$M_PATCHLEVEL" in
 0.0)	M_STATUS=a	;;

@@ -179,7 +179,7 @@ BEGIN
             VALUE "FileDescription", "Mahogany - the powerful cross-platform e-mail solution\0"
             VALUE "FileVersion", M_VERSION
             VALUE "InternalName", "Main Mahogany program file\0"
-            VALUE "LegalCopyright", "Copyright © 1998 Karsten Ballüder and Vadim Zeitlin\0"
+            VALUE "LegalCopyright", "Copyright © 1998-2001 Karsten Ballüder and Vadim Zeitlin\0"
             VALUE "OriginalFilename", "M.exe\0"
             VALUE "ProductName", "Mahogany\0"
             VALUE "ProductVersion", M_VERSION_STRING
