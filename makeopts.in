@@ -82,8 +82,10 @@ INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
-PREFIX = @prefix@
-EXEC_PREFIX = @exec_prefix@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+PREFIX=@prefix@
+exec_prefix=@exec_prefix@
 
 # Directory in which to install scripts.
 BINDIR = @bindir@
@@ -95,7 +97,7 @@ DATADIR = @datadir@/M
 INFODIR = @infodir@/M
 
 # where to install docs
-DOCDIR = $(DATADIR)/doc
+DOCDIR = $DATADIR/doc
 
 # for the dynamic linker, better than using -rpath
 LD_RUN_PATH=$(DATADIR)/bin/$(CANONICAL_HOST)
