@@ -44,6 +44,28 @@
 #  endif
 #endif
 
+// ----------------------------------------------------------------------------
+// the standard module properties
+// ----------------------------------------------------------------------------
+
+// the name of the module
+#define MMODULE_NAME_PROP "name"
+
+// the short description of the module shown in the folder dialog (module won't
+// be shown there if it is empty)
+#define MMODULE_DESC_PROP "desc"
+
+// the long (multiline) description of the module
+#define MMODULE_DESCRIPTION_PROP "description"
+
+// the interface the module implements (may be empty)
+#define MMODULE_INTERFACE_PROP "interface"
+
+// the version of the module
+#define MMODULE_VERSION_PROP "version"
+
+// author/copyright string
+#define MMODULE_AUTHOR_PROP "author"
 
 /**@name Mahogany Module management classes. */
 //@{
@@ -216,16 +238,29 @@ public:
        @return pointer to the freshly loaded MModule or NULL.
    */
    static MModule * LoadModule(const String & name);
+
    /** Returns a pointer to a listing of all loaded modules. Must be
        DecRef()'d by the caller. */
    static MModuleListing * ListLoadedModules(void);
+
    /** Returns a pointer to a listing of available modules. Must be
        DecRef()'d by the caller. Does not check if modules are loaded,
        i.e. GetModule() from these entries will return NULL.
-       If interfaceName is not empty, will only return modules implementing
+
+       If iface is not empty, will only return modules implementing
        the given interface.
+
+       If loadableOnly is true, will only return the modules with non
+       empty desc property.
    */
-   static MModuleListing * ListAvailableModules(const String& interfaceName = "");
+   static MModuleListing * ListAvailableModules(const String& iface = "",
+                                                bool loadableOnly = false);
+
+   /** As ListAvailableModules() but only returns the modules which can be
+       loaded manually by the user (and not various importers, for example)
+   */
+   static MModuleListing * ListLoadableModules();
+
    /** Finds the first module which provides the given interface. Only
        searches already loaded modules.
        @param interface name of the interface
@@ -350,10 +385,10 @@ MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version); \
 \
 const ModuleProperty ClassName::ms_properties[] = \
 { \
-   { "name", Name }, \
-   { "desc", Description }, \
-   { "version", Version }, \
-   { "interface", Interface },
+   { MMODULE_NAME_PROP, Name }, \
+   { MMODULE_DESC_PROP, Description }, \
+   { MMODULE_VERSION_PROP, Version }, \
+   { MMODULE_INTERFACE_PROP, Interface },
 
 #define MMODULE_PROP(name, value) { name, value },
 
@@ -368,13 +403,13 @@ MDLLEXPORT const ModuleProperty *GetMModuleProperties() \
 } \
 } \
 const char * ClassName::GetName(void) const \
-   { return GetMModuleProperty(GetMModuleProperties(), "name"); } \
+   { return GetMModuleProperty(GetMModuleProperties(), MMODULE_NAME_PROP); } \
 const char * ClassName::GetInterface(void) const \
-   { return GetMModuleProperty(GetMModuleProperties(), "interface"); } \
+   { return GetMModuleProperty(GetMModuleProperties(), MMODULE_INTERFACE_PROP); } \
 const char * ClassName::GetDescription(void) const \
-   { return GetMModuleProperty(GetMModuleProperties(), "desc"); } \
+   { return GetMModuleProperty(GetMModuleProperties(), MMODULE_DESC_PROP); } \
 const char * ClassName::GetVersion(void) const \
-   { return GetMModuleProperty(GetMModuleProperties(), "version"); }
+   { return GetMModuleProperty(GetMModuleProperties(), MMODULE_VERSION_PROP); }
 
 // ----------------------------------------------------------------------------
 // helper functions and macros

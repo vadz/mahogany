@@ -245,7 +245,8 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
          (MModule_GetModulePropFuncType)
          wxDllLoader::GetSymbol(dll, MMODULE_GETPROPERTY_FUNCTION);
       if(propFunc)
-         me->m_Interface = GetMModuleProperty((*propFunc)(), "interface");
+         me->m_Interface = GetMModuleProperty((*propFunc)(),
+                                              MMODULE_INTERFACE_PROP);
       else
          me->m_Interface = name;
       GetMModuleList()->push_back(me);
@@ -452,13 +453,17 @@ private:
    GCC_DTOR_WARN_OFF
 };
 
-#ifdef USE_MODULES_STATIC
+// this function can list all loaded modules (default) or do other things as
+// well depending on the parameters values, so the name is a bit unfortunate
 static MModuleListing * DoListLoadedModules(bool listall = false,
-                                            const String& interfaceName = "")
-#else
-static MModuleListing * DoListLoadedModules(void)
-#endif
+                                            const String& interfaceName = "",
+                                            bool loadableOnly = false)
 {
+#ifndef USE_MODULES_STATIC
+   // this function only works for loaded modules in dynamic case
+   ASSERT_MSG( !listall, "this mode is not supported with dynamic modules" );
+#endif // USE_MODULES_STATIC
+
    MModuleListingImpl *listing =
       MModuleListingImpl::Create(GetMModuleList()->size());
 
@@ -475,39 +480,56 @@ static MModuleListing * DoListLoadedModules(void)
       if ( (listall || me->m_Module) &&
            (interfaceName.empty() || me->m_Interface == interfaceName) )
       {
-         MModuleListingEntryImpl entry
-                                 (
-                                    me->m_Name, // module name
-                                    me->m_Interface,
-                                    me->m_Description,
-                                    "", // long description
-                                    String(me->m_Version) + _(" (builtin)"),
-                                    "mahogany-developers@lists.sourceforge.net",
-                                    me->m_Module
-                                 );
+         // check that the module is "loadable" if requested
+         String desc = me->m_Description;
+         if ( !loadableOnly || !desc.empty() )
+         {
+            MModuleListingEntryImpl entry
+                                    (
+                                       me->m_Name, // module name
+                                       me->m_Interface,
+                                       desc,
+                                       "", // long description
+                                       String(me->m_Version) + _(" (builtin)"),
+                                       "mahogany-developers@lists.sourceforge.net",
+                                       me->m_Module
+                                    );
 
-         (*listing)[count++] = entry;
+            (*listing)[count++] = entry;
+         }
       }
    }
-
-   listing->SetCount(count); // we might have less than we thought at first
 #else // !USE_MODULES_STATIC
    {
       MModule *m = (**i).m_Module;
-      ASSERT(m);
-      MModuleListingEntryImpl entry
-                              (
-                                 m->GetName(), // module name
-                                 m->GetInterface(),
-                                 m->GetDescription(),
-                                 "", // long description
-                                 m->GetVersion(),
-                                 "",
-                                 m
-                              );
-      (*listing)[count++] = entry;
+      if ( !m )
+      {
+         FAIL_MSG( "module should be loaded" );
+
+         continue;
+      }
+
+      // check that the module is "loadable" if requested
+      String desc = m->GetDescription();
+      if ( !loadableOnly || !desc.empty() )
+      {
+         MModuleListingEntryImpl entry
+                                 (
+                                    m->GetName(), // module name
+                                    m->GetInterface(),
+                                    desc,
+                                    "", // long description
+                                    m->GetVersion(),
+                                    "", // author
+                                    m
+                                 );
+         (*listing)[count++] = entry;
+      }
    }
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
+
+   // we might have less than we thought at first
+   listing->SetCount(count);
 
    return listing;
 }
@@ -521,10 +543,17 @@ MModule::ListLoadedModules(void)
 
 /* static */
 MModuleListing *
-MModule::ListAvailableModules(const String& interfaceName)
+MModule::ListLoadableModules()
+{
+   return ListAvailableModules("", true /* loadable only */);
+}
+
+/* static */
+MModuleListing *
+MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
 {
 #ifdef USE_MODULES_STATIC
-   return DoListLoadedModules(true, interfaceName);
+   return DoListLoadedModules(true, interfaceName, loadableOnly);
 #else // !USE_MODULES_STATIC
    kbStringList modules;
 
@@ -689,19 +718,26 @@ MModule::ListAvailableModules(const String& interfaceName)
             {
                const ModuleProperty *props = (*getProps)();
 
-               String interfaceModule = GetMModuleProperty(props, "interface");
+               // does it have the right interface?
+               String interfaceModule = GetMModuleProperty(props,
+                                                           MMODULE_INTERFACE_PROP);
                if ( !interfaceName || interfaceName == interfaceModule )
                {
-                  String name;
-                  wxSplitPath(filename, NULL, &name, NULL);
-                  MModuleListingEntryImpl entry(
-                     name,
-                     interfaceModule,
-                     GetMModuleProperty(props, "desc"),
-                     GetMModuleProperty(props, "description"),
-                     GetMModuleProperty(props, "version"),
-                     GetMModuleProperty(props, "author"));
-                  (*listing)[count++] = entry;
+                  // check if it is loadable if necessary
+                  String desc = GetMModuleProperty(props, MMODULE_DESC_PROP);
+                  if ( !loadableOnly || !desc.empty() )
+                  {
+                     String name;
+                     wxSplitPath(filename, NULL, &name, NULL);
+                     MModuleListingEntryImpl entry(
+                        name,
+                        interfaceModule,
+                        desc,
+                        GetMModuleProperty(props, MMODULE_DESCRIPTION_PROP),
+                        GetMModuleProperty(props, MMODULE_VERSION_PROP),
+                        GetMModuleProperty(props, MMODULE_AUTHOR_PROP));
+                     (*listing)[count++] = entry;
+                  }
                }
 
                errorflag = false;

@@ -98,15 +98,21 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
 // macros for importers declaration/implementation
 // ----------------------------------------------------------------------------
 
+// this macro must be used inside the declaration of the importer class
 #define DECLARE_M_IMPORTER()                                                   \
    virtual const char *GetProgName() const;                                    \
    MMODULE_DEFINE();                                                           \
    DEFAULT_ENTRY_FUNC                                                          \
 
-#define IMPLEMENT_M_IMPORTER(cname, progname, desc)                            \
-   MMODULE_BEGIN_IMPLEMENT(cname, #cname, M_IMPORTER_INTERFACE,                \
-                           _(desc), "1.00")                                    \
+// these macros are used to define the importer and its properties, you may put
+// lines of the form MMODULE_PROP(name, value) between them to add other
+// properties such as description or whatever
+#define MIMPORTER_BEGIN_IMPLEMENT(cname, progname, desc)                       \
+   MMODULE_BEGIN_IMPLEMENT(cname, #cname, M_IMPORTER_INTERFACE, "", "1.00")    \
       MMODULE_PROP(M_IMPORTER_PROG_NAME, progname)                             \
+      MMODULE_PROP(MMODULE_DESCRIPTION_PROP, _(desc))
+
+#define MIMPORTER_END_IMPLEMENT(cname)                                         \
    MMODULE_END_IMPLEMENT(cname)                                                \
    const char *cname::GetProgName() const                                      \
    {                                                                           \
@@ -116,5 +122,11 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
    {                                                                           \
       return new cname();                                                      \
    }
+
+// this macro replaces BEGIN/END pair if you don't need any additional
+// properties
+#define IMPLEMENT_M_IMPORTER(cname, progname, desc)                            \
+   MIMPORTER_BEGIN_IMPLEMENT(cname, progname, desc)                            \
+   MIMPORTER_END_IMPLEMENT(cname)
 
 #endif // _MIMPORT_H_
