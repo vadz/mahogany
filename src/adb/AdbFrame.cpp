@@ -641,8 +641,10 @@ private:
   // opposite order)
   void LayoutButtons(wxPanel *panel, size_t nButtons, wxButton *aButtons[]);
 
-  // calculate the (approx.) minimal dimensions of the frame
-  void SetMinSize();
+  // calculate the (approx.) minimal dimensions of the frame (returns TRUE if
+  // done, may return FALSE if called too early, i.e. before the window is
+  // fully created)
+  bool SetMinSize();
 
   // expand the specified path returning the pointer to the last item
   // (or NULL if the path is invalid)
@@ -1032,6 +1034,8 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   m_clipboard = NULL;
   m_pImageList = NULL;
   m_bFindDone = FALSE;
+  m_btnCancel =
+  m_btnDelete = NULL;
 
   // create our menu
   // ---------------
@@ -1112,6 +1116,8 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
 
   panel->SetAutoLayout(TRUE);
   SetAutoLayout(TRUE);
+
+  SetMinSize();
 
   // caption and icon
   // ----------------
@@ -1336,7 +1342,7 @@ void wxAdbEditFrame::LayoutButtons(wxPanel *panel,
       widthMax = width;
   }
 
-  widthMax += 10; // @@ loks better like this
+  widthMax += 10; // looks better like this
 
   // now layout them
   wxLayoutConstraints *c;
@@ -2080,13 +2086,6 @@ void wxAdbEditFrame::OnActivate(wxActivateEvent& event)
   // control in our frame, i.e. the toolbar - definitely not what we want)
   if ( event.GetActive() )
     m_treeAdb->SetFocus();
-
-  // should do it only the first time
-  static bool s_bMinSizeSet = FALSE;
-  if ( !s_bMinSizeSet ) {
-    SetMinSize();
-    s_bMinSizeSet = TRUE;
-  }
 }
 
 // expand all branches leading to the specified item
@@ -2144,14 +2143,19 @@ bool wxAdbEditFrame::MoveSelection(const wxString& strEntry)
 }
 
 // calculate the minimal size of the frame and set it
-void wxAdbEditFrame::SetMinSize()
+bool wxAdbEditFrame::SetMinSize()
 {
+  if ( !m_btnCancel )
+    return FALSE;
+
   // all buttons have the same size and we use them as length unit
   int widthBtn, heightBtn;
   m_btnCancel->GetClientSize(&widthBtn, &heightBtn);
 
   // FIXME the numbers are completely arbitrary
   SetSizeHints(7*widthBtn, 22*heightBtn);
+
+  return TRUE;
 }
 
 bool wxAdbEditFrame::SaveExpandedBranches(AdbTreeNode *group)
