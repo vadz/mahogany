@@ -33,8 +33,6 @@ class Profile;
 class MFolder;
 class MPersMsgBox;
 
-struct SearchCriterium;
-
 class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxStaticText;
 
@@ -364,12 +362,6 @@ void MDialog_FolderOpen(const wxWindow *parent);
 /// Configure modules, in wxModulesDialog.cpp:
 extern
 void ShowModulesDialog(wxFrame *parent);
-/* Configuration dialog for searching for messages. */
-extern
-bool
-ConfigureSearchMessages(SearchCriterium *crit,
-                        Profile *profile,
-                        wxWindow *parent);
 
 extern
 bool ConfigureDateFormat(Profile *profile, wxWindow *parent);

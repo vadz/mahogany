@@ -1,4 +1,4 @@
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
+///////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
 // File name:   gui/wxMenuDefs.h - items definitions for menus and toolbars
 // Purpose:     the definitions of all menu (and toolbar, inspite the name)
@@ -9,10 +9,10 @@
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Licence:     M license
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
+///////////////////////////////////////////////////////////////////////////////
 
-#ifndef  WXMENUDEFS_H
-#define  WXMENUDEFS_H
+#ifndef _GUI_WXMENUDEFS_H_
+#define _GUI_WXMENUDEFS_H_
 
 #include <wx/fontenc.h>
 
@@ -140,8 +140,9 @@ enum
    WXMENU_FOLDER_BROWSESUB,
    WXMENU_FOLDER_IMPORTTREE,
    WXMENU_FOLDER_SEP3,
-   WXMENU_FOLDER_FILTERS,
+   WXMENU_FOLDER_SEARCH,
    WXMENU_FOLDER_SEP4,
+   WXMENU_FOLDER_FILTERS,
    WXMENU_FOLDER_PROP,
    WXMENU_FOLDER_END = WXMENU_FOLDER_PROP,
 
@@ -208,7 +209,6 @@ enum
    WXMENU_MSG_GOTO_MSGNO,
    WXMENU_MSG_NEXT_UNREAD,
    WXMENU_MSG_NEXT_FLAGGED,
-   WXMENU_MSG_SEARCH,
    WXMENU_MSG_SEP4,
 
    WXMENU_MSG_FLAG,
@@ -461,4 +461,5 @@ extern void AddToolbarButton(wxToolBar *toolbar, int nButton);
 /// enables or disables the given button
 extern void EnableToolbarButton(wxToolBar *toolbar, int nButton, bool enable);
 
-#endif
+#endif // _GUI_WXMENUDEFS_H_
+

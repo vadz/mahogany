@@ -146,9 +146,6 @@ public:
       return FolderView::OnMEvent(event);
    }
 
-   /// Search messages for certain criteria.
-   virtual void SearchMessages(void);
-
    /// process folder delete event
    virtual void OnFolderDeleteEvent(const String& folderName);
    /// update the folderview

@@ -63,7 +63,6 @@
 #include "MThread.h"
 #include "MFolder.h"
 #include "MFCache.h"
-#include "MSearch.h"
 
 #include "FolderMonitor.h" // for case WXK_F5
 
@@ -3943,18 +3942,6 @@ wxFolderView::PreviewMessage(long uid)
    m_MessagePreview->ShowMessage(uid);
 }
 
-void
-wxFolderView::SearchMessages(void)
-{
-   SearchCriterium criterium;
-
-   if ( ConfigureSearchMessages(&criterium,GetProfile(),NULL) )
-   {
-      Ticket t = m_ASMailFolder->SearchMessages(&criterium, this);
-      m_TicketList->Add(t);
-   }
-}
-
 void wxFolderView::ExpungeMessages()
 {
    if ( GetDeletedCount() )
@@ -4292,10 +4279,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 
    switch ( cmd )
    {
-      case WXMENU_MSG_SEARCH:
-         SearchMessages();
-         break;
-
       case WXMENU_MSG_EXPUNGE:
          ExpungeMessages();
          break;

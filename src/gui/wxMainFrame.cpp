@@ -42,6 +42,8 @@
 
 #include "MFolder.h"
 
+#include "MSearch.h"
+
 #include "gui/wxMainFrame.h"
 #include "gui/wxMApp.h"
 #include "gui/wxIconManager.h"
@@ -561,6 +563,19 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                                                      NULL);
                }
                SafeDecRef(newfolder);
+            }
+            break;
+
+         case WXMENU_FOLDER_SEARCH:
+            {
+               SearchCriterium crit;
+
+               Profile_obj profile = GetFolderProfile();
+               if ( ConfigureSearchMessages(&crit, profile, this) )
+               {
+                  //Ticket t = m_ASMailFolder->SearchMessages(&crit, this);
+                  //m_TicketList->Add(t);
+               }
             }
             break;
 

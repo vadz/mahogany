@@ -272,7 +272,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tCtrl-Q"),             gettext_noop("Quit the application")     , wxITEM_NORMAL },
 
    // folder
-   // available accels: DGHJKMQTVWXYZ
+   // available accels: DGHJKMQVWXYZ
    { WXMENU_FOLDER_OPEN,      gettext_noop("&Open...\tCtrl-O"),   gettext_noop("Open an existing message folder")                  , wxITEM_NORMAL },
    { WXMENU_FOLDER_OPEN_RO,   gettext_noop("Open read-onl&y..."), gettext_noop("Open a folder in read only mode")                  , wxITEM_NORMAL },
    { WXMENU_FOLDER_CREATE,    gettext_noop("&Create..."), gettext_noop("Create a new folder definition")               , wxITEM_NORMAL },
@@ -284,14 +284,15 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FOLDER_CLOSEALL,  gettext_noop("Close &all"), gettext_noop("Close all opened folders")               , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_UPDATE,    gettext_noop("&Update"), gettext_noop("Update the shown status of this folder"), wxITEM_NORMAL },
-   { WXMENU_FOLDER_UPDATEALL, gettext_noop("Update &subtree..."), gettext_noop("Update the status of all folders under the currently selected one in the folder tree"), wxITEM_NORMAL },
+   { WXMENU_FOLDER_UPDATEALL, gettext_noop("Update sub&tree..."), gettext_noop("Update the status of all folders under the currently selected one in the folder tree"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_IMPORTTREE,gettext_noop("&Import file folders..."),
                               gettext_noop("Create folders for all files in a directory"), wxITEM_NORMAL },
    { WXMENU_FOLDER_BROWSESUB, gettext_noop("&Browse..."), gettext_noop("Show subfolders of the current folder")               , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
-   { WXMENU_FOLDER_FILTERS,   gettext_noop("&Filters..."), gettext_noop("Edit the filters to use for current folder")               , wxITEM_NORMAL },
+   { WXMENU_FOLDER_SEARCH,    gettext_noop("&Search..."), gettext_noop("Search for the messages in folder(s)") , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FOLDER_FILTERS,   gettext_noop("&Filters..."), gettext_noop("Edit the filters to use for current folder")               , wxITEM_NORMAL },
    { WXMENU_FOLDER_PROP,      gettext_noop("&Properties..."), gettext_noop("Show the properties of the current folder")               , wxITEM_NORMAL },
 
    // normal edit
@@ -406,7 +407,6 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_GOTO_MSGNO,   gettext_noop("&Jump to message...\tCtrl-J"), gettext_noop("Select the message by its number")     , wxITEM_NORMAL },
    { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , wxITEM_NORMAL },
    { WXMENU_MSG_NEXT_FLAGGED,   gettext_noop("N&ext flagged"), gettext_noop("Select next flagged message")     , wxITEM_NORMAL },
-   { WXMENU_MSG_SEARCH,  gettext_noop("Searc&h..."), gettext_noop("Search and select messages") , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_MSG_FLAG,      gettext_noop("Fla&g\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , wxITEM_NORMAL },
    { WXMENU_MSG_MARK_READ,   gettext_noop("Mark &read"), gettext_noop("Mark message as read"), wxITEM_NORMAL },
