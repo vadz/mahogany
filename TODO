@@ -24,10 +24,6 @@ $Id$
 		now 
 6	VZ	All Folder create dialog pages have no HelpIDs set.
 5	KB	for NNTP only count unread/new messages
-5		changing the value of "autocollect" timer doesn't take
-		effect until next run - either add a message saying
-		or, better, recreate timer when the option changes.
-		-- use OptionsChange event for this?!
 3		foldername in password prompt seems wrong
 3		URL highlighting in headers is missing (e.g. X-Url)
 ? win	VZ	lock files are sometimes left
