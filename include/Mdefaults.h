@@ -808,9 +808,9 @@
 #define MP_NET_CONNECTION_D "RasConnection"
 #elif defined(OS_UNIX)
 /// the command to go online
-#define MP_NET_ON_COMMAND_D   "wvdial"
+#define MP_NET_ON_COMMAND_D   "pon"
 /// the command to go offline
-#define MP_NET_OFF_COMMAND_D   "wvundial"
+#define MP_NET_OFF_COMMAND_D   "poff"
 #endif // platform
 
 /// the news server fallback
