@@ -1,0 +1,70 @@
+*** Makefile.old	Tue Oct 31 23:41:56 2000
+--- Makefile	Tue Oct 31 23:42:05 2000
+***************
+*** 281,291 ****
+  # *** TEMPORARY FOR PINE 4.10 BUILD ***
+  
+  
+  # Make the IMAP Toolkit
+  
+! all:	c-client rebuild bundled
+  
+  c-client:
+  	@echo Not processed yet.  In a first-time build, you must specify
+  	@echo the system type so that the sources are properly processed.
+  	@false
+--- 281,291 ----
+  # *** TEMPORARY FOR PINE 4.10 BUILD ***
+  
+  
+  # Make the IMAP Toolkit
+  
+! all:	c-client rebuild 
+  
+  c-client:
+  	@echo Not processed yet.  In a first-time build, you must specify
+  	@echo the system type so that the sources are properly processed.
+  	@false
+***************
+*** 392,402 ****
+  	$(TOOLS)/$@ "$(LN)" src/mtest mtest
+  	$(TOOLS)/$@ "$(LN)" src/ipopd ipopd
+  	$(TOOLS)/$@ "$(LN)" src/imapd imapd
+  	$(LN) $(TOOLS)/$@ .
+  
+! build:	OSTYPE rebuild rebuildclean bundled
+  
+  OSTYPE:
+  	@echo Building c-client for $(OS)...
+  	echo $(EXTRASPECIALS) > c-client/EXTRASPECIALS
+  # *** TEMPORARY FOR PINE 4.10 BUILD ***
+--- 392,402 ----
+  	$(TOOLS)/$@ "$(LN)" src/mtest mtest
+  	$(TOOLS)/$@ "$(LN)" src/ipopd ipopd
+  	$(TOOLS)/$@ "$(LN)" src/imapd imapd
+  	$(LN) $(TOOLS)/$@ .
+  
+! build:	OSTYPE rebuild rebuildclean 
+  
+  OSTYPE:
+  	@echo Building c-client for $(OS)...
+  	echo $(EXTRASPECIALS) > c-client/EXTRASPECIALS
+  # *** TEMPORARY FOR PINE 4.10 BUILD ***
+***************
+*** 412,426 ****
+  	$(CD) c-client;$(MAKE) all CC=`cat CCTYPE` CFLAGS="`cat CFLAGS`" `cat EXTRASPECIALS`
+  
+  rebuildclean:
+  	sh -c '$(RM) rebuild || true'
+  
+- bundled:
+- 	@echo Building bundled tools...
+- 	$(CD) mtest;$(MAKE)
+- 	$(CD) ipopd;$(MAKE)
+- 	$(CD) imapd;$(MAKE)
+  
+  clean:
+  	@echo Removing old processed sources and binaries...
+  	sh -c '$(RM) an ua OSTYPE c-client mtest imapd ipopd || true'
+  	$(CD) tools;$(MAKE) clean
+--- 412,421 ----
