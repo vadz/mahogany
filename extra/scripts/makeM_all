@@ -63,8 +63,12 @@ export DESTDIR
 
 USESTABLE=no
 
-FTPLOCATION="ballueder@shell1.sourceforge.net:/home/groups/ftp/pub/mahogany/daily/"
-WWWDOCLOCATION="ballueder@shell1.sourceforge.net:/home/groups/mahogany/htdocs/doc"
+#FTPLOCATION="ballueder@shell1.sourceforge.net:/home/groups/ftp/pub/mahogany/daily/"
+#WWWDOCLOCATION="ballueder@shell1.sourceforge.net:/home/groups/mahogany/htdocs/doc"
+FTPLOCATION="karsten@wxwindows.org:Mftp/daily/"
+WWWDOCLOCATION="karsten@wxwindows.org:Mwww/doc/"
+WXCVSROOT=":pserver:KB@wxcvs.dhs.org:/home/karsten/CVSSERVER/wxcvs"
+MCVSROOT=":pserver:KB@mcvs.dhs.org:/var/cvs/Mahogany"
 
 # Need to hardwire this as we run it as root for rpm/deb generation:
 REALHOME=$HOME
@@ -188,8 +192,6 @@ if [ ! -d $MPREFIX ] ; then mkdir $MPREFIX ; fi
 
 if [ "x$MAKE" = x ] ; then MAKE=make; fi
 
-CVSUSERID=KB@wxcvs.dhs.org
-
 # obtain central options file from ftp server
 $SCP $FTPLOCATION/buildoptions /tmp/makeM_deb.$$ && \
 ( . /tmp/makeM_deb.$$ ; rm -f /tmp/makeM_deb.$$ )
@@ -204,7 +206,8 @@ echo "REDHAT=$REDHAT"
 echo "WXPREFIX=$WXPREFIX"
 echo "MPREFIX=$MPREFIX"
 echo "DESTDIR=$DESTDIR"
-echo "CVSUSERID=$CVSUSERID"
+echo "WXCVSROOT=$WXCVSROOT"
+echo "MCVSROOT=$MCVSROOT"
 echo "DOWXWIN=$DOWXWIN"
 echo "DEBUG=$DEBUG"
 echo "SCP=$SCP"
@@ -233,8 +236,6 @@ then
   echo "Building wxGTK."
   echo "##################################################################"
 
-  CVSROOT=":pserver:$CVSUSERID:/home/karsten/CVSSERVER/wxcvs"
-  export CVSROOT
   NAME=$WXNAME
   VERSION="-$WXVERSION"
   if [ $USESTABLE = yes ]
@@ -250,10 +251,10 @@ then
   if [ ! -d wxWindows ]
   then
     echo "wxWindows directory does not exist. Doing fresh checkout."
-    ( HOME=$REALHOME; $CVS -q checkout $TAG wxGTK 2>&1)
+    ( HOME=$REALHOME; $CVS -d"$WXCVSROOT" -q checkout $TAG wxGTK 2>&1)
   else
     echo "Updating wxWindows sources."
-    (HOME=$REALHOME; cd wxWindows && $CVS -q update $TAG 2>&1)
+    (HOME=$REALHOME; cd wxWindows && $CVS -d "$WXCVSROOT" -q update $TAG 2>&1)
   fi
   if [ $? -gt 1 ]
   then
@@ -312,8 +313,7 @@ export LD_LIBRARY_PATH
 NAME=$MNAME
 VERSION=$MVERSION    
 
-CVSROOT=":pserver:$CVSUSERID:/home/karsten/CVSSERVER/mcvs"
-export CVSROOT NAME VERSION
+export NAME VERSION
 
 cd $BUILDDIR
 
@@ -321,11 +321,11 @@ if [ ! -d $NAME-$VERSION ]
 then
   echo "$NAME-$VERSION directory does not exist. Doing fresh checkout."
   rm -rf M
-  (HOME=$REALHOME; $CVS -q checkout M 2>&1) && \
+  (HOME=$REALHOME; $CVS -d "$MCVSROOT" -q checkout M 2>&1) && \
   mv M $NAME-$VERSION
 else
   echo "Updating Mahogany sources."
-  (HOME=$REALHOME; cd $NAME-$VERSION && $CVS -q update -A 2>&1)
+  (HOME=$REALHOME; cd $NAME-$VERSION && $CVS -d "$MCVSROOT" -q update -A 2>&1)
 fi
 if [ $? -gt 1 ]
 then
