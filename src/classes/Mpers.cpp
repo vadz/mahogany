@@ -154,6 +154,7 @@ static const struct
    { "ReenableHint",             gettext_noop("hint about how to reenable disabled message boxes") },
    { "DraftSaved",               gettext_noop("confirm saving the message as a draft") },
    { "DraftAutoDel",             gettext_noop("show a warning when \"automatically delete drafts\" option is on") },
+   { "ConfirmResend",            gettext_noop("confirm resending messages") },
 };
 
 // ============================================================================

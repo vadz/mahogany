@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+15.08.02 VZ: added "Resend message" command
 08.08.02 NB: added "Follow-up to newsgroup" command
 25.07.02 XN: preventing a renamed filter to not being used any more
 23.07.02 VZ: implemented "search in multiple folders" function

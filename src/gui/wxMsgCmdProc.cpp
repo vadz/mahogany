@@ -77,6 +77,12 @@ extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_REPLY_QUOTE_ORIG;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_CONFIRM_RESEND;
+
+// ----------------------------------------------------------------------------
 // MsgCmdProcImpl
 // ----------------------------------------------------------------------------
 
@@ -154,6 +160,7 @@ protected:
    void EditMessages(const UIdArray& selections);
 
    void BounceMessages(const UIdArray& selections);
+   void ResendMessages(const UIdArray& selections);
 
    void PrintOrPreviewMessages(const UIdArray& selections, bool preview);
    void PrintMessages(const UIdArray& selections);
@@ -789,6 +796,10 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          BounceMessages(messages);
          break;
 
+      case WXMENU_MSG_RESEND:
+         ResendMessages(messages);
+         break;
+
 
       case WXMENU_MSG_UNDELETE:
          UndeleteMessages(messages);
@@ -981,13 +992,14 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
       return;
    }
 
-   size_t count = messages.GetCount();
+   size_t countOk = 0,
+          count = messages.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
       Message *msg = GetMessage(messages[n]);
       if ( !msg )
       {
-         ERRORMESSAGE((_("Failed to bounce the message %ld"), messages[n]));
+         ERRORMESSAGE((_("Failed to retrieve the message to bounce.")));
          continue;
       }
 
@@ -997,6 +1009,11 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
                                  msg,
                                  GetFrame()
                                 );
+      if ( !sendMsg )
+      {
+         ERRORMESSAGE((_("Failed to create a new message.")));
+         continue;
+      }
 
       sendMsg->SetAddresses(address);
       if ( !sendMsg->SendOrQueue() )
@@ -1005,11 +1022,79 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
       }
       else
       {
-         STATUSMESSAGE((_("Message bounced to '%s'."), address.c_str()));
+         countOk++;
       }
 
       msg->DecRef();
    }
+
+   STATUSMESSAGE((_("Bounced %lu messages."), (unsigned long)countOk));
+}
+
+void
+MsgCmdProcImpl::ResendMessages(const UIdArray& messages)
+{
+   size_t count = messages.GetCount();
+   if ( !count )
+      return;
+
+   if ( !MDialog_YesNoDialog
+         (
+            String::Format
+            (
+               _("Do you want to resend the %lu selected messages?"),
+               (unsigned long)count
+            ),
+            GetFrame(),
+            MDIALOG_YESNOTITLE,
+            M_DLG_NO_DEFAULT,
+            M_MSGBOX_CONFIRM_RESEND
+         ) )
+   {
+      // cancelled by user
+      return;
+   }
+
+   size_t countOk = 0;
+   for ( size_t n = 0; n < count; n++ )
+   {
+      Message_obj msg = GetMessage(messages[n]);
+      if ( !msg )
+      {
+         ERRORMESSAGE((_("Failed to retrieve the message to be resent")));
+         continue;
+      }
+
+      SendMessage_obj sendMsg = SendMessage::CreateResent
+                                (
+                                 m_asmf->GetProfile(),
+                                 msg.Get(),
+                                 GetFrame()
+                                );
+
+      if ( !sendMsg )
+      {
+         ERRORMESSAGE((_("Failed to create a new message.")));
+         continue;
+      }
+
+      String to = msg->GetAddressesString(MAT_TO),
+             cc = msg->GetAddressesString(MAT_CC),
+             bcc = msg->GetAddressesString(MAT_BCC);
+
+      sendMsg->SetAddresses(to, cc, bcc);
+
+      if ( !sendMsg->SendOrQueue() )
+      {
+         ERRORMESSAGE((_("Failed to resend the message %lu."), (unsigned long)n));
+      }
+      else
+      {
+         countOk++;
+      }
+   }
+
+   STATUSMESSAGE((_("Resent %lu messages."), (unsigned long)countOk));
 }
 
 void

@@ -940,7 +940,8 @@ SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
    else if ( name == "MIME-VERSION" ||
              name == "CONTENT-TYPE" ||
              name == "CONTENT-DISPOSITION" ||
-             name == "CONTENT-TRANSFER-ENCODING" )
+             name == "CONTENT-TRANSFER-ENCODING" ||
+             name == "MESSAGE-ID" )
    {
       ERRORMESSAGE((_("The value of the header '%s' cannot be modified."),
                     name.c_str()));
@@ -1038,9 +1039,15 @@ SendMessageCC::Build(bool forStorage)
    // To:, Cc: and Bcc: have been already set by SetAddresses
 
    // Date:
-   char tmpbuf[MAILTMPLEN];
-   rfc822_date (tmpbuf);
-   m_Envelope->date = cpystr(tmpbuf);
+   //
+   // NB: we do allow the user to override the date header because this is
+   //     useful when editing a previously postponed message
+   if ( !HasHeaderEntry("Date") )
+   {
+      char tmpbuf[MAILTMPLEN];
+      rfc822_date (tmpbuf);
+      m_Envelope->date = cpystr(tmpbuf);
+   }
 
    // Message-Id:
    m_Envelope->message_id = cpystr(BuildMessageId(m_DefaultHost));

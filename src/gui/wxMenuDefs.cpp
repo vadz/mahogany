@@ -318,13 +318,12 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // msg
 
-   // the available accelerators for this menu:
-   // jqwz
+   // no more available accelerators for this menu!
 
    { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message in a separate window")    , wxITEM_NORMAL },
    { WXMENU_MSG_EDIT,      gettext_noop("Ed&it in composer\tCtrl-E"), gettext_noop("Edit selected message in composer")    , wxITEM_NORMAL },
    { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),    gettext_noop("Print this message")       , wxITEM_NORMAL },
-   { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       , wxITEM_NORMAL },
+   { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Previe&w"),gettext_noop("Preview a printout of this message")       , wxITEM_NORMAL },
 #ifdef USE_PS_PRINTING
    { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       , wxITEM_NORMAL },
    { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       , wxITEM_NORMAL },
@@ -398,11 +397,12 @@ static const MenuItemInfo g_aMenuItems[] =
          wxITEM_NORMAL
       },
    { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
-   { WXMENU_MSG_BOUNCE,    gettext_noop("&Bounce..."), gettext_noop("Redirect this message to another recipient"), wxITEM_NORMAL },
+   { WXMENU_MSG_BOUNCE,    gettext_noop("&Bounce..."), gettext_noop("Redirect the selected messages to another recipient"), wxITEM_NORMAL },
+   { WXMENU_MSG_RESEND,    gettext_noop("R&esend..."), gettext_noop("Send the selected messages again."), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_MSG_FILTER,    gettext_noop("&Apply filter rules..."), gettext_noop("Apply filter rules to selected messages")     , wxITEM_NORMAL },
    { WXMENU_MSG_QUICK_FILTER, gettext_noop("&Quick filter..."), gettext_noop("Create a new filter for the selected message")     , wxITEM_NORMAL },
-   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as &file..."), gettext_noop("Export message to a file")   , wxITEM_NORMAL },
+   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Sa&ve as file..."), gettext_noop("Export message to a file")   , wxITEM_NORMAL },
    { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to folder..."),gettext_noop("Save message to another folder")   , wxITEM_NORMAL },
    { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to folder..."),gettext_noop("Move message to another folder")   , wxITEM_NORMAL },
    { WXMENU_MSG_DELETE,    gettext_noop("&Delete"), gettext_noop("Delete messages(s) (mark it as deleted or move to trash)")      , wxITEM_NORMAL },
@@ -412,7 +412,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_MSG_GOTO_MSGNO,   gettext_noop("&Jump to message...\tCtrl-J"), gettext_noop("Select the message by its number")     , wxITEM_NORMAL },
    { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , wxITEM_NORMAL },
-   { WXMENU_MSG_NEXT_FLAGGED,   gettext_noop("N&ext flagged"), gettext_noop("Select next flagged message")     , wxITEM_NORMAL },
+   { WXMENU_MSG_NEXT_FLAGGED,   gettext_noop("Nex&t flagged"), gettext_noop("Select next flagged message")     , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_MSG_FLAG,      gettext_noop("Fla&g\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , wxITEM_NORMAL },
    { WXMENU_MSG_MARK_READ,   gettext_noop("Mark &read"), gettext_noop("Mark message as read"), wxITEM_NORMAL },
