@@ -1,18 +1,19 @@
 A new release of the `Mahogany' e-Mail and News client has been made.
-===================================================================== 
+=====================================================================
 
 Binaries and source for a variety of Linux and Unix systems are
 available at http://mahogany.sourceforge.net/ and
-http://sourceforge.net/projects/mahogany/ 
+http://sourceforge.net/projects/mahogany/
 
+Binaries for Win32 systems are available at request.
 
 In this message:
 
 1. Announcing Mahogany Version 0.60
 2. Changes against the previous release
 
-Announcing Mahogany Version 0.60 
-===================================================================== 
+Announcing Mahogany Version 0.60
+=====================================================================
 
 Mahogany is an OpenSource(TM) cross-platform mail and news client. It
 is available for X11/Unix and MS Windows platforms, supporting a wide
@@ -29,55 +30,96 @@ It aims at supporting GNOME (and KDE for that matter) and includes an
 extendable address book system supporting hierarchical organisation of
 entries, group aliases, searching the database and easy editing, with
 support for other program`s address database formats. Currently
-Mahogany`s native format, (X)Emacs` BBDB address books and PalmOS
+Mahogany`s native format, (X)Emacs' BBDB address books and PalmOS
 address books are supported.
 
 Mahogany is being developed using the OpenSource wxWindows application
 framework, building on the GTK+ toolkit on Unix.
 
 Mahogany is constantly being tested on a variety of Linux system,
-Solaris-sparc and MS Windows. It should compile and work on any major
+Solaris-sparc and MS Windows. It should compile and work on any modern
 Unix platform.
 
 CHANGES AGAINST RELEASE 0.50 / UPDATE :
-===================================================================== 
+=====================================================================
 
 Key changes are:
 
  - fixes to all serious bugs from version 0.50
- - new, improved filtering system replacing the broken filtering
-   in 0.50
- - supporting multiple-identities and easy switching between them
- - import of settings and folders from Pine and XFMail
+
+ - significantly improved IMAP support: it is now possible to
+   subscribe to all folders on an IMAP server with a single click or to
+   manually select them from a dialog; Mahogany also uses server side
+   message functions when possible resulting in huge performance
+   improvement
+
+ - new, improved filtering system (warning: old filters won't work
+   any more, contact us if this is really a serious problem for you)
+
+ - charset and encoding support for message contents and headers
+   (including autodetecting the charset of incoming messages and
+    setting it for the outgoing ones)
+
+ - mail can be sent using local MDA (sendmail) in addition to SMTP
+
+ - import of settings and folder collections from Pine and XFMail,
+   vCard support (import/export from addess book, attach to messages)
+
+UI improvements:
+
+ - drag and drop for message copying and moving
+ - "Quick Move" and "Quick Filter" functions
+ - folders now can (finally) be renamed
+ - quoted text highlighting in the message viewer!
+ - sort the messages display by simply clicking on the corresponding
+   column, the sorting dialog also has been improved
+ - folders with new/recent messages are highlighted in the folder tree
+
+Other miscellaneous improvements:
+
+ - it is possible (although still discouraged) to run Mahogany as root
+ - passwords in the config file are encrypted using TwoFish algorithm
+ - option to always use external editor by default
+ - messages from oneself are optionally marked as such
+ - support for password protected SMTP and NNTP servers
  - more verbose error reporting and detection
  - OpenSSL loaded dynamically if available
- - charset and encoding support for message contents and headers
- - speed improvements, IMAP server-side copying and searching
  - PalmOS module supports AvantGo/MAL synchronisation
+ - templates now may be used for replying/forwarding as well
+ - many other various fixes
 
- - various other fixes
+New experimental features include:
+
+ - supporting multiple-identities and easy switching between them
+ - support of storing configuration settings on an IMAP server
+   allowing to share them between different machines/accounts
+
+Please see the CHANGES file in the distribution for an even more
+detailed list of changes.
+
+FUTURE PLANS
+=====================================================================
 
 Next, we hope to tackle the following:
-   - full HTML message editing/displaying (almost complete)
-   - better POP support by using persistent message IDs and flags
-   - multi-threading to allow network operations to happen in
-     background
-   - full drag and drop interaction with filemanagers and between folders
-   - PGP/GPG support
+
+ - improving the message editor (work in progress)
+ - full HTML message editing/displaying (almost complete)
+ - better POP support by using persistent message IDs and flags
+ - multi-threading to allow network operations to happen in
+   background
+ - PGP/GPG support
+ - LDAP support
 
 Please direct any queries to mahogany-developers@lists.sourceforge.net
+and don't hesitate to contact us if you would like to participate in
+Mahogany development!
 
 Known bugs:
 -----------
+
 There are always some, listed on our bugtracker at
 http://www.wxwindows.org/m-bugs/ and we are working on them.
 
-Version 0.60 suffers from a minor printing bug leading to some overlap 
+Version 0.60 suffers from a minor printing bug leading to some overlap
 between strings sometimes, which is due to a bug in wxWindows which
 will hopefully be fixed fairly soon.
-
---
- Karsten Ballüder  http://Ballueder.home.dhs.org/  mailto:karste-@phy.hw.ac.uk
- Physics Department, Heriot-Watt University, Edinburgh, EH14 4AS, Scotland
-                     Tel. +44-(0)-131-4513068  Fax. +44-(0)-131-4513136
-            "In a world without fences, who needs Gates?"  
