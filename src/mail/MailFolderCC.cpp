@@ -373,7 +373,7 @@ MailFolderCC::Ping(void)
    if(! m_MailStream)
       return;
 
-   ProcessEventQueue();
+//   ProcessEventQueue();
    CCQuiet();
    mail_check(m_MailStream); // update flags, etc, .newsrc
    CCVerbose();
