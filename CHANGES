@@ -8,6 +8,7 @@ Release 0.60 'Redmond' October 24, 2000
 20.10.00 VZ: access program options dialog from root folder properties
              don't popup message boxes with unimportant messages any more  
 18.10.00 VZ: ask for the passwords as needed, propose to remember them
+05.10.00 NB: Fixed incorrect generation of the "From" header, readded Reply-To
 30.09.00 VZ: allow sending mail to the addresses without the hostname part
 30.09.00 KB: added mail delivery via sendmail
              removed assert for wxFONTENCODING_DEFAULT encoding in SendMessageCC.cpp
