@@ -1,5 +1,5 @@
-#This file was created by <karsten> Fri Apr 30 10:12:46 1999
-#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
+#This file was created by <karsten> Fri May  7 23:28:46 1999
+#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
 \begin_preamble
@@ -35,13 +35,13 @@ Mahogany
 \shape default 
 
 \newline 
-User Manual for Version 0.21a
+User Manual for Version 0.22a
 \newline 
 
 \begin_inset Quotes eld
 \end_inset 
 
-Polwarth II
+Viewforth
 \begin_inset Quotes erd
 \end_inset 
 
@@ -605,6 +605,64 @@ Obviously, the more of this manual you read, the better use you can make
  but for now we go on coding instead.
 \layout Section
 
+Setting up Mahogany, its configuration files
+\layout Subsection
+
+User configuration files
+\layout Standard
+
+When run for the first time, Mahogany creates a directory called 
+\family typewriter 
+.M
+\family default 
+ in the user's home directory.
+ The file 
+\family typewriter 
+$HOME/.M/config
+\family default 
+ will contain the current program configuration for this user.
+ Only values different from the default configuration are stored here.
+ If you want to obtain a list of all possible options, you can manually
+ add the entry
+\layout Quote
+
+
+\family typewriter 
+RecordDefaults = 1
+\layout Standard
+
+to the 
+\family typewriter 
+[M/Profiles]
+\family default 
+ section of the configuration file.
+ This will cause all values which are used to be written to the configuration
+ file.
+\layout Subsection
+
+System wide configuration file
+\layout Standard
+
+Mahogany can be pre-configured on a system wide basis by supplying a Mahogany.con
+f file in either 
+\family typewriter 
+/etc
+\family default 
+ or the Mahogany installation directory (e.g.
+ 
+\family typewriter 
+/usr/share/Mahogany
+\family default 
+).
+ The syntax for this configuration file is identical to the user's configuration
+ file, so you can just copy a user's file to this location and edit it by
+ hand.
+ Useful settings for a system wide default are servers or mail return addresses.
+ Note though, that Mahogany will not run properly as 
+\family typewriter 
+root.
+\layout Section
+
 The User Interface
 \layout Subsection
 
@@ -919,7 +977,7 @@ When the top window, the list of messages, is active, certain keyboard bindings
  are active, the following keys are recognized:
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol4
+multicol5
 13 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -934,34 +992,34 @@ multicol4
 0 1 0 0
 0 1 0 0
 0 1 0 0
-8 1 0 
-2 1 1 
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
+8 1 0 "" ""
+2 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
 
 English
 \newline 
@@ -2559,7 +2617,7 @@ import
 List of Callbacks
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol4
+multicol5
 11 5 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -2572,66 +2630,66 @@ multicol4
 0 1 0 0
 0 0 0 0
 0 1 0 0
-2 1 0 
-8 1 0 
-2 1 0 
-2 1 0 
-2 1 1 
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
+2 1 0 "" ""
+8 1 0 "" ""
+2 1 0 "" ""
+2 1 0 "" ""
+2 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
 
 Callback Name
 \newline 
@@ -7451,4 +7509,23 @@ You should be able to right-click on the folder treecontrol on the left
  Your normal mailspool /var/spool/mail/username is available under the name
  INBOX anyway, but I guess you have fetchpop/procmail deliver your mail
  to some other place.
+\layout Subsection
+
+Mahogany cannot create some filew when run as root
+\layout Standard
+
+Mahogany will not work properly when executed by the 
+\family typewriter 
+root
+\family default 
+ super-user.
+ The underlying mail handling library used in Mahogany will change to some
+ other user id for security reasons and therefore the program will not be
+ able to create some files needed.
+ For security reasons it is a bad idea anyway to run any X11 application
+ as 
+\family typewriter 
+root
+\family default 
+.
 \the_end
