@@ -1711,35 +1711,29 @@ SendMessageCC::Send(int flags)
             lfOnly = strutil_enforceLF(lfOnly);
 
             // write to temp file:
-            const String filename = wxFileName::CreateTempFileName(_T("Mtemp"));
+            wxFile out;
+            const String filename = wxFileName::CreateTempFileName(
+               _T("Mtemp"), &out);
 
             bool success = false;
             if ( !filename.empty() )
             {
-               wxFile out;
-
-               // don't overwrite because someone could have created file with "bad"
-               // (i.e. world readable) permissions in the meanwhile
-               if ( out.Create(filename, FALSE /* don't overwrite */,
-                               wxS_IRUSR | wxS_IWUSR) )
+               size_t written = out.Write(lfOnly, lfOnly.Length());
+               out.Close();
+               if ( written == lfOnly.Length() )
                {
-                  size_t written = out.Write(lfOnly, lfOnly.Length());
-                  out.Close();
-                  if ( written == lfOnly.Length() )
-                  {
-                     String command;
-                     command.Printf(_T("%s < '%s'; exec /bin/rm -f '%s'"),
-                                    m_SendmailCmd.c_str(),
-                                    filename.c_str(), filename.c_str());
-                     // HORRIBLE HACK: this should be `const char *' but wxExecute's
-                     // prototype doesn't allow it...
-                     wxChar *argv[4];
-                     argv[0] = (wxChar *)"/bin/sh";
-                     argv[1] = (wxChar *)"-c";
-                     argv[2] = (wxChar *)command.c_str();
-                     argv[3] = 0;  // NULL
-                     success = wxExecute(argv) != 0;
-                  }
+                  String command;
+                  command.Printf(_T("%s < '%s'; exec /bin/rm -f '%s'"),
+                                 m_SendmailCmd.c_str(),
+                                 filename.c_str(), filename.c_str());
+                  // HORRIBLE HACK: this should be `const char *' but wxExecute's
+                  // prototype doesn't allow it...
+                  wxChar *argv[4];
+                  argv[0] = (wxChar *)"/bin/sh";
+                  argv[1] = (wxChar *)"-c";
+                  argv[2] = (wxChar *)command.c_str();
+                  argv[3] = 0;  // NULL
+                  success = wxExecute(argv) != 0;
                }
             }
             else
