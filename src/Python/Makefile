@@ -1,45 +1,20 @@
-# Makefile for src/classes directory
+# Makefile for src/Python directory
 #
 # $Id$
 #
+# For all targets apart from clean, it will call the
+# Makefile2 which includes the usual standard rules.
+# This is needed to avoid warnings.
 
-CWD = Python
-
-SWIGSRC = MAppBase.i MailFolder.i String.i Profile.i Message.i MObject.i
-CPPSRC = InitPython.cpp PythonHelp.cpp
-SRC=$(CXXSRC) *.cpp
-
-CPPTARGETS = $(SWIGSRC:.i=.cpp) swiglib.cpp
-OBJECTS    = $(CPPTARGETS:.cpp=.o) $(CPPSRC:.cpp=.o)
-
-
-all:	$(OBJECTS)
-
-.PHONY: mkswig all
-
-include ../../makerules 
-include ../../makeopts
-include .depend
-
-ifdef USE_SWIG
-swiglib.cpp: swiglib.i
-	$(SWIG) $(SWIGFLAGS_LIBSWIG) -o $(ODIR)/$@ $<
-else
-swiglib.cpp: swiglib.i
-	touch $(ODIR)/$@ 
-endif
-
-
-install:
-	$(INSTALL) -d $(DATADIR)/scripts
-	$(INSTALL_DATA) *.py $(DATADIR)/scripts
-	$(INSTALL_DATA) Scripts/*.py $(DATADIR)/scripts
-	$(INSTALL) -d $(DOCDIR)/Python
-	$(INSTALL_DATA) *.doc *.html $(DOCDIR)/Python
+all:
+	@$(MAKE) -f Makefile2 $@
 
 clean:
 	$(RM) *.o *.so *.pyc *.py *.doc $(CPPTARGETS)
 	ln -s INIT/Minit.py .
 
-#%.py: %.i
-#	$(SWIG) $(SWIGFLAGS) $<
+%: force
+	@$(MAKE) -f Makefile2 $@
+force: ;
+
+,PHONY: clean

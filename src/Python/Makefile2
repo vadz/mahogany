@@ -1,0 +1,45 @@
+# Makefile2 for src/Python directory
+#
+# $Id$
+#
+# This is the actual makefile defining all targets apart from clean and
+# gets called by Makefile. This two-step process is required to cleanly
+# override any targets defined in makerules.
+#
+
+CWD = Python
+
+SWIGSRC = MAppBase.i MailFolder.i String.i Profile.i Message.i MObject.i
+CPPSRC = InitPython.cpp PythonHelp.cpp
+SRC=$(CXXSRC) *.cpp
+
+CPPTARGETS = $(SWIGSRC:.i=.cpp) swiglib.cpp
+OBJECTS    = $(CPPTARGETS:.cpp=.o) $(CPPSRC:.cpp=.o)
+
+
+all:	$(OBJECTS)
+
+.PHONY: mkswig all
+
+include ../../makerules 
+include ../../makeopts
+include .depend
+
+ifdef USE_SWIG
+swiglib.cpp: swiglib.i
+	$(SWIG) $(SWIGFLAGS_LIBSWIG) -o $(ODIR)/$@ $<
+else
+swiglib.cpp: swiglib.i
+	touch $(ODIR)/$@ 
+endif
+
+
+install:
+	$(INSTALL) -d $(DATADIR)/scripts
+	$(INSTALL_DATA) *.py $(DATADIR)/scripts
+	$(INSTALL_DATA) Scripts/*.py $(DATADIR)/scripts
+	$(INSTALL) -d $(DOCDIR)/Python
+	$(INSTALL_DATA) *.doc *.html $(DOCDIR)/Python
+
+#%.py: %.i
+#	$(SWIG) $(SWIGFLAGS) $<
