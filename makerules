@@ -49,16 +49,16 @@ endif
 ifdef USE_SWIG
 vpath %.i .src
 %.cpp: %.i
-	$(SWIG) $(SWIGFLAGS) -o $@ $<
+	$(SWIG) $(SWIGFLAGS) -o $*.cpp $<
 %.py: %.i
 	$(SWIG) $(SWIGFLAGS) -o $@ $<
 else
 vpath %.cpp-swig .src
 %.cpp: %.cpp-swig
-	ln -s $< $@
+	ln -sf $< $*.cpp
 vpath %.py-swig .src
 %.py: %.py-swig
-	ln -s $< $@
+	ln -sf $< $*.py
 ifneq ($(SOURCEDIR),$(BUILDDIR))
 # FIXME: should use .cpp-swig and .py-swig
 %.py: .src/%.py

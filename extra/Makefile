@@ -10,7 +10,7 @@ endif
 
 all: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i; done
-	$(MAKE) -C src/c-client -f .src/Makefile.M
+	$(MAKE) -j1 -C src/c-client -f .src/Makefile.M
 
 doc: ; @true
 

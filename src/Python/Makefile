@@ -10,12 +10,12 @@ SWIGSRC = MAppBase.i MailFolder.i MString.i MProfile.i Message.i\
 	MObject.i #SendMessageCC.i
 CPPSRC = InitPython.cpp PythonHelp.cpp
 
-CPPTARGETS := $(SWIGSRC:.i=.cpp) swiglib.cpp
 PYTARGETS  := $(SWIGSRC:.i=.py)
+CPPTARGETS := $(SWIGSRC:.i=.cpp) swiglib.cpp
 
 OBJECTS    := $(CPPTARGETS:.cpp=.o) $(CPPSRC:.cpp=.o)
 
-all:	$(OBJECTS) $(PYTARGETS)
+all:	$(PYTARGETS) $(OBJECTS)
 	@true
 
 include ../../makerules $(wildcard *.d)
@@ -38,7 +38,9 @@ install:
 	$(RM) $(DATADIR)/scripts/dummy.py $(DOCDIR)/Python/dummy.html
 
 clean:	stdclean
-	$(RM) *.pyc *.html *.doc junk $(CPPTARGETS) Minit.py
+	$(RM) *.pyc *.html *.doc junk Minit.py
+	$(RM) $(CPPTARGETS)
+	$(RM) $(PYTARGETS)
 	#??? ln -s INIT/Minit.py .
 
 .PHONY: mkswig all install clean
