@@ -81,7 +81,8 @@ MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
       *bodycptr = NULL;
    unsigned long
       headerLen;
-   
+
+   body = NULL;
    mailText = NULL;
    bodycptr = NULL;
    envelope = NULL;

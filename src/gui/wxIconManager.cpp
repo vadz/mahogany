@@ -556,13 +556,13 @@ wxIconManager::GetIcon(String const &_iconName)
    {
       PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
       if(ms_IconPath.Length() > 0)
-         pf.AddPaths(ms_IconPath,true /*prepend */);
-      pf.AddPaths(m_GlobalDir, true);
-      pf.AddPaths(m_LocalDir, true);
+         pf.AddPaths(ms_IconPath,false, true /*prepend */);
+      pf.AddPaths(m_GlobalDir, false, true);
+      pf.AddPaths(m_LocalDir, false, true);
       if(m_SubDir.Length() > 1)  // 1 == "/" == empty
       {
-         pf.AddPaths(m_GlobalDir+m_SubDir, true);
-         pf.AddPaths(m_LocalDir+m_SubDir, true);
+         pf.AddPaths(m_GlobalDir+m_SubDir, false, true);
+         pf.AddPaths(m_LocalDir+m_SubDir, false, true);
       }
    
       IconData *id;
