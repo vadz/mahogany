@@ -141,6 +141,8 @@ extern const MOption MP_FROM_ADDRESS;
 extern const MOption MP_REPLY_ADDRESS;
 extern const MOption MP_POPHOST;
 extern const MOption MP_IMAPHOST;
+extern const MOption MP_USE_SSL;
+extern const MOption MP_USE_SSL_UNSIGNED;
 extern const MOption MP_SMTPHOST;
 extern const MOption MP_GUESS_SENDER;
 extern const MOption MP_SENDER;
@@ -667,6 +669,10 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_POPHOST_NAME          "Pop3Host"
 /// the default IMAP4 host
 #define   MP_IMAPHOST_NAME          "Imap4Host"
+/// use SSL for POP/IMAP?
+#define   MP_USE_SSL_NAME           "UseSSL"
+/// accept unsigned SSL certificates?
+#define   MP_USE_SSL_UNSIGNED_NAME  "SSLUnsigned"
 /// the mail host
 #define   MP_SMTPHOST_NAME         "MailHost"
 /// use the specified sender value or guess it automatically?
@@ -1465,6 +1471,10 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_POPHOST_DEFVAL          "pop"
 /// the default IMAP4 host
 #define   MP_IMAPHOST_DEFVAL          "imap"
+/// use SSL for POP/IMAP?
+#define   MP_USE_SSL_DEFVAL       1l // SSLSupport_TLSIfAvailable
+/// accept unsigned SSL certificates?
+#define   MP_USE_SSL_UNSIGNED_DEFVAL 0l
 /// the mail host
 #define   MP_SMTPHOST_DEFVAL         "mail"
 /// use the specified sender value or guess it automatically?
@@ -1476,7 +1486,7 @@ extern const MOption MP_AWAY_STATUS;
 /// the mail host password
 #define   MP_SMTPHOST_PASSWORD_DEFVAL   ""
 /// use SSL?
-#define   MP_SMTPHOST_USE_SSL_DEFVAL   0l
+#define   MP_SMTPHOST_USE_SSL_DEFVAL   1l // SSLSupport_TLSIfAvailable
 /// check ssl-certs for SMTP connections?
 #define   MP_SMTPHOST_USE_SSL_UNSIGNED_DEFVAL   0l
 /// use ESMTP 8BITMIME extension if available
@@ -1500,7 +1510,7 @@ extern const MOption MP_AWAY_STATUS;
 /// the news server password
 #define   MP_NNTPHOST_PASSWORD_DEFVAL      ""
 /// use SSL?
-#define   MP_NNTPHOST_USE_SSL_DEFVAL   0l
+#define   MP_NNTPHOST_USE_SSL_DEFVAL   1l // SSLSupport_TLSIfAvailable
 /// check ssl-certs for NNTP connections?
 #define   MP_NNTPHOST_USE_SSL_UNSIGNED_DEFVAL   0l
 /// the beacon host to test for net connection
