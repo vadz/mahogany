@@ -282,48 +282,6 @@ private:
 };
 
 
-/** Builds an folder specification */
-static
-String BuildFolderSpec(const String &host,
-                       FolderType protocol,
-                       const String &mailbox = "")
-{
-   String spec;
-
-   switch ( protocol )
-   {
-      case MF_INBOX:
-         spec = "INBOX";
-         break;
-
-      case MF_IMAP:
-         spec << '{' << host << "/imap}" << mailbox;
-         break;
-
-      case MF_NNTP:
-         spec << '{' << host << "/nntp}" << mailbox;
-         break;
-
-      case MF_NEWS:
-         spec << "#news." << mailbox;
-         break;
-
-      case MF_POP:
-         spec << '{' << host << "/pop}" << mailbox;
-         break;
-
-      case MF_MH:
-         spec << "#mh/" << mailbox;
-         break;
-
-      default:
-         FAIL_MSG("unsupported protocol for folder listing");
-   }
-
-   return spec;
-}
-
-
 
 
 /*----------------------------------------------------------------------------------------
@@ -603,28 +561,13 @@ MailFolderCC::~MailFolderCC()
    // do not do it here again!
 }
 
-/*
-  This gets called with a folder path as its name, NOT with a symbolic
-  folder/profile name.
-*/
-/* static */
-MailFolderCC *
-MailFolderCC::OpenFolder(int typeAndFlags,
-                         String const &name,
-                         ProfileBase *profile,
-                         String const &server,
-                         String const &login,
-                         String const &password,
-                         String const &symname)
+
+static String GetImapSpec(int type, int flags,
+                          const String &name,
+                          const String &server,
+                          const String &login)
 {
-   MailFolderCC *mf;
    String mboxpath;
-
-   ASSERT(profile);
-
-   int flags = GetFolderFlags(typeAndFlags);
-   int type = GetFolderType(typeAndFlags);
-
 #ifdef USE_SSL
    // SSL only for NNTP/IMAP/POP:
    if(((flags & MF_FLAGS_SSLAUTH) != 0)
@@ -687,6 +630,46 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    default:
       FAIL_MSG("Unsupported folder type.");
    }
+   return mboxpath;
+}
+
+
+
+/** Builds an folder specification */
+static
+String BuildFolderSpec(const String &host,
+                       FolderType protocol,
+                       const String &mailbox = "")
+{
+   return GetImapSpec(protocol, 0, mailbox, host, "");
+}
+
+
+
+/*
+  This gets called with a folder path as its name, NOT with a symbolic
+  folder/profile name.
+*/
+/* static */
+MailFolderCC *
+MailFolderCC::OpenFolder(int typeAndFlags,
+                         String const &name,
+                         ProfileBase *profile,
+                         String const &server,
+                         String const &login,
+                         String const &password,
+                         String const &symname)
+{
+   MailFolderCC *mf;
+   String mboxpath;
+
+   ASSERT(profile);
+
+   int flags = GetFolderFlags(typeAndFlags);
+   int type = GetFolderType(typeAndFlags);
+
+
+   mboxpath = GetImapSpec(type, flags, name, server, login);
 
    //FIXME: This should somehow be done in MailFolder.cc
    mf = FindFolder(mboxpath,login);
@@ -1853,6 +1836,8 @@ MailFolderCC::CClientInit(void)
 String MailFolderCC::ms_MHpath;
 String MailFolderCC::ms_NewsPath;
 
+String MailFolderCC::ms_LastCriticalFolder = "";
+
 const String&
 MailFolderCC::InitializeMH()
 {
@@ -2360,6 +2345,7 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
 void
 MailFolderCC::mm_critical(MAILSTREAM * stream)
 {
+   ms_LastCriticalFolder = stream->mailbox;
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
    {
@@ -2377,6 +2363,7 @@ MailFolderCC::mm_critical(MAILSTREAM * stream)
 void
 MailFolderCC::mm_nocritical(MAILSTREAM *  stream )
 {
+   ms_LastCriticalFolder = "";
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
    {
@@ -2411,6 +2398,12 @@ MailFolderCC::mm_fatal(char *str)
 {
    String   msg = (String) "Fatal Error:" + (String) str;
    LOGMESSAGE((M_LOG_ERROR, Str(msg)));
+
+   String msg2 = str;
+   if(ms_LastCriticalFolder.length())
+      msg2 << _("\nLast folder in a critical section was: ")
+           << ms_LastCriticalFolder;
+   FatalError(msg2);
 }
 
 
@@ -2640,6 +2633,26 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 }
 
 
+/** Phyically deletes this folder.
+    @return true on success
+    */
+/* static */
+bool
+MailFolderCC::DeleteFolder(const MFolder *mfolder)
+{
+   ASSERT_MSG(0, "not implemented yet - unfinished");
+#if 0
+   int type = mfolder->GetType();
+   String mboxpath = GetImapSpec(mfolder->GetType(),
+                                 mfolder->GetFlags(),
+                                 mfolder->GetPath(),
+                                 mfolder->GetServer(),
+                                 mfolder->GetLogin(),
+                                 mfolder->GetPassword());
+   return mail_delete(NIL, mboxpath) != NIL;
+#endif
+   return false;
+}
 
 extern "C"
 {

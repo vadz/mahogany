@@ -245,7 +245,13 @@ MailFolder::OpenFolder(int folderType,
    return mf;
 }
 
-
+/* static */
+bool
+MailFolder::DeleteFolder(const MFolder *mfolder)
+{
+   // for now there is only one implementation to call:
+   return MailFolderCC::DeleteFolder(mfolder);
+}
 
 /* static */
 bool

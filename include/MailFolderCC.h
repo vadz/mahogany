@@ -107,6 +107,12 @@ public:
 
    //@}
 
+   /** Phyically deletes this folder.
+       @return true on success
+   */
+   static bool DeleteFolder(const class MFolder *mfolder);
+
+
    /// enable/disable debugging:
    void   DoDebug(bool flag = true) { debugFlag = flag; }
 
@@ -609,6 +615,9 @@ private:
    bool m_NeedFreshListing;
    /// Is this folder in a critical c-client section?
    bool m_InCritical;
+   /** We remember the last folder to enter a critical section, helps
+       to find crashes.*/
+   static String ms_LastCriticalFolder;
    /// folder flags
    int  m_FolderFlags;
    /** @name Global settings, timeouts for c-client lib */

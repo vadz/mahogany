@@ -992,3 +992,19 @@ MAppBase::GetStatusField(enum StatusFields function) const
    return field;
 #endif
 }
+
+static bool FatalErrorSemaphore = false;
+/// Report a fatal error:
+extern "C"
+{
+   void FatalError(const char *message)
+   {
+      if(FatalErrorSemaphore)
+         abort();
+      else
+      {
+         FatalErrorSemaphore = true;
+         mApplication->FatalError(message);
+      }
+   }
+};

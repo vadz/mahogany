@@ -357,7 +357,25 @@ BEGIN_EVENT_TABLE(wxMessageView, wxLayoutWindow)
    // menu & toolbars
    EVT_MENU(-1, wxMessageView::OnMenuCommand)
    EVT_TOOL(-1, wxMessageView::OnMenuCommand)
+   EVT_CHAR(wxMessageView::wxLayoutWindow::OnChar)
 END_EVENT_TABLE()
+
+void
+wxMessageView::OnChar(wxKeyEvent& event)
+{
+   // FIXME: this should be more intelligent, i.e. use the
+   // wxlayoutwindow key bindings:
+   if(m_WrapMargin > 0 &&
+      event.KeyCode() == 'q' || event.KeyCode() == 'Q')
+   {
+      // temporarily allow editing to enable manual word wrap:
+      SetEditable(TRUE);
+      event.Skip();
+      SetEditable(FALSE);
+   }
+   else
+      event.Skip();
+}
 
 void
 wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
@@ -525,7 +543,7 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
 #ifndef OS_WIN
    SetFocusFollowMode(READ_CONFIG(m_Profile,MP_FOCUS_FOLLOWSMOUSE) != 0);
 #endif
-   SetWrapMargin( READ_CONFIG(m_Profile, MP_WRAPMARGIN));
+   SetWrapMargin(READ_CONFIG(m_Profile, MP_WRAPMARGIN));
 }
 
 void
@@ -797,7 +815,7 @@ wxMessageView::Update(void)
       llist->WrapAll(m_WrapMargin);
    // yes, we allow the user to edit the buffer, in case he wants to
    // modify it for pasting or wrap lines manually:
-   SetEditable(TRUE); 
+   SetEditable(FALSE); 
    RequestUpdate();
 }
 

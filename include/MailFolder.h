@@ -128,6 +128,10 @@ public:
        MFolder object. */
    static MailFolder * OpenFolder(const class MFolder *mfolder,
                                   ProfileBase *profile);
+   /** Phyically deletes this folder.
+       @return true on success
+   */
+   static bool DeleteFolder(const MFolder *mfolder);
    /**   
          Creates a mailbox profile and checks the settings to be
          sensible.

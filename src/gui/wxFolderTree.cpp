@@ -589,13 +589,15 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
                                  configPath);
    if ( ok )
    {
-      // do delete it
-      folder->Delete();
-
       if ( !removeOnly )
       {
-         // TODO add code to physically delete the folder here
+         ok = MailFolder::DeleteFolder(folder);
+         if(! ok)
+            wxLogError(_("Failed to physically delete folder '%s'."),
+                       folder->GetName().c_str());
       }
+      // do delete it
+      folder->Delete();
    }
 
    return ok;

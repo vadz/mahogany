@@ -246,6 +246,10 @@ public:
    virtual int GetStatusField(enum StatusFields function) const;
    /// updates display of outbox status
    virtual void UpdateOutboxStatus(void) const = 0;
+
+   /// Report a fatal error:
+   virtual void FatalError(const char *message) = 0;
+   
 protected:
    /// Load modules at startup
    virtual void LoadModules(void) = 0;
@@ -312,6 +316,13 @@ protected:
 };
 
 extern MAppBase *mApplication;
+
+/// Report a fatal error:
+extern "C"
+{
+   void FatalError(const char *message);
+};
+
 
 /** A small class that locks the given Mutex during its existence. */
 class MMutexLocker

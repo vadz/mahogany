@@ -208,7 +208,7 @@ public:
          m_show = false;
          m_OnlineIcon = new wxIcon;
          m_OfflineIcon = new wxIcon;
-         *m_OnlineIcon = ICON( "online");
+         *m_Onli+neIcon = ICON( "online");
          *m_OfflineIcon = ICON( "offline");
       }
 
@@ -1182,4 +1182,21 @@ wxMApp::GoOffline(void) const
    {
       ERRORMESSAGE((_("Attempt to shut down network seems to have failed.")));
    }
+}
+
+void
+wxMApp::FatalError(const char *message)
+{
+   wxString msg = _("An unrecoverable internal error has occured.\n"
+                    "The application will shut down now. Please take\n"
+                    "a note of the error message and report it to\n"
+                    "m-developers@egroups.com\n\nInternal error message:\n\n");
+   msg << message;
+   MDialog_ErrorMessage(message, NULL, _("FATAL INTERNAL ERROR"));
+#ifdef DEBUG
+   abort();
+#else
+   DoExit();
+   exit(1);
+#endif
 }

@@ -101,6 +101,9 @@ public:
    void OnDisconnected(wxDialUpEvent &event);
    /// updates display of outbox status
    virtual void UpdateOutboxStatus(void) const;
+
+   /// Report a fatal error:
+   virtual void FatalError(const char *message);
 protected:
    /// makes sure the status bar has enough fields
    virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) const;

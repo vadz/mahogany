@@ -131,6 +131,9 @@ public:
    void PageDown(void);
    /// scroll up one page:
    void PageUp(void);
+   /// intercept character events
+   void OnChar(wxKeyEvent& event);
+
 private:
    /// register with MEventManager
    void RegisterForEvents();
