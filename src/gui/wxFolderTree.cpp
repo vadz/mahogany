@@ -41,6 +41,7 @@
 #include <wx/tokenzr.h>
 #include <wx/dnd.h>
 
+#include "gui/wxOptionsDlg.h"
 #include "gui/wxFolderTree.h"
 #include "gui/wxIconManager.h"
 #include "gui/wxFolderView.h"
@@ -304,10 +305,8 @@ private:
          {
             Append(ShowHidden, _("Show &hidden folders"), "", TRUE);
          }
-         else
-         {
-            Append(Properties, _("&Properties"));
-         }
+
+         Append(Properties, _("&Properties"));
       }
    } *m_menuRoot,                 // popup menu for the root folder
      *m_menu;                     // popup menu for all folders
@@ -485,7 +484,6 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
    if ( menu->FindItem(WXMENU_FOLDER_REMOVE) )
    {
       menu->Enable(WXMENU_FOLDER_REMOVE, !isRoot);
-      menu->Enable(WXMENU_FOLDER_PROP, !isRoot);
    }
 
    if ( !isRoot )
@@ -599,7 +597,15 @@ void wxFolderTree::OnBrowseSubfolders(MFolder *folder)
 // bring up the properties dialog for this profile
 void wxFolderTree::OnProperties(MFolder *folder)
 {
-   (void)ShowFolderPropertiesDialog(folder, m_tree);
+   if ( folder->GetType() == MF_ROOT )
+   {
+      // show the program preferences dialog for the root folder
+      ShowOptionsDialog(GetFrame(m_tree));
+   }
+   else // normal folder, show properties dialog for it
+   {
+      (void)ShowFolderPropertiesDialog(folder, m_tree);
+   }
 
    folder->DecRef();
 }

@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+20.10.00 VZ: access program options dialog from root folder properties
 18.10.00 VZ: ask for the passwords as needed, propose to remember them
 30.09.00 VZ: allow sending mail to the addresses without the hostname part
 30.09.00 KB: added mail delivery via sendmail
