@@ -15,7 +15,7 @@
 // ----------------------------------------------------------------------------
 
 #ifdef __GNUG__
-   #pragma implementation "MailFolderCC.h"
+#   pragma implementation "MailFolderCC.h"
 #endif
 
 #include  "Mpch.h"
@@ -687,19 +687,22 @@ MailFolderCC::Open(void)
       SetDefaultObj();
 
       // create the mailbox if it doesn't exist yet
-      if( GetType() == MF_FILE && GetType() == MF_MH &&
+      if( (GetType() == MF_FILE
+           || GetType() == MF_MH )&&
           !wxFileExists(m_MailboxPath) )
       {
          mail_create(NIL, (char *)m_MailboxPath.c_str());
       }
 
+      CCQuiet(true);
+      // first try, don't log errors (except in debug mode)
       // If we don't have a mailstram yet, we half-open one:
       if(m_MailStream == NIL)
          m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
                                   (debugFlag ? OP_DEBUG : NIL)|OP_HALFOPEN);
-
-
-
+      CCVerbose();
+      // this would give us a valid stream to use for looking up the
+      // object, but seems to break some POP server connections
       if(m_MailStream != NIL)
          m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                                   debugFlag ? OP_DEBUG : NIL);

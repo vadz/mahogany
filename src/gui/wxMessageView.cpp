@@ -1435,7 +1435,7 @@ wxMessageView::ShowMessage(ASMailFolder *folder, UIdType uid)
 void
 wxMessageView::ShowMessage(Message *mailMessage)
 {
-
+   mailMessage->IncRef();
    CHECK_RET( mailMessage, "no message with such uid" );
 
    unsigned long size = 0,
@@ -1744,6 +1744,7 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
          want to open it in a separate viewer. */
       Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
       ShowMessage(mptr);
+      mptr->DecRef();
       wxFrame *frame = GetFrame(this);
       if(frame && frame->IsKindOf(CLASSINFO(wxFolderViewFrame)))
       {

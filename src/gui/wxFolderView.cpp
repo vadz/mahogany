@@ -572,23 +572,19 @@ wxFolderView::Update(HeaderInfoList *listing)
       return; // don't call this code recursively
    m_UpdateSemaphore = true;
 
-   if(listing == NULL)
+   if(! listing )
    {
       listing = m_ASMailFolder->GetHeaders();
 
       if ( !listing )
       {
          m_UpdateSemaphore = false;
-
          return;
       }
    }
    else
       listing->IncRef();
 
-   if(! listing)
-      return;
-   
    wxBeginBusyCursor();// wxSafeYield();
 
 
