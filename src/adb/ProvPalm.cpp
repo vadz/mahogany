@@ -362,10 +362,10 @@ bool PalmDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
   MModule *palmModule = MModule::GetProvider("HandheldSynchronise");
   bool rc = palmModule != NULL;
-  SafeDecRef(palmModule);
   if(! rc)
      return FALSE;
   
+  palmModule->DecRef();
   rc = name == PALMOS_ADB_NAME;
   switch ( test )
   {
