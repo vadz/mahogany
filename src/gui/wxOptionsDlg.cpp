@@ -177,6 +177,7 @@ enum ConfigFields
    ConfigField_MessageViewHeaderNamesColour,
    ConfigField_MessageViewHeaderValuesColour,
    ConfigField_MessageViewInlineGraphics,
+   ConfigField_MessageViewRfc822IsText,
 #ifdef OS_UNIX
    ConfigField_MessageViewFaxSupport,
    ConfigField_MessageViewFaxDomains,
@@ -528,6 +529,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for header &names"),     Field_Color,   -1 },
    { gettext_noop("Colour for header &values"),    Field_Color,   -1 },
    { gettext_noop("&Inline graphics"),             Field_Bool,    -1 },
+   { gettext_noop("Display &mail messages as text"),Field_Bool,    -1 },
 #ifdef OS_UNIX
    { gettext_noop("Support special &fax mailers"), Field_Bool,    -1 },
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
@@ -710,6 +712,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MVIEW_HEADER_NAMES_COLOUR),
    CONFIG_ENTRY(MP_MVIEW_HEADER_VALUES_COLOUR),
    CONFIG_ENTRY(MP_INLINE_GFX),
+   CONFIG_ENTRY(MP_RFC822_IS_TEXT),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_INCFAX_SUPPORT),
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),
