@@ -127,7 +127,9 @@ BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
    EVT_SET_FOCUS(wxLayoutWindow::OnSetFocus)
    EVT_KILL_FOCUS(wxLayoutWindow::OnKillFocus)
 
-//   EVT_IDLE(wxLayoutWindow::ResizeScrollbars)
+#ifdef __WXMSW__
+   EVT_SCROLLWIN(wxLayoutWindow::OnScroll)
+#endif // __WXMSW__
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -874,6 +876,23 @@ wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event))
 
    RequestUpdate();
 }
+
+// under MSW, idle events are not generated while the scrollbar is being
+// dragged, so no repainting occurs
+//
+// this probably should be fixed in wxMSW aas it surely affects other controls
+// as well, but for now fixing it here
+#ifdef __WXMSW__
+
+void
+wxLayoutWindow::OnScroll(wxScrollWinEvent& event)
+{
+   InternalPaint(NULL);
+
+   event.Skip();
+}
+
+#endif // __WXMSW__
 
 void
 wxLayoutWindow::RequestUpdate(const wxRect *updateRect)

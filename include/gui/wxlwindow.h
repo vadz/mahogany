@@ -164,6 +164,9 @@ public:
    void OnMouseMove(wxMouseEvent &event)       { OnMouse(WXLOWIN_MENU_MOUSEMOVE, event) ; }
    void OnSetFocus(wxFocusEvent &ev);
    void OnKillFocus(wxFocusEvent &ev);
+#ifdef __WXMSW__
+   void OnScroll(wxScrollWinEvent& ev);
+#endif // __WXMSW__
    //@}
 
    /// Creates a wxMenu for use as a format popup.
