@@ -222,6 +222,9 @@ private:
    /// makes the canvas
    void CreateFTCanvas(void);
 
+   /// enable/disable editing of the message text
+   inline void EnableEditing(bool enable);
+
    /// ids for different processes we may launch
    enum
    {

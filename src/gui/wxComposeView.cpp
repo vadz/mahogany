@@ -353,6 +353,17 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
 }
 
 // ----------------------------------------------------------------------------
+// wxComposeView inline functions
+// ----------------------------------------------------------------------------
+
+void wxComposeView::EnableEditing(bool enable)
+{
+   // indicate the current state in the status bar
+   SetStatusText(enable ? "" : "RO", 1);
+   m_LayoutWindow->GetLayoutList().SetEditable(enable);
+}
+
+// ----------------------------------------------------------------------------
 // wxComposeView creation
 // ----------------------------------------------------------------------------
 
@@ -381,7 +392,9 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    m_ToolBar = CreateToolBar();
    AddToolbarButtons(m_ToolBar, WXFRAME_COMPOSE);
 
-   CreateStatusBar();
+   CreateStatusBar(2);
+   static const int s_widths[] = { -1, 50 };
+   SetStatusWidths(WXSIZEOF(s_widths), s_widths);
 
    // create the child controls
    // -------------------------
@@ -651,11 +664,10 @@ wxComposeView::CreateFTCanvas(void)
    m_style = READ_CONFIG(m_Profile,MP_FTEXT_STYLE);
    m_weight = READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT);
 
-   m_LayoutWindow->Clear(m_font, m_size, m_style, m_weight, 0, m_fg, 
-                         m_bg);
-   m_LayoutWindow->GetLayoutList().SetEditable(true);
-   m_LayoutWindow->GetLayoutList().SetWrapMargin(
-      READ_CONFIG(m_Profile, MP_COMPOSE_WRAPMARGIN)); 
+   m_LayoutWindow->Clear(m_font, m_size, m_style, m_weight, 0, m_fg, m_bg);
+   EnableEditing(true);
+   m_LayoutWindow->GetLayoutList().SetWrapMargin( READ_CONFIG(m_Profile,
+                                                  MP_COMPOSE_WRAPMARGIN)); 
 }
 
 wxComposeView::wxComposeView(const String &iname,
@@ -948,7 +960,11 @@ wxComposeView::OnMenuCommand(int id)
                   m_tmpFileName = tmpFileName.GetName();
 
                   wxLogStatus(this, _("Started external editor (pid %d)"),
-                        m_pidEditor);
+                              m_pidEditor);
+
+                  // disable editing with the internal editor to avoid
+                  // interference with the external one
+                  EnableEditing(false);
                }
             }
 
@@ -997,6 +1013,9 @@ wxComposeView::OnMenuCommand(int id)
 
 void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 {
+   // reenable editing the text in the built-in editor
+   EnableEditing(true);
+
    CHECK_RET( event.GetPid() == m_pidEditor , "unknown program terminated" );
 
    bool ok = false;
