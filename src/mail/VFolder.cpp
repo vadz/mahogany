@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Project:     Mahogany - cross platform e-mail GUI client
-// File name:   mail/VFolder.cpp: implementation of VirtualFolder class
+// File name:   mail/VFolder.cpp: implementation of MailFolderVirt class
 // Purpose:     virtual folder provides MailFolder interface to the message
 //              physically living in other, different folders
 // Author:      Vadim Zeitlin
@@ -60,14 +60,14 @@ public:
 static MFDriver gs_driverVirt
 (
    "virtual",
-   VirtualFolder::Init,
-   VirtualFolder::OpenFolder,
-   VirtualFolder::CheckStatus,
-   VirtualFolder::DeleteFolder,
-   VirtualFolder::RenameFolder,
-   VirtualFolder::ClearFolder,
-   VirtualFolder::GetFullImapSpec,
-   VirtualFolder::Cleanup
+   MailFolderVirt::Init,
+   MailFolderVirt::OpenFolder,
+   MailFolderVirt::CheckStatus,
+   MailFolderVirt::DeleteFolder,
+   MailFolderVirt::RenameFolder,
+   MailFolderVirt::ClearFolder,
+   MailFolderVirt::GetFullImapSpec,
+   MailFolderVirt::Cleanup
 );
 
 // ============================================================================
@@ -75,16 +75,16 @@ static MFDriver gs_driverVirt
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// VirtualFolder ctor/dtor
+// MailFolderVirt ctor/dtor
 // ----------------------------------------------------------------------------
 
-VirtualFolder::VirtualFolder(const MFolder *folder, OpenMode openmode)
-             : m_folder((MFolder *)folder), m_openMode(openmode)
+MailFolderVirt::MailFolderVirt(const MFolder *folder, OpenMode openmode)
+              : m_folder((MFolder *)folder), m_openMode(openmode)
 {
    m_folder->IncRef();
 }
 
-VirtualFolder::~VirtualFolder()
+MailFolderVirt::~MailFolderVirt()
 {
    Close();
 
@@ -94,38 +94,38 @@ VirtualFolder::~VirtualFolder()
 }
 
 // ----------------------------------------------------------------------------
-// VirtualFolder driver methods
+// MailFolderVirt driver methods
 // ----------------------------------------------------------------------------
 
 /* static */
-bool VirtualFolder::Init()
+bool MailFolderVirt::Init()
 {
    return true;
 }
 
 /* static */
-void VirtualFolder::Cleanup()
+void MailFolderVirt::Cleanup()
 {
    // NOOP
 }
 
 /* static */
 MailFolder *
-VirtualFolder::OpenFolder(const MFolder *folder,
-                          const String& login,
-                          const String& password,
-                          OpenMode openmode,
-                          wxFrame *frame)
+MailFolderVirt::OpenFolder(const MFolder *folder,
+                           const String& login,
+                           const String& password,
+                           OpenMode openmode,
+                           wxFrame *frame)
 {
-   CHECK( folder, NULL, "NULL folder in VirtualFolder::OpenFolder" );
+   CHECK( folder, NULL, "NULL folder in MailFolderVirt::OpenFolder" );
 
-   VirtualFolder *vf = new VirtualFolder(folder, openmode);
+   MailFolderVirt *vf = new MailFolderVirt(folder, openmode);
 
    return vf;
 }
 
 /* static */
-bool VirtualFolder::CheckStatus(const MFolder *folder)
+bool MailFolderVirt::CheckStatus(const MFolder *folder)
 {
    // the status of a virtual folder never changes from outside so this is a
    // NOOP too
@@ -133,7 +133,7 @@ bool VirtualFolder::CheckStatus(const MFolder *folder)
 }
 
 /* static */
-bool VirtualFolder::DeleteFolder(const MFolder *folder)
+bool MailFolderVirt::DeleteFolder(const MFolder *folder)
 {
    FAIL_MSG( "TODO" );
 
@@ -141,7 +141,7 @@ bool VirtualFolder::DeleteFolder(const MFolder *folder)
 }
 
 /* static */
-bool VirtualFolder::RenameFolder(const MFolder *folder, const String& name)
+bool MailFolderVirt::RenameFolder(const MFolder *folder, const String& name)
 {
    FAIL_MSG( "TODO" );
 
@@ -149,7 +149,7 @@ bool VirtualFolder::RenameFolder(const MFolder *folder, const String& name)
 }
 
 /* static */
-long VirtualFolder::ClearFolder(const MFolder *folder)
+long MailFolderVirt::ClearFolder(const MFolder *folder)
 {
    FAIL_MSG( "TODO" );
 
@@ -158,75 +158,75 @@ long VirtualFolder::ClearFolder(const MFolder *folder)
 
 /* static */
 String
-VirtualFolder::GetFullImapSpec(const MFolder *folder, const String& login)
+MailFolderVirt::GetFullImapSpec(const MFolder *folder, const String& login)
 {
-   CHECK( folder, "", "NULL folder in VirtualFolder::GetFullImapSpec" );
+   CHECK( folder, "", "NULL folder in MailFolderVirt::GetFullImapSpec" );
 
    return folder->GetFullName();
 }
 
 // ----------------------------------------------------------------------------
-// trivial VirtualFolder accessors
+// trivial MailFolderVirt accessors
 // ----------------------------------------------------------------------------
 
-bool VirtualFolder::IsOpened() const
+bool MailFolderVirt::IsOpened() const
 {
     // we're always opened for as long as we exist
     return true;
 }
 
-bool VirtualFolder::IsReadOnly() const
+bool MailFolderVirt::IsReadOnly() const
 {
     return m_openMode == ReadOnly;
 }
 
-bool VirtualFolder::CanSetFlag(int flags) const
+bool MailFolderVirt::CanSetFlag(int flags) const
 {
     // all flags can be set even though not all of them make sense for us
     return true;
 }
 
-bool VirtualFolder::IsInCriticalSection() const
+bool MailFolderVirt::IsInCriticalSection() const
 {
     // we never do anything critical
     return false;
 }
 
-ServerInfoEntry *VirtualFolder::CreateServerInfo(const MFolder *folder) const
+ServerInfoEntry *MailFolderVirt::CreateServerInfo(const MFolder *folder) const
 {
     // we use the trivial server info implementation as we never reuse them and
     // don't use authentification neither
     return new VirtualServerInfo(folder);
 }
 
-char VirtualFolder::GetFolderDelimiter() const
+char MailFolderVirt::GetFolderDelimiter() const
 {
     // the virtual folder name space is flat
     return '\0';
 }
 
-String VirtualFolder::GetName() const
+String MailFolderVirt::GetName() const
 {
    return m_folder->GetFullName();
 }
 
-String VirtualFolder::GetImapSpec() const
+String MailFolderVirt::GetImapSpec() const
 {
    return GetName();
 }
 
-MFolderType VirtualFolder::GetType() const
+MFolderType MailFolderVirt::GetType() const
 {
    return m_folder->GetType();
 }
 
-int VirtualFolder::GetFlags() const
+int MailFolderVirt::GetFlags() const
 {
    return m_folder->GetFlags();
 }
 
 // the pointer returned by this function should *NOT* be DecRef()'d
-Profile *VirtualFolder::GetProfile() const
+Profile *MailFolderVirt::GetProfile() const
 {
    Profile *profile = m_folder->GetProfile();
    if ( profile )
@@ -240,34 +240,34 @@ Profile *VirtualFolder::GetProfile() const
 }
 
 // ----------------------------------------------------------------------------
-// VirtualFolder methods working with m_messages
+// MailFolderVirt methods working with m_messages
 // ----------------------------------------------------------------------------
 
-VirtualFolder::Msg *VirtualFolder::GetMsgFromMsgno(MsgnoType msgno) const
+MailFolderVirt::Msg *MailFolderVirt::GetMsgFromMsgno(MsgnoType msgno) const
 {
    msgno--;
 
    CHECK( 0 <= msgno && msgno < GetMsgCount(), NULL,
-          "invalid msgno in VirtualFolder" );
+          "invalid msgno in MailFolderVirt" );
 
    return m_messages[(size_t)msgno];
 }
 
-void VirtualFolder::AddMsg(VirtualFolder::Msg *msg)
+void MailFolderVirt::AddMsg(MailFolderVirt::Msg *msg)
 {
-   CHECK_RET( msg, "NULL Msg in VirtualFolder?" );
+   CHECK_RET( msg, "NULL Msg in MailFolderVirt?" );
 
    m_messages.Add(msg);
 }
 
-VirtualFolder::Msg *VirtualFolder::GetFirstMsg(MsgCookie& cookie) const
+MailFolderVirt::Msg *MailFolderVirt::GetFirstMsg(MsgCookie& cookie) const
 {
    cookie = 0;
 
    return GetNextMsg(cookie);
 }
 
-VirtualFolder::Msg *VirtualFolder::GetNextMsg(MsgCookie& cookie) const
+MailFolderVirt::Msg *MailFolderVirt::GetNextMsg(MsgCookie& cookie) const
 {
    size_t count = GetMsgCount();
    if ( cookie < count )
@@ -277,15 +277,15 @@ VirtualFolder::Msg *VirtualFolder::GetNextMsg(MsgCookie& cookie) const
    else
    {
       // shouldn't be > than it!
-      ASSERT_MSG( cookie == count, "invalid msg index in VirtualFolder" );
+      ASSERT_MSG( cookie == count, "invalid msg index in MailFolderVirt" );
 
       return NULL;
    }
 }
 
-void VirtualFolder::DeleteMsg(MsgCookie& cookie)
+void MailFolderVirt::DeleteMsg(MsgCookie& cookie)
 {
-   CHECK_RET( cookie < GetMsgCount(), "invalid UID in VirtualFolder" );
+   CHECK_RET( cookie < GetMsgCount(), "invalid UID in MailFolderVirt" );
 
    delete m_messages[cookie];
 
@@ -293,35 +293,35 @@ void VirtualFolder::DeleteMsg(MsgCookie& cookie)
    m_messages.RemoveAt(cookie--);
 }
 
-void VirtualFolder::ClearMsgs()
+void MailFolderVirt::ClearMsgs()
 {
    WX_CLEAR_ARRAY(m_messages);
 }
 
 // ----------------------------------------------------------------------------
-// VirtualFolder access control
+// MailFolderVirt access control
 // ----------------------------------------------------------------------------
 
-bool VirtualFolder::Lock() const
+bool MailFolderVirt::Lock() const
 {
    return true;
 }
 
-void VirtualFolder::UnLock() const
+void MailFolderVirt::UnLock() const
 {
 }
 
-bool VirtualFolder::IsLocked() const
+bool MailFolderVirt::IsLocked() const
 {
    return false;
 }
 
 // ----------------------------------------------------------------------------
-// VirtualFolder operations on headers
+// MailFolderVirt operations on headers
 // ----------------------------------------------------------------------------
 
 MsgnoType
-VirtualFolder::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
+MailFolderVirt::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
 {
    size_t count = 0;
 
@@ -364,12 +364,12 @@ VirtualFolder::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
 }
 
 
-unsigned long VirtualFolder::GetMessageCount() const
+unsigned long MailFolderVirt::GetMessageCount() const
 {
    return GetMsgCount();
 }
 
-unsigned long VirtualFolder::CountNewMessages() const
+unsigned long MailFolderVirt::CountNewMessages() const
 {
    unsigned long count = 0;
 
@@ -383,7 +383,7 @@ unsigned long VirtualFolder::CountNewMessages() const
    return count;
 }
 
-unsigned long VirtualFolder::CountRecentMessages() const
+unsigned long MailFolderVirt::CountRecentMessages() const
 {
    unsigned long count = 0;
 
@@ -397,7 +397,7 @@ unsigned long VirtualFolder::CountRecentMessages() const
    return count;
 }
 
-unsigned long VirtualFolder::CountUnseenMessages() const
+unsigned long MailFolderVirt::CountUnseenMessages() const
 {
    unsigned long count = 0;
 
@@ -411,7 +411,7 @@ unsigned long VirtualFolder::CountUnseenMessages() const
    return count;
 }
 
-unsigned long VirtualFolder::CountDeletedMessages() const
+unsigned long MailFolderVirt::CountDeletedMessages() const
 {
    unsigned long count = 0;
 
@@ -425,7 +425,7 @@ unsigned long VirtualFolder::CountDeletedMessages() const
    return count;
 }
 
-bool VirtualFolder::DoCountMessages(MailFolderStatus *status) const
+bool MailFolderVirt::DoCountMessages(MailFolderStatus *status) const
 {
    status->Init();
    status->total = GetMsgCount();
@@ -457,28 +457,28 @@ bool VirtualFolder::DoCountMessages(MailFolderStatus *status) const
    return true;
 }
 
-MsgnoType VirtualFolder::GetMsgnoFromUID(UIdType uid) const
+MsgnoType MailFolderVirt::GetMsgnoFromUID(UIdType uid) const
 {
    // UIDs are the same as msgnos for us for now...
    return uid;
 }
 
 // ----------------------------------------------------------------------------
-// other VirtualFolder operations
+// other MailFolderVirt operations
 // ----------------------------------------------------------------------------
 
-bool VirtualFolder::Ping()
+bool MailFolderVirt::Ping()
 {
    // we never get any new mail
    return true;
 }
 
-void VirtualFolder::Checkpoint()
+void MailFolderVirt::Checkpoint()
 {
    // NOOP
 }
 
-Message *VirtualFolder::GetMessage(unsigned long uid)
+Message *MailFolderVirt::GetMessage(unsigned long uid)
 {
    const Msg *msg = GetMsgFromUID(uid);
 
@@ -486,9 +486,7 @@ Message *VirtualFolder::GetMessage(unsigned long uid)
 }
 
 bool
-VirtualFolder::SetMessageFlag(unsigned long uid,
-                              int flag,
-                              bool set)
+MailFolderVirt::SetMessageFlag(unsigned long uid, int flag, bool set)
 {
    Msg *msg = GetMsgFromUID(uid);
 
@@ -504,10 +502,10 @@ VirtualFolder::SetMessageFlag(unsigned long uid,
 }
 
 bool
-VirtualFolder::SetSequenceFlag(SequenceKind kind,
-                               const Sequence& seq,
-                               int flag,
-                               bool set)
+MailFolderVirt::SetSequenceFlag(SequenceKind kind,
+                                const Sequence& seq,
+                                int flag,
+                                bool set)
 {
    bool rc = true;
 
@@ -524,7 +522,7 @@ VirtualFolder::SetSequenceFlag(SequenceKind kind,
    return rc;
 }
 
-bool VirtualFolder::AppendMessage(const Message& msg)
+bool MailFolderVirt::AppendMessage(const Message& msg)
 {
    MailFolder *mf = msg.GetFolder();
    if ( !mf )
@@ -544,14 +542,14 @@ bool VirtualFolder::AppendMessage(const Message& msg)
    return true;
 }
 
-bool VirtualFolder::AppendMessage(const String& msg)
+bool MailFolderVirt::AppendMessage(const String& msg)
 {
    FAIL_MSG( "AppendMessage(string) can't be used with virtual folder" );
 
    return false;
 }
 
-void VirtualFolder::ExpungeMessages()
+void MailFolderVirt::ExpungeMessages()
 {
    MsgCookie cookie;
    for ( Msg *msg = GetFirstMsg(cookie); msg; msg = GetNextMsg(cookie) )
@@ -564,9 +562,9 @@ void VirtualFolder::ExpungeMessages()
 }
 
 MsgnoArray *
-VirtualFolder::SearchByFlag(MessageStatus flag,
-                            int flags,
-                            MsgnoType last) const
+MailFolderVirt::SearchByFlag(MessageStatus flag,
+                             int flags,
+                             MsgnoType last) const
 {
    int shouldBeSet = flags & SEARCH_SET;
 
@@ -600,12 +598,12 @@ VirtualFolder::SearchByFlag(MessageStatus flag,
 }
 
 void
-VirtualFolder::ListFolders(class ASMailFolder *asmf,
-                           const String &pattern,
-                           bool subscribed_only,
-                           const String &reference,
-                           UserData ud,
-                           Ticket ticket)
+MailFolderVirt::ListFolders(class ASMailFolder *asmf,
+                            const String &pattern,
+                            bool subscribed_only,
+                            const String &reference,
+                            UserData ud,
+                            Ticket ticket)
 {
    // we never have any subfolders
 }

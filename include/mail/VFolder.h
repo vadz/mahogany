@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Project:     Mahogany - cross platform e-mail GUI client
-// File name:   mail/VFolder.h: declaration of VirtualFolder class
+// File name:   mail/VFolder.h: declaration of MailFolderVirt class
 // Purpose:     virtual folder provides MailFolder interface to the message
 //              physically living in other, different folders
 // Author:      Vadim Zeitlin
@@ -22,7 +22,7 @@
 
 #include <wx/dynarray.h>
 
-class VirtualFolder : public MailFolderCmn
+class MailFolderVirt : public MailFolderCmn
 {
 public:
    /** @name Accessors */
@@ -206,7 +206,7 @@ protected:
    Msg *GetMsgFromMsgno(MsgnoType msgno) const;
 
    /// get the Msg corresponding to the given UID or NULL
-   Msg *VirtualFolder::GetMsgFromUID(UIdType uid) const
+   Msg *MailFolderVirt::GetMsgFromUID(UIdType uid) const
       { return GetMsgFromMsgno(uid); }
 
    /// add a new message (takes ownership of it)
@@ -231,10 +231,10 @@ protected:
 
 private:
    /// private ctor, only OpenFolder() creates us
-   VirtualFolder(const MFolder *folder, OpenMode openmode);
+   MailFolderVirt(const MFolder *folder, OpenMode openmode);
 
    /// private dtor, we're never deleted directly
-   virtual ~VirtualFolder();
+   virtual ~MailFolderVirt();
 
    GCC_DTOR_WARN_OFF
 };

@@ -164,7 +164,7 @@ private:
 
    // these classes can create/manipulate the HeaderInfo objects directly
    friend class MailFolderCC;
-   friend class VirtualFolder;
+   friend class MailFolderVirt;
 };
 
 /**
