@@ -286,6 +286,11 @@ USE_KDOC)
 
 AC_CONFIG_AUX_DIR(extra/scripts)
 
+
+dnl system check
+
+AC_CANONICAL_HOST
+
 dnl ###################
 dnl # checks programs #
 dnl ###################

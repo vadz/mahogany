@@ -40,6 +40,9 @@ PYTHON_INCLUDE = @PYTHON_INCLUDE@
 @MAKE_USE_PYTHON@
 @MAKE_USE_WXTAB@
 
+# canonical host
+CANONICAL_HOST=@host@
+
 # output dir for binaries:
 ODIR = .
 
@@ -95,7 +98,7 @@ INFODIR = @infodir@/M
 DOCDIR = $(DATADIR)/doc
 
 # for the dynamic linker, better than using -rpath
-LD_RUN_PATH=$(DATADIR)/bin/$(OSTYPE)
+LD_RUN_PATH=$(DATADIR)/bin/$(CANONICAL_HOST)
 
 X_CFLAGS = @X_CFLAGS@
 X_LIBS = @X_LIBS@

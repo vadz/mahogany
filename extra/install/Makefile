@@ -12,7 +12,7 @@ install:
 	$(INSTALL) -d $(DATADIR)/doc/classes
 	ln -fs $(DATADIR)/doc $(PREFIX)/doc/M
 	$(INSTALL) `find scripts/* -not -type d` $(DATADIR)/bin
-	$(INSTALL) `find scripts/py/* -not -type d` $(DATADIR)/scripts
+	$(INSTALL) `find scripts/py/* -not -type d | fgrep -v config.` $(DATADIR)/scripts
 	$(INSTALL) $(BUILDDIR)/doc/classes/* $(DATADIR)/doc/classes
 	$(INSTALL) $(BUILDDIR)/doc/*.lyx $(DATADIR)/doc/
 	$(INSTALL) $(BUILDDIR)/doc/*.tex $(DATADIR)/doc/
