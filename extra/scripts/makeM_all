@@ -554,8 +554,15 @@ then
   echo "##################################################################"
   echo "Building Debian package."
   echo "##################################################################"
+  DEBIAN_VERSION=`cat /etc/debian_version`
+  if [ "$DEBIAN_VERSION" != "2.1" && "$DEBIAN_VERSION" != "2.0" ]
+  then
+    DEBUILD="debuild"
+  else
+    DEBUILD="build"
+  fi
   rm -f $NAME_$VERSION_*.deb
-  (cd $NAME-$VERSION && build)
+  (cd $NAME-$VERSION && $DEBUILD)
   test -f $NAME_$VERSION_*.deb
   if [ $? != 0 ]
   then
