@@ -24,14 +24,19 @@ esac
 
 AC_CONFIG_HEADER(include/config.h)
 AC_CONFIG_AUX_DIR(extra/scripts)
+### HACK: unfortunately, the Makefiles in subdirectories can use this
+### install program without qualification.  We really shouldn't do it
+### this way, but we force the install-sh found here to be a full path.
+case "$ac_install_sh" in
+/*)	;;
+../*)	ac_install_sh=`cd .; exec pwd``expr "$ac_install_sh" : '\.\.\(.*\)'` ;;
+*)	ac_install_sh=`cd $srcdir; exec pwd`/$ac_install_sh ;;
+esac
 
 dnl --------------------------------------------------------------------------
 dnl Mahogany parameter evaluation
 dnl Usage: M_OVERRIDES(package,message,variable,default,help)
 dnl --------------------------------------------------------------------------
-
-## TEMPORARY
-rm -f ${OSTYPE}.system.cache*
 
 M_OVERRIDES(python,Python,USE_PYTHON,1,
 --disable-python        no Python scripting)
@@ -379,12 +384,6 @@ case "$USE_LEAKTRACER" in
 esac
 AC_SUBST(MAKE_USE_LEAKTRACER)
 
-case "$USE_THREADS" in 1)
-	AC_CHECK_LIB(pthread,main,,AC_CHECK_LIB(pthreads,main))
-	AC_DEFINE(USE_THREADS)
-	LIBS="$LIBS -lpthread"
-esac
-
 dnl set debug/optimisation flags
 
 case "$USE_DEBUG" in
@@ -649,6 +648,31 @@ dnl only now can we check for wx.h because it would
 dnl fail without the gtk headers
 AC_CHECK_HEADER(wx/wx.h,,AC_MSG_ERROR([cannot find wx/wx.h header file.
 	You must have wxWindows installed to compile Mahogany.]))
+
+case "$USE_THREADS" in 1)
+	AC_CACHE_CHECK(if wxWindows was compiled with threads,
+		m_cv_wx_threads,
+		[AC_TRY_RUN([#include "wx/setup.h"
+			int main(){
+			#ifdef wxUSE_THREADS
+				return 0;
+			#else
+				return 1;
+			#endif
+			}],
+			m_cv_wx_threads=yes,
+			m_cv_wx_threads=no,
+			m_cv_wx_threads=x)])
+	case "$m_cv_wx_threads" in
+	yes)	AC_DEFINE(USE_THREADS) ;;
+	no)	m_cv_USE_THREADS=0	# turn off our option
+		AC_MSG_WARN([Threads configured but not available]) ;;
+	x)	AC_MSG_WARN([Cross-compiling are we?
+		Geeze, I hope you know what you're doing...])
+		m_cv_wx_threads=yes
+		AC_DEFINE(USE_THREADS) ;;
+	esac
+esac
 
 dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
