@@ -1712,12 +1712,16 @@ wxComposeView::InitText(Message *msg, MessageView *msgview)
          // fall through
 
       case Message_New:
-      case Message_Forward:
          m_txtSubject->SetFocus();
          break;
 
       case Message_Reply:
          SetFocusToComposer();
+         break;
+
+      case Message_Forward:
+         m_txtRecipient->SetFocus();
+         break;
    }
 
    Show();
