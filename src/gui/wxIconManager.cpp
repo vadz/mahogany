@@ -75,6 +75,8 @@ inline bool IsMimeType(const wxString& str) { return str.Find('/') != -1; }
 
 #ifdef DEBUG
    static const int wxTraceIconLoading = 0x400;
+#else
+   static const int wxTraceIconLoading = 0x000;
 #endif
 
 // ============================================================================
