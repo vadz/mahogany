@@ -180,7 +180,6 @@ protected:
    bool SaveMsgTextToFile(const String& filename,
                           bool errorIfNoText = true) const;
 
->>>>>>> 1.25.2.8
 private:
    /// a profile
    ProfileBase * m_Profile;

@@ -466,6 +466,7 @@ wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
                              ProfileBase *profile,
                              size_t nFirst,
                              size_t nLast)
+   : wxNotebookPageBase(notebook)
 {
    int image = notebook->GetPageCount();
 
