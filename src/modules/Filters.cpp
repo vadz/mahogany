@@ -1686,6 +1686,8 @@ ParserImpl::ParseTerm(void)
 
 // FreeBSD uses a variable name "class"
 #define class xxclass
+#undef MIN  // defined by glib.h
+#undef MAX  // defined by glib.h
 #include <arpa/nameser.h>
 #undef class
 

@@ -53,7 +53,7 @@ if [ "$SMP" != "" ]; then
   export MAKE="make -j $SMP"
 fi
 
-(make all && cd ../src && make %MAKETARGET)
+(make -C include && make all && cd ../src && make %MAKETARGET)
 
 (make doc; exit 0)
 
