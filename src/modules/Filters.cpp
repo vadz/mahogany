@@ -1692,6 +1692,7 @@ extern "C"
       for(int i = 0; gs_RblSites[i] && ! rc ; i++)
          rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
 #endif
+      msg->DecRef();
       return rc;
    }
 

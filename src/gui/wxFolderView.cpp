@@ -27,6 +27,7 @@
 #  include "Profile.h"
 
 #  include <wx/dynarray.h>
+#  include <wx/colour.h>
 #endif
 
 #include <ctype.h>
@@ -110,8 +111,17 @@ public:
       }
 #endif // wxGTK
    /// goto next unread message
-   void SelectNextUnread(void); 
+   void SelectNextUnread(void);
 
+   void ApplyOptions(const wxColour &fg, const wxColour &bg,
+                     int fontFamily, int fontSize)
+      {
+         // the foregroundcolour is the one for the title line, we
+         // leave it as it is SetForegroundColour( fg );
+         // we want to use fg as the default item colour
+         SetBackgroundColour( bg );
+         SetFont( * new wxFont( fontSize, fontFamily, wxDEFAULT, wxDEFAULT ) );
+      }
 protected:
    long m_Style;
    long m_NextIndex;
@@ -131,7 +141,6 @@ protected:
    bool m_Initialised;
    /// the popup menu
    wxMenu *m_menu;
-
    DECLARE_EVENT_TABLE()
 };
 
@@ -621,6 +630,10 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       {
          wxWindow *oldfolderctrl = m_FolderCtrl;
          m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
+         m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
+                                     m_settingsCurrent.BgCol,
+                                     m_settingsCurrent.font,
+                                     m_settingsCurrent.size);
          m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
          delete oldfolderctrl;
       }
@@ -666,6 +679,10 @@ wxFolderView::wxFolderView(wxWindow *parent)
                                             wxSP_3D|wxSP_BORDER);
    m_MessagePreview = new wxMessageView(this,m_SplitterWindow);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
+   m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
+                               m_settingsCurrent.BgCol,
+                               m_settingsCurrent.font,
+                               m_settingsCurrent.size);
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview, y/3);
    m_SplitterWindow->SetMinimumPaneSize(0);
    m_SplitterWindow->SetFocus();
@@ -688,6 +705,18 @@ wxFolderView::~wxFolderView()
 void
 wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 {
+#   define NUM_FONTS 7
+   static int wxFonts[NUM_FONTS] =
+   {
+      wxDEFAULT,
+      wxDECORATIVE,
+      wxROMAN,
+      wxSCRIPT,
+      wxSWISS,
+      wxMODERN,
+      wxTELETYPE
+   };
+
 #ifdef OS_WIN
    // MP_DATE_FMT contains '%' which are being (mis)interpreted as env var
    // expansion characters under Windows - prevent this from happening
@@ -696,6 +725,18 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 
    settings->dateFormat = READ_CONFIG(m_Profile, MP_DATE_FMT);
    settings->dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT) != 0;
+   GetColourByName(&settings->FgCol, READ_CONFIG(m_Profile,
+                                                 MP_FVIEW_FGCOLOUR),
+                   MP_FVIEW_FGCOLOUR_D);
+   GetColourByName(&settings->BgCol, READ_CONFIG(m_Profile,
+                                                 MP_FVIEW_BGCOLOUR),
+                   MP_FVIEW_BGCOLOUR_D);
+   settings->font = READ_CONFIG(m_Profile,MP_MVIEW_FONT);
+   ASSERT(settings->font >= 0 && settings->font <= NUM_FONTS);
+   settings->font = wxFonts[settings->font];
+   settings->size = READ_CONFIG(m_Profile,MP_MVIEW_FONT_SIZE);
+
+
 }
 
 void
@@ -709,7 +750,7 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 
    AllProfileSettings settingsNew;
    ReadProfileSettings(&settingsNew);
-
+   
    if ( settingsNew == m_settingsCurrent )
    {
       // we don't care
@@ -724,6 +765,10 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
       case MEventOptionsChangeData::Ok:
       case MEventOptionsChangeData::Cancel:
          // need to repopulate the list ctrl because the date format changed
+         m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
+                                     m_settingsCurrent.BgCol,
+                                     m_settingsCurrent.font,
+                                     m_settingsCurrent.size);
          m_FolderCtrl->Clear();
          m_NumOfMessages = 0;
          Update();
@@ -799,6 +844,14 @@ wxFolderView::Update(HeaderInfoList *listing)
       m_FolderCtrl->SetItemState(i, wxLIST_STATE_FOCUSED,
                                  (hi->GetUId() == m_FocusedUId)?
                                  wxLIST_STATE_FOCUSED : 0);
+#if 0
+      // this only affects the first column, why?
+      wxListItem info;
+      info.m_itemId = i;
+      m_FolderCtrl->GetItem(info);
+      info.m_colour = & m_settingsCurrent.FgCol;
+      m_FolderCtrl->SetItem(info);
+#endif
       if(hi->GetUId() == m_FocusedUId)
          foundFocus = true;
    }

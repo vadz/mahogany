@@ -224,6 +224,10 @@ public:
    /// updates display of outbox status
    virtual void UpdateOutboxStatus(void) const = 0;
 protected:
+   /// Load modules at startup
+   virtual void LoadModules(void) = 0;
+   /// Unload modules loaded at startup
+   virtual void UnloadModules(void) = 0;
    /// makes sure the status bar has enough fields
    virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE)
       const = 0;

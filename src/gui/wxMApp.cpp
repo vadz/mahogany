@@ -598,9 +598,6 @@ wxMApp::OnInit()
       // reflect settings in menu and statusbar:
       UpdateOnlineDisplay();
       
-      // Load any modules requested.
-      LoadModules();
-
       // enable/disable modules button:
       ((wxMainFrame *)m_topLevelFrame)->UpdateToolBar();
       return true;

@@ -104,9 +104,9 @@ protected:
    */
    void ThrEnterLeave(bool enter, SectionId what);
    /// Load modules at startup
-   void LoadModules(void);
+   virtual void LoadModules(void);
    /// Unload modules loaded at startup
-   void UnloadModules(void);
+   virtual void UnloadModules(void);
 
    /// update display of online connection status
    void UpdateOnlineDisplay();

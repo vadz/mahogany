@@ -178,6 +178,11 @@ enum ConfigFields
    ConfigField_MessageViewFaxSupport,
    ConfigField_MessageViewFaxDomains,
 #endif // Unix
+   ConfigField_FolderViewHelpText,
+   ConfigField_FolderViewFontFamily,
+   ConfigField_FolderViewFontSize,
+   ConfigField_FolderViewFGColour,
+   ConfigField_FolderViewBGColour,
    ConfigField_MessageViewMaxHelpText,
    ConfigField_MessageViewMaxMsgSize,
    ConfigField_MessageViewMaxHeadersNum,
@@ -519,6 +524,14 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Support special &fax mailers"), Field_Bool,    -1 },
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
 #endif // unix
+   { gettext_noop("The following settings are for the list of messages."),
+                                                   Field_Message,  -1 },
+   { gettext_noop("Font famil&y"
+                  ":default:decorative:roman:script:swiss:modern:teletype"),
+                                                   Field_Combo,   -1},
+   { gettext_noop("Font si&ze"),                   Field_Number,  -1},
+   { gettext_noop("Foreground c&olour"),           Field_Color,   -1},
+   { gettext_noop("Back&ground colour"),           Field_Color,   -1},
    { gettext_noop("The following settings allow to limit the amount of data\n"
                   "retrieved from remote server: if the message size or\n"
                   "number is greater than the value specified here, you\n"
@@ -690,6 +703,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_INCFAX_SUPPORT),
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),
 #endif
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FVIEW_FONT),
+   CONFIG_ENTRY(MP_FVIEW_FONT_SIZE),
+   CONFIG_ENTRY(MP_FVIEW_FGCOLOUR),
+   CONFIG_ENTRY(MP_FVIEW_BGCOLOUR),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),

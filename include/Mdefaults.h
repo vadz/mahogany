@@ -437,6 +437,17 @@
 /// the colour for header values in the message view
 #define   MP_MVIEW_HEADER_VALUES_COLOUR  "MViewHeaderValuesColour"
 //@}
+/**@name  Font settings for folder view */
+//@{
+/// which font to use
+#define   MP_FVIEW_FONT         "MFiewFont"
+/// which font size
+#define   MP_FVIEW_FONT_SIZE         "MFiewFontSize"
+// which foreground colour for the font
+#define   MP_FVIEW_FGCOLOUR      "MFiewFgColour"
+// which background colour for the font
+#define   MP_FVIEW_BGCOLOUR      "MFiewBgColour"
+//@}
 /**@name Font settings for compose view */
 //@{
 /// which font to use
@@ -873,6 +884,17 @@
 #define   MP_MVIEW_HEADER_NAMES_COLOUR_D  "blue"
 /// the colour for header values in the message view
 #define   MP_MVIEW_HEADER_VALUES_COLOUR_D "black"
+//@}
+/**@name  Font settings for message view */
+//@{
+/// which font to use
+#define   MP_FVIEW_FONT_D         0L
+/// which font size
+#define   MP_FVIEW_FONT_SIZE_D         12L
+// which foreground colour for the font
+#define   MP_FVIEW_FGCOLOUR_D      "black"
+// which background colour for the font
+#define   MP_FVIEW_BGCOLOUR_D      "white"
 //@}
 /**@name Font settings for compose view */
 //@{

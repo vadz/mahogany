@@ -222,6 +222,10 @@ private:
       String dateFormat;
       /// TRUE => display time/date in GMT
       bool dateGMT;
+      /// Background and foreground colours, colours for URLs and headers
+      wxColour BgCol, FgCol;
+      /// font attributes
+      int font, size;
    } m_settingsCurrent;
 
    /// read the values from the profile into AllProfileSettings structure

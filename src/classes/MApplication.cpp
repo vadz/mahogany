@@ -579,6 +579,10 @@ MAppBase::OnStartup()
    CHECK( m_eventOptChangeReg, FALSE,
           "failed to register event handler for options change event " );
 
+   // Load any modules requested.
+   LoadModules();
+
+
    return TRUE;
 }
 
