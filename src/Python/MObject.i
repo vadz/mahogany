@@ -16,7 +16,8 @@
 
 %module   MObject
 %{
-#include "Mswig.h"
+//#include "Mswig.h"
+#include "Mcommon.h"
 #include "MObject.h"
 %}
 

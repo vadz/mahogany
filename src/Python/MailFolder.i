@@ -17,14 +17,12 @@
 #include   "Profile.h"
 #include   "HeaderInfo.h"
 #include   "UIdArray.h"
+#include   "Sequence.h"
 %}
 
 %import MString.i
 %import MProfile.i
 %import Message.i
-
-// forward declarations
-class FolderView;
 
 // forward declarations
 class FolderView;
@@ -126,38 +124,9 @@ public:
          @param comment optional comment for the folder
          @return false on error or true on success
    */
-   static bool CreateFolder(const String &name,
-                            MFolderType type,
-                            int flags,
-                            const String &path,
-                            const String &comment);
 
-   /** Checks if it is OK to exit the application now.
-       @param which will either be set to empty or a '\n' delimited
-       list of folders which are in critical sections.
-   */
    static bool CanExit(String *which);
 
-   /** Utility function to get a textual representation of a message
-       status.
-       @param message status
-       @return string representation
-   */
-   static String ConvertMessageStatusToString(int status);
-   /**@name Subscription management */
-   //@{
-   /** Subscribe to a given mailbox (related to the
-       mailfolder/mailstream underlying this folder.
-       @param host the server host, or empty for local newsspool
-       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
-       @param mailboxname name of the mailbox to subscribe to
-       @param bool if true, subscribe, else unsubscribe
-       @return true on success
-   */
-   static bool Subscribe(const String &host,
-                         MFolderType protocol,
-                         const String &mailboxname,
-                         bool subscribe = true);
    /** Get a listing of all mailboxes.
 
        DO NOT USE THIS FUNCTION, BUT ASMailFolder::ListFolders instead!!!
@@ -228,19 +197,6 @@ public:
                         int flag,
                         bool set = true);
 
-   /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
-       @param sequence the IMAP sequence of uids
-       @param flag flag to be set, e.g. "\\Deleted"
-       @param set if true, set the flag, if false, clear it
-       @return true on success
-   */
-   virtual bool SetSequenceFlag(const String &sequence,
-                                int flag,
-                                bool set = true);
-   /** Appends the message to this folder.
-       @param msg the message to append
-       @return true on success
-   */
    virtual bool AppendMessage(const Message &msg);
 
    /** Expunge messages.
@@ -390,14 +346,4 @@ public:
    virtual HeaderInfo *GetItem(size_t n);
 };
 
-/** This class holds information about a single folder. */
-class FolderListingEntry
-{
-public:
-   /// The folder's name.
-   virtual const String &GetName(void);
-   /// The folder's attribute.
-   virtual long GetAttribute(void);
-   virtual ~FolderListingEntry() {}
-};
 

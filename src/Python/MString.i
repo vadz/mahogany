@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$              *
+ * $Id$      *
  *******************************************************************/
 
 // naming this module String is a very bad idea for systems with
@@ -11,11 +11,15 @@
 // module string.
 
 %module	MString
+
 %{
-#include  "Mswig.h"
+//#include  "Mswig.h"
+#include "Mcommon.h"
 %}
 
-class String 
+//    Original KB Code
+
+class String
 {
 public:
    String(const char *);

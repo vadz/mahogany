@@ -11,7 +11,7 @@
 %module Message
 
 %{
-#include   "Mswig.h"
+//#include   "Mswig.h"
 #include   "Mcommon.h"
 #include   "Message.h"
 %}

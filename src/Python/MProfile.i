@@ -9,7 +9,8 @@
 %module MProfile
 
 %{
-#include "Mswig.h"
+#include "Mcommon.h"
+// #include "Mswig.h"
 #include "Profile.h"
 %}
 
@@ -27,9 +28,7 @@ public:
    /// Create a Profile object for a plugin module
    static Profile * CreateModuleProfile(const String & classname,
                                             const Profile *parent);
-   /// Create a dummy Profile just inheriting from the top level
-   static Profile * CreateEmptyProfile(const Profile *parent);
-
+ 
    /// Delete the global config object
    static void DeleteGlobalConfig();
 
@@ -43,7 +42,7 @@ public:
    virtual bool writeEntry(String & key, String & Value);
    //@}
    /// set the path within the profile,just like cd
-   virtual void   SetPath(String & path);
+   // virtual void   SetPath(String & path);
    /// return true if the entry is defined
    virtual bool HasEntry(String & key);
    /// delete the entry group specified by path
