@@ -403,7 +403,7 @@ extern "C" \
       return module; \
    }\
 } \
-MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version); \
+MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version) \
 \
 const ModuleProperty ClassName::ms_properties[] = \
 { \
@@ -425,13 +425,13 @@ MDLLEXPORT const ModuleProperty *GetMModuleProperties() \
 } \
 } \
 const wxChar * ClassName::GetName(void) const \
-   { return GetMModuleProperty(GetMModuleProperties(), MMODULE_NAME_PROP); } \
+   { return GetMModuleProperty(ms_properties, MMODULE_NAME_PROP); } \
 const wxChar * ClassName::GetInterface(void) const \
-   { return GetMModuleProperty(GetMModuleProperties(), MMODULE_INTERFACE_PROP); } \
+   { return GetMModuleProperty(ms_properties, MMODULE_INTERFACE_PROP); } \
 const wxChar * ClassName::GetDescription(void) const \
-   { return GetMModuleProperty(GetMModuleProperties(), MMODULE_DESC_PROP); } \
+   { return GetMModuleProperty(ms_properties, MMODULE_DESC_PROP); } \
 const wxChar * ClassName::GetVersion(void) const \
-   { return GetMModuleProperty(GetMModuleProperties(), MMODULE_VERSION_PROP); }
+   { return GetMModuleProperty(ms_properties, MMODULE_VERSION_PROP); }
 
 // ----------------------------------------------------------------------------
 // helper functions and macros
