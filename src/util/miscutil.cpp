@@ -163,8 +163,9 @@ AutoCollectAddresses(const String &email,
          // likely that it's the same person)
 
          // clear the status line
-         if(frame)
-            wxLogStatus(frame, "");
+         // uncommented to avoid unnecessary refresh
+         //if(frame)
+         //wxLogStatus(frame, "");
       }
 
       // release the found items (if any)
