@@ -650,6 +650,8 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
       wxLogError(msg);
       return;
    }
+   bool events = mf->SendsNewMailEvents();
+   mf->EnableNewMailEvents(false);
    for(i = 0; i < n; i++)
    {
       msg = m_MailFolder->GetMessage(selections[i]+1);
@@ -657,6 +659,7 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
       SafeDecRef(msg);
    }
    mf->Ping(); // update any views
+   mf->EnableNewMailEvents(true);
    mf->DecRef();
    wxLogStatus(GetFrame(m_Parent), _("%d messages saved"), n);
 }

@@ -160,15 +160,13 @@ public:
                                 bool set = true) = 0;
    /** Appends the message to this folder.
        @param msg the message to append
-       @param eventsflag if true, generate new mail events
    */
-   virtual void AppendMessage(const Message &msg, bool eventsflag = false) = 0;
+   virtual void AppendMessage(const Message &msg) = 0;
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
-       @param eventsflag if true, generate new mail events
    */
-   virtual void AppendMessage(const String &msg, bool eventsflag = false) = 0;
+   virtual void AppendMessage(const String &msg) = 0;
 
    /** Expunge messages.
      */
@@ -193,6 +191,15 @@ public:
    */
    static String ConvertMessageStatusToString(int status);
 
+   /** Toggle sending of new mail events.
+       @param send if true, send them
+   */
+   virtual void EnableNewMailEvents(bool send = true) = 0;
+   /** Query whether foldre is sending new mail events.
+       @return if true, folder sends them
+   */
+   virtual bool SendsNewMailEvents(void) const = 0;
+   
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /// Return a pointer to the first message's header info.
