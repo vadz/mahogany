@@ -62,6 +62,8 @@ public:
 
    virtual void SetNewsgroups(const String &groups);
 
+   virtual bool SetFcc(const String& fcc);
+
    virtual void SetHeaderEncoding(wxFontEncoding enc);
 
    // custom headers
@@ -151,9 +153,6 @@ protected:
    /// write the message using the specified writer function
    bool WriteMessage(soutr_t writer, void *where);
 
-   /// Parses string for folder aliases, removes them and stores them in m_FccList.
-   void ExtractFccFolders(String &addresses);
-
    /// sets one address field in the envelope
    void SetAddressField(ADDRESS **pAdr, const String& address);
 
@@ -224,9 +223,6 @@ private:
    /// Outgoing folder name or empty
    String m_OutboxName;
 
-   /// "Sent" folder name or empty
-   String m_SentMailName;
-
    /// Default charset
    String m_CharSet;
 
@@ -261,7 +257,7 @@ private:
    /// extra headers to be added before sending
    MessageHeadersList m_extraHeaders;
 
-   /// a list of folders to save copies in
+   /// a list of folders to save copies of the message in after sending
    kbStringList m_FccList;
 
    //@}

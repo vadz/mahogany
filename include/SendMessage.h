@@ -80,13 +80,13 @@ public:
    virtual void SetSubject(const String &subject) = 0;
 
    /** Sets the address fields, To:, CC: and BCC:.
-       @param To primary address to send mail to
-       @param CC carbon copy addresses
-       @param BCC blind carbon copy addresses
+       @param to primary address to send mail to
+       @param cc carbon copy addresses
+       @param bcc blind carbon copy addresses
    */
-   virtual void SetAddresses(const String &To,
-                     const String &CC = "",
-                     const String &BCC = "") = 0;
+   virtual void SetAddresses(const String &to,
+                             const String &cc = "",
+                             const String &bcc = "") = 0;
 
    /** Sets the value for the from field.
        @param from sender address
@@ -97,7 +97,25 @@ public:
                         const String &replyaddress = "",
                         const String &sender = "") = 0;
 
+   /**
+     Sets the Newsgroup header value
+
+     @param groups comma-separated list of newsgroups
+    */
    virtual void SetNewsgroups(const String &groups) = 0;
+
+   /**
+     Sets the folders to copy the message to after sending it. By default, the
+     FCC value is the value of MP_OUTGOINGFOLDER entry in the profile
+     associated with this message if MP_USEOUTGOINGFOLDER is true and empty
+     otherwise, but if this method is used it overrides this value and so
+     specifying an empty string here disables copying the message to
+     SentMail.
+
+     @param fcc comma-separated list of folders to copy the message to
+     @return true if all folders were ok, false if there was an error
+    */
+   virtual bool SetFcc(const String& fcc) = 0;
 
    //@}
 

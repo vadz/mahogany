@@ -289,7 +289,7 @@ SendMessageCC::SendMessageCC(Profile *profile,
    if ( READ_CONFIG_BOOL(profile, MP_USE_OUTBOX) )
       m_OutboxName = READ_CONFIG_TEXT(profile,MP_OUTBOX_NAME);
    if ( READ_CONFIG(profile,MP_USEOUTGOINGFOLDER) )
-      m_SentMailName = READ_CONFIG_TEXT(profile,MP_OUTGOINGFOLDER);
+      m_FccList.push_back(new String(READ_CONFIG_TEXT(profile,MP_OUTGOINGFOLDER)));
 
    // check that we have password if we use it
    //
@@ -774,12 +774,8 @@ SendMessageCC::SetAddressField(ADDRESS **pAdr, const String& address)
       return;
    }
 
-   // first remove '#fcc' stuff
-   String addressNoFCC = address;
-   ExtractFccFolders(addressNoFCC);
-
    // parse into ADDRESS struct
-   *pAdr = ParseAddressList(addressNoFCC, m_DefaultHost);
+   *pAdr = ParseAddressList(address, m_DefaultHost);
 
    // finally filter out any invalid addressees
    CheckAddressFieldForErrors(*pAdr);
@@ -847,29 +843,44 @@ SendMessageCC::SetNewsgroups(const String &groups)
 
 }
 
-void
-SendMessageCC::ExtractFccFolders(String &addresses)
+bool
+SendMessageCC::SetFcc(const String& fcc)
 {
-   kbStringList addrList;
-   kbStringList::iterator i;
+   m_FccList.clear();
 
-   char *buf = strutil_strdup(addresses);
-   // addresses are comma separated:
-   strutil_tokenise(buf, ",", addrList);
-   delete [] buf;
-   addresses = ""; // clear the address list
-   for(i = addrList.begin(); i != addrList.end(); i++)
+   wxArrayString fccFolders = strutil_restore_array(fcc, ',');
+   size_t count = fccFolders.GetCount();
+   for ( size_t n = 0; n < count; n++ )
    {
-      strutil_delwhitespace(**i);
-      if( *((*i)->c_str()) == '#')  // folder aliases are #foldername
-         m_FccList.push_back(new String((*i)->c_str()+1)); // only the foldername
-      else
+      String folderName = fccFolders[n];
+      strutil_delwhitespace(folderName);
+
+      if ( folderName.empty() )
       {
-         if(! strutil_isempty(addresses))
-            addresses += ", ";
-         addresses += **i;
+         // be lenient and simply ignore
+         continue;
       }
+
+      // ignore the leading slash, if any: the user may specify it, but it
+      // shouldn't be passed to MFolder 
+      if ( folderName[0u] == '/' )
+         folderName.erase(0, 1);
+
+      MFolder_obj folder(folderName);
+      if ( !folder )
+      {
+         // an interesting idea: what if we interpreted the strings which are
+         // not folder names as the file names? this would allow saving
+         // outgoing messages to files very easily...
+         ERRORMESSAGE((_("The folder '%s' specified in the FCC list "
+                         "doesn't exist."), folderName.c_str()));
+         return false;
+      }
+
+      m_FccList.push_back(new String(folderName));
    }
+
+   return true;
 }
 
 String
@@ -1440,17 +1451,9 @@ SendMessageCC::SendOrQueue(int flags)
    {
       success = Send(flags);
 
-      // make copy in the "SentMail" folder?
       if ( success )
       {
-         if ( !m_SentMailName.empty() )
-         {
-            // copy it to the sent mail in addition to all other configured
-            // folders
-            m_FccList.push_back(new String(m_SentMailName));
-         }
-
-         // save it in the local folders
+         // save it in the local folders, if any
          for ( kbStringList::iterator i = m_FccList.begin();
                i != m_FccList.end();
                i++ )
