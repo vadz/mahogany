@@ -6,7 +6,7 @@
 % Modified by: Vadim Zeitlin: 11.04.03: now it is pure LaTeX, not LyX any more
 % Created:     1997
 % CVS-ID:      $Id$
-% Copyright:   (c) 1997-2003 M Dev Team
+% Copyright:   (c) 1997-2004 M Dev Team
 % Licence:     M license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1656,6 +1656,8 @@ mail header. This allows you to send copies without other recipients
 of the message knowing about it.
 
 
+% this is obsolete now that we use a standard text control
+\iffalse
 \subsection{Key Bindings in the Message Editor}
 
 \vspace{0.3cm}
@@ -1704,6 +1706,7 @@ search same text again\\
 \end{tabular}\par}
 \vspace{0.3cm}
 
+\fi
 
 \subsection{Using the address book\_3100\_}
 
@@ -1769,6 +1772,195 @@ to send the message to, you can enter one or more newsgroups names
 window was opened, if it was opened while reading a specific newgroup,
 it will use the same newsserver that the newsgroup was read from,
 otherwise it will fall back to the setting in the global preferences.
+
+
+
+\section{Message Templates}
+
+\subsection{What are they?}
+
+Mahogany uses the message templates to initialize the text of the new message
+whenever you start composing a new mail message or reply to or forward an
+existing one. By default, the standard templates are used which are empty for
+the "new mail" and "new article" and have some reasonable default values for
+the "reply", "forward" and "follow up". However you may define an arbitrary
+number of additional templates and also modify the standard ones using the
+\MenuCmd{Edit|Templates...} menu command.
+
+Beyond customizing the standard templates to suit your tastes, it is also often
+useful to define additional templates for the messages you write often. For
+example, a system administrator could have some ready to use reply templates
+for answering the standard user questions and so on. If you create new
+templates, it is convenient to use the \texttt{Shift-Ctrl-<X>} versions of the
+usual commands, i.e. instead of using \texttt{F} in the folder view to forward
+a message you may use \texttt{Shift-Ctrl-F} to choose the template first. The
+same applies to the other commands.
+
+When you edit the templates in the dialog, most of the functionality is
+accessible via the right click menu in the control containing the template
+text, however it may sometimes be necessary to edit the templates by hand so
+the next section gives a brief description of their syntax.
+
+
+\subsection{Templates syntax}
+
+First of all, any normal text appearing in the template will be copied as is to
+the text of the new message. Special constructions are introduced by the
+\emph{variable expansion}, that is anything starting with the dollar sign
+(\texttt{\$}). The general syntax of a variable expansion is the following:
+\begin{center}
+\begin{verbatim}
+$([category:]name[?arguments][{+|-|=}<number>[!]])
+\end{verbatim}
+\end{center}
+(the parentheses around all this may be replaced with accolades). For the
+simplest cases (no category, no arguments, no justficiation tail) the
+parentheses may be omitted entirely, as in \texttt{\$DATE}.
+
+The possible values of \textit{category} and \textit{name} are described below.
+Both of them are "words", i.e. are sequences of alphabetic characters. The
+category also may be implied by using the special brackets: \texttt{\$`...`}
+implies the category \texttt{"cmd"}, i.e. executes the command specified inside
+the single quotes and \texttt{\$<...<} implies the category \texttt{"file"}
+(both of these shortcuts come from standard Unix shell notations).
+
+The arguments are optional and if they are present are either a
+comma-separated list of words (i.e. alphabetic characters only are allowed)
+or another variable expansion. For example, the following will insert
+the quoted contents of the file after asking the user for a file name
+defaulting to foo.bar:
+\begin{center}
+\begin{verbatim}
+$(file:foo.bar?ASK,QUOTE)
+\end{verbatim}
+\end{center}
+and this example will set the value of the specified header as expected:
+\begin{center}
+\begin{verbatim}
+$(header:X-UnixName?$`whoami`)
+\end{verbatim}
+\end{center}
+
+Finally, the optional tail \texttt{\{+|-|=\}<number>} may be used to justify
+the value: \texttt{"+"} aligns it to the right, \texttt{"-"} (which is default)
+to the left and \texttt{"="} centers it in the text field of width
+\textit{number}. If the number is followed by \texttt{"!"}, the value is
+truncated if it doesn't fit into the given width instead of taking as much
+place as is required for it as it does by default.
+
+
+\subsection{Template variables}
+
+After the description of the general syntax in the previous section, here are
+the possible values for the category and name parameter mentioned above:
+
+\subsubsection{Unnamed category}
+
+This category contains the most commonly used variables and allows to write
+them in the shortest possible form, i.e. without any parentheses or braces
+around them and without the category name. The names in this category are:
+\begin{itemize}
+   \item{date} Inserts the current date in the configured format (see the
+      "Configure format for displaying dates" button in the "Message view" page
+      of the options dialog).
+   \item{cursor} This is a special variable: its expansion is empty and instead
+      it has the effect of positioning the cursor at the place where it appears
+      in the template when the template expansion is done.
+   \item{to} Shortcut for \texttt{\$\{original:to\}}
+   \item{cc} Shortcut for \texttt{\$\{original:cc\}}
+   \item{subject} Shortcut for \texttt{\$\{original:subject\}}
+   \item{quote} Inserts the contents of the message being replied to or
+      forwarded as text. Not valid in new mail or article templates.
+   \item{quote822} Inserts the contents of the original message as an
+      attachment -- unlike the previous variable, this allows to insert the
+      original message with all the attachments it contains in the new message.
+   \item{text} Same as \texttt{\$quote} but inserts the original text without
+      quoting it, i.e. without quotation marks in front of each line.
+   \item{sender} Expands to the sender address.
+   \item{signature} Expands to the text of your currently configured signature.
+\end{itemize}
+
+
+\subsubsection{Message category}
+
+The \texttt{"message:"} prefix gives access to the headers of the message being
+composed. It allows to use the same message template for composing messages to
+different people, for example, by reusing the value of \texttt{To:} header in
+the message text. It has the following variables:
+
+\begin{itemize}
+   \item{to}
+   \item{cc}
+   \item{bcc}
+   \item{subject}
+   \item{firstname}
+   \item{lastname}
+\end{itemize}
+
+
+\subsubsection{Original message category}
+
+The category \texttt{"original:"} gives access to the message being forwarded
+or replied to. Accordingly, you can't use this category in the templates for
+the new messages.
+
+\begin{itemize}
+   \item{date}
+   \item{from}
+   \item{subject}
+   \item{fullname}
+   \item{firstname}
+   \item{lastname}
+   \item{to}
+   \item{cc}
+   \item{replyto}
+   \item{newsgroups}
+   \item{domain}
+   \item{header}
+\end{itemize}
+
+
+\subsubsection{File category}
+
+The \texttt{"file:"} category doesn't contain any fixed names, instead it
+allows you to insert the named file in the message text by using (full) path to
+it as \textit{name}. There are two arguments: \texttt{ask} and \texttt{quote}.
+The first will ask the user for the file to insert during the template
+expansion (with default being the file name in the template) and the second one
+will insert the file prepending a quote marker before each of its lines.
+
+
+\subsubsection{Attach category}
+
+The \texttt{"attach:"} category is very similar to the \texttt{"file:"} one,
+the only difference being that the contents of the file is attached and not
+inserted as text. It also supports \texttt{ask} but not \texttt{quote}
+arguments as the latter doesn't make sense for attachments.
+
+
+\subsubsection{Command category}
+
+Like the two previous one, this category doesn't have any standard names
+neither. The syntax \texttt{"cmd:\textit{name}"} allows to execute an external
+command \textit{name} and insert its output in the message text. The template
+arguments are passed to the command as command line parameters.
+
+
+\subsubsection{Python category}
+
+Very similar to the previous category, this one allows to execute arbitrary
+Python scripts. Currently this is not implemented.
+
+
+\subsubsection{Header category}
+
+Using \texttt{"header:"} category you can \emph{change} the values of the
+headers of the new message. This is mostly useful in the templates for the
+messages which are always sent to the same addressee as then you don't have to
+enter it manually each time. The \textit{name} is the name of the header to set
+and the (only allowed) argument is its value. Any header names, standard or
+not, can be used.
+
 
 
 \section{Understanding program options}
