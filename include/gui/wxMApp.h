@@ -69,8 +69,9 @@ public:
    virtual void ShowLog(bool doShow = TRUE);
    virtual void SetLogFile(const String& filename);
 
-   // override this to return true only if all frames can close
+   // program termination helpers
    virtual bool CanClose() const;
+   virtual void OnClose();
 
    // wxWin calls these functions to start/run/stop the application
    virtual bool OnInit();
@@ -200,9 +201,6 @@ private:
 
    /// get the default help directory
    static wxString GetHelpDir();
-
-   /// implement base class pure virtual
-   virtual void DoExit();
 
    /// an iconmanager instance
    wxIconManager *m_IconManager;

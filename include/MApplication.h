@@ -92,6 +92,11 @@ public:
    virtual void OnAbnormalTermination();
 
    /**
+     @name Exiting the application
+    */
+   //@{
+
+   /**
       Checks whether it is alright to exit the application now.
       Asks all the opened frames whether it's ok for them to close: returns
       true only if all of them returned true (base class version always
@@ -104,30 +109,47 @@ public:
    */
    virtual bool CanClose(void) const;
 
-   /// Returns the main frame.
-   virtual class MainFrameBase *GetMainFrame(void)
-      { return (MainFrameBase *)m_topLevelFrame; }
-
-
-   /** add a frame to the list of frames which were already asked whether it
-       was ok to close them and returned true - this prevents them from being
-       asked the second time
-     */
+   /**
+     Add a frame to the list of frames which were already asked whether it
+     was ok to close them and returned true - this prevents them from being
+     asked the second time
+    */
    void AddToFramesOkToClose(const wxMFrame *frame);
 
-   /** has this frame already been asked (and replied "yes")?
-     */
+   /**
+     Reset the list of frames which have been already asked about closing.
+   */
+   void ResetFramesOkToClose();
+
+   /**
+     Has this frame already been asked if it's ok to close it (and replied
+     "yes")?
+    */
    bool IsOkToClose(const wxMFrame *frame) const;
 
-   /** ends the application (unless ask == TRUE and the user cancels shutdown)
-     */
+   /**
+     Terminates the application (unless ask == TRUE and the user cancels
+     shutdown)
+    */
    void Exit(bool ask = TRUE);
+
+   /**
+     Called just before the application terminates, it is impossible to prevent
+     it from happening any more by now.
+    */
+   virtual void OnClose();
+
+   //@}
 
    /** Gets help for a specific topic.
        @param id help id from MHelp.h
        @param parent parent window pointer
    */
    virtual void Help(int id, wxWindow *parent = NULL) = 0;
+
+   /// Returns the main frame.
+   virtual class MainFrameBase *GetMainFrame(void)
+      { return (MainFrameBase *)m_topLevelFrame; }
 
    /** gets toplevel frame
        @return the toplevel window of the application
@@ -407,9 +429,6 @@ protected:
 
    /// Send all messages from the outbox "name"
    void SendOutbox(const String &name, bool checkOnline) const;
-
-   /// really (and unconditionally) terminate the app
-   virtual void DoExit() = 0;
 
    /**
      Initializes the value of the global and local directories returned by

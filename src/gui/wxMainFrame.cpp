@@ -379,24 +379,31 @@ wxMainFrame::OpenFolder(MFolder *pFolder, bool readonly)
 bool
 wxMainFrame::CanClose() const
 {
+   // just in case it's still opened - may get in the way of our dialogs
+   CloseSplash();
+
    // closing the main frame will close the app so ask the other frames
    // whether it's ok to close them
-   bool rc = mApplication->CanClose();
-
-   if ( rc )
+   if ( !mApplication->CanClose() )
    {
-      // remember the last opened folder name
-      if ( READ_APPCONFIG(MP_REOPENLASTFOLDER) )
-      {
-         // save the last opened folder if we're going to reopen it
-         mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, m_folderName);
-      }
-
-      // make sure folder is closed before we close the window
-      m_FolderView->SetFolder(NULL);
+      // not confirmed by user
+      return false;
    }
 
-   return rc;
+   // remember the last opened folder name
+   if ( READ_APPCONFIG(MP_REOPENLASTFOLDER) )
+   {
+      // save the last opened folder if we're going to reopen it
+      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, m_folderName);
+   }
+
+   // make sure folder is closed before we close the window
+   m_FolderView->SetFolder(NULL);
+
+   // tell all the others that we're going away
+   mApplication->OnClose();
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------

@@ -728,12 +728,32 @@ MAppBase::CanClose() const
       msg += folders;
       msg += _("Do you want to exit anyway?");
 
-      return MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
-                                 M_DLG_NO_DEFAULT,
-                                 M_MSGBOX_ABANDON_CRITICAL);
+      if ( !MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
+                                M_DLG_NO_DEFAULT,
+                                M_MSGBOX_ABANDON_CRITICAL) )
+         return false;
    }
 
+   // ok, we're going to shut down
    return true;
+}
+
+void
+MAppBase::OnClose()
+{
+#if 0
+   if ( READ_APPCONFIG(MP_REOPENLASTFOLDER) )
+   {
+      // reset the list of folders to be reopened, it will be recreated in
+      // MEventId_AppExit handlers
+      GetProfile()->writeEntry(MP_OPENFOLDERS, "");
+   }
+#endif // 0
+
+   // send an event telling everybody we're closing: note that this can't
+   // be blocked, it is just a notification
+   MEventManager::Send(new MEventData(MEventId_AppExit));
+   MEventManager::DispatchPending();
 }
 
 void
@@ -745,6 +765,13 @@ MAppBase::AddToFramesOkToClose(const wxMFrame *frame)
    m_framesOkToClose->Add(frame);
 }
 
+void
+MAppBase::ResetFramesOkToClose()
+{
+   if ( m_framesOkToClose )
+      m_framesOkToClose->Empty();
+}
+
 bool
 MAppBase::IsOkToClose(const wxMFrame *frame) const
 {
@@ -754,33 +781,10 @@ MAppBase::IsOkToClose(const wxMFrame *frame) const
 void
 MAppBase::Exit(bool ask)
 {
-   // in case it's still opened...
-   CloseSplash();
+   CHECK_RET( m_topLevelFrame, "can't close main window - there is none" );
 
-   if ( !ask || CanClose() )
-   {
-      if ( READ_APPCONFIG(MP_REOPENLASTFOLDER) )
-      {
-         // reset the list of folders to be reopened, it will be recreated in
-         // MEventId_AppExit handlers
-         GetProfile()->writeEntry(MP_OPENFOLDERS, "");
-      }
-
-      // send an event telling everybody we're closing: note that this can't
-      // be blocked, it is just a notification
-      MEventManager::Send(new MEventData(MEventId_AppExit));
-      MEventManager::DispatchPending();
-
-      // this will close all our window and thus terminate the application
-      DoExit();
-   }
-   else
-   {
-      // when we will try to close the next time, we shouldn't assume that
-      // these frames still don't mind being closed - may be the user will
-      // modify the compose view contents or something else changes
-      m_framesOkToClose->Empty();
-   }
+   // if we don't ask, force closing the frame by passing TRUE to Close()
+   m_topLevelFrame->Close(!ask);
 }
 
 void MAppBase::UpdateAwayMode()

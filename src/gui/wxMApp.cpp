@@ -602,7 +602,7 @@ wxMApp::CanClose() const
    // If we get called the second time, we just reuse our old value, but only
    // if it was TRUE (if we couldn't close before, may be we can now)
    if ( m_CanClose )
-      return m_CanClose;
+      return true;
 
    // verify that the user didn't accidentally remembered "No" as the answer to
    // the next message box - the problem with this is that in this case there
@@ -622,50 +622,56 @@ wxMApp::CanClose() const
    }
 
    // ask the user for confirmation
-   if ( !MDialog_YesNoDialog(_("Do you really want to exit Mahogany?"),
-                              m_topLevelFrame,
-                              MDIALOG_YESNOTITLE,
-                              M_DLG_YES_DEFAULT | M_DLG_NOT_ON_NO,
-                              M_MSGBOX_CONFIRM_EXIT) )
+   bool rc = MDialog_YesNoDialog
+             (
+               _("Do you really want to exit Mahogany?"),
+               m_topLevelFrame,
+               MDIALOG_YESNOTITLE,
+               M_DLG_YES_DEFAULT | M_DLG_NOT_ON_NO,
+               M_MSGBOX_CONFIRM_EXIT
+             );
+
+   if ( rc )
    {
+      // now check for anything else which may require the user intervention
+      if ( !MAppBase::CanClose() )
+         return false;
+
+      wxWindowList::Node *node = wxTopLevelWindows.GetFirst();
+      while ( node && rc )
+      {
+         wxWindow *win = node->GetData();
+         node = node->GetNext();
+
+         // We do not ask the toplevel frame as this would ask us again,
+         // leading to some recursion.
+         if ( win->IsKindOf(CLASSINFO(wxMFrame)) && win != m_topLevelFrame)
+         {
+            wxMFrame *frame = (wxMFrame *)win;
+
+            if ( !IsOkToClose(frame) )
+            {
+               rc = frame->CanClose();
+            }
+            //else: had been asked before
+         }
+         //else: what to do here? if there is something other than a frame
+         //      opened, it might be a (non modal) dialog or may be the log
+         //      frame?
+      }
+   }
+
+   if ( !rc )
+   {
+      // when we will try to close the next time, we shouldn't assume that
+      // these frames still don't mind being closed - may be the user will
+      // modify the compose view contents or something else changes
+      ((MAppBase *)this)->ResetFramesOkToClose();  // const_cast
+
       return false;
    }
 
-   wxWindowList::Node *node = wxTopLevelWindows.GetFirst();
-   while ( node )
-   {
-      wxWindow *win = node->GetData();
-      node = node->GetNext();
-
-      // We do not ask the toplevel frame as this would ask us again,
-      // leading to some recursion.
-      if ( win->IsKindOf(CLASSINFO(wxMFrame)) && win != m_topLevelFrame)
-      {
-         wxMFrame *frame = (wxMFrame *)win;
-
-         if ( !IsOkToClose(frame) )
-         {
-            if ( !frame->CanClose() )
-               return false;
-         }
-         //else: had been asked before
-      }
-      //else: what to do here? if there is something other than a frame
-      //      opened, it might be a (non modal) dialog or may be the log
-      //      frame?
-   }
-
-
-   // We assume that we can always close the toplevel frame if we make
-   // it until here. Attemps to close the toplevel frame will lead to
-   // this function being evaluated anyway. The frame itself does not
-   // do any tests.
-   wxMApp *self = (wxMApp *)this;
-   self->AddToFramesOkToClose(m_topLevelFrame);
-
-   self->m_CanClose = MAppBase::CanClose();
-
-   return m_CanClose;
+   return MAppBase::CanClose();
 }
 
 void wxMApp::OnQueryEndSession(wxCloseEvent& event)
@@ -678,19 +684,19 @@ void wxMApp::OnQueryEndSession(wxCloseEvent& event)
 
 // do close the app by closing all frames
 void
-wxMApp::DoExit()
+wxMApp::OnClose()
 {
    // shut down MEvent handling
-   if(m_IdleTimer)
+   if ( m_IdleTimer )
    {
-      m_IdleTimer->Stop();
       delete m_IdleTimer;
-      m_IdleTimer = NULL; // paranoid
+      m_IdleTimer = NULL;
    }
 
    // flush the logs while we can
    wxLog::FlushActive();
 
+#if 0
    // before deleting the frames, make sure that all dialogs which could be
    // still hanging around don't do it any more
    wxTheApp->DeletePendingObjects();
@@ -713,6 +719,7 @@ wxMApp::DoExit()
          frame->Close(TRUE);
       }
    }
+#endif // 0
 }
 
 // app initilization
