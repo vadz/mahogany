@@ -53,7 +53,7 @@
 // private classes
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY(wxBitmap *, wxIconArray);
+WX_DEFINE_ARRAY(wxBitmap *, BitmapArray);
 
 class wxIconView : public wxListCtrl
 {
@@ -62,7 +62,7 @@ public:
    static const int ms_iconSize;
 
    wxIconView(wxDialog *parent,
-              const wxIconArray& icons,
+              const BitmapArray& icons,
               int selection);
 };
 
@@ -71,7 +71,7 @@ class wxIconSelectionDialog : public wxManuallyLaidOutDialog
 public:
    wxIconSelectionDialog(wxWindow *parent,
                          const wxString& title,
-                         const wxIconArray& icons,
+                         const BitmapArray& icons,
                          int selection);
 
    // accessors
@@ -469,7 +469,7 @@ void wxIconBrowseButton::DoBrowse()
 {
    size_t n, nIcons = m_iconNames.GetCount();
 
-   wxIconArray icons;
+   BitmapArray icons;
    icons.Alloc(nIcons);
 
    for ( n = 0; n < nIcons; n++ )
@@ -537,7 +537,7 @@ const int wxIconView::ms_iconSize = 32;
 #endif
 
 wxIconView::wxIconView(wxDialog *parent,
-                       const wxIconArray& icons,
+                       const BitmapArray& icons,
                        int selection)
           : wxListCtrl(parent, -1, wxDefaultPosition, wxDefaultSize,
                        wxLC_ICON |
@@ -572,7 +572,7 @@ wxIconView::wxIconView(wxDialog *parent,
 
 wxIconSelectionDialog::wxIconSelectionDialog(wxWindow *parent,
                                              const wxString& title,
-                                             const wxIconArray& icons,
+                                             const BitmapArray& icons,
                                              int selection)
                      : wxManuallyLaidOutDialog(parent, title, "IconSelect")
 {
