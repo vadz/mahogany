@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.9  1998/06/09 14:11:29  VZ
+ * event tables for menu events added (wxWin2)
+ *
  * Revision 1.8  1998/06/05 16:56:22  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -83,6 +87,20 @@
 #include "gui/wxMessageView.h"
 #include "gui/wxComposeView.h"
 
+#ifdef USE_WXWINDOWS2
+   BEGIN_EVENT_TABLE(wxFolderView, wxMFrame)
+      EVT_MENU(WXMENU_MSG_PRINT,       wxFolderView::OnPrint)
+      EVT_MENU(WXMENU_MSG_DELETE,      wxFolderView::OnDelete)
+      EVT_MENU(WXMENU_MSG_SAVE,        wxFolderView::OnSave)
+      EVT_MENU(WXMENU_MSG_OPEN,        wxFolderView::OnOpen)
+      EVT_MENU(WXMENU_MSG_REPLY,       wxFolderView::OnReply)
+      EVT_MENU(WXMENU_MSG_FORWARD,     wxFolderView::OnForward)
+      EVT_MENU(WXMENU_MSG_SELECTALL,   wxFolderView::OnSelectAll)
+      EVT_MENU(WXMENU_MSG_DESELECTALL, wxFolderView::OnDeselectAll)
+      EVT_MENU(WXMENU_MSG_EXPUNGE,     wxFolderView::OnExpunge)
+   END_EVENT_TABLE()
+#endif // wxWin2
+ 
 wxFolderView::wxFolderView(MailFolder *iMailFolder,
                            const String &iname,
                            wxFrame *parent,
@@ -350,11 +368,11 @@ wxFolderViewPanel::wxFolderViewPanel(wxFolderView *iFolderView)
 {
    folderView = iFolderView;
 
-   #ifdef USE_WXWINDOWS2
+#  ifdef USE_WXWINDOWS2
       Create(folderView, -1);
-   #else
+#  else
       Create(folderView);
-   #endif
+#  endif
 }
 
 void
@@ -366,7 +384,12 @@ wxFolderViewPanel::OnDefaultAction(wxItem *item)
    folderView->OpenMessages(n, selections);
 }
 
+#ifdef USE_WXWINDOWS2
+   // @@@ wxFolderViewPanel::OnCommand() doesn't eixst in wxWin2
+#else // wxWin1
 void
 wxFolderViewPanel::OnCommand(wxWindow &win, wxCommandEvent &event)
 {
 }
+#endif // wxWin1/2
+

@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/06/09 14:11:32  VZ
+ * event tables for menu events added (wxWin2)
+ *
  * Revision 1.4  1998/06/05 16:56:56  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -61,7 +65,10 @@ public:
    /** gets called for events happening in the panel
        @param win the window
    */
+#ifdef USE_WXWINDOWS2
+#else  // wxWin1
    void OnCommand(wxWindow &win, wxCommandEvent &ev);
+#endif // wxWin1/2
 
    void OnDefaultAction(wxItem *item);
 };
@@ -142,6 +149,7 @@ public:
    /// called on Menu selection
    void OnMenuCommand(int id);
 
+
    /** Open some messages.
        @param n number of messages to open
        @messages pointer to an array holding the message numbers
@@ -175,7 +183,19 @@ public:
    */
    int   GetSelections(int **selections);
 
+#ifdef USE_WXWINDOWS2
+   void OnPrint() { OnMenuCommand(WXMENU_MSG_PRINT); }
+   void OnDelete() { OnMenuCommand(WXMENU_MSG_DELETE); }
+   void OnSave() { OnMenuCommand(WXMENU_MSG_SAVE); }
+   void OnOpen() { OnMenuCommand(WXMENU_MSG_OPEN); }
+   void OnReply() { OnMenuCommand(WXMENU_MSG_REPLY); }
+   void OnForward() { OnMenuCommand(WXMENU_MSG_FORWARD); }
+   void OnSelectAll() { OnMenuCommand(WXMENU_MSG_SELECTALL); }
+   void OnDeselectAll() { OnMenuCommand(WXMENU_MSG_DESELECTALL); }
+   void OnExpunge() { OnMenuCommand(WXMENU_MSG_EXPUNGE); }
 
+   DECLARE_EVENT_TABLE() 
+#endif // wxWin2
 }; 
 
 #endif
