@@ -886,7 +886,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Dialog minimal size t&hreshold (kb)"),             Field_Number,    -1 },
    { gettext_noop("Progress dialog &delay (seconds)"),             Field_Number,    -1 },
    { gettext_noop("Show images &inline"),             Field_Bool,    -1 },
-   { gettext_noop("Btu only if size is less than (kb)"), Field_Number, ConfigField_MessageViewInlineGraphics },
+   { gettext_noop("But only if size is less than (kb)"), Field_Number, ConfigField_MessageViewInlineGraphics },
    { gettext_noop("&Autodetect font encoding"),    Field_Bool,    -1 },
    { gettext_noop("Display &text attachments inline"),Field_Bool,    -1 },
    { gettext_noop("Display &mail messages as text"),Field_Bool,    -1 },
