@@ -77,7 +77,6 @@ d) Win32 binaries
 - run Inno Setup on extra/setup/M.iss
 
 
-
 5. Uploading the files
 ----------------------
 
@@ -87,6 +86,7 @@ doc/Mannounce.txt for the change log.
 
 Don't forget to upload Mdocs.tar.gz (do "make -C doc mdocs_tgz" to create it)!
 
+
 6. Announcing the release
 -------------------------
 
@@ -95,8 +95,8 @@ a) mailing lists and newsgroups
 Edit and send the announcement (doc/Mannounce.txt) to the following addresses:
 
 mahogany-announce@lists.sourceforge.net
-
-[should we spam the other ones?]
+mahogany-users@lists.sourceforge.net
+mahogany-developers@lists.sourceforge.net
 
 c-client@u.washington.edu
 wxwin-announce@lists.wxwindows.org
