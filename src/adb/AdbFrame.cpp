@@ -692,7 +692,7 @@ public:
   // find the contents of "lookup" text zone under the root key
   void DoFind();
   // find all entries which match the string under "root" (or the current
-  // entry if root == NULL). '*' and '?' are reckognized, case sensitive.
+  // entry if root == NULL). '*' and '?' are recognized, case sensitive.
   void DoFind(const char *szFindWhat, AdbTreeNode *root = NULL);
   // moves selection to the next item (previously found by DoFind())
   void AdvanceToNextFound();

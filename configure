@@ -3812,7 +3812,7 @@ fi
 
 *)
 	USE_PYTHON=0
-	echo "configure: warning: Unreckognized --with-python option value." 1>&2
+	echo "configure: warning: Unrecognized --with-python option value." 1>&2
 	;;
 esac
 

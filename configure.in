@@ -673,7 +673,7 @@ static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
 
 *)
 	USE_PYTHON=0
-	AC_MSG_WARN(Unreckognized --with-python option value.)
+	AC_MSG_WARN(Unrecognized --with-python option value.)
 	;;
 esac
 

@@ -997,11 +997,11 @@ String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
             else if ( *p == 'Q' || *p == 'q' )
                enc2047 = Encoding_QuotedPrintable;
          }
-         //else: multi letter encoding unreckognized
+         //else: multi letter encoding unrecognized
 
          if ( enc2047 == Encoding_Unknown )
          {
-            wxLogDebug("Unreckognized header encoding in '%s'.",
+            wxLogDebug("Unrecognized header encoding in '%s'.",
                        pEncWordStart);
 
             // scan until the end of the encoded word

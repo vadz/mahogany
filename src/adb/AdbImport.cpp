@@ -266,7 +266,7 @@ bool AdbImport(const String& filename,
    }
 
    // FIXME a hack which ensure that the header is written before the entries
-   //       (needed for automatic reckognition of ADB format later)
+   //       (needed for automatic recognition of ADB format later)
    {
       wxString adbUserName = username;
       if ( !adbUserName )

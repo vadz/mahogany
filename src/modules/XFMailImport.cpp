@@ -298,7 +298,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
       if ( !typeString.ToULong(&nType) || (nType != 1 && nType != 8) )
       {
          wxLogTrace("importxfmail",
-                    "%s(%u): unreckognized folder type %s, skipping.",
+                    "%s(%u): unrecognized folder type %s, skipping.",
                     foldersfilename.c_str(), nLine + 1, typeString.c_str());
          continue;
       }
@@ -640,7 +640,7 @@ typedef struct _xf_rule {
       if ( where == ORC_W_Illegal )
       {
          wxLogTrace("importxfmail",
-                    "%s(%u): unreckognized rule header '%s', skipping.",
+                    "%s(%u): unrecognized rule header '%s', skipping.",
                     filename.c_str(), nLine + 1, fmatch.c_str());
 
          continue;
