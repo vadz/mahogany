@@ -1118,7 +1118,7 @@ BEGIN_EVENT_TABLE(wxAdbEditFrame, wxFrame)
 
   // lookup combobox
   EVT_TEXT(AdbView_Lookup, wxAdbEditFrame::OnTextLookupChange)
-  EVT_COMBOBOX(AdbView_Lookup, wxAdbEditFrame::OnTextLookupEnter)
+  EVT_TEXT_ENTER(AdbView_Lookup, wxAdbEditFrame::OnTextLookupEnter)
 
   // update UI events
     // enable/disbale anything that can be done only when an entry is
@@ -2503,7 +2503,6 @@ void wxAdbEditFrame::OnTextLookupEnter(wxCommandEvent&)
   DoFind();
 }
 
-// FIXME should do it in UpdateUI handler
 void wxAdbEditFrame::OnTextLookupChange(wxCommandEvent&)
 {
   // these events are never received this early under MSW
