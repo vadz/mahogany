@@ -3710,8 +3710,18 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
          m_expungedIndices = NULL;
       }
 
+      // our cached idea of the number of messages we have doesn't correspond
+      // to reality any more
+      //
+      // flushing it like we do here is a bit dumb, so maybe we could analyze
+      // the status of only the messages? i.e. add "range" parameters to
+      // DoCountMessages() and call it from here?
+      MfStatusCache::Get()->InvalidateStatus(GetName());
+
+      // update to use in the enclosing "if" test the next time
       m_nMessages = msgnoMax;
 
+      // see if we have any new messages (i.e. new messages which are "new")
       if ( stream->recent )
       {
          // we need to apply the filtering code but we can't do it from here
