@@ -3112,7 +3112,8 @@ MailFolderCmn::FilterNewMail()
       return true;
    }
 
-   if ( messages->IsEmpty() )
+   size_t count = messages->GetCount();
+   if ( !count )
    {
       delete messages;
 
@@ -3124,8 +3125,13 @@ MailFolderCmn::FilterNewMail()
    // notice that it isn't really important that we force retrieving all these
    // headers now (instead of getting UIDs directly from server) as they will
    // be needed for Apply() below soon anyhow
-   size_t n,
-          count = messages->GetCount();
+
+   // it is very common to have a range of new messages, so cache all of them
+   // at once
+   hil->Cache(hil->GetIdxFromMsgno(messages->Item(0)),
+              hil->GetIdxFromMsgno(messages->Item(count - 1)));
+
+   size_t n;
    for ( n = 0; n < count; n++ )
    {
       HeaderInfo *hi = hil->GetItemByMsgno(messages->Item(n));
