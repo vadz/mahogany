@@ -235,7 +235,9 @@ private:
    void Restore(void);
    void Install(void);
    
-   void InstallFiles(char ** fnames, int files_total);
+   void AutoInstall(void);
+   void InstallFiles(char ** fnames, int files_total, bool delFiles);
+   void InstallFromDir(wxString directory, bool delFiles);
    
    inline void ErrorMessage(const String &msg)
       { m_MInterface->Message(msg,NULL,"PalmOS module error!");wxYield(); }
@@ -262,6 +264,7 @@ private:
    bool m_IncrBackup, m_BackupSync;
    String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
    String m_BackupDir;
+   String m_AutoInstallDir;
 
    class wxDeviceLock *m_Lock;
 };
@@ -937,7 +940,7 @@ pdbCompare(struct db * d1, struct db * d2)
 }
 
 void
-PalmOSModule::InstallFiles(char **fnames, int files_total)
+PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
 {
    struct DBInfo info;
    struct db * db[256];
@@ -982,6 +985,11 @@ PalmOSModule::InstallFiles(char **fnames, int files_total)
   	
       pi_file_close(f);
       dbcount++;
+
+      // shall we delete the file after deletion?      
+      if (delFile) {
+         unlink(fnames[j]);
+      }
    }
 
    // sort list in alphabetical order
@@ -1044,6 +1052,18 @@ PalmOSModule::InstallFiles(char **fnames, int files_total)
 void
 PalmOSModule::Restore() 
 {
+   InstallFromDir(m_BackupDir, false);
+}
+
+void
+PalmOSModule::AutoInstall()
+{
+   InstallFromDir(m_AutoInstallDir, true);
+}
+
+void
+PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
+{
    PiConnection conn(this);
    if( ! IsConnected())
       return;
@@ -1052,9 +1072,9 @@ PalmOSModule::Restore()
    int    ofile_total; 
    char ** fnames = 0;
 
-   dir = opendir(m_BackupDir);
+   dir = opendir(directory);
    if (dir <= 0) {
-      ErrorMessage(_("Couldn´t access backup directory."));
+      ErrorMessage(_("Couldn´t access directory.")); //TODO : add directory name
       return;
    }
 
@@ -1064,10 +1084,9 @@ PalmOSModule::Restore()
    closedir(dir);
 
    // install files
-   InstallFiles(fnames, ofile_total);
+   InstallFiles(fnames, ofile_total, delFiles);
    DeleteFileList(fnames, ofile_total);
 }
-
 
 void
 PalmOSModule::Install()
@@ -1076,6 +1095,10 @@ PalmOSModule::Install()
    char ** fnames = 0;
 
    MAppBase *mapp = m_MInterface->GetMApplication();
+
+
+   // TODO: extend to "real" install routine, e.g.
+   // let choose different files in different directories
 
    /*
    wxString wxPFileSelector("PalmOS/InstallFilesDlg",
@@ -1101,7 +1124,7 @@ PalmOSModule::Install()
    // install files
    PiConnection conn(this);
    if( IsConnected())
-      InstallFiles(fnames, ofile_total);
+      InstallFiles(fnames, ofile_total, false);
    DeleteFileList(fnames, ofile_total);
 }
 
@@ -1114,15 +1137,19 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
    struct AddressAppInfo aai;
    PalmEntryGroup *rootGroup;
 
-/*   
-     if (!palmbook) {
-     AdbManager_obj adbManager;
-     adbManager->LoadAll();
-      
-     // There is no PalmBook, create a new one if possible
-     palmbook = (PalmBook *)adbManager->CreateBook((String)"PalmOS Addressbook");
-*/      
    if (!palmbook) {
+      AdbManager_obj adbManager;
+      adbManager->LoadAll();
+      
+      String adbName;
+      
+      sprintf(adbName, "%s", "PalmOS-ADB (ReadOnly)");
+      // There is no PalmBook, create a new one if possible
+      palmbook = (PalmBook *)adbManager->CreateBook((String)"PalmOS Addressbook", NULL , &adbName);
+   }
+
+   if (!palmbook) {
+      ErrorMessage(_("Couldn´t create new palmbook"));
       return;
    }
 
