@@ -1698,7 +1698,7 @@ wxComposeView::OnMenuCommand(int id)
                                            _("Please choose a file to insert."),
                                            NULL, "dead.letter", NULL,
                                            _(wxALL_FILES),
-                                           wxOPEN | wxHIDE_READONLY,
+                                           wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
                                            this);
 
          if ( filename.IsEmpty() )
