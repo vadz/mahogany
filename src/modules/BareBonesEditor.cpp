@@ -535,7 +535,7 @@ wxBareBonesEditorNotebook::wxBareBonesEditorNotebook(
    : wxNotebook(parent,-1), m_editor(editor)
 {
    wxPanel *body = new wxPanel(this);
-   AddPage(body,_T("Message Body"));
+   AddPage(body,_("Message Body"));
 
    wxSizer *textColumn = new wxBoxSizer(wxVERTICAL);
    body->SetSizer(textColumn);
@@ -559,7 +559,7 @@ wxSizer *wxBareBonesEditorNotebook::CreateButtonRow(wxWindow *parent)
    buttonRow->Add(new wxButton(parent,Button_UnformatParagraph,
       _("Unformat Paragraph")),0,wxEXPAND);
    buttonRow->Add(new wxButton(parent,Button_UnformatAll,
-      _T("Unformat All")),0,wxEXPAND);
+      _("Unformat All")),0,wxEXPAND);
 
    return buttonRow;
 }
@@ -567,7 +567,7 @@ wxSizer *wxBareBonesEditorNotebook::CreateButtonRow(wxWindow *parent)
 void wxBareBonesEditorNotebook::CreateAttachmentPage()
 {
    wxPanel *files = new wxPanel(this);
-   AddPage(files,_T("Attachments"));
+   AddPage(files,_("Attachments"));
 
    wxBoxSizer *fileSizer = new wxBoxSizer(wxVERTICAL);
    files->SetSizer(fileSizer);
