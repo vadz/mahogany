@@ -48,9 +48,18 @@ the file extra\scripts\wxmsw_setup.h which had to be used previously.
 b) Build process
 ----------------
 
-   Open the project workspace M.dsw in Visual C++ IDE. You will have to load
-(right click the project in the project tree, choose "Load") the following
-projects contained in this workspace if they are not loaded yet:
+   Before building Mahogany you will need to build wxWindows. To do it, you
+should open src/wxWindows.dsw in wxWindows directory and build wxWindows
+project in it. Note that in wxWindows cvs HEAD there are new project files in
+build directory but you should _not_ use them. You may use extra\scripts\
+wxmsw_setup.h file instead of the standard setup.h when building if you want to
+disable all the features not needed by Mahogany but doing this is optional and
+you should revert to the standard wx/setup.h if using wxmsw_setup.h results in
+errors (it is not always up to date...).
+
+   After this you can open the project workspace M.dsw in Visual C++ IDE. You
+will have to load (right click the project in the project tree, choose "Load")
+the following projects contained in this workspace if they are not loaded yet:
 
 * cclient - the mail routines support library
 * compface - the library for X-Face handling
