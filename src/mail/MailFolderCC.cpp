@@ -2060,8 +2060,16 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 void
 MailFolderCC::UpdateStatus(void)
 {
-   m_nMessages = m_MailStream->nmsgs;
-   m_nRecent = m_MailStream->recent;
+   if(m_nMessages != m_MailStream->nmsgs ||
+      m_nRecent != m_MailStream->recent)
+   {
+      m_nMessages = m_MailStream->nmsgs;
+      m_nRecent = m_MailStream->recent;
+      MailFolderCC::Event *evptr = new
+         MailFolderCC::Event(m_MailStream,
+                             MailFolderCC::Status,__LINE__);
+      MailFolderCC::QueueEvent(evptr);
+   }
    m_LastUId = m_MailStream->uid_last;
 }
 
