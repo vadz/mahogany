@@ -105,7 +105,8 @@ String MailFolderCC::qprint(const String &in)
    {
       cptr += 2; // "?="
       unsigned long unused_len;
-      char *cptr2 = (char *)rfc822_qprint((unsigned char *)quoted.c_str(), in.Length(), &unused_len);
+      char *cptr2 = (char *)rfc822_qprint((unsigned char *)quoted.c_str(), quoted.length(),
+                                          &unused_len);
       out +=  cptr2;
       fs_give((void **) &cptr2); // free memory allocated
    }
