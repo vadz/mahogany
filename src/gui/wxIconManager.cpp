@@ -80,7 +80,9 @@ wxIconManager::~wxIconManager()
    for ( i = m_iconList->begin(); i != m_iconList->end(); i++ ) {
       // against what your common sense may tell you, the icons we manage
       // should *not* be deleted here because wxWindows does it too!
+      // now we do!
       IconData *id = *i;
+      delete id->iconPtr;
       delete id;
    }
 
@@ -106,6 +108,18 @@ wxIconManager::GetBitmap(const String& bmpName)
    return GetIcon(bmpName);
 }
 
+/*
+  We now always return a newly created wxIcon using the copy
+  constructor. Such we make sure that the original icon exists
+  throughout the lifetime of the application and wxIconManager will
+  delete it at program exit.
+  The copy constructor doesn't copy but keeps track of reference
+  counts for us.
+  If a class doesn't delete the icon it requested, this will lead to a 
+  wrong reference count but no memory loss as the icon exists all the
+  time anyway.
+*/
+
 wxIcon *
 wxIconManager::GetIcon(String const &_iconName)
 {
@@ -114,7 +128,7 @@ wxIconManager::GetIcon(String const &_iconName)
       // first, look in the ressources
       wxIcon *icon = new wxIcon(_iconName);
       if ( icon->Ok() )
-         return icon;
+         return  icon;
       else
          delete icon;
 
@@ -132,7 +146,7 @@ wxIconManager::GetIcon(String const &_iconName)
    for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
       if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0)
-        return (*i)->iconPtr;
+        return new wxIcon((*i)->iconPtr);
    }
 
    // not found, now look for MIME subtype, after '/':
@@ -140,7 +154,7 @@ wxIconManager::GetIcon(String const &_iconName)
    for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
       if(strcmp((*i)->iconName.c_str(), key.c_str())==0)
-        return (*i)->iconPtr;
+        return new wxIcon((*i)->iconPtr);
    }
 
    // not found, now look for iconName without '/':
@@ -148,7 +162,7 @@ wxIconManager::GetIcon(String const &_iconName)
    for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
       if(strcmp((*i)->iconName.c_str(), key.c_str())==0)
-        return (*i)->iconPtr;
+        return new wxIcon((*i)->iconPtr);
    }
 
    // new step: try to load the icon files .png,.xpm,.gif:
@@ -181,10 +195,10 @@ wxIconManager::GetIcon(String const &_iconName)
          id->iconPtr = icn;
          id->iconName = key;
          m_iconList->push_front(id);
-         return icn;
+         return new wxIcon(icn);
       }
    }   
-   return m_unknownIcon;
+   return new wxIcon(m_unknownIcon);
 }
 
 void
