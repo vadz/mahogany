@@ -33,6 +33,7 @@ extern const MOption MP_USEPYTHON;
 
 extern "C"
 {
+   void init_MDialogs();
    void init_MString();
    void init_MProfile();
    void init_MailFolder();
@@ -136,6 +137,7 @@ InitPython(void)
       return true; // it is not an error to have it disabled
 
    // initialise the modules
+   init_MDialogs();
    init_MString();
    init_MProfile();
    init_MailFolder();
