@@ -1928,6 +1928,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          new MEventFolderTreeChangeData(fullname,
                                         MEventFolderTreeChangeData::Create)
          );
+      MEventManager::DispatchPending();
    }
 
    folder->DecRef();

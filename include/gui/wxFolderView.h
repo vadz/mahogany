@@ -162,6 +162,10 @@ protected:
    */
    void SaveMessages(wxArrayInt const &messages, String const &file);
 
+   /// The UIds of the last selected messages.
+   INTARRAY m_SelectedUIds;
+   /// The last focused UId.
+   UIdType  m_FocusedUId;
 private:
    /// profile name
    wxString m_ProfileName;
@@ -262,87 +266,5 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-#if 0
-// abc to define interface for listctrl/treectrl interaction
-
-class wxFolderBaseCtrl
-{
-public:
-   virtual void Clear(void) = 0;
-   virtual void AddEntry(String const &status, String const &sender, String
-                         const &subject, String const &date, String
-                         const &size) = 0;
-   virtual int GetSelections(wxArrayInt &selections) const = 0;
-   virtual ~wxFolderBaseCtrl() {}
-   virtual wxControl *GetControl(void) const = 0;;
-protected:
-   /// parent window
-   wxWindow *m_Parent;
-};
-#endif // 0
-
-class wxFolderListCtrl : public wxPListCtrl
-{
-public:
-   wxFolderListCtrl(wxWindow *parent, wxFolderView *fv);
-   ~wxFolderListCtrl();
-   void Clear(void);
-   void SetEntry(long index,String const &status, String const &sender, String
-                 const &subject, String const &date, String const
-                 &size);
-
-   void Select(long index, bool on=true)
-      { SetItemState(index,on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
-
-   int GetSelections(INTARRAY &selections) const;
-   bool IsSelected(long index)
-      { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
-
-   void OnSelected(wxListEvent& event);
-   void OnChar( wxKeyEvent &event);
-   void OnMouse(wxMouseEvent& event);
-   void OnDoubleClick(wxMouseEvent & /* event */);
-   void OnActivated(wxListEvent& event);
-   void OnCommandEvent(wxCommandEvent& event)
-      { m_FolderView->OnCommandEvent(event); }
-
-   bool EnableSelectionCallbacks(bool enabledisable = true)
-      {
-         bool rc = m_SelectionCallbacks;
-         m_SelectionCallbacks = enabledisable;
-         return rc;
-      }
-   // this is a workaround for focus handling under GTK but it should not be
-   // enabled under other platforms
-#ifndef OS_WIN
-   void OnMouseMove(wxMouseEvent &event)
-      {
-         if(m_FolderView->GetFocusFollowMode())
-            SetFocus();
-      }
-#endif // wxGTK
-
-protected:
-   long m_Style;
-   long m_NextIndex;
-   /// parent window
-   wxWindow *m_Parent;
-   /// the folder view
-   wxFolderView *m_FolderView;
-   /// column numbers
-   int m_columns[WXFLC_NUMENTRIES];
-   /// which entry is in column 0?
-   int m_firstColumn;
-   /// do we want OnSelect() callbacks?
-   bool m_SelectionCallbacks;
-   /// do we preview a message on a single mouse click?
-   bool m_PreviewOnSingleClick;
-   /// have we been used previously?
-   bool m_Initialised;
-   /// the popup menu
-   wxMenu *m_menu;
-
-   DECLARE_EVENT_TABLE()
-};
 
 #endif // WXFOLDERVIEW_H

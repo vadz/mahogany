@@ -281,8 +281,6 @@ void wxIconBrowseButton::SetIcon(size_t nIcon)
       int w1, h1; // size of the icon on the screen
       m_staticBitmap->GetSize(&w1, &h1);
 
-#if 0
-      //UGLY! disabled for now         image.Rescale(w1, h1);
       // size of the icon
       int w2 = bmp.GetWidth(),
           h2 = bmp.GetHeight();
@@ -293,7 +291,6 @@ void wxIconBrowseButton::SetIcon(size_t nIcon)
          bmp = image.ConvertToBitmap();
       }
       //else: the size is already correct
-#endif
       
       m_staticBitmap->SetBitmap(bmp);
    }
@@ -312,7 +309,6 @@ void wxIconBrowseButton::DoBrowse()
 
       // save some typing
       static const int size = wxIconView::ms_iconSize;
-#if 0
       if ( bmp.GetWidth() != size || bmp.GetHeight() != size )
       {
          // must resize the icon
@@ -320,7 +316,6 @@ void wxIconBrowseButton::DoBrowse()
          image.Rescale(size, size);
          bmp = image.ConvertToBitmap();
       }
-#endif
 
       icons.Add(new wxBitmap(bmp));
    }
@@ -366,7 +361,11 @@ wxFolderIconBrowseButton::wxFolderIconBrowseButton(wxWindow *parent,
 // wxIconView - the canvas which shows all icons
 // ----------------------------------------------------------------------------
 
+#ifdef __WXGTK__
+const int wxIconView::ms_iconSize = 16;
+#else
 const int wxIconView::ms_iconSize = 64;
+#endif
 
 wxIconView::wxIconView(wxDialog *parent,
                        const wxIconArray& icons,

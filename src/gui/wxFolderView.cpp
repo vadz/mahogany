@@ -52,19 +52,6 @@
 #include "MHelp.h"
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
 
-BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
-   EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
-   EVT_CHAR              (wxFolderListCtrl::OnChar)
-   EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnActivated)
-   EVT_RIGHT_DOWN( wxFolderListCtrl::OnMouse)
-   EVT_MENU(-1, wxFolderListCtrl::OnCommandEvent)
-   EVT_LEFT_DCLICK(wxFolderListCtrl::OnDoubleClick)
-#ifndef OS_WIN
-   EVT_MOTION (wxFolderListCtrl::OnMouseMove)
-#endif // wxGTK
-
-END_EVENT_TABLE()
-
 #define   LCFIX ((wxFolderListCtrl *)this)->
 
 static const char *wxFLC_ColumnNames[] =
@@ -77,6 +64,85 @@ static const char *wxFLC_ColumnNames[] =
 };
 
 static const char *wxFLC_DEFAULT_SIZES = "80:80:80:80:80";
+
+
+class wxFolderListCtrl : public wxPListCtrl
+{
+public:
+   wxFolderListCtrl(wxWindow *parent, wxFolderView *fv);
+   ~wxFolderListCtrl();
+   void Clear(void);
+   void SetEntry(long index,String const &status, String const &sender, String
+                 const &subject, String const &date, String const
+                 &size);
+
+   void Select(long index, bool on=true)
+      { SetItemState(index,on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
+
+   int GetSelections(INTARRAY &selections) const;
+   UIdType GetFocusedUId(void) const;
+   bool IsSelected(long index)
+      { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
+
+   void OnSelected(wxListEvent& event);
+   void OnChar( wxKeyEvent &event);
+   void OnMouse(wxMouseEvent& event);
+   void OnDoubleClick(wxMouseEvent & /* event */);
+   void OnActivated(wxListEvent& event);
+   void OnCommandEvent(wxCommandEvent& event)
+      { m_FolderView->OnCommandEvent(event); }
+
+   bool EnableSelectionCallbacks(bool enabledisable = true)
+      {
+         bool rc = m_SelectionCallbacks;
+         m_SelectionCallbacks = enabledisable;
+         return rc;
+      }
+   // this is a workaround for focus handling under GTK but it should not be
+   // enabled under other platforms
+#ifndef OS_WIN
+   void OnMouseMove(wxMouseEvent &event)
+      {
+         if(m_FolderView->GetFocusFollowMode())
+            SetFocus();
+      }
+#endif // wxGTK
+
+protected:
+   long m_Style;
+   long m_NextIndex;
+   /// parent window
+   wxWindow *m_Parent;
+   /// the folder view
+   wxFolderView *m_FolderView;
+   /// column numbers
+   int m_columns[WXFLC_NUMENTRIES];
+   /// which entry is in column 0?
+   int m_firstColumn;
+   /// do we want OnSelect() callbacks?
+   bool m_SelectionCallbacks;
+   /// do we preview a message on a single mouse click?
+   bool m_PreviewOnSingleClick;
+   /// have we been used previously?
+   bool m_Initialised;
+   /// the popup menu
+   wxMenu *m_menu;
+
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
+   EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
+   EVT_CHAR              (wxFolderListCtrl::OnChar)
+   EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnActivated)
+   EVT_RIGHT_DOWN( wxFolderListCtrl::OnMouse)
+   EVT_MENU(-1, wxFolderListCtrl::OnCommandEvent)
+   EVT_LEFT_DCLICK(wxFolderListCtrl::OnDoubleClick)
+#ifndef OS_WIN
+   EVT_MOTION (wxFolderListCtrl::OnMouseMove)
+#endif // wxGTK
+
+END_EVENT_TABLE()
 
 void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
@@ -247,7 +313,11 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
-   if(m_SelectionCallbacks)
+   // check if there is already a selected message, if so, don´t
+   // update the message view:
+   INTARRAY selections;
+   if(GetSelections(selections) == 0 
+      && m_SelectionCallbacks)
    {
       HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
       const HeaderInfo *hi = (*hil)[event.m_itemIndex];
@@ -347,6 +417,7 @@ wxFolderListCtrl::~wxFolderListCtrl()
 int
 wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
 {
+   selections.Empty();
    long item = -1;
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
    const HeaderInfo *hi = NULL;
@@ -375,6 +446,25 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
       hil->DecRef();
    }
    return selections.Count();
+}
+
+UIdType
+wxFolderListCtrl::GetFocusedUId(void) const
+{
+   UIdType uid = UID_ILLEGAL;
+   HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
+   ASSERT(hil);
+   const HeaderInfo *hi = NULL;
+   long item = -1;
+   item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
+   if(item != -1 && item < (long) hil->Count() )
+   {
+      hi = (*hil)[item];
+      if(hi)
+         uid = hi->GetUId();
+   }
+   hil->DecRef();
+   return uid;
 }
 
 void
@@ -421,6 +511,9 @@ wxFolderListCtrl::SetEntry(long index,
 void
 wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 {
+   m_FocusedUId = UID_ILLEGAL;
+   m_SelectedUIds.Empty();
+   
    // this shows what's happening:
    m_MessagePreview->Clear();
    if ( recreateFolderCtrl )
@@ -539,6 +632,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_SplitterWindow->SetMinimumPaneSize(0);
    m_SplitterWindow->SetFocus();
    m_DeleteSavedMessagesTicket = ILLEGAL_TICKET;
+   m_FocusedUId = UID_ILLEGAL;
 }
 
 wxFolderView::~wxFolderView()
@@ -633,7 +727,7 @@ wxFolderView::Update(HeaderInfoList *listing)
    else
       listing->IncRef();
 
-   wxBeginBusyCursor();// wxSafeYield();
+   wxBeginBusyCursor();
 
    n = listing->Count();
 
@@ -643,19 +737,13 @@ wxFolderView::Update(HeaderInfoList *listing)
       m_NumOfMessages = 0;
    }
 
-/*FIXME! Seems not to cause strange access problems.
-  long focused = m_FolderCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-   if(focused >= (long) m_ASMailFolder->CountMessages()) //FIXME
-      focused = -1;
-*/
    HeaderInfo const *hi;
    for(i = 0; i < n; i++)
    {
       hi = (*listing)[i];
-      // FIXME vars are not initialised here!
       nsize = day = month = year = 0;
       size = strutil_ultoa(nsize);
-      selected = (i < m_NumOfMessages) ? m_FolderCtrl->IsSelected(i) : false;
+      selected = (m_SelectedUIds.Index(hi->GetUId()) != wxNOT_FOUND);
       m_FolderCtrl->SetEntry(i,
                              MailFolder::ConvertMessageStatusToString(hi->GetStatus()),
                              hi->GetFrom(),
@@ -665,9 +753,9 @@ wxFolderView::Update(HeaderInfoList *listing)
                                            m_settingsCurrent.dateGMT),
                              strutil_ultoa(hi->GetSize()));
       m_FolderCtrl->Select(i,selected);
-/*FIXME!      if(i == focused)
-         m_FolderCtrl->SetItemState( i, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED );
-*/
+      m_FolderCtrl->SetItemState(i, wxLIST_STATE_FOCUSED,
+                                 (hi->GetUId() == m_FocusedUId)?
+                                 wxLIST_STATE_FOCUSED : 0);
    }
 
    String statusMsg;
@@ -677,10 +765,10 @@ wxFolderView::Update(HeaderInfoList *listing)
                             m_MailFolder);
 
    m_NumOfMessages = n;
-   wxEndBusyCursor(); //wxSafeYield();
-//   m_FolderCtrl->SetFocus();
-
+   wxEndBusyCursor();
    listing->DecRef();
+   // the previously focused uid might be gone now:
+   PreviewMessage(m_FolderCtrl->GetFocusedUId());
    m_UpdateSemaphore = false;
 }
 
@@ -688,7 +776,7 @@ wxFolderView::Update(HeaderInfoList *listing)
 MailFolder *
 wxFolderView::OpenFolder(String const &profilename)
 {
-   wxBeginBusyCursor(); //wxSafeYield(); // make changes visible
+   wxBeginBusyCursor(); 
 
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE, profilename);
    SetFolder(mf);
@@ -720,8 +808,12 @@ void
 wxFolderView::OnCommandEvent(wxCommandEvent &event)
 {
    int n;
-   wxArrayInt selections;
+   INTARRAY selections;
 
+   // record this for the later Update:
+   GetSelections(m_SelectedUIds);
+   m_FocusedUId = m_FolderCtrl->GetFocusedUId();
+   
    switch(event.GetId())
    {
    case WXMENU_MSG_SEARCH:

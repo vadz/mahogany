@@ -73,11 +73,11 @@ static MEventList gs_EventList;
 // MEventReceiver
 // ----------------------------------------------------------------------------
 
-#ifdef DEBUG
 
 // check that we had removed ourself from the list of event handlers
 MEventReceiver::~MEventReceiver()
 {
+#ifdef DEBUG
    size_t count = gs_receivers.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
@@ -89,9 +89,8 @@ MEventReceiver::~MEventReceiver()
          break;
       }
    }
-}
-
 #endif // DEBUG
+}
 
 // ----------------------------------------------------------------------------
 // event manager
@@ -151,11 +150,14 @@ void MEventManager::Dispatch(MEventData * dataptr)
 //         cerr << "MEvent::Dispatch() sending to: " << &(info->receiver)
 //              << endl;
          // notify this one
+         cerr << "Calling receiver:" << endl;
          if ( !info->receiver.OnMEvent(data) )
          {
             // the handler decided to stop the event propagation
+            cerr << "receiver done and aborted." << endl;
             break;
          }
+         cerr << "receiver done." << endl;
          //else: continue to search other receivers for this event
       }
    }

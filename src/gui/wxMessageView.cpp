@@ -529,7 +529,9 @@ wxMessageView::Clear(void)
                          &m_ProfileValues.FgCol,
                          &m_ProfileValues.BgCol);
    SetBackgroundColour( m_ProfileValues.BgCol );
-   GetLayoutList()->SetAutoFormatting(FALSE); // speeds up insertion of text
+   GetLayoutList()->SetAutoFormatting(FALSE); // speeds up insertion
+   // of text
+   m_uid = UID_ILLEGAL;
 }
 
 void
@@ -549,6 +551,8 @@ wxMessageView::Update(void)
    if(! m_mailMessage)  // no message to display
       return;
 
+   m_uid = m_mailMessage->GetUId();
+   
    // if wanted, display all header lines
    if(m_ProfileValues.showHeaders)
    {
@@ -1421,6 +1425,11 @@ wxMessageView::DoMenuCommand(int id)
 void
 wxMessageView::ShowMessage(ASMailFolder *folder, UIdType uid)
 {
+   if(uid == UID_ILLEGAL)
+   {
+      Clear();
+      return;
+   }
    if ( m_uid == uid )
       return;
    if(m_folder) m_folder->DecRef();
@@ -1685,7 +1694,8 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
             /* The only situation where we receive a Message, is if we
                want to open it in a separate viewer. */
             Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
-            ShowMessage(mptr);
+            if(mptr->GetUId() != m_uid)
+               ShowMessage(mptr);
             mptr->DecRef();
             wxFrame *frame = GetFrame(this);
             if(frame && frame->IsKindOf(CLASSINFO(wxMessageViewFrame)))

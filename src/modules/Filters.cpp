@@ -1393,7 +1393,7 @@ extern "C"
          msg << v.ToString();
       }
       p->Output(msg);
-      return 0;
+      return 1;
    }
 
 /* * * * * * * * * * * * * * *
@@ -1431,6 +1431,31 @@ extern "C"
       return Value(subj);
    }
 
+   static Value func_delete(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value("");
+      MailFolder *mf = p->GetFolder();
+      if(! mf) return Value(0);
+      UIdType uid = p->GetMessageUId();
+      int rc = mf->DeleteMessage(uid);
+      mf->DecRef();
+      return Value(rc);
+   }
+
+   static Value func_copytofolder(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 1)
+         return Value("");
+      Value fn = args->GetArg(0)->Evaluate();
+      MailFolder *mf = p->GetFolder();
+      UIdType uid = p->GetMessageUId();
+      INTARRAY ia;
+      ia.Add(uid);
+      int rc = mf->SaveMessages(&ia, fn.ToString(), true);
+      mf->DecRef();
+      return Value(rc);
+   }
 };
 
 void
@@ -1439,6 +1464,8 @@ ParserImpl::AddBuiltinFunctions(void)
    ASSERT(DefineFunction("print", func_print) != NULL);
    ASSERT(DefineFunction("matchi", func_matchi) != NULL);
    ASSERT(DefineFunction("subject", func_subject) != NULL);
+   ASSERT(DefineFunction("delete", func_delete) != NULL);
+   ASSERT(DefineFunction("copyto", func_copytofolder) != NULL);
 }
 
 

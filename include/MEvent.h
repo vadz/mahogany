@@ -43,7 +43,7 @@ enum MEventId
 /** The data associated with an event - more classes can be derived from this
     one.
 */
-class MEventData
+class MEventData : public MObject
 {
 public:
    /// ctor takes the (string) id for the event
@@ -257,7 +257,7 @@ private:
 // Derive from this class to be able to process events.
 // ----------------------------------------------------------------------------
 
-class MEventReceiver
+class MEventReceiver 
 {
 public:
    // override this method to process the events:
@@ -265,10 +265,9 @@ public:
    // or FALSE to not propagate it any more
    virtual bool OnMEvent(MEventData& event) = 0;
 
-#ifdef DEBUG
-   // check that we had removed ourself from the list of event handlers
+   // check that we had removed ourself from the list of event
+   // handlers, also needed to handle derived classes destruction correctly
    virtual ~MEventReceiver();
-#endif // DEBUG
 };
 
 // ----------------------------------------------------------------------------
