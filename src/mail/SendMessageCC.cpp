@@ -19,8 +19,7 @@
     puts $f "Organization: $recipient(organisation)"
     puts $f "Address:      "
     puts $f "Telephone:     "
-    puts $f "Facsimile:    +$recipient(country) $recipient(local) $recipient(num
-ber)"
+    puts $f "Facsimile:    +$recipient(country) $recipient(local) $recipient(number)"
     puts $f "Email:        $recipient(email)"
     puts $f ""
     puts $f "Originator:   $user(name)"
@@ -28,9 +27,6 @@ ber)"
     puts $f "Telephone:    $user(tel)"
     puts $f "Facsimile:    $user(fax)"
     puts $f "Email:        $user(email)"
-
-
-
 
  */
 
@@ -48,8 +44,6 @@ ber)"
 #   include "guidef.h"
 
 #   include <strings.h>
-
-
 #endif // USE_PCH
 
 #include "Mdefaults.h"
@@ -500,7 +494,7 @@ SendMessageCC::AddPart(Message::ContentType type,
          else
             bdy->parameter = par;
       }
-      
+
    }
    bdy->disposition.type = strutil_strdup(disposition);
    if(dlist)
@@ -531,13 +525,13 @@ SendMessageCC::SendOrQueue(void)
       send_directly = FALSE;
    else if(! mApplication->IsOnline())
    {
-      
+
       MDialog_Message(
          _("No network connection available at present.\n"
            "Message will be queued in outbox."),
-         NULL, MDIALOG_MSGTITLE,"MailNoNetQueuedMessage"); 
+         NULL, MDIALOG_MSGTITLE,"MailNoNetQueuedMessage");
       send_directly = FALSE;
-      
+
    }
    if( send_directly )
       success = Send();
@@ -581,7 +575,7 @@ SendMessageCC::Send(void)
 
 
    MCclientLocker locker();
-   
+
    SENDSTREAM
       *stream = NIL;
    const char
