@@ -25,8 +25,9 @@ $Id$
 		- wxIcon <-> wxBitmap which one to use?
 		- last line contains garbage
 		- editing behaves a bit funny still
+9	KB	changing any properties, etc crashes immediately
+		in non-DEBUG for Micky
 		- editing leaks MObjects
-
 9	KB	add xface button to composeview
 
 9	KB	Check before reopening a closed MailFolder in

@@ -91,7 +91,7 @@ void MObject::CheckLeaks()
       wxLogDebug("Object %d: %s", n, gs_aMObjects[n]->DebugDump().c_str());
    }
 }
-
+#ifdef DEBUG
 String MObject::DebugDump() const
 {
    MOcheck();
@@ -100,7 +100,7 @@ String MObject::DebugDump() const
 
    return str;
 }
-
+#endif
 
 // ----------------------------------------------------------------------------
 // debug implementations of other functions

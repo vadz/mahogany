@@ -2723,9 +2723,11 @@ wxLayoutList::GetLine(CoordType index) const
    for ( line = m_FirstLine; line && n-- > 0; line =
             line->GetNextLine() )
    {
-      wxASSERT(line->GetLineNumber() == lineNo );
+#ifdef DEBUG
+wxASSERT(line->GetLineNumber() == lineNo );
       lineNo++;
-   }
+#endif
+}
 
    if ( line )
    {
