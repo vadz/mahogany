@@ -1781,7 +1781,9 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
       {
          MFilter_obj filter(filters[n]);
          MFilterDesc fd = filter->GetDesc();
+#ifdef DEBUG
          wxLogVerbose("Using filter rule '%s'", fd.GetName().c_str());
+#endif
          filterString += fd.GetRule();
       }
       if(filterString[0]) // not empty
