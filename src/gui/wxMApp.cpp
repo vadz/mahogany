@@ -231,6 +231,8 @@ END_EVENT_TABLE()
 void
 wxMApp::OnConnected(wxDialUpEvent &event)
 {
+   if(! m_DialupSupport)
+      return;
    m_IsOnline = TRUE;
    UpdateOnlineDisplay();
    MDialog_Message(_("Dial-Up network connection established."),
@@ -242,6 +244,8 @@ wxMApp::OnConnected(wxDialUpEvent &event)
 void
 wxMApp::OnDisconnected(wxDialUpEvent &event)
 {
+   if(! m_DialupSupport)
+      return;
    m_IsOnline = FALSE;
    UpdateOnlineDisplay();
    MDialog_Message(_("Dial-Up network shut down."),
@@ -494,10 +498,6 @@ wxMApp::OnInit()
    m_IconManager = new wxIconManager();
 
    m_OnlineManager = wxDialUpManager::Create();   
-   if(! m_OnlineManager->EnableAutoCheckOnlineStatus(60))
-   {
-      wxLogError(_("Cannot activate auto-check for dial-up network status."));
-   }
    m_PrintData = new wxPrintData;
    m_PageSetupData = new wxPageSetupDialogData;
 
@@ -985,23 +985,34 @@ wxMApp::SetupOnlineManager(void)
 {
    ASSERT(m_OnlineManager);
    m_DialupSupport = READ_APPCONFIG(MP_DIALUP_SUPPORT) != 0;
-   
-   String beaconhost = READ_APPCONFIG(MP_BEACONHOST);
-   strutil_delwhitespace(beaconhost);
-   // If no host configured, use smtp host:
-   if(beaconhost.length() > 0)
-      m_OnlineManager->SetWellKnownHost(beaconhost);
+
+   if(m_DialupSupport)
+   {
+      if(! m_OnlineManager->EnableAutoCheckOnlineStatus(60))
+      {
+         wxLogError(_("Cannot activate auto-check for dial-up network status."));
+      }
+
+      String beaconhost = READ_APPCONFIG(MP_BEACONHOST);
+      strutil_delwhitespace(beaconhost);
+      // If no host configured, use smtp host:
+      if(beaconhost.length() > 0)
+         m_OnlineManager->SetWellKnownHost(beaconhost);
+      else
+      {
+         beaconhost = READ_APPCONFIG(MP_SMTPHOST);
+         m_OnlineManager->SetWellKnownHost(beaconhost, 25);
+      }
+      m_OnlineManager->SetConnectCommand(
+         READ_APPCONFIG(MP_NET_ON_COMMAND),
+         READ_APPCONFIG(MP_NET_OFF_COMMAND));
+      m_IsOnline = m_OnlineManager->IsOnline();
+   }
    else
    {
-      beaconhost = READ_APPCONFIG(MP_SMTPHOST);
-      m_OnlineManager->SetWellKnownHost(beaconhost, 25);
+      m_OnlineManager->DisableAutoCheckOnlineStatus();
+      m_IsOnline = TRUE;
    }
-   m_OnlineManager->SetConnectCommand(
-      READ_APPCONFIG(MP_NET_ON_COMMAND),
-      READ_APPCONFIG(MP_NET_OFF_COMMAND));
-
-   m_IsOnline = m_OnlineManager->IsOnline();
-
    UpdateOnlineDisplay();
 }
 
