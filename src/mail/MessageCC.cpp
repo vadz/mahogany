@@ -214,7 +214,8 @@ MessageCC::Address(String &name, MessageAddressType type) const
       return "";
 
    email = String(addr->mailbox);
-   if(addr->host && strlen(addr->host))
+   if(addr->host && strlen(addr->host)
+      && (strcmp(addr->host,BADHOST) != 0))
       email += String("@") + String(addr->host);
 
    if(addr->personal && strlen(addr->personal))
