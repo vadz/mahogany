@@ -57,6 +57,7 @@
 #include "gui/wxMDialogs.h"
 
 #include <wx/file.h>
+#include <wx/filename.h>
 #include <wx/datetime.h>
 
 extern bool InitSSL(); // from src/util/ssl.cpp
@@ -1710,16 +1711,10 @@ SendMessageCC::Send(int flags)
             lfOnly = strutil_enforceLF(lfOnly);
 
             // write to temp file:
-#if 1 // VZ: wxGetTempFileName() is broken beyond repair, don't use it for now (NB - maybe not already?)
-            const wxChar *filename = wxGetTempFileName(_T("Mtemp"));
-#else
-            // tmpnam() is POSIX, so use it even if mk(s)temp() would be better
-            // because here we have a race condition
-            const char *filename = tmpnam(NULL);
-#endif
+            const String filename = wxFileName::CreateTempFileName(_T("Mtemp"));
 
             bool success = false;
-            if ( filename )
+            if ( !filename.empty() )
             {
                wxFile out;
 
