@@ -454,26 +454,34 @@ void TextViewer::EndBody()
 }
 
 // ----------------------------------------------------------------------------
-// scrolling - TODO!
+// scrolling
 // ----------------------------------------------------------------------------
 
 bool TextViewer::LineDown()
 {
+   m_window->LineDown();
+
    return false;
 }
 
 bool TextViewer::LineUp()
 {
+   m_window->LineUp();
+
    return false;
 }
 
 bool TextViewer::PageDown()
 {
+   m_window->PageDown();
+
    return false;
 }
 
 bool TextViewer::PageUp()
 {
+   m_window->PageUp();
+
    return false;
 }
 
