@@ -60,6 +60,18 @@ fi
 CFLAGS="$RPM_OPT_FLAGS" \
    ./configure --prefix=$RPM_BUILD_ROOT/%{prefix} $CONFIG_FLAGS
 
+if [ "x%{MAKETARGET}" = "xquartstatic" ]; then
+    # be nice and check for existence of static library before starting to build
+    # (see bug http://zeitlin.homeunix.com/cgi-bin/mbugs/show_bug.cgi?id=873)
+    libwx=$($(echo @WX_CONFIG_PATH@ | sed `grep WX_CONFIG_PATH config.status`) \
+                --static --libs | \
+                    sed 's@^.* \(/.*/libwx_based-[0-9.]\+.a\) .*$@\1@')
+    if [ ! -f $libwx ]; then
+        echo "You need to build static wxWindows library $libwx first!"
+        exit 1
+    fi
+fi
+
 # we have to fix M_PREFIX in config.h because the package will be later
 # installed in just %prefix, so fallback paths hardcoded into the binary
 # shouldn't contain RPM_BUILD_ROOT
