@@ -23,7 +23,6 @@ END_EVENT_TABLE()
 wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    : wxScrolledWindow(parent)
 {
-   m_Parent = parent;
    m_ScrollbarsSet = false;
    m_EventId = 0;
 }
@@ -46,11 +45,9 @@ wxLayoutWindow::OnMouse(wxMouseEvent& event)
    {
       if(m_EventId)
       {
-//       wxCommandEvent cevent(wxEVT_COMMAND_LEFT_CLICK,0);
-       wxCommandEvent cevent(00);
-         cevent.SetId(m_EventId);
-         cevent.SetClientData((char *)m_FoundObject);
-         GetEventHandler()->ProcessEvent(cevent);
+         wxCommandEvent commandEvent(wxEVENT_TYPE_MENU_COMMAND, m_EventId);
+         commandEvent.SetEventObject( this );
+         GetEventHandler()->ProcessEvent(commandEvent);
       }
    }
 }

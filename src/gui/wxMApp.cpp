@@ -6,7 +6,11 @@
  * $Id$                *
  *
  * $Log$
+ * Revision 1.7  1998/06/29 15:00:25  KB
+ * works with new wxGTK
+ *
  * Revision 1.6  1998/06/05 16:56:24  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -121,7 +125,7 @@ MFrame *wxMApp::CreateTopLevelFrame()
 #  ifdef USE_WXGTK
       // @@@ I don't understand why isn't it in gtk/app.cpp in wxGTK
       extern int wxEntry(int argc, char *argv[]);
-      int main(int argc, char *argv[]) { return wxEntry(argc, argv); }
+      //int main(int argc, char *argv[]) { return wxEntry(argc, argv); }
 #  endif
 #else   // wxWin1
    wzMApp mApplication;
