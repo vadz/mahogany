@@ -80,7 +80,7 @@ static const size_t LEVEL_INVALID = (size_t)-1;
     @param prev the start of previous line or NULL if start of text
     @param max_white max number of white characters before quotation mark
     @param max_alpha max number of A-Z characters before quotation mark
-    @param quote the char used by quoting, NUL initially meaning unknown,
+    @param quote the quoting prefix, empty initially meaning unknown,
                  should be saved between function calls later
     @return number of quoting levels (0 for unquoted text)
   */
@@ -90,7 +90,7 @@ CountQuoteLevel(const char *string,
                 int max_white,
                 int max_alpha,
                 bool *nextWrapped,
-                char& quote);
+                String& quote);
 
 /**
    Check if there is only whitespace until the end of line.
@@ -170,10 +170,15 @@ protected:
    size_t GetQuotedLevel(const char *line,
                          const char *prev,
                          bool *nextWrapped,
-                         char& quote) const;
+                         String& quote) const;
 
    // get the colour for the given quote level
    wxColour GetQuoteColour(size_t qlevel) const;
+
+   // finds the next URL if we're configured to detect them or always returns
+   // NULL if we are not
+   const wxChar *FindURLIfNeeded(const wxChar *s, int& len);
+
 
    Options m_options;
 };
@@ -236,7 +241,7 @@ CountQuoteLevel(const char *string,
                 int max_white,
                 int max_alpha,
                 bool *nextWrapped,
-                char& quote)
+                String& quote)
 {
    *nextWrapped = false;
 
@@ -258,7 +263,7 @@ CountQuoteLevel(const char *string,
    LineResult sameAsNext = Line_Unknown,
               sameAsPrev = Line_Unknown;
    int levels = 0;
-   for ( const char *c = string; *c != 0 && *c != '\n'; c++, prev++, next++ )
+   for ( const char *c = string; *c != 0 && *c != '\n'; c++ )
    {
       // skip leading white space
       for ( int num_white = 0; *c == '\t' || *c == ' '; c++ )
@@ -291,8 +296,8 @@ CountQuoteLevel(const char *string,
       // next lines starts with the same prefix as well or is blank and if the
       // previous line is similar to but not the same as this one
 
-      // first check if we have a quote character at all
-      if ( !quote )
+      // first check if we have a quote prefix for this level at all
+      if ( quote.length() <= (size_t)(c - string) )
       {
          // detect the quoting character used, and remember it for the rest of
          // the message
@@ -300,120 +305,100 @@ CountQuoteLevel(const char *string,
          // TODO: make the string of "quoting characters" configurable
          static const char *QUOTE_CHARS = ">|})*";
 
-         if ( !strchr(QUOTE_CHARS, *c) )
+         // strchr would find NUL in the string so test for it separately
+         if ( *c == '\0' || !strchr(QUOTE_CHARS, *c) )
             break;
 
          // '*' is too often used for other purposes, check that we really have
          // something like a whole paragraph quoted with it before deciding
          // that we really should accept it as a quoting character
-         if ( *next != *c )
+         if ( *c == '*' && *next != *c )
             break;
 
-         quote = *c;
+         quote = String(string, c + 1);
       }
-      else // we have already detected the quoting character used in this msg
+      else // we have already seen this quoting prefix
       {
-         if ( *c != quote )
+         // check that we have it
+         if ( !quote.StartsWith(String(string, c + 1)) )
             break;
       }
 
-      // check the previous line: if it was the same so far but differs now, we
-      // suppose that we have a numbered list which would be recognized as
-      // quotation by the code below, so deal with it first
-      if ( sameAsPrev == Line_Same && *prev != *c )
-      {
-         break;
-      }
-      //else: it's either identical or completely different, both are fine
+
+      // look at what we really have in the previos/next lines
+      UpdateLineStatus(c, &prev, &sameAsPrev);
+      UpdateLineStatus(c, &next, &sameAsNext);
 
       // if this line has the same prefix as the previous one, it surely must
       // be a continuation of a quoted paragraph
-      bool isQuoted = (sameAsPrev == Line_Unknown || sameAsPrev == Line_Same)
-                        && *c == quote;
+      bool isQuoted = sameAsPrev == Line_Same;
 
-      // next check the next line
-      if ( !isQuoted && sameAsNext == Line_Blank )
+      switch ( sameAsNext )
       {
-         // previous line not quoted and next one neither -- so suppose this
-         // one is a misdetection
-         break;
-      }
+         default:
+         case Line_Unknown:
+            FAIL_MSG( _T("logical error: unexpected sameAsNext value") );
 
-      // is the next line starts in the same way as this one?
-      if ( sameAsNext != Line_Different )
-      {
-         if ( IsBlankLine(next) )
-         {
-            // special case of bullet lists using "*"
-            if ( *c == '*' && (sameAsPrev == Line_Blank ||
-                     (sameAsPrev == Line_Unknown && IsBlankLine(prev))) )
-            {
-               // looks like just such a list
+         case Line_Different:
+            // check for wrapped quoted lines
+
+            // as this has a lot of potential for false positives, only do it
+            // for the most common quoting character
+            if ( !isQuoted && (!nextStart || *c != '>') )
                break;
-            }
-         }
-         else if ( *next != *c )    // so far it does...
-         {
-            // but then it diverges, so this is unlikely to be a quote marker
-            sameAsNext = Line_Different;
-         }
-      }
-      else // not the same one
-      {
-         // if the next line is blank, this one is considered to be quoted
-         // (otherwise the last line of a quoted paragraph would never be
-         // recognized as quoted)
-         sameAsNext = IsBlankLine(next + 1) ? Line_Blank : Line_Different;
-      }
 
-      // last chance: it is possible that the next line is a wrapped part of
-      // this one, so check the line after it too
-      if ( sameAsNext == Line_Different )
-      {
-         // as this has a lot of potential for false positives, only do it for
-         // the most common quoting character
-         if ( !isQuoted && (!nextStart || *c != '>') )
+            // empty or very short lines shouldn't be wrapped: this catches a
+            // not uncommon case of
+            //
+            //          > 111
+            //          >
+            //          333
+            //
+            // where "333" would otherwise have been recognized as wrapped
+            // quotation
+            if ( next - string > 50 )
+            {
+               // we also check "wrapped" line is short enough
+               const char *nextnext = strchr(nextStart + 1 /* skip \n */, '\n');
+               if ( !nextnext ||
+                     (nextnext - next > 25) ||
+                      (!IsBlankLine(nextnext + 1) &&
+                        strncmp(string, nextnext + 1, next - nextStart) != 0) )
+               {
+                  // the line after next doesn't start with the same prefix as
+                  // this one so it's improbable that the next line was garbled
+                  // because of quoting -- chances are this line is simply not
+                  // quoted at all unless we had already recognized it such
+                  if ( !isQuoted )
+                  {
+                     // last chance: we suppose that a quoted line preceded by
+                     // a blank line is really quoted
+                     if ( sameAsPrev == Line_Blank )
+                        isQuoted = true;
+                  }
+               }
+               else // looks like the next line is indeed our wrapped tail
+               {
+                  *nextWrapped = true;
+
+                  isQuoted = true;
+               }
+            }
             break;
 
-         // empty or very short lines shouldn't be wrapped: this catches a
-         // not uncommon case of
-         //
-         //          > 111
-         //          >
-         //          333
-         //
-         // where "333" would otherwise have been recognized as wrapped
-         // quotation
-         //
-         // note that another idea could be to check that the "wrapped" line is
-         // longer than the line following it -- it wouldn't make sense if it
-         // were otherwise
-         if ( next - string > 30 )
-         {
-            const char *nextnext = strchr(nextStart + 1 /* skip '\n' */, '\n');
-            if ( !nextnext ||
-                  (!IsBlankLine(nextnext + 1) &&
-                   strncmp(string, nextnext + 1, next - nextStart) != 0) )
-            {
-               // the line after next doesn't start with the same prefix as
-               // this one so it's improbable that the next line was garbled
-               // because of quoting -- chances are this line is simply not
-               // quoted at all unless we had already recognized it such
-               if ( !isQuoted )
-                  break;
-            }
-            else
-            {
-               // it does look like the next line is wrapped tail of this one
-               *nextWrapped = true;
+         case Line_Blank:
+            // we probably should check here that either the previous line is
+            // empty or it seems to be an attribution line (easier said than
+            // done)
 
-               isQuoted = true;
-            }
-         }
+            // fall through
 
-         if ( !isQuoted )
-            break;
+         case Line_Same:
+            isQuoted = true;
       }
+
+      if ( !isQuoted )
+         break;
 
       levels++;
    }
@@ -487,7 +472,7 @@ size_t
 QuoteURLFilter::GetQuotedLevel(const char *line,
                                const char *prev,
                                bool *nextWrapped,
-                               char& quote) const
+                               String& quote) const
 {
    size_t qlevel = CountQuoteLevel
                    (
@@ -531,6 +516,19 @@ QuoteURLFilter::GetQuoteColour(size_t qlevel) const
 // QuoteURLFilter::DoProcess() itself
 // ----------------------------------------------------------------------------
 
+const wxChar *
+QuoteURLFilter::FindURLIfNeeded(const wxChar *s, int& len)
+{
+   if ( !m_options.highlightURLs )
+      return NULL;
+
+   extern int FindURL(const wxChar *s, int& len);
+
+   int pos = FindURL(s, len);
+
+   return pos == -1 ? NULL : s + pos;
+}
+
 void
 QuoteURLFilter::DoProcess(String& text,
                           MessageViewer *viewer,
@@ -539,113 +537,76 @@ QuoteURLFilter::DoProcess(String& text,
    // the default foreground colour
    m_options.QuotedCol[0] = style.GetTextColour();
 
-   String url,
-          before;
-
-   size_t level = LEVEL_INVALID,
-          levelBeforeURL = LEVEL_INVALID;
+   size_t level = LEVEL_INVALID;
 
    bool nextWrapped = false;
-   char quoteChar = '\0';
+   String quotePrefix;
 
-   do
+   const wxChar *linePrev = NULL,
+                *lineCur = text.c_str();
+
+   int lenURL;
+   const wxChar *startURL = FindURLIfNeeded(lineCur, lenURL);
+   for ( ;; )
    {
-      if ( m_options.highlightURLs )
-      {
-         // extract the first URL into url string and put all preceding
-         // text into before, text is updated to contain only the text
-         // after the URL
-         before = strutil_findurl(text, url);
-      }
-      else // no URL highlighting
-      {
-         before = text;
-
-         text.clear();
-      }
-
       if ( m_options.quotedColourize )
       {
-         // if we have just inserted an URL, restore the same level we were
-         // using before as otherwise foo in a line like "> URL foo" wouldn't
-         // be highlighted correctly
-         if ( levelBeforeURL != LEVEL_INVALID )
+         // get the level of the current line, unless it is a wrapped tail of
+         // the last line in which case it has the same level
+         if ( nextWrapped )
          {
-            level = levelBeforeURL;
-            levelBeforeURL = LEVEL_INVALID;
+            nextWrapped = false;
          }
-         else // no preceding URL, we're really at the start of line
+         else // not wrapped
          {
-            if ( nextWrapped )
-               nextWrapped = false;
-            else
-               level = GetQuotedLevel(before, NULL, &nextWrapped, quoteChar);
-         }
-
-         style.SetTextColour(GetQuoteColour(level));
-
-         // lineCur is the start of the current line, lineNext of the next one
-         const wxChar *lineCur = before.c_str();
-         const wxChar *lineNext = wxStrchr(lineCur, '\n');
-         while ( lineNext )
-         {
-            // skip '\n'
-            lineNext++;
-
-            // calculate the quoting level for this line
-            if ( nextWrapped )
+            size_t levelNew =
+               GetQuotedLevel(lineCur, linePrev, &nextWrapped, quotePrefix);
+            if ( levelNew != level )
             {
-               // quoting level doesn't change anyhow
-               nextWrapped = false;
+               level = levelNew;
+               style.SetTextColour(GetQuoteColour(level));
             }
-            else
-            {
-               size_t levelNew =
-                  GetQuotedLevel(lineNext, lineCur, &nextWrapped, quoteChar);
-               if ( levelNew != level )
-               {
-                  String line(lineCur, lineNext);
-                  m_next->Process(line, viewer, style);
-
-                  level = levelNew;
-                  style.SetTextColour(GetQuoteColour(level));
-
-                  lineCur = lineNext;
-               }
-               //else: same level as the previous line, just continue
-            }
-
-            if ( !*lineNext )
-            {
-               // nothing left
-               break;
-            }
-
-            // we can use +1 here because there must be '\r' before the next
-            // '\n' anyhow, i.e. the very next char can't be '\n'
-            lineNext = wxStrchr(lineNext + 1, '\n');
          }
-
-         if ( lineCur )
-         {
-            String line(lineCur);
-            m_next->Process(line, viewer, style);
-         }
-
-         // remember the current quoting level to be able to restore it later
-         levelBeforeURL = level;
-      }
-      else // no quoted text colourizing
-      {
-         m_next->Process(before, viewer, style);
       }
 
-      if ( !strutil_isempty(url) )
+      // find the start of the next line
+      const wxChar *lineNext = wxStrchr(lineCur + 1, _T('\n'));
+
+      // and look for all URLs on the current line
+      const wxChar *endURL = lineCur;
+      while ( startURL && (lineCur <= startURL && startURL < lineNext) )
       {
-         // we use the URL itself for text here
+         // insert the text before URL
+         String textBefore(lineCur, startURL);
+         m_next->Process(textBefore, viewer, style);
+
+         // then the URL itself (we use the same string for text and URL)
+         endURL = startURL + lenURL;
+         String url(startURL, endURL);
          m_next->ProcessURL(url, url, viewer);
+
+         // if the URL wraps to the next line, we consider that we're still on
+         // the same logical line, i.e. that quoting level doesn't change if
+         // the line is wrapped
+         while ( lineNext && endURL > lineNext )
+         {
+            lineNext = wxStrchr(lineNext + 1, _T('\n'));
+         }
+
+         // now look for the next URL
+         startURL = FindURLIfNeeded(endURL, lenURL);
       }
+
+      // finally insert everything after the last URL (if any)
+      String textAfter(endURL, lineNext ? lineNext + 1 : text.end());
+      m_next->Process(textAfter, viewer, style);
+
+      if ( !lineNext )
+         break;
+
+      // go to the next line (skip '\n')
+      linePrev = lineCur;
+      lineCur = lineNext + 1;
    }
-   while ( !text.empty() );
 }
 
