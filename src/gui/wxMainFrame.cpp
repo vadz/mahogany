@@ -566,5 +566,9 @@ wxMainFrame::AddModulesMenu(const char *name,
    m_ModulesMenu->Append(id, name, help);
 }
 
-
+Profile *
+wxMainFrame::GetFolderProfile(void)
+{
+   return m_FolderView ? m_FolderView->GetProfile() : NULL;
+}
 

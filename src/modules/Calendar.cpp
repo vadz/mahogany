@@ -496,6 +496,7 @@ public:
    void CheckUpdate(MailFolder *mf = NULL);
    /// re-reads config
    void GetConfig(void);
+
 protected:
 
    String MakeDateLine(const wxDateTimeWithRepeat &dt);
@@ -839,6 +840,8 @@ CalendarFrame::ParseFolder(void)
 {
    // we are using synchronous access which is soo much easier:
    ASSERT(m_Folder);
+   if(! m_Folder) return;
+   
    MailFolder *mf = m_Folder->GetMailFolder();
    ASSERT(mf);
    if(! mf)

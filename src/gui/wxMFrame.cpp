@@ -233,7 +233,8 @@ wxMFrame::OnMenuCommand(int id)
                templ = ChooseTemplateFor(MessageTemplate_NewMessage, this);
             }
 
-            wxComposeView *composeView = wxComposeView::CreateNewMessage(templ, this);
+            wxComposeView *composeView =
+               wxComposeView::CreateNewMessage(templ, this, GetFolderProfile());
             composeView->InitText();
             composeView->Show();
          }
@@ -244,12 +245,13 @@ wxMFrame::OnMenuCommand(int id)
          break;
 
       case WXMENU_FILE_POST:
-         {
-            wxComposeView *composeView = wxComposeView::CreateNewArticle(this);
+         { 
+            wxComposeView *composeView =
+               wxComposeView::CreateNewArticle(this,
+                                               GetFolderProfile()); 
             composeView->InitText();
             composeView->Show();
          }
-         break;
 
       case WXMENU_FILE_COLLECT:
          //MEventManager::Send( new MEventPingData );
@@ -646,3 +648,4 @@ void wxMFrame::OnPageSetupPS()
       //FIXME orientation = pageSetupDialog.GetPageSetupData().GetOrientation();
 }
 #endif
+

@@ -40,7 +40,7 @@ dnl DEFAULT_USE_LIBTOOL=0
 DEFAULT_USE_MODULES=auto
 DEFAULT_USE_LEAKTRACER=0
 DEFAULT_USE_STRICT=0
-DEFAULT_USE_SSL=0
+DEFAULT_USE_SSL=1
 DEFAULT_USE_NO_DSA=0
 DEFAULT_USE_NO_IDEA=1	# illegal to use in most of Europe due to ASCOM patent
 DEFAULT_USE_NO_RSA=0
@@ -414,7 +414,7 @@ if test "$USE_SSL" = 1; then
 		AC_CHECK_LIB(ssl,ssl3_connect,
 		[ 	MAKE_USESSL="USESSL=yes"
 			AC_DEFINE(USE_SSL)
-			SSL_LIBS="-lssl -lcrypto"
+			dnl SSL_LIBS="-lssl -lcrypto"
 			CCLIENT_EXTRAAUTHENTICATORS="\"EXTRAAUTHENTICATORS=ssl\""
 		] ,AC_MSG_ERROR("Cannot find openSSL library libssl."), -lcrypto) ,
 	AC_MSG_ERROR("Cannot find openSSL library libcrypto."))

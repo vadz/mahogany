@@ -1109,6 +1109,12 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    }
 #endif // Unix
 
+   // We must save the file before actually calling GetOpenCommand()
+   if( !already_saved )
+   {
+      MimeSave(mimeDisplayPart,filename);
+      already_saved = TRUE;
+   }
    String command;
    if ( (fileType == NULL) || !fileType->GetOpenCommand(&command, params) )
    {

@@ -22,7 +22,7 @@ msgstr "Regular Expressions sind nicht implementiert."
 msgid ""
 "You need to specify at the SMTP server to be able to send email, please do "
 "it!"
-msgstr "Sie müssen einen SMTP-Server angeben, um e-Mails senden zu können."
+msgstr "Sie müssen einen SMTP-Server angeben, um E-Mails senden zu können."
 
 #: upgrade.cpp:501 wxWizards.cpp:226
 msgid "Do you really want to abort the wizard?"
@@ -64,7 +64,7 @@ msgstr ""
 
 #: upgrade.cpp:595
 msgid "I'm an &expert and don't need the wizard"
-msgstr "Ich brauche diesen Dialog &nicht"
+msgstr "Ich bin Profi und brauche diesen Dialog &nicht"
 
 #: upgrade.cpp:624 wxWizards.cpp:381
 msgid "&Next >"
@@ -88,7 +88,7 @@ msgstr ""
 "auf Ihrem Computer gefunden.\n"
 "\n"
 "Sie können jetzt einige Einstellungen von diesen\n"
-"übernehmen (z.B. Ihren Namen, e-Mail Adressen,\n"
+"übernehmen (z.B. Ihren Namen, E-Mail Adressen,\n"
 "Mailboxen, Adreßbücher, etc), indem Sie auf den\n"
 "Schalter \"Importieren...\" klicken."
 
@@ -101,7 +101,7 @@ msgid ""
 "Please specify your name and e-mail address:\n"
 "they will be used for sending the messages.\n"
 msgstr ""
-"Bitte geben Sie Ihren Namen und Ihre e-Mail\n"
+"Bitte geben Sie Ihren Namen und Ihre E-Mail\n"
 "Adresse an:\n"
 
 #: upgrade.cpp:673
@@ -203,7 +203,7 @@ msgstr ""
 
 #: upgrade.cpp:794
 msgid "&Collect new mail:"
-msgstr "&Mail sammeln"
+msgstr "&Mail holen"
 
 #: upgrade.cpp:795
 msgid "Use &Trash mailbox:"
@@ -1066,12 +1066,12 @@ msgstr ""
 "Kann auf die Eingangsmailbox\n"
 "'%s' nicht zugreifen.\n"
 "\n"
-"Möchten Sie das Sammeln von Nachrichten\n"
+"Möchten Sie das Abholen von Nachrichten\n"
 "aus dieser Mailbox für diese Sitzung abstellen?"
 
 #: MailCollector.cpp:471
 msgid "Mail collection failed"
-msgstr "Sammeln von Nachrichten fehlgeschlagen"
+msgstr "Abholen von Nachrichten fehlgeschlagen"
 
 #: MModule.cpp:234
 #, c-format
@@ -3863,7 +3863,7 @@ msgstr "Einstellungen für die Liste von Nachrichten"
 
 #: wxOptionsDlg.cpp:614
 msgid "Show only sender's name, not &e-mail"
-msgstr "Nur Absendernamen anzeigen, nicht &e-Mail"
+msgstr "Nur Absendernamen anzeigen, nicht &E-Mail"
 
 #: wxOptionsDlg.cpp:617
 msgid "&Backgroud colour"
@@ -3924,7 +3924,7 @@ msgid ""
 "receive in a special addresss book. This is called 'address\n"
 "autocollection' and may be turned on or off from this page."
 msgstr ""
-"Mahogany kann automatisch alle e-Mail Adressen aus eingehenden Nachrichten\n"
+"Mahogany kann automatisch alle E-Mail Adressen aus eingehenden Nachrichten\n"
 "in einem speziellen Adreßbuch sammeln. Dies können Sie hier konfigurieren."
 
 #: wxOptionsDlg.cpp:639
@@ -4443,7 +4443,7 @@ msgstr "&Kommentar: "
 
 #: wxMFolderDialogs.cpp:995
 msgid "C&ollect all mail from this folder: "
-msgstr "&Alle Nachrichten aus dieser Box einsammeln: "
+msgstr "&Alle Nachrichten aus dieser Box abholen: "
 
 #: wxMFolderDialogs.cpp:996
 msgid "&Keep folder always open: "
@@ -4706,7 +4706,7 @@ msgstr "News-Artikel"
 
 #: wxHeadersDialogs.cpp:785
 msgid "mail messages"
-msgstr "e-Mail Nachrichten"
+msgstr "E-Mail Nachrichten"
 
 #: wxHeadersDialogs.cpp:786
 msgid "all messages"

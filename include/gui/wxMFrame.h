@@ -57,7 +57,14 @@ public:
    /// used to set the title of the window class
    void  SetTitle(String const & name);
 
-
+   /** This virtual method returns either NULL or an incref'd
+       pointer to the profile of the mailfolder being displayed, for
+       those wxMFrames which have a folder displayed. Used to make the
+       compose view inherit the current folder's settings.
+   */
+   virtual class Profile *GetFolderProfile(void)
+      { return NULL; }
+   
    /// Passes a menu id to modules for reacting to it.
    virtual bool ProcessModulesMenu(int id);
 

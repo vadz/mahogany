@@ -1,4 +1,8 @@
 (next release) on (date of next release)
+08.06.00 KB: added OpenSSL dynamic loading
+             improvements/streamlining of Profile code
+             wxMessageView fixes, Mime detection improved
+             wxComposeView profile inheritance fixed
 06.06.00 VZ: added a "Folder" menu in the main frame, renamed "File" -> "Mail"
 05.06.00 KB: added Identity redirection support to Profile classes
              added MLogCircle and error guessing to folder and network operations

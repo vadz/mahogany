@@ -60,6 +60,13 @@ public:
 
    /// Returns the name of the currently open folder:
    wxString GetFolderName(void) const { return m_folderName; }
+   /** This virtual method returns either NULL or a (not incref'd)
+       pointer to the profile of the mailfolder being displayed, for
+       those wxMFrames which have a folder displayed. Used to make the
+       compose view inherit the current folder's settings.
+   */
+   virtual Profile *GetFolderProfile(void);
+
 protected:
    /// the splitter window holding the treectrl and folder view
    wxSplitterWindow *m_splitter;

@@ -139,7 +139,7 @@ public:
    /// rename a group
    virtual bool Rename(const String& oldName, const String& newName) = 0;
    /// return the name of the profile
-   virtual const String &GetName(void) const = 0;
+   virtual const String GetName(void) const = 0;
 
    /** @name Enumerating groups/entries
        again, this is just directly forwarded to wxConfig

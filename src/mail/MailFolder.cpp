@@ -186,7 +186,7 @@ MLogCircle::Clear(void)
 MailFolder *
 MailFolder::OpenFolder(const String &name, Profile *parentProfile)
 {
-   if(1) //FIXME: broken//if(Profile::ProfileExists(name))
+   if(Profile::ProfileExists(name))
    {
       MFolder *mf = MFolder::Get(name);
       if(mf )

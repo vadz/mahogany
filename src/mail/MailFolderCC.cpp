@@ -605,7 +605,10 @@ static String GetImapSpec(int type, int flags,
                           const String &login)
 {
    String mboxpath;
+
 #ifdef USE_SSL
+   bool InitSSL(void);
+
    // SSL only for NNTP/IMAP/POP:
    if(((flags & MF_FLAGS_SSLAUTH) != 0)
       && ! FolderTypeSupportsSSL( (FolderType) type))
@@ -613,13 +616,16 @@ static String GetImapSpec(int type, int flags,
       flags ^= MF_FLAGS_SSLAUTH;
       STATUSMESSAGE((_("Ignoring SSL authentication for folder '%s'"), name.c_str()));
    }
+
+   if( (flags & MF_FLAGS_SSLAUTH) != 0 
+       && ! InitSSL() )
 #else
-   if( (flags & MF_FLAGS_SSLAUTH) != 0)
+   if( (flags & MF_FLAGS_SSLAUTH) != 0 )
+#endif
    {
-      ERRORMESSAGE((_("SSL authentication is not supported.")));
+      ERRORMESSAGE((_("SSL authentication is not available.")));
       flags ^= MF_FLAGS_SSLAUTH;
    }
-#endif
 
    switch( type )
    {
@@ -3108,9 +3114,8 @@ mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov)
 
 } // extern "C"
 
-#if 0
-//#ifdef USE_SSL
 
+#ifdef USE_SSL
 
 /* These functions will serve as stubs for the real openSSL library
    and must be initialised at runtime as c-client actually links
@@ -3118,33 +3123,39 @@ mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov)
 
 #include <openssl/ssl.h>
 
+extern "C" {
+#define FUNC(returnval, name, args) \
+   typedef returnval (* name##_TYPE) args ; \
+   name##_TYPE stub_##name = NULL
 
-SSL     * (*stub_SSL_new) (SSL_CTX *ctx) = NULL;
-void	  (*stub_SSL_free) (SSL *ssl) = NULL;
-int	  (*stub_SSL_set_rfd) (SSL *s, int fd) = NULL;
-int	  (*stub_SSL_set_wfd) (SSL *s, int fd) = NULL;
-void	  (*stub_SSL_set_read_ahead) (SSL *s, int yes) = NULL;
-int 	  (*stub_SSL_connect) (SSL *ssl) = NULL;
-int 	  (*stub_SSL_read) (SSL *ssl,char *buf,int num) = NULL;
-int 	  (*stub_SSL_write) (SSL *ssl,const char *buf,int num) = NULL;
-int	  (*stub_SSL_pending) (SSL *s) = NULL;
-int       (*stub_SSL_library_init) (void ) = NULL;
-void	  (*stub_SSL_load_error_strings) (void ) = NULL;
-SSL_CTX * (*stub_SSL_CTX_new) (SSL_METHOD *meth) = NULL;
+#define LOAD(name) \
+      stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(dll, #name); \
+      if(stub_##name == NULL)  success = FALSE
 
+FUNC( SSL *, SSL_new, (SSL_CTX *ctx) );
+FUNC( void, SSL_free, (SSL *ssl) );
+FUNC( int,  SSL_set_rfd, (SSL *s, int fd) );
+FUNC( int,  SSL_set_wfd, (SSL *s, int fd) );
+FUNC( void, SSL_set_read_ahead, (SSL *s, int yes) );
+FUNC( int,  SSL_connect, (SSL *ssl) );
+FUNC( int,  SSL_read, (SSL *ssl,char *buf,int num) );
+FUNC( int,  SSL_write, (SSL *ssl,const char *buf,int num) );
+FUNC( int,  SSL_pending, (SSL *s) );
+FUNC( int,  SSL_library_init, (void ) );
+FUNC( void, SSL_load_error_strings, (void ) );
+FUNC( SSL_CTX *,SSL_CTX_new, (SSL_METHOD *meth) );
 //extern SSL_get_cipher_bits();
-const char *	SSL_CIPHER_get_name(SSL_CIPHER *c);
-
+FUNC( const char *, SSL_CIPHER_get_name, (SSL_CIPHER *c) );
 //extern SSL_get_cipher();
-SSL_CIPHER *SSL_get_current_cipher(SSL *s);
-
+FUNC( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s) );
 #   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
-SSL_METHOD *SSLv3_client_method(void);	/* SSLv3 */
+FUNC(SSL_METHOD *, SSLv3_client_method, (void) );
 #   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
-extern TLSv1_client_method();
+FUNC(int, TLSv1_client_method, () );
 #   else
-SSL_METHOD *SSLv23_client_method(void);	/* SSLv3 but can rollback to v2 */
+FUNC(SSL_METHOD *, SSLv23_client_method, (void) );
 #   endif
+}
 
 SSL     * SSL_new(SSL_CTX *ctx)
 { return (*stub_SSL_new)(ctx); }
@@ -3157,8 +3168,8 @@ int	  SSL_set_wfd(SSL *s, int fd)
 void	  SSL_set_read_ahead(SSL *s, int yes)
 { (*stub_SSL_set_read_ahead)(s,yes); } 
 int 	  SSL_connect(SSL *ssl)
-{ return (*stub_SSL_connect)(SSL *ssl); }
-int 	  SSL_read(SSL *ssl,char *buf,int num)
+{ return (*stub_SSL_connect)(ssl); }
+int 	  SSL_read(SSL *ssl,char * buf, int num)
 { return (*stub_SSL_read)(ssl, buf, num); }
 int 	  SSL_write(SSL *ssl,const char *buf,int num)
 { return (*stub_SSL_write)(ssl, buf, num); }
@@ -3171,6 +3182,45 @@ void	  SSL_load_error_strings(void )
 SSL_CTX * SSL_CTX_new(SSL_METHOD *meth)
 { return (*stub_SSL_CTX_new)(meth); }
 
+#include <wx/dynlib.h>
+
+bool gs_SSL_loaded = FALSE;
+bool gs_SSL_available = FALSE;
+
+bool InitSSL(void) /* FIXME: MT */
+{
+   if(gs_SSL_loaded)
+      return gs_SSL_available;
+
+   bool success = FALSE;
+   wxDllType cryptodll = wxDllLoader::LoadLibrary("/usr/lib/libcrypto.so.0", &success);
+   wxDllType dll = wxDllLoader::LoadLibrary("/usr/lib/libssl.so.0", &success);
+   if(! success) return FALSE;
+   
+   LOAD(SSL_new );
+   LOAD(SSL_free );
+   LOAD(SSL_set_rfd );
+   LOAD(SSL_set_wfd );
+   LOAD(SSL_set_read_ahead );
+   LOAD(SSL_connect );
+   LOAD(SSL_read );
+   LOAD(SSL_write );
+   LOAD(SSL_pending );
+   LOAD(SSL_library_init );
+   LOAD(SSL_load_error_strings );
+   LOAD(SSL_CTX_new );
+   LOAD(SSL_CIPHER_get_name );
+   LOAD(SSL_get_current_cipher );
+#   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
+   LOAD(SSLv3_client_method );
+#   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
+   LOAD(TLSv1_client_method );
+   LOAD(SSLv23_client_method );
+#   endif
+   gs_SSL_available = success;
+   gs_SSL_loaded = TRUE;
+   return success;
+}
 #endif
 
 // ----------------------------------------------------------------------------

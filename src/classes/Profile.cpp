@@ -72,11 +72,184 @@
 // private classes
 // ----------------------------------------------------------------------------
 
+/// a small struct holding key and value
+class LookupData
+{
+public:
+   LookupData(const String &key, const String &def)
+      {
+         m_Type = LD_STRING;
+         m_Str = def;
+         m_Key = key;
+         m_Found = false;
+      }
+   LookupData(const String &key, long def)
+      {
+         m_Type = LD_LONG;
+         m_Key = key;
+         m_Long = def;
+         m_Found = false;
+      }
+
+   enum Type { LD_LONG, LD_STRING };
+
+   Type GetType(void) const { return m_Type; }
+   const String & GetKey(void) const { return m_Key; }
+   const String & GetString(void) const
+      { ASSERT(m_Type == LD_STRING); return m_Str; }
+   long GetLong(void) const
+      { ASSERT(m_Type == LD_LONG); return m_Long; }
+   bool GetFound(void) const
+      {
+         return m_Found;
+      }
+   void SetResult(const String &str)
+      {
+         ASSERT(m_Type == LD_STRING);
+         m_Str = str;
+      }
+   void SetResult(long l)
+      {
+         ASSERT(m_Type == LD_LONG);
+         m_Long = l;
+      }
+   void SetFound(bool found = TRUE)
+      {
+         m_Found = found;
+      }
+private:
+   Type m_Type;
+   String m_Key;
+   String m_Str;
+   long   m_Long;
+   bool   m_Found;
+};
+
 #ifdef DEBUG
 #   define   PCHECK() MOcheck(); ASSERT(ms_GlobalConfig)
 #else
 #   define   PCHECK()
 #endif
+
+
+/// A dummy Profile just inheriting from the top level
+class EmptyProfile : public Profile
+{
+public:
+   /// Create a dummy Profile just inheriting from the top level
+   static Profile * CreateEmptyProfile(const Profile *parent = NULL)
+      { return new EmptyProfile(parent); }
+   /**@name Reading and writing entries.
+      All these functions are just identical to the wxConfig ones.
+   */
+   //@{  
+   /// Read a character entry.
+   virtual String readEntry(const String & key,
+                            const String & defaultvalue = (const char*)NULL,
+                            bool *found = NULL) const
+      {
+         if(found) *found = FALSE;
+         return m_Parent ?
+            m_Parent->readEntry(key, defaultvalue, found)
+            : defaultvalue;
+      }
+   /// Read an integer value.
+   virtual long readEntry(const String & key,
+                          long defaultvalue,
+                          bool *found = NULL) const
+      {
+         if(found) *found = FALSE;
+         return m_Parent ?
+            m_Parent->readEntry(key, defaultvalue, found)
+            : defaultvalue;
+      }
+
+   /// Write back the character value.
+   virtual bool writeEntry(const String & key, const String & Value)
+      { return FALSE ; }
+   /// Write back the int value.
+   virtual bool writeEntry(const String & key, long Value)
+      { return FALSE; }
+   //@}
+
+   /// return true if the entry is defined
+   virtual bool HasEntry(const String & key) const
+      { return FALSE; }
+   /// return true if the group exists
+   virtual bool HasGroup(const String & name) const
+      { return FALSE; }
+   /// delete the entry specified by path
+   virtual void DeleteEntry(const String& key)
+      { }
+   /// delete the entry group specified by path
+   virtual void DeleteGroup(const String & path)
+      { }
+   /// rename a group
+   virtual bool Rename(const String& oldName, const String& newName)
+      { return FALSE; }
+   /// return the name of the profile
+   virtual const String GetName(void) const
+      { return String(""); }
+
+   /** @name Enumerating groups/entries
+       again, this is just directly forwarded to wxConfig
+   */
+   /// see wxConfig docs
+   virtual bool GetFirstGroup(String& s, long& l) const{ return FALSE; }
+   /// see wxConfig docs
+   virtual bool GetNextGroup(String& s, long& l) const{ return FALSE; }
+   /// see wxConfig docs
+   virtual bool GetFirstEntry(String& s, long& l) const{ return FALSE; }
+   /// see wxConfig docs
+   virtual bool GetNextEntry(String& s, long& l) const{ return FALSE; }
+
+   /// Returns a unique, not yet existing sub-group name: //MT!!
+   virtual String GetUniqueGroupName(void) const
+      { return "NOSUCHGROUP"; }
+   
+   /// Returns a pointer to the parent profile.
+   virtual Profile *GetParent(void) const
+      { return m_Parent; }
+   virtual void SetPath(const String & /*path*/ ) {}
+   virtual void ResetPath(void) {} ;
+
+   /// Set temporary/suspended operation.
+   virtual void Suspend(void) { };
+   /// Commit changes from suspended mode.
+   virtual void Commit(void) { };
+   /// Discard changes from suspended mode.
+   virtual void Discard(void) { };
+
+   /// Set the identity to be used for this profile
+   virtual void SetIdentity(const String & /*idName*/) { };
+   /// Unset the identity set by SetIdentity
+   virtual void ClearIdentity(void) { };
+   // Get the currently used identity
+   virtual String GetIdentity(void) const { return ""; };
+
+   /// is this profile a (grand) parent of the given one?
+   virtual bool IsAncestor(Profile *profile) const
+      {
+         // if our  parent is one, then so are we
+         return m_Parent ? m_Parent->IsAncestor(profile) : FALSE;
+      };
+private:
+   Profile *m_Parent;
+
+   EmptyProfile(const Profile *parent)
+      {
+         m_Parent = (Profile *) parent;
+         if(m_Parent) m_Parent->IncRef();
+      }
+   ~EmptyProfile()
+      {
+         if(m_Parent) m_Parent->DecRef();
+      }
+};
+
+
+const char * gs_RootPath_Identity = M_IDENTITY_CONFIG_SECTION;
+const char * gs_RootPath_Profile = M_PROFILE_CONFIG_SECTION;
 
 /**
    ProfileImpl class, managing configuration options on a per class basis.
@@ -97,12 +270,7 @@ class ProfileImpl : public Profile
 public:
    /// creates a normal ProfileImpl
    static Profile * CreateProfile(const String & ipathname,
-                                      Profile const *Parent,
-                                      const String & root);
-   
-   /// creates an empty profile, not linked to a configuration entry
-   static Profile * CreateEmptyProfile(const Profile *Parent);
-
+                                      Profile const *Parent);
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */
@@ -115,6 +283,9 @@ public:
    long readEntry(const String & key,
                   long defaultvalue,
                   bool * found = NULL) const;
+   /// Read string or integer
+   virtual void readEntry(LookupData &ld) const;
+   
    /// Write back the character value.
    bool writeEntry(const String & key,
                    const String & Value);
@@ -143,7 +314,7 @@ public:
    virtual void DeleteGroup(const String & path);
    virtual bool Rename(const String& oldName, const String& newName);
 
-   virtual const String & GetName(void) const { return m_ProfileName;}
+   virtual const String GetName(void) const { return m_ProfileName;}
 
    virtual void SetPath(const String &path)
       {
@@ -183,6 +354,23 @@ public:
 
    virtual bool IsAncestor(Profile *profile) const;
 
+   static const char * GetRootPath(void)
+      {
+         return gs_RootPath_Profile;
+      }
+
+protected:
+   ProfileImpl()
+      {
+         m_Suspended = false;
+         m_Identity = NULL;
+      }
+   /// Destructor, writes back those entries that got changed.
+   ~ProfileImpl();
+   
+   /// Name of this profile == path in wxConfig
+   String   m_ProfileName;
+
 private:
    /** Constructor.
        @param iClassName the name of this profile
@@ -192,23 +380,54 @@ private:
        by GetAppConfig()->readEntry(MP_PROFILEPATH).
 
    */
-   ProfileImpl(const String & iClassName, Profile const *Parent,
-           const String &root);
-   /// Name of this profile == path in wxConfig
-   String   m_ProfileName;
+   ProfileImpl(const String & iClassName, Profile const *Parent);
    /// If not empty, temporarily modified path for this profile.
    String   m_ProfilePath;
-   /// Destructor, writes back those entries that got changed.
-   ~ProfileImpl();
    GCC_DTOR_WARN_OFF
-   /// this is an empty dummy profile, readonly
-   bool     m_IsEmpty;
    /// Is the profile operating in suspended mode?
    bool m_Suspended;
    /// Is this profile using a different Identity at present?
    Profile * m_Identity;
 };
 //@}
+
+
+/**
+   Identity class which is a Profile representing a single identity
+   setting.
+   @see Profile
+   @see wxConfig
+*/
+
+class Identity : public ProfileImpl
+{
+public:
+   static Profile * CreateIdentity(const String &name)
+      { return new Identity(name); }
+   
+   static const char * GetRootPath(void)
+      {
+         return gs_RootPath_Identity;
+      }
+private:
+   /** Constructor.
+       @param iClassName the name of this profile
+       @param iParent the parent profile
+       This will try to load the configuration file given by
+       iClassName".profile" and look for it in all the paths specified
+       by GetAppConfig()->readEntry(MP_PROFILEPATH).
+
+   */
+   Identity(const String & name)
+      {
+         m_ProfileName = GetRootPath();
+         m_ProfileName << '/' << name;
+      }
+};
+//@}
+
+
+
 
 // ============================================================================
 // implementation
@@ -240,9 +459,11 @@ void Profile::SetExpandEnvVars(bool bDoIt)
 /// does a profile/config group with this name exist?
 /* static */
 bool
-Profile::ProfileExists(const String &name)
+Profile::ProfileExists(const String &iName)
 {
    ms_GlobalConfig->SetPath("");
+   String name = M_PROFILE_CONFIG_SECTION;
+   name << '/' << iName;
    return ms_GlobalConfig->HasGroup(name);
 }
 
@@ -420,8 +641,7 @@ Profile::CreateProfile(const String & classname,
 {
    ASSERT(classname.Length() == 0 ||  // only relative paths allowed
           (classname[0u] != '.' && classname[0u] != '/'));
-   Profile *p =  ProfileImpl::CreateProfile(classname, parent,
-                                            M_PROFILE_CONFIG_SECTION);
+   Profile *p =  ProfileImpl::CreateProfile(classname, parent);
    
    EnforcePolicy(p);
    return p;
@@ -432,8 +652,7 @@ Profile::CreateIdentity(const String & idName)
 {
    ASSERT(idName.Length() == 0 ||  // only relative paths allowed
           (idName[0u] != '.' && idName[0u] != '/'));
-   Profile *p =  ProfileImpl::CreateProfile(idName, NULL,
-                                            M_IDENTITY_CONFIG_SECTION);  
+   Profile *p =  Identity::CreateIdentity(idName);  
    EnforcePolicy(p);
    return p;
 }
@@ -444,8 +663,7 @@ Profile::CreateModuleProfile(const String & classname, Profile const *parent)
    ASSERT(classname.Length() == 0 ||  // only relative paths allowed
           (classname[0u] != '.' && classname[0u] != '/'));
    String newName = "Modules/" + classname;
-   Profile *p =  ProfileImpl::CreateProfile(newName, parent,
-                                            M_PROFILE_CONFIG_SECTION);
+   Profile *p =  ProfileImpl::CreateProfile(newName, parent);
    
    EnforcePolicy(p);
    return p;
@@ -455,7 +673,7 @@ Profile::CreateModuleProfile(const String & classname, Profile const *parent)
 Profile *
 Profile::CreateEmptyProfile(Profile const *parent)
 {
-   Profile *p =  ProfileImpl::CreateEmptyProfile(parent);
+   Profile *p =  EmptyProfile::CreateEmptyProfile(parent);
    EnforcePolicy(p);
    return p;
 }
@@ -489,7 +707,7 @@ Profile::CreateGlobalConfig(const String & filename)
    // among other things, the passwords
    ((wxFileConfig *)ms_GlobalConfig)->SetUmask(0077);
 #  endif // Unix/Windows
-   Profile *p = ProfileImpl::CreateProfile("",NULL,M_PROFILE_CONFIG_SECTION);
+   Profile *p = ProfileImpl::CreateProfile("",NULL);
    EnforcePolicy(p);
    return p;
 }
@@ -524,15 +742,13 @@ Profile::readEntry(const String & key,
    file. If an entry is not found, it tries to get it from its parent
    profile. Thus, an inheriting profile structure is created.
 */
-ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent,
-                 const String & root)
+ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent)
 {
    m_ProfileName = ( Parent && Parent->GetName().Length())
                      ? ( Parent->GetName() + '/' )
-                     : root;
+                     : String(GetRootPath());
    if(iName.Length())
       m_ProfileName << '/' << iName;
-   m_IsEmpty = false;
    m_Suspended = false;
    m_Identity = NULL;
 
@@ -544,18 +760,9 @@ ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent,
 
 Profile *
 ProfileImpl::CreateProfile(const String & iClassName,
-                       Profile const *parent,
-                       const String & root)
+                       Profile const *parent)
 {
-   return new ProfileImpl(iClassName, parent, root);
-}
-
-Profile *
-ProfileImpl::CreateEmptyProfile(Profile const *parent)
-{
-   ProfileImpl * p = new ProfileImpl("", parent, M_PROFILE_CONFIG_SECTION);
-   p->m_IsEmpty = true;
-   return p;
+   return new ProfileImpl(iClassName, parent);
 }
 
 ProfileImpl::~ProfileImpl()
@@ -570,16 +777,13 @@ ProfileImpl::~ProfileImpl()
 Profile *
 ProfileImpl::GetParent(void) const
 {
-   return CreateProfile(GetName().BeforeLast('/'), NULL,
-                        /* not an error as root doesn't matter */
-                        "");
+   return CreateProfile(GetName().BeforeLast('/'), NULL);
 }
 
 bool
 ProfileImpl::HasGroup(const String & name) const
 {
    PCHECK();
-   if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    return ms_GlobalConfig->HasGroup(name);
 }
@@ -588,7 +792,6 @@ bool
 ProfileImpl::HasEntry(const String & key) const
 {
    PCHECK();
-   if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    return ms_GlobalConfig->HasEntry(key) || ms_GlobalConfig->HasGroup(key);
 }
@@ -597,7 +800,6 @@ bool
 ProfileImpl::Rename(const String& oldName, const String& newName)
 {
    PCHECK();
-   if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    return ms_GlobalConfig->RenameGroup(oldName, newName);
 }
@@ -618,8 +820,6 @@ void
 ProfileImpl::DeleteGroup(const String & path)
 {
    PCHECK();
-   if(m_IsEmpty)
-       return;
 
    String root = GetName();
    if ( !m_ProfilePath.IsEmpty() )
@@ -628,8 +828,24 @@ ProfileImpl::DeleteGroup(const String & path)
    ms_GlobalConfig->DeleteGroup(path);
 }
 
-// FIXME there is currently some duplicated code in 2 versions of readEntry() -
-//       it should somehow be factorized into another function
+String
+ProfileImpl::readEntry(const String & key, const String & def,
+                       bool * found) const
+{
+   LookupData ld(key, def);
+   readEntry(ld);
+   if(found) *found = ld.GetFound();
+   return ld.GetString();
+}
+
+long
+ProfileImpl::readEntry(const String & key, long def, bool * found) const
+{
+   LookupData ld(key, def);
+   readEntry(ld);
+   if(found) *found = ld.GetFound();
+   return ld.GetLong();
+}
 
 // Notice that we always look first under SUSPEND_PATH: if the profile is not
 // in suspend mode, the entry there simply doesn't exist, so it doesn't harm,
@@ -637,8 +853,8 @@ ProfileImpl::DeleteGroup(const String & path)
 // all parent profiles because they may be suspended without us knowing about
 // it.
 
-String
-ProfileImpl::readEntry(const String & key, const String & def, bool * found) const
+void
+ProfileImpl::readEntry(LookupData &ld) const
 {
    PCHECK();
 
@@ -650,18 +866,28 @@ ProfileImpl::readEntry(const String & key, const String & def, bool * found) con
    ms_GlobalConfig->SetPath(pathProfile);
 
    String keySuspended;
-   keySuspended << SUSPEND_PATH << '/' << key;
+   keySuspended << SUSPEND_PATH << '/' << ld.GetKey();
 
-   String str;
 
    bool foundHere = FALSE;
+   String strResult;
+   long   longResult;
+   
    if ( m_Suspended )
    {
-      foundHere = ms_GlobalConfig->Read(keySuspended, &str, def);
+      if( ld.GetType() == LookupData::LD_STRING )
+         foundHere = ms_GlobalConfig->Read(keySuspended, &strResult, ld.GetString());
+      else
+         foundHere = ms_GlobalConfig->Read(keySuspended, &longResult, ld.GetLong());
    }
    if ( !foundHere )
    {
-      foundHere = ms_GlobalConfig->Read(key, &str, def);
+      if( ld.GetType() == LookupData::LD_STRING )
+         foundHere = ms_GlobalConfig->Read(ld.GetKey(), &strResult,
+                                           ld.GetString());
+      else
+         foundHere = ms_GlobalConfig->Read(ld.GetKey(), &longResult,
+                                           ld.GetLong());
    }
 
    // if we don't have our own setting, check for identity override before
@@ -670,100 +896,69 @@ ProfileImpl::readEntry(const String & key, const String & def, bool * found) con
    {
       // try suspended path first:
       bool idFound = FALSE;
-      str = m_Identity->readEntry(keySuspended, def, &idFound);
-      if(! found)
-         str = m_Identity->readEntry(key, def, &idFound);
+      if( ld.GetType() == LookupData::LD_STRING )
+         strResult = m_Identity->readEntry(keySuspended, ld.GetString(),
+                                           &idFound);
+      else
+         strResult = m_Identity->readEntry(keySuspended, ld.GetLong(),
+                                           &idFound);
+      if(! idFound)
+      {
+         if( ld.GetType() == LookupData::LD_STRING )
+            strResult = m_Identity->readEntry(ld.GetKey(), ld.GetString(), &idFound);
+         else
+            longResult = m_Identity->readEntry(ld.GetKey(), ld.GetLong(), &idFound);            
+      }
       if(idFound)
       {
-         if(found) *found = FALSE;
-         return str;
+         if(ld.GetType() ==  LookupData::LD_STRING)
+            ld.SetResult(strResult);
+         else
+            ld.SetResult(longResult);
+         ld.SetFound(FALSE);
+         return;
       }
    }
    
    bool foundAnywhere = foundHere;
    while ( !foundAnywhere &&
-           (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
+           (ms_GlobalConfig->GetPath() != GetRootPath()) )
    {
       ms_GlobalConfig->SetPath("..");
       // try suspended global profile first:
-      foundAnywhere = ms_GlobalConfig->Read(keySuspended, &str, def);
-      if ( !foundAnywhere )
+      if( ld.GetType() == LookupData::LD_STRING )
       {
-         foundAnywhere = ms_GlobalConfig->Read(key, &str, def);
+         foundAnywhere = ms_GlobalConfig->Read(keySuspended,
+                                               &strResult,
+                                               ld.GetString()); 
+         if ( !foundAnywhere )
+            foundAnywhere = ms_GlobalConfig->Read(ld.GetKey(), &strResult,
+                                                  ld.GetString()); 
+      }
+      else
+      {
+         foundAnywhere = ms_GlobalConfig->Read(keySuspended,
+                                               &longResult,
+                                               ld.GetLong()); 
+         if ( !foundAnywhere )
+            foundAnywhere = ms_GlobalConfig->Read(ld.GetKey(), &longResult,
+                                                  ld.GetLong()); 
       }
    }
-
-   if ( found )
-      *found = foundHere;
-
-   return str;
-}
-
-long
-ProfileImpl::readEntry(const String & key, long def, bool * found) const
-{
-   PCHECK();
-
-   String pathProfile = GetName();
-
-   if( m_ProfilePath.length() )
-      pathProfile << '/' << m_ProfilePath;
-
-   ms_GlobalConfig->SetPath(pathProfile);
-
-   String keySuspended;
-   keySuspended << SUSPEND_PATH << '/' << key;
-
-   long val;
-
-   // First, check if we are being redirected:
-   if(m_Identity)
+   if(foundAnywhere)
    {
-      // try suspended path first:
-      bool idFound = FALSE;
-      val = m_Identity->readEntry(keySuspended, def, &idFound);
-      if(! found)
-         val = m_Identity->readEntry(key, def, &idFound);
-      if(idFound)
-      {
-         if(found) *found = FALSE;
-         return val;
-      }
+      if( ld.GetType() == LookupData::LD_STRING )
+         ld.SetResult(strResult);
+      else
+         ld.SetResult(longResult);
    }
-
-   bool foundHere = FALSE;
-   if ( m_Suspended )
-   {
-      foundHere = ms_GlobalConfig->Read(keySuspended, &val, def);
-   }
-   if ( !foundHere )
-   {
-      foundHere = ms_GlobalConfig->Read(key, &val, def);
-   }
-
-   bool foundAnywhere = foundHere;
-   while ( !foundAnywhere &&
-           (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
-   {
-      ms_GlobalConfig->SetPath("..");
-      foundAnywhere = ms_GlobalConfig->Read(keySuspended, &val, def);
-      if ( !foundAnywhere )
-      {
-         foundAnywhere = ms_GlobalConfig->Read(key, &val, def);
-      }
-   }
-
-   if ( found )
-       *found = foundHere;
-
-   return val;
+   ld.SetFound(foundHere);
 }
 
 bool
 ProfileImpl::writeEntry(const String & key, const String & value)
 {
    PCHECK();
-   if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
    if(m_Suspended)
@@ -778,7 +973,6 @@ bool
 ProfileImpl::writeEntry(const String & key, long value)
 {
    PCHECK();
-   if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
    if(m_Suspended)

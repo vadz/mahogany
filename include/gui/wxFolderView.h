@@ -317,6 +317,16 @@ public:
    void OnSize(wxSizeEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
 
+   /** This virtual method returns either NULL or a (not incref'd)
+       pointer to the profile of the mailfolder being displayed, for
+       those wxMFrames which have a folder displayed. Used to make the
+       compose view inherit the current folder's settings.
+   */
+   virtual Profile *GetFolderProfile(void)
+      {
+         return m_FolderView ?
+            m_FolderView->GetProfile() : NULL;
+      }
    /// don't even think of using this!
    wxFolderViewFrame(void) {ASSERT(0);}
    DECLARE_DYNAMIC_CLASS(wxFolderViewFrame)
