@@ -25,6 +25,13 @@
    #include <wx/layout.h>
    #include <wx/statbox.h>
    #include <wx/textctrl.h>
+   
+   #include <gui/wxIconManager.h>
+   #include <wx/sizer.h>
+   #include "guidef.h"
+   #include "pointers.h"
+   #include <wx/filename.h>
+   #include <wx/filedlg.h>
 #endif // USE_PCH
 
 #include <wx/imaglist.h>
