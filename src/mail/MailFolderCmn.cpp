@@ -297,6 +297,12 @@ void MailFolderTimer::Notify(void)
          NonInteractiveLock noInter(m_mf, false /* !interactive */);
 
          m_mf->Ping();
+
+         // restart the timer after Ping() has completed: this ensures that
+         // we're not going to ping the folder too often if accessing it took a
+         // lot of time (i.e. if Ping() takes longer than our timer interval,
+         // we'd keep pinging all the time and never do anything else)
+         Start();
       }
    }
 }
@@ -517,7 +523,11 @@ MailFolderCmn::DecRef()
 
             if ( delay > 0 )
             {
-               Checkpoint(); // flush data immediately
+               // don't do it any more as IMAP CHECK command is *slow* and we
+               // are calling it constantly when the folder is removed
+               // from/added back to gs_MailFolderCloser
+               //
+               // Checkpoint(); // flush data immediately
 
                // this calls IncRef() on us so we won't be deleted right now
                gs_MailFolderCloser->Add(this, delay);
@@ -1230,7 +1240,9 @@ MailFolderCmn::DoUpdate()
       m_Timer->Stop();
 
       if ( interval > 0 ) // interval of zero == disable ping timer
-         m_Timer->Start(interval);
+      {
+         m_Timer->Start(interval, TRUE /* one shot */);
+      }
    }
 }
 
