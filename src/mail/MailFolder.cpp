@@ -856,7 +856,10 @@ InitRecipients(Composer *cv,
          otherAddresses.Add(msg->From());
    }
 
-   msg->GetAddresses(MAT_CC, otherAddresses);
+   wxArrayString ccAddresses;
+   msg->GetAddresses(MAT_CC, ccAddresses);
+
+   WX_APPEND_ARRAY(otherAddresses, ccAddresses);
 
    // for messages from oneself we already used the "To" recipients above
    if ( !fromMyself )
@@ -966,6 +969,8 @@ InitRecipients(Composer *cv,
          continue;
       }
 
+      String address = uniqueAddresses[n];
+
       // what we do with this address depends on the kind of reply
       Composer::RecipientType rcptType;
       switch ( replyKind )
@@ -982,7 +987,12 @@ InitRecipients(Composer *cv,
 
          case MailFolder::REPLY_ALL:
             // reply to everyone and their dog
-            rcptType = Composer::Recipient_To;
+            //
+            // but if the dog was only cc'ed, we should keep cc'ing it
+            rcptType =
+               Message::FindAddress(ccAddresses, address) == wxNOT_FOUND
+                  ? Composer::Recipient_To
+                  : Composer::Recipient_Cc;
             break;
 
          case MailFolder::REPLY_LIST:
