@@ -238,7 +238,7 @@ public:
 protected:
    /// ask for test
    void DoTest(void);
-   
+
 private:
    /// remember which type of dialog we are
    Types        m_type;
@@ -287,7 +287,7 @@ public:
 
    // to change the profile associated with the page:
    void SetProfile(ProfileBase *profile) { m_Profile = profile; }
-   
+
    // callbacks
    void OnBrowse(wxCommandEvent&);
    void OnChange(wxEvent&);
@@ -301,7 +301,7 @@ protected:
    wxOptionsDialog *GetDialog() const;
 
    void SetTopConstraint(wxLayoutConstraints *c, wxControl *last);
-  
+
    wxListBox  *CreateListbox(const char *label, wxControl *last);
    wxCheckBox *CreateCheckBox(const char *label, long w, wxControl *last);
    wxTextCtrl *CreateTextWithLabel(const char *label, long w, wxControl *last,
@@ -316,7 +316,7 @@ protected:
 
    // we need a pointer to the profile to write to
    ProfileBase *m_Profile;
-   
+
    // get the control with "right" index
    wxControl *GetControl(size_t /* ConfigFields */ n) const
       { return m_aControls[n - m_nFirst]; }
@@ -469,7 +469,7 @@ BEGIN_EVENT_TABLE(wxOptionsDialog, wxDialog)
    { "Use signature se&parator",     Field_Bool,    ConfigField_Signature      },
    { "Us&e XFace",                   Field_Bool,    -1,                        },
    { "&XFace file",                  Field_File,    ConfigField_XFace},
-  
+
    // folders
    { "Folders to open on &startup",  Field_List,    -1,                        },
    { "&Folder opened in main frame", Field_Text,    -1,                        },
@@ -644,17 +644,10 @@ wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
 {
    int image = notebook->GetPageCount();
 
-   // FIXME: Why on earth does wxNotebook increment the GetPageCount()
-   // counter before we do AddPage() ? It gets incremented in
-   // wxPanel(notebook,-1)!!! This might be different for non-wxGTK!?
-#ifdef __WXGTK__
-   image--;
-#endif
-
    notebook->AddPage(this, title, FALSE /* don't select */, image);
 
    m_Profile = profile;
-  
+
    // see enum ConfigFields for "+1"
    m_nFirst = nFirst + 1;
    m_nLast = nLast + 1;
@@ -949,7 +942,7 @@ void wxOptionsPage::Refresh()
             // @@ we assume that the control ids are consecutif
             long id = control->GetId() + 1;
             wxWindow *win = FindWindow(id);
-        
+
             if ( win == NULL ) {
                wxFAIL_MSG("can't find browse button for the file entry zone");
             }
@@ -1252,7 +1245,7 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
    if ( n != -1 ) {
       listbox->Delete(n);
    }
-  
+
    return wxOptionsPage::TransferDataFromWindow();
 }
 
@@ -1325,19 +1318,18 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent,
                                  Types type)
    : wxDialog(parent, -1, wxString(_("M: Options")))
 {
-   wxLayoutConstraints *c;  
+   wxLayoutConstraints *c;
    SetAutoLayout(TRUE);
    m_type = type;
-   
+
    // calculate the controls size
    // ---------------------------
 
-   // basic unit is the height of a char, from this we fix the sizes of all 
+   // basic unit is the height of a char, from this we fix the sizes of all
    // other controls
    size_t heightLabel = AdjustCharHeight(GetCharHeight());
-   int
-      hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
-      wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
+   int hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
+       wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
 
    // these are more or less arbitrary numbers
    const int wDlg = 6*wBtn;
@@ -1345,7 +1337,7 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent,
    wxWindow::SetSize(wDlg, hDlg);
 
    wxWindow *last;
-   
+
    // create the panel
    // ----------------
    wxPanel *panel = new wxPanel(this, -1);
@@ -1385,7 +1377,7 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent,
    }
    else
       last = panel;
-   
+
 
    // create the notebook
    // -------------------
@@ -1405,7 +1397,7 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent,
    if(last == panel)
       c->top.SameAs(panel, wxTop, LAYOUT_Y_MARGIN);
    else
-      c->top.SameAs(last, wxBottom, LAYOUT_Y_MARGIN);      
+      c->top.SameAs(last, wxBottom, LAYOUT_Y_MARGIN);
    c->bottom.SameAs(panel, wxBottom, 2*LAYOUT_Y_MARGIN + hBtn);
    m_notebook->SetConstraints(c);
 
@@ -1492,7 +1484,7 @@ bool wxOptionsDialog::TransferDataFromWindow()
 
    if(m_type == Type_FolderCreate)
       profile->DecRef();
-      
+
    return TRUE;
 }
 
@@ -1504,7 +1496,7 @@ wxOptionsDialog::DoTest(void)
                              this, _("Test setup?"),true))
          VerifyMailConfig();
 }
-   
+
 void wxOptionsDialog::OnOK(wxCommandEvent& /* event */)
 {
    if(m_type == Type_FolderCreate && m_folderName->GetValue().length())
@@ -1559,7 +1551,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 {
    // create and fill the imagelist
    static const char *aszImages[] =
-   { 
+   {
       // should be in sync with the corresponding enum
       "ident",
       "compose",
@@ -1590,14 +1582,14 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 #endif
    (void)new wxOptionsPageOthers(this,profile);
 }
-   
+
 // create the control and add pages too
 wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent)
                       : wxOptionsNotebookBase("FolderCreateNotebook", parent)
 {
    // create and fill the imagelist
    static const char *aszImages[] =
-   { 
+   {
       // should be in sync with the corresponding enum
       "compose","FIXME"
    };
@@ -1618,7 +1610,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent)
    wxResourceParseData(FolderOpenPanel);
    AddPage(new wxResourcePanel("FolderOpenPanel",this), _("Folder"),FALSE,1);
 }
-   
+
 
 wxOptionsNotebookBase::~wxOptionsNotebookBase()
 {
