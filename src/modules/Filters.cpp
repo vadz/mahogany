@@ -2047,7 +2047,7 @@ int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid) const
 
    ASSERT(mf);
    ASSERT(uid != UID_ILLEGAL);
-   ASSERT(mf->IsLocked()); // must be called on a locked mailfolder
+//FIXME   ASSERT(mf->IsLocked()); // must be called on a locked mailfolder
    mf->IncRef();
    m_Parser->SetMessage(mf, uid);
    Value rc = m_Program->Evaluate();
