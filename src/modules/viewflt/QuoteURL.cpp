@@ -87,10 +87,17 @@ public:
 
    void SetQuoteAtLevel(size_t level, const String& s)
    {
-      ASSERT_MSG( level == m_quoteAtLevel.size(),
-                     _T("should set quote prefixes in order") );
+      if ( level >= m_quoteAtLevel.size() )
+      {
+         ASSERT_MSG( level == m_quoteAtLevel.size(),
+                        _T("should set quote prefixes in order") );
 
-      m_quoteAtLevel.push_back(s);
+         m_quoteAtLevel.push_back(s);
+      }
+      else // modify existing quote
+      {
+         m_quoteAtLevel[level] = s;
+      }
    }
 
    const String& GetQuoteAtLevel(size_t level) const
@@ -355,10 +362,10 @@ CountQuoteLevel(const char *string,
          if ( *c == '\0' || !strchr(QUOTE_CHARS, *c) )
             break;
 
-         // '*' is too often used for other purposes, check that we really have
-         // something like a whole paragraph quoted with it before deciding
-         // that we really should accept it as a quoting character
-         if ( *c == '*' && *next != *c )
+         // '*' and '}' are too often used for other purposes, check that we
+         // really have something like a whole paragraph quoted with it before
+         // deciding that we really should accept it as a quoting character
+         if ( (*c == '*' || *c == '}') && *next != *c )
             break;
 
          quoteData.SetQuoteAtLevel(level, String(lastQuote, c + 1));
@@ -368,7 +375,15 @@ CountQuoteLevel(const char *string,
          // check that we have the same prefix
          if ( wxStrncmp(lastQuote, quoteData.GetQuoteAtLevel(level),
                            c - lastQuote + 1) != 0 )
-            break;
+         {
+            // consider that '>' is always a "true" quote character...
+            // otherwise we fail to recognize too many strange messages where
+            // different quoting styles are used
+            if ( *c != '>' )
+               break;
+
+            quoteData.SetQuoteAtLevel(level, String(lastQuote, c + 1));
+         }
       }
 
 
