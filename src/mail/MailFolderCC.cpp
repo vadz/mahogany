@@ -4630,8 +4630,9 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
       String seq;
       seq << "1:" << nmsgs;
 
-      // now mark them all as deleted
-      mail_flag(stream, (char *)seq.c_str(), "\\DELETED", ST_SET);
+      // now mark them all as deleted (we don't need notifications about the
+      // status change so save a *lot* of bandwidth by using ST_SILENT)
+      mail_flag(stream, (char *)seq.c_str(), "\\DELETED", ST_SET | ST_SILENT);
 
       // and expunge
       if ( mf )
