@@ -643,7 +643,6 @@ case "$MAKE_PISOCKLIB" in '') ;; *)
 	fi
 esac
 AC_SUBST(MAKE_HAVE_LIBMAL)
-dnl AC_CONFIG_SUBDIRS(extra/src/libmal)
 
 
 dnl --------------------------------------------------------------------------
@@ -773,11 +772,11 @@ AC_SUBST(LIBS_STATIC)
 
 OUTPUT="makeopts"
 COPY=Makefile DIR=
-for dir in `cd $srcdir; find include extra src doc -type d -print`
+for dir in `cd $srcdir; find include extra src locale doc -type d -print`
 do	case "$dir" in
 	CVS | */CVS)		continue ;;
-	extra/src)		DIR="$DIR $dir" ;;
-	extra/src/libmal/*)	continue ;;
+	extra/src)		DIR="$DIR $dir" ;;   # no Makefile in this dir
+	extra/src/libmal*)	continue ;;
 	esac
 	if test -f $srcdir/$dir/Makefile.in
 	then	OUTPUT="$OUTPUT $dir/Makefile"
@@ -787,6 +786,9 @@ do	case "$dir" in
 		DIR="$DIR $dir"
 	fi
 done
+case "$MAKE_HAVE_LIBMAL" in '') ;; *)
+	OUTPUT="$OUTPUT extra/src/libmal/Makefile" ;;
+esac
 
 AC_OUTPUT_COMMANDS(
 [case "$SRC" in
@@ -804,8 +806,9 @@ AC_OUTPUT_COMMANDS(
 	do	test -d $dir || mkdir $dir
 		rm -f $dir/.src
 		case "$src" in
-		/*)  ln -s $src/$dir $dir/.src ;;
-		*)   ln -s ../.src/`expr //"$dir" : '.*/\(.*\)'` $dir/.src ;;
+		/*)	ln -s $src/$dir $dir/.src ;;
+		*)	lnk=`echo "$dir" | sed 's,\([^/][^/]*\),..,g'`
+			ln -s $lnk/$src/$dir $dir/.src ;;
 		esac
 	done
 	for mf in $COPY
