@@ -232,9 +232,8 @@ wxFolderListCtrl::Clear(void)
 
    SaveWidths();
 
-   DeleteAllItems();
-   DeleteAllColumns();
-
+   ClearAll();
+   
    if (m_Style & wxLC_REPORT)
    {
       for(int c = 0; c < WXFLC_NUMENTRIES; c++)
@@ -271,6 +270,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    m_MessagePreview->Clear();
    if ( recreateFolderCtrl )
       m_FolderCtrl->Clear();
+
    wxYield();
    
    if(m_MailFolder)  // clean up old folder
@@ -323,7 +323,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       m_MailFolder->IncRef();  // make sure it doesn't go away
       m_folderName = m_MailFolder->GetName();
       m_timer = new wxFVTimer(m_MailFolder);
-//      m_MailFolder->RegisterView(this);
 
       if ( recreateFolderCtrl )
       {

@@ -13,7 +13,6 @@ a daily basis.
 ** List of known and reported bugs in M with bug-ID                        **
 ** ID ***********************************************************************
 
-0006  KB Memory leaks whenever using wxMessageView (there are some from cclient)
 0007  KB add remaining translation strings from include files
 0008  KB handle "truncated mailfolder" more gracefully (i.e. close and
          re-open folder)  
@@ -25,10 +24,10 @@ a daily basis.
 ** Fixed, to be tested                                                     **
 ** ID ** date fixed ** comment **********************************************
 
+0006  KB Memory leaks whenever using wxMessageView (there are some from cclient)
 0005  KB Profile readEntry() needs interface extension to allow a boolean success
          value, remove hacks like 17 or "illegal value"!
          --> rewrite in progress
-0014  KB Sometimes program doesn't react to Exit button/menu. 
 
 *****************************************************************************
 ** Fixed   (only move entries here when tested)                            **
@@ -50,3 +49,4 @@ a daily basis.
           view and then only shows empty window
 0015  KB POP mail folders are a bit broken: "large" messages don't
          show up or corrupt other message contents
+0014  KB Sometimes program doesn't react to Exit button/menu. 

@@ -31,64 +31,35 @@ VZ:
   retrieve more messages than that from server. Need support for it and
   for anonymouse flag in folder creation/properties dialogs.
 
+- the listctrl seems to have a problem with nntp folder names like
+  {xxxx/yyy}newsgroup
+  After accessing them, the next program start produces an error
+  because there is more than one entry for their column sizes in the
+  config file.
+
 ******* Priorities for KB: ******************************
 
-DONE:
-
-Add choice of intermediary image format:
-  PNG, JPG, XPM
-  --> prefer JPG, Imagemagick PNG support is faulty!
-- If mail is from efax.com and contains an application/octet-stream,
-  use tiff2ps and ghostview to generate an application/postscript
-  instead. (Just convert the type to image/tiff-g3 and implement our
-  own handler for that.)
-  EFAX now sends image/tiff!
-  Configurable! Options for tiff2ps!
-  >>> Finish this: have share/M/mime.types with tiff2ps/gv combo
-- .newsrc read/write  --> should be there?!
-  For nntp folders, mark read messages as deleted. Somehow provide
-  feedback! At close, ask whether to mark all messages as read.
-  --> .newsrc does get updated! :-)
-
-- check in new options panels
-  - add help button in notebook, linked to help ids in panels
-
-- when doing "select all", disable OnSelect() for folder listctrl
-
-
-- Is this needed?
-  And disable events!
-  When doing a Delete() etc, do not rebuild the
-  listing between, this corrupts message numbers!
-  Find a clever way to handle this, build a sequence first!
-
-- retrieve messages starting from last one
-- fix bitmap allocation in SetBackgroundBitmap() calls (seems ok now)
- - save and restore printer settings in profile
-
-- fix occasional segfault/memory corruption in MailfolderCC.cpp
-   + this might have been caused by the bug with rfc822_extraheaders
-     and be fixed now -- wait and see (seems gone, 22.3.99)
 
 TODO:
 
-- add msgview.xpm icon to repository (forgot it at home)
-- save and restore printer settings in profile
+BUG:- saving message from messageview (called from embedded rfc822) saves
+  first message in parent folder instead. (Uses m_folderview which in
+  this case points to a different folder!) Maybe that functionality
+  should really be moved to MailFolder ??
+
+- add references (and In-Reply-To: ?) headers to message replies
+- modify wxIconManager to recycle last found path for icons first, to
+  avoid unnecessary filesystem traversals
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message.
 - speed up copy mail to folder by cusing c-client functionality
-- add references (and In-Reply-To: ?) headers to message replies
   wxComposeView: if replying, only mark message as answered if reply
   got sent
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
 
-- modify wxIconManager to recycle last found path for icons first, to
-  avoid unnecessary filesystem traversals
-
-- folderview listctrl has extra Subject column behind Size field ???
-
 = wxLayout:
+  - delete in empty line doesn't work
   - fix initial scrollbar sizes
   - update rectangle (needs support in wxllist and wxWindows)
   - fix(simplify) cursor size calculation
@@ -555,6 +526,49 @@ classes in the hierarchy.
  + config entry names should allow  ',' (needed for mail names which
    might contain it, just received one from "john doe, archeology"),
    the same for apostrophes  
+DONE:
+
+Add choice of intermediary image format:
+  PNG, JPG, XPM
+  --> prefer JPG, Imagemagick PNG support is faulty!
+- If mail is from efax.com and contains an application/octet-stream,
+  use tiff2ps and ghostview to generate an application/postscript
+  instead. (Just convert the type to image/tiff-g3 and implement our
+  own handler for that.)
+  EFAX now sends image/tiff!
+  Configurable! Options for tiff2ps!
+  >>> Finish this: have share/M/mime.types with tiff2ps/gv combo
+- .newsrc read/write  --> should be there?!
+  For nntp folders, mark read messages as deleted. Somehow provide
+  feedback! At close, ask whether to mark all messages as read.
+  --> .newsrc does get updated! :-)
+
+- check in new options panels
+  - add help button in notebook, linked to help ids in panels
+
+- when doing "select all", disable OnSelect() for folder listctrl
+
+
+- Is this needed?
+  And disable events!
+  When doing a Delete() etc, do not rebuild the
+  listing between, this corrupts message numbers!
+  Find a clever way to handle this, build a sequence first!
+
+- retrieve messages starting from last one
+- fix bitmap allocation in SetBackgroundBitmap() calls (seems ok now)
+ - save and restore printer settings in profile
+
+- fix occasional segfault/memory corruption in MailfolderCC.cpp
+   + this might have been caused by the bug with rfc822_extraheaders
+     and be fixed now -- wait and see (seems gone, 22.3.99)
+- add msgview.xpm icon to repository (forgot it at home)
+- save and restore printer settings in profile
+
+- folderview listctrl has extra Subject column behind Size field ???
+  Looks like a wxGTK bug that seems to have disappeared in the meantime.
+  However, using ClearAll() instead of DeleteXXX() now to simplify
+  things a bit.
 
 
  vi: set si tw=80:
