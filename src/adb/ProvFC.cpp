@@ -744,6 +744,13 @@ size_t FCBook::GetNumberOfEntries() const
 
 bool FCBook::IsReadOnly() const
 {
+  // flush config forcing the file creation, otherwise our we would always
+  // return true because wxFile::Access() fails for non existing file!
+  if ( !wxFile::Exists(m_strFile) )
+  {
+    m_pConfig->Flush();
+  }
+
   return !wxFile::Access(m_strFile, wxFile::write);
 }
 
