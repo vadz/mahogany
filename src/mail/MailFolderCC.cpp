@@ -822,6 +822,35 @@ private:
 
 #endif // USE_READ_PROGRESS
 
+// ----------------------------------------------------------------------------
+// AuthInfoList: stores the login/password pairs for the folders which don't
+//               store this info in the config - this allows to ask the user
+//               only once for them during the same session
+// ----------------------------------------------------------------------------
+
+struct AuthInfoEntry
+{
+   AuthInfoEntry(const String& folderName,
+                 const String& login,
+                 const String& password)
+      : m_folderName(folderName),
+        m_login(login),
+        m_password(password)
+   {
+   }
+
+   // the full folder name in the tree
+   String m_folderName;
+
+   // the login and password for it, both non empty
+   String m_login,
+          m_password;
+};
+
+M_LIST_OWN(AuthInfoList, AuthInfoEntry);
+
+static AuthInfoList gs_authInfoList;
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -1450,37 +1479,129 @@ MailFolderCC::~MailFolderCC()
    m_mfolder->DecRef();
 }
 
-/* static */
-bool MailFolderCC::AskPasswordIfNeeded(const String& name,
-                                       FolderType type,
-                                       int flags,
-                                       String *login,
-                                       String *password,
-                                       bool *didAsk)
-{
-   CHECK( login && password, false, "can't be NULL here" );
+// ----------------------------------------------------------------------------
+// MailFolderCC: login/password handling
+// ----------------------------------------------------------------------------
 
-   if ( FolderTypeHasUserName(type)
-        && !(flags & MF_FLAGS_ANON)
-        && (login->empty() || password->empty()) )
+void MailFolderCC::ProposeSavePassword()
+{
+   // ask the user if he'd like to remember the password for the future:
+   // this is especially useful for the folders created initially by the
+   // setup wizard as it doesn't ask for the passwords
+   if ( MDialog_YesNoDialog
+        (
+         _("Would you like to permanently remember the password "
+           "for this folder?\n"
+           "(WARNING: don't do it if you are concerned about security)"),
+         NULL,
+         MDIALOG_YESNOTITLE,
+         TRUE, /* [Yes] default */
+         GetPersMsgBoxName(M_MSGBOX_REMEMBER_PWD)
+        ) )
    {
-      if ( !MDialog_GetPassword(name, login, password) )
+      // MFolder doesn't have methods to set them
+      Profile *profile = m_mfolder->GetProfile();
+      profile->writeEntry(MP_FOLDER_LOGIN, m_login);
+      profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(m_password));
+   }
+   else // don't save password permanently
+   {
+      // but should we keep it at least during this session?
+      //
+      // this can only be done for the folders from the folder tree as
+      // otherwise we don't have any way to identify this folder later
+      if ( !m_mfolder->GetFullName().empty() &&
+           MDialog_YesNoDialog
+           (
+               _("Should the password be kept in memory during this\n"
+                 "session only (it won't be saved to a disk file)?\n"
+                 "If you answer \"No\", you will be asked for the password\n"
+                 "each time when the folder is accessed."),
+               NULL,
+               MDIALOG_YESNOTITLE,
+               TRUE, /* [Yes] default */
+               GetPersMsgBoxName(M_MSGBOX_KEEP_PWD)
+           ) )
+      {
+         SavePasswordForSession();
+      }
+      else
+      {
+         // don't keep the login info even in memory
+         m_login.clear();
+         m_password.clear();
+      }
+   }
+}
+
+void MailFolderCC::SavePasswordForSession()
+{
+   if ( HasLogin() )
+   {
+      gs_authInfoList.push_front(new AuthInfoEntry(m_mfolder->GetFullName(),
+                                                   m_login,
+                                                   m_password));
+   }
+}
+
+/* static */
+bool MailFolderCC::GetAuthInfoForFolder(const MFolder *mfolder,
+                                        String& login,
+                                        String& password,
+                                        bool *userEnteredPwd)
+{
+   if ( !mfolder->NeedsLogin() )
+   {
+      // nothing to do then, everything is already fine
+      return true;
+   }
+
+   login = mfolder->GetLogin();
+   password = mfolder->GetPassword();
+
+   if ( login.empty() || password.empty() )
+   {
+      String folderName = mfolder->GetFullName();
+      if ( !folderName.empty() )
+      {
+         // try to find login/password in the list of the previously entered
+         // ones
+         for ( AuthInfoList::iterator i = gs_authInfoList.begin();
+               i != gs_authInfoList.end();
+               i++ )
+         {
+            if ( i->m_folderName == folderName )
+            {
+               login = i->m_login;
+               password = i->m_password;
+
+               return true;
+            }
+         }
+      }
+
+      // we don't have password for this folder, ask the user about it
+      if ( !MDialog_GetPassword(mfolder->GetFullName(), &login, &password) )
       {
          ERRORMESSAGE((_("Cannot access this folder without a password.")));
 
-         mApplication->SetLastError(M_ERROR_AUTH);
+         mApplication->SetLastError(M_ERROR_CANCEL);
 
          return false;
       }
 
       // remember that the password was entered interactively and propose to
       // remember it if it really works later
-      if ( didAsk )
-         *didAsk = true;
+      if ( userEnteredPwd )
+         *userEnteredPwd = true;
    }
 
    return true;
 }
+
+// ----------------------------------------------------------------------------
+// MailFolderCC: Open() and related functions
+// ----------------------------------------------------------------------------
 
 /* static */
 bool MailFolderCC::CreateIfNeeded(const MFolder *folder)
@@ -1524,7 +1645,14 @@ MailFolderCC *
 MailFolderCC::OpenFolder(const MFolder* mfolder,
                          OpenMode openmode)
 {
-   String login = mfolder->GetLogin();
+   bool userEnteredPwd = false;
+   String login, password;
+   if ( !GetAuthInfoForFolder(mfolder, login, password, &userEnteredPwd) )
+   {
+      // can't continue without login/password
+      return NULL;
+   }
+
    String mboxpath = ::GetImapSpec(mfolder);
 
    //FIXME: This should somehow be done in MailFolder.cpp
@@ -1537,35 +1665,20 @@ MailFolderCC::OpenFolder(const MFolder* mfolder,
       return mf;
    }
 
-   String password = mfolder->GetPassword();
-   int flags = mfolder->GetFlags();
-   FolderType folderType = mfolder->GetType();
-
-   // ask the password for the folders which need it but for which it hadn't
-   // been specified during creation
-   bool userEnteredPwd = false;
-   if ( !AskPasswordIfNeeded(mfolder->GetFullName(),
-                             folderType,
-                             flags,
-                             &login,
-                             &password,
-                             &userEnteredPwd) )
-   {
-      // can't continue
-      mApplication->SetLastError(M_ERROR_CANCEL);
-
-      return NULL;
-   }
-
-   // create the mail folder and init its members
+   // no, we are not connected to this folder right now
+   //
+   // create the new mail folder for it and init its members
    mf = new MailFolderCC(mfolder);
 
-   if ( FolderTypeHasUserName(folderType) && !(flags & MF_FLAGS_ANON) )
+   if ( !login.empty() )
    {
-      SetLoginData(login, password);
+      mf->m_login = login;
+      mf->m_password = password;
    }
 
    bool ok = TRUE;
+
+   // check if we need to dial up to open this folder
    if ( mf->NeedsNetwork() && !mApplication->IsOnline() )
    {
       String msg;
@@ -1619,23 +1732,7 @@ MailFolderCC::OpenFolder(const MFolder* mfolder,
    }
    else if ( userEnteredPwd )
    {
-      // ask the user if he'd like to remember the password for the future:
-      // this is especially useful for the folders created initially by the
-      // setup wizard as it doesn't ask for the passwords
-      if ( MDialog_YesNoDialog(_("Would you like to remember the password "
-                                 "for this folder?\n"
-                                 "(WARNING: don't do it if you are concerned "
-                                 "about security)"),
-                               NULL,
-                               MDIALOG_YESNOTITLE,
-                               TRUE, /* [Yes] default */
-                               GetPersMsgBoxName(M_MSGBOX_REMEMBER_PWD)) )
-      {
-         // MFolder doesn't have methods to set them
-         Profile *profile = mfolder->GetProfile();
-         profile->writeEntry(MP_FOLDER_LOGIN, login);
-         profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(password));
-      }
+      mf->ProposeSavePassword();
    }
 
    return mf;
@@ -1838,6 +1935,19 @@ MailFolderCC::Open(OpenMode openmode)
    }
    //else: not a file based folder, no locking problems
 
+   // get the login/password to use (if we don't have them yet)
+   if ( NeedsAuthInfo() &&
+        !GetAuthInfoForFolder(m_mfolder, m_login, m_password) )
+   {
+      // can't open without login/password
+      return false;
+   }
+
+   if ( HasLogin() )
+   {
+      SetLoginData(m_login, m_password);
+   }
+
    // lock cclient inside this block
    {
       MCclientLocker lock;
@@ -1903,6 +2013,12 @@ MailFolderCC::Open(OpenMode openmode)
       // half open it now to know if this is just a folder with NOSELECT flag
       // or if we really can't open it
 
+      // reuse the same login/password again
+      if ( HasLogin() )
+      {
+         SetLoginData(m_login, m_password);
+      }
+
       // redirect all notifications to us again
       CCDefaultFolder def(this);
       MAILSTREAM *msHalfOpened = mail_open
@@ -1945,7 +2061,7 @@ MailFolderCC::Open(OpenMode openmode)
    // folder really opened!
 
    // now we are known
-   AddToMap(m_MailStream, MF_user);
+   AddToMap(m_MailStream, m_login);
 
    if ( frame )
    {
@@ -2360,42 +2476,6 @@ MailFolderCC::RemoveFromMap(void) const
       // no more
       ms_StreamListDefaultObj = NULL;
    }
-}
-
-
-/// Gets first mailfolder in map.
-/* static */
-MailFolderCC *
-MailFolderCC::GetFirstMapEntry(StreamConnectionList::iterator &i)
-{
-   CHECK_STREAM_LIST();
-
-   i = ms_StreamList.begin();
-   if( i != ms_StreamList.end())
-      return (**i).folder;
-   else
-      return NULL;
-}
-
-/// Gets next mailfolder in map.
-/* static */
-MailFolderCC *
-MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
-{
-   CHECK_STREAM_LIST();
-
-   ASSERT_MSG( i != ms_StreamList.end(), "no next entry in the map" );
-#ifdef DEBUG
-   wxLogTrace(TRACE_MF_CACHE, "GetNextMapEntry before: %s", i.Debug().c_str());
-#endif
-   i++;
-#ifdef DEBUG
-   wxLogTrace(TRACE_MF_CACHE, "GetNextMapEntry after: %s", i.Debug().c_str());
-#endif
-   if( i != ms_StreamList.end())
-      return (**i).folder;
-   else
-      return NULL;
 }
 
 // ----------------------------------------------------------------------------
@@ -5155,8 +5235,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
    }
    else // this folder is not opened
    {
-      if ( !AskPasswordIfNeeded(fullname,
-                                type, flags, &login, &password ) )
+      if ( !GetAuthInfoForFolder(mfolder, login, password ) )
       {
          return false;
       }
@@ -5232,25 +5311,23 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 bool
 MailFolderCC::DeleteFolder(const MFolder *mfolder)
 {
-   FolderType type = mfolder->GetType();
-   int flags = mfolder->GetFlags();
-   String login = mfolder->GetLogin(),
-          password = mfolder->GetPassword();
-
-   if ( !AskPasswordIfNeeded(mfolder->GetFullName(),
-                             type, flags, &login, &password ) )
+   String login, password;
+   if ( !GetAuthInfoForFolder(mfolder, login, password ) )
    {
       return false;
    }
 
-   String mboxpath = MailFolder::GetImapSpec(type,
-                                             flags,
+   String mboxpath = MailFolder::GetImapSpec(mfolder->GetType(),
+                                             mfolder->GetFlags(),
                                              mfolder->GetPath(),
                                              mfolder->GetServer(),
                                              login);
 
    MCclientLocker lock;
    SetLoginData(login, password);
+
+   wxLogTrace(TRACE_MF_CALLS,
+              "MailFolderCC::DeleteFolder(%s)", mboxpath.c_str());
 
    return mail_delete(NIL, (char *) mboxpath.c_str()) != NIL;
 }

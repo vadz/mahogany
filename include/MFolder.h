@@ -163,6 +163,10 @@ public:
       /// can this folder have a login/password?
    bool MayHaveLogin() const { return FolderTypeHasUserName(GetType()); }
 
+      /// does this folder need login/password to be opened?
+   bool NeedsLogin() const
+      { return MayHaveLogin() && !(GetFlags() & MF_FLAGS_ANON); }
+
       /// does this folder need net connection to be accessed?
    virtual bool NeedsNetwork(void) const = 0;
    //@}

@@ -6,6 +6,7 @@
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+27.10.01 VZ: added possibility to remember password for current session only
 22.10.01 VZ: added HTML printing
 15.10.01 VZ: remember POP3 flags between sessions
 12.10.01 VZ: use "List-Post" header, if any, when doing "Reply to list"

@@ -435,25 +435,6 @@ private:
    /// Build the sequence string from the array of message uids
    static String BuildSequence(const UIdArray& messages);
 
-   /** Ask the user for login/password if needed and return them. If we already
-       have them in the corresponding variables, don't do anything but just
-       return true.
-
-       @param name the name of the folder
-       @param type the type of the folder
-       @param flags the flags of the folder
-       @param login a non NULL pointer to the variable containing username
-       @param password a non NULL pointer to the variable containing password
-       @param didAsk a pointer (may be NULL) set to true if dlg was shown
-       @return true if the password is either not needed or was entered
-   */
-   static bool AskPasswordIfNeeded(const String& name,
-                                   FolderType type,
-                                   int flags,
-                                   String *login,
-                                   String *password,
-                                   bool *didAsk = NULL);
-
    /**
       Try to create folder if it hadn't been created yet, returns true if the
       folder could be created and opened successfully or NULL if it failed.
@@ -488,9 +469,39 @@ private:
 
    /// for POP/IMAP boxes, this holds the user id for the callback
    static String MF_user;
+
    /// for POP/IMAP boxes, this holds the password for the callback
    static String MF_pwd;
 
+   /// do we have login/password?
+   bool HasLogin() const { return !m_login.empty() && !m_password.empty(); }
+
+   /// do we need to authentificate?
+   bool NeedsAuthInfo() const
+      { return !HasLogin() && m_mfolder->NeedsLogin(); }
+
+   /// propose the user to save the password temporarily or permanently
+   void ProposeSavePassword();
+
+   /// temporarily (i.e. for this session only) save password if we have it
+   void SavePasswordForSession();
+
+   /**
+     Try to find login/password for the given folder looking among the
+     logins/passwords previosuly entered by user if they are not stored in the
+     folder itself. If it doesn't find it there neither, asks the user for the
+     password (and sets didAsk to true then)
+
+     @param mfolder the folder we need auth info for
+     @param login the variable containing username
+     @param password the variable containing password
+     @param didAsk a pointer (may be NULL) set to true if password was entered
+     @return true if the password is either not needed or was entered
+    */
+   static bool GetAuthInfoForFolder(const MFolder *mfolder,
+                                    String& login,
+                                    String& password,
+                                    bool *didAsk = NULL);
    //@}
 
    /** @name c-client initialization */
@@ -516,6 +527,18 @@ private:
 
    /// the profile we use for our options
    Profile *m_Profile;
+
+   /**
+     Note that login/password may be different from m_mfolder data (i.e. what
+     GetLogin()/Password() return) if the user had chosen to not store them in
+     the config but enters them interactively.
+    */
+
+   /// username to use for opening this folder
+   String m_login;
+
+   /// password to use for opening this folder
+   String m_password;
 
    //@}
 
@@ -631,12 +654,6 @@ private:
 
    /// remove this object from Map
    void RemoveFromMap(void) const;
-
-   /// Gets first mailfolder in map or NULL.
-   static MailFolderCC *GetFirstMapEntry(StreamConnectionList::iterator &i);
-
-   /// Gets next mailfolder in map or NULL
-   static MailFolderCC *GetNextMapEntry(StreamConnectionList::iterator &i);
 
    /// find the stream in the map
    static MailFolderCC *LookupStream(const MAILSTREAM *stream);
