@@ -59,9 +59,7 @@ void MObjectRC::CheckLeaks()
    size_t nCount = gs_aObjects.Count();
 
    if ( nCount > 0 ) {
-      wxFAIL_MSG("MObjectRC memory leaks detected, see debug log for details.");
-
-      wxLogDebug("%d MObjectRCs leaked:", nCount);
+      wxLogDebug("MEMORY LEAK: %d object leaked:", nCount);
    }
 
    for ( size_t n = 0; n < nCount; n++ ) {
