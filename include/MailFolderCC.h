@@ -20,10 +20,10 @@
 #ifndef   USE_PCH
 #  include "kbList.h"
 
-#  include "MFolder.h"
-
 #  include "Mcclient.h"
 #endif
+
+#include "MFolder.h"
 
 #include "MailFolderCmn.h"
 #include "FolderView.h"
