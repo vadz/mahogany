@@ -219,16 +219,16 @@ MDlgResult MDialog_YesNoCancel(wxChar const *message,
        @param wildcard   pattern matching expression
        @param save   if true, saving a file
        @param profile   the profile to use
-       @return pointer to a temporarily allocated buffer with he filename, or NULL
+       @return string with the filename or empty if cancelled
    */
-const wxChar *MDialog_FileRequester(const String &message,
-                                  const wxWindow *parent = NULL,
-                                  String path = NULLstring,
-                                  String filename = NULLstring,
-                                  String extension = NULLstring,
-                                  String wildcard = NULLstring,
-                                  bool save = false,
-                                  Profile *profile = NULL);
+String MDialog_FileRequester(const String &message,
+                             wxWindow *parent = NULL,
+                             String path = NULLstring,
+                             String filename = NULLstring,
+                             String extension = NULLstring,
+                             String wildcard = NULLstring,
+                             bool save = false,
+                             Profile *profile = NULL);
 
 /** show a (modal) dialog with the given text
 

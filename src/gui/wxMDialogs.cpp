@@ -873,9 +873,9 @@ MDialog_YesNoDialog(const char *message,
        @param save   if true, for saving a file
        @return pointer to a temporarily allocated buffer with he filename, or NULL
    */
-const char *
+String
 MDialog_FileRequester(String const & message,
-                      const wxWindow *parent,
+                      wxWindow *parent,
                       String path,
                       String filename,
                       String extension,
