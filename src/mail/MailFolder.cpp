@@ -599,8 +599,8 @@ MailFolderCmn::DeleteDuplicates()
 
    if(DeleteMessages(&toDelete,FALSE))
       return toDelete.Count();
-   else
-      return UID_ILLEGAL; // an error happened
+   // else - uncommented or compiler thinks there's return without value
+   return UID_ILLEGAL; // an error happened
 }
 
 

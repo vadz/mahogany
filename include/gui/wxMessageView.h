@@ -6,7 +6,7 @@
  * $Id$
  *******************************************************************/
 
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_karsten
 #   include "wxMessageViewNew.h"
 #else
 
@@ -60,17 +60,20 @@ public:
        @param parent parent window
    */
    wxMessageView(wxFolderView *fv,
-                 wxWindow *parent = NULL);
+                 wxWindow *parent = NULL,
+                 bool show = TRUE);
 
    /** Constructor
        @param folder the mailfolder
        @param num    sequence number of message (0 based)
        @param parent parent window
+       @param show if FALSE, don't show it
    */
    wxMessageView(ASMailFolder *folder,
                  long num,
                  wxFolderView *fv,
-                 wxWindow  *parent = NULL);
+                 wxWindow  *parent = NULL,
+                 bool show = TRUE);
 
    /// Tell it a new parent profile - in case folder changed.
    void SetParentProfile(Profile *profile);
@@ -91,8 +94,11 @@ public:
    /// set the user-specified encoding and update
    void SetEncoding(wxFontEncoding enc);
 
-   /// prints the currently displayed message
-   void Print(void);
+   /** Prints the currently displayed message.
+       @param interactive if TRUE, ask for user input
+       return TRUE on success
+   */
+   bool Print(bool interactive = TRUE);
 
    /// print-previews the currently displayed message
    void PrintPreview(void);
@@ -270,6 +276,8 @@ public:
       { m_MessageView->ShowMessage(msg); }
    /// don't even think of using this!
    wxMessageViewFrame(void) {ASSERT(0);}
+   wxMessageView *GetMessageView() { return m_MessageView; }
+   
    DECLARE_DYNAMIC_CLASS(wxMessageViewFrame)
 private:
    wxMessageView *m_MessageView;

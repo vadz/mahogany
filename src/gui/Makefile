@@ -6,15 +6,10 @@ wxlwindow.cpp wxllist.cpp wxlparser.cpp wxMenuDefs.cpp wxOptionsDlg.cpp \
 wxFolderTree.cpp wxDialogLayout.cpp wxMFolderDialogs.cpp wxBrowseButton.cpp \
 wxHeadersDialogs.cpp wxTemplateDialog.cpp wxModulesDlg.cpp \
 wxSubfoldersDialog.cpp wxFiltersDialog.cpp wxWizards.cpp wxFolderMenu.cpp \
-Mdnd.cpp MImport.cpp
+Mdnd.cpp MImport.cpp wxMessageView.cpp wxMessageViewNew.cpp wxMEditCtrl.cpp
 
 include ../../makeopts
 
-ifdef EXPERIMENTAL
-SRC += wxMessageViewNew.cpp wxMEditCtrl.cpp
-else
-SRC += wxMessageView.cpp
-endif
 
 TARGETS = $(SRC:.cpp=.o)
 

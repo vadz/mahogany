@@ -141,7 +141,8 @@ wxString OAC_Types[] =
    gettext_noop("Python"),
    gettext_noop("Change Score"),
    gettext_noop("Set Colour"),
-   gettext_noop("Delete Duplicates")
+   gettext_noop("Delete Duplicates"),
+   gettext_noop("Print")
 };
 
 static const
@@ -491,6 +492,7 @@ OneActionControl::UpdateUI()
                    || type == OAC_T_Expunge
                    //|| type == OAC_T_Python
                    || type == OAC_T_Uniq
+                   || type == OAC_T_Print
       );
    m_Argument->Enable(enable);
 

@@ -6,6 +6,8 @@
  * $Id$
  *******************************************************************/
 
+#ifndef EXPERIMENTAL_karsten
+
 #ifdef __GNUG__
 #   pragma implementation "wxMessageView.h"
 #endif
@@ -416,19 +418,22 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 }
 
 
-wxMessageView::wxMessageView(wxFolderView *fv, wxWindow *parent)
+wxMessageView::wxMessageView(wxFolderView *fv, 
+                             wxWindow *parent,
+                             bool show)
              : wxLayoutWindow(parent)
 {
    m_folder = NULL;
    m_Profile = NULL;
    Create(fv,parent);
-   Show(TRUE);
+   Show(show);
 }
 
 wxMessageView::wxMessageView(ASMailFolder *folder,
                              long num,
                              wxFolderView *fv,
-                             wxWindow *parent)
+                             wxWindow *parent,
+                             bool show)
              : wxLayoutWindow(parent)
 {
    m_folder = folder;
@@ -437,7 +442,7 @@ wxMessageView::wxMessageView(ASMailFolder *folder,
    Create(fv,parent);
    if(folder)
       ShowMessage(folder,num);
-   Show(TRUE);
+   Show(show);
 }
 
 wxMessageView::~wxMessageView()
@@ -863,7 +868,6 @@ wxMessageView::Update(void)
             
             SET_QUOTING_LEVEL(level, tmp)
             SET_QUOTING_COLOUR(level)
-            
             do
             {
                before = strutil_findurl(tmp, url);
@@ -889,7 +893,6 @@ wxMessageView::Update(void)
                                     before.Mid(line_from, line_lng - line_from),
                                     encPart);
                }
-               
                else // no quoted text colourizing
                   wxLayoutImportText(llist, before, encPart);
 
@@ -1770,8 +1773,8 @@ wxMessageView::ShowMessage(Message *mailMessage)
 }
 
 
-void
-wxMessageView::Print(void)
+bool
+wxMessageView::Print(bool interactive)
 {
 #ifdef OS_WIN
    wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
@@ -1797,14 +1800,21 @@ wxMessageView::Print(void)
    wxThePrintSetupData->SetAFMPath(afmpath);
 #endif
    wxLayoutPrintout printout(GetLayoutList(), _("Mahogany: Printout"));
-   if ( !printer.Print(this, &printout, TRUE)
-      && ! printer.GetAbort() )
+
+   if ( !printer.Print(this, &printout, interactive)
+        && ! printer.GetAbort() )
+   {
       wxMessageBox(_("There was a problem with printing the message:\n"
                      "perhaps your current printer is not set up correctly?"),
                    _("Printing"), wxOK);
+      return FALSE;
+   }
    else
+   {
       (* ((wxMApp *)mApplication)->GetPrintData())
          = printer.GetPrintDialogData().GetPrintData();
+      return TRUE;
+   }
 }
 
 // tiny class to restore and set the default zoom level
@@ -2075,3 +2085,5 @@ wxMessageViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 
 IMPLEMENT_DYNAMIC_CLASS(wxMessageViewFrame, wxMFrame)
 
+#endif
+   

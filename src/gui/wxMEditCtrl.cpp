@@ -6,6 +6,8 @@
  * $Id$
  *******************************************************************/
 
+#ifdef EXPERIMENTAL_karsten
+
 #ifdef __GNUG__
 #   pragma implementation "MEditCtrl.h"
 #endif
@@ -176,8 +178,11 @@ public:
    //@}
 
 
-   /// prints the currently displayed message
-   virtual void Print(void);
+   /** Prints the currently displayed message.
+       @param interactive if TRUE, ask for user input
+       return TRUE on success
+   */
+   virtual bool Print(bool interactive = TRUE);
    /// print-previews the currently displayed message
    virtual void PrintPreview(void);
 
@@ -602,8 +607,8 @@ wxMEditCtrlLWindow::~wxMEditCtrlLWindow()
    delete m_EC;
 }
    
-void
-wxMEditCtrl::Print(void)
+bool
+wxMEditCtrl::Print(bool interactive)
 {
 #ifdef OS_WIN
    wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
@@ -628,14 +633,20 @@ wxMEditCtrl::Print(void)
    wxThePrintSetupData->SetAFMPath(afmpath);
 #endif
    wxLayoutPrintout printout(m_LWin->GetLayoutList(), _("Mahogany: Printout"));
-   if ( !printer.Print(m_LWin, &printout, TRUE)
+   if ( !printer.Print(m_LWin, &printout, interactive)
       && ! printer.GetAbort() )
+   {
       wxMessageBox(_("There was a problem with printing the message:\n"
                      "perhaps your current printer is not set up correctly?"),
                    _("Printing"), wxOK);
+      return FALSE;
+   }
    else
+   {
       (* ((wxMApp *)mApplication)->GetPrintData())
          = printer.GetPrintDialogData().GetPrintData();
+      return TRUE;
+   }
 }
 
 
@@ -722,3 +733,5 @@ MEditCtrl::Create(int type,
    CHECK(type == MEC_WXLAYOUT, NULL, "unsupported MEditCtrl type");
    return new wxMEditCtrl(cbh, parent, p);
 }
+
+#endif

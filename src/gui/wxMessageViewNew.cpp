@@ -10,6 +10,8 @@
 #   pragma implementation "wxMessageView.h"
 #endif
 
+#ifdef EXPERIMENTAL_karsten
+
 // ============================================================================
 // declarations
 // ============================================================================
@@ -383,7 +385,8 @@ wxMessageView::wxMessageView(wxFolderView *fv, wxWindow *parent)
 wxMessageView::wxMessageView(ASMailFolder *folder,
                              long num,
                              wxFolderView *fv,
-                             wxWindow *parent)
+                             wxWindow *parent,
+                             bool show)
 {
    wxWindow::Create(parent, -1);
    m_folder = folder;
@@ -399,7 +402,7 @@ wxMessageView::wxMessageView(ASMailFolder *folder,
    int x,y;
    GetSize(&x,&y);
    m_EditCtrl->SetSize(x,y);
-   Show(TRUE);
+   Show(show);
 }
 
 wxMessageView::~wxMessageView()
@@ -1149,7 +1152,7 @@ wxMessageView::OnUrl(const wxString &url)
    if(url.Left(7) == "mailto:")
    {
       wxEndBusyCursor();
-      wxComposeView *cv = wxComposeView::CreateNewMessage(frame, m_Profile);
+      wxComposeView *cv = wxComposeView::CreateNewMessage(m_Profile);
       cv->SetAddresses(url.Right(url.Length()-7));
       cv->InitText();
       cv->Show(TRUE);
@@ -1620,3 +1623,6 @@ wxMessageViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 }
 
 IMPLEMENT_DYNAMIC_CLASS(wxMessageViewFrame, wxMFrame)
+
+#endif
+

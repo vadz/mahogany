@@ -64,11 +64,13 @@ public:
        @param folder the mailfolder
        @param num    sequence number of message (0 based)
        @param parent parent window
+       @param show if FALSE, don't show it
    */
    wxMessageView(ASMailFolder *folder,
                  long num,
                  wxFolderView *fv,
-                 wxWindow  *parent = NULL);
+                 wxWindow  *parent = NULL,
+                 bool show = TRUE);
 
    /// Tell it a new parent profile - in case folder changed.
    void SetParentProfile(Profile *profile);
@@ -86,8 +88,14 @@ public:
    /// update it
    void   Update(void);
 
-   /// prints the currently displayed message
-   void Print(void) { m_EditCtrl->Print(); }
+   /** Prints the currently displayed message.
+       @param interactive if TRUE, ask for user input
+       return TRUE on success
+   */
+   bool Print(bool interactive = TRUE)
+      {
+         return  m_EditCtrl->Print(interactive); 
+      }
 
    /// print-previews the currently displayed message
    void PrintPreview(void) { m_EditCtrl->PrintPreview(); }
@@ -99,6 +107,12 @@ public:
 
    /// convert string in cptr to one in which URLs are highlighted
    String HighLightURLs(const char *cptr);
+
+   /// set the language to use for message display
+   void SetLanguage(int id)
+      {
+         ASSERT_MSG(0,"missing functionality");
+      }
 
    // callbacks
    // ---------
@@ -264,6 +278,7 @@ public:
    void OnSize(wxSizeEvent & event);
    void ShowMessage(Message *msg)
       { m_MessageView->ShowMessage(msg); }
+   wxMessageView *GetMessageView() { return m_MessageView; }
    /// don't even think of using this!
    wxMessageViewFrame(void) {ASSERT(0);}
    DECLARE_DYNAMIC_CLASS(wxMessageViewFrame)

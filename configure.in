@@ -37,16 +37,16 @@ M_OVERRIDES(python,Python,USE_PYTHON,1,
 --disable-python        no Python scripting)
 
 M_OVERRIDES(strict,strict compiler options,USE_STRICT,0,
---enable-strict         strict compiler flags - may not work on all systems)
+--with-strict         strict compiler flags - may not work on all systems)
 
 M_OVERRIDES(opt,optimization,USE_OPT,1,
 --disable-opt           no compiler optimisations - may not be effective)
 
 M_OVERRIDES(debug,debug code,USE_DEBUG,0,
---enable-debug          compile debug code)
+--with-debug          compile debug code)
 
 M_OVERRIDES(debuginfo,debuging info,USE_DEBUG_INFO,0,
---enable-debuginfo      include debug info from compiler)
+--with-debuginfo      include debug info from compiler)
 
 M_OVERRIDES(wxdebug,wxWin debug libs,USE_WXDEBUG,0,
 --with-wxdebug          use debug wxWindows libraries)
@@ -55,13 +55,13 @@ M_OVERRIDES(wxconfigprg,wxWin config prog,USE_WXCONFIGPRG,,
 --with-wxconfigprg=xxx  use wx-config program named xxx e.g. wxgtkd-config)
 
 M_OVERRIDES(prof,profiling,USE_PROFILER,0,
---enable-prof           generate profiling code)
+--with-prof           generate profiling code)
 
 M_OVERRIDES(experimental,experimental code,USE_EXPERIMENTAL,0,
---enable-experimental   compile experimental code)
+--with-experimental   compile experimental code)
 
 M_OVERRIDES(threads,multi-threading,USE_THREADS,0,
---enable-threads        multi-threaded version)
+--with-threads        multi-threaded version)
 
 M_OVERRIDES(dmalloc,dmalloc library,USE_DMALLOC,0,
 --with-dmalloc          use dmalloc library for debugging)
@@ -354,9 +354,12 @@ esac
 dnl experimental code (unstable!)
 case "$USE_EXPERIMENTAL" in
 1)	AC_DEFINE(EXPERIMENTAL)
-	if test -x /usr/bin/whoami
-	then	CPPFLAGS="$CPPFLAGS -DEXPERIMENTAL_`/usr/bin/whoami`"
-	fi
+	CPPFLAGS="$CPPFLAGS -DEXPERIMENTAL"
+	if test -z "$EXPERIMENTAL" ; then EXPERIMENTAL="$USER"; fi
+	for i in $EXPERIMENTAL
+	do
+	  CPPFLAGS="$CPPFLAGS -DEXPERIMENTAL_$i"
+	done  
 	MAKE_EXPERIMENTAL="EXPERIMENTAL=yes" ;;
 *)	MAKE_EXPERIMENTAL='' ;;
 esac

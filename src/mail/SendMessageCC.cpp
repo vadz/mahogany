@@ -142,8 +142,8 @@ SendMessageCC::EncodeHeader(const String& header)
 {
    // only encode the strings which contain the characters unallowed in RFC
    // 822 headers (FIXME should we quote RFC 822 specials? probably too...)
-   const char *p;
-   for ( p = header.c_str(); *p; p++ )
+   const unsigned char *p;
+   for ( p = (unsigned char *)header.c_str(); *p; p++ )
    {
       if ( *p < 32 || *p > 127 )
          break;

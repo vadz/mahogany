@@ -1,4 +1,8 @@
 (next release) on (date of next release)
+06.08.00 KB: added printing to filter functions
+             renamed configure options back to --with instead of --enable
+             changed handling of --with-experimental to allow multiple
+             experimental settings together
 31.07.00 VZ: serious bug with messages in base64 encoding fixed
 28.07.00 VZ: readded rsh timeout setting, but it is now disabled by default
 26.07.00 VZ: encode 8bit characters in the header of outgoing messages too

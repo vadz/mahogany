@@ -2925,6 +2925,8 @@ private:
    static wxIdentComboArray ms_allIdentCombos;
 };
 
+wxIdentComboArray wxIdentCombo::ms_allIdentCombos;
+
 extern wxChoice *CreateIdentCombo(wxWindow *parent)
 {
    wxArrayString identities = Profile::GetAllIdentities();

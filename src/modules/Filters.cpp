@@ -43,6 +43,9 @@
 
 #include <wx/regex.h>   // wxRegEx::Flags
 
+// for the func_print() function:
+#include "gui/wxMessageView.h"
+
 class Value;
 class ArgList;
 class Parser;
@@ -2011,6 +2014,26 @@ extern "C"
    }
 #endif
 
+   static Value func_print(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value(0);
+
+      Message * msg = p->GetMessage();
+      if(! msg)
+         return Value("");
+
+      wxMessageViewFrame *mvf = new wxMessageViewFrame(NULL,
+                                                       UID_ILLEGAL,
+                                                       NULL);
+      mvf->Show(FALSE);
+      mvf->ShowMessage(msg);
+      msg->DecRef();
+      bool rc = mvf->GetMessageView()->Print(FALSE);
+      delete mvf;
+      
+      return Value(rc);
+   }
 /* * * * * * * * * * * * * * *
  *
  * Access to message contents
@@ -2150,9 +2173,10 @@ extern "C"
          return 0;
       MailFolder *mf = p->GetFolder();
       if(! mf) return Value(0);
-      int rc = mf->DeleteDuplicates();
+      UIdType rc = mf->DeleteDuplicates();
       mf->DecRef();
-      return Value(rc);
+      return Value( (int)(rc != UID_ILLEGAL) ); // success if 0 or
+      // more deleted
    }
 
    static Value func_copytofolder(ArgList *args, Parser *p)
@@ -2319,6 +2343,7 @@ ParserImpl::AddBuiltinFunctions(void)
    DefineFunction("uniq", func_uniq);
    DefineFunction("copy", func_copytofolder);
    DefineFunction("move", func_movetofolder);
+   DefineFunction("print", func_print);
    DefineFunction("date", func_date);
    DefineFunction("size", func_size);
    DefineFunction("now", func_now);

@@ -262,8 +262,12 @@ public:
    virtual void SetEditable(bool toggle) = 0;
    //@}
 
-   /// prints the currently displayed message
-   virtual void Print(void) = 0;
+   /** Prints the currently displayed message.
+       @param interactive if TRUE, ask for user input
+       return TRUE on success
+   */
+   virtual bool Print(bool interactive = TRUE) = 0;
+   
    /// print-previews the currently displayed message
    virtual void PrintPreview(void) = 0;
    /// moves the cursor to the new position
