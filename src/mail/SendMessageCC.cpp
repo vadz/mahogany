@@ -56,7 +56,9 @@
 #include <wx/fontmap.h> // for GetEncodingName()
 #include <wx/datetime.h>
 
-#ifdef OS_UNIX
+#ifdef OS_WIN
+   #include <wx/msw/private.h>  // for GetCurrentProcessId()
+#elif defined(OS_UNIX)
    #include <unistd.h>  // for getpid()
 #endif
 
@@ -991,8 +993,6 @@ String BuildMessageId(const char *hostname)
    if ( !s_pid )
    {
 #ifdef OS_WIN
-      extern "C" DWORD GetCurrentProcessId();
-
       s_pid = (unsigned long)GetCurrentProcessId();
 #elif defined(OS_UNIX)
       s_pid = (unsigned long)getpid();
