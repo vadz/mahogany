@@ -6,6 +6,7 @@
 Release 0.64 '???' ???, 2001
 -------------------------------------------------------------------------------
 
+03.08.01 VZ: better feedback for dnd, show the target folder name in status bar
 30.07.01 XN: added mark read/unread commands
 11.07.01 VZ: added support for logging messages to a file
 28.06.01 VZ: automatically remove "mailto:" from addresses in composer

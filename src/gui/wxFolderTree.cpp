@@ -510,7 +510,12 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-// a helper class for dnd
+// ----------------------------------------------------------------------------
+// dnd classes
+// ----------------------------------------------------------------------------
+
+// TreeMessagesDropWhere: implementation of MMessagesDropWhere which returns
+// the folder in the tree at the mouse position
 class TreeMessagesDropWhere : public MMessagesDropWhere
 {
 public:
@@ -533,8 +538,78 @@ public:
       return folder;
    }
 
+   // for TreeDropTarget below
+   wxWindow *GetTreeWindow() const { return m_tree; }
+
 private:
    wxFolderTreeImpl *m_tree;
+};
+
+// TreeDropTarget: slightly enhanced version of MMessagesDropTarget which
+// shows in the status bar which folder is the current drop target
+class TreeDropTarget : MMessagesDropTarget
+{
+public:
+   TreeDropTarget(MMessagesDropWhere *where, wxWindow *win)
+      : MMessagesDropTarget(where, win) { m_folderLast = NULL; }
+
+   virtual wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def)
+   {
+      TreeMessagesDropWhere *
+         dropWhere = ((TreeMessagesDropWhere *)GetDropWhere());
+
+      MFolder *folder = dropWhere->GetFolder(x, y);
+
+      // avoid flicker in the status bar by only calling wxLogStatus if the
+      // folder under mouse changed
+      if ( folder != m_folderLast )
+      {
+         SafeDecRef(m_folderLast);
+         m_folderLast = folder;
+
+         String msg;
+
+         // we can't drop messages to the root folder
+         if ( folder && folder->GetType() != MF_ROOT )
+         {
+            msg << _("Drop messages to the folder '")
+                << folder->GetName() << '\'';
+         }
+         else // no folder under mouse
+         {
+            msg = _("You cannot drop messages here.");
+         }
+
+         wxLogStatus(GetFrame(), msg);
+      }
+      else
+      {
+         SafeDecRef(folder);
+      }
+
+      return def;
+   }
+
+   virtual void OnLeave()
+   {
+      SafeDecRef(m_folderLast);
+      m_folderLast = NULL;
+
+      MMessagesDropTarget::OnLeave();
+   }
+
+   virtual bool OnDrop(wxCoord x, wxCoord y)
+   {
+      SafeDecRef(m_folderLast);
+      m_folderLast = NULL;
+
+      return MMessagesDropTarget::OnDrop(x, y);
+   }
+
+   virtual ~TreeDropTarget() { SafeDecRef(m_folderLast); }
+
+private:
+   MFolder *m_folderLast;
 };
 
 // ----------------------------------------------------------------------------
@@ -1425,7 +1500,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    UpdateBackground();
 
    // create our drop target
-   new MMessagesDropTarget(new TreeMessagesDropWhere(this), this);
+   new TreeDropTarget(new TreeMessagesDropWhere(this), this);
 
    // create the root item
    MFolder *folderRoot = MFolder::Get("");

@@ -108,7 +108,10 @@ public:
                                   wxDragResult def) = 0;
 
 protected:
-   // the frame to sue for status messages
+   // get the frame to use for status messages
+   wxFrame *GetFrame() const { return m_frame; }
+
+private:
    wxFrame *m_frame;
 };
 
@@ -129,6 +132,9 @@ public:
 
    /// will delete the MMessagesDropWhere object
    virtual ~MMessagesDropTarget();
+
+protected:
+   MMessagesDropWhere *GetDropWhere() const { return m_where; }
 
 private:
    MMessagesDropWhere *m_where;

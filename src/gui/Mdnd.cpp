@@ -96,16 +96,16 @@ MMessagesDataObject::~MMessagesDataObject()
 MMessagesDropTargetBase::MMessagesDropTargetBase(wxWindow *win)
                        : wxDropTarget(new MMessagesDataObject)
 {
-   m_frame = GetFrame(win);
+   m_frame = ::GetFrame(win);
    win->SetDropTarget(this);
 }
 
 wxDragResult
 MMessagesDropTargetBase::OnEnter(wxCoord x, wxCoord y, wxDragResult def)
 {
-   if ( m_frame )
+   if ( GetFrame() )
    {
-      wxLogStatus(m_frame, _("You can drop mail messages here."));
+      wxLogStatus(GetFrame(), _("You can drop mail messages here."));
    }
 
    return OnDragOver(x, y, def);
@@ -113,9 +113,9 @@ MMessagesDropTargetBase::OnEnter(wxCoord x, wxCoord y, wxDragResult def)
 
 void MMessagesDropTargetBase::OnLeave()
 {
-   if ( m_frame )
+   if ( GetFrame() )
    {
-      wxLogStatus(m_frame, "");
+      wxLogStatus(GetFrame(), "");
    }
 }
 
@@ -148,35 +148,40 @@ wxDragResult MMessagesDropTarget::OnMsgDrop(wxCoord x, wxCoord y,
                                             wxDragResult def)
 {
    MFolder_obj folder(m_where->GetFolder(x, y));
-   if ( folder )
+   if ( !folder )
    {
-      if ( !CanCreateMessagesInFolder(folder->GetType()) )
-      {
-         wxLogStatus(m_frame, _("Can't drop messages to this folder."));
+      wxLogStatus(GetFrame(),
+                  _("No folder under cursor, messages not dropped."));
 
-         return wxDragNone;
-      }
-
-      UIdArray messages = data->GetMessages();
-
-      MsgCmdProc *msgCmdProc = data->GetMsgCmdProc();
-
-      // TODO: check here if the folder can be written to?
-
-      // check that we are not copying to the same folder
-      if ( msgCmdProc->GetFolderName() == folder->GetFullName() )
-      {
-         wxLogStatus(m_frame, _("Can't drop messages to the same folder."));
-
-         return wxDragNone;
-      }
-
-      msgCmdProc->ProcessCommand(WXMENU_MSG_DROP_TO_FOLDER, messages, folder);
-
-      // it's ok even if m_frame is NULL
-      wxLogStatus(m_frame, _("%u messages dropped."), messages.GetCount());
-      m_where->Refresh();
+      return wxDragNone;
    }
+
+   if ( !CanCreateMessagesInFolder(folder->GetType()) )
+   {
+      wxLogStatus(GetFrame(), _("Can't drop messages to this folder."));
+
+      return wxDragNone;
+   }
+
+   UIdArray messages = data->GetMessages();
+
+   MsgCmdProc *msgCmdProc = data->GetMsgCmdProc();
+
+   // TODO: check here if the folder can be written to?
+
+   // check that we are not copying to the same folder
+   if ( msgCmdProc->GetFolderName() == folder->GetFullName() )
+   {
+      wxLogStatus(GetFrame(), _("Can't drop messages to the same folder."));
+
+      return wxDragNone;
+   }
+
+   msgCmdProc->ProcessCommand(WXMENU_MSG_DROP_TO_FOLDER, messages, folder);
+
+   // it's ok even if m_frame is NULL
+   wxLogStatus(GetFrame(), _("%u messages dropped."), messages.GetCount());
+   m_where->Refresh();
 
    return def;
 }
