@@ -381,7 +381,14 @@ bool wxAddressTextCtrl::DoExpand()
 
       if ( nLastAddr > 0 )
       {
-         // move beyond the ' ', ',' or ';' which stopped the scan
+         // move beyond the ',' or ';' which stopped the scan
+         nLastAddr++;
+      }
+
+      // the address will probably never start with spaces but if it does, it
+      // will be enough to just take it into quotes
+      while ( isspace(text[nLastAddr]) )
+      {
          nLastAddr++;
       }
    }

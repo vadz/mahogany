@@ -185,11 +185,33 @@ AutoCollectAddresses(const String &email,
             }
          }
       }
-      else
+      else if ( matches.GetCount() == 1 )
       {
          // there is already an entry which has this e-mail, don't create
          // another one (even if the name is different it's more than likely
-         // that it's the same person)
+         // that it's the same person) -- but check that the existing entry
+         // does have a name, and set it if it doesn't but we have the "real"
+         // name (i.e. not the one extracted from email address)
+         String nameFromEmail = email.BeforeFirst('@');
+         if ( name != nameFromEmail )
+         {
+            AdbEntry *entry = matches[0];
+            wxString nameOld;
+            entry->GetField(AdbField_FullName, &nameOld);
+
+            // autocreated entries have the full name == nick name
+            if ( !nameOld || nameOld == nameFromEmail )
+            {
+               entry->SetField(AdbField_FullName, name);
+            }
+         }
+         //else: we don't have the real fullname anyhow
+      }
+      else
+      {
+         // more than one match for this email - hence at least some of them
+         // were created by the user (we wouldn't do it automatically) and we
+         // won't change them
       }
 
       // release the found items (if any)
