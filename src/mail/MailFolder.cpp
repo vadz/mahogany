@@ -1372,14 +1372,14 @@ extern "C"
                subj2 = strutil_removeReplyPrefix(i2->GetSubject());
 
             result = criterium == MSO_SUBJECT ?
-               Stricmp(subj1, subj2) : -Stricmp(subj1, subj2);
+               -Stricmp(subj1, subj2) : Stricmp(subj1, subj2);
          }
          break;
          case MSO_AUTHOR:
          case MSO_AUTHOR_REV:
             result = criterium == MSO_SUBJECT ?
-               Stricmp(i1->GetFrom(), i2->GetFrom())
-               : -Stricmp(i1->GetFrom(), i2->GetFrom());
+               -Stricmp(i1->GetFrom(), i2->GetFrom())
+               : Stricmp(i1->GetFrom(), i2->GetFrom());
             break;
          case MSO_STATUS_REV:
          case MSO_STATUS:
