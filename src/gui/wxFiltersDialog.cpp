@@ -149,6 +149,17 @@ static const
 size_t OAC_TypesCount = WXSIZEOF(OAC_Types);
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// check whether a filter with the given name exists
+static bool FilterExists(const String& name);
+
+// create a new filter, return its name (or an empty string if the filter
+// creation was cancelled)
+static String CreateNewFilter(wxWindow *parent);
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -1035,10 +1046,11 @@ wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.LeftOf(m_btnDelete, 3*LAYOUT_X_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
-   m_lboxFilters = new wxListBox(this, -1,
-                                 wxDefaultPosition, wxDefaultSize,
-                                 0, NULL,
-                                 wxLB_SORT);
+   m_lboxFilters = new wxPListBox("FiltersList",
+                                  this, -1,
+                                  wxDefaultPosition, wxDefaultSize,
+                                  0, NULL,
+                                  wxLB_SORT);
    m_lboxFilters->SetConstraints(c);
 
    SetDefaultSize(5*wBtn, 9*hBtn);
@@ -1048,34 +1060,14 @@ wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
 void
 wxFiltersDialog::OnAddFiter(wxCommandEvent &event)
 {
-   MFilterDesc fd;
-   if ( !ConfigureFilter(&fd, this) )
+   String name = CreateNewFilter(this);
+   if ( !name )
    {
       // cancelled
       return;
    }
 
-   String name = fd.GetName();
-
-   // check if the filter with this name already exists
    int idx = m_lboxFilters->FindString(name);
-   if ( idx != -1 )
-   {
-      String msg;
-      msg.Printf(_("The filter '%s' already exists, do you want "
-                   "to replace it?"), name.c_str());
-      if ( !MDialog_YesNoDialog(msg, this, _("Replace filter?"),
-                                false,
-                                GetPersMsgBoxName(M_MSGBOX_FILTER_REPLACE)) )
-      {
-         return;
-      }
-   }
-
-   // create the new filter
-   MFilter_obj filter(name);
-   filter->Set(fd);
-
    if ( idx == -1 )
    {
       m_lboxFilters->Append(name);
@@ -1324,19 +1316,21 @@ void wxFolderFiltersDialog::OnButton(wxCommandEvent& event)
    if ( event.GetEventObject() == m_btnAdd )
    {
       wxArrayString allFiltersOld = Profile::GetAllFilters();
-      if ( ConfigureAllFilters(this) )
+      String name = CreateNewFilter(this);
+      if ( !name.empty() )
       {
-         // update list of available filters
-         wxArrayString allFiltersNew = Profile::GetAllFilters();
-         size_t count = allFiltersNew.GetCount();
-         for ( size_t n = 0; n < count; n++ )
+         int idx = m_checklstBox->FindString(name);
+         if ( idx == wxNOT_FOUND )
          {
-            const wxString& f = allFiltersNew[n];
-            if ( allFiltersOld.Index(f) == wxNOT_FOUND )
-               m_checklstBox->Append(f);
-            //else: we already had it
+            // add the new filter
+            m_checklstBox->Append(name);
+            idx = m_checklstBox->GetCount() - 1;
          }
+         //else: we already had it
+
+         m_checklstBox->Check(idx);
       }
+      //else: cancelled
    }
    else
    {
@@ -1526,7 +1520,55 @@ wxQuickFilterDialog::~wxQuickFilterDialog()
 }
 
 // ----------------------------------------------------------------------------
-// exported function
+// private functions
+// ----------------------------------------------------------------------------
+
+static bool FilterExists(const String& name)
+{
+   wxArrayString allFilters = Profile::GetAllFilters();
+   size_t count = allFilters.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( allFilters[n] == name )
+         return true;
+   }
+
+   return false;
+}
+
+static String CreateNewFilter(wxWindow *parent)
+{
+   String name;
+   MFilterDesc fd;
+   if ( ConfigureFilter(&fd, parent) )
+   {
+      name = fd.GetName();
+
+      // check if the filter with this name already exists
+      if ( FilterExists(name) )
+      {
+         String msg;
+         msg.Printf(_("The filter '%s' already exists, do you want "
+                      "to replace it?"), name.c_str());
+         if ( !MDialog_YesNoDialog(msg, parent, _("Replace filter?"),
+                                   false,
+                                   GetPersMsgBoxName(M_MSGBOX_FILTER_REPLACE)) )
+         {
+            return "";
+         }
+      }
+
+      // create the new filter
+      MFilter_obj filter(name);
+      filter->Set(fd);
+   }
+   //else: cancelled
+
+   return name;
+}
+
+// ----------------------------------------------------------------------------
+// public function
 // ----------------------------------------------------------------------------
 
 extern
