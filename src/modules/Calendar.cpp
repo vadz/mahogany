@@ -1030,21 +1030,14 @@ CalendarFrame::AddReminder(const wxString &itext,
    msg->DecRef();
 }
 
-
-
-
-
-
-
-
-
-
-
 MMODULE_BEGIN_IMPLEMENT(CalendarModule,
                         "Calendar",
                         "Calendar",
-                        "This module provides a calendar and scheduling plugin.",
-                        "0.00")
+                        "Calendar module",
+                        "1.00")
+   MMODULE_PROP("description",
+                _("This module provides a calendar and scheduling plugin."))
+   MMODULE_PROP("author", "Karsten Ballüder <karsten@phy.hw.ac.uk>")
 MMODULE_END_IMPLEMENT(CalendarModule)
 
 
@@ -1062,7 +1055,8 @@ CalendarModule::Init(int version_major, int version_minor,
    if(! MMODULE_SAME_VERSION(version_major, version_minor,
                              version_release))
    {
-      if(errorCode) *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
+      if(errorCode)
+         *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
       return NULL;
    }
 

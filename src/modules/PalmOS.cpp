@@ -607,11 +607,11 @@ MMODULE_BEGIN_IMPLEMENT(PalmOSModule,
                         "PalmOS",
                         "HandheldSynchronise",
                         "PalmOS module",
-                        "0.00")
+                        "1.00")
    MMODULE_PROP("description",
                 _("This module provides PalmOS connectivity"))
    MMODULE_PROP("author", "Karsten Ballüder <karsten@phy.hw.ac.uk>")
-   MMODULE_END_IMPLEMENT(PalmOSModule)
+MMODULE_END_IMPLEMENT(PalmOSModule)
 
 
 ///----------------------------------------------------------------------------
@@ -619,8 +619,7 @@ MMODULE_BEGIN_IMPLEMENT(PalmOSModule,
 ///----------------------------------------------------------------------------
 
 /* static */
-
-   MModule *
+MModule *
 PalmOSModule::Init(int version_major, int version_minor,
                    int version_release, MInterface *minterface,
                    int *errorCode)
@@ -628,7 +627,8 @@ PalmOSModule::Init(int version_major, int version_minor,
    if(! MMODULE_SAME_VERSION(version_major, version_minor,
                              version_release))
    {
-      if(errorCode) *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
+      if(errorCode)
+         *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
       return NULL;
    }
 
@@ -670,6 +670,7 @@ PalmOSModule::RegisterWithMainFrame()
                                                           _("Functionality to interact with your PalmOS based palmtop."),
                                                           palmOsMenu,
                                                           -1);
+   return true;
 }
 
 PalmOSModule::~PalmOSModule()

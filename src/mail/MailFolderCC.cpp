@@ -4104,7 +4104,7 @@ void mail_fetch_overview_x(MAILSTREAM *stream, char *sequence, overview_x_t ofn)
             continue;
          }
 
-         ENVELOPE *env = mail_fetch_structure(stream, i, NULL, NULL);
+         ENVELOPE *env = mail_fetch_structure(stream, i, NIL, NIL);
          if ( !env )
          {
             FAIL_MSG( "failed to get sequence element envelope?" );
