@@ -2903,41 +2903,48 @@ bool wxOptionsPageNewMail::TransferDataFromWindow()
    if ( rc )
    {
       // collect mail checkbox (MF_FLAGS_INCOMING)
-      wxCheckBox *checkbox =
-         wxStaticCast(GetControl(ConfigField_NewMailCollect), wxCheckBox);
+      wxWindow *win = GetControl(ConfigField_NewMailCollect);
 
-      if ( checkbox && checkbox->GetValue() != m_collectOld )
+      if ( win )
       {
-         // by now we must have a valid folder
-         if ( !m_folder )
-         {
-            if ( !GetFolderFromProfile() )
-            {
-               FAIL_MSG( "failed to create the folder in new mail page" );
-            }
-         }
+         wxCheckBox *checkbox = wxStaticCast(win, wxCheckBox);
 
-         if ( m_folder )
+         if ( checkbox->GetValue() != m_collectOld )
          {
-            if ( m_collectOld )
-               m_folder->ResetFlags(MF_FLAGS_INCOMING);
-            else
-               m_folder->AddFlags(MF_FLAGS_INCOMING);
+            // by now we must have a valid folder
+            if ( !m_folder )
+            {
+               if ( !GetFolderFromProfile() )
+               {
+                  FAIL_MSG( "failed to create the folder in new mail page" );
+               }
+            }
+
+            if ( m_folder )
+            {
+               if ( m_collectOld )
+                  m_folder->ResetFlags(MF_FLAGS_INCOMING);
+               else
+                  m_folder->AddFlags(MF_FLAGS_INCOMING);
+            }
          }
       }
 
       // monitor folder checkbox (MF_FLAGS_MONITOR)
-      checkbox =
-         wxStaticCast(GetControl(ConfigField_NewMailMonitor), wxCheckBox);
-
-      if ( checkbox && checkbox->GetValue() != m_monitorOld )
+      win = GetControl(ConfigField_NewMailMonitor);
+      if ( win )
       {
-         if ( m_folder )
+         wxCheckBox *checkbox = wxStaticCast(win, wxCheckBox);
+
+         if ( checkbox->GetValue() != m_monitorOld )
          {
-            // NB: remember that it was toggled, hence "!m_monitorOld"
-            FolderMonitor *folderMonitor = mApplication->GetFolderMonitor();
-            if ( folderMonitor )
-               folderMonitor->AddOrRemoveFolder(m_folder, !m_monitorOld);
+            if ( m_folder )
+            {
+               // NB: remember that it was toggled, hence "!m_monitorOld"
+               FolderMonitor *folderMonitor = mApplication->GetFolderMonitor();
+               if ( folderMonitor )
+                  folderMonitor->AddOrRemoveFolder(m_folder, !m_monitorOld);
+            }
          }
       }
    }
