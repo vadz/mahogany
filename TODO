@@ -8,6 +8,12 @@ $Id$
     just continue to remove bugs from this list as they are 
     fixed.
 
+************ Small features before release
+
+************ Translations
+
+auto update the translations state
+
 ************ HeaderInfo reorganization
 
 score/colour setting per message basis: grep for USE_HEADER_SCORE/COLOUR
