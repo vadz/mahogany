@@ -114,6 +114,11 @@ SendMessageCC::Create(Protocol protocol,
    m_CharSet = READ_CONFIG(prof,MP_CHARSET);
 
    m_DefaultHost = miscutil_GetDefaultHost(prof);
+   if ( !m_DefaultHost )
+   {
+      // trick c-client into accepting addresses without host names
+      m_DefaultHost = '@';
+   }
 
    m_SendmailCmd = READ_CONFIG(prof, MP_USE_SENDMAIL) ?
       READ_CONFIG(prof,MP_SENDMAILCMD) : String("");
@@ -574,13 +579,16 @@ SendMessageCC::Build(void)
    if(! HasHeaderEntry("X-Face") && m_XFaceFile.Length() > 0)
    {
       XFace xface;
-      xface.CreateFromFile(m_XFaceFile);
-      m_headerNames[h] = strutil_strdup("X-Face");
-      m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
-      if(strlen(m_headerValues[h]))  // paranoid, I know.
-         ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] =
-            '\0'; // cut off \n
-      h++;
+      if ( xface.CreateFromFile(m_XFaceFile) )
+      {
+         m_headerNames[h] = strutil_strdup("X-Face");
+         m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
+         if(strlen(m_headerValues[h]))  // paranoid, I know.
+            ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] =
+               '\0'; // cut off \n
+         h++;
+      }
+      //else: couldn't read X-Face from file (complain?)
    }
 #endif
 
