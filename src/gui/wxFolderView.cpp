@@ -310,8 +310,24 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 
 void wxFolderListCtrl::OnMouse(wxMouseEvent& event)
 {
-// why doesn't this work?   wxASSERT(event.m_rightDown);
+   // why doesn't this work?   wxASSERT(event.m_rightDown);
+   // VZ: because of GDK weirdness (it should work now though, I changed
+   //     wxGTK, but I don't think we should reenable assert)
+
+   // make sure that the popup menu entries are in sync with the ones in the
+   // top-level menu
+   wxFrame *frame = GetFrame(this);
+   CHECK_RET( frame, "wxFolderListCtrl outside a frame?" );
+
+   wxMenuBar *mb = frame->GetMenuBar();
+   m_menu->Check(WXMENU_MSG_TOGGLEHEADERS,
+                 mb->IsChecked(WXMENU_MSG_TOGGLEHEADERS));
+
    PopupMenu(m_menu, event.GetX(), event.GetY());
+
+   // and now sync them back again
+   mb->Check(WXMENU_MSG_TOGGLEHEADERS,
+             m_menu->IsChecked(WXMENU_MSG_TOGGLEHEADERS));
 }
 
 void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
