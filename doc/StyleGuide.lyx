@@ -1,4 +1,4 @@
-#This file was created by <karsten> Wed May 20 14:29:52 1998
+#This file was created by <karsten> Sun Aug 16 15:39:54 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -342,6 +342,13 @@ hungarian
  notation.
 \layout Itemize
 
+Do use the 
+\family typewriter 
+m_
+\family default 
+ prefix for member variables.
+\layout Itemize
+
 When using names consisting of several words, use mixed capitalisation,
  not underscores, i.e.
  use 
@@ -657,24 +664,26 @@ $Id$
  and the 
 \family typewriter 
 $Log$
-Revision 1.7  1998/05/20 13:32:10  KB
-Eventually fixed that Doc++ core dump problem and added a note about
-this in the StyleGuide.
-Revision 1.6  1998/05/14 18:49:07  KBExtended naming
- conventions, added postscript versions.Revision 1.5  1998/05/02 18:29:51
-  KBAfter many problems, Python integration is eventually taking off -works.
+Revision 1.8  1998/08/16 16:32:16  KB
+updates
+Revision 1.7  1998/05/20 13:32:10  KBEventually fixed
+ that Doc++ core dump problem and added a note aboutthis in the StyleGuide.Revisi
+on 1.6  1998/05/14 18:49:07  KBExtended naming conventions, added postscript
+ versions.Revision 1.5  1998/05/02 18:29:51  KBAfter many problems, Python
+ integration is eventually taking off -works.
 
 \family default 
  tags.
  Including the 
 \family typewriter 
 $Log$
-Revision 1.7  1998/05/20 13:32:10  KB
-Eventually fixed that Doc++ core dump problem and added a note about
-this in the StyleGuide.
-Revision 1.6  1998/05/14 18:49:07  KBExtended naming
- conventions, added postscript versions.Revision 1.5  1998/05/02 18:29:51
-  KBAfter many problems, Python integration is eventually taking off -works.
+Revision 1.8  1998/08/16 16:32:16  KB
+updates
+Revision 1.7  1998/05/20 13:32:10  KBEventually fixed
+ that Doc++ core dump problem and added a note aboutthis in the StyleGuide.Revisi
+on 1.6  1998/05/14 18:49:07  KBExtended naming conventions, added postscript
+ versions.Revision 1.5  1998/05/02 18:29:51  KBAfter many problems, Python
+ integration is eventually taking off -works.
 
 \family default 
  information in each file somehow inflates the code, but as the CVS archive

@@ -306,7 +306,7 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
    String
       seq;
 
-   seq << index << ':' << index;
+   seq << index;
 
    const char *flagstr;
    

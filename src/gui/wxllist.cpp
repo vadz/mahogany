@@ -316,7 +316,7 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const
 
    int currentPage = 1;
    
-   if(pageNo > 0)
+   if(pageNo != -1)
    {
       dc.GetSize(&pageWidth, &pageHeight);
       WXL_VAR(pageHeight);
@@ -366,9 +366,10 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const
       type = (*i)->GetType();
 
       // to initialise sizes of objects, we need to call Draw
-      if(draw && (pageNo == -1 || pageNo == currentPage))
+      if(draw)
       {
-         (*i)->Draw(dc, position, baseLine, draw);
+         (*i)->Draw(dc, position, baseLine, draw && (pageNo == -1
+                                                     || pageNo == currentPage));
 #ifdef   WXLAYOUT_DEBUG
          if(i == begin())
             wxLogDebug("first position = (%d,%d)",(int) position.x, (int)position.y);
@@ -455,10 +456,13 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const
          {
             // if the this line needs to go onto a new page, we need
             // to change pages before drawing it:
-            if(pageNo > 0 && position.y > margins.bottom)
+            if(pageNo != -1 && position.y > margins.bottom)
             {
                currentPage++;
                position_HeadOfLine.y = margins.top;
+               position.y = position_HeadOfLine;
+               i = headOfLine;
+               continue;
             }
             if(reallyDraw && (pageNo == -1 || pageNo == currentPage))
             {
@@ -1036,11 +1040,11 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    // This code doesn't work, because we don't have a DC yet.
    // How on earth are we supposed to calculate the number of pages then?
 
-   *minPage = 1;
+   *minPage = 0;
    *maxPage = 32000;
 
    *selPageFrom = 1;
-   *selPageTo = 1;
+   *selPageTo = 1000;
 
 #if 0
    CoordType height;

@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sun Aug 16 10:05:10 1998
+#This file was created by <karsten> Sun Aug 16 15:42:13 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -46,7 +46,7 @@ Ballueder@usa.net
 \backslash 
 Contact us: 
 \family typewriter 
-m-developers@findmail.com
+m-developers@makelistcom
 \layout Abstract
 
 These are the release notes for M.
@@ -130,6 +130,22 @@ Printing of nicely formatted messages.
 
 Full internationalisation support, M speaks multiple languages, but no translati
 ons yet.
+\layout Section
+
+Known bugs
+\layout Itemize
+
+selection in the folder view sometimes behaves strange, selecting all messages
+ doesn't work
+\layout Itemize
+
+message and composition view don't automatically scroll to the cursor
+\layout Itemize
+
+printing doesn't work yet
+\layout Itemize
+
+tab traversal in dialogs doesn't work (wxGTK problem)
 \layout Section
 
 TODO, features to implement

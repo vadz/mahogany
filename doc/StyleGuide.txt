@@ -108,6 +108,8 @@ Example:
 
 * Do not use hungarian notation.
 
+* Do use the m_ prefix for member variables.
+
 * When using names consisting of several words, use mixed capitalisation,
   not underscores, i.e. use MyNewClass, not My_new_class.
 
@@ -221,20 +223,21 @@ The sources are managed by the CVS version control system. For easy
 identification, each file should start with a comment, including at
 least the $Id$ and
 the $Log$
-the Revision 1.6  1998/05/20 13:32:12  KB
-the Eventually fixed that Doc++ core dump problem and added a note about
-the this in the StyleGuide.
-theRevision 1.6  1998/05/14 18:49:07  KBExtended
-naming conventions, added postscript versions.Revision 1.5  1998/05/02
-18:29:51  KBAfter many problems, Python integration is eventually
-taking off -works. tags. Including the $Log$
-taking off -works. tags. Including the Revision 1.6  1998/05/20 13:32:12  KB
-taking off -works. tags. Including the Eventually fixed that Doc++ core dump problem and added a note about
-taking off -works. tags. Including the this in the StyleGuide.
-taking off -works. tags. Including theRevision
-1.6  1998/05/14 18:49:07  KBExtended naming conventions, added postscript
-versions.Revision 1.5  1998/05/02 18:29:51  KBAfter many problems,
-Python integration is eventually taking off -works. information in
-each file somehow inflates the code, but as the CVS archive might
-only be accessible through a dial-up internet connection, it provides
-valuable information.
+the Revision 1.7  1998/08/16 16:32:19  KB
+the updates
+theRevision 1.7  1998/05/20 13:32:10  KBEventually
+fixed that Doc++ core dump problem and added a note aboutthis in the
+StyleGuide.Revision 1.6  1998/05/14 18:49:07  KBExtended naming conventions,
+added postscript versions.Revision 1.5  1998/05/02 18:29:51  KBAfter
+many problems, Python integration is eventually taking off -works.
+tags. Including the $Log$
+tags. Including the Revision 1.7  1998/08/16 16:32:19  KB
+tags. Including the updates
+tags. Including theRevision 1.7  1998/05/20
+13:32:10  KBEventually fixed that Doc++ core dump problem and added
+a note aboutthis in the StyleGuide.Revision 1.6  1998/05/14 18:49:07
+ KBExtended naming conventions, added postscript versions.Revision
+1.5  1998/05/02 18:29:51  KBAfter many problems, Python integration
+is eventually taking off -works. information in each file somehow
+inflates the code, but as the CVS archive might only be accessible
+through a dial-up internet connection, it provides valuable information.
