@@ -82,6 +82,12 @@
    #include <wx/dcps.h> // for wxThePrintSetupData
 #endif
 
+#include "Mcclient.h"
+extern "C"
+{
+   #include "utf8.h"  // for utf8_text_utf7()
+}
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------

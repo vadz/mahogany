@@ -893,7 +893,7 @@ MDialog_YesNoDialog(const char *message,
          // folderName)
          String msg = String::Format
                       (
-                        _("You have chosen to disabled the previous dialog and "
+                        _("You have chosen to disable the previous dialog and "
                           "now you have the choice between doing it\n"
                           "only for this folder (%s) or for all folders.\n"
                           "\n"
