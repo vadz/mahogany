@@ -238,9 +238,19 @@ private:
    // update the button colour to match the text control contents
    void UpdateColorFromText();
 
+   // notify us that the associated text control was deleted
+   void OnTextDelete();
+
+   // the current colour (may be invalid if none)
    wxColour m_color;
 
-   // it calls our UpdateColorFromText()
+   // do we still have a valid text control?
+   bool m_hasText;
+
+   // the custom event handler for the associated text control
+   class wxColorTextEvtHandler *m_evtHandlerText;
+
+   // it calls our UpdateColorFromText() and OnTextDelete()
    friend class wxColorTextEvtHandler;
 
    // abstract because we have no default ctor

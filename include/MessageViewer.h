@@ -58,6 +58,9 @@ public:
    /// get the viewer window
    virtual wxWindow *GetWindow() const = 0;
 
+   /// virtual dtor for the base class
+   virtual ~MessageViewer() { }
+
    //@}
 
    /** @name Operations

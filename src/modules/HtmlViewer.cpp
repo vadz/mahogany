@@ -55,7 +55,7 @@ static wxString Col2Html(const wxColour& col);
 static wxString MakeHtmlSafe(const wxString& text);
 
 // ----------------------------------------------------------------------------
-// HtmlViewer: a wxTextCtrl-based MessageViewer implementation
+// HtmlViewer: a wxHTML-based MessageViewer implementation
 // ----------------------------------------------------------------------------
 
 class HtmlViewer : public MessageViewer
@@ -383,7 +383,7 @@ void HtmlViewer::Clear()
 
    m_nPart = 0;
 
-   m_bmpXFace = wxNullBitmap;
+   //m_bmpXFace = wxNullBitmap;
 
    FreeMemoryFS();
 }
@@ -593,11 +593,9 @@ void HtmlViewer::ShowHeader(const String& headerName,
 
    const ProfileValues& profileValues = GetOptions();
 
-   // first row: header names
+   // first row: header names (width=1 means minimal width)
    m_htmlText += "<tr>"
-                 // FIXME: wxHTML doesn't support width="20%" construct
-                 "<td align=\"right\" width=120>"
-                 ;
+                 "<td align=\"right\" width=\"1\">";
 
    {
       FontColourChanger colChanger(profileValues.HeaderNameCol, m_htmlText);
@@ -733,7 +731,7 @@ void HtmlViewer::EndBody()
    m_htmlText += "</body></html>";
 
    // makes cut-&-pasting into Netscape easier
-   wxLogTrace("html", "Generated HTML output:\n%s\n", m_htmlText.c_str());
+   //wxLogTrace("html", "Generated HTML output:\n%s\n", m_htmlText.c_str());
 
    m_window->SetPage(m_htmlText);
 }

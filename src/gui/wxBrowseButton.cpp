@@ -103,6 +103,14 @@ protected:
       event.Skip();
    }
 
+   void OnDestroy(wxWindowDestroyEvent& event)
+   {
+      event.Skip();
+
+      // delete ourselves as this is the only place where we can do it
+      m_btn->OnTextDelete();
+   }
+
 private:
    wxColorBrowseButton *m_btn;
 
@@ -128,6 +136,7 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxColorTextEvtHandler, wxEvtHandler)
    EVT_TEXT(-1, wxColorTextEvtHandler::OnText)
+   EVT_WINDOW_DESTROY(wxColorTextEvtHandler::OnDestroy)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -252,12 +261,30 @@ IMPLEMENT_ABSTRACT_CLASS(wxColorBrowseButton, wxButton)
 wxColorBrowseButton::wxColorBrowseButton(wxTextCtrl *text, wxWindow *parent)
                    : wxTextBrowseButton(text, parent, _("Choose colour"))
 {
-   GetTextCtrl()->PushEventHandler(new wxColorTextEvtHandler(this));
+   m_hasText = TRUE;
+
+   m_evtHandlerText = new wxColorTextEvtHandler(this);
+   GetTextCtrl()->PushEventHandler(m_evtHandlerText);
 }
 
 wxColorBrowseButton::~wxColorBrowseButton()
 {
-   GetTextCtrl()->PopEventHandler(TRUE /* delete it */);
+   // the order of control deletion is undetermined, so handle both cases
+   if ( m_hasText )
+   {
+      // we're deleted before the text control
+      GetTextCtrl()->PopEventHandler(TRUE /* delete it */);
+   }
+   else
+   {
+      // the text control had been already deleted
+      delete m_evtHandlerText;
+   }
+}
+
+void wxColorBrowseButton::OnTextDelete()
+{
+   m_hasText = FALSE;
 }
 
 void wxColorBrowseButton::DoBrowse()
