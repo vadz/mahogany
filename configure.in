@@ -577,6 +577,10 @@ dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
 dnl --------------------------------------------------------------------------
 
+dnl This code also sets the EXTRALIBS setting with any OS 
+dnl specific flags that cannot otherwise be tested for.
+EXTRALIBS=
+
 dnl we need to set the target for c-client library:
 
 
@@ -599,6 +603,8 @@ else
 	  ;;
 	freebsd* | FreeBSD*)
 	  CCOSTYPE=bsf
+dnl extra libs as required by python on freebsd:
+	  EXTRALIBS="-lreadline -lstdc++"
 	  ;;
 	hpux_9*)
 	  CCOSTYPE=hpp
@@ -731,7 +737,7 @@ dnl just a file where to dump some unneeded code in the python dir
 MAKE_LOCAL_LIBS_DEFINE="junk"
 
 dnl compface is included in M source
-LIBS="$LIBS -lMcompface"
+LIBS="$LIBS -lMcompface $EXTRALIBS"
 
 dnl add other flags
 LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PNG $LIB_JPEG"
