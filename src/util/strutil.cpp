@@ -18,6 +18,7 @@
 #   include "strutil.h"
 #   include "kbList.h"
 #   include "MDialogs.h"
+#   include "Mpers.h"
 #endif
 
 #ifdef OS_UNIX
@@ -717,16 +718,34 @@ int TwoFishCrypt(
 
 static String gs_GlobalPassword;
 static bool strutil_has_twofish = false;
+static bool gs_UseGlobalPasswd = TRUE;
 
 static void
 setup_twofish(void)
 {
-   if(gs_GlobalPassword.Length() == 0)
+   if(gs_UseGlobalPasswd && gs_GlobalPassword.Length() == 0)
    {
-      MInputBox(&gs_GlobalPassword,
-                _("Global Password:"),
-                _("Please enter your global Mahogany password:"),
-                NULL,NULL,NULL,TRUE);
+      MDialog_Message(
+         _("Mahogany uses a global password to protect sensitive\n"
+           "information in your configuration files.\n\n"
+           "The next dialog will ask you for your global password.\n"
+           "If you have not previously chosen one, please choose one\n"
+           "now, otherwise enter the one you chose previously.\n\n"
+           "If you do not want to use a global password, just cancel\n"
+           "the next dialog.\n\n"
+           "(Tick the box below to never see this message again.)"),
+         NULL,
+         _("Global Password"),
+         GetPersMsgBoxName(M_MSGBOX_EXPLAIN_GLOBALPASSWD));
+      if(! MInputBox(&gs_GlobalPassword,
+                     _("Global Password:"),
+                     _("Please enter your global Mahogany password:"),
+                     NULL,NULL,NULL,TRUE))
+      {
+         gs_UseGlobalPasswd = FALSE;
+      }
+      else
+         gs_UseGlobalPasswd = TRUE;
    }
 }
 
