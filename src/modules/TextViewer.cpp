@@ -495,7 +495,16 @@ void TextViewer::ShowHeaderName(const String& name)
 {
    const ProfileValues& profileValues = GetOptions();
 
-   InsertText(name + ": ", wxTextAttr(profileValues.HeaderNameCol));
+   wxTextAttr attr(profileValues.HeaderNameCol);
+   wxFont font = m_window->GetFont();
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   attr.SetFont(font);
+
+   InsertText(name + ": ", attr);
+
+   // restore the non bold font
+   attr.SetFont(m_window->GetFont());
+   m_window->SetDefaultStyle(attr);
 }
 
 void TextViewer::ShowHeaderValue(const String& value,
