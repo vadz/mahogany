@@ -3,7 +3,7 @@
 #
 
 CWD = src
-SUB_DIRS = util classes gui mail
+SUB_DIRS = util classes gui mail adb
 MOBJS=util/*.o classes/*.o gui/*.o  mail/*.o 
 
 include ../makeopts
