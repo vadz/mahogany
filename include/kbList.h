@@ -272,7 +272,22 @@ public: \
    \
    inline iterator tail(void) const \
       { return kbList::tail(); } \
-}
+   ~name() \
+   { \
+      kbListNode *next; \
+      while ( first != NULL ) \
+      { \
+         next = first->next; \
+         if(ownsEntries) \
+            delete typecast(first->element); \
+         delete first; \
+         first = next; \
+      } \
+   } \
+   private: \
+   inline type * typecast(void *ptr) \
+      { return (type *) ptr; } \
+   }
 
 #ifdef   MCONFIG_H
 /// define the most commonly used list type once:
