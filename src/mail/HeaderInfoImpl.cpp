@@ -1025,25 +1025,31 @@ size_t* globalInvSortTable = 0;
 
 extern "C"
 {
+
+   static MsgnoType FindMsgno(THREADNODE* p) {
+      // This function relies on the fact that the children of a node
+      // are sorted before the node is sorted wrt its siblings. This
+      // way, we simply get the first non-dummy item.
+      MsgnoType msgno = p->num;
+      size_t count = 0;
+      while (msgno == 0) {
+         p = p->next;
+         ASSERT(p != 0);
+         msgno = p->num;
+         count++;
+         ASSERT(count < 1000);
+      }
+      return msgno;
+   }
+
    static int CompareThreadNodes(const void *p1, const void *p2)
    {
       THREADNODE* th1 = *(THREADNODE**)p1;
-      MsgnoType msgno1 = th1->num;
-      if (msgno1 == 0) {
-         // This is a dummy node
-         ASSERT(th1->next != 0);
-         ASSERT(th1->next->num != 0);
-         msgno1 = th1->next->num;
-      }
+      MsgnoType msgno1 = FindMsgno(th1);
       size_t pos1 = globalInvSortTable[msgno1-1];
+
       THREADNODE* th2 = *(THREADNODE**)p2;
-      MsgnoType msgno2 = th2->num;
-      if (msgno2 == 0) {
-         // This is a dummy node
-         ASSERT(th2->next != 0);
-         ASSERT(th2->next->num != 0);
-         msgno2 = th2->next->num;
-      }
+      MsgnoType msgno2 = FindMsgno(th2);
       size_t pos2 = globalInvSortTable[msgno2-1];
 
       return pos1 - pos2;
