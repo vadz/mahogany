@@ -66,10 +66,10 @@ public:
        @param type numeric mime type
        @param buf  pointer to data
        @param len  length of data
+       @param subtype if not empty, mime subtype to use
        @param disposition either INLINE or ATTACHMENT
        @param dlist list of disposition parameters
        @param plist list of parameters
-       @subtype if not empty, mime subtype to use
    */
    void	AddPart(MessageContentType type,
                  const char *buf, size_t len,

@@ -63,10 +63,10 @@
 
 // MSW icons are in the ressources, for all other platforms - in XPM files
 #ifndef __WXMSW__
-    #include "wx/generic/info.xpm"
-    #include "wx/generic/question.xpm"
-    #include "wx/generic/warning.xpm"
-    #include "wx/generic/error.xpm"
+#   include "wx/generic/info.xpm"
+#   include "wx/generic/question.xpm"
+#   include "wx/generic/warning.xpm"
+#   include "wx/generic/error.xpm"
 #endif // __WXMSW__
 
 // ----------------------------------------------------------------------------

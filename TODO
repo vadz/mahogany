@@ -9,6 +9,9 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
+9 		Does wxlwindow something nasty with undefined
+		update rectangles or wxRegion? Crash happened in
+		wxRegion. 
 9		New Mail dialog for non-collected messages shows empty
 		subject and from
 9		changing properties for IMAP folder (auto-collect)
@@ -17,13 +20,13 @@ $Id$
 7	KB	why does Message/Find no longer work?
 7 gtk		Mahogany occasionally doesn't terminate but remains in
 		gtk event loop without any open windows.
-6	KB	add a message status marker for "Unread"
 5		wxLayout editing glitches & cursor positioning bug
 		selections via keyboard still broken
 		speed up wxLayout scrollbar setting, *way* too slow
 		now
 6	VZ	All Folder create dialog pages have no HelpIDs set.
 5	KB	for NNTP only count unread/new messages
+5	KB	make MailFolder timer react to options change
 3		foldername in password prompt seems wrong
 3		URL highlighting in headers is missing (e.g. X-Url)
 ? win	VZ	lock files are sometimes left
@@ -38,17 +41,17 @@ $Id$
 * PRI	WHO	DESCRIPTION
 *********************************************************************
 
-6	VZ	Could you please add a file-browse button/dialog to
+6	KB	Could you please add a file-browse button/dialog to
 		the folder selection dialog and modify its return
 		value to somehow indicate that a file rather than a
 		folder name was selected?
 		I'll then add support for that to the Copy/Move
 		Messages functions. (KB)
 
-2	VZ	Would it be possible to set the icon in the treectrl
-		on a per-folder basis? I'd like to read the iconname
-		from the folder profile, that would allow nice things
-		such as a "trash/junk" folder, etc.
+2	KB	add sub-directories support for different icon sets to 
+		wxIconManager, e.g. small/large style
+		More icons needed: INBOX, PopServer, IMAPServer,
+		FolderGroup 
 
 5	VZ	Could you have a look at the setting of the default
 		columns sizes in wxFolderView.cpp, please?  Currently
@@ -60,7 +63,8 @@ $Id$
 7	KB	write tutorial bit in Manual.lyx
 7	KB	finish ASMailFolder classes
 6	KB	completion of filtering rules/scoring code
-6	KB	implement listing of folders on remote servers
+6	KB	implement listing of folders on remote
+		servers/subscription API
 4	CB	GPG/PGP support
 5	KB	Fix MessageCC(const String &) constructor.
 3	KB	eval wxHTML for help system and as built-in HTML viewer
@@ -70,7 +74,6 @@ $Id$
 		m-users/m-developers entries in it. Also add entry for
 		autocollect book. Wait for MessageCC(const String &)
 		constructor.
-7	KB	add group reply/followup functionality
 5		add goto_next_unread to folderview
 5		add more buttons to folderview, such as
 		next/previous/goto_next_unread
@@ -83,15 +86,19 @@ $Id$
 * PRI	WHO	DESCRIPTION
 *********************************************************************
 
+5	KB	group reply/followup functionality
 5	KB	properties dialog forgets IMAP mailbox name
 5	KB	clicking in startup dialog no longer causes crash
 5	KB	check handling of missing hostnames,
-
+5	KB	network page
+5	KB	folder properties for advanced user
+5	KB	POP/IMAP server/localhost default values
+5	KB	check mail now in File... menu
+5	KB	check "Unread" status flag
 
 *********************************************************************
 *** GENERAL TODO
 *********************************************************************
-
 
 - support for working offline (will need wxWin API modifications?)
 - subscription management for NNTP/IMAP/newsspool

@@ -412,7 +412,9 @@ SendMessageCC::AddPart(Message::ContentType type,
       {
          // shouldn't send message without MIME subtype, but we don't have any
          // and can't find the default!
-         FAIL_MSG("No subtype and no default subtype for this type!");
+         ERRORMESSAGE((_("MIME type specified without subtype and\n"
+                         "no default subtype for this type.")));
+         subtype = "UNKNOWN";
       }
    }
 

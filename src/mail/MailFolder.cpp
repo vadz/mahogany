@@ -178,7 +178,11 @@ MailFolder::ConvertMessageStatusToString(int status)
          strstatus << 'N'; // not seen yet  --> really new
    }
    else
-      strstatus << ' ';
+      if(! (status & MSG_STAT_SEEN))
+         strstatus << 'U';
+      else
+         strstatus << ' ';
+      
    strstatus << ((status & MSG_STAT_FLAGGED) ? 'F' : ' ');
    strstatus << ((status & MSG_STAT_ANSWERED) ? 'A' : ' ');
    strstatus << ((status & MSG_STAT_DELETED) ? 'D' : ' ');
@@ -325,7 +329,8 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
 void
 MailFolder::ReplyMessages(const INTARRAY *selections,
                           MWindow *parent,
-                          ProfileBase *profile)
+                          ProfileBase *profile,
+                          int flags)
 {
    int i,np,p;
    String str;
@@ -377,9 +382,17 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
          String name;
          String email = msg->Address(name, MAT_REPLYTO);
          email = GetFullEmailAddress(name, email);
-         cv->SetAddresses(email);
+         String cc;
+         if(flags & REPLY_FOLLOWUP) // group reply
+         {
+            String from = msg->Address(name, MAT_FROM);
+            msg->GetHeaderLine("CC", cc);
+            if(from != email)
+               email << ", " << from;
+         }
+         cv->SetAddresses(email,cc);
 
-      // construct the new subject
+         // construct    the new subject
          String newSubject;
          String replyPrefix = READ_CONFIG(GetProfile(), MP_REPLY_PREFIX);
          String subject = msg->Subject();

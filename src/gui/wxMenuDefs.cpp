@@ -249,6 +249,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       },
 #endif
    { WXMENU_MSG_REPLY,     gettext_noop("&Reply"),            gettext_noop("Reply to this message")    },
+   { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply"),      gettext_noop("Followup/group-reply to this message")    },
    { WXMENU_MSG_FORWARD,   gettext_noop("&Forward"),          gettext_noop("Forward this message")     },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("&Save as File"),

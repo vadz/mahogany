@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxFolderView.cc: a window displaying a mail folder               *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -115,9 +115,10 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 
       /** To    allow translations:
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
-          Movetofolder, ReplyTo, Forward, Open, Print, Show Headers, View
+          Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
+          View, Group reply (==followup)
       */
-      const char keycodes_en[] = gettext_noop("DUXCSMRFOPHV ");
+      const char keycodes_en[] = gettext_noop("DUXCSMRFOPHVG ");
       const char *keycodes = _(keycodes_en);
 
       int idx = 0;
@@ -149,11 +150,13 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          if(m_FolderView->SaveMessagesToFolder(selections))
             m_FolderView->GetFolder()->DeleteMessages(&selections);
          break;
+      case 'G':
       case 'R':
          m_FolderView->GetFolder()->ReplyMessages(
             &selections,
             GetFrame(this),
-            m_FolderView->GetProfile());
+            m_FolderView->GetProfile(),
+            (keycodes_en[idx] == 'G')?MailFolder::REPLY_FOLLOWUP:0);
          break;
       case 'F':
          m_FolderView->GetFolder()->ForwardMessages(
@@ -639,8 +642,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       SaveMessagesToFile(selections);
       break;
    case WXMENU_MSG_REPLY:
+   case WXMENU_MSG_FOLLOWUP:
       GetSelections(selections);
-      m_MF->ReplyMessages(&selections, GetFrame(m_Parent), m_Profile);
+      m_MF->ReplyMessages(&selections, GetFrame(m_Parent), m_Profile,
+                          (event.GetId() == WXMENU_MSG_FOLLOWUP)
+                          ? MailFolder::REPLY_FOLLOWUP:0);
       break;
    case WXMENU_MSG_FORWARD:
       GetSelections(selections);

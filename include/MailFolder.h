@@ -80,6 +80,12 @@ public:
       MSG_STAT_FLAGGED = 64
    };
 
+   /** Flags for several operations. */
+   enum Flags
+   {
+      NONE = 0,
+      REPLY_FOLLOWUP
+   };
    //@}
 
    /** @name Constructors and destructor */
@@ -280,10 +286,12 @@ public:
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
        @param profile pointer for environment
+       @param flags 0, or REPLY_FOLLOWUP
    */
    void ReplyMessages(const INTARRAY *messages,
                       MWindow *parent = NULL,
-                      ProfileBase *profile = NULL);
+                      ProfileBase *profile = NULL,
+                      int flags = 0);
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers

@@ -171,7 +171,7 @@ public:
    {
       Timer_Autosave,
       Timer_PollIncoming,
-      Timer_PingFolder,
+      Timer_PingFolder
    };
 
    virtual bool StartTimer(Timer timer) = 0;

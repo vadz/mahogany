@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * wxFolderView.h: a window displaying a mail folder                *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
- * $Id$           *
+ * $Id$          *
  *******************************************************************/
 
 #ifndef WXFOLDERVIEW_H
