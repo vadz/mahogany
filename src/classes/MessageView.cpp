@@ -1498,7 +1498,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
             }
             //else: same level as the previous line, just continue
 
-            if ( !*lineNext ) 
+            if ( !*lineNext )
             {
                // nothing left
                break;
@@ -1936,7 +1936,7 @@ MessageView::Update(void)
 
    // if user selects the language from the menu, m_encodingUser is set
    wxFontEncoding encoding;
-   if ( m_encodingUser != wxFONTENCODING_SYSTEM ) 
+   if ( m_encodingUser != wxFONTENCODING_SYSTEM )
    {
       encoding = m_encodingUser;
    }
@@ -2096,39 +2096,42 @@ MessageView::MimeHandle(const MimePart *mimepart)
       msg->DecRef();
 #else // 1
       bool ok = false;
-      char *filename = wxGetTempFileName("Mtemp");
-      if ( MimeSave(mimepart, filename) )
+      wxString filename;
+      if ( wxGetTempFileName("Mtemp", filename) )
       {
-         wxString name;
-         name.Printf(_("Attached message '%s'"), filenameOrig.c_str());
-
-         MFolder_obj mfolder = MFolder::CreateTemp
-                               (
-                                 name,
-                                 MF_FILE,
-                                 MF_FLAGS_TEMPORARY,  // delete file on close
-                                 filename
-                               );
-
-         if ( mfolder )
+         if ( MimeSave(mimepart, filename) )
          {
-            ASMailFolder *asmf = ASMailFolder::OpenFolder(mfolder);
-            if ( asmf )
+            wxString name;
+            name.Printf(_("Attached message '%s'"), filenameOrig.c_str());
+
+            MFolder_obj mfolder = MFolder::CreateTemp
+                                  (
+                                    name,
+                                    MF_FILE,
+                                    MF_FLAGS_TEMPORARY,  // delete file on close
+                                    filename
+                                  );
+
+            if ( mfolder )
             {
-               // FIXME: assume UID of the first message in a new MBX folder is
-               //        always 1
-               ShowMessageViewFrame(GetParentFrame(), asmf, 1);
+               ASMailFolder *asmf = ASMailFolder::OpenFolder(mfolder);
+               if ( asmf )
+               {
+                  // FIXME: assume UID of the first message in a new MBX folder
+                  //        is always 1
+                  ShowMessageViewFrame(GetParentFrame(), asmf, 1);
 
-               ok = true;
+                  ok = true;
 
-               asmf->DecRef();
+                  asmf->DecRef();
+               }
             }
-         }
-         else
-         {
-            // note that if we succeeded with folder creation, it will delete
-            // the file itself (because of MF_FLAGS_TEMPORARY)
-            wxRemoveFile(filename);
+            else
+            {
+               // note that if we succeeded with folder creation, it will
+               // delete the file itself (because of MF_FLAGS_TEMPORARY)
+               wxRemoveFile(filename);
+            }
          }
       }
 
@@ -2141,14 +2144,20 @@ MessageView::MimeHandle(const MimePart *mimepart)
       return;
    }
 
-   String
-      filename = wxGetTempFileName("Mtemp"),
-      filename2 = "";
+   String filename;
+   if ( !wxGetTempFileName("Mtemp", filename) )
+   {
+      wxLogError(_("Failed to open the attachment."));
+
+      delete fileType;
+      return;
+   }
 
    wxString ext;
    wxSplitPath(filenameOrig, NULL, NULL, &ext);
+
    // get the standard extension for such files if there is no real one
-   if ( fileType != NULL && !ext)
+   if ( fileType != NULL && ext.empty() )
    {
       wxArrayString exts;
       if ( fileType->GetExtensions(exts) && exts.GetCount() )
@@ -2177,8 +2186,8 @@ MessageView::MimeHandle(const MimePart *mimepart)
 
    MailMessageParameters params(filename, mimetype, mimepart);
 
-   // We might fake a file, so we need this:
-   bool already_saved = false;
+   // have we already saved the file to disk?
+   bool saved = false;
 
    Profile *profile = GetProfile();
 
@@ -2216,10 +2225,10 @@ MessageView::MimeHandle(const MimePart *mimepart)
          wxLogDebug("Detected image/tiff fax content.");
          // use TIFF2PS command to create a postscript file, open that
          // one with the usual ps viewer
-         filename2 = filename.BeforeLast('.') + ".ps";
+         String filenamePS = filename.BeforeLast('.') + ".ps";
          String command;
          command.Printf(READ_CONFIG_TEXT(profile,MP_TIFF2PS),
-                        filename.c_str(), filename2.c_str());
+                        filename.c_str(), filenamePS.c_str());
          // we ignore the return code, because next viewer will fail
          // or succeed depending on this:
          //system(command);  // this produces a postscript file on  success
@@ -2231,7 +2240,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
          //(void)LaunchProcess(command, msg );
 
          wxRemoveFile(filename);
-         filename = filename2;
+         filename = filenamePS;
          mimetype = "application/postscript";
          if(fileType) delete fileType;
          fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
@@ -2239,17 +2248,25 @@ MessageView::MimeHandle(const MimePart *mimepart)
          // proceed as usual
          MailMessageParameters new_params(filename, mimetype, mimepart);
          params = new_params;
-         already_saved = true; // use this file instead!
+         saved = true; // use this file instead!
       }
    }
 #endif // Unix
 
    // We must save the file before actually calling GetOpenCommand()
-   if( !already_saved )
+   if( !saved )
    {
-      MimeSave(mimepart, filename);
-      already_saved = TRUE;
+      if ( !MimeSave(mimepart, filename) )
+      {
+         wxLogError(_("Failed to open the attachment."));
+
+         delete fileType;
+         return;
+      }
+
+      saved = TRUE;
    }
+
    String command;
    if ( (fileType == NULL) || !fileType->GetOpenCommand(&command, params) )
    {
@@ -2287,18 +2304,14 @@ MessageView::MimeHandle(const MimePart *mimepart)
       //else: empty command means try to handle it internally
    }
 
-   if ( fileType )
-      delete fileType;
+   delete fileType;
 
-   if ( ! command.empty() )
+   if ( !command.empty() )
    {
-      if(already_saved || MimeSave(mimepart, filename))
-      {
-         wxString errmsg;
-         errmsg.Printf(_("Error opening attachment: command '%s' failed"),
-                       command.c_str());
-         (void)LaunchProcess(command, errmsg, filename);
-      }
+      wxString errmsg;
+      errmsg.Printf(_("Error opening attachment: command '%s' failed"),
+                    command.c_str());
+      (void)LaunchProcess(command, errmsg, filename);
    }
 }
 
@@ -2877,7 +2890,7 @@ MessageView::SetFolder(ASMailFolder *asmf)
 
    if ( m_asyncFolder )
    {
-      // use the settings for this folder now 
+      // use the settings for this folder now
       UpdateProfileValues();
    }
    else // no folder
