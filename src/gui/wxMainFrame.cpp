@@ -30,6 +30,7 @@
 #endif
 
 #include <wx/persctrl.h>
+#include <wx/menuitem.h>
 
 #include "MFolder.h"
 

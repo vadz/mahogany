@@ -28,11 +28,13 @@
 
 #  include <wx/dynarray.h>
 #endif
+
 #include <ctype.h>
 #include <XFace.h>
 
 #include <wx/file.h>
 #include <wx/persctrl.h>
+#include <wx/menuitem.h>
 
 #include "MFolder.h"
 

@@ -73,6 +73,9 @@
 #define WXLO_CURSORCHAR   "E"
 /** @name Helper functions */
 //@{
+
+// these operators are in wxWindows itself in the newer versions
+#ifndef wxWANTS_CHARS
 /// allows me to compare to wxPoints
 bool operator ==(wxPoint const &p1, wxPoint const &p2)
 {
@@ -84,6 +87,7 @@ bool operator !=(wxPoint const &p1, wxPoint const &p2)
 {
    return p1.x != p2.x || p1.y != p2.y;
 }
+#endif // wxWANTS_CHARS
 
 /// allows me to compare to wxPoints
 bool operator <=(wxPoint const &p1, wxPoint const &p2)

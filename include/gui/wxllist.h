@@ -372,7 +372,8 @@ public:
                    bool underline);
    wxFont & GetFont(wxLayoutStyleInfo const &si)
       {
-         return GetFont(si.family, si.size, si.style, si.weight, si.underline);
+         return GetFont(si.family, si.size, si.style, si.weight,
+                        si.underline != 0);
       }
 private:
    wxFCEList m_FontList;

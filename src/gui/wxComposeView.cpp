@@ -1383,7 +1383,7 @@ wxComposeView::Send(void)
       i, i2;
    i = m_ExtraHeaderLinesNames.begin();
    i2 = m_ExtraHeaderLinesValues.begin();
-   for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++, h++)
+   for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++)
       msg->AddHeaderEntry(**i, **i2);
    
    msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
@@ -1420,12 +1420,12 @@ wxComposeView::Send(void)
 
 void
 wxComposeView::AddHeaderEntry(const String &entry,
-                              const String &value)
+                              const String &ivalue)
 {
    String
-      *name = new String(),
-      *value = new String();
-   *name = entry; *value = ivalue;
+      *name = new String(entry),
+      *value = new String(ivalue);
+
    m_ExtraHeaderLinesNames.push_back(name);
    m_ExtraHeaderLinesValues.push_back(value);
 }

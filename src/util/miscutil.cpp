@@ -16,10 +16,11 @@
 #   include "guidef.h"
 #   include "gui/wxMFrame.h"
 #   include "MApplication.h"
-#   include "gui/wxIconManager.h"
 #endif
 
 #include <wx/colour.h>
+
+#include "gui/wxIconManager.h"
 
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"

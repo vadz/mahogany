@@ -50,7 +50,7 @@
 
 /// Test for MacOS:
 //#if defined(applec) || defined(THINK_C) || ( defined( __MWERKS__ ) && !defined(__INTEL__) )
-#if defined( __POWERPC__ )) && ( defined( __MWERKS__ ) || defined ( THINK_C ) )
+#if defined( __POWERPC__ ) && ( defined( __MWERKS__ ) || defined ( THINK_C ) )
 #   define   OS_MAC   1
 #   define   OS_TYPE      "MacOS"
 #   undef    OS_SUBTYPE
