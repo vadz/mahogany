@@ -608,13 +608,13 @@ wxMApp::OnAbnormalTermination()
    msg += "\n\n";
    msg += String::Format
           (
-            _("P.S. Mahogany will also try to generate bug report in file\n"
+            _("P.S. Mahogany will also try to generate bug report in the file\n"
               "\n"
               "              %s\n"
               "\n"
-              "after you close this message box. Please download the\n"
-              "PDB file and put it in the same directory as M.exe if\n"
-              "you don't have it already for better results."),
+              "after you close this message box. Please look at this\n"
+              "file if the program terminates without giving any other\n"
+              "messages, it might contain some additional information."),
             wxCrashReport::GetFileName()
           );
 #endif // wxCrashReport available
@@ -626,17 +626,30 @@ wxMApp::OnAbnormalTermination()
    {
       msg.Printf
           (
-            _("Detailed crash report has been generated in file\n"
+            _("Detailed crash report has been generated in the file\n"
               "\n"
               "           %s\n"
               "\n"
-              "please look at it for more information and join it\n"
-              "to your bug report."),
+              "please join it to your bug report.\n"
+              "\n"
+              "Thank you in advance!"),
             wxCrashReport::GetFileName()
           );
-
-      SafeMsgBox(msg);
    }
+   else // failed to generate crash dump
+   {
+      msg.Printf
+          (
+            _("Crash report generation failed, please look in the file\n"
+              "\n"
+              "           %s\n"
+              "\n"
+              "for the explanation of why it failed."),
+            wxCrashReport::GetFileName()
+          );
+   }
+
+   SafeMsgBox(msg);
 #endif // wxCrashReport available
 }
 
@@ -772,7 +785,7 @@ wxMApp::OnInit()
 {
    // in release build we handle any exceptions we generate (i.e. crashes)
    // ourselves
-#if 1 // ndef DEBUG
+#ifndef DEBUG
    wxHandleFatalExceptions();
 #endif
 
