@@ -979,13 +979,19 @@ strutil_expandfoldername(const String &name, FolderType folderType)
    if( folderType != MF_FILE && folderType != MF_MH)
        return name;
 
-   if( strutil_isabsolutepath(name) )
+   if ( strutil_isabsolutepath(name) )
       return strutil_expandpath(name);
 
    if ( folderType == MF_FILE )
    {
-      String mboxpath;
-      mboxpath << READ_APPCONFIG(MP_MBOXDIR) << DIR_SEPARATOR << name;
+      String mboxpath = READ_APPCONFIG(MP_MBOXDIR);
+      if ( mboxpath.empty() )
+         mboxpath = mApplication->GetLocalDir();
+
+      if ( !mboxpath.empty() )
+         mboxpath += DIR_SEPARATOR;
+
+      mboxpath += name;
 
       return strutil_expandpath(mboxpath);
    }

@@ -303,6 +303,7 @@ public:
 
    /**@name Functions to get an overview of messages in the folder. */
    //@{
+   virtual bool HasHeaders() const;
    /** Returns a listing of the folder. Must be DecRef'd by caller. */
    virtual HeaderInfoList *GetHeaders(void) const;
    //@}
@@ -419,8 +420,11 @@ private:
    /// Gets next mailfolder in map or NULL
    static MailFolderCC * GetNextMapEntry(StreamConnectionList::iterator &i);
 
-   /// lookup object in Map
-   static MailFolderCC *LookupObject(MAILSTREAM const *stream,
+   /// find the stream in the map
+   static MailFolderCC *LookupStream(const MAILSTREAM *stream);
+
+   /// lookup object in map first by stream, then by name
+   static MailFolderCC *LookupObject(const MAILSTREAM *stream,
                                      const char *name = NULL);
    //@}
    /** for use by class MessageCC

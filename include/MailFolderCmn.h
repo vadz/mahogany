@@ -142,6 +142,7 @@ public:
                                 const Params& params,
                                 MWindow *parent = NULL);
 
+   virtual void ProcessHeaderListing(HeaderInfoList *hilp);
    //@}
 
 
@@ -258,11 +259,6 @@ protected:
    /**@name All used to build listings */
    //@{
 
-   /** This function takes a header listing and sorts it or applies
-       filters to it. Will eventually replace the UpdateListing
-       mechanism. */
-   void ProcessHeaderListing(HeaderInfoList *hilp);
-
    /// generate NewMail messages if needed
    void CheckForNewMail(HeaderInfoList *hilp);
 
@@ -272,15 +268,6 @@ protected:
 
    /// Call this before actually closing the folder.
    void PreClose(void);
-
-   /** This function should be called by the driver when the status of
-       some message changed. It will cause all listings to be updated.
-       The driver should make sure that its listing is updated before
-       this function is called. It does not do much more than send an
-       event to the application.
-       @param uid uid of the message which changed status
-   */
-   void UpdateMessageStatus(UIdType uid);
 
    /// To display progress while reading message headers:
    class MProgressDialog *m_ProgressDialog;

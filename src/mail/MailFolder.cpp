@@ -1834,17 +1834,6 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
 }
 
 void
-MailFolderCmn::UpdateMessageStatus(UIdType uid)
-{
-   /* I thought we could be more clever here, but it seems that
-      c-client/imapd create *lots* of unnecessary status change
-      entries even when only one message status changes. So we just
-      tell the folder to send a single event and invalidate the
-      listing. That is more economical. */
-   RequestUpdate();
-}
-
-void
 MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
 {
    /*
@@ -1859,6 +1848,9 @@ MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
       m_Config = config;
 
       DoUpdate();
+
+      // listing has been resorted/rethreaded
+      RequestUpdate();
    }
 }
 
@@ -1877,10 +1869,20 @@ MailFolderCmn::DoUpdate()
    if ( interval != m_Timer->GetInterval() )
    {
       m_Timer->Stop();
-      if(interval > 0) // interval of zero == disable ping timer
+
+      if ( interval > 0 ) // interval of zero == disable ping timer
          m_Timer->Start(interval);
    }
-   RequestUpdate();
+
+   if ( HasHeaders() )
+   {
+      HeaderInfoList *hil = GetHeaders();
+      if ( hil )
+      {
+         ProcessHeaderListing(hil);
+         hil->DecRef();
+      }
+   }
 }
 
 void

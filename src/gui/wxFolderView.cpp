@@ -1723,15 +1723,20 @@ wxFolderView::Update(HeaderInfoList *listing)
       }
    }
    else
+   {
       listing->IncRef();
-
-   wxBeginBusyCursor();
+   }
 
    size_t n = listing->Count();
 
+   static const THRESHOLD = 100;
+   if ( n > THRESHOLD )
+   {
+      wxBeginBusyCursor();
 #ifdef __WXMSW__
-   m_FolderCtrl->Hide(); // optimise for speed under MSW
+      m_FolderCtrl->Hide(); // avoid flicker under MSW
 #endif
+   }
 
    long focusedIndex, tmp = -1;
    focusedIndex = m_FolderCtrl->GetNextItem(tmp, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
@@ -1768,12 +1773,16 @@ wxFolderView::Update(HeaderInfoList *listing)
    if(focusedIndex != -1 && focusedIndex < (long) n)
       m_FolderCtrl->EnsureVisible(focusedIndex);
 
+   if ( n > THRESHOLD )
+   {
 #ifdef __WXMSW__
-   m_FolderCtrl->Show();
+      m_FolderCtrl->Show();
 #endif
 
+      wxEndBusyCursor();
+   }
+
    m_NumOfMessages = n;
-   wxEndBusyCursor();
    listing->DecRef();
 
    // the previously focused uid might be gone now:

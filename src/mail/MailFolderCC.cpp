@@ -1449,10 +1449,25 @@ MailFolderCC *MailFolderCC::ms_StreamListDefaultObj = NULL;
 void
 MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 {
-   wxLogTrace(TRACE_MF_CACHE, "MailFolderCC::RemoveFromMap() for folder %s",
+   wxLogTrace(TRACE_MF_CACHE, "MailFolderCC::AddToMap() for folder %s",
               GetName().c_str());
+
    CHECK_STREAM_LIST();
 
+   // check that the folder is not already in the list
+   StreamConnectionList::iterator i;
+   for ( i = ms_StreamList.begin(); i != ms_StreamList.end(); i++ )
+   {
+      StreamConnection *conn = *i;
+      if ( conn->folder == this )
+      {
+         FAIL_MSG("adding a folder to the stream list twice");
+
+         return;
+      }
+   }
+
+   // add it now
    StreamConnection  *conn = new StreamConnection;
    conn->folder = (MailFolderCC *) this;
    conn->stream = stream;
@@ -1469,8 +1484,9 @@ MailFolderCC::CanExit(String *which)
 {
    CHECK_STREAM_LIST();
 
+   which->clear();
+
    bool canExit = true;
-   *which = "";
    StreamConnectionList::iterator i;
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
    {
@@ -1484,9 +1500,9 @@ MailFolderCC::CanExit(String *which)
    return canExit;
 }
 
-/// lookup object in Map
-/* static */ MailFolderCC *
-MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
+// it's ok to return NULL from this function
+/* static */
+MailFolderCC *MailFolderCC::LookupStream(const MAILSTREAM *stream)
 {
    CHECK_STREAM_LIST();
 
@@ -1494,9 +1510,20 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
    {
       StreamConnection *conn = *i;
-      if( conn->stream == stream )
+      if ( conn->stream == stream )
          return conn->folder;
    }
+
+   return NULL;
+}
+
+// this function should normally always return a non NULL folder
+/* static */ MailFolderCC *
+MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
+{
+   MailFolderCC *mf = LookupStream(stream);
+   if ( mf )
+      return mf;
 
    /* Sometimes the IMAP code (imap4r1.c) allocates a temporary stream
       for e.g. mail_status(), that is difficult to handle here, we
@@ -1506,10 +1533,12 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
       make sure that ms_StreamListDefaultObj gets set before any call to
       mail_status(). If that doesn't work, we need to parse the name
       string for hostname, portnumber and path and compare these.
-      //FIXME: This might be an issue for MT code.
+
+      FIXME: This might be an issue for MT code.
    */
    if(name)
    {
+      StreamConnectionList::iterator i;
       for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
       {
          StreamConnection *conn = *i;
@@ -1517,6 +1546,7 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
             return conn->folder;
       }
    }
+
    if(ms_StreamListDefaultObj)
    {
       LOGMESSAGE((M_LOG_DEBUG, "Routing call to default mailfolder."));
@@ -1677,7 +1707,7 @@ MailFolderCC::PingReopen(void)
    if ( lockFolder )
    {
       MLocker lockPing(m_PingReopenSemaphore);
-      bool rc = true;
+      rc = true;
 
       // This is terribly inefficient to do, but needed for some sick
       // POP3 servers which don't report new mail otherwise
@@ -2413,6 +2443,11 @@ MailFolderCC::DebugDump() const
 // ----------------------------------------------------------------------------
 // Working with the listing
 // ----------------------------------------------------------------------------
+
+bool MailFolderCC::HasHeaders() const
+{
+   return m_Listing != NULL;
+}
 
 /* FIXME-MT: we must add some clever locking to this function! */
 HeaderInfoList *

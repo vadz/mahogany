@@ -22,6 +22,8 @@
 #include "FolderType.h"
 #include "kbList.h"
 
+class HeaderInfoList;
+
 #include <wx/fontenc.h>
 
 /** The UIdArray define is a class which is an integer array. It needs
@@ -553,6 +555,10 @@ public:
                                 const Params& params,
                                 MWindow *parent = NULL) = 0;
 
+   /** This function takes a header listing and sorts and threads it.
+   */
+   virtual void ProcessHeaderListing(HeaderInfoList *hilp) = 0;
+
    //@}
 
    /**@name Access control */
@@ -570,8 +576,10 @@ public:
    //@}
    /**@name Functions to get an overview of messages in the folder. */
    //@{
+   /// returns true if the folder is opened
+   virtual bool HasHeaders() const = 0;
    /** Returns a listing of the folder. Must be DecRef'd by caller. */
-   virtual class HeaderInfoList *GetHeaders(void) const = 0;
+   virtual HeaderInfoList *GetHeaders(void) const = 0;
    //@}
    /// Return the folder's type.
    virtual FolderType GetType(void) const = 0;
@@ -607,8 +615,9 @@ public:
    */
    virtual int ApplyFilterRules(UIdArray msgs) = 0;
 
-   /** Request update. Causes the mailfolder to update its internal
-       status information when required. */
+   /** Request update: sends an event telling everyone that the mail folder
+       listing has changed.
+   */
    virtual void RequestUpdate() = 0;
 
    /** @name Various static functions
