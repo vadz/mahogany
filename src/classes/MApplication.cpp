@@ -71,7 +71,14 @@
 
 WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
 
-KBLIST_DEFINE(MailFolderList, MailFolder);
+
+struct MailFolderEntry
+{
+   String      m_name;
+   MailFolder *m_folder;
+};
+
+KBLIST_DEFINE(MailFolderList, MailFolderEntry);
 
 class MAppFolderTraversal : public MFolderTraversal
 {
@@ -92,7 +99,10 @@ public:
             MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,
                                                     folderName,
                                                     p);
-            m_list->push_back(mf);
+            MailFolderEntry *e = new MailFolderEntry;
+            e->m_name = folderName;
+            e->m_folder = mf;
+            m_list->push_back(e);
             p->DecRef();
          }
          f->DecRef();
@@ -104,6 +114,81 @@ private:
    MailFolderList *m_list;
 };
 
+
+
+class MailCollector : public MObject
+{
+public:
+   MailCollector();
+   ~MailCollector();
+   bool IsIncoming(MailFolder *mf);
+   bool Collect(MailFolder *mf = NULL);
+protected:
+   bool CollectOneFolder(MailFolder *mf);
+private:
+   MailFolderList m_list;
+};
+
+
+MailCollector::MailCollector(void)
+{
+   MAppFolderTraversal t (&m_list);
+   if(! t.Traverse(true))
+      wxLogError(_("Cannot build list of incoming mail folders."));
+}
+
+MailCollector::~MailCollector(void)
+{
+   MailFolderList::iterator i;
+   for(i = m_list.begin();i != m_list.end(); i++)
+      (**i).m_folder->DecRef();
+}
+
+bool
+MailCollector::IsIncoming(MailFolder *mf)
+{
+   MailFolderList::iterator i;
+   for(i = m_list.begin();i != m_list.end();i++)
+      if((**i).m_folder == mf)
+         return true;
+   return false;
+}
+
+bool
+MailCollector::Collect(MailFolder *mf)
+{
+   MailFolderList::iterator i;
+   if(mf == NULL)
+   {
+      bool rc = true;
+      for(i = m_list.begin();i != m_list.end();i++)
+         rc &= CollectOneFolder((*i)->m_folder);
+      return rc;
+   }
+   else
+      return CollectOneFolder(mf);
+}
+
+bool
+MailCollector::CollectOneFolder(MailFolder *mf)
+{
+   ASSERT(mf);
+
+   wxLogDebug(_("Auto-collecting mail from incoming folder '%s'."),
+                mf->GetName().c_str());
+   mf->Ping(); //update it
+   INTARRAY selections;
+
+   const HeaderInfo *hi;
+   for(hi = mf->GetFirstHeaderInfo();
+       hi;
+       hi = mf->GetNextHeaderInfo(hi))
+      selections.Add(hi->GetUId());
+
+   return mf->SaveMessages(&selections,
+                           READ_APPCONFIG(MP_NEWMAIL_FOLDER),
+                           true);
+}
 
 // ----------------------------------------------------------------------------
 // functions
@@ -128,6 +213,7 @@ MAppBase::MAppBase()
    m_eventReg = NULL;
    m_topLevelFrame = NULL;
    m_framesOkToClose = NULL;
+   m_MailCollector = NULL;
 }
 
 /* The code in VerifySettings somehow overlaps with the purpose of
@@ -492,6 +578,11 @@ MAppBase::OnStartup()
       (void)wxFolderViewFrame::Create((**i), m_topLevelFrame);
    }
 
+   // initialise collector object for incoming mails
+   // ----------------------------------------------
+   m_MailCollector = new MailCollector();
+   m_MailCollector->Collect(); // empty all at beginning
+   
    // register with the event subsystem
    // ---------------------------------
    m_eventReg = MEventManager::Register(*this, MEventId_NewMail);
@@ -500,13 +591,6 @@ MAppBase::OnStartup()
    CHECK( m_eventReg, FALSE,
           "failed to register event handler for new mail event " );
 
-   // Create list of folders to poll for new mail
-   // -------------------------------------------
-
-   m_IncomingFolderList = new MailFolderList;
-   MAppFolderTraversal t (m_IncomingFolderList);
-   if(! t.Traverse(true))
-      wxLogError(_("Cannot build list of incoming mail folders."));
    return TRUE;
 }
 
@@ -524,7 +608,7 @@ MAppBase::OnShutDown()
       MEventManager::Deregister(m_eventReg);
       m_eventReg = NULL;
    }
-
+   if(m_MailCollector) delete m_MailCollector;
    // clean up
    AdbManager::Delete();
    ProfileBase::FlushAll();
@@ -587,8 +671,6 @@ MAppBase::Exit()
 bool
 MAppBase::OnMEvent(MEventData& event)
 {
-   MailFolderList::iterator i;
-   
    // we're only registered for new mail events
    CHECK( event.GetId() == MEventId_NewMail, TRUE, "unexpected event" );
 
@@ -596,29 +678,16 @@ MAppBase::OnMEvent(MEventData& event)
    MEventNewMailData& mailevent = (MEventNewMailData &)event;
    MailFolder *folder = mailevent.GetFolder();
 
-
    /* First, we need to check whether it is one of our incoming mail
-      folders and if so, move it to the global new mail folder. */
-   for(i = m_IncomingFolderList->begin();
-       i != m_IncomingFolderList->end();
-       i++)
+      folders and if so, move it to the global new mail folder and
+      ignore the event. */
+   if(m_MailCollector->IsIncoming(folder))
    {
-      if(folder == *i)
-      {
-         /* bool */
-         INTARRAY selections;
-         unsigned long number = mailevent.GetNumber();
-         unsigned i;
-         for(i = 0; i < number; i++)
-            selections.Add(mailevent.GetNewMessageIndex(i));
-         folder->SaveMessages(&selections,
-                              READ_APPCONFIG(MP_NEWMAIL_FOLDER),
-                              true);
-         break;
-      }
+      if(!m_MailCollector->Collect(folder))
+         wxLogError(_("Could not collect mail from incoming folder '%s'."),
+                    folder->GetName().c_str());
+      return false; 
    }
-
-
 
    // step 1: execute external command if it's configured
    String command = READ_CONFIG(folder->GetProfile(), MP_NEWMAILCOMMAND);

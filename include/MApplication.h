@@ -178,7 +178,7 @@ protected:
    ProfileBase *m_profile;
 
    /// the list of all constantly open folders to check for new mail
-   class MailFolderList *m_IncomingFolderList;
+   class MailCollector *m_MailCollector;
    /// registration seed for EventManager
    void *m_eventReg;
 
