@@ -42,8 +42,8 @@ else
 %.o: %.c
 	$(CC)  -fPIC $(CPPFLAGS) $(CFLAGS) -c $<
 %.so: %.cpp
-	$(CXX) -shared -fPIC $(CPPFLAGS) $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src
-#-lM #$(LIBS)
+	$(CXX) -shared -fPIC $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(SO_LIBS)
+#-L$(BUILDDIR)/src #-lM #$(LIBS)
 endif
 
 ifdef USE_SWIG
@@ -121,12 +121,12 @@ stdclean:
 modules: $(MODULES)
 	@true
 
-install-modules: modules
-ifeq ($(USE_MODULES),dynamic)
+install-modules:
+ifeq ($(MODULES),)
+	@true
+else
 	$(INSTALL) -d $(MODULEDIR)
 	for i in $(MODULES); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
-else
-	@true
 endif
 
-.PHONY: stdclean dep depend tags msgcat modules install-modules modules
+.PHONY: all install stdclean tags msgcat modules install-modules

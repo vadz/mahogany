@@ -49,15 +49,21 @@ install_bin:
 	@echo "Installing M in " $(BINDIR)
 	@echo "        data in " $(DATADIR)
 	@echo "        docs in " $(DOCDIR)
-	$(INSTALL) -d $(DATADIR) $(BINDIR) $(DOCDIR)
-	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
-	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
-	$(INSTALL) -d $(DATADIR)/bin
-	$(INSTALL) -d $(DATADIR)/lib
-	$(INSTALL) -d $(DATADIR)/doc
+	set -e; for i in \
+	   $(BINDIR) \
+	   $(DATADIR) \
+	   $(DOCDIR) \
+	   $(DATADIR)/$(CANONICAL_HOST) \
+	   $(DATADIR)/$(CANONICAL_HOST)/bin \
+	   $(DATADIR)/$(CANONICAL_HOST)/lib \
+	   $(DATADIR)/bin \
+	   $(DATADIR)/lib \
+	   $(DATADIR)/doc \
+	   $(DOCDIR)/Tips \
+	;do $(INSTALL) -d -m 755 $$i; \
+	done
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
-	$(INSTALL) -d $(DOCDIR)/Tips
-	for i in .src/doc/Tips/Tips*.txt; \
+	set -e; for i in .src/doc/Tips/Tips*.txt; \
 	do $(INSTALL) $$i $(DOCDIR)/Tips; \
 	done
 

@@ -24,44 +24,31 @@ include ../../makeopts
 # aren't fully C++ compliant on RH6.1
 CXXFLAGS:=$(CXXFLAGS_RELAXED)
 
-MOD :=	Mdummy.cpp Filters.cpp Calendar.cpp \
-	PineImport.cpp XFMailImport.cpp
+MOD :=	$(filter-out PalmOS.cpp, $(wildcard *.cpp))
 
 ifdef PISOCK_LIB
 MOD += PalmOS.cpp
 ifdef LIBMAL_SRC
-CPPFLAGS := $(CPPFLAGS) -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC)/malsync_src/mal/client/common -I$(LIBMAL_SRC)/malsync_src/mal/common -I$(LIBMAL_SRC) 
+PalmOS.o PalmOS.so: CPPFLAGS += -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC)/malsync_src/mal/client/common -I$(LIBMAL_SRC)/malsync_src/mal/common -I$(LIBMAL_SRC) 
 endif
+PalmOS.so: SO_LIBS += $(PISOCK_LIB)
 endif
 
 ifdef EXPERIMENTAL
+# in the crypt subdirectory; pick them up with vpath
 MOD +=	MCrypt.cpp MExtProcCrypt.cpp MPGPCrypt.cpp MPassphrase.cpp
 vpath %.cpp .src/crypt
 endif
 
+# indirection to pick up definitions in makerules
 all:	binaries
-	@true
 
 include ../../makerules $(wildcard *.d)
 
 # MODOBJS and MODULES defined by makerules
-binaries: $(MODOBJS $(MODULES)
+binaries: $(MODOBJS) $(MODULES)
 	@true
 
-ifdef PISOCK_LIB
-PalmOS.so: PalmOS.cpp
-	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src $(PISOCK_LIB) 
-endif
-
-clean: 
-	$(RM) *.o *.so *.lo
-
-install: $(MODULES)
-ifeq ($(USE_MODULES),dynamic)
-	$(INSTALL) -d $(MODULEDIR)
-	for i in $(MODULES); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
-else
-	@true
-endif
+clean:	stdclean
 
 .PHONY: clean

@@ -28,16 +28,16 @@ ICONDIR=$(SOURCEDIR)/src/icons
 @MAKE_HAVE_LIBMAL@
 
 ifdef HAVE_LIBMAL
-LIBMAL_SRC:=$(SOURCEDIR)/extra/src/libmal
-PISOCK_LIB:=$(PISOCK_LIB) -L$(BUILDDIR)/extra/src/libmal/.libs -lmal
+LIBMAL_SRC := $(SOURCEDIR)/extra/src/libmal
+PISOCK_LIB += -L$(BUILDDIR)/extra/src/libmal/.libs -lmal
 endif
 
 # libraries needed by the modules, linked against individually in the modules
 # directory, but listed here in case we build a static library:
 ifeq ($(USE_MODULES),static)
-MODULES_LIBS:=$(PISOCK_LIB)
+MODULES_LIBS := $(PISOCK_LIB)
 else
-MODULES_LIBS:=
+MODULES_LIBS :=
 endif
 # canonical host
 CANONICAL_HOST=@host@

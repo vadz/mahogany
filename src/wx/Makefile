@@ -6,6 +6,4 @@ SUBDIRS=generic common vcard
 all clean msgcat:
 	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 
-modules:
-
 .PHONY: clean all msgcat
