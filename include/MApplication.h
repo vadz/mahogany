@@ -640,6 +640,6 @@ CopyEntries(wxConfigBase *src,
             const wxString &from,
             const wxString &to,
             bool recursive = true,
-            wxConfigBase *dest = NULL)
+            wxConfigBase *dest = NULL);
 
 #endif   // MAPPLICATION_H
