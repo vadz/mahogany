@@ -571,9 +571,8 @@ private:
 
 void Profile::FlushAll()
 {
-   ASSERT(ms_GlobalConfig);
-
-   ms_GlobalConfig->Flush();
+   if ( ms_GlobalConfig )
+      ms_GlobalConfig->Flush();
 }
 
 bool Profile::IsExpandingEnvVars() const
