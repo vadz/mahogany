@@ -70,7 +70,7 @@ binary:	M $(MSOS) $(M_BUNDLE)
 M:	$(MOBJS)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS) $(M_MINGW_LIBS) $(M_RES)
 ifdef USE_MAC
-	$(REZFLAGS) -o $@
+	$(REZFLAGS) $@ $(SOURCEDIR)/macosx/M.icns
 	$(SETFILE) -a C $@
 endif
 

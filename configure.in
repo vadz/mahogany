@@ -1088,6 +1088,13 @@ dnl --------------------------------------------------------------------------
 dnl How do we want to use modules?
 dnl --------------------------------------------------------------------------
 
+if test "$USE_MAC" = 1; then
+    dnl back-linking doesn't seem to work under Mac OS X: we can create the
+    dnl libraries but they can't be loaded at run-time, so until this is fixed
+    dnl we simply always link the modules statically
+    USE_MODULES="static"
+fi
+
 dnl must be done after configuring wxWin for auto detection to work
 MODULELDFLAGS=
 case "$USE_MODULES" in
@@ -1402,4 +1409,4 @@ echo "Please look at config.log for more details."
 
 exit 0
 
-dnl vi: set noet ts=8 sw=4 nolist sta:
+dnl vi: set noet ts=8 sw=4 nolist sta comments+=\:dnl:

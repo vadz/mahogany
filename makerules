@@ -3,7 +3,11 @@
 
 # flags to be set based upon the type of object
 M_FLAGS_o := -c
+ifndef USE_MAC
 M_FLAGS_so := -shared
+else
+M_FLAGS_so := -dynamiclib -undefined suppress -flat_namespace -bind_at_load
+endif
 M_FLAGS_ii := -E
 M_FLAGS_s := -S
 
