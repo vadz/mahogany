@@ -156,7 +156,10 @@ wxIconManager::LoadImage(String filename, bool *success)
                  "wxIconManager::LoadImage() calling '%s'...",
                  command.c_str());
       if(system(command) == 0)
+      {
+         wxLogNull lo; // suppress error messages
          loaded = img->LoadFile(filename, wxBITMAP_TYPE_PNG);
+      }
       if(tempfile.length()) // using a temporary file
          wxRemoveFile(tempfile);
    }
