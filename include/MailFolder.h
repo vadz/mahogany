@@ -11,7 +11,6 @@
 
 #ifndef	USE_PCH
 #	include	"Profile.h"
-#	include	"FolderView.h"
 #endif
 
 #define	MSG_STAT_UNREAD    1
@@ -31,6 +30,7 @@
    connect it to a file or open a connection for it.
    */
 
+class FolderViewBase;
 class MailFolder : public CommonBase
 {
 public:   
