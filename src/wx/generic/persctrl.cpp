@@ -1574,11 +1574,11 @@ public:
 
     // callbacks
     void OnCheckBox(wxCommandEvent& event)
-        { EnableRadioBtns(event.IsChecked()); }
+        { UpdateUIOnCheck(event.IsChecked()); }
     void OnButton(wxCommandEvent& event);
 
 private:
-    void EnableRadioBtns(bool enable);
+    void UpdateUIOnCheck(bool checked);
 
 
     wxCheckBox *m_chkDisable;
@@ -1586,6 +1586,7 @@ private:
     size_t m_countRadioBtns;
     wxRadioButton *m_radiobuttons[6]; // should be enough choices...
 
+    bool m_dontDisableOnNo;
 
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxPMessageDialog)
@@ -1616,6 +1617,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 {
     m_chkDisable = NULL;
     m_countRadioBtns = 0;
+    m_dontDisableOnNo = params.dontDisableOnNo;
 
     // the dialog consists of the main, msg box, part and optionally a lower
     // part allowing to disable it, sizerTop contains both of them
@@ -1710,7 +1712,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 
         const bool enable = params.indexDisable != -1;
         m_chkDisable->SetValue(enable);
-        EnableRadioBtns(enable);
+        UpdateUIOnCheck(enable);
 
         sizerTop->Add(sizerDontShow, 0, wxALIGN_CENTER | wxALL, LAYOUT_Y_MARGIN);
     }
@@ -1740,11 +1742,20 @@ int wxPMessageDialog::GetDisabledIndex() const
     return -1;
 }
 
-void wxPMessageDialog::EnableRadioBtns(bool enable)
+void wxPMessageDialog::UpdateUIOnCheck(bool checked)
 {
     for ( size_t n = 0; n < m_countRadioBtns; n++ )
     {
-        m_radiobuttons[n]->Enable(enable);
+        m_radiobuttons[n]->Enable(checked);
+    }
+
+    if ( m_dontDisableOnNo )
+    {
+        wxWindow *win = FindWindow(wxID_NO);
+        if ( win )
+        {
+            win->Enable(!checked);
+        }
     }
 }
 
