@@ -30,10 +30,6 @@
 #  include "gui/wxMApp.h"
 #endif
 
-// VZ: please don't change the order of headers, "Adb.h" must be the first one
-//     or it doesn't compile under VC++ (don't yet know why @@@)
-#include "Adb.h"
-
 #include "Message.h"
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -43,6 +39,8 @@
 
 #include "gui/wxIconManager.h"
 
+#include "adb/AdbFrame.h"
+
 // test:
 #include   "SendMessageCC.h"
 #include   "MailFolderCC.h"
@@ -50,7 +48,6 @@
 #include   "gui/wxMFrame.h"
 #include   "gui/wxComposeView.h"
 #include   "gui/wxFolderView.h"
-#include   "gui/wxAdbEdit.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
@@ -205,18 +202,11 @@ wxMFrame::OnMenuCommand(int id)
    {
    case WXMENU_FILE_OPEN:
    {
-#ifdef USE_WXWINDOWS2
-      wxString
-#else
-         char *
-#endif
-         name = wxGetTextFromUser(_("Name of the folder?"),
-                                  _("Folder Open"),
-                                  "INBOX",
-                                  this);
-      VAR(name);
-      if ( !strutil_isempty(name) )
-         (void) new wxFolderViewFrame(Str(name),this);
+      wxString name;
+      if ( MInputBox(&name, _("Folder Open"), _("Name of the folder?"),
+                     this, "OpenFolderName", "INBOX") ) {
+         (void)new wxFolderViewFrame(Str(name), this);
+      }
       break;
    }
    case WXMENU_FILE_CLOSE:
@@ -235,7 +225,7 @@ wxMFrame::OnMenuCommand(int id)
       mApplication.Exit();
       break;
    case WXMENU_EDIT_ADB:
-      (void) new wxAdbEditFrame(this);
+      ShowAdbFrame(this);
       break;
    case WXMENU_EDIT_PREF:
    case WXMENU_EDIT_SAVE_PREF:

@@ -42,7 +42,7 @@ struct MenuItemInfo
 const static MenuItemInfo g_aMenuItems[] =
 {
    // filler for WXMENU_LAYOUT_CLICK
-   { -1, "", "" },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
 
    // file
    { WXMENU_FILE_OPEN,     "&Open Folder",      "Open a message folder"    },
@@ -51,13 +51,13 @@ const static MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_TEST,     "&Test",             "Test"                     },
 #endif
    { WXMENU_FILE_CLOSE,    "&Close Window",     "Close this window"        },
-   { -1, "", "" },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_FILE_EXIT,     "E&xit",             "Quit the application"     },
 
    // edit
    { WXMENU_EDIT_ADB,      "&Database",         "Edit the address book(s)" },
    { WXMENU_EDIT_PREF,     "&Preferences",      "Change options"           },
-   { -1, "", "" },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_EDIT_SAVE_PREF,"&Save Preferences", "Save options"             },
 
    // msg
@@ -65,13 +65,13 @@ const static MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_PRINT,     "&Print",            "Print this message"       },
    { WXMENU_MSG_REPLY,     "&Reply",            "Reply to this message"    },
    { WXMENU_MSG_FORWARD,   "&Forward",          "Forward this message"     },
-   { -1, "", "" },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_MSG_SAVE_TO_FILE, "&Export",        "Export message to file"   },
    { WXMENU_MSG_SAVE_TO_FOLDER, "&Save",        "Save message to folder"   },
    { WXMENU_MSG_DELETE,    "&Delete",           "Delete this message"      },
    { WXMENU_MSG_UNDELETE,  "&Undelete",         "Undelete message"         },
    { WXMENU_MSG_EXPUNGE,   "Ex&punge",          "Expunge"                  },
-   { -1, "", "" },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_MSG_SELECTALL, "Select &all",       "Select all messages"      },
    { WXMENU_MSG_DESELECTALL,"D&eselect all",    "Unselect all messages"    },
 
@@ -80,12 +80,41 @@ const static MenuItemInfo g_aMenuItems[] =
                            "&Insert file...",   "Insert a file"            },
    { WXMENU_COMPOSE_SEND,  "&Send",             "Send the message now"     },
    { WXMENU_COMPOSE_PRINT, "&Print",            "Print the message"        },
-   { -1, "", "" },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_COMPOSE_CLEAR, "&Clear",            "Delete message contents"  },
+
+   // ADB book management
+   { WXMENU_ADBBOOK_NEW,   "&New...",           "Create a new address book"},
+   { WXMENU_ADBBOOK_OPEN,  "&Open...",          "Open an address book file"},
+   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_ADBBOOK_PROP,  "&Properties...",    "View properties of current"
+                                                " address book"            },
+
+   // ADB edit
+   { WXMENU_ADBEDIT_NEW,   "&New entry...",     "Create new entry/group"   },
+   { WXMENU_ADBEDIT_DELETE,"&Delete",           "Delete the selected items"},
+   { WXMENU_ADBEDIT_RENAME,"&Rename...",        "Rename the selected items"},
+   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_ADBEDIT_CUT,   "Cu&t",              "Copy and delete selected "
+                                                "items"                    },
+   { WXMENU_ADBEDIT_COPY,  "&Copy",             "Copy selected items"      },
+   { WXMENU_ADBEDIT_PASTE, "&Paste",            "Paste here"               },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_ADBEDIT_UNDO,  "&Undo changes",     "Undo all changes to the "
+                                                "entry being edited"       },
+
+   // ADB search
+   { WXMENU_ADBFIND_FIND,  "&Find...",          "Find entry by name or "
+                                                "contents"                 },
+   { WXMENU_ADBFIND_NEXT,  "Find &next",        "Go to the next match"     },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_ADBFIND_GOTO,  "&Go To...",         "Go to specified entry"    },
 
    // help
    { WXMENU_HELP_ABOUT,    "&About",            "Displays the program in"
                                                 "formation and copyright"  },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_HELP_HELP,     "&Help",             "Help..."                  },
 };
 
 // ============================================================================
@@ -93,7 +122,7 @@ const static MenuItemInfo g_aMenuItems[] =
 // ============================================================================
 void AppendToMenu(wxMenu *menu, int n)
 {
-   if ( g_aMenuItems[n].idMenu == -1 )
+   if ( g_aMenuItems[n].idMenu == WXMENU_SEPARATOR )
       menu->AppendSeparator();
    else {
       menu->Append(g_aMenuItems[n].idMenu,

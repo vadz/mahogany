@@ -34,6 +34,8 @@
 #  include <wx/log.h>
 #endif
 
+#include "MObject.h"
+
 #include "gui/wxMainFrame.h"
 #include "gui/wxIconManager.h"
 
@@ -135,7 +137,11 @@ MFrame *wxMApp::CreateTopLevelFrame()
 
 int wxMApp::OnExit()
 {
-   delete wxLog::SetActiveTarget(NULL);
+   MObject::CheckLeaks();
+
+   wxLogWindow *log = (wxLogWindow *)wxLog::GetActiveTarget();
+   wxLog::SetActiveTarget(log->GetOldLog());
+   delete log;
 
    return 0;
 }
@@ -147,12 +153,6 @@ int wxMApp::OnExit()
 // this creates the one and only application object
 #ifdef  USE_WXWINDOWS2
    IMPLEMENT_APP(wxMApp);
-   
-#  ifdef USE_WXGTK
-      // @@@ I don't understand why isn't it in gtk/app.cpp in wxGTK
-      extern int wxEntry(int argc, char *argv[]);
-      //int main(int argc, char *argv[]) { return wxEntry(argc, argv); }
-#  endif
 #else   // wxWin1
    wxMApp mApplication;
 #endif  // wxWin ver

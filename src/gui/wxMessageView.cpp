@@ -228,7 +228,9 @@ wxMessageView::wxMessageView(MailFolder *ifolder,
    String
       email, name;
    email = mailMessage->Address(name,MAT_FROM);
+#if 0 // @@@@ FIXME
    mApplication.GetAdb()->UpdateEntry(email, name);
+#endif
    Show(TRUE);
 }
 
@@ -510,6 +512,17 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    char const *content;
 
    mimetype = mailMessage->GetPartMimeType(mimeDisplayPart);
+
+   tmp = mailMessage->GetPartDesc(mimeDisplayPart);
+   if(tmp.length() > 0)
+      message += String(_("Description: ")) + tmp + String("\n");
+   message += String(_("Size: "))
+      + strutil_ltoa(mailMessage->GetPartSize(mimeDisplayPart));
+   type = mailMessage->GetPartType(mimeDisplayPart);
+   if(type == TYPEMESSAGE || type == TYPETEXT)
+      message += String(_(" lines"));
+   else
+      message += String(_(" bytes"));
 
    MimeList *ml = mApplication.GetMimeList();
    String command, flags;

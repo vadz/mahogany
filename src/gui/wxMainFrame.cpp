@@ -48,7 +48,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    AddFileMenu();
    AddEditMenu();
-   AddHelpMenu();
 
 #ifndef  USE_WXWINDOWS2
    CreateStatusLine(1);
@@ -75,6 +74,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    else
       m_splitter->Initialize(new wxPanel(m_splitter));  //FIXME: insert treectrl
 
+   AddHelpMenu();
    SetMenuBar(m_MenuBar);
 
 #ifdef USE_WXWINDOWS2

@@ -24,8 +24,8 @@
 #include <errno.h>
 
 #ifndef USE_PCH
-#  include <guidef.h>
-#  include <strutil.h>
+#  include "guidef.h"
+#  include "strutil.h"
 #  include "MFrame.h"
 #  include "MLogFrame.h"
 #  include "PathFinder.h"
@@ -43,18 +43,181 @@
 #include "MDialogs.h"
 #include "gui/wxlwindow.h"
 
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+// better looking wxTextEntryDialog
+class MTextInputDialog : public wxDialog
+{
+public:
+  MTextInputDialog(wxWindow *parent, const wxString& strText,
+                    const wxString& strCaption, const wxString& strPrompt);
+
+  // accessors
+  const wxString& GetText() const { return m_strText; }
+
+  // base class virtuals implemented
+  virtual bool TransferDataToWindow();
+  virtual bool TransferDataFromWindow();
+
+  static const int LAYOUT_X_MARGIN;
+  static const int LAYOUT_Y_MARGIN;
+
+private:
+  wxString    m_strText;
+  wxTextCtrl *m_text;
+};
+
+// ----------------------------------------------------------------------------
+// functions
+// ----------------------------------------------------------------------------
+
+// under Windows we don't use wxCENTRE style which uses the generic message box
+// instead of the native one (and thus it doesn't have icons, for example)
+inline long Style(long style)
+{
+# ifdef OS_WIN
+    return style;
+# else //OS_WIN
+    return style | wxCENTRE;
+# endif
+}
+
+// returns the argument if it's !NULL of the top-level application frame
+inline MWindow *GetParent(MWindow *parent)
+{
+  return parent == NULL ? mApplication.TopLevelFrame() : parent;
+}
+
 // ============================================================================
 // implementation
 // ============================================================================
 
-void  
-MDialog_ErrorMessage(const char *message,
-          MWindow *parent,
-          const char *title,
-          bool modal)
+// ----------------------------------------------------------------------------
+// MTextInputDialog dialog and MInputBox (which uses it)
+// ----------------------------------------------------------------------------
+
+const int MTextInputDialog::LAYOUT_X_MARGIN = 5;
+const int MTextInputDialog::LAYOUT_Y_MARGIN = 5;
+
+MTextInputDialog::MTextInputDialog(wxWindow *parent,
+                                   const wxString& strText,
+                                   const wxString& strCaption,
+                                   const wxString& strPrompt)
+                 : m_strText(strText),
+                   wxDialog(parent, -1, strCaption,
+                            wxDefaultPosition,
+                            wxDefaultSize,
+                            wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
 {
-   wxMessageBox((char *)message, title,
-      wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
+  // layout
+  long widthLabel, heightLabel;
+  wxClientDC dc(this);
+  dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+  dc.GetTextExtent(strPrompt, &widthLabel, &heightLabel);
+
+  uint widthText = 3*widthLabel,
+       heightText = TEXT_HEIGHT_FROM_LABEL(heightLabel);
+  uint heightBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
+       widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
+  uint widthDlg = widthLabel + widthText + 3*LAYOUT_X_MARGIN,
+       heightDlg = heightText + heightBtn + 3*LAYOUT_Y_MARGIN;
+
+  uint x = LAYOUT_X_MARGIN,
+       y = LAYOUT_Y_MARGIN,
+       dy = (heightText - heightLabel) / 2;
+
+  // label and the text
+  (void)new wxStaticText(this, -1, strPrompt, wxPoint(x, y + dy),
+                         wxSize(widthLabel, heightLabel));
+  m_text = new wxTextCtrl(this, -1, "",
+                          wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
+                          wxSize(widthText, heightText));
+
+  // buttons
+  wxButton *btnOk = new 
+    wxButton(this, wxID_OK, _("OK"), 
+             wxPoint(widthDlg - 2*LAYOUT_X_MARGIN - 2*widthBtn,
+                     heightDlg - LAYOUT_Y_MARGIN - heightBtn),
+             wxSize(widthBtn, heightBtn));
+  (void)new wxButton(this, wxID_CANCEL, _("Cancel"),
+                     wxPoint(widthDlg - LAYOUT_X_MARGIN - widthBtn,
+                             heightDlg - LAYOUT_Y_MARGIN - heightBtn),
+                     wxSize(widthBtn, heightBtn));
+  btnOk->SetDefault();
+
+  // set position and size
+  SetClientSize(widthDlg, heightDlg);
+  Centre(wxCENTER_FRAME | wxBOTH);
+}
+
+bool MTextInputDialog::TransferDataToWindow()
+{
+  m_text->SetValue(m_strText);
+  m_text->SetSelection(-1, -1); // select everything
+
+  return TRUE;
+}
+
+bool MTextInputDialog::TransferDataFromWindow()
+{
+  wxString strText = m_text->GetValue();
+  if ( strText.IsEmpty() ) {
+    // imitate [Cancel] button
+    EndModal(wxID_CANCEL);
+
+    return FALSE;
+  }
+  else {
+    m_strText = strText;
+
+    return TRUE;
+  }
+}
+
+// a wxConfig-aware function which asks user for a string
+bool MInputBox(wxString *pstr,
+               const wxString& strCaption,
+               const wxString& strPrompt,
+               wxWindow *parent,
+               const char *szKey,
+               const char *def)
+{
+  static const wxString strSectionName = "/Prompts/";
+
+  wxConfigBase *pConf = NULL;
+
+  if ( !IsEmpty(szKey) ) {
+    pConf = Profile::GetAppConfig();
+    if ( pConf != NULL )
+      pConf->Read(pstr, strSectionName + szKey, def);
+  }
+
+  MTextInputDialog dlg(GetParent(parent), *pstr, strCaption, strPrompt);
+  if ( dlg.ShowModal() == wxID_OK ) {
+    *pstr = dlg.GetText();
+
+    if ( pConf != NULL )
+      pConf->Write(strSectionName + szKey, *pstr);
+
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// other functions
+// ----------------------------------------------------------------------------
+void  
+MDialog_ErrorMessage(const char *msg,
+                     MWindow *parent,
+                     const char *title,
+                     bool modal)
+{
+   wxMessageBox(msg, title, Style(wxOK|wxICON_EXCLAMATION), GetParent(parent));
 }
 
 
@@ -76,9 +239,6 @@ MDialog_SystemErrorMessage(const char *message,
    msg = String(message) + String(("\nSystem error: "))
       + String(strerror(errno));
 
-   if(parent == NULL)
-      parent = mApplication.TopLevelFrame();
-   
    MDialog_ErrorMessage(msg.c_str(), parent, title, modal);
 }
 
@@ -95,9 +255,6 @@ MDialog_FatalErrorMessage(const char *message,
 {
    String msg = String(message) + _("\nExiting application...");
 
-   if(parent == NULL)
-      parent = mApplication.TopLevelFrame();
-   
    MDialog_ErrorMessage(message,parent,title,true);
    mApplication.Exit(true);
 }
@@ -110,17 +267,12 @@ MDialog_FatalErrorMessage(const char *message,
        @param modal  true to make messagebox modal
    */
 void
-MDialog_Message(const char *message,
-         MWindow *parent,
-         const char *title,
-         bool modal)
+MDialog_Message(const char *msg,
+                MWindow *parent,
+                const char *title,
+                bool modal)
 {
-
-   if(parent == NULL)
-      parent = mApplication.TopLevelFrame();
-   
-   wxMessageBox((char *)message, title,
-      wxOK|wxCENTRE|wxICON_INFORMATION, parent);
+   wxMessageBox(msg, title, Style(wxOK|wxICON_INFORMATION), GetParent(parent));
 }
 
 
@@ -139,14 +291,8 @@ MDialog_YesNoDialog(const char *message,
              const char *title,
              bool YesDefault)
 {
-
-   if(parent == NULL)
-      parent = mApplication.TopLevelFrame();
-   
-   return (bool) (wxYES == wxMessageBox(
-      (char *)message,title,
-      wxYES_NO|wxCENTRE|wxICON_QUESTION,
-      parent));
+   return wxMessageBox(message, title, Style(wxYES_NO|wxICON_QUESTION),
+                       GetParent(parent)) == wxYES;
 }
 
 
@@ -208,27 +354,15 @@ MDialog_FileRequester(String const & message,
       message, path, filename, extension, wildcard, 0, parent);
 }
 
-// simple "Yes/No" dialog (@@ we'd surely need one with [Cancel] also)
+// simple "Yes/No" dialog
 bool
 MDialog_YesNoDialog(String const &message,
                     MWindow *parent,
                     bool modal,
                     bool YesDefault)
 {
-#  ifdef  OS_WIN
-      const long styleMsgBox = wxYES_NO|wxICON_QUESTION;
-#  else
-      const long styleMsgBox = wxYES_NO|wxCENTRE|wxICON_QUESTION;
-#  endif
-
-   if(parent == NULL)
-      parent = mApplication.TopLevelFrame();
-   
-
-   return wxMessageBox((char *)message.c_str(), _("Decision"),
-                       styleMsgBox,
-                       parent == NULL ? mApplication.TopLevelFrame() 
-                                      : parent) == wxYES;
+   return wxMessageBox(message, _("Decision"), Style(wxYES_NO|wxICON_QUESTION),
+                       GetParent(parent)) == wxYES;
 }
 
 AdbEntry *

@@ -52,7 +52,6 @@
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"
 #include "gui/wxComposeView.h"
-#include "gui/wxAdbEdit.h"
 
 #include <wx/textfile.h>
 
@@ -365,6 +364,7 @@ wxComposeView::ProcessMouse(wxMouseEvent &event)
 void
 wxComposeView::OnExpand(wxCommandEvent &event)
 {
+#if 0
    Adb * adb = mApplication.GetAdb();
    AdbEntry *entry = NULL;
 
@@ -406,6 +406,7 @@ wxComposeView::OnExpand(wxCommandEvent &event)
       }
       m_txtFields[Field_To]->SetValue(WXCPTR tmp.c_str());
    }
+#endif
 }
 
 #ifndef USE_WXWINDOWS2

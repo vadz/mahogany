@@ -382,14 +382,12 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
 void
 wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections)
 {
-#  ifdef  USE_WXWINDOWS2
-   wxString 
-#  else
-      char *
-#  endif
-      folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
-                                     _("Save Message"),"",parent);
-   SaveMessages(selections,folderName);
+   wxString folderName;
+   if ( MInputBox(&folderName, _("Save Message"),
+                  _("Name of the folder to write to?"),
+                  parent, "SaveFolderName") ) {
+      SaveMessages(selections,folderName);
+   }
 }
 
 void
