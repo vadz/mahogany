@@ -1408,7 +1408,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    // by default, activate new mail notification for the folder which
    // is used and user visible, default for all other folders is "off"
    Profile_obj prof(
-      gs_installWizardData.collectAllMail ? foldername : "INBOX" );
+      gs_installWizardData.collectAllMail ? foldername : String("INBOX") );
    prof->writeEntry(MP_SHOW_NEWMAILMSG, 1);
    
 
