@@ -50,6 +50,10 @@ extern void FreePythonDll();
 // declare the wrappers
 extern "C"
 {
+   // startup/shutdown
+   extern void(*M_Py_Initialize)(void);
+   extern void(*M_Py_Finalize)(void);
+
    // errors
    //extern int (*M_PyErr_BadArgument)(void);
    extern void (*M_PyErr_Clear)(void);
@@ -112,7 +116,6 @@ extern "C"
    extern PyObject*(*M_Py_BuildValue)(char *, ...);
    extern PyObject*(*M_Py_FindMethod)(PyMethodDef[], PyObject *, char *);
    extern PyObject*(*M_Py_InitModule4)(char *, PyMethodDef *, char *, PyObject *, int);
-   extern void(*M_Py_Initialize)(void);
    extern PyObject *(*M_PyEval_CallObjectWithKeywords)(PyObject *, PyObject *, PyObject *);
    extern PyObject *(*M_PyFloat_FromDouble)(double);
    extern PyObject *(*M_PyImport_AddModule)(char *name);
@@ -135,6 +138,10 @@ extern "C"
 
 // redefine all functions we use to our wrappers instead
 // ----------------------------------------------------------------------------
+
+// startup/shutdown
+#define Py_Initialize M_Py_Initialize
+#define Py_Finalize M_Py_Finalize
 
 // errors
 #define PyErr_Clear M_PyErr_Clear
@@ -176,7 +183,6 @@ extern "C"
 #define PyTuple_GetItem M_PyTuple_GetItem
 
 // ...
-#define Py_Initialize M_Py_Initialize
 #define _Py_NoneStruct (*M__Py_NoneStruct)
 #define Py_BuildValue M_Py_BuildValue
 #define Py_VaBuildValue M_Py_VaBuildValue

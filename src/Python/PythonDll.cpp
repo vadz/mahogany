@@ -57,6 +57,10 @@ inline String GetPythonDllBaseName(const String& version)
 
 extern "C"
 {
+   // startup/shutdown
+   void(*M_Py_Initialize)(void) = NULL;
+   void(*M_Py_Finalize)(void) = NULL;
+
    // errors
    //int(*M_PyErr_BadArgument)(void) = NULL;
    void (*M_PyErr_Clear)(void) = NULL;
@@ -121,7 +125,6 @@ extern "C"
    PyObject*(*M_Py_BuildValue)(char *, ...) = NULL;
    PyObject*(*M_Py_FindMethod)(PyMethodDef[], PyObject *, char *) = NULL;
    PyObject*(*M_Py_InitModule4)(char *, PyMethodDef *, char *, PyObject *, int) = NULL;
-   void(*M_Py_Initialize)(void) = NULL;
    PyObject *(*M_PyEval_CallObjectWithKeywords)(PyObject *, PyObject *, PyObject *) = NULL;
    PyObject *(*M_PyFloat_FromDouble)(double) = NULL;
    PyObject *(*M_PyImport_AddModule)(char *name) = NULL;
@@ -164,6 +167,10 @@ static struct PythonFunc
     PYTHON_PROC *ptr;         // function pointer
 } pythonFuncs[] =
 {
+   // startup/shutdown
+   PYTHON_FUNC(Py_Initialize)
+   PYTHON_FUNC(Py_Finalize)
+
    // errors
    PYTHON_FUNC(PyErr_Clear)
    PYTHON_FUNC(PyErr_Fetch)
@@ -200,7 +207,6 @@ static struct PythonFunc
    PYTHON_FUNC(PyTuple_GetItem)
 
    // ...
-   PYTHON_FUNC(Py_Initialize)
    PYTHON_FUNC(_Py_NoneStruct)
    PYTHON_FUNC_ALT(Py_InitModule4, Py_InitModule4TraceRefs)
    PYTHON_FUNC(Py_BuildValue)

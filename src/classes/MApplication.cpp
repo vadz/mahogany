@@ -34,8 +34,6 @@
 #  include <wx/dirdlg.h>        // wxDirDialog
 #endif   // USE_PCH
 
-#include "MPython.h"
-
 #include "MFolder.h"
 #include "Message.h"
 #include "FolderView.h"       // for OpenFolderViewFrame()
@@ -47,7 +45,7 @@
 #include "SendMessage.h"
 
 #include "gui/wxMainFrame.h"
-#include "gui/wxMDialogs.h"         // MDialog_YesNoDialog
+#include "gui/wxMDialogs.h"   // MDialog_YesNoDialog
 #include "adb/AdbManager.h"   // for AdbManager::Delete
 
 #include "adb/AdbFrame.h"     // for ShowAdbFrame
@@ -139,8 +137,9 @@ WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
 // ----------------------------------------------------------------------------
 
 #ifdef  USE_PYTHON
-   // only used here
+   // only used here, defined in src/Python/InitPython.cpp
    extern bool InitPython(void);
+   extern void FreePython(void);
 #endif //Python
 
 // ============================================================================
@@ -503,7 +502,7 @@ MAppBase::OnStartup()
    // manipulated. Macro name was contributed by c-client maintainer.
    if(!READ_APPCONFIG(MP_CREATE_INTERNAL_MESSAGE))
       env_parameters(SET_USERHASNOLIFE,(void *)1);
-   
+
 #ifndef __CYGWIN__ // FIXME otherwise PATH becomes
                    // D:\Mahogany/scripts:D:\Mahogany/scripts:/cygdrive/c/WINNT/system32:...
    // extend path for commands, look in M's dirs first
@@ -522,7 +521,7 @@ MAppBase::OnStartup()
 #ifdef  USE_PYTHON
    // having the same error message each time M is started is annoying, so
    // give the user a possibility to disable it
-   if ( READ_CONFIG(m_profile, MP_USEPYTHON) && ! InitPython() )
+   if ( READ_CONFIG(m_profile, MP_USEPYTHON) && !InitPython() )
    {
       // show the error messages generated before first
       wxLog::FlushActive();
@@ -699,10 +698,10 @@ MAppBase::OnShutDown()
       free(myusername_full(NULL));
 #endif // OS_WIN
 
-#ifdef USE_PYTHON_DYNAMIC
-      // free python DLL: this is ok to call even if it wasn't loaded
-      FreePythonDll();
-#endif // USE_PYTHON_DYNAMIC
+#ifdef USE_PYTHON
+      // shut down Python interpreter
+      FreePython();
+#endif // USE_PYTHON
    }
 
    // normally this is done in OnStartup() but if we hadn't done it there

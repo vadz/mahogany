@@ -43,7 +43,10 @@ extern "C"
 /// used by PythonHelp.cc helper functions
 PyObject *Python_MinitModule = NULL;
 
-// returns TRUE if no error, FALSE if a Python error occured. In the last case
+// had Python been initialized? (MT ok as only used by the main thread)
+static bool gs_isPythonInitialized = false;
+
+// returns true if no error, false if a Python error occured. In the last case
 // an appropriate error message is logged.
 static bool CheckPyError()
 {
@@ -51,14 +54,14 @@ static bool CheckPyError()
    {
       ERRORMESSAGE((_T("%s"), PythonGetErrorMessage().c_str()));
 
-      return FALSE;
+      return false;
    }
 
    // no error
-   return TRUE;
+   return true;
 }
 
-bool
+extern bool
 InitPython(void)
 {
    // first check if Python is available
@@ -123,14 +126,15 @@ InitPython(void)
    // should be harmless otherwise
    putenv((char *)pythonPathNew.c_str());
 
-   // initialise the interpreter - this we do always, just to avoid problems
-   Py_Initialize();
-
    if ( !READ_CONFIG(mApplication->GetProfile(), MP_USEPYTHON) )
    {
       // it is not an error to have it disabled
       return true;
    }
+
+   // initialise the interpreter -- this we do always, just to avoid problems
+   Py_Initialize();
+   gs_isPythonInitialized = true;
 
    // initialise the modules
    init_HeaderInfo();
@@ -141,7 +145,7 @@ InitPython(void)
    init_SendMessage();
 
    // the return code
-   bool rc = TRUE;
+   bool rc = true;
 
    // run the init script
    Python_MinitModule = PyImport_ImportModule("Minit");
@@ -150,7 +154,7 @@ InitPython(void)
    {
       ERRORMESSAGE(("Python: Cannot find/evaluate Minit.py initialisation script."));
 
-      rc = FALSE;
+      rc = false;
    }
    else
    {
@@ -169,7 +173,7 @@ InitPython(void)
 
          ERRORMESSAGE(("Python: Cannot find Minit.Minit function in Minit module."));
 
-         rc = FALSE;
+         rc = false;
       }
    }
 
@@ -180,6 +184,21 @@ InitPython(void)
    }
 
    return rc;
+}
+
+extern
+void FreePython()
+{
+   if ( gs_isPythonInitialized )
+   {
+      Py_Finalize();
+
+      gs_isPythonInitialized = false;
+   }
+
+#ifdef USE_PYTHON_DYNAMIC
+   FreePythonDll();
+#endif // USE_PYTHON_DYNAMIC
 }
 
 #endif // USE_PYTHON
