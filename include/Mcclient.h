@@ -34,8 +34,19 @@ extern "C"
 #     undef not
 #  endif  //M_LOGICAL_OP_NAMES
 
-// stupid c-client lib redefines utime() in an incompatible way
+   // stupid c-client lib redefines utime() in an incompatible way
 #  undef utime
+
+   // windows.h included from osdep.h under Windows #defines all these
+#  undef   CreateDialog
+#  undef   DrawText
+#  undef   FindWindow
+#  undef   GetCharWidth
+#  undef   GetClassInfo
+#  undef   GetMessage
+#  undef   LoadAccelerators
+#  undef   SendMessage
+#  undef   StartDoc
 }
 
 #endif  //MCCLIENT_H

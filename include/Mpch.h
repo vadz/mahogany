@@ -26,17 +26,6 @@
 
 #include "Mcclient.h"
 
-   // windows.h included from osdep.h #defines all these
-#  undef   CreateDialog
-#  undef   DrawText
-#  undef   FindWindow
-#  undef   GetCharWidth
-#  undef   GetClassInfo
-#  undef   GetMessage
-#  undef   LoadAccelerators
-#  undef   SendMessage
-#  undef   StartDoc
-
 #include <wx/wx.h>
 #include <wx/config.h>
 #include <wx/help.h>
