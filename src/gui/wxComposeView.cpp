@@ -3274,8 +3274,16 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                   // will make reply prefix like "VZ>")
                   if ( READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX_FROM_SENDER) )
                   {
+                     // take from address, not reply-to which can be set to
+                     // reply to a mailing list, for example
                      String name;
-                     m_msg->Address(name);
+                     m_msg->Address(name, MAT_FROM);
+                     if ( name.empty() )
+                     {
+                        // no from address? try to find anything else
+                        m_msg->Address(name, MAT_REPLYTO);
+                     }
+
                      wxStringTokenizer tk(name);
                      while ( tk.HasMoreTokens() )
                      {
