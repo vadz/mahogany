@@ -1891,11 +1891,10 @@ static bool CheckMimePartForKoreanCSet(const MimePart *part)
 static bool CheckXSpamStatus(const String& value)
 {
    // check for "^.*^X-Spam-Status: Yes+$" regex manually
-   const char *pc = strstr(value, "Yes");
-   if ( !pc )
-      return false;
+   if ( value.Lower().StartsWith("yes") )
+      return true;
 
-   return true;
+   return false;
 }
 
 // another func_isspam() helper: check the value of X-Authentication-Warning
