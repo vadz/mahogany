@@ -349,11 +349,14 @@ void wxMIMETreeCtrl::InitImageLists()
 
    for ( int i = MimeType::TEXT; i <= MimeType::OTHER; i++ )
    {
-      // this is a big ugly: we need to get just the 
+      // this is a big ugly: we need to get just the primary MIME type
       MimeType mt((MimeType::Primary)i, "");
       wxIcon icon = iconManager->GetIconFromMimeType(mt.GetType());
       imaglist->Add(icon);
    }
+
+   // and the last icon for the unknown MIME images
+   imaglist->Add(iconManager->GetIcon("unknown"));
 
    AssignImageList(imaglist);
 }
@@ -401,6 +404,11 @@ void
 wxMIMETreeDialog::AddToTree(wxTreeItemId idParent, const MimePart *mimepart)
 {
    int image = mimepart->GetType().GetPrimary();
+   if ( image > MimeType::OTHER + 1 )
+   {
+      image = MimeType::OTHER + 1;
+   }
+
    wxTreeItemId id  = m_treectrl->AppendItem(idParent,
                                              MessageView::GetLabelFor(mimepart),
                                              image, image,
