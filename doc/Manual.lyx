@@ -1,4 +1,4 @@
-#This file was created by <zeitlin> Mon Jun 21 15:11:04 1999
+#This file was created by <karsten> Mon Jun 21 21:06:17 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -35,7 +35,7 @@ Mahogany User Manual
 \newline 
 
 \shape default 
-for Version 0.22a
+for Version 0.23a
 \newline 
 
 \begin_inset Quotes eld
@@ -72,8 +72,8 @@ Release Notes_1001_
 \layout Standard
 
 This is the fourth public release of Mahogany.
- As with the previous release we make binaries available for Linux-x86,
- Linux-alpha and Solaris-sparc.
+ As with the previous release we make the source available and binaries
+ for Linux-x86, Linux-alpha and Solaris-sparc.
  The main change since the previous release is that we now provide a Win32
  (requires Windows 95/98/NT) version of Mahogany.
 \layout Standard
@@ -82,7 +82,7 @@ Mahogany is also reported to compile and run on FreeBSD and should generally
  work on any Unix flavour.
  We didn't try it on Win32s platform and we're not going to support it (nor
  Win16).
- Finally, work on making Mahogany available for Mac is in progress.
+ Finally, work on making Mahogany available for MacOS is in progress.
 \layout Standard
 
 Due to the fact that it is a cross-platform effort, the compilation and
@@ -107,6 +107,9 @@ Several bugs in message composer (including a few fatal ones) were fixed.
  Only minor problems still persist.
 \layout Itemize
 
+Selections support (copy, cut, paste) in message composer and viewer.
+\layout Itemize
+
 The 
 \family typewriter 
 [Apply]
@@ -115,13 +118,41 @@ and
 \family typewriter 
 [Cancel]
 \family default 
-buttons in the options and folder properties dialogs work now
+buttons in the options and folder properties dialogs (mostly) work now.
 \layout Itemize
 
-Message boxes now have icons in them
+Several minor bug fixes and improvements, including a massive speedup in
+ the update of folder listings over slow connections.
 \layout Itemize
 
-And, of course, updated translations
+Printing no longer has overlap between pages.
+\layout Itemize
+
+Folders can be kept open all the time to speed up access to them, very useful
+ for 
+\begin_inset Quotes eld
+\end_inset 
+
+SentMail
+\begin_inset Quotes erd
+\end_inset 
+
+ folder.
+\layout Itemize
+
+Better behaved, asks before removing all mail from spool.
+\layout Itemize
+
+Message boxes now have icons in them.
+\layout Itemize
+
+And, of course, updated translations and documentation updates.
+\layout Standard
+
+We have also made good progress on the filtering code, PGP/GPG support,
+ multi-threading support and support for loadable external modules, but
+ these features are not complete yet and disabled in the release.
+ Expect them to appear in the next releases.
 \layout Subsubsection
 
 0.22a against 0.21a

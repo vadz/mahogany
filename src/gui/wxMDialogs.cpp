@@ -666,7 +666,7 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
       h = 400;
    if(parent)
    {
-      parent = GetFrame(parent);
+      parent = GetFrame((wxWindow *)parent);
       if(parent)
       {
          parent->GetClientSize(&w,&h);
@@ -754,7 +754,6 @@ END_EVENT_TABLE()
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
-   // strings used for primitive alignment of text
    static const char *align = "                 ";
    static const char *align2 = "        ";
 #ifdef __WXMSW__

@@ -45,7 +45,28 @@ msgstr ""
 "Die vorher installierte Version von Mahogany war vermutlich neuer als diese. "
 "Kann kein Upgrade durchführen."
 
-#: upgrade.cpp:437
+#: upgrade.cpp:435
+#, c-format
+msgid ""
+"Found additional folder '%s'\n"
+"marked as central new mail folder. Ignoring it."
+msgstr ""
+"Zusätzliche Mailbox '%s' gefunden, die als\n"
+"zentrale Mailbox für neue Nachrichten markiert ist.\n"
+"Wird ignoriert."
+
+#: upgrade.cpp:445
+#, c-format
+msgid ""
+"Cannot auto-collect mail from the new mail folder\n"
+"'%s'\n"
+"Corrected configuration data."
+msgstr ""
+"Kann Nachrichen nicht von der zentralen Mailbox\n"
+"'%s' einsammeln.\n"
+"Einstellungen korrigiert."
+
+#: upgrade.cpp:480 upgrade.cpp:481
 msgid ""
 "Normally Mahogany will automatically collect all mail\n"
 "from your system's default mail folder (INBOX,\n"
@@ -68,12 +89,30 @@ msgstr ""
 msgid "Collect mail from INBOX?"
 msgstr "Alle Nachrichten aus INBOX abholen?"
 
-#: upgrade.cpp:449 upgrade.cpp:460 upgrade.cpp:467 upgrade.cpp:478
-#: upgrade.cpp:504
+#: upgrade.cpp:497 upgrade.cpp:498
+msgid ""
+"Mahogany will not automatically collect mail from your\n"
+"system's default INBOX.\n"
+"You can change this in the INBOX folder's preferences\n"
+"dialog at any time."
+msgstr ""
+"Mahogany wird nicht automatisch alle Nachrichten aus\n"
+"der Systemmailbox INBOX abholen.\n"
+"Sie können dies jederzeit in den Einstellungen für\n"
+"die INBOX Mailbox ändern."
+
+#: upgrade.cpp:503 upgrade.cpp:504
 msgid "Default system folder for incoming mail."
 msgstr "Standard Mailbox für neu eingegangene Nachrichten."
 
-#: upgrade.cpp:513 upgrade.cpp:524 upgrade.cpp:623
+#: upgrade.cpp:528 upgrade.cpp:535
+msgid "Folder where Mahogany will collect all new mail."
+msgstr "Mailbox für neu eingegangene Nachrichten"
+
+#: upgrade.cpp:555 upgrade.cpp:569
+msgid "Folder where Mahogany will store copies of outgoing messages."
+msgstr "Mailbox in der Mahogany Kopien gesendeter Nachrichten speichert."
+
 msgid "Mahogany Test Message"
 msgstr "Mahogany Testnachricht"
 
@@ -186,7 +225,17 @@ msgstr ""
 msgid "Failed to set up initial configuration."
 msgstr "Kann Ausgangskonfiguration nicht einrichten."
 
-#: MApplication.cpp:241 MApplication.cpp:310
+#: MApplication.cpp:290 MApplication.cpp:295
+msgid ""
+"You are trying to run Mahogany as the super-user (root).\n"
+"For security reasons this is not possible, please log in\n"
+"as an ordinary user and try again."
+msgstr ""
+"Sie versuchen, Mahogany als Superuser (root) zu benutzen.\n"
+"Aus Sicherheitsgründen ist dies nicht möglich. Bitte melden\n"
+"Sie sich als normaler Benutzer an, und versuchen es nochmal."
+
+#: MApplication.cpp:310 MApplication.cpp:315
 #, c-format
 msgid "Cannot create the directory for configuration files '%s'."
 msgstr "Kann Verzeichnis '%s' für Konfigurationsdateien nicht anlegen."
@@ -3244,10 +3293,6 @@ msgstr ""
 "Kann Nachrichen nicht von der zentralen Mailbox\n"
 "'%s' einsammeln.\n"
 "Einstellungen korrigiert."
-
-#: upgrade.cpp:536
-msgid "Folder where Mahogany will collect all new mail."
-msgstr "Mailbox in der Mahogany neue Nachrichten ablegt."
 
 #: upgrade.cpp:563
 msgid "Sent"

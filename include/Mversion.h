@@ -27,6 +27,6 @@
 #define   M_VERSION         "0.23a"
 
 /// full version string
-#define   M_VERSION_STRING  "0.23a 'Polwarth III'"
+#define   M_VERSION_STRING  "0.23a 'Polwarth IV'"
 
 #endif  //_M_VERSION_H

@@ -1,7 +1,7 @@
 $Id$
 
 --------------------------------------------------------------------
-README file for Mahogany, Release 0.22a "Polwarth III"
+README file for Mahogany, Release 0.23a "Polwarth IV"
 --------------------------------------------------------------------
 
 --------------------------------------------------------------------
@@ -72,24 +72,32 @@ get Mahogany, and configure it as detailed below. Compiling wxGTK with
 different configure switches is possible, and should generally work with
 Mahogany. However, to play it safe, stick to the options below.
 
+If using the source from CVS or the snapshot, you need to understand
+wxGTK's build system. Have a look at wxWindows/BuildCVS.txt. It's simple:
+Create a new directory under wxWindows/ to contain your build tree and
+run ../configure from in there to set up the build system. If this fails,
+because you don't have all the latest tools, change into wxWindows/testconf
+instead and run ./apply. After that go back to your build directory and
+run ../configure. Running ../configure --help first is a good idea.
+
 - wxGTK should be configured with the following options:
+  (You can vary these as you like, but these are recommended.)
 
      ../configure \
-	--enable-threads \
-        --disable-shared \
-	--enable-static \
+        --disable-shared \          # or --disable-static if you prefer
+	--enable-static \           # or --enable-shared if you prefer
 	--with-libjpeg \
 	--with-libpng \
-	--without-dnd \
 	--with-gtk \
         --without-odbc \
-        --with-threads 
+        --with-threads 		   # this isn't strictly needed, you can leave
+	                             it out
 
 For debugging, the following options should be added:
 
 	--enable-debug_flag \
 	--enable-debug_info \
-	--disable-optimise     
+	--disable-optimise     # this is also needed for gcc 2.8.0
 
 If using gtk 1.0.6 rather than 1.2.x, you need to add --without-dnd .
 If you experience a problem with thread support, you can just as well
@@ -114,6 +122,9 @@ To compile and install Mahogany itself:
   make             # or "make all" to try to build message catalogs as well
   make doc
   make install_all
+
+  If you built wxWindows with debug enabled, specify the --with-debug option
+  when configuring Mahogany.
 
   Depending on whether you have installed all required programs in the
   right versions, "make doc" and "make install_all" might

@@ -99,19 +99,14 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *********************************************************************
 
 for release:
- - fix printing overlap
  - GetSingleChoiceIndex() in wxMDialogs height 
- - add new mail and group reply/followup buttons (and menu entry for
-   the latter) to folderview
- - update docs: 0.23a
- - document new configure system for wxGTK in HackersGuide
-
 - check handling of missing hostnames,
   suppress missing hostname c-client error message
-- drop classes documentation from archive/docs!!
-- add icons to doc++ generated docs
 
 -------------------------
+- add icons to doc++ generated docs
+- add new mail and group reply/followup buttons (and menu entry for
+   the latter) to folderview
 - move setting of -fPIC to configure
 
 - foldername in password prompt
