@@ -898,7 +898,7 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir, wxString directory)
       {
          wxString msg;
          msg.Printf(_("Ignoring entry '%s' which is not a regular file."),
-                    name.c_str());
+                    dirent->d_name.c_str());
          StatusMessage(_(msg));
          continue;
       }
