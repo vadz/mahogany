@@ -2473,7 +2473,7 @@ wxFolderView::OpenFolder(MFolder *folder)
             asmf->DecRef();
          }
 
-         return NULL;
+         return false;
       }
       //else: continue opening the server, this will just open INBOX on it
    }
@@ -2497,7 +2497,7 @@ wxFolderView::OpenFolder(MFolder *folder)
       {
          // no, we don't want to open it again
          mApplication->SetLastError(M_ERROR_CANCEL);
-         return NULL;
+         return false;
       }
 
       if ( MDialog_YesNoDialog
@@ -2518,7 +2518,7 @@ wxFolderView::OpenFolder(MFolder *folder)
                         m_fullname.c_str());
 
             mApplication->SetLastError(M_ERROR_CANCEL);
-            return NULL;
+            return false;
          }
       }
    }
