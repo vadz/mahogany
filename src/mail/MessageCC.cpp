@@ -65,7 +65,7 @@
 
 /// check for dead mailstream
 #define CHECK_DEAD()                                                          \
-   if ( !m_folder->Stream() && !m_folder->PingReopen() )                      \
+   if ( !m_folder->IsOpened() )                                               \
    {                                                                          \
       ERRORMESSAGE((_("Cannot access closed folder '%s'."),                   \
                    m_folder->GetName().c_str()));                             \
@@ -74,7 +74,7 @@
 
 /// check for dead mailstream (version with ret code)
 #define CHECK_DEAD_RC(rc)                                                     \
-   if ( !m_folder->Stream() && !m_folder->PingReopen() )                      \
+   if ( !m_folder->IsOpened() )                                               \
    {                                                                          \
       ERRORMESSAGE((_("Cannot access closed folder '%s'."),                   \
                    m_folder->GetName().c_str()));                             \

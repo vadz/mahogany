@@ -149,6 +149,9 @@ public:
    /// Checks if the folder is in a critical section.
    bool InCritical(void) const { return m_InCritical; }
 
+   /// @name Folder operations
+   //@{
+
    // count various kinds of messages
    virtual unsigned long CountNewMessages(void) const;
    virtual unsigned long CountRecentMessages(void) const;
@@ -224,18 +227,6 @@ public:
 
    /** Perform a checkpoint on the folder. */
    virtual void Checkpoint(void);
-
-   /**@name Semi-public functions, shouldn't usually be called by
-      normal code. */
-   //@{
-
-   /** Most of the Ping() functionality, but without updating the
-       mailbox status (mail_check()), a bit quicker. Returns true if
-       mailstream is still valid.
-       Just pings the stream and tries to reopen it if needed
-       @return true if stream still valid
-   */
-   bool PingReopen(void);
 
    //@}
 
@@ -436,6 +427,16 @@ private:
    */
    static bool CreateIfNeeded(const MFolder *folder,
                               MAILSTREAM **pStream = NULL);
+
+   /// just do mail_ping() on the opened folder, return TRUE if ok
+   bool PingOpenedFolder();
+
+   /**
+     Called when the folder was closed not in result of calling our Close():
+     this will reset m_MailStream to NIL, call Close() to clean up and notyf
+     the outside world about our closure
+   */
+   void ForceClose();
 
    /// Updates the status of a single message.
    void UpdateMessageStatus(unsigned long seqno);

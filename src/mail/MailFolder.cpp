@@ -261,7 +261,7 @@ MailFolder::CloseAll()
       mf->Close();
 
       // notify any opened folder views
-      MEventManager::Send(new MEventFolderClosedData(mf) );
+      MEventManager::Send(new MEventFolderClosedData(mf));
    }
 
    delete [] mfOpened;

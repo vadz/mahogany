@@ -94,20 +94,32 @@ extern "C"
 // macros
 // ----------------------------------------------------------------------------
 
-// check if the folder is still available trying to reopen it if not
+/**
+  @name checking folder macros
+
+  check if the folder is still available and give an error message if it isn't
+  (the message must contain a %s which is replaced by the folder name)
+ */
+
+//@{
+
+/// and return
 #define CHECK_DEAD(msg) \
-   if ( m_MailStream == NIL && !PingReopen() ) \
+   if ( m_MailStream == NIL ) \
    { \
       ERRORMESSAGE((_(msg), GetName().c_str()));\
       return;\
    }
 
+/// and return the given value
 #define CHECK_DEAD_RC(msg, rc) \
-   if ( m_MailStream == NIL && !PingReopen() )\
+   if ( m_MailStream == NIL )\
    { \
       ERRORMESSAGE((_(msg), GetName().c_str()));\
       return rc; \
    }
+
+//@}
 
 // enable this as needed as it produces *lots* of outputrun
 #ifdef DEBUG_STREAMS
@@ -1887,10 +1899,10 @@ MailFolderCC::OpenFolder(const MFolder *mfolder,
 
    //FIXME: This should somehow be done in MailFolder.cpp
    MailFolderCC *mf = FindFolder(mboxpath, login);
-   if(mf)
+   if ( mf )
    {
-      //FIXME: is this really needed? 
-      mf->PingReopen(); // make sure it's updated
+      // make sure it's updated
+      mf->Ping();
 
       return mf;
    }
@@ -2413,6 +2425,10 @@ MailFolderCC::Close()
       m_MailStream = NIL;
    }
 
+   // don't leave closed folders in the map, what for if we can't reuse them
+   // anyhow?
+   RemoveFromMap();
+
    // we could be closing before we had time to process all events
    //
    // FIXME: is this really true, i.e. does it ever happen?
@@ -2458,6 +2474,18 @@ MailFolderCC::Close()
                                           m_uidValidity
                                        ));
    }
+}
+
+void
+MailFolderCC::ForceClose()
+{
+   // now folder is dead
+   m_MailStream = NIL;
+
+   Close();
+
+   // notify any opened folder views
+   MEventManager::Send(new MEventFolderClosedData(this));
 }
 
 /* static */
@@ -2823,40 +2851,46 @@ MailFolderCC::Checkpoint(void)
 }
 
 bool
-MailFolderCC::PingReopen(void)
+MailFolderCC::Ping(void)
 {
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::PingReopen() on Folder %s.",
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Ping() on Folder %s.",
               GetName().c_str());
 
-   bool rc = false;
+   // we don't want to reopen the folder from here, this leads to inifinite
+   // loops if the network connection goes down because we are called from a
+   // timer event and so if folder pinging taks too long, we will be called
+   // again and again and again ... before we get the chance to do anything
+   if ( !IsOpened() )
+   {
+      return false;
+   }
+
+   bool rc;
 
    MailFolderLocker lockFolder(this);
    if ( lockFolder )
    {
-      rc = true;
-
       // This is terribly inefficient to do, but needed for some sick
       // POP3 servers which don't report new mail otherwise
       if( (GetFlags() & MF_FLAGS_REOPENONPING)
-          // c-client 4.7-bug: MH folders don't immediately notice new
-          // messages:
+          // c-client 4.7-bug: MH folders don't notice new
+          // messages without reopening them
           || GetType() == MF_MH )
       {
          wxLogTrace(TRACE_MF_CALLS,
                     "MailFolderCC::Ping() forcing close on folder %s.",
                     GetName().c_str());
 
-         // FIXME!!!!
          Close();
       }
 
-      if( NeedsNetwork() && ! mApplication->IsOnline() &&
-          !MDialog_YesNoDialog
+      if ( NeedsNetwork() && !mApplication->IsOnline() &&
+           !MDialog_YesNoDialog
            (
             wxString::Format
             (
                _("Dial-Up network is down.\n"
-                 "Do you want to try and check folder '%s' anyway?"),
+                 "Do you want to try to check folder '%s' anyway?"),
                GetName().c_str()
             ),
             NULL,
@@ -2865,56 +2899,41 @@ MailFolderCC::PingReopen(void)
             GetName()+"/NoNetPingAnyway")
         )
       {
-         Close(); // now folder is dead
+         ForceClose();
 
          return false;
       }
 
-      if ( !m_MailStream || !mail_ping(m_MailStream) )
+      // try to reopen the folder if it is closed
+      if ( !m_MailStream )
       {
          RemoveFromMap(); // will be added again by Open()
-         wxFrame *frame = GetInteractiveFrame();
-         if ( frame )
-         {
-            STATUSMESSAGE((frame,
-                           _("Mailstream for folder '%s' has been closed, trying to reopen it."),
-                           GetName().c_str()));
-         }
 
          rc = Open();
-         if( !rc )
-         {
-            ERRORMESSAGE((_("Re-opening closed folder '%s' failed."), GetName().c_str()));
-            m_MailStream = NIL;
-         }
       }
 
       if ( m_MailStream )
       {
-         rc = true;
-         wxLogTrace(TRACE_MF_CALLS, "Folder '%s' is alive.", GetName().c_str());
+         rc = PingOpenedFolder();
       }
+   }
+   else // failed to lock folder?
+   {
+      rc = false;
    }
 
    return rc;
 }
 
 bool
-MailFolderCC::Ping(void)
+MailFolderCC::PingOpenedFolder()
 {
-   if ( NeedsNetwork() && ! mApplication->IsOnline() )
-   {
-      ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
-      return false;
-   }
+   // caller must check for this
+   CHECK( m_MailStream, false, "PingOpenedFolder() called for closed folder" );
 
    wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Ping(%s)", GetName().c_str());
 
-   // we don't want to reopen the folder from here, this leads to inifinite
-   // loops if the network connection goes down because we are called from a
-   // timer event and so if folder pinging taks too long, we will be called
-   // again and again and again ... before we get the chance to do anything
-   return m_MailStream ? PingReopen() : true;
+   return mail_ping(m_MailStream) != NIL;
 }
 
 /* static */
@@ -3046,6 +3065,8 @@ MailFolderCC::UnLock(void) const
 void
 MailFolderCC::UpdateAfterAppend()
 {
+   CHECK_RET( IsOpened(), "how did we manage to append to a closed folder?" );
+
    // this mail will be stored as uid_last+1 which isn't updated
    // yet at this point
    m_LastNewMsgUId = m_MailStream->uid_last + 1;
@@ -3055,7 +3076,7 @@ MailFolderCC::UpdateAfterAppend()
    if ( !IsUpdateSuspended() )
    {
       // make the folder notice the new messages
-      mail_ping(m_MailStream);
+      PingOpenedFolder();
    }
 }
 
@@ -3089,8 +3110,6 @@ MailFolderCC::AppendMessage(const Message& msg)
    wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::AppendMessage(Message)",
               GetName().c_str());
 
-   CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
-
    String date;
    msg.GetHeaderLine("Date", date);
 
@@ -3116,6 +3135,9 @@ MailFolderCC::AppendMessage(const Message& msg)
 
    STRING str;
    INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
+
+   CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
+
    if ( !mail_append_full(m_MailStream,
                           (char *)m_ImapSpec.c_str(),
                           (char *)flags.c_str(),
@@ -3314,6 +3336,8 @@ MailFolderCC::ExpungeMessages(void)
       wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::ExpungeMessages()",
                  GetName().c_str());
 
+      CHECK_DEAD("ExpungeMessages(): folder closed");
+
       mail_expunge(m_MailStream);
 
       // for some types of folders (IMAP) mm_exists() is called from
@@ -3504,8 +3528,6 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
                                        int flags,
                                        MsgnoType last) const
 {
-   CHECK( m_MailStream, 0, "SearchByFlag: folder is closed" );
-
    SEARCHPGM *pgm = mail_newsearchpgm();
 
    // do we look for messages with this flag or without?
@@ -3587,6 +3609,9 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
       // only search among the messages after this one
       SEARCHSET *set = mail_newsearchset();
       set->first = last + 1;
+
+      CHECK( m_MailStream, 0, "SearchByFlag: folder is closed" );
+
       set->last = mail_uid(m_MailStream, m_nMessages);
 
       if ( flags & SEARCH_UID )
@@ -3666,6 +3691,8 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
          pgm->cc_not = mail_newsearchpgmlist();
          pgm->cc_not->pgm = pgmReal;
       }
+
+      CHECK( m_MailStream, 0, "SearchMessages: folder is closed" );
 
       // the m_SearchMessagesFound array is filled from mm_searched
       mail_search_full (m_MailStream,
@@ -3836,6 +3863,8 @@ MailFolderCC::DoSetSequenceFlag(SequenceKind kind,
       if ( kind == SEQ_UID )
          opFlags |= ST_UID;
 
+      CHECK( m_MailStream, 0, "DoSetSequenceFlag: folder is closed" );
+
       mail_flag(m_MailStream,
                 (char *)sequence.c_str(),
                 (char *)flags.c_str(),
@@ -3945,6 +3974,8 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
    // which will invalidate the current status anyhow
    if ( IsLocked() )
       return;
+
+   CHECK_RET( m_MailStream, "UpdateMessageStatus: folder is closed" );
 
    MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
    CHECK_RET( elt, "UpdateMessageStatus: no elt for the given msgno?" );
@@ -4152,6 +4183,11 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
          wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SortMessages()",
                     GetName().c_str());
 
+         // if any new messages appear in the folder during sorting, nmsgs is
+         // going to change but we only have enough place for the current value
+         // of it in the msgnos array
+         MsgnoType numMessagesSorted = m_MailStream->nmsgs;
+
          // we need to provide a search program, otherwise c-client doesn't
          // sort anything - but if we give it an uninitialized SEARCHPGM, it
          // sorts all the messages [it's just a pleasure to use this library]
@@ -4171,7 +4207,7 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
             // we need to copy the results as we can't just reuse this buffer
             // because c-client has its own memory allocation function which
             // could be incompatible with our malloc/free
-            for ( MsgnoType n = 0; n < m_MailStream->nmsgs; n++ )
+            for ( MsgnoType n = 0; n < numMessagesSorted; n++ )
             {
                *msgnos++ = *results++;
             }
@@ -4400,7 +4436,14 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
       MESSAGECACHE *elt = mail_elt(m_MailStream, i);
       if ( !elt )
       {
+         if ( !m_MailStream )
+         {
+            // the stream is dead, abort
+            break;
+         }
+
          FAIL_MSG( "failed to get sequence element?" );
+
          continue;
       }
 
@@ -4423,6 +4466,13 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
          // cancelled
          break;
       }
+   }
+
+   // notify the user if the connection was broken unexpectedly
+   if ( !m_MailStream )
+   {
+      ERRORMESSAGE((_("Error retrieving the message headers from folder '%s'"),
+                    GetName().c_str()));
    }
 
    return overviewData.GetRetrievedCount();
@@ -5186,8 +5236,7 @@ MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
    // detect the notifications about stream being closed
    if ( mf && errflg == BYE )
    {
-      // reset it to prevent us from trying to close it - won't work
-      mf->m_MailStream = NULL;
+      mf->ForceClose();
 
       wxLogWarning(_("Connection to the folder '%s' lost unexpectedly."),
                    mf->GetName().c_str());
@@ -5447,6 +5496,8 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
                           UserData ud,
                           Ticket ticket)
 {
+   CHECK_DEAD("Cannot list subfolder of the closed folder '%s'.");
+
    String spec = m_ImapSpec;
 
    // make sure that there is a folder name delimiter before pattern - this
@@ -5546,6 +5597,8 @@ char MailFolderCC::GetFolderDelimiter() const
          // anything in reply to this command! try working around this bug
          if ( !gs_delimiter )
          {
+            CHECK( m_MailStream, '\0', "folder closed in GetFolderDelimiter" );
+
             spec += '%';
             mail_list(m_MailStream, NULL, (char *)spec.c_str());
          }
@@ -5630,6 +5683,9 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
    if ( mf )
    {
       stream = mf->m_MailStream;
+
+      CHECK( stream, false, "Closed folder in the opened folders map?" );
+
       nmsgs = mf->GetMessageCount();
 
       noCCC = NULL;
