@@ -562,14 +562,18 @@ MAppBase::OnStartup()
 void
 MAppBase::AddKeepOpenFolder(const String name)
 {
-#ifdef DEBUG
+   bool alreadyThere = false;
    MailFolderList::iterator i;
    for(i = m_KeepOpenFolders->begin();
        i != m_KeepOpenFolders->end();
        i++)
-      ASSERT(name != (**i).GetName());
-#endif
-   m_KeepOpenFolders->push_back( new MailFolderEntry(name) );
+      if(name == (**i).GetName())
+      {
+         alreadyThere = true;
+         break;
+      }
+   if(! alreadyThere)
+      m_KeepOpenFolders->push_back( new MailFolderEntry(name) );
 }
 
 bool
