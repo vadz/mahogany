@@ -1584,7 +1584,8 @@ wxFolderPropertiesPage::SetDefaultValues()
 
    // although NNTP servers do support password-protected access, this
    // is so rare that anonymous is the default
-   m_originalIsAnonymous = (flags & MF_FLAGS_ANON) || (folderType == MF_NNTP);
+   m_originalIsAnonymous = (flags & MF_FLAGS_ANON) ||
+                           (m_isCreating && folderType == MF_NNTP);
    m_isAnonymous->SetValue(m_originalIsAnonymous);
 
    // update the folder icon

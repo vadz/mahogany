@@ -605,7 +605,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #ifdef OS_UNIX
    { gettext_noop("&Icon style:default:GNOME:KDE:small"), Field_Combo,   -1 },
 #endif
-   { gettext_noop("&Reenable disabled message boxes"), Field_SubDlg, -1 }
+   { gettext_noop("&Reenable disabled message boxes..."), Field_SubDlg, -1 }
 };
 
 // FIXME ugly, ugly, ugly... config settings should be living in an array from

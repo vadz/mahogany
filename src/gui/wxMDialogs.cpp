@@ -2051,6 +2051,7 @@ static const struct
    { "AdbDeleteEntry",           gettext_noop("ask for confirmation before deleing the address book entries") },
    { "ConfirmAdbImporter",       gettext_noop("ask for confirmation before importing unreckognized address book files") },
    { "BbdbSaveDialog",           gettext_noop("ask for confirmation before saving address books in BBDB format") },
+   { "FolderGroupHint",          gettext_noop("show explanation after creating a folder group") },
    //{ "", gettext_noop("") },
 };
 
@@ -2182,6 +2183,10 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
          case wxID_NO:
             value = _("no");
             break;
+
+         default:
+            // must be a simple msg box
+            value = _("off");
       }
 
       m_listctrl->SetItem(index, 1, value);
