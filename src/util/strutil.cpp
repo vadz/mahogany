@@ -49,6 +49,12 @@ extern const MOption MP_CRYPT_TWOFISH_OK;
 extern const MOption MP_MBOXDIR;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox M_MSGBOX_EXPLAIN_GLOBALPASSWD;
+
+// ----------------------------------------------------------------------------
 // local functions
 // ----------------------------------------------------------------------------
 

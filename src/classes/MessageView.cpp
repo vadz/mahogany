@@ -129,6 +129,13 @@ extern const MOption MP_SHOW_XFACES;
 extern const MOption MP_TIFF2PS;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox M_MSGBOX_GFX_NOT_INLINED;
+extern const MPersMsgBox M_MSGBOX_ASK_URL_BROWSER;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 

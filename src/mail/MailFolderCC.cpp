@@ -155,6 +155,16 @@ extern const MOption MP_TCP_RSHTIMEOUT;
 extern const MOption MP_TCP_SSHTIMEOUT;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox M_MSGBOX_REMEMBER_PWD;
+extern const MPersMsgBox M_MSGBOX_KEEP_PWD;
+extern const MPersMsgBox M_MSGBOX_DIALUP_ON_OPEN_FOLDER;
+extern const MPersMsgBox M_MSGBOX_NET_DOWN_OPEN_ANYWAY;
+extern const MPersMsgBox M_MSGBOX_NO_NET_PING_ANYWAY;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 

@@ -59,6 +59,14 @@
 #include "gui/wxFiltersDialog.h"
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox M_MSGBOX_FILTER_NOT_USED_YET;
+extern const MPersMsgBox M_MSGBOX_FILTER_CONFIRM_OVERWRITE;
+extern const MPersMsgBox M_MSGBOX_FILTER_REPLACE;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 

@@ -249,6 +249,10 @@ SOURCE=.\src\classes\PathFinder.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\classes\Mpers.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\classes\Profile.cpp
 # End Source File
 # Begin Source File

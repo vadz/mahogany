@@ -48,6 +48,8 @@
 
 extern const MOption MP_MODULES;
 
+extern const MPersMsgBox M_MSGBOX_MODULES_WARNING;
+
 class wxModulesDialog : public wxManuallyLaidOutDialog
 {
 public:

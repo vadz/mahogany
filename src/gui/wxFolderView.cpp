@@ -137,6 +137,19 @@ extern const MOption MP_USERLEVEL;
 extern const MOption MP_USE_TRASH_FOLDER;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox M_MSGBOX_VIEWER_BAR_TIP;
+extern const MPersMsgBox M_MSGBOX_EXPLAIN_COLUMN_CLICK;
+extern const MPersMsgBox M_MSGBOX_MARK_READ;
+extern const MPersMsgBox M_MSGBOX_BROWSE_IMAP_SERVERS;
+extern const MPersMsgBox M_MSGBOX_OPEN_UNACCESSIBLE_FOLDER;
+extern const MPersMsgBox M_MSGBOX_CHANGE_UNACCESSIBLE_FOLDER_SETTINGS;
+extern const MPersMsgBox M_MSGBOX_EDIT_FOLDER_ON_OPEN_FAIL;
+extern const MPersMsgBox M_MSGBOX_APPLY_QUICK_FILTER_NOW;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 

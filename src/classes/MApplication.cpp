@@ -108,6 +108,13 @@ extern const MOption MP_USE_SENDMAIL;
 #endif // OS_UNIX
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox M_MSGBOX_ASK_RUNASROOT;
+extern const MPersMsgBox M_MSGBOX_EMPTY_TRASH_ON_EXIT;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 

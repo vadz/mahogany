@@ -156,6 +156,15 @@ extern const MOption MP_VERSION;
 #define M_CUSTOM_HEADERS_CONFIG_SECTION "CustomHeaders"
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox M_MSGBOX_RETRIEVE_REMOTE;
+extern const MPersMsgBox M_MSGBOX_STORE_REMOTE;
+extern const MPersMsgBox M_MSGBOX_OVERWRITE_REMOTE;
+extern const MPersMsgBox M_MSGBOX_CONFIG_SAVED_REMOTELY;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 

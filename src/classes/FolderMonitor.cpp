@@ -52,6 +52,12 @@ extern const MOption MP_POLL_OPENED_ONLY;
 extern const MOption MP_POLLINCOMINGDELAY;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox M_MSGBOX_SUSPENDAUTOCOLLECT;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 

@@ -71,6 +71,12 @@ extern const MOption MP_REPLY_SIG_SEPARATOR;
 extern const MOption MP_WRAPMARGIN;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox M_MSGBOX_SIGNATURE_LENGTH;
+
+// ----------------------------------------------------------------------------
 // the classes which are used together with compose view - we have here a
 // derivation of variable expander and expansion sink which are used for parsing
 // the templates, but are completely hidden from the outside world because we
