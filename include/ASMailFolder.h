@@ -109,6 +109,10 @@ public:
       Op_ListFolders,
       Op_SearchMessages,
       Op_ApplyFilterRules
+#if defined(EXPERIMENTAL_MARK_READ)
+      , Op_MarkRead
+      , Op_MarkUnread
+#endif // EXPERIMENTAL_MARK_READ
    };
     /** A structure containing the return values from an operation.
         This will get passed in an MEvent to notify other parts of the
@@ -378,6 +382,16 @@ public:
      */
    virtual Ticket ExpungeMessages(void) = 0;
 
+
+#if defined(EXPERIMENTAL_MARK_READ)
+   /** Mark messages read/unread.
+       @param selections the message indices which will be converted using the current listing
+       @param read true if messages must be marked read
+     */
+   virtual Ticket MarkRead(const UIdArray *selections,
+                           UserData ud,
+                           bool read) = 0;
+#endif // EXPERIMENTAL_MARK_READ
 
    /** Search Messages for certain criteria.
        @return UIdArray with UIds of matching messages

@@ -2606,6 +2606,7 @@ void wxFolderView::ExpungeMessages()
    }
 }
 
+
 void wxFolderView::SelectAllByStatus(int status, bool isSet)
 {
    wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
@@ -2707,6 +2708,16 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
       case  WXMENU_MSG_EXPUNGE:
          ExpungeMessages();
          break;
+
+#if defined(EXPERIMENTAL_MARK_READ)
+      case WXMENU_MSG_MARK_READ:
+         MarkRead(GetSelections(), true);
+         break;
+
+      case WXMENU_MSG_MARK_UNREAD:
+         MarkRead(GetSelections(), false);
+         break;
+#endif // EXPERIMENTAL_MARK_READ
 
       case WXMENU_MSG_OPEN:
          OpenMessages(GetSelections());
@@ -3251,6 +3262,27 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections, MFolder *folder)
    return t;
 }
 
+#if defined(EXPERIMENTAL_MARK_READ)
+Ticket
+wxFolderView::MarkRead(UIdArray& selections, bool read)
+{
+   size_t count = selections.GetCount();
+   CHECK( count, ILLEGAL_TICKET, "no messages to mark" );
+
+   FolderViewAsyncStatus *status =
+      new FolderViewAsyncStatus(this, _("Marking %d message(s) ..."),
+                                count, (read ? "read" : "unread"));
+
+   Ticket t = m_ASMailFolder->
+                  MarkRead(&selections, this, read);
+
+   status->Monitor(t,
+                   _("Failed to mark messages."));
+
+      return t;
+}
+#endif // EXPERIMENTAL_MARK_READ
+
 Ticket
 wxFolderView::MoveMessagesToFolder(const UIdArray& messages, MFolder *folder)
 {
@@ -3763,6 +3795,10 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          case ASMailFolder::Op_DeleteMessages:
          case ASMailFolder::Op_DeleteOrTrashMessages:
          case ASMailFolder::Op_UnDeleteMessages:
+#if defined(EXPERIMENTAL_MARK_READ)
+         case ASMailFolder::Op_MarkRead:
+         case ASMailFolder::Op_MarkUnread:
+#endif // EXPERIMENTAL_MARK_READ
             break;
 
          case ASMailFolder::Op_GetMessage:

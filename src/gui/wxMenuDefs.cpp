@@ -285,7 +285,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // msg
 
    // the available accelerators for this menu:
-   // BJKQZ
+   // BJZ
 
    { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message")    , FALSE },
    { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print this message")       , FALSE },
@@ -314,6 +314,10 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
    { WXMENU_MSG_FLAG,      gettext_noop("Fla&g\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , FALSE },
    { WXMENU_MSG_EXPUNGE,   gettext_noop("Ex&punge"),          gettext_noop("Expunge")                  , FALSE },
+#if defined(EXPERIMENTAL_MARK_READ)
+   { WXMENU_MSG_MARK_READ,   gettext_noop("Mar&k read"), gettext_noop("Mark message as read"), FALSE },
+   { WXMENU_MSG_MARK_UNREAD,   gettext_noop("Mark unread (&q)\tShift-Ctrl-U"), gettext_noop("Mark message as unread"), FALSE },
+#endif // EXPERIMENTAL_MARK_READ
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_SELECTALL, gettext_noop("Select &all\tCtrl-A"),       gettext_noop("Select all messages")      , FALSE },
    { WXMENU_MSG_SELECTUNREAD, gettext_noop("Select all &unread\tShift-Ctrl-A"), gettext_noop("Select all unread messages")      , FALSE },

@@ -391,6 +391,40 @@ public:
       { m_MailFolder->ExpungeMessages(); }
 };
 
+#if defined(EXPERIMENTAL_MARK_READ)
+class MT_MarkRead : public MailThreadSeq
+{
+private:
+   bool m_read;
+public:
+   MT_MarkRead(ASMailFolder *mf,
+               UserData ud,
+               const UIdArray *selections,
+               bool read)
+      : MailThreadSeq(mf, ud, selections) 
+      , m_read(read)
+   {}
+   virtual void WorkFunction(void)
+   { 
+      bool rc = m_MailFolder->SetFlag(m_Seq, MailFolder::MSG_STAT_SEEN, m_read);
+      //bool rc = m_MailFolder->MarkRead(m_Seq, (bool)m_UserData); 
+      SendEvent(ASMailFolder::ResultInt::Create
+                (
+                  m_ASMailFolder,
+                  m_Ticket,
+                  (m_read ? ASMailFolder::Op_MarkRead : ASMailFolder::Op_MarkUnread),
+                  m_Seq,
+                  rc,
+                  m_UserData
+                 )
+               );
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif
+   }
+};
+#endif // EXPERIMENTAL_MARK_READ
+
 class MT_SearchMessages : public MailThread
 {
 public:
@@ -709,6 +743,19 @@ public:
          return (new MT_Expunge(this))->Start();
       }
 
+#if defined(EXPERIMENTAL_MARK_READ)
+   /** Mark messages read/unread.
+       @param selections the message indices which will be converted using the current listing
+       @param read true if messages must be marked read
+     */
+   virtual Ticket MarkRead(const UIdArray *selections,
+                           UserData ud,
+                           bool read)
+      {
+         //return SetFlag(selections, MailFolder::MSG_STAT_SEEN, read);
+         return (new MT_MarkRead(this, ud, selections, read))->Start();
+      }
+#endif // EXPERIMENTAL_MARK_READ
 
    /** Search Messages.
        @return a Result with a sequence of matching uids.
