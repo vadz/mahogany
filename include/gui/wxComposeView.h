@@ -182,6 +182,10 @@ public:
        @param value value of header entry
    */
    void AddHeaderEntry(const String &entry, const String &value);
+
+   /// reset the "dirty" flag
+   void ResetDirty();
+
 protected:
    /** quasi-Constructor
        @param parent parent window

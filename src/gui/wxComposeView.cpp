@@ -868,7 +868,7 @@ wxComposeView::OnMenuCommand(int id)
       if ( IsReadyToSend() )
       {
          if ( Send() )
-            m_LayoutWindow->SetModified(false);
+            ResetDirty();
          Close();
       }
       break;
@@ -1376,6 +1376,12 @@ wxComposeView::SetSubject(const String &subj)
    m_txtFields[Field_Subject]->SetValue(WXCPTR subj.c_str());
 }
 
+void wxComposeView::ResetDirty()
+{
+   if ( m_LayoutWindow )
+      m_LayoutWindow->SetModified(false);
+}
+
 /// inserts a text
 void
 wxComposeView::InsertText(const String &txt)
@@ -1608,7 +1614,7 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
          }
    }
 
-   m_LayoutWindow->SetModified(false);
+   ((wxComposeView *)this)->ResetDirty(); // const_cast
 
    return true;
 }

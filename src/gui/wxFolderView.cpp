@@ -437,8 +437,6 @@ wxFolderView::Update(void)
       return; // don't call this code recursively
    m_UpdateSemaphore = true;
 
-//FIXME: does not work!!    wxWindow *focusWindow = wxWindow::FindFocus();
-   
    wxBeginBusyCursor();
    wxSafeYield();
 
@@ -517,7 +515,6 @@ wxFolderView::Update(void)
 
    m_NumOfMessages = n;
    wxEndBusyCursor(); wxSafeYield();
-//   if(focusWindow == m_FolderCtrl)
    m_FolderCtrl->SetFocus();
    m_UpdateSemaphore = false;
 }
