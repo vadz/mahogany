@@ -27,5 +27,18 @@
 
 %import MString.i
 
-%include "../../include/MObject.h"
+class MObject
+{
+public:
+#ifdef DEBUG
+    virtual String DebugDump() const;
+#endif
+    static void CheckLeaks();
+};
 
+class MObjectRC : public MObject
+{
+public:
+   virtual void IncRef();
+   virtual bool DecRef();
+};

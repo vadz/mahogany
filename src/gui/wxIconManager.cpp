@@ -449,22 +449,10 @@ wxIconManager::SetSubDirectory(wxString subDir)
    // be set yet.
    if(mApplication && ! m_GlobalDir.Length())
    {
-      // VZ: admittedly, GetGlobalDir() will never be empty during normal use,
-      //     but it can be empty if M wasn't installed and not adding '/' in
-      //     this case makes it possible to find icons even then
-      m_GlobalDir = mApplication->GetGlobalDir();
-      if ( !!m_GlobalDir )
-         m_GlobalDir += '/';
-#ifdef OS_WIN
-      m_GlobalDir += "src/";
-#endif
-      m_GlobalDir += "icons";
-
-      m_LocalDir = mApplication->GetLocalDir();
-      if ( !!m_LocalDir )
-         m_LocalDir += '/';
-      m_LocalDir += "icons";
+      m_GlobalDir << mApplication->GetDataDir() << "/icons";
+      m_LocalDir << mApplication->GetLocalDir() << "/icons";
    }
+
    /* If nothing changed, we don't do anything: */
    if(! m_iconList
       || subDir != m_SubDir)

@@ -25,7 +25,7 @@ SWIGFLAGS := -c++ -python -shadow
 vpath %.i .src
 %.o %.py: %.i
 	@rm -f $*.py
-	$(SWIG) -I$(dir $<) $(SWIGFLAGS) -dhtml -c -o $*.cpp $<
+	$(SWIG) -I$(dir $<) $(SWIGFLAGS) -c -o $*.cpp $<
 	$(M_COMPILE_SWIG)
 Python/swiglib.o: Python/swiglib.i
 	$(SWIG) -I$(dir $<) $(SWIGFLAGS) -o $*.cpp $<

@@ -133,4 +133,11 @@
     and release for which M is compiled.
 */
 #define M_OSINFO   "UnknownOS"
+
+/** The top level source directory */
+#undef M_TOP_SOURCEDIR
+
+/** The top level build directory */
+#undef M_TOP_BUILDDIR
+
 //@}

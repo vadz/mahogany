@@ -120,8 +120,10 @@ dnl use "exec pwd" to avoid shell built-in
 dnl use "cd ." so FreeBSD shell will fork subshell
 SOURCEDIR=`cd $srcdir; exec pwd`
 AC_SUBST(SOURCEDIR)
+AC_DEFINE_UNQUOTED(M_TOP_SOURCEDIR, "$SOURCEDIR")
 BUILDDIR=`cd .; exec pwd`
 AC_SUBST(BUILDDIR)
+AC_DEFINE_UNQUOTED(M_TOP_BUILDDIR, "$BUILDDIR")
 
 dnl instead of invoking subsidary configures, we accumulate the flags
 dnl here for some third-party sources, since they would otherwise have

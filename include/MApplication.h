@@ -152,6 +152,11 @@ public:
    */
    const String & GetLocalDir(void) const { return m_localDir; }
 
+   /** get the directory containing the files from our source tree: it is the
+       global dir if it's set or ${top_srcdir} otherwise
+   */
+   String GetDataDir() const;
+
    /** sets the local path: for use by routines in upgrade.cpp only!
        @param path is the full path to the user M directory
    */
