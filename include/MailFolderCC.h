@@ -258,6 +258,27 @@ public:
    virtual bool SendsNewMailEvents(void) const
       { return m_GenerateNewMailEvents; }
 
+   /**@name Subscription management */
+   //@{
+   /** Subscribe to a given mailbox (related to the
+       mailfolder/mailstream underlying this folder.
+       @param mailboxname name of the mailbox to subscribe to
+       @param bool if true, subscribe, else unsubscribe
+       @return true on success
+   */
+   virtual bool Subscribe(const String &mailboxname,
+                          bool subscribe = true) const;
+   /** Get a listing of all mailboxes.
+       @param pattern a wildcard matching the folders to list
+       @param subscribed_only if true, only the subscribed ones
+       @param reference implementation dependend reference
+    */
+   virtual FolderListing *
+   ListFolders(const String &pattern = "*",
+               bool subscribed_only = false,
+               const String &reference = "") const;
+   //@}
+
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /// Return a pointer to the first message's header info.
@@ -568,7 +589,10 @@ private:
    int ms_TcpCloseTimeout;
    /// rsh connection timeout in seconds.
    int ms_TcpRshTimeout;
-//@}
+   //@}
+
+   /// Used by the subscription management.
+   class FolderListingCC *m_FolderListing;
 public:
    DEBUG_DEF
    MOBJECT_DEBUG(MailFolderCC)

@@ -32,6 +32,7 @@ class INTARRAY;
 class MWindow;
 class MailFolder;
 
+#include "MailFolder.h"
 #include "Message.h"
 //class Message;
 
@@ -105,7 +106,9 @@ public:
       Op_SaveMessagesToFolder,
       Op_SaveMessagesToFile,
       Op_ReplyMessages,
-      Op_ForwardMessages
+      Op_ForwardMessages,
+      Op_Subscribe,
+      Op_ListFolders
    };
     /** A structure containing the return values from an operation.
         This will get passed in an MEvent to notify other parts of the
@@ -201,6 +204,29 @@ public:
       Message *m_Message;
       unsigned long m_uid;
    };
+   /** Holds the result from a ListFolders() call.
+   */
+   class ResultFolderListing : public ResultImpl
+   {
+   public:
+      static ResultFolderListing *Create(ASMailFolder *mf,
+                                         Ticket t,
+                                         FolderListing *list,
+                                         UserData ud)
+         { return new ResultFolderListing(mf, t, list, ud); }
+      const FolderListing * GetListing(void) const { return m_List; }
+   protected:
+      ResultFolderListing(ASMailFolder *mf, Ticket t, FolderListing *list,
+                          UserData ud)
+         : ResultImpl(mf, t, Op_ListFolders, ud)
+         {
+            m_List = list;
+         }
+      ~ResultFolderListing() { delete m_List; }
+   private:
+      FolderListing *m_List;
+   };
+
 
    //@}
 
@@ -334,6 +360,26 @@ public:
                                   ProfileBase *profile = NULL,
                                   UserData ud = 0) = 0;
 
+   /**@name Subscription management */
+   //@{
+   /** Subscribe to a given mailbox (related to the
+       mailfolder/mailstream underlying this folder.
+       @param mailboxname name of the mailbox to subscribe to
+       @param bool if true, subscribe, else unsubscribe
+   */
+   virtual Ticket Subscribe(const String &mailboxname,
+                            bool subscribe = true,
+                            UserData ud = 0) const = 0 ;
+   /** Get a listing of all mailboxes.
+       @param pattern a wildcard matching the folders to list
+       @param subscribed_only if true, only the subscribed ones
+       @param reference implementation dependend reference
+    */
+   virtual Ticket ListFolders(const String &pattern = "*",
+                              bool subscribed_only = false,
+                              const String &reference = "",
+                              UserData ud = 0) const = 0;
+   //@}
    //@}   
    //@}
    /**@name Synchronous Access Functions */

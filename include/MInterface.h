@@ -29,6 +29,17 @@ public:
 
 
 
+wxMApp * GetMApplication (void);
+
+
+
+ProfileBase * CreateProfile (
+const char * classname ,
+ProfileBase * parent =NULL
+);
+
+
+
 ProfileBase * GetGlobalProfile (void);
 
 

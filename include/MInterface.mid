@@ -11,6 +11,19 @@ FILE_HEADER
 
 INTERFACE(MInterface,`
 
+FUNCTION(GetMApplication, wxMApp *, `(void)',
+`
+ return mApplication;
+')
+
+FUNCTION(CreateProfile, ProfileBase *, (
+ARG(STRING, classname),
+ARG(ProfileBase *, parent, =NULL)
+),
+`
+ return ProfileBase::CreateProfile(classname,parent);
+')
+
 FUNCTION(GetGlobalProfile, ProfileBase *, `(void)',
 `
  return mApplication->GetProfile();

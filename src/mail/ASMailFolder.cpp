@@ -381,9 +381,52 @@ private:
    int m_Flags;
 };
 
+class MT_Subscribe : public MailThread
+{
+public:
+   MT_Subscribe(ASMailFolder *mf, ASMailFolder::UserData ud,
+                const String &mailboxname,
+                bool subscribe)
+      : MailThread(mf, ud)
+      {
+         m_Name = mailboxname;
+         m_Sub = subscribe;
+      }
+   virtual void WorkFunction(void)
+      {
+         int rc = m_MailFolder->Subscribe(m_Name, m_Sub);
+         SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder, m_Ticket, ASMailFolder::Op_Subscribe, rc, m_UserData));
+      }
+private:
+   String  m_Name;
+   bool    m_Sub;
+};
 
-
-
+class MT_ListFolders : public MailThread
+{
+public:
+   MT_ListFolders(ASMailFolder *mf,
+                  ASMailFolder::UserData ud,
+                  const String &pattern,
+                  bool sub_only,
+                  const String &reference)
+      : MailThread(mf, ud)
+      {
+         m_Pattern = pattern;
+         m_SubOnly = sub_only;
+         m_Reference = reference;
+      }
+   virtual void WorkFunction(void)
+      {
+         FolderListing *fl = m_MailFolder->ListFolders(m_Pattern, m_SubOnly, m_Reference);
+         SendEvent(ASMailFolder::ResultFolderListing::Create(
+            m_ASMailFolder, m_Ticket, fl, m_UserData));
+      }
+private:
+   String  m_Pattern;
+   String  m_Reference;
+   bool  m_SubOnly;
+};
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -619,6 +662,38 @@ public:
                                           messages, parent,
                                           profile, 0))->Start();
    }
+
+   /**@name Subscription management */
+   //@{
+   /** Subscribe to a given mailbox (related to the
+       mailfolder/mailstream underlying this folder.
+       @param mailboxname name of the mailbox to subscribe to
+       @param bool if true, subscribe, else unsubscribe
+   */
+   virtual Ticket Subscribe(const String &mailboxname,
+                            bool subscribe,
+                            UserData ud) const
+      {
+         return (new MT_Subscribe((ASMailFolder *)this, ud, mailboxname,
+                            subscribe))->Start();
+      }
+   /** Get a listing of all mailboxes.
+       @param pattern a wildcard matching the folders to list
+       @param subscribed_only if true, only the subscribed ones
+       @param reference implementation dependend reference
+    */
+   virtual Ticket ListFolders(const String &pattern,
+                              bool subscribed_only,
+                              const String &reference,
+                              ASMailFolder::UserData ud) const
+   {
+      return (new MT_ListFolders((ASMailFolder *)this, ud,
+                                 pattern,
+                                 subscribed_only,
+                                 reference))->Start();
+   }
+   //@}
+
    //@}   
    //@}
    /**@name Synchronous Access Functions */

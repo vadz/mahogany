@@ -123,8 +123,9 @@ public:
    MEventFolderUpdateData(MailFolder *folder)
       : MEventData(MEventId_FolderUpdate)
       {
-         m_folder = folder;
+         m_folder = folder; m_folder->IncRef();
       }
+   ~MEventFolderUpdateData() { m_folder->DecRef(); }
    /// get the folder which changed
    MailFolder *GetFolder() const { return m_folder; }
 private:

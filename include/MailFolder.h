@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolder class: ABC defining the interface to mail folders     *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -16,6 +16,7 @@
 #endif
 
 #include "FolderType.h"
+#include "kbList.h"
 
 /** The INTARRAY define is a class which is an integer array. It needs
     to provide a int Count() method to return the number of elements
@@ -245,6 +246,26 @@ public:
    */
    virtual bool SendsNewMailEvents(void) const = 0;
 
+   /**@name Subscription management */
+   //@{
+   /** Subscribe to a given mailbox (related to the
+       mailfolder/mailstream underlying this folder.
+       @param mailboxname name of the mailbox to subscribe to
+       @param bool if true, subscribe, else unsubscribe
+       @return true on success
+   */
+   virtual bool Subscribe(const String &mailboxname,
+                          bool subscribe = true) const = 0;
+   /** Get a listing of all mailboxes.
+       @param pattern a wildcard matching the folders to list
+       @param subscribed_only if true, only the subscribed ones
+       @param reference implementation dependend reference
+    */
+   virtual class FolderListing *
+   ListFolders(const String &pattern = "*",
+                            bool subscribed_only = false,
+                            const String &reference = "") const = 0;
+   //@}
 
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.
@@ -366,5 +387,33 @@ public:
    virtual ~HeaderInfo() {}
 };
 
+class FolderListingEntry
+{
+public:
+   /// The folder's name.
+   virtual const String &GetName(void) const = 0;
+   /// The folder's attribute.
+   virtual long GetAttribute(void) const = 0;
+   virtual ~FolderListingEntry() {}
+};
 
+KBLIST_DEFINE(FolderListingList, FolderListingEntry);
+
+/** This class holds the listings of a server's folders. */
+class FolderListing
+{
+public:
+   typedef FolderListingList::iterator iterator;
+   /// Return the delimiter character for entries in the hierarchy.
+   virtual char GetDelimiter(void) const = 0;
+   /// Returns the number of entries.
+   virtual size_t CountEntries(void) const = 0;
+   /// Returns the first entry.
+   virtual const FolderListingEntry *
+   GetFirstEntry(FolderListing::iterator &i) const = 0;
+   /// Returns the next entry.
+   virtual const FolderListingEntry *
+   GetNextEntry(FolderListing::iterator &i) const = 0;
+   virtual ~FolderListing() {}
+};
 #endif

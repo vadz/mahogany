@@ -121,6 +121,67 @@ String MailFolderCC::qprint(const String &in)
 
 
 
+
+
+class FolderListingEntryCC : public FolderListingEntry
+{
+public:
+   /// The folder's name.
+   virtual const String &GetName(void) const
+      { return m_Name;}
+   /// The folder's attribute.
+   virtual long GetAttribute(void) const
+      { return m_Attr; }
+   FolderListingEntryCC(const String &name, long attr)
+      : m_Name(name)
+      { m_Attr = attr; }
+private:
+   const String &m_Name;
+   long          m_Attr;
+};
+
+
+/** This class holds the listings of a server's folders. */
+class FolderListingCC : public FolderListing
+{
+public:
+   /// Return the delimiter character for entries in the hierarchy.
+   virtual char GetDelimiter(void) const
+      { return m_Del; }
+   /// Returns the number of entries.
+   virtual size_t CountEntries(void) const
+      { return m_list.size(); }
+   /// Returns the first entry.
+   virtual const FolderListingEntry * GetFirstEntry(iterator &i) const
+      {
+         i = m_list.begin();
+         if ( i != m_list.end() )
+            return (*i);
+         else
+            return NULL;
+      }
+   /// Returns the next entry.
+   virtual const FolderListingEntry * GetNextEntry(iterator &i) const
+      {
+         i++;
+         if ( i != m_list.end())
+            return (*i);
+         else
+            return NULL;
+      }
+   /** For our use only. */
+   void SetDelimiter(char del)
+      { m_Del = del; }
+   void Add( FolderListingEntry *entry )
+      {
+         m_list.push_back(entry);
+      }
+private:
+   char m_Del;
+   FolderListingList m_list;
+};
+
+
 /*----------------------------------------------------------------------------------------
  * MailFolderCC code
  *---------------------------------------------------------------------------------------*/
@@ -232,7 +293,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_ProgressDialog = 0;
    m_PingReopenSemaphore = false;
    m_BuildListingSemaphore = false;
-
+   m_FolderListing = NULL;
    m_InCritical = false;
    
    FolderType type = GetFolderType(typeAndFlags);
@@ -1211,12 +1272,16 @@ MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
        @param attrib mailbox attributes
        */
 void
-MailFolderCC::mm_list(MAILSTREAM * /* stream */,
-                      char /* delim */,
-                      String /* name */,
-                      long /* attrib */)
+MailFolderCC::mm_list(MAILSTREAM * stream,
+                      char delim ,
+                      String  name,
+                      long  attrib)
 {
-   //FIXME
+   MailFolderCC *mf = LookupObject(stream);
+   ASSERT(mf);
+   ASSERT(mf->m_FolderListing);
+   mf->m_FolderListing->SetDelimiter(delim);
+   mf->m_FolderListing->Add(new FolderListingEntryCC(name, attrib));
 }
 
 
@@ -1227,12 +1292,16 @@ MailFolderCC::mm_list(MAILSTREAM * /* stream */,
        @param attrib mailbox attributes
        */
 void
-MailFolderCC::mm_lsub(MAILSTREAM * /* stream */,
-                      char /* delim */,
-                      String /* name */,
-                      long /* attrib */)
+MailFolderCC::mm_lsub(MAILSTREAM * stream,
+                      char delim ,
+                      String  name,
+                      long  attrib)
 {
-   //FIXME
+   MailFolderCC *mf = LookupObject(stream);
+   ASSERT(mf);
+   ASSERT(mf->m_FolderListing);
+   mf->m_FolderListing->SetDelimiter(delim);
+   mf->m_FolderListing->Add(new FolderListingEntryCC(name, attrib));
 }
 
 /** status of mailbox has changed
@@ -1515,6 +1584,40 @@ MailFolderCC::OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW *o
    ASSERT(mf);
    mf->OverviewHeaderEntry(uid, ov);
 }
+
+
+
+bool
+MailFolderCC::Subscribe(const String &mailboxname,
+                        bool subscribe) const
+{
+   return (subscribe ?
+           mail_subscribe (m_MailStream, (char *)mailboxname.c_str())
+           : mail_unsubscribe (m_MailStream, (char *)mailboxname.c_str()) )
+      != NIL;
+}
+
+
+FolderListing *
+MailFolderCC::ListFolders(const String &pattern,
+                          bool subscribedOnly,
+                          const String &reference) const
+{
+   FolderListingCC *m_FolderListing = new FolderListingCC;
+   if(subscribedOnly)
+   {
+      mail_lsub (m_MailStream, (char *) reference.c_str(), (char *) pattern.c_str());
+   }
+   else
+   {
+      mail_lsub (m_MailStream, (char *) reference.c_str(), (char *) pattern.c_str());
+   }
+   FolderListing * fl = m_FolderListing;
+   m_FolderListing = NULL;
+   return fl;
+}
+
+
 
 extern "C"
 {
