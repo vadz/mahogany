@@ -96,7 +96,7 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *********************************************************************
 *** KB:
 *********************************************************************
-
+- translation for SentMail folder name!
 - move setting of -fPIC to configure
 - check handling of missing hostnames,
   suppress missing hostname c-client error message
