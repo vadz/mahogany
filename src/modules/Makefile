@@ -19,15 +19,15 @@
 #
 #
 #######################################################################
-##
-##  DO NOT EDIT THIS MAKEFILE - JUST PLACE YOUR SOURCE IN THE DIRECTORY
-##
-#######################################################################
 
 include ../../makeopts
 
 CWD = modules
-SRC = $(wildcard *.cpp)
+SRC = Mdummy.cpp Filters.cpp 
+
+ifdef PISOCK_LIB
+SRC := $(SRC) PalmOS.cpp
+endif
 
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
