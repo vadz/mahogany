@@ -290,12 +290,12 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       , FALSE },
    { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       , FALSE },
 #endif
-   { WXMENU_MSG_REPLY,     gettext_noop("&Reply\tCtrl-R"),            gettext_noop("Reply to this message")    , FALSE },
+   { WXMENU_MSG_REPLY,     gettext_noop("&Reply\tR"),            gettext_noop("Reply to this message")    , FALSE },
    { WXMENU_MSG_REPLY_WITH_TEMPLATE, gettext_noop("Reply with &template...\tShift-Ctrl-R"), gettext_noop("Reply to this message after choosing a template to use ")    , FALSE },
-   { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply\tCtrl-G"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
+   { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply\tG"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
    { WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE,
                            gettext_noop("G&roup reply with template...\tShift-Ctrl-G"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
-   { WXMENU_MSG_FORWARD,   gettext_noop("&Forward\tCtrl-F"),          gettext_noop("Forward this message")     , FALSE },
+   { WXMENU_MSG_FORWARD,   gettext_noop("&Forward\tF"),          gettext_noop("Forward this message")     , FALSE },
    { WXMENU_MSG_FORWARD_WITH_TEMPLATE,
                            gettext_noop("Forward with te&mplate...\tShift-Ctrl-F"), gettext_noop("Forward this message after choosing a template to use ")     , FALSE },
    { WXMENU_MSG_FILTER,    gettext_noop("Appl&y filter rules..."), gettext_noop("Apply filter rules to selected messages")     , FALSE },
@@ -322,11 +322,12 @@ static const MenuItemInfo g_aMenuItems[] =
 #ifdef EXPERIMENTAL_show_uid
    { WXMENU_MSG_SHOWUID, "Show message UID&L", "", FALSE },
 #endif // EXPERIMENTAL_show_uid
-   { WXMENU_MSG_FIND,  gettext_noop("Fi&nd..."), gettext_noop("F&ind text in message\tCtrl-I") , FALSE },
+   { WXMENU_MSG_FIND,  gettext_noop("Find...\tCtrl-F"), gettext_noop("Find text in message") , FALSE },
 
    // compose
    { WXMENU_COMPOSE_INSERTFILE,
                            gettext_noop("&Insert file...\tCtrl-I"),   gettext_noop("Insert a file")            , FALSE },
+   { WXMENU_COMPOSE_LOADTEXT,gettext_noop("I&nsert text...\tCtrl-T"), gettext_noop("Insert text file")         , FALSE },
    { WXMENU_COMPOSE_SEND,  gettext_noop("&Send\tShift-Ctrl-S"),             gettext_noop("Send the message now")     , FALSE },
    { WXMENU_COMPOSE_SEND_LATER,  gettext_noop("Send &Later\tShift-Ctrl-L"),
      gettext_noop("Schedule the message to be send at a later time.")     , FALSE },
@@ -334,8 +335,7 @@ static const MenuItemInfo g_aMenuItems[] =
      gettext_noop("Send the message now and keep the editor open")     , FALSE },
    { WXMENU_COMPOSE_PRINT, gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save message text to file"), FALSE },
-   { WXMENU_COMPOSE_LOADTEXT,gettext_noop("In&sert text...\tCtrl-T"), gettext_noop("Insert text file")         , FALSE },
+   { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save (append) message text to file"), FALSE },
    { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear\tCtrl-C"),            gettext_noop("Delete message contents")  , FALSE },
    { WXMENU_COMPOSE_EVAL_TEMPLATE, gettext_noop("E&valuate template"), gettext_noop("Use the template to create skeleton of a message")  , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },

@@ -1720,10 +1720,10 @@ wxComposeView::OnMenuCommand(int id)
    case WXMENU_COMPOSE_SAVETEXT:
       {
          String filename = wxPFileSelector("MsgSaveText",
-                                           _("Choose file to save message to"),
+                                           _("Choose file to append message to"),
                                            NULL, "dead.letter", NULL,
                                            _(wxALL_FILES),
-                                           wxSAVE | wxOVERWRITE_PROMPT,
+                                           wxSAVE,
                                            this);
 
          if ( filename.IsEmpty() )
