@@ -35,6 +35,7 @@
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxOptionsPage.h"
+#include "gui/wxMDialogs.h"
 
 #include <wx/menu.h>
 
@@ -257,7 +258,7 @@ private:
    int m_Dispose;
    int m_Speed;
    bool m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
-   bool m_IncrBackup, m_BackupSync
+   bool m_IncrBackup, m_BackupSync;
    String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
    String m_BackupDir;
 
@@ -390,7 +391,7 @@ PalmOSModule::GetConfig(void)
    m_Dispose    = READ_CONFIG(p, MP_MOD_PALMOS_DISPOSE);
    m_Speed      = READ_CONFIG(p, MP_MOD_PALMOS_SPEED);
    m_IncrBackup = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_INCREMENTAL);
-   m_BackupSync = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_SYNC)
+   m_BackupSync = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_SYNC);
    
    if(m_Speed < 0  || m_Speed > (signed) WXSIZEOF(speeds))
       m_Speed = speeds[0];
@@ -805,7 +806,22 @@ PalmOSModule::Backup(void)
 
    closedir(dir);
 
+   int max = 0;
    int i = 0;
+   
+   while (true) {
+      struct DBInfo info;
+      if (dlp_ReadDBList(m_PiSocket, 0, 0x80, i, &info) < 0) 
+         break;
+      max++;
+      i = info.index + 1;
+   }
+   
+   MProgressDialog *pd;
+   pd = new MProgressDialog(_("Palm Backup"), _("Backuping files"), max, NULL, false, false);
+   max = 0;
+   i = 0;
+   
    while (true) {
       struct DBInfo   info;
       struct pi_file *f;
@@ -820,6 +836,7 @@ PalmOSModule::Backup(void)
       
       if (dlp_OpenConduit(m_PiSocket) < 0) {
          ErrorMessage(_("Exiting on cancel, backup process incomplete!"));
+         delete pd;
          return;
       }
       
@@ -831,6 +848,8 @@ PalmOSModule::Backup(void)
       else
          strcat(name, ".pdb");
          
+      pd->Update(max++, name);
+      
       if (m_IncrBackup) {
          if (stat(name, &statb) == 0) {
             if (info.modifyDate == statb.st_mtime) {
@@ -865,6 +884,8 @@ PalmOSModule::Backup(void)
 
       RemoveFromList(name, orig_files, ofile_total);
    }
+
+   delete pd;
 
    // Remaining files are outdated
    if (orig_files)
@@ -901,15 +922,16 @@ pdbCompare(struct db * d1, struct db * d2)
 }
 
 void
-PalmOSModule::InstallFiles(char **fnames, unsigned int files_total)
+PalmOSModule::InstallFiles(char **fnames, unsigned files_total)
 {
    struct DBInfo info;
    struct db * db[256];
    int    dbcount = 0;
-   int    max, size;
-   unsigned i, j;
+   int    size;
+   unsigned i, j, max;
    struct pi_file * f;
-
+   MProgressDialog *pd;
+      
    for ( j = 0; j < files_total; j++) {
    	db[dbcount] = (struct db*)malloc(sizeof(struct db));
 
@@ -921,6 +943,7 @@ PalmOSModule::InstallFiles(char **fnames, unsigned int files_total)
   	   if (f==0) {
          // TODO: show filename
          ErrorMessage(_("Unable to open file!"));
+         delete pd;
          break;
       }
   	
@@ -950,18 +973,20 @@ PalmOSModule::InstallFiles(char **fnames, unsigned int files_total)
    // sort list in alphabetical order
    for (i=0; i < dbcount; i++)
       for (j = i+1; j<dbcount; j++) 
-         if (compare(db[i], db[j]) > 0) {
+         if (pdbCompare(db[i], db[j]) > 0) {
             struct db * temp = db[i];
             db[i] = db[j];
             db[j] = temp;
          }
 
-   // todo: opening status window
-  
+   pd = new MProgressDialog(_("Palm Install"), _("Installing files"), dbcount, NULL, false, false);
+
    // Install files
-   for (i=0; i<dbcount; i++) {
+   for (i=0; i < dbcount; i++) {
+      pd->Update(i, db[i]->name);
       if ( dlp_OpenConduit(m_PiSocket) < 0) {
          ErrorMessage(_("Exiting on cancel, all data not restored"));
+         delete pd;
          return;
       }
 
@@ -978,6 +1003,8 @@ PalmOSModule::InstallFiles(char **fnames, unsigned int files_total)
       pi_file_install(f, m_PiSocket, 0);
       pi_file_close(f);
    }
+
+   delete pd;
 
    // save time of last hotsync
    struct PilotUser U;
