@@ -206,9 +206,6 @@ static const MenuItemInfo g_aMenuItems[] =
 {
    // ABCDEFGHIJKLMNOPQRSTUVWXYZ (VZ: leave it here, it's a cut-&-paste buffer)
 
-   // filler for WXMENU_LAYOUT_CLICK
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-
    // file
    // available accels: BFGHJKLOQVWZ
    { WXMENU_FILE_COMPOSE,  gettext_noop("Compose &new message\tCtrl-N"),  gettext_noop("Start a new message")      , FALSE },
@@ -473,9 +470,18 @@ static const MenuItemInfo g_aMenuItems[] =
 // menu stuff
 // ----------------------------------------------------------------------------
 
+static inline const MenuItemInfo& GetMenuItem(int n)
+{
+   n -= WXMENU_BEGIN;
+
+   ASSERT_MSG( 0 <= n && n < WXSIZEOF(g_aMenuItems), "bad menu item index" );
+
+   return g_aMenuItems[n];
+}
+
 void AppendToMenu(wxMenu *menu, int& n)
 {
-   int id = n > 0 ? g_aMenuItems[n].idMenu : WXMENU_SEPARATOR;
+   int id = n > 0 ? GetMenuItem(n).idMenu : WXMENU_SEPARATOR;
    if ( id == WXMENU_SEPARATOR ) {
       menu->AppendSeparator();
    }
@@ -485,21 +491,25 @@ void AppendToMenu(wxMenu *menu, int& n)
       wxMenu *submenu = new wxMenu();
 
       int nSubMenu = n;
-      for ( n++; g_aMenuItems[n].idMenu != WXMENU_SUBMENU; n++ )
+      for ( n++; GetMenuItem(n).idMenu != WXMENU_SUBMENU; n++ )
       {
          AppendToMenu(submenu, n);
       }
 
+      const MenuItemInfo& mii = GetMenuItem(nSubMenu);
+
       menu->Append(10000, // FIXME
-                   wxGetTranslation(g_aMenuItems[nSubMenu].label),
+                   wxGetTranslation(mii.label),
                    submenu,
-                   wxGetTranslation(g_aMenuItems[nSubMenu].helpstring));
+                   wxGetTranslation(mii.helpstring));
    }
    else {
+      const MenuItemInfo& mii = GetMenuItem(n);
+
       menu->Append(id,
-                   wxGetTranslation(g_aMenuItems[n].label),
-                   wxGetTranslation(g_aMenuItems[n].helpstring),
-                   g_aMenuItems[n].isCheckable);
+                   wxGetTranslation(mii.label),
+                   wxGetTranslation(mii.helpstring),
+                   mii.isCheckable);
    }
 }
 
@@ -507,7 +517,7 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
 {
    // consistency check which ensures (well, helps to ensure) that the array
    // and enum are in sync
-   wxASSERT( WXSIZEOF(g_aMenuItems) == WXMENU_END );
+   wxASSERT( WXSIZEOF(g_aMenuItems) == WXMENU_END - WXMENU_BEGIN );
 
    // in debug mode we also verify if the keyboard accelerators are ok
 #ifdef DEBUG
@@ -516,7 +526,7 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
 
    for ( int n = nFirst; n <= nLast; n++ ) {
 #ifdef DEBUG
-      const char *label = wxGetTranslation(g_aMenuItems[n].label);
+      const char *label = wxGetTranslation(GetMenuItem(n).label);
       if ( !IsEmpty(label) ) {
          const char *p = strchr(label, '&');
          if ( p == NULL ) {

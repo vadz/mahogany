@@ -69,7 +69,12 @@ enum
    WXMENU_SUBMENU = -2,
    WXMENU_SEPARATOR = -1,
 
-   WXMENU_FILE_BEGIN = 0,
+   // under MSW the system may generate command events with low ids like
+   // IDOK/IDCANCEL/... itself (for example IDCANCEL == 2 is generated when
+   // Escape is pressed) which shouldn't conflict with our commands, so start
+   // at something > 0
+   WXMENU_BEGIN = 100,
+   WXMENU_FILE_BEGIN = WXMENU_BEGIN - 1,
    WXMENU_FILE_COMPOSE,
    WXMENU_FILE_COMPOSE_WITH_TEMPLATE,
    WXMENU_FILE_POST,
