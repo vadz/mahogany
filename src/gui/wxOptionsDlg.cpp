@@ -251,7 +251,10 @@ enum ConfigFields
 
    // folder view options
    ConfigField_FolderViewFirst = ConfigField_MessageViewLast,
-   ConfigField_FolderViewNewMailotify,
+   ConfigField_FolderViewNewMailHelp,
+   ConfigField_FolderViewNewMailUseCommand,
+   ConfigField_FolderViewNewMailCommand,
+   ConfigField_FolderViewNewMailShowMsg,
    ConfigField_FolderViewHelpText,
    ConfigField_FolderViewOnlyNames,
    ConfigField_FolderViewReplaceFrom,
@@ -826,8 +829,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Configure &format for displaying dates"),         Field_SubDlg,    -1                     },
 
    // folder view
+   { gettext_noop("When new mail message appears in this folder Mahogany\n"
+                  "may execute an external command and/or show a message "
+                  "about it."), Field_Message,    -1 },
+   { gettext_noop("E&xecute new mail command"), Field_Bool,    -1 },
+   { gettext_noop("New mail &command"), Field_File, ConfigField_FolderViewNewMailUseCommand},
    { gettext_noop("Show new mail &notification"), Field_Bool,    -1 },
-   { gettext_noop("The following settings control appearance of the list of messages."),
+   { gettext_noop("\nThe following settings control appearance of the list of messages."),
                                                    Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
    { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
@@ -1086,6 +1094,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_DATE_FMT),
 
    // folder view
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_USE_NEWMAILCOMMAND),
+   CONFIG_ENTRY(MP_NEWMAILCOMMAND),
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_NAMES_ONLY),

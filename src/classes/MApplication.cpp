@@ -719,35 +719,39 @@ MAppBase::OnMEvent(MEventData& event)
       }
 
       // step 1: execute external command if it's configured
-      String command = READ_CONFIG(folder->GetProfile(), MP_NEWMAILCOMMAND);
-      if(! command.IsEmpty())
+      Profile *profile = folder->GetProfile();
+      if ( READ_CONFIG(profile, MP_USE_NEWMAILCOMMAND) )
       {
-         if ( ! SYSTEM(command) )
+         String command = READ_CONFIG(profile, MP_NEWMAILCOMMAND);
+         if(! command.IsEmpty())
          {
-            // TODO ask whether the user wants to disable it
-            wxLogError(_("Command '%s' (to execute on new mail reception)"
-                         " failed."), command.c_str());
+            if ( ! SYSTEM(command) )
+            {
+               // TODO ask whether the user wants to disable it
+               wxLogError(_("Command '%s' (to execute on new mail reception)"
+                            " failed."), command.c_str());
+            }
          }
       }
 
 #ifdef   USE_PYTHON
       // step 2: folder specific Python callback
       if(! PythonCallback(MCB_FOLDER_NEWMAIL, 0, folder, folder->GetClassName(),
-                          folder->GetProfile()))
+                          profile))
 
          // step 3: global python callback
          if(! PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0, this, "MApplication",
                              GetProfile()))
 #endif //USE_PYTHON
          {
-            if(READ_CONFIG(folder->GetProfile(), MP_SHOW_NEWMAILMSG))
+            if(READ_CONFIG(profile, MP_SHOW_NEWMAILMSG))
             {
                String message;
 
                unsigned long number = mailevent.GetNumber();
                unsigned i;
                unsigned found = 0;
-               if ( number <= (unsigned long) READ_CONFIG(folder->GetProfile(),
+               if ( number <= (unsigned long) READ_CONFIG(profile,
                                                           MP_SHOW_NEWMAILINFO))
                {
                   for(i = 0; i < number; i++)
