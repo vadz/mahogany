@@ -379,7 +379,7 @@ then
 #  $SCP $DOCSLOCATION $BUILDDIR/$NAME-$VERSION/doc && \
   $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc && \
   tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
-  cp $BUILDDIR/$NAME-$VERSION/extra/scripts/M.spec /usr/src/redhat/SPECS/M.spec && \
+  cp $BUILDDIR/$NAME-$VERSION/redhat/M.spec /usr/src/redhat/SPECS/M.spec && \
   cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
 #  cp $BUILDDIR/$NAME-$VERSION/doc/Mdocs.tar.gz /usr/src/redhat/BUILD/$NAME-$VERSION/doc/ && \
   cd /usr/src/redhat/ && \
