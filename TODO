@@ -176,6 +176,12 @@ from 32bitsonline review:
 4		option to hide expunged messages
 4		confirm expunge dialog
 
+********************* possible additions to *************************
+
+?		idea after seeing a standalone program on freshmeat which does
+		this: what if we supported retrieving mail from Web based email
+		services (hotmail, yahoo, ...)?
+
 *********************************************************************
 *** TESTS
 *********************************************************************
