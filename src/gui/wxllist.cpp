@@ -1403,14 +1403,14 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    psdc.GetSize(&m_PageWidth, &m_PageHeight); // that's all we need it for
 
    // We do 5% margins on top and bottom //, and a 5% high header line.
-   m_Margins.top = m_PageHeight / 5; //10 ;      // 10%, half of it header
+   m_Margins.top = m_PageHeight / 20; //10 ;      // 10%, half of it header
    m_Margins.bottom = m_PageHeight - m_PageHeight / 20;   // 95%
    // On the sides we reserve 10% each for the margins.
    m_Margins.left = m_PageWidth / 10;
    m_Margins.right = m_PageWidth - m_PageWidth / 10;
 
    // This is the length of the printable area.
-   m_PrintoutHeight = m_PageHeight - (int) (m_PageHeight * 0.15); 
+   m_PrintoutHeight = m_PageHeight - (int) (m_PageHeight * 0.1); 
 
    //FIXME this is wrong but not used at the moment
    m_PageWidth = m_Margins.right - m_Margins.left;
