@@ -1293,7 +1293,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
          // after the URL
          before = strutil_findurl(textPart, url);
       }
-      else
+      else // no URL highlighting
       {
          before = textPart;
 
@@ -1323,6 +1323,8 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
          // cast is still ugly and dangerous, it should be used here as it
          // allows us to avoid copying potentially huge strings below but to
          // just insert '\0' as needed
+
+         // lineCur is the start of the current line, lineNext of the next one
          char *lineCur = (char *)before.c_str();
          char *lineNext = strchr(lineCur, '\n');
          while ( lineNext )
@@ -1408,14 +1410,14 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
             }
             //else: same level as the previous line, just continue
 
-            if (*lineNext) 
+            if ( !*lineNext ) 
             {
-               lineNext = strchr(lineNext + 1, '\n');
+               // nothing left
+               break;
             }
-            else
-            {
-               lineNext = 0;
-            }
+
+            // FIXME: why +1 (bug?)?
+            lineNext = strchr(lineNext + 1, '\n');
          }
 
          if ( lineCur )
@@ -1436,7 +1438,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
          m_viewer->InsertURL(url);
       }
    }
-   while ( !strutil_isempty(textPart) );
+   while ( !textPart.empty() );
 }
 
 // ----------------------------------------------------------------------------
