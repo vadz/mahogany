@@ -112,8 +112,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(WXWIN)\debug\wxWindows.lib $(WXWIN)\src\xpm\debug\xpm.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 $(WXWIN)\lib\wxmsw240d.lib $(WXWIN)\DebugDll\wxWinDll.lib $(WXWIN)\src\xpm\debug\xpm.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib src\wx\vcard\debug\versit.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib"
+# ADD BASE LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 $(WXWIN)\lib\wxmsw240d.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib src\wx\vcard\debug\versit.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
@@ -168,9 +168,9 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo /o"Debug/M.bsc"
 # ADD BSC32 /nologo /o"Debug/M.bsc"
 LINK32=link.exe
-# ADD BASE LINK32 $(WXWIN)\Release\wxWindows.lib extra\src\c-client\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib $(WX)\src\xpm\Release\xpm.lib $(WX)\src\zlib\Release\zlib.lib $(WX)\src\png\Release\png.lib $(WX)\src\jpeg\Release\jpeg.lib $(WX)\src\tiff\Release\tiff.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /fixed:no
+# ADD BASE LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /fixed:no
 # SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 $(WXWIN)\Release\wxWindows.lib extra\src\c-client\Release\cclient.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib $(WX)\src\xpm\Release\xpm.lib $(WX)\src\zlib\Release\zlib.lib $(WX)\src\png\Release\png.lib $(WX)\src\jpeg\Release\jpeg.lib $(WX)\src\tiff\Release\tiff.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib" /fixed:no
+# ADD LINK32 extra\src\c-client\Release\cclient.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib wxmsw.lib regex.lib zlib.lib png.lib jpeg.lib tiff.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib /nologo /subsystem:windows /machine:I386 /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib" /fixed:no
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
