@@ -47,6 +47,9 @@ BUG:- saving message from messageview (called from embedded rfc822) saves
   this case points to a different folder!) Maybe that functionality
   should really be moved to MailFolder ??
 
+- when creating a newsgroup folder, subscribe to it, so it appears in .newsrc
+- add note about --with instead of -with to docs.
+- copying message to non-existing folder gives error message but works
 - add references (and In-Reply-To: ?) headers to message replies
 - modify wxIconManager to recycle last found path for icons first, to
   avoid unnecessary filesystem traversals
