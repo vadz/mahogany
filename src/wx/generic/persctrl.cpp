@@ -98,8 +98,13 @@ END_EVENT_TABLE()
 // constants
 // ----------------------------------------------------------------------------
 
-#define LAYOUT_X_MARGIN       5
-#define LAYOUT_Y_MARGIN       5
+#ifndef LAYOUT_X_MARGIN
+    #define LAYOUT_X_MARGIN       5
+#endif
+
+#ifndef LAYOUT_Y_MARGIN
+    #define LAYOUT_Y_MARGIN       5
+#endif
 
 // ----------------------------------------------------------------------------
 // private functions
