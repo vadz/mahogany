@@ -788,7 +788,10 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
 #undef CASE_REPLY
 
             MailFolder::Params params(templ, replyKind);
-            params.msgview = quote == M_ACTION_NEVER ? NULL : m_msgView;
+            if ( quote != M_ACTION_NEVER && m_msgView->HasMessage() )
+            {
+               params.msgview = m_msgView;
+            }
 
             m_TicketList->Add(m_asmf->ReplyMessages
                                       (
@@ -804,7 +807,10 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
       case WXMENU_MSG_FORWARD:
          {
             MailFolder::Params params(templ);
-            params.msgview = m_msgView;
+            if ( m_msgView->HasMessage() )
+            {
+               params.msgview = m_msgView;
+            }
 
             m_TicketList->Add(m_asmf->ForwardMessages
                                       (
