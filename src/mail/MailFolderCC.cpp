@@ -694,7 +694,6 @@ MailFolderCC::Open(void)
          mail_create(NIL, (char *)m_MailboxPath.c_str());
       }
 
-      CCQuiet(true);
       // first try, don't log errors (except in debug mode)
       // If we don't have a mailstram yet, we half-open one:
       if(m_MailStream == NIL)
@@ -2027,20 +2026,16 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 void
 mm_log(char *str, long errflg)
 {
-   if(mm_disable_callbacks)
+   if(mm_disable_callbacks || mm_ignore_errors)
       return;
+
    String *msg = new String(str);
    if(errflg >= 4) // fatal imap error, reopen-mailbox
    {
       if(!MailFolderCC::PingReopenAll())
          *msg << _("\nAttempt to re-open all folders failed.");
    }
-   else if(mm_ignore_errors)
-   {
-      delete msg;
-      return;
-   }
-
+   
    MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log);
    evptr->m_args[0].m_str = msg;
    evptr->m_args[1].m_long = errflg;
