@@ -28,6 +28,7 @@
    #include "gui/wxMApp.h"
 
    #include <wx/textctrl.h>
+   #include <wx/textbuf.h>
 #endif // USE_PCH
 
 #include <wx/dynarray.h>
@@ -534,7 +535,12 @@ void TextViewer::InsertRawContents(const String& data)
 void TextViewer::InsertText(const String& text, const TextStyle& style)
 {
    m_window->SetDefaultStyle(style);
+
+#ifdef OS_WIN
    m_window->AppendText(text);
+#else
+   m_window->AppendText(wxTextBuffer::Translate(text, wxTextFileType_Unix));
+#endif
 }
 
 void TextViewer::InsertURL(const String& url)
