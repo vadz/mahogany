@@ -1368,8 +1368,21 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          delete oldfolderctrl;
       }
 
+      // TODO: sometimes we already have an UpdateFolder event in the event
+      //       queue and then we could avoid updating the folder view twice,
+      //       but it can also happen that we open a folder which had been
+      //       opened before and then MailFolderCC::Open() we had called
+      //       doesn't produce any update events - currently we have no way to
+      //       test for this, but we should either add a method to MailFolder
+      //       to allow us to detect if the folder is already opened or not,
+      //       or add a method to MEventManager to detect if the event is
+      //       already in the queue
+#if 0
       // dispatch any update folder events in the queue
       MEventManager::DispatchPending();
+#else
+      Update();
+#endif
 
       if ( m_NumOfMessages > 0 &&
            READ_CONFIG(m_Profile,MP_AUTOSHOW_FIRSTMESSAGE) )

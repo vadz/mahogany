@@ -377,6 +377,8 @@ MGetNumberFromUser(const wxString& message,
                    wxWindow *parent,
                    const wxPoint& pos)
 {
+   CloseSplash();
+
    NoBusyCursor no;
 
    return wxGetNumberFromUser(message, prompt, caption,

@@ -2595,7 +2595,8 @@ MailFolderCC::BuildListing(void)
    MLocker lockListing(m_InListingRebuild);
 
    // update the number of total and recent messages first
-   m_nMessages = m_MailStream->nmsgs;
+   m_nMessages =
+   m_msgnoMax = m_MailStream->nmsgs;
    m_nRecent = m_MailStream->recent;
 
    // if the number of the messages in the folder is bigger than the
@@ -2639,7 +2640,7 @@ MailFolderCC::BuildListing(void)
    }
 
    // create the new listing
-   m_Listing = HeaderInfoListImpl::Create(m_nMessages);
+   m_Listing = HeaderInfoListImpl::Create(m_nMessages, m_msgnoMax);
 
    // set the entry listing we're currently building to 0 in the beginning
    m_BuildNextEntry = 0;
@@ -2653,11 +2654,13 @@ MailFolderCC::BuildListing(void)
       String msg;
       msg.Printf(_("Reading %lu message headers..."), m_nMessages);
       MGuiLocker locker;
+
+      // open a status window:
       m_ProgressDialog = new MProgressDialog(GetName(),
                                              msg,
                                              m_nMessages,
                                              NULL,
-                                             false, true);// open a status window:
+                                             false, true);
    }
 
    // do we have any messages to get?

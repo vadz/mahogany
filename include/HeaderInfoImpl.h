@@ -149,14 +149,14 @@ public:
 
    /// Returns an empty list of same size.
    virtual HeaderInfoListImpl *DuplicateEmpty(void) const
-      { return Create(m_NumEntries); }
+      { return Create(m_NumEntries, m_msgnoMax); }
 
    /// Creates a list of given size
-   static HeaderInfoListImpl * Create(size_t n)
-      { return new HeaderInfoListImpl(n); }
+   static HeaderInfoListImpl * Create(size_t nRetrieve, size_t nTotal)
+      { return new HeaderInfoListImpl(nRetrieve, nTotal); }
 
 protected:
-   HeaderInfoListImpl(size_t n);
+   HeaderInfoListImpl(size_t nRetrieve, size_t nTotal);
    ~HeaderInfoListImpl();
 
    /// get the real index after translation
@@ -180,13 +180,13 @@ protected:
    /// The current listing of the folder
    HeaderInfoImpl *m_Listing;
 
-   /// number of entries
-   size_t m_NumEntries;
-
    /// translation of indices
    size_t *m_TranslationTable;
 
-   /// the msgno of the first entry (the last msgno)
+   /// number of entries == number of messages we have
+   size_t m_NumEntries;
+
+   /// the msgno of the first entry (the last msgno) == total number of msgs
    size_t m_msgnoMax;
 
    MOBJECT_DEBUG(HeaderInfoListImpl)

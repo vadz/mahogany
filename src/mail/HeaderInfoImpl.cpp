@@ -60,12 +60,15 @@ HeaderInfo * HeaderInfoImpl::Clone() const
 // HeaderInfoListImpl creation
 // ----------------------------------------------------------------------------
 
-HeaderInfoListImpl::HeaderInfoListImpl(size_t n)
+HeaderInfoListImpl::HeaderInfoListImpl(size_t n, size_t nTotal)
 {
    m_Listing = n == 0 ? NULL : new HeaderInfoImpl[n];
 
-   m_NumEntries =
-   m_msgnoMax = n;
+   // this is the number of entries we have
+   m_NumEntries = n;
+
+   // this is the total number of messages in the folder (>= n)
+   m_msgnoMax = nTotal;
 
    m_TranslationTable = NULL;
 }
@@ -169,7 +172,7 @@ void HeaderInfoListImpl::Remove(size_t n)
    MOcheck();
    CHECK_RET( n < m_NumEntries, "invalid index in HeaderInfoList::Remove" );
 
-   // the msgno must be updated to account for the message removal
+   // the total number of messages in the folder decrements too
    m_msgnoMax--;
 
    // calc the position of the element being deleted before changing

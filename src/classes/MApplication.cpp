@@ -700,9 +700,6 @@ MAppBase::OnMEvent(MEventData& event)
 {
    if(event.GetId() == MEventId_NewMail)
    {
-      // we're only registered for new mail events
-      CHECK( event.GetId() == MEventId_NewMail, TRUE, "unexpected event" );
-
       // get the folder in which the new mail arrived
       MEventNewMailData& mailevent = (MEventNewMailData &)event;
       MailFolder *folder = mailevent.GetFolder();
@@ -771,7 +768,7 @@ MAppBase::OnMEvent(MEventData& event)
                // This test is there as the messages might have gone
                // in the meantime, as happens when filtering.
                if(found > 0)
-                  MDialog_Message(message, m_topLevelFrame, _("New Mail"));
+                  wxLogMessage(message);
             }
          }
    }
