@@ -1273,7 +1273,10 @@ strutil_freeRegEx(class strutil_RegEx *regex)
 // array <-> string
 // ----------------------------------------------------------------------------
 
-wxArrayString strutil_restore_array(const String& str, wxChar ch)
+// note that these functions don't work with strings containing NULs: this
+// shouldn't be a problem at all in practice however
+
+wxArrayString strutil_restore_array(const String& str, wxChar chSep)
 {
    wxArrayString array;
    if ( !str.empty() )
@@ -1281,11 +1284,21 @@ wxArrayString strutil_restore_array(const String& str, wxChar ch)
       String s;
       for ( const wxChar *p = str.c_str(); ; p++ )
       {
-         if ( *p == ch || *p == '\0' )
+         if ( *p == _T('\\') )
+         {
+            // skip the backslash and treat the next character literally,
+            // whatever it is -- but take care to not overrun the string end
+            const char ch = *++p;
+            if ( !ch )
+               break;
+
+            s += ch;
+         }
+         else if ( *p == chSep || *p == _T('\0') )
          {
             array.Add(s);
 
-            if ( *p == '\0' )
+            if ( *p == _T('\0') )
                break;
 
             s.clear();
@@ -1300,15 +1313,28 @@ wxArrayString strutil_restore_array(const String& str, wxChar ch)
    return array;
 }
 
-String strutil_flatten_array(const wxArrayString& array, wxChar ch)
+String strutil_flatten_array(const wxArrayString& array, wxChar chSep)
 {
    String s;
-   size_t count = array.GetCount();
+   s.reserve(1024);
+
+   const size_t count = array.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
       if ( n > 0 )
+         s += chSep;
+
+      const wxChar *p = array[n].c_str();
+      while ( *p )
+      {
+         const char ch = *p++;
+
+         // escape the separator characters
+         if ( ch == chSep || ch == '\\' )
+            s += '\\';
+
          s += ch;
-      s += array[n];
+      }
    }
 
    return s;
