@@ -77,8 +77,8 @@ Source: "doc\readme_win.txt"; DestDir: "{app}\doc"; DestName: "readme.txt"; Flag
 ; --- help
 Source: "doc\HtmlHlp\Manual.*"; DestDir: "{app}\help"; Components: help
 
-; icons
-Source: "src\icons\tb*.xpm"; DestDir: "{app}\icons"
+; icons -- not needed any more, we use the resources now
+;Source: "src\icons\tb*.xpm"; DestDir: "{app}\icons"
 
 ; --- python support
 
