@@ -106,6 +106,9 @@ protected:
                                                bool noBox = FALSE,
                                                int helpId = -1);
 
+   // create just the buttons
+   void CreateStdButtons() { (void)CreateStdButtonsAndBox("", TRUE); }
+
    // these variables are set in the ctor and are the basic measurement unites
    // for us (we allow direct access to them for derived classes for
    // compatibility with existing code)
