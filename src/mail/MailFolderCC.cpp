@@ -894,7 +894,10 @@ MailFolderCC::Open(void)
          if(! m_MailStream)
             return false;
          else
+	{
+            AddToMap(m_MailStream); // now we are known
             return true;
+        }
       }
       if ( !exists
            && (GetType() == MF_FILE || GetType() == MF_MH))
@@ -2495,6 +2498,17 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
       && spec[spec.Length()-1] != '/'
       && spec[spec.Length()-1] != '}')
       spec += '/';
+
+   if(GetType() == MF_NNTP || GetType() == MF_NEWS)
+   {
+      if(spec.Length() > 0
+      && spec[spec.Length()-1] != '.'
+      && spec[spec.Length()-1] != '}')
+	{
+	if(spec[spec.Length()-1] == '/')
+		spec[spec.Length()-1] = '.';
+     }
+   }
 
    spec += pattern;
 
