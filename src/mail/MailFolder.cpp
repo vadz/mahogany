@@ -147,7 +147,7 @@ MLogCircle::GetLog(void) const
    return log;
 }
 
-/* statuc */
+/* static */
 String
 MLogCircle::GuessError(void) const
 {
@@ -174,6 +174,17 @@ MLogCircle::GuessError(void) const
       addErr = true;
       addLog = true;
    }
+   // check for various POP3 server messages telling us that another session
+   // is active
+   else if ( Find("mailbox locked", &err) ||
+             Find("lock busy", &err) ||
+             Find("[IN-USE]", &err) )
+   {
+       guess = _("The mailbox is already opened from another session,\n"
+                 "you should close it there first.");
+       addErr = true;
+   }
+
    if(addErr)
    {
       guess += _("\nThe exact error message was:\n");

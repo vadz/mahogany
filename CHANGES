@@ -4,6 +4,7 @@
 Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+10.02.01 VZ: better error msg when opening POP3 folder opened from elsewhere
 09.02.01 VZ: added "Edit" button to folder filters dlg, also edit on dbl click
              allow setting Trash/Outbox on per folder basis
 08.02.01 VZ: fixed creation of all folders from IMAP server once again
@@ -13,6 +14,7 @@ Release 0.62 'Mars'
 31.01.01 VZ: safety guard against expunging messages accidentally when moving
 30.01.01 VZ: made title/status bar of the message/folder view customizable
 29.01.01 VZ: support for flagging messages (display and status changing)
+
 26.01.01 VZ: big internal changes => much better stability
 
 Release 0.61 'Hawkins' [UNRELEASED]
