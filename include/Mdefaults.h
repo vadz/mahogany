@@ -569,7 +569,7 @@
 /// Name from where to read XFace
 #define   MP_COMPOSE_XFACE_FILE_D   "$HOME/.xface"
 /// the folder type for a mailbox
-#define   MP_FOLDER_TYPE_D         (int)(-1)  // MF_ILLEGAL
+#define   MP_FOLDER_TYPE_D         (int)(0x00ff)  // MF_ILLEGAL
 /// the folder flags (see MFolder)
 #define   MP_FOLDER_FLAGS_D       0
 /// the filename for a mailbox
