@@ -2488,22 +2488,30 @@ bool wxOptionsPageMessageView::TransferDataToWindow()
       size_t count = MessageView::GetAllAvailableViewers(&m_nameViewers,
                                                          &descViewers);
 
-      wxChoice *choice = wxStaticCast(GetControl(ConfigField_MsgViewer),
-                                                 wxChoice);
-      if ( choice )
+      wxWindow *win = GetControl(ConfigField_MsgViewer);
+      if ( win )
       {
-         for ( size_t n = 0; n < count; n++ )
+         wxChoice *choice = wxStaticCast(win, wxChoice);
+         if ( choice )
          {
-            choice->Append(descViewers[n]);
-         }
+            for ( size_t n = 0; n < count; n++ )
+            {
+               choice->Append(descViewers[n]);
+            }
 
-         wxString name = READ_CONFIG(m_Profile, MP_MSGVIEW_VIEWER);
-         m_currentViewer = m_nameViewers.Index(name);
-         if ( m_currentViewer != -1 )
+            wxString name = READ_CONFIG(m_Profile, MP_MSGVIEW_VIEWER);
+            m_currentViewer = m_nameViewers.Index(name);
+            if ( m_currentViewer != -1 )
+            {
+               choice->SetSelection(m_currentViewer);
+            }
+         }
+         else
          {
-            choice->SetSelection(m_currentViewer);
+            FAIL_MSG( "ConfigField_MsgViewer is not a wxChoice?" );
          }
       }
+      //else: we're in "novice" mode and this control doesn't exist at all
    }
 
    return bRc;
