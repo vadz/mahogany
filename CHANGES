@@ -1,4 +1,6 @@
 (next release) on (date of next release)
+
+26.04.00 VZ: drag and drop works with other folder views (frames) too
 23.04.00 VZ: added drag and drop of messages to the folder tree
 23.04.00 VZ: added "Quick move" submenu to folder popup menu
 18.04.00 VZ: dynamic plug-in (modules) loading works under Windows

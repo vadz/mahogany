@@ -194,9 +194,6 @@ public:
    void OnTreeExpanding(wxTreeEvent&);
    void OnTreeSelect(wxTreeEvent&);
 
-   // called by TreeMessageDropTarget
-   void OnDrop(wxCoord x, wxCoord y, MMessagesDataObject *data);
-
    // event processing function
    virtual bool OnMEvent(MEventData& event);
 
@@ -361,37 +358,27 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-// the drop target for the tree which allows it to react to messages dropping
-class TreeMessageDropTarget : public wxDropTarget
+// a helper class for dnd
+class TreeMessagesDropWhere : public MMessagesDropWhere
 {
 public:
-   TreeMessageDropTarget(wxFolderTreeImpl *tree)
-      : wxDropTarget(new MMessagesDataObject)
-      { m_tree = tree; }
+   TreeMessagesDropWhere(wxFolderTreeImpl *tree) { m_tree = tree; }
 
-   virtual wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def)
+   virtual MFolder *GetFolder(wxCoord x, wxCoord y) const
    {
-      GetFrame(m_tree)->SetStatusText(_("You can drop mail messages here."));
-      return OnDragOver(x, y, def);
-   }
-
-   virtual void OnLeave()
-   {
-      GetFrame(m_tree)->SetStatusText("");
-   }
-
-   virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def)
-   {
-      if ( !GetData() )
+      wxTreeItemId item = m_tree->HitTest(wxPoint(x, y));
+      if ( !item.IsOk() )
       {
-         wxLogDebug("Failed to get drag and drop data");
-
-         return wxDragNone;
+         // no item, no folder
+         return NULL;
       }
 
-      m_tree->OnDrop(x, y, (MMessagesDataObject *)GetDataObject());
+      // get the folder for this item
+      wxFolderTreeNode *node = m_tree->GetFolderTreeNode(item);
+      MFolder *folder = node->GetFolder();
+      SafeIncRef(folder);
 
-      return def;
+      return folder;
    }
 
 private:
@@ -759,8 +746,8 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
 
    SetImageList(imageList);
 
-   // create our drop target and associate it with us
-   SetDropTarget(new TreeMessageDropTarget(this));
+   // create our drop target
+   new MMessagesDropTarget(new TreeMessagesDropWhere(this), this);
 
    // create the root item
    MFolder *folderRoot = MFolder::Get("");
@@ -1461,24 +1448,6 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
    delete GetImageList();
 
    delete m_menu;
-}
-
-void wxFolderTreeImpl::OnDrop(wxCoord x, wxCoord y, MMessagesDataObject *data)
-{
-   wxTreeItemId item = HitTest(wxPoint(x, y));
-   if ( !item.IsOk() )
-   {
-      // no folder, nothing to do
-      return;
-   }
-
-   // get the folder for this item
-   wxFolderTreeNode *node = GetFolderTreeNode(item);
-   MFolder *folder = node->GetFolder();
-
-   // TODO: check here if the folder can be written to?
-
-   data->GetFolderView()->DropMessagesToFolder(data->GetMessages(), folder);
 }
 
 // ----------------------------------------------------------------------------

@@ -288,7 +288,7 @@ private:
    void OnOptionsChange(MEventOptionsChangeData& event);
 
    void SetEntry(HeaderInfoList *hi, size_t idx);
-   
+
    // MEventManager reg info
    void *m_regOptionsChange;
 };

@@ -13,13 +13,11 @@
 #ifndef _MDND_H_
 #define _MDND_H_
 
-/* there is no matching Mdnd.cpp yet
 #ifdef __GNUG__
-#   pragma interface "Mdnd.h"
+   #pragma interface "Mdnd.h"
 #endif
-*/
 
-#include <wx/dataobj.h>
+#include <wx/dnd.h>
 
 class wxFolderView;
 
@@ -38,49 +36,16 @@ class wxFolderView;
 class MMessagesDataObject : public wxCustomDataObject
 {
 public:
-   MMessagesDataObject() : wxCustomDataObject(MMESSAGE_FORMAT)
-   {
-   }
+   MMessagesDataObject() : wxCustomDataObject(MMESSAGE_FORMAT) { }
 
-   MMessagesDataObject(wxFolderView *view, const UIdArray& messages)
-      : wxCustomDataObject(MMESSAGE_FORMAT)
-   {
-      // we store the wxFolderView pointer first followed bythe number of
-      // messages - and then all messages after it
-      size_t len = sizeof(MMessagesDataObject::Data) +
-                     messages.GetCount()*sizeof(UIdType);
-      void *buf = new char[len];
-      Data *data = (Data *)buf;
-      data->view = view;
-      data->number = messages.GetCount();
-
-      UIdType *p = GetUIDs(data);
-      for ( size_t n = 0; n < data->number; n++ )
-      {
-         p[n] = messages[n];
-      }
-
-      TakeData(len, data);
-   }
+   MMessagesDataObject(wxFolderView *view, const UIdArray& messages);
 
    // accessors
    wxFolderView *GetFolderView() const { return GetMData()->view; }
    size_t GetMessageCount() const { return GetMData()->number; }
    size_t GetMessageUId(size_t n) const { return GetUIDs(GetMData())[n]; }
 
-   UIdArray GetMessages() const
-   {
-      UIdArray messages;
-      size_t count = GetMessageCount();
-      messages.Alloc(count);
-
-      for ( size_t n = 0; n < count; n++ )
-      {
-         messages.Add(GetMessageUId(n));
-      }
-
-      return messages;
-   }
+   UIdArray GetMessages() const;
 
 private:
    struct Data
@@ -93,6 +58,46 @@ private:
 
    Data *GetMData() const { return ((Data *)GetData()); }
    UIdType *GetUIDs(Data *data) const { return (UIdType *)(data + 1); }
+};
+
+/** MMessagesDropWhere is a helper class for MMessagesDropTarget, it has only
+    one pure virtual function which must be overridden to return the folder we
+    should drop messages to.
+ */
+class MMessagesDropWhere
+{
+public:
+   /// return the folder which should be used to copy messages to (may be NULL)
+   virtual MFolder *GetFolder(wxCoord x, wxCoord y) const = 0;
+
+   /// called if the messages were successfully copied
+   virtual void Refresh();
+
+   virtual ~MMessagesDropWhere();
+};
+
+/** MMessagesDropTarget is the drop target object to work with
+    MMessagesDataObjects. It needs a window to register itself with and an
+    object of class MMessagesDropWhere which is used to retrieve the folder to
+    drop messages to (and which will be deleted by the drop target)
+ */
+class MMessagesDropTarget : public wxDropTarget
+{
+public:
+   /// ctor
+   MMessagesDropTarget(MMessagesDropWhere *where, wxWindow *win);
+
+   /// overridden base class virtuals
+   virtual wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
+   virtual void OnLeave();
+   virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
+
+   /// will delete the MMessagesDropWhere object
+   virtual ~MMessagesDropTarget();
+
+private:
+   MMessagesDropWhere *m_where;
+   wxFrame *m_frame;
 };
 
 #endif // _MDND_H_

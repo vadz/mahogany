@@ -6,6 +6,14 @@
  * $Id$
  *******************************************************************/
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
 #ifdef __GNUG__
 #pragma  implementation "wxFolderView.h"
 #endif
@@ -59,6 +67,10 @@
 
 #define   LCFIX ((wxFolderListCtrl *)this)->
 
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
 static const char *wxFLC_ColumnNames[] =
 {
    gettext_noop("Status"),
@@ -70,6 +82,9 @@ static const char *wxFLC_ColumnNames[] =
 
 static const char *wxFLC_DEFAULT_SIZES = "60:300:200:80:80";
 
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
 
 class wxFolderListCtrl : public wxPListCtrl
 {
@@ -162,6 +177,38 @@ protected:
    DECLARE_EVENT_TABLE()
 };
 
+// a helper class for dnd
+class FolderViewMessagesDropWhere : public MMessagesDropWhere
+{
+public:
+   FolderViewMessagesDropWhere(wxFolderView *view)
+   {
+      m_folderView = view;
+   }
+
+   virtual MFolder *GetFolder(wxCoord x, wxCoord y) const
+   {
+      // we don't even use the position of the drop
+      return MFolder::Get(m_folderView->GetFullName());
+   }
+
+   virtual void Refresh()
+   {
+      m_folderView->Update();
+   }
+
+private:
+   wxFolderView *m_folderView;
+};
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// event tables
+// ----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
    EVT_CHAR              (wxFolderListCtrl::OnChar)
@@ -171,6 +218,10 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LEFT_DCLICK(wxFolderListCtrl::OnDoubleClick)
    EVT_MOTION (wxFolderListCtrl::OnMouseMove)
 END_EVENT_TABLE()
+
+// ----------------------------------------------------------------------------
+// wxFolderListCtrl
+// ----------------------------------------------------------------------------
 
 void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
@@ -489,6 +540,9 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    AppendToMenu(m_menu, WXMENU_MSG_BEGIN+1, WXMENU_MSG_END);
 
    Clear();
+
+   // create a drop target for dropping messages on us
+   new MMessagesDropTarget(new FolderViewMessagesDropWhere(m_FolderView), this);
 }
 
 wxFolderListCtrl::~wxFolderListCtrl()
@@ -636,6 +690,10 @@ wxFolderListCtrl::SelectNextUnread()
    }
    SafeDecRef(hil);
 }
+
+// ----------------------------------------------------------------------------
+// wxFolderView
+// ----------------------------------------------------------------------------
 
 void
 wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
