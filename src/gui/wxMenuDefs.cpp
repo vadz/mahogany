@@ -724,6 +724,13 @@ EnableMMenu(MMenuId id, wxWindow *win, bool enable)
    }
 }
 
+extern void EnableToolbarButton(wxToolBar *toolbar, int nButton, bool enable)
+{
+   CHECK_RET( toolbar, "no toolbar in EnableToolbarButton" );
+
+   toolbar->EnableTool(g_aToolBarData[nButton].id, enable);
+}
+
 // ----------------------------------------------------------------------------
 // language menu stuff
 // ----------------------------------------------------------------------------

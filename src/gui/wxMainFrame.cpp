@@ -34,6 +34,7 @@
 #  include <wx/menu.h>
 #  include <wx/dirdlg.h>
 #  include <wx/statusbr.h>
+#  include <wx/toolbar.h>
 #endif
 
 #include "wx/persctrl.h"
@@ -440,6 +441,23 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
          return;
 
       mbar->EnableTop(idMessageMenu, hasFolder);
+
+      // also update the toolbar buttons
+      static const int buttonsToDisable[] =
+      {
+         WXTBAR_MSG_NEXT_UNREAD,
+         WXTBAR_MSG_OPEN,
+         WXTBAR_MSG_REPLY,
+         WXTBAR_MSG_FORWARD,
+         WXTBAR_MSG_PRINT,
+         WXTBAR_MSG_DELETE,
+      };
+
+      wxToolBar *tbar = GetToolBar();
+      for ( size_t n = 0; n < WXSIZEOF(buttonsToDisable); n++ )
+      {
+         EnableToolbarButton(tbar, buttonsToDisable[n], hasFolder);
+      }
 
       s_hasFolder = hasFolder;
    }

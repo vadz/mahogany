@@ -19,6 +19,10 @@
 class wxMenu;
 class wxToolBar;
 
+// ----------------------------------------------------------------------------
+// menu functions
+// ----------------------------------------------------------------------------
+
 /// append an item to menu
 extern void AppendToMenu(wxMenu *menu, int& n);
 
@@ -56,6 +60,10 @@ extern wxFontEncoding GetEncodingFromMenuCommand(int id);
 
 /// Check the entry corresponding to this encoding in the language submenu
 extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding);
+
+// ----------------------------------------------------------------------------
+// all existing menu commands
+// ----------------------------------------------------------------------------
 
 /** Definition of all numeric menu IDs.
     Include each menu in WXMENU_menuname_BEGIN and WXMENU_menuname_END, so it
@@ -416,6 +424,10 @@ enum
    WXTBAR_MAX
 };
 
+// ----------------------------------------------------------------------------
+// toolbar functions
+// ----------------------------------------------------------------------------
+
 /// all frames which have toolbars
 enum wxFrameId
 {
@@ -427,9 +439,13 @@ enum wxFrameId
    WXFRAME_MAX
 };
 
-// not only it adds the icons, but also calls CreateTools() or
-// Realize()/Layout() hiding MSW/GTK differences
-extern void AddToolbarButtons(wxToolBar *ToolBar, wxFrameId frameId);
+/// adds all buttons configured for the given frame
+extern void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId);
+
+/// adds the given button
 extern void AddToolbarButton(wxToolBar *toolbar, int nButton);
+
+/// enables or disables the given button
+extern void EnableToolbarButton(wxToolBar *toolbar, int nButton, bool enable);
 
 #endif
