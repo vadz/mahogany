@@ -460,7 +460,10 @@ wxMApp::DoExit()
       wxWindow *win = node->GetData();
       node = node->GetNext();
 
-      if ( win->IsKindOf(CLASSINFO(wxFrame)) )
+      // avoid closing the log window because it is so smart that it will not
+      // reopen itself the next time we're run if we do it
+      if ( (!m_logWindow || (win != m_logWindow->GetFrame()))
+               && win->IsKindOf(CLASSINFO(wxFrame)) )
       {
          wxMFrame *frame = (wxMFrame *)win;
 
