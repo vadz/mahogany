@@ -25,6 +25,7 @@ FreeBSD.system.cache
 tmp
 Release
 Debug
+ReleaseDebug
 imessages.po
 messages.po
 CVSROOT
