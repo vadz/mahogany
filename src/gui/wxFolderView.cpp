@@ -384,8 +384,7 @@ wxFolderView::Update(void)
       date.Printf(dateFormat, day, month, year);
       size = strutil_ultoa(nsize);
 
-      //selected = (i < m_NumOfMessages) ? m_FolderCtrl->IsSelected(i) : false;
-      selected = (i < m_NumOfMessages) ? m_FolderCtrl->GetItemState(i,wxLIST_STATE_SELECTED) : false;
+      selected = (i < m_NumOfMessages) ? m_FolderCtrl->IsSelected(i) : false;
       m_FolderCtrl->SetEntry(i,status, sender, subject, date, size);
       m_FolderCtrl->Select(i,selected);
       SafeDecRef(mptr);

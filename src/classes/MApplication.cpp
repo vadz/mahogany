@@ -254,20 +254,6 @@ MAppBase::OnStartup()
    // also set the path for persistent controls to save their state to
    wxPControls::SetSettingsPath("/Settings/");
 
-
-#ifdef DEBUG
-   kbStringList *plist = ProfileBase::ListProfiles();
-   String *sp, msg;
-   while(!plist->empty())
-   {
-      sp = plist->pop_front();
-      msg = "Profile: " + *sp;
-      wxLogDebug(msg);
-      delete sp;
-   }
-   delete plist;
-#endif
-   
    // find our directories
    // --------------------
    String tmp;

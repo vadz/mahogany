@@ -71,6 +71,12 @@ public:
    */
    wxIcon GetIcon(String const &iconName);
 
+   /** Get a bitmap: only different from GetIcon under Windows where it looks
+       for the bitmap in resources first and then calls GetIcon
+       @param bmpName the name of the bitmap
+   */
+   wxBitmap GetBitmap(const String& bmpName);
+
    /** Get the icon for MIME type (first calls GetIcon)
    */
    wxIcon GetIconFromMimeType(const String& type);
@@ -80,12 +86,6 @@ public:
        @param data the xpm data array (Unix) or the icon resource name (Win)
    */
    void AddIcon(String const &iconName, IconResourceType data);
-
-   /** Get a bitmap: only different from GetIcon under Windows where it looks
-       for th bitmap in resources first and then calls GetIcon
-       @param bmpName the name of the bitmap
-   */
-   wxIcon GetBitmap(const String& bmpName);
 
    /** Load an image file and return it as a wxImage.
        @filename the name of the file

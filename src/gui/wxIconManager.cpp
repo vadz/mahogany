@@ -66,15 +66,23 @@
 // private functions
 // ----------------------------------------------------------------------------
 
-/// @@ a bit lame, but should work in any reasonable case
+/// a bit lame, but should work in any reasonable case
 inline bool IsMimeType(const wxString& str) { return str.Find('/') != -1; }
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+#ifdef DEBUG
+   static const int wxTraceIconLoading = 0x400;
+#endif
 
 // ============================================================================
 // implementation
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// private date
+// private data
 // ----------------------------------------------------------------------------
 
 /// valid filename extensions for icon files
@@ -146,7 +154,8 @@ wxIconManager::LoadImageXpm(String filename)
    String oldfilename = filename;
    char **cpptr = NULL;
 
-   wxLogTrace("wxIconManager::LoadImage(%s) called...", filename.c_str());
+   wxLogTrace(wxTraceIconLoading, "wxIconManager::LoadImage(%s) called...",
+              filename.c_str());
 
    // lets convert to xpm using image magick:
    if(! wxMatchWild("*.xpm",filename,FALSE))
@@ -165,7 +174,9 @@ wxIconManager::LoadImageXpm(String filename)
          ) + String('/') + tempfile;
       String command;
       command << "convert " << filename << ' ' << tempfile;
-      wxLogTrace("wxIconManager::LoadImage() calling '%s'...", command.c_str());
+      wxLogTrace(wxTraceIconLoading,
+                 "wxIconManager::LoadImage() calling '%s'...",
+                 command.c_str());
       if(system(command) == 0)
          cpptr = LoadXpm(tempfile);
 #endif
@@ -264,13 +275,13 @@ wxIconManager::~wxIconManager()
    delete m_iconList;
 }
 
-wxIcon
+wxBitmap
 wxIconManager::GetBitmap(const String& bmpName)
 {
 #  ifdef    OS_WIN
    {
       // look in the ressources
-      wxIcon bmp(bmpName);
+      wxBitmap bmp(bmpName);
       if ( bmp.Ok() )
          return bmp;
 
@@ -301,13 +312,15 @@ wxIconManager::GetIcon(String const &_iconName)
    String iconName = _iconName;
 
    strutil_tolower(iconName);
-   wxLogTrace("wxIconManager::GetIcon(%s) called...", iconName.c_str());
+   wxLogTrace(wxTraceIconLoading,
+              "wxIconManager::GetIcon(%s) called...",
+              iconName.c_str());
 
    // first always look in the cache
    for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
       if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0) {
-        wxLogTrace("... icon was in the cache.");
+        wxLogTrace(wxTraceIconLoading, "... icon was in the cache.");
 
         return (*i)->iconRef;
       }
@@ -320,7 +333,7 @@ wxIconManager::GetIcon(String const &_iconName)
      for(i = m_iconList->begin(); i != m_iconList->end(); i++)
      {
         if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
-          wxLogTrace("... icon was in the cache.");
+          wxLogTrace(wxTraceIconLoading, "... icon was in the cache.");
 
           return (*i)->iconRef;
         }
@@ -331,7 +344,7 @@ wxIconManager::GetIcon(String const &_iconName)
      for(i = m_iconList->begin(); i != m_iconList->end(); i++)
      {
         if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
-          wxLogTrace("... icon was in the cache.");
+          wxLogTrace(wxTraceIconLoading, "... icon was in the cache.");
 
           return (*i)->iconRef;
         }
@@ -384,7 +397,8 @@ wxIconManager::GetIcon(String const &_iconName)
             id = new IconData;
             id->iconRef = icn;
             id->iconName = key;
-            wxLogTrace("... icon found in '%s'", name.c_str());
+            wxLogTrace(wxTraceIconLoading, "... icon found in '%s'",
+                       name.c_str());
             m_iconList->push_front(id);
             return icn;
          }
@@ -396,7 +410,7 @@ wxIconManager::GetIcon(String const &_iconName)
    {
       wxIcon icon(_iconName);
       if ( icon.Ok() ) {
-         wxLogTrace("... icon found in the ressources.");
+         wxLogTrace(wxTraceIconLoading, "... icon found in the ressources.");
          return icon;
       }
 
@@ -404,14 +418,14 @@ wxIconManager::GetIcon(String const &_iconName)
    }
 #  endif  //Windows
 
-   wxLogTrace("... icon not found.");
+   wxLogTrace(wxTraceIconLoading, "... icon not found.");
 
    return m_unknownIcon;
 }
 
 wxIcon wxIconManager::GetIconFromMimeType(const String& type)
 {
-   // the order of actions is important: we first try to find "exact" match,#
+   // the order of actions is important: we first try to find "exact" match,
    // but if we can't, we fall back to a standard icon and look for partial
    // matches only if there is none
    wxIcon icon = GetIcon(type);

@@ -277,7 +277,7 @@ public:
 
    int GetSelections(wxArrayInt &selections) const;
    bool IsSelected(long index)
-      { return GetItemState(index,wxLIST_STATE_SELECTED) == wxLIST_STATE_SELECTED; }
+      { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
    void OnSelected(wxListEvent& event);
    void OnSize( wxSizeEvent &event );
    void OnKey( wxKeyEvent &event);
