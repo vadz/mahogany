@@ -375,9 +375,8 @@ static MimeEncoding GetMimeEncodingForFontEncoding(wxFontEncoding enc)
       case wxFONTENCODING_CP1254:
       case wxFONTENCODING_CP1257:
 
-#if wxCHECK_VERSION(2, 3, 0)
+      case wxFONTENCODING_UTF7:
       case wxFONTENCODING_UTF8:
-#endif // 2.3.0
 
          return MimeEncoding_QuotedPrintable;
 

@@ -455,14 +455,14 @@ static const MenuItemInfo g_aMenuItems[] =
    // language
 
    // the available accelerators for this menu:
-   // FJMNPQUVXZ
+   // JKMQVWXZ
    { WXMENU_LANG_DEFAULT, gettext_noop("De&fault"), gettext_noop("Use the default encoding"), wxITEM_RADIO },
    { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_1, gettext_noop("&Western European (ISO-8859-1)"), gettext_noop(""), wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_2, gettext_noop("Ce&ntral European (ISO-8859-2)"), gettext_noop(""), wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_3, gettext_noop("Es&peranto (ISO-8859-3)"), gettext_noop(""), wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_4, gettext_noop("Baltic &old (ISO-8859-4)"), gettext_noop(""), wxITEM_RADIO },
-   { WXMENU_LANG_ISO8859_5, gettext_noop("&Cyrillic (ISO-8859-5)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_5, gettext_noop("C&yrillic (ISO-8859-5)"), gettext_noop(""), wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_6, gettext_noop("&Arabic (ISO-8859-6)"), gettext_noop(""), wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_7, gettext_noop("&Greek (ISO-8859-7)"), gettext_noop(""), wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_8, gettext_noop("Heb&rew (ISO-8859-8)"), gettext_noop(""), wxITEM_RADIO },
@@ -485,10 +485,9 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
    { WXMENU_LANG_KOI8, gettext_noop("Russian (KOI&8-R)"), gettext_noop(""), wxITEM_RADIO },
    { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
-#if wxCHECK_VERSION(2, 3, 0)
+   { WXMENU_LANG_UTF7, gettext_noop("Uni&code (UTF-7)"), gettext_noop(""), wxITEM_RADIO },
    { WXMENU_LANG_UTF8, gettext_noop("&Unicode (UTF-8)"), gettext_noop(""), wxITEM_RADIO },
    { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
-#endif // 2.3.0
    { WXMENU_LANG_SET_DEFAULT, gettext_noop("&Set default encoding..."), ""                         , wxITEM_NORMAL },
 
    // ADB book management
@@ -804,11 +803,13 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
          id = WXMENU_LANG_KOI8;
          break;
 
-#if wxCHECK_VERSION(2, 3, 0)
+      case wxFONTENCODING_UTF7:
+         id = WXMENU_LANG_UTF7;
+         break;
+
       case wxFONTENCODING_UTF8:
          id = WXMENU_LANG_UTF8;
          break;
-#endif // 2.3.0
 
       default:
          wxFAIL_MSG( "Unexpected encoding in CheckLanguageInMenu" );
@@ -848,9 +849,8 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       WXMENU_LANG_CP1256,
       WXMENU_LANG_CP1257,
       WXMENU_LANG_KOI8,
-#if wxCHECK_VERSION(2, 3, 0)
+      WXMENU_LANG_UTF7,
       WXMENU_LANG_UTF8,
-#endif // 2.3.0
    };
 
    for ( size_t nId = 0; nId < WXSIZEOF(menuIds); nId++ )
@@ -908,11 +908,13 @@ extern wxFontEncoding GetEncodingFromMenuCommand(int id)
          encoding = wxFONTENCODING_KOI8;
          break;
 
-#if wxCHECK_VERSION(2, 3, 0)
+      case WXMENU_LANG_UTF7:
+         encoding = wxFONTENCODING_UTF7;
+         break;
+
       case WXMENU_LANG_UTF8:
          encoding = wxFONTENCODING_UTF8;
          break;
-#endif // 2.3.0
    }
 
    return (wxFontEncoding)encoding;

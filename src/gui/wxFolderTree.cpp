@@ -59,7 +59,7 @@
 
 extern "C"
 {
-   #include <utf8.h>  // for utf8_text_utf7()
+   #include "utf8.h"  // for utf8_text_utf7()
 }
 
 // support for UTF-8 has been only added in 2.3.0

@@ -29,6 +29,8 @@
 #include <wx/fontmap.h>
 #include <wx/encconv.h>
 
+#include "MessageView.h" // ConvertUnicodeToSystem()
+
 #define   BASE_SIZE 12
 
 static inline bool IsEndOfLine(const char *p)
@@ -182,25 +184,13 @@ void wxLayoutImportText(wxLayoutList *list,
    if ( strOrig.empty() )
       return;
 
-   wxString str;
+   wxString str = strOrig;
 
-#if wxCHECK_VERSION(2, 3, 0)
    if ( encoding == wxFONTENCODING_UTF8 )
    {
       // Convert from UTF-8 to environment's default encoding
-      str = wxString(strOrig.wc_str(wxConvUTF8), wxConvLocal);
-      if ( str.Length() == 0 )
-      {
-         // conversion failed - use original text (and display
-         // incorrectly, unfortunately)
-         str = strOrig;
-         wxLogDebug("conversion from UTF-8 to environment's default encoding failed");
-      }
-      encoding = wxLocale::GetSystemEncoding();
+      encoding = ConvertUnicodeToSystem(&str);
    }
-   else
-#endif // 2.3.0
-      str = strOrig;
 
    bool useConverter = FALSE;
    wxEncodingConverter conv;

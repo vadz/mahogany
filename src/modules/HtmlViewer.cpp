@@ -759,16 +759,7 @@ void HtmlViewer::ShowHeader(const String& headerName,
    {
       // convert from UTF-8 to environment's default encoding
       // FIXME it won't be needed when full Unicode support is available
-      wxString htmlTextOrig = m_htmlText;
-      m_htmlText = wxString(htmlTextOrig.wc_str(wxConvUTF8), wxConvLocal);
-      if ( m_htmlText.Length() == 0 )
-      {
-         // conversion failed - use original text (and display
-         // incorrectly, unfortunately)
-         m_htmlText = htmlTextOrig;
-         wxLogDebug("conversion from UTF-8 to environment's default encoding failed");
-      }
-      encHeader = wxLocale::GetSystemEncoding();
+      encHeader = ConvertUnicodeToSystem(&m_htmlText);
    }
 
    {
