@@ -129,6 +129,9 @@ private:
    bool   m_Active;
 };
 
+// ----------------------------------------------------------------------------
+// wxOneFilterDialog - dialog for exactly one filter rule
+// ----------------------------------------------------------------------------
 
 /** A class representing the configuration GUI for a single filter. */
 class wxOneFilterDialog : public wxManuallyLaidOutDialog
@@ -204,8 +207,8 @@ wxString ORC_Types[] =
   gettext_noop("Match"), gettext_noop("Contains"),
   gettext_noop("Match Case"), gettext_noop("Contains Case"),
   gettext_noop("Match RegExp"),
-  gettext_noop("Larger than"),
-  gettext_noop("Smaller than"), gettext_noop("Older than"),
+  gettext_noop("Larger than"), gettext_noop("Smaller than"),
+  gettext_noop("Older than"), gettext_noop("Newer than"),
   gettext_noop("Is SPAM")
 #ifdef USE_PYTHON
   ,gettext_noop("Is SPAM")
@@ -223,6 +226,7 @@ enum ORC_Types_Enum
    ORC_T_LargerThan,
    ORC_T_SmallerThan,
    ORC_T_OlderThan,
+   ORC_T_NewerThan,
    ORC_T_IsSpam
 #ifdef USE_PYTHON
    ,ORC_T_Python
@@ -371,8 +375,19 @@ OneCritControl::TranslateToString(const wxString & criterium)
    case ORC_T_LargerThan:
    case ORC_T_SmallerThan:
    case ORC_T_OlderThan:
+      needsArgument = true;
       needsWhere = false;
-      wxASSERT_MSG(0,"not yet implemented");
+      switch(type)
+      {
+      case ORC_T_LargerThan:
+         program << "size() > "; break;
+      case ORC_T_SmallerThan:
+         program << "size() < "; break;
+      case ORC_T_OlderThan:
+         program << "(date()-now()) > "; break;
+      case ORC_T_NewerThan:
+         program << "(date()-now()) < "; break;
+      }
       break;
    case ORC_T_IsSpam:
       program << "isspam()";
@@ -574,17 +589,23 @@ wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
                             _("Filter rule"),
                             "OneFilterDialog")
 {
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rule"), FALSE,
-                                             MH_DIALOG_FILTERS);
-
    m_FilterData = fed;
-   
    SetDefaultSize(380, 240, FALSE /* not minimal */);
-
    SetAutoLayout( TRUE );
    wxLayoutConstraints *c;
 
-   m_NameCtrl = new wxTextCtrl(this, -1);
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rule"), FALSE,
+                                             MH_DIALOG_FILTERS);
+
+
+/* Why doesn't this work?
+   wxEnhancedPanel *panel = new wxEnhancedPanel(this, TRUE);
+   panel->SetSize(0, 0, 380, 240);
+   panel->SetAutoLayout(TRUE);
+*/
+   wxWindow *panel = this;
+
+   m_NameCtrl = new wxTextCtrl(panel, -1);
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -592,7 +613,7 @@ wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
    c->height.AsIs();
    m_NameCtrl->SetConstraints(c);
 
-   wxStaticBox *criteria = new wxStaticBox(this, -1, _("Filter Criteria"));
+   wxStaticBox *criteria = new wxStaticBox(panel, -1, _("Filter Criteria"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -613,7 +634,7 @@ wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
 
    ["More Tests"] [ "Less Tests" ]
 */
-   wxStaticBox *actions = new wxStaticBox(this, -1, _("Action Rules"));
+   wxStaticBox *actions = new wxStaticBox(panel, -1, _("Action Rules"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -626,16 +647,18 @@ wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
    c->top.SameAs(criteria, wxTop, 4*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   m_CritControl = new OneCritControl(this, c);
+   m_CritControl = new OneCritControl(panel, c);
 
    c = new wxLayoutConstraints;
    c->left.SameAs(actions, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(actions, wxTop, 4*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   m_ActionControl = new OneActionControl(this, c);
+   m_ActionControl = new OneActionControl(panel, c);
+
    
    TransferDataToWindow();
+   panel->Layout();
    m_OriginalFilterData = *m_FilterData;
 }
 
@@ -710,6 +733,10 @@ enum ButtonIndices
    Button_Up,
    Button_Down
 };
+
+// ----------------------------------------------------------------------------
+// wxFiltersDialog - dialog for managing all filter rules for one folder
+// ----------------------------------------------------------------------------
 
 
 #define MAX_FILTERS   128 // who would want more?

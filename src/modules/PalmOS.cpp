@@ -45,9 +45,9 @@ class PalmBook;
 
 #define MODULE_NAME    "PalmOS"
 
-#define DISPOSE_KEEP   0
-#define DISPOSE_DELETE 1
-#define DISPOSE_FILE   2
+#define DISPOSE_KEEP   0l
+#define DISPOSE_DELETE 1l
+#define DISPOSE_FILE   2l
 
 #define MP_MOD_PALMOS_BOX        "PalmBox"
 #define MP_MOD_PALMOS_BOX_D      "PalmBox"
@@ -62,7 +62,7 @@ class PalmBook;
 #define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
 #define MP_MOD_PALMOS_PILOTDEV_D "/dev/pilot"
 #define MP_MOD_PALMOS_SPEED      "Speed"
-#define MP_MOD_PALMOS_SPEED_D    "57600"
+#define MP_MOD_PALMOS_SPEED_D    3
 #define MP_MOD_PALMOS_LOCK       "Lock"
 #define MP_MOD_PALMOS_LOCK_D 0l
 #define MP_MOD_PALMOS_SCRIPT1    "Script1"
@@ -353,6 +353,10 @@ PalmOSModule::GetConfig(void)
    // all other values get read from the module profile:
    ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
 
+   // must be in sync with the combobox values in config table
+   //further down:
+   static int speeds[] = { 9600,19200,38400,57600,115200 };
+   
    m_Backup   = (READ_CONFIG(p, MP_MOD_PALMOS_BACKUP) != 0);
    m_SyncMail = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCMAIL) != 0);
    m_SyncAddr = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCADDR) != 0);
@@ -360,7 +364,11 @@ PalmOSModule::GetConfig(void)
    m_PilotDev = READ_CONFIG(p, MP_MOD_PALMOS_PILOTDEV);
    m_PalmBox = READ_CONFIG(p, MP_MOD_PALMOS_BOX);
    m_Dispose = READ_CONFIG(p,MP_MOD_PALMOS_DISPOSE);
-   m_Speed = atoi(READ_CONFIG(p,MP_MOD_PALMOS_SPEED));
+   m_Speed = READ_CONFIG(p,MP_MOD_PALMOS_SPEED);
+   if(m_Speed < 0  || m_Speed > (signed) WXSIZEOF(speeds))
+      m_Speed = speeds[0];
+   else
+      m_Speed = speeds[m_Speed];
    m_Script1 = READ_CONFIG(p, MP_MOD_PALMOS_SCRIPT1);
    m_Script2 = READ_CONFIG(p, MP_MOD_PALMOS_SCRIPT2);
    p->DecRef();
@@ -1243,9 +1251,9 @@ PalmOSModule::StoreEMails(void)
 
 static ConfigValueDefault gs_ConfigValues [] =
 {
+   ConfigValueDefault(MP_MOD_PALMOS_SYNCMAIL, MP_MOD_PALMOS_SYNCMAIL_D),
    ConfigValueDefault(MP_MOD_PALMOS_BOX, MP_MOD_PALMOS_BOX_D),
    ConfigValueDefault(MP_MOD_PALMOS_DISPOSE, MP_MOD_PALMOS_DISPOSE_D),
-   ConfigValueDefault(MP_MOD_PALMOS_SYNCMAIL, MP_MOD_PALMOS_SYNCMAIL_D),
    ConfigValueDefault(MP_MOD_PALMOS_SYNCADDR, MP_MOD_PALMOS_SYNCADDR_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP, MP_MOD_PALMOS_BACKUP_D),
    ConfigValueDefault(MP_MOD_PALMOS_PILOTDEV, MP_MOD_PALMOS_PILOTDEV_D),
@@ -1257,7 +1265,18 @@ static ConfigValueDefault gs_ConfigValues [] =
 
 static wxOptionsPage::FieldInfo gs_FieldInfos[] =
 {
-   { gettext_noop("Synchronise Mail"), wxOptionsPage::Field_Bool,    -1 }
+   { gettext_noop("Synchronise Mail"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Mailbox for exchange"), wxOptionsPage::Field_Text, 0},
+   { gettext_noop("Mail disposal mode:keep:delete:file"), wxOptionsPage::Field_Combo,   0},
+   { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Always do Backup"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
+   // the speed values must be in sync with the ones in the speeds[]
+   // array in GetConfig() further up:
+   { gettext_noop("Connection speed:9600:19200:38400:57600:115200"), wxOptionsPage::Field_Combo,    -1 },
+   { gettext_noop("Try to lock device"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Script to run before"), wxOptionsPage::Field_Text,    -1 },
+   { gettext_noop("Script to run after"), wxOptionsPage::Field_Text,    -1 }
 };
 
 static

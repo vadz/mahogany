@@ -41,11 +41,6 @@ public:
    void OnCommandEvent(wxCommandEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
    
-   /// called by wxMApp after initialisation to deactivate some button 
-   /// if needed
-   void UpdateToolBar(void);
-
-
    /// Appends the menu for a module to the menubar
    virtual void AddModulesMenu(const char *name,
                                const char *help,
@@ -71,8 +66,6 @@ protected:
    wxFolderTree *m_FolderTree;
       /// the folder view
    wxFolderView *m_FolderView;
-   /// the popup menu for modules
-   wxMenu *m_ModulePopup;
    
    /// the name of the currently opened folder (empty if none)
    String m_folderName;

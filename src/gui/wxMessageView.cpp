@@ -1799,16 +1799,19 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
             /* The only situation where we receive a Message, is if we
                want to open it in a separate viewer. */
             Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
-            if(mptr->GetUId() != m_uid)
-               ShowMessage(mptr);
-            mptr->DecRef();
-            wxFrame *frame = GetFrame(this);
-            if(frame && frame->IsKindOf(CLASSINFO(wxMessageViewFrame)))
+            
+            if(mptr && mptr->GetUId() != m_uid)
             {
-               wxString title;
-               title << mptr->Subject() << _(" , from ") << mptr->From();
-               frame->SetTitle(title);
+               ShowMessage(mptr);
+               wxFrame *frame = GetFrame(this);
+               if(frame && frame->IsKindOf(CLASSINFO(wxMessageViewFrame)))
+               {
+                  wxString title;
+                  title << mptr->Subject() << _(" , from ") << mptr->From();
+                  frame->SetTitle(title);
+               }
             }
+            SafeDecRef(mptr);
          }
          break;
 

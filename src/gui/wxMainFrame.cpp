@@ -56,7 +56,7 @@
 // private classes
 // ----------------------------------------------------------------------------
 
-
+#if 0
 // A popup menu for entering and configuring plugin modules
 class wxModulePopup : public wxMenu
 {
@@ -176,6 +176,11 @@ wxModulePopup::OnCommandEvent(wxCommandEvent &event)
    }
    ASSERT(0 /* unreachable code */);
 }
+BEGIN_EVENT_TABLE(wxModulePopup, wxMenu)
+  EVT_MENU(-1,    wxModulePopup::OnCommandEvent)
+END_EVENT_TABLE()
+
+#endif
 
 // override wxFolderTree OnOpenHere() function to open the folder in this
 // frame
@@ -221,10 +226,6 @@ BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
   EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxModulePopup, wxMenu)
-  EVT_MENU(-1,    wxModulePopup::OnCommandEvent)
-END_EVENT_TABLE()
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -232,7 +233,6 @@ END_EVENT_TABLE()
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    : wxMFrame(iname,parent)
 {
-   m_ModulePopup = NULL;
    SetIcon(ICON("MainFrame"));
    SetTitle(M_TOPLEVELFRAME_TITLE);
 
@@ -306,19 +306,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #endif // GTK
 }
 
-
-void
-wxMainFrame::UpdateToolBar(void)
-{
-   if(m_ModulePopup) delete m_ModulePopup;
-   m_ModulePopup = wxModulePopup::Create();
-   if(! m_ModulePopup)
-   {
-      GetToolBar()->EnableTool(WXMENU_MODULES, FALSE);
-      delete m_ModulePopup;
-      m_ModulePopup = NULL;
-   }
-}
 
 void
 wxMainFrame::OpenFolder(MFolder *pFolder)
@@ -451,22 +438,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       return;
    }
 
-   // do we want the modules popup?
-   if(id == WXMENU_MODULES)
-   {
-      if(m_ModulePopup)
-         delete m_ModulePopup;
-      m_ModulePopup = wxModulePopup::Create();
-      if(m_ModulePopup)
-      {
-         int xpos, ypos;
-         int fxpos=0, fypos=0;
-         wxGetMousePosition(&xpos,&ypos);
-         ClientToScreen(&fxpos,&fypos); // get client area offset
-         PopupMenu(m_ModulePopup, xpos-fxpos, ypos-fypos);
-      }
-   }
-   else if(m_FolderView &&
+   if(m_FolderView &&
       (WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
        || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST
        || id == WXMENU_EDIT_COPY ))
@@ -495,7 +467,6 @@ wxMainFrame::~wxMainFrame()
    // any moment
    mApplication->OnMainFrameClose();
 
-   if(m_ModulePopup) delete m_ModulePopup;
    delete m_FolderView;
    delete m_FolderTree;
    // save the last opened folder

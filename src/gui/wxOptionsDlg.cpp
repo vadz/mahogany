@@ -249,7 +249,6 @@ enum ConfigFields
    ConfigField_ShowNewMail,
 #ifdef OS_UNIX
    ConfigField_AFMPath,
-   ConfigField_TearOffMenus,
    ConfigField_FocusFollowsMouse,
 #endif
    ConfigField_DockableMenubars,
@@ -632,7 +631,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Text,    -1                     },
-   { gettext_noop("Use &detachable tear-off menus"), Field_Bool,    -1                     },
    { gettext_noop("&Focus follows mouse"), Field_Bool,    -1                     },
 #endif
    { gettext_noop("Use floating &menu-bars"), Field_Bool,    -1                     },
@@ -995,7 +993,7 @@ void wxOptionsPage::UpdateUI()
    for ( size_t n = m_nFirst; n < m_nLast; n++ ) {
       int nCheckField = m_aFields[n].enable;
       if ( nCheckField != -1 ) {
-         wxASSERT( nCheckField > 0 && nCheckField < ConfigField_Max );
+         wxASSERT( nCheckField >= 0 && nCheckField < ConfigField_Max );
 
          // avoid signed/unsigned mismatch in expressions
          size_t nCheck = (size_t)nCheckField;

@@ -1254,7 +1254,21 @@ Message *
 MailFolderCC::GetMessage(unsigned long uid)
 {
    CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
-//FIXME: add some test whether uid is valid   ASSERT(index < m_nMessages && index >= 0);
+
+   // This is a test to see if the UID is valid:
+   
+   bool uidValid = false;
+   HeaderInfoList *hil = GetHeaders();
+   if ( !hil ) return NULL;
+   for ( unsigned long msgno = 0; msgno < hil->Count() && ! uidValid; msgno++ )
+   {
+      if ( (*hil)[msgno]->GetUId() == uid)
+         uidValid = true;
+   }
+   hil->DecRef();
+   ASSERT_MSG(uidValid, "Attempting to get a non-existing message.");
+   if(! uidValid) return NULL;
+
    MessageCC *m = MessageCC::CreateMessageCC(this,uid);
    ProcessEventQueue();
    return m;

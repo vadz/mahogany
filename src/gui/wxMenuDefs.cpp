@@ -111,8 +111,6 @@ static const TbarItemInfo g_aToolBarData[] =
    { "tb_delete",   WXMENU_ADBEDIT_DELETE,  gettext_noop("Delete")                  },
    { "tb_undo",     WXMENU_ADBEDIT_UNDO,    gettext_noop("Undo")                    },
    { "tb_lookup",   WXMENU_ADBFIND_NEXT,    gettext_noop("Find next")               },
-   // modules
-   { "tb_modules",  WXMENU_MODULES, gettext_noop("Run or configure plugin modules") },
 };
 
 // arrays containing tbar buttons for each frame (must be -1 terminated!)
@@ -134,7 +132,6 @@ static const int g_aMainTbar[] =
    WXTBAR_SEP,
    WXTBAR_ADB,
    WXTBAR_SEP,
-   WXTBAR_MODULES,
    -1
 };
 

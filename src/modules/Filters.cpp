@@ -401,7 +401,11 @@ public:
    virtual UIdType GetMessageUId(void) { return m_MessageUId; }
    /// Obtain the message itself:
    virtual class Message * GetMessage(void)
-      { return m_MailFolder->GetMessage(m_MessageUId); }
+   {
+      return m_MailFolder ?
+         m_MailFolder->GetMessage(m_MessageUId) : 
+         NULL ;
+   }
    //@}
    virtual MInterface * GetInterface(void) { return m_MInterface; }
 
@@ -1949,7 +1953,7 @@ extern "C"
       return rc ? (result != 0) : false;
    }
 #endif
-   
+
 /* * * * * * * * * * * * * * *
  *
  * Access to message contents
@@ -2218,15 +2222,16 @@ FilterRuleImpl::ApplyCommonCode(class MailFolder *mf,
    int rc = 1; // no error yet
    ASSERT(mf);
    mf->IncRef();
-   HeaderInfoList *hil = mf->GetHeaders();
-   if(hil)
+
+   if(msgs) // apply to all messages in list
    {
-      if(msgs) // apply to all messages in list
-      {
-         for(size_t idx = 0; idx < msgs->Count(); idx++)
-            rc &= Apply(mf, (*msgs)[idx]);
-      }
-      else // apply to all or all recent messages
+      for(size_t idx = 0; idx < msgs->Count(); idx++)
+         rc &= Apply(mf, (*msgs)[idx]);
+   }
+   else // apply to all or all recent messages
+   {
+      HeaderInfoList *hil = mf->GetHeaders();
+      if(hil)
       {
          for(size_t i = 0; i < hil->Count(); i++)
          {
