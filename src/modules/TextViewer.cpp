@@ -472,7 +472,8 @@ bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
             // the mouse cursor is captured by the text control when we're here
             // and this results in very strange behaviour if we open a window
             // without releasing mouse capture first
-            ReleaseMouse();
+            if ( HasCapture() )
+               ReleaseMouse();
 
             id = WXMENU_LAYOUT_LCLICK;
          }
