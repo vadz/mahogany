@@ -17,6 +17,8 @@
    in the configuration file. E.g. "FolderView" or "ComposeWindow".
 */
 
+#include "MFrame.h"
+
 class MainFrameBase : public MFrameBase
 {
 public:
