@@ -2790,7 +2790,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
    // as we overview the messages in the reversed order (see comments before
    // mail_fetch_overview_x()) and msgnos are consecutive we should always have
    // this -- and maybe we can even save the call to mail_msgno() above
-   ASSERT_MSG( msgno == m_nMessages - m_BuildNextEntry,
+   ASSERT_MSG( msgno == m_msgnoMax - m_BuildNextEntry,
                "msgno and listing index out of sync" );
 
    MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
