@@ -6,6 +6,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  1998/06/09 10:14:38  KB
+ * InitPython now exits gracefully if Minit.Minit() cannot be found.
+ *
  * Revision 1.5  1998/06/08 08:19:06  KB
  * Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
  *
@@ -98,24 +101,17 @@ InitPython(void)
       PyErr_Print();
    if(Python_MinitModule == NULL)
       MDialog_ErrorMessage("Python: Cannot find/evaluate Minit.py initialisation script.");
-
-   Py_INCREF(Python_MinitModule);
-   PyObject *minit = PyObject_GetAttrString(Python_MinitModule, "Minit");
-   if(minit)
-   {
-      PyObject_CallObject(minit,NULL);
-      if(PyErr_Occurred())
-         PyErr_Print();
-   }
    else
-      MDialog_ErrorMessage("Python: Cannot find Minit function in Minit module.");
-
-
-/* example code for calling a callback function:
-  String teststring = "Hello World";
-   PyH_CallFunction("StringPrint",
-                      "StringPrint",
-                      &teststring, "String",
-                      "",NULL);
-*/
+   {
+      Py_INCREF(Python_MinitModule);
+      PyObject *minit = PyObject_GetAttrString(Python_MinitModule, "Minit");
+      if(minit)
+      {
+         PyObject_CallObject(minit,NULL);
+         if(PyErr_Occurred())
+            PyErr_Print();
+      }
+      else
+         MDialog_ErrorMessage("Python: Cannot find Minit.Minit function in Minit module.");
+   }
 }

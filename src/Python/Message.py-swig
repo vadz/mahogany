@@ -7,20 +7,16 @@ class MessagePtr :
         self.this = this
         self.thisown = 0
     def GetHeaderLine(self,arg0,arg1):
-        val = Messagec.Message_GetHeaderLine(self.this,arg0.this,arg1.this)
-        return val
+        Messagec.Message_GetHeaderLine(self.this,arg0.this,arg1.this)
     def Subject(self):
-        val = Messagec.Message_Subject(self.this)
-        val = StringPtr(val)
+        val = StringPtr(Messagec.Message_Subject(self.this))
         return val
     def From(self):
-        val = Messagec.Message_From(self.this)
-        val = StringPtr(val)
+        val = StringPtr(Messagec.Message_From(self.this))
         val.thisown = 1
         return val
     def Date(self):
-        val = Messagec.Message_Date(self.this)
-        val = StringPtr(val)
+        val = StringPtr(Messagec.Message_Date(self.this))
         return val
     def FetchText(self):
         val = Messagec.Message_FetchText(self.this)
@@ -41,20 +37,16 @@ class MessagePtr :
         val = apply(Messagec.Message_GetPartSize,(self.this,)+args)
         return val
     def GetPartMimeType(self,*args):
-        val = apply(Messagec.Message_GetPartMimeType,(self.this,)+args)
-        val = StringPtr(val)
+        val = StringPtr(apply(Messagec.Message_GetPartMimeType,(self.this,)+args))
         return val
     def GetPartDesc(self,*args):
-        val = apply(Messagec.Message_GetPartDesc,(self.this,)+args)
-        val = StringPtr(val)
+        val = StringPtr(apply(Messagec.Message_GetPartDesc,(self.this,)+args))
         return val
     def GetPartSpec(self,*args):
-        val = apply(Messagec.Message_GetPartSpec,(self.this,)+args)
-        val = StringPtr(val)
+        val = StringPtr(apply(Messagec.Message_GetPartSpec,(self.this,)+args))
         return val
     def WriteToString(self,arg0,*args):
-        val = apply(Messagec.Message_WriteToString,(self.this,arg0.this,)+args)
-        return val
+        apply(Messagec.Message_WriteToString,(self.this,arg0.this,)+args)
     def __del__(self):
         if self.thisown == 1 :
             Messagec.delete_Message(self.this)
