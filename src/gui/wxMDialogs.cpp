@@ -775,15 +775,23 @@ void MDialog_Message(char const *message,
 MDlgResult MDialog_YesNoCancel(char const *message,
                                const wxWindow *parent,
                                char const *title,
-                               int flags)
+                               int flags,
+                               const MPersMsgBox *persMsg)
 {
    CloseSplash();
    NoBusyCursor noBC;
 
-   switch ( wxMessageBox
+   String configPath;
+   if ( persMsg )
+   {
+      configPath = GetPersMsgBoxName(persMsg);
+   }
+
+   switch ( wxPMessageBox
             (
+               configPath,
                message,
-               String("Mahogany: ") + title,
+               String(M_TITLE_PREFIX) + title,
                GetYesNoMsgBoxStyle(flags) | wxCANCEL,
                GetDialogParent(parent)
             ) )

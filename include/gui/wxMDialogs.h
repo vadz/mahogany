@@ -204,7 +204,8 @@ bool   MDialog_YesNoDialog(char const *message,
 MDlgResult MDialog_YesNoCancel(char const *message,
                                const wxWindow *parent = NULL,
                                char const *title = MDIALOG_YESNOTITLE,
-                               int flags = M_DLG_YES_DEFAULT);
+                               int flags = M_DLG_YES_DEFAULT,
+                               const MPersMsgBox *persMsg = NULL);
 
 /** File requester dialog: asks user for a file name
        @param message the text to display
