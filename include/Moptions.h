@@ -1263,7 +1263,11 @@ extern const MOption MP_AWAY_STATUS;
 /// expand folder tree control?
 #define   MP_EXPAND_TREECTRL_DEFVAL   1
 /// focus follows mouse?
-#define MP_FOCUS_FOLLOWSMOUSE_DEFVAL    1l
+#ifdef OS_WIN
+#define MP_FOCUS_FOLLOWSMOUSE_DEFVAL    0l
+#else
+#define MP_FOCUS_FOLLOWSMOUSE_DEFVAL    0l
+#endif
 /// dockable menu bars?
 #define   MP_DOCKABLE_MENUBARS_DEFVAL   1l
 /// dockable tool bars?
