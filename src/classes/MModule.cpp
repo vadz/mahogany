@@ -611,6 +611,11 @@ static wxArrayString BuildListOfModulesDirs()
    dirs.Add(path1);
 #endif // Unix
 
+   // make it possible to use modules without installing them in debug builds
+#ifdef DEBUG
+   dirs.Add("./modules/");
+#endif // DEBUG
+
    return dirs;
 }
 
