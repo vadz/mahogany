@@ -1763,8 +1763,8 @@ MailFolderCC::Open(OpenMode openmode)
          folderType == MF_FILE
 #ifdef OS_UNIX
          || folderType == MF_INBOX
-        )
 #endif
+        )
       )
    {
       if ( !CheckForFileLock() )
