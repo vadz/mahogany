@@ -4,6 +4,7 @@ $Id$
 
 *** things to fix/implement next ***
 
+- Deletion of messages doesn't work.
 - Expand in ComposeView is broken: should insert "Formatted_Name <EMail>" and
   must not treat the whole To: as a single name but properly parse it. How can
   we expand CC/BCC fields?
