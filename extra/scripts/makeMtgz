@@ -34,6 +34,10 @@ else
   GZ=gz
 fi
 
+# tell cvs to use ssh, not rsh
+CVS_RSH=ssh
+export CVS_RSH
+
 # create temp dir
 if ! mkdir $TMPDIR; then
    echo "Failed to create temporary directory $TMPDIR"
