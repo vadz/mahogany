@@ -122,4 +122,7 @@ http://www.wxwindows.org/m-bugs/ and we are working on them.
 
 Version 0.60 suffers from a minor printing bug leading to some overlap
 between strings sometimes, which is due to a bug in wxWindows which
-will hopefully be fixed fairly soon.
+will hopefully be fixed fairly soon. Also, the global password option for
+encrypting passwords currently does not work on all systems. It has been tested
+on PCs under Linux but does not currently work on Solaris 7/Sparc (but, if you
+attempt to use it, you will be warned by it).

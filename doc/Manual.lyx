@@ -1,4 +1,5 @@
-#LyX 1.1 created this file. For more info see http://www.lyx.org/
+#This file was created by <karsten> Tue Oct 24 00:08:43 2000
+#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
 \begin_preamble
@@ -63,7 +64,7 @@ http://mahogany.sourceforge.net/
 \layout Standard
 
 
-\begin_inset LatexCommand \tableofcontents{}
+\begin_inset LatexCommand \tableofcontents
 
 \end_inset 
 
@@ -76,15 +77,11 @@ Using Mahogany
 Release Notes_1001_
 \layout Standard
 
-This is the another public release of Mahogany.
+This is another public release of Mahogany.
  As with usual we make the source available and binaries for the most common
  operating systems supported.
  Mahogany should generally work on any Unix flavour.
- This time, we do not include a Windows version, as our main Windows developer
- has been busy working on wxWindows over the last weeks.
- He is now catching up and we hope to release a common Windows and Unix
- version (0.51) within few weeks.
- Finally, work on making Mahogany available for MacOS is in progress.
+ 
 \layout Standard
 
 Due to the fact that it is a cross-platform effort, the compilation and
@@ -96,6 +93,118 @@ Due to the fact that it is a cross-platform effort, the compilation and
 \layout Subsection
 
 Changes against the previous version
+\layout Standard
+
+
+\series bold 
+0.6 against 0.5
+\newline 
+
+\series default 
+Most importantly, all known major bugs in 0.5 have been fixed in this release.
+ We still have some minor buglets and lots of wishes and enhancements on
+ our list, but all serious bugs should be gone now.
+ A couple of new features have been added:
+\layout Itemize
+
+fixes to all serious bugs from version 0.50
+\layout Itemize
+
+significantly improved IMAP support: it is now possible to subscribe to
+ all folders on an IMAP server with a single click or to manually select
+ them from a dialog; Mahogany also uses server side message functions when
+ possible resulting in huge performance improvement
+\layout Itemize
+
+new, improved filtering system (warning: old filters won't work any more,
+ contact us if this is really a serious problem for you)
+\layout Itemize
+
+charset and encoding support for message contents and headers (including
+ autodetecting the charset of incoming messages and setting it for the outgoing
+ ones)
+\layout Itemize
+
+mail can be sent using local MDA (sendmail) in addition to SMTP
+\layout Itemize
+
+import of settings and folder collections from Pine and XFMail, vCard support
+ (import/export from addess book, attach to messages)
+\layout Itemize
+
+drag and drop for message copying and moving - "Quick Move" and "Quick Filter"
+ functions 
+\layout Itemize
+
+folders now can (finally) be renamed 
+\layout Itemize
+
+quoted text highlighting in the message viewer! 
+\layout Itemize
+
+sort the messages display by simply clicking on the corresponding column,
+ the sorting dialog also has been improved 
+\layout Itemize
+
+folders with new/recent messages are highlighted in the folder tree 
+\layout Itemize
+
+it is possible (although still discouraged) to run Mahogany as root 
+\layout Itemize
+
+passwords in the config file are encrypted using TwoFish algorithm 
+\layout Itemize
+
+option to always use external editor by default 
+\layout Itemize
+
+messages from oneself are optionally marked as such 
+\layout Itemize
+
+support for password protected SMTP and NNTP servers 
+\layout Itemize
+
+more verbose error reporting and detection 
+\layout Itemize
+
+OpenSSL loaded dynamically if available 
+\layout Itemize
+
+PalmOS module supports AvantGo/MAL synchronisation 
+\layout Itemize
+
+templates now may be used for replying/forwarding as well 
+\layout Itemize
+
+many other various fixes
+\layout Standard
+
+
+\series bold 
+New experimental features include:
+\layout Itemize
+
+supporting multiple-identities and easy switching between them 
+\layout Itemize
+
+support of storing configuration settings on an IMAP server allowing to
+ share them between different machines/accounts
+\layout Standard
+
+
+\series bold 
+Known bugs:
+\series default 
+ 
+\layout Itemize
+
+There are always some, listed on our bugtracker at http://www.wxwindows.org/m-bugs
+/ and we are working on them.
+\layout Itemize
+
+Version 0.60 suffers from a minor printing bug leading to some overlap between
+ strings sometimes, which is due to a bug in wxWindows which will hopefully
+ be fixed fairly soon.
 \layout Subsubsection
 
 0.5 against 0.23a
@@ -401,7 +510,8 @@ Generally we welcome help for anything.
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{mahogany-developers@lists.sourceforge.net}{mailto:mahogany-developers@lists.sourceforge.net}
+htmladdnormallinkfoot{mahogany-developers@lists.sourceforge.net}{mailto:mahogany-d
+evelopers@lists.sourceforge.net}
 \latex default 
 .
  If you have questions about the Mahogany License, discuss them with us
@@ -5114,7 +5224,8 @@ htmladdnormallinkfoot{online docs}{../HackersGuide/index.html}
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{Mahogany Web page}{http://www.wxwindows.org/Mahogany/docs.html}
+htmladdnormallinkfoot{Mahogany Web page}{http://www.wxwindows.org/Mahogany/docs.htm
+l}
 \latex default 
 .
 \layout Standard

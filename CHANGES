@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+23.10.00 KB: fixed IMAP flag string generation which was incompatible with some servers (trailing space)
 20.10.00 VZ: access program options dialog from root folder properties
              don't popup message boxes with unimportant messages any more  
 18.10.00 VZ: ask for the passwords as needed, propose to remember them

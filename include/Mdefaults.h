@@ -1022,7 +1022,7 @@
 /// Which folder to use as Outbox
 #define MP_OUTBOX_NAME_D         ""
 /// Use Outbox?
-#define MP_USE_OUTBOX_D            1l
+#define MP_USE_OUTBOX_D            0l
 /// Name of Trash folder?
 #define MP_TRASH_FOLDER_D      ""
 /// Use a trash folder?
@@ -1297,7 +1297,7 @@
 #   define   MP_NEWMAILCOMMAND_D   M_EMPTYSTRING
 #endif
 /// show new mail messages?
-#define   MP_SHOW_NEWMAILMSG_D      0
+#define   MP_SHOW_NEWMAILMSG_D      1
 /// show detailed info about how many new mail messages?
 #define   MP_SHOW_NEWMAILINFO_D      10
 /// keep copies of outgoing mail?

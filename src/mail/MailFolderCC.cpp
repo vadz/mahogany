@@ -190,16 +190,16 @@ static String GetImapFlags(int flag)
 {
    String flags;
    if(flag & MailFolder::MSG_STAT_SEEN)
-      flags <<"\\SEEN ";
+      flags <<"\\SEEN";
 // RECENT flag cannot be set?
 //   if(flag & MailFolder::MSG_STAT_RECENT)
-//      flags <<"\\RECENT ";
+//      flags <<"\\RECENT";
    if(flag & MailFolder::MSG_STAT_ANSWERED)
-      flags <<"\\ANSWERED ";
+      flags <<"\\ANSWERED";
    if(flag & MailFolder::MSG_STAT_DELETED)
-      flags <<"\\DELETED ";
+      flags <<"\\DELETED";
    if(flag & MailFolder::MSG_STAT_FLAGGED)
-      flags <<"\\FLAGGED ";
+      flags <<"\\FLAGGED";
    return flags;
 }
 
