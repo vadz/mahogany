@@ -1111,7 +1111,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   wxButton *buttons[3];
   buttons[2] = new wxButton(panel, AdbView_New, _("&New..."));
   buttons[1] = new wxButton(panel, AdbView_Delete, _("&Delete"));
-  buttons[0] = new wxButton(panel, AdbView_Cancel, _("&Cancel"));
+  buttons[0] = new wxButton(panel, AdbView_Cancel, _("Cancel"));
   m_btnCancel = buttons[0];   // save them for status updates
   m_btnDelete = buttons[1];
 

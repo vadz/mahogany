@@ -867,7 +867,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    radioChoices[Radio_News]  = _("News");
    radioChoices[Radio_Group] = _("Group");
 
-   m_radio = new wxRadioBox(GetCanvas(), -1, _("Folder Type"),
+   m_radio = new wxRadioBox(GetCanvas(), -1, _("Folder &Type"),
                             wxDefaultPosition,wxDefaultSize,
                             Radio_Max, radioChoices,
                             // create a horizontal radio box
@@ -915,7 +915,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("C&ollect all mail from this folder: "),
       gettext_noop("&Keep folder always open: "),
       gettext_noop("Force &re-open on ping: "),
-      gettext_noop("&Anonymous access: "),
+      gettext_noop("Anon&ymous access: "),
 #ifdef USE_LOCAL_CHECKBOX
       gettext_noop("Folder can be accessed &without network "),
 #endif // USE_LOCAL_CHECKBOX

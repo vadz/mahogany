@@ -1004,7 +1004,7 @@ void wxNotebookDialog::CreateAllControls()
    c->bottom.SameAs(panel, wxBottom, LAYOUT_Y_MARGIN);
    m_btnHelp->SetConstraints(c);
 
-   m_btnOk = new wxButton(panel, wxID_OK, _("&OK"));
+   m_btnOk = new wxButton(panel, wxID_OK, _("OK"));
    m_btnOk->SetDefault();
    c = new wxLayoutConstraints;
    c->left.SameAs(panel, wxRight, -3*(LAYOUT_X_MARGIN + wBtn));
@@ -1013,7 +1013,7 @@ void wxNotebookDialog::CreateAllControls()
    c->bottom.SameAs(panel, wxBottom, LAYOUT_Y_MARGIN);
    m_btnOk->SetConstraints(c);
 
-   wxButton *btn = new wxButton(panel, wxID_CANCEL, _("&Cancel"));
+   wxButton *btn = new wxButton(panel, wxID_CANCEL, _("Cancel"));
    c = new wxLayoutConstraints;
    c->left.SameAs(panel, wxRight, -2*(LAYOUT_X_MARGIN + wBtn));
    c->width.Absolute(wBtn);
