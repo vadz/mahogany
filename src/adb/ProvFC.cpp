@@ -675,7 +675,7 @@ String FCBook::GetFullAdbPath(const String& filename)
   CHECK( !filename.empty(), "", _T("ADB without name?") );
 
   String path;
-  if ( IsAbsPath(filename) )
+  if ( wxIsAbsolutePath(filename) )
     path = filename;
   else
     path << mApplication->GetLocalDir() << DIR_SEPARATOR << filename;

@@ -3132,7 +3132,7 @@ SetupServers(void)
 
    // local newsspool ?
    String newsspool = MailFolderCC::GetNewsSpool();
-   if ( wxDirExists(newsspool) )
+   if ( wxPathExists(newsspool) )
    {
       MFolder_obj mfolder = CreateServerEntry
                             (

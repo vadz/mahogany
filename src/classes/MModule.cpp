@@ -571,7 +571,7 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
    for( size_t i = 0; i < nDirs ; i++ )
    {
       pathname = dirs[i];
-      if ( wxDirExists(pathname) )
+      if ( wxPathExists(pathname) )
       {
          // first look for MMDs
          pathname << "*.mmd";

@@ -1898,7 +1898,7 @@ void MailFolderCC::CreateFileFolder()
       String path;
       path << InitializeMH()
            << m_ImapSpec.c_str() + 4; // 4 == strlen("#mh/")
-      exists = wxDirExists(path);
+      exists = wxPathExists(path);
    }
 
    // if the file folder doesn't exist, we should create it first

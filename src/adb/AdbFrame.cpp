@@ -1375,7 +1375,7 @@ void wxAdbEditFrame::RestoreSettings1()
   // if there are no address books at all, load at least the autocollect book
   if ( !m_astrAdb.Count() ) {
     String bookAutoCollect = READ_APPCONFIG_TEXT(MP_AUTOCOLLECT_ADB);
-    if ( !IsAbsPath(bookAutoCollect) ) {
+    if ( !wxIsAbsolutePath(bookAutoCollect) ) {
       bookAutoCollect.Prepend(mApplication->GetLocalDir() + _T('/'));
     }
     m_astrAdb.Add(bookAutoCollect);
@@ -1698,7 +1698,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
     else {
       // for file based books we have to take account of the fact that either
       // string may be relative or absolute filename
-      wxASSERT_MSG( IsAbsPath(strName), _T("book name should be absolute") );
+      wxASSERT_MSG( wxIsAbsolutePath(strName), _T("book name should be absolute") );
 
 #ifdef __WXMSW__
       strName.Replace("\\", "/");
@@ -1708,7 +1708,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
       size_t count = m_astrAdb.Count();
       for ( size_t n = 0; n < count; n++ ) {
         wxString bookname = m_astrAdb[n];
-        if ( !IsAbsPath(bookname) ) {
+        if ( !wxIsAbsolutePath(bookname) ) {
           bookname = mApplication->GetLocalDir() + _T('/') + bookname;
         }
 #ifdef __WXMSW__

@@ -651,7 +651,7 @@ String
 VarExpander::GetAbsFilename(const String& name)
 {
    String filename = wxExpandEnvVars(name);
-   if ( !IsAbsPath(filename) )
+   if ( !wxIsAbsolutePath(filename) )
    {
       Profile *profile = mApplication->GetProfile();
       String path = READ_CONFIG(profile, MP_COMPOSETEMPLATEPATH_USER);

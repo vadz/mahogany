@@ -119,7 +119,7 @@ bool CacheFile::Save()
    String dirname;
    wxSplitPath(filename, &dirname, NULL, NULL);
 
-   if ( !wxDirExists(dirname) )
+   if ( !wxPathExists(dirname) )
    {
       if ( !wxMkdir(dirname) )
       {

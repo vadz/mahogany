@@ -16,6 +16,5 @@
 
 /// not defined by makefile
 #define M_CANONICAL_HOST   ""
-#define IsAbsPath(path) wxIsAbsolutePath(path)
 
 #endif
