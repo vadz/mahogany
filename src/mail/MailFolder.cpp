@@ -155,13 +155,19 @@ MLogCircle::GuessError(void) const
                 "Maybe the network connection or the DNS servers are down?");
       addErr = true;
    }
-   if(Find("User unknown", &err))
+   else if(Find("User unknown", &err))
    {
       guess = _("One or more email addresses were not recognised.");
       addErr = true;
       addLog = true;
    }
-
+   else if(Find("INVALID_ADDRESS", &err)
+           || Find(".SYNTAX-ERROR.", &err))
+   {
+      guess = _("The message contained an invalid address specification.");
+      addErr = true;
+      addLog = true;
+   }
    if(addErr)
    {
       guess += _("\nThe exact error message was:\n");

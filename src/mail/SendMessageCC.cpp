@@ -670,7 +670,7 @@ SendMessageCC::Send(void)
       }
 #endif
       stream = nntp_open_full
-         (NIL,(char **)hostlist,"nntp/ssl",SMTPTCPPORT,NIL);
+         (NIL,(char **)hostlist,"nntp/ssl",SMTPTCPPORT,OP_DEBUG);
       break;
       // make gcc happy
       case Prot_Illegal:
