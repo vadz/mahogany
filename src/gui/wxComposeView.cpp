@@ -935,11 +935,12 @@ void wxRcptTextCtrl::OnUpdateUI(wxUpdateUIEvent& event)
 // wxComposeView creation: static creator functions
 // ----------------------------------------------------------------------------
 
-static wxComposeView *CreateComposeView(Profile *profile,
-                                        const MailFolder::Params& params,
-                                        wxComposeView::Mode mode,
-                                        wxComposeView::MessageKind kind,
-                                        bool hide)
+wxComposeView *
+CreateComposeView(Profile *profile,
+                  const MailFolder::Params& params,
+                  wxComposeView::Mode mode,
+                  wxComposeView::MessageKind kind,
+                  bool hide)
 {
    wxWindow *parent = mApplication->TopLevelFrame();
    wxComposeView *cv = new wxComposeView
