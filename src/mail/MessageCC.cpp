@@ -516,7 +516,7 @@ MessageCC::GetHeaderLines(const char **headersOrig,
       headers = headersOrig;
       while ( *headers )
       {
-         int n = names.Index(*headers);
+         int n = names.Index(*headers, FALSE /* not case sensitive */);
          if ( n != wxNOT_FOUND )
          {
             values.Add(MailFolderCC::DecodeHeader(valuesInDisorder[(size_t)n],
