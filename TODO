@@ -18,7 +18,8 @@ $Id$
 - speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
-
+- cannot select only message in a folder or first message without
+  chosing a different one first
 - Proper NNTP support and POP3 fetch solution are the same thing:
   - Use mail_fetch_overview() and implement it on the MailFolder
     interface. Use that new function in wxFolderView::Update() to
