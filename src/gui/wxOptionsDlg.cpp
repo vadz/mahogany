@@ -1293,7 +1293,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "quickly browse through the list of messages without\n"
                   "waiting for them to be previewed. Set it to 0 to disable\n"
                   "this feature."),                Field_Message | Field_Advanced, -1 },
-   { gettext_noop("Delay in miliseconds:"),        Field_Number | Field_Advanced, -1 },
+   { gettext_noop("Delay in miliseconds"),        Field_Number | Field_Advanced, -1 },
    { gettext_noop("You can choose to show the information about\n"
                   "the currently selected message in the status bar.\n"
                   "You can use the same macros as in the template\n"
@@ -1303,7 +1303,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Status bar line format"),      Field_Text,    ConfigField_FolderViewUpdateStatus },
 
    // folder tree
-   { gettext_noop("Tree &background colour:"), Field_Color, -1 },
+   { gettext_noop("Tree &background colour"), Field_Color, -1 },
    { gettext_noop("Mahogany can show the number of messages in the folder\n"
                   "directly in the folder tree. You may wish to disable\n"
                   "this feature to speed it up slightly by leaving the text\n"
@@ -1311,21 +1311,21 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "to be replaced with the total number of messages and the\n"
                   "number of unseen messages respectively."),
                   Field_Message, -1 },
-   { gettext_noop("Folder tree &format:"), Field_Text | Field_Restart, -1 },
+   { gettext_noop("Folder tree &format"), Field_Text | Field_Restart, -1 },
    { gettext_noop("By default, if the folder has new/recent/unread messages\n"
                   "its parent is shown in the same state as well. Disable\n"
                   "it below if you don't like it (this makes sense mostly\n"
                   "for folders such as \"Trash\" or \"Sent Mail\")."), Field_Message, -1 },
-   { gettext_noop("&Parent shows status:"), Field_Bool, -1 },
+   { gettext_noop("&Parent shows status"), Field_Bool, -1 },
    { gettext_noop("You may check the option below to skip this folder when\n"
                   "navigating in the folder tree using Ctrl-Up/Down arrows\n"
                   "which normally selects the next folder with unread messages.\n"
                   "But if you select it, this one will be skipped even it has\n"
                   "unread mail (again, this is mainly useful for \"Trash\"\n"
                   "folder, for example)."), Field_Message, -1 },
-   { gettext_noop("&Skip this folder:"), Field_Bool, -1 },
-   { gettext_noop("Open folder on single &click"), Field_Bool, -1 },
-   { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool,-1 },
+   { gettext_noop("&Skip this folder"), Field_Bool, -1 },
+   { gettext_noop("Open folder on single &click"), Field_Bool | Field_Global, -1 },
+   { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool | Field_Global,-1 },
 
    // adb: autocollect and bbdb options
    { gettext_noop("The addresses listed below are the ones which are\n"
