@@ -22,7 +22,7 @@
 #include "MFolder.h"
 
 // put this in the trace mask to get messages about connection caching
-#define TRACE_CONN_CACHE  "conncache"
+#define TRACE_SERVER_CACHE  "servercache"
 
 /**
    Whenever we need to establish a connection with a remote server, we try to
@@ -75,12 +75,20 @@ public:
       {
          if ( i->CanBeUsedFor(folder) )
          {
+            wxLogTrace(TRACE_SERVER_CACHE,
+                       "Reusing existing server entry for %s(%s).",
+                       folder->GetFullName().c_str(), i->m_login.c_str());
+
             // found
             return *i;
          }
       }
 
       // not found
+      wxLogTrace(TRACE_SERVER_CACHE,
+                 "No server entry for %s found.",
+                 folder->GetFullName().c_str());
+
       return NULL;
    }
 
@@ -99,6 +107,10 @@ public:
       ServerInfoEntry *serverInfo = Get(folder);
       if ( !serverInfo )
       {
+         wxLogTrace(TRACE_SERVER_CACHE,
+                    "Creating new server entry for %s(%s).",
+                    folder->GetFullName().c_str(), folder->GetLogin().c_str());
+
          serverInfo = mf->CreateServerInfo(folder);
 
          CHECK( serverInfo, NULL, "CreateServerInfo() failed?" );
@@ -194,7 +206,7 @@ protected:
 
       m_hasAuthInfo = !m_login.empty() && !m_password.empty();
 
-      wxLogTrace(TRACE_CONN_CACHE,
+      wxLogTrace(TRACE_SERVER_CACHE,
                  "Created server entry for %s(%s).",
                  folder->GetFullName().c_str(), m_login.c_str());
    }

@@ -6068,7 +6068,7 @@ ServerInfoEntryCC::ServerInfoEntryCC(const MFolder *folder)
 
 ServerInfoEntryCC::~ServerInfoEntryCC()
 {
-   wxLogTrace(TRACE_CONN_CACHE,
+   wxLogTrace(TRACE_SERVER_CACHE,
               "Deleting server entry for %s(%s).",
               m_netmbx.host, m_netmbx.user);
 
@@ -6143,9 +6143,6 @@ MAILSTREAM *ServerInfoEntryCC::GetStream()
    m_connections.pop_front();
    m_timeouts.pop_front();
 
-   wxLogTrace(TRACE_CONN_CACHE,
-              "Reusing connection to %s.", stream->mailbox);
-
    return stream;
 }
 
@@ -6157,7 +6154,7 @@ void ServerInfoEntryCC::KeepStream(MAILSTREAM *stream, const MFolder *folder)
    time_t t = time(NULL);
    time_t delay = READ_CONFIG(profile, MP_CONN_CLOSE_DELAY);
 
-   wxLogTrace(TRACE_CONN_CACHE,
+   wxLogTrace(TRACE_SERVER_CACHE,
               "Keeping connection to %s alive for %d seconds.",
               stream->mailbox, (int)delay);
 
@@ -6171,7 +6168,7 @@ void ServerInfoEntryCC::KeepStream(MAILSTREAM *stream, const MFolder *folder)
    if ( !ms_connCloseTimer->IsRunning() ||
            (ms_connCloseTimer->GetInterval() / 1000 > delay) )
    {
-      wxLogTrace(TRACE_CONN_CACHE,
+      wxLogTrace(TRACE_SERVER_CACHE,
                  "Starting connection clean up timer (delay = %ds)", (int)delay);
 
       // we want to use a smaller interval
@@ -6202,7 +6199,7 @@ bool ServerInfoEntryCC::CheckTimeout()
          // timed out
          MAILSTREAM *stream = *i;
 
-         wxLogTrace(TRACE_CONN_CACHE,
+         wxLogTrace(TRACE_SERVER_CACHE,
                     "Connection to %s timed out, closing.", stream->mailbox);
 
          // we're not interested in getting mail_close() babble
@@ -6242,7 +6239,7 @@ void ServerInfoEntryCC::CheckTimeoutAll()
    if ( !hasAnyConns )
    {
       // timer will be restarted in KeepStream() when/if neecessary
-      wxLogTrace(TRACE_CONN_CACHE, "Stopping connection clean up timer");
+      wxLogTrace(TRACE_SERVER_CACHE, "Stopping connection clean up timer");
 
       ms_connCloseTimer->Stop();
    }
