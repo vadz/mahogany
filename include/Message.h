@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Message class: entries for message                               *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *
@@ -136,7 +136,7 @@ public:
    /** Get message text.
        @return the uninterpreted message body
    */
-   virtual char *FetchText(void) = 0;
+   virtual String FetchText(void) = 0;
 
    /** return the number of body parts in message
        @return the number of body parts

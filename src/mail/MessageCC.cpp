@@ -263,14 +263,14 @@ MessageCC::GetHeaderLine(const String &line, String &value)
                                   &slist,
                                   &len,FT_UID);
    value = String(rc, (size_t)len);
-   char *val = strutil_strdup(rc);
+   char *val = strutil_strdup(value);
    // trim off trailing newlines/crs
-   if(strlen(rc))
+   if(strlen(val))
    {
       // start by the last char and move backwards until we don't throw off all
       // line termination chars - be careful to not underflow the (almost)
       // empty string!
-      char *cptr  = val + strlen(rc) - 1;
+      char *cptr  = val + strlen(val) - 1;
       while( cptr >= val && (*cptr == '\n' || *cptr == '\r') )
          cptr--;
       cptr++;
@@ -343,16 +343,16 @@ MessageCC::Date(void) const
    return   hdr_date;
 }
 
-char *
+String
 MessageCC::FetchText(void)
 {
    if(folder)
    {
       CHECK_DEAD_RC("");
       mailText = mail_fetchtext_full(folder->Stream(), m_uid,
-                                            NIL, FT_UID);
+                                            &m_MailTextLen, FT_UID);
       MailFolderCC::ProcessEventQueue();
-      return mailText;
+      return String(mailText, (size_t) m_MailTextLen);
    }
    else // from a text
       return text;

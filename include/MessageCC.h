@@ -2,7 +2,7 @@
  * Message class: entries for message header                        *
  *                      implementation for MailFolderCC             *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -64,7 +64,7 @@ public:
    /** get message text
        @return the uninterpreted message body
    */
-   char *FetchText(void);
+   String FetchText(void);
 
    /** decode the MIME structure
      */
@@ -217,6 +217,8 @@ private:
    UIdType  m_uid;
    /// holds the pointer to a text buffer allocated by cclient lib
    char *mailText;
+   /// length of mailText
+   unsigned long m_MailTextLen;
    /// refresh information in this structure
    void  Refresh(void);
    /// Subject line
