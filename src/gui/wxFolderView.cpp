@@ -390,6 +390,7 @@ wxFolderView::Create(MWindow *parent)
 wxFolderView::wxFolderView(wxWindow *parent)
 {
    int x,y;
+   m_InDeletion = false;
    m_Parent = parent;
    m_MailFolder = NULL;
    m_NumOfMessages = 0;
@@ -517,6 +518,9 @@ wxFolderView::OpenFolder(String const &profilename)
 
 wxFolderView::~wxFolderView()
 {
+   if(m_InDeletion)
+      return;
+   m_InDeletion = true;
    SetFolder(NULL, FALSE);
 }
 

@@ -534,7 +534,10 @@ VerifyInbox(void)
       rc = FALSE;
       ProfileBase *ibp = ProfileBase::CreateProfile("INBOX");
       ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-      ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX);
+      if(READ_APPCONFIG(MP_NEWMAIL_FOLDER) != "INBOX")
+         ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX|MF_FLAGS_INCOMING);
+      else
+         ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX);
       ibp->writeEntry(MP_FOLDER_COMMENT, _("Default system folder for incoming mail."));
       ibp->DecRef();
    }
@@ -545,17 +548,19 @@ VerifyInbox(void)
    if(foldername.IsEmpty()) // this must not be
       foldername = MP_NEWMAIL_FOLDER_D; // reset to default
    // Do we need to create the NewMailFolder?
+   ProfileBase *ibp = ProfileBase::CreateProfile(foldername);
    if (!  parent->HasEntry(foldername) )
    {
-      ProfileBase *ibp = ProfileBase::CreateProfile(foldername);
       ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
       ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE);
       ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
       ibp->writeEntry(MP_FOLDER_COMMENT,
                       _("Default system folder for incoming mail."));
-      ibp->DecRef();
       rc = FALSE;
    }
+   if(READ_CONFIG(ibp,MP_FOLDER_TYPE) & MF_FLAGS_INCOMING)
+      ibp->writeEntry(MP_FOLDER_TYPE, (READ_CONFIG(ibp, MP_FOLDER_TYPE) ^ MF_FLAGS_INCOMING));
+   ibp->DecRef();
    return rc;
 }
 

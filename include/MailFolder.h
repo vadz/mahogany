@@ -122,17 +122,23 @@ public:
    */
    virtual void RegisterView(FolderView *view, bool reg = true) = 0;
 
-   /** get name of mailbox
+   /** Get name of mailbox.
        @return the symbolic name of the mailbox
    */
    virtual String GetName(void) const = 0;
 
-   /** get number of messages which have the given flag set or the number of
-       all messages if the flag is 0 (default)
-       @param flag is a (combination of) MessageStatus value(s) or 0
+   /** Sets the symbolic name.
+    */
+   virtual void SetName(const String &name) = 0;
+   
+   /** Get number of messages which have a message status of value
+       when combined with the mask. When mask = 0, return total
+       message count.
+       @param mask is a (combination of) MessageStatus value(s) or 0 to test against
+       @param value the value of MessageStatus AND mask to be counted
        @return number of messages
    */
-   virtual unsigned long CountMessages(int flag = 0) const = 0;
+   virtual unsigned long CountMessages(int mask = 0, int value = 0) const = 0;
 
    /** Check whether mailbox has changed. */
    virtual void Ping(void) = 0;

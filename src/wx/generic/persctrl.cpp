@@ -842,7 +842,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     wxString textCheckbox = _("Don't show this message again ");
     dc.GetTextExtent(textCheckbox, &width, &heightTextLine);
     width += 15;    // for the [x]
-
+    heightTextLine = (12*heightTextLine) / 10;   // *1.2 baselineskip
     long widthButtonsTotal = nButtons * (widthBtnMax + LAYOUT_X_MARGIN) -
                              LAYOUT_X_MARGIN;
     long widthDlg = MAX(widthTextMax, MAX(widthButtonsTotal, width)) +

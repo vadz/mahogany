@@ -136,6 +136,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_OldNumOfMessages = 0;
    m_Listing = NULL;
    m_GenerateNewMailEvents = false; // for now don't!
+   m_UpdateMsgCount = true; // normal operation
    m_UpdateNeeded = true;
    m_ProgressDialog = 0;
    FolderType type = GetFolderType(typeAndFlags);
@@ -156,7 +157,8 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                          ProfileBase *profile,
                          String const &server,
                          String const &login,
-                         String const &password)
+                         String const &password,
+                         String const &symname)
 {
 
    MailFolderCC *mf;
@@ -201,6 +203,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    if(mf)
    {
       mf->IncRef();
+      mf->SetName(symname);
       return mf;
    }
 
@@ -213,7 +216,6 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    else
    {
       mf->DecRef();
-
       return NULL;
    }
 }
@@ -444,6 +446,7 @@ MailFolderCC::UpdateViews(void)
    PY_CALLBACK(MCB_FOLDERUPDATE, 0, GetProfile());
 }
 
+#if 0
 String
 MailFolderCC::GetName(void) const
 {
@@ -470,19 +473,20 @@ MailFolderCC::GetName(void) const
    }
    return symbolicName;
 }
+#endif
 
 unsigned long
-MailFolderCC::CountMessages(int flag) const
+MailFolderCC::CountMessages(int mask, int value) const
 {
    unsigned long numOfMessages = m_NumOfMessages;
 
-   if ( flag )
+   if ( mask )
    {
       // FIXME there should probably be a much more efficient way (using
       //       cclient functions?) to do it
       for ( unsigned long msgno = 0; msgno < m_NumOfMessages; msgno++ )
       {
-         if ( !(GetHeaderInfo(msgno)->GetStatus() & flag) )
+         if ( (GetHeaderInfo(msgno)->GetStatus() & mask) != value)
             numOfMessages--;
       }
    }
@@ -671,8 +675,11 @@ MailFolderCC::BuildListing(void)
    // there are too many
    unsigned long numMessages = m_NumOfMessages;
 
-   // the value of 0 disables the limit
-   if ( (m_RetrievalLimit > 0) && (m_NumOfMessages > m_RetrievalLimit) )
+   /** The value of 0 disables the limit.
+       m_OldNumMessage == -1: only test the first time the folder is
+       opened
+   */
+   if ( (m_RetrievalLimit > 0) && m_OldNumOfMessages == -1 && (m_NumOfMessages > m_RetrievalLimit) )
    {
       // TODO should really ask the user how many of them he wants (like slrn)
       wxString msg;

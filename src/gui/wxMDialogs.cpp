@@ -172,13 +172,13 @@ MProgressDialog::MProgressDialog(wxString const &title,
    int height = 70;     // FIXME arbitrary numbers
    if ( abortButton )
       height += 35;
-   wxFrame::Create(parent, -1, wxString("Mahogany : ")+_(title),
+   wxFrame::Create(parent, -1, wxString("Mahogany : ")+title,
                    wxPoint(0, 0), wxSize(220, height),
                    wxCAPTION | wxSTAY_ON_TOP | wxTHICK_FRAME);
 
    wxLayoutConstraints *c;
 
-   wxControl *ctrl = new wxStaticText(this, -1, _(message));
+   wxControl *ctrl = new wxStaticText(this, -1, message);
    c = new wxLayoutConstraints;
    c->left.SameAs(this, wxLeft, 10);
    c->top.SameAs(this, wxTop, 10);
@@ -186,26 +186,33 @@ MProgressDialog::MProgressDialog(wxString const &title,
    c->height.AsIs();
    ctrl->SetConstraints(c);
 
-   m_gauge = new wxGauge(this, -1, maximum);
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.Below(ctrl, 2*LAYOUT_Y_MARGIN);
-   c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
-   c->height.AsIs();
-   m_gauge->SetConstraints(c);
-
+   if(maximum > 0)
+   {
+      m_gauge = new wxGauge(this, -1, maximum);
+      c = new wxLayoutConstraints;
+      c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN);
+      c->top.Below(ctrl, 2*LAYOUT_Y_MARGIN);
+      c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
+      c->height.AsIs();
+      m_gauge->SetConstraints(c);
+      m_gauge->SetValue(0);
+   }
+   else
+      m_gauge = NULL;
+   
    if ( abortButton )
    {
       ctrl = new wxButton(this, -1, _("Cancel"));
       c = new wxLayoutConstraints;
       c->centreX.SameAs(this, wxCentreX);
-      c->top.Below(m_gauge, 2*LAYOUT_Y_MARGIN);
+      if(m_gauge)
+         c->top.Below(m_gauge, 2*LAYOUT_Y_MARGIN);
+      else
+         c->top.Below(ctrl, 2*LAYOUT_Y_MARGIN);
       c->width.AsIs();
       c->height.AsIs();
       ctrl->SetConstraints(c);
    }
-
-   m_gauge->SetValue(0);
 
    SetAutoLayout(TRUE);
    Show(TRUE);
@@ -243,7 +250,9 @@ MProgressDialog::EnableDisableEvents(bool enable)
 bool
 MProgressDialog::Update(int value)
 {
-   m_gauge->SetValue(value);
+   ASSERT(value == -1 || m_gauge);
+   if(m_gauge)
+      m_gauge->SetValue(value);
 
    wxYield();
 

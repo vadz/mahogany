@@ -33,7 +33,7 @@ extern void AutoCollectAddresses(const String &email,
                                  bool collectNamed,
                                  const String& bookName,
                                  const String& groupName,
-                                 MFrame *frame = NULL);
+                                 class MFrame *frame = NULL);
 
 /// construct the full email address of the form "name <email>"
 inline String GetFullEmailAddress(const String& name, const String& email)

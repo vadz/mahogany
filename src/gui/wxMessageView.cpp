@@ -420,36 +420,6 @@ wxMessageView::Update(void)
    {
       String
          tmp = m_mailMessage->GetHeader();
-#if 0
-      /* I was trying to do something more clever here, to highlight
-         the header names. I'll rewrite it rsn. */
-         *sptr;
-      kbStringList sl;
-      bool istitle = true;
-      char *cptr = strutil_strdup(tmp);
-      strutil_tokenise(cptr, ":", sl);
-      delete [] cptr;
-      size_t n = sl.size(); // number of elements
-      size_t i = 0;
-      for(i = 0; i < n; i++)
-      {
-         sptr = sl.pop_front();
-         if(istitle)
-         {
-            llist->SetFontWeight(wxBOLD);
-            *sptr << ": ";
-            llist->Insert(*sptr);
-            llist->SetFontWeight(wxNORMAL);
-            istitle = false;
-         }
-         else
-         {
-            llist->Insert(*sptr);
-            istitle = true;
-         }
-         delete sptr;
-      }
-#endif
       char *buf = strutil_strdup(tmp);
       wxLayoutImportText(llist,buf);
       delete [] buf;
@@ -587,7 +557,7 @@ wxMessageView::Update(void)
             wxString filename = wxGetTempFileName("Mtemp");
             MimeSave(i,filename);
             bool ok;
-            wxImage img =  wxIconManager::LoadImage(filename, &ok);
+            wxImage img =  wxIconManager::LoadImage(filename, &ok, true);
             wxRemoveFile(filename);
             if(ok)
                icn = img.ConvertToBitmap();
@@ -1327,7 +1297,7 @@ wxMessageView::Print(void)
    bool found;
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
 
-   //    set AFM path
+   // set AFM path
    PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
    pf.AddPaths(m_ProfileValues.afmpath, false);
    pf.AddPaths(mApplication->GetLocalDir(), true);
@@ -1353,12 +1323,14 @@ wxMessageView::PrintPreview(void)
    wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
 #else // Unix
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-   //    set AFM path (recursive!)
-   PathFinder pf(m_ProfileValues.afmpath, true);
-   pf.AddPaths(mApplication->GetGlobalDir(), true);
+   // set AFM path
+   PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
+   pf.AddPaths(m_ProfileValues.afmpath, false);
    pf.AddPaths(mApplication->GetLocalDir(), true);
-   String afmpath = pf.FindDirFile("Cour.afm");
-   wxSetAFMPath((char *) afmpath.c_str());
+   bool found;
+   String afmpath = pf.FindDirFile("Cour.afm", &found);
+   if(found)
+      wxSetAFMPath(afmpath);
 #endif // in/Unix
 
    // Pass two printout objects: for preview, and possible printing.

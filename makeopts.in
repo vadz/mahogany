@@ -72,7 +72,7 @@ DESTDIR = @prefix@
 # Directory in which to install scripts.
 BINDIR = $(DESTDIR)/bin
 # Directory in which to install library files.
-DATADIR = $(DESTDIR)/share/M
+DATADIR = $(DESTDIR)/share/Mahogany
 # where to install docs
 DOCDIR = $(DATADIR)/doc
 

@@ -46,6 +46,8 @@ MailFolder::OpenFolder(int typeAndFlags,
    FolderType type = GetFolderType(typeAndFlags);
    int flags = GetFolderFlags(typeAndFlags);
 
+   String symbolicName = i_name;
+   
    if ( type == MF_PROFILE || type == MF_PROFILE_OR_FILE )
    {
       profile = ProfileBase::CreateProfile(i_name, parentProfile);
@@ -139,7 +141,7 @@ MailFolder::OpenFolder(int typeAndFlags,
    typeAndFlags = CombineFolderTypeAndFlags(type, flags);
 
    MailFolder *mf = MailFolderCC::OpenFolder(typeAndFlags, name, profile,
-                                             server, login, passwd);
+                                             server, login, passwd, symbolicName);
    if ( mf )
       mf->m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
 

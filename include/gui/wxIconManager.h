@@ -88,11 +88,14 @@ public:
    void AddIcon(String const &iconName, IconResourceType data);
 
    /** Load an image file and return it as a wxImage.
-       @filename the name of the file
-       @success set to true on success
+       @param filename the name of the file
+       @param success set to true on success
+       @parem showDlg if true, show abort/progress dialog
        @return wxImage holding the graphic
    */
-   static wxImage & LoadImage(String filename, bool *success);
+   static wxImage & LoadImage(String filename,
+                              bool *success,
+                              bool showDlg = false);
    
    /** Load an image file and return it as an xpm array.
        @filename the name of the file
@@ -113,6 +116,8 @@ private:
    static bool m_knowHandlers;
    /// list of supported types, terminated with -1
    static long m_wxBitmapHandlers[];
+   /// number of handlers
+   static int ms_NumOfHandlers;
    /// check this path first
    static wxString ms_IconPath;
 };

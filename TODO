@@ -147,29 +147,33 @@ CHECK:
   --> Just add MAppBase::AddIncomingFolder()/RemoveIncomingFolder()
       and keep a list of the folder names and MailFolder pointers.
       Regularly check the incoming folders for validity, i.e. Ping() them.
-
-
-TODO:
 - locale not found
 - message status etc in title bar
-- printer settings seem to have no effect : are persistent, do they get used?
-- MFolder.i
 - afm path in config
+- NewMail folder INCOMING flag reset
+- INBOX by default INCOMING
+- remove dialog box in MailFolderCC::Ping about reopening folder!!!
+- filter messages in mm_log/mm_notify
+
+TODO:
+- printer settings seem to have no effect : are persistent, do they get used?
+  -- no printout appears!
+  -- afm path should be stored
+   -- broken in wxGTK!!
+- MFolder.i
 - new mail dialog for "New Mail" folder!!!
+- MailCollector: implement Add/Remove calls
 
 for release:
 
 -- disable main frame updates if main frame folder is incoming folder, 
    while collecting mail
--- filter messages in mm_log/mm_notify
 
 - CHECK mailcollector for nntp: do mails get marked as read?
   ++ if necessary, reopen folder??
-  ++ implement Add/Remove calls
   ++ make delay configurable on a per-folder basis, compare elapsed
      time to their PING interval.
 
-- remove dialog box in MailFolderCC::Ping about reopening folder!!!
 - do we really need to scan /var/lib/news/active?
 - more configurability for news
 

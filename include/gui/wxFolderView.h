@@ -155,7 +155,6 @@ public:
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
    /// return profile name for persistent controls
    wxString const &GetFullName(void) const { return m_ProfileName; }
-
 protected:
    /** Save messages to a folder.
        @param n number of messages
@@ -202,6 +201,8 @@ private:
 
    /// allow it to access m_MessagePreview;
    friend class wxFolderListCtrl;
+   /// in deletion semaphore, ugly hack to avoid recursion in destructor
+   bool m_InDeletion;
 };
 
 class wxFolderViewFrame : public wxMFrame

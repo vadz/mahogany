@@ -29,8 +29,8 @@
 #endif
 
 #include "Mdefaults.h"
-
 #include "gui/wxIconManager.h"
+#include "gui/wxMDialogs.h"
 
 #include <wx/mimetype.h>
 
@@ -91,6 +91,10 @@ static const char *wxIconManagerFileExtensions[] =
 { 
    ".xpm", ".png", ".bmp", ".jpg", NULL
 };
+
+/// how many image handlers do we have
+int wxIconManager::ms_NumOfHandlers = 0;
+
 // how many formats/extensions stored in the array above?
 #define NUMBER_OF_FORMATS 4 
 
@@ -123,7 +127,7 @@ static const char *HandlerNames[]    =
 #define   WXICONMANAGER_DEFAULTSIZE 100
 
 wxImage &
-wxIconManager::LoadImage(String filename, bool *success)
+wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
 {
    bool loaded = false;
    wxImage *img = new wxImage();
@@ -136,19 +140,29 @@ wxIconManager::LoadImage(String filename, bool *success)
       wxLogDebug("Checking for natively supported image formats:");
       wxString formats;
 #endif
-      
+      ms_NumOfHandlers = 0;
       for(int i = 0; m_wxBitmapHandlers[i] != -1; i++)
          if(wxImage::FindHandler( m_wxBitmapHandlers[i] ) == NULL)
             m_wxBitmapHandlers[i] = 0; // not available
-#ifdef DEBUG
          else
+         {
+            ms_NumOfHandlers ++;
+#ifdef DEBUG
             formats << HandlerNames[i] << ',';
+         }
       formats << "xpm";
       wxLogDebug(formats);
 #endif
       m_knowHandlers = true;
    }
-   
+
+   MProgressDialog *pdlg = NULL;
+   int   step = 0;
+   if(showDlg)
+   {
+      pdlg = new MProgressDialog(_("Please wait"), _("Loading image..."),
+                                 ms_NumOfHandlers+3, NULL, false, true);
+   }
    // suppress any error logging from image handlers, some of them
    // will fail.
    {
@@ -156,7 +170,18 @@ wxIconManager::LoadImage(String filename, bool *success)
       
       for(int i = 0; (!loaded) && m_wxBitmapHandlers[i] != -1; i++)
          if(m_wxBitmapHandlers[i])
+         {
             loaded = img->LoadFile(filename, m_wxBitmapHandlers[i]);
+            if(pdlg)
+            {
+               if(!pdlg->Update(++step))
+               {
+                  if(success) *success = loaded;
+                  delete pdlg;
+                  return *img;
+               }
+            }
+         }
    }// normal logging again
 #ifdef OS_UNIX
    if(! loaded) // try to use imageMagick to convert image to another format:
@@ -206,6 +231,15 @@ wxIconManager::LoadImage(String filename, bool *success)
                  command.c_str());
       if(system(command) == 0)
       {
+         if(pdlg)
+         {
+            if(!pdlg->Update(++step))
+            {
+               if(success) *success = false;
+               delete pdlg;
+               return *img;
+            }
+         }
          wxLogNull lo; // suppress error messages
          if(format != 0) // not xpm which we handle internally
          {
@@ -225,6 +259,15 @@ wxIconManager::LoadImage(String filename, bool *success)
       }
       if(tempfile.length()) // using a temporary file
          wxRemoveFile(tempfile);
+      if(pdlg)
+      {
+         if(!pdlg->Update(++step))
+         {
+            if(success) *success = loaded;
+            delete pdlg;
+            return *img;
+         }
+      }
    }
 #endif // OS_UNIX
 
@@ -232,6 +275,8 @@ wxIconManager::LoadImage(String filename, bool *success)
    if((! loaded) /*&& m_wxBitmapHandlers[0] == 0*/) // try our own XPM loading code
    {
       char ** cpptr = LoadImageXpm(filename);
+      if(pdlg)
+         pdlg->Update(++step); // ignore break here
       if(cpptr)
       {
          *img = wxImage(cpptr);
@@ -241,6 +286,7 @@ wxIconManager::LoadImage(String filename, bool *success)
    }
    if(success)
       *success = loaded;
+   if(pdlg) delete pdlg;
    return *img;
 }
 

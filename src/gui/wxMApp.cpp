@@ -271,6 +271,20 @@ wxMApp::OnInit()
       // at this moment we're fully initialized, i.e. profile and log
       // subsystems are working and the main window is created
 
+#if 0
+      // If we are not in the default location:
+      if(GetGlobalDir() != wxString(M_BASEDIR)+"/Mahogany") // broken?
+      {
+         if( locale && (strcmp(locale, "C") != 0) )
+         {
+            String localePath;
+            localePath << GetGlobalDir() << "/locale";
+            m_Locale->AddCatalogLookupPathPrefix(localePath);
+            m_Locale->AddCatalog(M_APPLICATIONNAME);
+         }
+      }
+#endif
+      
       // restore our preferred printer settings
 #if wxUSE_POSTSCRIPT
       GetPrintData().SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));

@@ -101,7 +101,8 @@ public:
                                     ProfileBase *profile,
                                     String const &server,
                                     String const &login,
-                                    String const &password);
+                                    String const &password,
+                                    String const &symname);
 
    //@}
 
@@ -123,12 +124,20 @@ public:
    /** return a symbolic name for mail folder
        @return the folder's name
    */
-   String GetName(void) const;
+   String GetName(void) const { return m_Name; }
 
-   /** get number of messages
+   /** Sets the symbolic name.
+    */
+   virtual void SetName(const String &name) { m_Name = name; };
+   
+   /** Get number of messages which have a message status of value
+       when combined with the mask. When mask = 0, return total
+       message count.
+       @param mask is a (combination of) MessageStatus value(s) or 0 to test against
+       @param value the value of MessageStatus AND mask to be counted
        @return number of messages
    */
-   virtual unsigned long CountMessages(int flag = 0) const;
+   virtual unsigned long CountMessages(int mask = 0, int value = 0) const;
 
    /** get message header
        @param uid mesage uid
@@ -275,6 +284,8 @@ private:
    /// Path to mailbox
    String   m_MailboxPath;
 
+   /// The symbolic name of the folder
+   String m_Name;
    /// do we want c-client's debug messages?
    bool   debugFlag;
 

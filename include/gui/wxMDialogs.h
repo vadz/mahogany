@@ -43,7 +43,7 @@ public:
        frames or parent frame to avoid recursion problems.
        @param title title for window
        @param message message to display in window
-       @param maximum maximum value for status bar
+       @param maximum maximum value for status bar, if <= 0, no bar is shown
        @param parent window or NULL
        @param disableParentOnly if true, only disable parent window's
        event handling
@@ -63,7 +63,7 @@ public:
        @param value new value
        @returns true if ABORT button has not been pressed
    */
-   bool Update(int value);
+   bool Update(int value = -1);
 
    /** Can be called to continue after the cancel button has been pressed, but
        the program decided to continue the operation (e.g., user didn't

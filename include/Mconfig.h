@@ -97,7 +97,7 @@
 /// use simple dynamic class information
 #define   USE_CLASSINFO      1
 
-/// name of the application
+/// name of the application, has to remain "M" for compatibility reasons
 #define   M_APPLICATIONNAME   "M"
 /// name of the vendor
 #define   M_VENDORNAME   "Mahogany-Team"

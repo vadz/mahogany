@@ -240,10 +240,17 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
          // had
          folder->ResetFlags(MF_FLAGS_MODIFIED | MF_FLAGS_UNACCESSIBLE);
 
-         wxLogStatus(this, _("Opened folder '%s' (%lu messages, %lu new)"),
+         unsigned long
+            total = mailFolder->CountMessages(),
+                                // recent & !seen --> new      
+            newmsgs = mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN,
+                                                MailFolder::MSG_STAT_RECENT);
+         wxLogStatus(this, _("Opened folder '%s' (%lu messages, %lu recent, %lu new)"),
                      m_folderName.c_str(),
-                     mailFolder->CountMessages(),
-                     mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT));
+                     total,mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT, MailFolder::MSG_STAT_RECENT),newmsgs);
+         wxString title;
+         title.Printf("%s %lu/%lu", m_folderName.c_str(), total, newmsgs);
+         SetTitle(title);
       }
       else
       {
