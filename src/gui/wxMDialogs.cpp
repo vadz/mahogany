@@ -714,7 +714,19 @@ private:
    wxAboutWindow *m_window;
 };
 
+// VZ: there is a fatal bug in this code currently which I don't quite
+//     understand (it wasn't there before so it's due to someone else's
+//     changes): when the about frame is closed, it deletes the wrong pointer
+//     - the log window one instead of the splash killer as the log window is
+//     created *after* the about frame and so replaces the log target it
+//     installs. All this is so confusing that I start to think it's not a
+//     good idea to mess up with the log targets at this moment at all - and,
+//     at any rate, it currently just crashes, so I disable all this stuff for
+//     now
 
+#undef USE_SPLASH_LOG
+
+#ifdef USE_SPLASH_LOG
 // getting log messages when splash screen is shown is extremely annoying,
 // because there is no (easy) way to close the msg box hidden by the splash
 // screen, so install a temporary log redirector which will close the splash
@@ -749,8 +761,7 @@ public:
 private:
    wxLog *m_logOld;
 };
-
-
+#endif // USE_SPLASH_LOG
 
 #include "wx/html/htmlwin.h"
 
@@ -799,9 +810,11 @@ public:
    virtual ~wxAboutFrame() 
    {
       g_pSplashScreen = NULL; 
+#ifdef USE_SPLASH_LOG
       wxLog *log = wxLog::SetActiveTarget(NULL);
       delete log; 
       // this will remove SplashKillerLog and restore the original one
+#endif // USE_SPLASH_LOG
    }
 
    void Close(void)
@@ -942,7 +955,9 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
 
+#ifdef USE_SPLASH_LOG
    wxLog::SetActiveTarget(new SplashKillerLog);
+#endif // USE_SPLASH_LOG
 
    m_Window = new wxAboutWindow(this, bCloseOnTimeout);
    g_pSplashScreen = (wxMFrame *)this;
