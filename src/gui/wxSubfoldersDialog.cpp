@@ -73,6 +73,13 @@ private:
    // and the folder itself
    MFolder *m_folder;
 
+   // returns the separator of the folder name components
+   char GetFolderNameSeparator() const
+   {
+      return (m_folderType == MF_NNTP) || (m_folderType == MF_NEWS) ? '.'
+                                                                    : '/';
+   }
+
    // to find out under which item to add a new folder we maintain a stack
    // which contains the current branch. This stack is implemented using 2
    // arrays (not terribly clever or fast, but simple)
@@ -199,7 +206,7 @@ wxTreeItemId wxSubscriptionDialog::GetParentForFolder(String *name)
       // difference between listing all folders and all folders under some
       // folder (in the first case, there is no "root" returned by cclient, in
       // the second case there would be)
-      String label = m_folderPath.AfterLast('/');
+      String label = m_folderPath.AfterLast(GetFolderNameSeparator());
       if ( !label )
       {
          // anything better to say?
@@ -234,9 +241,9 @@ wxTreeItemId wxSubscriptionDialog::GetParentForFolder(String *name)
       }
 
       // to be the child of the folderName, name must be longer than it and
-      // start by folderName followed by '/'
+      // start by folderName followed by '/' (or '.')
       size_t len = folderName.length() + 1;
-      folderName += '/';
+      folderName += GetFolderNameSeparator();
       if ( strncmp(*name, folderName, len) == 0 )
       {
          // we found the parent, so now leave only the child part of the
@@ -381,10 +388,6 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
          continue;
       }
 
-      char separator = (m_folderType == MF_NNTP) || (m_folderType == MF_NEWS)
-                       ? '.'
-                       : '/';
-
       MFolder *parent = m_folder;
       parent->IncRef();
 
@@ -392,7 +395,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       for ( int level = levelMax - 1; level >= 0; level-- )
       {
          wxString name = components[level];
-         fullpath << separator << name;
+         fullpath << GetFolderNameSeparator() << name;
 
          // to create a a/b/c, we must first create a, then b and then c, so
          // we create a folder during each loop iteration - unless it already
