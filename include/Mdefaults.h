@@ -284,7 +284,7 @@
 /// the label for the CC: field
 #define   MC_CC_LABEL_D         "CC:"
 /// the printf() format for dates
-#define   MC_DATE_FMT_D         "%2u.%2u.%4u" //broken: "%1\\$2u.%2\\$2u.%3\\$4u"
+#define   MC_DATE_FMT_D         "\\%2u.\\%2u.\\%4u" //broken: "%1\\$2u.%2\\$2u.%3\\$4u"
 /// show console window
 #define   MC_SHOWCONSOLE_D      1
 /// name of address database
