@@ -5,7 +5,7 @@
 %define VERSION 0.50
 %define RELEASE 1
 
-# so far I didn't find how to make a relocatable package...
+# default installation directory
 %define prefix /usr/local
 
 # we can build 2 different packages from this spec file: a semistatically
@@ -25,7 +25,7 @@ URL: http://mahogany.home.dhs.org/
 Packager: Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 Provides: mua
 Prefix: %prefix
-BuildRoot: /home/zeitlin/build/rpm
+BuildRoot: /var/tmp/%{name}-root
 Icon: mahogany.gif
 
 %description
