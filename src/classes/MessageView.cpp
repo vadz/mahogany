@@ -104,7 +104,6 @@ extern const MOption MP_INLINE_GFX;
 extern const MOption MP_INLINE_GFX_EXTERNAL;
 extern const MOption MP_INLINE_GFX_SIZE;
 extern const MOption MP_MAX_MESSAGE_SIZE;
-extern const MOption MP_MSGVIEW_AUTO_ENCODING;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
 extern const MOption MP_MSGVIEW_HEADERS;
 extern const MOption MP_MSGVIEW_VIEWER;
@@ -1561,8 +1560,13 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
 void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
 {
    // get the encoding of the text
-   wxFontEncoding encPart = wxFONTENCODING_SYSTEM;
-   if ( READ_CONFIG(GetProfile(), MP_MSGVIEW_AUTO_ENCODING) )
+   wxFontEncoding encPart;
+   if( m_encodingUser != wxFONTENCODING_DEFAULT )
+   {
+      // user-specified encoding overrides everything
+      encPart = m_encodingUser;
+   }
+   else // determine the encoding ourselves
    {
       encPart = textEnc;
 
@@ -1589,11 +1593,11 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
 
    if ( encPart == wxFONTENCODING_SYSTEM )
    {
-      // autodetecting encoding is disabled or didn't work, use the users fall
-      // back encoding, if any
+      // autodetecting encoding didn't work, use the fall back encoding, if any
       if ( m_encodingUser != wxFONTENCODING_DEFAULT )
       {
-         encPart = m_encodingUser;
+         encPart = (wxFontEncoding)(long)
+                     READ_CONFIG(GetProfile(), MP_MSGVIEW_DEFAULT_ENCODING);
       }
    }
 
@@ -2940,12 +2944,9 @@ MessageView::SetEncoding(wxFontEncoding encoding)
 void MessageView::ResetUserEncoding()
 {
    // if the user had manually set the encoding for the old message, we
-   // revert back to the default encoding for the new message
-   //
-   // note that if m_encodingUser will be wxFONTENCODING_DEFAULT (default),
-   // we'll detect the encoding automatically
-   m_encodingUser = (wxFontEncoding)(long)
-                     READ_CONFIG(GetProfile(), MP_MSGVIEW_DEFAULT_ENCODING);
+   // revert back to the default encoding for the new message (otherwise it is
+   // already wxFONTENCODING_DEFAULT and the line below does nothing at all)
+   m_encodingUser = wxFONTENCODING_DEFAULT;
 }
 
 // ----------------------------------------------------------------------------
