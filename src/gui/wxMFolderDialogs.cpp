@@ -1173,7 +1173,17 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
       case MF_IMAP:
          if ( objEvent == m_mailboxname )
          {
-            SetFolderName(m_mailboxname->GetValue().AfterLast('/'));
+            // FIXME this is completely bogus as IMAP folders can have _any_
+            //       symbol as separator
+            wxString name, path = m_mailboxname->GetValue();
+            if ( strchr(path, '/') )
+               name = path.AfterLast('/');
+            else if ( strchr(path, '.') )
+               name = path.AfterLast('.');
+            else
+               name = path;
+
+            SetFolderName(path);
          }
          break;
 
