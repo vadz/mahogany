@@ -735,7 +735,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    if(mf)
    {
       mf->IncRef();
-      mf->PingReopen(); // make sure it's updated
+      //FIXME: is this really needed? mf->PingReopen(); // make sure it's updated
       return mf;
    }
 
@@ -840,7 +840,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
          profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pword));
       }
    }
-   if(mf) mf->PingReopen();
+   //FIXME: is this really needed if(mf) mf->PingReopen();
    return mf;
 }
 
@@ -1787,6 +1787,9 @@ MailFolderCC::BuildListing(void)
    if(! Lock())
       return;
 
+   LOGMESSAGE((M_LOG_DEBUG, "Building listing for folder '%s'..."),
+              GetName().c_str());
+
    // we don't want MEvents to be handled while we are in here, as
    // they might query this folder:
    MEventManager::Suspend(true);
@@ -1929,6 +1932,9 @@ MailFolderCC::BuildListing(void)
    // now we must release the MEvent queue again:
    MEventManager::Suspend(false);
    UnLock();
+   LOGMESSAGE((M_LOG_DEBUG, "Finished building listing for folder '%s'..."),
+              GetName().c_str());
+
 }
 
 int
