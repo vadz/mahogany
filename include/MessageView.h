@@ -506,13 +506,14 @@ public:
 
    /// ctor for URL
    ClickableInfo(const String& url)
+      : m_label(url)
       {
          m_type = CI_URL;
-         m_label = url;
       }
 
    /// ctor for all the rest
    ClickableInfo(int part, const String &label)
+      : m_label(label)
       {
          m_part = part;
          m_type = CI_ICON;
@@ -544,7 +545,12 @@ public:
    }
 
    /// get the label
-   const String& GetLabel() const { return m_label; }
+   const String& GetLabel() const
+   {
+      ASSERT_MSG( m_type != CI_URL, "Use GetUrl() for URLs!" );
+
+      return m_label;
+   }
 
    //@}
 

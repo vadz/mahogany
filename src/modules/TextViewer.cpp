@@ -181,13 +181,10 @@ void TextViewer::Clear()
 
    const ProfileValues& profileValues = GetOptions();
 
-   wxFont font = m_window->GetFont();
-   font.SetPointSize(profileValues.fontSize);
-   font.SetFamily(profileValues.fontFamily);
-
-   m_window->SetDefaultStyle(wxTextAttr(profileValues.FgCol,
-                                        profileValues.BgCol,
-                                        font));
+   m_window->SetFont(wxFont(profileValues.fontSize, profileValues.fontFamily,
+                            wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+   m_window->SetForegroundColour(profileValues.FgCol);
+   m_window->SetBackgroundColour(profileValues.BgCol);
 }
 
 void TextViewer::Update()
@@ -305,7 +302,10 @@ void TextViewer::StartPart()
 
 void TextViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 {
-   // we ignore attachments
+   // TODO something better
+   wxString str;
+   str << '[' << "Attachment: " << ci->GetLabel() << ']';
+   InsertText(str, wxTextAttr(*wxLIGHT_GREY));
 }
 
 void TextViewer::InsertImage(const wxBitmap& image, ClickableInfo *ci)
