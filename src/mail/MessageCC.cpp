@@ -753,12 +753,14 @@ MessageCC::FetchText(void)
                                                  FT_UID | FT_PEEK);
             m_folder->UnLock();
 
-            ASSERT_MSG(strlen(m_mailFullText) == m_MailTextLen,
-                       "DEBUG: Mailfolder corruption detected");
-
             // there once has been an assert here checking that the message
             // length was positive, but it makes no sense as 0 length messages
-            // do exist - so I removed it (VZ)
+            // do exist - so I removed it
+            //
+            // there was also another assert for strlen(m_mailFullText) ==
+            // m_MailTextLen but this one is simply wrong: the message text may
+            // contain NUL bytes and we should not use C string functions such
+            // as strlen() on it!
          }
          else
          {
