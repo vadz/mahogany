@@ -79,6 +79,7 @@ extern "C"
    PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *) = NULL;
    PyObject *(*M_PyObject_GetAttrString)(PyObject *, char *) = NULL;
    void *(*M_PyObject_Malloc)(size_t) = NULL;
+   void (*M_PyObject_Free)(void *) = NULL;
    int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *) = NULL;
    int (*M_PyObject_Size)(PyObject *) = NULL;
 
@@ -184,6 +185,7 @@ static struct PythonFunc
    PYTHON_FUNC(PyObject_GetAttr)
    PYTHON_FUNC(PyObject_GetAttrString)
    PYTHON_FUNC(PyObject_Malloc)
+   PYTHON_FUNC(PyObject_Free)
    PYTHON_FUNC(PyObject_SetAttrString)
    PYTHON_FUNC(PyObject_Size)
 

@@ -72,6 +72,7 @@ extern "C"
    extern PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *);
    extern PyObject *(*M_PyObject_GetAttrString)(PyObject *, char *);
    extern void *(*M_PyObject_Malloc)(size_t);
+   extern void (*M_PyObject_Free)(void *);
    extern int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *);
    extern int (*M_PyObject_Size)(PyObject *);
 
@@ -157,8 +158,10 @@ extern "C"
 #define PyObject_GetAttrString M_PyObject_GetAttrString
 #if defined(WITH_PYMALLOC) && defined(PYMALLOC_DEBUG)
    #define _PyObject_DebugMalloc M_PyObject_Malloc
+   #define _PyObject_DebugFree M_PyObject_Free
 #else
    #define PyObject_Malloc M_PyObject_Malloc
+   #define PyObject_Free M_PyObject_Free
 #endif
 #define PyObject_SetAttrString M_PyObject_SetAttrString
 #define PyObject_Size M_PyObject_Size
