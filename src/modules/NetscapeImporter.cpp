@@ -878,7 +878,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
      wxString tmpStr;
      if ( (! tmpDir.IsOpened()) ||
           (! tmpDir.GetFirst(&tmpStr,"*",wxDIR_FILES | wxDIR_DIRS)) ||
-          (tmpStr.IsEmpty()) )
+          (tmpStr.empty()) )
        continue;
 
      folder = CreateFolderTreeEntry (tmpParent,    // parent may be NULL
@@ -1190,7 +1190,7 @@ bool MNetscapeImporter::ImportComposeSettings ( MyHashTable& tbl )
   wxString lstr;
 
   // Netscape uses the complete path to the folder instead of the name
-  if ( tbl.GetValue("mail.default_fcc",lstr) && !lstr.IsEmpty())
+  if ( tbl.GetValue("mail.default_fcc",lstr) && !lstr.empty())
    {
      // if I'm correct, Netscape names the files and the folders the same
      // therefore taking the last of the path should be sufficient
@@ -1217,12 +1217,12 @@ bool MNetscapeImporter::ImportComposeSettings ( MyHashTable& tbl )
 
   lstr = lstr2 + lstr;
 
-  if (! lstr.IsEmpty() )
+  if (! lstr.empty() )
    WriteProfileEntry(MP_COMPOSE_BCC,lstr,"blind copy addresses");
 
   // use the fact that these variables are set to infer that they are also
   // used is weak, but it is all I have at the moment
-  if ( tbl.GetValue("mail.signature_file",lstr) && !lstr.IsEmpty())
+  if ( tbl.GetValue("mail.signature_file",lstr) && !lstr.empty())
    WriteProfileEntry(MP_COMPOSE_USE_SIGNATURE,TRUE,"use signature file");
 
   return TRUE;
@@ -1266,7 +1266,7 @@ bool MNetscapeImporter::ImportViewerSettings ( MyHashTable& tbl )
   wxString lstr;
   // use the fact that these variables are set to infer that they are also
   // used is weak, but it is all I have at the moment
-  if ( tbl.GetValue("mail.citation_color",lstr) && !lstr.IsEmpty())
+  if ( tbl.GetValue("mail.citation_color",lstr) && !lstr.empty())
    WriteProfileEntry(MP_MVIEW_QUOTED_COLOURIZE,TRUE,"use color for quoted messages");
 
   return TRUE;
@@ -1333,7 +1333,7 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
          {
           if ( tbl.GetValue(map[i].npKey,value) )
             {
-             if ((map[i].type == NM_IS_STRING) && value.IsEmpty() )
+             if ((map[i].type == NM_IS_STRING) && value.empty() )
                {
                 wxLogMessage(_("Bad value for key '%s': cannot be empty"),
                           map[i].npKey.c_str());

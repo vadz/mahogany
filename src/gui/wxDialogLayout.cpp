@@ -154,7 +154,7 @@ wxPDialog::wxPDialog(const wxString& profileKey,
 {
    int x, y, w, h;
 
-   m_didRestoreSize = !m_profileKey.IsEmpty() &&
+   m_didRestoreSize = !m_profileKey.empty() &&
                       wxMFrame::RestorePosition(m_profileKey, &x, &y, &w, &h);
 
    if ( m_didRestoreSize )
@@ -170,7 +170,7 @@ wxPDialog::~wxPDialog()
    // save the dialog position if we can and if the dialog wasn't dismissed by
    // Esc/Cancel - this indicates that the user doesn't want to remember
    // anything at all!
-   if ( !m_profileKey.IsEmpty() && GetReturnCode() != wxID_CANCEL )
+   if ( !m_profileKey.empty() && GetReturnCode() != wxID_CANCEL )
    {
       wxMFrame::SavePosition(m_profileKey, this);
    }

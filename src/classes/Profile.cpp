@@ -969,7 +969,7 @@ ProfileImpl::DeleteEntry(const String& key)
    PCHECK();
 
    String root = GetName();
-   if ( !m_ProfilePath.IsEmpty() )
+   if ( !m_ProfilePath.empty() )
        root  << '/' << m_ProfilePath;
    ms_GlobalConfig->SetPath(root);
    return ms_GlobalConfig->DeleteEntry(key);
@@ -981,7 +981,7 @@ ProfileImpl::DeleteGroup(const String & path)
    PCHECK();
 
    String root = GetName();
-   if ( !m_ProfilePath.IsEmpty() )
+   if ( !m_ProfilePath.empty() )
        root  << '/' << m_ProfilePath;
    ms_GlobalConfig->SetPath(root);
    return ms_GlobalConfig->DeleteGroup(path);

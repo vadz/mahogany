@@ -657,7 +657,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
    // [Ok], [Cancel] and a box around everything else
    wxString foldername = GetFolderNameFromProfile(profile);
    wxString labelBox;
-   if ( !foldername.IsEmpty() )
+   if ( !foldername.empty() )
       labelBox.Printf(_("Header value for folder '%s'"), foldername.c_str());
    else
       labelBox.Printf(_("Default value for header"));
@@ -838,7 +838,7 @@ wxCustomHeadersDialog::wxCustomHeadersDialog(Profile *profile,
    // [Ok], [Cancel] and a box around everything else
    wxString foldername = GetFolderNameFromProfile(profile);
    wxString labelBox;
-   if ( !foldername.IsEmpty() )
+   if ( !foldername.empty() )
       labelBox.Printf(_("Custom &headers for folder '%s'"), foldername.c_str());
    else
       labelBox.Printf(_("Default custom headers"));

@@ -569,7 +569,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
                   parent
                  );
 
-      if ( fileName.IsEmpty() )
+      if ( fileName.empty() )
       {
          // cancelled by user
          return false;

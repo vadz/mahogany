@@ -2200,7 +2200,7 @@ Upgrade(const String& fromVersion)
 {
    // what is the old version?
    MVersion oldVersion;
-   if ( fromVersion.IsEmpty() )
+   if ( fromVersion.empty() )
       oldVersion = Version_None;
    else
    {
@@ -2397,7 +2397,7 @@ VerifyInbox(void)
     */
    MFolder_obj folderRoot("");
    String foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
-   if(foldername.IsEmpty()) // this must not be
+   if(foldername.empty()) // this must not be
    {
       foldername = _("New Mail");
       mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, foldername);

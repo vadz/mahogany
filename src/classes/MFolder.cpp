@@ -439,7 +439,7 @@ MFolder *MFolder::Get(const String& fullname)
    if ( !folder )
    {
       // the first case catches the root folder - it always exists
-      if ( name.IsEmpty() )
+      if ( name.empty() )
       {
          folder = new MRootFolderFromProfile();
          MFolderCache::Add(folder);
@@ -865,7 +865,7 @@ MFolder *MFolderFromProfile::CreateSubfolder(const String& name, FolderType type
 
 void MFolderFromProfile::Delete()
 {
-   CHECK_RET( !m_folderName.IsEmpty(), "can't delete the root pseudo-folder" );
+   CHECK_RET( !m_folderName.empty(), "can't delete the root pseudo-folder" );
 
    // delete this folder from the parent profile
    String parentName = m_folderName.BeforeLast('/');
@@ -898,7 +898,7 @@ void MFolderFromProfile::Delete()
 
 bool MFolderFromProfile::Rename(const String& newName)
 {
-   CHECK( !m_folderName.IsEmpty(), FALSE, "can't rename the root pseudo-folder" );
+   CHECK( !m_folderName.empty(), FALSE, "can't rename the root pseudo-folder" );
 
    String path = m_folderName.BeforeLast('/'),
           name = m_folderName.AfterLast('/');
@@ -1028,7 +1028,7 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
    long dummy;
 
    wxString rootName(start);
-   if ( !rootName.IsEmpty() )
+   if ( !rootName.empty() )
       rootName += '/';
    //else: there should be no leading slash
 

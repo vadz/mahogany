@@ -2555,7 +2555,7 @@ void wxAdbEditFrame::OnActivate(wxActivateEvent& event)
 AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
 {
   AdbTreeElement *current;
-  if ( strEntry.IsEmpty() || wxIsPathSeparator(strEntry[0]) )
+  if ( strEntry.empty() || wxIsPathSeparator(strEntry[0]) )
     current = m_root;
   else
     current = GetCurNode();
@@ -4101,7 +4101,7 @@ bool AdbTreeNode::ExpandFirstTime(wxTreeCtrl& tree)
 wxString AdbTreeNode::GetWhere() const
 {
   wxString strWhere, strGroup = GetName();
-  if ( strGroup.IsEmpty() ) {
+  if ( strGroup.empty() ) {
     strWhere << _("at the root level of the addressbook '")
              << ((AdbTreeBook *)this)->GetAdbName() << '\'';
   }
@@ -4201,7 +4201,7 @@ void AdbTreeRoot::LoadChildren()
   size_t nAdbCount = m_astrAdb.Count();
   for ( size_t nAdb = 0; nAdb < nAdbCount; nAdb++ ) {
     strProv = m_astrProviders[nAdb];
-    if ( strProv.IsEmpty() )
+    if ( strProv.empty() )
       pProvider = NULL;
     else
       pProvider = AdbDataProvider::GetProviderByName(strProv);

@@ -62,7 +62,7 @@ PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
       {
          tmp = String(found) + ANYFILE;
          wxString nextfile = wxFindFirstFile(tmp.c_str(), wxDIR);
-         while ( !nextfile.IsEmpty() )
+         while ( !nextfile.empty() )
          {
             if(IsDir(nextfile))
             {

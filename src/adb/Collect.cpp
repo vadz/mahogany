@@ -104,12 +104,12 @@ void AutoCollectAddress(const String& email,
 
    // we need an address and a name
    bool hasEmailAndName = true;
-   if ( email.IsEmpty() )
+   if ( email.empty() )
    {
       // won't do anything without email address
       hasEmailAndName = false;
    }
-   else if ( name.IsEmpty() )
+   else if ( name.empty() )
    {
       // if there is no name and we want to autocollect such addresses
       // (it's a global option), take the first part of the e-mail address

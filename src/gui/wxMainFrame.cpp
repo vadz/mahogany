@@ -302,7 +302,7 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
    }
    else if ( folder )
       m_folderName = folder->GetFullName();
-   else if ( m_folderName.IsEmpty() )
+   else if ( m_folderName.empty() )
       return;
    else
       m_folderName.Empty();

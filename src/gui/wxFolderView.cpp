@@ -1755,7 +1755,7 @@ String wxFolderListCtrl::GetWidths() const
    int count = GetColumnCount();
    for ( int col = 0; col < count; col++ )
    {
-      if ( !str.IsEmpty() )
+      if ( !str.empty() )
          str << COLUMNS_WIDTHS_SEP;
 
       str << GetColumnWidth(col);

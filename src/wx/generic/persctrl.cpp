@@ -196,7 +196,7 @@ void wxPHelper::SetConfig(wxConfigBase *config)
 
 void wxPHelper::SetPath(const wxString& path, const wxString& prefix)
 {
-    wxCHECK_RET( !path.IsEmpty(), "empty path in persistent ctrl code" );
+    wxCHECK_RET( !path.empty(), "empty path in persistent ctrl code" );
 
     wxString strKey, strPath = path.BeforeLast('/');
     if ( !strPath ) {
@@ -216,7 +216,7 @@ void wxPHelper::SetPath(const wxString& path, const wxString& prefix)
     }
     else {
         m_path = wxPControls::GetSettingsPath();
-        if ( m_path.IsEmpty() || (m_path.Last() != '/') ) {
+        if ( m_path.empty() || (m_path.Last() != '/') ) {
             m_path += '/';
         }
 
@@ -373,7 +373,7 @@ wxPTextEntry::wxPTextEntry(const wxString& configPath,
            : wxComboBox(parent, id, value, pos, size, style)
 {
     wxString realConfigPath(configPath);
-    if ( !realConfigPath.IsEmpty() && realConfigPath.Last() != '/' ) {
+    if ( !realConfigPath.empty() && realConfigPath.Last() != '/' ) {
         // we need a subgroup name, not a key name
         realConfigPath += '/';
     }
@@ -421,7 +421,7 @@ void wxPTextEntry::SaveSettings()
 
         // save it compare later with other strings
         wxString text = GetValue();
-        if ( !text.IsEmpty() ) {
+        if ( !text.empty() ) {
             config->Write("0", text);
         }
 
@@ -697,7 +697,7 @@ void wxPListCtrl::RestoreWidths()
 {
     if ( m_persist->ChangePath() ) {
         wxString str = m_persist->GetConfig()->Read(m_persist->GetKey());
-        if ( !str.IsEmpty() )
+        if ( !str.empty() )
         {
             int countCol = GetColumnCount();
             char *p = str.GetWriteBuf(str.Len());
@@ -743,7 +743,7 @@ void wxPListCtrl::SaveWidths()
 
     for ( int col = 0; col < count; col++ )
     {
-        if ( !str.IsEmpty() )
+        if ( !str.empty() )
             str << ':';
 
         str << GetColumnWidth(col);
@@ -1912,7 +1912,7 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
     else {
         // remember the last filename/path chosen
         wxString filename = dialog->GetPath();
-        if ( !filename.IsEmpty() && config ) {
+        if ( !filename.empty() && config ) {
             wxString path, name, ext;
             wxSplitPath(filename, &path, &name, &ext);
 

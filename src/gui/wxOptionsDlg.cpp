@@ -2076,7 +2076,7 @@ bool wxOptionsPage::TransferDataFromWindow()
                wxListBox *listbox = wxStaticCast(control, wxListBox);
                size_t count = listbox->GetCount();
                for ( size_t m = 0; m < count; m++ ) {
-                  if ( !strValue.IsEmpty() ) {
+                  if ( !strValue.empty() ) {
                      strValue << ch;
                   }
 

@@ -155,7 +155,7 @@ bool AdbExpand(wxArrayString& results, const String& what,
 
   results.Empty();
 
-  if ( what.IsEmpty() )
+  if ( what.empty() )
      return FALSE;
 
   manager->LoadAll();
@@ -418,9 +418,9 @@ void AdbManager::LoadAll()
     if ( n < astrProv.Count() )
       strProv = astrProv[n];
     else
-      strProv.Empty();
+      strProv.empty();
 
-    if ( strProv.IsEmpty() )
+    if ( strProv.empty() )
       pProvider = NULL;
     else
       pProvider = AdbDataProvider::GetProviderByName(strProv);

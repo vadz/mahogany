@@ -301,7 +301,7 @@ BbdbEntry::BbdbEntry(BbdbEntryGroup *pGroup)
 bool
 BbdbEntry::ReadToken(char token, String * line)
 {
-   if(!line || line->IsEmpty())
+   if(!line || line->empty())
       return false;
 
    strutil_delwhitespace(*line);
@@ -402,7 +402,7 @@ BbdbEntry::WriteString(ostream &out, String const &string)
 {
    const char *cptr;
 
-   if(string.IsEmpty())
+   if(string.empty())
    {
       out << "nil";
       return;
@@ -523,7 +523,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
    AdbEntry *e_exists;
    String alias, temp;
 
-   if(first_name.IsEmpty() && last_name.IsEmpty())
+   if(first_name.empty() && last_name.empty())
    {
       if(m_IgnoreAnonymous)
          return NULL;
@@ -800,7 +800,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
             APPEND_FIELD(AdbField_O_Locality, home);
             APPEND_FIELD(AdbField_O_City, home);
             APPEND_FIELD(AdbField_O_Country, home);
-            if(!home.IsEmpty())
+            if(!home.empty())
             {
                out << '(';
                out << "[ \"home\" "; // Home Address

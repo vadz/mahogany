@@ -1061,7 +1061,7 @@ wxMApp::Help(int id, wxWindow *parent)
                            _("Search for?"),
                            _("Search help for keyword"),
                            parent ? parent : TopLevelFrame())
-                 && !s_lastSearchKey.IsEmpty() )
+                 && !s_lastSearchKey.empty() )
             {
                m_HelpController->KeywordSearch(s_lastSearchKey);
             }

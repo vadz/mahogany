@@ -578,7 +578,7 @@ bool MTextInputDialog::TransferDataFromWindow()
       strText = m_passwd->GetValue();
    else
       strText = m_text->GetValue();
-  if ( strText.IsEmpty() )
+  if ( strText.empty() )
   {
     // imitate [Cancel] button
     EndModal(wxID_CANCEL);

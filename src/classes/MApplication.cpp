@@ -505,7 +505,7 @@ MAppBase::OnStartup()
    if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
    {
       String foldername = READ_APPCONFIG(MP_MAINFOLDER);
-      if ( !foldername.IsEmpty() )
+      if ( !foldername.empty() )
       {
          MFolder *folder = MFolder::Get(foldername);
          if ( folder )
@@ -824,7 +824,7 @@ MAppBase::OnMEvent(MEventData& event)
       if ( READ_CONFIG(profile, MP_USE_NEWMAILCOMMAND) )
       {
          String command = READ_CONFIG(profile, MP_NEWMAILCOMMAND);
-         if(! command.IsEmpty())
+         if(! command.empty())
          {
             if ( ! SYSTEM(command) )
             {

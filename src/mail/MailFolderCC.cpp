@@ -1707,14 +1707,14 @@ MailFolderCC::Open(void)
             // get INBOX path name
             MCclientLocker lock;
             lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
-            if(lockfile.IsEmpty()) // another c-client stupidity
+            if(lockfile.empty()) // another c-client stupidity
                lockfile = (char *) sysinbox();
       }
 #endif // OS_UNIX
 
       lockfile << ".lock*"; //FIXME: is this fine for MS-Win? (NO!)
       lockfile = wxFindFirstFile(lockfile, wxFILE);
-      while ( !lockfile.IsEmpty() )
+      while ( !lockfile.empty() )
       {
          FILE *fp = fopen(lockfile,"r");
          if(fp) // outch, someone has a lock

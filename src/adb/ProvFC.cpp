@@ -378,7 +378,7 @@ void FCEntry::Load(const String& strValue)
     GetField(AdbField_OtherEMails, &str);
     for ( const char *pc = str; ; pc++ ) {
       if ( *pc == ',' || *pc == '\0' ) {
-        if ( !strCurrent.IsEmpty() )
+        if ( !strCurrent.empty() )
           AddEMail(strCurrent);
         strCurrent.Empty();
         if ( *pc == '\0' )
@@ -413,7 +413,7 @@ bool FCEntry::Save()
 
   // optimize a bit: remove all trailing empty fields
   wxString strField;
-  while ( strField.IsEmpty() )
+  while ( strField.empty() )
   {
       GetField(--nFieldMax, &strField);
   }
@@ -631,7 +631,7 @@ AdbEntry *FCEntryGroup::FindEntry(const char * /* szName */)
 
 String FCBook::GetFullAdbPath(const String& filename)
 {
-  CHECK( !filename.IsEmpty(), "", "ADB without name?" );
+  CHECK( !filename.empty(), "", "ADB without name?" );
 
   String path;
   if ( IsAbsPath(filename) )
@@ -647,7 +647,7 @@ FCBook::FCBook(const String& filename)
 {
   String file = strutil_getfilename(filename);
   String fileBaseName = file.BeforeLast('.');
-  m_strFileName = fileBaseName.IsEmpty() ? file : fileBaseName;
+  m_strFileName = fileBaseName.empty() ? file : fileBaseName;
 
   // we must load the file here because we need the ADB's name and description
   m_pConfig = new wxFileConfig(wxGetEmptyString(), wxGetEmptyString(),

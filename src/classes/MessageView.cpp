@@ -162,7 +162,7 @@ public:
       m_process = process;
       m_pid = pid;
 
-      if ( !tempfilename.IsEmpty() )
+      if ( !tempfilename.empty() )
          m_tempfile = new MTempFileName(tempfilename);
       else
          m_tempfile = NULL;
@@ -1807,12 +1807,12 @@ MessageView::MimeHandle(const MimePart *mimepart)
       // use the correct type (e.g. IMAGE/GIF) always leaving this one as
       // default. Try to guess a better MIME type ourselves from the file
       // extension.
-      if ( !filenameOrig.IsEmpty() )
+      if ( !filenameOrig.empty() )
       {
          wxString ext;
          wxSplitPath(filenameOrig, NULL, NULL, &ext);
 
-         if ( !ext.IsEmpty() )
+         if ( !ext.empty() )
             fileType = mimeManager.GetFileTypeFromExtension(ext);
       }
    }
@@ -2008,7 +2008,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
          return;
       }
 
-      if ( command.IsEmpty() )
+      if ( command.empty() )
       {
          wxLogWarning(_("Do not know how to handle data of type '%s'."),
                       mimetype.c_str());
@@ -2017,7 +2017,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
       {
          // the command must contain exactly one '%s' format specificator!
          String specs = strutil_extract_formatspec(command);
-         if ( specs.IsEmpty() )
+         if ( specs.empty() )
          {
             // at least the filename should be there!
             command += " %s";
@@ -2034,7 +2034,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    if ( fileType )
       delete fileType;
 
-   if ( ! command.IsEmpty() )
+   if ( ! command.empty() )
    {
       if(already_saved || MimeSave(mimepart, filename))
       {
@@ -2106,7 +2106,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
       return;
    }
 
-   if ( command.IsEmpty() )
+   if ( command.empty() )
    {
       wxLogWarning(_("Do not know how to handle data of type '%s'."),
                    mimetype.c_str());
@@ -2115,7 +2115,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
    {
       // the command must contain exactly one '%s' format specificator!
       String specs = strutil_extract_formatspec(command);
-      if ( specs.IsEmpty() )
+      if ( specs.empty() )
       {
          // at least the filename should be there!
          command += " %s";
@@ -2126,7 +2126,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
 
    }
 
-   if ( ! command.IsEmpty() )
+   if ( ! command.empty() )
    {
       if ( MimeSave(mimepart, filename) )
       {
@@ -2282,7 +2282,7 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
    wxString command;
 
    bool bOk;
-   if ( m_ProfileValues.browser.IsEmpty() )
+   if ( m_ProfileValues.browser.empty() )
    {
 #ifdef OS_WIN
       // ShellExecute() always opens in the same window,
@@ -2355,7 +2355,7 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
          )
          ShowOptionsDialog();
 
-      if ( m_ProfileValues.browser.IsEmpty() )
+      if ( m_ProfileValues.browser.empty() )
       {
          wxLogError(_("No command configured to view URLs."));
          bOk = false;
@@ -2800,7 +2800,7 @@ MessageView::LaunchProcess(const String& command,
    {
       delete process;
 
-      if ( !errormsg.IsEmpty() )
+      if ( !errormsg.empty() )
          wxLogError("%s.", errormsg.c_str());
 
       return false;

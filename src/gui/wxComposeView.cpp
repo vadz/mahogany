@@ -599,7 +599,7 @@ void MimeContent::SetData(void *data,
 
 void MimeContent::SetFile(const String& filename)
 {
-   ASSERT( !filename.IsEmpty() );
+   ASSERT( !filename.empty() );
 
    m_FileName = filename;
    m_Type = MIMECONTENT_FILE;
@@ -729,7 +729,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
          // [Expand] button then. This behaviour is not desirable when the user
          // presses TAB, however, so check it here and just treat TAB normally
          // if the text is empty instead.
-         if ( !GetValue().IsEmpty() )
+         if ( !GetValue().empty() )
          {
             DoExpand();
 
@@ -768,7 +768,7 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
    // check for the lone '"' simplifies the code for finding the starting
    // position below: it should be done here, otherwise the following loop
    // will crash!
-   if ( text.IsEmpty() || text == '"' )
+   if ( text.empty() || text == '"' )
    {
       // don't do anything
       if ( !quiet )
@@ -855,7 +855,7 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
 
       // take what was there before...
       wxString newText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
-      if ( !newText.IsEmpty() )
+      if ( !newText.empty() )
       {
          // there was something before, add separator
          newText += CANONIC_ADDRESS_SEPARATOR;
@@ -1653,7 +1653,7 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
       while ( !hasSign )
       {
          String strSignFile = READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE);
-         if ( !strSignFile.IsEmpty() )
+         if ( !strSignFile.empty() )
             hasSign = fileSig.Open(strSignFile);
 
          if ( !hasSign )
@@ -1661,7 +1661,7 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
             // no signature at all or sig file not found, propose to choose or
             // change it now
             wxString msg;
-            if ( strSignFile.IsEmpty() )
+            if ( strSignFile.empty() )
             {
                msg = _("You haven't configured your signature file.");
             }
@@ -1693,7 +1693,7 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
                break;
             }
 
-            if ( strSignFile.IsEmpty() )
+            if ( strSignFile.empty() )
             {
                // user canceled "choose signature" dialog
                break;
@@ -2114,7 +2114,7 @@ wxComposeView::OnMenuCommand(int id)
                                this
                               );
 
-            if ( filename.IsEmpty() )
+            if ( filename.empty() )
             {
                wxLogStatus(this, _("Cancelled"));
             }
@@ -2142,7 +2142,7 @@ wxComposeView::OnMenuCommand(int id)
                                this
                               );
 
-            if ( filename.IsEmpty() )
+            if ( filename.empty() )
             {
                wxLogStatus(this, _("Cancelled"));
             }
@@ -2722,7 +2722,7 @@ wxComposeView::IsReadyToSend() const
    while ( !networkSettingsOk )
    {
       String host = READ_CONFIG(mApplication->GetProfile(), MP_SMTPHOST);
-      if ( host.IsEmpty() )
+      if ( host.empty() )
       {
          if ( MDialog_YesNoDialog(
                   _("The message can not be sent because the network settings "

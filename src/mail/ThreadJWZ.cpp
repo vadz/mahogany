@@ -984,7 +984,7 @@ Threadable *Threader::thread(Threadable *threadableRoot)
 void Threader::buildContainer(Threadable *th)
 {
    String id = th->messageThreadID();
-   ASSERT(!id.IsEmpty());
+   ASSERT(!id.empty());
    ThreadContainer *container = lookUp(m_idTable, id);
 
    if (container != 0)
