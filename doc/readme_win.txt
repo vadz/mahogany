@@ -1,6 +1,6 @@
 File: readme_win.txt, the README file for MS Windows version
-Date: 16.12.01
-Version: the information in this file applies to alpha 0.64
+Date: 03.02.03
+Version: the information in this file applies to alpha 0.64.2
 
 0. Requirements
 --------------
@@ -51,19 +51,13 @@ Version: the information in this file applies to alpha 0.64
 ------------------------
 
  a) locale support: like the Unix version, Mahogany for Windows supports many
-    different languages (please see our WWW page for the up-to-date list - new
+    different languages (please see our WWW page for the up-to-date list as new
     translations are added quite often). However, they're not included in this
     distribution and you'll have to fetch them yourself from the WWW page (see
     the address above) and put them into the locale directory to make it work.
 
  b) documentation: sorry, this preliminary Windows version comes without
-    context-sensitive help. The help file is included in the distribution
-    though - it's a translation to Windows help format of Mahogany HTML
-    documentation which may always be found at
-
-       http://mahogany.sourceforge.net/doc/Manual/Manual.html
-
-    The context-sensitive help will work in the future versions.
+    context-sensitive help. It will work in the future versions.
 
     Generally speaking, documentation is far from complete, so if you have any
     questions please feel free to ask them on the Mahogany mailing lists (see

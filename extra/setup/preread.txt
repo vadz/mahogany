@@ -1,10 +1,10 @@
                                         *** WARNING ***
 
- This is the 0.64 alpha version of the Mahogany e-mail client. "Alpha" means
+ This is the 0.64.2 alpha version of the Mahogany e-mail client. "Alpha" means
 that many of the features which the finished product will have are still
-lacking and that you may (and probably will) find bugs in it. We believe that
-Mahogany is already quite useful but we hope to improve it much further - with
-your help!
+lacking and that you may (and probably will) find bugs in it. However even in
+its current state Mahogany is already very useful to us and we hope it will
+also be it for you as well as to improve it much further -- with your help!
 
  So please send your impressions, questions, feature requests and bug reports
 to our mailing list at
