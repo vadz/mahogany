@@ -2152,11 +2152,7 @@ Folders
  be asked for the confirmation.
  They also allow to set a similar threshold for the number of message headers
  retrieved: you will be asked before retrieving more than the specified
- number of headers (default is 
-\begin_inset Formula \( 100 \)
-\end_inset 
-
-) from server.
+ number of headers (default is 100) from server.
  This limit is called 
 \begin_inset Quotes eld
 \end_inset 
@@ -2174,11 +2170,7 @@ hard
 \end_inset 
 
  one which can be set in the same page.
- The hard limit, if set (it has value 
-\begin_inset Formula \( 0 \)
-\end_inset 
-
-, i.e.
+ The hard limit, if set (it has value 0, i.e.
  disabled, by default) says that at most that many message headers will
  be downloaded.
  Unlike the soft limit, it is unconditional and no questions will be asked

@@ -1947,21 +1947,25 @@ wxFolderView::UpdateSelectionInfo(void)
    {
       m_FocusedUId = uid;
 
-      String msg;
-      if ( m_FocusedUId != UID_ILLEGAL )
+      if ( READ_CONFIG(m_Profile, MP_FVIEW_STATUS_UPDATE) )
       {
-         HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-         if ( hil )
+         String msg;
+         if ( m_FocusedUId != UID_ILLEGAL )
          {
-            wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
-            HeaderVarExpander expander(hil[idx],
-                                       m_settings.dateFormat,
-                                       m_settings.dateGMT);
-            msg = ParseMessageTemplate(fmt, expander);
+            HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+            if ( hil )
+            {
+               wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
+               HeaderVarExpander expander(hil[idx],
+                                          m_settings.dateFormat,
+                                          m_settings.dateGMT);
+               msg = ParseMessageTemplate(fmt, expander);
+            }
          }
-      }
 
-      wxLogStatus(m_Frame, msg);
+         wxLogStatus(m_Frame, msg);
+      }
+      //else: no status message
    }
 }
 
@@ -2508,11 +2512,14 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
    if ( event.GetFolder() == m_MailFolder )
    {
       size_t index = event.GetIndex();
-      CHECK_RET( index < (size_t)m_FolderCtrl->GetItemCount(),
-                 "invalid index in wxFolderView::OnMsgStatusEvent" );
-
-      SetEntry(event.GetHeaderInfo(), index);
-      UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
+      if ( index < (size_t)m_FolderCtrl->GetItemCount() )
+      {
+         SetEntry(event.GetHeaderInfo(), index);
+         UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
+      }
+      //else: this can happen if we didn't have to update the control yet, just
+      //      ignore the event then as we will get the message with the
+      //      correct status when we retrieve it from Update() anyhow
    }
 }
 

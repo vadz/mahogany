@@ -2505,8 +2505,7 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
 }
 
 int
-FilterRuleImpl::Apply(MailFolder *mf, bool NewOnly,
-                      bool *changeflag)
+FilterRuleImpl::Apply(MailFolder *mf, bool NewOnly, bool *changeflag)
 {
    return ApplyCommonCode(mf, NULL, NewOnly, NewOnly, changeflag);
 }
@@ -2529,16 +2528,17 @@ FilterRuleImpl::Apply(MailFolder *folder,
 static inline bool
 CheckStatusMatch(int status, bool newOnly, bool ignoreDeleted)
 {
-   return
-      /* Do we want all messages or new ones only? If so, check
-         that the message is RECENT and not SEEN: */
-      ( ! newOnly ||
-        ( (status & MailFolder::MSG_STAT_RECENT)
-          && ! (status & MailFolder::MSG_STAT_SEEN) ) )
-      /* Check if we need to ignore this message: */
-      && (ignoreDeleted
-          || (status & MailFolder::MSG_STAT_DELETED) == 0 )
-      ;
+   if ( ignoreDeleted && (status & MailFolder::MSG_STAT_DELETED) )
+      return false;
+
+   if ( newOnly )
+   {
+      if ( !(status & MailFolder::MSG_STAT_RECENT) ||
+               (status & MailFolder::MSG_STAT_SEEN) )
+         return false;
+   }
+
+   return true;
 }
 
 int

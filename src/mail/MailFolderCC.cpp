@@ -1768,8 +1768,13 @@ MailFolderCC::PingReopen(void)
       if ( !m_MailStream || !mail_ping(m_MailStream) )
       {
          RemoveFromMap(); // will be added again by Open()
-         STATUSMESSAGE((_("Mailstream for folder '%s' has been closed, trying to reopen it."),
-                        GetName().c_str()));
+         MFrame *frame = GetInteractiveFrame();
+         if ( frame )
+         {
+            STATUSMESSAGE((frame,
+                           _("Mailstream for folder '%s' has been closed, trying to reopen it."),
+                           GetName().c_str()));
+         }
 
          rc = Open();
          if( !rc )
@@ -1817,7 +1822,8 @@ MailFolderCC::PingReopenAll(bool fullPing)
       MailFolderCC *mf = connections[n]->folder;
 
       // don't ping locked folders, they will have to wait for the next time
-      if ( !mf->IsLocked() )
+      if ( !mf->m_InListingRebuild->IsLocked() &&
+           !mf->m_InFilterCode->IsLocked() )
       {
          rc &= fullPing ? mf->PingReopen() : mf->Ping();
       }

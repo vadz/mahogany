@@ -70,9 +70,6 @@ KBLIST_DEFINE(MEventList, MEventData);
 /// the list of pending events
 static MEventList gs_EventList;
 
-// are we currently dispatching events?
-static bool gs_IsDispatching = false;
-
 /// are we suspended?
 static bool gs_IsSuspended = false;
 
@@ -117,24 +114,21 @@ MEventManager::DispatchPending(void)
 {
    // don't dispatch events while we're suspended: as Dispatch() just ignores
    // them, it means that events are simply lost if we do it
-   if ( gs_IsDispatching || gs_IsSuspended )
+   if ( gs_IsSuspended )
       return;
-
-   gs_IsDispatching = true;
 
    MEventLocker mutex;
 
    MEventData *dataptr = NULL;
-   while(! gs_EventList.empty() )
+   while ( !gs_EventList.empty() )
    {
       dataptr = gs_EventList.pop_front();
+
       // Dispatch is safe and might cause new events:
       mutex.Unlock();
       Dispatch(dataptr);
-      delete dataptr;
       mutex.Lock(); // restore locked status
    }
-   gs_IsDispatching = false;
 }
 
 /* static */
@@ -146,10 +140,15 @@ MEventManager::Send(MEventData * data)
 }
 
 /* static */
-void MEventManager::Dispatch(MEventData * dataptr)
+bool MEventManager::Dispatch(MEventData *dataptr)
 {
-   if(gs_IsSuspended) // don't do anything
-      return;
+   CHECK( dataptr, false, "NULL event in Dispatch()" );
+
+   if ( gs_IsSuspended )
+   {
+      // can't do it now!
+      return false;
+   }
 
    MEventData & data = *dataptr;
    MEventId id = data.GetId();
@@ -181,6 +180,10 @@ void MEventManager::Dispatch(MEventData * dataptr)
          //else: continue to search other receivers for this event
       }
    }
+
+   delete dataptr;
+
+   return true;
 }
 
 // the return value is just the pointer to the structure we add to the array

@@ -362,10 +362,13 @@ class MEventManager
 public:
    MEventManager();
 
-   /// send an event to the queue
-   static void Send(MEventData * data);
+   /// send an event to the queue, it will be processed some time later
+   static void Send(MEventData *data);
 
-   /// Dispatches all events in the queue.
+   /// dispatches the event immediately, return false if suspended
+   static bool Dispatch(MEventData *data);
+
+   /// dispatches all events in the queue.
    static void DispatchPending(void);
 
    // register the event receiever for the events "eventId", the returned
@@ -396,10 +399,6 @@ public:
 
    /// Temporarily suspend (enable/disable) event dispatching:
    static void Suspend(bool suspended = TRUE);
-
-protected:
-   /// Dispatches a single event.
-   static void Dispatch(MEventData *data);
 };
 
 // ----------------------------------------------------------------------------

@@ -576,20 +576,22 @@ enum MFolderIndex
 #define   MP_FVIEW_FONT_SIZE         "FViewFontSize"
 /// don't show full e-mail, only sender's name
 #define   MP_FVIEW_NAMES_ONLY         "FViewNamesOnly"
-// which foreground colour for the font
+/// which foreground colour for the font
 #define   MP_FVIEW_FGCOLOUR      "FViewFgColour"
-// which background colour for the font
+/// which background colour for the font
 #define   MP_FVIEW_BGCOLOUR      "FViewBgColour"
-// colour for deleted messages
+/// colour for deleted messages
 #define   MP_FVIEW_DELETEDCOLOUR      "FViewDeletedColour"
-// colour for new messages
+/// colour for new messages
 #define   MP_FVIEW_NEWCOLOUR      "FViewNewColour"
-// colour for recent messages
+/// colour for recent messages
 #define   MP_FVIEW_RECENTCOLOUR      "FViewRecentColour"
-// colour for unread messages
+/// colour for unread messages
 #define   MP_FVIEW_UNREADCOLOUR      "FViewUnreadColour"
-// colour for flagged messages
+/// colour for flagged messages
 #define   MP_FVIEW_FLAGGEDCOLOUR      "FViewFlaggedColour"
+/// update the folder view status bar to show the msg info?
+#define   MP_FVIEW_STATUS_UPDATE "FViewStatUpdate"
 /// folder view status bar string
 #define   MP_FVIEW_STATUS_FMT  "FViewStatFmt"
 //@}
@@ -1299,20 +1301,22 @@ enum MFolderIndex
 #define   MP_FVIEW_FONT_SIZE_D         12L
 /// don't show full e-mail, only sender's name
 #define   MP_FVIEW_NAMES_ONLY_D         0L
-// which foreground colour for the font
+/// which foreground colour for the font
 #define   MP_FVIEW_FGCOLOUR_D      "black"
-// which background colour for the font
+/// which background colour for the font
 #define   MP_FVIEW_BGCOLOUR_D      "white"
-// colour for deleted messages
+/// colour for deleted messages
 #define   MP_FVIEW_DELETEDCOLOUR_D      "grey"
-// colour for new messages
+/// colour for new messages
 #define   MP_FVIEW_NEWCOLOUR_D      "orange"
-// colour for recent messages
+/// colour for recent messages
 #define   MP_FVIEW_RECENTCOLOUR_D      "gold"
-// colour for unread messages
+/// colour for unread messages
 #define   MP_FVIEW_UNREADCOLOUR_D      "blue"
-// colour for flagged messages
+/// colour for flagged messages
 #define   MP_FVIEW_FLAGGEDCOLOUR_D      "purple"
+/// update the folder view status bar to show the msg info?
+#define   MP_FVIEW_STATUS_UPDATE_D 1L
 /// folder view status bar string
 #define   MP_FVIEW_STATUS_FMT_D "Date: $date, Subject: $subject, From: $from"
 //@}

@@ -931,17 +931,19 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                 "<center><img src=\"memory:splash" MEMORY_FS_FILE_EXT "\"><br>"
                 "</center>");
 
+#define HTML_WARNING "<font color=#ff0000><b>WARNING: </b></font>"
+
    bottom->SetPage("<body text=#000000 bgcolor=#ffffff>"
                    "<font face=\"Times New Roman,times\">"
 
                    "<h4>Mahogany information</h4>"
                    "Version " M_VERSION_STRING "<br>"
 #ifdef DEBUG
-                   "<b>WARNING:</b> This is a debug build"
+                   HTML_WARNING "This is a debug build<br>"
 #else
-                   "Release build"
+                   "Release build "
 #endif
-                   " (compiled at " __DATE__ ", " __TIME__ ")"
+                   "(compiled at " __DATE__ ", " __TIME__ ")"
 
 #if defined(USE_SSL) || defined(USE_THREADS) || defined(USE_PYTHON)
                    "<h4>Extra features:</h4>"
@@ -957,14 +959,15 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #endif // USE_XXX
 
 #ifdef EXPERIMENTAL
-                   "<b>WARNING</b>: Includes experimental code (" EXPERIMENTAL ")"
+                   HTML_WARNING "Includes experimental code (" EXPERIMENTAL ")"
 #endif
 
                    "<p>"
                    "<h4>List of contributors:</h4>"
                    "<p>"
                    "Karsten Ball&uuml;der, Vadim Zeitlin,<br> "
-                   "Greg Noel, Vaclav Slavik, Daniel Seifert,<br>"
+                   "Greg Noel, Nerijus Baliunas,<br>"
+                   "Vaclav Slavik, Daniel Seifert,<br>"
                    "and many others<br>"
                    "<i>The Mahogany team</i><br>"
                    "<font size=2>"
@@ -995,6 +998,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "and SuSE GmbH."
                   );
 
+#undef HTML_WARNING
 
    wxMemoryFSHandler::RemoveFile("splash" MEMORY_FS_FILE_EXT);
 #ifdef USE_PYTHON

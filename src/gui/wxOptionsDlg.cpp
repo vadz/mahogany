@@ -281,6 +281,8 @@ enum ConfigFields
    ConfigField_FolderViewRecentColour,
    ConfigField_FolderViewUnreadColour,
    ConfigField_FolderViewDeletedColour,
+   ConfigField_FolderViewStatusHelp,
+   ConfigField_FolderViewUpdateStatus,
    ConfigField_FolderViewStatusBarFormat,
    ConfigField_FolderViewSortMessagesBy,
    ConfigField_FolderViewHeaders,
@@ -884,7 +886,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for &recent messages"),  Field_Color,   -1},
    { gettext_noop("Colour for u&nread messages"),  Field_Color,   -1},
    { gettext_noop("Colour for &deleted messages" ),Field_Color,   -1},
-   { gettext_noop("&Status bar line formar"),      Field_Text,    -1                     },
+   { gettext_noop("You can choose to show the information about\n"
+                  "the currently selected message in the status bar.\n"
+                  "You can use the same macros as in the template\n"
+                  "dialog (i.e. $subject, $from, ...) in this string."),
+                                                   Field_Message, -1 },
+   { gettext_noop("&Use status bar"),              Field_Bool,    -1 },
+   { gettext_noop("&Status bar line format"),      Field_Text,    ConfigField_FolderViewUpdateStatus                     },
    { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
    { gettext_noop("Configure &columns to show..."),Field_SubDlg,   -1 },
 
@@ -1152,6 +1160,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_RECENTCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_UNREADCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_DELETEDCOLOUR),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FVIEW_STATUS_UPDATE),
    CONFIG_ENTRY(MP_FVIEW_STATUS_FMT),
    CONFIG_ENTRY(MP_MSGS_SORTBY),
    CONFIG_NONE(), // no such thing as MP_FOLDERVIEW_COLUMNS

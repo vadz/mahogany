@@ -813,8 +813,8 @@ bool wxFolderTree::OnRename(MFolder *folder, const String& folderNewName)
 
 bool wxFolderTree::OnClose(MFolder *folder)
 {
-   // we can't close it from here
-   return FALSE;
+   // we don't have to close it as we don't keep it opened
+   return TRUE;
 }
 
 bool wxFolderTree::OnDoubleClick()

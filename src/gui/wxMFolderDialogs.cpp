@@ -2363,11 +2363,17 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    {
       // generate an event notifying everybody that a new folder has been
       // created
-      MEventManager::Send(
-         new MEventFolderTreeChangeData(fullname,
-                                        MEventFolderTreeChangeData::Create)
-         );
-      MEventManager::DispatchPending();
+      MEventData *data = new MEventFolderTreeChangeData
+                             (
+                              fullname,
+                              MEventFolderTreeChangeData::Create
+                             );
+      if ( !MEventManager::Dispatch(data) )
+      {
+         // oops... we're suspended - don't lose the event, add it to the queue
+         // instead
+         MEventManager::Send(data);
+      }
    }
 
    folder->DecRef();
