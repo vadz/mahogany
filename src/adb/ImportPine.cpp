@@ -37,7 +37,7 @@
 #include "adb/AdbEntry.h"
 #include "adb/AdbImport.h"
 
-extern void wxSplitPath(wxArrayString&, const wxChar *);
+extern void WXDLLEXPORT wxSplitPath(wxArrayString&, const wxChar *);
 
 // ----------------------------------------------------------------------------
 // private classes
