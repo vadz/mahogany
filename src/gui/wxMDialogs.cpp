@@ -333,7 +333,6 @@ public:
        sizerTop->Add(sizerBtns, 0, wxCENTRE | wxTOP | wxBOTTOM, LAYOUT_Y_MARGIN);
 
        // set the sizer &c
-       sizerTop->Fit(this);
        SetSizer(sizerTop);
        SetAutoLayout(TRUE);
 
