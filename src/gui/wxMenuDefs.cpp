@@ -891,4 +891,4 @@ extern wxFontEncoding GetEncodingFromMenuCommand(int id)
    return (wxFontEncoding)encoding;
 }
 
-/* vi: set tw=0 */
+/* vi: set tw=0: */
