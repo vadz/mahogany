@@ -135,26 +135,12 @@ MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
 
    /*
       Nasty hack: c-client (and so probably IMAP as well) doesn't seem to
-      number the multipart parts whose parent and grand parent are multipart
-      as well and this part is the only part at this level
+      number the multipart parts whose parent part is the message, so when
+      assigning the part spec to their children we should skip the parent and
+      use the grandparent spec as the base.
 
-      For example, the part numbers are assigned like this in this example
-      message:
-
-         MULTIPART/MIXED
-            TEXT/PLAIN                          1
-            MESSAGE/RFC822                      2
-               MULTIPART/MIXED                  2.1
-                  MULTIPART/ALTERNATIVE
-                     TEXT/PLAIN                 2.1.1
-                     TEXT/HTML                  2.1.2
-                  MESSAGE/RFC822                2.2
-                     MULTIPART/MIXED
-                        TEXT/PLAIN              2.2.1
-                        IMAGE/JPEG              2.2.2
-
-      I.e. the MULTIPART/ALTERNATIVE and the last MIXED parts don't have the
-      part numbers (or rather have the same number as their parent).
+      I'd like to really understand the rule to be used here one of these
+      days...
     */
    if ( m_parent && m_parent->GetParent() )
    {
@@ -171,11 +157,7 @@ MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
          {
             mt = grandparent->GetType().GetPrimary();
 
-            if ( mt == MimeType::MESSAGE ||
-                 ( ( mt == MimeType::MULTIPART ) &&
-                   ( String(m_parent->m_body->subtype) == _T("ALTERNATIVE") )
-                 )
-               )
+            if ( mt == MimeType::MESSAGE )
             {
                // our parent part doesn't have its own part number, use the
                // grand parent spec as the base
