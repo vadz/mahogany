@@ -274,7 +274,8 @@ bool wxEnhancedPanel::DoLayout(const wxSize& size)
    bool ok = m_canvas ? m_canvas->Layout() : wxPanel::Layout();
    if ( ok )
    {
-      RefreshScrollbar(size);
+	 if (m_canvas)
+	   RefreshScrollbar(size);
    }
    //else: can it really fail?
 
