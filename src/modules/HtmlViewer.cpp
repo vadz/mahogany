@@ -207,7 +207,7 @@ TAG_HANDLER_BEGIN(META, "META" )
             tag.HasParam(_T("CONTENT")))
         {
             // strlen("text/html; charset=")
-            static const CHARSET_STRING_LEN = 19;
+            static const int CHARSET_STRING_LEN = 19;
 
             wxString content = tag.GetParam(_T("CONTENT"));
             if (content.Left(CHARSET_STRING_LEN) == _T("text/html; charset="))
