@@ -30,6 +30,7 @@
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
 #  include <wx/checkbox.h>
+#  include <wx/radiobox.h>
 #  include <wx/textctrl.h>
 #  include <wx/statbmp.h>
 #endif
@@ -1029,7 +1030,8 @@ wxCustomHeadersDialog::~wxCustomHeadersDialog()
 
 int wxCustomHeadersDialog::FindHeaderByName(const String& headerName) const
 {
-   for ( int index = -1; index = m_listctrl->GetNextItem(index); )
+   int index = -1;
+   while ( (index = m_listctrl->GetNextItem(index)) != -1 )
    {
       if ( m_listctrl->GetItemText(index) == headerName )
       {

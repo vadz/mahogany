@@ -22,6 +22,7 @@ class wxPHelper;
 
 // the headers we really need
 #include <wx/notebook.h>
+#include <wx/checkbox.h>
 #include <wx/control.h>
 #include <wx/combobox.h>
 #include <wx/splitter.h>

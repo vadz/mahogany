@@ -25,6 +25,11 @@
 #   include "Mcommon.h"
 #   include "MApplication.h"
 #   include "guidef.h"
+
+#   include <wx/layout.h>
+#   include <wx/listbox.h>
+#   include <wx/stattext.h>
+#   include <wx/statbmp.h>
 #endif //USE_PCH
 
 #include "Mdefaults.h"
@@ -199,7 +204,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
    int widthMax;
    wxString label(_("&File:"));
    GetTextExtent(label, &widthMax, NULL);
-   m_text = m_panel->CreateFileEntry(label, widthMax, msg, &m_browseBtn);
+   m_text = m_panel->CreateFileEntry(label, (long)widthMax, msg, &m_browseBtn);
 
    // checkboxes
    m_autoLocation = new wxPCheckBox("AdbImportAutoFile", m_panel, -1,
@@ -333,7 +338,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
          wxLogWarning(_("Sorry, impossible to determine the location of "
                         "the default address book file for the format "
                         "'%s' - please specify the file manually in the "
-                        "next dialog."), importerDesc);
+                        "next dialog."), importerDesc.c_str());
 
          filename = wxPFileSelector
                     (

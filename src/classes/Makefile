@@ -6,7 +6,7 @@ include ../../makeopts
 CWD = classes
 SRC = MObject.cpp MApplication.cpp PathFinder.cpp Profile.cpp \
       XFace.cpp kbList.cpp MFolder.cpp MEvent.cpp MailCollector.cpp \
-      MModule.cpp
+      MModule.cpp MessageTemplate.cpp
 
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)

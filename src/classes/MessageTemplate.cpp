@@ -22,6 +22,8 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
+   #include "Mcommon.h"
+
    #include <wx/intl.h>
    #include <wx/log.h>
 #endif // USE_PCH
