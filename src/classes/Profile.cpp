@@ -46,10 +46,9 @@
 
 #include "Mdefaults.h"
 
-// ============================================================================
-// declarations
-// ============================================================================
-
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
 
 /** ConfigFileManager class, this class allocates and deallocates
    wxConfig objects for the profile so to ensure that every config
@@ -59,7 +58,7 @@ class ConfigFileManager
 {
 private:
    class FCDataList *fcList;
-   
+
 public:
    /** Constructor
      */
@@ -105,7 +104,7 @@ public:
    /// like the constructor, but reuses existing objects
    static ProfileBase * CreateProfile(STRINGARG iClassName,
                                       ProfileBase const *Parent);
-   
+
    /// get the associated config object
    wxConfigBase *GetConfig() const { return m_config; }
 
@@ -119,7 +118,7 @@ public:
       /// Read a character entry.
    String readEntry(STRINGARG key,
                     STRINGARG defaultvalue = (const char *)NULL) const;
-   /// Read an integer value.   
+   /// Read an integer value.
    long readEntry(STRINGARG key, long defaultvalue) const;
    /// Read an integer value.
    virtual int readEntry(STRINGARG key, int defaultvalue) const
@@ -154,7 +153,7 @@ private:
        This will try to load the configuration file given by
        iClassName".profile" and look for it in all the paths specified
        by GetAppConfig()->readEntry(MC_PROFILEPATH).
-       
+
    */
    Profile(STRINGARG iClassName, ProfileBase const *Parent);
    /// The wxConfig object.
@@ -197,11 +196,11 @@ public:
       { return (int) readEntry(key, (long)defaultvalue); }
    /// Read a bool value.
    bool readEntry(STRINGARG key, bool defaultvalue) const;
-   /// Write back the character value.   
+   /// Write back the character value.
    bool writeEntry(STRINGARG key, STRINGARG Value);
-   /// Write back the int value.   
+   /// Write back the int value.
    bool writeEntry(STRINGARG key, long Value);
-   /// Write back the bool value.   
+   /// Write back the bool value.
    bool writeEntry(STRINGARG key, bool Value);
    //@}
    wxConfigProfile(STRINGARG fileName);
@@ -240,6 +239,13 @@ struct FCData
 */
 KBLIST_DEFINE(FCDataList, FCData);
 
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// some characters are invalid in the profile name, replace them
+static String FilterProfileName(const String& profileName);
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -264,7 +270,7 @@ String
 ProfileBase::readEntry(STRINGARG key,
                        const char *defaultvalue) const
 {
-   MOcheck(); 
+   MOcheck();
    String str;
    str = readEntry(key, String(defaultvalue));
    return str;
@@ -276,20 +282,26 @@ ProfileBase::readEntry(STRINGARG key,
 
 wxConfigProfile::wxConfigProfile(STRINGARG fileName)
 {
-   // we shouldn't be called twice normally
-   ASSERT( m_Config == NULL );
+   // the code for Unix is specific to wxFileConfig - unacceptable
+#  ifdef OS_WIN
+      // don't give explicit name, but rather use the default logic (it's
+      // perfectly ok, for the registry case our keys are under vendor\appname)
+      m_Config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+                              "", "",
+                              wxCONFIG_USE_LOCAL_FILE |
+                              wxCONFIG_USE_GLOBAL_FILE);
+#  else  // Unix
+      // we don't need the config file manager for this profile
+      PathFinder pf(M_ETC_PATH);
+      String globalconfig = pf.FindFile(M_GLOBAL_CONFIG_NAME);
+      m_Config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+                              fileName, globalconfig,
+                              wxCONFIG_USE_LOCAL_FILE|
+                              wxCONFIG_USE_GLOBAL_FILE);
 
-   // we don't need the config file manager for this profile
-   PathFinder pf(M_ETC_PATH);
-   String globalconfig = pf.FindFile(M_GLOBAL_CONFIG_NAME);
-   m_Config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                           fileName, globalconfig,
-                           wxCONFIG_USE_LOCAL_FILE|wxCONFIG_USE_GLOBAL_FILE);
-   // VZ: I don't want to have additional level in the registry
-#  ifndef OS_WIN
-   // set the default path for configuration entries
-   m_Config->SetPath(M_APPLICATIONNAME);
-#  endif // Windows
+      // set the default path for configuration entries
+      m_Config->SetPath(M_APPLICATIONNAME);
+#  endif // Unix/Windows
 }
 
 void wxConfigProfile::SetPath(STRINGARG path)
@@ -298,7 +310,7 @@ void wxConfigProfile::SetPath(STRINGARG path)
    m_Config->SetPath(path);
 }
 
-String 
+String
 wxConfigProfile::GetPath(void) const
 {
    MOcheck();
@@ -324,7 +336,7 @@ wxConfigProfile::~wxConfigProfile()
    MOcheck();
 }
 
-String 
+String
 wxConfigProfile::readEntry(STRINGARG key, STRINGARG def) const
 {
    MOcheck();
@@ -341,30 +353,16 @@ wxConfigProfile::readEntry(STRINGARG key, long def) const
 }
 
 bool
-wxConfigProfile::readEntry(STRINGARG key, bool def) const
-{
-   MOcheck();
-   return m_Config->Read(key.c_str(), def) != 0;
-}
-
-bool
 wxConfigProfile::writeEntry(STRINGARG key, STRINGARG value)
 {
-   MOcheck(); 
+   MOcheck();
    return m_Config->Write(key,value);
 }
 
 bool
 wxConfigProfile::writeEntry(STRINGARG key, long value)
 {
-   MOcheck(); 
-   return m_Config->Write(key,value);
-}
-
-bool
-wxConfigProfile::writeEntry(STRINGARG key, bool value)
-{
-   MOcheck(); 
+   MOcheck();
    return m_Config->Write(key,value);
 }
 
@@ -381,7 +379,7 @@ wxConfigProfile::writeEntry(STRINGARG key, bool value)
    profile. Thus, an inheriting profile structure is created.
 */
 Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
-   : profileName(iClassName)
+       : profileName(iClassName)
 {
    m_config = NULL;   // set it before using CHECK()
    parentProfile = Parent;
@@ -399,12 +397,25 @@ Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
          fullFileName = mApplication->GetLocalDir() + DIR_SEPARATOR + fileName;
    }
    else
+   {
       // easy...
       fullFileName << profileName << READ_APPCONFIG(MC_PROFILE_EXTENSION);
-   m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                         fullFileName,wxString(""),
-                         wxCONFIG_USE_LOCAL_FILE);
-   ms_cfManager.Register(iClassName,this);
+   }
+
+   // under Windows I only create entries in the registry and I think it should
+   // be also done with wxFileconfig under Unix as well
+#  ifdef OS_WIN
+      m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME);
+      String path;
+      path << M_PROFILE_CONFIG_SECTION << '/' << fullFileName;
+      m_config->SetPath(path);
+#  else // Unix
+      m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+                              fullFileName,wxString(""),
+                              wxCONFIG_USE_LOCAL_FILE);
+#  endif // Unix/Win
+
+   ms_cfManager.Register(iClassName, this);
 }
 
 ProfileBase *
@@ -425,10 +436,10 @@ Profile::~Profile()
 }
 
 
-String 
+String
 Profile::readEntry(STRINGARG key, STRINGARG defaultvalue) const
 {
-   MOcheck(); 
+   MOcheck();
    // config object must be created
    CHECK( m_config != NULL, "", "no m_config in Profile" );
 
@@ -473,7 +484,7 @@ Profile::readEntry(STRINGARG key, long defaultvalue) const
 {
    long rc;
    MOcheck();
-   
+
    if ( !m_config->Read(key, &rc, defaultvalue) )
    {
       if ( !parentProfile ||
@@ -490,42 +501,42 @@ Profile::readEntry(STRINGARG key, long defaultvalue) const
          }
       }
    }
-  
+
    return rc;
 }
 
 
 void Profile::SetPath(STRINGARG path)
 {
-   MOcheck(); 
+   MOcheck();
    m_config->SetPath(path);
 }
 
-String 
+String
 Profile::GetPath(void) const
 {
-   MOcheck(); 
+   MOcheck();
    return m_config->GetPath();
 }
 
 bool
 Profile::HasEntry(STRINGARG key) const
 {
-   MOcheck(); 
+   MOcheck();
    return m_config->HasEntry(key);
 }
 
 void
 Profile::DeleteGroup(STRINGARG path)
 {
-   MOcheck(); 
+   MOcheck();
    m_config->DeleteGroup(path);
 }
 
 bool
 Profile::readEntry(STRINGARG key, bool defaultvalue) const
 {
-   MOcheck(); 
+   MOcheck();
    return readEntry(key, (long) defaultvalue) != 0;
 }
 
@@ -565,7 +576,7 @@ ConfigFileManager::ConfigFileManager()
 ConfigFileManager::~ConfigFileManager()
 {
    FCDataList::iterator i;
-   
+
 #  ifdef DEBUG
    Debug();
 #  endif
@@ -591,7 +602,7 @@ ConfigFileManager::Find(STRINGARG className)
    FCDataList::iterator i;
 
    DBGLOG("ConfigFileManager.Find(" << Str(className) << ")");
-   
+
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
       if((*i)->className == className)
@@ -609,7 +620,7 @@ ConfigFileManager::DeRegister(ProfileBase *prof)
    FCDataList::iterator i;
 
    DBGLOG("ConfigFileManager.DeRegister()");
-   
+
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
       if((*i)->profile == prof)
@@ -624,12 +635,11 @@ void
 ConfigFileManager::Register(STRINGARG className, ProfileBase *profile)
 {
    DBGLOG("ConfigFileManager.Register(" << Str(className) << ")");
-   
+
    FCData   *newEntry = new FCData;
    newEntry->className = className;
    newEntry->profile = profile;
    fcList->push_front(newEntry);
-   return profile;
 }
 
 #ifdef DEBUG
@@ -726,4 +736,25 @@ ProfilePathChanger::ProfilePathChanger(ProfileBase *config, STRINGARG path)
 ProfilePathChanger::~ProfilePathChanger()
 {
    m_config->SetPath(m_strOldPath);
+}
+
+// some characters are invalid in the profile name, replace them
+static String FilterProfileName(const String& profileName)
+{
+   // the list of characters which are allowed in the profile names (all other
+   // non alphanumeric chars are not)
+   static const char *aValidChars = "_-.";
+
+   String filteredName = profileName;
+   for ( size_t n = 0; n < filteredName.Len(); n++ )
+   {
+      char ch = filteredName[n];
+      if ( !isalnum(ch) && !strchr(aValidChars, ch) )
+      {
+         // replace it -- hopefully the name will stay unique (@@)
+         filteredName[n] = '_';
+      }
+   }
+
+   return filteredName;
 }

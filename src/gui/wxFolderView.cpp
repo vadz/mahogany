@@ -48,7 +48,8 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_SIZE              (wxFolderListCtrl::OnSize)
 END_EVENT_TABLE()
 
-
+// FIXME need to put this function (now in wxMessageView.cpp) in some header
+extern wxFrame *GetFrame(wxWindow *win);
 
 #define   LCFIX ((wxFolderListCtrl *)this)->
 
@@ -85,11 +86,13 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_columnWidths[WXFLC_FROM] = READ_CONFIG(p,MP_FLC_FROMWIDTH);
 
    for(int i = 0; i < WXFLC_NUMENTRIES; i++)
+   {
       if(m_columns[i] == 0)
       {
          m_firstColumn = i;
          break;
       }
+   }
    
    Clear();
 }
@@ -100,19 +103,25 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
    long item = -1;
 
    for(item = 0; item < LCFIX GetItemCount(); item++)
+   {
       if(LCFIX GetItemState(item,wxLIST_STATE_SELECTED))
          selections.Add(item);
+   }
+
    return selections.Count();
 }
 void
 wxFolderListCtrl::OnSize( wxSizeEvent & WXUNUSED(event) )
 {
-   int x,y,i;
-   GetClientSize(&x,&y);
+   // VZ: what does this do? nothing good here, anyhow
+#  ifndef OS_WIN
+      int x,y,i;
+      GetClientSize(&x,&y);
    
-   if (m_Style & wxLC_REPORT)
-      for(i = 0; i < WXFLC_NUMENTRIES; i++)
-         SetColumnWidth(m_columns[i],(m_columnWidths[i]*x)/100*9/10);
+      if (m_Style & wxLC_REPORT)
+         for(i = 0; i < WXFLC_NUMENTRIES; i++)
+            SetColumnWidth(m_columns[i],(m_columnWidths[i]*x)/100*9/10);
+#  endif //OS_WIN
 }
 
 void
@@ -158,6 +167,7 @@ wxFolderListCtrl::SetEntry(long index,
 wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
 {
    wxCHECK_RET(iparent, "NULL parent frame in wxFolderView ctor");
+
    parent = iparent;
    m_NumOfMessages = 0; // At the beginning there was nothing.
    m_UpdateSemaphore = false;
@@ -167,7 +177,7 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    if ( !mailFolder )
    {
       ERRORMESSAGE((_("Can't open folder '%s'."), folderName.c_str()));
-      wxASSERT( !initialised );
+      initialised = FALSE;
       return;
    }
 
@@ -202,8 +212,7 @@ wxFolderView::Update(void)
    int   nstatus;
    unsigned long nsize;
    unsigned day, month, year;
-   char  buffer[200];
-   const char *format;
+   String dateFormat;
    int n;
    String status, sender, subject, date, size;
    bool selected;
@@ -219,7 +228,7 @@ wxFolderView::Update(void)
    // which introduce env vars under Windows)
    {
       ProfileEnvVarSuspend suspend(mApplication->GetProfile());
-      format = READ_APPCONFIG(MC_DATE_FMT);
+      dateFormat = READ_APPCONFIG(MC_DATE_FMT);
    }
 
    if(n < m_NumOfMessages)  // messages have been deleted, start over
@@ -237,11 +246,10 @@ wxFolderView::Update(void)
 
       subject = mptr->Subject();
       sender  = mptr->From();
-      sprintf(buffer,format, day, month, year);
-      date = buffer;
+      date.Printf(dateFormat, day, month, year);
       size = strutil_ultoa(nsize);
 
-      selected = (i <= m_NumOfMessages) ?m_FolderCtrl->IsSelected(n) : false;
+      selected = (i < m_NumOfMessages) ? m_FolderCtrl->IsSelected(i) : false;
       m_FolderCtrl->SetEntry(i,status, sender, subject, date, size);
       m_FolderCtrl->Select(i,selected);
 
@@ -279,10 +287,13 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_LAYOUT_CLICK:
       m_MessagePreview->OnCommandEvent(event);
       break;
+
    case  WXMENU_MSG_EXPUNGE:
       mailFolder->ExpungeMessages();
       Update();
+      wxLogStatus(GetFrame(parent), _("Deleted messages were expunged"));
       break;
+
    case WXMENU_MSG_OPEN:
       GetSelections(selections);
       OpenMessages(selections);
@@ -311,6 +322,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       GetSelections(selections);
       DeleteMessages(selections);
       break;
+
    case WXMENU_MSG_SELECTALL:
       for(n = 0; n < m_NumOfMessages; n++)
          m_FolderCtrl->Select(n,TRUE);
@@ -322,6 +334,12 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    default:
       wxFAIL_MSG("wxFolderView::OnMenuCommand() called with illegal id.");
    }
+}
+
+bool
+wxFolderView::HasSelection() const
+{
+   return m_FolderCtrl->GetSelectedItemCount() != 0;
 }
 
 int
@@ -359,6 +377,8 @@ wxFolderView::DeleteMessages(const wxArrayInt& selections)
    for(i = 0; i < n; i++)
       mailFolder->DeleteMessage(selections[i]+1);
    Update();
+
+   wxLogStatus(GetFrame(parent), _("%d messages deleted"), n);
 }
 
 void
@@ -369,6 +389,8 @@ wxFolderView::UnDeleteMessages(const wxArrayInt& selections)
    for(i = 0; i < n; i++)
       mailFolder->UnDeleteMessage(selections[i]+1);
    Update();
+
+   wxLogStatus(GetFrame(parent), _("%d messages undeleted"), n);
 }
 
 void
@@ -388,6 +410,8 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
       mf->AppendMessage(*(mailFolder->GetMessage(selections[i]+1)));
       mf->Close();
    }
+
+   wxLogStatus(GetFrame(parent), _("%d messages saved"), n);
 }
 
 void
@@ -428,7 +452,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
    Message *msg;
 
    int n = selections.Count();
-   prefix = mailFolder->GetProfile()->readEntry(MP_REPLY_MSGPREFIX,MP_REPLY_MSGPREFIX_D);
+   prefix = READ_CONFIG(mailFolder->GetProfile(), MP_REPLY_MSGPREFIX);
    for(i = 0; i < n; i++)
    {
       cv = GLOBAL_NEW wxComposeView(_("Reply"),parent,
@@ -442,8 +466,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
          {
             str = msg->GetPartContent(p);
             cptr = str.c_str();
-            str2 = "";
-            str2 += prefix;
+            str2 = prefix;
             while(*cptr)
             {
                if(*cptr == '\r')
@@ -453,7 +476,9 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
                }
                str2 += *cptr;
                if(*cptr == '\n' && *(cptr+1))
+               {
                   str2 += prefix;
+               }
                cptr++;
             }
             cv->InsertText(str2);
@@ -466,8 +491,8 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
       if(name.length() > 0)
          email = name + String(" <") + email + String(">");
       cv->SetTo(email);
-      cv->SetSubject(mailFolder->GetProfile()
-                     ->readEntry(MP_REPLY_PREFIX,String(MP_REPLY_PREFIX_D)) + msg->Subject());
+      cv->SetSubject(READ_CONFIG(mailFolder->GetProfile(), MP_REPLY_PREFIX)
+                     + msg->Subject());
    }
 }
 
@@ -482,19 +507,21 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
    Message *msg;
 
    int n = selections.Count();
-   prefix = mailFolder->GetProfile()->readEntry(MP_REPLY_MSGPREFIX,MP_REPLY_MSGPREFIX_D);
+   prefix = READ_CONFIG(mailFolder->GetProfile(), MP_REPLY_MSGPREFIX);
    for(i = 0; i < n; i++)
    {
       str = "";
       msg = mailFolder->GetMessage(selections[i]+1);
       cv = GLOBAL_NEW wxComposeView(_("Forward"),parent,
                                     mailFolder->GetProfile());
-      cv->SetSubject(mailFolder->GetProfile()
-                     ->readEntry(MP_FORWARD_PREFIX,String(MP_FORWARD_PREFIX_D)) + msg->Subject());
+      cv->SetSubject(READ_CONFIG(mailFolder->GetProfile(), MP_FORWARD_PREFIX)
+                                 + msg->Subject());
 
       mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
       cv->InsertData(strutil_strdup(str),str.Length(),"MESSAGE/RFC822",TYPEMESSAGE);
    }
+
+   wxLogStatus(GetFrame(parent), _("%d messages forwarded"), n);
 }
 
 void
@@ -510,6 +537,12 @@ BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
    EVT_SIZE(    wxFolderViewFrame::OnSize)
    EVT_MENU(-1,    wxFolderViewFrame::OnCommandEvent)
    EVT_TOOL(-1,    wxFolderViewFrame::OnCommandEvent)
+
+   // only enable message operations if the selection is not empty
+   // (the range should contain _only_ these operations!)
+   { wxEVT_UPDATE_UI, WXMENU_MSG_OPEN, WXMENU_MSG_UNDELETE,
+     (wxObjectEventFunction)(wxEventFunction)(wxUpdateUIEventFunction)
+     wxFolderViewFrame::OnUpdateUI, NULL },
 END_EVENT_TABLE()
 
 wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
@@ -533,10 +566,8 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
 
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands
-#ifdef USE_WXWINDOWS2
    m_ToolBar = CreateToolBar();
    AddToolbarButtons(m_ToolBar, WXFRAME_FOLDER);
-#endif
 
    m_FolderView = new wxFolderView(folderName,this);
    if ( m_FolderView->IsInitialised() )
@@ -548,6 +579,12 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
    }
 }
    
+void
+wxFolderViewFrame::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   event.Enable(m_FolderView->HasSelection());
+}
+
 void
 wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 {
@@ -566,11 +603,9 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 void
 wxFolderViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 {
-   int x = 0;
-   int y = 0;
+   int x, y;
    GetClientSize( &x, &y );
-//   if(m_ToolBar)
-//      m_ToolBar->SetSize( 1, 0, x-2, 30 );
+
    if(m_FolderView)
       m_FolderView->SetSize(0,0,x,y);
 };

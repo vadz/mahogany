@@ -239,10 +239,10 @@ public:
   virtual const char *GetName() const;
 
   virtual void SetUserName(const String& name);
-  virtual const char *GetUserName() const;
+  virtual String GetUserName() const;
 
   virtual void SetDescription(const String& desc);
-  virtual const char *GetDescription() const;
+  virtual String GetDescription() const;
 
   virtual size_t GetNumberOfEntries() const;
 
@@ -712,7 +712,8 @@ FCBook::FCBook(const String& filename)
   m_strFileName = strutil_getfilename(m_strFile).Left('.');
 
   // we must load the file here because we need the ADB's name and description
-  m_pConfig = new wxFileConfig(m_strFile, wxGetEmptyString());
+  m_pConfig = new wxFileConfig(wxGetEmptyString(), wxGetEmptyString(),
+                               m_strFile);
 
   // create the root group
   m_pRootGroup = new FCEntryGroup(m_pConfig);
@@ -734,7 +735,7 @@ void FCBook::SetUserName(const String& strAdb)
   m_pConfig->Write("/" ADB_HEADER "/" ADB_HEADER_NAME, strAdb);
 }
 
-const char *FCBook::GetUserName() const
+String FCBook::GetUserName() const
 {
   return m_pConfig->Read("/" ADB_HEADER "/" ADB_HEADER_NAME, m_strFileName);
 }
@@ -744,7 +745,7 @@ void FCBook::SetDescription(const String& strDesc)
   m_pConfig->Write("/" ADB_HEADER "/" ADB_HEADER_DESC, strDesc);
 }
 
-const char *FCBook::GetDescription() const
+String FCBook::GetDescription() const
 {
   return m_pConfig->Read("/" ADB_HEADER "/" ADB_HEADER_DESC, m_strFile);
 }

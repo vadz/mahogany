@@ -247,8 +247,11 @@ SendMessageCC::Send(void)
    for(i = m_FccList.begin(); i != m_FccList.end(); i++)
       WriteToFolder(**i);
    
-   hostlist[0] = profile->readEntry(MP_SMTPHOST, MP_SMTPHOST_D);
+   // notice that we _must_ assign the result to this string!
+   String host = READ_CONFIG(profile, MP_SMTPHOST);
+   hostlist[0] = host;
    hostlist[1] = NIL;
+
    if ((stream = smtp_open ((char **)hostlist,NIL)) != 0)
    {
       if (smtp_mail (stream,"MAIL",env,body))
@@ -286,8 +289,9 @@ SendMessageCC::Build(void)
    strutil_tokenise(headers,";",m_headerList);
    delete [] headers;
    
-   m_headerNames = new const char*[m_headerList.size()+1];
-   m_headerValues = new const char*[m_headerList.size()+1];
+   // +2: 1 for X-Mailer and 1 for the last NULL entry
+   m_headerNames = new const char*[m_headerList.size()+2];
+   m_headerValues = new const char*[m_headerList.size()+2];
    for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, j++)
    {
       m_headerNames[j] = strutil_strdup(StringCast(i)->c_str());

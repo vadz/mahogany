@@ -23,6 +23,6 @@
 #define   M_VERSION         "0.01a"
 
 /// full version string
-#define   M_VERSION_STRING  "pre-alpha 0.01 \042unnamed\042"
+#define   M_VERSION_STRING  "pre-alpha 0.015 \042unnamed\042"
 
 #endif  //_M_VERSION_H

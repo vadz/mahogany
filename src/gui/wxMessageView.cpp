@@ -74,7 +74,7 @@ extern "C"
 // ----------------------------------------------------------------------------
 
 // go up the window hierarchy until we find the frame
-static wxFrame *GetFrame(wxWindow *win)
+extern wxFrame *GetFrame(wxWindow *win)
 {
    // find our frame for the status message
    while ( win && !win->IsKindOf(CLASSINFO(wxFrame)) ) {
@@ -910,11 +910,8 @@ wxMessageViewFrame::OnCommandEvent(wxCommandEvent &ev)
 void
 wxMessageViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 {
-   int x = 0;
-   int y = 0;
+   int x, y;
    GetClientSize( &x, &y );
-   if(m_ToolBar)
-      m_ToolBar->SetSize( 1, 0, x-2, 30 );
    if(m_MessageView)
-      m_MessageView->SetSize(1,30,x-2,y-30);
+      m_MessageView->SetSize(0,0,x,y);
 };

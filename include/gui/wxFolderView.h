@@ -121,6 +121,10 @@ public:
    */
    void ForwardMessages(wxArrayInt const &messages);
 
+   /** Returns false if no items are selected
+   */
+   bool HasSelection() const;
+
    /** Gets an array containing the positions of the selected
        strings. The number of selections is returned. 
        @param  selections Pass a pointer to an integer array, and do not deallocate the returned array.
@@ -180,10 +184,15 @@ class wxFolderViewFrame : public wxMFrame
 {
 public:
    wxFolderViewFrame(const String &iname, wxFrame *parent = NULL);
-   void OnCommandEvent(wxCommandEvent & event);
-   void OnSize( wxSizeEvent &WXUNUSED(event) );
+
+   // callbacks
+   void OnCommandEvent(wxCommandEvent& event);
+   void OnSize(wxSizeEvent& event);
+   void OnUpdateUI(wxUpdateUIEvent& event);
+
 private:
    wxFolderView *m_FolderView;
+
    DECLARE_EVENT_TABLE() 
 };
 

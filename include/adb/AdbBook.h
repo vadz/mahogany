@@ -39,11 +39,11 @@ public:
 
     // get/set ADB name (user name)
   virtual void SetUserName(const String& name) = 0;
-  virtual const char *GetUserName() const = 0;
+  virtual String GetUserName() const = 0;
   
     // get/set ADB description (long name)
   virtual void SetDescription(const String& desc) = 0;
-  virtual const char *GetDescription() const = 0;
+  virtual String GetDescription() const = 0;
 
     // get the total number of enters (for information purposes only, may be
     // not supported, especially for non local books)

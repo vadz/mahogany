@@ -224,7 +224,7 @@ bool MInputBox(wxString *pstr,
   {
     pConf = mApplication->GetProfile();
     if ( pConf != NULL )
-      pstr = new wxString(pConf->readEntry(strSectionName + szKey, def));
+      *pstr = pConf->readEntry(strSectionName + szKey, def);
   }
 
   MTextInputDialog dlg(GetParent(parent), *pstr, wxString("M - "+strCaption), strPrompt);

@@ -339,7 +339,7 @@ enum FolderType
 /// the label for the BCC: field
 #define   MC_BCC_LABEL_D       "BCC:"
 /// the printf() format for dates
-#define   MC_DATE_FMT_D         "\\%2u.\\%2u.\\%4u"
+#define   MC_DATE_FMT_D         "%2u.%2u.%4u"
 /// show console window
 #define   MC_SHOWCONSOLE_D      1
 /// names of folders to open at startup

@@ -174,10 +174,10 @@ public:
   virtual const char *GetName() const;
 
   virtual void SetUserName(const String& name);
-  virtual const char *GetUserName() const;
+  virtual String GetUserName() const;
 
   virtual void SetDescription(const String& desc);
-  virtual const char *GetDescription() const;
+  virtual String GetDescription() const;
 
   virtual size_t GetNumberOfEntries() const;
 
@@ -362,7 +362,7 @@ void DummyBook::SetUserName(const String& strUserName)
   m_strUserName = strUserName;
 }
 
-const char *DummyBook::GetUserName() const
+String DummyBook::GetUserName() const
 {
   return m_strUserName.c_str();
 }
@@ -372,7 +372,7 @@ void DummyBook::SetDescription(const String& strDesc)
   m_strDesc = strDesc;
 }
 
-const char *DummyBook::GetDescription() const
+String DummyBook::GetDescription() const
 {
   return m_strDesc.c_str();
 }

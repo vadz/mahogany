@@ -3,7 +3,7 @@
 // File name:   adb/AdbFrame.cpp - ADB edit frame interface
 // Purpose:     implementation of wxAdbEditFrame
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -86,7 +86,7 @@ TODO: (+ in first column means done)
 + 12. save expanded tree branches
   13. d&d would be nice (if supported under wxGTK)
 + 14. case (in)sensitive match, take into account find options, make
-      the toolbar button work like "Find Next" if "Find" was done, 
+      the toolbar button work like "Find Next" if "Find" was done,
   15. sort the find results from top to bottom
   16. prompts should have a real history and not only remember the last value
 
@@ -292,8 +292,8 @@ public:
     // directly calling AdbBook methods
   void SetNameAndDescription(const wxString& strName, const wxString& strDesc)
     { m_pBook->SetUserName(strName); m_pBook->SetDescription(strDesc); }
-  const char *GetDescription() const { return m_pBook->GetDescription(); }
-  const char *GetAdbName() const { return m_pBook->GetUserName(); }
+  String GetDescription() const { return m_pBook->GetDescription(); }
+  String GetAdbName() const { return m_pBook->GetUserName(); }
 
   size_t GetNumberOfEntries() const { return m_pBook->GetNumberOfEntries(); }
 
@@ -605,7 +605,7 @@ private:
   // (or NULL if the path is invalid)
   AdbTreeElement *ExpandBranch(const wxString& strEntry);
 
-  // moves the selection to this entry, expanding the tree branches if 
+  // moves the selection to this entry, expanding the tree branches if
   // necessary. returns FALSE if entry not found.
   bool MoveSelection(const wxString& strEntry);
 
@@ -618,7 +618,7 @@ private:
   // get the current node (the same as selection if the selected item is a
   // group or the parent of the current selection if it isn't)
   AdbTreeNode *GetCurNode() const
-  { 
+  {
     AdbTreeNode *group;
     if ( m_current->IsGroup() )
       group = (AdbTreeNode *)m_current;
@@ -632,9 +632,9 @@ private:
 
   // get the current entry - only works if the selection is an entry
   AdbTreeEntry *GetEntry() const
-  { 
+  {
     wxASSERT( !m_current->IsGroup() );
-    
+
     return (AdbTreeEntry *)m_current;
   }
 
@@ -811,7 +811,7 @@ public:
 class wxAdbEMailPage : public wxAdbPage
 {
 public:
-  wxAdbEMailPage(wxNotebook *notebook) 
+  wxAdbEMailPage(wxNotebook *notebook)
     : wxAdbPage(notebook, "Email", wxAdbNotebook::EMail,
                 AdbField_EMailPageFirst, AdbField_EMailPageLast) { }
 
@@ -876,7 +876,7 @@ enum
   AdbView_New,
   AdbView_Delete,
   AdbView_Cancel,
-  
+
   // notebook pages' controls
     // e-mail page buttons (must be in order)
   AdbPage_BtnFirst,
@@ -1153,8 +1153,8 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     else                                          \
       RestoreArray(conf, var, aszConfigNames[i])
 
-  ProfileBase & conf = *mApplication->GetProfile();
-  conf.SetPath("/AdbEditor");
+  ProfileBase &conf = *mApplication->GetProfile();
+  ProfilePathChanger adbPath(&conf, "/AdbEditor");
 
   TRANSFER_STRING(m_strLastAdbDir, ConfigName_LastAdbDir);
   TRANSFER_STRING(m_strLastAdbFile, ConfigName_LastAdbFile);
@@ -1472,7 +1472,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
   wxString strName, strWhat;
   if ( m_current->IsBook() ) {
     // @@ should deleting the address book also delete the file??
-    
+
     strWhat = _("Address book");
     strName = ((AdbTreeBook *)m_current)->GetFileName();
 
@@ -1740,7 +1740,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
   for ( nProv = 0; nProv != (size_t)nChoice; nProv++ ) {
     while ( !info->bSupportsCreation ) {
       // skip the providers we didn't put into aPrompts array
-      info = info->pNext;  
+      info = info->pNext;
     }
 
     info = info->pNext;
@@ -2168,7 +2168,7 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
 
   // create child controls
   // ---------------------
-  
+
   size_t x = 2*LAYOUT_X_MARGIN,
        y = 2*LAYOUT_Y_MARGIN,
        dy = (heightText - heightLabel)/2;
@@ -2177,14 +2177,14 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   (void)new wxStaticBox(this, -1, "",  wxPoint(LAYOUT_X_MARGIN, 0),
                         wxSize(widthDlg - 2*LAYOUT_X_MARGIN,
                                heightDlg - 2*LAYOUT_Y_MARGIN - heightBtn));
-  
+
   // label and text control
   (void)new wxStaticText(this, -1, label, wxPoint(x, y + dy),
             wxSize(widthLabel, heightLabel));
   m_textWhat = new wxTextCtrl(this, -1, "",
                               wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                               wxSize(widthText, heightText));
-  
+
   // settings box and checkboxes
   y += heightText;
   size_t widthBox = widthDlg - 4*LAYOUT_X_MARGIN,
@@ -2199,7 +2199,7 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   m_checkSub = new wxCheckBox(this, -1, "&Substring search",
                                wxPoint(widthChk + 3*LAYOUT_X_MARGIN, y),
                                wxSize(widthChk, heightLabel));
-  
+
   // where to look for it
   y += 2*heightLabel;
 
@@ -2226,9 +2226,9 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   m_checkOrg = new wxCheckBox(this, -1, "&Organization",
                               wxPoint(x + LAYOUT_X_MARGIN, y),
                               wxSize(widthChk, heightLabel));
-  
+
   // and the buttons
-  wxButton *btnOk = new 
+  wxButton *btnOk = new
     wxButton(this, wxID_OK, "OK",
              wxPoint(widthDlg - 2*LAYOUT_X_MARGIN - 2*widthBtn,
                      heightDlg - LAYOUT_Y_MARGIN - heightBtn),
@@ -2344,8 +2344,8 @@ wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
                                 wxSize(widthLabel + widthText, heightText));
 
   // buttons
-  wxButton *btnOk = new 
-    wxButton(this, wxID_OK, _("OK"), 
+  wxButton *btnOk = new
+    wxButton(this, wxID_OK, _("OK"),
              wxPoint(widthDlg - 2*LAYOUT_X_MARGIN - 2*widthBtn,
                      heightDlg - LAYOUT_Y_MARGIN - heightBtn),
              wxSize(widthBtn, heightBtn));
@@ -2398,7 +2398,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   // layout
   // ------
 
-  static const char *labels[] = { 
+  static const char *labels[] = {
     "&Name:",
     "File name:",
     "File size:",
@@ -2463,8 +2463,8 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   m_staticNumEntries = new wxStaticText(this, -1, "", wxPoint(x, y + dy), sizeLabel);
 
   // finally add buttons
-  wxButton *btnOk = new 
-    wxButton(this, wxID_OK, _("OK"), 
+  wxButton *btnOk = new
+    wxButton(this, wxID_OK, _("OK"),
              wxPoint(widthDlg - 2*LAYOUT_X_MARGIN - 2*widthBtn,
                      heightDlg - LAYOUT_Y_MARGIN - heightBtn),
              wxSize(widthBtn, heightBtn));
@@ -2583,7 +2583,7 @@ wxAdbTree::~wxAdbTree()
 {
   delete GetImageList();
 }
-  
+
 // -----------------------------------------------------------------------------
 // ADB notebook
 // -----------------------------------------------------------------------------
@@ -2601,7 +2601,7 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
   m_box = new wxStaticBox(parent, -1, wxGetEmptyString());
   m_message = new wxStaticText(parent, -1, _("No selection"));
 
-  wxLayoutConstraints *c;  
+  wxLayoutConstraints *c;
   c = new wxLayoutConstraints;
   c->top.SameAs(this, wxTop);
   c->left.SameAs(this, wxLeft);
@@ -2623,7 +2623,7 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
 
   // add images to our image list
   static const char *aszImages[] =
-  { 
+  {
     // should be in sync with the corresponding enum
     #ifdef __WINDOWS__
       "general", "email", "home", "work"
@@ -2708,7 +2708,7 @@ wxAdbPage::wxAdbPage(wxNotebook *notebook, const char *title, int idImage,
 {
   m_nFirstField = nFirstField;
   m_nLastField  = nLastField;
-  
+
   notebook->AddPage(this, wxGetTranslation(title),
                     FALSE /* don't select */, idImage);
 
@@ -2869,7 +2869,7 @@ wxListBox *wxAdbPage::CreateListBox(const char *label, wxControl *last)
   const char *aszLabelsT[WXSIZEOF(aszLabels)];  // translated labels
 
   // should be in sync with enum!
-  wxASSERT( 
+  wxASSERT(
     AdbPage_BtnLast - AdbPage_BtnFirst == WXSIZEOF(aszLabels)
   );
 
@@ -3170,15 +3170,27 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
 
   switch ( m_kind )
   {
-  case TreeElement_Entry: item.m_image = wxAdbTree::Address; break;
-  case TreeElement_Group: item.m_image = wxAdbTree::Closed; break;
-  case TreeElement_Book:  item.m_image = wxAdbTree::Book; break;
-  case TreeElement_Root:  item.m_image = wxAdbTree::Library; break;
-  default:
-     ;
+    case TreeElement_Entry:
+       item.m_image = wxAdbTree::Address;
+       break;
+
+    case TreeElement_Group:
+       item.m_image = wxAdbTree::Closed;
+       break;
+
+    case TreeElement_Book:
+       item.m_image = wxAdbTree::Book;
+       break;
+
+    case TreeElement_Root:
+       item.m_image = wxAdbTree::Library;
+       break;
+
+    default:
+       wxFAIL_MSG("unknown tree element type");
   }
   item.m_selectedImage = item.m_image;
-  
+
   if ( IsRoot() ) {
     m_idItem = tree.InsertItem(0 /* at the top */, item);
   }

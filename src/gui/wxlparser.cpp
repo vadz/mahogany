@@ -17,7 +17,7 @@
 
 #define   BASE_SIZE 12
 
-inline static bool EndOfLine(const char *p)
+inline static bool IsEndOfLine(const char *p)
 {
    // in addition to Unix EOL convention we also (but not instead) understand
    // the DOS one under Windows
@@ -37,7 +37,7 @@ void wxLayoutImportText(wxLayoutList &list, String const &str)
    for(;;)
    {
       begin = cptr;
-      while( *cptr && !EndOfLine(cptr) )
+      while( *cptr && !IsEndOfLine(cptr) )
          cptr++;
       backup = *cptr;
       *cptr = '\0';
@@ -45,12 +45,11 @@ void wxLayoutImportText(wxLayoutList &list, String const &str)
       *cptr = backup;
 
       // check if it's the end of this line
-#ifdef OS_WIN
-      if ( backup == '\r' && *(cptr + 1) == '\n' ) {
-         cptr++;  // skip '\r'
-#else //Unix
-      if ( backup == '\n' ) {
-#endif
+      if ( IsEndOfLine(cptr) )
+      {
+         // if it was "\r\n", skip the following '\n'
+         if ( *cptr == '\r' )
+            cptr++;
          list.LineBreak();
       }
       else if(backup == '\0') // reached end of string

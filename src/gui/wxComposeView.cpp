@@ -372,7 +372,8 @@ wxComposeView::wxComposeView(const String &iname,
 
 wxComposeView::~wxComposeView()
 {
-   SafeDecRef(m_pManager);
+   if ( m_pManager )
+      AdbManager::Unget();
 
    if(!initialised)
       return;
