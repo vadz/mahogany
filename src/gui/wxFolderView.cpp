@@ -4302,8 +4302,12 @@ bool
 wxFolderView::HandleMsgViewCharEvent(wxKeyEvent& event)
 {
    // this function exists to make it possible to treat some keys differently
-   // in the viewer window than in the list control but for now we don't use
-   // this possibility (we probably will later, so don't remove it)
+   // in the viewer window than in the list control
+   if ( event.GetKeyCode() == WXK_SPACE )
+   {
+      if ( m_MessagePreview )
+         m_MessagePreview->PageDown();
+   }
 
    return HandleFolderViewCharEvent(event);
 }
