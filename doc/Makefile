@@ -24,6 +24,8 @@ subdirs:
 	set -e; for i in $(SUB_DIRS); do ( cd $$i && $(MAKE) -f ../Makefile.sub all DIR=$$i ) ; done
 
 install2: 
+	$(INSTALL) -d $(DOCDIR)
+	$(INSTALL) -d $(DOCDIR)/Postscript
 	$(INSTALL_DATA) $(FILES_PS) $(DOCDIR)/Postscript
 	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i install ; done
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
@@ -50,7 +52,7 @@ classes.tex: ../include/*.h ../include/adb/*.h ../include/gui/*.h
 
 makemap: subdirs
 	cp wxhelp.map0 wxhelp.tmp
-	../extra/scripts/html2wxhelp >>wxhelp.tmp
+	#../extra/scripts/html2wxhelp >>wxhelp.tmp
 	set -e; for i in $(SUB_DIRS); do cat $$i/wxhelp.map | \
 	sed "1,$$ s/^\([ 	-0-9]*\)/\1$$i\//g" >>wxhelp.tmp; done
 	cat wxhelp.tmp | sort -n > wxhelp.map
