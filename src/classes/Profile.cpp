@@ -1074,6 +1074,55 @@ ProfileImpl::writeEntry(const String & key, long value)
 }
 
 
+static void CommitGroup(wxConfigBase *cfg, String truePath, String suspPath)
+{
+   String strValue;
+   long   numValue;
+
+   long index;
+   String name;
+
+   cfg->SetPath(suspPath);
+
+   bool cont = cfg->GetFirstEntry(name, index);
+   while(cont)
+   {
+      switch ( cfg->GetEntryType(name) )
+      {
+         case wxConfig::Type_String:
+            if ( !cfg->Read(name, &strValue) ||
+                 !cfg->Write(truePath + name, strValue) )
+            {
+               FAIL_MSG("failed to copy config entry");
+            }
+            break;
+
+         case wxConfig::Type_Integer:
+            if ( !cfg->Read(name, &numValue) ||
+                 !cfg->Write(truePath + name, numValue) )
+            {
+               FAIL_MSG("failed to copy config entry");
+            }
+            break;
+
+         default:
+            FAIL_MSG("unsupported config entry type");
+      }
+
+      cont = cfg->GetNextEntry(name, index);
+   }
+
+
+   cont = cfg->GetFirstGroup(name, index);
+   while(cont)
+   {
+      CommitGroup(cfg, truePath + name + "/", suspPath + name + "/");
+      cfg->SetPath(suspPath);
+      cont = cfg->GetNextGroup(name, index);
+   }
+}
+
+
 void
 ProfileImpl::Commit(void)
 {
@@ -1085,7 +1134,7 @@ ProfileImpl::Commit(void)
       // call instead of giving an error
       return;
    }
-
+   
    String truePath = GetName();
    truePath << '/';
 
@@ -1096,38 +1145,7 @@ ProfileImpl::Commit(void)
    suspPath << SUSPEND_PATH << '/';
    ms_GlobalConfig->SetPath(suspPath);
 
-   String strValue;
-   long   numValue;
-
-   long index;
-   String name;
-   bool cont = ms_GlobalConfig->GetFirstEntry(name, index);
-   while(cont)
-   {
-      switch ( ms_GlobalConfig->GetEntryType(name) )
-      {
-         case wxConfig::Type_String:
-            if ( !ms_GlobalConfig->Read(name, &strValue) ||
-                 !ms_GlobalConfig->Write(truePath + name, strValue) )
-            {
-               FAIL_MSG("failed to copy config entry");
-            }
-            break;
-
-         case wxConfig::Type_Integer:
-            if ( !ms_GlobalConfig->Read(name, &numValue) ||
-                 !ms_GlobalConfig->Write(truePath + name, numValue) )
-            {
-               FAIL_MSG("failed to copy config entry");
-            }
-            break;
-
-         default:
-            FAIL_MSG("unsupported config entry type");
-      }
-
-      cont = ms_GlobalConfig->GetNextEntry(name, index);
-   }
+   CommitGroup(ms_GlobalConfig, truePath, suspPath);
 
    Discard(); // now we just forget the suspended sub-group
 }
