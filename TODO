@@ -17,6 +17,7 @@ $Id$
 - make AdbEdit textctrl accept pasted text
 - make AdbEdit auto-generate a formatted name from first/family-name and prefix/title.
 - add Picture field to Adb
+- update FolderView if mailbox has shrunk
 
 - New Mail indicator
 - Check for new mail button
@@ -62,6 +63,8 @@ $Id$
 - DND with gmc (dead easy, see dnd example :-) )
 
 *** to implement in near future ***
+
+- Use configure to check for utilities, like help browser. "ReConfigure" menu.
 
 - !!! non-blocking message retrieval !!!
 
