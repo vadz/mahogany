@@ -1029,7 +1029,7 @@ wxComposeView::wxComposeView(const String &name,
    m_rcptTypeLast = Recipient_To;
 
    m_LayoutWindow = NULL;
-   m_encoding = wxFONTENCODING_DEFAULT;
+   m_encoding = wxFONTENCODING_SYSTEM;
 }
 
 wxComposeView::~wxComposeView()
@@ -1381,12 +1381,7 @@ void wxComposeView::DoClear()
                          &m_fg, &m_bg);
 
    // set the default encoding if any
-   wxFontEncoding encoding =
-      (wxFontEncoding)(long)READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING);
-   if ( encoding != wxFONTENCODING_DEFAULT )
-   {
-      SetEncoding(encoding);
-   }
+   SetEncoding(wxFONTENCODING_DEFAULT);
 
    ResetDirty();
 }
@@ -1919,9 +1914,26 @@ void wxComposeView::OnFirstTimeModify()
 
 void wxComposeView::SetEncoding(wxFontEncoding encoding)
 {
+   if ( encoding == wxFONTENCODING_DEFAULT )
+   {
+      encoding = (wxFontEncoding)(long)
+                  READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING);
+
+      // no default encoding specified by user, use the system default one
+      if ( encoding == wxFONTENCODING_DEFAULT )
+      {
+         encoding = wxFONTENCODING_SYSTEM;
+      }
+   }
+
    m_encoding = encoding;
    m_LayoutWindow->GetLayoutList()->SetFontEncoding(m_encoding);
-   CheckLanguageInMenu(this, m_encoding);
+
+   // check "Default" menu item if we use the system default encoding in absence
+   // of any user-configured default
+   CheckLanguageInMenu(this, m_encoding == wxFONTENCODING_SYSTEM
+                                             ? wxFONTENCODING_DEFAULT
+                                             : m_encoding);
 }
 
 void wxComposeView::SetEncodingToSameAs(Message *msg)
@@ -2207,7 +2219,7 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       default:
-         if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
+         if ( WXMENU_CONTAINS(LANG, id) )
          {
             SetEncoding(GetEncodingFromMenuCommand(id));
          }
