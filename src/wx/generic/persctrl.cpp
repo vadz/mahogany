@@ -1658,6 +1658,12 @@ int wxPMessageBox(const wxString& configPath,
 
 bool wxPMessageBoxEnabled(const wxString& configPath, wxConfigBase *config)
 {
+    if ( configPath.empty() )
+    {
+        // non persistent msg boxes are always enabled
+        return TRUE;
+    }
+
     wxPHelper persist(configPath, gs_MessageBoxPath, config);
     wxString configValue = persist.GetKey();
 

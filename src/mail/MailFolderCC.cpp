@@ -3265,25 +3265,12 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    }
 }
 
-/** deliver stream message event
-       @param stream mailstream
-       @param str message str
-       @param errflg error level
-       */
-void
-MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
-{
-   // I don't really know what the difference with mm_log is...
-   mm_log(str, errflg, MailFolderCC::LookupObject(stream));
-}
-
-
 /** this mailbox name matches a listing request
        @param stream mailstream
        @param delim  character that separates hierarchies
        @param name   mailbox name
        @param attrib mailbox attributes
-       */
+ */
 void
 MailFolderCC::mm_list(MAILSTREAM * stream,
                       char delim,
@@ -3365,6 +3352,18 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
       mf->RequestUpdate();
 }
 
+/** log a verbose message
+       @param stream mailstream
+       @param str message str
+       @param errflg error level
+ */
+void
+MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
+{
+   // I don't really know what the difference with mm_log is...
+   mm_log(str, errflg, MailFolderCC::LookupObject(stream));
+}
+
 /** log a message
     @param str message str
     @param errflg error level
@@ -3381,6 +3380,13 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
       // has a \Noselect flag and we handle this ourselves
       mm_dlog(str);
 
+      return;
+   }
+
+   if ( errflg == 0 && !mm_show_debug )
+   {
+      // this is a verbose information message and we're not interested in
+      // them normally (there are tons of them...)
       return;
    }
 

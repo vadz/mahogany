@@ -406,6 +406,28 @@ MAppBase::OnStartup()
    // everything mostly works
    m_cycle = Running;
 
+   // open the remembered folder in the main frame unless disabled
+   if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
+   {
+      String foldername = READ_APPCONFIG(MP_MAINFOLDER);
+      if ( !foldername.IsEmpty() )
+      {
+         MFolder *folder = MFolder::Get(foldername);
+         if ( folder )
+         {
+            // make sure it doesn't go away after OpenFolder()
+            folder->IncRef();
+            ((wxMainFrame *)m_topLevelFrame)->OpenFolder(folder);
+            folder->DecRef();
+         }
+         else // huh?
+         {
+            wxLogWarning(_("Failed to reopen folder '%s', it doesn't seem "
+                           "to exist any more."), foldername.c_str());
+         }
+      }
+   }
+
    // update status of outbox once:
    UpdateOutboxStatus();
 
@@ -481,7 +503,6 @@ MAppBase::OnShutDown()
    m_cycle = ShuttingDown;
 
    // Try to store our remotely synchronised configuration settings
-   extern bool SaveRemoteConfigSettings();
    if(! SaveRemoteConfigSettings() )
       wxLogError(_("Synchronised configuration information could not "
                    "be stored remotely."));

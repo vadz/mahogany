@@ -410,9 +410,13 @@ public:
    MCclientLocker() : MMutexLocker(MAppBase::CCLIENT) {};
 };
 
-// upgrade.cpp:
-extern bool RetrieveRemoteConfigSettings(void);
-extern bool SaveRemoteConfigSettings(void);
+// NB: these functions are implemented in upgrade.cpp
+
+/// retrieve (parts) of config file from the remote server
+extern bool RetrieveRemoteConfigSettings(bool confirm = true);
+
+/// save (parts) of config on the remote server
+extern bool SaveRemoteConfigSettings(bool confirm = true);
 
 
 #endif   // MAPPLICATION_H

@@ -1304,14 +1304,11 @@ bool RunInstallWizard()
       gs_installWizardData.collectAllMail = false;
 #endif // USE_MAIL_COLLECT
 
-      // These are set up above.
-#if 0
-      // don't touch the SMTP server: it won't lead to creation of any
+      // don't reset the SMTP server: it won't lead to creation of any
       // (unwanted) folders, so it doesn't hurt to have the default value
       gs_installWizardData.pop =
       gs_installWizardData.imap =
       gs_installWizardData.nntp = "";
-#endif
 
       // don't try to send the test message if the SMTP server wasn't
       // configured
@@ -2471,10 +2468,11 @@ void VerifyUserDir(void)
    mApplication->SetLocalDir(userdir);
 }
 
-/*
+/**
   This function sets up folder entries for the servers, which can then
   be used for browsing them. Called only once when the application is
-  initialised for the first time. */
+  initialised for the first time.
+ */
 static
 void
 SetupServers(void)
@@ -2552,45 +2550,47 @@ SetupServers(void)
    }
 }
 
-/* Make sure we have the minimal set of things set up:
+/**
+   Make sure we have the minimal set of things set up:
 
    MP_USERNAME, MP_PERSONALNAME,
    MP_USERDIR
    MP_MBOXDIR
-   MP_HOSTNAME,
+   MP_HOSTNAME
+
+   and maybe take the values for
+
    MP_SMTPHOST, MP_NNTPHOST, MP_IMAPHOST, MP_POPHOST
+
+   from the environment
 */
 static
 void SetupMinimalConfig(void)
 {
-   // DNS lookup in wxGetFullHostName() may take quiet some time, show
-   // something to the user while we're blocking in it
-   //MProgressInfo proginfo(NULL, _("One time only setup...")); TODO
+   // DNS lookup in wxGetFullHostName() may take quite some time (especially
+   // if the DNS doesn't work...), show something to the user while we're
+   // blocking in it
+   MProgressInfo proginfo(NULL, _("One time only environment setup..."));
 
-   String str;
-   const size_t bufsize = 200;
-   char  buffer[bufsize];
+   wxYield(); // to show proginfo
 
    Profile *profile = mApplication->GetProfile();
 
    if( strutil_isempty(READ_APPCONFIG(MP_USERNAME)) )
    {
-      wxGetUserId(buffer,bufsize); // contains , delimited fields of info
-      str = strutil_before(str,',');
-      profile->writeEntry(MP_USERNAME, buffer);
+      profile->writeEntry(MP_USERNAME, wxGetUserId());
    }
+
    if( strutil_isempty(READ_APPCONFIG(MP_PERSONALNAME)) )
    {
-      wxGetUserName(buffer,bufsize);
-      profile->writeEntry(MP_PERSONALNAME, buffer);
+      profile->writeEntry(MP_PERSONALNAME, wxGetUserName());
    }
 
    // this is normally already done, but better be safe
    VerifyUserDir();
 
-   // now that we have the local dir, we can set up a default mail
-   // folder dir
-   str = READ_APPCONFIG(MP_MBOXDIR);
+   // now that we have the local dir, we can set up a default mail folder dir
+   String str = READ_APPCONFIG(MP_MBOXDIR);
    if( strutil_isempty(str) )
    {
       str = READ_APPCONFIG(MP_USERDIR);
@@ -2599,8 +2599,7 @@ void SetupMinimalConfig(void)
 
    if( strutil_isempty(READ_APPCONFIG(MP_HOSTNAME)) )
    {
-      wxGetFullHostName(buffer,bufsize);
-      profile->writeEntry(MP_HOSTNAME, buffer);
+      profile->writeEntry(MP_HOSTNAME, wxGetFullHostName());
    }
 
    if( strutil_isempty(READ_APPCONFIG(MP_NNTPHOST)) )
@@ -2631,26 +2630,7 @@ void SetupMinimalConfig(void)
       if(cptr && *cptr)
          profile->writeEntry(MP_IMAPHOST, cptr);
    }
-
-#if 0
-
-   mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent Mail"));
-   mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, _("New Mail"));
-
-   (void)VerifyInbox();
-
-#if 0
-#if defined ( USE_PYTHON )
-// run a python script to set up things
-   PyH_RunMScript(MSCRIPT_USER_SETUP);
-#else
-#   pragma warning "Missing functionality without Python!"
-#endif
-#endif
-#endif
-
 }
-
 
 /*
  * This doesn't strictly belong here(?) but for now it's the easiest
@@ -2665,20 +2645,19 @@ void SetupMinimalConfig(void)
 static time_t  gs_RemoteSyncDate = 0;
 
 extern
-bool RetrieveRemoteConfigSettings(void)
+bool RetrieveRemoteConfigSettings(bool confirm)
 {
-   if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
-      return TRUE; // nothing to do
+   if ( confirm )
+   {
+      if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
+         return TRUE; // nothing to do
 
-   // this forces the disappearance of the startup splash or wxGTK
-   // will crash or produce funny memory corruption :-)
-   CloseSplash();
-
-   if (! MDialog_YesNoDialog(
-      _("Retrieve remote configuration settings now?"), NULL,
-      _("Retrieve remote settings?"), true,
-            GetPersMsgBoxName(M_MSGBOX_RETRIEVE_REMOTE) ) )
-        return TRUE;
+      if (! MDialog_YesNoDialog(
+         _("Retrieve remote configuration settings now?"), NULL,
+         _("Retrieve remote settings?"), true,
+               GetPersMsgBoxName(M_MSGBOX_RETRIEVE_REMOTE) ) )
+           return TRUE;
+   }
 
    MailFolder *mf =
       MailFolder::OpenFolder(READ_APPCONFIG(MP_SYNC_FOLDER));
@@ -2766,16 +2745,19 @@ bool RetrieveRemoteConfigSettings(void)
 }
 
 extern
-bool SaveRemoteConfigSettings(void)
+bool SaveRemoteConfigSettings(bool confirm)
 {
-   if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
-      return TRUE; // nothing to do
+   if ( confirm )
+   {
+      if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
+         return TRUE; // nothing to do
 
-   if (! MDialog_YesNoDialog(
-      _("Store remote configuration settings now?"), NULL,
-      _("Store remote settings?"), true,
-            GetPersMsgBoxName(M_MSGBOX_STORE_REMOTE) ) )
-        return TRUE;
+      if (! MDialog_YesNoDialog(
+         _("Store remote configuration settings now?"), NULL,
+         _("Store remote settings?"), true,
+               GetPersMsgBoxName(M_MSGBOX_STORE_REMOTE) ) )
+           return TRUE;
+   }
 
    MailFolder *mf =
       MailFolder::OpenFolder(READ_APPCONFIG(MP_SYNC_FOLDER));
@@ -2949,7 +2931,8 @@ CheckConfiguration(void)
    // and other M files from it
    VerifyUserDir();
 
-   if ( READ_APPCONFIG(MP_FIRSTRUN) != 0 )
+   bool firstRun = READ_APPCONFIG(MP_FIRSTRUN);
+   if ( firstRun != 0 )
    {
       // make sure the essential things have proper values
       SetupMinimalConfig();
@@ -2970,10 +2953,12 @@ CheckConfiguration(void)
       profile->writeEntry(MP_VERSION, M_VERSION);
    }
 
-   if ( !VerifyInbox() )
+   // VerifyInbox() will always return FALSE during the first run, don't
+   // insult the user (just yet ;-)
+   if ( !VerifyInbox() && !firstRun )
       wxLogDebug("Evil user corrupted his profile settings - restored.");
 
-   if(! RetrieveRemoteConfigSettings() )
+   if ( !RetrieveRemoteConfigSettings() )
       wxLogError(_("Remote configuration information could not be retrieved."));
 
    return true;

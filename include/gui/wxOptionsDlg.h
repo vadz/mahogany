@@ -39,6 +39,7 @@ enum OptionsPage
    OptionsPage_FolderView,
    OptionsPage_Adb,
    OptionsPage_Helpers,
+   OptionsPage_Sync,
    OptionsPage_Misc,
    OptionsPage_Max
 };

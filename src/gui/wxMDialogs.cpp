@@ -368,6 +368,33 @@ static inline long Style(long style)
 # endif
 }
 
+// needed to fix a bug/misfeature of wxWin 2.2.x: an already deleted window may
+// be used as parent for the newly created dialogs, don't let this happen
+static void ReallyCloseTopLevelWindow(wxFrame *frame)
+{
+   frame->Hide(); // immediately
+   frame->Close(); // will happen later
+
+#if !wxCHECK_VERSION(2, 3, 0)
+   // unset the given frame as the main app window: otherwise we risk to create
+   // the dialogs with splash as parent and a crash later when the dialog is
+   // closed as its parent will have already been deleted
+   //
+   // NB: use mApplication and not wxTheApp now as the latter could still be
+   //     NULL if we're called from OnInit()!
+   if ( mApplication )
+   {
+      wxMApp *mapp = (wxMApp *)mApplication;
+      if ( mapp->GetTopWindow() == frame )
+      {
+         mapp->SetTopWindow(NULL);
+
+         wxTopLevelWindows.DeleteObject(frame);
+      }
+   }
+#endif // wxWin 2.3+
+}
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -606,20 +633,20 @@ MDialog_Message(const char *message,
                 const char *title,
                 const char *configPath)
 {
+   // if the msg box is disabled, don't make the splash disappear, return
+   // immediately
+   if ( !wxPMessageBoxEnabled(configPath) )
+      return;
+
    wxString caption = "Mahogany : ";
    caption += title;
 
-   //MGuiLocker lock;
    CloseSplash();
-   NoBusyCursor no;
-   if(configPath)
-      wxPMessageBox(configPath, message, caption,
-                    Style(wxOK | wxICON_INFORMATION),
-                   GetDialogParent(parent));
-   else
-      wxMessageBox(message, caption,
-                   Style(wxOK | wxICON_INFORMATION),
-                   GetDialogParent(parent));
+   NoBusyCursor noBC;
+
+   wxPMessageBox(configPath, message, caption,
+                 Style(wxOK | wxICON_INFORMATION),
+                 GetDialogParent(parent));
 }
 
 
@@ -642,15 +669,27 @@ MDialog_YesNoDialog(const char *message,
    caption += title;
 
    int style = Style(wxYES_NO | wxICON_QUESTION | wxCENTRE);
-   if(! yesDefault) style |= wxNO_DEFAULT;
+   if(! yesDefault)
+      style |= wxNO_DEFAULT;
 
-   //MGuiLocker lock;
-   CloseSplash();
-   NoBusyCursor no;
-   // gcc 2.95.2 complains about void return if I don't use rc
+   // if the msg box is disabled, don't make the splash disappear
+   NoBusyCursor *noBC;
+   if ( wxPMessageBoxEnabled(configPath) )
+   {
+      CloseSplash();
+      noBC = new NoBusyCursor;
+   }
+   else
+   {
+      noBC = NULL;
+   }
+
    bool rc = wxPMessageBox(configPath, message, caption,
                            style,
                            GetDialogParent(parent)) == wxYES;
+
+   delete noBC;
+
    return rc;
 }
 
@@ -1069,27 +1108,8 @@ extern void CloseSplash()
    {
       // do close the splash
       wxAboutFrame *frameSplash = (wxAboutFrame *)g_pSplashScreen;
-      frameSplash->Hide(); // immediately
-      frameSplash->Close(); // will happen later
 
-#if !wxCHECK_VERSION(2, 3, 0)
-      // and also unset the splash screen as the main app window: otherwise we
-      // risk to create the dialogs with splash as parent and a crash later when
-      // the dialog is closed as its parent will have already been deleted
-      //
-      // NB: use mApplication and not wxTheApp now as the latter could still be
-      //     NULL if we're called from OnInit()!
-      if ( mApplication )
-      {
-         wxMApp *mapp = (wxMApp *)mApplication;
-         if ( mapp->GetTopWindow() == frameSplash )
-         {
-            mapp->SetTopWindow(NULL);
-
-            wxTopLevelWindows.DeleteObject(frameSplash);
-         }
-      }
-#endif // wxWin 2.3+
+      ReallyCloseTopLevelWindow(frameSplash);
    }
 }
 
@@ -3425,8 +3445,7 @@ void MProgressInfo::SetValue(size_t numDone)
 
 MProgressInfo::~MProgressInfo()
 {
-   m_frame->Show(FALSE);
-   m_frame->Close();
+   ReallyCloseTopLevelWindow(m_frame);
 }
 
 // ----------------------------------------------------------------------------

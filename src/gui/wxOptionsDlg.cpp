@@ -347,7 +347,9 @@ enum ConfigFields
    ConfigField_DockableToolbars,
    ConfigField_ToolbarsFlatButtons,
    ConfigField_ReenableDialog,
+   ConfigField_OthersLast = ConfigField_ReenableDialog,
 
+   ConfigField_SyncFirst = ConfigField_OthersLast,
    ConfigField_RemoteSynchroniseMessage,
    ConfigField_RSynchronise,
    ConfigField_RSConfigFolder,
@@ -355,8 +357,9 @@ enum ConfigFields
    ConfigField_RSIds,
    ConfigField_RSFolders,
    ConfigField_RSFolderGroup,
-   ConfigField_OthersLast = ConfigField_RSFolderGroup,
-
+   ConfigField_SyncStore,
+   ConfigField_SyncRetrieve,
+   ConfigField_SyncLast = ConfigField_SyncRetrieve,
 
    // the end
    ConfigField_Max
@@ -610,6 +613,10 @@ END_EVENT_TABLE()
 BEGIN_EVENT_TABLE(wxOptionsPageIdent, wxOptionsPage)
    // buttons invoke subdialogs
    EVT_BUTTON(-1, wxOptionsPageIdent::OnButton)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxOptionsPageSync, wxOptionsPage)
+   EVT_BUTTON(-1, wxOptionsPageSync::OnButton)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxOptionsPageOthers, wxOptionsPage)
@@ -971,6 +978,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Use floating &tool-bars"), Field_Bool,    -1                     },
    { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     },
    { gettext_noop("&Reenable disabled message boxes..."), Field_SubDlg, -1 },
+
+   // sync page
    { gettext_noop("Mahogany can synchronise part of its configuration\n"
                   "with settings stored in a special folder. This can\n"
                   "be used to share settings between machines by storing\n"
@@ -979,11 +988,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "via the Help button below."),
                   Field_Message, -1 },
    { gettext_noop("Sync options with remote server"), Field_Bool|Field_Global, -1 },
-   { gettext_noop(" (IMAP) folder for synchronisation"), Field_Folder|Field_Global, ConfigField_RSynchronise },
-   { gettext_noop(" Sync Filter rules"), Field_Bool|Field_Global, ConfigField_RSynchronise },
-   { gettext_noop(" Sync Identities"), Field_Bool|Field_Global, ConfigField_RSynchronise },
-   { gettext_noop(" Sync part of the folder tree"), Field_Bool|Field_Global, ConfigField_RSynchronise },
-   { gettext_noop(" Folder group to synchronise"), Field_Folder|Field_Global, ConfigField_RSynchronise }
+   { gettext_noop("Remote (IMAP) folder for synchronisation"), Field_Folder|Field_Global, ConfigField_RSynchronise },
+   { gettext_noop("Sync filter rules"), Field_Bool|Field_Global, ConfigField_RSynchronise },
+   { gettext_noop("Sync identities"), Field_Bool|Field_Global, ConfigField_RSynchronise },
+   { gettext_noop("Sync part of the folder tree"), Field_Bool|Field_Global, ConfigField_RSynchronise },
+   { gettext_noop("Folder group to synchronise"), Field_Folder|Field_Global, ConfigField_RSFolders },
+   { gettext_noop("&Store settings..."), Field_SubDlg | Field_Global, ConfigField_RSynchronise },
+   { gettext_noop("&Retrieve settings..."), Field_SubDlg | Field_Global, ConfigField_RSynchronise },
 };
 
 // FIXME ugly, ugly, ugly... config settings should be living in an array from
@@ -1223,6 +1234,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_DOCKABLE_TOOLBARS),
    CONFIG_ENTRY(MP_FLAT_TOOLBARS),
    CONFIG_NONE(),
+
+   // sync
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SYNC_REMOTE),
    CONFIG_ENTRY(MP_SYNC_FOLDER),
@@ -1230,6 +1243,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SYNC_IDS),
    CONFIG_ENTRY(MP_SYNC_FOLDERS),
    CONFIG_ENTRY(MP_SYNC_FOLDERGROUP),
+   CONFIG_NONE(),
+   CONFIG_NONE(),
 };
 
 #undef CONFIG_ENTRY
@@ -2264,6 +2279,77 @@ wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
 {
 }
 
+// ----------------------------------------------------------------------------
+// wxOptionsPageSync
+// ----------------------------------------------------------------------------
+
+wxOptionsPageSync::wxOptionsPageSync(wxNotebook *parent,
+                                     Profile *profile)
+                 : wxOptionsPageStandard(parent,
+                                         _("Synchronize"),
+                                         profile,
+                                         ConfigField_SyncFirst,
+                                         ConfigField_SyncLast,
+                                         MH_OPAGE_OTHERS)
+{
+   m_SyncRemote = -1;
+}
+
+bool wxOptionsPageSync::TransferDataToWindow()
+{
+   bool rc = wxOptionsPage::TransferDataToWindow();
+   if ( rc )
+   {
+      m_SyncRemote = READ_CONFIG(m_Profile, MP_SYNC_REMOTE);
+   }
+
+   return rc;
+}
+
+bool wxOptionsPageSync::TransferDataFromWindow()
+{
+   bool rc = wxOptionsPage::TransferDataFromWindow();
+   if ( rc )
+   {
+      bool syncRemote = READ_CONFIG(m_Profile, MP_SYNC_REMOTE) != 0;
+      if ( syncRemote && !m_SyncRemote )
+      {
+         if ( MDialog_YesNoDialog
+              (
+               _("You have activated remote configuration synchronisation.\n"
+                 "\n"
+                 "Do you want to store the current setup now?"),
+               this,
+               _("Store settings now?"),
+               true,
+               GetPersMsgBoxName(M_MSGBOX_OPT_STOREREMOTENOW)
+              )
+            )
+         {
+            SaveRemoteConfigSettings();
+         }
+      }
+   }
+
+   return rc;
+}
+
+void wxOptionsPageSync::OnButton(wxCommandEvent& event)
+{
+   wxObject *obj = event.GetEventObject();
+   if ( obj == GetControl(ConfigField_SyncStore) )
+   {
+      SaveRemoteConfigSettings(false /* don't ask confirmation */);
+   }
+   else if ( obj == GetControl(ConfigField_SyncRetrieve) )
+   {
+      RetrieveRemoteConfigSettings(false /* don't ask confirmation */);
+   }
+   else
+   {
+      event.Skip();
+   }
+}
 
 // ----------------------------------------------------------------------------
 // wxOptionsPageOthers
@@ -2279,7 +2365,6 @@ wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
                                    MH_OPAGE_OTHERS)
 {
    m_nAutosaveDelay = -1;
-   m_SyncRemote = -1;
 }
 
 void wxOptionsPageOthers::OnButton(wxCommandEvent& event)
@@ -2312,7 +2397,6 @@ bool wxOptionsPageOthers::TransferDataToWindow()
    if ( rc )
    {
       m_nAutosaveDelay = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);
-      m_SyncRemote = READ_CONFIG(m_Profile, MP_SYNC_REMOTE);
    }
 
    return rc;
@@ -2340,28 +2424,6 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
          }
       }
 
-      long sRemote = READ_CONFIG(m_Profile, MP_SYNC_REMOTE);
-      if(sRemote && ! (m_SyncRemote))
-      {
-         if ( MDialog_YesNoDialog(
-            _("You have activated remote configuration synchronisation.\n"
-              "Do you want to store the current setup now?"),
-              this,
-              _("Store settings now?"),
-              true,
-            GetPersMsgBoxName(M_MSGBOX_OPT_STOREREMOTENOW) )
-            )
-            SaveRemoteConfigSettings();
-         else
-            if ( MDialog_YesNoDialog(
-               _("Do you want to merge in the remote setup now?"),
-               this,
-               _("Retrieve settings now?"),
-               true,
-               GetPersMsgBoxName(M_MSGBOX_OPT_GETREMOTENOW) )
-            )
-               RetrieveRemoteConfigSettings();
-      }
       // show/hide the log window depending on the new setting value
       bool showLog = READ_CONFIG(m_Profile, MP_SHOWLOG) != 0;
       if ( showLog != mApplication->IsLogShown() )
@@ -2609,6 +2671,7 @@ const char *wxOptionsNotebook::ms_aszImages[] =
    "folderview",
    "adrbook",
    "helpers",
+   "sync",
    "miscopt",
    NULL
 };
@@ -2634,6 +2697,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    new wxOptionsPageFolderView(this, profile);
    new wxOptionsPageAdb(this, profile);
    new wxOptionsPageHelpers(this, profile);
+   new wxOptionsPageSync(this, profile);
    new wxOptionsPageOthers(this, profile);
 
    profile->DecRef();

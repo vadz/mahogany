@@ -90,6 +90,7 @@ public:
       // compensate for it
       SafeIncRef(folder);
       wxFolderTree::OnOpenHere(folder);
+
       m_frame->OpenFolder(folder);
    }
 
@@ -161,30 +162,13 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
                      wxSize(x-1,y-31),
                      wxSP_3D | wxSP_BORDER
                     );
+
    // insert treectrl in one of the splitter panes
    m_FolderTree = new wxMainFolderTree(m_splitter, this);
    m_FolderView = wxFolderView::Create(m_splitter);
    m_splitter->SplitVertically(m_FolderTree->GetWindow(),
                                m_FolderView->GetWindow(),
                                x/3);
-
-   // open the last folder in the main frame by default
-   if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
-   {
-      String foldername = READ_APPCONFIG(MP_MAINFOLDER);
-      if ( !foldername.IsEmpty() )
-      {
-         MFolder *folder = MFolder::Get(foldername);
-         if ( folder )
-         {
-            // make sure it doesn't go away after OpenFolder()
-            folder->IncRef();
-            OpenFolder(folder);
-            m_FolderTree->SelectFolder(folder);
-            folder->DecRef();
-         }
-      }
-   }
 
    m_splitter->SetMinimumPaneSize(0);
    m_splitter->SetFocus();
@@ -258,6 +242,8 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
 
          m_folderName.clear();
       }
+
+      m_FolderTree->SelectFolder(folder);
   }
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
    // only add the msg menu once

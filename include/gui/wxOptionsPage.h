@@ -445,6 +445,25 @@ public:
    wxOptionsPageHelpers(wxNotebook *parent, Profile *profile);
 };
 
+// sync settings page
+class wxOptionsPageSync : public wxOptionsPageStandard
+{
+public:
+   wxOptionsPageSync(wxNotebook *parent, Profile *profile);
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
+   void OnButton(wxCommandEvent& event);
+
+protected:
+   // may be true, false or -1 if unknown
+   int m_SyncRemote;
+
+private:
+   DECLARE_EVENT_TABLE()
+};
+
 // miscellaneous settings
 class wxOptionsPageOthers : public wxOptionsPageStandard
 {
@@ -458,7 +477,7 @@ public:
 
 protected:
    long m_nAutosaveDelay;
-   int  m_SyncRemote;
+
 private:
    DECLARE_EVENT_TABLE()
 };
