@@ -504,24 +504,44 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
    partContentPtr[len] = '\0';
    //fs_give(&cptr); // c-client's free() function
 
+   /* This bit is a bit suspicious, it fails sometimes in
+      rfc822_qprint() when HTML code is fed into it and while Mahogany 
+      has long done all this, it seems to be not significantly worse
+      if I comment it all out. So what I do now, is to just return the 
+      plain text iff the decoding failed.
+      FIXME I should really find out whether this is correct :-)
+   */
+   const char * returnVal = NULL;
    switch(GetPartEncoding(n))
    {
+   case ENCBASE64:      // base-64 encoded data
+      returnVal = (const char *) rfc822_base64((unsigned char
+                                                *)partContentPtr,GetPartSize(n),lenptr); 
+      break;
+   case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
+      returnVal = (const char *) rfc822_qprint((unsigned char
+                                                *)partContentPtr,GetPartSize(n,true),lenptr); 
+      break;
    case  ENCBINARY:     // 8 bit binary data
       *lenptr = GetPartSize(n);
       return partContentPtr;
-   case ENCBASE64:      // base-64 encoded data
-      return (const char *) rfc822_base64((unsigned char *)partContentPtr,GetPartSize(n),lenptr);
-   case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
-      return (const char *) rfc822_qprint((unsigned char *)partContentPtr,GetPartSize(n,true),lenptr);
    case ENC7BIT:     // 7 bit SMTP semantic data
    case ENC8BIT:        // 8 bit SMTP semantic data
    case ENCOTHER:    //unknown
    default:
       *lenptr = strlen(partContentPtr);
-      return partContentPtr;
+      returnVal = partContentPtr;
    }
-
-//   return partContentPtr;
+   if(returnVal == NULL)
+      return partContentPtr;
+   else if(returnVal != partContentPtr)
+   { // we need to copy it over
+      if(partContentPtr) delete partContentPtr;
+      partContentPtr = new char [*lenptr];
+      memcpy(partContentPtr, returnVal, *lenptr);
+      fs_give((void **)&returnVal);
+   }
+   return partContentPtr;
 }
 
 MessageParameterList const &
