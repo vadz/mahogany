@@ -686,8 +686,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
 #endif
 #ifdef OS_UNIX
-   { gettext_noop("Use local mail delivery a&gent"), Field_Bool | Field_Global, -1,           },
-   { gettext_noop("Local MDA &command"), Field_Text | Field_Global, ConfigField_UseSendmail },
+   { gettext_noop("Use local mail delivery a&gent"), Field_Bool, -1,           },
+   { gettext_noop("Local MDA &command"), Field_Text, ConfigField_UseSendmail },
 #endif
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
@@ -1452,29 +1452,40 @@ void wxOptionsPage::UpdateUI()
                       "control index out of range" );
 
          bool bEnable = true;
-         if ( GetFieldType(nCheck) == Field_Bool )
+         wxControl *controlDep = GetControl(nCheck);
+         if ( controlDep )
          {
-            // enable only if the checkbox is checked
-            wxCheckBox *checkbox = wxStaticCast(GetControl(nCheck), wxCheckBox);
+            if ( GetFieldType(nCheck) == Field_Bool )
+            {
+               // enable only if the checkbox is checked
+               wxCheckBox *checkbox = wxStaticCast(controlDep, wxCheckBox);
 
-            bEnable = checkbox->GetValue();
-         }
-         else if ( GetFieldType(nCheck) == Field_Action )
-         {
-            // only enable if the radiobox selection is 0 (meaning "yes")
-            wxRadioBox *radiobox = wxStaticCast(GetControl(nCheck), wxRadioBox);
+               bEnable = checkbox->GetValue();
+            }
+            else if ( GetFieldType(nCheck) == Field_Action )
+            {
+               // only enable if the radiobox selection is 0 (meaning "yes")
+               wxRadioBox *radiobox = wxStaticCast(controlDep, wxRadioBox);
 
-            if ( radiobox->GetSelection() == 0 ) // FIXME hardcoded!
-               bEnable = false;
+               if ( radiobox->GetSelection() == 0 ) // FIXME hardcoded!
+                  bEnable = false;
+            }
+            else
+            {
+               // assume that this is one of the text controls
+               wxTextCtrl *text = wxStaticCast(controlDep, wxTextCtrl);
+               wxCHECK_RET( text, "can't depend on this control type" );
+
+               // only enable if the text control has something
+               bEnable = !text->GetValue().IsEmpty();
+            }
          }
          else
          {
-            // assume that this is one of the text controls
-            wxTextCtrl *text = wxStaticCast(GetControl(nCheck), wxTextCtrl);
-            wxCHECK_RET( text, "can't depend on this control type" );
-
-            // only enable if the text control has something
-            bEnable = !text->GetValue().IsEmpty();
+            // control we depend on wasn't created: this is possible if it is
+            // advanced/global control and we're in novice/identity mode, so
+            // just ignore it
+            continue;
          }
 
          if ( inverseMeaning )
