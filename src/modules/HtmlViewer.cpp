@@ -127,6 +127,9 @@ private:
    // the HTML string: we accumulate HTML in it and render it in EndBody()
    wxString m_htmlText;
 
+   // the string to put just before </body>: it contains the ends of some tags
+   wxString m_htmlEnd;
+
    // count of images used to generate unique names for them
    size_t m_nImage;
 
@@ -136,8 +139,8 @@ private:
    // the XFace if we have any
    wxBitmap m_bmpXFace;
 
-   // did we have any plain text inserted in m_htmlText?
-   bool m_hadPlainText;
+   // do we have a non default font?
+   bool m_hasGlobalFont;
 
    DECLARE_MESSAGE_VIEWER()
 };
@@ -349,6 +352,15 @@ static wxString MakeHtmlSafe(const wxString& text)
             textSafe += "&quot;";
             break;
 
+         case ' ':
+            textSafe += "&nbsp;";
+            break;
+
+         case '\t':
+            // we hardcode the tab width to 8
+            textSafe += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+            break;
+
          case '\r':
             // ignore, we process '\n' below
             break;
@@ -412,15 +424,43 @@ void HtmlViewer::StartHeaders()
    // set the default attributes
    const ProfileValues& profileValues = GetOptions();
 
+   m_htmlEnd.clear();
    m_htmlText = "<html><body";
 
    AddColourAttr("text", profileValues.FgCol);
    AddColourAttr("bgcolor", profileValues.BgCol);
    AddColourAttr("link", profileValues.UrlCol);
 
-   // close <body> tag and start the table containing the headers
-   m_htmlText += ">"
-                 "<table cellspacing=1 cellpadding=1 border=0>";
+   // close <body> tag
+   m_htmlText += ">";
+
+   // map the point size into the HTML font size so that if the standard font
+   // size is 12pt, 6pt is very small and 24pt is very big
+   //
+   // this is not very rigorous, of course...
+   int diff = profileValues.fontSize - MP_MVIEW_FONT_SIZE_D;
+   if ( diff > 0 )
+      diff /= 4;
+   else
+      diff /= 2;
+
+   if ( diff )
+   {
+      m_htmlText << "<font size=" << wxString::Format("%+d", diff) << ">";
+      m_htmlEnd.Prepend("</font>");
+   }
+
+   // map the font family into HTML font face name
+   //
+   // FIXME: use <font face="...">
+   if ( profileValues.fontFamily == wxTELETYPE )
+   {
+      m_htmlText << "<tt>";
+      m_htmlEnd.Prepend("</tt>");
+   }
+
+   // start the table containing the headers
+   m_htmlText += "<table cellspacing=1 cellpadding=1 border=0>";
 }
 
 void HtmlViewer::ShowRawHeaders(const String& header)
@@ -456,7 +496,7 @@ void HtmlViewer::ShowHeader(const String& headerName,
 
    hasFont = AddFontTag(profileValues.HeaderValueCol);
 
-   m_htmlText << "<pre>" << MakeHtmlSafe(headerValue) << "</pre>";
+   m_htmlText += MakeHtmlSafe(headerValue);
 
    if ( hasFont )
       m_htmlText += "</font>";
@@ -499,8 +539,6 @@ void HtmlViewer::EndHeaders()
 
 void HtmlViewer::StartBody()
 {
-   m_hadPlainText = false;
-
    m_htmlText += "<br>";
 }
 
@@ -549,14 +587,6 @@ void HtmlViewer::InsertRawContents(const String& data)
 
 void HtmlViewer::InsertText(const String& text, const TextStyle& style)
 {
-   if ( !m_hadPlainText )
-   {
-      // open <pre>: it will be closed in EndPart()
-      m_htmlText += "<pre>";
-
-      m_hadPlainText = true;
-   }
-
    // TODO: encoding support!!
 
    bool hasFont = AddFontTag(style.GetTextColour());
@@ -581,18 +611,13 @@ void HtmlViewer::InsertSignature(const String& signature)
 
 void HtmlViewer::EndPart()
 {
-   if ( m_hadPlainText )
-   {
-      m_htmlText += "</pre>";
-
-      m_hadPlainText = false;
-   }
-
    m_htmlText += "<br>";
 }
 
 void HtmlViewer::EndBody()
 {
+   m_htmlText += m_htmlEnd;
+
    m_htmlText += "</body></html>";
 
    // makes cut-&-pasting into Netscape easier

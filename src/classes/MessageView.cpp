@@ -1181,6 +1181,11 @@ void MessageView::ShowTextPart(wxFontEncoding encBody,
       style.SetFont(font);
    }
 
+   // FIXME: this is *horribly* slow, we iterate over the entire text
+   //        char by char - we should use regexs instead!
+   //
+   // TODO:  detect signature as well and call m_viewer->InsertSignature()
+   //        for it
    if ( m_ProfileValues.highlightURLs || m_ProfileValues.quotedColourize )
    {
       String url;
@@ -1271,59 +1276,63 @@ void MessageView::ShowImage(size_t nPart,
                             const String& mimeType,
                             size_t partSize)
 {
-   bool showInline = true;
+   // first of all, can we show it inline at all?
+   bool showInline = m_viewer->CanInlineImages();
 
-   switch ( m_ProfileValues.inlineGFX )
+   if ( showInline )
    {
-      default:
-         // check that the size of the image is less than configured
-         // maximum
-         if ( partSize > 1024*(size_t)m_ProfileValues.inlineGFX )
-         {
-            wxString msg;
-            msg.Printf
-                (
-                  _("An image embedded in this message is bigger "
-                    "than the currently configured limit of %luKb.\n"
-                    "\n"
-                    "Would you still like to see it?\n"
-                    "\n"
-                    "You can change this setting in the \"Message "
-                    "View\" page of the preferences dialog to 0 if "
-                    "you want to always show the images inline."),
-                  (unsigned long)m_ProfileValues.inlineGFX
-                );
+      switch ( m_ProfileValues.inlineGFX )
+      {
+         default:
+            // check that the size of the image is less than configured
+            // maximum
+            if ( partSize > 1024*(size_t)m_ProfileValues.inlineGFX )
+            {
+               wxString msg;
+               msg.Printf
+                   (
+                     _("An image embedded in this message is bigger "
+                       "than the currently configured limit of %luKb.\n"
+                       "\n"
+                       "Would you still like to see it?\n"
+                       "\n"
+                       "You can change this setting in the \"Message "
+                       "View\" page of the preferences dialog to 0 if "
+                       "you want to always show the images inline."),
+                     (unsigned long)m_ProfileValues.inlineGFX
+                   );
 
-            if ( MDialog_YesNoDialog
-                 (
-                  msg,
-                  GetParentFrame(),
-                  MDIALOG_YESNOTITLE,
-                  false, // [No] default
-                  GetPersMsgBoxName(M_MSGBOX_GFX_NOT_INLINED)
-                 ) )
+               if ( MDialog_YesNoDialog
+                    (
+                     msg,
+                     GetParentFrame(),
+                     MDIALOG_YESNOTITLE,
+                     false, // [No] default
+                     GetPersMsgBoxName(M_MSGBOX_GFX_NOT_INLINED)
+                    ) )
+               {
+                  // will inline
+                  break;
+               }
+
+            }
+            else
             {
                // will inline
                break;
             }
 
-         }
-         else
-         {
-            // will inline
+            // fall through
+
+         case -1:
+            // never inline
+            showInline = false;
             break;
-         }
 
-         // fall through
-
-      case -1:
-         // never inline
-         showInline = false;
-         break;
-
-      case 0:
-         // always inline
-         break;
+         case 0:
+            // always inline
+            break;
+      }
    }
 
    if ( showInline )
@@ -2755,15 +2764,6 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
       wxLogError(_("%s (external viewer exited with non null exit code)"),
                  info->GetErrorMsg().c_str());
    }
-
-#if 0
-   MTempFileName *tempfile = info->GetTempFile();
-   if ( tempfile )
-   {
-      // tell it that it's ok to delete the temp file
-      //FIXME: Ok() tells it not to delete it!tempfile->Ok();
-   }
-#endif
 
    m_processes.RemoveAt(n);
    delete info;
