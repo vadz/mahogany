@@ -653,6 +653,8 @@ wxMessageView::Update(void)
       mimeType = m_mailMessage->GetPartMimeType(i);
       strutil_tolower(mimeType);
       fileName = GetParameter(m_mailMessage,i,"FILENAME");
+      if(fileName.Length() == 0)
+         fileName = GetParameter(m_mailMessage,i,"NAME");
       (void) m_mailMessage->GetDisposition(i,&disposition);
       strutil_tolower(disposition);
 #ifdef DEBUG
@@ -728,9 +730,14 @@ wxMessageView::Update(void)
             In case of image content, we check whether it might be a
             Fax message. */
       {
+         wxString mimeFileName =
+            GetParameter(m_mailMessage,i,"FILENAME");
          if(t == Message::MSG_TYPEIMAGE && m_ProfileValues.inlineGFX)
          {
             wxString filename = wxGetTempFileName("Mtemp");
+            if(mimeFileName.Length() == 0)
+               mimeFileName = GetParameter(m_mailMessage,i,"NAME");
+            
             MimeSave(i,filename);
             bool ok;
             wxImage img =  wxIconManager::LoadImage(filename, &ok, true);
@@ -741,7 +748,7 @@ wxMessageView::Update(void)
                obj = new wxLayoutObjectIcon(
                   mApplication->GetIconManager()->
                   GetIconFromMimeType(m_mailMessage->GetPartMimeType(i),
-                                      GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.'))
+                                      mimeFileName.AfterLast('.'))
                   );
          }
          else
@@ -749,13 +756,13 @@ wxMessageView::Update(void)
             obj = new wxLayoutObjectIcon(
                mApplication->GetIconManager()->
                GetIconFromMimeType(m_mailMessage->GetPartMimeType(i),
-                                   GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.'))
+                                   mimeFileName.AfterLast('.'))
                );
          }
          ASSERT(obj);
          {
             String label;
-            label = GetParameter(m_mailMessage,i,"FILENAME");
+            label = mimeFileName;
             if(label.Length()) label << " : ";
             label << m_mailMessage->GetPartMimeType(i) << ", "
                   << strutil_ultoa(m_mailMessage->GetPartSize(i, true)) << _(" bytes");
@@ -881,13 +888,23 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
 {
    // we'll need this filename later
    wxString filenameOrig;
+   // look for "FILENAME" parameter:
    (void)m_mailMessage->ExpandParameter
          (
             m_mailMessage->GetDisposition(mimeDisplayPart),
             "FILENAME",
             &filenameOrig
          );
-
+   if(filenameOrig.Length() == 0)
+   {
+      // look for "NAME" parameter:
+      (void)m_mailMessage->ExpandParameter
+         (
+            m_mailMessage->GetDisposition(mimeDisplayPart),
+            "NAME",
+            &filenameOrig
+            );
+   }
    String mimetype = m_mailMessage->GetPartMimeType(mimeDisplayPart);
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
 
@@ -1121,6 +1138,13 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
                "FILENAME",
                &filename
             );
+      if(filename.Length() == 0)
+         (void)m_mailMessage->ExpandParameter
+            (
+               m_mailMessage->GetDisposition(mimeDisplayPart),
+               "NAME",
+               &filename
+               );
 
       wxString name, ext;
       wxSplitPath(filename, NULL, &name, &ext);
