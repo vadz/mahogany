@@ -805,7 +805,11 @@ void HtmlViewer::InsertText(const String& text, const TextStyle& style)
 
 void HtmlViewer::InsertURL(const String& url)
 {
-   m_htmlText << "<a href=\"" << url << "\">" << MakeHtmlSafe(url) << "</a>";
+   // URLs may contain special characters which must be replaced by HTML
+   // entities (i.e. '&' -> "&amp;")
+   String htmlizedUrl = MakeHtmlSafe(url);
+
+   m_htmlText << "<a href=\"" << htmlizedUrl << "\">" << htmlizedUrl << "</a>";
 }
 
 void HtmlViewer::InsertSignature(const String& signature)
