@@ -20,7 +20,7 @@ Version: %VERSION
 Release: %RELEASE
 Copyright: Mahogany Artistic License
 Group: X11/Applications/Networking
-Source: ftp://ronnie.phy.hw.ac.uk/pub/Mahogany/mahogany-%{VERSION}.tar.gz
+Source: ftp://ftp.wxwindows.org/pub/M/%{VERSION}/mahogany-%{VERSION}.tar.gz
 URL: http://mahogany.home.dhs.org/
 Packager: Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 Provides: mua
@@ -38,9 +38,8 @@ as local MBOX and news spool folders and sending mail using SMTP.
 %setup -n mahogany-%{VERSION}
 
 %build
-(cd include ; make ) || true
-make allclean || true
-(cd include ; make ) || true
+(cd include ; make -i ) || true
+make -i allclean || true
 if [ ! -f configure ]; then
   autoconf
 fi
@@ -48,8 +47,9 @@ fi
 CFLAGS="$RPM_OPT_FLAGS" ./configure --without-threads \
 	--prefix=$RPM_BUILD_ROOT/%prefix
 
-make depend || true
-make clean
+(cd include ; make ) || true
+make -i depend || true
+make -i clean
 
 if [ "$SMP" != "" ]; then
   export MAKE="make -j $SMP"
