@@ -4076,7 +4076,7 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
                                            FolderMonitor::Opened);
             }
          }
-         break;
+         return true;
 
       case WXK_PRIOR:
       case WXK_NEXT:
