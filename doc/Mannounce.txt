@@ -10,17 +10,13 @@ You can also get to the download page starting from
 
                   http://mahogany.sourceforge.net/
 
-NB: My sincere excuses to all people who have written me asking for
-    Win32 binaries and to whom I couldn't reply because there were
-    so many of them. For personal reasons I couldn't make the Win32
-    version as soon as I hoped to.
-
 In this message:
 
-1. Announcing Mahogany Version 0.62
+1. Announcing Mahogany Version 0.63
 2. Changes Against the Previous Release
+3. Future Plans
 
-Announcing Mahogany Version 0.62
+Announcing Mahogany Version 0.63
 =====================================================================
 
 Mahogany is an OpenSource(TM) cross-platform mail and news client. It
@@ -32,8 +28,8 @@ Python interpreter and/or its loadable modules (plug-ins).
 
 Mahogany's wealth of features and ease of use make it one of the most
 powerful clients available, providing a consistent and intuitive
-interface across all supported platforms and an ideal GUI email client
-for advanced and novice users alike.
+interface across all supported platforms and an ideal GUI email
+client for advanced and novice users alike.
 
 Mahogany includes an extendable address book system supporting
 hierarchical organisation of entries, group aliases, searching the
@@ -42,54 +38,44 @@ database formats. Currently Mahogany's native format, (X)Emacs' BBDB
 address books and PalmOS address books are supported. LDAP support is
 planned for future versions.
 
-Mahogany is written using the OpenSource wxWindows application
-framework for GUI C++ applications, building on the GTK+ toolkit on
-Unix and native Win32 API under Windows and imap-2000 (c-client)
-library developed by University of Washington for mail folder access.
+Mahogany is written using the OpenSource wxWindows framework for GUI
+C++ applications, building on the GTK+ toolkit on Unix and native
+Win32 API under Windows and imap-2000 (c-client) library developed by
+University of Washington for mail folder access.
 
 Mahogany is constantly being tested on a variety of Linux systems,
-Solaris-sparc and MS Windows. It should compile and work on any modern
-Unix platform.
+Solaris-sparc and MS Windows. It should compile and work on any
+modern Unix platform and any Win32 version.
 
-Changes Since Release 0.60
+Changes Since Release 0.62
 =====================================================================
 
 Key changes are:
 
- - fixes to several fatal crashes with IMAP servers
- - significant speed up of some operations (although more
-   optimizations are to come)
-
- - availability of Win32 version
-
- - Mahogany is now dual licensed under its Artistic License and GPL
+ - huge speed optimizations, especially for IMAP users
+ - several fatal bugs fixed (mainly in Win32 version)
 
 New features:
 
- - support for marking message as flagged/important
- - "Extract all addresses from message" command
- - possibility to import all MBOX folders under the given directory
- - possibility to set a hard limit for number of messages retrieved
-   from a (remote) folder
+ - show the number of messages in the folder tree
+ - "Clear folder" to delete all messages without opening a folder
+ - added "away" or "unattended" mode
+ - added "Close" and "Close all" folders commands
 
 Improvements:
 
- - folders in the tree can now be rearranged, system folders are at
-   top by default
- - messages can now be sorted by status and by size as well
- - title and status bar of folder view are customizable strings which
-   can include information about the number of new/unread/flagged
-   messages
- - show filtering progress in the status bar
- - filters dialog is now more convenient to use
- - new mail reporting was made less intrusive
+ - passwords can now be encrypted using TwoFish under Win32 as well
+ - URL popup menu in the message viewer
+ - "open URL in new browser window" option
+ - Python 2.x is now supported and not only 1.5 (Unix)
+ - option to automatically select the units for message size (kb/mb)
+ - added "Sender" option
 
 Bug fixes:
 
- - reading newsgroups doesn't crash the program immediately
- - parsing of complex MIME structures fixed
- - language autodetection fixed
- - fixed crash when viewing messages with wrong date
+ - fixed server side searching (IMAP only)
+ - fixed text highlighting when selecting text in the viewer
+ - renaming of the folders in the tree fixed once again
 
 Please see the CHANGES file in the distribution for an even more
 detailed list of changes.
@@ -97,18 +83,25 @@ detailed list of changes.
 Future Plans
 =====================================================================
 
-Next, we hope to tackle the following:
+We are going to continue on optimizing Mahogany and the next version
+should be much faster as the message headers will be retrieved on
+demand only. The speed optimization is the main focus of development
+for 0.64. The new features we are also working on are:
 
  - improving the message editor (work in progress)
  - full HTML message editing/displaying (almost complete)
+ - Unicode (UTF7/8) support (mostly done)
+
+Next we hope to implement the following:
+
  - multi-threading to allow network operations to happen in
    background
  - PGP/GPG support
  - LDAP support
 
 Please direct any queries to mahogany-users@lists.sourceforge.net
-and don't hesitate to contact us if you would like to participate in
-Mahogany development!
+and don't hesitate to contact us if you would like to participate
+in Mahogany development!
 
 Known bugs:
 -----------

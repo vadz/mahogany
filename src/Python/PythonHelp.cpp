@@ -321,7 +321,19 @@ PyH_RunScript(FILE *file, const char *filename)
 {
    // first check if Python is not disabled
    if ( READ_APPCONFIG(MP_USEPYTHON) )
-      PyRun_SimpleFile(file, (char *) filename);
+   {
+      if ( PyRun_SimpleFile(file, (char *) filename) != 0 )
+      {
+          String err;
+          PyH_GetErrorMessage(&err);
+          ERRORMESSAGE(("Python error while executing '%s':\n%s",
+                        filename, err.c_str()));
+      }
+   }
+   else
+   {
+       FAIL_MSG( "Python is disabled, can't run script!" );
+   }
 }
 
 

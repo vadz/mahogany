@@ -220,7 +220,7 @@ static const MenuItemInfo g_aMenuItems[] =
 
 #ifdef USE_PYTHON
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_SCRIPT,   gettext_noop("R&un Script..."),    gettext_noop("Run a simple python script"), FALSE },
+   { WXMENU_FILE_RUN_PYSCRIPT,   gettext_noop("R&un Python script..."),    gettext_noop("Run a simple python script"), FALSE },
 #endif // USE_PYTHON
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },

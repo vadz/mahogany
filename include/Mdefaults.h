@@ -950,7 +950,7 @@ enum MFolderIndex
 #define   MP_USEPYTHON_D         1
 #endif
 /// start-up script to run
-#define     MP_STARTUPSCRIPT_D            "Minit"
+#define     MP_STARTUPSCRIPT_D   ""
 /// show splash screen on startup?
 #define     MP_SHOWSPLASH_D      1
 /// how long should splash screen stay (0 disables timeout)?

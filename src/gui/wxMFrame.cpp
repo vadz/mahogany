@@ -218,6 +218,24 @@ wxMFrame::AddFileMenu(void)
    AppendToMenu(fileMenu, n, WXMENU_FILE_END);
 
    GetMenuBar()->Append(fileMenu, _("&Mail"));
+
+#ifdef USE_PYTHON
+   // disable the Python menu item if Python is disabled
+   if ( !READ_APPCONFIG(MP_USEPYTHON) )
+   {
+      wxMenuBar *mbar = GetMenuBar();
+      wxMenuItem *item = mbar->FindItem(WXMENU_FILE_RUN_PYSCRIPT);
+
+      if ( item )
+      {
+         item->Enable(FALSE);
+      }
+      else
+      {
+         FAIL_MSG( "where is \"Run Python script\" menu item?" );
+      }
+   }
+#endif // USE_PYTHON
 }
 
 void
@@ -372,19 +390,20 @@ wxMFrame::OnMenuCommand(int id)
          break;
 
 #ifdef USE_PYTHON
-      case WXMENU_FILE_SCRIPT:
+      case WXMENU_FILE_RUN_PYSCRIPT:
       {
-         String
-            path,
-            filename;
-
+         String path;
          path << mApplication->GetGlobalDir() << DIR_SEPARATOR << "scripts";
-         filename = MDialog_FileRequester(_("Please select a Python script to run."),
-                                          this,
-                                          path, filename,
-                                          "py", "*.py",
-                                          false,
-                                          NULL /* profile */);
+
+         wxString filename = MDialog_FileRequester
+                             (
+                              _("Please select a Python script to run."),
+                              this,
+                              path, filename,
+                              "py", "*.py",
+                              false,
+                              NULL /* profile */
+                             );
          if(! strutil_isempty(filename))
          {
             FILE *file = fopen(filename,"rb");
@@ -392,6 +411,11 @@ wxMFrame::OnMenuCommand(int id)
             {
                PyH_RunScript(file,filename);
                fclose(file);
+            }
+            else
+            {
+               wxLogSysError(_("Failed to open Python script '%s'"),
+                             filename.c_str());
             }
          }
          //else: cancelled by user

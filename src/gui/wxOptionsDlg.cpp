@@ -874,9 +874,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Python is the built-in scripting language which can be\n")
      gettext_noop("used to extend Mahogany's functionality. It is not essential\n")
      gettext_noop("for the program's normal operation."), Field_Message, -1},
-   { gettext_noop("&Enable Python"),               Field_Bool,    -1,                        },
-   { gettext_noop("Python &Path"),                 Field_Text,    ConfigField_EnablePython   },
-   { gettext_noop("&Startup script"),              Field_File,    ConfigField_EnablePython   },
+   { gettext_noop("&Enable Python"),               Field_Bool |
+                                                   Field_AppWide, -1,                        },
+   { gettext_noop("Python &path"),                 Field_Text |
+                                                   Field_AppWide, ConfigField_EnablePython   },
+   { gettext_noop("&Startup script"),              Field_File |
+                                                   Field_AppWide, ConfigField_EnablePython   },
    { gettext_noop("&Folder open callback"),        Field_Text,    ConfigField_EnablePython   },
    { gettext_noop("Folder &update callback"),      Field_Text,    ConfigField_EnablePython   },
    { gettext_noop("Folder e&xpunge callback"),     Field_Text,    ConfigField_EnablePython   },
