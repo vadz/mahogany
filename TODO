@@ -23,6 +23,9 @@ $Id$
   + flicker
   + key bindings for wxLayoutWindow
 
+- ComposeView:
+  + support saving of sent mail (FCC)
+
 - configure: USE_WXCONFIG does not get defined!
 
 - not all windows get closed when application exits.
