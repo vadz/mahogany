@@ -1735,7 +1735,9 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
 
     // use the values stored from the last time unless the special flag is
     // given and we do have the name/path
-    if ( config || ((flags & wxFILEDLG_USE_FILENAME) && defname && defpath) ) {
+    if ( config ||
+         ((flags & wxFILEDLG_USE_FILENAME) &&
+          !wxIsEmpty(defname) && !wxIsEmpty(defpath)) ) {
         defaultName = config->Read(configValueFile, defName);
         defaultPath = config->Read(configValuePath, defpath);
     }
