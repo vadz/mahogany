@@ -8,26 +8,34 @@
 # default installation directory
 %define prefix /usr/local
 
-# we can build 2 different packages from this spec file: a semistatically
-# linked version (only common libs linked dynamically) or a quartstatically
-# one (only wxGTK linked statically, GTK libs dynamically)
-#
-# not used any more
-#
-#%define MAKETARGET semistatic
-#%define MAKETARGET quartstatic
+# we can build 2 different packages from this spec file: a quartstatically
+# linked version (wxGTK linked statically, the rest dynamically) or a
+# dynamically linked one (we might also build a semistatic version with both
+# wxGTK abd GTK libs linked statically)
+%define static 1
+%if %{static}
+%define MAKETARGET quartstatic
+%else
+%define MAKETARGET
+%endif
 
 Summary: Mahogany email and news client
 Name: mahogany
-Version: %VERSION
-Release: %RELEASE
+Version: %{VERSION}
+Release: %{RELEASE}
 Copyright: Mahogany Artistic License or GPL
 Group: X11/Applications/Networking
-Source: ftp://ftp.sourceforge.net/pub/sourceforge/mahogany/mahogany-%{VERSION}.tar.gz
+Source: ftp://ftp.sourceforge.net/pub/sourceforge/mahogany/mahogany-%{VERSION}.tar.bz2
 URL: http://mahogany.sourceforge.net/
 Packager: Vadim Zeitlin <vadim@wxwindows.org>
 Provides: mua
+
+# doesn't seem to work for the programs?
+# BuildPreReq: wx-config
+
+%if !%{static}
 Requires: wxwin
+%endif
 
 Prefix: %prefix
 BuildRoot: /var/tmp/%{name}-root
@@ -48,7 +56,7 @@ if [ ! -f configure ]; then
   autoconf
 fi
 
-CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=$RPM_BUILD_ROOT/%prefix
+CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=$RPM_BUILD_ROOT/%{prefix}
 
 # we have to fix M_PREFIX in config.h because the package will be later
 # installed in just %prefix, so fallback paths hardcoded into the binary
@@ -65,7 +73,7 @@ if [ "x$MAKE" = "x" ]; then
   fi
 fi
 
-$MAKE quartstatic
+$MAKE %{MAKETARGET}
 
 %install
 export PATH=/sbin:$PATH
