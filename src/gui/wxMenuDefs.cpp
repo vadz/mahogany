@@ -103,11 +103,11 @@ static const TbarItemInfo g_aToolBarData[] =
    { "tb_trash",         WXMENU_MSG_DELETE,    "Delete message"    },
  
    // ADB edit frame
-   { "open",     WXMENU_ADBBOOK_OPEN,    "Open address book file"  },
-   { "new",      WXMENU_ADBEDIT_NEW,     "Create new entry"        },
-   { "delete",   WXMENU_ADBEDIT_DELETE,  "Delete"                  },
+   { "tb_open",     WXMENU_ADBBOOK_OPEN,    "Open address book file"  },
+   { "tb_new",      WXMENU_ADBEDIT_NEW,     "Create new entry"        },
+   { "tb_delete",   WXMENU_ADBEDIT_DELETE,  "Delete"                  },
    { "tb_undo",     WXMENU_ADBEDIT_UNDO,    "Undo"                    },
-   { "lookup",   WXMENU_ADBFIND_NEXT,    "Find next"               },
+   { "tb_lookup",   WXMENU_ADBFIND_NEXT,    "Find next"               },
 };
 
 // arrays containing tbar buttons for each frame (must be -1 terminated!)

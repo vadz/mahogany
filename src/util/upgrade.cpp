@@ -167,7 +167,7 @@ SetupInitialConfig(void)
 {
    ProfileBase *parent = mApplication->GetProfile();
 
-   parent->SetPath(M_PROFILE_CONFIG_SECTION);
+   ProfilePathChanger(parent,M_PROFILE_CONFIG_SECTION);
    // Do we need to create an INBOX profile?
    if(! parent->HasEntry("INBOX"))
    {

@@ -40,6 +40,7 @@ XFace::XFace()
    xface = NULL;
 }
 
+// reads from the data, not from a file in memory, it's different!
 bool
 XFace::CreateFromXpm(const char *xpmdata)
 {
@@ -68,15 +69,15 @@ XFace::CreateFromXpm(const char *xpmdata)
       token = strsep(&ptr, "\n\r");
       if(! token)
 	 break;
-      if(token[0] == '/' && token[1] == '*')
-	 continue;	// ignore comments
+      //if(token[0] == '/' && token[1] == '*')
+      // continue;	// ignore comments
       if(zero == 0 || one == 0)
       {
-	 if(strncmp(token+5,"#000000",7) == 0)
-	 zero = token[1];
-	 else if(strncmp(token+5,"#ffffff",7) == 0
-		 || strncmp(token+5,"#FFFFFF",7) == 0)
-	    one = token[1];
+	 if(strncmp(token+4,"#000000",7) == 0)
+            zero = token[0];
+	 else if(strncmp(token+4,"#ffffff",7) == 0
+		 || strncmp(token+4,"#FFFFFF",7) == 0)
+	    one = token[0];
       }
       else	// now the data will follow
 	 break;
@@ -95,11 +96,11 @@ XFace::CreateFromXpm(const char *xpmdata)
 	 value = 0;
 	 for(i = 0; i < 16; i++)
 	 {
-	    if(token[n+i+1] == one)
+	    if(token[n+i] == one)
 	       value += 1;
 	    value <<= 1;
 	 }
-	 sprintf(buffer,"%lx", value);
+	 sprintf(buffer,"0x%04lx", value);
 	 dataString += buffer;
 	 dataString += ',';
       }
@@ -115,17 +116,19 @@ XFace::CreateFromXpm(const char *xpmdata)
    if(data)  delete [] data;
    data = strutil_strdup(dataString);
    if(xface) delete [] xface;
+
+#ifdef HAVE_COMPFACE_H
    xface = new char[2500];
    strcpy(xface, data);
-
-#if  !USE_WXGTK
-     if(compface(xface) < 0)
-     {
-        delete [] xface;
-        delete [] data;
-        xface = data = NULL;
-        return false;
-     }
+   if(compface(xface) < 0)
+   {
+      delete [] xface;
+      delete [] data;
+      xface = data = NULL;
+      return false;
+   }
+#else
+   xface = NULL;
 #endif // wxGTK
    initialised = true;
    return true;

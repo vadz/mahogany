@@ -25,7 +25,7 @@ static char *magick[] = {
 "2 c #a7a79a",
 "3 c #a7a7a7",
 "4 c #b2b9b6",
-"5 c #bebebe",
+"5 c none",
 "6 c #c48b8b",
 "7 c #d4c38d",
 "8 c #dccb94",

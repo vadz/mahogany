@@ -156,7 +156,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                    const wxString& strCaption,
                                    const wxString& strPrompt,
                                    const wxString& strConfigPath)
-   : wxDialog(parent, -1, strCaption,
+   : wxDialog(parent, -1, wxString("M:")+strCaption,
               wxDefaultPosition,
               wxDefaultSize,
               wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
@@ -244,7 +244,7 @@ bool MInputBox(wxString *pstr,
   strConfigPath << "/Prompts/" << szKey;
 
   MTextInputDialog dlg(GetParent(parent), *pstr,
-                       wxString("M - " + strCaption), strPrompt, strConfigPath);
+                       strCaption, strPrompt, strConfigPath);
 
   if ( dlg.ShowModal() == wxID_OK ) {
     *pstr = dlg.GetText();
@@ -265,7 +265,7 @@ MDialog_ErrorMessage(const char *msg,
                      const char *title,
                      bool /* modal */)
 {
-   wxMessageBox(msg, wxString(title), Style(wxOK|wxICON_EXCLAMATION),
+   wxMessageBox(msg, wxString("M:")+title, Style(wxOK|wxICON_EXCLAMATION),
                 GetParent(parent));
 }
 
@@ -288,7 +288,7 @@ MDialog_SystemErrorMessage(const char *message,
    msg = String(message) + String(("\nSystem error: "))
       + String(strerror(errno));
 
-   MDialog_ErrorMessage(msg.c_str(), parent, wxString(title), modal);
+   MDialog_ErrorMessage(msg.c_str(), parent, wxString("M:")+title, modal);
 }
 
 
@@ -304,7 +304,7 @@ MDialog_FatalErrorMessage(const char *message,
 {
    String msg = String(message) + _("\nExiting application...");
 
-   MDialog_ErrorMessage(message,parent, wxString(title),true);
+   MDialog_ErrorMessage(message,parent, wxString("M:")+title,true);
    mApplication->Exit(true);
 }
 
@@ -321,7 +321,7 @@ MDialog_Message(const char *msg,
                 const char *title,
                 bool /* modal */)
 {
-   wxMessageBox(msg, wxString(title), Style(wxOK|wxICON_INFORMATION),
+   wxMessageBox(msg, wxString("M:")+title, Style(wxOK|wxICON_INFORMATION),
                 GetParent(parent));
 }
 
@@ -341,7 +341,7 @@ MDialog_YesNoDialog(const char *message,
              const char *title,
              bool /* YesDefault */)
 {
-   return wxMessageBox(message, wxString(title), Style(wxYES_NO|wxICON_QUESTION),
+   return wxMessageBox(message, wxString("M:")+title, Style(wxYES_NO|wxICON_QUESTION),
                        GetParent(parent)) == wxYES;
 }
 
@@ -389,8 +389,7 @@ MDialog_FileRequester(String const & message,
    if(parent == NULL)
       parent = mApplication->TopLevelFrame();
 
-   return wxFileSelector(
-      message, path, filename, extension, wildcard, 0, parent);
+   return wxFileSelector(message, path, filename, extension, wildcard, 0, parent);
 }
 
 int
@@ -428,7 +427,7 @@ MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
    else {
       return wxGetSingleChoiceIndex
              (
-               _("Please choose an entry:"),
+               wxString("M:")+_("Please choose an entry:"),
                _("Expansion options"),
                nEntryCount,
                &aChoices[0],

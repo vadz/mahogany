@@ -298,15 +298,14 @@ SendMessageCC::Build(void)
       if(xpmarray)
       {
          XFace xface;
-         String headerline;
          for(int i = 0; xpmarray[i]; i++)
+         {
             xpmdata += xpmarray[i];
+            xpmdata += '\n';
+         }
          wxIconManager::FreeImage(xpmarray);
          if(xface.CreateFromXpm(xpmdata.c_str()))
-         {
-            headerline = xface.GetHeaderLine();
-            m_headerList.push_back(&headerline);
-         }
+            m_headerList.push_back(new String(xface.GetHeaderLine()));
       }
    }
 #endif
