@@ -496,6 +496,10 @@ SOURCE=.\src\gui\wxTemplateDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\wxThrDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\wxWizards.cpp
 # End Source File
 # End Group
