@@ -138,6 +138,8 @@ extern const MOption MP_USEPYTHON;
 extern const MOption MP_USERDIR;
 extern const MOption MP_USERNAME;
 extern const MOption MP_USE_OUTBOX;
+extern const MOption MP_USE_SSL;
+extern const MOption MP_USE_SSL_UNSIGNED;
 extern const MOption MP_USE_TRASH_FOLDER;
 extern const MOption MP_VERSION;
 
@@ -155,6 +157,15 @@ extern const MOption MP_VERSION;
 #define M_TEMPLATE_SECTION "Template"
 
 #define M_CUSTOM_HEADERS_CONFIG_SECTION "CustomHeaders"
+
+// obsolete folder flags which are not used any more but are needed here for
+// the same reason as above
+enum
+{
+   MF_FLAGS_REOPENONPING  = 0x00008000,
+   MF_FLAGS_SSLAUTH       = 0x00080000,
+   MF_FLAGS_SSLUNSIGNED   = 0x00200000
+};
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -193,7 +204,9 @@ enum MVersion
    Version_063 = Version_062, // no changes in config since 0.62
    Version_064,      // folder profiles moved, MP_PROFILE_TYPE disappeared
    Version_064_1,    // MF_FLAGS_MONITOR added, half-replaces INCOMING
-   Version_Last = Version_064_1,// last existing version
+   Version_064_2 = Version_064_1, // no changes
+   Version_065,      // SSL flag is not boolean any more and not a flag at all
+   Version_Last = Version_065,// last existing version
    Version_Unknown   // some unrecognized version
 };
 
@@ -2530,6 +2543,85 @@ UpgradeFrom064()
 }
 
 // ----------------------------------------------------------------------------
+// 0.64.[12] -> 0.65
+// ----------------------------------------------------------------------------
+
+class UpgradeFolderFrom0641Traversal : public MFolderTraversal
+{
+public:
+   UpgradeFolderFrom0641Traversal(MFolder* folder) : MFolderTraversal(*folder)
+      { }
+
+   virtual bool OnVisitFolder(const wxString& folderName)
+      {
+         MFolder_obj folder(folderName);
+         CHECK( folder, false, _T("traversed folder which doesn't exist?") );
+
+         const int flags = folder->GetFlags();
+
+         int flagsNew = flags;
+
+         // replace the SSL flags with SSL profile entries
+         if ( flags & MF_FLAGS_SSLAUTH )
+         {
+            Profile_obj profile(folder->GetProfile());
+
+            if ( !profile->writeEntryIfNeeded
+                           (
+                              GetOptionName(MP_USE_SSL),
+                              SSLSupport_SSL,
+                              GetNumericDefault(MP_USE_SSL)
+                           ) )
+            {
+               return false;
+            }
+
+            if ( flags & MF_FLAGS_SSLUNSIGNED )
+            {
+               if ( !profile->writeEntryIfNeeded
+                              (
+                                 GetOptionName(MP_USE_SSL_UNSIGNED),
+                                 SSLSupport_SSL,
+                                 GetNumericDefault(MP_USE_SSL_UNSIGNED)
+                              ) )
+               {
+                  return false;
+               }
+
+            }
+
+            // reset the old SSL flags
+            flagsNew &= ~(MF_FLAGS_SSLAUTH | MF_FLAGS_SSLUNSIGNED);
+         }
+
+         // simply reset the MF_FLAGS_REOPENONPING flag, it's not used any
+         // longer
+         flagsNew &= ~MF_FLAGS_REOPENONPING;
+
+         // anything to update?
+         if ( flagsNew != flags )
+         {
+            folder->SetFlags(flagsNew);
+         }
+
+         return true;
+      }
+};
+
+static bool
+UpgradeFrom064_1()
+{
+   // replace SSL flags with SSL profile settings
+   MFolder_obj folderRoot("");
+   UpgradeFolderFrom0641Traversal traverse(folderRoot);
+
+   // it is important to process the parent before its children because by
+   // using writeEntryIfNeeded() they rely on its settings being updated before
+   // their own ones
+   return traverse.Traverse(MFolderTraversal::Recurse_ParentFirst);
+}
+
+// ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
 
@@ -2565,8 +2657,10 @@ Upgrade(const String& fromVersion)
          oldVersion = Version_061;
       else if ( version == "0.64" )
          oldVersion = Version_064;
-      else if ( version == "0.64.1" )
+      else if ( version == "0.64.1" || version == "0.64.2" )
          oldVersion = Version_064_1;
+      else if ( version == "0.65" )
+         oldVersion = Version_065;
       else
          oldVersion = Version_Unknown;
    }
@@ -2609,7 +2703,12 @@ Upgrade(const String& fromVersion)
          // fall through
 
       case Version_064:
-         if ( success && UpgradeFrom064() )
+         if ( success )
+            success = UpgradeFrom064();
+         // fall through
+
+      case Version_064_1:
+         if ( success && UpgradeFrom064_1() )
             wxLogMessage(_("Configuration information and program files were "
                            "successfully upgraded from the version '%s'."),
                          fromVersion.c_str());
