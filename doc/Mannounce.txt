@@ -13,7 +13,7 @@ You can also get to the download page starting from
 NB: My sincere excuses to all people who have written me asking for
     Win32 binaries and to whom I couldn't reply because there were
     so many of them. For personal reasons I couldn't make the Win32
-    version as soon as I hoped too.
+    version as soon as I hoped to.
 
 In this message:
 
