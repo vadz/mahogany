@@ -12,7 +12,7 @@
 
 #include "Mpch.h"
 #include "Mcommon.h"
-
+#include "guidef.h"
 #include "Message.h"
 
 #ifndef USE_PCH

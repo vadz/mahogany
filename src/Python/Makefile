@@ -2,34 +2,6 @@
 #
 # $Id$
 #
-# $Log$
-# Revision 1.9  1998/07/28 16:20:28  KB
-# Moved sources to .cpp ending.
-#
-# Revision 1.8  1998/06/08 08:19:07  KB
-# Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
-#
-# Revision 1.7  1998/05/30 17:55:54  KB
-# Python integration mostly complete, added hooks and sample callbacks.
-# Wrote documentation on how to use it.
-#
-# Revision 1.6  1998/05/24 14:47:33  KB
-# lots of progress on Python, but cannot call functions yet
-# kbList fixes again?
-#
-# Revision 1.5  1998/05/24 07:54:14  KB
-# works?
-#
-# Revision 1.4  1998/05/24 08:28:58  KB
-# eventually fixed the type problem, now python works as expected
-#
-# Revision 1.3  1998/05/19 17:02:43  KB
-# several small bugfixes
-#
-# Revision 1.2  1998/05/02 18:31:38  KB
-# Python integration works.
-#
-#
 
 CWD = Python
 

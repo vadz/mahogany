@@ -15,11 +15,10 @@
 
 #ifndef   USE_PCH
 #   include   "Mcommon.h"
-#   include   "kbList.h"
-#   include   "CommonBase.h"
 #   include   "MFrame.h"
 #   include   "guidef.h"
 #   include   "gui/wxMFrame.h"
+#   include   "kbList.h"
 #   include   <time.h>
 #   include   <iostream.h>
 #endif

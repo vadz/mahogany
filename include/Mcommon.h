@@ -45,11 +45,6 @@
 #     define DEFAULT_VALIDATOR wxDefaultValidator, 
 #  endif //GTK
     
-   // @@@ wxFrame::SetIcon doesn't exist in wxGTK
-#  ifdef  USE_WXGTK  
-#     define SetIcon(x)
-#  endif  //GTK
-    
    // @@@ is this really the same thing
 #  define wxMessage   wxStaticText
 #  define wxCanvas    wxWindow
