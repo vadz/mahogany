@@ -15,6 +15,10 @@
 #include "Mcallbacks.h"
 #include "Mversion.h"
 
+#ifndef gettext_noop(x)
+#   define    gettext_noop(x) x
+#endif
+
 /** @name The sections of the configuration file. */
 ///@{
 
@@ -677,7 +681,7 @@
 /// the folder type for a mailbox
 #define   MP_FOLDER_TYPE_D         (int)(0x00ff)  // MF_ILLEGAL
 /// Where to store all new mail
-#define MP_NEWMAIL_FOLDER_D      "New Mail"
+#define MP_NEWMAIL_FOLDER_D      "" // empty, no longer used
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// comment
@@ -770,7 +774,7 @@
 /// keep copies of outgoing mail?
 #define   MP_USEOUTGOINGFOLDER_D  1
 /// write outgoing mail to folder:
-#define   MP_OUTGOINGFOLDER_D  "SentMail"
+#define   MP_OUTGOINGFOLDER_D  gettext_noop("SentMail")
 /// Show all message headers?
 #define   MP_SHOWHEADERS_D         0l
 /// Autocollect email addresses? 0=no 1=ask 2=always
