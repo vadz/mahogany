@@ -26,6 +26,35 @@ class MailFolderCC;
 class MessageCC : public Message
 {
 public:
+   /// Structure holding information about the individual message parts.
+   struct PartInfo
+   {
+      /// MIME/IMAP4 part id
+      String   mimeId;
+      /// string describing the MIME type
+      String   type;
+      /// numerical type id as used by c-client lib
+      int   numericalType;
+      /// numerical encoding id as used by c-client lib
+      int   numericalEncoding;
+      /// string containing the parameter settings
+      String   params;
+      /// list of parameters
+      MessageParameterList parameterList;
+      /// disposition type
+      String dispositionType;
+      /// list of disposition parameters
+      MessageParameterList dispositionParameterList;
+      /// description
+      String   description;
+      /// id
+      String   id;
+      /// size, either in lines or bytes, depending on type
+      long  size_lines;
+      /// size, either in lines or bytes, depending on type
+      long  size_bytes;
+   };
+
    /** get any header line
        @line name of header line
        @value string where result will be stored, or empty string
@@ -227,8 +256,22 @@ protected:
    void AddressToNameAndEmail(ADDRESS *addr, wxString& name, wxString& email);
 
 private:
+   /// common part of all ctors
+   void Init();
+
+   /** Get the body information and update body variable.
+       @return the body value, NULL on failure.
+   */
+   BODY * GetBody(void);
+
+   /// get the PartInfo struct for the given part number
+   const PartInfo *GetPartInfo(int n) const;
+
+   /// parse the MIME structure of the message and fill m_partInfos array
+   bool ParseMIMEStructure();
+
    /// refresh information in this structure
-   void  Refresh(void);
+   void Refresh(void);
 
    /// reference to the folder this mail is stored in
    MailFolderCC   *m_folder;
@@ -244,16 +287,11 @@ private:
    String m_headerSubject;
    /// date line
    String m_headerDate;
-   /// number of parts
-   int   m_numOfParts;
    /// body of message
    BODY  *m_Body;
    /// m_Envelope for messages to be sent
    ENVELOPE *m_Envelope;
-   /** Get the body information and update body variable.
-       @return the body value, NULL on failure.
-   */
-   BODY * GetBody(void);
+
    /// Profile pointer, may be NULL
    Profile *m_Profile;
 
@@ -261,58 +299,10 @@ private:
        It holds the information returned by that function and is only
        valid until its next call.
    */
-   char *partContentPtr;
-
-   /** Structure holding information about the individual message parts.
-     */
-   struct PartInfo
-   {
-      /// MIME/IMAP4 part id
-      String   mimeId;
-      /// string describing the MIME type
-      String   type;
-      /// numerical type id as used by c-client lib
-      int   numericalType;
-      /// numerical encoding id as used by c-client lib
-      int   numericalEncoding;
-      /// string containing the parameter settings
-      String   params;
-      /// list of parameters
-      MessageParameterList parameterList;
-      /// disposition type
-      String dispositionType;
-      /// list of disposition parameters
-      MessageParameterList dispositionParameterList;
-      /// description
-      String   description;
-      /// id
-      String   id;
-      /// size, either in lines or bytes, depending on type
-      long  size_lines;
-      /// size, either in lines or bytes, depending on type
-      long  size_bytes;
-   };
+   char *m_partContentPtr;
 
    /// a vector of all the body part information
-   PartInfo *m_partInfos;
-
-   /** A function to recursively collect information about all the
-       body parts.
-       @param  body the body part to look at
-       @param  pfx  the current MIME part string
-       @param  i    the last MIME part subindex
-       @param  count an integer variable to be used for indexing the partInfos array
-       @param  write whether to write data to the partInfos structure or just count the parts
-
-   */
-   void decode_body(BODY *body, const String &pfx, long i,
-                    int *count, bool write);
+   class PartInfoArray *m_partInfos;
 };
-
-#ifndef  MESSAGECC_FROMLEN
-///   the width of the  From: field
-#  define   MESSAGECC_FROMLEN 40
-#endif
-
 
 #endif

@@ -1241,14 +1241,15 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    int threshold = GetProfile() ?
       READ_CONFIG(GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
       : MP_FOLDERPROGRESS_THRESHOLD_D;
-   if(n > threshold)
+   if ( threshold > 0 && n > threshold )
    {
-      String msg;
-      msg.Printf(_("Saving %d messages..."), n);
-      pd = new MProgressDialog(GetName(),
-                               msg,
-                               2*n, NULL);// open a status window:
+      wxString msg;
+      msg.Printf(_("Saving %d messages to the file '%s'..."),
+                 n, fileName0.c_str());
+
+      pd = new MProgressDialog(GetName(), msg, 2*n, NULL);
    }
+
    int t,n2,j;
    size_t size;
    bool rc = true;
@@ -1324,13 +1325,14 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       READ_CONFIG(mf->GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
       : MP_FOLDERPROGRESS_THRESHOLD_D;
 
-   if(n > threshold)
+   if ( threshold > 0 && n > threshold )
    {
       // open a progress window:
-      pd = new MProgressDialog(mf->GetName(),
-                               wxString::Format(_("Saving %d messages..."), n),
-                               2*n,
-                               NULL);
+      wxString msg;
+      msg.Printf(_("Saving %d messages to the folder '%s'..."),
+                 n, folder->GetName().c_str());
+
+      pd = new MProgressDialog(mf->GetName(), msg, 2*n, NULL);
    }
 
    bool rc = true;

@@ -658,7 +658,6 @@ wxMessageView::SetEncoding(wxFontEncoding encoding)
 void
 wxMessageView::Update(void)
 {
-   int i,n,t;
    char const * cptr;
    String tmp,from,url, mimeType, fileName, disposition;
    bool   lastObjectWasIcon = false; // a flag
@@ -798,20 +797,66 @@ wxMessageView::Update(void)
       }
    }
 
+   // this var stores the MIME spec of the MESSAGE/RFC822 we're currently in, it
+   // is empty if we're outside any embedded message
+   String specMsg;
+
    // iterate over all parts
-   n = m_mailMessage->CountParts();
-   for (i = 0; i < n; i++ )
+   int n = m_mailMessage->CountParts();
+   for ( int i = 0; i < n; i++ )
    {
-      if ( m_mailMessage->GetPartSpec(i).find('.') != wxString::npos )
+      String spec = m_mailMessage->GetPartSpec(i);
+
+      // FIXME: there is a bug with this code as it only remembers the last
+      //        embedded message and so will break if we have 2 embedded
+      //        RFC822s - it will forget about the enclosing one after leaving
+      //        the inner message
+      //
+      //        it's true that it happens rarely enough, but we should still
+      //        maintain a stack of msg specs here instead of having only one
+      //        variable...
+
+      if ( !specMsg.empty() )
       {
-         // this is a part of embedded message, don't show it
-         //
-         // TODO: maybe have an option for it?
-         continue;
+         // check if this is a part of MULTIPART or MESSAGE message,
+         // distinguish between the 2 as we do show MULTIPART subparts (even
+         // though we should only do it for MIXED and DIGEST, probably, and
+         // only show one part for ALTERNATIVE - TODO), but we don't show
+         // MESSAGE subparts unless we're configured to inline them
+         if ( spec.StartsWith(specMsg) )
+         {
+            // this is a part of embedded message
+            if ( !m_ProfileValues.inlineRFC822 )
+            {
+               // don't show it
+               continue;
+            }
+            //else: still show it as we're configured to do so
+         }
+         else
+         {
+            // we've finished with the embedded message
+            specMsg.clear();
+         }
+      }
+      //else: not part of an embedded message
+
+      int t = m_mailMessage->GetPartType(i);
+      if ( t == Message::MSG_TYPEMESSAGE )
+      {
+         // remember the part spec of the last embedded message found, used
+         // above
+         specMsg = spec;
+
+         if ( m_ProfileValues.inlineRFC822 )
+         {
+            // we don't show the message itself, just its subparts
+            continue;
+         }
+         //else: show the embedded message as an icon
       }
 
-      t = m_mailMessage->GetPartType(i);
-      if(m_mailMessage->GetPartSize(i) == 0)
+      if ( m_mailMessage->GetPartSize(i) == 0 )
       {
          // ignore empty parts but warn user as it might indicate a problem
          wxLogStatus(GetFrame(this), "Skipping the empty MIME part #%d.", i);
