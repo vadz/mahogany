@@ -194,7 +194,7 @@ case "$GXX" in yes)
 	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-exceptions,
 	m_cv_gxx_exceptions,
 	[echo 'void f(){}' >conftest.cc
-	case "`${CC-g++} -fno-exceptions -c conftest.cc 2>&1`" in
+	case "`${CXX-g++} -fno-exceptions -c conftest.cc 2>&1`" in
 	'')	m_cv_gxx_exceptions=yes ;;
 	*)	m_cv_gxx_exceptions=no ;;
 	esac
@@ -202,8 +202,26 @@ case "$GXX" in yes)
 	case "$m_cv_gxx_exceptions" in yes)
 		CXXFLAGS="$CXXFLAGS -fno-exceptions"
 	esac
-dnl	CXXFLAGS="$CXXFLAGS -DCC_GCC"
 esac
+
+dnl disable support for operator keywords (and, or, not, ...) if
+dnl the compiler is g++ and new enough to offer it.
+case "$GXX" in yes)
+	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-operator-names,
+	m_cv_gxx_oper_names,
+	[echo 'void f(){}' >conftest.cc
+	case "`${CXX-g++} -fno-operator-names -c conftest.cc 2>&1`" in
+	'')	m_cv_gxx_oper_names=yes ;;
+	*)	m_cv_gxx_oper_names=no ;;
+	esac
+	rm -f conftest*])
+	case "$m_cv_gxx_oper_names" in yes)
+		// FIXME: only one of these eventually
+		CXXFLAGS="$CXXFLAGS -fno-operator-names -DNO_OPER_NAMES"
+		OPER_FLAGS="-fno-operator-names -DNO_OPER_NAMES"
+	esac
+esac
+AC_SUBST(OPER_FLAGS)
 
 dnl how to generate dependencies...
 dnl for now, we just support -MD on g++
