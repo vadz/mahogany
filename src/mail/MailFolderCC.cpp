@@ -4420,6 +4420,11 @@ MailFolderCC::RequestUpdate()
    wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
               GetName().c_str());
 
+   // the number of unread/marked/... messages may have changed (there could be
+   // some more of them among the new ones), so update it
+   MailFolderStatus status;
+   (void)CountAllMessages(&status);
+
    // tell all interested that the folder changed
    MEventManager::Send(new MEventFolderUpdateData(this));
 }

@@ -6,6 +6,8 @@
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+15.11.01 VZ: added possibility to monitor the folders in the background
+14.11.01 VZ: apply filters faster by evaluating them all first
 02.11.01 VZ: show "busy info" dialog during long uninterruptible operations
 28.10.01 VZ: added Portuguese translation by Jorge Resende
 27.10.01 VZ: added possibility to remember password for current session only

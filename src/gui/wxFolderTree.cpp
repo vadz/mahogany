@@ -410,10 +410,8 @@ protected:
    }
 
    // process the event which can result in changing of a tree item colour due
-   // to change in new/recent messages
-   void ProcessMsgNumberChange(MailFolder *folder);
-
-   // new version which will replace the one above eventually
+   // to change in new/recent messages and also update the number of messages
+   // shown in the tree
    void ProcessMsgNumberChange(const wxString& folderName);
 
    // process the folder tree change event
@@ -483,9 +481,8 @@ private:
    wxFolderTreeNode  *m_current;  // current selection (NULL if none)
 
    // event registration handles
-   void *m_eventFolderChange;    // for folder creatio/destruction
+   void *m_eventFolderChange;    // for folder creation/destruction
    void *m_eventOptionsChange;   // options change (update icons)
-   void *m_eventFolderUpdate;    // folder status (including msg status) change
    void *m_eventFolderStatus;    // number of messages changed
 
    // the full names of the folder currently opened in the main frame and
@@ -1590,7 +1587,6 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
             this,
             MEventId_FolderTreeChange, &m_eventFolderChange,
             MEventId_OptionsChange, &m_eventOptionsChange,
-            MEventId_FolderUpdate, &m_eventFolderUpdate,
             MEventId_FolderStatus, &m_eventFolderStatus,
             MEventId_Null
          ) )
@@ -2588,12 +2584,6 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          }
       }
    }
-   else if ( ev.GetId() == MEventId_FolderUpdate )
-   {
-      MEventWithFolderData& event = (MEventWithFolderData &)ev;
-
-      ProcessMsgNumberChange(event.GetFolder());
-   }
    else if ( ev.GetId() == MEventId_FolderStatus )
    {
       MEventFolderStatusData& event = (MEventFolderStatusData &)ev;
@@ -2739,48 +2729,77 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
 
 void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
 {
-   wxTreeItemId item = GetTreeItemFromName(folderName);
+   wxLogTrace(M_TRACE_MFSTATUS, "Folder tree: status changed for '%s'.",
+              folderName.c_str());
 
-   // it's not an error: MTempFolder objects are not in the tree, yet they
-   // generate MEventId_FolderUpdate events as well
-   if ( !item.IsOk() )
+   // check if we need to react to this event at all
+   // ----------------------------------------------
+
+   // first find out which folder does it concern
+   MFolder_obj folder(folderName);
+
+   if ( !folder )
    {
+      // it's not an error: MTempFolder objects are not in the tree, yet they
+      // generate MEventId_FolderStatus events as well
+      //
+      // just ignore them as we don't show their status anyhow
+      wxLogTrace(M_TRACE_MFSTATUS,
+                 "Folder tree: ignoring it because the folder is not in tree");
+
       return;
    }
 
-   // get the status of the folder
+   // don't bother counting the messages - it may be time consuming - if
+   // we don't need to update this item
+   //
+   // NB: we do update the status for the hidden folders because otherwise
+   //     we'd have to rescan the tree completely each time the user does "show
+   //     hidden folders in tree"
+   Profile_obj profile(folder->GetProfile());
+   if ( READ_CONFIG_TEXT(profile, MP_FTREE_FORMAT).empty() )
+   {
+      wxLogTrace(M_TRACE_MFSTATUS,
+                 "Folder tree: ignoring it because we don't show status");
+
+      return;
+   }
+
+   // ok, do update the item
+   // ----------------------
+
+   // first get the status of the folder
    MailFolderStatus status;
    if ( !MfStatusCache::Get()->GetStatus(folderName, &status) )
    {
-      // this is not supposed to happen - when MEventFolderStatusData is sent,
-      // the status of the folder it is sent for should be cached
-      wxLogDebug("Impossible to get number of messages in folder '%s'.",
-                 folderName.c_str());
+      wxLogTrace(M_TRACE_MFSTATUS,
+                 "Folder tree: no cached status, calling CheckFolder().");
+
+      // we don't have the status right now, go open/ping/whatever the folder:
+      // this will result in another status update sent to us later but then
+      // the status cache should already be cached
+      MailFolder::CheckFolder(folder);
+
       return;
    }
 
-   // update the status of the item in the tree
+   // next find the folder in the tree
+   wxTreeItemId item = GetTreeItemFromName(folderName);
+   if ( !item.IsOk() )
+   {
+      // it can happen it the folder is hidden but otherwise we should have it
+      ASSERT_MSG( folder->GetFlags() & MF_FLAGS_HIDDEN,
+                  "update folder not in the tree?" );
+
+      return;
+   }
+
+   // do update the status of the item in the tree
    wxFolderTreeNode *node = GetFolderTreeNode(item);
    node->SetStatus(this, status);
-}
 
-void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *mf)
-{
-   if ( READ_CONFIG_TEXT(mf->GetProfile(), MP_FTREE_FORMAT).empty() )
-   {
-      // don't bother counting the messages - it may be time consuming, so
-      // don't do it just to throw away the result later anyhow
-      return;
-   }
-
-   String folderName = mf->GetName();
-   if ( !folderName.empty() )
-   {
-      ProcessMsgNumberChange(folderName);
-   }
-   //else: this may happen for folders not in the folder tree (i.e. created
-   //      with MFolder::CreateTemp() - but we're not interested in them anyhow
-   //      so just don't do anything)
+   wxLogTrace(M_TRACE_MFSTATUS, "Folder tree: updated status for '%s'",
+              folderName.c_str());
 }
 
 // ----------------------------------------------------------------------------
@@ -2892,7 +2911,6 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
 {
    MEventManager::DeregisterAll(&m_eventFolderChange,
                                 &m_eventOptionsChange,
-                                &m_eventFolderUpdate,
                                 &m_eventFolderStatus,
                                 NULL);
 

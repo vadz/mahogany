@@ -55,9 +55,6 @@ enum CacheFileFormat
    CacheFile_Max
 };
 
-// trace mask for logging MfStatusCache methods
-#define M_TRACE_MFSTATUSCACHE "statuscache"
-
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
@@ -168,7 +165,7 @@ void MfStatusCache::UpdateStatus(const String& folderName,
    int n = m_folderNames.Index(folderName);
    if ( n == wxNOT_FOUND )
    {
-      wxLogTrace(M_TRACE_MFSTATUSCACHE, "Added status for '%s' (%lu msgs)",
+      wxLogTrace(M_TRACE_MFSTATUS, "Added status for '%s' (%lu msgs)",
                  folderName.c_str(), status.total);
 
       // add it
@@ -184,7 +181,7 @@ void MfStatusCache::UpdateStatus(const String& folderName,
          return;
       }
 
-      wxLogTrace(M_TRACE_MFSTATUSCACHE, "Changed status for '%s' (%lu msgs)",
+      wxLogTrace(M_TRACE_MFSTATUS, "Changed status for '%s' (%lu msgs)",
                  folderName.c_str(), status.total);
    }
 
@@ -198,7 +195,7 @@ void MfStatusCache::UpdateStatus(const String& folderName,
 
 void MfStatusCache::InvalidateStatus(const String& folderName)
 {
-   wxLogTrace(M_TRACE_MFSTATUSCACHE, "Invalidated status for '%s'",
+   wxLogTrace(M_TRACE_MFSTATUS, "Invalidated status for '%s'",
               folderName.c_str());
 
    int n = m_folderNames.Index(folderName);
