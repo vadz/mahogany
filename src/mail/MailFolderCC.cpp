@@ -240,6 +240,9 @@ static bool mm_ignore_errors = false;
 /// a variable disabling most events (not mm_list or mm_lsub though)
 static bool mm_disable_callbacks = false;
 
+/// another one for disabling just mm_flags() callback (used by ClearFolder())
+static bool mm_disable_flags = false;
+
 /// show cclient debug output
 #ifdef DEBUG
    static bool mm_show_debug = true;
@@ -758,6 +761,22 @@ public:
    ~CCCallbackDisabler() { mm_disable_callbacks = m_old; }
 
 private:
+   bool m_old;
+};
+
+// temporarily disable mm_flags() callback
+class CCFlagsCallbackDisabler
+{
+public:
+   CCFlagsCallbackDisabler()
+   {
+      m_old = mm_disable_flags;
+      mm_disable_flags = true;
+   }
+
+   ~CCFlagsCallbackDisabler() { mm_disable_flags = m_old; }
+
+public:
    bool m_old;
 };
 
@@ -5420,6 +5439,10 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
       String seq;
       seq << "1:" << nmsgs;
 
+      // note that ST_SILENT doesn't work for the local folders, so disable the
+      // mm_flags notifications for them explicitly
+      CCFlagsCallbackDisabler noFlagsCallbacks;
+
       // now mark them all as deleted (we don't need notifications about the
       // status change so save a *lot* of bandwidth by using ST_SILENT)
       mail_flag(stream, (char *)seq.c_str(), "\\DELETED", ST_SET | ST_SILENT);
@@ -5441,7 +5464,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
       // all other members are already set to 0
       status.total = 0;
       MfStatusCache::Get()->UpdateStatus(fullname, status);
-}
+   }
    //else: no messages to delete
 
    if ( stream && !mf )
@@ -5685,7 +5708,7 @@ mm_flags(MAILSTREAM *stream, unsigned long msgno)
 {
    TRACE_CALLBACK1(mm_flags, "%lu", msgno);
 
-   if ( !mm_disable_callbacks )
+   if ( !mm_disable_callbacks && !mm_disable_flags )
    {
       MailFolderCC::mm_flags(stream, msgno);
    }
