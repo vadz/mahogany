@@ -68,6 +68,7 @@ BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
    EVT_MENU(-1,    wxMFrame::OnCommandEvent)
    EVT_TOOL(-1,    wxMFrame::OnCommandEvent)
    EVT_CLOSE(wxMFrame::OnCloseWindow)
+   EVT_WINDOW_CREATE(wxMFrame::OnCreate)
 END_EVENT_TABLE()
 
 #ifdef OS_WIN
@@ -110,32 +111,38 @@ bool wxMFrame::RestorePosition(const char *name,
 wxMFrame::wxMFrame(const String &iname, wxWindow *parent)
         : MFrameBase(iname)
 {
-   initialised = false;
+   m_initialised = false;
+   m_startIconised = false;
    Create(iname,parent);
 }
 
 void
 wxMFrame::Create(const String &iname, wxWindow *parent)
 {
-   wxCHECK_RET( !initialised, "wxMFrame created twice" );
+   wxCHECK_RET( !m_initialised, "wxMFrame created twice" );
 
    SetName(Str(iname));
 
    const char *name = MFrameBase::GetName();
    int xpos, ypos, width, height;
-   bool iconised;
-   RestorePosition(name, &xpos, &ypos, &width, &height, &iconised);
+   RestorePosition(name, &xpos, &ypos, &width, &height, &m_startIconised);
 
    // use name as default title
    wxFrame::Create(parent, -1, name, wxPoint(xpos, ypos), wxSize(width,height));
-   //Show(true);
-
-   Iconize(iconised);
 
    SetIcon(ICON("MFrame"));
 
-   initialised = true;
+   m_initialised = true;
    SetMenuBar(new wxMenuBar(wxMB_DOCKABLE));
+}
+
+void
+wxMFrame::OnCreate(wxWindowCreateEvent& event)
+{
+   if ( m_startIconised )
+      Iconize();
+
+   event.Skip();
 }
 
 void

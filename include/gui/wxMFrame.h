@@ -39,7 +39,7 @@ public:
    static void SavePosition(const char *name, wxWindow *frame);
 
    /// dummy ctor for DECLARE_DYNAMIC_CLASS
-   wxMFrame() : MFrameBase(M_EMPTYSTRING) { initialised = false; }
+   wxMFrame() : MFrameBase(M_EMPTYSTRING) { m_initialised = false; }
    /// Constructor
    wxMFrame(const String &iname, wxWindow *parent = NULL);
    /// Creates an object
@@ -50,7 +50,7 @@ public:
    /// to enforce common style
    wxToolBar *CreateToolBar(void);
    /// return true if initialised
-   bool  IsInitialised(void) const { return initialised; }
+   bool  IsInitialised(void) const { return m_initialised; }
 
    /// make it visible or invisible
    bool Show(bool visible = true) { return wxFrame::Show(visible); }
@@ -86,13 +86,18 @@ public:
    virtual void OnMenuCommand(int id);
    void OnCommandEvent(wxCommandEvent & event);
    void OnCloseWindow(wxCloseEvent& event);
+   void OnCreate(wxWindowCreateEvent& event);
 
    DECLARE_EVENT_TABLE()
 
 protected:
    static void SavePositionInternal(const char *name, wxWindow *frame, bool isFrame);
+
    /// is it initialised?
-   bool  initialised;
+   bool m_initialised;
+
+   /// should the frame be initially iconized?
+   bool m_startIconised;
 };
 
 #endif

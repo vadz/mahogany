@@ -32,8 +32,13 @@ public:
    /// retrieve the name of the window class
    const char *GetName() const { return name.c_str(); }
 
+   // VZ: this could lead to an ambiguity as wxFrame (from which wxMFrame
+   //     derives as well) has this (virtual) method too
+#if 0
    /// used to set the title of the window
    virtual void SetTitle(String const & name) = 0;
+#endif
+
    /// add a menu to the bar
    virtual void AddFileMenu(void) = 0;
    virtual void AddHelpMenu(void) = 0;
@@ -46,7 +51,7 @@ public:
    virtual bool CanClose() const { return true; }
 
    /// virtual destructor
-   virtual ~MFrameBase() {};
+   virtual ~MFrameBase() { }
 };
 
 #endif

@@ -1233,7 +1233,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
                       Profile *parentProfile,
                       bool hide)
 {
-   CHECK_RET( !initialised, "wxComposeView created twice" );
+   CHECK_RET( !m_initialised, "wxComposeView created twice" );
 
    m_LayoutWindow = NULL;
    nextFileID = 0;
@@ -1466,7 +1466,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
 
    // show the frame
    // --------------
-   initialised = true;
+   m_initialised = true;
    if ( !hide ) {
       Show(TRUE);
       m_txtFields[Field_To]->SetFocus();
@@ -1531,7 +1531,7 @@ wxComposeView::wxComposeView(const String &iname,
                              wxWindow *parent)
              : wxMFrame(iname,parent)
 {
-   initialised = false;
+   m_initialised = false;
 
    m_name = iname;
    m_pidEditor = 0;
@@ -1543,7 +1543,7 @@ wxComposeView::wxComposeView(const String &iname,
 
 wxComposeView::~wxComposeView()
 {
-   if ( initialised )
+   if ( m_initialised )
    {
       m_Profile->DecRef();
       delete m_LayoutWindow;
