@@ -6,12 +6,23 @@ $Id$
   + better detection of mime type for inlining graphics
   + extraction of parameter list and filenames for mime handling/saving
   + move wxMessageView to be a panel only and rewrite folderview
-  + some code in wxMessageView relies on unix unlink() behavious (file is still open and
-    in use when deleted)
+  + some code in wxMessageView relies on unix unlink() behaviour 
+    (file is still open and in use when deleted)
   + wxMessageView : Profile reading causes segfault, marked with FIXME
   + fix profile mess in here, use folder profile and MessageView profile
 
-- fix my printing code in wxl*.new in src/Projects/wxLayout
+- ComposeView:
+  + constraints
+  + MIME inclusion
+  + MIME subtypes are missing TEXT/ instead of TEXT/PLAIN
+
+- wxLayout:
+  + fix my printing code in wxl*.new in src/Projects/wxLayout
+  + deletion of first character (ComposeView)?
+  + backspace sometimes goes wrong
+  + flicker
+
+- parent frames should not be NULL
 
 - clean up header inclusion: use <> for system/wxWin files and "xxx" for M
   headers in order to get "make depend" right
@@ -21,39 +32,35 @@ $Id$
 - there is still a minor problem with URLs ending in > like <http:xxx>
   Ignored for now, until wxFText/wxFTCanvas get rewritten.
 
-- drop Script classes
-- for now, internal scripts directly execute the code passed as the
-  function, this may be changed to loading it from outside. Also,
-  namespace issues need to be sorted out. 
-
-- Script.cc: no input/output redirection for Windows, don't know how to do this.
-  (VZ: it's probably also (will be) needed in other places: think about
-  running external viewers for attachments &c?)
-
 - fix non-ASCII characters in header lines
 
-- in src/Python: improve rules to always redo .cpp/.py
+- Python
+  + in src/Python: improve rules to always redo .cpp/.py
+  + drop Script classes
+  + add remaining (important) interface definitions
+  + add an InputBox dialog
+  + user/global Minit files, security issues
 
-- In wxMessageView::MimeHandle is a call to wxRemoveFile(). This
-  relies on the Unix behaviour of a file continuing to exist after its
-  deletion for as long as it is still in use. Does this work for Windows?
+- remove wxFText/wxFTCanvas from code base
+
 *** to implement in near future ***
 
 - when run for the first time, should display "Mail" configuration dialog
   with reasonable defaults (add a top-level profile option "ConfigDone"
-  and do it if it's not found)
+  and do it if it's not found) including import of XFace from file
 
 - lots of dialogs for profile settings required
 
-- support for external editor
+- support for external editor (WHAT!? KB)
 
 *** long-term projects ***
 
 - Support for different charsets (Unicode/utf-7/8?)
 
-- LDAP
+- LDAP -- possibly using python ldap module?
 
 - automatic (but optional) mail compactification (to save disk space)?
   -> this could be done using scripts?
 
 - creation of separate index files for mail folders
+
