@@ -5,12 +5,8 @@ $Id$
 ** List of known and reported bugs in M with bug-ID                        **
 ** ID ***********************************************************************
 
-0001  KB forwarding messages as TEXT/PLAIN instead of MESSAGE/RFC822
-0002  KB lock file checking for INBOX:
-         needs to check for xxx.lock.* not just xxx.lock !
 0003  KB can't open autocollect.adb in AdbEditor if already opened
 
-0004  KB help fails to find copyright
 0005  KB Profile readEntry() needs interface extension to allow a boolean success
          value, remove hacks like 17 or "illegal value"!
 
@@ -20,7 +16,6 @@ $Id$
          re-open folder)  
       VZ when 2 mail clients are running simultaneously and the message is deleted
          from the spool M crashes with meaningless backtrace.
-0009  KB Sending messages with XFace can cause segfault in release mode.
 0010  KB Using a global /etc/M.conf file leads to lots of strange results.
 0011  KB message/save to file does not work but produces empty files
          and creates two files /path/xxx and $HOME/.M/path/xxx
@@ -37,3 +32,8 @@ $Id$
 *****************************************************************************
 ** Fixed   (only move entries here when tested)                            **
 ** ID ** date fixed ** comment **********************************************
+0001  KB forwarding messages as TEXT/PLAIN instead of MESSAGE/RFC822
+0002  KB lock file checking for INBOX:
+         needs to check for xxx.lock.* not just xxx.lock !
+0004  KB help fails to find copyright
+0009  KB Sending messages with XFace can cause segfault in release mode.

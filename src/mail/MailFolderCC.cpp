@@ -28,6 +28,9 @@
 
 #include "MEvent.h"
 
+// just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking
+#include   <wx/filefn.h>
+
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
 
@@ -135,33 +138,48 @@ MailFolderCC::Open(void)
    {
       String lockfile;
       if(GetType() == MF_FILE)
-         lockfile = m_MailboxPath + ".lock";
+         lockfile = m_MailboxPath;
 #ifdef OS_UNIX
       else // INBOX
       {
          // get INBOX path name
          lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
-         lockfile << ".lock";
+         if(lockfile.IsEmpty()) // another c-client stupidity
+            lockfile = (char *) sysinbox();
       }
 #endif
-      FILE *fp = fopen(lockfile,"r");
-      if(fp) // outch, someone has a lock
+      lockfile << ".lock*"; //FIXME: is this fine for MS-Win?
+      lockfile = wxFindFirstFile(lockfile, wxFILE);
+      while ( !lockfile.IsEmpty() )
       {
-         if(MDialog_YesNoDialog(
-            "Found lock-file for the mail folder\n"
-            "'%s'\n"
-            "Some other process may be using the folder.\n"
-            "Shall I forcefully override the lock?",
-            NULL, MDIALOG_YESNOTITLE, true))
+         FILE *fp = fopen(lockfile,"r");
+         if(fp) // outch, someone has a lock
          {
-            int success = remove(lockfile);
-            if(success != 0) // error!
+            fclose(fp);
+            String msg;
+            msg.Printf("Found lock-file:\n"
+                       "'%s'\n"
+                       "Some other process may be using the folder.\n"
+                       "Shall I forcefully override the lock?",
+                       lockfile.c_str());
+            if(MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, true))
+            {
+               int success = remove(lockfile);
+               if(success != 0) // error!
+                  MDialog_Message(
+                     "Could not remove lock-file.\n"
+                     "Other process may have terminated.\n"
+                     "Will try to continue as normal.");
+            }
+            else
+            {
                MDialog_Message(
-                  "Could not remove lock-file.\n"
-                  "Other process may have terminated.\n"
-                  "Will try to continue as normal.");
-         }
-         fclose(fp);
+                     "Cannot open the folder while.\n"
+                     "lock-file exists.\n");
+               return false;
+            }
+         }      
+         lockfile = wxFindNextFile();
       }
    }
    CCQuiet(); // first try, don't log errors

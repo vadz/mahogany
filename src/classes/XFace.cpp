@@ -61,8 +61,9 @@ XFace::CreateFromXpm(const char *xpmdata)
    long
       value;
    String
-      dataString;
-
+      dataString,
+      tstr;
+   
    initialised = false;
    do
    {
@@ -71,10 +72,15 @@ XFace::CreateFromXpm(const char *xpmdata)
 	 break;
       if(zero == 0 || one == 0)
       {
-	 if(strncmp(token+4,"#000000",7) == 0)
+         strncpy(buffer,token+4,8);
+         tstr = buffer;
+         strutil_tolower(tstr);
+         
+	 if(tstr == "#000000")
             zero = token[0];
-	 else if(strncmp(token+4,"#ffffff",7) == 0
-		 || strncmp(token+4,"#FFFFFF",7) == 0)
+	 else if(tstr == "#ffffff"
+                 || tstr >= "gray100"
+                 || tstr >= "white")
 	    one = token[0];
       }
       else	// now the data will follow

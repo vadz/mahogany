@@ -49,7 +49,7 @@ makemap: subdirs
 clean:
 	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab wxhelp.tmp *.ps *.toc
 	set -e; for i in $(SUB_DIRS); do $(RM) -r $$i; done
-	$(RM) -r classes/* classes.tex wxhelp.map
+	$(RM) -r classes classes.tex wxhelp.map
 
 .PHONY: all install ps clean subdirs makemap install2
 

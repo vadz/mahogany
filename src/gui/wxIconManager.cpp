@@ -108,7 +108,7 @@ wxIconManager::LoadImage(String filename)
       i = tempfile.length();
       while(i && tempfile.c_str()[i] != '/')
          i--;
-      tempfile.assign(tempfile,i+1,tempfile.length()-1);
+      tempfile.assign(tempfile,i+1,tempfile.length()-1-i);
       tempfile = String(
          (getenv("TMP") && strlen(getenv("TMP")))
          ? getenv("TMP"):"/tmp"
@@ -162,7 +162,7 @@ wxIconManager::LoadXpm(String filename)
          }
          // We only load the actual data, that is, lines starting with 
          // a double quote and ending in a comma:  "data",  --> data
-         if(str.c_str()[0] == '"')
+         if(str.length() > 0 && str.c_str()[0] == '"')
          {
             str = str.substr(1,str.length()-1);
             str = strutil_before(str,'"');

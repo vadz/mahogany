@@ -639,9 +639,7 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
                                  + msg->Subject());
 
       m_MailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-//FIXME:      cv->InsertData(strutil_strdup(str), str.Length(), "MESSAGE/RFC822");
-      cv->InsertData(strutil_strdup(str), str.Length(),
-                     "TEXT/PLAIN");
+      cv->InsertData(strutil_strdup(str), str.Length(), "MESSAGE/RFC822");
    }
 
    wxLogStatus(GetFrame(m_Parent), _("%d messages forwarded"), n);

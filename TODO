@@ -27,7 +27,6 @@ $Id$
  - allow '=' in urls and don't allow ' '
  - forwarding message triggers assert in wxComposeView:119
  - lock file checking for INBOX:
-   + need to check for xxx.lock.* not just xxx.lock !
    + it does locking under Windows too, but the lock file names are different
  - can't open autocollect.adb in AdbEditor if already opened (can't reproduce
    any more)
@@ -36,7 +35,6 @@ $Id$
   + Refresh!!
   + undo?
   + fix the minor (moving up in 1st column over empty line) bug
-  + after Clear() font becomes smaller
 
  - integrate new c-client lib 4.5
  - save and restore printer settings in profile

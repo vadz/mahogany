@@ -326,6 +326,15 @@ wxMFrame::OnMenuCommand(int id)
    }
 }
 
+wxToolBar *
+wxMFrame::CreateToolBar(void)
+{
+   wxToolBar *tb =
+      wxFrame::CreateToolBar(wxTB_DOCKABLE|wxTB_FLAT|wxTB_HORIZONTAL);
+   tb->SetMargins(2,2);
+   return tb;
+}
+
 void
 wxMFrame::OnCloseWindow(wxCloseEvent& event)
 {

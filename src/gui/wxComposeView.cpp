@@ -544,9 +544,8 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
       while ( !hasSign )
       {
          String strSignFile = READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE);
-         if ( !strSignFile.IsEmpty() ) {
+         if ( !strSignFile.IsEmpty() )
             hasSign = fileSig.Open(strSignFile);
-         }
 
          if ( !hasSign )
          {
@@ -600,8 +599,9 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
          wxLayoutList& layoutList = m_LayoutWindow->GetLayoutList();
          // insert separator optionally
          if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
+            layoutList.LineBreak();
             layoutList.Insert("--");
-            layoutList.LineBreak();;
+            layoutList.LineBreak();
          }
 
          // read the whole file
@@ -643,19 +643,19 @@ wxComposeView::CreateFTCanvas(void)
 {
    m_LayoutWindow = new wxLayoutWindow(m_panel);
 
-   String
-      fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR),
-      bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
+   m_fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR);
+   m_bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
 
-   m_LayoutWindow->Clear(
-      READ_CONFIG(m_Profile,MP_FTEXT_FONT),
-      READ_CONFIG(m_Profile,MP_FTEXT_SIZE),
-      READ_CONFIG(m_Profile,MP_FTEXT_STYLE),
-      READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT),
-      0,
-      fg.c_str(),bg.c_str());
+   m_font = READ_CONFIG(m_Profile,MP_FTEXT_FONT);
+   m_size = READ_CONFIG(m_Profile,MP_FTEXT_SIZE);
+   m_style = READ_CONFIG(m_Profile,MP_FTEXT_STYLE);
+   m_weight = READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT);
+
+   m_LayoutWindow->Clear(m_font, m_size, m_style, m_weight, 0, m_fg, 
+                         m_bg);
    m_LayoutWindow->GetLayoutList().SetEditable(true);
-   m_LayoutWindow->GetLayoutList().SetWrapMargin(READ_CONFIG(m_Profile, MP_COMPOSE_WRAPMARGIN));
+   m_LayoutWindow->GetLayoutList().SetWrapMargin(
+      READ_CONFIG(m_Profile, MP_COMPOSE_WRAPMARGIN)); 
 }
 
 wxComposeView::wxComposeView(const String &iname,
@@ -830,7 +830,8 @@ wxComposeView::OnMenuCommand(int id)
       break;
 
    case WXMENU_COMPOSE_CLEAR:
-      m_LayoutWindow->Clear();
+      m_LayoutWindow->Clear(m_font, m_size, m_style, m_weight, 0, m_fg, 
+                            m_bg);
       break;
 
    case WXMENU_COMPOSE_LOADTEXT:

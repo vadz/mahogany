@@ -47,8 +47,7 @@ public:
    ~wxMFrame();
 
    /// to enforce common style
-   wxToolBar *CreateToolBar(void)
-	{ return wxFrame::CreateToolBar(wxTB_DOCKABLE|wxTB_FLAT|wxTB_HORIZONTAL); }
+   wxToolBar *CreateToolBar(void);
    /// return true if initialised
    bool  IsInitialised(void) const { return initialised; }
 

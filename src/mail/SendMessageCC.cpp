@@ -172,8 +172,10 @@ SendMessageCC::AddPart(Message::ContentType type,
    
    switch(type)
    {
-   case TYPETEXT:
    case TYPEMESSAGE:
+      bdy->nested.msg = mail_newmsg(); // needed to allow c-client to free 
+      // it again (stupid thing, tsts)
+   case TYPETEXT:
       bdy->type = type;
       bdy->subtype = (char *) fs_get(subtype.length()+1);
       strcpy(bdy->subtype,(char *)subtype.c_str());
@@ -283,7 +285,7 @@ void
 SendMessageCC::Build(void)
 {
    int
-      j;
+      j, h = 0;
    char
       tmpbuf[MAILTMPLEN];
    char
@@ -301,14 +303,14 @@ SendMessageCC::Build(void)
    // +3: 1 for X-Mailer, 1 for X-Face and 1 for the last NULL entry
    m_headerNames = new const char*[m_headerList.size()+2];
    m_headerValues = new const char*[m_headerList.size()+2];
-   for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, j++)
+   for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, h++)
    {
-      m_headerNames[j] = strutil_strdup(StringCast(i)->c_str());
-      m_headerValues[j] = strutil_strdup(profile->readEntry(StringCast(i)->c_str(),""));
+      m_headerNames[h] = strutil_strdup(StringCast(i)->c_str());
+      m_headerValues[h] = strutil_strdup(profile->readEntry(StringCast(i)->c_str(),""));
    }
    //always add mailer header:
-   m_headerNames[j] = strutil_strdup("X-Mailer");
-   m_headerValues[j++] = strutil_strdup(String("M, ")+M_VERSION_STRING);
+   m_headerNames[h] = strutil_strdup("X-Mailer");
+   m_headerValues[h++] = strutil_strdup(String("M, ")+M_VERSION_STRING);
 
 #ifdef HAVE_XFACES
    // add an XFace?
@@ -317,7 +319,8 @@ SendMessageCC::Build(void)
    if(profile->readEntry(MP_COMPOSE_USE_XFACE,MP_COMPOSE_USE_XFACE_D))
    {
       xpmarray =
-         wxIconManager::LoadImage(profile->readEntry(MP_COMPOSE_XFACE_FILE,MP_COMPOSE_XFACE_FILE_D));
+         wxIconManager::LoadImage(profile->readEntry(
+               MP_COMPOSE_XFACE_FILE,MP_COMPOSE_XFACE_FILE_D)); 
       if(! xpmarray)
       {
          bool found;
@@ -339,19 +342,21 @@ SendMessageCC::Build(void)
          wxIconManager::FreeImage(xpmarray);
          if(xface.CreateFromXpm(xpmdata.c_str()))
          {
-            m_headerNames[j] = strutil_strdup("X-Face");
-            m_headerValues[j] = strutil_strdup(xface.GetHeaderLine());
+            m_headerNames[h] = strutil_strdup("X-Face");
+            m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
             //FIXME: find more elegant solution for this (GetHeaderLine())
-            ((char *)(m_headerValues[j]))[strlen(m_headerValues[j])-1] = '\0'; //
-            // cut off \n
-            j++;
+            if(strlen(m_headerValues[h]))  // paranoid, I know.
+               ((char*)
+                (m_headerValues[h]))[strlen(m_headerValues[h])-1] =
+                  '\0'; // cut off \n
+            h++;
          }
       }
    }
 #endif
 
-   m_headerNames[j] = NULL;
-   m_headerValues[j] = NULL;
+   m_headerNames[h] = NULL;
+   m_headerValues[h] = NULL;
    rfc822_setextraheaders(m_headerNames,m_headerValues);
 
    mail_free_body_part(&lastpart->next);
