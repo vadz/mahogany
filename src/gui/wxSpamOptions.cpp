@@ -38,7 +38,9 @@
 #include "gui/wxOptionsPage.h"
 #include "gui/wxSpamOptions.h"
 #include "gui/wxOptionsDlg.h"
+#include "pointers.h"
 
+DECLARE_REF_COUNTER(Profile)
 
 class SpamOption
 {
@@ -455,7 +457,8 @@ bool SpamOptionManagerBody::ShowDialog(wxFrame *parent)
 {
    // we use the global app profile to pass the settings to/from the options
    // page because like this we can reuse the options page classes easily
-   Profile *profile = mApplication->GetProfile();
+   RefCounter<Profile> profile;
+   profile.AttachAndIncRef(mApplication->GetProfile());
 
    // transfer data to dialog
    WriteProfile(profile);

@@ -149,5 +149,22 @@ void MObject::DeRegister(void)
    gs_aMObjects.Remove(this);
 }
 
+// ----------------------------------------------------------------------------
+// Reference counting helpers
+// ----------------------------------------------------------------------------
+
+extern void RefCounterDecrement(MObjectRC *pointer)
+{
+   if( pointer )
+      pointer->DecRef();
+}
+
+extern void RefCounterAssign(MObjectRC *target,MObjectRC *source)
+{
+   if( target )
+      target->DecRef();
+   if( source )
+      source->IncRef();
+}
 
 #endif //DEBUG

@@ -36,6 +36,7 @@
 #include <wx/confbase.h>                // for wxExpandEnvVars
 
 #include "lists.h"
+#include "pointers.h"
 
 #include "ConfigSource.h"
 
@@ -1082,6 +1083,8 @@ bool ProfileEnumDataImpl::DoGetNext(String& s, What what)
 // ============================================================================
 // Profile implementation
 // ============================================================================
+
+DEFINE_REF_COUNTER(Profile)
 
 // ----------------------------------------------------------------------------
 // Profile creation
