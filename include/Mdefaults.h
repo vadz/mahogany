@@ -1126,7 +1126,7 @@ enum MFolderIndex
 /// do automatic word wrap?
 #define MP_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for composition (set to -1 to disable it)
-#define   MP_WRAPMARGIN_D      60
+#define   MP_WRAPMARGIN_D      75
 /// do automatic word wrap in message view?
 #define MP_VIEW_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for message view (set to -1 to disable it)
