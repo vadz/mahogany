@@ -1869,6 +1869,51 @@ static bool findIP(String &header,
 // SPAM tests: different functions below are all used by func_isspam()
 // ----------------------------------------------------------------------------
 
+// check whether the subject contains too many raw 8 bit characters
+static bool CheckSubjectFor8Bit(const String& subject)
+{
+   // consider that the message is a spam if its subject contains more
+   // than half of non alpha numeric chars but isn't properly encoded
+   if ( subject != MailFolder::DecodeHeader(subject) )
+   {
+      // an encoded subject can have 8 bit chars
+      return false;
+   }
+
+   size_t num8bit = 0,
+          max8bit = subject.length() / 2;
+   for ( const unsigned char *pc = (const unsigned char *)subject.c_str();
+         *pc;
+         pc++ )
+   {
+      if ( *pc > 127 || *pc == '?' || *pc == '!' )
+      {
+         if ( num8bit++ == max8bit )
+         {
+            return true;
+         }
+      }
+   }
+
+   return false;
+}
+
+// check if the subject is in capitals
+static bool CheckSubjectForCapitals(const String& subject)
+{
+   size_t nLower = 0;
+   for ( const char *pc = subject; *pc; pc++ )
+   {
+      if ( islower(*pc) )
+      {
+         // not only caps
+         return false;
+      }
+   }
+
+   return true;
+}
+
 // check the given MIME part and all of its children for Korean charset, return
 // true if any of them has it
 static bool CheckMimePartForKoreanCSet(const MimePart *part)
@@ -2029,30 +2074,11 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       const wxString& test = tests[n];
       if ( test == SPAM_TEST_SUBJ8BIT )
       {
-         // consider that the message is a spam if its subject contains more
-         // than half of non alpha numeric chars but isn't properly encoded
-         String subject = msg->Subject();
-         if ( subject != MailFolder::DecodeHeader(subject) )
-         {
-            // an encoded subject can have 8 bit chars
-            continue;
-         }
-
-         size_t num8bit = 0,
-                max8bit = subject.length() / 2;
-         for ( const unsigned char *pc = (const unsigned char *)subject.c_str();
-               *pc;
-               pc++ )
-         {
-            if ( *pc > 127 || *pc == '?' || *pc == '!' )
-            {
-               if ( num8bit++ == max8bit )
-               {
-                  rc = true;
-                  break;
-               }
-            }
-         }
+         rc = CheckSubjectFor8Bit(msg->Subject());
+      }
+      else if ( test == SPAM_TEST_SUBJCAPS )
+      {
+         rc = CheckSubjectForCapitals(msg->Subject());
       }
       else if ( test == SPAM_TEST_KOREAN )
       {

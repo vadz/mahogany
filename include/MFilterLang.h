@@ -24,6 +24,9 @@
 /// does the subject contain too many (unencoded) 8 bit chars?
 #define SPAM_TEST_SUBJ8BIT "subj8bit"
 
+/// does the subject contain too many capital letters?
+#define SPAM_TEST_SUBJCAPS "subjcaps"
+
 /// korean charset?
 #define SPAM_TEST_KOREAN "korean"
 

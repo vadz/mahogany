@@ -188,6 +188,9 @@ static bool EditFilter(const String& name, wxWindow *parent);
 // private classes
 // ----------------------------------------------------------------------------
 
+class OneCritControl;
+class OneActionControl;
+
 // ----------------------------------------------------------------------------
 // wxOneFilterDialog - dialog for exactly one filter rule
 // ----------------------------------------------------------------------------
@@ -200,6 +203,7 @@ class wxOneFilterDialog : public wxManuallyLaidOutDialog
 public:
    // ctor & dtor
    wxOneFilterDialog(class MFilterDesc *fd, wxWindow *parent);
+   virtual ~wxOneFilterDialog();
 
    // transfer data to/from dialog
    virtual bool TransferDataFromWindow();
@@ -252,8 +256,8 @@ protected:
    wxTextCtrl *m_NameCtrl;
 
    size_t      m_nControls;
-   class OneCritControl *m_CritControl[MAX_CONTROLS];
-   class OneActionControl *m_ActionControl;
+   OneCritControl *m_CritControl[MAX_CONTROLS];
+   OneActionControl *m_ActionControl;
 
    wxTextCtrl *m_textProgram;
 
@@ -392,6 +396,7 @@ private:
    // the spam test data
    bool m_checkSpamAssassin:1;
    bool m_check8bit:1;
+   bool m_checkCaps:1;
    bool m_checkKorean:1;
    bool m_checkXAuthWarn:1;
    bool m_checkHtml:1;
@@ -614,6 +619,9 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
 #define MP_SPAM_8BIT_SUBJECT "Spam8BitSubject"
 #define MP_SPAM_8BIT_SUBJECT_D 1l
 
+#define MP_SPAM_CAPS_SUBJECT "SpamCapsSubject"
+#define MP_SPAM_CAPS_SUBJECT_D 1l
+
 #define MP_SPAM_KOREAN_CSET  "SpamKoreanCharset"
 #define MP_SPAM_KOREAN_CSET_D  1l
 
@@ -636,6 +644,7 @@ static const ConfigValueDefault gs_SpamPageConfigValues[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SPAM_SPAM_ASSASSIN),
    CONFIG_ENTRY(MP_SPAM_8BIT_SUBJECT),
+   CONFIG_ENTRY(MP_SPAM_CAPS_SUBJECT),
    CONFIG_ENTRY(MP_SPAM_KOREAN_CSET),
    CONFIG_ENTRY(MP_SPAM_X_AUTH_WARN),
    CONFIG_ENTRY(MP_SPAM_HTML),
@@ -655,8 +664,9 @@ static const wxOptionsPage::FieldInfo gs_SpamPageFieldInfos[] =
                   "\n"
                   "So the message is considered to be spam if it has..."),
                   wxOptionsPage::Field_Message, -1 },
-   { gettext_noop("been tagged as spam by Spam&Assassin"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Been tagged as spam by Spam&Assassin"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("Too many &8 bit characters in subject"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Only &capitals in subject"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("&Korean charset"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("X-Authentication-&Warning header"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("&HTML content"), wxOptionsPage::Field_Bool, -1 },
@@ -687,6 +697,7 @@ OneCritControl::InitSpamOptions(const String& rule)
    // use the default values to initialize the dialog
    m_checkSpamAssassin = MP_SPAM_SPAM_ASSASSIN_D;
    m_check8bit = MP_SPAM_8BIT_SUBJECT_D;
+   m_checkCaps = MP_SPAM_CAPS_SUBJECT_D;
    m_checkKorean = MP_SPAM_KOREAN_CSET_D;
 
    m_checkXAuthWarn = MP_SPAM_X_AUTH_WARN_D;
@@ -707,6 +718,7 @@ OneCritControl::ShowDetails()
    // transfer data to dialog
    profile->writeEntry(MP_SPAM_SPAM_ASSASSIN, m_checkSpamAssassin);
    profile->writeEntry(MP_SPAM_8BIT_SUBJECT, m_check8bit);
+   profile->writeEntry(MP_SPAM_CAPS_SUBJECT, m_checkCaps);
    profile->writeEntry(MP_SPAM_KOREAN_CSET, m_checkKorean);
    profile->writeEntry(MP_SPAM_X_AUTH_WARN, m_checkXAuthWarn);
    profile->writeEntry(MP_SPAM_HTML, m_checkHtml);
@@ -718,6 +730,7 @@ OneCritControl::ShowDetails()
    {
       m_checkSpamAssassin = profile->readEntry(MP_SPAM_SPAM_ASSASSIN, 0l) != 0;
       m_check8bit = profile->readEntry(MP_SPAM_8BIT_SUBJECT, 0l) != 0;
+      m_checkCaps = profile->readEntry(MP_SPAM_CAPS_SUBJECT, 0l) != 0;
       m_checkKorean = profile->readEntry(MP_SPAM_KOREAN_CSET, 0l) != 0;
       m_checkXAuthWarn = profile->readEntry(MP_SPAM_X_AUTH_WARN, 0l) != 0;
       m_checkHtml = profile->readEntry(MP_SPAM_HTML, 0l) != 0;
@@ -735,6 +748,7 @@ OneCritControl::ShowDetails()
    // don't keep this stuff in profile, we don't use it except here
    profile->DeleteEntry(MP_SPAM_SPAM_ASSASSIN);
    profile->DeleteEntry(MP_SPAM_8BIT_SUBJECT);
+   profile->DeleteEntry(MP_SPAM_CAPS_SUBJECT);
    profile->DeleteEntry(MP_SPAM_KOREAN_CSET);
    profile->DeleteEntry(MP_SPAM_X_AUTH_WARN);
    profile->DeleteEntry(MP_SPAM_HTML);
@@ -762,6 +776,8 @@ OneCritControl::GetSpamTestArgument() const
       AddToSpamArgument(s, SPAM_TEST_SPAMASSASSIN);
    if ( m_check8bit )
       AddToSpamArgument(s, SPAM_TEST_SUBJ8BIT);
+   if ( m_checkCaps )
+      AddToSpamArgument(s, SPAM_TEST_SUBJCAPS);
    if ( m_checkKorean )
       AddToSpamArgument(s, SPAM_TEST_KOREAN);
    if ( m_checkXAuthWarn )
@@ -1036,6 +1052,16 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    SetFocus();
 }
 
+wxOneFilterDialog::~wxOneFilterDialog()
+{
+   for ( size_t idx = 0; idx < m_nControls; idx++ )
+   {
+      delete m_CritControl[idx];
+   }
+
+   delete m_ActionControl;
+}
+
 void
 wxOneFilterDialog::LayoutControls()
 {
@@ -1104,18 +1130,19 @@ wxOneFilterDialog::AddOneControl()
 void
 wxOneFilterDialog::RemoveOneControl()
 {
-   ASSERT(m_nControls > 1);
+   ASSERT_MSG( m_nControls > 1, "can't remove control -- no more left" );
+
    m_nControls--;
    delete m_CritControl[m_nControls];
 }
 
 void wxOneFilterDialog::UpdateProgram()
 {
+   // show/create the appropriate controls first
+   DoUpdateUI();
+
    if ( !m_initializing )
    {
-      // show/create the appropriate controls first
-      DoUpdateUI();
-
       // next update the program text
       MFilterDesc filterData;
       if ( DoTransferDataFromWindow(&filterData) &&
