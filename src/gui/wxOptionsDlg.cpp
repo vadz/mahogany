@@ -610,11 +610,16 @@ END_EVENT_TABLE()
 // data: both of these arrays *must* be in sync with ConfigFields enum!
 // ============================================================================
 
-// the labels of all fields, their types and also the field they "depend on"
+// The labels of all fields, their types and also the field they "depend on"
 // (being dependent on another field only means that if that field is disabled
 //  or unchecked, we're disabled too)
 //
-// if you modify this array, search for DONT_FORGET_TO_MODIFY and modify data
+// Special case: if the index of the field we depend on is negative, the
+// update logic is inverted: this field will be enabled only if the other one
+// is disabled/unchecked. Note that it is impossible to have the field to
+// inversely depend on the field with index 1 - but this is probably ok.
+//
+// If you modify this array, search for DONT_FORGET_TO_MODIFY and modify data
 // there too
 const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 {
@@ -649,13 +654,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "here"),                         Field_Message, -1,                        },
    { gettext_noop("&POP server"),                  Field_Text,    -1,                        },
    { gettext_noop("&IMAP server"),                 Field_Text,    -1,                        },
-   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -1,           },
+   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -ConfigField_UseSendmail,           },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,
    },
    { gettext_noop("Some SMTP or NNTP servers require a user Id or login.\n"
                   "Leave these fields empty unless told to set it up by your ISP."),
      Field_Message, -1,                        },
-   { gettext_noop("SMTP server &user ID"),         Field_Text,   -1,           },
+   { gettext_noop("SMTP server &user ID"),         Field_Text,   -ConfigField_UseSendmail,           },
    { gettext_noop("SMTP server pa&ssword"),        Field_Passwd, ConfigField_MailServerLogin,           },
    { gettext_noop("NNTP server user &ID"),         Field_Text,   -1,           },
    { gettext_noop("NNTP server pass&word"),        Field_Passwd, ConfigField_NewsServerLogin,           },
@@ -1408,6 +1413,14 @@ void wxOptionsPage::UpdateUI()
          if ( !control )
             continue;
 
+         // HACK: if the index of the field we depend on is negative, inverse
+         //       the usual logic, i.e. only enable this field if the checkbox
+         //       is cleared and disabled it otherwise
+         bool inverseMeaning = nCheckField < 0;
+         if ( inverseMeaning ) {
+            nCheckField = -nCheckField;
+         }
+
          wxASSERT( nCheckField >= 0 && nCheckField < ConfigField_Max );
 
          // avoid signed/unsigned mismatch in expressions
@@ -1440,6 +1453,9 @@ void wxOptionsPage::UpdateUI()
             // only enable if the text control has something
             bEnable = !text->GetValue().IsEmpty();
          }
+
+         if ( inverseMeaning )
+            bEnable = !bEnable;
 
          control->Enable(bEnable);
 
