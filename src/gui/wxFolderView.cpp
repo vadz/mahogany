@@ -3718,7 +3718,7 @@ void wxFolderView::ExpungeMessages()
    }
    else
    {
-      wxLogWarning(_("No deleted messages - nothing to expunge"));
+      wxLogStatus(_("No deleted messages - nothing to expunge"));
    }
 }
 
