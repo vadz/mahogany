@@ -27,6 +27,53 @@
 class kbStringList;
 
 // ----------------------------------------------------------------------------
+// profile-related constants
+// ----------------------------------------------------------------------------
+
+/** @name The sections of the configuration file. */
+///@{
+
+/**
+  The section in the global configuration file used for storing
+  profiles (without trailing '/')
+*/
+#ifndef M_PROFILE_CONFIG_SECTION
+   #define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
+   #define   M_IDENTITY_CONFIG_SECTION  "/M/Ids"
+   #define   M_FILTERS_CONFIG_SECTION   "/M/Filters"
+   #define   M_FRAMES_CONFIG_SECTION    "/M/Frames"
+   #define   M_TEMPLATES_CONFIG_SECTION "/M/Templates"
+#endif
+
+/**
+  The section in the global configuration file used for storing
+  folder profiles (without trailing '/')
+*/
+#ifndef M_FOLDER_CONFIG_SECTION
+#  define   M_FOLDER_CONFIG_SECTION   M_PROFILE_CONFIG_SECTION
+#endif
+
+/**
+  The section in the global configuration file used for storing
+  control settings.
+*/
+#define M_SETTINGS_CONFIG_SECTION       "Settings"
+
+/// the root path for all ADB editor config entries
+#define ADB_CONFIG_PATH "AdbEditor"
+
+/** @name Keys where the template for messages of given type is stored */
+//@{
+#define MP_TEMPLATE_NEWMESSAGE   "NewMessage"
+#define MP_TEMPLATE_NEWARTICLE   "NewArticle"
+#define MP_TEMPLATE_REPLY        "Reply"
+#define MP_TEMPLATE_FOLLOWUP     "Followup"
+#define MP_TEMPLATE_FORWARD      "Forward"
+//@}
+
+//@}
+
+// ----------------------------------------------------------------------------
 // classes
 // ----------------------------------------------------------------------------
 
