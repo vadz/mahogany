@@ -2212,6 +2212,15 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
       {
          CHECK_RET( m_headers, "can't get headers without listing" );
 
+         // check if the folder is still opened - the connection might have
+         // been broken between the moment we realized we needed the headers
+         // and now
+         MailFolder_obj mf = m_FolderView->GetMailFolder();
+         if ( !mf || !mf->IsOpened() )
+         {
+            return;
+         }
+
          int posMin = INT_MAX,
              posMax = 0;
 
