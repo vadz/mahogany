@@ -154,6 +154,18 @@ void MfStatusCache::UpdateStatus(const String& folderName,
    MEventManager::Send(new MEventFolderStatusData(folderName));
 }
 
+void MfStatusCache::InvalidateStatus(const String& folderName)
+{
+   int n = m_folderNames.Index(folderName);
+   if ( n != wxNOT_FOUND )
+   {
+      m_folderNames.RemoveAt((size_t)n);
+      m_folderData.RemoveAt((size_t)n);
+
+      m_isDirty = true;
+   }
+}
+
 // ----------------------------------------------------------------------------
 // MfStatusCache loading/saving
 // ----------------------------------------------------------------------------

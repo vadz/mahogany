@@ -54,6 +54,9 @@ public:
    // update the status info 
    void UpdateStatus(const String& folderName, const MailFolderStatus& status);
 
+   // forget the status info for the given folder
+   void InvalidateStatus(const String& folderName);
+
 protected:
    // protected ctor for CreateStatusCache()
    MfStatusCache();
