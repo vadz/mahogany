@@ -81,9 +81,7 @@ class Token;
 class Value;
 
 /// Type for functions to be called.
-extern "C" {
-   typedef Value (* FunctionPointer)(ArgList *args, FilterRuleImpl *p);
-};
+typedef Value (* FunctionPointer)(ArgList *args, FilterRuleImpl *p);
 
 class Token
 {
@@ -346,6 +344,16 @@ public:
    Value(long num) : m_Type(Type_Number), m_Num(num) { Init(); }
    Value(const String &str) : m_Type(Type_String), m_String(str) { Init(); }
 
+   // suppress Purify warnings about UMRs
+#ifdef DEBUG
+   Value(const Value& val) : m_Type(val.m_Type), m_String(val.m_String)
+   {
+      Init();
+      if ( m_Type == Type_Number )
+         m_Num = val.m_Num;
+   }
+#endif // DEBUG
+
    bool IsValid(void) const
       { MOcheck(); return m_Type != Type_Error; }
    bool IsNumber(void) const
@@ -369,17 +377,12 @@ public:
    bool MakeNumber(void) const
       {
          MOcheck();
-         if (m_Type == Type_String) {
-            int v = 0, k = m_String.length();
-            for (int i = 0; i < k; ++i)
-            {
-               int c = m_String[i];
-               if (c < '0' || c > '9')
-                  return false;
-               v = v*10 + (c - '0');
-            }
+         if (m_Type == Type_String)
+         {
             Value *that = (Value*)this;
-            that->m_Num = v;
+            if ( !m_String.ToLong(&that->m_Num) )
+               return false;
+
             that->m_Type = Type_Number;
          }
          ASSERT(m_Type == Type_Number);
@@ -397,9 +400,8 @@ public:
          MOcheck();
          if(m_Type == Type_String)
             return m_String;
-         String str;
-         str.Printf("%ld", m_Num);
-         return str;
+
+         return String::Format("%ld", m_Num);
       }
 
    void Abort() { m_abort = true; }
@@ -1857,504 +1859,495 @@ static bool findIP(String &header,
 
 #endif
 
-// VZ: VC++ doesn't allow to have extern "C" functions returning a class
-#ifndef _MSC_VER
-extern "C"
+static Value func_checkSpam(ArgList *args, FilterRuleImpl *p)
 {
-#endif // VC++
-   static Value func_checkSpam(ArgList *args, FilterRuleImpl *p)
-   {
-      // standard check:
-      if(args->Count() != 0) return Value("");
+   // standard check:
+   if(args->Count() != 0) return Value("");
 
-      bool rc = false;
+   bool rc = false;
 #ifdef USE_RBL
-      String received;
+   String received;
 
-      Message * msg = p->GetMessage();
-      if(! msg) return Value(0);
-      msg->GetHeaderLine("Received", received);
-      msg->DecRef();
+   Message * msg = p->GetMessage();
+   if(! msg) return Value(0);
+   msg->GetHeaderLine("Received", received);
+   msg->DecRef();
 
-      int a,b,c,d;
-      String testHeader = received;
+   int a,b,c,d;
+   String testHeader = received;
 
-      while( (!rc) && (testHeader.Length() > 0) )
+   while( (!rc) && (testHeader.Length() > 0) )
+   {
+      if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
       {
-         if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
-         {
-            for(int i = 0; gs_RblSites[i] && ! rc ; ++i)
-               rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
-         }
+         for(int i = 0; gs_RblSites[i] && ! rc ; ++i)
+            rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
       }
-      testHeader = received;
-      while( (!rc) && (testHeader.Length() > 0) )
+   }
+   testHeader = received;
+   while( (!rc) && (testHeader.Length() > 0) )
+   {
+      if(findIP(testHeader, '[', ']', &a, &b, &c, &d))
       {
-         if(findIP(testHeader, '[', ']', &a, &b, &c, &d))
-         {
-            for(int i = 0; gs_RblSites[i] && ! rc ; ++i)
-               rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
-         }
+         for(int i = 0; gs_RblSites[i] && ! rc ; ++i)
+            rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
       }
+   }
 
-      /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
+   /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
 #endif
-      return rc;
-   }
+   return rc;
+}
 
-   static Value func_msgbox(ArgList *args, FilterRuleImpl *p)
-   {
-      ASSERT(args);
-      String msg;
-      for(size_t i = 0; i < args->Count(); ++i)
-         msg << args->GetArg(i)->Evaluate().ToString();
-      p->Output(msg);
-      return 1;
-   }
+static Value func_msgbox(ArgList *args, FilterRuleImpl *p)
+{
+   ASSERT(args);
+   String msg;
+   for(size_t i = 0; i < args->Count(); ++i)
+      msg << args->GetArg(i)->Evaluate().ToString();
+   p->Output(msg);
+   return 1;
+}
 
-   static Value func_log(ArgList *args, FilterRuleImpl *p)
-   {
-      ASSERT(args);
-      String msg;
-      for(size_t i = 0; i < args->Count(); ++i)
-         msg << args->GetArg(i)->Evaluate().ToString();
-      p->Log(msg);
-      return 1;
-   }
+static Value func_log(ArgList *args, FilterRuleImpl *p)
+{
+   ASSERT(args);
+   String msg;
+   for(size_t i = 0; i < args->Count(); ++i)
+      msg << args->GetArg(i)->Evaluate().ToString();
+   p->Log(msg);
+   return 1;
+}
 /* * * * * * * * * * * * * * *
- *
- * Tests for message contents
- *
- * * * * * * * * * * * * * */
-   static Value func_containsi(ArgList *args, FilterRuleImpl *p)
-   {
-      ASSERT(args);
-      if(args->Count() != 2)
-         return 0;
-      const Value v1 = args->GetArg(0)->Evaluate();
-      const Value v2 = args->GetArg(1)->Evaluate();
-      String haystack = v1.ToString();
-      String needle = v2.ToString();
-      p->GetInterface()->strutil_tolower(haystack);
-      p->GetInterface()->strutil_tolower(needle);
-      return haystack.Find(needle) != -1;
-   }
+*
+* Tests for message contents
+*
+* * * * * * * * * * * * * */
+static Value func_containsi(ArgList *args, FilterRuleImpl *p)
+{
+   ASSERT(args);
+   if(args->Count() != 2)
+      return 0;
+   const Value v1 = args->GetArg(0)->Evaluate();
+   const Value v2 = args->GetArg(1)->Evaluate();
+   String haystack = v1.ToString();
+   String needle = v2.ToString();
+   p->GetInterface()->strutil_tolower(haystack);
+   p->GetInterface()->strutil_tolower(needle);
+   return haystack.Find(needle) != -1;
+}
 
-   static Value func_contains(ArgList *args, FilterRuleImpl *p)
-   {
-      ASSERT(args);
-      if(args->Count() != 2)
-         return 0;
-      const Value v1 = args->GetArg(0)->Evaluate();
-      const Value v2 = args->GetArg(1)->Evaluate();
-      String haystack = v1.ToString();
-      String needle = v2.ToString();
-      return haystack.Find(needle) != -1;
-   }
+static Value func_contains(ArgList *args, FilterRuleImpl *p)
+{
+   ASSERT(args);
+   if(args->Count() != 2)
+      return 0;
+   const Value v1 = args->GetArg(0)->Evaluate();
+   const Value v2 = args->GetArg(1)->Evaluate();
+   String haystack = v1.ToString();
+   String needle = v2.ToString();
+   return haystack.Find(needle) != -1;
+}
 
-   static Value func_match(ArgList *args, FilterRuleImpl *p)
-   {
-      ASSERT(args);
-      if(args->Count() != 2)
-         return 0;
-      const Value v1 = args->GetArg(0)->Evaluate();
-      const Value v2 = args->GetArg(1)->Evaluate();
-      String haystack = v1.ToString();
-      String needle = v2.ToString();
-      return haystack == needle;
-   }
+static Value func_match(ArgList *args, FilterRuleImpl *p)
+{
+   ASSERT(args);
+   if(args->Count() != 2)
+      return 0;
+   const Value v1 = args->GetArg(0)->Evaluate();
+   const Value v2 = args->GetArg(1)->Evaluate();
+   String haystack = v1.ToString();
+   String needle = v2.ToString();
+   return haystack == needle;
+}
 
-   static Value func_matchi(ArgList *args, FilterRuleImpl *p)
-   {
-      ASSERT(args);
-      if(args->Count() != 2)
-         return 0;
-      const Value v1 = args->GetArg(0)->Evaluate();
-      const Value v2 = args->GetArg(1)->Evaluate();
-      String haystack = v1.ToString();
-      String needle = v2.ToString();
-      p->GetInterface()->strutil_tolower(haystack);
-      p->GetInterface()->strutil_tolower(needle);
-      return haystack == needle;
-   }
+static Value func_matchi(ArgList *args, FilterRuleImpl *p)
+{
+   ASSERT(args);
+   if(args->Count() != 2)
+      return 0;
+   const Value v1 = args->GetArg(0)->Evaluate();
+   const Value v2 = args->GetArg(1)->Evaluate();
+   String haystack = v1.ToString();
+   String needle = v2.ToString();
+   p->GetInterface()->strutil_tolower(haystack);
+   p->GetInterface()->strutil_tolower(needle);
+   return haystack == needle;
+}
 
-   static Value DoMatchRegEx(ArgList *args, FilterRuleImpl *p, int flags = 0)
-   {
-      ASSERT(args);
-      if(args->Count() != 2)
-         return 0;
-      const Value v1 = args->GetArg(0)->Evaluate();
-      const Value v2 = args->GetArg(1)->Evaluate();
-      String haystack = v1.ToString();
-      String needle = v2.ToString();
-      strutil_RegEx * re = p->GetInterface()->
-                              strutil_compileRegEx(needle, flags);
-      if(! re) return FALSE;
+static Value DoMatchRegEx(ArgList *args, FilterRuleImpl *p, int flags = 0)
+{
+   ASSERT(args);
+   if(args->Count() != 2)
+      return 0;
+   const Value v1 = args->GetArg(0)->Evaluate();
+   const Value v2 = args->GetArg(1)->Evaluate();
+   String haystack = v1.ToString();
+   String needle = v2.ToString();
+   strutil_RegEx * re = p->GetInterface()->
+                           strutil_compileRegEx(needle, flags);
+   if(! re) return FALSE;
 
-      // yes, 0, don't use flags here
-      bool rc = p->GetInterface()->strutil_matchRegEx(re, haystack, 0);
-      p->GetInterface()->strutil_freeRegEx(re);
-      return rc;
-   }
+   // yes, 0, don't use flags here
+   bool rc = p->GetInterface()->strutil_matchRegEx(re, haystack, 0);
+   p->GetInterface()->strutil_freeRegEx(re);
+   return rc;
+}
 
-   static Value func_matchregex(ArgList *args, FilterRuleImpl *p)
-   {
-      return DoMatchRegEx(args, p);
-   }
+static Value func_matchregex(ArgList *args, FilterRuleImpl *p)
+{
+   return DoMatchRegEx(args, p);
+}
 
-   static Value func_matchregexi(ArgList *args, FilterRuleImpl *p)
-   {
-      return DoMatchRegEx(args, p, wxRE_ICASE);
-   }
+static Value func_matchregexi(ArgList *args, FilterRuleImpl *p)
+{
+   return DoMatchRegEx(args, p, wxRE_ICASE);
+}
 
 #ifdef USE_PYTHON
-   static Value func_python(ArgList *args, FilterRuleImpl *p)
-   {
+static Value func_python(ArgList *args, FilterRuleImpl *p)
+{
 #ifndef TEST        // uses functions not in libraries
-      ASSERT(args);
-      if(args->Count() != 1)
-         return 0;
-      Message * msg = p->GetMessage();
-      if(! msg)
-         return Value("");
-      String funcName = args->GetArg(0)->Evaluate().ToString();
-
-      int result = 0;
-      bool rc = PyH_CallFunction(funcName,
-                                 "func_python",
-                                 p, "Message",
-                                 "%d", &result,
-                                 NULL);
-      msg->DecRef();
-      return rc ? (result != 0) : 0;
-#else
+   ASSERT(args);
+   if(args->Count() != 1)
       return 0;
+   Message * msg = p->GetMessage();
+   if(! msg)
+      return Value("");
+   String funcName = args->GetArg(0)->Evaluate().ToString();
+
+   int result = 0;
+   bool rc = PyH_CallFunction(funcName,
+                              "func_python",
+                              p, "Message",
+                              "%d", &result,
+                              NULL);
+   msg->DecRef();
+   return rc ? (result != 0) : 0;
+#else
+   return 0;
 #endif
-   }
+}
 #else // !USE_PYTHON
-   static Value func_python(ArgList *args, FilterRuleImpl *p)
-   {
-      p->Error(_("Python support for filters is not available."));
-      return false;
-   }
+static Value func_python(ArgList *args, FilterRuleImpl *p)
+{
+   p->Error(_("Python support for filters is not available."));
+   return false;
+}
 #endif // USE_PYTHON/!USE_PYTHON
 
-   static Value func_print(ArgList *args, FilterRuleImpl *p)
-   {
+static Value func_print(ArgList *args, FilterRuleImpl *p)
+{
 #ifndef TEST        // uses functions not in libraries
-      if(args->Count() != 0)
-         return Value(0);
+   if(args->Count() != 0)
+      return Value(0);
 
-      Message * msg = p->GetMessage();
-      if(! msg)
-         return Value("");
+   Message * msg = p->GetMessage();
+   if(! msg)
+      return Value("");
 
-      // FIXME: this can't work like this!!
+   // FIXME: this can't work like this!!
 #if 0
-      wxMessageViewFrame *mvf = new wxMessageViewFrame(NULL);
-      mvf->Show(FALSE);
-      mvf->ShowMessage(msg);
-      msg->DecRef();
-      bool rc = mvf->GetMessageView()->Print();
-      delete mvf;
+   wxMessageViewFrame *mvf = new wxMessageViewFrame(NULL);
+   mvf->Show(FALSE);
+   mvf->ShowMessage(msg);
+   msg->DecRef();
+   bool rc = mvf->GetMessageView()->Print();
+   delete mvf;
 
-      return Value(rc);
+   return Value(rc);
 #else
-      return 0;
+   return 0;
 #endif
 #else // TEST
+   return 0;
+#endif
+}
+/* * * * * * * * * * * * * * *
+*
+* Access to message contents
+*
+* * * * * * * * * * * * * */
+static Value func_subject(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value("");
+   Message * msg = p->GetMessage();
+   if(! msg)
+      return Value("");
+   String subj = msg->Subject();
+   msg->DecRef();
+   return Value(subj);
+}
+
+static Value func_from(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value("");
+   Message * msg = p->GetMessage();
+   if(! msg)
+      return Value("");
+   String subj = msg->From();
+   msg->DecRef();
+   return Value(subj);
+}
+
+static Value func_to(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value("");
+   Message * msg = p->GetMessage();
+   if(! msg)
+      return Value("");
+   String tostr;
+   msg->GetHeaderLine("To", tostr);
+   msg->DecRef();
+   return Value(tostr);
+}
+
+static Value func_recipients(ArgList *args, FilterRuleImpl *p)
+{
+   String result;
+
+   if ( args->Count() == 0 )
+   {
+      Message *msg = p->GetMessage();
+      if ( msg )
+      {
+         wxArrayString values = msg->GetHeaderLines(headersRecipients);
+         result = strutil_flatten_array(values, ',');
+
+         msg->DecRef();
+      }
+   }
+   //else: error in arg count!
+
+   return Value(result);
+}
+
+static Value func_header(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value("");
+   Message * msg = p->GetMessage();
+   if(! msg)
+      return Value("");
+   String subj = msg->GetHeader();
+   msg->DecRef();
+   return Value(subj);
+}
+
+static Value func_headerline(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 1)
+      return Value("");
+   const Value v1 = args->GetArg(0)->Evaluate();
+   String field = v1.ToString();
+   Message * msg = p->GetMessage();
+   if(! msg)
+      return Value("");
+   String result;
+   msg->GetHeaderLine(field, result);
+   msg->DecRef();
+   return Value(result);
+}
+
+static Value func_body(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value("");
+   Message * msg = p->GetMessage();
+   if(! msg)
+      return Value("");
+   String str;
+   msg->WriteToString(str, false);
+   msg->DecRef();
+   return Value(str);
+}
+
+static Value func_text(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value("");
+   Message * msg = p->GetMessage();
+   if(! msg)
+      return Value("");
+   String str;
+   msg->WriteToString(str, true);
+   msg->DecRef();
+   return Value(str);
+}
+
+static Value func_do_delete(ArgList *args, FilterRuleImpl *p, bool expunge)
+{
+   if(args->Count() != 0)
       return 0;
-#endif
-   }
-/* * * * * * * * * * * * * * *
- *
- * Access to message contents
- *
- * * * * * * * * * * * * * */
-   static Value func_subject(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value("");
-      Message * msg = p->GetMessage();
-      if(! msg)
-         return Value("");
-      String subj = msg->Subject();
-      msg->DecRef();
-      return Value(subj);
-   }
 
-   static Value func_from(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value("");
-      Message * msg = p->GetMessage();
-      if(! msg)
-         return Value("");
-      String subj = msg->From();
-      msg->DecRef();
-      return Value(subj);
-   }
-
-   static Value func_to(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value("");
-      Message * msg = p->GetMessage();
-      if(! msg)
-         return Value("");
-      String tostr;
-      msg->GetHeaderLine("To", tostr);
-      msg->DecRef();
-      return Value(tostr);
-   }
-
-   static Value func_recipients(ArgList *args, FilterRuleImpl *p)
-   {
-      String result;
-
-      if ( args->Count() == 0 )
-      {
-         Message *msg = p->GetMessage();
-         if ( msg )
-         {
-            wxArrayString values = msg->GetHeaderLines(headersRecipients);
-            result = strutil_flatten_array(values, ',');
-
-            msg->DecRef();
-         }
-      }
-      //else: error in arg count!
-
-      return Value(result);
-   }
-
-   static Value func_header(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value("");
-      Message * msg = p->GetMessage();
-      if(! msg)
-         return Value("");
-      String subj = msg->GetHeader();
-      msg->DecRef();
-      return Value(subj);
-   }
-
-   static Value func_headerline(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 1)
-         return Value("");
-      const Value v1 = args->GetArg(0)->Evaluate();
-      String field = v1.ToString();
-      Message * msg = p->GetMessage();
-      if(! msg)
-         return Value("");
-      String result;
-      msg->GetHeaderLine(field, result);
-      msg->DecRef();
-      return Value(result);
-   }
-
-   static Value func_body(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value("");
-      Message * msg = p->GetMessage();
-      if(! msg)
-         return Value("");
-      String str;
-      msg->WriteToString(str, false);
-      msg->DecRef();
-      return Value(str);
-   }
-
-   static Value func_text(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value("");
-      Message * msg = p->GetMessage();
-      if(! msg)
-         return Value("");
-      String str;
-      msg->WriteToString(str, true);
-      msg->DecRef();
-      return Value(str);
-   }
-
-   static Value func_do_delete(ArgList *args, FilterRuleImpl *p, bool expunge)
-   {
-      if(args->Count() != 0)
-         return 0;
-
-      p->SetDeleted();
-      if ( expunge )
-         p->SetExpunged();
-
-      // we shouldn't evaluate any subsequent filters after deleting the
-      // message
-      Value v = 1;
-      v.Abort();
-
-      return v;
-   }
-
-   static Value func_delete(ArgList *args, FilterRuleImpl *p)
-   {
-      return func_do_delete(args, p, false);
-   }
-
-   static Value func_zap(ArgList *args, FilterRuleImpl *p)
-   {
-      return func_do_delete(args, p, true);
-   }
-
-   static Value func_copytofolder(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 1)
-         return 0;
-
-      const Value fn = args->GetArg(0)->Evaluate();
-      p->CopyTo(fn.ToString());
-
-      return 1;
-   }
-
-   static Value func_movetofolder(ArgList *args, FilterRuleImpl *p)
-   {
-      Value rc = func_copytofolder(args, p);
-      if(rc.ToNumber()) // successful
-      {
-         ArgList emptyArgs;
-         return func_delete(&emptyArgs, p);
-      }
-      else
-         return 0;
-   }
-
-   static Value func_date(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value(-1);
-
-      Message *msg = p->GetMessage();
-      time_t today = msg->GetDate();
-      today /= 60 * 60 * 24; // we count in days, not seconds
-      msg->DecRef();
-
-      return Value(today);
-   }
-
-   static Value func_now(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value(-1);
-      time_t today = time(NULL) / 60 / 60 / 24;
-      return Value(today);
-   }
-
-   static Value func_size(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value(-1);
-      Message *msg = p->GetMessage();
-      unsigned long size = msg->GetSize();
-      msg->DecRef();
-      return Value(size / 1024); // return KiloBytes
-   }
-
-   static Value func_score(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value(0);
-      int score = 0;
-      Message *msg = p->GetMessage();
-      HeaderInfoList *hil = p->GetFolder()->GetHeaders();
-      if(hil)
-      {
-#ifdef USE_HEADER_SCORE
-         score = hil->GetEntryUId( msg->GetUId() )->GetScore();
-#endif
-         hil->DecRef();
-      }
-      msg->DecRef();
-      return Value(score);
-   }
-
-   static Value func_addscore(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 1)
-         return Value(-1);
-      const Value d = args->GetArg(0)->Evaluate();
-      Message *msg = p->GetMessage();
-      HeaderInfoList *hil = p->GetFolder()->GetHeaders();
-      if(hil)
-      {
-#ifdef USE_HEADER_SCORE
-         hil->GetEntryUId( msg->GetUId() )->AddScore(d.ToNumber());
-#endif
-         hil->DecRef();
-      }
-      msg->DecRef();
-      return Value(0);
-   }
-   static Value func_setcolour(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 1)
-         return Value(-1);
-      const Value c = args->GetArg(0)->Evaluate();
-      String col = c.ToString();
-      Message *msg = p->GetMessage();
-      HeaderInfoList *hil = p->GetFolder()->GetHeaders();
-      if(hil)
-      {
-#ifdef USE_HEADER_COLOUR
-         hil->GetEntryUId( msg->GetUId() )->SetColour(col);
-#endif
-         hil->DecRef();
-      }
-      msg->DecRef();
-      return Value(0);
-   }
-
-
-/* * * * * * * * * * * * * * *
- *
- * Folder functionality
- *
- * * * * * * * * * * * * * */
-   static Value func_expunge(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value(0);
-
+   p->SetDeleted();
+   if ( expunge )
       p->SetExpunged();
 
-      return 1;
+   // we shouldn't evaluate any subsequent filters after deleting the
+   // message
+   Value v = 1;
+   v.Abort();
+
+   return v;
+}
+
+static Value func_delete(ArgList *args, FilterRuleImpl *p)
+{
+   return func_do_delete(args, p, false);
+}
+
+static Value func_zap(ArgList *args, FilterRuleImpl *p)
+{
+   return func_do_delete(args, p, true);
+}
+
+static Value func_copytofolder(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 1)
+      return 0;
+
+   const Value fn = args->GetArg(0)->Evaluate();
+   p->CopyTo(fn.ToString());
+
+   return 1;
+}
+
+static Value func_movetofolder(ArgList *args, FilterRuleImpl *p)
+{
+   Value rc = func_copytofolder(args, p);
+   if(rc.ToNumber()) // successful
+   {
+      ArgList emptyArgs;
+      return func_delete(&emptyArgs, p);
    }
+   else
+      return 0;
+}
+
+static Value func_date(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value(-1);
+
+   Message *msg = p->GetMessage();
+   time_t today = msg->GetDate();
+   today /= 60 * 60 * 24; // we count in days, not seconds
+   msg->DecRef();
+
+   return Value(today);
+}
+
+static Value func_now(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value(-1);
+   time_t today = time(NULL) / 60 / 60 / 24;
+   return Value(today);
+}
+
+static Value func_size(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value(-1);
+   Message *msg = p->GetMessage();
+   unsigned long size = msg->GetSize();
+   msg->DecRef();
+   return Value(size / 1024); // return KiloBytes
+}
+
+static Value func_score(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value(0);
+   int score = 0;
+   Message *msg = p->GetMessage();
+   HeaderInfoList *hil = p->GetFolder()->GetHeaders();
+   if(hil)
+   {
+#ifdef USE_HEADER_SCORE
+      score = hil->GetEntryUId( msg->GetUId() )->GetScore();
+#endif
+      hil->DecRef();
+   }
+   msg->DecRef();
+   return Value(score);
+}
+
+static Value func_addscore(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 1)
+      return Value(-1);
+   const Value d = args->GetArg(0)->Evaluate();
+   Message *msg = p->GetMessage();
+   HeaderInfoList *hil = p->GetFolder()->GetHeaders();
+   if(hil)
+   {
+#ifdef USE_HEADER_SCORE
+      hil->GetEntryUId( msg->GetUId() )->AddScore(d.ToNumber());
+#endif
+      hil->DecRef();
+   }
+   msg->DecRef();
+   return Value(0);
+}
+static Value func_setcolour(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 1)
+      return Value(-1);
+   const Value c = args->GetArg(0)->Evaluate();
+   String col = c.ToString();
+   Message *msg = p->GetMessage();
+   HeaderInfoList *hil = p->GetFolder()->GetHeaders();
+   if(hil)
+   {
+#ifdef USE_HEADER_COLOUR
+      hil->GetEntryUId( msg->GetUId() )->SetColour(col);
+#endif
+      hil->DecRef();
+   }
+   msg->DecRef();
+   return Value(0);
+}
+
+
+/* * * * * * * * * * * * * * *
+*
+* Folder functionality
+*
+* * * * * * * * * * * * * */
+static Value func_expunge(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value(0);
+
+   p->SetExpunged();
+
+   return 1;
+}
 
 #ifdef TEST
 
 /* * * * * * * * * * * * * * *
- *
- * Testing hacks
- *
- * * * * * * * * * * * * * */
-   static Value func_nargs(ArgList *args, FilterRuleImpl *p)
-   {
-      return args->Count();
-   }
-   static Value func_arg(ArgList *args, FilterRuleImpl *p)
-   {
-      if (args->Count() != 1)
-         return 0;
-      return args->GetArg(0)->Evaluate();
-   }
+*
+* Testing hacks
+*
+* * * * * * * * * * * * * */
+static Value func_nargs(ArgList *args, FilterRuleImpl *p)
+{
+   return args->Count();
+}
+static Value func_arg(ArgList *args, FilterRuleImpl *p)
+{
+   if (args->Count() != 1)
+      return 0;
+   return args->GetArg(0)->Evaluate();
+}
 
-#endif
-
-#ifndef _MSC_VER
-};
-#endif // VC++
+#endif // TEST
 
 static const FunctionList *
 BuiltinFunctions(void)
