@@ -71,6 +71,13 @@ currently supported.
 - Before you can compile Mahogany, you will need to have installed
   wxWindows compiled for the GTK library (wxGTK).
 
+  NOTE: there are unfortunately a few bugs in wxGTK 2.3.2 directly
+        affecting Mahogany which were fixed immediately after 2.3.2
+        release. If, by the time you are reading it, 2.3.3 is not
+        released yet please download wxWindows source distribution
+        from our download page instead of using the official 2.3.2
+        release!
+
   Please refer to wxWindows documentation for the detailed
   installation instructions. The simple "configure; make; make
   install" should work in most cases, be sure to specify
