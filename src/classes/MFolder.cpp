@@ -128,7 +128,7 @@ public:
    virtual String GetName() const { return m_fullname.AfterLast('/'); }
    virtual wxString GetFullName() const { return m_fullname; }
    virtual MFolderType GetType() const { return m_type; }
-   virtual String GetClass() const { return ""; }
+   virtual String GetClass() const { return "cclient"; }
    virtual bool NeedsNetwork(void) const { return false; }
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
