@@ -30,6 +30,8 @@
 #include "MessageView.h"
 
 #include "ClickAtt.h"
+#include "gui/wxMenuDefs.h"
+#include "strutil.h"
 
 // ----------------------------------------------------------------------------
 // MimePopup: the popup menu invoked by clicking on an attachment

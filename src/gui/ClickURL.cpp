@@ -37,6 +37,16 @@
 
 #include <wx/clipbrd.h>
 
+#include "gui/wxMenuDefs.h"
+#include "gui/wxOptionsDlg.h"
+#include "MDialogs.h"
+
+// ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_ASK_URL_BROWSER;
+
 // ----------------------------------------------------------------------------
 // UrlPopup: the popup menu used with URLs in the message view
 // ----------------------------------------------------------------------------
