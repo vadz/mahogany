@@ -1731,13 +1731,13 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
 static const char * gs_RblSites[] =
 { "rbl.maps.vix.com", "relays.orbs.org", "rbl.dorkslayers.com", NULL };
 
-static bool findIP(const String &header,
+static bool findIP(String &header,
                    char openChar, char closeChar,
                    int *a, int *b, int *c, int *d)
 {
    String toExamine;
    String ip;
-   int pos = 0;
+   int pos = 0, closePos;
    
    toExamine = header;
    while(toExamine.Length() > 0)
@@ -1745,18 +1745,25 @@ static bool findIP(const String &header,
          if((pos = toExamine.Find(openChar)) == wxNOT_FOUND)
             return false;
          ip = toExamine.Mid(pos+1);
-         if(ip.Find(closeChar) == wxNOT_FOUND)
+         closePos = ip.Find(closeChar);
+         if(closePos == wxNOT_FOUND)
             // no second bracket found
             break;
          if(sscanf(ip.c_str(), "%d.%d.%d.%d", a,b,c,d) != 4)
          {
             // no valid IP number behind open bracket, continue
             // search:
+            ip = ip.Mid(closePos+1);
             toExamine = ip;
          }
          else // read the IP number
+         {
+            header = ip;
+            ip = ip.Mid(closePos+1);
             return true;
+         }
    }
+   header = "";
    return false;
 }
 
@@ -1780,14 +1787,26 @@ extern "C"
       msg->DecRef();
 
       int a,b,c,d;
-      bool hasIP = findIP(received, '(', ')', &a, &b, &c, &d); 
-      if(! hasIP)
-         hasIP =  findIP(received, '[', ']', &a, &b, &c, &d);
-      if(hasIP)
+      String testHeader = received;
+      
+      while( (!rc) && (testHeader.Length() > 0) )
       {
-         for(int i = 0; gs_RblSites[i] && ! rc ; i++)
-            rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
+         if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
+         {
+            for(int i = 0; gs_RblSites[i] && ! rc ; i++)
+               rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
+         }
       }
+      testHeader = received;
+      while( (!rc) && (testHeader.Length() > 0) )
+      {
+         if(findIP(testHeader, '[', ']', &a, &b, &c, &d))
+         {
+            for(int i = 0; gs_RblSites[i] && ! rc ; i++)
+               rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
+         }
+      }
+
       /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
 #endif
       return rc;
