@@ -952,6 +952,12 @@ static String ReadColumnWidths(Profile *profile)
 }
 
 // return columns widths from the given string
+//
+// NB: this should be only called for the string returned by GetColWidths() and
+//     never for the widths read from the profile for which
+//     NormalizeColumnWidths() must be used as the code expects the returned
+//     array to always have the correct number of elements which can be not the
+//     case if we have incorrect profile entry
 static wxArrayString UnpackWidths(const wxString& s)
 {
    return strutil_restore_array(COLUMNS_WIDTHS_SEP, s);
@@ -2427,12 +2433,17 @@ void wxFolderListCtrl::SaveColWidths()
    String str = GetWidths();
    if ( str != FOLDER_LISTCTRL_WIDTHS_D && str != GetColWidths() )
    {
-      // check if the only difference if for the columns we don't show anyhow:
+      // check if the only difference is for the columns we don't show anyhow:
       // this is needed to avoid always writing the widths for a folder which
       // just doesn't show one of the columns shown by default, it would have
       // "-1"s instead of the global values then
-      wxArrayString widthsOld = UnpackWidths(GetColWidths()),
+      wxArrayString widthsOld = NormalizeColumnWidths(GetColWidths()),
                     widthsNew = UnpackWidths(str);
+
+      CHECK_RET( widthsOld.GetCount() == WXFLC_NUMENTRIES &&
+                 widthsNew.GetCount() == WXFLC_NUMENTRIES,
+                 "invalid widths array element count" );
+
       size_t col;
       for ( col = 0; col < WXFLC_NUMENTRIES; col++ )
       {
