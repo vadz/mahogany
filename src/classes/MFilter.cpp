@@ -241,7 +241,9 @@ MFDialogComponent::WriteTest(void)
       program << ',';
    if(needsArgument)
    {
-      program << '"' << m_Argument << '"';
+      // use strutil_escapeString() here to prevent misparsing the quotes
+      // embedded into m_Argument as string terminator characters
+      program << '"' << strutil_escapeString(m_Argument) << '"';
    }
    if(needsTarget || needsArgument)
       program << ')'; // end of function call
