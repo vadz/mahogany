@@ -96,7 +96,7 @@ endif
 	do $(INSTALL_DATA) $$i $(DATADIR)/icons; \
 	done
 	set -e $(INSTALL_DIRS); \
-	for i; do $(MAKE) -C $$i install; done
+	for i in $(INSTALL_DIRS); do $(MAKE) -C $$i install; done
 
 # invoked from locale to build message catalog
 msgcat:
