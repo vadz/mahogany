@@ -90,7 +90,7 @@ bundle: $(BUNDLE)/MacOS/M \
 
 $(BUNDLE)/Info.plist: $(SOURCEDIR)/macosx/Info.plist.in
 	@$(INSTALL) -d `dirname $@`
-	@sed "s/VERSION/$(M_VERSION_MAJOR).$(M_VERSION_MINOR).$(M_RELEASE)/" $< > $@
+	@sed "s/VERSION/$(M_VERSION_MAJOR).$(M_VERSION_MINOR).$(M_VERSION_RELEASE)/" $< > $@
 
 $(BUNDLE)/PkgInfo:
 	@$(INSTALL) -d `dirname $@`
