@@ -832,6 +832,14 @@ MAppBase::InitDirectories()
                m_globalDir = dlg.GetPath();
             }
          }
+#ifdef OS_WIN
+         else // under Windows, use the same directory as the local one
+         {
+            // wxGetHomeDir() will usually return the directory where the
+            // program file is under Windows which is what we really want here
+            m_globalDir = wxGetHomeDir();
+         }
+#endif // OS_WIN
 #ifdef OS_UNIX
       }
 #endif // OS_UNIX
