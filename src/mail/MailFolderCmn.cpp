@@ -721,7 +721,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
          if ( pd )
             pd->Update( 2*i + 1 );
 
-         if ( !msg->WriteToString(tmpstr, false /* no headers */) )
+         if ( !msg->WriteToString(tmpstr) )
          {
             wxLogError(_("Failed to get the text of the mesage to save."));
             rc = false;
