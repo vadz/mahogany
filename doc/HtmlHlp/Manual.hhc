@@ -10,10 +10,6 @@
 <UL>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html">
-<param name="Name" value="Contents">
-</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00200000000000000000">
 <param name="Name" value="Using Mahogany ">
 </OBJECT>
 <UL>
@@ -84,10 +80,14 @@
 <UL>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00231000000000000000">
-<param name="Name" value="User configuration files (Unix only)">
+<param name="Name" value="Mahogany command line options">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00232000000000000000">
+<param name="Name" value="User configuration files (Unix only)">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00233000000000000000">
 <param name="Name" value="System wide configuration file">
 </OBJECT>
 </UL>
@@ -401,6 +401,14 @@
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION006213000000000000000">
 <param name="Name" value="How can I ``leave messages on server'' (POP3)?">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION006214000000000000000">
+<param name="Name" value="Can I have ``subfolders'' of File type (mbox) folders?">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION006215000000000000000">
+<param name="Name" value="Can I ``Follow-up'' to the message?">
 </OBJECT>
 </UL></UL></UL>
 </BODY></HTML>

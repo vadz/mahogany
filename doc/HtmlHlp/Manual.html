@@ -1,5 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<!--Converted with LaTeX2HTML 98.2 beta3 (July 4th, 1998)
+
+<!--Converted with jLaTeX2HTML 2002 (1.62) JA patch-1.4
+patched version by:  Kenshi Muto, Debian Project.
+LaTeX2HTML 2002 (1.62),
 original version by:  Nikos Drakos, CBLU, University of Leeds
 * revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
 * with significant contributions from:
@@ -7,15 +10,21 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <HTML>
 <HEAD>
 <TITLE>Mahogany User Manual
-Version 0.64 ``Sparc''</TITLE>
+Version 0.65 ``Claire''</TITLE>
 <META NAME="description" CONTENT="Mahogany User Manual
-Version 0.64 ``Sparc''">
+Version 0.65 ``Claire''">
 <META NAME="keywords" CONTENT="Manual">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
+
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="jLaTeX2HTML v2002 JA patch-1.4">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
 <LINK REL="STYLESHEET" HREF="Manual.css">
+
 </HEAD>
+
 <BODY >
 
 <P>
@@ -26,16 +35,23 @@ Version 0.64 ``Sparc''">
 <P>
 
 <P>
-<H1 ALIGN="CENTER"><I>Mahogany User Manual</I>
+<H1 ALIGN="CENTER"><FONT SIZE="+2"><I>Mahogany User Manual</I></FONT>
+<BR><FONT SIZE="+2">Version 0.65 ``Claire''</FONT></H1>
+<P ALIGN="CENTER"><STRONG>Copyright 1997-2003 by The Mahogany Development Team
 <BR>
-<FONT SIZE="+2">Version 0.64 ``Sparc''</FONT></H1>
-<P ALIGN="CENTER"><STRONG>Copyright 1997-2001 by The Mahogany Development Team
 <BR>
-Written by Karsten Ballüder, Vadim Zeitlin et.al.
 <BR>
-<TT>http://mahogany.sourceforge.net/</TT>
 <BR>
-<TT>&lt;mahogany-developers@lists.sourceforge.net&gt;</TT></STRONG></P>
+<A NAME="tex2html1"
+  HREF="mailto:mahogany-developers@lists.sourceforge.net">&lt;mahogany-developers@lists.sourceforge.net&gt;</A>
+
+<BR>
+<BR>
+<BR>
+<BR>
+Written by Vadim Zeitlin, Karsten Ball&#252;der et.al.</STRONG></P>
+
+<P>
 <BR>
 
 <H2><A NAME="SECTION00100000000000000000">
@@ -44,220 +60,228 @@ Contents</A>
 <!--Table of Contents-->
 
 <UL>
-<LI><A NAME="tex2html13"
- HREF="Manual.html">Contents</A>
-<LI><A NAME="tex2html14"
- HREF="Manual.html#SECTION00200000000000000000">Using Mahogany </A>
+<LI><A NAME="tex2html149"
+  HREF="Manual.html">Using Mahogany </A>
 <UL>
-<LI><A NAME="tex2html15"
- HREF="Manual.html#SECTION00210000000000000000">Release Notes</A>
+<LI><A NAME="tex2html150"
+  HREF="Manual.html#SECTION00210000000000000000">Release Notes</A>
 <UL>
-<LI><A NAME="tex2html16"
- HREF="Manual.html#SECTION00211000000000000000">Changes against the previous versions</A>
-<LI><A NAME="tex2html17"
- HREF="Manual.html#SECTION00212000000000000000">Known bugs</A>
-<LI><A NAME="tex2html18"
- HREF="Manual.html#SECTION00213000000000000000">TODO, features to implement</A>
-<LI><A NAME="tex2html19"
- HREF="Manual.html#SECTION00214000000000000000">Help Needed</A>
-<LI><A NAME="tex2html20"
- HREF="Manual.html#SECTION00215000000000000000">Copyright</A>
-<LI><A NAME="tex2html21"
- HREF="Manual.html#SECTION00216000000000000000">The Mahogany ``Artistic License''</A>
-<LI><A NAME="tex2html22"
- HREF="Manual.html#SECTION00217000000000000000">The License Dialog</A>
-<LI><A NAME="tex2html23"
- HREF="Manual.html#SECTION00218000000000000000">Additional Credits</A>
+<LI><A NAME="tex2html151"
+  HREF="Manual.html#SECTION00211000000000000000">Changes against the previous versions</A>
+<LI><A NAME="tex2html152"
+  HREF="Manual.html#SECTION00212000000000000000">Known bugs</A>
+<LI><A NAME="tex2html153"
+  HREF="Manual.html#SECTION00213000000000000000">TODO, features to implement</A>
+<LI><A NAME="tex2html154"
+  HREF="Manual.html#SECTION00214000000000000000">Help Needed</A>
+<LI><A NAME="tex2html155"
+  HREF="Manual.html#SECTION00215000000000000000">Copyright</A>
+<LI><A NAME="tex2html156"
+  HREF="Manual.html#SECTION00216000000000000000">The Mahogany ``Artistic License''</A>
+<LI><A NAME="tex2html157"
+  HREF="Manual.html#SECTION00217000000000000000">The License Dialog</A>
+<LI><A NAME="tex2html158"
+  HREF="Manual.html#SECTION00218000000000000000">Additional Credits</A>
 </UL>
-<LI><A NAME="tex2html24"
- HREF="Manual.html#SECTION00220000000000000000">Introduction / Tutorial</A>
+<LI><A NAME="tex2html159"
+  HREF="Manual.html#SECTION00220000000000000000">Introduction / Tutorial</A>
 <UL>
-<LI><A NAME="tex2html25"
- HREF="Manual.html#SECTION00221000000000000000">Getting started</A>
-<LI><A NAME="tex2html26"
- HREF="Manual.html#SECTION00222000000000000000">The main window</A>
-<LI><A NAME="tex2html27"
- HREF="Manual.html#SECTION00223000000000000000">How to configure POP and IMAP folders?</A>
-<LI><A NAME="tex2html28"
- HREF="Manual.html#SECTION00224000000000000000">How to set up your mail accounts</A>
+<LI><A NAME="tex2html160"
+  HREF="Manual.html#SECTION00221000000000000000">Getting started</A>
+<LI><A NAME="tex2html161"
+  HREF="Manual.html#SECTION00222000000000000000">The main window</A>
+<LI><A NAME="tex2html162"
+  HREF="Manual.html#SECTION00223000000000000000">How to configure POP and IMAP folders?</A>
+<LI><A NAME="tex2html163"
+  HREF="Manual.html#SECTION00224000000000000000">How to set up your mail accounts</A>
 </UL>
-<LI><A NAME="tex2html29"
- HREF="Manual.html#SECTION00230000000000000000">Setting up Mahogany, its configuration files</A>
+<LI><A NAME="tex2html164"
+  HREF="Manual.html#SECTION00230000000000000000">Setting up Mahogany, its configuration files</A>
 <UL>
-<LI><A NAME="tex2html30"
- HREF="Manual.html#SECTION00231000000000000000">User configuration files (Unix only)</A>
-<LI><A NAME="tex2html31"
- HREF="Manual.html#SECTION00232000000000000000">System wide configuration file</A>
+<LI><A NAME="tex2html165"
+  HREF="Manual.html#SECTION00231000000000000000">Mahogany command line options</A>
+<LI><A NAME="tex2html166"
+  HREF="Manual.html#SECTION00232000000000000000">User configuration files (Unix only)</A>
+<LI><A NAME="tex2html167"
+  HREF="Manual.html#SECTION00233000000000000000">System wide configuration file</A>
 </UL>
-<LI><A NAME="tex2html32"
- HREF="Manual.html#SECTION00240000000000000000">The User Interface</A>
+<LI><A NAME="tex2html168"
+  HREF="Manual.html#SECTION00240000000000000000">The User Interface</A>
 <UL>
-<LI><A NAME="tex2html33"
- HREF="Manual.html#SECTION00241000000000000000">The Main Window</A>
-<LI><A NAME="tex2html34"
- HREF="Manual.html#SECTION00242000000000000000">The Folder Tree</A>
-<LI><A NAME="tex2html35"
- HREF="Manual.html#SECTION00243000000000000000">Create New Folder Dialog</A>
-<LI><A NAME="tex2html36"
- HREF="Manual.html#SECTION00244000000000000000">Folder Views</A>
-<LI><A NAME="tex2html37"
- HREF="Manual.html#SECTION00245000000000000000">Migrating from another mail client</A>
+<LI><A NAME="tex2html169"
+  HREF="Manual.html#SECTION00241000000000000000">The Main Window</A>
+<LI><A NAME="tex2html170"
+  HREF="Manual.html#SECTION00242000000000000000">The Folder Tree</A>
+<LI><A NAME="tex2html171"
+  HREF="Manual.html#SECTION00243000000000000000">Create New Folder Dialog</A>
+<LI><A NAME="tex2html172"
+  HREF="Manual.html#SECTION00244000000000000000">Folder Views</A>
+<LI><A NAME="tex2html173"
+  HREF="Manual.html#SECTION00245000000000000000">Migrating from another mail client</A>
 </UL>
-<LI><A NAME="tex2html38"
- HREF="Manual.html#SECTION00250000000000000000">Reading Mail</A>
+<LI><A NAME="tex2html174"
+  HREF="Manual.html#SECTION00250000000000000000">Reading Mail</A>
 <UL>
-<LI><A NAME="tex2html39"
- HREF="Manual.html#SECTION00251000000000000000">The INBOX Folder</A>
-<LI><A NAME="tex2html40"
- HREF="Manual.html#SECTION00252000000000000000">The ``New Mail'' Folder</A>
-<LI><A NAME="tex2html41"
- HREF="Manual.html#SECTION00253000000000000000">Other Folders</A>
-<LI><A NAME="tex2html42"
- HREF="Manual.html#SECTION00254000000000000000">Accessing Mail Remotely</A>
-<LI><A NAME="tex2html43"
- HREF="Manual.html#SECTION00255000000000000000">Filters</A>
+<LI><A NAME="tex2html175"
+  HREF="Manual.html#SECTION00251000000000000000">The INBOX Folder</A>
+<LI><A NAME="tex2html176"
+  HREF="Manual.html#SECTION00252000000000000000">The ``New Mail'' Folder</A>
+<LI><A NAME="tex2html177"
+  HREF="Manual.html#SECTION00253000000000000000">Other Folders</A>
+<LI><A NAME="tex2html178"
+  HREF="Manual.html#SECTION00254000000000000000">Accessing Mail Remotely</A>
+<LI><A NAME="tex2html179"
+  HREF="Manual.html#SECTION00255000000000000000">Filters</A>
 </UL>
-<LI><A NAME="tex2html44"
- HREF="Manual.html#SECTION00260000000000000000">Sending Mail</A>
+<LI><A NAME="tex2html180"
+  HREF="Manual.html#SECTION00260000000000000000">Sending Mail</A>
 <UL>
-<LI><A NAME="tex2html45"
- HREF="Manual.html#SECTION00261000000000000000">To: CC: and BCC: Settings</A>
-<LI><A NAME="tex2html46"
- HREF="Manual.html#SECTION00262000000000000000">Key Bindings in the Message Editor</A>
-<LI><A NAME="tex2html47"
- HREF="Manual.html#SECTION00263000000000000000">Using the address book</A>
-<LI><A NAME="tex2html48"
- HREF="Manual.html#SECTION00264000000000000000">The Mail Composition Window</A>
-<LI><A NAME="tex2html49"
- HREF="Manual.html#SECTION00265000000000000000">The News Article Composition Window</A>
+<LI><A NAME="tex2html181"
+  HREF="Manual.html#SECTION00261000000000000000">To: CC: and BCC: Settings</A>
+<LI><A NAME="tex2html182"
+  HREF="Manual.html#SECTION00262000000000000000">Key Bindings in the Message Editor</A>
+<LI><A NAME="tex2html183"
+  HREF="Manual.html#SECTION00263000000000000000">Using the address book</A>
+<LI><A NAME="tex2html184"
+  HREF="Manual.html#SECTION00264000000000000000">The Mail Composition Window</A>
+<LI><A NAME="tex2html185"
+  HREF="Manual.html#SECTION00265000000000000000">The News Article Composition Window</A>
 </UL>
-<LI><A NAME="tex2html50"
- HREF="Manual.html#SECTION00270000000000000000">Understanding program options</A>
+<LI><A NAME="tex2html186"
+  HREF="Manual.html#SECTION00270000000000000000">Understanding program options</A>
 <UL>
-<LI><A NAME="tex2html51"
- HREF="Manual.html#SECTION00271000000000000000">Automatically remembered options</A>
-<LI><A NAME="tex2html52"
- HREF="Manual.html#SECTION00272000000000000000">Other options</A>
-<LI><A NAME="tex2html53"
- HREF="Manual.html#SECTION00273000000000000000">Remote configuration synchronisation</A>
-<LI><A NAME="tex2html54"
- HREF="Manual.html#SECTION00274000000000000000">Some Other Dialogs You May Encounter</A>
-<LI><A NAME="tex2html55"
- HREF="Manual.html#SECTION00275000000000000000">Mahogany Plugin Modules</A>
+<LI><A NAME="tex2html187"
+  HREF="Manual.html#SECTION00271000000000000000">Automatically remembered options</A>
+<LI><A NAME="tex2html188"
+  HREF="Manual.html#SECTION00272000000000000000">Other options</A>
+<LI><A NAME="tex2html189"
+  HREF="Manual.html#SECTION00273000000000000000">Remote configuration synchronisation</A>
+<LI><A NAME="tex2html190"
+  HREF="Manual.html#SECTION00274000000000000000">Some Other Dialogs You May Encounter</A>
+<LI><A NAME="tex2html191"
+  HREF="Manual.html#SECTION00275000000000000000">Mahogany Plugin Modules</A>
 </UL>
-<LI><A NAME="tex2html56"
- HREF="Manual.html#SECTION00280000000000000000">The Address Database</A>
+<LI><A NAME="tex2html192"
+  HREF="Manual.html#SECTION00280000000000000000">The Address Database</A>
 <UL>
-<LI><A NAME="tex2html57"
- HREF="Manual.html#SECTION00281000000000000000">The native Address Book </A>
-<LI><A NAME="tex2html58"
- HREF="Manual.html#SECTION00282000000000000000">The Address Book Editor</A>
-<LI><A NAME="tex2html59"
- HREF="Manual.html#SECTION00283000000000000000">Support for BBDB Address Books</A>
-<LI><A NAME="tex2html60"
- HREF="Manual.html#SECTION00284000000000000000">Support for Palm Address Books</A>
-</UL>
-</UL>
-<LI><A NAME="tex2html61"
- HREF="Manual.html#SECTION00300000000000000000">Scripting and Extending Mahogany</A>
-<UL>
-<LI><A NAME="tex2html62"
- HREF="Manual.html#SECTION00310000000000000000">Python Scripting</A>
-<UL>
-<LI><A NAME="tex2html63"
- HREF="Manual.html#SECTION00311000000000000000">Introduction</A>
-<LI><A NAME="tex2html64"
- HREF="Manual.html#SECTION00312000000000000000">Initialisation </A>
-<LI><A NAME="tex2html65"
- HREF="Manual.html#SECTION00313000000000000000">Callback Functions (Hooks)</A>
-<LI><A NAME="tex2html66"
- HREF="Manual.html#SECTION00314000000000000000">Namespaces</A>
-<LI><A NAME="tex2html67"
- HREF="Manual.html#SECTION00315000000000000000">List of Callbacks</A>
-<LI><A NAME="tex2html68"
- HREF="Manual.html#SECTION00316000000000000000">Supported Classes</A>
-</UL>
-<LI><A NAME="tex2html69"
- HREF="Manual.html#SECTION00320000000000000000">Plugins</A>
-<UL>
-<LI><A NAME="tex2html70"
- HREF="Manual.html#SECTION00321000000000000000">Introduction</A>
-<LI><A NAME="tex2html71"
- HREF="Manual.html#SECTION00322000000000000000">The Filters Module</A>
-<LI><A NAME="tex2html72"
- HREF="Manual.html#SECTION00323000000000000000">The PalmOS Module</A>
+<LI><A NAME="tex2html193"
+  HREF="Manual.html#SECTION00281000000000000000">The native Address Book </A>
+<LI><A NAME="tex2html194"
+  HREF="Manual.html#SECTION00282000000000000000">The Address Book Editor</A>
+<LI><A NAME="tex2html195"
+  HREF="Manual.html#SECTION00283000000000000000">Support for BBDB Address Books</A>
+<LI><A NAME="tex2html196"
+  HREF="Manual.html#SECTION00284000000000000000">Support for Palm Address Books</A>
 </UL>
 </UL>
-<LI><A NAME="tex2html73"
- HREF="Manual.html#SECTION00400000000000000000">Getting Help and Support</A>
+<BR>
+<LI><A NAME="tex2html197"
+  HREF="Manual.html#SECTION00300000000000000000">Scripting and Extending Mahogany</A>
 <UL>
-<LI><A NAME="tex2html74"
- HREF="Manual.html#SECTION00410000000000000000">Troubleshooting</A>
-<LI><A NAME="tex2html75"
- HREF="Manual.html#SECTION00420000000000000000">WWW Support</A>
-<LI><A NAME="tex2html76"
- HREF="Manual.html#SECTION00430000000000000000">Mailing Lists</A>
+<LI><A NAME="tex2html198"
+  HREF="Manual.html#SECTION00310000000000000000">Python Scripting</A>
+<UL>
+<LI><A NAME="tex2html199"
+  HREF="Manual.html#SECTION00311000000000000000">Introduction</A>
+<LI><A NAME="tex2html200"
+  HREF="Manual.html#SECTION00312000000000000000">Initialisation </A>
+<LI><A NAME="tex2html201"
+  HREF="Manual.html#SECTION00313000000000000000">Callback Functions (Hooks)</A>
+<LI><A NAME="tex2html202"
+  HREF="Manual.html#SECTION00314000000000000000">Namespaces</A>
+<LI><A NAME="tex2html203"
+  HREF="Manual.html#SECTION00315000000000000000">List of Callbacks</A>
+<LI><A NAME="tex2html204"
+  HREF="Manual.html#SECTION00316000000000000000">Supported Classes</A>
 </UL>
-<LI><A NAME="tex2html77"
- HREF="Manual.html#SECTION00500000000000000000">Advanced Usage</A>
+<LI><A NAME="tex2html205"
+  HREF="Manual.html#SECTION00320000000000000000">Plugins</A>
 <UL>
-<LI><A NAME="tex2html78"
- HREF="Manual.html#SECTION00510000000000000000">Compiling Mahogany from source</A>
-<LI><A NAME="tex2html79"
- HREF="Manual.html#SECTION00520000000000000000">Using Mahogany more efficiently</A>
-<UL>
-<LI><A NAME="tex2html80"
- HREF="Manual.html#SECTION00521000000000000000">Speeding up Mahogany startup</A>
-<LI><A NAME="tex2html81"
- HREF="Manual.html#SECTION00522000000000000000">Limiting Amount of Data Transferred</A>
+<LI><A NAME="tex2html206"
+  HREF="Manual.html#SECTION00321000000000000000">Introduction</A>
+<LI><A NAME="tex2html207"
+  HREF="Manual.html#SECTION00322000000000000000">The Filters Module</A>
+<LI><A NAME="tex2html208"
+  HREF="Manual.html#SECTION00323000000000000000">The PalmOS Module</A>
 </UL>
 </UL>
-<LI><A NAME="tex2html82"
- HREF="Manual.html#SECTION00600000000000000000">FAQ - Frequently Asked Questions</A>
+<BR>
+<LI><A NAME="tex2html209"
+  HREF="Manual.html#SECTION00400000000000000000">Getting Help and Support</A>
 <UL>
-<LI><A NAME="tex2html83"
- HREF="Manual.html#SECTION00610000000000000000">Installation Problems</A>
-<UL>
-<LI><A NAME="tex2html84"
- HREF="Manual.html#SECTION00611000000000000000">All Mahogany icons show a question mark</A>
-<LI><A NAME="tex2html85"
- HREF="Manual.html#SECTION00612000000000000000">How do I unpack the compressed files?</A>
-<LI><A NAME="tex2html86"
- HREF="Manual.html#SECTION00613000000000000000">Compiling aborts with errors</A>
-<LI><A NAME="tex2html87"
- HREF="Manual.html#SECTION00614000000000000000">Mahogany fails to find wxWindows, configure fails</A>
-<LI><A NAME="tex2html88"
- HREF="Manual.html#SECTION00615000000000000000">SSL does not work</A>
+<LI><A NAME="tex2html210"
+  HREF="Manual.html#SECTION00410000000000000000">Troubleshooting</A>
+<LI><A NAME="tex2html211"
+  HREF="Manual.html#SECTION00420000000000000000">WWW Support</A>
+<LI><A NAME="tex2html212"
+  HREF="Manual.html#SECTION00430000000000000000">Mailing Lists</A>
 </UL>
-<LI><A NAME="tex2html89"
- HREF="Manual.html#SECTION00620000000000000000">Other Problems / Questions</A>
+<BR>
+<LI><A NAME="tex2html213"
+  HREF="Manual.html#SECTION00500000000000000000">Advanced Usage</A>
 <UL>
-<LI><A NAME="tex2html90"
- HREF="Manual.html#SECTION00621000000000000000">The Preferences Dialog does not show up properly</A>
-<LI><A NAME="tex2html91"
- HREF="Manual.html#SECTION00622000000000000000">How to use Mahogany with fetchmail/procmail?</A>
-<LI><A NAME="tex2html92"
- HREF="Manual.html#SECTION00623000000000000000">Does Mahogany have group aliases?</A>
-<LI><A NAME="tex2html93"
- HREF="Manual.html#SECTION00624000000000000000">How can I set up POP3/IMAP access?</A>
-<LI><A NAME="tex2html94"
- HREF="Manual.html#SECTION00625000000000000000">How can I set up IMAP access?</A>
-<LI><A NAME="tex2html95"
- HREF="Manual.html#SECTION00626000000000000000">Can I have multiple POP3 or IMAP accounts?</A>
-<LI><A NAME="tex2html96"
- HREF="Manual.html#SECTION00627000000000000000">Can I have multiple identities?</A>
-<LI><A NAME="tex2html97"
- HREF="Manual.html#SECTION00628000000000000000">Can I run Mahogany as root?</A>
-<LI><A NAME="tex2html98"
- HREF="Manual.html#SECTION00629000000000000000">How can I set which language to use?</A>
-<LI><A NAME="tex2html99"
- HREF="Manual.html#SECTION006210000000000000000">How can I delete messages?</A>
-<LI><A NAME="tex2html100"
- HREF="Manual.html#SECTION006211000000000000000">How can I forward a message with attachments?</A>
-<LI><A NAME="tex2html101"
- HREF="Manual.html#SECTION006212000000000000000">How can I customize the position of folders in the tree?</A>
-<LI><A NAME="tex2html102"
- HREF="Manual.html#SECTION006213000000000000000">How can I ``leave messages on server'' (POP3)?</A>
+<LI><A NAME="tex2html214"
+  HREF="Manual.html#SECTION00510000000000000000">Compiling Mahogany from source</A>
+<LI><A NAME="tex2html215"
+  HREF="Manual.html#SECTION00520000000000000000">Using Mahogany more efficiently</A>
+<UL>
+<LI><A NAME="tex2html216"
+  HREF="Manual.html#SECTION00521000000000000000">Speeding up Mahogany startup</A>
+<LI><A NAME="tex2html217"
+  HREF="Manual.html#SECTION00522000000000000000">Limiting Amount of Data Transferred</A>
+</UL>
+</UL>
+<BR>
+<LI><A NAME="tex2html218"
+  HREF="Manual.html#SECTION00600000000000000000">FAQ - Frequently Asked Questions</A>
+<UL>
+<LI><A NAME="tex2html219"
+  HREF="Manual.html#SECTION00610000000000000000">Installation Problems</A>
+<UL>
+<LI><A NAME="tex2html220"
+  HREF="Manual.html#SECTION00611000000000000000">All Mahogany icons show a question mark</A>
+<LI><A NAME="tex2html221"
+  HREF="Manual.html#SECTION00612000000000000000">How do I unpack the compressed files?</A>
+<LI><A NAME="tex2html222"
+  HREF="Manual.html#SECTION00613000000000000000">Compiling aborts with errors</A>
+<LI><A NAME="tex2html223"
+  HREF="Manual.html#SECTION00614000000000000000">Mahogany fails to find wxWindows, configure fails</A>
+<LI><A NAME="tex2html224"
+  HREF="Manual.html#SECTION00615000000000000000">SSL does not work</A>
+</UL>
+<LI><A NAME="tex2html225"
+  HREF="Manual.html#SECTION00620000000000000000">Other Problems / Questions</A>
+<UL>
+<LI><A NAME="tex2html226"
+  HREF="Manual.html#SECTION00621000000000000000">The Preferences Dialog does not show up properly</A>
+<LI><A NAME="tex2html227"
+  HREF="Manual.html#SECTION00622000000000000000">How to use Mahogany with fetchmail/procmail?</A>
+<LI><A NAME="tex2html228"
+  HREF="Manual.html#SECTION00623000000000000000">Does Mahogany have group aliases?</A>
+<LI><A NAME="tex2html229"
+  HREF="Manual.html#SECTION00624000000000000000">How can I set up POP3/IMAP access?</A>
+<LI><A NAME="tex2html230"
+  HREF="Manual.html#SECTION00625000000000000000">How can I set up IMAP access?</A>
+<LI><A NAME="tex2html231"
+  HREF="Manual.html#SECTION00626000000000000000">Can I have multiple POP3 or IMAP accounts?</A>
+<LI><A NAME="tex2html232"
+  HREF="Manual.html#SECTION00627000000000000000">Can I have multiple identities?</A>
+<LI><A NAME="tex2html233"
+  HREF="Manual.html#SECTION00628000000000000000">Can I run Mahogany as root?</A>
+<LI><A NAME="tex2html234"
+  HREF="Manual.html#SECTION00629000000000000000">How can I set which language to use?</A>
+<LI><A NAME="tex2html235"
+  HREF="Manual.html#SECTION006210000000000000000">How can I delete messages?</A>
+<LI><A NAME="tex2html236"
+  HREF="Manual.html#SECTION006211000000000000000">How can I forward a message with attachments?</A>
+<LI><A NAME="tex2html237"
+  HREF="Manual.html#SECTION006212000000000000000">How can I customize the position of folders in the tree?</A>
+<LI><A NAME="tex2html238"
+  HREF="Manual.html#SECTION006213000000000000000">How can I ``leave messages on server'' (POP3)?</A>
+<LI><A NAME="tex2html239"
+  HREF="Manual.html#SECTION006214000000000000000">Can I have ``subfolders'' of File type (mbox) folders?</A>
+<LI><A NAME="tex2html240"
+  HREF="Manual.html#SECTION006215000000000000000">Can I ``Follow-up'' to the message?</A>
 </UL></UL></UL>
 <!--End of Table of Contents-->
 
@@ -321,13 +345,83 @@ Changes against the previous versions</A>
 <P>
 
 <H3><A NAME="SECTION00211100000000000000">
+0.65 against 0.64</A>
+</H3>
+
+<P>
+First of all, too many bugs to be mentioned here were fixed. During more than a
+year since the last release we mainly concentrated on making Mahogany more
+stable and faster (or at least less slow) rather than on adding new features.
+
+<P>
+Yet, inevitably, some of them still crept in and here is an incomplete list:
+
+<UL>
+<LI>It is now possible to postpone messages being composed and later resume
+      writing them by opening them in ``Drafts'' folder
+</LI>
+<LI>Mahogany tries to save messages being composed in case of crash or
+      interrupt
+</LI>
+<LI>TLS (as in STARTTLS) is now supported for all protocols (SMTP,
+      IMAP and POP)
+</LI>
+<LI>Preliminary and limited support for PGP added: GNU Privacy Guard
+      may be used for decoding the PGP-encoded message and checking PGP
+      signatures.
+</LI>
+<LI>Message viewer now recognizes <TT>*bold*</TT> and <TT>_italic_</TT> markup,
+      can decode messages encoded in ROT13 and highlights signatures in a
+      different colour. More URLs are found and highlighted and detecting them
+      is much faster now.
+</LI>
+<LI>SMTP authentication now can be tweaked to work even with seriously
+      broken servers such as qmail and exim 3
+</LI>
+<LI>Mahogany now comes with many built-in spam tests which can be tweaked
+      to be more or less strict. It isn't comparable to Spam Assasin yet, but
+      it is better than nothing.
+</LI>
+<LI>Composer interface has been changed, hopefully for the better, once again
+</LI>
+<LI>It is now possible to control a remote instance of Mahogany using the
+      command line arguments (see <A HREF="Manual.html#cmdlineargs">1.3.1</A>) and also to directly open
+      the composer from the command line.
+</LI>
+<LI>``Bounce'' (also known as ``Redirect'') command was added as well as
+      ``Resend message'' one.
+</LI>
+<LI>Search results are now shown in a so called virtual folder which makes
+      working with them much more convenient and it is now also possible to
+      search in many folders at once.
+</LI>
+<LI>More new commands in no special order: ``Move folder'', ``Follow up to
+      newsgroup'', ``Go to message'' (by number), ``Preview'' in composer
+</LI>
+<LI>Message viewer and composer support UTF-7 and UTF-8.
+</LI>
+<LI>Raw text view dialog now has a find button.
+</LI>
+<LI>It is now possible to use config files instead of the registry under
+      Windows too.
+</LI>
+</UL>
+
+<P>
+Finally not really a new feature but an important achievement in our struggle
+for world domination: Mahogany now runs under Mac OS X as well! Note that
+Mahogany is a real native (Carbon) application and doesn't require GTK+ or X11.
+
+<P>
+
+<H3><A NAME="SECTION00211200000000000000">
 0.64 against 0.63</A>
 </H3>
 
 <P>
 This time the most important changes have happened to the already
 existing features many of which were dramatically improved. Support
-for both IMAP4 andPOP3 has got better, many UI improvements were done
+for both IMAP4 andP OP3 has got better, many UI improvements were done
 and too many bugs to mention here were fixed.
 
 <P>
@@ -336,7 +430,10 @@ program internals which now allows us to only download the headers
 shown on the screen from server instead of getting all of them. This
 means that the time needed to open a folder is now almost independent
 of the folder size and Mahogany can be used without troubles with
-folders containing 50000 messages (and maybe more - but this wasn't
+folders containing <IMG
+ WIDTH="52" HEIGHT="17" ALIGN="BOTTOM" BORDER="0"
+ SRC="img1.png"
+ ALT="$50000$"> messages (and maybe more - but this wasn't
 tested yet).
 
 <P>
@@ -345,84 +442,87 @@ they are:
 
 <P>
 
-<UL><LI>Added optional support for viewing and printing the HTML messages.
+<UL>
+<LI>Added optional support for viewing and printing the HTML messages.
 Also added an optional text-only viewer and a viewer bar to quickly
 change the current viewer.
-
+</LI>
 <LI>Added possibility to monitor a folder (or server) in the background
 just updading the number of messages in it but without actually downloading
 them.
-
+</LI>
 <LI>IMAP server-side sorting and threading can now be used if available.
 It is also possible to sort and thread messages simultaneously. Both
 are now also done much more efficiently and more correctly.
-
+</LI>
 <LI>Mahogany now remembers the flags for the POP3 servers and new mail
 detection for them works much more reliably which now makes Mahogany
 a much better POP3 client (provided your server supports UIDL POP
 command). POP3 code also tries to be faster by optionally using TOP
 instead of downloading the entire messages.
-
+</LI>
 <LI>Support for List-Post header and the possibility to configure the
 program to automatically reply to the mailing list only.
-
+</LI>
 <LI>Added rename and copy buttons to the filter editing dialog.
-
+</LI>
 <LI>Added &#34;Open as readonly&#34; command - this can be significantly
 faster than &#34;Open&#34; for the local folders and also
 works for the read only files.
-
+</LI>
 <LI>Added a command to permanently delete messages instead of moving them
-to theTrash folder - useful for dealing with spam.
-
+to the Trash folder - useful for dealing with spam.
+</LI>
 <LI>Filters were sped up even more. They also show a nicer progress dialog
 now.
-
+</LI>
 <LI>Added commands to manually update the status of one or all folders.
-
+</LI>
 <LI>Also added commands to mark messages as read or unread.
-
+</LI>
 </UL>
 Some of the notable UI improvements are:
 
 <P>
 
-<UL><LI>Quoting the original text when replying is now optional, you can also
+<UL>
+<LI>Quoting the original text when replying is now optional, you can also
 choose to include only the text selected in the viewer in the reply.
-
+</LI>
 <LI>Progress dialogs are shown while Mahogany is performing some long
 operations. The existing progress dialogs shown while retrieving the
 message headers now show the details of the messages being retrieved.
-
+</LI>
 <LI>Password handling in case they are not stored in the config file has
 been improved - Mahogany can now remember them for this session only
 instead of keeping prompting for them.
-
+</LI>
 <LI>Clicking on the header in the folder view window gives fast access
 to the sorting/threading menu with many useful items.
-
+</LI>
 <LI>Scrolling beyond the end of the current messages (optionally) selects
 the next unread message or folder.
-
+</LI>
 <LI>It is possible to rename the folder in the tree and the underlying
 folder file or mailbox independently of each other.
-
+</LI>
 </UL>
 The Win32 version has now some more of the possibilities of the Unix
 one:
 
 <P>
 
-<UL><LI>SSL support is now available under Windows.
-
+<UL>
+<LI>SSL support is now available under Windows.
+</LI>
 <LI>Mahogany can play a sound on receiving a new mail (optionally, of
 course).
-
+</LI>
 </UL>
 
 <P>
 
-<H3><A NAME="SECTION00211200000000000000">
+<H3><A NAME="SECTION00211300000000000000">
 0.63 against 0.62</A>
 </H3>
 
@@ -438,47 +538,50 @@ The new features this time include
 
 <P>
 
-<UL><LI>Showing the total number and the number of unread messages directly
+<UL>
+<LI>Showing the total number and the number of unread messages directly
 in the folder tree
-
+</LI>
 <LI>New so-called unattended, or away, mode in which all new mail notifications
 and any interactive dialogs are temporarily suppressed
-
+</LI>
 <LI>A few new commands such as &#34;Clear folder&#34; to delete
 all messages in a folder without even opening it (handy for emptying
 the trash folder) and &#34;Close&#34; and &#34;Close
 all&#34; folder(s).
-
+</LI>
 </UL>
 There are several more minor improvements as well:
 
 <P>
 
-<UL><LI>New URL popup menu in the message viewer and &#34;Open URL in
+<UL>
+<LI>New URL popup menu in the message viewer and &#34;Open URL in
 new browser window&#34; option
-
+</LI>
 <LI>``Open with...'' command in attachment context menu
-
+</LI>
 <LI>A new option to automatically select the units for message size (KB/MB)
-
+</LI>
 <LI>Python 2.x is now supported and not only 1.5 (Unix)
-
+</LI>
 </UL>
 Some of non fatal but annoying bugs fixed in this release are:
 
 <P>
 
-<UL><LI>Fixed server side searching (IMAP only)
-
+<UL>
+<LI>Fixed server side searching (IMAP only)
+</LI>
 <LI>Fixed text highlighting when selecting text in the viewer
-
+</LI>
 <LI>Renaming of the folders in the tree fixed once again
-
+</LI>
 </UL>
 
 <P>
 
-<H3><A NAME="SECTION00211300000000000000">
+<H3><A NAME="SECTION00211400000000000000">
 0.62 against 0.61</A>
 </H3>
 
@@ -492,57 +595,60 @@ course, there are also several new features:
 
 <P>
 
-<UL><LI>Order of the folders in the folder tree is customizable, the system
+<UL>
+<LI>Order of the folders in the folder tree is customizable, the system
 folders appear at the top (and not scattered through the tree in alphabetical
 order)
-
+</LI>
 <LI>Support for flagging the messages was added, the folders containing
 flagged messages are shown in a different colour in the folder tree
-
+</LI>
 <LI>All folders opened the last time can be remembered and reopened during
 the next run
-
+</LI>
 <LI><TT>TEXT/PLAIN</TT> attachments can now be optionally shown inline
-
+</LI>
 <LI>hard limit on number of retrieved messages was added (see <A HREF="Manual.html#limitdatatransfer">4.2.2</A>)
-
+</LI>
 </UL>
 Many bugs have been fixed:
 
 <P>
 
-<UL><LI>sending mail with local MTA (sendmail) respects BCC settings
-
+<UL>
+<LI>sending mail with local MTA (sendmail) respects BCC settings
+</LI>
 <LI>temporary files with mail messages are not created world readable
 any more
-
+</LI>
 <LI>language autodetection fixed
-
+</LI>
 <LI>messages with embedded MIME attachments are shown correctly
-
+</LI>
 <LI>server side searching on IMAP servers works
-
+</LI>
 <LI>renaming folders was fixed
-
+</LI>
 <LI>crashes when: viewing messages with incorrect date, deleting some
 folders and some others were fixed
-
+</LI>
 </UL>
 And a few improvements too:
 
 <P>
 
-<UL><LI>better UI for the filters dialogs
-
+<UL>
+<LI>better UI for the filters dialogs
+</LI>
 <LI>messages can now also be sorted by status and by size
-
+</LI>
 <LI>a hard limit on number of the messages retrieved can be set
-
+</LI>
 </UL>
 
 <P>
 
-<H3><A NAME="SECTION00211400000000000000">
+<H3><A NAME="SECTION00211500000000000000">
 0.61 against 0.60 </A>
 </H3>
 
@@ -554,18 +660,19 @@ A couple of new features, most importantly:
 
 <P>
 
-<UL><LI>Possibility to save (to the address book) all addresses from a message
+<UL>
+<LI>Possibility to save (to the address book) all addresses from a message
 appearinganywhere in the headers.
-
+</LI>
 <LI>It is now possible to import all folder files in MBOX (Unix) format
 using ''F<SMALL>OLDER|</SMALL>I<SMALL>MPORT FOLDER TREE...</SMALL>'' command (see
 <A HREF="Manual.html#Import">1.4.5</A>)
-
+</LI>
 </UL>
 
 <P>
 
-<H3><A NAME="SECTION00211500000000000000">
+<H3><A NAME="SECTION00211600000000000000">
 0.60 against 0.50</A>
 </H3>
 
@@ -577,84 +684,87 @@ new features have been added:
 
 <P>
 
-<UL><LI>fixes to all serious bugs from version 0.50
-
+<UL>
+<LI>fixes to all serious bugs from version 0.50
+</LI>
 <LI>significantly improved IMAP support: it is now possible to subscribe
 to all folders on an IMAP server with a single click or to manually
 select them from a dialog; Mahogany also uses server side message
 functions when possible resulting in huge performance improvement
-
+</LI>
 <LI>new, improved filtering system (warning: old filters won't work any
 more, contact us if this is really a serious problem for you)
-
+</LI>
 <LI>charset and encoding support for message contents and headers (including
 autodetecting the charset of incoming messages and setting it for
 the outgoing ones)
-
+</LI>
 <LI>mail can be sent using local MTA (sendmail) in addition to SMTP
-
+</LI>
 <LI>import of settings and folder collections from Pine and XFMail, vCard
 support (import/export from addess book, attach to messages)
-
+</LI>
 <LI>drag and drop for message copying and moving - &#34;Quick Move&#34;
-and &#34;Quick Filter&#34; functions 
-
-<LI>folders now can (finally) be renamed 
-
-<LI>quoted text highlighting in the message viewer! 
-
+and &#34;Quick Filter&#34; functions
+</LI>
+<LI>folders now can (finally) be renamed
+</LI>
+<LI>quoted text highlighting in the message viewer!
+</LI>
 <LI>sort the messages display by simply clicking on the corresponding
-column, the sorting dialog also has been improved 
-
-<LI>folders with new/recent messages are highlighted in the folder tree 
-
-<LI>it is possible (although still discouraged) to run Mahogany as root 
-
-<LI>passwords in the config file are encrypted using TwoFish algorithm 
-
-<LI>option to always use external editor by default 
-
-<LI>messages from oneself are optionally marked as such 
-
-<LI>support for password protected SMTP and NNTP servers 
-
-<LI>more verbose error reporting and detection 
-
-<LI>OpenSSL loaded dynamically if available 
-
-<LI>PalmOS module supports AvantGo/MAL synchronisation 
-
-<LI>templates now may be used for replying/forwarding as well 
-
+column, the sorting dialog also has been improved
+</LI>
+<LI>folders with new/recent messages are highlighted in the folder tree
+</LI>
+<LI>it is possible (although still discouraged) to run Mahogany as root
+</LI>
+<LI>passwords in the config file are encrypted using TwoFish algorithm
+</LI>
+<LI>option to always use external editor by default
+</LI>
+<LI>messages from oneself are optionally marked as such
+</LI>
+<LI>support for password protected SMTP and NNTP servers
+</LI>
+<LI>more verbose error reporting and detection
+</LI>
+<LI>OpenSSL loaded dynamically if available
+</LI>
+<LI>PalmOS module supports AvantGo/MAL synchronisation
+</LI>
+<LI>templates now may be used for replying/forwarding as well
+</LI>
 <LI>many other various fixes
-
+</LI>
 </UL>
 <B>New experimental features include:</B>
 
 <P>
 
-<UL><LI>supporting multiple-identities and easy switching between them 
-
+<UL>
+<LI>supporting multiple-identities and easy switching between them
+</LI>
 <LI>support of storing configuration settings on an IMAP server allowing
 to share them between different machines/accounts
-
+</LI>
 </UL>
-<B>Known bugs:</B> 
+<B>Known bugs:</B>
 
 <P>
 
-<UL><LI>There are always some, listed on our bugtracker at http://mahogany.sourceforge.net/bugz/
+<UL>
+<LI>There are always some, listed on our bugtracker at http://mahogany.sourceforge.net/bugz/
 and we are working on them.
-
+</LI>
 <LI>Version 0.60 suffers from a minor printing bug leading to some overlap
 between strings sometimes, which is due to a bug in wxWindows which
 will hopefully be fixed fairly soon.
-
+</LI>
 </UL>
 
 <P>
 
-<H3><A NAME="SECTION00211600000000000000">
+<H3><A NAME="SECTION00211700000000000000">
 0.5 against 0.23a</A>
 </H3>
 
@@ -668,50 +778,51 @@ the future. The main new features are:
 
 <P>
 
-<UL><LI>Proper support for MH folders.
-
+<UL>
+<LI>Proper support for MH folders.
+</LI>
 <LI>Browsing and subscription management for IMAP and NNTP servers.
-
+</LI>
 <LI>A plugin module system has been created which allows to dynamically
 load expansion modules. Existing modules (statically linked in this
 release, but dynamically linkable) include a filtering language and
 PalmOS support. For the future, a calendar/timeplanner plugin is planned.
-
+</LI>
 <LI>Configurable filtering rules have been added.
-
+</LI>
 <LI>Message threading and configurable sort order is supported.
-
-<LI>An HTML-based help browser has been added. 
-
+</LI>
+<LI>An HTML-based help browser has been added.
+</LI>
 <LI>Configurable date format.
-
+</LI>
 <LI>Handling of dial-up networking and detection of connection status.
-
+</LI>
 <LI>Optional user of a Trash folder.
-
+</LI>
 <LI>Wizard-dialogs and ``tip of the day'' dialogs added to make
 Mahogany easier to use.
-
+</LI>
 <LI>Optional SSL support can be compiled in (not activated by default
 due to US export restrictions), allowing secure access to mail and
 news servers.
-
+</LI>
 <LI>PalmOS handheld connectivity: synchronise e-mails with your PalmOS
 handheld computer and use its addressbook within Mahogany. Also, backup,
 restore and install databases of your handheld.
-
+</LI>
 <LI>Bug fixes in nearly all parts of the code. Mahogany should suffer
 much less from crashes than earlier versions. The message editor behaves
 better and is faster.
-
+</LI>
 <LI>Minor GUI improvements like keyboard bindings and nicer icons. Support
 for KDE and GNOME filetype icons.
-
+</LI>
 </UL>
 
 <P>
 
-<H3><A NAME="SECTION00211700000000000000">
+<H3><A NAME="SECTION00211800000000000000">
 0.23a against 0.22a</A>
 </H3>
 
@@ -721,32 +832,33 @@ version. Also:
 
 <P>
 
-<UL><LI>Several bugs in message composer (including a few fatal ones) were
+<UL>
+<LI>Several bugs in message composer (including a few fatal ones) were
 fixed. Only minor problems still persist.
-
+</LI>
 <LI>Selections support (copy, cut, paste) in message composer and viewer.
-
+</LI>
 <LI>The <TT>[Apply]</TT>and<TT>[Cancel]</TT>buttons in the options
 and folder properties dialogs (mostly) work now.
-
+</LI>
 <LI>Several minor bug fixes and improvements, including a massive speedup
 in the update of folder listings over slow connections.
-
+</LI>
 <LI>Printing no longer has overlap between pages.
-
+</LI>
 <LI>Folders can be kept open all the time to speed up access to them,
 very useful for ``SentMail'' folder.
-
+</LI>
 <LI>Better behaved, asks before removing all mail from spool.
-
+</LI>
 <LI>Configurable templates for message composition and replies.
-
+</LI>
 <LI>Message boxes now have icons in them.
-
+</LI>
 <LI>Searching in mail folders.
-
+</LI>
 <LI>And, of course, updated translations and documentation updates.
-
+</LI>
 </UL>
 We have also made good progress on the filtering code, PGP/GPG support,
 multi-threading support and support for loadable external modules,
@@ -755,7 +867,7 @@ Expect them to appear in the next releases.
 
 <P>
 
-<H3><A NAME="SECTION00211800000000000000">
+<H3><A NAME="SECTION00211900000000000000">
 0.22a against 0.21a</A>
 </H3>
 
@@ -764,28 +876,29 @@ Release 0.22a is mainly a bugfix release against 0.21a.
 
 <P>
 
-<UL><LI>All know (crash-inducing) bugs fixed. 
-
-<LI>Message editor/viewer improvements, adding clipboard support and selections. 
-
-<LI>wxGTK layout bug fixes - German, French, Spanish translations 
-
-<LI>Text-search in messages 
-
-<LI>Several minor usability fixes, sub-folder support fixed. 
-
-<LI>Addressbook fixes 
-
-<LI>TCP timeouts configurable 
-
+<UL>
+<LI>All know (crash-inducing) bugs fixed.
+</LI>
+<LI>Message editor/viewer improvements, adding clipboard support and selections.
+</LI>
+<LI>wxGTK layout bug fixes - German, French, Spanish translations
+</LI>
+<LI>Text-search in messages
+</LI>
+<LI>Several minor usability fixes, sub-folder support fixed.
+</LI>
+<LI>Addressbook fixes
+</LI>
+<LI>TCP timeouts configurable
+</LI>
 <LI>Support for setting the Reply-To: header from To: field in message
 replies.
-
+</LI>
 </UL>
 
 <P>
 
-<H3><A NAME="SECTION00211900000000000000">
+<H3><A NAME="SECTION002111000000000000000">
 0.10a to 0.21a</A>
 </H3>
 
@@ -823,12 +936,13 @@ Known bugs</A>
 
 <P>
 
-<UL><LI>Newsspool support will not work with newsgroups not listed in the
+<UL>
+<LI>Newsspool support will not work with newsgroups not listed in the
 ``active'' file and is little configurable.
-
+</LI>
 <LI>News is not always the easiest to use, but will be the next thing
 to improve.
-
+</LI>
 </UL>
 
 <P>
@@ -845,21 +959,22 @@ The next few things to be implemented:</A>
 
 <P>
 
-<UL><LI>Multi-threaded folder access, to avoid blocking while retrieving slow
+<UL>
+<LI>Multi-threaded folder access, to avoid blocking while retrieving slow
 remote folders/servers. This is moreless complete but not enabled
 in the release as we want to test and debug it further before making
 it the default behaviour.
-
+</LI>
 <LI>Message editor: rich text editing &amp; HTML (Almost complete, but not
 activated yet. Will be there very soon.)
-
+</LI>
 <LI>A faster mail folder format or support for storing messages in an
 ODBC database.
-
-<LI>Support for PGP and GNU Privacy Guard to encrypt mails. 
-
+</LI>
+<LI>Support for PGP and GNU Privacy Guard to encrypt mails.
+</LI>
 <LI>Wide character (Unicode) and UTF-8 support (waiting for GTK+ 2.0)
-
+</LI>
 </UL>
 
 <P>
@@ -874,31 +989,33 @@ we need some help. Areas where we would use some help are
 
 <P>
 
-<UL><LI>Updating this manual
-
-<LI>Python 
-
+<UL>
+<LI>Updating this manual
+</LI>
+<LI>Python
+</LI>
 <LI>support for other mail protocols and mailfolder file formats, LDAP
-
+</LI>
 <LI>If you have access to other systems apart from Linux/Solaris/FreeBSD/Windows,
 you are very welcome to help us port Mahogany to those platforms,
 or to other hardware than Intel.
-
+</LI>
 <LI>Translations to other languages.
-
+</LI>
 <LI>MacOS development
-
+</LI>
 <LI><B>Generally we welcome help for anything. If you miss a feature
 in Mahogany, we are more than happy to help you implement it yourself.
 Naturally we tend to work on the features that we either need ourselves
 or find interesting to do. If your priorities are different, join
 our team and help us improve it. Mahogany is and will always be an
 OpenSource(TM) project and your involvement is wanted! If you have
-any questions about this, please contact the developers at <A NAME="tex2html1"
- HREF="mailto:mahogany-users@lists.sourceforge.net">mahogany-users@lists.sourceforge.net</A>.
+any questions about this, please contact the developers at
+<A NAME="tex2html2"
+  HREF="mailto:mahogany-users@lists.sourceforge.net">&lt;mahogany-users@lists.sourceforge.net&gt;</A>.
 If you have questions about the Mahogany License, discuss them with
 us - we don't want the license to scare anyone.</B>
-
+</LI>
 </UL>
 
 <P>
@@ -909,7 +1026,7 @@ Copyright</A>
 
 <P>
 Mahogany is copyright by The Mahogany Development Team (Founding members
-Karsten Ballüder and Vadim Zeitlin). It is licensed under the Mahogany
+Karsten Ball&#252;der and Vadim Zeitlin). It is licensed under the Mahogany
 ``Artistic License'' as stated in section<A HREF="Manual.html#License">1.1.6</A> or,
 alternatively, under GNU General Public License. Some part of the
 source tree distributed with Mahogany is not covered under this license.
@@ -927,8 +1044,8 @@ Why not the GPL/BSD/QPL/my favourite license?</A>
 <P>
 Recently discussions about which license to chose for which project
 provoked major flamewars in the Unix community. There is a trend to
-put everything under the GPL or LGPL<A NAME="tex2html2"
- HREF="#foot126"><SUP>1.1</SUP></A>. We do not want to get involved in this highly emotional and political
+put everything under the GPL or LGPL<A NAME="tex2html3"
+  HREF="#foot133"><SUP>1.1</SUP></A>. We do not want to get involved in this highly emotional and political
 discussion. Our intent is to allow everyone to use and modify Mahogany
 while preserving some form of control over its development. That is
 why we chose a modified version of Perl's Artistic License. It is
@@ -960,7 +1077,7 @@ this software package may be copied, such that the Copyright Holder
 maintains some semblance of artistic control over the development
 of the package, while giving the users of the package the right to
 use and distribute the Package in a more-or-less customary fashion,
-plus the right to make reasonable modifications. 
+plus the right to make reasonable modifications.
 
 <P>
 This license is based on Perl's ``Artistic License'' and has been
@@ -978,33 +1095,33 @@ Definitions</A>
 <P>
 ``Package'' refers to the collection of files distributed by the Copyright
 Holder, and derivatives of that collection of files created through
-textual modification. 
+textual modification.
 
 <P>
 ``Standard Version'' refers to such a Package if it has not been modified,
 or has been modified in accordance with the wishes of the Copyright
-Holder as specified below. 
+Holder as specified below.
 
 <P>
 ``Copyright Holder'' is whoever is named in the copyright or copyrights
-for the package. 
+for the package.
 
 <P>
 ``You'' is you, if you're thinking about copying or distributing this
-Package. 
+Package.
 
 <P>
 ``Reasonable copying fee'' is whatever you can justify on the basis
 of media cost, duplication charges, time of people involved, and so
 on. (You will not be required to justify it to the Copyright Holder,
 but only to the computing community at large as a market that must
-bear the fee.) 
+bear the fee.)
 
 <P>
 ``Freely Available'' means that no fee is charged for the item itself,
 though there may be fees involved in handling the item. It also means
 that recipients of the item may redistribute it under the same conditions
-they received it. 
+they received it.
 
 <P>
 
@@ -1013,25 +1130,26 @@ Conditions of Use</A>
 </H4>
 
 <P>
-<DL COMPACT>
-<DT>.
-<DD>You may make and give away verbatim copies of the source form of the
+
+<OL>
+<LI>You may make and give away verbatim copies of the source form of the
 Standard Version of this Package without restriction, provided that
 you duplicate all of the original copyright notices and associated
-disclaimers and only distribute the complete package as a whole. 
-<DT>.
-<DD>You may apply bug fixes, portability fixes and other modifications
+disclaimers and only distribute the complete package as a whole.
+</LI>
+<LI>You may apply bug fixes, portability fixes and other modifications
 derived from the Public Domain or from the Copyright Holder. A Package
-modified in such a way shall still be considered the Standard Version. 
-<DT>.
-<DD>You may otherwise modify your copy of this Package in any way, provided
+modified in such a way shall still be considered the Standard Version.
+</LI>
+<LI>You may otherwise modify your copy of this Package in any way, provided
 that you insert a prominent notice in each changed file stating how
 and when you changed that file, and provided that you do at least
-ONE of the following: 
+ONE of the following:
+
 <P>
-<DL COMPACT>
-<DT>)
-<DD>place your modifications in the Public Domain or otherwise make them
+
+<OL>
+<LI>place your modifications in the Public Domain or otherwise make them
 Freely Available, such as by posting said modifications to Usenet
 or an equivalent medium, or placing the modifications on a major archive
 site such as sunsite.unc.edu, or by allowing the Copyright Holder
@@ -1042,53 +1160,56 @@ a separate manual page for each non-standard executable that clearly
 documents how it differs from the Standard Version. You must not make
 the modified version depend on any other software or library if that
 software or library is not Freely Available or if it is covered under
-a license more restrictive than this. 
-<DT>)
-<DD>use the modified Package only within your corporation or organisation.
-<DT>)
-<DD>make other distribution arrangements with the Copyright Holder. 
-</DL>
-<DT>.
-<DD>You may distribute the programs of this Package in object code or
-executable form, provided that you do at least ONE of the following: 
+a license more restrictive than this.
+</LI>
+<LI>use the modified Package only within your corporation or organisation.
+</LI>
+<LI>make other distribution arrangements with the Copyright Holder.
+</LI>
+</OL>
+</LI>
+<LI>You may distribute the programs of this Package in object code or
+executable form, provided that you do at least ONE of the following:
 
 <P>
-<DL COMPACT>
-<DT>)
-<DD>distribute a Standard Version of the executables and library files,
+
+<OL>
+<LI>distribute a Standard Version of the executables and library files,
 together with instructions (in the manual page or equivalent) on where
-to get the Standard Version. 
-<DT>)
-<DD>accompany the distribution with the machine-readable source of the
+to get the Standard Version.
+</LI>
+<LI>accompany the distribution with the machine-readable source of the
 Package with your modifications, including the complete machine-readable
 source of the unmodified Standard Version. You must not make the modified
 version depend on any other software or library if that software or
 library is not Freely Available or if it is covered under a license
-more restrictive than this. 
-<DT>)
-<DD>give non-standard executables non-standard names, and clearly document
+more restrictive than this.
+</LI>
+<LI>give non-standard executables non-standard names, and clearly document
 the differences in manual pages (or equivalent), together with instructions
 on where to get the Standard Version. d.make other distribution arrangements
-with the Copyright Holder. 
-</DL>
-<DT>.
-<DD>You may charge a reasonable copying fee for any distribution of this
+with the Copyright Holder.
+</LI>
+</OL>
+</LI>
+<LI>You may charge a reasonable copying fee for any distribution of this
 Package. You may charge any fee you choose for support of this Package.
 You may not charge a fee for this Package itself. However, you may
 distribute this Package in aggregate with other (possibly commercial)
 programs as part of a larger (possibly commercial) software distribution
 provided that you do not advertise this Package as a product of your
-own. 
-<DT>.
-<DD>The name of the Copyright Holder may not be used to endorse or promote
+own.
+</LI>
+<LI>The name of the Copyright Holder may not be used to endorse or promote
 products derived from this software without specific prior written
 permission. However, all products derived from this software must
-reproduce the original copyright notice as found in the Standard Version. 
-<DT>.
-<DD>THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+reproduce the original copyright notice as found in the Standard Version.
+</LI>
+<LI>THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES
-OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. 
-</DL>
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+</LI>
+</OL>
 
 <P>
 
@@ -1157,8 +1278,8 @@ the authors and copyright of this library:
 <P>
 <BLOCKQUOTE>
 This product includes software developed by the OpenSSL Project for
-use in the <A NAME="tex2html3"
- HREF="http://www.openssl.org/">OpenSSL Toolkit</A>
+use in the <A NAME="tex2html4"
+  HREF="http://www.openssl.org/">OpenSSL Toolkit</A>
 .This product includes cryptographic software written by Eric Young
 (eay@cryptsoft.com) This product includes software written by Tim
 Hudson (tjh@cryptsoft.com)&#34;
@@ -1172,10 +1293,10 @@ wxWindows:</A>
 </H3>
 
 <P>
-We gratefully acknowledge the use of the <A NAME="tex2html4"
- HREF="http://www.wxwindows.org/">wxWindows</A>
+We gratefully acknowledge the use of the <A NAME="tex2html5"
+  HREF="http://www.wxwindows.org/">wxWindows</A>
 cross-platform class library and the excellent work and support of
-the wxWindows developer team. 
+the wxWindows developer team.
 
 <P>
 
@@ -1189,12 +1310,13 @@ of this manual:
 
 <P>
 
-<UL><LI>The Folder Tree (<A HREF="Manual.html#FolderTreeCtrl">1.4.2</A>) and how to create new folders
+<UL>
+<LI>The Folder Tree (<A HREF="Manual.html#FolderTreeCtrl">1.4.2</A>) and how to create new folders
 (<A HREF="Manual.html#CreateNewFolderDialog">1.4.3</A>).
-
+</LI>
 <LI>The explanation of the INBOX (<A HREF="Manual.html#INBOX_Folder">1.5.1</A>) and New Mail (<A HREF="Manual.html#New_Mail_Folder">1.5.2</A>)
 folders.
-
+</LI>
 </UL>
 Obviously, the more of this manual you read, the better use you can
 make of Mahogany. Once the manual has grown too large, we will provide
@@ -1249,35 +1371,36 @@ consider them in order:
 
 <P>
 
-<UL><LI>Collect new mail (Unix only): typically, new mail arrives into the
+<UL>
+<LI>Collect new mail (Unix only): typically, new mail arrives into the
 system I<SMALL>NBOX</SMALL> folder on a Unix workstation. It is strongly
 recommended that you don't leave it there but copy it immediately
 instead into your own mail folder. Mahogany proposes to do this for
 you by default, please let it do it unless you know better.
-
+</LI>
 <LI>Use Trash mailbox: this should be self explanatory except that you
 should note that this is just the global default setting and that
 it can be changed later on folder per folder basis (i.e. you can have
 some unimportant folders from which mail is deleted directly but just
 move the more important messages from other folders. which you might
 wish to undelete later, to the Trash).
-
+</LI>
 <LI>Use Outbox: again, this should be clear but this is a global setting.
 It can be changed later but it is probably worth setting it right
 from the very beginning. If you have a permanent net connection you
 probably don't need to use it.
-
+</LI>
 <LI>Use dial-up network: Mahogany may bring up or down your Internet connection
 for the dial up users. This is a half-experimental feature and, as
 above, is not particularly useful if have a permanent net connection
-
+</LI>
 <LI>Mailbox format (Unix only): this allows you to select the format for
 the local system mailbox files Mahogany is going to create soon (you
 will be able to choose the format for the folders you create yourself
 when you do it, of course). The default is the MBX format which is
 by far the most efficient but it is a binary format which is not understood
 by as many programs as the traditional Berkeley MBOX format.
-
+</LI>
 </UL>
 After finishing with the previous page you are almost done - the last
 page of the wizard doesn't have any more options. It just proposes
@@ -1311,31 +1434,32 @@ but it should be a subset of the following list:
 
 <P>
 
-<UL><LI>``SentMail'': This folder is always created as Mahogany stores
+<UL>
+<LI>``SentMail'': This folder is always created as Mahogany stores
 copies of the messages you send in it. You may tell Mahogany not to
 do it or save them in a different folder by modifying the options
 near the top of the ``Compose'' page in the preferences dialog.
-
+</LI>
 <LI>``Trash'': If you have chosen to use it in the wizard, this
 is the folder where the deleted messages will be moved to. The settings
 for using it can be found in the ``Folders'' page of the preferences
 dialog.
-
+</LI>
 <LI>``New Mail'': This is the central new mail folder. Under Unix
 the messages arriving into the system I<SMALL>NBOX</SMALL> will be moved
 here. Also, when you choose to collect mail from a remote POP3 or
 IMAP4 server (see next subsection) it will be moved here as well.
-
+</LI>
 <LI>``INBOX'' represents the ``system inbox'' for your system.
 You will only see it if you had chosen (in spite of multiple advices
 against it) to not move new mail from it to the ``New Mail''
 folder. Exact location of this folder depends on your system setup
 but some common locations are <TT>/var/spool/mail</TT> or <TT>/var/mail.</TT>
-
+</LI>
 <LI>Server entries: you may also have entries for POP3, IMAP and NNTP
 folders if you had specified them in the installation wizard. They
 are described in details below.
-
+</LI>
 </UL>
 The folder view on the right should show only one or two messages
 right now (unless you already had some mail in your I<SMALL>NBOX</SMALL>).
@@ -1344,7 +1468,7 @@ is the test message Mahogany has sent to test your configuration.
 If you didn't disable this test but don't see this message in the
 folder, something may have gone wrong. Please look at the activity
 log window which Mahogany has also created to see if there are any
-errors in it. Also please see (<A HREF="Manual.html#Troubleshooting"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="cross_ref_motif.gif"></A>) section.
+errors in it. Also please see (<A HREF="Manual.html#Troubleshooting">3.1</A>) section.
 
 <P>
 
@@ -1379,9 +1503,9 @@ are described in more details elsewhere in this manual.
 Right now let us just give some examples of the typical configurations:
 
 <P>
-<DL COMPACT>
-<DT>.
-<DD>Typical POP3 server: normally, the new mail is downloaded from the
+
+<OL>
+<LI>Typical POP3 server: normally, the new mail is downloaded from the
 POP3 folders locally so go to the ``New Mail'' page and select
 ``Collect new mail from this folder''. This will move all new
 mail from the POP3 server to the ``New Mail'' folder. If you
@@ -1390,18 +1514,19 @@ checkbox as well. Finally, if you want Mahogany to check the POP3
 folder for the updates automatically please check the ``Permanently
 monitor this folder'' checkbox and change the polling interval
 for it if needed.
-<DT>.
-<DD>IMAP server with only INBOX: if you only have INBOX folder on your
+</LI>
+<LI>IMAP server with only INBOX: if you only have INBOX folder on your
 IMAP server you may configure it exactly as the POP3 server above.
 You may also decide not to collect mail from it but read it directly
 on the server - this is, in fact, the preferred mode of operation
 as this works much better with IMAP than with POP.
-<DT>.
-<DD>IMAP server with multiple folders: in this case you almost surely
+</LI>
+<LI>IMAP server with multiple folders: in this case you almost surely
 don't want to download all new mail from the IMAP INBOX to the local
 folders but keep it on server. You will probably be interested in
-using filters (<A HREF="Manual.html#Filters"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="cross_ref_motif.gif"></A>) in this case.
-</DL>
+using filters (<A HREF="Manual.html#Filters">1.5.5</A>) in this case.
+</LI>
+</OL>
 
 <P>
 
@@ -1421,7 +1546,101 @@ Setting up Mahogany, its configuration files</A>
 
 <P>
 
-<H2><A NAME="SECTION00231000000000000000">
+<H2><A NAME="SECTION00231000000000000000"></A><A NAME="cmdlineargs"></A>
+<BR>
+Mahogany command line options
+</H2>
+
+<P>
+The following options are accepted. When both short and long options are listed
+either one can be used and if the long options requires an argument, it must be
+specified for the short one as well. The delimiter for the short options is
+either <TT>/</TT> or <TT>-</TT> but only <TT>-</TT> can be used for the long ones.
+
+<P>
+<BR>
+<BR>
+
+   <DIV ALIGN="CENTER"><TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="CENTER">Option</TD>
+<TD ALIGN="CENTER">Meaning</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-h, -help</TD>
+<TD ALIGN="CENTER">show the summary of the command line options</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-verbose</TD>
+<TD ALIGN="CENTER">generate verbose messages (off by default)</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-debug</TD>
+<TD ALIGN="CENTER">enable debug logging</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-safe</TD>
+<TD ALIGN="CENTER">don't do anything automatically on startup</TD>
+</TR>
+<TR><TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">may be useful if Mahogany crashes when trying</TD>
+</TR>
+<TR><TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">to automatically do something after starting up</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-config=file</TD>
+<TD ALIGN="CENTER">specify the alternate configuration file to use</TD>
+</TR>
+<TR><TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">may be also used to force using file instead of</TD>
+</TR>
+<TR><TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">the registry under Windows</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-b, -bcc=adr</TD>
+<TD ALIGN="CENTER">specify a blind carbon-copy (BCC) recipient</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-c, -cc=adr</TD>
+<TD ALIGN="CENTER">specify a carbon-copy (CC) recipient</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-s, -subject=str</TD>
+<TD ALIGN="CENTER">specify the subject for the new message</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-body=str</TD>
+<TD ALIGN="CENTER">the initial text of the message</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-f, -folder=str</TD>
+<TD ALIGN="CENTER">the folder to open in the main frame on startup</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-lang=lng</TD>
+<TD ALIGN="CENTER">the language to use for the program messages,</TD>
+</TR>
+<TR><TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">overrides the default language choice</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-newsgroup=group</TD>
+<TD ALIGN="CENTER">the news group to post the message to</TD>
+</TR>
+</TABLE></DIV>
+
+<P>
+<BR>
+<BR>
+
+<P>
+The remaining command line arguments are taken as the recipients for the new
+message.
+
+<P>
+If either of the <TT>-bcc</TT>, <TT>-cc</TT>, <TT>-subject</TT>, <TT>-newsgroup</TT> or
+<TT>-body</TT> options is given or a command line argument follows the options,
+the composer will be automatically opened on startup. If the ``Always run only
+one instance'' option (see <A HREF="Manual.html#onlyoneinstance">1.7.2</A>) is set, the composer will be
+opened in the already running instance of the program, if any.
+
+<P>
+Please do use <TT>-debug</TT> option if something goes wrongly, it can give
+valuable information about the problem! See also the corresponding option
+(<A HREF="Manual.html#debugoption">1.7.2</A>).
+
+<P>
+
+<H2><A NAME="SECTION00232000000000000000">
 User configuration files (Unix only)</A>
 </H2>
 
@@ -1450,7 +1669,7 @@ file to some other location or even delete it and restart Mahogany
 
 <P>
 
-<H2><A NAME="SECTION00232000000000000000">
+<H2><A NAME="SECTION00233000000000000000">
 System wide configuration file</A>
 </H2>
 
@@ -1513,7 +1732,7 @@ is a POP, IMAP, NNTP connection , a file based mailfolder, a newsgroup
 or whatever, Mahogany treats them all the same and calls them all
 ``folder''. The dialog has several pages which include at least:
 <B>Access</B> (<A HREF="Manual.html#FolderAccessPage">1.4.3</A>), <B>New Mail</B> ()<B>,
-Compose</B> (<A HREF="Manual.html#ComposePage">1.7.2</A>) and <B>MessageViewer</B> (<A HREF="Manual.html#MessageViewerPage">1.7.2</A>). 
+Compose</B> (<A HREF="Manual.html#ComposePage">1.7.2</A>) and <B>MessageViewer</B> (<A HREF="Manual.html#MessageViewerPage">1.7.2</A>).
 
 <P>
 
@@ -1523,7 +1742,8 @@ Access</A>
 
 <P>
 
-<UL><LI><B><A NAME="FolderAccessPage"></A>Folder Type</B>
+<UL>
+<LI><B><A NAME="FolderAccessPage"></A>Folder Type</B>
 <BR>
 Here you can choose from the currently supported folder types. The
 ``News'' type is for reading a local newsspool, it is only partially
@@ -1532,12 +1752,12 @@ is for reading news from a remote newsserver. ``IMAP'' and ``POP3''
 are for accessing remote mail server. If possible, prefer IMAP over
 POP, it is much more powerful and significantly faster, saving modem
 time.
-
+</LI>
 <LI><B>User name</B>
 <BR>
 For those folder types where it is required, the user name or login
 to get access to them.
-
+</LI>
 <LI><B>Password</B>
 <BR>
 For those folder types where it is required, you can specify the password
@@ -1553,35 +1773,35 @@ on Windows. While this file will be created as only readable by you
 and the passwords be encrypted (using very weak encryption), it is
 nevertheless a certain risk. If you accidentally change the permissions
 of that file, someone else could obtain your passwords, though Mahogany
-would detect this the next time it starts and warn you about it. 
-
+would detect this the next time it starts and warn you about it.
+</LI>
 <LI><B>Server</B>
 <BR>
 For the folders which require a server setting, you can specify the
 server host here. If unspecified they will inherit the setting from
 the global preferences. You may use a colon (:) after the server name
 to specify a non default port.
-
+</LI>
 <LI><B>Newsgroup</B>
 <BR>
 For NNTP and Newsspool folders, the name of the newsgroup, e.g. comp.os.linux.announce
 .
-
+</LI>
 <LI><B>Comment</B>
 <BR>
 Whatever you like to add, this is ignored by Mahogany.
-
+</LI>
 <LI><B>File name</B>
 <BR>
 For folders of type ``File'', the filename or directory where
 the folder is.
-
+</LI>
 <LI><B>Collect all mail from this folder</B>
 <BR>
 Makes this folder ``incoming''. Mahogany will regularly check
 the folder for new mail and move any messages to the global folder
 for new mail, usually the ``New Mail'' folder.
-
+</LI>
 <LI><B>Keep server connection when idle</B>
 <BR>
 If selected, Mahogany will keep the folder open during the entire
@@ -1590,19 +1810,19 @@ can significantly speed up access to large folders as opening them
 can take some time. A very useful option for frequently used folders
 and Mahogany uses it by default for the ``SentMail'' folder,
 for example.
-
+</LI>
 <LI><B>Force re-open on ping</B>
 <BR>
 This forces Mahogany to close and re-open the mailbox when trying
 to update the information about it. This is required for some broken
 servers to correctly detect new mail. Usually this should not be needed.
-
+</LI>
 <LI><B>Anonymous access</B>
 <BR>
 This marks the folder as anonymous, such as for anonymous IMAP access,
 telling Mahogany that no user name or password are required to access
 it.
-
+</LI>
 <LI><B>Use Secure Sockets Layer (SSL)</B>
 <BR>
 This option is only available if your copy of Mahogany was built with
@@ -1614,13 +1834,13 @@ open the preferences dialog, and, in the <B>Misc</B> tab, fill-out
 the boxes labeled ``Path where to find shared libssl'' and ``Path
 where to find shared libcrypto''. Linux users must also see the SSL
 section of the FAQ.
-
+</LI>
 <LI><B>Folder can be accessed without network</B>
 <BR>
 This option is only useful if you use Mahogany dial-up support - then
 check it to tell Mahogany that you don't need your Internet connection
 (and thus don't want to dial your ISP) to access this folder.
-
+</LI>
 <LI><B>Can be opened</B>
 <BR>
 This is usually checked for the normal folder but may be unchecked
@@ -1628,7 +1848,7 @@ for the folders which only contain subfolders (see also below) but
 not any messages. Normally you should allow Mahogany detect this itself,
 this checkbox is only here to allow you to override Mahogany if it
 does something wrong.
-
+</LI>
 <LI><B>Contains subfolders</B>
 <BR>
 Select this if the mailbox represents not a mailbox or newsgroup but
@@ -1637,7 +1857,7 @@ would be a normal newsgroup (unticked), while comp.os.linux would
 be a new hierarchy (ticked). Normally you should allow Mahogany detect
 this itself, this checkbox is only here to allow you to override Mahogany
 if it does something wrong.
-
+</LI>
 <LI><B>Hide folder in tree</B>
 <BR>
 If you do not want this mailbox to be shown in the folder tree (unless
@@ -1645,16 +1865,16 @@ you select the option to show all hidden folders), tick this box.
 For example, if you move all new mail from your POP3 folder to your
 INBOX you probably don't need to show POP3 folder in the tree at all
 so you may want to hide it to save valuable screen estate.
-
+</LI>
 <LI><B>Folder subtype</B>
 <BR>
 Here you can select some sub-type, e.g. different mailbox formats.
 This option cannot be changed after the folder creation.
-
+</LI>
 <LI><B>Icon for this folder</B>
 <BR>
 Allows you to set a different icon for the mailbox.
-
+</LI>
 </UL>
 
 <P>
@@ -1669,11 +1889,12 @@ the contents of a mail folder or a newsgroup. It consists of two parts:
 
 <P>
 
-<UL><LI>The list of message headers at the top, showing message subjects,
+<UL>
+<LI>The list of message headers at the top, showing message subjects,
 authors, dates, etc.
-
+</LI>
 <LI>The contents of the currently selected message below.
-
+</LI>
 </UL>
 
 <P>
@@ -1883,7 +2104,7 @@ It is the main system mailbox and cannot be deleted or renamed. All
 new mail will arrive in here. At present, Mahogany leaves all messages
 in the system inbox. Mahogany will collect mail from several different
 incoming mailboxes, e.g. the INBOX and some additional POP3 accounts,
-and move them to a new folder. 
+and move them to a new folder.
 
 <P>
 
@@ -2041,7 +2262,7 @@ To: CC: and BCC: Settings</A>
 All of these fields accept either mail addresses, aliases or folder
 names. Aliases must be expanded by using the tabulator key or the
 Expand button next to the fields. If multiple entries match the text,
-you will be prompted with a list to choose from. 
+you will be prompted with a list to choose from.
 
 <P>
 
@@ -2082,7 +2303,7 @@ CC:</A>
 
 <P>
 CC means Carbon Copy - copies of the message will get sent to the
-addresses listed here. 
+addresses listed here.
 
 <P>
 
@@ -2171,7 +2392,7 @@ will automatically replace them with the corresponding full e-mail
 address. Other possible cases: either there are no matches at all
 and a message in the status line of the window will tell you so, or
 there are more than one match in which case you will be presented
-with a choice of all possible completions. 
+with a choice of all possible completions.
 
 <P>
 <I>Hint:</I> if you press &lt;TAB&gt; immediately after the address expansion
@@ -2214,7 +2435,7 @@ the message, while the ``BCC'' (blind carbon copy) addresses
 will be suppressed in the message keeping them anonymous. If you enter
 an address like ``#myfolder'', Mahogany will interpret it as
 the name of a mailfolder and save a copy of the message to that folder
-(in this case ``myfolder''). 
+(in this case ``myfolder'').
 
 <P>
 
@@ -2296,8 +2517,7 @@ Identity page</A>
 </H3>
 
 <P>
-<A NAME="IdentityPage"></A>
-<P>
+<A NAME="IdentityPage"></A><P>
 Here several important settings are configured, so it is advised (as
 the program itself will tell you when it is run for the first time)
 to set them up before starting using Mahogany. These include your
@@ -2306,24 +2526,25 @@ servers which is configured from the network page (<A HREF="Manual.html#NetworkP
 
 <P>
 
-<UL><LI><B>Username</B>
+<UL>
+<LI><B>Username</B>
 <BR>
 This is used as (default) login name for the accounts which require
 one (POP3 or IMAP4) and also as the base for the return address unless
 it is overridden by explicit setting of the return address.
-
+</LI>
 <LI><B>Hostname</B> 
 <BR>
 This is used as the default hostname for your username. If you do
 not specify a return address, this must form a valid mail address
 when used together with your username.
-
+</LI>
 <LI><B>Reply address</B> 
 <BR>
 Here you can specify a return mail address where you want to receive
 mail and replies to your mails from other users. By using this you
 can hide your original (possibly ``uglier'') return address.
-
+</LI>
 <LI><B>Reply return address from To: field</B>
 <BR>
 If set, Mahogany will use the original <TT>To:</TT> address field
@@ -2337,11 +2558,11 @@ even if you read this mail from home, on a machine called <TT>MyBox.fun.org</TT>
 On the other hand, if someone sends you mail to <TT>MyAlias@writeme.com</TT>,
 your reply will carry that as a return address, so that person will
 never know about your <TT>mycompany.com</TT> office address.
-
+</LI>
 <LI><B>Personal name</B>
 <BR>
 Your full personal name to be included in your address.
-
+</LI>
 <LI><B><A NAME="UserLevel"></A>User level</B>
 <BR>
 Setting it to advance will allow you more detailed configuration of
@@ -2349,10 +2570,9 @@ Mahogany, allowing you to make changes to the configuration which
 might be confusing to a novice user. It's recommended that you first
 become familiar with the program before changing the value of this
 option.
-
+</LI>
 </UL>
-<A NAME="NetworkPage"></A>
-<P>
+<A NAME="NetworkPage"></A><P>
 This page allows you to configure the network-related settings. Please
 notice that the four server names (for POP3, IMAP4, SMTP and NNTP)
 are only the default values and that Mahogany can use as many different
@@ -2362,25 +2582,26 @@ from the default value specified here.
 
 <P>
 
-<UL><LI><B>POP server</B>
+<UL>
+<LI><B>POP server</B>
 <BR>
 This is the default server for your POP3 mail folders.
-
+</LI>
 <LI><B>IMAP server</B>
 <BR>
 This is the default server for your IMAP mail folders.
-
+</LI>
 <LI><B>SMTP server</B>
 <BR>
 This is the server used for sending outgoing mail, please ask your
 system administrator if you don't know its name. This option is disabled
 if ``Use local mail transfer agent'' is checked.
-
+</LI>
 <LI><B>NNTP server</B>
 <BR>
 This is the server used for reading USENET newsgroups and posting
 news articles.
-
+</LI>
 <LI><B>TCP Timeout Values</B>
 <BR>
 These timeouts are used for all accesses to remote servers. Generally
@@ -2392,34 +2613,36 @@ accesses to remote servers, you should try to increase these settings.
 
 <P>
 
-<UL><LI><B>TCP Open Timeout</B> 
+<UL>
+<LI><B>TCP Open Timeout</B> 
 <BR>
 This setting decides after how many seconds the attempt to open a
 connection to a remote mail or newsserver will time out. I.e. if no
 connection can be made within this time interval, the request will
 fail.
-
+</LI>
 <LI><B>TCP Write Timeout</B> 
 <BR>
 If the attempt to write data to a remote server takes longer than
 this, it will fail.
-
+</LI>
 <LI><B>TCP Read Timeout</B> 
 <BR>
 If the attempt to read data from a remote server takes longer than
 this, it will fail.
-
+</LI>
 <LI><B>TCP Close Timeout</B> 
 <BR>
 If the attempt to close the connection to a remote server takes longer
 than this, it will fail.
-
+</LI>
 <LI><B>TCP Rsh Timeout</B> 
 <BR>
 If the attempt to open a remote shell connection (used for some mail
 operations) to a remote server takes longer than this, it will fail.
-
+</LI>
 </UL>
+</LI>
 </UL>
 
 <P>
@@ -2438,42 +2661,44 @@ in the global dialog:
 
 <P>
 
-<UL><LI><B>Execute new mail command</B>
+<UL>
+<LI><B>Execute new mail command</B>
 <BR>
 You may specify a command to execute when new mail is received.
-
+</LI>
 <LI><B>Play a sound on new mail</B>
 <BR>
 You can select a sound file to be played on new mail reception.
-
+</LI>
 <LI><B>Show new mail notification</B>
 <BR>
 If this option is on, Mahogany will show a message about the new mail
 in the log window
-
+</LI>
 <LI><B>Ping folder interval</B>
 <BR>
 This setting specifies how often should the currently opened folder(s)
 be updated. It is typically smaller than the poll interval below because
 it is faster to check an already opened folder, especially when it
 is a remote folder.
-
+</LI>
 <LI><B>Poll interval</B>
 <BR>
 How often should Mahogany update the mail folders which it monitors
 in the background
-
+</LI>
 </UL>
 In addition to these settings, the folder ``New Mail'' properties
 page also proposes you the following settings:
 
 <P>
 
-<UL><LI><B>Configure filters</B>
+<UL>
+<LI><B>Configure filters</B>
 <BR>
 This button gives you access to the filters dialog. Please see the
-corresponding manual section (<A HREF="Manual.html#Filters"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="cross_ref_motif.gif"></A>) for more details
-
+corresponding manual section (<A HREF="Manual.html#Filters">1.5.5</A>) for more details
+</LI>
 <LI><B>Collect new mail from this folder</B>
 <BR>
 If checked, all new mail detected in this folder (either automatically
@@ -2483,7 +2708,7 @@ may change the destination folder if you are in advanced user mode.
 Of course, copying the new mail to a local folder from remote server
 may be time consuming so it may be worth to set the filters deleting
 the unwanted spam messages for this folder to avoid downloading them.
-
+</LI>
 <LI><B>Leave mail in this folder</B>
 <BR>
 If this checkbox is checked, the new mail will be copied to the ``New
@@ -2492,7 +2717,7 @@ moved to ``New Mail'' and deleted from this folder.
 <BR>
 This option is often called ``Leave mail on server'' in the
 other email clients.
-
+</LI>
 <LI><B>Permanently monitor this folder</B>
 <BR>
 Choose this to tell Mahogany to poll this folder in the background
@@ -2501,13 +2726,13 @@ you can still trigger new mail detection (including applying filters
 to it and/or downloading it from server) by either opening the folder
 or updating it (``Open'' and ``Update'' commands in the
 ``Folder'' manu respectively)
-
+</LI>
 <LI><B>Poll folder at startup</B>
 <BR>
 If on, Mahogany will check for new mail in this folder immediately
 after the program launch. Of course, if you have many permanently
 monitored folders this can make the program startup quite slow.
-
+</LI>
 </UL>
 
 <P>
@@ -2524,25 +2749,26 @@ forwarding mail messages, not only for composing the new ones).
 
 <P>
 
-<UL><LI><B>Save sent messages</B>
+<UL>
+<LI><B>Save sent messages</B>
 <BR>
 If enabled, Mahogany will keep a copy of each message you send.
-
+</LI>
 <LI><B>Folder file for sent messages</B>
 <BR>
 Where you want Mahogany to save the copies of sent messages.
-
+</LI>
 <LI><B>Wrap margin</B>
 <BR>
 If set to a value greater than zero, the message editor will wrap
 lines for you at that margin. It is recommended to set it at number
 less than 75, otherwise the lines in your mail messages might become
 too long to be conveniently read.
-
+</LI>
 <LI><B>Reply string in subject</B>
 <BR>
 The prefix for subject lines in message replies, usually set to ``Re:``
-
+</LI>
 <LI><B>Collapse reply marker</B>
 <BR>
 Mahogany can collapse multiple reply markers (such as ``Re:``)
@@ -2550,29 +2776,30 @@ into one in three different ways:
 
 <P>
 
-<UL><LI>no : do not collapse reply markers
-
+<UL>
+<LI>no : do not collapse reply markers
+</LI>
 <LI>collapse : collapse them into one
-
+</LI>
 <LI>count : collapse them into one and add a counter for the reply level,
 such as ``Re[2]:``
-
+</LI>
 </UL>
-
+</LI>
 <LI><B>Quote character</B>
 <BR>
 The text inserted before each line of the quoted message when replying.
-
+</LI>
 <LI><B>Use signature</B>
 <BR>
 If enabled, Mahogany will append the contents of your signature file
 to each message sent.
-
+</LI>
 <LI><B>Use signature separator</B>
 <BR>
 If enabled, your signature will be separated from the text with two
 dashes. This is a common Internet/Usenet convention.
-
+</LI>
 <LI><B>Use XFace</B>
 <BR>
 XFaces are small black and white bitmaps which can be added to the
@@ -2580,25 +2807,25 @@ message header to identify the sender. Mahogany will recognise and
 display them if enabled. It will also attempt to load your XFace from
 the file specified and send it with messages you write. If you do
 not have your own XFace file, Mahogany will use its own default XFace.
-
+</LI>
 <LI><B>XFace file</B>
 <BR>
 This file must contain a 48x48 pixel black and white image. Most image
 formats should be recognised, XPM is recommended. If the file cannot
 be loaded, the default XFace will be substituted.
-
+</LI>
 <LI><B>Mail alias substring expansion</B>
 <BR>
 If enabled, the EXPAND button will search the mail address databases
 using substring search rather than just comparing the text against
 the beginning of addresses and aliases. Produces many more matches
 than the default search and might take a bit longer.
-
+</LI>
 <LI><B>Font family, font sizes, foreground colour, background colour</B>
 <BR>
 These settings determine the appearance of the composition window's
 message editor.
-
+</LI>
 <LI><B>Configure headers</B>
 <BR>
 Allows you to specify default values for the To:, CC: and BCC: fields
@@ -2607,12 +2834,11 @@ may want to configure the folder where you collect all messages from
 some person (or the mailing list) to have this persons reply address
 default value for the ``To:`` field.
 <BR>
-
 <BR>
 The dialog shown will also allow you to edit the custom headers for
 outgoing messages (i.e. add arbitrary additional headers) if the user
 level (<A HREF="Manual.html#UserLevel">1.7.2</A>) is set to ``Advanced''.
-
+</LI>
 </UL>
 
 <P>
@@ -2623,15 +2849,16 @@ Folders page</A>
 
 <P>
 
-<UL><LI><B>Folders to open on startup</B>
+<UL>
+<LI><B>Folders to open on startup</B>
 <BR>
 Mahogany will open these folders on program startup.
-
+</LI>
 <LI><B>Folder opened in main frame</B>
 <BR>
 This specifies the folder to open in the main frame on program startup.
 It will be automatically remembered each time you exit Mahogany.
-
+</LI>
 <LI><B>Poll for new mail delay</B>
 <BR>
 Mahogany will check all incoming mailboxes for new mail. Specify the
@@ -2639,20 +2866,20 @@ time between checks in seconds here. Notice that each check causes
 a short delay as Mahogany polls the folders, set it to a longer value
 to reduce the annoying screen updates, set it to a shorter value if
 you care about receiving your new mail with little delay.
-
+</LI>
 <LI><B>Ping/check folder interval in seconds</B>
 <BR>
 Mahogany checks periodically whether the opened folders are still
 ``alive'' (a folder may become dead if, for example, the remote
 server goes down or the network link fails).
-
+</LI>
 <LI><B>Automatically select first message in viewer</B>
 <BR>
 If enabled, Mahogany will automatically select and display the first
 message in the message viewer whenever you open a folder. This can
 be inconvenient if you want to just look at headers without downloading
 messages over a slow link.
-
+</LI>
 <LI><B>Threshold for displaying progress dialog</B>
 <BR>
 Mahogany will display progress dialogs when parsing mail folders or
@@ -2661,7 +2888,7 @@ value, the progress dialog will be suppressed - play with this setting
 and set it to the value which doesn't show the progress dialogs which
 disappear too quickly, but still shows them if the operation lasts
 a long time.
-
+</LI>
 </UL>
 
 <P>
@@ -2677,21 +2904,22 @@ Python page</A>
 <A NAME="PythonOptions"></A>
 <P>
 
-<UL><LI><B>Enable Python</B>
+<UL>
+<LI><B>Enable Python</B>
 <BR>
 Enables the built-in python interpreter which can be used to extend
 Mahogany. It is not essential for normal operation, but if you want
 to do unusual things, python gives you the power to do practically
 anything you want with the program.
-
+</LI>
 <LI><B>Python Path</B>
 <BR>
 Where to search for python files.
-
+</LI>
 <LI><B>Startup script</B>
 <BR>
 The name of a python script which will be executed at program startup.
-
+</LI>
 </UL>
 
 <P>
@@ -2703,21 +2931,22 @@ Callbacks</A>
 <P>
 Callbacks are python functions that can be called from different parts
 of Mahogany's code. See the Scripting and Extending chapter (<A HREF="Manual.html#Scripting">2</A>)
-and the Hacker's guide (<A HREF="#HackersGuide"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="cross_ref_motif.gif"></A>) for more information
+and the Hacker's guide (<A HREF="#HackersGuide"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="crossref.png"></A>) for more information
 on this.
 
 <P>
 
-<UL><LI><B>Folder open callback</B>
-
+<UL>
+<LI><B>Folder open callback</B>
+</LI>
 <LI><B>Folder update callback</B>
-
+</LI>
 <LI><B>Folder expunge callback</B>
-
+</LI>
 <LI><B>Flag set callback</B>
-
+</LI>
 <LI><B>Flag clear callback</B>
-
+</LI>
 </UL>
 
 <P>
@@ -2728,7 +2957,8 @@ Message Viewer</A>
 
 <P>
 
-<UL><LI><B><A NAME="MessageViewerPage"></A>Preview message when selected</B>
+<UL>
+<LI><B><A NAME="MessageViewerPage"></A>Preview message when selected</B>
 <BR>
 When this option is set, any message that gets selected in the list
 of messages will get pre-viewed automatically. If using a modem connection,
@@ -2736,7 +2966,7 @@ it makes sense to disable it, so messages will only get loaded and
 pre-viewed when double-clicked upon or when the 'V' key is pressed.
 By default, this is enabled, so that clicking on a message or pressing
 the spacebar to select it, will also pre-view it.
-
+</LI>
 <LI><B>Font family, font size, foreground colour, background colour,
 colour for URLs, colour for header names, colour for header values</B>
 <BR>
@@ -2744,13 +2974,13 @@ These settings control the appearance of messages in the message viewer
 window. Mahogany will detect URLs embedded in messages and by using
 a different colour for them, can highlight them. When the user clicks
 on a URL, it will be opened in an external browser.
-
+</LI>
 <LI><B>Inline graphics</B>
 <BR>
 If enabled, Mahogany will display images included as MIME content
 in the message window. If disabled, images will be represented by
 a filetype icon like any other MIME content.
-
+</LI>
 <LI><B>Conversion graphics format</B>
 <BR>
 Mahogany uses an external conversion program (<A HREF="Manual.html#HelpersPage">1.7.2</A>)
@@ -2759,17 +2989,17 @@ chose one of the natively supported formats to use for the conversion.
 At present, the most reliable format appears to be XPM. If configured
 properly and all libraries are available, Mahogany should support
 XPM, PNG, JPEG and BMP. Notice that XPM files are extremely large,
-so you might want to change this setting to one of the other formats. 
-
+so you might want to change this setting to one of the other formats.
+</LI>
 <LI><B>Support special fax mailers</B>
 <BR>
 This enables support for domains sending faxes by email, such as the
-<A NAME="tex2html5"
- HREF="http://www.efax.com/">EFAX</A>
+<A NAME="tex2html6"
+  HREF="http://www.efax.com/">EFAX</A>
 fax to email gateway.
 Faxes are sent as MIME attachments and need treatment different from
 normal images.
-
+</LI>
 <LI><B>Domains sending faxes</B>
 <BR>
 This is a colon-separated list of domains sending faxes. All IMAGE/TIFF
@@ -2777,7 +3007,7 @@ or APPLICATION/OCTET-STREAM MIME content in mails coming from these
 domains will be treated as TIFF-G3 faxes. Note that the strings in
 this field do not need to be real domain names but are substrings
 looked for in the sender's email address.
-
+</LI>
 <LI><B>Maximum size of message</B>
 <BR>
 If you attempt to view a message larger than this limit, Mahogany
@@ -2785,7 +3015,7 @@ will prompt you for confirmation. This is to prevent you from accidentally
 downloading large messages over a slow remote connection. Setting
 it to 0 will disable this. The limit is not applied to mailfolder
 files.
-
+</LI>
 <LI><B>Maximum number of messages</B>
 <BR>
 If you open a folder with more than this limit of messages, Mahogany
@@ -2796,7 +3026,7 @@ Setting it to 0 disables this. It does not apply to mailfolder files.
 Also, for NNTP connections, this might be triggered although there
 could be less messages in the newsgroup, as at the time of testing
 the number of unread messages is not know yet.
-
+</LI>
 <LI><B>Configure headers to show</B>
 <BR>
 This allows you to chose from a list of the most commonly viewed header
@@ -2804,12 +3034,12 @@ lines, which you would like to display together with the message contents.
 By default, To:, From:, Subject: and Date: are shown. Note that you
 can always view the complete header information or the raw message
 text, no matter what you chose here.
-
+</LI>
 <LI><B>Configure Date Format</B>
 <BR>
 This will pop up a sub-dialog (<A HREF="Manual.html#date_format_dialog">1.7.4</A>) for setting
 the format for displaying dates.
-
+</LI>
 </UL>
 
 <P>
@@ -2825,18 +3055,19 @@ called <I>address autocollection</I> and, as almost any other feature
 of Mahogany can be turned on and off as desired. In this page you
 may choose whether you want to use this feature at all (it is on by
 default) and, if so, where should be the autocollected addresses be
-put and other settings. See the Addressbook section (<A HREF="Manual.html#AddressDatabase"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="cross_ref_motif.gif"></A>)
+put and other settings. See the Addressbook section (<A HREF="Manual.html#AddressDatabase">1.8</A>)
 for more information on Mahogany's built-in addressbook.
 
 <P>
 
-<UL><LI><B>Autocollect addresses</B>
+<UL>
+<LI><B>Autocollect addresses</B>
 <BR>
 You may choose ``No'' to disable autocollecting addresses completely,
 or choose ``Yes'' to always autocollect them. The remaining
 option, ``Ask'', means that you will be presented with a message
 box each time an address is about to be autocollected.
-
+</LI>
 <LI><B>Address book to use</B>
 <BR>
 You may enter the path of the address book to use for autocollected
@@ -2846,18 +3077,17 @@ If the path name given here is an absolute one, it is used as is.
 Otherwise, it is considered to be relative to your Mahogany directory.
 For example, the default for this option is ``autocollect.adb''
 and so the default autocollect book will be created in 
-<BR>
-$HOME/.M/<SMALL>AUTOCOLLECT.ADB</SMALL> 
+<BR>$HOME/.M/<SMALL>AUTOCOLLECT.ADB</SMALL> 
 <BR>
 under Unix.
-
+</LI>
 <LI><B>Ignore addresses without names</B>
 <BR>
 You may with to autocollect only addresses which have a full name
 - in this case you should check this option. If it is off and the
 address has no name, the first part of e-mail address (the one preceding
 the '@' symbol) will be used instead of the name.
-
+</LI>
 </UL>
 In addition to its own built-in addressbook format, Mahogany also
 supports the addressbook files of the BBDB addressbook used with Emacs
@@ -2866,11 +3096,12 @@ to the BBDB addressbook support:
 
 <P>
 
-<UL><LI><B>Ignore entries without names</B>
+<UL>
+<LI><B>Ignore entries without names</B>
 <BR>
 BBDB can store entries which have only an e-mail address with them,
 but no name. If you set this option, Mahogany will discard such entries.
-
+</LI>
 <LI><B>Generate unique aliases</B>
 <BR>
 Setting this option allows Mahogany to ensure that all aliases are
@@ -2881,13 +3112,13 @@ is slowed down considerably. However, setting it once, then saving
 the addressbook and disabling it, will make sure that all aliases
 are unique without slowing down subsequent loading of the addressbook
 the next time it is used.
-
+</LI>
 <LI><B>Name for nameless entries</B>
 <BR>
 If Mahogany finds entries without a name and is not set to ignore
 it, this name will be used for such entries. It can be combined with
 the option to generate unique aliases.
-
+</LI>
 <LI><B>Save on exit</B>
 <BR>
 As saving BBDB addressbook can potentially lead to some loss of information
@@ -2896,7 +3127,7 @@ fields), you can choose whether you want Mahogany to automatically
 save the data on exit or ask you for confirmation. Read section <A HREF="Manual.html#BBDB">1.8.3</A>
 for more details about how BBDB and Mahogany differ in interpreting
 the database.
-
+</LI>
 </UL>
 
 <P>
@@ -2912,14 +3143,15 @@ not perform itself.
 
 <P>
 
-<UL><LI><B>Open URLs with</B>
+<UL>
+<LI><B>Open URLs with</B>
 <BR>
 Mahogany will use the program listed here to open URLs embedded in
 email messages. If you want to use Lynx as your Web browser you should
 prefix it with ``xterm -e'' under Unix in order to open Lynx
 in a separate window. For example, you may use <SMALL>XTERM -T </SMALL>L<SMALL>YNX
 -E </SMALL>L<SMALL>YNX.</SMALL>
-
+</LI>
 <LI><B>URL browser is Netscape</B>
 <BR>
 If the browser used to open URLs belongs to the family of Netscape
@@ -2927,18 +3159,18 @@ programs, tick this box. Instead of calling a new browser each time,
 Mahogany will tell the already running Netscape process to load the
 new URL. Also, don't forget to clear it if you use another browser
 - otherwise it will fail to start up.
-
+</LI>
 <LI><B>Help viewer</B>
 <BR>
 The program listed here will be used to view the online help system
 in HTML format. Any simple HTML viewer can be used here.
-
+</LI>
 <LI><B>Help viewer is Netscape</B>
 <BR>
 Just like the option for the URL browser, this will take talk to an
 already running Netscape process instead of opening a new one each
 time.
-
+</LI>
 <LI><B>External editor</B>
 <BR>
 This is the external editor which will be invoked if you choose ``External
@@ -2946,13 +3178,13 @@ editor...'' from the compose view menu. You should use the ``%s''
 characters to indicate the place where the file name will be inserted
 in the command line (if you don't do it, an implicit ``%s''
 will be added to the end of the string).
-
+</LI>
 <LI><B>New Mail Command</B>
 <BR>
 The line in this field will be executed whenever Mahogany receives
 new mail. This can be used to play a sound to notify the user of incoming
 messages, or do something else to alert him.
-
+</LI>
 </UL>
 
 <P>
@@ -2966,30 +3198,31 @@ All options which don't fit in any other pages are collected here.
 
 <P>
 
-<UL><LI><B>Show log window</B>
+<UL>
+<LI><B>Show log window</B>
 <BR>
 If this option is on, the log window showing all program messages
 will be displayed during program execution. It is advised to leave
 it on because the log messages (which can be saved to a file from
 the log window menu) can be valuable for the bug reports.
-
-<LI><B>Debug server and mail folder access</B>
+</LI>
+<LI><B>Debug server and mail folder access</B><A NAME="debugoption"></A>
 <BR>
 This is another troubleshooting option: please turn it on if you experience
 any mail-related problems (either sending or receiving). It slows
 down the program a lot but allows to see what exactly is going on
 between the client and the server and this can be of great help sometimes.
-
+</LI>
 <LI><B>Splash screen on startup</B>
 <BR>
 If this option is on, a splash screen is shown on startup. It will
 go away when clicked with the mouse or when a given delay (see the
 next item) expires.
-
+</LI>
 <LI><B>Splash screen delay</B>
 <BR>
 The delay after which the splash screen disappears.
-
+</LI>
 <LI><B>Autosave delay</B>
 <BR>
 This option allows to automatically save all program settings (but
@@ -2997,14 +3230,14 @@ not messages being composed so far) each time the given delay (in
 seconds) passes. It can be disabled by setting the delay to 0, but
 it is advised to leave it enabled - so that your changes to the program
 configuration will be always saved.
-
+</LI>
 <LI><B>Confirm exit</B>
 <BR>
 If this options is on, you will be asked whether you want to leave
 the program each time before exiting. The checkbox on the message
 box with this question can be used to change the value of this option
 as well.
-
+</LI>
 <LI><B>Click folder to open<A NAME="clicktoopen"></A></B>
 <BR>
 If this option is on, it is enough to select (for example, by clicking
@@ -3016,28 +3249,39 @@ very big folders or on slow machines/network connections, so an alternative
 way is to uncheck this checkbox. Then double clicking a folder will
 be needed to open it in the integrated folder view - while ``Open''
 popup menu item will still open it in a separate window.
+</LI>
+<LI><B>Always run only one instance</B><A NAME="onlyoneinstance"></A>
+<BR>
+If this option is on and you launch another instance of Mahogany, i.e. execute
+it again while another copy of it is still running, the control will be given
+to the already running instance instead of launching another one in parallel.
 
+<P>
+This is especially useful when Mahogany is configured as your default mail
+client as otherwise another copy of it would have to be opened each time when
+you start writing a new message.
+</LI>
 <LI><B>Format for the date</B>
 <BR>
 This controls how the dates are shown in the folder view window. The
 string here has the same format as an argument to strftime(), on a
 Unix system you may execute <SMALL>MAN STRFTIME</SMALL> to see them all.
-
+</LI>
 <LI><B>Show new mail notification</B>
 <BR>
 If this option is on, a message box will be shown each time new messages
 are received.
-
+</LI>
 <LI><B>Path where to find AFM files</B> (Unix version only)
 <BR>
 To properly scale printing under Unix, Mahogany needs access to a
 set of AFM files. The searchpath where to look for them can be modified
 here.
-
+</LI>
 <LI><B>Remote configuration synchronisation settings</B>
 <BR>
 Please refer to the section below for a detailed explanation.
-
+</LI>
 </UL>
 
 <P>
@@ -3066,15 +3310,16 @@ to share. Currently supported are:
 
 <P>
 
-<UL><LI><B>Sync Filter Rules</B>: This keeps the global list of all filter
+<UL>
+<LI><B>Sync Filter Rules</B>: This keeps the global list of all filter
 rules synchronised via the IMAP folder. Very useful if you want to
 use the same set of filter rules no matter where you run Mahogany.
-
+</LI>
 <LI><B>Sync Identities</B>: This keeps the list of available identity
 settings synchronised. Be careful: some things such as server settings
 might cause problems if they are used on a machine with different
 network settings.
-
+</LI>
 <LI><B>Sync part of the folder tree</B>: This allows you to synchronise
 a complete sub-tree of the mailbox/folder tree. Activate this and
 pick a group of folders from the tree (Click on the [&gt;&gt;]
@@ -3085,7 +3330,7 @@ from both machines. It synchronises configuration information, not
 folder contents. So you cannot access a mailbox file residing on one
 machine via this mechanism, but you can share configuration entries
 for remote mailboxes, such as IMAP, POP3 or newsgroups.
-
+</LI>
 </UL>
 
 <P>
@@ -3256,20 +3501,21 @@ Generally speaking, there are several ways to perform the same action
 in the address book editor:
 
 <P>
-<DL COMPACT>
-<DT>.
-<DD>use the menus: the commands for creating and deleting address book
+
+<OL>
+<LI>use the menus: the commands for creating and deleting address book
 entries are in the ``Edit'' menu, the corresponding commands
 for the address books - in ``Book'' one.
-<DT>.
-<DD>use the toolbar: this may be more convenient because, depending on
+</LI>
+<LI>use the toolbar: this may be more convenient because, depending on
 the current position of the selected item in the tree it will propose
 to create either an address book or an entry.
-<DT>.
-<DD>use keyboard: &lt;INSERT&gt; key creates a new entry or address book if
+</LI>
+<LI>use keyboard: &lt;INSERT&gt; key creates a new entry or address book if
 the current selection is the root of the tree, &lt;DELETE&gt; deletes an
 item and &lt;Alt-ENTER&gt; brings up the ``Properties'' dialog.
-</DL>
+</LI>
+</OL>
 To edit the entry, simply select it in the tree. The data associated
 to it is spread over several notebook pages - select the one which
 contains the field you want to change and change it. If you want to
@@ -3306,7 +3552,7 @@ entry you're looking for.
 <P>
 You may import your existing address book file by choosing the ``Import
 book...''entry from the ``Book'' menu - this will open the
-address book import dialog proposing you to select the 
+address book import dialog proposing you to select the
 
 <P>
 
@@ -3420,27 +3666,27 @@ Callback Functions (Hooks)</A>
 <P>
 There are a number of callbacks available which will be called from
 different places within <I>Mahogany</I>. These are defined in the
-header file <TT>Mcallbacks.h</TT>. The documentation of these callbacks
-can be found in the Classes documentation(<A NAME="tex2html6"
- HREF="classes/index.html">Classes online docs</A>).
-All of these callbacks are called with at least two arguments:
+header file <TT>Mcallbacks.h</TT>. There is no documentation for these
+callbacks yet, but don't hesitate to ask us if you need more information
+about this. All of these callbacks are called with at least two arguments:
 
 <P>
-<DL COMPACT>
-<DT>.
-<DD>The name of the hook for which the function got called, e.g. <TT>FolderOpenHook</TT>
-<DT>.
-<DD>A pointer to the object from which it was called. E.g. for <TT>FolderOpenHook</TT>,
+
+<OL>
+<LI>The name of the hook for which the function got called, e.g. <TT>FolderOpenHook</TT>
+</LI>
+<LI>A pointer to the object from which it was called. E.g. for <TT>FolderOpenHook</TT>,
 this would be a pointer to a <TT>MailFolder</TT> object. This object
 does not carry a useable type with it and needs to be converted in
 the callback, e.g. if the argument is called <TT>arg</TT> and the
 object is a <TT>MailFolder</TT>, the object must either be used as
 <TT>MailFolder.MailFolder(arg)</TT> or be converted as <TT>mf
-= MailFolder.MailFolder(arg)</TT>. 
-<DT>.
-<DD>Some callbacks have a third argument. This is either a single value
+= MailFolder.MailFolder(arg)</TT>.
+</LI>
+<LI>Some callbacks have a third argument. This is either a single value
 or a tuple holding several values.
-</DL>
+</LI>
+</OL>
 
 <P>
 
@@ -3552,10 +3798,10 @@ more support!
 <P>
 Some automatically generated documentation of the Python interface
 to Mahogany classes can be found in the <A NAME="tex2html7"
- HREF="../Python/">doc/Python directory</A>.
+  HREF="../Python/">doc/Python directory</A>.
 Documentation about all classes, including those not available to
 Python, can be found in the <A NAME="tex2html8"
- HREF="../classes/">doc/classes directory</A>.
+  HREF="../classes/">doc/classes directory</A>.
 
 <P>
 
@@ -3572,7 +3818,7 @@ Introduction</A>
 <P>
 Starting with release 0.5, <I>Mahogany</I> allows the use of plugins
 (modules). This allows for an easy and comfortable way to enlarge
-<I>Mahogany</I>´s functionality. These modules can be loaded at runtime
+<I>Mahogany</I>&#180;s functionality. These modules can be loaded at runtime
 and do not need to be part of the main executable.
 
 <P>
@@ -3592,16 +3838,17 @@ three possible ways:
 
 <P>
 
-<UL><LI>You can use the filters dialog. This is the most convenient and best
+<UL>
+<LI>You can use the filters dialog. This is the most convenient and best
 supported option.
-
+</LI>
 <LI>You can write them by hand, using a simple programming language remotely
 similar to 'C', and put the filtering rules directly into the Mahogany
 configuration file or registry.
-
+</LI>
 <LI>You can write complex rules yourself, save them to a file and tell
 Mahogany to read the rules from that file.
-
+</LI>
 </UL>
 The normal way to set up filters is to specify them in the filters
 dialog (<A HREF="Manual.html#FiltersDialog">2.2.2</A>) and then tell Mahogany folder which
@@ -3636,17 +3883,18 @@ it contains of the following components:
 
 <P>
 
-<UL><LI>The rule name, in the text entry field at the very top. This name
+<UL>
+<LI>The rule name, in the text entry field at the very top. This name
 is only to help you remember what the rule does and will appear in
 the list of rules in the main Filters Dialog, but is without any further
 significance.
-
+</LI>
 <LI>Underneath the name, you find the text ``If Message...'' followed
 by at least one row of conditioncontrols.
-
+</LI>
 <LI>Under the condition controls you find the text ``Then do this:``
 followed by some action controls.
-
+</LI>
 </UL>
 You can add more pattern matching controls by pressing the [More]
 button, and you can delete the last pattern matching rule by pressing
@@ -3660,53 +3908,55 @@ conditions can be tested for at present:
 
 <P>
 
-<UL><LI>Always - this rule will always be executed
-
+<UL>
+<LI>Always - this rule will always be executed
+</LI>
 <LI>Contains - check if the text next to it is contained in the message
 component selected
-
+</LI>
 <LI>Match - check if the message component selected is exactly this text
 (case independent)
-
+</LI>
 <LI>Match Case - check if the message compent selected is exactly this
 text (case dependent)
-
+</LI>
 <LI>Match RegExp - check if the message compent selected matches the regular
 expression specified
-
+</LI>
 <LI>Larger Than - check if the message is larger than this in KByte
-
+</LI>
 <LI>Smaller Than - check if the message is smaller than this in KByte
-
+</LI>
 <LI>Older Than - check if the message is older than this many days
-
+</LI>
 <LI>Newer Than - check if the message is newer than this many days
-
+</LI>
 <LI>Is SPAM - check if the message originates from a system blacklisted
-as sending unsolicited emails (SPAM). 
-
+as sending unsolicited emails (SPAM).
+</LI>
 <LI>Python - execute the text in the box in the built-in Python interpreter
 and proceed if it returns a non-0 result.
-
+</LI>
 </UL>
 The possible actions which can be performed, are:
 
 <P>
 
-<UL><LI>Delete - deletes the message
-
+<UL>
+<LI>Delete - deletes the message
+</LI>
 <LI>Copy to - copies the message to the folder specified
-
+</LI>
 <LI>Move to - moves the message to the folder specified
-
+</LI>
 <LI>Expunge - expunge all messages in this folder
-
+</LI>
 <LI>MessageBox - open a message box dialog with the text specified
-
+</LI>
 <LI>LogEntry - add the text specified to the log window
-
+</LI>
 <LI>Python - execute the text specified in the built-in Python interpreter
-
+</LI>
 </UL>
 If you are not using a Trash folder, it is a good idea to add a rule
 at the end of the list of filtering rules, that always expunges all
@@ -3731,7 +3981,7 @@ The listbox on the left lists the existing filtering rules for the
 currently selected folder in the order in which they are executed.
 You can use the buttons to change the order or rules. You can also
 activate/deactivate rules by clicking on the litte checkbox ([X]
-or [ ]) next to their name. 
+or [ ]) next to their name.
 
 <P>
 If you want to apply rules to all incoming messages and are collecting
@@ -3748,14 +3998,14 @@ The PalmOS Module</A>
 <P>
 When 3Com released its first PalmPilots several years ago, many people
 did not believe in a success. But they were proven wrong, the Palm
-Pilot (or short: Palm) is today the most used handheld organizer. 
+Pilot (or short: Palm) is today the most used handheld organizer.
 
 <P>
-For all the people possessing one of those´s little helpers, the PalmOS
-Module allows (or will allow) for an easy integration of the Palm´s
+For all the people possessing one of those&#180;s little helpers, the PalmOS
+Module allows (or will allow) for an easy integration of the Palm&#180;s
 data in Mahogany. In future releases there will be full support for
 addressbook synching, schedules etc. Currently you can only view the
-Palm´s addressbook (see above) and use <I>Mahogany</I> as your Palm
+Palm&#180;s addressbook (see above) and use <I>Mahogany</I> as your Palm
 desktop software.
 
 <P>
@@ -3772,19 +4022,20 @@ to
 
 <P>
 
-<UL><LI>create backups of the Palm´s databases using the ``Backup''
+<UL>
+<LI>create backups of the Palm&#180;s databases using the ``Backup''
 function
-
+</LI>
 <LI>restore the previously backup-ed databases using the ``Restore''
 function
-
+</LI>
 <LI>install new files to the Palm using the ``Install'' function
-
+</LI>
 </UL>
 To use this functionality, you must of course have the PalmOS module
 enabled. You can access the functions via the Plugin menu. In addition
 to the above mentioned tasks, you can specify quite a lot of options
-to adapt for instance the backup process to your personal needs. 
+to adapt for instance the backup process to your personal needs.
 
 <P>
 There is an additional function not mentioned yet, labelled ``Synchronize''.
@@ -3801,16 +4052,16 @@ The configuration dialog</A>
 
 <P>
 You can configure the PalmOS module via the Plugin menu in a lot of
-ways. Let´s go through every single item in the configuration dialog
+ways. Let&#180;s go through every single item in the configuration dialog
 which you can access using the Plugin-Menu:
 
 <P>
 <DL>
-<DT><STRONG>l</STRONG>
+<DT><STRONG>Synchronise&nbsp;Mail</STRONG></DT>
 <DD>When you have this enabled, you can specify a mailbox
 which will be used as place of exchange for mails. Mails in this folder
 will be transfered to the Palm at the next hotsync and the outbox
-of the Palm´s mail program will be send. This mailbox is also used
+of the Palm&#180;s mail program will be send. This mailbox is also used
 as a configuration setting for messages sent. <I>Mahogany</I> will
 use the properties of this mailbox when sending the messages retrieved
 from the Palm's Outbox. If you have enabled the ``advanced user''
@@ -3819,31 +4070,37 @@ separate return-address or completely different options for this mailbox
 and therefore have the mail sent from the PalmPilot with different
 settings as those sent normally. The options for user name and return
 address as set on the Palm are ignored when mails are sent with <I>Mahogany</I>.
-<DT><STRONG>e</STRONG>
+</DD>
+<DT><STRONG>Mailbox&nbsp;for&nbsp;Exchange</STRONG></DT>
 <DD>Enter here the name of the mailbox that should
 be used for mail exchange when you have the ``Synchronise Mail''
 feature enabled (see above).
-<DT><STRONG>e</STRONG>
+</DD>
+<DT><STRONG>Mail&nbsp;disposal&nbsp;mode</STRONG></DT>
 <DD>This specifies what to do with outgoing e-mails
-retrieved from the PalmPilot and sent. You have three options: 
+retrieved from the PalmPilot and sent. You have three options:
 
 <P>
 
-<UL><LI>file : move messages from Outbox to Filed mailbox on the Palm
-
+<UL>
+<LI>file : move messages from Outbox to Filed mailbox on the Palm
+</LI>
 <LI>delete : delete messages after sending
-
+</LI>
 <LI>keep : keep messages in Palm's Outbox
-
+</LI>
 </UL>
-<DT><STRONG>p</STRONG>
+</DD>
+<DT><STRONG>Always&nbsp;do&nbsp;Backup</STRONG></DT>
 <DD>Setting this checkbox to true will make a backup
 take place every time you ``Synchronize''.
-<DT><STRONG>s</STRONG>
+</DD>
+<DT><STRONG>Directory&nbsp;for&nbsp;backup&nbsp;files</STRONG></DT>
 <DD>This field does contain a valid directory
-path where the PalmOS-Module will store the backup of your Palm´s
+path where the PalmOS-Module will store the backup of your Palm&#180;s
 databases.
-<DT><STRONG>s</STRONG>
+</DD>
+<DT><STRONG>Delete&nbsp;no&nbsp;longer&nbsp;existing&nbsp;backups</STRONG></DT>
 <DD>This checkbox determines whether
 you want files to be deleted on the PC that are residing in the backup
 directory but are not any longer on the Palm. This makes it possible
@@ -3851,42 +4108,51 @@ to really keep the backup identical to the Palm, but has the disadvantage
 that you might loose data if you (accidently?) delete important data
 on the Palm and do a backup, as the backup-ed databases will be deleted
 too. So think carefully whether you do really want to do this.
-<DT><STRONG>y</STRONG>
+</DD>
+<DT><STRONG>Make&nbsp;incremental&nbsp;backup&nbsp;only</STRONG></DT>
 <DD>Enable this checkbox if you only
 want to make an incremental backup. Using this features will speed
 the backup process up, as only changed or new databases are downloaded
 from the Palm.
-<DT><STRONG>s</STRONG>
+</DD>
+<DT><STRONG>Backup&nbsp;all&nbsp;databases</STRONG></DT>
 <DD>Enabling this checkbox will make the PalmOS-Module
 ignore the backup flags of the databases. By default the PalmOS-Module
 does only backup files with a set backup flag. Use this option if
-you want all files to be backup´ed.
-<DT><STRONG>s</STRONG>
+you want all files to be backup&#180;ed.
+</DD>
+<DT><STRONG>Exclude&nbsp;these&nbsp;databases</STRONG></DT>
 <DD>Here you can specify a comma separated
-list of databases (without spaces!) that should not be backup´ed. 
-<DT><STRONG>l</STRONG>
+list of databases (without spaces!) that should not be backup&#180;ed.
+</DD>
+<DT><STRONG>Do&nbsp;auto-install</STRONG></DT>
 <DD>Using this feature enables the auto-install feature
 and everytime you ``Synchronize'' the module will check the
 auto-install directory for Palm databases. If databases are found
 they will be installed and deleted without further notice!
-<DT><STRONG>y</STRONG>
+</DD>
+<DT><STRONG>Auto-install&nbsp;directory</STRONG></DT>
 <DD>Specify here a directory where the files
 to be auto-installed can be found.
+</DD>
 </DL>
 Besides that, some general options are available:
 
 <P>
 <DL>
-<DT><STRONG>e</STRONG>
+<DT><STRONG>Pilot&nbsp;device</STRONG></DT>
 <DD>Here you can specify the device where the Pilot is
 residing (this ought to be /dev/pilot under Unix/Linux and Com1: or
 Com2: under MS Windows (not yet supported)).
-<DT><STRONG>d</STRONG>
+</DD>
+<DT><STRONG>Connection&nbsp;speed</STRONG></DT>
 <DD>You have the choice beetween different hotsync
-speeds (``connection speed''), measured in baud. 
-<DT><STRONG>e</STRONG>
+speeds (``connection speed''), measured in baud.
+</DD>
+<DT><STRONG>Try&nbsp;to&nbsp;lock&nbsp;device</STRONG></DT>
 <DD>You can force a lock of the above set device
 by enabling ``Try to lock device''
+</DD>
 </DL>
 
 <P>
@@ -3904,7 +4170,7 @@ different actions will be taken (backup, mail exchange, ...).
 
 <P>
 If you only want to update your backup or to install a file or to
-restore your Palm´s contents, you can access these functions individually
+restore your Palm&#180;s contents, you can access these functions individually
 by using the corresponding menu points in the plugin menu.
 
 <P>
@@ -3928,13 +4194,14 @@ here but here are some basic recommendations:
 
 <P>
 
-<UL><LI>(Unix) If the program doesn't compile, please make sure you use GNU
+<UL>
+<LI>(Unix) If the program doesn't compile, please make sure you use GNU
 make. If it still doesn't help, please let us know about it but don't
 forget to include the compilation errors log (if there are too many
 errors, there is no need to include all of them, just the few first
 ones). If the problem has happened at configure time, please look
 at config.log file configure created and include it in your report.
-
+</LI>
 <LI>(Unix) If the program crashes mysteriously please make sure you don't
 have incompatible and/or different versions of the program sources,
 headers and modules. Also, please check that you have only one version
@@ -3942,10 +4209,10 @@ of wxWindows installed. Also, make sure to rebuild everything (ideally,
 create a new build directory) after installing or uninstalling a new
 wxWindows or Mahogany version. If the problem still persists, please
 try building the debug version of the program (you need debug wxWindows
-library and run configure with --enable-debug switch), run it under <SMALL>GDB</SMALL>
-and send us the output of ``bt'' command in the debugger when
-it crashes.
-
+library and run configure with -enable-debug switch), run it under
+<SMALL>GDB</SMALL> and send us the output of ``bt'' command in the
+debugger when it crashes.
+</LI>
 <LI>If your problem is related to receiving or sending mail, please look
 at the message log window for possible explanation. If you don't see
 the log window, make sure it wasn't disabled in the ``Miscellaneous''
@@ -3954,7 +4221,7 @@ If there is nothing helpful in the log window, please turn on ``Debug
 server and mailbox access'' option in the same page. It may also
 be useful to enable logging to a file if the program crashes as the
 file contents, unlike the log window, is not lost in this case.
-
+</LI>
 </UL>
 
 <P>
@@ -3967,7 +4234,7 @@ WWW Support</A>
 Mahogany has a home on the world wide web where you can get up to
 date information about development and the last releases. Come and
 visit us at the <A NAME="tex2html9"
- HREF="http://mahogany.sourceforge.net/">Mahogany Homepage</A>
+  HREF="http://mahogany.sourceforge.net/">Mahogany Homepage</A>
 <P>
 
 <H1><A NAME="SECTION00430000000000000000">
@@ -3978,7 +4245,7 @@ Mailing Lists</A>
 Several mailing lists exist to contact the developers, to receive
 updates of new releases and to exchange information and experiences
 with other users. Please visit the <A NAME="tex2html10"
- HREF="http://sourceforge.net/projects/mahogany">Mahogany Project Page</A>for
+  HREF="http://sourceforge.net/projects/mahogany">Mahogany Project Page</A>for
 more information and to join the lists.
 
 <P>
@@ -4002,9 +4269,9 @@ Compiling <I>Mahogany</I> from source</A>
 For detailed information on how to compile Mahogany yourself and how
 to change it or get involved in its development, please refer to the
 Hackers' Guide, included either in the <A NAME="tex2html11"
- HREF="../HackersGuide/index.html">online docs</A>
+  HREF="../HackersGuide/index.html">online docs</A>
 or on the <A NAME="tex2html12"
- HREF="http://mahogany.sourceforge.net/docs.html">Mahogany Web page</A>.
+  HREF="http://mahogany.sourceforge.net/docs.html">Mahogany Web page</A>.
 
 <P>
 Some quick notes about common compilation problems can be found in
@@ -4129,7 +4396,7 @@ The distribution files for Solaris and some of the other ones are
 in compressed tar format, having the ending <TT>.tar.gz</TT> . To
 unpack them you need <TT>gzip</TT> and <TT>tar</TT>. Change to the
 directory where you want to install Mahogany, e.g to <TT>/usr</TT>
-or <TT>/opt</TT> or <TT>/usr/local</TT> and issue the following command: 
+or <TT>/opt</TT> or <TT>/usr/local</TT> and issue the following command:
 
 <P>
 <BLOCKQUOTE>
@@ -4173,29 +4440,30 @@ Mahogany fails to find wxWindows, configure fails</A>
 The following steps should identify and solve the problem:
 
 <P>
-<DL COMPACT>
-<DT>.
-<DD>Do a &#34;make install&#34; for wxWindows and watch the
+
+<OL>
+<LI>Do a &#34;make install&#34; for wxWindows and watch the
 output, it should copy lots of things to /usr/local/....
-<DT>.
-<DD>Do a &#34;which wx-config&#34;, it should report wx-config
+</LI>
+<LI>Do a &#34;which wx-config&#34;, it should report wx-config
 to be in /usr/local/bin
-<DT>.
-<DD>Just type &#34;wx-config -cxxflags&#34;, it should run
+</LI>
+<LI>Just type &#34;wx-config -cxxflags&#34;, it should run
 the wx-config script and report the compiler flags, which should include
 something like &#34;-I/usr/local/include&#34;.
-<DT>.
-<DD>Then go to the Mahogany directory and &#34;rm *cache*&#34;
+</LI>
+<LI>Then go to the Mahogany directory and &#34;rm *cache*&#34;
 to remove old configuration info and run ./configure
-<DT>.
-<DD>This *should* find wx/wx.h if all of the above worked, if not,
+</LI>
+<LI>This *should* find wx/wx.h if all of the above worked, if not,
 look at the end of config.log to see what went wrong.
-<DT>.
-<DD>If it does not find the wxWindows library, you need to add /usr/local/lib
+</LI>
+<LI>If it does not find the wxWindows library, you need to add /usr/local/lib
 to either your LD_LIBRARY_PATH or to /etc/ld.so.conf (and run /sbin/ldconfig
 as root), then remove *cache* and try again. Again, if something
 fails, look at config.log.
-</DL>
+</LI>
+</OL>
 
 <P>
 
@@ -4286,16 +4554,17 @@ addresses:
 
 <P>
 
-<UL><LI>The quick and dirty approach: Create an addressbook entry and simply
+<UL>
+<LI>The quick and dirty approach: Create an addressbook entry and simply
 list multiple, comma separated, addresses in its Email field. Mahogany
-will use the whole contents of this field when expanding aliases. 
-
+will use the whole contents of this field when expanding aliases.
+</LI>
 <LI>The more elegant method: Create a new group in your addressbook and
 add the individual addresses as sub-entries of this group. If you
 use the group name as a mail alias, Mahogany will expand it to the
 list of email addresses of all of its group members. This is more
 powerful, as you can easily add and remove entries to sub groups.
-
+</LI>
 </UL>
 
 <P>
@@ -4312,29 +4581,31 @@ is no section in the initial configuration utility for this. <A NAME="POP3"></A>
 <P>
 Mahogany allows you to have as many folders or mail accounts as you
 like. That's why it doesn't ask you at the beginning. To add a POP
-account: 
+account:
 
 <P>
-<DL COMPACT>
-<DT>.
-<DD>right click on the folder tree and choose &#34;Create Folder&#34; 
-<DT>.
-<DD>give the folder a name, set its type to POP3 and fill in the required
-fields, such as server and login 
-<DT>.
-<DD>Click on [OK]. The folder will now appear in the tree 
-<DT>.
-<DD>Double-click on the folder to open it.
-</DL>
 
-<UL><LI>If opening fails, right click on it again and choose &#34;Properties&#34;,
+<OL>
+<LI>right click on the folder tree and choose &#34;Create Folder&#34;
+</LI>
+<LI>give the folder a name, set its type to POP3 and fill in the required
+fields, such as server and login
+</LI>
+<LI>Click on [OK]. The folder will now appear in the tree
+</LI>
+<LI>Double-click on the folder to open it.
+</LI>
+</OL>
+
+<UL>
+<LI>If opening fails, right click on it again and choose &#34;Properties&#34;,
 make sure that all settings are correct.
-
+</LI>
 <LI>- If you want Mahogany to collect all mail from that box, you can
 tick that checkbox and whenever Mahogany starts, it will open that
 box and continue collecting all mail from there and move it to the
 &#34;New Mail&#34; folder.
-
+</LI>
 </UL>
 
 <P>
@@ -4344,7 +4615,7 @@ How can I set up IMAP access?</A>
 </H2>
 
 <P>
-Follow the rules for setting up POP3 access<A HREF="Manual.html#POP3">5.2.5</A> but set the
+Follow the rules for setting up POP3 access<A HREF="Manual.html#POP3">5.2.4</A> but set the
 folder type to be ``IMAP folder''. Then enter the name of your
 IMAP server, your username and password (or leave it empty to be asked
 later) for that server and, optionally, the path to the folder on
@@ -4419,13 +4690,13 @@ as the superuser (root)?</I>
 Not directly. There are two problems with it:
 
 <P>
-<DL COMPACT>
-<DT>.
-<DD>It is not a good idea for security reasons. In fact, you should not
+
+<OL>
+<LI>It is not a good idea for security reasons. In fact, you should not
 even run X11 as root. Though, we would not dare to impose that on
 you, if you want to, that is your problem.
-<DT>.
-<DD>The technical reason, and this is why Mahogany does not allow it:
+</LI>
+<LI>The technical reason, and this is why Mahogany does not allow it:
 The c-client library that we use for accessing mail folders and servers
 uses the user-Id 0 (root) internally and does not work when called
 as root. When inquiring why this is so, c-client's author told us
@@ -4433,7 +4704,8 @@ that it was bad to read mail as root - he thinks he knows what is
 good for you. Unless we find an easy way to circumvent that problem,
 you will not be able to run Mahogany as root as we have no time and
 desire to re-write the c-client library just for this.
-</DL>
+</LI>
+</OL>
 There is a workaround however:
 
 <P>
@@ -4540,20 +4812,44 @@ properties and select ``Collect new mail from this folder''.
 This will move all new mail from the POP3 server to the ``New Mail''
 folder. If you want to copy it instead (leave messages on server)
 just check the ``Leave mail in this folder'' checkbox as well.
+
+<P>
+
+<H2><A NAME="SECTION006214000000000000000">
+Can I have ``subfolders'' of File type (mbox) folders?</A>
+</H2>
+
+<P>
+Mahogany tries to preserve some sanity by disabling &#34;Create
+new folder&#34; in the popup menu when you select a folder of
+a non hierarchical format (such as MBX) but you can still circumvent
+this by doing &#34;Folder|Create...&#34; and selecting the
+folder you want as the parent.
+
+<P>
+
+<H2><A NAME="SECTION006215000000000000000">
+Can I ``Follow-up'' to the message?</A>
+</H2>
+
+<P>
+You can open the message in the Sent Mail folder and do &#34;Message|Edit
+in composer&#34;. It is sort of like &#34;replying to yourself&#34;
+but the to/from fields remain the same.
 <BR><HR><H4>Footnotes</H4>
 <DL>
-<DT><A NAME="foot126">... LGPL</A><A NAME="foot126"
- HREF="Manual.html#tex2html2"><SUP>1.1</SUP></A>
-<DD>
-which we recently felt victim of - due to some strong demand, we have
+<DT><A NAME="foot133">... LGPL</A><A
+ HREF="Manual.html#tex2html3"><SUP>1.1</SUP></A></DT>
+<DD>which we recently felt victim of - due to some strong demand, we have
 decided to allow alternatively licensing Mahogany under GPL
 
 
+</DD>
 </DL>
 <BR><HR>
 <ADDRESS>
-<I></I>
-<BR><I>2001-12-16</I>
+Vadim ZEITLIN
+2003-04-11
 </ADDRESS>
 </BODY>
 </HTML>
