@@ -300,8 +300,6 @@ KB		add python hook for filters
 2	KB	optionally activate tearoff menus
 
 from 32bitsonline review:
-4		Trash folder, move to trash instead/alternative of of delete
-4		Message menu popup for folderlistctrl
 4		add option to hide messages marked as deleted
 
 2		Add code to collect split-up mime content from
@@ -311,12 +309,8 @@ from 32bitsonline review:
 		auto-collect ones
 4		reply unquoted, too
 4		composeview clear should re-insert signature
-4		auto-expunge on folder close option
-4		option to hide expunged messages
-4		confirm expunge dialog
 
 ********************* possible additions to *************************
-
 ?		idea after seeing a standalone program on freshmeat which does
 		this: what if we supported retrieving mail from Web based email
 		services (hotmail, yahoo, ...)?
