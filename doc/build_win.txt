@@ -2,7 +2,7 @@ File:		build_win.txt
 Summary:	contains instructions for building Mahogany under MS Windows
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	18.11.01
+Last modified:	12.01.02
 Version:	the information in this file applies to the cvs sources
 
 0. Requirments
@@ -20,8 +20,8 @@ b) cvs client: you need to have daily access to Mahogany (and so far wxWindows)
 c) GNU m4 from cygwin tools: this is not an absolute requirment, however you
    will not be able to compile *.mid (Mahogany Interface Description) files if
    you don't have it and so you will have to use the versions already in the
-   cvs. If you don't have m4, build process will fail: to get around it,
-   exclude the file Minterface.mid from build.
+   cvs. If you do have m4, set the environment variable M4 to contain its full
+   path (or just m4 if it is in your PATH), otherwise it won't be used.
 
 d) OpenSSL library from http://www.openssl.org/ for SSL support [optional]
 
