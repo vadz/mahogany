@@ -1,5 +1,5 @@
-#This file was created by <karsten> Sun Nov 22 18:28:40 1998
-#LyX 1.0 (C) 1995-1998 Matthias Ettrich and the LyX Team
+#This file was created by <karsten> Wed Jul 28 13:39:53 1999
+#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
 \language default
@@ -25,7 +25,7 @@
 
 \layout Title
 
-C++ Coding Style Guide
+Mahogany/C++ Coding Style Guide
 \layout Author
 
 Karsten Ballüder
@@ -38,13 +38,13 @@ Karsten Ballüder
 \latex default 
  (
 \family typewriter 
-Ballueder@usa.net, http://Ballueder.home.ml.org
+ballueder@gmx.net, http://Ballueder.home.dhs.org
 \family default 
-)
+/)
 \layout Abstract
 
 This document is a set of notes explaining my preferred style of coding
- for C++, as it should be used throughout M in order to avoid unnecessary
+ for C++, as it should be used throughout Mahogany in order to avoid unnecessary
  reformatting between different developers.
  The following guidelines have proven themselves to be useful during several
  cross-platform projects.
@@ -261,11 +261,7 @@ All preprocessor directives must start at column 0.
 Indentation is by a three spaces.
 \layout Itemize
 
-Between a 
-\family typewriter 
-#include
-\family default 
- and the file name, there should be three spaces.
+Do not use TABs.
 \layout Standard
 
 Example:
@@ -320,6 +316,14 @@ MApplication
 mApplication
 \family default 
  is a variable name.
+ 
+\layout Itemize
+
+Use prefixes to indicate scope of variables: m_MemberVariable, ms_StaticMemberVa
+riable, gs_GlobalStaticVariable.
+\layout Itemize
+
+Variable names starting with prefixes start capitalised after the underscore.
 \layout Itemize
 
 Class method names are capitalised, i.e.
@@ -339,14 +343,7 @@ Do not use
 \family typewriter 
 hungarian
 \family default 
- notation.
-\layout Itemize
-
-Do use the 
-\family typewriter 
-m_
-\family default 
- prefix for member variables.
+ notation! Use meaningful variable names instead.
 \layout Itemize
 
 When using names consisting of several words, use mixed capitalisation,
@@ -388,6 +385,18 @@ const
 \layout Itemize
 
 Try to avoid templates.
+\layout Itemize
+
+Do not use exceptions.
+\layout Itemize
+
+Use accessor functions with names like GetXXX()/SetXXX() rather XXX(), instead
+ of names like GetNumOfXXX(), use CountXXX().
+\layout Standard
+
+There are lots of places where these rules aren't followed, most of it in
+ old code.
+ I'm constantly trying to change this whenever convenient.
 \layout Section
 
 Formatting of C/C++ code
@@ -512,7 +521,22 @@ FIXME
  should be used.
 \layout Subsubsection
 
-Use DOC++ comments
+FIXME-MT comments
+\layout Standard
+
+Places where possible mutli-thread problems might happen, should be marked
+ with //FIXME-MT
+\layout Subsubsection
+
+FIXME WXWIN-COMPATIBILITY
+\layout Standard
+
+Use defines to test for new, unreleased wxWindows features and mark them
+ with WXWIN-COMPATIBILITY, so we can easily remove them after the next wxWindows
+ release.
+\layout Subsubsection
+
+Use DOC++/scandoc/javadoc comments
 \layout Standard
 
 
@@ -520,8 +544,15 @@ Use DOC++ comments
 
 \end_inset 
 
- It's pretty buggy, but maybe some day there will be a working version of
- it, so use it.
+ We have scandoc included in Mahogany, type 
+\begin_inset Quotes eld
+\end_inset 
+
+make classdoc
+\begin_inset Quotes erd
+\end_inset 
+
+ in the doc subdirectory to see what it does.
 \layout Paragraph
 
 Avoid duplicate definitions or declarations in multiple branches of compilation:
@@ -621,6 +652,13 @@ delete []
  difficult to detect.
 \layout Subsection
 
+Do not use static variables!
+\layout Standard
+
+VERY important, no static variables should be used, causing problems in
+ multi-threaded operation.
+\layout Subsection
+
 Use prefixes in global names
 \layout Standard
 
@@ -637,13 +675,13 @@ Do not define a global macro such as
 \family typewriter 
 SIZE(x)
 \family default 
-, but call it 
+, but call it
 \family typewriter 
-mylibSIZE(x)
+ MYLIB_SIZE(x)
 \family default 
  or 
 \family typewriter 
-mSIZE(x)
+M_SIZE(x)
 \family default 
 .
 \layout Subsection
@@ -651,44 +689,7 @@ mSIZE(x)
 Version Control
 \layout Standard
 
-The sources are managed by the 
-\family typewriter 
-CVS
-\family default 
- version control system.
- For easy identification, each file should start with a comment, including
- at least the 
-\family typewriter 
-$Id$
-\family default 
- and the 
-\family typewriter 
-$Log$
-Revision 1.9  1998/11/22 19:48:36  KB
-New documentation generation system. Automatically produces PS, HTML and wxhelp.map.
-Revision 1.8  1998/08/16 16:32:16  KBupdatesRevision
- 1.7  1998/05/20 13:32:10  KBEventually fixed that Doc++ core dump problem
- and added a note aboutthis in the StyleGuide.Revision 1.6  1998/05/14 18:49:07
-  KBExtended naming conventions, added postscript versions.Revision 1.5  1998/05/0
-2 18:29:51  KBAfter many problems, Python integration is eventually taking
- off -works.
+Use cvs.
+\layout Standard
 
-\family default 
- tags.
- Including the 
-\family typewriter 
-$Log$
-Revision 1.9  1998/11/22 19:48:36  KB
-New documentation generation system. Automatically produces PS, HTML and wxhelp.map.
-Revision 1.8  1998/08/16 16:32:16  KBupdatesRevision
- 1.7  1998/05/20 13:32:10  KBEventually fixed that Doc++ core dump problem
- and added a note aboutthis in the StyleGuide.Revision 1.6  1998/05/14 18:49:07
-  KBExtended naming conventions, added postscript versions.Revision 1.5  1998/05/0
-2 18:29:51  KBAfter many problems, Python integration is eventually taking
- off -works.
-
-\family default 
- information in each file somehow inflates the code, but as the CVS archive
- might only be accessible through a dial-up internet connection, it provides
- valuable information.
 \the_end
