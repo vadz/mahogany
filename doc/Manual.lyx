@@ -1,4 +1,4 @@
-#This file was created by <karsten> Thu Jan 13 17:08:17 2000
+#This file was created by <karsten> Fri Jan 14 09:55:26 2000
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -4834,4 +4834,21 @@ If it does not find the wxWindows library, you need to add /usr/local/lib
  to either your LD_LIBRARY_PATH or to /etc/ld.conf (and run ldconfig as root),
  then remove *cache* and try again.
  Again, if something fails, look at config.log.
+\layout Subsection
+
+How can I delete messages?
+\layout Standard
+
+
+\shape italic 
+If I press 'D' or use the menu to delete messages, they get marked as deleted
+ but never disappear.
+ How can I delete them?
+\layout Standard
+
+Simple, press '#' or 'x' or select Message/Expunge from the menu.
+ Mahogany will also ask you if you want to expunge them when closing the
+ folder.
+ If you use the Trash folder, this only applies to that one as all other
+ folders will move messages straight to Trash instead of marking them deleted.
 \the_end
