@@ -1863,16 +1863,10 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
                       wxFontEncoding encoding)
 
 {
-   wxColour
-      *cfg = NULL,
-      *cbg = NULL;
+   wxColour cfg = wxTheColourDatabase->Find( (fg) ? fg : wxT("BLACK") );
+   wxColour cbg = wxTheColourDatabase->Find( (bg) ? bg : wxT("WHITE") );
 
-   if( fg )
-      cfg = wxTheColourDatabase->FindColour(fg);
-   if( bg )
-      cbg = wxTheColourDatabase->FindColour(bg);
-
-   SetFont(family, size, style, weight, underline, cfg, cbg, encoding);
+   SetFont(family, size, style, weight, underline, &cfg, &cbg, encoding);
 }
 
 void
