@@ -1,0 +1,17 @@
+$Id$
+
+A list of things to do next, "The Big Rewrite".
+Updated on the web daily from the cvs repository.
+
+Pri:        5 high --- 0 low
+--------------------------------------------------------------------------
+Pri Difficulty Target				Treatment
+--------------------------------------------------------------------------
+5 1  - fix install target
+5 ?  - fix Linux/NIS bug
+4 5  - fix wxGTK memory holes, serious debugging with dmalloc
+4 5  - fix c-client memory holes
+
+- class rewrite:
+3 1  - Message/MailFolder classes              KB: will do this next
+
