@@ -1022,10 +1022,13 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 // public interface
 // ----------------------------------------------------------------------------
+
 void ShowAdbFrame(wxFrame *parent)
 {
   wxFrame *pAdbFrame = new wxAdbEditFrame(parent);
   pAdbFrame->Show(TRUE);
+
+  mApplication->GetProfile()->writeEntry(MP_SHOWADBEDITOR, TRUE);
 }
 
 // -----------------------------------------------------------------------------
@@ -2261,6 +2264,15 @@ bool wxAdbEditFrame::SaveExpandedBranches(AdbTreeNode *group)
 
 wxAdbEditFrame::~wxAdbEditFrame()
 {
+  // don't show the frame at startup the next time unless the application is
+  // closing too
+  if ( mApplication->IsRunning() )
+  {
+    // app continues to run =>only this frame is being closed
+    mApplication->GetProfile()->writeEntry(MP_SHOWADBEDITOR, FALSE);
+  }
+  //else: we had already written TRUE there when we showed the ADB editor
+
   // save current selction
   m_strSelection = m_current->GetFullName();
 

@@ -132,6 +132,9 @@
 /// show log window?
 #define   MP_SHOWLOG          "ShowLog"
 
+/// open ADB editor on startup?
+#define   MP_SHOWADBEDITOR    "ShowAdb"
+
 /// expand folder tree control?
 #define   MP_EXPAND_TREECTRL   "ExpandTreeControl"
 /// help browser name
@@ -514,6 +517,8 @@
 #define   MP_HEIGHT_D   400
 /// show log window?
 #define   MP_SHOWLOG_D  1
+/// open ADB editor on startup?
+#define   MP_SHOWADBEDITOR 0l
 /// help browser name
 #define   MP_HELPBROWSER_D   "netscape"
 /// is help browser of netscape type?

@@ -28,6 +28,7 @@
    #include <wx/dynarray.h>
 #endif // USE_PCH
 
+#include <wx/confbase.h>      // for wxExpandEnvVars
 #include <wx/textfile.h>
 #include <wx/utils.h>
 
@@ -48,6 +49,7 @@ class AdbMailrcImporter : public AdbImporter
 {
 public:
    // implement base class pure virtuals
+   virtual String GetDefaultFilename() const;
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);
    virtual size_t GetEntryNames(const String& path,
@@ -194,6 +196,31 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
 // ----------------------------------------------------------------------------
 // AdbImporter methods
 // ----------------------------------------------------------------------------
+
+String AdbMailrcImporter::GetDefaultFilename() const
+{
+   String location;
+
+#ifdef OS_UNIX
+   // the default location for Unix is $HOME/.mailrc
+   location = wxExpandEnvVars("$HOME/.mailrc");
+
+   if ( !wxFile::Exists(location) )
+   {
+      // nice try, but it's not there - so we don't know
+      wxLogVerbose(_("Didn't find the mailrc address book in the default "
+                     "location (%s)."), location.c_str());
+
+      location.Empty();
+   }
+#else // !Unix
+   // don't know where it can be (,mailrc only exists under Unix, so if the user
+   // tries to import its ADB from other OS, it means that he transfered it
+   // himself somewhere...)
+#endif // Unix/!Unix
+
+   return location;
+}
 
 bool AdbMailrcImporter::CanImport(const String& filename)
 {

@@ -535,6 +535,12 @@ MAppBase::OnStartup()
    m_MailCollector = new MailCollector();
    m_MailCollector->Collect(); // empty all at beginning
 
+   // show the ADB editor if it had been shown the last time when we ran
+   if ( GetProfile()->readEntry(MP_SHOWADBEDITOR) )
+   {
+      ShowAdbFrame();
+   }
+
    // register with the event subsystem
    // ---------------------------------
    m_eventReg = MEventManager::Register(*this, MEventId_NewMail);
@@ -551,7 +557,7 @@ MAppBase::OnStartup()
    FilterTest();
 #endif
 
-return TRUE;
+   return TRUE;
 }
 
 void

@@ -460,6 +460,10 @@ GetMessageTemplate(MessageTemplateKind kind, ProfileBase *profile)
             value = _("On $(ORIGINAL:DATE) $SENDER wrote in "
                       "$(ORIGINAL:NEWSGROUPS)\n\n$QUOTE\n$CURSOR");
             break;
+
+         default:
+            // nothing to do, but put it here to slience gcc warnings
+            ;
       }
    }
 

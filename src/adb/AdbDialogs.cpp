@@ -158,13 +158,16 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
 
    m_panel->SetAutoLayout(TRUE);
 
+   // all items must be created on the canvas, not the panel itself
+   wxWindow *canvas = m_panel->GetCanvas();
+
    // icon and help message
-   wxStaticBitmap *bmp = new wxStaticBitmap(m_panel, -1,
+   wxStaticBitmap *bmp = new wxStaticBitmap(canvas, -1,
                                             mApplication->GetIconManager()->
                                              GetBitmap("adbimport"));
    c = new wxLayoutConstraints;
-   c->top.SameAs(m_panel, wxTop);
-   c->left.SameAs(m_panel, wxLeft);
+   c->top.SameAs(canvas, wxTop);
+   c->left.SameAs(canvas, wxLeft);
    c->width.Absolute(32);
    c->height.Absolute(32);
    bmp->SetConstraints(c);
@@ -189,14 +192,14 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
       }
       else
       {
-         c->top.SameAs(m_panel, wxTop, LAYOUT_Y_MARGIN);
+         c->top.SameAs(canvas, wxTop, LAYOUT_Y_MARGIN);
       }
 
       c->left.RightOf(bmp, 2*LAYOUT_X_MARGIN);
       c->width.Absolute(sizeMsg.x);
       c->height.Absolute(sizeMsg.y);
 
-      msg = new wxStaticText(m_panel, -1, lines[nLine]);
+      msg = new wxStaticText(canvas, -1, lines[nLine]);
       msg->SetConstraints(c);
    }
 
@@ -207,31 +210,31 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
    m_text = m_panel->CreateFileEntry(label, (long)widthMax, msg, &m_browseBtn);
 
    // checkboxes
-   m_autoLocation = new wxPCheckBox("AdbImportAutoFile", m_panel, -1,
+   m_autoLocation = new wxPCheckBox("AdbImportAutoFile", canvas, -1,
                                     _("Determine the &location automatically"));
    c = new wxLayoutConstraints;
    c->top.Below(m_text, LAYOUT_Y_MARGIN);
-   c->left.SameAs(m_panel, wxLeft);
+   c->left.SameAs(canvas, wxLeft);
    c->width.AsIs();
    c->height.AsIs();
    m_autoLocation->SetConstraints(c);
 
-   m_autoFormat = new wxPCheckBox("AdbImportAutoFormat", m_panel, -1,
+   m_autoFormat = new wxPCheckBox("AdbImportAutoFormat", canvas, -1,
                                   _("Determine the &format automatically"));
    c = new wxLayoutConstraints;
    c->top.Below(m_autoLocation, LAYOUT_Y_MARGIN);
-   c->left.SameAs(m_panel, wxLeft);
+   c->left.SameAs(canvas, wxLeft);
    c->width.AsIs();
    c->height.AsIs();
    m_autoFormat->SetConstraints(c);
 
    // listbox
-   m_listbox = new wxListBox(m_panel, -1);
+   m_listbox = new wxListBox(canvas, -1);
    c = new wxLayoutConstraints;
    c->top.Below(m_autoFormat, LAYOUT_Y_MARGIN);
-   c->left.SameAs(m_panel, wxLeft);
-   c->right.SameAs(m_panel, wxRight);
-   c->bottom.SameAs(m_panel, wxBottom);
+   c->left.SameAs(canvas, wxLeft);
+   c->right.SameAs(canvas, wxRight);
+   c->bottom.SameAs(canvas, wxBottom);
    m_listbox->SetConstraints(c);
 
    // populate the listbox
@@ -339,6 +342,15 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
                         "the default address book file for the format "
                         "'%s' - please specify the file manually in the "
                         "next dialog."), importerDesc.c_str());
+
+         // make the message appear before the dialog box, otherwise it's
+         // really confusing - we say that we determine the file location
+         // ourself, yet ask the user for the file without any explanation
+         // (and the explanation will appear later!)
+         if ( wxLog::GetActiveTarget() )
+         {
+            wxLog::GetActiveTarget()->Flush();
+         }
 
          filename = wxPFileSelector
                     (
