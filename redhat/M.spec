@@ -36,7 +36,8 @@ Icon: mahogany.gif
 %description
 This package contains Mahogany, a powerful, scriptable GUI mail and news client
 using GTK+ toolkit. Mahogany supports remote POP3, IMAP4, NNTP servers as well
-as local MBOX and news spool folders and sending mail using SMTP or local MTA.
+as local MBX, MBOX, MH and news spool folders and sending mail using SMTP or
+local MTA.
 
 %prep
 # the name is the same whether the package name is mahogany or mahogany-dynamic
@@ -47,8 +48,7 @@ if [ ! -f configure ]; then
   autoconf
 fi
 
-CFLAGS="$RPM_OPT_FLAGS" ./configure --without-threads \
-	--prefix=$RPM_BUILD_ROOT/%prefix
+CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=$RPM_BUILD_ROOT/%prefix
 
 # we have to fix M_PREFIX in config.h because the package will be later
 # installed in just %prefix, so fallback paths hardcoded into the binary
@@ -58,14 +58,14 @@ mv include/config.h.new include/config.h
 
 # if MAKE is not set, find the best value ourselves
 if [ "x$MAKE" = "x" ]; then
-  if [ "$SMP" != "" ]; then
+  if [ "x$SMP" != "x" ]; then
     export MAKE="make -j $SMP"
   else
     export MAKE=make
   fi
 fi
 
-make
+$MAKE
 
 %install
 export PATH=/sbin:$PATH

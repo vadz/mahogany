@@ -5,7 +5,16 @@ Author:		Vadim Zeitlin <vadim@wxwindows.org>
 Last modified:	22.03.01
 Version:	the information in this file applies to the cvs sources
 
-0. Updating the files
+1. Updating the version
+-----------------------
+
+a) include/Mversion.h
+
+b) makeversion.in
+
+c) in the future we should also have version in configure.in
+
+2. Updating the files
 ---------------------
 
 a) Web pages in MahoganyWeb module: at least download.ht4, status.ht4 and
@@ -23,7 +32,7 @@ f) extra/setup/M.iss
 
 g) "cvs rtag" the files
 
-1. Preparing the release
+3. Preparing the release
 ------------------------
 
 a) tarball
@@ -39,12 +48,12 @@ c) DEB
 
 d) Win32 binaries
 
-2. Uploading the files
+4. Uploading the files
 ----------------------
 
 To upload.sourceforge.net, then create the release from SF project admin page.
 
-3. Announcing the release
+5. Announcing the release
 -------------------------
 
 a) mailing lists
