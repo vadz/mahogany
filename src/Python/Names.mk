@@ -6,7 +6,7 @@ ifdef USE_PYTHON
 
 POBJS	:= $(patsubst .src/%.py-swig,%.py,$(wildcard .src/Python/*.py-swig))
 POBJS	:= $(filter-out Python/MTest.py, $(POBJS))
-MSRC	:= Python/InitPython.cpp Python/PythonHelp.cpp
+MSRC	:= Python/InitPython.cpp Python/PythonHelp.cpp Python/PythonDll.cpp
 
 MOBJS	+= $(POBJS:.py=.o) $(MSRC:.cpp=.o)
 MSGSRC	+= $(MSRC)

@@ -23,6 +23,7 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
+    #include "Mcommon.h"
 #endif // USE_PCH
 
 #include "MPython.h"
@@ -35,12 +36,24 @@
 // macros
 // ----------------------------------------------------------------------------
 
-// we have to use the debug DLL in debug build under Windows
-#if defined(OS_WIN) && defined(DEBUG)
-    #define PYTHON_LIB(ver)     "python" #ver "_d"
-#else  // !WinDebug
-    #define PYTHON_LIB(ver)     "python" #ver
-#endif // WinDebug/!WinDebug
+// define the macro to return the name of the Python library
+#if defined(OS_WIN)
+    // we have to use the debug DLL in debug build under Windows
+    #ifdef DEBUG
+        #define PYTHON_LIB(ver)     "python" #ver "_d"
+    #else  // !Debug
+        #define PYTHON_LIB(ver)     "python" #ver
+    #endif // Debug/!Debug
+#else // !Win
+    #define PYTHON_LIB(ver)         "libpython" #ver
+#endif // Win/!Win
+
+inline String GetDllName(const String& basename)
+{
+    String fullname = basename;
+    fullname << '.' << wxDllLoader::GetDllExt();
+    return fullname;
+}
 
 #ifdef OS_WIN
     #define PYTHON_PROC FARPROC
@@ -109,7 +122,7 @@ extern "C"
    PyObject *(*M_PyString_InternFromString)(const char *) = NULL;
 
    // variables
-   long M__Py_RefTotal = NULL;
+   long M__Py_RefTotal = 0;
    PyTypeObject *M_PyModule_Type = NULL;
    PyObject* M__Py_NoneStruct = NULL;
 
@@ -182,10 +195,10 @@ extern bool InitPythonDll()
 {
    CHECK( !gs_dllPython, true, "shouldn't be called more than once" );
 
-   gs_dllPython = wxDllLoader::LoadLibrary(PYTHON_LIB(20));
+   gs_dllPython = wxDllLoader::LoadLibrary(GetDllName(PYTHON_LIB(20)));
    if ( !gs_dllPython )
    {
-      gs_dllPython = wxDllLoader::LoadLibrary(PYTHON_LIB(15));
+      gs_dllPython = wxDllLoader::LoadLibrary(GetDllName(PYTHON_LIB(15)));
    }
 
    if ( !gs_dllPython )

@@ -22,7 +22,9 @@
    #undef HAVE_STDARG_PROTOTYPES
 
    // use dynamic loading of Python DLL
-   #define USE_PYTHON_DYNAMIC
+   #ifndef USE_PYTHON_DYNAMIC
+      #define USE_PYTHON_DYNAMIC
+   #endif
 
    #ifdef USE_PYTHON_DYNAMIC
       // prevent Python.h from adding the library to our link settings (yes, it
