@@ -243,12 +243,8 @@ static bool mm_disable_callbacks = false;
 /// another one for disabling just mm_flags() callback (used by ClearFolder())
 static bool mm_disable_flags = false;
 
-/// show cclient debug output
-#ifdef DEBUG
-   static bool mm_show_debug = true;
-#else
-   static bool mm_show_debug = false;
-#endif
+/// show cclient debug output (accessed from
+static bool mm_show_debug = false;
 
 /// loglevel for cclient error messages:
 static int cc_loglevel = wxLOG_Error;
