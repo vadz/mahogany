@@ -1664,11 +1664,6 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                      msg = _("Dragging messages failed.");
                   else
                      msg = _("Copying messages failed.");
-
-                  wxLogError(msg);
-
-                  // avoid logging status message as well below
-                  msg.clear();
                }
                else // success
                {
