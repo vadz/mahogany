@@ -2,7 +2,7 @@ File:		doc/release.txt
 Summary:	what to do to make a new Mahogany release
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	2001.07.24
+Last modified:	2003.07.30
 Version:	the information in this file applies to the cvs sources
 
 1. Updating the version
