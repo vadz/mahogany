@@ -165,7 +165,7 @@ MTAG="-A"
 WXNAME=wxGTK
 WXVERSION=2.2
 
-DOCHOST=matterhorn
+DOCHOST=Matterhorn
 
 # This should be set to "yes" by the Mahogany compilation if it
 # succeeds. Used in the debian compilation only for now.
