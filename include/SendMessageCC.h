@@ -68,6 +68,7 @@ public:
        @param disposition either INLINE or ATTACHMENT
        @param dlist list of disposition parameters
        @param plist list of parameters
+       @param enc the text encoding (only for TEXT parts)
    */
    virtual void AddPart(MessageContentType type,
                         const char *buf, size_t len,
@@ -76,6 +77,9 @@ public:
                         MessageParameterList const *dlist = NULL,
                         MessageParameterList const *plist = NULL,
                         wxFontEncoding enc = wxFONTENCODING_SYSTEM);
+
+   /// set the encoding to use for 8bit characters in the headers
+   virtual void SetHeaderEncoding(wxFontEncoding enc);
 
    /** Writes the message to a String
        @param output string to write to
@@ -123,8 +127,17 @@ protected:
    /// Checks for existence of a header entry
    bool HasHeaderEntry(const String &entry);
 
-   /// set the charset from the encoding
-   void SetCharset(wxFontEncoding enc);
+   /// translate the (wxWin) encoding to (MIME) charset
+   String EncodingToCharset(wxFontEncoding enc);
+
+   /// encode the header field using m_encHeaders
+   String EncodeHeader(const String& header);
+
+   /// encode the address header field using m_encHeaders
+   String EncodeAddress(const String& addr);
+
+   /// encode all entries in the list of addresses
+   void EncodeAddressList(struct mail_address *adr);
 
 private:
    ENVELOPE *m_Envelope;
@@ -155,6 +168,9 @@ private:
    String m_CharSet;
    /// default hostname
    String m_DefaultHost;
+
+   /// the header encoding (wxFONTENCODING_SYSTEM if none)
+   wxFontEncoding m_encHeaders;
 
    /// 2nd stage constructor, see constructor
    void Create(Protocol protocol, Profile *iprof);

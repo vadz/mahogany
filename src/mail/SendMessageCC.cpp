@@ -81,6 +81,8 @@ SendMessageCC::Create(Protocol protocol,
 {
    String tmpstr;
 
+   m_encHeaders = wxFONTENCODING_SYSTEM;
+
    m_headerNames = NULL;
    m_headerValues = NULL;
    m_Protocol = protocol;
@@ -130,10 +132,145 @@ SendMessageCC::Create(Protocol protocol,
 }
 
 void
+SendMessageCC::SetHeaderEncoding(wxFontEncoding enc)
+{
+   m_encHeaders = enc;
+}
+
+String
+SendMessageCC::EncodeHeader(const String& header)
+{
+   // get the encoding in RFC 2047 sense
+   enum
+   {
+      Encoding_Unknown,
+      Encoding_Base64 = 'B',           // the values should be like this!
+      Encoding_QuotedPrintable = 'Q'
+   } enc2047;
+
+   // QP should be used for the encodings which mostly overlap with US_ASCII,
+   // Base64 for the others - choose the encoding method
+   switch ( m_encHeaders )
+   {
+      case wxFONTENCODING_ISO8859_1:
+      case wxFONTENCODING_ISO8859_2:
+      case wxFONTENCODING_ISO8859_3:
+      case wxFONTENCODING_ISO8859_4:
+      case wxFONTENCODING_ISO8859_10:
+      case wxFONTENCODING_ISO8859_12:
+      case wxFONTENCODING_ISO8859_13:
+      case wxFONTENCODING_ISO8859_14:
+      case wxFONTENCODING_ISO8859_15:
+
+      case wxFONTENCODING_CP1250:
+      case wxFONTENCODING_CP1252:
+      case wxFONTENCODING_CP1257:
+         enc2047 = Encoding_QuotedPrintable;
+         break;
+
+      case wxFONTENCODING_ISO8859_5:
+      case wxFONTENCODING_ISO8859_6:
+      case wxFONTENCODING_ISO8859_7:
+      case wxFONTENCODING_ISO8859_8:
+      case wxFONTENCODING_ISO8859_9:
+      case wxFONTENCODING_ISO8859_11:
+
+      case wxFONTENCODING_CP1251:
+      case wxFONTENCODING_CP1253:
+      case wxFONTENCODING_CP1254:
+      case wxFONTENCODING_CP1255:
+      case wxFONTENCODING_CP1256:
+
+      case wxFONTENCODING_KOI8:
+         enc2047 = Encoding_Base64;
+         break;
+
+      default:
+         FAIL_MSG( "unknown encoding" );
+
+      case wxFONTENCODING_SYSTEM:
+         enc2047 = Encoding_Unknown;
+         break;
+   }
+
+   String headerEnc;
+   if ( enc2047 == Encoding_Unknown )
+   {
+      // nothing to do
+      headerEnc = header;
+   }
+   else
+   {
+      unsigned long len; // length of the encoded text
+      unsigned char *text = (unsigned char *)header.c_str(); // cast for cclient
+      unsigned char *textEnc;
+      if ( enc2047 == Encoding_QuotedPrintable )
+      {
+            textEnc = rfc822_8bit(text, header.length(), &len);
+      }
+      else // Encoding_Base64
+      {
+            textEnc = rfc822_binary(text, header.length(), &len);
+            if ( textEnc[len - 2] == '\r' && textEnc[len - 1] == '\n' )
+            {
+               // discard eol
+               len -= 2;
+            }
+      }
+
+      // FIXME should we check that the length is not greater than 76 here or
+      //       does cclient take care of it?
+
+      // create a RFC 2047 encoded word
+      headerEnc << "=?" << EncodingToCharset(m_encHeaders)
+                << '?' << (char)enc2047 << '?'
+                << String(textEnc, (size_t)len)
+                << "?=";
+
+      fs_give((void **)&textEnc);
+   }
+
+   return headerEnc;
+}
+
+// unlike EncodeHeader(), we should only encode the personal name part of the
+// address headers
+String
+SendMessageCC::EncodeAddress(const String& addr)
+{
+   if ( m_encHeaders == wxFONTENCODING_SYSTEM )
+      return addr;
+
+   String name = Message::GetNameFromAddress(addr),
+          email = Message::GetEMailFromAddress(addr);
+
+   return EncodeHeader(name) + " <" + email + '>';
+}
+
+void
+SendMessageCC::EncodeAddressList(struct mail_address *adr)
+{
+   while ( adr )
+   {
+      if ( adr->personal )
+      {
+         char *tmp = adr->personal;
+         adr->personal = CPYSTR(EncodeHeader(tmp));
+
+         fs_give((void **)&tmp);
+      }
+
+      adr = adr->next;
+   }
+}
+
+void
 SendMessageCC::SetSubject(const String &subject)
 {
-   if(m_Envelope->subject) delete [] m_Envelope->subject;
-   m_Envelope->subject = CPYSTR(subject.c_str());
+   if(m_Envelope->subject) fs_give((void **)&m_Envelope->subject);
+
+   String subj = EncodeHeader(subject);
+   m_Envelope->subject = CPYSTR(subj.c_str());
 }
 
 void
@@ -142,11 +279,11 @@ SendMessageCC::SetFrom(const String & from,
                        const String & returnaddress)
 {
    if(from.Length())
-      m_FromAddress = from;
+      m_FromAddress = EncodeAddress(from);
    if(ipersonal.Length())
       m_FromPersonal = ipersonal;
    if(returnaddress.Length())
-      m_ReplyTo = returnaddress;
+      m_ReplyTo = EncodeAddress(returnaddress);
 }
 
 void
@@ -167,7 +304,7 @@ SendMessageCC::SetupAddresses(void)
    mailbox = strutil_before(email, '@');
    mailhost = strutil_after(email,'@');
 
-   m_Envelope->from->personal = CPYSTR(m_FromPersonal);
+   m_Envelope->from->personal = CPYSTR(EncodeHeader(m_FromPersonal));
    m_Envelope->from->mailbox = CPYSTR(mailbox);
    m_Envelope->from->host = CPYSTR(mailhost);
 
@@ -180,6 +317,8 @@ SendMessageCC::SetAddresses(const String &to,
                             const String &cc,
                             const String &bcc)
 {
+   // TODO should call EncodeHeader() on the name parts of the addresses!
+
    String
       tmpstr;
    char
@@ -194,30 +333,40 @@ SendMessageCC::SetAddresses(const String &to,
    if(to.Length())
    {
       ASSERT(m_Envelope->to == NIL);
-      tmpstr = to;   ExtractFccFolders(tmpstr);
+      tmpstr = to;
+      ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
       tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
       rfc822_parse_adrlist (&m_Envelope->to,tmp,tmp2);
-      delete [] tmp; delete [] tmp2;
+      delete [] tmp;
+      delete [] tmp2;
    }
    if(cc.Length())
    {
       ASSERT(m_Envelope->cc == NIL);
-      tmpstr = cc;   ExtractFccFolders(tmpstr);
+      tmpstr = cc;
+      ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
       tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
       rfc822_parse_adrlist (&m_Envelope->cc,tmp,tmp2);
-      delete [] tmp; delete [] tmp2;
+      delete [] tmp;
+      delete [] tmp2;
    }
    if(bcc.Length())
    {
       ASSERT(m_Envelope->bcc == NIL);
-      tmpstr = bcc;   ExtractFccFolders(tmpstr);
+      tmpstr = bcc;
+      ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
       tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
       rfc822_parse_adrlist (&m_Envelope->bcc,tmp,tmp2);
-      delete [] tmp; delete [] tmp2;
+      delete [] tmp;
+      delete [] tmp2;
    }
+
+   EncodeAddressList(m_Envelope->to);
+   EncodeAddressList(m_Envelope->cc);
+   EncodeAddressList(m_Envelope->bcc);
 }
 
 void
@@ -378,10 +527,10 @@ SendMessageCC::Build(void)
       m_headerNames[h] = strutil_strdup("X-Mailer");
       String version;
 #ifdef OS_UNIX
-      version << "Mahogany, " << M_VERSION_STRING << _(" , compiled for ") << M_OSINFO;
+      version << "Mahogany, " << M_VERSION_STRING << _(", compiled for ") << M_OSINFO;
 #else // Windows
       // TODO put Windows version info here
-      version << "Mahogany, " << M_VERSION_STRING << _(" , compiled for ") << "Windows";
+      version << "Mahogany, " << M_VERSION_STRING << _(", compiled for ") << "Windows";
 #endif // Unix/Windows
       m_headerValues[h++] = strutil_strdup(version);
    }
@@ -437,10 +586,11 @@ SendMessageCC::Build(void)
    strcpy (m_Envelope->date,tmpbuf);
 }
 
-void
-SendMessageCC::SetCharset(wxFontEncoding enc)
+String
+SendMessageCC::EncodingToCharset(wxFontEncoding enc)
 {
    // translate encoding to the charset
+   wxString cs;
    switch ( enc )
    {
       case wxFONTENCODING_ISO8859_1:
@@ -458,8 +608,7 @@ SendMessageCC::SetCharset(wxFontEncoding enc)
       case wxFONTENCODING_ISO8859_13:
       case wxFONTENCODING_ISO8859_14:
       case wxFONTENCODING_ISO8859_15:
-         m_CharSet.Printf("iso8859-%d",
-                          enc + 1 - wxFONTENCODING_ISO8859_1);
+         cs.Printf("iso-8859-%d", enc + 1 - wxFONTENCODING_ISO8859_1);
          break;
 
       case wxFONTENCODING_CP1250:
@@ -470,22 +619,22 @@ SendMessageCC::SetCharset(wxFontEncoding enc)
       case wxFONTENCODING_CP1255:
       case wxFONTENCODING_CP1256:
       case wxFONTENCODING_CP1257:
-         m_CharSet.Printf("windows-%d",
-                          1250 + enc - wxFONTENCODING_CP1250);
+         cs.Printf("windows-%d", 1250 + enc - wxFONTENCODING_CP1250);
          break;
 
       case wxFONTENCODING_KOI8:
-         m_CharSet = "koi8-r";
-         break;
-
-      case wxFONTENCODING_SYSTEM:
-         // use the default charset set in Create()
+         cs = "koi8-r";
          break;
 
       default:
          FAIL_MSG( "unknown encoding" );
-         m_CharSet = "us-ascii";
+
+      case wxFONTENCODING_SYSTEM:
+         // no special encoding
+         break;
    }
+
+   return cs;
 }
 
 void
@@ -573,7 +722,12 @@ SendMessageCC::AddPart(Message::ContentType type,
    // add the charset parameter to the param list
    if (type == TYPETEXT)
    {
-      SetCharset(enc);
+      String cs = EncodingToCharset(enc);
+      if ( !!cs )
+      {
+         // if an encoding is specified, it overrides the default value
+         m_CharSet = cs;
+      }
 
       if(m_CharSet.Length() != 0)
       {

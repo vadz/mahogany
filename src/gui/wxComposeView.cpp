@@ -1515,12 +1515,11 @@ void wxComposeView::DoClear()
                          &m_fg, &m_bg);
 
    // set the default encoding if any
-   wxFontEncoding enc = (wxFontEncoding)READ_CONFIG(m_Profile,
-                                                    MP_MSGVIEW_DEFAULT_ENCODING);
-   if ( enc != wxFONTENCODING_DEFAULT )
+   m_encoding = (wxFontEncoding)READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING);
+   if ( m_encoding != wxFONTENCODING_DEFAULT )
    {
-      CheckLanguageInMenu(this, enc);
-      m_LayoutWindow->GetLayoutList()->SetFontEncoding(enc);
+      CheckLanguageInMenu(this, m_encoding);
+      m_LayoutWindow->GetLayoutList()->SetFontEncoding(m_encoding);
    }
 
    ResetDirty();
@@ -2081,6 +2080,11 @@ wxComposeView::Send(bool schedule)
       break;
    }
 
+   if ( m_encoding != wxFONTENCODING_DEFAULT )
+   {
+      msg->SetHeaderEncoding(m_encoding);
+   }
+
    ASSERT(msg);
    while((exp = wxLayoutExport( &status,
                                    WXLO_EXPORT_AS_TEXT,
@@ -2230,8 +2234,6 @@ wxComposeView::Send(bool schedule)
          msg->SetNewsgroups(GetHeaderValue(Field_To));
          break;
    }
-
-   // TODO should encode the headers if they contain 8bit chars
 
    String from = GetHeaderValue(Field_From);
    if ( from && from != m_from )

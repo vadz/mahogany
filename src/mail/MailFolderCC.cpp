@@ -480,7 +480,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    else
       m_Profile = Profile::CreateEmptyProfile();
    UpdateConfig();
-   
+
    if(! cclientInitialisedFlag)
       CClientInit();
    Create(typeAndFlags);
@@ -573,7 +573,7 @@ static String GetImapSpec(int type, int flags,
       STATUSMESSAGE((_("Ignoring SSL authentication for folder '%s'"), name.c_str()));
    }
 
-   if( (flags & MF_FLAGS_SSLAUTH) != 0 
+   if( (flags & MF_FLAGS_SSLAUTH) != 0
        && ! InitSSL() )
 #else
    if( (flags & MF_FLAGS_SSLAUTH) != 0 )
@@ -1035,7 +1035,7 @@ MailFolderCC::Open(void)
 
       // apply filter rules to all new messages
       ApplyFilterRules(true);
-      
+
       PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
 
       return true;   // success
@@ -1179,7 +1179,7 @@ MailFolderCC::Ping(void)
       // This is terribly inefficient to do, but needed for some sick
       // POP3 servers.
       if( (m_FolderFlags & MF_FLAGS_REOPENONPING)
-          // c-client 4.7-bug: MH folders don't immediately notice new 
+          // c-client 4.7-bug: MH folders don't immediately notice new
           // messages:
           || GetType() == MF_MH)
       {
@@ -1311,7 +1311,7 @@ MailFolderCC::AppendMessage(String const &msg)
          // yet at this point
          m_LastNewMsgUId = m_MailStream->uid_last+1;
       }
-   	// triggers asserts:
+      // triggers asserts:
 #if 0
       /// apply filter rules to the new message, it might be moved
       /// somewhere straightaway
@@ -1431,7 +1431,7 @@ MailFolderCC::GetHeaders(void) const
 {
    if(m_ListingFrozen)
    {
-      ASSERT_MSG(m_Listing,"Debug assert - should be harmless"); 
+      ASSERT_MSG(m_Listing,"Debug assert - should be harmless");
       if(m_Listing) m_Listing->IncRef();
       return m_Listing;
    }
@@ -1582,7 +1582,7 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
       String msg;
       msg.Printf(_("Searching in %lu messages..."),
                  (unsigned long) m_nMessages);
-      { 
+      {
         MGuiLocker locker;
         progDlg = new MProgressDialog(GetName(),
                                     msg,
@@ -1832,7 +1832,7 @@ MailFolderCC::BuildListing(void)
    MEventManager::Suspend(true);
 
    m_BuildListingSemaphore = true;
-   
+
    if ( m_FirstListing )
    {
       // Hopefully this will only count really existing messages for
@@ -1876,7 +1876,7 @@ MailFolderCC::BuildListing(void)
 
       long nRetrieve;
       {
-	MGuiLocker locker;
+         MGuiLocker locker;
         nRetrieve = MGetNumberFromUser(msg, prompt, title,
                                             m_RetrievalLimit,
                                             1, m_nMessages);
@@ -1906,7 +1906,7 @@ MailFolderCC::BuildListing(void)
                                                 NULL,
                                                 false, true);// open a status window:
       }
-      
+
       // mail_fetch_overview() will now fill the m_Listing array with
       // info on the messages
       /* stream, sequence, header structure to fill */
@@ -1918,7 +1918,7 @@ MailFolderCC::BuildListing(void)
       else
          uid = m_nMessages;
 
-      
+
 /*      if ( numMessages != m_nMessages )
       {
       // the first one to retrieve
@@ -1937,13 +1937,13 @@ MailFolderCC::BuildListing(void)
          else
             sequence << ":*";
       }
-      
+
 */
       UIdType from, to;
       from = mail_uid(m_MailStream, uid);
       to = mail_uid(m_MailStream,m_nMessages);
       sequence = strutil_ultoa(from);
-      if(to != from) // don't produce sequences like "1:1" 
+      if(to != from) // don't produce sequences like "1:1"
       {
 /*         if( GetType() == MF_NNTP)
             sequence << '-' << strutil_ultoa(to);
@@ -1951,7 +1951,7 @@ MailFolderCC::BuildListing(void)
 */
          sequence << ":*";
       }
-      
+
       mail_fetch_overview_x(m_MailStream, (char *)sequence.c_str(), mm_overview_header);
       if ( m_ProgressDialog != (MProgressDialog *)1 )
       {
@@ -1959,7 +1959,7 @@ MailFolderCC::BuildListing(void)
          delete m_ProgressDialog;
       }
    }
-   
+
    // We set it to an illegal address here to suppress further updating. This
    // value is checked against in OverviewHeader(). The reason is that we only
    // want it the first time that the folder is being opened.
@@ -2062,10 +2062,10 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
 
       // FROM and TO
       entry.m_From = ParseAddress(ov->from);
-      if(m_folderType == MF_NNTP 
-	|| m_folderType == MF_NEWS)
+      if(m_folderType == MF_NNTP
+            || m_folderType == MF_NEWS)
       {
-	entry.m_To = ""; // no To: for news postings
+         entry.m_To = ""; // no To: for news postings
       }
       else
         entry.m_To = ParseAddress(ov->to);
@@ -2175,7 +2175,7 @@ MailFolderCC::CClientInit(void)
       LOGMESSAGE((M_LOG_ERROR, _("Cannot set signal handler for SIGPIPE.")));
    }
 #endif
-   
+
    cclientInitialisedFlag = true;
    ASSERT(gs_CCStreamCleaner == NULL);
    gs_CCStreamCleaner = new CCStreamCleaner();
@@ -2964,8 +2964,8 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
       )
    {
       String prompt;
-      prompt.Printf(_("Please enter the password for folder '%s':"), 
-                    mfolder->GetName().c_str()); 
+      prompt.Printf(_("Please enter the password for folder '%s':"),
+                    mfolder->GetName().c_str());
       if(! MInputBox(&password,
                      _("Password required"),
                      prompt, NULL,
@@ -3273,28 +3273,28 @@ SSL_DEF(SSL_METHOD *, SSLv23_client_method, (void) );
 #   endif
 
 #undef SSL_DEF
-   
+
 SSL     * SSL_new(SSL_CTX *ctx)
 { return (*stub_SSL_new)(ctx); }
-void	  SSL_free(SSL *ssl)
+void  SSL_free(SSL *ssl)
 { (*stub_SSL_free)(ssl); }
-int	  SSL_set_rfd(SSL *s, int fd)
+int  SSL_set_rfd(SSL *s, int fd)
 { return (*stub_SSL_set_rfd)(s,fd); }
-int	  SSL_set_wfd(SSL *s, int fd)
+int  SSL_set_wfd(SSL *s, int fd)
 { return (*stub_SSL_set_wfd)(s,fd); }
-void	  SSL_set_read_ahead(SSL *s, int yes)
-{ (*stub_SSL_set_read_ahead)(s,yes); } 
-int 	  SSL_connect(SSL *ssl)
+void  SSL_set_read_ahead(SSL *s, int yes)
+{ (*stub_SSL_set_read_ahead)(s,yes); }
+int   SSL_connect(SSL *ssl)
 { return (*stub_SSL_connect)(ssl); }
-int 	  SSL_read(SSL *ssl,char * buf, int num)
+int   SSL_read(SSL *ssl,char * buf, int num)
 { return (*stub_SSL_read)(ssl, buf, num); }
-int 	  SSL_write(SSL *ssl,const char *buf,int num)
+int   SSL_write(SSL *ssl,const char *buf,int num)
 { return (*stub_SSL_write)(ssl, buf, num); }
-int	  SSL_pending(SSL *s)
+int  SSL_pending(SSL *s)
 { return (*stub_SSL_pending)(s); }
 int       SSL_library_init(void )
 { return (*stub_SSL_library_init)(); }
-void	  SSL_load_error_strings(void )
+void  SSL_load_error_strings(void )
 { (*stub_SSL_load_error_strings)(); }
 SSL_CTX * SSL_CTX_new(SSL_METHOD *meth)
 { return (*stub_SSL_CTX_new)(meth); }
@@ -3349,7 +3349,7 @@ bool InitSSL(void) /* FIXME: MT */
    if(! success) return FALSE;
    wxDllType slldll = wxDllLoader::LoadLibrary(ssl_dll, &success);
    if(! success) return FALSE;
-   
+
    SSL_LOOKUP(SSL_new );
    SSL_LOOKUP(SSL_free );
    SSL_LOOKUP(SSL_set_rfd );
