@@ -35,7 +35,6 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "Mdefaults.h"
-
 #   include <wx/frame.h>                // for wxFrame
 #endif // USE_PCH
 
@@ -52,6 +51,11 @@
 #include "gui/wxMDialogs.h"             // for MProgressDialog
 
 #include <wx/regex.h>   // wxRegEx::Flags
+
+#ifdef USE_PYTHON
+#    include "MPython.h"	// Python fix for PyObject / presult
+#    include "PythonHelp.h"	// Python fix for PythonCallback
+#endif
 
 class MOption;
 
