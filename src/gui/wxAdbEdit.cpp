@@ -6,6 +6,9 @@
  * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.11  1998/08/11 15:44:29  KB
+ * minor fix
+ *
  * Revision 1.10  1998/07/12 15:05:27  KB
  * some fixes and ugly fix to work with std::string again
  *
@@ -134,7 +137,7 @@ class wxAdbEditPanel : public wxPanel
 {
 private:
    wxAdbEditFrame *frame;
-   wxText         *key;
+   wxTextCtrl         *key;
 
 public:
    wxAdbEditPanel(wxAdbEditFrame *frame, wxWindow *parent,
