@@ -1239,9 +1239,8 @@ msgid "Deactivate italics mode."
 msgstr "Kursiv ein-/ausschalten."
 
 #: wxlwindow.cpp:500 wxlwindow.cpp:724
-#, fuzzy
 msgid "&Roman"
-msgstr "&Roman"
+msgstr "&Römisch"
 
 #: wxlwindow.cpp:500 wxlwindow.cpp:724
 msgid "Switch to roman font."
@@ -1625,14 +1624,12 @@ msgid "Insert text file"
 msgstr "Textdatei einfügen"
 
 #: wxMenuDefs.cpp:271 wxMenuDefs.cpp:284
-#, fuzzy
 msgid "&Clear"
 msgstr "&Löschen"
 
 #: wxMenuDefs.cpp:271 wxMenuDefs.cpp:284
-#, fuzzy
 msgid "Delete message contents"
-msgstr "Nachricht löschen"
+msgstr "Nachrichteninhalt löschen"
 
 #: wxMenuDefs.cpp:273 wxMenuDefs.cpp:286 wxOptionsDlg.cpp:462
 #: wxOptionsDlg.cpp:466
@@ -1644,7 +1641,6 @@ msgid "Invoke alternative editor"
 msgstr "Aufrufen des externen Editors"
 
 #: AdbFrame.cpp:1066 wxMenuDefs.cpp:276 wxMenuDefs.cpp:289
-#, fuzzy
 msgid "&New..."
 msgstr "&Neu..."
 
@@ -2142,7 +2138,6 @@ msgid "&Autosave delay"
 msgstr "Speicher&intervall"
 
 #: wxOptionsDlg.cpp:472 wxOptionsDlg.cpp:476
-#, fuzzy
 msgid "Confirm &exit"
 msgstr "Programm&ende bestätigen"
 
@@ -2163,7 +2158,6 @@ msgid "&Path where to find AFM files"
 msgstr "Such&pfad für AFM Dateien"
 
 #: wxOptionsDlg.cpp:1046 wxOptionsDlg.cpp:1052
-#, fuzzy
 msgid "Compose"
 msgstr "Nachrichteneditor"
 
@@ -2209,7 +2203,6 @@ msgid "Folder '%s' is already present in the list, not added."
 msgstr "Mailbox '%s' ist bereits auf der Liste, nicht nocheinmal hinzugefügt."
 
 #: wxOptionsDlg.cpp:1353 wxOptionsDlg.cpp:1357
-#, fuzzy
 msgid "Program options"
 msgstr "Programmoptionen"
 
@@ -2315,9 +2308,8 @@ msgid "Folder '%s' deleted"
 msgstr "Mailbox '%s' gelöscht"
 
 #: wxFolderTree.cpp:751 wxFolderTree.cpp:754
-#, fuzzy
 msgid "Cannot open this folder."
-msgstr "Kann eingehende Mailbox '%s' nicht öffnen."
+msgstr "Kann diese Mailbox nicht öffnen."
 
 #: generic/persctrl.cpp:806 wxDialogLayout.cpp:373
 msgid "No"
@@ -2499,9 +2491,8 @@ msgid "Cannot access this folder without a password."
 msgstr "Kann diese Mailbox ohne Paßwort nicht öffnen."
 
 #: MailFolder.cpp:212
-#, fuzzy, c-format
 msgid "Cannot open folder '%s'."
-msgstr "Kann eingehende Mailbox '%s' nicht öffnen."
+msgstr "Kann Mailbox '%s' nicht öffnen."
 
 #: MailFolder.cpp:227
 #, c-format
@@ -2509,9 +2500,8 @@ msgid "Saving %d messages..."
 msgstr "Sichere %d Nachrichten..."
 
 #: MailFolder.cpp:302
-#, fuzzy
 msgid "Could not truncate the existing file."
-msgstr "Postscript Druckereinstellungen"
+msgstr "Konnte bestehende Datei nicht verkürzen."
 
 #: MailFolder.cpp:406
 msgid "re"
@@ -2555,9 +2545,8 @@ msgid "Re-opening closed folder '%s' failed."
 msgstr "Konnte Mailbox '%s' nicht wieder öffnen."
 
 #: MailFolderCC.cpp:436 MailFolderCC.cpp:438
-#, fuzzy, c-format
 msgid "Folder '%s' is alive."
-msgstr "Mailbox '%s' : "
+msgstr "Mailbox '%s' ist aktiv. "
 
 #: MailFolderCC.cpp:802 MailFolderCC.cpp:811
 #, c-format
@@ -2593,9 +2582,8 @@ msgid "Folder Log: "
 msgstr "Mailbox-Log:"
 
 #: MailFolderCC.cpp:1174 MailFolderCC.cpp:1185 MailFolderCC.cpp:1190
-#, fuzzy
 msgid ", error level: "
-msgstr " (Fehler %ld: %s)"
+msgstr ", Fehlergrad: "
 
 #: MailFolderCC.cpp:1188 MailFolderCC.cpp:1199 MailFolderCC.cpp:1204
 msgid "c-client debug: "
@@ -2626,14 +2614,12 @@ msgid "Article posted."
 msgstr "Artikel gesendet."
 
 #: SendMessageCC.cpp:507
-#, fuzzy, c-format
 msgid "Failed to send - %s"
 msgstr "Konnte Nachricht nicht senden - %s."
 
 #: SendMessageCC.cpp:508
-#, fuzzy
 msgid "unknown error"
-msgstr "unbekannt"
+msgstr "unbekannter Fehler"
 
 #: SendMessageCC.cpp:515
 msgid "Cannot open connection to any server"
@@ -2668,7 +2654,6 @@ msgid "&Title"
 msgstr "&Titel"
 
 #: AdbFrame.cpp:428
-#, fuzzy
 msgid "&Organization"
 msgstr "&Organisation"
 
@@ -2775,7 +2760,6 @@ msgid "The address book '%s' is already opened."
 msgstr "Das Adreßbuch '%s' ist bereits geöffnet."
 
 #: AdbFrame.cpp:1431
-#, fuzzy
 msgid "New entry creation cancelled."
 msgstr "Anlegen des neuen Eintrags abgebrochen."
 
@@ -2785,7 +2769,6 @@ msgid "%s '%s' already exists %s."
 msgstr "%s '%s' existiert bereits %s."
 
 #: AdbFrame.cpp:1457
-#, fuzzy, c-format
 msgid "Can't create %s named '%s' %s."
 msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
 
@@ -2799,14 +2782,12 @@ msgid "Address book"
 msgstr "Adreßbuch"
 
 #: AdbFrame.cpp:1496
-#, fuzzy, c-format
 msgid "Really delete the %s '%s'?"
 msgstr "%s '%s' wirklich löschen?"
 
 #: AdbFrame.cpp:1499
-#, fuzzy, c-format
 msgid "Cancelled: '%s' not deleted."
-msgstr "Mailbox '%s' gelöscht"
+msgstr "Abgebrochen: '%s' nicht gelöscht"
 
 #: AdbFrame.cpp:1515
 #, c-format
@@ -2891,7 +2872,6 @@ msgstr ""
 "diesem Namen existiert bereits."
 
 #: AdbFrame.cpp:1905
-#, fuzzy
 msgid "Cannot paste the clipboard contents here."
 msgstr "Kann den Inhalt der Zwischenablage hier nicht einfügen."
 
@@ -2914,11 +2894,9 @@ msgstr ""
 "'%s' hat keinen Eintrag oder Untergruppe '%s'"
 
 #: AdbFrame.cpp:2121
-#, fuzzy, c-format
 msgid "Entry '%s' cannot have subgroup/entry '%s'!"
 msgstr ""
-"Kein Eintrag '%s':\n"
-"'%s' hat keinen Eintrag oder Untergruppe '%s'"
+"Eintrag '%s' kann keine Untergruppe/Eintrag '%s' haben!"
 
 #: AdbFrame.cpp:2210
 msgid "Find address book entry"
@@ -3028,12 +3006,10 @@ msgid "No matches for '%s'."
 msgstr "Keine passenden Einträge für '%s'."
 
 #: AdbManager.cpp:355
-#, fuzzy, c-format
 msgid "Can't open the address book '%s'."
-msgstr "Geben Sie den Adreßbuchnamen an"
+msgstr "Kann Adreßbuchnamen '%s' nicht öffnen."
 
 #: ProvFC.cpp:342
-#, fuzzy, c-format
 msgid "Entry '%s' has too many fields, extra ones ignored."
 msgstr "Eintrag '%s' hat zu viele Felder, extra Felder ignoriert."
 
@@ -3128,47 +3104,40 @@ msgid ""
 msgstr ""
 
 #: wxMessageView.cpp:627
-#, fuzzy
 msgid "Find string in message"
-msgstr "Drucke Nachricht..."
+msgstr "Text in Nachricht suchen"
 
 #: wxMessageView.cpp:628
-#, fuzzy
 msgid "   Find:"
-msgstr "&Suchen"
+msgstr "   Suchen:"
 
 #: wxMenuDefs.cpp:239
-#, fuzzy
 msgid "C&ut"
 msgstr "&Ausschneiden"
 
 #: wxMenuDefs.cpp:239
 msgid "Cut selection and copy it to clipboard"
-msgstr ""
+msgstr "Markierten Text ausschneiden und in die Zwischenablage kopieren"
 
 #: wxMenuDefs.cpp:240
-#, fuzzy
 msgid "Copy selection to clipboard"
-msgstr "Konnte Nachricht nicht sichern."
+msgstr "Markierten Text in Zwischenablage kopieren"
 
 #: wxMenuDefs.cpp:241
 msgid "Paste from clipboard"
-msgstr "Einfügen"
+msgstr "Text aus der Zwischenablage einfügen"
 
 #: wxMenuDefs.cpp:274
-#, fuzzy
 msgid "F&ind..."
 msgstr "&Suchen..."
 
 #: wxMenuDefs.cpp:274
-#, fuzzy
 msgid "Find text in message"
-msgstr "Nachricht drucken"
+msgstr "Text in Nachricht suchen"
 
 #: wxOptionsDlg.cpp:357
-#, fuzzy
 msgid "Reply return address from &To: field"
-msgstr "Adreßbuch editieren"
+msgstr "Absenderadresse vom &An: Feld setzen"
 
 #: wxOptionsDlg.cpp:396
 msgid "&Automatically select first message in viewer"
