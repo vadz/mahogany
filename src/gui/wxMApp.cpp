@@ -1952,7 +1952,15 @@ void wxMApp::RecreateStatusBar()
    wxCOMPILE_TIME_ASSERT2( WXSIZEOF(s_statusWidths) == SF_MAXIMUM,
                            StatusWidthsNotInSync, MAppStatus );
 
-   CHECK_RET( m_topLevelFrame, _T("no top level frame to recreate status bar for") );
+   if ( !m_topLevelFrame )
+   {
+      // this may happen when we're shutting down, so just ignore it quietly in
+      // this case -- but complain loudly otherwise
+      ASSERT_MSG( IsShuttingDown(),
+                     _T("no top level frame to recreate status bar for") );
+
+      return;
+   }
 
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
    CHECK_RET( sbar, _T("no status bar to recreate?") );
