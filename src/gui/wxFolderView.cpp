@@ -1342,11 +1342,18 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
    // get some non NULL profile
    Profile_obj profile(m_FolderView->GetFolderProfile());
 
-   String name;
-   if ( !profile->GetName().
-            StartsWith(String(M_PROFILE_CONFIG_SECTION) + '/', &name) )
+   String name = profile->GetName();
+   if ( !name.StartsWith(String(M_PROFILE_CONFIG_SECTION) + '/', &name) )
    {
-      FAIL_MSG( "unexpected profile - what folder does it correspond to?" );
+      if ( name != M_PROFILE_CONFIG_SECTION )
+      {
+         FAIL_MSG( "unexpected profile - what folder does it correspond to?" );
+      }
+      else
+      {
+         // editing global settings
+         name.clear();
+      }
    }
 
    wxString menuTitle;
