@@ -402,7 +402,7 @@ solaris*|SunOS*)
     CCOSTYPE=sol
   fi
   ;;
-freebsd*)
+[fF]ree[bB][sS][dD]*)
   CCOSTYPE=bsf
   ;;
 OSF1*)
