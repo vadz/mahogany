@@ -37,8 +37,7 @@
 #include "adb/AdbImport.h"
 #include "adb/AdbImpExp.h"
 #include "MImport.h"
-
-#include "gui/wxFiltersDialog.h"
+#include "MFilter.h"
 
 // ----------------------------------------------------------------------------
 // the importer class
@@ -406,32 +405,12 @@ bool MXFMailImporter::ImportFilters()
    wxTextFile file(filename);
    if ( !file.Open() )
    {
-      wxLogError(_("Failed to open %s filter rules file."),"XFMail");
+      wxLogError(_("Failed to open %s filter rules file."), "XFMail");
 
       return FALSE;
    }
 
-   // find the profile where we will store our rules: as we want them to apply
-   // to all incoming messages, create them under "New Mail"
-
-   wxString newmail = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
-   if ( !newmail )
-      newmail = "INBOX";
-   newmail += "/Filters";
-   Profile *profileNewMailFilters = Profile::CreateProfile(newmail);
-
-   // find the first "unused" filter number
    size_t nFilter = 0;
-   for ( ;; )
-   {
-      if ( !profileNewMailFilters->HasGroup(wxString::Format("%u", nFilter)) )
-         break;
-
-      nFilter++;
-   }
-
-   size_t nFilterFirst = nFilter;
-
    size_t nLines = file.GetLineCount();
    for ( size_t nLine = 0; nLine < nLines; nLine++ )
    {
@@ -519,13 +498,13 @@ typedef struct _xf_rule {
          "To",
          "Sender"
       };
-      ORC_Where_Enum where = ORC_W_Invalid;
+      MFDialogTarget where = ORC_W_Invalid;
       wxASSERT_MSG( WXSIZEOF(headers) == ORC_W_Max, "should be in sync" );
       for ( size_t n = 0; n < ORC_W_Max; n++ )
       {
          if ( fmatch == headers[n] )
          {
-            where = (ORC_Where_Enum)n;
+            where = (MFDialogTarget)n;
 
             break;
          }
@@ -539,7 +518,7 @@ typedef struct _xf_rule {
          continue;
       }
 
-      OAC_Types_Enum what = OAC_T_Invalid;
+      MFDialogAction what = OAC_T_Invalid;
       switch ( action )
       {
          case R_DISCARD:
@@ -560,28 +539,20 @@ typedef struct _xf_rule {
       }
 
       // now create our rule from this data
-      wxString filterName = wxString::Format("%u", nFilter++);
-      Profile *profile = Profile::CreateProfile(filterName,
-                                                        profileNewMailFilters);
-      wxString program;
-      SaveSimpleFilter(
-                       profile,
-                       name,
-                       ORC_T_MatchRegEx,
-                       where,
-                       tmatch,
-                       what,
-                       data,
-                       &program
-                      );
-      profile->DecRef();
+      MFilter_obj filter(name);
+      MFilterDesc fd;
+      MFDialogSettings *settings = MFDialogSettings::Create();
+      fd.SetName(name);
+      settings->AddTest(ORC_L_None, false, ORC_T_MatchRegEx, where, tmatch);
+      settings->SetAction(what, data);
+      fd.Set(settings);
+      filter->Set(fd);
 
-      wxLogVerbose(_("Imported %s filter rule '%s'."), "XFMail", program.c_str());
+      nFilter++;
+
+      wxLogVerbose(_("Imported %s filter rule '%s'."), "XFMail", name.c_str());
    }
 
-   profileNewMailFilters->DecRef();
-
-   nFilter -= nFilterFirst;
    if ( !nFilter )
    {
       wxLogMessage(_("No filters were imported."));
