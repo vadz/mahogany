@@ -373,12 +373,20 @@ wxLayoutWindow::InternalPaint(void)
    if(m_BGbitmap)
    {
       CoordType
-         y, x,
          w = m_BGbitmap->GetWidth(),
          h = m_BGbitmap->GetHeight();
-      for(y = 0; y < y1; y+=h)
-         for(x = 0; x < x1; x+=w)
-            m_memDC->DrawBitmap(*m_BGbitmap, x, y);
+
+      if ( w == 0 || h == 0 )
+      {
+         // this does happen if bmp is invalid - don't enter infinite loop!
+         FAIL_MSG("invalid background bitmap");
+      }
+      else
+      {
+         for ( CoordType y = 0; y < y1; y += h )
+            for ( CoordType x = 0; x < x1; x += w )
+               m_memDC->DrawBitmap(*m_BGbitmap, x, y);
+      }
    }
    else
       m_memDC->DrawRectangle(0,0,x1, y1);

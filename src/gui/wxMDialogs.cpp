@@ -62,12 +62,14 @@
 #include "gui/wxDialogLayout.h"
 
 #ifdef    OS_WIN
-#  define mahogany   "Micon"
+#  define mahogany   "mahogany"
 #  define background "background"
 #else   //real XPMs
 #  include "../src/icons/background.xpm"
 #  include "../src/icons/mahogany.xpm"
-#  include "../src/icons/pythonpower.xpm"
+#  ifdef USE_PYTHON
+#     include "../src/icons/pythonpower.xpm"
+#  endif // USE_PYTHON
 #endif  //Win/Unix
 
 // ----------------------------------------------------------------------------
@@ -714,12 +716,8 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
    wxLayoutList *ll = GetLayoutList();
-#ifdef OS_UNIX
    wxBitmap *bm = new wxBitmap(background);
    SetBackgroundBitmap(bm);
-#else // Win
-   // TODO
-#endif // Unix/Win
 
    wxColour col("yellow");
    Clear(wxROMAN, 30, (int)wxNORMAL, (int)wxBOLD, FALSE, &col);
@@ -768,7 +766,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll->LineBreak();
    ll->Insert("                 ");
    ll->Insert(new wxLayoutObjectIcon(wxIcon(pythonpower)));
-#endif
+#endif // Python
    
    DoPaint();
    ResizeScrollbars(true); // let them disappear

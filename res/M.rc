@@ -17,7 +17,14 @@
 // main program icon
 // must be _alphabetically_ first to be the program icon by default!
 aaa		ICON	"Micon.ico"
+
+// global icons
 Micon		ICON	"Micon.ico"
+mahogany	BITMAP	"mahogany.bmp"
+#ifdef USE_PYTHON
+pythonopower	BITMAP	"pythonpower.bmp"
+#endif
+background	BITMAP	"background.bmp"
 
 // frame icons (32x32)
 MFrame		ICON	"mframe.ico"
@@ -77,9 +84,12 @@ work		BITMAP "work.bmp"
 ident		BITMAP "ident.bmp"
 compose		BITMAP "compose.bmp"
 folders		BITMAP "folders.bmp"
+#ifdef USE_PYTHON
 python		BITMAP "python.bmp"
+#endif
 adrbook		BITMAP "adrbook.bmp"
 helpers		BITMAP "helpers.bmp"
+msgview		BITMAP "msgview.bmp"
 miscopt		BITMAP "miscopt.bmp"
 access		BITMAP "access.bmp"
 
