@@ -1798,12 +1798,14 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
 }
 
 void
-wxLayoutList::Clear(int family, int size, int style, int weight,
-                    int underline, wxColour *fg, wxColour *bg)
+wxLayoutList::Clear(
+   int family, int size, int style, int weight,
+   int underline, wxColour *fg, wxColour *bg,
+   wxFontEncoding encoding)
 {
    InternalClear();
    m_DefaultStyleInfo = wxLayoutStyleInfo(family, size, style, weight,
-                                        underline, fg, bg);
+                                        underline, fg, bg, enc);
    m_CurrentStyleInfo = m_DefaultStyleInfo;
 
    // Empty() should be called after we set m_DefaultStyleInfo because
