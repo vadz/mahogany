@@ -363,7 +363,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
    { gettext_noop("Co&llapse reply markers"
-                  ":no:squeeze:count"),            Field_Combo,   -1,                        },
+                  ":no:collapse:collapse & count"),            Field_Combo,   -1,                        },
    { gettext_noop("Reply &character"),             Field_Text,    -1,                        },
 
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
