@@ -69,7 +69,9 @@ public:
       /// use this with AND to obtain pure type
       MF_TYPEMASK = 255,
       /// from here on it's flags
-      MF_FLAGS = 256
+      MF_FLAGS = 256,  // this doesn't make much sense
+      /// use anonymous access
+      MF_FLAGS_ANON = 0x100
    };
 
    /// what's the status of a given message in the folder?
