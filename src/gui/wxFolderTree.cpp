@@ -1398,6 +1398,22 @@ void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
    if ( !GetParent() )
    {
       // never change the status of the root folder
+
+      // but update the main frame icon depending on whether we have any new
+      // messages or not
+      if ( statusOld == Folder_New ||
+               statusNew == Folder_New )
+      {
+         wxMFrame *frame = mApplication->TopLevelFrame();
+         if ( frame )
+         {
+            wxIcon icon(ICON(statusNew == Folder_New ? _T("MainFrameNewMail")
+                                                     : _T("MainFrame")));
+            frame->SetIcon(icon);
+         }
+         //else: we can get this during startup, before the frame exists yet
+      }
+
       return;
    }
 
