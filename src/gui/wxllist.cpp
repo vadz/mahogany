@@ -2289,7 +2289,7 @@ wxLayoutList::Delete(CoordType npos)
 #else
             DeleteLines(1);
 #endif
-
+            wasMerged = true;
             left--;
          }
          else
