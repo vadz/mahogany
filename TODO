@@ -91,7 +91,8 @@ $Id$
 		whole page
 3	VZ	edit existing custom headers, remove them &c (from "Compose" options
 		page probably?
-
+2		different icon for activity log frame
+2	VZ?	make activity log frame appear on demand only
 *********************************************************************
 *** TESTS
 *********************************************************************

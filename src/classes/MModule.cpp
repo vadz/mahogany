@@ -16,12 +16,13 @@
 #include "Mconfig.h"
 #include "Mcommon.h"
 #include "MModule.h"
+#include "MApplication.h"
 
 #include "Mversion.h"
 #include "kbList.h"
 
 #include <wx/dynlib.h>
-
+#include <wx/utils.h>
 
 // ----------------------------------------------------------------------------
 // Implementation of the MInterface 
@@ -71,11 +72,14 @@ public:
 
 private:
    MModuleImpl(wxDllType dll);
-private:
+   ~MModuleImpl();
    MModule_GetNameFuncType m_GetName;
    MModule_GetDescriptionFuncType m_GetDescription;
    MModule_GetVersionFuncType m_GetVersion;
    MModule_GetMVersionFuncType m_GetMVersion;
+   wxDllType m_Dll;
+
+   GCC_DTOR_WARN_OFF();
 };
 
 
@@ -103,6 +107,7 @@ MModuleImpl::Create(wxDllType dll)
 
 MModuleImpl::MModuleImpl(wxDllType dll)
 {
+   m_Dll = dll;
    m_GetName = (MModule_GetNameFuncType)
       wxDllLoader::GetSymbol(dll, "GetName"); ;
    m_GetDescription  = (MModule_GetDescriptionFuncType)
@@ -112,6 +117,12 @@ MModuleImpl::MModuleImpl(wxDllType dll)
    m_GetMVersion = (MModule_GetMVersionFuncType)
       wxDllLoader::GetSymbol(dll, "GetMVersion"); 
 }
+
+MModuleImpl::~MModuleImpl()
+{
+   wxDllLoader::UnloadLibrary(m_Dll);
+}
+
 
 /// A list of all loaded modules.
 KBLIST_DEFINE(ModuleList, ModuleEntry);
@@ -132,14 +143,34 @@ MModule *FindModule(const String & name)
 }
 
 
+static
+MModule *LoadModuleInternal(const String & name)
+{
+   // No, load it:
+   bool success = false;
+   wxDllType dll = wxDllLoader::LoadLibrary(name, &success);
+   if(! success) return NULL;
+
+   MModule *module = MModuleImpl::Create(dll);
+   if(module)
+   {
+      ModuleEntry *me = new ModuleEntry;
+      me->m_Name = name;
+      me->m_Module = module;
+      gs_ModuleList.push_back(module);
+   }
+   else
+      wxDllLoader::UnloadLibrary(dll);
+   return module;
+}
+
+
 /* static */
 MModule *
 MModule::LoadModule(const String & name)
 {
-
    // Check if it's already loaded:
    MModule *module = FindModule(name);
-
    if(module)
    {
       // Yes, just return it:
@@ -148,24 +179,46 @@ MModule::LoadModule(const String & name)
    }
    else
    {
-      // No, load it:
-      bool success = false;
-      wxDllType dll = wxDllLoader::LoadLibrary(name, &success);
-      if(! success) return NULL;
+      const int nDirs = 3;
+      wxString
+         pathname,
+         dirs[nDirs];
 
-      module = MModuleImpl::Create(dll);
-      if(module)
+      /* We search for modules in three places:
+      Global directory:
+      prefix/share/Mahogany/CANONICAL_HOST/modules/
+      Local:
+      $HOME/.M/CANONICAL_HOST/modules/
+      $HOME/.M/modules/
+   */
+      dirs[0] = mApplication->GetGlobalDir();
+      dirs[0] << DIR_SEPARATOR << M_CANONICAL_HOST
+              << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+      dirs[1] = mApplication->GetLocalDir();
+      dirs[1] << DIR_SEPARATOR << M_CANONICAL_HOST
+              << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+      dirs[2] = mApplication->GetLocalDir();
+      dirs[2] << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+
+#if defined( OS_WIN )
+      const wxString moduleExt = ".dll";
+#elif defined( OS_UNIX )
+      const wxString moduleExt = ".so" ;
+#else
+#   error   "No DLL extension known on this platform."
+#endif
+
+      for(int i = 0; i < nDirs && ! module; i++)
       {
-         ModuleEntry *me = new ModuleEntry;
-         me->m_Name = name;
-         me->m_Module = module;
-         gs_ModuleList.push_back(module);
+         pathname = dirs[i];
+         pathname << name << moduleExt;
+         if(wxFileExists(pathname))
+            module = LoadModuleInternal(pathname);
       }
-      else
-         wxDllLoader::UnloadLibrary(dll);
       return module;
    }
 }
+
 
 /** Function to resolve main program symbols from modules.
  */

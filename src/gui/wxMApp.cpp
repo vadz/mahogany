@@ -646,44 +646,18 @@ wxMApp::Help(int id, wxWindow *parent)
 void
 wxMApp::LoadModules(void)
 {
-   wxString
-      pathname,
-      globalDir,
-      localDir;
    char *modulestring;
    kbStringList modules;
    kbStringList::iterator i;
-   MModule *module;
 
-#if defined( OS_WIN )
-   const wxString moduleExt = ".dll";
-#elif defined( OS_UNIX )
-   const wxString moduleExt = ".so" ;
-#else
-#   error   "No DLL extension known on this platform."
-#endif
-      
    modulestring = strutil_strdup(READ_APPCONFIG(MP_MODULES));
    strutil_tokenise(modulestring, ":", modules);
    delete [] modulestring;
    
-   globalDir = GetGlobalDir();
-   globalDir << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-   localDir = GetLocalDir();
-   localDir << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-   
+   MModule *module;
    for(i = modules.begin(); i != modules.end(); i++)
    {
-      pathname = globalDir + **i + moduleExt;
-      module = NULL;
-      if(wxFileExists(pathname))
-         module = MModule::LoadModule(pathname);
-      else
-      {
-         pathname = localDir + **i + moduleExt; 
-         if(wxFileExists(pathname))
-            module = MModule::LoadModule(pathname);
-      }
+      module = MModule::LoadModule(**i);
       if(module == NULL)
          ERRORMESSAGE((_("Cannot load module '%s'."),
                        (**i).c_str()));

@@ -14,6 +14,8 @@
 /// separating directories in a search path
 #define	PATH_SEPARATOR	';'
 
+/// not defined by makefile
+#define M_CANONICAL_HOST   ""
 #define IsAbsPath(path) wxIsAbsolutePath(path)
 
 #endif

@@ -30,7 +30,8 @@ clean:
 	$(RM) *.o *.so *.lo
 
 install:
-	 $(INSTALL_PROGRAM) $(TARGETS) $(MODULEDIR)
+	$(INSTALL) -d $(MODULEDIR)
+	$(INSTALL_PROGRAM) $(TARGETS) $(MODULEDIR)
 
 .PHONY: clean
 
