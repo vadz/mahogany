@@ -2287,7 +2287,9 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    bool isGroup = m_isGroup->GetValue();
    bool canBeOpened = m_canBeOpened->GetValue();
 
+   // some flags are not set from here, keep their existing value
    int flags = 0;
+
    if ( m_keepOpen->IsEnabled() && m_keepOpen->GetValue() )
       flags |= MF_FLAGS_KEEPOPEN;
    if ( m_forceReOpen->GetValue() )
@@ -2406,6 +2408,14 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    String fullname = folder->GetFullName();
    m_profile->DecRef();
    m_profile = Profile::CreateProfile(fullname);
+
+   // some flags are not set from here, keep their existing value
+   flags |= GetFolderFlags(READ_CONFIG(m_profile, MP_FOLDER_TYPE)) &
+                  (MF_FLAGS_UNACCESSIBLE  |
+                   MF_FLAGS_NEWMAILFOLDER |
+                   MF_FLAGS_DONTDELETE    |
+                   MF_FLAGS_INCOMING      |
+                   MF_FLAGS_MONITOR);
 
    // common for all folders: remember the login info for the folders for which
    // it makes sense or for folder groups (for which we always remember
