@@ -429,7 +429,12 @@ void TextViewerWindow::OnLinkEvent(wxTextUrlEvent& event)
 void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
 {
    long pos;
+#if defined(__WXMSW__) || defined(__WXGTK20__)
    wxTextCtrlHitTestResult rc = HitTest(event.GetPosition(), &pos);
+#else
+   rc = wxTE_HT_ON_TEXT;
+   pos = GetInsertionPoint();
+#endif
 
    if ( rc != wxTE_HT_ON_TEXT || !ProcessMouseEvent(event, pos) )
    {
