@@ -34,7 +34,14 @@
 
 #include "MPython.h"
 
-#include   "Mdefaults.h"
+#include "Mdefaults.h"
+
+extern "C"
+{
+   struct swig_type_info;
+   extern swig_type_info *SWIG_TypeQuery(const char *);
+   extern PyObject *SWIG_NewPointerObj(void *, swig_type_info *, int);
+}
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -221,7 +228,9 @@ PyH_CallFunction(const char *func,
          else // ok
          {
             // now build object reference argument:
-            PyObject *object = PyH_makeObjectFromPointer(obj, classname);
+            String ptrCls(classname);
+            ptrCls += _T(" *");
+            PyObject *object = SWIG_NewPointerObj(obj, SWIG_TypeQuery(ptrCls), 0);
 
             // and do call the function
             if ( parg )
@@ -251,6 +260,7 @@ PyH_CallFunction(const char *func,
    return false;
 }
 
+#if 0
 bool PyH_CallFunctionVa(const char *func,
                       const char *name,
                       void *obj, const char *classname,
@@ -304,7 +314,7 @@ bool PyH_CallFunctionVa(const char *func,
    // expr val to C
    return PyH_ConvertResult(presult, resultfmt, result) != 0;
 }
-
+#endif // 0
 
 PyObject *
 PyH_LoadModule(const char *modname)            /* returns module object */
