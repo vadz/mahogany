@@ -341,6 +341,9 @@
 #define   MP_AUTOCOLLECT_ADB     "AutoCollectAdb"
 /// Autocollect entries with names only?
 #define   MP_AUTOCOLLECT_NAMED "AutoCollectNamed"
+/// Use substrings in address expansion?
+#define   MP_ADB_SUBSTRINGEXPANSION   "ExpandWithSubstring"
+
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
 //@{
@@ -647,6 +650,8 @@
 #define   MP_AUTOCOLLECT_ADB_D    "autocollect.adb"
 /// Autocollect entries with names only?
 #define   MP_AUTOCOLLECT_NAMED_D 0l
+/// Use substrings in address expansion?
+#define   MP_ADB_SUBSTRINGEXPANSION_D 1l
 
 /** @name for folder list ctrls: ratios of the width to use for
     columns */

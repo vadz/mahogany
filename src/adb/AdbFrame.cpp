@@ -2228,7 +2228,7 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   (void)new wxStaticBox(this, -1, "&How", wxPoint(x, y),
                         wxSize(widthBox, 3*heightLabel));
   y += heightLabel + LAYOUT_Y_MARGIN;
-  m_checkCase = new wxCheckBox(this, -1, "&Case senstivie",
+  m_checkCase = new wxCheckBox(this, -1, "&Case sensitive",
                                wxPoint(x + LAYOUT_X_MARGIN, y),
                                wxSize(widthChk, heightLabel));
   m_checkSub = new wxCheckBox(this, -1, "&Substring search",

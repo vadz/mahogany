@@ -144,7 +144,8 @@ bool AdbLookup(ArrayAdbEntries& aEntries,
   return AdbLookupForEntriesOrGroups(aEntries, what, where, how, paBooks);
 }
 
-bool AdbExpand(wxArrayString& results, const String& what, wxFrame *frame)
+bool AdbExpand(wxArrayString& results, const String& what,
+               int how, wxFrame *frame)
 {
   AdbManager_obj manager;
   CHECK( manager, FALSE, "can't expand address: no AdbManager" );
@@ -165,7 +166,7 @@ bool AdbExpand(wxArrayString& results, const String& what, wxFrame *frame)
   ArrayAdbEntries aEntries;
 
   if ( AdbLookupForEntriesOrGroups(aEntries, what, lookupMode,
-                                   AdbLookup_StartsWith, NULL, &aGroups ) ) {
+                                   how, NULL, &aGroups ) ) {
     // merge both arrays into one big one: notice that the order is important,
     // the groups should come first (see below)
     ArrayAdbElements aEverything;

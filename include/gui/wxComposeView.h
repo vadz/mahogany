@@ -165,6 +165,8 @@ public:
    // for wxAddressTextCtrl usage
    void SetLastAddressEntry(AddressField field) { m_fieldLast = field; }
 
+   /// for wxAddressTextCtrl usage:
+   ProfileBase *GetProfile(void) const { return m_Profile; }
 protected:
    // helpers
    // -------

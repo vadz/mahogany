@@ -20,7 +20,14 @@ $Id$
   wxComposeView.
 
 - IMAP progress updates don't appear because there is too much to be
-  done in wxYield()?xvv
+  done in wxYield()?
+
+- If mail is from efax.com and contains an application/octet-stream,
+  use tiff2ps and ghostview to generate an application/postscript
+  instead. (Just convert the type to image/tiff-g3 and implement our
+  own handler for that.)
+  EFAX now sends image/tiff!
+  Configurable! Options for tiff2ps!
 
 - do not redraw messageview if the message is the one currently being
   shown
@@ -118,8 +125,6 @@ $Id$
 
 
 - ADB:
-  - ADB: does not use substring??? (Joen_Doe doe no expansion for
-    "doe" or "Doe")
   - ADB lookups take to long, delay in switching between messages, add a 
     "message/collect address" menu and keyboard binding
   + make AdbEdit auto-generate a formatted name from first/family-name

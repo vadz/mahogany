@@ -173,6 +173,10 @@ public:
       m_composeView = composeView;
       m_id = id;
       m_lastWasTab = FALSE;
+      m_lookupMode = (READ_CONFIG(m_composeView->GetProfile(),
+                                  MP_ADB_SUBSTRINGEXPANSION) ) ?
+         AdbLookup_Substring : AdbLookup_StartsWith;
+      
    }
 
    // expand the text in the control using the address book(s): returns FALSE
@@ -194,7 +198,7 @@ private:
    wxComposeView::AddressField m_id;
 
    bool m_lastWasTab;
-
+   int  m_lookupMode;
    DECLARE_EVENT_TABLE()
 };
 
@@ -345,7 +349,7 @@ bool wxAddressTextCtrl::DoExpand()
    }
 
    wxArrayString expansions;
-   if ( AdbExpand(expansions, text.c_str() + nLastAddr, m_composeView) )
+   if ( AdbExpand(expansions, text.c_str() + nLastAddr, m_lookupMode, m_composeView) )
    {
       // find the end of the previous address
       size_t nPrevAddrEnd;

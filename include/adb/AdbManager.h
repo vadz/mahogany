@@ -173,6 +173,7 @@ extern bool AdbLookup(ArrayAdbEntries& aEntries,
 
   @param results is the array filled with the expanded addresses
   @param what is the string to look for
+  @param how AdbLookup_ value to tell it how to look up the name
   @param frame is used as parent for possible dialog boxes and also to log
          status messages (may be NULL)
 
@@ -181,6 +182,7 @@ extern bool AdbLookup(ArrayAdbEntries& aEntries,
 class wxFrame;
 extern bool AdbExpand(wxArrayString& results,
                       const String& what,
+                      int how,
                       wxFrame *frame);
 
 #endif  //_ADBMANAGER_H

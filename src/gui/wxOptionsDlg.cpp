@@ -90,7 +90,8 @@ enum ConfigFields
    ConfigField_SignatureSeparator,
    ConfigField_XFace,
    ConfigField_XFaceFile,
-   ConfigField_ComposeLast = ConfigField_XFaceFile,
+   ConfigField_AdbSubstring,
+   ConfigField_ComposeLast = ConfigField_AdbSubstring,
 
    // folders
    ConfigField_FoldersFirst = ConfigField_ComposeLast,
@@ -299,7 +300,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Show &BCC field"),              Field_Bool,    -1,                        },
    { gettext_noop("BCC field d&efault value"),             Field_Text,    ConfigField_ShowBCC        },
 
-   { gettext_noop("Sa&ve sent mesasges"), Field_Bool,    -1,                        },
+   { gettext_noop("Sa&ve sent messages"), Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),   Field_File,    ConfigField_UseOutgoingFolder        },
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
    { gettext_noop("&Reply character"),             Field_Text,    -1,                        },
@@ -309,6 +310,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
    { gettext_noop("Us&e XFace"),                   Field_Bool,    -1,                        },
    { gettext_noop("&XFace file"),                  Field_File,    ConfigField_XFace          },
+   { gettext_noop("Mail alias substring ex&pansion"),Field_Bool,    -1,                        },
 
    // folders
    { gettext_noop("Folders to open on &startup"),  Field_List |
@@ -411,7 +413,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
    CONFIG_ENTRY(MP_COMPOSE_USE_XFACE),
    CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),
-
+   CONFIG_ENTRY(MP_ADB_SUBSTRINGEXPANSION),
    // folders
    CONFIG_ENTRY(MP_OPENFOLDERS),
    CONFIG_ENTRY(MP_MAINFOLDER),
