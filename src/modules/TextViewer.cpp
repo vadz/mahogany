@@ -432,7 +432,7 @@ void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
 #if defined(__WXMSW__) || defined(__WXGTK20__)
    wxTextCtrlHitTestResult rc = HitTest(event.GetPosition(), &pos);
 #else
-   rc = wxTE_HT_ON_TEXT;
+   wxTextCtrlHitTestResult rc = wxTE_HT_ON_TEXT;
    pos = GetInsertionPoint();
 #endif
 
