@@ -740,14 +740,14 @@ MAppBase::OnMEvent(MEventData& event)
                              GetProfile()))
 #endif //USE_PYTHON
          {
-            if(READ_CONFIG(GetProfile(), MP_SHOW_NEWMAILMSG))
+            if(READ_CONFIG(folder->GetProfile(), MP_SHOW_NEWMAILMSG))
             {
                String message;
 
                unsigned long number = mailevent.GetNumber();
                unsigned i;
                unsigned found = 0;
-               if ( number <= (unsigned long) READ_CONFIG(GetProfile(),
+               if ( number <= (unsigned long) READ_CONFIG(folder->GetProfile(),
                                                           MP_SHOW_NEWMAILINFO))
                {
                   for(i = 0; i < number; i++)

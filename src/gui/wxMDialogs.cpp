@@ -2190,8 +2190,7 @@ public:
          {
             Profile *p=mApplication->GetProfile();
             Profile_obj profile(folderName);
-            if(profile->HasEntry(keys[idx])) // don't work on
-               // inherited ones
+            if(profile->HasEntry(keys[idx])) // don't work on inherited ones
             {
                wxString val = profile->readEntry(keys[idx], "");
                if(val != "")
