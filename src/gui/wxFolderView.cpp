@@ -4537,6 +4537,7 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
       case WXK_DOWN:
       case WXK_HOME:
       case WXK_END:
+      case ' ':
          // let the control process these keys as they're used for navigation
          event.Skip();
          return false;
