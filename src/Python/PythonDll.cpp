@@ -66,7 +66,9 @@ inline String GetDllName(const String& basename)
 extern "C"
 {
    PyObject* (*M_Py_VaBuildValue)(char *, va_list) = NULL;
+#ifdef Py_TRACE_REFS
    void (*M__Py_Dealloc)(PyObject *) = NULL;
+#endif // Py_TRACE_REFS
    void (*M_PyErr_Fetch)(PyObject **, PyObject **, PyObject **) = NULL;
    void (*M_PyErr_Restore)(PyObject *, PyObject *, PyObject *) = NULL;
    void (*M_PyErr_Print)(void) = NULL;
@@ -120,7 +122,9 @@ extern "C"
    PyObject *(*M_PyString_InternFromString)(const char *) = NULL;
 
    // variables
+#ifdef Py_REF_DEBUG
    long M__Py_RefTotal = 0;
+#endif // Py_REF_DEBUG
    PyTypeObject *M_PyModule_Type = NULL;
    PyObject* M__Py_NoneStruct = NULL;
 
@@ -148,9 +152,13 @@ static struct
 #endif
    { "Py_BuildValue", (PYTHON_PROC *)&M_Py_BuildValue },
    { "Py_VaBuildValue", (PYTHON_PROC *)&M_Py_VaBuildValue },
+#ifdef Py_REF_DEBUG
    { "_Py_RefTotal", (PYTHON_PROC *)&M__Py_RefTotal },
+#endif // Py_REF_DEBUG
    { "PyModule_Type", (PYTHON_PROC *)&M_PyModule_Type },
+#ifdef Py_TRACE_REFS
    { "_Py_Dealloc", (PYTHON_PROC *)&M__Py_Dealloc },
+#endif // Py_TRACE_REFS
    { "PyErr_Fetch", (PYTHON_PROC *)&M_PyErr_Fetch },
    { "PyErr_Restore", (PYTHON_PROC *)&M_PyErr_Restore },
    { "PyErr_Print", (PYTHON_PROC *)&M_PyErr_Print },
