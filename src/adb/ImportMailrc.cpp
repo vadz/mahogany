@@ -1,0 +1,312 @@
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M
+// File name:   adb/ImportMailrc.cpp - import ADB data from .mailrc file
+// Purpose:     many Unix utilities lookup the address in the .mailrc file
+//              usually found in the users home directory
+// Author:      Vadim Zeitlin
+// Modified by:
+// Created:     07.07.99
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
+#include "Mpch.h"
+
+#ifndef USE_PCH
+   #include "Mcommon.h"
+
+   #include <wx/log.h>
+   #include <wx/dynarray.h>
+#endif // USE_PCH
+
+#include <wx/textfile.h>
+#include <wx/utils.h>
+
+#include "adb/AdbEntry.h"
+#include "adb/AdbImport.h"
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+static const size_t lenAlias = 5;   // strlen("alias")
+
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+class AdbMailrcImporter : public AdbImporter
+{
+public:
+   // implement base class pure virtuals
+   virtual bool CanImport(const String& filename);
+   virtual bool StartImport(const String& filename);
+   virtual size_t GetEntryNames(const String& path,
+                                wxArrayString& entries) const;
+   virtual size_t GetGroupNames(const String& path,
+                                wxArrayString& groups) const;
+   virtual bool ImportEntry(const String& path,
+                            size_t index,
+                            AdbEntry *entry);
+
+   DECLARE_ADB_IMPORTER();
+
+protected:
+   // parses one .mailrc line, returns FALSE if the syntax is invalid
+   // (although most errors are just silently ignored). The nickname is always
+   // extracted, but if the addresses pointer is NULL, the addresses are not
+   // parsed.
+   bool ParseMailrcAliasLine(const wxString& line,
+                             wxString *nickname,
+                             wxArrayString *addresses = NULL) const;
+
+   wxArrayInt m_lineNumbers;
+   wxTextFile m_textfile;
+};
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// macros for dynamic importer creation
+// ----------------------------------------------------------------------------
+
+IMPLEMENT_ADB_IMPORTER(AdbMailrcImporter,
+                       gettext_noop("Unix .mailrc file"));
+
+
+// ----------------------------------------------------------------------------
+// helpers
+// ----------------------------------------------------------------------------
+
+bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
+                                             wxString *nickname,
+                                             wxArrayString *addresses) const
+{
+   const char *pc = line.c_str() + lenAlias;
+   while ( isspace(*pc) )
+      pc++;
+
+   bool quoted = *pc == '"';
+   if ( quoted )
+   {
+      // skip the quote
+      pc++;
+   }
+
+   // first extract the nickname
+   for ( bool cont = TRUE; cont; pc++ )
+   {
+      switch ( *pc )
+      {
+         case '"':
+            if ( quoted )
+            {
+               // end of string
+               cont = FALSE;
+
+               break;
+            }
+
+            // fall through
+
+         case '\0':
+            // entries with unmatched quotes are ignored by mailx(1), so why
+            // shouldn't we ignore them
+            wxLogWarning(_("Invalid mailrc alias entry '%s' discarded."),
+                         line.c_str());
+
+            return FALSE;
+            
+         case '\\':
+            // it quotes the next character
+            *nickname += *++pc;
+            break;
+
+         case ' ':
+            if ( !quoted )
+            {
+               // field delimiter
+               cont = FALSE;
+
+               break;
+            }
+            // fall through
+
+         default:
+            *nickname += *pc;
+      }
+   }
+
+   // extract addresses too?
+   if ( addresses )
+   {
+      while ( isspace(*pc) )
+         pc++;
+
+      addresses->Empty();
+
+      // here everything is simple: mail addresses don't contain spaces nor
+      // quotes
+      wxString address;
+      for ( ; ; pc++ )
+      {
+         if ( *pc == ' ' || !*pc )
+         {
+            addresses->Add(address);
+
+            if ( !*pc )
+            {
+               // end of string
+               break;
+            }
+
+            address.Empty();
+         }
+         else
+         {
+            address += *pc;
+         }
+      }
+
+      if ( addresses->GetCount() == 0 )
+      {
+         wxLogWarning(_("Mailrc entry '%s' doesn't have any addresses and "
+                        "will be ignored."), line.c_str());
+
+         return FALSE;
+      }
+   }
+
+   return TRUE;
+}
+
+// ----------------------------------------------------------------------------
+// AdbImporter methods
+// ----------------------------------------------------------------------------
+
+bool AdbMailrcImporter::CanImport(const String& filename)
+{
+   // check the name: the file should be called .mailrc, we don't have any
+   // other reasonable way of identifying it
+   wxString name = filename.AfterLast('/');
+
+   return name == ".mailrc";
+}
+
+bool AdbMailrcImporter::StartImport(const String& filename)
+{
+   if ( m_textfile.GetName() == filename )
+   {
+      // already have it
+      return TRUE;
+   }
+
+   if ( !CanImport(filename) )
+   {
+      // don't even try
+      return FALSE;
+   }
+
+   // load the file into memory
+   return m_textfile.Open(filename);
+}
+
+size_t AdbMailrcImporter::GetEntryNames(const String& path,
+                                        wxArrayString& entries) const
+{
+   ASSERT_MSG( !path, "where did this path come from?" );
+
+   entries.Empty();
+
+   wxArrayInt& lineNumbers = (wxArrayInt &)m_lineNumbers; // const_cast
+   lineNumbers.Empty();
+
+   size_t nLines = m_textfile.GetLineCount();
+   for ( size_t nLine = 0; nLine < nLines; nLine++ )
+   {
+      wxString line(m_textfile[nLine]);
+
+      if ( !line || line[0u] == '#' )
+      {
+         // skip empty lines and comments
+         continue;
+      }
+
+      line.Trim(FALSE /* from left */);
+
+      if ( strncmp(line, "alias", lenAlias) != 0 )
+      {
+         // we're only interested in lines starting with "alias"
+         continue;
+      }
+
+      wxString nickname;
+      if ( ParseMailrcAliasLine(line, &nickname) )
+      {
+         lineNumbers.Add(nLine);
+         entries.Add(nickname);
+      }
+      //else: just skip invalid entry
+   }
+
+   return entries.GetCount();
+}
+
+size_t AdbMailrcImporter::GetGroupNames(const String& path,
+                                        wxArrayString& groups) const
+{
+   ASSERT_MSG( !path, "where did this path come from?" );
+
+   return 0;
+}
+
+bool AdbMailrcImporter::ImportEntry(const String& path,
+                                    size_t index,
+                                    AdbEntry *entry)
+{
+   CHECK( index < m_lineNumbers.GetCount(), FALSE, "invalid entry index" );
+
+   wxString line = m_textfile.GetLine((size_t)m_lineNumbers[index]);
+   if ( !line )
+   {
+      // hmm... empty address book entry?
+      return FALSE;
+   }
+
+   wxString nickname;
+   wxArrayString addresses;
+   if ( !ParseMailrcAliasLine(line, &nickname, &addresses) )
+   {
+      return FALSE;
+   }
+
+#ifdef DEBUG
+   wxString nicknameReal;
+   entry->GetField(AdbField_NickName, &nicknameReal);
+   ASSERT_MSG( nicknameReal == nickname, "importing wrong entry?" );
+#endif // DEBUG
+
+   // normally addresses shouldn't be empty, but better be safe...
+   size_t nAddresses = addresses.GetCount();
+   entry->SetField(AdbField_EMail, nAddresses == 0 ? nickname
+                                                   : addresses[0]);
+
+   for ( size_t nAddress = 1; nAddress < nAddresses; nAddress++ )
+   {
+      entry->AddEMail(addresses[nAddress]);
+   }
+
+   return TRUE;
+}
+
