@@ -36,6 +36,8 @@
    #include "Mcclient.h"      // need THREADNODE
 #endif // USE_PCH
 
+#include "Mdefaults.h"
+
 #include "HeaderInfoImpl.h"
 
 #include "Sequence.h"
