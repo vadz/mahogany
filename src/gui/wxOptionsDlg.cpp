@@ -95,6 +95,7 @@ enum ConfigFields
    ConfigField_MailServer,
    ConfigField_NewsServer,
    ConfigField_DialUpHelp,
+   ConfigField_DialUpSupport,
    ConfigField_BeaconHost,
    ConfigField_NetOnCommand,
    ConfigField_NetOffCommand,
@@ -404,15 +405,18 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&POP server"),                  Field_Text,    -1,                        },
    { gettext_noop("&IMAP server"),                 Field_Text,    -1,                        },
    { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -1,           },
-   { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,                        },
-   { gettext_noop("Mahogany will try to connect to the following beacon host\n"
-                  "to occasiaonally check if the network connection is up.\n"
-                  "Set this to a host which can easily be reached, e.g.\n"
-                  "the web server of your ISP. Leave it empty to use the SMTP"
-                  "server for this."), Field_Message, -1 },
-   { gettext_noop("&Beacon host"),                 Field_Text,    -1,                        },
-   { gettext_noop("Command to &activate network"),   Field_Text,    -1,                        },
-   { gettext_noop("Command to &deactivate network"), Field_Text,    -1,                        },
+   { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,
+   },
+   { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
+                  "network is up or not. It can also be used to connect and disconnect the\n"
+                  "network. To aid in detecting the network status, you can specify a beacon\n"
+                  "host which should only be reachable if the network is up, e.g. the WWW\n"
+                  "server of your ISP. Leave it empty to use the SMTP server for this.")
+     , Field_Message, -1 },
+   { gettext_noop("&Dial-up network support"),    Field_Bool,    -1,                        },
+   { gettext_noop("&Beacon host:port (e.g. www.yahoo.com:80)"),Field_Text,   ConfigField_DialUpSupport},
+   { gettext_noop("Command to &activate network"),   Field_Text, ConfigField_DialUpSupport},
+   { gettext_noop("Command to &deactivate network"), Field_Text, ConfigField_DialUpSupport},
    { gettext_noop("The following timeout values are used for TCP connections to\n"
                   "remote mail or news servers. Their scope is global, but they\n"
                   "will get set from the folder that has been opened last.\n")
@@ -588,6 +592,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SMTPHOST),
    CONFIG_ENTRY(MP_NNTPHOST),
    CONFIG_NONE(),
+   CONFIG_ENTRY(MP_DIALUP_SUPPORT),
    CONFIG_ENTRY(MP_BEACONHOST),
    CONFIG_ENTRY(MP_NET_ON_COMMAND),
    CONFIG_ENTRY(MP_NET_OFF_COMMAND),

@@ -318,6 +318,8 @@
 #define   MP_NNTPHOST         "NewsHost"
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST      "BeaconHost"
+/// does Mahogany control dial-up networking?
+#define MP_DIALUP_SUPPORT   "DialUpNetSupport"
 /// the command to go online
 #define MP_NET_ON_COMMAND   "NetOffCommand"
 /// the command to go offline
@@ -739,6 +741,8 @@
 #define   MP_NNTPHOST_D         ""
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST_D      ""
+/// does Mahogany control dial-up networking?
+#define MP_DIALUP_SUPPORT_D   0L
 /// the command to go online
 #define MP_NET_ON_COMMAND_D   "wvdial"
 /// the command to go offline

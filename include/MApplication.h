@@ -243,6 +243,8 @@ protected:
    /// registration seed for EventManager
    void *m_eventReg;
 
+   /// do we support dialup networking
+   bool m_DialupSupport;
    /// list of frames to not ask again in CanClose()
    ArrayFrames *m_framesOkToClose;
 };

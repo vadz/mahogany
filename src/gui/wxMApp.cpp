@@ -934,6 +934,7 @@ void
 wxMApp::SetupOnlineManager(void)
 {
    ASSERT(m_OnlineManager);
+   m_DialupSupport = READ_APPCONFIG(MP_DIALUP_SUPPORT);
    String beaconhost = READ_APPCONFIG(MP_BEACONHOST);
    strutil_delwhitespace(beaconhost);
    // If no host configured, use smtp host:
@@ -953,7 +954,10 @@ bool
 wxMApp::IsOnline(void)
 {
    SetupOnlineManager();
-   return m_OnlineManager->IsOnline();
+   if(! m_DialupSupport)
+      return TRUE; // no dialup--> always connected
+   else
+      return m_OnlineManager->IsOnline();
 }
 
 void
