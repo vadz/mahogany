@@ -47,8 +47,7 @@ public:
    MTextDialog(wxWindow *parent,
                const wxString& title,
                const wxString& text,
-               const wxPoint& position,
-               const wxSize& size);
+               const wxChar *configPath);
 
    virtual ~MTextDialog();
 
@@ -92,6 +91,8 @@ private:
    // flags of the last match (combination of wxFR_XXX)
    int m_flagsFind;
 
+   // the path for our size/position info in config (may be NULL)
+   const wxChar *m_configPath;
 
    DECLARE_EVENT_TABLE()
 };
@@ -116,13 +117,12 @@ END_EVENT_TABLE()
 MTextDialog::MTextDialog(wxWindow *parent,
                          const wxString& title,
                          const wxString& text,
-                         const wxPoint& position,
-                         const wxSize& size)
+                         const wxChar *configPath)
            : wxDialog(parent,
                       -1,
                       wxString("Mahogany: ") + title,
-                      position,
-                      size,
+                      wxDefaultPosition,
+                      wxDefaultSize,
                       wxDEFAULT_DIALOG_STYLE |
                       wxRESIZE_BORDER)
 {
@@ -135,11 +135,31 @@ MTextDialog::MTextDialog(wxWindow *parent,
 
    m_flagsFind = 0;
 
+   m_configPath = configPath;
+
+   // we may have or not the location in config where the dialogs position/size
+   // are stored
+   int x, y, w, h;
+   if ( m_configPath )
+   {
+      wxMFrame::RestorePosition(configPath, &x, &y, &w, &h);
+   }
+   else
+   {
+      x =
+      y = -1;
+      w = 500;
+      h = 300;
+   }
+
+   SetSize(x, y, w, h);
+
    // create controls
    // ---------------
 
    m_text = new wxTextCtrl(this, -1, "",
-                           wxPoint(0, 0), size,
+                           wxPoint(0, 0),
+                           wxSize(w, h),
                            wxTE_MULTILINE |
                            wxTE_READONLY |
                            wxTE_NOHIDESEL |
@@ -183,12 +203,19 @@ MTextDialog::MTextDialog(wxWindow *parent,
 #endif
 
    m_text->SetFocus();
+
+   Show();
 }
 
 MTextDialog::~MTextDialog()
 {
    if ( m_dlgFind )
       m_dlgFind->Destroy();
+
+   if ( m_configPath )
+   {
+      wxMFrame::SavePosition(m_configPath, this);
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -306,29 +333,8 @@ void MDialog_ShowText(wxWindow *parent,
                       const char *text,
                       const char *configPath)
 {
-   // we may have or not the location in config where the dialogs position/size
-   // are stored
-   int x, y, w, h;
-   if ( configPath )
-   {
-      wxMFrame::RestorePosition(configPath, &x, &y, &w, &h);
-   }
-   else
-   {
-      x =
-      y = -1;
-      w = 500;
-      h = 300;
-   }
-
-   MTextDialog dlg(GetFrame(parent), title, text, wxPoint(x, y), wxSize(w, h));
-
-   // show the dialog ...
-   if ( dlg.ShowModal() == wxID_OK && configPath )
-   {
-      // ... and save its position/size if the user didn't cancel it and if we
-      // have the location to save them to
-      wxMFrame::SavePosition(configPath, &dlg);
-   }
+   // show the dialog modelessly because otherwise we wouldn't be able to show
+   // a find dialog from it
+   new MTextDialog(GetFrame(parent), title, text, configPath);
 }
 
