@@ -14,24 +14,15 @@
 
 // SWIG bug: it generates code which assignes the default argument to "char *"
 // variable. To make it compile we need this hack
-#define	MDIALOG_ERRTITLE_C (char *)MDIALOG_ERRTITLE
-#define	MDIALOG_SYSERRTITLE_C (char *)MDIALOG_SYSERRTITLE
-#define	MDIALOG_FATALERRTITLE_C (char *)MDIALOG_FATALERRTITLE
-#define	MDIALOG_MSGTITLE_C (char *)MDIALOG_MSGTITLE
-#define	MDIALOG_YESNOTITLE_C (char *)MDIALOG_YESNOTITLE
-
-// we don't want to export our functions as we don't build a shared library
-#if defined(__WIN32__)
-#   undef SWIGEXPORT
-// one of these must be defined and the other commented out
-#   define SWIGEXPORT(a,b) a b
-//#   define SWIGEXPORT(a) a
-#endif
+#define MDIALOG_ERRTITLE_C (char *)MDIALOG_ERRTITLE
+#define MDIALOG_SYSERRTITLE_C (char *)MDIALOG_SYSERRTITLE
+#define MDIALOG_FATALERRTITLE_C (char *)MDIALOG_FATALERRTITLE
+#define MDIALOG_MSGTITLE_C (char *)MDIALOG_MSGTITLE
+#define MDIALOG_YESNOTITLE_C (char *)MDIALOG_YESNOTITLE
 
 // it's not really a dialog, but is useful too
 inline void MDialog_StatusMessage(const char *message, MFrame *frame = NULL)
   { wxLogStatus(frame, message); }
-
 %}
 
 %import MString.i
@@ -47,7 +38,6 @@ public:
    String  GetLocalDir(void) const;
    wxMimeTypesManager& GetMimeManager(void) const;
    Profile *GetProfile(void) const;
-//   Adb *GetAdb(void) ;
 };
 
 MAppBase &wxGetApp();
@@ -95,9 +85,3 @@ bool MInputBox(String *pstr,
                MWindow *parent = NULL,
                const char *key = NULL,
                const char *def = NULL);
-
-/*
-  AdbEntry *
-MDialog_AdbLookupList(AdbExpandListType *adblist,
-          MFrame *parent = NULL);
-*/
