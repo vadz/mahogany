@@ -4,11 +4,12 @@ $Id$
 *** things to fix/implement next ***
 
 - MessageView:
-  + extraction of parameter list and filenames for mime handling/saving
   + some code in wxMessageView relies on unix unlink() behaviour 
     (file is still open and in use when deleted)
   + fix MessageCC::GetParameters()
+  + extraction of parameter list and filenames for mime handling/saving
   + add a "save as html" option, using wxLayoutWindow functionality
+  + add a "save" option first
 
 - wxFolderView:
    + complete ForwardMessages
@@ -57,6 +58,9 @@ $Id$
   + add an InputBox dialog
   + user/global Minit files, security issues
   + add documentation to installation target
+  + add OnNewMail callback by counting messages in mailbox
+    + add sample callback showing new messages
+
 
 *** to implement in near future ***
 
