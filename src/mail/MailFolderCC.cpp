@@ -3711,9 +3711,14 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       return;
    }
 
-   if ( msgnoMax != m_nMessages )
+   // special case: when we get the first mm_exists() for an empty folder,
+   // msgnoMax will be equal to m_nMessages (both will be 0), so catch this
+   // with an additional check for m_LastUId
+   //
+   // TODO: would it be enough to just check if m_LastUId has changed?
+   if ( msgnoMax != m_nMessages || m_LastUId == UID_ILLEGAL )
    {
-      ASSERT_MSG( msgnoMax > m_nMessages, "where have they gone?" );
+      ASSERT_MSG( msgnoMax >= m_nMessages, "where have they gone?" );
 
       // update the number of headers in the listing
       if ( m_headers )
@@ -3732,11 +3737,24 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
 
       // our cached idea of the number of messages we have doesn't correspond
       // to reality any more
-      //
-      // flushing it like we do here is a bit dumb, so maybe we could analyze
-      // the status of only the messages? i.e. add "range" parameters to
-      // DoCountMessages() and call it from here?
-      MfStatusCache::Get()->InvalidateStatus(GetName());
+
+      MfStatusCache *mfStatusCache = MfStatusCache::Get();
+      if ( msgnoMax )
+      {
+         // flushing it like we do here is a bit dumb, so maybe we could
+         // analyze the status of only the messages? i.e. add "range"
+         // parameters to DoCountMessages() and call it from here?
+         mfStatusCache->InvalidateStatus(GetName());
+      }
+      else // no messages
+      {
+         // for an empty folder, we know the status
+         MailFolderStatus status;
+
+         // all other members are already set to 0
+         status.total = 0;
+         mfStatusCache->UpdateStatus(GetName(), status);
+      }
 
       // update to use in the enclosing "if" test the next time
       m_nMessages = msgnoMax;
@@ -3753,8 +3771,12 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       }
       else // recent messages number didn't change
       {
-         // just update directly
-         RequestUpdate();
+         // just update directly unless the folder is empty in which case no
+         // update is needed
+         if ( msgnoMax )
+         {
+            RequestUpdate();
+         }
       }
    }
    else // same number of messages
@@ -3774,6 +3796,8 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       // MEventFolderExpungeData() will delete it
       m_expungedIndices = NULL;
    }
+
+   m_LastUId = stream->uid_last;
 }
 
 void MailFolderCC::OnMailExpunge(MsgnoType msgno)
