@@ -4215,7 +4215,7 @@ MailFolderCC::DoSetSequenceFlag(SequenceKind kind,
       CHECK( m_MailStream, 0, "DoSetSequenceFlag: folder is closed" );
 
       wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SetFlags(%s) = %s",
-                 sequence.c_str(), flags.c_str());
+                 GetName().c_str(), sequence.c_str(), flags.c_str());
 
       mail_flag(m_MailStream,
                 (char *)sequence.c_str(),
