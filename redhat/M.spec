@@ -42,7 +42,7 @@ if [ ! -f configure ]; then
   autoconf
 fi
 
-CFLAGS="$RPM_OPT_FLAGS" ./configure --without-threads --without-python \
+CFLAGS="$RPM_OPT_FLAGS" ./configure --without-threads \
 	--prefix=$RPM_BUILD_ROOT/%prefix
 
 make dep
