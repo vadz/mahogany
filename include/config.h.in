@@ -104,14 +104,11 @@
 /** Define this if you want to compile in SSL support. */
 #undef USE_SSL
 
-/** Define this if you want to compile in SSL support without DSA. */
-#undef NO_DSA
-
-/** Define this if you want to compile in SSL support without IDEA. */
-#undef NO_IDEA
-
-/** Define this if you want to compile in SSL support without RSA. */
-#undef NO_RSA
+#ifdef USE_SSL		/* If SSL support is present, we compile with */
+#define NO_DSA	1	/* the minimum options.  It doesn't matter as */
+#define NO_IDEA	1	/* we load openssl later, but this makes it   */
+#define NO_RSA	1	/* easier to compile the header files.        */
+#endif
 
 /** Define this if you have POSIX.2 regexp suport. */
 #undef HAVE_POSIX_REGEX

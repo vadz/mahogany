@@ -118,9 +118,21 @@ AC_SUBST(SOURCEDIR)
 BUILDDIR=`cd .; exec pwd`
 AC_SUBST(BUILDDIR)
 
-dnl ###################
-dnl # checks programs #
-dnl ###################
+dnl instead of invoking subsidary configures, we accumulate the flags
+dnl here for some third-party sources, since they would otherwise have
+dnl to repeat much of the same logic just to set a few compiler flags.
+IMAP_CPPFLAGS="${CPPFLAGS}"
+IMAP_CFLAGS="${CFLAGS}"
+IMAP_CXXFLAGS="${CXXFLAGS}"
+AC_SUBST(IMAP_CPPFLAGS) AC_SUBST(IMAP_CFLAGS) AC_SUBST(IMAP_CXXFLAGS)
+CFACE_CPPFLAGS="${CPPFLAGS}"
+CFACE_CFLAGS="${CFLAGS}"
+CFACE_CXXFLAGS="${CXXFLAGS}"
+AC_SUBST(CFACE_CPPFLAGS) AC_SUBST(CFACE_CFLAGS) AC_SUBST(CFACE_CXXFLAGS)
+LIBMAL_CPPFLAGS="${CPPFLAGS}"
+LIBMAL_CFLAGS="${CFLAGS}"
+LIBMAL_CXXFLAGS="${CXXFLAGS}"
+AC_SUBST(LIBMAL_CPPFLAGS) AC_SUBST(LIBMAL_CFLAGS) AC_SUBST(LIBMAL_CXXFLAGS)
 
 dnl C-compiler checks
 dnl =================
@@ -441,45 +453,55 @@ case "$USE_PCH" in 1)
 	AC_DEFINE(USE_PCH)
 esac
 
-dnl Use SSL (requires openSSL)
 case "$USE_SSL" in
 0)	ssl_option=nope ;;
-1)	AC_CHECK_HEADER(openssl/ssl.h, ssl_option=ok, ssl_option=fail) ;;
-/*)	AC_CHECK_HEADER(openssl/ssl.h, ssl_option=ok,
-	[AC_MSG_CHECKING(for openssl/ssl.h in $USE_SSL/include)
-	if test -f "$USE_SSL"/include/openssl/ssl.h
-	then	AC_MSG_RESULT(yes)
-		ssl_option=okdir
-	else	AC_MSG_RESULT(no)
-		ssl_option=fail
-	fi]) ;;
+1|/*)	AC_MSG_CHECKING(for openssl/ssl.h)
+	case "$USE_SSL" in
+	/*/include) ssl_inc="$USE_SSL" ;;
+	/*)	ssl_inc="$USE_SSL $USE_SSL/include" ;;
+	*)	ssl_inc="" ;;
+	esac
+	ssl_option=no
+	for j in $ssl_inc /include \
+		/usr/include /usr/ssl/include \
+		/usr/local/include /usr/local/ssl/include \
+		/home/local/include /home/local/ssl/include
+	do	if test -f "$j"/openssl/ssl.h
+		then	ssl_option="$j"
+			break
+		fi
+	done
+	AC_MSG_RESULT($ssl_option)
+	AC_CHECK_FUNC(socket,,
+		AC_CHECK_LIB(socket,socket,, ssl_option=no))
+	AC_CHECK_FUNC(gethostname,,
+		AC_CHECK_LIB(resolv,gethostname,, ssl_option=no))
+	AC_CHECK_FUNC(gethostbyname,,
+		AC_CHECK_LIB(nsl,gethostbyname,, ssl_option=no))
+	;;
 *)	AC_MSG_WARN([Did not understand --with-ssl=$USE_SSL])
-	ssl_option=fail ;;
+	ssl_option=nope ;;
 esac
 MAKE_USESSL=
 CCLIENT_EXTRAAUTHENTICATORS=
 CCLIENT_EXTRACFLAGS=
 case "$ssl_option" in
 nope)	;;
-fail)	AC_MSG_WARN([Cannot find openssl/ssl.h - SSL support disabled])
+no)	AC_MSG_WARN([Cannot find libraries for SSL - SSL support disabled])
 	m_cv_USE_SSL=0 ;;
-ok*)	AC_CHECK_FUNC(socket,, AC_CHECK_LIB(socket,socket))
-	AC_CHECK_FUNC(gethostname,, AC_CHECK_LIB(resolv,gethostname))
-	AC_CHECK_FUNC(gethostbyname,, AC_CHECK_LIB(nsl,gethostbyname))
+/*)	m_cv_USE_SSL="$ssl_option"
 	MAKE_USESSL="USESSL=yes"
-	CCLIENT_EXTRAAUTHENTICATORS="\"EXTRAAUTHENTICATORS=ssl\""
+	CCLIENT_EXTRAAUTHENTICATORS="$CCLIENT_EXTRAAUTHENTICATORS ssl"
 	AC_DEFINE(USE_SSL)dnl
 	# We assume no idea/no dsa/no rsa as this is easiest
 	# to compile. It doesn't matter anyway as we load openssl
 	# later, but we must be able to compile the header file.
-	AC_DEFINE(NO_IDEA)AC_DEFINE(NO_DSA)AC_DEFINE(NO_RSA)dnl
 	CCLIENT_EXTRACFLAGS="-DNO_IDEA -DNO_DSA -DNO_RSA"
-	dnl THIS IS NOT NEEDED (KB): LIBS="-lssl -lcrypto $LIBS" 
-	case "$ssl_option" in okdir)
-		CCLIENT_EXTRACFLAGS="-I$USE_SSL/include $CCLIENT_EXTRACFLAGS"
-		CPPFLAGS="$CPPFLAGS -I$USE_SSL/include"
-		dnl NO SSL LIB REQUIRED!! (KB) LIBS="-L$USE_SSL/lib $LIBS"
-	;; esac
+	case "$ssl_option" in /usr/include) ;; *)
+		CCLIENT_EXTRACFLAGS="-I$ssl_option $CCLIENT_EXTRACFLAGS"
+		CPPFLAGS="$CPPFLAGS -I$ssl_option"
+	esac ;;
+*)	AC_MSG_ERROR([Internal configure problem; we shouldn't get here]) ;;
 esac
 AC_SUBST(MAKE_USESSL)
 AC_SUBST(CCLIENT_EXTRAAUTHENTICATORS)

@@ -10,7 +10,8 @@ MOD :=	ImportText.cpp ImportXFMail.cpp ImportPine.cpp \
 	ImportMailrc.cpp ImportVCard.cpp \
 	ExportPalm.cpp ExportText.cpp ExportVCard.cpp
 
-ifdef DEBUG
+# FIXME: should be a specific value rather than wildcard
+ifneq (,$(filter %, $(DEBUG)))
 SRC += ProvDummy.cpp
 endif
 
