@@ -44,6 +44,7 @@
 #include <wx/textfile.h>
 #include <wx/process.h>
 #include <wx/mimetype.h>
+#include <wx/tokenzr.h>
 #include "wx/persctrl.h"
 
 #include "Mdefaults.h"
@@ -3093,9 +3094,27 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             {
                // insert the original text (optionally prefixed by reply
                // string)
-               String prefix = name == "text" ? wxString("")
-                                              : READ_CONFIG(m_profile,
-                                                            MP_REPLY_MSGPREFIX);
+               String prefix;
+               if ( name == "quote" )
+               {
+                  // prepend the senders initials to the reply prefix (this
+                  // will make reply prefix like "VZ>")
+                  if ( READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX_FROM_SENDER) )
+                  {
+                     String name;
+                     m_msg->Address(name);
+                     wxStringTokenizer tk(name);
+                     while ( tk.HasMoreTokens() )
+                     {
+                        prefix += tk.GetNextToken()[0u];
+                     }
+                  }
+
+                  // and then the standard reply prefix too
+                  prefix += READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX);
+               }
+               //else: name == text, so no reply prefix at all
+
                int nParts = m_msg->CountParts();
                for ( int nPart = 0; nPart < nParts; nPart++ )
                {

@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+08.07.00 VZ: added an option to prepend sender initials to the reply prefix
 06.07.00 VS: quoted text highlighting in the message viewer
 06.07.00 VZ: almost complete rewrite of (user visible aspects of) filter code,
              there are now several dialogs for filter editing,

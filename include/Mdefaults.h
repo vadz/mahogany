@@ -454,6 +454,8 @@
 #define   MP_REPLY_COLLAPSE_PREFIX "CollapseReplyPrefix"
 /// prefix for text in replies
 #define   MP_REPLY_MSGPREFIX      "ReplyQuote"
+/// prepend the initials of the sender to thereply prefix?
+#define   MP_REPLY_MSGPREFIX_FROM_SENDER "ReplyQuoteUseSender"
 /// set reply string from To: field?
 #define MP_SET_REPLY_FROM_TO   "ReplyEqualsTo"
 /// prefix for subject in forwards
@@ -973,7 +975,9 @@
 /// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
 #define   MP_REPLY_COLLAPSE_PREFIX_D 2l
 /// prefix for text in replies
-#define   MP_REPLY_MSGPREFIX_D      " > "
+#define   MP_REPLY_MSGPREFIX_D      "> "
+/// prepend the initials of the sender to thereply prefix?
+#define   MP_REPLY_MSGPREFIX_FROM_SENDER_D 0l
 /// set reply string from To: field?
 #define MP_SET_REPLY_FROM_TO_D   1l
 /// prefix for subject in forwards
