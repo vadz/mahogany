@@ -752,60 +752,100 @@ wxMApp::OnInit()
    bool failedToLoadMsgs = false,
         failedToSetLocale = false;
 
-   if ( !locale.empty() )
+   // user may explicitly disable i18n by giving --lang=none switch
+   if ( locale != "none" )
    {
       // TODO should catch the error messages and save them for later
       wxLogNull noLog;
 
+      wxString nameShort,
+               nameLong;
+
       if ( locale.empty() )
       {
          // use the default system language
-         m_Locale = new wxLocale(wxLANGUAGE_DEFAULT);
-      }
-      else if ( locale != "none" )
-      {
-         m_Locale = new wxLocale(locale, locale, NULL);
-      }
-      //else: user explicitly disabled i18n
+         int lang = wxLocale::GetSystemLanguage();
+         switch ( lang )
+         {
+            case wxLANGUAGE_ENGLISH:
+            case wxLANGUAGE_ENGLISH_UK:
+            case wxLANGUAGE_ENGLISH_US:
+            case wxLANGUAGE_ENGLISH_AUSTRALIA:
+            case wxLANGUAGE_ENGLISH_BELIZE:
+            case wxLANGUAGE_ENGLISH_BOTSWANA:
+            case wxLANGUAGE_ENGLISH_CANADA:
+            case wxLANGUAGE_ENGLISH_CARIBBEAN:
+            case wxLANGUAGE_ENGLISH_DENMARK:
+            case wxLANGUAGE_ENGLISH_EIRE:
+            case wxLANGUAGE_ENGLISH_JAMAICA:
+            case wxLANGUAGE_ENGLISH_NEW_ZEALAND:
+            case wxLANGUAGE_ENGLISH_PHILIPPINES:
+            case wxLANGUAGE_ENGLISH_SOUTH_AFRICA:
+            case wxLANGUAGE_ENGLISH_TRINIDAD:
+            case wxLANGUAGE_ENGLISH_ZIMBABWE:
+               // nothing to do -- we don't have to translate the messages from
+               // English to English
+               break;
 
-      if ( !m_Locale->IsOk() )
-      {
-         delete m_Locale;
-         m_Locale = NULL;
+            case wxLANGUAGE_UNKNOWN:
+               // ignore silently for now, what can we do, anyhow?
+               break;
 
-         failedToSetLocale = true;
+            default:
+               const wxLanguageInfo *info = wxLocale::GetLanguageInfo(lang);
+               nameLong = info->Description;
+               nameShort = info->CanonicalName;
+         }
       }
-      else // set locale successfully
+      else // we have locale
       {
-         // now load the message catalogs
+         nameLong =
+         nameShort = locale;
+      }
+
+      if ( !nameShort.empty() )
+      {
+         m_Locale = new wxLocale(nameShort, nameLong);
+
+         if ( !m_Locale->IsOk() )
+         {
+            delete m_Locale;
+            m_Locale = NULL;
+
+            failedToSetLocale = true;
+         }
+         else // set locale successfully
+         {
+            // now load the message catalogs
 #ifdef OS_UNIX
-         String localePath;
-         localePath << M_BASEDIR << "/locale";
+            String localePath;
+            localePath << M_BASEDIR << "/locale";
 #elif defined(OS_WIN)
-         // the program directory is not initialized yet so we can't do much
-         // more than looking in the current directory...
-         wxString strPath;
-         ::GetModuleFileName(NULL, wxStringBuffer(strPath, MAX_PATH), MAX_PATH);
+            // the program directory is not initialized yet so we can't do much
+            // more than looking in the current directory...
+            wxString strPath;
+            ::GetModuleFileName(NULL, wxStringBuffer(strPath, MAX_PATH), MAX_PATH);
 
-         // get just the path
-         wxString strDir;
-         wxSplitPath(strPath, &strDir, NULL, NULL);
+            // get just the path
+            wxString strDir;
+            wxSplitPath(strPath, &strDir, NULL, NULL);
 
-         String localePath;
-         localePath << strDir << "/locale";
+            String localePath;
+            localePath << strDir << "/locale";
 #else
 #   error "don't know where to find message catalogs on this platform"
 #endif // OS
 
-         m_Locale->AddCatalogLookupPathPrefix(localePath);
+            m_Locale->AddCatalogLookupPathPrefix(localePath);
 
-         if ( !m_Locale->AddCatalog(M_APPLICATIONNAME) )
-         {
-            // better use English messages if msg catalog was not found
-            delete m_Locale;
-            m_Locale = NULL;
+            if ( !m_Locale->AddCatalog(M_APPLICATIONNAME) )
+            {
+               // better use English messages if msg catalog was not found
+               delete m_Locale;
+               m_Locale = NULL;
 
-            failedToLoadMsgs = true;
+               failedToLoadMsgs = true;
+            }
          }
       }
    }
