@@ -17,13 +17,11 @@
 #   include "MApplication.h"
 #   include "gui/wxMApp.h"
 #   include "strutil.h"
+#   include "MPython.h"
 #endif
 
 #include "Mdefaults.h"
 
-#include <Python.h>
-
-#include "PythonHelp.h"
 #include "MDialogs.h"
 
 // the module initialisations
@@ -75,9 +73,11 @@ InitPython(void)
       if ( globaldir.empty() )
       {
           // not installed
-          path << mApplication->GetDataDir() << "/Python/Scripts"
+          path << mApplication->GetDataDir() << "/Python" << PATH_SEPARATOR
+               << mApplication->GetDataDir() << "/Python/Scripts"
 #ifdef M_TOP_BUILDDIR
                << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python"
+               << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python/Scripts"
 #endif
               ;
       }
@@ -135,7 +135,10 @@ InitPython(void)
          rc = CheckPyError();
          Py_DECREF(minit);
       }
-      else {
+      else
+      {
+         (void)CheckPyError();
+
          ERRORMESSAGE(("Python: Cannot find Minit.Minit function in Minit module."));
 
          rc = FALSE;

@@ -216,11 +216,20 @@ wxLayoutObject::Read(wxString &istr)
 
 wxLayoutObjectText::wxLayoutObjectText(const wxString &txt)
 {
-   m_Text = txt;
+   SetText(txt);
+
    m_Width = 0;
    m_Height = 0;
    m_Top = 0;
    m_Bottom = 0;
+}
+
+void wxLayoutObjectText::SetText(const wxString& txt)
+{
+   // Draw() doesn't handle the TABs properly, so apply this ugly hack for now
+   // or otherwise they appear as "unknown char" on screen which is really ugly
+   m_Text = txt;
+   m_Text.Replace("\t", "        ");   // TAB = 8 spaces by default...
 }
 
 wxLayoutObject *

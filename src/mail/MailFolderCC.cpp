@@ -87,11 +87,11 @@
 #   include "strutil.h"
 #   include "MApplication.h"
 #   include "Profile.h"
+#   include "MPython.h"
 #endif // USE_PCH
 
 #include "Mdefaults.h"
 #include "MDialogs.h"
-#include "MPython.h"
 #include "FolderView.h"
 
 #include "MailFolderCC.h"

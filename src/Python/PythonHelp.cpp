@@ -7,22 +7,18 @@
  *
  *******************************************************************/
 
-#include   "Mpch.h"  // config.h for correct evaluation of Python.h
+#include   "Mpch.h"
 
 #ifndef   USE_PCH
-#  include   "Mcommon.h"
-#  include   "Profile.h"
-#  include   "MApplication.h"
-#  include   "gui/wxMApp.h"
-#  include   "strutil.h"
+#  include "Mcommon.h"
+#  include "Profile.h"
+#  include "MApplication.h"
+#  include "gui/wxMApp.h"
+#  include "strutil.h"
+#  include "MPython.h"
 #endif   // USE_PCH
 
 #include   "Mdefaults.h"
-
-#include   <Python.h>
-#include   <string.h>
-
-#include   "PythonHelp.h"
 
 // from InitPython.cc:
 extern PyObject *Python_MinitModule;
@@ -31,7 +27,7 @@ PyObject *PyH_LoadModule(const char *modname);            /* returns module obje
 
 extern "C"
 {
-   void SWIG_MakePtr(char *_c, const void *_ptr, char *type);
+   void SWIG_MakePtr(char *_c, const void *_ptr, const char *type);
 }
 
 int
@@ -87,8 +83,8 @@ PyH_makeObjectFromPointer(void *ptr,const char *classname)
    ptrtype += classname;
    ptrtype += "_p";
 
-   SWIG_MakePtr(ptemp,ptr,(char *)ptrtype.c_str());  // it doesn't get
-                                                     // changed
+   SWIG_MakePtr(ptemp,ptr, ptrtype.c_str());
+
    return Py_BuildValue("s",ptemp);
 }
 

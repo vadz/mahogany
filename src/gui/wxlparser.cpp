@@ -79,7 +79,7 @@ SetEncoding(wxLayoutList *list, wxFontEncoding encoding,
 }
 
 static void wxLayoutImportTextInternal(wxLayoutList *list,
-			               wxString const &str,
+                                       wxString const &str,
                                        bool useConverter,
                                        wxEncodingConverter &conv)
 {
@@ -127,36 +127,36 @@ void wxLayoutImportHTML(wxLayoutList *list,
   bool inTag = FALSE;
   while(*cptr)
   {
-	if(*cptr == '<') 
+     if(*cptr == '<')
+     {
+        inTag = TRUE;
+        cptr++;
+        // process known tags
+        continue;
+     }
+     if(inTag && *cptr == '>')
+     {
+        inTag = FALSE;
+        cptr++;
+        continue;
+     }
+     if(*cptr == '&') // ignore it
+     {
+        if( strncmp(cptr+1,"nbsp;", 5) == 0)
         {
-	  inTag = TRUE;
-          cptr++;
-	  // process known tags
-	  continue;
-	}
-        if(inTag && *cptr == '>')
-	{
-	  inTag = FALSE;
-	  cptr++;
-	  continue;
-	}
-        if(*cptr == '&') // ignore it
-        {
-           if( strncmp(cptr+1,"nbsp;", 5) == 0)
-           {
-              cptr += 6;
-              filtered += ' ';
-              continue;
-           }
-           while(*cptr && *cptr != ';')
-              cptr++;
-           if(*cptr == ';')
-              cptr++;
+           cptr += 6;
+           filtered += ' ';
            continue;
         }
-	if(!inTag)
-	  filtered += *cptr;
-        cptr++;
+        while(*cptr && *cptr != ';')
+           cptr++;
+        if(*cptr == ';')
+           cptr++;
+        continue;
+     }
+     if(!inTag)
+        filtered += *cptr;
+     cptr++;
   }
   wxLayoutImportText(list, filtered, encoding);
 }
@@ -167,7 +167,7 @@ void wxLayoutImportText(wxLayoutList *list,
 {
    if ( !str )
       return;
-   
+
    bool useConverter = FALSE;
    wxEncodingConverter conv;
    SetEncoding(list, encoding, &useConverter, &conv);

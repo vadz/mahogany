@@ -64,7 +64,7 @@
 #define USE_WXSTRING 1
 
 /** Define if you use Python. */
-#undef USE_PYTHON
+#define USE_PYTHON 1
 
 /** Define if the C++ compiler supports prototypes (of course it
     does!) - required for Python.h */

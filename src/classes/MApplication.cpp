@@ -32,11 +32,11 @@
 #  include "MApplication.h"
 #  include "Mpers.h"
 #  include  <wx/dynarray.h>
+#  include "MPython.h"
 #endif   // USE_PCH
 
 #include <errno.h>
 
-#include "MPython.h"
 #include "MFolder.h"
 #include "FolderView.h"
 #include "MailFolder.h"

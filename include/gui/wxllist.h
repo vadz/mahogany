@@ -294,7 +294,7 @@ public:
 
    // for editing:
    wxString & GetText(void) { return m_Text; }
-   void SetText(wxString const &text) { m_Text = text; }
+   void SetText(wxString const &text);
    /** Makes a copy of this object.
     */
    virtual wxLayoutObject *Copy(void);

@@ -11,9 +11,20 @@
 #define MPYTHON_H
 
 #ifdef   USE_PYTHON
-#   include   "Python.h"
-#   include   "PythonHelp.h"
-#   define   M_PYTHON_MODULE   "Minit"
+
+// before including Python.h, undef all these macros defined by our config.h
+// and redefined by Python's config.h under Windows to avoid the warnings
+#ifdef OS_WIN
+   #undef HAVE_STRERROR
+   #undef HAVE_PROTOTYPES
+   #undef HAVE_STDARG_PROTOTYPES
+#endif // OS_WIN
+
+#  include <Python.h>
+
+#  include "PythonHelp.h"
+
+#  define  M_PYTHON_MODULE   "Minit"
 #endif
 
-#endif
+#endif // MPYTHON_H
