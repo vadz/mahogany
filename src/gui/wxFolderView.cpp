@@ -296,8 +296,17 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
    if(m_MailFolder)  // clean up old folder
    {
-      m_timer->Stop();
-      delete m_timer;
+      if ( m_timer )
+      {
+         m_timer->Stop();
+         delete m_timer;
+         m_timer = NULL;
+      }
+      else
+      {
+          return;
+      }
+
       wxString msg;
       msg.Printf(_("Mark all articles in\n%s\nas read?"),
                  m_MailFolder->GetName().c_str());
