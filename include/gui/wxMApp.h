@@ -192,10 +192,18 @@ protected:
    /// Unload modules loaded at startup
    virtual void UnloadModules(void);
 
+private:
+   /// common part of OnExit() and dtor, i.e. cleanup which is always done
+   void DoCleanup();
+
+   /**
+     @name Help subsystem
+   */
+   //@{
+
    /// initialize the help controller, return true only if ok
    bool InitHelp();
 
-private:
    /// construct the helpfile name from the dir name
    static wxString BuildHelpInitString(const wxString& dir);
 
@@ -208,10 +216,17 @@ private:
    /// a help controller instance
    wxHelpControllerBase *m_HelpController;
 
+   //@}
+
 #ifdef USE_I18N
    /// a locale for translation
    wxLocale *m_Locale;
 #endif // USE_I18N
+
+   /**
+     @name Printing
+   */
+   //@{
 
    /// save the printing parameters
    void CleanUpPrintData();
@@ -220,6 +235,8 @@ private:
    wxPrintData *m_PrintData;
    /// page setup for printing
    wxPageSetupDialogData *m_PageSetupData;
+
+   //@}
 
    /// to recycle the last CanClose() result
    bool m_CanClose;

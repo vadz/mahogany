@@ -484,6 +484,13 @@ wxMApp::~wxMApp()
 #ifdef wxHAS_LOG_CHAIN
    delete m_logChain;
 #endif // wxHAS_LOG_CHAIN
+
+   DoCleanup();
+
+   Profile::DeleteGlobalConfig();
+
+   MObjectRC::CheckLeaks();
+   MObject::CheckLeaks();
 }
 
 void
@@ -991,17 +998,21 @@ int wxMApp::OnRun()
 #endif
 }
 
-int wxMApp::OnExit()
+void wxMApp::DoCleanup()
 {
-   // we won't be able to do anything more (i.e. another program copy can't ask
-   // us to execute any actions for it) so it's as if we were already not
-   // running at all
-   delete m_snglInstChecker;
-   m_snglInstChecker = NULL;
+   // we don't really run any more
+   if ( m_snglInstChecker )
+   {
+      delete m_snglInstChecker;
+      m_snglInstChecker = NULL;
+   }
 
    // no more IPC for us neither
-   delete m_serverIPC;
-   m_serverIPC = NULL;
+   if ( m_serverIPC )
+   {
+      delete m_serverIPC;
+      m_serverIPC = NULL;
+   }
 
    // if one timer was created, then all of them were
    if ( gs_timerAutoSave )
@@ -1015,6 +1026,14 @@ int wxMApp::OnExit()
       gs_timerMailCollection = NULL;
       gs_timerAway = NULL;
    }
+}
+
+int wxMApp::OnExit()
+{
+   // we won't be able to do anything more (i.e. another program copy can't ask
+   // us to execute any actions for it) so it's as if we were already not
+   // running at all -- call DoCleanup() to stop IPC service
+   DoCleanup();
 
    CleanUpPrintData();
 
@@ -1044,12 +1063,8 @@ int wxMApp::OnExit()
    delete m_OnlineManager;
 #endif // USE_DIALUP
 
-   // FIXME this is not the best place to do it, but at least we're safe
-   //       because we know that by now it's unused any more
-   Profile::DeleteGlobalConfig();
-
-   MObjectRC::CheckLeaks();
-   MObject::CheckLeaks();
+   // save all data now as we may still report errors - later will be too late
+   Profile::FlushAll();
 
    return 0;
 }
