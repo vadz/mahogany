@@ -478,6 +478,17 @@ public:
 
    virtual bool TransferDataToWindow()
       {
+         // use the user email address as the default domain for the servers -
+         // this i not ideal but has the best chance to work
+         wxString domain = gs_installWizardData.email.AfterFirst('@');
+         if ( !domain.empty() )
+         {
+            AddDomain(gs_installWizardData.pop, domain);
+            AddDomain(gs_installWizardData.imap, domain);
+            AddDomain(gs_installWizardData.smtp, domain);
+            AddDomain(gs_installWizardData.nntp, domain);
+         }
+
          m_pop->SetValue(gs_installWizardData.pop);
          m_imap->SetValue(gs_installWizardData.imap);
          m_smtp->SetValue(gs_installWizardData.smtp);
