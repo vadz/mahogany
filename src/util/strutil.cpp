@@ -207,14 +207,6 @@ strutil_strdup(const wxChar *in)
    return cptr;
 }
 
-char *
-strutil_strdup(const char *in)
-{
-   char *cptr = new char[strlen(in)+1];
-   strcpy(cptr,in);
-   return cptr;
-}
-
 wxChar *
 strutil_strdup(String const &in)
 {
