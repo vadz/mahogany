@@ -28,6 +28,9 @@
 /** Define if you have the <compface.h> header file.  -- we always have it */
 #define HAVE_COMPFACE_H 1
 
+/** Define if you have strsep() function */
+#undef HAVE_STRSEP
+
 /** Do we have the pisock library and headers? */
 #undef USE_PISOCK
 

@@ -194,37 +194,34 @@ dnl   defines CXX with the compiler to use
 dnl   defines GXX with yes if using gxx, else empty
 dnl   defines CXXFLAGS
 
-dnl don't do this any longer, these switches come from wx-config, so if you
-dnl really want to use them, just build wxWin with them
-dnl
-dnl ### disable support for exceptions if the compiler is g++ and
-dnl ### new enough to support it.
-dnl ### case "$GXX" in yes)
-dnl ### 	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-exceptions,
-dnl ### 		m_cv_gxx_exceptions,
-dnl ### 		[echo 'void f(){}' >conftest.cc
-dnl ### 		case "`${CXX-g++} -fno-exceptions -c conftest.cc 2>&1`" in
-dnl ### 		'')	m_cv_gxx_exceptions=yes ;;
-dnl ### 		*)	m_cv_gxx_exceptions=no ;;
-dnl ### 		esac
-dnl ### 		rm -f conftest*])
-dnl ### 	case "$m_cv_gxx_exceptions" in yes)
-dnl ### 		CXXFLAGS="$CXXFLAGS -fno-exceptions"
-dnl ### 	esac
-dnl ### 
-dnl ### 	dnl the same for RTTI - we don't use it neither
-dnl ### 	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-rtti,
-dnl ### 		m_cv_gxx_rtti,
-dnl ### 		[echo 'void f(){}' >conftest.cc
-dnl ### 		case "`${CXX-g++} -fno-rtti -c conftest.cc 2>&1`" in
-dnl ### 		'')	m_cv_gxx_rtti=yes ;;
-dnl ### 		*)	m_cv_gxx_rtti=no ;;
-dnl ### 		esac
-dnl ### 		rm -f conftest*])
-dnl ### 	case "$m_cv_gxx_rtti" in yes)
-dnl ### 		CXXFLAGS="$CXXFLAGS -fno-rtti"
-dnl ### 	esac
-dnl ### esac
+dnl disable support for exceptions if the compiler is g++ and
+dnl new enough to support it.
+case "$GXX" in yes)
+	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-exceptions,
+		m_cv_gxx_exceptions,
+		[echo 'void f(){}' >conftest.cc
+		case "`${CXX-g++} -fno-exceptions -c conftest.cc 2>&1`" in
+		'')	m_cv_gxx_exceptions=yes ;;
+		*)	m_cv_gxx_exceptions=no ;;
+		esac
+		rm -f conftest*])
+	case "$m_cv_gxx_exceptions" in yes)
+		CXXFLAGS="$CXXFLAGS -fno-exceptions"
+	esac
+
+	dnl the same for RTTI - we don't use it neither
+	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-rtti,
+		m_cv_gxx_rtti,
+		[echo 'void f(){}' >conftest.cc
+		case "`${CXX-g++} -fno-rtti -c conftest.cc 2>&1`" in
+		'')	m_cv_gxx_rtti=yes ;;
+		*)	m_cv_gxx_rtti=no ;;
+		esac
+		rm -f conftest*])
+	case "$m_cv_gxx_rtti" in yes)
+		CXXFLAGS="$CXXFLAGS -fno-rtti"
+	esac
+esac
 
 dnl check whether the C++ supports the new logical operator names
 dnl c-client library uses some of them as field names
@@ -1134,6 +1131,6 @@ DIR="$DIR"
 COPY="$COPY")
 
 AC_OUTPUT($OUTPUT)
-exit
+exit 0
 
 dnl vi: set noet ts=8 sw=4 nolist sta:
