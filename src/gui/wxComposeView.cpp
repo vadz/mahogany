@@ -447,19 +447,35 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// IconButton: class used for small buttons in the header
+// ----------------------------------------------------------------------------
+
+class IconButton : public wxBitmapButton
+{
+public:
+   IconButton(wxWindow *parent, wxBitmap bmp)
+      : wxBitmapButton(parent,
+                       wxID_ANY,
+                       bmp,
+                       wxDefaultPosition,
+                       wxDefaultSize,
+                       wxBORDER_NONE)
+   {
+   }
+
+   // we don't want to get in the way when tabbing through header fields
+   virtual bool AcceptsFocusFromKeyboard() const { return false; }
+};
+
+// ----------------------------------------------------------------------------
 // wxIsReplyButton: button indicating whether this is a reply
 // ----------------------------------------------------------------------------
 
-class wxIsReplyButton : public wxBitmapButton
+class wxIsReplyButton : public IconButton
 {
 public:
    wxIsReplyButton(wxComposeView *composer, wxWindow *parent)
-      : wxBitmapButton(parent,
-                       wxID_ANY,
-                       wxNullBitmap,
-                       wxDefaultPosition,
-                       wxDefaultSize,
-                       wxBORDER_NONE),
+      : IconButton(parent, wxNullBitmap),
         m_composer(composer)
    {
       UpdateAppearance();
@@ -588,16 +604,11 @@ private:
 // wxRcptExpandButton: small button used to expand the address entered
 // ----------------------------------------------------------------------------
 
-class wxRcptExpandButton : public wxBitmapButton
+class wxRcptExpandButton : public IconButton
 {
 public:
    wxRcptExpandButton(wxRcptControl *rcptControl, wxWindow *parent)
-      : wxBitmapButton(parent,
-                       -1,
-                       GetTransparentBitmap(_T("tb_lookup")),
-                       wxDefaultPosition,
-                       wxDefaultSize,
-                       wxBORDER_NONE)
+      : IconButton(parent, GetTransparentBitmap(_T("tb_lookup")))
       {
          m_rcptControl = rcptControl;
       }
@@ -617,16 +628,11 @@ private:
 // wxRcptAddButton: small button which is used to add a new recipient
 // ----------------------------------------------------------------------------
 
-class wxRcptAddButton : public wxBitmapButton
+class wxRcptAddButton : public IconButton
 {
 public:
    wxRcptAddButton(wxRcptMainControl *rcptControl, wxWindow *parent)
-      : wxBitmapButton(parent,
-                       -1,
-                       GetTransparentBitmap(_T("tb_new")),
-                       wxDefaultPosition,
-                       wxDefaultSize,
-                       wxBORDER_NONE)
+      : IconButton(parent, GetTransparentBitmap(_T("tb_new")))
       {
          m_rcptControl = rcptControl;
 
@@ -651,16 +657,11 @@ private:
 // recipient controls
 // ----------------------------------------------------------------------------
 
-class wxRcptRemoveButton : public wxBitmapButton
+class wxRcptRemoveButton : public IconButton
 {
 public:
    wxRcptRemoveButton(wxRcptExtraControl *rcptControl, wxWindow *parent)
-      : wxBitmapButton(parent,
-                       -1,
-                       GetTransparentBitmap(_T("tb_trash")),
-                       wxDefaultPosition,
-                       wxDefaultSize,
-                       wxBORDER_NONE)
+      : IconButton(parent, GetTransparentBitmap(_T("tb_trash")))
       {
          m_rcptControl = rcptControl;
 
