@@ -36,6 +36,8 @@
 #include <wx/notebook.h>
 #include <wx/listctrl.h>         // for wxListEvent
 
+#include "gui/wxMenuDefs.h"      // for WXMENU_COMPOSE_INSERTFILE
+
 #include "Composer.h"
 #ifdef OS_WIN
 #include "Mpers.h"
@@ -62,6 +64,7 @@ extern const MOption MP_REPLY_MSGPREFIX;
 
 extern const MPersMsgBox *M_MSGBOX_FORMAT_PARAGRAPH_BEFORE_EXIT;
 extern const MPersMsgBox *M_MSGBOX_LANG_CHANGED_WARN;
+extern const MPersMsgBox *M_MSGBOX_REMOVE_ALL_ATTACH;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -74,6 +77,10 @@ enum
    Button_FormatAll,
    Button_UnformatParagraph,
    Button_UnformatAll,
+
+   Button_AttachFile = 200,
+   Button_RemoveAllAttach,
+
    ListCtrl_Attachments
 };
 
@@ -130,6 +137,8 @@ public:
    void OnFirstTimeModify() { MessageEditor::OnFirstTimeModify(); }
 
    bool HasEncoding() const { return m_encoding != wxFONTENCODING_SYSTEM; }
+
+   void DeleteAllAttachments();
 
    friend class FormattedParagraph;
    friend class wxBareBonesEditorNotebook;
@@ -208,6 +217,10 @@ protected:
    void OnFormatAll(wxCommandEvent& event);
    void OnUnformatParagraph(wxCommandEvent& event);
    void OnUnformatAll(wxCommandEvent& event);
+
+   void OnAttachFile(wxCommandEvent& event);
+   void OnRemoveAllAttach(wxCommandEvent& event);
+
    void OnItemActivate(wxListEvent& event);
    void OnItemRightClick(wxListEvent& event);
 
@@ -641,6 +654,12 @@ BEGIN_EVENT_TABLE(wxBareBonesEditorNotebook, wxNotebook)
       wxBareBonesEditorNotebook::OnUnformatParagraph)
    EVT_BUTTON(Button_UnformatAll,
       wxBareBonesEditorNotebook::OnUnformatAll)
+
+   EVT_BUTTON(Button_AttachFile,
+      wxBareBonesEditorNotebook::OnAttachFile)
+   EVT_BUTTON(Button_RemoveAllAttach,
+      wxBareBonesEditorNotebook::OnRemoveAllAttach)
+
    EVT_LIST_ITEM_ACTIVATED(ListCtrl_Attachments,
       wxBareBonesEditorNotebook::OnItemActivate)
    EVT_LIST_ITEM_RIGHT_CLICK(ListCtrl_Attachments,
@@ -660,23 +679,26 @@ wxBareBonesEditorNotebook::wxBareBonesEditorNotebook(
    m_textControl = new wxBareBonesTextControl(editor,body);
    textColumn->Add(m_textControl,1,wxEXPAND);
 
-   textColumn->Add(CreateButtonRow(body),0,wxALL | wxALIGN_LEFT,10);
+   textColumn->Add(CreateButtonRow(body),
+                   0,
+                   wxTOP | wxBOTTOM | wxALIGN_CENTER_HORIZONTAL,
+                   LAYOUT_Y_MARGIN);
 
    CreateAttachmentPage();
 }
 
 wxSizer *wxBareBonesEditorNotebook::CreateButtonRow(wxWindow *parent)
 {
-   wxSizer *buttonRow = new wxGridSizer(1,4,0,10);
+   wxSizer *buttonRow = new wxBoxSizer(wxHORIZONTAL);
 
    buttonRow->Add(new wxButton(parent,Button_FormatParagraph,
-      _("Wrap Paragraph")),0,wxEXPAND);
+      _("Wrap &Paragraph")),0,wxEXPAND|wxRIGHT, LAYOUT_X_MARGIN);
    buttonRow->Add(new wxButton(parent,Button_FormatAll,
-      _("Wrap All")),0,wxEXPAND);
+      _("&Wrap All")),0,wxEXPAND|wxLEFT|wxRIGHT, LAYOUT_X_MARGIN);
    buttonRow->Add(new wxButton(parent,Button_UnformatParagraph,
-      _("Unwrap Paragraph")),0,wxEXPAND);
+      _("Unwrap Paragrap&h")),0,wxEXPAND|wxLEFT|wxRIGHT, LAYOUT_X_MARGIN);
    buttonRow->Add(new wxButton(parent,Button_UnformatAll,
-      _("Unwrap All")),0,wxEXPAND);
+      _("&Unwrap All")),0,wxEXPAND|wxLEFT, LAYOUT_X_MARGIN);
 
    return buttonRow;
 }
@@ -692,42 +714,83 @@ void wxBareBonesEditorNotebook::CreateAttachmentPage()
    m_attachments = new wxBareBonesAttachments(files);
    fileSizer->Add(m_attachments,1,wxEXPAND);
 
-   m_attachments->AssignImageList(
-      new wxImageList(32,32),wxIMAGE_LIST_NORMAL);
+   wxSizer *sizerBtns = new wxBoxSizer(wxHORIZONTAL);
+   sizerBtns->Add(new wxButton(files, Button_AttachFile, _("&Attach file...")),
+                  0,
+                  wxRIGHT, LAYOUT_X_MARGIN);
+   sizerBtns->Add(new wxButton(files, Button_RemoveAllAttach, _("&Remove all")),
+                  0,
+                  wxLEFT, LAYOUT_X_MARGIN);
+
+   fileSizer->Add(sizerBtns,
+                  0,
+                  wxTOP | wxBOTTOM | wxALIGN_CENTER_HORIZONTAL,
+                  LAYOUT_Y_MARGIN);
+
+   // FIXME: don't hardcode 32 here
+   m_attachments->AssignImageList(new wxImageList(32,32),wxIMAGE_LIST_NORMAL);
 }
 
-void wxBareBonesEditorNotebook::OnFormatParagraph(wxCommandEvent& event)
+void wxBareBonesEditorNotebook::OnFormatParagraph(wxCommandEvent& /* event */)
 {
    FormattedParagraph paragraph(m_textControl,m_editor);
 
    paragraph.FromCursor();
    paragraph.Format();
-
-   event.Skip();
 }
 
-void wxBareBonesEditorNotebook::OnFormatAll(wxCommandEvent& event)
+void wxBareBonesEditorNotebook::OnFormatAll(wxCommandEvent& /* event */)
 {
    FormattedParagraph paragraph(m_textControl,m_editor);
    paragraph.FormatAll();
-   event.Skip();
 }
 
-void wxBareBonesEditorNotebook::OnUnformatParagraph(wxCommandEvent& event)
+void wxBareBonesEditorNotebook::OnUnformatParagraph(wxCommandEvent& /* event */)
 {
    FormattedParagraph paragraph(m_textControl,m_editor);
 
    paragraph.FromCursor();
    paragraph.Unformat();
-
-   event.Skip();
 }
 
-void wxBareBonesEditorNotebook::OnUnformatAll(wxCommandEvent& event)
+void wxBareBonesEditorNotebook::OnUnformatAll(wxCommandEvent& /* event */)
 {
    FormattedParagraph paragraph(m_textControl,m_editor);
    paragraph.UnformatAll();
-   event.Skip();
+}
+
+void wxBareBonesEditorNotebook::OnAttachFile(wxCommandEvent& /* event */)
+{
+   // we don't want to duplicate the code from wxComposeView.cpp here so just
+   // emulate a menu command
+   wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, WXMENU_COMPOSE_INSERTFILE);
+
+   GetParent()->ProcessEvent(event);
+}
+
+void wxBareBonesEditorNotebook::OnRemoveAllAttach(wxCommandEvent& /* event */)
+{
+   // are there any attachment to remove, in fact?
+   const int count = m_attachments->GetItemCount();
+   if ( !count )
+   {
+      // nothing to do
+      return;
+   }
+
+   // ask for confirmation before removing potentially many attachments
+   if ( MDialog_YesNoDialog
+        (
+            _("Remove all the attachments from this message\n"
+              "(files on the disk will not be affected)?"),
+            this,
+            MDIALOG_YESNOTITLE,
+            M_DLG_NO_DEFAULT | M_DLG_NOT_ON_NO,
+            M_MSGBOX_REMOVE_ALL_ATTACH
+        ) )
+   {
+      m_editor->DeleteAllAttachments();
+   }
 }
 
 void wxBareBonesEditorNotebook::OnItemActivate(wxListEvent& event)
@@ -853,6 +916,11 @@ BareBonesEditor::BareBonesEditor()
 
 BareBonesEditor::~BareBonesEditor()
 {
+   DeleteAllAttachments();
+}
+
+void BareBonesEditor::DeleteAllAttachments()
+{
    // free all EditorContentPart objects in wxListCtrl
    const int count = m_attachments->GetItemCount();
    for ( int itemIndex = 0; itemIndex < count; ++itemIndex )
@@ -868,6 +936,8 @@ BareBonesEditor::~BareBonesEditor()
       if ( file )
          file->DecRef();
    }
+
+   m_attachments->DeleteAllItems();
 }
 
 void BareBonesEditor::Create(Composer *composer, wxWindow *parent)
