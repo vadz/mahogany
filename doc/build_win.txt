@@ -38,7 +38,7 @@ a) wxWindows
    Mahogany depends on wxWindows and prior to compiling Mahogany you need to
 build the wxMSW library.
 
-   You may use either wxMSW 2.5.2 release (latest 2.5 release as of the time
+   You may use either wxMSW 2.5.3 release (latest 2.5 release as of the time
 of this writing, if a newer one is available, do use it) or the latest
 wxWindows sources from cvs HEAD which usually provide more functionality. Note
 that you may use M_STABLE tag to check out the wxWindows version which is known
@@ -46,11 +46,15 @@ to work well with Mahogany.
 
    Before building Mahogany you will need to build wxWindows. To do it, you
 should open build/msw/wx.dsw in wxWindows directory and build all projects in
-it. You may use extra\scripts\ wxmsw_setup.h file instead of the standard
+it. You may use extra\scripts\wxmsw_setup.h file instead of the standard
 setup.h when building if you want to disable all the features not needed by
 Mahogany but doing this is optional and you should revert to the standard
 wx/setup.h if using wxmsw_setup.h results in errors (it is not always up to
 date...).
+
+   Also before opening M.sln for the first time, open it in any text editor
+and replace all occurences of "L:\wxWindows" with the path where your version
+of wxWindows is installed.
 
 
 b) DSPAM
