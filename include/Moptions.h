@@ -17,6 +17,8 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_PROFILE_TYPE;
+extern const MOption MP_CONFIG_SOURCE_TYPE;
+extern const MOption MP_CONFIG_SOURCE_PRIO;
 extern const MOption MP_VERSION;
 extern const MOption MP_FIRSTRUN;
 extern const MOption MP_RECORDDEFAULTS;
@@ -406,7 +408,6 @@ extern const MOption MP_AWAY_AUTO_EXIT;
 extern const MOption MP_AWAY_REMEMBER;
 extern const MOption MP_AWAY_STATUS;
 extern const MOption MP_CREATE_INTERNAL_MESSAGE;
-extern const MOption MP_CONFIG_SOURCE_TYPE;
 
 // ----------------------------------------------------------------------------
 // the option names
@@ -656,6 +657,10 @@ extern const MOption MP_CONFIG_SOURCE_TYPE;
 //@{
 /// The Profile Type. [OBSOLETE]
 #define   MP_PROFILE_TYPE_NAME      "ProfileType"
+/// The type of the config source
+#define   MP_CONFIG_SOURCE_TYPE_NAME "Type"
+/// The priority of the config source
+#define   MP_CONFIG_SOURCE_PRIO_NAME "Priority"
 /// the current user identity
 #define   MP_CURRENT_IDENTITY_NAME  "Identity"
 /// the user's full name
@@ -1215,8 +1220,6 @@ extern const MOption MP_CONFIG_SOURCE_TYPE;
 /// stop "folder internal data" message
 #define MP_CREATE_INTERNAL_MESSAGE_NAME   "CreateInternalMessage"
 
-#define MP_CONFIG_SOURCE_TYPE_NAME "ConfigSource"
-
 //@}
 
 // ----------------------------------------------------------------------------
@@ -1227,6 +1230,10 @@ extern const MOption MP_CONFIG_SOURCE_TYPE;
 //@{
 /// The Profile Type. [OBSOLETE]
 #define   MP_PROFILE_TYPE_DEFVAL      0l
+/// The type of the config source
+#define   MP_CONFIG_SOURCE_TYPE_DEFVAL ""
+/// The priority of the config source
+#define   MP_CONFIG_SOURCE_PRIO_DEFVAL 0l
 /// our version
 #define   MP_VERSION_DEFVAL          M_EMPTYSTRING
 /// are we running for the first time?
@@ -2209,8 +2216,6 @@ extern const MOption MP_CONFIG_SOURCE_TYPE;
 
 /// stop "folder internal data" message
 #define MP_CREATE_INTERNAL_MESSAGE_DEFVAL   1
-
-#define MP_CONFIG_SOURCE_TYPE_DEFVAL "local"
 
 //@}
 

@@ -82,6 +82,8 @@ static inline int NewMOption()
 // ----------------------------------------------------------------------------
 
 const MOption MP_PROFILE_TYPE;
+const MOption MP_CONFIG_SOURCE_TYPE;
+const MOption MP_CONFIG_SOURCE_PRIO;
 const MOption MP_VERSION;
 const MOption MP_FIRSTRUN;
 const MOption MP_RECORDDEFAULTS;
@@ -472,7 +474,6 @@ const MOption MP_AWAY_AUTO_EXIT;
 const MOption MP_AWAY_REMEMBER;
 const MOption MP_AWAY_STATUS;
 const MOption MP_CREATE_INTERNAL_MESSAGE;
-const MOption MP_CONFIG_SOURCE_TYPE;
 
 // ----------------------------------------------------------------------------
 // defaults
@@ -484,6 +485,8 @@ const MOption MP_CONFIG_SOURCE_TYPE;
 static const MOptionData MOptions[] =
 {
     DEFINE_OPTION(MP_PROFILE_TYPE),
+    DEFINE_OPTION(MP_CONFIG_SOURCE_TYPE),
+    DEFINE_OPTION(MP_CONFIG_SOURCE_PRIO),
     DEFINE_OPTION(MP_VERSION),
     DEFINE_OPTION(MP_FIRSTRUN),
     DEFINE_OPTION(MP_RECORDDEFAULTS),
@@ -868,7 +871,6 @@ static const MOptionData MOptions[] =
     DEFINE_OPTION(MP_AWAY_REMEMBER),
     DEFINE_OPTION(MP_AWAY_STATUS),
     DEFINE_OPTION(MP_CREATE_INTERNAL_MESSAGE),
-    DEFINE_OPTION(MP_CONFIG_SOURCE_TYPE),
 };
 
 // ============================================================================
