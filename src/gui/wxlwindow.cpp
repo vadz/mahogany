@@ -10,48 +10,31 @@
 #   pragma implementation "wxlwindow.h"
 #endif
 
-#include "Mpch.h"
+#include   "wxlwindow.h"
 
-#include "gui/wxlwindow.h"
+#define   VAR(x)   cout << #x"=" << x << endl;
 
 BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
-   EVT_PAINT(wxLayoutWindow::OnPaint)
-   EVT_CHAR(wxLayoutWindow::OnChar)
+   EVT_PAINT  (wxLayoutWindow::OnPaint)
+   EVT_CHAR   (wxLayoutWindow::OnChar)
    EVT_LEFT_DOWN(wxLayoutWindow::OnMouse)
 END_EVENT_TABLE()
 
 wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
-              : wxScrolledWindow(parent, -1, wxDefaultPosition, wxDefaultSize,
-                                 wxHSCROLL | wxVSCROLL | wxBORDER)
+   : wxScrolledWindow(parent)
 {
    m_ScrollbarsSet = false;
    m_EventId = -1;
 }
 
-#ifdef __WXMSW__
-long
-wxLayoutWindow::MSWGetDlgCode()
-{
-   // if we don't return this, we won't get OnChar() events
-   return DLGC_WANTCHARS | DLGC_WANTARROWS | DLGC_WANTMESSAGE;
-}
-#endif //MSW
-
 void
 wxLayoutWindow::OnMouse(wxMouseEvent& event)
 {
-   SetFocus();
-
    if(m_EventId == -1) // nothing to do
       return;
    
-   // this is unintuitive
-   wxClientDC dc(this);
-   PrepareDC( dc );
-
-   m_FindPos.x = dc.DeviceToLogicalX( event.GetX() );
-   m_FindPos.y = dc.DeviceToLogicalY( event.GetY() );
-
+   m_FindPos.x = event.GetX();
+   m_FindPos.y = event.GetY();
    m_FoundObject = NULL;
 
 #ifdef   WXLAYOUT_DEBUG
@@ -85,6 +68,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    
    long keyCode = event.KeyCode();
    wxPoint p;
+   CoordType help;
    
    switch(event.KeyCode())
    {
@@ -117,11 +101,19 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       m_llist.SetCursor(p);
       break;
    case WXK_DELETE :
-      m_llist.Delete(1);
+      if(event.ControlDown()) // delete to end of line
+      {
+         help = m_llist.GetLineLength(
+            m_llist.FindCurrentObject(NULL))
+            - m_llist.GetCursor().x;
+         m_llist.Delete(help ? help : 1);
+      }
+      else
+         m_llist.Delete(1);
       break;
    case WXK_BACK: // backspace
-      m_llist.MoveCursor(-1);
-      m_llist.Delete(1);
+      if(m_llist.MoveCursor(-1))
+         m_llist.Delete(1);
       break;
    case WXK_RETURN:
       m_llist.LineBreak();
@@ -175,6 +167,8 @@ wxLayoutWindow::UpdateScrollbars(void)
 void
 wxLayoutWindow::Print(void)
 {
+   VAR(wxThePrintSetupData);
+
    wxPostScriptDC   dc("layout.ps",true,this);
    if (dc.Ok() && dc.StartDoc((char *)_("Printing message...")))
    {
