@@ -184,34 +184,32 @@ bool MXFMailImporter::ImportFolders()
       return FALSE;
    }
 
-   // FIXME: should parse .xfmailrc from here to find maildir value
-   // FIXED
-
+   // find the directory where XFMail folders live by default (i.e. the
+   // relative paths are relative to this maildir)
    wxString filenamerc = GetXFMailDir() + ".xfmailrc";
    wxTextFile filerc(filenamerc);
    if ( filerc.Open() )
    {
+      size_t nLines = filerc.GetLineCount();
+      for ( size_t nLine = 0; nLine < nLines; nLine++ )
+      {
+         const wxString& line = filerc[nLine];
 
-    size_t nLines = filerc.GetLineCount();
-    for ( size_t nLine = 0; nLine < nLines; nLine++ )
-    {
-       const wxString& line = filerc[nLine];
+         int nEq = line.Find('=');
+         if ( nEq == wxNOT_FOUND )
+         {
+            wxLogDebug("%s(%u): missing '=' sign.", filenamerc.c_str(), nLine + 1);
 
-       int nEq = line.Find('=');
-       if ( nEq == wxNOT_FOUND )
-       {
-          wxLogDebug("%s(%u): missing '=' sign.", filenamerc.c_str(), nLine + 1);
+            // skip line
+            continue;
+         }
 
-          // skip line
-          continue;
-       }
-
-       wxString var(line, (size_t)nEq), value = line.c_str() + nEq + 1;
-       if ( var == "maildir" && !!value )
-       {
-          ImportSetting(filenamerc, nLine + 1, var, value);
-       }
-    }
+         wxString var(line, (size_t)nEq), value = line.c_str() + nEq + 1;
+         if ( var == "maildir" && !!value )
+         {
+            ImportSetting(filenamerc, nLine + 1, var, value);
+         }
+      }
    }
 
    if ( !m_mailDir )
@@ -220,6 +218,7 @@ bool MXFMailImporter::ImportFolders()
    if ( m_mailDir.Last() != '/' )
       m_mailDir += '/';
 
+   bool error = FALSE;
    size_t nImported = 0;
    bool bLastWasSystem = FALSE;
    size_t nLines = file.GetLineCount();
@@ -316,16 +315,20 @@ bool MXFMailImporter::ImportFolders()
       }
       else
       {
+         // set the error flag, but continue with the other folders
+         error = TRUE;
          wxLogError(_("Error importing folder '%s'."), folderName.c_str());
       }
    }
 
-   if ( !nImported )
+   if ( error && !nImported )
    {
-      wxLogError(_("%s %s folder import failed."), "XFMail", m_mailDir.c_str());
+      wxLogError(_("%s folder import from '%s' failed."), "XFMail",
+                 m_mailDir.BeforeLast('/').c_str());
 
       return FALSE;
    }
+   //else: we did import some folders, so consider it as success
 
    // refresh the tree(s)
    MEventManager::Send
