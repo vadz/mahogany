@@ -51,8 +51,8 @@
 
 #include "MFolderDialogs.h"
 
+#include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
-
 
 #include <errno.h>
 
@@ -63,8 +63,8 @@
 
 
 
-/** 
-  The MWizard is a very simple to use Wizard class. Each wizard uses a 
+/**
+  The MWizard is a very simple to use Wizard class. Each wizard uses a
   set of pages (can be shared across wizards) and knows on which page
   to start and finish. The decision which page is next/previous is
   handled by the page which can query the Wizard for a numeric id to
@@ -104,7 +104,7 @@ class MWizard : public wxWizard
 {
 public:
    enum MWizardType { MWizardType_CreateFolder };
-   
+
    MWizard(MWizardType type,
            MWizardPageId first,
            MWizardPageId last,
@@ -157,7 +157,7 @@ public:
          m_Wizard = wizard;
       }
 
-    /* These are two wxWindows wxWizard functions that we must override 
+    /* These are two wxWindows wxWizard functions that we must override
     */
    virtual wxWizardPage *GetPrev() const { return GetPageById(GetPreviousPageId()); }
    virtual wxWizardPage *GetNext() const { return GetPageById(GetNextPageId()); }
@@ -168,13 +168,13 @@ public:
 
    MWizardPageId GetPageId() const { return m_id; }
    virtual MWizard * GetWizard() const { return (MWizard *)m_Wizard; }
-   
+
    void OnWizardCancel(wxWizardEvent& event);
-   
+
 protected:
    wxWizardPage *GetPageById(MWizardPageId id) const
       { return GetWizard()->GetPageById(id); }
-      
+
 
    // creates an "enhanced panel" for placing controls into under the static
    // text (explanation)
@@ -185,7 +185,7 @@ private:
    MWizardPageId m_id;
    // the wizard
    MWizard *m_Wizard;
-   
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -257,6 +257,7 @@ public:
                  _("Create a Mailbox Entry"),
                  NULL, parent)
       {
+         m_wantsDialog = false;
          m_ParentFolder = parentFolder;
          SafeIncRef(m_ParentFolder);
       }
@@ -277,9 +278,14 @@ public:
 
    FolderParams * GetParams() { return &m_Params; }
    MFolder * GetPFolder() { return m_ParentFolder; }
+
+   void SetUserWantsDialog() { m_wantsDialog = true; }
+   bool UserWantsDialog() const { return m_wantsDialog; }
+
 protected:
    MFolder * m_ParentFolder;
    FolderParams m_Params;
+   bool m_wantsDialog;     // user wants to use dialog instead of wizard
 };
 
 
@@ -291,26 +297,56 @@ class MWizard_CreateFolder_WelcomePage : public MWizardPage
 {
 public:
    MWizard_CreateFolder_WelcomePage(MWizard *wizard);
-   virtual MWizardPageId GetPreviousPageId() const
-      { return MWizard_PageNone; }
+
+   virtual MWizardPageId GetPreviousPageId() const { return MWizard_PageNone; }
+   virtual MWizardPageId GetNextPageId() const;
+
 private:
+   wxCheckBox *m_checkNoWizard;
 };
 
 
 MWizard_CreateFolder_WelcomePage::MWizard_CreateFolder_WelcomePage(MWizard *wizard)
    : MWizardPage(wizard, MWizard_CreateFolder_Welcome)
 {
-   (void)new wxStaticText(this, -1, _(
+   wxStaticText *msg = new wxStaticText(this, -1, _(
       "This wizard will help you to set up\n"
       "a new mailbox entry.\n"
       "This can be either for an existing\n"
       "mailbox or mail account or for a new\n"
       "mailbox that you want to create.\n"
       "\n"
-      "If you decide not to use this dialog,\n"
-      "just press [Cancel] at any time and\n"
-      "you can create the entry manually."
+      "You may also use the check box below to\n"
+      "bypass the wizard and create the folder\n"
+      "by manually filling in the required\n"
+      "parameters (for advanced users only!)"
       ));
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
+   wxArrayString labels;
+   labels.Add(_("don't use the wizard"));
+
+   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
+
+   // VZ: hmm, the checkbox label is truncated under wxGTK - bug?
+   maxwidth += 10;
+
+   m_checkNoWizard = panel->CreateCheckBox(labels[0], maxwidth, NULL);
+
+   panel->Layout();
+}
+
+MWizardPageId MWizard_CreateFolder_WelcomePage::GetNextPageId() const
+{
+   if ( m_checkNoWizard->GetValue() )
+   {
+      // cancel wizard
+      ((CreateFolderWizard*)GetWizard())->SetUserWantsDialog();
+
+      return MWizard_PageNone;
+   }
+
+   return MWizardPage::GetNextPageId();
 }
 
 // CreateFolderWizardTypePage
@@ -346,12 +382,12 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
         "\n"
         "So, first you need to decide what kind\n"
         "of entry you would like to create:"));
-   
+
    wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
-   
+
    wxArrayString labels;
    labels.Add(_("Mailbox type"));
-   
+
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
 
       // a choice control, the entries are taken from the label string which is
@@ -363,7 +399,7 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
                                       "IMAP Server:NNTP News Server:"
                                       "IMAP Hierarchy:NNTP News Hierarchy:"
                                       "NNTP Newsgroup:Local News Hierarchy:"
-                                      "Local Newsgroup:Folder Group"), 
+                                      "Local Newsgroup:Folder Group"),
                                     maxwidth, NULL);
    panel->Layout();
 }
@@ -373,7 +409,7 @@ MWizard_CreateFolder_TypePage::GetNextPageId() const
 {
    int sel = m_TypeCtrl->GetSelection();
    sel += MWizard_CreateFolder_FirstType;
-   
+
    CHECK(sel >= MWizard_CreateFolder_FirstType
          && sel <= MWizard_CreateFolder_LastType,
          MWizard_CreateFolder_Final, "Unknown folder type");
@@ -397,6 +433,7 @@ public:
       { return MWizard_CreateFolder_Type; }
 private:
    wxTextCtrl *m_Name, *m_Server, *m_UserId, *m_Password, *m_Path;
+   wxFileOrDirBrowseButton *m_browsePath;
    FolderEntryType m_Type;
 };
 
@@ -417,7 +454,7 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
       needsUserId = FALSE,
       needsPassword = FALSE,
       needsPath = FALSE;
-   
+
    switch(type)
    {
    case ET_GROUP:
@@ -504,33 +541,33 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
    }
    else
       text.Printf(msg, entry.c_str());
-      
+
    wxStaticText *msgCtrl = new wxStaticText(
       this, -1,text);
-   
+
    wxEnhancedPanel *panel = CreateEnhancedPanel(msgCtrl);
-   
+
    wxArrayString labels;
    labels.Add(_("Server Host"));
    labels.Add(_("Your Login"));
    labels.Add(_("Your Password"));
    labels.Add(pathName);
-   labels.Add(_("Entry Name"));   
+   labels.Add(_("Entry Name"));
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
 
 #define CREATE_CTRL(name, creat) \
 if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
-   
+
    wxControl *last = NULL;
    CREATE_CTRL(Server,
-               panel->CreateTextWithLabel(labels[0],maxwidth,last)); 
+               panel->CreateTextWithLabel(labels[0],maxwidth,last));
    CREATE_CTRL(UserId,
-               panel->CreateTextWithLabel(labels[1],maxwidth,last)); 
+               panel->CreateTextWithLabel(labels[1],maxwidth,last));
    CREATE_CTRL(Password,
                panel->CreateTextWithLabel(labels[2],maxwidth,last, 0,
-                                          wxPASSWORD)); 
+                                          wxPASSWORD));
    CREATE_CTRL(Path, panel->CreateFileOrDirEntry(labels[3], maxwidth,
-                                  last,NULL,TRUE,FALSE));
+                                  last,&m_browsePath,TRUE,FALSE));
 #undef CREATE_CTRL
    wxStaticText * msg2 = panel->CreateMessage(
       _("\n"
@@ -538,6 +575,13 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
         "a name to appear in the tree."
         ), m_Path);
    m_Name = panel->CreateTextWithLabel(labels[4],maxwidth, msg2);
+
+   if ( type == ET_MH )
+   {
+      // the browser button should allow to select directories, not folders
+      // then
+      m_browsePath->BrowseForDirectories();
+   }
 
    panel->Layout();
 }
@@ -547,7 +591,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
 {
    CreateFolderWizard::FolderParams *params =
       ((CreateFolderWizard*)GetWizard())->GetParams();
-   
+
    if(m_Name && m_Name->GetValue() != params->m_Name)
       params->m_Name = m_Name->GetValue();
    if(m_Path && params->m_Path != m_Path->GetValue())
@@ -571,7 +615,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
 
    params->m_FolderType = 0;
    params->m_FolderFlags = MF_FLAGS_DEFAULT;
-   
+
    switch(m_Type)
    {
    case ET_IMAP:
@@ -617,7 +661,7 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
    MFolder *f = ((CreateFolderWizard*)GetWizard())->GetPFolder();
    ProfileBase * p = ProfileBase::CreateProfile(f->GetName());
    CHECK(p,FALSE,"No profile?");
-      
+
    m_Name->SetValue(_("New Folder"));
    if(GetPageId() != MWizard_CreateFolder_ImapServer
       && GetPageId() != MWizard_CreateFolder_NntpServer
@@ -734,7 +778,7 @@ MWizard::GetPageById(MWizardPageId id)
 {
    if ( id == GetLastPageId()+1 || id == MWizard_PageNone)
       return (MWizardPage *)NULL;
-   
+
    if ( !m_WizardPages[id-GetFirstPageId()] )
    {
 #define CREATE_PAGE(pid)                             \
@@ -773,58 +817,67 @@ MWizard::GetPageById(MWizardPageId id)
 
 
 MFolder *
-RunCreateFolderWizard(bool *cancelled, MFolder *parent, wxWindow *parentWin)
+RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
 {
-   ASSERT(cancelled);
-
    // Never show the wizard for advanced users:
    if(READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED)
    {
-      *cancelled = TRUE;
+      if ( wantsDialog )
+         *wantsDialog = true;
       return NULL;
    }
 
    CHECK(parent,NULL, "No parent folder?");
    CreateFolderWizard *wizard = new CreateFolderWizard(parent, parentWin);
    MFolder *newfolder = NULL;
-   if(wizard->Run() == TRUE)
+   if ( wantsDialog )
+      *wantsDialog = false;
+   if ( wizard->Run() )
    {
-      *cancelled = FALSE;
-      CreateFolderWizard::FolderParams *params =
-         wizard->GetParams();
-      newfolder = CreateFolderTreeEntry(
-         parent, params->m_Name,
-         (FolderType) params->m_FolderType,
-         params->m_FolderFlags,
-         params->m_Path, TRUE);
-      if(newfolder)
+      if ( wizard->UserWantsDialog() )
       {
-         ProfileBase *p =
-            ProfileBase::CreateProfile(newfolder->GetName());
-         p->writeEntry(MP_FOLDER_PASSWORD, params->m_Password);
-         FolderType type = (FolderType) params->m_FolderType;
-         switch(type)
+         if ( wantsDialog )
+            *wantsDialog = true;
+      }
+      else // wizard completed successfully, create folder
+      {
+         CreateFolderWizard::FolderParams *params =
+            wizard->GetParams();
+         newfolder = CreateFolderTreeEntry(
+            parent, params->m_Name,
+            (FolderType) params->m_FolderType,
+            params->m_FolderFlags,
+            params->m_Path, TRUE);
+         if(newfolder)
          {
-         case MF_IMAP:
-            p->writeEntry(MP_IMAPHOST, params->m_Server);
-         case MF_NNTP:
-            p->writeEntry(MP_NNTPHOST, params->m_Server);
-            break;
-         case MF_POP:
-            p->writeEntry(MP_POPHOST, params->m_Server);
-            break;
-         default:
-            ; // nothing
-         }
-         if(FolderTypeHasUserName(type))
-         {
-            p->writeEntry(MP_USERNAME, params->m_Login);
+            ProfileBase *p =
+               ProfileBase::CreateProfile(newfolder->GetName());
             p->writeEntry(MP_FOLDER_PASSWORD, params->m_Password);
+            FolderType type = (FolderType) params->m_FolderType;
+            switch(type)
+            {
+            case MF_IMAP:
+               p->writeEntry(MP_IMAPHOST, params->m_Server);
+            case MF_NNTP:
+               p->writeEntry(MP_NNTPHOST, params->m_Server);
+               break;
+            case MF_POP:
+               p->writeEntry(MP_POPHOST, params->m_Server);
+               break;
+            default:
+               ; // nothing
+            }
+            if(FolderTypeHasUserName(type))
+            {
+               p->writeEntry(MP_USERNAME, params->m_Login);
+               p->writeEntry(MP_FOLDER_PASSWORD, params->m_Password);
+            }
+            p->DecRef();
          }
-         p->DecRef();
       }
    }
-   *cancelled = TRUE;
+
    delete wizard;
+
    return newfolder;
 }

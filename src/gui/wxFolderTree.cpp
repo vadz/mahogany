@@ -531,15 +531,22 @@ void wxFolderTree::OnProperties(MFolder *folder)
 
 MFolder *wxFolderTree::OnCreate(MFolder *parent)
 {
-   bool cancelled;
-   MFolder *newfolder = RunCreateFolderWizard(&cancelled, parent,
-                                              ((wxMApp *)mApplication)->GetTopWindow());
-   if(cancelled)
-      return ShowFolderCreateDialog(((wxMApp *)mApplication)->GetTopWindow(),
-                                    FolderCreatePage_Default,
-                                    parent);
+   wxWindow *winTop = ((wxMApp *)mApplication)->GetTopWindow();
+
+   bool wantsDialog;
+   MFolder *newfolder = RunCreateFolderWizard(&wantsDialog, parent, winTop);
+   if ( wantsDialog )
+   {
+      // users wants to use the dialog directly instead of the wizard
+      newfolder = ShowFolderCreateDialog(winTop, FolderCreatePage_Default, parent);
+   }
    else
-      return newfolder;
+   {
+      // RunCreateFolderWizard() doesn't dec ref it
+      parent->DecRef();
+   }
+
+   return newfolder;
 }
 
 bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
