@@ -591,41 +591,45 @@ static inline const MenuItemInfo& GetMenuItem(int n)
 
 void AppendToMenu(wxMenu *menu, int& n)
 {
-   if ( n == WXMENU_SEPARATOR ) {
-      menu->AppendSeparator();
-   }
-   else {
-      int id = GetMenuItem(n).idMenu;
-      if ( id == WXMENU_SUBMENU ) {
-         // append all entries until the next one with id == WXMENU_SUBMENU to
-         // a submenu
-         wxMenu *submenu = new wxMenu();
+   int id = GetMenuItem(n).idMenu;
+   switch ( id )
+   {
+      case WXMENU_SEPARATOR:
+         menu->AppendSeparator();
+         break;
 
-         int nSubMenu = n;
-         for ( n++; GetMenuItem(n).idMenu != WXMENU_SUBMENU; n++ )
+      case WXMENU_SUBMENU:
          {
-            AppendToMenu(submenu, n);
+            // append all entries until the next one with id == WXMENU_SUBMENU
+            // to a submenu
+            wxMenu *submenu = new wxMenu();
+
+            int nSubMenu = n;
+            for ( n++; GetMenuItem(n).idMenu != WXMENU_SUBMENU; n++ )
+            {
+               AppendToMenu(submenu, n);
+            }
+
+            const MenuItemInfo& mii = GetMenuItem(nSubMenu);
+
+            // we don't have the menu id field for the submenus so use their
+            // offset in the menu item array
+            //
+            // note that if this changes, FindSubmenu() will have to change too!
+            menu->Append(WXMENU_BEGIN + n,
+                         wxGetTranslation(mii.label),
+                         submenu,
+                         wxGetTranslation(mii.helpstring));
          }
+         break;
 
-         const MenuItemInfo& mii = GetMenuItem(nSubMenu);
-
-         // we don't have the menu id field for the submenus so use their
-         // offset in the menu item array
-         //
-         // note that if this changes, FindSubmenu() will have to change too!
-         menu->Append(WXMENU_BEGIN + n,
-                      wxGetTranslation(mii.label),
-                      submenu,
-                      wxGetTranslation(mii.helpstring));
-      }
-      else {
+      default:
          const MenuItemInfo& mii = GetMenuItem(n);
 
          menu->Append(id,
                       wxGetTranslation(mii.label),
                       wxGetTranslation(mii.helpstring),
                       mii.kind);
-      }
    }
 }
 
