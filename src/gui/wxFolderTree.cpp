@@ -2660,20 +2660,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       }
 
       // find the folder which has been changed
-      wxString profileName = profileChanged->GetName();
-      if ( profileName.empty() )
-      {
-         // root folder, ignore
-         return true;
-      }
-
-      wxString folderName = profileChanged->GetFolderName();
-
-      // we should have a valid folder name
-      CHECK( !folderName.empty(), true, "weird profile path" );
-
-      wxTreeItemId item = GetTreeItemFromName(folderName);
-
+      wxTreeItemId item = GetTreeItemFromName(profileChanged->GetFolderName());
       if ( item.IsOk() )
       {
          // the icon might have changed too
@@ -2725,6 +2712,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
             ReopenBranch(idToReopen);
          }
       }
+      //else: folder which changed is not in the tree
    }
    else if ( ev.GetId() == MEventId_FolderStatus )
    {
