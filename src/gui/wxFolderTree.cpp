@@ -1650,7 +1650,7 @@ void wxFolderTreeImpl::RestoreLabel(const wxString& label)
       m_suffix.clear();
    }
 
-   m_idEditedInPlace = 0;
+   m_idEditedInPlace = 0l;
 }
 
 void wxFolderTreeImpl::OnIdle(wxIdleEvent& WXUNUSED(event))
