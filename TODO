@@ -50,6 +50,9 @@ $Id$
 		functions is ignored - is it used anywhere?
 
 
+		When MailFolderCC is called from wxSubfolderDialog, it 
+		has no username in the IMAP spec. WHY??
+
 7      ?        We need a generic way to re-enable disabled pControls
 
 8	KB	ComposeView/header dialog: remove my old-style
