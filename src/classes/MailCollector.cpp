@@ -81,7 +81,10 @@ class MailCollectorImpl : public MailCollector
 {
 public:
    MailCollectorImpl()
-      { InternalCreate(); }
+      {
+         InternalCreate();
+         m_EventReceiver = new MCEventReceiver(this);
+      }
    /// Returns true if the mailfolder mf is an incoming folder.
    virtual bool IsIncoming(MailFolder *mf);
    /** Collect all mail from folder mf.
@@ -124,7 +127,11 @@ protected:
    /// Collect mail from this one folder.
    bool CollectOneFolder(MailFolder *mf);
    ~MailCollectorImpl()
-      { InternalDestroy(); }
+      {
+         MOcheck();
+         delete m_EventReceiver;
+         InternalDestroy();
+      }
    /// re-opens any closed folders, depending on network status
    void UpdateFolderList(void);
    /// Re-initialise the MailCollector if needed
@@ -213,18 +220,17 @@ MailCollectorImpl::InternalCreate(void)
    MAppFolderTraversal t (m_list);
    if(! t.Traverse(true))
       wxLogError(_("Cannot build list of incoming mail folders."));
-   // keep it open all the time to speed things up
+   m_ReInit = false;
    m_NewMailFolder = NULL;
+   // keep it open all the time to speed things up
    SetNewMailFolder(READ_APPCONFIG(MP_NEWMAIL_FOLDER));
-   m_EventReceiver = new MCEventReceiver(this);
-   m_ReInit = FALSE;
 }
 
 void
 MailCollectorImpl::InternalDestroy(void)
 {
+   // the m_EventReceiver is not destroyed, we continue to use it
    MOcheck();
-   delete m_EventReceiver;
    MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end(); i++)
       if((**i).m_folder)
