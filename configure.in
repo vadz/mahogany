@@ -251,7 +251,7 @@ else
 	GTK_LDFLAGS=$X_EXTRA_LIBS
 fi
 LIBS="$LIBS $GTK_LDFLAGS"
-AC_CHECK_LIB(dl,main,,AC_MSG_ERROR("dl library is needed."))
+AC_CHECK_LIB(dl,main,,AC_MSG_WARN("dl library might be needed."))
 AC_CHECK_LIB(pthread,main)
 AC_CHECK_LIB(pthreads,main)
 
