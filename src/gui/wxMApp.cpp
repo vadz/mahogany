@@ -493,8 +493,8 @@ wxMApp::OnInit()
    // this variable is not usually set under Windows, but give the user a
    // chance to override our locale detection logic in case it doesn't work
    // (which is well possible because it's totally untested)
-   const char *locale = getenv("LANG");
-   if ( locale )
+   wxString locale = getenv("LANG");
+   if ( locale.Length() > 0 )
    {
       // setting LANG to "C" disables all this
       hasLocale = (locale[0] != 'C') || (locale[1] != '\0');
@@ -528,6 +528,12 @@ wxMApp::OnInit()
 #   error "don't know how to get the current locale on this platform."
 #endif // OS
 
+   /* This is a hack for SuSE Linux which sets LANG="german" instead
+      of LANG="de". Once again, they do their own thing...
+   */
+   if( hasLocale && locale.CmpNoCase("german") == 0)
+      locale = "de";
+   
    // if we fail to load the msg catalog, remember it in this variable because
    // we can't remember this in the profile yet - it is not yet created
    bool failedToLoadMsgs = false;
@@ -666,7 +672,7 @@ wxMApp::OnInit()
 
       // the timer to poll for new mail will be started when/if MailCollector
       // is created
-      //StartTimer(Timer_PollIncoming);
+      StartTimer(Timer_PollIncoming);
 
       // another timer to do MEvent handling:
       m_IdleTimer = new IdleTimer;
