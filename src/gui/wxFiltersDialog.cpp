@@ -160,7 +160,7 @@ size_t ORC_TypesCount  = WXSIZEOF(ORC_Types);
 static
 size_t ORC_TypesCountS = WXSIZEOF(ORC_Types);
 
-static 
+static
 MFDialogTest ORC_T_Swap[] =
 {
    // Must be in the same order as ORC_Types[]
@@ -497,8 +497,7 @@ public:
 
       switch ( test )
       {
-         // spam tests or message flags are decoded separately
-         case ORC_T_IsSpam: return m_spam->ToString();
+         // message flags are decoded separately
          case ORC_T_HasFlag:
             switch ( m_choiceFlags->GetSelection() )
             {
@@ -512,7 +511,8 @@ public:
             CHECK( false, _T(""), _T("Invalid test message flag") );
 
          // Argument is used, but not for spam or message flag
-         default: return m_Argument->GetValue();
+         default:
+            return m_Argument->GetValue();
       }
    }
 
@@ -552,10 +552,6 @@ private:
 
    // the parent for all these controls
    wxWindow   *m_Parent;
-
-
-   // the spam test data
-   RefCounter<SpamOptionManager> m_spam;
 };
 
 wxCOMPILE_TIME_ASSERT( ORC_LogicalCount == ORC_L_Max, MismatchInLogicOps );
@@ -564,7 +560,6 @@ wxCOMPILE_TIME_ASSERT( ORC_Msg_Flag_Count == ORC_MF_Max, MismatchInHasFlag );
 wxCOMPILE_TIME_ASSERT( ORC_WhereCount == ORC_W_Max, MismatchInTargets );
 
 OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
-   : m_spam(SpamOptionManager::Create())
 {
    m_Parent = parent;
 
@@ -809,14 +804,17 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
 void
 OneCritControl::InitSpamOptions(const String& /* rule */)
 {
+#if 0
    CHECK_RET( m_Argument, _T("no argument control in the spam test?") );
 
    m_spam->FromString(m_Argument->GetValue());
+#endif
 }
 
 void
 OneCritControl::ShowDetails()
 {
+#if 0
    if ( m_spam->ShowDialog(GetFrame(m_Parent)) )
    {
       wxOneFilterDialog *dlg =
@@ -826,6 +824,7 @@ OneCritControl::ShowDetails()
       dlg->UpdateProgram();
    }
    //else: cancelled
+#endif // 0
 }
 
 void CritDetailsButton::OnClick(wxCommandEvent& WXUNUSED(event))
@@ -877,7 +876,7 @@ public:
       MFDialogAction action = GetAction();
       if ( ! FilterActionNeedsArg(action) )
          return _T(""); // Don't return the value if it won't be used
- 
+
       // message flags are decoded separately
       if ( FilterActionMsgFlag(GetAction()) )
       {
@@ -1710,7 +1709,7 @@ private:
   wxString m_name;
   wxString m_nameNew;
 public:
-   RenameAFilterTraversal(MFolder* folder, wxString name, wxString nameNew) 
+   RenameAFilterTraversal(MFolder* folder, wxString name, wxString nameNew)
       : MFolderTraversal(*folder)
       , m_name(name)
       , m_nameNew(nameNew)
