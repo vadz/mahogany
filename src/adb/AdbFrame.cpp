@@ -77,6 +77,33 @@
 // the root path for all our config entries
 #define ADB_CONFIG_PATH "AdbEditor"
 
+// the profile entries we use
+
+// enum must be in sync with the array below
+enum
+{
+  ConfigName_LastNewEntry,
+  ConfigName_LastNewWasGroup,
+  ConfigName_AddressBooks,
+  ConfigName_AddressBookProviders,
+  ConfigName_ExpandedBranches,
+  ConfigName_TreeSelection,
+  ConfigName_LastLookup,
+  ConfigName_FindOptions
+};
+
+static const char *aszConfigNames[] =
+{
+  "LastNewEntry",
+  "LastNewWasGroup",
+  "AddressBooks",
+  "Providers",
+  "ExpandedBranches",
+  "TreeSelection",
+  "FindWhere",
+  "FindOptions"
+};
+
 // ----------------------------------------------------------------------------
 // classes
 // ----------------------------------------------------------------------------
@@ -103,6 +130,8 @@ TODO: (+ in first column means done)
       the toolbar button work like "Find Next" if "Find" was done,
   15. sort the find results from top to bottom
 + 16. prompts should have a real history and not only remember the last value
++ 17. send an event from ADB code when a new ADB is created and react to it
+      from here
 
   @@PERS indicates the things that should be persistent (default values for
          the controls &c) but are not yet
@@ -595,7 +624,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // ADB view frame
-class wxAdbEditFrame : public wxMFrame
+class wxAdbEditFrame : public wxMFrame, public MEventReceiver
 {
 public:
   wxAdbEditFrame(wxFrame *parent);
@@ -603,7 +632,12 @@ public:
   // operations
   void Load();
 
+  // queries
+  static bool IsEditorShown() { return ms_nAdbFrames > 0; }
+
   // callbacks
+  bool OnMEvent(MEventData& event);
+
   void OnMenuCommand(wxCommandEvent&);
 
   void OnHelp(wxCommandEvent&);
@@ -797,8 +831,17 @@ private:
   // tree branches to expand on startup
   wxArrayString m_astrBranches;
 
+  // misc data
+  // ---------
+
+  void *m_eventNewADB;          // event manager cookie
+
+  static size_t ms_nAdbFrames;  // number of the editor frames currently shown
+
   DECLARE_EVENT_TABLE()
 };
+
+size_t wxAdbEditFrame::ms_nAdbFrames = 0;
 
 // ----------------------------------------------------------------------------
 // notebook pages
@@ -1080,6 +1123,34 @@ void ShowAdbFrame(wxFrame *parent)
   mApplication->GetProfile()->writeEntry(MP_SHOWADBEDITOR, TRUE);
 }
 
+void AddBookToAdbEditor(const String& adbname, const String& provname)
+{
+  if ( wxAdbEditFrame::IsEditorShown() )
+  {
+    // let the ADB editor update itself
+    MEventManager::Send(new MEventNewADBData(adbname, provname));
+  }
+  else
+  {
+    // write to the profile, the editor will load the books the next time it
+    // shows up
+
+    ProfileBase *conf = ProfileBase::CreateProfile(ADB_CONFIG_PATH);
+
+    wxArrayString books;
+    RestoreArray(conf, books, aszConfigNames[ConfigName_AddressBooks]);
+    books.Add(adbname);
+    SaveArray(conf, books, aszConfigNames[ConfigName_AddressBooks]);
+
+    wxArrayString providers;
+    RestoreArray(conf, providers, aszConfigNames[ConfigName_AddressBookProviders]);
+    providers.Add(provname);
+    SaveArray(conf, providers, aszConfigNames[ConfigName_AddressBookProviders]);
+
+    conf->DecRef();
+  }
+}
+
 // -----------------------------------------------------------------------------
 // main frame
 // -----------------------------------------------------------------------------
@@ -1088,6 +1159,9 @@ void ShowAdbFrame(wxFrame *parent)
 wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
               : wxMFrame("adbedit", parent)
 {
+  // inc the number of objects alive
+  ms_nAdbFrames++;
+
   // NULL everything
   // ---------------
   m_treeAdb = NULL;
@@ -1099,6 +1173,9 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   m_bFindDone = FALSE;
   m_btnCancel =
   m_btnDelete = NULL;
+
+  m_eventNewADB = MEventManager::Register(*this, MEventId_NewADB);
+  ASSERT_MSG( m_eventNewADB, "ADB editor failed to register with event manager" );
 
   // create our menu
   // ---------------
@@ -1201,31 +1278,6 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
 
 void wxAdbEditFrame::TransferSettings(bool bSave)
 {
-  // enum must be in sync with the array below
-  enum
-  {
-    ConfigName_LastNewEntry,
-    ConfigName_LastNewWasGroup,
-    ConfigName_AddressBooks,
-    ConfigName_AddressBookProviders,
-    ConfigName_ExpandedBranches,
-    ConfigName_TreeSelection,
-    ConfigName_LastLookup,
-    ConfigName_FindOptions
-  };
-
-  static const char *aszConfigNames[] =
-  {
-    "LastNewEntry",
-    "LastNewWasGroup",
-    "AddressBooks",
-    "Providers",
-    "ExpandedBranches",
-    "TreeSelection",
-    "FindWhere",
-    "FindOptions"
-  };
-
   #define TRANSFER_STRING(var, i)           \
     if ( bSave )                            \
       conf->writeEntry(aszConfigNames[i], var);   \
@@ -1686,6 +1738,46 @@ void wxAdbEditFrame::DoUndoChanges()
   wxLogStatus(this, _("Changes to '%s' undone"), m_current->GetName().c_str());
 }
 
+bool wxAdbEditFrame::OnMEvent(MEventData& d)
+{
+   if ( d.GetId() == MEventId_NewADB )
+   {
+      MEventNewADBData& data = (MEventNewADBData &)d;
+
+      // we need to get the full address book name from the "user name"
+      wxString adbname = data.GetAdbName(),
+               provname = data.GetProviderName();
+
+      AdbBook *adbBook = NULL;
+      AdbDataProvider *provider = AdbDataProvider::GetProviderByName(provname);
+
+      {
+        AdbManager_obj adbManager;
+        if ( adbManager )
+        {
+          adbBook = adbManager->CreateBook(adbname, provider);
+        }
+      }
+
+      if ( adbBook )
+      {
+        adbname = adbBook->GetDescription();
+      }
+
+      SafeDecRef(adbBook);
+
+      // add the newly created ADB to the tree
+      if ( !IsAdbOpened(adbname) )
+      {
+        OpenAdb(adbname, provider, provider->GetProviderName());
+      }
+
+      SafeDecRef(provider);
+   }
+
+   return true;
+}
+
 // dispatch menu or toolbar command
 void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
 {
@@ -1964,33 +2056,6 @@ bool wxAdbEditFrame::ImportAdb()
 
   if ( ok )
   {
-    // we need to get the full address book name from the "user name"
-    AdbBook *adbBook = NULL;
-    AdbDataProvider *provider = AdbDataProvider::GetNativeProvider();
-
-    {
-      AdbManager_obj adbManager;
-      if ( adbManager )
-      {
-        adbBook = adbManager->CreateBook(adbname, provider);
-      }
-    }
-
-    if ( adbBook )
-    {
-      adbname = adbBook->GetDescription();
-    }
-
-    SafeDecRef(adbBook);
-
-    // add the newly created ADB to the tree
-    if ( !IsAdbOpened(adbname) )
-    {
-      ok = OpenAdb(adbname, provider, provider->GetProviderName());
-    }
-
-    SafeDecRef(provider);
-
     wxLogStatus(this, _("Address book successfully imported into book '%s'."),
                 adbname.c_str());
   }
@@ -2438,11 +2503,14 @@ bool wxAdbEditFrame::SaveExpandedBranches(AdbTreeNode *group)
 
 wxAdbEditFrame::~wxAdbEditFrame()
 {
+  // don't want to get events any more
+  MEventManager::Deregister(m_eventNewADB);
+
   // don't show the frame at startup the next time unless the application is
   // closing too
   if ( mApplication->IsRunning() )
   {
-    // app continues to run =>only this frame is being closed
+    // app continues to run => only this frame is being closed
     mApplication->GetProfile()->writeEntry(MP_SHOWADBEDITOR, FALSE);
   }
   //else: we had already written TRUE there when we showed the ADB editor
@@ -2465,7 +2533,10 @@ wxAdbEditFrame::~wxAdbEditFrame()
 #endif
 
   // and the imagelist we were using
-  if(m_pImageList) delete m_pImageList; // FIXME OBSOLETE?
+  delete m_pImageList;
+
+  // dec the number of objects alive
+  ms_nAdbFrames--;
 }
 
 // ----------------------------------------------------------------------------

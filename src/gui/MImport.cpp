@@ -61,7 +61,7 @@ public:
 
    // get the log listbox (for wxImportDialogLog)
    wxListBox *GetLogListBox() const { return m_listbox; }
-   
+
    // event handlers
    void OnOk(wxCommandEvent& event);
 
@@ -133,7 +133,9 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 
 wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
-              : wxDialog(parent, -1, _("Mahogany: Import Dialog")),
+              : wxDialog(parent, -1, _("Mahogany: Import Dialog"),
+                         wxDefaultPosition, wxDefaultSize,
+                         wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
                 m_importer(importer)
 {
    m_done = false;
@@ -163,12 +165,21 @@ wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
    actionsSizer->Add(m_checkFilters, 0, wxEXPAND);
 
    int flags = m_importer.GetFeatures();
-   m_checkADB->Enable( flags & MImporter::Import_ADB );
-   m_checkFolders->Enable( flags & MImporter::Import_Folders );
-   m_checkSettings->Enable( flags & MImporter::Import_Settings );
-   m_checkFilters->Enable( flags & MImporter::Import_Filters );
 
-   topsizer->Add( actionsSizer, 1, wxEXPAND | wxLEFT | wxRIGHT, 15 );
+   #define INIT_IMPORT(what)                    \
+      if ( flags & MImporter::Import_##what )   \
+         m_check##what->SetValue(TRUE);         \
+      else                                      \
+         m_check##what->Disable()
+
+   INIT_IMPORT(ADB);
+   INIT_IMPORT(Folders);
+   INIT_IMPORT(Settings);
+   INIT_IMPORT(Filters);
+
+   #undef INIT_IMPORT
+
+   topsizer->Add( actionsSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 15 );
 
    m_listbox = new wxListBox(this, -1);
    m_listbox->Disable();
@@ -205,15 +216,20 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
       wxLog *logOld = wxLog::GetActiveTarget();
       wxLog::SetActiveTarget(new wxImportDialogLog(this, logOld));
 
-      #define DO_IMPORT(what) \
-         if ( m_check##what->GetValue() ) \
-            if ( !m_importer.Import##what() ) \
-               m_ok = false
+      const char *progname = m_importer.GetProgName();
 
-      DO_IMPORT(Settings);
-      DO_IMPORT(ADB);
-      DO_IMPORT(Folders);
-      DO_IMPORT(Filters);
+      #define DO_IMPORT(what, desc) \
+         if ( m_check##what->GetValue() ) \
+         { \
+            wxLogMessage(_("Importing %s %s"), progname, desc); \
+            if ( !m_importer.Import##what() ) \
+               m_ok = false; \
+         }
+
+      DO_IMPORT(Settings, _("settings"));
+      DO_IMPORT(ADB, _("address books"));
+      DO_IMPORT(Folders, _("folders"));
+      DO_IMPORT(Filters, _("filter rules"));
 
       #undef DO_IMPORT
 
@@ -233,9 +249,14 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
          btnCancel->Disable();
 
       if ( m_ok )
-         wxLogMessage(_("PINE configuration settings imported successfully."));
+      {
+         wxLogMessage(_("%s configuration settings imported successfully."),
+                      progname);
+      }
       else
-         wxLogError(_("Importing PINE settings failed."));
+      {
+         wxLogError(_("Importing %s settings failed."), progname);
+      }
 
       m_listbox->Enable();
 
@@ -244,24 +265,15 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
 }
 
 // ----------------------------------------------------------------------------
-// public API
+// helper: common part of HasImporters() and ShowImportDialog()
 // ----------------------------------------------------------------------------
 
-extern bool ShowImportDialog(MImporter& importer, wxWindow *parent)
+static void FindAllImporters(wxArrayImporters& importers,
+                             wxArrayString& prognames)
 {
-   wxImportDialog dlg(importer, parent);
-
-   return dlg.ShowModal() == wxID_OK && dlg.IsOk();
-}
-
-extern bool ShowImportDialog(wxWindow *parent)
-{
-   // first, find all (applicable) importers
-   wxArrayImporters importers;
-   wxArrayString prognames;
    MModuleListing *listing = MModule::ListAvailableModules(M_IMPORTER_INTERFACE);
    if ( !listing )
-      return false;
+      return;
 
    size_t n, count = listing->Count();
    for ( n = 0; n < count; n++ )
@@ -290,10 +302,44 @@ extern bool ShowImportDialog(wxWindow *parent)
    }
 
    listing->DecRef();
+}
+
+// ----------------------------------------------------------------------------
+// public API
+// ----------------------------------------------------------------------------
+
+extern bool HasImporters()
+{
+   wxArrayImporters importers;
+   wxArrayString prognames;
+   FindAllImporters(importers, prognames);
+
+   size_t count = importers.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      importers[n]->DecRef();
+   }
+
+   return count > 0;
+}
+
+extern bool ShowImportDialog(MImporter& importer, wxWindow *parent)
+{
+   wxImportDialog dlg(importer, parent);
+
+   return dlg.ShowModal() == wxID_OK && dlg.IsOk();
+}
+
+extern bool ShowImportDialog(wxWindow *parent)
+{
+   // first, find all (applicable) importers
+   wxArrayImporters importers;
+   wxArrayString prognames;
+   FindAllImporters(importers, prognames);
 
    // then let the user choose which ones he wants to use
    wxArrayInt selections;
-   count = MDialog_GetSelections(
+   size_t count = MDialog_GetSelections(
                                  _("Please select the programs you want to\n"
                                    "import the settings from."),
                                  _("Mahogany: Import Settings"),
@@ -304,6 +350,7 @@ extern bool ShowImportDialog(wxWindow *parent)
 
    // and do import from those he chose
    bool doneSomething = false;
+   size_t n;
    for ( n = 0; n < count; n++ )
    {
       if ( ShowImportDialog(*importers[selections[n]], parent) )

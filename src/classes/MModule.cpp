@@ -402,7 +402,8 @@ private:
 };
 
 #ifdef USE_MODULES_STATIC
-static MModuleListing * DoListLoadedModules(bool listall = false)
+static MModuleListing * DoListLoadedModules(bool listall = false,
+                                            const String& interfaceName = "")
 #else
 static MModuleListing * DoListLoadedModules(void)
 #endif
@@ -415,8 +416,10 @@ static MModuleListing * DoListLoadedModules(void)
        i++)
 #ifdef USE_MODULES_STATIC
    {
-      // we have unloaded modules in the list, ignore them:
-      if((**i).m_Module || listall)
+      // we have unloaded modules in the list, ignore them unless listall is
+      // TRUE
+      if( ((**i).m_Module || listall) &&
+          (!interfaceName || (**i).m_Interface == interfaceName) )
       {
          MModuleListingEntryImpl entry(
             (**i).m_Name, // module name
@@ -459,7 +462,7 @@ MModuleListing *
 MModule::ListAvailableModules(const String& interfaceName)
 {
 #ifdef USE_MODULES_STATIC
-   return DoListLoadedModules(true);
+   return DoListLoadedModules(true, interfaceName);
 #else // !USE_MODULES_STATIC
    kbStringList modules;
 

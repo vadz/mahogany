@@ -41,6 +41,8 @@ enum MEventId
    MEventId_OptionsChange,
    /// MEventPing - causes folders to ping themselves
    MEventId_Ping,
+   /// MEventNewADB - causes the ADB editor to update itself
+   MEventId_NewADB,
    /// (invalid id for an event)
    MEventId_Max
 };
@@ -111,6 +113,24 @@ class MEventPingData : public MEventData
 {
 public:
    MEventPingData() : MEventData( MEventId_Ping ) {}
+};
+
+/// MEventNewADBData - the event telling ADB editor to refresh
+class MEventNewADBData : public MEventData
+{
+public:
+   MEventNewADBData(const String& adbname,
+                    const String& provname)
+      : MEventData(MEventId_NewADB),
+        m_adbname(adbname), m_provname(provname)
+   {
+   }
+
+   const String& GetAdbName() const { return m_adbname; }
+   const String& GetProviderName() const { return m_provname; }
+
+private:
+   String m_adbname, m_provname;
 };
 
 // ----------------------------------------------------------------------------

@@ -107,7 +107,7 @@ bool MPineImporter::ImportADB()
    wxString filename = importer->GetDefaultFilename();
    wxLogMessage(_("Starting importing PINE address book '%s'..."),
                 filename.c_str());
-   bool ok = AdbImport(filename, "PINE Address Book", importer);
+   bool ok = AdbImport(filename, "pine.adb", "PINE Address Book", importer);
 
    importer->DecRef();
 

@@ -37,6 +37,7 @@ class AdbEntryGroup;
 // it did exist, it won't be deleted even if import fails).
 extern bool AdbImport(const String& filename,
                       const String& adbname,
+                      const String& username,
                       AdbImporter *importer = NULL);
 
 // just as AdbImport() but imports the data into an existing group of an

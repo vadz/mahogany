@@ -21,12 +21,12 @@ DEP = $(SRC:.cpp=.d)
 include ../../makeopts
 
 ifeq ($(USE_MODULES),static)
-TARGETS = $(MOD:.cpp=.o)
+TARGETS = $(MOD:.cpp=.o) $(SRC:.cpp=.o)
 else
 ifeq ($(USE_MODULES),dynamic)
-TARGETS = $(MOD:.cpp=.so)
+TARGETS = $(MOD:.cpp=.so) $(SRC:.cpp=.o)
 else
-TARGETS=
+TARGETS = $(SRC:.cpp=.o)
 endif
 endif
 

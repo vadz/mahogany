@@ -418,7 +418,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
    }
 
    // do import
-   bool ok = AdbImport(filename, adbname, importer);
+   bool ok = AdbImport(filename, adbname, "", importer);
 
    // release it only if we created it
    SafeDecRef(importer);

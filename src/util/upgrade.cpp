@@ -45,7 +45,6 @@
 #include <wx/confbase.h>
 #include <wx/utils.h>         // wxGetFullHostName()
 #include <wx/dialup.h>        // for IsAlwaysOnline()
-#include <wx/datetime.h>      // for wxDateTime::Now()
 
 #define USE_WIZARD
 
@@ -58,6 +57,7 @@
 #include "gui/wxDialogLayout.h"
 #include "gui/wxFolderTree.h"
 
+#include "MImport.h"
 #include "Mupgrade.h"
 
 // ----------------------------------------------------------------------------
@@ -87,6 +87,9 @@ enum MVersion
 enum InstallWizardPageId
 {
    InstallWizard_WelcomePage,          // say hello
+   InstallWizard_ImportPage,           // propose to import settings from
+                                       // another MUA
+   InstallWizard_FirstPage = InstallWizard_ImportPage,
    InstallWizard_IdentityPage,         // ask name, e-mail
    InstallWizard_ServersPage,          // ask POP, SMTP, NNTP servers
    InstallWizard_OperationsPage,       // how we want Mahogany to work
@@ -95,7 +98,6 @@ enum InstallWizardPageId
 #ifdef USE_HELPERS_PAGE
 //   InstallWizard_HelpersPage,          // external programs set up
 #endif // USE_HELPERS_PAGE
-//   InstallWizard_ImportPage,           // propose to import ADBs (and folders)
    InstallWizard_FinalPage,            // say that everything is ok
    InstallWizard_PagesMax,             // the number of pages
    InstallWizard_Done = -1             // invalid page index
@@ -148,6 +150,9 @@ struct InstallWizardData
 
    // did we run the wizard at all?
    bool done;
+
+   // do we have something to import?
+   int showImportPage; // logically bool but initially -1
 } gs_installWizardData;
 
 // the base class for our wizards pages: it allows to return page ids (and not
@@ -166,6 +171,9 @@ public:
 
    // the dial up page should be shown only if this function returns TRUE
    static bool ShouldShowDialUpPage();
+
+   // the import page should be shown only if this function returns TRUE
+   static bool ShouldShowImportPage();
 
    // implement the wxWizardPage pure virtuals in terms of our ones
    virtual wxWizardPage *GetPrev() const
@@ -223,8 +231,8 @@ public:
       // if the email is user@some.where, then suppose that the servers are
       // pop.some.where &c - be sure to check that some.where is really a
       // domain and not just a hostname by checking the number of dots in it
-      wxString domain = email.AfterFirst('@');
-      if ( !!domain && (domain.Find('.') != wxNOT_FOUND) )
+      wxString domain = email.AfterFirst('@').AfterFirst('.');
+      if ( !!domain )
       {
          AddDomain(gs_installWizardData.pop, domain);
          AddDomain(gs_installWizardData.smtp, domain);
@@ -232,7 +240,7 @@ public:
          AddDomain(gs_installWizardData.nntp, domain);
       }
       //else: no domain specified
-      
+
       return TRUE;
    }
 
@@ -390,11 +398,6 @@ class InstallWizardHelpersPage : public InstallWizardPage
 {
 public:
    InstallWizardHelpersPage(wxWizard *wizard);
-
-   virtual bool TransferDataFromWindow()
-   {
-      return TRUE;
-   }
 };
 
 #endif // USE_HELPERS_PAGE
@@ -403,11 +406,6 @@ class InstallWizardMiscPage : public InstallWizardPage
 {
 public:
    InstallWizardMiscPage(wxWizard *wizard);
-
-   virtual bool TransferDataFromWindow()
-   {
-      return TRUE;
-   }
 };
 
 class InstallWizardImportPage : public InstallWizardPage
@@ -415,10 +413,10 @@ class InstallWizardImportPage : public InstallWizardPage
 public:
    InstallWizardImportPage(wxWizard *wizard);
 
-   virtual bool TransferDataFromWindow()
-   {
-      return TRUE;
-   }
+   void OnImportButton(wxCommandEvent& event);
+
+private:
+   DECLARE_EVENT_TABLE()
 };
 
 class InstallWizardFinalPage : public InstallWizardPage
@@ -459,10 +457,19 @@ bool InstallWizardPage::ShouldShowDialUpPage()
    return gs_installWizardData.useDialUp != 0;
 }
 
+bool InstallWizardPage::ShouldShowImportPage()
+{
+   if ( gs_installWizardData.showImportPage == -1 )
+      gs_installWizardData.showImportPage = HasImporters();
+
+   return gs_installWizardData.showImportPage != 0;
+}
+
 InstallWizardPageId InstallWizardPage::GetPrevPageId() const
 {
    int id = m_id - 1;
-   if ( id == InstallWizard_DialUpPage && !ShouldShowDialUpPage() )
+   if ( (id == InstallWizard_DialUpPage && !ShouldShowDialUpPage()) ||
+        (id == InstallWizard_ImportPage && !ShouldShowImportPage()) )
    {
       // skip it
       id--;
@@ -474,7 +481,8 @@ InstallWizardPageId InstallWizardPage::GetPrevPageId() const
 InstallWizardPageId InstallWizardPage::GetNextPageId() const
 {
    int id = m_id + 1;
-   if ( id == InstallWizard_DialUpPage && !ShouldShowDialUpPage() )
+   if ( (id == InstallWizard_DialUpPage && !ShouldShowDialUpPage()) ||
+        (id == InstallWizard_ImportPage && !ShouldShowImportPage()) )
    {
       // skip it
       id++;
@@ -514,6 +522,7 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
 
       switch ( id )
       {
+         CREATE_PAGE(Import);
          CREATE_PAGE(Identity);
          CREATE_PAGE(Servers);
          CREATE_PAGE(Operations);
@@ -522,7 +531,6 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
 #ifdef USE_HELPERS_PAGE
 //         CREATE_PAGE(Helpers);
 #endif // USE_HELPERS_PAGE
-//         CREATE_PAGE(Import);
          CREATE_PAGE(Final);
       case InstallWizard_WelcomePage:
       case InstallWizard_Done:
@@ -593,7 +601,7 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
 InstallWizardPageId InstallWizardWelcomePage::GetNextPageId() const
 {
    if ( m_useWizard )
-      return InstallWizard_IdentityPage;
+      return InstallWizard_FirstPage;
 
    // remember that we didn't really run the wizard
    gs_installWizardData.done = false;
@@ -613,6 +621,35 @@ void InstallWizardWelcomePage::OnUseWizardCheckBox(wxCommandEvent& event)
       else
          btn->SetLabel(_("&Finish"));
    }
+}
+
+// InstallWizardImportPage
+// ----------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(InstallWizardImportPage, InstallWizardPage)
+   EVT_BUTTON(-1, InstallWizardImportPage::OnImportButton)
+END_EVENT_TABLE()
+
+InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
+                       : InstallWizardPage(wizard, InstallWizard_ImportPage)
+{
+   wxStaticText *text = new wxStaticText(this, -1,
+         _("Mahogany has detected that you have one or more\n"
+           "other email programs installed on this computer.\n"
+           "\n"
+           "You may click the button below to invoke a dialog\n"
+           "which will allow you to import some configuration\n"
+           "settings (your personal name, email address, folders,\n"
+           "address books &c) from one or more of them."));
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(text);
+   panel->CreateButton(_("&Import..."), NULL);
+   panel->ForceLayout();
+}
+
+void InstallWizardImportPage::OnImportButton(wxCommandEvent& event)
+{
+   ShowImportDialog(this);
 }
 
 // InstallWizardIdentityPage
@@ -843,20 +880,7 @@ InstallWizardMiscPage::InstallWizardMiscPage(wxWizard *wizard)
    new wxStaticText(this, -1, "This page is under construction");
 }
 */
-// InstallWizardImportPage
-// ----------------------------------------------------------------------------
-/*
-InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
-                       : InstallWizardPage(wizard, InstallWizard_ImportPage)
-{
-   // TODO autodetect all mailers installed and propose to import as much as
-   //      possible.
-   //
-   // NB: use an external function for this, this functionality should be
-   //     separate from the update module
-   new wxStaticText(this, -1, "This page is under construction");
-}
-*/
+
 // InstallWizardFinalPage
 // ----------------------------------------------------------------------------
 
@@ -919,6 +943,7 @@ bool RunInstallWizard()
    // first, set up the default values for the wizard:
 
    gs_installWizardData.useDialUp = -1;
+   gs_installWizardData.showImportPage = -1;
 #if defined(OS_WIN)
    gs_installWizardData.connection = READ_APPCONFIG(MP_NET_CONNECTION);
 #elif defined(OS_UNIX)
@@ -2033,36 +2058,34 @@ VerifyMailConfig(void)
 static
 void VerifyUserDir(void)
 {
+   if( !strutil_isempty(READ_APPCONFIG(MP_USERDIR)) )
+      return;
+
    ProfileBase *profile = mApplication->GetProfile();
 #if defined(OS_UNIX)
-   if( strutil_isempty(READ_APPCONFIG(MP_USERDIR)) )
-   {
-      wxString strHome;
-      strHome = getenv("HOME");
-      strHome << DIR_SEPARATOR << READ_APPCONFIG(MP_USER_MDIR);
-      profile->writeEntry(MP_USERDIR, strHome);
-   }
+   wxString strHome;
+   strHome = getenv("HOME");
+   strHome << DIR_SEPARATOR << READ_APPCONFIG(MP_USER_MDIR);
+   profile->writeEntry(MP_USERDIR, strHome);
 #elif defined(OS_WIN)
-   if ( strutil_isempty(READ_APPCONFIG(MP_USERDIR)) )
+   // take the directory of the program
+   char szFileName[MAX_PATH];
+   if ( !GetModuleFileName(NULL, szFileName, WXSIZEOF(szFileName)) )
    {
-      // take the directory of the program
-      char szFileName[MAX_PATH];
-      if ( !GetModuleFileName(NULL, szFileName, WXSIZEOF(szFileName)) )
-      {
-         wxLogError(_("Cannot find your Mahogany directory, please specify it "
-                      "in the options dialog."));
-      }
-      else
-      {
-         wxString localDir;
-         wxSplitPath(szFileName, &localDir, NULL, NULL);
-         profile->writeEntry(MP_USERDIR, localDir);
-      }
+      wxLogError(_("Cannot find your Mahogany directory, please specify it "
+                   "in the options dialog."));
+   }
+   else
+   {
+      wxString localDir;
+      wxSplitPath(szFileName, &localDir, NULL, NULL);
+      profile->writeEntry(MP_USERDIR, localDir);
    }
 #else
 #   error "Don't know how to find local dir under this OS"
 #endif // OS
 
+   mApplication->SetLocalDir(READ_APPCONFIG(MP_USERDIR));
 }
 
 /*

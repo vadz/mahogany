@@ -74,9 +74,13 @@ public:
 };
 
 // ----------------------------------------------------------------------------
-// functions to show import dialog for all importers or the specified one
+// functions to work with importers
 // ----------------------------------------------------------------------------
 
+// return TRUE if at least one importer can import something, FALSE otherwise
+extern bool HasImporters();
+
+// functions to show import dialog for all importers or the specified one
 extern bool ShowImportDialog(MImporter& importer, wxWindow *parent = NULL);
 extern bool ShowImportDialog(wxWindow *parent = NULL);
 

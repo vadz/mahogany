@@ -3,7 +3,7 @@
 // File name:   adb/AdbFrame.h - ADB edit frame interface
 // Purpose:     we provide a function to create and show the ADB editor frame
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -17,5 +17,9 @@ class wxFrame;
 
 /// create the ADB frame if it doesn't exist and show it
 void ShowAdbFrame(wxFrame *parent);
+
+// add the given address book to the list of address books opened in the ADB
+// editor
+void AddBookToAdbEditor(const String& adbname, const String& provname);
 
 #endif  //_ADBFRAME_H

@@ -38,6 +38,7 @@
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"
 #include "adb/AdbImport.h"
+#include "adb/AdbFrame.h"     // for AddBookToAdbEditor()
 
 #ifdef USE_ADB_MODULES
    #include "MModule.h"
@@ -221,6 +222,7 @@ bool DoAdbImport(const String& filename,
 
 bool AdbImport(const String& filename,
                const String& adbname,
+               const String& username,
                AdbImporter *importer)
 {
    importer = FindImporter(filename, importer);
@@ -228,7 +230,7 @@ bool AdbImport(const String& filename,
    AdbBook *adbBook = NULL;
 
    bool ok = TRUE;
-   wxString errMsg;
+   wxString errMsg, provname;
 
    // can't conntinue without an importer
    if ( !importer )
@@ -245,6 +247,7 @@ bool AdbImport(const String& filename,
       {
          AdbDataProvider *providerNative = AdbDataProvider::GetNativeProvider();
          adbBook = adbManager->CreateBook(adbname, providerNative);
+         provname = providerNative->GetProviderName();
          SafeDecRef(providerNative);
       }
    }
@@ -259,7 +262,12 @@ bool AdbImport(const String& filename,
 
    // FIXME a hack which ensure that the header is written before the entries
    //       (needed for automatic reckognition of ADB format later)
-   adbBook->SetUserName(adbBook->GetUserName());
+   {
+      wxString adbUserName = username;
+      if ( !adbUserName )
+         adbUserName = adbBook->GetUserName();
+      adbBook->SetUserName(adbUserName);
+   }
 
    // load the data
    ok = DoAdbImport(filename, adbBook, importer, &errMsg);
@@ -273,7 +281,15 @@ exit:
 
    if ( ok )
    {
-      adbBook->Flush();
+      ok = adbBook->Flush();
+
+      errMsg = _("failed to save the address book.");
+   }
+
+   if ( ok )
+   {
+      // the new ADB will be opened next time the editor opens
+      AddBookToAdbEditor(adbname, provname);
 
       wxLogMessage(_("Successfully imported address book from file '%s' "
                      "(format '%s')"),

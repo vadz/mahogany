@@ -160,11 +160,7 @@ MAppBase::~MAppBase()
 bool
 MAppBase::VerifySettings(void)
 {
-   bool rc = CheckConfiguration();
-
-   m_localDir = wxExpandEnvVars(READ_APPCONFIG(MP_USERDIR));
-
-   return rc;
+   return CheckConfiguration();
 }
 
 /// only used to find list of folders to keep open at all times
@@ -854,11 +850,14 @@ MAppBase::InitGlobalDir()
 void
 MAppBase::SendOutbox(void) const
 {
-   STATUSMESSAGE((_("Checking for queued messages...")));
-   // get name of SMTP outbox:
-   String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
-   SendOutbox(outbox, true);
-   UpdateOutboxStatus();
+   if ( READ_APPCONFIG(MP_USE_OUTBOX) )
+   {
+      STATUSMESSAGE((_("Checking for queued messages...")));
+      // get name of SMTP outbox:
+      String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
+      SendOutbox(outbox, true);
+      UpdateOutboxStatus();
+   }
 }
 
 // return true if there are messages to be sent
@@ -936,6 +935,8 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
 void
 MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
 {
+   CHECK_RET( outbox.length(), "missing outbox folder name" );
+
    Protocol protocol;
    UIdType count = 0;
    MailFolder *mf = MailFolder::OpenFolder(outbox);

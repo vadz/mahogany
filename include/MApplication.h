@@ -152,6 +152,11 @@ public:
    */
    const String & GetLocalDir(void) const { return m_localDir; }
 
+   /** sets the local path: for use by routines in upgrade.cpp only!
+       @param path is the full path to the user M directory
+   */
+   void SetLocalDir(const String& path) { m_localDir = path; }
+
    /** Get a pointer to the list of known Mime types.
        @return the wxMimeTypesManager reference
    */
