@@ -440,7 +440,12 @@ MessageCC::GetHeaderLines(const char **headersOrig,
 
                      s.clear();
                   }
-                  //else: continue with the current s
+                  else
+                  {
+                     // continue with the current s but add "\r\n" to the
+                     // header value as it is part of it
+                     s += "\r\n";
+                  }
                }
                break;
 
