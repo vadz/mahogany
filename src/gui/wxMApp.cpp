@@ -1070,8 +1070,8 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
    int n = nfields;
 
    // ugly, but effective:
-   static int statusIconWidth = -1;
-      
+   //static int statusIconWidth = -1;
+
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
    if(isminimum && sbar->GetFieldsCount() > nfields)
       n = sbar->GetFieldsCount();
