@@ -181,7 +181,8 @@ MailFolder::ConvertMessageStatusToString(int status)
 bool
 MailFolder::SaveMessages(const INTARRAY *selections,
                          String const & folderName,
-                         bool isProfile)
+                         bool isProfile,
+                         bool updateCount)
 {
    int
       n = selections->Count(),
@@ -202,7 +203,7 @@ MailFolder::SaveMessages(const INTARRAY *selections,
    }
    Message *msg;
    bool events = mf->SendsNewMailEvents();
-   mf->EnableNewMailEvents(false);
+   mf->EnableNewMailEvents(false, updateCount);
 
    MProgressDialog *pd = NULL;
    int threshold = mf->GetProfile() ?
@@ -225,7 +226,7 @@ MailFolder::SaveMessages(const INTARRAY *selections,
       msg->DecRef();
    }
    mf->Ping(); // update any views
-   mf->EnableNewMailEvents(events);
+   mf->EnableNewMailEvents(events, true);
    mf->DecRef();
    if(pd) delete pd;
    return true;

@@ -475,7 +475,7 @@ MFolder *MFolderFromProfile::CreateSubfolder(const String& name, FolderType type
    MFolder *folder = GetSubfolder(name);
    if ( folder )
    {
-      wxLogError(_("Can't create subfolder '%s': folder with this name "
+      wxLogError(_("Cannot create subfolder '%s': folder with this name "
                    "already exists."), name.c_str());
 
       folder->DecRef();
@@ -523,7 +523,7 @@ bool MFolderFromProfile::Rename(const String& newName)
 
    if ( Exists(newFullName) )
    {
-      wxLogError(_("Can't rename folder '%s' to '%s': the folder with "
+      wxLogError(_("Cannot rename folder '%s' to '%s': the folder with "
                    "the new name already exists."),
                    m_folderName.c_str(), newName.c_str());
 

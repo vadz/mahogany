@@ -531,7 +531,7 @@
 /// print mode
 #define MP_PRINT_MODE_D 0  /* PS_PRINTER */
 /// paper name
-#define MP_PRINT_PAPER_D "A4"
+#define MP_PRINT_PAPER_D 0L
 /// paper name
 #define MP_PRINT_FILE_D "mahogany.ps"
 /// print in colour?

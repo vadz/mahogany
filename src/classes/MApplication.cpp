@@ -39,7 +39,7 @@
 
 #include "FolderView.h"
 #include "MailFolder.h"
-#include "MailFolderCC.h"
+#include "MailCollector.h"
 
 #include "gui/wxFolderView.h"
 #include "gui/wxMainFrame.h"
@@ -57,8 +57,9 @@
 #include <wx/persctrl.h>      // for wxPControls::SetSettingsPath
 
 #ifdef OS_UNIX
-#  include  <unistd.h>
-#  include  <sys/stat.h>
+#  include <unistd.h>
+#  include <sys/stat.h>
+#  include <fcntl.h>
 #endif //Unix
 
 // instead of writing our own wrapper for wxExecute()
@@ -70,159 +71,6 @@
 // ----------------------------------------------------------------------------
 
 WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
-
-
-struct MailFolderEntry
-{
-   String      m_name;
-   MailFolder *m_folder;
-};
-
-KBLIST_DEFINE(MailFolderList, MailFolderEntry);
-
-/// only used by MailCollector to find incoming folders
-class MAppFolderTraversal : public MFolderTraversal
-{
-public:
-   MAppFolderTraversal(MailFolderList *list)
-      : MFolderTraversal(*(m_folder = MFolder::Get("")))
-      { m_list = list;}
-   ~MAppFolderTraversal()
-      { m_folder->DecRef(); }
-   bool OnVisitFolder(const wxString& folderName)
-      {
-         MFolder *f = MFolder::Get(folderName);
-         if(f && f->GetFlags() & MF_FLAGS_INCOMING)
-         {
-            wxLogDebug("Found incoming folder '%s'.",
-                       folderName.c_str());
-            MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
-            MailFolderEntry *e = new MailFolderEntry;
-            e->m_name = folderName;
-            e->m_folder = mf;
-            m_list->push_back(e);
-         }
-         if(f)f->DecRef();
-         return true;
-      }
-
-private:
-   MFolder *m_folder;
-   MailFolderList *m_list;
-};
-
-
-
-MailCollector::MailCollector(void)
-{
-   m_IsCollecting = false;
-   m_list = new MailFolderList;
-   MAppFolderTraversal t (m_list);
-   if(! t.Traverse(true))
-      wxLogError(_("Cannot build list of incoming mail folders."));
-   // keep it open all the time to speed things up
-   m_NewMailFolder = MailFolder::OpenFolder(MF_PROFILE,
-                                            READ_APPCONFIG(MP_NEWMAIL_FOLDER));
-}
-
-MailCollector::~MailCollector(void)
-{
-   MailFolderList::iterator i;
-   for(i = m_list->begin();i != m_list->end(); i++)
-      (**i).m_folder->DecRef();
-   if(m_NewMailFolder)
-      m_NewMailFolder->DecRef();
-   delete m_list;
-}
-
-bool
-MailCollector::IsIncoming(MailFolder *mf)
-{
-   MailFolderList::iterator i;
-   for(i = m_list->begin();i != m_list->end();i++)
-      if((**i).m_folder == mf)
-         return true;
-   return false;
-}
-
-bool
-MailCollector::Collect(MailFolder *mf)
-{
-   bool rc = true;
-   if(m_NewMailFolder)
-   {
-      m_NewMailFolder->EnableNewMailEvents(false,false);
-      m_NewMailFolder->Ping();
-   }
-
-   MailFolderList::iterator i;
-   if(mf == NULL)
-   {
-      for(i = m_list->begin();i != m_list->end();i++)
-         rc &= CollectOneFolder((*i)->m_folder);
-   }
-   else
-      rc = CollectOneFolder(mf);
-   if(m_NewMailFolder)
-   {
-      m_NewMailFolder->EnableNewMailEvents(true,true);
-      m_NewMailFolder->Ping();
-   }
-   return rc;
-}
-
-bool
-MailCollector::CollectOneFolder(MailFolder *mf)
-{
-   ASSERT(mf);
-   bool rc;
-   
-   m_IsCollecting = true;
-   wxLogDebug(_("Auto-collecting mail from incoming folder '%s'."),
-                mf->GetName().c_str());
-   long oldcount = m_NewMailFolder->CountMessages();
-   bool sendsEvents = mf->SendsNewMailEvents();
-   mf->EnableNewMailEvents(false,true);
-   mf->Ping(); //update it
-   INTARRAY selections;
-
-   const HeaderInfo *hi;
-   for(hi = mf->GetFirstHeaderInfo();
-       hi;
-       hi = mf->GetNextHeaderInfo(hi))
-      selections.Add(hi->GetUId());
-
-   if(mf->SaveMessages(&selections,
-                       READ_APPCONFIG(MP_NEWMAIL_FOLDER),
-                       true))
-   {
-      mf->DeleteMessages(&selections);
-      mf->ExpungeMessages();
-      m_IsCollecting = false;
-      rc = true;
-   }
-   else
-      rc = false;
-   long i = 0;
-   String seq;
-   for(hi = m_NewMailFolder->GetFirstHeaderInfo();
-       hi;
-       hi = m_NewMailFolder->GetNextHeaderInfo(hi))
-   {
-      if(i >= oldcount)
-      {
-         if(seq.Length()) seq << ',';
-         seq << strutil_ultoa(hi->GetUId());
-      }
-      i++;
-   }
-   // mark new messages as new:
-   m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
-   m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
-   mf->EnableNewMailEvents(sendsEvents);
-   m_IsCollecting = false;
-   return rc;
-}
 
 // ----------------------------------------------------------------------------
 // functions
@@ -390,7 +238,7 @@ MAppBase::OnStartup()
    {
       if ( mkdir(strConfFile, 0700) != 0 )
       {
-         wxLogError(_("Can't create the directory for configuration "
+         wxLogError(_("Cannot create the directory for configuration "
                       "files '%s'."), strConfFile.c_str());
          return FALSE;
       }
@@ -503,7 +351,7 @@ MAppBase::OnStartup()
             if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
                                      TRUE /* yes default */, "AskSpecifyDir") )
             {
-               wxDirDialog dlg(NULL, _("Specify global directory for M"));
+               wxDirDialog dlg(NULL, _("Specify global directory for Mahogany"));
                if ( dlg.ShowModal() )
                {
                   m_globalDir = dlg.GetPath();
@@ -762,8 +610,9 @@ MAppBase::OnMEvent(MEventData& event)
                   folder->GetMessage(mailevent.GetNewMessageIndex(i));
                if ( msg )
                {
-                  message << _("Subject: ") << msg->Subject() << '\n'
-                          << _("From: ") << msg->From() << '\n'
+                  message << _("Subject: ") << msg->Subject() 
+                          << _("From: ") << msg->From()
+                          << '\n'
                           << _("in folder '") << folder->GetName() << "'\n\n";
                   msg->DecRef();
                }

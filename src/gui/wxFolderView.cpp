@@ -499,7 +499,7 @@ wxFolderView::OpenFolder(String const &profilename)
 
    if ( !mf )
    {
-      wxLogError(_("The folder '%s' couldn't be opened, please check "
+      wxLogError(_("The folder '%s' could not be opened, please check "
                    "its settings."), profilename.c_str());
    }
 

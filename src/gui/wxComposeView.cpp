@@ -833,7 +833,7 @@ wxComposeView::CanClose() const
    // lead to a nice crash later)
    if ( m_procExtEdit )
    {
-      wxLogError(_("Please terminate the external editor (pid %d) before "
+      wxLogError(_("Please terminate the external editor (PID %d) before "
                    "closing this window."), m_pidEditor);
 
       canClose = false;
@@ -939,7 +939,7 @@ wxComposeView::OnMenuCommand(int id)
       {
          if ( m_procExtEdit )
          {
-            wxLogError(_("External editor is already running (pid %d)"),
+            wxLogError(_("External editor is already running (PID %d)"),
                        m_pidEditor);
 
             break;
@@ -998,7 +998,7 @@ wxComposeView::OnMenuCommand(int id)
                   tmpFileName.Ok();
                   m_tmpFileName = tmpFileName.GetName();
 
-                  wxLogStatus(this, _("Started external editor (pid %d)"),
+                  wxLogStatus(this, _("Started external editor (PID %d)"),
                               m_pidEditor);
 
                   // disable editing with the internal editor to avoid
@@ -1386,7 +1386,7 @@ wxComposeView::Print(void)
       wxSetAFMPath(afmpath);
 #endif
    wxPrinter printer;
-   wxLayoutPrintout printout(m_LayoutWindow->GetLayoutList(),_("M: Printout"));
+   wxLayoutPrintout printout(m_LayoutWindow->GetLayoutList(),_("Mahogany: Printout"));
    if (! printer.Print(this, &printout, TRUE))
       wxMessageBox(
          _("There was a problem with printing the message:\n"

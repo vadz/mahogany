@@ -275,7 +275,7 @@ wxMainFrame::CanClose() const
    bool ok;
 
    // ask the user unless disabled
-   if ( MDialog_YesNoDialog(_("Do you really want to exit M?"), this,
+   if ( MDialog_YesNoDialog(_("Do you really want to exit Mahogany?"), this,
                             MDIALOG_YESNOTITLE, false,
                             MP_CONFIRMEXIT) )
    {

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: M 0.023\n"
-"POT-Creation-Date: 1999-04-05 12:20+0100\n"
+"POT-Creation-Date: 1999-04-17 12:42+0100\n"
 "PO-Revision-Date: 1999-01-11 23:23+0000\n"
 "Last-Translator: Karsten Ballüder <Ballueder@usa.net>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
@@ -9,7 +9,16 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: upgrade.cpp:149
+#: upgrade.cpp:273
+msgid "Deleted illegal folder profile: '"
+msgstr "Ungültige Mailbox-Konfiguration gelöscht: '"
+
+#: upgrade.cpp:308
+#, fuzzy, c-format
+msgid "Converting information for folder '%s'."
+msgstr "Konvertiere Information für Mailbox '%s'."
+
+#: upgrade.cpp:494
 #, c-format
 msgid ""
 "Configuration information and program files were successfully upgraded from "
@@ -18,38 +27,51 @@ msgstr ""
 "Konfigurationsdaten und Dateien wurden erfolgreich von Version '%s' "
 "übernommen."
 
-#: upgrade.cpp:157
+#: upgrade.cpp:498
+#, c-format
 msgid ""
-"The previously installed version of M was probably newer than this one. Can "
-"not upgrade."
+"Configuration information and program files could not be upgraded from "
+"version '%s', some settings might be lost.\n"
+"\n"
+"It is recommended that you uninstall and reinstall the program before using "
+"it."
 msgstr ""
-"Die vorher installierte Version von M war vermutlich neuer als diese. Kann "
+"Konfiguration und Programmdateien konnten nicht von Version '%s' konvertiert
+"werden,\n"
+"einige Einstellungen könnten verloren gegangen sein.\n"
+"Es wird empfohlen, daß Sie das Programm entfernen und neu installieren bevor Sie es verwenden."
+
+#: upgrade.cpp:512
+#, fuzzy
+msgid ""
+"The previously installed version of Mahogany was probably newer than this "
+"one. Cannot upgrade."
+msgstr ""
+"Die vorher installierte Version von Mahogany war vermutlich neuer als diese. Kann "
 "kein Upgrade durchführen."
 
-#: upgrade.cpp:191
+#: upgrade.cpp:538 upgrade.cpp:555
 msgid "Default system folder for incoming mail."
 msgstr "Standard Mailbox für neu eingegangene Nachrichten."
 
-#: upgrade.cpp:210
-msgid "Folder where new mail gets collected."
-msgstr ""
-
-#: upgrade.cpp:248
+#: upgrade.cpp:593
 #, fuzzy
-msgid "M test message"
-msgstr "M Testnachricht"
+msgid "Mahogany Test Message"
+msgstr "Mahogany Testnachricht"
 
-#: upgrade.cpp:251
+#: upgrade.cpp:596
 msgid ""
-"If you can read this, your M configuration works.\n"
+"If you have received this mail, your Mahogany configuration works.\n"
 "You should also try to reply to this mail and check that your reply arrives."
 msgstr ""
+"Wenn Sie diese Mail erhalten haven, sind Ihre Mahogany Einstellungen korrekt.\n"
+"Sie sollten versuchen, auf die Mail zu antworten und prüfen ob die Antwort Sie erreicht."
 
-#: upgrade.cpp:257
+#: upgrade.cpp:602
 msgid "Sent email message to:\n"
 msgstr "Nachricht gesendet an:\n"
 
-#: upgrade.cpp:259
+#: upgrade.cpp:604
 msgid ""
 "\n"
 "\n"
@@ -59,67 +81,132 @@ msgstr ""
 "\n"
 "Bitte prüfen Sie, ob sie ankommt."
 
-#: upgrade.cpp:260
+#: upgrade.cpp:605
 msgid "Testing your configuration"
 msgstr "Einstellungen werden geprüft"
 
-#: miscutil.cpp:73
+#: miscutil.cpp:74
 #, c-format
 msgid ""
 "Failed to create the address book '%s' for autocollected e-mail addresses."
 msgstr "Kann Adreßbuch '%s' zum automatischen Adreßsammeln nicht anlegen."
 
-#: miscutil.cpp:94
+#: miscutil.cpp:95
 #, c-format
 msgid "Auto collected e-mail address '%s' (added to the entry '%s')."
-msgstr "E-Mail Adresse '%s' gesammelt, in Eintrag '%s'."
+msgstr "E-Mail Adresse '%s' gesammelt (in Eintrag '%s')."
 
-#: miscutil.cpp:104
+#: miscutil.cpp:105
 msgid "Add new e-mail entry to database?"
 msgstr "Neue E-Mail Addresse in Datenbank aufnehmen?"
 
-#: miscutil.cpp:119
+#: miscutil.cpp:132
 #, c-format
 msgid ""
 "Couldn't create an entry in the address book '%s' for autocollected address."
 msgstr ""
 "Kann  keinen automatisch gesammelten Eintrag in Adreßbuch '%s' anlegen."
 
-#: miscutil.cpp:143
+#: miscutil.cpp:156
 #, c-format
-msgid "This entry was automatically added by M on %s."
-msgstr ""
+msgid "This entry was automatically added on %s."
+msgstr "Dieser Eintrag wurde automatisch gesammelt (%s)."
 
-#: miscutil.cpp:152
+#: miscutil.cpp:166
 #, fuzzy, c-format
-msgid "Auto collected e-mail address '%s' (created new entry '%s')."
-msgstr "E-Mail Adresse '%s' gesammelt, in Eintrag '%s'."
+msgid ""
+"Auto collected e-mail address '%s' (created new entry '%s' in group '%s')."
+msgstr "E-Mail Adresse '%s' gesammelt (neuer Eintrag '%s' in Gruppe '%s')."
 
-#: miscutil.cpp:186
+#: miscutil.cpp:210
 #, c-format
 msgid "'%s': the name is missing, address was not autocollected."
 msgstr "'%s': der Name fehlt, Adresse wurde nicht gesammelt."
 
-#: MApplication.cpp:147
-msgid "Can't find your M directory, please specify it in the options dialog."
-msgstr ""
-"Kann das M Verzeichnis nicht finden, bitte geben Sie es im Optionendialog an."
+#: MApplication.cpp:122
+msgid "Cannot build list of incoming mail folders."
+msgstr "Kann keine Liste der Eingangsmailboxen erstellen."
 
-#: MApplication.cpp:201
+#: MApplication.cpp:181
+#, c-format
+msgid "Auto-collecting mail from incoming folder '%s'."
+msgstr "Hole alle mail von Eingangsmailbox '%s'."
+
+#: MApplication.cpp:301
+#, fuzzy
+msgid ""
+"Cannot find your Mahogany directory, please specify it in the options dialog."
+msgstr ""
+"Kann das Mahogany Verzeichnis nicht finden, bitte geben Sie es im Optionendialog an."
+
+#: MApplication.cpp:349
 msgid "Failed to set up initial configuration."
 msgstr "Kann Ausgangskonfiguration nicht einrichten."
 
-#: MApplication.cpp:238
+#: MApplication.cpp:393
 #, c-format
-msgid "Can't create the directory for configuration files '%s'."
+msgid "Cannot create the directory for configuration files '%s'."
 msgstr "Kann Verzeichnis '%s' für Konfigurationsdateien nicht anlegen."
 
-#: MApplication.cpp:243
+#: MApplication.cpp:398
 #, c-format
 msgid "Created directory '%s' for configuration files."
 msgstr "Verzeichnis '%s' für Konfigurationsdateien angelegt."
 
-#: MApplication.cpp:281
+#: MApplication.cpp:408
+#, fuzzy, c-format
+msgid ""
+"Could not create initial empty configuration file\n"
+"'%s'\n"
+"%s"
+msgstr "Kann Verzeichnis '%s' für Konfigurationsdateien nicht anlegen.\n"
+"%s"
+
+#: MApplication.cpp:423
+#, c-format
+msgid ""
+"Configuration directory '%s' was writable for other users.\n"
+"Passwords may have been compromised, please consider changing them.\n"
+msgstr ""
+"Konfigurationsverzeichnis '%s' war schreibbar für andere Benutzer.\n"
+"Ihre Paßwörter könnten gelesen worden sein, bitte ändern Sie diese falls nötig.\n"
+
+#: MApplication.cpp:427
+msgid ""
+"This has been fixed now, the directory is no longer writable for others."
+msgstr "Dies ist nun korrigiert, das Verzeichnis ist für andere Benutzer nicht mehr schreibbar."
+
+#: MApplication.cpp:431
+#, c-format
+msgid ""
+"The attempt to make the directory unwritable for others has failed.\n"
+"(%s)"
+msgstr "Der Versuch, das Verzeichnis gegen Schreibzugriffe anderer Benutzer\n"
+"zu schützen, schlug fehl: %s."
+
+#: MApplication.cpp:454
+#, c-format
+msgid ""
+"Configuration file '%s' was readable for other users.\n"
+"Passwords may have been compromised, please consider changing them.\n"
+msgstr ""
+"Konfigurationdatei '%s' war für andere Benutzer lesbar.\n"
+"Paßwörter konnten gelesen werden, bitte ändern Sie diese falls nötig."
+
+#: MApplication.cpp:458
+msgid "This has been fixed now, the file is no longer readable for others."
+msgstr "Dies ist nun korrigiert, die Datei ist nicht länger für andere lesbar."
+
+#: MApplication.cpp:462
+#, c-format
+msgid ""
+"The attempt to make the file unreadable for others has failed.\n"
+"(%s)"
+msgstr ""
+"Der Versuch, die Datei für andere unlesbar zu machen schlug fehl.\n"
+"(%s)"
+
+#: MApplication.cpp:499
 #, c-format
 msgid ""
 "Cannot find global directory \"%s\" in\n"
@@ -130,63 +217,68 @@ msgstr ""
 "'%s'\n"
 "nicht finden. Möchten Sie es nun manuell angeben?"
 
-#: MApplication.cpp:288
-msgid "Specify global directory for M"
-msgstr "Systemweites Verzeichnis für M"
+#: MApplication.cpp:506
+msgid "Specify global directory for Mahogany"
+msgstr "Systemweites Verzeichnis für Mahogany"
 
-#: MApplication.cpp:321
+#: MApplication.cpp:540
 msgid "Program execution aborted due to installation problems."
-msgstr "Programmausführung wegen Installationsproblem abgebrochen."
+msgstr "Programmausführung wegen Installationsproblems abgebrochen."
 
-#: MApplication.cpp:492
+#: MApplication.cpp:723
+#, c-format
+msgid "Could not collect mail from incoming folder '%s'."
+msgstr "Konnte Nachrichten von Eingangsmailbox '%s' nicht abholen."
+
+#: MApplication.cpp:735
 #, c-format
 msgid "Command '%s' (to execute on new mail reception) failed."
 msgstr "Befehlsausführung '%s' (wegen neuen Mailempfangs) gescheitert."
 
-#: MApplication.cpp:522 wxMessageView.cpp:480
+#: MApplication.cpp:765 wxMessageView.cpp:514
 #, fuzzy
 msgid "Subject: "
 msgstr "Betreff: "
 
-#: MApplication.cpp:523 wxMessageView.cpp:458
+#: MApplication.cpp:766 wxMessageView.cpp:492
 #, fuzzy
 msgid "From: "
 msgstr "Von: "
 
-#: MApplication.cpp:524
+#: MApplication.cpp:767
 #, fuzzy
 msgid "in folder '"
 msgstr "in Mailbox '"
 
-#: MApplication.cpp:535
+#: MApplication.cpp:778
 #, fuzzy, c-format
 msgid ""
 "You have received %lu new messages\n"
 "in folder '%s'."
 msgstr "Sie haben %lu neue Nachrichten."
 
-#: MApplication.cpp:540
+#: MApplication.cpp:783
 msgid "New Mail"
 msgstr "Neue Nachrichten"
 
-#: MFolder.cpp:233
+#: MFolder.cpp:241
 #, fuzzy, c-format
-msgid "Can not create a folder '%s' which already exists."
+msgid "Cannot create a folder '%s' which already exists."
 msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
 
-#: MFolder.cpp:329
+#: MFolder.cpp:333
 #, fuzzy, c-format
 msgid ""
-"Can not create profile folder '%s' because a group with this name already "
+"Cannot create profile folder '%s' because a group with this name already "
 "exists."
-msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
+msgstr "Kann Konfiguration mit Namen '%s' nicht anlegen: existiert bereits."
 
 #: MFolder.cpp:478
 #, c-format
-msgid "Can't create subfolder '%s': folder with this name already exists."
-msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
+msgid "Cannot create subfolder '%s': folder with this name already exists."
+msgstr "Kann Mailbox mit Namen '%s' nicht anlegen: existiert bereits."
 
-#: MFolder.cpp:514
+#: MFolder.cpp:512
 msgid ""
 "INBOX folder is a special folder used by the mail system and can not be "
 "renamed."
@@ -194,95 +286,100 @@ msgstr ""
 "INBOX ist eine spezielle Mailbox die vom System verwaltet wird und kann "
 "nicht umbenannt werden."
 
-#: MFolder.cpp:528
+#: MFolder.cpp:526
 #, c-format
 msgid ""
-"Can't rename folder '%s' to '%s': the folder with the new name already "
+"Cannot rename folder '%s' to '%s': the folder with the new name already "
 "exists."
 msgstr ""
 "Kann Mailbox '%s' nicht zu '%s' umbenennen: eine Mailbox mit diesem Namen "
 "existiert bereits."
 
-#: wxMApp.cpp:151
+#: wxMApp.cpp:196
 msgid ""
 "The application is terminating abnormally.\n"
 "Please report the bug to m-developers@makelist.com\n"
 "Thank you!"
 msgstr ""
-"Die Applikation wurde abgebrochen.\n"
+"Das Programm wurde abgebrochen.\n"
 "Bitte berichten Sie diesen Fehler an m-developers@makelist.com\n"
 "Danke!"
 
-#: wxMApp.cpp:211
-msgid "M Activity Log"
-msgstr "M Aktionsbericht"
+#: wxMApp.cpp:264
+#, fuzzy
+msgid "Mahogany: Activity Log"
+msgstr "Mahogany: Aktions-Log"
 
-#: wxMApp.cpp:323
+#: wxMApp.cpp:383
 #, fuzzy
 msgid "Cannot initialise help system.\n"
 msgstr "Kann Hilfesystem nicht initialisieren\n"
 
-#: wxMApp.cpp:324
+#: wxMApp.cpp:384
 msgid "Help file '"
 msgstr "Hilfedatei '"
 
-#: wxMApp.cpp:324
+#: wxMApp.cpp:384
 msgid "' not found."
 msgstr "' nicht gefunden."
 
-#: wxMApp.cpp:337
+#: wxMApp.cpp:397
 msgid "Search for?"
 msgstr "Suche nach?"
 
-#: wxMApp.cpp:338
+#: wxMApp.cpp:398
 msgid "Search help for keyword"
 msgstr "In Hilfe nach Schlüsselbegriff suchen"
 
-#: wxMApp.cpp:349
+#: wxMApp.cpp:409
 #, fuzzy, c-format
 msgid "No help found for current context (%d)."
 msgstr "Keine Hilfe für aktuellen Kontext (%d)."
 
-#: wxMApp.cpp:350 wxMFrame.cpp:295
+#: wxMApp.cpp:410 wxMFrame.cpp:298
 msgid "Sorry"
 msgstr "Tut mir leid."
 
-#: wxMFrame.cpp:141
+#: wxMFrame.cpp:138
 msgid "&File"
 msgstr "&Datei"
 
-#: AdbFrame.cpp:1006 wxMFrame.cpp:147
+#: AdbFrame.cpp:1041 wxMFrame.cpp:144
 msgid "&Edit"
 msgstr "&Bearbeiten"
 
-#: wxDialogLayout.cpp:489 wxMFrame.cpp:153 wxMenuDefs.cpp:303
+#: wxDialogLayout.cpp:584 wxMFrame.cpp:150 wxMenuDefs.cpp:304
 msgid "&Help"
 msgstr "&Hilfe"
 
-#: wxMFrame.cpp:159
+#: wxMFrame.cpp:156
 msgid "&Message"
 msgstr "&Nachricht"
 
-#: wxMFrame.cpp:202
+#: wxMFrame.cpp:199
 msgid "Folder Open"
 msgstr "Mailbox öffnen"
 
-#: wxMFrame.cpp:202
+#: wxMFrame.cpp:199
 msgid "Name of the folder?"
 msgstr "Name der Mailbox?"
 
-#: wxMFrame.cpp:285
+#: wxMFrame.cpp:288
 msgid "Program preferences successfully saved."
 msgstr "Programmeinstellungen erfolgreich gesichert."
 
-#: wxMFrame.cpp:287
+#: wxMFrame.cpp:290
 #, fuzzy
 msgid "Couldn't save preferences."
 msgstr "Konnte Einstellungen nicht speichern."
 
-#: wxMFrame.cpp:295
+#: wxMFrame.cpp:298
 msgid "Help not implemented for current context, yet."
 msgstr "Noch keine Hilfe für den aktuellen Kontext implementiert."
+
+#: wxMFrame.cpp:338
+msgid "Mahogany Toolbar"
+msgstr ""
 
 #: wxFolderView.cpp:61
 msgid "Status"
@@ -305,11 +402,10 @@ msgid "Subject"
 msgstr "Betreff"
 
 #: wxFolderView.cpp:96
-#, fuzzy
 msgid "DUXCSMRFOPH "
 msgstr ""
 
-#: wxFolderView.cpp:290
+#: wxFolderView.cpp:302
 #, c-format
 msgid ""
 "Mark all articles in\n"
@@ -320,97 +416,113 @@ msgstr ""
 "%s\n"
 "als gelesen markieren?"
 
-#: wxFolderView.cpp:423
+#: wxFolderView.cpp:442
+#, fuzzy
 msgid ""
-"Invalid value '%s' for the date format: it should contain exactly 3 %%u "
+"Invalid value '%s' for the date format: it should contain exacty 3 %%u "
 "format specificators. Default value '%s' will be used instead."
 msgstr ""
-"Falsches Format '%s' für Datum: es sollte genau 3 %%uFormatangaben enhalten. "
+"Falsches Format '%s' für Datum: es sollte genau 3 %%u Formatangaben enhalten. "
 "Standardwert '%s' wird verwendet."
 
-#: wxFolderView.cpp:503
+#: wxFolderView.cpp:502
+#, c-format
+msgid "The folder '%s' could not be opened, please check its settings."
+msgstr "Die Mailbox '%s' konnte nicht geöffnet werden, bitte überprüfen Sie ihre Einstellungen."
+
+#: wxFolderView.cpp:531
 msgid "Deleted messages were expunged"
 msgstr "Gelöschte Nachrichten wurden entfernt"
 
-#: wxFolderView.cpp:656 wxFolderView.cpp:672
+#: wxFolderView.cpp:704 wxFolderView.cpp:720
 #, c-format
 msgid "%d messages saved"
-msgstr "%d Nachrichten gespeicher<t"
+msgstr "%d Nachrichten gesichert"
 
-#: wxFolderView.cpp:658 wxFolderView.cpp:674
+#: wxFolderView.cpp:706 wxFolderView.cpp:722
 #, fuzzy
 msgid "Saving messages failed."
 msgstr "Nachrichten konnten nicht gesichert werden."
 
-#: wxFolderView.cpp:694
+#: wxFolderView.cpp:742
 #, c-format
 msgid "Closing folder '%s' because the underlying mail folder was deleted."
-msgstr ""
+msgstr "Schließe Mailbox '%s' weil die Mailbox gelöscht wurde."
 
-#: wxMessageView.cpp:184
+#: wxMessageView.cpp:196
 #, fuzzy
 msgid "MIME Menu"
-msgstr "MIME Typ:"
+msgstr "MIME Menu"
 
-#: wxMessageView.cpp:191
+#: wxMessageView.cpp:203
 #, fuzzy
 msgid "&Info..."
-msgstr "&Öffnen..."
+msgstr "&Information..."
 
-#: wxFolderTree.cpp:192 wxMenuDefs.cpp:235 wxMessageView.cpp:193
+#: wxFolderTree.cpp:192 wxMenuDefs.cpp:236 wxMessageView.cpp:205
 msgid "&Open"
 msgstr "&Öffnen"
 
-#: wxMessageView.cpp:194
+#: wxMessageView.cpp:206
 msgid "&Save..."
 msgstr "&Sichern..."
 
-#: wxMessageView.cpp:469
+#: wxComposeView.cpp:762 wxComposeView.cpp:770 wxMessageView.cpp:372
+#: wxMessageView.cpp:380 wxMessageView.cpp:388
+#, c-format
+msgid ""
+"Cannot find a colour named '%s'.\n"
+"Please change settings."
+msgstr ""
+"Kann keine Farbe mit Namen '%s' finden.\n"
+"Bitte ändern Sie die Einstellungen."
+
+#: wxMessageView.cpp:503
 #, fuzzy
 msgid "Newsgroups: "
-msgstr "Nachricht öffnen"
+msgstr "Newsgruppen: "
 
-#: wxMessageView.cpp:471
+#: wxMessageView.cpp:505
 #, fuzzy
 msgid "To: "
 msgstr "An:"
 
-#: wxMessageView.cpp:485
+#: wxMessageView.cpp:519
 #, fuzzy
 msgid "Date: "
 msgstr "Datum"
 
-#: wxMessageView.cpp:619
+#: wxMessageView.cpp:653
 #, c-format
 msgid ""
 "Temporary file '%s' left because it is still in use by an external process"
 msgstr ""
-"Le fichier temporaire '%s' n'a pas été effacé car il est utilisé par un "
-"procès externe"
+"Temporäre Datie '%s' wurde nicht gelöscht, da sie noch von einem externen"
+"Prozeß benutzt wird."
 
-#: wxMessageView.cpp:640
+#: wxMessageView.cpp:674
 msgid "MIME type: "
 msgstr "MIME Typ:"
 
-#: wxMessageView.cpp:646
+#: wxMessageView.cpp:680
 msgid "Description: "
 msgstr "Beschreibung: "
 
-#: wxMessageView.cpp:648
+#: wxMessageView.cpp:682
 msgid "Size: "
 msgstr "Größe: "
 
-#: wxMessageView.cpp:653
+#: wxMessageView.cpp:687
 #, fuzzy
 msgid " lines"
 msgstr " Zeilen\n"
 
-#: wxMessageView.cpp:655
+#: wxMessageView.cpp:689
 #, fuzzy
 msgid " bytes"
 msgstr " Bytes\n"
 
-#: wxMessageView.cpp:663
+#: wxMessageView.cpp:697
 msgid ""
 "\n"
 "Parameters:\n"
@@ -418,74 +530,74 @@ msgstr ""
 "\n"
 "Parameter:\n"
 
-#: wxMessageView.cpp:676
+#: wxMessageView.cpp:710
 #, fuzzy
 msgid ""
 "\n"
 "Disposition: "
-msgstr "Beschreibung: "
+msgstr "Verwendung: "
 
-#: wxMessageView.cpp:679
+#: wxMessageView.cpp:713
 msgid ""
 "\n"
 "Disposition Parameters:\n"
 msgstr ""
 "\n"
-"Disposition Parameter:\n"
+"Verwendungsparameter:\n"
 
-#: wxMessageView.cpp:686
+#: wxMessageView.cpp:720
 #, fuzzy
 msgid "MIME information"
 msgstr "MIME Information"
 
-#: wxMessageView.cpp:836
+#: wxMessageView.cpp:870
 #, c-format
 msgid "Please enter the command to handle '%s' data:"
 msgstr "Bitte geben Sie den Programmaufruf ein um '%s' Daten anzuzeigen:"
 
-#: wxMessageView.cpp:838
+#: wxMessageView.cpp:872
 msgid "Unknown MIME type"
 msgstr "Unbekannter MIME-Typ"
 
-#: wxMessageView.cpp:847
+#: wxMessageView.cpp:881
 #, c-format
-msgid "Don't know how to handle data of type '%s'."
+msgid "Do not know how to handle data of type '%s'."
 msgstr "Keine Information über die Behandlung von Typ '%s'."
 
-#: wxMessageView.cpp:884
-msgid "Can't rename temporary file."
+#: wxMessageView.cpp:918
+msgid "Cannot rename temporary file."
 msgstr "Kann temporäre Datei nicht umbenennen."
 
-#: wxMessageView.cpp:891
+#: wxMessageView.cpp:925
 #, fuzzy, c-format
 msgid "Error opening attachment: command '%s' failed"
 msgstr "Kann Anlage nicht öffnen: Fehler bei Programmaufruf '%s'."
 
-#: wxMessageView.cpp:916
+#: wxMessageView.cpp:950
 msgid "Save attachment as:"
-msgstr "Sauvegarder l'attachement sous:"
+msgstr "Anhang sichern als:"
 
-#: wxMessageView.cpp:933
+#: wxMessageView.cpp:967
 #, fuzzy
 msgid "Cannot get attachment content."
-msgstr "Kann Nachrichteninhalt nicht erhalten."
+msgstr "Kann Nachrichtenanhang nicht erhalten."
 
-#: wxMessageView.cpp:946
+#: wxMessageView.cpp:980
 #, c-format
 msgid "Wrote %lu bytes to file '%s'"
 msgstr "%lu Bytes in Datei '%s' geschrieben"
 
-#: wxMessageView.cpp:955
+#: wxMessageView.cpp:989
 #, fuzzy
-msgid "Couldn't save the attachment."
-msgstr "Einstellungen ändern"
+msgid "Could not save the attachment."
+msgstr "Konnte Anhang nicht sichern."
 
-#: wxMessageView.cpp:1029
+#: wxMessageView.cpp:1063
 #, c-format
-msgid "Can't open URL '%s'"
+msgid "Cannot open URL '%s'"
 msgstr "Kann URL '%s' nicht öffnen"
 
-#: wxMessageView.cpp:1037
+#: wxMessageView.cpp:1071
 msgid ""
 "No command configured to view URLs.\n"
 "Would you like to choose one now?"
@@ -493,96 +605,143 @@ msgstr ""
 "Kein Programmaufruf zum Betrachten von URLs\n"
 "konfiguriert. Möchten Sie einen auswählen?"
 
-#: wxMessageView.cpp:1049
+#: wxMessageView.cpp:1083
 msgid "No command configured to view URLs."
 msgstr "Kein Programmaufruf zum Betradchten von URLs konfiguriert."
 
-#: wxMessageView.cpp:1084
+#: wxMessageView.cpp:1107 wxMessageView.cpp:1120
 #, c-format
-msgid "Couldn't launch browser: '%s' failed"
-msgstr "Impossible de lancer le navigateur: la commande '%s' a échoué."
+msgid "Could not launch browser: '%s' failed."
+msgstr "Kann Browser nicht starten: '%s' fehlgeschlagen."
 
-#: wxMessageView.cpp:1093
+#: wxMessageView.cpp:1129
 #, c-format
 msgid "Opening URL '%s'... done."
 msgstr "Öffne URL '%s'... done."
 
-#: wxMessageView.cpp:1096
+#: wxMessageView.cpp:1132
 #, c-format
 msgid "Opening URL '%s' failed."
 msgstr "Fehler beim Öffnen von URL '%s'."
 
-#: wxMessageView.cpp:1123
+#: wxMessageView.cpp:1159
 msgid "Failed to get the raw text of the message."
-msgstr ""
+msgstr "Konnte den Nachrichtentext nicht bekommen."
 
-#: wxMessageView.cpp:1128
+#: wxMessageView.cpp:1164
 #, fuzzy
 msgid "Raw message text"
-msgstr "Nachricht Sichern"
+msgstr "Nachrichtentext"
 
-#: wxComposeView.cpp:1295 wxMessageView.cpp:1252
+#: wxMessageView.cpp:1262
+#, c-format
+msgid ""
+"The selected message is %u Kbytes long which is more than the current "
+"threshold of %d Kbytes.\n"
+"\n"
+"Do you still want to download it?"
+msgstr ""
+"Die gewählte Nachricht ist %u KB lang, mehr als die aktuelle Maximalgröße von %d KB.\n"
+"\n"
+"Möchten Sie sie trotzdem öffnen?"
+
+#: wxMessageView.cpp:1331
 #, fuzzy
-msgid "M: Printout"
-msgstr "Drucken"
+msgid "Mahogany: Printout"
+msgstr "Mahogany: Ausdruck"
 
-#: wxComposeView.cpp:1298 wxMessageView.cpp:1255
+#: wxComposeView.cpp:1392 wxMessageView.cpp:1334
 msgid ""
 "There was a problem with printing the message:\n"
 "perhaps your current printer is not set up correctly?"
 msgstr ""
+"Es gab ein Problem beim Drucken der Nachricht:\n"
+"Vielleicht ist Ihr Drucker nicht richtig eingestellt?"
 
-#: wxComposeView.cpp:1300 wxMessageView.cpp:1257
+#: wxComposeView.cpp:1394 wxMessageView.cpp:1336
 #, fuzzy
 msgid "Printing"
 msgstr "Drucken"
 
-#: wxMessageView.cpp:1283
+#: wxMessageView.cpp:1364
 msgid ""
 "There was a problem with showing the preview:\n"
 "perhaps your current printer is not set correctly?"
 msgstr ""
 "Es gab ein Problem mit der Druckvoransicht:\n"
-"Möglicherweise ist Ihr Durcker nicht richtig eingestellt?"
+"Vielleicht ist Ihr Durcker nicht richtig eingestellt?"
 
-#: wxMessageView.cpp:1285
+#: wxMessageView.cpp:1366
 msgid "Previewing"
 msgstr "Duckvoransicht"
 
-#: wxMessageView.cpp:1290
+#: wxMessageView.cpp:1371
 #, fuzzy
 msgid "Print Preview"
 msgstr "Druckvoransicht"
 
-#: wxMessageView.cpp:1345
+#: wxMessageView.cpp:1426
 #, c-format
 msgid "%s (external viewer exited with non null exit code)"
-msgstr "%s (un procès externe s'est terminé avec un code de retour non nul)"
+msgstr "%s (externer Betracher terminierte mit Fehlercode)"
 
 #: wxComposeView.cpp:331
 msgid "Nothing to expand - please enter something."
-msgstr "Nichts zum expandieren - bitte geben Sie erste etwas ein."
+msgstr "Nichts zum expandieren - bitte geben Sie erst etwas ein."
 
-#: wxComposeView.cpp:431
+#: wxComposeView.cpp:426
+#, fuzzy
+msgid "Article Composition"
+msgstr "Artikeleditor"
+
+#: wxComposeView.cpp:444
+#, fuzzy
+msgid "Message Composition"
+msgstr "Nachrichteneditor"
+
+#: wxComposeView.cpp:476
 #, fuzzy
 msgid "&Compose"
 msgstr "&Nachricht schreiben"
 
-#: wxComposeView.cpp:542
+#: wxComposeView.cpp:538
+#, fuzzy
+msgid "To:"
+msgstr "An:"
+
+#: wxComposeView.cpp:538
+#, fuzzy
+msgid "Newsgroups:"
+msgstr "Nachricht öffnen"
+
+#: wxComposeView.cpp:539
+#, fuzzy
+msgid "Subject:"
+msgstr "Betreff"
+
+#: wxComposeView.cpp:540
+msgid "CC:"
+msgstr "Verteiler:"
+
+#: wxComposeView.cpp:541
+msgid "BCC:"
+msgstr "Blind-Verteiler:"
+
+#: wxComposeView.cpp:595
 #, fuzzy
 msgid "Expand the address using address books"
 msgstr "Adresse mit Hilfe der Adreßbücher expandieren"
 
-#: wxComposeView.cpp:604
+#: wxComposeView.cpp:657
 msgid "You haven't configured your signature file."
 msgstr "Sie haben keine Signaturdatei konfiguriert."
 
-#: wxComposeView.cpp:613
+#: wxComposeView.cpp:666
 #, c-format
 msgid "Signature file '%s' couldn't be opened."
 msgstr "Signaturdatei '%s' konnte nicht geöffnet werden."
 
-#: wxComposeView.cpp:617
+#: wxComposeView.cpp:670
 #, fuzzy
 msgid ""
 "\n"
@@ -593,31 +752,27 @@ msgstr ""
 "Keine Signaturdatei gefunden. Möchten Sie jetzt eine\n"
 "auswählen (andernfalls wird keine Signatur angehängt)?"
 
-#: wxComposeView.cpp:623
+#: wxComposeView.cpp:676
 msgid "Choose signature file"
 msgstr "Signaturdatei wählen"
 
-#: MailFolder.cpp:233 wxBrowseButton.cpp:58 wxComposeView.cpp:625
-#: wxComposeView.cpp:815 wxComposeView.cpp:840 wxComposeView.cpp:1062
+#: MailFolder.cpp:277 wxBrowseButton.cpp:61 wxComposeView.cpp:678
+#: wxComposeView.cpp:893 wxComposeView.cpp:918 wxComposeView.cpp:1144
 msgid "All files (*.*)|*.*"
 msgstr "Alle Dateien (*.*)|*.*"
 
-#: wxComposeView.cpp:664
+#: wxComposeView.cpp:717
 #, fuzzy, c-format
 msgid "Your signature is %stoo long: it should not be more than %d lines."
 msgstr ""
 "Ihre Singatur ist %s zu lang: sie sollte nicht mehr als %d Zeilen haben"
 
-#: wxComposeView.cpp:666
+#: wxComposeView.cpp:719
 #, fuzzy
 msgid "way "
 msgstr "viel"
 
-#: wxComposeView.cpp:718
-msgid "M : Message Composition"
-msgstr "M : Neue Nachricht schreiben"
-
-#: wxComposeView.cpp:759
+#: wxComposeView.cpp:836
 #, c-format
 msgid ""
 "Please terminate the external editor (pid %d) before closing this window."
@@ -625,133 +780,139 @@ msgstr ""
 "Bitte beenden Sie den externen Editor (pid %d) bevor Sie dieses Fenster "
 "schließen."
 
-#: wxComposeView.cpp:769
+#: wxComposeView.cpp:846
 msgid "There are unsaved changes, close anyway?"
 msgstr "Änderungen nicht gesichert, trotzdem schließen?"
 
-#: wxComposeView.cpp:813 wxComposeView.cpp:1060
+#: wxComposeView.cpp:891 wxComposeView.cpp:1142
 #, fuzzy
 msgid "Please choose a file to insert."
 msgstr "Bitte wählen Sie eine Datei zum einfügen."
 
-#: wxComposeView.cpp:821 wxComposeView.cpp:846
+#: wxComposeView.cpp:899 wxComposeView.cpp:924
 #, fuzzy
 msgid "Cancelled"
 msgstr "Abgebrochen"
 
-#: wxComposeView.cpp:825
+#: wxComposeView.cpp:903
 #, fuzzy, c-format
 msgid "Inserted file '%s'."
 msgstr "Datei '%s' eingefügt."
 
-#: wxComposeView.cpp:829
+#: wxComposeView.cpp:907
 #, c-format
 msgid "Failed to insert the text file '%s'."
 msgstr "Konte Textdatei '%s' nicht einfügen."
 
-#: MailFolder.cpp:231 wxComposeView.cpp:838
+#: MailFolder.cpp:275 wxComposeView.cpp:916
 #, fuzzy
 msgid "Choose file to save message to"
-msgstr "Kein Profileintrag um Mailbox zu sichern"
+msgstr "Wählen Sie eine Datei zum speichern"
 
-#: wxComposeView.cpp:850
+#: wxComposeView.cpp:928
 #, fuzzy, c-format
 msgid "Message text saved to file '%s'."
-msgstr "%lu Bytes in Datei '%s' geschrieben"
+msgstr "Nachrichtentext in Datei '%s' gesichert."
 
-#: wxComposeView.cpp:855
+#: wxComposeView.cpp:933
 #, fuzzy
 msgid "Failed to save the message."
-msgstr "Nachricht löschen"
-
-#: wxComposeView.cpp:864
-#, c-format
-msgid "External editor is already running (pid %d)"
-msgstr ""
-
-#: wxComposeView.cpp:883
-#, fuzzy
-msgid "External editor not configured."
-msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
-
-#: wxComposeView.cpp:891
-#, fuzzy
-msgid "Can not create temporary file"
-msgstr "Kann temporäre Datei nicht umbenennen."
-
-#: wxComposeView.cpp:899
-msgid "Failed to pass message to external editor."
-msgstr ""
-
-#: wxComposeView.cpp:916
-#, fuzzy, c-format
-msgid "Execution of '%s' failed."
-msgstr "Fehler beim Öffnen von URL '%s'."
-
-#: wxComposeView.cpp:923
-#, c-format
-msgid "Started external editor (pid %d)"
-msgstr ""
+msgstr "Konnte Nachricht nicht sichern."
 
 #: wxComposeView.cpp:942
+#, c-format
+msgid "External editor is already running (PID %d)"
+msgstr "Externer Editor läuft schon (PID %d)"
+
+#: wxComposeView.cpp:961
+#, fuzzy
+msgid "External editor not configured."
+msgstr "Kein externer Editor konfiguriert."
+
+#: wxComposeView.cpp:969
+#, fuzzy
+msgid "Cannot create temporary file"
+msgstr "Kann temporäre Datei nicht anlegen"
+
+#: wxComposeView.cpp:977
+msgid "Failed to pass message to external editor."
+msgstr "Konnte Nachricht nicht an externen Editor übergeben."
+
+#: wxComposeView.cpp:994
+#, fuzzy, c-format
+msgid "Execution of '%s' failed."
+msgstr "Fehler beim Ausführen von '%s'."
+
+#: wxComposeView.cpp:1001
+#, c-format
+msgid "Started external editor (PID %d)"
+msgstr "Externen Editor gestarted (PID %d)"
+
+#: wxComposeView.cpp:1020
 msgid "Would you like to change the external editor setting now?"
-msgstr ""
+msgstr "Möchten Sie die Einstellungen für den externen Editor ändern?"
 
-#: wxComposeView.cpp:948
+#: wxComposeView.cpp:1026
 msgid "Set up external editor"
-msgstr ""
+msgstr "Externen Editor konfigurieren"
 
-#: wxComposeView.cpp:949
+#: wxComposeView.cpp:1027
 msgid ""
 "Enter the command name (%%s will be replaced with the name of the file):"
 msgstr ""
+"Geben Sie den Befehl ein (%%s wird durch den Dateinamen ersetzt werden):"
 
-#: wxComposeView.cpp:987
+#: wxComposeView.cpp:1069
 msgid "External editor terminated with non null exit code."
-msgstr ""
+msgstr "Externer Editor terminierte mit Fehlercode."
 
-#: wxComposeView.cpp:994
+#: wxComposeView.cpp:1076
 msgid "Failed to insert back the text from external editor."
-msgstr ""
+msgstr "Konnte Text vom externen Editor nicht einfügen."
 
-#: wxComposeView.cpp:1004
+#: wxComposeView.cpp:1086
 msgid "Inserted text from external editor."
-msgstr ""
+msgstr "Text vom externen Editor eingefügt."
 
-#: wxComposeView.cpp:1010
+#: wxComposeView.cpp:1092
 #, c-format
 msgid "The text was left in the file '%s'."
-msgstr ""
+msgstr "Der Text wurde in Datei '%s' hinterlassen."
 
-#: wxComposeView.cpp:1109
+#: wxComposeView.cpp:1191
 #, c-format
 msgid "Inserted file '%s' (as '%s')"
 msgstr "Datei '%s' eingefügt (als '%s')"
 
-#: wxComposeView.cpp:1176
+#: wxComposeView.cpp:1261
 #, c-format
 msgid "Cannot read file '%s' included in this message!"
 msgstr "Kann die in der Nachricht enhaltene Datei '%s' nicht lesen!"
 
-#: wxComposeView.cpp:1184
+#: wxComposeView.cpp:1269
 #, c-format
 msgid "Cannot open file '%s' included in this message!"
 msgstr "Kann die in der Nachricht enhaltene Datei '%s' nicht lesen!"
 
-#: wxComposeView.cpp:1213
+#: wxComposeView.cpp:1298
 #, fuzzy
 msgid "Unknwown part type"
 msgstr "Unbekannter MIME-Typ"
 
-#: wxComposeView.cpp:1316
+#: wxComposeView.cpp:1389
+#, fuzzy
+msgid "Mahogany: Printout"
+msgstr "Mahogany: Ausdruck"
+
+#: wxComposeView.cpp:1410
 msgid ""
 "The external editor is still opened, please close it before sending the "
 "message."
 msgstr ""
-"Der externe Editor läuft noch, bitte schließen Sie ihn before Sie die"
-"Nachricht senden."
+"Der externe Editor läuft noch, bitte schließen Sie ihn before Sie "
+"dieNachricht senden."
 
-#: wxComposeView.cpp:1330
+#: wxComposeView.cpp:1424
 msgid ""
 "The message can not be sent because the network settings are either not "
 "configured or incorrect. Would you like to change them now?"
@@ -759,69 +920,97 @@ msgstr ""
 "Die Nachricht kann nicht gesendet werden. Netzwerkeinstellungen sind "
 "fehlerhaft. Möchten Sie sie ändern?"
 
-#: wxComposeView.cpp:1342
+#: wxComposeView.cpp:1436
 #, fuzzy
 msgid "Cannot send message - network is not configured."
 msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
 
-#: wxComposeView.cpp:1357
+#: wxComposeView.cpp:1451
 msgid "Please specify at least one recipient in the \"To:\" field!"
 msgstr "Bitte geben Sie mindestens einen Empfänger an!"
 
-#: wxComposeView.cpp:1369
+#: wxComposeView.cpp:1463
 msgid "The subject of your message is empty, would you like to change it?"
 msgstr "Das Betreff-Feld ist leer, möchten Sie dies korrigieren?"
 
-#: wxComposeView.cpp:1407
+#: wxComposeView.cpp:1501
 #, fuzzy
-msgid "Can not insert text file into the message."
+msgid "Cannot insert text file into the message."
 msgstr "Kann die Textdatei nicht einfügen."
 
-#: wxComposeView.cpp:1494
+#: wxComposeView.cpp:1587
 #, fuzzy, c-format
 msgid "Cannot write message to file '%s'."
 msgstr "Kann Nachricht nicht in Datei '%s' schreiben."
 
-#: wxMainFrame.cpp:69
+#: wxMainFrame.cpp:70
 #, fuzzy, c-format
 msgid "Selected folder '%s'."
 msgstr "Mailbox '%s' ausgewählt."
 
-#: wxMainFrame.cpp:221
-msgid "Do you really want to exit M?"
-msgstr "Möchten Sie M wirklich beenden?"
+#: wxMainFrame.cpp:198
+msgid ""
+"This folder couldn't be opened last time, do you still want to try to open "
+"it (it will probably fail again)?"
+msgstr ""
+"Diese Mailbox konnte das letzte Mal nicht geöffnet werden, möchten Sie es trotzdem versuchen?"
 
-#: wxIconManager.cpp:191
+#: wxMainFrame.cpp:206
+msgid "Would you like to change folder settings before trying to open it?"
+msgstr "Möchten Sie die Mailboxeinstellungen ändern bevor Sie versuchen sie zu öffnen?"
+
+#: wxMainFrame.cpp:243
+#, c-format
+msgid "Opened folder '%s' (%lu messages, %lu new)"
+msgstr "Mailbox '%s' geöffnet (%lu Nachrichten, %lu neu)"
+
+#: wxMainFrame.cpp:278
+msgid "Do you really want to exit Mahogany?"
+msgstr "Möchten Sie Mahogany wirklich beenden?"
+
+#: wxIconManager.cpp:170
+#, c-format
+msgid ""
+"Unsupported intermediary image format '%s' specified,\n"
+"reset to '%s'."
+msgstr ""
+"Nicht unterstütztes Grafikformat zur Umwandlung '%s' angegeben,\n"
+"zurückgesetzt auf '%s'."
+
+#: wxIconManager.cpp:193
 msgid ""
 "The setting for image conversion program should include exactly two '%%s' "
 "format specificators.\n"
 "The current format specificators are incorrect and the default value will be "
 "used instead."
 msgstr ""
-"Die Einstellung für das Grafikformat-Konvertierprogramm sollte exakt zwei '%%s' "
-"Formatangaben enthalten.\n"
+"Die Einstellung für das Grafikformat-Konvertierprogramm sollte exakt zwei "
+"'%%s' Formatangaben enthalten.\n"
 "Die aktuelle Einstellung ist fehlerhaft und der Vorgabewert wird stattdessen "
 "verwendet."
 
-#: AdbFrame.cpp:2387 AdbFrame.cpp:2506 generic/persctrl.cpp:819
-#: wxMDialogs.cpp:184 wxMDialogs.cpp:363 wxMDialogs.cpp:1065
-#: wxMFolderDialogs.cpp:1010
+#: AdbFrame.cpp:2422 AdbFrame.cpp:2541 generic/persctrl.cpp:819
+#: wxHeadersDialogs.cpp:201 wxMDialogs.cpp:199 wxMDialogs.cpp:391
+#: wxMDialogs.cpp:1108 wxMFolderDialogs.cpp:1234
 msgid "Cancel"
 msgstr "Abbruch"
 
-#: AdbFrame.cpp:2383 AdbFrame.cpp:2502 generic/persctrl.cpp:812
-#: wxMDialogs.cpp:359 wxMDialogs.cpp:1075 wxMFolderDialogs.cpp:1001
+#: AdbFrame.cpp:2418 AdbFrame.cpp:2537 generic/persctrl.cpp:812
+#: wxHeadersDialogs.cpp:192 wxMDialogs.cpp:387 wxMDialogs.cpp:1118
+#: wxMFolderDialogs.cpp:1225
 msgid "OK"
 msgstr "OK"
 
-#: wxMDialogs.cpp:454
+#: wxMDialogs.cpp:492
 #, fuzzy
 msgid ""
 "\n"
 "System error: "
-msgstr "Systemfehler"
+msgstr ""
+"\n"
+"Systemfehler: "
 
-#: wxMDialogs.cpp:471
+#: wxMDialogs.cpp:509
 msgid ""
 "\n"
 "Exiting application..."
@@ -829,238 +1018,234 @@ msgstr ""
 "\n"
 "Programm wird beendet..."
 
-#: wxMDialogs.cpp:626
+#: wxMDialogs.cpp:664
 msgid "Please choose an entry:"
 msgstr "Bitte wählen Sie einen Eintrag:"
 
-#: wxMDialogs.cpp:627
+#: wxMDialogs.cpp:665
 msgid "Expansion options"
 msgstr "Expansions-Einstellungen"
 
-#: wxMDialogs.cpp:706
-msgid "   Mahogany Mail"
-msgstr ""
-
-#: wxMDialogs.cpp:711
+#: wxMDialogs.cpp:743
 msgid "    Version: "
-msgstr "       Version: "
+msgstr "    Version: "
 
-#: wxMDialogs.cpp:715
+#: wxMDialogs.cpp:747
 #, fuzzy
 msgid "        compiled for: "
-msgstr "         zu"
+msgstr "         für: "
 
-#: wxMDialogs.cpp:727
+#: wxMDialogs.cpp:759
 msgid "  Copyright (c) 1999 by Karsten Ballüder"
 msgstr "  Alle Rechte (c) 1999: Karsten Ballüder"
 
-#: wxMDialogs.cpp:730
+#: wxMDialogs.cpp:762
 msgid "          Written by Karsten Ballüder"
 msgstr "          Geschrieben von Karsten Ballüder"
 
-#: wxMDialogs.cpp:732
+#: wxMDialogs.cpp:764
 msgid "                      and Vadim Zeitlin"
 msgstr "                      und Vadim Zeitlin"
 
-#: wxMDialogs.cpp:735
+#: wxMDialogs.cpp:768
 msgid "This software is provied 'as is' and without any express or implied"
-msgstr ""
+msgstr "Dieses Programm wird ohne jede ausdrückliche oder implizierte"
 
-#: wxMDialogs.cpp:737
+#: wxMDialogs.cpp:771
 msgid "warranties, including, without limitation, the implied warranties"
-msgstr ""
+msgstr "Garantien zur Verfügung gestellt, einschließlich, ohne Begrenzungen, die Annahme"
 
-#: wxMDialogs.cpp:739
+#: wxMDialogs.cpp:774
 msgid "of merchantibility and fitness for a particular purpose."
-msgstr ""
+msgstr "der Verwendungsfähigkeit für einen bestimmten Zweck."
 
-#: wxMDialogs.cpp:741
+#: wxMDialogs.cpp:777
 msgid "This is OpenSource(TM) software."
-msgstr ""
+msgstr "Dies ist OpenSource(TM) Software."
 
-#: wxMDialogs.cpp:755
+#: wxMDialogs.cpp:798
 msgid "Welcome"
 msgstr "Willkommen"
 
-#: wxMDialogs.cpp:864 wxMFolderDialogs.cpp:526
+#: wxMDialogs.cpp:907 wxMFolderDialogs.cpp:551
 #, fuzzy
 msgid "Folder properties"
-msgstr "Mailbox öffnen"
+msgstr "Mailboxeinstellungen"
 
-#: wxMDialogs.cpp:893 wxMDialogs.cpp:1267 wxMFolderDialogs.cpp:578
+#: wxMDialogs.cpp:936 wxMDialogs.cpp:1310 wxMFolderDialogs.cpp:611
 msgid "INBOX"
 msgstr ""
 
-#: wxMDialogs.cpp:894
+#: wxMDialogs.cpp:937
 #, fuzzy
 msgid "Message box file"
 msgstr "Mailbox-Datei"
 
-#: wxMDialogs.cpp:895 wxMFolderDialogs.cpp:580
+#: wxMDialogs.cpp:938 wxMFolderDialogs.cpp:613
 msgid "POP3"
 msgstr ""
 
-#: wxMDialogs.cpp:896 wxMFolderDialogs.cpp:581
+#: wxMDialogs.cpp:939 wxMFolderDialogs.cpp:614
 msgid "IMAP"
 msgstr ""
 
-#: wxMDialogs.cpp:897
+#: wxMDialogs.cpp:940
 msgid "News"
 msgstr ""
 
-#: wxMDialogs.cpp:900 wxMFolderDialogs.cpp:585
+#: wxMDialogs.cpp:943 wxMFolderDialogs.cpp:618
 #, fuzzy
 msgid "Folder Type"
 msgstr "Mailbox öffnen"
 
-#: wxMDialogs.cpp:935
+#: wxMDialogs.cpp:978
 msgid "Hostname"
 msgstr "Rechnername"
 
-#: wxMDialogs.cpp:941
+#: wxMDialogs.cpp:984
 #, fuzzy
 msgid "Pathname or name of folder"
 msgstr "Name oder Datei der Mailbox?"
 
-#: wxMDialogs.cpp:1011
-msgid "M - New Folder"
-msgstr "M : Neue Mailbox"
+#: wxMDialogs.cpp:1054
+msgid "New Folder"
+msgstr "Neue Mailbox"
 
-#: wxMDialogs.cpp:1012
+#: wxMDialogs.cpp:1055
 #, fuzzy
 msgid "Symbolic name for the new folder"
-msgstr "Name der neuen Mailbox?"
+msgstr "Symbolischer Name der neuen Mailbox?"
 
-#: wxMDialogs.cpp:1047
+#: wxMDialogs.cpp:1090
 #, fuzzy
 msgid "Choose folder"
 msgstr "Mailbox auswählen"
 
-#: wxMDialogs.cpp:1266 wxMDialogs.cpp:1273
+#: wxMDialogs.cpp:1309 wxMDialogs.cpp:1316
 #, fuzzy
 msgid "Folder Name"
 msgstr "Mailbox öffnen"
 
-#: wxMDialogs.cpp:1279
+#: wxMDialogs.cpp:1322
 msgid "Mailhost"
 msgstr "Mailserver"
 
-#: wxMDialogs.cpp:1286
+#: wxMDialogs.cpp:1329
 msgid "Newsserver"
 msgstr ""
 
-#: wxMDialogs.cpp:1288
+#: wxMDialogs.cpp:1331
 msgid "Newsgroup"
-msgstr ""
+msgstr "Newsgruppe"
 
-#: wxlwindow.cpp:449
+#: wxlwindow.cpp:488
 msgid "Layout Menu"
 msgstr ""
 
-#: wxlwindow.cpp:451
+#: wxlwindow.cpp:490
 msgid "&Larger"
 msgstr "&Größer"
 
-#: wxlwindow.cpp:451
+#: wxlwindow.cpp:490
 msgid "Switch to larger font."
 msgstr "Größere Schrift wählen."
 
-#: wxlwindow.cpp:452
+#: wxlwindow.cpp:491
 msgid "&Smaller"
 msgstr "&Kleiner"
 
-#: wxlwindow.cpp:452
+#: wxlwindow.cpp:491
 msgid "Switch to smaller font."
 msgstr "Kleinere Schrift wählen."
 
-#: wxlwindow.cpp:454
+#: wxlwindow.cpp:493
 #, fuzzy
 msgid "&Underline on"
 msgstr "&Unterstreichen"
 
-#: wxlwindow.cpp:454
+#: wxlwindow.cpp:493
 #, fuzzy
 msgid "Activate underline mode."
 msgstr "Unterstreichen ein-/ausschalten."
 
-#: wxlwindow.cpp:455
+#: wxlwindow.cpp:494
 #, fuzzy
 msgid "&Underline off"
-msgstr "&Unterstreichen"
+msgstr "&Unterstreichen ein"
 
-#: wxlwindow.cpp:455
+#: wxlwindow.cpp:494
 #, fuzzy
 msgid "Deactivate underline mode."
 msgstr "Unterstreichen ein-/ausschalten."
 
-#: wxlwindow.cpp:456
+#: wxlwindow.cpp:495
 #, fuzzy
 msgid "&Bold on"
-msgstr "&Fett"
+msgstr "&Fett ein"
 
-#: wxlwindow.cpp:456
+#: wxlwindow.cpp:495
 #, fuzzy
 msgid "Activate bold mode."
 msgstr "Fettdruck ein-/ausschalten."
 
-#: wxlwindow.cpp:457
+#: wxlwindow.cpp:496
 #, fuzzy
 msgid "&Bold off"
-msgstr "&Fett"
+msgstr "&Fett aus"
 
-#: wxlwindow.cpp:457
+#: wxlwindow.cpp:496
 #, fuzzy
 msgid "Deactivate bold mode."
 msgstr "Fettdruck ein-/ausschalten."
 
-#: wxlwindow.cpp:458
+#: wxlwindow.cpp:497
 #, fuzzy
 msgid "&Italics on"
-msgstr "Kur&siv"
+msgstr "Kur&siv ein"
 
-#: wxlwindow.cpp:458
+#: wxlwindow.cpp:497
 #, fuzzy
 msgid "Activate italics mode."
 msgstr "Kursiv ein-/ausschalten."
 
-#: wxlwindow.cpp:459
+#: wxlwindow.cpp:498
 #, fuzzy
 msgid "&Italics off"
-msgstr "Kur&siv"
+msgstr "Kur&siv aus"
 
-#: wxlwindow.cpp:459
+#: wxlwindow.cpp:498
 #, fuzzy
 msgid "Deactivate italics mode."
 msgstr "Kursiv ein-/ausschalten."
 
-#: wxlwindow.cpp:461
+#: wxlwindow.cpp:500
 msgid "&Roman"
 msgstr "&Roman"
 
-#: wxlwindow.cpp:461
+#: wxlwindow.cpp:500
 #, fuzzy
 msgid "Switch to roman font."
 msgstr "Kleinere Schrift wählen."
 
-#: wxlwindow.cpp:462
+#: wxlwindow.cpp:501
 msgid "&Typewriter"
 msgstr "&Courier"
 
-#: wxlwindow.cpp:462
+#: wxlwindow.cpp:501
 #, fuzzy
 msgid "Switch to typewriter font."
 msgstr "Größere Schrift wählen."
 
-#: wxlwindow.cpp:463
+#: wxlwindow.cpp:502
 msgid "&Sans Serif"
 msgstr "&Helvetica"
 
-#: wxlwindow.cpp:463
+#: wxlwindow.cpp:502
 #, fuzzy
 msgid "Switch to sans serif font."
 msgstr "Kleinere Schrift wählen."
 
-#: wxMenuDefs.cpp:81 wxMenuDefs.cpp:224
+#: wxMenuDefs.cpp:81 wxMenuDefs.cpp:225
 msgid "Close this window"
 msgstr "Dieses Fenster schließen"
 
@@ -1163,460 +1348,468 @@ msgstr "&Nachricht schreiben"
 msgid "Start a new message"
 msgstr "Neue Nachricht"
 
-#: wxMenuDefs.cpp:208
+#: wxMenuDefs.cpp:207
+msgid "Post &News Article"
+msgstr "News&artikel schreiben"
+
+#: wxMenuDefs.cpp:207
+msgid "Write a news article and post it"
+msgstr "Neuen Newsartikel schreiben und senden"
+
+#: wxMenuDefs.cpp:209
 #, fuzzy
-msgid "&Print Setup"
-msgstr "&Drucken"
+msgid "P&rint Setup"
+msgstr "Druck&erinstellungen"
 
-#: wxMenuDefs.cpp:208
+#: wxMenuDefs.cpp:209
 msgid "Configure printing"
-msgstr "Configurer les paramètres d'impression"
+msgstr "Druckereinstellungen"
 
-#: wxMenuDefs.cpp:212
+#: wxMenuDefs.cpp:213
 #, fuzzy
 msgid "&Print PS Setup"
-msgstr "&Drucken"
+msgstr "&Postscript Druckereinstellungen"
 
-#: wxMenuDefs.cpp:212
+#: wxMenuDefs.cpp:213
 msgid "Configure PostScript printing"
-msgstr "Configurer les paramètres d'impression PostScript"
+msgstr "Postscript Druckereinstellungen"
 
-#: wxMenuDefs.cpp:216
+#: wxMenuDefs.cpp:217
 msgid "Create &Folder..."
 msgstr "Mailbox &anlegen..."
 
-#: wxMenuDefs.cpp:216
+#: wxMenuDefs.cpp:217
 msgid "Creates a new folder definition"
-msgstr "Neue Mailbox definieren"
+msgstr "Legt eine neue Mailboxeinstellung an"
 
-#: wxMenuDefs.cpp:220
+#: wxMenuDefs.cpp:221
 msgid "Run &Script..."
 msgstr "Skript aus&führen..."
 
-#: wxMenuDefs.cpp:220
+#: wxMenuDefs.cpp:221
 msgid "Run a simple python script"
 msgstr "Pythonskript ausführen"
 
-#: wxMenuDefs.cpp:224
+#: wxMenuDefs.cpp:225
 msgid "&Close Window"
 msgstr "Fenster &schließen"
 
-#: wxMenuDefs.cpp:226
+#: wxMenuDefs.cpp:227
 msgid "E&xit"
 msgstr "&Ende"
 
-#: wxMenuDefs.cpp:226
+#: wxMenuDefs.cpp:227
 #, fuzzy
 msgid "Quit the application"
 msgstr "Nicht behebbarer Programmfehler"
 
-#: wxMenuDefs.cpp:229
+#: wxMenuDefs.cpp:230
 msgid "&Address books..."
 msgstr "&Adreßbücher..."
 
-#: wxMenuDefs.cpp:229
+#: wxMenuDefs.cpp:230
 #, fuzzy
 msgid "Edit the address book(s)"
 msgstr "Adreßbuch editieren"
 
-#: wxMenuDefs.cpp:230
+#: wxMenuDefs.cpp:231
 msgid "&Preferences..."
 msgstr "&Einstellungen..."
 
-#: wxMenuDefs.cpp:230
+#: wxMenuDefs.cpp:231
 msgid "Change options"
 msgstr "Einstellungen ändern"
 
-#: wxMenuDefs.cpp:232
+#: wxMenuDefs.cpp:233
 msgid "&Save Preferences"
 msgstr "Einstellungen &sichern"
 
-#: wxMenuDefs.cpp:232
+#: wxMenuDefs.cpp:233
 msgid "Save options"
 msgstr "Einstellungen sichern"
 
-#: wxMenuDefs.cpp:235
+#: wxMenuDefs.cpp:236
 #, fuzzy
 msgid "View selected message"
-msgstr "Nachricht löschen"
+msgstr "Ausgewählte Nachrichten ansehen"
 
-#: wxMenuDefs.cpp:236 wxMenuDefs.cpp:263
+#: wxMenuDefs.cpp:237 wxMenuDefs.cpp:264
 msgid "&Print"
 msgstr "&Drucken"
 
-#: wxMenuDefs.cpp:236
+#: wxMenuDefs.cpp:237
 #, fuzzy
 msgid "Print this message"
 msgstr "Nachricht drucken"
 
-#: wxMenuDefs.cpp:237
+#: wxMenuDefs.cpp:238
 #, fuzzy
 msgid "Print Pre&view"
 msgstr "Druckvoransicht"
 
-#: wxMenuDefs.cpp:237
+#: wxMenuDefs.cpp:238
 #, fuzzy
 msgid "Preview a printout of this message"
-msgstr "Nachricht drucken"
+msgstr "Betrachten eines Ausrucks dieser Nachricht"
 
-#: wxMenuDefs.cpp:239
+#: wxMenuDefs.cpp:240
 #, fuzzy
 msgid "PS-Prin&t"
-msgstr "Drucken"
+msgstr "&PS-Drucken"
 
-#: wxMenuDefs.cpp:239
+#: wxMenuDefs.cpp:240
 #, fuzzy
 msgid "Print this message as PostScript"
-msgstr "Nachricht drucken"
+msgstr "Nachricht als PostScript drucken"
 
-#: wxMenuDefs.cpp:240
+#: wxMenuDefs.cpp:241
 #, fuzzy
 msgid "PS&-Print Preview"
-msgstr "Drucken"
+msgstr "PS-Druckvo&ransicht"
 
-#: wxMenuDefs.cpp:240
+#: wxMenuDefs.cpp:241
 msgid "View PostScript printout"
-msgstr "Aperçu d'imppression PostScript"
+msgstr "Druckvoransicht für PostScript Ausdruck"
 
-#: wxMenuDefs.cpp:242
+#: wxMenuDefs.cpp:243
 msgid "&Reply"
 msgstr "&Beantworten"
 
-#: wxMenuDefs.cpp:242
+#: wxMenuDefs.cpp:243
 #, fuzzy
 msgid "Reply to this message"
 msgstr "Nachricht beantworten"
 
-#: wxMenuDefs.cpp:243
+#: wxMenuDefs.cpp:244
 msgid "&Forward"
 msgstr "&Weiterleiten"
 
-#: wxMenuDefs.cpp:243
+#: wxMenuDefs.cpp:244
 #, fuzzy
 msgid "Forward this message"
 msgstr "Nachricht weiterleiten"
 
-#: wxMenuDefs.cpp:245
+#: wxMenuDefs.cpp:246
 msgid "&Save as File"
 msgstr "Als &Datei sichern"
 
-#: wxMenuDefs.cpp:246
+#: wxMenuDefs.cpp:247
 #, fuzzy
 msgid "Export message to a file"
 msgstr "Nachricht Sichern"
 
-#: wxMenuDefs.cpp:247
+#: wxMenuDefs.cpp:248
 msgid "&Copy to Folder"
 msgstr "In Mailbox &kopieren"
 
-#: wxMenuDefs.cpp:247
+#: wxMenuDefs.cpp:248
 #, fuzzy
 msgid "Save message to another folder"
 msgstr "Nachricht Sichern"
 
-#: wxMenuDefs.cpp:248
+#: wxMenuDefs.cpp:249
 #, fuzzy
 msgid "&Move to Folder"
 msgstr "In Mailbox &kopieren"
 
-#: wxMenuDefs.cpp:248
+#: wxMenuDefs.cpp:249
 #, fuzzy
 msgid "Move message to another folder"
 msgstr "Nachricht Sichern"
 
-#: AdbFrame.cpp:1032 wxMenuDefs.cpp:249 wxMenuDefs.cpp:283
+#: AdbFrame.cpp:1067 wxMenuDefs.cpp:250 wxMenuDefs.cpp:284
 msgid "&Delete"
 msgstr "&Löschen"
 
-#: wxMenuDefs.cpp:249
+#: wxMenuDefs.cpp:250
 #, fuzzy
 msgid "Delete this message"
 msgstr "Nachricht löschen"
 
-#: wxMenuDefs.cpp:250
+#: wxMenuDefs.cpp:251
 msgid "&Undelete"
 msgstr "&Wiederherstellen"
 
-#: wxMenuDefs.cpp:250
+#: wxMenuDefs.cpp:251
 #, fuzzy
 msgid "Undelete message"
 msgstr "Nachricht löschen"
 
-#: wxMenuDefs.cpp:251
+#: wxMenuDefs.cpp:252
 msgid "Ex&punge"
 msgstr "&Verwerfen"
 
-#: wxMenuDefs.cpp:251
+#: wxMenuDefs.cpp:252
 #, fuzzy
 msgid "Expunge"
 msgstr "&Verwerfen"
 
-#: wxMenuDefs.cpp:253
+#: wxMenuDefs.cpp:254
 msgid "Select &all"
 msgstr "&Alle markieren"
 
-#: wxMenuDefs.cpp:253
+#: wxMenuDefs.cpp:254
 #, fuzzy
 msgid "Select all messages"
 msgstr "Nachricht löschen"
 
-#: wxMenuDefs.cpp:254
+#: wxMenuDefs.cpp:255
 msgid "D&eselect all"
 msgstr "&Keine markieren"
 
-#: wxMenuDefs.cpp:254
+#: wxMenuDefs.cpp:255
 #, fuzzy
 msgid "Unselect all messages"
-msgstr "Nachricht löschen"
+msgstr "Alle Markierungen entfernen"
 
-#: wxMenuDefs.cpp:256
+#: wxMenuDefs.cpp:257
 #, fuzzy
 msgid "Show &header"
-msgstr "Nachricht weiterleiten"
-
-#: wxMenuDefs.cpp:256
-msgid "Toggle display of message header"
-msgstr "Montrer ou cacher les en-têtes du message"
+msgstr "Nachrichten&kopf anzeigen"
 
 #: wxMenuDefs.cpp:257
+msgid "Toggle display of message header"
+msgstr "Anzeige der Nachrichtenköpfe ein-/ausschalten"
+
+#: wxMenuDefs.cpp:258
 #, fuzzy
 msgid "Show ra&w message"
-msgstr "Nachricht weiterleiten"
+msgstr "Nachrichten&text anzeigen"
 
-#: wxMenuDefs.cpp:257
+#: wxMenuDefs.cpp:258
 #, fuzzy
 msgid "Show the raw message text"
-msgstr "Nachricht senden"
+msgstr "Anzeigen des reinen Nachrichtentext"
 
-#: wxMenuDefs.cpp:261
+#: wxMenuDefs.cpp:262
 msgid "&Insert file..."
-msgstr "Datei &einfügen"
+msgstr "Datei &einfügen..."
 
-#: wxMenuDefs.cpp:261
+#: wxMenuDefs.cpp:262
 #, fuzzy
 msgid "Insert a file"
 msgstr "Datei einfügen"
 
-#: wxMenuDefs.cpp:262
+#: wxMenuDefs.cpp:263
 msgid "&Send"
 msgstr "&Senden"
 
-#: wxMenuDefs.cpp:262
+#: wxMenuDefs.cpp:263
 #, fuzzy
 msgid "Send the message now"
-msgstr "Nachricht senden"
+msgstr "Nachricht jetzt senden"
 
-#: wxMenuDefs.cpp:263
+#: wxMenuDefs.cpp:264
 #, fuzzy
 msgid "Print the message"
 msgstr "Nachricht drucken"
 
-#: wxMenuDefs.cpp:265
+#: wxMenuDefs.cpp:266
 #, fuzzy
 msgid "Save &text..."
-msgstr "&Sichern..."
+msgstr "&Text sichern..."
 
-#: wxMenuDefs.cpp:265
+#: wxMenuDefs.cpp:266
 #, fuzzy
 msgid "Save message text to file"
-msgstr "Nachricht Sichern"
-
-#: wxMenuDefs.cpp:266
-#, fuzzy
-msgid "In&sert text..."
-msgstr "Datei &einfügen"
-
-#: wxMenuDefs.cpp:266
-#, fuzzy
-msgid "Insert text file"
-msgstr "Datei einfügen"
+msgstr "Nachrichtentext in Datei sichern"
 
 #: wxMenuDefs.cpp:267
+#, fuzzy
+msgid "In&sert text..."
+msgstr "Textdatei &einfügen..."
+
+#: wxMenuDefs.cpp:267
+#, fuzzy
+msgid "Insert text file"
+msgstr "Textdatei einfügen"
+
+#: wxMenuDefs.cpp:268
 msgid "&Clear"
 msgstr "&Löschen"
 
-#: wxMenuDefs.cpp:267
+#: wxMenuDefs.cpp:268
 #, fuzzy
 msgid "Delete message contents"
-msgstr "Nachricht löschen"
+msgstr "Nachrichteninhalt löschen"
 
-#: wxMenuDefs.cpp:269 wxOptionsDlg.cpp:392
+#: wxMenuDefs.cpp:270 wxOptionsDlg.cpp:421
 #, fuzzy
 msgid "&External editor"
-msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
+msgstr "&Externer Editor"
 
-#: wxMenuDefs.cpp:269
+#: wxMenuDefs.cpp:270
 msgid "Invoke alternative editor"
-msgstr "Lancer un éditeur externe"
+msgstr "Aufrufen des externen Editors"
 
-#: AdbFrame.cpp:1031 wxMenuDefs.cpp:272
+#: AdbFrame.cpp:1066 wxMenuDefs.cpp:273
 msgid "&New..."
 msgstr "&Neu..."
 
-#: wxMenuDefs.cpp:272
+#: wxMenuDefs.cpp:273
 #, fuzzy
 msgid "Create a new address book"
 msgstr "Adreßbuch editieren"
 
-#: wxMenuDefs.cpp:273
+#: wxMenuDefs.cpp:274
 msgid "&Open..."
 msgstr "&Öffnen..."
 
-#: wxMenuDefs.cpp:273
+#: wxMenuDefs.cpp:274
 #, fuzzy
 msgid "Open an address book file"
-msgstr "Adreßbuch editieren"
+msgstr "Ein Adreßbuch öffnen"
 
-#: wxMenuDefs.cpp:279
+#: wxMenuDefs.cpp:280
 msgid "&Properties..."
 msgstr "&Eigenschaften..."
 
-#: wxMenuDefs.cpp:279
+#: wxMenuDefs.cpp:280
 #, fuzzy
 msgid "View properties of the current address book"
-msgstr "am obersten Level des Adreßbuchs '"
+msgstr "Eigenschaften des aktuellen Adreßbuchs"
 
-#: wxMenuDefs.cpp:282
+#: wxMenuDefs.cpp:283
 msgid "&New entry..."
 msgstr "&Neuer Eintrag..."
 
-#: wxMenuDefs.cpp:282
+#: wxMenuDefs.cpp:283
 #, fuzzy
 msgid "Create new entry/group"
 msgstr "Neuen Eintrag/Gruppe anlegen"
 
-#: wxMenuDefs.cpp:283
+#: wxMenuDefs.cpp:284
 #, fuzzy
 msgid "Delete the selected items"
-msgstr "Nachricht löschen"
+msgstr "Die ausgewählten Einträge löschen"
 
-#: wxMenuDefs.cpp:284
+#: wxMenuDefs.cpp:285
 msgid "&Rename..."
 msgstr "&Umbenennen..."
 
-#: wxMenuDefs.cpp:284
+#: wxMenuDefs.cpp:285
 msgid "Rename the selected items"
-msgstr "Renommer les entrées sélectionnées"
+msgstr "Die ausgewählten Einträge umbenennen"
 
-#: wxMenuDefs.cpp:286
+#: wxMenuDefs.cpp:287
 #, fuzzy
 msgid "Cu&t"
-msgstr "&Bearbeiten"
-
-#: wxMenuDefs.cpp:286
-msgid "Copy and delete selected items"
-msgstr "Copier et effacer les entrées sélectionnées"
+msgstr "&Ausschneiden"
 
 #: wxMenuDefs.cpp:287
+msgid "Copy and delete selected items"
+msgstr "Ausgewählte Einträge kopieren und löschen"
+
+#: wxMenuDefs.cpp:288
 #, fuzzy
 msgid "&Copy"
-msgstr "&Nachricht schreiben"
+msgstr "&Kopieren"
 
-#: wxMenuDefs.cpp:287
+#: wxMenuDefs.cpp:288
 #, fuzzy
 msgid "Copy selected items"
-msgstr "Nachricht löschen"
+msgstr "Ausgewählte Einträge kopieren"
 
-#: wxMenuDefs.cpp:288
+#: wxMenuDefs.cpp:289
 #, fuzzy
 msgid "&Paste"
-msgstr "Datum"
+msgstr "&Einfügen"
 
-#: wxMenuDefs.cpp:288
+#: wxMenuDefs.cpp:289
 #, fuzzy
 msgid "Paste here"
-msgstr "Datum"
+msgstr "Hier einfügen"
 
-#: wxMenuDefs.cpp:290
+#: wxMenuDefs.cpp:291
 msgid "&Undo changes"
-msgstr "&Annuler"
+msgstr "&Rückggängig"
 
-#: wxMenuDefs.cpp:290
+#: wxMenuDefs.cpp:291
 msgid "Undo all changes to the entry being edited"
 msgstr ""
-"Annuler tous les changement apporté à l'entrée dont l'édition est en cours"
+"Alle Änderungen rückggängig machen"
 
-#: wxMenuDefs.cpp:293
+#: wxMenuDefs.cpp:294
 #, fuzzy
 msgid "&Find..."
-msgstr "&FAQ..."
-
-#: wxMenuDefs.cpp:293
-msgid "Find entry by name or contents"
-msgstr "Trouver une entrée par nom ou d'autres critères"
+msgstr "&Suchen..."
 
 #: wxMenuDefs.cpp:294
+msgid "Find entry by name or contents"
+msgstr "Eintrag nach Namen oder Inhalt suchen"
+
+#: wxMenuDefs.cpp:295
 #, fuzzy
 msgid "Find &next"
-msgstr "Nächsten finden"
+msgstr "&Nächsten finden"
 
-#: wxMenuDefs.cpp:294
+#: wxMenuDefs.cpp:295
 msgid "Go to the next match"
-msgstr "Avancez au prochain résultat de la recherche en cours"
+msgstr "Nächten gefunden Eintrag anzeigen"
 
-#: wxMenuDefs.cpp:296
+#: wxMenuDefs.cpp:297
 msgid "&Go To..."
-msgstr "&Aller à..."
+msgstr "&Gehen zu.."
 
-#: wxMenuDefs.cpp:296
+#: wxMenuDefs.cpp:297
 msgid "Go to specified entry"
-msgstr "Aller à l'entrée spécifiée"
-
-#: wxMenuDefs.cpp:299
-msgid "&About..."
-msgstr "&Über M..."
-
-#: wxMenuDefs.cpp:299
-#, fuzzy
-msgid "Displays the program in formation and copyright"
-msgstr "Zeigt Programminformation und Copyright an."
+msgstr "Den angegebenen Eintrag anzeigen"
 
 #: wxMenuDefs.cpp:300
+msgid "&About..."
+msgstr "&Über..."
+
+#: wxMenuDefs.cpp:300
+#, fuzzy
+msgid "Displays the program in formation and copyright"
+msgstr "Zeigt Programminformation und Lizenz an."
+
+#: wxMenuDefs.cpp:301
 msgid "&Release Notes..."
 msgstr "&Zu dieser Version..."
 
-#: wxMenuDefs.cpp:300
+#: wxMenuDefs.cpp:301
 msgid "Displays notes about the current release."
 msgstr "Zeigt aktuelle Infos über diese Version an."
 
-#: wxMenuDefs.cpp:301
+#: wxMenuDefs.cpp:302
 msgid "&FAQ..."
 msgstr "&FAQ..."
 
-#: wxMenuDefs.cpp:301
+#: wxMenuDefs.cpp:302
 msgid "Displays the list of Frequently Asked Questions."
 msgstr ""
-"Zeigt die Liste der häufig gestellten Fragen (Frequently Asked Questions)."
+"Zeigt die Liste der häufig gestellten Fragen (FAQ)."
 
-#: wxMenuDefs.cpp:303
+#: wxMenuDefs.cpp:304
 msgid "Help on current context..."
 msgstr "Hilfe zum aktuellen Kontext..."
 
-#: wxMenuDefs.cpp:304
+#: wxMenuDefs.cpp:305
 msgid "Help &Contents"
 msgstr "&Inhalt"
 
-#: wxMenuDefs.cpp:304
+#: wxMenuDefs.cpp:305
 msgid "Contents of help system..."
 msgstr "Inhaltsverzeichnis des Hilfesystems..."
 
-#: wxMenuDefs.cpp:305
+#: wxMenuDefs.cpp:306
 msgid "&Search Help"
 msgstr "&Suchen"
 
-#: wxMenuDefs.cpp:305
+#: wxMenuDefs.cpp:306
 msgid "Search help system for keyword..."
 msgstr "Suche in Hilfe nach Stichwort..."
 
-#: wxMenuDefs.cpp:306
+#: wxMenuDefs.cpp:307
 msgid "C&opyright"
 msgstr "&Copyright"
 
-#: wxMenuDefs.cpp:306
+#: wxMenuDefs.cpp:307
 msgid "Show Copyright."
-msgstr "Affiche les informations concernantes le copyright."
+msgstr "Copyright Notiz und Nutzungsbedingungen anzeigen."
 
-#: wxOptionsDlg.cpp:298
+#: wxOptionsDlg.cpp:316
 msgid ""
 "The user and host names are used to compose the return address, unless\n"
 "a differenent return address is explicitly specified."
@@ -1625,195 +1818,225 @@ msgstr ""
 "verwendet,\n"
 "es sei denn, Sie geben explizit eine Rücksendeadresse an."
 
-#: wxOptionsDlg.cpp:301
+#: wxOptionsDlg.cpp:319
 #, fuzzy
 msgid "&Username"
 msgstr "&Benutzername"
 
-#: wxOptionsDlg.cpp:302
+#: wxOptionsDlg.cpp:320
 msgid ""
 "The host name is also used as a default host name for local mail addresses."
 msgstr "Der Rechnername wird auch als Vorgabe für lokale Adressen verwendet."
 
-#: wxOptionsDlg.cpp:304
+#: wxOptionsDlg.cpp:322
 #, fuzzy
 msgid "&Hostname"
 msgstr "&Rechnername"
 
-#: wxOptionsDlg.cpp:306
+#: wxOptionsDlg.cpp:323
 msgid "&Return/Reply address"
 msgstr "&Rücksendeadresse"
 
-#: wxOptionsDlg.cpp:308
+#: wxOptionsDlg.cpp:324
 msgid "SMTP (&mail) server"
 msgstr "SMTP (&Mail) Server"
 
-#: wxOptionsDlg.cpp:310
+#: wxOptionsDlg.cpp:325
 msgid "NNTP (&news) server"
 msgstr "&NNTP (Usenet-News) Server"
 
-#: wxOptionsDlg.cpp:311
+#: wxOptionsDlg.cpp:326
 #, fuzzy
 msgid "&Personal name"
 msgstr "&Persönlicher Name"
 
-#: wxOptionsDlg.cpp:314
-msgid "&To field default value"
-msgstr "Voreinstellung für &Empfänger: "
-
-#: wxOptionsDlg.cpp:315
-#, fuzzy
-msgid "Show &CC field"
-msgstr "&Verteiler-Feld anzeigen"
-
-#: wxOptionsDlg.cpp:316
-msgid "CC field &default value"
-msgstr "Voreinstellung für Ver&teiler'"
-
-#: wxOptionsDlg.cpp:317
-msgid "Show &BCC field"
-msgstr "&Blindverteiler-Feld anzeigen"
-
-#: wxOptionsDlg.cpp:318
-msgid "BCC field d&efault value"
-msgstr "Voreinstellung für B&lindverteiler"
-
-#: wxOptionsDlg.cpp:320
-#, fuzzy
-msgid "Sa&ve sent messages"
-msgstr "Nachricht Sichern"
-
-#: wxOptionsDlg.cpp:321
-#, fuzzy
-msgid "&Folder file for sent messages"
-msgstr "Kein Profileintrag um Mailbox zu sichern"
-
-#: wxOptionsDlg.cpp:322
-msgid "&Wrap margin"
-msgstr "&Largeur du texte"
-
-#: wxOptionsDlg.cpp:323
-msgid "&Reply character"
-msgstr "C&aractère à utiliser pour citer"
-
-#: wxOptionsDlg.cpp:325
-#, fuzzy
-msgid "&Use signature"
-msgstr "Signaturdatei wählen"
-
-#: wxOptionsDlg.cpp:326
-#, fuzzy
-msgid "&Signature file"
-msgstr "Signaturdatei wählen"
-
 #: wxOptionsDlg.cpp:327
-#, fuzzy
-msgid "Use signature se&parator"
-msgstr "Signaturdatei wählen"
-
-#: wxOptionsDlg.cpp:328
-msgid "Us&e XFace"
-msgstr "Utiliser &XFace"
-
-#: wxOptionsDlg.cpp:329
-#, fuzzy
-msgid "&XFace file"
-msgstr "&Datei"
+msgid "User &level:novice:advanced"
+msgstr "Benutzer&level:Anfänger:Fortgeschrittener"
 
 #: wxOptionsDlg.cpp:330
-msgid "Mail alias substring ex&pansion"
-msgstr ""
+#, fuzzy
+msgid "Sa&ve sent messages"
+msgstr "Ausgehende Mails &sichern"
+
+#: wxOptionsDlg.cpp:331
+#, fuzzy
+msgid "&Folder file for sent messages"
+msgstr "&Mailbox für ausgehende Mails"
+
+#: wxOptionsDlg.cpp:332
+msgid "&Wrap margin"
+msgstr "Rand für &Zeilenumbruch"
 
 #: wxOptionsDlg.cpp:333
-#, fuzzy
-msgid "Folders to open on &startup"
-msgstr "Mailboxen die zu Programmstart geöffnet werden"
+msgid "&Reply character"
+msgstr "&Quotierungszeichen"
 
 #: wxOptionsDlg.cpp:335
 #, fuzzy
-msgid "Folder opened in &main frame"
-msgstr "Mailbox öffnen"
+msgid "&Use signature"
+msgstr "Signaturdatei &verwenden"
 
 #: wxOptionsDlg.cpp:336
-msgid "Folder where to collect &new mail"
-msgstr ""
+#, fuzzy
+msgid "&Signature file"
+msgstr "&Signaturdatei"
+
+#: wxOptionsDlg.cpp:337
+#, fuzzy
+msgid "Use signature se&parator"
+msgstr "Signaturs&eparator verwenden"
+
+#: wxOptionsDlg.cpp:338
+msgid "Us&e XFace"
+msgstr "&XFace verwenden"
+
+#: wxOptionsDlg.cpp:339
+#, fuzzy
+msgid "&XFace file"
+msgstr "XFAce &Datei"
+
+#: wxOptionsDlg.cpp:340
+msgid "Mail alias substring ex&pansion"
+msgstr "Aliase in ganzem Text ex&pandieren"
 
 #: wxOptionsDlg.cpp:341
+msgid "Font famil&y:default:decorative:roman:script:swiss:modern:teletype"
+msgstr "&Zeichensatz:Standard:Dekorativ:Roman:Skript:Schweitzer:Schreibmaschine"
+
+#: wxOptionsDlg.cpp:344
+msgid "Font si&ze"
+msgstr "Zeichen&größe"
+
+#: wxOptionsDlg.cpp:345 wxOptionsDlg.cpp:378
+msgid "Foreground c&olour"
+msgstr "Schrift&farbe"
+
+#: wxOptionsDlg.cpp:346 wxOptionsDlg.cpp:379
+msgid "Back&ground colour"
+msgstr "&Hintergrundfarbe"
+
+#: wxOptionsDlg.cpp:348
+msgid "Configure &headers..."
+msgstr "Nachrichten&kopf..."
+
+#: wxOptionsDlg.cpp:351
+#, fuzzy
+msgid "Folders to open on &startup"
+msgstr "Mailboxen die zu Programm&start geöffnet werden"
+
+#: wxOptionsDlg.cpp:352
+#, fuzzy
+msgid "Folder opened in &main frame"
+msgstr "Mailbox für Haupt&fenster"
+
+#: wxOptionsDlg.cpp:353
+msgid "Folder where to collect &new mail"
+msgstr "Mailbox für &neue Nachrichten"
+
+#: wxOptionsDlg.cpp:354
+msgid "&Poll for new mail delay in seconds"
+msgstr ""
+
+#: wxOptionsDlg.cpp:355
+msgid "&Threshold for displaying progress dialog"
+msgstr ""
+
+#: wxOptionsDlg.cpp:360
 msgid "Python is the built-in scripting language which can be\n"
 msgstr "Python est un language qui permer d'écrire des scripts\n"
 
-#: wxOptionsDlg.cpp:342
+#: wxOptionsDlg.cpp:361
 msgid "used to extend M's functionality. It is not essential\n"
 msgstr "pour éteindre les fonctionallités de M. Il n'est pas indispensable\n"
 
-#: wxOptionsDlg.cpp:343
+#: wxOptionsDlg.cpp:362
 msgid "for the program's normal operation."
 msgstr "pour l'opération normale du programme."
 
-#: wxOptionsDlg.cpp:344
+#: wxOptionsDlg.cpp:363
 #, fuzzy
 msgid "&Enable Python"
 msgstr "Python"
 
-#: wxOptionsDlg.cpp:345
+#: wxOptionsDlg.cpp:364
 #, fuzzy
 msgid "Python &Path"
 msgstr "Python"
 
-#: wxOptionsDlg.cpp:346
+#: wxOptionsDlg.cpp:365
 msgid "&Startup script"
 msgstr "Script à exécuter au &démarrage"
 
-#: wxOptionsDlg.cpp:347
+#: wxOptionsDlg.cpp:366
 #, fuzzy
 msgid "&Folder open callback"
 msgstr "Mailbox öffnen"
 
-#: wxOptionsDlg.cpp:348
+#: wxOptionsDlg.cpp:367
 #, fuzzy
 msgid "Folder &update callback"
 msgstr "Mailbox öffnen"
 
-#: wxOptionsDlg.cpp:349
+#: wxOptionsDlg.cpp:368
 #, fuzzy
 msgid "Folder e&xpunge callback"
 msgstr "Mailbox öffnen"
 
-#: wxOptionsDlg.cpp:350
+#: wxOptionsDlg.cpp:369
 #, fuzzy
 msgid "Flag &set callback"
 msgstr "Mailbox öffnen"
 
-#: wxOptionsDlg.cpp:351
+#: wxOptionsDlg.cpp:370
 #, fuzzy
 msgid "Flag &clear callback"
 msgstr "Mailbox öffnen"
 
-#: wxOptionsDlg.cpp:355
-msgid "&Font family:Default:Decorative:Roman:Script:Swiss:Modern:Teletype"
+#: wxOptionsDlg.cpp:374
+msgid "&Font family:default:decorative:roman:script:swiss:modern:teletype"
 msgstr ""
 
-#: wxOptionsDlg.cpp:358
+#: wxOptionsDlg.cpp:377
 msgid "Font &size"
 msgstr ""
 
-#: wxOptionsDlg.cpp:359
+#: wxOptionsDlg.cpp:380
+msgid "Colour for &URLs"
+msgstr ""
+
+#: wxOptionsDlg.cpp:381
 msgid "&Inline graphics"
 msgstr ""
 
-#: wxOptionsDlg.cpp:361
-msgid "Conversion &graphics format:XPM:PNG:BMP"
+#: wxOptionsDlg.cpp:383
+msgid "Conversion &graphics format:XPM:PNG:BMP:JPG"
 msgstr ""
 
-#: wxOptionsDlg.cpp:362
+#: wxOptionsDlg.cpp:385
 msgid "Support special &fax mailers"
 msgstr ""
 
-#: wxOptionsDlg.cpp:363
+#: wxOptionsDlg.cpp:386
 msgid "&Domains sending faxes"
 msgstr ""
 
-#: wxOptionsDlg.cpp:369
+#: wxOptionsDlg.cpp:388
+msgid ""
+"The following settings allow to limit the amount of data retrieved from "
+"remote server: if the message size or number is greater than the value "
+"specified here, you will be asked for confirmation before transfering data."
+msgstr ""
+
+#: wxOptionsDlg.cpp:393
+msgid "Maximum size of &message (in Kb)"
+msgstr ""
+
+#: wxOptionsDlg.cpp:395
+msgid "Maximum &number of messages"
+msgstr ""
+
+#: wxOptionsDlg.cpp:398
 msgid ""
 "M may automatically remember all e-mail addresses in the messages you "
 "receive in a special addresss book. This is called 'address autocollection' "
@@ -1823,21 +2046,21 @@ msgstr ""
 "les messages que vous recevez. Ceci est appellé 'ramassage automatique "
 "d'adresses' et peut être activé ou desactivé à partir de cette page"
 
-#: wxOptionsDlg.cpp:373
+#: wxOptionsDlg.cpp:402
 msgid "&Autocollect addresses"
 msgstr "&Ramasser les adresses"
 
-#: wxOptionsDlg.cpp:374
+#: wxOptionsDlg.cpp:403
 #, fuzzy
 msgid "Address &book to use"
 msgstr "&Adreßbücher..."
 
-#: wxOptionsDlg.cpp:375
+#: wxOptionsDlg.cpp:404
 #, fuzzy
 msgid "Ignore addresses without &names"
 msgstr "Adreßbuch editieren"
 
-#: wxOptionsDlg.cpp:376
+#: wxOptionsDlg.cpp:405
 msgid ""
 "Thes following settings configure the support of the Big Brother\n"
 "addressbook (BBDB) format. This is supported only for compatibility\n"
@@ -1848,156 +2071,156 @@ msgstr ""
 "format BBDB. Ils ne sont supportés que pour compatibilité avec d'autres\n"
 "logiciels et sont gérés indépendamment de carnets d'adresses normaux."
 
-#: wxOptionsDlg.cpp:380
+#: wxOptionsDlg.cpp:409
 #, fuzzy
 msgid "&Ignore entries without names"
 msgstr "Adreßbuch editieren"
 
-#: wxOptionsDlg.cpp:381
+#: wxOptionsDlg.cpp:410
 msgid "&Generate unique aliases"
 msgstr "&Générer les alias uniques"
 
-#: wxOptionsDlg.cpp:382
+#: wxOptionsDlg.cpp:411
 msgid "&Name for nameless entries"
 msgstr "Nom pour les adresses sans n&om"
 
-#: wxOptionsDlg.cpp:383
+#: wxOptionsDlg.cpp:412
 #, fuzzy
 msgid "&Save on exit"
 msgstr "Als &Datei sichern"
 
-#: wxOptionsDlg.cpp:386
+#: wxOptionsDlg.cpp:415
 msgid "The following program will be used to open URLs embedded in messages:"
 msgstr ""
 "Le programme suivant sera utilisé pour ouvrir les URLs dans les messages "
 "e-mail:"
 
-#: wxOptionsDlg.cpp:387
+#: wxOptionsDlg.cpp:416
 msgid "Open &URLs with"
 msgstr "Ouvrir les &URLs avec"
 
-#: wxOptionsDlg.cpp:388
+#: wxOptionsDlg.cpp:417
 msgid "URL &browser is Netscape"
 msgstr "Programme précédent est &Netscape"
 
-#: wxOptionsDlg.cpp:389
+#: wxOptionsDlg.cpp:418
 msgid "The following program will be used to view the online help system:"
 msgstr "Le programme suivant sera utilisé pour consulter l'aide en ligne:"
 
-#: wxOptionsDlg.cpp:390
+#: wxOptionsDlg.cpp:419
 #, fuzzy
 msgid "&Help viewer"
 msgstr "Helfer"
 
-#: wxOptionsDlg.cpp:391
+#: wxOptionsDlg.cpp:420
 msgid "Help &viewer is Netscape"
 msgstr "Programme précédent est Ne&tscape"
 
-#: wxOptionsDlg.cpp:393
+#: wxOptionsDlg.cpp:422
 msgid "&Image format converter"
 msgstr ""
 
-#: wxOptionsDlg.cpp:394
+#: wxOptionsDlg.cpp:423
 msgid "The following line will be executed each time new mail is received:"
 msgstr "Ce programme sera exécuté à chaque fois quand un message est reçu:"
 
-#: wxOptionsDlg.cpp:395
+#: wxOptionsDlg.cpp:424
 #, fuzzy
 msgid "&New Mail Command"
 msgstr "Neue Nachrichten"
 
-#: wxOptionsDlg.cpp:398
+#: wxOptionsDlg.cpp:427
 #, fuzzy
 msgid "Show &log window"
 msgstr "Fenster &schließen"
 
-#: wxOptionsDlg.cpp:399
+#: wxOptionsDlg.cpp:428
 msgid "&Splash screen at startup"
 msgstr "Ecran de &bienvenu au démarrage"
 
-#: wxOptionsDlg.cpp:400
+#: wxOptionsDlg.cpp:429
 msgid "Splash screen &delay"
 msgstr "Le &delai avant qu'il disparaisse"
 
-#: wxOptionsDlg.cpp:401
+#: wxOptionsDlg.cpp:430
 msgid "&Autosave delay"
 msgstr "Dela&i entre les sauvegardes automatiques"
 
-#: wxOptionsDlg.cpp:402
+#: wxOptionsDlg.cpp:431
 msgid "Confirm &exit"
 msgstr "Confirmer la &sortie"
 
-#: wxOptionsDlg.cpp:403
-msgid "&Click folder to open"
-msgstr "&Cliquer pour ouvrir"
+#: wxOptionsDlg.cpp:432
+msgid "Open folder on single &click"
+msgstr ""
 
-#: wxOptionsDlg.cpp:404
+#: wxOptionsDlg.cpp:433
 msgid "&Format for the date"
 msgstr "Le format de &date"
 
-#: wxOptionsDlg.cpp:405
+#: wxOptionsDlg.cpp:434
 msgid "Show new mail &notifications"
 msgstr "Afficher à la réception d'un nouveau message"
 
-#: wxOptionsDlg.cpp:407
+#: wxOptionsDlg.cpp:436
 msgid "&Path where to find AFM files"
 msgstr ""
 
-#: wxOptionsDlg.cpp:926
+#: wxOptionsDlg.cpp:999
 #, fuzzy
 msgid "Compose"
 msgstr "&Nachricht schreiben"
 
-#: wxOptionsDlg.cpp:941
+#: wxOptionsDlg.cpp:1033
 #, fuzzy
 msgid "Message Viewer"
 msgstr "&Nachricht"
 
-#: wxOptionsDlg.cpp:956
+#: wxOptionsDlg.cpp:1048
 msgid "Identity"
 msgstr "Identität"
 
-#: wxOptionsDlg.cpp:973
+#: wxOptionsDlg.cpp:1065
 msgid "Python"
 msgstr "Python"
 
-#: wxOptionsDlg.cpp:991
+#: wxOptionsDlg.cpp:1083
 #, fuzzy
 msgid "Adressbook"
 msgstr "Adreßbuch"
 
-#: wxOptionsDlg.cpp:1007
+#: wxOptionsDlg.cpp:1099
 msgid "Miscellaneous"
 msgstr "Sonstiges"
 
-#: wxOptionsDlg.cpp:1048
+#: wxOptionsDlg.cpp:1140
 #, fuzzy
 msgid "Helpers"
 msgstr "Helfer"
 
-#: wxOptionsDlg.cpp:1089
+#: wxOptionsDlg.cpp:1181
 msgid "Mail boxes"
 msgstr "Mailboxen"
 
-#: wxOptionsDlg.cpp:1131
+#: wxOptionsDlg.cpp:1223
 msgid "Folders to open on startup"
 msgstr "Mailboxen die zu Programmstart geöffnet werden"
 
-#: wxOptionsDlg.cpp:1131
+#: wxOptionsDlg.cpp:1223
 #, fuzzy
 msgid "Folder name"
 msgstr "Mailboxname"
 
-#: wxOptionsDlg.cpp:1139
+#: wxOptionsDlg.cpp:1231
 #, c-format
 msgid "Folder '%s' is already present in the list, not added."
 msgstr "Mailbox '%s' ist bereits auf der Liste, nicht nocheinmal hinzugefügt."
 
-#: wxOptionsDlg.cpp:1195
+#: wxOptionsDlg.cpp:1288
 msgid "Program options"
 msgstr "Programmoptionen"
 
-#: wxOptionsDlg.cpp:1218
+#: wxOptionsDlg.cpp:1311
 msgid ""
 "Some important program settings were changed.\n"
 "\n"
@@ -2007,11 +2230,11 @@ msgstr ""
 "\n"
 "Möchten Sie die neuen Einstellungen testen (empfohlen)?"
 
-#: wxOptionsDlg.cpp:1222
+#: wxOptionsDlg.cpp:1315
 msgid "Test setup?"
 msgstr "Einstellungen testen?"
 
-#: wxOptionsDlg.cpp:1240
+#: wxOptionsDlg.cpp:1333
 msgid ""
 "Some of the changes to the program options will\n"
 "only take effect when the progam will be run the\n"
@@ -2046,17 +2269,17 @@ msgstr "Mailbox &öffnen..."
 msgid "&Properties"
 msgstr "&Eigenschaften..."
 
-#: wxFolderTree.cpp:396
+#: wxFolderTree.cpp:398
 msgid ""
 "You should not delete the INBOX folder:\n"
 "it is automatically created by M to store your incoming mail"
 msgstr ""
 
-#: wxFolderTree.cpp:402
+#: wxFolderTree.cpp:404
 msgid "The root folder can not be deleted."
 msgstr ""
 
-#: wxFolderTree.cpp:415
+#: wxFolderTree.cpp:417
 #, c-format
 msgid ""
 "Do you really want to delete folder '%s' and all of its\n"
@@ -2064,149 +2287,229 @@ msgid ""
 "for the deleted folders!"
 msgstr ""
 
-#: wxFolderTree.cpp:422
+#: wxFolderTree.cpp:424
 #, fuzzy, c-format
 msgid "Do you really want to delete folder '%s'?"
 msgstr "Möchten Sie M wirklich beenden?"
 
-#: wxFolderTree.cpp:487
+#: wxFolderTree.cpp:489
 msgid "All folders"
 msgstr "Alle Mailboxen"
 
-#: wxFolderTree.cpp:648
+#: wxFolderTree.cpp:650
 #, fuzzy
 msgid "Please select the folder to delete first."
 msgstr "Bitte wählen Sie ein Pythonskript zum Ausführen."
 
-#: wxFolderTree.cpp:662
+#: wxFolderTree.cpp:664
 #, c-format
 msgid "Folder '%s' deleted"
 msgstr ""
 
-#: wxFolderTree.cpp:747
+#: wxFolderTree.cpp:749
 #, fuzzy
-msgid "Can not open this folder."
+msgid "Cannot open this folder."
 msgstr "Kann obersten Eintrag nicht umbenennen."
 
-#: generic/persctrl.cpp:806 wxDialogLayout.cpp:282
+#: generic/persctrl.cpp:806 wxDialogLayout.cpp:336
 msgid "No"
 msgstr "Nein"
 
-#: wxDialogLayout.cpp:283
+#: wxDialogLayout.cpp:337
 msgid "Ask"
 msgstr ""
 
-#: generic/persctrl.cpp:805 wxDialogLayout.cpp:284
+#: generic/persctrl.cpp:805 wxDialogLayout.cpp:338
 msgid "Yes"
 msgstr "Ja"
 
-#: wxDialogLayout.cpp:498
+#: wxDialogLayout.cpp:593
 #, fuzzy
 msgid "&OK"
 msgstr "OK"
 
-#: AdbFrame.cpp:1033 wxDialogLayout.cpp:507
+#: AdbFrame.cpp:1068 wxDialogLayout.cpp:602
 msgid "&Cancel"
 msgstr "&Abbruch"
 
-#: wxDialogLayout.cpp:515
+#: wxDialogLayout.cpp:610
 #, fuzzy
 msgid "&Apply"
 msgstr "&Übernehmen"
 
-#: wxMFolderDialogs.cpp:326
+#: wxMFolderDialogs.cpp:364
 #, fuzzy
 msgid "Folder Name: "
 msgstr "Mailbox öffnen"
 
-#: wxMFolderDialogs.cpp:362
+#: wxMFolderDialogs.cpp:400
 #, fuzzy
 msgid "Parent folder: "
 msgstr "Mailbox öffnen"
 
-#: wxMFolderDialogs.cpp:414
+#: wxMFolderDialogs.cpp:452
 #, fuzzy
 msgid "Create new folder"
 msgstr "Mailbox &anlegen..."
 
-#: wxMFolderDialogs.cpp:561
+#: wxMFolderDialogs.cpp:592
 msgid "Access"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:579
+#: wxMFolderDialogs.cpp:612
 #, fuzzy
 msgid "File"
 msgstr "&Datei"
 
-#: wxMFolderDialogs.cpp:582
+#: wxMFolderDialogs.cpp:615
 msgid "NNTP"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:583
+#: wxMFolderDialogs.cpp:616
 msgid "Newsspool"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:619
+#: wxMFolderDialogs.cpp:653
 #, fuzzy
-msgid "User name: "
+msgid "&User name: "
 msgstr "&Umbenennen..."
 
-#: wxMFolderDialogs.cpp:620
+#: wxMFolderDialogs.cpp:654
 #, fuzzy
-msgid "Password: "
+msgid "&Password: "
 msgstr "Passwort"
 
-#: wxMFolderDialogs.cpp:621
+#: wxMFolderDialogs.cpp:655
 #, fuzzy
-msgid "File name: "
+msgid "&File name: "
 msgstr "Mailbox öffnen"
 
-#: wxMFolderDialogs.cpp:622
-msgid "Server: "
+#: wxMFolderDialogs.cpp:656
+#, fuzzy
+msgid "&Server: "
 msgstr "Serveur: "
 
-#: wxMFolderDialogs.cpp:623
+#: wxMFolderDialogs.cpp:657
 #, fuzzy
-msgid "Mailbox: "
+msgid "&Mailbox: "
 msgstr "Mailboxen"
 
-#: wxMFolderDialogs.cpp:624
+#: wxMFolderDialogs.cpp:658
 #, fuzzy
-msgid "Newsgroup: "
+msgid "&Newsgroup: "
 msgstr "Nachricht öffnen"
 
-#: wxMFolderDialogs.cpp:625
+#: wxMFolderDialogs.cpp:659
 #, fuzzy
-msgid "Comment: "
+msgid "&Comment: "
 msgstr "&Inhalt"
 
-#: wxMFolderDialogs.cpp:626
-msgid "Collect all mail from this folder: "
+#: wxMFolderDialogs.cpp:660
+msgid "C&ollect all mail from this folder: "
 msgstr ""
 
-#: wxMFolderDialogs.cpp:984
+#: wxMFolderDialogs.cpp:661
+msgid "&Anonymous access: "
+msgstr ""
+
+#: wxMFolderDialogs.cpp:1013
+msgid "login name"
+msgstr ""
+
+#: wxMFolderDialogs.cpp:1018
+#, fuzzy
+msgid "password"
+msgstr "Passwort"
+
+#: wxMFolderDialogs.cpp:1025
+#, c-format
+msgid ""
+"You didn't specify the %s for this folder although it requires one.\n"
+"\n"
+"Would you like to do it now?"
+msgstr ""
+
+#: wxMFolderDialogs.cpp:1032
+msgid ""
+"\n"
+"\n"
+"Notice that the password will be stored in your configuration with\n"
+"very weak encryption. If you are concerned about security, leave it\n"
+"empty and Mahogany will prompt you for it whenever needed."
+msgstr ""
+
+#: wxMFolderDialogs.cpp:1208
 #, fuzzy
 msgid "Please choose a folder"
 msgstr "Bitte wählen Sie"
 
-#: MailFolder.cpp:175
+#: wxBrowseButton.cpp:77
+#, fuzzy
+msgid "Browse for folder"
+msgstr "Mailbox auswählen"
+
+#: wxHeadersDialogs.cpp:154
+msgid "&To"
+msgstr ""
+
+#: wxHeadersDialogs.cpp:155
+#, fuzzy
+msgid "&Cc"
+msgstr "&Abbruch"
+
+#: wxHeadersDialogs.cpp:156
+msgid "&Bcc"
+msgstr ""
+
+#: wxHeadersDialogs.cpp:176
+msgid "Configure headers for message composition"
+msgstr ""
+
+#: wxHeadersDialogs.cpp:210
+#, fuzzy
+msgid "&Headers"
+msgstr "Helfer"
+
+#: wxHeadersDialogs.cpp:219
+#, fuzzy
+msgid "Show the field?"
+msgstr "&Verteiler-Feld anzeigen"
+
+#: wxHeadersDialogs.cpp:220
+#, fuzzy
+msgid "Default value"
+msgstr "Voreinstellung für &Empfänger: "
+
+#: MailFolder.cpp:120
+#, fuzzy, c-format
+msgid "Password for '%s':"
+msgstr "Eigenschaften für '%s'"
+
+#: MailFolder.cpp:123
+#, fuzzy
+msgid "Password prompt"
+msgstr "Passwort"
+
+#: MailFolder.cpp:129
+#, fuzzy
+msgid "Cannot access this folder without a password."
+msgstr "Kann obersten Eintrag nicht umbenennen."
+
+#: MailFolder.cpp:199
 #, fuzzy
 msgid "Cannot open folder '"
 msgstr "Kann Mailbox '%s' nicht öffnen."
 
-#: MailFolder.cpp:241
+#: MailFolder.cpp:214
+#, fuzzy, c-format
+msgid "Saving %d messages..."
+msgstr "Nachrichten konnten nicht gesichert werden."
+
+#: MailFolder.cpp:285
 msgid "Couldn't truncate the existing file."
 msgstr ""
 
-#: MailFolder.cpp:266
-msgid "Reply"
-msgstr "Beantworten"
-
-#: MailFolder.cpp:338
-msgid "Forward"
-msgstr "Weiterleiten"
-
-#: MailFolderCC.cpp:247
+#: MailFolderCC.cpp:266
 #, c-format
 msgid ""
 "Found lock-file:\n"
@@ -2215,72 +2518,220 @@ msgid ""
 "Shall I forcefully override the lock?"
 msgstr ""
 
-#: MailFolderCC.cpp:257
+#: MailFolderCC.cpp:276
 msgid ""
 "Could not remove lock-file.\n"
 "Other process may have terminated.\n"
 "Will try to continue as normal."
 msgstr ""
 
-#: MailFolderCC.cpp:263
+#: MailFolderCC.cpp:282
 #, fuzzy
 msgid "Cannot open the folder while lock-file exists."
 msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
 
-#: MailFolderCC.cpp:576
+#: MailFolderCC.cpp:356
+#, c-format
+msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
+msgstr ""
+
+#: MailFolderCC.cpp:361
+#, fuzzy, c-format
+msgid "Re-opening folder '%s' failed."
+msgstr "Fehler beim Öffnen von URL '%s'."
+
+#: MailFolderCC.cpp:679
+#, c-format
+msgid ""
+"This folder contains %lu messages which is greater than the current "
+"threshold of %lu.\n"
+"\n"
+"Would you like to retrieve only the first %lu messages?\n"
+"(selecting [No] will retrieve all messages)"
+msgstr ""
+
+#: MailFolderCC.cpp:699
 #, fuzzy, c-format
 msgid "Reading %lu message headers..."
 msgstr "Montrer ou cacher les en-têtes du message"
 
-#: MailFolderCC.cpp:577
-msgid "M: Progress"
-msgstr ""
-
-#: MailFolderCC.cpp:678
+#: MailFolderCC.cpp:813
 msgid "<address missing>"
 msgstr ""
 
-#: MailFolderCC.cpp:909
+#: MailFolderCC.cpp:1041
 msgid "c-client log: "
 msgstr "c-msgstr log: "
 
-#: MailFolderCC.cpp:921
+#: MailFolderCC.cpp:1044
+msgid " error level: "
+msgstr ""
+
+#: MailFolderCC.cpp:1071
 msgid "c-client debug: "
 msgstr "c-client debug: "
 
-#: MessageCC.cpp:181 MessageCC.cpp:378
+#: MessageCC.cpp:188 MessageCC.cpp:390
 msgid "Non-existent message data."
 msgstr ""
 
-#: SendMessageCC.cpp:267 SendMessageCC.cpp:270
+#: SendMessageCC.cpp:284 SendMessageCC.cpp:287
 msgid " , compiled for "
 msgstr ""
 
-#: SendMessageCC.cpp:555
+#: SendMessageCC.cpp:498
+#, fuzzy
+msgid "Mail sent."
+msgstr "Mailserver"
+
+#: SendMessageCC.cpp:498
+msgid "Article posted."
+msgstr ""
+
+#: SendMessageCC.cpp:501
+#, fuzzy, c-format
+msgid "Failed to send - %s"
+msgstr "Nachricht löschen"
+
+#: SendMessageCC.cpp:502
+#, fuzzy
+msgid "unknown error"
+msgstr "Unbekannter MIME-Typ"
+
+#: SendMessageCC.cpp:509
+#, fuzzy
+msgid "Cannot open connection to any server"
+msgstr "Kann Mailbox yum sichern nicht öffnen:"
+
+#: SendMessageCC.cpp:573
 #, fuzzy
 msgid "Cannot open folder to save to:"
 msgstr "Kann Mailbox yum sichern nicht öffnen:"
 
-#: AdbFrame.cpp:1005
+#: AdbFrame.cpp:422
+msgid "Nick &Name"
+msgstr ""
+
+#: AdbFrame.cpp:423
+#, fuzzy
+msgid "F&ull Name"
+msgstr "Mailbox öffnen"
+
+#: AdbFrame.cpp:424
+#, fuzzy
+msgid "&First Name"
+msgstr "Mailbox öffnen"
+
+#: AdbFrame.cpp:425
+#, fuzzy
+msgid "F&amily Name"
+msgstr "Mailbox öffnen"
+
+#: AdbFrame.cpp:426
+#, fuzzy
+msgid "&Prefix"
+msgstr "&Drucken"
+
+#: AdbFrame.cpp:427
+#, fuzzy
+msgid "&Title"
+msgstr "&Datei"
+
+#: AdbFrame.cpp:428
+msgid "&Organization"
+msgstr ""
+
+#: AdbFrame.cpp:429
+msgid "&Birthday date"
+msgstr ""
+
+#: AdbFrame.cpp:430
+#, fuzzy
+msgid "&Comments"
+msgstr "&Inhalt"
+
+#: AdbFrame.cpp:432
+msgid "&E-Mail"
+msgstr ""
+
+#: AdbFrame.cpp:433
+#, fuzzy
+msgid "&Home Page"
+msgstr "&Nachricht schreiben"
+
+#: AdbFrame.cpp:434
+msgid "&ICQ"
+msgstr ""
+
+#: AdbFrame.cpp:435
+msgid "Prefers &HTML mail"
+msgstr ""
+
+#: AdbFrame.cpp:436
+#, fuzzy
+msgid "&Additional e-mail addresses"
+msgstr "Adreßbuch editieren"
+
+#: AdbFrame.cpp:439 AdbFrame.cpp:449
+msgid "Street &Number"
+msgstr ""
+
+#: AdbFrame.cpp:440 AdbFrame.cpp:450
+msgid "&Street"
+msgstr ""
+
+#: AdbFrame.cpp:441 AdbFrame.cpp:451
+msgid "&Locality"
+msgstr ""
+
+#: AdbFrame.cpp:442 AdbFrame.cpp:452
+#, fuzzy
+msgid "C&ity"
+msgstr "&Bearbeiten"
+
+#: AdbFrame.cpp:443 AdbFrame.cpp:453
+#, fuzzy
+msgid "&Postcode"
+msgstr "Datum"
+
+#: AdbFrame.cpp:444 AdbFrame.cpp:454
+#, fuzzy
+msgid "&Country"
+msgstr "&Nachricht schreiben"
+
+#: AdbFrame.cpp:445 AdbFrame.cpp:455
+msgid "PO &Box"
+msgstr ""
+
+#: AdbFrame.cpp:446 AdbFrame.cpp:456
+#, fuzzy
+msgid "P&hone"
+msgstr "Python"
+
+#: AdbFrame.cpp:447 AdbFrame.cpp:457
+msgid "&Fax"
+msgstr ""
+
+#: AdbFrame.cpp:1040
 #, fuzzy
 msgid "&Book"
 msgstr "&Suchen:"
 
-#: AdbFrame.cpp:1007
+#: AdbFrame.cpp:1042
 #, fuzzy
 msgid "&Find"
 msgstr "&Datei"
 
-#: AdbFrame.cpp:1025
+#: AdbFrame.cpp:1060
 msgid "&Lookup:"
 msgstr "&Suchen:"
 
-#: AdbFrame.cpp:1083
+#: AdbFrame.cpp:1118
 #, fuzzy
 msgid "Address Book Editor"
 msgstr "&Adreßbucheditor"
 
-#: AdbFrame.cpp:1230
+#: AdbFrame.cpp:1265
 #, c-format
 msgid ""
 "Address book '%s' couldn't be opened:\n"
@@ -2289,109 +2740,109 @@ msgstr ""
 "Adreßbuch '%s' konnte nicht geöffnet werden:\n"
 "Diese Format ist nicht unterstützt."
 
-#: AdbFrame.cpp:1250
+#: AdbFrame.cpp:1285
 msgid "Not all address books could be reopened."
 msgstr "Nicht alle Adreßbücher konnten wieder geöffnet werden."
 
-#: AdbFrame.cpp:1276
+#: AdbFrame.cpp:1311
 msgid "Not all tree branches could be reopened."
 msgstr "Nicht alle Zweige konnten wieder geöffnet werden."
 
-#: AdbFrame.cpp:1328
+#: AdbFrame.cpp:1363
 #, c-format
 msgid "The address book '%s' is already opened."
 msgstr "Das Adreßbuch '%s' ist bereits geöffnet."
 
-#: AdbFrame.cpp:1396
+#: AdbFrame.cpp:1431
 msgid "New entry creation cancelled."
 msgstr "Anlegen des neuen Eintrags abgebrochen."
 
-#: AdbFrame.cpp:1413
+#: AdbFrame.cpp:1448
 #, c-format
 msgid "%s '%s' already exists %s."
 msgstr "%s '%s' existiert bereits %s."
 
-#: AdbFrame.cpp:1422
+#: AdbFrame.cpp:1457
 #, fuzzy, c-format
 msgid "Can't create %s named '%s' %s."
 msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
 
-#: AdbFrame.cpp:1430
+#: AdbFrame.cpp:1465
 #, c-format
 msgid "Created new %s '%s' %s."
 msgstr "Neues %s '%s' %s angelegt."
 
-#: AdbFrame.cpp:1445
+#: AdbFrame.cpp:1480
 #, fuzzy
 msgid "Address book"
 msgstr "Adreßbuch"
 
-#: AdbFrame.cpp:1461
+#: AdbFrame.cpp:1496
 #, c-format
 msgid "Really delete the %s '%s'?"
 msgstr "%s '%s' wirklich löschen?"
 
-#: AdbFrame.cpp:1464
+#: AdbFrame.cpp:1499
 #, c-format
 msgid "Cancelled: '%s' not deleted."
 msgstr "Abgebrochen: '%s' nicht gelöscht."
 
-#: AdbFrame.cpp:1480
+#: AdbFrame.cpp:1515
 #, fuzzy, c-format
 msgid "%s '%s' deleted."
 msgstr "%d '%s' gelöscht."
 
-#: AdbFrame.cpp:1492
+#: AdbFrame.cpp:1527
 #, fuzzy, c-format
 msgid "Can't find any matches for '%s'."
 msgstr "Kann keine passenden Einträge für '%s' finden."
 
-#: AdbFrame.cpp:1497
+#: AdbFrame.cpp:1532
 #, c-format
 msgid "Search for '%s' found %d entries."
 msgstr "Suche nach '%s' fand %d Einträge."
 
-#: AdbFrame.cpp:1501
+#: AdbFrame.cpp:1536
 msgid "Search wrapped to the beginning."
 msgstr "Suche am Beginn neu begonnen."
 
-#: AdbFrame.cpp:1562
+#: AdbFrame.cpp:1597
 #, c-format
 msgid "Changes to '%s' undone"
 msgstr "Änderungen an '%s' rückgängig gemacht."
 
-#: AdbFrame.cpp:1607
+#: AdbFrame.cpp:1642
 msgid "Go to entry/group"
 msgstr "Geh zu Eintrag/Gruppe"
 
-#: AdbFrame.cpp:1608
+#: AdbFrame.cpp:1643
 msgid "Full entry &name:"
 msgstr "Voller Eintrags&name:"
 
-#: AdbFrame.cpp:1702
+#: AdbFrame.cpp:1737
 msgid "What kind of address book do you want to create?"
 msgstr "Was für ein Adreßbuch möchten Sie anlegen?"
 
-#: AdbFrame.cpp:1703
+#: AdbFrame.cpp:1738
 #, fuzzy
 msgid "Creating new address book"
 msgstr "Adreßbuch wird angelegt"
 
-#: AdbFrame.cpp:1730
+#: AdbFrame.cpp:1765
 #, fuzzy, c-format
 msgid "%s an address book"
 msgstr "eines Adreßbuchs"
 
-#: AdbFrame.cpp:1747
+#: AdbFrame.cpp:1782
 msgid "Address books (*.adb)|*.adb|All files (*.*)|*.*"
 msgstr ""
 
-#: AdbFrame.cpp:1761
+#: AdbFrame.cpp:1796
 #, fuzzy
 msgid "Enter the address book name"
 msgstr "Adreßbuch editieren"
 
-#: AdbFrame.cpp:1784
+#: AdbFrame.cpp:1819
 #, c-format
 msgid ""
 "Address book '%s' was created, but couldn't be flushed. It might be "
@@ -2401,7 +2852,7 @@ msgstr ""
 "disque. Il peut y avoir des problèmes d'accès à ce carnet d'adresses à moins "
 "que vous ne redémarriez le programme."
 
-#: AdbFrame.cpp:1850
+#: AdbFrame.cpp:1889
 #, c-format
 msgid ""
 "Can't paste entry '%s' %s: an entry with\n"
@@ -2410,20 +2861,20 @@ msgstr ""
 "Kann Eintrag '%s' %s nicht einfügen: ein Eintrag mit\n"
 "diesem Namen existiert bereits."
 
-#: AdbFrame.cpp:1860
+#: AdbFrame.cpp:1899
 msgid "Can't paste the clipboard contents here."
 msgstr "Kann den Inhalt der Zwischenablage hier nicht einfügen."
 
-#: AdbFrame.cpp:1894
+#: AdbFrame.cpp:1933
 #, c-format
 msgid "Editing entry '%s'"
 msgstr "Editieren von Eintrag '%s'"
 
-#: AdbFrame.cpp:1939
+#: AdbFrame.cpp:1978
 msgid "This group doesn't have any entries"
 msgstr "Diese Gruppe hat keine Einträge"
 
-#: AdbFrame.cpp:2072
+#: AdbFrame.cpp:2107
 #, c-format
 msgid ""
 "No entry '%s':\n"
@@ -2432,106 +2883,106 @@ msgstr ""
 "Kein Eintrag '%s':\n"
 "'%s' hat keinen Eintrag oder Untergruppe '%s'"
 
-#: AdbFrame.cpp:2080
+#: AdbFrame.cpp:2115
 #, c-format
 msgid "Entry '%s' can't have subgroup/entry '%s'!"
 msgstr "Eintrag '%s' kann keine Untergruppe/Eintrag '%s' haben!"
 
-#: AdbFrame.cpp:2169
+#: AdbFrame.cpp:2204
 #, fuzzy
 msgid "Find address book entry"
 msgstr "Suche Adreßbucheintrag"
 
-#: AdbFrame.cpp:2190
+#: AdbFrame.cpp:2225
 msgid "Find &what:"
 msgstr "Suche &nach:"
 
-#: AdbFrame.cpp:2321
+#: AdbFrame.cpp:2356
 msgid "Please specify where to search!"
 msgstr "Bitte geben Sie den Suchbegriff an!"
 
-#: AdbFrame.cpp:2336
+#: AdbFrame.cpp:2371
 msgid "Create a new entry/group"
 msgstr "Neuen Eintrag/Gruppe anlegen"
 
-#: AdbFrame.cpp:2342
+#: AdbFrame.cpp:2377
 msgid "&New entry/group name:"
 msgstr "&Name des neuen Eintrags/Gruppe:"
 
-#: AdbFrame.cpp:2377
+#: AdbFrame.cpp:2412
 msgid "Create a &group"
 msgstr "&Gruppe anlegen"
 
-#: AdbFrame.cpp:2414
+#: AdbFrame.cpp:2449
 #, fuzzy, c-format
 msgid "Please specify a name for the new %s!"
 msgstr "Bitte geben Sie dem neuen '%s' einen Namen!"
 
-#: AdbFrame.cpp:2515
+#: AdbFrame.cpp:2550
 #, fuzzy, c-format
 msgid "Properties for '%s'"
 msgstr "Eigenschaften für '%s'"
 
-#: AdbFrame.cpp:2535
+#: AdbFrame.cpp:2570
 msgid "unknown"
 msgstr "unbekannt"
 
-#: AdbFrame.cpp:2629
+#: AdbFrame.cpp:2664
 msgid "No selection"
 msgstr "Keine Auswahl"
 
-#: AdbFrame.cpp:2693
+#: AdbFrame.cpp:2728
 #, c-format
 msgid "Entry '%s' saved."
 msgstr "Eintrag '%s' gesichert."
 
-#: AdbFrame.cpp:3094
+#: AdbFrame.cpp:3129
 msgid "Add another address"
 msgstr "Weitere Adresse hinzufügen"
 
-#: AdbFrame.cpp:3095 AdbFrame.cpp:3114
+#: AdbFrame.cpp:3130 AdbFrame.cpp:3149
 #, fuzzy
 msgid "E-mail &address:"
 msgstr "E-Mail &Adresse:"
 
-#: AdbFrame.cpp:3108
+#: AdbFrame.cpp:3143
 #, fuzzy
 msgid "Please select an entry to modify it."
 msgstr "Bitte wählen Sie einen Eintrag zum ändern."
 
-#: AdbFrame.cpp:3114
+#: AdbFrame.cpp:3149
 #, fuzzy
 msgid "Modify address"
 msgstr "Adresse ändern"
 
-#: AdbFrame.cpp:3127
+#: AdbFrame.cpp:3162
 #, fuzzy
 msgid "Please select an entry to delete."
 msgstr "Bitte wählen Sie einen Eintrag zum löschen."
 
-#: AdbFrame.cpp:3217
+#: AdbFrame.cpp:3252
 #, fuzzy
 msgid "Address Books"
 msgstr "&Adreßbücher..."
 
-#: AdbFrame.cpp:3359
+#: AdbFrame.cpp:3435
 msgid "Group"
 msgstr "Groupe"
 
-#: AdbFrame.cpp:3359
+#: AdbFrame.cpp:3435
 msgid "Entry"
 msgstr "Entrée"
 
-#: AdbFrame.cpp:3365
+#: AdbFrame.cpp:3441
 #, c-format
 msgid "%s '%s' already exists in this group."
 msgstr "%s '%s' existiert bereits in dieser Gruppe."
 
-#: AdbFrame.cpp:3469
+#: AdbFrame.cpp:3545
 msgid "at the root level of the addressbook '"
 msgstr "am obersten Level des Adreßbuchs '"
 
-#: AdbFrame.cpp:3473
+#: AdbFrame.cpp:3549
 msgid "in group '"
 msgstr "in Gruppe '"
 
@@ -2565,7 +3016,7 @@ msgstr "Eintrag '%s' hat zu viele Felder, extra Felder ignoriert."
 msgid "Trailing backslash discarded in entry '%s'."
 msgstr "Backslash '\\' am Ende von Eintrag '%s' ignoriert."
 
-#: ProvFC.cpp:710
+#: ProvFC.cpp:719
 #, fuzzy, c-format
 msgid "Couldn't create or write address book file '%s'."
 msgstr "Kann Adreßbuch '%s' nicht öffnen."
@@ -2616,6 +3067,24 @@ msgstr "Diese Meldung nicht wieder zeigen "
 msgid "Cannot run script: "
 msgstr "Kann Skript nicht ausführen: "
 
+#~ msgid "CC field &default value"
+#~ msgstr "Voreinstellung für Ver&teiler'"
+
+#~ msgid "Show &BCC field"
+#~ msgstr "&Blindverteiler-Feld anzeigen"
+
+#~ msgid "BCC field d&efault value"
+#~ msgstr "Voreinstellung für B&lindverteiler"
+
+#~ msgid "&Click folder to open"
+#~ msgstr "&Cliquer pour ouvrir"
+
+#~ msgid "Reply"
+#~ msgstr "Beantworten"
+
+#~ msgid "Forward"
+#~ msgstr "Weiterleiten"
+
 #~ msgid "Open any folder"
 #~ msgstr "Generelle Mailbox öffnen"
 
@@ -2628,9 +3097,6 @@ msgstr "Kann Skript nicht ausführen: "
 
 #~ msgid "If you can read this, your M configuration works."
 #~ msgstr "Falls Sie dies lesen können, funktionieren die M Einstellungen."
-
-#~ msgid "Can't open folder '%s'."
-#~ msgstr "Kann Mailbox '%s' nicht öffnen."
 
 #~ msgid "%d messages deleted"
 #~ msgstr "%d Nachrichten gelöscht"
@@ -2790,16 +3256,6 @@ msgstr "Kann Skript nicht ausführen: "
 #~ msgid "wxComposeView created twice"
 #~ msgstr "wxMFrame wurde zweimal erzeugt"
 
-#, fuzzy
-#~ msgid "Subject:"
-#~ msgstr "Betreff"
-
-#~ msgid "CC:"
-#~ msgstr "Verteiler:"
-
-#~ msgid "BCC:"
-#~ msgstr "Blind-Verteiler:"
-
 #~ msgid "Expand"
 #~ msgstr "Expandieren"
 
@@ -2908,18 +3364,6 @@ msgstr "Kann Skript nicht ausführen: "
 #~ msgstr "Kann nicht in temporäre Datei schreiben."
 
 #, fuzzy
-#~ msgid "&Prefix"
-#~ msgstr "&Drucken"
-
-#, fuzzy
-#~ msgid "&Title"
-#~ msgstr "&Datei"
-
-#, fuzzy
-#~ msgid "&Home Page"
-#~ msgstr "&Nachricht schreiben"
-
-#, fuzzy
 #~ msgid "FindKey"
 #~ msgstr "&Datei"
 
@@ -2942,10 +3386,6 @@ msgstr "Kann Skript nicht ausführen: "
 #, fuzzy
 #~ msgid "unknown ADB name format"
 #~ msgstr "Unbekannte Mausaktion"
-
-#, fuzzy
-#~ msgid "&E-mail address"
-#~ msgstr "Adreßbuch editieren"
 
 #, fuzzy
 #~ msgid "&Home page"
@@ -3084,10 +3524,6 @@ msgstr "Kann Skript nicht ausführen: "
 #, fuzzy
 #~ msgid "Messagec"
 #~ msgstr "&Nachricht"
-
-#, fuzzy
-#~ msgid "Unknown error"
-#~ msgstr "Unbekannter MIME-Typ"
 
 #~ msgid "Name of the folder to write to?"
 #~ msgstr "Name der Mailbox zum Sichern?"

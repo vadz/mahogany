@@ -590,10 +590,10 @@ VerifyMailConfig(void)
 // here with sendmail 8.8.8 running under Solaris 2.6)
    String nil;
    SendMessageCC  sm(mApplication->GetProfile());
-   sm.SetSubject(_("M test message"));
+   sm.SetSubject(_("Mahogany Test Message"));
    sm.SetAddresses(me);
    String msg =
-      _("If you can read this, your M configuration works.\n"
+      _("If you have received this mail, your Mahogany configuration works.\n"
         "You should also try to reply to this mail and check that your reply arrives.");
    sm.AddPart(Message::MSG_TYPETEXT, msg.c_str(), msg.length());
    sm.Send();

@@ -153,8 +153,7 @@ AutoCollectAddresses(const String &email,
                      strftime(szBuf, WXSIZEOF(szBuf),
                               "%d/%b/%Y %H:%M:%S", ptmNow);
 
-                     comment.Printf(_("This entry was automatically "
-                                      "added by M on %s."), szBuf);
+                     comment.Printf(_("This entry was automatically added on %s."), szBuf);
                   }
 
                   entry->SetField(AdbField_Comments, comment);

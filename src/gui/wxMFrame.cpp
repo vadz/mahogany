@@ -368,18 +368,14 @@ wxMFrame::OnPrintSetup()
 #else
       wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
 #endif
-
-//      wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
-      wxPrintDialog printerDialog(this); //, & data);
+      wxPrintDialog printerDialog(this, &((wxMApp *)mApplication)->GetPrintDialogData());
       printerDialog.ShowModal();
 }
 
 void wxMFrame::OnPrintSetupPS()
 {
       wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-
-//      wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
-      wxPrintDialog printerDialog(this); //, & data);
+      wxPrintDialog printerDialog(this, &((wxMApp *)mApplication)->GetPrintDialogData());
       printerDialog.ShowModal();
 }
 
@@ -412,7 +408,7 @@ void wxMFrame::OnPageSetupPS()
       wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
 
       wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
-      data.SetOrientation(orientation);
+      //data.SetOrientation(orientation);
 
       wxGenericPageSetupDialog pageSetupDialog(this, & data);
       pageSetupDialog.ShowModal();

@@ -878,7 +878,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
 
       if ( command.IsEmpty() )
       {
-         wxLogWarning(_("Don't know how to handle data of type '%s'."),
+         wxLogWarning(_("Do not know how to handle data of type '%s'."),
                       mimetype.c_str());
       }
       else
@@ -915,7 +915,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
             String newFilename;
             newFilename << filename << '.' << ext;
             if ( rename(filename, newFilename) != 0 )
-               wxLogSysError(_("Can't rename temporary file."));
+               wxLogSysError(_("Cannot rename temporary file."));
             else
                filename = newFilename;
          }
@@ -986,7 +986,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
       }
    }
 
-   wxLogError(_("Couldn't save the attachment."));
+   wxLogError(_("Could not save the attachment."));
 
    return false;
 }
@@ -1060,7 +1060,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                                        NULL, NULL, SW_SHOWNORMAL ) > 32;
                if ( !bOk )
                {
-                  wxLogSysError(_("Can't open URL '%s'"),
+                  wxLogSysError(_("Cannot open URL '%s'"),
                                 ci->GetUrl().c_str());
                }
 # else  // Unix
@@ -1104,7 +1104,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                      command = "";
                      command << m_ProfileValues.browser << " -remote openURL(" << ci->GetUrl() << ")";
                      wxString errmsg;
-                     errmsg.Printf(_("Couldn't launch browser: '%s' failed"),
+                     errmsg.Printf(_("Could not launch browser: '%s' failed."),
                                    command.c_str());
                      bOk = LaunchProcess(command, errmsg);
                   }
@@ -1326,8 +1326,7 @@ wxMessageView::Print(void)
       wxSetAFMPath(afmpath);
 #endif // Win/Unix
 
-   wxPrintDialogData &data = ((wxMApp *)mApplication)->GetPrintDialogData();
-   wxPrinter printer(&data);
+   wxPrinter printer(&((wxMApp *)mApplication)->GetPrintDialogData());
    wxLayoutPrintout printout(GetLayoutList(), _("Mahogany: Printout"));
    if ( !printer.Print(this, &printout, TRUE) )
    {
@@ -1353,11 +1352,11 @@ wxMessageView::PrintPreview(void)
 #endif // in/Unix
 
    // Pass two printout objects: for preview, and possible printing.
-   wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
    wxPrintPreview *preview = new wxPrintPreview(
-   new wxLayoutPrintout(GetLayoutList()),
-                        new wxLayoutPrintout(GetLayoutList()),
-                        &data);
+      new wxLayoutPrintout(GetLayoutList()),
+      new wxLayoutPrintout(GetLayoutList()),
+      &((wxMApp *)mApplication)->GetPrintDialogData()
+      );
    if( !preview->Ok() )
    {
       delete preview;

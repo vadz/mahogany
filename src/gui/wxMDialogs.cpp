@@ -1051,7 +1051,7 @@ MDialog_FolderCreate(const MWindow *parent)
    wxString name = "NewFolder";
 
    if(! MInputBox(&name,
-                  _("M - New Folder"),
+                  _("New Folder"),
                   _("Symbolic name for the new folder"),
                   parent,
                   "NewFolderDialog",
