@@ -107,7 +107,7 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 #endif
 
 #include <string.h>
-#ifndef __MWERKS__
+#if !defined(__MWERKS__) && !defined(__FreeBSD__)
 #include <malloc.h>
 #endif
 #include <stdio.h>
@@ -432,7 +432,8 @@ static void enterProps(const char *s)
 
 static void enterAttr(const char *s1, const char *s2)
     {
-    const char *p1, *p2;
+    const char *p1;
+    const char *p2 = NULL;
     p1 = lookupProp_(s1);
     if (s2) {
 	VObject *a;

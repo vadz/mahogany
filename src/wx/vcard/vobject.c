@@ -42,7 +42,7 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
  * vobject, and convert a vobject into its textual representation.
  */
 
-#ifndef	 MWERKS
+#if !defined(MWERKS) && !defined(__FreeBSD__)
 #include <malloc.h>
 #endif
 
