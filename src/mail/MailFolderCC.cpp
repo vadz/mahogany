@@ -1918,12 +1918,14 @@ MailFolderCC::AppendMessage(String const &msg, bool update)
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    STRING str;
-
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
 
    bool rc = mail_append(m_MailStream, (char *)m_ImapSpec.c_str(), &str) != 0;
-   if(! rc)
-      ERRORMESSAGE(("cannot append message"));
+   if ( !rc )
+   {
+      wxLogError(_("Failed to save message to the folder '%s'"),
+                 GetName().c_str());
+   }
    else
    {
       if( ( (m_UpdateFlags & UF_DetectNewMail) == 0)
@@ -1933,12 +1935,13 @@ MailFolderCC::AppendMessage(String const &msg, bool update)
          // yet at this point
          m_LastNewMsgUId = m_MailStream->uid_last+1;
       }
-      // triggers asserts:
+
+      if ( update )
+      {
+         FilterNewMail(GetHeaders());
+      }
    }
-   if(update)
-   {
-     FilterNewMail(GetHeaders());
-   }
+
    return rc;
 }
 
@@ -1947,7 +1950,9 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
-   long rc = 0; //failure
+   // we didn't append the message yet
+   long rc = 0;
+
    /* This is an optimisation: if both mailfolders are IMAP and on the
       same server, we ask the server to copy the message, which is
       more efficient (think of a modem!).
@@ -1969,16 +1974,17 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
             String sequence;
             sequence.Printf("%lu", msg.GetUId());
             String path = GetPathFromImapSpec(GetImapSpec());
-            rc =
-               mail_copy_full (ms,
+            rc = mail_copy_full(ms,
                                (char *)sequence.c_str(),
                                (char *)path.c_str(),
                                CP_UID);
-            // if failed, we try to append normally
+            // if failed, we try to append normally below
          }
       }
    }
-   if(rc == 0) // no success yet, almost "else" :-)
+
+   // either we didn't try anything at all or copying on IMAP side failed
+   if ( rc == 0 )
    {
       String flags = GetImapFlags(msg.GetStatus());
       String date;
@@ -1993,7 +1999,7 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
       }
       // different folders, so we actually copy the message around:
       String tmp;
-      if(msg.WriteToString(tmp))
+      if( msg.WriteToString(tmp) )
       {
          STRING str;
          INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
@@ -2003,16 +2009,25 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
                                 (char *)dateptr,
                                 &str);
       }
-      else
+      else // failed to write message to string?
+      {
+         wxLogError(_("Failed to retrieve the message text."));
+
          rc = 0;
+      }
    }
-   if(rc == 0)
+
+   if ( !rc )
    {
-      ERRORMESSAGE(("cannot append message"));
-      return FALSE;
+      // useful to know which message exactly we failed to copy
+      wxLogError(_("Message details: subject '%s', from '%s'"),
+                 msg.Subject().c_str(), msg.From().c_str());
+
+      wxLogError(_("Failed to save message to the folder '%s'"),
+                 GetName().c_str());
    }
-   else
-      return TRUE;
+
+   return rc != 0;
 }
 
 void

@@ -1656,9 +1656,7 @@ wxComposeView::OnMenuCommand(int id)
       {
          if ( Send( (id == WXMENU_COMPOSE_SEND_LATER) ) )
          {
-            ResetDirty();
             Close();
-            mApplication->UpdateOutboxStatus();
          }
       }
       break;
@@ -1666,15 +1664,10 @@ wxComposeView::OnMenuCommand(int id)
    case WXMENU_COMPOSE_SEND_KEEP_OPEN:
       if ( IsReadyToSend() )
       {
-         if ( Send() )
-         {
-            ResetDirty();
-            MDialog_Message(_("Message has been sent."),
-                            this, _("Message sent"), "MessageSent");
-
-         }
+         (void)Send();
       }
       break;
+
    case WXMENU_COMPOSE_PRINT:
       Print();
       break;
@@ -2085,36 +2078,48 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
 bool
 wxComposeView::Send(bool schedule)
 {
-   bool success = false;
-   String
-      tmp2, mimeType, mimeSubType;
+   Protocol proto;
+   switch(m_mode)
+   {
+      case Mode_Mail:
+         proto = READ_CONFIG(m_Profile, MP_USE_SENDMAIL) ? Prot_Sendmail
+                                                         : Prot_SMTP;
+         break;
 
+      case Mode_News:
+         proto = Prot_NNTP;
+         break;
+
+      default:
+         proto = Prot_Illegal;
+   }
+
+   if ( proto == Prot_Illegal )
+   {
+      FAIL_MSG( "unknown protocol" );
+
+      // we do have to use something though
+      proto = Prot_Default;
+   }
+
+   // Create the message to be composed
+   SendMessage *msg = SendMessage::Create(m_Profile, proto);
+   if ( !msg )
+   {
+      // this shouldn't ever happen, but who knows...
+      wxLogError(_("Failed to create the message to send."));
+
+      return false;
+   }
+
+   wxBusyCursor bc;
+   Disable();
+
+   // compose the body
    wxLayoutObject *lo = NULL;
    MimeContent *mc = NULL;
    wxLayoutExportObject *exp;
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
-
-   /// The message to be composed.
-   SendMessage * msg = NULL;
-
-   switch(m_mode)
-   {
-   case Mode_Mail:
-      if( READ_CONFIG(m_Profile, MP_USE_SENDMAIL) != 0)
-         msg = SendMessage::Create(m_Profile, Prot_Sendmail);
-      else
-         msg = SendMessage::Create(m_Profile, Prot_SMTP);
-      break;
-   case Mode_News:
-      msg = SendMessage::Create(m_Profile, Prot_NNTP);
-      break;
-   }
-
-   if ( m_encoding != wxFONTENCODING_DEFAULT )
-   {
-      msg->SetHeaderEncoding(m_encoding);
-   }
-
    while((exp = wxLayoutExport( &status,
                                    WXLO_EXPORT_AS_TEXT,
                                    WXLO_EXPORT_WITH_CRLF)) != NULL)
@@ -2226,26 +2231,14 @@ wxComposeView::Send(bool schedule)
       delete exp;
    }
 
-   // Add additional header lines: first for this time only and then also the
-   // headers stored in the profile
-   kbStringList::iterator
-      i, i2;
-   i = m_ExtraHeaderLinesNames.begin();
-   i2 = m_ExtraHeaderLinesValues.begin();
-   for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++)
-      msg->AddHeaderEntry(**i, **i2);
+   // setup the headers
 
-   wxArrayString headerNames, headerValues;
-   size_t nHeaders = GetCustomHeaders(m_Profile,
-                                      m_mode == Mode_Mail ? CustomHeader_Mail
-                                                          : CustomHeader_News,
-                                      &headerNames,
-                                      &headerValues);
-   for ( size_t nHeader = 0; nHeader < nHeaders; nHeader++ )
+   if ( m_encoding != wxFONTENCODING_DEFAULT )
    {
-      msg->AddHeaderEntry(headerNames[nHeader], headerValues[nHeader]);
+      msg->SetHeaderEncoding(m_encoding);
    }
 
+   // first the standard ones
    msg->SetSubject(GetHeaderValue(Field_Subject));
    switch(m_mode)
    {
@@ -2275,7 +2268,29 @@ wxComposeView::Send(bool schedule)
                    /* don't set Reply-To yet FIXME?*/);
    }
 
-   if( schedule )
+   // Add additional header lines: first for this time only and then also the
+   // headers stored in the profile
+   kbStringList::iterator
+      i, i2;
+   i = m_ExtraHeaderLinesNames.begin();
+   i2 = m_ExtraHeaderLinesValues.begin();
+   for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++)
+      msg->AddHeaderEntry(**i, **i2);
+
+   wxArrayString headerNames, headerValues;
+   size_t nHeaders = GetCustomHeaders(m_Profile,
+                                      m_mode == Mode_Mail ? CustomHeader_Mail
+                                                          : CustomHeader_News,
+                                      &headerNames,
+                                      &headerValues);
+   for ( size_t nHeader = 0; nHeader < nHeaders; nHeader++ )
+   {
+      msg->AddHeaderEntry(headerNames[nHeader], headerValues[nHeader]);
+   }
+
+   // and now do send the message
+   bool success;
+   if ( schedule )
    {
       MModule_Calendar *calmod =
          (MModule_Calendar *) MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
@@ -2285,20 +2300,44 @@ wxComposeView::Send(bool schedule)
          calmod->DecRef();
       }
       else
+      {
+         wxLogError(_("Cannot schedule message for sending later because "
+                      "the calendar module is not available."));
+
          success = FALSE;
+      }
    }
    else
+   {
       success = msg->SendOrQueue();
+   }
+
    delete msg;
 
-   if(success && m_OriginalMessage != NULL)
+   if ( success )
    {
-      // we mark the original message as "answered"
-      MailFolder *mf = m_OriginalMessage->GetFolder();
-      if(mf)
-         mf->SetMessageFlag(m_OriginalMessage->GetUId(),
-                            MailFolder::MSG_STAT_ANSWERED, true);
+      if ( m_OriginalMessage != NULL )
+      {
+         // we mark the original message as "answered"
+         MailFolder *mf = m_OriginalMessage->GetFolder();
+         if(mf)
+         {
+            mf->SetMessageFlag(m_OriginalMessage->GetUId(),
+                               MailFolder::MSG_STAT_ANSWERED, true);
+         }
+      }
+
+      ResetDirty();
+      mApplication->UpdateOutboxStatus();
+      wxLogStatus(this, _("Message has been sent."));
    }
+   else
+   {
+      wxLogError(_("The message couldn't be sent."));
+   }
+
+   // reenable the window disabled previously
+   Enable();
 
    return success;
 }

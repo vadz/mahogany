@@ -2502,6 +2502,9 @@ wxFolderView::PreviewMessage(long uid)
 void
 wxFolderView::OpenMessages(const UIdArray& selections)
 {
+   if ( !selections.Count() )
+      return;
+
    String title;
 
    int n = selections.Count();
@@ -2517,11 +2520,11 @@ wxFolderView::PrintMessages(const UIdArray& selections)
 {
    int n = selections.Count();
 
-   if(n == 1)
+   if ( n == 1 )
    {
       m_MessagePreview->Print();
    }
-   else
+   else if ( n != 0 )
    {
       int i;
       for(i = 0; i < n; i++)
@@ -2535,6 +2538,9 @@ wxFolderView::PrintMessages(const UIdArray& selections)
 void
 wxFolderView::PrintPreviewMessages(const UIdArray& selections)
 {
+   if ( !selections.Count() )
+      return;
+
    int n = selections.Count();
 
    if(n == 1)
@@ -2553,9 +2559,12 @@ wxFolderView::PrintPreviewMessages(const UIdArray& selections)
 }
 
 void
-wxFolderView::DeleteOrTrashMessages(const UIdArray& messages)
+wxFolderView::DeleteOrTrashMessages(const UIdArray& selections)
 {
-   Ticket t = m_ASMailFolder->DeleteOrTrashMessages(&messages, this);
+   if ( !selections.Count() )
+      return;
+
+   Ticket t = m_ASMailFolder->DeleteOrTrashMessages(&selections, this);
    m_TicketList->Add(t);
 }
 
@@ -2595,6 +2604,9 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
                                    MFolder *folder,
                                    bool del)
 {
+   if ( !selections.Count() )
+      return ILLEGAL_TICKET;
+
    Ticket t =
       m_ASMailFolder->SaveMessagesToFolder(&selections,
                                            m_Frame,
@@ -2613,6 +2625,9 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
 void
 wxFolderView::DropMessagesToFolder(const UIdArray& selections, MFolder *folder)
 {
+   if ( !selections.Count() )
+      return;
+
    Ticket t = SaveMessagesToFolder(selections, folder);
 
    if ( !m_TicketsDroppedList )
@@ -2624,6 +2639,9 @@ wxFolderView::DropMessagesToFolder(const UIdArray& selections, MFolder *folder)
 void
 wxFolderView::SaveMessagesToFile(const UIdArray& selections)
 {
+   if ( !selections.Count() )
+      return;
+
    bool rc = m_ASMailFolder->SaveMessagesToFile(&selections,
                                                 m_Frame,
                                                 this) != 0;

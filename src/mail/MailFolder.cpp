@@ -2022,8 +2022,14 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
 bool
 MailFolderCmn::DeleteMessages(const UIdArray *selections, bool expunge)
 {
-   bool rc = SetSequenceFlag(GetSequenceString(selections),
-                             MailFolder::MSG_STAT_DELETED);
+   String seq = GetSequenceString(selections);
+   if ( seq.empty() )
+   {
+      // nothing to do
+      return true;
+   }
+
+   bool rc = SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
    if ( rc && expunge )
       ExpungeMessages();
 

@@ -2596,10 +2596,30 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
       }
    }
 
-   mf->DecRef();
-
    if ( changeflag )
       *changeflag = changed;
+
+   #define MP_SAFE_FILTERS "SafeFilters"
+   #define MP_SAFE_FILTERS_D 0l
+
+   if ( !READ_APPCONFIG(MP_SAFE_FILTERS) )
+   {
+      // if some of the *new* messages were deleted, expunge them now - unless
+      // this had been already done
+      //
+      // note that we only do this when we're applied automatically, to the new
+      // messages which have just appeared in the folder as then the risk of
+      // accidentally expunging something the user doesn't want to epxunge is
+      // small (but still exists) - we don't do it when we're applied manualyl
+      // because there could be other deleted messages in the folder which the
+      // user wants to keep
+      if ( newOnly && (m_deletedMsgs.Count() > 0) && !m_expungedMsgs )
+      {
+         mf->ExpungeMessages();
+      }
+   }
+
+   mf->DecRef();
 
    return rc;
 #else
