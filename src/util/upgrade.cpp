@@ -43,7 +43,6 @@
 #include "HeaderInfo.h"
 #include "MailFolderCC.h"
 #include "SendMessage.h"
-#include "MessageCC.h"
 
 #include "Mdefaults.h"
 
