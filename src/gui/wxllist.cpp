@@ -532,19 +532,26 @@ void wxLayoutStyleInfo::InitColours(wxColour *fg, wxColour *bg)
    m_bg = m_bg_valid ? *bg : *wxWHITE;
 }
 
-#define COPY_SI_(what) if(right.what != -1) what = right.what;
+#define COPY_SI_(what) if(other.what != -1) what = other.what;
 
 wxLayoutStyleInfo &
-wxLayoutStyleInfo::operator=(const wxLayoutStyleInfo &right)
+wxLayoutStyleInfo::operator=(const wxLayoutStyleInfo &other)
 {
+   if ( other.font.Ok() )
+      font = other.font;
+
    COPY_SI_(family);
    COPY_SI_(style);
    COPY_SI_(size);
    COPY_SI_(weight);
    COPY_SI_(underline);
    COPY_SI_(enc);
-   if(right.m_fg_valid) m_fg = right.m_fg;
-   if(right.m_bg_valid) m_bg = right.m_bg;
+
+   if(other.m_fg_valid)
+      m_fg = other.m_fg;
+   if(other.m_bg_valid)
+      m_bg = other.m_bg;
+
    return *this;
 }
 
