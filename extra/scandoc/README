@@ -1,28 +1,48 @@
-ScanDoc: A C/C++ Embedded Documentation Analyser, Version 0.9
-(c) 1997-1998 Talin
+ScanDoc - Version 0.12,  A C/C++ Embedded Documentation Analyser
+----------------------------------------------------------------
 
-Contact: Talin@ACM.org [http://www.sylvantech.com/~talin]
+WHAT IS SCANDOC?
 
-ScanDoc scans C and C++ program for embedded documentation, and formats it into
-HTML or other formats. It also analyses code structure and uses this information
-to enhance the generated documentation. It has been inspired by JavaDoc, as well
-as the Amiga "autodoc" utility.
+  ScanDoc scans C and C++ program for embedded documentation, and
+  formats it into HTML or other formats. It also analyzes code
+  structure and uses this information to enhance the generated 
+  documentation. It has been inspired by JavaDoc, as well as the 
+  Amiga "autodoc" utility.
 
-See scandoc.html for complete documentation.
+LICENSING
 
-This archive contains the following:
+  ScanDoc is distributed under the "Artistic License" (see the file
+  "COPYING" for more information).
 
-README          This file.
-COPYING		License terms. (The "Artistic License")
-scandoc.pl	The ScanDoc program.
-template.html	A starter template for generating HTML output
-scandoc.html	The ScanDoc documentation.
-sample.h	An example C++ include file showing how to write ScanDoc comment tags.
-sample/         A more extensive example of some documentation that was created with
-		ScanDoc. You'll need a frames browser to view it correctly.
-images/		Various images which are referenced by the ScanDoc documentation and
-		the the supplied template.html.
+DOCUMENTATION
 
-Version History:
+  ScanDoc's documentation can be found in the file "scandoc.html"
+  as well as on the web at http://scandoc.sourceforge.net/scandoc.html
 
-0.9 First public release.
+INSTALLATION
+
+  ScanDoc doesn't require system installation.  You can simply include
+  ScanDoc with the source code you are documenting.  Copy "scandoc",
+  your template file (try "templates/default.scandoc" if you haven't
+  built your own), and the images directory to your package's
+  documentation directory. 
+
+  To see ScanDoc in action, go to the "test" dir and type "make".
+  ScanDoc will build documentation for the included test files.
+
+VERSION HISTORY
+
+  0.13  Mostly bug fixes.
+  0.12  Mostly formatting and packaging changes.
+  0.11  Fixed parser bugs with global functions.
+  0.10  Fixed parser bugs reported by users.
+  0.9   First public release.
+
+  See "ChangeLog" for more details.
+
+CONTRIBUTORS:
+
+  Talin <talin@acm.org>
+  James Dean Palmer <james@tiger-marmalade.com>
+
+(c) 1997-2000 Talin and others
