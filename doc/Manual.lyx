@@ -5792,13 +5792,9 @@ Mahogany
 Mcallbacks.h
 \family default 
 .
- The documentation of these callbacks can be found in the Classes documentation(
-\latex latex 
+ There is no documentation for these callbacks yet, but don't hesitate to ask
+ us if you need more information about this.
 
-\backslash 
-htmladdnormallinkfoot{Classes online docs}{classes/index.html}
-\latex default 
-).
  All of these callbacks are called with at least two arguments:
 \layout Enumerate
 
