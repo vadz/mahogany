@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sun Apr 26 13:53:06 1998
+#This file was created by <karsten> Mon Apr 27 13:25:22 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -301,6 +301,78 @@ make
  to compile and link M.
  Compiling some of the source files will take an enormous amount of memory,
  so make sure you have enough virtual memory.
+ 
+\layout Section
+
+Configuration and Testing
+\layout Subsection
+
+Configuration settings
+\layout Standard
+
+Under Unix all configuration settings are stored in 
+\family typewriter 
+~/.M/config
+\family default 
+ under Windows in the registry.
+ To get an overview over all possible configuration options and their default
+ values, set the value 
+\family typewriter 
+RecordDefaults=1
+\family default 
+.
+ Under Unix, do this by creating a new 
+\family typewriter 
+~/.M/config
+\family default 
+ file containig the lines
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|[M]|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|RecordDefaults=1|
+\layout Standard
+
+After running M, this file will then contain all default settings.
+ Most of them are easily understood.
+ Otherwise, the file 
+\family typewriter 
+include/Mdefaults.h
+\family default 
+ contains them all with some short comments.
+\layout Subsection
+
+Reading mail/news
+\layout Standard
+
+To read news, you need to open a folder.
+ The default incoming mail folder has the name 
+\family typewriter 
+INBOX
+\family default 
+.
+ Any other name will be interpreted as a filename relative to the folder
+ directory.
+ 
+\layout Subsection
+
+Writing mail/news
+\layout Standard
+
+Before being able to send mail, you need to configure the 
+\family typewriter 
+MailHost
+\family default 
+ setting to tell it where to send the mail.
  
 \layout Section
 
