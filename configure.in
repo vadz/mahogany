@@ -653,11 +653,16 @@ static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
         M_CHECK_MYHEADER(Python.h,
         [ \
 	    $prefix/include \
+	    $prefix/include/python1.5 \
+	    $prefix/include/python2.0 \
+	    $prefix/include/python2.1 \
 	    /usr/include/python1.5 \
+	    /usr/include/python2.0 \
+	    /usr/include/python2.1 \
 	    /usr/local/include \
 	    /usr/local/include/python1.5 \
-	    /home/local/include \
-	    /home/local/include/python1.5 \
+	    /usr/local/include/python2.0 \
+	    /usr/local/include/python2.1 \
         ],
 	[
 	],
@@ -682,34 +687,67 @@ dynamic|Dynamic|DYNAMIC|1)
 	;;
 
 static|Static|STATIC)
+	dnl argh, we have to check for 1.5, 2.0 and 2.1 - does any m4 guru
+	dnl care to write a function to automate this
 	M_CHECK_MYLIB(python1.5, main,
 	[ \
-	    /usr \
+	    $prefix/lib \
+	    $prefix/lib/python1.5 \
+	    $prefix/lib/python1.5/config \
 	    /usr/lib \
 	    /usr/lib/python1.5 \
 	    /usr/lib/python1.5/config \
-	    /usr/local \
 	    /usr/local/lib \
 	    /usr/local/lib/python1.5 \
 	    /usr/local/lib/python1.5/config \
-	    /usr/local/python1.5/config\
-	    /home/local \
-	    /home/local/lib \
-	    /home/local/lib/python1.5 \
-	    /home/local/lib/python1.5/config \
-	    /home/local/python1.5/config\
 	],
         [
 	    PYTHON_LIBS="$libpath_python1_5_main -lpython1.5"
+	],
+        [
+	    M_CHECK_MYLIB(python2.0, main,
+	    [ \
+		$prefix/lib \
+		$prefix/lib/python2.0 \
+		$prefix/lib/python2.0/config \
+		/usr/lib \
+		/usr/lib/python2.0 \
+		/usr/lib/python2.0/config \
+		/usr/local/lib \
+		/usr/local/lib/python2.0 \
+		/usr/local/lib/python2.0/config \
+	    ],
+	    [
+		PYTHON_LIBS="$libpath_python2_0_main -lpython2.0"
+	    ],
+	    [
+		M_CHECK_MYLIB(python2.1, main,
+		[ \
+		    $prefix/lib \
+		    $prefix/lib/python2.1 \
+		    $prefix/lib/python2.1/config \
+		    /usr/lib \
+		    /usr/lib/python2.1 \
+		    /usr/lib/python2.1/config \
+		    /usr/local/lib \
+		    /usr/local/lib/python2.1 \
+		    /usr/local/lib/python2.1/config \
+		],
+		[
+		    PYTHON_LIBS="$libpath_python2_1_main -lpython2.1"
+		],
+		[
+		    USE_PYTHON=0
+		])
+	    ])
+	])
+	if test "$USE_PYTHON" != 0; then
 	    dnl extra libs required by python on freebsd
 	    case "$OSTYPE" in freebsd* | FreeBSD*)
 		LIBS="-lreadline $LIBS"
 		;;
 	    esac
-	],
-        [
-	    USE_PYTHON=0
-	])
+	fi
 	;;
 
 0)
