@@ -383,7 +383,7 @@ GENERATE_HTML          = YES
 # put in front of it. If left blank `html' will be used as the default path. 
 # tofi: html.1st also contains ENABLE_PREPROCESSING
 
-HTML_OUTPUT            = html.complete
+HTML_OUTPUT            = html.diagram
 
 # The HTML_HEADER tag can be used to specify a personal HTML header for 
 # each generated HTML page. If it is left blank doxygen will generate a 
