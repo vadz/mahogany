@@ -3485,7 +3485,7 @@ wxFolderView::Update()
 }
 
 void
-wxFolderView::Clear(bool keepTheViewer)
+wxFolderView::DoClear(bool keepTheViewer)
 {
    // remember the last selected item, if any, and if we use/need it
    if ( m_Profile )
@@ -3663,7 +3663,7 @@ wxFolderView::SetFolder(MailFolder *mf)
    // keep the viewer (by passing true to Clear()) only if we're going to open
    // a new folder soon: this avoids flicker but still ensures that we close
    // the current viewer if we are not going to open any folder
-   Clear(mf != NULL);
+   DoClear(mf != NULL);
 
    if ( mf )
    {

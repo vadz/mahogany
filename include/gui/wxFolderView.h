@@ -184,8 +184,11 @@ protected:
    /// update the view after new messages appeared in the folder
    void Update();
 
-   /// forget the currently shown folder
-   void Clear(bool keepTheViewer = false);
+   /// forget the currently shown folder (keep the viewer if necessary though)
+   void DoClear(bool keepTheViewer);
+
+   /// call DoClear() but via SetFolder() which allows overriding it
+   void Clear() { SetFolder(NULL); }
 
    /// set the folder to show, can't be NULL (unlike in SetFolder)
    void ShowFolder(MailFolder *mf);
