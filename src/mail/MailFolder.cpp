@@ -264,7 +264,8 @@ MailFolder::OpenFolder(const MFolder *mfolder)
                                 mfolder->GetServer(),
                                 mfolder->GetLogin(),
                                 mfolder->GetPassword(),
-                                mfolder->GetName());
+                                mfolder->GetFullName());
+                                /*VS:was mfolder->GetName()*/
    return mf;
 }
 
@@ -348,6 +349,7 @@ MailFolder::OpenFolder(int folderType,
    {
       String pname = (symbolicName[0] == '/') ? String(symbolicName.c_str()+1) : symbolicName;
       profile = Profile::CreateProfile(symbolicName, parentProfile);
+
       CHECK(profile, NULL, "can't create profile");   // return if it fails
 
       server = i_server;
