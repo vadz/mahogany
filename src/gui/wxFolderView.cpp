@@ -601,8 +601,8 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 {
    // If we don't check, we could get called recursively from within a 
    // wxYield()...
-   if(m_SetFolderSemaphore)
-      return;
+//   if(m_SetFolderSemaphore)
+//      return;
    m_SetFolderSemaphore = true;
 
 
