@@ -20,7 +20,8 @@ Here is the rough plan for the future of the M development:
    
       - it becomes very slow with big books and the autocollect book grows
         really fast (~1000 entries in mine) and the books are also way too
-        big. We need a more efficient and more compact format.
+        big. We need a more efficient and more compact format. Support for
+	Gnome and KDE address books (maybe even Windows WAB? ;).
 
       - GUI side: we need a reusable ADB-tree control like the folder tree
         one which could be reused from other places (composer, extract
