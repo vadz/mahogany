@@ -10,7 +10,7 @@ Architecture: any
 Depends: ${shlibs:Depends}
 Recommends: libssl09
 Suggests: python
-Description: Mahogany, powerful and user-friendly GUI mail/news client.
+Description: Powerful and user-friendly portable GUI mail client with SSL support.
  This package contains Mahogany, a powerful, flexible GUI mail and news client
  using GTK+ toolkit. Mahogany supports remote POP3, IMAP4, NNTP servers as well
  as local MBX, MBOX, MH and news spool folders and sending mail using SMTP or
