@@ -204,6 +204,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
 
    // file
+   // available accels: BFGHJKLOQVWZ
    { WXMENU_FILE_COMPOSE,  gettext_noop("Compose &New Message\tCtrl-N"),  gettext_noop("Start a new message")      , FALSE },
    { WXMENU_FILE_COMPOSE_WITH_TEMPLATE,
                            gettext_noop("Compose with &template...\tShift-Ctrl-N"),  gettext_noop("Compose a new message using after choosing a temple for it")      , FALSE },
@@ -244,6 +245,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window\tCtrl-W"),     gettext_noop("Close this window")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_FILE_AWAY_MODE,gettext_noop("Awa&y mode\tCtrl-Y"), gettext_noop("Quit the application"), TRUE },
    { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tCtrl-Q"),             gettext_noop("Quit the application")     , FALSE },
 
    // folder

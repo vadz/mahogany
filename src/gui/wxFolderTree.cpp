@@ -1371,6 +1371,9 @@ void wxFolderTreeImpl::DoToggleHidden()
 
 void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
 {
+   // someone clicked the tree, so the user must be back
+   mApplication->UpdateAwayMode();
+
    bool allow; // should we allow renaming this item?
 
    MFolder *folder = m_sink->GetSelection();
@@ -1415,6 +1418,9 @@ void wxFolderTreeImpl::OnEndLabelEdit(wxTreeEvent& event)
 // add all subfolders of the folder being expanded
 void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
 {
+   // someone clicked the tree, so the user must be back
+   mApplication->UpdateAwayMode();
+
    ASSERT_MSG( event.GetEventObject() == this, "got other treectrls event?" );
 
    wxTreeItemId itemId = event.GetItem();
@@ -1500,6 +1506,9 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
 
 void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
 {
+   // someone clicked the tree, so the user must be back
+   mApplication->UpdateAwayMode();
+
    ASSERT_MSG( event.GetEventObject() == this, "got other treectrls event?" );
 
    wxTreeItemId itemId = event.GetItem();
@@ -1587,6 +1596,9 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
 
 void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
 {
+   // someone clicked in the tree, so the user must be back
+   mApplication->UpdateAwayMode();
+
    if ( !ProcessMenuCommand(event.GetId()) )
       event.Skip();
 }
@@ -1677,6 +1689,9 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
 
 void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
 {
+  // someone typed into the tree, so the user must be back
+  mApplication->UpdateAwayMode();
+
   switch ( event.KeyCode() ) {
     case WXK_DELETE:
       DoFolderDelete(event.ShiftDown());

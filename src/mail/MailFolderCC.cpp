@@ -3163,26 +3163,32 @@ MailFolderCC::BuildListing(void)
    // set the entry listing we're currently building to 0 in the beginning
    m_BuildNextEntry = 0;
 
-   // show the progress dialog if there are many messages to retrieve
-   // (see below for the reason of the m_ProgressDialog == NULL check, the
-   // check for threshold > 0 allows to disable the progress dialog
-   // completely if the user wants)
-   long threshold = READ_CONFIG(m_Profile, MP_FOLDERPROGRESS_THRESHOLD);
-   if ( m_ProgressDialog == NULL &&
-        threshold > 0 &&
-        m_nMessages > (unsigned long)threshold )
+   // don't show the progress dialog if we're not in interactive mode or if it
+   // had been already shown (see below near NO_PROGRESS_DLG assignment for the
+   // explanation of this)
+   if ( m_ProgressDialog == NULL && !mApplication->IsInAwayMode() )
    {
-      String msg;
-      msg.Printf(_("Reading %lu message headers..."), m_nMessages);
-      MGuiLocker locker;
+      // show the progress dialog if there are many messages to retrieve,
+      // the check for threshold > 0 allows to disable the progress dialog
+      // completely if the user wants
+      long threshold = READ_CONFIG(m_Profile, MP_FOLDERPROGRESS_THRESHOLD);
+      if ( m_ProgressDialog == NULL &&
+           threshold > 0 &&
+           m_nMessages > (unsigned long)threshold )
+      {
+         String msg;
+         msg.Printf(_("Reading %lu message headers..."), m_nMessages);
+         MGuiLocker locker;
 
-      // open a status window:
-      m_ProgressDialog = new MProgressDialog(GetName(),
-                                             msg,
-                                             m_nMessages,
-                                             NULL,
-                                             false, true);
+         // create the progress meter which we will just have to Update() later
+         m_ProgressDialog = new MProgressDialog(GetName(),
+                                                msg,
+                                                m_nMessages,
+                                                NULL,
+                                                false, true);
+      }
    }
+   //else: no progress dialog
 
    // remember the status of the new messages
    m_statusNew = new MailFolderStatus;

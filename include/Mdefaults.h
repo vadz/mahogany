@@ -142,6 +142,7 @@ enum MFolderIndex
 /// unknown icon
 #define   M_ICON_UNKNOWN      "UNKNOWN"
 //@}
+
 /** @name names of configuration entries */
 //@{
 /// our version
@@ -769,6 +770,18 @@ enum MFolderIndex
 #define MP_CONFIRM_SEND "ConfirmSend"
 /// preview the message being sent?
 #define MP_PREVIEW_SEND "PreviewSend"
+//@}
+
+/** @name away mode */
+//@{
+/// automatically enter the away mode after that many minutes (0 to disable)
+#define MP_AWAY_AUTO_ENTER "AutoAway"
+/// automaticlly exit from the away mode when the user chooses menu command
+#define MP_AWAY_AUTO_EXIT "AutoExitAway"
+/// keep the value of away mode for the next run (otherwise always reset it)
+#define MP_AWAY_REMEMBER "RememberAway"
+/// the saved value of away status (only written if MP_AWAY_REMEMBER is set)
+#define MP_AWAY_STATUS "AwayStatus"
 //@}
 
 /** @name names of obsolete configuration entries, for upgrade routines */
@@ -1561,7 +1574,6 @@ enum MFolderIndex
 #define MP_SYNC_FOLDERS_D   0L
 /// sync folder tree
 #define MP_SYNC_FOLDERGROUP_D   ""
-//@}
 
 /** @name sending */
 //@{
@@ -1569,6 +1581,20 @@ enum MFolderIndex
 #define MP_CONFIRM_SEND_D 0L
 /// preview the message being sent?
 #define MP_PREVIEW_SEND_D 0L
+//@}
+
+/** @name away mode */
+//@{
+/// automatically enter the away mode after that many minutes (0 to disable)
+#define MP_AWAY_AUTO_ENTER_D 0L
+/// automaticlly exit from the away mode when the user chooses menu command
+#define MP_AWAY_AUTO_EXIT_D 1L
+/// keep the value of away mode for the next run (otherwise always reset it)
+#define MP_AWAY_REMEMBER_D 0L
+/// the saved value of away status (only written if MP_AWAY_REMEMBER is set)
+#define MP_AWAY_STATUS_D 0L
+//@}
+
 //@}
 
 /** @name other defines used in M */
@@ -1584,4 +1610,5 @@ enum MFolderIndex
 /// postfix for News outbox
 #define M_NEWSOUTBOX_POSTFIX _("_News")
 //@}
+
 #endif // MDEFAULTS_H

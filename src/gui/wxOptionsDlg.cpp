@@ -368,7 +368,11 @@ enum ConfigFields
    ConfigField_ToolbarsFlatButtons,
 #endif // OS_UNIX
    ConfigField_ReenableDialog,
-   ConfigField_OthersLast = ConfigField_ReenableDialog,
+   ConfigField_AwayHelp,
+   ConfigField_AwayAutoEnter,
+   ConfigField_AwayAutoExit,
+   ConfigField_AwayRemember,
+   ConfigField_OthersLast = ConfigField_AwayRemember,
 
    ConfigField_SyncFirst = ConfigField_OthersLast,
    ConfigField_RemoteSynchroniseMessage,
@@ -1022,6 +1026,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     },
 #endif // OS_UNIX
    { gettext_noop("&Reenable disabled message boxes..."), Field_SubDlg, -1 },
+   { gettext_noop("\"Away\", or unattended, state is a special mode in\n"
+                  "which Mahogany tries to avoid any interaction with the user,\n"
+                  "e.g. new mail notification is disabled, no progress dialogs\n"
+                  "are shown &&c.\n"
+                  "\n"
+                  "This is useful if you want to not be distracted by new\n"
+                  "mail arrival temporarily without having to shut down."), Field_Message, -1 },
+   { gettext_noop("Enter awa&y mode after that many minutes:"), Field_Number, -1 },
+   { gettext_noop("E&xit from away mode when user does something"), Field_Bool, -1 },
+   { gettext_noop("Rememeber a&way status (otherwise always reset it)"), Field_Bool, -1 },
 
    // sync page
    { gettext_noop("Mahogany can synchronise part of its configuration\n"
@@ -1290,7 +1304,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_DOCKABLE_TOOLBARS),
    CONFIG_ENTRY(MP_FLAT_TOOLBARS),
 #endif // OS_UNIX
-   CONFIG_NONE(),
+   CONFIG_NONE(), // reenable disabled msg boxes
+   CONFIG_NONE(), // away help
+   CONFIG_ENTRY(MP_AWAY_AUTO_ENTER),
+   CONFIG_ENTRY(MP_AWAY_AUTO_EXIT),
+   CONFIG_ENTRY(MP_AWAY_REMEMBER),
 
    // sync
    CONFIG_NONE(),
@@ -2458,7 +2476,8 @@ wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
                                    ConfigField_OthersLast,
                                    MH_OPAGE_OTHERS)
 {
-   m_nAutosaveDelay = -1;
+   m_nAutosaveDelay =
+   m_nAutoAwayDelay = -1;
 }
 
 void wxOptionsPageOthers::OnButton(wxCommandEvent& event)
@@ -2491,6 +2510,7 @@ bool wxOptionsPageOthers::TransferDataToWindow()
    if ( rc )
    {
       m_nAutosaveDelay = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);
+      m_nAutoAwayDelay = READ_CONFIG(m_Profile, MP_AWAY_AUTO_ENTER);
    }
 
    return rc;
@@ -2507,12 +2527,24 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
                           READ_CONFIG(m_Profile, MP_CONFIRMEXIT) != 0);
 
       // restart the timer if the timeout changed
-      long nAutosaveDelay = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);
-      if ( nAutosaveDelay != m_nAutosaveDelay )
+      long delayNew = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);
+      if ( delayNew != m_nAutosaveDelay )
       {
          if ( !mApplication->RestartTimer(MAppBase::Timer_Autosave) )
          {
             wxLogError(_("Invalid delay value for autosave timer."));
+
+            rc = false;
+         }
+      }
+
+      // and the other timer too
+      delayNew = READ_CONFIG(m_Profile, MP_AWAY_AUTO_ENTER);
+      if ( delayNew != m_nAutoAwayDelay )
+      {
+         if ( !mApplication->RestartTimer(MAppBase::Timer_Away) )
+         {
+            wxLogError(_("Invalid delay value for auto away timer."));
 
             rc = false;
          }

@@ -476,7 +476,11 @@ public:
    void OnButton(wxCommandEvent&);
 
 protected:
+   // the old auto save timer interval
    long m_nAutosaveDelay;
+
+   // the old away mode timer interval
+   long m_nAutoAwayDelay;
 
 private:
    DECLARE_EVENT_TABLE()

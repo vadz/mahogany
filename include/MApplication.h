@@ -31,11 +31,16 @@
 
 #include "MEvent.h"
 
-class wxMimeTypesManager;
+class MAppBase;
 class MailFolder;
 class MailCollector;
 class MModuleCommon;
 class ArrayFrames;
+
+class WXDLLEXPORT wxMimeTypesManager;
+
+/// the global application object pointer
+extern MAppBase *mApplication;
 
 /**
    Application class, doing all non-GUI application specific stuff
@@ -138,12 +143,6 @@ public:
    */
    MError GetLastError() const { return m_error; }
 
-   /**  translate a string to national language:
-        @param in the text to translate
-        @return the translated text
-   */
-   const char *GetText(const char *in) const;
-
    /** return the global directory
        @return the path to the global M data files
    */
@@ -178,10 +177,6 @@ public:
        @return reference to the mailcollector object.
    */
    virtual MailCollector *GetMailCollector(void) const { return m_MailCollector; }
-   /** Toggle display of log output window
-       @param display true to show it
-   */
-   void ShowConsole(bool display = true);
 
    /// return a pointer to the IconManager:
    virtual class wxIconManager *GetIconManager(void) const = 0;
@@ -200,9 +195,37 @@ public:
    bool IsShuttingDown() const { return m_cycle == ShuttingDown; }
    //@}
 
+   /// @name "Away" or unattended mode support
+   //@{
+
+   /// are we in "away" mode?
+   bool IsInAwayMode() const { return m_isAway; }
+
+   /// switch to/from away mode
+   virtual void SetAwayMode(bool isAway = true) { m_isAway = isAway; }
+
+   /// exit away mode if necessary
+   void UpdateAwayMode()
+   {
+      if ( IsInAwayMode() && READ_APPCONFIG(MP_AWAY_AUTO_EXIT) )
+      {
+         SetAwayMode(false);
+      }
+   }
+   //@}
+
+   /// @name Dial-up support
+   //@{
+
+   /// are we currently online?
    virtual bool IsOnline(void) const = 0;
+
+   /// dial the modem
    virtual void GoOnline(void) const = 0;
+
+   /// hang up the modem
    virtual void GoOffline(void) const = 0;
+   //@}
 
    /// Send all messages from the outbox
    virtual void SendOutbox(void) const;
@@ -214,19 +237,28 @@ public:
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
 
-   /// the application maintains several global timers
+   /// @name timer stuff
+   //@{
+   /// the application maintains several global timers which are known by ids
    enum Timer
    {
       Timer_Autosave,
       Timer_PollIncoming,
-      Timer_PingFolder
+      Timer_PingFolder,
+      Timer_Away,
+      Timer_Max
    };
 
+   /// start the given timer
    virtual bool StartTimer(Timer timer) = 0;
+
+   /// stop the given timer
    virtual bool StopTimer(Timer timer) = 0;
 
+   /// restart the given timer
    bool RestartTimer(Timer timer)
       { return StopTimer(timer) && StartTimer(timer); }
+   //@}
 
    /** @name Log window */
    //@{
@@ -280,8 +312,11 @@ public:
    virtual void FatalError(const char *message) = 0;
 
    /// remove the module from the list of all modules
-   /// (this is implemented in MModule.cpp actually)
+   // (this is implemented in MModule.cpp actually)
    void RemoveModule(MModuleCommon *module);
+
+   /// get the translated (if possible) text (used by Python interface only)
+   static const char *GetText(const char *text) { return _(text); }
 
 protected:
    /// Load modules at startup
@@ -357,9 +392,10 @@ protected:
       Running,
       ShuttingDown
    } m_cycle;
-};
 
-extern MAppBase *mApplication;
+   /// are we in away mode?
+   bool m_isAway;
+};
 
 /// Report a fatal error:
 extern "C"

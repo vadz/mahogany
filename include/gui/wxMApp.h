@@ -115,8 +115,11 @@ public:
 
    void OnConnected(wxDialUpEvent &event);
    void OnDisconnected(wxDialUpEvent &event);
+
    /// updates display of outbox status
    virtual void UpdateOutboxStatus(class MailFolder *mf = NULL) const;
+
+   virtual void SetAwayMode(bool isAway = true);
 
    /// Report a fatal error:
    virtual void FatalError(const char *message);

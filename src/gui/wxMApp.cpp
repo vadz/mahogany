@@ -73,6 +73,9 @@
 // the name of config section where the log window position is saved
 #define  LOG_FRAME_SECTION    "LogWindow"
 
+// trace mask for timer events
+#define TRACE_TIMER "timer"
+
 // ----------------------------------------------------------------------------
 // classes
 // ----------------------------------------------------------------------------
@@ -107,7 +110,7 @@ public:
 
    virtual void Notify()
    {
-      wxLogTrace("timer", "Autosaving options and folder status.");
+      wxLogTrace(TRACE_TIMER, "Autosaving options and folder status.");
 
       Profile::FlushAll();
 
@@ -132,7 +135,7 @@ public:
 
    virtual void Notify()
       {
-         wxLogTrace("timer", "Collection timer expired.");
+         wxLogTrace(TRACE_TIMER, "Collection timer expired.");
          mApplication->UpdateOutboxStatus();
          MailCollector *collector = mApplication->GetMailCollector();
          if ( collector )
@@ -156,14 +159,30 @@ public:
    virtual void Notify() { wxWakeUpIdle(); }
 };
 
+// and yet another timer for the away mode
+class AwayTimer : public wxTimer
+{
+public:
+   virtual void Notify()
+   {
+      wxLogTrace(TRACE_TIMER, "Going awya on timer");
+
+      mApplication->SetAwayMode(TRUE);
+   }
+};
+
 // ----------------------------------------------------------------------------
 // global vars
 // ----------------------------------------------------------------------------
 
 // a (unique) autosave timer instance
 static AutoSaveTimer *gs_timerAutoSave = NULL;
+
 // a (unique) timer for polling for new mail
 static MailCollectionTimer *gs_timerMailCollection = NULL;
+
+// the timer for auto going into away mode: may be NULL
+static AwayTimer *gs_timerAway = NULL;
 
 struct MModuleEntry
 {
@@ -176,12 +195,12 @@ KBLIST_DEFINE(ModulesList, MModuleEntry);
 // a list of modules loaded at startup:
 static ModulesList gs_GlobalModulesList;
 
-// this creates the one and only application object
-IMPLEMENT_APP(wxMApp);
-
 // ============================================================================
 // implementation
 // ============================================================================
+
+// this creates the one and only application object
+IMPLEMENT_APP(wxMApp);
 
 // ----------------------------------------------------------------------------
 // wxMLogWindow
@@ -696,14 +715,15 @@ wxMApp::OnInit()
          READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X)));
 #endif // wxUSE_POSTSCRIPT
 
-
-
       // start a timer to autosave the profile entries
       StartTimer(Timer_Autosave);
 
       // the timer to poll for new mail will be started when/if MailCollector
       // is created
       StartTimer(Timer_PollIncoming);
+
+      // start away timer if necessary
+      StartTimer(Timer_Away);
 
       // another timer to do MEvent handling:
       m_IdleTimer = new IdleTimer;
@@ -763,6 +783,7 @@ int wxMApp::OnExit()
    // delete timers
    delete gs_timerAutoSave;
    delete gs_timerMailCollection;
+   delete gs_timerAway;
 
    gs_timerAutoSave = NULL;
    gs_timerMailCollection = NULL;
@@ -1064,24 +1085,46 @@ bool wxMApp::StartTimer(Timer timer)
    switch ( timer )
    {
       case Timer_Autosave:
-         delay = READ_APPCONFIG(MP_AUTOSAVEDELAY)*1000;
-
-         return (delay == 0) || gs_timerAutoSave->Start(delay);
+         delay = READ_APPCONFIG(MP_AUTOSAVEDELAY);
+         if ( delay )
+         {
+            return gs_timerAutoSave->Start(1000*delay);
+         }
+         break;
 
       case Timer_PollIncoming:
-         delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY)*1000;
-
-         return (delay == 0) || gs_timerMailCollection->Start(delay);
+         delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY);
+         if ( delay )
+         {
+            return gs_timerMailCollection->Start(1000*delay);
+         }
+         break;
 
       case Timer_PingFolder:
          // TODO - just sending an event "restart timer" which all folders
          //        would be subscribed too should be enough
          return true;
 
+      case Timer_Away:
+         delay = READ_APPCONFIG(MP_AWAY_AUTO_ENTER);
+         if ( delay )
+         {
+            // this timer is not created by default
+            if ( !gs_timerAway )
+               gs_timerAway = new AwayTimer;
+
+            // this delay is in minutes
+            return gs_timerAway->Start(1000*60*delay);
+         }
+         break;
+
+      case Timer_Max:
       default:
          wxFAIL_MSG("attempt to start an unknown timer");
-         return false;
    }
+
+   // timer not started
+   return false;
 }
 
 bool wxMApp::StopTimer(Timer timer)
@@ -1100,6 +1143,12 @@ bool wxMApp::StopTimer(Timer timer)
          // TODO!!!
          break;
 
+      case Timer_Away:
+         if ( gs_timerAway )
+            gs_timerAway->Stop();
+         break;
+
+      case Timer_Max:
       default:
          wxFAIL_MSG("attempt to stop an unknown timer");
          return false;
@@ -1446,6 +1495,21 @@ void
 wxMApp::FatalError(const char *message)
 {
    OnAbnormalTermination();
+}
+
+void
+wxMApp::SetAwayMode(bool isAway)
+{
+   MAppBase::SetAwayMode(isAway);
+
+   if ( m_topLevelFrame )
+   {
+      wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
+      if ( mbar )
+      {
+         mbar->Check(WXMENU_FILE_AWAY_MODE, isAway);
+      }
+   }
 }
 
 // ----------------------------------------------------------------------------

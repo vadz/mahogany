@@ -148,6 +148,8 @@ MAppBase::MAppBase()
 
    m_cycle = Initializing;
 
+   m_isAway = FALSE;
+
    ResetLastError();
 }
 
@@ -325,6 +327,10 @@ MAppBase::OnStartup()
 #endif
    // cause it to re-read our global dir
    GetIconManager()->SetSubDirectory("");
+
+   // do it first to avoid any interactive stuff from popping up if configured
+   // to start up in the unattended mode
+   SetAwayMode(READ_APPCONFIG(MP_AWAY_STATUS));
 
    // show the splash screen (do it as soon as we have profile to read
    // MP_SHOWSPLASH from) unless this is our first run in which case it will
@@ -520,6 +526,12 @@ MAppBase::OnShutDown()
 {
    m_cycle = ShuttingDown;
 
+   // do we need to save the away mode state?
+   if ( READ_APPCONFIG(MP_AWAY_REMEMBER) )
+   {
+      m_profile->writeEntry(MP_AWAY_STATUS, IsInAwayMode());
+   }
+
    // Try to store our remotely synchronised configuration settings
    if(! SaveRemoteConfigSettings() )
       wxLogError(_("Synchronised configuration information could not "
@@ -542,11 +554,11 @@ MAppBase::OnShutDown()
       m_eventFolderUpdateReg = NULL;
    }
 
-    if (m_MailCollector)
-    {
+   if (m_MailCollector)
+   {
       m_MailCollector->DecRef();
       m_MailCollector = NULL;
-    }
+   }
 
    // clean up
    MEventManager::DispatchPending();
@@ -580,16 +592,6 @@ MAppBase::OnShutDown()
    // free python DLL: this is ok to call even if it wasn't loaded
    FreePythonDll();
 #endif // USE_PYTHON_DYNAMIC
-}
-
-const char *
-MAppBase::GetText(const char *in) const
-{
-#  ifdef   USE_GETTEXT
-      return   gettext(in);
-#  else
-      return   in;
-#  endif
 }
 
 bool
@@ -698,6 +700,13 @@ MAppBase::OnMEvent(MEventData& event)
 {
    if(event.GetId() == MEventId_NewMail)
    {
+      // first of all, do nothing at all in the away mode
+      if ( IsInAwayMode() )
+      {
+         // avoid any interaction with the user
+         return TRUE;
+      }
+
       // get the folder in which the new mail arrived
       MEventNewMailData& mailevent = (MEventNewMailData &)event;
       MailFolder *folder = mailevent.GetFolder();
@@ -801,8 +810,10 @@ MAppBase::OnMEvent(MEventData& event)
       }
    }
    else
-      // else
-      ASSERT(0); // unexpected
+   {
+      FAIL_MSG("unexpected event in MAppBase");
+   }
+
    return TRUE;
 }
 
