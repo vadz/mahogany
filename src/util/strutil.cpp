@@ -1416,9 +1416,6 @@ static wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
    // default value: use system default font
    wxFontEncoding enc = wxFONTENCODING_SYSTEM;
 
-   if ( !pwz )
-      return enc;
-
    // first find a non ASCII character as ASCII ones are present in all (well,
    // many) code pages
    while ( *pwz && *pwz < 0x80 )
@@ -1430,7 +1427,8 @@ static wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
       return enc;
 
    // build the array of encodings in which the character appears
-   wxFontEncoding encodings[WXSIZEOF(s_codepages)];
+   // (+1 is needed to account for wxFONTENCODING_ISO8859_1)
+   wxFontEncoding encodings[WXSIZEOF(s_codepages) + 1];
    size_t numEncodings = 0;
 
    // special test for iso8859-1 which is identical to first 256 Unicode
@@ -1509,28 +1507,36 @@ ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
       // try to determine which multibyte encoding is best suited for this
       // Unicode string
       wxWCharBuffer wbuf(strUtf->wc_str(wxConvUTF8));
-      enc = GuessUnicodeCharset(wbuf);
+      if ( !wbuf )
+      {
+         // invalid UTF-8 data, leave it as is
+         enc = wxFONTENCODING_SYSTEM;
+      }
+      else // try to find a multibyte encoding we can show this in
+      {
+         enc = GuessUnicodeCharset(wbuf);
 
-      // finally convert to multibyte
-      wxString str;
-      if ( enc == wxFONTENCODING_SYSTEM )
-      {
-         str = wxString(wbuf);
-      }
-      else
-      {
-         wxCSConv conv(enc);
-         str = wxString(wbuf, conv);
-      }
-      if ( str.empty() )
-      {
-         // conversion failed - use original text (and display incorrectly,
-         // unfortunately)
-         wxLogDebug(_T("conversion from UTF-8 to default encoding failed"));
-      }
-      else
-      {
-         *strUtf = str;
+         // finally convert to multibyte
+         wxString str;
+         if ( enc == wxFONTENCODING_SYSTEM )
+         {
+            str = wxString(wbuf);
+         }
+         else
+         {
+            wxCSConv conv(enc);
+            str = wxString(wbuf, conv);
+         }
+         if ( str.empty() )
+         {
+            // conversion failed - use original text (and display incorrectly,
+            // unfortunately)
+            wxLogDebug(_T("conversion from UTF-8 to default encoding failed"));
+         }
+         else
+         {
+            *strUtf = str;
+         }
       }
    }
    else // doesn't really matter what we return from here
