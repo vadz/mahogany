@@ -530,6 +530,8 @@ enum ConfigFields
    ConfigField_Splash,
    ConfigField_SplashDelay,
    ConfigField_ShowTbarImages,
+   ConfigField_EnvVarsHelp,
+   ConfigField_EnvVars,
    ConfigField_AutosaveHelp,
    ConfigField_AutosaveDelay,
    ConfigField_ConfirmExit,
@@ -1590,6 +1592,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Show &tips at startup"),        Field_Bool,    -1,                    },
    { gettext_noop("&Splash screen at startup"),    Field_Bool | Field_Restart, -1,                    },
    { gettext_noop("Splash screen &delay"),         Field_Number,  ConfigField_Splash     },
+   { gettext_noop("Mahogany may expand environment variables in the\n"
+                  "configuration entries which is useful but takes some\n"
+                  "extra time, you may disable it here if you don't need it."),
+                                                   Field_Message, -1, },
+   { gettext_noop("E&xpand variables"),            Field_Bool, -1 },
    { gettext_noop("Show toolbar buttons and notebook tabs &as"
                   ":Images:Text:Both"),            Field_Radio | Field_Restart, -1     },
    { gettext_noop("If autosave delay is not 0, the program will periodically\n"
@@ -1613,7 +1620,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     },
 #endif // OS_UNIX
    { gettext_noop("&Reenable disabled message boxes..."), Field_SubDlg, -1 },
-   { gettext_noop("\"Away\", or unattended, state is a special mode in\n"
+   { "\n"
+     gettext_noop("\"Away\", or unattended, state is a special mode in\n"
                   "which Mahogany tries to avoid any interaction with the user,\n"
                   "e.g. new mail notification is disabled, no progress dialogs\n"
                   "are shown &&c.\n"
@@ -2018,6 +2026,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SHOWTIPS),
    CONFIG_ENTRY(MP_SHOWSPLASH),
    CONFIG_ENTRY(MP_SPLASHDELAY),
+   CONFIG_NONE(),                   // env vars help
+   CONFIG_ENTRY(MP_EXPAND_ENV_VARS),
    CONFIG_ENTRY(MP_TBARIMAGES),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOSAVEDELAY),
