@@ -17,6 +17,8 @@
 
 #include <time.h>
 
+#include "FolderType.h"    // for strutil_expandfoldername
+
 class kbStringList;
 
 /**@name String class helper functions */
@@ -220,10 +222,11 @@ String strutil_expandpath(const String &ipath);
     expanded and returned, relative names are expanded relative to the
     mail folder directory.
     @param name name of a mail folder
+    @param ftype type of the mail folder, MBOX (default) or MH only
     @return the path to the folder file
 */
 String
-strutil_expandfoldername(const String &name);
+strutil_expandfoldername(const String &name, FolderType ftype = MF_FILE);
 
 #ifdef OS_UNIX
 #   define STRUTIL_PATH_SEPARATOR '/'

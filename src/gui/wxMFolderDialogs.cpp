@@ -89,6 +89,8 @@ public:
    wxString GetParentFolderName() const { return m_parentName->GetValue(); }
    // get the folder name
    wxString GetFolderName() const { return m_folderName->GetValue(); }
+   // set the folder name
+   void SetFolderName(const String& name) { m_folderName->SetValue(name); }
 
    // after the dialog is closed, retrieve the folder which was created or
    // NULL if the user cancelled us without creating anything
@@ -109,9 +111,6 @@ public:
    {
       m_mayEnableOk = may;
    }
-
-   // set the folder name
-   void SetFolderName(const String& name) { m_folderName->SetValue(name); }
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
    wxFolderBaseDialog() { }
@@ -219,11 +218,14 @@ public:
 
    /// update controls
    void UpdateUI(FolderType folderType = MF_ILLEGAL);
+
+   // handlers
    void OnChange(wxKeyEvent& event);
    void OnRadioBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnCheckBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnComboBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnChoice(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
+   void OnUpdateUIPath(wxUpdateUIEvent& event);
 
 protected:
    // react to any event - update all the controls
@@ -359,6 +361,11 @@ protected:
    /// the current folder type or -1 if none
    FolderType m_folderType;
 
+   // true if the user modified manually the filename, false if not and -1 if
+   // we the next notification will come from us and not from the user
+   // (effectively disables setting the flag to TRUE when doing SetValue)
+   int m_userModifiedPath;
+
 private:
    DECLARE_EVENT_TABLE()
 };
@@ -469,6 +476,9 @@ BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
    EVT_COMBOBOX(-1, wxFolderPropertiesPage::OnComboBox)
    EVT_CHOICE  (-1, wxFolderPropertiesPage::OnChoice)
    EVT_TEXT    (-1, wxFolderPropertiesPage::OnChange)
+#if 0 // no, do it dynamically - search for OnUpdateUIPath below
+   EVT_UPDATE_UI(-1, wxFolderPropertiesPage::OnUpdateUIPath)
+#endif
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxFolderSelectionDialog, wxDialog)
@@ -803,6 +813,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    // ------------
    m_notebook = notebook;
    m_folderType = MF_ILLEGAL;
+   m_userModifiedPath = false;
    m_profile = profile;
    m_profile->IncRef();
 
@@ -905,6 +916,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                  m_comment, &m_browsePath,
                                  TRUE,    // open
                                  FALSE);  // allow non existing files
+
    m_isIncoming = CreateCheckBox(labels[Label_IsIncoming], widthMax, m_path);
    m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
    m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_keepOpen);
@@ -927,6 +939,20 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    (void)CreateIconEntry(labels[Label_FolderIcon], widthMax, m_folderSubtype, m_browseIcon);
 
    m_radio->Enable(m_isCreating);
+
+   // an optimisation: as we don't use ids here, we'd have to associate
+   // OnUpdateUIPath() with all text controls (i.e. use id == -1) if we were
+   // doing it using (static) event tables and we'd also have to do even when
+   // just viewing the folder properties (then it's unneeded).
+   //
+   // this would have been too slow, so, instead, connect the event handler to
+   // the control dynamically
+   if ( m_isCreating )
+   {
+      Connect(m_path->GetId(), -1, wxEVT_UPDATE_UI,
+              (wxObjectEventFunction)(wxEventFunction)(wxUpdateUIEventFunction)
+              &wxFolderPropertiesPage::OnUpdateUIPath);
+   }
 }
 
 void
@@ -1005,6 +1031,51 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
             ;
       }
    }
+
+   if ( objEvent == m_path )
+   {
+      // don't override the m_path value from the program any more if this
+      // comes really from user (special value -1 means that we're called from
+      // SetValue() - i.e. from our own program, in which case we just reset
+      // the flag to FALSE)
+      m_userModifiedPath = m_userModifiedPath != -1;
+   }
+}
+
+void
+wxFolderPropertiesPage::OnUpdateUIPath(wxUpdateUIEvent& event)
+{
+   if ( event.GetEventObject() == m_path )
+   {
+      // if the path is empty (or has only spaces) ...
+      if ( !m_userModifiedPath )
+      {
+         FolderType folderType = GetCurrentFolderType();
+         if ( folderType == MF_FILE || folderType == MF_MH )
+         {
+            // ... try to set it from the folder name
+            wxFolderCreateDialog *dlg =
+               GET_PARENT_OF_CLASS(this, wxFolderCreateDialog);
+
+            CHECK_RET( dlg, "we should be only called when creating" );
+
+            // modify the text even if the folder name is empty because
+            // otherwise entering a character into "Folder name" field and
+            // erasing it wouldn't restore the original "Path" value
+            wxString folderName = dlg->GetFolderName();
+            event.SetText(strutil_expandfoldername(folderName, folderType));
+
+            // so that the OnChange() handler will know that it comes from
+            // us, not from the user
+            m_userModifiedPath = -1;
+
+            // skip call to Skip() below
+            return;
+         }
+      }
+   }
+
+   event.Skip();
 }
 
 // enable the controls which make sense for a NNTP or News folder
@@ -1179,6 +1250,10 @@ wxFolderPropertiesPage::UpdateUI(FolderType folderType)
             default:
                FAIL_MSG( "new file folder type?" );
          }
+
+         // not yet
+         m_userModifiedPath = false;
+
          break;
 
       case MF_INBOX:

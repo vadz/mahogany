@@ -445,7 +445,7 @@ strutil_compare_filenames(const String& path1, const String& path2)
 
    file1 = strutil_expandpath(file1);
    file2 = strutil_expandpath(file2);
-   
+
    // replace all repeating '/' with only one
    strutil_squeeze_slashes(file1);
    strutil_squeeze_slashes(file2);
@@ -630,7 +630,7 @@ strutil_encrypt(const String &original)
 {
    if(original.Length() == 0)
       return "";
-   
+
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
 
@@ -662,7 +662,7 @@ strutil_decrypt(const String &original)
    if(original.Length() == 0)
       return "";
    CHECK(original.Length() % 4 == 0, "", "Decrypt function called with illegal string.");
-      
+
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
 
@@ -700,19 +700,44 @@ strutil_decrypt(const String &original)
 #include   "Profile.h"
 #include   "Mdefaults.h"
 #include   "MApplication.h"
+#include   "MailFolderCC.h"   // for InitializeMH
 
 /// A small helper function to expand mailfolder names:
 String
-strutil_expandfoldername(const String &name)
+strutil_expandfoldername(const String &name, FolderType folderType)
 {
-   String mboxpath;
+   ASSERT_MSG( folderType == MF_FILE || folderType == MF_MH,
+               "unsupported folder type in strutil_expandfoldername()" );
 
-   if(strutil_isabsolutepath(name))
-      mboxpath = name;
-   else
+   if( strutil_isabsolutepath(name) )
+      return name;
+
+   if ( folderType == MF_FILE )
+   {
+      String mboxpath;
       mboxpath << READ_APPCONFIG(MP_MBOXDIR) << DIR_SEPARATOR << name;
-   mboxpath = strutil_expandpath(mboxpath);
-   return mboxpath;
+
+      return strutil_expandpath(mboxpath);
+   }
+   else // if ( folderType == MF_MH )
+   {
+      // the name is a misnomer, it is used here just to get MHPATH value
+      String mhpath = MailFolderCC::InitializeMH();
+      if ( !mhpath )
+      {
+         // oops - failed to init MH
+         FAIL_MSG("can't construct MH folder full name");
+      }
+      else
+      {
+         if ( !wxEndsWithPathSeparator(mhpath) )
+            mhpath += DIR_SEPARATOR;
+
+         mhpath += name;
+      }
+
+      return mhpath; // no need to expand, MHPATH should be already expanded
+   }
 }
 
 
@@ -738,14 +763,14 @@ strutil_removeReplyPrefix(const String &isubject)
    String trPrefix = _("Re");
 
    size_t idx = 0;
-   
+
    if(subject.Length() > strlen("Re")
       && Stricmp(subject.Left(strlen("Re")), "Re") == 0)
       idx = strlen("Re");
    else if(subject.Length() > trPrefix.Length()
            && Stricmp(subject.Left(trPrefix.Length()), trPrefix) == 0)
       idx = trPrefix.Length();
-           
+
    if(idx == 0)
       return subject;
 
