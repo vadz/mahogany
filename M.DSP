@@ -208,6 +208,10 @@ SOURCE=.\src\classes\kbList.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\classes\ListReceiver.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\classes\MApplication.cpp
 # End Source File
 # Begin Source File
@@ -1839,6 +1843,10 @@ SOURCE=.\src\modules\LayoutEditor.cpp
 # Begin Source File
 
 SOURCE=.\src\modules\LayoutViewer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\modules\Migrate.cpp
 # End Source File
 # Begin Source File
 
