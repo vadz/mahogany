@@ -32,7 +32,8 @@ class MModule_Filters;
 */
 enum MFDialogTest
 {
-   ORC_T_Always = 0,       // test is always true
+   ORC_T_Illegal = -1,
+   ORC_T_Always  = 0,      // test is always true
    ORC_T_Match,            // argument matches the target (case insensitive)
    ORC_T_Contains,         // target contains the argument (case insensitive)
    ORC_T_MatchC,           // as Match but case sensitive
@@ -49,8 +50,7 @@ enum MFDialogTest
    ORC_T_ScoreBelow,       //                         less
    ORC_T_IsToMe,           // the message is addressed to one of my addresses
    ORC_T_HasFlag,          // flag is set for message
-   ORC_T_Illegal,          // illegal must not occur
-   ORC_T_Max = ORC_T_Illegal
+   ORC_T_Max
 };
 
 enum MFDialogHasFlag

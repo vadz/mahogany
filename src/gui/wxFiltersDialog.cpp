@@ -116,7 +116,7 @@ int T##_toSelect ( T value ) \
       if ( arrayS[i] == value ) \
          return i; \
    } \
-   CHECK(false, default, _T("choice not in " #T)); \
+   CHECK(false, default, _T("choice not implemented in " #T)); \
 }
 
 // ----------------------------------------------------------------------------
@@ -213,9 +213,9 @@ static
 wxString ORC_Where[] =
 {
    // Must be in the same order as ORC_W_Swap[]
-   gettext_noop("in subject"),          // ORC_W_Subject
    gettext_noop("in from"),             // ORC_W_From
    gettext_noop("in to"),               // ORC_W_To
+   gettext_noop("in subject"),          // ORC_W_Subject
    gettext_noop("in sender"),           // ORC_W_Sender
    gettext_noop("in any recipient"),    // ORC_W_Recipients
    gettext_noop("in header"),           // ORC_W_Header
@@ -232,9 +232,9 @@ static
 MFDialogTarget ORC_W_Swap[] =
 {
    // Must be in the same order as ORC_Where[]
-   ORC_W_Subject,
    ORC_W_From,
    ORC_W_To,
+   ORC_W_Subject,
    ORC_W_Sender,
    ORC_W_Recipients,
    ORC_W_Header,
@@ -260,9 +260,9 @@ static
 wxString OAC_Types[] =
 {
    // Must be in the same order as OAC_T_Swap[]
-   gettext_noop("Delete"),              // OAC_T_Delete
-   gettext_noop("Copy to"),             // OAC_T_CopyTo
    gettext_noop("Move to"),             // OAC_T_MoveTo
+   gettext_noop("Copy to"),             // OAC_T_CopyTo
+   gettext_noop("Delete"),              // OAC_T_Delete
    gettext_noop("Expunge"),             // OAC_T_Expunge
    gettext_noop("Zap"),                 // OAC_T_Zap
    gettext_noop("MessageBox"),          // OAC_T_MessageBox
@@ -285,9 +285,9 @@ static
 MFDialogAction OAC_T_Swap[] =
 {
    // Must be in the same order as OAC_Types[]
-   OAC_T_Delete,
-   OAC_T_CopyTo,
    OAC_T_MoveTo,
+   OAC_T_CopyTo,
+   OAC_T_Delete,
    OAC_T_Expunge,
    OAC_T_Zap,
    OAC_T_MessageBox,
@@ -300,8 +300,8 @@ MFDialogAction OAC_T_Swap[] =
    OAC_T_SetFlag,
    OAC_T_ClearFlag
 };
-ENUM_fromSelect(MFDialogAction, OAC_T_Swap, OAC_TypesCountS, OAC_T_Delete)
-ENUM_toSelect(  MFDialogAction, OAC_T_Swap, OAC_TypesCountS, OAC_T_Delete)
+ENUM_fromSelect(MFDialogAction, OAC_T_Swap, OAC_TypesCountS, OAC_T_MoveTo)
+ENUM_toSelect(  MFDialogAction, OAC_T_Swap, OAC_TypesCountS, OAC_T_MoveTo)
 
 static const
 wxString OAC_Msg_Flag[] =
@@ -496,8 +496,13 @@ public:
 
    String GetArgument() const
    {
-      switch ( GetTest() )
+      MFDialogTest test = GetTest();
+      if ( ! FilterTestNeedsArgument(test) )
+         return ""; // Don't return the value if it won't be used
+
+      switch ( test )
       {
+         // spam tests or message flags are decoded separately
          case ORC_T_IsSpam: return GetSpamTestArgument();
          case ORC_T_HasFlag:
             switch ( m_choiceFlags->GetSelection() )
@@ -510,7 +515,8 @@ public:
                case ORC_MF_Recent:    return "R";
             }
             CHECK( false, "", _T("Invalid test message flag") );
-            break;
+
+         // Argument is used, but not for spam or message flag
          default: return m_Argument->GetValue();
       }
    }
@@ -581,21 +587,25 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
    // don't create it yet as it might be not needed at all, so postpone it
    m_btnSpam = NULL;
 
-   // only create the logical condition (And/Or) control if we have something
-   // to combine this one with
    if ( previous )
    {
+      // only create the logical condition (And/Or) control if we have
+      // something to combine this one with
       m_Logical = new wxChoice(parent, -1, wxDefaultPosition,
                                wxDefaultSize, ORC_LogicalCount,
                                ORC_Logical);
-      m_Not = new wxCheckBox(parent, -1, _("Not"));
+
+      // take the value from the preceding control, if any, instead of default
+      // as it is usually more convenient (user usually creates filter of the
+      // form "foo AND bar AND baz" or "foo OR bar OR baz"...)
+      wxChoice *prevLogical = previous->m_Logical;
+      m_Logical->SetSelection(prevLogical ? prevLogical->GetSelection()
+                              : ORC_L_Or);
    }
    else
-   {
       m_Logical = NULL;
-      m_Not = new wxCheckBox(parent, -1, _("Not"));
-   }
 
+   m_Not = new wxCheckBox(parent, -1, _("Not"));
    m_Type = new wxChoice(parent, -1, wxDefaultPosition,
                          wxDefaultSize, ORC_TypesCountS, ORC_Types);
    m_choiceFlags = new wxChoice(parent, -1, wxDefaultPosition,
@@ -606,16 +616,6 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
 
    // set up the initial values or the code in UpdateProgram() would complain
    // about invalid values
-   if ( m_Logical )
-   {
-      // take the values from the preceding control, if any, instead of default
-      // as it is usually more convenient (user usually creates filter of the
-      // form "foo AND bar AND baz" or "foo OR bar OR baz"...)
-      wxChoice *prevLogical = previous->m_Logical;
-      m_Logical->SetSelection(prevLogical ? prevLogical->GetSelection()
-                              : ORC_L_Or);
-   }
-
    m_Type->SetSelection(MFDialogTest_toSelect(ORC_T_Contains));
    m_choiceFlags->SetSelection(ORC_MF_Unseen);
    m_Where->SetSelection(MFDialogTarget_toSelect(ORC_W_Subject));
@@ -714,9 +714,6 @@ OneCritControl::CreateSpamButton(const String& rule)
 void
 OneCritControl::UpdateUI(wxTextCtrl *textProgram)
 {
-   if ( m_Type->GetSelection() == -1 ) // use raw selection value here
-      return; // do nothing if not a valid test
-
    // decide what to show and enable
    MFDialogTest test   = GetTest();
    bool enable_isspam  = test == ORC_T_IsSpam;
@@ -724,16 +721,6 @@ OneCritControl::UpdateUI(wxTextCtrl *textProgram)
    bool enable_arg     = ! enable_isspam && ! enable_msgflag &&
                          FilterTestNeedsArgument(test);
    bool enable_target  = FilterTestNeedsTarget(test);
-
-   // don't leave anything in the argument if it's not needed for this test
-   if ( !enable_arg )
-   {
-      // NB: don't call SetValue() unconditionally because it results in
-      //     another callback generated by wxGTK even if the text control
-      //     is already empty!
-      if ( !m_Argument->GetValue().empty() )
-         m_Argument->SetValue("");
-   }
 
    // disable everything if test not implemented
    if ( ! FilterTestImplemented(test) )
@@ -1100,6 +1087,11 @@ public:
    /// get the action argument
    String GetArgument() const
    {
+      MFDialogAction action = GetAction();
+      if ( ! FilterActionNeedsArg(action) )
+         return ""; // Don't return the value if it won't be used
+ 
+      // message flags are decoded separately
       if ( FilterActionMsgFlag(GetAction()) )
       {
          switch ( m_choiceFlags->GetSelection() )
@@ -1113,8 +1105,9 @@ public:
          }
          CHECK( false, "", _T("Invalid action message flag") );
       }
-      else
-         return m_Argument->GetValue();
+
+      // Argument is used, but not for message flag
+      return m_Argument->GetValue();
    }
 
    void UpdateUI(void);
@@ -1160,16 +1153,6 @@ OneActionControl::UpdateUI()
    bool enable_colour  = FilterActionUsesColour(type);
    bool enable_folder  = FilterActionUsesFolder(type);
 
-   // don't leave anything in the argument if it's not needed for this action
-   if ( !enable_arg )
-   {
-      // NB: don't call SetValue() unconditionally because it results in
-      //     another callback generated by wxGTK even if the text control
-      //     is already empty!
-      if ( !m_Argument->GetValue().empty() )
-         m_Argument->SetValue("");
-   }
-
    // disable everything if action not implemented
    if ( ! FilterActionImplemented(type) )
    {
@@ -1181,12 +1164,16 @@ OneActionControl::UpdateUI()
 
    m_choiceFlags->Show(enable_msgflag);
    m_choiceFlags->Enable(enable_msgflag);
-   m_Argument->Show(enable_arg);
-   m_Argument->Enable(enable_arg);
    m_btnColour->Show(enable_colour);
    m_btnColour->Enable(enable_colour);
    m_btnFolder->Show(enable_folder);
    m_btnFolder->Enable(enable_folder);
+
+   // update the argument *after* updating the browse buttons because their
+   // Enable() disables the text control as well if they're disabled and so the
+   // text could end up disabled even when it should be enabled
+   m_Argument->Show(enable_arg);
+   m_Argument->Enable(enable_arg);
 }
 
 OneActionControl::OneActionControl(wxWindow *parent)
@@ -1205,7 +1192,7 @@ OneActionControl::OneActionControl(wxWindow *parent)
    m_btnColour = new wxColorBrowseButton(m_Argument, parent);
 
    // select something or UpdateProgram() would complain about invalid action
-   m_Type->SetSelection(MFDialogAction_toSelect(OAC_T_Delete));
+   m_Type->SetSelection(MFDialogAction_toSelect(OAC_T_MoveTo));
    m_choiceFlags->SetSelection(OAC_MF_Unseen);
 }
 
@@ -1612,8 +1599,7 @@ wxOneFilterDialog::TransferDataToWindow()
       m_textProgram->SetValue(m_FilterData->GetProgram());
    }
 
-   // MAC: The test and action controls were not getting hidden and
-   // MAC: disabled properly sometimes when the dialog started.
+   // show/enable the controls as needed
    DoUpdateUI();
 
    // now any updates come from user, not from program
