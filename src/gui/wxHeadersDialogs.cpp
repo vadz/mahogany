@@ -45,6 +45,7 @@
 #  include <wx/stattext.h>      // for wxStaticText
 #  include <wx/utils.h>         // for wxMax
 #  include <wx/checklst.h>
+#  include <wx/textdlg.h>       // for wxTextEntryDialog
 
 #  include "strutil.h"   // strutil_flatten_array()
 #  include "Mdefaults.h"
