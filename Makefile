@@ -130,12 +130,6 @@ rpm_prep:
 	cd $(M); \
 	cp redhat/mahogany.gif $$RPM_ROOT/SOURCES; \
 	cp redhat/M.spec $$RPM_ROOT/SPECS
-=======
-	mv $(M) M; \
-	cd M; \
-	cp redhat/mahogany.gif $$RPM_TOP_DIR/SOURCES; \
-	cp redhat/M.spec $$RPM_TOP_DIR/SPECS
->>>>>>> 1.40
 
 # build the source and binary RPMs
 rpm: rpm_prep
