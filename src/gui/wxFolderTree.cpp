@@ -327,7 +327,7 @@ public:
 
       // change the currently opened (in the main frame) folder name: we need
       // it to notify the main frame if this folder is deleted
-   void SetOpenFolderName(const String& name) { m_openFolderName = name; }
+   void SetOpenFolderName(const String& name);
 
       // used to process menu commands from the global menubar and from our
       // own popup menu
@@ -568,6 +568,10 @@ private:
 
    // the id of the item being edited in place
    wxTreeItemId m_idEditedInPlace;
+
+   // the id of the item last opened in the sense that OnOpenHere() has been
+   // called for it
+   wxTreeItemId m_idOpenedHere;
 
    // the temporarily saved suffix part of the tree item label being edited
    wxString m_suffix;
@@ -1234,6 +1238,8 @@ bool wxFolderTree::OnClose(MFolder *folder)
                _("Folder '%s' closed."),
                folder->GetFullName().c_str());
 
+   m_tree->SetOpenFolderName(_T(""));
+
    return true;
 }
 
@@ -1794,6 +1800,27 @@ void wxFolderTreeImpl::UpdateColours()
       }
 
       m_colFgName = colName;
+   }
+}
+
+void wxFolderTreeImpl::SetOpenFolderName(const String& name)
+{
+   m_openFolderName = name;
+
+   // in any case, the previous opened folder is not opened here any more, stop
+   // showing it in bold
+   if ( m_idOpenedHere.IsOk() )
+   {
+      SetItemBold(m_idOpenedHere, false);
+      m_idOpenedHere.Unset();
+   }
+
+   // do have an opened folder?
+   if ( !m_openFolderName.empty() )
+   {
+      // yes, visually emphasize it
+      m_idOpenedHere = wxTreeCtrl::GetSelection();
+      SetItemBold(m_idOpenedHere, true);
    }
 }
 
