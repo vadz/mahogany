@@ -168,14 +168,12 @@ private:
 class FilterRuleImpl : public FilterRule
 {
 public:
-   virtual int Apply(MailFolder *mf, UIdType uid,
-                     bool *changeflag);
-   virtual int Apply(MailFolder *folder, bool NewOnly,
-                     bool *changeflag);
+   virtual int Apply(MailFolder *mf, UIdType uid);
+   virtual int Apply(MailFolder *folder, bool newOnly);
    virtual int Apply(MailFolder *folder,
                      UIdArray msgs,
-                     bool ignoreDeleted,
-                     bool *changeflag);
+                     bool ignoreDeleted);
+
    static FilterRule * Create(const String &filterrule,
                               MInterface *minterface,
                               MModule_Filters *mod)
@@ -197,8 +195,7 @@ protected:
    int ApplyCommonCode(MailFolder *folder,
                        UIdArray *msgs,
                        bool newOnly,
-                       bool ignoreDeleted,
-                       bool *changeflag);
+                       bool ignoreDeleted);
 
 public:
    const SyntaxNode * Parse(const String &);
@@ -252,16 +249,7 @@ public:
          SafeIncRef(m_MailFolder);
          m_MessageUId = uid;
 
-         m_expungedMsgs = FALSE;
-      }
-   /// Has filter rule caused a change to the folder/message?
-   bool GetChanged(void) const
-      {
-         ASSERT(m_MailFolder);
-
-         // m_deletedMsgs doesn't count here as if the messages were only
-         // deleted we don't need to rebuild the folder listing
-         return m_expungedMsgs;
+         m_expungeMsgs = FALSE;
       }
    /// Obtain the mailfolder to operate on:
    MailFolder * GetFolder(void)
@@ -276,10 +264,12 @@ public:
             NULL ;
       }
    //@}
-   MInterface * GetInterface(void) { return m_MInterface; }
 
-   /// called if messages were expunged from folder
-   void SetExpunged() { m_expungedMsgs = true; m_deletedMsgs.Empty(); }
+   /// obtain the interface to the main program
+   MInterface *GetInterface(void) { return m_MInterface; }
+
+   /// called if messages should be expunged from folder
+   void SetExpunged() { m_expungeMsgs = true; }
 
    /// called by func_delete() to tell us that a message was deleted
    void SetDeleted() { m_deletedMsgs.Add(m_msgno); }
@@ -323,7 +313,7 @@ private:
    size_t m_msgnoMax;
 
    // this flag is set during evalutation if any filter calls Expunge()
-   bool m_expungedMsgs;
+   bool m_expungeMsgs;
 
    // this array contains the msgnos of the messages which were deleted from the
    // filter rule action part
@@ -2345,9 +2335,9 @@ extern "C"
    {
       if(args->Count() != 0)
          return Value(0);
-      MailFolder *mf = p->GetFolder();
-      mf->ExpungeMessages();
-      mf->DecRef();
+
+      // can't call ExpungeMessages() now as the mail folder is locked by
+      // filters, it will be called later
       p->SetExpunged();
       return 1;
    }
@@ -2442,7 +2432,7 @@ String FilterRuleImpl::GetStatusString(Message *msg) const
    return text;
 }
 
-int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
+int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid)
 {
    if(! m_Program)
       return 0;
@@ -2492,32 +2482,39 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
       msg->DecRef();
    }
 
-   if ( changeflag )
-      *changeflag = GetChanged();
-
    // count the messages filtered for the status string message
    m_msgno++;
 
    SetMessage(NULL);
    mf->DecRef();
 
-   return rc.IsNumber() ? (int) rc.GetNumber() : -1;
+   if ( !rc.IsNumber() )
+      return FilterRule::Error;
+
+   int retval = 0;
+   if ( !m_deletedMsgs.IsEmpty() )
+      retval |= Deleted;
+   if ( m_expungeMsgs )
+      retval |= Expunged;
+
+   return retval;
 }
 
 int
-FilterRuleImpl::Apply(MailFolder *mf, bool NewOnly, bool *changeflag)
+FilterRuleImpl::Apply(MailFolder *mf, bool newOnly)
 {
-   return ApplyCommonCode(mf, NULL, NewOnly, NewOnly, changeflag);
+   // if we apply the filters only to the new messages, we ignore the deleted
+   // ones, otherwise apply them to all messages including the deleted
+   return ApplyCommonCode(mf, NULL, newOnly, newOnly);
 }
 
 int
 FilterRuleImpl::Apply(MailFolder *folder,
                       UIdArray msgs,
-                      bool ignoreDeleted,
-                      bool *changeflag)
+                      bool ignoreDeleted)
 {
 #ifndef TEST                // UIdArray not instantiated
-   return ApplyCommonCode(folder, &msgs, FALSE, ignoreDeleted, changeflag);
+   return ApplyCommonCode(folder, &msgs, false, ignoreDeleted);
 #else
    return 0;
 #endif
@@ -2548,8 +2545,7 @@ int
 FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
                                 UIdArray *msgs,
                                 bool newOnly,
-                                bool ignoreDeleted,
-                                bool *changeflag)
+                                bool ignoreDeleted)
 {
 #ifndef TEST                // UIdArray not instantiated
    CHECK(mf, 0, "no folder for filtering");
@@ -2557,65 +2553,30 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
    if(! m_Program)
       return 0;
 
-   int rc = true; // no error yet
+   // no error yet
+   int rc = 0;
+
    mf->IncRef();
 
-   bool changed = FALSE;
-   bool changedtemp;
    HeaderInfoList_obj hil = mf->GetHeaders();
-   CHECK(hil, 0, "Cannot get header info list");
+   CHECK( hil, 0, "can't filter messages - failed to get header info list" );
 
-   if (msgs) // apply to all messages in list
+   // apply filter either to all messages in the list or only to the given ones
+   m_msgnoMax = msgs ? msgs->Count() : hil->Count();
+   for ( size_t idx = 0; idx < m_msgnoMax; idx++ )
    {
-      m_msgnoMax = msgs->Count();
-      for(size_t idx = 0; idx < m_msgnoMax; idx++)
-      {
-         const HeaderInfo * hi = hil->GetEntryUId((*msgs)[idx]);
-         ASSERT(hi);
-         if(hi && CheckStatusMatch(hi->GetStatus(),
-                                   newOnly, ignoreDeleted))
-         {
-            rc &= Apply(mf, (*msgs)[idx], &changedtemp);
-            changed |= changedtemp;
-         }
-      }
-   }
-   else // apply to all or all recent messages
-   {
-      m_msgnoMax = hil->Count();
-      for(size_t i = 0; i < m_msgnoMax; i++)
-      {
-         const HeaderInfo * hi = hil->GetItemByIndex(i);
-         ASSERT(hi);
-         if(hi && CheckStatusMatch(hi->GetStatus(),
-                                   newOnly, ignoreDeleted))
-         {
-            rc &= Apply(mf, hi->GetUId(), &changedtemp);
-            changed |= changedtemp;
-         }
-      }
-   }
+      const HeaderInfo *hi;
+      if ( msgs )
+         hi = hil->GetEntryUId((*msgs)[idx]);
+      else
+         hi = hil->GetItemByIndex(idx);
 
-   if ( changeflag )
-      *changeflag = changed;
+      ASSERT_MSG( hi, "can't filter message - failed to get header info" );
 
-   #define MP_SAFE_FILTERS "SafeFilters"
-   #define MP_SAFE_FILTERS_D 0l
-
-   if ( !READ_APPCONFIG(MP_SAFE_FILTERS) )
-   {
-      // if some of the *new* messages were deleted, expunge them now - unless
-      // this had been already done
-      //
-      // note that we only do this when we're applied automatically, to the new
-      // messages which have just appeared in the folder as then the risk of
-      // accidentally expunging something the user doesn't want to epxunge is
-      // small (but still exists) - we don't do it when we're applied manualyl
-      // because there could be other deleted messages in the folder which the
-      // user wants to keep
-      if ( newOnly && (m_deletedMsgs.Count() > 0) && !m_expungedMsgs )
+      if ( hi && CheckStatusMatch(hi->GetStatus(),
+                                  newOnly, ignoreDeleted))
       {
-         mf->ExpungeMessages();
+         rc |= Apply(mf, hi->GetUId());
       }
    }
 
@@ -2641,8 +2602,11 @@ FilterRuleImpl::FilterRuleImpl(const String &filterrule,
    m_Program = Parse(filterrule);
    m_MessageUId = UID_ILLEGAL;
 
-   m_msgno =
-   m_msgnoMax = 0u;
+   m_msgno = 0u;
+
+   // this will be either set by ApplyCommonCode() or should be left as 1 if
+   // Apply(single message) is called directly
+   m_msgnoMax = 1u;
 }
 
 FilterRuleImpl::~FilterRuleImpl()

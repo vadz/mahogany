@@ -193,12 +193,12 @@ public:
    /// goto next unread message, return true if found
    bool SelectNextUnread(void);
 
-   /// focus the given item
-   void Focus(long index)
-      {
-         m_itemFocus = index;
-         SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
-      }
+   /// select next unread message after the given one
+   UIdType SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
+                                 long indexStart = -1);
+
+   /// focus the given item and ensure it is visible
+   void Focus(long index);
 
    /// get the next selected item after the given one (use -1 to start)
    long GetNextSelected(long item) const
@@ -731,7 +731,6 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    {
       // move focus
       Focus(newFocus);
-      EnsureVisible(newFocus);
       m_FolderView->UpdateSelectionInfo();
    }
 }
@@ -1081,6 +1080,25 @@ wxFolderListCtrl::GetSelections(UIdArray &selections, bool nofocused) const
    return selections.Count();
 }
 
+void wxFolderListCtrl::Focus(long index)
+{
+   m_itemFocus = index;
+   SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
+
+   // this doesn't work well with wxWin <= 2.2.5 in debug mode as calling
+   // EnsureVisible() results in an assert failure which is harmless but
+   // _very_ annoying as it happens all the time
+#if !defined(__WXDEBUG__) || wxCHECK_VERSION(2,2,6)
+   if ( index != -1 )
+   {
+      // we don't want any events come here while we're inside EnsureVisible()
+      MEventManagerSuspender noEvents;
+
+      EnsureVisible(index);
+   }
+#endif
+}
+
 long wxFolderListCtrl::GetFocusedItem() const
 {
    return GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
@@ -1269,7 +1287,42 @@ wxFolderListCtrl::SelectNextUnread()
       return false;
    }
 
-   long idxFocused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+   long idxFocused = GetFocusedItem();
+   UIdType uid = SelectNextUnreadAfter(hil, idxFocused);
+   if ( uid != UID_ILLEGAL )
+   {
+      // always preview the selected message, if we did "Show next unread"
+      // we really want to see it regardless of m_PreviewOnSingleClick
+      // setting
+      m_FolderView->PreviewMessage(uid);
+      m_FolderView->UpdateSelectionInfo();
+
+      return true;
+   }
+   //else: no next unread msg found
+
+   String msg;
+   if ( (idxFocused != -1) &&
+            !(hil[idxFocused]->GetStatus() & MailFolder::MSG_STAT_SEEN) )
+   {
+      // "more" because the one selected previously was unread
+      msg = _("No more unread messages in this folder.");
+   }
+   else
+   {
+      // no unread messages at all
+      msg = _("No unread messages in this folder.");
+   }
+
+   wxLogStatus(GetFrame(this), msg);
+
+   return false;
+}
+
+
+UIdType wxFolderListCtrl::SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
+                                                long idxFocused)
+{
    long idx = idxFocused;
    for ( ;; )
    {
@@ -1291,34 +1344,12 @@ wxFolderListCtrl::SelectNextUnread()
       if( !(hi->GetStatus() & MailFolder::MSG_STAT_SEEN) )
       {
          Focus(idx);
-         EnsureVisible(idx);
 
-         // always preview the selected message, if we did "Show next unread"
-         // we really want to see it regardless of m_PreviewOnSingleClick
-         // setting
-         m_FolderView->PreviewMessage(hi->GetUId());
-         m_FolderView->UpdateSelectionInfo();
-
-         return true;
+         return hi->GetUId();
       }
    }
 
-   String msg;
-   if ( (idxFocused != -1) &&
-            !(hil[idx]->GetStatus() & MailFolder::MSG_STAT_SEEN) )
-   {
-      // "more" because the one selected previously was unread
-      msg = _("No more unread messages in this folder.");
-   }
-   else
-   {
-      // no unread messages at all
-      msg = _("No unread messages in this folder.");
-   }
-
-   wxLogStatus(GetFrame(this), msg);
-
-   return false;
+   return UID_ILLEGAL;
 }
 
 // ----------------------------------------------------------------------------
@@ -1451,14 +1482,32 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       Update();
 #endif
 
-      if ( m_NumOfMessages > 0 &&
-           READ_CONFIG(m_Profile,MP_AUTOSHOW_FIRSTMESSAGE) )
+      // select some "interesting" message initially
+      if ( m_NumOfMessages > 0 )
       {
-         m_FolderCtrl->Focus(0);
-
          HeaderInfoList_obj hil = m_ASMailFolder->GetHeaders();
-         if ( hil && hil->Count() > 0 )
-            PreviewMessage(hil[0]->GetUId());
+         if ( hil )
+         {
+            UIdType uid;
+            if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
+            {
+               uid = m_FolderCtrl->SelectNextUnreadAfter(hil);
+            }
+            else if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTMESSAGE) )
+            {
+               m_FolderCtrl->Focus(0);
+
+               HeaderInfo *hi = hil[0];
+               uid = hi ? hi->GetUId() : UID_ILLEGAL;
+            }
+
+            // the item is already focused, now preview it automatically too
+            // if we're configured to do this automatically
+            if ( (uid != UID_ILLEGAL) && m_settings.previewOnSingleClick )
+            {
+               PreviewMessage(uid);
+            }
+         }
       }
 
 #ifndef OS_WIN
@@ -1793,11 +1842,14 @@ wxFolderView::Update(HeaderInfoList *listing)
    if ( !m_ASMailFolder )
       return;
 
-   // this shouldn't happen but unfortunately it does because
+   // this shouldn't happen but unfortunately it did before because
    // wxGTK::wxListCtrl::EnsureVisible() which we call from here calls
-   // wxYield() - and so bad things happen :-(
-   if ( m_UpdateSemaphore )
-      return;
+   // wxYield() - now I've added a workaround for this, but keep this check in
+   // case it starts happen again
+   //
+   // notice that it's a real error if it happens because the update folder
+   // events can just be lost like this
+   CHECK_RET( !m_UpdateSemaphore, "reentrancy in wxFolderView::Update" );
 
    m_UpdateSemaphore = true;
 
@@ -1818,10 +1870,10 @@ wxFolderView::Update(HeaderInfoList *listing)
       listing->IncRef();
    }
 
-   size_t n = listing->Count();
+   size_t nMessagesNew = listing->Count();
 
    static const size_t THRESHOLD = 100;
-   if ( n > THRESHOLD )
+   if ( nMessagesNew > THRESHOLD )
    {
       wxBeginBusyCursor();
 #ifdef __WXMSW__
@@ -1831,28 +1883,32 @@ wxFolderView::Update(HeaderInfoList *listing)
 
    // should we clear the preview window or keep it?
    bool keepPreview;
-   long focusedIndex;
+   long focusedIndex = m_FolderCtrl->GetFocusedItem();
 
    // if the messages have been deleted, we need to start over
-   if ( n < (size_t) m_NumOfMessages )
+   if ( nMessagesNew < (size_t) m_NumOfMessages )
    {
       m_FolderCtrl->Clear();
       m_NumOfMessages =
       m_nDeleted = 0;
 
       keepPreview = false; // it might have disappeared
-      focusedIndex = -1;
-   }
-   else
-   {
-      focusedIndex = m_FolderCtrl->GetFocusedItem();
 
+      // if we deleted the last message, the focus should really stay on the
+      // new last one and not be reset completely
+      if ( (focusedIndex != -1) && ((size_t)focusedIndex >= nMessagesNew) )
+      {
+         focusedIndex = nMessagesNew - 1;
+      }
+   }
+   else // new messages were added
+   {
       keepPreview = focusedIndex != -1;
    }
 
    // fill the list control
    HeaderInfo const *hi;
-   for(size_t i = 0; i < n; i++)
+   for ( size_t i = 0; i < nMessagesNew; i++ )
    {
       hi = (*listing)[i];
       SetEntry(hi, i);
@@ -1870,22 +1926,14 @@ wxFolderView::Update(HeaderInfoList *listing)
 
    if ( focusedIndex != -1 )
    {
-      ASSERT_MSG( (size_t)focusedIndex < n, "invalid focused index" );
+      ASSERT_MSG( (size_t)focusedIndex < nMessagesNew, "invalid focused index" );
 
       m_FolderCtrl->Focus(focusedIndex);
-
-      // this doesn't work well with wxWin <= 2.2.5 in debug mode as calling
-      // EnsureVisible() results in an assert failure which is harmless but
-      // _very_ annoying as it happens all the time
-#if !defined(__WXDEBUG__) || wxCHECK_VERSION(2,2,6)
-      if ( focusedIndex != -1 )
-         m_FolderCtrl->EnsureVisible(focusedIndex);
-#endif
    }
 
    UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
 
-   if ( n > THRESHOLD )
+   if ( nMessagesNew > THRESHOLD )
    {
 #ifdef __WXMSW__
       m_FolderCtrl->Show();
@@ -1894,7 +1942,7 @@ wxFolderView::Update(HeaderInfoList *listing)
       wxEndBusyCursor();
    }
 
-   m_NumOfMessages = n;
+   m_NumOfMessages = nMessagesNew;
    listing->DecRef();
 
    // clear the preview window if the focused message changed

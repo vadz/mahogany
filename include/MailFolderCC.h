@@ -493,8 +493,8 @@ protected:
    /// Gets a complete folder listing from the stream.
    void BuildListing(void);
 
-   /// Apply filters to the new messages if needed
-   void FilterNewMailIfNeeded();
+   /// Apply filters to the new messages and rebuild the listing
+   void FilterNewMailAndUpdate();
 
    /** The index of the next entry in list to fill. Only used for
        BuildListing()/OverviewHeader() interaction. */

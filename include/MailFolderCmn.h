@@ -195,9 +195,9 @@ public:
 
 protected:
    /** Checks for new mail and filters if necessary.
-       @return TRUE if the folder might have been changed
+       @return FilterRule flags combination
    */
-   virtual bool FilterNewMail(HeaderInfoList *);
+   virtual int FilterNewMail(HeaderInfoList *);
 
    /// Is the mailfolder still connected to a server or file?
    virtual bool IsAlive(void) const = 0;
@@ -291,9 +291,6 @@ private:
    friend class MFCmnEventReceiver;
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;
-
-   /// just to notice if the filter code did any work
-   bool m_FiltersCausedChange;
 
    /** gcc 2.7.2.1 on FreeBSD 2.8.8-stable is reported to need this to
        link correctly: */

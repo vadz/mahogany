@@ -221,22 +221,25 @@ void HeaderInfoListImpl::Remove(size_t n)
    delete [] m_Listing;
    m_Listing = listingNew;
 
-   // then with the translation table: here the situation is more complicated
-   // as we need to not only remove the entry, but to adjust indices as well:
-   // all indices greater than the one being removed must be decremented
-   // to account for the index shift
-   if ( pos < m_NumEntries )
+   if ( m_TranslationTable )
    {
-      // deleting is easy in this case
-      memmove(&m_TranslationTable[pos], &m_TranslationTable[pos + 1],
-              (m_NumEntries - pos)*sizeof(size_t));
-   }
-   //else: no need to memmove(), last element can be just discarded
+      // then with the translation table: here the situation is more
+      // complicated as we need to not only remove the entry, but to adjust
+      // indices as well: all indices greater than the one being removed must
+      // be decremented to account for the index shift
+      if ( pos < m_NumEntries )
+      {
+         // deleting is easy in this case
+         memmove(&m_TranslationTable[pos], &m_TranslationTable[pos + 1],
+                 (m_NumEntries - pos)*sizeof(size_t));
+      }
+      //else: no need to memmove(), last element can be just discarded
 
-   for ( entry = 0; entry < m_NumEntries; entry++ )
-   {
-      if ( m_TranslationTable[entry] >= n )
-         m_TranslationTable[entry]--;
+      for ( entry = 0; entry < m_NumEntries; entry++ )
+      {
+         if ( m_TranslationTable[entry] >= n )
+            m_TranslationTable[entry]--;
+      }
    }
 #endif // 0/1
 }

@@ -296,6 +296,8 @@ enum MFolderIndex
 #define   MP_UMASK               "Umask"
 /// automatically show first message in folderview?
 #define   MP_AUTOSHOW_FIRSTMESSAGE "AutoShowFirstMessage"
+/// automatically show first unread message in folderview?
+#define   MP_AUTOSHOW_FIRSTUNREADMESSAGE "AutoShowFirstUnread"
 /// open messages when they're clicked (otherwise - double clicked)
 #define   MP_PREVIEW_ON_SELECT     "PreviewOnSelect"
 /// program used to convert image files?
@@ -669,6 +671,10 @@ enum MFolderIndex
 /// never download more than that many messages
 #define MP_MAX_HEADERS_NUM_HARD "HardHeadersLimit"
 //@}
+
+/// setting this prevents the filters from expuning the msgs automatically
+#define MP_SAFE_FILTERS "SafeFilters"
+
 /** @name timeout values for c-client mail library */
 //@{
 /// IMAP lookahead value
@@ -912,6 +918,8 @@ enum MFolderIndex
 #define   MP_UMASK_D               022
 /// automatically show first message in folderview?
 #define   MP_AUTOSHOW_FIRSTMESSAGE_D 0l
+/// automatically show first unread message in folderview?
+#define   MP_AUTOSHOW_FIRSTUNREADMESSAGE_D 1l
 /// open messages when they're clicked (otherwise - double clicked)
 #define   MP_PREVIEW_ON_SELECT_D     1l
 /// program used to convert image files?
@@ -1430,6 +1438,8 @@ enum MFolderIndex
 /// never download more than that many messages
 #define MP_MAX_HEADERS_NUM_HARD_D 0l
 //@}
+/// setting this prevents the filters from expuning the msgs automatically
+#define MP_SAFE_FILTERS_D 0l
 /** @name timeout values for c-client mail library */
 //@{
 /// IMAP lookahead value

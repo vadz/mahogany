@@ -70,8 +70,8 @@ KBLIST_DEFINE(MEventList, MEventData);
 /// the list of pending events
 static MEventList gs_EventList;
 
-/// are we suspended?
-static bool gs_IsSuspended = false;
+/// are we suspended (if > 0)?
+static int gs_IsSuspended = 0;
 
 // ============================================================================
 // implementation
@@ -233,11 +233,11 @@ void
 MEventManager::Suspend(bool suspend)
 {
    MEventLocker mutex;
-   ASSERT_MSG( !(suspend == TRUE && gs_IsSuspended != FALSE),
-              "attempt to suspend already suspended MEvent queue");
-   ASSERT_MSG( !(suspend == FALSE && gs_IsSuspended != TRUE),
-              "attempt to release already not suspended MEvent queue");
-   gs_IsSuspended = suspend;
+
+   CHECK_RET( suspend || gs_IsSuspended > 0,
+              "resuming events but not suspended" );
+
+   gs_IsSuspended += suspend ? 1 : -1;
 }
 
 // ----------------------------------------------------------------------------

@@ -227,6 +227,39 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// a slightly different wxLayoutWindow: it calls back the composer the first
+// time it gets focus which allows us to launch an external editor then (if
+// configured to do so, of course)
+class wxComposerLayoutWindow : public wxLayoutWindow
+{
+public:
+   wxComposerLayoutWindow(wxComposeView *composer, wxWindow *parent)
+      : wxLayoutWindow(parent)
+   {
+      m_composer = composer;
+      m_firstTime = TRUE;
+   }
+
+protected:
+   void OnFocus(wxFocusEvent& event)
+   {
+      if ( m_firstTime )
+      {
+         m_firstTime = FALSE;
+
+         m_composer->OnFirstTimeFocus();
+      }
+
+      event.Skip();
+   }
+
+private:
+   wxComposeView *m_composer;
+   bool m_firstTime;
+
+   DECLARE_EVENT_TABLE()
+};
+
 // ----------------------------------------------------------------------------
 // the classes which are used together with compose view - a derivation of
 // variable expander and expansion sink
@@ -579,6 +612,9 @@ BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)
    EVT_TEXT_ENTER(-1, wxAddressTextCtrl::OnEnter)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxComposerLayoutWindow, wxLayoutWindow)
+   EVT_SET_FOCUS(wxComposerLayoutWindow::OnFocus)
+END_EVENT_TABLE()
 
 // ============================================================================
 // implementation
@@ -1217,16 +1253,6 @@ wxComposeView::DoInitText(Message *msg)
    }
 
    m_LayoutWindow->Refresh();
-
-   // now we can launch the ext editor if configured to do it
-   if ( READ_CONFIG(m_Profile, MP_ALWAYS_USE_EXTERNALEDITOR) )
-   {
-      if ( !StartExternalEditor() )
-      {
-         // disable it for the next time
-         m_Profile->writeEntry(MP_ALWAYS_USE_EXTERNALEDITOR, 0l);
-      }
-   }
 }
 
 void
@@ -1489,8 +1515,8 @@ static int wxFonts[NUM_FONTS] =
 void
 wxComposeView::CreateFTCanvas(void)
 {
-   wxASSERT(m_LayoutWindow == NULL);
-   m_LayoutWindow = new wxLayoutWindow(m_panel);
+   wxASSERT_MSG( m_LayoutWindow == NULL, "creating layout window twice?" );
+   m_LayoutWindow = new wxComposerLayoutWindow(this, m_panel);
 
    GetColourByName(&m_fg, READ_CONFIG(m_Profile, MP_CVIEW_FGCOLOUR), "black");
    GetColourByName(&m_bg, READ_CONFIG(m_Profile, MP_CVIEW_BGCOLOUR), "white");
@@ -1798,6 +1824,19 @@ wxComposeView::OnMenuCommand(int id)
 // ----------------------------------------------------------------------------
 // external editor support
 // ----------------------------------------------------------------------------
+
+void wxComposeView::OnFirstTimeFocus()
+{
+   // now we can launch the ext editor if configured to do it
+   if ( READ_CONFIG(m_Profile, MP_ALWAYS_USE_EXTERNALEDITOR) )
+   {
+      if ( !StartExternalEditor() )
+      {
+         // disable it for the next time
+         m_Profile->writeEntry(MP_ALWAYS_USE_EXTERNALEDITOR, 0l);
+      }
+   }
+}
 
 bool wxComposeView::StartExternalEditor()
 {

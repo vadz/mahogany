@@ -218,6 +218,9 @@ public:
 
       /// called when external editor terminates
    void OnExtEditorTerm(wxProcessEvent& event);
+
+      /// called when composer window gets focus for the 1st time
+   void OnFirstTimeFocus();
    //@}
 
    // for wxAddressTextCtrl usage

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
 // File name:   mail/MailFolderCC.cpp: implements MailFolderCC class
 // Purpose:     handling of mail folders with c-client lib
@@ -103,6 +103,8 @@
 #include "Mpers.h"
 
 #include "HeaderInfoImpl.h"
+
+#include "modules/Filters.h"
 
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking and
 // wxFile::Exists() too
@@ -1574,7 +1576,7 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
 
    if(ms_StreamListDefaultObj)
    {
-      wxLogTrace(TRACE_MF_CALLBACK, "Routing call to default mailfolder.");
+      wxLogTrace(TRACE_MF_CACHE, "Routing call to default mailfolder.");
       return ms_StreamListDefaultObj;
    }
 
@@ -1936,9 +1938,11 @@ MailFolderCC::AppendMessage(String const &msg, bool update)
          m_LastNewMsgUId = m_MailStream->uid_last+1;
       }
 
-      if ( update )
+      // if we don't have the listing yet, don't update - we will notice the
+      // new messages anyhow when we build it
+      if ( update && m_Listing )
       {
-         FilterNewMail(GetHeaders());
+         FilterNewMailAndUpdate();
       }
    }
 
@@ -2585,6 +2589,10 @@ MailFolderCC::GetHeaders(void) const
          }
       }
 
+      // we don't want MEvents to be handled while we are rebuilding the
+      // listing, as they might query this folder
+      MEventManagerSuspender noEvents;
+
       // get the new listing
       that->BuildListing();
 
@@ -2597,7 +2605,10 @@ MailFolderCC::GetHeaders(void) const
       }
 
       // if we have any new messages, reapply filters to them
-      that->FilterNewMailIfNeeded();
+      if ( m_GotNewMessages )
+      {
+         that->FilterNewMailAndUpdate();
+      }
 
       // sort/thread listing
       that->ProcessHeaderListing(m_Listing);
@@ -2624,7 +2635,7 @@ MailFolderCC::GetHeaders(void) const
    return m_Listing;
 }
 
-void MailFolderCC::FilterNewMailIfNeeded()
+void MailFolderCC::FilterNewMailAndUpdate()
 {
    CHECK_RET( m_Listing, "can't filter new mail without valid listing" );
 
@@ -2636,26 +2647,47 @@ void MailFolderCC::FilterNewMailIfNeeded()
    // will just return immediately, but this is quite inefficient as the
    // folder views don't have to be updated to reflect any intermidiate
    // states)
-   if ( m_GotNewMessages )
+
+   m_Listing->IncRef();
+   int rc;
    {
       // we don't want to process any events while we're filtering mail as
       // there can be a lot of them and all of them can be processed later
       MEventManagerSuspender suspendEvents;
 
-      MLocker lockFilters(m_InFilterCode);
+      // also tell everyone not to modify the listing while we're filtering it
+      MLocker filterLock(m_InFilterCode);
 
-      // filter code returns true if something might have changed
-      m_Listing->IncRef();
-      if ( FilterNewMail(m_Listing) )
+      rc = FilterNewMail(m_Listing);
+   }
+
+   // avoid doing anything harsh (like expunging the messages) if an error
+   // occurs
+   if ( !(rc & FilterRule::Error) )
+   {
+      // some of the messages might have been deleted by the filters and,
+      // moreover, the filter code could have called ExpungeMessages()
+      // explicitly, so we may have to expunge some messages from the folder
+
+      // calling ExpungeMessages() from filter code is unconditional and
+      // should always be honoured, so check for it first
+      bool expunge = (rc & FilterRule::Expunged) != 0;
+      if ( !expunge )
       {
-         // rebuild the listing again
-         m_Listing->DecRef();
-         m_Listing = NULL;
+         if ( rc & FilterRule::Deleted )
+         {
+            // expunging here is dangerous because we can expunge the messages
+            // which had been deleted by the user manually before the filters
+            // were applied, so check a special option which may be set to
+            // prevent us from doing this
+            expunge = !READ_APPCONFIG(MP_SAFE_FILTERS);
+         }
+      }
 
-         // TODO: expunge all messages deleted by filters - but how to do it
-         //       without expunging the messages previously deleted by user?
-
-         BuildListing();
+      if ( expunge )
+      {
+         // so be it
+         ExpungeMessages();
       }
    }
 }
@@ -2676,10 +2708,6 @@ MailFolderCC::BuildListing(void)
 
    MEventLocker locker;
 
-   // we don't want MEvents to be handled while we are in here, as
-   // they might query this folder
-   MEventManagerSuspender noEvents;
-
 #ifdef TIMER_SUSPENDING_WORKS
    // neither do we want our PingReopen() be called in the middle of update
    MTimerSuspender noTimer(MAppBase::Timer_PollIncoming);
@@ -2696,7 +2724,7 @@ MailFolderCC::BuildListing(void)
    // configured limit, ask the user whether he really wants to retrieve them
    // all. The value of 0 disables the limit. Ask only once and never for file
    // folders (loading headers from them is quick)
-   if ( !IsLocalQuickFolder(GetType()) && m_FirstListing )
+   if ( !IsLocalQuickFolder(GetType()) )
    {
       unsigned long retrLimit = m_RetrievalLimit;
       if ( m_RetrievalLimitHard > 0 && m_RetrievalLimitHard < retrLimit )
@@ -2717,9 +2745,10 @@ MailFolderCC::BuildListing(void)
          }
          else // soft limit exceeded
          {
-            // ask the user (in interactive mode only)
+            // ask the user (in interactive mode only and only if this folder
+            // is opened for the first time)
             MFrame *frame = GetInteractiveFrame();
-            if ( frame )
+            if ( frame && m_FirstListing )
             {
                MGuiLocker locker;
 
@@ -2745,7 +2774,7 @@ MailFolderCC::BuildListing(void)
             {
                // get all messages - better do this than present the user with
                // an annoying modal dialog (he can always set the hard limit
-               // if he really doesn't want to limit the number of messages
+               // if he really wants to always limit the number of messages
                // retrieved)
                nRetrieve = 0;
             }
@@ -2797,14 +2826,14 @@ MailFolderCC::BuildListing(void)
       // find the first and last messages to retrieve
       UIdType from = mail_uid(m_MailStream,
                               m_MailStream->nmsgs - m_nMessages + 1),
-              to = mail_uid(m_MailStream, m_nMessages);
+              to = mail_uid(m_MailStream, m_MailStream->nmsgs);
 
       String sequence = strutil_ultoa(from);
 
       // don't produce sequences like "1:1" or "1:*"
       if ( to != from )
       {
-         sequence << ":*";
+         sequence << ':' << strutil_ultoa(to);
       }
 
       // do fill the listing by calling mail_fetch_overview_x() which will
@@ -3587,7 +3616,7 @@ bool MailFolderCC::CanSendUpdateEvents() const
    // regenerated anyhow after we're done with filters) and in the worst case
    // can be fatal
    //
-   // also, if the application is shutting down, there is no point in send
+   // also, if the application is shutting down, there is no point in sending
    // events
    return !m_InFilterCode->IsLocked() && !mApplication->IsShuttingDown();
 }

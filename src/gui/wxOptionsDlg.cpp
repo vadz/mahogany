@@ -233,8 +233,6 @@ enum ConfigFields
 
    // message view
    ConfigField_MessageViewFirst = ConfigField_PythonLast,
-   ConfigField_AutoShowFirstMessage,
-   ConfigField_MessageViewPreviewOnSelect,
    ConfigField_MessageViewFontFamily,
    ConfigField_MessageViewFontSize,
    ConfigField_MessageViewFGColour,
@@ -269,7 +267,11 @@ enum ConfigFields
    ConfigField_FolderViewNewMailUseCommand,
    ConfigField_FolderViewNewMailCommand,
    ConfigField_FolderViewNewMailShowMsg,
-   ConfigField_FolderViewHelpText,
+   ConfigField_FolderViewHelpText1,
+   ConfigField_AutoShowFirstMessage,
+   ConfigField_AutoShowFirstUnreadMessage,
+   ConfigField_FolderViewPreviewOnSelect,
+   ConfigField_FolderViewHelpText2,
    ConfigField_FolderViewOnlyNames,
    ConfigField_FolderViewReplaceFrom,
    ConfigField_FolderViewReplaceFromAddresses,
@@ -833,8 +835,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_PYTHON
 
    // message view
-   { gettext_noop("&Select first message in viewer"), Field_Bool, -1},
-   { gettext_noop("Preview message when &selected"), Field_Bool,    -1 },
    { gettext_noop("&Font family"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1 },
@@ -871,8 +871,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("E&xecute new mail command"), Field_Bool,    -1 },
    { gettext_noop("New mail &command"), Field_File, ConfigField_FolderViewNewMailUseCommand},
    { gettext_noop("Show new mail &notification"), Field_Bool,    -1 },
-   { gettext_noop("\nThe following settings control appearance of the messages list:"),
-                                                   Field_Message,  -1 },
+   { gettext_noop("\nWhen opening the folder:"), Field_Message,  -1 },
+   { gettext_noop("&Select first message initially"), Field_Bool, -1 },
+   { gettext_noop("Select &first unread message initially"), Field_Bool, -1 },
+   { gettext_noop("Preview message when &selected"), Field_Bool,    -1 },
+   { gettext_noop("\nThe following settings control appearance of the messages list:"), Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
    { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
    { gettext_noop("&Addresses to replace with \"To\""),  Field_List, ConfigField_FolderViewReplaceFrom,           },
@@ -1114,8 +1117,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_PYTHON
 
    // message views
-   CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
-   CONFIG_ENTRY(MP_PREVIEW_ON_SELECT),
    CONFIG_ENTRY(MP_MVIEW_FONT),
    CONFIG_ENTRY(MP_MVIEW_FONT_SIZE),
    CONFIG_ENTRY(MP_MVIEW_FGCOLOUR),
@@ -1148,6 +1149,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USE_NEWMAILCOMMAND),
    CONFIG_ENTRY(MP_NEWMAILCOMMAND),
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
+   CONFIG_ENTRY(MP_AUTOSHOW_FIRSTUNREADMESSAGE),
+   CONFIG_ENTRY(MP_PREVIEW_ON_SELECT),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_NAMES_ONLY),
    CONFIG_ENTRY(MP_FVIEW_FROM_REPLACE),
