@@ -825,6 +825,8 @@ wxMessageView::Update(void)
    // modify it for pasting or wrap lines manually:
    SetEditable(FALSE);
    SetCursorVisibility(-1);
+   GetLayoutList()->ForceTotalLayout();
+   // for safety, this is required to set scrollbars
    RequestUpdate();
 }
 

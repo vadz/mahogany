@@ -1346,9 +1346,12 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
       bool foundSpace = FALSE;
       do
       {
+//         while(i != NULLIT && (**i).GetType() != WXLO_TYPE_TEXT)
+//            i--;
          // try to find a suitable place to split the object:
          wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
-         if(tobj->GetText().Length() >= breakpos)
+         if((**i).GetType() == WXLO_TYPE_TEXT
+            && tobj->GetText().Length() >= breakpos)
          {
             do
             {

@@ -822,7 +822,7 @@ wxLayoutWindow::ScrollToCursor(void)
          ny = 0;
    }
 
-   if ( nx != -1 || ny != -1 )
+   if( nx != -1 || ny != -1 )
    {
       // set new view start
       Scroll(nx == -1 ? -1 : (nx+dx-1)/dx, ny == -1 ? -1 : (ny+dy-1)/dy);
