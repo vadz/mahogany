@@ -411,8 +411,9 @@ MessageCC::FetchText(void)
                  "DEBUG: Mailfolder corruption detected");
       MailFolderCC::ProcessEventQueue();
       String str( (size_t) m_MailTextLen);
+      const char *cptr = mailText;
       for(size_t i = 0; i < m_MailTextLen; i++)
-         str[i] = headerPart[i];
+         str[i] += *cptr++;
       str[m_MailTextLen] = '\0';
       return str;
    }
@@ -867,8 +868,9 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
          ASSERT_MSG(strlen(headerPart) == len,
                     "DEBUG: Mailfolder corruption detected");
          str = String( (size_t) len + 1);
+         const char *cptr = headerPart;
          for(size_t i = 0; i < len; i++)
-            str[i] = headerPart[i];
+            str[i] = *cptr++;
          str[len] = '\0';
          //str += String(headerPart, (size_t)len);
          str += ((MessageCC*)this)->FetchText();
