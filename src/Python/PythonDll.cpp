@@ -42,9 +42,11 @@ inline String GetPythonDllBaseName(const String& version)
    String
 #if defined(OS_WIN)
       basename = _T("python");
-#else // !Win
+#elif defined(OS_UNIX)
       basename = _T("libpython");
-#endif // Win/!Win
+#else
+    #error "Unknown Python library naming convention under this OS"
+#endif // OS
 
    return basename + version;
 }
@@ -243,7 +245,13 @@ extern bool InitPythonDll()
    // load the library
    static const wxChar *versions[] =
    {
+#ifdef OS_WIN
       _T("23"), _T("22"), _T("20"), _T("15")
+#elif defined(OS_UNIX)
+      _T("2.3"), _T("2.2"), _T("2.0"), _T("1.5")
+#else
+    #error "Unknown Python library naming convention under this OS"
+#endif
    };
 
    wxDynamicLibrary dllPython;
@@ -254,12 +262,14 @@ extern bool InitPythonDll()
       for ( size_t nVer = 0; nVer < WXSIZEOF(versions); nVer++ )
       {
          String name = GetPythonDllBaseName(versions[nVer]);
-         if ( dllPython.Load(name + wxDynamicLibrary::GetDllExt()) )
+         const String ext = wxDynamicLibrary::GetDllExt();
+
+         if ( dllPython.Load(name + ext) )
             break;
 
 #ifdef OS_WIN
          // also try debug version of the DLL
-         if ( dllPython.Load(name + _T("_d") + wxDynamicLibrary::GetDllExt()) )
+         if ( dllPython.Load(name + _T("_d") + ext) )
             break;
 #endif // OS_WIN
       }

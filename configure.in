@@ -112,7 +112,7 @@ M_OVERRIDES(strict,strict compiler options,USE_STRICT,0,
 M_OVERRIDES(nls,i18n support,USE_I18N,1,
 --disable-nls           no internationalization support)
 
-M_OVERRIDES(python,Python scripting,USE_PYTHON,1,
+M_OVERRIDES(python,Python scripting,USE_PYTHON,dynamic,
 --with-python=xxx       one of none/static/dynamic)
 
 case "$USE_PYTHON" in
@@ -824,10 +824,7 @@ esac
 dnl now check for the Python lib but only if linking statically
 case "$USE_PYTHON" in
 dynamic|Dynamic|DYNAMIC)
-	dnl FIXME
-	AC_MSG_WARN([Sorry, dynamic Python linking doesn't work currently])
-	USE_PYTHON=0
-	dnl AC_DEFINE(USE_PYTHON_DYNAMIC)
+	AC_DEFINE(USE_PYTHON_DYNAMIC)
 	;;
 
 static|Static|STATIC|1)
