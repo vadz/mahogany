@@ -160,6 +160,7 @@ extern const MOption MP_MSGS_SERVER_SORT;
 extern const MOption MP_MSGS_SERVER_THREAD;
 extern const MOption MP_MSGS_SERVER_THREAD_REF_ONLY;
 extern const MOption MP_NEWS_SPOOL_DIR;
+extern const MOption MP_POP_NO_AUTH;
 extern const MOption MP_RSH_PATH;
 extern const MOption MP_SSH_PATH;
 extern const MOption MP_TCP_CLOSETIMEOUT;
@@ -1297,6 +1298,18 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
          break;
 
       case MF_POP:
+         {
+            // if we use SSL, we already have a profile object in local scope
+#ifndef USE_SSL
+            Profile_obj profile(folder->GetProfile());
+#endif
+            if ( READ_CONFIG(profile, MP_POP_NO_AUTH) )
+            {
+               // turn authentification off forcefully
+               spec << "/loser";
+            }
+         }
+
          spec << "/pop3}";
          break;
 
@@ -2639,54 +2652,48 @@ MailFolderCC::Ping(void)
    MailFolderLocker lockFolder(this);
    if ( lockFolder )
    {
-       // c-client 4.7-bug: MH folders don't notice new messages without
+      // POP folders never notice any new messages until you close and reopen
+      // the session but it's a very bad idea to do it from inside Ping() as it
+      // can be called at any moment and closing the folder invalidates lots of
+      // data associated with it which can be completely unexpected (as we
+      // don't even get a "connection broken" notification!), so simply do
+      // nothing for them
+      //
+      // because of an apparent c-client bug, MH folders don't notice new mail
       // reopening them: check if this is still needed with imap2000 (TODO)
-      if ( GetType() == MF_POP || GetType() == MF_MH )
+      const MFolderType type = GetType();
+      if ( type != MF_POP || type != MF_MH )
       {
-         wxLogTrace(TRACE_MF_CALLS,
-                    _T("MailFolderCC::Ping() forcing close on folder %s."),
-                    GetName().c_str());
-
-         Close();
-      }
-
 #ifdef USE_DIALUP
-      if ( NeedsNetwork() && !mApplication->IsOnline() &&
-           !MDialog_YesNoDialog
-           (
-            wxString::Format
-            (
-               _("Dial-Up network is down.\n"
-                 "Do you want to try to check folder '%s' anyway?"),
-               GetName().c_str()
-            ),
-            NULL,
-            MDIALOG_YESNOTITLE,
-            M_DLG_NO_DEFAULT,
-            M_MSGBOX_NO_NET_PING_ANYWAY,
-            GetName()
+         if ( NeedsNetwork() && !mApplication->IsOnline() &&
+              !MDialog_YesNoDialog
+              (
+               wxString::Format
+               (
+                  _("Dial-Up network is down.\n"
+                    "Do you want to try to check folder '%s' anyway?"),
+                  GetName().c_str()
+               ),
+               NULL,
+               MDIALOG_YESNOTITLE,
+               M_DLG_NO_DEFAULT,
+               M_MSGBOX_NO_NET_PING_ANYWAY,
+               GetName()
+              )
            )
-        )
-      {
-         ForceClose();
+         {
+            ForceClose();
 
-         return false;
-      }
+            return false;
+         }
 #endif // USE_DIALUP
 
-      // try to reopen the folder if it is closed
-      if ( !m_MailStream )
-      {
-         rc = Open();
-      }
-
-      if ( m_MailStream )
-      {
          rc = PingOpenedFolder();
       }
-      else
+      else // POP/MH folder
       {
-         rc = false;
+         // pretend that everything is ok even though we didn't do anything
+         rc = true;
       }
    }
    else // failed to lock folder?
