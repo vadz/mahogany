@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxMDialogs.h : wxWindows version of dialog boxes                 *
  *                                                                  *
- * (C) 1998-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -806,7 +806,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
    ll->SetFontSize(12);
    ll->Insert(align);
-   ll->Insert(_("Copyright (c) 1999 by Karsten Ballüder"));
+   ll->Insert(_("Copyright (c) 1997-2000 by Karsten Ballüder"));
    ll->LineBreak();
    ll->LineBreak();
    ll->Insert(align);

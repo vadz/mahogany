@@ -10,27 +10,26 @@ $Id$
 *********************************************************************
 9	KB	- fix new mail event generation to avoid duplicate
 		  listing of already previously existing new mails
-		   UID for comparison? CheckNewMail() function?
+		  UID for comparison? CheckNewMail() function?
+		Does it work?
+
 9	KB	finish filters dialog
+
 9	KB	wxLayout:
-		- delete in empty line
-		- undo
-		- write editor plugin translating keysyms to actions
-		- ctrl keys not recognised when CAPSLOCK is down
+		- delete in empty line (works at home...)
 		- add blinking cursor
 		- add HTML import
 		- selection can get confused, when selecting with
 		  pagedown beyond end of text
 		MessageView:
+		- undo
 		 - should show cursor only on demand
-		 - remember focused message not by index but by UID
-		   and find it again after re-sort
 		 - shouldn't preview messages unless configured to do so
                    (currently does preview on delete)
 
 8	KB	modules:
-		- use new config stuff / no direct gui calls
 		- PalmOS: sync adb and check linkage on solaris
+		- use new config stuff / no direct gui calls (DEFERRED?)
 8	KB	integrate imap 4.7 and recently received patches
 7	KB	why do newsgroups seem empty after closing even if
 		I answered no to catchup? Mark undeleted?
@@ -41,8 +40,10 @@ $Id$
 	KB	properties/custom headers/more shows corrupted title
 
 	KB	wxMessageView: message/rfc822 display via MessageCC(string)
-9	KB	copyright display accept/cancel dialog at fist startup
-KB		add python hook for filters
+
+1	KB	copyright display accept/cancel dialog at fist startup
+
+	KB	add python hook for filters
 
 7	KB	selecting/deselecting only message in folder
 		--fixed?

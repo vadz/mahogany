@@ -355,7 +355,9 @@ private:
    bool m_FirstListing;
    /// Path to mailbox
    String   m_MailboxPath;
-
+   /// The last seen UID, to check for new mails:
+   UIdType  m_LastSeenUId;
+   
    /// The symbolic name of the folder
    String m_Name;
    /// do we want c-client's debug messages?
@@ -422,6 +424,9 @@ protected:
    void UpdateTimeoutValues(void);
    void SetType(FolderType type) { m_folderType = type; }
 
+   /// Check if this message is a "New Message":
+   virtual bool IsNewMessage(UIdType msgId) const;
+   
    /* Handles the mm_overview_header callback on a per folder basis.
       It returns 0 to abort overview generation, 1 to continue.*/
    int OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov);

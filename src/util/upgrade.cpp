@@ -48,9 +48,9 @@
 #define USE_WIZARD
 
 #ifdef USE_WIZARD
-   #include <wx/wizard.h>
+#   include <wx/wizard.h>
 #else
-   #include "gui/wxOptionsDlg.h" // for ShowOptionsDialog()
+#   include "gui/wxOptionsDlg.h" // for ShowOptionsDialog()
 #endif
 
 #include "gui/wxDialogLayout.h"
@@ -75,7 +75,7 @@ enum MVersion
 #ifdef USE_WIZARD
 
 #ifndef OS_WIN
-   #define USE_HELPERS_PAGE
+#   define USE_HELPERS_PAGE
 #endif // OS_WIN
 
 // ids for install wizard pages
@@ -85,6 +85,7 @@ enum InstallWizardPageId
    InstallWizard_IdentityPage,         // ask name, e-mail
    InstallWizard_ServersPage,          // ask POP, SMTP, NNTP servers
    InstallWizard_DialUpPage,           // set up dial-up networking
+   InstallWizard_OperationsPage,       // how we want Mahogany to work
    InstallWizard_MiscPage,             // signature, other common options
 #ifdef USE_HELPERS_PAGE
    InstallWizard_HelpersPage,          // external programs set up
@@ -203,7 +204,13 @@ public:
    {
       gs_installWizardData.name = m_name->GetValue();
       gs_installWizardData.email = m_email->GetValue();
-
+      return TRUE;
+   }
+   
+   virtual bool TransferDataToWindow()
+   {
+      m_name->SetValue(gs_installWizardData.name);
+      m_email->SetValue(gs_installWizardData.email);
       return TRUE;
    }
 
@@ -218,9 +225,25 @@ public:
    InstallWizardServersPage(wxWizard *wizard);
 
    virtual bool TransferDataFromWindow()
-   {
-      return TRUE;
-   }
+      {
+         gs_installWizardData.pop  = m_pop->GetValue();
+         gs_installWizardData.imap = m_imap->GetValue();
+         gs_installWizardData.smtp = m_smtp->GetValue();
+         gs_installWizardData.nntp = m_nntp->GetValue();
+         return gs_installWizardData.pop.Length() > 0
+            && gs_installWizardData.imap.Length() > 0
+            && gs_installWizardData.smtp.Length() > 0
+            && gs_installWizardData.nntp.Length() > 0;
+      }
+
+   virtual bool TransferDataToWindow()
+      {
+         m_pop->SetValue(gs_installWizardData.pop);
+         m_imap->SetValue(gs_installWizardData.imap);
+         m_smtp->SetValue(gs_installWizardData.smtp);
+         m_nntp->SetValue(gs_installWizardData.nntp);
+         return TRUE;
+      }
 
 private:
    wxTextCtrl *m_pop,
@@ -238,6 +261,20 @@ public:
    {
       return TRUE;
    }
+};
+
+class InstallWizardOperationsPage : public InstallWizardPage
+{
+public:
+   InstallWizardOperationsPage(wxWizard *wizard);
+
+   virtual bool TransferDataFromWindow()
+   {
+      return TRUE;
+   }
+private:
+   wxCheckBox *m_CollectCheckbox, *m_TrashCheckbox,
+      *m_OutboxCheckbox;
 };
 
 #ifdef USE_HELPERS_PAGE
@@ -384,6 +421,7 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
       {
          CREATE_PAGE(Identity);
          CREATE_PAGE(Servers);
+         CREATE_PAGE(Operations);
          CREATE_PAGE(DialUp);
          CREATE_PAGE(Misc);
 #ifdef USE_HELPERS_PAGE
@@ -444,7 +482,6 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
 
    wxSize sizeBox = m_checkbox->GetSize(),
    sizePage = wizard->GetPageSize();
-//      sizePage = wizard->GetSize();
    
    // adjust the vertical position
    m_checkbox->Move(-1, sizePage.y - 2*sizeBox.y);
@@ -534,6 +571,50 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    new wxStaticText(this, -1, "This page is under construction");
 }
 
+// InstallWizardOperationsPage
+// ----------------------------------------------------------------------------
+
+InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
+                        : InstallWizardPage(wizard, InstallWizard_OperationsPage)
+{
+   wxStaticText *text = new wxStaticText(this, -1, _(
+      "Mahogany can either leave all messages in your system\n"
+      "mailbox or create its own mailbox for new mail and\n"
+      "collect new messages in there. This is recommended,\n"
+      "especially when collecting from remote servers."
+      ));
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(text);
+
+
+   wxArrayString labels;
+   labels.Add(_("&Collect new mail:"));
+   labels.Add(_("Use &Trash mailbox:"));
+   labels.Add(_("Use &Outbox queues:"));
+
+   long widthMax = GetMaxLabelWidth(labels, panel);
+
+   m_CollectCheckbox = panel->CreateCheckBox(labels[0], widthMax,NULL);
+   wxStaticText *text2 = panel->CreateMessage(
+      _(
+         "Mahogany has two options for deleting messages.\n"
+         "You can mark messages as deleted and leave them\n"
+         "around to be expunged later, or you can use a Trash\n"
+         "folder where to move them to."
+         ), m_CollectCheckbox);
+   m_TrashCheckbox = panel->CreateCheckBox(labels[1], widthMax, text2);
+
+   wxStaticText *text3 = panel->CreateMessage(
+      _(
+         "Mahogany can either send messages immediately\n"
+         "or queue them and only send them on demand."
+         ), m_TrashCheckbox);
+   m_OutboxCheckbox = panel->CreateCheckBox(labels[2], widthMax, text3);
+   //TODO: collect remote POP account?
+   
+   panel->Layout();
+}
+
 #ifdef USE_HELPERS_PAGE
 
 // InstallWizardHelpersPage
@@ -616,6 +697,22 @@ bool RunInstallWizard()
 
    gs_isWizardRunning = true;
 
+   // first, set up the default values for the wizard:
+
+   gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
+   if(gs_installWizardData.email.Length() == 0)
+   {
+      gs_installWizardData.email
+         << READ_APPCONFIG(MP_USERNAME)
+         << '@' << READ_APPCONFIG(MP_HOSTNAME);
+   }
+   gs_installWizardData.name = READ_APPCONFIG(MP_PERSONALNAME);
+   
+   gs_installWizardData.pop  = READ_APPCONFIG(MP_POPHOST);
+   gs_installWizardData.imap = READ_APPCONFIG(MP_IMAPHOST);
+   gs_installWizardData.smtp = READ_APPCONFIG(MP_SMTPHOST);
+   gs_installWizardData.nntp = READ_APPCONFIG(MP_NNTPHOST);
+   
    wxIconManager *iconManager = mApplication->GetIconManager();
    wxWizard *wizard = wxWizard::Create
                       (
@@ -633,7 +730,16 @@ bool RunInstallWizard()
    {
       // transfer the wizard settings from InstallWizardData
 
-      // TODO
+      ProfileBase * profile = mApplication->GetProfile();
+      profile->writeEntry(MP_RETURN_ADDRESS,
+                          gs_installWizardData.email);
+      profile->writeEntry(MP_PERSONALNAME, gs_installWizardData.name);
+
+      profile->writeEntry(MP_POPHOST, gs_installWizardData.pop);
+      profile->writeEntry(MP_IMAPHOST, gs_installWizardData.imap);
+      profile->writeEntry(MP_SMTPHOST, gs_installWizardData.smtp);
+      profile->writeEntry(MP_NNTPHOST, gs_installWizardData.nntp);
+// TODO
    }
 
    wizard->Destroy();

@@ -177,6 +177,10 @@ protected:
    /** This function is called to update the folder listing. */
    void UpdateListing(void);
 
+   /** Check if this message is a "New Message" for generating new
+       mail event. */
+   virtual bool IsNewMessage(UIdType msgId) const = 0;
+
    /// Call this before actually closing the folder.
    void PreClose(void);
 

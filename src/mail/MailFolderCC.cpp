@@ -1460,6 +1460,14 @@ extern "C"
 };
 
 
+bool
+MailFolderCC::IsNewMessage(UIdType msgId) const
+{
+   return (
+      m_LastSeenUId != UID_ILLEGAL // if not initialised, we cannot tell
+      && msgId > m_LastSeenUId );
+}
+
 /* This is called by the UpdateListing method of the common code. */
 HeaderInfoList *
 MailFolderCC::BuildListing(void)
@@ -1572,6 +1580,9 @@ MailFolderCC::BuildListing(void)
    m_NumOfMessages = m_BuildNextEntry;
    m_Listing->SetCount(m_NumOfMessages);
 
+
+   if(m_UpdateMsgCount)
+      m_LastSeenUId = m_MailStream->uid_last;
    m_FirstListing = false;
    m_BuildListingSemaphore = false;
 

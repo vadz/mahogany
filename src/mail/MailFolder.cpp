@@ -1025,15 +1025,18 @@ MailFolderCmn::UpdateListing(void)
          int status;
          for ( UIdType i = 0; i < n; i++ )
          {
-            status =(*hilp)[i]->GetStatus();
-            ASSERT(nextIdx < n);
-            if( (status & MSG_STAT_RECENT) &&
-                !(status & MSG_STAT_SEEN))
-               messageIDs[nextIdx++] = (*hilp)[i]->GetUId();
+            /* status =(*hilp)[i]->GetStatus();
+               ASSERT(nextIdx < n);
+               if( (status & MSG_STAT_RECENT) &&
+               !(status & MSG_STAT_SEEN))
+            */
+               if( IsNewMessage( (*hilp)[i]->GetUId() ) )
+                  messageIDs[nextIdx++] = (*hilp)[i]->GetUId();
+            
          }
          ASSERT(nextIdx <= n);
 
-         MEventManager::Send( new MEventNewMailData (this, n, messageIDs) );
+         MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
          delete [] messageIDs;
       }
 
