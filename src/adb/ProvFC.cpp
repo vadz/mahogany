@@ -817,6 +817,9 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
 
     case Test_Create:
       {
+        // no error messages please
+        wxLogNull nolog;
+
         // it's the only portable way to test for it I can think of
         wxFile file;
         if ( file.Create(name, FALSE /* !overwrite */, wxFile::write) )

@@ -30,6 +30,8 @@
 
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
+
+#  include <ctype.h>          // for isspace()
 #endif
 
 #include "Mdefaults.h"
@@ -255,24 +257,42 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
          return;
       }
 
-      size_t n;
-      for ( n = text.length() - 1; n > 0; n-- )
+      // find the starting position of the last address in the address list
+      size_t nLastAddr;
+      for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
       {
-         char c = text[n];
+         char c = text[nLastAddr];
          if ( isspace(c) || (c == ',') || (c == ';') )
             break;
       }
 
-      String expansion = AdbExpand(text.c_str() + n, m_composeView);
+      if ( nLastAddr > 0 )
+      {
+         // move beyond the ' ', ',' or ';' which stopped the scan
+         nLastAddr++;
+      }
+
+      String expansion = AdbExpand(text.c_str() + nLastAddr, m_composeView);
       if ( !expansion.IsEmpty() )
       {
-         wxString newText(text, n);   // take first n letters only
-         if ( n > 0 )
+         // find the end of the previous address
+         size_t nPrevAddrEnd;
+         for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
          {
-            // there is something before, add separator
+            char c = text[nPrevAddrEnd];
+            if ( !isspace(c) && (c != ',') && (c != ';') )
+               break;
+         }
+         
+         // take what was there before...
+         wxString newText(text, nPrevAddrEnd);
+         if ( !newText.IsEmpty() )
+         {
+            // there was something before, add separator
             newText += CANONIC_ADDRESS_SEPARATOR;
          }
 
+         // ... and and the replacement string
          newText += expansion;
 
          SetValue(newText);
@@ -388,10 +408,21 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    {
       if ( bDoShow[n] )
       {
+         // FIXME there might be other fields where we'd like to complete with
+         // TABs - so we probably need some flag to distinguish them from the
+         // others
+         if ( n !=  Field_Subject ) {
+            m_txtFields[n] = new wxAddressTextCtrl(this, (AddressField)n,
+                                                   m_panel);
+         }
+         else {
+            // fields which don't contain addresses don't need completition
+            m_txtFields[n] = new wxTextCtrl(m_panel, -1, "");
+         }
+
          // text entry goes from right border of the label to the right border
          // of the box except for the first one where we must also leave space
          // for the button
-         m_txtFields[n] = new wxAddressTextCtrl(this, (AddressField)n, m_panel);
          c = new wxLayoutConstraints;
          c->left.Absolute(widthMax + LAYOUT_MARGIN);
          if ( last )

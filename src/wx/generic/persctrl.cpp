@@ -582,7 +582,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
             c->top.Below(text);
         c->centreX.SameAs(this, wxCentreX);
         c->width.Absolute(widthTextMax);
-        c->height.AsIs();
+        c->height.Absolute(heightTextLine);
         text = new wxStaticText(this, -1, lines[nLine]);
         text->SetConstraints(c);
     }
@@ -592,15 +592,20 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     for ( nBtn = 0; nBtn < Btn_Max; nBtn++ ) {
         if ( buttons[nBtn] ) {
             c = new wxLayoutConstraints;
-            if ( btnPrevious )
+            
+            if ( btnPrevious ) {
                 c->left.RightOf(btnPrevious, LAYOUT_X_MARGIN);
-            else
+            }
+            else {
                 c->left.SameAs(this, wxLeft, 
                                (widthDlg - widthButtonsTotal) / 2);
+            }
+
             c->width.Absolute(widthBtnMax);
             c->top.Below(text, 3*LAYOUT_Y_MARGIN);
             c->height.Absolute(heightButton);
             buttons[nBtn]->SetConstraints(c);
+
             btnPrevious = buttons[nBtn];
         }
     }

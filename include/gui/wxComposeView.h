@@ -32,7 +32,6 @@ class wxFTOList;
 class wxComposeView;
 class wxFTCanvas;
 class wxLayoutWindow;
-class wxAddressTextCtrl;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -181,8 +180,8 @@ private:
    /**@name Input fields (arranged into an array) */
    //@{
       /// The text fields
-   AddressField       m_fieldLast;            // which had the focus last time
-   wxAddressTextCtrl *m_txtFields[Field_Max];
+   AddressField m_fieldLast;            // which had the focus last time
+   wxTextCtrl  *m_txtFields[Field_Max];
 
       /// the canvas for displaying the mail
    wxLayoutWindow *m_LayoutWindow;

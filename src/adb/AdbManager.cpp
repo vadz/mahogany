@@ -123,8 +123,11 @@ String AdbExpand(const String& what, wxFrame *frame)
   
   manager->LoadAll();
 
+  static const int lookupMode = AdbLookup_NickName |
+                                AdbLookup_FullName |
+                                AdbLookup_EMail;
   ArrayAdbEntries aEntries;
-  if ( AdbLookup(aEntries, what) )
+  if ( AdbLookup(aEntries, what, lookupMode, AdbLookup_StartsWith ) )
   {
     int rc = MDialog_AdbLookupList(aEntries, frame);
     
