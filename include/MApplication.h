@@ -235,6 +235,9 @@ public:
    /// do we have dial-up support?
    bool SupportsDialUpNetwork(void) const { return m_DialupSupport; }
 
+   /// sets up the class handling dial up networking
+   virtual void SetupOnlineManager(void) = 0;
+
    //@}
 #endif // USE_DIALUP
 
@@ -372,11 +375,6 @@ protected:
 
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
-
-#ifdef USE_DIALUP
-   /// sets up the class handling dial up networking
-   virtual void SetupOnlineManager(void) = 0;
-#endif // USE_DIALUP
 
    /**
      Initializes the value of the global and local directories returned by

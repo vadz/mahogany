@@ -1271,7 +1271,7 @@ MailFolder::Init()
       {
 #ifdef USE_DIALUP
          // must be done before using the network
-         SetupOnlineManager();
+         mApplication->SetupOnlineManager();
 #endif // USE_DIALUP
 
          s_initialized = true;
