@@ -152,6 +152,9 @@ private:
    // the XFace if we have any
    wxBitmap m_bmpXFace;
 
+   // did we have some headers already?
+   bool m_firstheader;
+
    // do we have a non default font?
    bool m_hasGlobalFont;
 
@@ -588,13 +591,13 @@ void HtmlViewer::StartHeaders()
       m_htmlEnd.Prepend("</tt>");
    }
 
-   // start the table containing the headers
-   m_htmlText += "<table cellspacing=1 cellpadding=1 border=0>";
+   // the next header is going to be the first one
+   m_firstheader = true;
 }
 
 void HtmlViewer::ShowRawHeaders(const String& header)
 {
-   m_htmlText << "<pre>" << header << "</pre>";
+   m_htmlText << "<pre>" << MakeHtmlSafe(header) << "</pre>";
 }
 
 void HtmlViewer::ShowHeader(const String& headerName,
@@ -604,6 +607,14 @@ void HtmlViewer::ShowHeader(const String& headerName,
    // don't show empty headers at all
    if ( headerValue.empty() )
       return;
+
+   if ( m_firstheader )
+   {
+      // start the table containing the headers
+      m_htmlText += "<table cellspacing=1 cellpadding=1 border=0>";
+
+      m_firstheader = false;
+   }
 
    const ProfileValues& profileValues = GetOptions();
 
@@ -641,8 +652,12 @@ void HtmlViewer::ShowXFace(const wxBitmap& bitmap)
 
 void HtmlViewer::EndHeaders()
 {
-   // close the headers table
-   m_htmlText += "</table>";
+   if ( !m_firstheader )
+   {
+      // close the headers table
+      m_htmlText += "</table>";
+   }
+   //else: we had no headers at all
 
    if ( m_bmpXFace.Ok() )
    {
