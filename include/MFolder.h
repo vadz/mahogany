@@ -299,4 +299,14 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
 extern size_t AddAllSubfoldersToTree(MFolder *parent,
                                      class ASMailFolder *mailFolder);
 
+/**
+   Creates entries for all files and directories under the given directory.
+   The MBOX folders are created for files and GROUP folders for subdirs.
+
+   @returns number of created folders
+ */
+
+extern size_t CreateMboxSubtree(MFolder *parent,
+                                const String& rootMailDir);
+
 #endif // _MFOLDER_H

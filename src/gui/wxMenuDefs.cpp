@@ -254,6 +254,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FOLDER_REMOVE,    gettext_noop("&Remove"), gettext_noop("Remove the selected folder from the folder tree")               , FALSE },
    { WXMENU_FOLDER_DELETE,    gettext_noop("&Delete"), gettext_noop("Delete all messages in the folder and remove it")               , FALSE },
    { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
+   { WXMENU_FOLDER_IMPORTTREE,gettext_noop("&Import file folders..."),
+                              gettext_noop("Create folders for all files in a directory"), FALSE },
    { WXMENU_FOLDER_BROWSESUB, gettext_noop("&Browse..."), gettext_noop("Show subfolders of the current folder")               , FALSE },
    { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
    { WXMENU_FOLDER_FILTERS,   gettext_noop("&Filters..."), gettext_noop("Edit the filters to use for current folder")               , FALSE },

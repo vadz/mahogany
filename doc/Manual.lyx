@@ -1,5 +1,5 @@
-#This file was created by <karsten> Tue Nov 21 21:33:06 2000
-#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
+#This file was created by <zeitlin> Mon Nov 27 12:27:21 2000
+#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
 \begin_preamble
@@ -97,7 +97,39 @@ Changes against the previous version
 
 
 \series bold 
-0.6 against 0.5
+0.61 against 0.60
+\newline 
+New features:
+\layout Itemize
+
+Possibility to save (to the address book) all addresses from a message appearing
+anywhere in the headers.
+\layout Itemize
+
+It is now possible to import all folder files in MBOX (Unix) format using
+ 
+\noun on 
+
+\begin_inset Quotes erd
+\end_inset 
+
+Folde|Import folder tree...
+\begin_inset Quotes erd
+\end_inset 
+
+
+\noun default 
+ command (see 
+\begin_inset LatexCommand \ref{Import}
+
+\end_inset 
+
+)
+\layout Standard
+
+
+\series bold 
+0.60 against 0.50
 \newline 
 
 \series default 
@@ -1702,6 +1734,63 @@ open messages in separate window
 H
 \newline 
 toggle display of headers
+\layout Subsection
+
+Migrating from another mail client
+\layout Standard
+
+
+\begin_inset LatexCommand \label{Import}
+
+\end_inset 
+
+Mahogany supports importing the settings from a few other popular mail clients.
+ The current list includes Pine, XFMail and Eudora.
+ Depending on the mail client only part of its settings may be imported
+ but in the best case Mahogany can import the address books, the configuration
+ settings, the filter rules and the list of folders to use.
+ To use this feature, choose 
+\noun on 
+
+\begin_inset Quotes eld
+\end_inset 
+
+Mail|Import...
+\begin_inset Quotes erd
+\end_inset 
+
+ 
+\noun default 
+command and follow the dialogs.
+\layout Standard
+
+Even if you don't find your email client in the list proposed in the dialog,
+ everything is not lost.
+ You won't be able to import its configuration information nor the filter
+ rules but you might still recuperate the address book information if your
+ program can export the addresses in the standard comma separated format
+ or as vCards.
+ In either case you can then import just the address books from the address
+ book editor.
+\layout Standard
+
+Finally, Mahogany can automatically create the entries in the folder tree
+ for all MBOX (standard Unix format, also used by Eudora) files under the
+ given directory.
+ To do this, select the folder in the tree which you want the new folders
+ to appear under and choose 
+\noun on 
+
+\begin_inset Quotes eld
+\end_inset 
+
+Folder|Import folder tree...
+\begin_inset Quotes erd
+\end_inset 
+
+
+\noun default 
+ command.
 \layout Section
 
 Reading Mail

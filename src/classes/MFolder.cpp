@@ -30,8 +30,11 @@
 #  include "Profile.h"
 #  include "MApplication.h"
 #  include "strutil.h"
+
 #  include <wx/confbase.h>    // for wxSplitPath
 #  include <wx/dynarray.h>
+
+#  include <wx/dir.h>
 #endif // USE_PCH
 
 #include "Mdefaults.h"
@@ -959,4 +962,98 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
    }
 
    return folder;
+}
+
+bool CreateMboxSubtreeHelper(MFolder *parent,
+                             const String& rootMailDir,
+                             size_t *count)
+{
+   wxDir dir(rootMailDir);
+   if ( !dir.IsOpened() )
+   {
+      wxLogError(_("Directory doesn't exist - no MBOX folders found."));
+
+      return FALSE;
+   }
+
+   // create folders for all files in this dir
+   wxString filename;
+   bool cont = dir.GetFirst(&filename, "", wxDIR_FILES);
+   while ( cont )
+   {
+      wxString fullname;
+      fullname << rootMailDir << wxFILE_SEP_PATH << filename;
+      MFolder *folderMbox = CreateFolderTreeEntry
+                            (
+                             parent,
+                             filename,
+                             MF_FILE,
+                             0,
+                             fullname,
+                             FALSE // don't send notify event
+                            );
+      if ( folderMbox )
+      {
+         (*count)++;
+
+         folderMbox->DecRef();
+      }
+      else
+      {
+         wxLogWarning(_("Failed to create folder '%s'"), fullname.c_str());
+      }
+
+      cont = dir.GetNext(&filename);
+   }
+
+   // and recursively call us for each subdir
+   wxString dirname;
+   cont = dir.GetFirst(&dirname, "", wxDIR_DIRS);
+   while ( cont )
+   {
+      wxString subdir;
+      subdir << rootMailDir << wxFILE_SEP_PATH << dirname;
+      MFolder *folderSubgroup = CreateFolderTreeEntry
+                                (
+                                 parent,
+                                 dirname,
+                                 MF_GROUP,
+                                 0,
+                                 subdir,
+                                 FALSE // don't send notify event
+                                );
+
+      if ( folderSubgroup )
+      {
+         CreateMboxSubtreeHelper(folderSubgroup, subdir, count);
+
+         folderSubgroup->DecRef();
+      }
+      else
+      {
+         wxLogWarning(_("Failed to create folder group '%s'"), dirname.c_str());
+      }
+
+      cont = dir.GetNext(&dirname);
+   }
+
+   return TRUE;
+}
+
+size_t CreateMboxSubtree(MFolder *parent, const String& rootMailDir)
+{
+   size_t count = 0;
+   if ( !CreateMboxSubtreeHelper(parent, rootMailDir, &count) )
+   {
+      wxLogError(_("Failed to import MBOX folders."));
+
+      return 0;  
+   }
+
+   // notify everyone about folder creation
+   MEventManager::Send(
+      new MEventFolderTreeChangeData(parent->GetPath(),
+                                     MEventFolderTreeChangeData::CreateUnder));
+
+   return count;
 }

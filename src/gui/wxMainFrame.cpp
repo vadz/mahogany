@@ -518,6 +518,41 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             }
             break;
 
+         case WXMENU_FOLDER_IMPORTTREE:
+            // create all MBOX folders under the specified dir
+            {
+               // TODO: it should be more user friendly (i.e. either let the
+               //       user choose the folder too or take the dir from folder
+               //       or both...)
+
+               // get the directory to use
+               wxDirDialog dlgDir(this,
+                                  _("Choose directory containing MBOX folders"),
+                                  mApplication->GetLocalDir());
+               if ( dlgDir.ShowModal() == wxID_OK )
+               {
+                  // get the parent folder
+                  MFolder *folder = m_FolderTree->GetSelection();
+                  if ( !folder )
+                  {
+                     // use root folder if no selection
+                     folder = MFolder::Get("");
+                  }
+
+                  // do create them
+                  size_t count = CreateMboxSubtree(folder, dlgDir.GetPath());
+                  if ( count )
+                  {
+                     wxLogStatus(this, _("Created %u folders under '%s'."),
+                                 count, folder->GetPath().c_str());
+                  }
+
+                  folder->DecRef();
+               }
+               //else: dir dlg cancelled by user
+            }
+            break;
+
          default:
             // all others are processed by the folder tree
             m_FolderTree->ProcessMenuCommand(id);
