@@ -1,6 +1,8 @@
 TODO list for M   
 $Id$
 
+*** bugs to fix ***
+
 - fix configure: it currently depends on the right order of with-wxGTK/without-wxXt
 
 - check how Python handles (wx)Strings, try some interaction
@@ -19,3 +21,18 @@ $Id$
   namespace issues need to be sorted out. 
 
 - Script.cc: no input/output redirection for Windows, don't know how to do this.
+  (VZ: it's probably also (will be) needed in other places: think about
+  running external viewers for attachments &c?)
+
+*** to implement in near future ***
+
+- support for external editor
+
+*** long-term projects ***
+
+- Support for different charsets (Unicode/utf-7/8?)
+
+- LDAP
+
+- automatic (but optional) mail compactification (to save disk space)?
+-
