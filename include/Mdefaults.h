@@ -22,9 +22,9 @@
 */
 #ifndef M_PROFILE_CONFIG_SECTION
 #  ifdef OS_WIN
-#     define   M_PROFILE_CONFIG_SECTION   "/Profiles"
+#     define   M_PROFILE_CONFIG_SECTION   ""
 #  else  // Unix
-#     define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
+#     define   M_PROFILE_CONFIG_SECTION   "/M"
 #  endif // Unix/Win
 #endif
 

@@ -237,6 +237,7 @@ public:
   wxOptionsPage(wxNotebook *parent,
                 const char *title,
                 wxOptionsNotebook::Icon image,
+                ProfileBase *profile,
                 size_t nFirst,
                 size_t nLast);
 
@@ -269,6 +270,9 @@ protected:
   size_t        m_nFirst,
                 m_nLast;
 
+   // we need a pointer to the profile to write to
+   ProfileBase *m_Profile;
+   
   // get the control with "right" index
   wxControl *GetControl(size_t /* ConfigFields */ n) const
     { return m_aControls[n - m_nFirst]; }
@@ -292,9 +296,11 @@ private:
 class wxOptionsPageCompose : public wxOptionsPage
 {
 public:
-  wxOptionsPageCompose(wxNotebook *parent)
-    : wxOptionsPage(parent, _("Compose"), wxOptionsNotebook::Icon_Compose,
-                    ConfigField_ComposeFirst, ConfigField_ComposeLast) { }
+  wxOptionsPageCompose(wxNotebook *parent, ProfileBase *profile)
+     : wxOptionsPage(parent, _("Compose"),
+                     wxOptionsNotebook::Icon_Compose,
+                     profile,
+                     ConfigField_ComposeFirst, ConfigField_ComposeLast) { }
 
 private:
 };
@@ -302,9 +308,11 @@ private:
 class wxOptionsPageIdent : public wxOptionsPage
 {
 public:
-  wxOptionsPageIdent(wxNotebook *parent)
-    : wxOptionsPage(parent, _("Identity"), wxOptionsNotebook::Icon_Ident,
-                    ConfigField_IdentFirst, ConfigField_IdentLast) { }
+  wxOptionsPageIdent(wxNotebook *parent, ProfileBase *profile)
+     : wxOptionsPage(parent, _("Identity"),
+                     wxOptionsNotebook::Icon_Ident,
+                     profile,
+                     ConfigField_IdentFirst, ConfigField_IdentLast) { }
 
 private:
 };
@@ -312,9 +320,11 @@ private:
 class wxOptionsPageFolders : public wxOptionsPage
 {
 public:
-  wxOptionsPageFolders(wxNotebook *parent)
-    : wxOptionsPage(parent, _("Mail boxes"), wxOptionsNotebook::Icon_Folders,
-                    ConfigField_FoldersFirst, ConfigField_FoldersLast) { }
+  wxOptionsPageFolders(wxNotebook *parent, ProfileBase *profile)
+     : wxOptionsPage(parent, _("Mail boxes"),
+                     wxOptionsNotebook::Icon_Folders,
+                     profile,
+                     ConfigField_FoldersFirst, ConfigField_FoldersLast) { }
 
   virtual bool TransferDataToWindow();
   virtual bool TransferDataFromWindow();
@@ -332,9 +342,11 @@ private:
 class wxOptionsPagePython : public wxOptionsPage
 {
 public:
-  wxOptionsPagePython(wxNotebook *parent)
-    : wxOptionsPage(parent, _("Python"), wxOptionsNotebook::Icon_Python,
-                    ConfigField_PythonFirst, ConfigField_PythonLast) { }
+  wxOptionsPagePython(wxNotebook *parent, ProfileBase *profile)
+     : wxOptionsPage(parent, _("Python"),
+                     wxOptionsNotebook::Icon_Python,
+                     profile,
+                     ConfigField_PythonFirst, ConfigField_PythonLast) { }
 
 private:
 };
@@ -342,9 +354,11 @@ private:
 class wxOptionsPageOthers : public wxOptionsPage
 {
 public:
-  wxOptionsPageOthers(wxNotebook *parent)
-    : wxOptionsPage(parent, _("Others"), wxOptionsNotebook::Icon_Others,
-                    ConfigField_OthersFirst, ConfigField_OthersLast) { }
+  wxOptionsPageOthers(wxNotebook *parent, ProfileBase *profile)
+     : wxOptionsPage(parent, _("Others"),
+                     wxOptionsNotebook::Icon_Others,
+                     profile,
+                     ConfigField_OthersFirst, ConfigField_OthersLast) { }
 
 private:
 };
@@ -497,12 +511,15 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
                              const char *title,
                              wxOptionsNotebook::Icon image,
+                             ProfileBase *profile,
                              size_t nFirst,
                              size_t nLast)
              : wxPanel(notebook, -1)
 {
   notebook->AddPage(this, title, FALSE /* don't select */, image);
 
+  m_Profile = profile;
+  
   // see enum ConfigFields for "+1"
   m_nFirst = nFirst + 1;
   m_nLast = nLast + 1;
@@ -842,13 +859,11 @@ bool wxOptionsPage::TransferDataToWindow()
 {
   // disable environment variable expansion here because we want the user to
   // edit the real value stored in the config
-  ProfileEnvVarSuspend suspend(mApplication->GetProfile());
+  ProfileEnvVarSuspend suspend(m_Profile);
 
   // check that we didn't forget to update one of the arrays...
   wxASSERT( WXSIZEOF(gs_aConfigDefaults) == ConfigField_Max );
   wxASSERT( WXSIZEOF(wxOptionsPage::ms_aFields) == ConfigField_Max );
-
-  ProfileBase *conf = mApplication->GetProfile();
 
   String strValue;
   long lValue;
@@ -856,13 +871,13 @@ bool wxOptionsPage::TransferDataToWindow()
   {
      if ( gs_aConfigDefaults[n].IsNumeric() )
      {
-      lValue = conf->readEntry(gs_aConfigDefaults[n].name,
+      lValue = m_Profile->readEntry(gs_aConfigDefaults[n].name,
                           (int) gs_aConfigDefaults[n].lValue);
       strValue.Printf("%ld", lValue);
     }
     else {
       // it's a string
-      strValue = conf->readEntry(gs_aConfigDefaults[n].name,
+      strValue = m_Profile->readEntry(gs_aConfigDefaults[n].name,
                                  gs_aConfigDefaults[n].szValue);
     }
 
@@ -929,7 +944,6 @@ bool wxOptionsPage::TransferDataToWindow()
 bool wxOptionsPage::TransferDataFromWindow()
 {
   // @@@ should only write the entries which really changed
-  ProfileBase *conf = mApplication->GetProfile();
 
   String strValue;
   long lValue;
@@ -985,12 +999,12 @@ bool wxOptionsPage::TransferDataFromWindow()
 
     if ( gs_aConfigDefaults[n].IsNumeric() )
     {
-      conf->writeEntry(gs_aConfigDefaults[n].name, (int)lValue);
+      m_Profile->writeEntry(gs_aConfigDefaults[n].name, (int)lValue);
     }
     else
     {
       // it's a string
-      conf->writeEntry(gs_aConfigDefaults[n].name, strValue);
+      m_Profile->writeEntry(gs_aConfigDefaults[n].name, strValue);
     }
   }
 
@@ -1240,7 +1254,9 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
 
 bool wxOptionsDialog::TransferDataToWindow()
 {
-  for ( size_t nPage = 0; nPage < wxOptionsNotebook::Icon_Max; nPage++ ) {
+   ProfilePathChanger(mApplication->GetProfile(),M_PROFILE_CONFIG_SECTION);
+
+   for ( size_t nPage = 0; nPage < wxOptionsNotebook::Icon_Max; nPage++ ) {
     if ( !m_notebook->GetPage(nPage)->TransferDataToWindow() ) {
       return FALSE;
     }
@@ -1251,7 +1267,9 @@ bool wxOptionsDialog::TransferDataToWindow()
 
 bool wxOptionsDialog::TransferDataFromWindow()
 {
-  for ( size_t nPage = 0; nPage < wxOptionsNotebook::Icon_Max; nPage++ ) {
+   ProfilePathChanger(mApplication->GetProfile(),M_PROFILE_CONFIG_SECTION);
+
+   for ( size_t nPage = 0; nPage < wxOptionsNotebook::Icon_Max; nPage++ ) {
     if ( !m_notebook->GetPage(nPage)->TransferDataFromWindow() ) {
       return FALSE;
     }
@@ -1335,12 +1353,13 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 
   SetImageList(imageList);
 
+  ProfileBase *profile = mApplication->GetProfile();
   // create and add the pages
-  (void)new wxOptionsPageIdent(this);
-  (void)new wxOptionsPageCompose(this);
-  (void)new wxOptionsPageFolders(this);
-  (void)new wxOptionsPagePython(this);
-  (void)new wxOptionsPageOthers(this);
+  (void)new wxOptionsPageIdent(this,profile);
+  (void)new wxOptionsPageCompose(this,profile);
+  (void)new wxOptionsPageFolders(this,profile);
+  (void)new wxOptionsPagePython(this,profile);
+  (void)new wxOptionsPageOthers(this,profile);
 }
 
 wxOptionsNotebook::~wxOptionsNotebook()

@@ -69,8 +69,6 @@ XFace::CreateFromXpm(const char *xpmdata)
       token = strsep(&ptr, "\n\r");
       if(! token)
 	 break;
-      //if(token[0] == '/' && token[1] == '*')
-      // continue;	// ignore comments
       if(zero == 0 || one == 0)
       {
 	 if(strncmp(token+4,"#000000",7) == 0)
@@ -98,11 +96,13 @@ XFace::CreateFromXpm(const char *xpmdata)
 	 {
 	    if(token[n+i] == one)
 	       value += 1;
-	    value <<= 1;
+	    if(i != 15)
+               value <<= 1;
 	 }
-	 sprintf(buffer,"0x%04lx", value);
+         value = value ^ 0xffff;
+	 sprintf(buffer,"0x%04lX", value);
 	 dataString += buffer;
-	 dataString += ',';
+         dataString += ',';
       }
       dataString += '\n';
       token = strsep(&ptr, "\n\r");
@@ -335,9 +335,8 @@ XFace::CreateXpm(char ***xpm)
 String
 XFace::GetHeaderLine(void) const
 {
-   String header = "X-Face: ";
    if(xface)
-      return header + xface;
+      return xface;
    else
       return "";
 }

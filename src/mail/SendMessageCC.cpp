@@ -288,6 +288,18 @@ SendMessageCC::Build(void)
    strutil_tokenise(headers,";",m_headerList);
    delete [] headers;
 
+   // +3: 1 for X-Mailer, 1 for X-Face and 1 for the last NULL entry
+   m_headerNames = new const char*[m_headerList.size()+2];
+   m_headerValues = new const char*[m_headerList.size()+2];
+   for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, j++)
+   {
+      m_headerNames[j] = strutil_strdup(StringCast(i)->c_str());
+      m_headerValues[j] = strutil_strdup(profile->readEntry(StringCast(i)->c_str(),""));
+   }
+   //always add mailer header:
+   m_headerNames[j] = strutil_strdup("X-Mailer");
+   m_headerValues[j++] = strutil_strdup(String("M, ")+M_VERSION_STRING);
+
 #ifdef HAVE_XFACES
    // add an XFace?
    if(profile->readEntry(MP_COMPOSE_USE_XFACE,MP_COMPOSE_USE_XFACE_D))
@@ -305,21 +317,14 @@ SendMessageCC::Build(void)
          }
          wxIconManager::FreeImage(xpmarray);
          if(xface.CreateFromXpm(xpmdata.c_str()))
-            m_headerList.push_back(new String(xface.GetHeaderLine()));
+         {
+            m_headerNames[j] = strutil_strdup("X-Face");
+            m_headerValues[j++] = strutil_strdup(xface.GetHeaderLine());
+         }
       }
    }
 #endif
-   // +2: 1 for X-Mailer and 1 for the last NULL entry
-   m_headerNames = new const char*[m_headerList.size()+2];
-   m_headerValues = new const char*[m_headerList.size()+2];
-   for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, j++)
-   {
-      m_headerNames[j] = strutil_strdup(StringCast(i)->c_str());
-      m_headerValues[j] = strutil_strdup(profile->readEntry(StringCast(i)->c_str(),""));
-   }
-   //always add mailer header:
-   m_headerNames[j] = strutil_strdup("X-Mailer:");
-   m_headerValues[j++] = strutil_strdup(String("M, ")+M_VERSION_STRING);
+
    m_headerNames[j] = NULL;
    m_headerValues[j] = NULL;
    rfc822_setextraheaders(m_headerNames,m_headerValues);
