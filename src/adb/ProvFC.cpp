@@ -122,7 +122,7 @@ private:
 
   FCEntryGroup *m_pGroup;     // the group which contains us (never NULL)
 
-  GCC_DTOR_WARN_OFF();
+  GCC_DTOR_WARN_OFF
 };
 
 // our AdbEntryGroup implementation: it maps on a wxFileConfig group
@@ -178,7 +178,7 @@ private:
   wxFileConfig *m_pConfig;      // our config object
   FCEntryGroup *m_pParent;      // the parent group (never NULL)
 
-  GCC_DTOR_WARN_OFF();
+  GCC_DTOR_WARN_OFF
 };
 
 // our AdbBook implementation: it maps to a disk file here
@@ -251,7 +251,7 @@ private:
 
   FCEntryGroup *m_pRootGroup; // the ADB_Entries group
 
-  GCC_DTOR_WARN_OFF();
+  GCC_DTOR_WARN_OFF
 };
 
 // our AdbDataProvider implementation

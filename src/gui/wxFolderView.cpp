@@ -428,7 +428,7 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections, bool nofocused) const
    {
       while((item = GetNextItem(item,
                                 wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
-            != -1)
+            != -1 && item < hil->Count())
       {
          hi = (*hil)[item++];
          if(hi)
@@ -439,7 +439,7 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections, bool nofocused) const
       {
          item = -1;
          item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
-         if(item != -1)
+         if(item != -1 && item < hil->Count())
          {
             hi = (*hil)[item++];
             if(hi)
@@ -775,17 +775,22 @@ wxFolderView::Update(HeaderInfoList *listing)
       m_NumOfMessages = 0;
    }
 
+   long focusedIndex, tmp = -1;
+   focusedIndex = m_FolderCtrl->GetNextItem(tmp, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
+   bool foundFocus = false;
    HeaderInfo const *hi;
    for(i = 0; i < n; i++)
    {
       hi = (*listing)[i];
+      subject = wxString('-', hi->GetIndentation());
+      subject << hi->GetSubject();
       nsize = day = month = year = 0;
       size = strutil_ultoa(nsize);
       selected = (m_SelectedUIds.Index(hi->GetUId()) != wxNOT_FOUND);
       m_FolderCtrl->SetEntry(i,
                              MailFolder::ConvertMessageStatusToString(hi->GetStatus()),
                              hi->GetFrom(),
-                             hi->GetSubject(),
+                             subject,
                              strutil_ftime(hi->GetDate(),
                                            m_settingsCurrent.dateFormat,
                                            m_settingsCurrent.dateGMT),
@@ -794,8 +799,14 @@ wxFolderView::Update(HeaderInfoList *listing)
       m_FolderCtrl->SetItemState(i, wxLIST_STATE_FOCUSED,
                                  (hi->GetUId() == m_FocusedUId)?
                                  wxLIST_STATE_FOCUSED : 0);
+      if(hi->GetUId() == m_FocusedUId)
+         foundFocus = true;
    }
-
+   if(! foundFocus) // old focused UId is gone, so we use the list
+      // index instead
+      if(focusedIndex != -1)
+         m_FolderCtrl->SetItemState(focusedIndex,
+                                    wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
    String statusMsg;
    statusMsg.Printf(_("Folder '%s'"), m_folderName.c_str());
 

@@ -369,15 +369,44 @@ public:
    virtual int GetStatus(void) const { return m_Status; }
    virtual unsigned long const &GetSize(void) const { return m_Size; }
    virtual size_t SizeOf(void) const { return sizeof(HeaderInfoCC); }
+   /// Return the indentation level for message threading.
+   virtual unsigned GetIndentation() const { return m_Indentation; }
+   /// Set the indentation level for message threading.
+   virtual void SetIndentation(unsigned level) { m_Indentation = level; }
+   /// Assignment operator.
+   HeaderInfo & operator= (const HeaderInfo &);
 
+   HeaderInfoCC();
 protected:
    String m_Subject, m_From, m_Id, m_References;
    int m_Status;
    unsigned long m_Size;
    unsigned long m_Uid;
    time_t m_Date;
+   unsigned m_Indentation;
    friend class MailFolderCC;
 };
+
+HeaderInfoCC::HeaderInfoCC()
+{
+   m_Indentation = 0;
+   // all other fields are filled in by the MailFolderCC when creating
+   // it 
+}
+
+HeaderInfo &
+HeaderInfoCC::operator= ( const HeaderInfo &old)
+{
+   m_Subject = old.GetSubject();
+   m_From = old.GetFrom();
+   m_Date = old.GetDate();
+   m_Id = old.GetUId();
+   m_References = old.GetReferences();
+   m_Status = old.GetStatus();
+   m_Size = old.GetSize();
+   SetIndentation(old.GetIndentation());
+   return *this;
+}
 
 /** This class holds a complete list of all messages in the folder. */
 class HeaderInfoListCC : public HeaderInfoList
@@ -390,7 +419,13 @@ public:
       { return m_NumEntries; }
    /// Returns the n-th entry.
    virtual const HeaderInfo * operator[](size_t n) const
-      { MOcheck(); ASSERT(n < m_NumEntries); return & m_Listing[n]; }
+      {
+         MOcheck(); ASSERT(n < m_NumEntries);
+         if(n >= m_NumEntries)
+            return NULL;
+         else
+            return & m_Listing[n];
+      }
    //@}
    ///@name Implementation
    //@{
@@ -406,8 +441,25 @@ public:
       m_NumEntries = newcount; }
    //@}
 
+   /// Returns an empty list of same size.
+   virtual HeaderInfoList *DuplicateEmpty(void) const
+      {
+         return Create(m_NumEntries);
+      }
+
    static HeaderInfoListCC * Create(size_t n)
       { return new HeaderInfoListCC(n); }
+   /// Swaps two elements:
+   virtual void Swap(size_t index1, size_t index2)
+      {
+         MOcheck();
+         ASSERT(index1 < m_NumEntries);
+         ASSERT(index2 < m_NumEntries);
+         HeaderInfoCC hicc;
+         hicc = m_Listing[index1];
+         m_Listing[index1] = m_Listing[index2];
+         m_Listing[index2] = hicc;
+      }
 protected:
    HeaderInfoListCC(size_t n)
       {
@@ -1380,6 +1432,7 @@ extern "C"
 };
 
 
+/* This is called by the UpdateListing method of the common code. */
 HeaderInfoList *
 MailFolderCC::BuildListing(void)
 {

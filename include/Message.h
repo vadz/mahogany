@@ -251,7 +251,7 @@ public:
 protected:
    /** virtual destructor */
    virtual ~Message() {}
-   GCC_DTOR_WARN_OFF();
+   GCC_DTOR_WARN_OFF
    MOBJECT_NAME(Message)
 };
 

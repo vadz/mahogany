@@ -180,7 +180,7 @@ private:
    int    m_id;
    String m_url;
 
-   GCC_DTOR_WARN_OFF();
+   GCC_DTOR_WARN_OFF
 };
 
 // the popup menu invoked by clicking on an attachment in the mail message

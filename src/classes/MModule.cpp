@@ -316,7 +316,7 @@ private:
    String m_Name, m_Interface, m_ShortDesc,
          m_Desc, m_Version, m_Author;
    MModule *m_Module;
-   GCC_DTOR_WARN_OFF();
+   GCC_DTOR_WARN_OFF
 };
 
 class MModuleListingImpl : public MModuleListing
@@ -348,7 +348,7 @@ protected:
 private:
    MModuleListingEntryImpl *m_entries;
    size_t m_count;
-   GCC_DTOR_WARN_OFF();
+   GCC_DTOR_WARN_OFF
 };
 
 /* static */

@@ -92,7 +92,7 @@ wxString wxIconManager::ms_IconPath = "";
 /// valid filename extensions for icon files
 static const char *wxIconManagerFileExtensions[] =
 { 
-   ".xpm", ".png", ".bmp", ".jpg", NULL
+   ".xpm", ".png", ".bmp", ".jpg",".gif",".pcx",".pnm", NULL
 };
 
 /// how many image handlers do we have
@@ -109,6 +109,8 @@ long wxIconManager::m_wxBitmapHandlers[] =
    wxBITMAP_TYPE_BMP,  //wxGTK
    wxBITMAP_TYPE_JPEG, //wxGTK optional
    wxBITMAP_TYPE_GIF,
+   wxBITMAP_TYPE_PNM,
+   wxBITMAP_TYPE_PCX,
    wxBITMAP_TYPE_TIF,
    wxBITMAP_TYPE_ANY,
    wxBITMAP_TYPE_CUR, 
@@ -119,7 +121,9 @@ long wxIconManager::m_wxBitmapHandlers[] =
 static const char *HandlerNames[]    =
 {
    "xpm", "png", "bmp", "jpg",
-   "gif", "tif",
+   "gif",
+   "pnm", "pcx",
+   "tif",
    "any", "cur", "ico"
 };
 

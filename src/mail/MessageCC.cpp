@@ -246,7 +246,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
 {
    CHECK_DEAD();
    if(! folder)
-      return NULL;
+      return;
 
    STRINGLIST  slist;
    slist.next = NULL;

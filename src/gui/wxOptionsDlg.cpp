@@ -560,7 +560,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #ifdef OS_UNIX
    { gettext_noop("&Image format converter"),     Field_File,    -1                      },
    { gettext_noop("Conversion &graphics format"
-                  ":XPM:PNG:BMP:JPG"),             Field_Combo,   -1 },
+                  ":XPM:PNG:BMP:JPG:GIF:PCX:PNM"),    Field_Combo,   -1 },
 #endif
    { gettext_noop("The following line will be executed each time new mail is received:"),       Field_Message, -1                      },
    { gettext_noop("&New Mail Command"),           Field_File,    -1                      },

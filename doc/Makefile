@@ -42,7 +42,7 @@ install_classdoc:
 pdf:
 	for i in $(FILES_PDF); do $(MAKE) -k $$i; done   # one after another
 
-install:
+install: all
 	if [ -f Mdocs.tar.gz ] ; then gzip -dc < Mdocs.tar.gz | (cd $(DOCDIR) && tar xvf - ); else $(MAKE) install2 ; fi
 
 classdoc: 

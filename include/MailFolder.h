@@ -445,7 +445,14 @@ private:
 };
 
 /** This class essentially maps to the c-client Overview structure,
-    which holds information for showing lists of messages. */
+    which holds information for showing lists of messages.
+
+    IMPORTANT: When sorting messages, the instances of this class will 
+    be copied around in memory bytewise, but not duplicates of the
+    object will be created. So the reference counting in wxString
+    objects should be compatible with this, as at any time only one
+    object exists.
+*/
 class HeaderInfo
 {
 public:
@@ -458,7 +465,16 @@ public:
    virtual int GetStatus(void) const = 0;
    virtual unsigned long const &GetSize(void) const = 0;
    virtual size_t SizeOf(void) const = 0;
+   HeaderInfo() {}
    virtual ~HeaderInfo() {}
+   /// Return the indentation level for message threading.
+   virtual unsigned GetIndentation() const = 0;
+   /// Set the indentation level for message threading.
+   virtual void SetIndentation(unsigned level) = 0;
+private:
+   /// Disallow copy construction
+   HeaderInfo(const HeaderInfo &);
+   GCC_DTOR_WARN_OFF
 };
 
 /** This class holds a complete list of all messages in the folder.
@@ -470,8 +486,12 @@ public:
    virtual size_t Count(void) const = 0;
    /// Returns the n-th entry.
    virtual const HeaderInfo * operator[](size_t n) const = 0;
+   /// Returns the n-th entry.
+   virtual HeaderInfo * operator[](size_t n) = 0;
    /// Returns pointer to array of data:
    virtual HeaderInfo * GetArray(void) = 0;
+   /// Swaps two elements:
+   virtual void Swap(size_t index1, size_t index2) = 0;
    MOBJECT_NAME(HeaderInfoList)
 };
 

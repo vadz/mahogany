@@ -188,7 +188,7 @@ private:
    String   m_ProfilePath;
    /// Destructor, writes back those entries that got changed.
    ~Profile();
-   GCC_DTOR_WARN_OFF();
+   GCC_DTOR_WARN_OFF
    /// this is an empty dummy profile, readonly
    bool     m_IsEmpty;
    /// Is the profile operating in suspended mode?

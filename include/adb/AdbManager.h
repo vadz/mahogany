@@ -104,7 +104,7 @@ private:
 
   static AdbManager *ms_pManager;
 
-  GCC_DTOR_WARN_OFF();
+  GCC_DTOR_WARN_OFF
 };
 
 /**

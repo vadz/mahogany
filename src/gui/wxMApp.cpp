@@ -487,18 +487,8 @@ wxMApp::OnInit()
    else
       m_Locale = NULL;
 
-#if wxUSE_LIBPNG
-   wxImage::AddHandler( new wxPNGHandler );
-#endif
-
-#if wxUSE_LIBJPEG
-   wxImage::AddHandler( new wxJPEGHandler );
-#endif
-
-#if wxUSE_LIBGIF
-   wxImage::AddHandler( new wxGIFHandler );
-#endif
-
+   wxInitAllImageHandlers();
+   
    m_IconManager = new wxIconManager();
 
    m_OnlineManager = wxDialUpManager::Create();   

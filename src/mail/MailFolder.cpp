@@ -48,6 +48,8 @@
  * local classes
  *-------------------------------------------------------------------*/
 
+KBLIST_DEFINE(SizeTList, size_t);
+
 /** a timer class to regularly ping the mailfolder. */
 class MailFolderTimer : public wxTimer
 {
@@ -853,7 +855,7 @@ extern "C"
          break;
          case MSO_THREAD:
          case MSO_THREAD_REV:
-            ASSERT_MSG(0,"threading not implemented yet");
+            ASSERT_MSG(0,"reverse threading not implemented yet");
             break;
          default:
             ASSERT_MSG(0,"unknown sorting criterium");
@@ -862,6 +864,123 @@ extern "C"
       }
       return result;
      }
+}
+
+#define MFCMN_INDENT1_MARKER   1000
+#define MFCMN_INDENT2_MARKER   1001
+
+static void AddDependents(size_t &idx, int level,
+                          int i ,
+                          size_t indices[],
+                          unsigned indents[],
+                          HeaderInfoList *hilp,
+                          SizeTList dependents[])
+{
+   if(level >= MFCMN_INDENT1_MARKER)
+      level = MFCMN_INDENT1_MARKER - 1;
+   
+   SizeTList::iterator it;
+
+   for(it = dependents[i].begin(); it != dependents[i].end(); it++)
+   {
+      size_t idxToAdd = **it;
+      // a non-zero index means, this one has been added already
+      if((*hilp)[idxToAdd]->GetIndentation() != MFCMN_INDENT1_MARKER)
+      {
+         ASSERT(idx < (*hilp).Count());
+         indices[idx] = idxToAdd;
+         indents[idx] = level;
+         (*hilp)[idxToAdd]->SetIndentation(MFCMN_INDENT1_MARKER);
+         idx++;
+         // after adding an element, we need to check if we have to add
+         // any of its own dependents:
+         AddDependents(idx, level+1, idxToAdd, indents, indices, hilp, dependents);
+      }
+   }
+}
+
+
+static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
+{
+   // no need to incref/decref, done in UpdateListing()
+   if((*hilp).Count() <= 1)
+      return; // nothing to be done
+
+   for(size_t i = 0; i < hilp->Count(); i++)
+      (*hilp)[i]->SetIndentation(0);
+   
+   /* We need a list of dependent messages for each entry. */
+   SizeTList  * dependents = new SizeTList[ (*hilp).Count() ];
+
+   for(size_t i = 0; i < (*hilp).Count(); i++)
+   {
+      String id = (*hilp)[i]->GetId();
+      if(id.Length()) // no Id lines in Outbox!
+      {
+         for(size_t j = 0; j < (*hilp).Count(); j++)
+         {
+            String references = (*hilp)[j]->GetReferences();
+            if(references.Find(id) != wxNOT_FOUND)
+            {
+               dependents[i].push_front(new size_t(j));
+               (*hilp)[j]->SetIndentation(MFCMN_INDENT2_MARKER);
+            }
+         }
+      }
+   }
+   /* Now we have all the dependents set up properly and can re-build
+      the list. We now build an array of indices for the new list.
+   */
+
+   size_t * indices = new size_t [(*hilp).Count()];
+   unsigned * indents = new unsigned [(*hilp).Count()];
+   for(size_t i = 0; i < hilp->Count(); i++)
+      indents[i] = 0;
+   
+   size_t idx = 0; // where to store next entry
+   for(size_t i = 0; i < hilp->Count(); i++)
+   {
+      // we mark used indices with a non-0 indentation:
+      if((*hilp)[i]->GetIndentation() == 0)
+      {
+         ASSERT(idx < (*hilp).Count());
+         indices[idx++] = i;
+         (*hilp)[i]->SetIndentation(MFCMN_INDENT1_MARKER);
+         AddDependents(idx, 1, i, indices, indents, hilp, dependents);
+      }
+   }
+   ASSERT(idx == hilp->Count());
+
+   // now we have all indices and can re-sort the listing
+//#if 0
+   for(size_t i = 0; i < hilp->Count(); i++)
+      cerr << "indices: " << indices[i] << "  indents: " << indents[i] 
+           << "  subjects: " << (*hilp)[indices[i]]->GetSubject() << endl;
+//#endif
+   
+   for(size_t i = 0; i < hilp->Count(); i++)
+   {
+      (*hilp)[i]->SetIndentation(indents[i]);
+   }
+   for(size_t i = 0; i < hilp->Count(); i++)
+   {
+      if(indices[i] != i)
+      {
+         size_t a = indices[i];
+         hilp->Swap(a,i);
+         for(size_t j = 0; j < hilp->Count(); j++)
+         {
+            if(indices[j] == a)
+               indices[j] = i;
+            else if(indices[j] == i)
+               indices[j] = a;
+         }
+      }
+   }
+
+   delete [] indices;
+   delete [] indents;
+   delete [] dependents;
 }
 
 static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
@@ -892,7 +1011,7 @@ MailFolderCmn::UpdateListing(void)
    // once, or ApplyFilterRules() will get into an endless recursion
    // when it tries to obtain a listing and then gets called from
    // here.
-   HeaderInfoList *hil = BuildListing();
+   HeaderInfoList * hilp = BuildListing();
    if(CountNewMessages() > 0)
    {
       m_FiltersCausedChange = false;
@@ -901,30 +1020,34 @@ MailFolderCmn::UpdateListing(void)
       if(m_FiltersCausedChange)
       {
         // need to re-build it as it might have changed:
-         SafeDecRef(hil);
-         hil = BuildListing();
+         SafeDecRef(hilp);
+         hilp = BuildListing();
       }
    }
-   if(hil)
+   if(hilp)
    {
-      SortListing(this, hil, m_Config.m_ListingSortOrder);
-
+      SortListing(this, hilp, m_Config.m_ListingSortOrder);
+#ifdef EXPERIMENTAL
+      if(m_Config.m_UseThreading)
+         ThreadMessages(this, hilp);
+#endif
+      
       /* Now check whether we need to send new mail notifications: */
       if(!m_FirstListing && m_GenerateNewMailEvents
-         && hil->Count() > m_OldMessageCount)
+         && (*hilp).Count() > m_OldMessageCount)
       {
-         UIdType n = hil->Count() - m_OldMessageCount;
+         UIdType n = (*hilp).Count() - m_OldMessageCount;
          UIdType *messageIDs = new UIdType[n];
          // Find the new messages:
          UIdType nextIdx = 0;
          int status;
          for ( UIdType i = 0; i < n; i++ )
          {
-            status =(*hil)[i]->GetStatus();
+            status =(*hilp)[i]->GetStatus();
             ASSERT(nextIdx < n);
             if( (status & MSG_STAT_RECENT) &&
                 !(status & MSG_STAT_SEEN))
-               messageIDs[nextIdx++] = (*hil)[i]->GetUId();
+               messageIDs[nextIdx++] = (*hilp)[i]->GetUId();
          }
          ASSERT(nextIdx == n);
 
@@ -936,9 +1059,9 @@ MailFolderCmn::UpdateListing(void)
       MEventManager::Send( new MEventFolderUpdateData (this) );
 
       if(m_UpdateMsgCount) // this will suppress more new mail events
-         m_OldMessageCount = hil->Count();
+         m_OldMessageCount = (*hilp).Count();
 
-      hil->DecRef();
+      hilp->DecRef();
       m_FirstListing = false;
    }
 
@@ -962,7 +1085,10 @@ MailFolderCmn::UpdateConfig(void)
    m_Config.m_ListingSortOrder = READ_CONFIG(GetProfile(), MP_MSGS_SORTBY);
    m_Config.m_ReSortOnChange = READ_CONFIG(GetProfile(),
                                            MP_MSGS_RESORT_ON_CHANGE) != 0;
-   m_Config.m_UpdateInterval = READ_CONFIG(GetProfile(), MP_UPDATEINTERVAL);
+   m_Config.m_UpdateInterval = READ_CONFIG(GetProfile(),
+                                           MP_UPDATEINTERVAL);
+   m_Config.m_UseThreading = READ_CONFIG(GetProfile(), MP_MSGS_USE_THREADING);
+
    m_Timer->Stop();
    m_Timer->Start(m_Config.m_UpdateInterval * 1000);   
 }

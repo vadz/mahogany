@@ -405,7 +405,7 @@ private:
    UIdType m_MessageUId;
    MailFolder *m_MailFolder;
    
-   GCC_DTOR_WARN_OFF();
+   GCC_DTOR_WARN_OFF
 };
 
 // ----------------------------------------------------------------------------

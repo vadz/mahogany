@@ -83,9 +83,9 @@
    // even when it's a ref counted class which deletes itself.
    //
    // suppress it for all MObjectRC derived classes with this macro
-#  define GCC_DTOR_WARN_OFF()    friend class MObjectRC
+#  define GCC_DTOR_WARN_OFF    friend class MObjectRC;
 #else
-#  define GCC_DTOR_WARN_OFF()
+#  define GCC_DTOR_WARN_OFF
 #endif
 
 // Are we using Microsoft Visual C++ ?

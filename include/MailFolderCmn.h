@@ -232,6 +232,8 @@ protected:
       bool m_ReSortOnChange;
       /// Timer update interval for checking folder content
       int m_UpdateInterval;
+      /// do we want to thread messages?
+      bool m_UseThreading;
    } m_Config;
    //@}
 

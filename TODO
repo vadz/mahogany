@@ -28,6 +28,8 @@ $Id$
 		 - remember focused message not by index but by UID
 		   and find it again after re-sort
 
+8	KB	no handler found for this image in html help
+
 8	KB	integrate imap 4.7 and recently received patches
 
 	KB	properties/access shows wrong help

@@ -269,7 +269,7 @@ public:
 struct wxOptionsPageDesc
 {
    String title;        // the page title in the notebook
-   String image;        //          image
+   String image;        // image
 
    int helpId;
 
