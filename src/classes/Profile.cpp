@@ -486,7 +486,9 @@ private:
 
 size_t ProfileImpl::ms_suspendCount = 0;
 
-bool ProfileImpl::ms_usingRegConfig = true;
+#ifdef OS_WIN
+   bool ProfileImpl::ms_usingRegConfig = true;
+#endif // OS_WIN
 
 //@}
 
