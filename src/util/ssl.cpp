@@ -29,20 +29,6 @@
    which are all in "C" */
 extern "C" {
 
-extern long ssl_init_Mahogany()
-#if 1 // VZ: my test code
-{
-   extern void ssl_onceonlyinit(void);
-
-   ssl_onceonlyinit();
-
-   return 0;
-}
-#else
-;
-#endif
-
-
 #define SSL_DEF(returnval, name, args) \
    typedef returnval (* name##_TYPE) args ; \
    name##_TYPE stub_##name = NULL
@@ -145,9 +131,11 @@ bool InitSSL(void) /* FIXME: MT */
    String ssl_dll = READ_APPCONFIG(MP_SSL_DLL_SSL);
    String crypto_dll = READ_APPCONFIG(MP_SSL_DLL_CRYPTO);
 
+#if 0 // there is no status bar anyhow by the time it is called
    STATUSMESSAGE((_("Trying to load '%s' and '%s'..."),
                   crypto_dll.c_str(),
                   ssl_dll.c_str()));
+#endif // 0
 
    bool success = FALSE;
    wxDllType cryptodll = wxDllLoader::LoadLibrary(crypto_dll, &success);
@@ -189,8 +177,9 @@ bool InitSSL(void) /* FIXME: MT */
                      crypto_dll.c_str(),
                      ssl_dll.c_str()));
 
-      ssl_init_Mahogany();
+      ssl_onceonlyinit();
    }
+
    return success;
 }
 

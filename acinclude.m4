@@ -65,7 +65,7 @@ LIBS="$m_save_LIBS"
 done
 ])dnl
 if eval "test \"`echo '$m_cv_lib_'$m_lib_var`\" != no"; then
-  AC_MSG_RESULT(yes)
+  AC_MSG_RESULT(yes (in $j))
   eval eval "`echo '$m_cv_lib_'$m_lib_var`"
   dnl  LIBS="`echo '$libpath_'$m_lib_var` -l$1 $LIBS"
   ifelse([$4], ,
@@ -109,7 +109,7 @@ AC_DEFUN(M_CHECK_MYHEADER,
       ]
     )
     if eval "test \"`echo '$m_cv_header_'$m_safe`\" != no"; then
-       AC_MSG_RESULT(yes)
+       AC_MSG_RESULT(yes (in $j))
        eval eval "`echo '$m_cv_header_'$m_safe`"
        eval "CPPFLAGS=\"`echo '$headerpath_'$m_safe` $CPPFLAGS\""
        ifelse([$3], , :, [$3])

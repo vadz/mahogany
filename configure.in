@@ -12,15 +12,12 @@ else	AC_MSG_ERROR([Sorry, this build system will not work on a
 	that can be worked around.])
 fi
 
-case "$OSTYPE" in '')
-	UNAME=`uname`
-	AC_MSG_ERROR([The system variable OSTYPE has not been set
-	Please set it every time before compiling on this system
-	A possible value for this system might be:
-	setenv OSTYPE $UNAME        for csh as a SHELL
-	export OSTYPE=$UNAME        for sh as SHELL
-	Please set this and restart.])
-esac
+dnl OSTYPE may be set by the user to override the default which is just uname
+if test "x$OSTYPE" = "x"; then
+        OSTYPE=`uname`
+fi
+
+echo "Configuring Mahogany for $OSTYPE"
 
 AC_CONFIG_HEADER(include/config.h)
 AC_CONFIG_AUX_DIR(extra/scripts)
@@ -352,7 +349,7 @@ AC_STRUCT_TM
 AC_CHECK_FUNCS(strsep)
 
 dnl --------------------------------------------------------------------------
-dnl check for the overridable options
+dnl check for the debugging options
 dnl --------------------------------------------------------------------------
 
 dnl memory debug libraries get tested last to make sure they are linked last
@@ -410,6 +407,10 @@ case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
 1.no.yes)	MYFLAGS="$MYFLAGS -g" ;;
 esac
 
+dnl --------------------------------------------------------------------------
+dnl check for misc other compilation options
+dnl --------------------------------------------------------------------------
+
 case "$USE_OPT" in
 1)	MYFLAGS="$MYFLAGS -O2" ;;
 *)	MYFLAGS="$MYFLAGS -O0" ;;
@@ -438,93 +439,124 @@ case "$EXPERIMENTAL" in '') ;; *)
 esac
 AC_SUBST(MAKE_EXPERIMENTAL)
 
-dnl precompiled headers
-case "$USE_PCH" in 1)
-	AC_DEFINE(USE_PCH)
-esac
+dnl --------------------------------------------------------------------------
+dnl check for SSL
+dnl --------------------------------------------------------------------------
 
 case "$USE_SSL" in
-0)	ssl_option=nope ;;
-1|/*)	AC_MSG_CHECKING(for openssl/ssl.h)
+0)	ssl_option=no
+	;;
+
+1|/*)	dnl be smart: if --with-ssl value already ends in include, don't do
+	dnl anything, but if it doesn't then add it
 	case "$USE_SSL" in
 	/*/include) ssl_inc="$USE_SSL" ;;
 	/*)	ssl_inc="$USE_SSL $USE_SSL/include" ;;
 	*)	ssl_inc="" ;;
 	esac
-	ssl_option=no
-	for j in $ssl_inc /include \
-		/usr/include /usr/ssl/include \
-		/usr/local/include /usr/local/ssl/include \
-		/home/local/include /home/local/ssl/include
-	do	if test -f "$j"/openssl/ssl.h
-		then	ssl_option="$j"
-			break
-		fi
-	done
-	AC_MSG_RESULT($ssl_option)
-	AC_CHECK_FUNC(socket,,
-		AC_CHECK_LIB(socket,socket,, ssl_option=no))
-	AC_CHECK_FUNC(gethostname,,
-		AC_CHECK_LIB(resolv,gethostname,, ssl_option=no))
-	AC_CHECK_FUNC(gethostbyname,,
-		AC_CHECK_LIB(nsl,gethostbyname,, ssl_option=no))
+
+	M_CHECK_MYHEADER(openssl/ssl.h,
+	[ \
+		$ssl_inc \
+		$prefix/include \
+		/include \
+		/usr/include \
+		/usr/ssl/include \
+		/usr/local/include \
+		/usr/local/ssl/include \
+		/home/local/include \
+		/home/local/ssl/include \
+	],
+        [
+	   ssl_option=yes
+           ssl_inc=`echo $headerpath_openssl_ssl_h | sed 's/^-I//'`
+        ],
+	   ssl_option=no
+	)
+
+	dnl only test for other functions if ssl.h was found
+	if test "$ssl_option" != "no"; then
+	    AC_CHECK_FUNC(socket,,
+	            AC_CHECK_LIB(socket,socket,, ssl_option=no))
+	    AC_CHECK_FUNC(gethostname,,
+	            AC_CHECK_LIB(resolv,gethostname,, ssl_option=no))
+	    AC_CHECK_FUNC(gethostbyname,,
+	            AC_CHECK_LIB(nsl,gethostbyname,, ssl_option=no))
+	fi
+
 	case "$ssl_option" in
-	*)  dnl must check if ssl needs libcrypto
+	no*) 	AC_MSG_WARN([Cannot find libraries for SSL - SSL support disabled])
+		;;
+	*)  	dnl must check if ssl needs libcrypto
 		LIBS_SAVE=$LIBS
 		LIBS="$LIBS -lssl"
-		AC_CACHE_CHECK(if libssl needs libcrypto,
-			m_cv_ssl_needs_crypto,
-		[AC_TRY_LINK([#include "$ssl_option/openssl/ssl.h"],
-			[SSLv2_client_method(); return 0;],m_cv_ssl_needs_crypto="no");
-		case "$m_cv_ssl_needs_crypto" in
-		no) ;;
-		*)  LIBS="$LIBS -lcrypto"
-			AC_TRY_LINK([#include "$ssl_option/openssl/ssl.h"],
-				[SSLv2_client_method(); return 0;],m_cv_ssl_needs_crypto="yes")
-		;;
-		esac])
+		AC_CACHE_CHECK(if libssl needs libcrypto, m_cv_ssl_needs_crypto,
+                    [
+                        dnl FIXME why AC_TRY_LINK and not AC_CHECK_LIB? (VZ)
+                        AC_TRY_LINK([#include <openssl/ssl.h>],
+                            [
+                                    SSLv2_client_method();
+                                    return 0;
+                            ],
+                            m_cv_ssl_needs_crypto="no",
+			    m_cv_ssl_needs_crypto="yes"
+                        )
+
+                        if test "$m_cv_ssl_needs_crypto" = "yes"; then
+                            LIBS="$LIBS -lcrypto"
+                            AC_TRY_LINK([#include <openssl/ssl.h>],
+                                [
+                                        SSLv2_client_method();
+                                        return 0;
+                                ],
+                                m_cv_ssl_needs_crypto="yes"
+                            )
+                        fi
+                    ]
+                )
 		LIBS="$LIBS_SAVE";;
-	no) ;;
-	nope) ;;
 	esac
 	;;
-*)	AC_MSG_WARN([Did not understand --with-ssl=$USE_SSL])
-	ssl_option=nope ;;
+*)	AC_MSG_WARN([--with-ssl=$USE_SSL ignored, you must specify absolute path])
+	ssl_option=no ;;
 esac
 MAKE_USESSL=
-CCLIENT_EXTRAAUTHENTICATORS=
-CCLIENT_EXTRACFLAGS=
-case "$ssl_option" in
-nope)	;;
-no)	AC_MSG_WARN([Cannot find libraries for SSL - SSL support disabled])
-	m_cv_USE_SSL=0 ;;
-/*)	m_cv_USE_SSL="$ssl_option"
+IMAP_SPECIALAUTHENTICATORS=
+IMAP_CPPFLAGS=
+
+if test "$ssl_option" = "yes"; then
 	MAKE_USESSL="USESSL=yes"
-	CCLIENT_EXTRAAUTHENTICATORS="$CCLIENT_EXTRAAUTHENTICATORS ssl"
-	AC_DEFINE(USE_SSL)dnl
-	# We assume no idea/no dsa/no rsa as this is easiest
-	# to compile. It doesn't matter anyway as we load openssl
-	# later, but we must be able to compile the header file.
-	CCLIENT_EXTRACFLAGS="-DNO_IDEA -DNO_DSA -DNO_RSA"
-	case "$ssl_option" in
+	IMAP_SPECIALAUTHENTICATORS="$IMAP_SPECIALAUTHENTICATORS ssl"
+	AC_DEFINE(USE_SSL)
+
+	dnl We assume no IDEA/no DSA as this is easiest to compile. It doesn't
+	dnl matter anyway as we load openssl later, but we must be able to
+	dnl compile the header file (note that we can't give -DNO_RSA any longer
+	dnl (starting with imap2000) or auth_ssl.cpp wouldn't compile!)
+	IMAP_CPPFLAGS="-DNO_IDEA -DNO_DSA"
+
+        dnl have to give the location of SSL headers to cclient if it is in a
+        dnl non standard place
+	case "$ssl_inc" in
 	    /usr/include)
-	    ;;
+	        ;;
 	    *)
-		CCLIENT_EXTRACFLAGS="-I$ssl_option $CCLIENT_EXTRACFLAGS"
-		CPPFLAGS="$CPPFLAGS -I$ssl_option"
+	    	dnl imap2000 includes <ssl.h> and not <openssl/ssl.h> but SSL
+		dnl headers themselves use the second form, so we need both
+		IMAP_CPPFLAGS="-I$ssl_inc -I$ssl_inc/openssl $IMAP_CPPFLAGS"
 	esac
+
+	dnl although we're loading libssl dynamically, cclient uses it
+	dnl statically, so we still need it in LIBS
 	LIBS="$LIBS -lssl"
-	case "$m_cv_ssl_needs_crypto" in
-	yes) LIBS="$LIBS -lcrypto";;
-	*);;
-	esac
-	;;
-*)	AC_MSG_ERROR([Internal configure problem; we shouldn't get here])
-	;;
-esac
+	if test "$m_cv_ssl_needs_crypto" = "yes"; then
+            LIBS="$LIBS -lcrypto"
+        fi
+fi
+
 AC_SUBST(MAKE_USESSL)
-AC_SUBST(CCLIENT_EXTRAAUTHENTICATORS)
-AC_SUBST(CCLIENT_EXTRACFLAGS)
+AC_SUBST(IMAP_SPECIALAUTHENTICATORS)
+AC_SUBST(IMAP_CPPFLAGS)
 
 dnl --------------------------------------------------------------------------
 dnl check for other libraries
@@ -571,7 +603,9 @@ dnl --------------------------------------------------------------------------
 
 case "$USE_PYTHON" in 1)
    M_CHECK_MYHEADER(Python.h,
-       [ /usr \
+       [ \
+       	 $prefix/include \
+       	 /usr \
          /usr/include \
          /usr/include/python1.5 \
          /usr/local \
