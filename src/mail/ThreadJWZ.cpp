@@ -1450,6 +1450,11 @@ void Threader::gatherSubjects()
 #endif // wxUSE_REGEX/!wxUSE_REGEX
       {
          // Make this message be a child of the other.
+
+         // XNOFIXME: if c is a dummy node, shouldn't we include its children
+         // instead of the node itself ? It works corectly as is but I suspect
+         // that dummy dones are strictly useless in the ThreadData, and only
+         // make the code more complicated. To be studied.
          old->addAsChild(c);
       }
       else
