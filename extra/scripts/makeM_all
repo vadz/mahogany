@@ -607,7 +607,7 @@ fi
 # .tar.gz
 ###########################
 if [ "$DEBUG" = "yes" ] ; then
-	DEBUGOPTS="--with-debug"
+	DEBUGOPTS="--with-debug --with-wxdebug"
 else
 	DEBUGOPTS="--without-debug"
 fi
