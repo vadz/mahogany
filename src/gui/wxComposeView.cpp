@@ -761,8 +761,9 @@ AttachmentMenu::OnCommandEvent(wxCommandEvent &event)
             }
 
             wxString content;
-            const size_t len = file.Length();
-            if ( file.Read(wxStringBuffer(content, len + 1), len) != len )
+            const wxFileOffset len = file.Length();
+            if ( len == wxInvalidOffset ||
+                  file.Read(wxStringBuffer(content, len + 1), len) != len )
             {
                wxLogError(_("Failed to read attachment data."));
                break;
