@@ -6,6 +6,7 @@
 Release 0.64 '???' ???, 2001
 -------------------------------------------------------------------------------
 
+19.06.01 XN: threading takes into account In-Reply-To, not only References
 19.06.01 VZ: POP3 speedup: only retrieve headers, not entire messages
 
 Release 0.63 'Saugus' June 14, 2001
