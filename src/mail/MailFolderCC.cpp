@@ -639,34 +639,6 @@ MailFolderCC::mm_fatal(char *str)
    LOGMESSAGE((M_LOG_ERROR, Str(msg)));
 }
 
-#if 0
-//-------------------------------------------------------------------
-
-MailFolderPopCC::MailFolderPopCC(String const &name)
-   : MailFolderCC(name)
-{
-   SetType(MFolder::POP);
-   Open();
-}
-
-void
-MailFolderPopCC::Create(String const &name)
-{
-   MailFolderCC::Create(name);
-   SetType(MFolder::POP);
-   Open();
-}
-
-bool
-MailFolderPopCC::Open(void)
-{
-   String mboxname = "{";
-   mboxname += READ_CONFIG(GetProfile(), MP_POP_HOST);
-   mboxname +="/pop3}";
-
-   return MailFolderCC::Open(mboxname.c_str());
-}
-#endif
 
 
 // the callbacks:

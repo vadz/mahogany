@@ -193,6 +193,18 @@ String strutil_extract_formatspec(const char *format);
     || c == '%' || c == '~' || c == '!' || c == '?' \
     || c == '*' || c == '+' || c == '$' || c == '@' )
 
+/// If path is an absolute path, return true.
+bool strutil_isabsolutepath(const String &path);
+
+/** Expands tilde in a pathname. A tilde followed by a slash is the
+    user's home directory, taken from the environment. Tilde+name will 
+    be expanded to /home/name. This is not looked up in /etc/passwd -
+    so it might be wrong!
+    @param ipath the path to look up
+    @return the expanded path
+*/
+String strutil_expandpath(const String &ipath);
+
 
 #ifndef     HAVE_STRSEP
       /// implements the strsep() function found on some Unix systems

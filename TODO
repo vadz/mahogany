@@ -12,12 +12,12 @@ $Id$
 - sequence invalid bug on close of folder
 - test sl5/slx abiguity in c-client: use -lshadow on libc5 and -lcrypt on glibc2?
 - SentMail folder path should be relative - broken
-- reply mail does not quote original mail but inserts junk
+- reply mail does not quote original mail but inserts junk (fixed?)
 - reply/forward buttons for messageview/folderview
 - make AdbEdit textctrl accept pasted text
 - make AdbEdit auto-generate a formatted name from first/family-name and prefix/title.
 - add Picture field to Adb
-- update FolderView if mailbox has shrunk
+- update FolderView if mailbox has shrunk  (which callback gets called?)
 
 - New Mail indicator
 - Check for new mail button

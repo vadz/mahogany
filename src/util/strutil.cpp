@@ -379,3 +379,45 @@ strutil_getfilename(const String& path)
       return path.c_str()+ nPos1 + 1;
 }
 
+bool
+strutil_isabsolutepath(const String &path)
+{
+   if(strutil_isempty(path))
+      return false;
+#ifdef OS_UNIX
+   if(path.c_str()[0] == DIR_SEPARATOR || path.c_str()[1] == '~')
+      return true;
+#elif defined ( OS_WIN )
+#   error "How do we handle this?"
+#endif
+   return false;
+}
+
+String
+strutil_expandpath(const String &ipath)
+{
+   String path;
+   
+   if(strutil_isempty(path))
+      return "";
+
+   if(path.c_str()[0]=='~')
+   {
+      if{path.c_str()[1] == DIR_SEPARRATOR)
+      {
+         path = getenv("HOME");
+         path << DIR_SEPARATOR;
+      }
+      else
+      {
+         String user =
+            strutil_before(String(path.c_str()+1),DIR_SEPARATOR);
+         // FIXME: crode fix, should go through /etc/passwd and look it 
+         // up... - but do we really need that?
+         path << "/home/" << user << DIR_SEPARATOR;
+      }
+   }
+   path << ipath;
+   
+   return path;
+}
