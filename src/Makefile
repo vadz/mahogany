@@ -118,16 +118,16 @@ libM.so: $(MOBJS)
 
 # build the binary which is statically linked to wxGTK, dynamically to
 # everything else
-quartstatic: $(MOBJS)
+quartstatic: $(MOBJS) $(MSOS) $(M_BUNDLE)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS_QUARTSTATIC) $(LIBS)
 
 # build the binary which is statically linked to wxGTK and GTK+, dynamically
 # to everything else
-semistatic: $(MOBJS)
+semistatic: $(MOBJS) $(MSOS) $(M_BUNDLE)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS_SEMISTATIC) $(LIBS)
 
 # build a (completely) statically linked binary
-static: $(MOBJS)
+static: $(MOBJS) $(M_BUNDLE)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) -static $(GUI_LIBS_STATIC) $(LIBS)
 
 doc:
