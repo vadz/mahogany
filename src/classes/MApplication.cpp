@@ -561,6 +561,26 @@ MAppBase::IsOkToClose(const wxMFrame *frame) const
    return m_framesOkToClose && m_framesOkToClose->Index(frame) != wxNOT_FOUND;
 }
 
+void
+MAppBase::Exit(bool ask)
+{
+   // in case it's still opened...
+   CloseSplash();
+
+   if ( !ask || CanClose() )
+   {
+      // this will close all our window and thus terminate the application
+      DoExit();
+   }
+   else
+   {
+      // when we will try to close the next time, we shouldn't assume that
+      // these frames still don't mind being closed - may be the user will
+      // modify the compose view contents or something else changes
+      m_framesOkToClose->Empty();
+   }
+}
+
 bool
 MAppBase::OnMEvent(MEventData& event)
 {

@@ -41,8 +41,6 @@ public:
 
    // override this to return true only if all frames can close
    virtual bool CanClose() const;
-   // and this to effectively close all top level frames
-   virtual void Exit();
 
    // wxWin calls these functions to start/run/stop the application
    virtual bool OnInit();
@@ -66,6 +64,9 @@ public:
    wxPageSetupData * GetPageSetupData(void) { return m_PageSetupData; }
 
 private:
+   // implement base class pure virtual
+   virtual void DoExit();
+
    /// an iconmanager instance
    wxIconManager *m_IconManager;
    /// a help controller instance

@@ -91,9 +91,9 @@ public:
      */
    bool IsOkToClose(const wxMFrame *frame) const;
 
-   /** ends the application (unless the user cancels shutdown)
+   /** ends the application (unless ask == TRUE and the user cancels shutdown)
      */
-   virtual void Exit() { }
+   void Exit(bool ask = TRUE);
 
    /** Gets help for a specific topic.
        @param id help id from MHelp.h
@@ -154,7 +154,11 @@ public:
 
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
+
 protected:
+   /// really (and unconditionally) terminate the app
+   virtual void DoExit() = 0;
+
    /** Checks some global configuration settings and makes sure they
        have sensible values. Especially important when M is run for
        the first time.

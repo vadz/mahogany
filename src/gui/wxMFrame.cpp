@@ -266,6 +266,7 @@ wxMFrame::OnMenuCommand(int id)
          // don't ask it again
          mApplication->AddToFramesOkToClose(this);
 
+         // exit the application if other frames don't object
          mApplication->Exit();
       }
       break;
@@ -374,10 +375,10 @@ wxMFrame::OnPrintSetup()
 #endif
    wxPrintDialogData printDialogData(* ((wxMApp *)mApplication)->GetPrintData());
    wxPrintDialog printerDialog(this, & printDialogData);
-   
+
    printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
    printerDialog.ShowModal();
-   
+
    (*((wxMApp *)mApplication)->GetPrintData())
       = printerDialog.GetPrintDialogData().GetPrintData();
 }
@@ -385,13 +386,13 @@ wxMFrame::OnPrintSetup()
 void wxMFrame::OnPrintSetupPS()
 {
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-   
+
    wxPrintDialogData printDialogData(* ((wxMApp *)mApplication)->GetPrintData());
    wxPrintDialog printerDialog(this, & printDialogData);
-   
+
    printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
    printerDialog.ShowModal();
-   
+
    (*((wxMApp *)mApplication)->GetPrintData())
       = printerDialog.GetPrintDialogData().GetPrintData();
 }
@@ -406,7 +407,7 @@ void wxMFrame::OnPageSetup()
                                         ((wxMApp *)mApplication)->GetPageSetupData()
                                         );
     pageSetupDialog.ShowModal();
-    
+
     *((wxMApp *)mApplication)->GetPrintData()
        = pageSetupDialog.GetPageSetupData().GetPrintData();
     *((wxMApp *)mApplication)->GetPageSetupData()

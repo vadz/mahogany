@@ -233,11 +233,8 @@ wxMApp::CanClose() const
 
 // do close the app by closing all frames
 void
-wxMApp::Exit()
+wxMApp::DoExit()
 {
-   // in case it's still opened...
-   CloseSplash();
-
    wxWindowList::Node *node = wxTopLevelWindows.GetFirst();
    while ( node )
    {
@@ -248,7 +245,8 @@ wxMApp::Exit()
       {
          wxMFrame *frame = (wxMFrame *)win;
 
-         frame->Close();
+         // force closing the frame
+         frame->Close(TRUE);
       }
    }
 }
