@@ -69,7 +69,13 @@ CHECK:- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   done-->  // check whether enc8bit is needed or not
 
 
+BUG:
+- MessageCC::GetBody() can return with body/envelope == NULL if
+  message no longer exists. Just got a crash in Refresh().
+  Add a CHECK() wherever it is called.
+
 TODO:
+- add auto collection to compose view
 - add a popup dialog to edit message headers in composeview
 - some html mail import/filtering of tags (easy, quick and dirty)
 - copying message to non-existing folder gives error message but works

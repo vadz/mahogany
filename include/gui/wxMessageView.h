@@ -185,7 +185,7 @@ protected:
       /// Autocollect only email addresses with complete name?
       int autocollectNamed;
       /// Name of the ADB book to use for autocollect.
-      String autoCollectBookName;
+      String autocollectBookName;
 #ifdef OS_UNIX
       /// Where to find AFM files.
       String afmpath;

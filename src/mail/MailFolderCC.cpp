@@ -564,7 +564,7 @@ MailFolderCC::UpdateCount(void)
       unsigned long *messageIDs = new unsigned long[n];
       // FIXME: this will need to be changed when we sort message
       for ( unsigned long i = 0; i < n; i++ )
-         messageIDs[i] = m_Listing[oldnum + i + 1].GetUId();
+         messageIDs[i] = m_Listing[oldnum + i].GetUId();
 
       MEventNewMailData data(this, n, messageIDs);
       MEventManager::Send(data);
