@@ -1130,7 +1130,7 @@ enum MFolderIndex
 /// do automatic word wrap in message view?
 #define MP_VIEW_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for message view (set to -1 to disable it)
-#define   MP_VIEW_WRAPMARGIN_D      80
+#define   MP_VIEW_WRAPMARGIN_D      100
 /// show TEXT/PLAIN as inlined text?
 #define   MP_PLAIN_IS_TEXT_D      1l
 /// show MESSAGE/RFC822 as text?
