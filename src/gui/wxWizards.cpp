@@ -623,6 +623,11 @@ MWizardPageId
 MWizard_CreateFolder_TypePage::GetNextPageId() const
 {
    int sel = m_TypeCtrl->GetSelection();
+
+   // assume first selection if we don't have any - we do have to return
+   // some next page
+   if ( sel == -1 )
+       sel = 0;
    sel += MWizard_CreateFolder_FirstType;
 
    CHECK(sel >= MWizard_CreateFolder_FirstType

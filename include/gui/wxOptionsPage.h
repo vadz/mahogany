@@ -147,12 +147,15 @@ public:
 
    // callbacks
       // called when text zone content changes
-   void OnChange(wxEvent&);
+   void OnChange(wxEvent& event);
       // called when a {radio/combo/check}box value changes
    void OnControlChange(wxEvent& event);
 
    // enable/disable controls (better than OnUpdateUI here)
    void UpdateUI();
+
+   // called when any control changes, returns TRUE if processed
+   bool OnChangeCommon(wxControl *control);
 
    /// Returns the numeric help id.
    int HelpId(void) const { return m_HelpId; }

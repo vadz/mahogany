@@ -1207,18 +1207,15 @@ void wxOptionsPage::CreateControls()
    }
 }
 
-void wxOptionsPage::OnChange(wxEvent& event)
+bool wxOptionsPage::OnChangeCommon(wxControl *control)
 {
-   wxControl *control = (wxControl *)event.GetEventObject();
    int index = m_aControls.Index(control);
 
    if ( index == wxNOT_FOUND )
    {
       // we can get events from the text controls from "file open" dialog here
       // too - just skip them silently
-      event.Skip();
-
-      return;
+      return FALSE;
    }
 
    m_aDirtyFlags[(size_t)index] = true;
@@ -1232,9 +1229,7 @@ void wxOptionsPage::OnChange(wxEvent& event)
       // we don't put an assert here because this does happen when we're a
       // page in the folder properties dialog, but we must have event.Skip()
       // here to allow the base class version mark the dialog as being dirty
-      event.Skip();
-
-      return;
+      return FALSE;
    }
 
    if ( m_aVitalControls.Index(control) != -1 )
@@ -1244,6 +1239,17 @@ void wxOptionsPage::OnChange(wxEvent& event)
 
    if ( m_aRestartControls.Index(control) != -1 )
       dialog->SetGiveRestartWarning();
+
+   return TRUE;
+}
+
+void wxOptionsPage::OnChange(wxEvent& event)
+{
+   if ( !OnChangeCommon((wxControl *)event.GetEventObject()) )
+   {
+      // not our event
+      event.Skip();
+   }
 }
 
 void wxOptionsPage::OnControlChange(wxEvent& event)
@@ -1968,7 +1974,7 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
       if ( IsDirty(ConfigField_StatusFormat_StatusBar) ||
            IsDirty(ConfigField_StatusFormat_TitleBar) )
       {
-         // TODO: send the folder statyus change event
+         // TODO: send the folder status change event
       }
    }
 
@@ -2012,7 +2018,7 @@ void wxOptionsPageFolders::OnNewFolder(wxCommandEvent& event)
       // ok, do add it
       listbox->Append(str);
 
-      wxOptionsPage::OnChange(event);
+      wxOptionsPage::OnChangeCommon(listbox);
    }
 }
 
@@ -2035,7 +2041,7 @@ void wxOptionsPageFolders::OnDeleteFolder(wxCommandEvent& event)
    wxCHECK_RET( nSel != -1, "should be disabled" );
 
    l->Delete(nSel);
-   wxOptionsPage::OnChange(event);
+   wxOptionsPage::OnChangeCommon(l);
 }
 
 void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
