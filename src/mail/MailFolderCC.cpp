@@ -2240,13 +2240,20 @@ MailFolderCC::Open(OpenMode openmode)
       if ( !m_MailStream && tryOpen )
       {
          // try to reuse an existing stream if possible
-         ServerInfoEntryCC *server = ServerInfoEntryCC::Get(m_mfolder);
+         MAILSTREAM *stream = NIL;
+         if ( IsReusableFolder(m_mfolder) )
+         {
+            ServerInfoEntryCC *server = ServerInfoEntryCC::Get(m_mfolder);
+            if ( server )
+            {
+               stream = server->GetStream();
+            }
+         }
 
          wxLogTrace(TRACE_MF_CALLS, "Opening MailFolderCC '%s'.",
                     m_ImapSpec.c_str());
 
-         m_MailStream = MailOpen(server ? server->GetStream() : NIL,
-                                 m_ImapSpec, ccOptions);
+         m_MailStream = MailOpen(stream, m_ImapSpec, ccOptions);
       }
    } // end of cclient lock block
 
