@@ -55,6 +55,14 @@
 #include <wx/regex.h>   // wxRegEx::Flags
 
 // ----------------------------------------------------------------------------
+// global variables
+// ----------------------------------------------------------------------------
+
+// this is exquisitely ugly but I don't see any other way to return any
+// information from the spam test functions so we just use a global flag :-(
+static String gs_spamTest;                // MT-FIXME
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -1957,7 +1965,7 @@ static bool CheckSubjectForJunkAtEnd(const String& subject)
 
    // start of the tail
    const wxChar * const start = p;
-   while ( *p && (wxIsalnum(*p) || *p == _T('-') || *p == _T('_')) )
+   while ( *p && (wxIsalnum(*p) || wxStrchr(_T("-_{}+"), *p)) )
       p++;
 
    // only junk (and enough of it) until the end?
@@ -2154,25 +2162,26 @@ static bool CheckForHTMLOnly(const Message *msg)
 // check if we have a message with "suspicious" MIME structure
 static bool CheckForSuspiciousMIME(const Message *msg)
 {
-   // we consider multipart/alternative message with one part only suspicious:
-   // although formally valid, there is really no legitimate reason to send
-   // them
+   // we consider multipart messages with only one part suspicious: although
+   // formally valid, there is really no legitimate reason to send them
    //
-   // note that although other multipart messages with a single are weird too,
-   // there *is* some reason to send them, namely to protect the Base 64
-   // encoded parts from being corrupted by the mailing list trailers and
-   // although no client known to me does this currently it may happen in the
-   // future
+   // the sole exception is for multipart/mixed messages with a single part:
+   // although they are weird too, there *is* some reason to send them, namely
+   // to protect the Base 64 encoded parts from being corrupted by the mailing
+   // list trailers and although no client known to me does this currently it
+   // may happen in the future
    const MimePart *part = msg->GetTopMimePart();
-   if ( !part || 
-            part->GetType() != MimeType(MimeType::MULTIPART, "alternative") )
+   if ( !part ||
+            part->GetType().GetPrimary() != MimeType::MULTIPART ||
+               part->GetType().GetSubType() == _T("MIXED") )
    {
-      // not multipart/alternative at all
+      // either not multipart at all or multipart/mixed which we don't check
       return false;
    }
 
    // only return true if we have exactly one subpart
    const MimePart *subpart = part->GetNested();
+
    return subpart && !subpart->GetNext();
 }
 
@@ -2212,54 +2221,69 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
 
    String value;
 
-   bool rc = false;
-   for ( size_t n = 0; n < count && !rc; n++ )
+   gs_spamTest.clear();
+   for ( size_t n = 0; n < count && gs_spamTest.empty(); n++ )
    {
       const wxString& test = tests[n];
       if ( test == SPAM_TEST_SUBJ8BIT )
       {
-         rc = CheckSubjectFor8Bit(msg->Subject());
+         if ( CheckSubjectFor8Bit(msg->Subject()) )
+            gs_spamTest = _("8 bit subject");
       }
       else if ( test == SPAM_TEST_SUBJCAPS )
       {
-         rc = CheckSubjectForCapitals(msg->Subject());
+         if ( CheckSubjectForCapitals(msg->Subject()) )
+            gs_spamTest = _("only caps in subject");
       }
       else if ( test == SPAM_TEST_SUBJENDJUNK )
       {
-         rc = CheckSubjectForJunkAtEnd(msg->Subject());
+         if ( CheckSubjectForJunkAtEnd(msg->Subject()) )
+            gs_spamTest = _("junk at end of subject");
       }
       else if ( test == SPAM_TEST_KOREAN )
       {
          // detect all Korean charsets -- and do it for all MIME parts, not
          // just the top level one
-         rc = CheckMimePartForKoreanCSet(msg->GetTopMimePart());
+         if ( CheckMimePartForKoreanCSet(msg->GetTopMimePart()) )
+            gs_spamTest = _("message in Korean");
       }
       else if ( test == SPAM_TEST_SPAMASSASSIN )
       {
          // SpamAssassin adds header "X-Spam-Status: Yes" to all (probably)
          // detected spams
-         rc = msg->GetHeaderLine("X-Spam-Status", value) &&
-                  CheckXSpamStatus(value);
+         if ( msg->GetHeaderLine("X-Spam-Status", value) &&
+                  CheckXSpamStatus(value) )
+         {
+            gs_spamTest = _("tagged by SpamAssassin");
+         }
       }
       else if ( test == SPAM_TEST_XAUTHWARN )
       {
          // unfortunately not only spams have this header but we consider that
          // only spammers change their address in such way
-         rc = msg->GetHeaderLine("X-Authentication-Warning", value) &&
-                  CheckXAuthWarning(value);
+         if ( msg->GetHeaderLine("X-Authentication-Warning", value) &&
+                  CheckXAuthWarning(value) )
+         {
+            gs_spamTest = _("contains X-Authentication-Warning");
+         }
       }
       else if ( test == SPAM_TEST_RECEIVED )
       {
-         rc = msg->GetHeaderLine("Received", value) &&
-                  CheckReceivedHeaders(value);
+         if ( msg->GetHeaderLine("Received", value) &&
+                  CheckReceivedHeaders(value) )
+         {
+            gs_spamTest = _("suspicious \"Received:\"");
+         }
       }
       else if ( test == SPAM_TEST_MIME )
       {
-         rc = CheckForSuspiciousMIME(msg.Get());
+         if ( CheckForSuspiciousMIME(msg.Get()) )
+            gs_spamTest = _("suspicious MIME structure");
       }
       else if ( test == SPAM_TEST_HTML )
       {
-         rc = CheckForHTMLOnly(msg.Get());
+         if ( CheckForHTMLOnly(msg.Get()) )
+            gs_spamTest = _("pure HTML content");
       }
 #ifdef USE_RBL
       else if ( test == SPAM_TEST_RBL )
@@ -2269,6 +2293,7 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
          int a,b,c,d;
          String testHeader = value;
 
+         bool rc = false;
          while ( !rc && !testHeader.empty() )
          {
             if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
@@ -2304,13 +2329,16 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
          }
 
          /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
+
+         if ( rc )
+            gs_spamTest = _("blacklisted by RBL");
       }
 #endif // USE_RBL
       //else: simply ignore unknown tests, don't complain as it would be
       //      too annoying probably
    }
 
-   return rc;
+   return !gs_spamTest.empty();
 }
 
 static Value func_msgbox(ArgList *args, FilterRuleImpl *p)
@@ -3172,13 +3200,24 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
 
             rc |= FilterRule::Error;
          }
-         else
+         else // filter executed ok
          {
+            // if it was caught as a spam, tell the user why do we think so
+            if ( !gs_spamTest.empty() )
+            {
+               textExtra += String::Format
+                                    (
+                                       _("recognized as spam (%s); "),
+                                       gs_spamTest.c_str()
+                                    );
+               gs_spamTest.clear();
+            }
+
             bool wasDeleted = (m_operation & Deleted) != 0;
             if ( !m_copiedTo.empty() )
             {
                textExtra << (wasDeleted ? _("moved to ") : _("copied to "))
-                      << m_copiedTo;
+                         << m_copiedTo;
 
                m_copiedTo.clear();
             }
