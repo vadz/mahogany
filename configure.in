@@ -39,6 +39,64 @@ else
 fi
 ])
 
+dnl AC_CHECK_MYLIB(LIBRARY, FUNCTION, LIBPATHLIST [, ACTION-IF-FOUND 
+dnl            [, ACTION-IF-NOT-FOUND [, OTHER-LIBRARIES]]])
+
+AC_DEFUN(AC_CHECK_MYLIB,
+[AC_MSG_CHECKING([for $2 in -l$1])
+dnl Use a cache variable name containing both the library and function name,
+dnl because the test really is for library $1 defining function $2, not
+dnl just for library $1.  Separate tests with the same $1 and different $2s
+dnl may have different results.
+ac_lib_var=`echo $1['_']$2 | sed 'y%./+-%__p_%'`
+AC_CACHE_VAL(ac_cv_lib_$ac_lib_var,
+[ac_save_LIBS="$LIBS"
+for j in "." $3 ; do
+LIBS="-L$j -l$1 $6 $LIBS"
+AC_TRY_LINK(dnl
+ifelse([$2], [main], , dnl Avoid conflicting decl of main.
+[/* Override any gcc2 internal prototype to avoid an error.  */
+]ifelse(AC_LANG, CPLUSPLUS, [#ifdef __cplusplus
+extern "C"
+#endif
+])dnl
+[/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char $2();
+]),
+	    [$2()],
+            [eval "ac_cv_lib_$ac_lib_var=\"libpath_$ac_lib_var=-L$j\"" 
+             eval eval "`echo '$ac_cv_lib_'$ac_lib_var`"
+             LIBS="$ac_save_LIBS"
+             break
+            ],
+	     eval "ac_cv_lib_$ac_lib_var=no")
+LIBS="$ac_save_LIBS"
+done
+])dnl
+if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" != no"; then
+  AC_MSG_RESULT(yes)
+  eval eval "`echo '$ac_cv_lib_'$ac_lib_var`"
+  dnl  LIBS="`echo '$libpath_'$ac_lib_var` -l$1 $LIBS"
+  ifelse([$4], ,
+[changequote(, )dnl
+  ac_tr_lib=HAVE_LIB`echo $1 | sed -e 's/[^a-zA-Z0-9_]/_/g' \
+    -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
+changequote([, ])dnl
+  AC_DEFINE_UNQUOTED($ac_tr_lib)
+  eval eval "`echo '$ac_cv_lib_'$ac_lib_var`"
+  LIBS="`echo '$libpath_'$ac_lib_var` -l$1 $LIBS"
+], [$4])
+else
+  AC_MSG_RESULT(no)
+ifelse([$5], , , [$5
+])dnl
+fi
+])
+
+
+dnl ######################## Here the actual script begins ###############
+
 AC_INIT(configure.in)
 OS="${OSTYPE}"
 
@@ -231,12 +289,12 @@ done
 
 dnl electric fence
 if test "$USE_EFENCE" = 1; then
-	AC_CHECK_LIB(efence,main)
+	AC_CHECK_LIB(efence,main,,AC_MSG_WARN("efence library configured but not available."))
 fi
 
 dnl dmalloc debugging lib
 if test "$USE_DMALLOC" = 1; then
-	AC_CHECK_LIB(dmalloc,main)
+	AC_CHECK_LIB(dmalloc,main,,AC_MSG_WARN("dmalloc library configured but not available."))
 fi
 
 
@@ -280,20 +338,30 @@ dnl we test for python last, because setting LIBS like this confuses further tes
 MAKE_USE_PYTHON=
 if test "$USE_PYTHON" = 1
 then
-AC_CHECK_HEADERS(python1.5/Python.h
+	AC_CHECK_HEADERS(python1.5/Python.h
 	,
- 	AC_CHECK_LIB(python1.5,main,
-		AC_CHECK_LIB(swigpy,main,
-			AC_DEFINE(USE_PYTHON)
-			MAKE_USE_PYTHON="USE_PYTHON=yes"
-			LIBS="$LIBS -lpython1.5 -lswigpy"
-			,
-			AC_MSG_WARN("Cannot find SWIG library for python - disabling python.")
-			MAKE_USE_PYTHON=
-			,-lpython1.5
+ 		AC_CHECK_MYLIB(python1.5,main,
+		[        /usr \
+		         /usr/lib \
+		         /usr/lib/python1.5 \
+		         /usr/lib/python1.5/config \
+		         /usr/local \
+		         /usr/local/lib \
+		         /usr/local/lib/python1.5 \
+		         /usr/local/lib/python1.5/config \
+		         /usr/local/python1.5/config\
+		],
+			AC_CHECK_LIB(swigpy,main,
+				AC_DEFINE(USE_PYTHON)
+				MAKE_USE_PYTHON="USE_PYTHON=yes"
+				LIBS="$libpath_python1_5_main -lpython1.5 -lswigpy $LIBS"
+				,
+				AC_MSG_WARN("Cannot find SWIG library for python - disabling python.")
+				MAKE_USE_PYTHON=
+				,[$libpath_python1_5_main -lpython1.5]
 			)
 		)			
-)
+	)
 AC_PATH_PROG(SWIG,swig)
 fi
 AC_SUBST(MAKE_USE_PYTHON)
