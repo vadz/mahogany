@@ -276,9 +276,14 @@ PGPFilter::DoProcess(String& text,
          else // encrypted
          {
             // try to decrypt
-            if ( m_engine->Decrypt(in, out) != MCryptoEngine::OK )
+            MCryptoEngine::Status rc = m_engine->Decrypt(in, out);
+            if ( rc != MCryptoEngine::OK )
             {
-               wxLogError(_("Decrypting the PGP message failed."));
+               // if the user cancelled decryption, don't complain about it
+               if ( rc != MCryptoEngine::OPERATION_CANCELED_BY_USER )
+               {
+                  wxLogError(_("Decrypting the PGP message failed."));
+               }
 
                // using unmodified text is not very helpful here, is it?
                out = _("\r\n[Encrypted message text]\r\n");

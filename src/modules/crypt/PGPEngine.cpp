@@ -517,18 +517,28 @@ PGPEngine::ExecCommand(const String& options,
    messageOut.clear();
    char buf[4096];
 
-   while ( !process.IsDone() )
+   bool outEof = false,
+        errEof = false;
+   while ( !process.IsDone() || !outEof || !errEof )
    {
       wxYield();
 
-      if ( out->CanRead() )
+      if ( out->GetLastError() == wxSTREAM_EOF )
+      {
+         outEof = true;
+      }
+      else if ( out->CanRead() )
       {
          buf[out->Read(buf, WXSIZEOF(buf)).LastRead()] = '\0';
 
          messageOut += buf;
       }
 
-      if ( err->CanRead() )
+      if ( err->GetLastError() == wxSTREAM_EOF )
+      {
+         errEof = true;
+      }
+      else if ( err->CanRead() )
       {
          String line = errText.ReadLine();
          if ( line.StartsWith(_T("[GNUPG:] "), &line) )
@@ -539,6 +549,9 @@ PGPEngine::ExecCommand(const String& options,
             {
                code += *pc;
             }
+
+            if ( *pc )
+               pc++; // skip the space/TAB
 
             if ( code == _T("GOODSIG") ||
                  code == _T("VALIDSIG") ||
@@ -572,11 +585,14 @@ PGPEngine::ExecCommand(const String& options,
             else if ( code == _T("USERID_HINT") )
             {
                // skip the key id
-               for ( pc++; *pc && !isspace(*pc); pc++ )
-                  ;
+               while ( *pc && !isspace(*pc) )
+                  pc++;
+
+               if ( *pc )
+                  pc++;
 
                // remember the user
-               user = ++pc;
+               user = pc;
             }
             else if ( code == _T("NEED_PASSPHRASE") )
             {
@@ -595,11 +611,6 @@ PGPEngine::ExecCommand(const String& options,
 
                   break;
                }
-
-               String pass2 = pass;
-               pass2 += wxTextFile::GetEOL();
-
-               in->Write(pass2.c_str(), pass2.length());
             }
             else if ( code == _T("GOOD_PASSPHRASE") )
             {
@@ -614,11 +625,6 @@ PGPEngine::ExecCommand(const String& options,
                wxLogWarning(_("Passphrase for the user \"%s\" unavailable."),
                             user.c_str());
             }
-            else if ( code == _T("NO_SECKEY") )
-            {
-               wxLogWarning(_("Secret key for the user \"%s\" not available."),
-                            user.c_str());
-            }
             else if ( code == _T("DECRYPTION_FAILED") )
             {
                status = DECRYPTION_ERROR;
@@ -627,10 +633,36 @@ PGPEngine::ExecCommand(const String& options,
                       code == _T("GET_LINE") ||
                       code == _T("GET_HIDDEN") )
             {
-               // TODO: give gpg whatever it's asking for, otherwise
-               //       we'd deadlock!
+               // give gpg whatever it's asking for, otherwise we'd deadlock!
+               if ( code == _T("GET_HIDDEN") )
+               {
+                  if ( strcmp(pc, _T("passphrase.enter")) == 0 )
+                  {
+                     // we're being asked for a passphrase
+                     String pass2 = pass;
+                     pass2 += wxTextFile::GetEOL();
+
+                     in->Write(pass2.c_str(), pass2.length());
+                  }
+                  else
+                  {
+                     // TODO
+                     FAIL_MSG( _T("unexpected GET_HIDDEN") );
+                  }
+               }
+               else
+               {
+                  // TODO
+                  FAIL_MSG( _T("unexpected GET_XXX") );
+               }
+            }
+            else if ( code == _T("NO_PUBKEY") )
+            {
+               wxLogWarning(_("Failed to check signature: public key \"%s\" "
+                              "not available."), pc);
             }
             else if ( code == _T("ENC_TO") ||
+                      code == _T("NO_SECKEY") ||
                       code == _T("BEGIN_DECRYPTION") ||
                       code == _T("END_DECRYPTION") ||
                       code == _T("GOT_IT") )
@@ -648,6 +680,12 @@ PGPEngine::ExecCommand(const String& options,
    }
 
    ASSERT_MSG( status != MAX_ERROR, _T("GNUPG didn't return the status?") );
+
+   // we must wait until the process terminates because its termination handler
+   // access process object which is going to be destroyed when we exit this
+   // scope
+   while ( !process.IsDone() )
+      wxYield();
 
    return status;
 }
