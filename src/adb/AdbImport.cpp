@@ -224,7 +224,7 @@ bool DoAdbImport(const String& filename,
 
 bool AdbImport(const String& filename,
                const String& adbname,
-               const String& username,
+               const String& desc,
                AdbImporter *importer)
 {
    // reset the last error first as we check it below
@@ -268,10 +268,10 @@ bool AdbImport(const String& filename,
    // FIXME a hack which ensure that the header is written before the entries
    //       (needed for automatic recognition of ADB format later)
    {
-      wxString adbUserName = username;
-      if ( !adbUserName )
-         adbUserName = adbBook->GetUserName();
-      adbBook->SetUserName(adbUserName);
+      wxString adbDesc = desc;
+      if ( !adbDesc )
+         adbDesc = adbBook->GetDescription();
+      adbBook->SetDescription(adbDesc);
    }
 
    // load the data

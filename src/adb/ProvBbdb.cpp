@@ -233,10 +233,10 @@ public:
 
       // AdbBook
    virtual bool IsSameAs(const String& name) const;
-   virtual String GetName() const;
+   virtual String GetFileName() const;
 
-   virtual void SetUserName(const String& name);
-   virtual String GetUserName() const;
+   virtual void SetName(const String& name);
+   virtual String GetName() const;
 
    virtual void SetDescription(const String& desc);
    virtual String GetDescription() const;
@@ -254,8 +254,8 @@ public:
 private:
    virtual ~BbdbBook();
 
-   wxString m_strName,
-            m_strUserName,
+   wxString m_strFileName,
+            m_strName,
             m_strDesc;
 
    BbdbEntryGroup *m_pRootGroup; // the ADB_Entries group
@@ -953,17 +953,12 @@ BbdbBook::BbdbBook(const String& name)
 {
    MOcheck();
 
-   // the user name shouldn't contain slashes - so extract the file name from
-   // the full path
-   wxString ext;
-   wxSplitPath(name, NULL, &m_strUserName, &ext);
-   if(m_strUserName.Length() == 0)
-      m_strUserName << '.' << ext;
-   m_strName = name;
+   m_strFileName = name;
 
-   String desc = GetUserName();
-   desc << _(" (Emacs BBDB addressbook)");
-   SetDescription(desc);
+   wxSplitPath(m_strFileName, NULL, &m_strName, NULL);
+
+   m_strDesc << m_strName << _(" (Emacs BBDB addressbook)");
+
    // create the root group
    m_pRootGroup = new BbdbEntryGroup(NULL, name); // there is only one group
 }
@@ -977,27 +972,27 @@ BbdbBook::~BbdbBook()
 bool
 BbdbBook::IsSameAs(const String& name) const
 {
-   return sysutil_compare_filenames(m_strName,name);
+   return sysutil_compare_filenames(m_strFileName, name);
 }
 
 String
-BbdbBook::GetName() const
+BbdbBook::GetFileName() const
 {
    MOcheck();
-   return m_strName;
+   return m_strFileName;
 }
 
 void
-BbdbBook::SetUserName(const String& strUserName)
+BbdbBook::SetName(const String& strName)
 {
    MOcheck();
-   m_strUserName = strUserName;
+   m_strName = strName;
 }
 
-String BbdbBook::GetUserName() const
+String BbdbBook::GetName() const
 {
    MOcheck();
-   return m_strUserName.c_str();
+   return m_strName;
 }
 
 void
@@ -1011,7 +1006,7 @@ String
 BbdbBook::GetDescription() const
 {
    MOcheck();
-   return m_strDesc.c_str();
+   return m_strDesc;
 }
 
 size_t
@@ -1025,7 +1020,7 @@ bool
 BbdbBook::IsReadOnly() const
 {
    MOcheck();
-   return !wxFile::Access(m_strName, wxFile::write);
+   return !wxFile::Access(m_strFileName, wxFile::write);
 }
 
 // ----------------------------------------------------------------------------

@@ -385,12 +385,6 @@ public:
   // accessors
     // return the file name (NB: not really always a file name...)
   const char *GetName() const { return m_pBook->GetName(); }
-    // for compatibility with existing code we have these functions instead of
-    // directly calling AdbBook methods
-  void SetNameAndDescription(const wxString& strName, const wxString& strDesc)
-    { m_pBook->SetUserName(strName); m_pBook->SetDescription(strDesc); }
-  String GetDescription() const { return m_pBook->GetDescription(); }
-  String GetAdbName() const { return m_pBook->GetUserName(); }
 
   size_t GetNumberOfEntries() const { return m_pBook->GetNumberOfEntries(); }
 
@@ -1567,7 +1561,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
   wxString strProv = szProvName;
   AdbTreeBook *adb = new AdbTreeBook(m_root, strPath, pProvider, &strProv);
 
-  m_astrAdb.Add(adb->GetName());
+  m_astrAdb.Add(adb->GetBook()->GetFileName());
   m_astrProviders.Add(strProv);
 
   if ( m_root->WasExpanded() )
@@ -1684,7 +1678,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
     strWhat = _("Address book");
 
     AdbTreeBook *adbBook = (AdbTreeBook *)m_current;
-    strName = adbBook->GetName();
+    strName = adbBook->GetBook()->GetFileName();
 
     // find the book index in m_astrAdb array
     int nIndex;
@@ -1905,7 +1899,7 @@ bool wxAdbEditFrame::OnMEvent(MEventData& d)
 
       if ( adbBook )
       {
-        adbname = adbBook->GetDescription();
+        adbname = adbBook->GetFileName();
       }
 
       SafeDecRef(adbBook);
@@ -2307,7 +2301,7 @@ void wxAdbEditFrame::DoShowAdbProperties()
   wxADBPropertiesDialog dlg(this, book);
   if ( dlg.ShowModal() == wxID_OK ) {
     // update the tree label (it may have been changed)
-    m_treeAdb->SetItemText(book->GetId(), book->GetAdbName());
+    m_treeAdb->SetItemText(book->GetId(), book->GetName());
   }
 }
 
@@ -2397,7 +2391,7 @@ void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
   if ( m_current->IsGroup() ) {
     if ( m_current->IsBook() ) {
       // show the book description in the status line
-      SetStatusText(((AdbTreeBook *)m_current)->GetDescription(), 0);
+      SetStatusText(((AdbTreeBook *)m_current)->GetName(), 0);
     }
     else {
       SetStatusText("", 0);
@@ -3056,7 +3050,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   // set label and position
   // ----------------------
   wxString strTitle;
-  strTitle.Printf(_("Properties for '%s'"), book->GetAdbName().c_str());
+  strTitle.Printf(_("Properties for '%s'"), book->GetName());
   SetTitle(strTitle);
 
   Centre(wxCENTER_FRAME | wxBOTH);
@@ -3064,17 +3058,17 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
 
 bool wxADBPropertiesDialog::TransferDataToWindow()
 {
-  wxString name = m_book->GetName();
+  wxString filename = m_book->GetBook()->GetFileName();
 
   wxString str;
 
   // get the file size
-  if ( !name.empty() )
+  if ( !filename.empty() )
   {
     // suppress log messages because the file might not yet exist and it's
     // perfectly normal
     wxLogNull nolog;
-    wxFile file(name);
+    wxFile file(filename);
     if ( file.IsOpened() ) {
       str.Printf("%d", file.Length());
     }
@@ -3082,23 +3076,29 @@ bool wxADBPropertiesDialog::TransferDataToWindow()
       str = _("unknown");
     }
   }
+  else {
+    // it is not a file based book
+    str = _("not applicable");
+  }
 
   m_staticFileSize->SetLabel(str);
-  m_staticFileName->SetLabel(name);
+  m_staticFileName->SetLabel(filename);
 
   str.Printf("%d", m_book->GetNumberOfEntries());
   m_staticNumEntries->SetLabel(str);
 
-  m_textName->SetValue(m_book->GetAdbName());
-  m_textDescription->SetValue(m_book->GetDescription());
+  m_textName->SetValue(m_book->GetBook()->GetName());
+  m_textDescription->SetValue(m_book->GetBook()->GetDescription());
 
   return TRUE;
 }
 
 bool wxADBPropertiesDialog::TransferDataFromWindow()
 {
-  m_book->SetNameAndDescription(m_textName->GetValue(),
-                                m_textDescription->GetValue());
+  AdbBook *adbbook = m_book->GetBook();
+
+  adbbook->SetName(m_textName->GetValue());
+  adbbook->SetDescription(m_textDescription->GetValue());
 
   return TRUE;
 }
@@ -3755,7 +3755,7 @@ wxString AdbTreeElement::GetFullName() const
   if ( IsRoot() )
     strPath = "/";
   else if ( GetParent()->IsRoot() )
-    strPath << "/" << ((AdbTreeBook *)this)->GetAdbName();
+    strPath << "/" << ((AdbTreeBook *)this)->GetName();
   else {
     strPath << GetParent()->GetFullName() << "/" << m_name;
   }
@@ -4124,7 +4124,7 @@ wxString AdbTreeNode::GetWhere() const
   wxString strWhere, strGroup = GetName();
   if ( strGroup.empty() ) {
     strWhere << _("at the root level of the addressbook '")
-             << ((AdbTreeBook *)this)->GetAdbName() << '\'';
+             << ((AdbTreeBook *)this)->GetName() << '\'';
   }
   else {
     strWhere << _("in group '") << strGroup << '\'';
@@ -4165,7 +4165,7 @@ AdbTreeBook::AdbTreeBook(AdbTreeRoot *root,
   m_pGroup = m_pBook = root->GetAdbManager()->
     CreateBook(filename, pProvider, pstrProviderName);
 
-  m_name = m_pBook->GetUserName();
+  m_name = m_pBook->GetName();
 }
 
 AdbTreeBook::~AdbTreeBook()
@@ -4201,7 +4201,7 @@ AdbTreeElement *AdbTreeRoot::FindChild(const char *szName)
   size_t nCount = m_children.Count();
   wxString strAdbName;
   for ( size_t n = 0; n < nCount; n++ ) {
-    strAdbName = ((AdbTreeBook *)m_children[n])->GetAdbName();
+    strAdbName = ((AdbTreeBook *)m_children[n])->GetName();
 
     if ( strAdbName.IsSameAs(szName, wxARE_FILENAMES_CASE_SENSITIVE) )
       return m_children[n];

@@ -90,6 +90,25 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
                         int how,
                         ArrayAdbGroups *aGroups)
 {
+  // check if this book doesn't match itself: the other groups are checked in
+  // the parent one but the books don't have a parent
+  String nameMatch;
+  if ( aGroups ) {
+     // we'll use it below
+     nameMatch = what.Lower() + '*';
+
+     // is it a book?
+     if ( !((AdbElement *)pGroup)->GetGroup() ) {
+       AdbBook *book = (AdbBook *)pGroup;
+
+       if ( book->GetName().Lower().Matches(nameMatch) ) {
+         pGroup->IncRef();
+
+         aGroups->Add(pGroup);
+       }
+     }
+  }
+
   wxArrayString aNames;
   size_t nGroupCount = pGroup->GetGroupNames(aNames);
   for ( size_t nGroup = 0; nGroup < nGroupCount; nGroup++ ) {
@@ -98,7 +117,7 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
     GroupLookup(aEntries, pSubGroup, what, where, how);
 
     // groups are matched by name only (case-insensitive)
-    if ( aGroups && aNames[nGroup].Lower().Matches(what.Lower() + '*') ) {
+    if ( aGroups && aNames[nGroup].Lower().Matches(nameMatch) ) {
       aGroups->Add(pSubGroup);
     }
     else {

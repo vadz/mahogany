@@ -225,10 +225,10 @@ public:
 
     // AdbBook
   virtual bool IsSameAs(const String& name) const;
-  virtual String GetName() const;
+  virtual String GetFileName() const;
 
-  virtual void SetUserName(const String& name);
-  virtual String GetUserName() const;
+  virtual void SetName(const String& name);
+  virtual String GetName() const;
 
   virtual void SetDescription(const String& desc);
   virtual String GetDescription() const;
@@ -674,29 +674,29 @@ bool FCBook::IsSameAs(const String& name) const
    return sysutil_compare_filenames(m_strFile, path);
 }
 
-String FCBook::GetName() const
+String FCBook::GetFileName() const
 {
   return m_strFile;
 }
 
-void FCBook::SetUserName(const String& strAdb)
+void FCBook::SetDescription(const String& strAdb)
 {
-  m_pConfig->Write("/" ADB_HEADER "/" ADB_HEADER_NAME, strAdb);
-}
-
-String FCBook::GetUserName() const
-{
-  return m_pConfig->Read("/" ADB_HEADER "/" ADB_HEADER_NAME, m_strFileName);
-}
-
-void FCBook::SetDescription(const String& strDesc)
-{
-  m_pConfig->Write("/" ADB_HEADER "/" ADB_HEADER_DESC, strDesc);
+  m_pConfig->Write("/" ADB_HEADER "/" ADB_HEADER_DESC, strAdb);
 }
 
 String FCBook::GetDescription() const
 {
-  return m_pConfig->Read("/" ADB_HEADER "/" ADB_HEADER_DESC, m_strFile);
+  return m_pConfig->Read("/" ADB_HEADER "/" ADB_HEADER_DESC, m_strFileName);
+}
+
+void FCBook::SetName(const String& strDesc)
+{
+  m_pConfig->Write("/" ADB_HEADER "/" ADB_HEADER_NAME, strDesc);
+}
+
+String FCBook::GetName() const
+{
+  return m_pConfig->Read("/" ADB_HEADER "/" ADB_HEADER_NAME, m_strFile);
 }
 
 size_t FCBook::GetNumberOfEntries() const
@@ -712,15 +712,6 @@ bool FCBook::IsReadOnly() const
 
 bool FCBook::Flush()
 {
-   // force wxConfig::Flush() do something (the tests will be true if they
-   // return the default value, yet actually writing these entries to the
-   // config ensures that they will get dirty and be written to the file when
-   // we call Flush).
-   if ( GetDescription() == m_strFile )
-      SetDescription(m_strFile);
-   if ( GetUserName() == m_strFileName )
-      SetUserName(m_strFileName);
-
    if ( !m_pConfig->Flush() )
    {
       wxLogError(_("Couldn't create or write address book file '%s'."),

@@ -37,14 +37,15 @@ public:
     // compare this book with the book named 'name' and return TRUE if it's the
     // same (dumb name comparaison doesn't work for file based books)
   virtual bool IsSameAs(const String& name) const = 0;
-    // get the "name" (uniquely identifies the book)
+    // get the "file name" (which uniquely identifies the book), return an
+    // empty string for the non file based books
+  virtual String GetFileName() const = 0;
+
+    // get/set ADB name (shown in the ADB tree)
+  virtual void SetName(const String& desc) = 0;
   virtual String GetName() const = 0;
 
-    // get/set ADB name (user name)
-  virtual void SetUserName(const String& name) = 0;
-  virtual String GetUserName() const = 0;
-
-    // get/set ADB description (long name)
+    // get/set the book description (shown in the ADB properties dialog)
   virtual void SetDescription(const String& desc) = 0;
   virtual String GetDescription() const = 0;
 

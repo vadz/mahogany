@@ -278,7 +278,7 @@ PalmBook::PalmBook(const String& strName)
   // allowed to contain subgroups!
   m_pRootGroup = new PalmEntryGroup(NULL, strName);
 
-  SetUserName(_("PalmOS Addressbook"));
+  SetName(_("PalmOS Addressbook"));
   SetDescription(_("PalmOS Addressbook"));
   m_strName = strName;
 }
@@ -288,19 +288,24 @@ PalmBook::~PalmBook()
   SafeDecRef(m_pRootGroup);
 }
 
+String PalmBook::GetFileName() const
+{
+   return "";
+}
+
 String PalmBook::GetName() const
 {
   return m_strName;
 }
 
-void PalmBook::SetUserName(const String& strUserName)
+void PalmBook::SetName(const String& strName)
 {
-  m_strUserName = strUserName;
+  m_strName = strName;
 }
 
-String PalmBook::GetUserName() const
+String PalmBook::GetName() const
 {
-  return m_strUserName;
+  return m_strName;
 }
 
 void PalmBook::SetDescription(const String& strDesc)

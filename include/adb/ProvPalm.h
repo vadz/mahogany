@@ -181,10 +181,10 @@ public:
   // there can be only one PalmADB
   virtual bool IsSameAs(const String& name) const
     { return TRUE; }
-  virtual String GetName() const;
+  virtual String GetFileName() const;
 
-  virtual void SetUserName(const String& name);
-  virtual String GetUserName() const;
+  virtual void SetName(const String& name);
+  virtual String GetName() const;
 
   virtual void SetDescription(const String& desc);
   virtual String GetDescription() const;

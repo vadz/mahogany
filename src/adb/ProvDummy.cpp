@@ -175,10 +175,10 @@ public:
 
     // AdbBook
   virtual bool IsSameAs(const String& name) const;
-  virtual String GetName() const;
+  virtual String GetFileName() const;
 
-  virtual void SetUserName(const String& name);
-  virtual String GetUserName() const;
+  virtual void SetName(const String& name);
+  virtual String GetName() const;
 
   virtual void SetDescription(const String& desc);
   virtual String GetDescription() const;
@@ -192,7 +192,6 @@ private:
   virtual ~DummyBook();
 
   wxString m_strName,
-           m_strUserName,
            m_strDesc;
 
   DummyEntryGroup *m_pRootGroup; // the ADB_Entries group
@@ -347,7 +346,7 @@ AdbEntry *DummyEntryGroup::FindEntry(const char *szName)
 // ----------------------------------------------------------------------------
 
 DummyBook::DummyBook(const String& name)
-         : m_strName(name), m_strUserName(name), m_strDesc(name)
+         : m_strName(name), m_strDesc(name)
 {
   // create the root group
   m_pRootGroup = new DummyEntryGroup(NULL, "Dummy group");
@@ -363,19 +362,19 @@ bool DummyBook::IsSameAs(const String& name) const
    return m_strName == name;
 }
 
-String DummyBook::GetName() const
+String DummyBook::GetFileName() const
 {
   return m_strName;
 }
 
-void DummyBook::SetUserName(const String& strUserName)
+void DummyBook::SetName(const String& strName)
 {
-  m_strUserName = strUserName;
+  m_strName = strName;
 }
 
-String DummyBook::GetUserName() const
+String DummyBook::GetName() const
 {
-  return m_strUserName.c_str();
+  return m_strName.c_str();
 }
 
 void DummyBook::SetDescription(const String& strDesc)

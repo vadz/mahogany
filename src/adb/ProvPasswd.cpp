@@ -185,10 +185,11 @@ public:
 
    // AdbBook
    virtual bool IsSameAs(const String& name) const;
-   virtual String GetName() const;
 
-   virtual void SetUserName(const String& name);
-   virtual String GetUserName() const;
+   virtual String GetFileName() const;
+
+   virtual void SetName(const String& name);
+   virtual String GetName() const;
 
    virtual void SetDescription(const String& desc);
    virtual String GetDescription() const;
@@ -413,21 +414,22 @@ bool PasswdBook::IsSameAs(const String& name) const
    return false;
 }
 
-String PasswdBook::GetName() const
+String PasswdBook::GetFileName() const
 {
    return "";
 }
 
-void PasswdBook::SetUserName(const String& strUserName)
+void PasswdBook::SetName(const String& WXUNUSED(strName))
 {
 }
 
-String PasswdBook::GetUserName() const
+String PasswdBook::GetName() const
 {
+   // it just returns "Local Users" string
    return m_pRootGroup->GetName();
 }
 
-void PasswdBook::SetDescription(const String& strDesc)
+void PasswdBook::SetDescription(const String& WXUNUSED(strDesc))
 {
 }
 
