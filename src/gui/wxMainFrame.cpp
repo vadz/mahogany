@@ -75,9 +75,9 @@ extern const MOption MP_REOPENLASTFOLDER;
 // private functions
 // ----------------------------------------------------------------------------
 
-// update the status of all folders shown in the folder tree, returns the
-// number of the folders updated or -1 on error
-static int UpdateAllFolders(wxWindow *parent);
+// update the status of all folders under the given one in the folder tree,
+// returns the number of the folders updated or -1 on error
+static int UpdateFoldersSubtree(const MFolder& folder, wxWindow *parent);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -611,26 +611,23 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             break;
 
          case WXMENU_FOLDER_UPDATEALL:
-            if ( MDialog_YesNoDialog
-                 (
-                  _("Please note that updating all folders may take a long "
-                    "time. Do you still want to do it?"),
-                  this,
-                  _("Please confirm full rescan"),
-                  false, // [No] default
-                  GetPersMsgBoxName(M_MSGBOX_CONFIRM_UPDATE_ALL)
-                 ) )
             {
-               int nUpdated = UpdateAllFolders(this);
+               MFolder *folder = m_FolderTree->GetSelection();
+               if ( !folder )
+                  folder = MFolder::Get("");
+
+               int nUpdated = UpdateFoldersSubtree(*folder, this);
                if ( nUpdated < 0 )
                {
                   wxLogError(_("Failed to update the status"));
                }
                else
                {
-                  wxLogStatus(this, _("Updated status of %d folder."),
+                  wxLogStatus(this, _("Updated status of %d folders."),
                               nUpdated);
                }
+
+               folder->DecRef();
             }
             break;
 
@@ -718,14 +715,15 @@ wxMainFrame::GetFolderProfile(void)
 }
 
 // ----------------------------------------------------------------------------
-// UpdateAllFolders() implementation
+// UpdateFoldersSubtree() implementation
 // ----------------------------------------------------------------------------
 
 class UpdateFolderVisitor : public MFolderTraversal
 {
 public:
-   UpdateFolderVisitor(wxWindow *parent)
-      : m_progInfo(parent, _("Folders updated:"), _("Updating folder tree"))
+   UpdateFolderVisitor(const MFolder& folder, wxWindow *parent)
+      : MFolderTraversal(folder),
+        m_progInfo(parent, _("Folders updated:"), _("Updating folder tree"))
    {
       m_nCount = 0;
    }
@@ -762,9 +760,9 @@ private:
    size_t m_nCount;
 };
 
-static int UpdateAllFolders(wxWindow *parent)
+static int UpdateFoldersSubtree(const MFolder& folder, wxWindow *parent)
 {
-   UpdateFolderVisitor visitor(parent);
+   UpdateFolderVisitor visitor(folder, parent);
 
    (void)visitor.Traverse();
 
