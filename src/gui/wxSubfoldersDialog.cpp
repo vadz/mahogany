@@ -717,7 +717,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       wxTreeItemId id = selections[sel];
 
       // this will be used to set MF_FLAGS_GROUP flag later
-      bool isGroup = m_treectrl->HasChildren(id);
+      bool isGroup = m_treectrl->ItemHasChildren(id);
 
       // construct the full folder name by going upwars the tree and
       // concatenating everything

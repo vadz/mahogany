@@ -885,7 +885,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
                   updateRect->y+updateRect->height));
    }
 
-   ResizeScrollbars(y0+y1);
+   ResizeScrollbars(true, y0+y1);
 
    WXLO_TIMER_START(TmpTimer);
    /* Check whether the window has grown, if so, we need to reallocate

@@ -332,10 +332,17 @@
 #define   MP_BEACONHOST      "BeaconHost"
 /// does Mahogany control dial-up networking?
 #define MP_DIALUP_SUPPORT   "DialUpNetSupport"
+
+#if defined(OS_WIN)
+/// the RAS connection to use
+#define MP_NET_CONNECTION "RasConnection"
+#elif defined(OS_UNIX)
 /// the command to go online
 #define MP_NET_ON_COMMAND   "NetOffCommand"
 /// the command to go offline
 #define MP_NET_OFF_COMMAND   "NetOnCommand"
+#endif // platform
+
 /// show CC field in message composition?
 #define   MP_SHOWCC         "ShowCC"
 /// show BCC field in message composition?
@@ -800,10 +807,17 @@
 #define   MP_BEACONHOST_D      ""
 /// does Mahogany control dial-up networking?
 #define MP_DIALUP_SUPPORT_D   0L
+
+#if defined(OS_WIN)
+/// the RAS connection to use
+#define MP_NET_CONNECTION_D "RasConnection"
+#elif defined(OS_UNIX)
 /// the command to go online
 #define MP_NET_ON_COMMAND_D   "wvdial"
 /// the command to go offline
 #define MP_NET_OFF_COMMAND_D   "wvundial"
+#endif // platform
+
 /// the news server fallback
 #define   MP_NNTPHOST_FB        "news"
 /// the username for returned mail

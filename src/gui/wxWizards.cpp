@@ -29,9 +29,9 @@
 #   include "Profile.h"
 #   include "MModule.h"
 #   include "MHelp.h"
-#   include "MFolder.h"
 #endif
 
+#include "MFolder.h"
 #include "Mpers.h"
 
 #include "MHelp.h"

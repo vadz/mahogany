@@ -417,7 +417,7 @@ wxMApp::DoExit()
       }
    }
 
-#if wxUSE_HELP && wxUSE_HTML
+#if defined(OS_UNIX) && wxUSE_HELP && wxUSE_HTML
    /// Close the help frame if it is open:
    wxFrame *hf = NULL;
    if(m_HelpController
@@ -1148,9 +1148,11 @@ wxMApp::SetupOnlineManager(void)
          beaconhost = READ_APPCONFIG(MP_SMTPHOST);
          m_OnlineManager->SetWellKnownHost(beaconhost, 25);
       }
+#ifdef OS_UNIX
       m_OnlineManager->SetConnectCommand(
          READ_APPCONFIG(MP_NET_ON_COMMAND),
          READ_APPCONFIG(MP_NET_OFF_COMMAND));
+#endif // Unix
       m_IsOnline = m_OnlineManager->IsOnline();
    }
    else

@@ -64,6 +64,17 @@
 #include "HeadersDialogs.h"
 #include "TemplateDialog.h"
 
+// ----------------------------------------------------------------------------
+// conditional compilation
+// ----------------------------------------------------------------------------
+
+// define this to have additional TCP parameters in the options dialog
+#undef USE_TCP_TIMEOUTS
+
+// ----------------------------------------------------------------------------
+// data
+// ----------------------------------------------------------------------------
+
 // first and last are shifted by -1, i.e. the range of fields for the page Foo
 // is from ConfigField_FooFirst + 1 to ConfigField_FooLast inclusive.
 //
@@ -102,17 +113,21 @@ enum ConfigFields
    ConfigField_DialUpHelp,
    ConfigField_DialUpSupport,
    ConfigField_BeaconHost,
+#ifdef OS_WIN
+   ConfigField_NetConnection,
+#elif defined(OS_UNIX)
    ConfigField_NetOnCommand,
    ConfigField_NetOffCommand,
+#endif // platform
    ConfigField_TimeoutInfo,
    ConfigField_OpenTimeout,
-#if 0
+#ifdef USE_TCP_TIMEOUTS
    ConfigField_ReadTimeout,
    ConfigField_WriteTimeout,
    ConfigField_CloseTimeout,
    ConfigField_RshTimeout,
    ConfigField_NetworkLast = ConfigField_RshTimeout,
-#endif
+#endif // USE_TCP_TIMEOUTS
    ConfigField_NetworkLast = ConfigField_OpenTimeout,
 
    // compose
@@ -465,17 +480,21 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
      , Field_Message, -1 },
    { gettext_noop("&Dial-up network support"),    Field_Bool,    -1,                        },
    { gettext_noop("&Beacon host (e.g. www.yahoo.com)"),Field_Text,   ConfigField_DialUpSupport},
+#ifdef OS_WIN
+   { gettext_noop("&RAS connection to use"),   Field_Combo, ConfigField_DialUpSupport},
+#elif defined(OS_UNIX)
    { gettext_noop("Command to &activate network"),   Field_Text, ConfigField_DialUpSupport},
    { gettext_noop("Command to &deactivate network"), Field_Text, ConfigField_DialUpSupport},
+#endif // platform
    { gettext_noop("The following timeout value is used for TCP connections to\n"
                   "remote mail or news servers."), Field_Message, -1 },
    { gettext_noop("&Open timeout (in seconds)"),  Field_Number,    -1,                        },
-#if 0
+#ifdef USE_TCP_TIMEOUTS
    { gettext_noop("&Read timeout"),                Field_Number,    -1,                        },
    { gettext_noop("&Write timeout"),               Field_Number,    -1,                        },
    { gettext_noop("&Close timeout"),               Field_Number,    -1,                        },
    { gettext_noop("&rsh timeout"),                 Field_Number,    -1,                        },
-#endif
+#endif // USE_TCP_TIMEOUTS
 
    // compose
 #if 0
@@ -676,16 +695,20 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_DIALUP_SUPPORT),
    CONFIG_ENTRY(MP_BEACONHOST),
+#ifdef OS_WIN
+   CONFIG_ENTRY(MP_NET_CONNECTION),
+#elif defined(OS_UNIX)
    CONFIG_ENTRY(MP_NET_ON_COMMAND),
    CONFIG_ENTRY(MP_NET_OFF_COMMAND),
+#endif // platform
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_TCP_OPENTIMEOUT),
-#if 0
+#ifdef USE_TCP_TIMEOUTS
    CONFIG_ENTRY(MP_TCP_READTIMEOUT),
    CONFIG_ENTRY(MP_TCP_WRITETIMEOUT),
    CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
    CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
-#endif
+#endif // USE_TCP_TIMEOUTS
 
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of
@@ -899,7 +922,30 @@ void wxOptionsPage::CreateControls()
          break;
 
       case Field_Combo:
+         // a hack to dynamicially fill the RAS connections combo box under
+         // Windows - I didn't find anything better to do right now, may be
+         // later (feel free to tell me if you have any ideas)
+#ifdef OS_WIN
+         if ( n == ConfigField_NetConnection )
+         {
+            wxString connections = _(m_aFields[n].label);
+
+            wxDialUpManager *dial = wxDialUpManager::Create();
+            wxArrayString aConnections;
+            size_t nCount = dial->GetISPNames(aConnections);
+            delete dial;
+
+            for ( size_t n = 0; n < nCount; n++ )
+            {
+               connections << ':' << aConnections[n];
+            }
+
+            last = CreateComboBox(connections, widthMax, last);
+         }
+         else
+#else
          last = CreateComboBox(_(m_aFields[n].label), widthMax, last);
+#endif
          break;
 
       case Field_Number:

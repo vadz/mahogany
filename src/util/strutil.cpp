@@ -931,11 +931,11 @@ strutil_freeRegEx(class strutil_RegEx *regex)
    ASSERT(regex);
    delete regex;
 }
-#else
+#else // WX_HAVE_REGEX
 class strutil_RegEx *
 strutil_compileRegEx(const String &pattern)
 {
-   ERRORMESSAGE(_("Regular expression matching not implemented."));
+   ERRORMESSAGE((_("Regular expression matching not implemented.")));
    return NULL;
 }
 
@@ -951,4 +951,4 @@ strutil_freeRegEx(class strutil_RegEx *regex)
 {
    // nothing
 }
-#endif
+#endif // WX_HAVE_REGEX

@@ -36,7 +36,6 @@
 #  include <wx/process.h>
 
 #  include <ctype.h>          // for isspace()
-#  include "Mpers.h"
 #endif
 
 #include <wx/textctrl.h>
@@ -48,6 +47,7 @@
 #include "wx/persctrl.h"
 
 #include "Mdefaults.h"
+#include "Mpers.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -2215,7 +2215,7 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
    // TODO write (and read later...) headers too!
 
    // write the text part of the message into a file
-   wxFile file(filename, wxFile::write);
+   wxFile file(filename, wxFile::write_append);
 
    // export first text part of the message
 

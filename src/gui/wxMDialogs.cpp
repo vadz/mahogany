@@ -984,7 +984,7 @@ MDialog_ShowTip(const MWindow *parent)
    bool showOnStarup = wxShowTip((wxWindow *)parent, tipProvider);
 
    ProfileBase *profile = mApplication->GetProfile();
-   if ( showOnStarup != READ_APPCONFIG(MP_SHOWTIPS) )
+   if ( showOnStarup != (READ_APPCONFIG(MP_SHOWTIPS) != 0) )
    {
       profile->writeEntry(MP_SHOWTIPS, showOnStarup);
    }
@@ -2394,10 +2394,10 @@ wxLicenseDialog::wxLicenseDialog(ProfileBase *profile, wxWindow *parent)
                               wxBITMAP_TYPE_PNG);
 
    license->SetPage("<body text=#000000 bgcolor=#ffffff>"
-                "<center><img src=\"memory:splash.png\"><br>"
-                "</center>"
+                    "<center><img src=\"memory:splash.png\"><br>"
+                    "</center>"
 #include "license.html"
-      );
+                   );
    wxMemoryFSHandler::RemoveFile("splash.png");
 
 

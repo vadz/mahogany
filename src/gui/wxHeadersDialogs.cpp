@@ -28,18 +28,20 @@
 #  include "MHelp.h"
 
 #  include <wx/layout.h>
+#  include <wx/menuitem.h>
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
 #  include <wx/checkbox.h>
 #  include <wx/radiobox.h>
 #  include <wx/textctrl.h>
 #  include <wx/statbmp.h>
+
+#  include <wx/utils.h>  // wxMax()
 #endif
 
+#include <wx/imaglist.h>
 #include <wx/notebook.h>
-#include <wx/menuitem.h>
 #include <wx/checklst.h>
-#include <wx/utils.h>  // wxMax()
 #include <wx/listctrl.h>
 #include "wx/persctrl.h"
 

@@ -19,10 +19,10 @@
 #   include "MHelp.h"
 #   include "gui/wxMIds.h"
 #   include "strutil.h"
-#   include "Mpers.h"
 #endif
 
 #include "Mdefaults.h"
+#include "Mpers.h"
 
 #include "MModule.h"
 #include "MDialogs.h"

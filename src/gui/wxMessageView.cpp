@@ -367,7 +367,7 @@ BEGIN_EVENT_TABLE(wxMessageView, wxLayoutWindow)
    // menu & toolbars
    EVT_MENU(-1, wxMessageView::OnMenuCommand)
    EVT_TOOL(-1, wxMessageView::OnMenuCommand)
-   EVT_CHAR(wxMessageView::wxLayoutWindow::OnChar)
+   EVT_CHAR(wxMessageView::OnChar)
 END_EVENT_TABLE()
 
 void

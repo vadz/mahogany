@@ -1179,9 +1179,8 @@ void
 wxFiltersDialog::DoUpdate(void )
 {
    // First, make sure we have the activation flags set correctly:
-   for(int i = 0; i < m_ListBox->Number(); i++)
-      m_FilterData[i].SetActive(
-         m_ListBox->IsChecked(i) );
+   for(int iLB = 0; iLB < m_ListBox->Number(); iLB++)
+      m_FilterData[iLB].SetActive( m_ListBox->IsChecked(iLB) );
 
    int selection = m_ListBox->GetSelection();
    m_ListBox->Clear();

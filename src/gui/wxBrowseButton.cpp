@@ -27,13 +27,14 @@
 #  include "guidef.h"
 
 #  include <wx/cmndata.h>
-#   include <wx/statbmp.h>
-#   include <wx/dcmemory.h>
-#   include <wx/layout.h>
-#   include <wx/statbox.h>
-#   include <wx/dirdlg.h>
+#  include <wx/statbmp.h>
+#  include <wx/dcmemory.h>
+#  include <wx/layout.h>
+#  include <wx/statbox.h>
+#  include <wx/dirdlg.h>
 #endif
 
+#include <wx/imaglist.h>
 #include <wx/colordlg.h>
 
 #include "MFolder.h"

@@ -376,6 +376,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
       HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
       const HeaderInfo *hi = (*hil)[event.m_itemIndex];
       m_FolderView->UpdateSelectionInfo();
+
       m_FolderView->PreviewMessage(hi->GetUId());
       hil->DecRef();
    }
@@ -819,8 +820,8 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    settings->font = READ_CONFIG(m_Profile,MP_FVIEW_FONT);
    ASSERT(settings->font >= 0 && settings->font <= NUM_FONTS);
    settings->font = wxFonts[settings->font];
-   settings->size = READ_CONFIG(m_Profile,MP_FVIEW_FONT_SIZE);
-   settings->senderOnlyNames = READ_CONFIG(m_Profile,MP_FVIEW_NAMES_ONLY);
+   settings->size = READ_CONFIG(m_Profile, MP_FVIEW_FONT_SIZE);
+   settings->senderOnlyNames = READ_CONFIG(m_Profile,MP_FVIEW_NAMES_ONLY) != 0;
 }
 
 void

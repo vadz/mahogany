@@ -310,6 +310,10 @@ SOURCE=.\src\gui\wxSubfoldersDialog.cpp
 
 SOURCE=.\src\gui\wxTemplateDialog.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\wxWizards.cpp
+# End Source File
 # End Group
 # Begin Group "Resources"
 
@@ -317,7 +321,6 @@ SOURCE=.\src\gui\wxTemplateDialog.cpp
 # Begin Source File
 
 SOURCE=.\res\M.rc
-
 # End Source File
 # End Group
 # Begin Group "adb"

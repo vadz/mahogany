@@ -131,7 +131,7 @@ struct InstallWizardData
 #endif
    bool   collectAllMail;
    // dial up page
-   
+
 #if defined(OS_WIN)
    String connection;
 #elif defined(OS_UNIX)
@@ -210,7 +210,7 @@ public:
       gs_installWizardData.email = m_email->GetValue();
       return TRUE;
    }
-   
+
    virtual bool TransferDataToWindow()
    {
       m_name->SetValue(gs_installWizardData.name);
@@ -266,21 +266,35 @@ public:
 
    virtual bool TransferDataFromWindow()
    {
+#if defined(OS_WIN)
+      gs_installWizardData.connection = m_connections->GetValue();
+#elif defined(OS_UNIX)
       gs_installWizardData.dialCommand = m_connect->GetValue();
       gs_installWizardData.hangupCommand = m_disconnect->GetValue();
+#endif // platform
+
       return TRUE;
    }
-   
+
    virtual bool TransferDataToWindow()
    {
+#if defined(OS_WIN)
+      m_connections->SetValue(gs_installWizardData.connection);
+#elif defined(OS_UNIX)
       m_connect->SetValue(gs_installWizardData.dialCommand);
       m_disconnect->SetValue(gs_installWizardData.hangupCommand);
+#endif // platform
+
       return TRUE;
    }
 
 private:
+#if defined(OS_WIN)
+   wxComboBox *m_connections;
+#elif defined(OS_UNIX)
    wxTextCtrl *m_connect,
               *m_disconnect;
+#endif // platform
 };
 
 class InstallWizardOperationsPage : public InstallWizardPage
@@ -424,7 +438,7 @@ InstallWizardPageId InstallWizardPage::GetNextPageId() const
       // skip it
       id++;
    }
-   
+
    return id < InstallWizard_PagesMax ? (InstallWizardPageId) id
                                       : InstallWizard_Done;
 }
@@ -526,7 +540,7 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
 
    wxSize sizeBox = m_checkbox->GetSize(),
    sizePage = wizard->GetPageSize();
-   
+
    // adjust the vertical position
    m_checkbox->Move(-1, sizePage.y - 2*sizeBox.y);
 }
@@ -614,8 +628,7 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
 InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
                        : InstallWizardPage(wizard, InstallWizard_DialUpPage)
 {
-   
-#ifdef OS_UNIX
+
    wxStaticText *text = new wxStaticText(this, -1, _(
       "Mahogany can automatically detect if your\n"
       "network connection is online or offline.\n"
@@ -626,6 +639,27 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
 
    wxArrayString labels;
+
+#if defined(OS_WIN)
+   // get all existing RAS connections
+   wxDialUpManager *dial = wxDialUpManager::Create();
+   wxArrayString connections;
+   size_t nCount = dial->GetISPNames(connections);
+   delete dial;
+
+   // concatenate all connection names into one ':' separated string
+   wxString comboChoices = _("&Dial up connection to use");
+   labels.Add(comboChoices);
+   for ( size_t n = 0; n < nCount; n++ )
+   {
+      comboChoices << ':' << connections[n];
+   }
+
+   // do create controls now
+   long widthMax = GetMaxLabelWidth(labels, panel);
+
+   m_connections = panel->CreateComboBox(comboChoices, widthMax, NULL);
+#elif defined(OS_UNIX)
    labels.Add(_("Command to &connect:"));
    labels.Add(_("Command to &disconnect:"));
 
@@ -633,13 +667,9 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
 
    m_connect = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
    m_disconnect = panel->CreateTextWithLabel(labels[1], widthMax, m_connect);
+#endif // platform
 
    panel->ForceLayout();
-   
-#else
-#   pragma warning TODO ask for the connection name under
-   new wxStaticText(this, -1, "This page is under construction");
-#endif   
 }
 
 // InstallWizardOperationsPage
@@ -690,7 +720,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          "recommended for dial-up networking."
          ), m_TrashCheckbox);
    m_UseOutboxCheckbox = panel->CreateCheckBox(labels[2], widthMax, text3);
-   
+
    wxStaticText *text4 = panel->CreateMessage(
       _(
          "\n"
@@ -823,8 +853,12 @@ bool RunInstallWizard()
    // first, set up the default values for the wizard:
 
    gs_installWizardData.useDialUp = -1;
+#if defined(OS_WIN)
+   gs_installWizardData.connection = READ_APPCONFIG(MP_NET_CONNECTION);
+#elif defined(OS_UNIX)
    gs_installWizardData.dialCommand = READ_APPCONFIG(MP_NET_ON_COMMAND);
    gs_installWizardData.hangupCommand = READ_APPCONFIG(MP_NET_OFF_COMMAND);
+#endif // platform
 
    gs_installWizardData.useOutbox = TRUE;
    gs_installWizardData.useTrash = TRUE;
@@ -833,7 +867,7 @@ bool RunInstallWizard()
    gs_installWizardData.usePython = FALSE;
 #endif
    gs_installWizardData.usePalmOs = TRUE;
-   
+
    gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
    if(gs_installWizardData.email.Length() == 0)
    {
@@ -846,7 +880,7 @@ bool RunInstallWizard()
    gs_installWizardData.imap = READ_APPCONFIG(MP_IMAPHOST);
    gs_installWizardData.smtp = READ_APPCONFIG(MP_SMTPHOST);
    gs_installWizardData.nntp = READ_APPCONFIG(MP_NNTPHOST);
-   
+
    wxIconManager *iconManager = mApplication->GetIconManager();
    wxWizard *wizard = wxWizard::Create
                       (
@@ -879,7 +913,7 @@ bool RunInstallWizard()
          profile->writeEntry(MP_MODULES,"Filters:PalmOS");
       else
          profile->writeEntry(MP_MODULES,"Filters");
-      
+
       CompleteConfiguration(gs_installWizardData);
    }
 
@@ -966,7 +1000,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
          wxLogError(_("Could not create the outgoing mailbox '%'."),
                     name.c_str());
    }
-   
+
    // INBOX/NEW MAIL
    if(gs_installWizardData.collectAllMail)
    {
@@ -974,7 +1008,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       if(! MailFolder::CreateFolder("INBOX",
                                     MF_INBOX,
                                     MF_FLAGS_INCOMING|MF_FLAGS_DONTDELETE
-                                    |MF_FLAGS_HIDDEN|MF_FLAGS_KEEPOPEN, 
+                                    |MF_FLAGS_HIDDEN|MF_FLAGS_KEEPOPEN,
                                     "",
                                     _("Default system folder for incoming mail.")))
          wxLogError(_("Could not create INBOX mailbox."));
@@ -1022,12 +1056,15 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    }
 
    // Dial-Up network:
-   profile->writeEntry(MP_DIALUP_SUPPORT,
-                       gs_installWizardData.useDialUp);
+   profile->writeEntry(MP_DIALUP_SUPPORT, gs_installWizardData.useDialUp);
    if(gs_installWizardData.useDialUp)
    {
+#if defined(OS_WIN)
+      profile->writeEntry(MP_NET_CONNECTION, gs_installWizardData.connection);
+#elif defined(OS_UNIX)
       profile->writeEntry(MP_NET_ON_COMMAND,gs_installWizardData.dialCommand);
       profile->writeEntry(MP_NET_OFF_COMMAND,gs_installWizardData.hangupCommand);
+#endif // platform
    }
 
    // PalmOS-box
@@ -1042,7 +1079,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
                                     "PalmBox",
                                     _("This folder and its configuration settings\n"
                                       "are used to synchronise with your PalmOS\n"
-                                      "based handheld computer.") ) ) 
+                                      "based handheld computer.") ) )
          wxLogError(_("Could not create PalmOS mailbox."));
       else
       {
@@ -1707,7 +1744,7 @@ void VerifyUserDir(void)
       profile->writeEntry(MP_USERDIR, strHome);
    }
 #elif defined(OS_WIN)
-   if ( m_localDir.IsEmpty() )
+   if ( strutil_isempty(READ_APPCONFIG(MP_USERDIR)) )
    {
       // take the directory of the program
       char szFileName[MAX_PATH];
@@ -1730,7 +1767,7 @@ void VerifyUserDir(void)
 }
 
 /*
-  This function sets up folder entries for the servers, which can then 
+  This function sets up folder entries for the servers, which can then
   be used for browsing them. Called only once when the application is
   initialised for the first time. */
 static
@@ -1740,7 +1777,7 @@ SetupServers(void)
    String serverName;
    MFolder *mfolder;
    ProfileBase *p;
-   
+
    /* The NNTP server: */
    serverName = READ_APPCONFIG(MP_NNTPHOST);
    mfolder = CreateFolderTreeEntry(NULL,
@@ -1753,7 +1790,7 @@ SetupServers(void)
    p->writeEntry(MP_NNTPHOST, serverName);
    p->DecRef();
    SafeDecRef(mfolder);
-   
+
    /* The IMAP server: */
    serverName = READ_APPCONFIG(MP_IMAPHOST);
    mfolder = CreateFolderTreeEntry(NULL,
@@ -1799,7 +1836,7 @@ SetupMinimalConfig(void)
    char  buffer[bufsize];
 
    ProfileBase *profile = mApplication->GetProfile();
-   
+
    if( strutil_isempty(READ_APPCONFIG(MP_USERNAME)) )
    {
       wxGetUserId(buffer,bufsize); // contains , delimited fields of info
@@ -1813,7 +1850,7 @@ SetupMinimalConfig(void)
    }
 
    VerifyUserDir();
-   
+
    // now that we have the local dir, we can set up a default mail
    // folder dir
    str = READ_APPCONFIG(MP_MBOXDIR);
@@ -1859,7 +1896,7 @@ SetupMinimalConfig(void)
    }
 
 #if 0
-   
+
    mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent Mail"));
    mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, _("New Mail"));
 
@@ -1894,7 +1931,7 @@ CheckConfiguration(void)
          return FALSE;
       }
    }
-   
+
    if ( READ_APPCONFIG(MP_FIRSTRUN) != 0 )
    {
       // make sure the essential things have proper values

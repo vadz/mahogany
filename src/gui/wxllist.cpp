@@ -1349,11 +1349,21 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
          // try to find a suitable place to split the object:
          wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
          if(tobj->GetText().Length() >= breakpos)
-            while( (! (foundSpace = isspace(tobj->GetText()[breakpos])))
-                   && breakpos > 0)
-               breakpos--;
+         {
+            do
+            {
+               foundSpace = isspace(tobj->GetText()[breakpos]) != 0;
+               if ( !foundSpace )
+                  break;
+
+            }
+            while ( breakpos-- > 0 );
+         }
          else
+         {
             breakpos = 0;
+         }
+
          if(! foundSpace) // breakpos == 0!
          {
             if(i == m_ObjectList.begin())

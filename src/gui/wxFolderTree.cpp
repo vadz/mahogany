@@ -39,6 +39,7 @@
 #include "MFolder.h"
 #include "MFolderDialogs.h"
 
+#include <wx/imaglist.h>
 #include <wx/treectrl.h>
 #include <wx/tokenzr.h>
 
