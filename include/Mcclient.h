@@ -12,7 +12,7 @@
 
 extern "C"
 {
-#   define private   cc__private
+#   define private cc__private
 #   define or cc_or
 #   define not cc_not
 #     include <stdio.h>
@@ -22,9 +22,9 @@ extern "C"
 #     include <smtp.h>
 #     include <nntp.h>
 #     include <misc.h>
-#   undef cc_private   
-#   undef cc_or
-#   undef cc_not
+#   undef private   
+#   undef or
+#   undef not
 // stupid c-client lib redefines utime() in an incompatible way
 #   undef utime
 }
