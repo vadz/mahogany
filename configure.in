@@ -493,7 +493,7 @@ AC_SUBST(MAKE_DEBUG)
 if test "$USE_WXDEBUG" = 1; then
    USE_OPT=0
    dnl FIXME: shouldn't hard code wxWin version here!
-   WX_CONFIG_NAME="wxgtkd-2.3-config"
+   WX_CONFIG_NAME="wxgtkd-2.4-config"
 fi
 
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
