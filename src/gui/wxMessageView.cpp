@@ -1915,7 +1915,7 @@ void wxMessageView::OpenURL(const String& url, bool inNewWindow)
 #ifdef OS_WIN
       // using ShellExecute() doesn't allow us to open in the same
       // window, so do it manually
-      if ( inNewWindow )
+      if ( !inNewWindow )
       {
          wxRegKey key(wxRegKey::HKCR, url.BeforeFirst(':') + "\\shell\\open");
          if ( key.Exists() )
