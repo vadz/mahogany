@@ -116,6 +116,7 @@ extern const MOption MP_NET_OFF_COMMAND;
 extern const MOption MP_NET_ON_COMMAND;
 extern const MOption MP_NEWMAIL_FOLDER;
 extern const MOption MP_NNTPHOST;
+extern const MOption MP_ORGANIZATION;
 extern const MOption MP_OUTBOX_NAME;
 extern const MOption MP_OUTGOINGFOLDER;
 extern const MOption MP_PERSONALNAME;
@@ -229,8 +230,10 @@ static wxWizardPage *gs_wizardPages[InstallWizard_PagesMax];
 struct InstallWizardData
 {
    // identity page
-   String name;         // personal name, not login one (we can find it out)
-   String email;
+   String name,         // personal name
+          login,        // the user name
+          organization, // optional organization
+          email;
 
    // servers page
    String pop,
@@ -373,45 +376,13 @@ class InstallWizardIdentityPage : public InstallWizardPage
 public:
    InstallWizardIdentityPage(wxWizard *wizard);
 
-   virtual bool TransferDataToWindow()
-   {
-      // the first time the page is shown, construct the reasonable default
-      // value
-      if ( !gs_installWizardData.name )
-         gs_installWizardData.name = READ_APPCONFIG_TEXT(MP_PERSONALNAME);
-
-      if ( !gs_installWizardData.email )
-         gs_installWizardData.email = READ_APPCONFIG_TEXT(MP_FROM_ADDRESS);
-
-      if ( !gs_installWizardData.email )
-      {
-         gs_installWizardData.email = READ_APPCONFIG_TEXT(MP_USERNAME);
-         gs_installWizardData.email << '@' << READ_APPCONFIG_TEXT(MP_HOSTNAME);
-      }
-
-      m_name->SetValue(gs_installWizardData.name);
-      m_email->SetValue(gs_installWizardData.email);
-
-      return true;
-   }
-
-   virtual bool TransferDataFromWindow()
-   {
-      gs_installWizardData.name = m_name->GetValue();
-      gs_installWizardData.email = m_email->GetValue();
-      if ( !gs_installWizardData.email )
-      {
-         wxLogError(_("Please specify a valid email address."));
-         m_email->SetFocus();
-
-         return false;
-      }
-
-      return true;
-   }
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
 
 private:
    wxTextCtrl *m_name,
+              *m_login,
+              *m_organization,
               *m_email;
 };
 
@@ -855,6 +826,7 @@ void InstallWizardImportPage::OnImportButton(wxCommandEvent& event)
    ShowImportDialog(this);
 }
 
+// ----------------------------------------------------------------------------
 // InstallWizardIdentityPage
 // ----------------------------------------------------------------------------
 
@@ -862,24 +834,88 @@ InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
                          : InstallWizardPage(wizard, InstallWizard_IdentityPage)
 {
    wxStaticText *text = new wxStaticText(this, -1, _(
-         "Please specify your name and e-mail address:\n"
-         "they will be used for sending the messages.\n"
+         "Please specify your e-mail address which will\n"
+         "be used for the outgoing messages.\n"
+         "\n"
+         "The personal name and organization are used\n"
+         "for informational purposes only and may be\n"
+         "left empty.\n"
+         "\n"
+         "Finally, the user name will be used as default\n"
+         "login to your POP, IMAP and/or SMTP servers."
          ));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
 
    wxArrayString labels;
    labels.Add(_("&Personal name:"));
+   labels.Add(_("&Organization:"));
+   labels.Add(_("&User name/login:"));
    labels.Add(_("&E-mail:"));
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
    m_name = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
-   m_email = panel->CreateTextWithLabel(labels[1], widthMax, m_name);
+   m_organization = panel->CreateTextWithLabel(labels[1], widthMax, m_name);
+   m_login = panel->CreateTextWithLabel(labels[2], widthMax, m_organization);
+   m_email = panel->CreateTextWithLabel(labels[3], widthMax, m_login);
 
    panel->Layout();
 }
 
+bool InstallWizardIdentityPage::TransferDataToWindow()
+{
+   // the first time the page is shown, construct the reasonable default
+   // value
+   if ( gs_installWizardData.name.empty() )
+      gs_installWizardData.name = READ_APPCONFIG_TEXT(MP_PERSONALNAME);
+
+   if ( gs_installWizardData.organization.empty() )
+      gs_installWizardData.organization = READ_APPCONFIG_TEXT(MP_ORGANIZATION);
+
+   if ( gs_installWizardData.login.empty() )
+      gs_installWizardData.login = READ_APPCONFIG_TEXT(MP_USERNAME);
+
+   if ( gs_installWizardData.email.empty() )
+   {
+      gs_installWizardData.email = READ_APPCONFIG_TEXT(MP_FROM_ADDRESS);
+
+      if ( gs_installWizardData.email.empty() )
+      {
+         gs_installWizardData.email << gs_installWizardData.login
+                                    << '@'
+                                    << READ_APPCONFIG_TEXT(MP_HOSTNAME);
+      }
+   }
+
+   m_name->SetValue(gs_installWizardData.name);
+   m_organization->SetValue(gs_installWizardData.organization);
+   m_login->SetValue(gs_installWizardData.login);
+   m_email->SetValue(gs_installWizardData.email);
+
+   return true;
+}
+
+bool InstallWizardIdentityPage::TransferDataFromWindow()
+{
+   gs_installWizardData.email = m_email->GetValue();
+
+   if ( gs_installWizardData.email.empty() )
+   {
+      wxLogError(_("Please specify a valid email address."));
+      m_email->SetFocus();
+
+      return false;
+   }
+
+   gs_installWizardData.name = m_name->GetValue();
+   gs_installWizardData.login = m_login->GetValue();
+   gs_installWizardData.organization = m_organization->GetValue();
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
 // InstallWizardServersPage
 // ----------------------------------------------------------------------------
 
@@ -1526,6 +1562,8 @@ bool RunInstallWizard()
    // transfer the wizard settings from InstallWizardData
    profile->writeEntry(MP_FROM_ADDRESS, gs_installWizardData.email);
    profile->writeEntry(MP_PERSONALNAME, gs_installWizardData.name);
+   profile->writeEntry(MP_ORGANIZATION, gs_installWizardData.organization);
+   profile->writeEntry(MP_USERNAME, gs_installWizardData.login);
 
    // write the values even if they're empty as otherwise we'd try to create
    // folders with default names - instead of not creating them at all
