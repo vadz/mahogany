@@ -93,8 +93,7 @@ InitPython(void)
       tmp << PATH_SEPARATOR << pathOld;
    }
 
-   char *pathstring = strutil_strdup(tmp);  // this string must not be used again or freed
-   putenv(pathstring);
+   putenv(tmp);
 
    // initialise the interpreter - this we do always, just to avoid problems
    Py_Initialize();

@@ -1295,7 +1295,7 @@ bool SendMessageCC::WriteMessage(soutr_t writer, void *where)
    // install our output routine temporarily
    Rfc822OutputRedirector redirect(true /* with bcc */, this);
 
-   return rfc822_output(headers, m_Envelope, m_Body, writer, where, NIL);
+   return rfc822_output(headers, m_Envelope, m_Body, writer, where, NIL) == T;
 }
 
 void

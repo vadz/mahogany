@@ -1588,19 +1588,29 @@ extern "C"
      }
 }
 
-#define MFCMN_INDENT1_MARKER   1000
-#define MFCMN_INDENT2_MARKER   1001
+// ----------------------------------------------------------------------------
+// threading
+// ----------------------------------------------------------------------------
 
-static void AddDependents(size_t &idx, int level,
-                          int i ,
+/*
+   FIXME:
+
+   1. we should use server side threading when possible
+   2. this algorithm is O(N^2) and awfully inefficient in its using of
+      Set/GetIndentation() for its own temporary data
+ */
+
+#define MFCMN_INDENT1_MARKER   ((size_t)-1)
+#define MFCMN_INDENT2_MARKER   ((size_t)-2)
+
+static void AddDependents(size_t &idx,
+                          int level,
+                          int i,
                           size_t indices[],
-                          unsigned indents[],
+                          size_t indents[],
                           HeaderInfoList *hilp,
                           SizeTList dependents[])
 {
-   if(level >= MFCMN_INDENT1_MARKER)
-      level = MFCMN_INDENT1_MARKER - 1;
-
    SizeTList::iterator it;
 
    for(it = dependents[i].begin(); it != dependents[i].end(); it++)
@@ -1621,56 +1631,67 @@ static void AddDependents(size_t &idx, int level,
    }
 }
 
-
 static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
 {
-   // no need to incref/decref, done in UpdateListing()
-   if((*hilp).Count() <= 1)
-      return; // nothing to be done
+   HeaderInfoList_obj hil(hilp);
 
-   STATUSMESSAGE((_("Threading %lu messages..."), (unsigned long) hilp->Count()));
+   size_t count = hil->Count();
 
-   size_t i;
-   for(i = 0; i < hilp->Count(); i++)
-      (*hilp)[i]->SetIndentation(0);
-
-   /* We need a list of dependent messages for each entry. */
-   SizeTList  * dependents = new SizeTList[ (*hilp).Count() ];
-
-   for(i = 0; i < (*hilp).Count(); i++)
+   if ( count <= 1 )
    {
-      String id = (*hilp)[i]->GetId();
-      if(id.Length()) // no Id lines in Outbox!
+      // nothing to be done: one message is never threaded
+      return;
+   }
+
+   // FIXME: should go to the relevant frame
+   STATUSMESSAGE((_("Threading %u messages..."), count));
+
+   // reset indentation first
+   size_t i;
+   for ( i = 0; i < count; i++ )
+   {
+      hil[i]->SetIndentation(0);
+   }
+
+   // We need a list of dependent messages for each entry.
+   SizeTList *dependents = new SizeTList[count];
+
+   for ( i = 0; i < count; i++ )
+   {
+      String id = hil[i]->GetId();
+
+      if ( !id.empty() ) // no Id lines in Outbox!
       {
-         for(size_t j = 0; j < (*hilp).Count(); j++)
+         for ( size_t j = 0; j < count; j++ )
          {
-            String references = (*hilp)[j]->GetReferences();
-            if(references.Find(id) != wxNOT_FOUND)
+            String references = hil[j]->GetReferences();
+            if ( references.Find(id) != wxNOT_FOUND )
             {
-               dependents[i].push_front(new size_t(j));
-               (*hilp)[j]->SetIndentation(MFCMN_INDENT2_MARKER);
+               dependents[i].push_back(new size_t(j));
+               hil[j]->SetIndentation(MFCMN_INDENT2_MARKER);
             }
          }
       }
    }
+
    /* Now we have all the dependents set up properly and can re-build
       the list. We now build an array of indices for the new list.
    */
 
-   size_t * indices = new size_t [(*hilp).Count()];
-   unsigned * indents = new unsigned [(*hilp).Count()];
-   for(i = 0; i < hilp->Count(); i++)
-      indents[i] = 0;
+   size_t *indices = new size_t[count];
+   size_t *indents = new size_t[count];
+   memset(indents, 0, count*sizeof(size_t));
 
    size_t idx = 0; // where to store next entry
-   for(i = 0; i < hilp->Count(); i++)
+   for (i = 0; i < count; i++ )
    {
-      // we mark used indices with a non-0 indentation:
-      if((*hilp)[i]->GetIndentation() == 0)
+      // we mark used indices with a non-0 indentation, so only the top level
+      // messages still have 0 indentation
+      if ( hil[i]->GetIndentation() == 0 )
       {
          ASSERT(idx < (*hilp).Count());
          indices[idx++] = i;
-         (*hilp)[i]->SetIndentation(MFCMN_INDENT1_MARKER);
+         hil[i]->SetIndentation(MFCMN_INDENT1_MARKER);
          AddDependents(idx, 1, i, indices, indents, hilp, dependents);
       }
    }
@@ -1678,15 +1699,17 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
 
    hilp->SetTranslationTable(indices);
 
-
-   for(i = 0; i < hilp->Count(); i++)
-      (*hilp)[i]->SetIndentation(indents[i]);
+   for ( i = 0; i < hilp->Count(); i++ )
+   {
+      hil[i]->SetIndentation(indents[i]);
+   }
 
 
    //delete [] indices; // freed by ~HeaderInfoList()
    delete [] indents;
    delete [] dependents;
-   STATUSMESSAGE((_("Threading %lu messages...done."), (unsigned long) hilp->Count()));
+
+   STATUSMESSAGE((_("Threading %lu messages...done."), count));
 }
 
 static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
@@ -1695,12 +1718,16 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
    gs_MailFolder = mf;
    gs_SortOrder = SortOrder;
 
-   // no need to incref/decref, done in UpdateListing()
-   if(hil->Count() > 1)
+   size_t count = hil->Count();
+   if ( count >= 1 )
+   {
       qsort(hil->GetArray(),
-            hil->Count(),
+            count,
             (*hil)[0]->SizeOf(),
             ComparisonFunction);
+   }
+
+   hil->DecRef();
 
    gs_MailFolder = NULL;
    gs_SortListingMutex.Unlock();
@@ -1783,14 +1810,15 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 void
 MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
 {
-   ASSERT(hilp);
-   if(hilp)
+   CHECK_RET( hilp, "no listing to process" );
+
+   hilp->IncRef();
+   SortListing(this, hilp, m_Config.m_ListingSortOrder);
+
+   if ( m_Config.m_UseThreading )
    {
       hilp->IncRef();
-      SortListing(this, hilp, m_Config.m_ListingSortOrder);
-      if(m_Config.m_UseThreading)
-         ThreadMessages(this, hilp);
-      hilp->DecRef();
+      ThreadMessages(this, hilp);
    }
 }
 

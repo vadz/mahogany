@@ -78,11 +78,12 @@ HeaderInfoListImpl::~HeaderInfoListImpl()
 HeaderInfo *HeaderInfoListImpl::operator[](size_t n)
 {
    MOcheck();
-   ASSERT(n < m_NumEntries);
-   if(n >= m_NumEntries)
-      return NULL;
-   if(m_TranslationTable)
+
+   CHECK( n < m_NumEntries, NULL, "invalid index in HeaderInfoList" );
+
+   if ( m_TranslationTable )
       n = m_TranslationTable[n];
+
    return &m_Listing[n];
 }
 
@@ -149,7 +150,9 @@ void HeaderInfoListImpl::Remove(size_t n)
 #else // 1
    m_NumEntries--;
 
-   // first deal with the header objects
+   // first deal with the header objects: here we simply have to remove the
+   // object from the list - unfortunately, because we use an array of objects
+   // and not pointers we have to copy it around
    HeaderInfoImpl *listingNew =
       m_NumEntries == 0 ? NULL : new HeaderInfoImpl[m_NumEntries];
    HeaderInfoImpl *p1 = listingNew,
@@ -166,8 +169,10 @@ void HeaderInfoListImpl::Remove(size_t n)
    delete [] m_Listing;
    m_Listing = listingNew;
 
-   // then with the translation table: notice that we need not only to remove
-   // the entry but also to shift all entries greater than n by -1
+   // then with the translation table: here the situation is more complicated
+   // as we need to not only remove the entry, but to adjust indices as well:
+   // all indices greater than the one being removed must be decremented
+   // to account for the index shift
    if ( n < m_NumEntries )
    {
       // deleting is easy in this case

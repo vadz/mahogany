@@ -360,7 +360,7 @@ MAppBase::OnStartup()
 
 #if 0 // we don't provide any mailcaps so far
    // attempt to load the extra information supplied with M:
-   
+
    if(wxFileExists(GetGlobalDir()+"/mailcap"))
       m_mimeManager->ReadMailcap(GetGlobalDir()+"/mailcap");
    if(wxFileExists(GetGlobalDir()+"/mime.types"))
@@ -391,8 +391,7 @@ MAppBase::OnStartup()
    if ( path )
       tmp << PATH_SEPARATOR << path;
 
-   char *pathstring = strutil_strdup(tmp);  // this string must not be used again or freed
-   putenv(pathstring);
+   putenv(tmp);
 
    // initialise python interpreter
 #  ifdef  USE_PYTHON
@@ -796,57 +795,53 @@ void
 MAppBase::InitGlobalDir()
 {
    m_globalDir = READ_APPCONFIG(MP_GLOBALDIR);
-   if(strutil_isempty(m_globalDir) || ! PathFinder::IsDir(m_globalDir))
+   if ( m_globalDir.empty() || !PathFinder::IsDir(m_globalDir) )
    {
+      // under Unix we try to find our directory in some standard locations
 #ifdef OS_UNIX
-      bool   found;
-      if(PathFinder::IsDir(M_BASEDIR))
+      bool found;
+      if ( PathFinder::IsDir(M_BASEDIR) )
+      {
          m_globalDir = M_BASEDIR;
+
+         found = true;
+      }
       else
       {
          PathFinder pf(MP_PREFIXPATH_D);
          pf.AddPaths(M_PREFIX,false,true);
          m_globalDir = pf.FindDir(MP_ROOTDIRNAME_D, &found);
-         if(!found)
+      }
+
+      if ( !found )
+      {
+         String msg;
+         msg.Printf(_("Cannot find global directory \"%s\" in\n"
+                      "\"%s\"\n"
+                      "Would you like to specify its location now?"),
+                    MP_ROOTDIRNAME_D, MP_ETCPATH_D);
+#else
+         String msg = _("Cannot find global program directory.\n"
+                        "\n"
+                        "Would you like to specify its location now?");
+#endif // OS_UNIX
+         if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
+                                  TRUE /* yes default */, "AskSpecifyDir") )
          {
-            String msg;
-            msg.Printf(_("Cannot find global directory \"%s\" in\n"
-                         "\"%s\"\n"
-                         "Would you like to specify its location now?"),
-                       MP_ROOTDIRNAME_D, MP_ETCPATH_D);
-            if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
-                                     TRUE /* yes default */, "AskSpecifyDir") )
+            wxDirDialog dlg(NULL, _("Specify global directory for Mahogany"));
+            if ( dlg.ShowModal() )
             {
-               wxDirDialog dlg(NULL, _("Specify global directory for Mahogany"));
-               if ( dlg.ShowModal() )
-               {
-                  m_globalDir = dlg.GetPath();
-               }
+               m_globalDir = dlg.GetPath();
             }
          }
+#ifdef OS_UNIX
       }
-#else  // Windows
-      // under Windows our directory is always the one where the executable is
-      // located. At least we're sure that it exists this way...
-      wxString strPath;
-      ::GetModuleFileName(::GetModuleHandle(NULL),
-                          strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
-      strPath.UngetWriteBuf();
+#endif // OS_UNIX
 
-      // extract the dir name
-      wxSplitPath(strPath, &m_globalDir, NULL, NULL);
-
-      // a really stupid hack: when I run the program while developing it, the
-      // executable is in either Debug or Release subdirectory but I want to
-      // use the top program dir
-      wxString strLastDir = m_globalDir.AfterLast('\\');
-      if ( strLastDir == "Debug" || strLastDir == "Release" )
+      if ( !m_globalDir.empty() )
       {
-         m_globalDir = m_globalDir.BeforeLast('\\');
+         m_profile->writeEntry(MP_GLOBALDIR, m_globalDir);
       }
-#endif // Unix/Windows
-
-      m_profile->writeEntry(MP_GLOBALDIR, m_globalDir);
    }
 }
 
