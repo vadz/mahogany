@@ -12,7 +12,7 @@ SUB_DIRS=$(FILES_TEX:.htex=)
 include ../makeopts
 
 all: test
-	if [ ! -f Mdoc.tar.gz ] ; then $(MAKE) all2 ; fi
+	if [ ! -f Mdocs.tar.gz ] ; then $(MAKE) all2 ; fi
 
 all2:
 	$(MAKE) -k pdf
