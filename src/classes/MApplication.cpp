@@ -575,6 +575,7 @@ MAppBase::OnShutDown()
    delete m_KeepOpenFolders;
 
    // clean up
+   MEventManager::DispatchPending();
    AdbManager::Delete();
    Profile::FlushAll();
    // The following little hack allows us to decref and delete the
@@ -585,6 +586,8 @@ MAppBase::OnShutDown()
    p->DecRef();
    delete m_mimeManager;
    MailFolder::CleanUp();
+   // there might have been events queued, get rid of them:
+   MEventManager::DispatchPending();
 }
 
 const char *
