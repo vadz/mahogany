@@ -35,10 +35,8 @@ private:
    /** Dummy constructor.
        As the class has no usable interface, this doesn´t do much, but
        it displays a small dialog to say hello.
-       A real module would store the MInterface pointer for later
-       reference and check if everything is set up properly.
    */
-   DummyModule(MInterface *minterface);
+   DummyModule();
 
    MInterface *m_Minterface;
 
@@ -67,10 +65,10 @@ DummyModule::Init(int version_major, int version_minor, int version_release,
 }
 
 
-DummyModule::DummyModule(MInterface *minterface)
-           : MModule(minterface)
+DummyModule::DummyModule()
+           : MModule()
 {
-   minterface->Message(
+   GetMInterface()->Message(
       "This message is created by the DummyModule plugin\n"
       "for Mahogany. This module has been loaded at runtime\n"
       "and is not part of the normal Mahogany executable.",

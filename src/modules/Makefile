@@ -60,7 +60,7 @@ $(INTERFACE): ../../include/MInterface.mid
 
 ifdef PISOCK_LIB
 PalmOS.so: PalmOS.cpp
-	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src $(PISOCK_LIB) -lM 
+	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src $(PISOCK_LIB) #-lM 
 
 endif
 

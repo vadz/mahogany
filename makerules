@@ -38,7 +38,7 @@ else
 	$(CC)  -fPIC $(CFLAGS) -c $<
 
 %.so: %.cpp
-	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src -lM #$(LIBS)
+	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src #-lM #$(LIBS)
 endif
 
 %.py: %.i

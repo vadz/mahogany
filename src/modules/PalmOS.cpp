@@ -215,10 +215,8 @@ private:
    /** PalmOS constructor.
        As the class has no usable interface, this doesn´t do much, but
        it displays a small dialog to say hello.
-       A real module would store the MInterface pointer for later
-       reference and check if everything is set up properly.
    */
-   PalmOSModule(MInterface *minterface);
+   PalmOSModule();
 
    ~PalmOSModule();
 
@@ -426,12 +424,13 @@ PalmOSModule::GetConfig(void)
    m_Lock = new wxDeviceLock(dev);
 }
 
-MMODULE_IMPLEMENT(PalmOSModule,
-                  "PalmOS",
-                  "HandheldSynchronise",
-                  "This module provides PalmOS connectivity.",
-                  "0.00")
+MMODULE_BEGIN_IMPLEMENT(PalmOSModule,
+                        "PalmOS",
+                        "HandheldSynchronise",
+                        "This module provides PalmOS connectivity.",
+                        "0.00")
 MMODULE_END_IMPLEMENT(PalmOSModule)
+
 
 ///------------------------------
 /// Own functionality:
@@ -455,8 +454,8 @@ PalmOSModule::Init(int version_major, int version_minor,
 }
 
 
-PalmOSModule::PalmOSModule(MInterface *minterface)
-            : MModule(minterface)
+PalmOSModule::PalmOSModule()
+            : MModule()
 {
    m_PiSocket = -1;
    m_Profile = NULL;
@@ -471,7 +470,7 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
    palmOsMenu->Break();
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_CONFIG, _("&Configure"));
 
-   MAppBase *mapp = minterface->GetMApplication();
+   MAppBase *mapp = m_MInterface->GetMApplication();
    ((wxMainFrame *)mapp->TopLevelFrame())->AddModulesMenu(_("&PalmOS Module"),
                                         _("Functionality to interact with your PalmOS based palmtop."),
                                         palmOsMenu,

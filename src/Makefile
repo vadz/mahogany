@@ -32,24 +32,19 @@ endif
 
 ifeq ($(USE_MODULES),dynamic)
 # build the dynamically linked binary by default
-all:	Mdll modules main
+#all:	Mdll modules main
+all:	M modules
 else
 all:	M
 endif
 
-main:   Mdll
-
 M:	subdirs modules_obj
-	$(LINK) -symbolic -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 
 #$(MOBJS): subdirs
 
-#
-#left over from my attempt to create a M.so shared lib
-#
-
 Mdll:	libM.so
-	$(LINK) -symbolic -o M -L. $(LDFLAGS) -lM 
+	$(LINK) -o M -L. $(LDFLAGS) -lM 
 
 libM.so: subdirs
 	$(CXX) -shared -Xlinker -z -Xlinker nodefs $(MOBJS) $(LDFLAGS) $(NONPLIBS) $(LDFLAGS) $(GUI_LIBS) $(LIBS) -o libM.so

@@ -3,11 +3,16 @@
 CWD = mail 
 SRC = MailFolder.cpp Message.cpp MailFolderCC.cpp MessageCC.cpp SendMessageCC.cpp ASMailFolder.cpp
 
+include ../../makeopts
+
+ifdef EXPERIMENTAL
+SRC += MMailFolder.cpp
+endif
+
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 OBJ = $(SRC:.cpp=.o)
 
-include ../../makeopts
 
 LINK = ../util/strutil.o ../classes/CommonBase.o $(CCLIENTLIB)
 

@@ -144,6 +144,8 @@ public:
    /// MInterface pointer must be set immediately after construction
    void SetMInterface(MInterface *minterface) { m_MInterface = minterface; }
 
+   virtual MInterface *GetMInterface() { return m_MInterface; }
+   
    virtual void IncRef() { m_nRef++; }
    virtual bool DecRef() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
 

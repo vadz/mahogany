@@ -2342,8 +2342,8 @@ class MModule_FiltersImpl : public MModule_Filters
    virtual class FilterRule * GetFilter(const String &filterrule) const;
    DEFAULT_ENTRY_FUNC
 protected:
-   MModule_FiltersImpl(MInterface *minterface)
-      : MModule_Filters(minterface)
+   MModule_FiltersImpl()
+      : MModule_Filters()
       {
 //         (void) FilterTest(m_MInterface, this);
       }
