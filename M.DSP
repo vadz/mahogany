@@ -814,7 +814,6 @@ SOURCE=.\src\adb\ProvFC.cpp
 # Begin Source File
 
 SOURCE=.\src\adb\ProvLine.cpp
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
