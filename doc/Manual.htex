@@ -84,7 +84,8 @@ they are:
 
 \begin{itemize}
 \item Added optional support for viewing and printing the HTML messages.
-Also added anoptional text-only viewer.
+Also added an optional text-only viewer and a viewer bar to quickly
+change the current viewer.
 \item Added possibility to monitor a folder (or server) in the background
 justupdading the number of messages in it but without actually downloading
 them.
@@ -666,74 +667,169 @@ a short tutorial, but for now we go on coding instead.
 
 \subsection{Getting started}
 
-When you start Mahogany for the first time, it will present you with
-a rather lengthy configuration dialog where you can configure all
-kinds of more or less useful options. Don't be afraid of it - just
-make sure that the main points, notably the settings on the Identity
-(\ref{IdentityPage}) and Network (\ref{NetworkPage}) page are correct
-and ignore the rest for now. The defaults should be suitable for most
-situations.
+When you start Mahogany for the first time, it will first ask you
+to accept the terms of its license. Note that you must accept it to
+be able to use the program. After doing it, you will see the installation
+wizard. It will guide you through several pages whose purpose is to
+get the information absolutely required for running the program and
+also prepare a useable initial setup for you. Please avoid abandoning
+the wizard unless you really know what you are doing, so just click
+next and ignore the checkbox on the first page for now.
 
-The main window will then show you a tree of folders (\ref{FolderTreeCtrl})
-on the left and a view of the currently selected folder (\ref{FolderView})
-to the right of it. By default, you will find a small number of folders
-that Mahogany sets up for you, usually these are {}``INBOX{}'',
-{}``SentMail{}'' and {}``New Mail{}''. So, what are they? 
+It is quite likely that you already have some other email program
+installed on your computer. Mahogany may import the configuration
+settings for some of them (currently, Netscape Communicator, Pine
+and XFMail but we have plans to add support for more programs in the
+future) meaning that it will provide your existing settings as the
+default values in the next pages. Of course, it is absolutely safe
+to just skip this step and continue directly.
+
+Next page asks you for your minimal personal information. You may
+enter an empty personal name here if you wish (although it is better
+to enter something) but it is required that you enter a valid email
+address below. It will be used as your default return email address.
+Note that you will be able to change this address in the future in
+the program prefernces dialog as well as add other identities, possibly
+with different email addresses, later.
+
+The next page proposes you to setup some default servers. Windows
+users \textbf{must} specify an SMTP server here. Under Unix you may
+leave it empty if you want to use a local MTA such as \noun{sendmail},
+\noun{qmail} or \noun{exim.} For the other servers you are free
+to enter the server name or leave the entry empty if you don't want
+to use it.
+
+The following page is more interesting as it gives you the possibility
+to configure some of the basic Mahogany options to your liking. Let's
+consider them in order:
 
 \begin{itemize}
-\item {}``SentMail{}'' is obvious, Mahogany will store copies of messages
-that you send in there. 
-\item {}``INBOX{}'' is a little more tricky, it represents the {}``system
-inbox{}'' for your system. This depends on your system setup, on
-Unix, it will most commonly be the \texttt{/var/spool/mail} or \texttt{/var/mail}
-entry for you, or wherever new mail for you gets stored. If you have
-an existing \texttt{mbox} or \texttt{INBOX} mailfolder in your home
-directory, as created by some other mail software, it will refer to
-this. Generally, you don't need to worry about it, it will just be
-a black-box showing you new mail on the system you are logged in to.
-If it should not work, you can just create a folder entry for wherever
-the mail gets stored and ignore \texttt{INBOX}.
-\item {}``New Mail{}'' is just a normal file folder, which is used by
-Mahogany to store mail that it collects from other places. By default,
-Mahogany will attempt to collect all new mail arriving in \texttt{INBOX}
-and move it to {}``New Mail{}'', as it is considered bad practice
-to leave messages in the system spool area. Also, if you want to collect
-mail from more than one location, for example from your ISP's POP
-account, Mahogany will move it to {}``New Mail{}''. It's just a
-convenient central place to store new messages, so you have them all
-in one folder, no matter where they come from. Of course, you can
-change this, if you don't like it. Whether Mahogany collects mail
-from a folder or not, can be set in the Properties dialog of the folder,
-accessible via a click with the right mouse button in the folder tree.
-If you try this, you will see, that Mahogany is set up to collect
-from {}``INBOX{}'', but not from {}``SentMail{}''. Good.
+\item Collect new mail (Unix only): typically, new mail arrives into the
+system \noun{Inbox} folder on a Unix workstation. It is strongly
+recommended that you don't leave it there but copy it immediately
+instead into your own mail folder. Mahogany proposes to do this for
+you by default, please let it do it unless you know better.
+\item Use Trash mailbox: this should be self explanatory except that you
+should note that this is just the global default setting and that
+it can be changed later on folder per folder basis (i.e. you can have
+some unimportant folders from which mail is deleted directly but just
+move the more important messages from other folders. which you might
+wish to undelete later, to the Trash).
+\item Use Outbox: again, this should be clear but this is a global setting.
+It can be changed later but it is probably worth setting it right
+from the very beginning. If you have a permanent net connection you
+probably don't need to use it.
+\item Use dial-up network: Mahogany may bring up or down your Internet connection
+for the dial up users. This is a half-experimental feature and, as
+above, is not particularly useful if have a permanent net connection
+\item Mailbox format (Unix only): this allows you to select the format for
+the local system mailbox files Mahogany is going to create soon (you
+will be able to choose the format for the folders you create yourself
+when you do it, of course). The default is the MBX format which is
+by far the most efficient but it is a binary format which is not understood
+by as many programs as the traditional Berkeley MBOX format.
 \end{itemize}
-
-\subsection{So how about setting up POP access? And what is IMAP?}
-
-Setting up POP access is dead easy: You simply click the right mouse
-button in the folder tree and select {}``Create new folder{}''.
-Then fill in the details: your username and password for accessing
-the account and the hostname of the POP server. Optionally you can
-enter a port number after a colon. By default, Mahogany will collect
-all mail from here and move it to {}``New Mail{}'' automatically.
-If you don't want this (i.e. you prefer to leave the messages on server
-or maybe only move some of them to {}``New Mail{}'' selectively
-using filters), clear the {}``Collect all mail{}'' checkbox. Note
-that the default behaviour works better in most cases and that it
-is impossible to remember the status of the messages on a POP3 server
-so if you do leave on it, they will always appear as new, even if
-you had already seen them before.
+After finishing with the previous page you are almost done - the last
+page of the wizard doesn't have any more options. It just proposes
+you to send a test email to the address you had entered in the beginning
+(remember that it must have been a valid one?). If you are absolutely
+sure that you made no mistakes or if you can't or don't want to send
+mail currently, please uncheck the checkbox at the bottom of the page.
+Otherwise, let Mahogany do it as it might discover some problem with
+your SMTP server. In any case, you should now see the main Mahogany
+window which is described in the main section in front of you and
+it means that Mahogany has been successfully installed. Congratulations!
 
 
-\subsubsection{IMAP - what's that?}
+\subsection{The main window}
 
-IMAP is POP's big brother. Faster, more powerful and better, even
-more secure. If your ISP supports it, use IMAP rather than POP, your
-phone bills will go down, too. It's really just a different protocol
-for accessing the folder, but can do a few fancy things, more about
-that later.
+The main window is broken in three parts. There is a tree of folders
+(\ref{FolderTreeCtrl}) on the left and a view of the currently selected
+folder (\ref{FolderView}) to the right of it which itself has two
+parts: the upper one shows the list of all messages in the folder
+while the lower one shows the currently previewed message.
 
+The installation wizard has created a small number of standard folders
+that Mahogany uses itself. Exactly which folders you now see on your
+screen depends, of course, on the choices you have done in the wizard
+but it should be a subset of the following list:
+
+\begin{itemize}
+\item {}``SentMail{}'': This folder is always created as Mahogany stores
+copies of the messages you send in it. You may tell Mahogany not to
+do it or save them in a different folder by modifying the options
+near the top of the {}``Compose{}'' page in the preferences dialog.
+\item {}``Trash{}'': If you have chosen to use it in the wizard, this
+is the folder where the deleted messages will be moved to. The settings
+for using it can be found in the {}``Folders{}'' page of the preferences
+dialog.
+\item {}``New Mail{}'': This is the central new mail folder. Under Unix
+the messages arriving into the system \noun{Inbox} will be moved
+here. Also, when you choose to collect mail from a remote POP3 or
+IMAP4 server (see next subsection) it will be moved here as well.
+\item {}``INBOX{}'' represents the {}``system inbox{}'' for your system.
+You will only see it if you had chosen (in spite of multiple advices
+against it) to not move new mail from it to the {}``New Mail{}''
+folder. Exact location of this folder depends on your system setup
+but some common locations are \texttt{/var/spool/mail} or \texttt{/var/mail.}
+\item Server entries: you may also have entries for POP3, IMAP and NNTP
+folders if you had specified them in the installation wizard. They
+are described in details below.
+\end{itemize}
+The folder view on the right should show only one or two messages
+right now (unless you already had some mail in your \noun{Inbox}).
+The first of them should be self-explanatory and the second, if any,
+is the test message Mahogany has sent to test your configuration.
+If you didn't disable this test but don't see this message in the
+folder, something may have gone wrong. Please look at the activity
+log window which Mahogany has also created to see if there are any
+errors in it. Also please see (\ref{Troubleshooting}) section.
+
+
+\subsection{How to configure POP and IMAP folders?}
+
+Although the installation wizard did create entries for POP and/or
+IMAP servers in the folder, they are probably not very useful right
+now. Or maybe you didn't create them then and want to do it now -
+then just choose {}``Create{}'' item from the {}``Folder{}'' menu
+and follow the instructions. If you are already fed up with the wizards
+you may prefer to dismiss it on the first page by selecting the checkbox
+there and enter all the folder parameters directly in the folder properties
+dialog.
+
+If you have let the wizard create the folder, you still need to use
+the folder properties dialog to customize it. By the way, this dialog
+can be accessed by selecting the corresponding item either from the
+{}``Folder{}'' menu in the menu bar or from the popup menu you obtain
+by right-clicking the folder in the tree.
+
+Browse this dialog to get an idea of some of the options you may change.
+Please note that most of the options in the first, {}``Access{}'',
+page cannot be changed after the folder creation. The different options
+are described in more details elsewhere in this manual.
+
+Right now let us just give some examples of the typical configurations:
+
+\begin{enumerate}
+\item Typical POP3 server: normally, the new mail is downloaded from the
+POP3 folders locally so go to the {}``New Mail{}'' page and select
+{}``Collect new mail from this folder{}''. This will move all new
+mail from the POP3 server to the {}``New Mail{}'' folder. If you
+want to copy it instead just check the {}``Leave mail on this server{}''
+checkbox as well. Finally, if you want Mahogany to check the POP3
+folder for the updates automatically please check the {}``Permanently
+monitor this folder{}'' checkbox and change the polling interval
+for it if needed.
+\item IMAP server with only INBOX: if you only have INBOX folder on your
+IMAP server you may configure it exactly as the POP3 server above.
+You may also decide not to collect mail from it but read it directly
+on the server - this is, in fact, the preferred mode of operation
+as this works much better with IMAP than with POP.
+\item IMAP server with multiple folders: in this case you almost surely
+don't want to download all new mail from the IMAP INBOX to the local
+folders but keep it on server. You will probably be interested in
+using filters (\ref{Filters}) in this case.
+\end{enumerate}
 
 \subsection{How to set up your mail accounts}
 
@@ -744,7 +840,7 @@ explain here how to set up your accounts.
 \section{Setting up Mahogany, its configuration files}
 
 
-\subsection{User configuration files}
+\subsection{User configuration files (Unix only)}
 
 When run for the first time, \emph{Mahogany} creates a directory called
 \texttt{.M} in the user's home directory. The file \texttt{\$HOME/.M/config}
@@ -760,6 +856,10 @@ you can manually add the entry
 to the \texttt{{[}M/Profiles{]}} section of the configuration file.
 This will cause all values which are used to be written to the configuration
 file.
+
+Note that an easy way to {}``reinstall{}'' Mahogany is to move \texttt{\$HOME/.M/config}
+file to some other location or even delete it and restart Mahogany
+- then it will go through the installation process once again.
 
 
 \subsection{System wide configuration file}
@@ -805,9 +905,9 @@ time, choose {}``Create New Folder{}'' which will show you a dialog
 connection to a server or view a mailfolder. No matter whether it
 is a POP, IMAP, NNTP connection , a file based mailfolder, a newsgroup
 or whatever, Mahogany treats them all the same and calls them all
-{}``folder{}''. The dialog has (when the user level is set to {}``novice{}'')
-three tabs, \textbf{Access} (\ref{FolderAccessPage}), \textbf{Compose}
-(\ref{ComposePage}) and \textbf{MessageViewer} (\ref{MessageViewerPage}). 
+{}``folder{}''. The dialog has several pages which include at least:
+\textbf{Access} (\ref{FolderAccessPage}), \textbf{New Mail} ()\textbf{,
+Compose} (\ref{ComposePage}) and \textbf{MessageViewer} (\ref{MessageViewerPage}). 
 
 
 \subsubsection{Access\_2005\_}
@@ -828,66 +928,85 @@ to get access to them.
 For those folder types where it is required, you can specify the password
 here. If you leave it empty, Mahogany will prompt you for the password
 whenever it is needed. If you want to auto-collect mail from this
-folder, you should really specify it. \textbf{This is a potential
+folder or even just check it in the background, you should specify
+it, otherwise you will be asked for it at least once per session (you
+will be able to tell Mahogany if it should keep it for the session
+duration or not). \textbf{Note that storing passwords is a potential
 security risk!} The password typed in here will get stored in your
-\$HOME/.M/config configuration file on Unix or in the registry on
-Windows. While this file will be created as only readable by you and
-the passwords be encrypted (using very weak encryption), it is nevertheless
-a certain risk. If you accidentally change the permissions of that
-file, someone else could obtain your passwords, though Mahogany would
-detect this the next time it starts and warn you about it. Generally
-this should not pose a problem, but you should be aware of this. Previous
-versions of Mahogany had the passwords world-readable, so if you used
-it before this release, you might want to change them.
+\texttt{\$HOME/.M/config} configuration file on Unix or in the registry
+on Windows. While this file will be created as only readable by you
+and the passwords be encrypted (using very weak encryption), it is
+nevertheless a certain risk. If you accidentally change the permissions
+of that file, someone else could obtain your passwords, though Mahogany
+would detect this the next time it starts and warn you about it. 
 \item \textbf{Server}\\
 For the folders which require a server setting, you can specify the
 server host here. If unspecified they will inherit the setting from
-the global preferences.
+the global preferences. You may use a colon (:) after the server name
+to specify a non default port.
 \item \textbf{Newsgroup}\\
 For NNTP and Newsspool folders, the name of the newsgroup, e.g. comp.os.linux.announce
 .
 \item \textbf{Comment}\\
-Whatever you like to add.
+Whatever you like to add, this is ignored by Mahogany.
 \item \textbf{File name}\\
-For folders of type {}``File{}'', the filename or MH directory.
+For folders of type {}``File{}'', the filename or directory where
+the folder is.
 \item \textbf{Collect all mail from this folder}\\
 Makes this folder {}``incoming{}''. Mahogany will regularly check
 the folder for new mail and move any messages to the global folder
 for new mail, usually the {}``New Mail{}'' folder.
-\item \textbf{Keep folder always open}\\
-If selected, Mahogany will attempt to open the folder at program start
-and keep it open all the time. This can significantly speed up access
-to large folders as opening them can take some time. A very useful
-option for frequently used folders, such as, for example, the folder
-where you save copies of outgoing messages.
+\item \textbf{Keep server connection when idle}\\
+If selected, Mahogany will keep the folder open during the entire
+program session after it had been opened for the first time. This
+can significantly speed up access to large folders as opening them
+can take some time. A very useful option for frequently used folders
+and Mahogany uses it by default for the {}``SentMail{}'' folder,
+for example.
 \item \textbf{Force re-open on ping}\\
 This forces Mahogany to close and re-open the mailbox when trying
-to update the information about it. This is required for some POP
+to update the information about it. This is required for some broken
 servers to correctly detect new mail. Usually this should not be needed.
-\item \textbf{Use Secure Sockets Layer (SSL)}\\
-This option is not always available, as the use of strong cryptography
-is outlawed in some dictatorical countries. If your copy of Mahogany
-supports SSL, tick this box to access a secure IMAP/POP/NNTP server.
-Must be supported by the server side, too. It will ensure that your
-communication with the server is encrypted and safe from eavesdropping.
-For this to work, the user might also need to open the preferences
-dialog, and, in the \textbf{Misc} tab, fill-out the boxes labeled
-``Path where to find shared libssl'' and ``Path where to find shared
-libcrypto''. Linux users must also see the SSL section of the FAQ.
 \item \textbf{Anonymous access}\\
 This marks the folder as anonymous, such as for anonymous IMAP access,
 telling Mahogany that no user name or password are required to access
 it.
-\item \textbf{Is directory}\\
+\item \textbf{Use Secure Sockets Layer (SSL)}\\
+This option is only available if your copy of Mahogany was built with
+SSL support. Tick this box to access a secure IMAP/POP/NNTP server.
+It must, of course, be supported by the server side, too. It will
+ensure that your communication with the server is encrypted and safe
+from eavesdropping. For this to work, the user might also need to
+open the preferences dialog, and, in the \textbf{Misc} tab, fill-out
+the boxes labeled ``Path where to find shared libssl'' and ``Path
+where to find shared libcrypto''. Linux users must also see the SSL
+section of the FAQ.
+\item \textbf{Folder can be accessed without network}\\
+This option is only useful if you use Mahogany dial-up support - then
+check it to tell Mahogany that you don't need your Internet connection
+(and thus don't want to dial your ISP) to access this folder.
+\item \textbf{Can be opened}\\
+This is usually checked for the normal folder but may be unchecked
+for the folders which only contain subfolders (see also below) but
+not any messages. Normally you should allow Mahogany detect this itself,
+this checkbox is only here to allow you to override Mahogany if it
+does something wrong.
+\item \textbf{Contains subfolders}\\
 Select this if the mailbox represents not a mailbox or newsgroup but
 a hierarchy on an IMAP or NNTP server. E.g. comp.os.linux.announce
 would be a normal newsgroup (unticked), while comp.os.linux would
-be a new hierarchy (ticket).
+be a new hierarchy (ticked). Normally you should allow Mahogany detect
+this itself, this checkbox is only here to allow you to override Mahogany
+if it does something wrong.
 \item \textbf{Hide folder in tree}\\
 If you do not want this mailbox to be shown in the folder tree (unless
 you select the option to show all hidden folders), tick this box.
+For example, if you move all new mail from your POP3 folder to your
+INBOX you probably don't need to show POP3 folder in the tree at all
+so you may want to hide it to save valuable screen estate.
 \item \textbf{Folder subtype}\\
 Here you can select some sub-type, e.g. different mailbox formats.
+This option cannot be changed after the folder creation.
 \item \textbf{Icon for this folder}\\
 Allows you to set a different icon for the mailbox.
 \end{itemize}
@@ -1131,6 +1250,65 @@ as the path to the mailbox file. Like this, you can access any mail
 folder on that machine that you have access to locally, making remote
 access to your mail much more flexible than just accessing your new
 messages.
+
+
+\subsection{Filters}
+
+
+\subsubsection{\label{Filters}Overview}
+
+Mahogany has powerful builtin filters. The filters are written in
+a real (albeit small and specialized) programming language but there
+is also GUI support for creating them. All the existing filters appear
+in the dialog shown by the {}``Filters rules{}'' command of the
+{}``Edit{}'' menu. You can also access the filters configured for
+a specific folder by selecting {}``Filters{}'' from the {}``Folders{}''
+menu. The difference between these dialogs is that not all filters
+are associated with all folder, i.e. you may have two filters and
+two folders but the first folder can use only the first filter rule
+and the second - only the second one. The global {}``Filter rules{}''
+dialog allows you to manage all the filters but after creating a new
+one you still must associate it with some folder or folders for it
+to be useful.
+
+After creating some filters you may go to the {}``Filters{}'' dialog
+of the {}``Folder{}'' menu (you will also have an opportunity to
+go directly there immediately after the filter creation) and check
+the filters you would like to use for this folder. The filters are
+applied in the order in which they appear in the list, so use the
+up and down buttons to arrange them as needed: the order of filters
+is important because if one filter had decided to move a message to
+another folder the subsequent filters won't process this message at
+all.
+
+
+\subsubsection{Filter Rule Editor}
+
+This dialog allows you to edit an individual filter. You may use the
+different controls to compose it, note the {}``More{}'' button which
+allows you to add a new condition to the rule. You may notice that
+when you change something in the upper part of the dialog, the text
+in the lower part is updated to reflect it: this text is the source
+of the filter program which Mahogany will apply. By experimenting
+with the dialog controls it should be easy to see the different possibilities
+of this language. In a few words, it is a C-like language which has
+several built-in functions for testing for the various conditions
+and performing some actions. All of the usual C operations are supported.
+
+You may also edit the filter program text directly but be warned that
+it will be impossible to use the GUI controls to modify it then because
+they are not flexible enough to be able to express an arbitrary filter
+program.
+
+
+\subsubsection{Quick Filter}
+
+There is another, quicker, way to create filters as well: this is
+done with {}``Quick filter{}'' command from the {}``Message{}''
+menu or the popup menu displayed when you right click the message.
+It allows to easily create filters for the most common cases. Note
+that you may update the filter rule later using the full-fledged filter
+edit dialog if you decide to add more conditions to it, for example.
 
 
 \section{Sending Mail}
@@ -1434,6 +1612,65 @@ than this, it will fail.
 If the attempt to open a remote shell connection (used for some mail
 operations) to a remote server takes longer than this, it will fail.
 \end{itemize}
+\end{itemize}
+
+\subsubsection{\label{NewMailPage}New Mail Page\_4110\_}
+
+This page looks slightly differently in the global preferences dialog
+and in the folder properties one as some of the settings here must
+be the same for all folders while the others can only be set for a
+specific folder. First here is the list of the settings which appear
+in the global dialog:
+
+\begin{itemize}
+\item \textbf{Execute new mail command}\\
+You may specify a command to execute when new mail is received.
+\item \textbf{Play a sound on new mail}\\
+You can select a sound file to be played on new mail reception.
+\item \textbf{Show new mail notification}\\
+If this option is on, Mahogany will show a message about the new mail
+in the log window
+\item \textbf{Ping folder interval}\\
+This setting specifies how often should the currently opened folder(s)
+be updated. It is typically smaller than the poll interval below because
+it is faster to check an already opened folder, especially when it
+is a remote folder.
+\item \textbf{Poll interval}\\
+How often should Mahogany update the mail folders which it monitors
+in the background
+\end{itemize}
+In addition to these settings, the folder {}``New Mail{}'' properties
+page also proposes you the following settings:
+
+\begin{itemize}
+\item \textbf{Configure filters}\\
+This button gives you access to the filters dialog. Please see the
+corresponding manual section (\ref{Filters}) for more details
+\item \textbf{Collect new mail from this folder}\\
+If checked, all new mail detected in this folder (either automatically
+or manually) not handled by the filters will be copied or moved to
+another folder, normally the central {}``New Mail{}'' folder. You
+may change the destination folder if you are in advanced user mode.
+Of course, copying the new mail to a local folder from remote server
+may be time consuming so it may be worth to set the filters deleting
+the unwanted spam messages for this folder to avoid downloading them.
+\item \textbf{Leave mail in this folder}\\
+If this checkbox is checked, the new mail will be copied to the {}``New
+Mail{}'' folder and also left in this folder. Otherwise it will be
+moved to {}``New Mail{}'' and deleted from this folder.\\
+This option is often called {}``Leave mail on server{}'' in the
+other email clients.
+\item \textbf{Permanently monitor this folder}\\
+Choose this to tell Mahogany to poll this folder in the background
+periodically (the interval may be set below). If you leave it unset,
+you can still trigger new mail detection (including applying filters
+to it and/or downloading it from server) by either opening the folder
+or updating it ({}``Open{}'' and {}``Update{}'' commands in the
+{}``Folder{}'' manu respectively)
+\item \textbf{Poll folder at startup}\\
+If on, Mahogany will check for new mail in this folder immediately
+after the program launch. Of course, if you have many permanently
+monitored folders this can make the program startup quite slow.
 \end{itemize}
 
 \subsubsection{\label{ComposePage}Compose Page\_4100\_ }
@@ -1744,6 +1981,11 @@ If this option is on, the log window showing all program messages
 will be displayed during program execution. It is advised to leave
 it on because the log messages (which can be saved to a file from
 the log window menu) can be valuable for the bug reports.
+\item \textbf{Debug server and mail folder access}\\
+This is another troubleshooting option: please turn it on if you experience
+any mail-related problems (either sending or receiving). It slows
+down the program a lot but allows to see what exactly is going on
+between the client and the server and this can be of great help sometimes.
 \item \textbf{Splash screen on startup}\\
 If this option is on, a splash screen is shown on startup. It will
 go away when clicked with the mouse or when a given delay (see the
@@ -2438,6 +2680,40 @@ by using the corresponding menu points in the plugin menu.
 
 \chapter{Getting Help and Support}
 
+
+\section{Troubleshooting\label{Troubleshooting}}
+
+Before asking for the help on our mailing lists, please try to see
+if you cannot fix, or, at least, understand the reasons of, the problem
+yourself. It is difficult to list everything which could go wrong
+here but here are some basic recommendations:
+
+\begin{itemize}
+\item (Unix) If the program doesn't compile, please make sure you use GNU
+make. If it still doesn't help, please let us know about it but don't
+forget to include the compilation errors log (if there are too many
+errors, there is no need to include all of them, just the few first
+ones). If the problem has happened at configure time, please look
+at config.log file configure created and include it in your report.
+\item (Unix) If the program crashes mysteriously please make sure you don't
+have incompatible and/or different versions of the program sources,
+headers and modules. Also, please check that you have only one version
+of wxWindows installed. Also, make sure to rebuild everything (ideally,
+create a new build directory) after installing or uninstalling a new
+wxWindows or Mahogany version. If the problem still persists, please
+try building the debug version of the program (you need debug wxWindows
+library and run configure --with-debug switch), run it under \noun{gdb}
+and send us the output of {}``bt{}'' command in the debugger when
+it crashes.
+\item If your problem is related to receiving or sending mail, please look
+at the message log window for possible explanation. If you don't see
+the log window, make sure it wasn't disabled in the {}``Miscellaneous{}''
+(last) page of the preferences dialog - and reenable it if it was.
+If there is nothing helpful in the log window, please turn on {}``Debug
+server and mailbox access{}'' option in the same page. It may also
+be useful to enable logging to a file if the program crashes as the
+file contents,unlike the log window, is not lost in this case.
+\end{itemize}
 
 \section{WWW Support}
 
