@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Filters - Filtering code for Mahogany                            *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (ballueder@gmx.net)                 *
+ * (C) 1999-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *
@@ -1339,6 +1339,8 @@ ParserImpl::ParseFactor(void)
          GetToken();
       }
    }
+   // sn == NULL, illegal factor
+   Error(_("Expected a either a number, a string, an identifier, '(' or '!'."));
    return sn;
 }
 
@@ -2054,7 +2056,7 @@ FilterRuleImpl::Apply(class MailFolder *mf, bool NewOnly) const
    HeaderInfoList *hil = mf->GetHeaders();
    if(hil)
    {
-      for(size_t i = 0; i < hil->Count() && rc != 0; i++)
+      for(size_t i = 0; i < hil->Count(); i++)
       {
          const HeaderInfo * hi = (*hil)[i];
          if( (! NewOnly) || // handle all or only new ones:
@@ -2064,7 +2066,7 @@ FilterRuleImpl::Apply(class MailFolder *mf, bool NewOnly) const
                 ) // new == recent and not seen
             )
          {
-            rc = Apply(mf, hi->GetUId());
+            rc &= Apply(mf, hi->GetUId());
          }
       }
       hil->DecRef();
@@ -2107,6 +2109,7 @@ void FilterRuleImpl::Debug(void)
 }
 
 
+#if 0
 /** A small test for the filter module. */
 static
 int FilterTest(MInterface *interface, MModule_Filters *that)
@@ -2142,6 +2145,7 @@ int FilterTest(MInterface *interface, MModule_Filters *that)
    return rc;
 }
 #endif
+#endif
 
 
 
@@ -2160,9 +2164,7 @@ protected:
    MModule_FiltersImpl(MInterface *interface)
       {
          m_Interface = interface;
-#ifdef DEBUG
-         (void) FilterTest(m_Interface, this);
-#endif
+//         (void) FilterTest(m_Interface, this);
       }
 
    /// the MInterface

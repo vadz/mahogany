@@ -1121,10 +1121,14 @@ MailFolderCmn::DeleteMessages(const INTARRAY *selections)
 int
 MailFolderCmn::ApplyFilterRules(bool newOnly)
 {
+#if 0
+   // This test does not work, as CountNewMessages() might not return
+   // the updated count yet.
    // Maybe we are lucky and have nothing to do?
    if(newOnly && CountNewMessages() == 0)
          return 0;
-
+#endif
+   
    // Obtain pointer to the filtering module: 
    MModule_Filters *filterModule = MModule_Filters::GetModule();
 
