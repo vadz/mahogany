@@ -29,8 +29,13 @@ MOD	:= $(filter-out modules/PalmOS.so, $(MOD))
 endif
 
 ifdef USE_DSPAM
-CPPFLAGS_modules_spam_dspam_so := -I../lib/dspam/.src
-LDFLAGS_modules_spam_dspam_so := ../lib/dspam/libdspam.a -lsqlite
+ifeq ($(USE_MODULES),static)
+CPPFLAGS_modules_spam_DspamFilter_o := -I../lib/dspam/.src
+LDFLAGS_modules_spam_DspamFilter_o := ../lib/dspam/libdspam.a -lsqlite
+else
+CPPFLAGS_modules_spam_DspamFilter_so := -I../lib/dspam/.src
+LDFLAGS_modules_spam_DspamFilter_so := ../lib/dspam/libdspam.a -lsqlite
+endif
 else
 MOD	:= $(filter-out modules/spam/dspam.so, $(MOD))
 endif
