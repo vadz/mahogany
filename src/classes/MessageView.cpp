@@ -1341,9 +1341,9 @@ void MessageView::ShowImage(const MimePart *mimepart)
 
       wxMemoryInputStream mis(data, len);
       wxImage img(mis);
-#ifdef OS_UNIX
       if ( !img.Ok() )
       {
+#ifdef OS_UNIX
          // try loading via wxIconManager which can use ImageMagik to do the
          // conversion
          MTempFileName tmpFN;
@@ -1357,8 +1357,10 @@ void MessageView::ShowImage(const MimePart *mimepart)
             if ( !ok )
                showInline = false;
          }
+#else // !OS_UNIX
+         showInline = false;
+#endif // OS_UNIX/!OS_UNIX
       }
-#endif // OS_UNIX
 
       if ( showInline )
       {
