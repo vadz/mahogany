@@ -49,6 +49,17 @@ If compiling with a non-default compiler like egcs, make sure that
 <em/M/ uses the STL, so you need a sufficiently recent compiler,
 i.e. <tt/egcs/ or <tt/gcc-2.8/.
 
+<sect2>
+The <tt/c-client library/ is required and is available from
+<tt>ftp://ftp.cac.washington.edu/imap/imap.tar.Z</tt>. Before
+compiling it with <em/M/, you need to patch it.
+<br>
+First, install the <tt/rfc822.c.patch/ on c-client's <tt/rfc822.c/
+file from the <tt>extra/patches</tt> subdirectory of <em/M/. Then run
+the <tt/c-client++/ script from the <tt>extra/scripts</tt>
+subdirectory in the c-client source directory, which will rename
+variables in the c-client code to make it C++ compliant.
+
 <sect2>Python
 <tt/configure/ looks for Python in
 <tt>/usr/local/src/Python-1.3</tt>. If your Python is installed in a
