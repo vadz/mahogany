@@ -161,7 +161,7 @@ enum LexMode {
 /****  Private Forward Declarations  ****/
 static int pushVObject(const char *prop);
 static VObject* popVObject();
-static char* lexDataFromBase64();
+/* SAH Un-used ?? static char* lexDataFromBase64(); */
 static void lexPopMode(int top);
 static int lexWithinMode(enum LexMode mode);
 static void lexPushMode(enum LexMode mode);
@@ -371,7 +371,7 @@ todoitem:
 	;
 
 %%
-/*/////////////////////////////////////////////////////////////////////////*/
+/* ///////////////////////////////////////////////////////////////////////// */
 static int pushVObject(const char *prop)
     {
     VObject *newObj;
@@ -391,7 +391,7 @@ static int pushVObject(const char *prop)
     }
 
 
-/*/////////////////////////////////////////////////////////////////////////*/
+/* ///////////////////////////////////////////////////////////////////////// */
 /* This pops the recently built vCard off the stack and returns it. */
 static VObject* popVObject()
     {
@@ -632,6 +632,8 @@ static char* lexGetWord() {
     return lexStr();
     }
 
+#ifdef USELESS_CODE
+ /* SAH - This routine isn't used ? */
 static void lexPushLookahead(char *s, int len) {
     int putptr;
     if (len == 0) len = strlen(s);
@@ -647,6 +649,7 @@ static void lexPushLookahead(char *s, int len) {
 	}
     lexBuf.len += len;
     }
+#endif
 
 static void lexPushLookaheadc(int c) {
     int putptr;
@@ -726,7 +729,7 @@ static void handleMoreRFC822LineBreak(int c) {
     }
 
 static char* lexGet1Value() {
-    int size = 0;
+    /* SAH Unused int size = 0; */
     int c;
     lexSkipWhite();
     c = lexLookahead();
@@ -757,8 +760,10 @@ static char* lexGet1Value() {
     }
 #endif
 
+#ifndef _SUPPORT_LINE_FOLDING
+ /* SAH - this routine is only used when not folding lines */
 static char* lexGetStrUntil(char *termset) {
-    int size = 0;
+    /* SAH un-used int size = 0; */
     int c = lexLookahead();
     lexClearToken();
     while (c != EOF && !strchr(termset,c)) {
@@ -769,6 +774,7 @@ static char* lexGetStrUntil(char *termset) {
     lexAppendc(0);
     return c==EOF?0:lexStr();
     }
+#endif
 
 static int match_begin_name(int end) {
     char *n = lexLookaheadWord();
@@ -814,7 +820,7 @@ static void finiLex() {
     }
 
 
-/*/////////////////////////////////////////////////////////////////////////*/
+/* ///////////////////////////////////////////////////////////////////////// */
 /* This parses and converts the base64 format for binary encoding into
  * a decoded buffer (allocated with new).  See RFC 1521.
  */
@@ -943,7 +949,7 @@ static int match_begin_end_name(int end) {
 static char* lexGetQuotedPrintable()
     {
     char cur;
-    unsigned long len = 0;
+    /* SAH Un-used unsigned long len = 0; */
 
     lexClearToken();
     do {
@@ -999,7 +1005,7 @@ EndString:
     } /* LexQuotedPrintable */
 
 int yylex() {
-    int token = 0;
+    /* SAH Un-used int token = 0; */
 
     int lexmode = LEXMODE();
     if (lexmode == L_VALUES) {
@@ -1130,7 +1136,7 @@ static VObject* Parse_MIMEHelper()
     return vObjList;
     }
 
-/*/////////////////////////////////////////////////////////////////////////*/
+/* ///////////////////////////////////////////////////////////////////////// */
 DLLEXPORT(VObject*) Parse_MIME(const char *input, unsigned long len)
     {
     initLex(input, len, 0);
@@ -1185,7 +1191,7 @@ DLLEXPORT(VObject*) Parse_MIME_FromFileName(char *fname)
 
 #endif
 
-/*/////////////////////////////////////////////////////////////////////////*/
+/* ///////////////////////////////////////////////////////////////////////// */
 static void YYDebug(const char *s)
 {
 /*	Parse_Debug(s); */
