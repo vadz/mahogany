@@ -79,6 +79,8 @@ wxMApp::OnInit()
 
 MFrame *wxMApp::CreateTopLevelFrame()
 {
+   m_IconManager = new wxIconManager();
+
    topLevelFrame = GLOBAL_NEW wxMainFrame();
    topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
    topLevelFrame->Show(true);
@@ -87,8 +89,6 @@ MFrame *wxMApp::CreateTopLevelFrame()
    SetTopWindow(topLevelFrame);
 #endif
       
-   m_IconManager = new wxIconManager();
-
    return topLevelFrame;
 }
 
