@@ -29,7 +29,7 @@ msgid ""
 "the version '%s'."
 msgstr ""
 "Informacion de configuracion y archivos de programa actualizados "
-"exitosamente dela version '%s'."
+"exitosamente de la version '%s'."
 
 #: upgrade.cpp:392 upgrade.cpp:500
 #, c-format
@@ -41,7 +41,7 @@ msgid ""
 "it."
 msgstr ""
 "Informacion de configuracion y archivos de programa no pudieron ser "
-"actualizados dela version '%s', algunas configuraciones pueden ser "
+"actualizados de la version '%s', algunas configuraciones pueden ser "
 "perdidas.\n"
 "\n"
 "Es recomendable que desinstale y reinstale el programa antes de usarlo"
@@ -1092,13 +1092,12 @@ msgid "Loading image..."
 msgstr "Cargando imagen..."
 
 #: wxIconManager.cpp:200
-#, fuzzy, c-format
 msgid ""
 "Unsupported intermediary image format '%s' specified,\n"
 "reset to '%s'."
 msgstr ""
-"Formato de imagen no soportado '%s' ,\n"
-"'%s'."
+"Formato de imagen intermedio no soportado '%s'especificado ,\n"
+"resetee a '%s'."
 
 #: wxIconManager.cpp:223
 msgid ""
@@ -2432,13 +2431,13 @@ msgstr "Restaurar opciones por defecto"
 msgid "&All settings"
 msgstr "&Todas las variables"
 
-# fuzzy
 #: wxOptionsDlg.cpp:1495 wxOptionsDlg.cpp:1499 wxOptionsDlg.cpp:1503
 #: wxOptionsDlg.cpp:1523
 msgid ""
 "Please check the settings whose values\n"
 "should be reset to the defaults."
-msgstr ""
+msgstr "Por favor chequee las configuraciones cuyos valores/n"
+"deben resetearse a los valores por defecto"
 
 #: wxFolderTree.cpp:190
 msgid "Folder '"
@@ -3316,126 +3315,120 @@ msgstr "Folder abierto'%s'"
 msgid ""
 "You are trying to collect mail from your central New Mail folder.\n"
 "This makes no sense. Please correct its settings."
-msgstr ""
+msgstr "Esta tratando de recoger mail del folder central de Mail nuevo.\n"
+"No tiene sentido. Por favor corrija la configuracion." 
 
 #: wxMessageView.cpp:627 wxMessageView.cpp:635 wxMessageView.cpp:639
-#, fuzzy
 msgid "Find string in message"
-msgstr "Imprimir este mensaje"
+msgstr "Buscar texto en mensaje"
 
 #: wxMessageView.cpp:628 wxMessageView.cpp:636 wxMessageView.cpp:640
 msgid "   Find:"
 msgstr "   Buscar:"
 
 #: wxMenuDefs.cpp:230 wxMenuDefs.cpp:239
-#, fuzzy
 msgid "C&ut"
 msgstr "&Cortar"
 
 #: wxMenuDefs.cpp:230 wxMenuDefs.cpp:239
 msgid "Cut selection and copy it to clipboard"
-msgstr ""
+msgstr "Cortar seleccion y copiar al portapapeles"
 
 #: wxMenuDefs.cpp:231 wxMenuDefs.cpp:240
 msgid "Copy selection to clipboard"
-msgstr ""
+msgstr "Copiar seleccion al portapapeles"
 
 #: wxMenuDefs.cpp:232 wxMenuDefs.cpp:241
 msgid "Paste from clipboard"
-msgstr ""
+msgstr "Pegar desde el portapapeles"
 
 #: wxMenuDefs.cpp:266 wxMenuDefs.cpp:274
-#, fuzzy
+#, 
 msgid "F&ind..."
 msgstr "&Buscar"
 
 #: wxMenuDefs.cpp:266 wxMenuDefs.cpp:274
-#, fuzzy
 msgid "Find text in message"
-msgstr "Imprimir mensaje"
+msgstr "Buscar texto en mensaje"
 
 #: wxOptionsDlg.cpp:357 wxOptionsDlg.cpp:358 wxOptionsDlg.cpp:363
 msgid "Reply return address from &To: field"
-msgstr ""
+msgstr "Responder a direccion en campo £Para:"
 
 #: wxOptionsDlg.cpp:396 wxOptionsDlg.cpp:399 wxOptionsDlg.cpp:413
 msgid "&Automatically select first message in viewer"
-msgstr ""
+msgstr "&Seleccione automaticamente el priemer mensaje en el visor"
 
 #: MApplication.cpp:469
 #, c-format
 msgid "Opening folder '%s' for saving outgoing messages."
-msgstr ""
+msgstr "Abriendo folder '%s' para salvar mensajes de salida."
 
 #: MApplication.cpp:475
-#, fuzzy, c-format
 msgid "Cannot open folder '%s' for saving outgoing messages."
-msgstr "No puedo abrir el archivo'%s' incluido en este mensaje!"
+msgstr "No puedo abrir el folder '%s' para salvar mensajes de salida."
 
 #: wxOptionsDlg.cpp:368 wxOptionsDlg.cpp:382
 msgid "&Keep this folder always open"
-msgstr ""
+msgstr "&Conserve este folder abierto siempre"
 
 #: wxMFrame.cpp:242 wxMFrame.cpp:248
-#, fuzzy
 msgid "Please select a Python script to run."
-msgstr "Por favor seleccione entrada para modificar"
+msgstr "Por favor seleccione script Python a ejecutar."
 
 #: wxlwindow.cpp:632
 #, c-format
 msgid "L:%d C:%d)"
-msgstr ""
+msgstr "L:%d C:%d)"
 
 #: wxOptionsDlg.cpp:368
 msgid ""
 "The following timeout values are used for TCP connections to\n"
 "remote mail or news servers. Their scope is global, but they\n"
 "will get set from the folder that has been opened last.\n"
-msgstr ""
+msgstr "Los siguientes valores limite se usan para conecciones TCP a\n"
+"servidores de mail remotos. Su fin es global, pero seran\n"
+"tomados del ultimo folder qhe haya sido abierto.\n"
+
 
 #: wxOptionsDlg.cpp:372
 msgid "&Open timeout"
-msgstr ""
+msgstr "&Tiempo limite de abertura"
 
 #: wxOptionsDlg.cpp:373
 msgid "&Read timeout"
-msgstr ""
+msgstr "&Tiempo limite de lectura"
 
 #: wxOptionsDlg.cpp:374
 msgid "&Write timeout"
-msgstr ""
+msgstr "&Tiempo limite de escritura"
 
 #: wxOptionsDlg.cpp:375
 msgid "&rsh timeout"
-msgstr ""
+msgstr "&Tiempo limite de rsh"
 
 #: wxOptionsDlg.cpp:376
-#, fuzzy
 msgid "&Close timeout"
-msgstr "&Cerrar Ventana"
+msgstr "&Tiempo limite para cerrar"
 
 #: wxlwindow.cpp:632
 #, c-format
 msgid "L:%d C:%d"
-msgstr ""
+msgstr "L:%d C:%d"
 
 # MDialogs.h
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
-#, fuzzy
 msgid "System Error"
-msgstr ""
-"\n"
-"Error de Sistema"
+msgstr "Error de Sistema"
+
 
 msgid "Fatal Error"
-msgstr ""
+msgstr "Error Fatal"
 
-#, fuzzy
 msgid "Information"
-msgstr "Informacion MIME"
+msgstr "Informacion"
 
-#, fuzzy
 msgid "Please choose"
-msgstr "Seleccione un folder"
+msgstr "Por favor seleccione"
