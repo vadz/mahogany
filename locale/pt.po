@@ -770,7 +770,7 @@ msgstr "Entrada '%s' tem demasiados campos, os excedentes serão ignorados."
 #: adb/ProvFC.cpp:352
 #, c-format
 msgid "Trailing backslash discarded in entry '%s'."
-msgstr "A barra oblíqua invertida (\) no fim da entrada '%s' foi descartada."
+msgstr "A barra oblíqua invertida (\\) no fim da entrada '%s' foi descartada."
 
 #: adb/ProvFC.cpp:726
 #, fuzzy, c-format
@@ -4753,7 +4753,7 @@ msgstr "Marcar\tCtrl-I"
 
 #: gui/wxMenuDefs.cpp:315
 msgid "Mark message as flagged/unflagged"
-msgstr "Marcar mensagem como marcada\desmarcada"
+msgstr "Marcar mensagem como marcada/desmarcada"
 
 #: gui/wxMenuDefs.cpp:316
 msgid "Ex&punge"
@@ -4817,7 +4817,7 @@ msgstr "Mostrar cabeçalhos"
 #: gui/wxMenuDefs.cpp:325
 #, fuzzy
 msgid "Toggle display of message header"
-msgstr "Mostrar\Esconder cabeçalho da mensagem"
+msgstr "Mostrar/Esconder cabeçalho da mensagem"
 
 #: gui/wxMenuDefs.cpp:326
 #, fuzzy
