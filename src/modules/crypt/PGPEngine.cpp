@@ -531,6 +531,11 @@ PGPEngine::DoExecCommand(const String& options,
       else if ( err->CanRead() )
       {
          String line = errText.ReadLine();
+#if !defined(NDEBUG)
+         // In debug mode, log everything
+         if (log)
+            log->AddMessage(line);
+#endif
          if ( line.StartsWith(_T("[GNUPG:] "), &line) )
          {
             String code;
@@ -550,7 +555,6 @@ PGPEngine::DoExecCommand(const String& options,
             {
                if ( status != SIGNATURE_EXPIRED_ERROR ) {
                   status = OK;
-                  wxLogStatus(_("Valid signature for public key \"%s\""), pc);
                }
 
             }
@@ -567,7 +571,6 @@ PGPEngine::DoExecCommand(const String& options,
             else if ( code == _T("EXPSIG") || code == _T("EXPKEYSIG") )
             {
                status = SIGNATURE_EXPIRED_ERROR;
-               wxLogWarning(_("Expired signature for public key \"%s\""), pc);
             }
             else if ( code == _T("BADSIG") )
             {
@@ -588,7 +591,6 @@ PGPEngine::DoExecCommand(const String& options,
                     code == _T("TRUST_NEVER") )
                {
                   status = SIGNATURE_UNTRUSTED_WARNING;
-                  //wxLogWarning(_("Signature from untrusted public key \"%s\""), pc);
                }
                // else: "_MARGINAL, _FULLY and _ULTIMATE" do not trigger a warning
             }
@@ -717,7 +719,8 @@ PGPEngine::DoExecCommand(const String& options,
                log->SetUserID(userId);
             }
          }
-         else // normal (free form) gg output
+#if defined(NDEBUG) // In non-debug mode, log only free-form output
+         else // normal (free form) gpg output
          {
             // remember in the output log object if we have one
             if ( log )
@@ -725,13 +728,27 @@ PGPEngine::DoExecCommand(const String& options,
                log->AddMessage(line);
             }
          }
+#endif
       }
    }
 
-   if ( encryptedForSomeoneElse && status != OK )
+   switch (status) 
    {
-      wxLogWarning(_("Secret key needed to decrypt this message is "
-                              "not available"));
+      case OK:
+         wxLogStatus(_("Valid signature from \"%s\""), log->GetUserID());
+         break;
+      case SIGNATURE_UNTRUSTED_WARNING:
+         wxLogStatus(_("Valid signature from (invalid) \"%s\""), log->GetUserID());
+         break;
+      case SIGNATURE_EXPIRED_ERROR:
+         wxLogWarning(_("Expired signature from \"%s\""), log->GetUserID());
+         break;
+      default:
+         if ( encryptedForSomeoneElse )
+         {
+            wxLogWarning(_("Secret key needed to decrypt this message is "
+                                    "not available"));
+         }
    }
 
    // Removing this assert:

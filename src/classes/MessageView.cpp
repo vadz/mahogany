@@ -2969,6 +2969,12 @@ MessageView::ShowMessage(UIdType uid)
       // file request, our DoShowMessage() will be called later
       m_uid = uid;
       (void)m_asyncFolder->GetMessage(uid, this);
+
+      // Reset the status bar, so that some information pertaining
+      // to the previous message does not stay there...
+      wxFrame *frame = GetParentFrame();
+      CHECK_RET( frame, _T("message view without parent frame?") );
+      frame->SetStatusText("");
    }
 }
 
