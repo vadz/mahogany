@@ -260,6 +260,7 @@ private:
                                                                               \
       classname *Get() const { return m_ptr; }                                \
                                                                               \
+      classname& operator*() const { return *Get(); }                         \
       classname *operator->() const { return Get(); }                         \
                                                                               \
       void Swap(classname##_obj& other)                                       \
