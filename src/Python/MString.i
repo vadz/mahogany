@@ -3,13 +3,14 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                 *
+ * $Id$              *
  *******************************************************************/
 
 // naming this module String is a very bad idea for systems with
 // case-insensitive file system (Windows...) because of standard Python
 // module string.
-%module 	MString
+
+%module	MString
 %{
 #include  "Mswig.h"
 %}

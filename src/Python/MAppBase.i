@@ -5,7 +5,9 @@
  *                                                                  *
  * $Id$
  *******************************************************************/
-%nodefault
+
+// %nodefault
+
 %module   MAppBase
 %{
 #include "Mswig.h"

@@ -6,7 +6,8 @@
  * $Id$
  *******************************************************************/
 
-%nodefault
+// %nodefault
+
 %module MailFolder
 
 %{
@@ -33,7 +34,7 @@ class Message;
 
 
 /**
-   MailFolder base class, represents anything containig mails.
+   MailFolder base class, represents anything containing mails.
 
    This class defines the interface for all MailFolder classes. It can
    represent anything which contains messages, e.g. folder files, POP3
@@ -111,7 +112,7 @@ public:
        MFolder object. */
    static MailFolder * OpenFolder(const class MFolder *mfolder);
 
-   /** Phyically deletes this folder.
+   /** Physically deletes this folder.
        @return true on success
    */
    static bool DeleteFolder(const MFolder *mfolder);
@@ -132,12 +133,12 @@ public:
                             const String &comment);
 
    /** Checks if it is OK to exit the application now.
-       @param which Will either be set to empty or a '\n' delimited
+       @param which will either be set to empty or a '\n' delimited
        list of folders which are in critical sections.
    */
    static bool CanExit(String *which);
 
-   /** Utiltiy function to get a textual representation of a message
+   /** Utility function to get a textual representation of a message
        status.
        @param message status
        @return string representation

@@ -8,7 +8,8 @@
 // Copyright:   (c) 1998 Karsten Ballueder (Ballueder@usa.net)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
-%module   swiglib
+
+%module swiglib
 %{
 %}
 
