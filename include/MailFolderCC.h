@@ -260,8 +260,8 @@ private:
    friend class MessageCC;
 
 protected:
-   void SetType(MailFolderType type) { folderType = type; }
-   MailFolderType GetType(void) { return folderType; }
+   void SetType(MailFolderType type) { m_folderType = type; }
+   MailFolderType GetType(void) { return m_folderType; }
 public:
    /** @name common callback routines
        They all take a stram argument and the number of a message.
