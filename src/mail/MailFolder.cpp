@@ -233,18 +233,6 @@ MailFolder::Subscribe(const String &host, FolderType protocol,
 }
 
 /* static */
-class FolderListing *
-MailFolder::ListFolders(const String &host,
-                        FolderType protocol,
-                        const String &pattern,
-                        bool subscribed_only,
-                        const String &reference)
-{
-   return MailFolderCC::ListFolders(host, protocol,pattern,
-                                    subscribed_only, reference);
-}
-
-/* static */
 void
 MailFolder::ReplyMessage(class Message *msg,
                          int flags,

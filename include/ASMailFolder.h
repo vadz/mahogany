@@ -61,14 +61,6 @@ class ASMailFolder : public MObjectRC
 {
 public:
    /** @name Constants and Types */
-   /** Each operation returns a unique number, to identify it. */
-   typedef int Ticket;
-
-   /// A ticket value which must never appear.
-   static const Ticket IllegalTicket;
-   
-   /** Each operation can carry some user data. */
-   typedef void * UserData;
    
    //@{
    /** What is the status of a given message in the folder?
@@ -224,27 +216,30 @@ public:
       Message *m_Message;
       UIdType  m_uid;
    };
-   /** Holds the result from a ListFolders() call.
+   /** Holds a single folder name found in a ListFolders() call.
    */
-   class ResultFolderListing : public ResultImpl
+   class ResultFolderExists : public ResultImpl
    {
    public:
-      static ResultFolderListing *Create(ASMailFolder *mf,
+      static ResultFolderExists *Create(ASMailFolder *mf,
                                          Ticket t,
-                                         FolderListing *list,
+                                         const String &name,
+                                         char delimiter,
                                          UserData ud)
-         { return new ResultFolderListing(mf, t, list, ud); }
-      const FolderListing * GetListing(void) const { return m_List; }
+         { return new ResultFolderExists(mf, t, name, delimiter, ud); }
+      String GetName(void) const { return m_Name; }
+      char GetDelimiter(void) const { return m_Delim; }
    protected:
-      ResultFolderListing(ASMailFolder *mf, Ticket t, FolderListing *list,
+      ResultFolderExists(ASMailFolder *mf, Ticket t,
+                          const String &name, char delimiter,
                           UserData ud)
          : ResultImpl(mf, t, Op_ListFolders, NULL, ud)
          {
-            m_List = list;
+            m_Name = name;
+            m_Delim = delimiter;
          }
-      ~ResultFolderListing() { delete m_List; }
    private:
-      FolderListing *m_List;
+      String m_Name; char m_Delim;
    };
 
 
@@ -495,9 +490,9 @@ public:
 class ASTicketList : public MObjectRC
 {
 public:
-   virtual bool Contains(ASMailFolder::Ticket t) const = 0;
-   virtual void Add(ASMailFolder::Ticket t) = 0;
-   virtual void Remove(ASMailFolder::Ticket t) = 0;
+   virtual bool Contains(Ticket t) const = 0;
+   virtual void Add(Ticket t) = 0;
+   virtual void Remove(Ticket t) = 0;
    virtual void Clear(void) = 0;
    static ASTicketList * Create(void);
 };

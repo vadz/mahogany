@@ -228,18 +228,24 @@ public:
                           const String &mailboxname,
                           bool subscribe = true);
    /** Get a listing of all mailboxes.
+
+       DO NOT USE THIS FUNCTION, BUT ASMailFolder::ListFolders instead!!!
+
+       @param asmf the ASMailFolder initiating the request
        @param host the server host, or empty for local newsspool
        @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   static FolderListing *
-   ListFolders(const String &host,
-               FolderType protocol,
-               const String &pattern = "*",
-               bool subscribed_only = false,
-               const String &reference = "");
+   void ListFolders(class ASMailFolder *asmf,
+                    const String &host,
+                    FolderType protocol,
+                    const String &pattern = "*",
+                    bool subscribed_only = false,
+                    const String &reference = "",
+                    UserData ud = 0,
+                    Ticket ticket = ILLEGAL_TICKET);
    //@}
    /**@name Access control */
    //@{
@@ -281,6 +287,9 @@ private:
                 String const &login,
                 String const &password);
 
+   /// Common code for constructors
+   void Create(int typeAndFlags);
+   
    /** Try to open the mailstream for this folder.
        @return true on success
    */
@@ -568,6 +577,13 @@ private:
 
    /// Used by the subscription management.
    class FolderListingCC *m_FolderListing;
+
+   /**@name only used for ListFolders: */
+   //@{
+   UserData m_UserData;
+   Ticket   m_Ticket;
+   class ASMailFolder *m_ASMailFolder;
+   //@}
 public:
    DEBUG_DEF
    MOBJECT_DEBUG(MailFolderCC)

@@ -28,9 +28,6 @@
 #include "ASMailFolder.h"
 #include "MailFolderCC.h"
 
-/// A ticket number that never appears.
-#define ILLEGAL_TICKET   -1
-
 /// Call this always before using it.
 #ifdef DEBUG
 #   define   AScheck()   { MOcheck(); ASSERT(m_MailFolder); }
@@ -75,7 +72,7 @@ class MailThread
 
 {
 public:
-   MailThread(ASMailFolder *mf, ASMailFolder::UserData ud)
+   MailThread(ASMailFolder *mf, UserData ud)
       {
          m_ASMailFolder = mf;
          if(mf) mf->IncRef();
@@ -83,7 +80,7 @@ public:
          m_UserData = ud;
       }
 
-   ASMailFolder::Ticket Start(void)
+   Ticket Start(void)
       {
          m_Ticket = GetTicket();
          Run();
@@ -106,7 +103,7 @@ protected:
    inline void UnLockFolder(void)
       { m_ASMailFolder->UnLockFolder(); };
 
-   static ASMailFolder::Ticket GetTicket(void)
+   static Ticket GetTicket(void)
       { return ms_Ticket++;}
 
 #ifndef USE_THREADS
@@ -119,14 +116,10 @@ protected:
 protected:
    class ASMailFolder *m_ASMailFolder;
    MailFolder            *m_MailFolder;
-   ASMailFolder::UserData m_UserData;
-   ASMailFolder::Ticket   m_Ticket;
-   static ASMailFolder::Ticket ms_Ticket;
+   UserData m_UserData;
+   Ticket   m_Ticket;
+   static Ticket ms_Ticket;
 };
-
-/* static */
-ASMailFolder::Ticket
-MailThread::ms_Ticket = ILLEGAL_TICKET + 1;
 
 void *
 MailThread::Entry()
@@ -159,7 +152,7 @@ class MailThreadSeq : public MailThread
 {
 public:
    MailThreadSeq(ASMailFolder *mf,
-                 ASMailFolder::UserData ud,
+                 UserData ud,
                  const INTARRAY *selections)
       : MailThread(mf, ud)
       {
@@ -180,7 +173,7 @@ class MT_Ping : public MailThread
 {
 public:
    MT_Ping(ASMailFolder *mf,
-           ASMailFolder::UserData ud)
+           UserData ud)
       : MailThread(mf, ud) {}
    virtual void WorkFunction(void)
       { m_MailFolder->Ping(); }
@@ -189,7 +182,7 @@ public:
 class MT_SetSequenceFlag : public MailThread
 {
 public:
-   MT_SetSequenceFlag(ASMailFolder *mf, ASMailFolder::UserData ud,
+   MT_SetSequenceFlag(ASMailFolder *mf, UserData ud,
                       const String &sequence,
                       int flag, bool set)
       : MailThread(mf, ud)
@@ -211,7 +204,7 @@ protected:
 class MT_SetFlag : public MailThreadSeq
 {
 public:
-   MT_SetFlag(ASMailFolder *mf, ASMailFolder::UserData ud,
+   MT_SetFlag(ASMailFolder *mf, UserData ud,
               const INTARRAY *sequence,
               int flag, bool set)
       : MailThreadSeq(mf, ud, sequence)
@@ -236,7 +229,7 @@ class MT_GetMessage : public MailThread
 {
 public:
    MT_GetMessage(ASMailFolder *mf,
-                 ASMailFolder::UserData ud,
+                 UserData ud,
                  unsigned long uid)
                  
       : MailThread(mf, ud)
@@ -259,7 +252,7 @@ class MT_AppendMessage : public MailThread
 {
 public:
    MT_AppendMessage(ASMailFolder *mf,
-                    ASMailFolder::UserData ud,
+                    UserData ud,
                     const Message *msg)
                  
       : MailThread(mf, ud)
@@ -268,7 +261,7 @@ public:
          m_Message->IncRef();
       }
    MT_AppendMessage(ASMailFolder *mf,
-                    ASMailFolder::UserData ud,
+                    UserData ud,
                     const String &msgstr)
                  
       : MailThread(mf, ud)
@@ -310,7 +303,7 @@ public:
 class MT_SaveMessages : public MailThreadSeq
 {
 public:
-   MT_SaveMessages(ASMailFolder *mf, ASMailFolder::UserData ud,
+   MT_SaveMessages(ASMailFolder *mf, UserData ud,
                    const INTARRAY *selections,
                    const String &folderName, 
                    bool isProfile, bool updateCount)
@@ -341,7 +334,7 @@ private:
 class MT_SaveMessagesToFile : public MailThreadSeq
 {
 public:
-   MT_SaveMessagesToFile(ASMailFolder *mf, ASMailFolder::UserData ud,
+   MT_SaveMessagesToFile(ASMailFolder *mf, UserData ud,
                          const INTARRAY *selections,
                          const String &fileName)
       : MailThreadSeq(mf, ud, selections)
@@ -368,7 +361,7 @@ class MT_SaveMessagesToFileOrFolder : public MailThreadSeq
 {
 public:
    MT_SaveMessagesToFileOrFolder(ASMailFolder *mf,
-                                 ASMailFolder::UserData ud,
+                                 UserData ud,
                                  ASMailFolder::OperationId op,
                                  const INTARRAY *selections,
                                  MWindow *parent)
@@ -400,7 +393,7 @@ private:
 class MT_ReplyForwardMessages : public MailThreadSeq
 {
 public:
-   MT_ReplyForwardMessages(ASMailFolder *mf, ASMailFolder::UserData ud,
+   MT_ReplyForwardMessages(ASMailFolder *mf, UserData ud,
                            ASMailFolder::OperationId op,
                            const INTARRAY *selections,
                            MWindow *parent,
@@ -433,7 +426,7 @@ private:
 class MT_Subscribe : public MailThread
 {
 public:
-   MT_Subscribe(ASMailFolder *mf, ASMailFolder::UserData ud,
+   MT_Subscribe(ASMailFolder *mf, UserData ud,
                   const String &host,
                   FolderType protocol,
                 const String &mailboxname,
@@ -464,7 +457,7 @@ class MT_ListFolders : public MailThread
 {
 public:
    MT_ListFolders(ASMailFolder *mf,
-                  ASMailFolder::UserData ud,
+                  UserData ud,
                   const String &host,
                   FolderType protocol,
                   const String &pattern,
@@ -480,10 +473,11 @@ public:
       }
    virtual void WorkFunction(void)
       {
-         FolderListing *fl = MailFolderCC::ListFolders(m_Host, m_Prot, 
-                                                       m_Pattern, m_SubOnly, m_Reference);
-         SendEvent(ASMailFolder::ResultFolderListing::Create(
-            NULL, m_Ticket, fl, m_UserData));
+         m_MailFolder->ListFolders(m_ASMailFolder,
+                                   m_Host, m_Prot, m_Pattern,
+                                   m_SubOnly,
+                                   m_Reference,
+                                   m_UserData, m_Ticket);
       }
 private:
    String  m_Host;
@@ -498,11 +492,6 @@ private:
    ASMailFolderImpl implementation, common code
 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/* static */
-const ASMailFolder::Ticket
-ASMailFolder::IllegalTicket = ILLEGAL_TICKET;
-
 
 class ASMailFolderImpl : public ASMailFolder
 {
@@ -772,7 +761,7 @@ public:
                              const String &pattern,
                              bool subscribed_only,
                              const String &reference,
-                             ASMailFolder::UserData ud)
+                             UserData ud)
    {
       return (new MT_ListFolders(NULL, ud,
                                  host, protocol,
@@ -906,19 +895,19 @@ ASMailFolder::Create(MailFolder *mf)
 class ASTicketListImpl : public ASTicketList
 {
 public:
-   virtual bool Contains(ASMailFolder::Ticket t) const
+   virtual bool Contains(Ticket t) const
       {
          for(size_t i = 0; i < m_Tickets.Count(); i++)
             if( m_Tickets[i] == t)
                return true;
          return false;
       }
-   virtual void Add(ASMailFolder::Ticket t)
+   virtual void Add(Ticket t)
       {
          ASSERT(!Contains(t));
          m_Tickets.Add(t);
       }
-   virtual void Remove(ASMailFolder::Ticket t)
+   virtual void Remove(Ticket t)
       {
          ASSERT(Contains(t));
          m_Tickets.Remove(t);
@@ -950,7 +939,7 @@ ASTicketList * ASTicketList::Create(void)
     @param bool if true, subscribe, else unsubscribe
 */
 /* static */
-ASMailFolder::Ticket
+Ticket
 ASMailFolder::Subscribe(const String &host,
                         FolderType protocol,
                         const String &mailboxname,
@@ -961,7 +950,7 @@ ASMailFolder::Subscribe(const String &host,
 }
 
 /* static */
-ASMailFolder::Ticket
+Ticket
 ASMailFolder::ListFolders(const String &host,
                           FolderType protocol,
                           const String &pattern,

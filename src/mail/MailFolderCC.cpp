@@ -27,6 +27,7 @@
 #include "MessageCC.h"
 
 #include "MEvent.h"
+#include "ASMailFolder.h"
 
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking
 #include <wx/filefn.h>
@@ -339,6 +340,15 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
                            String const &password)
    : MailFolderCmn(profile)
 {
+   Create(typeAndFlags);
+   m_MailboxPath = path;
+   m_Login = login;
+   m_Password = password;
+}
+
+void
+MailFolderCC::Create(int typeAndFlags)
+{
    m_MailStream = NIL;
 
 #ifdef DEBUG
@@ -360,9 +370,6 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
 #undef SET_TO
 
    SetRetrievalLimit(0); // no limit
-   m_MailboxPath = path;
-   m_Login = login;
-   m_Password = password;
    m_NumOfMessages = 0;
    m_OldNumOfMessages = 0;
    m_Listing = NULL;
@@ -413,6 +420,7 @@ MailFolderCC::~MailFolderCC()
   This gets called with a folder path as its name, NOT with a symbolic
   folder/profile name.
 */
+/* static */
 MailFolderCC *
 MailFolderCC::OpenFolder(int typeAndFlags,
                          String const &name,
@@ -1411,8 +1419,13 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf,"NULL mailfolder");
    CHECK_RET(mf->m_FolderListing,"NULL mailfolder listing");
-   mf->m_FolderListing->SetDelimiter(delim);
-   mf->m_FolderListing->Add(new FolderListingEntryCC(name, attrib));
+
+   ASMailFolder::ResultFolderExists *result =
+      ASMailFolder::ResultFolderExists::Create(
+         mf->m_ASMailFolder, mf->m_Ticket,
+         name, delim, mf->m_UserData);
+   MEventManager::Send(new MEventASFolderResultData (result) );
+
 }
 
 
@@ -1737,16 +1750,21 @@ MailFolderCC::Subscribe(const String &host,
       != NIL;
 }
 
-/* static */
-FolderListing *
-MailFolderCC::ListFolders(const String &host,
+void
+MailFolderCC::ListFolders(ASMailFolder *asmf,
+                          const String &host,
                           FolderType protocol,
                           const String &pattern,
                           bool subscribedOnly,
-                          const String &reference)
+                          const String &reference,
+                          UserData ud,
+                          Ticket ticket)
 {
+   m_ASMailFolder = asmf;
+   m_UserData = ud;
+   m_Ticket = ticket;
+   
    String imap_spec = ImapSpec(host, protocol, pattern);
-   FolderListingCC *m_FolderListing = new FolderListingCC;
    if(subscribedOnly)
    {
       mail_lsub (NIL, (char *) reference.c_str(), (char *) imap_spec.c_str());
@@ -1755,9 +1773,6 @@ MailFolderCC::ListFolders(const String &host,
    {
       mail_list (NIL, (char *) reference.c_str(), (char *) imap_spec.c_str());
    }
-   FolderListing * fl = m_FolderListing;
-   m_FolderListing = NULL;
-   return fl;
 }
 
 
@@ -1887,11 +1902,15 @@ mm_list(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
    if(mm_disable_callbacks)
       return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::List);
+
+   MailFolderCC::mm_list(stream, delim, name, attrib);
+/*
+  MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::List);
    evptr->m_args[0].m_int = delim;
    evptr->m_args[1].m_str = new String(name);
    evptr->m_args[2].m_long = attrib;
    MailFolderCC::QueueEvent(evptr);
+*/
 }
 
 void

@@ -237,16 +237,25 @@ MailCollector::CollectOneFolder(MailFolder *mf)
          }
          hil->DecRef();
       }
-      if(mf->SaveMessages(&selections,
-                          READ_APPCONFIG(MP_NEWMAIL_FOLDER),
-                          true /* isProfile */, true /* update count */))
+      if(selections.Count() > 0)
       {
-         mf->DeleteMessages(&selections);
-         mf->ExpungeMessages();
-         rc = true;
+         if(mf->SaveMessages(&selections,
+                             READ_APPCONFIG(MP_NEWMAIL_FOLDER),
+                             true /* isProfile */, true /* update count */))
+         {
+            mf->DeleteMessages(&selections);
+            mf->ExpungeMessages();
+            rc = true;
+         }
+         else
+            rc = false;
       }
       else
-         rc = false;
+         rc = true;
+#if 0
+      /* The following bit of code got broken because the folder
+         listing is now sorted. I think it's not needed anyway, so I
+         comment it out now and might delete the code later. KB*/
       i = 0;
       String seq;
       hil = m_NewMailFolder->GetHeaders();
@@ -262,10 +271,13 @@ MailCollector::CollectOneFolder(MailFolder *mf)
          }
          hil->DecRef();
       }
-      // mark new messages as new:
-      m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
-      m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
-      
+      if(seq.Length() > 0)
+      {
+         // mark new messages as new:
+         m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
+         m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
+      }
+#endif
       mf->EnableNewMailEvents(sendsEvents);
       mf->Ping(); //update it
    }

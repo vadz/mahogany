@@ -1368,7 +1368,8 @@ public:
          for ( int n = 0; n < NUM_DATE_FMTS;n++ )
             m_menu->Append(n, _(DateFormatsLabels[n]));
       }
-
+   ~wxDateTextCtrl()
+      { delete m_menu; }
    void OnRClick(wxMouseEvent& event)
       { (void)PopupMenu(m_menu, event.GetPosition()); }
    void OnMenu(wxCommandEvent &event)

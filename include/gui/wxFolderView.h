@@ -181,7 +181,7 @@ private:
    /// a list of pending tickets from async operations
    class ASTicketList *m_TicketList;
    /// Used by SaveMessagesToFolder: ticket from moving messages
-   ASMailFolder::Ticket m_DeleteSavedMessagesTicket;
+   Ticket m_DeleteSavedMessagesTicket;
    /// do we have focus-follow enabled?
    bool m_FocusFollowMode;
 };
@@ -244,6 +244,7 @@ class wxFolderListCtrl : public wxPListCtrl
 {
 public:
    wxFolderListCtrl(wxWindow *parent, wxFolderView *fv);
+   ~wxFolderListCtrl();
    void Clear(void);
    void SetEntry(long index,String const &status, String const &sender, String
                  const &subject, String const &date, String const

@@ -79,6 +79,19 @@ enum FolderFlags
    MF_FLAGS_KEEPOPEN      = 0x4000, // keep this folder open at all times
    MF_FLAGS_REOPENONPING  = 0x8000  // force a close and re-open on a ping
 };
+// ----------------------------------------------------------------------------
+// For asynchronous operations:
+// ----------------------------------------------------------------------------
+
+/** Each operation returns a unique number, to identify it. */
+typedef int Ticket;
+
+/// A ticket number that never appears.
+#define ILLEGAL_TICKET   -1
+
+   
+/** Each operation can carry some user data. */
+typedef void * UserData;
 
 // ----------------------------------------------------------------------------
 // helper functions

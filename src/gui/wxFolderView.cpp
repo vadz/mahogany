@@ -325,6 +325,11 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    Clear();
 }
 
+wxFolderListCtrl::~wxFolderListCtrl()
+{
+   delete m_menu;
+}
+
 int
 wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
 {
@@ -524,7 +529,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview, y/3);
    m_SplitterWindow->SetMinimumPaneSize(0);
    m_SplitterWindow->SetFocus();
-   m_DeleteSavedMessagesTicket = ASMailFolder::IllegalTicket;
+   m_DeleteSavedMessagesTicket = ILLEGAL_TICKET;
 }
 
 wxFolderView::~wxFolderView()
@@ -859,7 +864,7 @@ wxFolderView::PrintPreviewMessages(const wxArrayInt& selections)
 void
 wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections, bool del)
 {
-   ASMailFolder::Ticket t =
+   Ticket t =
       m_ASMailFolder->SaveMessagesToFolder(&selections,GetFrame(m_Parent), this);
    m_TicketList->Add(t);
    if(del)

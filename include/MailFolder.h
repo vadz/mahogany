@@ -169,20 +169,26 @@ public:
                          const String &mailboxname,
                          bool subscribe = true);
    /** Get a listing of all mailboxes.
+
+       DO NOT USE THIS FUNCTION, BUT ASMailFolder::ListFolders instead!!!
+
+       @param asmf the ASMailFolder initiating the request
        @param host the server host, or empty for local newsspool
        @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   static class FolderListing *
-   ListFolders(const String &host,
-               FolderType protocol,
-               const String &pattern = "*",
-               bool subscribed_only = false,
-               const String &reference = "");
+   virtual void ListFolders(class ASMailFolder *asmf,
+                            const String &host,
+                            FolderType protocol,
+                            const String &pattern = "*",
+                            bool subscribed_only = false,
+                            const String &reference = "",
+                            UserData ud = 0,
+                            Ticket ticket = ILLEGAL_TICKET) = 0;
    //@}
-   //@}
+   //@}   
 
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
