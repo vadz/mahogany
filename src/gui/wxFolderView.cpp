@@ -1347,6 +1347,11 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
    menu.Append(WXMENU_FVIEW_CONFIG_THREAD, _("&Configure threading..."));
 
    Profile *profile = m_FolderView->GetProfile();
+   if ( !profile )
+   {
+      // edit global settings if we don't have any open folder
+      profile = mApplication->GetProfile();
+   }
 
    if ( !READ_CONFIG(profile, MP_MSGS_SORTBY) )
    {
@@ -3476,10 +3481,13 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 
 void wxFolderView::OnHeaderPopupMenu(int cmd)
 {
+   // edit the global settings if we don't have any open folder
+   Profile *profile = m_Profile ? m_Profile : mApplication->GetProfile();
+
    switch ( cmd )
    {
       case WXMENU_FVIEW_CONFIG_SORT:
-         if ( !ConfigureSorting(m_Profile, GetWindow()) )
+         if ( !ConfigureSorting(profile, GetWindow()) )
          {
             // nothing changed, skip MEventManager::Send() below
             return;
@@ -3487,7 +3495,7 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
          break;
 
       case WXMENU_FVIEW_CONFIG_THREAD:
-         if ( !ConfigureThreading(m_Profile, GetWindow()) )
+         if ( !ConfigureThreading(profile, GetWindow()) )
          {
             // nothing changed, skip MEventManager::Send() below
             return;
@@ -3497,19 +3505,19 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
       case WXMENU_FVIEW_RESET_SORT:
          // we try to keep our profiles tidy and clean, so first just delete
          // the current sorting order
-         m_Profile->DeleteEntry(MP_MSGS_SORTBY);
-         if ( READ_CONFIG(m_Profile, MP_MSGS_SORTBY) )
+         profile->DeleteEntry(MP_MSGS_SORTBY);
+         if ( READ_CONFIG(profile, MP_MSGS_SORTBY) )
          {
             // but it didn't help - our parent must have a non 0 sort order
             // too, so we're forced to override it in our profile
-            m_Profile->writeEntry(MP_MSGS_SORTBY, 0l);
+            profile->writeEntry(MP_MSGS_SORTBY, 0l);
          }
          break;
 
       case WXMENU_FVIEW_TOGGLE_THREAD:
          {
-            bool thread = READ_CONFIG_BOOL(m_Profile, MP_MSGS_USE_THREADING);
-            m_Profile->writeEntry(MP_MSGS_USE_THREADING, !thread);
+            bool thread = READ_CONFIG_BOOL(profile, MP_MSGS_USE_THREADING);
+            profile->writeEntry(MP_MSGS_USE_THREADING, !thread);
          }
          break;
 
@@ -3535,7 +3543,7 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
 
             ASSERT_MSG( sortOrder != MSO_NONE, "invalid sort order" );
 
-            m_FolderCtrl->SetSortOrder(m_Profile, reverse ? sortOrder + 1
+            m_FolderCtrl->SetSortOrder(profile, reverse ? sortOrder + 1
                                                           : sortOrder);
 
             // SetSortOrder() notifies about the options change event itself,
@@ -3551,7 +3559,7 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
    MEventManager::Send(
                         new MEventOptionsChangeData
                             (
-                              m_Profile,
+                              profile,
                               MEventOptionsChangeData::Ok
                             )
                       );
