@@ -76,6 +76,9 @@ public:
 protected:
    // we handle verbose messages in a special way
    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
+
+private:
+   bool m_hasWindow;
 };
 
 // a timer used to periodically autosave profile settings
@@ -141,6 +144,7 @@ wxMLogWindow::wxMLogWindow(wxFrame *pParent, const char *szTitle)
    int x, y, w, h;
    wxMFrame::RestorePosition(LOG_FRAME_SECTION, &x, &y, &w, &h);
    GetFrame()->SetSize(x, y, w, h);
+   m_hasWindow = true;
    Show();
 }
 
@@ -148,12 +152,14 @@ void wxMLogWindow::OnFrameDelete(wxFrame *frame)
 {
    wxMFrame::SavePosition(LOG_FRAME_SECTION, frame);
 
+   m_hasWindow = false;
+
    wxLogWindow::OnFrameDelete(frame);
 }
 
 void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 {
-   if ( level == wxLOG_Info )
+   if ( m_hasWindow && level == wxLOG_Info )
    {
       // this will call wxLogWindow::DoLogString()
       wxLog::DoLog(level, szString, t);
