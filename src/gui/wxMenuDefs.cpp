@@ -577,7 +577,7 @@ wxCOMPILE_TIME_ASSERT( WXSIZEOF(g_aMenuItems) == WXMENU_END - WXMENU_BEGIN,
 
 // we don't have the menu id field for the submenus so generate "unique" ids
 // for them (can't use wxID_ANY as FindMenu() wouldn't work then)
-static inline SubmenuId(int n)
+static inline int SubmenuId(int n)
 {
    // this is really a hack: to avoid conflicts with the real menu items, put
    // submenus after WXMENU_END
