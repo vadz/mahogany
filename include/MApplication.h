@@ -338,6 +338,9 @@ public:
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
 
+   /// CreateInternalMessage option changed
+   void OnChangeCreateInternalMessage(MEventData& event);
+
    /// @name timer stuff
    //@{
    /// the application maintains several global timers which are known by ids

@@ -9,7 +9,8 @@
 Release 0.65 'Claire' ???, 2003
 -------------------------------
 
-14.07.03 NB: Mahogany can now be compiled with cygwin's -mno-cygwin switch (mingw)
+16.07.03 RV: added option to not create "folder internal data" pseudo message
+14.07.03 NB: Mahogany can now be compiled with cygwin's -mno-cygwin switch
 23.06.03 VZ: fixed SSL compilation on RedHat 9
 23.06.03 NB: Mahogany can now be compiled with cygwin
 11.04.03 VZ: debugged the "Migrate" tool which is now half-usable
@@ -491,6 +492,7 @@ KB:     Karsten Ballüder
 MC:     Michael A Chase
 MR:     Michele Ravani
 NB:     Nerijus Baliunas
+RV:     Robert Vazan
 TF:     Thomas Finneid
 VS:     Vaclav Slavik
 VZ:     Vadim Zeitlin

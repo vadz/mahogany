@@ -403,6 +403,7 @@ extern const MOption MP_AWAY_AUTO_ENTER;
 extern const MOption MP_AWAY_AUTO_EXIT;
 extern const MOption MP_AWAY_REMEMBER;
 extern const MOption MP_AWAY_STATUS;
+extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 
 // ----------------------------------------------------------------------------
 // the option names
@@ -1203,6 +1204,10 @@ extern const MOption MP_AWAY_STATUS;
 //@{
 #define MP_OLD_FOLDER_HOST_NAME "HostName"
 //@}
+
+/// stop "folder internal data" message
+#define MP_CREATE_INTERNAL_MESSAGE_NAME   "CreateInternalMessage"
+
 //@}
 
 // ----------------------------------------------------------------------------
@@ -2188,6 +2193,9 @@ extern const MOption MP_AWAY_STATUS;
 /// the saved value of away status (only written if MP_AWAY_REMEMBER is set)
 #define MP_AWAY_STATUS_DEFVAL 0L
 //@}
+
+/// stop "folder internal data" message
+#define MP_CREATE_INTERNAL_MESSAGE_DEFVAL   1
 
 //@}
 

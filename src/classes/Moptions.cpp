@@ -469,6 +469,7 @@ const MOption MP_AWAY_AUTO_ENTER;
 const MOption MP_AWAY_AUTO_EXIT;
 const MOption MP_AWAY_REMEMBER;
 const MOption MP_AWAY_STATUS;
+const MOption MP_CREATE_INTERNAL_MESSAGE;
 
 // ----------------------------------------------------------------------------
 // defaults
@@ -861,6 +862,7 @@ static const MOptionData MOptions[] =
     DEFINE_OPTION(MP_AWAY_AUTO_EXIT),
     DEFINE_OPTION(MP_AWAY_REMEMBER),
     DEFINE_OPTION(MP_AWAY_STATUS),
+    DEFINE_OPTION(MP_CREATE_INTERNAL_MESSAGE),
 };
 
 // ============================================================================

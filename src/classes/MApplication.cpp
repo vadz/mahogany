@@ -66,6 +66,8 @@
 
 #include "wx/persctrl.h"      // for wxPControls::SetSettingsPath
 
+#include "Mcclient.h"         // For env_parameters
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -94,6 +96,7 @@ extern const MOption MP_USE_OUTBOX;
 extern const MOption MP_USE_TRASH_FOLDER;
 extern const MOption MP_USERDIR;
 extern const MOption MP_USER_MDIR;
+extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 
 #ifdef OS_UNIX
 extern const MOption MP_ETCPATH;
@@ -482,6 +485,12 @@ MAppBase::OnStartup()
       return false;
    }
 
+   // Turn off "folder internal data" message. This must be done after
+   // profile is initialized and before any window is shown or folder
+   // manipulated. Macro name was contributed by c-client maintainer.
+   if(!READ_APPCONFIG(MP_CREATE_INTERNAL_MESSAGE))
+      env_parameters(SET_USERHASNOLIFE,(void *)1);
+   
    // extend path for commands, look in M's dirs first
    String pathEnv;
    pathEnv << GetLocalDir() << _T("/scripts") << PATH_SEPARATOR
@@ -842,6 +851,7 @@ MAppBase::OnMEvent(MEventData& event)
 #ifdef USE_DIALUP
       SetupOnlineManager(); // make options change effective
 #endif // USE_DIALUP
+      OnChangeCreateInternalMessage(event);
    }
    else if (event.GetId() == MEventId_FolderUpdate)
    {
@@ -861,6 +871,32 @@ MAppBase::OnMEvent(MEventData& event)
    }
 
    return TRUE;
+}
+
+void
+MAppBase::OnChangeCreateInternalMessage(MEventData& event)
+{
+   MEventOptionsChangeData *optionsChange
+      = (MEventOptionsChangeData *)&event;
+
+   if( optionsChange->GetChangeKind() == MEventOptionsChangeData::Ok
+         || optionsChange->GetChangeKind() == MEventOptionsChangeData::Apply )
+   {
+      bool original = !env_parameters(GET_USERHASNOLIFE, NULL);
+      bool current = READ_APPCONFIG_BOOL(MP_CREATE_INTERNAL_MESSAGE);
+      if ( original != current )
+      {
+         env_parameters(SET_USERHASNOLIFE, (void *)!current);
+         if ( !current )
+         {
+            MDialog_Message(_(
+               "Creating hidden \"folder internal data\" message is\n"
+               "disabled, but old such messages still appear in your\n"
+               "folders. Delete them using text editor. Keep in mind\n"
+               "that not all such messages were created by Mahogany."));
+         }
+      }
+   }
 }
 
 void

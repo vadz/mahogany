@@ -330,6 +330,7 @@ enum ConfigFields
    ConfigField_DraftsName,
    ConfigField_DraftsAutoDelete,
    ConfigField_FoldersFileFormat,
+   ConfigField_CreateInternalMessage,
    ConfigField_StatusFormatHelp,
    ConfigField_StatusFormat_StatusBar,
    ConfigField_StatusFormat_TitleBar,
@@ -1288,6 +1289,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Default format for mailbox files"
                   ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
      Field_Combo | Field_AppWide | Field_Advanced, -1},
+   { gettext_noop("Create \"folder internal data\" message"), Field_Bool, -1 },
    { gettext_noop("You can specify the format for the strings shown in the\n"
                   "status and title bars. Use %f for the folder name and\n"
                   "%t, %r and %n for the number of all, recent and new\n"
@@ -1835,6 +1837,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_DRAFTS_FOLDER),
    CONFIG_ENTRY(MP_DRAFTS_AUTODELETE),
    CONFIG_ENTRY(MP_FOLDER_FILE_DRIVER),
+   CONFIG_ENTRY(MP_CREATE_INTERNAL_MESSAGE),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDERSTATUS_STATBAR),
    CONFIG_ENTRY(MP_FOLDERSTATUS_TITLEBAR),

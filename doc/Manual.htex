@@ -1905,6 +1905,17 @@ value, the progress dialog will be suppressed - play with this setting
 and set it to the value which doesn't show the progress dialogs which
 disappear too quickly, but still shows them if the operation lasts
 a long time.
+\item \textbf{Create "folder internal data" message}\\
+Mahogany normally creates hidden message entitled "don't delete this
+message - folder internal data" to store its private data. This is done
+only with Unix mailbox and MMDF formats, because other formats have
+built-in mechanisms for storing folder properties. This allows Mahogany
+to provide extra functionality, but it confuses new mail notification
+programs and it looks ugly in mail software that doesn't support it.
+Unchecking this option prevents Mahogany from creating new such messages
+and you can delete previously created messages using text editor. Keep
+in mind many other programs can create such messages and this options
+applies only to Mahogany.
 \end{itemize}
 
 \subsubsection{Python page\_4103\_}
