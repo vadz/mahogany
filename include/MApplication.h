@@ -189,7 +189,8 @@ public:
    virtual void SendOutbox(void) const;
    /// Check if we have messages to send.
    virtual bool CheckOutbox(UIdType *nSMTP = NULL,
-                            UIdType *nNNTP = NULL) const;
+                            UIdType *nNNTP = NULL,
+                            class MailFolder *mf = NULL) const;
 
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
@@ -247,11 +248,10 @@ public:
    /// function
    virtual int GetStatusField(enum StatusFields function) const;
    /// updates display of outbox status
-   virtual void UpdateOutboxStatus(void) const = 0;
+   virtual void UpdateOutboxStatus(class MailFolder *mf = NULL) const = 0;
 
    /// Report a fatal error:
    virtual void FatalError(const char *message) = 0;
-   
 protected:
    /// Load modules at startup
    virtual void LoadModules(void) = 0;

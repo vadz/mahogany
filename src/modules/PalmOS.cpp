@@ -542,12 +542,13 @@ PalmOSModule::Connect(void)
       {
          int oldPiSocket = m_PiSocket;
          acceptThread->Run();
+         //FIXME: should use wxThread::Sleep(5); instead
          time_t start = time(NULL);
          while(time(NULL)-start < 5)
             ;
          // wxSleep(5);  // using wxSleep() here crashes wxWindows when 
          // thread gets Killed()
-         if(acceptThread->IsAlive())
+//         if(acceptThread->IsAlive())
             acceptThread->Kill();
          if(m_PiSocket == -1)
             pi_close(oldPiSocket);

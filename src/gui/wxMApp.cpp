@@ -1078,12 +1078,12 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
 }
 
 void
-wxMApp::UpdateOutboxStatus(void) const
+wxMApp::UpdateOutboxStatus(MailFolder *mf) const
 {
    ASSERT(m_topLevelFrame);
 
    UIdType nNNTP, nSMTP;
-   bool enable = CheckOutbox(&nSMTP, &nNNTP);
+   bool enable = CheckOutbox(&nSMTP, &nNNTP, mf);
 
    // only enable menu item if outbox is used and contains messages:
    ASSERT(m_topLevelFrame->GetMenuBar());

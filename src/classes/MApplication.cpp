@@ -777,7 +777,12 @@ MAppBase::OnMEvent(MEventData& event)
    }
    else if (event.GetId() == MEventId_FolderStatus)
    {
-// is locked??      UpdateOutboxStatus();
+      MEventFolderStatusData& ev = (MEventFolderStatusData &)event;
+      MailFolder *folder = ev.GetFolder();
+      String folderName = folder->GetName();
+      String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
+      if(folderName.CmpNoCase(outbox) == 0)
+         UpdateOutboxStatus(folder);
    }
    else
       // else
@@ -816,15 +821,21 @@ MAppBase::SendOutbox(void) const
    UpdateOutboxStatus();
 }
 
-bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP) const
+bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) const
 {
    String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
 
    UIdType
       smtp = 0,
       nntp = 0;
-
-   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
+   MailFolder *mf = NULL;
+   if(mfi)
+   {
+      mf = mfi;
+      mf->IncRef();
+   }
+   else
+      mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
    if(mf == NULL)
    {
       String msg;
