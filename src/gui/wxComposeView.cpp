@@ -486,7 +486,9 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
 
    if(filename == NULL)
    {
-      filename = MDialog_FileRequester(NULL,this,NULL,NULL,NULL,NULL,true,m_Profile);
+      filename = MDialog_FileRequester(NULLstring, this, NULLstring,
+                                       NULLstring, NULLstring,
+                                       NULLstring, true, m_Profile); 
       if(! filename)
          return;
       mc->m_NumericMimeType = TYPEAPPLICATION;

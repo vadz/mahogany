@@ -45,8 +45,13 @@ wxLayoutWindow::OnMouse(wxMouseEvent& event)
    if(m_EventId == -1) // nothing to do
       return;
    
-   m_FindPos.x = event.GetX();
-   m_FindPos.y = event.GetY();
+   // this is unintuitive
+   wxClientDC dc(this);
+   PrepareDC( dc );
+
+   m_FindPos.x = dc.DeviceToLogicalX( event.GetX() );
+   m_FindPos.y = dc.DeviceToLogicalY( event.GetY() );
+
    m_FoundObject = NULL;
 
 #ifdef   WXLAYOUT_DEBUG
@@ -170,8 +175,6 @@ wxLayoutWindow::UpdateScrollbars(void)
 void
 wxLayoutWindow::Print(void)
 {
-   VAR(wxThePrintSetupData);
-
    wxPostScriptDC   dc("layout.ps",true,this);
    if (dc.Ok() && dc.StartDoc((char *)_("Printing message...")))
    {

@@ -544,8 +544,9 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
   {
     message = _("Please choose a filename to save as:");
     filename = MDialog_FileRequester((char *)message.c_str(),m_Parent,
-        NULL,NULL,NULL,NULL,true,
-        folder ? folder->GetProfile() : NULL);
+                                     NULLstring, NULLstring,
+                                     NULLstring, NULLstring, true,  
+                                     folder ? folder->GetProfile() : NULL); 
   }
   else
     filename = ifilename;
