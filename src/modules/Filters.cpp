@@ -1901,7 +1901,6 @@ static bool CheckSubjectFor8Bit(const String& subject)
 // check if the subject is in capitals
 static bool CheckSubjectForCapitals(const String& subject)
 {
-   size_t nLower = 0;
    for ( const char *pc = subject; *pc; pc++ )
    {
       if ( islower(*pc) )
