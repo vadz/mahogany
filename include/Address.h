@@ -21,6 +21,9 @@
 
 class Profile;
 
+// see near definition of this symbol in src/modules/PalmOS.cpp
+#ifndef M_DONT_DEFINE_ADDRESS
+
 /**
    Note on variable names: we have a lot of addresses here (strings, objects of
    address class, cclient addresses...) so we name them in a consitent manner
@@ -151,6 +154,9 @@ END_DECLARE_AUTOPTR();
 /// declare global comparison operator for addresses
 extern bool operator==(const AddressList_obj& addrList1,
                        const AddressList_obj& addrList2);
+
+#endif // M_DONT_DEFINE_ADDRESS
+
 
 /// Values for ContainsOwnAddress() last parameter
 enum OwnAddressKind

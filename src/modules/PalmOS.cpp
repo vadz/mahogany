@@ -42,6 +42,7 @@
 #   include "wx/stattext.h"
 #   include <wx/menu.h>
 #   include <wx/log.h>
+#   include <wx/filedlg.h>
 #endif // USE_PCH
 
 #include "MDialogs.h"
@@ -61,6 +62,10 @@
 #   include <wx/minifram.h>
 #endif
 
+#include <wx/dir.h>
+
+#include "adb/AdbManager.h"
+#include "adb/ProvPalm.h"
 
 #ifdef HAVE_LIBMAL
 extern "C"
@@ -73,6 +78,11 @@ extern "C"
 //#define PALMOS_SYNCTIME
 #undef PALMOS_SYNCTIME
 
+// one of pisock headers defines struct Address and MInterface.h below
+// includes our Address.h which defines class Address, so define this to
+// prevent our Address from being defined now
+#define M_DONT_DEFINE_ADDRESS
+
 #include "MModule.h"
 #include "Mversion.h"
 #include "MInterface.h"
@@ -84,9 +94,6 @@ extern "C"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxOptionsPage.h"
 #include "gui/wxMDialogs.h"
-
-#include "adb/AdbManager.h"
-#include "adb/ProvPalm.h"
 
 #define MODULE_NAME    "PalmOS"
 
@@ -333,7 +340,7 @@ private:
    int GetPalmDBList(wxArrayString &dblist, bool getFilenames);
 
    int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
-   int CreateFileList(wxArrayString &list, DIR * dir, wxString directory);
+   int CreateFileList(wxArrayString &list, const wxString& directory);
    void RemoveFromList(wxArrayString &list, wxString &name)
       { if (list.Index(name) >= 0) list.Remove(list.Index(name)); }
 
@@ -740,14 +747,14 @@ PalmOSModule::Connect(void)
          if(! m_Lock->Lock())
             return false;
 
-      if (!(m_PiSocket = pi_socket(PI_AF_SLP, PI_SOCK_STREAM, PI_PF_PADP)))
+      if (!(m_PiSocket = pi_socket(PI_AF_PILOT, PI_SOCK_STREAM, PI_PF_PADP)))
       {
          ErrorMessage(_("Failed to connect to PalmOS device:\nCould not open socket."));
          if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
       }
 
-      addr.pi_family = PI_AF_SLP;
+      addr.pi_family = PI_AF_PILOT;
       strncpy(addr.pi_device,
               m_PilotDev.c_str(),
               sizeof(addr.pi_device));
@@ -938,38 +945,21 @@ static void protect_name(wxString &s)
 }
 
 int
-PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir,
-                             wxString directory)
+PalmOSModule::CreateFileList(wxArrayString &list, const wxString& directory)
 {
-   struct dirent * dirent;
+   wxDir dir;
+   if ( !dir.Open(directory) )
+      return -1;
+
    int filecount = 0;
 
    list.Empty();
 
    StatusMessage(_("Reading local directory ..."));
-   while( (dirent = readdir(dir)) ) {
-      wxString name;
-
-      // ignore .* files (especially . or ..)
-      if (dirent->d_name[0] == '.')
-         continue;
-// this test is broken and needs to be replaced with stat()
-#undef _DIRENT_HAVE_D_TYPE
-#ifdef _DIRENT_HAVE_D_TYPE
-      // ignore directories
-      if ( (dirent->d_type & DT_REG) == 0
-         && (dirent->d_type & DT_LNK) == 0
-         && (dirent->d_type & DT_UNKNOWN) == 0 )
-      {
-         wxString msg;
-         msg.Printf(_("Ignoring entry '%s' which is not a regular file."),
-                    dirent->d_name);
-         StatusMessage(_(msg));
-         continue;
-      }
-
-#endif
-      name = dirent->d_name;
+   wxString name;
+   for ( bool cont = dir.GetFirst(&name); cont; cont = dir.GetNext(&name) )
+   {
+      // TODO: check that we got a regular file
       wxString extension = name.AfterLast('.');
       if(extension != "pdb" && extension != "prc" &&
          extension != "prc" && extension != "PRC")
@@ -982,7 +972,8 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir,
       }
 
       // now we need the full pathname:
-      name.Printf("%s%s", directory.c_str(), dirent->d_name);
+      name = directory + '/' + name;
+
       // now we open the file and see whether it is really a file for
       // the Palm. If yes, then we remember the filename.
       struct pi_file *f = pi_file_open((char*)name.c_str());
@@ -993,6 +984,7 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir,
          ++filecount;
       }
    }
+
    return filecount;
 }
 
@@ -1052,24 +1044,15 @@ PalmOSModule::Backup(void)
    if( ! IsConnected())
       return;
 
-   // access backup directory
-   DIR * dir;
-   dir = opendir(m_BackupDir);
-
-   if (dir <= 0)
+   // Read original list of files in the backup dir
+   wxArrayString orig_files;
+   if ( CreateFileList(orig_files, m_BackupDir) == -1 )
    {
       String msg;
       msg.Printf(_("Could not access backup directory '%s'."),
                  m_BackupDir.c_str());
       ErrorMessage(msg);
-      return;
    }
-
-   // Read original list of files in the backup dir
-   wxArrayString orig_files;
-
-   CreateFileList(orig_files, dir, m_BackupDir);
-   closedir(dir);
 
    // count files on the palm
    int max = 0;
@@ -1376,23 +1359,17 @@ PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
    if( ! IsConnected())
       return;
 
-   DIR*   dir;
-   int    ofile_total;
    wxArrayString fnames;
 
-   dir = opendir(directory);
-   if (dir <= 0) {
+   int ofile_total = CreateFileList(fnames, directory);
+   if ( ofile_total == -1 )
+   {
       wxString msg;
       msg.Printf(_("Could not access directory %s!"),
                  directory.c_str());
       ErrorMessage(_(msg));
       return;
    }
-
-   ofile_total = CreateFileList(fnames, dir, directory);
-
-   // we've finished reading the filelist
-   closedir(dir);
 
    // install files
    if (ofile_total > 0)
@@ -1804,7 +1781,7 @@ PalmOSModule::StoreEMails(void)
          {
             String mimeType = msg->GetPartMimeType(partNo);
 
-            if ( msg->GetPartType(partNo) == Message::MSG_TYPETEXT &&
+            if ( msg->GetPartType(partNo) == MimeType::TEXT &&
                   mimeType.Upper() == "TEXT/PLAIN" )
                content << (char *)msg->GetPartContent(partNo);
             else
