@@ -307,9 +307,21 @@ public:
    // handlers
    void OnChange(wxKeyEvent& event);
    void OnRadioBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
-   void OnCheckBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnComboBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnChoice(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
+#ifdef USE_SSL
+   void OnCheckBox(wxCommandEvent& event)
+   {
+      if ( event.GetEventObject() == m_useSSL )
+      {
+         m_acceptUnsignedSSL->Enable( m_useSSL->GetValue() );
+      }
+
+      OnEvent();
+   }
+#else // !USE_SSL
+   void OnCheckBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
+#endif // USE_SSL
 
    void UpdateOnFolderNameChange();
 
@@ -1565,7 +1577,6 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 
 #ifdef USE_SSL
    m_useSSL->Enable(enableSSL);
-   m_acceptUnsignedSSL->Enable(enableSSL && m_useSSL->GetValue());
 #endif // USE_SSL
 
    m_isAnonymous->Enable(enableAnonymous);
@@ -2142,6 +2153,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_useSSL->SetValue(m_originalUseSSL);
    m_originalAcceptUnsignedSSL = ((flags & MF_FLAGS_SSLUNSIGNED) != 0);
    m_acceptUnsignedSSL->SetValue(m_originalAcceptUnsignedSSL);
+   m_acceptUnsignedSSL->Enable(m_originalUseSSL);
 #endif // USE_SSL
 
    // update the folder icon
