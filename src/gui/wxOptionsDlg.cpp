@@ -923,7 +923,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "network. To aid in detecting the network status, you can specify a beacon\n"
                   "host which should only be reachable if the network is up, e.g. the WWW\n"
                   "server of your ISP. Leave it empty to use the SMTP server for this.")
-     , Field_Message | Field_Global, -1 },
+     , Field_Message | Field_AppWide | Field_Global, -1 },
    { gettext_noop("&Dial-up network support"),    Field_Bool | Field_AppWide | Field_Global,    -1,                        },
    { gettext_noop("&Beacon host (e.g. www.yahoo.com)"), Field_Text | Field_AppWide | Field_Global,   ConfigField_DialUpSupport},
 #ifdef OS_WIN
@@ -1253,7 +1253,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "always inline them) and also enable showing the images\n"
                   "embedded in HTML messages even if they are are not included\n"
                   "into the message itself (for the HTML viewer only).\n"
-                  "Be warned that this could be a potential secutiry risk!"), Field_Message,    -1 },
+                  "Be warned that this could be a potential security risk!"), Field_Message,    -1 },
    { gettext_noop("Show images &inline"),             Field_Bool,    -1 },
    { gettext_noop("But only if size is less than (kb)"), Field_Number, ConfigField_MessageViewInlineGraphics },
    { gettext_noop("&Enable showing external images"), Field_Bool,    ConfigField_MessageViewInlineGraphics },
@@ -1366,8 +1366,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "unread mail (again, this is mainly useful for \"Trash\"\n"
                   "folder, for example)."), Field_Message, -1 },
    { gettext_noop("&Skip this folder"), Field_Bool, -1 },
-   { gettext_noop("Open folder on single &click"), Field_Bool | Field_Global, -1 },
-   { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool | Field_Global,-1 },
+   { gettext_noop("Open folder on single &click"), Field_Bool | Field_AppWide, -1 },
+   { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool | Field_AppWide, -1 },
 
    // adb: autocollect and bbdb options
    { gettext_noop("The addresses listed below are the ones which are\n"
