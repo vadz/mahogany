@@ -3907,22 +3907,25 @@ wxComposeView::BuildMessage() const
                      String name = part->GetName();
                      if ( name.empty() )
                      {
-                        name = filename;
+                        // use only file name, i.e. without path, because the
+                        // receiving MUA discards the path anyhow (for obvious
+                        // security reasons) and the user might not like that
+                        // we show his local paths in outgoing mail messages
+                        name = wxFileNameFromPath(filename);
                      }
 
                      MessageParameterList plist, dlist;
                      MessageParameter *p;
 
-                     // some mailers want "FILENAME" in disposition parameters
-                     // (where only file name, i.e. without path, should be
-                     // used for obvious security reasons)
-                     p = new MessageParameter(_T("FILENAME"),
-                                              wxFileNameFromPath(name));
+                     // newer mailers look for "FILENAME" in disposition
+                     // parameters according to RFC 2183
+                     p = new MessageParameter(_T("FILENAME"), name);
                      dlist.push_back(p);
 
-                     // and some mailers want "NAME" in parameters (we can use
-                     // the full name here)
-                     p = new MessageParameter(_T("NAME"), filename);
+                     // but some old mailers still use "NAME" in content-type
+                     // parameters (per obsolete RFC 1521), so put it there as
+                     // well
+                     p = new MessageParameter(_T("NAME"), name);
                      plist.push_back(p);
 
                      const MimeType& mt = part->GetMimeType();
@@ -3932,7 +3935,8 @@ wxComposeView::BuildMessage() const
                             buffer, size,
                             mt.GetSubType(),
                             part->GetDisposition(),
-                            &dlist, &plist
+                            &dlist,
+                            &plist
                           );
                   }
                   else
