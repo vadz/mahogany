@@ -8,6 +8,7 @@ CPPFILES:=$(IDLFILES:.idl=.cpp)
 
 include ../makeopts
 
+ifdef M4
 vpath %.mid .src
 
 %.h: %.mid
@@ -18,6 +19,18 @@ vpath %.mid .src
 
 %.idl: %.mid
 	$(M4) -DM4FILE=.src/mid2idl.m4 >$@ $<
+else
+vpath %.m4 .src
+
+%.cpp: %.cpp.m4
+	cp $< $@
+
+%.h: %.h.m4
+	cp $< $@
+
+%.idl: %.idl.m4
+	cp $< $@
+endif
 
 all:	interface
 	@true
