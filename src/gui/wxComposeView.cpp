@@ -1429,17 +1429,21 @@ wxComposeView::InsertFileAsText(const String& filename,
       while((export = wxLayoutExport( &status,
                                       WXLO_EXPORT_AS_OBJECTS)) != NULL)
       {
-         obj = export->content.object;
-         switch(obj->GetType())
+         // ignore WXLO_EXPORT_EMPTYLINE:
+         if(export->type == WXLO_EXPORT_OBJECT)
          {
-         case WXLO_TYPE_TEXT:
-            ; // do nothing
-            break;
-         case WXLO_TYPE_ICON:
-            other_list->Insert(obj->Copy());
-            break;
-         default:
-            ; // cmd objects get ignored
+            obj = export->content.object;
+            switch(obj->GetType())
+            {
+            case WXLO_TYPE_TEXT:
+               ; //    do nothing
+               break;
+            case WXLO_TYPE_ICON:
+               other_list->Insert(obj->Copy());
+               break;
+            default:
+               ; // cmd    objects get ignored
+            }
          }
          delete export;
       }
@@ -1447,8 +1451,12 @@ wxComposeView::InsertFileAsText(const String& filename,
       //now we move the non-text objects back:
       wxLayoutExportStatus status2(other_list);
       while((export = wxLayoutExport( &status2,
-                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
-         layoutList->Insert(export->content.object->Copy());
+                                      WXLO_EXPORT_AS_OBJECTS)) !=
+            NULL)
+         if(export->type == WXLO_EXPORT_EMPTYLINE)
+            layoutList->LineBreak();
+         else
+            layoutList->Insert(export->content.object->Copy());
       layoutList->MoveCursorTo(wxPoint(0, 0));
       delete other_list;
    }

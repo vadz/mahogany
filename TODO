@@ -29,6 +29,7 @@ $Id$
 - add references (and In-Reply-To: ?) headers to message replies
   wxComposeView: if replying, only mark message as answered if reply
   got sent
+- IMPROVE HEADER SUPPORT
 
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
   required for imap  --> drop the dialog!

@@ -397,6 +397,8 @@ wxMessageView::Update(void)
       String
          tmp = mailMessage->GetHeader();
 #if 0
+      /* I was trying to do something more clever here, to highlight
+         the header names. I'll rewrite it rsn. */
          *sptr;
       kbStringList sl;
       bool istitle = true;
@@ -424,7 +426,9 @@ wxMessageView::Update(void)
          delete sptr;
       }
 #endif
-      wxLayoutImportText(llist,tmp);
+      char *buf = strutil_strdup(tmp);
+      wxLayoutImportText(llist,buf);
+      delete [] buf;
       llist->LineBreak();
    }
 

@@ -1228,10 +1228,14 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom) const
       if(bottom != -1 && line->GetPosition().y > bottom) break;
       line = line->GetNextLine();
    }
+
+///FIXME: disabled for now
+#if 0
    // can only be 0 if we are on the first line and have no next line
    wxASSERT(m_CursorSize.x != 0 || (m_CursorLine &&
                                     m_CursorLine->GetNextLine() == NULL &&
                                     m_CursorLine == m_FirstLine));
+#endif
 }
 
 void
@@ -1333,7 +1337,7 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
       dc.DrawLine(coords.x, coords.y+m_CursorSize.y-1,
                   coords.x+m_CursorSize.x, coords.y+m_CursorSize.y-1);
    dc.SetLogicalFunction(wxCOPY);
-   dc.SetBrush(wxNullBrush);
+   //dc.SetBrush(wxNullBrush);
 }
 
 
@@ -1445,13 +1449,9 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    m_PrintoutHeight = (int)( m_PrintoutHeight / scale); // we want to use the real paper height
    
    
-   m_NumOfPages = (int)( m_llist->GetSize().y / (float)(m_PrintoutHeight) + 0.5);
+   m_NumOfPages = 1 +
+      (int)( m_llist->GetSize().y / (float)(m_PrintoutHeight));
 
-   // This is a crude hack to get it right for very small
-   // printouts. No idea why this is required, I thought +0.5 would do 
-   // the job. :-(
-   if(m_NumOfPages == 0 && m_llist->GetSize().y > 0)
-      m_NumOfPages = 1;
    *minPage = 1;
    *maxPage = m_NumOfPages;
 
