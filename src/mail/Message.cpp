@@ -29,36 +29,6 @@
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// parameters handling
-// ----------------------------------------------------------------------------
-
-/** Get a parameter value from the list.
-    @param list a MessageParameterList
-    @param value set to new value if found
-    @return true if found
-*/
-bool
-Message::ExpandParameter(MessageParameterList const & list,
-                         String const &parameter,
-                         String *value) const
-{
-   MessageParameterList::iterator i;
-
-   for(i = list.begin(); i != list.end(); i++)
-   {
-      // parameter names are not case-sensitive, i.e. "charset" == "CHARSET"
-      if ( parameter.CmpNoCase((*i)->name) == 0 )
-      {
-         // found
-         *value = (*i)->value;
-         return true;
-      }
-   }
-
-   return false;
-}
-
-// ----------------------------------------------------------------------------
 // working with email addresses
 // ----------------------------------------------------------------------------
 

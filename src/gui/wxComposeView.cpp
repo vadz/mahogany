@@ -169,8 +169,8 @@ public:
    // accessors
    MimeContentType GetType() const { return m_Type; }
 
-   const String& GetMimeType() const { return m_MimeType; }
-   Message::ContentType GetMimeCategory() const { return m_NumericMimeType; }
+   String GetMimeType() const { return m_MimeType.GetFull(); }
+   MimeType::Primary GetMimeCategory() const { return m_MimeType.GetPrimary(); }
 
    const String& GetFileName() const
       { return m_FileName; }
@@ -198,8 +198,7 @@ private:
    size_t    m_Length;
    String    m_FileName;
 
-   Message::ContentType m_NumericMimeType;
-   String               m_MimeType;
+   MimeType m_MimeType;
 };
 
 // ----------------------------------------------------------------------------
@@ -547,25 +546,6 @@ END_EVENT_TABLE()
 void MimeContent::SetMimeType(const String& mimeType)
 {
    m_MimeType = mimeType;
-
-   // determin the numeric type
-   String category = mimeType.Before('/');
-   if ( category.CmpNoCase("VIDEO") == 0 )
-      m_NumericMimeType = Message::MSG_TYPEVIDEO;
-   else if ( category.CmpNoCase("AUDIO") == 0 )
-      m_NumericMimeType = Message::MSG_TYPEAUDIO;
-   else if ( category.CmpNoCase("IMAGE") == 0 )
-      m_NumericMimeType = Message::MSG_TYPEIMAGE;
-   else if ( category.CmpNoCase("TEXT") == 0 )
-      m_NumericMimeType = Message::MSG_TYPETEXT;
-   else if ( category.CmpNoCase("MESSAGE") == 0 )
-      m_NumericMimeType = Message::MSG_TYPEMESSAGE;
-   else if ( category.CmpNoCase("APPLICATION") == 0 )
-      m_NumericMimeType = Message::MSG_TYPEAPPLICATION;
-   else if ( category.CmpNoCase("MODEL") == 0 )
-      m_NumericMimeType = Message::MSG_TYPEMODEL;
-   else
-      m_NumericMimeType = Message::MSG_TYPEOTHER;
 }
 
 void MimeContent::SetData(void *data,
@@ -2775,7 +2755,7 @@ wxComposeView::Send(bool schedule)
       {
          String* text = exp->content.text;
          msg->AddPart(
-                        Message::MSG_TYPETEXT,
+                        MimeType::TEXT,
                         text->c_str(), text->length(),
                         "PLAIN",
                         "INLINE",   // disposition
@@ -2806,16 +2786,17 @@ wxComposeView::Send(bool schedule)
                      // always NUL terminate it
                      buffer[size] = '\0';
 
+                     String basename = wxFileNameFromPath(filename);
+
                      MessageParameterList plist, dlist;
+
                      // some mailers want "FILENAME" in disposition parameters
-                     MessageParameter *p = new MessageParameter;
-                     p->name = "FILENAME";
-                     p->value = wxFileNameFromPath(filename);
+                     MessageParameter *p =
+                         new MessageParameter("FILENAME", basename);
                      dlist.push_back(p);
+
                      // some mailers want "NAME" in parameters:
-                     p = new MessageParameter;
-                     p->name = "NAME";
-                     p->value = wxFileNameFromPath(filename);
+                     p = new MessageParameter("NAME", basename);
                      plist.push_back(p);
 
                      msg->AddPart
@@ -2848,15 +2829,14 @@ wxComposeView::Send(bool schedule)
                MessageParameterList dlist, plist;
                if(! strutil_isempty(mc->GetFileName()))
                {
-                  MessageParameter *p = new MessageParameter;
-                  p->name = "FILENAME";
-                  p->value = wxFileNameFromPath(mc->GetFileName());
+                  MessageParameter *p
+                      = new MessageParameter("FILENAME", mc->GetFileName());
                   dlist.push_back(p);
-                  p = new MessageParameter;
-                  p->name = "NAME";
-                  p->value = wxFileNameFromPath(mc->GetFileName());
+
+                  p = new MessageParameter("NAME", mc->GetFileName());
                   plist.push_back(p);
                }
+
                msg->AddPart
                   (
                      mc->GetMimeCategory(),

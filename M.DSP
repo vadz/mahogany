@@ -290,6 +290,10 @@ SOURCE=.\src\mail\MFCache.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\mail\MimePartCC.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\mail\SendMessageCC.cpp
 # End Source File
 # End Group
@@ -1977,22 +1981,11 @@ SOURCE=.\src\modules\Filters.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\modules\HtmlViewer.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\modules\LayoutViewer.cpp
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 

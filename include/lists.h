@@ -115,6 +115,9 @@ private: \
    friend class name; \
    /* the node to which this iterator points */ \
    ListNode *node; \
+protected: \
+   reference GetData() \
+      { NodeCheck(); return node->element; } \
 public: \
    inline void NodeCheck(void) const \
       { node->NodeCheck(); } \
@@ -128,11 +131,7 @@ public: \
        @return the data pointer of the node belonging to this \
        iterator \
    */ \
-   inline reference operator*(void) \
-      { \
-         NodeCheck(); \
-         return node->element; \
-      } \
+   inline reference operator*(void) { return GetData(); } \
    inline pointer operator->(void) { return &(operator*()); } \
    /** Increment operator - prefix, goes to next node in list. \
        @return itself \
@@ -307,6 +306,7 @@ public: \
    class iterator : public name##_common::iterator \
    { \
    public: \
+      iterator(ListNode *n = NULL) : name##_common::iterator(n) {} \
       iterator(const name##_common::iterator &i) \
          : name##_common::iterator(i) {} \
       inline type operator*(void) \
@@ -334,12 +334,14 @@ public: \
    class iterator : public name##_common::iterator \
    { \
    public: \
-      iterator(const name##_common::iterator &i) \
-         : name##_common::iterator(i) {} \
-      inline type operator*(void) \
-         { return *(name##_common::iterator::operator*()); } \
+      typedef name##_common::iterator iterator_common; \
+      \
+      iterator(ListNode *n = NULL) : iterator_common(n) {} \
+      iterator(const iterator_common &i) : iterator_common(i) {} \
       inline value_type operator->(void) \
-         { return name##_common::iterator::operator*(); } \
+         { return GetData(); } \
+      inline type operator*(void) \
+         { return *GetData(); } \
    }; \
    inline iterator erase(iterator i) \
       { \

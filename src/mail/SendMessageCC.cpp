@@ -864,7 +864,7 @@ SendMessageCC::Build(bool forStorage)
 }
 
 void
-SendMessageCC::AddPart(Message::ContentType type,
+SendMessageCC::AddPart(MimeType::Primary type,
                        const char *buf, size_t len,
                        String const &subtype_given,
                        String const &disposition,
@@ -949,7 +949,7 @@ SendMessageCC::AddPart(Message::ContentType type,
       {
          par = mail_newbody_parameter();
 
-         String name = (*i)->name;
+         String name = i->name;
          if ( name.Lower() == "charset" )
          {
             if ( hasCharset )
@@ -962,7 +962,7 @@ SendMessageCC::AddPart(Message::ContentType type,
          }
 
          par->attribute = strdup(name);
-         par->value     = strdup((*i)->value);
+         par->value     = strdup(i->value);
          par->next      = lastpar;
          lastpar = par;
       }
@@ -1013,8 +1013,8 @@ SendMessageCC::AddPart(Message::ContentType type,
       for ( i = dlist->begin(); i != dlist->end(); i++ )
       {
          par = mail_newbody_parameter();
-         par->attribute = strdup((*i)->name);
-         par->value     = strdup((*i)->value);
+         par->attribute = strdup(i->name);
+         par->value     = strdup(i->value);
          par->next      = NULL;
          if(lastpar)
             lastpar->next = par;

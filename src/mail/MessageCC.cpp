@@ -42,11 +42,9 @@
 
 #include "Mdefaults.h"
 
-#include "MailFolder.h"
 #include "MailFolderCC.h"
-
-#include "Message.h"
 #include "MessageCC.h"
+#include "MimePartCC.h"
 
 #include "SendMessage.h"
 
@@ -83,34 +81,6 @@
       return rc;                                                              \
    }
 
-// ----------------------------------------------------------------------------
-// types
-// ----------------------------------------------------------------------------
-
-typedef MessageCC::PartInfo MessagePartInfo;
-WX_DEFINE_ARRAY(MessagePartInfo *, PartInfoArray);
-
-// ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-/** A function to recursively collect information about all the body parts.
-
-    Note that the caller is responsible for freeing partInfos array.
-
-    @param  partInfos the array to store the part infos we find in
-    @param  body the body part to look at
-    @param  pfx  the MIME part prefix, our MIME part is "pfx.partNo+1"
-    @param  partNo the MIME part number (counted from 0)
-    @param  topLevel is true only when this is called for the entire message
-
-*/
-static void decode_body(PartInfoArray& partInfos,
-                        BODY *body,
-                        const String &pfx,
-                        long partNo,
-                        bool topLevel = false);
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -136,10 +106,10 @@ MessageCC::Create(MailFolderCC *folder, const HeaderInfo& hi)
 
 void MessageCC::Init()
 {
+   m_mimePartTop = NULL;
    m_mailFullText = NULL;
    m_Body = NULL;
    m_Envelope = NULL;
-   m_partInfos = NULL;
    m_partContentPtr = NULL;
    m_msgText = NULL;
 
@@ -226,13 +196,7 @@ MessageCC::MessageCC(const char *text, UIdType uid, Profile *profile)
 
 MessageCC::~MessageCC()
 {
-   if ( m_partInfos )
-   {
-      WX_CLEAR_ARRAY((*m_partInfos));
-
-      delete m_partInfos;
-   }
-
+   delete m_mimePartTop;
    delete [] m_partContentPtr;
    delete [] m_msgText;
    SafeDecRef(m_folder);
@@ -818,200 +782,240 @@ MessageCC::FetchText(void)
    }
 }
 
-/*
-  This function is based on display_body() from mtest example of UW imap
-  distribution.
-*/
+// ----------------------------------------------------------------------------
+// MIME message structure
+// ----------------------------------------------------------------------------
 
-static void decode_body(PartInfoArray& partInfos,
-                        BODY *body,
-                        const String &pfx,
-                        long partNo,
-                        bool topLevel)
+void
+MessageCC::CheckMIME(void) const
 {
-   // in any case, the MIME part number increases (we do it before using it as
-   // part 0 has MIME id of "1")
-   partNo++;
-
-   if ( body->type == TYPEMULTIPART )
+   if ( !m_mimePartTop )
    {
-      // extend the prefix: the subparts of the first multipart MIME part
-      // are 1.1, 1.2, ... , 1.N
-      String prefix;
-      if ( !topLevel )
-      {
-         // top level parts don't have prefix "1.", but all others do!
-         prefix << pfx << strutil_ltoa(partNo) << '.';
-      }
+      CheckBody();
 
-      // parse all parts recursively
-      PART *part;
-      long n;
-      for ( n = 0, part = body->nested.part; part; part = part->next, n++ )
-      {
-         decode_body(partInfos, &part->body, prefix, n);
-      }
+      ((MessageCC *)this)->ParseMIMEStructure();
    }
-   else // not multipart
+}
+
+bool
+MessageCC::ParseMIMEStructure()
+{
+   // this is the worker function, it is wasteful to call it more than once
+   CHECK( !m_mimePartTop, false,
+          "ParseMIMEStructure() should only be called once for each message" );
+
+   if ( !m_Body )
    {
-      // construct the MIME part sequence for this part: they are dot
-      // separated part numbers in each message (i.e. the 3rd part of an
-      // embedded message which is itself the 2nd part of the main one should
-      // have the MIME id of 2.3)
-      String mimeId;
-      mimeId << pfx << strutil_ltoa(partNo);
+      return false;
+   }
 
-      String type = body_types[body->type];
-      if ( body->subtype )
-         type = type + '/' + body->subtype;
+   m_numParts = 0;
+   m_mimePartTop = new MimePartCC(this);
 
-#ifdef DEBUG
-      // the description of the part for debugging purposes
-      String partDesc;
-      partDesc << mimeId << ' ' << type;
-#endif // DEBUG
+   DecodeMIME(m_mimePartTop, m_Body);
 
-      String desc;
-      if ( body->description )
+   return true;
+}
+
+void MessageCC::DecodeMIME(MimePartCC *mimepart, BODY *body)
+{
+   CHECK_RET( mimepart && body, "NULL pointer(s) in DecodeMIME" );
+
+   mimepart->m_body = body;
+
+   if ( body->type != TYPEMULTIPART )
+   {
+      m_numParts++;
+
+      // is it an encapsulated message?
+      if ( body->type == TYPEMESSAGE && strcmp(body->subtype, "RFC822") == 0 )
       {
-         desc = body->description;
-
-#ifdef DEBUG
-         partDesc << '(' << desc << ')';
-#endif // DEBUG
-      }
-      //else: leave empty
-
-      MessageParameter *parameter;
-      MessageParameterList plist(false); // temporary, doesn't own entries
-
-      String parms;
-      PARAMETER *par;
-      if ((par = body->parameter) != NULL)
-      {
-#ifdef DEBUG
-         // separate the parameters
-         partDesc << "; ";
-#endif // DEBUG
-
-         do
+         body = body->nested.msg->body;
+         if ( body )
          {
-            parameter = new MessageParameter();
-            parameter->name = par->attribute;
-            parameter->value = par->value;
-            plist.push_back(parameter);
+            mimepart->m_nested = new MimePartCC(mimepart);
 
-            parms << par->attribute << '=' << par->value;
-            if( par->next )
-               parms << ':';
-         }
-         while ((par = par->next) != NULL);
-
-#ifdef DEBUG
-         partDesc << parms;
-#endif // DEBUG
-      }
-
-      MessageParameterList dispPlist(false); // temporary, doesn't own entries
-      if ((par = body->disposition.parameter) != NULL)
-      {
-#ifdef DEBUG
-         partDesc << "; ";
-#endif // DEBUG
-
-         do
-         {
-            parameter = new MessageParameter();
-            parameter->name = par->attribute;
-            parameter->value = par->value;
-            dispPlist.push_back(parameter);
-
-#ifdef DEBUG
-            partDesc << par->attribute << '=' << par->value;
-            if( par->next )
-               partDesc << ':';
-#endif // DEBUG
-         }
-         while ((par = par->next) != NULL);
-      }
-
-      String id;
-      if ( body->id )
-      {
-         id = body->id;
-
-#ifdef DEBUG
-         partDesc << " , id=" << id;
-#endif // DEBUG
-      }
-
-#ifdef DEBUG
-      // show bytes or lines depending upon body type
-      partDesc << " (";
-      switch ( body->type )
-      {
-         case TYPEMESSAGE:
-         case TYPETEXT:
-            partDesc << strutil_ltoa(body->size.lines) << " lines";
-            break;
-
-         default:
-            partDesc << strutil_ltoa(body->size.bytes) << " bytes";
-      }
-      partDesc << ')';
-#endif // DEBUG
-
-      MessagePartInfo *pi = new MessagePartInfo;
-      pi->mimeId = mimeId;
-      pi->type = type;
-      pi->numericalType  = body->type;
-      pi->numericalEncoding = body->encoding;
-      pi->params = parms;
-      pi->description = desc;
-      pi->id = id;
-      pi->size_lines = body->size.lines;
-      pi->size_bytes = body->size.bytes;
-
-      MessageParameterList::iterator plist_iterator;
-      for ( plist_iterator = plist.begin();
-            plist_iterator != plist.end();
-            plist_iterator++ )
-      {
-         pi->parameterList.push_back(*plist_iterator);
-      }
-
-      pi->dispositionType = body->disposition.type;
-      for( plist_iterator = dispPlist.begin();
-           plist_iterator != dispPlist.end();
-           plist_iterator++ )
-      {
-         pi->dispositionParameterList.push_back(*plist_iterator);
-      }
-
-      partInfos.Add(pi);
-
-#ifdef DEBUG
-      wxLogTrace("msgparse", partDesc.c_str());
-#endif // DEBUG
-
-      // encapsulated message?
-      if ((body->type == TYPEMESSAGE) && !strcmp (body->subtype,"RFC822") &&
-          (body = body->nested.msg->body))
-      {
-         if ( body->type == TYPEMULTIPART )
-         {
-            // FIXME I don't understand why is there "- 1" here (VZ)
-            decode_body(partInfos, body, pfx, partNo - 1);
+            DecodeMIME(mimepart->m_nested, body);
          }
          else
          {
-            // build encapsulation prefix
-            String prefix;
-            prefix << pfx << strutil_ltoa(partNo) << '.';
-            decode_body(partInfos, body, prefix, 0l);
+            // this is not fatal but not expected neither - I don't know if it
+            // can ever happen, in fact
+            wxLogDebug("Embedded message/rfc822 without body structure?");
          }
       }
    }
+   else // multi part
+   {
+      // note that we don't increment m_numParts here as we only count parts
+      // containing something and GetMimePart(n) ignores multitype parts
+
+      MimePartCC **prev = &mimepart->m_nested;
+      PART *part;
+
+      // NB: message parts are counted from 1
+      size_t n;
+      for ( n = 1, part = body->nested.part; part; part = part->next, n++ )
+      {
+         *prev = new MimePartCC(mimepart, n);
+
+         DecodeMIME(*prev, &part->body);
+
+         prev = &((*prev)->m_next);
+      }
+   }
+}
+
+int
+MessageCC::CountParts(void) const
+{
+   CheckMIME();
+
+   return m_numParts;
+}
+
+/* static */
+MimePart *MessageCC::FindPartInMIMETree(MimePart *mimepart, int& n)
+{
+   if ( mimepart->GetNested() )
+   {
+      return FindPartInMIMETree(mimepart->GetNested(), n);
+   }
+   else // a simple part
+   {
+      // n may be already 0 if we're looking for the first part with contents
+      // (i.e. not multipart one), in this case just return this one
+      if ( !n )
+      {
+         return mimepart;
+      }
+
+      n--;
+
+      MimePart *next = mimepart->GetNext();
+      while ( !next )
+      {
+         mimepart = mimepart->GetParent();
+         if ( !mimepart )
+            break;
+
+         next = mimepart->GetNext();
+      }
+
+      return next;
+   }
+}
+
+const MimePart *MessageCC::GetMimePart(int n) const
+{
+   CheckMIME();
+
+   CHECK( n >= 0 && (size_t)n < m_numParts, NULL, "invalid part number" );
+
+   MimePart *mimepart = m_mimePartTop;
+   while ( n || mimepart->GetNested() )
+   {
+      mimepart = FindPartInMIMETree(mimepart, n);
+
+      if ( !mimepart )
+      {
+         FAIL_MSG( "logic error in MIME tree traversing code" );
+
+         break;
+      }
+   }
+
+   return mimepart;
+}
+
+const char *
+MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
+{
+   CheckMIME();
+
+   if(! m_folder)
+      return NULL;
+
+   long  unsigned
+      len = 0;
+   String const
+      & sp = mimepart.GetPartSpec();
+
+   if(! m_folder->Lock())
+      return NULL;
+
+   unsigned long size = mimepart.GetSize();
+   m_folder->StartReading(size);
+
+   char *cptr = mail_fetchbody_full(m_folder->Stream(),
+                                    m_uid,
+                                    (char *)sp.c_str(),
+                                    &len, FT_UID);
+   m_folder->EndReading();
+
+   m_folder->UnLock();
+
+   if(lenptr == NULL)
+      lenptr  = &len;   // so to give c-client lib a place where to write to
+
+   if(len == 0)
+   {
+      *lenptr = 0;
+      return NULL;
+   }
+
+   if(m_partContentPtr)
+      delete [] m_partContentPtr;
+   m_partContentPtr = new char[len+1];
+   strncpy(m_partContentPtr, cptr, len);
+   m_partContentPtr[len] = '\0';
+   //fs_give(&cptr); // c-client's free() function
+
+   /* This bit is a bit suspicious, it fails sometimes in
+      rfc822_qprint() when HTML code is fed into it and while Mahogany
+      has long done all this, it seems to be not significantly worse
+      if I comment it all out. So what I do now, is to just return the
+      plain text if the decoding failed.
+      FIXME I should really find out whether this is correct :-)
+   */
+
+   unsigned char *data = (unsigned char *)m_partContentPtr; // cast for cclient
+   const char * returnVal = NULL;
+   switch( mimepart.GetTransferEncoding() )
+   {
+      case ENCBASE64:      // base-64 encoded data
+         returnVal = (const char *) rfc822_base64(data, size, lenptr);
+         break;
+      case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
+         returnVal = (const char *) rfc822_qprint(data, size, lenptr);
+         break;
+      case  ENCBINARY:     // 8 bit binary data
+         *lenptr = size;
+         return m_partContentPtr;
+
+      case ENC7BIT:     // 7 bit SMTP semantic data
+      case ENC8BIT:        // 8 bit SMTP semantic data
+      case ENCOTHER:    //unknown
+      default:
+         *lenptr = strlen(m_partContentPtr);
+         returnVal = m_partContentPtr;
+   }
+   if(returnVal == NULL)
+      return m_partContentPtr;
+   else if(returnVal != m_partContentPtr)
+   { // we need to copy it over
+      if(m_partContentPtr) delete [] m_partContentPtr;
+      m_partContentPtr = new char [(*lenptr)+1];
+      memcpy(m_partContentPtr, returnVal, *lenptr);
+      m_partContentPtr[(*lenptr)] = '\0';
+      fs_give((void **)&returnVal);
+   }
+   return m_partContentPtr;
+}
+
+const char *MimePartCC::GetContent(unsigned long *len) const
+{
+   return GetMessage()->GetPartData(*this, len);
 }
 
 // ----------------------------------------------------------------------------
@@ -1129,215 +1133,6 @@ MessageCC::GetSize() const
    CHECK( mc, 0, "no cache element in GetSize?" );
 
    return mc->rfc822_size;
-}
-
-bool
-MessageCC::ParseMIMEStructure()
-{
-   // this is the worker function, it is wasteful to call it more than once
-   CHECK( !m_partInfos, false,
-          "ParseMIMEStructure() should only be called once for each message" );
-
-   m_partInfos = new PartInfoArray;
-   decode_body(*m_partInfos, m_Body, "", 0l, true /* top level message */);
-
-   return true;
-}
-
-void
-MessageCC::DecodeMIME(void)
-{
-   if ( !m_partInfos )
-   {
-      CheckBody();
-
-      (void)ParseMIMEStructure();
-   }
-}
-
-int
-MessageCC::CountParts(void)
-{
-   DecodeMIME();
-
-   return m_partInfos->GetCount();
-}
-
-
-const char *
-MessageCC::GetPartContent(int n, unsigned long *lenptr)
-{
-   DecodeMIME();
-
-   if(! m_folder)
-      return NULL;
-
-   long  unsigned
-      len = 0;
-   String const
-      & sp = GetPartSpec(n);
-
-   if(! m_folder->Lock())
-      return NULL;
-
-   m_folder->StartReading(GetPartInfo(n)->size_bytes);
-   char *cptr = mail_fetchbody_full(m_folder->Stream(),
-                                    m_uid,
-                                    (char *)sp.c_str(),
-                                    &len, FT_UID);
-   m_folder->EndReading();
-
-   m_folder->UnLock();
-
-   if(lenptr == NULL)
-      lenptr  = &len;   // so to give c-client lib a place where to write to
-
-   if(len == 0)
-   {
-      *lenptr = 0;
-      return NULL;
-   }
-
-   if(m_partContentPtr)
-      delete [] m_partContentPtr;
-   m_partContentPtr = new char[len+1];
-   strncpy(m_partContentPtr, cptr, len);
-   m_partContentPtr[len] = '\0';
-   //fs_give(&cptr); // c-client's free() function
-
-   /* This bit is a bit suspicious, it fails sometimes in
-      rfc822_qprint() when HTML code is fed into it and while Mahogany
-      has long done all this, it seems to be not significantly worse
-      if I comment it all out. So what I do now, is to just return the
-      plain text if the decoding failed.
-      FIXME I should really find out whether this is correct :-)
-   */
-
-   unsigned char *data = (unsigned char *)m_partContentPtr; // cast for cclient
-   const char * returnVal = NULL;
-   switch(GetPartTransferEncoding(n))
-   {
-   case ENCBASE64:      // base-64 encoded data
-      returnVal = (const char *) rfc822_base64(data, GetPartSize(n), lenptr);
-      break;
-   case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
-      returnVal = (const char *) rfc822_qprint(data, GetPartSize(n), lenptr);
-      break;
-   case  ENCBINARY:     // 8 bit binary data
-      *lenptr = GetPartSize(n);
-      return m_partContentPtr;
-
-   case ENC7BIT:     // 7 bit SMTP semantic data
-   case ENC8BIT:        // 8 bit SMTP semantic data
-   case ENCOTHER:    //unknown
-   default:
-      *lenptr = strlen(m_partContentPtr);
-      returnVal = m_partContentPtr;
-   }
-   if(returnVal == NULL)
-      return m_partContentPtr;
-   else if(returnVal != m_partContentPtr)
-   { // we need to copy it over
-      if(m_partContentPtr) delete [] m_partContentPtr;
-      m_partContentPtr = new char [(*lenptr)+1];
-      memcpy(m_partContentPtr, returnVal, *lenptr);
-      m_partContentPtr[(*lenptr)] = '\0';
-      fs_give((void **)&returnVal);
-   }
-   return m_partContentPtr;
-}
-
-const MessageCC::PartInfo *MessageCC::GetPartInfo(int n) const
-{
-   CHECK( m_partInfos, NULL, "no MIME part info available" );
-
-   return m_partInfos->Item(n);
-}
-
-MessageParameterList const &
-MessageCC::GetParameters(int n)
-{
-   DecodeMIME();
-
-   return GetPartInfo(n)->parameterList;
-}
-
-
-MessageParameterList const &
-MessageCC::GetDisposition(int n, String *disptype)
-{
-   DecodeMIME();
-
-   if ( disptype )
-      *disptype = GetPartInfo(n)->dispositionType;
-
-   return GetPartInfo(n)->dispositionParameterList;
-}
-
-Message::ContentType
-MessageCC::GetPartType(int n)
-{
-   DecodeMIME();
-
-   // by a greatest of hazards, the numerical types used by cclient lib are
-   // just the same as Message::ContentType enum values - of course, if it
-   // were not the case, we would have to translate them somehow!
-   return (Message::ContentType)GetPartInfo(n)->numericalType;
-}
-
-int
-MessageCC::GetPartTransferEncoding(int n)
-{
-   DecodeMIME();
-
-   return GetPartInfo(n)->numericalEncoding;
-}
-
-wxFontEncoding
-MessageCC::GetTextPartEncoding(int n)
-{
-   String charset;
-   if ( GetParameter(n, "charset", &charset) )
-      return wxTheFontMapper->CharsetToEncoding(charset);
-   else
-      return wxFONTENCODING_SYSTEM;
-}
-
-size_t
-MessageCC::GetPartSize(int n, bool useNaturalUnits)
-{
-   DecodeMIME();
-
-   CHECK( m_Body, (size_t)-1, "should have the body in GetPartSize" );
-
-   // return the size in lines for the text messages if requested, otherwise
-   // return size in bytes
-   if( useNaturalUnits &&
-       (m_Body->type == TYPEMESSAGE || m_Body->type == TYPETEXT) )
-      return GetPartInfo(n)->size_lines;
-   else
-      return GetPartInfo(n)->size_bytes;
-}
-
-String const &
-MessageCC::GetPartMimeType(int n)
-{
-   DecodeMIME();
-   return GetPartInfo(n)->type;
-}
-
-String const &
-MessageCC::GetPartSpec(int n)
-{
-   DecodeMIME();
-   return GetPartInfo(n)->mimeId;
-}
-
-String const &
-MessageCC::GetPartDesc(int n)
-{
-   DecodeMIME();
-   return GetPartInfo(n)->description;
 }
 
 // ----------------------------------------------------------------------------

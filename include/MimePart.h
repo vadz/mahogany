@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
-// File name:   MimePart.h: declaration of MimePart class
+// File name:   MimePart.h: declaration of MimeType and MimePart classes
 // Purpose:     MimePart represents a part of MIME message with the convention
 //              that the main message is also considered as a part (it is not
 //              according to MIME RFCs) - it is the root of the tree of
@@ -18,6 +18,12 @@
 
 // for wxFontEncoding enum
 #include <wx/fontenc.h>
+
+// for MimeParameterList
+#include "lists.h"
+
+// c-client defines this
+#undef MESSAGE
 
 // ----------------------------------------------------------------------------
 // MimeType: represents a string of the form "type/subtype"
@@ -64,6 +70,9 @@ public:
    /// from string
    MimeType(const String& mimetype) { Assign(mimetype); }
 
+   /// from type and subtype
+   MimeType(Primary primary, const String& subtype);
+
    /// copy
    MimeType(const MimeType& mt) { Assign(mt); }
 
@@ -75,7 +84,7 @@ public:
 
    /// set to another MimeType
    MimeType& Assign(const MimeType& mt)
-      { m_primary = mt.m_primary; m_subtype = mt.m_subtype; }
+      { m_primary = mt.m_primary; m_subtype = mt.m_subtype; return *this; }
    //@}
 
    /** @name Accessors
@@ -90,11 +99,14 @@ public:
    /// is this MimeType a wildcard?
    bool IsWildcard() const { return m_subtype == '*'; }
 
+   /// does this type represent a text contents?
+   bool IsText() const { return m_primary == TEXT || m_primary == MESSAGE; }
+
    /// get the numeric primary id
-   String GetPrimary() const { return m_primary; }
+   Primary GetPrimary() const { return m_primary; }
 
    /// just the type ("MESSAGE")
-   String GetType() const { return ms_types[m_primary]; }
+   String GetType() const;
 
    /// just the subtype ("RFC822")
    String GetSubType() const { return m_subtype; }
@@ -119,7 +131,7 @@ public:
       { return !(*this == mt); }
 
    /// is this MimeType the same as or specialization of the other?
-   bool Matches(const wxMimeType& wildcard) const;
+   bool Matches(const MimeType& wildcard) const;
 
    //@}
 
@@ -129,9 +141,58 @@ private:
 
    /// the subtype string in upper case
    String m_subtype;
+};
 
-   /// the table for mapping m_primary to the string types
-   static const char **ms_types;
+// ----------------------------------------------------------------------------
+// MimeParameter
+// ----------------------------------------------------------------------------
+
+class MimeParameter
+{
+public:
+   MimeParameter(const String& name_, const String& value_)
+      : name(name_), value(value_) { }
+
+   /// the parameter name
+   String name;
+
+   /// the parameter value
+   String value;
+};
+
+/// a linked list of parameters
+M_LIST_OWN(MimeParameterList, MimeParameter);
+
+// ----------------------------------------------------------------------------
+// MimeXferEncoding: transfer encoding as defined by RFC 2045
+// ----------------------------------------------------------------------------
+
+/** This enum describes the transfer encodings
+
+    NB: their values coincide with those of c-client, don't change!
+ */
+enum MimeXferEncoding
+{
+   /// 7 bit SMTP semantic data
+   MIME_ENC_7BIT = 0,
+
+   /// 8 bit SMTP semantic data
+   MIME_ENC_8BIT = 1,
+
+   /// 8 bit binary data
+   MIME_ENC_BINARY = 2,
+
+   /// base-64 encoded data
+   MIME_ENC_BASE64 = 3,
+
+   /// human-readable = 8-as-7 bit data
+   MIME_ENC_QUOTEDPRINTABLE = 4,
+
+   /// unknown
+   MIME_ENC_OTHER = 5,
+
+   /// maximum encoding code
+   MIME_ENC_INVALID = 10,
 };
 
 // ----------------------------------------------------------------------------
@@ -141,6 +202,54 @@ private:
 class MimePart
 {
 public:
+   /** @name Navigation through the MIME tree
+
+       MIME structure of the message is a tree where the nodes are parts of
+       type MULTIPART/<*> or MESSAGE/RFC822 and the leaves parts of all other
+       types.
+
+       There is always the root in this tree corresponding to the main message
+       itself (_unlike_ in IMAP RFC 2060!). For a non multipart message the
+       tree is reduced to the single node which has the IMAP part spec "1".
+
+       For a multipart message, the root has IMAP pseudo spec "0" but it
+       shouldn't matter as this part is not used directly, only the subparts
+       are.
+
+       Example of the tree and the corresponding IMAP specs for a real-life
+       messsage:
+
+       MULTIPART/RELATED                              0
+            MULTIPART/ALTERNATIVE                     1
+                  TEXT/PLAIN                          1.1
+                  TEXT/HTML                           1.2
+            IMAGE/GIF                                 2
+            IMAGE/JPEG                                3
+
+       The results of calling GetXXX() for this tree:
+
+       part    parent   next  nested
+       -----------------------------
+       0        NULL    NULL    1
+       1         0       2      1.1
+       1.1       1       1.2   NULL
+       1.2       1      NULL   NULL
+       2         0       3     NULL
+       3         0      NULL   NULL
+    */
+   //@{
+
+   /// get the parent MIME part (NULL for the top level one)
+   virtual MimePart *GetParent() const = 0;
+
+   /// get the next MIME part (NULL if this is the last part of multipart)
+   virtual MimePart *GetNext() const = 0;
+
+   /// get the first child part (NULL if not multipart or message)
+   virtual MimePart *GetNested() const = 0;
+
+   //@}
+
    /** @name Headers access
 
        Get the information from "Content-Type" and "Content-Disposition"
@@ -157,19 +266,23 @@ public:
    /// get the filename if the part is an attachment
    virtual String GetFilename() const = 0;
 
+   /// get the disposition specified in Content-Disposition
+   virtual String GetDisposition() const = 0;
+
+   /// get the IMAP part spec (of the #.#.#.# form)
+   virtual String GetPartSpec() const = 0;
+
    /// get the value of the specified Content-Type parameter
    virtual String GetParam(const String& name) const = 0;
 
    /// get the value of the specified Content-Disposition parameter
    virtual String GetDispositionParam(const String& name) const = 0;
 
-   /// get all parameters, return their count
-   virtual size_t GetParameters(wxArrayString *names,
-                                wxArrayString *values) const = 0;
+   /// get the list of all parameters (from Content-Type)
+   virtual const MimeParameterList& GetParameters() const = 0;
 
-   /// get all disposition parameters, return their count
-   virtual size_t GetDispositionParameters(wxArrayString *names,
-                                           wxArrayString *values) const = 0;
+   /// get the list of all disposition parameters (from Content-Disposition)
+   virtual const MimeParameterList& GetDispositionParameters() const = 0;
 
    //@}
 
@@ -182,7 +295,7 @@ public:
    //@{
 
    /// get the decoded contents of this part
-   virtual const char *GetContent(size_t *len = NULL) const = 0;
+   virtual const char *GetContent(unsigned long *len = NULL) const = 0;
 
    /// get the encoding of the part
    virtual MimeXferEncoding GetTransferEncoding() const = 0;
@@ -207,6 +320,14 @@ public:
 
    //@}
 };
+
+// ----------------------------------------------------------------------------
+// for backwards compatibility only, don't use in new code
+// ----------------------------------------------------------------------------
+
+typedef MimeType::Primary MessageContentType;
+typedef MimeParameter MessageParameter;
+typedef MimeParameterList MessageParameterList;
 
 #endif // _MIMEPART_H_
 

@@ -21,41 +21,13 @@
 
 // fwd decl
 class MailFolderCC;
+class MimePartCC;
 
 /** Message class, containing the most commonly used message headers.
    */
 class MessageCC : public Message
 {
 public:
-   /// Structure holding information about the individual message parts.
-   struct PartInfo
-   {
-      /// MIME/IMAP4 part id
-      String   mimeId;
-      /// string describing the MIME type
-      String   type;
-      /// numerical type id as used by c-client lib
-      int   numericalType;
-      /// numerical encoding id as used by c-client lib
-      int   numericalEncoding;
-      /// string containing the parameter settings
-      String   params;
-      /// list of parameters
-      MessageParameterList parameterList;
-      /// disposition type
-      String dispositionType;
-      /// list of disposition parameters
-      MessageParameterList dispositionParameterList;
-      /// description
-      String   description;
-      /// id
-      String   id;
-      /// size, either in lines or bytes, depending on type
-      long  size_lines;
-      /// size, either in lines or bytes, depending on type
-      long  size_bytes;
-   };
-
    // get specfied header lines
    virtual wxArrayString GetHeaderLines(const char **headers,
                                         wxArrayInt *encodings = NULL) const;
@@ -113,14 +85,17 @@ public:
    */
    virtual String FetchText(void);
 
-   /** decode the MIME structure
-     */
-   void DecodeMIME(void);
+   /** get the decoded part text
+    */
+   const char *GetPartData(const MimePart& mimepart,
+                           unsigned long *len = NULL);
 
    /** return the number of body parts in message
        @return the number of body parts
    */
-   int CountParts(void);
+   virtual int CountParts(void) const;
+
+   virtual const MimePart *GetMimePart(int n) const;
 
    /** Returns a pointer to the folder. If the caller needs that
        folder to stay around, it should IncRef() it. It's existence is
@@ -129,62 +104,6 @@ public:
    */
    virtual MailFolder * GetFolder(void) const { return m_folder; }
 
-   /**@name Methods accessing individual parts of a message. */
-   //@{
-   /** Return the content of the part.
-       @param  n part number
-       @param  len a pointer to a variable where to store length of data returned
-       @return pointer to the content
-   */
-   const char *GetPartContent(int n = 0, unsigned long *len = NULL);
-
-   /** Query the type of the content.
-       @param  n part number
-       @return content type ID
-   */
-   ContentType GetPartType(int n = 0);
-
-   /** Query the encoding of the content.
-       @param  n part number
-       @return encoding type ID
-   */
-   int GetPartTransferEncoding(int n = 0);
-
-   virtual wxFontEncoding GetTextPartEncoding(int n = 0);
-
-   /** Query the size of the content.
-       @param  n part number
-       @param useNaturalUnits must be set to true to get size in lines for text
-       @return size
-   */
-   virtual size_t GetPartSize(int n = 0, bool useNaturalUnits = false);
-
-   /** Get the list of parameters for a given part.
-       @param n part number, if -1, for the top level.
-       @return list of parameters, must be freed by caller.
-   */
-   MessageParameterList const & GetParameters(int n = -1);
-
-   /** Get the list of disposition parameters for a given part.
-       @param n part number, if -1, for the top level.
-       @param disptype string where to store disposition type
-       @return list of parameters, must be freed by caller.
-   */
-   MessageParameterList const & GetDisposition(int n = -1,
-                                               String *disptype = NULL);
-
-   /** Query the MimeType of the content.
-       @param  n part number
-       @return string describing the Mime type
-   */
-   String const & GetPartMimeType(int n = 0);
-
-   /** Query the description of the part.
-       @param  n part number
-       @return string describing the part.
-   */
-   String const & GetPartDesc(int n = 0);
-
    /** Return the numeric status of message.
        @return flags of message
    */
@@ -192,12 +111,6 @@ public:
 
    // get the size in bytes
    virtual unsigned long GetSize() const;
-
-   /** Query the section specification string of body part.
-       @param  n part number
-       @return MIME/IMAP4 section specifier #.#.#.#
-   */
-   String const & GetPartSpec(int n = 0);
 
    /** Write the message to a String.
        @param str the string to write message text to
@@ -218,7 +131,6 @@ public:
 
    /// Return the numeric uid
    virtual UIdType GetUId(void) const { return m_uid; }
-   //@}
 
    static MessageCC *Create(const char *text,
                             UIdType uid = UID_ILLEGAL,
@@ -238,8 +150,7 @@ protected:
 
    /// The MailFolderCC class creates MessageCC objects.
    friend class MailFolderCC;
-   //@}
-protected:
+
    /// constructors called by Create()
    MessageCC(MailFolderCC *folder, const HeaderInfo& hi);
    MessageCC(const char *text,
@@ -248,6 +159,8 @@ protected:
 
    /** destructor */
    ~MessageCC();
+
+   //@}
 
    /// get the ADDRESS struct for the given address header
    ADDRESS *GetAddressStruct(MessageAddressType type) const;
@@ -276,11 +189,24 @@ private:
    /// get the cache element for this message
    MESSAGECACHE *GetCacheElement() const;
 
-   /// get the PartInfo struct for the given part number
-   const PartInfo *GetPartInfo(int n) const;
+   /** @name MIME structure decoding
 
-   /// parse the MIME structure of the message and fill m_partInfos array
+       c-cliet does everything for us in fact
+    */
+   //@{
+
+   /// ensure that we have MIME structure info
+   void CheckMIME() const;
+
+   /// parse the MIME structure of the message and fill m_mimePartTop
    bool ParseMIMEStructure();
+
+   /// ParseMIMEStructure() helper
+   void DecodeMIME(MimePartCC *mimepart, struct mail_bodystruct *body);
+
+   /// GetMimePart() helper
+   static MimePart *FindPartInMIMETree(MimePart *mimepart, int& n);
+   //@}
 
    /// reference to the folder this mail is stored in
    MailFolderCC *m_folder;
@@ -315,8 +241,11 @@ private:
    */
    char *m_partContentPtr;
 
-   /// a vector of all the body part information
-   class PartInfoArray *m_partInfos;
+   /// pointer to the main message MIME part, it links to all others
+   MimePartCC *m_mimePartTop;
+
+   /// total number of MIME parts in the message
+   size_t m_numParts;
 };
 
 #endif // _MESSAGECC_H

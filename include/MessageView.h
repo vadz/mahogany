@@ -290,7 +290,7 @@ protected:
    wxFontEncoding ShowHeaders();
 
    /// show a text part
-   void ShowTextPart(wxFontEncoding encBody, size_t nPart);
+   void ShowTextPart(wxFontEncoding& encBody, size_t nPart);
 
    /// show an attachment
    void ShowAttachment(size_t nPart, const String& mimeType, size_t partSize);

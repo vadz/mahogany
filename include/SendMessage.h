@@ -66,7 +66,7 @@ public:
        @param plist list of parameters
        @param enc the text encoding (only for TEXT parts)
    */
-   virtual void AddPart(MessageContentType type,
+   virtual void AddPart(MimeType::Primary type,
                         const char *buf, size_t len,
                         const String &subtype = M_EMPTYSTRING,
                         const String &disposition = "INLINE",

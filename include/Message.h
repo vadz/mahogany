@@ -13,19 +13,19 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#include "FolderType.h"
 #include "MObject.h"
-#include "kbList.h"
 
-#include <wx/fontenc.h>
+#include "MimePart.h"
 
 class WXDLLEXPORT wxArrayString;
 class MailFolder;
+class Profile;
 
 // ----------------------------------------------------------------------------
-// C-client compatibility defines
+// compatibility defines
 // ----------------------------------------------------------------------------
 
+// c-client needs this
 #ifdef   OS_WIN
 #  define   TEXT_DATA_CAST(x)    ((unsigned char *)x)
 #else
@@ -48,64 +48,21 @@ enum MessageAddressType
    MAT_BCC
 };
 
-/// a define to make scandoc work
-#define MessageContentType Message::ContentType
-
-/// a type to store parameters and their values
-class MessageParameter
-{
-public:
-   /// the parameter name
-   String name;
-   /// the parameter value
-   String value;
-};
-
-/// define a parameter list
-KBLIST_DEFINE(MessageParameterList, MessageParameter);
-
 /**
    Message class, containing the most commonly used message headers.
    */
 class Message : public MObjectRC
 {
 public:
-   /**@name Constants (correspoding to c-client's mail.h */
-   //@{
-   /** Primary body types
-       If you change any of these you must also change body_types in
-       rfc822.c */
-   enum ContentType
-   {
-      /// unformatted text
-      MSG_TYPETEXT = 0,
-      /// multipart content
-      MSG_TYPEMULTIPART = 1,
-      /// encapsulated message
-      MSG_TYPEMESSAGE = 2,
-      /// application data
-      MSG_TYPEAPPLICATION = 3,
-      /// audio
-      MSG_TYPEAUDIO = 4,
-      /// static image
-      MSG_TYPEIMAGE = 5,
-      /// video
-      MSG_TYPEVIDEO = 6,
-      /// model
-      MSG_TYPEMODEL = 7,
-      /// unknown
-      MSG_TYPEOTHER = 8,
-      /// maximum type code
-      MSG_TYPEMAX = 15
-   };
-   //@}
-
    /** This constructor creates a Message from a string.
     */
-   static class Message * Create(
-      const char * itext,
-      UIdType uid = UID_ILLEGAL,
-      class Profile *iprofile = NULL);
+   static Message *Create(const char * itext,
+                          UIdType uid = UID_ILLEGAL,
+                          Profile *profile = NULL);
+
+   /** @name Address stuff
+    */
+   //@{
 
    /// return "Foo" from address of form "Foo Bar <baz>"
    static String GetFirstNameFromAddress(const String& address);
@@ -124,6 +81,13 @@ public:
 
    /// return the address index in the array of addresses or wxNOT_FOUND
    static int FindAddress(const wxArrayString& addresses, const String& addr);
+
+   //@}
+
+   /** @name Headers access
+    */
+
+   //@{
 
    /** get any header line
 
@@ -211,71 +175,6 @@ public:
     */
    virtual String GetNewsgroups() const = 0;
 
-   /** Get message text.
-       @return the uninterpreted message body
-   */
-   virtual String FetchText(void) = 0;
-
-   /** return the number of body parts in message
-       @return the number of body parts
-   */
-   virtual int CountParts(void) = 0;
-
-   /** Returns a pointer to the folder. If the caller needs that
-       folder to stay around, it should IncRef() it. It's existence is
-       guaranteed for as long as the message exists.
-       @return folder pointer (not incref'ed)
-   */
-   virtual MailFolder * GetFolder(void) const = 0;
-
-   /**@name Methods accessing individual parts of a message. */
-   //@{
-   /** Return the content of the part.
-       @param  n part number
-       @param  len a pointer to a variable where to store length of data returned
-       @return pointer to the content
-   */
-   virtual const char *GetPartContent(int n = 0, unsigned long *len = NULL) = 0;
-
-   /** Query the type of the content.
-       @param  n part number
-       @return content type ID
-   */
-   virtual ContentType GetPartType(int n = 0) = 0;
-
-   /** Query the type of the content.
-       @param  n part number
-       @return font encoding (ASCII-7, ISO8859-1, KOI8-R, ...)
-   */
-   virtual wxFontEncoding GetTextPartEncoding(int n = 0) = 0;
-
-   /** Query the type of the content.
-       @param  n part number
-       @return content type ID (ENCBASE64, ENCQUOTEDPRINTABLE, ...)
-   */
-   virtual int GetPartTransferEncoding(int n = 0) = 0;
-
-   /** Returns the size of the part in bytes or lines (only for the text
-       messages and only if useNaturalUnits is true)
-       @param n part number
-       @param useNaturalUnits must be set to true to get size in lines for text
-       @return size
-   */
-   virtual size_t GetPartSize(int n = 0, bool useNaturalUnits = false) = 0;
-
-   /** Get the list of parameters for a given part.
-       @param n part number, if -1, for the top level.
-       @return list of parameters, must be freed by caller.
-   */
-   virtual MessageParameterList const & GetParameters(int n = -1) = 0;
-
-   /** Get the list of disposition parameters for a given part.
-       @param n part number, if -1, for the top level.
-       @param disptype string where to store disposition type
-       @return list of parameters, must be freed by caller.
-   */
-   virtual MessageParameterList const & GetDisposition(int n = -1, String *disptype = NULL) = 0;
-
    /**
        Get the list of all unique addresses appearing in this message headers
        (including from, to, reply-to, cc, bcc, ...)
@@ -284,43 +183,6 @@ public:
        @return the number of addresses retrieved
    */
    virtual size_t ExtractAddressesFromHeader(wxArrayString& addresses);
-
-   /** Get a parameter value from the list.
-       @param list a MessageParameterList
-       @param parameter parameter to look up
-       @param value set to new value if found
-       @return true if found
-   */
-   bool ExpandParameter(MessageParameterList const & list,
-                        String const &parameter,
-                        String *value) const;
-
-   /** Get parameter by name.
-       @param n part number, if -1, for the top level.
-       @return true if parameter was found
-   */
-   bool GetParameter(int n, const String& param, String *value)
-   {
-      return ExpandParameter(GetParameters(n), param, value);
-   }
-
-   /** Query the MimeType of the content.
-       @param  n part number
-       @return string describing the Mime type
-   */
-   virtual String const & GetPartMimeType(int n = 0) = 0;
-
-   /** Query the description of the part.
-       @param  n part number
-       @return string describing the part.
-   */
-   virtual String const & GetPartDesc(int n = 0) = 0;
-
-   /** Query the section specification string of body part.
-       @param  n part number
-       @return MIME/IMAP4 section specifier #.#.#.#
-   */
-   virtual String const & GetPartSpec(int n = 0) = 0;
 
    /** Return the numeric status of message.
        @return flags of message (combination of MailFolder::MSG_STAT_XXX flags)
@@ -332,6 +194,141 @@ public:
 
    /** return the date of the message */
    virtual time_t GetDate() const = 0;
+
+   //@}
+
+   /** @name Accessors
+    */
+
+   //@{
+
+   /** Returns a pointer to the folder. If the caller needs that
+       folder to stay around, it should IncRef() it. It's existence is
+       guaranteed for as long as the message exists.
+       @return folder pointer (not incref'ed)
+   */
+   virtual MailFolder *GetFolder(void) const = 0;
+
+   /// Return the numeric uid
+   virtual UIdType GetUId(void) const = 0;
+
+   //@}
+
+   /** @name Methods accessing individual parts of a message.
+
+       All of them but GetTopMimePart() are deprecated now, use MimePart class
+       directly instead
+    */
+   //@{
+
+   /// get the top level MIME part of the message
+   const MimePart *GetTopMimePart() const { return GetMimePart(0); }
+
+   /** return the number of body parts in message
+       @return the number of body parts
+   */
+   virtual int CountParts(void) const = 0;
+
+   /// return the MimePart object for the given part number
+   virtual const MimePart *GetMimePart(int n) const = 0;
+
+   /** Return the content of the part.
+       @param  n part number
+       @param  len a pointer to a variable where to store length of data returned
+       @return pointer to the content
+   */
+   const char *GetPartContent(int n, unsigned long *len = NULL) const
+      { return GetMimePart(n)->GetContent(len); }
+
+   /** Query the type of the content.
+       @param  n part number
+       @return content type ID
+   */
+   MessageContentType GetPartType(int n) const
+      { return GetMimePart(n)->GetType().GetPrimary(); }
+
+   /** Query the type of the content.
+       @param  n part number
+       @return font encoding (ASCII-7, ISO8859-1, KOI8-R, ...)
+   */
+   wxFontEncoding GetTextPartEncoding(int n) const
+      { return GetMimePart(n)->GetTextEncoding(); }
+
+   /** Query the type of the content.
+       @param  n part number
+       @return content type ID (ENCBASE64, ENCQUOTEDPRINTABLE, ...)
+   */
+   MimeXferEncoding GetPartTransferEncoding(int n) const
+      { return GetMimePart(n)->GetTransferEncoding(); }
+
+   /** Returns the size of the part in bytes or lines (only for the text
+       messages and only if useNaturalUnits is true)
+       @param n part number
+       @param useNaturalUnits must be set to true to get size in lines for text
+       @return size
+   */
+   size_t GetPartSize(int n, bool useNaturalUnits = false) const
+   {
+      const MimePart *part = GetMimePart(n);
+      if ( useNaturalUnits && part->GetType().IsText() )
+         return part->GetNumberOfLines();
+      else
+         return part->GetSize();
+   }
+
+   /** Query the MimeType of the content.
+       @param  n part number
+       @return string describing the Mime type
+   */
+   String GetPartMimeType(int n) const
+      { return GetMimePart(n)->GetType().GetFull(); }
+
+   /** Query the description of the part.
+       @param  n part number
+       @return string describing the part.
+   */
+   String GetPartDesc(int n) const
+      { return GetMimePart(n)->GetDescription(); }
+
+   /** Query the section specification string of body part.
+       @param  n part number
+       @return MIME/IMAP4 section specifier #.#.#.#
+   */
+   String GetPartSpec(int n) const
+      { return GetMimePart(n)->GetPartSpec(); }
+
+   /** Get the list of parameters for a given part.
+       @param n part number
+       @return list of parameters, must be freed by caller.
+   */
+   const MimeParameterList& GetParameters(int n) const
+      { return GetMimePart(n)->GetParameters(); }
+
+   /** Get the list of disposition parameters for a given part.
+       @param n part number
+       @param disptype string where to store disposition type
+       @return list of parameters, must be freed by caller.
+   */
+   const MimeParameterList& GetDisposition(int n,
+                                           String *disptype = NULL) const
+   {
+      const MimePart *part = GetMimePart(n);
+      if ( disptype )
+         *disptype = part->GetDisposition();
+
+      return part->GetDispositionParameters();
+   }
+
+   //@}
+
+   /** @name Functions working with the message contents
+    */
+   //@{
+
+   /** Get message text.
+       @return the uninterpreted message body
+   */
+   virtual String FetchText(void) = 0;
 
    /** Write the message to a String.
        @param str the string to write message text to
@@ -349,9 +346,33 @@ public:
    virtual bool SendOrQueue(Protocol protocol = Prot_Illegal,
                             bool send = FALSE) = 0;
 
-   /// Return the numeric uid
-   virtual UIdType GetUId(void) const = 0;
    //@}
+
+   // for backwards compatibility only, don't use
+   enum ContentType
+   {
+      /// unformatted text
+      MSG_TYPETEXT = MimeType::TEXT,
+      /// multipart content
+      MSG_TYPEMULTIPART = MimeType::MULTIPART,
+      /// encapsulated message
+      MSG_TYPEMESSAGE = MimeType::MESSAGE,
+      /// application data
+      MSG_TYPEAPPLICATION = MimeType::APPLICATION,
+      /// audio
+      MSG_TYPEAUDIO = MimeType::AUDIO,
+      /// static image
+      MSG_TYPEIMAGE = MimeType::IMAGE,
+      /// video
+      MSG_TYPEVIDEO = MimeType::VIDEO,
+      /// model
+      MSG_TYPEMODEL = MimeType::MODEL,
+      /// unknown
+      MSG_TYPEOTHER = MimeType::OTHER,
+      /// invalid type code
+      MSG_TYPEINVALID = MimeType::INVALID
+   };
+
 protected:
    /** virtual destructor */
    virtual ~Message() {}
@@ -361,4 +382,4 @@ protected:
 
 DECLARE_AUTOPTR(Message);
 
-#endif
+#endif // MESSAGE_H

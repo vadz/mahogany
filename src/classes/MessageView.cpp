@@ -177,15 +177,13 @@ public:
          int part)
       : wxFileType::MessageParameters(filename, mimetype)
       {
-         m_mailMessage = mailMessage;
-         m_part = part;
+         m_mimepart = mailMessage->GetMimePart(part);
       }
 
    virtual wxString GetParamValue(const wxString& name) const;
 
 private:
-   Message *m_mailMessage;
-   int m_part;
+   const MimePart *m_mimepart;
 };
 
 // ----------------------------------------------------------------------------
@@ -277,24 +275,10 @@ private:
 // helper functions
 // ----------------------------------------------------------------------------
 
-static String
-GetParameter(Message *msg, int partno, const String &param)
-{
-   String value;
-   if ( !msg->ExpandParameter(msg->GetParameters(partno), param, &value) )
-      (void)msg->ExpandParameter(msg->GetDisposition(partno), param, &value);
-
-   return value;
-}
-
-static
+static inline
 String GetFileNameForMIME(Message *message, int partNo)
 {
-   String fileName = GetParameter(message, partNo, "FILENAME");
-   if ( fileName.empty() )
-      fileName = GetParameter(message, partNo,"NAME");
-
-   return fileName;
+   return message->GetMimePart(partNo)->GetFilename();
 }
 
 // ----------------------------------------------------------------------------
@@ -312,28 +296,25 @@ END_EVENT_TABLE()
 wxString
 MailMessageParameters::GetParamValue(const wxString& name) const
 {
-   const MessageParameterList &plist = m_mailMessage->GetParameters(m_part);
-   MessageParameterList::iterator i;
-   for ( i = plist.begin(); i != plist.end(); i++) {
-      if ( name.CmpNoCase((*i)->name) == 0 ) {
-         // found
-         return (*i)->value;
-      }
+   // look in Content-Type parameters
+   String value = m_mimepart->GetParam(name);
+
+   if ( value.empty() )
+   {
+      // try Content-Disposition parameters (should we?)
+      value = m_mimepart->GetDispositionParam(name);
    }
 
-   const MessageParameterList &dlist = m_mailMessage->GetDisposition(m_part);
-   for ( i = dlist.begin(); i != dlist.end(); i++) {
-      if ( name.CmpNoCase((*i)->name) == 0 ) {
-         // found
-         return (*i)->value;
-      }
+   if ( value.empty() )
+   {
+      // if all else failed, call the base class
+
+      // typedef is needed for VC++ 5.0 - otherwise you get a compile error!
+      typedef wxFileType::MessageParameters BaseMessageParameters;
+      value = BaseMessageParameters::GetParamValue(name);
    }
 
-   // if all else failed, call the base class
-
-   // typedef is needed for VC++ 5.0 - otherwise you get a compile error!
-   typedef wxFileType::MessageParameters BaseMessageParameters;
-   return BaseMessageParameters::GetParamValue(name);
+   return value;
 }
 
 // ----------------------------------------------------------------------------
@@ -1132,7 +1113,7 @@ wxColour MessageView::GetQuoteColour(size_t qlevel) const
    return m_ProfileValues.QuotedCol[qlevel];
 }
 
-void MessageView::ShowTextPart(wxFontEncoding encBody,
+void MessageView::ShowTextPart(wxFontEncoding& encBody,
                                size_t nPart)
 {
    // get the encoding of the text
@@ -1394,34 +1375,20 @@ MessageView::Update(void)
 {
    m_viewer->Clear();
 
-   if(! m_mailMessage)  // no message to display
+   if( !m_mailMessage )
+   {
+      // no message to display
       return;
+   }
 
    m_uid = m_mailMessage->GetUId();
 
    // deal with the headers first
-   wxFontEncoding encInHeaders = ShowHeaders();
-
-   // get/guess the body encoding
-   wxFontEncoding encBody;
-   if ( m_encodingUser != wxFONTENCODING_SYSTEM )
-   {
-      // user-specified encoding overrides everything
-      encBody = m_encodingUser;
-   }
-   else // auto-detect
-   {
-      // FIXME how to get the params of the top level message?
-#if 0
-      encBody = m_mailMessage->GetTextPartEncoding(-1);
-      if ( encBody == wxFONTENCODING_SYSTEM )
-#endif
-      {
-         // some broken mailers don't create correct "Content-Type" header,
-         // but they may yet give us the necessary info in the other headers
-         encBody = encInHeaders;
-      }
-   }
+   //
+   // NB: some broken mailers don't create correct "Content-Type" header,
+   //     but they may yet give us the necessary info in the other headers so
+   //     we assume the header encoding as the default encoding for the body
+   wxFontEncoding encBody = ShowHeaders();
 
    m_viewer->StartBody();
 
@@ -1591,7 +1558,7 @@ MessageView::MimeInfo(int mimeDisplayPart)
 
    // as we passed true to GetPartSize() above, it will return size in lines
    // for the text messages (and in bytes for everything else)
-   Message::ContentType type = m_mailMessage->GetPartType(mimeDisplayPart);
+   int type = m_mailMessage->GetPartType(mimeDisplayPart);
    if(type == Message::MSG_TYPEMESSAGE || type == Message::MSG_TYPETEXT)
       message << _(" lines");
    else
@@ -1609,11 +1576,11 @@ MessageView::MimeInfo(int mimeDisplayPart)
       message += _("\nParameters:\n");
       for ( plist_it = plist.begin(); plist_it != plist.end(); plist_it++ )
       {
-         name = (*plist_it)->name;
+         name = plist_it->name;
          message << NormalizeString(name) << ": ";
 
          // filenames are case-sensitive, don't modify them
-         value = (*plist_it)->value;
+         value = plist_it->value;
          if ( name.CmpNoCase("name") != 0 )
          {
             value.MakeLower();
@@ -1636,10 +1603,10 @@ MessageView::MimeInfo(int mimeDisplayPart)
       message += _("\nDisposition parameters:\n");
       for ( plist_it = dlist.begin(); plist_it != dlist.end(); plist_it++ )
       {
-         name = (*plist_it)->name;
+         name = plist_it->name;
          message << NormalizeString(name) << ": ";
 
-         value = (*plist_it)->value;
+         value = plist_it->value;
          if ( name.CmpNoCase("filename") != 0 )
          {
             value.MakeLower();
@@ -2058,25 +2025,23 @@ MessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
             String fromLine = "From ";
 
             // find the from address
-            const MessageParameterList& params =
-               m_mailMessage->GetParameters(mimeDisplayPart);
-            MessageParameterList::iterator i;
-            for ( i = params.begin(); i != params.end(); i++ )
-            {
-               if ( (*i)->name == "From" )
-               {
-                  // found, now extract just the address
-                  fromLine += Message::GetEMailFromAddress((*i)->value);
-               }
-            }
-
-            if ( i == params.end() )
+            const char *p = strstr(content, "From: ");
+            if ( !p )
             {
                // this shouldn't normally happen, but if it does just make it
-               // up (FIXME: now it always happens!)
+               // up
                wxLogDebug("Couldn't find from header in the message");
 
                fromLine += "MAHOGANY-DUMMY-SENDER";
+            }
+            else // take everything until the end of line
+            {
+               // FIXME: we should extract just the address in angle brackets
+               //        instead of taking everything
+               while ( *p && *p != '\r' )
+               {
+                  fromLine += *p++;
+               }
             }
 
             fromLine += ' ';

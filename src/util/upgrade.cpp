@@ -2505,7 +2505,7 @@ VerifyEMailSendingWorks(void)
    String msg =
       _("If you have received this mail, your Mahogany configuration works.\n"
         "You should also try to reply to this mail and check that your reply arrives.");
-   sm->AddPart(Message::MSG_TYPETEXT, msg.c_str(), msg.length());
+   sm->AddPart(MimeType::TEXT, msg.c_str(), msg.length());
    bool ok = sm->SendOrQueue();
    delete sm;
 
