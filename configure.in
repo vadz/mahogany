@@ -50,7 +50,7 @@ M_OVERRIDES(wxdebug,wxWin debug libs,USE_WXDEBUG,0,
 --with-wxdebug          use debug wxWindows libraries)
 
 M_OVERRIDES(dmalloc,dmalloc library,USE_DMALLOC,0,
---with-dmalloc          use dmalloc library for debugging)
+--with-dmalloc          use dmalloc library (http://dmalloc.com/) for debugging)
 
 M_OVERRIDES(leaktracer,LeakTracer,USE_LEAKTRACER,0,
 --with-leaktracer       use LeakTracer for debugging)
@@ -419,11 +419,15 @@ case "$USE_EFENCE" in 1)
 esac
 
 dnl dmalloc debugging lib
-case "$USE_DMALLOC" in 1)
-	AC_CHECK_LIB(dmalloc,main,
-		[LIB_DMALLOC="-ldmalloc"
-		 AC_DEFINE(USE_DMALLOC)],
-		AC_MSG_WARN(dmalloc library not available, get it from http://dmalloc.com/.))
+case "$USE_DMALLOC" in
+1) M_CHECK_MYLIB(dmalloc, main,
+    [ /usr/lib /usr/local/lib $prefix/lib ],
+    [
+	LIB_DMALLOC="-ldmalloc"
+	AC_DEFINE(USE_DMALLOC)
+    ],
+    AC_MSG_WARN(dmalloc library not available, get it from http://dmalloc.com/.)
+   )
 esac
 
 dnl LeakTracer debugging lib
