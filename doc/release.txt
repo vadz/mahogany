@@ -10,13 +10,10 @@ Version:	the information in this file applies to the cvs sources
 
 a) include/Mversion.h
 
-b) makeversion.in
+b) Manual.lyx and the files generated from it
 
-c) in the future we should also have version in configure.in
+c) Bugzilla
 
-d) Manual.lyx and the files generated from it
-
-e) Bugzilla
 
 2. Updating the files
 ---------------------
@@ -38,12 +35,14 @@ g) po files: make -C locale mergecat
 
 h) "cvs rtag" the files
 
+
 3. Testing
 ------------------------
 
 a) test wizard with empty config
 
 b) test novice mode
+
 
 4. Preparing the release
 ------------------------
@@ -55,11 +54,19 @@ gzip. The script extra/scripts/makeMtgz automates it.
 
 b) RPM
 
-rpm -ba works without changes
+(i) if there is no appropriate wxGTK RPM, static wxWin build must be used.
+    for the current cvs HEAD configure wxGTK with the following arguments:
 
-c) DEB
+    --disable-shared --disable-threads --disable-joystick --without-expat
 
-d) Win32 binaries
+(ii) then do "rpmbuild -ba redhat/M.spec", possible after setting CONFIG_FLAGS
+     to contain extra arguments to pass to M configure (e.g. --with-wxdir or
+     --with-ssl and, when using static wxWindows, --with-modules=dynamic!)
+
+c) DEB: ???
+
+d) Win32 binaries: build with debug info, save the PDB and MAP files
+
 
 5. Uploading the files
 ----------------------
