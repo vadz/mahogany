@@ -301,8 +301,12 @@ public:
       We don't provide a method for entry renaming first because we don't need
       it right now and second because doing it is already possible using
       CopyEntry() and DeleteEntry().
+
+      @param pathOld the full path to an existing group
+      @param nameNew the new name of the group (path remains the same)
+      @return true if ok, false on failure
     */
-   virtual bool RenameGroup(const String& nameOld, const String& nameNew) = 0;
+   virtual bool RenameGroup(const String& pathOld, const String& nameNew) = 0;
 
    //@}
 
@@ -393,7 +397,7 @@ public:
    virtual bool CopyEntry(const String& nameSrc,
                           const String& nameDst,
                           ConfigSource *configDst);
-   virtual bool RenameGroup(const String& nameOld, const String& nameNew);
+   virtual bool RenameGroup(const String& pathOld, const String& nameNew);
 
    // for internal use by ProfileImpl only, don't use elsewhere
    wxConfigBase *GetConfig() const { return m_config; }

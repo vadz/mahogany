@@ -307,10 +307,14 @@ public:
    /**
       Rename a group in all config sources where it exists.
 
+      @param pathOld the full path to the existing group
+      @param nameNew the new name (just the name)
+
       @return true if the group was renamed successfully in all configs, false
-              if for at least one of them it failed
+              if for at least one of them it failed or if it was not found in
+              any config
     */
-   bool Rename(const String& nameOld, const String& nameNew);
+   bool Rename(const String& pathOld, const String& nameNew);
 
    /**
       Delete the entry from all config sources where it exists.
@@ -948,12 +952,13 @@ bool AllConfigSources::FlushAll()
    return rc;
 }
 
-bool AllConfigSources::Rename(const String& nameOld, const String& nameNew)
+bool AllConfigSources::Rename(const String& pathOld, const String& nameNew)
 {
    bool rc = true;
+   size_t numRenamed = 0;
 
-   String parent = nameOld.BeforeLast(_T('/')),
-          name = nameOld.AfterLast(_T('/')),
+   String parent = pathOld.BeforeLast(_T('/')),
+          name = pathOld.AfterLast(_T('/')),
           group;
 
    const List::iterator end = m_sources.end();
@@ -967,14 +972,17 @@ bool AllConfigSources::Rename(const String& nameOld, const String& nameNew)
          if ( group == name )
          {
             // this config has that group, do rename it
-            rc &= i->RenameGroup(nameOld, nameNew);
+            if ( i->RenameGroup(pathOld, nameNew) )
+               numRenamed++;
+            else
+               rc = false;
 
             break;
          }
       }
    }
 
-   return rc;
+   return rc && numRenamed > 0;
 }
 
 bool AllConfigSources::DeleteEntry(const String& path)
@@ -1450,7 +1458,7 @@ ProfileImpl::Rename(const String& oldName, const String& newName)
    CHECK( gs_allConfigSources, false,
             _T("can't call Profile methods before CreateGlobalConfig()") );
 
-   return gs_allConfigSources->Rename(oldName, newName);
+   return gs_allConfigSources->Rename(GetFullPath(oldName), newName);
 }
 
 bool

@@ -738,9 +738,11 @@ ConfigSourceLocal::CopyEntry(const String& nameSrc,
 }
 
 bool
-ConfigSourceLocal::RenameGroup(const String& nameOld, const String& nameNew)
+ConfigSourceLocal::RenameGroup(const String& pathOld, const String& nameNew)
 {
-   return m_config->RenameGroup(nameOld, nameNew);
+   wxConfigPathChanger path(m_config, pathOld);
+
+   return m_config->RenameGroup(path.Name(), nameNew);
 }
 
 // ============================================================================
