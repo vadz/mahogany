@@ -191,6 +191,9 @@ public:
    // get the entry for this folder or NULL if it's not in the list
    MfCloseEntry *GetCloseEntry(MailFolderCmn *mf) const;
 
+   // is this folder in this list?
+   bool HasFolder(MailFolderCmn *mf) const { return GetCloseEntry(mf) != NULL; }
+
    // remove the given entry from list
    void Remove(MfCloseEntry *entry);
 
@@ -228,33 +231,27 @@ private:
         *m_MEventPingCookie;
 };
 
-/** a timer class to regularly ping the mailfolder. */
+// ----------------------------------------------------------------------------
+// MailFolderTimer: a timer class to regularly ping the mailfolder
+// ----------------------------------------------------------------------------
+
 class MailFolderTimer : public wxTimer
 {
 public:
    /** constructor
        @param mf the mailfolder to query on timeout
    */
-   MailFolderTimer(MailFolder *mf)
+   MailFolderTimer(MailFolderCmn *mf)
    {
       m_mf = mf;
    }
 
    /// get called on timeout and pings the mailfolder
-   void Notify(void)
-   {
-      if ( mApplication->AllowBgProcessing() && !m_mf->IsLocked() )
-      {
-         // don't show any dialogs when doing background checks
-         NonInteractiveLock noInter(m_mf, false /* !interactive */);
-
-         m_mf->Ping();
-      }
-   }
+   void Notify(void);
 
 protected:
    /// the mailfolder to update
-   MailFolder *m_mf;
+   MailFolderCmn *m_mf;
 };
 
 // ----------------------------------------------------------------------------
@@ -267,6 +264,27 @@ static MfCloser *gs_MailFolderCloser = NULL;
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// MailFolderTimer
+// ----------------------------------------------------------------------------
+
+void MailFolderTimer::Notify(void)
+{
+   if ( mApplication->AllowBgProcessing() && !m_mf->IsLocked() )
+   {
+      // don't ping the mailbox which we maintain artificially alive, otherwise
+      // it can never close at all as pinging it may remove and add it back to
+      // MfCloser thus resetting its expiration timeout
+      if ( !gs_MailFolderCloser || !gs_MailFolderCloser->HasFolder(m_mf) )
+      {
+         // don't show any dialogs when doing background checks
+         NonInteractiveLock noInter(m_mf, false /* !interactive */);
+
+         m_mf->Ping();
+      }
+   }
+}
 
 // ----------------------------------------------------------------------------
 // MfCloseEntry
@@ -285,13 +303,6 @@ MfCloseEntry::MfCloseEntry(MailFolderCmn *mf, int secs)
    // keep it for now
    m_mf->IncRef();
 
-#if 0
-   // stop the update timer: we don't want to update the folders kept
-   // artificially alive, if we do they could never close at all
-   if ( m_mf->m_Timer )
-      m_mf->m_Timer->Stop();
-#endif // 0
-
    m_expires = secs != NEVER_EXPIRES;
    if ( m_expires )
    {
@@ -303,14 +314,6 @@ MfCloseEntry::~MfCloseEntry()
 {
    wxLogTrace(TRACE_MF_CLOSE, "Destroying MfCloseEntry(%s) (%d refs left)",
               m_mf->GetName().c_str(), m_mf->GetNRef());
-
-#if 0
-   // we don't need to restart the timer if we're going to close this folder
-   // now anyhow, but if it is just being removed from the list, then do
-   // restart it
-   if ( m_mf->GetNRef() > 1 && m_mf->m_Timer )
-      m_mf->m_Timer->Start();
-#endif // 0
 
    m_mf->RealDecRef();
 }
