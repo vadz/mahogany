@@ -5,22 +5,17 @@
 # and modify it. Save your Module's source in this directory and run
 # make. The Makefile will find it automatically, there is no need to
 # edit this file.
-# (KB)
-#
-# Don't forget to add a .mmd (Mahogany Module Definition) file, which
-# must contain the following lines:
-# Mahogany-Module-Definition
-# Name: Modulename
-# Version: any kind of version id
-# Author: who wrote it
-# <empty line>
-# Any descriptive text...
-#
 #######################################################################
 
 include $(wildcard .src/modules/*/Names.mk) $(wildcard $(patsubst .src/%/Names.mk,%/*.d,$(wildcard .src/modules/*/Names.mk)))
 
 SRC	:= $(patsubst .src/%,%,$(wildcard .src/modules/*.cpp))
+
+# unfortunately Calendar.cpp doesn't work any more (if it ever has, I'm not
+# even sure about it) and I prefer to disable even building it until I have
+# time to look at it in details
+SRC	:=	$(filter-out Calendar.cpp, $(SRC))
+
 MOD	:= $(SRC:.cpp=.so)
 
 ifdef PISOCK_LIB
