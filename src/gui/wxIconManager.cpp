@@ -15,7 +15,7 @@
 // ----------------------------------------------------------------------------
 
 #ifdef __GNUG__
-   #pragma implementation "wxIconManager.h"
+#   pragma implementation "wxIconManager.h"
 #endif
 
 #include "Mpch.h"
@@ -34,6 +34,7 @@
 #include "gui/wxMDialogs.h"
 
 #include <wx/mimetype.h>
+#include <wx/file.h>
 
 #ifdef    OS_WIN
 #  define   unknown_xpm     "unknown"
@@ -215,55 +216,54 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
          (getenv("TMP") && strlen(getenv("TMP")))
          ? getenv("TMP"):"/tmp"
          ) + String('/') + tempfile;
-
-      String strConvertProgram = READ_APPCONFIG(MP_CONVERTPROGRAM);
-      String strFormatSpec = strutil_extract_formatspec(strConvertProgram);
-      if ( strFormatSpec != "ss" )
+      if(wxFile::Exists(filename))
       {
-         wxLogError(_("The setting for image conversion program should include "
-                      "exactly two '%%s' format specificators.\n"
-                      "The current format specificators are incorrect and "
-                      "the default value will be used instead."));
-
-         strConvertProgram = MP_CONVERTPROGRAM_D;
-      }
-      
-      String command;
-      command.Printf(strConvertProgram, filename.c_str(), tempfile.c_str());
-
-      wxLogTrace(wxTraceIconLoading,
-                 "wxIconManager::LoadImage() calling '%s'...",
-                 command.c_str());
-      if(system(command) == 0)
-      {
-         if(pdlg)
+         String strConvertProgram = READ_APPCONFIG(MP_CONVERTPROGRAM);
+         String strFormatSpec = strutil_extract_formatspec(strConvertProgram);
+         if ( strFormatSpec != "ss" )
          {
-            if(!pdlg->Update(++step))
-            {
-               if(success) *success = false;
-               delete pdlg;
-               return *img;
-            }
+            wxLogError(_("The setting for image conversion program should include "
+                         "exactly two '%%s' format specificators.\n"
+                         "The current format specificators are incorrect and "
+                         "the default value will be used instead."));
+            strConvertProgram = MP_CONVERTPROGRAM_D;
          }
-         wxLogNull lo; // suppress error messages
-         if(format != 0) // not xpm which we handle internally
+         String command;
+         command.Printf(strConvertProgram, filename.c_str(), tempfile.c_str());
+         wxLogTrace(wxTraceIconLoading,
+                    "wxIconManager::LoadImage() calling '%s'...",
+                    command.c_str());
+         if(system(command) == 0)
          {
-            switch(format)
+            if(pdlg)
             {
-            case 1: // PNG!
-               loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_PNG);
-               break;
-            case 2: // 2 BMP
-               loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_BMP);
-               break;
-            case 3: // 3 JPG
-               loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_JPEG);
-               break;
+               if(!pdlg->Update(++step))
+               {
+                  if(success) *success = false;
+                  delete pdlg;
+                  return *img;
+               }
             }
-         }
-      }
-      if(tempfile.length()) // using a temporary file
-         wxRemoveFile(tempfile);
+            wxLogNull lo; // suppress error messages
+            if(format != 0) // not xpm which we handle internally
+            {
+               switch(format)
+               {
+               case 1: // PNG!
+                  loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_PNG);
+                  break;
+               case 2: // 2 BMP
+                  loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_BMP);
+                  break;
+               case 3: // 3 JPG
+                  loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_JPEG);
+                  break;
+               }
+            }
+         } // system()
+         if(tempfile.length()) // using a temporary file
+            wxRemoveFile(tempfile);
+      }// if(wxFile::Exists())
       if(pdlg)
       {
          if(!pdlg->Update(++step))
@@ -273,7 +273,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
             return *img;
          }
       }
-   }
+   }//! loaded
 #endif // OS_UNIX
 
    // if everything else failed, try xpm loading:

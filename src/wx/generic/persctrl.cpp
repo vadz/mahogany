@@ -53,9 +53,9 @@
 #   define   MAX(a,b) (((a) > (b))?(a):(b))
 #endif
 
-// use icon in msg box? doesn't work under GTK yet...
-#ifndef __WXGTK__
-    #define USE_ICON
+// use icon in msg box? 
+#ifdef __WXMSW__
+#define USE_ICON
 #endif
 
 // ----------------------------------------------------------------------------
