@@ -27,7 +27,7 @@
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"
 
-#include "MDefaults.h"
+#include "Mdefaults.h"
 #include "MDialogs.h"
 #include "MailFolder.h"    // UpdateTitleAndStatusBars uses it
 #include "ASMailFolder.h"
