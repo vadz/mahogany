@@ -8,13 +8,10 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9       KB      PalmOS: store to Palm needs to strip headers and set
-                To/etc and correct LF/CR convention
-
 9	KB	wxLayout:
+		- selecting backwards and deleting gets into endless
+		  loop 
 		- cannot type text when NUMLOCK is on
-		- speed up by only running Layout() for recalculations 
-		  rather than the full RequestUpdate()
 		- editing leaks MObjects
 		- write editor plugin translating keysyms to actions
 		- scroll to cursor after Find()
