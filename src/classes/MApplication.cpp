@@ -6,6 +6,9 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.19  1998/06/12 16:06:57  KB
+ * updated
+ *
  * Revision 1.18  1998/06/08 08:19:12  KB
  * Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
  *
@@ -172,9 +175,8 @@ MAppBase::OnStartup()
 {
    // initialise the profile
 #  if USE_WXCONFIG
-      profile = GLOBAL_NEW Profile(
-                  wxFileConfig::GetLocalFileName(M_APPLICATIONNAME)
-                );
+      String strConfFile = wxFileConfig::GetLocalFileName(M_APPLICATIONNAME);
+      profile = GLOBAL_NEW Profile(strConfFile + "/config");
 
       // FIXME @@@@ do something about recordDefaults
 #  else

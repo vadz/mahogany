@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.10  1998/06/12 16:07:00  KB
+ * updated
+ *
  * Revision 1.9  1998/06/09 14:11:29  VZ
+ *
  * event tables for menu events added (wxWin2)
  *
  * Revision 1.8  1998/06/05 16:56:22  VZ
@@ -251,7 +255,7 @@ wxFolderView::OnMenuCommand(int id)
       break;
    case WXMENU_MSG_SELECTALL:
       for(n = 0; n < listBox->Number(); n++)
-    listBox->SetSelection(n);
+         listBox->SetSelection(n);
       break;
    case WXMENU_MSG_DESELECTALL:
       for(n = 0; n < listBox->Number(); n++)
@@ -266,6 +270,7 @@ int
 wxFolderView::GetSelections(int **selections)
 {
    int n = listBox->GetSelections(selections);
+   VAR(n);
    return n;
 }
 
