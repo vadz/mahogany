@@ -29,13 +29,15 @@ enum ORC_Types_Enum
    ORC_T_Contains,
    ORC_T_MatchC,
    ORC_T_ContainsC,
-   ORC_T_MatchRegEx,
+   ORC_T_MatchRegExC,
    ORC_T_LargerThan,
    ORC_T_SmallerThan,
    ORC_T_OlderThan,
    ORC_T_NewerThan,
    ORC_T_IsSpam,
-   ORC_T_Python
+   ORC_T_Python,
+   ORC_T_MatchRegEx,
+   ORC_T_Max
 };
 
 enum ORC_Where_Enum
@@ -60,7 +62,16 @@ enum OAC_Types_Enum
    OAC_T_Expunge,
    OAC_T_MessageBox,
    OAC_T_LogEntry,
-   OAC_T_Python
+   OAC_T_Python,
+   OAC_T_Max
+};
+
+enum ORC_Logical_Enum
+{
+   ORC_L_None = -1,
+   ORC_L_Or = 0,
+   ORC_L_And,
+   ORC_L_Max
 };
 
 // ----------------------------------------------------------------------------
@@ -79,6 +90,7 @@ bool SaveSimpleFilter(ProfileBase *profile,
                       ORC_Where_Enum condWhere,
                       const wxString& condWhat,
                       OAC_Types_Enum action,
-                      const wxString& actionArg);
+                      const wxString& actionArg,
+                      wxString *program = NULL);
 
 #endif // _WXFILTERSDIALOG_H_

@@ -411,6 +411,27 @@ bool MXFMailImporter::ImportFilters()
       return FALSE;
    }
 
+   // find the profile where we will store our rules: as we want them to apply
+   // to all incoming messages, create them under "New Mail"
+
+   wxString newmail = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
+   if ( !newmail )
+      newmail = "INBOX";
+   newmail += "/Filters";
+   ProfileBase *profileNewMailFilters = ProfileBase::CreateProfile(newmail);
+
+   // find the first "unused" filter number
+   size_t nFilter = 0;
+   for ( ;; )
+   {
+      if ( !profileNewMailFilters->HasGroup(wxString::Format("%u", nFilter)) )
+         break;
+
+      nFilter++;
+   }
+
+   size_t nFilterFirst = nFilter;
+
    size_t nLines = file.GetLineCount();
    for ( size_t nLine = 0; nLine < nLines; nLine++ )
    {
@@ -539,7 +560,10 @@ typedef struct _xf_rule {
       }
 
       // now create our rule from this data
-      ProfileBase *profile;
+      wxString filterName = wxString::Format("%u", nFilter++);
+      ProfileBase *profile = ProfileBase::CreateProfile(filterName,
+                                                        profileNewMailFilters);
+      wxString program;
       SaveSimpleFilter(
                        profile,
                        name,
@@ -547,9 +571,27 @@ typedef struct _xf_rule {
                        where,
                        tmatch,
                        what,
-                       data
+                       data,
+                       &program
                       );
+      profile->DecRef();
+
+      wxLogVerbose(_("Imported XFMail filter rule '%s'."), program.c_str());
    }
 
-   return TRUE;
+   profileNewMailFilters->DecRef();
+
+   nFilter -= nFilterFirst;
+   if ( !nFilter )
+   {
+      wxLogMessage(_("No filters were imported."));
+
+      return FALSE;
+   }
+   else
+   {
+      wxLogMessage(_("Successfully imported %u filters."), nFilter);
+
+      return TRUE;
+   }
 }

@@ -66,6 +66,8 @@ public:
    void OnOk(wxCommandEvent& event);
 
 private:
+   static wxString GetImportDialogTitle(const MImporter& importer);
+
    void SetOkBtnLabel(const wxString& label)
    {
       wxWindow *btnOk = FindWindow(wxID_OK);
@@ -133,7 +135,7 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 
 wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
-              : wxDialog(parent, -1, _("Mahogany: Import Dialog"),
+              : wxDialog(parent, -1, GetImportDialogTitle(importer),
                          wxDefaultPosition, wxDefaultSize,
                          wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
                 m_importer(importer)
@@ -200,6 +202,12 @@ wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
    topsizer->Fit( this );
 
    Centre( wxBOTH );
+}
+
+wxString wxImportDialog::GetImportDialogTitle(const MImporter& importer)
+{
+   return wxString::Format(_("Mahogany: Import Dialog for %s"),
+                           importer.GetProgName());
 }
 
 void wxImportDialog::OnOk(wxCommandEvent& event)

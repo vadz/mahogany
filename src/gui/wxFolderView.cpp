@@ -59,6 +59,7 @@
 #include "gui/wxMessageView.h"
 #include "gui/wxComposeView.h"
 #include "gui/wxFolderMenu.h"
+#include "gui/wxFiltersDialog.h" // for ConfigureFilterRules()
 
 #include "gui/wxMIds.h"
 #include "MDialogs.h"

@@ -56,13 +56,78 @@
 #define FILTER_ACTION      "Action"
 #define FILTER_ACTIVE      "Active"
 
+// data for the OneCritControl
+
+static const
+wxString ORC_Types[] =
+{
+   gettext_noop("Always"),
+   gettext_noop("Match"),
+   gettext_noop("Contains"),
+   gettext_noop("Match Case"),
+   gettext_noop("Contains Case"),
+   gettext_noop("Match RegExp Case"),
+   gettext_noop("Larger than"),
+   gettext_noop("Smaller than"),
+   gettext_noop("Older than"),
+   gettext_noop("Newer than"),
+   gettext_noop("Is SPAM"),
+   gettext_noop("Python"),
+   gettext_noop("Match RegExp"),
+};
+
+static const
+size_t ORC_TypesCount = WXSIZEOF(ORC_Types);
+
+static const
+wxString ORC_Where[] =
+{
+   gettext_noop("in subject"),
+   gettext_noop("in header"),
+   gettext_noop("in from"),
+   gettext_noop("in body"),
+   gettext_noop("in message"),
+   gettext_noop("in to"),
+   gettext_noop("in sender")
+};
+
+static const
+size_t ORC_WhereCount = WXSIZEOF(ORC_Where);
+
+static const
+wxString ORC_Logical[] =
+{
+   gettext_noop("or"),
+   gettext_noop("and"),
+};
+
+static const
+size_t ORC_LogicalCount = WXSIZEOF(ORC_Logical);
+
+// and for OneActionControl
+
+static const
+wxString OAC_Types[] =
+{
+   gettext_noop("Delete"),
+   gettext_noop("Copy to"),
+   gettext_noop("Move to"),
+   gettext_noop("Expunge"),
+   gettext_noop("MessageBox"),
+   gettext_noop("Log Entry"),
+   gettext_noop("Python")
+};
+
+static const
+size_t OAC_TypesCount = WXSIZEOF(OAC_Types);
+
 // ----------------------------------------------------------------------------
 // global vars and functions
 // ----------------------------------------------------------------------------
 
 /* Calculates a common button size for buttons with labels when given
    an array with their labels. */
-wxSize GetButtonSize(const char * labels[], wxWindow *win)
+static wxSize GetButtonSize(const char * labels[], wxWindow *win)
 {
    long widthLabel, heightLabel;
    long heightBtn, widthBtn;
@@ -79,6 +144,51 @@ wxSize GetButtonSize(const char * labels[], wxWindow *win)
       if(heightBtn > maxHeight) maxHeight = heightBtn;
    }
    return wxSize(maxWidth, maxHeight);
+}
+
+// create the criterium string from its components
+static wxString GetCriteriumString(ORC_Logical_Enum logOp,
+                                   bool negate,
+                                   ORC_Types_Enum condType,
+                                   const wxString& value,
+                                   ORC_Where_Enum where
+                                  )
+{
+   return wxString::Format("%d %d %d \"%s\" %d",
+                           logOp,
+                           negate,
+                           condType,
+                           strutil_escapeString(value).c_str(),
+                           where);
+}
+
+// create the action string from its components
+static wxString GetActionString(OAC_Types_Enum action,
+                                const wxString& argument)
+{
+   return wxString::Format("%d \"%s\"",
+                           action,
+                           strutil_escapeString(argument).c_str());
+}
+
+// write one filter into profile
+static bool SaveFilter(ProfileBase *profile,
+                       const wxString& name,
+                       const wxString& criterium,
+                       const wxString& action,
+                       bool active = TRUE)
+{
+   bool ok = TRUE;
+   if ( ok )
+      ok = profile->writeEntry(FILTER_NAME, name);
+   if ( ok )
+      ok = profile->writeEntry(FILTER_CRITERIUM, criterium);
+   if ( ok )
+      ok = profile->writeEntry(FILTER_ACTION, action);
+   if ( ok )
+      ok = profile->writeEntry(FILTER_ACTIVE, active);
+
+   return ok;
 }
 
 // ----------------------------------------------------------------------------
@@ -221,62 +331,14 @@ public:
    wxWindow *GetLastCtrl() { return m_Where; }
 
 private:
-   wxCheckBox *m_Not; // Not
-   wxChoice   *m_Type; // "Match", "Match substring", "Match RegExp",
-   // "Greater than", "Smaller than", "Older than"; "Newer than"
-   wxTextCtrl  *m_Argument; // string, number of days or bytes
+   wxCheckBox *m_Not;   // Not
+   wxChoice   *m_Type;  // "Match", "Match substring", "Match RegExp",
+                        // "Greater than", "Smaller than", "Older than"; "Newer than"
+   wxTextCtrl *m_Argument; // string, number of days or bytes
    wxChoice   *m_Where; // "In Header", "In Subject", "In From..."
    wxWindow   *m_Parent;
    wxChoice   *m_Logical;
 };
-
-
-static
-wxString ORC_Types[] =
-{ gettext_noop("Always"),
-  gettext_noop("Match"), gettext_noop("Contains"),
-  gettext_noop("Match Case"), gettext_noop("Contains Case"),
-  gettext_noop("Match RegExp"),
-  gettext_noop("Larger than"), gettext_noop("Smaller than"),
-  gettext_noop("Older than"), gettext_noop("Newer than"),
-  gettext_noop("Is SPAM")
-  ,gettext_noop("Python")
-};
-
-static
-size_t ORC_TypesCount = WXSIZEOF(ORC_Types);
-
-static
-wxString ORC_Where[] =
-{
-   gettext_noop("in Subject"),
-   gettext_noop("in header"),
-   gettext_noop("in From"),
-   gettext_noop("in body"),
-   gettext_noop("in message"),
-   gettext_noop("in To"),
-   gettext_noop("in Sender")
-};
-static
-size_t ORC_WhereCount = WXSIZEOF(ORC_Where);
-
-static
-wxString ORC_Logical[] =
-{
-   gettext_noop("or"),
-   gettext_noop("and"),
-};
-static
-size_t ORC_LogicalCount = WXSIZEOF(ORC_Logical);
-
-#define CRIT_CTRLCONST(oldctrl,newctrl) \
-   c = new wxLayoutConstraints;\
-   c->left.RightOf(oldctrl, LAYOUT_X_MARGIN);\
-   c->width.PercentOf(m_Parent, wxWidth, 20);\
-   c->top.SameAs(m_Not, wxTop, 0);\
-   c->height.AsIs();\
-   newctrl->SetConstraints(c);
-
 
 OneCritControl::OneCritControl(wxWindow *parent,
                                bool followup)
@@ -284,6 +346,8 @@ OneCritControl::OneCritControl(wxWindow *parent,
    m_Parent = parent;
    if(! followup)
    {
+      wxASSERT_MSG( ORC_LogicalCount == ORC_L_Max, "forgot to update something" );
+
       m_Logical = new wxChoice(parent, -1, wxDefaultPosition,
                                wxDefaultSize, ORC_LogicalCount,
                                ORC_Logical);
@@ -294,9 +358,13 @@ OneCritControl::OneCritControl(wxWindow *parent,
       m_Logical = NULL;
       m_Not = new wxCheckBox(parent, -1, _("Not"));
    }
+
+   wxASSERT_MSG( ORC_TypesCount == ORC_T_Max, "forgot to update something" );
    m_Type = new wxChoice(parent, -1, wxDefaultPosition,
                          wxDefaultSize, ORC_TypesCount, ORC_Types);
    m_Argument = new wxTextCtrl(parent,-1,"", wxDefaultPosition);
+
+   wxASSERT_MSG( ORC_WhereCount == ORC_W_Max, "forgot to update something" );
    m_Where = new wxChoice(parent, -1, wxDefaultPosition,
                           wxDefaultSize, ORC_WhereCount, ORC_Where);
 }
@@ -334,9 +402,28 @@ OneCritControl::LayoutControls(wxWindow **last)
    }
    else
       m_Not->SetConstraints(c);
-   CRIT_CTRLCONST(m_Not, m_Type);
-   CRIT_CTRLCONST(m_Type, m_Argument);
-   CRIT_CTRLCONST(m_Argument, m_Where);
+
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_Not, LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->top.SameAs(m_Not, wxTop, 0);
+   c->height.AsIs();
+   m_Type->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->right.SameAs(m_Parent, wxRight, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->top.SameAs(m_Not, wxTop, 0);
+   c->height.AsIs();
+   m_Where->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_Type, LAYOUT_X_MARGIN);
+   c->right.LeftOf(m_Where, LAYOUT_X_MARGIN);
+   c->top.SameAs(m_Not, wxTop, 0);
+   c->height.AsIs();
+   m_Argument->SetConstraints(c);
+
    *last = m_Where;
 }
 
@@ -353,9 +440,10 @@ OneCritControl::UpdateUI()
    m_Where->Enable(
       type == ORC_T_Match
       || type == ORC_T_Contains
+      || type == ORC_T_MatchRegEx
       || type == ORC_T_MatchC
       || type == ORC_T_ContainsC
-      || type == ORC_T_MatchRegEx
+      || type == ORC_T_MatchRegExC
       );
 }
 
@@ -363,14 +451,15 @@ OneCritControl::UpdateUI()
 void
 OneCritControl::Save(wxString *str)
 {
-   String tmp;
-   tmp.Printf(" %d %d %d \"%s\" %d",
-              (int)(m_Logical ? m_Logical->GetSelection() : -1),
-              (int)m_Not->GetValue(),
-              m_Type->GetSelection(),
-              strutil_escapeString(m_Argument->GetValue()).c_str(),
-              m_Where->GetSelection());
-   *str << tmp;
+   *str << GetCriteriumString
+           (
+            m_Logical ? (ORC_Logical_Enum)m_Logical->GetSelection()
+                      : ORC_L_None,
+            m_Not->GetValue(),
+            (ORC_Types_Enum)m_Type->GetSelection(),
+            m_Argument->GetValue(),
+            (ORC_Where_Enum)m_Where->GetSelection()
+           );
 }
 
 void
@@ -436,8 +525,10 @@ OneCritControl::TranslateToString(wxString & criterium)
       program << "match("; break;
    case ORC_T_ContainsC:
       program << "contains("; break;
-   case ORC_T_MatchRegEx:
+   case ORC_T_MatchRegExC:
       program << "matchregex("; break;
+   case ORC_T_MatchRegEx:
+      program << "matchregexi("; break;
    case ORC_T_Python:
       program << "python(";
       needsWhere = false;
@@ -521,19 +612,6 @@ private:
    wxFolderBrowseButton *m_Button;
 };
 
-static
-wxString OAC_Types[] =
-{ gettext_noop("Delete"),
-  gettext_noop("Copy to"),
-  gettext_noop("Move to"),
-  gettext_noop("Expunge"),
-  gettext_noop("MessageBox"),
-  gettext_noop("Log Entry"),
-  gettext_noop("Python")
-};
-static
-size_t OAC_TypesCount = WXSIZEOF(OAC_Types);
-
 void
 OneActionControl::UpdateUI()
 {
@@ -553,12 +631,8 @@ OneActionControl::UpdateUI()
 void
 OneActionControl::Save(wxString *str)
 {
-   String tmp;
-   int type = m_Type->GetSelection();
-   tmp.Printf("%d \"%s\"",
-              type,
-              strutil_escapeString(m_Argument->GetValue()).c_str());
-   *str << tmp;
+   *str << GetActionString((OAC_Types_Enum)m_Type->GetSelection(),
+                           m_Argument->GetValue());
 }
 
 void
@@ -608,6 +682,8 @@ OneActionControl::OneActionControl(wxWindow *parent)
 {
    m_Parent = parent;
 
+   wxASSERT_MSG( OAC_TypesCount == OAC_T_Max, "forgot to update something" );
+
    m_Type = new wxChoice(m_Parent, -1, wxDefaultPosition,
                          wxDefaultSize, OAC_TypesCount, OAC_Types);
 
@@ -626,22 +702,21 @@ OneActionControl::LayoutControls(wxWindow **last)
    c->top.Below(*last, 2*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   //c->width.PercentOf(m_Parent, wxWidth, 30);
    m_Type->SetConstraints(c);
 
    c = new wxLayoutConstraints;
-   c->left.RightOf(m_Type, LAYOUT_X_MARGIN);
-   c->width.PercentOf(m_Parent, wxWidth, 40);
-   c->top.SameAs(m_Type, wxTop, 0);
-   c->height.AsIs();
-   m_Argument->SetConstraints(c);
-
-   c = new wxLayoutConstraints;
-   c->left.RightOf(m_Argument, LAYOUT_X_MARGIN);
-   c->width.Absolute(60);
+   c->right.SameAs(m_Parent, wxRight, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
    c->top.SameAs(m_Type, wxTop, 0);
    c->height.AsIs();
    m_Button->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_Type, LAYOUT_X_MARGIN);
+   c->right.LeftOf(m_Button, LAYOUT_X_MARGIN);
+   c->top.SameAs(m_Type, wxTop, 0);
+   c->height.AsIs();
+   m_Argument->SetConstraints(c);
 
    *last = m_Argument;
 }
@@ -902,8 +977,14 @@ String TranslateOneRuleToProgram(const wxString &criterium,
 
 
 static const char *ButtonLabels [] =
-{ gettext_noop("New"), gettext_noop("Delete"), gettext_noop("Edit"),
-  gettext_noop("Up"), gettext_noop("Down"), NULL };
+{
+   gettext_noop("&Add"),
+   gettext_noop("&Delete"),
+   gettext_noop("&Modify..."),
+   gettext_noop("&Up"),
+   gettext_noop("&Down"),
+   NULL
+};
 
 enum ButtonIndices
 {
@@ -918,7 +999,7 @@ enum ButtonIndices
 // wxFiltersDialog - dialog for managing all filter rules for one folder
 // ----------------------------------------------------------------------------
 
-
+// FIXME VZ: I will want more - why impose arbitrary restrictions??
 #define MAX_FILTERS   128 // who would want more?
 
 class wxFiltersDialog : public wxOptionsPageSubdialog
@@ -1275,3 +1356,35 @@ bool ConfigureFilterRules(ProfileBase *profile, wxWindow *parent)
    return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
 }
 
+extern
+bool SaveSimpleFilter(ProfileBase *profile,
+                      const wxString& name,
+                      ORC_Types_Enum condType,
+                      ORC_Where_Enum condWhere,
+                      const wxString& condWhat,
+                      OAC_Types_Enum actionWhat,
+                      const wxString& actionArg,
+                      wxString *program)
+{
+   wxString criterium = GetCriteriumString
+                        (
+                           ORC_L_None,
+                           FALSE,         // don't negate condition
+                           condType,
+                           condWhat,
+                           condWhere
+                        );
+
+   wxString action = GetActionString
+                     (
+                        actionWhat,
+                        actionArg
+                     );
+
+   if ( program )
+   {
+      *program = TranslateOneRuleToProgram(criterium, action);
+   }
+
+   return SaveFilter(profile, name, criterium, action);
+}

@@ -51,6 +51,7 @@
 #include "MModule.h"
 #include "MImport.h"
 
+#include "gui/wxFiltersDialog.h" // for ConfigureFilterRules()
 #include "gui/wxIconManager.h"
 #include "gui/wxOptionsDlg.h"
 #include "adb/AdbFrame.h"

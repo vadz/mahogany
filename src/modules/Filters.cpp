@@ -41,6 +41,8 @@
 
 #include "modules/Filters.h"
 
+#include <wx/regex.h>   // wxRegEx::Flags
+
 class Value;
 class ArgList;
 class Parser;
@@ -1931,7 +1933,7 @@ extern "C"
       return haystack == needle;
    }
 
-   static Value func_matchregex(ArgList *args, Parser *p)
+   static Value DoMatchRegEx(ArgList *args, Parser *p, int flags = 0)
    {
       ASSERT(args);
       if(args->Count() != 2)
@@ -1943,9 +1945,19 @@ extern "C"
       class strutil_RegEx * re =
          p->GetInterface()->strutil_compileRegEx(needle);
       if(! re) return FALSE;
-      bool rc = p->GetInterface()->strutil_matchRegEx(re, haystack,0);
+      bool rc = p->GetInterface()->strutil_matchRegEx(re, haystack, flags);
       p->GetInterface()->strutil_freeRegEx(re);
       return rc;
+   }
+
+   static Value func_matchregex(ArgList *args, Parser *p)
+   {
+      return DoMatchRegEx(args, p);
+   }
+
+   static Value func_matchregexi(ArgList *args, Parser *p)
+   {
+      return DoMatchRegEx(args, p, wxRegExBase::RE_ICASE);
    }
 
 #ifdef USE_PYTHON
@@ -2200,6 +2212,7 @@ ParserImpl::AddBuiltinFunctions(void)
 #ifdef USE_PYTHON
    DefineFunction("python", func_python);
 #endif
+   DefineFunction("matchregexi", func_matchregexi);
 }
 
 

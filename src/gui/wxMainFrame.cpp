@@ -39,6 +39,8 @@
 #include "gui/wxIconManager.h"
 #include "gui/wxFolderView.h"
 #include "gui/wxFolderTree.h"
+#include "gui/wxFiltersDialog.h" // for ConfigureFilterRules()
+
 #include "MFolderDialogs.h"      // for ShowFolderPropertiesDialog
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
 
