@@ -45,6 +45,7 @@ ber)"
 #   include "Profile.h"
 #   include "strutil.h"
 #   include "strings.h"
+#   include "guidef.h"
 #   include "MDialogs.h"
 
 #   include <strings.h>
@@ -495,7 +496,12 @@ SendMessageCC::Send(void)
          break;
       }
       if(success)
-         LOGMESSAGE((M_LOG_DEFAULT,m_protocol==Prot_SMTP?_("Mail sent."):_("Article posted.")));
+      {
+         MDialog_Message(m_protocol==Prot_SMTP?_("Mail sent."):_("Article posted."),
+                         NULL, // parent window
+                         MDIALOG_MSGTITLE,
+                         "MailSentMessage");
+      }
       else
       {
          sprintf (tmpbuf, _("Failed to send - %s"),
