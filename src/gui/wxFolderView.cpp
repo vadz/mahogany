@@ -1951,7 +1951,7 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
               "if you don't want to change anything."),
             GetFrame(this),
             M_MSGBOX_EXPLAIN_COLUMN_CLICK,
-            M_DLG_ALLOW_CANCEL
+            M_DLG_ALLOW_CANCEL | M_DLG_DISABLE
          ) )
    {
       // cancelled by user
