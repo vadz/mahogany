@@ -471,12 +471,7 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
    AddToolbarButton(toolbar, WXTBAR_MAIN_EXIT);
 
    // must do it for the toolbar to be shown properly
-#ifdef __WXMSW__
-   toolbar->CreateTools();
-#elif defined(__WXGTK__)
    toolbar->Realize();
-   toolbar->Layout();
-#endif // Windows
 }
 
 

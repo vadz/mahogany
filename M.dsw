@@ -1,0 +1,143 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "M"=.\M.DSP - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name cclient
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name python15
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxXPM
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name MModule
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name compface
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxWindows
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "MModule"=.\MModule\MModule.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "cclient"=".\extra\src\c-client\cclient.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "compface"=.\extra\src\compface\compface.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "mtest"="L:\wxWindows\samples\help\src\imap-4.2\mtest\mtest.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "python15"=L:\wxWindows\samples\help\Python\PCbuild\python15.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "wxWinDll"=L:\wxWindows\samples\help\Libs\wxWindows\wxWinDll\wxWinDll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "wxWindows"=l:\wxwindows\wxWindows.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "wxXPM"=L:\wxWindows\samples\help\Libs\wxWindows\contrib\WXXPM\wxXPM.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+
