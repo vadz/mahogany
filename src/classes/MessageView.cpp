@@ -1150,12 +1150,18 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
             textPart = textPartOrig;
             wxLogDebug("conversion from UTF-8 to environment's default encoding failed");
          }
+
+#if wxUSE_INTL
          encPart = wxLocale::GetSystemEncoding();
+#else // !wxUSE_INTL
+         encPart = wxFONTENCODING_ISO8859_1;
+#endif // wxUSE_INTL/!wxUSE_INTL
+
          // show UTF-8, not env. encoding in Language menu
          m_encodingAuto = wxFONTENCODING_UTF8;
       }
       else if ( encPart == wxFONTENCODING_SYSTEM ||
-            encPart == wxFONTENCODING_DEFAULT )
+                encPart == wxFONTENCODING_DEFAULT )
       {
          // use the encoding of the last part which had it
          encPart = m_encodingAuto;
