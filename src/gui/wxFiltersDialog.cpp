@@ -385,7 +385,6 @@ OneCritControl::TranslateToString(const wxString & criterium)
    {
       program << '"' << argument << '"';
    }
-   program << ';';
    if(needsWhere || needsArgument)
       program << ')'; // end of function call
    return program;

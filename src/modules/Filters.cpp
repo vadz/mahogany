@@ -1211,10 +1211,12 @@ ParserImpl::ParseArgList(void)
       SyntaxNode *expr = ParseExpression();
       if(expr)
          arglist->Add(expr);
+      else
+         Error(_("Expected an expression in argument list."));
       t = PeekToken();
       if(t.GetType() != TT_Char)
       {
-         Error("Expected ',' or ')' behind argument.");
+         Error(_("Expected ',' or ')' behind argument."));
          delete arglist;
          arglist = NULL;
       }
@@ -1252,7 +1254,7 @@ ParserImpl::ParseFunctionCall(void)
 
    EatWhiteSpace();
    if(Char() != ')')
-      Error("Expected ')' at end of argument list.");
+      Error(_("Expected ')' at end of argument list."));
    else
       GetToken(); // swallow it
    
@@ -1302,7 +1304,7 @@ ParserImpl::ParseFactor(void)
          else
          {
             if(sn) delete sn;
-            Error("Expected ')' after expression.");
+            Error(_("Expected ')' after expression."));
             return NULL;
          }
       }
@@ -1727,9 +1729,39 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
 }
 
 static const char * gs_RblSites[] =
-{ "rbl.maps.vix.com", "rbl.dorkslayers.com", NULL };
+{ "rbl.maps.vix.com", "relays.orbs.org", "rbl.dorkslayers.com", NULL };
+
+static bool findIP(const String &header,
+                   char openChar, char closeChar,
+                   int *a, int *b, int *c, int *d)
+{
+   String toExamine;
+   String ip;
+   int pos = 0;
+   
+   toExamine = header;
+   while(toExamine.Length() > 0)
+   {
+         if((pos = toExamine.Find(openChar)) == wxNOT_FOUND)
+            return false;
+         ip = toExamine.Mid(pos+1);
+         if(ip.Find(closeChar) == wxNOT_FOUND)
+            // no second bracket found
+            break;
+         if(sscanf(ip.c_str(), "%d.%d.%d.%d", a,b,c,d) != 4)
+         {
+            // no valid IP number behind open bracket, continue
+            // search:
+            toExamine = ip;
+         }
+         else // read the IP number
+            return true;
+   }
+   return false;
+}
 
 #endif
+
 
 extern "C"
 {
@@ -1737,34 +1769,27 @@ extern "C"
    {
       // standard check:
       if(args->Count() != 0) return Value("");
-      Message * msg = p->GetMessage();
-      if(! msg) return Value("");
 
       bool rc = false;
 #ifdef USE_RBL
       String received;
+
+      Message * msg = p->GetMessage();
+      if(! msg) return Value(0);
       msg->GetHeaderLine("Received", received);
-      char found = '\0';
-      int pos;
-      if((pos = received.Find('[')) != wxNOT_FOUND)
-         found = ']';
-      else if((pos = received.Find('(')) != wxNOT_FOUND)
-         found = ')';
-      else
-         return false; // no IP number in Received line, suspicious,
-      // but not good enough
-      String ip;
-      ip = received.Mid(pos+1);
-      if(ip.Find(found) == wxNOT_FOUND)
-         return false; // no closing bracket, suspicious?
-      int a,b,c,d;
-      if(sscanf(ip.c_str(), "%d.%d.%d.%d", &a,&b,&c,&d) != 4)
-         return false; // no properly formatted IP number, suspicious?
-      /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
-      for(int i = 0; gs_RblSites[i] && ! rc ; i++)
-         rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
-#endif
       msg->DecRef();
+
+      int a,b,c,d;
+      bool hasIP = findIP(received, '(', ')', &a, &b, &c, &d); 
+      if(! hasIP)
+         hasIP =  findIP(received, '[', ']', &a, &b, &c, &d);
+      if(hasIP)
+      {
+         for(int i = 0; gs_RblSites[i] && ! rc ; i++)
+            rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
+      }
+      /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
+#endif
       return rc;
    }
 
