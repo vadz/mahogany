@@ -114,6 +114,12 @@ public:
    /// get the full MIME string ("MESSAGE/RFC822")
    String GetFull() const { return GetType() + _T('/') + GetSubType(); }
 
+   /// return true if this is a type which it makes sense to show inline
+   bool ShouldShowInline() const
+   {
+      return m_primary == TEXT || m_primary == IMAGE || m_primary == VIDEO;
+   }
+
    //@}
 
    /** @name Comparison
