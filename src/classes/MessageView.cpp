@@ -1419,6 +1419,13 @@ MessageView::ShowHeaders()
 
          String value = values[line];
 
+         wxFontEncoding encReal = encHeader;
+         if ( encHeader != wxFONTENCODING_SYSTEM )
+         {
+            // convert the string to an encoding we can show, if needed
+            EnsureAvailableTextEncoding(&encReal, &value);
+         }
+
          // don't highlight the message IDs which looks just like the URLs but,
          // in fact, are not ones (the test is for Message-Id and Content-Id
          // headers only right now but we use a wildcard in case there are some
@@ -1478,9 +1485,11 @@ MessageView::ShowHeaders()
                value.clear();
             }
 
-            if ( !before.empty() )
+            // do this even if "before" is empty if we have to change the
+            // encoding (it will affect the URL following it)
+            if ( !before.empty() || encReal != wxFONTENCODING_SYSTEM )
             {
-               m_viewer->ShowHeaderValue(before, encHeader);
+               m_viewer->ShowHeaderValue(before, encReal);
             }
 
             if ( !url.empty() )
