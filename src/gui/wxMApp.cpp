@@ -1892,10 +1892,13 @@ wxMApp::SetupOnlineManager(void)
          m_OnlineManager = wxDialUpManager::Create();
       }
 
+      // under Windows it autostarts itself
+#ifndef OS_WIN
       if(! m_OnlineManager->EnableAutoCheckOnlineStatus(60))
       {
          wxLogError(_("Cannot activate auto-check for dial-up network status."));
       }
+#endif // !OS_WIN
 
       String beaconhost = READ_APPCONFIG(MP_BEACONHOST);
       strutil_delwhitespace(beaconhost);
