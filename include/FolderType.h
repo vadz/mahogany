@@ -59,7 +59,7 @@ enum FolderType
    News  = MF_NEWS,
 
    // pseudo types
-   MF_GROUP = 50,
+   MF_GROUP = 0x20,
    FolderGroup = MF_GROUP,     // doesn't contain mail, but (any) other folders
    MF_GROUP_NEWS,              // a news hierarchy
    MF_GROUP_IMAP,              // a directory on an IMAP server
@@ -75,22 +75,23 @@ enum FolderType
 // ----------------------------------------------------------------------------
 
 // mask to AND with an int to obtain pure flags
-static const int MF_FLAGSMASK = 0xff00;
+static const int MF_FLAGSMASK = 0xffffff00;
 
 // the flags of a mail folder
 enum FolderFlags
 {
-   MF_FLAGS_ANON          = 0x00100, // use anonymous access
-   MF_FLAGS_INCOMING      = 0x00200, // collect all new mail from it
-   MF_FLAGS_UNACCESSIBLE  = 0x00400, // folder can't be opened
-   MF_FLAGS_MODIFIED      = 0x00800, // [essential] folder settings have been
-                                     // modified (invalidates "unaccessible"
-                                     // flag) since the last attempt to open it
-   MF_FLAGS_NEWMAILFOLDER = 0x01000, // the central new mail folder
-   MF_FLAGS_DONTDELETE    = 0x02000, // forbid deletion of this folder
-   MF_FLAGS_KEEPOPEN      = 0x04000, // keep this folder open at all times
-   MF_FLAGS_REOPENONPING  = 0x08000, // force a close and re-open on a ping
-   MF_FLAGS_ISLOCAL       = 0x10000  // can be accessed even without network
+   MF_FLAGS_ANON          = 0x00000100, // use anonymous access
+   MF_FLAGS_INCOMING      = 0x00000200, // collect all new mail from it
+   MF_FLAGS_UNACCESSIBLE  = 0x00000400, // folder can't be opened
+   MF_FLAGS_MODIFIED      = 0x00000800, // [essential] folder settings have been
+                                        // modified (invalidates "unaccessible"
+                                        // flag) since the last attempt to open it
+   MF_FLAGS_NEWMAILFOLDER = 0x00001000, // the central new mail folder
+   MF_FLAGS_DONTDELETE    = 0x00002000, // forbid deletion of this folder
+   MF_FLAGS_KEEPOPEN      = 0x00004000, // keep this folder open at all times
+   MF_FLAGS_REOPENONPING  = 0x00008000, // force a close and re-open on a ping
+   MF_FLAGS_ISLOCAL       = 0x00010000, // can be accessed even without network
+   MF_FLAGS_HIDDEN        = 0x00020000  // don't show in the folder tree
 };
 
 /** SendMessageCC supports two different protocols:

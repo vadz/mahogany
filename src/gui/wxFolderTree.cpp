@@ -767,10 +767,25 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
    for ( size_t n = 0; n < nSubfolders; n++ )
    {
       MFolder *subfolder = folder->GetSubfolder(n);
-      if ( subfolder )
+      if ( !subfolder )
       {
-         (void)new wxFolderTreeNode(this, subfolder, parent);
+         FAIL_MSG( "no subfolder?" );
+
+         continue;
       }
+
+      // if the folder is marked as being "hidden", we don't show it in the
+      // tree (but still use for all other purposes), this is useful for
+      // "system" folders like INBOX
+      if ( subfolder->GetFlags() & MF_FLAGS_HIDDEN )
+      {
+         subfolder->DecRef();
+
+         continue;
+      }
+
+      // ok, create the new tree item
+      (void)new wxFolderTreeNode(this, subfolder, parent);
    }
 
    // if there are no subfolders, indicate it to user by removing the [+]

@@ -1,4 +1,6 @@
 (next release) on (date of next release)
+
+01.12.99 VZ: added support for hidden folder flag        
 29.11.99 KB: Filters and application of filter rules added, next_unread button added.
              Mail collection should now work more intelligently for dialup situations.
              Better update and selection behaviour for folderview.

@@ -173,7 +173,9 @@ KB		add python hook for filters
 		names, not just 1 2 3 4 ...
 
 9		Add option to import a directory of mailfolder files.
-		Config and wxWin support for different character sets
+8		filters import
+
+7	VZ	Config and wxWin support for different character sets
 
 	KB	wxModulesDialog: add decref/load as reaction to check/uncheck?
 
