@@ -602,7 +602,7 @@ AC_CHECK_FUNCS(strerror strstr strsep)
 dnl glibc2 has crypt in extra library
 NEED_LIB_CRYPT=0
 AC_CHECK_FUNC(crypt, NEED_LIB_CRYPT=0,NEED_LIB_CRYPT=1)
-if test "$NEED_LIB_CRYPT" = 0; then
+if test "$NEED_LIB_CRYPT" = 1; then
 	EXTRA_LINK="$EXTRA_LINK -lcrypt"
 fi
 

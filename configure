@@ -3766,7 +3766,7 @@ else
 NEED_LIB_CRYPT=1
 fi
 
-if test "$NEED_LIB_CRYPT" = 0; then
+if test "$NEED_LIB_CRYPT" = 1; then
 	EXTRA_LINK="$EXTRA_LINK -lcrypt"
 fi
 
