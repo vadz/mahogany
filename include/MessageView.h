@@ -42,6 +42,7 @@ class MimePart;
 class MsgCmdProc;
 class ProcessEvtHandler;
 class ProcessInfo;
+class ViewFilter;
 
 WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
 
@@ -347,21 +348,31 @@ protected:
       Start iterating over all filters in the filter chain.
 
       @param name the string where the name of the filter is returned
+      @param desc the string where the user-readable description of the filter
+                  is returned
       @param enabled on return is true if the filter is enabled
       @param cookie opaque cookie to be passed to GetNextViewFilter() later
-      @return true if there any filtersm, false otherwise
+      @return true if ok, false if there are no filters
     */
-   bool GetFirstViewFilter(String *name, bool *enabled, void **cookie);
+   bool GetFirstViewFilter(String *name,
+                           String *desc,
+                           bool *enabled,
+                           void **cookie);
 
    /**
       Continue iterating over all filters in the filter chain.
 
       @param name the string where the name of the filter is returned
+      @param desc the string where the user-readable description of the filter
+                  is returned
       @param enabled on return is true if the filter is enabled
       @param cookie opaque cookie (same as passed to GetFirstViewFilter())
-      @return true if there any more filtersm, false otherwise
+      @return true if ok, false if there are no more filters
     */
-   bool GetNextViewFilter(String *name, bool *enabled, void **cookie);
+   bool GetNextViewFilter(String *name,
+                          String *desc,
+                          bool *enabled,
+                          void **cookie);
 
    //@}
 

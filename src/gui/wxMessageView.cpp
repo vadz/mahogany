@@ -297,23 +297,24 @@ wxMessageView::CreateViewMenu()
    // and then iterate over all the filters adding them
    int id = WXMENU_VIEW_FILTERS_BEGIN + 1;
    void *cookie;
-   String name;
+   String name,
+          desc;
    bool enabled;
-   bool cont = GetFirstViewFilter(&name, &enabled, &cookie);
+   bool cont = GetFirstViewFilter(&name, &desc, &enabled, &cookie);
    while ( cont )
    {
       m_namesFilters.Add(name);
 
-      menu->AppendCheckItem(id, name);
+      menu->AppendCheckItem(id, desc);
       if ( enabled )
          menu->Check(id, true);
 
       id++;
 
-      cont = GetNextViewFilter(&name, &enabled, &cookie);
+      cont = GetNextViewFilter(&name, &desc, &enabled, &cookie);
    }
 
-   // TODO: disable/remove filters menu if there are no filters?
+   // should we disable/remove filters menu if there are no filters?
 }
 
 void

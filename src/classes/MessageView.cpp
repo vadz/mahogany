@@ -276,8 +276,10 @@ public:
    ViewFilterNode(ViewFilter *filter,
                   int prio,
                   const String& name,
+                  const String& desc,
                   ViewFilterNode *next)
-      : m_name(name)
+      : m_name(name),
+        m_desc(desc)
    {
       m_filter = filter;
       m_prio = prio;
@@ -293,6 +295,7 @@ public:
    ViewFilter *GetFilter() const { return m_filter; }
    int GetPriority() const { return m_prio; }
    const String& GetName() const { return m_name; }
+   const String& GetDescription() const { return m_desc; }
    ViewFilterNode *GetNext() const { return m_next; }
 
    void SetNext(ViewFilterNode *next)
@@ -304,7 +307,8 @@ public:
 private:
    ViewFilter *m_filter;
    int m_prio;
-   String m_name;
+   String m_name,
+          m_desc;
    ViewFilterNode *m_next;
 };
 
@@ -681,6 +685,7 @@ MessageView::InitializeViewFilters()
                      new TransparentFilter(this),
                      ViewFilter::Priority_Lowest,
                      _T(""),
+                     _T(""),
                      NULL
                    );
 
@@ -723,13 +728,15 @@ MessageView::InitializeViewFilters()
                      filter = filterFactory->Create(this, node->GetFilter());
 
                   // and insert it here
-                  ViewFilterNode *nodeNew = new ViewFilterNode
-                                                (
-                                                   filter,
-                                                   prio,
-                                                   name,
-                                                   node
-                                                );
+                  ViewFilterNode *
+                     nodeNew = new ViewFilterNode
+                                   (
+                                       filter,
+                                       prio,
+                                       name,
+                                       filterFactory->GetDescription(),
+                                       node
+                                   );
 
                   if ( !nodePrev )
                      m_filters = nodeNew;
@@ -794,19 +801,25 @@ MessageView::CreateViewMenu()
 }
 
 bool
-MessageView::GetFirstViewFilter(String *name, bool *enabled, void **cookie)
+MessageView::GetFirstViewFilter(String *name,
+                                String *desc,
+                                bool *enabled,
+                                void **cookie)
 {
-   CHECK( cookie, false, _T("NULL cookie in GetFirstFilter") );
+   CHECK( cookie, NULL, _T("NULL cookie in GetFirstFilter") );
 
    *cookie = m_filters;
 
-   return GetNextViewFilter(name, enabled, cookie);
+   return GetNextViewFilter(name, desc, enabled, cookie);
 }
 
 bool
-MessageView::GetNextViewFilter(String *name, bool *enabled, void **cookie)
+MessageView::GetNextViewFilter(String *name,
+                               String *desc,
+                               bool *enabled,
+                               void **cookie)
 {
-   CHECK( name && enabled && cookie, false,
+   CHECK( name && desc && enabled && cookie, NULL,
           _T("NULL parameter in GetNextFilter") );
 
    if ( !*cookie )
@@ -823,6 +836,7 @@ MessageView::GetNextViewFilter(String *name, bool *enabled, void **cookie)
       return false;
 
    *name = filter->GetName();
+   *desc = filter->GetDescription();
    *enabled = filter->GetFilter()->IsEnabled();
    *cookie = filter->GetNext();
 
