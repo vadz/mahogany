@@ -135,6 +135,7 @@ public:
 
    virtual bool HasEntry(const String & key) const;
    virtual bool HasGroup(const String & name) const;
+   virtual void DeleteEntry(const String& key);
    virtual void DeleteGroup(const String & path);
    virtual bool Rename(const String& oldName, const String& newName);
 
@@ -478,6 +479,18 @@ Profile::Rename(const String& oldName, const String& newName)
    if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    return ms_GlobalConfig->RenameGroup(oldName, newName);
+}
+
+void
+Profile::DeleteEntry(const String& key)
+{
+   PCHECK();
+
+   String root = GetName();
+   if ( !m_ProfilePath.IsEmpty() )
+       root  << '/' << m_ProfilePath;
+   ms_GlobalConfig->SetPath(root);
+   ms_GlobalConfig->DeleteEntry(key);
 }
 
 void

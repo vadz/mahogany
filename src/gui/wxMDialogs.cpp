@@ -35,6 +35,8 @@
 #   include "MHelp.h"
 #endif
 
+#include "Mpers.h"
+
 #include "modules/Scoring.h"
 #include "XFace.h"
 
@@ -247,6 +249,38 @@ BEGIN_EVENT_TABLE(MTextDialog, wxDialog)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
+// NoBusyCursor ensures that the cursor is not "busy" (hourglass) while this
+// object is in scope and is supposed to be used when creating a modal dialog
+// (see MDialog_ErrorMessage &c for the examples)
+// ----------------------------------------------------------------------------
+
+class NoBusyCursor
+{
+public:
+   NoBusyCursor()
+   {
+      m_countBusy = 0;
+      while ( wxIsBusy() )
+      {
+         m_countBusy++;
+
+         wxEndBusyCursor();
+      }
+   }
+
+   ~NoBusyCursor()
+   {
+      while ( m_countBusy-- > 0 )
+      {
+         wxBeginBusyCursor();
+      }
+   }
+
+private:
+   int m_countBusy;
+};
+
+// ----------------------------------------------------------------------------
 // functions
 // ----------------------------------------------------------------------------
 
@@ -444,6 +478,7 @@ MDialog_ErrorMessage(const char *msg,
 {
    MGuiLocker lock;
    CloseSplash();
+   NoBusyCursor no;
    wxMessageBox(msg, wxString("Mahogany : ") + title,
                 Style(wxOK|wxICON_EXCLAMATION),
                  GetDialogParent(parent));
@@ -468,7 +503,6 @@ MDialog_SystemErrorMessage(const char *message,
    msg = String(message) + String(_("\nSystem error: "))
       + String(strerror(errno));
 
-   MGuiLocker lock;
    MDialog_ErrorMessage(msg.c_str(), parent, wxString("Mahogany : ")+title, modal);
 }
 
@@ -485,10 +519,7 @@ MDialog_FatalErrorMessage(const char *message,
 {
    String msg = String(message) + _("\nExiting application...");
 
-   {
-      MGuiLocker lock;
-      MDialog_ErrorMessage(message,parent, wxString("Mahogany : ")+title,true);
-   }
+   MDialog_ErrorMessage(message,parent, wxString("Mahogany : ")+title,true);
    mApplication->Exit();
 }
 
@@ -510,6 +541,7 @@ MDialog_Message(const char *message,
 
    MGuiLocker lock;
    CloseSplash();
+   NoBusyCursor no;
    if(configPath)
       wxPMessageBox(configPath, message, caption,
                     Style(wxOK | wxICON_INFORMATION),
@@ -544,6 +576,7 @@ MDialog_YesNoDialog(const char *message,
 
    MGuiLocker lock;
    CloseSplash();
+   NoBusyCursor no;
    return wxPMessageBox(configPath, message, caption,
                         style,
                         GetDialogParent(parent)) == wxYES;
@@ -1968,4 +2001,288 @@ void CheckExpungeDialog(ASMailFolder *mf, wxWindow *parent)
    {
       (void) mf->ExpungeMessages();
    }
+}
+
+// ----------------------------------------------------------------------------
+// reenable previously disabled persistent message boxes
+//
+// TODO should all this stuff go to a separate file?
+// ----------------------------------------------------------------------------
+
+static const struct
+{
+   const char *name;
+   const char *desc;
+} gs_persMsgBoxData[] =
+{
+   { "AskSpecifyDir",            gettext_noop("prompt for global directory if not found") },
+   { "SendOutboxOnExit",         gettext_noop("ask whether to send unset messages on exit") },
+   { "AbandonCriticalFolders",   gettext_noop("prompt before abandoning critical folders ") },
+   { "GoOnlineToSendOutbox",     gettext_noop("ask whether to go online to send Outbox") },
+   { "FixTemplate",              gettext_noop("propose to fix template with errors") },
+   { "AskForSig",                gettext_noop("ask for signature if none found") },
+   { "UnsavedCloseAnyway",       gettext_noop("propose to save message before closing") },
+   { "MessageSent",              gettext_noop("show notification after sending the message") },
+   { "AskForExtEdit",            gettext_noop("propose to change external editor settings if unset") },
+   { "MimeTypeCorrect",          gettext_noop("ask confirmation for guessed MIME types") },
+   { "ConfigNetFromCompose",     gettext_noop("propose to configure network settings before sending the message if necessary") },
+   { "SendemptySubject",         gettext_noop("ask confirmation before sending messages without subject") },
+   { "ConfirmFolderDelete",      gettext_noop("ask confirmation for folder deletion") },
+   { "MarkRead",                 gettext_noop("ask whether to mark all articles as read before closing folder") },
+   { "DialUpConnectedMsg",       gettext_noop("show notification on dial-up network connection") },
+   { "DialUpDisconnectedMsg",    gettext_noop("show notification on dial-up network disconnection") },
+   { MP_CONFIRMEXIT,             gettext_noop("ask confirmation before exiting the program") },
+   { "AskLogin",                 gettext_noop("ask for the login name when opening the folder if required") },
+   { "AskPwd",                   gettext_noop("ask for the password when opening the folder if required") },
+   { "GoOfflineSendFirst",       gettext_noop("propose to send outgoing messages before hanging up") },
+   { "OpenUnaccessibleFolder",   gettext_noop("warn before trying to reopen folder which couldn't be opened the last time") },
+   { "ChangeUnaccessibleFolderSettings", gettext_noop("propose to change settings of a folder which couldn't be opened the last time before reopening it") },
+   { "AskUrlBrowser",            gettext_noop("ask for the WWW browser if it was not configured") },
+   { "OptTestAsk",               gettext_noop("propose to test new settings after changing any important ones") },
+   { "WarnRestartOpt",           gettext_noop("warn if some options changes don't take effect until program restart") },
+   { "SaveTemplate",             gettext_noop("propose to save changed template before closing it") },
+   { "DialUpOnOpenFolder",       gettext_noop("propose to start dial up networking before trying to open a remote folder") },
+   { "NetDownOpenAnyway",        gettext_noop("warn before opening remote folder while not being online") },
+   { "NoNetPingAnyway",          gettext_noop("ask whether to ping remote folders offline") },
+   { "MailNoNetQueuedMessage",   gettext_noop("show notification if the message is queued in Outbox and not sent out immediately") },
+   { "MailQueuedMessage",        gettext_noop("show notification for queued messages") },
+   { "MailSentMessage",          gettext_noop("show notification for sent messages") },
+   { "TestMailSent",             gettext_noop("show succesful test message") },
+   { "AdbDeleteEntry",           gettext_noop("ask for confirmation before deleing the address book entries") },
+   { "ConfirmAdbImporter",       gettext_noop("ask for confirmation before importing unreckognized address book files") },
+   { "BbdbSaveDialog",           gettext_noop("ask for confirmation before saving address books in BBDB format") },
+   //{ "", gettext_noop("") },
+};
+
+/// return the name to use for the given persistent msg box
+extern String GetPersMsgBoxName(MPersMsgBox which)
+{
+   ASSERT_MSG( M_MSGBOX_MAX == WXSIZEOF(gs_persMsgBoxData),
+               "should be kept in sync!" );
+
+   return gs_persMsgBoxData[which].name;
+}
+
+/// return a user-readable description of the pers msg box with given name
+static
+String GetPersistentMsgBoxDesc(const String& name)
+{
+   String s;
+   for ( size_t n = 0; n < WXSIZEOF(gs_persMsgBoxData); n++ )
+   {
+      if ( gs_persMsgBoxData[n].name == name )
+      {
+         s = _(gs_persMsgBoxData[n].desc);
+         break;
+      }
+   }
+
+   if ( !s )
+   {
+      s.Printf(_("unknown (%s)"), name.c_str());
+   }
+
+   return s;
+}
+
+class ReenableDialog : public wxManuallyLaidOutDialog
+{
+public:
+   ReenableDialog(wxWindow *parent);
+
+   // adds all entries for the given folder to the listctrl
+   void AddAllEntries(wxConfigBase *config,
+                      const String& folder,
+                      wxArrayString& entries);
+
+   // get the selected items
+   const wxArrayInt& GetSelections() const { return m_selections; }
+
+   // return TRUE if there are any msg boxes to reenable
+   bool ShouldShow() const { return m_listctrl->GetItemCount() != 0; }
+
+   // transfer data (selections) from control
+   virtual bool TransferDataFromWindow();
+
+private:
+   wxArrayInt  m_selections;
+   wxListCtrl *m_listctrl;
+};
+
+ReenableDialog::ReenableDialog(wxWindow *parent)
+              : wxManuallyLaidOutDialog(parent,
+                                        _("Mahogany"),
+                                        "ReenableDialog")
+{
+   // layout the controls
+   // -------------------
+   wxLayoutConstraints *c;
+
+   // Ok and Cancel buttons and a static box around everything else
+   wxStaticBox *box = CreateStdButtonsAndBox(_("&Settings"));
+
+   // an explanatory text
+   wxStaticText *text = new wxStaticText(this, -1,
+                                         _("Select the settings to reset"));
+   c = new wxLayoutConstraints;
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   text->SetConstraints(c);
+
+   // and a listctrl
+   m_listctrl = new wxPListCtrl("PMsgBoxList", this, -1,
+                                wxDefaultPosition, wxDefaultSize,
+                                wxLC_REPORT);
+   c = new wxLayoutConstraints;
+   c->top.Below(text, 2*LAYOUT_Y_MARGIN);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_listctrl->SetConstraints(c);
+
+   // setup the listctrl columns
+   m_listctrl->InsertColumn(0, _("Setting"));
+   m_listctrl->InsertColumn(1, _("Value"));
+   m_listctrl->InsertColumn(2, _("Folder"));
+
+   // finishing initialization
+   // ------------------------
+
+   m_listctrl->SetFocus();
+
+   // set the minimal and initial window size
+   SetDefaultSize(6*wBtn, 8*hBtn);
+}
+
+void ReenableDialog::AddAllEntries(wxConfigBase *config,
+                                   const String& folder,
+                                   wxArrayString& entries)
+{
+   long dummy;
+   String name;
+   bool cont = config->GetFirstEntry(name, dummy);
+   while ( cont )
+   {
+      int index = m_listctrl->GetItemCount();
+      m_listctrl->InsertItem(index, GetPersistentMsgBoxDesc(name));
+
+      // decode the remembered value
+      String value;
+      long val = config->Read(name, 0l);
+      switch ( val )
+      {
+         case wxYES:
+         case wxID_YES:
+            value = _("yes");
+            break;
+
+         case wxNO:
+         case wxID_NO:
+            value = _("no");
+            break;
+      }
+
+      m_listctrl->SetItem(index, 1, value);
+      m_listctrl->SetItem(index, 2, !folder ? _("all folders") : folder);
+
+      // and remember the config path in case we'll delete it later
+      if ( !!folder )
+      {
+         name.Prepend(folder + '/');
+      }
+      entries.Add(name);
+
+      cont = config->GetNextEntry(name, dummy);
+   }
+}
+
+bool ReenableDialog::TransferDataFromWindow()
+{
+   ASSERT_MSG( m_selections.IsEmpty(),
+               "TransferDataFromWindow() called twice?" );
+
+   int index = -1;
+   for ( ;; )
+   {
+      index = m_listctrl->GetNextItem(index,
+                                      wxLIST_NEXT_ALL,
+                                      wxLIST_STATE_SELECTED);
+      if ( index == -1 )
+         break;
+
+      m_selections.Add(index);
+   }
+
+   return TRUE;
+}
+
+extern
+bool ReenablePersistentMessageBoxes(wxWindow *parent)
+{
+   // NB: working with global config in M is tricky - here, we need to create
+   //     the dialog before setting the config path because the dlg ctor will
+   //     change the current path in the global config...
+   ReenableDialog dlg(parent);
+
+   // get all entries under Settings/MessageBox
+   wxConfigBase *config = wxConfigBase::Get();
+   CHECK( config, FALSE, "no app config?" );
+
+   wxString root;
+   root << '/' << M_SETTINGS_CONFIG_SECTION << "MessageBox";
+   config->SetPath(root);
+
+   wxArrayString entries;
+   dlg.AddAllEntries(config, "", entries);
+
+   long dummy;
+   String name;
+   bool cont = config->GetFirstGroup(name, dummy);
+   while ( cont )
+   {
+      config->SetPath(name);
+
+      dlg.AddAllEntries(config, name, entries);
+
+      config->SetPath("..");
+
+      cont = config->GetNextGroup(name, dummy);
+   }
+
+   if ( dlg.ShouldShow() )
+   {
+      // now show the dialog allowing to choose those entries whih the user
+      // wants to reenable
+      if ( dlg.ShowModal() )
+      {
+         const wxArrayInt& selections = dlg.GetSelections();
+         size_t count = selections.GetCount();
+         if ( count )
+         {
+            config->SetPath(root);
+
+            for ( size_t n = 0; n < count; n++ )
+            {
+               config->DeleteEntry(entries[selections[n]]);
+            }
+
+            wxLogStatus(_("Reenabled %d previously disabled message boxes."),
+                        count);
+
+            return true;
+         }
+         else
+         {
+            wxLogStatus(_("No message boxes were reenabled."));
+         }
+      }
+   }
+   else
+   {
+      MDialog_Message(_("No message boxes have been disabled yet."), parent);
+   }
+
+   return false;
 }

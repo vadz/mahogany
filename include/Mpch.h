@@ -52,6 +52,7 @@ extern "C"
 #include "sysutil.h"
 
 #include "Mcommon.h"
+#include "Merror.h"
 
 #include "PathFinder.h"
 

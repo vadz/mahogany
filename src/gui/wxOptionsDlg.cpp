@@ -242,11 +242,11 @@ enum ConfigFields
    ConfigField_ToolbarsFlatButtons,
 #ifdef OS_UNIX
    ConfigField_IconStyle,
-   ConfigField_OthersLast = ConfigField_IconStyle,
-#else
-   ConfigField_OthersLast = ConfigField_ToolbarsFlatButtons,
 #endif
-// the end
+   ConfigField_ReenableDialog,
+   ConfigField_OthersLast = ConfigField_ReenableDialog,
+
+   // the end
    ConfigField_Max
 };
 
@@ -385,6 +385,10 @@ BEGIN_EVENT_TABLE(wxOptionsPageFolders, wxOptionsPage)
    EVT_BUTTON(-1, wxOptionsPageFolders::OnButton)
 
    EVT_IDLE(wxOptionsPageFolders::OnIdle)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxOptionsPageOthers, wxOptionsPage)
+   EVT_BUTTON(-1, wxOptionsPageOthers::OnButton)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -546,7 +550,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
    { gettext_noop("Configure &format for displaying dates"),         Field_SubDlg,    -1                     },
 
-
    // adb: autocollect and bbdb options
    { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
                   "receive in a special addresss book. This is called 'address\n"
@@ -600,8 +603,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Use floating &tool-bars"), Field_Bool,    -1                     },
    { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     },
 #ifdef OS_UNIX
-   { gettext_noop("&Icon style:default:GNOME:KDE:small"), Field_Combo,   -1 }
+   { gettext_noop("&Icon style:default:GNOME:KDE:small"), Field_Combo,   -1 },
 #endif
+   { gettext_noop("&Reenable disabled message boxes"), Field_SubDlg, -1 }
 };
 
 // FIXME ugly, ugly, ugly... config settings should be living in an array from
@@ -764,6 +768,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_ICONSTYLE)
 #endif
+   CONFIG_NONE()
 };
 
 #undef CONFIG_ENTRY
@@ -1465,6 +1470,24 @@ wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
    m_nAutosaveDelay = -1;
 }
 
+void wxOptionsPageOthers::OnButton(wxCommandEvent& event)
+{
+   wxObject *obj = event.GetEventObject();
+   if ( obj == GetControl(ConfigField_ReenableDialog) )
+   {
+      if ( ReenablePersistentMessageBoxes(this) )
+      {
+         wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+         wxCHECK_RET( dialog, "options page without a parent dialog?" );
+         dialog->SetDirty();
+      }
+   }
+   else
+   {
+      event.Skip();
+   }
+}
+
 bool wxOptionsPageOthers::TransferDataToWindow()
 {
    // if the user checked "don't ask me again" checkbox in the message box
@@ -1600,8 +1623,6 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
 
    return rc;
 }
-
-
 
 void wxOptionsPageFolders::OnButton(wxCommandEvent& event)
 {

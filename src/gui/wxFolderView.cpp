@@ -169,7 +169,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       return; // nothing to do
    }
    m_FolderView->UpdateSelectionInfo();
-   
+
    if(! event.ControlDown())
    {
       long keyCode = event.KeyCode();
@@ -431,33 +431,39 @@ int
 wxFolderListCtrl::GetSelections(wxArrayInt &selections, bool nofocused) const
 {
    selections.Empty();
-   long item = -1;
-   HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-   const HeaderInfo *hi = NULL;
-   if(hil)
+   ASMailFolder *asmf = m_FolderView->GetFolder();
+
+   if ( asmf )
    {
-      while((item = GetNextItem(item,
-                                wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
-            != -1 && (unsigned long)item < hil->Count())
+      long item = -1;
+      HeaderInfoList *hil = asmf->GetHeaders();
+      const HeaderInfo *hi = NULL;
+      if(hil)
       {
-         hi = (*hil)[item++];
-         if(hi)
-            selections.Add(hi->GetUId());
-      }
-      // If none is selected, use the focused entry
-      if(selections.Count() == 0 && ! nofocused)
-      {
-         item = -1;
-         item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
-         if(item != -1 && (unsigned long)item < hil->Count())
+         while((item = GetNextItem(item,
+                                   wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
+               != -1 && (unsigned long)item < hil->Count())
          {
             hi = (*hil)[item++];
             if(hi)
                selections.Add(hi->GetUId());
          }
+         // If none is selected, use the focused entry
+         if(selections.Count() == 0 && ! nofocused)
+         {
+            item = -1;
+            item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
+            if(item != -1 && (unsigned long)item < hil->Count())
+            {
+               hi = (*hil)[item++];
+               if(hi)
+                  selections.Add(hi->GetUId());
+            }
+         }
+         hil->DecRef();
       }
-      hil->DecRef();
    }
+
    return selections.Count();
 }
 
@@ -465,18 +471,23 @@ UIdType
 wxFolderListCtrl::GetFocusedUId(void) const
 {
    UIdType uid = UID_ILLEGAL;
-   HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-   ASSERT(hil);
-   const HeaderInfo *hi = NULL;
-   long item = -1;
-   item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
-   if(item != -1 && item < (long) hil->Count() )
+   ASMailFolder *asmf = m_FolderView->GetFolder();
+   if ( asmf )
    {
-      hi = (*hil)[item];
-      if(hi)
-         uid = hi->GetUId();
+      HeaderInfoList *hil = asmf->GetHeaders();
+      ASSERT(hil);
+      const HeaderInfo *hi = NULL;
+      long item = -1;
+      item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
+      if(item != -1 && item < (long) hil->Count() )
+      {
+         hi = (*hil)[item];
+         if(hi)
+            uid = hi->GetUId();
+      }
+      hil->DecRef();
    }
-   hil->DecRef();
+
    return uid;
 }
 
@@ -531,7 +542,7 @@ wxFolderListCtrl::SelectNextUnread()
       return; // cannot do anything
    }
    UIdType focusedUId = GetFocusedUId();
-   
+
    long idx = -1;
    bool foundFocused = false;
    while((idx = GetNextItem(idx)) != -1)
@@ -561,7 +572,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 {
    m_FocusedUId = UID_ILLEGAL;
    m_SelectedUIds.Empty();
-   
+
    // this shows what's happening:
    m_MessagePreview->Clear();
    if ( recreateFolderCtrl )
@@ -698,7 +709,7 @@ wxFolderView::~wxFolderView()
 
    MEventManager::Deregister(m_regOptionsChange);
    DeregisterEvents();
-   
+
    m_TicketList->DecRef();
    m_InDeletion = true;
    SetFolder(NULL, FALSE);
@@ -752,7 +763,7 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 
    AllProfileSettings settingsNew;
    ReadProfileSettings(&settingsNew);
-   
+
    if ( settingsNew == m_settingsCurrent )
    {
       // we don't care
@@ -880,7 +891,7 @@ wxFolderView::Update(HeaderInfoList *listing)
 MailFolder *
 wxFolderView::OpenFolder(String const &profilename)
 {
-   wxBeginBusyCursor(); 
+   wxBeginBusyCursor();
 
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE, profilename);
    SetFolder(mf);
@@ -889,8 +900,9 @@ wxFolderView::OpenFolder(String const &profilename)
 
    wxEndBusyCursor();
 
-   if ( !mf )
+   if ( !mf && (mApplication->GetLastError() != M_ERROR_CANCEL) )
    {
+      // FIXME propose to show the folder properties dialog right here
       wxLogError(_("The folder '%s' could not be opened, please check "
                    "its settings."), profilename.c_str());
    }
@@ -923,7 +935,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    INTARRAY selections;
 
    UpdateSelectionInfo();
-   
+
    switch(event.GetId())
    {
    case WXMENU_MSG_SEARCH:

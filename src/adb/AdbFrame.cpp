@@ -470,6 +470,7 @@ public:
   ~wxAdbTree();
 
   void OnChar(wxKeyEvent& event);
+  void OnRightDown(wxMouseEvent& event);
 
   enum ImageListImage
   {
@@ -482,6 +483,26 @@ public:
 
 private:
   wxAdbEditFrame *m_frame;
+
+  // the popup menu we use for right mouse click
+  class AdbTreeMenu : public wxMenu
+  {
+  public:
+    AdbTreeMenu()
+    {
+      // FIXME the strings are from wxMenuDefs.cpp - how could we get them
+      //       directly from there instead of copying them?
+      Append(WXMENU_ADBEDIT_NEW, _("&New entry..."));
+      Append(WXMENU_ADBEDIT_DELETE, _("&Delete"));
+      Append(WXMENU_ADBEDIT_RENAME, _("&Rename..."));
+      AppendSeparator();
+      Append(WXMENU_ADBEDIT_CUT, _("Cu&t"));
+      Append(WXMENU_ADBEDIT_COPY, _("&Copy"));
+      Append(WXMENU_ADBEDIT_PASTE, _("&Paste"));
+      AppendSeparator();
+      Append(WXMENU_ADBBOOK_PROP, _("Properties..."));
+    }
+  } *m_menu;
 
   DECLARE_EVENT_TABLE()
 };
@@ -601,6 +622,9 @@ public:
   bool AllowCreate() const { return TRUE;                 }
   bool AllowDelete() const { return !m_current->IsRoot(); }
   bool AllowShowProp() const { return m_current->IsBook(); }
+
+  bool AllowPaste() const { return m_clipboard != NULL; }
+  bool AllowCopy() const { return !(m_current->IsRoot() || m_current->IsBook()); }
 
   // create/delete/rename items (entries, groups, address books...)
   void DoCreateNode();
@@ -1002,6 +1026,7 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAdbTree, wxTreeCtrl)
   EVT_CHAR(wxAdbTree::OnChar)
+  EVT_RIGHT_DOWN(wxAdbTree::OnRightDown)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAdbPage, wxPanel)
@@ -2168,7 +2193,7 @@ void wxAdbEditFrame::OnUpdatePaste(wxUpdateUIEvent& event)
   CHECK_INIT_DONE
 
   // only when there is something on the clipboard
-  event.Enable(m_clipboard != NULL);
+  event.Enable(AllowPaste());
 }
 
 void wxAdbEditFrame::OnUpdateCopy(wxUpdateUIEvent& event)
@@ -2176,7 +2201,7 @@ void wxAdbEditFrame::OnUpdateCopy(wxUpdateUIEvent& event)
   CHECK_INIT_DONE
 
   // only when not root or ADB (i.e. a normal entry or group)
-  event.Enable(!(m_current->IsRoot() || m_current->IsBook()));
+  event.Enable(AllowCopy());
 }
 
 // keep your namespace clean
@@ -2729,12 +2754,17 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
                       wxTR_HAS_BUTTONS | wxSUNKEN_BORDER)
 {
   m_frame = frame;
+  m_menu = NULL;
 
   // add images to our image list
   static const char *aszImages[] =
   {
     // should be in sync with the corresponding enum in wxAdbTree
-    "adb_library", "adb_book", "adb_address", "adb_opened", "adb_closed",
+    "adb_library",
+    "adb_book",
+    "adb_address",
+    "adb_opened",
+    "adb_closed",
   };
 
   wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
@@ -2776,9 +2806,34 @@ void wxAdbTree::OnChar(wxKeyEvent& event)
   }
 }
 
+void wxAdbTree::OnRightDown(wxMouseEvent& event)
+{
+  wxPoint pt = event.GetPosition();
+  wxTreeItemId item = HitTest(pt);
+  if ( item.IsOk() )
+  {
+    SelectItem(item);
+  }
+
+  if ( !m_menu )
+  {
+    m_menu = new AdbTreeMenu;
+  }
+
+  m_menu->Enable(WXMENU_ADBEDIT_NEW, m_frame->AllowCreate());
+  m_menu->Enable(WXMENU_ADBEDIT_DELETE, m_frame->AllowDelete());
+  m_menu->Enable(WXMENU_ADBEDIT_CUT, m_frame->AllowCopy());
+  m_menu->Enable(WXMENU_ADBEDIT_COPY, m_frame->AllowCopy());
+  m_menu->Enable(WXMENU_ADBEDIT_PASTE, m_frame->AllowPaste());
+  m_menu->Enable(WXMENU_ADBBOOK_PROP, m_frame->AllowShowProp());
+
+  PopupMenu(m_menu, pt.x, pt.y);
+}
+
 wxAdbTree::~wxAdbTree()
 {
   delete GetImageList();
+  delete m_menu;
 }
 
 // -----------------------------------------------------------------------------
@@ -3814,3 +3869,5 @@ AdbTreeElement::AdbTreeElement(TreeElement kind,
 
    m_data = NULL;
 }
+
+/* vi: set cin ts=2 sw=2 et list tw=80: */

@@ -14,6 +14,14 @@ $Id$
 6	VZ	constraints in the notebooks half broken again, both GTK and
                 Windows (well, they actually work but give warnings)
 
+9    W  VZ      wxStaticBox bug makes it impossible to work with most dialogs
+
+5               [Cancel] in options dialog doesn't cancel everything (i.e. if
+                you [Apply] change first it's not undone when [Cancel] is
+                pressed), for example:
+                a) sorting order
+                b) ...
+              
 9		disabling "collect mail" in properties has no effect!
 9	KB	finish filters dialog
 9	KB	debug filters, does '|' really work?
@@ -71,11 +79,9 @@ $Id$
 		with that name "CRAC", because another entry has
 		"crac" in its mail address. Should present the dialog
 		and offer a choice instead of just picking the first.
+		VZ: can't reproduce, any example?
 
 9	VZ	Subfolderdialog must check for asmf == NULL
-9	VZ	Folder Properties dialog: OK disabled, Apply sometimes 
-		enabled... impossible to change settings for existing
-		folders. 
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 
@@ -144,9 +150,6 @@ $Id$
 8	KB	ComposeView/header dialog: remove my old-style
 		mechanism for setting custom headers. Move Vadim's
 		code to SendMessaggeCC. Introduce SendMessage??
-
-7      ?        We need a generic way to re-enable disabled pControls
-
 
 5	KB	let all message sorting use the translation table
 
@@ -550,6 +553,12 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 
 
 DONE - TO BE TESTED:
+7       VZ     We need a generic way to re-enable disabled pControls
+
+
+9	VZ	Folder Properties dialog: OK disabled, Apply sometimes 
+		enabled... impossible to change settings for existing
+		folders. 
 9	VZ	Creating a new entry under "all Folders" is possible, i.e.
 		you get the dialog, but, clicking on "OK" does not close it,
 		the only way out is "Cancel" so at present one cannot create

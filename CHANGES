@@ -1,14 +1,16 @@
 (next release) on (date of next release)
 
+16.01.00 VZ: added right click popup menu to the ADB editor
+             added a dialog to reenable previously disabled msg boxes
 03.12.99 KB: MIME type prompt added to compose view. Started adding filters dialog.
-	     Message threading added. Fixed dialup handling in wxGTK.
-01.12.99 VZ: added support for hidden folder flag        
+             Message threading added. Fixed dialup handling in wxGTK.
+01.12.99 VZ: added support for hidden folder flag
 29.11.99 KB: Filters and application of filter rules added, next_unread button added.
              Mail collection should now work more intelligently for dialup situations.
              Better update and selection behaviour for folderview.
              Network-local folder added, accessible without dial up network.
              Bugs in event handling fixed.
-             "Trash" folder added. 
+             "Trash" folder added.
 27.11.99 VZ: Ok/Cancel/Apply buttons in the options dialog finally work
 26.11.99 VZ: fixed the bug with double clicking in folder tree in "click to open
              mode" (wrong folder was opened)

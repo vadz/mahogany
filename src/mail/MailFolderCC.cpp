@@ -69,7 +69,7 @@ typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW *ov);
 
 
 
-/** This is a list of all mailstreams which were left open because the 
+/** This is a list of all mailstreams which were left open because the
     dialup connection broke before we could close them.
     We remember them and try to close them at program exit. */
 KBLIST_DEFINE(StreamList, MAILSTREAM);
@@ -391,7 +391,7 @@ HeaderInfoCC::HeaderInfoCC()
 {
    m_Indentation = 0;
    // all other fields are filled in by the MailFolderCC when creating
-   // it 
+   // it
 }
 
 HeaderInfo &
@@ -500,7 +500,7 @@ protected:
    size_t              m_NumEntries;
    /// translation of indices
    size_t *m_TranslationTable;
-   
+
    MOBJECT_DEBUG(HeaderInfoListCC)
 };
 
@@ -675,21 +675,25 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       if(! fname) fname = mboxpath;
       prompt.Printf(_("Please enter the password for folder '%s':"), fname.c_str());
       if(! MInputBox(&pword,
-                     _("Password needed"),
+                     _("Password required"),
                      prompt, NULL,
                      NULL,NULL, true))
       {
          ERRORMESSAGE((_("Cannot access this folder without a password.")));
+
+         mApplication->SetLastError(M_ERROR_AUTH);
+
          return NULL; // cannot open it
       }
-   } 
+   }
    mf = new
       MailFolderCC(typeAndFlags,mboxpath,profile,server,login,pword);
    mf->SetName(symname);
    if(mf && profile)
       mf->SetRetrievalLimit(READ_CONFIG(profile, MP_MAX_HEADERS_NUM));
 
-   if( mf->NeedsNetwork() && !mApplication->IsOnline() )
+   bool ok = TRUE;
+   if ( mf->NeedsNetwork() && !mApplication->IsOnline() )
    {
       String msg;
       msg.Printf(_("To open the folder '%s', network access is required "
@@ -698,15 +702,40 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                  mf->GetName().c_str());
 
       if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
-                               FALSE /* [No] default */,
-                               mf->GetName()+"/NetDownOpenAnyway"))
+                               TRUE /* [Yes] default */,
+                               mf->GetName()+"/DialUpOnOpenFolder"))
       {
          mApplication->GoOnline();
+      }
+
+      if ( !mApplication->IsOnline() ) // still not?
+      {
+         if ( !MDialog_YesNoDialog(_("Opening this folder will probably fail!\n"
+                                     "Continue anyway?"),
+                                   NULL, MDIALOG_YESNOTITLE,
+                                   FALSE /* [No] default */,
+                                   mf->GetName()+"/NetDownOpenAnyway") )
+         {
+             ok = FALSE;
+
+             // remember that the user cancelled opening the folder
+             mApplication->SetLastError(M_ERROR_CANCEL);
+         }
       }
    }
 
    // try to really open it
-   if( !mf->Open() )
+   if ( ok )
+   {
+      ok = mf->Open();
+
+      if ( !ok )
+      {
+         mApplication->SetLastError(M_ERROR_CCLIENT);
+      }
+   }
+
+   if ( !ok )
    {
       mf->DecRef();
       mf = NULL;
@@ -742,7 +771,7 @@ MailFolderCC::Open(void)
 {
    STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
 
-   
+
    /** Now, we apply the very latest c-client timeout values, in case
        they have changed.
    */
@@ -836,7 +865,7 @@ MailFolderCC::Open(void)
       }
 
       /* Clever hack: if the folder is IMAP and the folder name ends
-         in a slash '/' we only half-open it. The server does not like 
+         in a slash '/' we only half-open it. The server does not like
          opening directories, but the half-open stream can still be
          used for retrieving subfolder listings. */
       if(GetType() == MF_IMAP
@@ -962,7 +991,7 @@ MailFolderCC::PingReopen(void) const
       return false;
    }
 
-   
+
    if(! m_MailStream || ! mail_ping(m_MailStream))
    {
       if(m_MailStream)
@@ -1118,7 +1147,7 @@ MailFolderCC::AppendMessage(String const &msg)
                != 0);
 #else
    bool rc = ( mail_append(
-      m_MailStream, (char *)m_MailboxPath.c_str(), &str) 
+      m_MailStream, (char *)m_MailboxPath.c_str(), &str)
                != 0);
 #endif
    if(! rc)
@@ -1247,8 +1276,8 @@ MailFolderCC::ExpungeMessages(void)
 }
 
 /*
-  TODO: this code relies on the header info list being sorted the same 
-  way as the listing in the folderview. Better would be to return UIds 
+  TODO: this code relies on the header info list being sorted the same
+  way as the listing in the folderview. Better would be to return UIds
   rather than msgnumbers and have the folderview select individual
   messages, or simply mark them as selected somehow and rebuild the
   listing in the views. But that seems to be an O(N^2) operation. :-(
@@ -1259,7 +1288,7 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
 {
    ASSERT(m_SearchMessagesFound == NULL);
    ASSERT(crit);
-   
+
    HeaderInfoList *hil = GetHeaders();
    if ( !hil )
       return 0;
@@ -1278,7 +1307,7 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
                                     NULL,
                                     false, true);// open a status window:
    }
-   
+
    m_SearchMessagesFound = new INTARRAY;
 
    String what;
@@ -1345,20 +1374,20 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
       }
    }
    hil->DecRef();
-   
+
 #if 0
    /// TODO: Use this code for IMAP!
    // c-client does not implement this for all drivers, so we do it ourselves
    SEARCHPGM *pgm = mail_newsearchpgm();
 
    STRINGLIST *slist = mail_newstringlist();
-   
+
 
    slist->text.data = (unsigned char *)strutil_strdup(crit->m_Key);
    slist->text.size = crit->m_Key.length();
 
    bool error = false;
-   
+
    switch(crit->m_What)
    {
    case SearchCriterium::SC_FULL:
@@ -1377,7 +1406,7 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
       LOGMESSAGE((M_LOG_ERROR,"Unknown search criterium!"));
       error = true;
    }
-   
+
    if(! error)
       mail_search_full (m_MailStream,
                         /* charset */ NIL,
@@ -1386,7 +1415,7 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
    else
       mail_free_searchpgm(&pgm);
 #endif
-   
+
    INTARRAY *rc = m_SearchMessagesFound; // will get freed by caller!
    m_SearchMessagesFound = NULL;
 
@@ -1495,7 +1524,7 @@ MailFolderCC::IsNewMessage(const HeaderInfo *hi)
    if(m_LastNewMsgUId != UID_ILLEGAL
       && m_LastNewMsgUId >= msgId)
       isNew = false;
-   
+
    return isNew;
 }
 

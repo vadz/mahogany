@@ -15,6 +15,7 @@
 
 #ifndef   USE_PCH
 #   include   "Mcommon.h"
+#   include   "Merror.h"
 #   include   "Mdefaults.h"
 
 #   include   "kbList.h"
@@ -113,6 +114,20 @@ public:
    */
    MFrame *TopLevelFrame(void) const { return m_topLevelFrame; }
 
+   /** set the last error (see the error codes in Merror.h)
+       @param error the error code of the last failed operation
+   */
+   void SetLastError(MError error) { m_error = error; }
+
+   /** reset the last error to 0 (no error)
+   */
+   void ResetLastError() { m_error = M_ERROR_OK; }
+
+   /** query the last error
+       @return the error code of the last failed operation
+   */
+   MError GetLastError() const { return m_error; }
+
    /**  translate a string to national language:
         @param in the text to translate
         @return the translated text
@@ -168,7 +183,7 @@ public:
    /// Check if we have messages to send.
    virtual bool CheckOutbox(UIdType *nSMTP = NULL,
                             UIdType *nNNTP = NULL) const;
-   
+
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
 
@@ -187,7 +202,7 @@ public:
 
    virtual bool StartTimer(Timer timer) = 0;
    virtual bool StopTimer(Timer timer) = 0;
-   
+
    bool RestartTimer(Timer timer)
       { return StopTimer(timer) && StartTimer(timer); }
 
@@ -219,7 +234,7 @@ public:
       SF_MAXIMUM
    };
    /// return the number of the status bar field to use for a given
-   /// function 
+   /// function
    virtual int GetStatusField(enum StatusFields function) const;
    /// updates display of outbox status
    virtual void UpdateOutboxStatus(void) const = 0;
@@ -233,7 +248,7 @@ protected:
       const = 0;
    /// Send all messages from the outbox "name"
    void SendOutbox(const String &name, bool checkOnline) const;
-   
+
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
 
@@ -269,6 +284,9 @@ protected:
 
    /// a profile wrapper object for the global configuration
    ProfileBase *m_profile;
+
+   /// the last error code
+   MError m_error;
 
    /// a list of folders to keep open at all times
    class MailFolderList *m_KeepOpenFolders;

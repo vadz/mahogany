@@ -393,6 +393,12 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
          UpdateTitleAndStatusBars(m_folderName, statusMsg, this, mailFolder);
          mailFolder->DecRef();
       }
+      else if ( mApplication->GetLastError() == M_ERROR_CANCEL )
+      {
+         // don't set the unaccessible flag - may be it's ok
+         wxLogStatus(this, _("Opening folder '%s' cancelled."),
+                     m_folderName.c_str());
+      }
       else
       {
          // it's not modified any more...

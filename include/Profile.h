@@ -142,6 +142,8 @@ public:
    virtual bool HasEntry(String const & key) const = 0;
    /// return true if the group exists
    virtual bool HasGroup(String const & name) const = 0;
+   /// delete the entry specified by path
+   virtual void DeleteEntry(const String& key) = 0;
    /// delete the entry group specified by path
    virtual void DeleteGroup(String const & path) = 0;
    /// rename a group

@@ -61,7 +61,7 @@ public:
                    bool disableParentOnly = false,
                    bool abortButton = false)
    : wxProgressDialog(wxString("Mahogany : ") + title, message,
-                      maximum, parent, 
+                      maximum, parent,
                       (disableParentOnly ? 0 : wxPD_APP_MODAL) |
                       (abortButton ? wxPD_CAN_ABORT : 0) |
                       wxPD_AUTO_HIDE
@@ -78,7 +78,7 @@ public:
 /// This allows us to call them from modules.
 extern "C"
 {
-   
+
 /** display error message:
        @param message the text to display
        @param parent   the parent frame
@@ -181,7 +181,7 @@ const char *MDialog_FileRequester(String const &message,
   @param key contains the name of config entry to use if !NULL
   @param def contains the default value (only if pstr->IsEmpty())
   @param passwordflag if true, hide the input
-  
+
   @return FALSE if cancelled, TRUE otherwise
 */
 bool MInputBox(wxString *pstr,
@@ -286,16 +286,19 @@ void CheckExpungeDialog(class ASMailFolder *mf, wxWindow *parent = NULL);
 extern
 bool ConfigureFilterRules(ProfileBase *profile, wxWindow *parent);
 
+/// Shows the dialog allowing to reenable disabled wxPMesageBox()es
+extern
+bool ReenablePersistentMessageBoxes(wxWindow *parent = NULL);
 
 #ifdef OS_WIN
 #  undef USE_SEMIMODAL
 
-#  define wxSMDialog wxDialog 
-#else
+#  define wxSMDialog wxDialog
+#else // !Win
 #  define USE_SEMIMODAL
 
 /** Semi-modal dialog to allow pop-up help to work.
-    (Yes, I know it's a funny name, but so is the whole Help/Modal 
+    (Yes, I know it's a funny name, but so is the whole Help/Modal
     problem... :-)
 
     Behaves identical to wxDialog, but ShowModal() is only a
@@ -318,7 +321,7 @@ public:
    virtual int ShowModal();
    virtual void EndModal(int rc);
 };
-#endif
+#endif // Win/!Win
 
 
 class wxXFaceButton : public wxBitmapButton

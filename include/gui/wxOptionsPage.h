@@ -381,8 +381,13 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
+   void OnButton(wxCommandEvent&);
+
 protected:
    long m_nAutosaveDelay;
+
+private:
+   DECLARE_EVENT_TABLE()
 };
 
 #endif // _GUI_WXOPTIONSPAGE_H

@@ -114,7 +114,7 @@ public:
 private:
    String      m_name;
    MailFolder *m_folder;
-   
+
 };
 
 KBLIST_DEFINE(MailFolderList, MailFolderEntry);
@@ -133,12 +133,13 @@ MAppBase::MAppBase()
    m_profile = NULL;
    m_DialupSupport = FALSE;
    m_UseOutbox = FALSE;
+
+   ResetLastError();
 }
 
 MAppBase::~MAppBase()
 {
-   if ( m_framesOkToClose )
-      delete m_framesOkToClose;
+   delete m_framesOkToClose;
 }
 
 /* The code in VerifySettings somehow overlaps with the purpose of
@@ -150,7 +151,7 @@ bool
 MAppBase::VerifySettings(void)
 {
    const size_t bufsize = 200;
-  char  buffer[bufsize];
+   char  buffer[bufsize];
 
    String
       str;
@@ -175,7 +176,6 @@ MAppBase::VerifySettings(void)
    if( strutil_isempty(READ_APPCONFIG(MP_USERDIR)) )
    {
       wxString strHome;
-      //FIXME wxGetHomeDir(&strHome);
       strHome = getenv("HOME");
       strHome << DIR_SEPARATOR << READ_APPCONFIG(MP_USER_MDIR);
       m_profile->writeEntry(MP_USERDIR, strHome);
@@ -486,13 +486,13 @@ MAppBase::OnStartup()
    SetupOnlineManager();
 
    m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX) != 0;
-   
+
    // create and show the main program window
    CreateTopLevelFrame();
 
    // update status of outbox once:
    UpdateOutboxStatus();
-   
+
    // it doesn't seem to do anything under Windows (though it should...)
 #  ifndef OS_WIN
    // extend path for commands, look in M's dirs first
@@ -509,7 +509,7 @@ MAppBase::OnStartup()
    char *pathstring = strutil_strdup(tmp);  // this string must not be used again or freed
    putenv(pathstring);
 #  endif //OS_WIN
-   
+
    // initialise python interpreter
 #  ifdef  USE_PYTHON
    // having the same error message each time M is started is annoying, so
@@ -631,7 +631,7 @@ MAppBase::OnShutDown()
    // clean up CClient driver memory
    extern void CC_Cleanup(void);
    CC_Cleanup();
-   
+
    // don't want events any more
    if ( m_eventNewMailReg )
    {
@@ -702,7 +702,7 @@ MAppBase::CanClose() const
          mf->DecRef();
       }
    }
-   
+
    String folders;
    if(! MailFolder::CanExit(&folders) )
    {
@@ -907,11 +907,9 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP) const
    {
       if(mf->Lock())
       {
-      
+
          HeaderInfoList *hil = mf->GetHeaders();
-         if(! hil)
-            mf->DecRef();
-         else
+         if( hil )
          {
             const HeaderInfo *hi;
             Message *msg;
@@ -938,7 +936,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP) const
          ERRORMESSAGE((_("Could not obtain lock for outbox '%s'."),
                        mf->GetName().c_str()));
       }
-      SafeDecRef(mf);
+      mf->DecRef();
    }
    if(nSMTP) *nSMTP = smtp;
    if(nNNTP) *nNNTP = nntp;
@@ -964,7 +962,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
       mf->DecRef();
       return;
    }
-   
+
    if(checkOnline && ! IsOnline())
    {
       if ( MDialog_YesNoDialog(
@@ -981,7 +979,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
 
    if(mf->Lock())
    {
-      
+
       HeaderInfoList *hil = mf->GetHeaders();
       if(! hil)
       {
@@ -990,7 +988,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
       }
 
       const HeaderInfo *hi;
-   
+
       Message *msg;
       for(UIdType i = 0; i < hil->Count(); i++)
       {
