@@ -432,6 +432,7 @@ public:
 
 // the function which runs the install wizard
 extern bool RunInstallWizard();
+extern bool VerifyMailConfig(void);
 
 #endif // USE_WIZARD
 
@@ -1045,28 +1046,28 @@ bool RunInstallWizard()
       if ( mf )
       {
          String msgFmt =
-            _("From: m-users-subscribe@egroups.com\015\012"
-              "Subject: Welcome to Mahogany!\015\012"
-              "Date: %s\015\012"
-              "\015\012"
-              "Thank you for trying Mahogany!\015\012"
-              "\015\012"
-              "This mail and news client is developed as an OpenSource project by a\015\012"
-              "team of volunteers from around the world.\015\012"
-              "If you would like to contribute to its development, you are\015\012"
-              "always welcome to join in.\015\012"
-              "\015\012"
-              "We also rely on you to report any bugs or wishes for improvements\015\012"
-              "that you may have.\015\012"
-              "\015\012"
-              "Please visit our web pages at http://www.wxwindows.org/Mahogany/\015\012"
-              "\015\012"
-              "Also, reply to this e-mail message and you will automatically be\015\012"
-              "added to the mailing list of Mahogany users, where you will find\015\012"
-              "other users happy to share their experiences with you and help you\015\012"
-              "get started.\015\012"
-              "\015\012"
-              "Your Mahogany Developers Team\015\012"
+            _("From: m-users-subscribe@egroups.com\n"
+              "Subject: Welcome to Mahogany!\n"
+              "Date: %s\n"
+              "\n"
+              "Thank you for trying Mahogany!\n"
+              "\n"
+              "This mail and news client is developed as an OpenSource project by a\n"
+              "team of volunteers from around the world.\n"
+              "If you would like to contribute to its development, you are\n"
+              "always welcome to join in.\n"
+              "\n"
+              "We also rely on you to report any bugs or wishes for improvements\n"
+              "that you may have.\n"
+              "\n"
+              "Please visit our web pages at http://www.wxwindows.org/Mahogany/\n"
+              "\n"
+              "Also, reply to this e-mail message and you will automatically be\n"
+              "added to the mailing list of Mahogany users, where you will find\n"
+              "other users happy to share their experiences with you and help you\n"
+              "get started.\n"
+              "\n"
+              "Your Mahogany Developers Team\n"
               );
 
          // VZ: why do it in such complicated way? could use strftime(), too...
@@ -1105,6 +1106,7 @@ bool RunInstallWizard()
 
          String msgString = wxString::Format(msgFmt, timeStr.c_str());
 
+         strutil_enforceCRLF(msgString);
          mf->AppendMessage(msgString);
          mf->DecRef();
       }
@@ -1303,6 +1305,7 @@ UpgradeFromNone()
    ShowOptionsDialog();
 #endif
 
+   VerifyMailConfig();
    return true;
 }
 
