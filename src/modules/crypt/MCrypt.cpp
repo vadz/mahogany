@@ -9,6 +9,8 @@
  * License: M license                                              *
  ******************************************************************/
 
+#ifdef EXPERIMENTAL
+
 #include <wx/intl.h>
 #include <wx/log.h>
 #include <wx/msgdlg.h>
@@ -17,7 +19,7 @@
 #pragma implementation "MCrypt.h"
 #endif
 
-#include "MCrypt.h"
+#include "modules/MCrypt.h"
 
 wxString MCrypt::ms_comment(gettext_noop("Mahogany\\ crypto\\ library"));
 
@@ -36,3 +38,5 @@ int MCrypt::IsSigned(const wxString & messageIn)
 //-----BEGIN PGP SIGNED MESSAGE-----
 }
 */
+
+#endif // EXPERIMENTAL
