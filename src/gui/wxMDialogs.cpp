@@ -1004,20 +1004,20 @@ void wxMROpenFolderDialog::UpdateRadioBox(void)
    switch(win->GetSelection())
    {
    case 0: // INBOX
-      HostLabel->SetLabel("Foldername");
-      Hostname->SetValue("INBOX");
+      HostLabel->SetLabel(_("Foldername"));
+      Hostname->SetValue(_("INBOX"));
       Hostname->Enable(false);
       UserID->Enable(false);
       Password->Enable(false);
       break;
    case 1: // mbox
-      HostLabel->SetLabel("Foldername");
+      HostLabel->SetLabel(_("Foldername"));
       UserID->Enable(false);
       Password->Enable(false);
       Hostname->Enable(true);
       break;
    case 2: case 3: // POP3, IMAP
-      HostLabel->SetLabel("Mailhost");
+      HostLabel->SetLabel(_("Mailhost"));
       UserID->Enable(true);
       Password->Enable(true);
       Hostname->Enable(true);
@@ -1026,8 +1026,9 @@ void wxMROpenFolderDialog::UpdateRadioBox(void)
       profile->DecRef();
       break;
    case 4: // NNTP
-      HostLabel->SetLabel("Newsserver");
-      UidLabel->SetLabel("Newsgroup");
+      HostLabel->SetLabel(_("Newsserver"));
+      Hostname->SetValue(READ_CONFIG(profile,MP_NNTPHOST));
+      UidLabel->SetLabel(_("Newsgroup"));
       UserID->Enable(true);
       Password->Enable(false);
       Hostname->Enable(true);
