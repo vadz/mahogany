@@ -604,7 +604,7 @@ else
 	freebsd* | FreeBSD*)
 	  CCOSTYPE=bsf
 dnl extra libs as required by python on freebsd:
-	  EXTRALIBS="-lreadline -lstdc++"
+	  EXTRALIBS="-lreadline"
 	  ;;
 	hpux_9*)
 	  CCOSTYPE=hpp
