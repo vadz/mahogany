@@ -998,7 +998,13 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             ( WXMENU_CONTAINS(MSG, id) ||
               WXMENU_CONTAINS(LAYOUT, id) ||
               ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) ) ||
-              WXMENU_CONTAINS(EDIT, id) ||
+              // in edit menu there are some commands which should be forwarded
+              // to the folder view but the others should not so it is a bit
+              // tricky...
+              id == WXMENU_EDIT_COPY ||
+              id == WXMENU_EDIT_FIND ||
+              id == WXMENU_EDIT_FINDAGAIN ||
+              id == WXMENU_EDIT_SELECT_ALL ||
               WXMENU_CONTAINS(VIEW, id) ||
               WXMENU_CONTAINS(VIEW_FILTERS, id) ||
               WXMENU_CONTAINS(VIEW_VIEWERS, id) ) )
