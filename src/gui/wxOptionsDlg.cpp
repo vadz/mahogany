@@ -319,7 +319,6 @@ enum ConfigFields
    ConfigField_FolderViewAutoNextFolder,
 
    ConfigField_FolderViewThreadMessages,
-#if defined(EXPERIMENTAL_JWZ_THREADING)
 #if wxUSE_REGEX
    ConfigField_FolderViewSimplifyingRegex,
    ConfigField_FolderViewReplacementString,
@@ -333,7 +332,6 @@ enum ConfigFields
    ConfigField_FolderViewRemoveListPrefixBreaking,
 #endif
    ConfigField_FolderViewIndentIfDummy,
-#endif // EXPERIMENTAL_JWZ_THREADING
    ConfigField_FolderViewSortMessagesBy,
    ConfigField_FolderViewHeaders, //"Configure columns to show..."
    ConfigField_FolderViewSizeUnits,
@@ -1028,21 +1026,19 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
    { gettext_noop("&Thread messages"),             Field_Bool,    -1},
 
-#if defined(EXPERIMENTAL_JWZ_THREADING)
 #if wxUSE_REGEX
-   { gettext_noop("Regex used to simplify subjects"),       Field_Text,    ConfigField_FolderViewThreadMessages},
-   { gettext_noop("Replacement string for the matched part"),       Field_Text,    ConfigField_FolderViewThreadMessages},
+   { gettext_noop("Regex used to &simplify subjects"), Field_Text | Field_Advanced,    ConfigField_FolderViewThreadMessages},
+   { gettext_noop("&Replacement string for the matched part"), Field_Text | Field_Advanced,    ConfigField_FolderViewThreadMessages},
 #endif // wxUSE_REGEX
-   { gettext_noop("Gather messages with same subject"),              Field_Bool,    ConfigField_FolderViewThreadMessages},
+   { gettext_noop("&Gather messages with same subject"), Field_Bool | Field_Advanced,    ConfigField_FolderViewThreadMessages},
 #if !wxUSE_REGEX
-   { gettext_noop("Remove list prefix to compare subjects to gather messages"),         Field_Bool,    ConfigField_FolderViewGatherSubjects},
+   { gettext_noop("&Remove list prefix from subjects"), Field_Bool | Field_Advanced,    ConfigField_FolderViewGatherSubjects},
 #endif // !wxUSE_REGEX
-   { gettext_noop("B&reak thread when subject changes"),             Field_Bool,    ConfigField_FolderViewThreadMessages},
+   { gettext_noop("B&reak thread when subject changes"), Field_Bool | Field_Advanced,    ConfigField_FolderViewThreadMessages},
 #if !wxUSE_REGEX
-   { gettext_noop("Remove list prefix to compare subjects to break threads"),         Field_Bool,    ConfigField_FolderViewBreakThreads},
+   { gettext_noop("Remove list prefix to compare subjects to break threads"), Field_Bool | Field_Advanced,    ConfigField_FolderViewBreakThreads},
 #endif // !wxUSE_REGEX
-   { gettext_noop("Indent messages with missing ancestor"),          Field_Bool,    ConfigField_FolderViewThreadMessages},
-#endif // EXPERIMENTAL_JWZ_THREADING
+   { gettext_noop("&Indent messages with missing ancestor"), Field_Bool | Field_Advanced,    ConfigField_FolderViewThreadMessages},
 
    { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
    { gettext_noop("Configure &columns to show..."),Field_SubDlg,   -1 },
@@ -1412,7 +1408,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 
    CONFIG_ENTRY(MP_MSGS_USE_THREADING),
 
-#if defined(EXPERIMENTAL_JWZ_THREADING)
 #if wxUSE_REGEX
    CONFIG_ENTRY(MP_MSGS_SIMPLIFYING_REGEX),
    CONFIG_ENTRY(MP_MSGS_REPLACEMENT_STRING),
@@ -1426,7 +1421,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MSGS_REMOVE_LIST_PREFIX_BREAKING),
 #endif // !wxUSE_REGEX
    CONFIG_ENTRY(MP_MSGS_INDENT_IF_DUMMY),
-#endif // EXPERIMENTAL_JWZ_THREADING
 
    CONFIG_NONE(), // sorting subdialog
    CONFIG_NONE(), // columns subdialog

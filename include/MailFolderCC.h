@@ -225,6 +225,10 @@ public:
    */
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
 
+   virtual bool ThreadMessages(MsgnoType *msgnos,
+                               size_t *indents,
+                               const ThreadParams& thrParams);
+
    virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);
 
    /** Get a string uniquely identifying the message in this folder, will be

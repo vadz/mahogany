@@ -891,8 +891,6 @@ extern const MOption MP_AWAY_STATUS;
 /// use threading
 #define MP_MSGS_USE_THREADING_NAME  "ThreadMessages"
 
-#if defined(EXPERIMENTAL_JWZ_THREADING)
-
 /// Gather messages with same subject in one thread
 #define MP_MSGS_GATHER_SUBJECTS_NAME "GatherSubjectsWhenThreading"
 /// break thread when subject changes
@@ -909,8 +907,6 @@ extern const MOption MP_AWAY_STATUS;
     /// Remove list prefix when comparing message's subject to break threads
 #   define MP_MSGS_REMOVE_LIST_PREFIX_BREAKING_NAME "RemoveListPrefixWhenBreaking"
 #endif // wxUSE_REGEX
-
-#endif // EXPERIMENTAL_JWZ_THREADING
 
 /// search criterium for searching in folders
 #define MP_MSGS_SEARCH_CRIT_NAME   "SearchCriterium"
@@ -1732,8 +1728,6 @@ extern const MOption MP_AWAY_STATUS;
 /// use threading
 #define MP_MSGS_USE_THREADING_DEFVAL  1l
 
-#if defined(EXPERIMENTAL_JWZ_THREADING)
-
 /// Gather messages with same subject in one thread
 #define MP_MSGS_GATHER_SUBJECTS_DEFVAL 1l
 /// break thread when subject changes
@@ -1750,8 +1744,6 @@ extern const MOption MP_AWAY_STATUS;
    /// Remove list prefix when comparing message's subject to break threads
 #  define MP_MSGS_REMOVE_LIST_PREFIX_BREAKING_DEFVAL 1l
 #endif // wxUSE_REGEX
-
-#endif // EXPERIMENTAL_JWZ_THREADING
 
 /// search criterium for searching in folders
 #define MP_MSGS_SEARCH_CRIT_DEFVAL   0l

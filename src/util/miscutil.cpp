@@ -27,7 +27,6 @@
 
 #include "Mdefaults.h"
 #include "MailFolder.h"    // UpdateTitleAndStatusBars uses it
-#include "HeaderInfo.h"    // GetAllMessagesSequence
 #include "ASMailFolder.h"
 #include "miscutil.h"
 

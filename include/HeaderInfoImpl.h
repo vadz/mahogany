@@ -20,6 +20,7 @@
 
 #ifndef  USE_PCH
    #include "Sorting.h"
+   #include "Threading.h"
 #endif // USE_PCH
 
 #include "HeaderInfo.h"
@@ -84,6 +85,7 @@ public:
                                            bool set);
 
    virtual bool SetSortOrder(const SortParams& sortParams);
+   virtual bool SetThreadParameters(const ThreadParams& thrParams);
 
    virtual LastMod GetLastMod() const;
    virtual bool HasChanged(const LastMod since) const;
@@ -107,8 +109,14 @@ private:
    /// perform the clean up (called from dtor)
    void CleanUp();
 
+   /// allocate a table of m_count MsgnoTypes
+   MsgnoType *AllocTable() const;
+
    /// free the sort/thread tables
    void FreeSortTables();
+
+   /// free the indent data (used for threading only)
+   void FreeIndentTable();
 
    /// is the given entry valid (i.e. already cached)?
    inline bool IsHeaderValid(MsgnoType n) const;
@@ -116,11 +124,14 @@ private:
    /// do we sort messages at all?
    inline bool IsSorting() const;
 
-   /// do we have the translation tables?
-   inline bool HaveTables() const;
+   /// do we have the translation table mapping indices to positions?
+   inline bool HasTransTable() const;
 
    /// do we have to be resorted?
    inline bool NeedsSort() const;
+
+   /// build the inverse table from the direct one
+   void UpdateInverseTable();
 
    /// get the msgno which should appear at the given display position
    MsgnoType GetMsgnoFromPos(MsgnoType pos) const;
@@ -134,11 +145,17 @@ private:
    /// init the translation tables using the current searching criterium
    void Sort();
 
+   /// thread the messages according to m_thrParams
+   void Thread();
+
    /// reverse the existing translation tables
    void Reverse();
 
    /// resort us after the new messages appeared in the folder
    void Resort();
+
+   /// thread again after some messages were added/removed
+   void Rethread();
 
    /**
       Find first position in the given range containing a msgno from array
@@ -178,11 +195,17 @@ private:
    /// the translation table allowing to get position from msgno (index)
    MsgnoType *m_tablePos;
 
+   /// table containing the message indent in the thread, NULL if !threading
+   size_t *m_indents;
+
    /// should we reverse the order of messages in the folder?
    bool m_reverseOrder;
 
    /// sorting parameters
    SortParams m_sortParams;
+
+   /// threading parameters
+   ThreadParams m_thrParams;
 
    /// set to true if we must be resorted (after OnAdd(), for example)
    bool m_needsResort;

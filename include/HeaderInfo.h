@@ -25,7 +25,9 @@
 
 class WXDLLEXPORT wxArrayString;
 class Sequence;
+
 struct SortParams;
+struct ThreadParams;
 
 /// illegal value of the message index (it nicely corresponds to 0 msgno)
 #define INDEX_ILLEGAL UID_ILLEGAL
@@ -236,7 +238,7 @@ public:
    /** @name Appearance parameters */
    //@{
    /// get the indentation level of this message in thread (0 for root)
-   virtual size_t GetIndentation(MsgnoType n) const = 0;
+   virtual size_t GetIndentation(MsgnoType pos) const = 0;
 
    // TODO: possible score and colour settings for individual messages should
    //       be kept here as well
@@ -303,7 +305,14 @@ public:
     */
    virtual bool SetSortOrder(const SortParams& sortParams) = 0;
 
-   /// TODO: threading
+   /**
+      Set the threading parameters (thread or not and, if yes, various options
+      governing the threading)
+
+      @param thrParams specifies if we thread or not and, if yes, then how
+      @return true if the order of messages really changed
+    */
+   virtual bool SetThreadParameters(const ThreadParams& thrParams) = 0;
 
    //@}
 

@@ -3596,6 +3596,21 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
    return MailFolderCmn::SortMessages(msgnos, sortParams);
 }
 
+bool MailFolderCC::ThreadMessages(MsgnoType *msgnos,
+                                  size_t *indents,
+                                  const ThreadParams& thrParams)
+{
+   CHECK( m_MailStream, false, "can't thread closed folder" );
+
+   if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) )
+   {
+      // TODO: implement server side threading
+   }
+
+   // call base class version to do local sorting
+   return MailFolderCmn::ThreadMessages(msgnos, indents, thrParams);
+}
+
 // ----------------------------------------------------------------------------
 // MailFolderCC working with the headers
 // ----------------------------------------------------------------------------

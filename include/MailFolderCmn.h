@@ -25,6 +25,7 @@
 #  include "MEvent.h"     // for MEventOptionsChangeData
 
 #  include "Sorting.h"
+#  include "Threading.h"
 #endif // USE_PCH
 
 // define this for some additional checks of folder closing logic
@@ -139,6 +140,10 @@ public:
                                 const Params& params,
                                 MWindow *parent = NULL);
 
+   virtual bool ThreadMessages(MsgnoType *msgnos,
+                               size_t *indents,
+                               const ThreadParams& thrParams);
+
    virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);
    //@}
 
@@ -215,35 +220,15 @@ protected:
 
       /// how to sort the list of messages
       SortParams m_SortParams;
-      /// do we want to re-sort it on a status change?
+
+      /// how do we thread the messages
+      ThreadParams m_ThrParams;
+
+      /// do we want to resort messages on a status change? [NOT IMPL'D]
       bool m_ReSortOnChange;
 
       /// Timer update interval for checking folder content
       int m_UpdateInterval;
-
-      /// do we want to thread messages?
-      bool m_UseThreading;
-
-#if defined(EXPERIMENTAL_JWZ_THREADING)
-#if wxUSE_REGEX
-      /// the strings to use to bring subject to canonical form
-      String m_SimplifyingRegex;
-      String m_ReplacementString;
-#else // !wxUSE_REGEX
-      /// Should we remove list prefix when comparing subjects to gather them
-      bool m_RemoveListPrefixGathering;
-      /// Should we remove list prefix when comparing subjects to break threads
-      bool m_RemoveListPrefixBreaking;
-#endif // wxUSE_REGEX/!wxUSE_REGEX
-
-      /// SHould we gather in same thread messages with same subject
-      bool m_GatherSubjects;
-      /// Should we break thread when subject changes
-      bool m_BreakThread;
-
-      /// Should we indent messages with missing ancestor
-      bool m_IndentIfDummyNode;
-#endif // EXPERIMENTAL_JWZ_THREADING
    } m_Config;
 
    /// Use the new options from m_Config
