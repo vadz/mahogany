@@ -17,6 +17,7 @@
 
 
 
+
 #include "MApplication.h"
 #include "gui/wxMDialogs.h"
 
@@ -26,24 +27,10 @@
 class MInterfaceImpl : public MInterface
 {
 public:
-    MAppBase * GetMApplication (void);
-
-    ProfileBase * CreateProfile (
-    const char * classname,
-    ProfileBase * parent
-    );
 
 
-    ProfileBase *GetGlobalProfile (void);
 
-    void  Message (
-    const char * message, const MWindow * parent,
-    const char * title,
-    const char * configPath );
-};
-
-
-MAppBase * MInterfaceImpl::GetMApplication (void)
+virtual MAppBase * GetMApplication (void)
 {
 
  return mApplication;
@@ -52,7 +39,7 @@ MAppBase * MInterfaceImpl::GetMApplication (void)
 
 
 
-ProfileBase * MInterfaceImpl::CreateProfile (
+virtual ProfileBase * CreateProfile (
 const char * classname,
 ProfileBase * parent
 )
@@ -64,7 +51,7 @@ ProfileBase * parent
 
 
 
-ProfileBase * MInterfaceImpl::GetGlobalProfile (void)
+virtual ProfileBase * GetGlobalProfile (void)
 {
 
  return mApplication->GetProfile();
@@ -73,7 +60,7 @@ ProfileBase * MInterfaceImpl::GetGlobalProfile (void)
 
 
 
-void  MInterfaceImpl::Message (
+virtual void  Message (
 const char * message, const MWindow * parent,
 const char * title,
 const char * configPath )
@@ -88,7 +75,9 @@ const char * configPath )
 
 
 
+};
 
+static MInterfaceImpl gs_MInterface;
 
 
 

@@ -37,7 +37,7 @@
 #include "MInterface.h"
 #include "MInterface.cpp"
 
-static MInterface gs_MInterface;
+//static MInterfaceImpl gs_MInterface;
 
 // ----------------------------------------------------------------------------
 // Actual MModule code

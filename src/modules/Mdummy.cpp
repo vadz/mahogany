@@ -13,10 +13,9 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-    #include "Mconfig.h"
-    #include "Mcommon.h"
-
-    #include "MDialogs.h"
+#   include "Mconfig.h"
+#   include "Mcommon.h"
+#   include "MDialogs.h"
 #endif
 
 #include "MModule.h"
@@ -27,10 +26,14 @@
 static void DummyFunc(MInterface *minterface);
 
 // this is compiler dependent
-#ifdef _MSC_VER
-    #define MDLLEXPORT __declspec( dllexport )
+#ifdef OS_WIN
+#   ifdef _MSC_VER
+#         define MDLLEXPORT __declspec( dllexport )
 #else
-    #error "don't know how export functions from DLL with this compiler"
+#      error "don't know how export functions from DLL with this compiler"
+#   endif
+#else
+#   define MDLLEXPORT
 #endif
 
 ///------------------------------

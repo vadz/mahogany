@@ -798,7 +798,6 @@ wxMApp::GetStdIcon(int which) const
    case wxICON_INFORMATION:
       return ICON("msg_info"); break;
 #endif
-   case wxICON_HAND:    // suppress a warning about missing "case"
    default:
       return wxApp::GetStdIcon(which);
    }

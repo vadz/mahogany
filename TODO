@@ -10,8 +10,9 @@ $Id$
 *********************************************************************
 9		if message is quoted-printable unquote it before
                 saving to file (how stupid!) same for encbinary
-9		persistent message boxes are broken, path changes somewhere and the
-		results are written under Profile while read from Settings/MessageBox
+9		persistent message boxes are broken, path changes
+		somewhere and the  results are written under Profile
+		while read from Settings/MessageBox 
 		(the correct location)
 9 		Does wxlwindow something nasty with undefined
 		update rectangles or wxRegion? Crash happened in
@@ -51,7 +52,8 @@ $Id$
 9		MEvents need handlers with different priorities --
 		needed to get Filtering and ASMailFolder to work
 		properly 
-
+6		simple HTML import for wxLayout
+5		integrate wxHTML for help and HTML viewing
 6	VZ	Could you please add a file-browse button/dialog to
 		the folder selection dialog and modify its return
 		value to somehow indicate that a file rather than a

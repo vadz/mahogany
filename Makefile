@@ -4,7 +4,7 @@
 
 
 CWD = 
-SUB_DIRS = extra src include
+SUB_DIRS = include extra src
 FILES = makeopts makerules Makefile makeopts.in configure.in configure
 EXTRA = extra
 

@@ -17,7 +17,7 @@
 
 
 
-#include "MApplication.h"
+class mApplication;
 #include "gui/wxMDialogs.h"
 
 
@@ -29,18 +29,18 @@ public:
 
 
 
-    virtual MAppBase * GetMApplication (void) { }
+virtual MAppBase * GetMApplication (void) = 0;
 
 
 
 virtual ProfileBase * CreateProfile (
 const char * classname ,
 ProfileBase * parent =NULL
-) { }
+) = 0;
 
 
 
-virtual ProfileBase * GetGlobalProfile (void) { }
+virtual ProfileBase * GetGlobalProfile (void) = 0;
 
 
 
@@ -48,7 +48,7 @@ virtual void  Message (
 const char * message , const MWindow * parent =NULL,
 const char * title =MDIALOG_MSGTITLE,
 const char * configPath =NULL )
-{ }
+ = 0;
 
 
 

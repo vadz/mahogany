@@ -43,6 +43,7 @@
 #   include  "wx/settings.h"
 #   include  "wx/statbox.h"
 #   include  "wx/filedlg.h"
+#   include  "wx/app.h"
 #endif //WX_PRECOMP
 
 #include "wx/log.h"

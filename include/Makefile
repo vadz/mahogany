@@ -8,7 +8,6 @@ M4DEF:=$(wildcard *.m4)
 IDLFILES:=$(MID:.mid=.idl)
 INTERFACES:=$(MID:.mid=.h)
 CPPFILES:=$(MID:.mid=.cpp)
-
 include ../makeopts
 
 INSTALLTARGET=

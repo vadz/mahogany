@@ -5,7 +5,7 @@
  */
 include(M4FILE)
 
-INCLUDE(`"MApplication.h"')
+CLASSINCLUDE(`"MApplication.h"', `class mApplication;')
 INCLUDE(`"gui/wxMDialogs.h"')
 FILE_HEADER
 

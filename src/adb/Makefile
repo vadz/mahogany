@@ -2,7 +2,7 @@
 
 CWD = adb
 SRC = AdbFrame.cpp AdbManager.cpp AdbProvider.cpp AdbEntry.cpp \
-      ProvFC.cpp ProvBbdb.cpp
+      ProvFC.cpp ProvBbdb.cpp ImportText.cpp
 
 ifdef DEBUG
 SRC += ProvDummy.cpp
