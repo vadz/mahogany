@@ -1274,6 +1274,8 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
    String url;
    String before;
 
+   size_t levelBeforeURL = (size_t)-1;
+
    do
    {
       if ( m_ProfileValues.highlightURLs )
@@ -1292,7 +1294,21 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
 
       if ( m_ProfileValues.quotedColourize )
       {
-         size_t level = GetQuotedLevel(before);
+         size_t level;
+
+         // if we have just inserted an URL, restore the same level we were
+         // using before as otherwise foo in a line like "> URL foo" wouldn't
+         // be highlighted correctly
+         if ( levelBeforeURL != (size_t)-1 )
+         {
+            level = levelBeforeURL;
+            levelBeforeURL = (size_t)-1;
+         }
+         else // no preceding URL, we're really at the start of line
+         {
+            level = GetQuotedLevel(before);
+         }
+
          style.SetTextColour(GetQuoteColour(level));
 
          // the string shouldn't be shared as only we use it and, although the
@@ -1337,6 +1353,9 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
          {
             m_viewer->InsertText(lineCur, style);
          }
+
+         // remember the current quoting level to be able to restore it later
+         levelBeforeURL = level;
       }
       else // no quoted text colourizing
       {
