@@ -118,6 +118,8 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    c->top.Below(m_checklistBox, 2*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_textCtrl->SetConstraints(c);
+
+   Layout();
 }
 
 wxModulesDialog::~wxModulesDialog()

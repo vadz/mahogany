@@ -1688,7 +1688,12 @@ UpgradeFrom001()
    return true;
 }
 
-#define COPYENTRY(type)  { type val; rc &= _this->Read(entry, &val); rc &= dest->Write(newentry,val); }
+#define COPYENTRY(type) \
+   { \
+      type val; \
+      if ( !src->Read(entry, &val) || !dest->Write(newentry,val) ) \
+         return -1; \
+   }
 
 /** Copies all entries and optionally subgroups from path from to path
     to in the wxConfig.
@@ -1697,17 +1702,21 @@ UpgradeFrom001()
     @param to    absolute group where to copy to
     @param recursive if true, copy all subgroups, too
     @param dest      if NULL, the global config will be used
-    @return false on error, true if ok
+    @return number of groups copied (may be 0) or -1 on error
 */
-static bool
-CopyEntries(wxConfigBase *_this,
+static int
+CopyEntries(wxConfigBase *src,
             const wxString &from,
             const wxString &to,
             bool recursive = TRUE,
             wxConfigBase *dest = NULL)
 {
-   wxString oldPath = _this->GetPath();
-   bool rc = TRUE;
+   wxString oldPath = src->GetPath();
+
+   // we count the groups copied, not entries (the former is more interesting
+   // as it corresponds to the number of filters/folders/identities, for
+   // example)
+   size_t numCopied = 1;
 
    if ( !dest )
    {
@@ -1716,68 +1725,105 @@ CopyEntries(wxConfigBase *_this,
    }
 
    // Build a list of all entries to copy:
-   _this->SetPath(from);
+   src->SetPath(from);
 
    long
       index = 0;
    wxString
       entry, newentry;
    bool ok;
-   for ( ok = _this->GetFirstEntry(entry, index);
+   for ( ok = src->GetFirstEntry(entry, index);
          ok ;
-         ok = _this->GetNextEntry(entry, index))
+         ok = src->GetNextEntry(entry, index))
    {
       newentry = to;
       newentry << '/' << entry;
-      switch(_this->GetEntryType(entry))
+
+      switch( src->GetEntryType(entry) )
       {
-      case wxConfigBase::Type_String:
-         COPYENTRY(wxString); break;
-      case wxConfigBase::Type_Integer:
-         COPYENTRY(long); break;
-      case wxConfigBase::Type_Float:
-         COPYENTRY(double); break;
-      case wxConfigBase::Type_Boolean:
-         COPYENTRY(bool); break;
-      case wxConfigBase::Type_Unknown:
-         wxFAIL_MSG("unexpected entry type");
+         case wxConfigBase::Type_Unknown:
+            wxFAIL_MSG("unexpected entry type");
+            // fall through
+
+         case wxConfigBase::Type_String:
+            // GetEntryType() returns string for all wxFileConfig entries, so
+            // try to correct it here
+            {
+               wxString val;
+               if ( src->Read(entry, &val) )
+               {
+                  bool ok;
+                  long l;
+                  if ( val.ToLong(&l) )
+                     ok = dest->Write(newentry, l);
+                  else
+                     ok = dest->Write(newentry, val);
+
+                  if ( ok )
+                     numCopied++;
+               }
+            }
+            break;
+
+         case wxConfigBase::Type_Integer:
+            COPYENTRY(long);
+            break;
+
+         case wxConfigBase::Type_Float:
+            COPYENTRY(double);
+            break;
+
+         case wxConfigBase::Type_Boolean:
+            COPYENTRY(bool);
+            break;
       }
    }
-   if(recursive)
-   {
-      wxString
-         fromgroup, togroup;
-      wxString
-         *groups;
 
+   if ( recursive )
+   {
       size_t
          idx = 0,
-         n = _this->GetNumberOfGroups(FALSE);
+         n = src->GetNumberOfGroups(FALSE);
       if(n > 0)
       {
-         groups = new wxString[n];
+         wxString *groups = new wxString[n];
          index = 0;
-         for ( ok = _this->GetFirstGroup(entry, index);
+         for ( ok = src->GetFirstGroup(entry, index);
                ok ;
-               ok = _this->GetNextGroup(entry, index))
+               ok = src->GetNextGroup(entry, index))
          {
             wxASSERT(idx < n);
             groups[idx++] = entry;
          }
+
+         wxString
+            fromgroup, togroup;
          for(idx = 0; idx < n; idx++)
          {
             fromgroup = from;
             fromgroup << '/' << groups[idx];
             togroup = to;
             togroup << '/' << groups[idx];
-            rc &= CopyEntries(_this, fromgroup, togroup, recursive, dest);
+
+            int nSub = CopyEntries(src, fromgroup, togroup, recursive, dest);
+            if ( nSub == -1 )
+            {
+               // fatal error, bail out
+               numCopied = -1;
+
+               break;
+            }
+
+            numCopied += nSub;
          }
+
          delete [] groups;
       }
    }
 
-   _this->SetPath(oldPath);
-   return rc;
+   src->SetPath(oldPath);
+
+   return numCopied;
 }
 
 static bool
@@ -1795,11 +1841,13 @@ UpgradeFrom010()
    bool rc = true;
 
    //FIXME paths need adjustment for windows?
-   rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
-                     "/M/Profiles/Folders","/M/Profiles");
+   if ( CopyEntries(mApplication->GetProfile()->GetConfig(),
+                    "/M/Profiles/Folders","/M/Profiles") == -1 )
+      rc = false;
 
-   rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
-                     "/AdbEditor","/M/Profiles/AdbEditor");
+   if ( CopyEntries(mApplication->GetProfile()->GetConfig(),
+                    "/AdbEditor","/M/Profiles/AdbEditor") )
+      rc = false;
 
    Profile
       *p = Profile::CreateProfile(""),
@@ -2763,45 +2811,76 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    tmpfile.Write(msgText, msgText.Length());
    tmpfile.Close();
 
-   wxFileConfig *fc = new
-      wxFileConfig("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
+   wxFileConfig fc("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
 
-   bool rc = TRUE;
-   if(fc)
+   bool rc = true;
+
+   // the config file is supposed to be in Unix format, so we use _UNIX
+   // versions of profile paths as from parameter
+   if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
    {
-      // the config file is supposed to be in Unix format, so we use _UNIX
-      // versions of profile paths as from parameter
-      if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
+      int nFilters = CopyEntries(&fc,
+                                 M_FILTERS_CONFIG_SECTION_UNIX,
+                                 M_FILTERS_CONFIG_SECTION);
+      if ( nFilters == -1 )
       {
-         rc &= CopyEntries(fc,
-                           M_FILTERS_CONFIG_SECTION_UNIX,
-                           M_FILTERS_CONFIG_SECTION);
+         rc = false;
+
+         wxLogError(_("Failed to retrieve remote filters information."));
       }
-
-      if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
+      else
       {
-         rc &= CopyEntries(fc,
-                           M_IDENTITY_CONFIG_SECTION_UNIX,
-                           M_IDENTITY_CONFIG_SECTION);
-      }
-
-      if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
-      {
-         String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
-         String src, dest;
-         src << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
-         dest << M_PROFILE_CONFIG_SECTION << '/' << group;
-
-         rc &= CopyEntries(fc, src, dest);
+         wxLogMessage(_("Retrieved %d remote filters."), nFilters);
       }
    }
-   else
+
+   if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
    {
-      rc = FALSE;
+      int nIds = CopyEntries(&fc,
+                             M_IDENTITY_CONFIG_SECTION_UNIX,
+                             M_IDENTITY_CONFIG_SECTION);
+      if ( nIds == -1 )
+      {
+         rc = false;
+
+         wxLogError(_("Failed to retrieve remote identities information."));
+      }
+      else
+      {
+         wxLogMessage(_("Retrieved %d remote identities."), nIds);
+      }
    }
 
-   delete  fc;
+   if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
+   {
+      String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
+      String src, dest;
+      src << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
+      dest << M_PROFILE_CONFIG_SECTION << '/' << group;
+
+      int nFolders = CopyEntries(&fc, src, dest);
+      if ( nFolders == -1 )
+      {
+         rc = false;
+
+         wxLogError(_("Failed to retrieve remote folders information."));
+      }
+      else
+      {
+         wxLogMessage(_("Retrieved %d remote folders."), nFolders);
+
+         // refresh all existing folder trees
+         MEventData *data = new MEventFolderTreeChangeData
+                                (
+                                 "",
+                                 MEventFolderTreeChangeData::CreateUnder
+                                );
+         MEventManager::Send(data);
+      }
+   }
+
    wxRemoveFile(filename);
+
    return rc;
 }
 
@@ -2886,33 +2965,27 @@ bool SaveRemoteConfigSettings(bool confirm)
    }
 
    wxString filename = wxGetTempFileName("MTemp");
-   wxFileConfig *fc = new
-      wxFileConfig("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
-   if(!fc)
-   {
-      mf->DecRef();
-      return FALSE;
-   }
+   wxFileConfig fc("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
 
    bool rc = TRUE;
 
    // always create the config file in Unix format
    if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
    {
-      rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
-                        M_FILTERS_CONFIG_SECTION,
-                        M_FILTERS_CONFIG_SECTION_UNIX,
-                        TRUE,
-                        fc);
+      rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
+                         M_FILTERS_CONFIG_SECTION,
+                         M_FILTERS_CONFIG_SECTION_UNIX,
+                         TRUE,
+                         &fc) != -1);
    }
 
    if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
    {
-      rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
-                        M_IDENTITY_CONFIG_SECTION,
-                        M_IDENTITY_CONFIG_SECTION_UNIX,
-                        TRUE,
-                        fc);
+      rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
+                         M_IDENTITY_CONFIG_SECTION,
+                         M_IDENTITY_CONFIG_SECTION_UNIX,
+                         TRUE,
+                         &fc) != -1);
    }
 
    if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
@@ -2922,11 +2995,10 @@ bool SaveRemoteConfigSettings(bool confirm)
       src << M_PROFILE_CONFIG_SECTION << '/' << group;
       dest << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
 
-      rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
-                        src, dest, TRUE,
-                        fc);
+      rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
+                         src, dest, TRUE,
+                         &fc) != -1);
    }
-   delete fc;
 
    if(rc == FALSE)
    {

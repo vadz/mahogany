@@ -708,7 +708,17 @@ CalendarFrame::GetConfig(void)
    // settings read from folder profile:
    Profile *fp = m_MInterface->CreateProfile(m_FolderName);
    m_MyEmail = m_MInterface->miscutil_GetFromAddress(fp);
-   m_DateFormat = READ_CONFIG(fp, MP_DATE_FMT);
+
+   {
+#ifdef OS_WIN
+      // MP_DATE_FMT contains '%' which are being (mis)interpreted as
+      // env var expansion characters under Windows
+      ProfileEnvVarSave noEnvVars(m_profile);
+#endif // OS_WIN
+
+      m_DateFormat = READ_CONFIG(fp, MP_DATE_FMT);
+   }
+
    m_NewMailFolder = READ_CONFIG(fp, MP_NEWMAIL_FOLDER);
    fp->DecRef();
 

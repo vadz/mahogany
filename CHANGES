@@ -6,6 +6,7 @@
 Release 0.63 '?'
 -------------------------------------------------------------------------------
 
+24.03.01 VZ: retrieving remotedly stored folders/identities from Win works too
 23.03.01 VZ: added explicit "Sender" setting
 23.03.01 VZ: fixed bug with "Add" button being disabled in template dialog
 

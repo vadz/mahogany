@@ -73,9 +73,12 @@
 // conditional compilation
 // ----------------------------------------------------------------------------
 
-// define this to allow using MTA (typically on under Unix, but off under Win)
 #ifdef OS_UNIX
+   // define this to allow using MTA (typically only for Unix)
    #define USE_SENDMAIL
+
+   // BBDB support only makes sense for Unix
+   #define USE_BBDB
 #endif
 
 // define this to have additional TCP parameters in the options dialog
@@ -298,12 +301,16 @@ enum ConfigFields
    ConfigField_AutoCollect,
    ConfigField_AutoCollectAdb,
    ConfigField_AutoCollectNameless,
+#ifdef USE_BBDB
    ConfigField_Bbdb_HelpText,
    ConfigField_Bbdb_IgnoreAnonymous,
    ConfigField_Bbdb_GenerateUnique,
    ConfigField_Bbdb_AnonymousName,
    ConfigField_Bbdb_SaveOnExit,
    ConfigField_AdbLast = ConfigField_Bbdb_SaveOnExit,
+#else // !USE_BBDB
+   ConfigField_AdbLast = ConfigField_AutoCollectNameless,
+#endif // USE_BBDB/!USE_BBDB
 
    // helper programs
    ConfigField_HelpersFirst = ConfigField_AdbLast,
@@ -319,7 +326,7 @@ enum ConfigFields
 #ifdef OS_UNIX
    ConfigField_ImageConverter,
    ConfigField_ConvertGraphicsFormat,
-#endif
+#endif // OS_UNIX
    ConfigField_HelpNewMailCommand,
    ConfigField_NewMailCommand,
    ConfigField_HelpersLast = ConfigField_NewMailCommand,
@@ -341,14 +348,14 @@ enum ConfigFields
    ConfigField_SslHelp,
    ConfigField_SslDllName,
    ConfigField_CryptoDllName,
-#endif
+#endif // USE_SSL
 #ifdef OS_UNIX
    ConfigField_AFMPath,
    ConfigField_FocusFollowsMouse,
-#endif
    ConfigField_DockableMenubars,
    ConfigField_DockableToolbars,
    ConfigField_ToolbarsFlatButtons,
+#endif // OS_UNIX
    ConfigField_ReenableDialog,
    ConfigField_OthersLast = ConfigField_ReenableDialog,
 
@@ -924,6 +931,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Autocollect addresses"),       Field_Action,  -1,                    },
    { gettext_noop("Address &book to use"),         Field_Text, ConfigField_AutoCollect   },
    { gettext_noop("Ignore addresses without &names"), Field_Bool, ConfigField_AutoCollect},
+#ifdef USE_BBDB
    { gettext_noop("The following settings configure the support of the Big Brother\n"
                   "addressbook (BBDB) format. This is supported only for compatibility\n"
                   "with other software (emacs). The normal addressbook is unaffected by\n"
@@ -932,6 +940,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Generate unique aliases"),      Field_Bool, -1 },
    { gettext_noop("&Name for nameless entries"),    Field_Text, ConfigField_Bbdb_GenerateUnique },
    { gettext_noop("&Save on exit"),                 Field_Action, -1 },
+#endif // USE_BBDB
 
    // helper programs
    { gettext_noop("The following program will be used to open URLs embedded in messages:"),       Field_Message, -1                      },
@@ -981,14 +990,14 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
      Field_Message, -1                     },
    { gettext_noop("Path where to find s&hared libssl"), Field_File|Field_Restart,    -1                     },
    { gettext_noop("Path where to find sha&red libcrypto"), Field_File|Field_Restart,    -1                     },
-#endif
+#endif // USE_SSL
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Dir,    -1                     },
    { gettext_noop("&Focus follows mouse"), Field_Bool,    -1                     },
-#endif
    { gettext_noop("Use floating &menu-bars"), Field_Bool,    -1                     },
    { gettext_noop("Use floating &tool-bars"), Field_Bool,    -1                     },
    { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     },
+#endif // OS_UNIX
    { gettext_noop("&Reenable disabled message boxes..."), Field_SubDlg, -1 },
 
    // sync page
@@ -1201,11 +1210,13 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AUTOCOLLECT),
    CONFIG_ENTRY(MP_AUTOCOLLECT_ADB),
    CONFIG_ENTRY(MP_AUTOCOLLECT_NAMED),
+#ifdef USE_BBDB
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_BBDB_IGNOREANONYMOUS),
    CONFIG_ENTRY(MP_BBDB_GENERATEUNIQUENAMES),
    CONFIG_ENTRY(MP_BBDB_ANONYMOUS),
    CONFIG_ENTRY(MP_BBDB_SAVEONEXIT),
+#endif // USE_BBDB
 
    // helper programs
    CONFIG_NONE(),
@@ -1240,14 +1251,14 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SSL_DLL_SSL),
    CONFIG_ENTRY(MP_SSL_DLL_CRYPTO),
-#endif
+#endif // USE_SSL
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
    CONFIG_ENTRY(MP_FOCUS_FOLLOWSMOUSE),
-#endif
    CONFIG_ENTRY(MP_DOCKABLE_MENUBARS),
    CONFIG_ENTRY(MP_DOCKABLE_TOOLBARS),
    CONFIG_ENTRY(MP_FLAT_TOOLBARS),
+#endif // OS_UNIX
    CONFIG_NONE(),
 
    // sync
