@@ -26,7 +26,7 @@ c) GNU m4 from cygwin tools: this is not an absolute requirment, however you
 1. wxWindows
 ------------
 
-   Mahogany depends on wxWindows and priot to compiling Mahogany you need to
+   Mahogany depends on wxWindows and prior to compiling Mahogany you need to
 build the wxMSW library. However, do *not* follow the standard build
 instructions included into wxWindows distribution. For historical reasons I am
 using my own project file to build wxWindows version used by Mahogany: it is

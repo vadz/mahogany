@@ -170,7 +170,7 @@ void HeaderInfoListImpl::Remove(size_t n)
    // the entry but also to shift all entries greater than n by -1
    if ( n < m_NumEntries )
    {
-      // deletign is easy in this case
+      // deleting is easy in this case
       memmove(&m_TranslationTable[n], &m_TranslationTable[n + 1],
               (m_NumEntries - n)*sizeof(size_t));
    }
