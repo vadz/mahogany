@@ -317,7 +317,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
                                           parent, -1, _("&Delimiter"),
                                           wxDefaultPosition, wxDefaultSize,
                                           WXSIZEOF(choices), choices,
-                                          3, wxRA_VERTICAL);
+                                          1, wxRA_SPECIFY_COLS);
 
    c = new wxLayoutConstraints;
    c->left.SameAs(parent, wxLeft, 2*LAYOUT_X_MARGIN);
