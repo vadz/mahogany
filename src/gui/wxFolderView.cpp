@@ -671,13 +671,24 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_MSG_REPLY:
    case WXMENU_MSG_FOLLOWUP:
       GetSelections(selections);
+#ifdef USE_ASYNC
       m_TicketList->Add(m_MF->ReplyMessages(&selections, GetFrame(m_Parent),
                                             (event.GetId() == WXMENU_MSG_FOLLOWUP)
                                             ? MailFolder::REPLY_FOLLOWUP:0));
+#else
+      m_MF->ReplyMessages(&selections, GetFrame(m_Parent), m_Profile,
+                          event.GetId() == WXMENU_MSG_FOLLOWUP ?
+                          MailFolder::REPLY_FOLLOWUP:0);
+#endif
+
       break;
    case WXMENU_MSG_FORWARD:
       GetSelections(selections);
-      m_TicketList->Add(m_MF->ForwardMessages(&selections, GetFrame(m_Parent)));
+#ifdef USE_ASYNC
+      m_TicketList->Add(m_MF->ForwardMessages(&selections, GetFrame(m_Parent), m_Profile));
+#else
+      m_MF->ForwardMessages(&selections, GetFrame(m_Parent), m_Profile);
+#endif
       break;
    case WXMENU_MSG_UNDELETE:
       GetSelections(selections);
@@ -826,12 +837,15 @@ wxFolderView::PrintPreviewMessages(const wxArrayInt& selections)
 void
 wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections, bool del)
 {
-   String msg;
+#ifdef USE_ASYNC
    ASMailFolder::Ticket t =
-      m_MF->SaveMessagesToFolder(&selections,GetFrame(m_Parent), this);
+#endif
+      m_MF->SaveMessagesToFolder(&selections,GetFrame(m_Parent) USERDATA);
+#ifdef USE_ASYNC
    m_TicketList->Add(t);
    if(del)
       m_DeleteSavedMessagesTicket = t;
+#endif
 }
 
 void
@@ -841,7 +855,7 @@ wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
    bool rc;
 
    rc = m_MF->SaveMessagesToFile(&selections,
-                                 GetFrame(m_Parent), this);
+                                 GetFrame(m_Parent) USERDATA);
    if(rc)
      msg.Printf(_("%d messages saved"), selections.Count());
    else

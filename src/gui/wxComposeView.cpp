@@ -202,42 +202,62 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// ----------------------------------------------------------------------------
+// template expansion classes
+// ----------------------------------------------------------------------------
+
+// this struct and array are used by ExpansionSink only - they contain the
+// information about the attachments
+struct AttachmentInfo
+{
+   AttachmentInfo(const void *d, size_t l, const String& m) : mimetype(m)
+      { data = d; len = l; }
+
+   const void *data;
+   size_t      len;
+   String      mimetype;
+};
+
+WX_DECLARE_OBJARRAY(AttachmentInfo, ArrayAttachmentInfo);
+#include <wx/arrimpl.cpp>
+WX_DEFINE_OBJARRAY(ArrayAttachmentInfo);
+
 class ExpansionSink : public MessageTemplateSink
 {
 public:
    // ctor
    ExpansionSink() { m_hasCursorPosition = FALSE; m_x = m_y = 0; }
 
-   // accessors
-      // get the whole text of the message
-   const wxString& GetText() const { return m_text; }
-      // get the cursor position
-   bool GetCursorPosition(int *x, int *y) const
-   {
-      if ( m_hasCursorPosition )
-      {
-         *x = m_x;
-         *y = m_y;
-
-         return TRUE;
-      }
-      else
-      {
-         return FALSE;
-      }
-   }
+   // called after successful parsing of the template to insert the resulting
+   // text into the compose view
+   void InsertTextInto(wxComposeView& cv) const;
 
    // implement base class pure virtual function
    virtual bool Output(const String& text);
+
+   // TODO the functions below should be in the base class (as pure virtuals)
+   //      somehow, not here
 
    // called by VarExpander to remember the current position as the initial
    // cursor position
    void RememberCursorPosition() { m_hasCursorPosition = TRUE; }
 
+   // called by VarExpander to insert an attachment
+   void InsertAttachment(const void *data, size_t len, const String& mimetype);
+
 private:
-   wxString m_text;
+   // as soon as m_hasCursorPosition becomes TRUE we stop to update the current
+   // cursor position which we normally keep track of in m_x and m_y - so that
+   // we'll have the position of the cursor when RememberCursorPosition() in
+   // them at the end
    bool m_hasCursorPosition;
    int  m_x, m_y;
+
+   // before each m_attachments[n] there is text from m_texts[n] - and after
+   // the last attachment there is m_text
+   wxString m_text;
+   wxArrayString m_texts;
+   ArrayAttachmentInfo m_attachments;
 };
 
 // VarExpander is the implementation of
@@ -250,6 +270,7 @@ public:
    {
       Category_Misc,       // empty category - misc variables
       Category_File,       // insert file
+      Category_Attach,     // attach file
       Category_Command,    // execute external command
 #ifdef USE_PYTHON
       Category_Python,     // execute Python script
@@ -314,11 +335,17 @@ public:
                        String *value) const;
 
 protected:
+   // read the file into the string, return TRUE on success
    static bool SlurpFile(const String& filename, String *value);
+
+   // try to find the filename the user wants if only the name was specified
+   // (look in the standard locations...)
+   static String GetAbsFilename(const String& name);
 
    // Expand determines the category and then calls one of these functions
    bool ExpandMisc(const String& name, String *value) const;
    bool ExpandFile(const String& name, String *value) const;
+   bool ExpandAttach(const String& name, String *value) const;
    bool ExpandCommand(const String& name, String *value) const;
 #ifdef USE_PYTHON
    bool ExpandPython(const String& name, String *value) const;
@@ -660,13 +687,7 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
       MessageTemplateParser parser(text, filename, &expander);
       if ( parser.Parse(sink) )
       {
-         cv->InsertText(sink.GetText());
-         int x, y;
-         sink.GetCursorPosition(&x, &y);
-         cv->MoveCursorTo(x, y);
-
-         // clear the dirty flag - this text wasn't typed by user
-         cv->ResetDirty();
+         sink.InsertTextInto(*cv);
       }
    }
 #endif
@@ -783,13 +804,7 @@ wxComposeView::InitText(Message *msg)
       MessageTemplateParser parser(templateValue, _("template"), &expander);
       if ( parser.Parse(sink) )
       {
-         InsertText(sink.GetText());
-         int x, y;
-         sink.GetCursorPosition(&x, &y);
-         MoveCursorTo(x, y);
-
-         // the inserted text comes from the program, not from the user
-         ResetDirty();
+         sink.InsertTextInto(*this);
       }
       else
       {
@@ -1251,6 +1266,7 @@ wxComposeView::OnMenuCommand(int id)
       m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)
                             wxNORMAL, 0,
                             &m_fg, &m_bg);
+      ResetDirty();
       break;
 
    case WXMENU_COMPOSE_LOADTEXT:
@@ -2082,11 +2098,13 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
 // ExpansionSink
 // ----------------------------------------------------------------------------
 
-bool ExpansionSink::Output(const String& text)
+bool
+ExpansionSink::Output(const String& text)
 {
    if ( !m_hasCursorPosition )
    {
       // update the current x and y position
+      // FIXME: this supposes that there is no autowrap - is it true?
       int deltaX = 0, deltaY = 0;
       for ( const char *pc = text.c_str(); *pc; pc++ )
       {
@@ -2107,9 +2125,59 @@ bool ExpansionSink::Output(const String& text)
    //else: we don't have to count anything, we already have the cursor position
    //      and this is all we want
 
+   // we always add this text to the last "component" of text (i.e. the one
+   // after the last attachment)
    m_text += text;
 
    return TRUE;
+}
+
+void
+ExpansionSink::InsertAttachment(const void *data,
+                                size_t len,
+                                const String& mimetype)
+{
+   if ( !m_hasCursorPosition )
+   {
+      // an attachment count as one cursor position
+      m_x++;
+   }
+
+   // create a new attachment info object (NB: it will be deleted by the array
+   // automatically because we pass it by pointer and not by reference)
+   m_attachments.Add(new AttachmentInfo(data, len, mimetype));
+
+   // the last component of text becomes the text before this attachment
+   m_texts.Add(m_text);
+
+   // and the new last component is empty
+   m_text.Empty();
+}
+
+void
+ExpansionSink::InsertTextInto(wxComposeView& cv) const
+{
+   size_t nCount = m_texts.GetCount();
+   ASSERT_MSG( m_attachments.GetCount() == nCount,
+               "something is very wrong in template expansion sink" );
+
+   for ( size_t n = 0; n < nCount; n++ )
+   {
+      cv.InsertText(m_texts[n]);
+
+      AttachmentInfo& attInfo = m_attachments[n];
+      cv.InsertData((char *)attInfo.data, attInfo.len, attInfo.mimetype);
+   }
+
+   cv.InsertText(m_text);
+
+   // position the cursor - if RememberCursorPosition() hadn't been called, it
+   // will be put in (0, 0)
+   cv.MoveCursorTo(m_x, m_y);
+
+   // as the inserted text comes from the program, not from the user, don't
+   // mark the composer contents as dirty
+   cv.ResetDirty();
 }
 
 // ----------------------------------------------------------------------------
@@ -2120,6 +2188,7 @@ const char *VarExpander::ms_templateVarCategories[] =
 {
    "",
    "file",
+   "attache",
    "cmd",
 #ifdef USE_PYTHON
    "python",
@@ -2156,9 +2225,52 @@ VarExpander::FindStringInArray(const char *strings[],
 bool
 VarExpander::SlurpFile(const String& filename, String *value)
 {
+   // it's important that value is not empty even if we return FALSE because if
+   // it's empty when Expand() returns the template parser will log a
+   // misleading error message about "unknown variable"
+   *value = '?';
+
    wxFFile file(filename);
 
    return file.IsOpened() && file.ReadAll(value);
+}
+
+String
+VarExpander::GetAbsFilename(const String& name)
+{
+   String filename = wxExpandEnvVars(name);
+   if ( !IsAbsPath(filename) )
+   {
+      ProfileBase *profile = mApplication->GetProfile();
+      String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_USER,
+                                       mApplication->GetLocalDir());
+      if ( !path || path.Last() != '/' )
+      {
+         path += '/';
+      }
+      String filename2 = path + filename;
+
+      if ( wxFile::Exists(filename2) )
+      {
+         // ok, found
+         filename = filename2;
+      }
+      else
+      {
+         // try the global dir
+         String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_GLOBAL,
+                                          mApplication->GetGlobalDir());
+         if ( !path || path.Last() != '/' )
+         {
+            path += '/';
+         }
+
+         filename.Prepend(path);
+      }
+   }
+   //else: absolute filename given, don't look anywhere else
+
+   return filename;
 }
 
 bool
@@ -2173,6 +2285,9 @@ VarExpander::Expand(const String& category,
    {
       case Category_File:
          return ExpandFile(name, value);
+
+      case Category_Attach:
+         return ExpandAttach(name, value);
 
       case Category_Command:
          return ExpandCommand(name, value);
@@ -2241,37 +2356,7 @@ VarExpander::ExpandMisc(const String& name, String *value) const
 bool
 VarExpander::ExpandFile(const String& name, String *value) const
 {
-   String filename = wxExpandEnvVars(name);
-   if ( !IsAbsPath(filename) )
-   {
-      ProfileBase *profile = mApplication->GetProfile();
-      String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_USER,
-                                       mApplication->GetLocalDir());
-      if ( !path || path.Last() != '/' )
-      {
-         path += '/';
-      }
-      String filename2 = path + filename;
-
-      if ( wxFile::Exists(filename2) )
-      {
-         // ok, found
-         filename = filename2;
-      }
-      else
-      {
-         // try the global dir
-         String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_GLOBAL,
-                                          mApplication->GetGlobalDir());
-         if ( !path || path.Last() != '/' )
-         {
-            path += '/';
-         }
-
-         filename.Prepend(path);
-      }
-   }
-   //else: absolute filename given, don't look anywhere else
+   String filename = GetAbsFilename(name);
 
    // insert the contents of a file
    if ( !SlurpFile(filename, value) )
@@ -2279,9 +2364,28 @@ VarExpander::ExpandFile(const String& name, String *value) const
       wxLogError(_("Failed to insert file '%s' into the message."),
                  name.c_str());
 
-      // don't return FALSE, because we did understood this variable - just
-      // failed to find the file
+      return FALSE;
    }
+
+   return TRUE;
+}
+
+bool
+VarExpander::ExpandAttach(const String& name, String *value) const
+{
+   String filename = GetAbsFilename(name);
+   if ( !SlurpFile(filename, value) )
+   {
+      wxLogError(_("Failed to attach file '%s' to the message."),
+                 name.c_str());
+
+      return FALSE;
+   }
+
+   // FIXME where to take MIME type from?
+   m_sink.InsertAttachment(strutil_strdup(value->c_str()),
+                           value->length(),
+                           "APPLICATION/OCTET-STREAM");
 
    return TRUE;
 }
@@ -2308,6 +2412,8 @@ VarExpander::ExpandCommand(const String& name, String *value) const
    if ( !ok )
    {
       wxLogSysError(_("Failed to execute the command '%s'"), name.c_str());
+
+      return FALSE;
    }
 
    return TRUE;
@@ -2339,7 +2445,7 @@ VarExpander::ExpandOriginal(const String& name, String *value) const
       // unfortunately we don't have the real name of the variable
       // here
       wxLogWarning(_("The variables using the original message cannot "
-               "be used in this template; variable ignored."));
+                     "be used in this template; variable ignored."));
    }
    else
    {
@@ -2381,13 +2487,10 @@ VarExpander::ExpandOriginal(const String& name, String *value) const
       else if ( name == "quote822" )
       {
          // insert the original message as RFC822 attachment
-#if 0
          String str;
          m_msg->WriteToString(str);
-         InsertData(strutil_strdup(str), str.Length(), "MESSAGE/RFC822");
-#else
-         m_msg->WriteToString(*value);
-#endif
+         m_sink.InsertAttachment(strutil_strdup(str), str.Length(),
+                                 "MESSAGE/RFC822");
       }
       else
       {

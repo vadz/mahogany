@@ -73,8 +73,13 @@ class MessageTemplateVarExpander
 {
 public:
    // expands the variable 'name' in the category 'category' returning the
-   // value in 'value' if the variable is known to us - otherwise just return
-   // FALSE without changing 'value' at all.
+   // value in 'value' if the variable is known to us - otherwise return
+   // FALSE.
+   //
+   // NB: if value is non empty when the function returns FALSE, the parser
+   //     considers that the error message had been already given. If it's
+   //     empty, it will log a standard message about "unknown variable"
+   //     instead.
    virtual bool Expand(const String& category,
                        const String& name,
                        String *value) const = 0;

@@ -309,12 +309,19 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       String value;
       if ( !m_expander->Expand(category, name, &value) )
       {
-         wxLogWarning(_("Unknown variable '%s' at line %d, position %d "
-                        "in the file '%s'."),
-                      name.c_str(),
-                      nLine,
-                      pc - pStartOfLine - name.length(),
-                      m_filename.c_str());
+         // don't log the message if the value is not empty - this means that
+         // the variable *is* known, but that the expansion, for some reason,
+         // failed.
+         if ( !value )
+         {
+            wxLogWarning(_("Unknown variable '%s' at line %d, position %d "
+                           "in the file '%s'."),
+                         name.c_str(),
+                         nLine,
+                         pc - pStartOfLine - name.length(),
+                         m_filename.c_str());
+         }
+         //else: message should have been already given
 
          return FALSE;
       }
