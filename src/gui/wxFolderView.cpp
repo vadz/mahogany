@@ -360,6 +360,9 @@ private:
    // the array containing the names of all the existing filters
    wxArrayString m_namesFilters;
 
+   // the array containing the default states of the filters
+   wxArrayInt m_defFilterStates;
+
    // the event handler to hook the kbd input (NULL initially, !NULL later)
    class wxFolderMsgViewerEvtHandler *m_evtHandlerMsgView;
 
@@ -1152,16 +1155,13 @@ void wxFolderMsgWindow::CreateViewerBar()
 
    choice->SetSize(choice->GetBestSize());
 
-   UpdateViewerBar();
-
    sizer->Add(choice, 0, wxALL | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
 
    // add the controls for the view filters
    wxArrayString labelsFilters;
-   wxArrayInt statesFilters;
    size_t countFilters = MessageView::GetAllAvailableFilters(&m_namesFilters,
                                                              &labelsFilters,
-                                                             &statesFilters);
+                                                             &m_defFilterStates);
    for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
    {
       if ( !nFilter )
@@ -1180,7 +1180,7 @@ void wxFolderMsgWindow::CreateViewerBar()
                                     wxNO_BORDER
                                 );
 
-      btn->SetValue(statesFilters[nFilter] != 0);
+      btn->SetValue(m_defFilterStates[nFilter] != 0);
 
       sizer->Add(btn, 0,
                  wxTOP | wxBOTTOM | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
@@ -1208,7 +1208,10 @@ void wxFolderMsgWindow::CreateViewerBar()
 
    sizer->Add(btnClose, 0, wxALL | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
 
-   // final initializations
+   // set the correct values for all controls
+   UpdateViewerBar();
+
+   // put the layout together
    m_winBar->SetSizer(sizer);
    m_winBar->SetAutoLayout(TRUE);
    sizer->Fit(m_winBar);
@@ -1226,12 +1229,15 @@ void wxFolderMsgWindow::DeleteViewerBar()
 void wxFolderMsgWindow::UpdateViewerBar()
 {
    Profile_obj profile(m_folderView->GetFolderProfile());
+   CHECK_RET( profile, _T("no profile in wxFolderMsgWindow::UpdateViewerBar()") );
 
+   // first update the current viewer
    wxString name = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
    int curViewer = m_namesViewers.Index(name);
    if ( curViewer != -1 )
    {
-      wxChoice *choice = wxStaticCast(FindWindow(Choice_Viewer), wxChoice);
+      wxChoice *choice = wxStaticCast(m_winBar->FindWindow(Choice_Viewer),
+                                      wxChoice);
 
       if ( choice )
       {
@@ -1239,12 +1245,34 @@ void wxFolderMsgWindow::UpdateViewerBar()
       }
       else
       {
-         FAIL_MSG( _T("where is out choice control?") );
+         FAIL_MSG( _T("where is our choice control?") );
       }
    }
    else
    {
       FAIL_MSG( _T("current viewer not in the list of all viewers?") );
+   }
+
+   // then update the filters states
+   const size_t countFilters = m_namesFilters.GetCount();
+   for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
+   {
+      // determine if this filter is enabled
+      bool found;
+      bool enable = profile->readEntry(m_namesFilters[nFilter], false, &found);
+      if ( !found )
+         enable = m_defFilterStates[nFilter] != 0;
+
+      // and change its state accordingly
+      wxToggleButton *btn = wxStaticCast
+                            (
+                              m_winBar->FindWindow(TglButton_First + nFilter),
+                              wxToggleButton
+                            );
+
+      CHECK_RET( btn, _T("no filter button in the viewer bar") );
+
+      btn->SetValue(enable);
    }
 }
 

@@ -334,6 +334,11 @@ size_t GetAllAvailablePlugins(const char *iface,
 {
    CHECK( names && descs, 0, _T("NULL pointer in GetAllAvailablePlugins()") );
 
+   names->Empty();
+   descs->Empty();
+   if ( states )
+      states->Empty();
+
    MModuleListing *listing = MModule::ListAvailableModules(iface);
    if ( !listing )
    {
