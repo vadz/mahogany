@@ -42,6 +42,7 @@ $Id$
 
 - drag and drop interaction with gmc and kfm
 
+- full URL parsing according to specs (have the BNF now)
 - cut and paste for wxllist, wxhtmlwindow, wxHtmlImport()
 
 - when run for the first time, should display "Mail" configuration dialog
