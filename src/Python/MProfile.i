@@ -8,16 +8,8 @@
 %module MProfile
 
 %{
-#include  "Mcommon.h"
-#include  "Profile.h"
-
-// we don't want to export our functions as we don't build a shared library
-#if defined(__WIN32__)
-#   undef SWIGEXPORT
-// one of these must be defined and the other commented out
-#   define SWIGEXPORT(a,b) a b
-//#   define SWIGEXPORT(a) a
-#endif
+#include "Mswig.h"
+#include "Profile.h"
 %}
 
 %import MObject.i

@@ -9,19 +9,8 @@
 %module Message
 
 %{
-#include   "Mpch.h"
-#include   "Mcommon.h"
+#include   "Mswig.h"
 #include   "Message.h"
-#include   "kbList.h"
-
-// we don't want to export our functions as we don't build a shared library
-#if defined(__WIN32__)
-#   undef SWIGEXPORT
-// one of these must be defined and the other commented out
-#   define SWIGEXPORT(a,b) a b
-//#   define SWIGEXPORT(a) a
-#endif
-
 %}
 
 %import MString.i

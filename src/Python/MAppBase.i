@@ -7,20 +7,10 @@
  *******************************************************************/
 %module   MAppBase
 %{
-#include   "Mcommon.h"
-#include   <wx/config.h>
-#include   "kbList.h"
-#include   "guidef.h"
-#include   "strutil.h"
-#include   "Profile.h"
-#include   "MFrame.h"
-#include   "gui/wxMFrame.h"
-#include   "Mdefaults.h"
-#include   "MApplication.h"
-#include   "gui/wxMApp.h"
-#include   "MDialogs.h"
-#include   "Profile.h"
-#include   <wx/mimetype.h>
+#include "Mswig.h"
+#include "gui/wxMApp.h"
+#include "MDialogs.h"
+#include "MFrame.h"
 
 // SWIG bug: it generates code which assignes the default argument to "char *"
 // variable. To make it compile we need this hack

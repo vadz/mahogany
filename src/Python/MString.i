@@ -11,17 +11,7 @@
 // module string.
 %module 	MString
 %{
-#include  "Mcommon.h"
-
-#include  <wx/config.h>
-
-// we don't want to export our functions as we don't build a shared library
-#if defined(__WIN32__)
-#   undef SWIGEXPORT
-// one of these must be defined and the other commented out
-#   define SWIGEXPORT(a,b) a b
-//#   define SWIGEXPORT(a) a
-#endif
+#include  "Mswig.h"
 %}
 
 class String 
