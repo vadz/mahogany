@@ -1372,6 +1372,10 @@ wxMApp::Help(int id, wxWindow *parent)
    // by now we should have either created it or returned
    CHECK_RET( m_HelpController, _T("no help controller, but should have one!") );
 
+#ifdef OS_WIN
+   // under Windows only help contents can be currently shown
+   m_HelpController->DisplayContents();
+#else // !OS_WIN
    switch(id)
    {
          // look up contents:
@@ -1403,6 +1407,7 @@ wxMApp::Help(int id, wxWindow *parent)
             wxLogWarning(_("No help found for current context (%d)."), id);
          }
    }
+#endif // OS_WIN/!OS_WIN
 }
 
 // ----------------------------------------------------------------------------
