@@ -221,7 +221,10 @@ class PalmOSModule : public MModule
    void StoreEMails(void);
 
    void Backup(void);
-
+   void Restore(void);
+   
+   void InstallFiles(char ** fnames, unsigned int files_total);
+   
    inline void ErrorMessage(const String &msg)
       { m_MInterface->Message(msg,NULL,"PalmOS module error!");wxYield(); }
    inline void Message(const String &msg)
@@ -233,6 +236,7 @@ MInterface * m_MInterface;
 private:
 
    int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
+   int CreateFileList(char *** list, DIR * dir);
    void RemoveFromList(char *name, char **list, int max);
 
    int m_PiSocket;
@@ -283,6 +287,7 @@ PalmOSModule::ProcessMenuEvent(int id)
       return TRUE;
 #ifdef EXPERIMENTAL
    case WXMENU_MODULES_PALMOS_RESTORE:
+      Restore();
       return TRUE;
    case WXMENU_MODULES_PALMOS_INSTALL:
       return TRUE;
@@ -679,6 +684,38 @@ static void protect_name(char *d, char *s)
    *d = '\0';
 }
 
+int
+PalmOSModule::CreateFileList(char ***list, DIR * dir) 
+{
+  char **filelist = 0;
+  struct dirent * dirent;
+
+  int file_len;
+  int filecount;
+  filecount = 0;
+  file_len = 0;
+  
+  while( (dirent = readdir(dir)) ) {
+    char name[256];
+    if (dirent->d_name[0] == '.')
+      continue;
+
+    if (!filelist) {
+      file_len += 256;
+      filelist = (char **) malloc(sizeof(char*) * file_len);
+    } else if (filecount >= file_len) {
+      file_len += 256;
+      filelist = (char **) realloc(filelist, sizeof(char*) * file_len);
+    }
+
+    sprintf(name, "%s/%s", m_BackupDir.c_str(), dirent->d_name);
+    filelist[filecount++] = strdup(name);
+  }
+  
+  *list = filelist;
+  return filecount;
+}
+
 void
 PalmOSModule::RemoveFromList(char *name, char **list, int max)
 {
@@ -699,49 +736,28 @@ PalmOSModule::Backup(void)
    if( ! IsConnected())
       return;
 
-   /* This is a first attempt to add backup functionality to Mahogany. It
-   ** is currently not ready for daily-use but shouldn´t put any danger to
-   ** your data either as it currently only reads from but does not write
-   ** to the Palm.
-   */
-   
    /* It will be necessary to add several options to the PalmOSModule
    ** configuration dialog, like ...
    */
-   bool removeDeleted = FALSE;     // really delete deleted entries on the Palm
-   bool onlyChanged   = FALSE;     // backup only changed files or always all?
 
-   mkdir(m_BackupDir, 0700);
+   bool removeDeleted = FALSE;     // really delete deleted entries on the Palm
+   bool onlyChanged   = TRUE;     // backup only changed files or always all?
+   DIR * dir;
+
+   dir = opendir(m_BackupDir);
+   if (dir <= 0) {
+       ErrorMessage(_("Couldn´t access backup directory."));
+       return;
+   }
    
    // Read original list of files in the backup dir
-   int i, ofile_total, ofile_len;
-   DIR * dir;
-   struct dirent * dirent;
+   int i, ofile_total;
    char ** orig_files = 0;
 
-   ofile_total = 0;
-   ofile_len = 0;
+   if (onlyChanged)
+     ofile_total = CreateFileList(&orig_files, dir);
 
-   if (onlyChanged) {
-      dir = opendir(m_BackupDir);
-      while( (dirent = readdir(dir)) ) {
-         char name[256];
-         if (dirent->d_name[0] == '.')
-            continue;
-
-         if (!orig_files) {
-            ofile_len += 256;
-            orig_files = (char **) malloc(sizeof(char*) * ofile_len);
-         } else if (ofile_total >= ofile_len) {
-            ofile_len += 256;
-            orig_files = (char **) realloc(orig_files, sizeof(char*) * ofile_len);
-         }
-
-         sprintf(name, "%s/%s", m_BackupDir.c_str(), dirent->d_name);
-         orig_files[ofile_total++] = strdup(name);
-      }
-      closedir(dir);
-   }
+   closedir(dir);
 
    i = 0;
    while (true) {
@@ -816,10 +832,148 @@ PalmOSModule::Backup(void)
       if (orig_files)
          free(orig_files);
    }
-   
-   
 }
 
+struct db {
+  	char name[256];
+  	int flags;
+  	unsigned long creator;
+  	unsigned long type;
+  	int maxblock;
+};
+
+#define pi_mktag(c1,c2,c3,c4) (((c1)<<24)|((c2)<<16)|((c3)<<8)|(c4))
+
+int compare(struct db * d1, struct db * d2)
+{
+  /* types of 'appl' sort later then other types */
+  if(d1->creator == d2->creator)
+    if(d1->type != d2->type) {
+      if(d1->type == pi_mktag('a','p','p','l'))
+        return 1;
+      if(d2->type == pi_mktag('a','p','p','l'))
+        return -1;
+    }
+  return d1->maxblock < d2->maxblock;
+}
+
+void
+PalmOSModule::InstallFiles(char **fnames, unsigned int files_total)
+{
+  struct DBInfo info;
+  struct db * db[256];
+  int    dbcount = 0;
+  int    i, j, max, size;
+  struct pi_file * f;
+
+  for (j = 0; j < files_total; j++) {
+	db[dbcount] = (struct db*)malloc(sizeof(struct db));
+
+    // remember filename
+    sprintf(db[dbcount]->name, "%s", fnames[j]);
+    	
+	f = pi_file_open(db[dbcount]->name);
+
+  	if (f==0) {
+      // TODO: show filename
+  	  ErrorMessage(_("Unable to open file!"));
+  	  break;
+  	}
+  	
+  	pi_file_get_info(f, &info);
+  	
+  	db[dbcount]->creator = info.creator;
+  	db[dbcount]->type = info.type;
+  	db[dbcount]->flags = info.flags;
+  	db[dbcount]->maxblock = 0;
+  	
+  	pi_file_get_entries(f, &max);
+  	
+  	for (i=0; i<max; i++) {
+  	  if (info.flags & dlpDBFlagResource)
+  	    pi_file_read_resource(f, i, 0, &size, 0, 0);
+  	  else
+  	    pi_file_read_record(f, i, 0, &size, 0, 0,0 );
+  	    
+  	  if (size > db[dbcount]->maxblock)
+  	    db[dbcount]->maxblock = size;
+  	}
+  	
+  	pi_file_close(f);
+  	dbcount++;
+  }
+
+  // sort list in alphabetical order
+  for (i=0; i < dbcount; i++)
+    for (j = i+1; j<dbcount; j++) 
+      if (compare(db[i], db[j]) > 0) {
+        struct db * temp = db[i];
+        db[i] = db[j];
+        db[j] = temp;
+      }
+
+  // todo: opening status window
+  
+  // Install files
+  for (i=0; i<dbcount; i++) {
+	if ( dlp_OpenConduit(m_PiSocket) < 0) {
+	   ErrorMessage(_("Exiting on cancel, all data not restored"));
+	   return;
+	}
+
+  	f = pi_file_open(db[i]->name);
+  	if (f == 0) {
+      // TODO: display filename
+  	  ErrorMessage(_("Unable to open file."));
+  	  break;
+  	}
+
+    // TODO: update status window
+    
+  	fflush(stdout);
+  	pi_file_install(f, m_PiSocket, 0);
+  	pi_file_close(f);
+  }
+  
+  struct PilotUser U;
+  if (dlp_ReadUserInfo(m_PiSocket, &U)>=0) {
+    U.lastSyncPC = 0x00000000; /* Hopefully unique constant, to tell
+                                  any Desktop software that databases
+                                  have been altered, and that a slow
+                                  sync is necessary */
+    U.lastSyncDate = U.successfulSyncDate = time(0);
+    dlp_WriteUserInfo(m_PiSocket, &U);
+  } 
+
+  // TODO: close status window
+
+}
+
+void
+PalmOSModule::Restore() 
+{
+  PiConnection conn(this);
+  if( ! IsConnected())
+     return;
+
+  DIR*   dir;
+  int    ofile_total; 
+  char ** fnames = 0;
+
+  dir = opendir(m_BackupDir);
+  if (dir <= 0) {
+    ErrorMessage(_("Couldn´t access backup directory."));
+    return;
+  }
+
+  ofile_total = CreateFileList(&fnames, dir);
+
+  // we´ve finished reading the filelist
+  closedir(dir);
+
+  // install files
+  InstallFiles(fnames, ofile_total);
+}
 
 void
 PalmOSModule::GetAddresses(PalmBook *palmbook)
