@@ -97,7 +97,7 @@ private:
 };
 
 // our AdbEntryGroup implementation
-class PasswdEntryGroup : public AdbEntryGroup
+class PasswdEntryGroup : public AdbEntryGroupCommon
 {
 public:
    // ctor

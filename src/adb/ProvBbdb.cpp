@@ -164,7 +164,7 @@ bool BbdbEntry::m_EnforceUnique;
 KBLIST_DEFINE(BbdbEntryList, BbdbEntry);
 
 // our AdbEntryGroup implementation
-class BbdbEntryGroup : public AdbEntryGroup
+class BbdbEntryGroup : public AdbEntryGroupCommon
 {
 public:
    // ctors

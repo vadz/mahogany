@@ -90,7 +90,7 @@ private:
 };
 
 // our AdbEntryGroup implementation
-class DummyEntryGroup : public AdbEntryGroup
+class DummyEntryGroup : public AdbEntryGroupCommon
 {
 public:
   // ctors

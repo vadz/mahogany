@@ -2343,27 +2343,20 @@ static bool CheckWhiteList(const Message *msg)
       manager->CreateBook(READ_APPCONFIG_TEXT(MP_WHITE_LIST)));
    manager->Unget();
 
-   wxArrayString names;
-   book->GetEntryNames(names);
-
-   bool found = false;
    for( Address *candidate = parser->GetFirst(); candidate;
       candidate = parser->GetNext(candidate) )
    {
-      for( size_t each = 0; each < names.GetCount(); ++each )
+      if( !candidate->GetDomain().empty() )
       {
-         RefCounter<AdbEntry> entry(book->GetEntry(names[each]));
-   
-         // FIXME: Grammar without escape sequences
-         if( entry->Matches(String(_T("*@"))+candidate->GetDomain(),
-            AdbLookup_EMail,AdbLookup_Match) )
+         if( book->Matches(String(_T("*@"))+candidate->GetDomain(),
+               AdbLookup_EMail,AdbLookup_Match) )
          {
-            found = true;
+            return true;
          }
       }
    }
 
-   return !found;
+   return false;
 }
 
 // check if we have a message with "suspicious" MIME structure

@@ -29,6 +29,7 @@
 #include "adb/AdbEntry.h"
 
 #include "Address.h"
+#include "pointers.h"
 
 // ============================================================================
 // implementation
@@ -77,6 +78,35 @@ AdbEntryCommon::GetField(size_t n, wxString *pstr) const
       else if(n == AdbField_FamilyName)
          *pstr = pstr->AfterLast(' ');
    }
+}
+
+// ----------------------------------------------------------------------------
+// AdbEntryGroupCommon
+// ----------------------------------------------------------------------------
+
+int AdbEntryGroupCommon::Matches(const wxChar *str, int where, int how)
+{
+   wxArrayString names;
+   size_t each;
+   int result = 0;
+
+   GetEntryNames(names);
+   for( each = 0; each < names.GetCount(); ++each )
+   {
+      RefCounter<AdbEntry> entry(GetEntry(names[each]));
+
+      result |= entry->Matches(str,where,how);
+   }
+
+   GetGroupNames(names);
+   for( each = 0; each < names.GetCount(); ++each )
+   {
+      RefCounter<AdbEntryGroup> group(GetGroup(names[each]));
+
+      result |= group->Matches(str,where,how);
+   }
+   
+   return result;
 }
 
 // ----------------------------------------------------------------------------

@@ -122,7 +122,7 @@ private:
 };
 
 // our AdbEntryGroup implementation: it maps on a wxFileConfig group
-class FCEntryGroup : public AdbEntryGroup
+class FCEntryGroup : public AdbEntryGroupCommon
 {
 public:
   // ctors

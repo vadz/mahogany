@@ -74,7 +74,7 @@ private:
 KBLIST_DEFINE(PalmEntryList, PalmEntry);
 
 // our AdbEntryGroup implementation
-class PalmEntryGroup : public AdbEntryGroup
+class PalmEntryGroup : public AdbEntryGroupCommon
 {
 public:
   // ctors

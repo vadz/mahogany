@@ -30,7 +30,7 @@
   the comments in MObject.h for more details about it.
 */
 
-class AdbBook : public AdbEntryGroup
+class AdbBook : public AdbEntryGroupCommon
 {
 public:
   // accessors

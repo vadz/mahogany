@@ -227,9 +227,19 @@ public:
     /// find entry by name (returns NULL if not found)
   virtual AdbEntry *FindEntry(const wxChar *szName) = 0;
 
+    /// apply Matches to each entry and recursively, return union of flags
+  virtual int Matches(const wxChar *str, int where, int how) = 0;
+
   // misc
     /// description of a group is just its name
   virtual String GetDescription() const { return GetName(); }
+};
+
+class AdbEntryGroupCommon : public AdbEntryGroup
+{
+public:
+   /// Brute force implementation that really iterates all entries
+  virtual int Matches(const wxChar *str, int where, int how);
 };
 
 // ============================================================================
