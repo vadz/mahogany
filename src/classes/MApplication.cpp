@@ -624,10 +624,13 @@ MAppBase::OnShutDown()
    // FIXME: there should be no events by now, is this really needed? (VZ)
    MEventManager::DispatchPending();
 
-#ifdef OS_WIN
-   // clean up after cclient
-   free(myusername_full(NULL));
+   // suppress memory leak reports in debug mode - it is not a real memory
+   // leak as memory is allocated only once but still
+#if defined(OS_WIN) && defined(DEBUG)
+   // clean up after cclient (order is important as sysinbox() uses the
+   // username)
    free(sysinbox());
+   free(myusername_full(NULL));
 #endif // OS_WIN
 
 #ifdef USE_PYTHON_DYNAMIC
