@@ -135,3 +135,4 @@ bool EventManager::Unregister(void *handle)
 
    return true;
 }
+
