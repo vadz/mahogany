@@ -420,11 +420,11 @@ MailFolderCC::Ping(void)
 
 MailFolderCC::~MailFolderCC()
 {
-   ProcessEventQueue();
    CCQuiet();
    mail_check(m_MailStream); // update flags, etc, .newsrc
-   if( m_MailStream ) mail_close(m_MailStream);
    CCVerbose();
+   ProcessEventQueue(); // must be done before close or we run into trouble!!
+   if( m_MailStream ) mail_close(m_MailStream);
    if( m_Listing ) delete [] m_Listing;
 
    RemoveFromMap(m_MailStream);
