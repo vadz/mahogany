@@ -15,10 +15,17 @@ $Id$
 *** not fixed yet:
 *********************************************************************
 
+******* Priorities for KB: ******************************
 - retrieve messages starting from last one
 - folderview listctrl has extra Subject column behind Size field ???
-- reimplement some form of IsDirty() / HasBeenModified() for
-  wxComposeView.
+
+= wxLayout:
+  - add setting of background colour and/or image
+  - reimplement some form of IsDirty() / HasBeenModified() for
+    wxComposeView.
+  - update rectangle
+  - fix(simplify) cursor size calculation
+  - font optimisations(?)
 
 - IMAP progress updates don't appear because there is too much to be
   done in wxYield()?
@@ -29,31 +36,40 @@ $Id$
   own handler for that.)
   EFAX now sends image/tiff!
   Configurable! Options for tiff2ps!
+  >>> Finish this
+
+- check in new options panels
+
+- once this works, make mailfolders collectable:
+  - have a "collect" flag
+  - have a global "NewMail" folder setting and ensure its existence
+    (and the one of SentFolder) in VerifySettings()
+
+- Change MessageCC code to first look for a mail cache entry via
+  mail_elt() instead of always fetching message.
+- speed up copy mail to folder by cusing c-client functionality
+- add references (and In-Reply-To: ?) headers to message replies
+  wxComposeView: if replying, only mark message as answered if reply
+  got sent
+- when inserting filetype of unknown MIME type, prompt for it,
+  possibly have a MIME types editor (similar to netscape's?)
+- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
+  SendMessageCC::AddPart()
+
+---> simplify Profiles on separate branch
+**************** end of KB priorities :-) *********************
 
 - do not redraw messageview if the message is the one currently being
   shown
   -- option to keep wxLayoutList around for reuse?
 - show status dialog while importing graphics into messageview
 - fix occasional segfault/memory corruption in MailfolderCC.cpp
-- Change MessageCC code to first look for a mail cache entry via
-  mail_elt() instead of always fetching message.
-- speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
 - cannot select only message in a folder or first message without
   chosing a different one first
-- add references (and In-Reply-To: ?) headers to message replies
-  wxComposeView: if replying, only mark message as answered if reply
-  got sent
 - IMPROVE HEADER SUPPORT
 
-- fix my OpenAnyFolderDialog to take hostname and folderpath, as
-  required for imap  --> drop the dialog!
-
-- when inserting filetype of unknown MIME type, prompt for it,
-  possibly have a MIME types editor (similar to netscape's?)
-- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
-  SendMessageCC::AddPart()
 - add "double click to open" profile option support to folder list ctrl
 - Things like CopyMessagesToFolder need a return code indicating
   whether they were successful or not, otherwise MoveMessagesToFolde r
