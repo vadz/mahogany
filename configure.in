@@ -415,9 +415,9 @@ if test "$USE_PYTHON" = 1 ; then
 #              ],
 #              [$libpath_python1_5_main -lpython1.5]
 #             )
-           ]
+           ], [ USE_PYTHON=0 ]
          )
-       ]
+       ], [ USE_PYTHON=0 ]
    )
    AC_PATH_PROG(SWIG,swig)
    if test "x$SWIG" != "x"
@@ -425,10 +425,13 @@ if test "$USE_PYTHON" = 1 ; then
 	MAKE_USE_SWIG="USE_SWIG=yes"
    fi
 fi
-AC_SUBST(MAKE_USE_PYTHON)
-AC_SUBST(MAKE_USE_SWIG)
-if test "x$MAKE_USE_PYTHON" = x 
+
+if test "$USE_PYTHON" = 1
 then
+  MAKE_USE_PYTHON="USE_PYTHON=yes"
+  AC_SUBST(MAKE_USE_PYTHON)
+  AC_SUBST(MAKE_USE_SWIG)
+else
   AC_MSG_WARN("Building M without Python leads to reduced functionality!")
 fi
 
@@ -445,7 +448,7 @@ dnl check for msgfmt
 AC_PATH_PROG(MSGFMT,msgfmt)
 if test "x$MSGFMT" = x
 then
-AC_MSG_WARN("Cannot translate messages.")
+  AC_MSG_WARN("Cannot translate messages.")
   MSGFMT="echo msgfmt "
   AC_SUBST(MSGFMT)
 fi
