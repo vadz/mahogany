@@ -58,16 +58,16 @@
 #define USE_WXWINDOWS 1
 
 /** Define if you use wxWindows, version 2. */
-/* #undef USE_WXWINDOWS2 */
+#define USE_WXWINDOWS2 1
 
 /** Define if you use wxWindows, wxXt port. */
-#define USE_WXXT 1
+/* #undef USE_WXXT */
 
 /** Define if you use wxWindows, wxGTK port. */
-/* #undef USE_WXGTK */
+#define USE_WXGTK 1
 
 /** Define if you want to use wxString instead of C++ string */
-/* #undef USE_WXSTRING */
+#define USE_WXSTRING 1
 
 /** Define if you use Python. */
 #define USE_PYTHON 1

@@ -1,9 +1,14 @@
 /*-*- c++ -*-********************************************************
  * strutil.h : utility functions for string handling                *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$                *
+ *                                                                  *
+ * $Log$
+ * Revision 1.6  1998/05/14 09:48:31  KB
+ * added IsEmpty() to strutil, minor changes
+ *
  *******************************************************************/
 #ifndef STRUTIL_H
 #define STRUTIL_H
@@ -16,6 +21,11 @@
 
 /**@name String class helper functions */
 //@{
+
+
+#ifndef USE_WXSTRING // use std::string
+inline bool IsEmpty(const String& s) { return s.c_str() == '\0'; }
+#endif
 
 /** Read a NL terminated line into a string.
 
@@ -69,7 +79,7 @@ void strutil_toupper(String &str);
     @return true if they are identical
 */
 bool strutil_cmp(String const & str1, String const & str2,
-		 int offs1 = 0, int offs2 = 0);
+                 int offs1 = 0, int offs2 = 0);
 
 /** Compare two strings, starting at an offset each.
 
@@ -83,8 +93,8 @@ bool strutil_cmp(String const & str1, String const & str2,
 */
 bool
 strutil_ncmp(String const &str1, String const &str2, int n,
-	     int offs1 = 0,
-	     int offs2 = 0);
+             int offs1 = 0,
+             int offs2 = 0);
 
 /** Convert a long integer to a string.
 
@@ -123,13 +133,13 @@ void strutil_splitlist(String const &str, std::map<String,String> &table);
    This takes the string and splits it into tokens delimited by the
    given delimiters, by using the strsep() function. The tokens are
    returned as an STL list.
-   @param string	pointer to the character array holding the string
-   @param delim		character array holding the delimiters
-   @param tlist		reference to an STL String list to append the tokens to
+   @param string     pointer to the character array holding the string
+   @param delim          character array holding the delimiters
+   @param tlist          reference to an STL String list to append the tokens to
   */
 void strutil_tokenise(char *string, const char *delim, STL_LIST<String> &tlist);
 
-#ifndef	HAVE_STRSEP
+#ifndef     HAVE_STRSEP
 char * strsep(char **stringp, const char *delim);
 #endif
 

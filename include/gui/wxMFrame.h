@@ -6,6 +6,9 @@
  * $Id$               *
  *
  * $Log$
+ * Revision 1.9  1998/05/14 09:48:40  KB
+ * added IsEmpty() to strutil, minor changes
+ *
  * Revision 1.8  1998/05/11 20:18:44  VZ
  * Testing CVS from Windows
  *
@@ -38,7 +41,7 @@ private:
    /// each frame has a unique name used to identify it
    String	name;
    /// used to set the name of the window class
-   void	SetName(String const &name);
+   virtual void	SetName(String const &name);
    /// is it initialised?
    bool 	initialised;
 protected:

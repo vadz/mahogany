@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/14 09:48:28  KB
+ * added IsEmpty() to strutil, minor changes
+ *
  * Revision 1.5  1998/05/12 12:18:56  VZ
+ *
  * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
  *
  * Revision 1.4  1998/05/02 15:21:32  KB
@@ -32,10 +36,11 @@
 #   pragma interface "PathFinder.h"
 #endif
 
-#ifndef USE_PCH
-#  include	<Mcommon.h>
-#  include	<CommonBase.h>
-#  include	<list>
+#include   <list>
+
+#ifdef USE_PCH
+#   include	<Mcommon.h>
+#   include	<CommonBase.h>
 #endif
 
 /**@name PathFinder class for finding files */

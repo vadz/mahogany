@@ -174,8 +174,9 @@ SEARCH_INCLUDE="\
     /usr/local/include/X11R6  \
     /usr/local/include/X11R5  \
     /usr/local/include/X11R4  \
-    /usr/local/include        \	
-    /usr/local/src            \	
+    /usr/local/include        \        
+    /usr/local/src            \        
+    /usr/scratch/tmp          \
                               \
     /usr/X11/include          \
     /usr/include/X11          \
@@ -343,6 +344,7 @@ if test "$USE_WXGTK" = 1; then
       CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
       WX_LINK="$ac_path_to_link -lwx_gtk"
       WX_INCLUDE="$ac_path_to_include/wxGTK/include $ac_path_to_include/wxGTK/setup/${OSTYPE}"
+      WX_DEFS=-D__GTK__
       AC_MSG_RESULT(yes)
       WX_DEFS=-D__GTK__
     else
@@ -388,8 +390,13 @@ else
         CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
         WX_LINK="$ac_path_to_link -lwx_xt -lwx_xtwidgets $XT_LIBS $XLIBS"
         WX_SLINK="$ac_pure_path_to_link/libwx_xt.a $ac_pure_path_to_link/libwx_xtwidgets.a $XT_LIBS $XLIBS"
+<<<<<<< configure.in
+        WX_INCLUDE="$ac_path_to_include/wxxt $ac_path_to_include/wxxt/setup/${OSTYPE}"
+        AC_MSG_RESULT(yes)
+=======
 	WX_INCLUDE="$ac_path_to_include/wxxt $ac_path_to_include/wxxt/setup/${OSTYPE}"
 	AC_MSG_RESULT(yes)
+>>>>>>> 1.10
       else
         AC_MSG_RESULT(no)
       fi
