@@ -510,8 +510,8 @@ else
 			AC_MSG_WARN("Cannot generate class documentation!")
 		else 
 			dnl use scandoc
-			DOCHTML="\$(PERL) \$(SCANDOCHTML)"
-			DOCTEX="\$(PERL) \$(SCANDOCTEX)"
+			DOCHTML="\$(SCANDOCHTML)"
+			DOCTEX="\$(SCANDOCTEX)"
 		fi
 	fi
 fi

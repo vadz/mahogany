@@ -3977,8 +3977,8 @@ fi
 		then
 			echo "configure: warning: "Cannot generate class documentation!"" 1>&2
 		else 
-						DOCHTML="\$(PERL) \$(SCANDOCHTML)"
-			DOCTEX="\$(PERL) \$(SCANDOCTEX)"
+						DOCHTML="\$(SCANDOCHTML)"
+			DOCTEX="\$(SCANDOCTEX)"
 		fi
 	fi
 fi
