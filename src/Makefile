@@ -51,16 +51,16 @@ libM.so: subdirs
 
 # build the binary which is statically linked to wxGTK, dynamically to
 # everything else
-quartstatic: $(MOBJS)
+quartstatic: $(MOBJS) modules_object
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS_STATIC)
 
 # build the binary which is statically linked to wxGTK and GTK+, dynamically
 # to everything else
-semistatic: $(MOBJS)
+semistatic: $(MOBJS) modules_obj
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(LIBS_STATIC) $(GUI_LIBS_STATIC)
 
 # build a (completely) statically linked binary
-static: $(MOBJS)
+static: $(MOBJS) modules_obj
 	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(LIBS) -lcrypt
 
 subdirs:
@@ -70,6 +70,9 @@ subdirs:
 modules:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i modules; done
 	set -e; $(MAKE) -C modules modules
+
+modules_obj:
+	set -e; $(MAKE) -C modules 
 
 doc:
 	$(MAKE) -C ../include $@
@@ -109,7 +112,7 @@ msgcat:
 	set -e; for i in $(SUB_DIRS) modules ; do $(MAKE) -C $$i $@; done
 #	$(MAKE) -C $(BUILDDIR)/locale mergecat
 
-.PHONY: all dep clean doc semistatic static allclean install msgcat subdirs install-modules modules main
+.PHONY: all dep clean doc semistatic static allclean install msgcat subdirs install-modules modules main modules_obj
 
 
 
