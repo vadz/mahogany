@@ -700,9 +700,11 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
             // message
             if ( quote == M_ACTION_NEVER )
             {
-               // can't just leave it empty because wxComposeView::DoInitText()
-               // would use the default for it then
-               templ = "$cursor";
+               // FIXME: this is just a quick and dirty hack, what we really
+               //        need is a way to pass an extra flag to ReplyMessages()
+               //        below, but simply doing this should work in most cases
+               templ.Replace("$QUOTE", "");
+               templ.Replace("$quote", "");
             }
 
 #define CASE_REPLY(kind) \
