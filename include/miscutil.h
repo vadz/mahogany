@@ -14,6 +14,7 @@
 #ifndef  USE_PCH
 #   include "Mconfig.h"
 #   include "FolderType.h"
+#   include "Profile.h"
 #endif
 
 /**@name Miscellaneous utility functions */
@@ -77,6 +78,19 @@ extern String GetSequenceString(const UIdArray *sequence);
 /// Gets an UIdArray with all message uids in the folder:
 extern UIdArray *GetAllMessagesSequence(class ASMailFolder *mf);
 
+/// Get the user's From mail address from a profile
+extern String miscutil_GetFromAddress(Profile *p,
+                                      String * personal = NULL,
+                                      String * email = NULL);
+/// Get the user's reply address from a profile
+extern String miscutil_GetReplyAddress(Profile *p,
+                                       String * personal = NULL,
+                                       String * email = NULL);
+/// Expand a local (user-only) mail address
+extern String miscutil_ExpandLocalAddress(Profile *p, const String &mbox);
+
+/// Get Default hostname or empty for mail addresses
+extern String miscutil_GetDefaultHost(Profile *p);
 //@}
 #endif // MISCUTIL_H
 

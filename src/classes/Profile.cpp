@@ -252,6 +252,7 @@ private:
 
 const char * gs_RootPath_Identity = M_IDENTITY_CONFIG_SECTION;
 const char * gs_RootPath_Profile = M_PROFILE_CONFIG_SECTION;
+const char * gs_RootPath_FilterProfile = M_FILTERS_CONFIG_SECTION;
 
 /**
    ProfileImpl class, managing configuration options on a per class basis.
@@ -428,7 +429,38 @@ private:
          m_ProfileName << '/' << name;
       }
 };
-//@}
+/**
+   Filter profile class which is a Profile representing a single
+   filter rule.
+   @see Profile
+   @see wxConfig
+*/
+
+class FilterProfile : public ProfileImpl
+{
+public:
+   static FilterProfile * CreateFilterProfile(const String &name)
+      { return new FilterProfile(name); }
+   
+   virtual const char * GetRootPath(void) const
+      {
+         return gs_RootPath_FilterProfile;
+      }
+private:
+   /** Constructor.
+       @param iClassName the name of this profile
+       @param iParent the parent profile
+       This will try to load the configuration file given by
+       iClassName".profile" and look for it in all the paths specified
+       by GetAppConfig()->readEntry(MP_PROFILEPATH).
+
+   */
+   FilterProfile(const String & name)
+      {
+         m_ProfileName = GetRootPath();
+         m_ProfileName << '/' << name;
+      }
+};
 
 
 
@@ -658,6 +690,16 @@ Profile::CreateIdentity(const String & idName)
    ASSERT(idName.Length() == 0 ||  // only relative paths allowed
           (idName[0u] != '.' && idName[0u] != '/'));
    Profile *p =  Identity::CreateIdentity(idName);  
+   EnforcePolicy(p);
+   return p;
+}
+
+Profile *
+Profile::CreateFilterProfile(const String & idName)
+{
+   ASSERT(idName.Length() == 0 ||  // only relative paths allowed
+          (idName[0u] != '.' && idName[0u] != '/'));
+   Profile *p =  FilterProfile::CreateFilterProfile(idName);  
    EnforcePolicy(p);
    return p;
 }

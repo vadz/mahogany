@@ -703,13 +703,7 @@ CalendarFrame::GetConfig(void)
 
    // settings read from folder profile:
    Profile *fp = m_MInterface->CreateProfile(m_FolderName);
-   m_MyEmail = fp->readEntry(MP_RETURN_ADDRESS,
-                             MP_RETURN_ADDRESS_D);
-   if(m_MyEmail.Length() == 0)
-   {
-      m_MyEmail = fp->readEntry(MP_USERNAME, MP_USERNAME_D);
-      m_MyEmail << '@' << fp->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
-   }
+   m_MyEmail = m_MInterface->miscutil_GetReplyAddress(fp);
    m_DateFormat = READ_CONFIG(fp, MP_DATE_FMT);
    m_NewMailFolder = READ_CONFIG(fp, MP_NEWMAIL_FOLDER);
    fp->DecRef();

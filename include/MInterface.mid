@@ -9,6 +9,7 @@ FILE_HEADER(MApplication)
 
 INCLUDE(`"MApplication.h"')
 INCLUDE(`"strutil.h"')
+INCLUDE(`"miscutil.h"')
 INCLUDE(`"MDialogs.h"')
 INCLUDE(`"MFolder.h"')
 INCLUDE(`"MailFolderCC.h"')
@@ -155,6 +156,9 @@ ARG(strutil_RegEx *, re)), `::strutil_freeRegEx(re);')
 
 FUNCTION(RemoveModule, void, (ARG(MModuleCommon *, module)),
       `mApplication->RemoveModule(module);')
+
+FUNCTION(miscutil_GetReplyAddress, String, (
+ARG(Profile *,p)), `return ::miscutil_GetReplyAddress(p);')
 
 /* The following line is the end of the MInterface interface definition. */
 ')

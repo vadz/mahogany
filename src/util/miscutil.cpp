@@ -16,6 +16,7 @@
 #   include "guidef.h"
 #   include "gui/wxMFrame.h"
 #   include "MApplication.h"
+#   include "Message.h"
 #endif
 
 #include <wx/colour.h>
@@ -433,4 +434,80 @@ UIdArray *GetAllMessagesSequence(ASMailFolder *mf)
       hil->DecRef();
    }
    return sequence;
+}
+
+
+
+
+/// Get the user's From mail address from a profile
+extern String miscutil_GetFromAddress(Profile *p,
+                                      String *pers,
+                                      String *email)
+{
+   ASSERT(p);
+   String personal = READ_CONFIG(p, MP_PERSONALNAME);
+   String mbox = READ_CONFIG(p, MP_USERNAME);
+   String host = READ_CONFIG(p, MP_HOSTNAME);
+   strutil_delwhitespace(host);
+   if(host.Length() == 0)
+      mbox = miscutil_ExpandLocalAddress(p, mbox);
+   else
+      mbox << '@' << host;
+   if(pers) *pers = personal;
+   if(email) *email = mbox;
+   return strutil_makeMailAddress(personal,mbox);
+}
+
+/// Get the user's reply address from a profile
+extern String miscutil_GetReplyAddress(Profile *p,
+                                       String *pers,
+                                       String *email)
+{
+   ASSERT(p);
+   String replyTo = READ_CONFIG(p, MP_RETURN_ADDRESS);
+   strutil_delwhitespace(replyTo);
+   if(replyTo.Length() == 0)
+      return miscutil_GetFromAddress(p, pers, email);
+   //else:
+   String personal, mbox;
+   personal = Message::GetNameFromAddress(replyTo);
+   mbox = Message::GetEMailFromAddress(replyTo);
+   if(mbox.Length() == 0)
+      return miscutil_GetFromAddress(p, &personal, &mbox);
+   if(pers) *pers = personal;
+   if(email) *email = mbox;
+   return strutil_makeMailAddress(personal, mbox);
+}
+
+extern String miscutil_GetDefaultHost(Profile *p)
+{
+   if( READ_CONFIG(p,   MP_ADD_DEFAULT_HOSTNAME ) == 0)
+      return "";
+   String hostname = READ_CONFIG(p, MP_HOSTNAME);
+   if(hostname.Length() == 0)
+   {
+      // get it from reply-to address:
+      (void) miscutil_GetReplyAddress(p, NULL, &hostname);
+      hostname = hostname.AfterLast('@');
+   }
+   return hostname;
+}
+
+/// Expand a local (user-only) mail address
+extern String miscutil_ExpandLocalAddress(Profile *p, const String &mbox)
+{
+   if( READ_CONFIG(p,   MP_ADD_DEFAULT_HOSTNAME ) == 0)
+      return mbox; // nothing to do
+
+   String email = Message::GetEMailFromAddress(mbox);
+   if(mbox.Find('@') != wxNOT_FOUND)
+      return mbox; // contains a host name
+
+   String mbox2 = mbox;
+   
+   String personal = Message::GetNameFromAddress(mbox2);
+
+
+   mbox2 << '@' << miscutil_GetDefaultHost(p);
+   return strutil_makeMailAddress(personal, mbox2);
 }

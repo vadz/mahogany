@@ -327,8 +327,8 @@ strutil_escapeString(const String &string);
    Combine personal name and mailaddress into a mailaddress line.
 */
 String
-strutil_makeMailAddress(const String &personal, const String
-                        &mailaddress);
+strutil_makeMailAddress(const String &personal,
+                        const String &mailaddress);
 
 /**
    Parse a mail address line and return personal/mailbox/hostname

@@ -57,6 +57,9 @@
 #define FILTER_ACTION      "Action"
 #define FILTER_ACTIVE      "Active"
 
+
+#include "MFilter.h"
+
 // data for the OneCritControl
 
 static const

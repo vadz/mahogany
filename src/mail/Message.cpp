@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Message class: entries for message header                        *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -28,18 +28,6 @@
 // private functions
 // ----------------------------------------------------------------------------
 
-// extract first and last names from an address
-static void SplitAddress(const String& addr,
-                         String *firstName,
-                         String *lastName);
-
-// extract the full name from the address
-static void SplitAddress(const String& addr,
-                         String *fullname);
-
-// extract the email address (without <>) from the address
-static void ExtractAddress(const String& addr,
-                           String *email);
 
 // ============================================================================
 // implementation
@@ -78,8 +66,23 @@ Message::ExpandParameter(MessageParameterList const & list, String
 // working with email addresses
 // ----------------------------------------------------------------------------
 
+/// extract first and last names from an address
 static void SplitAddress(const String& addr,
-                         String *fullname)
+                         String *firstName,
+                         String *lastName);
+
+/// extract the full name from the address
+static void SplitAddress(const String& addr,
+                         String *fullname);
+
+/// extract the email address (without <>) from the address
+static void ExtractAddress(const String& addr,
+                           String *email);
+
+
+static void
+SplitAddress(const String& addr,
+             String *fullname)
 {
    CHECK_RET( fullname, "fullname param can't be NULL" );
 
@@ -128,8 +131,10 @@ static void SplitAddress(const String& addr,
       fullname->Trim();
    }
 }
-static void ExtractAddress(const String& addr,
-                           String *email)
+
+static void
+ExtractAddress(const String& addr,
+               String *email)
 {
    *email = "";
 
@@ -176,14 +181,15 @@ static void ExtractAddress(const String& addr,
    email->Trim(FALSE);
 }
 
-static void SplitAddress(const String& addr,
-                         String *firstName,
-                         String *lastName)
+static void
+SplitAddress(const String& addr,
+             String *firstName,
+             String *lastName)
 {
    if ( addr.length() == 0 )
    {
-      *firstName = "";
-      *lastName = "";
+      if(firstName) *firstName = "";
+      if(lastName) *lastName = "";
       return;
    }
 
@@ -208,7 +214,8 @@ static void SplitAddress(const String& addr,
       *lastName = last;
 }
 
-/* static */ String Message::GetFirstNameFromAddress(const String& address)
+/* static */ String
+GetFirstNameFromAddress(const String& address)
 {
    String first;
    SplitAddress(address, &first, NULL);
@@ -246,6 +253,14 @@ String Message::GetAddressLastName(MessageAddressType type) const
    Address(addr, type);
 
    return GetLastNameFromAddress(addr);
+}
+
+/* static */
+String Message::GetEMailFromAddress(const String &address)
+{
+   String email;
+   ExtractAddress(address, &email);
+   return email;
 }
 
 bool Message::CompareAddresses(const String& adr1, const String& adr2)

@@ -75,8 +75,11 @@ public:
    /// Create a dummy Profile just inheriting from the top level
    static Profile * CreateEmptyProfile(const Profile *parent = NULL);
 
-   /// creates an Identity entry in the configuration
+   /// creates/gets an Identity entry in the configuration
    static Profile * CreateIdentity(const String &name);
+
+   /// creates/gets a FilterProfile entry in the configuration
+   static Profile * CreateFilterProfile(const String &name);
 
    /// Delete the global config object
    static void DeleteGlobalConfig();

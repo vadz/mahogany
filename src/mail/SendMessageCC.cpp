@@ -42,7 +42,7 @@
 #   include "strutil.h"
 #   include "strings.h"
 #   include "guidef.h"
-
+#   include "miscutil.h"
 #   include <strings.h>
 #endif // USE_PCH
 
@@ -97,13 +97,11 @@ SendMessageCC::Create(Protocol protocol,
 
    CHECK_RET(prof,"SendMessageCC::Create() requires profile");
 
-   m_FromPersonal = READ_CONFIG(prof, MP_PERSONALNAME);
-   m_FromAddress = READ_CONFIG(prof, MP_USERNAME);
-   m_FromAddress << '@' << READ_CONFIG(prof, MP_HOSTNAME);
+   (void) miscutil_GetFromAddress(prof, &m_FromPersonal, &m_FromAddress);
+   m_ReplyTo = miscutil_GetReplyAddress(prof);
 
    m_ReturnAddress = m_FromAddress;
-   m_ReplyTo = READ_CONFIG(prof, MP_RETURN_ADDRESS);
-
+   
    if(READ_CONFIG(prof,MP_COMPOSE_USE_XFACE) != 0)
       m_XFaceFile = prof->readEntry(MP_COMPOSE_XFACE_FILE,"");
    if(READ_CONFIG(prof, MP_USE_OUTBOX) != 0)
@@ -112,8 +110,7 @@ SendMessageCC::Create(Protocol protocol,
       m_SentMailName = READ_CONFIG(prof,MP_OUTGOINGFOLDER);
    m_CharSet = READ_CONFIG(prof, MP_CHARSET);
 
-   if(READ_CONFIG(prof, MP_ADD_DEFAULT_HOSTNAME))
-      m_DefaultHost = prof->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
+   m_DefaultHost = miscutil_GetDefaultHost(prof);
 
    if(protocol == Prot_SMTP)
    {
@@ -166,8 +163,8 @@ SendMessageCC::SetupAddresses(void)
 
    String mailbox, mailhost;
 
-   mailbox = strutil_before(m_FromAddress,'@');
-   mailhost = strutil_after(m_FromAddress,'@');
+   mailbox = Message::GetNameFromAddress(m_FromAddress);
+   mailhost = Message::GetEMailFromAddress(m_FromAddress);
    if(! mailhost.Length()) mailhost = wxGetFullHostName();
    
    m_Envelope->from->personal = CPYSTR(m_FromPersonal);

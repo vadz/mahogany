@@ -980,14 +980,16 @@ bool RunInstallWizard()
    gs_installWizardData.usePalmOs = TRUE;
 #endif
 
+   gs_installWizardData.name = READ_APPCONFIG(MP_PERSONALNAME);
    gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
    if(gs_installWizardData.email.Length() == 0)
    {
-      gs_installWizardData.email
-         << READ_APPCONFIG(MP_USERNAME)
-         << '@' << READ_APPCONFIG(MP_HOSTNAME);
+      String email = READ_APPCONFIG(MP_USERNAME);
+      email << '@' << READ_APPCONFIG(MP_HOSTNAME);
+   
+      gs_installWizardData.email = strutil_makeMailAddress(
+         gs_installWizardData.name, email);
    }
-   gs_installWizardData.name = READ_APPCONFIG(MP_PERSONALNAME);
    gs_installWizardData.pop  = READ_APPCONFIG(MP_POPHOST);
    gs_installWizardData.imap = READ_APPCONFIG(MP_IMAPHOST);
    gs_installWizardData.smtp = READ_APPCONFIG(MP_SMTPHOST);

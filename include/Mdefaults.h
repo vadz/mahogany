@@ -32,9 +32,11 @@
 #  ifdef OS_WIN
 #     define   M_PROFILE_CONFIG_SECTION   "/Profiles"
 #     define   M_IDENTITY_CONFIG_SECTION   "/Ids"
+#     define   M_FILTERS_CONFIG_SECTION   "/Filters"
 #  else  // Unix
 #     define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
 #     define   M_IDENTITY_CONFIG_SECTION   "/M/Ids"
+#     define   M_FILTERS_CONFIG_SECTION   "/M/Filters"
 #  endif // Unix/Win
 #endif
 

@@ -2260,9 +2260,7 @@ wxComposeView::SetFrom()
 {
    if ( m_txtFields[Field_From] )
    {
-      // FIXME this is incorrect, may be MP_RETURN_ADDRESS too (?)
-      m_from = READ_CONFIG(m_Profile, MP_RETURN_ADDRESS);
-
+      m_from = miscutil_GetReplyAddress(m_Profile);
       m_txtFields[Field_From]->SetValue(m_from);
    }
 }
