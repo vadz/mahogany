@@ -62,8 +62,6 @@ static const char *wxIconManagerFileExtensions[] =
 
 wxIconManager::wxIconManager()
 {
-   // NB: IconData has a dtor, we must call it ourselves and not let ~kbList
-   //     do it (which leads to memory leaks)
    m_iconList = new IconDataList(FALSE);
 
    AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
@@ -83,7 +81,7 @@ wxIconManager::~wxIconManager()
       IconData *id = *i;
 #     ifndef OS_WIN
          // now we do!
-         delete id->iconPtr;
+      delete id->iconPtr;
 #     else  // Windows
          // ok, you can delete it if you want but it provokes crash under
          // Windows and if I don't delete it I don't have memory leaks, so:

@@ -34,10 +34,10 @@
 #  include "Profile.h"
 #endif
 
-#include "Mdefaults.h"
-
-#include "MApplication.h"
-#include "gui/wxMApp.h"
+#include   "Mdefaults.h"
+#include   "MApplication.h"
+#include   "gui/wxMApp.h"
+#include   "gui/wxMIds.h"
 
 #include "MDialogs.h"
 #include "gui/wxlwindow.h"
@@ -463,6 +463,9 @@ public:
    void    UpdateProfile(void);
    /// transfer settings from profile to panel
    void    UpdatePanel(void);
+   /// update controls
+   void    UpdateUI(void);
+   void OnEvent(wxCommandEvent&);
 private:
    // profile settings:
    int    m_FolderType;
@@ -476,17 +479,50 @@ private:
    wxTextCtrl *m_UpdateIntervalTextCtrl;
    wxTextCtrl *m_UserIdTextCtrl;
    wxTextCtrl *m_PasswordTextCtrl;
-
+   wxButton   *m_CancelButton, *m_OkButton, *m_UndoButton;
    wxString choices[5];
+
+   DECLARE_EVENT_TABLE()
 };
 
-#define   MkTextCtrl(control,label) \
-  (void) new wxStaticText(this, -1, _(label), pos, wxSize(labelWidth,labelHeight)); \
-  control = new wxTextCtrl(this, -1, "",wxPoint(pos.x+labelWidth,pos.y)); \
+BEGIN_EVENT_TABLE(wxPEP_Folder, wxPanel)
+//  EVT_CHECKBOX(-1, wxAdbEMailPage::OnCheckBox)
+
+  EVT_BUTTON(M_WXID_PEP_OK, wxPEP_Folder::OnEvent)
+  EVT_BUTTON(M_WXID_PEP_UNDO, wxPEP_Folder::OnEvent)
+  EVT_BUTTON(M_WXID_PEP_CANCEL, wxPEP_Folder::OnEvent)
+  EVT_RADIOBOX(M_WXID_PEP_RADIO, wxPEP_Folder::OnEvent)
+END_EVENT_TABLE()
+
+
+#define   MkTextCtrl(control,label,id) \
+  (void) new wxStaticText(this, id, _(label), pos, wxSize(labelWidth,labelHeight)); \
+  control = new wxTextCtrl(this, id, "",wxPoint(pos.x+labelWidth,pos.y),wxSize(inputWidth,-1)); \
   pos.y += labelHeight;\
-  
-#define   labelWidth 200
-#define   labelHeight 20
+
+#define  MkButton(control,label,id) \
+  control = new wxButton(this, id, _(label), pos);
+
+void
+wxPEP_Folder::OnEvent(wxCommandEvent& event)
+{
+   switch(event.GetId())
+   {
+   case M_WXID_PEP_OK:
+      UpdateProfile();
+   case M_WXID_PEP_CANCEL:
+      m_Parent->Close();
+      break;
+   case M_WXID_PEP_UNDO:
+      UpdatePanel();
+      break;
+   case M_WXID_PEP_RADIO:
+      UpdateUI();
+      break;
+   default:
+      event.Skip();
+   }
+}
 
 wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    : wxProfileEditPanel(parent)
@@ -497,32 +533,92 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    wxASSERT(m_Parent);
 
    wxPoint  pos = wxPoint(10,10);
-
-   MkTextCtrl(m_FolderPathTextCtrl, "Path or name of folder");
-   MkTextCtrl(m_UpdateIntervalTextCtrl, "Update interval in seconds");
-   MkTextCtrl(m_UserIdTextCtrl, "User ID");
-   MkTextCtrl(m_PasswordTextCtrl, "Password");
+   long labelWidth, labelHeight;
+   long inputWidth;
+   
+   // first determine the longest button caption
+   wxClientDC dc(this);
+   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+   dc.GetTextExtent(_("Update interval in seconds"), &labelWidth, &labelHeight);
+   labelHeight *= 2;
+   labelWidth += 10;
+   dc.GetTextExtent("/home/karsten/MailFolders/foldername", &inputWidth, NULL);
+   inputWidth += 10;
+   
+   MkTextCtrl(m_FolderPathTextCtrl, "Path or name of folder",-1);
+   MkTextCtrl(m_UpdateIntervalTextCtrl, "Update interval in seconds",-1);
+   MkTextCtrl(m_UserIdTextCtrl, "User ID",-1);
+   MkTextCtrl(m_PasswordTextCtrl, "Password",-1);
    
    choices[0] = _("INBOX");
    choices[1] = _("Message box file");
    choices[2] = _("POP3");
    choices[3] = _("IMAP");
    choices[4] = _("NNTP/News");
-   m_FolderTypeRadioBox = new wxRadioBox( this, -1, _("Folder Type"),
-                                          pos,
+   m_FolderTypeRadioBox = new wxRadioBox( this, M_WXID_PEP_RADIO, _("Folder Type"),
+                                          wxPoint(labelWidth+inputWidth+10,10),
                                           wxSize(-1,-1),
                                           5, choices,
                                           1, wxRA_VERTICAL );
+
+   int x,y;
+   MkButton(m_OkButton,"Ok",M_WXID_PEP_OK);
+   m_OkButton->GetSize(&x,&y);
+   pos.x += 2*x;
+   MkButton(m_UndoButton,"Undo",M_WXID_PEP_UNDO);
+   pos.x += 2*x;
+   MkButton(m_CancelButton,"Cancel",M_WXID_PEP_CANCEL);
+
+   UpdatePanel();
+   Fit();
+}
+
+void
+wxPEP_Folder::UpdateUI(void)
+{
+   int type = m_FolderTypeRadioBox->GetSelection();
+   
+   if(type == 2 || type == 3) // we need defines for that: pop/imap
+   {
+      m_UserIdTextCtrl->Enable(TRUE);
+      m_PasswordTextCtrl->Enable(TRUE);
+   }
+   else
+   {
+      m_UserIdTextCtrl->Enable(FALSE);
+      m_PasswordTextCtrl->Enable(FALSE);
+   }
 }
 
 void
 wxPEP_Folder::UpdateProfile(void)
 {
+   int type;
+   m_Profile->writeEntry(MP_FOLDER_TYPE,type = m_FolderTypeRadioBox->GetSelection());
+   m_Profile->writeEntry(MP_FOLDER_PATH,m_FolderPathTextCtrl->GetValue());
+   m_Profile->writeEntry(MP_UPDATEINTERVAL,atoi(m_UpdateIntervalTextCtrl->GetValue()));
+   
+   if(type == 2 || type == 3) // we need defines for that: pop/imap
+   {
+      m_Profile->writeEntry(MP_POP_LOGIN,m_UserIdTextCtrl->GetValue());
+      m_Profile->writeEntry(MP_POP_PASSWORD,m_PasswordTextCtrl->GetValue());
+   }
 }
 
 void
 wxPEP_Folder::UpdatePanel(void)
 {
+   int type = READ_CONFIG(m_Profile,MP_FOLDER_TYPE);
+   
+   m_FolderTypeRadioBox->SetSelection(type);
+   m_FolderPathTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_FOLDER_PATH));
+   m_UpdateIntervalTextCtrl->SetValue(strutil_ltoa(READ_CONFIG(m_Profile,MP_UPDATEINTERVAL)));
+   if(type == 2 || type == 3) // we need defines for that: pop/imap
+   {
+      m_UserIdTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_POP_LOGIN));
+      m_PasswordTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_POP_PASSWORD));
+   }
+   UpdateUI();
 }
 
 
@@ -532,8 +628,20 @@ MDialog_FolderProfile(MWindow *parent, ProfileBase *profile)
 {
    // for now, open a frame and display the panel, return immediately
    wxMFrame *frame = new wxMFrame("FolderProfileFrame",parent);
-   
-   wxPEP_Folder *panel = new wxPEP_Folder(profile,frame);
+   (void) new wxPEP_Folder(profile,frame);
+   frame->SetTitle(_("M - Folder Profile Settings"));
+   frame->Fit();
+   frame->Show(TRUE);
+}
 
+void
+MDialog_FolderCreate(MWindow *parent, ProfileBase *profile)
+{
+   // for now, open a frame and display the panel, return immediately
+   wxMFrame *frame = new wxMFrame("FolderCreateFrame",parent);
+
+   (void) new wxPEP_Folder(profile,frame);
+   frame->SetTitle(_("M - Create Folder"));
+   frame->Fit();
    frame->Show(TRUE);
 }
