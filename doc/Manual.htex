@@ -2888,7 +2888,7 @@ who will be happy to add it.
 \subsection{Initialisation }
 
 At startup, \textsl{Mahogany} will load a file called \texttt{Minit.py}
-and call the \texttt{Minit()} function defined in there, without any
+and call the \texttt{Init()} function defined in there, without any
 arguments.
 
 

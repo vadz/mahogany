@@ -37,7 +37,7 @@ def GetUserName():
     return username
 
 # define the global initialisation callback Minit():
-def Minit():
+def Init():
     msg = "Welcome, " + GetUserName() + \
           ", to the wonderful world of M/Python integration!\n" + \
           "\n" + \
