@@ -409,9 +409,8 @@ private:
    // event registration handles
    void *m_eventFolderChange;    // for folder creatio/destruction
    void *m_eventOptionsChange;   // options change (update icons)
-   void *m_eventFolderUpdate;    // when a folder's status changes
-   void *m_eventMsgStatusChange; // or even a status of a message in it
-   void *m_eventFolderStatus;    // when a folder status changes
+   void *m_eventFolderUpdate;    // folder status (including msg status) change
+   void *m_eventFolderStatus;    // number of messages changed
 
    // the full names of the folder currently opened in the main frame and
    // of the current selection in the tree ctrl (empty if none)
@@ -1218,7 +1217,6 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
             MEventId_FolderTreeChange, &m_eventFolderChange,
             MEventId_OptionsChange, &m_eventOptionsChange,
             MEventId_FolderUpdate, &m_eventFolderUpdate,
-            MEventId_MsgStatus, &m_eventMsgStatusChange,
             MEventId_FolderStatus, &m_eventFolderStatus,
             MEventId_Null
          ) )
@@ -1958,8 +1956,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          }
       }
    }
-   else if ( ev.GetId() == MEventId_FolderUpdate ||
-             ev.GetId() == MEventId_MsgStatus )
+   else if ( ev.GetId() == MEventId_FolderUpdate )
    {
       MEventWithFolderData& event = (MEventWithFolderData &)ev;
 
@@ -2222,7 +2219,6 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
    MEventManager::DeregisterAll(&m_eventFolderChange,
                                 &m_eventOptionsChange,
                                 &m_eventFolderUpdate,
-                                &m_eventMsgStatusChange,
                                 &m_eventFolderStatus,
                                 NULL);
 
