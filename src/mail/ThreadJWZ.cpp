@@ -234,7 +234,7 @@ strutil_removeAllReplyPrefixes(const String& subject,
 
          default:
 #ifndef TEST_SUBJECT_NORMALIZE
-            FAIL_MSG( "unknown parser state" );
+            FAIL_MSG( _T("unknown parser state") );
 #endif
             // fall through
 
@@ -418,13 +418,13 @@ Threadable::~Threadable()
 
 void Threadable::destroy() {
    static size_t depth = 0;
-   CHECK_RET(depth < MAX_THREAD_DEPTH, "Deep recursion in Threadable::destroy()");
+   CHECK_RET(depth < MAX_THREAD_DEPTH, _T("Deep recursion in Threadable::destroy()"));
    if (m_child != 0)
    {
       depth++;
       m_child->destroy();
       depth--;
-      CHECK_RET(depth >= 0, "Negative recursion depth in Threadable::destroy()");
+      CHECK_RET(depth >= 0, _T("Negative recursion depth in Threadable::destroy()"));
    }
    delete m_child;
    m_child = 0;
@@ -777,7 +777,7 @@ size_t ThreadContainer::getIndex() const
    const size_t foolish = 1000000000;
    static size_t depth = 0;
    CHECK(depth < MAX_THREAD_DEPTH, foolish,
-      "Deep recursion in ThreadContainer::getIndex()");
+      _T("Deep recursion in ThreadContainer::getIndex()"));
    Threadable *th = getThreadable();
    if (th != 0)
       return th->getIndex();
@@ -789,7 +789,7 @@ size_t ThreadContainer::getIndex() const
          size_t index = getChild()->getIndex();
          depth--;
          CHECK(depth >= 0, foolish,
-            "Negative recursion depth in ThreadContainer::getIndex()");
+            _T("Negative recursion depth in ThreadContainer::getIndex()"));
          return index;
       }
       else
@@ -804,9 +804,9 @@ void ThreadContainer::addAsChild(ThreadContainer *c)
    // Takes into account the indices so that the new kid
    // is inserted in the correct position
 #if !defined(JWZ_NO_SORT)
-   CHECK_RET(c->getThreadable(), "No threadable in ThreadContainer::addAsChild()");
+   CHECK_RET(c->getThreadable(), _T("No threadable in ThreadContainer::addAsChild()"));
 #endif
-   CHECK_RET(!c->findChild(this), "Adding our own parent as a child !");
+   CHECK_RET(!c->findChild(this), _T("Adding our own parent as a child !"));
    ThreadContainer *prev = 0;
    ThreadContainer *current = getChild();
 
@@ -842,7 +842,7 @@ void ThreadContainer::addAsChild(ThreadContainer *c)
 bool ThreadContainer::findChild(ThreadContainer *target, bool withNexts) const
 {
    static size_t depth = 0;
-   CHECK(depth < MAX_THREAD_DEPTH, true, "Deep recursion in ThreadContainer::findChild()");
+   CHECK(depth < MAX_THREAD_DEPTH, true, _T("Deep recursion in ThreadContainer::findChild()"));
    if (m_child == target)
       return true;
    if (withNexts && m_next == target)
@@ -852,7 +852,7 @@ bool ThreadContainer::findChild(ThreadContainer *target, bool withNexts) const
       depth++;
       bool found = m_child->findChild(target, true);
       depth--;
-      CHECK(depth >= 0, true, "Negative recursion depth in ThreadContainer::findChild()");
+      CHECK(depth >= 0, true, _T("Negative recursion depth in ThreadContainer::findChild()"));
       if (found)
          return true;
    }
@@ -869,8 +869,8 @@ bool ThreadContainer::findChild(ThreadContainer *target, bool withNexts) const
 void ThreadContainer::flush(size_t &threadedIndex, size_t indent, bool indentIfDummyNode)
 {
    static size_t depth = 0;
-   CHECK_RET(depth < MAX_THREAD_DEPTH, "Deep recursion in ThreadContainer::flush()");
-   CHECK_RET(m_threadable != 0, "No threadable in ThreadContainer::flush()");
+   CHECK_RET(depth < MAX_THREAD_DEPTH, _T("Deep recursion in ThreadContainer::flush()"));
+   CHECK_RET(m_threadable != 0, _T("No threadable in ThreadContainer::flush()"));
    m_threadable->setChild(m_child == 0 ? 0 : m_child->getThreadable());
    if (!m_threadable->isDummy())
    {
@@ -887,7 +887,7 @@ void ThreadContainer::flush(size_t &threadedIndex, size_t indent, bool indentIfD
                         indent+(m_threadable->isDummy() ? 0 : 1),
                         indentIfDummyNode);
       depth--;
-      CHECK_RET(depth >= 0, "Negative recursion depth in ThreadContainer::flush()");
+      CHECK_RET(depth >= 0, _T("Negative recursion depth in ThreadContainer::flush()"));
    }
    if (m_threadable != 0)
       m_threadable->setNext(m_next == 0 ? 0 : m_next->getThreadable());
@@ -899,13 +899,13 @@ void ThreadContainer::flush(size_t &threadedIndex, size_t indent, bool indentIfD
 void ThreadContainer::destroy()
 {
    static size_t depth = 0;
-   CHECK_RET(depth < MAX_THREAD_DEPTH, "Deep recursion in ThreadContainer::destroy()");
+   CHECK_RET(depth < MAX_THREAD_DEPTH, _T("Deep recursion in ThreadContainer::destroy()"));
    if (m_child != 0)
    {
       depth++;
       m_child->destroy();
       depth--;
-      CHECK_RET(depth >= 0, "Negative recursion depth in ThreadContainer::destroy()");
+      CHECK_RET(depth >= 0, _T("Negative recursion depth in ThreadContainer::destroy()"));
    }
    delete m_child;
    m_child = 0;
@@ -1687,7 +1687,7 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
                                  bool recursive)
 {
    static size_t depth = 0;
-   ASSERT_MSG(depth < MAX_THREAD_DEPTH, "Deep recursion in Threader::collectSubjects()");
+   ASSERT_MSG(depth < MAX_THREAD_DEPTH, _T("Deep recursion in Threader::collectSubjects()"));
    size_t count = 0;
    ThreadContainer *c;
    for (c = parent->getChild(); c != 0; c = c->getNext())
@@ -1766,18 +1766,18 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
 void Threader::breakThreads(ThreadContainer* c)
 {
    static size_t depth = 0;
-   CHECK_RET(depth < MAX_THREAD_DEPTH, "Deep recursion in Threader::breakThreads()");
+   CHECK_RET(depth < MAX_THREAD_DEPTH, _T("Deep recursion in Threader::breakThreads()"));
 
    // Dummies should have been built
    CHECK_RET((c == m_root) || (c->getThreadable() != NULL),
-             "No threadable in Threader::breakThreads()");
+             _T("No threadable in Threader::breakThreads()"));
 
    // If there is no parent, there is no thread to break.
    if (c->getParent() != NULL)
    {
       // Dummies should have been built
       CHECK_RET(c->getParent()->getThreadable() != NULL,
-                "No parent's threadable in Threader::breakThreads()");
+                _T("No parent's threadable in Threader::breakThreads()"));
 
       ThreadContainer *parent = c->getParent();
 
@@ -1798,7 +1798,7 @@ void Threader::breakThreads(ThreadContainer* c)
          {
             ThreadContainer *prev = parent->getChild();
             CHECK_RET(parent->findChild(c),
-                      "Not child of its parent in Threader::breakThreads()");
+                      _T("Not child of its parent in Threader::breakThreads()"));
             while (prev->getNext() != c)
                prev = prev->getNext();
             prev->setNext(c->getNext());

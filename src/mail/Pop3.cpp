@@ -172,7 +172,7 @@ bool PopFlagsCacheFile::DoLoad(const wxTextFile& file, int version)
          }
          else
          {
-            FAIL_MSG( "where is the cache element?" );
+            FAIL_MSG( _T("where is the cache element?") );
          }
       }
    }
@@ -182,7 +182,7 @@ bool PopFlagsCacheFile::DoLoad(const wxTextFile& file, int version)
 
 bool PopFlagsCacheFile::DoSave(wxTempFile& file)
 {
-   CHECK( m_uidls, false, "must have UIDL array for saving" );
+   CHECK( m_uidls, false, _T("must have UIDL array for saving") );
 
    wxString str;
    str.reserve(1024);
@@ -199,7 +199,7 @@ bool PopFlagsCacheFile::DoSave(wxTempFile& file)
       }
       else
       {
-         FAIL_MSG( "where is the cache element?" );
+         FAIL_MSG( _T("where is the cache element?") );
 
          flags = 0;
       }
@@ -304,7 +304,7 @@ static bool Pop3_GetUIDLs(MAILSTREAM *stream, wxArrayString& uidls)
 
 extern void Pop3_SaveFlags(const String& folderName, MAILSTREAM *stream)
 {
-   CHECK_RET( stream, "Pop3_SaveFlags(): folder is closed" );
+   CHECK_RET( stream, _T("Pop3_SaveFlags(): folder is closed") );
 
    if ( !stream->nmsgs )
    {
@@ -332,7 +332,7 @@ extern void Pop3_SaveFlags(const String& folderName, MAILSTREAM *stream)
 
 extern void Pop3_RestoreFlags(const String& folderName, MAILSTREAM *stream)
 {
-   CHECK_RET( stream, "Pop3_RestoreFlags(): folder is closed" );
+   CHECK_RET( stream, _T("Pop3_RestoreFlags(): folder is closed") );
 
    if ( !stream->nmsgs )
    {

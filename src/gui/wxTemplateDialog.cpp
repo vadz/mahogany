@@ -261,10 +261,10 @@ void TemplateEditor::OnRClick(wxMouseEvent& event)
 void TemplateEditor::OnMenu(wxCommandEvent& event)
 {
    size_t id = (size_t)event.GetId();
-   CHECK_RET( id < m_items.GetCount(), "unexpected menu event" );
+   CHECK_RET( id < m_items.GetCount(), _T("unexpected menu event") );
 
    const TemplatePopupMenuItem *menuitem = m_items[id];
-   CHECK_RET( menuitem, "no menu item" );
+   CHECK_RET( menuitem, _T("no menu item") );
 
    String value;
    switch ( menuitem->type )
@@ -272,7 +272,7 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
          // put it here because in the last case clause we have some variables
          // which would be otherwise have to be taken inside another block...
       default:
-         FAIL_MSG("unexpected menu item type");
+         FAIL_MSG(_T("unexpected menu item type"));
          return;
 
       case TemplatePopupMenuItem::Normal:
@@ -343,7 +343,7 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
 
          // check that the format string contains exactly what it must
          ASSERT_MSG( strutil_extract_formatspec(menuitem->format) == "s",
-                     "incorrect format string" );
+                     _T("incorrect format string") );
 
          value.Printf(menuitem->format, value.c_str());
          break;
@@ -384,7 +384,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
          break;
 
       default:
-         FAIL_MSG("unknown popup menu item type");
+         FAIL_MSG(_T("unknown popup menu item type"));
          return;
    }
 
@@ -401,7 +401,7 @@ void TemplateEditor::CreatePopupMenu()
 
    // the top level pseudo item must have type "Submenu" - otherwise we
    // wouldn't have any menu at all
-   CHECK_RET( m_menuInfo.type == TemplatePopupMenuItem::Submenu, "no menu?" );
+   CHECK_RET( m_menuInfo.type == TemplatePopupMenuItem::Submenu, _T("no menu?") );
 
    m_menu = new wxMenu;
    m_menu->SetTitle(_("Please choose"));
@@ -462,7 +462,7 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
 
    // this array should be in sync with MessageTemplateKind enum
    ASSERT_MSG( WXSIZEOF(gs_templateNames) == MessageTemplate_Max,
-               "forgot to update the labels array?" );
+               _T("forgot to update the labels array?") );
    for ( size_t n = 0; n < WXSIZEOF(gs_templateNames); n++ )
    {
       listbox->Append(_(gs_templateNames[n]));
@@ -507,7 +507,7 @@ void wxFolderTemplatesDialog::SaveChanges()
 
 void wxFolderTemplatesDialog::OnListboxSelection(wxCommandEvent& event)
 {
-   CHECK_RET( m_textctrl, "unexpected listbox selection event" );
+   CHECK_RET( m_textctrl, _T("unexpected listbox selection event") );
 
    if ( m_textctrl->IsModified() )
    {
@@ -583,7 +583,7 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
 
    // this array should be in sync with MessageTemplateKind enum
    ASSERT_MSG( WXSIZEOF(gs_templateNames) == MessageTemplate_Max,
-               "forgot to update the labels array?" );
+               _T("forgot to update the labels array?") );
    wxString choices[MessageTemplate_Max];
    for ( size_t n = 0; n < WXSIZEOF(gs_templateNames); n++ )
    {
@@ -684,7 +684,7 @@ wxString wxAllTemplatesDialog::GetTemplateTitle(MessageTemplateKind kind)
          break;
 
       default:
-         FAIL_MSG("unknown template kind");
+         FAIL_MSG(_T("unknown template kind"));
    }
 
    title.Printf(_("Configure templates for %s"), what.c_str());
@@ -705,7 +705,7 @@ wxString wxAllTemplatesDialog::GetTemplateValue() const
 
 void wxAllTemplatesDialog::SaveChanges()
 {
-   wxASSERT_MSG( !!m_name, "shouldn't try to save" );
+   wxASSERT_MSG( !!m_name, _T("shouldn't try to save") );
 
    SetMessageTemplate(m_name, m_textctrl->GetValue(), m_kind, NULL);
 }
@@ -779,7 +779,7 @@ void wxAllTemplatesDialog::OnListboxSelection(wxCommandEvent& event)
 
 void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& event)
 {
-   wxASSERT_MSG( !!m_name, "shouldn't try to delete" );
+   wxASSERT_MSG( !!m_name, _T("shouldn't try to delete") );
 
    String msg;
    msg.Printf(_("Do you really want to delete the template '%s'?"),

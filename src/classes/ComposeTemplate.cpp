@@ -541,7 +541,7 @@ ExpansionSink::InsertTextInto(Composer& cv) const
 {
    size_t nCount = m_texts.GetCount();
    ASSERT_MSG( m_attachments.GetCount() == nCount,
-               "something is very wrong in template expansion sink" );
+               _T("something is very wrong in template expansion sink") );
 
    for ( size_t n = 0; n < nCount; n++ )
    {
@@ -1003,7 +1003,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
 
       default:
          CHECK( header <= MessageHeader_LastControl, FALSE,
-                "unexpected macro in message category" );
+                _T("unexpected macro in message category") );
 
          // the MessageHeader enum values are the same as RecipientType ones,
          // so no translation is needed
@@ -1551,7 +1551,7 @@ VarExpander::ExpandOriginalText(const String& text,
       {
          // sanity test
          ASSERT_MSG( !wrapMargin || lineCur.length() <= wrapMargin,
-                     "logic error in auto wrap code" );
+                     _T("logic error in auto wrap code") );
 
          *value += lineCur;
 

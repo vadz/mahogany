@@ -30,7 +30,7 @@ public:
       }
       else
       {
-         FAIL_MSG( "NULL folder in MFInteractiveLock" );
+         FAIL_MSG( _T("NULL folder in MFInteractiveLock") );
       }
    }
 

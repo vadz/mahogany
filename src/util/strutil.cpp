@@ -355,7 +355,7 @@ strutil_extract_formatspec(const char *format)
                      break;
 
                   default:
-                     FAIL_MSG("unknown size field");
+                     FAIL_MSG(_T("unknown size field"));
                }
                break;
 
@@ -978,7 +978,7 @@ strutil_checkpasswd(const String& passwd)
 {
    wxString testdata = READ_APPCONFIG(MP_CRYPT_TESTDATA);
 
-   CHECK( !testdata.empty(), true, "shouldn't be called if no old password" );
+   CHECK( !testdata.empty(), true, _T("shouldn't be called if no old password") );
 
    String oldPassword = gs_GlobalPassword;
    gs_GlobalPassword = passwd;
@@ -1074,7 +1074,7 @@ strutil_expandfoldername(const String &name, MFolderType folderType)
       if ( !mhpath )
       {
          // oops - failed to init MH
-         FAIL_MSG("can't construct MH folder full name");
+         FAIL_MSG(_T("can't construct MH folder full name"));
       }
       else
       {
@@ -1227,7 +1227,7 @@ strutil_matchRegEx(const class strutil_RegEx *regex,
                    const String &pattern,
                    int flags)
 {
-   CHECK( regex, FALSE, "NULL regex" );
+   CHECK( regex, FALSE, _T("NULL regex") );
 
    return regex->Matches(pattern, flags);
 }
@@ -1364,7 +1364,7 @@ wxFontEncoding
 ConvertUnicodeToSystem(wxString *strUtf, wxFontEncoding enc)
 {
    CHECK( strUtf, wxFONTENCODING_SYSTEM,
-          "NULL string in ConvertUnicodeToSystem" );
+          _T("NULL string in ConvertUnicodeToSystem") );
 
    if ( !strUtf->empty() )
    {
@@ -1390,7 +1390,7 @@ ConvertUnicodeToSystem(wxString *strUtf, wxFontEncoding enc)
       }
       else
       {
-         ASSERT_MSG( enc == wxFONTENCODING_UTF8, "unknown Unicode enocding" );
+         ASSERT_MSG( enc == wxFONTENCODING_UTF8, _T("unknown Unicode encoding") );
       }
 
       wxString str(strUtf->wc_str(wxConvUTF8), wxConvLocal);

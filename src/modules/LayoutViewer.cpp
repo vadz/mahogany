@@ -249,7 +249,7 @@ void LayoutViewerWindow::OnMouseEvent(wxCommandEvent& event)
             break;
 
          default:
-            FAIL_MSG("unknown mouse action");
+            FAIL_MSG(_T("unknown mouse action"));
 
          case WXLOWIN_MENU_LCLICK:
             id = WXMENU_LAYOUT_LCLICK;
@@ -379,7 +379,7 @@ String LayoutViewer::GetSelection() const
                break;
 
             default:
-               FAIL_MSG( "unexpected wxLayoutExport result" );
+               FAIL_MSG( _T("unexpected wxLayoutExport result") );
          }
       }
 
@@ -521,7 +521,7 @@ void LayoutViewer::InsertRawContents(const String& data)
 {
    // as we return false from our CanProcess(), MessageView is not supposed to
    // ask us to process any raw data
-   FAIL_MSG( "LayoutViewer::InsertRawContents() shouldn't be called" );
+   FAIL_MSG( _T("LayoutViewer::InsertRawContents() shouldn't be called") );
 }
 
 void LayoutViewer::InsertText(const String& text, const MTextStyle& style)

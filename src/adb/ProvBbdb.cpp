@@ -944,7 +944,7 @@ void
 BbdbEntryGroup::DeleteGroup(const String& strName)
 {
    MOcheck();
-   wxFAIL_MSG("Not implemented");
+   wxFAIL_MSG(_T("Not implemented"));
 }
 
 AdbEntry *

@@ -364,7 +364,7 @@ public:
    // before us)
    void DecIndex()
    {
-      ASSERT_MSG( m_index > 0, "shouldn't be called" );
+      ASSERT_MSG( m_index > 0, _T("shouldn't be called") );
 
       m_index--;
    }
@@ -640,7 +640,7 @@ Composer::Options::Options()
 
 void Composer::Options::Read(Profile *profile)
 {
-   CHECK_RET( profile, "NULL profile in Composer::Options::Read" );
+   CHECK_RET( profile, _T("NULL profile in Composer::Options::Read") );
 
    // colours
    GetColourByName(&m_fg, READ_CONFIG(profile, MP_CVIEW_FGCOLOUR), "black");
@@ -673,7 +673,7 @@ void EditorContentPart::SetData(void *data,
                                 size_t length,
                                 const char *filename)
 {
-   ASSERT_MSG( data != NULL, "NULL data is invalid in EditorContentPart::SetData!" );
+   ASSERT_MSG( data != NULL, _T("NULL data is invalid in EditorContentPart::SetData!") );
 
    m_Data = data;
    m_Length = length;
@@ -690,7 +690,7 @@ void EditorContentPart::SetData(void *data,
 
 void EditorContentPart::SetFile(const String& filename)
 {
-   ASSERT_MSG( !filename.empty(), "a file attachment must have a valid file" );
+   ASSERT_MSG( !filename.empty(), _T("a file attachment must have a valid file") );
 
    m_Name =
    m_FileName = filename;
@@ -751,7 +751,7 @@ wxSizer *wxRcptControl::CreateControls(wxWindow *parent)
 void wxRcptControl::InitControls(const String& value,
                                   wxComposeView::RecipientType rt)
 {
-   CHECK_RET( m_choice, "must call CreateControls first" );
+   CHECK_RET( m_choice, _T("must call CreateControls first") );
 
    m_choice->SetSelection(rt);
    m_text->SetValue(value);
@@ -795,7 +795,7 @@ void wxRcptControl::OnTypeChange(wxComposeView::RecipientType rcptType)
 
       case Composer::Recipient_Max:
       default:
-         FAIL_MSG( "unexpected rcpt type on wxRcptControl" );
+         FAIL_MSG( _T("unexpected rcpt type on wxRcptControl") );
    }
 }
 
@@ -850,7 +850,7 @@ void wxRcptControl::OnExpand()
       case Composer::Recipient_None:
       case Composer::Recipient_Max:
       default:
-         FAIL_MSG( "unexpected wxRcptControl::OnExpand() call" );
+         FAIL_MSG( _T("unexpected wxRcptControl::OnExpand() call") );
    }
 }
 
@@ -1067,7 +1067,7 @@ Composer::RecipientType wxAddressTextCtrl::DoExpand()
 
       case Composer::Recipient_Max:
       default:
-         FAIL_MSG( "unexpected wxRcptControl type" );
+         FAIL_MSG( _T("unexpected wxRcptControl type") );
          // fall through
 
       case Composer::Recipient_None:
@@ -1144,7 +1144,7 @@ Composer::CreateNewArticle(const MailFolder::Params& params,
                                          wxComposeView::Mode_News,
                                          wxComposeView::Message_New);
 
-   CHECK( cv, NULL, "failed to create composer for a new article" );
+   CHECK( cv, NULL, _T("failed to create composer for a new article") );
 
    cv->Launch();
 
@@ -1172,7 +1172,7 @@ Composer::CreateNewMessage(const MailFolder::Params& params, Profile *profile)
                                          wxComposeView::Mode_Mail,
                                          wxComposeView::Message_New);
 
-   CHECK( cv, NULL, "failed to create composer for a new message" );
+   CHECK( cv, NULL, _T("failed to create composer for a new message") );
 
    cv->Launch();
 
@@ -1210,7 +1210,7 @@ Composer::CreateFwdMessage(const MailFolder::Params& params,
 Composer *
 Composer::EditMessage(Profile *profile, Message *msg)
 {
-   CHECK( msg, NULL, "no message to edit?" );
+   CHECK( msg, NULL, _T("no message to edit?") );
 
    // first, create the composer
 
@@ -1359,7 +1359,7 @@ wxComposeView::wxComposeView(const String &name,
 
 void wxComposeView::SetOriginal(Message *original)
 {
-   CHECK_RET( original, "no original message in composer" );
+   CHECK_RET( original, _T("no original message in composer") );
 
    m_OriginalMessage = original;
    m_OriginalMessage->IncRef();
@@ -1372,7 +1372,7 @@ void wxComposeView::SetDraft(Message *msg)
 {
    if ( m_DraftMessage )
    {
-      FAIL_MSG( "Duplicate X-M-Draft?" );
+      FAIL_MSG( _T("Duplicate X-M-Draft?") );
 
       m_DraftMessage->DecRef();
    }
@@ -1397,7 +1397,7 @@ wxComposeView::~wxComposeView()
    {
       if ( i == gs_listOfAllComposers.end() )
       {
-         FAIL_MSG( "composer not in the list of all composers?" );
+         FAIL_MSG( _T("composer not in the list of all composers?") );
 
          break;
       }
@@ -1455,7 +1455,7 @@ wxComposeView::CreateMenu()
       }
       else // unexpected
       {
-         FAIL_MSG( "didn't find \"Send later\" in compose menu, why?" );
+         FAIL_MSG( _T("didn't find \"Send later\" in compose menu, why?") );
       }
    }
    else // we do have calendar module
@@ -1481,7 +1481,7 @@ wxComposeView::CreateToolAndStatusBars()
 void wxComposeView::CreatePlaceHolder()
 {
    CHECK_RET( m_sizerRcpts && m_rcptExtra.IsEmpty(),
-              "can't or shouldn't create the place holder now!" );
+              _T("can't or shouldn't create the place holder now!") );
 
    m_sizerRcpts->Add(0, 0, 1);
    m_sizerRcpts->Add(new wxStaticText
@@ -1497,7 +1497,7 @@ void wxComposeView::CreatePlaceHolder()
 void wxComposeView::DeletePlaceHolder()
 {
    CHECK_RET( m_sizerRcpts && m_rcptExtra.IsEmpty(),
-              "can't or shouldn't delete the place holder now!" );
+              _T("can't or shouldn't delete the place holder now!") );
 
    // remove the spacers and the static text we had added to it
    m_sizerRcpts->Remove((int)0); // remove first spacer by position
@@ -1505,7 +1505,7 @@ void wxComposeView::DeletePlaceHolder()
    wxSizerItem *item =
       (wxSizerItem *)m_sizerRcpts->GetChildren().First()->Data();
 
-   ASSERT_MSG( item->IsWindow(), "should be the static text" );
+   ASSERT_MSG( item->IsWindow(), _T("should be the static text") );
 
    wxWindow *win = item->GetWindow();
    m_sizerRcpts->Remove((int)0); // remove static text by position
@@ -1654,7 +1654,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
 void
 wxComposeView::CreateEditor(void)
 {
-   wxASSERT_MSG( m_editor == NULL, "creating the editor twice?" );
+   wxASSERT_MSG( m_editor == NULL, _T("creating the editor twice?") );
 
    MModuleListing *listing =
       MModule::ListAvailableModules(MESSAGE_EDITOR_INTERFACE);
@@ -2039,7 +2039,7 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
 
       case Recipient_Max:
       default:
-         FAIL_MSG( "unexpected wxRcptControl type" );
+         FAIL_MSG( _T("unexpected wxRcptControl type") );
          // fall through
 
       case Recipient_None:
@@ -2054,7 +2054,7 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
    // this is a private function, AddRecipients() above is the public one and it
    // does the parameter validation
    CHECK_RET( !addr.empty() && addrType != Recipient_Max,
-              "invalid parameter in AddRecipient()" );
+              _T("invalid parameter in AddRecipient()") );
 
    // look if we don't already have it
    size_t count = m_rcptExtra.GetCount();
@@ -2200,7 +2200,7 @@ wxComposeView::InitText(Message *msg, const MessageView *msgview)
    else
    {
       // replying or forwarding - evaluate the template right now
-      CHECK_RET( msg, "no message in InitText" );
+      CHECK_RET( msg, _T("no message in InitText") );
 
       DoInitText(msg, msgview);
    }
@@ -2217,7 +2217,7 @@ void wxComposeView::Launch()
    switch ( m_kind )
    {
       default:
-         FAIL_MSG( "unknown message kind" );
+         FAIL_MSG( _T("unknown message kind") );
          // fall through
 
       case Message_New:
@@ -2254,13 +2254,13 @@ wxComposeView::DoInitText(Message *mailmsg, const MessageView *msgview)
          break;
 
       case Message_Forward:
-         ASSERT_MSG( m_mode == Mode_Mail, "can't forward article in news" );
+         ASSERT_MSG( m_mode == Mode_Mail, _T("can't forward article in news") );
 
          kind = MessageTemplate_Forward;
          break;
 
       default:
-         FAIL_MSG("unknown message kind");
+         FAIL_MSG(_T("unknown message kind"));
          // still fall through
 
       case Message_New:
@@ -2454,7 +2454,7 @@ void wxComposeView::OnFirstTimeModify()
    // don't clear the text below if we already have something there - but
    // normally we shouldn't
    CHECK_RET( !IsModified(),
-              "shouldn't be called if we had been already changed!" );
+              _T("shouldn't be called if we had been already changed!") );
 
    // evaluate the template right now if we have one and it hadn't been done
    // yet (for messages of kind other than new it is done on creation)
@@ -2495,7 +2495,7 @@ void wxComposeView::SetEncoding(wxFontEncoding encoding)
 
 void wxComposeView::SetEncodingToSameAs(Message *msg)
 {
-   CHECK_RET( msg, "no message in SetEncodingToSameAs" );
+   CHECK_RET( msg, _T("no message in SetEncodingToSameAs") );
 
    // find the first text part with non default encoding
    int count = msg->CountParts();
@@ -2936,7 +2936,7 @@ bool wxComposeView::StartExternalEditor()
             }
             else
             {
-               FAIL_MSG( "composer without frame?" );
+               FAIL_MSG( _T("composer without frame?") );
             }
 
             launchedOk = true;
@@ -2985,7 +2985,7 @@ bool wxComposeView::StartExternalEditor()
 
 void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 {
-   CHECK_RET( event.GetPid() == m_pidEditor , "unknown program terminated" );
+   CHECK_RET( event.GetPid() == m_pidEditor , _T("unknown program terminated") );
 
    // reenable editing the text in the built-in editor
    EnableEditing(true);
@@ -2997,7 +2997,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
    }
    else
    {
-      FAIL_MSG( "composer without frame?" );
+      FAIL_MSG( _T("composer without frame?") );
    }
 
    bool ok = false;
@@ -3106,7 +3106,7 @@ wxComposeView::InsertData(void *data,
 void
 wxComposeView::InsertFile(const char *fileName, const char *mimetype)
 {
-   CHECK_RET( !strutil_isempty(fileName), "filename can't be empty" );
+   CHECK_RET( !strutil_isempty(fileName), _T("filename can't be empty") );
 
    // if there is a slash after the dot, it is not extension (otherwise it
    // might be not an extension too, but consider that it is - how can we
@@ -3217,7 +3217,7 @@ wxComposeView::InsertText(const String &text)
 void
 wxComposeView::InsertMimePart(const MimePart *mimePart)
 {
-   CHECK_RET( mimePart, "no top MIME part in the message to edit?" );
+   CHECK_RET( mimePart, _T("no top MIME part in the message to edit?") );
 
    MimeType type = mimePart->GetType();
    switch ( type.GetPrimary() )
@@ -3264,7 +3264,7 @@ wxComposeView::InsertMimePart(const MimePart *mimePart)
             // we need to make a copy of the data as we're going to free() it
             unsigned long len;
             const void *data = mimePart->GetContent(&len);
-            CHECK_RET( data, "failed to retrieve the message data" );
+            CHECK_RET( data, _T("failed to retrieve the message data") );
 
             void *data2 = malloc(len);
             memcpy(data2, data, len);
@@ -3281,7 +3281,7 @@ wxComposeView::InsertMimePart(const MimePart *mimePart)
       case MimeType::CUSTOM5:
       case MimeType::CUSTOM6:
       default:
-         FAIL_MSG( "unknown MIME type" );
+         FAIL_MSG( _T("unknown MIME type") );
    }
 }
 
@@ -3391,7 +3391,7 @@ wxComposeView::BuildMessage() const
    switch ( m_mode )
    {
       default:
-         FAIL_MSG( "unknown protocol" );
+         FAIL_MSG( _T("unknown protocol") );
          // fall through nevertheless
 
       case Mode_Mail:
@@ -3527,7 +3527,7 @@ wxComposeView::BuildMessage() const
             break;
 
          default:
-            FAIL_MSG( "Unknown editor content part type!" );
+            FAIL_MSG( _T("Unknown editor content part type!") );
       }
 
       part->DecRef();
@@ -3592,7 +3592,7 @@ wxComposeView::BuildMessage() const
 bool
 wxComposeView::Send(bool schedule)
 {
-   CHECK( !m_sending, false, "wxComposeView::Send() reentered" );
+   CHECK( !m_sending, false, _T("wxComposeView::Send() reentered") );
 
    m_sending = true;
 
@@ -3866,7 +3866,7 @@ bool wxComposeView::DeleteDraft()
 
    // NB: GetFolder() doesn't IncRef() the result, so don't DecRef() it
    MailFolder *mf = m_DraftMessage->GetFolder();
-   CHECK( mf, false, "draft message without folder?" );
+   CHECK( mf, false, _T("draft message without folder?") );
 
    if ( !mf->DeleteMessage(m_DraftMessage->GetUId()) )
    {
@@ -4062,7 +4062,7 @@ wxComposeView::AutoSave()
    if ( !msg->WriteToString(contents) )
    {
       // this is completely unexpected
-      FAIL_MSG( "Failed to get the message text?" );
+      FAIL_MSG( _T("Failed to get the message text?") );
 
       return false;
    }
@@ -4186,7 +4186,7 @@ bool Composer::RestoreAll()
 void
 MessageEditor::EditAttachmentProperties(EditorContentPart *part)
 {
-   CHECK_RET( part, "no attachment to edit in EditAttachmentProperties" );
+   CHECK_RET( part, _T("no attachment to edit in EditAttachmentProperties") );
 
    AttachmentProperties props;
    props.filename = part->GetFileName();

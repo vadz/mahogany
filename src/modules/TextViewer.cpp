@@ -336,7 +336,7 @@ bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
          }
          else // must be double click, what else?
          {
-            ASSERT_MSG( event.LeftDClick(), "unexpected mouse event" );
+            ASSERT_MSG( event.LeftDClick(), _T("unexpected mouse event") );
 
             id = WXMENU_LAYOUT_DBLCLICK;
          }
@@ -570,14 +570,14 @@ void TextViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
 {
    // as we return false from CanInlineImages() this is not supposed to be
    // called
-   FAIL_MSG( "unexpected call to TextViewer::InsertImage" );
+   FAIL_MSG( _T("unexpected call to TextViewer::InsertImage") );
 }
 
 void TextViewer::InsertRawContents(const String& data)
 {
    // as we return false from our CanProcess(), MessageView is not supposed to
    // ask us to process any raw data
-   FAIL_MSG( "unexpected call to TextViewer::InsertRawContents()" );
+   FAIL_MSG( _T("unexpected call to TextViewer::InsertRawContents()") );
 }
 
 void TextViewer::InsertText(const String& text, const MTextStyle& style)

@@ -328,12 +328,12 @@ AdbEntryGroup *DummyEntryGroup::CreateGroup(const String& strName)
 
 void DummyEntryGroup::DeleteEntry(const String& strName)
 {
-  wxFAIL_MSG("Not implemented");
+  wxFAIL_MSG(_T("Not implemented"));
 }
 
 void DummyEntryGroup::DeleteGroup(const String& strName)
 {
-  wxFAIL_MSG("Not implemented");
+  wxFAIL_MSG(_T("Not implemented"));
 }
 
 AdbEntry *DummyEntryGroup::FindEntry(const char *szName)

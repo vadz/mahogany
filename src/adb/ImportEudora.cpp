@@ -127,7 +127,7 @@ bool AdbEudoraImporter::ParseTagValue(const char **ppc,
 {
    const char *pc = *ppc;
 
-   ASSERT_MSG( *pc == '<', "should be at the start of the entry!" );
+   ASSERT_MSG( *pc == '<', _T("should be at the start of the entry!") );
 
    // skip '<'
    pc++;
@@ -332,7 +332,7 @@ bool AdbEudoraImporter::StartImport(const String& filename)
 size_t AdbEudoraImporter::GetEntryNames(const String& path,
                                         wxArrayString& entries) const
 {
-   ASSERT_MSG( !path, "where did this path come from?" );
+   ASSERT_MSG( !path, _T("where did this path come from?") );
 
    entries.Empty();
 
@@ -359,7 +359,7 @@ size_t AdbEudoraImporter::GetEntryNames(const String& path,
 size_t AdbEudoraImporter::GetGroupNames(const String& path,
                                         wxArrayString& groups) const
 {
-   ASSERT_MSG( !path, "where did this path come from?" );
+   ASSERT_MSG( !path, _T("where did this path come from?") );
 
    return 0;
 }
@@ -368,7 +368,7 @@ bool AdbEudoraImporter::ImportEntry(const String& path,
                                     size_t index,
                                     AdbEntry *entry)
 {
-   CHECK( index < m_lineNumbers.GetCount(), FALSE, "invalid entry index" );
+   CHECK( index < m_lineNumbers.GetCount(), FALSE, _T("invalid entry index") );
 
    wxString nickname;
    if ( !ParseEudoraAdbEntry((size_t)m_lineNumbers[index], &nickname, entry) )
@@ -379,7 +379,7 @@ bool AdbEudoraImporter::ImportEntry(const String& path,
 #ifdef DEBUG
    wxString nicknameReal;
    entry->GetField(AdbField_NickName, &nicknameReal);
-   ASSERT_MSG( nicknameReal == nickname, "importing wrong entry?" );
+   ASSERT_MSG( nicknameReal == nickname, _T("importing wrong entry?") );
 #endif // DEBUG
 
    return TRUE;

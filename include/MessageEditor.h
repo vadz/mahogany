@@ -280,7 +280,7 @@ public:
    /// get our text, only valid for text parts
    const String& GetText() const
    {
-      ASSERT_MSG( m_Type == Type_Text, "this attachment doesn't have any text" );
+      ASSERT_MSG( m_Type == Type_Text, _T("this attachment doesn't have any text") );
 
       return m_Text;
    }
@@ -288,7 +288,7 @@ public:
    /// get our text length, only valid for text parts
    size_t GetLength() const
    {
-      ASSERT_MSG( m_Type == Type_Text, "this attachment doesn't have any text" );
+      ASSERT_MSG( m_Type == Type_Text, _T("this attachment doesn't have any text") );
 
       return m_Text.length();
    }
@@ -296,7 +296,7 @@ public:
    /// get the pointer to attachment data, only valid for data attachments
    const void *GetData() const
    {
-      ASSERT_MSG( m_Type == Type_Data, "this attachment doesn't have any data" );
+      ASSERT_MSG( m_Type == Type_Data, _T("this attachment doesn't have any data") );
 
       return m_Data;
    }
@@ -304,7 +304,7 @@ public:
    /// get the size of the attachment data, only valid for data attachments
    size_t GetSize() const
    {
-      ASSERT_MSG( m_Type == Type_Data, "this attachment doesn't have any data" );
+      ASSERT_MSG( m_Type == Type_Data, _T("this attachment doesn't have any data") );
 
       return m_Length;
    }

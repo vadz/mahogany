@@ -262,7 +262,7 @@ void PasswdEntry::GetField(size_t n, String *pstr) const
 
 void PasswdEntry::GetEMail(size_t n, String *pstr) const
 {
-   CHECK_RET( !n, "we have only one email" );
+   CHECK_RET( !n, _T("we have only one email") );
 
    AddressList_obj addrList(m_username, READ_APPCONFIG(MP_HOSTNAME));
 
@@ -450,7 +450,7 @@ size_t PasswdBook::GetNumberOfEntries() const
 
 AdbBook *PasswdDataProvider::CreateBook(const String& name)
 {
-   ASSERT_MSG( name.empty(), "book name is ignored by PasswdDataProvider" );
+   ASSERT_MSG( name.empty(), _T("book name is ignored by PasswdDataProvider") );
 
    return new PasswdBook();
 }
@@ -466,7 +466,7 @@ bool PasswdDataProvider::TestBookAccess(const String& name, AdbTests test)
    switch ( test )
    {
       default:
-         FAIL_MSG( "unknown access method" );
+         FAIL_MSG( _T("unknown access method") );
          // fall through
 
       case Test_Create:

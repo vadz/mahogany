@@ -74,7 +74,7 @@ int convertExitStatus(int status)
    }
 
    // shouldn't arrive here
-   wxFAIL_MSG("PGP: unhandled exit status");
+   wxFAIL_MSG(_T("PGP: unhandled exit status"));
    return 0;
 }
 

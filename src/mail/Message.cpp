@@ -70,7 +70,7 @@ static void ExtractAddress(const String& addr,
 static void
 SplitAddress(const String& address, String *fullname)
 {
-   CHECK_RET( fullname, "SplitAddress(): fullname param can't be NULL" );
+   CHECK_RET( fullname, _T("SplitAddress(): fullname param can't be NULL") );
 
    AddressList_obj addrList = address;
 
@@ -100,7 +100,7 @@ SplitAddress(const String& address, String *fullname)
 static void
 ExtractAddress(const String& address, String *email)
 {
-   CHECK_RET( email, "ExtractAddress(): email param can't be NULL" );
+   CHECK_RET( email, _T("ExtractAddress(): email param can't be NULL") );
 
    AddressList_obj addrList = address;
 
@@ -118,7 +118,7 @@ ExtractAddress(const String& address, String *email)
       // check that there are no more as this function doesn't work correctly
       // (and shouldn't be used) with multiple addresses
       ASSERT_MSG( !addrList->HasNext(addr),
-                  "extra addresses ignored in ExtractAddress" );
+                  _T("extra addresses ignored in ExtractAddress") );
    }
 }
 
@@ -154,7 +154,7 @@ static void
 SplitAddress(const String& addr,
              String *fullname)
 {
-   CHECK_RET( fullname, "fullname param can't be NULL" );
+   CHECK_RET( fullname, _T("fullname param can't be NULL") );
 
    // The code below will crash for empty addresses
    if ( addr.length() == 0 )

@@ -261,7 +261,7 @@ void wxFolderRenameDialog::DoUpdateMboxPath(const String& folderName)
 void wxFolderRenameDialog::DoUpdateUI()
 {
    // if we have the checkbox, we must have the other two controls as well
-   CHECK_RET( m_textMbox && m_labelMbox, "where are our controls?" );
+   CHECK_RET( m_textMbox && m_labelMbox, _T("where are our controls?") );
 
    bool enable = m_chkRenameMbox->GetValue();
 
@@ -338,7 +338,7 @@ extern bool ShowFolderRenameDialog(const MFolder *folder,
                                    String *mboxName,
                                    wxWindow *parent)
 {
-   CHECK( folderName, false, "invalid parameter in ShowFolderRenameDialog" );
+   CHECK( folderName, false, _T("invalid parameter in ShowFolderRenameDialog") );
 
    // only allow to rename the mailbox if we have a valid mboxName pointer
    // and if the mailbox can be renamed

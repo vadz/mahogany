@@ -126,7 +126,7 @@ bool AdbVCardImporter::StartImport(const String& filename)
 size_t AdbVCardImporter::GetEntryNames(const String& path,
                                        wxArrayString& entries) const
 {
-   wxCHECK_MSG( !path, 0, "path can be only empty in AdbVCardImporter" );
+   wxCHECK_MSG( !path, 0, _T("path can be only empty in AdbVCardImporter") );
 
    // we suppose that vCard contains info for just one person
 
@@ -186,7 +186,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
                                    AdbEntry *entry)
 {
    wxCHECK_MSG( !path && (index < m_cards.GetCount()), false,
-                "unexpected params in AdbVCardImporter" );
+                _T("unexpected params in AdbVCardImporter") );
 
    // set all simple fields
    wxString val;

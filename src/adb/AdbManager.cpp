@@ -217,7 +217,7 @@ bool
 AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
 {
   AdbManager_obj manager;
-  CHECK( manager, FALSE, "can't expand address: no AdbManager" );
+  CHECK( manager, FALSE, _T("can't expand address: no AdbManager") );
 
   results.Empty();
 
@@ -371,7 +371,7 @@ AdbManager *AdbManager::Get()
 void AdbManager::Unget()
 {
   wxCHECK_RET( ms_pManager,
-               "AdbManager::Unget() called without matching Get()!" );
+               _T("AdbManager::Unget() called without matching Get()!") );
 
   if ( !ms_pManager->DecRef() ) {
     // the object deleted itself
@@ -387,7 +387,7 @@ void AdbManager::Delete()
   // we should only be called when the program terminates, otherwise some
   // objects could still have references to us
   ASSERT_MSG( !mApplication->IsRunning(),
-              "AdbManager::Delete() called, but the app is still running!" );
+              _T("AdbManager::Delete() called, but the app is still running!") );
 
 #ifdef DEBUG
   size_t count = 0;
@@ -402,7 +402,7 @@ void AdbManager::Delete()
   }
 
   // there should be _exactly_ one extra IncRef(), not several
-  ASSERT_MSG( count < 2, "Forgot AdbManager::Unget() somewhere" );
+  ASSERT_MSG( count < 2, _T("Forgot AdbManager::Unget() somewhere") );
 }
 
 // ----------------------------------------------------------------------------
@@ -472,7 +472,7 @@ AdbBook *AdbManager::CreateBook(const String& name,
 size_t AdbManager::GetBookCount() const
 {
   ASSERT_MSG( gs_provCache.Count() == gs_booksCache.Count(),
-              "mismatch between gs_booksCache and gs_provCache!" );
+              _T("mismatch between gs_booksCache and gs_provCache!") );
 
   return gs_booksCache.Count();
 }

@@ -1131,7 +1131,7 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    size_t nCount;
    if ( !dial )
    {
-      FAIL_MSG( "GetDialUpManager() returned NULL?" );
+      FAIL_MSG( _T("GetDialUpManager() returned NULL?") );
       nCount = 0;
    }
    else
@@ -1465,7 +1465,7 @@ bool RunInstallWizard()
 
    if ( gs_isWizardRunning )
    {
-      FAIL_MSG( "the installation wizard is already running!" );
+      FAIL_MSG( _T("the installation wizard is already running!") );
 
       return false;
    }
@@ -1682,7 +1682,7 @@ bool RunInstallWizard()
       }
       else
       {
-         FAIL_MSG( "Cannot get main folder?" );
+         FAIL_MSG( _T("Cannot get main folder?") );
       }
    }
 
@@ -1873,7 +1873,7 @@ CopyEntries(wxConfigBase *src,
       switch ( src->GetEntryType(entry) )
       {
          case wxConfigBase::Type_Unknown:
-            wxFAIL_MSG("unexpected entry type");
+            wxFAIL_MSG(_T("unexpected entry type"));
             // fall through
 
          case wxConfigBase::Type_String:
@@ -2086,7 +2086,7 @@ public:
             else
             {
                // what can we do? nothing...
-               FAIL_MSG( "profile without config - can't delete entry" );
+               FAIL_MSG( _T("profile without config - can't delete entry") );
             }
 
             profile->writeEntry(MP_IMAPHOST, hostname);
@@ -2506,7 +2506,7 @@ public:
    virtual bool OnVisitFolder(const wxString& folderName)
       {
          MFolder_obj folder(folderName);
-         CHECK( folder, false, "traversed folder which doesn't exist?" );
+         CHECK( folder, false, _T("traversed folder which doesn't exist?") );
 
          if ( folder->GetFlags() & MF_FLAGS_INCOMING )
          {
@@ -2626,7 +2626,7 @@ Upgrade(const String& fromVersion)
          break;
 
       default:
-         FAIL_MSG("invalid version value");
+         FAIL_MSG(_T("invalid version value"));
          // fall through
 
       case Version_Unknown:
@@ -2781,7 +2781,7 @@ SetReplaceFromOption(const String& folderName)
    MFolder_obj folder(folderName);
    if ( !folder )
    {
-      FAIL_MSG( "folder must exist" );
+      FAIL_MSG( _T("folder must exist") );
    }
    else
    {
@@ -2920,7 +2920,7 @@ VerifyStdFolders(void)
             break;
 
          default:
-            FAIL_MSG( "unexpected VerifyStdFolder return value" );
+            FAIL_MSG( _T("unexpected VerifyStdFolder return value") );
             // fall through
 
          case 1:
@@ -2973,7 +2973,7 @@ VerifyStdFolders(void)
             break;
 
          default:
-            FAIL_MSG( "unexpected VerifyStdFolder return value" );
+            FAIL_MSG( _T("unexpected VerifyStdFolder return value") );
             // fall through
 
          case 1:

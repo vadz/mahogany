@@ -253,7 +253,7 @@ public:
    virtual String GetConfigPath() const
    {
       // we don't even have an associated wxConfig!
-      FAIL_MSG( "not supposed to be called" );
+      FAIL_MSG( _T("not supposed to be called") );
 
       return "";
    }
@@ -380,7 +380,7 @@ public:
          PCHECK();
 
          ASSERT_MSG( path.Length() == 0 || path[0u] != '/',
-                     "only relative paths allowed" );
+                     _T("only relative paths allowed") );
 
          m_ProfilePath = path;
       }
@@ -1070,7 +1070,7 @@ ProfileImpl::~ProfileImpl()
 
    if ( m_Suspended )
    {
-      FAIL_MSG( "deleting a suspended profile" );
+      FAIL_MSG( _T("deleting a suspended profile") );
 
       Discard(); // but we tidy up, no big deal
    }
@@ -1134,7 +1134,7 @@ ProfileImpl::DeleteGroup(const String & path)
 {
    PCHECK();
 
-   CHECK( !path.empty(), false, "must have a valid group name to delete it" );
+   CHECK( !path.empty(), false, _T("must have a valid group name to delete it") );
 
    if ( path[0u] != '/' )
    {
@@ -1378,7 +1378,7 @@ static void CommitGroup(wxConfigBase *cfg, String truePath, String suspPath)
             if ( !cfg->Read(name, &strValue) ||
                  !cfg->Write(truePath + name, strValue) )
             {
-               FAIL_MSG("failed to copy config entry");
+               FAIL_MSG(_T("failed to copy config entry"));
             }
             break;
 
@@ -1386,12 +1386,12 @@ static void CommitGroup(wxConfigBase *cfg, String truePath, String suspPath)
             if ( !cfg->Read(name, &numValue) ||
                  !cfg->Write(truePath + name, numValue) )
             {
-               FAIL_MSG("failed to copy config entry");
+               FAIL_MSG(_T("failed to copy config entry"));
             }
             break;
 
          default:
-            FAIL_MSG("unsupported config entry type");
+            FAIL_MSG(_T("unsupported config entry type"));
       }
 
       cont = cfg->GetNextEntry(name, index);
@@ -1413,7 +1413,7 @@ ProfileImpl::Commit(void)
 {
    PCHECK();
 
-   CHECK_RET( m_Suspended, "calling Commit() without matching Suspend()" );
+   CHECK_RET( m_Suspended, _T("calling Commit() without matching Suspend()") );
 
    String truePath = GetName();
    truePath << '/';
@@ -1435,7 +1435,7 @@ ProfileImpl::Discard(void)
 {
    PCHECK();
 
-   CHECK_RET( m_Suspended, "calling Discard() without matching Suspend()" );
+   CHECK_RET( m_Suspended, _T("calling Discard() without matching Suspend()") );
 
    if ( !--m_Suspended )
    {
@@ -1454,11 +1454,11 @@ ProfileImpl::Discard(void)
 #endif
             ms_GlobalConfig->DeleteGroup(path);
 
-         ASSERT_MSG( success, "failed to delete suspended settings" );
+         ASSERT_MSG( success, _T("failed to delete suspended settings") );
       }
    }
 
-   ASSERT_MSG( ms_suspendCount > 0, "suspend count broken" );
+   ASSERT_MSG( ms_suspendCount > 0, _T("suspend count broken") );
 
    ms_suspendCount--;
 }
@@ -1526,7 +1526,7 @@ void RestoreArray(wxConfigBase *conf, wxArrayString& astr, const String& key)
 void SaveArray(Profile *profile, const wxArrayString& astr, const String& key)
 {
    wxConfigBase *conf = profile->GetConfig();
-   CHECK_RET( conf, "can't be used with non config based profile!" );
+   CHECK_RET( conf, _T("can't be used with non config based profile!") );
 
    conf->SetPath(profile->GetConfigPath());
 
@@ -1536,7 +1536,7 @@ void SaveArray(Profile *profile, const wxArrayString& astr, const String& key)
 void RestoreArray(Profile *profile, wxArrayString& astr, const String& key)
 {
    wxConfigBase *conf = profile->GetConfig();
-   CHECK_RET( conf, "can't be used with non config based profile!" );
+   CHECK_RET( conf, _T("can't be used with non config based profile!") );
 
    conf->SetPath(profile->GetConfigPath());
 
@@ -1611,7 +1611,7 @@ String ProfileImpl::GetFolderName() const
 
       if ( *p )
       {
-         ASSERT_MSG( *p == '/', "profile path must start with slash" );
+         ASSERT_MSG( *p == _T('/'), _T("profile path must start with slash") );
 
          // erase the slash
          folderName.erase(0, 1);
@@ -1638,8 +1638,8 @@ String Profile::GetSectionPath(const String& section)
    if ( ProfileImpl::ms_usingRegConfig )
    {
       // remove "/M" prefix
-      ASSERT_MSG( path[0u] == '/' && path[1u] == 'M',
-                  "all profile sections must start with \"/M\"" );
+      ASSERT_MSG( path[0u] == _T('/') && path[1u] == _T('M'),
+                  _T("all profile sections must start with \"/M\"") );
 
       path.erase(0, 2);
    }

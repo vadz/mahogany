@@ -136,7 +136,7 @@ extern "C"
    */
 void   MDialog_ErrorMessage(char const *message,
                             const wxWindow *parent = NULL,
-                            char const *title = MDIALOG_ERRTITLE,
+                            wxChar const *title = MDIALOG_ERRTITLE,
                             bool modal = false);
 
 /** display system error message:
@@ -147,7 +147,7 @@ void   MDialog_ErrorMessage(char const *message,
    */
 void   MDialog_SystemErrorMessage(char const *message,
                                   const wxWindow *parent = NULL,
-                                  char const *title = MDIALOG_SYSERRTITLE,
+                                  wxChar const *title = MDIALOG_SYSERRTITLE,
                                   bool modal = false);
 
 /** display error message and exit application
@@ -157,7 +157,7 @@ void   MDialog_SystemErrorMessage(char const *message,
    */
 void   MDialog_FatalErrorMessage(char const *message,
                                  const wxWindow *parent = NULL,
-                                 char const *title = MDIALOG_FATALERRTITLE);
+                                 wxChar const *title = MDIALOG_FATALERRTITLE);
 
 /** display normal message and, if configPath != NULL, give a user a checkbox
     "don't show this message again" which allows not to show the same message
@@ -171,7 +171,7 @@ void   MDialog_FatalErrorMessage(char const *message,
    */
 bool   MDialog_Message(char const *message,
                        const wxWindow *parent = NULL,
-                       char const *title = MDIALOG_MSGTITLE,
+                       wxChar const *title = MDIALOG_MSGTITLE,
                        const char *configPath = NULL,
                        int flags = 0);
 
@@ -190,7 +190,7 @@ bool   MDialog_Message(char const *message,
 */
 bool   MDialog_YesNoDialog(char const *message,
                            const wxWindow *parent = NULL,
-                           char const *title = MDIALOG_YESNOTITLE,
+                           wxChar const *title = MDIALOG_YESNOTITLE,
                            int flags = M_DLG_YES_DEFAULT,
                            const MPersMsgBox *persMsg = NULL,
                            const char *folderName = NULL);
@@ -209,7 +209,7 @@ bool   MDialog_YesNoDialog(char const *message,
  */
 MDlgResult MDialog_YesNoCancel(char const *message,
                                const wxWindow *parent = NULL,
-                               char const *title = MDIALOG_YESNOTITLE,
+                               wxChar const *title = MDIALOG_YESNOTITLE,
                                int flags = M_DLG_YES_DEFAULT,
                                const MPersMsgBox *persMsg = NULL);
 
@@ -262,7 +262,7 @@ bool MDialog_Message(char const *message,
                      const wxWindow *parent,
                      const MPersMsgBox *persMsg,
                      int flags = 0,
-                     char const *title = MDIALOG_MSGTITLE);
+                     wxChar const *title = MDIALOG_MSGTITLE);
 
 
 /** Ask user for a directory

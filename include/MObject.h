@@ -215,7 +215,7 @@ private:
  \
       void Attach(classname *ptr) \
       { \
-         ASSERT_MSG( !m_ptr, "should have used Detach() first" ); \
+         ASSERT_MSG( !m_ptr, _T("should have used Detach() first") ); \
  \
          m_ptr = ptr; \
       } \

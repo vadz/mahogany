@@ -49,7 +49,7 @@ SizeToString(unsigned long sizeBytes,
    switch ( show )
    {
       case MessageSize_Max: // to silence gcc warning
-         FAIL_MSG( "unexpected message size format" );
+         FAIL_MSG( _T("unexpected message size format") );
          // fall through
 
       case MessageSize_Automatic:

@@ -230,7 +230,7 @@ public:
    void OnCancel(wxCommandEvent& event);
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxOptionsEditDialog() { wxFAIL_MSG("unaccessible"); }
+   wxOptionsEditDialog() { wxFAIL_MSG(_T("unaccessible")); }
 
    // disable or reenable Ok and Apply buttons
    virtual void EnableButtons(bool enable);

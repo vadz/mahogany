@@ -531,7 +531,7 @@ bool wxMsgViewHeadersDialog::TransferDataToWindow()
    {
       if ( *p == ':' )
       {
-         wxASSERT_MSG( !!header, "header name shouldn't be empty" );
+         wxASSERT_MSG( !!header, _T("header name shouldn't be empty") );
 
          m_checklstBox->Append(header);
 
@@ -916,12 +916,12 @@ void wxCustomHeadersDialog::ModifyHeader(int index,
 {
    if ( m_listctrl->SetItem(index, 0, headerName) == -1 )
    {
-      FAIL_MSG("can't set item info in listctrl");
+      FAIL_MSG(_T("can't set item info in listctrl"));
    }
 
    if ( m_listctrl->SetItem(index, 1, headerValue) == -1 )
    {
-      FAIL_MSG("can't set item info in listctrl");
+      FAIL_MSG(_T("can't set item info in listctrl"));
    }
 
    wxListItem li;
@@ -930,7 +930,7 @@ void wxCustomHeadersDialog::ModifyHeader(int index,
    li.m_col = 0;
    if ( !m_listctrl->SetItem(li) )
    {
-      FAIL_MSG("can't change items icon in listctrl");
+      FAIL_MSG(_T("can't change items icon in listctrl"));
    }
 
    m_headerTypes[(size_t)index] = type;
@@ -945,12 +945,12 @@ void wxCustomHeadersDialog::AddHeader(int index,
 
    if ( m_listctrl->InsertItem(index, headerName, type) == -1 )
    {
-      FAIL_MSG("can't insert item into listctrl");
+      FAIL_MSG(_T("can't insert item into listctrl"));
    }
 
    if ( m_listctrl->SetItem(index, 1, headerValue) == -1 )
    {
-      FAIL_MSG("can't set item info in listctrl");
+      FAIL_MSG(_T("can't set item info in listctrl"));
    }
 }
 
@@ -966,7 +966,7 @@ void wxCustomHeadersDialog::GetHeader(int index,
    li.m_col = 1;
    if ( !m_listctrl->GetItem(li) )
    {
-      FAIL_MSG("can't get header value from listctrl");
+      FAIL_MSG(_T("can't get header value from listctrl"));
    }
 
    *headerValue = li.m_text;
@@ -1092,7 +1092,7 @@ void wxCustomHeadersDialog::OnUpdateUI(wxUpdateUIEvent& event)
 void wxCustomHeadersDialog::OnEdit(wxCommandEvent& WXUNUSED(event))
 {
    size_t sel;
-   CHECK_RET( GetSelection(&sel), "button should be disabled" );
+   CHECK_RET( GetSelection(&sel), _T("button should be disabled") );
 
    wxCustomHeaderDialog dlg(m_profile, GetParent(), TRUE);
 
@@ -1136,7 +1136,7 @@ void wxCustomHeadersDialog::OnAdd(wxCommandEvent& WXUNUSED(event))
 void wxCustomHeadersDialog::OnDelete(wxCommandEvent& WXUNUSED(event))
 {
    size_t sel;
-   CHECK_RET( GetSelection(&sel), "button should be disabled" );
+   CHECK_RET( GetSelection(&sel), _T("button should be disabled") );
 
    m_listctrl->DeleteItem(sel);
    m_headerTypes.RemoveAt(sel);
@@ -1228,7 +1228,7 @@ size_t GetCustomHeaders(Profile *profile,
                         wxArrayString *values,
                         wxArrayInt *types)
 {
-   CHECK( profile && names && values, (size_t)-1, "invalid parameter" );
+   CHECK( profile && names && values, (size_t)-1, _T("invalid parameter") );
 
    // init
    names->Empty();

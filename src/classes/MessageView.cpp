@@ -180,7 +180,7 @@ public:
                const String& tempfilename)
       : m_errormsg(errormsg)
    {
-      ASSERT_MSG( process && pid, "invalid process in ProcessInfo" );
+      ASSERT_MSG( process && pid, _T("invalid process in ProcessInfo") );
 
       m_process = process;
       m_pid = pid;
@@ -455,7 +455,7 @@ MessageView::Init()
 size_t MessageView::GetAllAvailableViewers(wxArrayString *names,
                                            wxArrayString *descs)
 {
-   CHECK( names && descs, 0, "NULL pointer in GetAllAvailableViewers" );
+   CHECK( names && descs, 0, _T("NULL pointer in GetAllAvailableViewers") );
 
    MModuleListing *listing =
       MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
@@ -488,7 +488,7 @@ MessageView::SetViewer(MessageViewer *viewer, wxWindow *parent)
       // simpler/cleaner than inserting "if ( m_viewer )" checks everywhere
       viewer = CreateDefaultViewer();
 
-      ASSERT_MSG( viewer, "must have default viewer, will crash without it!" );
+      ASSERT_MSG( viewer, _T("must have default viewer, will crash without it!") );
 
       m_usingDefViewer = true;
    }
@@ -597,8 +597,8 @@ wxFrame *MessageView::GetParentFrame() const
 
 String MessageView::GetFolderName() const
 {
-   CHECK( m_mailMessage->GetFolder(), "unknown",
-          "no folder in MessageView?" );
+   CHECK( m_mailMessage->GetFolder(), _T("unknown"),
+          _T("no folder in MessageView?") );
 
    return m_mailMessage->GetFolder()->GetName();
 }
@@ -633,9 +633,9 @@ MessageView::RegisterForEvents()
 {
    // register with the event manager
    m_regCookieOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
-   ASSERT_MSG( m_regCookieOptionsChange, "can't register for options change event");
+   ASSERT_MSG( m_regCookieOptionsChange, _T("can't register for options change event"));
    m_regCookieASFolderResult = MEventManager::Register(*this, MEventId_ASFolderResult);
-   ASSERT_MSG( m_regCookieASFolderResult, "can't reg folder view with event manager");
+   ASSERT_MSG( m_regCookieASFolderResult, _T("can't reg folder view with event manager"));
 }
 
 void MessageView::UnregisterForEvents()
@@ -684,7 +684,7 @@ void MessageView::OnOptionsChange(MEventOptionsChangeData& event)
          break;
 
       default:
-         FAIL_MSG("unknown options change event");
+         FAIL_MSG(_T("unknown options change event"));
    }
 
    Update();
@@ -718,7 +718,7 @@ MessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
          break;
 
          default:
-            FAIL_MSG("Unexpected async result event");
+            FAIL_MSG(_T("Unexpected async result event"));
       }
    }
 
@@ -766,7 +766,7 @@ void
 MessageView::ReadAllSettings(AllProfileValues *settings)
 {
    Profile *profile = GetProfile();
-   CHECK_RET( profile, "MessageView::ReadAllSettings: no profile" );
+   CHECK_RET( profile, _T("MessageView::ReadAllSettings: no profile") );
 
    // a macro to make setting many colour options less painful
    #define GET_COLOUR_FROM_PROFILE(col, name) \
@@ -940,7 +940,7 @@ MessageView::ShowHeaders()
       };
 
       ASSERT_MSG( EnvelopHeader_Max == WXSIZEOF(envelopHeadersNames),
-                  "forgot to update something - should be kept in sync!" );
+                  _T("forgot to update something - should be kept in sync!") );
 
       for ( n = 0; n < WXSIZEOF(envelopHeadersNames); n++ )
       {
@@ -995,7 +995,7 @@ MessageView::ShowHeaders()
       }
 
       // did their number change from just recounting?
-      ASSERT_MSG( nNonEnv == countNonEnvHeaders, "logic error" );
+      ASSERT_MSG( nNonEnv == countNonEnvHeaders, _T("logic error") );
 
       headerPtrs[countNonEnvHeaders] = NULL;
 
@@ -1018,7 +1018,7 @@ MessageView::ShowHeaders()
          if ( envhdr == wxNOT_FOUND )
          {
             // if headerIsEnv, then it must be in the array
-            FAIL_MSG( "logic error" );
+            FAIL_MSG( _T("logic error") );
 
             continue;
          }
@@ -1035,7 +1035,7 @@ MessageView::ShowHeaders()
                   MessageAddressType mat;
                   switch ( envhdr )
                   {
-                     default: FAIL_MSG( "forgot to add header here ");
+                     default: FAIL_MSG( _T("forgot to add header here") );
                      case EnvelopHeader_From: mat = MAT_FROM; break;
                      case EnvelopHeader_To: mat = MAT_TO; break;
                      case EnvelopHeader_Cc: mat = MAT_CC; break;
@@ -1074,7 +1074,7 @@ MessageView::ShowHeaders()
 
 
             default:
-               FAIL_MSG( "unknown envelop header" );
+               FAIL_MSG( _T("unknown envelop header") );
          }
 
          // extract encoding info from it
@@ -1302,7 +1302,7 @@ wxColour MessageView::GetQuoteColour(size_t qlevel) const
    }
 
    CHECK( qlevel < QUOTE_LEVEL_MAX, wxNullColour,
-          "MessageView::GetQuoteColour(): invalid quoting level" );
+          _T("MessageView::GetQuoteColour(): invalid quoting level") );
 
    return m_ProfileValues.QuotedCol[qlevel];
 }
@@ -1835,7 +1835,7 @@ MessageView::ProcessAllNestedParts(const MimePart *mimepart)
 void
 MessageView::ProcessPart(const MimePart *mimepart)
 {
-   CHECK_RET( mimepart, "MessageView::ProcessPart: NULL mimepart" );
+   CHECK_RET( mimepart, _T("MessageView::ProcessPart: NULL mimepart") );
 
    MimeType type = mimepart->GetType();
    switch ( type.GetPrimary() )
@@ -1871,7 +1871,7 @@ MessageView::ProcessPart(const MimePart *mimepart)
                }
 
                // show just the best one
-               CHECK_RET(partBest != 0, "No part can be displayed !");
+               CHECK_RET(partBest != 0, _T("No part can be displayed !"));
                ShowPart(partBest);
             }
             else // assume MIXED for all unknown
@@ -1906,7 +1906,7 @@ MessageView::ProcessPart(const MimePart *mimepart)
          break;
 
       default:
-         FAIL_MSG( "unknown MIME type" );
+         FAIL_MSG( _T("unknown MIME type") );
    }
 }
 
@@ -1928,7 +1928,7 @@ MessageView::Update(void)
    // stuff in the headers instead of using RFC 2047
    const MimePart *mimepart = m_mailMessage->GetTopMimePart();
 
-   CHECK_RET( mimepart, "No MIME part to show?" );
+   CHECK_RET( mimepart, _T("No MIME part to show?") );
 
    m_encodingAuto = mimepart->GetTextEncoding();
 
@@ -2688,10 +2688,10 @@ MessageView::DoMenuCommand(int id)
    if ( m_uid == UID_ILLEGAL )
       return false;
 
-   CHECK( GetFolder(), false, "no folder in message view?" );
+   CHECK( GetFolder(), false, _T("no folder in message view?") );
 
    Profile *profile = GetProfile();
-   CHECK( profile, false, "no profile in message view?" );
+   CHECK( profile, false, _T("no profile in message view?") );
 
    UIdArray msgs;
    msgs.Add(m_uid);
@@ -2758,7 +2758,7 @@ MessageView::DoMenuCommand(int id)
 void
 MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
 {
-   CHECK_RET( ci, "MessageView::DoMouseCommand(): NULL ClickableInfo" );
+   CHECK_RET( ci, _T("MessageView::DoMouseCommand(): NULL ClickableInfo") );
 
    switch ( ci->GetType() )
    {
@@ -2780,7 +2780,7 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
                break;
 
             default:
-               FAIL_MSG("unknown mouse action");
+               FAIL_MSG(_T("unknown mouse action"));
          }
       }
       break;
@@ -2831,7 +2831,7 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
       break;
 
       default:
-         FAIL_MSG("unknown embedded object type");
+         FAIL_MSG(_T("unknown embedded object type"));
    }
 }
 
@@ -2865,10 +2865,10 @@ void
 MessageView::UpdateShowHeadersInMenu()
 {
    wxFrame *frame = GetParentFrame();
-   CHECK_RET( frame, "message view without parent frame?" );
+   CHECK_RET( frame, _T("message view without parent frame?") );
 
    wxMenuBar *mbar = frame->GetMenuBar();
-   CHECK_RET( mbar, "message view frame without menu bar?" );
+   CHECK_RET( mbar, _T("message view frame without menu bar?") );
 
    mbar->Check(WXMENU_MSG_TOGGLEHEADERS, m_ProfileValues.showHeaders);
 }
@@ -2984,8 +2984,8 @@ MessageView::CheckMessageSize(const Message *message) const
 void
 MessageView::DoShowMessage(Message *mailMessage)
 {
-   CHECK_RET( mailMessage, "no message to show in MessageView" );
-   CHECK_RET( m_asyncFolder, "no folder in MessageView::DoShowMessage()" );
+   CHECK_RET( mailMessage, _T("no message to show in MessageView") );
+   CHECK_RET( m_asyncFolder, _T("no folder in MessageView::DoShowMessage()") );
 
    if ( !CheckMessageSize(mailMessage) )
    {
@@ -3005,7 +3005,7 @@ MessageView::DoShowMessage(Message *mailMessage)
    if ( !(m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN) )
    {
       MailFolder *mf = m_mailMessage->GetFolder();
-      CHECK_RET( mf, "mail message without associated folder?" );
+      CHECK_RET( mf, _T("mail message without associated folder?") );
 
       // mark it as seen if we can
       if ( mf->CanSetFlag(MailFolder::MSG_STAT_SEEN) )
@@ -3122,7 +3122,7 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
          break;
    }
 
-   CHECK_RET( n != procCount, "unknown process terminated!" );
+   CHECK_RET( n != procCount, _T("unknown process terminated!") );
 
    ProcessInfo *info = m_processes[n];
    if ( exitcode != 0 )

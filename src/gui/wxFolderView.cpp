@@ -507,7 +507,7 @@ public:
    UIdType GetUIdFromIndex(long item) const
    {
       CHECK( (size_t)item < GetHeadersCount(), UID_ILLEGAL,
-             "invalid listctrl index" );
+             _T("invalid listctrl index") );
 
       return m_headers->GetItem((size_t)item)->GetUId();
    }
@@ -892,7 +892,7 @@ static wxFolderListColumn ColFromSortOrder(MessageSortOrder sortOrder)
          return WXFLC_STATUS;
 
       default:
-         wxFAIL_MSG( "invalid column" );
+         wxFAIL_MSG( _T("invalid column") );
          // fall through
 
       case MSO_NONE:
@@ -921,7 +921,7 @@ static MessageSortOrder SortOrderFromCol(wxFolderListColumn col)
 
       case WXFLC_NUMENTRIES: // suppress gcc warning
       default:
-         wxFAIL_MSG( "invalid column" );
+         wxFAIL_MSG( _T("invalid column") );
          // fall through
 
       case WXFLC_MSGNO:
@@ -989,7 +989,7 @@ static wxArrayString NormalizeColumnWidths(const String& widthsStr)
       count = widthsStd.GetCount();
    }
 
-   wxASSERT_MSG( count == WXFLC_NUMENTRIES, "mismatch in max column number" );
+   wxASSERT_MSG( count == WXFLC_NUMENTRIES, _T("mismatch in max column number") );
 
    for ( size_t n = widths.GetCount(); n < count; n++ )
    {
@@ -1118,7 +1118,7 @@ wxFolderMsgWindow::~wxFolderMsgWindow()
 
 void wxFolderMsgWindow::CreateViewerBar()
 {
-   ASSERT_MSG( !m_winBar, "recreating the viewer bar twice?" );
+   ASSERT_MSG( !m_winBar, _T("recreating the viewer bar twice?") );
 
    // create the window and the sizer containing all controls
    m_winBar = new wxPanel(this, -1);
@@ -1181,7 +1181,7 @@ void wxFolderMsgWindow::CreateViewerBar()
 void wxFolderMsgWindow::DeleteViewerBar()
 {
    // harmless but stupid
-   ASSERT_MSG( m_winBar, "deleting non existent viewer bar?" );
+   ASSERT_MSG( m_winBar, _T("deleting non existent viewer bar?") );
 
    delete m_winBar;
    m_winBar = NULL;
@@ -1203,12 +1203,12 @@ void wxFolderMsgWindow::UpdateViewerBar()
       }
       else
       {
-         FAIL_MSG( "where is out choice control?" );
+         FAIL_MSG( _T("where is out choice control?") );
       }
    }
    else
    {
-      FAIL_MSG( "current viewer not in the list of all viewers?" );
+      FAIL_MSG( _T("current viewer not in the list of all viewers?") );
    }
 }
 
@@ -1291,7 +1291,7 @@ void wxFolderMsgWindow::OnChoice(wxCommandEvent& event)
    int n = event.GetInt();
 
    CHECK_RET( n >= 0 && (size_t)n < m_namesViewers.GetCount(),
-              "invalid viewer selected?" );
+              _T("invalid viewer selected?") );
 
    Profile_obj profile(m_folderView->GetFolderProfile());
 
@@ -1716,7 +1716,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
       {
          m_itemFocus = event.GetIndex();
 
-         CHECK_RET( m_itemFocus != -1, "must have a valid item" );
+         CHECK_RET( m_itemFocus != -1, _T("must have a valid item") );
       }
 
       // check if we already have this item - maybe we need to retrieve it
@@ -1735,7 +1735,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 
          uid = GetUIdFromIndex(m_itemFocus);
 
-         ASSERT_MSG( uid != UID_ILLEGAL, "invalid uid after ReallyGet()?" );
+         ASSERT_MSG( uid != UID_ILLEGAL, _T("invalid uid after ReallyGet()?") );
       }
 
       // we need to update m_selIsUnique right now because usually it's updated
@@ -1859,7 +1859,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
             sizeFmt += WXMENU_FVIEW_SIZE_AUTO;
             if ( sizeFmt > WXMENU_FVIEW_SIZE_MBYTES )
             {
-               FAIL_MSG( "incorrect MP_FVIEW_SIZE_FORMAT value" );
+               FAIL_MSG( _T("incorrect MP_FVIEW_SIZE_FORMAT value") );
 
                sizeFmt = WXMENU_FVIEW_SIZE_AUTO;
             }
@@ -1869,7 +1869,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
          break;
 
       default:
-         FAIL_MSG( "forgot to update the switch after adding a new column?" );
+         FAIL_MSG( _T("forgot to update the switch after adding a new column?") );
 
       case WXFLC_NONE:
       case WXFLC_MSGNO:
@@ -1906,7 +1906,7 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
 
    // get the column which was clicked
    wxFolderListColumn col = GetColumnByIndex(m_columns, event.GetColumn());
-   wxCHECK_RET( col != WXFLC_NONE, "should have a valid column" );
+   wxCHECK_RET( col != WXFLC_NONE, _T("should have a valid column") );
 
    MessageSortOrder orderCol = SortOrderFromCol(col);
    if ( orderCol == MSO_NONE )
@@ -2116,7 +2116,7 @@ bool wxFolderListCtrl::SetPreviewMsg(long idx, UIdType uid)
       return false;
 
    CHECK( idx != -1 && uid != UID_ILLEGAL, false,
-          "invalid params in SetPreviewMsg" );
+          _T("invalid params in SetPreviewMsg") );
 
    // note that the item which has just been selected for being previewed must
    // be focused too
@@ -2168,7 +2168,7 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
 {
    if ( headers == m_headers )
    {
-      CHECK_RET( headers, "wxFolderListCtrl::UpdateListing: NULL listing" );
+      CHECK_RET( headers, _T("wxFolderListCtrl::UpdateListing: NULL listing") );
 
       // we already have it
       headers->DecRef();
@@ -2193,7 +2193,7 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
 #if 0
       else
       {
-         ASSERT_MSG( m_itemFocus == -1, "why no focused UID?" );
+         ASSERT_MSG( m_itemFocus == -1, _T("why no focused UID?") );
       }
 #endif // 0
 
@@ -2255,7 +2255,7 @@ void wxFolderListCtrl::InvalidateCache()
 
 void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
 {
-   CHECK_RET( listing, "NULL listing in wxFolderListCtrl" );
+   CHECK_RET( listing, _T("NULL listing in wxFolderListCtrl") );
 
    m_cacheLastMod = listing->GetLastMod();
 
@@ -2273,14 +2273,14 @@ void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
    // NB: do it before calling UpdateItemCount() as under GTK it redraws
    //     the window immediately, hence calling back our OnGetItemText() which
    //     sets m_hiCached
-   ASSERT_MSG( !m_hiCached, "should be reset" );
+   ASSERT_MSG( !m_hiCached, _T("should be reset") );
 
    UpdateItemCount();
 }
 
 HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
 {
-   CHECK( m_headers, NULL, "no listing hence no header info" );
+   CHECK( m_headers, NULL, _T("no listing hence no header info") );
 
    wxFolderListCtrl *self = wxConstCast(this, wxFolderListCtrl);
 
@@ -2339,7 +2339,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
    {
       if ( !m_headersToGet.IsEmpty() && !m_mutexHeaders.IsLocked() )
       {
-         CHECK_RET( m_headers, "can't get headers without listing" );
+         CHECK_RET( m_headers, _T("can't get headers without listing") );
 
          // check if the folder is still opened - the connection might have
          // been broken between the moment we realized we needed the headers
@@ -2460,7 +2460,7 @@ void wxFolderListCtrl::SaveColWidths()
 
       CHECK_RET( widthsOld.GetCount() == WXFLC_NUMENTRIES &&
                  widthsNew.GetCount() == WXFLC_NUMENTRIES,
-                 "invalid widths array element count" );
+                 _T("invalid widths array element count") );
 
       size_t col;
       for ( col = 0; col < WXFLC_NUMENTRIES; col++ )
@@ -2818,7 +2818,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
             break;
 
          default:
-            wxFAIL_MSG( "unknown column" );
+            wxFAIL_MSG( _T("unknown column") );
       }
 
       return text;
@@ -2858,7 +2858,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
             {
                default:
                case HeaderInfo::Invalid:
-                  FAIL_MSG( "unexpected GetFromOrTo() return value" );
+                  FAIL_MSG( _T("unexpected GetFromOrTo() return value") );
                   // fall through
 
                case HeaderInfo::From:
@@ -2904,7 +2904,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
          break;
 
       default:
-         wxFAIL_MSG( "unknown column" );
+         wxFAIL_MSG( _T("unknown column") );
    }
 
    if ( field == WXFLC_FROM || field == WXFLC_SUBJECT )
@@ -3104,7 +3104,7 @@ wxFolderListCtrl::SelectNextUnreadAfter(long idxFocused,
                                         MailFolder::MessageStatus status,
                                         bool isSet)
 {
-   CHECK( m_headers, false, "no headers in SelectNextUnreadAfter" );
+   CHECK( m_headers, false, _T("no headers in SelectNextUnreadAfter") );
 
    MLocker lockHeaders(m_mutexHeaders);
 
@@ -3132,7 +3132,7 @@ wxFolderListCtrl::SelectNextUnreadAfter(long idxFocused,
 wxFolderView *
 wxFolderView::Create(wxWindow *parent)
 {
-   wxCHECK_MSG(parent, NULL, "NULL parent frame in wxFolderView ctor");
+   wxCHECK_MSG(parent, NULL, _T("NULL parent frame in wxFolderView ctor"));
    wxFolderView *fv = new wxFolderView(parent);
    return fv;
 }
@@ -3191,7 +3191,7 @@ wxFolderView::~wxFolderView()
    Clear();
 
    // must have been deleted in Clear()
-   ASSERT_MSG( !m_Profile, "profile leak in wxFolderView" );
+   ASSERT_MSG( !m_Profile, _T("profile leak in wxFolderView") );
 
    delete m_msgCmdProc;
 }
@@ -3333,7 +3333,7 @@ wxFolderView::SelectInitialMessage()
       }
       else
       {
-         FAIL_MSG( "no mail folder?" );
+         FAIL_MSG( _T("no mail folder?") );
       }
    }
 
@@ -3378,7 +3378,7 @@ wxFolderView::SelectInitialMessage()
       HeaderInfoList_obj hil = GetFolder()->GetHeaders();
 
       const HeaderInfo *hi = hil[idx];
-      CHECK_RET( hi, "Failed to get the uid of preselected message" );
+      CHECK_RET( hi, _T("Failed to get the uid of preselected message") );
 
       UIdType uid = hi->GetUId();
       if ( uid != UID_ILLEGAL )
@@ -3547,7 +3547,7 @@ void
 wxFolderView::Update()
 {
    MailFolder_obj mf = GetMailFolder();
-   CHECK_RET( mf, "wxFolderView::Update(): no folder" );
+   CHECK_RET( mf, _T("wxFolderView::Update(): no folder") );
 
    m_FolderCtrl->UpdateListing(mf->GetHeaders());
 
@@ -3676,16 +3676,16 @@ wxFolderView::DoClear(bool keepTheViewer)
 void
 wxFolderView::ShowFolder(MailFolder *mf)
 {
-   CHECK_RET( mf, "NULL MailFolder in wxFolderView::ShowFolder" );
+   CHECK_RET( mf, _T("NULL MailFolder in wxFolderView::ShowFolder") );
 
    m_ASMailFolder = ASMailFolder::Create(mf);
    m_msgCmdProc->SetFolder(m_ASMailFolder);
 
    // this is not supposed to happen, it's an internal operation
-   CHECK_RET( m_ASMailFolder, "ASMailFolder::Create() failed??" );
+   CHECK_RET( m_ASMailFolder, _T("ASMailFolder::Create() failed??") );
 
    m_Profile = m_ASMailFolder->GetProfile();
-   CHECK_RET( m_Profile, "ASMailFolder without profile?" );
+   CHECK_RET( m_Profile, _T("ASMailFolder without profile?") );
 
    m_Profile->IncRef();
 
@@ -3762,7 +3762,7 @@ wxFolderView::SetFolder(MailFolder *mf)
 bool
 wxFolderView::OpenFolder(MFolder *folder, bool readonly)
 {
-   CHECK( folder, false, "NULL folder in wxFolderView::OpenFolder" );
+   CHECK( folder, false, _T("NULL folder in wxFolderView::OpenFolder") );
 
    m_fullname = folder->GetFullName();
 
@@ -3997,7 +3997,7 @@ void wxFolderView::SelectAllByStatus(MailFolder::MessageStatus status,
    wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
 
    HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-   CHECK_RET( hil, "can't select unread or flagged messages without folder listing" );
+   CHECK_RET( hil, _T("can't select unread or flagged messages without folder listing") );
 
    MsgnoArray *indices = hil->GetAllHeadersByFlag(status, isSet);
    if ( !indices )
@@ -4265,7 +4265,7 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
 
       default:
          // all others should have been mapped to 0 in the code above
-         FAIL_MSG("unexpected key");
+         FAIL_MSG(_T("unexpected key"));
 
          // fall through
 
@@ -4529,11 +4529,11 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
                (reverse ? cmd - WXMENU_FVIEW_SORT_BY_STATUS_REV
                         : cmd - WXMENU_FVIEW_SORT_BY_STATUS);
 
-            ASSERT_MSG( col < WXFLC_NUMENTRIES, "invalid column" );
+            ASSERT_MSG( col < WXFLC_NUMENTRIES, _T("invalid column") );
 
             long sortOrder = SortOrderFromCol(col);
 
-            ASSERT_MSG( sortOrder != MSO_NONE, "invalid sort order" );
+            ASSERT_MSG( sortOrder != MSO_NONE, _T("invalid sort order") );
 
             m_FolderCtrl->SetSortOrder(profile,
                                        reverse ? sortOrder + 1 : sortOrder,
@@ -4545,7 +4545,7 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
          }
 
       default:
-         FAIL_MSG( "unexpected command" );
+         FAIL_MSG( _T("unexpected command") );
    }
 
    // this will resort/thread the messages and refresh us a bit later
@@ -4571,7 +4571,7 @@ wxFolderView::OnFocusChange(long idx, UIdType uid)
    if ( uid != UID_ILLEGAL && m_settings.updateStatus )
    {
       HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-      CHECK_RET( hil, "failed to get headers" );
+      CHECK_RET( hil, _T("failed to get headers") );
 
       HeaderVarExpander expander(hil[idx],
                                  m_settings.dateFormat,
@@ -4752,7 +4752,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
    {
       HeaderInfoList_obj hil = GetFolder()->GetHeaders();
 
-      CHECK_RET( hil, "no headers but msg status changed?" );
+      CHECK_RET( hil, _T("no headers but msg status changed?") );
 
       size_t posMin = (size_t)-1,
              posMax = 0;
@@ -4819,7 +4819,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    {
       const Ticket& t = result->GetTicket();
 
-      ASSERT_MSG( m_TicketList->Contains(t), "unexpected async result ticket" );
+      ASSERT_MSG( m_TicketList->Contains(t), _T("unexpected async result ticket") );
 
       m_TicketList->Remove(t);
 
@@ -4875,7 +4875,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
             break;
 
          default:
-            FAIL_MSG( "unexpected async operation result" );
+            FAIL_MSG( _T("unexpected async operation result") );
       }
    }
    //else: not out result at all
@@ -4937,7 +4937,7 @@ wxFolderViewFrame::Create(MFolder *folder,
 
    // doesn't make sense to half open we're going to view
    ASSERT_MSG( openmode != MailFolder::HalfOpen,
-               "invalid open mode in wxFolderViewFrame::Create" );
+               _T("invalid open mode in wxFolderViewFrame::Create") );
 
    if ( !fv->OpenFolder(folder, openmode == MailFolder::ReadOnly) )
    {

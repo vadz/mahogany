@@ -352,7 +352,7 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
    m_reference = m_mailFolder->GetImapSpec();
 
    m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
-   ASSERT_MSG( m_regCookie, "can't register with event manager");
+   ASSERT_MSG( m_regCookie, _T("can't register with event manager"));
 
    m_progressInfo = (MProgressInfo *)NULL;
    m_chDelimiter = m_mailFolder->GetFolderDelimiter();
@@ -398,7 +398,7 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
             break;
 
          default:
-            FAIL_MSG( "unexpected older type" );
+            FAIL_MSG( _T("unexpected older type") );
       }
    }
 
@@ -412,7 +412,7 @@ wxString wxSubfoldersTree::GetRelativePath(wxTreeItemId id) const
    wxTreeItemId idRoot = GetRootItem();
    while ( id != idRoot )
    {
-      ASSERT_MSG( m_chDelimiter, "should know folder name separator by now!" );
+      ASSERT_MSG( m_chDelimiter, _T("should know folder name separator by now!") );
 
       path.Prepend(GetItemText(id) + m_chDelimiter);
       id = GetParent(id);
@@ -444,7 +444,7 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
          char chLast = m_reference.Last();
          if ( chLast != '}' && chLast != m_chDelimiter )
          {
-            ASSERT_MSG( m_chDelimiter, "should have folder name separator" );
+            ASSERT_MSG( m_chDelimiter, _T("should have folder name separator") );
 
             m_reference += m_chDelimiter;
          }
@@ -486,7 +486,7 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
 {
    // we're only subscribed to the ASFolder events
    CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
-          "unexpected event type" );
+          _T("unexpected event type") );
 
    MEventASFolderResultData &data = (MEventASFolderResultData &)event;
 
@@ -501,7 +501,7 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
 
    if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
    {
-      FAIL_MSG( "unexpected operation notification" );
+      FAIL_MSG( _T("unexpected operation notification") );
 
       // eat the event - it was for us but we didn't process it...
       return FALSE;
@@ -511,7 +511,7 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
    // for everything else), but IMAP INBOX is special and can have a NUL one
    ASSERT_MSG( result->GetDelimiter() == m_chDelimiter ||
                !result->GetDelimiter(),
-               "unexpected delimiter returned by ListFolders" );
+               _T("unexpected delimiter returned by ListFolders") );
 
    // is it the special event which signals that there will be no more of
    // folders?
@@ -585,7 +585,7 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
 
 wxTreeItemId wxSubfoldersTree::OnNewFolder(String& name)
 {
-   CHECK( !!name, wxTreeItemId(), "folder name should not be empty" );
+   CHECK( !!name, wxTreeItemId(), _T("folder name should not be empty") );
 
    // count the number of folders retrieved and show progress
    m_nFoldersRetrieved++;
@@ -1181,7 +1181,7 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
 {
    // we're only subscribed to the ASFolder events
    CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
-          "unexpected event type" );
+          _T("unexpected event type") );
 
    MEventASFolderResultData &data = (MEventASFolderResultData &)event;
 
@@ -1196,7 +1196,7 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
 
    if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
    {
-      FAIL_MSG( "unexpected operation notification" );
+      FAIL_MSG( _T("unexpected operation notification") );
 
       // eat the event - it was for us but we didn't process it...
       return FALSE;

@@ -672,7 +672,7 @@ public:
    /// get the URL text
    const String& GetUrl() const
    {
-      ASSERT_MSG( m_type == CI_URL, "no URL for this ClickableInfo!" );
+      ASSERT_MSG( m_type == CI_URL, _T("no URL for this ClickableInfo!") );
 
       return m_label;
    }
@@ -680,7 +680,7 @@ public:
    /// get the MIME part (not for URLs)
    const MimePart *GetPart() const
    {
-      ASSERT_MSG( m_type != CI_URL, "no part number for this ClickableInfo!" );
+      ASSERT_MSG( m_type != CI_URL, _T("no part number for this ClickableInfo!") );
 
       return m_part;
    }
@@ -688,7 +688,7 @@ public:
    /// get the label
    const String& GetLabel() const
    {
-      ASSERT_MSG( m_type != CI_URL, "Use GetUrl() for URLs!" );
+      ASSERT_MSG( m_type != CI_URL, _T("Use GetUrl() for URLs!") );
 
       return m_label;
    }

@@ -134,7 +134,7 @@ void AutoCollectAddress(const String& email,
    if ( hasEmailAndName )
    {
       AdbManager_obj manager;
-      CHECK_RET( manager, "can't get AdbManager" );
+      CHECK_RET( manager, _T("can't get AdbManager") );
 
       AdbBook *autocollectbook = manager->CreateBook(bookName);
 
@@ -363,7 +363,7 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
             ) )
        {
          AdbManager_obj manager;
-         CHECK( manager, -1, "can't get AdbManager" );
+         CHECK( manager, -1, _T("can't get AdbManager") );
 
          AdbBook_obj autocollectbook(manager->CreateBook(bookName));
 

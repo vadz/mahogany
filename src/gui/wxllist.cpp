@@ -351,7 +351,7 @@ wxLayoutObjectText::Layout(wxDC &dc, class wxLayoutList *llist)
       // as the text length changed, it must be refreshed
       wxLayoutLine *line = GetLine();
 
-      wxCHECK_RET( line, "wxLayoutObjectText can't refresh itself" );
+      wxCHECK_RET( line, _T("wxLayoutObjectText can't refresh itself") );
 
       // as our size changed, we need to repaint the part which was appended
       wxPoint position(line->GetPosition());
@@ -395,7 +395,7 @@ wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap const &icon)
 {
    if ( !icon.Ok() )
    {
-      wxFAIL_MSG("invalid icon");
+      wxFAIL_MSG(_T("invalid icon"));
 
       m_Icon = NULL;
 
@@ -1081,7 +1081,7 @@ wxLayoutLine::DeleteWord(CoordType xpos)
       }
    }
 
-   wxFAIL_MSG("unreachable");
+   wxFAIL_MSG(_T("unreachable"));
 }
 
 wxLayoutLine *
@@ -1381,7 +1381,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    CoordType offset;
    wxLOiterator i = FindObject(wrapmargin, &offset);
    wxCHECK_MSG( i != m_ObjectList.end(), FALSE,
-      "Cannot find object covering wrapmargin.");
+      _T("Cannot find object covering wrapmargin."));
 
    // from this object on, the rest of the line must be copied to the
    // next one:
@@ -1510,7 +1510,7 @@ wxLayoutLine::ReNumber(void)
 void
 wxLayoutLine::MergeNextLine(wxLayoutList *llist)
 {
-   wxCHECK_RET(GetNextLine(),"wxLayout internal error: no next line to merge");
+   wxCHECK_RET(GetNextLine(),_T("wxLayout internal error: no next line to merge"));
    wxLayoutObjectList &list = GetNextLine()->m_ObjectList;
    wxLOiterator i;
 
@@ -1735,7 +1735,7 @@ wxLayoutList::~wxLayoutList()
    Empty();
    m_FirstLine->DeleteLine(false, this);
 
-   wxASSERT_MSG( m_numLines == 0, "line count calculation broken" );
+   wxASSERT_MSG( m_numLines == 0, _T("line count calculation broken") );
 }
 
 void
@@ -1809,7 +1809,7 @@ wxLayoutList::Read(wxString &istr)
 void
 wxLayoutList::SetFont(const wxFont& font)
 {
-   CHECK_RET( font.Ok(), "invalid font in wxLayoutList::SetFont" );
+   CHECK_RET( font.Ok(), _T("invalid font in wxLayoutList::SetFont") );
 
    m_CurrentStyleInfo.font = font;
    Insert(new wxLayoutObjectCmd(font));
@@ -1862,7 +1862,7 @@ wxLayoutList::Clear(const wxFont& font,
                     wxColour *fg,
                     wxColour *bg)
 {
-   wxCHECK_RET( font.Ok(), "invalid font in Clear()" );
+   wxCHECK_RET( font.Ok(), _T("invalid font in Clear()") );
 
    DoClear(wxLayoutStyleInfo(font, fg, bg));
 }
@@ -2036,8 +2036,8 @@ wxLayoutList::MoveCursorHorizontally(int n)
 bool
 wxLayoutList::MoveCursorWord(int n, bool untilNext)
 {
-   wxCHECK_MSG( m_CursorLine, false, "no current line" );
-   wxCHECK_MSG( n == -1 || n == +1, false, "not implemented yet" );
+   wxCHECK_MSG( m_CursorLine, false, _T("no current line") );
+   wxCHECK_MSG( n == -1 || n == +1, false, _T("not implemented yet") );
 
    CoordType moveDistance = 0;
    CoordType offset;
@@ -2197,7 +2197,7 @@ bool
 wxLayoutList::Insert(wxString const &text)
 {
    wxASSERT(m_CursorLine);
-   wxASSERT_MSG( text.Find('\n') == wxNOT_FOUND, "use wxLayoutImportText!" );
+   wxASSERT_MSG( text.Find('\n') == wxNOT_FOUND, _T("use wxLayoutImportText!") );
 
    if ( !text )
        return true;
@@ -2319,7 +2319,7 @@ wxLayoutList::WrapAll(CoordType column)
 bool
 wxLayoutList::Delete(CoordType npos)
 {
-   wxCHECK_MSG(m_CursorLine, false, "can't delete in non existing line");
+   wxCHECK_MSG(m_CursorLine, false, _T("can't delete in non existing line"));
 
    if ( npos == 0 )
        return true;
@@ -2374,7 +2374,7 @@ wxLayoutList::Delete(CoordType npos)
                }
                else
                {
-                  wxFAIL_MSG("can't delete all this");
+                  wxFAIL_MSG(_T("can't delete all this"));
 
                   return false;
                }
@@ -3002,7 +3002,7 @@ wxLayoutLine *
 wxLayoutList::GetLine(CoordType index) const
 {
    wxASSERT_MSG( (0 <= index) && (index < (CoordType)m_numLines),
-                 "invalid index" );
+                 _T("invalid index") );
 
    wxLayoutLine *line;
    CoordType n = index;

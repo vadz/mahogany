@@ -437,7 +437,7 @@ wxBitmap wxIconBrowseButton::GetBitmap(size_t nIcon) const
 
 void wxIconBrowseButton::SetIcon(size_t nIcon)
 {
-   CHECK_RET( nIcon < m_iconNames.GetCount(), "invalid icon index" );
+   CHECK_RET( nIcon < m_iconNames.GetCount(), _T("invalid icon index") );
 
    if ( m_nIcon == (int)nIcon )
       return;

@@ -349,7 +349,7 @@ PyH_RunScript(FILE *file, const char *filename)
    }
    else
    {
-       FAIL_MSG( "Python is disabled, can't run script!" );
+       FAIL_MSG( _T("Python is disabled, can't run script!") );
    }
 }
 

@@ -191,9 +191,9 @@ MPersMsgBox::MPersMsgBox()
 extern String GetPersMsgBoxName(const MPersMsgBox *which)
 {
    ASSERT_MSG( M_MSGBOX_MAX->GetId() == WXSIZEOF(gs_persMsgBoxData),
-               "should be kept in sync!" );
+               _T("should be kept in sync!") );
 
-   CHECK( which, "", "NULL pointer in GetPersMsgBoxName" );
+   CHECK( which, "", _T("NULL pointer in GetPersMsgBoxName") );
 
    return gs_persMsgBoxData[which->GetId()].name;
 }

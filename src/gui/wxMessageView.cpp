@@ -367,7 +367,7 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
          break;
 
       default:
-         FAIL_MSG( "unexpected URL popup menu command" );
+         FAIL_MSG( _T("unexpected URL popup menu command") );
          break;
    }
 }

@@ -596,7 +596,7 @@ public:
    virtual bool TransferDataToWindow();
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxGlobalOptionsDialog() { wxFAIL_MSG("should be never used"); }
+   wxGlobalOptionsDialog() { wxFAIL_MSG(_T("should be never used")); }
 
    // return TRUE if this dialog edits global options for the program, FALSE
    // if this is another kind of dialog
@@ -2168,10 +2168,10 @@ void wxOptionsPage::CreateControls()
             break;
 
          default:
-            wxFAIL_MSG("unknown field type in CreateControls");
+            wxFAIL_MSG(_T("unknown field type in CreateControls"));
          }
 
-      wxCHECK_RET( last, "control creation failed" );
+      wxCHECK_RET( last, _T("control creation failed") );
 
       if ( flags & Field_Vital )
          m_aVitalControls.Add(last);
@@ -2202,7 +2202,7 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
 
    // mark the dialog as being dirty
    wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
-   CHECK( dialog, FALSE, "option page without option dialog?" );
+   CHECK( dialog, FALSE, _T("option page without option dialog?") );
 
    if ( m_aVitalControls.Index(control) != -1 )
       dialog->SetDoTest();
@@ -2222,7 +2222,7 @@ void wxOptionsPage::OnTextChange(wxEvent& event)
    // because otherwise OnChangeCommon() would never find it in m_aControls
    // array (we don't keep text control itself there)
    wxControl *control = wxStaticCast(event.GetEventObject(), wxControl);
-   CHECK_RET( control, "text event from nowhere?" );
+   CHECK_RET( control, _T("text event from nowhere?") );
 
    wxWindow *win = FindWindow(NextControlId(control->GetId()));
    wxColorBrowseButton *btn = wxDynamicCast(win, wxColorBrowseButton);
@@ -2275,7 +2275,7 @@ void wxOptionsPage::UpdateUI()
          // avoid signed/unsigned mismatch in expressions
          size_t nCheck = (size_t)nCheckField;
          wxCHECK_RET( nCheck >= m_nFirst && nCheck < m_nLast,
-                      "control index out of range" );
+                      _T("control index out of range") );
 
          bool bEnable = true;
          wxControl *controlDep = GetControl(nCheck);
@@ -2315,7 +2315,7 @@ void wxOptionsPage::UpdateUI()
             {
                // assume that this is one of the text controls
                wxTextCtrl *text = wxStaticCast(controlDep, wxTextCtrl);
-               wxCHECK_RET( text, "can't depend on this control type" );
+               wxCHECK_RET( text, _T("can't depend on this control type") );
 
                // only enable if the text control has something
                bEnable = !text->GetValue().IsEmpty();
@@ -2487,7 +2487,7 @@ bool wxOptionsPage::TransferDataToWindow()
 
       case Field_Message:
       default:
-         wxFAIL_MSG("unexpected field type");
+         wxFAIL_MSG(_T("unexpected field type"));
       }
 
       // the dirty flag was set from the OnChange() callback, reset it!
@@ -2598,7 +2598,7 @@ bool wxOptionsPage::TransferDataFromWindow()
             break;
 
          default:
-            wxFAIL_MSG("unexpected field type");
+            wxFAIL_MSG(_T("unexpected field type"));
       }
 
       if ( m_aDefaults[n].IsNumeric() )
@@ -2626,10 +2626,10 @@ bool wxOptionsPage::GetListboxFromButtonEvent(const wxEvent& event,
 {
    // find the listbox associated with the button which generated this event
    wxButton *btn = wxStaticCast(event.GetEventObject(), wxButton);
-   CHECK( btn, false, "button event from non-button?" );
+   CHECK( btn, false, _T("button event from non-button?") );
 
    wxListBox *lbox = wxStaticCast((wxObject *)btn->GetClientData(), wxListBox);
-   CHECK( lbox, false, "lbox button event without lbox?" );
+   CHECK( lbox, false, _T("lbox button event without lbox?") );
 
    // find which one of our listboxes this one is
    LboxData *data;
@@ -2639,7 +2639,7 @@ bool wxOptionsPage::GetListboxFromButtonEvent(const wxEvent& event,
          break;
    }
 
-   CHECK( data, false, "button even from foreign lbox?" );
+   CHECK( data, false, _T("button even from foreign lbox?") );
 
    if ( pLbox )
       *pLbox = lbox;
@@ -2690,7 +2690,7 @@ void wxOptionsPage::OnListBoxButton(wxCommandEvent& event)
          break;
 
       default:
-         FAIL_MSG( "can't get here" );
+         FAIL_MSG( _T("can't get here") );
    }
 }
 
@@ -2728,7 +2728,7 @@ bool wxOptionsPage::OnListBoxModify(wxListBox *lbox, const LboxData& lboxData)
 {
    int nSel = lbox->GetSelection();
 
-   wxCHECK_MSG( nSel != -1, FALSE, "should be disabled" );
+   wxCHECK_MSG( nSel != -1, FALSE, _T("should be disabled") );
 
    wxString val = wxGetTextFromUser
                   (
@@ -2756,7 +2756,7 @@ wxOptionsPage::OnListBoxDelete(wxListBox *lbox, const LboxData& lboxData)
 {
    int nSel = lbox->GetSelection();
 
-   wxCHECK_MSG( nSel != -1, FALSE, "should be disabled" );
+   wxCHECK_MSG( nSel != -1, FALSE, _T("should be disabled") );
 
    lbox->Delete(nSel);
 
@@ -2825,13 +2825,13 @@ wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
                                      notebook->GetPageCount())
 {
    // nFirst + 1 really must be unsigned
-   ASSERT_MSG( nFirst >= -1, "bad parameret in wxOptionsPageStandard ctor" );
+   ASSERT_MSG( nFirst >= -1, _T("bad parameret in wxOptionsPageStandard ctor") );
 
    // check that we didn't forget to update one of the arrays...
    ASSERT_MSG( WXSIZEOF(ms_aConfigDefaults) == ConfigField_Max,
-               "defaults array size mismatch" );
+               _T("defaults array size mismatch") );
    ASSERT_MSG( WXSIZEOF(ms_aFields) == ConfigField_Max,
-               "fields array size mismatch" );
+               _T("fields array size mismatch") );
 }
 
 // ----------------------------------------------------------------------------
@@ -2878,7 +2878,7 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
    }
    else
    {
-      FAIL_MSG("click from alien button in compose view page");
+      FAIL_MSG(_T("click from alien button in compose view page"));
 
       dirty = FALSE;
 
@@ -2890,7 +2890,7 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
       // something changed - make us dirty
       wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
 
-      wxCHECK_RET( dialog, "options page without a parent dialog?" );
+      wxCHECK_RET( dialog, _T("options page without a parent dialog?") );
 
       dialog->SetDirty();
    }
@@ -2923,7 +2923,7 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
       dirty = ConfigureMsgViewHeaders(m_Profile, this);
    else
    {
-      wxFAIL_MSG( "alien button" );
+      wxFAIL_MSG( _T("alien button") );
 
       dirty = false;
    }
@@ -2932,7 +2932,7 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
    {
       // something changed - make us dirty
       wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
-      wxCHECK_RET( dialog, "options page without a parent dialog?" );
+      wxCHECK_RET( dialog, _T("options page without a parent dialog?") );
       dialog->SetDirty();
    }
 }
@@ -2966,7 +2966,7 @@ bool wxOptionsPageMessageView::TransferDataToWindow()
          }
          else
          {
-            FAIL_MSG( "ConfigField_MsgViewer is not a wxChoice?" );
+            FAIL_MSG( _T("ConfigField_MsgViewer is not a wxChoice?") );
          }
       }
       //else: we're in "novice" mode and this control doesn't exist at all
@@ -2996,7 +2996,7 @@ bool wxOptionsPageMessageView::TransferDataFromWindow()
          }
          else
          {
-            FAIL_MSG( "ConfigField_MsgViewer is not a wxChoice?" );
+            FAIL_MSG( _T("ConfigField_MsgViewer is not a wxChoice?") );
          }
       }
    }
@@ -3035,7 +3035,7 @@ bool wxOptionsPageFolderView::TransferDataToWindow()
    wxRadioBox *radio =
       wxStaticCast(GetControl(ConfigField_FolderViewShowInitially), wxRadioBox);
 
-   CHECK( radio, false, "where is the initial selection radio box?" );
+   CHECK( radio, false, _T("where is the initial selection radio box?") );
 
    int sel;
    if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
@@ -3062,7 +3062,7 @@ bool wxOptionsPageFolderView::TransferDataFromWindow()
    wxRadioBox *radio =
       wxStaticCast(GetControl(ConfigField_FolderViewShowInitially), wxRadioBox);
 
-   CHECK( radio, false, "where is the initial selection radio box?" );
+   CHECK( radio, false, _T("where is the initial selection radio box?") );
 
    int sel = radio->GetSelection();
    switch ( sel )
@@ -3075,7 +3075,7 @@ bool wxOptionsPageFolderView::TransferDataFromWindow()
          break;
 
       default:
-         FAIL_MSG( "unexpected initial selection radiobox value" );
+         FAIL_MSG( _T("unexpected initial selection radiobox value") );
          // fall through
 
       case FolderViewPage_Show_Unread:
@@ -3107,7 +3107,7 @@ void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
    {
       // something changed - make us dirty
       wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
-      wxCHECK_RET( dialog, "options page without a parent dialog?" );
+      wxCHECK_RET( dialog, _T("options page without a parent dialog?") );
       dialog->SetDirty();
    }
 }
@@ -3135,7 +3135,7 @@ bool wxOptionsPageFolderTree::TransferDataToWindow()
    if ( control )
    {
       wxCheckBox *check = wxStaticCast(control, wxCheckBox);
-      CHECK( check, true, "folder tree is home control is not a checkbox?" );
+      CHECK( check, true, _T("folder tree is home control is not a checkbox?") );
 
       String folderHome = READ_APPCONFIG_TEXT(MP_FTREE_HOME);
       m_isHomeOrig = !folderHome.empty() && folderHome == GetFolderName();
@@ -3156,7 +3156,7 @@ bool wxOptionsPageFolderTree::TransferDataFromWindow()
    if ( control )
    {
       wxCheckBox *check = wxStaticCast(control, wxCheckBox);
-      CHECK( check, true, "folder tree is home control is not a checkbox?" );
+      CHECK( check, true, _T("folder tree is home control is not a checkbox?") );
 
       // only do something if the value really changed
       if ( check->GetValue() != m_isHomeOrig )
@@ -3202,7 +3202,7 @@ void wxOptionsPageIdent::OnButton(wxCommandEvent& event)
    }
    else
    {
-      FAIL_MSG("click from alien button in compose view page");
+      FAIL_MSG(_T("click from alien button in compose view page"));
       event.Skip();
    }
 }
@@ -3288,7 +3288,7 @@ wxOptionsPageNewMail::~wxOptionsPageNewMail()
 
 bool wxOptionsPageNewMail::GetFolderFromProfile()
 {
-   CHECK( !m_folder, true, "creating the folder twice" );
+   CHECK( !m_folder, true, _T("creating the folder twice") );
 
    m_folder = MFolder::Get(GetFolderName());
 
@@ -3326,7 +3326,7 @@ bool wxOptionsPageNewMail::TransferDataToWindow()
       }
       else
       {
-         FAIL_MSG( "where is the monitor checkbox?" );
+         FAIL_MSG( _T("where is the monitor checkbox?") );
       }
    }
    //else: happens when editing the global settings
@@ -3357,7 +3357,7 @@ bool wxOptionsPageNewMail::TransferDataFromWindow()
             {
                if ( !GetFolderFromProfile() )
                {
-                  FAIL_MSG( "failed to create the folder in new mail page" );
+                  FAIL_MSG( _T("failed to create the folder in new mail page") );
                }
             }
 
@@ -3642,7 +3642,7 @@ void wxOptionsPageOthers::OnButton(wxCommandEvent& event)
       if ( ReenablePersistentMessageBoxes(this) )
       {
          wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
-         wxCHECK_RET( dialog, "options page without a parent dialog?" );
+         wxCHECK_RET( dialog, _T("options page without a parent dialog?") );
          dialog->SetDirty();
       }
    }

@@ -111,7 +111,7 @@ void AttachmentProperties::SetDisposition(const String& disp)
       }
    }
 
-   FAIL_MSG( "unknown disposition string" );
+   FAIL_MSG( _T("unknown disposition string") );
 }
 
 // ----------------------------------------------------------------------------
@@ -169,7 +169,7 @@ wxAttachmentDialog::wxAttachmentDialog(wxWindow *parent,
    labels.Add(_("&Disposition"));
    labels.Add(_("&MIME type:"));
 
-   ASSERT_MSG( labels.GetCount() == Label_Max, "labels not in sync" );
+   ASSERT_MSG( labels.GetCount() == Label_Max, _T("labels not in sync") );
 
    long widthMax = GetMaxLabelWidth(labels, this);
 
@@ -197,7 +197,7 @@ wxAttachmentDialog::wxAttachmentDialog(wxWindow *parent,
 bool wxAttachmentDialog::TransferDataToWindow()
 {
    CHECK( m_props.disposition != AttachmentProperties::Disposition_Max,
-          false, "disposition field hasn't been initialized" );
+          false, _T("disposition field hasn't been initialized") );
 
    m_txtFilename->SetValue(m_props.filename);
    m_txtName->SetValue(m_props.name);
@@ -248,7 +248,7 @@ ShowAttachmentDialog(wxWindow *parent,
                      AttachmentProperties *properties,
                      bool *allowDisable)
 {
-   CHECK( properties, false, "NULL properties in EditAttachmentProperties" );
+   CHECK( properties, false, _T("NULL properties in EditAttachmentProperties") );
 
    wxAttachmentDialog dlg(parent, properties, allowDisable);
 

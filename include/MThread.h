@@ -33,19 +33,19 @@ public:
 
    void Lock()
    {
-      ASSERT_MSG( !IsLocked(), "attempting to lock locked mutex" );
+      ASSERT_MSG( !IsLocked(), _T("attempting to lock locked mutex") );
 
       m_locked = true;
    }
 
    void Unlock()
    {
-      ASSERT_MSG( IsLocked(), "attempting to unlock unlocked mutex" );
+      ASSERT_MSG( IsLocked(), _T("attempting to unlock unlocked mutex") );
 
       m_locked = false;
    }
 
-   ~MMutex() { ASSERT_MSG( !IsLocked(), "deleting locked mutex" ); }
+   ~MMutex() { ASSERT_MSG( !IsLocked(), _T("deleting locked mutex") ); }
 
 private:
    bool m_locked;

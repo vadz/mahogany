@@ -373,7 +373,7 @@ bool wxMLogWindow::OnFrameClose(wxFrame *frame)
          break;
 
       default:
-         FAIL_MSG( "unexpected MDialog_YesNoCancel return value" );
+         FAIL_MSG( _T("unexpected MDialog_YesNoCancel return value") );
          // fall through
 
       case MDlg_Cancel:
@@ -1131,7 +1131,7 @@ const wxPrintData *wxMApp::GetPrintData()
 
 void wxMApp::SetPrintData(const wxPrintData& printData)
 {
-   CHECK_RET( m_PrintData, "must have called GetPrintData() before!" );
+   CHECK_RET( m_PrintData, _T("must have called GetPrintData() before!") );
 
    *m_PrintData = printData;
 }
@@ -1157,7 +1157,7 @@ wxPageSetupDialogData *wxMApp::GetPageSetupData()
 
 void wxMApp::SetPageSetupData(const wxPageSetupDialogData& data)
 {
-   CHECK_RET( m_PrintData, "must have called GetPageSetupData() before!" );
+   CHECK_RET( m_PrintData, _T("must have called GetPageSetupData() before!") );
 
    *m_PageSetupData = data;
 }
@@ -1289,7 +1289,7 @@ wxMApp::Help(int id, wxWindow *parent)
    }
 
    // by now we should have either created it or returned
-   CHECK_RET( m_HelpController, "no help controller, but should have one!" );
+   CHECK_RET( m_HelpController, _T("no help controller, but should have one!") );
 
    switch(id)
    {
@@ -1447,7 +1447,7 @@ bool wxMApp::StartTimer(Timer timer)
 
       case Timer_Max:
       default:
-         wxFAIL_MSG("attempt to start an unknown timer");
+         wxFAIL_MSG(_T("attempt to start an unknown timer"));
    }
 
    // timer not started
@@ -1479,7 +1479,7 @@ bool wxMApp::StopTimer(Timer timer)
 
       case Timer_Max:
       default:
-         wxFAIL_MSG("attempt to stop an unknown timer");
+         wxFAIL_MSG(_T("attempt to stop an unknown timer"));
          return false;
    }
 
@@ -1526,7 +1526,7 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what, bool
       which = &gs_CclientMutex;
       break;
    default:
-      FAIL_MSG("unsupported mutex id");
+      FAIL_MSG(_T("unsupported mutex id"));
    }
    ASSERT(which);
    if(enter)
@@ -1629,7 +1629,7 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
 
    // only enable menu item if outbox is used and contains messages:
    wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
-   CHECK_RET( mbar, "no menubar in the main frame?" );
+   CHECK_RET( mbar, _T("no menubar in the main frame?") );
 
    bool useOutbox = READ_APPCONFIG_BOOL(MP_USE_OUTBOX);
    mbar->Enable(WXMENU_FILE_SEND_OUTBOX, enable && useOutbox);
@@ -1647,7 +1647,7 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
                  (unsigned long) nNNTP);
 
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
-   CHECK_RET( sbar, "no status bar in the main frame?" );
+   CHECK_RET( sbar, _T("no status bar in the main frame?") );
 
    // const_cast needed
    sbar->SetStatusText(msg, ((wxMApp *)this)->GetStatusField(SF_OUTBOX));
@@ -1759,7 +1759,7 @@ wxMApp::IsOnline(void) const
 void
 wxMApp::GoOnline(void) const
 {
-   CHECK_RET( m_OnlineManager, "can't go online" );
+   CHECK_RET( m_OnlineManager, _T("can't go online") );
 
    if(m_OnlineManager->IsOnline())
    {
@@ -1774,7 +1774,7 @@ wxMApp::GoOnline(void) const
 void
 wxMApp::GoOffline(void) const
 {
-   CHECK_RET( m_OnlineManager, "can't go offline" );
+   CHECK_RET( m_OnlineManager, _T("can't go offline") );
 
    if(! m_OnlineManager->IsOnline())
    {
@@ -1799,7 +1799,7 @@ wxMApp::UpdateOnlineDisplay(void)
 
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
    wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
-   CHECK_RET( sbar && mbar, "no status/menu bar in the main frame?" );
+   CHECK_RET( sbar && mbar, _T("no status/menu bar in the main frame?") );
 
    if(! m_DialupSupport)
    {
@@ -1878,10 +1878,10 @@ void wxMApp::RecreateStatusBar()
    wxCOMPILE_TIME_ASSERT2( WXSIZEOF(s_statusWidths) == SF_MAXIMUM,
                            StatusWidthsNotInSync, MAppStatus );
 
-   CHECK_RET( m_topLevelFrame, "no top level frame to recreate status bar for" );
+   CHECK_RET( m_topLevelFrame, _T("no top level frame to recreate status bar for") );
 
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
-   CHECK_RET( sbar, "no status bar to recreate?" );
+   CHECK_RET( sbar, _T("no status bar to recreate?") );
 
    int widths[SF_MAXIMUM];
    size_t n;
@@ -2159,7 +2159,7 @@ extern bool EnsureAvailableTextEncoding(wxFontEncoding *enc,
                                         wxString *text,
                                         bool mayAskUser)
 {
-   CHECK( enc, false, "CheckEncodingAvailability: NULL encoding" );
+   CHECK( enc, false, _T("CheckEncodingAvailability: NULL encoding") );
 
    if ( !wxFontMapper::Get()->IsEncodingAvailable(*enc) )
    {
@@ -2292,14 +2292,14 @@ bool wxMApp::IsAnotherRunning() const
 {
    // it's too early or too late to call us, normally we shouldn't try to do it
    // then, i.e. this indicates an error in the caller logic
-   CHECK( m_snglInstChecker, false, "IsAnotherRunning() shouldn't be called" );
+   CHECK( m_snglInstChecker, false, _T("IsAnotherRunning() shouldn't be called") );
 
    return m_snglInstChecker->IsAnotherRunning();
 }
 
 bool wxMApp::SetupRemoteCallServer()
 {
-   ASSERT_MSG( !m_serverIPC, "SetupRemoteCallServer() called twice?" );
+   ASSERT_MSG( !m_serverIPC, _T("SetupRemoteCallServer() called twice?") );
 
    m_serverIPC = new MAppIPCServer;
    if ( !m_serverIPC->Create(GetIPCSocket()) )
@@ -2316,10 +2316,10 @@ bool wxMApp::SetupRemoteCallServer()
 bool wxMApp::CallAnother()
 {
    CHECK( IsAnotherRunning(), false,
-          "can't call another copy when it doesn't run!" );
+          _T("can't call another copy when it doesn't run!") );
 
    CHECK( m_cmdLineOptions, false,
-          "we need to parse the options before doing the remote call" );
+          _T("we need to parse the options before doing the remote call") );
 
    wxClient client;
    wxConnectionBase *conn = client.MakeConnection("", GetIPCSocket(), IPC_TOPIC);

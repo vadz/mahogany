@@ -117,7 +117,7 @@ public:
       }
       else
       {
-         FAIL_MSG( "NULL folder in FolderMonitorFolderEntry?" );
+         FAIL_MSG( _T("NULL folder in FolderMonitorFolderEntry?") );
       }
 
       m_failcount = 0;
@@ -200,7 +200,7 @@ public:
       {
          MFolder_obj folder(folderName);
 
-         CHECK( folder, true, "traversed a non-existing folder?" );
+         CHECK( folder, true, _T("traversed a non-existing folder?") );
 
          if ( folder->GetFlags() & MF_FLAGS_MONITOR )
          {
@@ -289,7 +289,7 @@ FolderMonitor::Create(void)
 {
    static FolderMonitor *s_folderMonitor = NULL;
 
-   CHECK( !s_folderMonitor, NULL, "FolderMonitor::Create() called twice!" );
+   CHECK( !s_folderMonitor, NULL, _T("FolderMonitor::Create() called twice!") );
 
    // do create it
    s_folderMonitor = new FolderMonitorImpl;
@@ -378,12 +378,12 @@ FolderMonitorImpl::GetMinCheckTimeout(void) const
 bool
 FolderMonitorImpl::AddOrRemoveFolder(MFolder *folder, bool monitor)
 {
-   CHECK( folder, false, "FolderMonitor::AddOrRemoveFolder(): NULL folder" );
+   CHECK( folder, false, _T("FolderMonitor::AddOrRemoveFolder(): NULL folder") );
 
 #ifdef DEBUG
    if ( IsBeingMonitored(folder) == monitor )
    {
-      FAIL_MSG( "FolderMonitor::AddOrRemoveFolder(): nothing to do!" );
+      FAIL_MSG( _T("FolderMonitor::AddOrRemoveFolder(): nothing to do!") );
 
       folder->DecRef();
 
@@ -401,7 +401,7 @@ FolderMonitorImpl::AddOrRemoveFolder(MFolder *folder, bool monitor)
       if ( !RemoveFolder(folder->GetFullName()) )
       {
          // this is impossible in debug mode because of the check above
-         FAIL_MSG( "logic error in FolderMonitor::AddOrRemoveFolder()" );
+         FAIL_MSG( _T("logic error in FolderMonitor::AddOrRemoveFolder()") );
 
          return false;
       }
@@ -416,7 +416,7 @@ bool
 FolderMonitorImpl::RemoveFolder(const String& name)
 {
    // this could lead to a crash in CheckNewMail()
-   CHECK( !m_inNewMailCheck.IsLocked(), false, "can't remove it now" );
+   CHECK( !m_inNewMailCheck.IsLocked(), false, _T("can't remove it now") );
 
    for ( FolderMonitorFolderList::iterator i = m_list.begin();
          i != m_list.end();
@@ -518,7 +518,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
          return true;
 
       default:
-         FAIL_MSG( "unknown folder state" );
+         FAIL_MSG( _T("unknown folder state") );
          // fall through
 
       case Folder_Ok:

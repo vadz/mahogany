@@ -272,7 +272,7 @@ private:
    // function for changing the m_nXXX fiedls below
    void Dec(size_t& n)
    {
-      wxCHECK_RET( n > 0, "logic error in folder status change code" );
+      wxCHECK_RET( n > 0, _T("logic error in folder status change code") );
 
       n--;
    }
@@ -392,7 +392,7 @@ protected:
 
       wxFolderTreeNode *node = GetSelection();
 
-      CHECK( node, false, "shouldn't be called if no selection" );
+      CHECK( node, false, _T("shouldn't be called if no selection") );
 
       return ::CanOpen(node->GetFolder());
    }
@@ -751,7 +751,7 @@ bool wxFolderTree::SelectFolder(MFolder *folder)
       // with, otherwise there is something wrong
       ASSERT_MSG(
                   m_tree->GetFolderTreeNode(item)->GetFolder() == folder,
-                  "GetTreeItemFromName() is buggy"
+                  _T("GetTreeItemFromName() is buggy")
                 );
 
       // select the item and also scroll to it
@@ -767,7 +767,7 @@ bool wxFolderTree::SelectFolder(MFolder *folder)
 
 MFolder *wxFolderTree::FindNextUnreadFolder(bool next)
 {
-   CHECK( m_tree, NULL, "you didn't call Init()" );
+   CHECK( m_tree, NULL, _T("you didn't call Init()") );
 
    wxFolderTreeNode *node = m_tree->GetSelection();
    if ( !node )
@@ -784,7 +784,7 @@ MFolder *wxFolderTree::FindNextUnreadFolder(bool next)
 
 void wxFolderTree::ProcessMenuCommand(int id)
 {
-   CHECK_RET( m_tree, "you didn't call Init()" );
+   CHECK_RET( m_tree, _T("you didn't call Init()") );
 
    m_tree->ProcessMenuCommand(id);
 }
@@ -850,7 +850,7 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
 
 MFolder *wxFolderTree::GetSelection() const
 {
-   CHECK( m_tree, NULL, "you didn't call Init()" );
+   CHECK( m_tree, NULL, _T("you didn't call Init()") );
 
    // get it from the tree
    wxFolderTreeNode *node = m_tree->GetSelection();
@@ -865,7 +865,7 @@ MFolder *wxFolderTree::GetSelection() const
 
 wxWindow *wxFolderTree::GetWindow() const
 {
-   ASSERT_MSG( m_tree, "you didn't call Init()" );
+   ASSERT_MSG( m_tree, _T("you didn't call Init()") );
 
    return m_tree;
 }
@@ -924,7 +924,7 @@ void wxFolderTree::OnOpen(MFolder *folder)
    }
    else
    {
-      FAIL_MSG("OnOpen() called for folder which can't be opened");
+      FAIL_MSG(_T("OnOpen() called for folder which can't be opened"));
    }
 
    folder->DecRef();
@@ -981,7 +981,7 @@ MFolder *wxFolderTree::OnCreate(MFolder *parent)
 
 bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
 {
-   CHECK( folder, false, "can't delete NULL folder" );
+   CHECK( folder, false, _T("can't delete NULL folder") );
 
    if ( folder->GetFlags() & MF_FLAGS_DONTDELETE )
    {
@@ -1072,7 +1072,7 @@ bool wxFolderTree::OnRename(MFolder *folder,
                             const String& folderNewName,
                             const String& mboxNewName)
 {
-   CHECK( folder, false, "can't rename NULL folder" );
+   CHECK( folder, false, _T("can't rename NULL folder") );
 
    bool rc = true;
    if ( !mboxNewName.empty() )
@@ -1106,13 +1106,13 @@ bool wxFolderTree::OnRename(MFolder *folder,
 bool wxFolderTree::OnMove(MFolder *folder,
                           MFolder *newParent)
 {
-   CHECK( folder, false, "can't move NULL folder" );
-   CHECK( newParent, false, "can't move folder to NULL parent" );
+   CHECK( folder, false, _T("can't move NULL folder") );
+   CHECK( newParent, false, _T("can't move folder to NULL parent") );
 
    bool rc = true;
 
    String fullPath = folder->GetFullName();
-   CHECK( !fullPath.empty(), false, "can't move the root pseudo-folder" );
+   CHECK( !fullPath.empty(), false, _T("can't move the root pseudo-folder") );
 
    String oldPath = fullPath.BeforeLast('/'),
           name    = fullPath.AfterLast('/');
@@ -1212,7 +1212,7 @@ bool wxFolderTree::OnClose(MFolder *folder)
 bool wxFolderTree::OnDoubleClick()
 {
    MFolder *sel = GetSelection();
-   CHECK( sel, false, "no folder to open" );
+   CHECK( sel, false, _T("no folder to open") );
 
    if ( !CanOpen(sel) )
    {
@@ -1391,7 +1391,7 @@ void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
          break;
 
       default:
-         FAIL_MSG("unexpected folder status in OnChildStatusChange");
+         FAIL_MSG(_T("unexpected folder status in OnChildStatusChange"));
 
       case Folder_Normal:
          // nothing to do
@@ -1414,7 +1414,7 @@ void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
          break;
 
       default:
-         FAIL_MSG("unexpected folder status in OnChildStatusChange");
+         FAIL_MSG(_T("unexpected folder status in OnChildStatusChange"));
 
       case Folder_Normal:
          // nothing to do
@@ -1468,7 +1468,7 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
       switch ( statusShown )
       {
          default:
-            FAIL_MSG( "unexpected folder status value" );
+            FAIL_MSG( _T("unexpected folder status value") );
             // fall through
 
          case Folder_Normal:
@@ -1719,7 +1719,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
             MEventId_Null
          ) )
     {
-        FAIL_MSG( "Failed to register folder tree with event manager" );
+        FAIL_MSG( _T("Failed to register folder tree with event manager") );
     }
 }
 
@@ -1834,7 +1834,7 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
       // find the child with the given name
       wxString name = tk.GetNextToken();
 
-      ASSERT_MSG( !!name, "token can't be empty here" );
+      ASSERT_MSG( !!name, _T("token can't be empty here") );
 
       if ( ItemHasChildren(current) && !IsExpanded(current) )
       {
@@ -1887,7 +1887,7 @@ void wxFolderTreeImpl::DoFolderCreate()
      wxTreeItemId idCurrent = wxTreeCtrl::GetSelection();
      wxFolderTreeNode *parent = GetFolderTreeNode(idCurrent);
 
-     wxASSERT_MSG( parent, "can't get the parent of current tree item" );
+     wxASSERT_MSG( parent, _T("can't get the parent of current tree item") );
 
      (void)new wxFolderTreeNode(this, folderNew, parent);
 #endif // 0
@@ -2097,7 +2097,7 @@ void wxFolderTreeImpl::DoToggleHidden()
 wxTreeItemId wxFolderTreeImpl::GetNextItem(wxTreeItemId id, bool next) const
 {
    // garbage in, garbage out
-   CHECK( id.IsOk(), id, "invalid tree item in GetNextItem" );
+   CHECK( id.IsOk(), id, _T("invalid tree item in GetNextItem") );
 
    long cookie;
    wxTreeItemId idNext;
@@ -2145,7 +2145,7 @@ wxTreeItemId wxFolderTreeImpl::GetNextItem(wxTreeItemId id, bool next) const
    }
 
    // avoid infinite loops in the caller
-   ASSERT_MSG( idNext != id, "logic error in GetNextItem" );
+   ASSERT_MSG( idNext != id, _T("logic error in GetNextItem") );
 
    return idNext;
 }
@@ -2273,7 +2273,7 @@ void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
       else
       {
          // what's going on? label is normally composed of name and suffix
-         FAIL_MSG( "unexpected tree item label" );
+         FAIL_MSG( _T("unexpected tree item label") );
       }
 
       // this is checked in OnIdle() to detect cancelling the label edit
@@ -2286,7 +2286,7 @@ void wxFolderTreeImpl::OnEndLabelEdit(wxTreeEvent& event)
    MFolder *folder = m_sink->GetSelection();
    if ( !folder )
    {
-      wxFAIL_MSG( "how can we edit a label without folder?" );
+      wxFAIL_MSG( _T("how can we edit a label without folder?") );
 
       event.Veto();
    }
@@ -2365,7 +2365,7 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
    // someone clicked the tree, so the user must be back
    mApplication->UpdateAwayMode();
 
-   ASSERT_MSG( event.GetEventObject() == this, "got other treectrls event?" );
+   ASSERT_MSG( event.GetEventObject() == this, _T("got other treectrls event?") );
 
    wxTreeItemId itemId = event.GetItem();
    wxFolderTreeNode *parent = GetFolderTreeNode(itemId);
@@ -2405,7 +2405,7 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
          if ( !subfolder )
          {
             // this is not expected to happen
-            FAIL_MSG( "no subfolder?" );
+            FAIL_MSG( _T("no subfolder?") );
 
             continue;
          }
@@ -2456,7 +2456,7 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    // someone clicked the tree, so the user must be back
    mApplication->UpdateAwayMode();
 
-   ASSERT_MSG( event.GetEventObject() == this, "got other treectrls event?" );
+   ASSERT_MSG( event.GetEventObject() == this, _T("got other treectrls event?") );
 
    wxTreeItemId itemId = event.GetItem();
    wxFolderTreeNode *newCurrent = GetFolderTreeNode(itemId);
@@ -2627,7 +2627,7 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
          // we're now called from wxManFrame msg processing code so it's
          // possible for us to be called for another event - ignore silently
          //
-         //FAIL_MSG("unexpected menu command in wxFolderTree");
+         //FAIL_MSG(_T("unexpected menu command in wxFolderTree"));
          return false;
    }
 
@@ -2776,7 +2776,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
                break;
 
             default:
-               FAIL_MSG("unknown options change event");
+               FAIL_MSG(_T("unknown options change event"));
          }
 
          // important: after calling ReopenBranch() we can't use item any more
@@ -2864,7 +2864,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
             // if parentName is empty, the root will be returned which is ok
             wxString parentName = folderName.BeforeLast('/');
             wxTreeItemId parent = GetTreeItemFromName(parentName);
-            CHECK_RET( parent.IsOk(), "no such item in the tree??" );
+            CHECK_RET( parent.IsOk(), _T("no such item in the tree??") );
 
             wxFolderTreeNode *nodeParent = GetFolderTreeNode(parent);
             if ( nodeParent->WasExpanded() )
@@ -2873,7 +2873,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
                // it (and don't use MFolder_obj)
                MFolder *folder = MFolder::Get(folderName);
 
-               CHECK_RET( folder, "just created folder doesn't exist?" );
+               CHECK_RET( folder, _T("just created folder doesn't exist?") );
 
                // insert the new folder at the right place
                int pos = 0;
@@ -2926,7 +2926,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
       case MEventFolderTreeChangeData::CreateUnder:
          {
             wxTreeItemId parent = GetTreeItemFromName(folderName);
-            CHECK_RET( parent.IsOk(), "no such item in the tree??" );
+            CHECK_RET( parent.IsOk(), _T("no such item in the tree??") );
 
             if ( IsExpanded(parent) )
             {
@@ -2952,7 +2952,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
       case MEventFolderTreeChangeData::Delete:
          {
             wxTreeItemId item = GetTreeItemFromName(folderName);
-            CHECK_RET( item.IsOk(), "no such item in the tree??" );
+            CHECK_RET( item.IsOk(), _T("no such item in the tree??") );
 
             wxTreeItemId parent = GetParent(item);
 
@@ -3050,7 +3050,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
    {
       // it can happen it the folder is hidden but otherwise we should have it
       ASSERT_MSG( folder->GetFlags() & MF_FLAGS_HIDDEN,
-                  "update folder not in the tree?" );
+                  _T("update folder not in the tree?") );
 
       return;
    }
@@ -3072,7 +3072,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
 void wxFolderTreeImpl::UpdateIcon(const wxTreeItemId item, bool tmp)
 {
    wxFolderTreeNode *node = GetFolderTreeNode(item);
-   CHECK_RET( node, "can't update icon of non existing node" );
+   CHECK_RET( node, _T("can't update icon of non existing node") );
 
    // first remember the old icon to be able to restore it
    if ( tmp )
@@ -3214,9 +3214,9 @@ String GetFolderIconName(size_t n)
    };
 
    ASSERT_MSG( wxFolderTree::iconFolderMax == WXSIZEOF(aszImages),
-               "bad number of icon names" );
+               _T("bad number of icon names") );
 
-   CHECK( n < WXSIZEOF(aszImages), "", "invalid icon index" );
+   CHECK( n < WXSIZEOF(aszImages), "", _T("invalid icon index") );
 
    return aszImages[n];
 }
@@ -3269,7 +3269,7 @@ int GetDefaultFolderTypeIcon(MFolderType folderType)
       }
    }
 
-   ASSERT_MSG( image != -1, "no icon for this folder type" );
+   ASSERT_MSG( image != -1, _T("no icon for this folder type") );
 
    return image;
 }

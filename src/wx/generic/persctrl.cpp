@@ -199,7 +199,7 @@ void wxPHelper::SetConfig(wxConfigBase *config)
 
 void wxPHelper::SetPath(const wxString& path, const wxString& prefix)
 {
-    wxCHECK_RET( !path.empty(), "empty path in persistent ctrl code" );
+    wxCHECK_RET( !path.empty(), _T("empty path in persistent ctrl code") );
 
     wxString strKey, strPath = path.BeforeLast('/');
     if ( !strPath ) {
@@ -238,7 +238,7 @@ wxPHelper::~wxPHelper()
 
 bool wxPHelper::ChangePath()
 {
-    wxCHECK_MSG( m_config, FALSE, "can't change path without config!" );
+    wxCHECK_MSG( m_config, FALSE, _T("can't change path without config!") );
 
     m_oldPath = m_config->GetPath();
     m_config->SetPath(m_path);
@@ -251,7 +251,7 @@ bool wxPHelper::ChangePath()
 void wxPHelper::RestorePath()
 {
     if ( !m_pathRestored ) {
-        wxCHECK_RET( m_config, "can't restore path without config!" );
+        wxCHECK_RET( m_config, _T("can't restore path without config!") );
 
         m_config->SetPath(m_oldPath);
 
@@ -720,7 +720,7 @@ void wxPListCtrl::RestoreWidths()
                 }
                 else
                 {
-                    wxFAIL_MSG("wxPListCtrl: corrupted config entry?");
+                    wxFAIL_MSG(_T("wxPListCtrl: corrupted config entry?"));
                 }
 
                 if ( !end )
@@ -1551,10 +1551,10 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 
     // some checks are in order...
     wxASSERT_MSG( !(style & wxOK) || !(style & wxYES_NO),
-                  "don't create dialog with both Yes/No and Ok buttons!" );
+                  _T("don't create dialog with both Yes/No and Ok buttons!") );
 
     wxASSERT_MSG( (style & wxOK ) || (style & wxYES_NO),
-                  "don't create dialog with only the Cancel button!" );
+                  _T("don't create dialog with only the Cancel button!") );
 
     if ( style & wxYES_NO ) {
        buttons[Btn_Yes] = new wxButton(this, wxID_YES, _("Yes"));
@@ -1706,7 +1706,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         buttons[nDefaultBtn]->SetFocus();
     }
     else {
-        wxFAIL_MSG( "can't find default button for this dialog." );
+        wxFAIL_MSG( _T("can't find default button for this dialog.") );
     }
 
     if ( style & wxPMSGBOX_DISABLE )
@@ -1738,7 +1738,7 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
             break;
 
         default:
-            wxFAIL_MSG("unexpected button id in wxPMessageDialog.");
+            wxFAIL_MSG(_T("unexpected button id in wxPMessageDialog."));
             // fall through nevertheless
 
         case wxID_CANCEL:
@@ -2087,7 +2087,7 @@ static int TranslateBtnIdToMsgBox(int rc)
             return wxOK;
 
         default:
-            wxFAIL_MSG("unexpected button id in TranslateBtnIdToMsgBox.");
+            wxFAIL_MSG(_T("unexpected button id in TranslateBtnIdToMsgBox."));
             // fall through nevertheless
 
         case wxID_CANCEL:

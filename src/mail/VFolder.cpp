@@ -121,7 +121,7 @@ MailFolderVirt::OpenFolder(const MFolder *folder,
                            OpenMode openmode,
                            wxFrame *frame)
 {
-   CHECK( folder, NULL, "NULL folder in MailFolderVirt::OpenFolder" );
+   CHECK( folder, NULL, _T("NULL folder in MailFolderVirt::OpenFolder") );
 
    MailFolderVirt *vf = new MailFolderVirt(folder, openmode);
 
@@ -139,7 +139,7 @@ bool MailFolderVirt::CheckStatus(const MFolder *folder)
 /* static */
 bool MailFolderVirt::DeleteFolder(const MFolder *folder)
 {
-   FAIL_MSG( "TODO" );
+   FAIL_MSG( _T("TODO") );
 
    return false;
 }
@@ -147,7 +147,7 @@ bool MailFolderVirt::DeleteFolder(const MFolder *folder)
 /* static */
 bool MailFolderVirt::RenameFolder(const MFolder *folder, const String& name)
 {
-   FAIL_MSG( "TODO" );
+   FAIL_MSG( _T("TODO") );
 
    return false;
 }
@@ -155,7 +155,7 @@ bool MailFolderVirt::RenameFolder(const MFolder *folder, const String& name)
 /* static */
 long MailFolderVirt::ClearFolder(const MFolder *folder)
 {
-   FAIL_MSG( "TODO" );
+   FAIL_MSG( _T("TODO") );
 
    return -1;
 }
@@ -164,7 +164,7 @@ long MailFolderVirt::ClearFolder(const MFolder *folder)
 String
 MailFolderVirt::GetFullImapSpec(const MFolder *folder, const String& login)
 {
-   CHECK( folder, "", "NULL folder in MailFolderVirt::GetFullImapSpec" );
+   CHECK( folder, "", _T("NULL folder in MailFolderVirt::GetFullImapSpec") );
 
    String spec;
    spec << folder->GetFullName() << ';' << folder->GetPath();
@@ -255,7 +255,7 @@ MailFolderVirt::Msg *MailFolderVirt::GetMsgFromMsgno(MsgnoType msgno) const
    msgno--;
 
    CHECK( 0 <= msgno && msgno < GetMsgCount(), NULL,
-          "invalid msgno in MailFolderVirt" );
+          _T("invalid msgno in MailFolderVirt") );
 
    return m_messages[(size_t)msgno];
 }
@@ -271,14 +271,14 @@ MailFolderVirt::Msg *MailFolderVirt::GetMsgFromUID(UIdType uid) const
       }
    }
 
-   FAIL_MSG( "no message with such UID in the virtual folder" );
+   FAIL_MSG( _T("no message with such UID in the virtual folder") );
 
    return NULL;
 }
 
 void MailFolderVirt::AddMsg(MailFolderVirt::Msg *msg)
 {
-   CHECK_RET( msg, "NULL Msg in MailFolderVirt?" );
+   CHECK_RET( msg, _T("NULL Msg in MailFolderVirt?") );
 
    m_messages.Add(msg);
 }
@@ -300,7 +300,7 @@ MailFolderVirt::Msg *MailFolderVirt::GetNextMsg(MsgCookie& cookie) const
    else
    {
       // shouldn't be > than it!
-      ASSERT_MSG( cookie == count, "invalid msg index in MailFolderVirt" );
+      ASSERT_MSG( cookie == count, _T("invalid msg index in MailFolderVirt") );
 
       return NULL;
    }
@@ -308,9 +308,9 @@ MailFolderVirt::Msg *MailFolderVirt::GetNextMsg(MsgCookie& cookie) const
 
 void MailFolderVirt::DeleteMsg(MsgCookie& cookie)
 {
-   CHECK_RET( cookie < GetMsgCount(), "invalid UID in MailFolderVirt" );
+   CHECK_RET( cookie < GetMsgCount(), _T("invalid UID in MailFolderVirt") );
 
-   CHECK_RET( m_headers, "no HeaderInfoList in MailFolderVirt::DeleteMsg()?" );
+   CHECK_RET( m_headers, _T("no HeaderInfoList in MailFolderVirt::DeleteMsg()?") );
 
    // collect the information about the expunged messages to notify the GUI
    // about them later
@@ -380,14 +380,14 @@ MailFolderVirt::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
       HeaderInfo * const hiDst = headers[n - 1]; // -1 to make index from msgno
       if ( !hiDst )
       {
-         FAIL_MSG( "NULL pointer in array passed to GetHeaderInfo()? ");
+         FAIL_MSG( _T("NULL pointer in array passed to GetHeaderInfo()?") );
          break;
       }
 
       const HeaderInfo * const hiSrc = hil->GetEntryUId(msg->uidPhys);
       if ( !hiSrc )
       {
-         FAIL_MSG( "failed to get header info in virtual folder" );
+         FAIL_MSG( _T("failed to get header info in virtual folder") );
          break;
       }
 
@@ -573,13 +573,13 @@ MailFolderVirt::DoSetMessageFlag(SequenceKind kind,
    }
 
    const MsgnoType msgno = kind == SEQ_MSGNO ? uid : GetMsgnoFromUID(uid);
-   CHECK( msgno != MSGNO_ILLEGAL, false, "SetMessageFlag: invalid UID" );
+   CHECK( msgno != MSGNO_ILLEGAL, false, _T("SetMessageFlag: invalid UID") );
 
    HeaderInfoList_obj headers = GetHeaders();
-   CHECK( headers, false, "SetMessageFlag: couldn't get headers" );
+   CHECK( headers, false, _T("SetMessageFlag: couldn't get headers") );
 
    HeaderInfo *hi = headers->GetItemByMsgno(msgno);
-   CHECK( hi, false, "SetMessageFlag: no header info for the given msgno?" );
+   CHECK( hi, false, _T("SetMessageFlag: no header info for the given msgno?") );
 
    // remember the old and new status of the changed messages
    if ( !m_statusChangeData )
@@ -642,7 +642,7 @@ bool MailFolderVirt::AppendMessage(const Message& msg)
 
 bool MailFolderVirt::AppendMessage(const String& msg)
 {
-   FAIL_MSG( "AppendMessage(string) can't be used with virtual folder" );
+   FAIL_MSG( _T("AppendMessage(string) can't be used with virtual folder") );
 
    return false;
 }

@@ -218,7 +218,7 @@ SendMessageCC::SendMessageCC(Profile *profile,
 
    if ( !profile )
    {
-      FAIL_MSG( "SendMessageCC::Create() requires profile" );
+      FAIL_MSG( _T("SendMessageCC::Create() requires profile") );
 
       profile = mApplication->GetProfile();
    }
@@ -242,7 +242,7 @@ SendMessageCC::SendMessageCC(Profile *profile,
    switch ( m_Protocol )
    {
       default:
-         FAIL_MSG( "unknown SendMessage protocol" );
+         FAIL_MSG( _T("unknown SendMessage protocol") );
          // fall through
 
       case Prot_SMTP:
@@ -354,9 +354,9 @@ void SendMessageCC::InitNew()
 
 void SendMessageCC::InitResent(const Message *message)
 {
-   CHECK_RET( message, "message being resent can't be NULL" );
+   CHECK_RET( message, _T("message being resent can't be NULL") );
 
-   CHECK_RET( m_Envelope, "envelope must be created in InitResent" );
+   CHECK_RET( m_Envelope, _T("envelope must be created in InitResent") );
 
    // get the original message header and copy it to remail envelope field
    // almost without any changes except that we have to mask the transport
@@ -481,7 +481,7 @@ static MimeEncoding GetMimeEncodingForFontEncoding(wxFontEncoding enc)
          return MimeEncoding_Base64;
 
       default:
-         FAIL_MSG( "unknown encoding" );
+         FAIL_MSG( _T("unknown encoding") );
 
       case wxFONTENCODING_SYSTEM:
          return MimeEncoding_Unknown;
@@ -536,7 +536,7 @@ SendMessageCC::EncodeHeaderString(const String& header, bool isaddr)
 
    if ( enc2047 == MimeEncoding_Unknown )
    {
-      FAIL_MSG( "should have valid MIME encoding" );
+      FAIL_MSG( _T("should have valid MIME encoding") );
 
       enc2047 = MimeEncoding_QuotedPrintable;
    }
@@ -545,7 +545,7 @@ SendMessageCC::EncodeHeaderString(const String& header, bool isaddr)
    String csName = EncodingToCharset(enc);
    if ( csName.empty() )
    {
-      FAIL_MSG( "should have a valid charset name!" );
+      FAIL_MSG( _T("should have a valid charset name!") );
 
       csName = "UNKNOWN";
    }
@@ -755,7 +755,7 @@ SendMessageCC::SetupFromAddresses(void)
    if ( adr )
    {
       // Return-Path (it is used as SMTP "MAIL FROM: <>" argument)
-      ASSERT_MSG( m_Envelope->return_path == NIL, "Return-Path already set?" );
+      ASSERT_MSG( m_Envelope->return_path == NIL, _T("Return-Path already set?") );
 
       m_Envelope->return_path = mail_newaddr();
       m_Envelope->return_path->mailbox = cpystr(adr->mailbox);
@@ -766,7 +766,7 @@ SendMessageCC::SetupFromAddresses(void)
 void
 SendMessageCC::SetAddressField(ADDRESS **pAdr, const String& address)
 {
-   ASSERT_MSG( !*pAdr, "shouldn't be called twice" );
+   ASSERT_MSG( !*pAdr, _T("shouldn't be called twice") );
 
    if ( address.empty() )
    {
@@ -833,7 +833,7 @@ SendMessageCC::SetNewsgroups(const String &groups)
 
    // TODO-NEWS: we should support sending and posting the message, doing
    //            it separately if necessary
-   ASSERT_MSG( m_Protocol == Prot_NNTP, "can't post and send message" );
+   ASSERT_MSG( m_Protocol == Prot_NNTP, _T("can't post and send message") );
 
    if(groups.Length())
    {
@@ -982,7 +982,7 @@ void
 SendMessageCC::RemoveHeaderEntry(const String& name)
 {
    MessageHeadersList::iterator i = FindHeaderEntry(name);
-   CHECK_RET( i != m_extraHeaders.end(), "RemoveHeaderEntry(): no such header");
+   CHECK_RET( i != m_extraHeaders.end(), _T("RemoveHeaderEntry(): no such header") );
 
    (void)m_extraHeaders.erase(i);
 }
@@ -1154,7 +1154,7 @@ SendMessageCC::Build(bool forStorage)
    // set Reply-To if it hadn't been set by the user as a custom header
    if ( !replyToSet )
    {
-      ASSERT_MSG( !HasHeaderEntry("Reply-To"), "logic error" );
+      ASSERT_MSG( !HasHeaderEntry("Reply-To"), _T("logic error") );
 
       if ( !m_ReplyTo.empty() )
       {
@@ -1174,8 +1174,8 @@ SendMessageCC::Build(bool forStorage)
          m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
          if(strlen(m_headerValues[h]))  // paranoid, I know.
          {
-            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] == '\r', "String should have been DOSified" );
-            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] == '\n', "String should have been DOSified" );
+            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] == '\r', _T("String should have been DOSified") );
+            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] == '\n', _T("String should have been DOSified") );
             ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] =
                '\0'; // cut off \n
          }
@@ -1281,7 +1281,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
                   break;
 
                default:
-                  FAIL_MSG( "unknown MIME encoding" );
+                  FAIL_MSG( _T("unknown MIME encoding") );
                   // fall through
 
                case MimeEncoding_Base64:
@@ -1499,7 +1499,7 @@ void SendMessageCC::Preview(String *text)
 bool
 SendMessageCC::Send(int flags)
 {
-   ASSERT_MSG( m_wasBuilt, "Build() must have been called!" );
+   ASSERT_MSG( m_wasBuilt, _T("Build() must have been called!") );
 
    if ( !MailFolder::Init() )
       return false;
@@ -1689,7 +1689,7 @@ SendMessageCC::Send(int flags)
          // make gcc happy
          case Prot_Illegal:
          default:
-            FAIL_MSG("illegal protocol");
+            FAIL_MSG(_T("illegal protocol"));
    }
 
    bool success;
@@ -1714,7 +1714,7 @@ SendMessageCC::Send(int flags)
          // make gcc happy
          case Prot_Illegal:
          default:
-            FAIL_MSG("illegal protocol");
+            FAIL_MSG(_T("illegal protocol"));
             success = false;
       }
 
@@ -1937,7 +1937,7 @@ long Rfc822OutputRedirector::FullRfc822Output(char *headers,
   else
   {
      // just in case MRC decides to change it in the future...
-     wxFAIL_MSG("cclient message header doesn't have terminating blank line?");
+     wxFAIL_MSG(_T("cclient message header doesn't have terminating blank line?"));
   }
 
   // save the pointer as rfc822_address_line() modifies it

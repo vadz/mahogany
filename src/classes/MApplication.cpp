@@ -288,7 +288,7 @@ MAppBase::ContinueStartup()
 
          if ( name->empty() )
          {
-            FAIL_MSG( "empty folder name in the list of folders to open?" );
+            FAIL_MSG( _T("empty folder name in the list of folders to open?") );
             continue;
          }
 
@@ -561,11 +561,11 @@ MAppBase::OnStartup()
    m_eventOptChangeReg = MEventManager::Register(*this,
                                                  MEventId_OptionsChange);
    CHECK( m_eventOptChangeReg, FALSE,
-          "failed to register event handler for options change event " );
+          _T("failed to register event handler for options change event") );
    m_eventFolderUpdateReg = MEventManager::Register(*this,
                                                     MEventId_FolderUpdate);
    CHECK( m_eventFolderUpdateReg, FALSE,
-          "failed to register event handler for folder status event " );
+          _T("failed to register event handler for folder status event") );
 
    // finish non critical initialization
    // ----------------------------------
@@ -800,7 +800,7 @@ MAppBase::IsOkToClose(const wxMFrame *frame) const
 void
 MAppBase::Exit(bool ask)
 {
-   CHECK_RET( m_topLevelFrame, "can't close main window - there is none" );
+   CHECK_RET( m_topLevelFrame, _T("can't close main window - there is none") );
 
    // if we don't ask, force closing the frame by passing TRUE to Close()
    m_topLevelFrame->Close(!ask);
@@ -848,7 +848,7 @@ MAppBase::OnMEvent(MEventData& event)
    }
    else
    {
-      FAIL_MSG("unexpected event in MAppBase");
+      FAIL_MSG(_T("unexpected event in MAppBase"));
    }
 
    return TRUE;
@@ -1023,7 +1023,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
 void
 MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
 {
-   CHECK_RET( outbox.length(), "missing outbox folder name" );
+   CHECK_RET( outbox.length(), _T("missing outbox folder name") );
 
    UIdType count = 0;
 
@@ -1100,7 +1100,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
          // Temporary kludge because the same message is sent multiple
          // time in some 'to-be-determined' cases...
          if (lastMsgTried == msg) {
-            wxFAIL_MSG("Sending same message again !?");
+            wxFAIL_MSG(_T("Sending same message again !?"));
             i++;
             continue;
          }
@@ -1219,7 +1219,7 @@ MAppBase::GetStatusField(StatusFields field)
       }
    }
 
-   FAIL_MSG( "logic error in GetStatusField" );
+   FAIL_MSG( _T("logic error in GetStatusField") );
 
    return -1;
 }
@@ -1305,7 +1305,7 @@ wxMimeTypesManager& MAppBase::GetMimeManager(void) const
 
 bool MAppBase::IsMailDebuggingEnabled() const
 {
-   ASSERT_MSG( m_debugMail != -1, "command line not parsed yet!" );
+   ASSERT_MSG( m_debugMail != -1, _T("command line not parsed yet!") );
 
    return m_debugMail == 1; // don't use TRUE to avoid VC++ warning
 }

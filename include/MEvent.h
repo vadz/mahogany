@@ -244,7 +244,7 @@ public:
                        StatusChangeData *statusChangeData)
       : MEventWithFolderData(MEventId_MsgStatus, folder)
    {
-      ASSERT_MSG( statusChangeData, "NULL pointer in MEventMsgStatus" );
+      ASSERT_MSG( statusChangeData, _T("NULL pointer in MEventMsgStatus") );
 
       m_statusChangeData = statusChangeData;
    }

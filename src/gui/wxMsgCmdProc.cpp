@@ -206,7 +206,7 @@ protected:
    {
       // do it synchronously (FIXME should we?)
       MailFolder_obj mf = GetMailFolder();
-      CHECK( mf, NULL, "no folder in MsgCmdProcImpl::GetMessage()" );
+      CHECK( mf, NULL, _T("no folder in MsgCmdProcImpl::GetMessage()") );
 
       return mf->GetMessage(uid);
    }
@@ -565,7 +565,7 @@ AsyncStatusHandler::~AsyncStatusHandler()
 /* static */
 MsgCmdProc *MsgCmdProc::Create(MessageView *msgView, wxWindow *winForDnd)
 {
-   CHECK( msgView, NULL, "must have an associated message view" );
+   CHECK( msgView, NULL, _T("must have an associated message view") );
 
    return new MsgCmdProcImpl(msgView, winForDnd);
 }
@@ -639,7 +639,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
    if ( !m_asmf )
       return false;
 
-   CHECK( !messages.IsEmpty(), false, "no messages to operate on" );
+   CHECK( !messages.IsEmpty(), false, _T("no messages to operate on") );
 
    bool rc = true;
 
@@ -751,7 +751,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
             switch ( cmd )
             {
                default:
-                  FAIL_MSG( "unknown reply menu command" );
+                  FAIL_MSG( _T("unknown reply menu command") );
                   // fall through
 
                CASE_REPLY(REPLY);
@@ -885,7 +885,7 @@ void
 MsgCmdProcImpl::ShowUIDL(UIdType uid)
 {
    MailFolder_obj mf = GetMailFolder();
-   CHECK_RET( mf, "no folder in MsgCmdProcImpl::ShowUIDL" );
+   CHECK_RET( mf, _T("no folder in MsgCmdProcImpl::ShowUIDL") );
 
    String uidString = mf->GetMessageUID(GetFocus());
    if ( uidString.empty() )
@@ -924,7 +924,7 @@ MsgCmdProcImpl::ShowMIMEDialog(UIdType uid)
 {
    // do it synchronously (FIXME should we?)
    MailFolder_obj mf = GetMailFolder();
-   CHECK_RET( mf, "no folder in MsgCmdProcImpl::ShowMIMEDialog" );
+   CHECK_RET( mf, _T("no folder in MsgCmdProcImpl::ShowMIMEDialog") );
 
    const MimePart *part = NULL;
    Message *msg = mf->GetMessage(uid);
@@ -1222,10 +1222,10 @@ void
 MsgCmdProcImpl::ToggleMessages(const UIdArray& messages)
 {
    MailFolder_obj mf = GetMailFolder();
-   CHECK_RET( mf, "no folder in MsgCmdProcImpl::ToggleMessages" );
+   CHECK_RET( mf, _T("no folder in MsgCmdProcImpl::ToggleMessages") );
 
    HeaderInfoList_obj hil = mf->GetHeaders();
-   CHECK_RET( hil, "can't toggle messages without folder listing" );
+   CHECK_RET( hil, _T("can't toggle messages without folder listing") );
 
    size_t count = messages.GetCount();
    for ( size_t n = 0; n < count; n++ )
@@ -1243,7 +1243,7 @@ MsgCmdProcImpl::ToggleMessages(const UIdArray& messages)
       HeaderInfo *hi = hil->GetItemByIndex(idx);
       if ( !hi )
       {
-         FAIL_MSG( "HeaderInfoList::GetItemByIndex() failed?" );
+         FAIL_MSG( _T("HeaderInfoList::GetItemByIndex() failed?") );
 
          continue;
       }
@@ -1341,7 +1341,7 @@ MsgCmdProcImpl::ExtractAddresses(const UIdArray& selections)
    // FIXME: should this be implemented as async operation?
 
    MailFolder_obj mf = GetMailFolder();
-   CHECK_RET( mf, "message preview without folder?" );
+   CHECK_RET( mf, _T("message preview without folder?") );
 
    // extract all addresses from the selected messages to this array
    wxSortedArrayString addressesSorted;
@@ -1370,7 +1370,7 @@ MsgCmdProcImpl::ExtractAddresses(const UIdArray& selections)
       Message *msg = mf->GetMessage(selections[n]);
       if ( !msg )
       {
-         FAIL_MSG( "selected message disappeared?" );
+         FAIL_MSG( _T("selected message disappeared?") );
 
          continue;
       }
@@ -1431,7 +1431,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    // normally DragAndDropMessages() shouldn't be called at all in this case
    // (i.e. currently it is only called from wxFolderView which does provide a
    // window for us but not from wxMessageViewFrame)
-   CHECK( m_winForDnd, false, "this msg view doesn't support dnd" );
+   CHECK( m_winForDnd, false, _T("this msg view doesn't support dnd") );
 
 #if wxUSE_DRAG_AND_DROP
    bool didDrop = false;
@@ -1439,7 +1439,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    size_t countSel = selections.Count();
 
    MailFolder_obj mf = GetMailFolder();
-   CHECK( mf, false, "no mail folder to drag messages from?" );
+   CHECK( mf, false, _T("no mail folder to drag messages from?") );
 
    MMessagesDataObject dropData(this, mf, selections);
 
@@ -1458,7 +1458,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    switch ( dropSource.DoDragDrop(wxDrag_DefaultMove) )
    {
       default:
-         wxFAIL_MSG( "unexpected DoDragDrop return value" );
+         wxFAIL_MSG( _T("unexpected DoDragDrop return value") );
          // fall through
 
       case wxDragError:
@@ -1569,7 +1569,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
    {
       const Ticket& t = result->GetTicket();
 
-      ASSERT_MSG( m_TicketList->Contains(t), "unexpected async result ticket" );
+      ASSERT_MSG( m_TicketList->Contains(t), _T("unexpected async result ticket") );
 
       m_TicketList->Remove(t);
 
@@ -1663,7 +1663,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                {
                   // message was copied ok, what else to do with it?
                   UIdArray *seq = result->GetSequence();
-                  CHECK( seq, false, "invalid async event data" );
+                  CHECK( seq, false, _T("invalid async event data") );
 
                   unsigned long count = seq->Count();
 
@@ -1741,7 +1741,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
             else
             {
                // we don't use them for anything else yet
-               FAIL_MSG( "unexpected GetMessage() ticket" );
+               FAIL_MSG( _T("unexpected GetMessage() ticket") );
             }
 
          // nothing special to do for these cases
@@ -1757,7 +1757,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
             break;
 
          default:
-            FAIL_MSG( "unexpected async operation result" );
+            FAIL_MSG( _T("unexpected async operation result") );
       }
    }
 
@@ -1779,7 +1779,7 @@ void MsgCmdProcImpl::RemoveAsyncStatus(AsyncStatusHandler *asyncStatus)
       }
    }
 
-   wxFAIL_MSG( "async status not found in m_arrayAsyncStatus" );
+   wxFAIL_MSG( _T("async status not found in m_arrayAsyncStatus") );
 }
 
 void MsgCmdProcImpl::AddAsyncStatus(AsyncStatusHandler *asyncStatus)

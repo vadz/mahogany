@@ -128,7 +128,7 @@ void Sequence::Add(UIdType n)
 
 void Sequence::AddRange(UIdType from, UIdType to)
 {
-   CHECK_RET( from <= to, "invalid range in Sequence::AddRange" );
+   CHECK_RET( from <= to, _T("invalid range in Sequence::AddRange") );
 
    Add(from);
    switch ( to - from )
@@ -250,7 +250,7 @@ UIdType Sequence::GetNext(UIdType n, size_t& cookie) const
          if ( m_seq[cookie] != '\0' )
          {
             // nothing else can follow the end of the range
-            ASSERT_MSG( m_seq[cookie] == ',', "bad sequence string format" );
+            ASSERT_MSG( m_seq[cookie] == ',', _T("bad sequence string format") );
 
             cookie++;
 
@@ -276,7 +276,7 @@ UIdType Sequence::GetNext(UIdType n, size_t& cookie) const
 
 String GetSequenceString(const UIdArray *messages)
 {
-   CHECK( messages, "", "NULL messages array in GetSequenceString" );
+   CHECK( messages, "", _T("NULL messages array in GetSequenceString") );
 
    Sequence seq;
 

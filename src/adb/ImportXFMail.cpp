@@ -138,7 +138,7 @@ bool AdbXFMailImporter::StartImport(const String& filename)
 size_t AdbXFMailImporter::GetEntryNames(const String& path,
                                         wxArrayString& entries) const
 {
-   ASSERT_MSG( !path, "where did this path come from?" );
+   ASSERT_MSG( !path, _T("where did this path come from?") );
 
    entries.Empty();
 
@@ -204,7 +204,7 @@ size_t AdbXFMailImporter::GetEntryNames(const String& path,
 size_t AdbXFMailImporter::GetGroupNames(const String& path,
                                         wxArrayString& groups) const
 {
-   ASSERT_MSG( !path, "where did this path come from?" );
+   ASSERT_MSG( !path, _T("where did this path come from?") );
 
    // no groups
    return 0;
@@ -214,7 +214,7 @@ bool AdbXFMailImporter::ImportEntry(const String& path,
                                     size_t index,
                                     AdbEntry *entry)
 {
-   CHECK( index < m_lineNumbers.GetCount(), FALSE, "invalid entry index" );
+   CHECK( index < m_lineNumbers.GetCount(), FALSE, _T("invalid entry index") );
 
    wxString line = m_textfile.GetLine((size_t)m_lineNumbers[index]);
    if ( !line )

@@ -272,7 +272,7 @@ public:
    bool AddSearchFolder(MailFolder *mf, Ticket t)
    {
       CHECK( mf && t != ILLEGAL_TICKET, false,
-             "invalid params in AsyncSearchData::AddSearchFolder" );
+             _T("invalid params in AsyncSearchData::AddSearchFolder") );
 
       m_listSingleSearch.push_back(new SingleSearchData(t, mf));
 
@@ -300,7 +300,7 @@ public:
                const UIdArray *uidsMatching = result.GetSequence();
                if ( !uidsMatching )
                {
-                  FAIL_MSG( "searched ok but no search results??" );
+                  FAIL_MSG( _T("searched ok but no search results??") );
                }
                else // have some messages to show
                {
@@ -359,7 +359,7 @@ public:
    // show the search results to the user
    void ShowSearchResults(wxFrame *frame)
    {
-      ASSERT_MSG( IsSearchCompleted(), "shouldn't be called yet!" );
+      ASSERT_MSG( IsSearchCompleted(), _T("shouldn't be called yet!") );
 
       if ( m_folderVirt && m_nMatchingMessages )
       {
@@ -511,7 +511,7 @@ public:
          }
       }
 
-      FAIL_MSG( "got search result for a search we hadn't ever started?" );
+      FAIL_MSG( _T("got search result for a search we hadn't ever started?") );
    }
 
 private:
@@ -993,7 +993,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             break;
 
          default:
-            FAIL_MSG( "unknown debug menu command?" );
+            FAIL_MSG( _T("unknown debug menu command?") );
       }
    }
 #endif // DEBUG
@@ -1100,12 +1100,12 @@ bool wxMainFrame::OnMEvent(MEventData& ev)
                   }
                   else
                   {
-                     FAIL_MSG( "search in progress but no search data?" );
+                     FAIL_MSG( _T("search in progress but no search data?") );
                   }
                   break;
 
                default:
-                  FAIL_MSG( "unexpected ASMailFolder::Result in wxMainFrame" );
+                  FAIL_MSG( _T("unexpected ASMailFolder::Result in wxMainFrame") );
             }
          }
 
@@ -1213,7 +1213,7 @@ public:
    virtual bool OnVisitFolder(const wxString& folderName)
    {
       MFolder_obj folder(folderName);
-      CHECK( folder, false, "visiting folder which doesn't exist?" );
+      CHECK( folder, false, _T("visiting folder which doesn't exist?") );
 
       if ( !folder->CanOpen() )
       {

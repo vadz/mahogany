@@ -199,7 +199,7 @@ static wxDllType gs_dllPython = 0;
 
 extern bool InitPythonDll()
 {
-   CHECK( !gs_dllPython, true, "shouldn't be called more than once" );
+   CHECK( !gs_dllPython, true, _T("shouldn't be called more than once") );
 
    gs_dllPython = wxDllLoader::LoadLibrary(GetDllName(PYTHON_LIB(20)));
    if ( !gs_dllPython )

@@ -379,7 +379,7 @@ wxString AdbPineImporter::GetAddressesOfGroup(const wxString& path) const
 
    if ( components.GetCount() != 1 )
    {
-      FAIL_MSG( "we may only have simple subgroups in PINE addressbooks" );
+      FAIL_MSG( _T("we may only have simple subgroups in PINE addressbooks") );
 
       return "";
    }
@@ -387,7 +387,7 @@ wxString AdbPineImporter::GetAddressesOfGroup(const wxString& path) const
    int indexGroup = m_groupNames.Index(components[0u]);
    if ( indexGroup == wxNOT_FOUND )
    {
-      FAIL_MSG( "unknown group" );
+      FAIL_MSG( _T("unknown group") );
 
       return "";
    }
@@ -406,7 +406,7 @@ size_t AdbPineImporter::SplitMailingListAddresses(const wxString& addresses,
                                                   wxArrayString *nicks,
                                                   wxArrayString *emails) const
 {
-   CHECK( nicks, 0, "must pass a valid pointer to nicknames array" );
+   CHECK( nicks, 0, _T("must pass a valid pointer to nicknames array") );
 
    if ( !addresses || addresses[0u] != '(' || addresses.Last() != ')' )
    {
@@ -581,7 +581,7 @@ bool AdbPineImporter::ImportEntry(const String& path,
    {
       // a top level entry
       CHECK( index < m_entriesLineNumbers.GetCount(), FALSE,
-             "invalid entry index" );
+             _T("invalid entry index") );
 
       size_t nLine = m_entriesLineNumbers[index];
 
@@ -606,7 +606,7 @@ bool AdbPineImporter::ImportEntry(const String& path,
       wxArrayString nicks, emails;
       size_t count = SplitMailingListAddresses(addresses, &nicks, &emails);
 
-      CHECK( index < count, FALSE, "invalid entry index" );
+      CHECK( index < count, FALSE, _T("invalid entry index") );
 
 #ifdef DEBUG
       nickname = nicks[index];
@@ -620,7 +620,7 @@ bool AdbPineImporter::ImportEntry(const String& path,
    wxString nickReal;
    entry->GetField(AdbField_NickName, &nickReal);
 
-   ASSERT_MSG( nickname == nickReal, "wrong index or wrong entry" );
+   ASSERT_MSG( nickname == nickReal, _T("wrong index or wrong entry") );
 #endif // DEBUG
 
    return TRUE;

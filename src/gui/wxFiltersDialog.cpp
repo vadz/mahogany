@@ -520,7 +520,7 @@ OneCritControl::LayoutControls(wxWindow **last)
 void
 OneCritControl::CreateSpamButton(const String& rule)
 {
-   ASSERT_MSG( !m_btnSpam, "CreateSpamButton() called twice?" );
+   ASSERT_MSG( !m_btnSpam, _T("CreateSpamButton() called twice?") );
 
    InitSpamOptions(rule);
 
@@ -700,7 +700,7 @@ static const wxOptionsPageDesc gs_SpamPageDesc =
 void
 OneCritControl::InitSpamOptions(const String& rule)
 {
-   CHECK_RET( m_Argument, "no argument control in the spam test?" );
+   CHECK_RET( m_Argument, _T("no argument control in the spam test?") );
 
    const String testString = m_Argument->GetValue();
 
@@ -797,7 +797,7 @@ OneCritControl::ShowDetails()
 #endif // USE_RBL
 
       wxOneFilterDialog *dlg = GET_PARENT_OF_CLASS(m_Parent, wxOneFilterDialog);
-      CHECK_RET( dlg, "should be a child of wxOneFilterDialog" );
+      CHECK_RET( dlg, _T("should be a child of wxOneFilterDialog") );
 
       dlg->UpdateProgram();
    }
@@ -829,7 +829,7 @@ OneCritControl::GetSpamTestArgument() const
 {
    String s;
 
-   CHECK( m_btnSpam, s, "shouldn't be called if spam button not used" );
+   CHECK( m_btnSpam, s, _T("shouldn't be called if spam button not used") );
 
    if ( m_checkSpamAssassin )
       AddToSpamArgument(s, SPAM_TEST_SPAMASSASSIN);
@@ -951,7 +951,7 @@ OneActionControl::UpdateUI()
 
 OneActionControl::OneActionControl(wxWindow *parent)
 {
-   wxASSERT_MSG( OAC_TypesCount == OAC_T_Max, "forgot to update something" );
+   wxASSERT_MSG( OAC_TypesCount == OAC_T_Max, _T("forgot to update something") );
 
    m_Parent = parent;
 
@@ -1179,7 +1179,7 @@ wxOneFilterDialog::LayoutControls()
 void
 wxOneFilterDialog::AddOneControl()
 {
-   ASSERT_MSG( m_nControls < MAX_CONTROLS, "too many filter controls" );
+   ASSERT_MSG( m_nControls < MAX_CONTROLS, _T("too many filter controls") );
 
    OneCritControl *prev = m_nControls == 0 ? NULL
                                            : m_CritControl[m_nControls - 1];
@@ -1191,7 +1191,7 @@ wxOneFilterDialog::AddOneControl()
 void
 wxOneFilterDialog::RemoveOneControl()
 {
-   ASSERT_MSG( m_nControls > 1, "can't remove control -- no more left" );
+   ASSERT_MSG( m_nControls > 1, _T("can't remove control -- no more left") );
 
    m_nControls--;
    delete m_CritControl[m_nControls];
@@ -1213,7 +1213,7 @@ void wxOneFilterDialog::UpdateProgram()
          MFDialogSettings *settings = m_FilterData->GetSettings();
 
          CHECK_RET( settings,
-                    "can't update program for a non-simple filter rule!" );
+                    _T("can't update program for a non-simple filter rule!") );
 
          m_initializing = true;
          m_textProgram->SetValue(settings->WriteRule());
@@ -1271,7 +1271,7 @@ wxOneFilterDialog::OnText(wxCommandEvent& event)
    if ( event.GetEventObject() == m_NameCtrl )
    {
       wxWindow *btnOk = FindWindow(wxID_OK);
-      CHECK_RET( btnOk, "no [Ok] button in the dialog?" );
+      CHECK_RET( btnOk, _T("no [Ok] button in the dialog?") );
 
       // the filter name can't be empty
       btnOk->Enable( !m_NameCtrl->GetValue().empty() );
@@ -1608,7 +1608,7 @@ void
 wxAllFiltersDialog::OnCopyFiter(wxCommandEvent &event)
 {
    wxString name = m_lboxFilters->GetStringSelection();
-   CHECK_RET( !!name, "must have selection in the listbox" );
+   CHECK_RET( !!name, _T("must have selection in the listbox") );
 
    wxString nameNew = name;
    for ( ;; )
@@ -1638,7 +1638,7 @@ void
 wxAllFiltersDialog::OnEditFiter(wxCommandEvent &event)
 {
    String name = m_lboxFilters->GetStringSelection();
-   CHECK_RET( !!name, "must have selection in the listbox" );
+   CHECK_RET( !!name, _T("must have selection in the listbox") );
 
    if ( EditFilter(name, this) )
    {
@@ -1664,7 +1664,7 @@ public:
    virtual bool OnVisitFolder(const wxString& folderName)
       {
          MFolder* folder = MFolder::Get(folderName);
-         CHECK( folder, false, "RenameAFilterTraversal: NULL folder" );
+         CHECK( folder, false, _T("RenameAFilterTraversal: NULL folder") );
          wxArrayString filters = folder->GetFilters();
          size_t countFilters = filters.GetCount();
          int foundInThisFolder = 0;
@@ -1689,7 +1689,7 @@ void
 wxAllFiltersDialog::OnRenameFiter(wxCommandEvent &event)
 {
    wxString name = m_lboxFilters->GetStringSelection();
-   CHECK_RET( !!name, "must have selection in the listbox" );
+   CHECK_RET( !!name, _T("must have selection in the listbox") );
 
    wxString nameNew = name;
    if ( !MInputBox(&nameNew,
@@ -1730,7 +1730,7 @@ void
 wxAllFiltersDialog::OnDeleteFiter(wxCommandEvent &event)
 {
    String name = m_lboxFilters->GetStringSelection();
-   CHECK_RET( !!name, "must have selection in the listbox" );
+   CHECK_RET( !!name, _T("must have selection in the listbox") );
 
    (void)DoDeleteFilter(name);
 }
@@ -1751,7 +1751,7 @@ wxAllFiltersDialog::DoCopyFilter(const wxString& nameOld,
                                  const wxString& nameNew)
 {
    // caller is supposed to check for this
-   CHECK( nameOld != nameNew, false, "can't copy filter to itself" );
+   CHECK( nameOld != nameNew, false, _T("can't copy filter to itself") );
 
    // check if the filter with the new name doesn't already exist
    int idx = m_lboxFilters->FindString(nameNew);
@@ -1787,7 +1787,7 @@ wxAllFiltersDialog::DoCopyFilter(const wxString& nameOld,
       // (as it owuld do if we used simple Append() here)
       idx = m_lboxFilters->FindString(nameOld);
 
-      ASSERT_MSG( idx != wxNOT_FOUND, "copied a filter which doesn't exist??" );
+      ASSERT_MSG( idx != wxNOT_FOUND, _T("copied a filter which doesn't exist??") );
 
       m_lboxFilters->Insert(nameNew, idx + 1);
    }
@@ -1906,10 +1906,10 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
 
    // assume there is only one of them
    wxWindow *boxTop = FindWindow(wxStaticBoxNameStr);
-   wxCHECK_RET( boxTop, "can't find static box in wxFolderFiltersDialog" );
+   wxCHECK_RET( boxTop, _T("can't find static box in wxFolderFiltersDialog") );
 
    wxWindow *btnOk = FindWindow(wxID_OK);
-   wxCHECK_RET( btnOk, "can't find ok button in wxFolderFiltersDialog" );
+   wxCHECK_RET( btnOk, _T("can't find ok button in wxFolderFiltersDialog") );
 
    // create additional pane below the check list box with existing filters
    wxStaticBox *boxBottom = new wxStaticBox(this, -1, _("Instructions:"));
@@ -2282,7 +2282,7 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
    }
 
    CHECK( settings, false,
-          "the [Ok] button not supposed to be enabled in this case" );
+          _T("the [Ok] button not supposed to be enabled in this case") );
 
    settings->SetAction(m_action->GetAction(), m_action->GetArgument());
 
@@ -2372,7 +2372,7 @@ static String CreateNewFilter(wxWindow *parent)
 static bool EditFilter(const String& name, wxWindow *parent)
 {
    MFilter_obj filter(name);
-   CHECK( filter, false, "filter unexpectedly missing" );
+   CHECK( filter, false, _T("filter unexpectedly missing") );
 
    MFilterDesc fd = filter->GetDesc();
    if ( !ConfigureFilter(&fd, parent) )

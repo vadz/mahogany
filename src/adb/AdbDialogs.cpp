@@ -502,7 +502,7 @@ void wxAdbExpandDialog::OnBtnMore(wxCommandEvent& event)
 void wxAdbExpandDialog::OnBtnDelete(wxCommandEvent& WXUNUSED(event))
 {
    size_t n = (size_t)m_listbox->GetSelection();
-   CHECK_RET( n >= m_nGroups, "should be disabled" );
+   CHECK_RET( n >= m_nGroups, _T("should be disabled") );
 
    // first remove it from the listbox
    m_listbox->Delete(n);
@@ -557,7 +557,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
    if ( !filename )
    {
       // we can't guess everything!
-      CHECK( importer, FALSE, "should have either importer or filename" );
+      CHECK( importer, FALSE, _T("should have either importer or filename") );
 
       filename = importer->GetDefaultFilename();
       if ( !filename )

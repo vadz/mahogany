@@ -377,12 +377,12 @@ void MfCloser::Add(MailFolderCmn *mf, int delay)
    // to it (MfCloseEntry has a lock), so this would be an error in ref
    // counting (extra DecRef()) elsewhere
    ASSERT_MSG( !GetCloseEntry(mf),
-               "adding a folder to MfCloser twice??" );
+               _T("adding a folder to MfCloser twice??") );
 #endif // DEBUG_FOLDER_CLOSE
 
-   CHECK_RET( mf, "NULL MailFolder in MfCloser::Add()");
+   CHECK_RET( mf, _T("NULL MailFolder in MfCloser::Add()"));
 
-   CHECK_RET( delay > 0, "folder close timeout must be positive" );
+   CHECK_RET( delay > 0, _T("folder close timeout must be positive") );
 
    wxLogTrace(TRACE_MF_REF, "Adding '%s' to gs_MailFolderCloser",
               mf->GetName().c_str());
@@ -426,7 +426,7 @@ void MfCloser::CleanUp(void)
 
 void MfCloser::Remove(MfCloseEntry *entry)
 {
-   CHECK_RET( entry, "NULL entry in MfCloser::Remove" );
+   CHECK_RET( entry, _T("NULL entry in MfCloser::Remove") );
 
 #ifdef DEBUG
    wxLogTrace(TRACE_MF_REF, "Removing '%s' from gs_MailFolderCloser",
@@ -588,7 +588,7 @@ MailFolderCmn::RealDecRef()
       if ( gs_MailFolderCloser && gs_MailFolderCloser->GetCloseEntry(this) )
       {
          // we will crash later when removing it from the list!
-         FAIL_MSG("deleting folder still in MfCloser list!");
+         FAIL_MSG(_T("deleting folder still in MfCloser list!"));
       }
    }
 #endif // DEBUG_FOLDER_CLOSE
@@ -620,14 +620,14 @@ MailFolderCmn::MailFolderCmn()
 MailFolderCmn::~MailFolderCmn()
 {
    ASSERT_MSG( !m_suspendUpdates,
-               "mismatch between Suspend/ResumeUpdates()" );
+               _T("mismatch between Suspend/ResumeUpdates()") );
 
-   ASSERT_MSG( !MFPool::Remove(this), "folder shouldn't be left in the pool!" );
+   ASSERT_MSG( !MFPool::Remove(this), _T("folder shouldn't be left in the pool!") );
 
    // this must have been cleared by SendMsgStatusChangeEvent() call earlier
    if ( m_statusChangeData )
    {
-      FAIL_MSG( "m_statusChangeData unexpectedly != NULL" );
+      FAIL_MSG( _T("m_statusChangeData unexpectedly != NULL") );
 
       delete m_statusChangeData;
    }
@@ -635,7 +635,7 @@ MailFolderCmn::~MailFolderCmn()
    // normally this one should be deleted as well
    if ( m_expungeData )
    {
-      FAIL_MSG( "m_expungeData unexpectedly != NULL" );
+      FAIL_MSG( _T("m_expungeData unexpectedly != NULL") );
 
       delete m_expungeData;
    }
@@ -671,7 +671,7 @@ void MailFolderCmn::CacheLastMessages(MsgnoType count)
    {
       HeaderInfoList_obj hil = GetHeaders();
 
-      CHECK_RET( hil, "Failed to cache messages because there are no headers" );
+      CHECK_RET( hil, _T("Failed to cache messages because there are no headers") );
 
       MsgnoType total = GetMessageCount();
 
@@ -779,7 +779,7 @@ bool
 MailFolderCmn::SaveMessages(const UIdArray *selections,
                             MFolder *folder)
 {
-   CHECK( folder, false, "SaveMessages() needs a valid folder pointer" );
+   CHECK( folder, false, _T("SaveMessages() needs a valid folder pointer") );
 
    if ( !CanCreateMessagesInFolder(folder->GetType()) )
    {
@@ -792,7 +792,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    }
 
    int n = selections->Count();
-   CHECK( n, true, "SaveMessages(): nothing to save" );
+   CHECK( n, true, _T("SaveMessages(): nothing to save") );
 
    MailFolder *mf = MailFolder::OpenFolder(folder);
    if ( !mf )
@@ -806,7 +806,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
 
    if ( mf->IsLocked() )
    {
-      FAIL_MSG( "Can't SaveMessages() to locked folder" );
+      FAIL_MSG( _T("Can't SaveMessages() to locked folder") );
 
       mf->DecRef();
 
@@ -862,7 +862,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       }
       else
       {
-         FAIL_MSG( "copying inexistent message?" );
+         FAIL_MSG( _T("copying inexistent message?") );
       }
    }
 
@@ -954,7 +954,7 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
 UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
 {
    HeaderInfoList_obj hil = GetHeaders();
-   CHECK( hil, NULL, "no listing in SearchMessages" );
+   CHECK( hil, NULL, _T("no listing in SearchMessages") );
 
    // the search results
    UIdArray *results = new UIdArray;
@@ -990,7 +990,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
 
       if ( !hi )
       {
-         FAIL_MSG( "SearchMessages: can't get header info" );
+         FAIL_MSG( _T("SearchMessages: can't get header info") );
 
          continue;
       }
@@ -1012,7 +1012,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
          Message_obj msg = GetMessage(hi->GetUId());
          if ( !msg )
          {
-            FAIL_MSG( "SearchMessages: can't get message" );
+            FAIL_MSG( _T("SearchMessages: can't get message") );
 
             continue;
          }
@@ -1035,7 +1035,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
                break;
 
             default:
-               FAIL_MSG("Unknown search criterium!");
+               FAIL_MSG(_T("Unknown search criterium!"));
          }
       }
 
@@ -1153,7 +1153,7 @@ extern "C"
    static int SortComparisonFunction(const void *p1, const void *p2)
    {
       // check that the caller didn't forget to acquire the global data lock
-      ASSERT_MSG( gs_SortData.mutex.IsLocked(), "using unlocked gs_SortData" );
+      ASSERT_MSG( gs_SortData.mutex.IsLocked(), _T("using unlocked gs_SortData") );
 
       // convert msgnos to indices
       MsgnoType n1 = *(MsgnoType *)p1 - 1,
@@ -1246,12 +1246,12 @@ extern "C"
 #ifdef USE_HEADER_SCORE
                result = CmpNumeric(hi1->GetScore(), hi2->GetScore());
 #else
-               FAIL_MSG("unimplemented");
+               FAIL_MSG(_T("unimplemented"));
 #endif // USE_HEADER_SCORE
                break;
 
             default:
-               FAIL_MSG("unknown sorting criterium");
+               FAIL_MSG(_T("unknown sorting criterium"));
          }
 
          if ( reverse )
@@ -1278,16 +1278,16 @@ MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 {
    HeaderInfoList_obj hil = GetHeaders();
 
-   CHECK( hil, false, "no listing to sort" );
+   CHECK( hil, false, _T("no listing to sort") );
 
    MsgnoType count = hil->Count();
 
    // HeaderInfoList::Sort() is supposed to check for these cases
    ASSERT_MSG( GetSortCritDirect(sortParams.sortOrder) != MSO_NONE,
-               "nothing to do in Sort() - shouldn't be called" );
+               _T("nothing to do in Sort() - shouldn't be called") );
 
    ASSERT_MSG( count > 1,
-               "nothing to sort in Sort() - shouldn't be called" );
+               _T("nothing to sort in Sort() - shouldn't be called") );
 
    // we need all headers, prefetch them
    hil->CacheMsgnos(1, count);
@@ -1321,16 +1321,16 @@ bool MailFolderCmn::ThreadMessages(const ThreadParams& thrParams,
 {
    HeaderInfoList_obj hil = GetHeaders();
 
-   CHECK( hil, false, "no listing to sort" );
+   CHECK( hil, false, _T("no listing to sort") );
 
    MsgnoType count = hil->Count();
 
    // HeaderInfoList::Thread() is supposed to check for these cases
    ASSERT_MSG( thrParams.useThreading,
-               "nothing to do in ThreadMessages() - shouldn't be called" );
+               _T("nothing to do in ThreadMessages() - shouldn't be called") );
 
    ASSERT_MSG( count > 1,
-               "nothing to sort in ThreadMessages() - shouldn't be called" );
+               _T("nothing to sort in ThreadMessages() - shouldn't be called") );
 
    // we need all headers, prefetch them
    hil->CacheMsgnos(1, count);
@@ -1487,7 +1487,7 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections,
                                      int flags)
 {
    CHECK( CanDeleteMessagesInFolder(GetType()), FALSE,
-          "can't delete messages in this folder" );
+          _T("can't delete messages in this folder") );
 
    // we can either delete the messages by moving them to the trash folder and
    // expunging them from this one or by marking them deleted and leaving them
@@ -1541,7 +1541,7 @@ bool
 MailFolderCmn::DeleteMessages(const UIdArray *selections, int flags)
 {
    CHECK( selections, false,
-          "NULL selections in MailFolderCmn::DeleteMessages" );
+          _T("NULL selections in MailFolderCmn::DeleteMessages") );
 
    Sequence seq;
    seq.AddArray(*selections);
@@ -1562,7 +1562,7 @@ int
 MailFolderCmn::ApplyFilterRules(const UIdArray& msgsOrig)
 {
    MFolder_obj folder(GetName());
-   CHECK( folder, FilterRule::Error, "ApplyFilterRules: no MFolder?" );
+   CHECK( folder, FilterRule::Error, _T("ApplyFilterRules: no MFolder?") );
 
    int rc = 0;
 
@@ -1594,7 +1594,7 @@ MailFolderCmn::ApplyFilterRules(const UIdArray& msgsOrig)
 bool
 MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
 {
-   CHECK( filterRule, false, "FilterNewMail: NULL filter" );
+   CHECK( filterRule, false, _T("FilterNewMail: NULL filter") );
 
    wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::FilterNewMail(%u msgs)",
               GetName().c_str(), uidsNew.GetCount());
@@ -1701,10 +1701,10 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
    // if we don't have uidsNew, the folder can't be opened
    if ( !uidsNew )
    {
-      CHECK( !mf, false, "ProcessNewMail: bad parameters" );
+      CHECK( !mf, false, _T("ProcessNewMail: bad parameters") );
 
       // and we are also supposed to have at least the number of new messages
-      ASSERT_MSG( countNew, "ProcessNewMail: no new mail at all?" );
+      ASSERT_MSG( countNew, _T("ProcessNewMail: no new mail at all?") );
    }
 
    Profile_obj profile(folder->GetProfile());
@@ -1914,7 +1914,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
                              MsgnoType countNew,
                              MailFolder *mf)
 {
-   CHECK_RET( folder, "ReportNewMail: NULL folder" );
+   CHECK_RET( folder, _T("ReportNewMail: NULL folder") );
 
    // first of all, do nothing at all in the away mode
    if ( mApplication->IsInAwayMode() )
@@ -2094,7 +2094,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
 
 bool MailFolderCmn::CountAllMessages(MailFolderStatus *status) const
 {
-   CHECK( status, false, "CountAllMessages: NULL pointer" );
+   CHECK( status, false, _T("CountAllMessages: NULL pointer") );
 
    String name = GetName();
    MfStatusCache *mfStatusCache = MfStatusCache::Get();
@@ -2193,7 +2193,7 @@ MailFolderCmn::SendMsgStatusChangeEvent()
                   status.what--; \
                } \
                else \
-                  FAIL_MSG( "error in msg status change logic" )
+                  FAIL_MSG( _T("error in msg status change logic") )
 
          UPDATE_NUM_OF(recent);
          UPDATE_NUM_OF(unread);
@@ -2234,7 +2234,7 @@ void MailFolderCmn::DiscardExpungeData()
 
 void MailFolderCmn::RequestUpdateAfterExpunge()
 {
-   CHECK_RET( m_expungeData, "shouldn't be called if we didn't expunge" );
+   CHECK_RET( m_expungeData, _T("shouldn't be called if we didn't expunge") );
 
    // FIXME: we ignore IsUpdateSuspended() here, should we? and if not,
    //        what to do?
@@ -2253,7 +2253,7 @@ void MailFolderCmn::RequestUpdateAfterExpunge()
    if ( mfStatusCache->GetStatus(GetName(), &status) )
    {
       // caller is supposed to check for this!
-      CHECK_RET( IsOpened(), "RequestUpdateAfterExpunge(): closed folder?" );
+      CHECK_RET( IsOpened(), _T("RequestUpdateAfterExpunge(): closed folder?") );
 
       status.total = GetMessageCount();
 
@@ -2296,10 +2296,10 @@ MfCmnEventReceiver::MfCmnEventReceiver(MailFolderCmn *mf)
    m_Mf = mf;
 
    m_MEventCookie = MEventManager::Register(*this, MEventId_OptionsChange);
-   ASSERT_MSG( m_MEventCookie, "can't reg folder with event manager");
+   ASSERT_MSG( m_MEventCookie, _T("can't reg folder with event manager"));
 
    m_MEventPingCookie = MEventManager::Register(*this, MEventId_Ping);
-   ASSERT_MSG( m_MEventPingCookie, "can't reg folder with event manager");
+   ASSERT_MSG( m_MEventPingCookie, _T("can't reg folder with event manager"));
 }
 
 MfCmnEventReceiver::~MfCmnEventReceiver()

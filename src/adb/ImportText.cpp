@@ -265,12 +265,12 @@ size_t AdbTextImporter::GetEntryNames(const String& path,
    {
       // the text file is flat, there are nothing in subgroups
 
-      FAIL_MSG("how did we get here in the first place?");
+      FAIL_MSG(_T("how did we get here in the first place?"));
 
       return 0;
    }
 
-   CHECK( m_textfile.IsOpened(), 0, "forgot to call StartImport?" );
+   CHECK( m_textfile.IsOpened(), 0, _T("forgot to call StartImport?") );
 
    entries.Empty();
    size_t nLines = m_textfile.GetLineCount();

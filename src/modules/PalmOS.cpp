@@ -379,7 +379,7 @@ extern "C" { int register_printErrorHook (printErrorHook); }
 static
 int MAL_PrintFunc(bool errorflag, const char * format, va_list args)
 {
-   CHECK(gs_MInterface != NULL, 0, "no MInterface");
+   CHECK(gs_MInterface != NULL, 0, _T("no MInterface"));
    static wxString msg;
    int rc;
    if(! errorflag && format[0] == '.')
@@ -666,7 +666,7 @@ PalmOSModule::RegisterWithMainFrame()
    MAppBase *mapp = m_MInterface->GetMApplication();
 
    wxMFrame *mframe = mapp->TopLevelFrame();
-   CHECK( mframe, false, "can't init PalmOS module - no main window" );
+   CHECK( mframe, false, _T("can't init PalmOS module - no main window") );
 
    ((wxMainFrame *)mapp->TopLevelFrame())->AddModulesMenu(_("&PalmOS Module"),
                                                           _("Functionality to interact with your PalmOS based palmtop."),

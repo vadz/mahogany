@@ -248,7 +248,7 @@ public:
    virtual bool TransferDataFromWindow();
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxFolderPropertiesDialog() { wxFAIL_MSG("not reached"); }
+   wxFolderPropertiesDialog() { wxFAIL_MSG(_T("not reached")); }
 
 private:
    DECLARE_DYNAMIC_CLASS(wxFolderPropertiesDialog)
@@ -275,7 +275,7 @@ public:
    void OnUpdateButton(wxUpdateUIEvent& event);
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxFolderCreateDialog() { wxFAIL_MSG("not reached"); }
+   wxFolderCreateDialog() { wxFAIL_MSG(_T("not reached")); }
 
 private:
    // set to TRUE if the user changed the folder name, FALSE otherwise and -1
@@ -727,7 +727,7 @@ void wxFolderBaseDialog::SetPagesProfile(Profile *profile)
 {
    // we assume that the first page is the "Access" one which is a bit special,
    // this is why we start from the second one
-   wxASSERT_MSG( FolderCreatePage_Folder == 0, "this code must be fixed" );
+   wxASSERT_MSG( FolderCreatePage_Folder == 0, _T("this code must be fixed") );
 
    size_t nPageCount = m_notebook->GetPageCount();
    for ( size_t nPage = 1; nPage < nPageCount; nPage++ )
@@ -792,7 +792,7 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(MFolderType folderType)
    if ( m_newFolder )
    {
       // we shouldn't have had it yet
-      ASSERT_MSG( !m_profile, "folder just created, but profile exists?" );
+      ASSERT_MSG( !m_profile, _T("folder just created, but profile exists?") );
 
       // tell the other pages that we now have a folder (and hence a profile)
       String folderName = m_newFolder->GetFullName();
@@ -929,12 +929,12 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
 
    if ( ok )
    {
-      CHECK( m_parentFolder, false, "should have created parent folder" );
+      CHECK( m_parentFolder, false, _T("should have created parent folder") );
 
       // new folder has already been created normally
       m_newFolder = m_parentFolder->GetSubfolder(m_folderName->GetValue());
 
-      CHECK( m_newFolder, false, "new folder not created" );
+      CHECK( m_newFolder, false, _T("new folder not created") );
    }
 
    return ok;
@@ -953,7 +953,7 @@ wxFolderPropertiesDialog::wxFolderPropertiesDialog(wxWindow *frame,
 
 bool wxFolderPropertiesDialog::TransferDataToWindow()
 {
-   CHECK( m_newFolder, FALSE, "no folder in folder properties dialog" );
+   CHECK( m_newFolder, FALSE, _T("no folder in folder properties dialog") );
 
    wxString folderName = m_newFolder->GetFullName();
    Profile *profile = GetProfile();
@@ -971,7 +971,7 @@ bool wxFolderPropertiesDialog::TransferDataToWindow()
 
 bool wxFolderPropertiesDialog::TransferDataFromWindow()
 {
-   CHECK( m_newFolder, FALSE, "no folder in folder properties dialog" );
+   CHECK( m_newFolder, FALSE, _T("no folder in folder properties dialog") );
 
    return wxFolderBaseDialog::TransferDataFromWindow();
 }
@@ -1137,7 +1137,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 #endif // USE_SSL
 
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
-   ASSERT_MSG( dlgParent, "should have a parent dialog!" );
+   ASSERT_MSG( dlgParent, _T("should have a parent dialog!") );
 
    m_browseIcon = new wxFolderIconBrowseButtonInDialog(dlgParent,
                                                        GetCanvas(),
@@ -1153,7 +1153,7 @@ wxFolderPropertiesPage::SetFolderName(const wxString& name)
 {
    wxFolderCreateDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderCreateDialog);
 
-   CHECK_RET( dlg, "SetFolderName() can be only called when creating" );
+   CHECK_RET( dlg, _T("SetFolderName() can be only called when creating") );
 
    dlg->SetFolderName(name);
 }
@@ -1163,7 +1163,7 @@ wxFolderPropertiesPage::OnEvent()
 {
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
 
-   CHECK_RET( dlg, "folder page should be in folder dialog!" );
+   CHECK_RET( dlg, _T("folder page should be in folder dialog!") );
 
    dlg->SetDirty();
 
@@ -1177,7 +1177,7 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
 {
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
 
-   CHECK_RET( dlg, "folder page should be in folder dialog!" );
+   CHECK_RET( dlg, _T("folder page should be in folder dialog!") );
 
    wxObject *objEvent = event.GetEventObject();
 
@@ -1276,7 +1276,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
       wxFolderCreateDialog *dlg =
          GET_PARENT_OF_CLASS(this, wxFolderCreateDialog);
 
-      CHECK_RET( dlg, "we should be only called when creating" );
+      CHECK_RET( dlg, _T("we should be only called when creating") );
 
       MFolder_obj parent(dlg->GetParentFolder());
 
@@ -1355,7 +1355,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
             break;
 
          default:
-            FAIL_MSG( "unexpected folder type in UpdateOnFolderNameChange" );
+            FAIL_MSG( _T("unexpected folder type in UpdateOnFolderNameChange") );
             // fall through
 
          case MF_POP:
@@ -1366,7 +1366,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
             return;
       }
 
-      CHECK_RET( textToSet, "must have been set above" );
+      CHECK_RET( textToSet, _T("must have been set above") );
 
       folderName += dlg->GetFolderName();
 
@@ -1537,7 +1537,7 @@ void
 wxFolderPropertiesPage::DoUpdateUIForFolder()
 {
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
-   CHECK_RET( dlg, "wxFolderPropertiesPage without parent dialog?" );
+   CHECK_RET( dlg, _T("wxFolderPropertiesPage without parent dialog?") );
 
    bool enableAnonymous, enableLogin;
 #ifdef USE_SSL
@@ -1643,7 +1643,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
          break;
 
       default:
-         wxFAIL_MSG("Unexpected folder type.");
+         wxFAIL_MSG(_T("Unexpected folder type."));
    }
 
    // enable folder subtype combobox only if we're creating because (folder
@@ -1744,7 +1744,7 @@ wxFolderPropertiesPage::GetCurrentFolderType(RadioIndex selRadio,
          switch ( selChoice )
          {
             default:
-               FAIL_MSG("invalid file folder subtype");
+               FAIL_MSG(_T("invalid file folder subtype"));
                // fall through
 
 #ifdef EXPERIMENTAL_MFormat
@@ -1775,7 +1775,7 @@ wxFolderPropertiesPage::GetCurrentFolderType(RadioIndex selRadio,
          switch ( selChoice )
          {
             default:
-               FAIL_MSG("invalid news folder subtype");
+               FAIL_MSG(_T("invalid news folder subtype"));
                // fall through
 
             case NewsFolderSubtype_Nntp:
@@ -1790,7 +1790,7 @@ wxFolderPropertiesPage::GetCurrentFolderType(RadioIndex selRadio,
 
       case Radio_Max:
       default:
-         FAIL_MSG("invalid folder radio box selection");
+         FAIL_MSG(_T("invalid folder radio box selection"));
          return MF_ILLEGAL;
    }
 }
@@ -1818,7 +1818,7 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(MFolderType type,
             switch ( type )
             {
                default:
-                  FAIL_MSG( "unknown file folder type?" );
+                  FAIL_MSG( _T("unknown file folder type?") );
                   // fall through
 
                case MF_INBOX:
@@ -1829,7 +1829,7 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(MFolderType type,
                      if ( subtype < 0  ||
                            (size_t)subtype > FileFolderSubtype_Max )
                      {
-                        FAIL_MSG( "invalid mailbox format" );
+                        FAIL_MSG( _T("invalid mailbox format") );
                         subtype = FileFolderSubtype_Mbx;
                      }
                   }
@@ -1881,7 +1881,7 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(MFolderType type,
          return Radio_Group;
 
       default:
-         FAIL_MSG("unexpected folder type value");
+         FAIL_MSG(_T("unexpected folder type value"));
          return Radio_Max;
    }
 }
@@ -2009,7 +2009,7 @@ wxFolderPropertiesPage::SetDefaultValues()
             break;
 
          default:
-            FAIL_MSG("new remote foldertype was added");
+            FAIL_MSG(_T("new remote foldertype was added"));
             // fall through
 
          case MF_GROUP:
@@ -2236,7 +2236,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 
    if ( (m_folderType == MF_INBOX) && IsCreating() )
    {
-      // FAIL_MSG("how did we manage to create an INBOX folder?"); --
+      // FAIL_MSG(_T("how did we manage to create an INBOX folder?")); --
       // obviously by using a corrupted config file... no need to crash though
 
       m_folderType =
@@ -2246,7 +2246,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
    if ( m_folderType == MF_INBOX )
    {
       // this is checked for above!
-      wxASSERT_MSG( !IsCreating(), "can't create INBOX" );
+      wxASSERT_MSG( !IsCreating(), _T("can't create INBOX") );
 
       // we don't have any special properties for INBOX, so just treat it as
       // file folder
@@ -2281,7 +2281,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    // it's impossible to create INBOX folder
    CHECK( !m_dlgCreate || folderType != MF_INBOX, false,
-          "Ok button should be disabled" );
+          _T("Ok button should be disabled") );
 
    // 0th step: verify if the settings are self-consistent
    {
@@ -2412,14 +2412,14 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // the name and the type
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
 
-   CHECK( dlg, false, "folder page should be in folder dialog!" );
+   CHECK( dlg, false, _T("folder page should be in folder dialog!") );
 
    // FIXME instead of this `if' we should have a virtual function in the
    //       base class to either create or return the folder object
    MFolder *folder;
    if ( m_dlgCreate )
    {
-      ASSERT_MSG( m_dlgCreate == dlg, "GET_PARENT_OF_CLASS broken?" );
+      ASSERT_MSG( m_dlgCreate == dlg, _T("GET_PARENT_OF_CLASS broken?") );
 
       folder = m_dlgCreate->DoCreateFolder(folderType);
       if ( !folder )
@@ -2432,7 +2432,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       folder = dlg->GetFolder();
    }
 
-   CHECK( folder, false, "must have folder by this point" );
+   CHECK( folder, false, _T("must have folder by this point") );
 
    // 2nd step: put what we can in MFolder
    folder->SetComment(m_comment->GetValue());
@@ -2480,7 +2480,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       switch(folderType)
       {
          default:
-            FAIL_MSG( "new foldertype with server added" );
+            FAIL_MSG( _T("new foldertype with server added") );
             // fall through, otherwise we will crash with uninit serverType
             // anyhow
 
@@ -2549,7 +2549,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          {
             long format = m_folderSubtype->GetSelection();
             ASSERT_MSG( format >= 0 && format < FileMbox_Max,
-                        "invalid folder format selection" );
+                        _T("invalid folder format selection") );
 
             // we used to only write the entry if it was different from the
             // value inherited from parent but it was wrong as a folder of
@@ -2589,7 +2589,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          break;
 
       default:
-         wxFAIL_MSG("Unexpected folder type.");
+         wxFAIL_MSG(_T("Unexpected folder type."));
    }
 
    bool isAnonymous = m_isAnonymous->GetValue();
@@ -2716,7 +2716,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
 
    // use the parent profile for the default values if we have any
    Profile_obj profile(dlg ? dlg->GetParentFolderName() : String(""));
-   CHECK_RET( profile, "failed to create profile in wxFolderCreateNotebook" );
+   CHECK_RET( profile, _T("failed to create profile in wxFolderCreateNotebook") );
 
    // create and add the pages: some are always present, others are only shown
    // to "advanced" users (because they're not generally useful and may confuse
@@ -2786,7 +2786,7 @@ bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
    if ( folderNew != NULL )
    {
       // what else can it return?
-      ASSERT_MSG( folderNew == folder, "unexpected folder change" );
+      ASSERT_MSG( folderNew == folder, _T("unexpected folder change") );
 
       // as DoShowFolderDialog() calls GetFolder() which calls IncRef() on
       // folder, compensate for it here

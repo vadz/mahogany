@@ -1369,7 +1369,7 @@ wxLayoutWindow::Find(const wxString &needle,
                      const wxString &configPath)
 {
    m_FindString = needle;
-   CHECK( !m_FindString.empty(), false, "can't search for empty string" );
+   CHECK( !m_FindString.empty(), false, _T("can't search for empty string") );
 
    wxPoint found;
 

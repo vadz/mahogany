@@ -243,7 +243,7 @@ public:
     if ( IsOnClipboard() )
       delete m_data;
     else
-      wxASSERT_MSG( !m_data, "memory leak in AdbTreeElement" );
+      wxASSERT_MSG( !m_data, _T("memory leak in AdbTreeElement") );
   }
 
   // accessors
@@ -1205,7 +1205,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   m_btnDelete = NULL;
 
   m_eventNewADB = MEventManager::Register(*this, MEventId_NewADB);
-  ASSERT_MSG( m_eventNewADB, "ADB editor failed to register with event manager" );
+  ASSERT_MSG( m_eventNewADB, _T("ADB editor failed to register with event manager") );
 
   // create our menu
   // ---------------
@@ -1390,7 +1390,7 @@ void wxAdbEditFrame::RestoreSettings1()
       provDef->DecRef();
     }
     else {
-      wxFAIL_MSG( "no default ADB provider?" );
+      wxFAIL_MSG( _T("no default ADB provider?") );
     }
 
     m_astrProviders.Add(nameDef);
@@ -1596,7 +1596,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
 void wxAdbEditFrame::AddNewTreeElement(AdbTreeElement *element)
 {
   wxCHECK_RET( element && element->GetParent(),
-               "bad parameter in AddNewTreeElement" );
+               _T("bad parameter in AddNewTreeElement") );
 
   AdbTreeNode *parent = element->GetParent();
 
@@ -1672,7 +1672,7 @@ ask_name:
 
 void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
 {
-  wxCHECK_RET( !m_current->IsRoot(), "command should be disabled" );
+  wxCHECK_RET( !m_current->IsRoot(), _T("command should be disabled") );
 
   AdbTreeNode *parent = m_current->GetParent();
   wxASSERT( parent != NULL ); // impossible if !m_current->IsRoot()
@@ -1698,7 +1698,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
     else {
       // for file based books we have to take account of the fact that either
       // string may be relative or absolute filename
-      wxASSERT_MSG( IsAbsPath(strName), "book name should be absolute" );
+      wxASSERT_MSG( IsAbsPath(strName), _T("book name should be absolute") );
 
 #ifdef __WXMSW__
       strName.Replace("\\", "/");
@@ -1724,7 +1724,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
     if ( nIndex == wxNOT_FOUND )
     {
       // this is never supposed to happen
-      wxFAIL_MSG( "deleting book which isn't opened??" );
+      wxFAIL_MSG( _T("deleting book which isn't opened??") );
 
       return;
     }
@@ -1872,7 +1872,7 @@ void wxAdbEditFrame::DoFind(const char *szFindWhat, AdbTreeNode *root)
 // FIXME perhaps it should undo all changes to the current page only?
 void wxAdbEditFrame::DoUndoChanges()
 {
-  wxCHECK_RET( !m_current->IsGroup(), "command should be disabled" );
+  wxCHECK_RET( !m_current->IsGroup(), _T("command should be disabled") );
 
   // the IncRef() done by GetData() compensated with DecRef() in SetData()
   m_notebook->SetData(GetEntry());
@@ -2145,7 +2145,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
       break;
 
     default:
-      wxFAIL_MSG("unknown ADB name format");
+      wxFAIL_MSG(_T("unknown ADB name format"));
   }
 
   AdbDataProvider *pProvider = info->CreateProvider();
@@ -2168,7 +2168,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
         book->DecRef();
      }
      else {
-        wxFAIL_MSG("book should be in the cache if it was created");
+        wxFAIL_MSG(_T("book should be in the cache if it was created"));
      }
   }
   SafeDecRef(pProvider);
@@ -2179,7 +2179,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 void wxAdbEditFrame::ExportAdb()
 {
   wxCHECK_RET( m_current->IsGroup() && !m_current->IsRoot(),
-               "command should be disabled" );
+               _T("command should be disabled") );
 
   if ( AdbShowExportDialog(*(GetCurNode()->AdbGroup())) )
   {
@@ -2211,7 +2211,7 @@ bool wxAdbEditFrame::ImportAdb()
 
 void wxAdbEditFrame::ExportVCardEntry()
 {
-  wxCHECK_RET( !m_current->IsGroup(), "command should be disabled" );
+  wxCHECK_RET( !m_current->IsGroup(), _T("command should be disabled") );
 
   AdbExporter *exporter = AdbExporter::GetExporterByName("AdbVCardExporter");
   if ( !exporter )
@@ -2257,7 +2257,7 @@ bool wxAdbEditFrame::ImportVCardEntry()
 {
   // check that we have a group to import it under
   wxCHECK_MSG( GetCurNode() && GetCurNode()->AdbGroup(), FALSE,
-               "should be disabled as there is no current group" );
+               _T("should be disabled as there is no current group") );
 
   // check that we have the importer for vCards
   AdbImporter *importer = AdbImporter::GetImporterByName("AdbVCardImporter");
@@ -2299,7 +2299,7 @@ bool wxAdbEditFrame::ImportVCardEntry()
 
 void wxAdbEditFrame::DoShowAdbProperties()
 {
-  wxCHECK_RET( m_current->IsBook(), "command should be disabled" );
+  wxCHECK_RET( m_current->IsBook(), _T("command should be disabled") );
 
   AdbTreeBook *book = (AdbTreeBook *)m_current;
   wxADBPropertiesDialog dlg(this, book);
@@ -2312,7 +2312,7 @@ void wxAdbEditFrame::DoShowAdbProperties()
 void wxAdbEditFrame::DoCopy()
 {
   AdbTreeNode *parent = m_current->GetParent();
-  wxCHECK_RET( parent && parent != m_root, "command should be disabled" );
+  wxCHECK_RET( parent && parent != m_root, _T("command should be disabled") );
 
   // first of all, delete the previous clipboard's contents
   delete m_clipboard;
@@ -2346,7 +2346,7 @@ void wxAdbEditFrame::DoPaste()
 {
   // we must have something to paste and we can't paste address books (yet?)
   wxCHECK_RET( m_clipboard != NULL && !m_current->IsRoot(),
-               "command should be disabled" );
+               _T("command should be disabled") );
 
   AdbTreeNode *group = GetCurNode();
 
@@ -3307,7 +3307,7 @@ void wxAdbNotebook::SetData(AdbTreeEntry *pEntry)
       m_bReadOnly = ((AdbTreeBook *)parent)->GetBook()->IsReadOnly();
     }
     else {
-      wxFAIL_MSG("entry outside of an address book?");
+      wxFAIL_MSG(_T("entry outside of an address book?"));
     }
 
     for ( size_t n = 0; n < Page_Max; n++ ) {
@@ -3617,10 +3617,10 @@ void wxAdbPage::LayoutControls(size_t nCount,
         break;
 
       default:
-        wxFAIL_MSG("unknown field type in LayoutControls");
+        wxFAIL_MSG(_T("unknown field type in LayoutControls"));
     }
 
-    wxCHECK_RET( last, "control creation failed" );
+    wxCHECK_RET( last, _T("control creation failed") );
 
     entries.Add(last);
   }
@@ -3823,7 +3823,7 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
      break;
 
   default:
-     wxFAIL_MSG("unknown tree element type");
+     wxFAIL_MSG(_T("unknown tree element type"));
   }
 
 
@@ -3876,11 +3876,11 @@ void AdbTreeEntry::CopyData(const AdbTreeEntry& other)
   if ( IsOnClipboard() ) {
     // currently it's not possible - if it changes later, this assert will
     // remind that this case has never been tested
-    wxCHECK_RET( !m_data, "copying to item which already has some data?" );
+    wxCHECK_RET( !m_data, _T("copying to item which already has some data?") );
 
     // we're copying data to the clipboard
     AdbEntry *otherEntry = other.GetAdbEntry();
-    wxCHECK_RET( otherEntry, "can't copy from entry without data" );
+    wxCHECK_RET( otherEntry, _T("can't copy from entry without data") );
 
     m_data = new AdbData(*otherEntry);
 
@@ -3890,7 +3890,7 @@ void AdbTreeEntry::CopyData(const AdbTreeEntry& other)
     // we should be copying from clipboard to a normal entry
     AdbEntry *entry = GetAdbEntry();
 
-    wxCHECK_RET( other.IsOnClipboard() && entry, "error copying data" );
+    wxCHECK_RET( other.IsOnClipboard() && entry, _T("error copying data") );
 
     other.m_data->Copy(entry);
     entry->DecRef();
@@ -3976,7 +3976,7 @@ void AdbTreeNode::LoadChildren()
 
   EnsureHasGroup();
 
-  wxCHECK_RET( m_pGroup, "AdbTreeNode without associated AdbEntryGroup" );
+  wxCHECK_RET( m_pGroup, _T("AdbTreeNode without associated AdbEntryGroup") );
 
   wxArrayString aNames;
   size_t n, nCount = m_pGroup->GetEntryNames(aNames);
@@ -4009,7 +4009,7 @@ void AdbTreeNode::LoadAllData()
 
 AdbTreeElement *AdbTreeNode::CreateChild(const wxString& name, bool bGroup)
 {
-  wxCHECK_MSG( !IsRoot(), NULL, "only address books can be created at root");
+  wxCHECK_MSG( !IsRoot(), NULL, _T("only address books can be created at root") );
 
   wxString strWhat = bGroup ? _("Group") : _("Entry");
 
@@ -4080,7 +4080,7 @@ void AdbTreeNode::DeleteChild(AdbTreeElement *child)
       break;
 
     default:
-      wxFAIL_MSG("something weird in our ADB tree");
+      wxFAIL_MSG(_T("something weird in our ADB tree"));
   }
 
   // don't do this, the tree will delete the item itself

@@ -92,7 +92,7 @@ Message::Create(const char *text, UIdType uid, Profile *profile)
 MessageCC *
 MessageCC::Create(MailFolderCC *folder, const HeaderInfo& hi)
 {
-   CHECK(folder, NULL, "NULL m_folder");
+   CHECK(folder, NULL, _T("NULL m_folder"));
 
    return new MessageCC(folder, hi);
 }
@@ -129,13 +129,13 @@ MessageCC::MessageCC(MailFolderCC *folder, const HeaderInfo& hi)
       }
       else
       {
-         FAIL_MSG( "no profile in MessageCC ctor" );
+         FAIL_MSG( _T("no profile in MessageCC ctor") );
       }
    }
    else
    {
       // we must have one in this ctor
-      FAIL_MSG( "no folder in MessageCC ctor" );
+      FAIL_MSG( _T("no folder in MessageCC ctor") );
    }
 }
 
@@ -268,7 +268,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
       // make gcc happy
       case Prot_Illegal:
       default:
-         FAIL_MSG("unknown protocol");
+         FAIL_MSG(_T("unknown protocol"));
    }
 
    for(int i = 0; i < CountParts(); i++)
@@ -335,7 +335,7 @@ String MessageCC::Subject(void) const
    if ( m_Envelope )
       subject = m_Envelope->subject;
    else
-      FAIL_MSG( "should have envelop in Subject()" );
+      FAIL_MSG( _T("should have envelop in Subject()") );
 
    return subject;
 }
@@ -354,7 +354,7 @@ String MessageCC::Date(void) const
    if ( m_Envelope )
       date = m_Envelope->date;
    else
-      FAIL_MSG( "should have envelop in Date()" );
+      FAIL_MSG( _T("should have envelop in Date()") );
 
    return date;
 }
@@ -373,7 +373,7 @@ MessageCC::GetId(void) const
 
    if ( !m_Envelope )
    {
-      FAIL_MSG( "no envelope in GetId" );
+      FAIL_MSG( _T("no envelope in GetId") );
    }
    else
    {
@@ -392,7 +392,7 @@ MessageCC::GetNewsgroups(void) const
 
    if ( !m_Envelope )
    {
-      FAIL_MSG( "no envelope in GetNewsgroups" );
+      FAIL_MSG( _T("no envelope in GetNewsgroups") );
    }
    else
    {
@@ -415,7 +415,7 @@ MessageCC::GetReferences(void) const
 
    if ( !m_Envelope )
    {
-      FAIL_MSG( "no envelope in GetReferences" );
+      FAIL_MSG( _T("no envelope in GetReferences") );
    }
    else
    {
@@ -434,7 +434,7 @@ MessageCC::GetInReplyTo(void) const
 
    if ( !m_Envelope )
    {
-      FAIL_MSG( "no envelope in GetReferences" );
+      FAIL_MSG( _T("no envelope in GetReferences") );
    }
    else
    {
@@ -471,7 +471,7 @@ String MessageCC::GetHeader(void) const
    }
    else
    {
-      FAIL_MSG( "MessageCC::GetHeader() can't be called for this message" );
+      FAIL_MSG( _T("MessageCC::GetHeader() can't be called for this message") );
    }
 
    return str;
@@ -483,7 +483,7 @@ MessageCC::GetHeaderLines(const char **headersOrig,
 {
    wxArrayString values;
    CHECK( m_folder, values,
-          "GetHeaderLines() can't be called for this message" );
+          _T("GetHeaderLines() can't be called for this message") );
 
    CHECK_DEAD_RC(values);
 
@@ -571,7 +571,7 @@ ADDRESS *
 MessageCC::GetAddressStruct(MessageAddressType type) const
 {
    CheckEnvelope();
-   CHECK( m_Envelope, NULL, "no envelop in GetAddressStruct()" )
+   CHECK( m_Envelope, NULL, _T("no envelop in GetAddressStruct()") )
 
    ADDRESS *addr;
 
@@ -585,7 +585,7 @@ MessageCC::GetAddressStruct(MessageAddressType type) const
       case MAT_REPLYTO:    addr = m_Envelope->reply_to; break;
       case MAT_RETURNPATH: addr = m_Envelope->return_path; break;
       default:
-         FAIL_MSG( "unknown address type" );
+         FAIL_MSG( _T("unknown address type") );
          addr = NULL;
    }
 
@@ -706,7 +706,7 @@ MessageCC::ParseMIMEStructure()
 {
    // this is the worker function, it is wasteful to call it more than once
    CHECK( !m_mimePartTop, false,
-          "ParseMIMEStructure() should only be called once for each message" );
+          _T("ParseMIMEStructure() should only be called once for each message") );
 
    if ( !m_Body )
    {
@@ -723,7 +723,7 @@ MessageCC::ParseMIMEStructure()
 
 void MessageCC::DecodeMIME(MimePartCC *mimepart, BODY *body)
 {
-   CHECK_RET( mimepart && body, "NULL pointer(s) in DecodeMIME" );
+   CHECK_RET( mimepart && body, _T("NULL pointer(s) in DecodeMIME") );
 
    mimepart->m_body = body;
 
@@ -828,7 +828,7 @@ const MimePart *MessageCC::GetMimePart(int n) const
 {
    CheckMIME();
 
-   CHECK( n >= 0 && (size_t)n < m_numParts, NULL, "invalid part number" );
+   CHECK( n >= 0 && (size_t)n < m_numParts, NULL, _T("invalid part number") );
 
    MimePart *mimepart = m_mimePartTop;
 
@@ -840,7 +840,7 @@ const MimePart *MessageCC::GetMimePart(int n) const
 
       if ( !mimepart )
       {
-         FAIL_MSG( "logic error in MIME tree traversing code" );
+         FAIL_MSG( _T("logic error in MIME tree traversing code") );
 
          break;
       }
@@ -852,7 +852,7 @@ const MimePart *MessageCC::GetMimePart(int n) const
 const void *
 MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
 {
-   CHECK( m_folder, NULL, "MessageCC::GetPartData() without folder?" );
+   CHECK( m_folder, NULL, _T("MessageCC::GetPartData() without folder?") );
 
    CheckMIME();
 
@@ -962,7 +962,7 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
             if ( sizeValid != size )
             {
                ASSERT_MSG( sizeValid < size,
-                           "logic error in base64 validity check" );
+                           _T("logic error in base64 validity check") );
 
                // take all the rest verbatim below
                startSlack = p;
@@ -1056,7 +1056,7 @@ MessageCC::GetEnvelope()
                                      FT_UID);
    m_folder->UnLock();
 
-   ASSERT_MSG( m_Envelope, "failed to get message envelope!" );
+   ASSERT_MSG( m_Envelope, _T("failed to get message envelope!") );
 }
 
 void
@@ -1084,7 +1084,7 @@ MessageCC::GetBody(void)
                                          FT_UID);
    m_folder->UnLock();
 
-   ASSERT_MSG( m_Body && m_Envelope, "failed to get body and envelope!" );
+   ASSERT_MSG( m_Body && m_Envelope, _T("failed to get body and envelope!") );
 }
 
 MESSAGECACHE *
@@ -1105,12 +1105,12 @@ MessageCC::GetCacheElement() const
          }
          else
          {
-            FAIL_MSG( "failed to get cache element for the message?" );
+            FAIL_MSG( _T("failed to get cache element for the message?") );
          }
       }
       else
       {
-         FAIL_MSG( "folder is closed in GetCacheElement" );
+         FAIL_MSG( _T("folder is closed in GetCacheElement") );
       }
 
       m_folder->UnLock();
@@ -1143,7 +1143,7 @@ MessageCC::GetStatus() const
    }
    else
    {
-      FAIL_MSG( "no cache element in GetStatus?" );
+      FAIL_MSG( _T("no cache element in GetStatus?") );
    }
 
    return (MailFolder::MessageStatus) status;
@@ -1155,7 +1155,7 @@ MessageCC::GetSize() const
 {
    MESSAGECACHE *mc = GetCacheElement();
 
-   CHECK( mc, 0, "no cache element in GetSize?" );
+   CHECK( mc, 0, _T("no cache element in GetSize?") );
 
    return mc->rfc822_size;
 }
@@ -1187,14 +1187,14 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
             m_folder->UnLock();
 
             ASSERT_MSG(strlen(header) == len,
-                       "DEBUG: Mailfolder corruption detected");
+                       _T("DEBUG: Mailfolder corruption detected"));
 
             str = String(header, (size_t)len);
          }
       }
       else // folder-less message doesn't have headers (why?)!
       {
-         FAIL_MSG( "WriteToString can't be called for this message" );
+         FAIL_MSG( _T("WriteToString can't be called for this message") );
       }
    }
 

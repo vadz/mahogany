@@ -54,7 +54,7 @@ void HeaderIterator::Reset()
 
 bool HeaderIterator::GetNext(String *name, String *value)
 {
-   CHECK( name, false, "NULL header name in HeaderIterator::GetNext()" );
+   CHECK( name, false, _T("NULL header name in HeaderIterator::GetNext()") );
 
    name->clear();
 
@@ -174,7 +174,7 @@ bool HeaderIterator::GetNext(String *name, String *value)
 
 size_t HeaderIterator::GetAll(wxArrayString *names, wxArrayString *values)
 {
-   CHECK( names && values, 0, "NULL pointer in HeaderIterator::GetAll()" );
+   CHECK( names && values, 0, _T("NULL pointer in HeaderIterator::GetAll()") );
 
    String name, value;
    while ( GetNext(&name, &value) )

@@ -58,7 +58,7 @@ AdbDataProvider *AdbDataProvider::GetNativeProvider()
 {
    AdbDataProvider *provider = GetProviderByName("FCDataProvider");
 
-   ASSERT_MSG( provider, "native ADB data provider not linked in??" );
+   ASSERT_MSG( provider, _T("native ADB data provider not linked in??") );
 
    return provider;
 }

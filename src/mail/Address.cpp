@@ -52,7 +52,7 @@ extern const MOption MP_LIST_ADDRESSES;
 
 bool Address::operator==(const String& address) const
 {
-   CHECK( IsValid(), false, "can't compare invalid addresses" );
+   CHECK( IsValid(), false, _T("can't compare invalid addresses") );
 
    AddressList_obj addrList(address);
    Address *addr = addrList->GetFirst();

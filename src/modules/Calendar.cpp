@@ -590,9 +590,9 @@ public:
       {
          m_CalMod = calmod;
          m_regASFResult = MEventManager::Register(*this, MEventId_ASFolderResult);
-         ASSERT_MSG( m_regASFResult, "can't reg calendar with event manager");
+         ASSERT_MSG( m_regASFResult, _T("can't reg calendar with event manager"));
          m_regCookieFolderUpdate = MEventManager::Register(*this, MEventId_FolderUpdate);
-         ASSERT_MSG( m_regCookieFolderUpdate, "can't reg calendar with event manager");
+         ASSERT_MSG( m_regCookieFolderUpdate, _T("can't reg calendar with event manager"));
       }
    /// event processing function
    virtual bool OnMEvent(MEventData& ev)
@@ -881,7 +881,7 @@ void
 CalendarFrame::ParseFolder(void)
 {
    // we are using synchronous access which is soo much easier:
-   CHECK_RET( m_Folder, "no calendar folder in the calendar module" );
+   CHECK_RET( m_Folder, _T("no calendar folder in the calendar module") );
 
    MailFolder *mf = m_Folder->GetMailFolder();
    if(! mf)
@@ -971,7 +971,7 @@ CalendarFrame::DeleteOrRewrite(MailFolder *mf,
 void
 CalendarFrame::CheckUpdate(MailFolder *eventFolder)
 {
-   CHECK_RET( m_Folder, "no calendar folder in the calendar module" );
+   CHECK_RET( m_Folder, _T("no calendar folder in the calendar module") );
 
    MailFolder *mf = m_Folder->GetMailFolder();
    if ( !mf )
@@ -1142,7 +1142,7 @@ CalendarModule::RegisterWithMainFrame()
    MAppBase *mapp = m_MInterface->GetMApplication();
 
    wxMFrame *mframe = mapp->TopLevelFrame();
-   CHECK( mframe, false, "can't init calendar module - no main window" );
+   CHECK( mframe, false, _T("can't init calendar module - no main window") );
 
    ((wxMainFrame *)mframe)->AddModulesMenu
                             (

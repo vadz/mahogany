@@ -100,7 +100,7 @@ MHFoldersImporter::MHFoldersImporter()
    m_ok = false;
 
    m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
-   ASSERT_MSG( m_regCookie, "can't register with event manager");
+   ASSERT_MSG( m_regCookie, _T("can't register with event manager"));
 }
 
 MHFoldersImporter::~MHFoldersImporter()
@@ -116,7 +116,7 @@ bool MHFoldersImporter::OnMEvent(MEventData& event)
 {
    // we're only subscribed to the ASFolder events
    CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
-          "unexpected event type" );
+          _T("unexpected event type") );
 
    MEventASFolderResultData &data = (MEventASFolderResultData &)event;
 
@@ -131,7 +131,7 @@ bool MHFoldersImporter::OnMEvent(MEventData& event)
 
    if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
    {
-      FAIL_MSG( "unexpected operation notification" );
+      FAIL_MSG( _T("unexpected operation notification") );
 
       // eat the event - it was for us but we didn't process it...
       return FALSE;

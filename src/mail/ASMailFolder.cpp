@@ -1145,7 +1145,7 @@ public:
    virtual Ticket Pop(void)
    {
       size_t n = m_Tickets.GetCount();
-      CHECK( n > 0, ILLEGAL_TICKET, "ticket list is empty in Pop()" );
+      CHECK( n > 0, ILLEGAL_TICKET, _T("ticket list is empty in Pop()") );
 
       Ticket t = m_Tickets.Last();
       m_Tickets.RemoveAt(n - 1);
@@ -1207,7 +1207,7 @@ char ASMailFolder::GetFolderDelimiter() const
 {
    MailFolder *mf = GetMailFolder();
 
-   CHECK( mf, '\0', "no folder in GetFolderDelimiter" );
+   CHECK( mf, '\0', _T("no folder in GetFolderDelimiter") );
 
    char chDelim = mf->GetFolderDelimiter();
    mf->DecRef();

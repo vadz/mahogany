@@ -100,7 +100,7 @@ public:
 
       ++m_iterConn;
 
-      CHECK( mf, NULL, "NULL mailfolder in MFPool?" );
+      CHECK( mf, NULL, _T("NULL mailfolder in MFPool?") );
 
       if ( driverName )
       {
@@ -188,7 +188,7 @@ MFPool::Add(MFDriver *driver,
             const MFolder *folder,
             const String& login)
 {
-   CHECK_RET( driver, "MFPool::Add(): NULL driver" );
+   CHECK_RET( driver, _T("MFPool::Add(): NULL driver") );
 
    const String driverName = driver->GetName();
 
@@ -204,7 +204,7 @@ MFPool::Add(MFDriver *driver,
    const String spec = driver->GetFullSpec(folder, login);
 
    MFConnection *conn = FindConnectionInPool(pool, spec);
-   CHECK_RET( !conn, "MFPool::Add(): folder already in the pool" );
+   CHECK_RET( !conn, _T("MFPool::Add(): folder already in the pool") );
 
    pool->connections.push_back(new MFConnection(mf, spec));
 
@@ -217,7 +217,7 @@ MFPool::Find(MFDriver *driver,
              const MFolder *folder,
              const String& login)
 {
-   CHECK( driver, NULL, "MFPool::Find(): NULL driver" );
+   CHECK( driver, NULL, _T("MFPool::Find(): NULL driver") );
 
    MFClassPool *pool = FindClassPool(driver->GetName());
    if ( !pool )
@@ -233,7 +233,7 @@ MFPool::Find(MFDriver *driver,
       return NULL;
 
    MailFolder *mf = conn->mf;
-   CHECK( mf, NULL, "NULL mailfolder in MFPool?" );
+   CHECK( mf, NULL, _T("NULL mailfolder in MFPool?") );
 
    mf->IncRef();
    return mf;

@@ -77,7 +77,7 @@ MimeType& MimeType::Assign(const String& mimetype)
 
 String MimeType::GetType() const
 {
-   ASSERT_MSG( IsOk(), "using uninitialized MimeType" );
+   ASSERT_MSG( IsOk(), _T("using uninitialized MimeType") );
 
    // body_types is defined in c-client/rfc822.c
    return body_types[m_primary];

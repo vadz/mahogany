@@ -185,7 +185,7 @@ Profile *wxMFrame::GetFolderProfile(void) const
 {
    Profile *profile = mApplication->GetProfile();
 
-   CHECK( profile, NULL, "no global profile??" );
+   CHECK( profile, NULL, _T("no global profile??") );
 
    profile->IncRef();
 
@@ -270,7 +270,7 @@ wxMFrame::SetTitle(String const &title)
 void
 wxMFrame::Create(const String &name, wxWindow *parent)
 {
-   wxCHECK_RET( !m_initialised, "wxMFrame created twice" );
+   wxCHECK_RET( !m_initialised, _T("wxMFrame created twice") );
 
    SetName(name);
 
@@ -283,7 +283,7 @@ wxMFrame::Create(const String &name, wxWindow *parent)
    if ( !wxFrame::Create(parent, -1, name,
                          wxPoint(xpos, ypos), wxSize(width,height)) )
    {
-      wxFAIL_MSG( "Failed to create a frame!" );
+      wxFAIL_MSG( _T("Failed to create a frame!") );
 
       return;
    }
@@ -360,7 +360,7 @@ void wxMFrame::UpdateRunPyScriptMenu()
    }
    else
    {
-      FAIL_MSG( "where is \"Run Python script\" menu item?" );
+      FAIL_MSG( _T("where is \"Run Python script\" menu item?") );
    }
 }
 
@@ -403,7 +403,7 @@ bool wxMFrame::RestorePosition(const char *name,
 {
    // only i can be NULL
    CHECK( x && y && w && h, FALSE,
-          "NULL pointer in wxMFrame::RestorePosition" );
+          _T("NULL pointer in wxMFrame::RestorePosition") );
 
    wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
    if ( pConf != NULL )
@@ -793,7 +793,7 @@ wxMFrame::OnMenuCommand(int id)
                   }
                   else
                   {
-                     FAIL_MSG("where is the main frames toolbar?");
+                     FAIL_MSG(_T("where is the main frames toolbar?"));
                   }
                }
 

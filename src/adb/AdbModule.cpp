@@ -117,7 +117,7 @@ AdbModule *AdbModule::GetModuleByName(const char *kind, const String& name)
 AdbModule::AdbModuleInfo *AdbModule::GetAdbModuleInfo(const char *kind)
 {
 #ifdef USE_ADB_MODULES
-   ASSERT_MSG( !ms_listModules, "forgot to call FreeAdbModuleInfo()!" );
+   ASSERT_MSG( !ms_listModules, _T("forgot to call FreeAdbModuleInfo()!") );
 
    // find all modules implementing AdbModule interface
    MModuleListing *listing = MModule::ListAvailableModules(kind);

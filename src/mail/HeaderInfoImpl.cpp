@@ -200,16 +200,16 @@ static void VerifyTables(MsgnoType count,
       MsgnoType msgno = msgnos[n];
 
       ASSERT_MSG( msgno > 0 && msgno <= count,
-                  "invalid msgno in the translation table" );
+                  _T("invalid msgno in the translation table") );
 
       if ( pos[msgno - 1] != n )
       {
-         FAIL_MSG( "translation tables are in inconsistent state!" );
+         FAIL_MSG( _T("translation tables are in inconsistent state!") );
       }
 
       if ( msgnosFound.Index(msgno) != wxNOT_FOUND )
       {
-         FAIL_MSG( "duplicate msgno in translation table!" );
+         FAIL_MSG( _T("duplicate msgno in translation table!") );
       }
       else
       {
@@ -218,7 +218,7 @@ static void VerifyTables(MsgnoType count,
    }
 
    ASSERT_MSG( msgnosFound.GetCount() == count,
-               "missing msgnos in translation table!?" );
+               _T("missing msgnos in translation table!?") );
 }
 
 // do some basic checks on thread data for consitency
@@ -234,11 +234,11 @@ static void VerifyThreadData(const ThreadData *thrData)
       MsgnoType msgno = thrData->m_tableThread[n];
 
       ASSERT_MSG( msgno > 0 && msgno <= count,
-                  "invalid msgno in the thread table" );
+                  _T("invalid msgno in the thread table") );
 
       if ( msgnosFound.Index(msgno) != wxNOT_FOUND )
       {
-         FAIL_MSG( "duplicate msgno in thread table!" );
+         FAIL_MSG( _T("duplicate msgno in thread table!") );
       }
       else
       {
@@ -247,14 +247,14 @@ static void VerifyThreadData(const ThreadData *thrData)
    }
 
    ASSERT_MSG( msgnosFound.GetCount() == count,
-               "missing msgnos in thread table!?" );
+               _T("missing msgnos in thread table!?") );
 
    // second check: indents must be positive
    for ( n = 0; n < count; n++ )
    {
       if ( thrData->m_indents[n] > (size_t)1000 )
       {
-         FAIL_MSG( "suspiciously big indent - overflow?" );
+         FAIL_MSG( _T("suspiciously big indent - overflow?") );
       }
    }
 
@@ -273,7 +273,7 @@ static void VerifyThreadData(const ThreadData *thrData)
       }
 
       ASSERT_MSG( thrData->m_children[idx] == m - n - 1,
-                  "inconsistent thread data" );
+                  _T("inconsistent thread data") );
    }
 }
 
@@ -404,7 +404,7 @@ HeaderInfo::GetFromOrTo(const HeaderInfo *hi,
                         const wxArrayString& ownAddresses,
                         String *value)
 {
-   CHECK( hi && value, Invalid, "invalid parameter in HeaderInfo::GetFromOrTo" );
+   CHECK( hi && value, Invalid, _T("invalid parameter in HeaderInfo::GetFromOrTo") );
 
    *value = hi->GetFrom();
 
@@ -507,7 +507,7 @@ inline bool HeaderInfoListImpl::IsTranslatingIndices() const
 /* static */
 HeaderInfoList *HeaderInfoList::Create(MailFolder *mf)
 {
-   CHECK( mf, NULL, "NULL mailfolder in HeaderInfoList::Create" );
+   CHECK( mf, NULL, _T("NULL mailfolder in HeaderInfoList::Create") );
 
    return new HeaderInfoListImpl(mf);
 }
@@ -579,7 +579,7 @@ MsgnoType HeaderInfoListImpl::Count(void) const
 
 HeaderInfo *HeaderInfoListImpl::GetItemByIndex(MsgnoType n) const
 {
-   CHECK( n < m_count, NULL, "invalid index in HeaderInfoList::GetItemByIndex" );
+   CHECK( n < m_count, NULL, _T("invalid index in HeaderInfoList::GetItemByIndex") );
 
    if ( !IsHeaderValid(n) )
    {
@@ -597,7 +597,7 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(MsgnoType n) const
    }
 
    // the caller will crash...
-   ASSERT_MSG( m_headers[n], "returning NULL HeaderInfo?" );
+   ASSERT_MSG( m_headers[n], _T("returning NULL HeaderInfo?") );
 
    return m_headers[n];
 }
@@ -627,7 +627,7 @@ MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
 
    if ( m_reverseOrder )
    {
-      ASSERT_MSG( !IsThreading(), "can't reverse threaded listing!" );
+      ASSERT_MSG( !IsThreading(), _T("can't reverse threaded listing!") );
 
       if ( pos < m_sizeTables )
       {
@@ -643,7 +643,7 @@ MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
    {
       // it is wasteful to call us if we don't perform any index translation at
       // all and this is not supposed to happen
-      CHECK( m_tableMsgno, 0, "shouldn't be called at all in this case" );
+      CHECK( m_tableMsgno, 0, _T("shouldn't be called at all in this case") );
 
       return m_tableMsgno[pos];
    }
@@ -651,14 +651,14 @@ MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
 
 MsgnoType HeaderInfoListImpl::GetIdxFromPos(MsgnoType pos) const
 {
-   CHECK( pos < m_count, INDEX_ILLEGAL, "invalid position in GetIdxFromPos" );
+   CHECK( pos < m_count, INDEX_ILLEGAL, _T("invalid position in GetIdxFromPos") );
 
    return IsTranslatingIndices() ? GetMsgnoFromPos(pos) - 1 : pos;
 }
 
 MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
 {
-   CHECK( n < m_count, INDEX_ILLEGAL, "invalid index in GetPosFromIdx" );
+   CHECK( n < m_count, INDEX_ILLEGAL, _T("invalid index in GetPosFromIdx") );
 
    // calculate the table on the fly if needed
    if ( MustRebuildTables() )
@@ -668,7 +668,7 @@ MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
 
    if ( m_reverseOrder )
    {
-      ASSERT_MSG( !IsThreading(), "can't reverse threaded listing!" );
+      ASSERT_MSG( !IsThreading(), _T("can't reverse threaded listing!") );
 
       if ( n < m_sizeTables )
       {
@@ -730,9 +730,9 @@ RemoveElementFromTable(size_t *table,
 
 void HeaderInfoListImpl::OnRemove(MsgnoType n)
 {
-   CHECK_RET( n < m_count, "invalid index in HeaderInfoList::OnRemove" );
+   CHECK_RET( n < m_count, _T("invalid index in HeaderInfoList::OnRemove") );
 
-   ASSERT_MSG( m_count, "removing a message from empty folder?" );
+   ASSERT_MSG( m_count, _T("removing a message from empty folder?") );
 
    if ( n < m_headers.GetCount() )
    {
@@ -765,7 +765,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
    if ( m_sizeTables != m_count )
    {
       // m_sizeTables must always be <= m_count
-      ASSERT_MSG( m_sizeTables < m_count, "more sorted messages than total?" );
+      ASSERT_MSG( m_sizeTables < m_count, _T("more sorted messages than total?") );
 
       // note that if m_sizeTables == 0, we don't have any tables at all so
       // don't try to free them
@@ -805,7 +805,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
 
          // delete the removed element from the sort table
          ASSERT_MSG( idxRemovedInMsgnos != INDEX_ILLEGAL,
-                     "expunged item not found in m_tableSort?" );
+                     _T("expunged item not found in m_tableSort?") );
 
          RemoveElementFromTable(m_tableSort, idxRemovedInMsgnos, m_sizeTables);
 
@@ -853,7 +853,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
 
                      // our children must have non zero indents!
                      ASSERT_MSG( m_thrData->m_indents[idx] > 0,
-                                 "error in OnRemove() logic" );
+                                 _T("error in OnRemove() logic") );
 
                      m_thrData->m_indents[idx]--;
                   }
@@ -895,7 +895,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
                   if ( !nParent )
                   {
                      // actually I'm not completely sure it really can't happen
-                     FAIL_MSG( "no parent of the item with non null indent?" );
+                     FAIL_MSG( _T("no parent of the item with non null indent?") );
 
                      break;
                   }
@@ -905,7 +905,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
                   idxCur = m_thrData->m_tableThread[nCur] - 1;
 
                   ASSERT_MSG( m_thrData->m_children[idxCur] > 0,
-                              "our parent doesn't have any children?" );
+                              _T("our parent doesn't have any children?") );
 
                   m_thrData->m_children[idxCur]--;
                }
@@ -931,7 +931,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
 
          // delete the removed element from the thread table
          ASSERT_MSG( idxRemovedInMsgnos != INDEX_ILLEGAL,
-                     "expunged item not found in m_thrData->m_tableThread?" );
+                     _T("expunged item not found in m_thrData->m_tableThread?") );
 
          RemoveElementFromTable(m_thrData->m_tableThread,
                                 idxRemovedInMsgnos, m_sizeTables);
@@ -1031,7 +1031,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
             // delete the removed element from the translation tables
 
             ASSERT_MSG( idxRemovedInMsgnos != INDEX_ILLEGAL,
-                        "expunged item not found in m_tableMsgno?" );
+                        _T("expunged item not found in m_tableMsgno?") );
 
             RemoveElementFromTable(m_tableMsgno, idxRemovedInMsgnos,
                                    m_sizeTables);
@@ -1236,12 +1236,12 @@ extern "C"
    {
       THREADNODE* th1 = *(THREADNODE**)p1;
       MsgnoType msgno1 = FindMsgno(th1);
-      CHECK(msgno1 != 0, 0, "No message number found in CompareThreadNodes");
+      CHECK(msgno1 != 0, 0, _T("No message number found in CompareThreadNodes"));
       size_t pos1 = globalInvSortTable[msgno1-1];
 
       THREADNODE* th2 = *(THREADNODE**)p2;
       MsgnoType msgno2 = FindMsgno(th2);
-      CHECK(msgno2 != 0, 0, "No message number found in CompareThreadNodes");
+      CHECK(msgno2 != 0, 0, _T("No message number found in CompareThreadNodes"));
       size_t pos2 = globalInvSortTable[msgno2-1];
 
       return pos1 - pos2;
@@ -1400,10 +1400,10 @@ static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
 void HeaderInfoListImpl::CombineSortAndThread()
 {
    // don't crash below if we don't have it somehow
-   CHECK_RET( m_thrData, "must be already threaded" );
+   CHECK_RET( m_thrData, _T("must be already threaded") );
 
    // normally we're called from BuildTables() so we shouldn't have it yet
-   ASSERT_MSG( !m_tableMsgno, "unexpected call to CombineSortAndThread" );
+   ASSERT_MSG( !m_tableMsgno, _T("unexpected call to CombineSortAndThread") );
 
    /*
      We have, on one side, an array of msgno sorted correctly and,
@@ -1445,13 +1445,13 @@ void HeaderInfoListImpl::BuildTables()
    // maybe we have them already?
    if ( m_tableMsgno )
    {
-      ASSERT_MSG( m_tablePos, "should have inverse table as well!" );
+      ASSERT_MSG( m_tablePos, _T("should have inverse table as well!") );
 
       return;
    }
 
    // what is it inverse for?
-   ASSERT_MSG( !m_tablePos, "shouldn't have inverse table neither!" );
+   ASSERT_MSG( !m_tablePos, _T("shouldn't have inverse table neither!") );
 
    // we are going to have the valid tables for that many messages only:
    // m_count may change under our feet from inside Sort() and/or Thread() if
@@ -1552,9 +1552,9 @@ MsgnoType *HeaderInfoListImpl::BuildInverseTable(MsgnoType *table) const
 
 void HeaderInfoListImpl::BuildPosTable()
 {
-   CHECK_RET( m_tableMsgno, "can't build inverse table without direct one" );
+   CHECK_RET( m_tableMsgno, _T("can't build inverse table without direct one") );
 
-   ASSERT_MSG( !m_tablePos, "rebuilding inverse table (and leaking memory)?" );
+   ASSERT_MSG( !m_tablePos, _T("rebuilding inverse table (and leaking memory)?") );
 
    m_tablePos = BuildInverseTable(m_tableMsgno);
 }
@@ -1596,7 +1596,7 @@ bool HeaderInfoListImpl::Sort()
 {
    // caller must check if we need to be sorted
    ASSERT_MSG( !m_tableMsgno && !m_tableSort,
-               "shouldn't be called again" );
+               _T("shouldn't be called again") );
 
    switch ( GetSortCrit(m_sortParams.sortOrder) )
    {
@@ -1774,7 +1774,7 @@ void HeaderInfoListImpl::FreeThreadData()
 bool HeaderInfoListImpl::Thread()
 {
    // the caller must check that we need to be threaded
-   ASSERT_MSG( (!m_thrData || !m_thrData->m_root) && IsThreading(), "shouldn't be called" );
+   ASSERT_MSG( (!m_thrData || !m_thrData->m_root) && IsThreading(), _T("shouldn't be called") );
 
    delete m_thrData;
    m_thrData = new ThreadData(m_sizeTables);
@@ -1865,7 +1865,7 @@ void HeaderInfoListImpl::Cache(const Sequence& seq)
    // make it an index from msgno
    idxMax--;
 
-   CHECK_RET( idxMax < m_count, "HeaderInfoListImpl::Cache(): invalid range" );
+   CHECK_RET( idxMax < m_count, _T("HeaderInfoListImpl::Cache(): invalid range") );
 
    // create all headers we're going to cache first
    ExpandToMakeIndexValid(idxMax);
@@ -1916,7 +1916,7 @@ void HeaderInfoListImpl::CachePositions(const Sequence& seq)
             pos != UID_ILLEGAL;
             pos = seq.GetNext(pos, n) )
       {
-         ASSERT_MSG( pos < m_count, "invalid position in the sequence" );
+         ASSERT_MSG( pos < m_count, _T("invalid position in the sequence") );
 
          msgnos.Add(GetMsgnoFromPos(pos));
       }
@@ -1955,7 +1955,7 @@ bool HeaderInfoListImpl::IsInCache(MsgnoType pos) const
    MsgnoType idx = GetIdxFromPos(pos);
 
    CHECK( idx < m_count, false,
-          "HeaderInfoListImpl::IsInCache(): invalid position" );
+          _T("HeaderInfoListImpl::IsInCache(): invalid position") );
 
    return (idx < m_headers.GetCount()) && (m_headers[idx] != NULL);
 }
@@ -1964,12 +1964,12 @@ bool HeaderInfoListImpl::ReallyGet(MsgnoType pos)
 {
    // we must be already sorted/threaded by now
    CHECK( !IsTranslatingIndices() || HasTransTable(), false,
-          "can't be called now" );
+          _T("can't be called now") );
 
    MsgnoType idx = GetIdxFromPos(pos);
 
    CHECK( idx < m_count, false,
-          "HeaderInfoListImpl::IsInCache(): invalid position" );
+          _T("HeaderInfoListImpl::IsInCache(): invalid position") );
 
    ExpandToMakeIndexValid(idx);
 
@@ -1979,7 +1979,7 @@ bool HeaderInfoListImpl::ReallyGet(MsgnoType pos)
       // "retrieved" before but the transfer was cancelled by the user, so we
       // don't really have any information for it - but in this case the element
       // corresponding to it must have been already created, so assert
-      FAIL_MSG( "not supposed to be called" );
+      FAIL_MSG( _T("not supposed to be called") );
 
       // but still don't crash
       m_headers[idx] = new HeaderInfo;
@@ -1987,7 +1987,7 @@ bool HeaderInfoListImpl::ReallyGet(MsgnoType pos)
 
    if ( m_headers[idx]->IsValid() )
    {
-      FAIL_MSG( "why call ReallyGet() then?" );
+      FAIL_MSG( _T("why call ReallyGet() then?") );
 
       return true;
    }

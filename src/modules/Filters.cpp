@@ -2777,7 +2777,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
 {
    // note the use of explicit scope qualifier to avoid conflicts with our
    // Error() member function
-   CHECK( mf, FilterRule::Error, "FilterRule::Apply(): NULL parameter" );
+   CHECK( mf, FilterRule::Error, _T("FilterRule::Apply(): NULL parameter") );
 
    // no error yet
    int rc = 0;
@@ -2841,7 +2841,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
 
          if ( m_MessageUId == UID_ILLEGAL )
          {
-            FAIL_MSG( "invalid UID in FilterRule::Apply()!" );
+            FAIL_MSG( _T("invalid UID in FilterRule::Apply()!") );
 
             continue;
          }

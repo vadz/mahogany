@@ -672,7 +672,7 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
 
    // should be always in sync
    ASSERT_MSG( m_TypeCtrl->GetCount() == FOLDERTYPE_MAX,
-               "forgot to update something" );
+               _T("forgot to update something") );
 
    panel->Layout();
 }
@@ -692,7 +692,7 @@ MWizard_CreateFolder_TypePage::GetNextPageId() const
    if ( sel < MWizard_CreateFolder_FirstType ||
          sel > MWizard_CreateFolder_LastType )
    {
-      FAIL_MSG("Unknown folder type");
+      FAIL_MSG(_T("Unknown folder type"));
 
       sel = MWizard_CreateFolder_Final;
    }
@@ -786,7 +786,7 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
    switch(type)
    {
       case FOLDERTYPE_MAX:
-         FAIL_MSG("unknown folder type");
+         FAIL_MSG(_T("unknown folder type"));
          // fall through
 
       case FOLDERTYPE_GROUP:
@@ -1013,7 +1013,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
    switch(m_Type)
    {
       case FOLDERTYPE_MAX:
-         FAIL_MSG("unknown folder type");
+         FAIL_MSG(_T("unknown folder type"));
          // fall through
 
       case FOLDERTYPE_GROUP:
@@ -1093,7 +1093,7 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
       profile->IncRef();
    }
 
-   CHECK(profile, false, "No profile?");
+   CHECK(profile, false, _T("No profile?"));
 
    Profile_obj p(profile);
 
@@ -1141,7 +1141,7 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
             break;
 
          default:
-            FAIL_MSG("This folder has no server setting!");
+            FAIL_MSG(_T("This folder has no server setting!"));
       }
 
       m_Server->SetValue(p->readEntry(serverKey, ""));
@@ -1372,7 +1372,7 @@ MWizard::GetPageById(MWizardPageId id)
 
       case MWizard_PageNone:
       case MWizard_PagesMax:
-         ASSERT_MSG(0,"illegal MWizard PageId");
+         ASSERT_MSG(0, _T("illegal MWizard PageId"));
       }
 #undef CREATE_PAGE
    }

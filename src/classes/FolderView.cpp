@@ -60,7 +60,7 @@ FolderView::FolderView()
             MEventId_Null
           ) )
     {
-        FAIL_MSG( "Failed to register folder view with event manager" );
+        FAIL_MSG( _T("Failed to register folder view with event manager") );
     }
 }
 
@@ -133,7 +133,7 @@ Profile *FolderView::GetFolderProfile() const
    {
       profile = mApplication->GetProfile();
 
-      CHECK( profile, NULL, "no global profile?" );
+      CHECK( profile, NULL, _T("no global profile?") );
    }
 
    profile->IncRef();

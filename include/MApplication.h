@@ -452,7 +452,7 @@ public:
    void RemoveModule(MModuleCommon *module);
 
    /// get the translated (if possible) text (used by Python interface only)
-   static const char *GetText(const char *text) { return _(text); }
+   static const wxChar *GetText(const wxChar *text) { return wxGetTranslation(text); }
 
 protected:
    /// Load modules at startup

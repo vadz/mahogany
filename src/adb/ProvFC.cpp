@@ -435,7 +435,7 @@ void FCEntry::Load(const String& strValue)
 // save entry to wxFileConfig (doesn't check if it's modified or not)
 bool FCEntry::Save()
 {
-  wxCHECK_MSG( m_bDirty, TRUE, "shouldn't save unmodified FCEntry" );
+  wxCHECK_MSG( m_bDirty, TRUE, _T("shouldn't save unmodified FCEntry") );
 
   size_t nFieldMax = m_astrFields.Count();
 
@@ -627,7 +627,7 @@ AdbEntryGroup *FCEntryGroup::GetGroup(const String& name) const
 
 AdbEntry *FCEntryGroup::CreateEntry(const String& name)
 {
-  CHECK( !!name, NULL, "can't create entries with empty names" );
+  CHECK( !!name, NULL, _T("can't create entries with empty names") );
 
   FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name, TRUE /* new */);
   if ( !pEntry->IsOk() ) {
@@ -672,7 +672,7 @@ AdbEntry *FCEntryGroup::FindEntry(const char * /* szName */)
 
 String FCBook::GetFullAdbPath(const String& filename)
 {
-  CHECK( !filename.empty(), "", "ADB without name?" );
+  CHECK( !filename.empty(), "", _T("ADB without name?") );
 
   String path;
   if ( IsAbsPath(filename) )
@@ -839,7 +839,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
       break;
 
     default:
-      FAIL_MSG("invalid test in TestBookAccess");
+      FAIL_MSG(_T("invalid test in TestBookAccess"));
   }
 
   return ok;

@@ -562,7 +562,7 @@ static inline const MenuItemInfo& GetMenuItem(int n)
    n -= WXMENU_BEGIN;
 
    ASSERT_MSG( 0 <= n && (size_t)n < WXSIZEOF(g_aMenuItems),
-               "bad menu item index" );
+               _T("bad menu item index") );
 
    return g_aMenuItems[n];
 }
@@ -727,9 +727,9 @@ extern void
 EnableMMenu(MMenuId id, wxWindow *win, bool enable)
 {
    wxFrame *frame = GetFrame(win);
-   CHECK_RET(frame, "no parent frame in EnableMMenu");
+   CHECK_RET(frame, _T("no parent frame in EnableMMenu"));
    wxMenuBar *mb = frame->GetMenuBar();
-   CHECK_RET(mb, "no menu bar in EnableMMenu");
+   CHECK_RET(mb, _T("no menu bar in EnableMMenu"));
 
    // only the main frame has MMenu_Folder, so adjust the menu index
    if ( frame->GetParent() && (id > MMenu_Folder) )
@@ -756,7 +756,7 @@ EnableMMenu(MMenuId id, wxWindow *win, bool enable)
 
 extern void EnableToolbarButton(wxToolBar *toolbar, int nButton, bool enable)
 {
-   CHECK_RET( toolbar, "no toolbar in EnableToolbarButton" );
+   CHECK_RET( toolbar, _T("no toolbar in EnableToolbarButton") );
 
    toolbar->EnableTool(g_aToolBarData[nButton].id, enable);
 }
@@ -769,10 +769,10 @@ extern void EnableToolbarButton(wxToolBar *toolbar, int nButton, bool enable)
 extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
 {
    wxFrame *frame = GetFrame(win);
-   CHECK_RET(frame, "no parent frame in CheckLanguageInMenu");
+   CHECK_RET(frame, _T("no parent frame in CheckLanguageInMenu"));
 
    wxMenuBar *mb = frame->GetMenuBar();
-   CHECK_RET(mb, "no menu bar in CheckLanguageInMenu");
+   CHECK_RET(mb, _T("no menu bar in CheckLanguageInMenu"));
 
    int id;
    switch ( encoding )
@@ -819,7 +819,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
          break;
 
       default:
-         wxFAIL_MSG( "Unexpected encoding in CheckLanguageInMenu" );
+         wxFAIL_MSG( _T("Unexpected encoding in CheckLanguageInMenu") );
 
       case wxFONTENCODING_DEFAULT:
          id = WXMENU_LANG_DEFAULT;
@@ -875,7 +875,7 @@ extern wxFontEncoding GetEncodingFromMenuCommand(int id)
    switch ( id )
    {
       default:
-         wxFAIL_MSG("unexpected menu event id in GetEncodingFromMenuEvent");
+         wxFAIL_MSG(_T("unexpected menu event id in GetEncodingFromMenuEvent"));
          // fall through
 
       case WXMENU_LANG_DEFAULT:

@@ -262,7 +262,7 @@ LayoutEditor::~LayoutEditor()
    // just in case
    if ( m_exportStatus )
    {
-      FAIL_MSG( "GetNextPart() must be called until it returns NULL!" );
+      FAIL_MSG( _T("GetNextPart() must be called until it returns NULL!") );
 
       delete m_exportStatus;
    }
@@ -547,7 +547,7 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
 EditorContentPart *LayoutEditor::GetFirstPart()
 {
    CHECK( !m_exportStatus, NULL,
-          "GetNextPart() should be called, not GetFirstPart()" );
+          _T("GetNextPart() should be called, not GetFirstPart()") );
 
    m_exportStatus = new wxLayoutExportStatus(m_LayoutWindow->GetLayoutList());
 
@@ -556,7 +556,7 @@ EditorContentPart *LayoutEditor::GetFirstPart()
 
 EditorContentPart *LayoutEditor::GetNextPart()
 {
-   CHECK( m_exportStatus, NULL, "must call GetFirstPart() first!" );
+   CHECK( m_exportStatus, NULL, _T("must call GetFirstPart() first!") );
 
    for ( ;; )
    {
@@ -602,7 +602,7 @@ EditorContentPart *LayoutEditor::GetNextPart()
             break;
 
          default:
-            FAIL_MSG( "unexpected layout object type" );
+            FAIL_MSG( _T("unexpected layout object type") );
             continue;
       }
 

@@ -460,7 +460,7 @@ static MModuleListing * DoListLoadedModules(bool listall = false,
 {
 #ifndef USE_MODULES_STATIC
    // this function only works for loaded modules in dynamic case
-   ASSERT_MSG( !listall, "this mode is not supported with dynamic modules" );
+   ASSERT_MSG( !listall, _T("this mode is not supported with dynamic modules") );
 #endif // USE_MODULES_STATIC
 
    MModuleListingImpl *listing =
@@ -503,7 +503,7 @@ static MModuleListing * DoListLoadedModules(bool listall = false,
       MModule *m = (**i).m_Module;
       if ( !m )
       {
-         FAIL_MSG( "module should be loaded" );
+         FAIL_MSG( _T("module should be loaded") );
 
          continue;
       }
@@ -630,7 +630,7 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
    };
 
    ASSERT_MSG( WXSIZEOF(MMD_HEADERS) == MMD_LINE_LAST,
-               "forgot to update the constants describing MMD format" );
+               _T("forgot to update the constants describing MMD format") );
 
    // Second: load list info:
    MModuleListingImpl *listing = MModuleListingImpl::Create(modules.size());

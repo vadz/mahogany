@@ -161,7 +161,7 @@ bool MfStatusCache::GetStatus(const String& folderName,
 void MfStatusCache::UpdateStatus(const String& folderName,
                                  const MailFolderStatus& status)
 {
-   CHECK_RET( status.IsValid(), "invalid status in MfStatusCache" );
+   CHECK_RET( status.IsValid(), _T("invalid status in MfStatusCache") );
 
    int n = m_folderNames.Index(folderName);
    if ( n == wxNOT_FOUND )
@@ -314,7 +314,7 @@ bool MfStatusCache::DoLoad(const wxTextFile& file, int version)
             break;
 
          default:
-            FAIL_MSG( "unknown cache file format" );
+            FAIL_MSG( _T("unknown cache file format") );
             // fall through nevertheless
 
          case CacheFile_1_1:

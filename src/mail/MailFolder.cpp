@@ -153,7 +153,7 @@ static MFDriver *GetFolderDriver(const MFolder *folder)
    if ( !MailFolder::Init() )
       return NULL;
 
-   CHECK( folder, NULL, "MailFolder: NULL folder object" );
+   CHECK( folder, NULL, _T("MailFolder: NULL folder object") );
 
    const String kind = folder->GetClass();
 
@@ -270,7 +270,7 @@ bool MailFolder::CheckNetwork(const MFolder *folder, wxFrame *frame)
 bool
 MailFolder::CloseFolder(const MFolder *folder)
 {
-   CHECK( folder, false, "MailFolder::CloseFolder(): NULL folder" );
+   CHECK( folder, false, _T("MailFolder::CloseFolder(): NULL folder") );
 
    // don't try to close the folder which can't be opened, it's a NOOP
    if ( !folder->CanOpen() )
@@ -793,7 +793,7 @@ InitRecipients(Composer *cv,
       switch ( replyKind )
       {
          default:
-            FAIL_MSG( "unexpected reply kind" );
+            FAIL_MSG( _T("unexpected reply kind") );
             // fall through
 
          case MailFolder::REPLY_SENDER:
@@ -834,7 +834,7 @@ MailFolder::ReplyMessage(Message *msg,
                          wxWindow *parent,
                          Composer *cv)
 {
-   CHECK( msg, NULL, "no message to reply to");
+   CHECK( msg, NULL, _T("no message to reply to") );
 
    if(! profile)
       profile = mApplication->GetProfile();
@@ -853,7 +853,7 @@ MailFolder::ReplyMessage(Message *msg,
          cv = Composer::CreateReplyMessage(params, profile, msg);
       }
 
-      CHECK( cv, NULL, "failed to create composer" );
+      CHECK( cv, NULL, _T("failed to create composer") );
    }
 
    InitRecipients(cv, msg, params, profile);
@@ -1029,7 +1029,7 @@ MailFolder::ForwardMessage(Message *msg,
                            wxWindow *parent,
                            Composer *cv)
 {
-   CHECK(msg, NULL, "no message to forward");
+   CHECK(msg, NULL, _T("no message to forward"));
 
    if ( !profile )
       profile = mApplication->GetProfile();
@@ -1037,7 +1037,7 @@ MailFolder::ForwardMessage(Message *msg,
    if ( !cv )
    {
       cv = Composer::CreateFwdMessage(params, profile, msg);
-      CHECK( cv, NULL, "failed to create composer" );
+      CHECK( cv, NULL, _T("failed to create composer") );
    }
 
    // FIXME: we shouldn't assume that all headers have the same encoding
@@ -1059,7 +1059,7 @@ char MailFolder::GetFolderDelimiter() const
    switch ( GetType() )
    {
       default:
-         FAIL_MSG( "Don't call GetFolderDelimiter() for this type" );
+         FAIL_MSG( _T("Don't call GetFolderDelimiter() for this type") );
          // fall through nevertheless
 
       case MF_POP:
@@ -1080,7 +1080,7 @@ char MailFolder::GetFolderDelimiter() const
 
       case MF_IMAP:
          // for IMAP this depends on server!
-         FAIL_MSG( "shouldn't be called for IMAP, unknown delimiter" );
+         FAIL_MSG( _T("shouldn't be called for IMAP, unknown delimiter") );
 
          // guess :-(
          return '/';
@@ -1110,7 +1110,7 @@ MailFolder::SetFlagForAll(int flag, bool set)
 
 bool MailFolder::SetFlag(const UIdArray *sequence, int flag, bool set)
 {
-   CHECK( sequence, false, "NULL sequence in MailFolder::SetFlag" );
+   CHECK( sequence, false, _T("NULL sequence in MailFolder::SetFlag") );
 
    Sequence seq;
    seq.AddArray(*sequence);
@@ -1244,7 +1244,7 @@ MailFolder::ProposeSavePassword(MailFolder *mf,
            ) )
       {
          ServerInfoEntry *server = ServerInfoEntry::GetOrCreate(folder, mf);
-         CHECK_RET( server, "folder which has login must have server as well!" );
+         CHECK_RET( server, _T("folder which has login must have server as well!") );
 
          server->SetAuthInfo(login, password);
       }

@@ -222,14 +222,14 @@ AdbEntryGroup *PalmEntryGroup::GetGroup(const String& name) const
 
 void PalmEntryGroup::AddEntry(PalmEntry* p_Entry) 
 {
-  ASSERT_MSG (!!m_entries, "AddEntry: non-initialized m_entries" );
-  ASSERT_MSG (!!p_Entry, "AddEntry: non-initialized p_Entry" );
+  ASSERT_MSG (!!m_entries, _T("AddEntry: non-initialized m_entries") );
+  ASSERT_MSG (!!p_Entry, _T("AddEntry: non-initialized p_Entry") );
   m_entries->push_back(p_Entry);
 }
 
 AdbEntry *PalmEntryGroup::CreateEntry(const String& name)
 {
-  CHECK( !!name, NULL, "can't create entries with empty names" );
+  CHECK( !!name, NULL, _T("can't create entries with empty names") );
 
   PalmEntry *pEntry = new PalmEntry((PalmEntryGroup *)this, name, TRUE /* new */);
   if ( !pEntry->IsOk() ) {
@@ -380,7 +380,7 @@ bool PalmDataProvider::TestBookAccess(const String& name, AdbTests test)
   case Test_Create:
      return FALSE;
   default:
-     FAIL_MSG("invalid test in TestBookAccess");
+     FAIL_MSG(_T("invalid test in TestBookAccess"));
      return FALSE;
   }
 }

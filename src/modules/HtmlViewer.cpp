@@ -391,7 +391,7 @@ void HtmlViewerWindow::OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y)
 {
    wxHtmlLinkInfo *link = cell->GetLink();
    wxFrame *frame = GetFrame(this);
-   CHECK_RET( frame, "no parent frame?" );
+   CHECK_RET( frame, _T("no parent frame?") );
 
    String statText;
    if ( link )
@@ -895,7 +895,7 @@ void HtmlViewer::InsertSignature(const String& signature)
 {
    // this is not called by MessageView yet, but should be implemented when it
    // starts recognizing signatures in the messages
-   FAIL_MSG( "not implemented" );
+   FAIL_MSG( _T("not implemented") );
 }
 
 void HtmlViewer::EndPart()

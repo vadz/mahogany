@@ -670,7 +670,7 @@ bool MInputBox(wxString *pstr,
 
   // do not allow attempts to store the password:
   wxASSERT_MSG( !passwordflag || (szKey==NULL && def == NULL),
-                "passwords can't be stored!" );
+                _T("passwords can't be stored!") );
 
   if ( dlg.ShowModal() != wxID_OK )
      return false;
@@ -819,7 +819,7 @@ MDlgResult MDialog_YesNoCancel(char const *message,
          return MDlg_Yes;
 
       default:
-         FAIL_MSG( "unexpected wxMessageBox return value" );
+         FAIL_MSG( _T("unexpected wxMessageBox return value") );
          // fall through
 
       case wxCANCEL:
@@ -885,7 +885,7 @@ MDialog_YesNoDialog(const char *message,
          storedValue = 0;
          path = configPath;
 
-         ASSERT_MSG( !strchr(configPath, '/'), "configPath must be simple!" );
+         ASSERT_MSG( !strchr(configPath, '/'), _T("configPath must be simple!") );
       }
 
       if ( !storedValue )
@@ -1064,7 +1064,7 @@ public:
      StopTimer();
 
      wxFrame *parent = wxDynamicCast(GetParent(), wxFrame);
-     CHECK_RET( parent, "should have the splash frame as parent!" );
+     CHECK_RET( parent, _T("should have the splash frame as parent!") );
 
      ReallyCloseTopLevelWindow(parent);
   }
@@ -1289,7 +1289,7 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
                       wxSize(400, 480),
                       /* no border styles at all */ wxSTAY_ON_TOP )
 {
-   wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
+   wxCHECK_RET( g_pSplashScreen == NULL, _T("one splash is more than enough") );
 
    g_pSplashScreen = (wxMFrame *)this;
 
@@ -2469,7 +2469,7 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
             break;
 
          default:
-            FAIL_MSG( "unknown message box value" );
+            FAIL_MSG( _T("unknown message box value") );
             // fall through
 
          case wxOK:
@@ -2519,7 +2519,7 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
 bool ReenableDialog::TransferDataFromWindow()
 {
    ASSERT_MSG( m_selections.IsEmpty(),
-               "TransferDataFromWindow() called twice?" );
+               _T("TransferDataFromWindow() called twice?") );
 
    int index = -1;
    for ( ;; )
@@ -2548,7 +2548,7 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
 
    // get all entries under Settings/MessageBox
    wxConfigBase *config = wxConfigBase::Get();
-   CHECK( config, FALSE, "no app config?" );
+   CHECK( config, FALSE, _T("no app config?") );
 
    wxString root;
    root << '/' << M_SETTINGS_CONFIG_SECTION << "/MessageBox";
@@ -3099,7 +3099,7 @@ public:
          ms_indexOfAppend = ms_allIdentCombos.Index(this);
 
          CHECK( ms_indexOfAppend != wxNOT_FOUND, -1,
-                "all wxIdentCombos should be in the array!" );
+                _T("all wxIdentCombos should be in the array!") );
 
          size_t count = ms_allIdentCombos.GetCount();
          for ( size_t n = 0; n < count; n++ )

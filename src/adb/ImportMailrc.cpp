@@ -284,7 +284,7 @@ bool AdbMailrcImporter::StartImport(const String& filename)
 size_t AdbMailrcImporter::GetEntryNames(const String& path,
                                         wxArrayString& entries) const
 {
-   ASSERT_MSG( !path, "where did this path come from?" );
+   ASSERT_MSG( !path, _T("where did this path come from?") );
 
    entries.Empty();
 
@@ -325,7 +325,7 @@ size_t AdbMailrcImporter::GetEntryNames(const String& path,
 size_t AdbMailrcImporter::GetGroupNames(const String& path,
                                         wxArrayString& groups) const
 {
-   ASSERT_MSG( !path, "where did this path come from?" );
+   ASSERT_MSG( !path, _T("where did this path come from?") );
 
    return 0;
 }
@@ -334,7 +334,7 @@ bool AdbMailrcImporter::ImportEntry(const String& path,
                                     size_t index,
                                     AdbEntry *entry)
 {
-   CHECK( index < m_lineNumbers.GetCount(), FALSE, "invalid entry index" );
+   CHECK( index < m_lineNumbers.GetCount(), FALSE, _T("invalid entry index") );
 
    wxString line = m_textfile.GetLine((size_t)m_lineNumbers[index]);
    if ( !line )
@@ -353,7 +353,7 @@ bool AdbMailrcImporter::ImportEntry(const String& path,
 #ifdef DEBUG
    wxString nicknameReal;
    entry->GetField(AdbField_NickName, &nicknameReal);
-   ASSERT_MSG( nicknameReal == nickname, "importing wrong entry?" );
+   ASSERT_MSG( nicknameReal == nickname, _T("importing wrong entry?") );
 #endif // DEBUG
 
    // normally addresses shouldn't be empty, but better be safe...

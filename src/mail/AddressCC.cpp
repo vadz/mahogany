@@ -77,7 +77,7 @@ static String Adr2Email(ADDRESS *adr);
 
 AddressCC::AddressCC(ADDRESS *adr)
 {
-   ASSERT_MSG( adr && !adr->error, "invalid ADDRESS in AddressCC ctor" );
+   ASSERT_MSG( adr && !adr->error, _T("invalid ADDRESS in AddressCC ctor") );
 
    m_adr = adr;
    m_addrNext = NULL;
@@ -100,7 +100,7 @@ String AddressCC::GetAddress() const
 String AddressCC::GetName() const
 {
    String personal;
-   CHECK( m_adr, personal, "invalid address" );
+   CHECK( m_adr, personal, _T("invalid address") );
 
    personal = m_adr->personal;
 
@@ -110,7 +110,7 @@ String AddressCC::GetName() const
 String AddressCC::GetMailbox() const
 {
    String mailbox;
-   CHECK( m_adr, mailbox, "invalid address" );
+   CHECK( m_adr, mailbox, _T("invalid address") );
 
    mailbox = m_adr->mailbox;
 
@@ -120,7 +120,7 @@ String AddressCC::GetMailbox() const
 String AddressCC::GetDomain() const
 {
    String host;
-   CHECK( m_adr, host, "invalid address" );
+   CHECK( m_adr, host, _T("invalid address") );
 
    host = m_adr->host;
 
@@ -148,7 +148,7 @@ static inline bool SafeCompare(const char *s1, const char *s2)
 bool AddressCC::IsSameAs(const Address& addr) const
 {
    CHECK( IsValid() && addr.IsValid(), false,
-          "can't compare invalid addresses" );
+          _T("can't compare invalid addresses") );
 
    const AddressCC& addrCC = (const AddressCC&)addr;
 
@@ -319,7 +319,7 @@ Address *AddressListCC::GetFirst() const
 
 Address *AddressListCC::GetNext(const Address *addr) const
 {
-   CHECK( addr, NULL, "NULL address in AddressList::GetNext" );
+   CHECK( addr, NULL, _T("NULL address in AddressList::GetNext") );
 
    return ((AddressCC *)addr)->m_addrNext;
 }

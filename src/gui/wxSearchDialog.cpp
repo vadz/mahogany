@@ -139,7 +139,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
                                               _("Search for messages"),
                                               "MessageSearchDialog")
 {
-   ASSERT_MSG( crit, "NULL SearchCriterium pointer in wxMessageSearchDialog" );
+   ASSERT_MSG( crit, _T("NULL SearchCriterium pointer in wxMessageSearchDialog") );
 
    m_CritStruct = crit;
 

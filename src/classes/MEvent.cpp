@@ -92,7 +92,7 @@ MEventReceiver::~MEventReceiver()
       MEventReceiverInfo *info = gs_receivers[n];
       if ( &(info->receiver) == this )
       {
-         FAIL_MSG( "Forgot to Deregister() - will probably crash!" );
+         FAIL_MSG( _T("Forgot to Deregister() - will probably crash!") );
 
          break;
       }
@@ -144,7 +144,7 @@ MEventManager::Send(MEventData * data)
 /* static */
 bool MEventManager::Dispatch(MEventData *dataptr)
 {
-   CHECK( dataptr, false, "NULL event in Dispatch()" );
+   CHECK( dataptr, false, _T("NULL event in Dispatch()") );
 
    if ( gs_IsSuspended )
    {
@@ -204,8 +204,8 @@ void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
       MEventReceiverInfo *info = gs_receivers[n];
       if ( info->id == eventId && &(info->receiver) == &who )
       {
-         FAIL_MSG( "Registering the same handler twice in "
-                   "MEventManager::Register()" );
+         FAIL_MSG( _T("Registering the same handler twice in "
+                   "MEventManager::Register()") );
       }
    }
 #endif
@@ -224,7 +224,7 @@ bool MEventManager::Deregister(void *handle)
    int index = gs_receivers.Index((MEventReceiverInfo *)handle);
 
    CHECK( index != wxNOT_FOUND, false,
-          "unregistering event handler which was not registered" );
+          _T("unregistering event handler which was not registered") );
 
    size_t n = (size_t)index;
    delete gs_receivers[n];
@@ -239,7 +239,7 @@ MEventManager::Suspend(bool suspend)
    MEventLocker mutex;
 
    CHECK_RET( suspend || gs_IsSuspended > 0,
-              "resuming events but not suspended" );
+              _T("resuming events but not suspended") );
 
    gs_IsSuspended += suspend ? 1 : -1;
 }

@@ -305,7 +305,7 @@ public:
          }
          else
          {
-            wxFAIL_MSG( "attempt to create MFolder from non folder profile" );
+            wxFAIL_MSG( _T("attempt to create MFolder from non folder profile") );
 
             m_folder = NULL;
          }

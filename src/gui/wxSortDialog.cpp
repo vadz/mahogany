@@ -128,10 +128,10 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    long width, widthMax = 0;
 
    // see the comment near sortCriteria definition
-   ASSERT_MSG( NUM_CRITERIA < 16, "too many sort criteria" );
+   ASSERT_MSG( NUM_CRITERIA < 16, _T("too many sort criteria") );
 
    // should have enough space for them in a long
-   ASSERT_MSG( NUM_SORTLEVELS < 8, "too many sort levels" );
+   ASSERT_MSG( NUM_SORTLEVELS < 8, _T("too many sort levels") );
 
    size_t n;
    for ( n = 0; n < NUM_LABELS; n++ )

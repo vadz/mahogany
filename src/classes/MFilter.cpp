@@ -177,7 +177,7 @@ static unsigned char ORC_T_Flags[] =
 bool FilterTestNeedsArgument(int test)
 {
    CHECK( test >= 0 && (unsigned)test < WXSIZEOF(ORC_T_Flags), false,
-          "invalid filter test" );
+          _T("invalid filter test") );
 
    return (ORC_T_Flags[test] & ORC_F_NeedsArg) != 0;
 }
@@ -185,7 +185,7 @@ bool FilterTestNeedsArgument(int test)
 bool FilterTestNeedsTarget(int test)
 {
    CHECK( test >= 0 && (unsigned)test < WXSIZEOF(ORC_T_Flags), false,
-          "invalid filter test" );
+          _T("invalid filter test") );
 
    return (ORC_T_Flags[test] & ORC_F_NeedsTarget) != 0;
 }
@@ -250,7 +250,7 @@ MFDialogComponent::WriteTest(void)
 {
    String program;
 
-   CHECK( m_Test >= 0 && m_Test < ORC_T_Max, program, "illegal filter test" );
+   CHECK( m_Test >= 0 && m_Test < ORC_T_Max, program, _T("illegal filter test") );
 
    // This returns the bit to go into an if between the brackets:
    // if ( .............. )
@@ -265,7 +265,7 @@ MFDialogComponent::WriteTest(void)
          break;
 
       default:
-         FAIL_MSG( "unknown logical filter operation" );
+         FAIL_MSG( _T("unknown logical filter operation") );
 
       case ORC_L_None:
          break;
@@ -287,7 +287,7 @@ MFDialogComponent::WriteTest(void)
          program << ORC_W_Names[ m_Target ];
       else
       {
-         FAIL_MSG("This must not happen!");
+         FAIL_MSG(_T("This must not happen!"));
          return "";
       }
    }
@@ -520,7 +520,7 @@ MFDialogSettingsImpl::WriteAction(void) const
    String program;
    if(m_Action < 0 || m_Action >= OAC_T_Max)
    {
-      ASSERT_MSG(0,"illegal action - must not happen");
+      ASSERT_MSG(0, _T("illegal action - must not happen"));
       return "";
    }
    bool needsArgument = OAC_T_Flags[m_Action] & OAC_F_NeedsArg;
@@ -832,7 +832,7 @@ bool
 MFilter::Copy(const String& nameSrc, const String& nameDst)
 {
    // GUI code is supposed to check for this
-   CHECK( nameSrc != nameDst, false, "can't copy filter over itself" );
+   CHECK( nameSrc != nameDst, false, _T("can't copy filter over itself") );
 
    Profile_obj profileSrc(Profile::CreateFilterProfile(nameSrc));
    Profile_obj profileDst(Profile::CreateFilterProfile(nameDst));
@@ -893,7 +893,7 @@ MFilterFromProfile::DebugDump() const
 extern FilterRule *
 GetFilterForFolder(const MFolder *folder)
 {
-   CHECK( folder, NULL, "GetFilterForFolder: NULL parameter" );
+   CHECK( folder, NULL, _T("GetFilterForFolder: NULL parameter") );
 
    // build a single program from all filter rules:
    String filterString;

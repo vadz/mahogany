@@ -369,7 +369,7 @@ public:
    virtual Profile *GetFolderProfile(void) const;
 
    /// don't even think of using this!
-   wxFolderViewFrame(void) { wxFAIL_MSG("unreachable"); }
+   wxFolderViewFrame(void) { wxFAIL_MSG(_T("unreachable")); }
 
 private:
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);

@@ -223,7 +223,7 @@ KeywordDetector::scanAtStart(const char* toBeScanned,
       {
          // This is not the end of a keyword
          // Go on
-         CHECK( current->_son, -1, "current cell must have a son" );
+         CHECK( current->_son, -1, _T("current cell must have a son") );
          return scanAtStart(toBeScanned+1, current->_son, longueurDejaVue+1, lngDernierTrouve);
       }
    }
@@ -279,7 +279,7 @@ int KeywordDetector::scan(const char* toBeScanned,
          {
             // This is not the end of a keyword
             // Go on
-            CHECK( current->_son, -1, "current cell must have a son" );
+            CHECK( current->_son, -1, _T("current cell must have a son") );
             current = current->_son;
             atRootLevel = false;
             lng++;
@@ -308,7 +308,7 @@ int KeywordDetector::scan(const char* toBeScanned,
             // This is a 'back-link'
             currentPosition = currentPosition + lng - current->_isKey;
             lng = current->_isKey;
-            ASSERT_MSG( lng > 0, "length must be non 0" );
+            ASSERT_MSG( lng > 0, _T("length must be non 0") );
             current = current->_son;
          }
       }
@@ -322,7 +322,7 @@ KeywordDetectorCell::computeBackArc(KeywordDetectorCell* root,
                                     KeywordDetectorCell* parentBack)
 {
    ASSERT_MSG(parentBack == 0 || parentBack->_c == '\000',
-              "logic error in KeywordDetectorCell?");
+              _T("logic error in KeywordDetectorCell?"));
 
    KeywordDetectorCell* back = 0;
    KeywordDetectorCell* current = 0;
@@ -361,7 +361,7 @@ KeywordDetectorCell::computeBackArc(KeywordDetectorCell* root,
 
       // There must be a son, otherwise the current node would be a keyword
       // and there is no need for a back node
-      CHECK(lastSon, 0, "node with a back link must have a son");
+      CHECK(lastSon, 0, _T("node with a back link must have a son"));
 
       while (lastSon->_brother)
       {

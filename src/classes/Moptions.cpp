@@ -878,7 +878,7 @@ extern long GetNumericOptionValue(Profile *profile, const MOption opt)
 extern const char *GetOptionName(const MOption opt)
 {
    ASSERT_MSG( (size_t)opt.GetId() < WXSIZEOF(MOptions),
-               "invalid option index!" );
+               _T("invalid option index!") );
 
    return MOptions[opt.GetId()].name;
 }
@@ -914,7 +914,7 @@ extern int GetFontFamilyFromProfile(Profile *profile, const MOption option)
    int font = GetOptionValue(profile, option);
    if ( font < 0 || (size_t)font > WXSIZEOF(fontFamilies) )
    {
-      wxFAIL_MSG( "bad font setting in config" );
+      wxFAIL_MSG( _T("bad font setting in config") );
 
       font = 0;
    }

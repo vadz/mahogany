@@ -332,7 +332,7 @@ CreateEntryWithButton(wxWindow *parent,
          break;
 
       default:
-         wxFAIL_MSG("unknown browse button kind");
+         wxFAIL_MSG(_T("unknown browse button kind"));
          return NULL;
    }
 
@@ -934,7 +934,7 @@ void wxEnhancedPanel::EnableTextWithButton(wxTextCtrl *control, bool bEnable)
    wxWindow *win = FindWindow(id);
 
    if ( win == NULL ) {
-      wxFAIL_MSG("can't find browse button for the text entry zone");
+      wxFAIL_MSG(_T("can't find browse button for the text entry zone"));
    }
    else {
       wxASSERT( win->IsKindOf(CLASSINFO(wxButton)) );
@@ -968,7 +968,7 @@ void wxEnhancedPanel::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
    wxWindow *win = FindWindow(id);
 
    if ( win == NULL ) {
-      wxFAIL_MSG("can't find label for the text entry zone");
+      wxFAIL_MSG(_T("can't find label for the text entry zone"));
    }
    else {
       // did we find the right one?
@@ -991,7 +991,7 @@ void wxEnhancedPanel::EnableControlWithLabel(wxControl *control, bool bEnable)
    wxWindow *win = FindWindow(id);
 
    if ( win == NULL ) {
-      wxFAIL_MSG("can't find label for the control");
+      wxFAIL_MSG(_T("can't find label for the control"));
    }
    else {
       // did we find the right one?
@@ -1004,14 +1004,14 @@ void wxEnhancedPanel::EnableControlWithLabel(wxControl *control, bool bEnable)
 // enable/disable the listbox and its buttons
 void wxEnhancedPanel::EnableListBox(wxListBox *control, bool bEnable)
 {
-   wxCHECK_RET( control, "NULL pointer in EnableListBox" );
+   wxCHECK_RET( control, _T("NULL pointer in EnableListBox") );
 
    control->Enable(bEnable);
 
    for ( int id = wxOptionsPage_BtnNew; id <= wxOptionsPage_BtnDelete; id++ )
    {
       wxWindow *btn = FindWindow(id);
-      wxASSERT_MSG( wxDynamicCast(btn, wxButton), "listbox btn not found" );
+      wxASSERT_MSG( wxDynamicCast(btn, wxButton), _T("listbox btn not found") );
       if ( btn )
          btn->Enable(bEnable);
    }
@@ -1337,7 +1337,7 @@ void
 wxOptionsEditDialog::SendOptionsChangeEvent()
 {
    ASSERT_MSG( m_lastBtn != MEventOptionsChangeData::Invalid,
-               "this should be only called when a button is pressed" );
+               _T("this should be only called when a button is pressed") );
 
    // note that we might actually not have this profile when creating the
    // folder (there is no profile yet then), so it's not an error - just don't
@@ -1394,7 +1394,7 @@ void wxOptionsEditDialog::OnOK(wxCommandEvent& /* event */)
 
 void wxOptionsEditDialog::OnApply(wxCommandEvent& /* event */)
 {
-   ASSERT_MSG( m_bDirty, "'Apply' should be disabled!" );
+   ASSERT_MSG( m_bDirty, _T("'Apply' should be disabled!") );
 
    m_lastBtn = MEventOptionsChangeData::Apply;
 
@@ -1520,7 +1520,7 @@ static wxArrayString SplitLabelWithChoices(wxString *label)
 {
    wxArrayString choices;
 
-   CHECK( label, choices, "NULL label in SplitLabelWithChoices" );
+   CHECK( label, choices, _T("NULL label in SplitLabelWithChoices") );
 
    choices = strutil_restore_array(*label);
    if ( !choices.IsEmpty() )

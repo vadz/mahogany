@@ -154,7 +154,7 @@ wxFolderViewColumnsDialog(const String& folderName,
    m_widths = widths;
 
    ASSERT_MSG( m_countCol == widths->GetCount(),
-               "arrays should have the same size" );
+               _T("arrays should have the same size") );
 
    m_asDefault = asDefault;
 
@@ -263,9 +263,9 @@ wxFolderViewColumnsDialog::~wxFolderViewColumnsDialog()
 void wxFolderViewColumnsDialog::OnItemSwap(size_t item1, size_t item2)
 {
    CHECK_RET( item1 < m_countCol && item2 < m_countCol,
-              "invalid item in OnItemSwap" );
+              _T("invalid item in OnItemSwap") );
 
-   ASSERT_MSG( item1 != item2, "swapping an item with itself?" );
+   ASSERT_MSG( item1 != item2, _T("swapping an item with itself?") );
 
    // swap the corresponding items in our translation table
    size_t tmp = m_idxTrans[item1];
@@ -374,7 +374,7 @@ bool ShowFolderViewColumnDialog(const String& folderName,
                                 wxWindow *parent)
 {
    CHECK( names && status && widths && asDefault, false,
-          "NULL pointer in ShowFolderViewColumnDialog" );
+          _T("NULL pointer in ShowFolderViewColumnDialog") );
 
    wxFolderViewColumnsDialog dlg(folderName, names, status, widths,
                                  asDefault, parent);

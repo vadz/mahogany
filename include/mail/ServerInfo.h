@@ -113,7 +113,7 @@ public:
 
          serverInfo = mf->CreateServerInfo(folder);
 
-         CHECK( serverInfo, NULL, "CreateServerInfo() failed?" );
+         CHECK( serverInfo, NULL, _T("CreateServerInfo() failed?") );
 
          ms_servers.push_back(serverInfo);
       }
@@ -142,9 +142,9 @@ public:
    /// set the login and password to use with this server
    void SetAuthInfo(const String& login, const String& password)
    {
-      CHECK_RET( !login.empty(), "empty login not allowed" );
+      CHECK_RET( !login.empty(), _T("empty login not allowed") );
 
-      ASSERT_MSG( !m_hasAuthInfo, "overriding auth info for the server?" );
+      ASSERT_MSG( !m_hasAuthInfo, _T("overriding auth info for the server?") );
 
       m_hasAuthInfo = true;
       m_login = login;

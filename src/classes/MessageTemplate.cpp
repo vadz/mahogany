@@ -89,7 +89,7 @@ MessageTemplateParser::ExpandTemplate(const char **ppc, String *value) const
 {
    const char *pc = *ppc;
 
-   ASSERT_MSG( *pc == '$', "we should be called for $expression only" );
+   ASSERT_MSG( *pc == '$', _T("we should be called for $expression only") );
 
    // what kind of brackets do we have? some of them imply the category
    // (like $`...` is the same as $(cmd: ...))
@@ -417,7 +417,7 @@ MessageTemplateParser::ExpandTemplate(const char **ppc, String *value) const
                break;
 
             default:
-               FAIL_MSG("unknown alignment value");
+               FAIL_MSG(_T("unknown alignment value"));
          }
       }
    }
@@ -550,7 +550,7 @@ static String GetTemplateKindPath(MessageTemplateKind kind)
          break;
 
       default:
-         FAIL_MSG("unknown template kind");
+         FAIL_MSG(_T("unknown template kind"));
    }
 
    return path;
@@ -639,7 +639,7 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
             break;
 
          default:
-            FAIL_MSG("unknown template kind");
+            FAIL_MSG(_T("unknown template kind"));
             // fall through
 
          case MessageTemplate_NewMessage:

@@ -85,7 +85,7 @@ Profile * profile =NULL
 
 virtual void  MessageDialog (
 const char * message , const wxWindow * parent =NULL,
-const char * title =MDIALOG_MSGTITLE,
+const wxChar * title =MDIALOG_MSGTITLE,
 const char * configPath =NULL )
  = 0;
 
@@ -101,7 +101,7 @@ const char * message
 
 virtual bool  YesNoDialog (
 const char * message , const wxWindow * parent =NULL,
-const char * title =MDIALOG_YESNOTITLE
+const wxChar * title =MDIALOG_YESNOTITLE
 )
  = 0;
 

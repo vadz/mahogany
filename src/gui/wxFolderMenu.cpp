@@ -69,7 +69,7 @@ public:
    const wxArrayString& GetFolderNames() const
    {
       // we must had created the menu first
-      ASSERT_MSG(!m_folderNames.IsEmpty(), "wxFolderMenuData used incorrectly");
+      ASSERT_MSG(!m_folderNames.IsEmpty(), _T("wxFolderMenuData used incorrectly"));
 
       return m_folderNames;
    }
@@ -145,7 +145,7 @@ void wxFolderMenuData::AddSubFoldersToMenu(wxString& folderName,
       MFolder_obj subfolder = folder->GetSubfolder(n);
       if ( !subfolder.IsOk() )
       {
-         FAIL_MSG( "no subfolder?" );
+         FAIL_MSG( _T("no subfolder?") );
 
          continue;
       }
@@ -219,9 +219,9 @@ wxMenu *wxFolderMenu::GetMenu() const
 
 MFolder *wxFolderMenu::GetFolder(int id) const
 {
-   CHECK( m_data, NULL, "must call wxFolderMenu::GetMenu() first" );
+   CHECK( m_data, NULL, _T("must call wxFolderMenu::GetMenu() first") );
 
-   ASSERT_MSG( id >= WXMENU_POPUP_FOLDER_MENU, "bad id in wxFolderMenu::GetFolder" );
+   ASSERT_MSG( id >= WXMENU_POPUP_FOLDER_MENU, _T("bad id in wxFolderMenu::GetFolder") );
 
    const wxArrayString& names = m_data->GetFolderNames();
    size_t idx = (size_t)(id - WXMENU_POPUP_FOLDER_MENU);
@@ -238,7 +238,7 @@ MFolder *wxFolderMenu::GetFolder(int id) const
 
 void wxFolderMenu::Detach()
 {
-   CHECK_RET( m_data, "must call wxFolderMenu::GetMenu() first" );
+   CHECK_RET( m_data, _T("must call wxFolderMenu::GetMenu() first") );
 
    m_data->Detach();
 }
