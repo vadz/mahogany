@@ -87,6 +87,7 @@ class DspamFilter : public SpamFilter
 {
 public:
    DspamFilter();
+   virtual ~DspamFilter();
 
    // these public methods are used by GUI class (DspamOptionsPage below)
 
@@ -106,6 +107,9 @@ protected:
    virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
                                              Profile *profile,
                                              String *params) const;
+
+   // get the context creating it on demand
+   DSPAM_CTX *GetCtx() const;
 
 private:
    // helper: used as DoProcess() argument to initialize the context or to get
@@ -150,6 +154,8 @@ private:
    // false if we failed, use ContextHandler to customize processing
    bool DoProcess(const Message& msg, ContextHandler& handler);
 
+
+   DspamCtx *m_ctx;
 
    DECLARE_SPAM_FILTER("dspam", 100);
 };
@@ -209,10 +215,44 @@ DspamFilter::DspamFilter()
    dspam_set_home(mApplication->GetLocalDir());
 
    dspam_init_driver();
+
+   m_ctx = NULL;
+}
+
+DspamFilter::~DspamFilter()
+{
+   delete m_ctx;
+}
+
+DSPAM_CTX *DspamFilter::GetCtx() const
+{
+   if ( !m_ctx )
+   {
+      const_cast<DspamFilter *>(this)->
+         m_ctx = new DspamCtx(dspam_init
+                              (
+                                 M_DSPAM_USER,
+                                 NULL,
+                                 DSM_PROCESS,
+                                 DSF_CHAINED | DSF_NOISE
+                              ));
+   }
+
+   if ( !*m_ctx )
+   {
+      ERRORMESSAGE((_("DSPAM: library initialization failed.")));
+
+      return NULL;
+   }
+
+   return *m_ctx;
 }
 
 bool DspamFilter::DoProcess(const Message& msg, ContextHandler& handler)
 {
+#if 0
+   DSPAM_CTX *ctx = GetCtx();
+#else
    DspamCtx ctx(dspam_init
                 (
                   M_DSPAM_USER,
@@ -220,12 +260,9 @@ bool DspamFilter::DoProcess(const Message& msg, ContextHandler& handler)
                   DSM_PROCESS,
                   DSF_CHAINED | DSF_NOISE
                 ));
+#endif
    if ( !ctx )
-   {
-      ERRORMESSAGE((_("DSPAM: library initialization failed.")));
-
       return false;
-   }
 
    String str;
    if ( !msg.WriteToString(str) )
