@@ -24,18 +24,21 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 
+#   include "Mdefaults.h"
 #   include "gui/wxMApp.h"
 #endif // USE_PCH
 
 #include "MessageViewer.h"
+#include "gui/wxMenuDefs.h"
 #include "ClickURL.h"
+#include "MTextStyle.h"
 
 #include <wx/fontmap.h>
 #include <wx/fs_mem.h>
 
-#include <wx/html/htmlwin.h>
-#include <wx/html/htmprint.h>
-#include <wx/html/m_templ.h>
+#include <wx/html/htmlwin.h>    // for wxHtmlWindow
+#include <wx/html/htmprint.h>   // for wxHtmlEasyPrinting
+#include <wx/html/m_templ.h>    // for TAG_HANDLER_BEGIN
 
 class HtmlViewerWindow;
 

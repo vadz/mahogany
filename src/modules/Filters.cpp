@@ -34,12 +34,14 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
-#endif
+#endif // USE_PCH
 
 #include "modules/Filters.h"
 #include "MFilterLang.h"
+#include "MInterface.h"
 
 #include "UIdArray.h"
+#include "Message.h"
 
 #include <wx/regex.h>   // wxRegEx::Flags
 

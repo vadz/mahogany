@@ -16,6 +16,11 @@
 
 #include "ClickInfo.h"
 
+class MessageView;
+class MimePart;
+
+class WXDLLEXPORT wxWindow;
+
 class ClickableAttachment : public ClickableInfo
 {
 public:

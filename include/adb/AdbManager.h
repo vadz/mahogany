@@ -17,7 +17,9 @@
 
 #include "adb/AdbEntry.h"   // for AdbLookup_xxx constants
 
-#include <wx/dynarray.h>
+#ifndef USE_PCH
+#  include <wx/dynarray.h>
+#endif // USE_PCH
 
 // forward declaration for classes we use
 class AdbBook;

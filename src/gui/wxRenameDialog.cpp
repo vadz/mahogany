@@ -24,7 +24,7 @@
 
 #  include <wx/layout.h>
 #  include <wx/statbox.h>
-#  include <wx/stattext.h>
+#  include <wx/stattext.h>      // for wxStaticText
 #  include <wx/textdlg.h>
 #endif // USE_PCH
 

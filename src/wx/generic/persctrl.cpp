@@ -30,6 +30,7 @@
 
 // wxWindows
 #ifndef WX_PRECOMP
+#   include "wx/config.h"
 #   include  "wx/layout.h"
 #   include  "wx/button.h"
 #   include  "wx/stattext.h"
@@ -39,14 +40,13 @@
 #   include  "wx/filedlg.h"
 #   include  "wx/dirdlg.h"
 #   include  "wx/msgdlg.h"
-#   include  "wx/artprov.h"
+#   include  "wx/log.h"
 #endif //WX_PRECOMP
 
-#include "wx/log.h"
+#include  "wx/artprov.h"
 
 #include "wx/tokenzr.h"
 
-#include "wx/config.h"
 #include "wx/persctrl.h"
 
 #ifdef __WINDOWS__

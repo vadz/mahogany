@@ -17,7 +17,9 @@
    #pragma interface "Sorting.h"
 #endif
 
-#include <wx/dynarray.h>   // for wxArrayInt
+#ifndef  USE_PCH
+#  include <wx/dynarray.h>   // for wxArrayInt
+#endif // USE_PCH
 
 class Profile;
 class WXDLLEXPORT wxWindow;

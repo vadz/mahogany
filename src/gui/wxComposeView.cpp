@@ -35,23 +35,29 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "sysutil.h"
-
+#  include "strutil.h"
+#  include "Mdefaults.h"
 #  include "MHelp.h"
 
-#  include <wx/process.h>
 #  include <wx/sizer.h>
 #  include <wx/menu.h>
+#  include <wx/filedlg.h>
 #  include <wx/stattext.h>
+#endif // USE_PCH
 
-#  include <ctype.h>            // for isspace
 #ifdef __CYGWIN__
 #  include <sys/unistd.h>     // for getpid()
 #endif
 #ifdef __MINGW32__
 #  include <process.h>        // for getpid()
 #endif
-#endif // USE_PCH
 
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <ctype.h>            // for isspace
+
+#include <wx/process.h>
 #include <wx/file.h>
 #include <wx/ffile.h>
 #include <wx/dir.h>
@@ -73,11 +79,15 @@
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxComposeView.h"
+#include "gui/wxMenuDefs.h"
 
 #include "adb/AdbManager.h"
 
 #include "TemplateDialog.h"
 #include "AttachDialog.h"
+#include "MFolder.h"
+#include "Address.h"
+#include "SendMessage.h"
 
 #include "modules/Calendar.h"
 

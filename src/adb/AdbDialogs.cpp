@@ -23,27 +23,25 @@
 #ifndef  USE_PCH
 #   include "Mcommon.h"
 #   include "MApplication.h"
-#   include "guidef.h"
 
 #   include <wx/layout.h>
-#   include <wx/listbox.h>
-#   include <wx/stattext.h>
+#   include <wx/listbox.h>              // for wxListBox
+#   include <wx/stattext.h>             // for wxStaticText
 #   include <wx/statbmp.h>
 #   include <wx/statbox.h>
 #   include <wx/choicdlg.h>
+#   include <wx/filedlg.h>
 #endif //USE_PCH
-
-#include "Mdefaults.h"
 
 #include "adb/AdbImport.h"
 #include "adb/AdbExport.h"
 #include "adb/AdbImpExp.h"
 #include "adb/AdbManager.h"
 
-#include "gui/wxIconManager.h"
-#include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxMDialogs.h"
+
+#include <wx/confbase.h>
 
 // ----------------------------------------------------------------------------
 // dialog classes

@@ -22,15 +22,9 @@
 #endif
 
 #ifndef USE_PCH
-#   include   "Message.h"
-#   include   "gui/wxMenuDefs.h"
-#   include   "gui/wxMFrame.h"
-#   include   "gui/wxIconManager.h"
-#   include   "Profile.h"
-#   include   "kbList.h"
 #endif // USE_PCH
 
-#include "Composer.h"         // the base class
+#include "Composer.h"         // for Composer
 
 #include "MessageEditor.h"    // for MessageEditor::InsertMode enum
 
@@ -42,7 +36,7 @@ class wxRcptMainControl;
 class wxRcptExtraControl;
 class wxComposeView;
 class wxEnhancedPanel;
-
+class SendMessage;
 class MessageEditor;
 
 class WXDLLEXPORT wxChoice;
@@ -51,8 +45,6 @@ class WXDLLEXPORT wxProcess;
 class WXDLLEXPORT wxProcessEvent;
 class WXDLLEXPORT wxSplitterWindow;
 class WXDLLEXPORT wxTextCtrl;
-
-#include <wx/dynarray.h>
 
 WX_DEFINE_ARRAY(wxRcptExtraControl *, ArrayRcptControls);
 

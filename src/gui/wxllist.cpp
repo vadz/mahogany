@@ -33,15 +33,6 @@
 
 #include "Mpch.h"
 
-#ifdef M_BASEDIR
-#   include "Mcommon.h"
-#   include "gui/wxllist.h"
-#   include "gui/wxlparser.h"
-#else
-#   include "wxllist.h"
-#   include "wxlparser.h"
-#endif
-
 #ifndef USE_PCH
 #   if wxUSE_IOSTREAMH 
 #      include <iostream.h> 
@@ -49,11 +40,24 @@
 #      include <iostream> 
 #   endif 
 
+#   ifdef M_BASEDIR
+#      include "Mcommon.h"
+#   endif
+
 #   include <wx/dc.h>
 #   include <wx/dcps.h>
 #   include <wx/print.h>
 #   include <wx/log.h>
 #   include <wx/filefn.h>
+#   include <wx/msgdlg.h>
+#endif // USE_PCH
+
+#ifdef M_BASEDIR
+#   include "gui/wxllist.h"
+#   include "gui/wxlparser.h"
+#else
+#   include "wxllist.h"
+#   include "wxlparser.h"
 #endif
 
 #ifdef WXLAYOUT_USE_CARET

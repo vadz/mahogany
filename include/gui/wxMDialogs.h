@@ -14,19 +14,15 @@
 #endif
 
 #ifndef     USE_PCH
-#   include "Mcommon.h"
-#   include "Mdefaults.h"
-#   include "guidef.h"
-#   include "MFrame.h"
 #   include "gui/wxIconManager.h"
 #   include "MApplication.h"
-#endif
 
-#include <wx/icon.h>
-#include <wx/frame.h>
+#   include <wx/bmpbuttn.h>
+#endif // USE_PCH
+
+#include "MDialogs.h"
+
 #include <wx/progdlg.h>
-#include <wx/dialog.h>
-#include <wx/bmpbuttn.h>
 
 // fwd decl
 class Profile;

@@ -25,12 +25,12 @@
 
    #include "wx/layout.h"
    #include "wx/statbox.h"
-   #include "wx/stattext.h"
-#endif
+   #include "wx/stattext.h"             // for wxStaticText
+   #include "wx/checklst.h"
+#endif // USE_PCH
 
 #include "gui/wxSelectionDlg.h"
 
-#include "wx/checklst.h"
 #include "wx/spinctrl.h"
 
 // ----------------------------------------------------------------------------

@@ -17,9 +17,12 @@
 #   pragma interface "SendMessageCC.h"
 #endif
 
-#include "lists.h"
+#ifndef USE_PCH
+#  include "Mcclient.h"
+#endif  //USE_PCH
 
-#include "FolderType.h"
+#include "lists.h"
+#include "SendMessage.h"
 
 class Profile;
 

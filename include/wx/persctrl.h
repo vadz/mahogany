@@ -21,16 +21,19 @@ class wxConfigBase;
 class wxPHelper;
 
 // the headers we really need
-#include <wx/defs.h>
+#ifndef USE_PCH
+#  include <wx/defs.h>
+#  include <wx/checkbox.h>
+#  include <wx/choice.h>
+#  include <wx/control.h>
+#  include <wx/combobox.h>
+#  include <wx/listbox.h>
+#  include <wx/radiobox.h>
+#endif // USE_PCH
+
 #include <wx/notebook.h>
-#include <wx/checkbox.h>
-#include <wx/choice.h>
-#include <wx/control.h>
-#include <wx/combobox.h>
 #include <wx/splitter.h>
 #include <wx/listctrl.h>
-#include <wx/listbox.h>
-#include <wx/radiobox.h>
 #include <wx/treectrl.h>
 #if wxUSE_LISTBOOK
     #include <wx/listbook.h>

@@ -27,9 +27,13 @@
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
+// FIXME: we shouldn't use the apps functions from modules...
+#  include "MApplication.h"
+#  include "Profile.h"
+#  include "Mdefaults.h"
 
-#  include <wx/string.h>
-#  include <wx/dynarray.h>
+#  include <wx/string.h>                // for wxString
+#  include <wx/dynarray.h>              // for wxSortedArrayString
 #endif //USE_PCH
 
 #include "Address.h"
@@ -41,11 +45,6 @@
 
 #include <pwd.h>
 #include <sys/types.h>
-
-// FIXME: we shouldn't use the apps functions from modules...
-#include "MApplication.h"
-#include "Profile.h"
-#include "Mdefaults.h"
 
 extern const MOption MP_HOSTNAME;
 

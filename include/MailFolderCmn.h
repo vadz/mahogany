@@ -19,14 +19,14 @@
 #   pragma interface "MailFolderCmn.h"
 #endif
 
-#include "MailFolder.h" // the base class
+#include "MailFolder.h"         // for MailFolder
 
 #ifndef USE_PCH
-#  include "MEvent.h"     // for MEventOptionsChangeData
-
 #  include "Sorting.h"
 #  include "Threading.h"
 #endif // USE_PCH
+
+#include "MEvent.h"     // for MEventOptionsChangeData
 
 // define this for some additional checks of folder closing logic
 #undef DEBUG_FOLDER_CLOSE

@@ -8,17 +8,19 @@
  *******************************************************************/
 
 #include "Mpch.h"
-#include "Mcommon.h"
 
 #ifndef   USE_PCH
+#   include "Mcommon.h"
 #   include "MApplication.h"
-#endif
-
-#include "gui/wxIconManager.h"
+#   include "gui/wxIconManager.h"
+#   include "Mdefaults.h"
+#endif // USE_PCH
 
 #include "MFStatus.h"
 
 #include "miscutil.h"
+
+class MOption;
 
 extern const MOption MP_FOLDERSTATUS_STATBAR;
 extern const MOption MP_FOLDERSTATUS_TITLEBAR;

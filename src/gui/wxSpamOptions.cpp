@@ -28,7 +28,7 @@
 #   include "Mcommon.h"
 #   include "strutil.h"
 #   include "Profile.h"
-#endif
+#endif // USE_PCH
 
 #include <stdlib.h>
 

@@ -28,11 +28,11 @@
    #include "Mcommon.h"
 
    #include "MApplication.h"
+
+   #include <wx/log.h>           // for wxLogNull
 #endif // USE_PCH
 
-#include <wx/log.h>           // for wxLogNull
 #include <wx/filefn.h>        // for wxMkdir
-#include <wx/file.h>
 #include <wx/textfile.h>
 
 #include "CacheFile.h"

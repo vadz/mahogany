@@ -35,17 +35,19 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include "Mconfig.h"
 #   include "Mcommon.h"
-#   include "MDialogs.h"
 #   include "strutil.h"
 #   include "Mdefaults.h"
-#   include "gui/wxMenuDefs.h"
-#   include "MMainFrame.h"
-#   include "HeaderInfo.h"
 
 #   include "wx/stattext.h"
-#endif
+#   include <wx/menu.h>
+#   include <wx/log.h>
+#endif // USE_PCH
+
+#include "MDialogs.h"
+#include "gui/wxMenuDefs.h"
+#include "MMainFrame.h"
+#include "HeaderInfo.h"
 
 // we can't compile an empty library as it was done before as then you get
 // constant error messages when looking for a module telling that it is not a
@@ -82,8 +84,6 @@ extern "C"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxOptionsPage.h"
 #include "gui/wxMDialogs.h"
-
-#include <wx/menu.h>
 
 #include "adb/AdbManager.h"
 #include "adb/ProvPalm.h"
@@ -183,7 +183,6 @@ extern "C"
 #include <time.h>
 #include <utime.h>
 
-#include <wx/log.h>
 #include <wx/textfile.h>
 
 #ifdef OS_SOLARIS

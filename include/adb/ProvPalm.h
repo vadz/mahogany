@@ -13,19 +13,17 @@
 #ifndef   _PROVPALM_H
 #define   _PROVPALM_H
 
-// M
-#include "Mpch.h"
-
 #ifdef USE_PISOCK
 
 #ifndef  USE_PCH
-#  include "Mcommon.h"
 #  include "guidef.h"
 #  include "strutil.h"
 #  include "sysutil.h"
 #  include "MApplication.h"
-#  include <ctype.h>
+#  include "kbList.h"
 #endif //USE_PCH
+
+#include <ctype.h>
 
 #include "adb/AdbManager.h"
 #include "adb/AdbEntry.h"
@@ -34,7 +32,6 @@
 
 #include <pi-address.h>
 #include "MModule.h"
-#include "kbList.h"
 
 // fwd decl
 class PalmEntry;

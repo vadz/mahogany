@@ -23,19 +23,14 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 
-#   include <wx/log.h>
-#   include <wx/dynarray.h>
-
 #   include "MApplication.h"
-#   include "guidef.h"
 
+#   include <wx/log.h>                  // for wxLogMessage
 #   include <wx/layout.h>
-#   include <wx/stattext.h>
 #endif // USE_PCH
 
 #include <wx/textfile.h>
 #include <wx/ffile.h>
-#include "wx/persctrl.h"
 
 #include "gui/wxDialogLayout.h"
 

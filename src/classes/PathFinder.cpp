@@ -20,19 +20,15 @@
 
 #ifndef   USE_PCH
 #  include  "Mcommon.h"
-#  include   <guidef.h>
-#  include   <string.h>
 #  include   "kbList.h"
+#endif // USE_PCH
+
 #ifdef OS_WIN // cygwin and mingw
 #  include  <io.h> // for access()
 #endif
-#endif // USE_PCH
-
-#include <sys/stat.h>
 
 #include "PathFinder.h"
 
-#include <wx/filefn.h>
 #include <wx/file.h>
 
 #if defined(OS_UNIX)

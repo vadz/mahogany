@@ -12,10 +12,9 @@
 #define STRUTIL_H
 
 #ifndef  USE_PCH
-#  include  "Mconfig.h"
 #endif
 
-#include <time.h>
+#include <time.h>               // for time_t
 
 #include "FolderType.h"    // for strutil_expandfoldername
 

@@ -18,6 +18,10 @@
 
 #include "Mpch.h"
 
+#ifndef USE_PCH
+#  include "Mcommon.h"
+#endif // USE_PCH
+
 #include "gui/wxllist.h"
 #include "gui/wxlparser.h"
 

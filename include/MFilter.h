@@ -15,9 +15,9 @@
 
 #ifndef USE_PCH
 #   include "Profile.h"
-#endif
+#endif // USE_PCH
 
-#include "MObject.h"
+#include "MObject.h"            // for MObjectRC
 
 class WXDLLEXPORT wxWindow;
 

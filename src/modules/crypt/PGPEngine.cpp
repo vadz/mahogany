@@ -24,14 +24,17 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
    #include "sysutil.h"
+   #include "Mdefaults.h"
+
+   #include <wx/textdlg.h>
 #endif //USE_PCH
 
 #include "modules/MCrypt.h"
+#include "gui/wxMDialogs.h"
 
 #include <wx/textfile.h>
 #include <wx/process.h>
 #include <wx/txtstrm.h>
-#include <wx/textdlg.h>
 
 // ----------------------------------------------------------------------------
 // options we use here

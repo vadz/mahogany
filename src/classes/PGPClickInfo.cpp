@@ -23,11 +23,14 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "MApplication.h"
+   #include "gui/wxIconManager.h"
 
    #include <wx/menu.h>
 #endif //USE_PCH
 
 #include "MessageView.h"
+#include "gui/wxMDialogs.h"
 
 #include "modules/MCrypt.h"
 

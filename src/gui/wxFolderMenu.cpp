@@ -25,13 +25,12 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 
-#  include "gui/wxMenuDefs.h"
-
 #  include <wx/menu.h>
 #endif // USE_PCH
 
 #include "MEvent.h"
 #include "MFolder.h"
+#include "gui/wxMenuDefs.h"
 
 #include "gui/wxFolderMenu.h"
 

@@ -25,14 +25,15 @@
 #include  "Mpch.h"
 
 #ifndef USE_PCH
-   #include "MEvent.h"
+   #include "Mcommon.h"
 #endif // USE_PCH
 
 #include <wx/textfile.h>
 
+#include "MEvent.h"
 #include "MFolder.h"
-
 #include "MFCache.h"
+#include "MFStatus.h"
 
 // ----------------------------------------------------------------------------
 // constants

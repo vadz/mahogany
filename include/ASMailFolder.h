@@ -18,8 +18,6 @@
 #   pragma interface "ASMailFolder.h"
 #endif
 
-#include "FolderType.h"
-
 
 // forward declarations
 class FolderView;

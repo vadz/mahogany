@@ -24,16 +24,16 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "Mdefaults.h"
 
 #  include <wx/statbox.h>
-#  include <wx/stattext.h>
+#  include <wx/stattext.h>      // for wxStaticText
 #  include <wx/layout.h>
-#endif
+#endif // USE_PCH
 
 #include <wx/tokenzr.h>
 
 #include "MFolder.h"
-
 #include "ListReceiver.h"
 
 #include "gui/wxDialogLayout.h"

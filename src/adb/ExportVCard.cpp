@@ -25,13 +25,15 @@
    #include "Mcommon.h"
 
    #include "guidef.h"
+
+   #include <wx/dirdlg.h>
+   #include <wx/filedlg.h>
 #endif // USE_PCH
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbExport.h"
 
 #include <wx/dir.h>
-#include <wx/dirdlg.h>
 #include <wx/datetime.h>
 #include <wx/vcard.h>
 

@@ -15,6 +15,7 @@
 #define _M_CLICKINFO_H_
 
 class MessageView;
+class wxPoint;
 
 // ----------------------------------------------------------------------------
 // ClickableInfo: anything which the user can click on in the MessageView

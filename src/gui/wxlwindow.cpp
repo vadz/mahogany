@@ -49,6 +49,9 @@
 #include <wx/clipbrd.h>
 #include <wx/textctrl.h>
 #include <wx/dataobj.h>
+#include <wx/menu.h>
+#include <wx/statusbr.h>
+#include <wx/dcmemory.h>
 
 #ifdef WXLAYOUT_USE_CARET
 #   include <wx/caret.h>

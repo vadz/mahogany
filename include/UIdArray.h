@@ -19,7 +19,11 @@
 
     We use wxArrayInt to implement it.
 */
-#include <wx/dynarray.h>
+
+#ifndef USE_PCH
+#  include <wx/dynarray.h>        // for WX_DEFINE_ARRAY_INT
+#endif // USE_PCH
+
 WX_DEFINE_ARRAY_INT(UIdType, UIdArray);
 
 #ifndef MsgnoArray

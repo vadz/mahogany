@@ -17,6 +17,8 @@
 #include "ClickInfo.h"
 
 class MessageView;
+class wxPoint;
+class Profile;
 
 /// options for OpenInBrowser() (these are bit masks)
 enum

@@ -17,14 +17,14 @@
 #   pragma interface "MFolder.h"
 #endif
 
-#include "Mdefaults.h"
+#ifndef  USE_PCH
+#  include "FolderType.h"
+#  include "Profile.h"
+#endif // USE_PCH
 
-#ifndef USE_PCH
-#   include "Profile.h"
-#   include "MailFolder.h"
-#   include "MObject.h"
-#   include "FolderType.h"
-#endif
+#include "MObject.h"         // for MObjectRC
+
+class Profile;
 
 /** A class representing a folder used by M. The folders are organized in a tree
     structure with an artificial "root" folder on the top of it. It is the only

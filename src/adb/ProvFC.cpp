@@ -44,20 +44,16 @@
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
-#  include "guidef.h"
 #  include "strutil.h"
 #  include "sysutil.h"
 #  include "MApplication.h"
-#  include <ctype.h>
 
-#  include <wx/string.h>
-#  include <wx/log.h>
-#  include <wx/dynarray.h>
+#  include <wx/string.h>                // for wxString
+#  include <wx/log.h>                   // for wxLogWarning
 #endif //USE_PCH
 
 // wxWindows
-#include <wx/file.h>
-#include <wx/textfile.h>
+#include <wx/file.h>                    // for wxFile
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
 

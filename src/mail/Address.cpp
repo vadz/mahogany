@@ -28,10 +28,10 @@
    #include "Mcommon.h"
 
    #include "strutil.h"
+   #include "Mdefaults.h"
 #endif // USE_PCH
 
 #include "Address.h"
-#include "Mdefaults.h"
 
 // ----------------------------------------------------------------------------
 // options we use here

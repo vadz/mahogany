@@ -17,7 +17,9 @@
    in the configuration file. E.g. "FolderView" or "ComposeWindow".
 */
 
-#include "MFrame.h"
+#ifndef USE_PCH
+#  include "MFrame.h"
+#endif // USE_PCH
 
 class MainFrameBase : public MFrameBase
 {

@@ -23,11 +23,15 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 
-#   include <wx/textbuf.h>
+#   include <wx/textctrl.h>
 #endif // USE_PCH
 
+#include "gui/wxMenuDefs.h"
 #include "MessageViewer.h"
 #include "ClickURL.h"
+#include "MTextStyle.h"
+
+#include <wx/textbuf.h>
 
 class TextViewerWindow;
 

@@ -20,7 +20,9 @@
 
 #include "MailFolderCmn.h"
 
-#include <wx/dynarray.h>
+#ifndef USE_PCH
+#  include <wx/dynarray.h>
+#endif // USE_PCH
 
 class MailFolderVirt : public MailFolderCmn
 {

@@ -23,12 +23,12 @@
 
 #ifndef  USE_PCH
    #include "Mcommon.h"
-#endif
+   #include "Profile.h"
+   #include "Mdefaults.h"
+   #include "FolderType.h" // for MF_FILE used by MP_LAST_CREATED_FOLDER_TYPE
+#endif // USE_PCH
 
-#include "Mdefaults.h"
 #include "Moptions.h"
-
-#include "FolderType.h" // for MF_FILE used by MP_LAST_CREATED_FOLDER_TYPE
 
 // ----------------------------------------------------------------------------
 // MOptionData

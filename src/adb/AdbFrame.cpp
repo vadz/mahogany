@@ -22,48 +22,39 @@
 #include "Mpch.h"
 
 #ifndef  USE_PCH
-#   include "kbList.h"
-
-#   include "guidef.h"
-#   include "strutil.h"
-
 #   include "Mcommon.h"
-#   include "MFrame.h"
-#   include "gui/wxMFrame.h"
-
+#   include "strutil.h"
 #   include "MApplication.h"
-#   include "gui/wxMApp.h"
 #   include "MHelp.h"
-#   include <ctype.h>
+#   include "Profile.h"
+#   include "Mdefaults.h"
 #endif //USE_PCH
 
-#include "MDialogs.h"
-#include "Mdefaults.h"
+#include "wx/persctrl.h"
 #include "gui/wxMenuDefs.h"
-#include "gui/wxIconManager.h"
+#include "gui/wxMDialogs.h"
 
 #undef   CreateListBox
 
 // wxWindows
 #ifndef USE_PCH
-#   include <wx/frame.h>
-#   include <wx/log.h>
-#   include <wx/confbase.h>
-#   include <wx/dynarray.h>
+#   include <wx/log.h>          // for wxLogError
 #   include <wx/toolbar.h>
 #   include <wx/menu.h>
 #   include <wx/layout.h>
 #   include <wx/statbox.h>
 #   include <wx/choicdlg.h>
-#   include <wx/stattext.h>
+#   include <wx/stattext.h>     // for wxStaticText
+#   include <wx/textctrl.h>
+#   include <wx/button.h>       // for wxButton
+#   include <wx/filedlg.h>
 #endif // USE_PCH
 
-#include <wx/notebook.h>
-#include <wx/treectrl.h>
-#include <wx/file.h>
-#include <wx/imaglist.h>
-
-#include "wx/persctrl.h"
+#include <wx/notebook.h>        // for wxNotebook
+#include <wx/treectrl.h>        // for wxTreeCtrl
+#include <wx/file.h>            // for wxFile
+#include <wx/imaglist.h>        // for wxImageList
+#include <wx/confbase.h>        // for wxConfigBase
 
 #include "adb/AdbManager.h"
 #include "adb/AdbEntry.h"
@@ -76,6 +67,11 @@
 
 // our public interface
 #include "adb/AdbFrame.h"
+
+class MPersMsgBox;
+class MOption;
+class wxPTextEntry;
+class WXDLLEXPORT wxFrame;
 
 // ----------------------------------------------------------------------------
 // options we use here

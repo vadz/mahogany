@@ -20,6 +20,7 @@
 #include "lists.h"
 
 #include "MFolder.h"
+#include "MailFolder.h"
 
 // put this in the trace mask to get messages about connection caching
 #define TRACE_SERVER_CACHE  "servercache"

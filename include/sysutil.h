@@ -12,8 +12,7 @@
 #define SYSUTIL_H
 
 #ifndef  USE_PCH
-#  include  "Mconfig.h"
-#endif
+#endif // USE_PCH
 
 #include <wx/filename.h>
 

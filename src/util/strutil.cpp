@@ -20,9 +20,12 @@
 #ifndef   USE_PCH
 #  include "Mcommon.h"
 #  include "strutil.h"
-#endif
+#  include "Profile.h"
+#  include "Mcclient.h"
+#  include "Mdefaults.h"
+#endif // USE_PCH
 
-#include "MDialogs.h"
+#include "gui/wxMDialogs.h"
 #include "Mpers.h"
 
 #ifdef OS_UNIX
@@ -32,11 +35,12 @@
 #include <wx/textfile.h>  // just for strutil_enforceNativeCRLF()
 #include <wx/regex.h>
 
-#include "Mcclient.h"
 extern "C"
 {
    #include "utf8.h"  // for utf8_text_utf7()
 }
+
+class MOption;
 
 // ----------------------------------------------------------------------------
 // options we use here

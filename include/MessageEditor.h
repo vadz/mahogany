@@ -20,11 +20,12 @@ class WXDLLEXPORT wxWindow;
 
 class EditorContentPart;
 
-#include <wx/fontenc.h>
+#include <wx/fontenc.h>         // for wxFontEncoding
 
 #include "MimePart.h"         // for MimeType
 
 #include "MModule.h"
+#include "Composer.h"
 
 // the message editor module interface name
 #define MESSAGE_EDITOR_INTERFACE "MessageEditor"

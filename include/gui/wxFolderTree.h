@@ -13,13 +13,18 @@
 #ifndef   _WXFOLDERTREE_H
 #define   _WXFOLDERTREE_H
 
+#ifndef USE_PCH
+#  include <wx/window.h>
+#endif // USE_PCH
+
 // fwd declarations
 class wxFolderTreeImpl;
 class MFolder;
 class wxMainFrame;
 
 class WXDLLEXPORT wxMenu;
-class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxPoint;
+class WXDLLEXPORT wxSize;
 
 // abstraction of the folder tree control for M usage
 class wxFolderTree

@@ -26,14 +26,12 @@
 #   include "Profile.h"
 #   include "MApplication.h"
 
-#   include <wx/string.h>
-#   include <wx/log.h>
+#   include <wx/string.h>       // for wxString
+#   include <wx/log.h>          // for wxLogWarning
 #   include <wx/config.h>
 #endif // USE_PCH
 
-#include <wx/textfile.h>
-
-#include "Mdefaults.h"
+#include <wx/textfile.h>        // for wxTextFileType_Unix
 
 #include "MessageTemplate.h"
 

@@ -22,10 +22,9 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+#endif // USE_PCH
 
-   #include <wx/confbase.h>
-#endif
-
+#include <wx/confbase.h>
 #include <wx/fileconf.h>
 
 #include "ConfigSource.h"
@@ -92,7 +91,7 @@ ConfigSourceIMAP::ConfigSourceIMAP(const ConfigSource& config,
                                    const String& name)
                 : ConfigSource(name)
 {
-   m_dirty = false;
+   m_isDirty = false;
    m_folder = MFolder::CreateTemp();
 }
 
@@ -111,8 +110,8 @@ ConfigSourceIMAP::~ConfigSourceIMAP()
 bool
 ConfigSourceIMAP::Flush()
 {
-   if ( m_dirty )
+   if ( m_isDirty )
    {
-      m_dirty = false;
+      m_isDirty = false;
    }
 }

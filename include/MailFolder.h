@@ -17,10 +17,13 @@
 #   pragma interface "MailFolder.h"
 #endif
 
-#include "MObject.h"
-#include "FolderType.h"
+#ifndef USE_PCH
+#  include "FolderType.h"
+#endif // USE_PCH
 
-#include <wx/fontenc.h>
+#include "MObject.h"
+
+#include <wx/fontenc.h>         // for wxFontEncoding
 
 // forward declarations
 class ArrayHeaderInfo;

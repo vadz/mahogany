@@ -24,17 +24,24 @@
 #ifndef  USE_PCH
 #  include "Mcommon.h"
 #  include "gui/wxMApp.h"
-#endif
+#  include "strutil.h"
+#  include "kbList.h"
+#  include "MHelp.h"
+#  include "gui/wxIconManager.h"
+#  include "Mdefaults.h"
+#  include "Profile.h"
 
-#include <wx/msgdlg.h>   // for wxMessageBox
+#  include <wx/msgdlg.h>   // for wxMessageBox
+#  include <wx/menu.h>
+#  include <wx/statusbr.h>
+#endif // USE_PCH
+
 #include "wx/persctrl.h" // for wxPMessageBoxEnable
 #include <wx/ffile.h>
-#include <wx/menu.h>
-#include <wx/statusbr.h>
 #include <wx/fs_mem.h>
 #include <wx/fs_inet.h>
 #include <wx/cmdline.h>
-#include <wx/encconv.h>
+#include <wx/encconv.h>         // for wxEncodingConverter
 
 #ifdef USE_DIALUP
 #  include <wx/dialup.h>
@@ -61,8 +68,9 @@
    #include <wx/sckipc.h>
 #endif // Windows/!Windows
 
-#include "MHelp.h"
+#include "PathFinder.h"
 
+#include "gui/wxMDialogs.h"
 #include "gui/wxMainFrame.h"
 #include "FolderMonitor.h"
 #include "MModule.h"

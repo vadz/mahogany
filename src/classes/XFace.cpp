@@ -11,23 +11,25 @@
 #endif
 
 #include "Mpch.h"
-#include "Mcommon.h"
+
+#ifndef USE_PCH
+#  include "Mcommon.h"
+#  include "strutil.h"
+#  include "Mdefaults.h"
+#  include "MApplication.h"             // for mApplication
+#  include "gui/wxIconManager.h"     // for wxIconManager
+
+#  ifdef XFACE_WITH_WXIMAGE
+#     include "MApplication.h"
+#     include "Profile.h"
+#  endif
+#endif // USE_PCH
 
 #include "XFace.h"
-#include "strutil.h"
-#include "kbList.h"
-#include  <stdio.h>
 
 #ifdef XFACE_WITH_WXIMAGE
-#   include "guidef.h"
-#   include "MDialogs.h"
-#   include "gui/wxIconManager.h"
 #   include "PathFinder.h"
-#   include "MApplication.h"
-#   include "Profile.h"
 #endif
-
-#include "Mdefaults.h"
 
 extern const MOption MP_ICONPATH;
 

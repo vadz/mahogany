@@ -30,18 +30,18 @@
 #  include "Profile.h"
 #  include "MApplication.h"
 #  include "strutil.h"
+#  include "Mdefaults.h"
 
-#  include <wx/confbase.h>    // for wxSplitPath
-#  include <wx/dynarray.h>
+#  include <wx/dynarray.h>      // for WX_DEFINE_ARRAY
 #endif // USE_PCH
-
-#include "Mdefaults.h"
 
 #include "MFolder.h"
 #include "MFilter.h"
 #include "MFCache.h"
+#include "MFStatus.h"
 
 #include <wx/dir.h>
+#include <wx/confbase.h>    // for wxSplitPath
 
 // ----------------------------------------------------------------------------
 // template classes

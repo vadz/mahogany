@@ -25,14 +25,13 @@
    #include "Mcommon.h"
 
    #include <wx/log.h>
-
-   #include "Message.h"
 #endif // USE_PCH
 
-#include "MDialogs.h"
+#include "gui/wxMDialogs.h"
 
 #include "Address.h"
 #include "Collect.h"
+#include "Message.h"
 
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"

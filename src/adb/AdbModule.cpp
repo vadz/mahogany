@@ -31,7 +31,7 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include <wx/log.h>
+   #include <wx/log.h>          // for wxLogDebug
 #endif // USE_PCH
 
 #include "adb/AdbModule.h"

@@ -15,16 +15,16 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "MHelp.h"
+#  include "strutil.h"
+#  include "Mdefaults.h"
 
-#  include <wx/stattext.h>
+#  include <wx/stattext.h>      // for wxStaticText
 #  include <wx/statbox.h>
+#  include <wx/checklst.h>
+#  include <wx/layout.h>
 #endif // USE_PCH
 
-#include <wx/checklst.h>
-#include <wx/layout.h>
-
 #include "Mpers.h"
-
 #include "MModule.h"
 
 #include "gui/wxDialogLayout.h"

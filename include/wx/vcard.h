@@ -20,8 +20,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/string.h"
-#include "wx/dynarray.h"
+#ifndef USE_PCH
+#  include "wx/string.h"
+#  include "wx/dynarray.h"
+#endif // USE_PCH
 
 // we can be compiled inside wxWin or not
 #ifdef WXMAKINGDLL

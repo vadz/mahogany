@@ -10,8 +10,6 @@
 #ifndef MGUIAPP_H
 #define MGUIAPP_H
 
-#include   "Mcommon.h"
-
 /**
    GUI Application class, defining the interface to the real GUI
    application class

@@ -23,13 +23,15 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "strutil.h"
-#endif
+#   include "Mdefaults.h"
+
+#   include <wx/stattext.h>        // for wxStaticText
+#endif // USE_PCH
 
 #include "Mpers.h"
 
 #include "MailFolderCC.h"
 
-#include <wx/stattext.h>
 #include <wx/wizard.h>
 
 #include "gui/wxBrowseButton.h"

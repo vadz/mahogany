@@ -35,6 +35,7 @@
 #include "MFolder.h"
 
 #include "MsgCmdProc.h"
+#include "gui/wxMenuDefs.h"
 
 #include "UIdArray.h"
 

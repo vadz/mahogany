@@ -27,8 +27,10 @@
 #ifndef  USE_PCH
 #  include "Mcommon.h"
 #  include "strutil.h"
+#  include "Mdefaults.h"
 #endif // USE_PCH
 
+#include "Mversion.h"
 #include "MailFolderCC.h"
 
 #include "LogCircle.h"
@@ -46,12 +48,15 @@
 #include "SendMessageCC.h"
 
 #include "XFace.h"
-#include "MDialogs.h"
+#include "gui/wxMDialogs.h"
 
 #include <wx/file.h>
 #include <wx/datetime.h>
 
 extern bool InitSSL(); // from src/util/ssl.cpp
+
+class MOption;
+class MPersMsgBox;
 
 // ----------------------------------------------------------------------------
 // options we use here

@@ -22,18 +22,17 @@
 #ifndef  USE_PCH
 #   include "Mcommon.h"
 #   include "kbList.h"
+#   include "Profile.h"
+#   include "MApplication.h"
 
-#   include <stdarg.h>
-
-#   include <wx/dynarray.h>
-#   include <wx/utils.h>
+#   include <wx/dynarray.h>     // for WX_DEFINE_ARRAY
 #endif // USE_PCH
 
+#include <stdarg.h>             // for va_start
+
 #include "MEvent.h"
-#include "Profile.h"
 #include "MailFolder.h"
 #include "HeaderInfo.h"
-#include "MApplication.h"
 
 // ----------------------------------------------------------------------------
 // private types

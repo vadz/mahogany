@@ -18,9 +18,9 @@
 // headers
 // ----------------------------------------------------------------------------
 #include "Mpch.h"
-#ifndef M_PCH
+#ifndef USE_PCH
 #   include "Mcommon.h"
-#endif
+#endif // USE_PCH
 
 #include "adb/AdbDataProvider.h"
 

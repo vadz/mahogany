@@ -19,15 +19,19 @@
 // ----------------------------------------------------------------------------
 #include "Mpch.h"
 
+#ifndef USE_PCH
+#  ifdef DEBUG
+#     include <wx/log.h>
+#     include <wx/dynarray.h>        // for WX_DEFINE_ARRAY
+#  endif
+#endif // USE_PCH
+
 // note: this source file is intentionally empty in release mode, all the code
 // here is only for the debugging support, otherwise the functions are inline in
 // the header.
 #include "MObject.h"
 
 #ifdef DEBUG
-
-#include <wx/log.h>
-#include <wx/dynarray.h>
 
 // ----------------------------------------------------------------------------
 // this module global variables

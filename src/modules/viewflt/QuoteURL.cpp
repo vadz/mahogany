@@ -32,11 +32,14 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+#   include "strutil.h"
+#   include "Mdefaults.h"
 #endif //USE_PCH
 
 #include "ViewFilter.h"
 
 #include "MessageViewer.h"
+#include "MTextStyle.h"
 
 #include "miscutil.h"         // for GetColourByName()
 

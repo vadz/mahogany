@@ -23,8 +23,7 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include <wx/log.h>
-   #include <wx/dynarray.h>
+   #include <wx/log.h>                  // for wxLogNull
 #endif // USE_PCH
 
 #include <wx/vcard.h>

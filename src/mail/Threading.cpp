@@ -28,11 +28,10 @@
    #include "Mcommon.h"
 
    #include "Threading.h"
+   #include "Mdefaults.h"
 
    #include "Mcclient.h"      // need THREADNODE
 #endif // USE_PCH
-
-#include "Mdefaults.h"
 
 // ----------------------------------------------------------------------------
 // options we use

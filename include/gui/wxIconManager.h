@@ -14,9 +14,9 @@
 #endif
 
 #ifndef USE_PCH
-#  include <wx/icon.h>
-#  include <Mcommon.h>
 #  include "kbList.h"
+
+#  include <wx/icon.h>
 #endif  //USE_PCH
 
 #include <wx/image.h>

@@ -27,14 +27,9 @@
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
-#  include "guidef.h"
 
-#  include <wx/string.h>
-#  include <wx/log.h>
-#  include <wx/dynarray.h>
+#  include <wx/string.h>                // for wxString
 #endif //USE_PCH
-
-#include "MDialogs.h"
 
 #include "adb/AdbManager.h"
 #include "adb/AdbEntry.h"

@@ -26,9 +26,10 @@
 
 #ifndef  USE_PCH
 #   include "Mcommon.h"
-#ifdef OS_WIN // cygwin and mingw
-#   include <wx/timer.h>
-#endif
+#   include "MApplication.h"
+#   include "strutil.h"
+#   include "Mdefaults.h"
+#   include <wx/timer.h>                // for wxTimer
 #endif // USE_PCH
 
 #include "UIdArray.h"
@@ -47,7 +48,9 @@
 #include "modules/Filters.h"
 
 #include "MFCache.h"
+#include "MFStatus.h"
 #include "Sequence.h"
+#include "gui/wxMDialogs.h"
 
 #include "MFPrivate.h"
 #include "mail/Driver.h"
@@ -57,6 +60,8 @@
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking and
 // wxFile::Exists() too
 #include <wx/file.h>
+
+class MPersMsgBox;
 
 // windows.h included from fontutil.h defines ERROR
 #if defined(__CYGWIN__) || defined(__MINGW32__)

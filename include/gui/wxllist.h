@@ -14,9 +14,10 @@
 #   pragma interface "wxllist.h"
 #endif
 
-#include   "kbList.h"
+#ifndef USE_PCH
+#  include   "kbList.h"
+#endif // USE_PCH
 
-#include   <wx/wx.h>
 #include   <wx/print.h>
 #include   <wx/printdlg.h>
 #include   <wx/generic/printps.h>

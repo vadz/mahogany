@@ -18,7 +18,6 @@
 #endif
 
 #ifndef  USE_PCH
-   #include "Message.h"
 #endif // USE_PCH
 
 class Profile;

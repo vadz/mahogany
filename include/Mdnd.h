@@ -17,9 +17,12 @@
    #pragma interface "Mdnd.h"
 #endif
 
+#include "MailFolder.h"
+
 #include <wx/dnd.h>
 
 class MsgCmdProc;
+class MailFolder;
 
 /// the clipboard/dnd format for Mahogany messages
 #define MMESSAGE_FORMAT "MMessage"

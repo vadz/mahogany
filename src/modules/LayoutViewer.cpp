@@ -25,10 +25,14 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+#   include "Mdefaults.h"
 #endif // USE_PCH
 
 #include "MessageViewer.h"
+#include "gui/wxMenuDefs.h"
 #include "ClickURL.h"
+#include "MTextStyle.h"
+#include "gui/wxMDialogs.h"
 
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"

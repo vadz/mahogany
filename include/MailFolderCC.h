@@ -18,19 +18,16 @@
 #endif
 
 #ifndef   USE_PCH
-#  include "kbList.h"
-
 #  include "Mcclient.h"
-#endif
+#endif // USE_PCH
 
 #include "MThread.h"
 
 #include "MFolder.h"
 
 #include "MailFolderCmn.h"
-#include "FolderView.h"
 
-#include <wx/fontenc.h>    // enum wxFontEncoding can't be fwd declared
+#include <wx/fontenc.h>    // for wxFontEncoding
 
 // fwd decls
 class ASMailFolder;

@@ -14,22 +14,9 @@
 #endif
 
 #ifndef   USE_PCH
-#   include "Mcommon.h"
 #   include "Merror.h"
-#   include "Mdefaults.h"
-
-#   include "kbList.h"
-#   include "PathFinder.h"
-#   include "Profile.h"
-
-#   include "guidef.h"
-#   include "MFrame.h"
 #   include "gui/wxMFrame.h"
-#   include "MLogFrame.h"
-#   include "FolderType.h"
-
-#   include <wx/cmndata.h>  // wxPageSetupDialogData
-#endif
+#endif // USE_PCH
 
 #include "MEvent.h"
 
@@ -44,6 +31,7 @@ class WXDLLEXPORT wxDynamicLibrary;
 class WXDLLEXPORT wxMimeTypesManager;
 class WXDLLEXPORT wxPageSetupDialogData;
 class WXDLLEXPORT wxPrintData;
+class WXDLLEXPORT wxConfigBase;
 
 M_LIST_PTR(ListLibraries, wxDynamicLibrary);
 

@@ -27,6 +27,8 @@
 #include  "Mpch.h"
 
 #ifndef  USE_PCH
+   #include "Mcommon.h"
+   #include "Mdefaults.h"
    #include "Mcclient.h"      // need THREADNODE
 #endif // USE_PCH
 
@@ -35,7 +37,7 @@
 #include "Sequence.h"
 #include "UIdArray.h"
 
-#include "MDialogs.h"         // for MProgressInfo
+#include "gui/wxMDialogs.h"         // for MProgressInfo
 
 // ----------------------------------------------------------------------------
 // options we use

@@ -28,8 +28,6 @@
 #  include "strutil.h"
 #endif //USE_PCH
 
-#include <ctype.h>
-
 #include <wx/file.h>
 
 #include "adb/AdbEntry.h"

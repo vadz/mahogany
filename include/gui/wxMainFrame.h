@@ -16,9 +16,12 @@
 #   pragma interface "wxMainFrame.h"
 #endif
 
+#ifndef USE_PCH
+#  include "gui/wxMFrame.h"
+#endif // USE_PCH
+
 #include "MMainFrame.h"
 #include "gui/wxMenuDefs.h"
-#include "gui/wxMFrame.h"
 
 #include "MEvent.h"
 

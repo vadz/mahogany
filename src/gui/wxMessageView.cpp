@@ -26,6 +26,8 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "Mdefaults.h"
+#  include "Profile.h"
 
 #  include <wx/stattext.h>
 #  include <wx/app.h>
@@ -35,6 +37,7 @@
 #include "MessageViewer.h"
 #include "MsgCmdProc.h"
 #include "FolderView.h"
+#include "gui/wxMenuDefs.h"
 
 #include "UIdArray.h"
 

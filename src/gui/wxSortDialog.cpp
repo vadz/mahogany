@@ -20,11 +20,11 @@
    #include "Mcommon.h"
 
    #include "Sorting.h"
-
+   #include "Mdefaults.h"
    #include "MHelp.h"
 
    #include <wx/layout.h>
-   #include <wx/stattext.h>
+   #include <wx/stattext.h>     // for wxStaticText
    #include <wx/statbox.h>
 #ifdef OS_WIN // cygwin and mingw
    #include <wx/settings.h>

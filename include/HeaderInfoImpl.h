@@ -21,11 +21,11 @@
 #ifndef  USE_PCH
    #include "Sorting.h"
    #include "Threading.h"
+
+   #include <wx/dynarray.h>        // for WX_DEFINE_ARRAY
 #endif // USE_PCH
 
 #include "HeaderInfo.h"
-
-#include <wx/dynarray.h>
 
 WX_DEFINE_ARRAY(HeaderInfo *, ArrayHeaderInfo);
 

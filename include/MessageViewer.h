@@ -17,11 +17,12 @@
 class WXDLLEXPORT wxBitmap;
 class WXDLLEXPORT wxTextAttr;
 class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxImage;
 
 class ClickableInfo;
+class MTextStyle;
 
 #include "MModule.h"
-#include "MTextStyle.h"
 #include "MessageView.h"      // we use MessageView in inline funcs below
 
 // the message viewer module interface name

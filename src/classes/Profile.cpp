@@ -30,16 +30,16 @@
    #include "Profile.h"
    #include "strutil.h"
    #include "MApplication.h"
+   #include "Mdefaults.h"
+#endif // USE_PCH
 
-   #include <wx/confbase.h>
-#endif
+#include <wx/confbase.h>                // for wxExpandEnvVars
 
-#include "Mdefaults.h"
 #include "lists.h"
 
 #include "ConfigSource.h"
 
-#include <ctype.h>
+class wxConfigBase;
 
 #ifdef DEBUG
    #define   PCHECK() MOcheck()

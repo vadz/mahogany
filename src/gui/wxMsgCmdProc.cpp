@@ -24,16 +24,21 @@
 #include  "Mpch.h"
 
 #ifndef USE_PCH
+   #include "Mcommon.h"
+   #include "strutil.h"          // for strutil_uniq_array()
+   #include "Mdefaults.h"
+
    #include <wx/layout.h>
    #include <wx/statbox.h>
+   #include <wx/dynarray.h>
 #endif // USE_PCH
 
-#include <wx/imaglist.h>
+#include <wx/imaglist.h>        // for wxImageList
 
-#include "strutil.h"          // for strutil_uniq_array()
 #include "Collect.h"          // for InteractivelyCollectAddresses()
 
 #include "UIdArray.h"
+#include "gui/wxMenuDefs.h"
 
 #include "HeaderInfo.h"
 
@@ -41,6 +46,8 @@
 #include "MessageView.h"
 #include "ClickAtt.h"
 #include "Composer.h"
+#include "SendMessage.h"
+#include "MFolder.h"
 
 #include "MsgCmdProc.h"
 
@@ -54,7 +61,6 @@
 
 class AsyncStatusHandler;
 
-#include <wx/dynarray.h>
 WX_DEFINE_ARRAY(AsyncStatusHandler *, ArrayAsyncStatus);
 
 // the trace mask for dnd messages

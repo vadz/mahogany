@@ -22,9 +22,7 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-
-   #include <wx/intl.h>
-#endif
+#endif // USE_PCH
 
 #include "Mpers.h"
 

@@ -22,17 +22,21 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-
-   #include <wx/textfile.h>
+   #include "Mdefaults.h"
+   #include "MApplication.h"
 #endif // USE_PCH
 
 #include <wx/dir.h>
 #include <wx/tokenzr.h>
+#include <wx/confbase.h>
+#include <wx/textfile.h>
 
 #include "adb/AdbImport.h"
 #include "adb/AdbImpExp.h"
 #include "MImport.h"
 #include "MFilter.h"
+#include "Message.h"
+#include "MFolder.h"
 
 // ----------------------------------------------------------------------------
 // options we use here

@@ -26,10 +26,9 @@
    #include <wx/layout.h>
 
    #include <wx/statbox.h>
-#endif
+#endif // USE_PCH
 
 #include "gui/wxDialogLayout.h"
-
 #include "AttachDialog.h"
 
 // ----------------------------------------------------------------------------

@@ -27,21 +27,18 @@
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
-#  include "guidef.h"
 #  include "Profile.h"
 #  include "MApplication.h"
 #  include "strutil.h"
 #  include "sysutil.h"
+#  include "kbList.h"                   // for KBLIST_DEFINE
+#  include "Mdefaults.h"
 
-#  include <wx/string.h>
-#  include <wx/log.h>
-#  include <wx/dynarray.h>
-#  include <wx/filefn.h>
-#  include <wx/app.h>
+#  include <wx/string.h>                // for wxString
+#  include <wx/log.h>                   // for wxLogWarning
 #endif //USE_PCH
 
-#include "Mdefaults.h"
-#include "MDialogs.h"
+#include "gui/wxMDialogs.h"
 
 #include "adb/AdbManager.h"
 #include "adb/AdbEntry.h"
@@ -49,17 +46,15 @@
 #include "adb/AdbDataProvider.h"
 
 // wxWindows
-#include <wx/utils.h>
-#include <wx/minifram.h>
 #include <wx/file.h>
 
-#include "kbList.h"
-
 #if wxUSE_IOSTREAMH
-#  include <fstream.h>
+#  include <fstream.h>                  // for ifstream
 #else
-#  include <fstream>
+#  include <fstream>                    // for ifstream
 #endif
+
+class MOption;
 
 // ----------------------------------------------------------------------------
 // options we use here

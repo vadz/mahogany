@@ -25,8 +25,10 @@
 #  include "strutil.h"
 #  include "sysutil.h"
 #  include "MApplication.h"
-#  include <ctype.h>
+#  include "kbList.h"
 #endif //USE_PCH
+
+#include <ctype.h>
 
 #include "adb/AdbManager.h"
 #include "adb/AdbEntry.h"
@@ -35,7 +37,6 @@
 
 #include <pi-address.h>
 #include "MModule.h"
-#include "kbList.h"
 #include "adb/ProvPalm.h"   // class declarations
 
 // ----------------------------------------------------------------------------

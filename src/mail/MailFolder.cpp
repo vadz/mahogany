@@ -28,15 +28,16 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+#   include "MApplication.h"
 #   include "strutil.h"
-#endif
+#   include "Mdefaults.h"
+#endif // USE_PCH
 
 #include <wx/file.h>
 
-#include "MDialogs.h" // for MDialog_FolderChoose
+#include "gui/wxMDialogs.h"
 
 #include "Sequence.h"
-
 #include "LogCircle.h"
 
 #include "MFPrivate.h"
@@ -45,7 +46,6 @@
 #include "mail/ServerInfo.h"
 
 #include "Composer.h"
-#include "MApplication.h"
 
 class MPersMsgBox;
 

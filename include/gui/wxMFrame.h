@@ -22,6 +22,8 @@
 #   include  "guidef.h"
 #endif
 
+#include <wx/frame.h>
+
 // enable workaround broken maximize?
 #if defined(__WXMSW__) && !wxCHECK_VERSION(2, 3, 0)
    #define USE_WORKAROUND_FOR_MAXIMIZE

@@ -20,7 +20,9 @@
 
 #ifdef EXPERIMENTAL
 
-#include "Mdefaults.h"
+#ifndef  USE_PCH
+#  include "Mdefaults.h"
+#endif // USE_PCH
 
 #include <wx/process.h>
 #include <wx/textfile.h>

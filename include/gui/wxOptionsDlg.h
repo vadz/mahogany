@@ -19,6 +19,7 @@
 
 class wxFrame;
 struct wxOptionsPageDesc;
+class Profile;
 
 // -----------------------------------------------------------------------------
 // constants

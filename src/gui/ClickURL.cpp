@@ -23,8 +23,7 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-   #include "MDialogs.h"
-   #include "gui/wxOptionsDlg.h"
+   #include "Mdefaults.h"
 
    #include <wx/menu.h>
    #ifdef OS_WIN // cygwin and mingw
@@ -32,19 +31,23 @@
    #endif
 #endif //USE_PCH
 
+#include "gui/wxMDialogs.h"
+#include "gui/wxOptionsDlg.h"
+
 #include "ClickURL.h"
 #include "MessageView.h"
+#include "gui/wxMenuDefs.h"
 
 #include "Composer.h"
 #include "Collect.h"
-
-#include "Mpers.h"
 
 #include <wx/clipbrd.h>
 
 #ifdef OS_UNIX
    #include <sys/stat.h>
 #endif
+
+class MPersMsgBox;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here

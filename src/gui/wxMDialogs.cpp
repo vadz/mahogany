@@ -26,12 +26,13 @@
 #  include "guidef.h"
 #  include "strutil.h"
 #  include "MFrame.h"
-#  include "MDialogs.h"
 #  include "Profile.h"
 #  include "MApplication.h"
-#  include "MailFolder.h"
 #  include "Profile.h"
-#  include "MModule.h"
+#  include "gui/wxMApp.h"
+#  include "gui/wxMIds.h"
+#  include "gui/wxIconManager.h"
+#  include "sysutil.h"    // for sysutil_compare_filenames
 #  include "MHelp.h"
 
 #  include <wx/layout.h>
@@ -39,7 +40,6 @@
 #  include <wx/window.h>
 #  include <wx/menu.h>
 #  include <wx/radiobox.h>
-#  include <wx/confbase.h>
 #  include <wx/checklst.h>
 #  include <wx/gauge.h>
 #  include <wx/stattext.h>
@@ -47,32 +47,30 @@
 #  include <wx/statbox.h>
 #  include <wx/choice.h>
 #  include <wx/textdlg.h>
-#  include <wx/treectrl.h>
 #  include <wx/utils.h>
 #  include <wx/msgdlg.h>
 #  include <wx/choicdlg.h>
+#  include <wx/filedlg.h>
+#  include <wx/help.h>
 #endif // USE_PCH
 
 #include "Mpers.h"
+#include "MDialogs.h"
+#include "MailFolder.h"
+#include "MModule.h"
 
 #include "XFace.h"
-
-#include "MHelp.h"
-
-#include "gui/wxMApp.h"
-#include "gui/wxMIds.h"
 
 #include "MFolder.h"
 #include "MSearch.h"
 
-#include "gui/wxIconManager.h"
-
 #include "wx/persctrl.h"
-#include <wx/help.h>
 #include <wx/tipdlg.h>
 #include <wx/statline.h>
 #include <wx/minifram.h>
 #include <wx/fs_mem.h> // memory filesystem for startup screen
+#include <wx/confbase.h>
+#include <wx/treectrl.h>
 
 #include "MFolderDialogs.h"
 #include "FolderView.h"
@@ -85,8 +83,6 @@
 #include "gui/wxDialogLayout.h"
 #include "gui/wxSelectionDlg.h"
 #include "gui/wxIdentityCombo.h"
-
-#include "sysutil.h"    // for sysutil_compare_filenames
 
 #include <errno.h>
 

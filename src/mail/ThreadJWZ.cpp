@@ -43,7 +43,7 @@
 
 #if wxUSE_REGEX
   #if defined(JWZ_USE_REGEX)
-    #include <wx/regex.h>
+    #include <wx/regex.h>       // for wxRegEx
   #endif
 #else
   #undef JWZ_USE_REGEX

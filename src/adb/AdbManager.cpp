@@ -25,9 +25,9 @@
 #  include "Profile.h"
 #  include "MApplication.h"
 
-#  include <wx/log.h>
+#  include <wx/log.h>           // for wxLogStatus
 #  include <wx/config.h>
-#  include <wx/dynarray.h>
+#  include <wx/dynarray.h>      // for wxArrayString
 #endif // USE_PCH
 
 #include "adb/AdbEntry.h"

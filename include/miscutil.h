@@ -12,9 +12,6 @@
 #define MISCUTIL_H
 
 #ifndef  USE_PCH
-#   include "Mconfig.h"
-#   include "FolderType.h"
-#   include "Profile.h"
 #endif
 
 class WXDLLEXPORT wxArrayString;

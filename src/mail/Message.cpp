@@ -27,8 +27,9 @@
 
 #ifndef  USE_PCH
    #include "Mcommon.h"
-   #include "Message.h"
 #endif // USE_PCH
+
+#include "Message.h"
 
 // should be always defined now
 #define USE_ADDRESS_CLASS

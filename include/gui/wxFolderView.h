@@ -17,8 +17,11 @@
    #pragma interface "wxFolderView.h"
 #endif
 
-#include "Mdefaults.h"
-#include "wxMFrame.h"
+#ifndef USE_PCH
+#  include "Mdefaults.h"
+#  include "gui/wxMFrame.h"
+#endif // USE_PCH
+
 #include "FolderView.h"
 #include "MEvent.h"
 #include "Mpers.h"

@@ -29,6 +29,4 @@
 #define   MDIALOG_YESNOTITLE     _("Please choose")
 //@}
 
-#include   "gui/wxMDialogs.h"
-
 #endif

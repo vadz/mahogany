@@ -26,22 +26,23 @@
 #include "Mpch.h"
 
 #ifndef   USE_PCH
-   #include "Mcommon.h"
-   #include "lists.h"
+#  include "Mcommon.h"
+#  include "Mdefaults.h"
+
+#  ifdef USE_DIALUP
+#     include "MApplication.h"  // for IsOnline()
+#  endif // USE_DIALUP
 #endif   // USE_PCH
 
+#include "MThread.h"
+#include "lists.h"
 #include "MFolder.h"
 
 #include "FolderMonitor.h"
 
-#include "MThread.h"
+#include "gui/wxMDialogs.h"      // MDialog_YesNoDialog
 
-#ifdef USE_DIALUP
-   #include "MApplication.h"  // for IsOnline()
-#endif // USE_DIALUP
-
-#include "MDialogs.h"      // MDialog_YesNoDialog
-#include "Mpers.h"
+class MOption;
 
 // ----------------------------------------------------------------------------
 // options we use

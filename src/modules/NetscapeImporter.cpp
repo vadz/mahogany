@@ -31,14 +31,20 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "Mdefaults.h"
+   #include "MApplication.h"
 
-   #include <wx/textfile.h>
+   #include <wx/hash.h>
 #endif // USE_PCH
 
 #include <wx/dir.h>
 #include <wx/tokenzr.h>
+#include <wx/confbase.h>
+#include <wx/textfile.h>
 
 #include "MImport.h"
+#include "MFolder.h"
+#include "MEvent.h"
 
 // ----------------------------------------------------------------------------
 // options we use here

@@ -10,14 +10,11 @@
 #ifndef GUIDEF_H
 #define GUIDEF_H
 
-#include <wx/defs.h>
-#include <wx/frame.h>
-#include <wx/button.h>
-#include <wx/filefn.h>
-#include <wx/filedlg.h>
-#include <wx/textctrl.h> // wxBrowsebutton
+#ifndef USE_PCH
+#  include <wx/frame.h>
+#endif // USE_PCH
 
-#include "gui/wxMenuDefs.h"
+class WXDLLEXPORT wxClassInfo;
 
 /// how much space to leave in frame around other items
 #define   WXFRAME_WIDTH_DELTA   16

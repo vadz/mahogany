@@ -17,9 +17,9 @@
 #ifndef USE_PCH
 #       include <wx/control.h>
 #       include <wx/dynarray.h>
-#endif
+#endif // USE_PCH
 
-#include "gui/wxDialogLayout.h"
+#include "gui/wxDialogLayout.h"         // for wxNotebookPageBase
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
 WX_DEFINE_ARRAY_INT(bool, ArrayBool);

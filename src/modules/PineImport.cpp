@@ -24,13 +24,18 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "Mdefaults.h"
+   #include "MApplication.h"
 #endif // USE_PCH
 
 #include <wx/textfile.h>
 #include <wx/dir.h>
+#include <wx/confbase.h>
 
 #include "adb/AdbImport.h"
 #include "adb/AdbImpExp.h"
+#include "MFolder.h"
+#include "MEvent.h"
 #include "MImport.h"
 
 // ----------------------------------------------------------------------------

@@ -12,11 +12,7 @@
 #   pragma interface "wxlwindow.h"
 #endif
 
-#ifndef USE_PCH
-#  include   <wx/wx.h>
-#endif
-
-#include "wxllist.h"
+#include "gui/wxllist.h"
 
 #ifndef WXLOWIN_MENU_FIRST
 #   define WXLOWIN_MENU_FIRST 12000

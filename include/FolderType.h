@@ -13,11 +13,7 @@
 #ifndef  _FOLDERTYPE_H
 #define  _FOLDERTYPE_H
 
-#include "Mcommon.h"
-
 #include <wx/setup.h>   // for wxSIZE_T_IS_ULONG/UINT
-
-#include <limits.h>
 
 // ----------------------------------------------------------------------------
 // Type of a mail folder

@@ -28,8 +28,6 @@
 #  include "Mcommon.h"
 #  include "strutil.h"
 #  include "MFrame.h"
-#  include "MLogFrame.h"
-#  include "PathFinder.h"
 #  include "Profile.h"
 #  include "Mdefaults.h"
 #  include "MApplication.h"
@@ -38,16 +36,15 @@
 
 #  include "Sorting.h"
 #  include "Threading.h"
+#  include "gui/wxMIds.h"
+#  include "MHelp.h"
 
 #  include <wx/dynarray.h>
-#  include <wx/colour.h>
 #  include <wx/menu.h>
 
 #  include <wx/stattext.h>
 
 #  include <wx/sizer.h>
-#else
-#  include <wx/imaglist.h>
 #endif // USE_PCH
 
 #include <ctype.h>
@@ -57,12 +54,17 @@
 #include <wx/listctrl.h>
 #include <wx/menuitem.h>
 #include <wx/fontutil.h>
+#include <wx/colour.h>
+#include <wx/imaglist.h>
 
 #include "wx/persctrl.h"
 
 #include "MThread.h"
 #include "MFolder.h"
 #include "MFCache.h"
+
+#include "MLogFrame.h"
+#include "PathFinder.h"
 
 #include "FolderMonitor.h" // for case WXK_F5
 
@@ -79,6 +81,9 @@
 #include "Sequence.h"
 #include "UIdArray.h"
 
+#include "MFStatus.h"
+#include "gui/wxMDialogs.h"
+#include "gui/wxMenuDefs.h"
 #include "gui/wxFolderView.h"
 #include "gui/wxFolderMenu.h"
 #include "gui/wxFiltersDialog.h" // for ConfigureFiltersForFolder()
@@ -88,9 +93,7 @@
    #include "Mdnd.h"
 #endif // wxUSE_DRAG_AND_DROP
 
-#include "gui/wxMIds.h"
 #include "MDialogs.h"
-#include "MHelp.h"
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
 
 // use XPMs under MSW as well as it's the simplest way to have transparent

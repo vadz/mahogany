@@ -24,6 +24,7 @@
    #include "Mcommon.h"
 #endif //USE_PCH
 
+#include "MTextStyle.h"
 #include "MessageViewer.h"
 
 #include "ViewFilter.h"

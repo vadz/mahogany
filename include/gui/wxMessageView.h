@@ -18,19 +18,19 @@
 #   pragma interface "wxMessageView.h"
 #endif
 
-class FolderView;
-class MsgCmdProc;
-
-#include "FolderType.h"
-#include "MessageView.h"
-
 #ifndef USE_PCH
 #  include "gui/wxMFrame.h"
+#  include "FolderType.h"
 
 #  include <wx/dynarray.h>
-#endif
+#endif // USE_PCH
 
 #include <wx/process.h>
+
+#include "MessageView.h"
+
+class FolderView;
+class MsgCmdProc;
 
 // ----------------------------------------------------------------------------
 // wxMessageView

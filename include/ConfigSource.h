@@ -38,7 +38,7 @@
    #pragma interface "ConfigSource.h"
 #endif
 
-#include "MObject.h"
+#include "MObject.h"            // for MObjectRC
 
 #include "MModule.h"
 

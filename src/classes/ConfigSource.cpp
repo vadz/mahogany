@@ -26,19 +26,19 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "Mdefaults.h"
 
-   #ifdef  OS_WIN
-      #include <wx/msw/regconf.h>
-   #else
-      #include <wx/confbase.h>
-   #endif
+   #include <wx/utils.h>        // for wxGetHomeDir
+#endif // USE_PCH
 
-   #include <wx/config.h>
-   #include <wx/dir.h>
-   #include <wx/utils.h>
+#ifdef  OS_WIN
+   #include <wx/msw/regconf.h>
+#else
+   #include <wx/confbase.h>          // for wxConfigBase
 #endif
 
-#include <wx/fileconf.h>
+#include <wx/dir.h>
+#include <wx/fileconf.h>                // for wxFileConfig
 
 #ifdef OS_UNIX
    #include <sys/types.h>
@@ -51,7 +51,7 @@
 
 #include "ConfigSource.h"
 
-#include "Mdefaults.h"
+class MOption;
 
 // ----------------------------------------------------------------------------
 // constants

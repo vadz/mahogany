@@ -25,7 +25,10 @@
    #include "gui/wxMFrame.h"
 
    #include <wx/sizer.h>
-#endif
+   #include <wx/button.h>
+   #include <wx/filedlg.h>
+   #include <wx/textctrl.h>
+#endif // USE_PCH
 
 #include <wx/ffile.h>
 #include <wx/regex.h>

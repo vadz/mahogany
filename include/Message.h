@@ -21,7 +21,9 @@
 
 #include "MimePart.h"
 
-#include "FolderType.h"    // for Protocol enum
+#ifndef USE_PCH
+#  include "FolderType.h"    // for Protocol enum
+#endif // USE_PCH
 
 class WXDLLEXPORT wxArrayString;
 

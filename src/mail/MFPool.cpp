@@ -26,9 +26,9 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-
-   #include "lists.h"
 #endif // USE_PCH
+
+#include "lists.h"
 
 #include "mail/Driver.h"
 #include "mail/FolderPool.h"

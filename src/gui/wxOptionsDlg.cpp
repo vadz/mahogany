@@ -24,22 +24,25 @@
 #  include "Mcommon.h"
 #  include "MHelp.h"
 #  include "strutil.h"
-#  include "Mpers.h"
 
 #  include "Sorting.h"
 #  include "Threading.h"
+#  include "Mdefaults.h"
 
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
 #  include <wx/textdlg.h>  // for wxGetTextFromUser()
+#  include <wx/checklst.h>
+#  include <wx/layout.h>
+#endif // USE_PCH
+
+#include <wx/confbase.h>
+
+#if defined(OS_WIN) && defined(USE_DIALUP)
+#  include <wx/dialup.h>          // for wxDialUpManager
 #endif
 
-#include <wx/checklst.h>
-#include <wx/layout.h>
-#include <wx/dialup.h>
-
 #include "Mpers.h"
-
 #include "Moptions.h"            // we need all MP_XXX for our arrays
 
 // we have to include these 3 headers just for wxOptionsPageNewMail... move it
@@ -53,6 +56,7 @@
 #include "gui/wxBrowseButton.h"  // for wxStaticCast(wxColorBrowseButton) only
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxOptionsPage.h"
+#include "gui/wxMenuDefs.h"
 
 #include "HeadersDialogs.h"
 #include "FolderView.h"

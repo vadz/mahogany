@@ -64,10 +64,11 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "strutil.h"
+#  include "Mdefaults.h"
 
 #  include <wx/layout.h>
-#  include <wx/stattext.h>
-#endif
+#  include <wx/stattext.h>      // for wxStaticText
+#endif // USE_PCH
 
 #include "MFolderDialogs.h"
 #include "MFolder.h"

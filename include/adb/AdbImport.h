@@ -18,7 +18,7 @@
    #pragma interface "AdbImport.h"
 #endif
 
-#include "AdbModule.h"     // the base class
+#include "adb/AdbModule.h"     // the base class
 
 // some forward declarations
 class wxArrayString;

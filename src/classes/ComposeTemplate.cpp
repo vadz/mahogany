@@ -22,18 +22,18 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#  include <wx/log.h>
-
+#  include "Mcommon.h"
 #  include "sysutil.h"
 #  include "strutil.h"
-#endif
+#  include "MApplication.h"
+#  include "Profile.h"
+#  include "Mdefaults.h"
+#endif // USE_PCH
 
 #include "TemplateDialog.h"
-#include "MApplication.h"
 
 #include "Composer.h"
-#include "MDialogs.h"
-#include "Mdefaults.h"
+#include "gui/wxMDialogs.h"
 
 #include "Address.h"
 
@@ -42,7 +42,7 @@
 #include "Mpers.h"
 
 #include <wx/confbase.h>      // for wxExpandEnvVars()
-#include <wx/file.h>
+#include <wx/file.h>            // for wxFile
 #include <wx/ffile.h>
 #include <wx/textfile.h>
 #include <wx/tokenzr.h>

@@ -24,14 +24,14 @@
    #include "Mcommon.h"
 
    #include "MHelp.h"
+   #include "Mdefaults.h"
 
    #include <wx/layout.h>
-   #include <wx/stattext.h>
+   #include <wx/stattext.h>     // for wxStaticText
    #include <wx/statbox.h>
 #endif // USE_PCH
 
 #include "MFolder.h"
-
 #include "MSearch.h"
 
 #include "gui/wxDialogLayout.h"

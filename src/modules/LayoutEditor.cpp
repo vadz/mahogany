@@ -25,6 +25,7 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+#   include "Mdefaults.h"
 #endif // USE_PCH
 
 #include <wx/fontutil.h>      // for wxNativeFontInfo

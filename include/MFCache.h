@@ -17,13 +17,13 @@
 #   pragma interface "MFCache.h"
 #endif
 
-#include "MFStatus.h"
+#ifndef   USE_PCH
+#  include <wx/dynarray.h>        // for WX_DEFINE_ARRAY
+#endif // USE_PCH
 
 #include "CacheFile.h"           // base class
 
 #include "MEvent.h"
-
-#include <wx/dynarray.h>
 
 WX_DEFINE_ARRAY(MailFolderStatus *, MfStatusArray);
 

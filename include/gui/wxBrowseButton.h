@@ -17,7 +17,7 @@
 #ifndef USE_PCH
 #   include <wx/button.h>
 #   include <wx/textctrl.h>
-#endif
+#endif // USE_PCH
 
 // forward declaration
 class MFolder;

@@ -22,8 +22,10 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+#   include "Mdefaults.h"
 #endif //USE_PCH
 
+#include "MTextStyle.h"
 #include "ViewFilter.h"
 #include "MessageViewer.h"
 

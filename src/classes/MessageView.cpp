@@ -33,17 +33,17 @@
 
 #  include "Profile.h"
 
-#  include "MFrame.h"
-
 #  include "gui/wxMApp.h"      // for PrepareForPrinting()
+#  include "MHelp.h"
+#  include "sysutil.h"
+#  include "gui/wxIconManager.h"
+#  include "Mdefaults.h"
 
-#  include <wx/menu.h>
-
-#  include "gui/wxOptionsDlg.h"
+#  include <wx/filedlg.h>
 #endif //USE_PCH
 
-#include "Mdefaults.h"
-#include "MHelp.h"
+#include "gui/wxOptionsDlg.h"
+#include "MTextStyle.h"
 #include "MModule.h"
 
 #include "MessageView.h"
@@ -56,16 +56,14 @@
 #include "FolderView.h"
 #include "ASMailFolder.h"
 #include "MFolder.h"
-#include "UIdArray.h"
+#include "gui/wxMenuDefs.h"
+#include "gui/wxMDialogs.h"
 
-#include "MDialogs.h"
-#include "Mpers.h"
+#include "wx/persctrl.h"
 #include "XFace.h"
 #include "Collect.h"
-#include "sysutil.h"
 #include "miscutil.h"         // for GetColourByName()
 
-#include "MessageTemplate.h"
 #include "Composer.h"
 
 #include "modules/MCrypt.h"
@@ -73,10 +71,7 @@
 
 #include "ClickAtt.h"
 
-#include "gui/wxIconManager.h"
-
-#include <wx/dynarray.h>
-#include <wx/file.h>
+#include <wx/file.h>            // for wxFile
 #include <wx/mimetype.h>      // for wxFileType::MessageParameters
 #include <wx/process.h>
 #include <wx/mstream.h>
@@ -84,13 +79,14 @@
 #include <wx/tokenzr.h>
 
 #include <ctype.h>  // for isspace
-#include <time.h>   // for time stamping autocollected addresses
 
 #ifdef OS_UNIX
    #include <sys/stat.h>
 
    #include <wx/dcps.h> // for wxThePrintSetupData
 #endif
+
+class MPersMsgBox;
 
 // ----------------------------------------------------------------------------
 // options we use here

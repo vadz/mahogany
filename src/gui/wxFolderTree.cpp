@@ -21,13 +21,17 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
+#  include "Mcommon.h"
 #  include "gui/wxMApp.h"
+#  include "Mdefaults.h"                // for READ_APPCONFIG
+#  include "Mcclient.h"
 
 #  include <wx/menu.h>
 #endif // USE_PCH
 
-#include "MDialogs.h"
+#include "gui/wxMDialogs.h"
 
+#include "gui/wxMenuDefs.h"
 #include "MFolder.h"
 #include "MFolderDialogs.h"
 #include "FolderView.h"
@@ -35,19 +39,20 @@
 #include "miscutil.h" // for ParseColourString()
 
 #include <wx/tokenzr.h>
-#include <wx/imaglist.h>
+#include <wx/imaglist.h>        // for wxImageList
 #include <wx/persctrl.h>
 
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxFolderTree.h"
 
 #include "MFCache.h"
+#include "MFStatus.h"
 
 #if wxUSE_DRAG_AND_DROP
    #include "Mdnd.h"
 #endif // wxUSE_DRAG_AND_DROP
 
-#include "Mcclient.h"
+class MPersMsgBox;
 
 extern "C"
 {

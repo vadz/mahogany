@@ -9,8 +9,6 @@
 #ifndef MLOGFRAME_H
 #define MLOGFRAME_H
 
-#include "Mconfig.h"
-
 /**
    MLogFrameBase virtual base class, defining the interface for a
    window printing log information.

@@ -19,11 +19,13 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#include "MObject.h"
+
 class WXDLLEXPORT wxDynamicLibrary;
 
-#include "Mversion.h"      // for M_VERSION_MAJOR &c
+class MInterface;
 
-#include "MInterface.h"
+#include "Mversion.h"      // for M_VERSION_MAJOR &c
 
 // ----------------------------------------------------------------------------
 // macros
@@ -203,8 +205,7 @@ public:
 
 protected:
    /// Removes the module from the global list
-   virtual ~MModuleCommon()
-      { if ( m_MInterface ) m_MInterface->RemoveModule(this); }
+   virtual ~MModuleCommon();
 
    MInterface *m_MInterface;
 

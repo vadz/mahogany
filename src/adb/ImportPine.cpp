@@ -28,11 +28,11 @@
 
    #include <wx/log.h>
    #include <wx/dynarray.h>
+   #include <wx/utils.h>
 #endif // USE_PCH
 
 #include <wx/confbase.h>      // for wxExpandEnvVars
 #include <wx/textfile.h>
-#include <wx/utils.h>
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbImport.h"

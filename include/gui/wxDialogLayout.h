@@ -18,15 +18,15 @@
 // headers we have to include
 // -----------------------------------------------------------------------------
 
+#ifndef USE_PCH
+#  include "Profile.h"
+
+#  include <wx/textctrl.h>
+#endif // USE_PCH
+
 #include <wx/persctrl.h>   // needed for wxPNotebook
 
-#include "MDialogs.h"
-
-#ifndef USE_PCH
-#ifdef OS_WIN // cygwin and mingw
-#  include <wx/scrolwin.h>
-#endif
-#endif // USE_PCH
+#include "gui/wxMDialogs.h"
 
 // use wxListbook instead of wxNotebook if available
 #if wxUSE_LISTBOOK

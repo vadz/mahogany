@@ -17,11 +17,17 @@
    #pragma interface "MessageCC.h"
 #endif
 
+#ifndef USE_PCH
+#  include "Mcclient.h"         // for ADDRESS
+#endif  //USE_PCH
+
+#include "MailFolderCC.h"
 #include "Message.h"
 
 // fwd decl
 class MailFolderCC;
 class MimePartCC;
+class HeaderInfo;
 
 /** Message class, containing the most commonly used message headers.
    */
@@ -263,4 +269,3 @@ private:
 };
 
 #endif // _MESSAGECC_H
-

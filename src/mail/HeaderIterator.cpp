@@ -23,9 +23,9 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+#endif // USE_PCH
 
-   #include "Message.h"
-#endif
+#include "Message.h"
 
 // ============================================================================
 // HeaderIterator implementation

@@ -27,7 +27,7 @@
 
 #ifndef USE_PCH
     #include "Mcommon.h"
-#endif
+#endif // USE_PCH
 
 #include "Sequence.h"
 #include "UIdArray.h"

@@ -29,9 +29,15 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "strutil.h"
+#  include "MApplication.h"
+#  include "Mdefaults.h"
 
-#  include <wx/mimetype.h>
+#  include <wx/filedlg.h>
+#  include <wx/timer.h>                   // for wxTimer
 #endif // USE_PCH
+
+#include <wx/mimetype.h>
 
 #include "Sequence.h"
 #include "UIdArray.h"
@@ -45,12 +51,17 @@
 
 #include "MThread.h"
 #include "MFCache.h"
+#include "MFStatus.h"
+#include "MFolder.h"
+#include "Address.h"
 
 #include "Composer.h"
 
 #include "MailFolderCmn.h"
 #include "MFPrivate.h"
 #include "mail/FolderPool.h"
+#include "gui/wxMDialogs.h"
+#include "wx/persctrl.h"
 
 #include <wx/datetime.h>
 #include <wx/file.h>

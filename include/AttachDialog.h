@@ -15,6 +15,8 @@
 
 #include "MimeType.h"
 
+class wxWindow;
+
 /// AttachmentProperties: the structure describing all attachment properties
 struct AttachmentProperties
 {

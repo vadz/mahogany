@@ -25,22 +25,15 @@
 #include "Mpch.h"
 
 #ifndef  USE_PCH
-#   include "Mconfig.h"
 #   include "Mcommon.h"
 #   include "MApplication.h"
-#   include "gui/wxMApp.h"
-#   include "kbList.h"
 #   include "strutil.h"
-#endif
+#endif // USE_PCH
 
-#include "MDialogs.h"
-
-#include "Mversion.h"
 #include "MModule.h"
 
 #include <wx/dynlib.h>
-#include <wx/utils.h>
-#include <wx/textfile.h>
+#include <wx/textfile.h>        // for wxTextFile
 
 // ----------------------------------------------------------------------------
 // Implementation of the MInterface
@@ -911,4 +904,10 @@ const char *GetMModuleProperty(const ModuleProperty *table, const char *name)
    }
 
    return "";
+}
+
+MModuleCommon::~MModuleCommon()
+{
+   if ( m_MInterface )
+      m_MInterface->RemoveModule(this);
 }

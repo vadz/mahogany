@@ -16,8 +16,7 @@
 #ifndef _MIMEPART_H_
 #define _MIMEPART_H_
 
-// for wxFontEncoding enum
-#include <wx/fontenc.h>
+#include <wx/fontenc.h>         // for wxFontEncoding
 
 // for MimeParameterList
 #include "lists.h"

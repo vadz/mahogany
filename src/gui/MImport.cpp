@@ -26,16 +26,25 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "MApplication.h"
+#  include "gui/wxIconManager.h"
 
 #  include <wx/sizer.h>
 #  include <wx/statbmp.h>
 #  include <wx/statbox.h>
+#  include <wx/listbox.h>
+#  include <wx/checkbox.h>
 #endif // USE_PCH
 
 #include <wx/datetime.h>
 #include <wx/statline.h>
 
+#include "gui/wxMDialogs.h"
+#include "MFolder.h"
+
 #include "MImport.h"
+
+class MPersMsgBox;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here

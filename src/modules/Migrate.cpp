@@ -37,12 +37,13 @@
 
    #include <wx/gauge.h>
    #include <wx/radiobut.h>
-   #include <wx/stattext.h>
+   #include <wx/stattext.h>     // for wxStaticText
 
    #include <wx/msgdlg.h>
 #endif // USE_PCH
 
 #include "MModule.h"
+#include "MInterface.h"
 
 #include "ListReceiver.h"
 

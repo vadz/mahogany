@@ -22,10 +22,22 @@
 
 #ifndef   USE_PCH
 #  include "Mcommon.h"
-#  include "Mpers.h"
+#  include "strutil.h"
+#  include "Mdefaults.h"
 
-#  include <wx/stattext.h>
+#  include <wx/stattext.h>              // for wxStaticText
+#  if wxCHECK_VERSION(2,5,0)
+#     include <wx/sizer.h>              // for wxBoxSizer
+#  endif
 #endif  //USE_PCH
+
+#include "Mpers.h"
+#include "SendMessage.h"
+
+#include <wx/version.h>               // for wxCHECK_VERSION
+#include <wx/file.h>                    // for wxFile
+#include <wx/confbase.h>        // Dumb fileconf.h doesn't pull dependencies
+#include <wx/fileconf.h>
 
 // use wizard and not the old (and probably broken) dialog-based code
 #define USE_WIZARD
@@ -43,8 +55,7 @@
 #include "HeaderInfo.h"
 #include "MailFolderCC.h"
 
-#include <wx/fileconf.h>
-#include <wx/file.h>
+#include <wx/confbase.h>
 
 #ifdef USE_DIALUP
    #include <wx/dialup.h>     // for IsAlwaysOnline()

@@ -26,43 +26,33 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
-#   include "Mdefaults.h"
-#   include "guidef.h"
 #   include "strutil.h"
-#   include "MFrame.h"
-#   include "MDialogs.h"
 #   include "Profile.h"
 #   include "MApplication.h"
-#   include "MailFolder.h"
 #   include "Profile.h"
-#   include "MModule.h"
-#   include "MHelp.h"
 #   include "strutil.h"
-#endif
+#   include "MHelp.h"
 
-#include "MHelp.h"
-#include "gui/wxMIds.h"
-#include "Mpers.h"
+#   include <wx/stattext.h>        // for wxStaticText
+#   include <wx/layout.h>
+#   include <wx/checklst.h>
+#   include <wx/statbox.h>
+#endif // USE_PCH
+
 #include "MFilter.h"
 #include "MFolder.h"
+#include "MailFolder.h"
+#include "MModule.h"
 
 #include "MFilterLang.h"      // for SPAM_TEST_XXX constants
-
-#include <wx/window.h>
-#include <wx/confbase.h>
-#include "wx/persctrl.h"
-#include <wx/stattext.h>
-#include <wx/layout.h>
-#include <wx/checklst.h>
-#include <wx/statbox.h>
 
 #include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxFiltersDialog.h"
-#include "gui/wxOptionsPage.h"
-#include "gui/wxOptionsDlg.h"
 #include "gui/wxSelectionDlg.h"
 #include "gui/wxSpamOptions.h"
+
+class WXDLLEXPORT wxWindow;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here

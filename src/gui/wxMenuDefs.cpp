@@ -20,22 +20,20 @@
 // ----------------------------------------------------------------------------
 
 #include "Mpch.h"
-#include "Mcommon.h"
 
 #ifndef USE_PCH
-
+#  include "Mcommon.h"
 #  include "MApplication.h"
+#  include "Mdefaults.h"
+#  include "Profile.h"            // FIXME: Why is this header needed?
+#  include "gui/wxIconManager.h"
 
 #  include <wx/toolbar.h>
 #  include <wx/choice.h>
-#endif
+#  include <wx/menu.h>
+#endif // USE_PCH
 
-#include <wx/menu.h>
-
-#include "Profile.h"
-
-#include "gui/wxIconManager.h"
-#include "gui/wxIdentityCombo.h"
+#include "gui/wxIdentityCombo.h"        // for CreateIdentCombo
 
 #include "gui/wxMenuDefs.h"
 

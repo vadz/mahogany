@@ -25,12 +25,11 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
+   #include "Mcommon.h"
    #include "Sorting.h"
-
+   #include "Mdefaults.h"
    #include "strutil.h"    // for strutil_restore_array()
 #endif // USE_PCH
-
-#include "Mdefaults.h"
 
 // ----------------------------------------------------------------------------
 // options we use

@@ -26,8 +26,6 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-
-   #include <wx/log.h>
 #endif // USE_PCH
 
 #include "adb/AdbExport.h"

@@ -39,7 +39,6 @@
     #include "wx/statbox.h"
     #include "wx/checkbox.h"
     #include "wx/listbox.h"
-    #include "wx/textctrl.h"
     #include "wx/sizer.h"
     #include "wx/textdlg.h"
 #endif //WX_PRECOMP

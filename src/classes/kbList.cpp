@@ -11,8 +11,11 @@
 #   pragma implementation "kbList.h"
 #endif
 
-#include   "Mconfig.h"
-#include   "kbList.h"
+#include "Mpch.h"
+
+#ifndef USE_PCH
+#  include   "kbList.h"
+#endif // USE_PCH
 
 #ifdef   DEBUG
 /** Simulate the layout of a list of pointers.  This struct knows

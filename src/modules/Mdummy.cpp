@@ -14,9 +14,10 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
-#endif
+#endif // USE_PCH
 
 #include "MModule.h"
+#include "MInterface.h"
 
 ///------------------------------
 /// MModule interface:

@@ -26,17 +26,19 @@
 #  include "strutil.h"
 #  include "MHelp.h"
 #  include "gui/wxMIds.h"
+#  include "Mdefaults.h"
 
 #  include <wx/layout.h>
-#  include <wx/stattext.h>
+#  include <wx/stattext.h>      // for wxStaticText
 #  include <wx/statbox.h>
 #  include <wx/statbmp.h>
-#endif
+#endif // USE_PCH
 
-#include <wx/imaglist.h>
+#include <wx/imaglist.h>        // for wxImageList
 
 #include "gui/wxOptionsPage.h"
 #include "gui/wxBrowseButton.h"
+#include "gui/wxMenuDefs.h"
 
 #include "Mupgrade.h"      // for VerifyEMailSendingWorks()
 

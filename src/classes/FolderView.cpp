@@ -22,9 +22,9 @@
 #ifndef  USE_PCH
 #   include "Mcommon.h"
 #   include "MApplication.h"
+#   include "Profile.h"
+#   include "Mdefaults.h"
 #endif // USE_PCH
-
-#include "Mdefaults.h"
 
 #include "FolderView.h"
 

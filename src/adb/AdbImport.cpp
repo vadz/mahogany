@@ -29,10 +29,10 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include <wx/log.h>
+   #include <wx/log.h>          // for wxLogDebug
 #endif // USE_PCH
 
-#include "MDialogs.h"
+#include "gui/wxMDialogs.h"
 
 #include "adb/AdbDataProvider.h"
 #include "adb/AdbManager.h"

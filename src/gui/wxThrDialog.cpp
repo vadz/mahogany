@@ -18,10 +18,11 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "Mdefaults.h"
 
    #include <wx/layout.h>
-   #include <wx/stattext.h>
    #include <wx/statbox.h>
+   #include <wx/stattext.h>             // for wxStaticText
 #endif // USE_PCH
 
 #include "gui/wxDialogLayout.h"

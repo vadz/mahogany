@@ -25,12 +25,12 @@
 #  include "Mcommon.h"
 #  include "strutil.h"
 #  include "Profile.h"
-#  include "kbList.h"
-#  include "Mdefaults.h"
 #  include "MApplication.h"
+#  include "Mcclient.h"         // For env_parameters
+#  include "Mdefaults.h"
 
-#  include  <wx/dynarray.h>
-#  include  <wx/file.h>
+#  include <wx/dynarray.h>      // for WX_DEFINE_ARRAY
+#  include <wx/dirdlg.h>        // wxDirDialog
 #endif   // USE_PCH
 
 #include "MPython.h"
@@ -40,34 +40,27 @@
 #include "MailFolder.h"
 #include "HeaderInfo.h"
 #include "FolderMonitor.h"
-#include "PathFinder.h"
+#include "PathFinder.h"         // for PathFinder
 #include "Composer.h"         // for RestoreAll()
 
 #include "gui/wxMainFrame.h"
-#include "gui/wxMApp.h"
-#include "MDialogs.h"         // MDialog_YesNoDialog
-#include "gui/wxIconManager.h"
+#include "gui/wxMDialogs.h"         // MDialog_YesNoDialog
 #include "adb/AdbManager.h"   // for AdbManager::Delete
 
 #include "adb/AdbFrame.h"     // for ShowAdbFrame
 
-#include "Mpers.h"
-
-#include "Mversion.h"
 #include "Mupgrade.h"
 
 #include "MFCache.h"          // for MfStatusCache::CleanUp
 
 #include "CmdLineOpts.h"
 
-#include <wx/confbase.h>      // wxExpandEnvVars
 #include <wx/mimetype.h>      // wxMimeTypesManager
-
-#include <wx/dirdlg.h>        // wxDirDialog
+#include <wx/confbase.h>        // for wxConfigBase
 
 #include "wx/persctrl.h"      // for wxPControls::SetSettingsPath
 
-#include "Mcclient.h"         // For env_parameters
+class MOption;
 
 // ----------------------------------------------------------------------------
 // options we use here

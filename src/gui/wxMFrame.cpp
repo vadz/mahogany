@@ -23,11 +23,17 @@
 #endif
 
 #include "Mpch.h"
-#include "Mcommon.h"
 
 #ifndef  USE_PCH
+#  include "Mcommon.h"
+#  include "MApplication.h"
+#  include "MHelp.h"
+#  include "gui/wxMFrame.h"
+#  include "Mdefaults.h"
+
 #  include <wx/menu.h>
 #  include <wx/toolbar.h>
+#  include <wx/choice.h>
 #endif // USE_PCH
 
 #ifdef USE_PYTHON
@@ -36,29 +42,30 @@
 #  include <wx/ffile.h>
 #endif // Python
 
-#include "MHelp.h"
-
 #include "FolderMonitor.h"
 
 #include "TemplateDialog.h"
 
 #include "Composer.h"
-
 #include "MImport.h"
 
 #include "gui/wxFiltersDialog.h" // for ConfigureAllFilters()
 #include "gui/wxOptionsDlg.h"
+#include "gui/wxMDialogs.h"
 #include "adb/AdbFrame.h"
-#include "gui/wxMFrame.h"
 #include "gui/wxIdentityCombo.h"
+#include "gui/wxMenuDefs.h"
 
 #include <wx/fontmap.h>          // for GetEncodingDescription()
+#include <wx/confbase.h>
 
 #include <wx/printdlg.h>
 
 #if defined(OS_UNIX) && !defined(OS_MAC) && !defined(__CYGWIN__)
     typedef wxGenericPrintDialog wxPrintDialog;
 #endif
+
+class MPersMsgBox;
 
 // ----------------------------------------------------------------------------
 // options we use here

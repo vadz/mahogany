@@ -29,10 +29,12 @@
 #   include "Mcommon.h"
 #   include "Profile.h"
 #   include "strutil.h"
-#   include "Mdefaults.h"
-#endif
+
+#   include <wx/dynarray.h>        // for WX_DECLARE_OBJARRAY
+#endif // USE_PCH
 
 #include "MFilter.h"
+#include "MFolder.h"
 #include "modules/Filters.h"
 
 // ----------------------------------------------------------------------------
@@ -462,7 +464,6 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
    return TRUE;
 }
 
-#include <wx/dynarray.h>
 WX_DECLARE_OBJARRAY(MFDialogComponent, MFDComponentArray);
 #include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY(MFDComponentArray);

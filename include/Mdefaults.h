@@ -13,9 +13,7 @@
 #ifndef MDEFAULTS_H
 #define MDEFAULTS_H
 
-#include "Mcallbacks.h"
-#include "Mversion.h"
-#include "Profile.h"
+class Profile;
 
 // under Windows 12pt font looks too huge, letters are like in a book for
 // children

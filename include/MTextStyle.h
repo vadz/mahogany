@@ -13,7 +13,9 @@
 #ifndef _MTEXTSTYLE_H_
 #define _MTEXTSTYLE_H_
 
-#include <wx/textctrl.h>
+#ifndef   USE_PCH
+#  include <wx/textctrl.h>
+#endif // USE_PCH
 
 // use the standard wxWin class: even if it is not really intended for this, it
 // just what we need here as it combines text colours and font info

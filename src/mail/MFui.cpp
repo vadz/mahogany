@@ -20,11 +20,11 @@
    #include "Mcommon.h"
 
    #include "strutil.h"    // for strutil_ultoa()
-#endif
+#endif // USE_PCH
 
 #include "MFui.h"
 #include "MFStatus.h"
-
+#include "MailFolder.h"
 #include "MFolder.h"
 
 // ============================================================================

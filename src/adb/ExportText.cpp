@@ -25,20 +25,16 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include <wx/log.h>
-   #include <wx/dynarray.h>
+   #include <wx/log.h>                  // for wxLogMessage
 
    #include "MApplication.h"
 
-   #include "guidef.h"
-
    #include <wx/layout.h>
-   #include <wx/stattext.h>
+   #include <wx/stattext.h>             // for wxStaticText
 #endif // USE_PCH
 
 #include <wx/textfile.h>
 #include <wx/ffile.h>
-#include "wx/persctrl.h"
 
 #include "gui/wxDialogLayout.h"
 

@@ -13,6 +13,13 @@
 #ifndef SENDMESSAGE_H
 #define SENDMESSAGE_H
 
+#ifndef   USE_PCH
+#  include "FolderType.h"
+#endif // USE_PCH
+
+#include "MimePart.h"
+#include "MObject.h"
+
 class Message;
 class Profile;
 

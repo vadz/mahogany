@@ -19,10 +19,10 @@
 #endif
 
 #ifndef USE_PCH
-   #include <wx/dynarray.h>
-   #include <wx/font.h>
-#endif
+   #include <wx/dynarray.h>     // for WX_DEFINE_ARRAY
+#endif // USE_PCH
 
+#include <wx/font.h>         // for wxFont
 #include <wx/colour.h>
 
 #include "MEvent.h"

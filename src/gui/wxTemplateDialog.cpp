@@ -29,11 +29,14 @@
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
 #  include <wx/menu.h>
-#endif
+#  include <wx/filedlg.h>
+#endif // USE_PCH
 
 #include "gui/wxDialogLayout.h"
 
 #include "TemplateDialog.h"
+
+#include <wx/confbase.h>
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here

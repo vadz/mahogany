@@ -14,6 +14,8 @@
 
 #include <wx/fontenc.h> // enum wxFontEncoding declaration
 
+#include "gui/wxllist.h"
+
 #ifndef   NULL
 #   define   NULL 0
 #endif

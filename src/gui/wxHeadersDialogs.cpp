@@ -42,14 +42,15 @@
 
 #  include <wx/layout.h>
 #  include <wx/statbox.h>
-#  include <wx/stattext.h>
+#  include <wx/stattext.h>      // for wxStaticText
 #  include <wx/utils.h>         // for wxMax
+#  include <wx/checklst.h>
 
 #  include "strutil.h"   // strutil_flatten_array()
-#endif
+#  include "Mdefaults.h"
+#endif // USE_PCH
 
-#include <wx/imaglist.h>
-#include <wx/checklst.h>
+#include <wx/imaglist.h>        // for wxImageList
 
 #include "gui/wxSelectionDlg.h"
 

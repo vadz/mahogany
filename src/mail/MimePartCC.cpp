@@ -26,14 +26,13 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-   #include "MailFolder.h"    // for DecodeHeader
+   #include "Mcclient.h" // for body_types
 #endif // USE_PCH
 
 #include <wx/fontmap.h>
 
 #include "MimePartCC.h"
-
-#include "Mcclient.h" // for body_types
+#include "MailFolder.h"    // for DecodeHeader
 
 #undef MESSAGE
 

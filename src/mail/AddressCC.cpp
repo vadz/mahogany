@@ -26,12 +26,11 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "Mcclient.h"
+   #include "Mdefaults.h"
 #endif // USE_PCH
 
 #include "AddressCC.h"
-
-#include "Mcclient.h"
-#include "Mdefaults.h"
 
 // ----------------------------------------------------------------------------
 // options we use here

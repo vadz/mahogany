@@ -15,7 +15,7 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "guidef.h"    // only for high-level functions
-#endif
+#endif // USE_PCH
 
 #include "Sequence.h"
 #include "UIdArray.h"
@@ -70,7 +70,7 @@ ASMailFolder::GetTicket(void)
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifdef USE_THREADS
-#   include <wx/thread.h>
+#   include <wx/thread.h>       // for wxThread
 #endif
 
 

@@ -27,12 +27,13 @@
 #  include <wx/layout.h>
 #  include <wx/statbox.h>
 #  include <wx/dirdlg.h>
-#endif
+#  include <wx/filedlg.h>
+#endif // USE_PCH
 
 #include <wx/colordlg.h>
 #include <wx/fontdlg.h>
 #include <wx/fontutil.h>
-#include <wx/imaglist.h>
+#include <wx/imaglist.h>        // for wxImageList
 
 #include "MFolder.h"
 

@@ -12,27 +12,26 @@
 
 #include "Mpch.h"
 
-#ifndef USE_PCH
-   #include "Mcommon.h"
-#endif // !USE_PCH
-
 #ifdef USE_SSL
 
-// needed to get ssl_onceonlyinit() declaration
-#include "Mcclient.h"
+#ifndef USE_PCH
+   #include "Mcommon.h"
+   #include "Mdefaults.h"
+
+   // needed to get ssl_onceonlyinit() declaration
+   #include "Mcclient.h"
+
+   #if defined(OS_UNIX) || defined(__CYGWIN__)
+      #include "Profile.h"
+      #include "MApplication.h"
+   #endif
+#endif // USE_PCH
+
+#include "gui/wxMDialogs.h"
 
 // under Unix we have to load libssl and libcrypto to provide access to them to
 // c-client
 #if defined(OS_UNIX) || defined(__CYGWIN__)
-
-#ifndef USE_PCH
-   #include "Profile.h"
-   #include "MApplication.h"
-#endif // !USE_PCH
-
-#include "Mdefaults.h"
-
-#include "MDialogs.h"
 
 #include <wx/dynlib.h>
 

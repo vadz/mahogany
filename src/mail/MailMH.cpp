@@ -23,6 +23,7 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "Mcclient.h"
 
 #  include "strutil.h"
 
@@ -39,13 +40,13 @@
 
 extern "C"
 {
-   #include "Mcclient.h"
-
    // including mh.h doesn't seem to work...
    int mh_isvalid(char *name, char *tmp, long synonly);
 
    char *mh_getpath(void);
 }
+
+class MOption;
 
 // ----------------------------------------------------------------------------
 // options we use here

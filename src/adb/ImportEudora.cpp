@@ -59,12 +59,10 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include <wx/log.h>
-   #include <wx/dynarray.h>
+   #include <wx/log.h>                  // for wxLogWarning
 #endif // USE_PCH
 
 #include <wx/textfile.h>
-#include <wx/utils.h>
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbImport.h"

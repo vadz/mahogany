@@ -14,13 +14,14 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+#   include "MHelp.h"
 
-#   include <wx/stattext.h>
 #   include <wx/layout.h>
 #   include <wx/menu.h>
 #   include <wx/statusbr.h>
 #   include <wx/statbox.h>
-#endif
+#   include <wx/textdlg.h>
+#endif // USE_PCH
 
 #include "modules/Calendar.h"
 
@@ -34,9 +35,6 @@
 
 #include <wx/calctrl.h>
 #include <wx/spinbutt.h>
-#include <wx/textdlg.h>
-
-#include "MHelp.h"
 
 #if wxUSE_DRAG_AND_DROP
    #include "Mdnd.h"

@@ -8,19 +8,16 @@
  *******************************************************************/
 
 #include "Mpch.h"
-#include "Mcommon.h"
 
 #ifndef   USE_PCH
+#   include "Mcommon.h"
 #   include "sysutil.h"
 #   include "strutil.h"
-#endif
+#endif // USE_PCH
 
 #ifdef OS_UNIX
-#   include <sys/types.h>
-#   include <sys/stat.h>
 #   include <unistd.h>
 #   include <fcntl.h>
-#   include <errno.h>
 #endif
 
       
