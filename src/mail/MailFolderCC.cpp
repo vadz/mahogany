@@ -2435,6 +2435,17 @@ MailFolderCC::Open(OpenMode openmode)
       SetLoginData(m_login, m_password);
    }
 
+   // we need to dispatch the pending MEventFolderExpungeData events because
+   // they may keep the other folder(s) on the server we're going to open
+   // artificially opened thus preventing us from reusing the connection to it
+   // and forcing to open a new one even if the old one is going to be closed
+   // during the next main loop iteration
+   //
+   // ideally we should just dispatch MEventWithFolderData events, not all of
+   // the pending ones as this might cause problems but for now let's keep it
+   // simple and fix it when/if we find the problems with the current approach
+   MEventManager::DispatchPending();
+
    // lock cclient inside this block
    {
       MCclientLocker lock;
