@@ -147,7 +147,7 @@ wxString ORC_Types[] =
    gettext_noop("Smaller than"),        // ORC_T_SmallerThan
    gettext_noop("Older than"),          // ORC_T_OlderThan
    gettext_noop("Newer than"),          // ORC_T_NewerThan
-   gettext_noop("Seems to be SPAM"),    // ORC_T_IsSpam
+   gettext_noop("Seems to be spam"),    // ORC_T_IsSpam
    gettext_noop("Python"),              // ORC_T_Python
    gettext_noop("Score above"),         // ORC_T_ScoreAbove
    gettext_noop("Score below"),         // ORC_T_ScoreBelow
