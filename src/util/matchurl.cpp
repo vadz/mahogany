@@ -410,7 +410,7 @@ KeywordDetectorCell::computeBackArcs(KeywordDetectorCell* root,
 // ============================================================================
 
 /// a locale-independent isalnum()
-static inline bool IsAlnum(char c)
+static inline bool IsAlnum(unsigned char c)
 {
    // normally URLs should be in plain ASCII (7bit) but in practice some broken
    // programs (people?) apparently write them using 8bit chars too so be
