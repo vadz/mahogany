@@ -37,9 +37,6 @@ $Id$
   + Preferences editor should mail oneself for test (MAppBase::VerifySettings)
 
 - wxLayout: --- working on this, KB ---
-  + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
-    + check printing example
-  + scroll to cursor
   + cut&paste, different cursor for focus/no focus
  
 - UI things
