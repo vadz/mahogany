@@ -331,6 +331,8 @@ MessageView::AllProfileValues::AllProfileValues()
    // used before ReadAllSettings() is called it is still better not to leave
    // junk in the struct fields
 
+   msgViewer = "LayoutViewer";
+
    fontFamily = wxDEFAULT;
    fontSize = 12;
 
@@ -360,7 +362,7 @@ bool MessageView::AllProfileValues::operator==(const AllProfileValues& other)
 {
    #define CMP(x) (x == other.x)
 
-   return CMP(BgCol) && CMP(FgCol) && CMP(UrlCol) &&
+   return CMP(msgViewer) && CMP(BgCol) && CMP(FgCol) && CMP(UrlCol) &&
           CMP(QuotedCol[0]) && CMP(QuotedCol[1]) && CMP(QuotedCol[2]) &&
           CMP(quotedColourize) && CMP(quotedCycleColours) &&
           CMP(quotedMaxWhitespace) && CMP(quotedMaxAlpha) &&
@@ -423,19 +425,24 @@ MessageView::CreateViewer(wxWindow *parent)
 
    if ( !listing  )
    {
-      wxLogError(_("No message viewer plug ins found. It will be "
+      wxLogError(_("No message viewer plugins found. It will be "
                    "impossible to view any messages."));
    }
    else // have at least one viewer, load it
    {
-      Profile *profile = GetProfile();
+//      Profile *profile = GetProfile();
+//m_profile = profile ? profile : mApplication->GetProfile();
+//m_profile->IncRef();
 
       String nameFirst = (*listing)[0].GetName();
 
       String name;
-      if ( profile )
+//      if ( profile )
+      if ( 1 )
       {
-         name = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
+//         name = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
+//         name = READ_CONFIG(m_profile, MP_MSGVIEW_VIEWER);
+name=m_ProfileValues.msgViewer;
       }
       else
       {
@@ -450,7 +457,7 @@ MessageView::CreateViewer(wxWindow *parent)
       {
          m_viewer = (MessageViewer *)viewer;
       }
-      else // failed to load the ocnfigured viewer
+      else // failed to load the configured viewer
       {
          if ( name != nameFirst )
          {
@@ -691,12 +698,14 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
       idx = 0;
    }
 
+   settings->msgViewer = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
+
    settings->fontFamily = fontFamilies[idx];
-   settings->fontSize = READ_CONFIG(profile,MP_MVIEW_FONT_SIZE);
-   settings->showHeaders = READ_CONFIG(profile,MP_SHOWHEADERS) != 0;
-   settings->inlinePlainText = READ_CONFIG(profile,MP_PLAIN_IS_TEXT) != 0;
-   settings->inlineRFC822 = READ_CONFIG(profile,MP_RFC822_IS_TEXT) != 0;
-   settings->highlightURLs = READ_CONFIG(profile,MP_HIGHLIGHT_URLS) != 0;
+   settings->fontSize = READ_CONFIG(profile, MP_MVIEW_FONT_SIZE);
+   settings->showHeaders = READ_CONFIG(profile, MP_SHOWHEADERS) != 0;
+   settings->inlinePlainText = READ_CONFIG(profile, MP_PLAIN_IS_TEXT) != 0;
+   settings->inlineRFC822 = READ_CONFIG(profile, MP_RFC822_IS_TEXT) != 0;
+   settings->highlightURLs = READ_CONFIG(profile, MP_HIGHLIGHT_URLS) != 0;
 
    // we set inlineGFX to -1 if we don't inline graphics at all and to the
    // max size limit of graphics to show inline otherwise (0 if no limit)

@@ -289,6 +289,8 @@ private:
    /// All values read from the profile
    struct AllProfileValues
    {
+      /// message viewer (LayoutViewer, TextViewer, ...)
+      String msgViewer;
       /// Background and foreground colours, colours for URLs and headers
       wxString BgCol, FgCol, UrlCol, HeaderNameCol, HeaderValueCol;
       /// font attributes
@@ -330,13 +332,14 @@ wxMEditCtrl::ReadProfile(Profile *p)
 
 #undef GET_COLOUR_FROM_PROFILE
 
-   m_ProfileValues.font = READ_CONFIG(p,MP_MVIEW_FONT);
+   m_ProfileValues.msgViewer = READ_CONFIG(p, MP_MSGVIEW_VIEWER);
+   m_ProfileValues.font = READ_CONFIG(p, MP_MVIEW_FONT);
    ASSERT(m_ProfileValues.font >= 0 && m_ProfileValues.font <= NUM_FONTS);
    m_ProfileValues.font = wxFonts[m_ProfileValues.font];
-   m_ProfileValues.size = READ_CONFIG(p,MP_MVIEW_FONT_SIZE);
-   m_ProfileValues.showHeaders = READ_CONFIG(p,MP_SHOWHEADERS) != 0;
-   m_ProfileValues.rfc822isText = READ_CONFIG(p,MP_RFC822_IS_TEXT) != 0;
-   m_ProfileValues.highlightURLs = READ_CONFIG(p,MP_HIGHLIGHT_URLS) != 0;
+   m_ProfileValues.size = READ_CONFIG(p, MP_MVIEW_FONT_SIZE);
+   m_ProfileValues.showHeaders = READ_CONFIG(p, MP_SHOWHEADERS) != 0;
+   m_ProfileValues.rfc822isText = READ_CONFIG(p, MP_RFC822_IS_TEXT) != 0;
+   m_ProfileValues.highlightURLs = READ_CONFIG(p, MP_HIGHLIGHT_URLS) != 0;
    m_ProfileValues.inlineGFX = READ_CONFIG(p, MP_INLINE_GFX) != 0;
    m_ProfileValues.browser = READ_CONFIG(p, MP_BROWSER);
    m_ProfileValues.browserIsNS = READ_CONFIG(p, MP_BROWSER_ISNS) != 0;

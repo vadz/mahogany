@@ -247,6 +247,7 @@ enum ConfigFields
 
    // message view
    ConfigField_MessageViewFirst = ConfigField_PythonLast,
+   ConfigField_MsgViewer,
    ConfigField_MessageViewFontFamily,
    ConfigField_MessageViewFontSize,
    ConfigField_MessageViewFGColour,
@@ -917,6 +918,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_PYTHON
 
    // message view
+   { gettext_noop("&Message viewer"),              Field_Text,    -1 },
    { gettext_noop("&Font family"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1 },
@@ -1294,6 +1296,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_PYTHON
 
    // message views
+   CONFIG_ENTRY(MP_MSGVIEW_VIEWER),
    CONFIG_ENTRY(MP_MVIEW_FONT),
    CONFIG_ENTRY(MP_MVIEW_FONT_SIZE),
    CONFIG_ENTRY(MP_MVIEW_FGCOLOUR),

@@ -371,6 +371,9 @@ private:
       /** @name Appearance parameters
        */
       //@{
+      /// message viewer (LayoutViewer, TextViewer, ...)
+      String msgViewer;
+
       /// Background and foreground colours, colours for URLs and headers
       wxColour BgCol,
                FgCol,
