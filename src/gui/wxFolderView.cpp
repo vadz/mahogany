@@ -1239,8 +1239,18 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
 
    // optionally replace the "From" with "To: someone" for messages sent by
    // the user himself
-   if ( m_settingsCurrent.replaceFromWithTo &&
-        m_settingsCurrent.returnAddresses.Index(sender) != wxNOT_FOUND )
+   bool replaceFromWithTo = false;
+   if ( m_settingsCurrent.replaceFromWithTo )
+   {
+      const wxArrayString& adrs = m_settingsCurrent.returnAddresses;
+      size_t nAdrCount = adrs.GetCount();
+      for ( size_t nAdr = 0; !replaceFromWithTo && (nAdr < nAdrCount); nAdr++ )
+      {
+         replaceFromWithTo = Message::CompareAddresses(sender, adrs[nAdr]);
+      }
+   }
+
+   if ( replaceFromWithTo )
    {
       sender.clear();
       sender << _("To: ") << hi->GetTo();

@@ -28,9 +28,18 @@
 // private functions
 // ----------------------------------------------------------------------------
 
+// extract first and last names from an address
 static void SplitAddress(const String& addr,
                          String *firstName,
                          String *lastName);
+
+// extract the full name from the address
+static void SplitAddress(const String& addr,
+                         String *fullname);
+
+// extract the email address (without <>) from the address
+static void ExtractAddress(const String& addr,
+                           String *email);
 
 // ============================================================================
 // implementation
@@ -72,9 +81,10 @@ Message::ExpandParameter(MessageParameterList const & list, String
 static void SplitAddress(const String& addr,
                          String *fullname)
 {
-   ASSERT(fullname);
+   CHECK_RET( fullname, "fullname param can't be NULL" );
+
    // The code below will crash for empty addresses
-   if(addr.Length() == 0)
+   if ( addr.length() == 0 )
    {
       *fullname = "";
       return;
@@ -118,19 +128,64 @@ static void SplitAddress(const String& addr,
       fullname->Trim();
    }
 }
+static void ExtractAddress(const String& addr,
+                           String *email)
+{
+   *email = "";
+
+   if ( !addr )
+      return;
+
+   // first check for the most common form
+   const char *addrStart = strchr(addr, '<');
+   const char *addrEnd;
+   if ( addrStart )
+   {
+      // return the part before the next '>'
+      addrEnd = strchr(addrStart, '>');
+      if ( !addrEnd )
+      {
+         wxLogError(_("Unmatched '<' in the email address '%s'."),
+                    addr.c_str());
+
+         return;
+      }
+   }
+   else // no '<' in address
+   {
+      // address starts in the very beginning
+      addrStart = addr.c_str();
+
+      addrEnd = strchr(addr, '(');
+      if ( !addrEnd )
+      {
+         // just take all
+         *email = addr;
+      }
+   }
+
+   // take the part of the string
+   if ( addrStart && addrEnd )
+   {
+      *email = String(addrStart, addrEnd);
+   }
+
+   // trim the address from both sides
+   email->Trim(TRUE);
+   email->Trim(FALSE);
+}
 
 static void SplitAddress(const String& addr,
                          String *firstName,
                          String *lastName)
 {
-   ASSERT(firstName);
-   ASSERT(lastName);
-   if(addr.Length() == 0)
+   if ( addr.length() == 0 )
    {
       *firstName = "";
       *lastName = "";
       return;
    }
+
    String fullname;
    SplitAddress(addr, &fullname);
 
@@ -190,6 +245,19 @@ String Message::GetAddressLastName(MessageAddressType type) const
    Address(addr, type);
 
    return GetLastNameFromAddress(addr);
+}
+
+bool Message::CompareAddresses(const String& adr1, const String& adr2)
+{
+   String email1, email2;
+
+   ExtractAddress(adr1, &email1);
+   ExtractAddress(adr2, &email2);
+
+   // TODO the address foo.bar@baz.com should be considered the same as
+   //      bar@baz.com, for now it is not...
+
+   return email1 == email2;
 }
 
 // ----------------------------------------------------------------------------

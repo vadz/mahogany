@@ -108,6 +108,9 @@ public:
    /// return "Foo Bar" from address of form "Foo Bar <baz>"
    static String GetNameFromAddress(const String& address);
 
+   /// compare 2 addresses, return TRUE if they're the same
+   static bool CompareAddresses(const String& adr1, const String& adr2);
+
    /** get any header line
        @param line name of header line
        @param value string where result will be stored, or empty string
