@@ -345,11 +345,13 @@ public:
    //@{
 
    /**
-     Focuses and selects the given item and unselects the previously selected
-     one if it was the only item selected.
+     Focuses and possibly selects the given item and unselects the previously
+     selected one if it was the only item selected. The specified item will be
+     selected if we had exactly one selected item before, just focused
+     otherwise.
 
      @param item the item to focus and select
-     @return true if we have one one selected item, false if there are others
+     @return true if we selected this item, false if only focused it
     */
    bool GoToItem(long item);
 
@@ -1509,6 +1511,9 @@ bool wxFolderListCtrl::SetPreviewMsg(long idx, UIdType uid)
    if ( uid == m_uidPreviewed )
       return false;
 
+   CHECK( idx != -1 && uid != UID_ILLEGAL, false,
+          "invalid params in SetPreviewMsg" );
+
    m_itemPreviewed = idx;
    m_uidPreviewed = uid;
 
@@ -1516,7 +1521,11 @@ bool wxFolderListCtrl::SetPreviewMsg(long idx, UIdType uid)
    wxFolderListCtrlBlockOnSelect noselect(this);
 
    // select the item being previewed
-   GoToItem(m_itemPreviewed);
+   if ( !GoToItem(m_itemPreviewed) )
+   {
+      // select unconditionally
+      Select(m_itemPreviewed, true);
+   }
 
    return true;
 }
@@ -2214,16 +2223,20 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
 
 bool wxFolderListCtrl::GoToItem(long item)
 {
+   Focus(item);
+
    long itemOldSel = GetUniqueSelection();
    if ( itemOldSel != -1 )
    {
       Select(itemOldSel, false);
+      Select(item, true);
+
+      // we selected the new item, return true
+      return true;
    }
 
-   Focus(item);
-   Select(item, true);
-
-   return itemOldSel != -1;
+   // this means we didn't select the specified item
+   return false;
 }
 
 bool
@@ -3288,8 +3301,8 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
 
    if ( newFocus != -1 )
    {
-      // move focus
-      m_FolderCtrl->GoToItem(newFocus);
+      // move focus, possibly selecting the new item as well
+      (void)m_FolderCtrl->GoToItem(newFocus);
    }
 
    return true;
