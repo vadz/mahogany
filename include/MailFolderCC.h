@@ -31,10 +31,6 @@
 #include  "FolderView.h"
 #include  "MFolder.h"
 
-//#ifdef DEBUG
-#   define DEBUG_MAILFOLDERCC_EVENTS
-//#endif
-
 /// To really clean up left over memory, call this function at program
 /// end:
 extern void CC_Cleanup();
@@ -496,7 +492,7 @@ public:
    /// The event structure.
    struct Event
    {
-#ifndef DEBUG_MAILFOLDERCC_EVENTS
+#ifndef DEBUG
       Event(MAILSTREAM *stream, EventType type, int /*caller*/)
          {
             m_stream = stream; m_type = type;
@@ -516,7 +512,7 @@ public:
       MAILSTREAM *m_stream;
       /// The data structure, no more than three members needed
       EventArgument m_args[3];
-#ifdef DEBUG_MAILFOLDERCC_EVENTS
+#ifdef DEBUG
       /// where it was called from:
       String m_caller;
       /// the name of the folder:
