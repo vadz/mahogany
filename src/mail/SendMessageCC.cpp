@@ -733,7 +733,6 @@ SendMessageCC::SetAddresses(const String &to,
    // If Build() has already been called, then it's too late to change
    // anything.
    ASSERT(m_headerNames == NULL);
-   ASSERT(m_Protocol == Prot_SMTP || m_Protocol == Prot_Sendmail);
 
    SetAddressField(&m_Envelope->to, to);
    SetAddressField(&m_Envelope->cc, cc);
@@ -748,7 +747,10 @@ SendMessageCC::SetNewsgroups(const String &groups)
    // If Build() has already been called, then it's too late to change
    // anything.
    ASSERT(m_headerNames == NULL);
-   ASSERT(m_Protocol == Prot_NNTP);
+
+   // TODO-NEWS: we should support sending and posting the message, doing
+   //            it separately if necessary
+   ASSERT_MSG( m_Protocol == Prot_NNTP, "can't post and send message" );
 
    if(groups.Length())
    {
