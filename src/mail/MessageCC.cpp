@@ -107,7 +107,7 @@ MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
    m_uid = uid;
 
    // move \n --> \r\n convention
-   text = strutil_strdup(strutil_enforceCRLF(itext)));
+   text = strutil_strdup(strutil_enforceCRLF(itext));
    
    unsigned long pos = 0;
    // find end of header "\012\012"
