@@ -552,9 +552,8 @@ wxTreeItemId wxSubfoldersTree::OnNewFolder(String& name)
    // count the number of folders retrieved and show progress
    m_nFoldersRetrieved++;
 
-   // create the progress indicator if there are many folders and it hadn't
-   // been yet created
-   if ( m_nFoldersRetrieved > 20 && !m_progressInfo )
+   // create the progress indicator if it hadn't been yet created
+   if ( !m_progressInfo )
    {
       m_progressInfo = new MProgressInfo(this, _("Retrieving the folder list: "));
    }
