@@ -99,15 +99,15 @@ public:
     // AdbEntry
   virtual AdbEntryGroup *GetGroup() const;
 
-  virtual void GetField(uint n, String *pstr) const;
+  virtual void GetField(size_t n, String *pstr) const;
 
-  virtual uint GetEMailCount() const           { return m_astrEmails.Count(); }
-  virtual void GetEMail(uint n, String *pstr) const { *pstr = m_astrEmails[n]; }
+  virtual size_t GetEMailCount() const           { return m_astrEmails.Count(); }
+  virtual void GetEMail(size_t n, String *pstr) const { *pstr = m_astrEmails[n]; }
 
   virtual void ClearDirty()    { m_bDirty = FALSE; }   
   virtual bool IsDirty() const { return m_bDirty; }
 
-  virtual void SetField(uint n, const String& strValue);
+  virtual void SetField(size_t n, const String& strValue);
   virtual void AddEMail(const String& strEMail)
     { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }
   virtual void ClearExtraEMails();
@@ -160,8 +160,8 @@ public:
     // AdbEntryGroup
   virtual AdbEntryGroup *GetGroup() const { return m_pParent; }
 
-  virtual uint GetEntryNames(wxArrayString& aNames) const;
-  virtual uint GetGroupNames(wxArrayString& aNames) const;
+  virtual size_t GetEntryNames(wxArrayString& aNames) const;
+  virtual size_t GetGroupNames(wxArrayString& aNames) const;
 
   virtual AdbEntry *GetEntry(const String& name) const;
   virtual AdbEntryGroup *GetGroup(const String& name) const;
@@ -215,9 +215,9 @@ public:
   virtual bool Exists(const String& path) const
     { return m_pRootGroup->Exists(path); }
 
-  virtual uint GetEntryNames(wxArrayString& aNames) const
+  virtual size_t GetEntryNames(wxArrayString& aNames) const
     { return m_pRootGroup->GetEntryNames(aNames); }
-  virtual uint GetGroupNames(wxArrayString& aNames) const
+  virtual size_t GetGroupNames(wxArrayString& aNames) const
     { return m_pRootGroup->GetGroupNames(aNames); }
 
   virtual AdbEntryGroup *GetGroup(const String& name) const
@@ -331,7 +331,7 @@ AdbEntryGroup *FCEntry::GetGroup() const
 }
 
 // we store only the fields which were non-empty, so check the index
-void FCEntry::GetField(uint n, String *pstr) const
+void FCEntry::GetField(size_t n, String *pstr) const
 {
   if ( n < m_astrFields.Count() )
     *pstr = m_astrFields[n];
@@ -341,9 +341,9 @@ void FCEntry::GetField(uint n, String *pstr) const
 
 // the problem here is that we may have only several first strings in the
 // m_astrFields array, so we need to add some before setting n-th field
-void FCEntry::SetField(uint n, const wxString& strValue)
+void FCEntry::SetField(size_t n, const wxString& strValue)
 {
-  uint nCur = m_astrFields.Count();
+  size_t nCur = m_astrFields.Count();
   // add some empty fields if needed
   for ( int nAdd = 0; nAdd < (int)(n - nCur + 1); nAdd++ )
     m_astrFields.Add(wxGetEmptyString());
@@ -405,8 +405,8 @@ bool FCEntry::Matches(const char *szWhat, int where, int how)
     }
 
     // look in additional email addresses too
-    uint nCount = m_astrEmails.Count();
-    for ( uint n = 0; n < nCount; n++ ) {
+    size_t nCount = m_astrEmails.Count();
+    for ( size_t n = 0; n < nCount; n++ ) {
       strField = m_astrEmails[n];
       strField.MakeLower();
       if ( strField.Matches(strWhat) )
@@ -421,7 +421,7 @@ bool FCEntry::Matches(const char *szWhat, int where, int how)
 void FCEntry::Load(const String& strValue)
 {
   wxASSERT( AdbField_NickName == 0 ); // must be always the first one
-  uint nField = 1;
+  size_t nField = 1;
 
   // first read all the fields (up to AdbField_Max)
   wxString strCurrent;
@@ -500,21 +500,21 @@ bool FCEntry::Save()
 {
   wxCHECK_MSG( m_bDirty, TRUE, "shouldn't save unmodified FCEntry" );
 
-  uint nFieldMax = m_astrFields.Count();
+  size_t nFieldMax = m_astrFields.Count();
 
   wxASSERT( nFieldMax <= AdbField_Max ); // too many fields?
   wxASSERT( AdbField_NickName == 0 );    // nickname must be always the first one
 
   wxString str, strValue;
-  for ( uint nField = 1; nField < nFieldMax; nField++ ) {
+  for ( size_t nField = 1; nField < nFieldMax; nField++ ) {
     // @@ in fact, it should be done if ms_aFields[nField].type == FieldList
     //    and not only for the emails, but so far it's the only list field we
     //    have
     if ( nField == AdbField_OtherEMails ) {
       // concatenate all e-mail addresses
-      uint nEMailCount = GetEMailCount();
+      size_t nEMailCount = GetEMailCount();
       str.Empty();
-      for ( uint nEMail = 0; nEMail < nEMailCount; nEMail++ ) {
+      for ( size_t nEMail = 0; nEMail < nEMailCount; nEMail++ ) {
         if ( nEMail > 0 )
           str += ',';
         for ( const char *pc = m_astrEmails[nEMail]; *pc != '\0'; pc++ ) {
@@ -596,7 +596,7 @@ wxString FCEntryGroup::GetPath() const
   return strPath;
 }
 
-uint FCEntryGroup::GetEntryNames(wxArrayString& aNames) const
+size_t FCEntryGroup::GetEntryNames(wxArrayString& aNames) const
 {
   SetOurPath();
 
@@ -616,7 +616,7 @@ uint FCEntryGroup::GetEntryNames(wxArrayString& aNames) const
   return aNames.Count();
 }
 
-uint FCEntryGroup::GetGroupNames(wxArrayString& aNames) const
+size_t FCEntryGroup::GetGroupNames(wxArrayString& aNames) const
 {
   SetOurPath();
 

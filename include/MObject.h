@@ -87,7 +87,7 @@ protected:
 private:
 #endif
 
-  uint m_nRef;  // always > 0 - as soon as it becomes 0 we delete ourselves
+  size_t m_nRef;  // always > 0 - as soon as it becomes 0 we delete ourselves
 };
 
 #ifdef   DEBUG

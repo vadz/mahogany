@@ -195,7 +195,7 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    };
    wxClientDC dc(this);
    long width, widthMax = 0;
-   uint n;
+   size_t n;
    for ( n = 0; n < WXSIZEOF(aszLabels); n++ )
    {
       if ( !bDoShow[n] )
@@ -394,8 +394,8 @@ wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
      }
 
      // free all entries
-     uint nCount = aEntries.Count();
-     for ( uint n = 0; n < nCount; n++ ) {
+     size_t nCount = aEntries.Count();
+     for ( size_t n = 0; n < nCount; n++ ) {
        aEntries[n]->Unlock();
      }
    }

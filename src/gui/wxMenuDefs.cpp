@@ -369,7 +369,7 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
     AddToolbarButton(toolbar, WXTBAR_SEP);
   }
 
-  for ( uint nButton = 0; aTbarIcons[nButton] != -1 ; nButton++ ) {
+  for ( size_t nButton = 0; aTbarIcons[nButton] != -1 ; nButton++ ) {
     AddToolbarButton(toolbar, aTbarIcons[nButton]);
   }
 

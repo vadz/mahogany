@@ -6,6 +6,9 @@
  * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.12  1998/08/19 13:39:58  VZ
+ * uint -> size_t change
+ *
  * Revision 1.11  1998/08/11 15:44:29  KB
  * minor fix
  *
@@ -153,7 +156,7 @@ public:
    wxTextCtrl *LayoutTextWithLabel(const char *szLabel, wxTextCtrl *top);
 
    // put a row of buttons in the bottom right corner
-   void LayoutButtons(uint nButtons, wxButton *aButtons[]);
+   void LayoutButtons(size_t nButtons, wxButton *aButtons[]);
 
    DECLARE_EVENT_TABLE()
 };
@@ -292,11 +295,11 @@ wxTextCtrl *wxAdbEditPanel::LayoutTextWithLabel(const char *szLabel,
    return text;
 }
 
-void wxAdbEditPanel::LayoutButtons(uint nButtons, wxButton *aButtons[])
+void wxAdbEditPanel::LayoutButtons(size_t nButtons, wxButton *aButtons[])
 {
    wxLayoutConstraints *c;
 
-   for ( uint n = 0; n < nButtons; n++ ) {
+   for ( size_t n = 0; n < nButtons; n++ ) {
       c = new wxLayoutConstraints;
       if ( n == 0 )
          c->right.SameAs(this, wxRight, 5);

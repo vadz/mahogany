@@ -64,15 +64,15 @@ public:
     // AdbEntry
   virtual AdbEntryGroup *GetGroup() const;
 
-  virtual void GetField(uint n, String *pstr) const;
+  virtual void GetField(size_t n, String *pstr) const;
 
-  virtual uint GetEMailCount() const           { return m_astrEmails.Count(); }
-  virtual void GetEMail(uint n, String *pstr) const { *pstr = m_astrEmails[n]; }
+  virtual size_t GetEMailCount() const           { return m_astrEmails.Count(); }
+  virtual void GetEMail(size_t n, String *pstr) const { *pstr = m_astrEmails[n]; }
 
   virtual void ClearDirty()    { m_bDirty = FALSE; }   
   virtual bool IsDirty() const { return m_bDirty; }
 
-  virtual void SetField(uint n, const String& strValue);
+  virtual void SetField(size_t n, const String& strValue);
   virtual void AddEMail(const String& strEMail)
     { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }
   virtual void ClearExtraEMails();
@@ -106,8 +106,8 @@ public:
     // AdbEntryGroup
   virtual AdbEntryGroup *GetGroup() const { return m_pParent; }
 
-  virtual uint GetEntryNames(wxArrayString& aNames) const;
-  virtual uint GetGroupNames(wxArrayString& aNames) const;
+  virtual size_t GetEntryNames(wxArrayString& aNames) const;
+  virtual size_t GetGroupNames(wxArrayString& aNames) const;
 
   virtual AdbEntry *GetEntry(const String& name) const;
   virtual AdbEntryGroup *GetGroup(const String& name) const;
@@ -149,9 +149,9 @@ public:
   virtual bool Exists(const String& path) const
     { return m_pRootGroup->Exists(path); }
 
-  virtual uint GetEntryNames(wxArrayString& aNames) const
+  virtual size_t GetEntryNames(wxArrayString& aNames) const
     { return m_pRootGroup->GetEntryNames(aNames); }
-  virtual uint GetGroupNames(wxArrayString& aNames) const
+  virtual size_t GetGroupNames(wxArrayString& aNames) const
     { return m_pRootGroup->GetGroupNames(aNames); }
 
   virtual AdbEntryGroup *GetGroup(const String& name) const
@@ -236,7 +236,7 @@ AdbEntryGroup *DummyEntry::GetGroup() const
 }
 
 // we store only the fields which were non-empty, so check the index
-void DummyEntry::GetField(uint n, String *pstr) const
+void DummyEntry::GetField(size_t n, String *pstr) const
 {
   if ( n < m_astrFields.Count() )
     *pstr = m_astrFields[n];
@@ -246,9 +246,9 @@ void DummyEntry::GetField(uint n, String *pstr) const
 
 // the problem here is that we may have only several first strings in the
 // m_astrFields array, so we need to add some before setting n-th field
-void DummyEntry::SetField(uint n, const wxString& strValue)
+void DummyEntry::SetField(size_t n, const wxString& strValue)
 {
-  uint nCur = m_astrFields.Count();
+  size_t nCur = m_astrFields.Count();
   // add some empty fields if needed
   for ( int nAdd = 0; nAdd < (int)(n - nCur + 1); nAdd++ )
     m_astrFields.Add(wxGetEmptyString());
@@ -281,7 +281,7 @@ DummyEntryGroup::~DummyEntryGroup()
 {
 }
 
-uint DummyEntryGroup::GetEntryNames(wxArrayString& aNames) const
+size_t DummyEntryGroup::GetEntryNames(wxArrayString& aNames) const
 {
   aNames.Empty();
   aNames.Add("Dummy entry");
@@ -289,7 +289,7 @@ uint DummyEntryGroup::GetEntryNames(wxArrayString& aNames) const
   return aNames.Count();
 }
 
-uint DummyEntryGroup::GetGroupNames(wxArrayString& aNames) const
+size_t DummyEntryGroup::GetGroupNames(wxArrayString& aNames) const
 {
   aNames.Empty();
 

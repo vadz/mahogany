@@ -390,9 +390,9 @@ MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
    wxArrayString aChoices;
    wxString strName, strEMail;
 
-   uint nEntryCount = aEntries.Count();
+   size_t nEntryCount = aEntries.Count();
    AdbEntry *pEntry;
-   for( uint nEntry = 0; nEntry < nEntryCount; nEntry++ )
+   for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
    {
       pEntry = aEntries[nEntry];
       pEntry->GetField(AdbField_FullName, &strName);
@@ -639,7 +639,7 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    wxClientDC dc(this);
    dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
    dc.GetTextExtent(_(label), &labelWidth, &labelHeight);
-   uint heightBtn = TEXT_HEIGHT_FROM_LABEL(labelHeight),
+   size_t heightBtn = TEXT_HEIGHT_FROM_LABEL(labelHeight),
         widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
 
    labelHeight *= 2;

@@ -296,9 +296,9 @@ void SaveArray(wxConfigBase& conf, const wxArrayString& astr, const char *szKey)
   conf.DeleteGroup(szKey);    // remove all old entries
   conf.SetPath(szKey);
 
-  uint nCount = astr.Count();
+  size_t nCount = astr.Count();
   wxString strKey;
-  for ( uint n = 0; n < nCount; n++ ) {
+  for ( size_t n = 0; n < nCount; n++ ) {
     strKey.Printf("%d", n);
     conf.Write(strKey, astr[n]);
   }
@@ -314,7 +314,7 @@ void RestoreArray(wxConfigBase& conf, wxArrayString& astr, const char *szKey)
   conf.SetPath(szKey);
 
   wxString strKey, strVal;
-  for ( uint n = 0; ; n++ ) {
+  for ( size_t n = 0; ; n++ ) {
     strKey.Printf("%d", n);
     if ( !conf.HasEntry(strKey) )
       break;

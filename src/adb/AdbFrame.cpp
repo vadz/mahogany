@@ -211,8 +211,8 @@ public:
 
   // accessors
     // access to children
-  uint GetChildrenCount() const { return m_children.Count(); }
-  AdbTreeElement *GetChild(uint n) const { return m_children[n]; }
+  size_t GetChildrenCount() const { return m_children.Count(); }
+  AdbTreeElement *GetChild(size_t n) const { return m_children[n]; }
     // returns TRUE after first call to ExpandFirstTime
   bool WasExpanded() const { return m_bWasExpanded; }
 
@@ -603,7 +603,7 @@ private:
   // put the buttons in the lower right corner, one after another but from
   // right to left (so to have correct TAB order they must be created in
   // opposite order)
-  void LayoutButtons(wxPanel *panel, uint nButtons, wxButton *aButtons[]);
+  void LayoutButtons(wxPanel *panel, size_t nButtons, wxButton *aButtons[]);
 
   // calculate the (approx.) minimal dimensions of the frame
   void SetMinSize();
@@ -764,7 +764,7 @@ class wxAdbPage : public wxPanel
 {
 public:
   wxAdbPage(wxNotebook *notebook, const char *title, int idImage,
-            uint nFirstField, uint nLastField);
+            size_t nFirstField, size_t nLastField);
 
   // notify the notebook that we became dirty
   void SetDirty() { ((wxAdbNotebook *)GetParent())->SetDirty(); }
@@ -772,7 +772,7 @@ public:
   // helpers
     // this function will create nCount controls using the information from
     // fields[] array and layout them nicely from the top to the bottom
-  void LayoutControls(uint nCount, ArrayControls& entries,
+  void LayoutControls(size_t nCount, ArrayControls& entries,
                       AdbTreeEntry::FieldInfo fields[]);
     // put the label and the control between 'last' and the bottom of the page
   void LayoutBelow(wxControl *control, wxStaticText *label, wxControl *last);
@@ -800,7 +800,7 @@ protected:
   ArrayControls  m_aEntries;
 
   // first and last fields of this page in AdbField enum
-  uint m_nFirstField, m_nLastField;
+  size_t m_nFirstField, m_nLastField;
 
   DECLARE_EVENT_TABLE()
 };
@@ -1218,7 +1218,7 @@ void wxAdbEditFrame::RestoreSettings1()
   wxArrayString astrAdb, astrProviders;
   bool bAllAdbOk = TRUE;
   wxString strFile, strProv;
-  uint nCountAdb = m_astrAdb.Count();
+  size_t nCountAdb = m_astrAdb.Count();
 
   // there should be one provider name for each address book
   if ( nCountAdb != m_astrProviders.Count() ) {
@@ -1228,14 +1228,14 @@ void wxAdbEditFrame::RestoreSettings1()
     // and we really don't know what went wrong - this can only happen if the
     // config file was hand (and wrongly) edited)
     m_astrProviders.Empty();
-    for ( uint n = 0; n < nCountAdb; n++ ) {
+    for ( size_t n = 0; n < nCountAdb; n++ ) {
       // empty string means that the provider is unknown
       m_astrProviders.Add(wxGetEmptyString());
     }
   }
 
   AdbDataProvider *pProvider;
-  for ( uint nAdb = 0; nAdb < nCountAdb; nAdb++ ) {
+  for ( size_t nAdb = 0; nAdb < nCountAdb; nAdb++ ) {
     strFile = m_astrAdb[nAdb];
     strProv = m_astrProviders[nAdb];
     // GetProviderByName would return NULL anyhow, but why call it in the
@@ -1278,10 +1278,10 @@ void wxAdbEditFrame::RestoreSettings2()
 {
   // expand all previously expanded tree branches
   bool bAllBranchesOk = TRUE;
-  uint nCountBranches = m_astrBranches.Count();
+  size_t nCountBranches = m_astrBranches.Count();
 
   AdbTreeElement *current;
-  for ( uint nBranch = 0; nBranch < nCountBranches; nBranch++ ) {
+  for ( size_t nBranch = 0; nBranch < nCountBranches; nBranch++ ) {
     current = ExpandBranch(m_astrBranches[nBranch]);
     if ( current == NULL ) {
       // it didn't find it
@@ -1316,10 +1316,10 @@ void wxAdbEditFrame::UpdateNotebook()
 }
 
 void wxAdbEditFrame::LayoutButtons(wxPanel *panel,
-                                   uint nButtons,
+                                   size_t nButtons,
                                    wxButton *aButtons[])
 {
-  uint n;
+  size_t n;
 
   // first determine the longest button caption
   wxClientDC dc(this);
@@ -1488,8 +1488,8 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
 
     int nIndex = m_astrAdb.Index(strName);
     wxASSERT( nIndex >= 0 );
-    m_astrAdb.Remove((uint)nIndex);
-    m_astrProviders.Remove((uint)nIndex);
+    m_astrAdb.Remove((size_t)nIndex);
+    m_astrProviders.Remove((size_t)nIndex);
   }
   else {
     // it's a normal entry or group
@@ -1534,7 +1534,7 @@ void wxAdbEditFrame::DoRenameNode()
 
 void wxAdbEditFrame::AdvanceToNextFound()
 {
-  uint nCount = m_aFindResults.Count();
+  size_t nCount = m_aFindResults.Count();
   if ( nCount == 0 )
     wxLogWarning(_("Can't find any matches for '%s'."), m_strFind.c_str());
   else {
@@ -1544,7 +1544,7 @@ void wxAdbEditFrame::AdvanceToNextFound()
       wxLogStatus(this, _("Search for '%s' found %d entries."),
                   m_strFind.c_str(), nCount);
     }
-    else if ( (uint)++m_nFindIndex == nCount ) {
+    else if ( (size_t)++m_nFindIndex == nCount ) {
       wxLogStatus(this, _("Search wrapped to the beginning."));
       m_nFindIndex = 0;
     }
@@ -1580,8 +1580,8 @@ void wxAdbEditFrame::DoFind(const char *szFindWhat, AdbTreeNode *root)
     root->LoadChildren();
 
   // depth first search the tree recursively calling ourselves
-  uint nCount = root->GetChildrenCount();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = root->GetChildrenCount();
+  for ( size_t n = 0; n < nCount; n++ ) {
     AdbTreeElement *current = root->GetChild(n);
     if ( current->IsGroup() )
       DoFind(szFindWhat, (AdbTreeNode *)current);
@@ -1701,7 +1701,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 {
   // what kind of ADB to create, i.e. which provider to use?
 
-  uint nProvCount = 0;
+  size_t nProvCount = 0;
   AdbDataProvider::AdbProviderInfo *info = AdbDataProvider::ms_listProviders;
   while ( info ) {
     if ( info->bSupportsCreation ) {
@@ -1717,7 +1717,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
   wxString *aPrompts = new wxString[nProvCount];
 
   info = AdbDataProvider::ms_listProviders;
-  uint nProv = 0;
+  size_t nProv = 0;
   while ( info ) {
     if ( info->bSupportsCreation ) {
       aPrompts[nProv++] = info->szFmtName;
@@ -1749,9 +1749,9 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
   }
 
   // find the adb name format for this provider
-  wxASSERT( (uint)nChoice < nProvCount );
+  wxASSERT( (size_t)nChoice < nProvCount );
   info = AdbDataProvider::ms_listProviders;
-  for ( nProv = 0; nProv != (uint)nChoice; nProv++ ) {
+  for ( nProv = 0; nProv != (size_t)nChoice; nProv++ ) {
     while ( !info->bSupportsCreation ) {
       // skip the providers we didn't put into aPrompts array
       info = info->pNext;  
@@ -2044,7 +2044,7 @@ AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
 
   wxArrayString aComponents;
   wxSplitPath(aComponents, strEntry);
-  uint n, nCount = aComponents.Count();
+  size_t n, nCount = aComponents.Count();
   for ( n = 0; n < nCount; n++ ) {
     if ( current->IsGroup() ) {
       // we can safely cast it to AdbTreeNode
@@ -2102,8 +2102,8 @@ bool wxAdbEditFrame::SaveExpandedBranches(AdbTreeNode *group)
   if ( m_treeAdb->IsItemExpanded(group->GetId()) ) {
     // recursively save the expanded branches of our children
     bool bHasExpandedChild = FALSE;
-    uint nChildren = group->GetChildrenCount();
-    for ( uint n = 0; n < nChildren; n++ ) {
+    size_t nChildren = group->GetChildrenCount();
+    for ( size_t n = 0; n < nChildren; n++ ) {
       AdbTreeElement *child = group->GetChild(n);
       if ( child->IsGroup() && SaveExpandedBranches((AdbTreeNode *)child) )
         bHasExpandedChild = TRUE;
@@ -2175,18 +2175,18 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
   dc.GetTextExtent(label, &widthLabel, &heightLabel);
 
-  uint heightText = TEXT_HEIGHT_FROM_LABEL(heightLabel);
-  uint heightBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
+  size_t heightText = TEXT_HEIGHT_FROM_LABEL(heightLabel);
+  size_t heightBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
        widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
-  uint widthDlg = 5*widthBtn,
+  size_t widthDlg = 5*widthBtn,
        heightDlg = heightText + 8*heightLabel + 8*LAYOUT_Y_MARGIN + heightBtn;
-  uint widthText = widthDlg - 5*LAYOUT_X_MARGIN - widthLabel;
+  size_t widthText = widthDlg - 5*LAYOUT_X_MARGIN - widthLabel;
   SetClientSize(widthDlg, heightDlg);
 
   // create child controls
   // ---------------------
   
-  uint x = 2*LAYOUT_X_MARGIN,
+  size_t x = 2*LAYOUT_X_MARGIN,
        y = 2*LAYOUT_Y_MARGIN,
        dy = (heightText - heightLabel)/2;
 
@@ -2204,7 +2204,7 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   
   // settings box and checkboxes
   y += heightText;
-  uint widthBox = widthDlg - 4*LAYOUT_X_MARGIN,
+  size_t widthBox = widthDlg - 4*LAYOUT_X_MARGIN,
        widthChk = widthBox/2 - 4*LAYOUT_X_MARGIN;
 
   (void)new wxStaticBox(this, -1, "&How", wxPoint(x, y),
@@ -2329,16 +2329,16 @@ wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
   dc.GetTextExtent(label, &widthLabel, &heightLabel);
 
-  uint widthText = widthLabel,
+  size_t widthText = widthLabel,
        heightText = TEXT_HEIGHT_FROM_LABEL(heightLabel);
-  uint heightBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
+  size_t heightBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
        widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
-  uint widthDlg = widthLabel + widthText + 5*LAYOUT_X_MARGIN,
+  size_t widthDlg = widthLabel + widthText + 5*LAYOUT_X_MARGIN,
        heightDlg = 2*heightText + 6*LAYOUT_Y_MARGIN + heightBtn;
 
   SetClientSize(widthDlg, heightDlg);
 
-  uint x = 2*LAYOUT_X_MARGIN,
+  size_t x = 2*LAYOUT_X_MARGIN,
        y = 2*LAYOUT_Y_MARGIN,
        dy = (heightText - heightLabel) / 2;
 
@@ -2426,7 +2426,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   // translated lables
   const char *labelsT[WXSIZEOF(labels)];
 
-  uint n, x, y, dy;
+  size_t n, x, y, dy;
 
   // first determine the longest label
   wxClientDC dc(this);
@@ -2440,11 +2440,11 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   }
 
   // @@ just don't look at this mess, ok?
-  uint widthText = 2*widthLabelMax,
+  size_t widthText = 2*widthLabelMax,
        heightText = TEXT_HEIGHT_FROM_LABEL(heightLabel);
-  uint heightBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
+  size_t heightBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
        widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
-  uint widthDlg = widthLabelMax + widthText + 5*LAYOUT_X_MARGIN,
+  size_t widthDlg = widthLabelMax + widthText + 5*LAYOUT_X_MARGIN,
        heightDlg = WXSIZEOF(labels)*heightText + 5*LAYOUT_Y_MARGIN + heightBtn;
 
   SetClientSize(widthDlg, heightDlg);
@@ -2559,7 +2559,7 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
 
   wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
 
-  for ( uint n = 0; n < WXSIZEOF(aszImages); n++ ) {
+  for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ ) {
     imageList->Add(wxBitmap(aszImages[n]));
   }
 
@@ -2648,7 +2648,7 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
   };
 
   wxImageList *imageList = new wxImageList(32, 32, FALSE, WXSIZEOF(aszImages));
-  for ( uint n = 0; n < WXSIZEOF(aszImages); n++ ) {
+  for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ ) {
     imageList->Add(wxBitmap(aszImages[n]));
   }
 
@@ -2667,7 +2667,7 @@ void wxAdbNotebook::ChangeData(AdbTreeEntry *pEntry)
 void wxAdbNotebook::SaveChanges()
 {
   if ( m_pAdbEntry ) {
-    for ( uint n = 0; n < Page_Max; n++ ) {
+    for ( size_t n = 0; n < Page_Max; n++ ) {
       ((wxAdbPage *)GetPage(n))->SaveChanges(*m_pAdbEntry);
     }
 
@@ -2697,7 +2697,7 @@ void wxAdbNotebook::SetData(AdbTreeEntry *pEntry)
 
   // if we have got some data - show it
   if ( m_pAdbEntry ) {
-    for ( uint n = 0; n < Page_Max; n++ ) {
+    for ( size_t n = 0; n < Page_Max; n++ ) {
       ((wxAdbPage *)GetPage(n))->SetData(*m_pAdbEntry);
     }
   }
@@ -2720,7 +2720,7 @@ wxAdbNotebook::~wxAdbNotebook()
 // base notebook page
 // -----------------------------------------------------------------------------
 wxAdbPage::wxAdbPage(wxNotebook *notebook, const char *title, int idImage,
-                     uint nFirstField, uint nLastField)
+                     size_t nFirstField, size_t nLastField)
          : wxPanel(notebook, -1)
 {
   m_nFirstField = nFirstField;
@@ -2739,7 +2739,7 @@ void wxAdbPage::SetData(const AdbEntry& data)
 {
   wxString str;
   wxTextCtrl *text;
-  for ( uint n = m_nFirstField; n < m_nLastField; n++ ) {
+  for ( size_t n = m_nFirstField; n < m_nLastField; n++ ) {
     switch ( AdbTreeEntry::ms_aFields[n].type ) {
       case AdbTreeEntry::FieldDate:
       case AdbTreeEntry::FieldURL:
@@ -2769,7 +2769,7 @@ void wxAdbPage::SetData(const AdbEntry& data)
 void wxAdbPage::SaveChanges(AdbEntry& data)
 {
   wxTextCtrl *text;
-  for ( uint n = m_nFirstField; n < m_nLastField; n++ ) {
+  for ( size_t n = m_nFirstField; n < m_nLastField; n++ ) {
     switch ( AdbTreeEntry::ms_aFields[n].type ) {
       case AdbTreeEntry::FieldDate:
       case AdbTreeEntry::FieldURL:
@@ -2891,7 +2891,7 @@ wxListBox *wxAdbPage::CreateListBox(const char *label, wxControl *last)
   );
 
   // determine the longest button label
-  uint nBtn;
+  size_t nBtn;
   wxClientDC dc(this);
   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
   long width, widthMax = 0;
@@ -2945,13 +2945,13 @@ wxCheckBox *wxAdbPage::CreateCheckBox(const char *label, wxControl *last)
 }
 
 // create the controls and layout them
-void wxAdbPage::LayoutControls(uint nCount,
+void wxAdbPage::LayoutControls(size_t nCount,
                                ArrayControls& entries,
                                AdbTreeEntry::FieldInfo fields[])
 {
   wxASSERT( entries.IsEmpty() );  // we create the controls ourselves
 
-  uint n;
+  size_t n;
 
   // first determine the longest label
   wxClientDC dc(this);
@@ -3043,8 +3043,8 @@ void wxAdbEMailPage::SetData(const AdbEntry& data)
   wxListBox *listbox = GetListBox();
   wxString str;
   listbox->Clear();
-  uint nCount = data.GetEMailCount();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = data.GetEMailCount();
+  for ( size_t n = 0; n < nCount; n++ ) {
     data.GetEMail(n, &str);
     listbox->Append(str);
   }
@@ -3061,8 +3061,8 @@ void wxAdbEMailPage::SaveChanges(AdbEntry& data)
   if ( m_bListboxModified ) {
     data.ClearExtraEMails();
     wxListBox *listbox = GetListBox();
-    uint nCount = listbox->Number();
-    for ( uint n = 0; n < nCount; n++ ) {
+    size_t nCount = listbox->Number();
+    for ( size_t n = 0; n < nCount; n++ ) {
       data.AddEMail(listbox->GetString(n));
     }
   }
@@ -3257,8 +3257,8 @@ void AdbTreeNode::CopyData(const AdbTreeNode& other)
   wxASSERT( m_children.Count() == 0 ); // we must be empty
 
   AdbTreeElement *child, *current;
-  uint nCount = other.m_children.Count();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = other.m_children.Count();
+  for ( size_t n = 0; n < nCount; n++ ) {
     current = other.m_children[n];
     if ( current->IsGroup() )
       child = new AdbTreeNode(current->GetName(), this);
@@ -3270,8 +3270,8 @@ void AdbTreeNode::CopyData(const AdbTreeNode& other)
 
 void AdbTreeNode::ClearDirty()
 {
-  uint nCount = m_children.Count();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = m_children.Count();
+  for ( size_t n = 0; n < nCount; n++ ) {
     m_children[n]->ClearDirtyFlag();
   }
 }
@@ -3288,7 +3288,7 @@ void AdbTreeNode::LoadChildren()
   wxCHECK_RET( m_pGroup, "AdbTreeNode without associated AdbEntryGroup" );
 
   wxArrayString aNames;
-  uint n, nCount = m_pGroup->GetEntryNames(aNames);
+  size_t n, nCount = m_pGroup->GetEntryNames(aNames);
   for ( n = 0; n < nCount; n++ ) {
     (void)new AdbTreeEntry(aNames[n], this);
   }
@@ -3304,8 +3304,8 @@ void AdbTreeNode::LoadAllData()
   LoadChildren(); // NOP if it was already done
 
   AdbTreeElement *current;
-  uint nCount = m_children.Count();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = m_children.Count();
+  for ( size_t n = 0; n < nCount; n++ ) {
     current = m_children[n];
     if ( current->IsGroup() )
       ((AdbTreeNode *)current)->LoadAllData();
@@ -3379,8 +3379,8 @@ AdbTreeElement *AdbTreeNode::FindChild(const char *szName)
 {
   // @@ we should sort the items in alphabetical order and use binary search
   //    instead of linear search
-  uint nCount = m_children.Count();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = m_children.Count();
+  for ( size_t n = 0; n < nCount; n++ ) {
     if ( m_children[n]->GetName() == szName )
       return m_children[n];
   }
@@ -3397,8 +3397,8 @@ bool AdbTreeNode::ExpandFirstTime(wxTreeCtrl& tree)
 
   LoadChildren();
 
-  uint nCount = GetChildrenCount();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = GetChildrenCount();
+  for ( size_t n = 0; n < nCount; n++ ) {
     GetChild(n)->TreeInsert(tree);
   }
 
@@ -3421,8 +3421,8 @@ wxString AdbTreeNode::GetWhere() const
 
 AdbTreeNode::~AdbTreeNode()
 {
-  uint nCount = m_children.Count();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = m_children.Count();
+  for ( size_t n = 0; n < nCount; n++ ) {
     AdbTreeElement *child = m_children[n];
     delete child;
   }
@@ -3453,8 +3453,8 @@ AdbTreeBook::AdbTreeBook(AdbTreeRoot *root,
 AdbTreeBook::~AdbTreeBook()
 {
   // must delete children first to give them the last chance to save changes
-  uint nCount = m_children.Count();
-  for ( uint n = 0; n < nCount; n++ )
+  size_t nCount = m_children.Count();
+  for ( size_t n = 0; n < nCount; n++ )
     delete m_children[n];
   m_children.Clear();
 
@@ -3480,9 +3480,9 @@ AdbTreeRoot::AdbTreeRoot(wxArrayString& astrAdb, wxArrayString& astrProviders)
 // find the ADB by name
 AdbTreeElement *AdbTreeRoot::FindChild(const char *szName)
 {
-  uint nCount = m_children.Count();
+  size_t nCount = m_children.Count();
   wxString strAdbName;
-  for ( uint n = 0; n < nCount; n++ ) {
+  for ( size_t n = 0; n < nCount; n++ ) {
     strAdbName = ((AdbTreeBook *)m_children[n])->GetAdbName();
 
     if ( strAdbName.IsSameAs(szName, wxARE_FILENAMES_CASE_SENSITIVE) )
@@ -3501,8 +3501,8 @@ void AdbTreeRoot::LoadChildren()
 
   wxString strProv;
   AdbDataProvider *pProvider;
-  uint nAdbCount = m_astrAdb.Count();
-  for ( uint nAdb = 0; nAdb < nAdbCount; nAdb++ ) {
+  size_t nAdbCount = m_astrAdb.Count();
+  for ( size_t nAdb = 0; nAdb < nAdbCount; nAdb++ ) {
     strProv = m_astrProviders[nAdb];
     if ( strProv.IsEmpty() )
       pProvider = NULL;

@@ -71,8 +71,8 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
                         int how)
 {
   wxArrayString aNames;
-  uint nGroupCount = pGroup->GetGroupNames(aNames);
-  for ( uint nGroup = 0; nGroup < nGroupCount; nGroup++ ) {
+  size_t nGroupCount = pGroup->GetGroupNames(aNames);
+  for ( size_t nGroup = 0; nGroup < nGroupCount; nGroup++ ) {
     AdbEntryGroup *pSubGroup = pGroup->GetGroup(aNames[nGroup]);
 
     GroupLookup(aEntries, pSubGroup, what, where, how);
@@ -81,8 +81,8 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
   }
 
   aNames.Empty();
-  uint nEntryCount = pGroup->GetEntryNames(aNames);
-  for ( uint nEntry = 0; nEntry < nEntryCount; nEntry++ ) {
+  size_t nEntryCount = pGroup->GetEntryNames(aNames);
+  for ( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ ) {
     AdbEntry *pEntry = pGroup->GetEntry(aNames[nEntry]);
 
     if ( pEntry->Matches(what, where, how) ) {
@@ -105,8 +105,8 @@ bool AdbLookup(ArrayAdbEntries& aEntries,
   if ( paBooks == NULL || paBooks->IsEmpty() )
     paBooks = &gs_cache;
 
-  uint nBookCount = paBooks->Count();
-  for ( uint nBook = 0; nBook < nBookCount; nBook++ ) {
+  size_t nBookCount = paBooks->Count();
+  for ( size_t nBook = 0; nBook < nBookCount; nBook++ ) {
     GroupLookup(aEntries, (*paBooks)[nBook], what, where, how);
   }
 
@@ -235,8 +235,8 @@ void AdbManager::LoadAll()
 
   wxString strProv;
   AdbDataProvider *pProvider;
-  uint nCount = astrAdb.Count();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = astrAdb.Count();
+  for ( size_t n = 0; n < nCount; n++ ) {
     if ( n < astrProv.Count() )
       strProv = astrProv[n];
     else
@@ -258,8 +258,8 @@ void AdbManager::LoadAll()
 
 void AdbManager::ClearCache()
 {
-  uint nCount = gs_cache.Count();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = gs_cache.Count();
+  for ( size_t n = 0; n < nCount; n++ ) {
     gs_cache[n]->Unlock();
   }
 
@@ -277,8 +277,8 @@ AdbManager::~AdbManager()
 AdbBook *AdbManager::FindInCache(const String& name) const
 {
   AdbBook *book;
-  uint nCount = gs_cache.Count();
-  for ( uint n = 0; n < nCount; n++ ) {
+  size_t nCount = gs_cache.Count();
+  for ( size_t n = 0; n < nCount; n++ ) {
     book = gs_cache[n];
     if ( name == book->GetName() )
       return book;

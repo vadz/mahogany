@@ -123,15 +123,15 @@ class AdbEntry : public AdbElement
 public:
   // accessors
     /// retrieve the value of a field (see enum AdbField for index values)
-  virtual void GetField(uint n, String *pstr) const = 0;
+  virtual void GetField(size_t n, String *pstr) const = 0;
     /// get the count of additional e-mail addresses (i.e. except the 1st one)
-  virtual uint GetEMailCount() const = 0;
+  virtual size_t GetEMailCount() const = 0;
     /// get an additional e-mail adderss
-  virtual void GetEMail(uint n, String *pstr) const = 0;
+  virtual void GetEMail(size_t n, String *pstr) const = 0;
 
   // changing the data
     /// set any text field with this function
-  virtual void SetField(uint n, const String& strValue) = 0;
+  virtual void SetField(size_t n, const String& strValue) = 0;
     /// add an additional e-mail (primary one is changed with SetField)
   virtual void AddEMail(const String& strEMail) = 0;
     /// delete all additional e-mails
@@ -160,7 +160,7 @@ class AdbEntryGroup : public AdbElement
 public:
   // accessors
     /// get the names of all entries, returns the number of them
-  virtual uint GetEntryNames(wxArrayString& aNames) const = 0;
+  virtual size_t GetEntryNames(wxArrayString& aNames) const = 0;
 
     /// get entry by name
   virtual AdbEntry *GetEntry(const String& name) const = 0;
@@ -169,7 +169,7 @@ public:
   virtual bool Exists(const String& path) const = 0;
 
     /// get the names of all groups, returns the number of them
-  virtual uint GetGroupNames(wxArrayString& aNames) const = 0;
+  virtual size_t GetGroupNames(wxArrayString& aNames) const = 0;
 
     /// get the name of the group/group by name
   virtual AdbEntryGroup *GetGroup(const String& name) const = 0;

@@ -42,7 +42,7 @@ static ArrayObjects gs_aObjects;
 // ----------------------------------------------------------------------------
 void MObject::CheckLeaks()
 {
-  uint nCount = gs_aObjects.Count();
+  size_t nCount = gs_aObjects.Count();
 
   if ( nCount > 0 ) {
     wxFAIL_MSG("MObject memory leaks detected, see debug log for details.");
@@ -50,7 +50,7 @@ void MObject::CheckLeaks()
     wxLogDebug("%d MObjects leaked:", nCount);
   }
 
-  for ( uint n = 0; n < nCount; n++ ) {
+  for ( size_t n = 0; n < nCount; n++ ) {
     wxLogDebug("Object %d: %s", n, gs_aObjects[n]->Dump().c_str());
   }
 }
