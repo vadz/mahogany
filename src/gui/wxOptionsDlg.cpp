@@ -518,8 +518,18 @@ enum ConfigFields
 
    ConfigField_HelpersLast = ConfigField_PGPGetPubKey,
 
-   // other options
+#ifdef USE_TEST_PAGE
+   ConfigField_TestFirst = ConfigField_HelpersLast,
+   ConfigField_TestMessage,
+   ConfigField_TestFolder,
+   ConfigField_TestLast = ConfigField_TestFolder,
+
+   ConfigField_OthersFirst = ConfigField_TestLast,
+#else // !USE_TEST_PAGE
    ConfigField_OthersFirst = ConfigField_HelpersLast,
+#endif // USE_TEST_PAGE/!USE_TEST_PAGE
+
+   // other options
    ConfigField_LogHelp,
    ConfigField_ShowLog,
    ConfigField_LogToFile,
@@ -1590,6 +1600,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("GPG &key server"),             Field_Text,    -1                      },
    { gettext_noop("Get GPG key &from server"),    Field_Bool,    -1                      },
 
+   // test page
+#ifdef USE_TEST_PAGE
+   { _T("This is a test page used only for debugging.\n")
+     _T("Normally you shouldn't see it at all."), Field_Message, -1 },
+   { _T("Test folder entry"), Field_Folder, -1 },
+#endif // USE_TEST_PAGE
+
    // other options
    { gettext_noop("Mahogany may log everything into the log window, a file\n"
                   "or both simultaneously. Additionally, you may enable mail\n"
@@ -2032,6 +2049,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_PGP_KEYSERVER),
    CONFIG_ENTRY(MP_PGP_GET_PUBKEY),
 
+#ifdef USE_TEST_PAGE
+   CONFIG_NONE(),
+   CONFIG_NONE(),
+#endif // USE_TEST_PAGE
+
    // other
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SHOWLOG),
@@ -2079,6 +2101,17 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 
 #undef CONFIG_ENTRY
 #undef CONFIG_NONE
+
+// check that we didn't forget to update one of the arrays...
+wxCOMPILE_TIME_ASSERT(
+      WXSIZEOF(wxOptionsPageStandard::ms_aConfigDefaults) == ConfigField_Max,
+      MismatchFieldDefaults
+   );
+
+wxCOMPILE_TIME_ASSERT(
+      WXSIZEOF(wxOptionsPageStandard::ms_aFields) == ConfigField_Max,
+      MismatchFieldDescs
+   );
 
 // ============================================================================
 // implementation
@@ -2995,12 +3028,6 @@ wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
 {
    // nFirst + 1 really must be unsigned
    ASSERT_MSG( nFirst >= -1, _T("bad parameret in wxOptionsPageStandard ctor") );
-
-   // check that we didn't forget to update one of the arrays...
-   ASSERT_MSG( WXSIZEOF(ms_aConfigDefaults) == ConfigField_Max,
-               _T("defaults array size mismatch") );
-   ASSERT_MSG( WXSIZEOF(ms_aFields) == ConfigField_Max,
-               _T("fields array size mismatch") );
 }
 
 // ----------------------------------------------------------------------------
@@ -3842,6 +3869,24 @@ void wxOptionsPageSync::OnButton(wxCommandEvent& event)
 }
 
 // ----------------------------------------------------------------------------
+// wxOptionsPageTest
+// ----------------------------------------------------------------------------
+
+#ifdef USE_TEST_PAGE
+
+wxOptionsPageTest::wxOptionsPageTest(wxNotebook *parent,
+                                     Profile *profile)
+                 : wxOptionsPageStandard(parent,
+                                         _T("Test page"),
+                                         profile,
+                                         ConfigField_TestFirst,
+                                         ConfigField_TestLast)
+{
+}
+
+#endif // USE_TEST_PAGE
+
+// ----------------------------------------------------------------------------
 // wxOptionsPageOthers
 // ----------------------------------------------------------------------------
 
@@ -4186,17 +4231,24 @@ const char *wxOptionsNotebook::ms_aszImages[] =
    "adrbook",
    "helpers",
    "sync",
+#ifdef USE_TEST_PAGE
+   "unknown",
+#endif // USE_TEST_PAGE
    "miscopt",
    NULL
 };
+
+// don't forget to update both the array above and the enum when modifying
+// either of them!
+wxCOMPILE_TIME_ASSERT(
+      WXSIZEOF(wxOptionsNotebook::ms_aszImages) == OptionsPage_Max + 1,
+      MismatchImagesAndPages
+   );
 
 // create the control and add pages too
 wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
                  : wxNotebookWithImages("OptionsNotebook", parent, ms_aszImages)
 {
-   // don't forget to update both the array above and the enum!
-   wxASSERT( WXSIZEOF(ms_aszImages) == OptionsPage_Max + 1);
-
    Profile *profile = GetProfile();
 
    // create and add the pages
@@ -4214,6 +4266,9 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    new wxOptionsPageAdb(this, profile);
    new wxOptionsPageHelpers(this, profile);
    new wxOptionsPageSync(this, profile);
+#ifdef USE_TEST_PAGE
+   new wxOptionsPageTest(this, profile);
+#endif // USE_TEST_PAGE
    new wxOptionsPageOthers(this, profile);
 
    profile->DecRef();

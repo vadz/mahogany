@@ -598,4 +598,15 @@ private:
    DECLARE_NO_COPY_CLASS(wxOptionsPageOthers)
 };
 
+#ifdef USE_TEST_PAGE
+
+// test page just for testing layout &c
+class wxOptionsPageTest : public wxOptionsPageStandard
+{
+public:
+   wxOptionsPageTest(wxNotebook *parent, Profile *profile);
+};
+
+#endif // USE_TEST_PAGE
+
 #endif // _GUI_WXOPTIONSPAGE_H
