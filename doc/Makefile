@@ -26,7 +26,7 @@ subdirs: docxx.sty html.sty
 	set -e; for i in $(SUB_DIRS); \
 	do if [ ! -d $$i ]; then mkdir $$i; fi; \
 	   cp -f docxx.sty html.sty $$i; \
-	   $(MAKE) DIR=$$i -f ../.src/Makefile.sub -C $$i setup all; \
+	   $(MAKE) DIR=$$i -f ../.src/Makefile.sub -C $$i all; \
 	done
 	
 install2:
@@ -61,9 +61,8 @@ makemap: .src/wxhelp.map0 subdirs
 	sort -n -o wxhelp.map .src/wxhelp.map0 wxhelp.map
 
 clean:
-	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab *.ps *.toc *.pdf
+	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab *.ps *.toc *.pdf tmp.*
 	$(RM) -r $(SUB_DIRS) classes classes.tex wxhelp.map
-	$(RM) tmp.*
 
 test:
 	@if test -f Manual.tex; then \

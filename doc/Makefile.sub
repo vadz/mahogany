@@ -1,9 +1,6 @@
 # Makefile for doc sub-directories
 # $Id$
 
-FILES_TEX=$(DIR).htex
-FILES_PS=$(FILES_TEX:.htex=.ps)
-
 include ../../makeopts
 
 all:	wxhelp.map
@@ -11,21 +8,17 @@ all:	wxhelp.map
 
 #include ../../makerules
 
-wxhelp.map: ../$(DIR).aux pics
-	cp -f ../.src/$(DIR).htex ../$(DIR).aux .
+wxhelp.map: ../.src/$(DIR).htex ../$(DIR).aux
+	@ln -sf ../.src/$(DIR).htex ../$(DIR).aux ../.src/pics .
+	@$(RM) -r $(DIR)
+	@mkdir $(DIR)
 	$(LATEX2HTML) -debug $(DIR).htex
-	@$(RM) -r tmp
-	@mkdir tmp
-	cd tmp && ../../../.src/extra/scripts/html2wxhelp > ../wxhelp.map
-
-pics:	../.src/pics
-	ln -sf ../.src/pics pics
+	cd $(DIR) && ../../../.src/extra/scripts/html2wxhelp > ../wxhelp.map
 
 install: wxhelp.map
 	$(INSTALL) -d $(DOCDIR)/$(DIR)
-	$(INSTALL_DATA) `find tmp -type f` $(DOCDIR)/$(DIR)/
+	for i in `find $(DIR) -type f`; \
+	do $(INSTALL_DATA) $$i $(DOCDIR)/$(DIR); \
+	done
 
-clean:
-	$(RM) -r tmp pics
-
-.PHONY:	all install ps clean setup index copyfiles
+.PHONY:	all install
