@@ -157,6 +157,7 @@ static const struct
    { "ConfirmResend",            gettext_noop("confirm resending messages") },
    { "ConfirmZap",               gettext_noop("confirm permanently deleting messages") },
    { "RememberPGPPassphrase",    gettext_noop("remember PGP/GPG passphrase in memory") },
+   { "GetPGPPubKey",             gettext_noop("retrieve PGP/GPG public keys from key server") },
    { "SearchAgainIfNoMatch",     gettext_noop("propose to search again if no matches were found") },
 };
 
