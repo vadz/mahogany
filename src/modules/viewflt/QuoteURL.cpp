@@ -315,10 +315,20 @@ CountQuoteLevel(const char *string,
          break;
       }
 
+      // is the next line starts in the same way as this one?
       if ( sameAsNext != Line_Different )
       {
-         // so far it does
-         if ( *next != *c && !IsBlankLine(next) )
+         if ( IsBlankLine(next) )
+         {
+            // special case of bullet lists using "*"
+            if ( *c == '*' && (sameAsPrev == Line_Blank ||
+                     (sameAsPrev == Line_Unknown && IsBlankLine(prev))) )
+            {
+               // looks like just such a list
+               break;
+            }
+         }
+         else if ( *next != *c )    // so far it does...
          {
             // but then it diverges, so this is unlikely to be a quote marker
             sameAsNext = Line_Different;
