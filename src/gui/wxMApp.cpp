@@ -125,7 +125,11 @@ public:
       { m_started = TRUE; return wxTimer::Start(millisecs, oneShot); }
 
    virtual void Notify()
-      { wxLogTrace("Collection timer expired."); mApplication->GetMailCollector()->Collect(); }
+      {
+         wxLogTrace("Collection timer expired.");
+         mApplication->UpdateOutboxStatus();
+         mApplication->GetMailCollector()->Collect();
+      }
 
     virtual void Stop()
       { if ( m_started ) wxTimer::Stop(); }
@@ -974,11 +978,62 @@ wxMApp::UpdateOnlineDisplay(void)
       mbar->Enable((int)WXMENU_FILE_NET_ON, m_DialupSupport);
 //    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
    }
-   
-   static int widths[2] = { -1, 80 };
-   sbar->SetFieldsCount(2, widths);
-   sbar->SetStatusText(online ? _("Online"):_("Offline"), 1);
+
+   int field = GetStatusField(SF_ONLINE);
+   UpdateStatusBar(field+1, TRUE);
+   sbar->SetStatusText(online ? _("Online"):_("Offline"), field);
 }
+
+void
+wxMApp::UpdateStatusBar(int nfields, bool isminimum)
+{
+   ASSERT(nfields < SF_MAXIMUM);
+   ASSERT(nfields >= 0);
+   ASSERT(m_topLevelFrame);
+   ASSERT(m_topLevelFrame->GetStatusBar());
+   int n = nfields;
+   wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
+   if(isminimum && sbar->GetFieldsCount() > nfields)
+      n = sbar->GetFieldsCount();
+
+   int widths[SF_MAXIMUM];
+   widths[0] = -1; //flexible
+   if(m_DialupSupport)
+      widths[GetStatusField(SF_ONLINE)] = 70;
+   if(m_UseOutbox)
+      widths[GetStatusField(SF_OUTBOX)] = 100;
+   sbar->SetFieldsCount(n, widths);
+}
+
+void
+wxMApp::UpdateOutboxStatus(void)
+{
+   ASSERT(m_topLevelFrame);
+   
+   UIdType nNNTP, nSMTP;
+   bool enable = CheckOutbox(&nSMTP, &nNNTP);
+   
+   // only enable menu item if outbox is used and contains messages:
+   ASSERT(m_topLevelFrame->GetMenuBar());
+   m_topLevelFrame->GetMenuBar()->Enable(
+      (int)WXMENU_FILE_SEND_OUTBOX,enable && m_UseOutbox);
+
+   if(! m_UseOutbox)
+         return;
+   // update status bar
+   String msg;
+   if(nNNTP == 0 && nSMTP == 0)
+      msg = _("Outbox empty");
+   else
+      msg.Printf(_("Outbox %lu, %lu"),
+                 (unsigned long) nSMTP,
+                 (unsigned long) nNNTP);
+
+   int field = GetStatusField(SF_OUTBOX);
+   UpdateStatusBar(field+1, TRUE);
+   m_topLevelFrame->GetStatusBar()->SetStatusText(msg, field);
+}
+
 
 void
 wxMApp::SetupOnlineManager(void)
@@ -1017,7 +1072,7 @@ wxMApp::SetupOnlineManager(void)
 }
 
 bool
-wxMApp::IsOnline(void)
+wxMApp::IsOnline(void) const
 {
    if(! m_DialupSupport)
       return TRUE; // no dialup--> always connected
@@ -1026,11 +1081,11 @@ wxMApp::IsOnline(void)
 }
 
 void
-wxMApp::GoOnline(void)
+wxMApp::GoOnline(void) const
 {
    if(m_OnlineManager->IsOnline())
    {
-      m_IsOnline = TRUE;
+      ((wxMApp *)this)->m_IsOnline = TRUE;
       ERRORMESSAGE((_("Dial-up network is already online.")));
       return;
    }
@@ -1038,11 +1093,11 @@ wxMApp::GoOnline(void)
 }
 
 void
-wxMApp::GoOffline(void)
+wxMApp::GoOffline(void) const
 {
    if(! m_OnlineManager->IsOnline())
    {
-      m_IsOnline = FALSE;
+      ((wxMApp *)this)->m_IsOnline = FALSE;
       ERRORMESSAGE((_("Dial-up network is already offline.")));
       return;
    }

@@ -125,6 +125,8 @@ MAppBase::MAppBase()
    m_MailCollector = NULL;
    m_KeepOpenFolders = new MailFolderList;
    m_profile = NULL;
+   m_DialupSupport = FALSE;
+   m_UseOutbox = FALSE;
 }
 
 MAppBase::~MAppBase()
@@ -473,9 +475,14 @@ MAppBase::OnStartup()
    // must be done before using the network
    SetupOnlineManager();
 
+   m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX);
+   
    // create and show the main program window
    CreateTopLevelFrame();
 
+   // update status of outbox once:
+   UpdateOutboxStatus();
+   
    // it doesn't seem to do anything under Windows (though it should...)
 #  ifndef OS_WIN
    // extend path for commands, look in M's dirs first
@@ -607,10 +614,6 @@ MAppBase::OnAbnormalTermination()
 void
 MAppBase::OnShutDown()
 {
-   // Try to send outgoing messages:
-   
-   SendOutbox();
-
    // clean up CClient driver memory
    extern void CC_Cleanup(void);
    CC_Cleanup();
@@ -654,6 +657,17 @@ MAppBase::GetText(const char *in) const
 bool
 MAppBase::CanClose() const
 {
+   // Try to send outgoing messages:
+   if(CheckOutbox() != 0)
+   {
+      if(MDialog_YesNoDialog(
+         _("You still have messages queued to be sent.\n"
+           "Do you want to send them before exiting the application?"),
+         NULL, MDIALOG_YESNOTITLE,
+                             TRUE, "SendOutboxOnExit"))
+         SendOutbox();
+   }
+   
    String folders;
    if(! MailFolder::CanExit(&folders) )
    {
@@ -793,6 +807,7 @@ MAppBase::OnMEvent(MEventData& event)
    }
    else if (event.GetId() == MEventId_OptionsChange)
    {
+      m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX);
       SetupOnlineManager(); // make options change effective
       return TRUE;
    }
@@ -823,7 +838,7 @@ MAppBase::InitGlobalDir()
 
 /// Send all messages from the outbox
 void
-MAppBase::SendOutbox(void)
+MAppBase::SendOutbox(void) const
 {
    STATUSMESSAGE((_("Checking for queued messages...")));
    // get name of SMTP outbox:
@@ -833,7 +848,7 @@ MAppBase::SendOutbox(void)
    SendOutbox(outbox, Prot_NNTP, false);
 }
 
-bool MAppBase::CheckOutbox(const String &outbox)
+UIdType MAppBase::CheckOutbox(const String &outbox) const
 {
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
    if(! mf)
@@ -843,22 +858,27 @@ bool MAppBase::CheckOutbox(const String &outbox)
       ERRORMESSAGE((msg));
       return FALSE;
    }
-   bool rc = mf->CountMessages() != 0;
+   UIdType rc = mf->CountMessages();
    mf->DecRef();
    return rc;
 }
 
-bool MAppBase::CheckOutbox(void)
+bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP) const
 {
    String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
-   return
-      CheckOutbox(outbox)
-      || CheckOutbox(outbox+M_NEWSOUTBOX_POSTFIX);
+
+   UIdType smtp, nntp;
+   
+   smtp = CheckOutbox(outbox);
+   nntp = CheckOutbox(outbox+M_NEWSOUTBOX_POSTFIX);
+   if(nSMTP) *nSMTP = smtp;
+   if(nNNTP) *nNNTP = nntp;
+   return smtp != 0 || nntp != 0;
 }
 
 void
 MAppBase::SendOutbox(const String & outbox, Protocol protocol,
-                     bool checkOnline )
+                     bool checkOnline ) const
 {
    UIdType count = 0;
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
@@ -889,49 +909,75 @@ MAppBase::SendOutbox(const String & outbox, Protocol protocol,
          GoOnline();
       }
    }
-   
-   HeaderInfoList *hil = mf->GetHeaders();
-   if(! hil)
-   {
-      mf->DecRef();
-      return; // nothing to do
-   }
 
-   const HeaderInfo *hi;
-   
-   Message *msg;
-   for(UIdType i = 0; i < hil->Count(); i++)
+   if(mf->Lock())
    {
-      hi = (*hil)[i];
-      ASSERT(hi);
-      msg = mf->GetMessage(hi->GetUId());
-      ASSERT(msg);
-      String msgText;
-      if(msg->Send(protocol))
+      
+      HeaderInfoList *hil = mf->GetHeaders();
+      if(! hil)
       {
-         count++;
-         mf->DeleteMessage(hi->GetUId());
+         mf->DecRef();
+         return; // nothing to do
       }
-      else
+
+      const HeaderInfo *hi;
+   
+      Message *msg;
+      for(UIdType i = 0; i < hil->Count(); i++)
+      {
+         hi = (*hil)[i];
+         ASSERT(hi);
+         msg = mf->GetMessage(hi->GetUId());
+         ASSERT(msg);
+         STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
+                         (unsigned long)(i+1),
+                         (unsigned long)(hil->Count()),
+                         msg->Subject().c_str()));
+         wxYield();
+         String msgText;
+         if(msg->Send(protocol))
+         {
+            count++;
+            mf->DeleteMessage(hi->GetUId());
+         }
+         else
+         {
+            String msg;
+            msg.Printf( protocol == Prot_SMTP ?
+                        _("Cannot send message ´%s´.")
+                        :_("Cannot post article ´%s´."),
+                        hi->GetSubject().c_str());
+            ERRORMESSAGE((msg));
+         }
+         //ASSERT(0); //TODO: static SendMessageCC::Send(String)!!!
+         SafeDecRef(msg);
+         mf->ExpungeMessages();
+      }
+      SafeDecRef(hil);
+      if(count > 0)
       {
          String msg;
-         msg.Printf( protocol == Prot_SMTP ?
-                     _("Cannot send message ´%s´.")
-                     :_("Cannot post article ´%s´."),
-                     hi->GetSubject().c_str());
-         ERRORMESSAGE((msg));
+         msg.Printf(_("Sent %lu messages from outbox ´%s´."),
+                    (unsigned long) count, mf->GetName().c_str());
+         STATUSMESSAGE((msg));
       }
-      //ASSERT(0); //TODO: static SendMessageCC::Send(String)!!!
-      SafeDecRef(msg);
-      mf->ExpungeMessages();
    }
-   SafeDecRef(hil);
-   if(count > 0)
+   else
    {
-      String msg;
-      msg.Printf(_("Send %lu messages from outbox ´%s´."),
-                 (unsigned long) count, mf->GetName().c_str());
-      STATUSMESSAGE((msg));
+      ERRORMESSAGE((_("Could not obtain lock for outbox '%s'."),
+                    mf->GetName().c_str()));
    }
    SafeDecRef(mf);
+}
+
+
+int
+MAppBase::GetStatusField(enum StatusFields function)
+{
+   int field = 0;
+   if( function > SF_STANDARD)
+      field++;
+   if(function > SF_ONLINE && m_DialupSupport)
+      field++;
+   return field;
 }

@@ -159,14 +159,15 @@ public:
    */
    bool IsRunning() const { return m_topLevelFrame != NULL; }
 
-   virtual bool IsOnline(void) = 0;
-   virtual void GoOnline(void) = 0;
-   virtual void GoOffline(void) = 0;
+   virtual bool IsOnline(void) const = 0;
+   virtual void GoOnline(void) const = 0;
+   virtual void GoOffline(void) const = 0;
 
    /// Send all messages from the outbox
-   virtual void SendOutbox(void);
+   virtual void SendOutbox(void) const;
    /// Check if we have messages to send.
-   virtual bool CheckOutbox(void);
+   virtual bool CheckOutbox(UIdType *nSMTP = NULL,
+                            UIdType *nNNTP = NULL) const;
    
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
@@ -209,18 +210,32 @@ public:
    //@}
    bool SupportsDialUpNetwork(void) const
       { return m_DialupSupport; }
+
+   enum StatusFields
+   {
+      SF_STANDARD = 0,
+      SF_ONLINE,
+      SF_OUTBOX,
+      SF_MAXIMUM
+   };
+   /// return the number of the status bar field to use for a given
+   /// function 
+   virtual int GetStatusField(enum StatusFields function);
+   /// updates display of outbox status
+   virtual void UpdateOutboxStatus(void) = 0;
 protected:
+   /// makes sure the status bar has enough fields
+   virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) = 0;
    /// Send all messages from the outbox "name"
-   void SendOutbox(const String &name, Protocol prot, bool checkOnline);
+   void SendOutbox(const String &name, Protocol prot, bool checkOnline) const;
    /// Check if we have messages to send.
-   virtual bool CheckOutbox(const String &name);
+   virtual UIdType CheckOutbox(const String &name) const;
    
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
 
    /// sets up the class handling dial up networking
    virtual void SetupOnlineManager(void) = 0;
-
    /** Checks some global configuration settings and makes sure they
        have sensible values. Especially important when M is run for
        the first time.
@@ -261,6 +276,8 @@ protected:
    void *m_eventOptChangeReg;
    /// do we support dialup networking
    bool m_DialupSupport;
+   /// do we use an Outbox?
+   bool m_UseOutbox;
    /// list of frames to not ask again in CanClose()
    ArrayFrames *m_framesOkToClose;
 };

@@ -8,6 +8,11 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9		Send outbox before closing windows!
+
+9		wxLayout PS printing text overlaps as font sizes are
+		wrong. Install different AFM set?
+
 6		implement temporary/fake Profile mode
 		--> add Suspend()/Discard()/Commit() methods to normal 
 		    profile which work with a temporary subgroup

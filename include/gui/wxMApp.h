@@ -86,13 +86,17 @@ public:
    wxHelpController *GetHelpController(void)
       { return m_HelpController; }
 
-   virtual bool IsOnline(void);
-   virtual void GoOnline(void);
-   virtual void GoOffline(void);
+   virtual bool IsOnline(void) const;
+   virtual void GoOnline(void) const;
+   virtual void GoOffline(void) const;
 
    void OnConnected(wxDialUpEvent &event);
    void OnDisconnected(wxDialUpEvent &event);
+   /// updates display of outbox status
+   virtual void UpdateOutboxStatus(void);
 protected:
+   /// makes sure the status bar has enough fields
+   virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE);
    /// sets up the class handling dial up networking
    virtual void SetupOnlineManager(void);
    /** Common code for ThrEnter and ThrLeave, if enter==TRUE, enter,

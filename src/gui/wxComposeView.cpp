@@ -1347,6 +1347,7 @@ wxComposeView::OnMenuCommand(int id)
          {
             ResetDirty();
             Close();
+            mApplication->UpdateOutboxStatus();
          }
       }
       break;
