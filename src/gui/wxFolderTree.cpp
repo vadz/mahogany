@@ -96,6 +96,14 @@ WX_DEFINE_OBJARRAY(ArrayOfItemsWithChangedIcon);
 class wxFolderTreeNode : public wxTreeItemData
 {
 public:
+   enum Status
+   {
+      Folder_Normal,       // normal state
+      Folder_New,          // folder has new messages
+      Folder_Recent,       // folder has recent messages
+      Folder_StatusMax
+   };
+
    // the ctor creates the element and inserts it in the tree
    wxFolderTreeNode(wxTreeCtrl *tree,
                     MFolder *folder,
@@ -127,6 +135,10 @@ public:
    MFolder          *GetFolder() const { return m_folder; }
    wxFolderTreeNode *GetParent() const { return m_parent; }
 
+      // the folder status
+   Status GetStatus() const { return m_status; }
+   void SetStatus(Status status) { m_status = status; }
+
 private:
    // not implemented
    wxFolderTreeNode(const wxFolderTreeNode&);
@@ -135,6 +147,8 @@ private:
    MFolder *m_folder;            // the folder we represent
 
    wxFolderTreeNode *m_parent;   // the parent node (may be NULL)
+
+   Status m_status;
 
    bool m_wasExpanded;
 };
@@ -596,6 +610,7 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    m_parent = parent;
    m_folder = folder;
    m_wasExpanded = false;
+   m_status = Folder_Normal;
 
    int image = GetFolderIconForDisplay(folder);
 
@@ -1151,8 +1166,6 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       }
 
       // find the folder which has been changed
-      wxTreeItemId item;
-
       wxString profileName = profileChanged->GetName();
       int pos = profileName.Find(M_PROFILE_CONFIG_SECTION);
 
@@ -1163,7 +1176,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       wxString folderName = profileName.c_str() +
                             strlen(M_PROFILE_CONFIG_SECTION);
 
-      item = GetTreeItemFromName(folderName);
+      wxTreeItemId item = GetTreeItemFromName(folderName);
 
       if ( item.IsOk() )
       {
@@ -1219,15 +1232,47 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
    }
    else if ( ev.GetId() == MEventId_FolderStatus )
    {
-      // FIXME: Vadim: here you can call MailFolder::CountMessages() to 
-      // count the recent messages, or CountNewMessages()
-      // Maybe we should drop the distinction between recent and new??
-#if 0
       MEventFolderStatusData& event = (MEventFolderStatusData &)ev;
-      wxLogError("wxFolderTree need implementation of FolderStatus event handling (%s)",
-                 event.GetFolder()->GetName().c_str());
-#endif
+      MailFolder *folder = event.GetFolder();
+
+      wxString folderName = folder->GetName();
+      wxTreeItemId item = GetTreeItemFromName(folderName);
+
+      CHECK( item.IsOk(), false, "no such folder in the tree" );
+
+      // change the folder colour depending on whether it has any recent
+      // messages, any new messages or neither at all
+      wxFolderTreeNode::Status status;
+      if ( folder->CountRecentMessages() )
+      {
+         status = wxFolderTreeNode::Folder_Recent;
+      }
+      else if ( folder->CountMessages(MailFolder::MSG_STAT_SEEN, 0) )
+      {
+         status = wxFolderTreeNode::Folder_New;
+      }
+      else // no recent, no new
+      {
+         status = wxFolderTreeNode::Folder_Normal;
+      }
+
+      wxFolderTreeNode *node = GetFolderTreeNode(item);
+      if ( node->GetStatus() != status )
+      {
+         // customize
+         unsigned long colours[wxFolderTreeNode::Folder_StatusMax] =
+         {
+            0x000000,
+            0x00ff00,
+            0xff0000,
+         };
+
+         node->SetStatus(status);
+
+         SetItemTextColour(item, wxColour(colours[status]));
+      }
    }
+
    return true;
 }
 
