@@ -892,6 +892,7 @@ wxFolderView::Update(HeaderInfoList *listing)
       m_NumOfMessages = 0;
    }
 
+   m_FolderCtrl->Hide(); // optimise for speed under MSW
    long focusedIndex, tmp = -1;
    focusedIndex = m_FolderCtrl->GetNextItem(tmp, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
    bool foundFocus = false;
@@ -953,6 +954,7 @@ wxFolderView::Update(HeaderInfoList *listing)
    UpdateTitleAndStatusBars(m_folderName, statusMsg, GetFrame(m_Parent),
                             m_MailFolder);
 
+   m_FolderCtrl->Show();
    m_NumOfMessages = n;
    wxEndBusyCursor();
    listing->DecRef();

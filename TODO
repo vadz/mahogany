@@ -16,6 +16,22 @@ $Id$
     FIXED.
 
 
+
+************ THREADING PROBLEMS:
+
+(I am keeping a list of threading problems here, which I will use for
+keeping track of them. No need to pass it all through the
+bugtracker. KB)
+SaveMessagesToFolder() should take a list of actual messages as it
+cannot obtain the messages *and* store them to a folder if the two
+folders are identical, i.e. copying from "xx" to "xx" leads to a
+deadlock. 
+
+
+
+
+
+
 5	VZ	we should really remember the folder tree state, i.e. reexpand
 		all branches which were open the last time, not just root
 		(it's annoying that all opened branches are closed when the

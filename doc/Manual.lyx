@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sat Feb  5 17:57:23 2000
+#This file was created by <karsten> Tue Feb 15 23:30:35 2000
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -679,6 +679,71 @@ The name of the Copyright Holder may not be used to endorse or promote products
 THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES
 , INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY
  AND FITNESS FOR A PARTICULAR PURPOSE.
+ 
+\layout Subsection
+
+Additional Credits
+\layout Paragraph
+
+C-Client library: 
+\layout Standard
+
+The use of the c-client library requires us to display the following copyright
+ notice:
+\layout Quote
+
+Copyright 1999 by the University of Washington
+\newline 
+Permission to use, copy, modify, and distribute this software and its documentat
+ion for any purpose and without fee is hereby granted, provided that the
+ above copyright notice appears in all copies and that both the above copyright
+ notice and this permission notice appear in supporting documentation, and
+ that the name of the University of Washington not be used in advertising
+ or publicity pertaining to distribution of the software without specific,
+ written prior permission.
+\protected_separator 
+ This software is made available "as is", and THE UNIVERSITY OF WASHINGTON
+ DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, WITH REGARD TO THIS SOFTWARE,
+ INCLUDING WITHOUT LIMITATION ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ AND FITNESS FOR A PARTICULAR PURPOSE, AND IN NO EVENT SHALL THE UNIVERSITY
+ OF WASHINGTON BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES
+ OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+ WHETHER IN AN ACTION OF CONTRACT, TORT (INCLUDING NEGLIGENCE) OR STRICT
+ LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+ OF THIS SOFTWARE.
+\layout Subsubsection
+
+The OpenSSL toolkit:
+\layout Standard
+
+Mahogany can be linked with the OpenSSL toolkit to support secure communications
+ over SSL.
+ In that case, we must give due credit to the authors and copyright of this
+ library:
+\layout Quote
+
+This product includes software developed by the OpenSSL Project for use
+ in the 
+\latex latex 
+
+\backslash 
+htmladdnormallinkfoot{OpenSSL Toolkit}{http://www.openssl.org/}
+\latex default 
+ .This product includes cryptographic software written by Eric Young (eay@cryptso
+ft.com) This product includes software written by Tim Hudson (tjh@cryptsoft.com)"
+\layout Subsubsection
+
+wxWindows:
+\layout Standard
+
+We gratefully acknowledge the use of the 
+\latex latex 
+
+\backslash 
+htmladdnormallinkfoot{wxWindows}{http://www.wxwindows.org/}
+\latex default 
+ cross-platform class library and the excellent work and support of the
+ wxWindows developer team.
  
 \layout Section
 

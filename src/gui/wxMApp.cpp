@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxMApp class: do all GUI specific  application stuff             *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *
@@ -894,7 +894,7 @@ bool wxMApp::StopTimer(Timer timer)
 #ifndef USE_THREADS
 
 void
-wxMApp::ThrEnterLeave(bool /* enter */, SectionId /*what*/, bool /* testing */)
+wxMApp::ThrEnterLeave(bool /* enter */, SectionId /*what*/ , bool /*testing */)
 {
    // nothing to do
 }

@@ -608,29 +608,6 @@ MDialog_FileRequester(String const & message,
    //MGuiLocker lock;
    CloseSplash();
 
-   // VZ: disabling this code because it is almost useless now with the advent
-   //     of wxPFileSelector()
-#if 0
-   if(! profile)
-      profile = mApplication->GetProfile();
-
-   if(! path)
-      path = save ?
-         profile->readEntry(MP_DEFAULT_SAVE_PATH,MP_DEFAULT_SAVE_PATH_D)
-         : profile->readEntry(MP_DEFAULT_LOAD_PATH,MP_DEFAULT_LOAD_PATH_D);
-   if(! filename)
-      filename = save ?
-         profile->readEntry(MP_DEFAULT_SAVE_FILENAME,MP_DEFAULT_SAVE_FILENAME_D)
-         : profile->readEntry(MP_DEFAULT_LOAD_FILENAME,MP_DEFAULT_LOAD_FILENAME_D);
-   if(! extension)
-      extension = save ?
-         profile->readEntry(MP_DEFAULT_SAVE_EXTENSION,MP_DEFAULT_SAVE_EXTENSION_D)
-         : profile->readEntry(MP_DEFAULT_LOAD_EXTENSION,MP_DEFAULT_LOAD_EXTENSION_D);
-   if(! wildcard)
-      wildcard = save ?
-         profile->readEntry(MP_DEFAULT_SAVE_WILDCARD,MP_DEFAULT_SAVE_WILDCARD_D)
-         : profile->readEntry(MP_DEFAULT_LOAD_WILDCARD,MP_DEFAULT_LOAD_WILDCARD_D);
-#endif // 0
 
    if(parent == NULL)
       parent = mApplication->TopLevelFrame();
@@ -696,6 +673,9 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
 
 // simple AboutDialog to be displayed at startup
 
+#define NEW_SPLASH
+
+#ifdef NEW_SPLASH
 // timer which calls our DoClose() when it expires
 class LogCloseTimer : public wxTimer
 {
@@ -713,6 +693,213 @@ private:
 };
 
 
+// getting log messages when splash screen is shown is extremely annoying,
+// because there is no (easy) way to close the msg box hidden by the splash
+// screen, so install a temporary log redirector which will close the splash
+// screen before showing any messages
+class SplashKillerLog : public wxLog
+{
+public:
+   SplashKillerLog() { m_logOld = wxLog::GetActiveTarget(); }
+   virtual ~SplashKillerLog() { wxLog::SetActiveTarget(m_logOld); }
+
+   virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t)
+      {
+         // all previous ones will show a msg box
+         if ( level < wxLOG_Status )
+         {
+            CloseSplash();
+         }
+
+         if ( m_logOld )
+         {
+            // the cast is bogus, just to be able to call protected DoLog()
+            ((SplashKillerLog *)m_logOld)->DoLog(level, szString, t);
+         }
+      }
+
+private:
+   wxLog *m_logOld;
+};
+
+
+
+#include "wx/html/htmlwin.h"
+
+// the main difference is that it goes away as soon as you click it
+// or after some time (if not disabled in the ctor).
+//
+// It is also unique and must be removed before showing any message boxes
+// (because it has on top attribute) with CloseSplash() function.
+class wxAboutWindow : public wxWindow
+{
+public:
+  // fills the window with some pretty text
+  wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout = true);
+
+  // mouse event handler closes the parent window
+  void OnClick(wxMouseEvent&) { DoClose(); }
+
+  /// stop the timer
+  void StopTimer(void)
+  {
+     if(m_pTimer)
+     {
+        delete m_pTimer;
+        m_pTimer = NULL;
+     }
+  }
+
+  // close the about frame
+  void DoClose()
+  {
+     if(GetParent()) GetParent()->Close(true);
+     StopTimer();
+  }
+
+private:
+  LogCloseTimer  *m_pTimer;
+
+  DECLARE_EVENT_TABLE();
+};
+
+void
+LogCloseTimer::Notify()
+{
+   m_window->DoClose();
+}
+
+class wxAboutFrame : public wxFrame
+{
+public:
+   wxAboutFrame(bool bCloseOnTimeout);
+   virtual ~wxAboutFrame()
+   {
+      // remove our temp log redirector
+      delete wxLog::GetActiveTarget();
+
+      g_pSplashScreen = NULL;
+   }
+
+   void Close(void) { m_Window->StopTimer(); wxWindow::Close(); }
+
+private:
+   wxAboutWindow *m_Window;
+};
+
+BEGIN_EVENT_TABLE(wxAboutWindow, wxWindow)
+  EVT_LEFT_DOWN(wxAboutWindow::OnClick)
+  EVT_MIDDLE_DOWN(wxAboutWindow::OnClick)
+  EVT_RIGHT_DOWN(wxAboutWindow::OnClick)
+END_EVENT_TABLE()
+
+wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
+             : wxWindow(parent, -1, wxDefaultPosition, parent->GetClientSize())
+{
+   
+   
+   wxSplitterWindow *sp = new wxSplitterWindow(this, -1,
+                                               wxDefaultPosition,
+                                               GetSize());
+   wxHtmlWindow *top = new wxHtmlWindow(sp,-1);
+   wxHtmlWindow *bottom = new wxHtmlWindow(sp,-1);
+   sp->SplitHorizontally(top,bottom,200);
+
+   top->SetPage("<body text=#ffffff bgcolor=#000000>"
+                "<center>Welcome to Mahogany!</center>");
+   
+   bottom->SetPage("<body text=#ffffff bgcolor=#000000>"
+#ifdef DEBUG
+                   "<h3>Debug information:</h3>"
+                   "<h4>Features:</h4>"
+#ifdef USE_THREADS
+                   "Threads "
+#endif
+#ifdef USE_PYTHON
+                   "Python "
+#endif
+#ifdef USE_SSL
+                   "SSL "
+#   if defined(NO_IDEA) || defined (NO_DSA) || defined (NO_RSA)
+                   "("
+#      ifdef NO_IDEA
+                   "no-IDEA "
+#      endif
+#      ifdef NO_RSA
+                   "no-RSA "
+#      endif
+#      ifdef _NO_DSA
+                   "no-DSA"
+#      endif
+                   ")"
+#   endif
+#endif
+                   
+                   "<p>"
+#endif
+                   "<b>List of contributors:</b><p>"
+                   "Karsten Ball&uuml;der<br>Vadim Zeitlin<br>Vaclav Slavik<br>"
+                   "Daniel Seifert<br>"
+                   "<i>The wxWindows team</i><br><hr><br>"
+                   "<p>This Product includes software developed and Copyrighted "
+                   "by the University of Washington.<br>" 
+#ifdef USE_SSL
+                   "<p>"
+                   "This product includes software developed by the OpenSSL Project "
+                   "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
+                   "This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)<br>" 
+                   "This product includes software written by Tim Hudson (tjh@cryptsoft.com)<br>"
+
+#endif
+      );
+   
+
+   // start a timer which will close us (if not disabled)
+   if ( bCloseOnTimeout ) {
+     m_pTimer = new LogCloseTimer(this);
+   }
+   else {
+     // must initialize to NULL because we delete it later unconditionally
+     m_pTimer = NULL;
+   }
+}
+
+wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
+            : wxFrame(NULL, -1, _("Welcome"),
+                      wxDefaultPosition,
+                      // this is ugly, but having scrollbars is even uglier
+#ifdef __WXMSW__
+                      wxSize(400, 350),
+#else  // !MSW
+                      wxSize(320, 270),
+#endif // MSW/!MSW
+                      /* no border styles at all */ wxSTAY_ON_TOP )
+{
+   wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
+
+   wxLog::SetActiveTarget(new SplashKillerLog);
+
+   m_Window = new wxAboutWindow(this, bCloseOnTimeout);
+   g_pSplashScreen = (wxMFrame *)this;
+   Centre(wxCENTER_FRAME | wxBOTH);
+   Show(TRUE);
+}
+
+
+
+#endif
+
+
+class wxMFrame *g_pSplashScreen = NULL;
+
+extern void CloseSplash()
+{
+   if ( g_pSplashScreen )
+     ((wxAboutFrame *)g_pSplashScreen)->Close();
+}
+
+
+#ifndef NEW_SPLASH   
 // the main difference is that it goes away as soon as you click it
 // or after some time (if not disabled in the ctor).
 //
@@ -780,15 +967,11 @@ BEGIN_EVENT_TABLE(wxAboutWindow, wxLayoutWindow)
   EVT_RIGHT_DOWN(wxAboutWindow::OnClick)
 END_EVENT_TABLE()
 
+#endif
 
-class wxMFrame *g_pSplashScreen = NULL;
 
-extern void CloseSplash()
-{
-   if ( g_pSplashScreen )
-     ((wxAboutFrame *)g_pSplashScreen)->Close();
-}
 
+#ifndef NEW_SPLASH
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
@@ -883,37 +1066,6 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    }
 }
 
-
-// getting log messages when splash screen is shown is extremely annoying,
-// because there is no (easy) way to close the msg box hidden by the splash
-// screen, so install a temporary log redirector which will close the splash
-// screen before showing any messages
-class SplashKillerLog : public wxLog
-{
-public:
-   SplashKillerLog() { m_logOld = wxLog::GetActiveTarget(); }
-   virtual ~SplashKillerLog() { wxLog::SetActiveTarget(m_logOld); }
-
-   virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t)
-      {
-         // all previous ones will show a msg box
-         if ( level < wxLOG_Status )
-         {
-            CloseSplash();
-         }
-
-         if ( m_logOld )
-         {
-            // the cast is bogus, just to be able to call protected DoLog()
-            ((SplashKillerLog *)m_logOld)->DoLog(level, szString, t);
-         }
-      }
-
-private:
-   wxLog *m_logOld;
-};
-
-
 wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
             : wxFrame(NULL, -1, _("Welcome"),
                       wxDefaultPosition,
@@ -934,6 +1086,10 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
    Centre(wxCENTER_FRAME | wxBOTH);
    Show(TRUE);
 }
+#endif
+
+
+
 
 void
 MDialog_AboutDialog( const MWindow * /* parent */, bool bCloseOnTimeout)
