@@ -73,6 +73,7 @@
 #include <wx/process.h>
 #include <wx/mstream.h>
 #include <wx/fontutil.h>
+#include <wx/tokenzr.h>
 
 #include <ctype.h>  // for isspace
 #include <time.h>   // for time stamping autocollected addresses
@@ -1172,78 +1173,93 @@ MessageView::ShowHeaders()
       }
 
       // show the header and mark the URLs in it
-      String name = headerNames[n];
-      m_viewer->ShowHeaderName(name);
+      const String& name = headerNames[n];
 
-      // don't highlight the message IDs which looks just like the URLs but,
-      // in fact, are not ones (the test catches Message-Id and Content-Id
-      // headers)
-      bool highlightURLs = m_ProfileValues.highlightURLs &&
-                              !name.MakeUpper().Matches(_T("*-ID"));
-      do
+      // there can be more than one line in each header in which case we show
+      // each line of the value on a separate line -- although this is wrong
+      // because there could be a single header with a multiline value as well,
+      // this is the best we can do considering that GetHeaderLine()
+      // concatenates the values of all headers with the same name anyhow
+      wxArrayString values = wxStringTokenize(value, _T("\n"));
+
+      const size_t linesCount = values.GetCount();
+      for ( size_t line = 0; line < linesCount; ++line )
       {
-         String before,
-                url,
-                urlText;
+         m_viewer->ShowHeaderName(name);
 
-         if ( highlightURLs )
+         String value = values[line];
+
+         // don't highlight the message IDs which looks just like the URLs but,
+         // in fact, are not ones (the test is for Message-Id and Content-Id
+         // headers only right now but we use a wildcard in case there are some
+         // other similar ones)
+         bool highlightURLs = m_ProfileValues.highlightURLs &&
+                                 !name.Upper().Matches(_T("*-ID"));
+         do
          {
-            before = strutil_findurl(value, url);
+            String before,
+                   url,
+                   urlText;
 
-            if ( *url.c_str() == '<' )
+            if ( highlightURLs )
             {
-               urlText = url;
+               before = strutil_findurl(value, url);
 
-               // try to find the personal name as well by going backwards
-               // until we reach the previous address
-               bool inQuotes = false,
-                    stop = false;
-
-               while ( !before.empty() )
+               if ( *url.c_str() == '<' )
                {
-                  char ch = before.Last();
-                  switch ( ch )
+                  urlText = url;
+
+                  // try to find the personal name as well by going backwards
+                  // until we reach the previous address
+                  bool inQuotes = false,
+                       stop = false;
+
+                  while ( !before.empty() )
                   {
-                     case '"':
-                        inQuotes = !inQuotes;
+                     char ch = before.Last();
+                     switch ( ch )
+                     {
+                        case '"':
+                           inQuotes = !inQuotes;
+                           break;
+
+                        case ',':
+                        case ';':
+                           if ( !inQuotes )
+                              stop = true;
+                     }
+
+                     if ( stop )
                         break;
 
-                     case ',':
-                     case ';':
-                        if ( !inQuotes )
-                           stop = true;
+                     urlText.insert(0, 1, ch);
+                     before.erase(before.length() - 1);
                   }
-
-                  if ( stop )
-                     break;
-
-                  urlText.insert(0, 1, ch);
-                  before.erase(before.length() - 1);
+               }
+               else // not a mail address
+               {
+                  // use the URL itself as label
+                  urlText = url;
                }
             }
-            else // not a mail address
+            else // no URL highlighting
             {
-               // use the URL itself as label
-               urlText = url;
+               before = value;
+               value.clear();
+            }
+
+            if ( !before.empty() )
+            {
+               m_viewer->ShowHeaderValue(before, encHeader);
+            }
+
+            if ( !url.empty() )
+            {
+               m_viewer->ShowHeaderURL(urlText, url);
             }
          }
-         else // no URL highlighting
-         {
-            before = value;
-            value.clear();
-         }
-
-         if ( !before.empty() )
-         {
-            m_viewer->ShowHeaderValue(before, encHeader);
-         }
-
-         if ( !url.empty() )
-         {
-            m_viewer->ShowHeaderURL(urlText, url);
-         }
+         while ( !value.empty() );
       }
-      while ( !value.empty() );
 
       m_viewer->EndHeader();
    }
