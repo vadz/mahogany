@@ -229,11 +229,43 @@ public:
 
    virtual bool TransferDataToWindow()
    {
+      // the first time the page is shown, construct the reasonable default
+      // value
+      if ( !gs_installWizardData.name )
+         gs_installWizardData.name = READ_APPCONFIG(MP_PERSONALNAME);
+
+      if ( !gs_installWizardData.email )
+         gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
+
+      if ( !gs_installWizardData.email )
+      {
+         String email = READ_APPCONFIG(MP_USERNAME);
+         email << '@' << READ_APPCONFIG(MP_HOSTNAME);
+
+         gs_installWizardData.email = strutil_makeMailAddress(
+               gs_installWizardData.name, email);
+      }
+
       m_name->SetValue(gs_installWizardData.name);
       m_email->SetValue(gs_installWizardData.email);
+
       return TRUE;
    }
 
+   virtual bool TransferDataFromWindow()
+   {
+      gs_installWizardData.name = m_name->GetValue();
+      gs_installWizardData.email = m_email->GetValue();
+      if ( !gs_installWizardData.email )
+      {
+         wxLogError(_("Please specify a valid email address."));
+         m_email->SetFocus();
+
+         return FALSE;
+      }
+
+      return TRUE;
+   }
 
 private:
    wxTextCtrl *m_name,
@@ -352,7 +384,6 @@ public:
 
    virtual bool TransferDataToWindow()
       {
-#ifdef OS_WIN
          if(gs_installWizardData.useDialUp == -1) // no setting yet
          {
             wxDialUpManager *man = wxDialUpManager::Create();
@@ -360,7 +391,6 @@ public:
             // networking, but if we don't, then we probably do
             gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
          }
-#endif
          m_FolderTypeChoice->SetSelection(gs_installWizardData.folderType);
 #ifdef USE_PYTHON
          m_UsePythonCheckbox->SetValue(gs_installWizardData.usePython != 0);
@@ -1022,16 +1052,6 @@ bool RunInstallWizard()
 #endif
    gs_installWizardData.sendTestMsg = TRUE;
 
-   gs_installWizardData.name = READ_APPCONFIG(MP_PERSONALNAME);
-   gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
-   if(gs_installWizardData.email.Length() == 0)
-   {
-      String email = READ_APPCONFIG(MP_USERNAME);
-      email << '@' << READ_APPCONFIG(MP_HOSTNAME);
-   
-      gs_installWizardData.email = strutil_makeMailAddress(
-         gs_installWizardData.name, email);
-   }
    gs_installWizardData.pop  = READ_APPCONFIG(MP_POPHOST);
    gs_installWizardData.imap = READ_APPCONFIG(MP_IMAPHOST);
    gs_installWizardData.smtp = READ_APPCONFIG(MP_SMTPHOST);
@@ -1105,7 +1125,7 @@ bool RunInstallWizard()
       gs_installWizardData.imap =
       gs_installWizardData.nntp = "";
 #endif
-      
+
       // also, don't show the tips for the users who skip the wizard
       profile->writeEntry(MP_SHOWTIPS, 0l);
    }
