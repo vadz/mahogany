@@ -1284,15 +1284,14 @@ MailFolderCmn::ApplyFilterRules(const UIdArray& msgsOrig)
 
    int rc = 0;
 
-   MModule_Filters *filterModule = NULL;
-   FilterRule *filterRule = GetFilterForFolder(folder, &filterModule);
+   FilterRule *filterRule = GetFilterForFolder(folder);
    if ( filterRule )
    {
       wxBusyCursor busyCursor;
 
       // make copy as Apply() may modify it
       UIdArray msgs = msgsOrig;
-      rc = filterRule->Apply(this, msgs, false /* don't ignore deleted */);
+      rc = filterRule->Apply(this, msgs);
 
       filterRule->DecRef();
    }
@@ -1319,7 +1318,7 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
               GetName().c_str(), uidsNew.GetCount());
 
    // apply the filters finally
-   int rc = filterRule->Apply(this, uidsNew, true /* ignore deleted */);
+   int rc = filterRule->Apply(this, uidsNew);
 
    // avoid doing anything harsh (like expunging the messages) if an
    // error occurs
@@ -1421,8 +1420,7 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
    // first filter the messages
    // -------------------------
 
-   MModule_Filters *filterModule = NULL;
-   FilterRule *filterRule = GetFilterForFolder(folder, &filterModule);
+   FilterRule *filterRule = GetFilterForFolder(folder);
    if ( filterRule )
    {
       bool ok;
@@ -1446,7 +1444,6 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
       }
 
       filterRule->DecRef();
-      filterModule->DecRef();
 
       // return if an error occured or if we had opened the folderDst - in this
       // case we have nothing to do here any more as this folder processed (or
@@ -1620,13 +1617,35 @@ MailFolderCmn::ReportNewMail(const UIdArray& uidsNew, const MFolder *folder)
                   Message *msg = GetMessage(uidsNew[i]);
                   if ( msg )
                   {
+                     String from = msg->From();
+                     if ( from.empty() )
+                     {
+                        from = _("unknown sender");
+                     }
+
+                     String subject = msg->Subject();
+                     if ( subject.empty() )
+                     {
+                        subject = _("without subject");
+                     }
+                     else
+                     {
+                        String s;
+                        s << _(" about '") << subject << '\'';
+                        subject = s;
+                     }
+
                      message << '\n'
-                             << _("\tFrom: '") << msg->From()
-                             << _("' with subject: ") << msg->Subject();
+                             << _("\tFrom: ") << from << subject;
 
                      msg->DecRef();
                   }
-                  //else: this may happen if another session deleted it
+                  else // no message?
+                  {
+                     // this may happen if another session deleted it
+                     wxLogDebug("New message %lu disappeared from folder '%s'",
+                                uidsNew[i], folder->GetFullName().c_str());
+                  }
                }
             }
             else // too many new messages
