@@ -1071,16 +1071,27 @@ CalendarModule::CalendarModule(MInterface *minterface)
 {
    SetMInterface(minterface);
    m_Frame = NULL;
+   m_Timer = NULL;
+   m_EventReceiver = NULL;
+
    m_CalendarMenu = new wxMenu("", wxMENU_TEAROFF);
    m_CalendarMenu->Append(WXMENU_MODULES_CALENDAR_SHOW, _("&Show"), "", TRUE);
    m_CalendarMenu->Break();
    m_CalendarMenu->Append(WXMENU_MODULES_CALENDAR_CONFIG, _("&Configure"));
 
    MAppBase *mapp = m_MInterface->GetMApplication();
-   ((wxMainFrame *)mapp->TopLevelFrame())->AddModulesMenu(_("&Calendar Module"),
-                                        _("Functionality to schedule messages and reminders."),
-                                        m_CalendarMenu,
-                                        -1);
+
+   MFrame *mframe = mapp->TopLevelFrame();
+   CHECK_RET( mframe, "can't load calendar module - no main window" );
+
+   ((wxMainFrame *)mframe)->AddModulesMenu
+                            (
+                             _("&Calendar Module"),
+                             _("Functionality to schedule messages and reminders."),
+                             m_CalendarMenu,
+                             -1
+                            );
+
    m_Today = wxDateTime::Today();
 
    m_Timer = new DayCheckTimer(this);
@@ -1092,8 +1103,9 @@ CalendarModule::CalendarModule(MInterface *minterface)
 CalendarModule::~CalendarModule()
 {
    delete m_Timer;
-   if(m_EventReceiver) delete m_EventReceiver;
-   if(m_Frame) m_Frame->Close();
+   delete m_EventReceiver;
+   if(m_Frame)
+      m_Frame->Close();
 }
 
 
