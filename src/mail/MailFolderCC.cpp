@@ -648,7 +648,7 @@ MailFolderCC::BuildListing(void)
 
       // actually these are no IDs, but indices into the listing
       for ( unsigned long i = 0; i < n; i++ )
-         messageIDs[i] = m_OldNumOfMessages + i;
+         messageIDs[i] = m_Listing[m_OldNumOfMessages + i].GetUId();
 
       MEventNewMailData data(this, n, messageIDs);
       MEventManager::Send(data);

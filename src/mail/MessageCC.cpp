@@ -112,11 +112,13 @@ MessageCC::MessageCC(const char * /* itext */,  ProfileBase *iprofile)
 void
 MessageCC::Refresh(void)
 {
-   GetBody();
-   hdr_date = envelope->date ? String(envelope->date) :  :: String("");
-   hdr_subject = envelope->subject ? String(envelope->subject) :
-      String("");
-   hdr_subject = MailFolderCC::qprint(hdr_subject);
+   if(GetBody())
+   {
+      hdr_date = envelope->date ? String(envelope->date) :  :: String("");
+      hdr_subject = envelope->subject ? String(envelope->subject) :
+         String("");
+      hdr_subject = MailFolderCC::qprint(hdr_subject);
+   }
 }
 
 String const &
@@ -176,6 +178,7 @@ String const
 MessageCC::Address(String &name, MessageAddressType type) const
 {
    ((MessageCC *)this)->GetBody();
+   CHECK(envelope, "", _("Non-existent message data."))
 
    ADDRESS
       * addr = NULL;
@@ -211,7 +214,7 @@ MessageCC::Address(String &name, MessageAddressType type) const
       name = String(addr->personal);
 
    name = MailFolderCC::qprint(name);
-   return   MailFolderCC::qprint(email);
+   return MailFolderCC::qprint(email);
 }
 
 String const &
@@ -371,6 +374,7 @@ MessageCC::GetBody(void)
       envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &body,
                                           FT_UID);
    MailFolderCC::ProcessEventQueue();
+   CHECK_RET(body && envelope, _("Non-existent message data."))
    return body;
 }
 

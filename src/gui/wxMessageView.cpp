@@ -1205,15 +1205,15 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
    /* FIXME for now it's here, should go somewhere else: */
    if ( m_ProfileValues.autocollect )
    {
-      String name;
-      AutoCollectAddresses(mailMessage->Address(name, MAT_REPLYTO),
-                           name,
+      String addr, name;
+      addr = mailMessage->Address(name, MAT_REPLYTO);
+      AutoCollectAddresses(addr, name,
                            m_ProfileValues.autocollect,
                            m_ProfileValues.autocollectNamed,
                            m_ProfileValues.autocollectBookName,
                            (MFrame *)GetFrame(this));
-      AutoCollectAddresses(mailMessage->Address(name, MAT_FROM),
-                           name,
+      addr = mailMessage->Address(name, MAT_FROM);
+      AutoCollectAddresses(addr, name,
                            m_ProfileValues.autocollect,
                            m_ProfileValues.autocollectNamed,
                            m_ProfileValues.autocollectBookName,

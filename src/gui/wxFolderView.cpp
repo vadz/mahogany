@@ -122,8 +122,8 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
          m_FolderView->SaveMessagesToFile(selections);
          break;
       case 'M':
-         m_FolderView->SaveMessagesToFolder(selections);
-         m_FolderView->GetFolder()->DeleteMessages(&selections);
+         if(m_FolderView->SaveMessagesToFolder(selections))
+            m_FolderView->GetFolder()->DeleteMessages(&selections);
          break;
       case 'R':
          m_FolderView->GetFolder()->ReplyMessages(
@@ -251,6 +251,7 @@ wxFolderListCtrl::Clear(void)
    }
 
    RestoreWidths();
+   SetFocus(); // otherwise we lose it...strange
 }
 
 void
