@@ -149,15 +149,15 @@ CopyEntries(wxConfigBase *_this,
       newentry << '/' << entry;
       switch(_this->GetEntryType(entry))
       {
-      case wxConfigBase::String:
+      case wxConfigBase::Type_String:
          COPYENTRY(wxString); break;
-      case wxConfigBase::Integer:
+      case wxConfigBase::Type_Integer:
          COPYENTRY(long); break;
-      case wxConfigBase::Float:
+      case wxConfigBase::Type_Float:
          COPYENTRY(double); break;
-      case wxConfigBase::Boolean:
+      case wxConfigBase::Type_Boolean:
          COPYENTRY(bool); break;
-      case wxConfigBase::Unknown:
+      case wxConfigBase::Type_Unknown:
          wxASSERT(0);
       }
    }

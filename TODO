@@ -27,9 +27,6 @@ VZ:
   Key = Value
 
 - upgrade.cpp causes three problems that I hope you can understand:
-  - line 154: prints empty or nonsense strings, although both entry
-              and value have the correct values. Somehow wxLogDebug()
-              breaks this. wxLogMessage worked fine here.
   - p2->DeleteGroup("Folders") triggers an assert deep inside the
     wxFileConfig/wxDynArray code. The group "Folders" exists, the path 
     is set to M/Profiles before deleting it, so it's apparently a
@@ -40,20 +37,9 @@ VZ:
     before calling wxConfig::GetXXXGroup() but, obviously, always to the
     same path, not causing any change.
     This seems to be a bug in wxFileConfig, or at least, some
-    undocumented behaviour. The index parameter suggests that using it is
-    all that's needed for consistency.
-    I could work around it, by removing the functions from the Profile 
-    interface and have a function to obtain a list of subgroups instead,
-    but fixing wxFileConfig seems the better solution. I don't think
-    changing the path between calls to these functions is too unusual.
-
-- a serious problem: wxFileConfig does no preserve the protection
-  flags of the config file. Neither are there any docs telling when it 
-  writes a new file. For now I have added calls to umask() around the
-  wxConfig() constructor and Flush() in Profile.cpp, but this *should*
-  really be in wxFileConfig as it is a wide open security hole.
-  (As a consequence my passwords in university are compromised and I
-  should change them...)
+    undocumented behaviour. 
+    I worked around it in CopyEntries(), building a list of all groups
+    first and then traversing them afterwards. Not important for M anymore.
 
 - Initially selected folder is not highlighted in treectrl.
 
@@ -65,8 +51,6 @@ VZ:
 - .mailcap should override /etc/mailcap, not other way round
 - MimeManager::ReadXXX should have returncode and not print error
   message
-- wxExcute()/RunProcess() extremely slow (replaced by system() now)
-- help button and more fields for folder creation dialog
 
 - MailFolder now reads the "RetrievalLimit" config value and will not
   retrieve more messages than that from server. Need support for it and
@@ -76,13 +60,12 @@ VZ:
   {xxxx/yyy}newsgroup
   After accessing them, the next program start produces an error
   because there is more than one entry for their column sizes in the
-  config file.
+  config file. 
+  I am now using static ProfileBase::FilterProfileName() to avoid that.
+  Not ideal, though.
 
 - Folder config/create dialog:
   - anonymous access
-  - NEWS (local newsspool) type support
-    (Just add a folder type News and I'll do the rest in MailFolder to 
-     support it).
 
 - If any top level window is open (messageview/composeview), the
   application will not exit. Happened after you changed the exit
@@ -103,47 +86,47 @@ DONE:
   whether they were successful or not, otherwise MoveMessagesToFolder
   deletes them in any case. Trivial to add.
  --> Clicking ABORT doesn't return false!
-
-CHECK:- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
+- MessageCC::Addresses() returns empty name for Morten Poulson  WHY?
+- add news posting
+- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
   done-->  // check whether enc8bit is needed or not
+
+CHECK:
 - MessageCC::GetBody() can return with body/envelope == NULL if
   message no longer exists. Just got a crash in Refresh().
   Add a CHECK() wherever it is called.
-
-- Things like CopyMessagesToFolder need a return code indicating
-  whether they were successful or not, otherwise MoveMessagesToFolder
-  deletes them in any case. Trivial to add.
- --> Clicking ABORT doesn't return false!
-- MessageCC::Addresses() returns empty name for Morten Poulson  WHY?
+- support for local news spool
+- gtk 1.2 support seems to work
 
 
+TODO:
 
+for release:
 - make mailfolders collectable:
   - have a "collect" flag
   - have a global "NewMail" folder setting and ensure its existence
 ---> done, after merging of profile code, add support for building
      list of these folders and periodically checking them.
-- add news posting
 
 
-
-TODO:
-- support for local news spool
-  (Waiting for VZ to support MF_NEWS) then implement /service=news
-  DONE?
+- do wxImage changes affect list of available handlers, etc?
+- printer settings seem to have no effect
+- do we really need to scan /var/lib/news/active?
 
 
-TESTING!!
+after release:
 
-
+- more configurability for news
+- add auto collection to compose view
+- add a popup dialog to edit message headers in composeview
+- some html mail import/filtering of tags (easy, quick and dirty)
+- copying message to non-existing folder gives error message but works
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message. (REALLY REQUIRED?)
   Is already like this, but fetch_overview() does an extra fetch, even 
   in mtest.
 STRANGE....
-
-- gtk 1.2 support
 
 = wxLayout:
   - delete in empty line doesn't work
@@ -163,20 +146,10 @@ STRANGE....
     x- composeview: after inserting text (reply), update scrollbars
     x- fix initial scrollbar sizes --> seems ok, what exactly is wrong?
 
-- do we really need to scan /var/lib/news/active?
-- some html mail import/filtering of tags (easy, quick and dirty)
-- copying message to non-existing folder gives error message but works
-
-
-- more configurability for news
-- add auto collection to compose view
-- add a popup dialog to edit message headers in composeview
-
-
 - add progress indicator to image loading
     (and the one of SentFolder) in VerifySettings()
 - do not redraw messageview if the message is the one currently being
-  shown
+  shown (DONE, better:)
   -- option to keep wxLayoutList around for reuse?
 
 - show status dialog while importing graphics into messageview
