@@ -25,6 +25,7 @@
    #include "gui/wxIconManager.h"  // for GetBitmap
    #include "pointers.h"           // for RefCounter
    #include "strutil.h"            // for strutil_restore_array
+   #include "Profile.h"            // for Profile_obj
 #endif // USE_PCH
 
 #include <wx/imaglist.h>
