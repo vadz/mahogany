@@ -1,1 +1,1 @@
-shlibs:Depends=libc6 (>= 2.1.2), libglib1.2 (>= 1.2.0), libgtk1.2 (>= 1.2.7-1), libstdc++2.10, python-base (>= 1.5.2-2), xlib6g (>= 3.3.6-4)
+shlibs:Depends=libc6 (>= 2.3.1-1), libexpat1 (>= 1.95.6), libgcc1 (>= 1:3.3-1), libjpeg62, libpng2 (>=1.0.12), libstdc++5 (>= 1:3.3-1), libtiff3g, xlibs (>> 4.1.0), zlib1g (>= 1:1.1.4)

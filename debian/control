@@ -1,13 +1,15 @@
 Source: mahogany
 Section: x11
 Priority: optional
-Maintainer: Karsten Ballueder <ballueder@gmx.net>
+Maintainer: Vadim Zeitlin <mahogany-developers@lists.sourceforge.net>
+Build-Depends: debmake, g++, make, tetex, tetex-extra, latex2html
 Standards-Version: 2.5.0
 
 Package: mahogany
 Architecture: any
 Depends: ${shlibs:Depends}
-Suggests: libssl09, python
+Recommends: libssl09
+Suggests: python
 Description: Mahogany, powerful and user-friendly mail/news client for X11.
  Mahogany is a mail and news client for X11, using the gtk toolkit. It
  supports a wide range of standards and protocols, including IMAP and POP3.

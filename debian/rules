@@ -2,34 +2,15 @@
 # Made with the aid of debmake, by Christoph Lameter,
 # based on the sample debian/rules file for GNU hello by Ian Jackson.
 
-PATH:=$(PATH):/usr/local/bin
-
 package=mahogany
 
 build:
 	$(checkdir)
 	autoconf
-# debian 2.1 has no wxGTK shared lib:
-	if test "`cat /etc/debian_version`" = "2.1" ; \
-	then \
-		(./configure --prefix=/usr --with-modules=static) \
-	else \
-		(./configure --prefix=/usr) \
-	fi
-	make depend || true
-	make -C include 
-	make doc
-	echo "############### DEBIAN COMPILATION STARTED #################"
-	# If we are on Debian Slink, we need to build a semistatic binary:
-	if test "`cat /etc/debian_version`" = "2.1" ; \
-	then \
-		( $(MAKE) all || true; \
-		cd src && make semistatic ) \
-	else \
-		( $(MAKE) all ; \
-		cd src && make ) \
-	fi
-	echo "############### DEBIAN COMPILATION ENDED #################"
+	mkdir build-debian; \
+	cd build-debian; \
+	../configure --prefix=/usr $(CONFIG_FLAGS); \
+	$(MAKE) semistatic
 	touch build
 
 clean:
@@ -50,7 +31,7 @@ binary-arch: checkroot build
 	-rm -rf debian/tmp
 	install -d debian/tmp
 	cd debian/tmp && install -d `cat ../dirs`
-	$(MAKE) install DESTDIR=`pwd`/debian/tmp/usr
+	$(MAKE) -C build-debian install DESTDIR=`pwd`/debian/tmp/usr
 # Must have debmake installed for this to work. Otherwise please copy
 # /usr/bin/debstd into the debian directory and change debstd to debian/debstd
 	debstd README TODO 
