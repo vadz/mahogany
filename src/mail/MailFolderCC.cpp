@@ -1627,8 +1627,7 @@ MailFolderCC::BuildListing(void)
    {
       String msg;
       msg.Printf(_("Reading %lu message headers..."), numMessages);
-      m_ProgressDialog = n
-         ew MProgressDialog(GetName(),
+      m_ProgressDialog = new MProgressDialog(GetName(),
                                              msg,
                                              numMessages,
                                              NULL,
