@@ -23,12 +23,14 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "guidef.h"
-#  include "gui/wxMApp.h"
-#  include "Mdefaults.h"                // for READ_APPCONFIG
-#  include "Mcclient.h"
-#  include "gui/wxIconManager.h"
 
 #  include <wx/menu.h>
+
+#  include "Mdefaults.h"               // for READ_APPCONFIG
+#  include "Mcclient.h"
+#  include "gui/wxIconManager.h"
+#  include "gui/wxMApp.h"
+#  include "gui/wxMFrame.h"            // for SetIcon()
 #endif // USE_PCH
 
 #include "gui/wxMDialogs.h"
