@@ -508,8 +508,9 @@ void
 wxLayoutWindow::OnChar(wxKeyEvent& event)
 {
    int keyCode = event.KeyCode();
-   bool ctrlDown = event.ControlDown();
-   bool shiftDown = event.ShiftDown();
+   const bool ctrlDown = event.ControlDown();
+   const bool shiftDown = event.ShiftDown();
+   const bool altDown = event.AltDown();
 
 #ifdef WXLAYOUT_DEBUG
    if(keyCode == WXK_F1)
@@ -539,7 +540,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       && !m_Selecting
       && m_llist->HasSelection()
       && ! IsDirectionKey(keyCode)
-      && ! (event.AltDown() || ctrlDown)
+      && ! (altDown || ctrlDown)
       )
    {
       m_llist->DeleteSelection();
@@ -637,7 +638,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       else if( IsEditable() )
       {
          /* First, handle control keys */
-         if(ctrlDown && !shiftDown && ! event.AltDown())
+         if(ctrlDown && !shiftDown && ! altDown)
          {
             if(keyCode >= 'A' && keyCode <= 'Z')
                keyCode = tolower(keyCode);
@@ -716,7 +717,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
             }
          }
          // ALT only:
-         else if( event.AltDown() && ! event.ControlDown() )
+         else if( altDown && ! ctrlDown )
          {
             switch(keyCode)
             {
@@ -731,7 +732,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
             }
          }
          // no control keys:
-         else if ( ! event.AltDown() && ! event.ControlDown())
+         else if ( ! altDown && ! ctrlDown)
          {
             switch(keyCode)
             {
@@ -780,8 +781,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   break;
 
                default:
-                  if((!(event.ControlDown() || event.AltDown()
-                     ))
+                  if((!(ctrlDown || altDown))
                      && (keyCode < 256 && keyCode >= 32)
                      )
                   {
