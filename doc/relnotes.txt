@@ -1,10 +1,23 @@
-Release notes for Mahogany 0.63:
+Release notes for Mahogany 0.64
 =====================================================================
+
+0. General
+----------
+
+The binary distribution contains the version of Mahogany compiled
+with SSL support but without Python support. To use the latter you
+should recompile the program from sources yourself.
+
+Please remember that you can always ask about any problems you have
+on our mailing list:
+
+                      mahogany-users@lists.sourceforge.net
+
 
 1. Unix
 -------
 
- The provided binary RPM are for x86 RedHat 7.0 systems, if you use
+ The provided binary RPM are for x86 RedHat 7.1 systems, if you use
 another system or architecture please rebuild the RPM from the source
 RPM.
 
@@ -17,11 +30,8 @@ and latex2html).
 2. Win32
 --------
 
- Do *not* uninstall Mahogany 0.62 before installing this version if
+ Do *not* uninstall Mahogany 0.63 before installing this version if
 you want to keep your old settings. Install the program into the same
 directory if you wish to keep the old system folders (such as
 SentMail and NewMail) as well.
 
- Last minute note: it seems that the installer doesn't overwrite the
-existing M.exe file when installing into the same directory, please
-delete/rename it manually before the installation to avoid problems.

@@ -1,5 +1,5 @@
 --------------------------------------------------------------------
-README file for Mahogany, Release 0.63 "Saugus"
+README file for Mahogany, Release 0.64 "Sparc"
 --------------------------------------------------------------------
 
 --------------------------------------------------------------------
@@ -7,73 +7,84 @@ Issues with the current release
 --------------------------------------------------------------------
 
 More detailed information about Mahogany, how to get support for it,
-how to contribute it, and last not least, how to use it, can be found
-in the user manual, included in HTML and PostScript format, or the
-online help system. Some quick compilation notes can be found below,
-more in the manual. All the information, including the full online
-docs, are also available on the Mahogany web page:
+how to contribute it, and last not least, how to use it, can be
+found in the user manual, included in HTML and PostScript format, or
+the online help system. All the information, including the full
+online docs, are also available on the Mahogany web page:
 
                   http://mahogany.sourceforge.net/
 
 Be not confused by references to a program called "M", which was the
 original working title for "Mahogany".
 
+Please note that in places where this file contradicts the manual,
+it should be considered correct.
+
 --------------------------------------------------------------------
 Internet resources
 --------------------------------------------------------------------
 
-The Mahogany web page is http://mahogany.sourceforge.net/ or
-http://mahogany.home.dhs.org/
+The Mahogany web page:
 
-The wxWindows home page is http://wxwindows.org/ or
-http://wxwindows.sourceforge.net/
+                  http://mahogany.sourceforge.net/
+
+The wxWindows home page:
+
+                     http://www.wxwindows.org/
 
 More info on Mahogany can be found on the SourceForge project page,
 including links to the FAQ, docs and mailing lists:
-http://sourceforge.net/projects/mahogany
+
+              http://sourceforge.net/projects/mahogany
+
+Mahogany mailing lists:
+
+                mahogany-users@lists.sourceforge.net
+             mahogany-developers@lists.sourceforge.net
 
 --------------------------------------------------------------------
-Windows users
+Note for the Windows users
 --------------------------------------------------------------------
 
-You shouldn't be reading this file, please refer to doc/readme_win.txt
-The rest of this file is oriented towards Unix users.
+You shouldn't be reading this file further, please refer to
+doc/readme_win.txt The rest of this file is oriented towards Unix
+users.
 
 --------------------------------------------------------------------
-Compilation notes
+Unix compilation instructions
 --------------------------------------------------------------------
-
-These are some very brief notes about how to compile Mahogany.  More
-detailed step-for-step instructions can be found in the Manual, which
-is contained in the Mdoc.tar.gz file in the doc directory.  You can
-also view it online at http://mahogany.sourceforge.net/docs.html
 
 Required software
 
-   - wxGTK (GTK port of wxWindows) 2.2.1 or above, 2.2.7 recommended
-     (2.3.0 is also known to work)
-   - GTK+ 1.2.3 or above, 1.2.10 recommended
+   - wxGTK (GTK+ port of wxWindows) 2.3.2 or above
+     (2.3.2 is the latest released version as of this writing)
 
-If you want to compile Mahogany with SSL support, you must have OpenSSL
-installed first. Then you can configure Mahogany with the additional
-option --with-ssl.
+   - GTK+ 1.2.3 or above, at leats 1.2.10 recommended
 
-Before you can compile Mahogany, you will need to have installed
-wxWindows compiled for the GTK library (wxGTK).
+If you want to compile Mahogany with SSL support, you must also
+have OpenSSL libraries and headers, see http://www.openssl.org/.
 
-- wxWindows should be configured with the following option:
-     ./configure --with-gtk
+If you want to compile Mahogany with Python support, you need Python
+libraries and headers installed. Python 1.5x, 2.0 and 2.1 is
+currently supported.
 
-Doing a "make" and "make install" in the wxWindows directory should
-install the header files and libraries on your system.
+- Before you can compile Mahogany, you will need to have installed
+  wxWindows compiled for the GTK library (wxGTK).
+
+  Please refer to wxWindows documentation for the detailed
+  installation instructions. The simple "configure; make; make
+  install" should work in most cases, be sure to specify
+  "--with-gtk" configure switch when compiling on a commercial Unix
+  system with Motif installed.
 
 - To compile and install Mahogany itself:
-  ./configure --help
-  cd /some/build/dir
-  sh /the/source/dir/configure "with your appropriate options"
-  make    # or "make all" to try to build message catalogs as well
-  make doc
-  make install
+
+     ./configure --help
+     cd /some/build/dir
+     sh /the/source/dir/configure "with your appropriate options"
+     make    # or "make all" to try to build message catalogs as well
+     make doc
+     make install
 
   Depending on whether you have installed all required programs in the
   right versions, "make doc" and "make install" might

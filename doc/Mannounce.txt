@@ -10,8 +10,9 @@ You can also get to the download page starting from
 
                   http://mahogany.sourceforge.net/
 
-If you have any problems, please contact us at
+If you have any problems, please contact us on our mailing lists:
 
+		mahogany-users@lists.sourceforge.net
 	      mahogany-developers@lists.sourceforge.net
 
 
@@ -74,9 +75,15 @@ simpler (and even possible at all)!
 Changes Since Release 0.63
 =====================================================================
 
+Don't let the small difference of the version numbers fool you -
+many things have changed dramatically since 0.63. For example, do try
+this version if you had tried Mahogany before and were unhappy about
+the speed of accessing the IMAP folders or deficiencies of POP3
+support!
+
 Key changes are:
 
-* much more efficient IMAP support:
+* incomparably more efficient IMAP support:
 
   - retrieve headers on-demand making it possible to work with huge
     IMAP folders efficiently
