@@ -62,6 +62,13 @@
 
 #include "wx/persctrl.h"      // for wxPControls::SetSettingsPath
 
+#ifdef OS_WIN
+   #include <shlobj.h>
+   #include <wx/msw/winundef.h>
+
+   #include <wx/dynlib.h>
+#endif // OS_WIN
+
 class MOption;
 
 // ----------------------------------------------------------------------------
@@ -907,9 +914,33 @@ MAppBase::InitDirectories()
    {
       m_localDir = wxGetHomeDir();
 
-#if defined(OS_UNIX)
+#ifdef OS_WIN
+      wxDynamicLibrary dllShell32(_T("shell32.dll"));
+      if ( dllShell32.IsLoaded() )
+      {
+         typedef BOOL (WINAPI *SHGetSpecialFolderPathA_t)(HWND, LPTSTR, int, BOOL);
+
+         wxDYNLIB_FUNCTION(SHGetSpecialFolderPathA_t, SHGetSpecialFolderPathA,
+                           dllShell32);
+
+         if ( pfnSHGetSpecialFolderPathA )
+         {
+            String pathAppData;
+            if ( pfnSHGetSpecialFolderPathA
+                    (
+                     NULL,                                  // owner hwnd
+                     wxStringBuffer(pathAppData, MAX_PATH), // [out] buffer
+                     CSIDL_APPDATA,                         // which to get
+                     FALSE                                  // don't create
+                    ) )
+            {
+               m_localDir = pathAppData;
+            }
+         }
+      }
+#endif // OS_WIN
+
       m_localDir << DIR_SEPARATOR << READ_APPCONFIG_TEXT(MP_USER_MDIR);
-#endif // OS
 
       // save it for the next runs
       m_profile->writeEntry(MP_USERDIR, m_localDir);
@@ -961,9 +992,7 @@ MAppBase::InitDirectories()
 #ifdef OS_WIN
          else // under Windows, use the same directory as the local one
          {
-            // wxGetHomeDir() will usually return the directory where the
-            // program file is under Windows which is what we really want here
-            m_globalDir = wxGetHomeDir();
+            m_globalDir = m_localDir;
          }
 #endif // OS_WIN
 #ifdef OS_UNIX
