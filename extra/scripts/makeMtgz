@@ -26,7 +26,7 @@ trap 'cleanup; exit 4' INT TERM
 OUTPUT_DIR=${1-`pwd`}
 
 # create tar.gz or tar.bz2?
-if test $USE_BZIP2 != ""; then
+if test "x$USE_BZIP2" != "x"; then
   GZIP=bzip2
   GZ=bz2
 else
