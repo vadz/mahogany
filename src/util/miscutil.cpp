@@ -390,7 +390,8 @@ String GetSequenceString(const INTARRAY *array)
       sequence += strutil_ultoa((*array)[i]);
       sequence += ',';
    }
-   sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
+   if(array->Count())
+      sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
    return sequence;
 }
 

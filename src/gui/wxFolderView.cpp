@@ -548,7 +548,8 @@ wxFolderView::~wxFolderView()
    wxCHECK_RET( !m_InDeletion, "being deleted second time??" );
 
    MEventManager::Deregister(m_regOptionsChange);
-
+   DeregisterEvents();
+   
    m_TicketList->DecRef();
    m_InDeletion = true;
    SetFolder(NULL, FALSE);

@@ -33,12 +33,19 @@ public:
       }
    /// update the user interface
    virtual void Update(class HeaderInfoList *list = NULL) = 0;
-   /// virtual destructor
-   virtual ~FolderView()
+   /// deregister event handlers
+   virtual void DeregisterEvents(void)
       {
          MEventManager::Deregister(m_regCookieTreeChange);
          MEventManager::Deregister(m_regCookieFolderUpdate);
          MEventManager::Deregister(m_regCookieASFolderResult);
+         m_regCookieTreeChange = NULL;
+      }
+   /// virtual destructor
+   virtual ~FolderView()
+      {
+         ASSERT( m_regCookieTreeChange == NULL);
+
       }
 
    /// event processing function

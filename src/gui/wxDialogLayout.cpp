@@ -1140,7 +1140,8 @@ void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)
 {
    m_lastBtn = MEventOptionsChangeData::Cancel;
    SendOptionsChangeEvent();
-
+   // allow the event to be processed before we are gone
+   MEventManager::DispatchPending();
    EndModal(FALSE);
 }
 
