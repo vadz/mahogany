@@ -15,7 +15,7 @@
 #include "Mcallbacks.h"
 #include "Mversion.h"
 
-#ifndef gettext_noop(x)
+#ifndef gettext_noop
 #   define    gettext_noop(x) x
 #endif
 
