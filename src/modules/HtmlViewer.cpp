@@ -187,15 +187,13 @@ TAG_HANDLER_BEGIN(META, "META" )
 
     TAG_HANDLER_PROC(tag)
     {
-        if (tag.HasParam(_T("HTTP-EQUIV")) &&
-            tag.GetParam(_T("HTTP-EQUIV")) == _T("Content-Type") &&
-            tag.HasParam(_T("CONTENT")))
+        if ( tag.GetParam(_T("HTTP-EQUIV")).CmpNoCase(_T("Content-Type")) == 0 )
         {
             // strlen("text/html; charset=")
             static const int CHARSET_STRING_LEN = 19;
 
             wxString content = tag.GetParam(_T("CONTENT"));
-            if (content.Left(CHARSET_STRING_LEN) == _T("text/html; charset="))
+            if ( content.Left(CHARSET_STRING_LEN) == _T("text/html; charset=") )
             {
                 wxFontEncoding enc =
                     wxFontMapper::Get()->CharsetToEncoding(
@@ -949,7 +947,60 @@ void HtmlViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
 
 void HtmlViewer::InsertRawContents(const String& data)
 {
-   m_htmlText += data;
+   // collect all meta tags in the HTML document in this string
+   String metaTags;
+
+   // we're already inside body so we can't insert the entire HTML document
+   // here, instead we're going to try to insert our existing contents in the
+   // beginning of the given document
+   const wxChar *pHtml = data.c_str();
+   const wxChar *pBody = pHtml;
+   while ( pBody )
+   {
+      pBody = wxStrchr(pBody, _T('<'));
+      if ( pBody )
+      {
+         // we also check for "<meta charset>" tag or, as it's simpler, for any
+         // "<meta>" tags at all, as otherwise we could have a wrong charset
+         if ( (pBody[1] == _T('m') || pBody[1] == _T('M')) &&
+              (pBody[2] == _T('e') || pBody[2] == _T('E')) &&
+              (pBody[3] == _T('t') || pBody[3] == _T('T')) &&
+              (pBody[4] == _T('a') || pBody[4] == _T('A')) )
+         {
+            const wxChar *pEnd = wxStrchr(pBody + 4, _T('>'));
+            if ( pEnd )
+            {
+               metaTags += String(pBody, pEnd + 1);
+            }
+         }
+
+         if ( (pBody[1] == _T('b') || pBody[1] == _T('B')) &&
+              (pBody[2] == _T('o') || pBody[2] == _T('O')) &&
+              (pBody[3] == _T('d') || pBody[3] == _T('D')) &&
+              (pBody[4] == _T('y') || pBody[4] == _T('Y')) )
+         {
+            pBody = wxStrchr(pBody + 4, _T('>'));
+            if ( pBody )
+            {
+               // skip '>'
+               pBody++;
+            }
+
+            break;
+         }
+
+         pBody++;
+      }
+   }
+
+   if ( pBody )
+   {
+      m_htmlText = String(pHtml, pBody) + m_htmlText + metaTags + pBody;
+   }
+   else // HTML fragment only?
+   {
+      m_htmlText += pHtml;
+   }
 }
 
 void HtmlViewer::InsertText(const String& text, const MTextStyle& style)
