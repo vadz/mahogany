@@ -51,6 +51,35 @@
 #include "adb/AdbImpExp.h"
 #include "MImport.h"
 
+// User Comments TODO
+// - create an outbox folder
+//
+// - use flags in folder creation
+// The important parameter is "flags" which is a combination of masks defined
+// in MImport.h:
+//    enum
+//    {
+//       ImportFolder_SystemImport    = 0x0001, // import system folders
+//       ImportFolder_SystemUseParent = 0x0003, // put them under parent
+//       ImportFolder_AllUseParent    = 0x0006  // put all folders under parent
+//    };
+
+// i.e. you should use the provided parent folder for the normal folders only if
+// AllUseParent flag is given (be careful to test for equality, not just for !=
+// 0) and the system folders (such as inbox, drafts, ...) may be:
+
+// 1. not imported at all (if !SystemImport)
+// 2. imported under root (if !SystemUseParent)
+// 3. imported under parent
+
+//  These flags are really confusing, I know, but this is the price to pay for
+// the flexiblity Nerijus requested to have for XFMail importer - have a look
+// at it, BTW, you will see how it handles system folders (Pine code doesn't do
+// it although it probably should as well).
+//
+// - if the user selects 'All Folders' force creation of container for imported
+//   folders
+
 
 // GENERAL TODO
 // - set up makefile stuff to create the module out of many
@@ -68,7 +97,7 @@
 // - implement the choice between 'sharing' the mail folders or physically move
 //   them to the .M directory.
 //
-// - using '/' explicitly in the code is not portable
+// - using '/' explicitly in the code is not portable [DONE]
 //
 // - check that the config files is backed up or implement it!
 //
@@ -81,7 +110,12 @@
 // - check error detection and treatment.
 //   (If I hold my breath until I turn blue, can I have exceptions?)
 //
-// - implement a way to log the NS pref keys in the NS
+// - Misc folders, i.e. foo in foo.sbd
+//    + create only if they are not empty
+//    + if the group folder with the same name is empty, create only a mailbox folder
+//    + rename to 'AAA Misc' to make it appear in the first slot in the folder [ASK]
+//
+// - implement importing of IMAP server stuff [ASK]
 
 
 //------------------------------------------
@@ -1098,6 +1132,10 @@ bool MNetscapeImporter::ImportFolderSettings ( MyHashTable& tbl )
   // otherwise leave it as set.
   if ( tbl.GetValue("mail.check_new_mail",tmpBool) && ! tmpBool )
    WriteProfileEntry(MP_POLLINCOMINGDELAY,30000,"new mail polling delay");
+
+  // if Not deliver immediately, then create an Outbox to be used
+  if ( tbl.GetValue("mail.deliver_immediately",tmpBool) && ! tmpBool )
+	WriteProfileEntry(MP_OUTBOX_NAME, "Outbox","Outgoing mail folder");
 
   return TRUE;
 }
