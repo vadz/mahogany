@@ -1291,11 +1291,15 @@ wxMessageView::DoMenuCommand(int id)
       break;
    case WXMENU_MSG_REPLY:
       if(m_uid != UID_ILLEGAL)
-         GetFolder()->ReplyMessages(&msgs, GetFrame(this), m_Profile);
+         MailFolder::ReplyMessage(m_mailMessage,0,m_Profile,GetFrame(this));
+      break;
+   case WXMENU_MSG_FOLLOWUP:
+      if(m_uid != UID_ILLEGAL)
+         MailFolder::ReplyMessage(m_mailMessage,MailFolder::REPLY_FOLLOWUP,m_Profile,GetFrame(this)); 
       break;
    case WXMENU_MSG_FORWARD:
       if(m_uid != UID_ILLEGAL)
-         GetFolder()->ForwardMessages(&msgs, GetFrame(this), m_Profile);
+         MailFolder::ForwardMessage(m_mailMessage,m_Profile,GetFrame(this));
       break;
 
    case WXMENU_MSG_SAVE_TO_FOLDER:
@@ -1368,7 +1372,7 @@ wxMessageView::ShowMessage(ASMailFolder *folder, UIdType uid)
 {
    if ( m_uid == uid )
       return;
-   // check the message size
+   m_folder = folder;
    (void) m_folder->GetMessage(uid, this); // file request
 }
 
@@ -1674,6 +1678,8 @@ void
 wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
 {
    ASMailFolder::Result *result = event.GetResult();
+   if(result->GetUserData() != this)
+      return;
    switch(result->GetOperation())
    {
    case ASMailFolder::Op_GetMessage:
@@ -1682,6 +1688,13 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
          want to open it in a separate viewer. */
       Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
       ShowMessage(mptr);
+      wxFrame *frame = GetFrame(this);
+      if(frame && frame->IsKindOf(CLASSINFO(wxFolderViewFrame)))
+      {
+         wxString title;
+         title << "Mahogany: " << mptr->Subject() << _(" , from ") << mptr->From(); 
+         frame->SetTitle(title);
+      }
    }
    break;
    default:

@@ -76,20 +76,15 @@ typedef long int lcoord_t;
 // ----------------------------------------------------------------------------
 #ifdef DEBUG
 #  define   DEBUG_DEF     void Debug(void) const;
-#  ifdef USE_WXWINDOWS2
 #     define ASSERT(x)          wxASSERT(x)
 #     define ASSERT_MSG(x, msg) wxASSERT_MSG(x, msg)
-#  else  // !wxWin2
-#     include <assert.h>
-
-#     define ASSERT(x)          assert(x)
-#     define ASSERT_MSG(x, msg) DBGMESSAGE((msg)); assert(x)
-#  endif // wxWin2
+#     define ASSERT_RET(x)      {wxASSERT(x); if(!(x)) return;}
 #else
 #  define   DEBUG_DEF
 // these macros do nothing in release build
 #  define ASSERT(x)
 #  define ASSERT_MSG(x, msg)
+#  define ASSERT_RET(x)      {if(!(x)) return;}
 #endif
 
 #define FAIL           ASSERT(0)
@@ -99,7 +94,6 @@ typedef long int lcoord_t;
 #define VERIFY(x, msg)     if ( !(x) ) { wxFAIL_MSG(msg); }
 #define CHECK(x, rc, msg)  wxCHECK_MSG(x, rc, msg)
 #define CHECK_RET(x, msg)  wxCHECK_RET(x, msg)
-
 // ----------------------------------------------------------------------------
 // message logging macros
 // ----------------------------------------------------------------------------

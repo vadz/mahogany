@@ -390,18 +390,15 @@ public:
    */
    virtual Ticket ReplyMessages(const INTARRAY *messages,
                                 MWindow *parent = NULL,
-                                ProfileBase *profile = NULL,
                                 int flags = 0,
                                 UserData ud = 0) = 0;
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
-       @param profile pointer for environment
    */
    virtual Ticket ForwardMessages(const INTARRAY *messages,
                                   MWindow *parent = NULL,
-                                  ProfileBase *profile = NULL,
                                   UserData ud = 0) = 0;
 
    /**@name Subscription management.

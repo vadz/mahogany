@@ -125,7 +125,7 @@ enum ConfigFields
    ConfigField_ComposeHeaders,
    ConfigField_ComposeTemplates,
 
-   ConfigField_ComposeLast = ConfigField_ComposeHeaders,
+   ConfigField_ComposeLast = ConfigField_ComposeTemplates,
 
    // folders
    ConfigField_FoldersFirst = ConfigField_ComposeLast,

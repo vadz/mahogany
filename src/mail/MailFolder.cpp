@@ -396,213 +396,219 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
       return false;
 }
 
+/* static */
+void
+MailFolder::ReplyMessage(class Message *msg,
+                         int flags,
+                         ProfileBase *profile,
+                         MWindow *parent)
+{
+   ASSERT_RET(msg);
+   if(! profile) profile = mApplication->GetProfile();
+
+   wxComposeView *cv = wxComposeView::CreateReplyMessage(parent, profile);
+
+         // set the recipient address
+   String name;
+   String email = msg->Address(name, MAT_REPLYTO);
+   email = GetFullEmailAddress(name, email);
+   String cc;
+   if(flags & REPLY_FOLLOWUP) // group reply
+   {
+      String from = msg->Address(name, MAT_FROM);
+      msg->GetHeaderLine("CC", cc);
+      if(from != email)
+         email << ", " << from;
+   }
+   cv->SetAddresses(email,cc);
+
+         // construct the new subject
+   String newSubject;
+   String replyPrefix = READ_CONFIG(profile, MP_REPLY_PREFIX);
+   String subject = msg->Subject();
+
+   // we may collapse "Re:"s in the subject if asked for it
+   enum CRP // this is an abbreviation of "collapse reply prefix"
+   {
+      NoCollapse,
+      DumbCollapse,
+      SmartCollapse
+   } collapse = (CRP)READ_CONFIG(profile, MP_REPLY_COLLAPSE_PREFIX);
+
+   if ( collapse != NoCollapse )
+   {
+      // the default value of the reply prefix is "Re: ", yet we want to
+      // match something like "Re[2]: " in replies, so hack it a little
+      String replyPrefixWithoutColon(replyPrefix);
+      replyPrefixWithoutColon.Trim();
+      if ( replyPrefixWithoutColon.Last() == ':' )
+      {
+         // throw away last character
+         replyPrefixWithoutColon.Truncate(replyPrefixWithoutColon.Len() - 1);
+      }
+
+      // determine the reply level (level is 0 for first reply, 1 for the
+      // reply to the reply &c)
+      size_t replyLevel = 0;
+
+            // the search is case insensitive
+      wxString subjectLower(subject.Lower()),
+         replyPrefixLower(replyPrefixWithoutColon.Lower());
+      const char *pStart = subjectLower.c_str();
+      for ( ;; )
+      {
+         // search for the standard string, for the configured string, and
+         // for the translation of the standard string (notice that the
+         // standard string should be in lower case because we transform
+         // everything to lower case)
+         static const char *replyPrefixStandard = gettext_noop("re");
+
+         size_t matchLen = 0;
+         const char *pMatch = strstr(pStart, replyPrefixLower);
+         if ( !pMatch )
+            pMatch = strstr(pStart, replyPrefixStandard);
+         else if ( !matchLen )
+            matchLen = replyPrefixLower.length();
+         if ( !pMatch )
+            pMatch = strstr(pStart, _(replyPrefixStandard));
+         else if ( !matchLen )
+            matchLen = strlen(replyPrefixStandard);
+         if ( !pMatch
+              || (*(pMatch+matchLen) != '[' &&
+                  *(pMatch+matchLen) != ':'
+                  && *(pMatch+matchLen) != '(')
+            )
+            break;
+         else if ( !matchLen )
+            matchLen = strlen(_(replyPrefixStandard));
+         pStart = pMatch + matchLen;
+         replyLevel++;
+      }
+
+      //            if ( replyLevel == 1 )
+      //            {
+      // try to see if we don't have "Re[N]" string already
+      int replyLevelOld;
+      if ( sscanf(pStart, "[%d]", &replyLevelOld) == 1 ||
+           sscanf(pStart, "(%d)", &replyLevelOld) == 1 )
+      {
+         replyLevel += replyLevelOld;
+         replyLevel --; // one was already counted
+         pStart++; // opening [ or (
+         while( isdigit(*pStart) )
+            pStart ++;
+         pStart++; // closing ] or )
+      }
+      //            }
+
+            // skip spaces
+      while ( isspace(*pStart) )
+         pStart++;
+
+            // skip also the ":" after "Re" is there was one
+      if ( replyLevel > 0 && *pStart == ':' )
+      {
+         pStart++;
+
+         // ... and the spaces after ':' if any too
+         while ( isspace(*pStart) )
+            pStart++;
+      }
+
+      // this is the start of real subject
+      subject = subject.Mid(pStart - subjectLower.c_str());
+
+      if ( collapse == SmartCollapse && replyLevel > 0 )
+      {
+         // TODO not configurable enough, allow the user to specify the
+         //      format string himself and also decide whether we use powers
+         //      of 2, just multiply by 2 or nothing at all
+         // for now we just increment the replyLevel by one,
+         // everything else is funny as it doesn't maintain
+         // powers of two :-) KB
+         replyLevel ++;
+         newSubject.Printf("%s[%d]: %s",
+                           replyPrefixWithoutColon.c_str(),
+                           replyLevel,
+                           subject.c_str());
+      }
+   }
+
+   // in cases of {No|Dumb}Collapse we fall here
+   if ( !newSubject )
+   {
+      newSubject = replyPrefix + subject;
+   }
+
+   cv->SetSubject(newSubject);
+
+         // other headers
+   String messageid;
+   msg->GetHeaderLine("Message-Id", messageid);
+   String references;
+   msg->GetHeaderLine("References", references);
+   strutil_delwhitespace(references);
+   if(references.Length() > 0)
+      references << ",\015\012 ";
+   references << messageid;
+   cv->AddHeaderEntry("In-Reply-To", messageid);
+   cv->AddHeaderEntry("References", references);
+   if( READ_CONFIG(profile, MP_SET_REPLY_FROM_TO) )
+   {
+      String rt;
+      msg->GetHeaderLine("To", rt);
+      cv->AddHeaderEntry("Reply-To", rt);
+   }
+
+   cv->InitText(msg);
+   cv->Show(TRUE);
+
+   SafeDecRef(msg);
+}
+
 void
 MailFolder::ReplyMessages(const INTARRAY *selections,
                           MWindow *parent,
-                          ProfileBase *profile,
                           int flags)
 {
-   wxComposeView *cv;
    Message *msg;
 
-   if(! profile)
-      profile = mApplication->GetProfile();
    int n = selections->Count();
    for( int i = 0; i < n; i++ )
    {
       msg = GetMessage((*selections)[i]);
-      if(msg)
-      {
-         // create the new message
-         cv = wxComposeView::CreateReplyMessage(parent, profile);
+      ReplyMessage(msg, flags, GetProfile(), parent);
+      SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
+   }
+}
 
-         // set the recipient address
-         String name;
-         String email = msg->Address(name, MAT_REPLYTO);
-         email = GetFullEmailAddress(name, email);
-         String cc;
-         if(flags & REPLY_FOLLOWUP) // group reply
-         {
-            String from = msg->Address(name, MAT_FROM);
-            msg->GetHeaderLine("CC", cc);
-            if(from != email)
-               email << ", " << from;
-         }
-         cv->SetAddresses(email,cc);
-
-         // construct the new subject
-         String newSubject;
-         String replyPrefix = READ_CONFIG(GetProfile(), MP_REPLY_PREFIX);
-         String subject = msg->Subject();
-
-         // we may collapse "Re:"s in the subject if asked for it
-         enum CRP // this is an abbreviation of "collapse reply prefix"
-         {
-            NoCollapse,
-            DumbCollapse,
-            SmartCollapse
-         } collapse = (CRP)READ_CONFIG(GetProfile(), MP_REPLY_COLLAPSE_PREFIX);
-
-         if ( collapse != NoCollapse )
-         {
-            // the default value of the reply prefix is "Re: ", yet we want to
-            // match something like "Re[2]: " in replies, so hack it a little
-            String replyPrefixWithoutColon(replyPrefix);
-            replyPrefixWithoutColon.Trim();
-            if ( replyPrefixWithoutColon.Last() == ':' )
-            {
-               // throw away last character
-               replyPrefixWithoutColon.Truncate(replyPrefixWithoutColon.Len() - 1);
-            }
-
-            // determine the reply level (level is 0 for first reply, 1 for the
-            // reply to the reply &c)
-            size_t replyLevel = 0;
-
-            // the search is case insensitive
-            wxString subjectLower(subject.Lower()),
-            replyPrefixLower(replyPrefixWithoutColon.Lower());
-            const char *pStart = subjectLower.c_str();
-            for ( ;; )
-            {
-               // search for the standard string, for the configured string, and
-               // for the translation of the standard string (notice that the
-               // standard string should be in lower case because we transform
-               // everything to lower case)
-               static const char *replyPrefixStandard = gettext_noop("re");
-
-               size_t matchLen = 0;
-               const char *pMatch = strstr(pStart, replyPrefixLower);
-               if ( !pMatch )
-                  pMatch = strstr(pStart, replyPrefixStandard);
-               else if ( !matchLen )
-                  matchLen = replyPrefixLower.length();
-               if ( !pMatch )
-                  pMatch = strstr(pStart, _(replyPrefixStandard));
-               else if ( !matchLen )
-                  matchLen = strlen(replyPrefixStandard);
-               if ( !pMatch
-                     || (*(pMatch+matchLen) != '[' &&
-                        *(pMatch+matchLen) != ':'
-                        && *(pMatch+matchLen) != '(')
-                  )
-                  break;
-               else if ( !matchLen )
-                  matchLen = strlen(_(replyPrefixStandard));
-               pStart = pMatch + matchLen;
-               replyLevel++;
-            }
-
-            //            if ( replyLevel == 1 )
-            //            {
-            // try to see if we don't have "Re[N]" string already
-            int replyLevelOld;
-            if ( sscanf(pStart, "[%d]", &replyLevelOld) == 1 ||
-                  sscanf(pStart, "(%d)", &replyLevelOld) == 1 )
-            {
-               replyLevel += replyLevelOld;
-               replyLevel --; // one was already counted
-               pStart++; // opening [ or (
-                     while( isdigit(*pStart) )
-                     pStart ++;
-                     pStart++; // closing ] or )
-            }
-            //            }
-
-            // skip spaces
-            while ( isspace(*pStart) )
-               pStart++;
-
-            // skip also the ":" after "Re" is there was one
-            if ( replyLevel > 0 && *pStart == ':' )
-            {
-               pStart++;
-
-               // ... and the spaces after ':' if any too
-               while ( isspace(*pStart) )
-                  pStart++;
-            }
-
-            // this is the start of real subject
-            subject = subject.Mid(pStart - subjectLower.c_str());
-
-            if ( collapse == SmartCollapse && replyLevel > 0 )
-            {
-               // TODO not configurable enough, allow the user to specify the
-               //      format string himself and also decide whether we use powers
-               //      of 2, just multiply by 2 or nothing at all
-               // for now we just increment the replyLevel by one,
-               // everything else is funny as it doesn't maintain
-               // powers of two :-) KB
-               replyLevel ++;
-               newSubject.Printf("%s[%d]: %s",
-                     replyPrefixWithoutColon.c_str(),
-                     replyLevel,
-                     subject.c_str());
-            }
-         }
-
-         // in cases of {No|Dumb}Collapse we fall here
-         if ( !newSubject )
-         {
-            newSubject = replyPrefix + subject;
-         }
-
-         cv->SetSubject(newSubject);
-
-         // other headers
-         String messageid;
-         msg->GetHeaderLine("Message-Id", messageid);
-         String references;
-         msg->GetHeaderLine("References", references);
-         strutil_delwhitespace(references);
-         if(references.Length() > 0)
-            references << ",\015\012 ";
-         references << messageid;
-         cv->AddHeaderEntry("In-Reply-To", messageid);
-         cv->AddHeaderEntry("References", references);
-         if( READ_CONFIG(profile, MP_SET_REPLY_FROM_TO) )
-         {
-            String rt;
-            msg->GetHeaderLine("To", rt);
-            cv->AddHeaderEntry("Reply-To", rt);
-         }
-
-         cv->InitText(msg);
-         cv->Show(TRUE);
-
-         SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
-         SafeDecRef(msg);
-      }//if(msg)
-   }//for()
+/* static */
+void
+MailFolder::ForwardMessage(class Message *msg,
+                           ProfileBase *profile,
+                           MWindow *parent)
+{
+   ASSERT_RET(msg);
+   if(! profile) profile = mApplication->GetProfile();
+   
+   wxComposeView *cv = wxComposeView::CreateFwdMessage(parent, profile);
+   cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX)+ msg->Subject());
+   cv->InitText(msg);
+   cv->Show(TRUE);
+   SafeDecRef(msg);
 }
 
 void
-MailFolder::ForwardMessages(const INTARRAY *selections,
-                            MWindow *parent,
-                            ProfileBase *profile)
+MailFolder::ForwardMessages(const INTARRAY *selections, MWindow *parent)
 {
    int i;
-   wxComposeView *cv;
    Message *msg;
 
-   if( !profile )
-      profile = mApplication->GetProfile();
    int n = selections->Count();
    for(i = 0; i < n; i++)
    {
       msg = GetMessage((*selections)[i]);
-      if(msg)
-      {
-         cv = wxComposeView::CreateFwdMessage(parent,GetProfile());
-         cv->SetSubject(READ_CONFIG(GetProfile(), MP_FORWARD_PREFIX)
-                        + msg->Subject());
-
-         cv->InitText(msg);
-         cv->Show(TRUE);
-
-         SafeDecRef(msg);
-      }
+      ForwardMessage(msg, GetProfile(), parent);
    }
 }
 

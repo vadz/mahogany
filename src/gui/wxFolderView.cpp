@@ -165,15 +165,12 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          m_FolderView->GetFolder()->ReplyMessages(
             &selections,
             GetFrame(this),
-            m_FolderView->GetProfile(),
             (keycodes_en[idx] == 'G')?MailFolder::REPLY_FOLLOWUP:0,
             m_FolderView);
          break;
       case 'F':
          m_FolderView->GetFolder()->ForwardMessages(
-            &selections,
-            GetFrame(this),
-            m_FolderView->GetProfile(), m_FolderView);
+            &selections, GetFrame(this), m_FolderView);
          break;
       case 'O':
          m_FolderView->OpenMessages(selections);
@@ -674,13 +671,13 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_MSG_REPLY:
    case WXMENU_MSG_FOLLOWUP:
       GetSelections(selections);
-      m_TicketList->Add(m_MF->ReplyMessages(&selections, GetFrame(m_Parent), m_Profile,
+      m_TicketList->Add(m_MF->ReplyMessages(&selections, GetFrame(m_Parent),
                                             (event.GetId() == WXMENU_MSG_FOLLOWUP)
                                             ? MailFolder::REPLY_FOLLOWUP:0));
       break;
    case WXMENU_MSG_FORWARD:
       GetSelections(selections);
-      m_TicketList->Add(m_MF->ForwardMessages(&selections, GetFrame(m_Parent), m_Profile));
+      m_TicketList->Add(m_MF->ForwardMessages(&selections, GetFrame(m_Parent)));
       break;
    case WXMENU_MSG_UNDELETE:
       GetSelections(selections);
@@ -1063,3 +1060,5 @@ wxFolderViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
    if(m_FolderView)
       m_FolderView->SetSize(0,0,x,y);
 }
+
+IMPLEMENT_DYNAMIC_CLASS(wxFolderViewFrame, wxMFrame)

@@ -14,11 +14,6 @@ $Id$
 		selections via keyboard still broken
 		speed up wxLayout scrollbar setting, *way* too slow
 		now
-9	KB	Calling events asynchronously can lead to the default
-		object being reset in MailFolderCC
-		streamConnectionList. For threaded operation this will
-		be solved with the mutex, but how can we fix it for
-		non-threaded M? 
 5	KB	for NNTP only count unread/new messages
 4		Change "only retrieve first X messages" dialog box:
 		1. make it more intuitive (yes/no switch)
@@ -47,10 +42,7 @@ $Id$
 4 gtk	VZ	icon selector suffers from several appearance problems
 3 gtk	??	menu acceleratos don't work if we process char events
 
-4	KB	I don't quite understabd profile usage in
-		MailFolder::ForwardMessages() - is the profile parameter used at
-		all (doesn't seem so)? Should it be used?
-		Also, why "hide" parameter to all wxComposeView::CreateXXX()
+4	KB	Also, why "hide" parameter to all wxComposeView::CreateXXX()
 		functions is ignored - is it used anywhere?
 
 *********************************************************************
@@ -60,8 +52,6 @@ $Id$
 *********************************************************************
 
 9	KB	Change/Finish ASMailFolder API for subscription management.
-		---> FINISH THE WXFOLDERVIEW WITH ASYNC CODE!!!
-                     --> add missing this userdata pointer to calls
 		---> Add a "find text in folder" method, too, trivial.
 
 9	KB	Profile: add enumeration of entries for profile and

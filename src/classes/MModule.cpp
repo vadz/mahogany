@@ -320,15 +320,18 @@ MModuleListing *MModule::GetListing(void)
    /// First, build list of all .mmd files:
    for(int i = 0; i < nDirs ; i++)
    {
-      pathname = dirs[i];
-      pathname << "*.mmd";
-      filename = wxFindFirstFile(pathname);
-      while(filename.Length())
-      {
-         modules.push_back(new // without ".mmd" :
-                           String(filename.Mid(0,filename.Length()-4))); 
-         filename = wxFindNextFile();
-      }
+         pathname = dirs[i];
+         if(wxDirExists(pathname))
+         {
+            pathname << "*.mmd";
+            filename = wxFindFirstFile(pathname);
+            while(filename.Length())
+            {
+               modules.push_back(new // without ".mmd" :
+                                 String(filename.Mid(0,filename.Length()-4))); 
+               filename = wxFindNextFile();
+            }
+         }
    }
    /// Second: load list info:
    MModuleListingImpl *listing = MModuleListingImpl::Create(modules.size());
@@ -371,5 +374,6 @@ MModuleListing *MModule::GetListing(void)
          MDialog_ErrorMessage(msg);
       }
    }
+   listing->SetCount(count);
    return listing;
 }

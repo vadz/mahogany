@@ -231,4 +231,8 @@ void MDialog_ShowText(MWindow *parent,
                       const char *configPath = NULL);
 
 } // extern "C"
+
+/// Configure modules, in wxModulesDialog.cpp:
+extern void ShowModulesDialog(wxFrame *parent);
+
 #endif  //WXMDIALOGS_H

@@ -399,30 +399,25 @@ public:
    MT_ReplyForwardMessages(ASMailFolder *mf, ASMailFolder::UserData ud,
                            ASMailFolder::OperationId op,
                            const INTARRAY *selections,
-                           MWindow *parent, ProfileBase *profile,
+                           MWindow *parent,
                            int flags )
       : MailThreadSeq(mf, ud, selections)
       {
-         m_Profile = profile;
-         if(m_Profile) m_Profile->IncRef();
          m_Parent = parent;
          m_Flags = flags;
          m_Op = op;
          ASSERT(m_Op == ASMailFolder::Op_ReplyMessages ||
                 m_Op == ASMailFolder::Op_ForwardMessages);
       }
-   ~MT_ReplyForwardMessages()
-      { if(m_Profile) m_Profile->DecRef(); }
    virtual void WorkFunction(void)
       {
          if(m_Op == ASMailFolder::Op_ReplyMessages)
-            m_MailFolder->ReplyMessages(m_Seq, m_Parent, m_Profile, m_Flags);
+            m_MailFolder->ReplyMessages(m_Seq, m_Parent, m_Flags);
          else
-            m_MailFolder->ForwardMessages(m_Seq, m_Parent, m_Profile);
+            m_MailFolder->ForwardMessages(m_Seq, m_Parent);
       }
 private:
    ASMailFolder::OperationId m_Op;
-   ProfileBase *m_Profile;
    MWindow *m_Parent;
    int m_Flags;
 };
@@ -713,34 +708,30 @@ public:
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
-       @param profile pointer for environment
    */
    virtual Ticket ReplyMessages(const INTARRAY *messages,
                                 MWindow *parent,
-                                ProfileBase *profile,
                                 int flags,
                                 UserData ud)
    {
       return (new MT_ReplyForwardMessages(this, ud,
                                           Op_ReplyMessages,
                                           messages, parent,
-                                          profile, flags))->Start();
+                                          flags))->Start();
    }
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
-       @param profile pointer for environment
    */
    virtual Ticket ForwardMessages(const INTARRAY *messages,
                                   MWindow *parent,
-                                  ProfileBase *profile,
                                   UserData ud)
    {
       return (new MT_ReplyForwardMessages(this, ud,
                                           Op_ForwardMessages,
                                           messages, parent,
-                                          profile, 0))->Start();
+                                          0))->Start();
    }
 
    /**@name Subscription management */

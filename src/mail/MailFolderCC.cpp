@@ -510,7 +510,6 @@ MailFolderCC::Open(void)
             // get INBOX path name
             {
                MCclientLocker lock;
-               SetDefaultObj();
                lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
                if(lockfile.IsEmpty()) // another c-client stupidity
                   lockfile = (char *) sysinbox();
@@ -571,8 +570,8 @@ MailFolderCC::Open(void)
       if(m_MailStream != NIL)
          m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                                   debugFlag ? OP_DEBUG : NIL);
-         ProcessEventQueue();
-         SetDefaultObj(false);
+      ProcessEventQueue();
+      SetDefaultObj(false);
    }
    CCVerbose();
    if(m_MailStream == NIL)
@@ -1025,16 +1024,17 @@ MailFolderCC::BuildListing(void)
         (m_RetrievalLimit > 0) && m_FirstListing && (m_NumOfMessages > m_RetrievalLimit) )
    {
       // TODO should really ask the user how many of them he wants (like slrn)
-      wxString msg;
+      String msg;
       msg.Printf(_("This folder (%s) contains %lu messages, which is greater than "
                    "the current threshold of %lu.\n"
                    "\n"
-                   "Would you like to retrieve only the last %lu messages?\n"
-                   "(selecting [No] will retrieve all messages)"),
+                   "Would you like to retrieve all messages anyway?\n"),
                  GetName().c_str(),
-                 m_NumOfMessages, m_RetrievalLimit, m_RetrievalLimit);
-
-      if ( MDialog_YesNoDialog(msg) )
+                 m_NumOfMessages, m_RetrievalLimit);
+      String confpath;
+      confpath << m_Profile->GetName() << '/' << "RetrieveAll";
+      if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, false,
+                               confpath) )
       {
          numMessages = m_RetrievalLimit;
          firstMessage = m_NumOfMessages - m_RetrievalLimit + 1;

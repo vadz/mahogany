@@ -343,18 +343,33 @@ public:
    */
    void ReplyMessages(const INTARRAY *messages,
                       MWindow *parent = NULL,
-                      ProfileBase *profile = NULL,
                       int flags = 0);
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
-       @param profile pointer for environment
    */
    void ForwardMessages(const INTARRAY *messages,
-                        MWindow *parent = NULL,
-                        ProfileBase *profile = NULL);
+                        MWindow *parent = NULL);
 
+   /** Forward one message.
+       @param message message to forward
+       @param profile environment
+       @param parent window for dialog
+   */
+   static void ForwardMessage(class Message *msg,
+                              ProfileBase *profile = NULL,
+                              MWindow *parent = NULL);
+   /** Reply to one message.
+       @param message message to reply to
+       @param flags 0, or REPLY_FOLLOWUP
+       @param profile environment
+       @param parent window for dialog
+   */
+   static void ReplyMessage(class Message *msg,
+                            int flags = 0,
+                            ProfileBase *profile = NULL,
+                            MWindow *parent = NULL);
    //@}
 
    /**@name Access control */

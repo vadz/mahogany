@@ -120,8 +120,13 @@ static const int g_aMainTbar[] =
    WXTBAR_MAIN_OPEN,
    WXTBAR_MAIN_COMPOSE,
    WXTBAR_SEP,
+   WXTBAR_MSG_OPEN,
+   WXTBAR_MSG_FORWARD,
+   WXTBAR_MSG_REPLY,
+   WXTBAR_MSG_PRINT,
+   WXTBAR_MSG_DELETE,
+   WXTBAR_SEP,
    WXTBAR_ADB,
-   WXTBAR_PREFERENCES,
    -1
 };
 
@@ -135,7 +140,6 @@ static const int g_aComposeTbar[] =
    WXTBAR_COMPOSE_SEND,
    WXTBAR_SEP,
    WXTBAR_ADB,
-   WXTBAR_PREFERENCES,
    -1
 };
 
@@ -151,7 +155,6 @@ static const int g_aFolderTbar[] =
    WXTBAR_MSG_DELETE,
    WXTBAR_SEP,
    WXTBAR_ADB,
-   WXTBAR_PREFERENCES,
    -1
 };
 
@@ -166,7 +169,6 @@ static const int g_aMsgTbar[] =
    WXTBAR_MSG_DELETE,
    WXTBAR_SEP,
    WXTBAR_ADB,
-   WXTBAR_PREFERENCES,
    -1
 };
 
@@ -234,6 +236,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_EDIT_ADB,      gettext_noop("&Address books..."), gettext_noop("Edit the address book(s)") },
    { WXMENU_EDIT_PREF,     gettext_noop("Pre&ferences..."),   gettext_noop("Change options")           },
+   { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_EDIT_RESTORE_PREF,
                            gettext_noop("&Restore defaults..."), gettext_noop("Restore default options values") },

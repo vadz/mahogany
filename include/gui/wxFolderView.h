@@ -180,6 +180,7 @@ private:
    ASMailFolder::Ticket m_DeleteSavedMessagesTicket;
 };
 
+
 class wxFolderViewFrame : public wxMFrame
 {
 public:
@@ -203,6 +204,9 @@ public:
    void OnSize(wxSizeEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
 
+   /// don't even think of using this!
+   wxFolderViewFrame(void) {ASSERT(0);}
+   DECLARE_DYNAMIC_CLASS(wxFolderViewFrame)
 private:
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);
    wxFolderViewFrame(String const &name, wxMFrame *parent);
