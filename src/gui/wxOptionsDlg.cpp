@@ -436,14 +436,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Open timeout"),                Field_Number,    -1,                        },
    { gettext_noop("&Read timeout"),                Field_Number,    -1,                        },
    { gettext_noop("&Write timeout"),               Field_Number,    -1,                        },
-   { gettext_noop("&rsh timeout"),                 Field_Number,    -1,                        },
    { gettext_noop("&Close timeout"),               Field_Number,    -1,                        },
+   { gettext_noop("&rsh timeout"),                 Field_Number,    -1,                        },
 
    // compose
+#if 0
    { gettext_noop("Store outgoing messages and send only when asked to"),
      Field_Bool, -1 },
    { gettext_noop("Folder where to store outgoing messages"),
      Field_Text, ConfigField_UseOutbox },
+#endif // 0
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),
                                                    Field_File,    ConfigField_UseOutgoingFolder },
@@ -478,7 +480,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
-   { gettext_noop("Store outgoing messages and send only when asked to"), 
+   { gettext_noop("Store outgoing messages and send only when asked to"),
      Field_Bool, -1 },
    { gettext_noop("Folder where to store &outgoing messages"),
      Field_Text, ConfigField_UseOutbox },
@@ -658,7 +660,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before
                                 // sending them
    CONFIG_ENTRY(MP_OUTBOX_NAME),
-   CONFIG_ENTRY(MP_USE_TRASH_FOLDER), 
+   CONFIG_ENTRY(MP_USE_TRASH_FOLDER),
    CONFIG_ENTRY(MP_TRASH_FOLDER),
 
    // python
