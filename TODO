@@ -3,6 +3,10 @@ TODO list for Mahogany
 $Id$
 
 
+
+*** PLEASE ADD NEW BUGS TO BUGZILLA AND THE TODO FILE FOR NOW ***
+
+
 *********************************************************************
 *** BUGS
 *********************************************************************
@@ -25,6 +29,8 @@ $Id$
 9		disabling "collect mail" in properties has no effect!
 
 9	KB	fix mm_list, follow Vadim's mail
+9	KB	only Filters appear in list of statically linked
+                modules -why?
 9	KB	only one new mail dialog at any given time, suppress
 		them while showing it
 
