@@ -107,9 +107,12 @@ enum ConfigFields
    ConfigField_PopServer,
    ConfigField_ImapServer,
    ConfigField_MailServer,
+   ConfigField_NewsServer,
    ConfigField_MailServerLoginHelp,
    ConfigField_MailServerLogin,
-   ConfigField_NewsServer,
+   ConfigField_MailServerPassword,
+   ConfigField_NewsServerLogin,
+   ConfigField_NewsServerPassword,
 #ifdef USE_SSL
    ConfigField_SSLtext,
    ConfigField_PopServerSSL,
@@ -477,12 +480,15 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&POP server"),                  Field_Text,    -1,                        },
    { gettext_noop("&IMAP server"),                 Field_Text,    -1,                        },
    { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -1,           },
-   { gettext_noop("Some SMTP servers require a user Id or login.\n"
-                  "Leave this empty unless told to set it up by your ISP."),
-     Field_Message, -1,                        },
-   { gettext_noop("SMTP server &user ID"),         Field_Text,   -1,           },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,
    },
+   { gettext_noop("Some SMTP or NNTP servers require a user Id or login.\n"
+                  "Leave these fields empty unless told to set it up by your ISP."),
+     Field_Message, -1,                        },
+   { gettext_noop("SMTP server &user ID"),         Field_Text,   -1,           },
+   { gettext_noop("SMTP server &password"),         Field_Text,   -1,           },
+   { gettext_noop("NNTP server &user ID"),         Field_Text,   -1,           },
+   { gettext_noop("NNTP server &password"),         Field_Text,   -1,           },
 #ifdef USE_SSL
    { gettext_noop("Mahogany can use SSL (secure sockets layer) to send\n"
                   "mail or news. Tick the following boxes to activate this.")
@@ -708,9 +714,12 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_POPHOST),
    CONFIG_ENTRY(MP_IMAPHOST),
    CONFIG_ENTRY(MP_SMTPHOST),
+   CONFIG_ENTRY(MP_NNTPHOST),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SMTPHOST_LOGIN),
-   CONFIG_ENTRY(MP_NNTPHOST),
+   CONFIG_ENTRY(MP_SMTPHOST_PASSWORD),
+   CONFIG_ENTRY(MP_NNTPHOST_LOGIN),
+   CONFIG_ENTRY(MP_NNTPHOST_PASSWORD),
 #ifdef USE_SSL
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SMTPHOST_USE_SSL),

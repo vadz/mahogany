@@ -119,20 +119,14 @@ SendMessageCC::Create(Protocol protocol,
    if(protocol == Prot_SMTP)
    {
       m_ServerHost = READ_CONFIG(prof, MP_SMTPHOST);
-      if(READ_CONFIG(prof,MP_SMTPHOST_LOGIN) != "")
-         m_ServerHost = 
-            m_ServerHost
-            << String("/user=")
-            << String(READ_CONFIG(prof,MP_SMTPHOST_LOGIN));
+      m_UserName = READ_CONFIG(prof,MP_SMTPHOST_LOGIN);
+      m_Password = READ_CONFIG(prof,MP_SMTPHOST_PASSWORD);
    }
    else
    {
       m_ServerHost = READ_CONFIG(prof, MP_NNTPHOST);
-      if(READ_CONFIG(prof,MP_USERNAME) != "")
-         m_ServerHost = 
-            m_ServerHost
-            << String("/user=")
-            << String(READ_CONFIG(prof,MP_USERNAME));
+      m_UserName = READ_CONFIG(prof,MP_NNTPHOST_LOGIN);
+      m_Password = READ_CONFIG(prof,MP_NNTPHOST_PASSWORD);
    }
 #ifdef USE_SSL
    m_UseSSL = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
@@ -641,11 +635,19 @@ SendMessageCC::Send(void)
    hostlist[1] = NIL;
    String service;
 
+   String server = m_ServerHost;
+
+   MCclientLocker locker;
+   locker.Unlock(); // not needed for now
+   
+   if(m_UserName.Length() > 0) // activate authentication
+      server << "/user=\"" << m_UserName << '"';
+   
    switch(m_Protocol)
    {
    case Prot_SMTP:
       service = "smtp";
-      hostlist[0] = m_ServerHost;
+      hostlist[0] = server;
       DBGMESSAGE(("Trying to open connection to SMTP server '%s'", m_ServerHost.c_str()));
 #ifdef USE_SSL
       if(m_UseSSL)
@@ -654,14 +656,21 @@ SendMessageCC::Send(void)
          service << "/ssl";
       }
 #endif
+      if(m_UserName.Length() > 0)
+      {
+         locker.Lock();
+         MailFolderCC::SetLoginData(m_Username, m_Password);
+      }
       stream = smtp_open_full
          (NIL,(char **)hostlist, (char *)service.c_str(),
           SMTPTCPPORT, OP_DEBUG); 
+      if(m_UserName.Length() > 0)
+         locker.Unlock();
       break;
    case Prot_NNTP:
       service = "nntp";
       // notice that we _must_ assign the result to this string!
-      hostlist[0] = m_ServerHost;
+      hostlist[0] = server;
       DBGMESSAGE(("Trying to open connection to NNTP server '%s'", m_ServerHost.c_str()));
 #ifdef USE_SSL
       if( m_UseSSL )
@@ -670,8 +679,15 @@ SendMessageCC::Send(void)
          service << "/ssl";
       }
 #endif
+      if(m_UserName.Length() > 0)
+      {
+         locker.Lock();
+         MailFolderCC::SetLoginData(m_Username, m_Password);
+      }
       stream = nntp_open_full
          (NIL,(char **)hostlist,"nntp/ssl",SMTPTCPPORT,NIL);
+      if(m_UserName.Length() > 0)
+         locker.Unlock();
       break;
 
       // make gcc happy

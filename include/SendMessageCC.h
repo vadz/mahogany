@@ -128,6 +128,8 @@ private:
 
    /// server name to use
    String m_ServerHost;
+   /// for servers requiring authentication
+   String m_UserName, m_Password;
 #ifdef USE_SSL
    /// use SSL ?
    bool m_UseSSL;

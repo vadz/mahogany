@@ -327,8 +327,14 @@
 #define   MP_SMTPHOST         "MailHost"
 /// the smtp host user-id
 #define   MP_SMTPHOST_LOGIN   "MailHostLogin"
+/// the smtp host password
+#define   MP_SMTPHOST_PASSWORD  "MailHostPw"
 /// the news server
 #define   MP_NNTPHOST         "NewsHost"
+/// the news host user-id
+#define   MP_NNTPHOST_LOGIN   "NewsHostLogin"
+/// the news host password
+#define   MP_NNTPHOST_PASSWORD  "NewsHostPw"
 /// the mail host
 #define   MP_SMTPHOST_USE_SSL         "MailHostSSL"
 /// the news server
@@ -803,12 +809,18 @@
 #define   MP_SMTPHOST_D         "mail"
 /// the mail host user-id
 #define   MP_SMTPHOST_LOGIN_D   ""
+/// the mail host user-id
+#define   MP_SMTPHOST_PASSWORD_D   ""
 /// the mail host
 #define   MP_SMTPHOST_USE_SSL_D   0l
 /// tyhe mail server fallback
 #define   MP_SMTPHOST_FB        "localhost"
 /// the news server
 #define   MP_NNTPHOST_D      "news"
+/// the news server
+#define   MP_NNTPHOST_LOGIN_D      "news"
+/// the news server
+#define   MP_NNTPHOST_PASSWORD_D      "news"
 /// the news server
 #define   MP_NNTPHOST_USE_SSL_D   0l
 /// the beacon host to test for net connection

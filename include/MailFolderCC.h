@@ -352,8 +352,10 @@ private:
    bool HalfOpen(void);
 
 
+   /// The following is also called by SendMessageCC for ESMTP authentication
    static void SetLoginData(const String &user, const String &pw);
-
+   friend class SendMessageCC;
+   
    /// for POP/IMAP boxes, this holds the user id for the callback   
    static String MF_user;
    /// for POP/IMAP boxes, this holds the password for the callback
