@@ -46,7 +46,7 @@
 
 // define this to do some (expensive!) run-time checks for translation tables
 // consistency
-//#undef DEBUG_SORTING
+//#define DEBUG_SORTING
 
 #ifdef DEBUG_SORTING
    #define CHECK_TABLES() VerifyTables(m_count, m_tableMsgno, m_tablePos)
@@ -672,8 +672,9 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       DUMP_TABLE((MsgnoType *)m_thrData->m_indents, (" "));
       DUMP_TABLE(m_thrData->m_children, (" "));
 
-      MsgnoType idxRemovedInMsgnos = INDEX_ILLEGAL;
-      for ( MsgnoType i = 0; i < m_count; i++ )
+      MsgnoType i,
+                idxRemovedInMsgnos = INDEX_ILLEGAL;
+      for ( i = 0; i < m_count; i++ )
       {
          MsgnoType msgno = m_thrData->m_tableThread[i];
          if ( msgno == msgnoRemoved )
@@ -753,7 +754,17 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
                m_thrData->m_children[idxCur]--;
             }
          }
-         else if ( msgno > msgnoRemoved )
+      }
+
+      // FIXME: we can't adjust indices while we're traversing the table above
+      //        because it confuses the code dealing with unindenting the
+      //        parent, but it would still be nice to avoid traversing the
+      //        entire array twice, but I don't have any time to understand how
+      //        to do it now (OTOH, who cares about array traversal...?)
+      for ( i = 0; i < m_count; i++ )
+      {
+         MsgnoType msgno = m_thrData->m_tableThread[i];
+         if ( msgno > msgnoRemoved )
          {
             // subsequent indices get shifted
             m_thrData->m_tableThread[i]--;
@@ -1170,15 +1181,9 @@ void HeaderInfoListImpl::CombineSortAndThread()
    // don't crash below if we don't have it somehow
    CHECK_RET( m_thrData, "must be already threaded" );
 
-//   // check it now or we'd crash in the loop below (and I don't want to
-//   // put the check inside the loop obviously)
-//   CHECK_RET( m_tableSort || m_reverseOrder, "how do we sort them?" );
-
    // normally we're called from BuildTables() so we shouldn't have it yet
    ASSERT_MSG( !m_tableMsgno, "unexpected call to CombineSortAndThread" );
 
-#if 1
-   
    /*
      We have, on one side, an array of msgno sorted correctly and,
      on the other side, a tree structure resulting from threading.
@@ -1192,210 +1197,26 @@ void HeaderInfoListImpl::CombineSortAndThread()
      the tree structure to the tables.
      */
    
-   m_thrData->m_root = ReOrderTree(m_thrData->m_root, m_tableSort, m_reverseOrder, m_count);
+   m_thrData->m_root =
+      ReOrderTree(m_thrData->m_root, m_tableSort, m_reverseOrder, m_count);
    
    size_t threadedIndex = 0;
    (void)FillThreadTables(m_thrData->m_root, m_thrData, threadedIndex, 
                           0, m_thrParams.indentIfDummyNode);
    
+   DUMP_TABLE(m_thrData->m_tableThread, ("after threading"));
+
    m_tableMsgno = m_thrData->m_tableThread;
-   //m_thrData->m_tableThread = 0;
    m_dontFreeMsgnos = true;
    
    m_tablePos = AllocTable();
-   for (size_t i = 0; i < m_count; ++i) {
+   for (size_t i = 0; i < m_count; ++i)
+   {
       m_tablePos[m_tableMsgno[i]-1] = i;
    }
+
    CHECK_TABLES();
    CHECK_THREAD_DATA();
-
-#else
-
-   // allocate the tables: we're bulding both of them on the fly here
-   m_tableMsgno = AllocTable();
-   m_tablePos = AllocTable();
-   memset(m_tableMsgno, 0, m_count * sizeof(MsgnoType));
-
-   // we also need the inverse thread table to quickly find the parents of the
-   // messages in thread in the code below
-   MsgnoType *tableThrInv = BuildInverseTable(m_thrData->m_tableThread);
-
-   /*
-      TODO: describe the current code correctly once it works (the comment
-            below is wrong because it omits to mention that we must put the
-            children in the free slots under their parent, otherwise the thread
-            structure would be broken!)
-
-      Here is the idea: we scan the sorting table from top to bottom and
-      extract from it first the root messages (i.e. with 0 indent in the
-      threading table) which we can immediately put in order into
-      m_tableMsgno because we know that the first root message will be at
-      position 0, the next one - at position 1 + total number of children
-      of the previous one &c (this index is idxCur below).
-
-      Next we rescan the table for messages of indent 1 and put them in
-      the free slots of m_tableMsgno (this is why we initialize it with
-      0s above), i.e. do the same thing as above but skipping over the
-      slots already taken by roots &c.
-
-      The code below optimizes the algorithm outlined above: while the
-      latter would require "max thread depth" passes over the sorting
-      table (and the last passes are very inefficient as we need to scan
-      the whole huge table only to find a few messages), the former does
-      only 2 passes:
-
-         1. position all roots as described above and count the number
-            of messages at level N
-         2. store the indices in the sort table of all messages at level
-            N in the preallocated arrays
-         3. traverse each of these arrays putting messages in place
-    */
-
-   // first pass: position the root messages and remember the number of other
-   // ones in the array
-   wxArrayInt numAtLevel;
-
-   // the next available slot in m_tableMsgno
-   MsgnoType idxCur = 0;
-
-   MsgnoType n;
-   for ( n = 0; n < m_count; n++ )
-   {
-      MsgnoType msgno = GetNthSortedMsgno(n);
-
-      size_t level = m_thrData->m_indents[msgno - 1];
-      if ( !level ) // root message?
-      {
-         // this is the next message we have here, so put it in the first
-         // available slot in the msgno table
-         m_tableMsgno[idxCur] = msgno;
-
-         // build the position table on the fly, too
-         m_tablePos[msgno - 1] = idxCur;
-
-         // reserve some places for the children of this item (always add 1 as
-         // we just used the slot at the position idxCur)
-         idxCur += m_thrData->m_children[msgno - 1] + 1;
-      }
-      else // child
-      {
-         // array indices start from 0, not 1
-         level--;
-
-         // make sure the array has enough elements expanding it if necessary
-         size_t count = numAtLevel.GetCount();
-         for ( size_t n = count; n <= level; n++ )
-         {
-            numAtLevel.Add(0);
-         }
-
-         // one more
-         numAtLevel[level]++;
-      }
-   }
-
-   // alloc memory for the arrays of indices themselves and their parents
-   size_t level,
-          depthMax = numAtLevel.GetCount();
-   MsgnoType **indicesAtLevel = new MsgnoType *[depthMax];
-   MsgnoType **parentsAtLevel = new MsgnoType *[depthMax];
-   for ( level = 0; level < depthMax; level++ )
-   {
-      indicesAtLevel[level] = new MsgnoType[numAtLevel[level]];
-      parentsAtLevel[level] = new MsgnoType[numAtLevel[level]];
-      numAtLevel[level] = 0;
-   }
-
-   // second pass: fill the arrays: indicesAtLevel[level] contains all messages
-   // at this depth in the sorted order while parentsAtLevel[level][n] contains
-   // the parent of the message indicesAtLevel[level][n]
-   for ( n = 0; n < m_count; n++ )
-   {
-      MsgnoType msgno = GetNthSortedMsgno(n);
-
-      size_t level = m_thrData->m_indents[msgno - 1];
-      if ( level > 0 )
-      {
-         size_t depth = level - 1; // convert to array index
-         indicesAtLevel[depth][numAtLevel[depth]] = msgno;
-
-         // find the parent of this message by finding the previous message in
-         // the thread table with indent strictly less than this one
-
-         // use index offset by 1 to avoid comparing unsigned quantities with 0,
-         // so idxInThread really corresponds to the previous message
-         MsgnoType idxInThread = tableThrInv[msgno - 1];
-         while ( idxInThread )
-         {
-            // see comment above for this "-1": we need the real index here
-            msgno = m_thrData->m_tableThread[idxInThread - 1];
-
-            // and this "-1" just transforms msgno to index
-            if ( m_thrData->m_indents[msgno - 1] < level )
-               break;
-
-            // NB: do it after "break" to avoid triggering the assert below
-            idxInThread--;
-         }
-
-         ASSERT_MSG( idxInThread, "didn't find the parent for a child?" );
-
-         parentsAtLevel[depth][numAtLevel[depth]++] = msgno;
-      }
-   }
-
-   // and finally, traverse the arrays for all depths putting the messages in
-   // place
-   for ( level = 0; level < depthMax; level++ )
-   {
-      MsgnoType countLevel = numAtLevel[level];
-      for ( n = 0; n < countLevel; n++ )
-      {
-         MsgnoType msgno = indicesAtLevel[level][n];
-
-         // skip the slots already taken (by messages of the lesser
-         // level)
-         //
-         // TODO: how can we speed it up? this can be quite slow with atypical
-         //       threads having a lot of messages at the same level (hopefully
-         //       this doesn't happen that often though)
-         MsgnoType msgnoParent = parentsAtLevel[level][n];
-         ASSERT_MSG( msgnoParent != MSGNO_ILLEGAL, "must have parent!" );
-
-         idxCur = m_tablePos[msgnoParent - 1];
-         ASSERT_MSG( m_tableMsgno[idxCur] == msgnoParent,
-                     "msgno/pos tables discrepancy detected" );
-
-         while ( idxCur < m_count && m_tableMsgno[idxCur] )
-         {
-            idxCur++;
-         }
-
-         // there must be a free slot somewhere left!
-         ASSERT_MSG( idxCur < m_count, "logic error" );
-
-         // this is the next message we have here, so put it in the first
-         // available slot in the msgno table
-         m_tableMsgno[idxCur] = msgno;
-
-         // remember to update the position table as well, we must build it
-         // completely
-         m_tablePos[msgno - 1] = idxCur;
-      }
-   }
-
-   // free memory
-   for ( level = 0; level < depthMax; level++ )
-   {
-      delete [] indicesAtLevel[level];
-      delete [] parentsAtLevel[level];
-   }
-
-   delete [] indicesAtLevel;
-   delete [] parentsAtLevel;
-   delete [] tableThrInv;
-
-#endif
 }
 
 void HeaderInfoListImpl::BuildTables()
@@ -1709,13 +1530,7 @@ void HeaderInfoListImpl::Thread()
    delete m_thrData;
    m_thrData = new ThreadData(m_count);
 
-   if ( m_mf->ThreadMessages(m_thrParams, m_thrData) )
-   {
-      //DUMP_TABLE(m_thrData->m_tableThread, ("after threading"));
-
-      //CHECK_THREAD_DATA();
-   }
-   else // threading failed
+   if ( !m_mf->ThreadMessages(m_thrParams, m_thrData) )
    {
       FreeThreadData();
 

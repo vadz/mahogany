@@ -3841,7 +3841,8 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
    size_t n,
           count = event.GetCount();
 
-   wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Expunge() (%u items)", count);
+   wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Expunge(%u items), now %ld",
+              count, m_FolderCtrl->GetItemCount());
 
    HeaderInfoList_obj hil = GetFolder()->GetHeaders();
 

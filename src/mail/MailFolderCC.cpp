@@ -4299,6 +4299,8 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
    // (it would be wasteful to create them just to do it)
    if ( m_headers )
    {
+      wxLogTrace(TRACE_MF_EVENTS, "Removing msgno %u from headers", msgno);
+
       m_headers->OnRemove(idx);
    }
 
