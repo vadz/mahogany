@@ -901,6 +901,9 @@ wxFolderView::HasSelection() const
 int
 wxFolderView::GetSelections(wxArrayInt& selections)
 {
+   if(! m_ASMailFolder)
+      return 0;
+   
    // in case there is an event pending:
    if(m_FolderCtrl->GetItemCount() != (int)m_ASMailFolder->CountMessages())
    {
