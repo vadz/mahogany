@@ -108,21 +108,6 @@
 // miscellaneous other stuff
 // ----------------------------------------------------------------------------
 
-/// debug allocator
-#undef   USE_DEBUGNEW
-
-
-#ifdef USE_DEBUGNEW
-#   define   GLOBAL_NEW     WXDEBUG_NEW
-#   define   GLOBAL_DELETE   delete
-#else
-#   define   GLOBAL_NEW     new
-#   define   GLOBAL_DELETE   delete
-#endif
-
-/// use simple dynamic class information
-#define   USE_CLASSINFO      1
-
 /// name of the application, has to remain "M" for compatibility reasons
 #define   M_APPLICATIONNAME   _T("M")
 /// name of the vendor
