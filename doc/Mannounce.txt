@@ -74,7 +74,7 @@ are currently working on the following:
  possibly also:
      GPG/PGP support 
      built-in HTML viewer
-     Finish the new message editor code: selections, cut&paste, rich-text editing 
+     Finish the new message editor code: rich-text editing 
 
 --
  Karsten Ballüder  http://Ballueder.home.dhs.org/  mailto:karste-@phy.hw.ac.uk
