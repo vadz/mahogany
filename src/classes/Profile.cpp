@@ -371,6 +371,8 @@ public:
          m_Suspended++;
 
          ms_suspendCount++;
+
+         m_wroteSuspended = false;
       }
 
    /// Commit changes from suspended mode.
@@ -424,6 +426,9 @@ private:
 
    /// suspend count: if positive, we're in suspend mode
    int m_Suspended;
+
+   /// did we actually write any settings while suspended (have to undo them?)?
+   bool m_wroteSuspended;
 
    /// Is this profile using a different Identity at present?
    Profile *m_Identity;
@@ -1150,7 +1155,13 @@ ProfileImpl::writeEntry(const String & key, const String & value)
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
    if(m_Suspended)
+   {
+      // set the flag telling us that we did write some suspended entries
+      m_wroteSuspended = true;
+
       keypath << SUSPEND_PATH << '/';
+   }
+
    if(m_ProfilePath.Length())
       keypath << m_ProfilePath << '/';
    keypath << key;
@@ -1164,7 +1175,13 @@ ProfileImpl::writeEntry(const String & key, long value)
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
    if(m_Suspended)
+   {
+      // set the flag telling us that we did write some suspended entries
+      m_wroteSuspended = true;
+
       keypath << SUSPEND_PATH << '/';
+   }
+
    if(m_ProfilePath.Length())
       keypath << m_ProfilePath << '/';
    keypath << key;
@@ -1259,12 +1276,16 @@ ProfileImpl::Discard(void)
 
       path << SUSPEND_PATH;
 
+      if ( m_wroteSuspended )
+      {
+         // avoid warning about unused variable in release builds
 #ifdef DEBUG
-      bool success =
+         bool success =
 #endif
-         ms_GlobalConfig->DeleteGroup(path);
+            ms_GlobalConfig->DeleteGroup(path);
 
-      ASSERT_MSG( success, "failed to delete suspended settings" );
+         ASSERT_MSG( success, "failed to delete suspended settings" );
+      }
    }
 
    ASSERT_MSG( ms_suspendCount > 0, "suspend count broken" );
