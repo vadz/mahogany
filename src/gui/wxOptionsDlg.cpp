@@ -1502,7 +1502,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Show &tips at startup"),        Field_Bool,    -1,                    },
    { gettext_noop("&Splash screen at startup"),    Field_Bool | Field_Restart, -1,                    },
    { gettext_noop("Splash screen &delay"),         Field_Number,  ConfigField_Splash     },
-   { gettext_noop("Show &images in the toolbar"),  Field_Bool | Field_Restart, -1     },
+   { gettext_noop("Show toolbar buttons &as"
+                  ":Images:Text:Both"),            Field_Radio | Field_Restart, -1     },
    { gettext_noop("If autosave delay is not 0, the program will periodically\n"
                   "save all unsaved information (settings, contents of the\n"
                   "opened compose windows, ...) which reduces the risk of loss\n"

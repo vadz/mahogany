@@ -649,12 +649,6 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
 // toolbar stuff
 // ----------------------------------------------------------------------------
 
-enum
-{
-   Show_Icons = 1,
-   Show_Text = 2
-};
-
 // add the given button to the toolbar
 void AddToolbarButton(wxToolBar *toolbar, int flags, int nButton)
 {
@@ -668,13 +662,13 @@ void AddToolbarButton(wxToolBar *toolbar, int flags, int nButton)
 
       // we use either bitmap or label, but not both
       wxString label;
-      if ( flags & Show_Text )
+      if ( flags & TbarShow_Text )
       {
          label = tbii.text;
       }
 
       wxBitmap bmp;
-      if ( flags & Show_Icons )
+      if ( flags & TbarShow_Icons )
       {
          wxString iconName = tbii.bmp;
 #ifdef __WXMSW__
@@ -693,18 +687,18 @@ void CreateMToolbar(wxFrame *parent, wxFrameId frameId)
 {
    wxASSERT_MSG( frameId < WXFRAME_MAX, _T("unknown frame id in CreateMToolbar") );
 
-   int flags = Show_Text;
-   if ( READ_APPCONFIG(MP_TBARIMAGES) )
-      flags |= Show_Icons;
+   // first radiobox button (0) corresponds to TbarShow_Icons (1)
+   int flags = READ_APPCONFIG(MP_TBARIMAGES);
+   flags++;
 
    long style = wxTB_HORIZONTAL | wxTB_FLAT | wxTB_DOCKABLE | wxTB_TEXT;
-   if ( !(flags & Show_Icons) )
+   if ( !(flags & TbarShow_Icons) )
       style |= wxTB_NOICONS;
 
    wxToolBar *toolbar = parent->CreateToolBar(style);
 
 #ifdef __WXMSW__
-   if ( flags & Show_Icons )
+   if ( flags & TbarShow_Icons )
    {
       // we use the icons of non standard size
       toolbar->SetToolBitmapSize(wxSize(24, 24));

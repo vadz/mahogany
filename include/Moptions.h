@@ -1258,7 +1258,7 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_RUNONEONLY_DEFVAL 1l
 
 /// show images in the toolbar
-#define MP_TBARIMAGES_DEFVAL 1l
+#define MP_TBARIMAGES_DEFVAL 1l // == Show_Icons - 1
 
 // Unix-only entries
 #ifdef OS_UNIX

@@ -455,6 +455,15 @@ enum wxFrameId
    WXFRAME_MAX
 };
 
+// tbar styles: note that these values shouldn't be changed, they correspond to
+// the radiobox selections in the options dialog!
+enum
+{
+   TbarShow_Icons = 1,
+   TbarShow_Text = 2,
+   TbarShow_Both = TbarShow_Icons | TbarShow_Text
+};
+
 /// creates the toolbar for the given frame
 extern void CreateMToolbar(wxFrame *parent, wxFrameId frameId);
 

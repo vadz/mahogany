@@ -50,9 +50,6 @@
 #include <wx/notebook.h>
 #include "wx/persctrl.h"
 
-#include <wx/menuitem.h>
-#include <wx/checklst.h>
-
 #include "gui/wxIconManager.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsPage.h"
@@ -60,6 +57,8 @@
 
 #include "MEvent.h"
 #include "Mupgrade.h"      // for VerifyEMailSendingWorks()
+
+#include "Mdefaults.h"
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -72,6 +71,12 @@ static size_t GetBrowseButtonWidth(wxWindow *win);
 // "LABEL:choice1:...:choiceN" and returns the array of choices and modifies
 // the passed in string to contain just the label
 static wxArrayString SplitLabelWithChoices(wxString *label);
+
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_TBARIMAGES;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -442,14 +447,22 @@ wxNotebookWithImages::wxNotebookWithImages(const wxString& configPath,
                                            const char *aszImages[])
                     : wxPNotebook(configPath, parent, -1)
 {
-   wxImageList *imageList = new wxImageList(32, 32, TRUE, WXSIZEOF(aszImages));
-   wxIconManager *iconmanager = mApplication->GetIconManager();
+   // assume that if the user doesn't want to see the images in the toolbar, he
+   // doesn't want to see them elsewhere, in particular in the notebook tabs
+   // neither
+   //
+   // NB: the config values are shifted related to the enum values, hence "+1"
+   if ( (int)READ_APPCONFIG(MP_TBARIMAGES) + 1 != TbarShow_Text )
+   {
+      wxImageList *imageList = new wxImageList(32, 32, TRUE, WXSIZEOF(aszImages));
+      wxIconManager *iconmanager = mApplication->GetIconManager();
 
-   for ( size_t n = 0; aszImages[n]; n++ ) {
-      imageList->Add(iconmanager->GetBitmap(aszImages[n]));
+      for ( size_t n = 0; aszImages[n]; n++ ) {
+         imageList->Add(iconmanager->GetBitmap(aszImages[n]));
+      }
+
+      SetImageList(imageList);
    }
-
-   SetImageList(imageList);
 }
 
 wxNotebookWithImages::~wxNotebookWithImages()
