@@ -89,8 +89,9 @@ public:
      after closing it.
 
      @param mf pointer to the folder to remove
+     @return true if the folder was removed, false if it wasn't found
     */
-   static void Remove(MailFolder *mf);
+   static bool Remove(MailFolder *mf);
 
    /**
      Remove all still opened folders from the pool.

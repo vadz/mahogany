@@ -231,7 +231,7 @@ MFPool::Find(MFDriver *driver,
 }
 
 /* static */
-void MFPool::Remove(MailFolder *mf)
+bool MFPool::Remove(MailFolder *mf)
 {
    for ( MFClassPoolList::iterator pool = gs_pool.begin();
          pool != gs_pool.end();
@@ -245,11 +245,13 @@ void MFPool::Remove(MailFolder *mf)
          {
             pool->connections.erase(i);
 
-            // there can be only one node containing this folder
-            return;
+            // there can be only one node containing this folder so stop here
+            return true;
          }
       }
    }
+
+   return false;
 }
 
 /* static */
