@@ -62,7 +62,7 @@
 #	define wxTextWindow  wxTextCtrl
 #	define wxText        wxTextCtrl
 #   ifdef   USE_WXGTK
-#      define   wxMToolBar   wxToolBarGTK
+#      define   wxMToolBar   wxToolBar
 #   else
 #      define   wxMToolBar   wxToolBar95
 #   endif
