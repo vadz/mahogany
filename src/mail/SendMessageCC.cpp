@@ -397,58 +397,60 @@ SendMessageCC::EncodeHeaderString(const String& header)
       return header;
    }
 
-   // get the encoding in RFC 2047 sense
-   MimeEncoding enc2047 = GetMimeEncodingForFontEncoding(m_encHeaders);
+   // get the encoding in RFC 2047 sense: we must get use some encoding so
+   // choose some reasonable one by default
+   wxFontEncoding enc = m_encHeaders == wxFONTENCODING_SYSTEM
+                           ? wxFONTENCODING_ISO8859_1
+                           : m_encHeaders;
+
+   MimeEncoding enc2047 = GetMimeEncodingForFontEncoding(enc);
+
+   ASSERT_MSG( enc2047 != MimeEncoding_Unknown,
+               "should have valid MIME encoding" );
+
+   // do encode the header
+   unsigned long len; // length of the encoded text
+   unsigned char *text = (unsigned char *)header.c_str(); // cast for cclient
+   unsigned char *textEnc;
+   if ( enc2047 == MimeEncoding_QuotedPrintable )
+   {
+         textEnc = rfc822_8bit(text, header.length(), &len);
+   }
+   else // MimeEncoding_Base64
+   {
+         textEnc = rfc822_binary(text, header.length(), &len);
+         if ( textEnc[len - 2] == '\r' && textEnc[len - 1] == '\n' )
+         {
+            // discard eol
+            len -= 2;
+         }
+   }
+
+   // FIXME should we check that the length is not greater than 76 here or
+   //       does cclient take care of it?
+
+   String encword(textEnc, (size_t)len);
+
+   // hack: rfc822_8bit() doesn't encode spaces normally but we must
+   // do it inside the headers
+   //
+   // FIXME: what about TABs and other NLs?
+   if ( enc2047 == MimeEncoding_QuotedPrintable )
+   {
+      encword.Replace(" ", "=20");
+   }
+
+   // create a RFC 2047 encoded word
+   String csName = EncodingToCharset(enc);
+   ASSERT_MSG( !csName.empty(), "should have a valid charset name!" );
 
    String headerEnc;
-   if ( enc2047 == MimeEncoding_Unknown )
-   {
-      // nothing to do
-      headerEnc = header;
-   }
-   else // do encode the header
-   {
-      unsigned long len; // length of the encoded text
-      unsigned char *text = (unsigned char *)header.c_str(); // cast for cclient
-      unsigned char *textEnc;
-      if ( enc2047 == MimeEncoding_QuotedPrintable )
-      {
-            textEnc = rfc822_8bit(text, header.length(), &len);
-      }
-      else // MimeEncoding_Base64
-      {
-            textEnc = rfc822_binary(text, header.length(), &len);
-            if ( textEnc[len - 2] == '\r' && textEnc[len - 1] == '\n' )
-            {
-               // discard eol
-               len -= 2;
-            }
-      }
+   headerEnc.reserve(csName.length() + encword.length() + 16);
+   headerEnc << "=?" << csName << '?' << (char)enc2047 << '?'
+             << encword
+             << "?=";
 
-      // FIXME should we check that the length is not greater than 76 here or
-      //       does cclient take care of it?
-
-      String encword(textEnc, (size_t)len);
-
-      // hack: rfc822_8bit() doesn't encode spaces normally but we must
-      // do it inside the headers
-      //
-      // FIXME: what about TABs and other NLs?
-      if ( enc2047 == MimeEncoding_QuotedPrintable )
-      {
-         encword.Replace(" ", "=20");
-      }
-
-      // create a RFC 2047 encoded word
-      String csName = EncodingToCharset(m_encHeaders);
-      ASSERT_MSG( !csName.empty(), "should have a valid charset name!" );
-
-      headerEnc << "=?" << csName << '?' << (char)enc2047 << '?'
-                << encword
-                << "?=";
-
-      fs_give((void **)&textEnc);
-   }
+   fs_give((void **)&textEnc);
 
    return headerEnc;
 }
