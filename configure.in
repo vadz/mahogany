@@ -1,6 +1,12 @@
 dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 
+# WARNING ... WARNING ... WARNING ... WARNING ... WARNING ... WARNING
+# This file is undergoing active modification to support separate
+# build directories.  If you really feel you need to change it, please
+# co-ordinate your changes with GregNoel@san.rr.com so the equivalent
+# changes can be made on the branch as well.
+
 dnl ######################## Here the actual script begins ###############
 
 AC_INIT(configure.in)
@@ -793,6 +799,15 @@ dnl libtool does not like -L.
 LIBS=`echo $LIBS | sed 's/-L\.//g'`
 AC_SUBST(LIBS_STATIC)
 
+for dir in . `exec find * -type d -print`
+do	case "$dir" in
+	CVS | */CVS)		continue ;;
+	extra/src/libmal*)	continue ;;
+	esac
+	rm -f $dir/.src
+	ln -s . $dir/.src
+done
+
 OUTPUT=makeopts
 
 if test "x$MAKE_HAVE_LIBMAL" != "x"; then
@@ -800,4 +815,4 @@ if test "x$MAKE_HAVE_LIBMAL" != "x"; then
 fi
 
 AC_OUTPUT($OUTPUT)
-
+exit

@@ -651,7 +651,7 @@ if test "$USE_PYTHON" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_PYTHON="$USE_PYTHON"
 
 
 echo $ac_n "checking "for threads"""... $ac_c" 1>&6
@@ -685,7 +685,7 @@ if test "$USE_THREADS" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_THREADS="$USE_THREADS"
 
 
 echo $ac_n "checking "for dmalloc"""... $ac_c" 1>&6
@@ -719,7 +719,7 @@ if test "$USE_DMALLOC" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_DMALLOC="$USE_DMALLOC"
 
 
 echo $ac_n "checking "for leaktracer"""... $ac_c" 1>&6
@@ -753,7 +753,7 @@ if test "$USE_LEAKTRACER" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_LEAKTRACER="$USE_LEAKTRACER"
 
 
 echo $ac_n "checking "for efence"""... $ac_c" 1>&6
@@ -787,7 +787,7 @@ if test "$USE_EFENCE" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_EFENCE="$USE_EFENCE"
 
 
 echo $ac_n "checking "for debug"""... $ac_c" 1>&6
@@ -821,7 +821,7 @@ if test "$USE_DEBUG" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_DEBUG="$USE_DEBUG"
 
 
 echo $ac_n "checking "for opt"""... $ac_c" 1>&6
@@ -855,7 +855,7 @@ if test "$USE_OPT" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_OPT="$USE_OPT"
 
 
 echo $ac_n "checking "for prof"""... $ac_c" 1>&6
@@ -889,7 +889,7 @@ if test "$USE_PROFILER" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_PROFILER="$USE_PROFILER"
 
 
 echo $ac_n "checking "for debuginfo"""... $ac_c" 1>&6
@@ -923,7 +923,7 @@ if test "$USE_DEBUG_FLAG" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_DEBUG_FLAG="$USE_DEBUG_FLAG"
 
 
 echo $ac_n "checking "for wxdebug"""... $ac_c" 1>&6
@@ -957,7 +957,7 @@ if test "$USE_WXDEBUG" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_WXDEBUG="$USE_WXDEBUG"
 
 
 
@@ -992,7 +992,7 @@ if test "$USE_EXPERIMENTAL" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_EXPERIMENTAL="$USE_EXPERIMENTAL"
 
 
 
@@ -1027,7 +1027,7 @@ if test "$USE_CCOSTYPE" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_CCOSTYPE="$USE_CCOSTYPE"
 
 
 echo $ac_n "checking "for modules"""... $ac_c" 1>&6
@@ -1061,7 +1061,7 @@ if test "$USE_MODULES" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_MODULES="$USE_MODULES"
 
 
 echo $ac_n "checking "for strict"""... $ac_c" 1>&6
@@ -1095,7 +1095,7 @@ if test "$USE_STRICT" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_STRICT="$USE_STRICT"
 
 
 echo $ac_n "checking "for ssl"""... $ac_c" 1>&6
@@ -1129,7 +1129,7 @@ if test "$USE_SSL" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_SSL="$USE_SSL"
 
 
 echo $ac_n "checking "for wxconfigprg"""... $ac_c" 1>&6
@@ -1163,7 +1163,7 @@ if test "$USE_WXCONFIGPRG" != 0; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+m_cv_USE_WXCONFIGPRG="$USE_WXCONFIGPRG"
 
 
 
@@ -4842,6 +4842,15 @@ LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk./-Wl,-Bstatic & -Wl,-Bdynamic/g'`
 LIBS=`echo $LIBS | sed 's/-L\.//g'`
 
 
+for dir in . `exec find * -type d -print`
+do	case "$dir" in
+	CVS | */CVS)		continue ;;
+	extra/src/libmal*)	continue ;;
+	esac
+	rm -f $dir/.src
+	ln -s . $dir/.src
+done
+
 OUTPUT=makeopts
 
 if test "x$MAKE_HAVE_LIBMAL" != "x"; then
@@ -5258,4 +5267,4 @@ chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
-
+exit

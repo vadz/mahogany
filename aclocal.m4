@@ -1,6 +1,12 @@
 dnl $Id$
 dnl local macro definitions for M's configure.in
 
+# WARNING ... WARNING ... WARNING ... WARNING ... WARNING ... WARNING
+# This file is undergoing active modification to support separate
+# build directories.  If you really feel you need to change it, please
+# co-ordinate your changes with GregNoel@san.rr.com so the equivalent
+# changes can be made on the branch as well.
+
 AC_DEFUN(M_OVERRIDES_PREPARE,
 [
 rm -f ${OSTYPE}.system.cache.tmp
@@ -41,7 +47,7 @@ if test "$$4" != 0; then
 else
   AC_MSG_RESULT(no)
 fi
-])
+m_cv_$4="$$4"])
 
 dnl M_CHECK_MYLIB(LIBRARY, FUNCTION, LIBPATHLIST [, ACTION-IF-FOUND 
 dnl            [, ACTION-IF-NOT-FOUND [, OTHER-LIBRARIES]]])
