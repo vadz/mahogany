@@ -869,6 +869,10 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
    UIdType
       smtp = 0,
       nntp = 0;
+
+   if(nSMTP) *nSMTP = 0;
+   if(nNNTP) *nNNTP = 0;
+
    MailFolder *mf = NULL;
    if(mfi)
    {
