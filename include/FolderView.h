@@ -17,7 +17,8 @@
 class MailFolder;
 class Profile;
 class ASMailFolder;
-class wxWindow;
+
+class WXDLLEXPORT wxWindow;
 
 /**
    FolderView class, a window displaying a MailFolder.
@@ -68,6 +69,9 @@ public:
 
    /// event processing function
    virtual bool OnMEvent(MEventData& ev);
+
+   /// called when our message viewer changes
+   virtual void OnMsgViewerChange(wxWindow *viewerNew) = 0;
 
 protected:
    /// the derived class should close when our folder is deleted

@@ -18,6 +18,7 @@
 #   pragma interface "wxMessageView.h"
 #endif
 
+class FolderView;
 class MsgCmdProc;
 
 #include "FolderType.h"
@@ -41,7 +42,7 @@ public:
    /** Constructor
        @param parent parent window
    */
-   wxMessageView(wxWindow *parent);
+   wxMessageView(wxWindow *parent, FolderView *folderView = NULL);
 
    /// Destructor
    ~wxMessageView();
@@ -65,6 +66,9 @@ public:
 
    /// show the MIME tree
    virtual void ShowMIMEDialog(const MimePart *part);
+
+private:
+   FolderView *m_FolderView;
 };
 
 // ----------------------------------------------------------------------------

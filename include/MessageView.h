@@ -67,7 +67,7 @@ protected:
 
 public:
    /// create a new MessageView
-   static MessageView *Create(wxWindow *parent);
+   static MessageView *Create(wxWindow *parent, FolderView *folderView = NULL);
 
    /// dtor
    virtual ~MessageView();
@@ -348,7 +348,7 @@ private:
    /// the message being previewed or NULL
    Message *m_mailMessage;
 
-   /// the mail folder (only used if m_FolderView is NULL)
+   /// the mail folder
    ASMailFolder *m_asyncFolder;
    //@}
 

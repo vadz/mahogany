@@ -200,6 +200,74 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// wxFolderMsgWindow: the window containing the message viewer
+// ----------------------------------------------------------------------------
+
+// NB: we have a separate window because the message viewer (and hence its
+//     viewer) may change during our lifetime which is not very convenient
+//     to handle in the code and, worse, provokes flicker when we call
+//     wxSplitterWindow::ReplaceWindow() (mostly under MSW)
+//
+//     it also allows us to hook into the kbd processing and forward it to
+//     wxFolderView
+
+class wxFolderMsgWindow : public wxWindow
+{
+public:
+   wxFolderMsgWindow(wxWindow *parent, wxFolderView *fv);
+   virtual ~wxFolderMsgWindow();
+
+   // called when the old viewer window is about to be destroyed and replaced
+   // with the new one
+   void SetViewerWindow(wxWindow *winViewerNew);
+
+   // don't get the focus from keyboard, we don't normally need it
+   virtual bool AcceptsFocusFromKeyboard() const { return false; }
+
+protected:
+   void OnSize(wxSizeEvent& event);
+
+   // resize our own child to fill the entire window
+   void Resize()
+   {
+      wxSize size = GetClientSize();
+      m_winViewer->SetSize(0, 0, size.x, size.y);
+   }
+
+private:
+   // the associated folder view (never NULL)
+   wxFolderView *m_folderView;
+
+   // the current viewer window (may be NULL)
+   wxWindow *m_winViewer;
+
+   // the event handler to hook the kbd input (NULL initially, !NULL later)
+   class wxFolderMsgViewerEvtHandler *m_evtHandlerMsgView;
+
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// wxFolderMsgViewerEvtHandler: helper of wxFolderMsgWindow
+// ----------------------------------------------------------------------------
+
+// this class intercepts key events in the viewer window and forwards them to
+// the folder view
+class wxFolderMsgViewerEvtHandler : public wxEvtHandler
+{
+public:
+   wxFolderMsgViewerEvtHandler(wxFolderView *fv) { m_folderView = fv; }
+
+protected:
+   void OnChar(wxKeyEvent& event);
+
+   wxFolderView *m_folderView;
+
+private:
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
 // wxFolderListCtrl: the list ctrl showing the messages in the folder
 // ----------------------------------------------------------------------------
 
@@ -613,6 +681,87 @@ int CMPFUNC_CONV compareLongsReverse(long *first, long *second)
 }
 
 // ============================================================================
+// wxFolderMsgWindow and wxFolderMsgViewerEvtHandler implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// event tables
+// ----------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(wxFolderMsgViewerEvtHandler, wxEvtHandler)
+   EVT_CHAR(wxFolderMsgViewerEvtHandler::OnChar)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxFolderMsgWindow, wxWindow)
+   EVT_SIZE(wxFolderMsgWindow::OnSize)
+END_EVENT_TABLE()
+
+// ----------------------------------------------------------------------------
+// wxFolderMsgWindow
+// ----------------------------------------------------------------------------
+
+wxFolderMsgWindow::wxFolderMsgWindow(wxWindow *parent, wxFolderView *fv)
+                 : wxWindow(parent, -1,
+                            wxDefaultPosition, wxDefaultSize,
+                            wxBORDER_NONE)
+{
+   m_winViewer = NULL;
+   m_folderView = fv;
+   m_evtHandlerMsgView = NULL;
+}
+
+// called when the old viewer window is about to be destroyed and replaced
+// with the new one
+void wxFolderMsgWindow::SetViewerWindow(wxWindow *winViewerNew)
+{
+   if ( m_winViewer )
+   {
+      m_winViewer->PopEventHandler(false /* don't delete it */);
+   }
+
+   m_winViewer = winViewerNew;
+
+   if ( m_winViewer )
+   {
+      if ( !m_evtHandlerMsgView )
+      {
+         m_evtHandlerMsgView = new wxFolderMsgViewerEvtHandler(m_folderView);
+      }
+
+      m_winViewer->PushEventHandler(m_evtHandlerMsgView);
+
+      Resize();
+   }
+}
+
+// resize our own child to fill the entire window
+void wxFolderMsgWindow::OnSize(wxSizeEvent& event)
+{
+   if ( m_winViewer )
+   {
+      Resize();
+   }
+}
+
+wxFolderMsgWindow::~wxFolderMsgWindow()
+{
+   if ( m_winViewer )
+   {
+      m_winViewer->PopEventHandler(true /* delete it */);
+   }
+}
+
+// ----------------------------------------------------------------------------
+// wxFolderMsgViewerEvtHandler
+// ----------------------------------------------------------------------------
+
+void wxFolderMsgViewerEvtHandler::OnChar(wxKeyEvent& event)
+{
+   // HandleCharEvent() will skip the event if it doesn't process it
+   m_folderView->HandleCharEvent(event);
+}
+
+// ============================================================================
 // wxFolderListCtrl implementation
 // ============================================================================
 
@@ -761,8 +910,7 @@ void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
 
 void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
-   // don't process events until we're fully initialized and also only process
-   // simple characters here (without Ctrl/Alt)
+   // don't process events until we're fully initialized
    if( !HasFolder() || !m_FolderView->m_MessagePreview )
    {
       // can't process any commands now
@@ -770,239 +918,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       return;
    }
 
-   // which command?
-   // --------------
-
-   long key = event.KeyCode();
-   switch ( key )
-   {
-      case WXK_F1:
-         mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS, m_FolderView->GetWindow());
-         return;
-
-      case WXK_PRIOR:
-      case WXK_NEXT:
-         // Shift-PageUp/Down have a predefined meaning in the wxListCtrl, so
-         // let it have it
-         if ( event.ShiftDown() )
-         {
-            event.Skip();
-            return;
-         }
-         // fall through
-
-      case WXK_BACK:
-      case '*':
-         // leave as is
-         break;
-
-      case '#':
-         // # == expunge for VM compatibility
-         key = 'X';
-         break;
-
-      case WXK_DELETE:
-         // <Del> should delete
-         key = 'D';
-         break;
-
-      default: // translatable key?
-         {
-            /** To allow translations:
-
-                Delete, Undelete, eXpunge, Copytofolder, Savetofile,
-                Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
-                View, Group reply (== followup)
-            */
-            static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHG");
-            static const char *keycodes = _(keycodes_en);
-
-            key = toupper(key);
-
-            int idx = 0;
-            for ( ; keycodes[idx] && keycodes[idx] != key; idx++ )
-               ;
-
-            key = keycodes[idx] ? keycodes_en[idx] : 0;
-         }
-   }
-
-   // we only process unmodified key presses normally - except for Ctrl-Del
-   // and '*' (which may need Shift on some keyboards (including US))
-   if ( event.AltDown() ||
-        (event.ShiftDown() && key != '*') ||
-        (event.ControlDown() && key != 'D') )
-   {
-      event.Skip();
-      return;
-   }
-
-   // do command
-   // ----------
-
-   // we can operate either on all selected items
-   const UIdArray& selections = m_FolderView->GetSelections();
-
-   // get the focused item
-   long focused = GetFocusedItem();
-
-   // find the next item
-   long newFocus = focused;
-   if ( newFocus == -1 )
-      newFocus = 0;
-   else if ( focused < GetItemCount() - 1 )
-      newFocus++;
-
-   MsgCmdProc *msgCmdProc = m_FolderView->m_msgCmdProc;
-   switch ( key )
-   {
-      case 'M': // move
-         if ( !msgCmdProc->ProcessCommand(WXMENU_MSG_MOVE_TO_FOLDER,
-                                          selections) )
-         {
-            // don't delete the messages if we couldn't save them!
-            newFocus = -1;
-         }
-         break;
-
-      case 'D': // delete
-         if ( event.ControlDown() )
-         {
-            msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE_EXPUNGE, selections);
-            newFocus = -1;
-         }
-         else // normal delete
-         {
-            msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE, selections);
-
-            // only move on if we mark as deleted, for trash usage, selection
-            // remains the same:
-            if ( READ_CONFIG(m_FolderView->m_Profile, MP_USE_TRASH_FOLDER) )
-            {
-               // don't move focus
-               newFocus = -1;
-            }
-         }
-         break;
-
-      case 'U': // undelete
-         msgCmdProc->ProcessCommand(WXMENU_MSG_UNDELETE, selections);
-         break;
-
-      case 'X': // expunge
-         m_FolderView->ExpungeMessages();
-         newFocus = -1;
-         break;
-
-      case 'C': // copy (to folder)
-         msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FOLDER, selections);
-         break;
-
-      case 'S': // save (to file)
-         msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FILE, selections);
-         break;
-
-      case 'G': // group reply
-         msgCmdProc->ProcessCommand(WXMENU_MSG_FOLLOWUP, selections);
-         newFocus = -1;
-         break;
-
-      case 'R': // reply
-         msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY, selections);
-         newFocus = -1;
-         break;
-
-      case 'F': // forward
-         msgCmdProc->ProcessCommand(WXMENU_MSG_FORWARD, selections);
-         newFocus = -1;
-         break;
-
-      case 'O': // open
-         msgCmdProc->ProcessCommand(WXMENU_MSG_OPEN, selections);
-         break;
-
-      case 'P': // print
-         msgCmdProc->ProcessCommand(WXMENU_MSG_PRINT, selections);
-         break;
-
-      case 'H': // headers
-         msgCmdProc->ProcessCommand(WXMENU_MSG_TOGGLEHEADERS, selections);
-
-         // don't move focus
-         newFocus = -1;
-         break;
-
-      case '*':
-         msgCmdProc->ProcessCommand(WXMENU_MSG_FLAG, selections);
-
-         // don't move focus
-         newFocus = -1;
-         break;
-
-      case WXK_NEXT:
-         // scroll down the preview window
-         if ( IsPreviewed(focused) )
-         {
-            if ( !m_FolderView->m_MessagePreview->PageDown() )
-            {
-               // go to the next message if we were already at the end
-               MoveToNextUnread();
-            }
-         }
-         else
-         {
-            // let it work as usual
-            event.Skip();
-         }
-
-         // don't move focus
-         newFocus = -1;
-         break;
-
-      case WXK_PRIOR:
-      case WXK_BACK:
-         // scroll up within the message viewer:
-         if ( IsPreviewed(focused) )
-         {
-            m_FolderView->m_MessagePreview->PageUp();
-         }
-         else
-         {
-            // let it work as usual
-            event.Skip();
-         }
-
-
-         // don't move focus
-         newFocus = -1;
-         break;
-
-      default:
-         // all others should have been mapped to 0 in the code above
-         FAIL_MSG("unexpected key");
-
-         // fall through
-
-      case 0:
-         // don't move focus
-         newFocus = -1;
-
-         event.Skip();
-   }
-
-   if ( newFocus != -1 )
-   {
-      // move focus
-      Focus(newFocus);
-
-      long sel = GetUniqueSelection();
-      if ( sel != -1 )
-      {
-         Select(sel, false);
-      }
-
-      UpdateFocus();
-   }
+   (void)m_FolderView->HandleCharEvent(event);
 }
 
 void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
@@ -1987,7 +1903,9 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
    m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
-   m_MessagePreview = MessageView::Create(m_SplitterWindow);
+   m_MessageWindow = new wxFolderMsgWindow(m_SplitterWindow, this);
+
+   m_MessagePreview = MessageView::Create(m_MessageWindow, this);
 
    m_msgCmdProc = MsgCmdProc::Create(m_MessagePreview, m_FolderCtrl);
    m_msgCmdProc->SetFrame(GetFrame(m_FolderCtrl));
@@ -1996,7 +1914,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    ApplyOptions();
 
    m_SplitterWindow->SplitHorizontally(m_FolderCtrl,
-                                       m_MessagePreview->GetWindow(),
+                                       m_MessageWindow,
                                        m_Parent->GetClientSize().y/3);
    m_SplitterWindow->SetMinimumPaneSize(10);
    m_SplitterWindow->SetFocus();
@@ -2722,6 +2640,245 @@ void wxFolderView::SelectAll(bool on)
 // wxFolderView event handlers
 // ----------------------------------------------------------------------------
 
+bool
+wxFolderView::HandleCharEvent(wxKeyEvent& event)
+{
+   // which command?
+   // --------------
+
+   long key = event.KeyCode();
+   switch ( key )
+   {
+      case WXK_F1:
+         mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS, GetWindow());
+         return true;
+
+      case WXK_PRIOR:
+      case WXK_NEXT:
+         // Shift-PageUp/Down have a predefined meaning in the wxListCtrl, so
+         // let it have it
+         if ( event.ShiftDown() )
+         {
+            event.Skip();
+            return false;
+         }
+         // fall through
+
+      case WXK_BACK:
+      case '*':
+         // leave as is
+         break;
+
+      case '#':
+         // # == expunge for VM compatibility
+         key = 'X';
+         break;
+
+      case WXK_DELETE:
+         // <Del> should delete
+         key = 'D';
+         break;
+
+      default: // translatable key?
+         {
+            /** To allow translations:
+
+                Delete, Undelete, eXpunge, Copytofolder, Savetofile,
+                Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
+                View, Group reply (== followup)
+            */
+            static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHG");
+            static const char *keycodes = _(keycodes_en);
+
+            key = toupper(key);
+
+            int idx = 0;
+            for ( ; keycodes[idx] && keycodes[idx] != key; idx++ )
+               ;
+
+            key = keycodes[idx] ? keycodes_en[idx] : 0;
+         }
+   }
+
+   // we only process unmodified key presses normally - except for Ctrl-Del
+   // and '*' (which may need Shift on some keyboards (including US))
+   if ( event.AltDown() ||
+        (event.ShiftDown() && key != '*') ||
+        (event.ControlDown() && key != 'D') )
+   {
+      event.Skip();
+      return false;
+   }
+
+   // do command
+   // ----------
+
+   // we can operate either on all selected items
+   const UIdArray& selections = GetSelections();
+
+   // get the focused item
+   long focused = m_FolderCtrl->GetFocusedItem();
+
+   // find the next item
+   long newFocus = focused;
+   if ( newFocus == -1 )
+      newFocus = 0;
+   else if ( focused < m_FolderCtrl->GetItemCount() - 1 )
+      newFocus++;
+
+   switch ( key )
+   {
+      case 'M': // move
+         if ( !m_msgCmdProc->ProcessCommand(WXMENU_MSG_MOVE_TO_FOLDER,
+                                            selections) )
+         {
+            // don't delete the messages if we couldn't save them!
+            newFocus = -1;
+         }
+         break;
+
+      case 'D': // delete
+         if ( event.ControlDown() )
+         {
+            m_msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE_EXPUNGE, selections);
+            newFocus = -1;
+         }
+         else // normal delete
+         {
+            m_msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE, selections);
+
+            // only move on if we mark as deleted, for trash usage, selection
+            // remains the same:
+            if ( READ_CONFIG(m_Profile, MP_USE_TRASH_FOLDER) )
+            {
+               // don't move focus
+               newFocus = -1;
+            }
+         }
+         break;
+
+      case 'U': // undelete
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_UNDELETE, selections);
+         break;
+
+      case 'X': // expunge
+         ExpungeMessages();
+         newFocus = -1;
+         break;
+
+      case 'C': // copy (to folder)
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FOLDER, selections);
+         break;
+
+      case 'S': // save (to file)
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FILE, selections);
+         break;
+
+      case 'G': // group reply
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_FOLLOWUP, selections);
+         newFocus = -1;
+         break;
+
+      case 'R': // reply
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY, selections);
+         newFocus = -1;
+         break;
+
+      case 'F': // forward
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_FORWARD, selections);
+         newFocus = -1;
+         break;
+
+      case 'O': // open
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_OPEN, selections);
+         break;
+
+      case 'P': // print
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_PRINT, selections);
+         break;
+
+      case 'H': // headers
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_TOGGLEHEADERS, selections);
+
+         // don't move focus
+         newFocus = -1;
+         break;
+
+      case '*':
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_FLAG, selections);
+
+         // don't move focus
+         newFocus = -1;
+         break;
+
+      case WXK_NEXT:
+         // scroll down the preview window
+         if ( m_FolderCtrl->IsPreviewed(focused) )
+         {
+            if ( !m_MessagePreview->PageDown() )
+            {
+               // go to the next message if we were already at the end
+               MoveToNextUnread();
+            }
+         }
+         else
+         {
+            // let it work as usual
+            event.Skip();
+         }
+
+         // don't move focus
+         newFocus = -1;
+         break;
+
+      case WXK_PRIOR:
+      case WXK_BACK:
+         // scroll up within the message viewer:
+         if ( m_FolderCtrl->IsPreviewed(focused) )
+         {
+            m_MessagePreview->PageUp();
+         }
+         else
+         {
+            // let it work as usual
+            event.Skip();
+         }
+
+
+         // don't move focus
+         newFocus = -1;
+         break;
+
+      default:
+         // all others should have been mapped to 0 in the code above
+         FAIL_MSG("unexpected key");
+
+         // fall through
+
+      case WXK_UP:
+      case WXK_DOWN:
+      case 0:
+         event.Skip();
+         return false;
+   }
+
+   if ( newFocus != -1 )
+   {
+      // move focus
+      m_FolderCtrl->Focus(newFocus);
+
+      long sel = m_FolderCtrl->GetUniqueSelection();
+      if ( sel != -1 )
+      {
+         m_FolderCtrl->Select(sel, false);
+      }
+
+      m_FolderCtrl->UpdateFocus();
+   }
+
+   return true;
+}
+
 void
 wxFolderView::OnCommandEvent(wxCommandEvent& event)
 {
@@ -2872,6 +3029,15 @@ UIdType
 wxFolderView::GetFocus() const
 {
    return m_FolderCtrl->GetFocusedUId();
+}
+
+// ----------------------------------------------------------------------------
+// wxFolderView message viewer handling
+// ----------------------------------------------------------------------------
+
+void wxFolderView::OnMsgViewerChange(wxWindow *viewerNew)
+{
+   m_MessageWindow->SetViewerWindow(viewerNew);
 }
 
 // ----------------------------------------------------------------------------

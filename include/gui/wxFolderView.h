@@ -29,6 +29,7 @@
 class wxFolderViewPanel;
 class wxFolderView;
 class wxFolderListCtrl;
+class wxFolderMsgWindow;
 class wxMFrame;
 class MailFolder;
 class MessageView;
@@ -162,6 +163,9 @@ public:
    /// the derived class should react to the result to an asynch operation
    virtual void OnASFolderResultEvent(MEventASFolderResultData &event);
 
+   /// called when our message viewer changes
+   virtual void OnMsgViewerChange(wxWindow *viewerNew);
+
    /// return profile name for persistent controls
    const wxString& GetFullName(void) const { return m_fullname; }
 
@@ -176,6 +180,9 @@ public:
 
    /// get the parent frame of the folder view
    MFrame *GetParentFrame() const { return m_Frame; }
+
+   /// process a keyboard event, return true if processed
+   bool HandleCharEvent(wxKeyEvent& event);
 
 protected:
    /// update the view after new messages appeared in the folder
@@ -217,8 +224,11 @@ private:
    /// either a listctrl or a treectrl
    wxFolderListCtrl *m_FolderCtrl;
 
-   /// a splitter window
+   /// a splitter window: it contains m_FolderCtrl and m_MessageWindow
    wxSplitterWindow *m_SplitterWindow;
+
+   /// container window for the message viewer (it changes, we don't)
+   wxFolderMsgWindow *m_MessageWindow;
 
    /// the preview window
    MessageView *m_MessagePreview;

@@ -50,6 +50,7 @@
 #include "MessageView.h"
 #include "MessageViewer.h"
 #include "MsgCmdProc.h"
+#include "FolderView.h"
 
 #include "MessageTemplate.h"
 #include "Composer.h"
@@ -415,9 +416,10 @@ wxMIMETreeDialog::AddToTree(wxTreeItemId idParent, const MimePart *mimepart)
 // ctor/dtor
 // ----------------------------------------------------------------------------
 
-wxMessageView::wxMessageView(wxWindow *parent)
+wxMessageView::wxMessageView(wxWindow *parent, FolderView *folderView)
              : MessageView(parent)
 {
+   m_FolderView = folderView;
 }
 
 wxMessageView::~wxMessageView()
@@ -425,9 +427,9 @@ wxMessageView::~wxMessageView()
 }
 
 /* static */
-MessageView *MessageView::Create(wxWindow *parent)
+MessageView *MessageView::Create(wxWindow *parent, FolderView *folderView)
 {
-   return new wxMessageView(parent);
+   return new wxMessageView(parent, folderView);
 }
 
 // ----------------------------------------------------------------------------
@@ -489,18 +491,16 @@ void
 wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
                               const MessageViewer *viewerNew)
 {
-   if ( !viewerOld )
+   if ( m_FolderView )
    {
-      return;
+      m_FolderView->OnMsgViewerChange(viewerNew ? viewerNew->GetWindow()
+                                                : NULL);
    }
 
-   wxWindow *winOld = viewerOld->GetWindow();
-   wxSplitterWindow *splitter = wxDynamicCast(winOld->GetParent(), wxSplitterWindow);
-
-   if ( splitter )
-      splitter->ReplaceWindow(winOld, viewerNew->GetWindow());
-
-   delete winOld;
+   if ( viewerOld )
+   {
+      delete viewerOld->GetWindow();
+   }
 }
 
 // ----------------------------------------------------------------------------
