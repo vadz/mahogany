@@ -47,7 +47,7 @@
 #include <wx/cmndata.h>  // for wxPageSetupData
 #include <wx/persctrl.h> // for wxPMessageBoxEnable(d)
 
-#include "wx/net.h"
+#include "wx/dialup.h"
 
 #include "Mdefaults.h"
 #include "MDialogs.h"
