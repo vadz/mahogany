@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/24 07:54:13  KB
+ * works?
+ *
  * Revision 1.3  1998/05/24 08:28:56  KB
  * eventually fixed the type problem, now python works as expected
  *
@@ -34,6 +37,7 @@
 #	include	"MApplication.h"
 #endif
 %}
+
 %import String.i
 
 class MApplication 

@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.5  1998/05/24 07:54:14  KB
+# works?
+#
 # Revision 1.4  1998/05/24 08:28:58  KB
 # eventually fixed the type problem, now python works as expected
 #
@@ -16,7 +19,7 @@
 
 CWD = Python
 
-SWIGSRC = String.i MApplication.i Profile.i 
+SWIGSRC = MApplication.i MailFolder.i String.i Profile.i 
 CXXSRC = InitPython.cc
 SRC=$(CXXSRC) *.cpp
 
