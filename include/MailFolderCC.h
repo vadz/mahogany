@@ -320,6 +320,8 @@ public:
       side effect of returning the MHPATH which is the root path under which
       all MH folders should be situated on success. Returns empty string on
       failure.
+
+      If the string is not empty it will be '/' terminated.
    */
    static const String& InitializeMH();
    //@}

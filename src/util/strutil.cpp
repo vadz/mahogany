@@ -731,9 +731,6 @@ strutil_expandfoldername(const String &name, FolderType folderType)
       }
       else
       {
-         if ( !wxEndsWithPathSeparator(mhpath) )
-            mhpath += DIR_SEPARATOR;
-
          mhpath += name;
       }
 

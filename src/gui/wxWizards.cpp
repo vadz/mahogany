@@ -441,7 +441,7 @@ bool MWizard_ImportFolders_MHPage::TransferDataFromWindow()
 {
    ImportFoldersWizard::Params& params =
       ((ImportFoldersWizard *)GetWizard())->GetParams();
-   
+
    params.importMH = true;
    params.takeAllMH = m_checkAll->GetValue();
    params.pathRootMH = m_textTop->GetValue();
@@ -561,10 +561,18 @@ MWizardPageId MWizard_CreateFolder_WelcomePage::GetNextPageId() const
 
 enum FolderEntryType
 {
-   ET_FILE = 0, ET_MH, ET_IMAP, ET_POP3,
-   ET_IMAP_SERVER, ET_NNTP_SERVER,
-   ET_IMAP_HIER, ET_NNTP_HIER,
-   ET_NNTP, ET_NEWS_HIER, ET_NEWS, ET_GROUP
+   ET_FILE = 0,
+   ET_MH,
+   ET_IMAP,
+   ET_POP3,
+   ET_IMAP_SERVER,
+   ET_NNTP_SERVER,
+   ET_IMAP_HIER,
+   ET_NNTP_HIER,
+   ET_NNTP,
+   ET_NEWS_HIER,
+   ET_NEWS,
+   ET_GROUP
 };
 
 class MWizard_CreateFolder_TypePage : public MWizardPage
@@ -653,7 +661,7 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
    wxString
       entry,
       pathName = _("Mailbox name"),
-      msg = _("To access %s\n"
+      msg = _("To create %s\n"
               "the following access parameters\n"
               "are needed:\n");
       bool
@@ -777,11 +785,11 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
 
    wxControl *last = NULL;
    CREATE_CTRL(Server,
-               panel->CreateTextWithLabel(labels[0],maxwidth,last));
+               panel->CreateTextWithLabel(labels[0], maxwidth,last));
    CREATE_CTRL(UserId,
-               panel->CreateTextWithLabel(labels[1],maxwidth,last));
+               panel->CreateTextWithLabel(labels[1], maxwidth,last));
    CREATE_CTRL(Password,
-               panel->CreateTextWithLabel(labels[2],maxwidth,last, 0,
+               panel->CreateTextWithLabel(labels[2], maxwidth,last, 0,
                                           wxPASSWORD));
    CREATE_CTRL(Path, panel->CreateFileOrDirEntry(labels[3], maxwidth,
                                                  last,
@@ -789,16 +797,15 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
                                                  &m_browsePath : NULL,
                                                  TRUE,FALSE));
 #undef CREATE_CTRL
-   wxStaticText * msg2 = panel->CreateMessage(
+   last = panel->CreateMessage(
       _("\n"
         "You also need to give your new entry\n"
         "a name to appear in the tree."
         ), m_Path);
-   m_Name = panel->CreateTextWithLabel(labels[4],maxwidth, last);
+   m_Name = panel->CreateTextWithLabel(labels[4], maxwidth, last);
 
    if ( type == ET_MH )
    {
-      ASSERT(m_browsePath);
       // the browser button should allow to select directories, not folders
       // then
       m_browsePath->BrowseForDirectories();
@@ -841,10 +848,14 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
    {
       String server = params->m_Server;
       strutil_tolower(server);
+
+      // TODO better check if the hostname resolves to the same address as
+      //      localhost - my machine name is faster to type than localhost, so I
+      //      always use it instead, yet the folders on this machien are local
       if(server== "localhost")
          params->m_FolderFlags |= MF_FLAGS_ISLOCAL;
    }
-   
+
    switch(m_Type)
    {
    case ET_IMAP:
@@ -875,7 +886,31 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
       params->m_FolderType = MF_FILE;
       break;
    case ET_MH:
-      params->m_FolderType = MF_MH;
+      {
+         wxString name,
+                  root = MailFolderCC::InitializeMH();
+         if ( params->m_Path.StartsWith(root, &name) )
+         {
+            // remove extra slashes
+            const char *p = name.c_str();
+            while ( *p == '/' )
+               p++;
+            if ( p != name.c_str() )
+               name = p;
+
+            params->m_Path = name;
+         }
+         else
+         {
+            wxLogError(_("The path '%s' is invalid for a MH folder. All MH "
+                         "folders should be under the directory '%s'."),
+                      name.c_str(), root.c_str());
+
+            return false;
+         }
+
+         params->m_FolderType = MF_MH;
+      }
       break;
    case ET_GROUP:
       params->m_FolderType = MF_GROUP;
@@ -892,10 +927,17 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
    CHECK(p,FALSE,"No profile?");
 
    m_Name->SetValue(_("New Folder"));
-   if(GetPageId() != MWizard_CreateFolder_ImapServer
-      && GetPageId() != MWizard_CreateFolder_NntpServer
-      && GetPageId() != MWizard_CreateFolder_Pop3)
-      m_Path->SetValue( READ_CONFIG(p,MP_FOLDER_PATH));
+   if ( GetPageId() == MWizard_CreateFolder_MH )
+   {
+      // start from the MHROOT
+      m_Path->SetValue(MailFolderCC::InitializeMH());
+   }
+   else if ( GetPageId() != MWizard_CreateFolder_ImapServer &&
+             GetPageId() != MWizard_CreateFolder_NntpServer &&
+             GetPageId() != MWizard_CreateFolder_Pop3 )
+   {
+      m_Path->SetValue(READ_CONFIG(p, MP_FOLDER_PATH));
+   }
 
    if(GetPageId() != MWizard_CreateFolder_MH
       && GetPageId() != MWizard_CreateFolder_File

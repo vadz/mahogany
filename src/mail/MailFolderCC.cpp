@@ -629,12 +629,35 @@ static String GetImapSpec(int type, int flags,
       break;
 
    case MF_MH:
-      // newly created MH folders won't have leading slash, but we may still
-      // have to deal with the old entries in config, so eat both here, but be
-      // sure to remove the leading backslash: we want #mh/inbox, not
-      // #mh//inbox
       {
-         const char *p = name.c_str();
+         // accept either absolute or relative filenames here, but the absolute
+         // ones should start with MHROOT
+         wxString mhRoot = MailFolderCC::InitializeMH();
+
+         const char *p;
+         wxString nameReal;
+         if ( name.StartsWith(mhRoot, &nameReal) )
+         {
+            p = nameReal.c_str();
+         }
+         else
+         {
+            p = name.c_str();
+
+            if ( *p == '/' )
+            {
+               wxLogError(_("Invalid MH folder name '%s' not under the "
+                            "root MH directory '%s'."),
+                         p, mhRoot.c_str());
+
+               return "";
+            }
+         }
+
+         // newly created MH folders won't have leading slash, but we may still
+         // have to deal with the old entries in config, so eat both here, but
+         // be sure to remove the leading backslash: we want #mh/inbox, not
+         // #mh//inbox
          while ( *p == '/' )
             p++;
 

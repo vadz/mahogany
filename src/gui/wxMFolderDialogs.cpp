@@ -1371,7 +1371,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
    case MF_MFILE:
    case MF_MDIR:
 #endif
-      
+
       EnableTextWithLabel(m_mailboxname, FALSE);
       EnableTextWithLabel(m_server, FALSE);
       EnableTextWithLabel(m_newsgroup, FALSE);
@@ -1389,48 +1389,53 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
       // file folders come in several flavours
       switch ( m_folderType )
       {
-      case MF_FILE:
+         case MF_FILE:
 #ifdef EXPERIMENTAL
-      case MF_MFILE:
-         m_folderSubtype->SetSelection(
-            m_folderType == MF_MFILE ? FileFolderSubtype_MFile
-            : FileFolderSubtype_Mbox);
+         case MF_MFILE:
+            m_folderSubtype->SetSelection(
+               m_folderType == MF_MFILE ? FileFolderSubtype_MFile
+               : FileFolderSubtype_Mbox);
 #else
-         m_folderSubtype->SetSelection(FileFolderSubtype_Mbox);
+            m_folderSubtype->SetSelection(FileFolderSubtype_Mbox);
 #endif
-         m_browsePath->BrowseForFiles();
-         m_isDir->Enable(FALSE);
+            m_browsePath->BrowseForFiles();
+            m_isDir->Enable(FALSE);
+            break;
+
+         case MF_MH:
+#ifdef EXPERIMENTAL
+         case MF_MDIR:
+            m_folderSubtype->SetSelection(
+               m_folderType == MF_MFILE ? FileFolderSubtype_MDir
+               : FileFolderSubtype_MH);
+#else
+            m_folderSubtype->SetSelection(FileFolderSubtype_MH);
+#endif
+         {
+            m_browsePath->BrowseForDirectories();
+
+            // set the path to MHROOT by default
+            if ( !m_path->GetValue() )
+            {
+               MFolder_obj folderParent(dlg->GetParentFolderName());
+               Profile_obj profile(folderParent->GetFullName());
+
+               wxString path;
+               path << MailFolderCC::InitializeMH()
+                    << READ_CONFIG(profile, MP_FOLDER_PATH);
+               if ( !!path && !wxIsPathSeparator(path.Last()) )
+                  path << '/';
+               path << dlg->GetFolderName().AfterLast('/');
+
+               m_path->SetValue(path);
+            }
+
+            m_isDir->Enable(TRUE);
+         }
          break;
 
-      case MF_MH:
-#ifdef EXPERIMENTAL
-      case MF_MDIR:
-         m_folderSubtype->SetSelection(
-            m_folderType == MF_MFILE ? FileFolderSubtype_MDir
-            : FileFolderSubtype_MH);
-#else
-         m_folderSubtype->SetSelection(FileFolderSubtype_MH);
-#endif
-      {
-         m_browsePath->BrowseForDirectories();
-         MFolder_obj folderParent(dlg->GetParentFolderName());
-         Profile_obj profile(folderParent->GetFullName());
-
-         wxString path;
-         path << MailFolderCC::InitializeMH()
-              << READ_CONFIG(profile, MP_FOLDER_PATH);
-         if ( !!path && !wxIsPathSeparator(path.Last()) )
-            path << '/';
-         path << dlg->GetFolderName().AfterLast('/');
-
-         m_path->SetValue(path);
-
-         m_isDir->Enable(TRUE);
-      }
-      break;
-
-      default:
-         FAIL_MSG( "new file folder type?" );
+         default:
+            FAIL_MSG( "new file folder type?" );
       }
 
       // not yet
@@ -1765,8 +1770,8 @@ wxFolderPropertiesPage::SetDefaultValues()
       }
 
       m_server->SetValue(value);
-         switch ( folderType )
-         {
+      switch ( folderType )
+      {
          case MF_NNTP:
             m_originalValues[ServerNews] = value;
             break;
@@ -1779,12 +1784,18 @@ wxFolderPropertiesPage::SetDefaultValues()
          default:
             // suppress warnings
             break;
-         }
+      }
    }
 
    value = READ_CONFIG(profile, MP_FOLDER_PATH);
    if ( (selRadio == Radio_File) && !m_isCreating )
    {
+      // MH complications: must prepend MHROOT to relative paths
+      if ( folderType == MF_MH )
+      {
+         value << MailFolderCC::InitializeMH() << value;
+      }
+
       m_path->SetValue(value);
    }
    else if ( selRadio == Radio_News )
