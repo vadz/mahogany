@@ -472,7 +472,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
          email = name + String(" <") + email + String(">");
       cv->SetTo(email);
       cv->SetSubject(mailFolder->GetProfile()
-                     ->readEntry(MP_REPLY_PREFIX,MP_REPLY_PREFIX_D) + msg->Subject());
+                     ->readEntry(MP_REPLY_PREFIX,String(MP_REPLY_PREFIX_D)) + msg->Subject());
    }
 }
 
@@ -495,7 +495,7 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
       cv = GLOBAL_NEW wxComposeView(_("Forward"),parent,
                                     mailFolder->GetProfile());
       cv->SetSubject(mailFolder->GetProfile()
-                     ->readEntry(MP_FORWARD_PREFIX,MP_FORWARD_PREFIX_D) + msg->Subject());
+                     ->readEntry(MP_FORWARD_PREFIX,String(MP_FORWARD_PREFIX_D)) + msg->Subject());
 
       mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
       cv->InsertData(strutil_strdup(str),str.Length(),"MESSAGE/RFC822",TYPEMESSAGE);

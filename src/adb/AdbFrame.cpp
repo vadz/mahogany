@@ -1132,21 +1132,21 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
 
   #define TRANSFER_STRING(var, i)           \
     if ( bSave )                            \
-      conf.Write(aszConfigNames[i], var);   \
+      conf.writeEntry(aszConfigNames[i], var);   \
     else                                    \
-      conf.Read(&var, aszConfigNames[i])
+      var = conf.readEntry(aszConfigNames[i], var)
 
   #define TRANSFER_INT(var, i)                    \
     if ( bSave )                                  \
-      conf.Write(aszConfigNames[i], var);         \
+      conf.writeEntry(aszConfigNames[i], var);         \
     else                                          \
-      var = conf.Read(aszConfigNames[i], 0l)
+      var = conf.readEntry(aszConfigNames[i], 0l)
 
   #define TRANSFER_BOOL(var, i)                   \
     if ( bSave )                                  \
-      conf.Write(aszConfigNames[i], var);         \
+      conf.writeEntry(aszConfigNames[i], var);         \
     else                                          \
-      var = conf.Read(aszConfigNames[i], 0l) != 0
+      var = conf.readEntry(aszConfigNames[i], 0l) != 0
 
   #define TRANSFER_ARRAY(var, i)                  \
     if ( bSave )                                  \

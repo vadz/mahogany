@@ -207,19 +207,7 @@ fi
 
 
 
-dnl check for gtk libraries
-AC_PATH_PROG(GTK_CONFIG,gtk-config,yes,no)
-if test "$GTK_CONFIG" = yes
-then
-	GTK_CFLAGS=`gtk-config --cflags`
-	GTK_LDFLAGS=`gtk-config --libs`
-else
-	dnl find the X11 include and library files
-	AC_PATH_XTRA
-	GTK_CFLAGS=$X_CFLAGS
-	GTK_LDFLAGS=$X_EXTRA_LIBS
-fi
-LIBS="$LIBS $GTK_LDFLAGS"
+
 AC_CHECK_LIB(dl,main,,AC_MSG_WARN("dl library might be needed."))
 
 if test "$USE_THREADS" = 1
@@ -240,8 +228,6 @@ AC_CHECK_HEADERS(libintl.h,
 		AC_CHECK_LIB(intl,gettext,AC_DEFINE(HAVE_GETTEXT) LIBS="$LIBS -lintl")
 	)
 )
-
-dnl we test for python last, because setting LIBS like this confuses further tests
 
 MAKE_USE_PYTHON=
 
@@ -292,6 +278,25 @@ fi
 AC_SUBST(MAKE_USE_PYTHON)
 
 AC_CHECK_HEADERS(compface.h)
+
+dnl check for gtk libraries
+dnl This must be the last library check, as wxGTK defines a main() function
+dnl which will break all further attemps to test for main() in a library!
+AC_PATH_PROG(GTK_CONFIG,gtk-config,yes,no)
+if test "$GTK_CONFIG" = yes
+then
+	GTK_CFLAGS=`gtk-config --cflags`
+	GTK_LDFLAGS=`gtk-config --libs`
+else
+	dnl find the X11 include and library files
+	AC_PATH_XTRA
+	GTK_CFLAGS=$X_CFLAGS
+	GTK_LDFLAGS=$X_EXTRA_LIBS
+fi
+LIBS="$LIBS $GTK_LDFLAGS"
+CXXFLAGS="$CXXFLAGS $GTK_CFLAGS"
+CFLAGS="$CXXFLAGS $GTK_CFLAGS"
+echo $CXXFLAGS
 
 dnl set debug/optimisation flags
 dnl we don't use CFLAGS/CXXFLAGS from autoconf

@@ -95,9 +95,9 @@ PythonCallback(const char *name, int def, void *obj, const char *classname,
       parg = NULL;
 
    if(profile)
-      realname = profile->readEntry(name);
+      realname = profile->readEntry(name,realname);
    if(strutil_isempty(realname))
-      realname = Profile::GetAppConfig()->READ_ENTRY(name);
+      realname = mApplication->GetProfile()->readEntry(name,realname);
 
    if(strutil_isempty(realname))
       return def;    // no callback called, default value 0

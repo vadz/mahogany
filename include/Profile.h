@@ -55,21 +55,33 @@ public:
    */
    //@{
    /// Read a character entry.
-   virtual String readEntry(const char *szKey,
-                            const char *szDefault = NULL) const = 0;
+   virtual String const & readEntry(String const &key, String const
+                            &defaultvalue = (const char *)NULL) const = 0;
+   /// Read a character entry.
+   String const & readEntry(String const &key,
+                            const char *defaultvalue = NULL) const
+      { return readEntry(key, String(defaultvalue)); }
    /// Read an integer value.
-   virtual int readEntry(const char *szKey, int Default) const = 0;
+   virtual long readEntry(String const &key, long defaultvalue) const = 0;
+   /// Read an integer value.
+   virtual int readEntry(String const &key, int defaultvalue) const
+      { return (int) readEntry(key, (long)defaultvalue); }
    /// Read a bool value.
-   virtual bool readEntry(const char *szKey, bool Default) const = 0;
+   virtual bool readEntry(String const &key, bool defaultvalue) const = 0;
    /// Write back the character value.
-   virtual bool writeEntry(const char *szKey, const char *szValue) = 0;
+   virtual bool writeEntry(String const &key, String const &Value) = 0;
    /// Write back the int value.
-   virtual bool writeEntry(const char *szKey, int Value) = 0;
-   /// Write back the bool value.
-   virtual bool writeEntry(const char *szKey, bool Value) = 0;
+   virtual bool writeEntry(String const &key, long Value) = 0;
+   /// Write back the int value.
+   virtual bool writeEntry(String const &key, int Value)
+      { return writeEntry(key, (long)Value); }
+/// Write back the bool value.
+   virtual bool writeEntry(String const &key, bool Value) = 0;
    //@}
    virtual void SetPath(String const &path) = 0;
    virtual String const &GetPath(void) const = 0;
+   virtual bool HasEntry(String const &key) const = 0;
+   virtual void DeleteGroup(String const &path) = 0;
 };
 
 
@@ -118,24 +130,27 @@ public:
    */
    //@{
       /// Read a character entry.
-   String readEntry(const char *szKey, const char *szDefault = NULL) const;
-      /// Read an integer value.
-   int readEntry(const char *szKey, int Default) const;
-      /// Read a bool value.
-   bool readEntry(const char *szKey, bool Default) const;
-      /// Write back the character value.
-   bool writeEntry(const char *szKey, const char *szValue);
-      /// Write back the int value.
-   bool writeEntry(const char *szKey, int Value);
-      /// Write back the bool value.
-   bool writeEntry(const char *szKey, bool Value);
+   String const &readEntry(String const &key,
+                    String const &defaultvalue = (const char *)NULL) const;
+   /// Read an integer value.   
+   long readEntry(String const &key, long defaultvalue) const;
+   /// Read an integer value.
+   virtual int readEntry(String const &key, int defaultvalue) const
+      { return (int) readEntry(key, (long)defaultvalue); }
+   /// Read a bool value.
+   bool readEntry(String const &key, bool defaultvalue) const;
+   /// Write back the character value.
+   bool writeEntry(String const &key, String const &Value);
+   /// Write back the int value.
+   bool writeEntry(String const &key, long Value);
+   /// Write back the bool value.
+   bool writeEntry(String const &key, bool Value);
    //@}
 
    void SetPath(String const &path);
    String const &GetPath(void) const;
-
-   /// return class name
-   const char *GetClassName(void) const { return "MailFolder"; }
+   virtual bool HasEntry(String const &key) const;
+   virtual void DeleteGroup(String const &path);
 
 private:
    /// The wxConfig object.
@@ -163,23 +178,29 @@ public:
    */
    //@{
    /// Read a character entry.
-   String readEntry(const char *szKey, const char *szDefault = NULL) const;
+   String const & readEntry(String const &key,
+                            String const &defaultvalue = (const char *) NULL) const;
    /// Read an integer value.
-   int readEntry(const char *szKey, int Default) const;
+   long readEntry(String const &key, long defaultvalue) const;
+   /// Read an integer value.
+   virtual int readEntry(String const &key, int defaultvalue) const
+      { return (int) readEntry(key, (long)defaultvalue); }
    /// Read a bool value.
-   bool readEntry(const char *szKey, bool Default) const;
-   /// Write back the character value.
-   bool writeEntry(const char *szKey, const char *szValue);
-   /// Write back the int value.
-   bool writeEntry(const char *szKey, int Value);
-   /// Write back the bool value.
-   bool writeEntry(const char *szKey, bool Value);
+   bool readEntry(String const &key, bool defaultvalue) const;
+   /// Write back the character value.   
+   bool writeEntry(String const &key, String const &Value);
+   /// Write back the int value.   
+   bool writeEntry(String const &key, long Value);
+   /// Write back the bool value.   
+   bool writeEntry(String const &key, bool Value);
    //@}
-   wxConfigProfile(const char *fileName);
+   wxConfigProfile(String const &fileName);
    ~wxConfigProfile();
 
    void SetPath(String const &path);
    String const &GetPath(void) const;
+   virtual bool HasEntry(String const &key) const;
+   virtual void DeleteGroup(String const &path);
 
 private:
    wxConfigBase *m_Config;
@@ -249,8 +270,8 @@ private:
 // ----------------------------------------------------------------------------
 // two handy functions for savings/restoring arrays of strings to/from config
 // ----------------------------------------------------------------------------
-void SaveArray(wxConfigBase& conf, const wxArrayString& astr, const char *key);
-void RestoreArray(wxConfigBase& conf, wxArrayString& astr, const char *key);
+void SaveArray(ProfileBase& conf, const wxArrayString& astr, String const &key);
+void RestoreArray(ProfileBase& conf, wxArrayString& astr, String const &key);
 
 
 #endif // PROFILE_H

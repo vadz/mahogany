@@ -68,7 +68,7 @@
 // wxConfigProfile
 // ----------------------------------------------------------------------------
 
-wxConfigProfile::wxConfigProfile(const char *fileName)
+wxConfigProfile::wxConfigProfile(String const &fileName)
 {
    // we shouldn't be called twice normally
    ASSERT( m_Config == NULL );
@@ -89,43 +89,55 @@ wxConfigProfile::GetPath(void) const
    return m_Config->GetPath();
 }
 
-wxConfigProfile::~wxConfigProfile(const char *appName)
+bool
+wxConfigProfile::HasEntry(String const &key) const
+{
+   return m_Config->HasEntry(key);
+}
+
+void
+wxConfigProfile::DeleteGroup(String const &path)
+{
+   m_Config->DeleteGroup(path);
+}
+
+wxConfigProfile::~wxConfigProfile(String const &appName)
 {
    delete m_Config;
 }
 
-String
-wxConfigProfile::readEntry(const char *key, const char *def) const
+String const &
+wxConfigProfile::readEntry(String const &key, String const &def) const
 {
    return m_Config->Read(key,def);
 }
 
-int
-wxConfigProfile::readEntry(const char *key, int def) const
-{
-   return m_Config->Read(key,def);
-}
-
-bool
-wxConfigProfile::readEntry(const char *key, bool def) const
+long
+wxConfigProfile::readEntry(String const &key, long def) const
 {
    return m_Config->Read(key,def);
 }
 
 bool
-wxConfigProfile::writeEntry(const char *key, const char *value)
+wxConfigProfile::readEntry(String const &key, bool def) const
+{
+   return m_Config->Read(key,def);
+}
+
+bool
+wxConfigProfile::writeEntry(String const &key, String const &value)
 {
    return m_Config->Write(key,value);
 }
 
 bool
-wxConfigProfile::writeEntry(const char *key, int value)
+wxConfigProfile::writeEntry(String const &key, long value)
 {
    return m_Config->Write(key,value);
 }
 
 bool
-wxConfigProfile::writeEntry(const char *key, bool value)
+wxConfigProfile::writeEntry(String const &key, bool value)
 {
    return m_Config->Write(key,value);
 }
@@ -161,7 +173,10 @@ Profile::Profile(String const &iClassName, ProfileBase const *Parent)
       String tmp = READ_APPCONFIG(MC_PROFILE_PATH);
       PathFinder pf(tmp);
 
-      String fileName = profileName + READ_APPCONFIG(MC_PROFILE_EXTENSION);
+      String fileName = profileName +
+         mApplication->GetProfile()->readEntry((const char *)MC_PROFILE_EXTENSION,
+                                               String(MC_PROFILE_EXTENSION_D));
+      //READ_APPCONFIG(MC_PROFILE_EXTENSION);
       fullFileName = pf.FindFile(fileName, &isOk);
    
       if( !isOk )
@@ -184,19 +199,17 @@ Profile::~Profile()
 }
 
 
-String
-Profile::readEntry(const char *szKey, const char *szDefault) const
+String const &
+Profile::readEntry(String const &key, String const &defaultvalue) const
 {
    // config object must be created
    CHECK( fileConfig != NULL, "", "no fileConfig in Profile" );
 
-   wxString rc;
-
-   fileConfig->Read(&rc, szKey, (const char *)NULL);
+   wxString &rc = fileConfig->Read(key, String((const char *)NULL));
 
    if( strutil_isempty(rc) && parentProfile != NULL)
    {
-      rc = parentProfile->readEntry(szKey, (const char *)NULL);
+      rc = parentProfile->readEntry(key, (const char *)NULL);
    }
 
    if( strutil_isempty(rc) )
@@ -204,51 +217,47 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
       ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
 
       mApplication->GetProfile()->SetPath(profileName.c_str());
-      rc = mApplication->GetProfile()->readEntry(szKey, (const char *)NULL);
+      rc = mApplication->GetProfile()->readEntry(key, (const char *)NULL);
       if( strutil_isempty(rc))
       {
          mApplication->GetProfile()->SetPath(M_PROFILE_CONFIG_SECTION);
-         rc = mApplication->GetProfile()->readEntry(szKey, (const char *)NULL);
+         rc = mApplication->GetProfile()->readEntry(key, (const char *)NULL);
       }
    }
 
    if( strutil_isempty(rc) )
    {
       if(READ_APPCONFIG(MC_RECORDDEFAULTS) )
-         fileConfig->Write(szKey,szDefault); // so default value can be recorded
-      rc = szDefault;
+         fileConfig->Write(key,defaultvalue); // so default value can be recorded
+      rc = defaultvalue;
    }
 
 #  ifdef DEBUG
    String dbgtmp = "Profile(" + profileName + String(")::readEntry(") +
-      String(szKey) + ") returned: " + 
-      (strutil_isempty(rc) ? (String(szDefault == NULL
-                                     ? "null" : szDefault)
-                              + " (default)")
-       : rc);
+      String(key) + ") returned: " + rc;
    DBGLOG(Str(dbgtmp));
 #  endif
 
    return rc;
 }
 
-int
-Profile::readEntry(const char *szKey, int Default) const
+long
+Profile::readEntry(String const &key, long defaultvalue) const
 {
-   int rc;
+   long rc;
 
-   if ( !fileConfig->Read((long *)&rc, szKey, Default) )
+   if ( !fileConfig->Read((long *)&rc, key, defaultvalue) )
    {
       if ( !parentProfile ||
-           (rc = parentProfile->readEntry(szKey, Default)) == Default
+           (rc = parentProfile->readEntry(key, defaultvalue)) == defaultvalue
          )
       {
          if ( mApplication->GetProfile() )
          {
-            rc = mApplication->GetProfile()->readEntry(szKey,Default);
+            rc = mApplication->GetProfile()->readEntry(key,defaultvalue);
             {
                if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
-                  fileConfig->Write(szKey, Default);
+                  fileConfig->Write(key, defaultvalue);
             }
          }
       }
@@ -270,31 +279,43 @@ Profile::GetPath(void) const
 }
 
 bool
-Profile::readEntry(const char *szKey, bool Default) const
+Profile::HasEntry(String const &key) const
 {
-   return readEntry(szKey, (int) Default) != 0;
+   return fileConfig->HasEntry(key);
+}
+
+void
+Profile::DeleteGroup(String const &path)
+{
+   fileConfig->DeleteGroup(path);
 }
 
 bool
-Profile::writeEntry(const char *szKey, int Value)
+Profile::readEntry(String const &key, bool defaultvalue) const
+{
+   return readEntry(key, (long) defaultvalue) != 0;
+}
+
+bool
+Profile::writeEntry(String const &key, long Value)
 {
    CHECK( fileConfig != NULL, false, "no fileConfig in Profile" );
 
-   return fileConfig->Write(szKey, (long int) Value) != 0;
+   return fileConfig->Write(key, (long int) Value) != 0;
 }
 
 bool
-Profile::writeEntry(const char *szKey, const char *szValue)
+Profile::writeEntry(String const &key, String const &Value)
 {
    CHECK( fileConfig != NULL, false, "no fileConfig in Profile" );
 
-   return fileConfig->Write(szKey, szValue) != 0;
+   return fileConfig->Write(key, Value) != 0;
 }
 
 bool
-Profile::writeEntry(const char *szKey, bool Value)
+Profile::writeEntry(String const &key, bool Value)
 {
-   return writeEntry(szKey, (int) Value);
+   return writeEntry(key, (long) Value);
 }
 
 // ----------------------------------------------------------------------------
@@ -372,36 +393,36 @@ ConfigFileManager::Debug() const
 // global functions
 // ----------------------------------------------------------------------------
 
-// all settings are saved as entries 0, 1, 2, ... of group szKey
-void SaveArray(ProfileBase& conf, const wxArrayString& astr, const char *szKey)
+// all settings are saved as entries 0, 1, 2, ... of group key
+void SaveArray(ProfileBase& conf, const wxArrayString& astr, String const &key)
 {
    // save all array entries
-   conf.DeleteGroup(szKey);    // remove all old entries
-   conf.SetPath(szKey);
+   conf.DeleteGroup(key);    // remove all old entries
+   conf.SetPath(key);
 
    size_t nCount = astr.Count();
-   wxString strKey;
+   wxString strkey;
    for ( size_t n = 0; n < nCount; n++ ) {
-      strKey.Printf("%d", n);
-      conf.Write(strKey, astr[n]);
+      strkey.Printf("%d", n);
+      conf.writeEntry(strkey, astr[n]);
    }
 
    conf.SetPath("..");
 }
 
 // restores array saved by SaveArray
-void RestoreArray(ProfileBase& conf, wxArrayString& astr, const char *szKey)
+void RestoreArray(ProfileBase& conf, wxArrayString& astr, String const &key)
 {
    wxASSERT( astr.IsEmpty() ); // should be called in the very beginning
 
-   conf.SetPath(szKey);
+   conf.SetPath(key);
 
-   wxString strKey, strVal;
+   wxString strkey, strVal;
    for ( size_t n = 0; ; n++ ) {
-      strKey.Printf("%d", n);
-      if ( !conf.HasEntry(strKey) )
+      strkey.Printf("%d", n);
+      if ( !conf.HasEntry(strkey) )
          break;
-      conf.readEntry(&strVal, strKey);
+      strVal = conf.readEntry(strkey, "");
       astr.Add(strVal);
    }
 

@@ -66,13 +66,13 @@ InitPython(void)
 #  ifndef OS_WIN
       // initialise python interpreter
       tmp = "PYTHONPATH=";
-      tmp += mApplication.GetLocalDir();
+      tmp += mApplication->GetLocalDir();
       tmp += "/scripts";
       tmp += PATH_SEPARATOR;
-      tmp += mApplication.GetGlobalDir();
+      tmp += mApplication->GetGlobalDir();
       tmp += "/scripts";
       tmp += PATH_SEPARATOR;
-      tmp += mApplication.GetProfile()->readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
+      tmp += mApplication->GetProfile()->readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
       if(getenv("PYTHONPATH"))
       {
          tmp += PATH_SEPARATOR;
