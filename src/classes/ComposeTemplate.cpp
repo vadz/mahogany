@@ -215,6 +215,7 @@ public:
       OriginalHeader_To,
       OriginalHeader_ReplyTo,
       OriginalHeader_Newsgroups,
+      OriginalHeader_Domain,
       OriginalHeader_Invalid,
       OriginalHeader_Max = OriginalHeader_Invalid
    };
@@ -590,6 +591,7 @@ const char *VarExpander::ms_templateOriginalVars[] =
    "to",
    "replyto",
    "newsgroups",
+   "domain",
 };
 
 int
@@ -731,8 +733,10 @@ VarExpander::ExpandMisc(const String& name, String *value) const
       case MiscVar_Quote:
       case MiscVar_Quote822:
       case MiscVar_Text:
-      case MiscVar_Sender:
          return ExpandOriginal(name, value);
+
+      case MiscVar_Sender:
+         return ExpandOriginal("from", value);
 
       case MiscVar_Signature:
          *value = GetSignature();
@@ -986,6 +990,17 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             m_msg->GetHeaderLine("Newsgroups", *value);
             break;
 
+         case OriginalHeader_Domain:
+            {
+               AddressList_obj addrList(m_msg->From());
+               Address *addr = addrList->GetFirst();
+               if ( addr )
+               {
+                  *value = addr->GetDomain();
+               }
+            }
+            break;
+
          default:
             isHeader = false;
 
@@ -1171,20 +1186,17 @@ String VarExpander::GetSignature() const
 
       if ( hasSign )
       {
-         // the signature must be on its own line(s)
-         signature = '\n';
-
          // insert separator optionally
          if ( READ_CONFIG(m_profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
          {
-            signature += "--\n";
+            signature += "\n--";
          }
 
          // read the whole file
          size_t nLineCount = fileSig.GetLineCount();
          for ( size_t nLine = 0; nLine < nLineCount; nLine++ )
          {
-            signature << fileSig[nLine] << '\n';
+            signature << '\n' << fileSig[nLine];
          }
 
          // let's respect the netiquette
