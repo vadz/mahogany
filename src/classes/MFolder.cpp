@@ -906,6 +906,7 @@ bool MFolderFromProfile::Rename(const String& newName)
       String oldName = m_folderName;
       m_folderName = newFullName;
 
+      // TODO: MFolderCache should just subscribe to "Rename" events...
       MFolderCache::RenameAll(oldName, newFullName);
 
       // notify everybody about the change of the folder name
