@@ -364,6 +364,9 @@
 					RelativePath=".\src\gui\wxMFrame.cpp">
 				</File>
 				<File
+					RelativePath=".\src\gui\wxMimeDialog.cpp">
+				</File>
+				<File
 					RelativePath=".\src\gui\wxMIMETreeDialog.cpp">
 				</File>
 				<File
@@ -1709,6 +1712,9 @@
 			</File>
 			<File
 				RelativePath=".\include\MHelp.h">
+			</File>
+			<File
+				RelativePath=".\include\MimeDialog.h">
 			</File>
 			<File
 				RelativePath=".\include\MimePart.h">
