@@ -1184,6 +1184,9 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
          WXMENU_MSG_DELETE,
          WXMENU_MSG_UNDELETE,
          WXMENU_SEPARATOR,
+         WXMENU_MSG_MARK_READ,
+         WXMENU_MSG_MARK_UNREAD,
+         WXMENU_SEPARATOR,
          WXMENU_MSG_SHOWRAWTEXT,
       };
 
