@@ -248,8 +248,10 @@ wxFolderView::SetFolder(MailFolder *mf)
          m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_UNREAD, false);
       }
       m_MailFolder->DecRef();
-      m_Profile->DecRef(); 
    }
+
+   SafeDecRef(m_Profile); 
+
    m_NumOfMessages = 0; // At the beginning there was nothing.
    m_UpdateSemaphore = false;
    m_MailFolder = mf;
