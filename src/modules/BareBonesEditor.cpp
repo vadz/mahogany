@@ -157,6 +157,8 @@ private:
    wxFontEncoding m_encoding;
 
    int m_getNextAttachement;
+
+   bool m_hasNewAttachments;
 };
 
 class FormattedParagraph
@@ -906,6 +908,8 @@ BareBonesEditor::BareBonesEditor()
    m_encoding = wxFONTENCODING_SYSTEM;
 
    m_getNextAttachement = -1;
+
+   m_hasNewAttachments = false;
 }
 
 BareBonesEditor::~BareBonesEditor()
@@ -932,6 +936,7 @@ void BareBonesEditor::DeleteAllAttachments()
    }
 
    m_attachments->DeleteAllItems();
+   m_hasNewAttachments = false;
 }
 
 void BareBonesEditor::Create(Composer *composer, wxWindow *parent)
@@ -999,7 +1004,7 @@ wxWindow *BareBonesEditor::GetWindow() const
 
 bool BareBonesEditor::IsModified() const
 {
-   return m_textControl->IsModified();
+   return m_textControl->IsModified() || m_hasNewAttachments;
 }
 
 bool BareBonesEditor::IsEmpty() const
@@ -1045,6 +1050,7 @@ void BareBonesEditor::Enable(bool enable)
 void BareBonesEditor::ResetDirty()
 {
    m_textControl->DiscardEdits();
+   m_hasNewAttachments = false;
 }
 
 void BareBonesEditor::SetFontEncoding(wxFontEncoding encoding)
@@ -1163,6 +1169,8 @@ BareBonesEditor::InsertAttachment(const wxBitmap& icon, EditorContentPart *mc)
    item.SetMask(wxLIST_MASK_TEXT | wxLIST_MASK_IMAGE | wxLIST_MASK_DATA);
 
    m_attachments->InsertItem(item);
+
+   m_hasNewAttachments = true;
 }
 
 void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
@@ -1190,10 +1198,8 @@ void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
       case Insert_Replace:
          m_textControl->SetValue(text);
 
-#if wxCHECK_VERSION(2, 5, 1)
          // we want our IsModified() to return true when new text is added
          m_textControl->MarkDirty();
-#endif
          break;
 
       case Insert_Append:
