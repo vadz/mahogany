@@ -458,7 +458,7 @@ dnl libresolv or libbind (or simply libc under FreeBSD)
 USE_RBL=1
 AC_CHECK_LIB(resolv,res_query,,
 	AC_CHECK_LIB(bind,res_query,,
-      AC_CHECK_FUNC(res_query,,
+      AC_CHECK_LIB(r,res_query,,
          [
             AC_MSG_WARN(cannot use RBL spam checker.)
             USE_RBL=0
@@ -466,7 +466,7 @@ AC_CHECK_LIB(resolv,res_query,,
       )
    )
 )
-)
+
 case "$USE_RBL" in 1) AC_DEFINE(USE_RBL) ;; esac
 
 dnl POSIX.2 regexp support
