@@ -169,8 +169,7 @@ public:
    /** Erase an element, move iterator to following element.
        @param i iterator pointing to the element to be deleted
    */
-   inline void erase(iterator & i);
-      { deleteContent(i); doErase(i); }
+   void erase(iterator & i) { deleteContent(i); doErase(i); }
 
    /* Get head of list.
       @return iterator pointing to head of list
