@@ -2211,9 +2211,9 @@ MAKE_DEBUG=
 if test "$USE_DEBUG" = 1; then
 	if test "$GCC" = "yes"
 	then
-		DBGFLAGS="-O0 -g3 -DDEBUG -D__WXDEBUG__"
+		DBGFLAGS="-O0 -g3 -DDEBUG"
 	else
-		DBGFLAGS="-g -DDEBUG -D__WXDEBUG__"
+		DBGFLAGS="-g -DDEBUG"
 	fi
 	MAKE_DEBUG="DEBUG=yes"
 fi
