@@ -405,8 +405,11 @@ private:
    virtual void Close(void);
    //@}
 
-   /// Called to notify the folder that its listing changed "from outside"
+   /// called to notify everybody that its listing changed
    virtual void RequestUpdate(void);
+
+   /// called to notify everybody that some messages were expunged
+   void RequestUpdateAfterExpunge();
 
    virtual bool IsAlive(void) const;
 
