@@ -374,6 +374,8 @@ wxMIMETreeDialog::wxMIMETreeDialog(wxMessageView *msgView,
    // initialize them
    AddToTree(wxTreeItemId(), partRoot);
 
+   m_treectrl->Expand(m_treectrl->GetRootItem());
+
    m_box->SetLabel(wxString::Format(_("%u MIME parts"), m_countParts));
 
    SetDefaultSize(4*wBtn, 10*hBtn);
