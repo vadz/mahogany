@@ -1,5 +1,5 @@
 #!/bin/sh
-# -*- text -*-
+# -*- text *-
 #
 # $Id$
 # makeM_all script: Checkout, compile and package wxGTK and Mahogany.
@@ -78,8 +78,10 @@ USESTABLE=no
 #FTPLOCATION="ballueder@shell1.sourceforge.net:/home/groups/ftp/pub/mahogany/daily/"
 #WWWDOCLOCATION="ballueder@shell1.sourceforge.net:/home/groups/mahogany/htdocs/doc"
 FTPLOCATION="karsten@wxwindows.org:Mftp/daily/"
+LIBMALLOCATION="karsten@wxwindows.org:Mftp/Libraries/libmal.tar.gz"
 WWWDOCLOCATION="karsten@wxwindows.org:Mwww/doc/"
-WXCVSROOT=":pserver:KB@wxcvs.dhs.org:/home/karsten/CVSSERVER/wxcvs"
+#WXCVSROOT=":pserver:KB@wxcvs.dhs.org:/home/karsten/CVSSERVER/wxcvs"
+WXCVSROOT=":pserver:KB@cvs.wxwindows.org:/var/cvs/wxWindows"
 MCVSROOT=":pserver:KB@mcvs.dhs.org:/var/cvs/Mahogany"
 
 # Need to hardwire this as we run it as root for rpm/deb generation:
@@ -352,6 +354,7 @@ then
 
   rm -f wxWindows/*.cache
   cd wxWindows && \
+  ($MAKE clean || true ) && \
   autoconf && \
 	./configure \
 	$SHAREDFLAG \
@@ -409,7 +412,16 @@ else # build from cvs
     exit 2
   fi
 fi
-    
+
+# get libmal to be able to build AvantGO/MAL support
+
+echo "Copying libmal.tar.gz to $BUILDDIR/$NAME-$VERSION/extra/src"
+  rm -f $BUILDDIR/$NAME-$VERSION/extra/src/libmal.tar.gz
+  $SCP $LIBMALLOCATION $BUILDDIR/$NAME-$VERSION/extra/src/libmal.tar.gz && \
+  (cd $BUILDDIR/$NAME-$VERSION/extra/src && \
+   gzip -d -f libmal.tar.gz && tar xf libmal.tar && \
+   rm libmal.tar* )
+
 PATH="/sbin:/usr/sbin:$PATH:$WXPREFIX/bin"
 export PATH
 
@@ -506,6 +518,7 @@ then
     echo "Copying documentation from ftp server."
     $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc/
   fi
+
   cd $BUILDDIR/$NAME-$VERSION && $MAKE install_all DESTDIR=$DESTDIR  >/dev/null && \
   cd $DESTDIR && tar cvf $BUILDDIR/$NAME-$VERSION-$OSTYPE$OSTYPE_ADDON$ADDON.tar * && \
   gzip -f -9 $BUILDDIR/$NAME-$VERSION-$OSTYPE$OSTYPE_ADDON$ADDON.tar
@@ -542,7 +555,13 @@ then
   cd $BUILDDIR && \
   (tar cf $HOME/wxWindows.tar wxWindows && gzip -f -9 $HOME/wxWindows.tar)
   echo "Cleaning and building $HOME/Mahogany.tar.gz"
+	
   cd $BUILDDIR/$MNAME-$MVERSION && ($MAKE allclean; rm -f *cache ) >/dev/null 2>&1
+  # before packaging source, remove libmal:
+  echo "Removing libmal from source tree"
+  (cd $BUILDDIR/$NAME-$VERSION/extra/src && \
+    rm -rf libmal )
+  
     cd $BUILDDIR && \
       (mv $MNAME-$MVERSION M && tar cf $HOME/Mahogany.tar M && gzip -f -9 $HOME/Mahogany.tar)
   	mv $BUILDDIR/M $BUILDDIR/$MNAME-$MVERSION
