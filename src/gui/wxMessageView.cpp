@@ -63,6 +63,7 @@
 #include "gui/wxOptionsDlg.h"
 
 #include <wx/dynarray.h>
+#include <wx/file.h>
 #include <wx/mimetype.h>
 
 #include "adb/AdbManager.h"
@@ -598,16 +599,17 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
 
    Message::ContentType type = mailMessage->GetPartType(mimeDisplayPart);
    if(type == Message::MSG_TYPEMESSAGE || type == Message::MSG_TYPETEXT)
-      message << _(" lines\n");
+      message << _(" lines");
    else
-      message << _(" bytes\n");
+      message << _(" bytes");
+   message << '\n';
 
    // debug output with all parameters
    const MessageParameterList &plist = mailMessage->GetParameters(mimeDisplayPart);
    MessageParameterList::iterator plist_it;
    if(plist.size() > 0)
    {
-      message += "\nParameters:\n";
+      message += _("\nParameters:\n");
       for(plist_it = plist.begin(); plist_it != plist.end();
           plist_it++)
       {
@@ -620,10 +622,10 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
    String disposition;
    const MessageParameterList &dlist = mailMessage->GetDisposition(mimeDisplayPart,&disposition);
    if(! strutil_isempty(disposition))
-      message << "\nDisposition: " << disposition << '\n';
+      message << _("\nDisposition: ") << disposition << '\n';
    if(dlist.size() > 0)
    {
-      message += "\nDisposition Parameters:\n";
+      message += _("\nDisposition Parameters:\n");
       for(plist_it = dlist.begin(); plist_it != dlist.end();
           plist_it++)
          message << (*plist_it)->name << ": "
@@ -637,9 +639,42 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
 void
 wxMessageView::MimeHandle(int mimeDisplayPart)
 {
+   // we'll need this filename later
+   wxString filenameOrig;
+   (void)mailMessage->ExpandParameter
+         (
+            mailMessage->GetDisposition(mimeDisplayPart),
+            "FILENAME",
+            &filenameOrig
+         );
+
    String mimetype = mailMessage->GetPartMimeType(mimeDisplayPart);
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
-   wxFileType *fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
+
+   wxFileType *fileType = NULL;
+   if ( wxMimeTypesManager::IsOfType(mimetype, "APPLICATION/OCTET-STREAM") )
+   {
+      // special handling of "APPLICATION/OCTET-STREAM": this is the default
+      // MIME type for all binary attachments and many e-mail clients don't
+      // use the correct type (e.g. IMAGE/GIF) always leaving this one as
+      // default. Try to guess a better MIME type ourselves from the file
+      // extension.
+      if ( !filenameOrig.IsEmpty() )
+      {
+         wxString ext;
+         wxSplitPath(filenameOrig, NULL, NULL, &ext);
+
+         if ( !ext.IsEmpty() )
+            fileType = mimeManager.GetFileTypeFromExtension(ext);
+      }
+   }
+
+   if ( !fileType )
+   {
+      // non default MIME type (so use it) or couldn't get the MIME type from
+      // extension
+      fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
+   }
 
 #  ifdef OS_WIN
    // get the standard extension for such files - we'll use it below...
@@ -715,7 +750,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    else
    {
       // have a command to open this kind of data - so do it
-      FILE *out = fopen(filename,"wb");
+      FILE *out = fopen(filename, "wb");
       if( !out )
       {
          wxLogSysError(_("Can't open temporary file"));
@@ -759,59 +794,62 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
 bool
 wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 {
-   String message;
    String filename;
 
-   if(! ifilename)
+   if ( strutil_isempty(ifilename) )
    {
-      mailMessage->ExpandParameter(
-         mailMessage->GetDisposition(mimeDisplayPart),
-         "FILENAME", &filename);
-      message = _("Please choose a filename to save as:");
-      filename = MDialog_FileRequester(message, m_Parent,
-                                       NULLstring, filename,
-                                       NULLstring, NULLstring, true,
-                                       m_FolderView ? m_FolderView->GetProfile() :
-                                       NULL);
-      if ( strutil_isempty(filename) ) {
-         // cancelled
-         return false;
-      }
+      (void)mailMessage->ExpandParameter
+            (
+               mailMessage->GetDisposition(mimeDisplayPart),
+               "FILENAME",
+               &filename
+            );
+
+      wxString name, ext;
+      wxSplitPath(filename, NULL, &name, &ext);
+
+      filename = wxFileSelector(_("Save attachment as:"),
+                                NULLstring, name, ext,
+                                NULLstring, 0, this);
    }
    else
       filename = ifilename;
 
-   if(filename)
+   if ( !filename )
    {
-      unsigned long len;
-      char const *content = mailMessage->GetPartContent(mimeDisplayPart,&len);
-      if(! content)
-      {
-         wxLogError(_("Cannot get message content."));
-         return false;
-      }
-      FILE *out = fopen(filename,"wb");
-      if(out)
-      {
-         size_t written;
-         written = fwrite(content,1,len,out);
-         if(written != len)
-         {
-            wxLogSysError(_("Cannot write file."));
-            fclose(out);
-            return false;
-         }
-         else if(! ifilename) // only display in interactive mode
-         {
-            wxLogStatus(GetFrame(this), _("Wrote %lu bytes to file '%s'"),
-                        len, filename.c_str());
-         }
-         fclose(out);
-      }
+      // no filename and user cancelled the dialog
+      return false;
+   }
+
+   unsigned long len;
+   char const *content = mailMessage->GetPartContent(mimeDisplayPart, &len);
+   if( !content )
+   {
+      wxLogError(_("Cannot get attachment content."));
    }
    else
-      return false;
-   return true;
+   {
+      wxFile out(filename, wxFile::write);
+      if ( out.IsOpened() )
+      {
+         size_t written = out.Write(content, len);
+         if ( written == len )
+         {
+            // only display in interactive mode
+            if( strutil_isempty(ifilename) )
+            {
+               wxLogStatus(GetFrame(this), _("Wrote %lu bytes to file '%s'"),
+                           len, filename.c_str());
+            }
+
+            return true;
+         }
+      }
+   }
+
+   wxLogError(_("Couldn't save the attachment."));
+
+   return false;
 }
 
 void

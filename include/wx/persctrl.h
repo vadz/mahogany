@@ -110,6 +110,7 @@ protected:
 
     void RestorePage();
 
+    bool       m_bFirstTime;  // FIXME hack used in OnSize()
     wxPHelper *m_persist;
 
 private:

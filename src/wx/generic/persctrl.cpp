@@ -199,6 +199,7 @@ const char *wxPNotebook::ms_pageKey = "Page";
 
 wxPNotebook::wxPNotebook()
 {
+    m_bFirstTime = true;
     m_persist = new wxPHelper;
 }
 
@@ -211,6 +212,7 @@ wxPNotebook::wxPNotebook(const wxString& configPath,
                          wxConfigBase *config)
           : wxNotebook(parent, id, pos, size, style)
 {
+    m_bFirstTime = true;
     m_persist = new wxPHelper(configPath, config);
 }
 
@@ -255,14 +257,15 @@ wxPNotebook::~wxPNotebook()
     delete m_persist;
 }
 
+// first time our OnSize() is called we restore the page: there is no other
+// event sent specifically after window creation and we can't do in the ctor
+// (too early) - this should change in wxWin 2.1...
 void wxPNotebook::OnSize(wxSizeEvent& event)
 {
-    static bool s_bFirstTime = TRUE;
-
-    if ( s_bFirstTime ) {
+    if ( m_bFirstTime ) {
         RestorePage();
 
-        s_bFirstTime = FALSE;
+        m_bFirstTime = FALSE;
     }
 
     // important things are done in the base class version!

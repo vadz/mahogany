@@ -198,9 +198,15 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
    : wxDialog(parent, -1, wxString("M: ") + strCaption,
               wxDefaultPosition,
               wxDefaultSize,
-              wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
-     m_strText(strText)
+              wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
 {
+  // text is the default value normally read from config and it may be
+  // overriden by strDefault parameter if it is not empty
+  if ( !strDefault )
+     m_strText = strText;
+  else
+     m_strText = strDefault;
+
   // layout
   long widthLabel, heightLabel;
   wxClientDC dc(this);
@@ -226,7 +232,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
   // label and the text
   (void)new wxStaticText(this, -1, strPrompt, wxPoint(x, y + dy),
                          wxSize(widthLabel, heightLabel));
-  m_text = new wxPTextEntry(strConfigPath, this, -1, strDefault,
+  m_text = new wxPTextEntry(strConfigPath, this, -1, "",
                             wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                             wxSize(widthText, heightText));
 
@@ -250,7 +256,10 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
 bool MTextInputDialog::TransferDataToWindow()
 {
   m_text->SetValue(m_strText);
-  m_text->SetSelection(-1, -1); // select everything
+
+  // select everything so that it's enough to type a single letter to erase
+  // the old value (this way it's as unobtrusive as you may get)
+  m_text->SetSelection(-1, -1);
 
   return TRUE;
 }
