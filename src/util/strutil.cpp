@@ -1190,39 +1190,40 @@ String
 strutil_readString(String &string, bool *success)
 {
    strutil_delwhitespace(string);
+
+   String newstr;
+   bool ok;
+
    const char *cptr = string.c_str();
    if(*cptr != '"')
    {
-      if(success)
-         *success = false;
-      return "";
+      ok = false;
    }
-   else
-      cptr++;
-
-   String newstr;
-   bool escaped = false;
-   for(; *cptr && (*cptr != '"' || escaped); cptr++)
+   else // starts with quote, ok
    {
-      if(*cptr == '\\' && ! escaped)
+      for ( cptr++; *cptr && *cptr != '"'; cptr++ )
       {
-         escaped = true;
-         continue;
+         if ( cptr[0] == '\\' && cptr[1] == '"' )
+         {
+            // escaped quote, ignore it
+            cptr++;
+         }
+
+         newstr << *cptr;
       }
-      newstr << *cptr;
+
+      // string must be terminated with a quote
+      ok = *cptr == '"';
+
+      if ( ok )
+      {
+         string = ++cptr;
+      }
    }
-   if(*cptr == '"')
-   {
-      if(success)
-         *success = true;
-      cptr++;
-   }
-   else
-   {
-      if(success)
-         *success = false;
-   }
-   string = cptr;
+
+   if ( success )
+      *success = ok;
+
    return newstr;
 }
 
