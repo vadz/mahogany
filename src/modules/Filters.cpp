@@ -1987,6 +1987,19 @@ static bool CheckXAuthWarning(const String& value)
    return *pc == '.' && *pc2 == '\r';
 }
 
+// check the value of Received headers and return true if we believe they
+// indicate that this is a spam
+static bool CheckReceivedHeaders(const String& value)
+{
+   // "Received: from unknown" is very suspicious
+   const char *pc = strstr(value, "from unknown");
+   if ( !pc )
+      return false;
+
+   // it should be in the beginning of the header line
+   return pc == value.c_str() || *(pc - 1) == '\n';
+}
+
 // check if we have an HTML-only message
 static bool CheckForHTMLOnly(const Message *msg)
 {
@@ -2100,6 +2113,11 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
          // only spammers change their address in such way
          rc = msg->GetHeaderLine("X-Authentication-Warning", value) &&
                   CheckXAuthWarning(value);
+      }
+      else if ( test == SPAM_TEST_RECEIVED )
+      {
+         rc = msg->GetHeaderLine("Received", value) &&
+                  CheckReceivedHeaders(value);
       }
       else if ( test == SPAM_TEST_HTML )
       {

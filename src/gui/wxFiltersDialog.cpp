@@ -399,6 +399,7 @@ private:
    bool m_checkCaps:1;
    bool m_checkKorean:1;
    bool m_checkXAuthWarn:1;
+   bool m_checkReceived:1;
    bool m_checkHtml:1;
 #ifdef USE_RBL
    bool m_checkRBL:1;
@@ -628,6 +629,9 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
 #define MP_SPAM_X_AUTH_WARN  "SpamXAuthWarning"
 #define MP_SPAM_X_AUTH_WARN_D  0l
 
+#define MP_SPAM_RECEIVED   "SpamReceived"
+#define MP_SPAM_RECEIVED_D  0l
+
 #define MP_SPAM_HTML  "SpamHtml"
 #define MP_SPAM_HTML_D  0l
 
@@ -647,6 +651,7 @@ static const ConfigValueDefault gs_SpamPageConfigValues[] =
    CONFIG_ENTRY(MP_SPAM_CAPS_SUBJECT),
    CONFIG_ENTRY(MP_SPAM_KOREAN_CSET),
    CONFIG_ENTRY(MP_SPAM_X_AUTH_WARN),
+   CONFIG_ENTRY(MP_SPAM_RECEIVED),
    CONFIG_ENTRY(MP_SPAM_HTML),
 #ifdef USE_RBL
    CONFIG_ENTRY(MP_SPAM_RBL),
@@ -669,6 +674,7 @@ static const wxOptionsPage::FieldInfo gs_SpamPageFieldInfos[] =
    { gettext_noop("Only &capitals in subject"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("&Korean charset"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("X-Authentication-&Warning header"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Suspicious \"&Received\" headers"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("&HTML content"), wxOptionsPage::Field_Bool, -1 },
 #ifdef USE_RBL
    { gettext_noop("been &blacklisted by RBL"), wxOptionsPage::Field_Bool, -1},
@@ -701,6 +707,7 @@ OneCritControl::InitSpamOptions(const String& rule)
    m_checkKorean = MP_SPAM_KOREAN_CSET_D;
 
    m_checkXAuthWarn = MP_SPAM_X_AUTH_WARN_D;
+   m_checkReceived = MP_SPAM_RECEIVED_D;
    m_checkHtml = MP_SPAM_HTML_D;
 
 #ifdef USE_RBL
@@ -721,6 +728,7 @@ OneCritControl::ShowDetails()
    profile->writeEntry(MP_SPAM_CAPS_SUBJECT, m_checkCaps);
    profile->writeEntry(MP_SPAM_KOREAN_CSET, m_checkKorean);
    profile->writeEntry(MP_SPAM_X_AUTH_WARN, m_checkXAuthWarn);
+   profile->writeEntry(MP_SPAM_RECEIVED, m_checkReceived);
    profile->writeEntry(MP_SPAM_HTML, m_checkHtml);
 #ifdef USE_RBL
    profile->writeEntry(MP_SPAM_RBL, m_checkRBL);
@@ -733,6 +741,7 @@ OneCritControl::ShowDetails()
       m_checkCaps = profile->readEntry(MP_SPAM_CAPS_SUBJECT, 0l) != 0;
       m_checkKorean = profile->readEntry(MP_SPAM_KOREAN_CSET, 0l) != 0;
       m_checkXAuthWarn = profile->readEntry(MP_SPAM_X_AUTH_WARN, 0l) != 0;
+      m_checkReceived = profile->readEntry(MP_SPAM_RECEIVED, 0l) != 0;
       m_checkHtml = profile->readEntry(MP_SPAM_HTML, 0l) != 0;
 #ifdef USE_RBL
       m_checkRBL = profile->readEntry(MP_SPAM_RBL, 0l) != 0;
@@ -751,6 +760,7 @@ OneCritControl::ShowDetails()
    profile->DeleteEntry(MP_SPAM_CAPS_SUBJECT);
    profile->DeleteEntry(MP_SPAM_KOREAN_CSET);
    profile->DeleteEntry(MP_SPAM_X_AUTH_WARN);
+   profile->DeleteEntry(MP_SPAM_RECEIVED);
    profile->DeleteEntry(MP_SPAM_HTML);
 #ifdef USE_RBL
    profile->DeleteEntry(MP_SPAM_RBL);
@@ -782,6 +792,8 @@ OneCritControl::GetSpamTestArgument() const
       AddToSpamArgument(s, SPAM_TEST_KOREAN);
    if ( m_checkXAuthWarn )
       AddToSpamArgument(s, SPAM_TEST_XAUTHWARN);
+   if ( m_checkReceived )
+      AddToSpamArgument(s, SPAM_TEST_RECEIVED);
    if ( m_checkHtml )
       AddToSpamArgument(s, SPAM_TEST_HTML);
 #ifdef USE_RBL

@@ -33,6 +33,9 @@
 /// suspicious X-Authentication-Warning header?
 #define SPAM_TEST_XAUTHWARN "xauthwarn"
 
+/// suspicious Received: headers?
+#define SPAM_TEST_RECEIVED "received"
+
 /// HTML contents at top level?
 #define SPAM_TEST_HTML "html"
 
