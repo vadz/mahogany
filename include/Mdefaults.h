@@ -1507,7 +1507,7 @@ enum MFolderIndex
 /** @name other defines used in M */
 //@{
 /// title for main window
-#define   M_TOPLEVELFRAME_TITLE   "Copyright (C) 1997-2000 The Mahogany Developers Team"
+#define   M_TOPLEVELFRAME_TITLE   "Copyright (C) 1997-2001 The Mahogany Developers Team"
 /// do we want variable expansion for profiles?
 #define   M_PROFILE_VAREXPAND      1
 /// c-client lib needs a char buffer to write header data
