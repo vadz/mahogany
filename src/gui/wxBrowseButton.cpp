@@ -20,10 +20,13 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include   "Mcommon.h"
-#   include   "MApplication.h"
-#   include   "Profile.h"
-#   include   "guidef.h"
+#  include "Mcommon.h"
+#  include "MApplication.h"
+#  include "Profile.h"
+#  include "guidef.h"
+
+#  include <wx/cmndata.h>
+#  include <wx/colordlg.h>
 #endif
 
 #include "MFolder.h"
@@ -102,4 +105,39 @@ MFolder *wxFolderBrowseButton::GetFolder() const
 wxFolderBrowseButton::~wxFolderBrowseButton()
 {
    SafeDecRef(m_folder);
+}
+
+// ----------------------------------------------------------------------------
+// wxColorBrowseButton
+// ----------------------------------------------------------------------------
+
+void wxColorBrowseButton::DoBrowse()
+{
+   wxColourData colData;
+   m_color = GetText();
+   colData.SetColour(m_color);
+
+   wxColourDialog dialog(this, &colData);
+
+   if ( dialog.ShowModal() == wxID_OK )
+   {
+      colData = dialog.GetColourData();
+      m_color = colData.GetColour();
+
+      wxString colName(wxTheColourDatabase->FindName(m_color));
+      if ( !colName )
+      {
+         // no name for this colour
+         colName.Printf("RGB(%d, %d, %d)",
+                        m_color.Red(), m_color.Green(), m_color.Blue());
+      }
+      else
+      {
+         // at least under X the string returned is always capitalized,
+         // convert it to lower case (it doesn't really matter, but capitals
+         // look ugly)
+         colName.MakeLower();
+      }
+      SetText(colName);
+   }
 }

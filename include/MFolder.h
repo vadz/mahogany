@@ -33,7 +33,7 @@
 //
 // A folder is identified by its full name which has the form
 //                   /folder1/.../folderN/folder.
-// The name "/" corresponds to a root pseudo-folder which always exists and
+// The name "" corresponds to a root pseudo-folder which always exists and
 // can't be recreated or changed.
 //
 // This class is refcounted (deriving from MObjectRC) so the usual rules of

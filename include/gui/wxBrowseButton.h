@@ -97,4 +97,22 @@ private:
    MFolder *m_folder;
 };
 
+// this button is used to browse for colours: the text control can be used to
+// enter the color name
+class wxColorBrowseButton : public wxBrowseButton
+{
+public:
+   wxColorBrowseButton(wxTextCtrl *text, wxWindow *parent)
+      : wxBrowseButton(text, parent, _("Choose colour")) { }
+
+   // get the colour chosen
+   wxColour GetColor() const { return m_color; }
+
+   // show the color selection dialog
+   virtual void DoBrowse();
+
+private:
+   wxColour m_color;
+};
+
 #endif // _GUI_WXBROWSEBUTTON_H_

@@ -50,6 +50,7 @@ public:
       Field_Message= 0x0020, // just a bit of explaining text, no input
       Field_Action = 0x0040, // offering the 0,1,2 No,Ask,Yes radiobox
       Field_Combo  = 0x0080, // offering 0,1,2,..n, from a combobox
+      Field_Color  = 0x0100, // a text entry with a "Browse for colour" button
       Field_Type   = 0x0fff  // bit mask selecting the type
    };
 

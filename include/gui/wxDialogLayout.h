@@ -23,9 +23,11 @@ class wxControl;
 class wxListBox;
 class wxCheckBox;
 class wxFileBrowseButton;
+class wxBrowseButton;
 class wxStaticText;
 class wxRadioBox;
 class wxComboBox;
+
 // -----------------------------------------------------------------------------
 // classes
 // -----------------------------------------------------------------------------
@@ -171,20 +173,37 @@ protected:
                                    wxControl *last,
                                    size_t nRightMargin = 0,
                                    int style = 0);
-   wxStaticText *CreateMessage(const char *label,
-                             wxControl *last);
+   wxStaticText *CreateMessage(const char *label, wxControl *last);
 
-   // A ComboBox, the entries are taken from the label string which 
+   // A ComboBox, the entries are taken from the label string which
    // is composed as: "LABEL:entry1:entry2:entry3:...."
    wxComboBox *CreateComboBox(const char *label,
                               long widthMax,
                               wxControl *last,
                               size_t nRightMargin = 0);
    // if ppButton != NULL, it's filled with the pointer to the ">>" browse
-      // button created by this function
-   wxTextCtrl *CreateFileEntry(const char *label, long widthMax,
+   // button created by this function
+   wxTextCtrl *CreateFileEntry(const char *label,
+                               long widthMax,
                                wxControl *last,
-                               wxFileBrowseButton **ppButton = NULL);
+                               wxFileBrowseButton **ppButton = NULL)
+   {
+      return CreateEntryWithButton(label, widthMax, last, FileBtn,
+                                   (wxBrowseButton **)ppButton);
+   }
+
+   // another entry with a browse button
+   wxTextCtrl *CreateColorEntry(const char *label,
+                                long widthMax,
+                                wxControl *last)
+   {
+      return CreateEntryWithButton(label, widthMax, last, ColorBtn);
+   }
+
+   // callbacks which will set the parent's dirty flag whenever something
+   // changes
+   void OnChange(wxEvent& event);
+
 private:
    // called from CreateXXX() functions to set up the top constraint which is
    // either just below the "last", or below the page top (with some
@@ -192,6 +211,16 @@ private:
    void SetTopConstraint(wxLayoutConstraints *c,
                          wxControl *last,
                          size_t extraSpace = 0);
+
+   // create an entry with a browse button
+   enum BtnKind { FileBtn, ColorBtn };
+   wxTextCtrl *CreateEntryWithButton(const char *label,
+                                     long widthMax,
+                                     wxControl *last,
+                                     wxNotebookPageBase::BtnKind kind,
+                                     wxBrowseButton **ppButton = NULL);
+
+   DECLARE_EVENT_TABLE()
 };
 
 // -----------------------------------------------------------------------------

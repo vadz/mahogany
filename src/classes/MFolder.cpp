@@ -99,7 +99,7 @@ protected:
    static bool GroupExists(ProfileBase *profile, const String& fullname);
    /** Get the full name of the subfolder.
        As all folder names are relative profile names, we need to
-       check for m_folderName not being empty before appending a slash 
+       check for m_folderName not being empty before appending a slash
        and subfolder name.
        @param name relative subfolder name
        @return the complete relative folder name of the subfolder
@@ -494,7 +494,7 @@ void MFolderFromProfile::Delete()
    CHECK_RET( profile != NULL, "panic in MFolder: no app profile" );
    profile->DeleteGroup(GetName());
    profile->DecRef();
-      
+
    // notify everybody about the disappearance of the folder
    MEventFolderTreeChangeData event(GetFullName(),
                                     MEventFolderTreeChangeData::Delete);

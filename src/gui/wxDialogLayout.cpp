@@ -68,6 +68,12 @@ BEGIN_EVENT_TABLE(wxNotebookDialog, wxDialog)
    EVT_BUTTON(wxID_CANCEL, wxNotebookDialog::OnCancel)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxNotebookPageBase, wxPanel)
+   EVT_TEXT    (-1, wxNotebookPageBase::OnChange)
+   EVT_CHECKBOX(-1, wxNotebookPageBase::OnChange)
+   EVT_RADIOBOX(-1, wxNotebookPageBase::OnChange)
+END_EVENT_TABLE()
+
 // ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
@@ -129,6 +135,13 @@ wxNotebookWithImages::~wxNotebookWithImages()
 // wxNotebookPageBase
 // ----------------------------------------------------------------------------
 
+void wxNotebookPageBase::OnChange(wxEvent& event)
+{
+   wxNotebookDialog *dlg = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+   if ( dlg )
+      dlg->SetDirty();
+}
+
 // the top item is positioned near the top of the page, the others are
 // positioned from top to bottom, i.e. under the last one
 void wxNotebookPageBase::SetTopConstraint(wxLayoutConstraints *c,
@@ -148,10 +161,12 @@ void wxNotebookPageBase::SetTopConstraint(wxLayoutConstraints *c,
    }
 }
 
-wxTextCtrl *wxNotebookPageBase::CreateFileEntry(const char *label,
-                                               long widthMax,
-                                               wxControl *last,
-                                               wxFileBrowseButton **ppButton)
+wxTextCtrl *
+wxNotebookPageBase::CreateEntryWithButton(const char *label,
+                                          long widthMax,
+                                          wxControl *last,
+                                          wxNotebookPageBase::BtnKind kind,
+                                          wxBrowseButton **ppButton)
 {
    static size_t widthBtn = 0;
    if ( widthBtn == 0 ) {
@@ -164,7 +179,22 @@ wxTextCtrl *wxNotebookPageBase::CreateFileEntry(const char *label,
                                           widthBtn + 2*LAYOUT_X_MARGIN);
 
    // and also create a button for browsing for file
-   wxFileBrowseButton *btn = new wxFileBrowseButton(text, this);
+   wxBrowseButton *btn;
+   switch ( kind )
+   {
+      case FileBtn:
+         btn = new wxFileBrowseButton(text, this);
+         break;
+
+      case ColorBtn:
+         btn = new wxColorBrowseButton(text, this);
+         break;
+
+      default:
+         wxFAIL_MSG("unknown browse button kind");
+         return NULL;
+   }
+
    wxLayoutConstraints *c = new wxLayoutConstraints;
    c->centreY.SameAs(text, wxCentreY);
    c->left.RightOf(text, LAYOUT_X_MARGIN);
@@ -317,8 +347,7 @@ wxComboBox *wxNotebookPageBase::CreateComboBox(const char *label,
    delete [] buf;
 
    size_t n = tlist.size(); // number of elements
-   wxString *choices = new wxString[n];  // refcounted, so having a local var should
-   // be fine
+   wxString *choices = new wxString[n];
    wxString *sptr;
    size_t i = 0;
    for(i = 0; i < n; i++)
@@ -328,7 +357,7 @@ wxComboBox *wxNotebookPageBase::CreateComboBox(const char *label,
       delete sptr;
    }
    // the real choices start at 1, 0 is the label
-   
+
    wxLayoutConstraints *c;
 
    // for the label
@@ -395,7 +424,7 @@ wxListBox *wxNotebookPageBase::CreateListbox(const char *label,
 
    long widthMax = GetMaxLabelWidth(labels, this);
 
-   widthMax += 15; // @@ loks better like this
+   widthMax += 15; // loks better like this
    for ( nBtn = 0; nBtn < WXSIZEOF(aszLabels); nBtn++ ) {
       c = new wxLayoutConstraints;
       if ( nBtn == 0 )
@@ -452,7 +481,7 @@ void wxNotebookDialog::CreateAllControls()
 
    // FIXME these are more or less arbitrary numbers
    const int wDlg = 6*wBtn;
-   const int hDlg = 25*hBtn;
+   const int hDlg = 31*hBtn;
 
    // create the panel
    // ----------------

@@ -138,7 +138,7 @@ enum ConfigFields
 #else // !Unix
    ConfigField_MessageViewLast = ConfigField_MessageViewInlineGraphics,
 #endif // Unix/!Unix
-   
+
    // autocollecting addresses options
    ConfigField_AdbFirst = ConfigField_MessageViewLast,
    ConfigField_AutoCollect_HelpText,
@@ -165,7 +165,7 @@ enum ConfigFields
    ConfigField_ImageConverter,
    ConfigField_NewMailCommand,
    ConfigField_HelpersLast = ConfigField_NewMailCommand,
-   
+
    // other options
    ConfigField_OthersFirst = ConfigField_HelpersLast,
    ConfigField_ShowLog,
@@ -243,9 +243,9 @@ public:
    ~wxOptionsDialog();
 
    // notifications from the notebook pages
-   // something important change
+      // something important change
    void SetDoTest() { SetDirty(); m_bTest = TRUE; }
-   // some setting changed, but won't take effect until restart
+      // some setting changed, but won't take effect until restart
    void SetGiveRestartWarning() { m_bRestartWarning = TRUE; }
 
    // override base class functions
@@ -338,8 +338,8 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Font famil&y:default:decorative:roman:script:swiss:modern:teletype"),
                                                      Field_Combo,  -1},
    { gettext_noop("Font si&ze"),                   Field_Number,     -1},
-   { gettext_noop("Foreground c&olour"),           Field_Text,    -1},
-   { gettext_noop("Back&ground colour"),           Field_Text,    -1},
+   { gettext_noop("Foreground c&olour"),           Field_Color,    -1},
+   { gettext_noop("Back&ground colour"),           Field_Color,    -1},
 
    // folders
    { gettext_noop("Folders to open on &startup"),  Field_List |
@@ -367,18 +367,18 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Font family"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
      Field_Combo,    -1 },
-   { gettext_noop("Font &size"),                Field_Number, -1 },
-   { gettext_noop("Foreground c&olour"),           Field_Text,    -1},
-   { gettext_noop("Back&ground colour"),           Field_Text,    -1},
-   { gettext_noop("&Inline graphics"),          Field_Bool, -1 },
+   { gettext_noop("Font &size"),                   Field_Number, -1 },
+   { gettext_noop("Foreground c&olour"),           Field_Color,    -1},
+   { gettext_noop("Back&ground colour"),           Field_Color,    -1},
+   { gettext_noop("&Inline graphics"),             Field_Bool, -1 },
 #ifdef OS_UNIX
    { gettext_noop("Conversion &graphics format:XPM:PNG:BMP:JPG"), Field_Combo, ConfigField_MessageViewInlineGraphics },
    { gettext_noop("Support special &fax mailers"), Field_Bool, -1},
    { gettext_noop("&Domains sending faxes"), Field_Text,
      ConfigField_MessageViewFaxSupport},
 #endif
-   
-   
+
+
    // adb: autocollect and bbdb options
    { gettext_noop("M may automatically remember all e-mail addresses in the messages you "
                   "receive in a special addresss book. This is called 'address "
@@ -422,8 +422,8 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 #endif
 };
 
-// @@@ ugly, ugly, ugly... config settings should be living in an array from
-//     the beginning which would avoid us all these contorsions
+// FIXME ugly, ugly, ugly... config settings should be living in an array from
+//       the beginning which would avoid us all these contorsions
 #define CONFIG_ENTRY(name)  ConfigValueDefault(name, name##_D)
 // even worse: dummy entries for message fields
 #define CONFIG_NONE()  ConfigValueNone()
@@ -493,7 +493,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_INCFAX_SUPPORT),
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),
 #endif
-   
+
    // autocollect
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOCOLLECT),
@@ -556,7 +556,7 @@ wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
 
    m_Profile = profile;
    m_Profile->IncRef();
-   
+
    m_HelpId = helpId;
    // see enum ConfigFields for "+1"
    m_nFirst = nFirst + 1;
@@ -576,6 +576,7 @@ void wxOptionsPage::CreateControls()
       switch ( GetFieldType(n) ) {
       case Field_Number:
       case Field_File:
+      case Field_Color:
       case Field_Bool:
          // fall through: for this purpose (finding the longest label)
          // they're the same as text
@@ -601,15 +602,18 @@ void wxOptionsPage::CreateControls()
          last = CreateFileEntry(_(ms_aFields[n].label), widthMax, last);
          break;
 
+      case Field_Color:
+         last = CreateColorEntry(_(ms_aFields[n].label), widthMax, last);
+         break;
+
       case Field_Action:
-         last = CreateActionChoice(_(ms_aFields[n].label), widthMax,
-                                   last);
+         last = CreateActionChoice(_(ms_aFields[n].label), widthMax, last);
          break;
 
       case Field_Combo:
-         last = CreateComboBox(_(ms_aFields[n].label), widthMax,
-                               last);
+         last = CreateComboBox(_(ms_aFields[n].label), widthMax, last);
          break;
+
       case Field_Number:
          // fall through -- for now they're the same as text
       case Field_Text:
@@ -653,7 +657,10 @@ void wxOptionsPage::OnChange(wxEvent& event)
    if ( !dialog )
    {
       // we don't put an assert here because this does happen when we're a
-      // page in the folder properties dialog
+      // page in the folder properties dialog, but we must have event.Skip()
+      // here to allow the base class version mark the dialog as being dirty
+      event.Skip();
+
       return;
    }
 
@@ -715,48 +722,49 @@ void wxOptionsPage::UpdateUI()
          control->Enable(bEnable);
 
          switch ( GetFieldType(n) ) {
-         case Field_File:
             // for file entries, also disable the browse button
-         {
-            // @@ we assume that the control ids are consecutif
-            long id = control->GetId() + 1;
-            wxWindow *win = FindWindow(id);
+            case Field_File:
+            case Field_Color:
+            {
+               // NB: we assume that the control ids are consecutif
+               long id = control->GetId() + 1;
+               wxWindow *win = FindWindow(id);
 
-            if ( win == NULL ) {
-               wxFAIL_MSG("can't find browse button for the file entry zone");
-            }
-            else {
-               win->Enable(bEnable);
-            }
-         }
-         // fall through
-
-         case Field_Text:
-            // not only enable/disable it, but also make (un)editable because
-            // it gives visual feedback
-            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
-            ((wxTextCtrl *)control)->SetEditable(bEnable);
-            break;
-
-         case Field_List:
-            // also disable the buttons
-         {
-            long i;
-            for ( i = wxOptionsPage_BtnNew; i <= wxOptionsPage_BtnNew; i++ ) {
-               wxWindow *win = FindWindow(i);
-               if ( win ) {
-                  win->Enable(bEnable);
+               if ( win == NULL ) {
+                  wxFAIL_MSG("can't find browse button for the file entry zone");
                }
                else {
-                  wxFAIL_MSG("can't find listbox buttons by id");
+                  win->Enable(bEnable);
                }
             }
-         }
-         break;
+            // fall through
 
-         default:
-            ;
-         }
+            case Field_Text:
+               // not only enable/disable it, but also make (un)editable because
+               // it gives visual feedback
+               wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+               ((wxTextCtrl *)control)->SetEditable(bEnable);
+               break;
+
+            case Field_List:
+               // also disable the buttons
+            {
+               long i;
+               for ( i = wxOptionsPage_BtnNew; i <= wxOptionsPage_BtnNew; i++ ) {
+                  wxWindow *win = FindWindow(i);
+                  if ( win ) {
+                     win->Enable(bEnable);
+                  }
+                  else {
+                     wxFAIL_MSG("can't find listbox buttons by id");
+                  }
+               }
+            }
+            break;
+
+            default:
+               ;
+            }
       }
       // this field is always enabled
    }
@@ -791,65 +799,71 @@ bool wxOptionsPage::TransferDataToWindow()
 
       wxControl *control = GetControl(n);
       switch ( GetFieldType(n) ) {
-      case Field_Text:
-      case Field_File:
-      case Field_Number:
-         if ( GetFieldType(n) == Field_Number ) {
+         case Field_Text:
+         case Field_File:
+         case Field_Color:
+         case Field_Number:
+            if ( GetFieldType(n) == Field_Number ) {
+               wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+
+               strValue.Printf("%ld", lValue);
+            }
+            else {
+               wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+            }
+            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+
+            ((wxTextCtrl *)control)->SetValue(strValue);
+            break;
+
+         case Field_Bool:
             wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
+            ((wxCheckBox *)control)->SetValue(lValue != 0);
+            break;
 
-            strValue.Printf("%ld", lValue);
-         }
-         else {
+         case Field_Action:
+            wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
+            ((wxRadioBox *)control)->SetSelection(lValue);
+            break;
+
+         case Field_Combo:
+            wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
+            ((wxComboBox *)control)->SetSelection(lValue);
+            break;
+
+         case Field_List:
             wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
-         }
-         wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+            wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
-         ((wxTextCtrl *)control)->SetValue(strValue);
-         break;
-
-      case Field_Bool:
-         wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
-         wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
-         ((wxCheckBox *)control)->SetValue(lValue != 0);
-         break;
-      case Field_Action:
-         wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
-         ((wxRadioBox *)control)->SetSelection(lValue);
-         break;
-      case Field_Combo:
-         wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
-         ((wxComboBox *)control)->SetSelection(lValue);
-         break;
-      case Field_List:
-         wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
-         wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
-
-         // split it (FIXME @@@ what if it contains ';'?)
-         {
-            String str;
-            for ( size_t m = 0; m < strValue.Len(); m++ ) {
-               if ( strValue[m] == ';' ) {
-                  if ( !str.IsEmpty() ) {
-                     ((wxListBox *)control)->Append(str);
-                     str.Empty();
+            // split it (FIXME what if it contains ';'?)
+            {
+               String str;
+               for ( size_t m = 0; m < strValue.Len(); m++ ) {
+                  if ( strValue[m] == ';' ) {
+                     if ( !str.IsEmpty() ) {
+                        ((wxListBox *)control)->Append(str);
+                        str.Empty();
+                     }
+                     //else: nothing to do, two ';' one after another
                   }
-                  //else: nothing to do, two ';' one after another
+                  else {
+                     str << strValue[m];
+                  }
                }
-               else {
-                  str << strValue[m];
-               }
-            }
 
-            if ( !str.IsEmpty() ) {
-               ((wxListBox *)control)->Append(str);
+               if ( !str.IsEmpty() ) {
+                  ((wxListBox *)control)->Append(str);
+               }
             }
+            break;
+
+         case Field_Message:
+            break;
+
+         default:
+            wxFAIL_MSG("unexpected field type");
          }
-         break;
-      case Field_Message:
-         break;
-      default:
-         wxFAIL_MSG("unexpected field type");
-      }
    }
 
    return TRUE;
@@ -858,7 +872,7 @@ bool wxOptionsPage::TransferDataToWindow()
 // write the data to config
 bool wxOptionsPage::TransferDataFromWindow()
 {
-   // @@@ should only write the entries which really changed
+   // TODO should only write the entries which really changed
 
    String strValue;
    long lValue = 0;
@@ -869,6 +883,7 @@ bool wxOptionsPage::TransferDataFromWindow()
       {
       case Field_Text:
       case Field_File:
+      case Field_Color:
       case Field_Number:
          wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
@@ -907,7 +922,7 @@ bool wxOptionsPage::TransferDataFromWindow()
          wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
          wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
-         // join it (FIXME @@@ what if it contains ';'?)
+         // join it (FIXME what if it contains ';'?)
          {
             wxListBox *listbox = (wxListBox *)control;
             for ( size_t m = 0; m < (size_t)listbox->Number(); m++ ) {
@@ -936,7 +951,7 @@ bool wxOptionsPage::TransferDataFromWindow()
       }
    }
 
-   // @@@@ life is easy if we don't check for errors...
+   // TODO life is easy if we don't check for errors...
    return TRUE;
 }
 

@@ -29,10 +29,17 @@ class MFolder;
 enum FolderCreatePage
 {
    FolderCreatePage_Default = -1, // default must have value -1
-   FolderCreatePage_Compose,
    FolderCreatePage_Folder,
+   FolderCreatePage_Compose,
    FolderCreatePage_Max
 };
+
+// -----------------------------------------------------------------------------
+// macros
+// -----------------------------------------------------------------------------
+
+#define GET_FOLDER_PAGE(nbook)   ((wxFolderPropertiesPage *)nbook->GetPage(FolderCreatePage_Folder))
+#define GET_COMPOSE_PAGE(nbook)  ((wxOptionsPage *)nbook->GetPage(FolderCreatePage_Compose))
 
 // -----------------------------------------------------------------------------
 // functions

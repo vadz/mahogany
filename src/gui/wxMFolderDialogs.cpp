@@ -108,8 +108,8 @@ protected:
 
    wxFolderBrowseButton *m_btnParentFolder;
 
-   MFolder     *m_parentFolder,
-      *m_newFolder;
+   MFolder *m_parentFolder,
+           *m_newFolder;
 
    // FALSE if at least one of the pages contains incorrect information, if
    // it's TRUE it doesn't mean that the buttons are enabled - the global
@@ -281,23 +281,23 @@ private:
 // -----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxFolderBaseDialog, wxNotebookDialog)
-   IMPLEMENT_DYNAMIC_CLASS(wxFolderCreateDialog, wxFolderBaseDialog)
-   IMPLEMENT_DYNAMIC_CLASS(wxFolderPropertiesDialog, wxFolderBaseDialog)
+IMPLEMENT_DYNAMIC_CLASS(wxFolderCreateDialog, wxFolderBaseDialog)
+IMPLEMENT_DYNAMIC_CLASS(wxFolderPropertiesDialog, wxFolderBaseDialog)
 
-   BEGIN_EVENT_TABLE(wxFolderCreateDialog, wxNotebookDialog)
+BEGIN_EVENT_TABLE(wxFolderCreateDialog, wxNotebookDialog)
    EVT_TEXT(wxFolderCreateDialog::Folder_Name,
             wxFolderCreateDialog::OnFolderNameChange)
-   END_EVENT_TABLE()
+END_EVENT_TABLE()
 
-   BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
+BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
    EVT_RADIOBOX(-1, wxFolderPropertiesPage::OnEvent)
    EVT_TEXT    (-1, wxFolderPropertiesPage::OnChange)
-   END_EVENT_TABLE()
+END_EVENT_TABLE()
 
-   BEGIN_EVENT_TABLE(wxFolderSelectionDialog, wxDialog)
+BEGIN_EVENT_TABLE(wxFolderSelectionDialog, wxDialog)
    EVT_BUTTON(wxID_OK,     wxFolderSelectionDialog::OnOK)
    EVT_BUTTON(wxID_CANCEL, wxFolderSelectionDialog::OnCancel)
-   END_EVENT_TABLE()
+END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
 // wxFolderBaseDialog
@@ -441,6 +441,16 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(MFolder::Type typeFolder)
    m_newFolder = m_parentFolder->CreateSubfolder(m_folderName->GetValue(),
                                                  typeFolder);
 
+
+   if ( m_newFolder )
+   {
+      // tell the other pages that we now have a folder (and hence a profile)
+      ProfileBase *profile = ProfileBase::CreateProfile(m_newFolder->GetFullName());
+      GET_COMPOSE_PAGE(m_notebook)->SetProfile(profile);
+
+      profile->DecRef();
+   }
+
    return m_newFolder;
 }
 
@@ -458,8 +468,7 @@ bool wxFolderCreateDialog::TransferDataToWindow()
    EnableButtons(FALSE);   // initially, we have no folder name
 
    // initialize our pages
-   wxFolderPropertiesPage *page = (wxFolderPropertiesPage *)(m_notebook->
-                                                             GetPage(FolderCreatePage_Folder));
+   wxFolderPropertiesPage *page = GET_FOLDER_PAGE(m_notebook);
 
    // by default, take the same values as for the parent
    if ( m_parentFolder )
@@ -481,30 +490,19 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
 {
    wxString folderName = m_folderName->GetValue();
 
-   // for the creation of a folder we don't use the toplevel config
-   // section but create a profile of that name first
-   ProfileBase *profile = ProfileBase::CreateProfile(folderName);
-
    bool ok = TRUE;
 
-   // we must restore the path before the profile is released with DecRef(),
-   // so take all this in a block
+   if ( wxNotebookDialog::TransferDataFromWindow() )
    {
-      profile->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-      // tell the pages to use this profile instead of the global one
-      ((wxOptionsPage *)m_notebook->GetPage(FolderCreatePage_Compose))->SetProfile(profile);
-      if ( wxNotebookDialog::TransferDataFromWindow() )
-      {
-         // do create the new folder
-         CHECK( m_parentFolder, false, "should have created parent folder" );
-         m_newFolder = m_parentFolder->GetSubfolder(m_folderName->GetValue());
-         CHECK( m_newFolder, false, "new folder not created" );
-      }
-      else
-         ok = false;
-   }
+      CHECK( m_parentFolder, false, "should have created parent folder" );
 
-   profile->DecRef();
+      // new folder has already been created normally
+      m_newFolder = m_parentFolder->GetSubfolder(m_folderName->GetValue());
+
+      CHECK( m_newFolder, false, "new folder not created" );
+   }
+   else
+      ok = false;
 
    return ok;
 }
@@ -520,7 +518,7 @@ void wxFolderCreateDialog::CreateNotebook(wxPanel *panel)
 
 wxFolderPropertiesDialog::wxFolderPropertiesDialog(wxWindow *frame,
                                                    MFolder *folder)
-   : wxFolderBaseDialog(frame, _("Folder properties"))
+                        : wxFolderBaseDialog(frame, _("Folder properties"))
 {
    SetFolder(folder);
 }
@@ -529,10 +527,15 @@ bool wxFolderPropertiesDialog::TransferDataToWindow()
 {
    CHECK( m_newFolder, FALSE, "no folder in folder properties dialog" );
 
+   wxString folderName = m_newFolder->GetFullName();
+   ProfileBase *profile = ProfileBase::CreateProfile(folderName);
+
    // lame hack: use SetDefaults() so the page will read its data from the
    // profile section corresponding to our folder
-   ((wxFolderPropertiesPage *)m_notebook->GetPage(FolderCreatePage_Folder))
-      ->SetDefaults(m_newFolder->GetFullName());
+   GET_FOLDER_PAGE(m_notebook)->SetDefaults(folderName);
+   GET_COMPOSE_PAGE(m_notebook)->SetProfile(profile);
+
+   profile->DecRef();
 
    return wxFolderBaseDialog::TransferDataToWindow();
 }
@@ -551,7 +554,7 @@ bool wxFolderPropertiesDialog::TransferDataFromWindow()
 wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                                ProfileBase *profile,
                                                wxFolderCreateDialog *dlg)
-   : wxNotebookPageBase(notebook)
+                      : wxNotebookPageBase(notebook)
 {
    // add us to the notebook
    int image = notebook->GetPageCount();
@@ -869,6 +872,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    // 0th step: verify if the settings are self-consistent
 
+   // doesn't the folder by this name already exist?
+
    // folder flags
    int flags = 0;
 
@@ -1011,8 +1016,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 // should be in sync with the enum FolderCreatePage!
 const char *wxFolderCreateNotebook::s_aszImages[] =
 {
-   "compose",
    "access",
+   "compose",
    NULL
 };
 
@@ -1029,8 +1034,8 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
    ProfileBase *profile = ProfileBase::CreateProfile("");
 
    // create and add the pages
-   (void)new wxOptionsPageCompose(this, profile);
    (void)new wxFolderPropertiesPage(this, profile, dlg);
+   (void)new wxOptionsPageCompose(this, profile);
 
    profile->DecRef();
 }
