@@ -250,13 +250,13 @@
 //@{
 #ifdef   USE_PYTHON
 /** This macro takes three arguments: the callback function name to
-    look up in a profile, a profile pointer (can be NULL) and a
-    default return value.
+    look up in a profile, a default return value, and a profile
+    pointer (can be NULL). 
     It can only be called from within object member functions and the
     object needs to support the GetClasName() method to get the Python
     class name for the argument.
 */
-#   define   PY_CALLBACK(name,profile,default)        PythonCallback(name,this,this->GetClassName(),profile)
+#   define   PY_CALLBACK(name,default,profile)        PythonCallback(name,default,this,this->GetClassName(),profile)
 /** This macro takes multiple arguments.
     The last argument is the default return value.
     The first argument is a list of arguments in brackets, it must

@@ -25,6 +25,13 @@ class wxFolderListCtrl;
 class wxMFrame;
 class wxMessageView;
 
+
+enum wxFolderListCtrlFields
+{
+   WXFLC_STATUS = 0, WXFLC_DATE, WXFLC_SIZE, WXFLC_FROM,
+   WXFLC_SUBJECT, WXFLC_DUMMY, WXFLC_NUMENTRIES
+};
+
 /** a timer class for the FolderView */
 class wxFVTimer : public wxTimer
 {
@@ -117,6 +124,9 @@ public:
    void SetSize(const int x, const int y, const int width, int height);
    /// return the MWindow pointer:
    MWindow *GetWindow(void) { return m_SplitterWindow; }
+   /// return a profile pointer:
+   ProfileBase *GetProfile(void)
+      { return mailFolder ? mailFolder->GetProfile() : NULL; }
 private:
    /// is initialised?
    bool initialised;
@@ -144,6 +154,8 @@ private:
    wxSplitterWindow *m_SplitterWindow;
    /// the preview window
    wxMessageView *m_MessagePreview;
+   /// semaphore to avoid duplicate calling of Update
+   bool m_UpdateSemaphore;
 }; 
 
 class wxFolderViewFrame : public wxMFrame
@@ -179,15 +191,7 @@ protected:
 class wxFolderListCtrl : public wxListCtrl
 {
 public:
-   wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
-      :wxListCtrl(parent,-1,wxDefaultPosition,wxSize(500,300),wxLC_REPORT)
-
-      {
-         m_Parent = parent;
-         m_FolderView = fv;
-         m_Style = wxLC_REPORT;
-         Clear();
-      }
+   wxFolderListCtrl(wxWindow *parent, wxFolderView *fv);
    void Clear(void);
    void SetEntry(long index,String const &status, String const &sender, String
                  const &subject, String const &date, String const
@@ -200,6 +204,7 @@ public:
    bool IsSelected(long index)
       { return GetItemState(index,wxLIST_STATE_SELECTED); }
    void OnSelected(wxListEvent& event);
+   void OnSize( wxSizeEvent &event );
 
    DECLARE_EVENT_TABLE()
 
@@ -210,6 +215,12 @@ protected:
    wxWindow *m_Parent;
    /// the folder view
    wxFolderView *m_FolderView;
+   /// column numbers
+   int m_columns[WXFLC_NUMENTRIES];
+   /// column widths
+   int m_columnWidths[WXFLC_NUMENTRIES];
+   /// which entry is in column 0?
+   int m_firstColumn;
 };
 
 #endif

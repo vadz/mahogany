@@ -73,7 +73,7 @@ MailFolderCC::Open(String const & filename)
    
    okFlag = true;
    if(okFlag)
-      PY_CALLBACK(MCB_FOLDEROPEN, profile,0);
+      PY_CALLBACK(MCB_FOLDEROPEN, 0, profile);
    return true;   // success
 }
 
@@ -205,7 +205,7 @@ MailFolderCC::UpdateViews(void)
       i;
    for(i = viewList.begin(); i != viewList.end(); i++)
       (*i)->Update();
-   PY_CALLBACK(MCB_FOLDERUPDATE, profile,0);
+   PY_CALLBACK(MCB_FOLDERUPDATE, 0, profile);
 }
 
 const String &
@@ -255,14 +255,15 @@ MailFolderCC::DeleteMessage(unsigned long index)
 {
    String
       seq = strutil_ultoa(index);
-   if(PY_CALLBACKVA((MCB_FOLDERDELMSG, this, this->GetClassName(), profile, "l", (signed long) index),1)  )
+   if(PY_CALLBACKVA((MCB_FOLDERDELMSG, this, this->GetClassName(),
+                     1, profile, "l", (signed long) index),1)  )
       mail_setflag(mailstream, (char *)seq.c_str(), "\\Deleted");
 }
 
 void
 MailFolderCC::ExpungeMessages(void)
 {
-   if(PY_CALLBACK(MCB_FOLDEREXPUNGE,profile,1))
+   if(PY_CALLBACK(MCB_FOLDEREXPUNGE,1,profile))
       mail_expunge (mailstream);
 }
 

@@ -134,8 +134,6 @@ MAppBase::OnStartup()
 #     endif // Unix
 
       profile = GLOBAL_NEW Profile(strConfFile);
-
-      // FIXME @@@@ do something about recordDefaults
 #  else
       // FIXME @@@@ config file location?
       profile = GLOBAL_NEW Profile(M_APPLICATIONNAME);

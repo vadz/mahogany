@@ -60,7 +60,7 @@ SWIG_MakePtr(char *_c, const void *_ptr, char *type)
 #endif
 
 int
-PythonCallback(const char *name, void *obj, const char *classname,
+PythonCallback(const char *name, int def, void *obj, const char *classname,
                ProfileBase *profile, const char *argfmt,
                ...)
 {
@@ -89,7 +89,7 @@ PythonCallback(const char *name, void *obj, const char *classname,
       realname = mApplication.GetProfile()->readEntry(name,NULL);
 
    if(strutil_isempty(realname))
-      return 0;    // no callback called, default value 0
+      return def;    // no callback called, default value 0
 
    PyH_CallFunction(realname,
                     name,

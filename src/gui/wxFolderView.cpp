@@ -39,13 +39,48 @@
 #include "gui/wxMessageView.h"
 #include "gui/wxComposeView.h"
 
+#include   "gui/wxMIds.h"
+
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
-	EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
+   EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
+   EVT_SIZE              (wxFolderListCtrl::OnSize)
 END_EVENT_TABLE()
+
+
+
+#define   LCFIX ((wxFolderListCtrl *)this)->
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
    m_FolderView->PreviewMessage(event.m_itemIndex);
+}
+
+
+wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
+   :wxListCtrl(parent,-1,wxDefaultPosition,wxSize(500,300),wxLC_REPORT)
+{
+   ProfileBase *p = fv->GetProfile();
+      
+   m_Parent = parent;
+   m_FolderView = fv;
+   m_Style = wxLC_REPORT;
+
+   m_columns[WXFLC_STATUS] = READ_CONFIG(p,MP_FLC_STATUSCOL);
+   m_columnWidths[WXFLC_STATUS] = READ_CONFIG(p,MP_FLC_STATUSWIDTH);
+   m_columns[WXFLC_DATE] = READ_CONFIG(p,MP_FLC_DATECOL);
+   m_columnWidths[WXFLC_DATE] = READ_CONFIG(p,MP_FLC_DATEWIDTH);
+   m_columns[WXFLC_SUBJECT] = READ_CONFIG(p,MP_FLC_SUBJECTCOL);
+   m_columnWidths[WXFLC_SUBJECT] = READ_CONFIG(p,MP_FLC_SUBJECTWIDTH);
+   m_columns[WXFLC_SIZE] = READ_CONFIG(p,MP_FLC_SIZECOL);
+   m_columnWidths[WXFLC_SIZE] = READ_CONFIG(p,MP_FLC_SIZEWIDTH);
+   m_columns[WXFLC_FROM] = READ_CONFIG(p,MP_FLC_FROMCOL);
+   m_columnWidths[WXFLC_FROM] = READ_CONFIG(p,MP_FLC_FROMWIDTH);
+
+   for(int i = 0; i < WXFLC_NUMENTRIES; i++)
+      if(m_columns[i] == 0)
+         m_firstColumn = i;
+   
+   Clear();
 }
 
 int
@@ -53,25 +88,48 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
 {
    long item = -1;
 
-   while( (item = ((wxFolderListCtrl
-                    *)this)->GetNextItem(item,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED)) != -1) 
-      selections.Add(item);
+   for(item = 1; item <= LCFIX GetItemCount(); item++)
+      if(LCFIX GetItemState(item,wxLIST_STATE_SELECTED))
+         selections.Add(item);
    return selections.Count();
 }
+void
+wxFolderListCtrl::OnSize( wxSizeEvent &event )
+{
+   int x,y,i;
+   GetClientSize(&x,&y);
    
+   if (m_Style & wxLC_REPORT)
+      for(i = 0; i < WXFLC_NUMENTRIES; i++)
+         SetColumnWidth(m_columns[i],(m_columnWidths[i]*x)/100);
+}
+
 void
 wxFolderListCtrl::Clear(void)
 {
+   int x,y;
+   GetClientSize(&x,&y);
+   
    DeleteAllItems();
    for (int i = 0; i < 5; i++)
       DeleteColumn( i );
    if (m_Style & wxLC_REPORT)
    {
-      InsertColumn( 0, "Status",  wxLIST_FORMAT_LEFT, 50 );
-      InsertColumn( 1, "Sender",  wxLIST_FORMAT_LEFT, 150 );
-      InsertColumn( 2, "Date",    wxLIST_FORMAT_LEFT, 85 );
-      InsertColumn( 3, "Size",    wxLIST_FORMAT_LEFT, 50 );
-      InsertColumn( 4, "Subject", wxLIST_FORMAT_LEFT, 120 );
+      InsertColumn( m_columns[WXFLC_STATUS], _("Status"),
+                    wxLIST_FORMAT_LEFT,
+                    (m_columnWidths[WXFLC_STATUS]*x)/100 );
+      InsertColumn( m_columns[WXFLC_FROM], _("From"),
+                    wxLIST_FORMAT_LEFT,
+                    (m_columnWidths[WXFLC_FROM]*x)/100 );  
+      InsertColumn( m_columns[WXFLC_DATE], _("Date"),
+                    wxLIST_FORMAT_LEFT,
+                    (m_columnWidths[WXFLC_DATE]*x)/100 );  
+      InsertColumn( m_columns[WXFLC_SIZE], _("Size"),
+                    wxLIST_FORMAT_LEFT,
+                    (m_columnWidths[WXFLC_SIZE]*x)/100 );  
+      InsertColumn( m_columns[WXFLC_SUBJECT], _("Subject"),
+                    wxLIST_FORMAT_LEFT,
+                    (m_columnWidths[WXFLC_SUBJECT]*x)/100 );  
    };
 }
 
@@ -84,13 +142,17 @@ wxFolderListCtrl::SetEntry(long index,
                            String const &size)
 {
    if(index <= GetItemCount())
-      SetItem(index, 0, status);
+   {
+      DeleteItem(index);
+      InsertItem(index, status); // column 0, set to something
+   }
    else
       InsertItem(index, status); // column 0
-   SetItem(index, 1, sender);
-   SetItem(index, 2, date);
-   SetItem(index, 3, size);
-   SetItem(index, 4, subject);
+   SetItem(index, m_columns[WXFLC_STATUS], status);
+   SetItem(index, m_columns[WXFLC_FROM], sender);
+   SetItem(index, m_columns[WXFLC_DATE], date);
+   SetItem(index, m_columns[WXFLC_SIZE], size);
+   SetItem(index, m_columns[WXFLC_SUBJECT], subject);
 }
 
 
@@ -99,16 +161,14 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    wxCHECK_RET(iparent, "NULL parent frame in wxFolderView ctor");
    parent = iparent;
    m_NumOfMessages = 0; // At the beginning there was nothing.
+   m_UpdateSemaphore = false;
    
    mailFolder = MailFolderCC::OpenFolder(folderName);
    wxCHECK_RET(mailFolder, "can't open folder in wxFolderView ctor" );
-   
    initialised = mailFolder->IsInitialised();
    
    if(! initialised)
       return;
-   
-   listBoxEntries = NULL;
 
    int x,y;
    parent->GetClientSize(&x, &y);
@@ -123,6 +183,12 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    m_SplitterWindow->SetMinimumPaneSize(0);
    m_SplitterWindow->SetFocus();
    Update();
+   if(m_NumOfMessages > 0)
+   {
+      m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
+      PreviewMessage(0);
+   }
+
 }
 
 void
@@ -137,10 +203,15 @@ wxFolderView::Update(void)
    unsigned day, month, year;
    char  buffer[200];
    const char *format;
-   int n = mailFolder->CountMessages();
+   int n;
    String status, sender, subject, date, size;
    bool selected;
+
+   if(m_UpdateSemaphore == true)
+      return; // don't call this code recursively
+   m_UpdateSemaphore = true;
    
+   n = mailFolder->CountMessages();
    format = READ_APPCONFIG(MC_DATE_FMT);
 
    if(n < m_NumOfMessages)  // messages have been deleted, start over
@@ -167,6 +238,7 @@ wxFolderView::Update(void)
       m_FolderCtrl->Select(i,selected);
    }
    m_NumOfMessages = n;
+   m_UpdateSemaphore = false;
 }
 
 wxFolderView::~wxFolderView()

@@ -19,7 +19,7 @@
 // skip the following defines if embedded in M application
 #ifdef   M_BASEDIR
 #   ifdef   DEBUG
-#      define   WXLAYOUT_DEBUG
+//#      define   WXLAYOUT_DEBUG
 #   endif
 #else
     // for testing only:

@@ -76,6 +76,10 @@ Profile::Profile(const String& appConfigFile)
    isOk = fileConfig != NULL;
    if ( isOk )
       appConfig = fileConfig;
+   //  activate recording of configuration entries
+   if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
+      fileConfig->SetRecordDefaults(TRUE);
+
 }
 
 Profile::Profile(String const &iClassName, ProfileBase const *Parent)
@@ -139,7 +143,7 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
       appConfig->SET_PATH(tmp.c_str());
    }
 
-   if( strutil_isempty(rc) )
+   if( strutil_isempty(rc) && READ_APPCONFIG(MC_RECORDDEFAULTS) )
    {
       fileConfig->WRITE_ENTRY(szKey,szDefault); // so default value can be recorded
       rc = szDefault;

@@ -200,6 +200,33 @@
 #define   MP_HIGHLIGHT_URLS      "HighlightURL"
 /// open URLs with
 #define   MP_BROWSER         "Browser"
+/** @name for folder list ctrls: ratios of the width to use for
+    columns */
+//@{
+/// status
+#define   MP_FLC_STATUSWIDTH   "ColumnWidthStatus"
+/// subject
+#define   MP_FLC_SUBJECTWIDTH   "ColumnWidthSubject"
+/// from
+#define   MP_FLC_FROMWIDTH   "ColumnWidthFrom"
+/// date
+#define   MP_FLC_DATEWIDTH   "ColumnWidthDate"
+/// size
+#define   MP_FLC_SIZEWIDTH   "ColumnWidthSize"
+//@}
+/** @name for folder list ctrls: column numbers */
+//@{
+/// status
+#define   MP_FLC_STATUSCOL   "ColumnStatus"
+/// subject
+#define   MP_FLC_SUBJECTCOL   "ColumnSubject"
+/// from
+#define   MP_FLC_FROMCOL   "ColumnFrom"
+/// date
+#define   MP_FLC_DATECOL   "ColumnDate"
+/// size
+#define   MP_FLC_SIZECOL   "ColumnSize"
+//@}
 /// the wildcard for save dialog
 //@}
 //@}
@@ -207,7 +234,7 @@
 /** @name default values of configuration entries */
 //@{
 /// shall we record default values in configuration files
-#define   MC_RECORDDEFAULTS_D      1
+#define   MC_RECORDDEFAULTS_D      0
 /// default window position x
 #define   MC_XPOS_D        20L
 /// default window position y
@@ -353,6 +380,34 @@
 #define   MP_HIGHLIGHT_URLS_D      1
 /// open URLs with
 #define   MP_BROWSER_D         "Mnetscape"
+/** @name for folder list ctrls: ratios of the width to use for
+    columns */
+//@{
+/// status
+#define   MP_FLC_STATUSWIDTH_D 10  
+/// subject
+#define   MP_FLC_SUBJECTWIDTH_D  33
+/// from
+#define   MP_FLC_FROMWIDTH_D   20
+/// date
+#define   MP_FLC_DATEWIDTH_D   27
+/// size
+#define   MP_FLC_SIZEWIDTH_D   10
+//@}
+/** @name for folder list ctrls: column numbers */
+//@{
+/// status
+#define   MP_FLC_STATUSCOL_D  0
+/// subject
+#define   MP_FLC_SUBJECTCOL_D 1
+/// from
+#define   MP_FLC_FROMCOL_D   2
+/// date
+#define   MP_FLC_DATECOL_D   3
+/// size
+#define   MP_FLC_SIZECOL_D   4
+//@}
+
 /// the wildcard for save dialog
 #ifdef OS_UNIX
 #define   MP_DEFAULT_SAVE_WILDCARD_D   "*"

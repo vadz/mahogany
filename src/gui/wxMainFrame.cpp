@@ -32,7 +32,7 @@
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
-  EVT_SIZE    (wxMFrame::OnSize)
+//  EVT_SIZE    (wxMFrame::OnSize)
   EVT_MENU(-1,    wxMFrame::OnCommandEvent)
   EVT_TOOL(-1,    wxMFrame::OnCommandEvent)
 END_EVENT_TABLE()
@@ -87,12 +87,12 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
   //FIXME: insert treectrl here
    if(! strutil_isempty(foldername))
    {
-      m_FolderView = new wxFolderView(foldername,this);
-      m_splitter->SplitVertically(new wxPanel(this), //FIXME: insert treectrl
+      m_FolderView = new wxFolderView(foldername,m_splitter);
+      m_splitter->SplitVertically(new wxPanel(m_splitter), //FIXME: insert treectrl
                                   m_FolderView->GetWindow(),x/3);
    }
    else
-      m_splitter->Initialize(new wxPanel(this));  //FIXME: insert treectrl
+      m_splitter->Initialize(new wxPanel(m_splitter));  //FIXME: insert treectrl
 
    m_splitter->SetMinimumPaneSize(0);
    m_splitter->SetFocus();
@@ -104,6 +104,7 @@ wxMainFrame::OnMenuCommand(int id)
    wxMFrame::OnMenuCommand(id);
 }
 
+#if 0
 void
 wxMainFrame::OnSize( wxSizeEvent &event )
    
@@ -114,3 +115,4 @@ wxMainFrame::OnSize( wxSizeEvent &event )
 //   if(m_ToolBar)  m_ToolBar->SetSize( 1, 0, x-2, 30 );
    if(m_splitter) m_splitter->SetSize(0,0,x,y);
 };
+#endif

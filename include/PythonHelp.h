@@ -15,6 +15,7 @@
 /** Function to call a callback function.
     The callback will be called with its name and the object as first arguments.
     @param name name of the callback name in the profiles
+    @param def default value to return
     @param obj pointer to the object calling it
     @param class classname of the object
     @param profile (optional) profile to evaluate
@@ -22,16 +23,10 @@
     @return an integer value
 */
 int
-PythonCallback(const char *name, void *obj, const char *classname,
+PythonCallback(const char *name, int def, void *obj, const char *classname,
                ProfileBase *profile = NULL, const char *argfmt = NULL,
                ...);
 
-/** Function to create a Python object being a pointer to a C++
-    object, e.g. a StringPtr object from a String * in C++.
-    @param obj - Pointer to a C++ object
-    @param classname - Name of the class
-    @return the Python Object
-*/
 
 PyObject *PyH_makeObjectFromPointer(void *obj,const char *classname);
 

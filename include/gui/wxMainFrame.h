@@ -39,7 +39,7 @@ public:
    
    void OnMenuCommand(int id);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
-   void OnSize( wxSizeEvent &event );
+//   void OnSize( wxSizeEvent &event );
 
    DECLARE_EVENT_TABLE()
 private:
