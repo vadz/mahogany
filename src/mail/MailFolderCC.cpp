@@ -2488,7 +2488,7 @@ MailFolderCC::ProcessEventQueue(void)
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT(mf);
          // tell all interested that the folder status has changed:
-         MEventManager::Send( new MEventFolderStatusData (mf) );
+         if(mf) MEventManager::Send( new MEventFolderStatusData (mf) );
          break;
       }
       case Flags: // obsolete

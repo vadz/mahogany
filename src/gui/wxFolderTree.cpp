@@ -1235,9 +1235,11 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       // FIXME: Vadim: here you can call MailFolder::CountMessages() to 
       // count the recent messages, or CountNewMessages()
       // Maybe we should drop the distinction between recent and new??
+#if 0
       MEventFolderStatusData& event = (MEventFolderStatusData &)ev;
       wxLogError("wxFolderTree need implementation of FolderStatus event handling (%s)",
                  event.GetFolder()->GetName().c_str());
+#endif
    }
    return true;
 }

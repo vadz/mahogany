@@ -1197,6 +1197,6 @@ wxMApp::FatalError(const char *message)
    abort();
 #else
    DoExit();
-   exit(1);
+   OnFatalException();
 #endif
 }
