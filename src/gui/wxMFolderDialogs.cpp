@@ -209,7 +209,8 @@ protected:
    wxTextCtrl *m_server;
    /// newsgroup name
    wxTextCtrl *m_newsgroup;
-
+   /// mailbox name for IMAP
+   wxTextCtrl *m_mailboxname;
    // comment for the folder
    wxTextCtrl *m_comment;
 
@@ -294,6 +295,7 @@ wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
    m_parentFolder = NULL;
    m_newFolder = NULL;
    m_mayEnableOk = false;
+   m_mailboxname = NULL;
 }
 
 wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
@@ -597,6 +599,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_Password,
       Label_Path,
       Label_Server,
+      Label_Mailboxname,
       Label_Newsgroup,
       Label_Comment,
       Label_Max
@@ -608,6 +611,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       "Password: ",
       "File name: ",
       "Server: ",
+      "Mailbox: ",
       "Newsgroup: ",
       "Comment: "
    };
@@ -625,7 +629,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_password = CreateTextWithLabel(labels[Label_Password], widthMax, m_login,
                                     0, wxPASSWORD);
    m_server = CreateTextWithLabel(labels[Label_Server], widthMax, m_password);
-   m_newsgroup = CreateTextWithLabel(labels[Label_Newsgroup], widthMax, m_server);
+   m_mailboxname = CreateTextWithLabel(labels[Label_Mailboxname], widthMax, m_server);
+   m_newsgroup = CreateTextWithLabel(labels[Label_Newsgroup], widthMax, m_mailboxname);
    m_comment = CreateTextWithLabel(labels[Label_Comment], widthMax, m_newsgroup);
    m_path = CreateFileEntry(labels[Label_Path], widthMax, m_comment, &m_browsePath);
 
@@ -683,7 +688,8 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
             // set the newsgroup name as the default folder name
             dlg->SetFolderName(m_newsgroup->GetValue());
             break;
-
+      case MFolder::IMAP:
+         break;
          default:
             // nothing
             ;
@@ -712,7 +718,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
       m_login->SetValue("");
       m_password->SetValue("");
       m_server->SetValue("");
-
+      m_mailboxname->SetValue("");
       s_selection = selection;
    }
 
@@ -720,51 +726,53 @@ wxFolderPropertiesPage::UpdateUI(int sel)
 
    switch ( selection )
    {
-      case MailFolder::MF_POP:
-      case MailFolder::MF_IMAP:
-         m_login->Enable(TRUE);
-         m_password->Enable(TRUE);
-         m_server->Enable(TRUE);
-         m_newsgroup->Enable(FALSE);
+   case MailFolder::MF_IMAP:
+      m_mailboxname->Enable(TRUE); //only difference from POP
+   case MailFolder::MF_POP:
+      m_login->Enable(TRUE);
+      m_password->Enable(TRUE);
+      m_server->Enable(TRUE);
+      m_newsgroup->Enable(FALSE);
+      m_browsePath->Enable(FALSE);
+      break;
 
-         m_browsePath->Enable(FALSE);
-         break;
+   case MailFolder::MF_NNTP:
+      m_mailboxname->Enable(FALSE);
+      m_login->Enable(FALSE);
+      m_password->Enable(FALSE);
+      m_server->Enable(TRUE);
+      m_newsgroup->Enable(TRUE);
+      m_browsePath->Enable(FALSE);
+      break;
 
-      case MailFolder::MF_NNTP:
-         m_login->Enable(FALSE);
-         m_password->Enable(FALSE);
-         m_server->Enable(TRUE);
-         m_newsgroup->Enable(TRUE);
+   case MailFolder::MF_FILE:
+      m_mailboxname->Enable(FALSE);
+      m_login->Enable(FALSE);
+      m_password->Enable(FALSE);
+      m_server->Enable(FALSE);
+      m_newsgroup->Enable(FALSE);
 
-         m_browsePath->Enable(FALSE);
-         break;
+      // this can not be changed for an already existing folder
+      m_browsePath->Enable(TRUE & m_isCreating);
+      break;
 
-      case MailFolder::MF_FILE:
-         m_login->Enable(FALSE);
-         m_password->Enable(FALSE);
-         m_server->Enable(FALSE);
-         m_newsgroup->Enable(FALSE);
+   case MailFolder::MF_INBOX:
+      m_mailboxname->Enable(FALSE);
+      m_login->Enable(FALSE);
+      m_password->Enable(FALSE);
+      m_server->Enable(FALSE);
+      m_newsgroup->Enable(FALSE);
 
-         // this can not be changed for an already existing folder
-         m_browsePath->Enable(TRUE & m_isCreating);
-         break;
+      m_browsePath->Enable(FALSE);
+      if ( m_isCreating )
+      {
+         // INBOX folder can't be created by the user
+         enableOk = false;
+      }
+      break;
 
-      case MailFolder::MF_INBOX:
-         m_login->Enable(FALSE);
-         m_password->Enable(FALSE);
-         m_server->Enable(FALSE);
-         m_newsgroup->Enable(FALSE);
-
-         m_browsePath->Enable(FALSE);
-         if ( m_isCreating )
-         {
-            // INBOX folder can't be created by the user
-            enableOk = false;
-         }
-         break;
-
-      default:
-         wxFAIL_MSG("Unexpected folder type.");
+   default:
+      wxFAIL_MSG("Unexpected folder type.");
    }
 
    dlg->SetMayEnableOk(enableOk);
@@ -879,6 +887,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          m_profile->writeEntry(MP_POP_LOGIN,m_login->GetValue());
          m_profile->writeEntry(MP_POP_PASSWORD,m_password->GetValue());
          m_profile->writeEntry(MP_POP_HOST,m_server->GetValue());
+         m_profile->writeEntry(MP_FOLDER_PATH,m_mailboxname->GetValue());
          break;
 
       case MFolder::News:

@@ -273,7 +273,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
      Field_Message, -1},
    { gettext_noop("&Hostname"),                    Field_Text |
      Field_Vital,   -1,                        },
-   { gettext_noop("&Return address"),              Field_Text |
+   { gettext_noop("&Return/Reply address"),              Field_Text |
      Field_Vital,   -1,                        },
    { gettext_noop("SMTP (&mail) server"),          Field_Text |
      Field_Vital,   -1,                        },

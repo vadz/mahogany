@@ -130,6 +130,7 @@ $Id$
   - copying between address books and groups
   - BBDB: sort entries by surname
 
+  - easy: add support for email-to-fax gateway at www.tpc.int
 
 (Windows)
  - list ctrl resizing columns doesn't propagate the event to the app
