@@ -108,6 +108,10 @@ public:
                              MFolder *folder = NULL,
                              bool del = FALSE);
 
+   /** Delete messages
+    */
+   void DeleteOrTrashMessages(const UIdArray& messages);
+
    /** Returns false if no items are selected
    */
    bool HasSelection() const;

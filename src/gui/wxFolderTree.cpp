@@ -37,11 +37,13 @@
 #include "MDialogs.h"
 
 #include "MFolder.h"
+#include "Mdnd.h"
 #include "MFolderDialogs.h"
 
 #include <wx/imaglist.h>
 #include <wx/treectrl.h>
 #include <wx/tokenzr.h>
+#include <wx/dnd.h>
 
 #include "gui/wxFolderTree.h"
 #include "gui/wxIconManager.h"
@@ -161,8 +163,11 @@ class wxFolderTreeImpl : public wxPTreeCtrl, public MEventReceiver
 {
 public:
    // ctor
-   wxFolderTreeImpl(wxFolderTree *sink, wxWindow *parent, wxWindowID id,
-                const wxPoint& pos, const wxSize& size);
+   wxFolderTreeImpl(wxFolderTree *sink,
+                    wxWindow *parent,
+                    wxWindowID id,
+                    const wxPoint& pos,
+                    const wxSize& size);
    // and dtor
    ~wxFolderTreeImpl();
 
@@ -188,6 +193,9 @@ public:
 
    void OnTreeExpanding(wxTreeEvent&);
    void OnTreeSelect(wxTreeEvent&);
+
+   // called by TreeMessageDropTarget
+   void OnDrop(wxCoord x, wxCoord y, MMessagesDataObject *data);
 
    // event processing function
    virtual bool OnMEvent(MEventData& event);
@@ -351,6 +359,43 @@ private:
 #endif // wxGTK
 
    DECLARE_EVENT_TABLE()
+};
+
+// the drop target for the tree which allows it to react to messages dropping
+class TreeMessageDropTarget : public wxDropTarget
+{
+public:
+   TreeMessageDropTarget(wxFolderTreeImpl *tree)
+      : wxDropTarget(new MMessagesDataObject)
+      { m_tree = tree; }
+
+   virtual wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def)
+   {
+      GetFrame(m_tree)->SetStatusText(_("You can drop mail messages here."));
+      return OnDragOver(x, y, def);
+   }
+
+   virtual void OnLeave()
+   {
+      GetFrame(m_tree)->SetStatusText("");
+   }
+
+   virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def)
+   {
+      if ( !GetData() )
+      {
+         wxLogDebug("Failed to get drag and drop data");
+
+         return wxDragNone;
+      }
+
+      m_tree->OnDrop(x, y, (MMessagesDataObject *)GetDataObject());
+
+      return def;
+   }
+
+private:
+   wxFolderTreeImpl *m_tree;
 };
 
 // ----------------------------------------------------------------------------
@@ -713,6 +758,9 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    }
 
    SetImageList(imageList);
+
+   // create our drop target and associate it with us
+   SetDropTarget(new TreeMessageDropTarget(this));
 
    // create the root item
    MFolder *folderRoot = MFolder::Get("");
@@ -1413,6 +1461,24 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
    delete GetImageList();
 
    delete m_menu;
+}
+
+void wxFolderTreeImpl::OnDrop(wxCoord x, wxCoord y, MMessagesDataObject *data)
+{
+   wxTreeItemId item = HitTest(wxPoint(x, y));
+   if ( !item.IsOk() )
+   {
+      // no folder, nothing to do
+      return;
+   }
+
+   // get the folder for this item
+   wxFolderTreeNode *node = GetFolderTreeNode(item);
+   MFolder *folder = node->GetFolder();
+
+   // TODO: check here if the folder can be written to?
+
+   data->GetFolderView()->SaveMessagesToFolder(data->GetMessages(), folder);
 }
 
 // ----------------------------------------------------------------------------

@@ -36,8 +36,10 @@
 #include <wx/file.h>
 #include "wx/persctrl.h"
 #include <wx/menuitem.h>
+#include <wx/dnd.h>
 
 #include "MFolder.h"
+#include "Mdnd.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -91,7 +93,7 @@ public:
 
    void OnSelected(wxListEvent& event);
    void OnChar( wxKeyEvent &event);
-   void OnMouse(wxMouseEvent& event);
+   void OnRightClick(wxMouseEvent& event);
    void OnDoubleClick(wxMouseEvent & /* event */);
    void OnActivated(wxListEvent& event);
    void OnCommandEvent(wxCommandEvent& event)
@@ -103,15 +105,8 @@ public:
          m_SelectionCallbacks = enabledisable;
          return rc;
       }
-   // this is a workaround for focus handling under GTK but it should not be
-   // enabled under other platforms
-#ifndef OS_WIN
-   void OnMouseMove(wxMouseEvent &event)
-      {
-         if(m_FolderView->GetFocusFollowMode() && (FindFocus() != this))
-            SetFocus();
-      }
-#endif // wxGTK
+   void OnMouseMove(wxMouseEvent &event);
+
    /// goto next unread message
    void SelectNextUnread(void);
 
@@ -171,13 +166,10 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
    EVT_CHAR              (wxFolderListCtrl::OnChar)
    EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnActivated)
-   EVT_RIGHT_DOWN( wxFolderListCtrl::OnMouse)
+   EVT_RIGHT_DOWN( wxFolderListCtrl::OnRightClick)
    EVT_MENU(-1, wxFolderListCtrl::OnCommandEvent)
    EVT_LEFT_DCLICK(wxFolderListCtrl::OnDoubleClick)
-#ifndef OS_WIN
    EVT_MOTION (wxFolderListCtrl::OnMouseMove)
-#endif // wxGTK
-
 END_EVENT_TABLE()
 
 void wxFolderListCtrl::OnChar(wxKeyEvent& event)
@@ -250,8 +242,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       switch(keycodes_en[idx])
       {
       case 'D':
-         m_FolderView->GetTicketList()->Add(
-            m_FolderView->GetFolder()->DeleteOrTrashMessages(&selections, m_FolderView));
+         m_FolderView->DeleteOrTrashMessages(selections);
          break;
       case 'U':
          m_FolderView->GetTicketList()->Add(
@@ -314,12 +305,54 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    event.Skip();
 }
 
-void wxFolderListCtrl::OnMouse(wxMouseEvent& event)
+void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
 {
-   // why doesn't this work?   wxASSERT(event.m_rightDown);
-   // VZ: because of GDK weirdness (it should work now though, I changed
-   //     wxGTK, but I don't think we should reenable assert)
+   // this is a workaround for focus handling under GTK but it should not be
+   // enabled under other platforms
+#ifndef OS_WIN
+   if(m_FolderView->GetFocusFollowMode() && (FindFocus() != this))
+      SetFocus();
+#endif // wxGTK
 
+   // start the drag and drop operation
+   if ( event.Dragging() )
+   {
+      UIdArray selections;
+      if ( GetSelections(selections) > 0 )
+      {
+         MMessagesDataObject dropData(m_FolderView, selections);
+         wxDropSource dropSource(dropData, this);
+
+         switch ( dropSource.DoDragDrop(TRUE /* allow move */) )
+         {
+            default:
+            case wxDragError:
+               wxLogDebug("An error occured during drag and drop operation");
+               break;
+
+            case wxDragNone:
+            case wxDragCancel:
+               wxLogDebug("Drag and drop aborted by user.");
+               break;
+
+            case wxDragMove:
+               // we have to delete the messages as they were moved
+               m_FolderView->DeleteOrTrashMessages(selections);
+
+               // fall through
+
+            case wxDragCopy:
+               // skip the event.Skip() below
+               return;
+         }
+      }
+   }
+
+   event.Skip();
+}
+
+void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
+{
    // make sure that the popup menu entries are in sync with the ones in the
    // top-level menu
    wxFrame *frame = GetFrame(this);
@@ -1167,7 +1200,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_MSG_DELETE:
       GetSelections(selections);
-      m_TicketList->Add(m_ASMailFolder->DeleteOrTrashMessages(&selections));
+      DeleteOrTrashMessages(selections);
       break;
    case WXMENU_MSG_NEXT_UNREAD:
       m_FolderCtrl->SelectNextUnread();
@@ -1324,6 +1357,12 @@ wxFolderView::PrintPreviewMessages(const UIdArray& selections)
    }
 }
 
+void
+wxFolderView::DeleteOrTrashMessages(const UIdArray& messages)
+{
+   Ticket t = m_ASMailFolder->DeleteOrTrashMessages(&messages, this);
+   m_TicketList->Add(t);
+}
 
 void
 wxFolderView::SaveMessagesToFolder(const UIdArray& selections,

@@ -1,6 +1,8 @@
 (next release) on (date of next release)
+23.04.00 VZ: added drag and drop of messages to the folder tree
 23.04.00 VZ: added "Quick move" submenu to folder popup menu
 18.04.00 VZ: dynamic plug-in (modules) loading works under Windows
+
      0.50        March 27, 2000
 24.03.00 VZ: startup tips
              creating MH folders from subfolders dialogs works
