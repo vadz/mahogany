@@ -197,7 +197,7 @@ public:
    void OnButton(wxCommandEvent& event);
    void OnProgramTextUpdate(wxCommandEvent& event);
 
-   void OnText(wxCommandEvent& event) { UpdateProgram(event); }
+   void OnText(wxCommandEvent& event);
    void OnChoice(wxCommandEvent& event) { UpdateProgram(event); }
    void OnCheckBox(wxCommandEvent& event) { UpdateProgram(event); }
 
@@ -797,10 +797,14 @@ void wxOneFilterDialog::UpdateProgram(wxCommandEvent& event)
    if ( !m_initializing )
    {
       MFilterDesc filterData;
-      if ( DoTransferDataFromWindow(&filterData) && (filterData != *m_FilterData) )
+      if ( DoTransferDataFromWindow(&filterData) &&
+               (filterData != *m_FilterData) )
       {
          *m_FilterData = filterData;
          MFDialogSettings *settings = m_FilterData->GetSettings();
+
+         CHECK_RET( settings,
+                    "can't update program for a non-simple filter rule!" );
 
          m_initializing = true;
          m_textProgram->SetValue(settings->WriteRule());
@@ -855,9 +859,24 @@ wxOneFilterDialog::OnProgramTextUpdate(wxCommandEvent& event)
 }
 
 void
+wxOneFilterDialog::OnText(wxCommandEvent& event)
+{
+   if ( event.GetEventObject() == m_NameCtrl )
+   {
+      // avoid updating the program unnecessarily if only the filter name was
+      // changed
+      event.Skip();
+
+      return;
+   }
+
+   UpdateProgram(event);
+}
+
+void
 wxOneFilterDialog::OnButton(wxCommandEvent &event)
 {
-   if(event.GetEventObject() == m_ButtonLess)
+   if ( event.GetEventObject() == m_ButtonLess )
    {
       RemoveOneControl();
 
@@ -867,7 +886,7 @@ wxOneFilterDialog::OnButton(wxCommandEvent &event)
       // UpdateProgram() calls Skip() on the event, undo it
       event.Skip(FALSE);
    }
-   else if(event.GetEventObject() == m_ButtonMore)
+   else if ( event.GetEventObject() == m_ButtonMore )
    {
       AddOneControl();
    }
