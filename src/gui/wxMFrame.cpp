@@ -839,21 +839,19 @@ wxMFrame::OnMenuCommand(int id)
          }
          break;
 
-         // edit the current identity parameters
+         // edit an identity's parameters
       case WXMENU_FILE_IDENT_EDIT:
          {
-            wxString ident = READ_APPCONFIG(MP_CURRENT_IDENTITY);
-            if ( !ident )
+            String ident;
+            wxArrayString identities = Profile::GetAllIdentities();
+            if ( identities.IsEmpty() )
             {
-               // if there is no current identity, choose any among the
-               // existing ones
-               wxArrayString identities = Profile::GetAllIdentities();
-               if ( identities.IsEmpty() )
-               {
-                  wxLogError(_("There are no existing identities to edit.\n"
-                               "Please create an identity first."));
-               }
-               else
+               wxLogError(_("There are no existing identities to edit.\n"
+                            "Please create an identity first."));
+            }
+            else
+            {
+               if ( identities.GetCount() > 1 )             
                {
                   int rc = MDialog_GetSelection
                            (
@@ -862,14 +860,24 @@ wxMFrame::OnMenuCommand(int id)
                             identities,
                             this
                            );
+
                   if ( rc != -1 )
+                  {
                      ident = identities[(size_t)rc];
-                  //else: cancelled
+                  }
+                  //else: dialog was cancelled
+               }
+               else // only one identity
+               {
+                  // use the current one
+                  ident = READ_APPCONFIG_TEXT(MP_CURRENT_IDENTITY);
                }
             }
 
-            if ( !!ident )
+            if ( !ident.empty() )
+            {
                ShowIdentityDialog(ident, this);
+            }
          }
          break;
 
