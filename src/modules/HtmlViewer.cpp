@@ -34,10 +34,21 @@
 #include "MessageView.h"
 #include "MessageViewer.h"
 
+#include <wx/fontmap.h>
 #include <wx/fs_mem.h>
 #include <wx/wxhtml.h>
 
 class HtmlViewerWindow;
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// return RRGGBB HTML colour spec
+static wxString Col2Html(const wxColour& col);
+
+// filter out special HTML characters from the text
+static wxString MakeHtmlSafe(const wxString& text);
 
 // ----------------------------------------------------------------------------
 // HtmlViewer: a wxTextCtrl-based MessageViewer implementation
@@ -108,9 +119,6 @@ private:
    // add "attr=#colour" attribute to m_htmlText if col is valid
    void AddColourAttr(const wxChar *attr, const wxColour& col);
 
-   // add "<font>" tag if necessary, return true if it was added
-   bool AddFontTag(const wxColour& col);
-
    // create a new image in memory, returns its name
    wxString CreateImageInMemoryFS(const wxImage& image);
 
@@ -143,6 +151,89 @@ private:
    bool m_hasGlobalFont;
 
    DECLARE_MESSAGE_VIEWER()
+};
+
+// ----------------------------------------------------------------------------
+// a collection of small classes which add something to the given string in
+// its ctor and something else in its dtor, this is useful for HTML tags as
+// you can't forget to close them like this
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// AttributeChanger: base class for all changers
+// ----------------------------------------------------------------------------
+
+class AttributeChanger
+{
+public:
+   AttributeChanger(String& str) : m_str(str) { m_doChange = false; }
+
+   void DoChange(const String& start, const String& end)
+   {
+      m_doChange = true;
+
+      m_str += start;
+      m_end = end;
+   }
+
+   ~AttributeChanger() { if ( m_doChange ) m_str += m_end; }
+
+private:
+   String& m_str;
+
+   String m_end;
+
+   bool m_doChange;
+};
+
+// ----------------------------------------------------------------------------
+// EncodingChanger
+// ----------------------------------------------------------------------------
+
+class EncodingChanger : public AttributeChanger
+{
+public:
+   EncodingChanger(wxFontEncoding enc, String& str)
+      : AttributeChanger(str)
+   {
+      if ( enc != wxFONTENCODING_SYSTEM )
+      {
+         // FIXME: this is a really strange way to change the encoding but
+         //        it is the only one which works with wxHTML - so be it
+         //        [for now]
+         DoChange(GetMetaString(wxFontMapper::GetEncodingName(enc)),
+                  GetMetaString("iso-8859-1"));
+      }
+   }
+
+private:
+   static String GetMetaString(const String& charset)
+   {
+      String s;
+      s << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset="
+        << charset << "\">";
+      return s;
+   }
+};
+
+// ----------------------------------------------------------------------------
+// FontColourChanger
+// ----------------------------------------------------------------------------
+
+class FontColourChanger : public AttributeChanger
+{
+public:
+   FontColourChanger(const wxColour& col, String& str)
+      : AttributeChanger(str)
+   {
+      if ( col.Ok() )
+      {
+         String start;
+         start << "<font color=\"#" << Col2Html(col) << "\">";
+
+         DoChange(start, "</font>");
+      }
+   }
 };
 
 // ----------------------------------------------------------------------------
@@ -188,16 +279,6 @@ private:
 
    wxCoord m_y;
 };
-
-// ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-// return RRGGBB HTML colour spec
-static wxString Col2Html(const wxColour& col);
-
-// filter out special HTML characters from the text
-static wxString MakeHtmlSafe(const wxString& text);
 
 // ============================================================================
 // HtmlViewerWindow implementation
@@ -377,18 +458,6 @@ static wxString MakeHtmlSafe(const wxString& text)
    return textSafe;
 }
 
-bool HtmlViewer::AddFontTag(const wxColour& col)
-{
-   if ( !col.Ok() || col == GetOptions().FgCol )
-      return false;
-
-   m_htmlText += "<font";
-   AddColourAttr("color", col);
-   m_htmlText += '>';
-
-   return true;
-}
-
 void HtmlViewer::AddColourAttr(const wxChar *attr, const wxColour& col)
 {
    if ( col.Ok() )
@@ -484,26 +553,24 @@ void HtmlViewer::ShowHeader(const String& headerName,
                  "<td align=\"right\" width=120>"
                  ;
 
-   bool hasFont = AddFontTag(profileValues.HeaderNameCol);
+   {
+      FontColourChanger colChanger(profileValues.HeaderNameCol, m_htmlText);
 
-   m_htmlText << "<tt>" << headerName << ":&nbsp;</tt>";
-
-   if ( hasFont )
-      m_htmlText += "</font>";
+      m_htmlText << "<tt>" << headerName << ":&nbsp;</tt>";
+   }
 
    // second row: header values
    m_htmlText += "</td><td>";
 
-   hasFont = AddFontTag(profileValues.HeaderValueCol);
+   {
+      FontColourChanger colChanger(profileValues.HeaderValueCol, m_htmlText);
 
-   m_htmlText += MakeHtmlSafe(headerValue);
+      EncodingChanger encChanger(encHeader, m_htmlText);
 
-   if ( hasFont )
-      m_htmlText += "</font>";
+      m_htmlText += MakeHtmlSafe(headerValue);
+   }
 
    m_htmlText += "</td></tr>";
-
-   // TODO: handle encHeader!!
 }
 
 void HtmlViewer::ShowXFace(const wxBitmap& bitmap)
@@ -587,14 +654,13 @@ void HtmlViewer::InsertRawContents(const String& data)
 
 void HtmlViewer::InsertText(const String& text, const TextStyle& style)
 {
-   // TODO: encoding support!!
+   EncodingChanger encChanger(style.HasFont() ? style.GetFont().GetEncoding()
+                                              : wxFONTENCODING_SYSTEM,
+                              m_htmlText);
 
-   bool hasFont = AddFontTag(style.GetTextColour());
+   FontColourChanger colChanger(style.GetTextColour(), m_htmlText);
 
    m_htmlText += MakeHtmlSafe(text);
-
-   if ( hasFont )
-      m_htmlText += "</font>";
 }
 
 void HtmlViewer::InsertURL(const String& url)
