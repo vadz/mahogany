@@ -3,23 +3,36 @@ TODO list for M
 $Id$
 
 *********************************************************************
-*** Suspicious, to be tested:
+*** Plans for the next release:
 *********************************************************************
 
- - on Alpha: no XFace inserted, trying to convert ~/.xface to ~/.xface.xpm although already an Xpm
- - mAppBase::OnExit() gets called twice
+** These are the main topics planned for the next release:
+
+- Messages sorting, threading, scoring and searching
+- completion of filtering rules/scoring code
+- subscription management for NNTP/IMAP/newsspool
+- DND with KDE/Gnome filemanagers (now supported by wxGTK)
+- Finish the new message editor code: selections, cut&paste,
+  richt-text editing
+- Templates/style-sheets for message composition and flexible reply
+  handling 
+- Windows version release (End of May?)
+
+** Possibly that one or the release after that:
+ 
+- multi-threading to avoid delays and timeouts
+- GPG/PGP support?
+- built-in HTML viewer
 
 *********************************************************************
-*** not fixed yet:
+*** Currently being worked on.:
+***   (This section is a bit of a mess as it is our day to day
+***    noticeboard where we list whatever comes to our mind.)
 *********************************************************************
 
 wxGTK bug:
-
- - listctrl can have no focused element, i.e. the assert in
-   wxFolderView.cpp:85 can be triggered
-
  - wxTreeCtrl::HitTest() doesn't work well with non standard icon sizes
- - printing to printer broken, preview/print to file work
+ - strange WM hints on fvwm95/alpha
 
 wxMSW bugs:
  - memory leaks (some from cclient, others - not sure)
@@ -43,36 +56,12 @@ VZ:
   but insists on
   Key = Value
 
-- upgrade.cpp causes three problems that I hope you can understand:
-  - p2->DeleteGroup("Folders") triggers an assert deep inside the
-    wxFileConfig/wxDynArray code. The group "Folders" exists, the path
-    is set to M/Profiles before deleting it, so it's apparently a
-    wxFileConfig bug. (line 165 in upgrade.cpp)
-
-  - the code with GetFirstGroup()/GetNextGroup() does not find all
-    groups under "Folders". The Profile functions change the path
-    before calling wxConfig::GetXXXGroup() but, obviously, always to the
-    same path, not causing any change.
-    This seems to be a bug in wxFileConfig, or at least, some
-    undocumented behaviour.
-    I worked around it in CopyEntries(), building a list of all groups
-    first and then traversing them afterwards. Not important for M anymore.
-
 - Initially selected folder is not highlighted in treectrl.
 
-- help button and more fields for folder creation dialog
-
-- MailFolder now reads the "RetrievalLimit" config value and will not
-  retrieve more messages than that from server. Need support for it and
-  for anonymouse flag in folder creation/properties dialogs.
-
-- the listctrl seems to have a problem with nntp folder names like
-  {xxxx/yyy}newsgroup
-  After accessing them, the next program start produces an error
-  because there is more than one entry for their column sizes in the
-  config file.
-  I am now using static ProfileBase::FilterProfileName() to avoid that.
-  Not ideal, though.
+- help button for first folder create page nees a help id
+  KB: couldn't even find out where you create the button :-(
+- when user level is >=1 (advanced) show full preferences pages in
+  folder notbook
 
 - If any top level window is open (messageview/composeview), the
   application will not exit. Happened after you changed the exit
@@ -80,118 +69,29 @@ VZ:
     VZ: can't reproduce this
 
 - closing splashscreen calls wxApp::ExitMainLoop() which is wrong!
-    VZ: can't reproduce this
+  VZ: can't reproduce this
+  KB: only if no other window is open
 
 ******* Priorities for KB: ******************************
 
-DONE:
-- Modify MailFolder interface to take UIDs instead of listing indices
-  everywhere. This is important for "Views" to be implemented.
-  --> add test for validy of uid
-- ISO8859 encoded message headers!
-
-- the selection in wxFoldreview should store uids directly, currently
-  the wxMessageview of a standalone viewer passes its msgno to some
-  functions but msgnos might have changed in the meantime.
-- Things like CopyMessagesToFolder need a return code indicating
-  whether they were successful or not, otherwise MoveMessagesToFolder
-  deletes them in any case. Trivial to add.
- --> Clicking ABORT doesn't return false!
-- MessageCC::Addresses() returns empty name for Morten Poulson  WHY?
-- add news posting
-- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
-  SendMessageCC::AddPart()
-  done-->  // check whether enc8bit is needed or not
-- support for local news spool
-- gtk 1.2 support seems to work
-- add -ljpeg to linker options and JPG as intermediary image format
-- have a global "NewMail" folder setting and ensure its existence
-- MessageCC::GetBody() can return with body/envelope == NULL if
-  message no longer exists. Just got a crash in Refresh().
-  Add a CHECK() wherever it is called.
-- do wxImage changes affect list of available handlers, etc?
-- suppress mm_log() checkpoint completed messages
-- add URL highlight colour
-- are mail contens exported/imported in wrong order in reply?
-  attachments appear before text.
-
-- MailFolderCC: keep m_MailStream around after error and mark dead
-  stream otherwise, OR, really completely reopen the folder.
-  Like it is now, MessageCC might access it.
-- add support for POLLINCOMINGDELAY in preferences
-  and threshold for progress dialog
-- remove dialog box in MailFolderCC::Ping about reopening folder!!!
-- filter messages in mm_log/mm_notify
-- make mailfolders collectable:
-  - have a "collect" flag
----> done, after merging of profile code, add support for building
-     list of these folders and periodically checking them.
-     TEST!!!!
-- When mm_log reports a "Unexpected change", do a Ping(), trying to
-  reopen the stream.
-- update the list of folders to poll for new mail when the folder
-  properties are changed, tricky.
-  --> Just add MAppBase::AddIncomingFolder()/RemoveIncomingFolder()
-      and keep a list of the folder names and MailFolder pointers.
-      Regularly check the incoming folders for validity, i.e. Ping() them.
-- locale not found
-
-
-CHECK:
-- MailFolderCC:
-   -if mailfolder has been closed due to timeout, reopen it.
- - SendMessageCC: allow re-sending of aborted send, i.e. Send() called
-                  more than once
-- message status etc in title bar
-- afm path in config
-- NewMail folder INCOMING flag reset
-- INBOX by default INCOMING
-
-TODO:
-- printer settings seem to have no effect : are persistent, do they get used?
-  -- no printout appears!
-  -- afm path should be stored
-   -- broken in wxGTK!!
-- MFolder.i
-- new mail dialog for "New Mail" folder!!!
-- MailCollector: implement Add/Remove calls
-
-for release:
-
--- disable main frame updates if main frame folder is incoming folder, 
-   while collecting mail
-
-- CHECK mailcollector for nntp: do mails get marked as read?
-  ++ if necessary, reopen folder??
-  ++ make delay configurable on a per-folder basis, compare elapsed
-     time to their PING interval.
-
-- do we really need to scan /var/lib/news/active?
-- more configurability for news
 
 doc: add note about news active file
 
-
-after release:
-
 - more configurability for news
-- add auto collection to compose view
+- do we really need to scan /var/lib/news/active?
+- add address auto collection to compose view
 - add a popup dialog to edit message headers in composeview
 - some html mail import/filtering of tags (easy, quick and dirty)
-- copying message to non-existing folder gives error message but works
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message. (REALLY REQUIRED?)
   Is already like this, but fetch_overview() does an extra fetch, even
   in mtest.
-STRANGE....
-
+  STRANGE....
 - Problem: mail uids and nums are long, WXARRAYINT.Count() is int,
   content is int.
-
 - MFolderDialog: TransferFromWindow return false ignored when asked
   for password
 = wxLayout:
-  - merge my colour changes into wxGTK/devel version
   - fix horiz scrollbar size
   - update rectangle (needs support in wxllist and wxWindows)
   - fix(simplify) cursor size calculation
@@ -209,118 +109,55 @@ STRANGE....
     x- fix initial scrollbar sizes --> seems ok, what exactly is wrong?
     L- delete in empty line doesn't work
 
-- add progress indicator to image loading
-    (and the one of SentFolder) in VerifySettings()
 - do not redraw messageview if the message is the one currently being
   shown (DONE, better:)
   -- option to keep wxLayoutList around for reuse?
 
-- show status dialog while importing graphics into messageview
 - when inserting filetype of unknown MIME type, prompt for it
-
-- implement Compose/Reply templates
-
-- merge font settings in wxComposeView/wxMessageView to share code
-
 - speed up copy mail to folder by cusing c-client functionality
-  wxComposeView: if replying, only mark message as answered if reply
+- wxComposeView: if replying, only mark message as answered if reply
   got sent --> difficult
-
-
-- add a message/delivery-status icon (like message, but with a red 'S' ?)
-
-- IMAP progress updates don't appear because there is too much to be
-  done in wxYield()?
-
-- occasionally parts of xface header show up in following mail header
-  lines (content type/parameters)
-
-
 - possibly have a MIME types editor (similar to netscape's?)
 - if time permits: vcard-import
+- use mm_critical() and delay application exit if necessary
+- add "double click to open" profile option support to folder list ctrl
 
-- support for local news spool
-
-- Let Iconmanager chose handler by format! JPEG crashes program if fed
-  the wrong filetype! Handler can return extension, caller should do
-  the same.
-- make message view use the new font settings.
 **************** end of KB priorities :-) *********************
 
 - change of settings in the msg view section of the options dlg should generate
   an event which would propagete to all open msg views.
 - make [Apply] work too!
 
-- add some more folder properties to config dialog, i.e. be able to
-  switch off automatic notification of incoming emails.
-- cannot select only message in a folder or first message without
-  chosing a different one first
-
-- make message view use the new font settings.
-- improve header support
-- add support for faxing mails via tpc.int
-- folderview listctrl has extra Subject column behind Size field ???
 - when inserting filetype of unknown MIME type, prompt for it,
   possibly have a MIME types editor (similar to netscape's?)
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
-- add "double click to open" profile option support to folder list ctrl
-- allow angle brackets and full name <> in reply-to field.
+
 - folder set message flag update hook takes too long for really large folders
    ==> code commented out in MailFolderCC.cpp
 
- - merge many Re: into one, optionally Re[n]:
- - easy to implement but useful features:
- - "check for new mail now"
+ - easy to implement but useful feature: "check for new mail now"
 
-- use mm_critical() and delay application exit if necessary
 - delete temporary files (esp. from image conversion!)
   - easy: add support for email-to-fax gateway at www.tpc.int and
     their coverpage
-
- - Memory leaks whenever using wxMessageView (there are some from
-  cclient) still there?
-
- - handle "truncated mailfolder" more gracefully (i.e. close and re-open folder)
-   VZ: when 2 mail clients are running simultaneously and the message is deleted
-       from the spool M crashes with meaningless backtrace.
-       Didn't happen to me but c-client produced an error message and deactivated
-       the mail stream.
 
  - document scripts in extra/scripts
 
  - somehow allow different configs for different hosts, maybe a
    [M/HOSTNAME/Profiles] section overriding [M/Profiles]?
 
- - Add a way to query news and imap server for a list of
-   folders/groups, subscribed folders/groups and to subscribe to them
-     --> mainly a GUI issue
-
  - toggle readonly status of mailboxes?
 
- - OptionsPanels:
-   -add a help button which calls a help id depending on which page we're on
-   - confirm exit button does have no effect and should be Yes No Ask
-     Radiobox anyway
-
  - GUI problems:
-  - configuration panels way too large!
-  - log window occasionally doesn't layout menu correctly (here too, no
-    idea) wxGTK bug
-
-  - replace the ugly "Insert File" icon with one looking more like the
-    other icons
   - folder tree control should (configurable on a per-folder basis)
     highlight and count the number of new messages
   - add "Inline" option for MIME popup on graphics
-  - The "Specify global M directory" dialog doesn't save its value.
   - typing keys while M starts up can cause segfault (startup-splash
     event handling?)
 
 
 - ADB:
-  - ADB lookups take to long, delay in switching between messages, add a
-    "message/collect address" menu and keyboard binding
   + make AdbEdit auto-generate a formatted name from first/family-name
     and prefix/title.
   + for names without entries, use the same method for name generation
@@ -330,22 +167,14 @@ STRANGE....
     elsewhere for now...), add an event for this
   - can't open autocollect.adb in AdbEditor if already opened (can't reproduce
     any more)
-  - ADB: does not use substring??? (Joen_Doe no expansion for
-    "doe" or "Doe")
-  - closing adb editor while entries are selected somewhere (at least
-    in bbdb) causes error messages when opened the next time because
-    it cannot select the entry again
-  - copying between address books and groups
-  - BBDB: sort entries by surname
   - add ADB support for $HOME/.mailrc
     ( lines: "alias john_doe  john@doe.com, second@xxx.uuu, ...")
-
+  - fix remaining BBDB/ADB problems (low priority)
 
 *********************************************************************
 *** things to fix/implement next ***
 *********************************************************************
 
-- drag and drop of messages between folders
 - configuration dialog for columns in folderview
   + VZ: will do
 - alternative treecontrol instead of listctrl for folderview
@@ -356,8 +185,7 @@ STRANGE....
 - wxFolderCreateNotebook should be split into base class and 2 derivations:
   wxFolderCreateNotebook and wxFolderPropNotebook
 
-- put number of total/unread/new msgs in the status bar for the selected
-  folder in wxMainFrame, also draw the folders with the new mail in bold
+- drag and drop of messages between folders
 - Are wxConfig/Profile GetNextGroup()/GetFirstGroup()  thread-safe??
   I started marking possible problems for multi-threaded code with
   //FIXME:MT
@@ -373,45 +201,13 @@ STRANGE....
   does, mark "To: ..." in "From:" column for them) and optionally suppress them
   completely.
 
-- configurable ReplyString
-
-
-- integrate new IMAP c-client library CAREFUL: rfc822.c has changed, old patch no longer
-  valid:
-   This is the new code for rfc822_extraheader_lines:
-
-	void rfc822_extraheader_lines (char **header,ENVELOPE *env)
-	{
-	   char **names = rfc822_extraheader_names;
-	   char **values = rfc822_extraheader_values;
-	   while(names && *names)
-	   {
-	      if (values) sprintf ((*header += strlen (*header)),"%s%s: %s\015\012",
-				 env->remail ? "ReSent-" : "",
-				 *(names++),
-				 *(values++)
-				 );
-	   }
-	}
-
-
-- KEYBOARD BINDINGS AND TAB TRAVERSAL (!!IMPORTANT!!)
-
 - add !(command) expansion to wxConfig, i.e.
   VAR=!(hostname):me would execute "hostname" and return "hydra.medieval.de:me"
 
-- reply/forward buttons for messageview/folderview
 - only quote the selected text in reply/forward if there is any selection
   (as in XFMail) - very handy
-- update FolderView if mailbox has shrunk  (which callback gets called?)
-
-- look into wxListCtrl reset after dialog box popup
-
-- rearrange some preferences pages, distinguish between compose options
-  and compose window layout (BCC label etc)
 
 - Add the real folder create panel to the folder create notebook
-
 - DND with gmc (dead easy, see dnd example :-) )
 
 
@@ -439,18 +235,14 @@ STRANGE....
   + merge in wxPython
 
 - find a way to run stripwxhelpids from Manual automatically
-- merge text parts into one, send non-MIME mail
-
 
 *** to implement in near future ***
-
-- fix non-ASCII characters in header lines (important!)
 
 - event subsystem
   + write some macros for safe casting of the event param in the handlers to
     the correct type
   + separate "folder tree change" event in "pre" and "post" kind
-  + may be introduce return values?
+  + maybe introduce return values?
 
 - news reader functions
   + get the list of newsgroup and allow to choose from them
@@ -463,8 +255,6 @@ STRANGE....
     only once)
   + "killfile" features and a special "quick kill" (TM) feature which would kill
     all articles of the author of the selected one
-
-- wxFolderView assumes that msg numbers are 1...n - change this to use uids instead.
 
 - Use configure to check for utilities, like help browser. "ReConfigure" menu.
 
@@ -506,37 +296,11 @@ STRANGE....
 
 ********************* targets for re-write **********************
 
-MailFolder::OpenFolder() are so confusing (login for NNTP is the newsgroup!!)
-that even you apparently forget what is what - let's call the newsgroup
-parameter "newsgroup" even if we will have unused parameters for each call...
-
-Clean up MailFolder/Message classes as part of header/class rewrite
-for modularisation. Share common code in
-MessageCC/MailFolderCC/SendMessageCC and somehow integrate SendMessage
-classes in the hierarchy.
-
-- !!! non-blocking message retrieval !!!
-
-********************* known wxWindows bugs **********************
-
-- font mess (wxGTK)
-- constraints
-  - Ian Galbraith complained about being unable to enter anything into
-    the compose view (all wxTextCtrls in wxFrames instead of dialogs under
-    OpenLook WM)  --> wxGTK bug, ignore it!
-
-- wxMemoryDC and Blit() cannot handle non-(0,0) viewports
+- start multi-threading on separate branch
 
 *********************************************************************
 *** Fixed, to be tested:
 *********************************************************************
- - wxLayout:
-   + clicking before begin of line (wrongly) gives assert
-
- - wxComboBox textctrl allows editing!
-   + VZ: I think RR fixed it
-
- - .mailcap should override /etc/mailcap, not other way round
 
 *********************************************************************
 *** Fixed and tested:
@@ -718,5 +482,73 @@ Add choice of intermediary image format:
   However, using ClearAll() instead of DeleteXXX() now to simplify
   things a bit.
 
+- Modify MailFolder interface to take UIDs instead of listing indices
+  everywhere. This is important for "Views" to be implemented.
+  --> add test for validy of uid
+- ISO8859 encoded message headers!
+
+- the selection in wxFoldreview should store uids directly, currently
+  the wxMessageview of a standalone viewer passes its msgno to some
+  functions but msgnos might have changed in the meantime.
+- Things like CopyMessagesToFolder need a return code indicating
+  whether they were successful or not, otherwise MoveMessagesToFolder
+  deletes them in any case. Trivial to add.
+ --> Clicking ABORT doesn't return false!
+- MessageCC::Addresses() returns empty name for Morten Poulson  WHY?
+- add news posting
+- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
+  SendMessageCC::AddPart()
+  done-->  // check whether enc8bit is needed or not
+- support for local news spool
+- gtk 1.2 support seems to work
+- add -ljpeg to linker options and JPG as intermediary image format
+- have a global "NewMail" folder setting and ensure its existence
+- MessageCC::GetBody() can return with body/envelope == NULL if
+  message no longer exists. Just got a crash in Refresh().
+  Add a CHECK() wherever it is called.
+- do wxImage changes affect list of available handlers, etc?
+- suppress mm_log() checkpoint completed messages
+- add URL highlight colour
+- are mail contens exported/imported in wrong order in reply?
+  attachments appear before text.
+
+- MailFolderCC: keep m_MailStream around after error and mark dead
+  stream otherwise, OR, really completely reopen the folder.
+  Like it is now, MessageCC might access it.
+- add support for POLLINCOMINGDELAY in preferences
+  and threshold for progress dialog
+- remove dialog box in MailFolderCC::Ping about reopening folder!!!
+- filter messages in mm_log/mm_notify
+- make mailfolders collectable:
+  - have a "collect" flag
+---> done, after merging of profile code, add support for building
+     list of these folders and periodically checking them.
+     TEST!!!!
+- When mm_log reports a "Unexpected change", do a Ping(), trying to
+  reopen the stream.
+- update the list of folders to poll for new mail when the folder
+  properties are changed, tricky.
+  --> Just add MAppBase::AddIncomingFolder()/RemoveIncomingFolder()
+      and keep a list of the folder names and MailFolder pointers.
+      Regularly check the incoming folders for validity, i.e. Ping() them.
+- locale not found
+- MailFolderCC:
+   -if mailfolder has been closed due to timeout, reopen it.
+ - SendMessageCC: allow re-sending of aborted send, i.e. Send() called
+                  more than once
+- message status etc in title bar
+- afm path in config
+- NewMail folder INCOMING flag reset
+- INBOX by default INCOMING
+- printer settings seem to have no effect : are persistent, do they get used?
+  -- no printout appears!
+  -- afm path should be stored
+   -- broken in wxGTK!!
+- MFolder.i
+- new mail dialog for "New Mail" folder!!!
+- MailCollector: implement Add/Remove calls
+- CHECK mailcollector for nntp: do mails get marked as read?
+  ++ if necessary, reopen folder??
+- copying message to non-existing folder gives error message but works
 
  vi: set si tw=80:
