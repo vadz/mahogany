@@ -2595,6 +2595,11 @@ MessageView::SetFolder(ASMailFolder *asmf)
       // on the contrary, revert to the default ones if we don't have any
       // folder any more
       SetViewer(NULL, GetWindow()->GetParent());
+
+      // make sure the viewer will be recreated the next time we are called
+      // with a valid folder - if we didn't do it, the UpdateProfileValues()
+      // wouldn't do anything if the same folder was reopened, for example
+      m_ProfileValues.msgViewer.clear();
    }
 
    ResetUserEncoding();
