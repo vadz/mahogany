@@ -56,6 +56,7 @@
 #include <wx/log.h>
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
+#include <wx/sizer.h>
 
 #ifdef USE_DIALUP
    #include <wx/dialup.h>     // for IsAlwaysOnline()
@@ -216,7 +217,7 @@ enum MVersion
 
 #ifdef USE_WIZARD
 
-#ifndef OS_WIN
+#if 0 // ndef OS_WIN
 #   define USE_HELPERS_PAGE
 #endif // OS_WIN
 
@@ -236,7 +237,7 @@ enum InstallWizardPageId
 
 //   InstallWizard_MiscPage,             // other common options
 #ifdef USE_HELPERS_PAGE
-//   InstallWizard_HelpersPage,          // external programs set up
+   InstallWizard_HelpersPage,          // external programs set up
 #endif // USE_HELPERS_PAGE
 
    InstallWizard_FinalPage,            // say that everything is ok
@@ -364,9 +365,9 @@ public:
 
    void OnWizardCancel(wxWizardEvent& event);
 
-protected:
    wxWizardPage *GetPageById(InstallWizardPageId id) const;
 
+protected:
    // creates an "enhanced panel" for placing controls into under the static
    // text (explanation)
    wxEnhancedPanel *CreateEnhancedPanel(wxStaticText *text);
@@ -444,33 +445,12 @@ class InstallWizardDialUpPage : public InstallWizardPage
 public:
    InstallWizardDialUpPage(wxWizard *wizard);
 
-   virtual bool TransferDataFromWindow()
-   {
-#if defined(OS_WIN)
-      gs_installWizardData.connection = m_connections->GetValue();
-#elif defined(OS_UNIX)
-      gs_installWizardData.dialCommand = m_connect->GetValue();
-      gs_installWizardData.hangupCommand = m_disconnect->GetValue();
-#endif // platform
-
-      return true;
-   }
-
-   virtual bool TransferDataToWindow()
-   {
-#if defined(OS_WIN)
-      if ( !gs_installWizardData.connection.empty() )
-         m_connections->SetValue(gs_installWizardData.connection);
-#elif defined(OS_UNIX)
-      m_connect->SetValue(gs_installWizardData.dialCommand);
-      m_disconnect->SetValue(gs_installWizardData.hangupCommand);
-#endif // platform
-
-      return true;
-   }
+   virtual bool TransferDataFromWindow();
+   virtual bool TransferDataToWindow();
 
 private:
 #if defined(OS_WIN)
+   bool m_firstShow;
    wxComboBox *m_connections;
 #elif defined(OS_UNIX)
    wxTextCtrl *m_connect,
@@ -612,7 +592,11 @@ private:
 // ----------------------------------------------------------------------------
 
 // the function which runs the install wizard
-extern bool RunInstallWizard();
+extern bool RunInstallWizard(
+#ifdef DEBUG
+                             bool justTest = false
+#endif // DEBUG
+                            );
 
 #endif // USE_WIZARD
 
@@ -720,7 +704,7 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
 
 //         CREATE_PAGE(Misc);
 #ifdef USE_HELPERS_PAGE
-//         CREATE_PAGE(Helpers);
+         CREATE_PAGE(Helpers);
 #endif // USE_HELPERS_PAGE
 
          CREATE_PAGE(Final);
@@ -739,13 +723,35 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
 
 wxEnhancedPanel *InstallWizardPage::CreateEnhancedPanel(wxStaticText *text)
 {
+#if !wxCHECK_VERSION(2,5,0)
    wxSize sizeLabel = text->GetSize();
    wxSize sizePage = ((wxWizard *)GetParent())->GetPageSize();
 //   wxSize sizePage = ((wxWizard *)GetParent())->GetSize();
    wxCoord y = sizeLabel.y + 2*LAYOUT_Y_MARGIN;
+#endif
 
    wxEnhancedPanel *panel = new wxEnhancedPanel(this, true /* scrolling */);
+#if !wxCHECK_VERSION(2,5,0)
    panel->SetSize(0, y, sizePage.x, sizePage.y - y);
+#endif
+
+#if wxCHECK_VERSION(2,5,0)
+   wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
+   SetSizer(pageSizer);
+
+   pageSizer->Add(
+      text,
+      0, // No vertical stretching
+      wxALL, // Border all around, no horizontal stretching
+      5 // Border width
+   );
+
+   pageSizer->Add(
+      panel,
+      1, // Vertical stretching
+      wxEXPAND // No border, horizontal stretching
+   );
+#endif
 
    panel->SetAutoLayout(true);
 
@@ -762,7 +768,7 @@ END_EVENT_TABLE()
 InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
                         : InstallWizardPage(wizard, InstallWizard_WelcomePage)
 {
-   (void)new wxStaticText(this, -1, _(
+   wxStaticText *introduction = new wxStaticText(this, -1, _(
       "Welcome to Mahogany!\n"
       "\n"
       "This wizard will help you to setup the most\n"
@@ -789,11 +795,30 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
                   _("I'm an &expert and don't need the wizard")
                 );
 
+#if !wxCHECK_VERSION(2,5,0)
    wxSize sizeBox = m_checkbox->GetSize(),
           sizePage = wizard->GetPageSize();
 
    // adjust the vertical position
    m_checkbox->Move(5, sizePage.y - 2*sizeBox.y);
+#else
+   wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
+   pageSizer->Add(
+      introduction,
+      0, // No vertical stretching
+      wxALL, // Border all around, no horizontal stretching
+      5 // Border width
+   );
+   pageSizer->Add(
+      m_checkbox,
+      0, // No vertical stretching
+      wxALL, // Border all around
+      5 // Border width
+   );
+
+   SetSizer(pageSizer);
+   pageSizer->Fit(this);
+#endif
 }
 
 InstallWizardPageId InstallWizardWelcomePage::GetNextPageId() const
@@ -852,7 +877,12 @@ InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
    panel->CreateButton(_("&Import..."), NULL);
+
+#if !wxCHECK_VERSION(2,5,0)
    panel->Layout();
+#else
+   GetSizer()->Fit(this);
+#endif
 }
 
 void InstallWizardImportPage::OnImportButton(wxCommandEvent& event)
@@ -894,7 +924,11 @@ InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
    m_login = panel->CreateTextWithLabel(labels[2], widthMax, m_organization);
    m_email = panel->CreateTextWithLabel(labels[3], widthMax, m_login);
 
+#if !wxCHECK_VERSION(2,5,0)
    panel->Layout();
+#else
+   GetSizer()->Fit(this);
+#endif
 }
 
 bool InstallWizardIdentityPage::TransferDataToWindow()
@@ -988,7 +1022,11 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
    m_smtp = panel->CreateTextWithLabel(labels[3], widthMax, m_leaveOnServer);
    m_nntp = panel->CreateTextWithLabel(labels[4], widthMax, m_smtp);
 
+#if !wxCHECK_VERSION(2,5,0)
    panel->Layout();
+#else
+   GetSizer()->Fit(this);
+#endif
 }
 
 bool InstallWizardServersPage::TransferDataToWindow()
@@ -1143,35 +1181,13 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    wxArrayString labels;
 
 #if defined(OS_WIN)
-   // get all existing RAS connections
-   wxDialUpManager *dial = wxDialUpManager::Create();
-
-   wxArrayString connections;
-   size_t nCount;
-   if ( !dial )
-   {
-      FAIL_MSG( _T("GetDialUpManager() returned NULL?") );
-      nCount = 0;
-   }
-   else
-   {
-      nCount = dial->GetISPNames(connections);
-
-      delete dial;
-   }
-
-   // concatenate all connection names into one ':' separated string
-   wxString comboChoices = _("&Dial up connection to use");
-   labels.Add(comboChoices);
-   for ( size_t n = 0; n < nCount; n++ )
-   {
-      comboChoices << ':' << connections[n];
-   }
-
    // do create controls now
    long widthMax = GetMaxLabelWidth(labels, panel);
 
-   m_connections = panel->CreateComboBox(comboChoices, widthMax, NULL);
+   m_connections = panel->CreateComboBox(_("&Dial up connection to use"),
+      widthMax, NULL);
+
+   m_firstShow = true;
 #elif defined(OS_UNIX)
    labels.Add(_("Command to &connect:"));
    labels.Add(_("Command to &disconnect:"));
@@ -1182,7 +1198,63 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    m_disconnect = panel->CreateTextWithLabel(labels[1], widthMax, m_connect);
 #endif // platform
 
+#if !wxCHECK_VERSION(2,5,0)
    panel->Layout();
+#else
+   GetSizer()->Fit(this);
+#endif
+}
+
+bool InstallWizardDialUpPage::TransferDataFromWindow()
+{
+#if defined(OS_WIN)
+   gs_installWizardData.connection = m_connections->GetValue();
+#elif defined(OS_UNIX)
+   gs_installWizardData.dialCommand = m_connect->GetValue();
+   gs_installWizardData.hangupCommand = m_disconnect->GetValue();
+#endif // platform
+
+   return true;
+}
+
+bool InstallWizardDialUpPage::TransferDataToWindow()
+{
+#if defined(OS_WIN)
+   if(m_firstShow)
+   {
+      m_firstShow = false;
+
+      // get all existing RAS connections
+      wxDialUpManager *dial = wxDialUpManager::Create();
+
+      wxArrayString connections;
+      size_t nCount;
+      if ( !dial )
+      {
+         FAIL_MSG( _T("GetDialUpManager() returned NULL?") );
+         nCount = 0;
+      }
+      else
+      {
+         nCount = dial->GetISPNames(connections);
+
+         delete dial;
+      }
+
+      for ( size_t n = 0; n < nCount; n++ )
+      {
+         m_connections->Append(connections[n]);
+      }
+   }
+
+   if ( !gs_installWizardData.connection.empty() )
+      m_connections->SetValue(gs_installWizardData.connection);
+#elif defined(OS_UNIX)
+   m_connect->SetValue(gs_installWizardData.dialCommand);
+   m_disconnect->SetValue(gs_installWizardData.hangupCommand);
+#endif // platform
+
+   return true;
 }
 
 #endif // USE_DIALUP
@@ -1329,7 +1401,11 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
                                                widthMax, text6);
 #endif // USE_PYTHON
 
+#if !wxCHECK_VERSION(2,5,0)
    panel->Layout();
+#else
+   GetSizer()->Fit(this);
+#endif
 }
 
 #ifdef USE_HELPERS_PAGE
@@ -1406,7 +1482,11 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
       m_checkboxSendTestMsg = NULL;
    }
 
+#if !wxCHECK_VERSION(2,5,0)
    panel->Layout();
+#else
+   GetSizer()->Fit(this);
+#endif
 }
 
 bool InstallWizardFinalPage::TransferDataToWindow()
@@ -1476,7 +1556,11 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
 
 static void SetupServers(void);
 
-bool RunInstallWizard()
+bool RunInstallWizard(
+#ifdef DEBUG
+                      bool justTest
+#endif // DEBUG
+                     )
 {
    // as we use a static array, make sure that only one install wizard is
    // running at any time (a sensible requirment anyhow)
@@ -1530,18 +1614,30 @@ bool RunInstallWizard()
    gs_installWizardData.done = true;
 
    wxIconManager *iconManager = mApplication->GetIconManager();
-   wxWizard *wizard = wxWizardBase::Create
+   wxWizard *wizard = new wxWizard
                       (
                         NULL,                         // parent
                         -1,                           // id
                         _("Mahogany Installation"),   // title
                         iconManager->GetBitmap("install_welcome") // def image
+#if wxCHECK_VERSION(2,5,0)
+                        ,
+                        wxDefaultPosition,
+                        wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
+#endif
                       );
 
    // NULL the pages array
    memset(gs_wizardPages, 0, sizeof(gs_wizardPages));
 
-   gs_wizardPages[InstallWizard_WelcomePage] = new InstallWizardWelcomePage(wizard);
+   InstallWizardWelcomePage *welcomePage
+      = new InstallWizardWelcomePage(wizard);
+
+   gs_wizardPages[InstallWizard_WelcomePage] = welcomePage;
+
+#if wxCHECK_VERSION(2,5,0)
+   wizard->GetPageAreaSizer()->Add(welcomePage);
+#endif
 
    // the wizard may be either cancelled or a checkbox may be used to skip it
    // entirely (besides, this is confusing - the checkbox is probably useless,
@@ -1556,6 +1652,11 @@ bool RunInstallWizard()
    wizard->Destroy();
 
    gs_isWizardRunning = false;
+
+#ifdef DEBUG
+   if ( justTest )
+      return true;
+#endif // DEBUG
 
    // make sure we have some _basic_ things set up whether the wizard ran or
    // not (basic here meaning that the program will not operate properly
@@ -1604,11 +1705,16 @@ bool RunInstallWizard()
       profile->writeEntry(MP_SHOWTIPS, 0l);
    }
 
-   // transfer the wizard settings from InstallWizardData
-   profile->writeEntry(MP_FROM_ADDRESS, gs_installWizardData.email);
-   profile->writeEntry(MP_PERSONALNAME, gs_installWizardData.name);
-   profile->writeEntry(MP_ORGANIZATION, gs_installWizardData.organization);
-   profile->writeEntry(MP_USERNAME, gs_installWizardData.login);
+   // Don't reset defaults when running wizard second time and stopping it
+   // No effect on users, but it's awfully annoying when testing
+   if(gs_wizardPages[InstallWizard_IdentityPage])
+   {
+      // transfer the wizard settings from InstallWizardData
+      profile->writeEntry(MP_FROM_ADDRESS, gs_installWizardData.email);
+      profile->writeEntry(MP_PERSONALNAME, gs_installWizardData.name);
+      profile->writeEntry(MP_ORGANIZATION, gs_installWizardData.organization);
+      profile->writeEntry(MP_USERNAME, gs_installWizardData.login);
+   }
 
    // write the values even if they're empty as otherwise we'd try to create
    // folders with default names - instead of not creating them at all
