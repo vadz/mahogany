@@ -17,7 +17,7 @@ If you use a PalmOS handheld computer with Mahogany, you can combine this with f
 If you use Mahogany in a non-English environment and it is not yet translated to your language, or the translations are incomplete, get in touch with us and we can update the translations. As we don't do them ourselves, we have to rely on others to tell us about this and actually translate it for us.
 If you click the right mouse button (or shift-click on an Apple Mac) over a mailbox in the tree, you can access a popup menu with many useful options and settings.
 To define filters for incoming messages, you need to first define filter rules via the Edit/Filter Rules menu and then associate them with the corresponding mail folders (e.g. the "New Mail" folder) via the Folder/Filters menu.
-You can import messages and settings from a few other E-Mail programs such as Eudora, Pine or XFMail.
+You can import messages and settings from a few other E-Mail programs such as Netscape, Eudora, Pine or XFMail.
 You can configure an external editor (such as vim or emacs) to be used for message composition and also configure Mahogany to automatically launch it - go to the "Helpers" page of the preferences dialog to do it.
 You may use Ctrl-Up or Ctrl-Down in the folder tree to quickly go to the next or previous folder with unread messages.
 If you are concerned about security, you shouldn't let Mahogany store the passwords - but it is probably still ok to let it remember them for the current session.
