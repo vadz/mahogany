@@ -1,4 +1,4 @@
-rdnl Process this file with autoconf to produce a configure script.
+dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(configure.in)
 AC_REVISION([$Id$])
@@ -254,6 +254,22 @@ AC_DEFUN([M_OPER_NAMES],
 		m_cv_cxx_disableopernames="none supported"
 	esac])])
 
+dnl really a subroutine to avoid nesting source lines too deeply
+AC_DEFUN([M_GCC_BUGGY_NO_OPERATOR_NAMES],
+[AC_CACHE_CHECK(if disabling the logical operator names works,
+	m_cv_gcc_buggy_fno_operator_names,
+	[case "$GCC" in
+	yes)	echo '#define TEST 1
+#if defined(TEST)
+#undef TEST
+#endif' >conftest.cc
+		case "`${CXX-g++} -c -fno-operator-names conftest.cc 2>&1`" in
+		'')	m_cv_gcc_buggy_fno_operator_names="no" ;;
+		*)  m_cv_gcc_buggy_fno_operator_names="yes" ;;
+		esac
+		rm -f conftest* ;;
+	esac])])
+
 dnl if the compiler treats "or" and "not" as keywords, we must to get a
 dnl workaround for compiling the c-client header files
 case "$m_cv_cxx_opernames" in yes)
@@ -282,7 +298,26 @@ case "$m_cv_cxx_opernames" in yes)
 	disabling them, please go to http://mahogany.sourceforge.net/bugz
 	and submit a bug against the Build component telling us which
 	flag will work.]) ;;
-		*)	CXXFLAGS="$CXXFLAGS $m_cv_cxx_disableopernames"
+		*) M_GCC_BUGGY_NO_OPERATOR_NAMES
+			case "$m_cv_gcc_buggy_fno_operator_names" in
+			yes)
+			if test -f /etc/redhat-release && ! grep "7\.0" /etc/redhat-release
+			then workarroundmsg="
+	It seems you are using Red Hat Linux 7.0. A workaround for your
+	problem is to use egcs to compile wxWindows and Mahogany:
+		- at your bash prompt type:
+			export CC=egcs
+			export CXX=egcs++
+		- reconfigure and rebuild wxWindows and Mahogany
+		(don't forget to remove the config.cache files
+		located in the source code directories of
+		wxWindows and Mahogany before reconfiguring them."
+			else workarroundmsg=""
+			fi
+			AC_MSG_ERROR([Sorry, it seems that you have a buggy gcc version which is
+	not able to compile Mahogany (gcc-2.96-69 shipped by Red Hat with Red
+	Hat Linux 7.0 is one of them). Please upgrade it.$workaroundmsg]) ;;
+			esac ;;
 		esac ;;
 	esac
 esac
