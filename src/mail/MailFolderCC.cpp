@@ -1171,38 +1171,39 @@ MailFolderCC::Open(void)
 {
    STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
 
+   FolderType folderType = GetType();
 
-   /** Now, we apply the very latest c-client timeout values, in case
-       they have changed.
-   */
+   // Now, we apply the very latest c-client timeout values, in case they have
+   // changed.
    UpdateTimeoutValues();
 
-   if( FolderTypeHasUserName(GetType()) )
+   if( FolderTypeHasUserName(folderType) )
+   {
       SetLoginData(m_Login, m_Password);
+   }
 
    // for files, check whether mailbox is locked, c-client library is
    // to dumb to handle this properly
-   if ( GetType() == MF_FILE
+   if ( folderType == MF_FILE
 #ifdef OS_UNIX
-         || GetType() == MF_INBOX
+         || folderType == MF_INBOX
 #endif
       )
       {
          String lockfile;
-         if(GetType() == MF_FILE)
+         if(folderType == MF_FILE)
             lockfile = m_ImapSpec;
 #ifdef OS_UNIX
          else // INBOX
          {
             // get INBOX path name
-            {
-               MCclientLocker lock;
-               lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
-               if(lockfile.IsEmpty()) // another c-client stupidity
-                  lockfile = (char *) sysinbox();
-            }
-         }
+            MCclientLocker lock;
+            lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
+            if(lockfile.IsEmpty()) // another c-client stupidity
+               lockfile = (char *) sysinbox();
+      }
 #endif // OS_UNIX
+
       lockfile << ".lock*"; //FIXME: is this fine for MS-Win? (NO!)
       lockfile = wxFindFirstFile(lockfile, wxFILE);
       while ( !lockfile.IsEmpty() )
@@ -1237,67 +1238,66 @@ MailFolderCC::Open(void)
          lockfile = wxFindNextFile();
       }
    }
+   //else: not a file based folder, no locking problems
 
    {
       MCclientLocker lock;
 
-      // create the mailbox if it doesn't exist yet
-      bool exists = TRUE;
-      bool alreadyTriedToCreate = FALSE;
-      if ( GetType() == MF_FILE )
-      {
-         exists = wxFileExists(m_ImapSpec);
-      }
-      else if ( GetType() == MF_MH )
-      {
-         // construct the filename from MH folder name
-         String path;
-         path << InitializeMH()
-              << m_ImapSpec.c_str() + 4; // 4 == strlen("#mh/")
-         exists = wxFileExists(path);
-      }
-      else
-      {
-         // for all other types we assume that it doesn't exist, as
-         // IMAP servers allow us to open a non-existing mailbox but
-         // not to write to it, so we force a creation attempt
-         CCErrorDisabler noErrors;
-         mail_create(NIL, (char *)m_ImapSpec.c_str());
-         alreadyTriedToCreate = TRUE;
-      }
-
       // Make sure that all events to unknown folder go to us
       CCDefaultFolder def(this);
 
-      // if the file folder doesn't exist, we should create it first
-      if ( !exists
-           && (GetType() == MF_FILE || GetType() == MF_MH))
+      // create the mailbox if it doesn't exist yet
+      bool alreadyTriedToCreate = FALSE;
+      if ( folderType == MF_FILE || folderType == MF_MH )
       {
-         // This little hack makes it root (uid 0) safe and allows us
-         // to choose the file format, too:
-         String tmp;
-         if(GetType() == MF_FILE)
+         bool exists;
+         if ( folderType == MF_FILE )
          {
-            long format = READ_CONFIG(m_Profile, MP_FOLDER_FILE_DRIVER);
-            if ( format < 0  || (size_t)format > CCLIENT_MAX_DRIVER )
+            exists = wxFileExists(m_ImapSpec);
+         }
+         else if ( folderType == MF_MH )
+         {
+            // construct the filename from MH folder name
+            String path;
+            path << InitializeMH()
+                 << m_ImapSpec.c_str() + 4; // 4 == strlen("#mh/")
+            exists = wxFileExists(path);
+         }
+
+         // if the file folder doesn't exist, we should create it first
+         if ( !exists )
+         {
+            // This little hack makes it root (uid 0) safe and allows us
+            // to choose the file format, too:
+            String tmp;
+            if(folderType == MF_FILE)
             {
-               FAIL_MSG( "invalid mailbox format" );
-               format = 0;
+               long format = READ_CONFIG(m_Profile, MP_FOLDER_FILE_DRIVER);
+               if ( format < 0  || (size_t)format > CCLIENT_MAX_DRIVER )
+               {
+                  FAIL_MSG( "invalid mailbox format" );
+                  format = 0;
+               }
+
+               tmp = "#driver.";
+               tmp << cclient_drivers[format] << '/';
+                  STATUSMESSAGE((_("Trying to create folder '%s' in %s format."),
+                              GetName().c_str(),
+                              cclient_drivers[format]
+                     ));
+            }
+            else // MF_MH folder
+            {
+               // forgot to handle this one...
+               ASSERT_MSG( folderType == MF_MH, "unexpected folder type" );
+
+               tmp = "#driver.mh/";
             }
 
-            tmp = "#driver.";
-            tmp << cclient_drivers[format] << '/';
-               STATUSMESSAGE((_("Trying to create folder '%s' in %s format."),
-                           GetName().c_str(),
-                           cclient_drivers[format]
-                  ));
+            tmp += m_ImapSpec;
+            mail_create(NIL, (char *)tmp.c_str());
+            alreadyTriedToCreate = TRUE;
          }
-         else
-            tmp = "#driver.mh/";
-         tmp += m_ImapSpec;
-         mail_create(NIL, (char *)tmp.c_str());
-         //mail_create(NIL, (char *)m_ImapSpec.c_str());
-         alreadyTriedToCreate = TRUE;
       }
 
       // first try, don't log errors (except in debug mode)
@@ -1309,44 +1309,71 @@ MailFolderCC::Open(void)
                                   mm_show_debug ? OP_DEBUG : NIL);
       }
 
-      // try to create it if hadn't tried yet
-      if ( !m_MailStream && !alreadyTriedToCreate )
+      // try to create it if opening failed and we hadn't tried to create yet
+      // (note that if the mailbox doesn't exist, the mail stream will still
+      // be non NULL, but the folder will be only half opened)
+      if ( (!m_MailStream || m_MailStream->halfopen) && !alreadyTriedToCreate )
       {
          mail_create(NIL, (char *)m_ImapSpec.c_str());
-         m_MailStream = mail_open(m_MailStream,(char *)m_ImapSpec.c_str(),
+
+         // do we need this: if ( m_MailStream ) mail_close(m_MailStream) ?
+
+         // retry again, showing the errors this time
+         m_MailStream = mail_open(m_MailStream, (char *)m_ImapSpec.c_str(),
                                   mm_show_debug ? OP_DEBUG : NIL);
       }
    }
 
-   if ( m_MailStream == NIL )
-   {
-      STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
-      return false;
-   }
-
-   AddToMap(m_MailStream); // now we are known
-
-   // listing already built
-
-   // for some folders (notably the IMAP ones), mail_open() will return a
+   // for some folders (notably the IMAP ones), mail_open() will return a not
    // NULL pointer but set halfopen flag if it couldn't be SELECTed - as we
    // really want to open it here and not halfopen, this is an error for us
-   ASSERT(m_MailStream);
-   if ( m_MailStream->halfopen )
+   if ( m_MailStream && m_MailStream->halfopen )
    {
-      MFolder_obj(m_Profile)->AddFlags(MF_FLAGS_NOSELECT);
+      // unfortunately, at least the IMAP folder will have halfopen flag
+      // set even in some situations when the folder can't be opened at all -
+      // for example, if the INBOX is locked by another session (yes, this
+      // goes against the IMAP RFC, but some servers just break the connection
+      // if the mailbox is locked by another session...), so we need to try to
+      // half open it now to know if this is just a folder with NOSELECT flag
+      // or if we really can't open it
 
-      mApplication->SetLastError(M_ERROR_HALFOPENED_ONLY);
+      // redirect all notifications to us again
+      CCDefaultFolder def(this);
+      MAILSTREAM *msHalfOpened = mail_open
+                                 (
+                                  NIL,
+                                  (char *)m_ImapSpec.c_str(),
+                                  (mm_show_debug ? OP_DEBUG : 0) | OP_HALFOPEN
+                                 );
+      if ( msHalfOpened )
+      {
+         mail_close(msHalfOpened);
 
-      RemoveFromMap();
+         MFolder_obj(m_Profile)->AddFlags(MF_FLAGS_NOSELECT);
+
+         mApplication->SetLastError(M_ERROR_HALFOPENED_ONLY);
+      }
+      //else: it can't be opened at all
+
+      mail_close(m_MailStream);
+      m_MailStream = NIL;
+   }
+
+   // so did we eventually succeed in opening it or not?
+   if ( m_MailStream == NIL )
+   {
+      STATUSMESSAGE((_("Could not open mailbox '%s'."), GetName().c_str()));
       return false;
    }
-   else // folder really opened
-   {
-      STATUSMESSAGE((_("Mailbox %s opened."), GetName().c_str()));
-      PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
-      return true;   // success
-   }
+
+   // folder really opened!
+
+   // now we are known
+   AddToMap(m_MailStream);
+
+   STATUSMESSAGE((_("Mailbox %s opened."), GetName().c_str()));
+   PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
+   return true;   // success
 }
 
 bool
@@ -1999,7 +2026,12 @@ bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
    status->Init();
 
    HeaderInfoList_obj hil = GetHeaders();
-   CHECK( hil, false, "no listing in CountInterestingMessages" );
+   if ( !hil )
+   {
+      // this is not a (programming) error - maybe we just failed to open the
+      // folder - so don't assert here
+      return false;
+   }
 
    status->total = m_nMessages;
    for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )

@@ -51,8 +51,6 @@
 #include "Mdefaults.h"
 #include "MailCollector.h"
 
-#include "MailFolderCC.h"        // for HasInferiors()
-
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsPage.h"
 #include "gui/wxBrowseButton.h"
@@ -2209,38 +2207,39 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    switch ( folderType )
    {
       case MF_IMAP:
-         // VZ: commenting out as calling HasInferiors() crashes right now
-         // for IMAP we can auto detect MF_FLAGS_GROUP flag
-         if ( folderType == MF_IMAP )
+         // it's a bad idea to always connect to the server from here, now we
+         // always assume the the folder does have children - and if later we
+         // find out that it doesn't we just reset MF_FLAGS_GROUP then
+#if 0
+         // we need login/password for this
+         if ( !(!password || !loginName) ||
+              (flags & MF_FLAGS_ANON) ||
+              MDialog_GetPassword(fullname, &password, &loginName) )
          {
-            // we need login/password for this
-            if ( !(!password || !loginName) ||
-                 (flags & MF_FLAGS_ANON) ||
-                 MDialog_GetPassword(fullname, &password, &loginName) )
+            // and also the IMAP server (already written above)
+            String server = folder->GetServer();
+
+            // got them all, build the spec and check the flag
+            String spec = MailFolder::GetImapSpec
+                          (
+                           MF_IMAP,
+                           flags,
+                           m_mailboxname->GetValue(),
+                           server,
+                           loginName
+                          );
+
+            wxLogStatus(_("Connecting to the IMAP server %s..."),
+                        server.c_str());
+
+            if ( MailFolderCC::HasInferiors(spec, loginName, password) )
             {
-               // and also the IMAP server (already written above)
-               String server = folder->GetServer();
-
-               // got them all, build the spec and check the flag
-               String spec = MailFolder::GetImapSpec
-                             (
-                              MF_IMAP,
-                              flags,
-                              m_mailboxname->GetValue(),
-                              server,
-                              loginName
-                             );
-
-               wxLogStatus(_("Connecting to the IMAP server %s..."),
-                           server.c_str());
-
-               if ( MailFolderCC::HasInferiors(spec, loginName, password) )
-               {
-                  flags |= MF_FLAGS_GROUP;
-               }
+               flags |= MF_FLAGS_GROUP;
             }
          }
+#endif // 0
 
+         // fall through
 
       case MF_POP:
          WriteEntryIfChanged(Path, m_mailboxname->GetValue());

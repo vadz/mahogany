@@ -79,3 +79,5 @@ src/wx/vcard/vcc.c-yacc to vcc.c.
 
 If you get problem with PROIO_yywrap being multiply defined in wxWindows,
 comment out the 2nd definition of this function in src/common/y_tab.c.
+
+vi: ts=8 nolist:

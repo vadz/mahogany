@@ -1257,8 +1257,16 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
             folderNew->SetFlags(flags);
 
             Profile_obj profile(folderNew->GetFullName());
-            String fullpath;
-            fullpath << m_folder->GetPath() << chDelimiter << relpath;
+            String fullpath = m_folder->GetPath();
+            if ( !fullpath.empty() )
+            {
+               // we don't want the paths to start with '/', but we want to
+               // have it if there is something before
+               fullpath += chDelimiter;
+            }
+
+            fullpath += relpath;
+
             profile->writeEntry(MP_FOLDER_PATH, fullpath);
          }
          //else: folder already exists

@@ -4,6 +4,7 @@
 Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+08.02.01 VZ: fixed creation of all folders from IMAP server once again
 07.02.01 VZ: fixed bug with incorrect name in the folder tree after renaming
              better handling of folder view columns widths setting
 06.02.01 VZ: scroll the msg view to the beginning when viewing a new message
