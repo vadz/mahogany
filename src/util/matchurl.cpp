@@ -449,7 +449,11 @@ inline bool IsURLChar(char c)
 /// check if this is this atext as defined in RFC 2822
 static inline bool IsATextChar(char c)
 {
-   return IsAlnum(c) || strchr("!#$%&'*+-/=?^_`{|}~", c);
+   // VZ: '|' should appear here too normally but I'm too tired of seeing
+   //     Mahogany highlighting URLs improperly in Bugzilla reports (where
+   //     an email address is always shown in '|'-separated columns), so
+   //     I removed it
+   return IsAlnum(c) || strchr("!#$%&'*+-/=?^_`{}~", c);
 }
 
 /// check if the character is valid in the personal part of an address
