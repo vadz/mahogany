@@ -241,6 +241,12 @@ void TextViewerWindow::InsertClickable(const wxString& text,
    m_clickables.Add(clickable);
 
    AppendText(text);
+
+   if ( col.Ok() )
+   {
+      // reset the style back to the previous one
+      SetDefaultStyle(wxTextAttr());
+   }
 }
 
 void TextViewerWindow::Clear()
