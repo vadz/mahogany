@@ -1712,7 +1712,7 @@ configuration settings are inherited in a logical fashion. The settings in the
 preferences dialog are the global default settings and can be overridden on a
 per-folder basis. The top level folders in the tree use by default the same
 global options but you may also edit each folders options via
-\MenuCmd{Folder\|Properties...} menu item. Subfolders inherit from their
+\MenuCmd{Folder|Properties...} menu item. Subfolders inherit from their
 parent folders and, again, you can change their options independently.
 
 To make visualizing this mechanism easier, the names of the options with non
