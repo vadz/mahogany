@@ -3,6 +3,18 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
+Project: "ImportEudora"=.\ImportEudora.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "M"=.\M.DSP - Package Owner=<4>
 
 Package=<5>
@@ -29,11 +41,17 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name wxWindows
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Mdummy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ImportEudora
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "MModule"=.\MModule\MModule.dsp - Package Owner=<4>
+Project: "Mdummy"=.\Mdummy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -61,10 +61,14 @@ class AdbImporter : public AdbImporterBase
 {
 public:
    // dynamic creation helpers
+#ifdef USE_ADB_MODULES
+   AdbImporter(MInterface *minterface) : AdbImporterBase(minterface) { }
+#else // !USE_ADB_MODULES
    typedef AdbImporter *(*Constructor)();
+#endif // USE_ADB_MODULES/!USE_ADB_MODULES
 
    // list holding information about all ADB importers we have
-   friend struct AdbImporterInfo
+   struct AdbImporterInfo
    {
       const char *name;    // internal name
       const char *desc;    // descriptive name (shown to the user)
@@ -140,6 +144,7 @@ public:
    virtual const char *GetDescription() const = 0;
 
 private:
+   friend AdbImporterInfo; // give it access to ms_listImporters
    static AdbImporterInfo *ms_listImporters;
 };
 
@@ -159,7 +164,7 @@ private:
                        int version_release, MInterface *minterface,        \
                        int *errorCode)                                     \
    {                                                                       \
-      return new name;                                                     \
+      return new name(minterface);                                         \
    }
 
 #else // !USE_ADB_MODULES

@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\imap-4.2\cclient" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "\python\include" /D "NDEBUG" /D "USE_PCH" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MD /W3 /GX- /O2 /I "..\imap-4.2\cclient" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "\python\include" /D "NDEBUG" /D "USE_PCH" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /Yu"Mpch.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -70,7 +70,8 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "\python\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /FR /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX- /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "\python\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /Yu"Mpch.h" /FD /c
+# SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -361,22 +362,27 @@ SOURCE=.\src\adb\ExportText.cpp
 # Begin Source File
 
 SOURCE=.\src\adb\ImportEudora.cpp
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\adb\ImportMailrc.cpp
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\adb\ImportPine.cpp
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\adb\ImportText.cpp
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\adb\ImportXFMail.cpp
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 

@@ -76,6 +76,8 @@
 class AdbEudoraImporter : public AdbImporter
 {
 public:
+   AdbEudoraImporter(MInterface *minterface) : AdbImporter(minterface) { }
+
    // implement base class pure virtuals
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);
@@ -86,6 +88,7 @@ public:
    virtual bool ImportEntry(const String& path,
                             size_t index,
                             AdbEntry *entry);
+   virtual String GetDefaultFilename() const;
 
    DECLARE_ADB_IMPORTER();
 
@@ -382,4 +385,9 @@ bool AdbEudoraImporter::ImportEntry(const String& path,
    return TRUE;
 }
 
+String AdbEudoraImporter::GetDefaultFilename() const
+{
+   // TODO: get the installation directory from the registry...
+   return "";
+}
 

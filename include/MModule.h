@@ -122,21 +122,17 @@ class MModuleCommon
 {
 public:
    /// ctor sets the ref count to 1 to make the object alive
-   MModuleCommon(MInterface *minterface)
-      { m_nRef = 1; m_MInterface = minterface; }
+   MModuleCommon(MInterface *mint) { m_nRef = 1; m_MInterface = mint; }
 
-   virtual void IncRef()
-      { wxASSERT(m_nRef > 0); m_nRef++; }
-   virtual bool DecRef()
-      { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
+   virtual void IncRef() { m_nRef++; }
+   virtual bool DecRef() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
 
    void SafeIncRef() { if ( this ) IncRef(); }
    void SafeDecRef() { if ( this ) DecRef(); }
 
 protected:
    /// Removes the module from the global list
-   virtual ~MModuleCommon()
-      { ASSERT(!m_nRef); m_MInterface->RemoveModule(this); }
+   virtual ~MModuleCommon() { m_MInterface->RemoveModule(this); }
 
    MInterface *m_MInterface;
 
