@@ -33,7 +33,7 @@ class WXDLLEXPORT wxVCard;
    #define VOBJECT_DEFINED
 #endif // VOBJECT_DEFINED
 
-WX_DEFINE_ARRAY(wxVCard, wxArrayCards);
+WX_DEFINE_ARRAY(wxVCard *, wxArrayCards);
 
 // ----------------------------------------------------------------------------
 // wxVCardObject has a name, a value and a list of associated properties which
@@ -43,43 +43,84 @@ WX_DEFINE_ARRAY(wxVCard, wxArrayCards);
 class WXDLLEXPORT wxVCardObject
 {
 public:
-   // return the object name
-   wxString GetName() const;
+    // types of wxVCardObject properties
+    enum Type
+    {
+        Invalid = -1,
+        None,           // no value
+        String,         // string value
+        UString,        // unicode string (not used in this class)
+        Int,            // unsigned int value
+        Long,           // unsigned long value
+        Raw,            // binary data value
+        Object          // subobject data
+    };
 
-   // access the object value, all functions return TRUE on success
-   bool GetValue(wxString *val) const;
-   bool GetValue(int *val) const;
-   bool GetValue(long *val) const;
+    // is this object valid?
+    bool IsOk() { return m_vObj != NULL; }
 
-   // set the object name
-   void SetName(const wxString& name);
+    // return the object name
+    wxString GetName() const;
 
-   // set the object value
-   void SetValue(const wxString& val);
-   void SetValue(int val);
-   void SetValue(long val);
+    // return the object type
+    Type GetType() const;
 
-   // iterate through the list of object properties
-   wxVCardObject *GetFirstProp() const;
-   wxVCardObject *GetNextProp() const;
+    // access the object value, all functions return TRUE on success
+    bool GetValue(wxString *val) const;
+    bool GetValue(unsigned int *val) const;
+    bool GetValue(unsigned long *val) const;
 
-   // return property by name or NULL if no such property
-   wxVCardObject *GetProp(const wxString& name) const;
+    // set the object name
+    void SetName(const wxString& name);
 
-private:
-   VObject *m_vObj;
+    // set the object value
+    void SetValue(const wxString& val);
+    void SetValue(unsigned int val);
+    void SetValue(unsigned long val);
+
+    // iterate through the list of object properties
+    wxVCardObject *GetFirstProp(void **cookie) const;
+    wxVCardObject *GetNextProp(void **cookie) const;
+
+    // return property by name or NULL if no such property
+    wxVCardObject *GetProperty(const wxString& name) const;
+
+    // virtual dtor for any base class
+    virtual ~wxVCardObject();
+
+    // dump the internal representation to the given filename
+    void Dump(const wxString& filename);
+
+protected:
+    // ctors
+    wxVCardObject(VObject *vObj = NULL);
+    wxVCardObject(wxVCardObject *parent, const wxString& name);
+
+    VObject *m_vObj;
 };
 
 // ----------------------------------------------------------------------------
-// wxVCard class encapsulates one vcard object
+// wxVCard class encapsulates an entire vCard record
 // ----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxVCard : public wxVCardObject
 {
 public:
-   // create an array of card objects from the contents of the given file
-   static wxArrayCards CreateFromFile(const wxString& filename);
+    // create an array of card objects from the contents of the given file
+    static wxArrayCards CreateFromFile(const wxString& filename);
 
+    // ctor creates an object containing the first vCard in a file
+    wxVCard(const wxString& filename);
+
+    // destroyes the vCard object and invalidates all wxVCardObject which are
+    // subobjects of this one
+    virtual ~wxVCard();
+
+    // accessors for standard properties
+    wxString GetFullName() const;
+
+private:
+    wxVCard(VObject *vObj) : wxVCardObject(vObj) { }
 };
 
 #endif // _WX_VCARD_H_
