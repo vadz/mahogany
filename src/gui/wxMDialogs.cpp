@@ -284,7 +284,9 @@ public:
                 const wxPoint& position,
                 const wxSize& size)
     : wxDialog(parent, -1, title, position, size,
-               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER) // make it resizealbe
+               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
+               | wxSYSTEM_MENU| wxMINIMIZE_BOX
+               | wxMAXIMIZE_BOX | wxTHICK_FRAME) // make it resizealbe
     {
         m_text = new wxTextCtrl(this, -1, text, wxPoint(0, 0), size,
                                 wxTE_MULTILINE | wxTE_READONLY);
