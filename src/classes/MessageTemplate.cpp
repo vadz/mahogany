@@ -51,7 +51,12 @@
 // parser helper: return the word (sequence of alnum characters until
 // endOfWordMarker) from ppc and adjust ppc pointer to point to the char after
 // the end of word
-static String ExtractWord(const char **ppc, char endOfWordMarker);
+//
+// if quoted is true, we behave as if there were double quotes surrounding the
+// word
+static String ExtractWord(const char **ppc,
+                          char endOfWordMarker,
+                          bool quoted = false);
 
 // ============================================================================
 // implementation
@@ -118,17 +123,27 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       // what kind of brackets do we have? some of them imply the category
       // (like $`...` is the same as $(cmd: ...))
       String category;
-      char bracketClose, bracketOpen = *++pc;
+
+      // also, $`...` and $<...< imply implicit quoting as there are almost
+      // surely going to be non-alnum characters inside them (they should
+      // still be quoted explicitly if they contain some special token)
+      bool quoted = false;
+
+      char bracketClose,
+           bracketOpen = *++pc;
       switch ( bracketOpen )
       {
          case '\'':
-            bracketClose = '\'';
+         case '`':
+            bracketClose = bracketOpen;
             category = "cmd";
+            quoted = true;
             break;
 
          case '<':
             bracketClose = '<';
             category = "file";
+            quoted = true;
             break;
 
          case '(':
@@ -172,7 +187,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       pc++;
 
       // extract the next word
-      String word = ExtractWord(&pc, bracketClose);
+      String word = ExtractWord(&pc, bracketClose, quoted);
 
       // decide what we've got
       const int None   = 0;
@@ -417,7 +432,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
 // private functions
 // ----------------------------------------------------------------------------
 
-String ExtractWord(const char **ppc, char endOfWordMarker)
+String ExtractWord(const char **ppc, char endOfWordMarker, bool forceQuotes)
 {
    const char *pc = *ppc;
 
@@ -427,8 +442,8 @@ String ExtractWord(const char **ppc, char endOfWordMarker)
 
    String word;
    while ( *pc && (*pc != '\n') &&
-         ((quoted && *pc && *pc != '"') ||
-          (isalnum(*pc) && *pc != endOfWordMarker && *pc)) )
+           ((quoted && *pc != '"') ||
+            ((forceQuotes || isalnum(*pc)) && *pc != endOfWordMarker)) )
    {
       if ( quoted && *pc == '\\' )
       {
