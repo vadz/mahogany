@@ -31,8 +31,8 @@ class wxBrowseButton : public wxButton
 {
 public:
    // ctor: text is the associated text control
-   wxBrowseButton(wxTextCtrl *text, wxWindow *parent)
-      : wxButton(parent, -1, ">>") { m_text = text; }
+   wxBrowseButton(wxTextCtrl *text, wxWindow *parent, const wxString& tooltip)
+      : wxButton(parent, -1, ">>") { m_text = text; SetToolTip(tooltip); }
 
    // function which shows the file selection dialog and fills the associated
    // text field; it is called in response to the click on the button, but may
@@ -67,7 +67,7 @@ class wxFileBrowseButton : public wxBrowseButton
 {
 public:
    wxFileBrowseButton(wxTextCtrl *text, wxWindow *parent)
-      : wxBrowseButton(text, parent) { }
+      : wxBrowseButton(text, parent, _("Browse for the file")) { }
 
    // show the file selection dialog and fill the associated text control with
    // the name of the selected file

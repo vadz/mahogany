@@ -71,7 +71,7 @@ void wxFileBrowseButton::DoBrowse()
 wxFolderBrowseButton::wxFolderBrowseButton(wxTextCtrl *text,
                                            wxWindow *parent,
                                            MFolder *folder)
-                    : wxBrowseButton(text, parent)
+                    : wxBrowseButton(text, parent, _("Browse for folder"))
 {
    m_folder = folder;
 
