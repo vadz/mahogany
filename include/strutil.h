@@ -17,7 +17,7 @@
 
 #include <time.h>
 
-#include "MFolderType.h"    // for strutil_expandfoldername
+#include "FolderType.h"    // for strutil_expandfoldername
 
 class kbStringList;
 

@@ -18,7 +18,7 @@
 #   pragma interface "ASMailFolder.h"
 #endif
 
-#include "MFolderType.h"
+#include "FolderType.h"
 
 
 // forward declarations

@@ -2981,7 +2981,7 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
 }
 
 // ----------------------------------------------------------------------------
-// global functions from include/MFolderType.h implemented here
+// global functions from include/FolderType.h implemented here
 // ----------------------------------------------------------------------------
 
 size_t GetNumberOfFolderIcons()

@@ -1,6 +1,6 @@
 //-*- c++ -*-//////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
-// File name:   MFolderType.h - constants for folder types
+// File name:   FolderType.h - constants for folder types
 // Purpose:     collect all folder types and flags in one place
 // Author:      Vadim Zeitlin
 // Modified by:

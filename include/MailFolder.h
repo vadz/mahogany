@@ -18,7 +18,7 @@
 #endif
 
 #include "MObject.h"
-#include "MFolderType.h"
+#include "FolderType.h"
 #include "kbList.h"
 
 // ----------------------------------------------------------------------------

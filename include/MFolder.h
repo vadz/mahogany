@@ -23,7 +23,7 @@
 #   include "Profile.h"
 #   include "MailFolder.h"
 #   include "MObject.h"
-#   include "MFolderType.h"
+#   include "FolderType.h"
 #endif
 
 /** A class representing a folder used by M. The folders are organized in a tree
