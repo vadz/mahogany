@@ -171,14 +171,19 @@ public:
    virtual bool AcceptsFocusFromKeyboard() const { return FALSE; }
 
 private:
-   // only Win32 supports URLs in the text control natively so far
 #ifdef __WXMSW__
+   // only Win32 supports URLs in the text control natively so far
    void OnLinkEvent(wxTextUrlEvent& event);
+
+   // get the text position from the coords
+   long GetTextPositionFromCoords(const wxPoint& pt) const;
 #endif // __WXMSW__
+
+   // the generic mouse event handler for right/left/double clicks
    void OnMouseEvent(wxMouseEvent& event);
 
    // process the mouse click at the given text position
-   void ProcessMouseEvent(const wxMouseEvent& event, long pos);
+   bool ProcessMouseEvent(const wxMouseEvent& event, long pos);
 
    TextViewer *m_viewer;
 
@@ -254,34 +259,41 @@ void TextViewerWindow::OnLinkEvent(wxTextUrlEvent& event)
         type == wxEVT_LEFT_UP ||
         type == wxEVT_LEFT_DCLICK )
    {
-      ProcessMouseEvent(eventMouse, event.GetURLStart());
+      if ( ProcessMouseEvent(eventMouse, event.GetURLStart()) )
+      {
+         // skip event.Skip() below
+         return;
+      }
    }
-   else
-   {
-      event.Skip();
-   }
+
+   event.Skip();
+}
+
+long TextViewerWindow::GetTextPositionFromCoords(const wxPoint& pt) const
+{
+   POINTL ptl = { pt.x, pt.y };
+
+   // can't use SendMessage because it's a class name!
+   return ::SendMessageA(GetHwnd(), EM_CHARFROMPOS, 0, (LPARAM)&ptl);
 }
 
 #endif // __WXMSW__
 
 void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
 {
-   // we need to position the cursor at the position of the click under MSW but
-   // GTK does it for us - which is great as we don't have EM_CHARFROMPOS there
 #ifdef __WXMSW__
-   wxPoint pt = event.GetPosition();
-   POINTL ptl = { pt.x, pt.y };
-
-   // can't use SendMessage because it's a class name!
-   SetInsertionPoint(::SendMessageA(GetHwnd(), EM_CHARFROMPOS, 0, (LPARAM)&ptl));
+   long pos = GetTextPositionFromCoords(event.GetPosition());
+#else
+   long pos = GetInsertionPoint();
 #endif // __WXMSW__/!__WXMSW__
 
-   ProcessMouseEvent(event, GetInsertionPoint());
-
-   event.Skip();
+   if ( !ProcessMouseEvent(event, pos) )
+   {
+      event.Skip();
+   }
 }
 
-void TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
+bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
 {
    size_t count = m_clickables.GetCount();
    for ( size_t n = 0; n < count; n++ )
@@ -307,8 +319,12 @@ void TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
 
          m_viewer->DoMouseCommand(id, clickable->GetClickableInfo(),
                                   event.GetPosition());
+
+         return true;
       }
    }
+
+   return false;
 }
 
 // ============================================================================
