@@ -1892,7 +1892,7 @@ static wxOptionsPage::FieldInfo gs_FieldInfos1[] =
                         // the speed values must be in sync with the ones in the speeds[]
                         // array in GetConfig() further up:
                         { gettext_noop("Connection speed:9600:19200:38400:57600:115200"), wxOptionsPage::Field_Combo,    -1 },
-                           { gettext_noop("Mailbox for exchange"), wxOptionsPage::Field_Text, -1},
+                           { gettext_noop("Mailbox for exchange"), wxOptionsPage::Field_Folder, -1},
                               { gettext_noop("Mail disposal mode:keep:delete:file"), wxOptionsPage::Field_Combo,   -1},
                                  { gettext_noop("Directory for backup files"), wxOptionsPage::Field_Text,    -1 },
                                     { gettext_noop("Delete backups of no longer existing databases"),
