@@ -210,11 +210,14 @@ MailFolderCC::Open(void)
    AddToMap(m_MailStream); // now we are known
 
    mail_status(m_MailStream, (char *)m_MailboxPath.c_str(), SA_MESSAGES|SA_RECENT|SA_UNSEEN);
-   // load fast information of all messages, so we can use mail_elt
-   String sequence = String("1:") + strutil_ultoa(numOfMessages);
-   // shall we use mail_fetchstructure here? Or drop mail_elt() below?
-   mail_fetchfast(m_MailStream, (char *)sequence.c_str());
 
+   if(numOfMessages > 0)
+   {
+      // load fast information of all messages, so we can use mail_elt
+      String sequence = String("1:") + strutil_ultoa(numOfMessages);
+      // shall we use mail_fetchstructure here? Or drop mail_elt() below?
+      mail_fetchfast(m_MailStream, (char *)sequence.c_str());
+   }
    okFlag = true;
    if(okFlag)
       PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
