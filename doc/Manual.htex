@@ -1486,6 +1486,24 @@ that you may update the filter rule later using the full-fledged filter
 edit dialog if you decide to add more conditions to it, for example.
 
 
+\subsubsection{Filter Language}
+
+Almost, but not quite all constructs of the filter language are accessible from
+the GUI editor, so if you need something which it doesn't provide yuo can try
+editing the filter text directly. Be warned, however, that you wouldn't be able
+to use the GUI again if you do this.
+
+The syntax of the filter language is very simple. It is C-like but a program
+consists just of a sequence of \texttt{if} statements. Inside each of them you
+can have a condition of (almost) arbitrary complexity using the usual C
+operations \texttt{\&\&}, \texttt{||} and \texttt{!} and the built-in filter
+functions. The filter functions correspond to the choices in the GUI dialogs.
+
+Each test also has the associated code block executed only if it succeeds. Here
+again you can use the built-in functions which are the same as the verbs in the
+GUI controls.
+
+
 \section{Sending Mail}
 
 
