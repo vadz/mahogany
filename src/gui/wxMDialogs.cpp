@@ -363,8 +363,9 @@ MDialog_ErrorMessage(const char *msg,
 {
    CloseSplash();
 
-   wxMessageBox(msg, wxString("Mahogany : ") + title, Style(wxOK|wxICON_EXCLAMATION),
-                GetDialogParent(parent));
+   wxPMessageBox(msg, wxString("Mahogany : ") + title, "",
+                 Style(wxOK|wxICON_EXCLAMATION),
+                 GetDialogParent(parent));
 }
 
 
@@ -424,18 +425,9 @@ MDialog_Message(const char *message,
 
    CloseSplash();
 
-   if ( configPath != NULL )
-   {
-      wxPMessageBox(configPath, message, caption,
-                    Style(wxOK | wxICON_INFORMATION),
-                    GetDialogParent(parent));
-   }
-   else
-   {
-      wxMessageBox(message, caption,
-                   Style(wxOK | wxICON_INFORMATION),
-                   GetDialogParent(parent));
-   }
+   wxPMessageBox(configPath?configPath:"", message, caption,
+                 Style(wxOK | wxICON_INFORMATION),
+                 GetDialogParent(parent));
 }
 
 
@@ -462,18 +454,9 @@ MDialog_YesNoDialog(const char *message,
    int style = Style(wxYES_NO | wxICON_QUESTION | wxCENTRE);
    if(! yesDefault) style |= wxNO_DEFAULT;
    
-   if ( configPath != NULL )
-   {
-      return wxPMessageBox(configPath, message, caption,
-                           style,
-                           GetDialogParent(parent)) == wxYES;
-   }
-   else
-   {
-      return wxMessageBox(message, caption,
-                          style,
-                          GetDialogParent(parent)) == wxYES;
-   }
+   return wxPMessageBox(configPath, message, caption,
+                        style,
+                        GetDialogParent(parent)) == wxYES;
 }
 
 
