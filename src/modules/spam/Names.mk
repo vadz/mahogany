@@ -11,10 +11,20 @@
 ###############################################################################
 
 SRC	:= $(patsubst .src/%,%,$(wildcard .src/modules/spam/*.cpp))
-ifndef USE_DSPAM
+MOD	:= $(SRC:.cpp=.so)
+
+ifdef USE_DSPAM
+DSPAM_CPPFLAGS=-DHAVE_CONFIG_H -DDSPAM_HOME="\"\"" -I../lib/dspam -I../lib/dspam/.src
+
+ifeq ($(USE_MODULES),static)
+CPPFLAGS_modules_spam_DspamFilter_o := $(DSPAM_CPPFLAGS)
+LDFLAGS := $(LDFLAGS) ../lib/dspam/libdspam.a -lsqlite
+else
+CPPFLAGS_modules_spam_DspamFilter_so := $(DSPAM_CPPFLAGS)
+endif
+else
 SRC	:= $(filter-out modules/spam/DspamFilter.cpp, $(SRC))
 endif
-MOD	:= $(SRC:.cpp=.so)
 
 MSOS	+= $(MOD)
 MSGSRC	+= $(SRC)
