@@ -86,6 +86,7 @@ any problems with building it.
    \item Options with non default values are now highlighted in the
          preferences dialog (see \ref{optionshighlight})
    \item New \texttt{nop()} (stop filter processing) filter action added
+   \item The "Set From from To" option (\ref{IdentityPage}) is more useful
 \end{itemize}
 
 \subsubsection{0.66 against 0.65}
@@ -1761,21 +1762,30 @@ personal identity settings - see also your preferred mail and news
 servers which is configured from the network page (\ref{NetworkPage}).
 
 \begin{itemize}
-\item \textbf{Username}\\
+\item \textbf{Personal name}\\
+Your full personal name to be included in your address. This field is free
+form. It is not mandatory but should normally be set.
+\item \textbf{Organization}\\
+This field is optional and may be filled with the name of the organization you
+work in. If it is non empty, an appropriate header is automatically added to
+all outgoing messages.
+\item \textbf{User name or login}\\
 This is used as (default) login name for the accounts which require
 one (POP3 or IMAP4) and also as the base for the return address unless
-it is overridden by explicit setting of the return address.
-\item \textbf{Hostname} \\
-This is used as the default hostname for your username. If you do
-not specify a return address, this must form a valid mail address
-when used together with your username.
+it is overridden by explicit setting of the email address below. This field is
+mandatory and is usually a single word.
+\item \textbf{E-mail address}\\
+Your primary address (others can be used if needed). It is used as the default
+value of "From:" header and should be set correctly if you want to get replies
+to your mail.
 \item \textbf{Reply address} \\
-Here you can specify a return mail address where you want to receive
-mail and replies to your mails from other users. By using this you
-can hide your original (possibly {}``uglier{}'') return address.
-\item \textbf{Reply return address from To: field}\\
+Here you can specify a return mail address if it is different from the email
+address above. Usually this is not needed.
+\item \textbf{Domain} \\
+This is used as the default domain for local addresses.
+\item \textbf{Set "From:" header from "To:" field}\\
 If set, Mahogany will use the original \texttt{To:} address field
-values for the \texttt{Reply-To:} header entry of any message replies
+values for the \texttt{From:} header entry of any message replies
 that you send. This makes sure that the same person sending you mail
 will always see the same mail address for you. It is especially useful,
 if you collect mail from several different incoming mail folders.
@@ -1784,16 +1794,12 @@ If you reply to this message, it will appear as coming from \texttt{John.Doe@myc
 even if you read this mail from home, on a machine called \texttt{MyBox.fun.org}.
 On the other hand, if someone sends you mail to \texttt{MyAlias@writeme.com},
 your reply will carry that as a return address, so that person will
-never know about your \texttt{mycompany.com} office address.
-\item \textbf{Personal name}\\
- Your full personal name to be included in your address.
-\item \textbf{\label{UserLevel}User level}\\
-Setting it to advance will allow you more detailed configuration of
-Mahogany, allowing you to make changes to the configuration which
-might be confusing to a novice user. It's recommended that you first
-become familiar with the program before changing the value of this
-option.
+never know about your \texttt{mycompany.com} office address. Notice that for
+this option to work correctly, you should enter all addresses you usually
+receive mail from in the "Addresses" options page (\ref{AddressesPage}).
 \end{itemize}
+
+
 \label{NetworkPage}%%disabled!\begin{figure}{\htmlimage{scale=1}\centering\epsfig{file=pics/Network.eps,width=0.6\textwidth}}\end{figure}
 
 This page allows you to configure the network-related settings. Please
@@ -2107,7 +2113,7 @@ This will pop up a sub-dialog (\ref{date_format_dialog}) for setting
 the format for displaying dates.
 \end{itemize}
 
-\subsubsection{Addressbook page\_4104\_}
+\subsubsection{Addresses page\_4104\_}
 
 Mahogany may automatically remember all addresses from all e-mail
 messages you receive (actually, only those which you read). This is
@@ -2119,6 +2125,15 @@ put and other settings. See the Addressbook section (\ref{AddressDatabase})
 for more information on Mahogany's built-in addressbook.
 
 \begin{itemize}
+\item \textbf{Address to replace with "To"}\\
+The addresses in this listbox are considered to be your own addresses. It is
+not necessary to add the primary email address here but you can add as many of
+other addresses as needed. You can use the \texttt{*} wildcard in the
+addresses here to stand for any number of arbitrary characters.
+\item \textbf{Mailing list addresses}\\
+If the "Reply to list" command doesn't work you should enter the mailing list
+address here. Normally this is not necessary as modern mailing list software
+usually identifies itself correctly in the message headers anyhow.
 \item \textbf{Autocollect addresses}\\
 You may choose {}``No{}'' to disable autocollecting addresses completely,
 or choose {}``Yes{}'' to always autocollect them. The remaining
