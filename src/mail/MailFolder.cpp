@@ -321,7 +321,7 @@ MailFolder::CloseAll()
    MFPool::Cookie cookie;
    for ( MailFolder *mf = MFPool::GetFirst(cookie);
          mf;
-         mf = MFPool::GetNext(cookie) )
+         mf = MFPool::GetNext(cookie), n++ )
    {
       mf->Close();
 
