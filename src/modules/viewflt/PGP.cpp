@@ -328,6 +328,13 @@ PGPFilter::DoProcess(String& text,
          {
             delete log;
          }
+
+         // output the part after the END line, if any
+         String epilog(end);
+         if ( !epilog.empty() )
+         {
+            m_next->Process(epilog, viewer, style);
+         }
       }
 
       if ( ok )
