@@ -55,25 +55,48 @@ inline String GetPythonDllBaseName(const String& version)
 
 extern "C"
 {
+   // errors
+   //int(*M_PyErr_BadArgument)(void) = NULL;
+   void (*M_PyErr_Clear)(void) = NULL;
+   void (*M_PyErr_Fetch)(PyObject **, PyObject **, PyObject **) = NULL;
+   //PyObject*(*M_PyErr_NoMemory)(void) = NULL;
+   PyObject*(*M_PyErr_Occurred)(void) = NULL;
+   void (*M_PyErr_Restore)(PyObject *, PyObject *, PyObject *) = NULL;
+   //void(*M_PyErr_SetNone)(PyObject *) = NULL;
+   void(*M_PyErr_SetString)(PyObject *, const char *) = NULL;
+
+   // objects
+   //PyObject*(*M__PyObject_New)(PyTypeObject *, PyObject *) = NULL;
+   //PyObject*(*M__PyObject_Init)(PyObject *, PyTypeObject *) = NULL;
+   PyObject *(*M_PyObject_CallFunction)(PyObject *, char *format, ...) = NULL;
+   PyObject *(*M_PyObject_CallObject)(PyObject *, PyObject *) = NULL;
+   PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *) = NULL;
+   PyObject *(*M_PyObject_GetAttrString)(PyObject *, char *) = NULL;
+   void *(*M_PyObject_Malloc)(size_t) = NULL;
+   int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *) = NULL;
+   int (*M_PyObject_Size)(PyObject *) = NULL;
+
+   // ints
+   long(*M_PyInt_AsLong)(PyObject *) = NULL;
+   PyObject*(*M_PyInt_FromLong)(long) = NULL;
+   PyTypeObject *M_PyInt_Type = NULL;
+
+   // longs
+   PyTypeObject *M_PyLong_Type = NULL;
+
+   // tuples
+   PyObject *(*M_PyTuple_GetItem)(PyObject *, int) = NULL;
+
+   // ...
    PyObject* (*M_Py_VaBuildValue)(char *, va_list) = NULL;
 #ifdef Py_TRACE_REFS
    void (*M__Py_Dealloc)(PyObject *) = NULL;
 #endif // Py_TRACE_REFS
-   void (*M_PyErr_Fetch)(PyObject **, PyObject **, PyObject **) = NULL;
-   void (*M_PyErr_Restore)(PyObject *, PyObject *, PyObject *) = NULL;
    int(*M_PyArg_Parse)(PyObject *, char *, ...) = NULL;
    int(*M_PyArg_ParseTuple)(PyObject *, char *, ...) = NULL;
    int(*M_PyDict_SetItemString)(PyObject *dp, char *key, PyObject *item) = NULL;
-   int(*M_PyErr_BadArgument)(void) = NULL;
-   PyObject*(*M_PyErr_NoMemory)(void) = NULL;
-   PyObject*(*M_PyErr_Occurred)(void) = NULL;
-   void(*M_PyErr_SetNone)(PyObject *) = NULL;
-   void(*M_PyErr_SetString)(PyObject *, const char *) = NULL;
    void(*M_PyEval_RestoreThread)(PyThreadState *) = NULL;
    PyThreadState*(*M_PyEval_SaveThread)(void) = NULL;
-   long(*M_PyInt_AsLong)(PyObject *) = NULL;
-   PyObject*(*M_PyInt_FromLong)(long) = NULL;
-   PyTypeObject* M_PyInt_Type = NULL;
    PyObject*(*M_PyList_GetItem)(PyObject *, int) = NULL;
    PyObject*(*M_PyList_New)(int size) = NULL;
    int(*M_PyList_SetItem)(PyObject *, int, PyObject *) = NULL;
@@ -93,23 +116,15 @@ extern "C"
    PyObject*(*M_Py_FindMethod)(PyMethodDef[], PyObject *, char *) = NULL;
    PyObject*(*M_Py_InitModule4)(char *, PyMethodDef *, char *, PyObject *, int) = NULL;
    void(*M_Py_Initialize)(void) = NULL;
-   PyObject*(*M__PyObject_New)(PyTypeObject *, PyObject *) = NULL;
-   PyObject*(*M__PyObject_Init)(PyObject *, PyTypeObject *) = NULL;
    PyObject *(*M_PyEval_CallObjectWithKeywords)(PyObject *, PyObject *, PyObject *) = NULL;
    PyObject *(*M_PyFloat_FromDouble)(double) = NULL;
    PyObject *(*M_PyImport_AddModule)(char *name) = NULL;
    PyObject *(*M_PyImport_GetModuleDict)(void) = NULL;
    PyObject *(*M_PyImport_ReloadModule)(PyObject *) = NULL;
-   PyObject *(*M_PyObject_CallFunction)(PyObject *, char *format, ...) = NULL;
-   PyObject *(*M_PyObject_CallObject)(PyObject *, PyObject *) = NULL;
-   PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *) = NULL;
-   PyObject *(*M_PyObject_GetAttrString)(PyObject *, char *) = NULL;
    PyObject *(*M_PyRun_String)(const char *, int, PyObject *, PyObject *) = NULL;
    PyObject *(*M_PyString_InternFromString)(const char *) = NULL;
 
    int (*M_PyType_IsSubtype)(PyTypeObject *, PyTypeObject *) = NULL;
-   int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *) = NULL;
-   void *(*M_PyObject_Malloc)(size_t) = NULL;
    void (*M__Py_NegativeRefcount)(const char *, int, PyObject *) = NULL;
 
    // variables
@@ -144,6 +159,34 @@ static struct PythonFunc
     PYTHON_PROC *ptr;         // function pointer
 } pythonFuncs[] =
 {
+   // errors
+   PYTHON_FUNC(PyErr_Clear)
+   PYTHON_FUNC(PyErr_Fetch)
+   PYTHON_FUNC(PyErr_Occurred)
+   PYTHON_FUNC(PyErr_Restore)
+   PYTHON_FUNC(PyErr_SetString)
+
+   // objects
+   PYTHON_FUNC(PyObject_CallFunction)
+   PYTHON_FUNC(PyObject_CallObject)
+   PYTHON_FUNC(PyObject_GetAttr)
+   PYTHON_FUNC(PyObject_GetAttrString)
+   PYTHON_FUNC(PyObject_Malloc)
+   PYTHON_FUNC(PyObject_SetAttrString)
+   PYTHON_FUNC(PyObject_Size)
+
+   // ints
+   PYTHON_FUNC(PyInt_AsLong)
+   PYTHON_FUNC(PyInt_FromLong)
+   PYTHON_FUNC(PyInt_Type)
+
+   // longs
+   PYTHON_FUNC(PyLong_Type)
+
+   // tuples
+   PYTHON_FUNC(PyTuple_GetItem)
+
+   // ...
    PYTHON_FUNC(Py_Initialize)
    PYTHON_FUNC(_Py_NoneStruct)
    PYTHON_FUNC_ALT(Py_InitModule4, Py_InitModule4TraceRefs)
@@ -156,16 +199,11 @@ static struct PythonFunc
 #ifdef Py_TRACE_REFS
    PYTHON_FUNC(_Py_Dealloc)
 #endif // Py_TRACE_REFS
-   PYTHON_FUNC(PyErr_Fetch)
-   PYTHON_FUNC(PyErr_Restore)
+
    PYTHON_FUNC(PyArg_Parse)
    PYTHON_FUNC(PyArg_ParseTuple)
    PYTHON_FUNC(PyDict_GetItemString)
    PYTHON_FUNC(PyDict_SetItemString)
-   PYTHON_FUNC(PyErr_Occurred)
-   PYTHON_FUNC(PyErr_SetString)
-   PYTHON_FUNC(PyInt_AsLong)
-   PYTHON_FUNC(PyInt_FromLong)
    PYTHON_FUNC(PyImport_ImportModule)
    PYTHON_FUNC(PyModule_GetDict)
    PYTHON_FUNC(PyString_AsString)
@@ -177,15 +215,9 @@ static struct PythonFunc
    PYTHON_FUNC(PyImport_AddModule)
    PYTHON_FUNC(PyImport_GetModuleDict)
    PYTHON_FUNC(PyImport_ReloadModule)
-   PYTHON_FUNC(PyObject_CallFunction)
-   PYTHON_FUNC(PyObject_CallObject)
-   PYTHON_FUNC(PyObject_GetAttr)
-   PYTHON_FUNC(PyObject_GetAttrString)
    PYTHON_FUNC(PyRun_String)
    PYTHON_FUNC(PyString_InternFromString)
    PYTHON_FUNC(PyType_IsSubtype)
-   PYTHON_FUNC(PyObject_SetAttrString)
-   PYTHON_FUNC(PyObject_Malloc)
    { "", NULL }
 };
 

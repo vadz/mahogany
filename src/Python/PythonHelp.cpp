@@ -10,6 +10,8 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
+// TODO: there seems to be some useless junk in this file, to reread/clean up
+
 // ============================================================================
 // declarations
 // ============================================================================
@@ -52,9 +54,12 @@ class M_PyObject
 public:
    M_PyObject(PyObject *pyObj) : m_pyObj(pyObj) { }
 
+   M_PyObject& operator=(PyObject *pyObj)
+      { Py_XDECREF(m_pyObj); m_pyObj = pyObj; return *this; }
    operator PyObject *() const { return m_pyObj; }
+   PyObject * operator->() const { return m_pyObj; }
 
-   ~M_PyObject() { if ( m_pyObj ) Py_DECREF(m_pyObj); }
+   ~M_PyObject() { Py_XDECREF(m_pyObj); }
 
 private:
    PyObject *m_pyObj;
@@ -145,73 +150,105 @@ PyH_makeObjectFromPointer(void *ptr,const char *classname)
    return Py_BuildValue("s",ptemp);
 }
 
-bool PyH_CallFunction(const char *func,
-                      const char *name,
-                      void *obj, const char *classname,
-                      const char *resultfmt, void *result,
-                      PyObject *parg
-   )
+bool
+PyH_CallFunction(const char *func,
+                 const char *name,
+                 void *obj,
+                 const char *classname,
+                 const char *resultfmt,
+                 void *result,
+                 PyObject *parg)
 {
    // first check if Python is not disabled
    if ( !READ_APPCONFIG(MP_USEPYTHON) )
-      return false;
-
-   PyObject
-      *module,
-      *function,
-      *object,
-      *presult;
-
-   String
-      functionName = func;
-
-   if(strchr(func,'.') != NULL)  // function name contains module name
    {
+      ERRORMESSAGE(( _("Python support is disabled, please enable it in "
+                       "the \"Preferences\" dialog.") ));
+   }
+   else
+   {
+      // next determine which module should we load the function from
+      String functionName = func;
+
+      // does function name contain module name?
       String modname;
-      const char *cptr = func;
-      while(*cptr != '.')
-         modname += *cptr++;
-      functionName = "";
-      cptr++;
-      while(*cptr)
-         functionName += *cptr++;
-      module = PyH_LoadModule(modname.c_str());             /* get module, init python */
-   }
-   else
-   {
-      module = Python_MinitModule;
-      functionName = func;
-   }
+      if(strchr(func,'.') != NULL)
+      {
+         const char *cptr = func;
+         while(*cptr != '.')
+            modname += *cptr++;
+         functionName = "";
+         cptr++;
+         while(*cptr)
+            functionName += *cptr++;
+      }
+      else // no explicit module, use the default one
+      {
+         modname = _T("Minit");
+      }
 
-   if (module == NULL)
-      return 0;  // failure
+      M_PyObject module(PyImport_ImportModule((char *)modname.c_str()));
 
-   function = PyObject_GetAttrString(module, (char *)functionName.c_str());
-   if(! function)
-      return 0; // failure
+      if ( !module )
+      {
+         ERRORMESSAGE(( _("Module \"%s\" couldn't be loaded."),
+                        modname.c_str() ));
+      }
+      else
+      {
+         // we want to allow modifying the Python code on the fly, so try to
+         // reload the module here -- this is nice for playing with Python even
+         // if possibly very slow...
+         PyObject *moduleRe = PyImport_ReloadModule(module);
+         if ( moduleRe )
+         {
+            // if reloading failed, fall back to the original module
+            module = moduleRe;
+         }
 
-   // now build object reference argument:
+         PyObject *rc = NULL;
 
-   object = PyH_makeObjectFromPointer(obj, classname);
-   if(parg)
-      presult =
-         PyObject_CallFunction(function,"sOO",name,object,parg);
-   else
-      presult =
-         PyObject_CallFunction(function,"sO",name,object);
+         PyObject *function = PyObject_GetAttrString
+                              (
+                                 module,
+                                 const_cast<char *>(functionName.c_str())
+                              );
+         if ( !function )
+         {
+            ERRORMESSAGE(( _("Function \"%s\" not found in module \"%s\"."),
+                           functionName.c_str(), modname.c_str() ));
+         }
+         else // ok
+         {
+            // now build object reference argument:
+            PyObject *object = PyH_makeObjectFromPointer(obj, classname);
 
-   if ( !presult )
-   {
+            // and do call the function
+            if ( parg )
+               rc = PyObject_CallFunction(function, "sOO", name, object, parg);
+            else
+               rc = PyObject_CallFunction(function, "sO", name, object);
+
+            if ( rc )
+            {
+               // translate result back to C
+               PyH_ConvertResult(rc, resultfmt, result);
+
+               return true;
+            }
+         }
+      }
+
       String err = PyH_GetErrorMessage();
       if ( !err.empty() )
       {
          ERRORMESSAGE((_T("%s"), err.c_str()));
       }
-      ERRORMESSAGE((_("Calling Python function \"%s\" failed."), func));
    }
 
-   // expr val to C
-   return PyH_ConvertResult(presult, resultfmt, result) != 0;
+   ERRORMESSAGE((_("Calling Python function \"%s\" failed."), func));
+
+   return false;
 }
 
 bool PyH_CallFunctionVa(const char *func,

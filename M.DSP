@@ -786,12 +786,12 @@ SOURCE=.\src\adb\Collect.cpp
 # PROP Default_Filter "*.i"
 # Begin Source File
 
-SOURCE=.\src\Python\MailFolder.i
+SOURCE=.\src\Python\HeaderInfo.i
 # PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\Python\MAppBase.i
+SOURCE=.\src\Python\MailFolder.i
 # PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
@@ -806,17 +806,12 @@ SOURCE=.\src\Python\Message.i
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\Python\MObject.i
+SOURCE=.\src\Python\MimePart.i
 # PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\Python\MProfile.i
-# PROP Exclude_From_Build 1
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\Python\MString.i
+SOURCE=.\src\Python\SendMessage.i
 # PROP Exclude_From_Build 1
 # End Source File
 # End Group
@@ -940,17 +935,17 @@ InputPath=".\src\Python\MailFolder.cpp-swig"
 # End Source File
 # Begin Source File
 
-SOURCE=".\src\Python\MAppBase.cpp-swig"
+SOURCE=".\src\Python\HeaderInfo.cpp-swig"
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MAppBase.cpp-swig"
+InputPath=".\src\Python\HeaderInfo.cpp-swig"
 
-"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+"$(InputDir)\HeaderInfo_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\HeaderInfo_swig.cpp
 
 # End Custom Build
 
@@ -959,10 +954,10 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MAppBase.cpp-swig"
+InputPath=".\src\Python\HeaderInfo.cpp-swig"
 
-"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+"$(InputDir)\HeaderInfo_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\HeaderInfo_swig.cpp
 
 # End Custom Build
 
@@ -971,10 +966,10 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MAppBase.cpp-swig"
+InputPath=".\src\Python\HeaderInfo.cpp-swig"
 
-"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+"$(InputDir)\HeaderInfo_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\HeaderInfo_swig.cpp
 
 # End Custom Build
 
@@ -983,10 +978,10 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MAppBase.cpp-swig"
+InputPath=".\src\Python\HeaderInfo.cpp-swig"
 
-"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+"$(InputDir)\HeaderInfo_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\HeaderInfo_swig.cpp
 
 # End Custom Build
 
@@ -995,10 +990,10 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MAppBase.cpp-swig"
+InputPath=".\src\Python\HeaderInfo.cpp-swig"
 
-"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+"$(InputDir)\HeaderInfo_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\HeaderInfo_swig.cpp
 
 # End Custom Build
 
@@ -1007,10 +1002,10 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MAppBase.cpp-swig"
+InputPath=".\src\Python\HeaderInfo.cpp-swig"
 
-"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+"$(InputDir)\HeaderInfo_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\HeaderInfo_swig.cpp
 
 # End Custom Build
 
@@ -1019,10 +1014,10 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MAppBase.cpp-swig"
+InputPath=".\src\Python\HeaderInfo.cpp-swig"
 
-"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+"$(InputDir)\HeaderInfo_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\HeaderInfo_swig.cpp
 
 # End Custom Build
 
@@ -1031,10 +1026,10 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MAppBase.cpp-swig"
+InputPath=".\src\Python\HeaderInfo.cpp-swig"
 
-"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+"$(InputDir)\HeaderInfo_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\HeaderInfo_swig.cpp
 
 # End Custom Build
 
@@ -1043,10 +1038,10 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MAppBase.cpp-swig"
+InputPath=".\src\Python\HeaderInfo.cpp-swig"
 
-"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+"$(InputDir)\HeaderInfo_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\HeaderInfo_swig.cpp
 
 # End Custom Build
 
@@ -1285,17 +1280,17 @@ InputPath=".\src\Python\Message.cpp-swig"
 # End Source File
 # Begin Source File
 
-SOURCE=".\src\Python\MObject.cpp-swig"
+SOURCE=".\src\Python\MimePart.cpp-swig"
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MObject.cpp-swig"
+InputPath=".\src\Python\MimePart.cpp-swig"
 
-"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+"$(InputDir)\MimePart_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MimePart_swig.cpp
 
 # End Custom Build
 
@@ -1304,10 +1299,10 @@ InputPath=".\src\Python\MObject.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MObject.cpp-swig"
+InputPath=".\src\Python\MimePart.cpp-swig"
 
-"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+"$(InputDir)\MimePart_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MimePart_swig.cpp
 
 # End Custom Build
 
@@ -1316,10 +1311,10 @@ InputPath=".\src\Python\MObject.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MObject.cpp-swig"
+InputPath=".\src\Python\MimePart.cpp-swig"
 
-"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+"$(InputDir)\MimePart_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MimePart_swig.cpp
 
 # End Custom Build
 
@@ -1328,10 +1323,10 @@ InputPath=".\src\Python\MObject.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MObject.cpp-swig"
+InputPath=".\src\Python\MimePart.cpp-swig"
 
-"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+"$(InputDir)\MimePart_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MimePart_swig.cpp
 
 # End Custom Build
 
@@ -1340,10 +1335,10 @@ InputPath=".\src\Python\MObject.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MObject.cpp-swig"
+InputPath=".\src\Python\MimePart.cpp-swig"
 
-"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+"$(InputDir)\MimePart_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MimePart_swig.cpp
 
 # End Custom Build
 
@@ -1352,10 +1347,10 @@ InputPath=".\src\Python\MObject.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MObject.cpp-swig"
+InputPath=".\src\Python\MimePart.cpp-swig"
 
-"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+"$(InputDir)\MimePart_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MimePart_swig.cpp
 
 # End Custom Build
 
@@ -1364,10 +1359,10 @@ InputPath=".\src\Python\MObject.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MObject.cpp-swig"
+InputPath=".\src\Python\MimePart.cpp-swig"
 
-"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+"$(InputDir)\MimePart_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MimePart_swig.cpp
 
 # End Custom Build
 
@@ -1376,10 +1371,10 @@ InputPath=".\src\Python\MObject.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MObject.cpp-swig"
+InputPath=".\src\Python\MimePart.cpp-swig"
 
-"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+"$(InputDir)\MimePart_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MimePart_swig.cpp
 
 # End Custom Build
 
@@ -1388,10 +1383,10 @@ InputPath=".\src\Python\MObject.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MObject.cpp-swig"
+InputPath=".\src\Python\MimePart.cpp-swig"
 
-"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+"$(InputDir)\MimePart_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MimePart_swig.cpp
 
 # End Custom Build
 
@@ -1400,17 +1395,17 @@ InputPath=".\src\Python\MObject.cpp-swig"
 # End Source File
 # Begin Source File
 
-SOURCE=".\src\Python\MProfile.cpp-swig"
+SOURCE=".\src\Python\SendMessage.cpp-swig"
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MProfile.cpp-swig"
+InputPath=".\src\Python\SendMessage.cpp-swig"
 
-"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+"$(InputDir)\SendMessage_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\SendMessage_swig.cpp
 
 # End Custom Build
 
@@ -1419,125 +1414,10 @@ InputPath=".\src\Python\MProfile.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MProfile.cpp-swig"
+InputPath=".\src\Python\SendMessage.cpp-swig"
 
-"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MProfile.cpp-swig"
-
-"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MProfile.cpp-swig"
-
-"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MProfile.cpp-swig"
-
-"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MProfile.cpp-swig"
-
-"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MProfile.cpp-swig"
-
-"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MProfile.cpp-swig"
-
-"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MProfile.cpp-swig"
-
-"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
-
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=".\src\Python\MString.cpp-swig"
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MString.cpp-swig"
-
-"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MString_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MString.cpp-swig"
-
-"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MString_swig.cpp
+"$(InputDir)\SendMessage_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\SendMessage_swig.cpp
 
 # End Custom Build
 
@@ -1546,125 +1426,10 @@ InputPath=".\src\Python\MString.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MString.cpp-swig"
+InputPath=".\src\Python\SendMessage.cpp-swig"
 
-"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MString_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MString.cpp-swig"
-
-"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MString_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MString.cpp-swig"
-
-"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MString_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MString.cpp-swig"
-
-"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MString_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MString.cpp-swig"
-
-"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MString_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MString.cpp-swig"
-
-"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MString_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MString.cpp-swig"
-
-"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MString_swig.cpp
-
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=".\src\Python\MTest.cpp-swig"
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MTest.cpp-swig"
-
-"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MTest_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MTest.cpp-swig"
-
-"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MTest_swig.cpp
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MTest.cpp-swig"
-
-"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+"$(InputDir)\SendMessage_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\SendMessage_swig.cpp
 
 # End Custom Build
 
@@ -1673,10 +1438,10 @@ InputPath=".\src\Python\MTest.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MTest.cpp-swig"
+InputPath=".\src\Python\SendMessage.cpp-swig"
 
-"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+"$(InputDir)\SendMessage_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\SendMessage_swig.cpp
 
 # End Custom Build
 
@@ -1685,10 +1450,10 @@ InputPath=".\src\Python\MTest.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MTest.cpp-swig"
+InputPath=".\src\Python\SendMessage.cpp-swig"
 
-"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+"$(InputDir)\SendMessage_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\SendMessage_swig.cpp
 
 # End Custom Build
 
@@ -1697,10 +1462,10 @@ InputPath=".\src\Python\MTest.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MTest.cpp-swig"
+InputPath=".\src\Python\SendMessage.cpp-swig"
 
-"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+"$(InputDir)\SendMessage_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\SendMessage_swig.cpp
 
 # End Custom Build
 
@@ -1709,10 +1474,10 @@ InputPath=".\src\Python\MTest.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MTest.cpp-swig"
+InputPath=".\src\Python\SendMessage.cpp-swig"
 
-"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+"$(InputDir)\SendMessage_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\SendMessage_swig.cpp
 
 # End Custom Build
 
@@ -1721,10 +1486,10 @@ InputPath=".\src\Python\MTest.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MTest.cpp-swig"
+InputPath=".\src\Python\SendMessage.cpp-swig"
 
-"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+"$(InputDir)\SendMessage_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\SendMessage_swig.cpp
 
 # End Custom Build
 
@@ -1733,10 +1498,10 @@ InputPath=".\src\Python\MTest.cpp-swig"
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
-InputPath=".\src\Python\MTest.cpp-swig"
+InputPath=".\src\Python\SendMessage.cpp-swig"
 
-"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+"$(InputDir)\SendMessage_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\SendMessage_swig.cpp
 
 # End Custom Build
 
@@ -1870,7 +1635,7 @@ SOURCE=.\src\Python\MailFolder_swig.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\Python\MAppBase_swig.cpp
+SOURCE=.\src\Python\HeaderInfo_swig.cpp
 # ADD CPP /W1
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
@@ -1888,19 +1653,13 @@ SOURCE=.\src\Python\Message_swig.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\Python\MObject_swig.cpp
+SOURCE=.\src\Python\MimePart_swig.cpp
 # ADD CPP /W1
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\Python\MProfile_swig.cpp
-# ADD CPP /W1
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\Python\MString_swig.cpp
+SOURCE=.\src\Python\SendMessage_swig.cpp
 # ADD CPP /W1
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File

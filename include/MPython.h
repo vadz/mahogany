@@ -62,24 +62,46 @@ extern void FreePythonDll();
 // declare the wrappers
 extern "C"
 {
-   // functions
+   // errors
+   //extern int (*M_PyErr_BadArgument)(void);
+   extern void (*M_PyErr_Clear)(void);
+   extern void (*M_PyErr_Fetch)(PyObject **, PyObject **, PyObject **);
+   //extern PyObject * (*M_PyErr_NoMemory)(void);
+   extern PyObject * (*M_PyErr_Occurred)(void);
+   extern void (*M_PyErr_Restore)(PyObject *, PyObject *, PyObject *);
+   //extern void (*M_PyErr_SetNone)(PyObject *);
+   extern void (*M_PyErr_SetString)(PyObject *, const char *);
+
+   // objects
+   //extern PyObject *(*M__PyObject_New)(PyTypeObject *, PyObject *);
+   //extern PyObject *(*M__PyObject_Init)(PyObject *, PyTypeObject *);
+   extern PyObject *(*M_PyObject_CallFunction)(PyObject *, char *format, ...);
+   extern PyObject *(*M_PyObject_CallObject)(PyObject *, PyObject *);
+   extern PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *);
+   extern PyObject *(*M_PyObject_GetAttrString)(PyObject *, char *);
+   extern void *(*M_PyObject_Malloc)(size_t);
+   extern int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *);
+   extern int (*M_PyObject_Size)(PyObject *);
+
+   // ints
+   extern long(*M_PyInt_AsLong)(PyObject *);
+   extern PyObject*(*M_PyInt_FromLong)(long);
+   extern PyTypeObject *M_PyInt_Type;
+
+   // longs
+   extern PyTypeObject *M_PyLong_Type;
+
+   // tuples
+   extern PyObject *(*M_PyTuple_GetItem)(PyObject *, int);
+
+   // ...
    extern PyObject* (*M_Py_VaBuildValue)(char *, va_list);
    extern void (*M__Py_Dealloc)(PyObject *);
-   extern void (*M_PyErr_Fetch)(PyObject **, PyObject **, PyObject **);
-   extern void (*M_PyErr_Restore)(PyObject *, PyObject *, PyObject *);
    extern int(*M_PyArg_Parse)(PyObject *, char *, ...);
    extern int(*M_PyArg_ParseTuple)(PyObject *, char *, ...);
    extern int(*M_PyDict_SetItemString)(PyObject *dp, char *key, PyObject *item);
-   extern int(*M_PyErr_BadArgument)(void);
-   extern PyObject*(*M_PyErr_NoMemory)(void);
-   extern PyObject*(*M_PyErr_Occurred)(void);
-   extern void(*M_PyErr_SetNone)(PyObject *);
-   extern void(*M_PyErr_SetString)(PyObject *, const char *);
    extern void(*M_PyEval_RestoreThread)(PyThreadState *);
    extern PyThreadState*(*M_PyEval_SaveThread)(void);
-   extern long(*M_PyInt_AsLong)(PyObject *);
-   extern PyObject*(*M_PyInt_FromLong)(long);
-   extern PyTypeObject* M_PyInt_Type;
    extern PyObject*(*M_PyList_GetItem)(PyObject *, int);
    extern PyObject*(*M_PyList_New)(int size);
    extern int(*M_PyList_SetItem)(PyObject *, int, PyObject *);
@@ -99,23 +121,15 @@ extern "C"
    extern PyObject*(*M_Py_FindMethod)(PyMethodDef[], PyObject *, char *);
    extern PyObject*(*M_Py_InitModule4)(char *, PyMethodDef *, char *, PyObject *, int);
    extern void(*M_Py_Initialize)(void);
-   extern PyObject*(*M__PyObject_New)(PyTypeObject *, PyObject *);
-   extern PyObject*(*M__PyObject_Init)(PyObject *, PyTypeObject *);
    extern PyObject *(*M_PyEval_CallObjectWithKeywords)(PyObject *, PyObject *, PyObject *);
    extern PyObject *(*M_PyFloat_FromDouble)(double);
    extern PyObject *(*M_PyImport_AddModule)(char *name);
    extern PyObject *(*M_PyImport_GetModuleDict)(void);
    extern PyObject *(*M_PyImport_ReloadModule)(PyObject *);
-   extern PyObject *(*M_PyObject_CallFunction)(PyObject *, char *format, ...);
-   extern PyObject *(*M_PyObject_CallObject)(PyObject *, PyObject *);
-   extern PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *);
-   extern PyObject *(*M_PyObject_GetAttrString)(PyObject *, char *);
    extern PyObject *(*M_PyRun_String)(const char *, int, PyObject *, PyObject *);
    extern PyObject *(*M_PyString_InternFromString)(const char *);
 
    extern int (*M_PyType_IsSubtype)(PyTypeObject *, PyTypeObject *);
-   extern int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *);
-   extern void *(*M_PyObject_Malloc)(size_t);
    extern void (*M__Py_NegativeRefcount)(const char *fname, int lineno, PyObject *op);
 
    // variables
@@ -129,21 +143,46 @@ extern "C"
 }
 
 // redefine all functions we use to our wrappers instead
+// ----------------------------------------------------------------------------
+
+// errors
+#define PyErr_Clear M_PyErr_Clear
+#define PyErr_Fetch M_PyErr_Fetch
+#define PyErr_Occurred M_PyErr_Occurred
+#define PyErr_Restore M_PyErr_Restore
+#define PyErr_SetString M_PyErr_SetString
+
+// objects
+#define PyObject_CallFunction M_PyObject_CallFunction
+#define PyObject_CallObject M_PyObject_CallObject
+#define PyObject_GetAttr M_PyObject_GetAttr
+#define PyObject_GetAttrString M_PyObject_GetAttrString
+#define PyObject_Malloc M_PyObject_Malloc
+#define PyObject_SetAttrString M_PyObject_SetAttrString
+#define PyObject_Size M_PyObject_Size
+
+// ints
+#define PyInt_AsLong M_PyInt_AsLong
+#define PyInt_FromLong M_PyInt_FromLong
+#define PyInt_Type (*M_PyInt_Type)
+
+// longs
+#define PyLong_Type (*M_PyLong_Type)
+
+// tuples
+#define PyTuple_GetItem M_PyTuple_GetItem
+
+// ...
 #define Py_Initialize M_Py_Initialize
 #define _Py_NoneStruct (*M__Py_NoneStruct)
 #define Py_BuildValue M_Py_BuildValue
 #define Py_VaBuildValue M_Py_VaBuildValue
 #define _Py_RefTotal M__Py_RefTotal
 #define PyModule_Type (*M_PyModule_Type)
-#define PyErr_Fetch M_PyErr_Fetch
-#define PyErr_Restore M_PyErr_Restore
 #define PyArg_Parse M_PyArg_Parse
 #define PyArg_ParseTuple M_PyArg_ParseTuple
 #define PyDict_GetItemString M_PyDict_GetItemString
 #define PyDict_SetItemString M_PyDict_SetItemString
-#define PyErr_Occurred M_PyErr_Occurred
-#define PyErr_SetString M_PyErr_SetString
-#define PyInt_FromLong M_PyInt_FromLong
 #define PyImport_ImportModule M_PyImport_ImportModule
 #define PyModule_GetDict M_PyModule_GetDict
 #define PyString_AsString M_PyString_AsString
@@ -157,18 +196,11 @@ extern "C"
 #define PyImport_AddModule M_PyImport_AddModule
 #define PyImport_GetModuleDict M_PyImport_GetModuleDict
 #define PyImport_ReloadModule M_PyImport_ReloadModule
-#define PyObject_CallFunction M_PyObject_CallFunction
-#define PyObject_CallObject M_PyObject_CallObject
-#define PyObject_GetAttr M_PyObject_GetAttr
-#define PyObject_GetAttrString M_PyObject_GetAttrString
 #define PyRun_String M_PyRun_String
 #define PyString_InternFromString M_PyString_InternFromString
 
 // Python 2.3+
 #define PyType_IsSubtype M_PyType_IsSubtype
-#define PyObject_SetAttrString M_PyObject_SetAttrString
-#define PyObject_Malloc M_PyObject_Malloc
-#define PyInt_AsLong M_PyInt_AsLong
 #define _Py_NegativeRefcount M__Py_NegativeRefcount
 
 // special cases
