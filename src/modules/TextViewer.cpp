@@ -154,6 +154,9 @@ public:
                         ClickableInfo *ci,
                         const wxColour& col = wxNullColour);
 
+   // override base class virtuals
+   virtual void Clear();
+
 private:
    void OnMouseEvent(wxMouseEvent& event);
 
@@ -202,6 +205,13 @@ void TextViewerWindow::InsertClickable(const wxString& text,
    m_clickables.Add(clickable);
 
    AppendText(text);
+}
+
+void TextViewerWindow::Clear()
+{
+   wxTextCtrl::Clear();
+
+   WX_CLEAR_ARRAY(m_clickables);
 }
 
 void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
