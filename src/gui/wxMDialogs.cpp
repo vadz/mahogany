@@ -716,19 +716,19 @@ public:
    virtual ~SplashKillerLog() { wxLog::SetActiveTarget(m_logOld); }
 
    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t)
+   {
+      // all previous ones will show a msg box
+      if ( level < wxLOG_Status )
       {
-         // all previous ones will show a msg box
-         if ( level < wxLOG_Status )
-         {
-            CloseSplash();
-         }
-
-         if ( m_logOld )
-         {
-            // the cast is bogus, just to be able to call protected DoLog()
-            ((SplashKillerLog *)m_logOld)->DoLog(level, szString, t);
-         }
+         CloseSplash();
       }
+
+      if ( m_logOld )
+      {
+         // the cast is bogus, just to be able to call protected DoLog()
+         ((SplashKillerLog *)m_logOld)->DoLog(level, szString, t);
+      }
+   }
 
 private:
    wxLog *m_logOld;
@@ -786,10 +786,6 @@ public:
    {
       m_Window->StopTimer();
       wxWindow::Close();
-
-      // remove our temp log redirector
-      delete wxLog::GetActiveTarget();
-
    }
 
 private:
