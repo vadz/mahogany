@@ -485,7 +485,7 @@ MailFolderCmn::MailFolderCmn(ProfileBase *profile)
    m_UpdateMsgCount = true; // normal operation
    ASSERT(profile);
    m_Profile = profile;
-   m_Profile->IncRef();
+   if(m_Profile) m_Profile->IncRef();
    m_Timer = new MailFolderTimer(this);
 
    m_MEventReceiver = new MFCmnEventReceiver(this);
@@ -500,7 +500,8 @@ MailFolderCmn::~MailFolderCmn()
 #endif
    delete m_Timer;
    delete m_MEventReceiver;
-   m_Profile->DecRef();
+   if(m_Profile)
+      m_Profile->DecRef();
 }
 
 void

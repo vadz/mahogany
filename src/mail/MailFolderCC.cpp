@@ -378,7 +378,7 @@ MailFolderCC::Create(int typeAndFlags)
 
    m_InCritical = false;
 
-#define SET_TO(setting, var) var = MP_TCP_##setting##_D
+#define SET_TO(setting, var) var = READ_APPCONFIG(MP_TCP_##setting)
 
    SET_TO(OPENTIMEOUT, ms_TcpOpenTimeout);
    SET_TO(READTIMEOUT, ms_TcpReadTimeout);
@@ -399,7 +399,6 @@ MailFolderCC::Create(int typeAndFlags)
    m_FolderListing = NULL;
    m_InCritical = false;
    m_ASMailFolder = NULL;
-
    FolderType type = GetFolderType(typeAndFlags);
    m_FolderFlags = GetFolderFlags(typeAndFlags);
 

@@ -576,6 +576,10 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 void
 wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 {
+   // This can be called from funny places, so be careful:
+   if(m_Profile == NULL)
+      return;
+   
    AllProfileSettings settingsNew;
    ReadProfileSettings(&settingsNew);
 
