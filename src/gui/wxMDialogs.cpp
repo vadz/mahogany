@@ -2678,7 +2678,7 @@ static const struct
    { "ImportUnderRoot",          gettext_noop("ask where do you want to import folders") },
    { "MoveExpungeConfirm",       gettext_noop("confirm expunging messages after moving") },
    { "ApplyQuickFilter",         gettext_noop("propose to apply quick filter after creation") },
-   { "BrowseImapServers",        gettext_noop("propose to get all mailboxes from IMAP server") },
+   { "BrowseImapServers",        gettext_noop("propose to get all folders from IMAP server") },
    { "GfxNotInlined",            gettext_noop("ask if big images should be inlined") },
    //{ "", gettext_noop() },
 };
