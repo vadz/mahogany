@@ -49,15 +49,4 @@ extern bool CreateQuickFilter(MFolder *folder,
                               const String& subject,
                               wxWindow *parent = NULL);
 
-/// write the filter to the given profile
-extern
-bool SaveSimpleFilter(Profile *profile,
-                      const wxString& name,
-                      ORC_Types_Enum cond,
-                      ORC_Where_Enum condWhere,
-                      const wxString& condWhat,
-                      OAC_Types_Enum action,
-                      const wxString& actionArg,
-                      wxString *program = NULL);
-
 #endif // _WXFILTERSDIALOG_H_

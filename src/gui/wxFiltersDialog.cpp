@@ -147,55 +147,6 @@ static const
 size_t OAC_TypesCount = WXSIZEOF(OAC_Types);
 
 // ----------------------------------------------------------------------------
-// global vars and functions
-// ----------------------------------------------------------------------------
-
-// create the criterium string from its components
-static wxString GetCriteriumString(ORC_Logical_Enum logOp,
-                                   bool negate,
-                                   ORC_Types_Enum condType,
-                                   const wxString& value,
-                                   ORC_Where_Enum where
-                                  )
-{
-   return wxString::Format("%d %d %d \"%s\" %d",
-                           logOp,
-                           negate,
-                           condType,
-                           strutil_escapeString(value).c_str(),
-                           where);
-}
-
-// create the action string from its components
-static wxString GetActionString(OAC_Types_Enum action,
-                                const wxString& argument)
-{
-   return wxString::Format("%d \"%s\"",
-                           action,
-                           strutil_escapeString(argument).c_str());
-}
-
-// write one filter into profile
-static bool SaveFilter(Profile *profile,
-                       const wxString& name,
-                       const wxString& criterium,
-                       const wxString& action,
-                       bool active = TRUE)
-{
-   bool ok = TRUE;
-   if ( ok )
-      ok = profile->writeEntry(FILTER_NAME, name);
-   if ( ok )
-      ok = profile->writeEntry(FILTER_CRITERIUM, criterium);
-   if ( ok )
-      ok = profile->writeEntry(FILTER_ACTION, action);
-   if ( ok )
-      ok = profile->writeEntry(FILTER_ACTIVE, active);
-
-   return ok;
-}
-
-// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -309,9 +260,6 @@ public:
    {
       return m_Argument->GetValue();
    }
-
-   /// translate a storage string into a proper rule
-   static wxString TranslateToString(wxString & criterium);
 
    void UpdateUI();
    void Disable()
@@ -460,123 +408,6 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
    m_Argument->SetValue(settings.GetTestArgument(n));
 }
 
-/* static */
-wxString
-OneCritControl::TranslateToString(wxString & criterium)
-{
-   String program;
-   // This returns the bit to go into an if between the brackets:
-   // if ( .............. )
-
-   long logical = strutil_readNumber(criterium);
-   switch(logical)
-   {
-   case 0: // OR:
-      program << "|";
-      break;
-   case 1: // AND:
-      program << "&";
-      break;
-   case -1: // none:
-      break;
-   default:
-      ASSERT(0); // not possible
-   }
-   program << '(';
-   if(strutil_readNumber(criterium) != 0)
-      program << '!';
-
-   long type = strutil_readNumber(criterium);
-   wxString argument = strutil_readString(criterium);
-   long where = strutil_readNumber(criterium);
-   bool needsWhere = true;
-   bool needsArgument = true;
-   switch(type)
-   {
-   case ORC_T_Always:
-      needsWhere = false;
-      needsArgument = false;
-      program << '1'; // true
-      break;
-   case ORC_T_Match:
-      program << "matchi("; break;
-   case ORC_T_Contains:
-      program << "containsi("; break;
-   case ORC_T_MatchC:
-      program << "match("; break;
-   case ORC_T_ContainsC:
-      program << "contains("; break;
-   case ORC_T_MatchRegExC:
-      program << "matchregex("; break;
-   case ORC_T_MatchRegEx:
-      program << "matchregexi("; break;
-   case ORC_T_Python:
-      program << "python(";
-      needsWhere = false;
-      break;
-   case ORC_T_LargerThan:
-   case ORC_T_SmallerThan:
-   case ORC_T_OlderThan:
-   case ORC_T_ScoreAbove:
-   case ORC_T_ScoreBelow:
-      needsArgument = true;
-      needsWhere = false;
-      switch(type)
-      {
-      case ORC_T_ScoreAbove:
-         program << "score() > "; break;
-      case ORC_T_ScoreBelow:
-         program << "score() < "; break;
-      case ORC_T_LargerThan:
-         program << "size() > "; break;
-      case ORC_T_SmallerThan:
-         program << "size() < "; break;
-      case ORC_T_OlderThan:
-         program << "(date()-now()) > "; break;
-      case ORC_T_NewerThan:
-         program << "(date()-now()) < "; break;
-      }
-      break;
-   case ORC_T_IsSpam:
-      program << "isspam()";
-      needsWhere = false;
-      needsArgument = false;
-      break;
-   default:
-      wxASSERT_MSG(0,"unknown rule"); // FIXME: give meaningful error message
-   }
-   if(needsWhere)
-   {
-      switch(where)
-      {
-      case ORC_W_Subject:
-         program << "subject()"; break;
-      case ORC_W_Header:
-         program << "header()"; break;
-      case ORC_W_From:
-         program << "from()"; break;
-      case ORC_W_Body:
-         program << "body()"; break;
-      case ORC_W_Message:
-         program << "message()"; break;
-      case ORC_W_To:
-         program << "to()"; break;
-      case ORC_W_Sender:
-         program << "header(\"Sender\")"; break;
-      };
-   }
-   if(needsWhere && needsArgument)
-      program << ',';
-   if(needsArgument)
-   {
-      program << '"' << argument << '"';
-   }
-   if(needsWhere || needsArgument)
-      program << ')'; // end of function call
-   program << ')';
-   return program;
-}
-
 // ----------------------------------------------------------------------------
 // OneActionControl: allows to edit the action part of MFDialogSettings
 // ----------------------------------------------------------------------------
@@ -619,9 +450,6 @@ public:
    void LayoutControls(wxWindow **last,
                        int leftMargin = 8*LAYOUT_X_MARGIN,
                        int rightMargin = 2*LAYOUT_X_MARGIN);
-
-   /// translate a storage string into a proper rule
-   static wxString TranslateToString(wxString & action);
 
 private:
    wxChoice             *m_Type;       // Which action to perform
@@ -669,48 +497,6 @@ OneActionControl::UpdateUI()
          m_btnFolder->Disable();
    }
 }
-
-/* static */
-wxString
-OneActionControl::TranslateToString(wxString & action)
-{
-   long type = strutil_readNumber(action);
-   wxString argument = strutil_readString(action);
-   wxString program;
-
-   bool needsArgument = true;
-   switch(type)
-   {
-   case OAC_T_Delete:
-      program << "delete("; needsArgument = false; break;
-   case OAC_T_CopyTo:
-      program << "copy("; break;
-   case OAC_T_MoveTo:
-      program << "move("; break;
-   case OAC_T_Expunge:
-      program << "expunge("; needsArgument = false; break;
-   case OAC_T_MessageBox:
-      program << "message("; break;
-   case OAC_T_LogEntry:
-      program << "log("; break;
-   case OAC_T_Python:
-      program << "python("; break;
-   case OAC_T_ChangeScore:
-      program << "addscore("
-              << argument;
-      needsArgument = false;
-      break;
-   case OAC_T_SetColour:
-      program << "setcolour("; break;
-   case OAC_T_Uniq:
-      program << "uniq("; needsArgument = false; break;
-   }
-   if(needsArgument)
-      program << '"' << argument << '"';
-   program << ");";
-   return program;
-}
-
 
 OneActionControl::OneActionControl(wxWindow *parent)
 {
@@ -1096,32 +882,6 @@ wxOneFilterDialog::TransferDataFromWindow()
    }
 
    return TRUE;
-}
-
-static
-String TranslateOneRuleToProgram(const wxString &criterium,
-                                 const wxString &action)
-{
-   wxString program;
-   wxString
-      str1 = criterium,
-      str2 = action;
-   if(criterium.Length() > 0 && action.Length() > 0)
-   {
-      program = "if(";
-      do
-      {
-         program << OneCritControl::TranslateToString(str1);
-         strutil_delwhitespace(str1);
-      }while(str1.Length());
-
-      program << ')'
-              << '{'
-              << OneActionControl::TranslateToString(str2)
-              << '}';
-
-   }
-   return program;
 }
 
 // ----------------------------------------------------------------------------
@@ -1645,35 +1405,3 @@ extern bool CreateQuickFilter(MFolder *folder,
    return dlg.ShowModal() == wxID_OK;
 }
 
-extern
-bool SaveSimpleFilter(Profile *profile,
-                      const wxString& name,
-                      ORC_Types_Enum condType,
-                      ORC_Where_Enum condWhere,
-                      const wxString& condWhat,
-                      OAC_Types_Enum actionWhat,
-                      const wxString& actionArg,
-                      wxString *program)
-{
-   wxString criterium = GetCriteriumString
-                        (
-                           ORC_L_None,
-                           FALSE,         // don't negate condition
-                           condType,
-                           condWhat,
-                           condWhere
-                        );
-
-   wxString action = GetActionString
-                     (
-                        actionWhat,
-                        actionArg
-                     );
-
-   if ( program )
-   {
-      *program = TranslateOneRuleToProgram(criterium, action);
-   }
-
-   return SaveFilter(profile, name, criterium, action);
-}
