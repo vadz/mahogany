@@ -1037,7 +1037,8 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
                     filename.c_str());
       }
 
-      filename = path + wxFILE_SEP_PATH + name + ext;
+      filename = path + wxFILE_SEP_PATH + name;
+      filename << '.' << ext;
    }
 
    MailMessageParameters
@@ -1168,28 +1169,14 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
    if ( strutil_isempty(ifilename) )
    {
       filename = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
-#if 0
-      (void)m_mailMessage->ExpandParameter
-            (
-               m_mailMessage->GetDisposition(mimeDisplayPart),
-               "FILENAME",
-               &filename
-            );
-      if(filename.Length() == 0)
-         (void)m_mailMessage->ExpandParameter
-            (
-               m_mailMessage->GetDisposition(mimeDisplayPart),
-               "NAME",
-               &filename
-               );
-#endif
-
       wxString path, name, ext;
       wxSplitPath(filename, &path, &name, &ext);
 
       name << '.' << ext;
       filename = wxPFileSelector("MimeSave",_("Save attachment as:"),
-                                 path, name, ext,
+                                 NULL, // no default path
+                                 name[0] ? name.c_str() : NULL,
+                                 ext[0] ? ext.c_str() : NULL,
                                  NULL, 0, this);
    }
    else
