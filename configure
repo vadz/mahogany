@@ -3539,7 +3539,7 @@ if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   cat >> confdefs.h <<\EOF
 #define HAVE_GETTEXT 1
 EOF
-
+ LIBS="$LIBS -lintl"
 else
   echo "$ac_t""no" 1>&6
 fi
@@ -3896,6 +3896,7 @@ fi
 
 
 
+LIBS="$LIBS -lcompface"
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure

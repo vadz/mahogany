@@ -33,10 +33,6 @@
 #   include "MFrame.h"
 #   include "gui/wxMFrame.h"
 
-#   include "wx/config.h"
-#   include "wx/file.h"
-#   include "wx/textfile.h"
-#   include "wx/fileconf.h"
 #   include "Profile.h"
 
 #   include "MApplication.h"

@@ -329,7 +329,7 @@ AC_CHECK_LIB(shadow,main)
 
 AC_CHECK_HEADERS(libintl.h,
 	AC_CHECK_LIB(c,gettext,AC_DEFINE(HAVE_GETTEXT),
-		AC_CHECK_LIB(intl,gettext,AC_DEFINE(HAVE_GETTEXT))
+		AC_CHECK_LIB(intl,gettext,AC_DEFINE(HAVE_GETTEXT) LIBS="$LIBS -lintl")
 	)
 )
 

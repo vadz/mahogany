@@ -52,14 +52,15 @@
 #endif //USE_PCH
 
 // wxWindows
-#include "wx/string.h"
-#include "wx/log.h"
-#include "wx/intl.h"
-#include "wx/dynarray.h"
-#include "wx/config.h"
-#include "wx/file.h"
-#include "wx/textfile.h"
-#include "wx/fileconf.h"
+#include <wx/string.h>
+#include <wx/log.h>
+#include <wx/intl.h>
+#include <wx/dynarray.h>
+#include <wx/file.h>
+#include <wx/textfile.h>
+#include <wx/confbase.h>
+#include <wx/fileconf.h>
+#include <wx/config.h>
 
 
 #include "adb/AdbManager.h"

@@ -27,7 +27,7 @@
 #   include  "guidef.h"
 #   include  "strutil.h"
 #   include  <ctype.h>
-#    include <wx/config.h>
+#   include <wx/confbase.h>
 
 #   include "Mcommon.h"
 #   include "MFrame.h"
