@@ -86,8 +86,9 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
       wxASSERT(focused != -1); // should never happen
 
       // in this case we operate on the highlighted  message
-      if(nselected == 0)
-         selections.Add(m_FolderView->GetFolder()->GetHeaderInfo(focused)->GetUId());
+      HeaderInfo *hi = m_FolderView->GetFolder()->GetHeaderInfo(focused);
+      if(nselected == 0 && hi)
+         selections.Add(hi->GetUId());
 
       /** To    allow translations:
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
