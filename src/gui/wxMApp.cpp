@@ -72,6 +72,10 @@ public:
 
    // override base class virtual to implement saving the frame position
    virtual void OnFrameDelete(wxFrame *frame);
+
+protected:
+   // we handle verbose messages in a special way
+   virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
 };
 
 // a timer used to periodically autosave profile settings
@@ -145,6 +149,20 @@ void wxMLogWindow::OnFrameDelete(wxFrame *frame)
    wxMFrame::SavePosition(LOG_FRAME_SECTION, frame);
 
    wxLogWindow::OnFrameDelete(frame);
+}
+
+void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
+{
+   if ( level == wxLOG_Info )
+   {
+      // this will call wxLogWindow::DoLogString()
+      wxLog::DoLog(level, szString, t);
+   }
+   else
+   {
+      // leave the base class handle it
+      wxLogWindow::DoLog(level, szString, t);
+   }
 }
 
 // ----------------------------------------------------------------------------
