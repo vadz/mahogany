@@ -975,17 +975,35 @@ MailFolder::ReplyMessage(class Message *msg,
    cv->SetSubject(newSubject);
 
    // other headers
-   String messageid;
-   msg->GetHeaderLine("Message-Id", messageid);
-   String references;
-   msg->GetHeaderLine("References", references);
-   strutil_delwhitespace(references);
-   if(references.Length() > 0)
-      references << ",\015\012 ";
-   references << messageid;
-   cv->AddHeaderEntry("In-Reply-To", messageid);
-   cv->AddHeaderEntry("References", references);
-   if( READ_CONFIG(profile, MP_SET_REPLY_FROM_TO) )
+   static const char *headers[] =
+   {
+      "Message-Id",
+      "References",
+      NULL
+   };
+
+   wxArrayString headersOrig = msg->GetHeaderLines(headers);
+
+   String messageid = headersOrig[0].Trim(TRUE).Trim(FALSE);
+
+   // some message don't contain Message-Id at all
+   if ( !messageid.empty() )
+   {
+      String references = headersOrig[1].Trim(TRUE).Trim(FALSE);
+      if ( !references.empty() )
+      {
+         // continue "References" header on the next line
+         references += "\015\012 ";
+      }
+      references += messageid;
+
+      cv->AddHeaderEntry("References", references);
+      cv->AddHeaderEntry("In-Reply-To", messageid);
+   }
+
+   // if configured, set Reply-To to the same address the message we're
+   // replying to was sent
+   if ( READ_CONFIG(profile, MP_SET_REPLY_FROM_TO) )
    {
       String rt;
       msg->GetHeaderLine("To", rt);
