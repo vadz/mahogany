@@ -537,7 +537,7 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
       if(! filename)
          return;
       mc->m_NumericMimeType = TYPEAPPLICATION;
-      if(! mApplication->GetMimeTypes()->Lookup(mc->m_FileName, mc->m_MimeType, &(mc->m_NumericMimeType)))
+      if(! mApplication->GetMimeTypes()->Lookup(filename, mc->m_MimeType, &(mc->m_NumericMimeType)))
          mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
    }
    else
@@ -545,7 +545,6 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
       mc->m_NumericMimeType = num_mimetype;
       mc->m_MimeType = mimetype;
    }
-
    mc->m_FileName = filename;
    mc->m_Type = MimeContent::MIMECONTENT_FILE;
 

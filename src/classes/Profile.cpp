@@ -22,29 +22,25 @@
 #include  "Mcommon.h"
 
 #ifndef USE_PCH
+#   include "Profile.h"
 #   include "strutil.h"
 #   include "PathFinder.h"
-#   include "MimeList.h"
-#   include "MimeTypes.h"
 #   include "kbList.h"
-#   include "MFrame.h"
-#   include "gui/wxMFrame.h"
-#   include "Profile.h"
+#   include "Mdefaults.h"
 
 #   include "MApplication.h"
-#   include "gui/wxMApp.h"
 #   ifdef  OS_WIN
-#      include   <wx/msw/regconf.h>
+#      include <wx/msw/regconf.h>
 #   else
-#      include   <wx/confbase.h>
-#      include   <wx/file.h>
-#      include   <wx/textfile.h>
-#      include   <wx/fileconf.h>
+#      include <wx/confbase.h>
+#      include <wx/file.h>
+#      include <wx/textfile.h>
+#      include <wx/fileconf.h>
 #   endif
 #   include   <wx/config.h>
 #endif
 
-#include "Mdefaults.h"
+#include   <ctype.h>
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -399,7 +395,6 @@ Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
          fullFileName = mApplication->GetLocalDir() + DIR_SEPARATOR + fileName;
    }
    else
-   {
       // easy...
       fullFileName << profileName << READ_APPCONFIG(MC_PROFILE_EXTENSION);
 

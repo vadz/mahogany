@@ -275,7 +275,7 @@ strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
    for(;;)
    {
       found = strsep(&string, delim);
-      if(! found)
+      if(! found || ! *found)
 	 break;
       tlist.push_back(new String(found));
    }

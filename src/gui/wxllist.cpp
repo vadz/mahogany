@@ -591,12 +591,26 @@ wxLayoutList::FindObjectCursor(wxPoint *cpos, CoordType *offset)
 {
    wxPoint object = wxPoint(0,0);  // runs along the objects
    CoordType width = 0;
-   wxLayoutObjectList::iterator i;
-
+   wxLayoutObjectList::iterator i, begin_it;
+   int go_up;
+   
 #ifdef WXLAYOUT_DEBUG
    wxLayoutDebug("Looking for object at (%d, %d)", cpos->x, cpos->y);
 #endif
-   for(i = begin(); i != end() && object.y <= cpos->y; i++)
+
+   // optimisation: compare to last looked at object:
+   if(cpos->y > m_FoundCursor.y || (cpos->y == m_FoundCursor.y &&
+                                    cpos->x >= m_FoundCursor.x))
+      go_up = 1;
+   else
+      go_up = 0;
+
+   //broken at the moment
+   //begin_it = m_FoundIterator;
+   //m_FoundCursor = *cpos;
+   begin_it = begin();
+   go_up = 1;
+   for(i = begin_it; i != end() && object.y <= cpos->y; )
    {
       width = (**i).CountPositions();
       if(cpos->y == object.y) // a possible candidate
@@ -606,11 +620,11 @@ wxLayoutList::FindObjectCursor(wxPoint *cpos, CoordType *offset)
             if(cpos->x == object.x)
             {
                if(offset) *offset = 0;
-               return i;
+               return m_FoundIterator = i;
             }
             if(offset) *offset=1;
             cpos->x = object.x;
-            return i;
+            return m_FoundIterator = i;
          }
          if(cpos->x >= object.x && cpos->x <= object.x+width) // overlap
          {
@@ -619,7 +633,7 @@ wxLayoutList::FindObjectCursor(wxPoint *cpos, CoordType *offset)
             wxLayoutDebug("   found object at (%d, %d), type: %s",
                           object.x,  object.y, TypeString((*i)->GetType()));
 #endif      
-            return i;
+            return m_FoundIterator = i;
          }
       }
       // no overlap, increment coordinates
@@ -629,25 +643,29 @@ wxLayoutList::FindObjectCursor(wxPoint *cpos, CoordType *offset)
          object.x = 0;
          object.y++;
       }
-   }
+      if(go_up)
+         i++;
+      else
+         i--;
+   }//for
 #ifdef WXLAYOUT_DEBUG
    wxLayoutDebug("   not found");
 #endif
 // return last object, coordinates of that one:
    i = tail();
    if(i == end())
-      return i;
+      return m_FoundIterator = i;
    if((**i).GetType()==WXLO_TYPE_LINEBREAK)
    {
       if(offset)
          *offset = 1;
-      return i;
+      return m_FoundIterator = i;
    }
    cpos->x = object.x; // would be the coordinate of next object
    cpos->y = object.y;
    cpos->x += width; // last object's width
    if(*offset)  *offset = cpos->x-object.x;
-   return i; // not found
+   return m_FoundIterator = i; // not found
 }
 
 wxLayoutObjectList::iterator 
@@ -1019,6 +1037,9 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
    m_LineHeight = (BASELINESTRETCH*m_FontPtSize)/10;
    m_MaxX = 0; m_MaxY = 0;
 
+
+   m_FoundCursor = wxPoint(0,0);
+   m_FoundIterator = begin();
    
    if(m_DefaultSetting)
       delete m_DefaultSetting;

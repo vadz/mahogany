@@ -349,6 +349,11 @@ protected:
    /// find the object to the cursor position and returns the offset
    /// in there
    wxLayoutObjectList::iterator FindObjectCursor(wxPoint *cpos, CoordType *offset = NULL);
+private:
+   /// remembers the last cursor position for which FindObjectCursor was called
+   wxPoint m_FoundCursor;
+   /// remembers the iterator to the object related to m_FoundCursor
+   wxLayoutObjectList::iterator m_FoundIterator;
 };
 
 class wxLayoutPrintout: public wxPrintout

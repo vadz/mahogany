@@ -184,6 +184,7 @@ class wxFolderViewFrame : public wxMFrame
 {
 public:
    wxFolderViewFrame(const String &iname, wxFrame *parent = NULL);
+   ~wxFolderViewFrame();
 
    // callbacks
    void OnCommandEvent(wxCommandEvent& event);

@@ -575,10 +575,16 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
    else
    {
       delete m_FolderView;
+      m_FolderView = NULL;
       Close(true);
    }
 }
-   
+
+wxFolderViewFrame::~wxFolderViewFrame()
+{
+   if(m_FolderView) delete m_FolderView;
+}
+
 void
 wxFolderViewFrame::OnUpdateUI(wxUpdateUIEvent& event)
 {
