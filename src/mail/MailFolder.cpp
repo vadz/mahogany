@@ -349,7 +349,7 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
          }
          cv->Show(TRUE);
 
-      // set the recepient address
+      // set the recipient address
          String name;
          String email = msg->Address(name, MAT_REPLYTO);
          email = GetFullEmailAddress(name, email);
@@ -384,7 +384,7 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
             // reply to the reply &c)
             size_t replyLevel = 0;
 
-            // the search i   s case insensitive
+            // the search is case insensitive
             wxString subjectLower(subject.Lower()),
                replyPrefixLower(replyPrefixWithoutColon.Lower());
             const char *pStart = subjectLower.c_str();
@@ -406,11 +406,14 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
                   pMatch = strstr(pStart, _(replyPrefixStandard));
                else if ( !matchLen )
                   matchLen = strlen(replyPrefixStandard);
-               if ( !pMatch )
+               if ( !pMatch
+                    || (*(pMatch+matchLen) != '[' &&
+                        *(pMatch+matchLen) != ':'
+                        && *(pMatch+matchLen) != '(')
+                  )
                   break;
                else if ( !matchLen )
                   matchLen = strlen(_(replyPrefixStandard));
-
                pStart = pMatch + matchLen;
                replyLevel++;
             }
