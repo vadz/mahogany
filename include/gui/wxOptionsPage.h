@@ -91,6 +91,7 @@ public:
       Field_Color  = 0x0100, // a text entry with a "Browse for colour" button
       Field_SubDlg = 0x0200, // a button invoking another dialog
       Field_XFace  = 0x0400, // a wxXFaceButton invoking another dialog
+      Field_Folder = 0x0800, // a text entry with a "Browse for folder" button
       Field_Type   = 0x0fff  // bit mask selecting the type
    };
 

@@ -888,6 +888,7 @@ void wxOptionsPage::CreateControls()
          case Field_Number:
          case Field_File:
          case Field_Color:
+         case Field_Folder:
          case Field_Bool:
             // fall through: for this purpose (finding the longest label)
             // they're the same as text
@@ -909,74 +910,78 @@ void wxOptionsPage::CreateControls()
    wxControl *last = NULL; // last control created
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       switch ( GetFieldType(n) ) {
-      case Field_File:
-         last = CreateFileEntry(_(m_aFields[n].label), widthMax, last);
-         break;
+         case Field_File:
+            last = CreateFileEntry(_(m_aFields[n].label), widthMax, last);
+            break;
 
-      case Field_Color:
-         last = CreateColorEntry(_(m_aFields[n].label), widthMax, last);
-         break;
+         case Field_Folder:
+            last = CreateFolderEntry(_(m_aFields[n].label), widthMax, last);
+            break;
 
-      case Field_Action:
-         last = CreateActionChoice(_(m_aFields[n].label), widthMax, last);
-         break;
+         case Field_Color:
+            last = CreateColorEntry(_(m_aFields[n].label), widthMax, last);
+            break;
 
-      case Field_Combo:
-         // a hack to dynamicially fill the RAS connections combo box under
-         // Windows - I didn't find anything better to do right now, may be
-         // later (feel free to tell me if you have any ideas)
+         case Field_Action:
+            last = CreateActionChoice(_(m_aFields[n].label), widthMax, last);
+            break;
+
+         case Field_Combo:
+            // a hack to dynamicially fill the RAS connections combo box under
+            // Windows - I didn't find anything better to do right now, may be
+            // later (feel free to tell me if you have any ideas)
 #ifdef OS_WIN
-         if ( n == ConfigField_NetConnection )
-         {
-            wxString connections = _(m_aFields[n].label);
-
-            wxDialUpManager *dial = wxDialUpManager::Create();
-            wxArrayString aConnections;
-            size_t nCount = dial->GetISPNames(aConnections);
-            delete dial;
-
-            for ( size_t n = 0; n < nCount; n++ )
+            if ( n == ConfigField_NetConnection )
             {
-               connections << ':' << aConnections[n];
+               wxString connections = _(m_aFields[n].label);
+
+               wxDialUpManager *dial = wxDialUpManager::Create();
+               wxArrayString aConnections;
+               size_t nCount = dial->GetISPNames(aConnections);
+               delete dial;
+
+               for ( size_t n = 0; n < nCount; n++ )
+               {
+                  connections << ':' << aConnections[n];
+               }
+
+               last = CreateComboBox(connections, widthMax, last);
             }
-
-            last = CreateComboBox(connections, widthMax, last);
-         }
-         else
+            else
 #else
-         last = CreateComboBox(_(m_aFields[n].label), widthMax, last);
+            last = CreateComboBox(_(m_aFields[n].label), widthMax, last);
 #endif
-         break;
+            break;
 
-      case Field_Number:
-         // fall through -- for now they're the same as text
-      case Field_Text:
-         last = CreateTextWithLabel(_(m_aFields[n].label), widthMax, last);
-         break;
+         case Field_Number:
+            // fall through -- for now they're the same as text
+         case Field_Text:
+            last = CreateTextWithLabel(_(m_aFields[n].label), widthMax, last);
+            break;
 
-      case Field_List:
-         last = CreateListbox(_(m_aFields[n].label), last);
-         break;
+         case Field_List:
+            last = CreateListbox(_(m_aFields[n].label), last);
+            break;
 
-      case Field_Bool:
-         last = CreateCheckBox(_(m_aFields[n].label), widthMax, last);
-         break;
+         case Field_Bool:
+            last = CreateCheckBox(_(m_aFields[n].label), widthMax, last);
+            break;
 
-      case Field_Message:
-         last = CreateMessage(_(m_aFields[n].label), last);
-         break;
+         case Field_Message:
+            last = CreateMessage(_(m_aFields[n].label), last);
+            break;
 
-      case Field_SubDlg:
-         last = CreateButton(_(m_aFields[n].label), last);
-         break;
+         case Field_SubDlg:
+            last = CreateButton(_(m_aFields[n].label), last);
+            break;
 
-      case Field_XFace:
-         last = CreateXFaceButton(_(m_aFields[n].label), widthMax, last);
-         break;
+         case Field_XFace:
+            last = CreateXFaceButton(_(m_aFields[n].label), widthMax, last);
+            break;
 
-      default:
-         wxFAIL_MSG("unknown field type in CreateControls");
-      }
+         default:
+            wxFAIL_MSG("unknown field type in CreateControls");
+         }
 
       wxCHECK_RET( last, "control creation failed" );
 
@@ -1072,39 +1077,40 @@ void wxOptionsPage::UpdateUI()
 
          switch ( GetFieldType(n) )
          {
-            // for file entries, also disable the browse button
-         case Field_File:
-         case Field_Color:
-            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+               // for file entries, also disable the browse button
+            case Field_File:
+            case Field_Color:
+            case Field_Folder:
+               wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
-            EnableTextWithButton((wxTextCtrl *)control, bEnable);
-            break;
+               EnableTextWithButton((wxTextCtrl *)control, bEnable);
+               break;
 
-         case Field_Number:
-         case Field_Text:
-            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+            case Field_Number:
+            case Field_Text:
+               wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
-            EnableTextWithLabel((wxTextCtrl *)control, bEnable);
-            break;
+               EnableTextWithLabel((wxTextCtrl *)control, bEnable);
+               break;
 
-         case Field_List:
-            // also disable the buttons
-         {
-            long i;
-            for ( i = wxOptionsPage_BtnNew; i <= wxOptionsPage_BtnNew; i++ ) {
-               wxWindow *win = FindWindow(i);
-               if ( win ) {
-                  win->Enable(bEnable);
-               }
-               else {
-                  wxFAIL_MSG("can't find listbox buttons by id");
+            case Field_List:
+               // also disable the buttons
+            {
+               long i;
+               for ( i = wxOptionsPage_BtnNew; i <= wxOptionsPage_BtnNew; i++ ) {
+                  wxWindow *win = FindWindow(i);
+                  if ( win ) {
+                     win->Enable(bEnable);
+                  }
+                  else {
+                     wxFAIL_MSG("can't find listbox buttons by id");
+                  }
                }
             }
-         }
-         break;
+            break;
 
-         default:
-            ;
+            default:
+               ;
          }
       }
       // this field is always enabled
@@ -1137,8 +1143,6 @@ bool wxOptionsPage::TransferDataToWindow()
       wxControl *control = GetControl(n);
       switch ( GetFieldType(n) ) {
          case Field_Text:
-         case Field_File:
-         case Field_Color:
          case Field_Number:
             if ( GetFieldType(n) == Field_Number ) {
                wxASSERT( m_aDefaults[n].IsNumeric() );
@@ -1148,6 +1152,11 @@ bool wxOptionsPage::TransferDataToWindow()
             else {
                wxASSERT( !m_aDefaults[n].IsNumeric() );
             }
+
+            // can only have text value
+         case Field_File:
+         case Field_Color:
+         case Field_Folder:
             wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
             ((wxTextCtrl *)control)->SetValue(strValue);
@@ -1234,6 +1243,7 @@ bool wxOptionsPage::TransferDataFromWindow()
          case Field_Text:
          case Field_File:
          case Field_Color:
+         case Field_Folder:
          case Field_Number:
             wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
