@@ -316,7 +316,7 @@ SendMessageCC::Build(void)
    tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
    if(!strutil_isempty(tmpstr))
    {
-      m_headerNames[h] = strutil_strdup("Reply-To:");
+      m_headerNames[h] = strutil_strdup("Reply-To");
       m_headerValues[h++] = strutil_strdup(tmpstr);
    }
 
