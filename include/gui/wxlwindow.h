@@ -38,8 +38,15 @@ public:
 
    // callbacks
    // NB: these functions are used as event handlers and must not be virtual
-   void OnPaint(wxPaintEvent &WXUNUSED(event));
-   void OnMouse(wxMouseEvent& event);
+   void OnPaint(wxPaintEvent &event);
+
+   void OnLeftMouseClick(wxMouseEvent& event)
+      { OnMouse(WXMENU_LAYOUT_LCLICK, event); }
+   void OnRightMouseClick(wxMouseEvent& event)
+      { OnMouse(WXMENU_LAYOUT_RCLICK, event); }
+   void OnMouseDblClick(wxMouseEvent& event)
+      { OnMouse(WXMENU_LAYOUT_DBLCLICK, event); }
+
    void OnChar(wxKeyEvent& event);
 
 #ifdef __WXMSW__
@@ -48,17 +55,24 @@ public:
 
    void UpdateScrollbars(void);
    void Print(void);
-   void SetEventId(int id) { m_EventId = id; }
-   virtual ~wxLayoutWindow() {}
+
+   /// if the flag is true, we send events when user clicks on embedded objects
+   void SetMouseTracking(bool doIt = true) { m_doSendEvents = doIt; }
+
+   virtual ~wxLayoutWindow() { }
 
    // dirty flag access
    bool IsDirty() const { return m_llist.IsDirty(); }
-   void ResetDirty() { m_llist.ResetDirty(); }
+   void ResetDirty()    { m_llist.ResetDirty();     }
 
-private:
+protected:
+   // generic function for mouse events processing
+   void OnMouse(int eventId, wxMouseEvent& event);
+
    /// for sending events
    wxWindow *m_Parent;
-   int m_EventId;
+   bool m_doSendEvents;
+
    /// the layout list to be displayed
    wxLayoutList m_llist;
    /// have we already set the scrollbars?
@@ -71,6 +85,7 @@ private:
    /// do we have unsaved data?
    bool m_bDirty;
 
+private:
    DECLARE_EVENT_TABLE()
 };
 

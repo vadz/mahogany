@@ -26,6 +26,7 @@
 #include <wx/log.h>
 
 #include "gui/wxOptionsDlg.h"
+#include "gui/wxMDialogs.h"   // for CloseSplash()
 
 // ----------------------------------------------------------------------------
 // symbolic version constants
@@ -79,11 +80,17 @@ bool UpgradeFrom001()
    //    of a single value /Prompts/foo.
    // 2) last values of the adb editor search control stored as subkeys of
    //    /AdbEditor/LastSearch instead of a single value with this name.
+   // 3) /AdbEditor/LastPage is /AdbEditor/Notebook/Page
+
+   // TODO
+   return true;
 }
 
 // ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
+
+// upgrade from the specified version to the current one
 bool Upgrade(const String& fromVersion)
 {
    // what is the old version?
@@ -107,7 +114,7 @@ bool Upgrade(const String& fromVersion)
    switch ( oldVersion ) {
       case Version_None:
          UpgradeFromNone();
-         // fall through
+         break;
 
       case Version_Alpha001:
          UpgradeFrom001();
@@ -115,6 +122,9 @@ bool Upgrade(const String& fromVersion)
 
       case Version_Alpha002:
          // nothing to do, this is the current version
+         wxLogMessage(_("Configuration information and program files were "
+                        "successfully upgraded from the version '%s'."),
+                      fromVersion.c_str());
          break;
 
       case Version_Unknown:

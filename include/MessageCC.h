@@ -202,7 +202,7 @@ public:
        @param  n part number
        @return content type ID
    */
-   int GetPartType(int n = 0);
+   ContentType GetPartType(int n = 0);
 
    /** Query the encoding of the content.
        @param  n part number

@@ -212,8 +212,12 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_COMPOSE,  "&Compose Message",  "Start a new message"      },
    { WXMENU_FILE_CLOSE,    "&Close Window",     "Close this window"        },
    { WXMENU_SEPARATOR,     "",                  ""                         },
+
+#ifdef USE_PYTHON
    { WXMENU_FILE_SCRIPT,   "Run &Script...",    "Run a simple python script"},
    { WXMENU_SEPARATOR,     "",                  ""                         },
+#endif // USE_PYTHON
+
    { WXMENU_FILE_EXIT,     "E&xit",             "Quit the application"     },
 
    // edit

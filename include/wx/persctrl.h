@@ -18,60 +18,11 @@
 
 // forward declarations
 class wxConfigBase;
+class wxPHelper;
 
 // the headers we really need
 #include <wx/notebook.h>
 #include <wx/combobox.h>
-
-// ----------------------------------------------------------------------------
-// This is a helper class for all "persistent" window classes, i.e. the classes
-// which save their last state in a wxConfig object. The information saved
-// depends on each derived class, the base class only provides the functions to
-// change to the path in the config object where the information is saved (using
-// them ensures that all derived classes behave in more or less consistent way).
-// ----------------------------------------------------------------------------
-
-class wxPHelper
-{
-public:
-    // static functions
-        // set the default prefix for storing the configuration settings
-    static void SetSettingsPath(const wxString& path) { ms_pathPrefix = path; }
-        // retrieve the default prefix for storing the configuration settings
-    static const wxString& GetSettingsPath() { return ms_pathPrefix; }
-
-    // ctors and dtor
-        // default: need to use Set() functions later
-    wxPHelper() { }
-        // the 'path' parameter may be either an absolute path or a relative
-        // path, in which case it will go under wxPHelper::GetSettingsPath()
-        // branch. If the config object is not given the global application one
-        // is used.
-    wxPHelper(const wxString& path, wxConfigBase *config = NULL);
-        // dtor automatically restores the path if not done yet
-    ~wxPHelper();
-
-    // accessors
-        // get our config object
-    wxConfigBase *GetConfig() const { return m_config; }
-        // set the config object to use (must be !NULL)
-    void SetConfig(wxConfigBase *config) { m_config = config; }
-        // set the path to use (either absolute or relative)
-    void SetPath(const wxString& path) { m_path = path; }
-
-    // operations
-        // change path to the place where we will write our values, returns
-        // FALSE if path couldn't be changed (e.g. no config object)
-    bool ChangePath();
-        // restore the old path (also done implicitly in dtor)
-    void RestorePath();
-
-private:
-    static wxString ms_pathPrefix;
-
-    wxString      m_path, m_oldPath;
-    wxConfigBase *m_config;
-};
 
 /*
    The persistent classes themselves start from here. They behave exactly in
@@ -99,7 +50,7 @@ class wxPNotebook : public wxNotebook
 {
 public:
     // ctors and dtor
-    wxPNotebook() { }
+    wxPNotebook();
 
     wxPNotebook(const wxString& configPath,
                 wxWindow *parent,
@@ -107,10 +58,7 @@ public:
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = 0,
-                wxConfigBase *config = NULL)
-              : wxNotebook(parent, id, pos, size, style),
-                m_persist(configPath, config)
-    { }
+                wxConfigBase *config = NULL);
 
     bool Create(const wxString& configPath,
                 wxWindow *parent,
@@ -124,9 +72,9 @@ public:
 
     // accessors
         // set the config object to use (must be !NULL)
-    void SetConfigObject(wxConfigBase *config) { m_persist.SetConfig(config); }
+    void SetConfigObject(wxConfigBase *config);
         // set the path to use (either absolute or relative)
-    void SetConfigPath(const wxString& path) { m_persist.SetPath(path); }
+    void SetConfigPath(const wxString& path);
 
     // callbacks
         // when we're resized the first time we restore our page
@@ -137,7 +85,7 @@ protected:
 
     void RestorePage();
 
-    wxPHelper m_persist;
+    wxPHelper *m_persist;
 
 private:
     DECLARE_EVENT_TABLE()
@@ -156,7 +104,7 @@ class wxPTextEntry : public wxComboBox
 public:
     // ctors
         // default, use Create() after it
-    wxPTextEntry() { m_countSaveMax = ms_countSaveDefault; }
+    wxPTextEntry();
         // normal ctor
     wxPTextEntry(const wxString& configPath,
                  wxWindow *parent,
@@ -165,14 +113,8 @@ public:
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize,
                  long style = 0,
-                 wxConfigBase *config = NULL)
-               : wxComboBox(parent, id, value, pos, size, style),
-                 m_persist(configPath, config)
-    {
-        m_countSaveMax = ms_countSaveDefault;
+                 wxConfigBase *config = NULL);
 
-        RestoreStrings();
-    }
         // to be used if object was created with default ctor
     Create(const wxString& configPath,
            wxWindow *parent,
@@ -182,17 +124,18 @@ public:
            const wxSize& size = wxDefaultSize,
            long style = 0,
            wxConfigBase *config = NULL);
+
         // dtor saves the strings
-    ~wxPTextEntry() { SaveSettings(); }
+    ~wxPTextEntry();
 
     // accessors
         // set how many of last strings will be saved (if 0, only the text sone
         // value is saved, but not the strings in the combobox)
     void SetCountOfStringsToSave(size_t n) { m_countSaveMax = n; }
         // set the config object to use (must be !NULL)
-    void SetConfigObject(wxConfigBase *config) { m_persist.SetConfig(config); }
+    void SetConfigObject(wxConfigBase *config);
         // set the path to use (either absolute or relative)
-    void SetConfigPath(const wxString& path) { m_persist.SetPath(path); }
+    void SetConfigPath(const wxString& path);
 
 protected:
     void SaveSettings();
@@ -201,7 +144,7 @@ protected:
     static size_t ms_countSaveDefault;  // (default)
     size_t m_countSaveMax;              // max number of strings to save
 
-    wxPHelper m_persist;
+    wxPHelper *m_persist;
 };
 
 #endif // _WX_PWINDOW_H_

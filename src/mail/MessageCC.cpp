@@ -469,11 +469,15 @@ MessageCC::GetDisposition(int n, String *disptype)
    return partInfos[n].dispositionParameterList;
 }
 
-int
+Message::ContentType
 MessageCC::GetPartType(int n) 
 {
    DecodeMIME();
-   return partInfos[n].numericalType;
+
+   // by a greatest of hazards, the numerical types used by cclient lib are
+   // just the same as Message::ContentType enum values - of course, if it
+   // were not the case, we would have to translate them somehow!
+   return (Message::ContentType)partInfos[n].numericalType;
 }
 
 int

@@ -82,22 +82,24 @@ public:
     // initialize us with our file type name
     void SetFileType(const wxString& strFileType)
         { m_strFileType = strFileType; }
+    void SetExt(const wxString& ext)
+        { m_ext = ext; }
 
     // implement accessor functions
-    bool GetExtensions(wxArrayString& extensions)
-        { return FALSE; }  // @@ scanning all HKCR subkeys would be too slow...
+    bool GetExtensions(wxArrayString& extensions);
+    bool GetMimeType(wxString *mimeType) const;
     bool GetIcon(wxIcon *icon) const;
     bool GetDescription(wxString *desc) const;
     bool GetOpenCommand(wxString *openCmd) const
         { return GetCommand(openCmd, "open"); }
     bool GetPrintCommand(wxString *printCmd) const
-        { return GetCommand(openCmd, "print"); }
+        { return GetCommand(printCmd, "print"); }
 
 private:
     // helper function
-    bool GetCommand(wxString *command, const char *verb);
+    bool GetCommand(wxString *command, const char *verb) const;
 
-    wxString m_strFileType;
+    wxString m_strFileType, m_ext;
 };
 
 class wxMimeTypesManagerImpl
@@ -127,8 +129,10 @@ public:
 
     // accessors
     bool GetExtensions(wxArrayString& extensions);
+    bool GetMimeType(wxString *mimeType) const
+        { *mimeType = m_manager->m_aTypes[m_index]; return TRUE; }
     bool GetIcon(wxIcon *icon) const
-        { return FALSE; }   // @@ may be with Gnome/KDE integration...
+        { return FALSE; }   // @@ maybe with Gnome/KDE integration...
     bool GetDescription(wxString *desc) const
         { *desc = m_manager->m_aDescriptions[m_index]; return TRUE; }
     bool GetOpenCommand(wxString *openCmd) const
@@ -188,21 +192,71 @@ private:
 #endif // OS type
 
 // ============================================================================
-// trivial implementation of the wrapper classes
+// implementation of the wrapper classes
 // ============================================================================
 
 // ----------------------------------------------------------------------------
 // wxFileType
 // ----------------------------------------------------------------------------
 
-wxFileType::wxFileType(const wxString& strFileType)
+wxString wxFileType::ExpandCommand(const wxString& command,
+                                   const wxString& filename,
+                                   const wxString& mimetype)
 {
-    m_impl = new wxFileTypeImpl(strFileType);
+    String str;
+    for ( const char *pc = command.c_str(); *pc != '\0'; pc++ )
+    {
+        if ( *pc == '%' )
+        {
+            switch ( *++pc ) {
+                case 's':
+                    // '%s' expands into file name (quoted because it might
+                    // contain spaces) - except if there are already quotes
+                    // there because otherwise some programs may get confused by
+                    // double double quotes
+                    if ( *(pc - 2) == '"' )
+                        str << filename;
+                    else
+                        str << '"' << filename << '"';
+                    break;
+
+                case 't':
+                    // '%t' expands into MIME type (quote it too just to be
+                    // consistent)
+                    str << '"' << mimetype << '"';
+                    break;
+
+                default:
+                    str << *pc;
+            }
+        }
+        else
+        {
+            str << *pc;
+        }
+    }
+
+    return str;
+}
+
+wxFileType::wxFileType()
+{
+    m_impl = new wxFileTypeImpl;
 }
 
 wxFileType::~wxFileType()
 {
     delete m_impl;
+}
+
+bool wxFileType::GetExtensions(wxArrayString& extensions)
+{
+    return m_impl->GetExtensions(extensions);
+}
+
+bool wxFileType::GetMimeType(wxString *mimeType) const
+{
+    return m_impl->GetMimeType(mimeType);
 }
 
 bool wxFileType::GetIcon(wxIcon *icon) const
@@ -257,7 +311,7 @@ wxMimeTypesManager::GetFileTypeFromMimeType(const wxString& mimeType)
 
 #ifdef __WXMSW__
 
-bool wxFileTypeImpl::GetCommand(wxString *command, const char *verb)
+bool wxFileTypeImpl::GetCommand(wxString *command, const char *verb) const
 {
     // suppress possible error messages
     wxLogNull nolog;
@@ -295,10 +349,40 @@ bool wxFileTypeImpl::GetCommand(wxString *command, const char *verb)
     return FALSE;
 }
 
+// @@ this function is half implemented
+bool wxFileTypeImpl::GetExtensions(wxArrayString& extensions)
+{
+    if ( m_ext.IsEmpty() ) {
+        // the only way to get the list of extensions from the file type is to
+        // scan through all extensions in the registry - too slow...
+        return FALSE;
+    }
+    else {
+        extensions.Empty();
+        extensions.Add(m_ext);
+
+        // it's a lie too, we don't return _all_ extensions...
+        return TRUE;
+    }
+}
+
+bool wxFileTypeImpl::GetMimeType(wxString *mimeType) const
+{
+    // suppress possible error messages
+    wxLogNull nolog;
+    wxRegKey key(wxRegKey::HKCR, m_strFileType);
+    if ( key.Open() && key.QueryValue("Content Type", *mimeType) ) {
+        return TRUE;
+    }
+    else {
+        return FALSE;
+    }
+}
+
 bool wxFileTypeImpl::GetIcon(wxIcon *icon) const
 {
     wxString strIconKey;
-    strIconKey << strFileType << "\\DefaultIcon";
+    strIconKey << m_strFileType << "\\DefaultIcon";
 
     // suppress possible error messages
     wxLogNull nolog;
@@ -329,11 +413,11 @@ bool wxFileTypeImpl::GetIcon(wxIcon *icon) const
                 case 0: // means no icons were found
                 case 1: // means no such file or it wasn't a DLL/EXE/OCX/ICO/...
                     wxLogDebug("incorrect registry entry '%s': no such icon.",
-                            GetFullName(&key));
+                               key.GetName().c_str());
                     break;
 
                 default:
-                    pIcon->SetHICON((WXHICON)hIcon);
+                    icon->SetHICON((WXHICON)hIcon);
                     return TRUE;
             }
         }
@@ -365,7 +449,7 @@ wxMimeTypesManagerImpl::GetFileTypeFromExtension(const wxString& ext)
 {
     // add the leading point if necessary
     wxString str;
-    if ( strExt[0u] != '.' ) {
+    if ( ext[0u] != '.' ) {
         str = '.';
     }
     str << ext;
@@ -381,6 +465,7 @@ wxMimeTypesManagerImpl::GetFileTypeFromExtension(const wxString& ext)
             // create the new wxFileType object
             wxFileType *fileType = new wxFileType;
             fileType->m_impl->SetFileType(strFileType);
+            fileType->m_impl->SetExt(ext);
 
             return fileType;
         }
@@ -656,6 +741,11 @@ void wxMimeTypesManagerImpl::ReadMimeTypes(const wxString& strFileName)
             m_aExtensions[index] += strExtensions;
         }
     }
+
+    // check our data integriry
+    wxASSERT( m_aTypes.Count() == m_aCommands.Count() &&
+              m_aTypes.Count() == m_aExtensions.Count() &&
+              m_aTypes.Count() == m_aDescriptions.Count() );
 }
 
 void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
@@ -768,7 +858,8 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
 
     // check our data integriry
     wxASSERT( m_aTypes.Count() == m_aCommands.Count() &&
-              m_aTypes.Count() == m_aExtensions.Count() );
+              m_aTypes.Count() == m_aExtensions.Count() &&
+              m_aTypes.Count() == m_aDescriptions.Count() );
 }
 
 #endif // OS type

@@ -14,13 +14,14 @@
 
 #ifndef USE_PCH
 #   include  "Mcommon.h"
-#   include  "Mdefaults.h"
 #   include  "strutil.h"
 #   include  "Profile.h"
-#   include  "MailFolder.h"
-#   include  "MailFolderCC.h"
 #endif
 
+#include  "Mdefaults.h"
+
+#include  "MailFolder.h"
+#include  "MailFolderCC.h"
 
 MailFolder *
 MailFolder::OpenFolder(MailFolder::Type i_type,
@@ -65,7 +66,10 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
 
    // @@ calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
    MailFolder *mf = MailFolderCC::OpenFolder(type, name, profile, login, passwd);
-   mf->m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
+   if ( mf ) {
+      mf->m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
+   }
+
    profile->DecRef();
 
    return mf;

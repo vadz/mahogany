@@ -41,23 +41,16 @@ extern "C"
 #  undef   StartDoc
 }
 
-#include  "kbList.h"
-#include  "guidef.h"
+#include <wx/config.h>
 
-#include  "strutil.h"
+#include "kbList.h"
+#include "guidef.h"
 
-#ifdef   USE_WXCONFIG
-#  include <wx/config.h>
-#else  //standalone appconf
-#  include "appconf.h"
-#endif
+#include "strutil.h"
 
 #include "Mcommon.h"
 
 #include "PathFinder.h"
-
-#include "MimeList.h"
-#include "MimeTypes.h"
 
 #include "MFrame.h"
 #include "gui/wxMFrame.h"
@@ -69,4 +62,5 @@ extern "C"
 #include "gui/wxMFrame.h"
 
 #endif  //USE_PCH
+
 #endif  //MPCH_H

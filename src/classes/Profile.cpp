@@ -83,6 +83,7 @@ public:
        @param prof pointer to profile
     */
    void DeRegister(ProfileBase *prof);
+
    /// Prints a list of all entries.
    DEBUG_DEF
 };
@@ -142,18 +143,6 @@ public:
    /// return the name of the profile
    virtual String GetProfileName(void) { return profileName; }
 
-   // enumeration
-   virtual bool GetFirstGroup(String& s, long l)
-      { return m_config->GetFirstGroup(s, l); }
-   virtual bool GetNextGroup(String& s, long l)
-      { return m_config->GetNextGroup(s, l); }
-
-   // env vars stuff
-   virtual bool IsExpandingEnvVars() const
-      { return m_config && m_config->IsExpandingEnvVars(); }
-   virtual void SetExpandEnvVars(bool bDoIt)
-      { if(m_config) m_config->SetExpandEnvVars(bDoIt); }
-
 private:
    /** Constructor.
        @param iClassName the name of this profile
@@ -166,8 +155,6 @@ private:
    Profile(STRINGARG iClassName, ProfileBase const *Parent);
    /// constructor for empty, inheriting profile
    Profile(ProfileBase const *Parent);
-   /// The wxConfig object.
-   wxConfigBase  *m_config;
    /// The parent profile.
    ProfileBase const *parentProfile;
    /// Name of this profile
@@ -177,13 +164,13 @@ private:
    /** Destructor, writes back those entries that got changed.
    */
    ~Profile();
+
    /// config file manager class
    static ConfigFileManager ms_cfManager;
 };
 //@}
 
 ConfigFileManager Profile::ms_cfManager;
-
 
 
 /** wxConfigProfile, a wrapper around wxConfig.
@@ -222,20 +209,7 @@ public:
    /// return the name of the profile
    virtual String GetProfileName(void) { return String("/"); }
 
-   // enumeration
-   virtual bool GetFirstGroup(String& s, long l)
-      { return m_Config->GetFirstGroup(s, l); }
-   virtual bool GetNextGroup(String& s, long l)
-      { return m_Config->GetNextGroup(s, l); }
-
-   // env vars stuff
-   virtual bool IsExpandingEnvVars() const
-      { return m_Config->IsExpandingEnvVars(); }
-   virtual void SetExpandEnvVars(bool bDoIt)
-      { m_Config->SetExpandEnvVars(bDoIt); }
-
 private:
-   wxConfigBase *m_Config;
    /// forbid deletion
    ~wxConfigProfile();
 };
@@ -270,11 +244,34 @@ static String FilterProfileName(const String& profileName);
 // ----------------------------------------------------------------------------
 // ProfileBase
 // ----------------------------------------------------------------------------
+bool ProfileBase::GetFirstGroup(String& s, long l)
+{
+   return m_config && m_config->GetFirstGroup(s, l);
+}
+
+bool ProfileBase::GetNextGroup(String& s, long l)
+{
+   return m_config && m_config->GetNextGroup(s, l);
+}
+
+bool ProfileBase::IsExpandingEnvVars() const
+{
+   return m_config && m_config->IsExpandingEnvVars();
+}
+
+void ProfileBase::SetExpandEnvVars(bool bDoIt)
+{
+   if(m_config) m_config->SetExpandEnvVars(bDoIt);
+}
+
+// ----------------------------------------------------------------------------
+// ProfileBase
+// ----------------------------------------------------------------------------
 
 ProfileBase *
 ProfileBase::CreateProfile(STRINGARG classname, ProfileBase const *parent)
 {
-   return  Profile::CreateProfile(classname, parent);
+   return  Profile::CreateProfile(FilterProfileName(classname), parent);
 }
 
 ProfileBase *
@@ -309,7 +306,7 @@ wxConfigProfile::wxConfigProfile(STRINGARG fileName)
 #  ifdef OS_WIN
       // don't give explicit name, but rather use the default logic (it's
       // perfectly ok, for the registry case our keys are under vendor\appname)
-      m_Config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+      m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
                               "", "",
                               wxCONFIG_USE_LOCAL_FILE |
                               wxCONFIG_USE_GLOBAL_FILE);
@@ -317,48 +314,48 @@ wxConfigProfile::wxConfigProfile(STRINGARG fileName)
       // we don't need the config file manager for this profile
       PathFinder pf(M_ETC_PATH);
       String globalconfig = pf.FindFile(M_GLOBAL_CONFIG_NAME);
-      m_Config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+      m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
                               fileName, globalconfig,
                               wxCONFIG_USE_LOCAL_FILE|
                               wxCONFIG_USE_GLOBAL_FILE);
 
       // set the default path for configuration entries
-      m_Config->SetPath(M_APPLICATIONNAME);
+      m_config->SetPath(M_APPLICATIONNAME);
 #  endif // Unix/Windows
 }
 
 void wxConfigProfile::SetPath(STRINGARG path)
 {
    MOcheck();
-   m_Config->SetPath(path);
+   m_config->SetPath(path);
 }
 
 String
 wxConfigProfile::GetPath(void) const
 {
    MOcheck();
-   return m_Config->GetPath();
+   return m_config->GetPath();
 }
 
 bool
 wxConfigProfile::HasEntry(STRINGARG key) const
 {
    MOcheck();
-   return m_Config->HasEntry(key);
+   return m_config->HasEntry(key);
 }
 
 void
 wxConfigProfile::DeleteGroup(STRINGARG path)
 {
    MOcheck();
-   m_Config->DeleteGroup(path);
+   m_config->DeleteGroup(path);
 }
 
 wxConfigProfile::~wxConfigProfile()
 {
    MOcheck();
-   m_Config->Flush();
-   delete m_Config;
+   m_config->Flush();
+   delete m_config;
 }
 
 String
@@ -366,7 +363,7 @@ wxConfigProfile::readEntry(STRINGARG key, STRINGARG def) const
 {
    MOcheck();
    String str;
-   str = m_Config->Read(key.c_str(),def.c_str());
+   str = m_config->Read(key.c_str(),def.c_str());
    return str;
 }
 
@@ -374,21 +371,21 @@ long
 wxConfigProfile::readEntry(STRINGARG key, long def) const
 {
    MOcheck();
-   return m_Config->Read(key.c_str(),def);
+   return m_config->Read(key.c_str(),def);
 }
 
 bool
 wxConfigProfile::writeEntry(STRINGARG key, STRINGARG value)
 {
    MOcheck();
-   return m_Config->Write(key,value);
+   return m_config->Write(key,value);
 }
 
 bool
 wxConfigProfile::writeEntry(STRINGARG key, long value)
 {
    MOcheck();
-   return m_Config->Write(key,value);
+   return m_config->Write(key,value);
 }
 
 // ----------------------------------------------------------------------------
@@ -458,7 +455,8 @@ Profile::CreateEmptyProfile(ProfileBase const *parent)
 
 Profile::~Profile()
 {
-   if(m_config) m_config->Flush();
+   if ( m_config )
+      m_config->Flush();
    ms_cfManager.DeRegister(this);
    delete m_config;
 }
@@ -684,7 +682,7 @@ ConfigFileManager::~ConfigFileManager()
    FCDataList::iterator i;
 
 #  ifdef DEBUG
-   Debug();
+      Debug();
 #  endif
 
    for(i = fcList->begin(); i != fcList->end(); i++)
@@ -725,22 +723,24 @@ ConfigFileManager::DeRegister(ProfileBase *prof)
 {
    FCDataList::iterator i;
 
-   DBGLOG("ConfigFileManager.DeRegister()");
-
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
       if((*i)->profile == prof)
       {
-         fcList->erase(i);
+         TRACEMESSAGE(("ConfigFileManager::DeRegister(%s)",
+                       (*i)->className.c_str()));
+         delete fcList->remove(i);
          return;
       }
    }
+
+   FAIL_MSG("ConfigFileManager::DeRegister(): bogus profile");
 }
 
 void
 ConfigFileManager::Register(STRINGARG className, ProfileBase *profile)
 {
-   DBGLOG("ConfigFileManager.Register(" << Str(className) << ")");
+   TRACEMESSAGE(("ConfigFileManager.Register(%s)", className.c_str()));
 
    FCData   *newEntry = new FCData;
    newEntry->className = className;
@@ -752,15 +752,13 @@ ConfigFileManager::Register(STRINGARG className, ProfileBase *profile)
 void
 ConfigFileManager::Debug() const
 {
-   kbListIterator i;
-
    DBGLOG("------ConfigFileManager------\n");
+
+   FCDataList::iterator i;
    for(i = fcList->begin(); i != fcList->end(); i++) {
-      // @@ where is operator<<(m_config)?
-#     if 0
-      DBGLOG('"' << (*i).fileName << '"' << '\t' << (*i).m_config << '\n');
-#     endif
+      DBGMESSAGE(((*i)->className));
    }
+
    DBGLOG("-----------------------------\n");
 }
 #endif
@@ -805,60 +803,26 @@ void RestoreArray(ProfileBase& conf, wxArrayString& astr, STRINGARG key)
    conf.SetPath("..");
 }
 
-// ----------------------------------------------------------------------------
-// a small class to temporarily suspend env var expansion
-// ----------------------------------------------------------------------------
-
-ProfileEnvVarSuspend::ProfileEnvVarSuspend(ProfileBase *profile)
-{
-  m_profile = profile;
-  m_wasExpanding = profile->IsExpandingEnvVars();
-  profile->SetExpandEnvVars(FALSE);
-}
-
-ProfileEnvVarSuspend::~ProfileEnvVarSuspend()
-{
-  m_profile->SetExpandEnvVars(m_wasExpanding);
-}
-
-// ----------------------------------------------------------------------------
-// a tiny utility class which is used to temporary change the config path, for
-// example:
-//    {
-//       ProfilePathChanger ppc(profile->GetConfig(), "/M/Frames");
-//       profile->WriteEntry("x", 400);
-//       ...
-//       // path automatically restored here
-//    }
-// ----------------------------------------------------------------------------
-
-ProfilePathChanger::ProfilePathChanger(ProfileBase *config, STRINGARG path)
-{
-   m_config = config;
-   m_strOldPath = m_config->GetPath();
-   m_config->SetPath(path);
-}
-
-ProfilePathChanger::~ProfilePathChanger()
-{
-   m_config->SetPath(m_strOldPath);
-}
-
 // some characters are invalid in the profile name, replace them
 static String FilterProfileName(const String& profileName)
 {
    // the list of characters which are allowed in the profile names (all other
    // non alphanumeric chars are not)
-   static const char *aValidChars = "_-.";
+   static const char *aValidChars = "_-.";   // NOT '/' and '\\'!
 
-   String filteredName = profileName;
-   for ( size_t n = 0; n < filteredName.Len(); n++ )
+   String filteredName;
+   size_t len = profileName.Len();
+   for ( size_t n = 0; n < len; n++ )
    {
-      char ch = filteredName[n];
-      if ( !isalnum(ch) && !strchr(aValidChars, ch) )
+      char ch = profileName[n];
+      if ( isalnum(ch) || strchr(aValidChars, ch) )
+      {
+         filteredName << ch;
+      }
+      else
       {
          // replace it -- hopefully the name will stay unique (@@)
-         filteredName[n] = '_';
+         filteredName << '_';
       }
    }
 

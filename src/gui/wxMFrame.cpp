@@ -211,9 +211,12 @@ wxMFrame::OnMenuCommand(int id)
    }
    case WXMENU_FILE_COMPOSE:
    {
-      (new wxComposeView("ComposeView", this))->Show();
+      wxComposeView *composeView = new wxComposeView("ComposeView", this);
+      composeView->Show();
       break;
    }
+
+#ifdef USE_PYTHON
    case WXMENU_FILE_SCRIPT:
    {
       String
@@ -221,10 +224,12 @@ wxMFrame::OnMenuCommand(int id)
          filename;
       
       path << mApplication->GetGlobalDir() << DIR_SEPARATOR << "scripts";
-      filename = MDialog_FileRequester(
-         "Please select a Python script to run.",
-         this, path, filename, "py", "*.py?", false, NULL /* profile
-                                                           */);
+      filename = MDialog_FileRequester("Please select a Python script to run.",
+                                       this,
+                                       path, filename,
+                                       "py", "*.py?",
+                                       false,
+                                       NULL /* profile */);
       if(! strutil_isempty(filename))
       {
          FILE *file = fopen(filename,"rb");
@@ -235,7 +240,10 @@ wxMFrame::OnMenuCommand(int id)
          }
          break;
       }
+      //else: cancelled by user
    }
+#endif   // USE_PYTHON
+
    case WXMENU_FILE_EXIT:
       mApplication->Exit();
       break;

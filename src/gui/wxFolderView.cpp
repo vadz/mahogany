@@ -231,13 +231,8 @@ wxFolderView::Update(void)
 
       // should have _exactly_ 3 format specificators, otherwise can't call
       // Printf()!
-      size_t nFound = 0;
-      for ( const char *p = dateFormat; p != NULL; nFound++ )
-      {
-         p = strstr(p, "%u");
-      }
-
-      if ( nFound != 3 )
+      String specs = strutil_extract_formatspec(dateFormat);
+      if ( specs != "ddd" )
       {
          static bool s_bErrorMessageGiven = false;
          if ( s_bErrorMessageGiven )
@@ -246,7 +241,7 @@ wxFolderView::Update(void)
             s_bErrorMessageGiven = true;
 
             wxLogError(_("Invalid value '%s' for the date format: it should "
-                         "contain exactyly 3 %u format specificators. Default "
+                         "contain exactyly 3 %%u format specificators. Default "
                          "value '%s' will be used instead."),
                          dateFormat.c_str(), MC_DATE_FMT_D);
          }
@@ -309,8 +304,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
 
    switch(event.GetId())
    {
-   case WXMENU_LAYOUT_CLICK:
-      m_MessagePreview->OnCommandEvent(event);
+   case WXMENU_LAYOUT_LCLICK:
+   case WXMENU_LAYOUT_RCLICK:
+   case WXMENU_LAYOUT_DBLCLICK:
+      m_MessagePreview->OnMouseEvent(event);
       break;
 
    case  WXMENU_MSG_EXPUNGE:
@@ -543,7 +540,7 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
                                  + msg->Subject());
 
       mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-      cv->InsertData(strutil_strdup(str),str.Length(),"MESSAGE/RFC822",Message::MSG_TYPEMESSAGE);
+      cv->InsertData(strutil_strdup(str), str.Length(), "MESSAGE/RFC822");
    }
 
    wxLogStatus(GetFrame(parent), _("%d messages forwarded"), n);
@@ -625,7 +622,7 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
       MDialog_FolderProfile(this, m_FolderView->GetProfile());
       return;
    }
-   if(WXMENU_CONTAINS(MSG,id) || id == WXMENU_LAYOUT_CLICK)
+   if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id) )
       m_FolderView->OnCommandEvent(event);
    else
       wxMFrame::OnMenuCommand(id);

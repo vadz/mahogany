@@ -32,6 +32,8 @@
 
 #include "gui/wxIconManager.h"
 
+#include <wx/mimetype.h>
+
 #ifdef    OS_WIN
 #  define   unknown_xpm     "unknown"
 #  define   txt_xpm         "txt"
@@ -239,62 +241,42 @@ wxIconManager::GetIcon(String const &_iconName)
 
 wxIcon wxIconManager::GetIconFromMimeType(const String& type)
 {
-   wxIcon icon;
+   // the order of actions is important: we first try to find "exact" match,#
+   // but if we can't, we fall back to a standard icon and look for partial
+   // matches only if there is none
+   wxIcon icon = GetIcon(type);
+   if ( icon == m_unknownIcon )
+   {
+      wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
+      wxFileType *fileType = mimeManager.GetFileTypeFromMimeType(type);
+      if ( fileType != NULL ) {
+         fileType->GetIcon(&icon);
 
-#  ifdef    OS_WIN
-      // for MIME types, we can find the standard extension
-      wxString strExt;
-      if ( GetExtensionFromMimeType(&strExt, type) ) {
-         icon = GetIconFromExtension(strExt);
-      }
-      else {
-         icon = m_unknownIcon;
-      }
-#  else
-      icon = GetIcon(type);
-      if ( icon == m_unknownIcon )
-         icon = GetIcon(type.Before('/'));
-      if ( icon == m_unknownIcon )
-         icon = GetIcon(type.After('/'));
-#  endif // Windows
-
-   return icon;
-}
-
-#ifdef OS_WIN
-
-wxIcon wxIconManager::GetIconFromExtension(const String& ext)
-{
-   wxIcon icon = GetIcon(ext);
-   if ( icon == m_unknownIcon ) {
-      wxString strType;
-      if ( GetFileTypeFromExtension(&strType, ext) ) {
-         GetFileTypeIcon(&icon, strType);
+         delete fileType;
       }
    }
+   if ( icon == m_unknownIcon )
+      icon = GetIcon(type.Before('/'));
+   if ( icon == m_unknownIcon )
+      icon = GetIcon(type.After('/'));
 
    return icon;
 }
-
-#endif //Windows
 
 void
 wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
 {
    // load icon
-   wxIcon icon = wxIcon(data);
-   if ( !icon.Ok() )
+   wxIcon icon(data);
+   if ( icon.Ok() )
    {
-//      delete icon;
-      return;
+      // only loaded icons should be added to the list
+      IconData *id = new IconData;
+
+      id->iconName = iconName;
+      id->iconRef  = icon;
+      m_iconList->push_front(id);
    }
-
-   // only loaded icons should be added to the list
-   IconData *id = new IconData;
-
-   id->iconName = iconName;
-   id->iconRef  = icon;
-   m_iconList->push_front(id);
 }
 
 

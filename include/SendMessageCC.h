@@ -54,11 +54,12 @@ public:
        @param plist list of parameters
        @subtype if not empty, mime subtype to use
    */
-   void	AddPart(int type, const char *buf, size_t len,
-		String const &subtype = "",
-                String const &disposition = "INLINE",
-                MessageParameterList const *dlist = NULL,
-                MessageParameterList const *plist = NULL);
+   void	AddPart(Message::ContentType type,
+                 const char *buf, size_t len,
+		           String const &subtype = "",
+                 String const &disposition = "INLINE",
+                 MessageParameterList const *dlist = NULL,
+                 MessageParameterList const *plist = NULL);
 
    /** Writes the message to a String
        @param output string to write to

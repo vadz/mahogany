@@ -49,6 +49,8 @@
 #include <wx/dynarray.h>
 #include <wx/radiobox.h>
 
+#include <wx/persctrl.h>
+
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 
@@ -80,12 +82,15 @@ extern void CloseSplash()
 // an array of AdbEntries
 WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
 
-// better looking wxTextEntryDialog
+// better looking and wxConfig-aware wxTextEntryDialog
 class MTextInputDialog : public wxDialog
 {
 public:
-  MTextInputDialog(wxWindow *parent, const wxString& strText,
-                    const wxString& strCaption, const wxString& strPrompt);
+  MTextInputDialog(wxWindow *parent,
+                   const wxString& strText,
+                   const wxString& strCaption,
+                   const wxString& strPrompt,
+                   const wxString& strConfigPath);
 
   // accessors
   const wxString& GetText() const { return m_strText; }
@@ -95,8 +100,8 @@ public:
   virtual bool TransferDataFromWindow();
 
 private:
-  wxString    m_strText;
-  wxTextCtrl *m_text;
+  wxString      m_strText;
+  wxPTextEntry *m_text;
 };
 
 // ----------------------------------------------------------------------------
@@ -131,7 +136,8 @@ inline MWindow *GetParent(MWindow *parent)
 MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                    const wxString& strText,
                                    const wxString& strCaption,
-                                   const wxString& strPrompt)
+                                   const wxString& strPrompt,
+                                   const wxString& strConfigPath)
    : wxDialog(parent, -1, strCaption,
               wxDefaultPosition,
               wxDefaultSize,
@@ -163,9 +169,9 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
   // label and the text
   (void)new wxStaticText(this, -1, strPrompt, wxPoint(x, y + dy),
                          wxSize(widthLabel, heightLabel));
-  m_text = new wxTextCtrl(this, -1, "",
-                          wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
-                          wxSize(widthText, heightText));
+  m_text = new wxPTextEntry(strConfigPath, this, -1, "",
+                            wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
+                            wxSize(widthText, heightText));
 
   // buttons
   wxButton *btnOk = new 
@@ -216,23 +222,13 @@ bool MInputBox(wxString *pstr,
                const char *szKey,
                const char *def)
 {
-  static const wxString strSectionName = "/Prompts/";
+  wxString strConfigPath;
+  strConfigPath << "/Prompts/" << szKey;
 
-  ProfileBase *pConf = NULL;
-
-  if ( !IsEmpty(szKey) )
-  {
-    pConf = mApplication->GetProfile();
-    if ( pConf != NULL )
-      *pstr = pConf->readEntry(strSectionName + szKey, def);
-  }
-
-  MTextInputDialog dlg(GetParent(parent), *pstr, wxString("M - "+strCaption), strPrompt);
+  MTextInputDialog dlg(GetParent(parent), *pstr,
+                       strCaption, strPrompt, strConfigPath);
   if ( dlg.ShowModal() == wxID_OK ) {
     *pstr = dlg.GetText();
-
-    if ( pConf != NULL )
-      pConf->writeEntry(strSectionName + szKey, *pstr);
 
     return TRUE;
   }

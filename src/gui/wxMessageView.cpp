@@ -62,6 +62,7 @@
 #include "gui/wxOptionsDlg.h"
 
 #include <wx/dynarray.h>
+#include <wx/mimetype.h>
 
 #include <ctype.h>  // for isspace
 
@@ -94,12 +95,29 @@ extern wxFrame *GetFrame(wxWindow *win)
 // private types
 // ----------------------------------------------------------------------------
 
-// for clickable objects
-struct ClickableInfo
+// data associated with the clickable objects
+class ClickableInfo : public wxLayoutObjectBase::UserData
 {
-   enum { CI_ICON, CI_URL } type;
-   int id;
-   String url;
+public:
+   enum Type
+   {
+      CI_ICON,
+      CI_URL 
+   };
+
+   ClickableInfo(const String& url) : m_url(url) { m_type = CI_URL; }
+   ClickableInfo(int id) { m_id = id; m_type = CI_ICON; }
+
+   // accessors
+   Type          GetType() const { return m_type; }
+   const String& GetUrl()  const { return m_url;  }
+   int           GetPart() const { return m_id;   }
+
+private:
+   Type   m_type;
+
+   int    m_id;
+   String m_url;
 };
 
 // ----------------------------------------------------------------------------
@@ -166,7 +184,7 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
 {
    if(initialised)
       return; // ERROR!
-  
+
    mailMessage = NULL;
    mimeDisplayPart = 0;
    xface = NULL;
@@ -175,17 +193,16 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
    m_FolderView = fv;
    m_MimePopup = NULL;
    m_uid = -1;
-  
-  // wxLayoutWindow:
-  SetEventId(WXMENU_LAYOUT_CLICK);
-  SetFocus();
 
-#ifndef __WXMSW__
-  SetBackgroundColour( wxColour("White") ); 
-#endif
+   SetFocus();
+   SetMouseTracking();
 
-  m_Profile = ProfileBase::CreateProfile(iname, fv ? fv->GetProfile() : NULL);
-  initialised = true;
+//#ifndef __WXMSW__
+   SetBackgroundColour( wxColour("White") );
+//#endif
+
+   m_Profile = ProfileBase::CreateProfile(iname, fv ? fv->GetProfile() : NULL);
+   initialised = true;
 }
 
 wxMessageView::wxMessageView(wxFolderView *fv, wxWindow *parent, const String &iname)
@@ -228,7 +245,7 @@ wxMessageView::Update(void)
    bool   lastObjectWasIcon = false; // a flag
 
    ClickableInfo *ci;
-   
+
    wxLayoutList &llist = GetLayoutList();
    wxLayoutObjectBase *obj = NULL;
 
@@ -237,7 +254,7 @@ wxMessageView::Update(void)
    String
       fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR),
       bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
-   
+
    Clear(READ_CONFIG(m_Profile,MP_FTEXT_FONT),
          READ_CONFIG(m_Profile,MP_FTEXT_SIZE),
          READ_CONFIG(m_Profile,MP_FTEXT_STYLE),
@@ -322,10 +339,11 @@ wxMessageView::Update(void)
          VAR( (*plist_it)->value);
       }
 #endif
+
       // insert text:
-      if(t == Message::MSG_TYPETEXT
-         || (t == Message::MSG_TYPEMESSAGE &&
-             READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT))) 
+      if ( (t == Message::MSG_TYPETEXT) ||
+           (t == Message::MSG_TYPEMESSAGE &&
+            READ_CONFIG(m_Profile, MP_RFC822_IS_TEXT)) )
       {
          cptr = mailMessage->GetPartContent(i);
          if(cptr == NULL)
@@ -343,16 +361,17 @@ wxMessageView::Update(void)
                wxLayoutImportText(llist,before);
                if(!strutil_isempty(url))
                {
-                  ci = new ClickableInfo;
-                  ci->type = ClickableInfo::CI_URL;
-                  ci->url = url;
+                  ci = new ClickableInfo(url);
                   obj = new wxLayoutObjectText(url);
                   obj->SetUserData(ci);
+
                   llist.SetFontColour("BLUE");  // @@PERS
                   llist.Insert(obj);
                   llist.SetFontColour("BLACK"); // @@PERS
                }
-            }while(! strutil_isempty(tmp));
+            }
+            while( !strutil_isempty(tmp) );
+
             lastObjectWasIcon = false;
          }
       }
@@ -379,11 +398,10 @@ wxMessageView::Update(void)
 
          obj = new wxLayoutObjectIcon(icn);
 
-         ci = new ClickableInfo;
-         ci->type = ClickableInfo::CI_ICON;
-         ci->id = i;
+         ci = new ClickableInfo(i);
          obj->SetUserData(ci); // gets freed by list
          llist.Insert(obj);
+
          lastObjectWasIcon = true;
       }
    }
@@ -394,9 +412,10 @@ wxMessageView::Update(void)
    UpdateScrollbars();
 }
 
-void
-wxMessageView::HighLightURLs(const char *input, String &out)
+String
+wxMessageView::HighLightURLs(const char *input)
 {
+   String out;
    const char *cptr = input;
 
    while(*cptr)
@@ -405,8 +424,7 @@ wxMessageView::HighLightURLs(const char *input, String &out)
       if(strncmp(cptr, "http:", 5) == 0 || strncmp(cptr, "ftp:", 4) == 0)
       {
          const char *cptr2 = cptr;
-         out += " <a href=\"";
-         out += "\"";
+         out << " <a href=\"" << "\"";
          while(*cptr2 && ! isspace(*cptr2))
             out += *cptr2++;
          out += "\"> ";
@@ -422,6 +440,8 @@ wxMessageView::HighLightURLs(const char *input, String &out)
       }
       out += *cptr++;
    }
+
+   return out;
 }
 
 wxMessageView::~wxMessageView()
@@ -440,26 +460,27 @@ wxMessageView::~wxMessageView()
    m_Profile->DecRef();
 }
 
+// show information about an attachment
 void
 wxMessageView::MimeInfo(int mimeDisplayPart)
 {
-   String message, tmp;
-   int type;
+   String message;
+   message << _("MIME type: ")
+           << mailMessage->GetPartMimeType(mimeDisplayPart)
+           << '\n';
 
-   message =
-      String(  _("MIME type: "))
-      + mailMessage->GetPartMimeType(mimeDisplayPart) + "\n";
-
-   tmp = mailMessage->GetPartDesc(mimeDisplayPart);
+   String tmp = mailMessage->GetPartDesc(mimeDisplayPart);
    if(tmp.length() > 0)
-      message << "\n" << _("Description: ") << tmp << '\n';
+      message << '\n' << _("Description: ") << tmp << '\n';
+
    message << _("Size: ")
            << strutil_ltoa(mailMessage->GetPartSize(mimeDisplayPart));
-   type = mailMessage->GetPartType(mimeDisplayPart);
+
+   Message::ContentType type = mailMessage->GetPartType(mimeDisplayPart);
    if(type == Message::MSG_TYPEMESSAGE || type == Message::MSG_TYPETEXT)
-      message += String(_(" lines\n"));
+      message << _(" lines\n");
    else
-      message += String(_(" bytes\n"));
+      message << _(" bytes\n");
 
    // debug output with all parameters
    const MessageParameterList &plist = mailMessage->GetParameters(mimeDisplayPart);
@@ -488,115 +509,124 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
          message << (*plist_it)->name << ": "
                  << (*plist_it)->value << '\n';
    }
-   wxMessageBox((char *)message.c_str(), _("MIME information"),
+
+   wxMessageBox(message.c_str(), _("MIME information"),
                 wxOK|wxCENTRE|wxICON_INFORMATION, this);
 }
 
-// @@@@ FIXME it's a mess here
+// open (execute) a message attachment
 void
 wxMessageView::MimeHandle(int mimeDisplayPart)
 {
-   String tmp, mimetype;
-   int type;
-   unsigned long len;
-   char const *content;
-
-   mimetype = mailMessage->GetPartMimeType(mimeDisplayPart);
-   String message = String(  _("MIME type: ")) + mimetype + "\n";
-
-   tmp = mailMessage->GetPartDesc(mimeDisplayPart);
-   if(tmp.length() > 0)
-      message += String(_("Description: ")) + tmp + String("\n");
-   message += String(_("Size: "))
-      + strutil_ltoa(mailMessage->GetPartSize(mimeDisplayPart));
-   type = mailMessage->GetPartType(mimeDisplayPart);
-   if(type == Message::MSG_TYPEMESSAGE || type == Message::MSG_TYPETEXT)
-      message += String(_(" lines"));
-   else
-      message += String(_(" bytes"));
+   String mimetype = mailMessage->GetPartMimeType(mimeDisplayPart);
+   wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
+   wxFileType *fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
 
 #  ifdef OS_WIN
-      // @@@@ FIXME should somehow adapt MimeList interface for this...
-      wxString strExt;
-      if ( !GetExtensionFromMimeType(&strExt, mimetype) ) {
-         ERRORMESSAGE((_("Unknown MIME type '%s', can't execute."), mimetype));
+      // get the standard extension for such files - we'll use it below...
+      wxString ext;
+      if ( fileType != NULL ) {
+         wxArrayString exts;
+         if ( fileType->GetExtensions(exts) ) {
+            ext = exts[0u];
+         }
+      }
+#  endif // Win
+
+   String command;
+   if ( (fileType == NULL) || !fileType->GetOpenCommand(&command) ) {
+      // unknown MIME type, ask the user for the command to use
+      String prompt;
+      prompt.Printf(_("Please enter the command to handle '%s' data:"),
+                    mimetype.c_str());
+      if ( !MInputBox(&command, _("Unknown MIME type"), prompt,
+                      this, "MimeHandler") ) {
+         // cancelled by user
          return;
       }
 
-      const char *filename = tmpnam(NULL);
-      FILE *out = fopen(filename,"wb");
-      if( !out ) {
-         ERRORMESSAGE((_("Can't open temporary file.")));
-         return;
+      // the command must contain exactly one '%s' format specificator!
+      String specs = strutil_extract_formatspec(command);
+      if ( specs.IsEmpty() && !command.IsEmpty() ) {
+         // at least the filename should be there!
+         command += " %s";
       }
+      //else: if the command was empty, leave it empty
 
-      content = mailMessage->GetPartContent(mimeDisplayPart,&len);
-      if(fwrite(content,1,len,out) != len)
+      // TODO save this command to mailcap!
+   }
+
+   delete fileType;  // may be NULL, ok
+
+   if ( command.IsEmpty() )
+   {
+      // no command - try to handle it internally
+      if(mimetype == "MESSAGE/RFC822")
       {
-         ERRORMESSAGE((_("Cannot write file.")));
-         fclose(out);
+         char *filename = wxGetTempFileName("Mtemp");
+         MimeSave(mimeDisplayPart,filename);
+         MailFolder *mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,
+                                                 filename);
+         (void) GLOBAL_NEW wxMessageViewFrame(mf, 1, m_FolderView, m_Parent);
+         mf->DecRef();
+         wxRemoveFile(filename);
+      }
+      else
+      {
+         wxLogWarning(_("Don't know how to handle data of type '%s'."),
+                      mimetype.c_str());
+      }
+   }
+   else
+   {
+      // have a command to open this kind of data - so do it
+      String filename = tmpnam(NULL);
+      FILE *out = fopen(filename,"wb");
+      if( !out )
+      {
+         wxLogSysError(_("Can't open temporary file"));
          return;
       }
+
+      unsigned long len;
+      const void *content = mailMessage->GetPartContent(mimeDisplayPart, &len);
+      bool ok = fwrite(content, 1, len, out) == len;
       fclose(out);
 
-      wxString strNewName = filename;
-      strNewName += strExt;
-      if ( rename(filename, strNewName) != 0 ) {
-         ERRORMESSAGE((_("Can't rename '%s' to '%s'."),
-                      filename, strNewName.c_str()));
-         return;
-      }
-
-      bool bOk = (int)ShellExecute(NULL, "open", strNewName,
-                              NULL, NULL, SW_SHOWNORMAL ) > 32;
-      if ( !bOk ) {
-         wxLogSysError(_("Can't open attachment"));
-         return;
-      }
-
-      return;
-
-#  else // Unix
-      MimeList *ml = mApplication->GetMimeList();
-      String command, flags;
-      bool found = ml->GetCommand(mimetype, command, flags);
-      if(found)
+      if ( !ok )
       {
-         const char *filename = tmpnam(NULL);
-         FILE *out = fopen(filename,"wb");
-         if(out)
-         {
-            content = mailMessage->GetPartContent(mimeDisplayPart,&len);
-            if(fwrite(content,1,len,out) != len)
-            {
-               ERRORMESSAGE((_("Cannot write file.")));
-               fclose(out);
-               return;
-            }
-            fclose(out);
-            command = ml->ExpandCommand(command,filename,mimetype);
+         wxLogSysError(_("Can't write data to temporary file."));
+         return;
+      }
 
-            // @@@@ what about error handling here (fork, system, ...)?
-            if(fork() == 0)
-            {
-               system(command.c_str());
-               unlink(command.c_str());
+#     ifdef OS_WIN
+         // under Windows some programs will do different things depending on
+         // the extensions of the input file (case in point: WinZip), so try to
+         // choose a correct one
+         if ( !ext.IsEmpty() ) {
+            String newFilename;
+            newFilename << filename << '.' << ext;
+            if ( rename(filename, newFilename) != 0 ) {
+               wxLogSysError(_("Can't rename temporary file."));
+            }
+            else {
+               filename = newFilename;
             }
          }
+#     endif // Win
 
-         return;
+      command = wxFileType::ExpandCommand(command, filename, mimetype);
+      if ( !wxExecute(command) )
+      {
+         wxLogError(_("Error opening attachment: command '%s' failed."),
+                    command.c_str());
       }
-#  endif // Unix
 
-   // what can we handle internally?
-   if(mimetype == "MESSAGE/RFC822")
-   {
-      char *filename = wxGetTempFileName("Mtemp");
-      MimeSave(mimeDisplayPart,filename);
-      MailFolder *mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,filename);
-      (void) GLOBAL_NEW wxMessageViewFrame(mf, 1, m_FolderView, m_Parent);
-      mf->DecRef();
-      wxRemoveFile(filename);
+      // clean up
+      if ( remove(filename) != 0 )
+      {
+         wxLogSysError(_("Can't delete temporary file '%s'"), filename);
+      }
    }
 }
 
@@ -605,7 +635,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 {
    String message;
    String filename;
-  
+
    if(! ifilename)
    {
       mailMessage->ExpandParameter(
@@ -616,7 +646,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
                                        NULLstring, filename,
                                        NULLstring, NULLstring, true,
                                        m_FolderView ? m_FolderView->GetProfile() :
-                                       NULL); 
+                                       NULL);
       if ( strutil_isempty(filename) ) {
          // cancelled
          return;
@@ -650,113 +680,114 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 }
 
 void
-wxMessageView::OnCommandEvent(wxCommandEvent &event)
+wxMessageView::OnMouseEvent(wxCommandEvent &event)
 {
    ClickableInfo *ci;
-   
-   if(event.GetId() == WXMENU_LAYOUT_CLICK)
+
+   wxLayoutObjectBase *obj;
+   obj = (wxLayoutObjectBase *)event.GetClientData();
+   ci = (ClickableInfo *)obj->GetUserData();
+   if(ci)
    {
-      wxLayoutObjectBase *obj;
-      obj = (wxLayoutObjectBase *)event.GetClientData();
-      ci = (ClickableInfo *)obj->GetUserData();
-      if(ci)
+      switch( ci->GetType() )
       {
-         switch(ci->type)
+         case ClickableInfo::CI_ICON:
          {
-            case ClickableInfo::CI_ICON:
+            switch ( event.GetId() )
             {
-               int x,y;
-               wxPoint pos;// = GetClickPosition();
-               wxWindow *p = GetParent();
-               while(p)
-               {
-                  p->GetPosition(&x,&y);
-                  pos.x += x; pos.y += y;
-                  if(p->IsKindOf(CLASSINFO(wxFrame)))
-                     break;
-                  p = p->GetParent();
-               }
-               GetPosition(&x,&y);
-               pos.x += x; pos.y += y;
+               case WXMENU_LAYOUT_RCLICK:
+                  // show the menu
+                  if ( m_MimePopup == NULL )
+                  {
+                     // create the pop up menu now if not done yet
+                     m_MimePopup = new MimePopup(this, ci->GetPart());
+                  }
 
-               if ( m_MimePopup == NULL )
-               {
-                  // create the pop up menu now if not done yet
-                  m_MimePopup = new MimePopup(this, ci->id);
-               }
+                  PopupMenu(m_MimePopup, m_ClickPosition.x, m_ClickPosition.y);
+                  break;
 
-               PopupMenu(m_MimePopup, pos.x, pos.y);
-               break;
-            }
+               case WXMENU_LAYOUT_LCLICK:
+                  // for now, do the same thing as double click: perhaps the
+                  // left button behaviour should be configurable?
 
-            case ClickableInfo::CI_URL:
-            {
-               wxFrame *frame = GetFrame(this);
+               case WXMENU_LAYOUT_DBLCLICK:
+                  // open
+                  MimeHandle(ci->GetPart());
+                  break;
 
-               // wxYield() hangs the program in the release build under Windows
-               /*
-               wxLogStatus(frame, _("Opening URL '%s'..."), ci->url.c_str());
-               wxYield();  // let the status bar update itself
-               */
-
-               wxBeginBusyCursor();
-
-               bool bOk;
-               String cmd = READ_CONFIG(m_Profile, MP_BROWSER);
-               if ( cmd.IsEmpty() ) {
-#                 ifdef OS_WIN
-                     bOk = (int)ShellExecute(NULL, "open", ci->url,
-                                             NULL, NULL, SW_SHOWNORMAL ) > 32;
-                     if ( !bOk ) {
-                        wxLogSysError(_("Can't open URL '%s'"), ci->url.c_str());
-                     }
-#                 else  // Unix
-                     // propose to choose program for opening URLs
-                     if (
-                          MDialog_YesNoDialog
-                          (
-                           _("No command configured to view URLs.\n"
-                             "Would you like to choose one now?"),
-                           frame
-                          )
-                        )
-                     {
-                        ShowOptionsDialog();
-                        cmd = READ_CONFIG(m_Profile, MP_BROWSER);
-                     }
-
-                     if ( cmd.IsEmpty() )
-                     {
-                        wxLogError(_("No command configured to view URLs."));
-                        bOk = FALSE;
-                     }
-#                 endif
-               }
-               else {
-                  // not empty, user provided his script - use it
-                  cmd += ' '; 
-                  cmd += ci->url;
-                  bOk = wxExecute(Str(cmd)) != 0;
-               }
-
-               wxEndBusyCursor();
-
-               if ( bOk ) {
-                  wxLogStatus(frame, _("Opening URL '%s'... done."),
-                              ci->url.c_str());
-               }
-               else {
-                  wxLogStatus(frame, _("Opening URL '%s' failed."),
-                              ci->url.c_str());
-               }
-
-               break;
+               default:
+                  FAIL_MSG("unknown mouse action");
             }
          }
+         break;
+
+         case ClickableInfo::CI_URL:
+         {
+            wxFrame *frame = GetFrame(this);
+
+            // wxYield() hangs the program in the release build under Windows
+            /*
+            wxLogStatus(frame, _("Opening URL '%s'..."), ci->url.c_str());
+            wxYield();  // let the status bar update itself
+            */
+
+            wxBeginBusyCursor();
+
+            bool bOk;
+            String cmd = READ_CONFIG(m_Profile, MP_BROWSER);
+            if ( cmd.IsEmpty() ) {
+#                 ifdef OS_WIN
+                  bOk = (int)ShellExecute(NULL, "open", ci->GetUrl(),
+                                          NULL, NULL, SW_SHOWNORMAL ) > 32;
+                  if ( !bOk ) {
+                     wxLogSysError(_("Can't open URL '%s'"),
+                                   ci->GetUrl().c_str());
+                  }
+#                 else  // Unix
+                  // propose to choose program for opening URLs
+                  if (
+                       MDialog_YesNoDialog
+                       (
+                        _("No command configured to view URLs.\n"
+                          "Would you like to choose one now?"),
+                        frame
+                       )
+                     )
+                  {
+                     ShowOptionsDialog();
+                     cmd = READ_CONFIG(m_Profile, MP_BROWSER);
+                  }
+
+                  if ( cmd.IsEmpty() )
+                  {
+                     wxLogError(_("No command configured to view URLs."));
+                     bOk = FALSE;
+                  }
+#                 endif
+            }
+            else {
+               // not empty, user provided his script - use it
+               cmd << ' ' << ci->GetUrl();
+               bOk = wxExecute(Str(cmd)) != 0;
+            }
+
+            wxEndBusyCursor();
+
+            if ( bOk ) {
+               wxLogStatus(frame, _("Opening URL '%s'... done."),
+                           ci->GetUrl().c_str());
+            }
+            else {
+               wxLogStatus(frame, _("Opening URL '%s' failed."),
+                           ci->GetUrl().c_str());
+            }
+         }
+         break;
+
+         default:
+            FAIL_MSG("unknown embedded object type");
       }
    }
-   else
-      OnMenuCommand(event.GetId());
 }
 
 
@@ -765,7 +796,7 @@ wxMessageView::OnMenuCommand(int id)
 {
    wxArrayInt msgs;
    msgs.Insert(0,m_uid);
-   
+
    switch(id)
    {
    case WXMENU_MSG_PRINT:
@@ -827,9 +858,9 @@ wxMessageView::Print(void)
    String afmpath = pf.FindDirFile("Cour.afm");
    wxSetAFMPath((char *) afmpath.c_str());
 #endif // Unix
-    
+
    wxLayoutWindow::Print();
-} 
+}
 
 
 BEGIN_EVENT_TABLE(wxMessageViewFrame, wxMFrame)
@@ -865,18 +896,28 @@ wxMessageViewFrame::wxMessageViewFrame(MailFolder *folder,
    wxSizeEvent se; // unused
    OnSize(se);
 }
-   
+
 void
-wxMessageViewFrame::OnCommandEvent(wxCommandEvent &ev)
+wxMessageViewFrame::OnCommandEvent(wxCommandEvent &event)
 {
-   int id = ev.GetId();
-   if(id == WXMENU_MSG_REPLY ||
-      id == WXMENU_MSG_FORWARD ||
-      id == WXMENU_MSG_PRINT ||
-      id == WXMENU_LAYOUT_CLICK)
-      m_MessageView->OnCommandEvent(ev);
-   else
-      wxMFrame::OnCommandEvent(ev);
+   int id = event.GetId();
+   switch ( id )
+   {
+      case WXMENU_MSG_REPLY:
+      case WXMENU_MSG_FORWARD:
+      case WXMENU_MSG_PRINT:
+         m_MessageView->OnMenuCommand(id);
+         break;
+
+      case WXMENU_LAYOUT_LCLICK:
+      case WXMENU_LAYOUT_RCLICK:
+      case WXMENU_LAYOUT_DBLCLICK:
+         m_MessageView->OnMouseEvent(event);
+         break;
+
+      default:
+         wxMFrame::OnCommandEvent(event);
+   }
 }
 
 void

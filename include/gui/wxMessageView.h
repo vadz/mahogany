@@ -52,7 +52,7 @@ public:
                  wxWindow *parent = NULL,
                  const String &iname = String("MessageView")
                  );
-   
+
    /** Constructor
        @param folder the mailfolder
        @param num    number of message (0 based)
@@ -73,24 +73,25 @@ public:
        @param num the message number
    */
    void ShowMessage(MailFolder *folder, long num);
-   
+
    /// update it
    void   Update(void);
 
    /// return true if initialised
    bool   IsInitialised(void) const { return initialised; }
 
-   /// called on Menu selection
-   void OnMenuCommand(int id);
-
    /// prints the currently displayed message
    void Print(void);
 
    /// convert string in cptr to one in which URLs are highlighted
-   void HighLightURLs(const char *cptr, String &out);
+   String HighLightURLs(const char *cptr);
 
-   /// wxWin2 event system
-   void OnCommandEvent(wxCommandEvent & event);
+   // callbacks
+      /// called on Menu selection
+   void OnMenuCommand(int id);
+
+      /// called on mouse click
+   void OnMouseEvent(wxCommandEvent & event);
 
 private:
    /// is initialised?
@@ -134,19 +135,19 @@ class wxMessageViewFrame : public wxMFrame
 {
 public:
    wxMessageViewFrame(MailFolder *folder,
-                      long num, 
+                      long num,
                       wxFolderView *folderview,
                       wxWindow  *parent = NULL,
                       const String &iname = String("MessageViewFrame"));
 
-   /// wxWin2 event system
+   /// wxWin2 event system callbacks
    void OnCommandEvent(wxCommandEvent & event);
-#ifdef USE_WXWINDOWS2
-      void OnSize( wxSizeEvent &WXUNUSED(event) );
-#endif
+   void OnSize(wxSizeEvent & event);
+
 private:
    wxMessageView *m_MessageView;
-   DECLARE_EVENT_TABLE() 
+
+   DECLARE_EVENT_TABLE()
 };
 
 #endif

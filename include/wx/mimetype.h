@@ -36,6 +36,8 @@ public:
     // accessors: all of them return true if the corresponding information
     // could be retrieved/found, false otherwise (and in this case all [out]
     // parameters are unchanged)
+        // return the MIME type for this file type
+    bool GetMimeType(wxString *mimeType) const;
         // fill passed in array with all extensions associated with this file
         // type
     bool GetExtensions(wxArrayString& extensions);
@@ -49,6 +51,13 @@ public:
         // get the command to print the file of given type, returned string
         // always contains exactly one '%s' printf() format specifier
     bool GetPrintCommand(wxString *printCmd) const;
+
+    // operations
+        // expand a string in the format of GetOpenCommand (which may contain
+        // '%s' and '%t' format specificators for the file name and mime type)
+    static wxString ExpandCommand(const wxString& command,
+                                  const wxString& filename,
+                                  const wxString& mimetype);
 
     // dtor (not virtual, shouldn't be derived from)
     ~wxFileType();
@@ -70,7 +79,7 @@ class wxMimeTypesManager
 {
 public:
     // ctor
-    MimeTypesManager();
+    wxMimeTypesManager();
 
     // Database lookup: all functions return a pointer to wxFileType object
     // whose methods may be used to query it for the information you're
@@ -89,7 +98,7 @@ public:
     void ReadMimeTypes(const wxString& filename);
 
     // dtor (not virtual, shouldn't be derived from)
-    ~MimeTypesManager();
+    ~wxMimeTypesManager();
 
 private:
     // no copy ctor/assignment operator

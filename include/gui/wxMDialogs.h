@@ -15,8 +15,9 @@
 
 #ifndef     USE_PCH
 #   include   "MFrame.h"
-#   include   "MDialogs.h"
 #endif
+
+#include "MDialogs.h"
 
 // fwd decl
 class ProfileBase;
@@ -35,9 +36,9 @@ class MWindow;
        @param modal   true to make messagebox modal
    */
 void   MDialog_ErrorMessage(char const *message,
-           MWindow *parent = NULL,
-              char const *title = MDIALOG_ERRTITLE,
-           bool modal = false);
+                            MWindow *parent = NULL,
+                            char const *title = MDIALOG_ERRTITLE,
+                            bool modal = false);
 
 /** display system error message:
        @param message the text to display
@@ -46,9 +47,9 @@ void   MDialog_ErrorMessage(char const *message,
        @param modal   true to make messagebox modal
    */
 void   MDialog_SystemErrorMessage(char const *message,
-            MWindow *parent = NULL,
-            char const *title = MDIALOG_SYSERRTITLE,
-            bool modal = false);
+                                  MWindow *parent = NULL,
+                                  char const *title = MDIALOG_SYSERRTITLE,
+                                  bool modal = false);
 
 /** display error message and exit application
        @param message the text to display
@@ -56,9 +57,8 @@ void   MDialog_SystemErrorMessage(char const *message,
        @param parent   the parent frame
    */
 void   MDialog_FatalErrorMessage(char const *message,
-           MWindow *parent = NULL,
-           char const *title = MDIALOG_FATALERRTITLE
-   );
+                                 MWindow *parent = NULL,
+                                 char const *title = MDIALOG_FATALERRTITLE);
 
 /** display normal message:
        @param message the text to display
@@ -67,9 +67,9 @@ void   MDialog_FatalErrorMessage(char const *message,
        @param modal   true to make messagebox modal
    */
 void   MDialog_Message(char const *message,
-      MWindow *parent = NULL,
-      char const *title = MDIALOG_MSGTITLE,
-      bool modal = false);
+                       MWindow *parent = NULL,
+                       char const *title = MDIALOG_MSGTITLE,
+                       bool modal = false);
 
 /** simple Yes/No dialog
        @param message the text to display
@@ -80,10 +80,10 @@ void   MDialog_Message(char const *message,
        @return true if Yes was selected
    */
 bool   MDialog_YesNoDialog(char const *message,
-          MWindow *parent = NULL,
-          bool modal = false,
-          char const *title = MDIALOG_YESNOTITLE,
-          bool YesDefault = true);
+                           MWindow *parent = NULL,
+                           bool modal = false,
+                           char const *title = MDIALOG_YESNOTITLE,
+                           bool YesDefault = true);
 
 /** Filerequester
        @param message the text to display
@@ -98,14 +98,13 @@ bool   MDialog_YesNoDialog(char const *message,
    */
 #if 0
 const char *MDialog_FileRequester(char const *message,
-                  MWindow *parent = NULL,
-                  char const *path = NULL,
-                  char const *filename = NULL,
-                  char const *extension = NULL,
-                  char const *wildcard = NULL,
-                  bool save = false,
-                  ProfileBase *profile = NULL
-   );
+                                  MWindow *parent = NULL,
+                                  char const *path = NULL,
+                                  char const *filename = NULL,
+                                  char const *extension = NULL,
+                                  char const *wildcard = NULL,
+                                  bool save = false,
+                                  ProfileBase *profile = NULL);
 #endif
 
 const char *MDialog_FileRequester(String const &message,

@@ -24,7 +24,7 @@
 
 /// read from the global config section
 #define   READ_APPCONFIG(key) (mApplication->GetProfile()->readEntry(key, key##_D))
-/// read from a normal profile   
+/// read from a normal profile
 #define   READ_CONFIG(profile, key) profile->readEntry(key, key##_D)
 
 // ----------------------------------------------------------------------------
@@ -35,14 +35,14 @@ class wxConfigBase;
 
 /**@name Profile management classes. */
 //@{
-   
+
 /** ProfileBase, an abstract base class for all Profile classes.
     This class serves as a common base class for the ProfileAppConfig
     and Profile classes. The real implementation is class Profile. In
     order to allow it to inherit values from an AppConfig class
     instance, the wrapper class ProfileAppConfig is available.
     @see Profile
-    @see ProfileAppConfig
+    @see ProfileAppConfig (VZ: there is no such class??)
     @see AppConfig
 */
 class ProfileBase : public MObjectRC
@@ -55,7 +55,7 @@ public:
    static ProfileBase * CreateGlobalConfig(String const &  filename);
    /// Create a dummy Profile just inheriting from the top level
    static ProfileBase * CreateEmptyProfile(ProfileBase const *parent = NULL);
-   
+
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */
@@ -94,20 +94,29 @@ public:
 
        again, this is just directly forwarded to wxConfig
    */
-   virtual bool GetFirstGroup(String&, long) = 0;
-   virtual bool GetNextGroup(String&, long) = 0;
-   
+   bool GetFirstGroup(String& s, long l);
+   bool GetNextGroup(String& s, long l);
+
    /** @name Managing environment variables
 
        just expose wxConfig methods (we do need them to be able to read the
        real config values, i.e. to disable expansion, sometimes)
    */
    /// are we automatically expanding env vars?
-   virtual bool IsExpandingEnvVars() const = 0;
+   bool IsExpandingEnvVars() const;
    /// set the flag which tells if we should auto expand env vars
-   virtual void SetExpandEnvVars(bool bDoIt = TRUE) = 0;
+   void SetExpandEnvVars(bool bDoIt = TRUE);
+
+   // for internal use by wxWindows related code only: get the pointer to the
+   // underlying wxConfig object. ProfileBase readEntry() functions should be
+   // used for reading/writing the entries!
+   wxConfigBase *GetConfig() const { return m_config; }
 
 protected:
+   /// the config object we use (may be NULL)
+   // VZ: when can it be NULL exactly??
+   wxConfigBase  *m_config;
+
    /// why does egcs want this?
    ProfileBase() {}
 
@@ -118,32 +127,58 @@ private:
    ProfileBase & operator=(const ProfileBase & );
 };
 
-// ----------------------------------------------------------------------------
+// ============================================================================
 // Helper classes
-// ----------------------------------------------------------------------------
+// ============================================================================
 
-// suspend the env var expansion (the old state restored in dtor)
+// ----------------------------------------------------------------------------
+// a small class to temporarily suspend env var expansion
+// ----------------------------------------------------------------------------
 class ProfileEnvVarSuspend
 {
 public:
-  ProfileEnvVarSuspend(ProfileBase *profile);
-  ~ProfileEnvVarSuspend();
+   ProfileEnvVarSuspend(ProfileBase *profile)
+   {
+      m_profile = profile;
+      m_wasExpanding = profile->IsExpandingEnvVars();
+      profile->SetExpandEnvVars(FALSE);
+   }
+
+   ~ProfileEnvVarSuspend()
+   {
+      m_profile->SetExpandEnvVars(m_wasExpanding);
+   }
 
 private:
   ProfileBase *m_profile;
   bool         m_wasExpanding;
 };
 
-// change the profile path temporarily (will be restored in dtor)
+// ----------------------------------------------------------------------------
+// a tiny utility class which is used to temporary change the config path, for
+// example:
+//    {
+//       ProfilePathChanger ppc(profile->GetConfig(), "/M/Frames");
+//       profile->WriteEntry("x", 400);
+//       ...
+//       // path automatically restored here
+//    }
+// ----------------------------------------------------------------------------
 class ProfilePathChanger
 {
 public:
-   ProfilePathChanger(ProfileBase *config, String const & path);
-   ~ProfilePathChanger();
-   
+   ProfilePathChanger(ProfileBase *config, const String& path)
+   {
+      m_config = config;
+      m_strOldPath = m_config->GetPath();
+      m_config->SetPath(path);
+   }
+
+   ~ProfilePathChanger() { m_config->SetPath(m_strOldPath); }
+
 private:
    ProfileBase *m_config;
-   String      m_strOldPath;
+   String       m_strOldPath;
 };
 
 
@@ -152,6 +187,5 @@ private:
 // ----------------------------------------------------------------------------
 void SaveArray(ProfileBase& conf, const wxArrayString& astr, String const & key);
 void RestoreArray(ProfileBase& conf, wxArrayString& astr, String const & key);
-
 
 #endif // PROFILE_H

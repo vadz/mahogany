@@ -24,8 +24,6 @@
 #  include "strutil.h"
 
 #  include "PathFinder.h"
-#  include "MimeList.h"
-#  include "MimeTypes.h"
 #  include "Profile.h"
 
 #  include "MFrame.h"
@@ -54,8 +52,8 @@
 #include "gui/wxlparser.h"
 #include "gui/wxComposeView.h"
 
-
 #include <wx/textfile.h>
+#include <wx/mimetype.h>
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbManager.h"
@@ -100,27 +98,111 @@ IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
    END_EVENT_TABLE()
 #endif
 
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
 
-struct MimeContent
+class MimeContent : public wxLayoutObjectBase::UserData
 {
-   enum { MIMECONTENT_FILE, MIMECONTENT_DATA } m_Type;
-   char *m_Data;
-   size_t m_Length;
-   String m_FileName;
-   int    m_NumericMimeType;
-   String m_MimeType;
-   MimeContent()
-      { m_Type = MIMECONTENT_FILE; m_Data = NULL; } // safe settings
+public:
+   // constants
+   enum MimeContentType
+   {
+      MIMECONTENT_NONE,
+      MIMECONTENT_FILE,
+      MIMECONTENT_DATA
+   };
+
+   // ctor & dtor
+   MimeContent() { m_Type = MIMECONTENT_NONE; }
    ~MimeContent()
       {
-         if(m_Type == MIMECONTENT_DATA && m_Data != NULL)
+         if ( m_Type == MIMECONTENT_DATA )
             delete m_Data;
       }
+
+   // initialize
+   void SetMimeType(const String& mimeType);
+   void SetData(char *data, size_t length); // we'll delete data!
+   void SetFile(const String& filename);
+
+   // accessors
+   MimeContentType GetType() const { return m_Type; }
+
+   const String& GetMimeType() const { return m_MimeType; }
+   Message::ContentType GetMimeCategory() const { return m_NumericMimeType; }
+
+   const String& GetFileName() const
+      { ASSERT( m_Type == MIMECONTENT_FILE ); return m_FileName; }
+
+   const char *GetData() const
+      { ASSERT( m_Type == MIMECONTENT_DATA ); return m_Data; }
+   size_t GetSize() const
+      { ASSERT( m_Type == MIMECONTENT_DATA ); return m_Length; }
+
+private:
+   MimeContentType m_Type;
+
+   char     *m_Data;
+   size_t    m_Length;
+   String    m_FileName;
+
+   Message::ContentType m_NumericMimeType;
+   String               m_MimeType;
 };
 
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// MimeContent
+// ----------------------------------------------------------------------------
+
+void MimeContent::SetMimeType(const String& mimeType)
+{
+   m_MimeType = mimeType;
+
+   // determin the numeric type
+   String category = mimeType.Before('/');
+   if ( category.CmpNoCase("VIDEO") == 0 )
+      m_NumericMimeType = Message::MSG_TYPEVIDEO;
+   else if ( category.CmpNoCase("AUDIO") == 0 )
+      m_NumericMimeType = Message::MSG_TYPEAUDIO;
+   else if ( category.CmpNoCase("IMAGE") == 0 )
+      m_NumericMimeType = Message::MSG_TYPEIMAGE;
+   else if ( category.CmpNoCase("TEXT") == 0 )
+      m_NumericMimeType = Message::MSG_TYPETEXT;
+   else if ( category.CmpNoCase("MESSAGE") == 0 )
+      m_NumericMimeType = Message::MSG_TYPEMESSAGE;
+   else if ( category.CmpNoCase("APPLICATION") == 0 )
+      m_NumericMimeType = Message::MSG_TYPEAPPLICATION;
+   else if ( category.CmpNoCase("MODEL") == 0 )
+      m_NumericMimeType = Message::MSG_TYPEMODEL;
+   else
+      m_NumericMimeType = Message::MSG_TYPEOTHER;
+}
+
+void MimeContent::SetData(char *data, size_t length)
+{
+   ASSERT( data != NULL );
+
+   m_Data = data;
+   m_Length = length;
+   m_Type = MIMECONTENT_DATA;
+}
+
+void MimeContent::SetFile(const String& filename)
+{
+   ASSERT( !filename.IsEmpty() );
+
+   m_FileName = filename;
+   m_Type = MIMECONTENT_FILE;
+}
+
+// ----------------------------------------------------------------------------
+// wxComposeView
+// ----------------------------------------------------------------------------
 void
 wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
                       ProfileBase *parentProfile,
@@ -132,7 +214,7 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    m_LayoutWindow = NULL;
    nextFileID = 0;
    m_pManager = NULL;
-   
+
    if(!parentProfile)
       parentProfile = mApplication->GetProfile();
    m_Profile = ProfileBase::CreateProfile(iname,parentProfile);
@@ -316,7 +398,7 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
             }
 
             // let's respect the netiquette
-            static const size_t nMaxSigLines = 4; 
+            static const size_t nMaxSigLines = 4;
             if ( nLineCount > nMaxSigLines ) {
                wxLogWarning(_("Your signature is too long: it should not be more"
                               " than %d lines"), nMaxSigLines);
@@ -348,7 +430,7 @@ wxComposeView::CreateFTCanvas(void)
    String
       fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR),
       bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
-   
+
    m_LayoutWindow->Clear(
       READ_CONFIG(m_Profile,MP_FTEXT_FONT),
       READ_CONFIG(m_Profile,MP_FTEXT_SIZE),
@@ -405,7 +487,7 @@ wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
      m_pManager = AdbManager::Get();
      m_pManager->LoadAll();
    }
-   
+
    ArrayAdbEntries aEntries;
    if ( AdbLookup(aEntries, what) ) {
      int rc = MDialog_AdbLookupList(aEntries, this);
@@ -431,18 +513,6 @@ wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
    }
 }
 
-#ifndef USE_WXWINDOWS2
-void
-wxComposeView::OnCommand(wxWindow &win, wxCommandEvent &event)
-{
-   // this gets called when the Expand button is pressed
-   if ( strcmp(win.GetName(),"toField") == 0 ||
-        strcmp(win.GetName(),"button")  == 0    ) {
-      OnExpand(event);
-   }
-}
-#endif // wxWin1
-
 void
 wxComposeView::OnCloseWindow(wxCloseEvent& event)
 {
@@ -455,7 +525,7 @@ wxComposeView::OnCloseWindow(wxCloseEvent& event)
                   true, // modal
                   MDIALOG_YESNOTITLE,
                   false // "yes" not default
-                 ); 
+                 );
    }
 
    if ( bDoClose ) {
@@ -492,28 +562,21 @@ wxComposeView::OnMenuCommand(int id)
 }
 
 void
-wxComposeView::InsertData(const char *data,
+wxComposeView::InsertData(char *data,
                           size_t length,
-                          const char *mimetype,
-                          int num_mimetype)
+                          const char *mimetype)
 {
    MimeContent *mc = new MimeContent();
 
    if(strutil_isempty(mimetype))
    {
-      mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
-      mc->m_NumericMimeType = Message::MSG_TYPEAPPLICATION;
+      mimetype = "APPLICATION/OCTET-STREAM";
    }
-   else
-   {
-      mc->m_NumericMimeType = num_mimetype;
-      mc->m_MimeType = mimetype;
-   }
-   mc->m_Data = (char *)data; // @@@
-   mc->m_Length = length;
-   mc->m_Type = MimeContent::MIMECONTENT_DATA;
-   
-   wxIcon icon = mApplication->GetIconManager()->GetIconFromMimeType(mc->m_MimeType);
+
+   mc->SetMimeType(mimetype);
+   mc->SetData(data, length);
+
+   wxIcon icon = mApplication->GetIconManager()->GetIconFromMimeType(mimetype);
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
    obj->SetUserData(mc);
@@ -523,39 +586,47 @@ wxComposeView::InsertData(const char *data,
 }
 
 void
-wxComposeView::InsertFile(const char *filename, const char *mimetype,
-                          int num_mimetype)
+wxComposeView::InsertFile(const char *filename, const char *mimetype)
 {
-   MimeContent 
+   MimeContent
       *mc = new MimeContent();
 
-   if(filename == NULL)
+   if( strutil_isempty(filename) )
    {
       filename = MDialog_FileRequester(NULLstring, this, NULLstring,
                                        NULLstring, NULLstring,
                                        NULLstring, true, m_Profile);
-      if(! filename)
+      if( strutil_isempty(filename) )
+      {
+         // cancelled by user
          return;
-      mc->m_NumericMimeType = Message::MSG_TYPEAPPLICATION;
-      if(! mApplication->GetMimeTypes()->Lookup(filename, mc->m_MimeType, &(mc->m_NumericMimeType)))
-         mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
+      }
+   }
+
+   String strExt = wxString(filename).After('.');
+   String strMimeType;
+   if ( strutil_isempty(mimetype) )
+   {
+      wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
+      wxFileType *fileType = mimeManager.GetFileTypeFromExtension(strExt);
+      if ( (fileType == NULL) || !fileType->GetMimeType(&strMimeType) )
+      {
+         // can't find MIME type from file extension, set some default one
+         strMimeType = "APPLICATION/OCTET-STREAM";
+      }
+
+      delete fileType;  // may be NULL, ok
    }
    else
    {
-      mc->m_NumericMimeType = num_mimetype;
-      mc->m_MimeType = mimetype;
+      strMimeType = mimetype;
    }
-   mc->m_FileName = filename;
-   mc->m_Type = MimeContent::MIMECONTENT_FILE;
+
+   mc->SetMimeType(strMimeType);
+   mc->SetFile(filename);
 
    wxIconManager *iconManager = mApplication->GetIconManager();
-
-#  ifdef OS_WIN
-      wxString strExt = wxString(filename).After('.');
-      wxIcon icon = iconManager->GetIconFromExtension(strExt);
-#  else
-      wxIcon icon = iconManager->GetIconFromMimeType(mc->m_MimeType);
-#  endif // Win/Unix
+   wxIcon icon = iconManager->GetIconFromMimeType(strMimeType);
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
    obj->SetUserData(mc);
@@ -563,7 +634,7 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
    m_LayoutWindow->GetLayoutList().Insert(obj);
 
    wxLogStatus(this, _("Inserted file '%s' (as '%s')"),
-               filename, mc->m_MimeType.c_str());
+               filename, strMimeType.c_str());
 
    Refresh();
 }
@@ -573,12 +644,6 @@ wxComposeView::Send(void)
 {
    String
       tmp2, mimeType, mimeSubType;
-   char
-      *buffer;
-   ifstream
-      istr;
-   size_t
-      size;
 
    SendMessageCC sm
       (
@@ -600,65 +665,97 @@ wxComposeView::Send(void)
                                   i,WXLO_EXPORT_AS_TEXT)) != NULL)
    {
       if(export->type == WXLO_EXPORT_TEXT)
-         sm.AddPart(Message::MSG_TYPETEXT,export->content.text->c_str(),export->content.text->length(),
-                    "PLAIN");
+      {
+         String* text = export->content.text;
+         sm.AddPart
+         (
+            Message::MSG_TYPETEXT,
+            text->c_str(), text->length(),
+            "PLAIN"
+         );
+      }
       else
       {
          lo = export->content.object;
          if(lo->GetType() == WXLO_TYPE_ICON)
          {
             mc = (MimeContent *)lo->GetUserData();
-            switch(mc->m_Type)
+
+            switch( mc->GetType() )
             {
             case MimeContent::MIMECONTENT_FILE:
-               istr.open(mc->m_FileName.c_str());
-               if(istr)
                {
-                  istr.seekg(0,ios::end);
-                  size = istr.tellg();
-                  buffer = new char [size];
-                  istr.seekg(0,ios::beg);
-                  istr.read(buffer, size);
+                  String filename = mc->GetFileName();
+                  wxFile file;
+                  if ( file.Open(filename) )
+                  {
+                     size_t size = file.Length();
+                     char *buffer = new char[size];
+                     if ( file.Read(buffer, size) )
+                     {
+                        MessageParameterList dlist;
+                        MessageParameter *p = new MessageParameter;
+                        p->name = "FILENAME";
+                        p->value = wxFileNameFromPath(filename);
+                        dlist.push_back(p);
 
+                        sm.AddPart
+                        (
+                           mc->GetMimeCategory(),
+                           buffer, size,
+                           strutil_after(mc->GetMimeType(),'/'), //subtype
+                           "INLINE",
+                           &dlist
+                        );
+                     }
+                     else
+                     {
+                        wxLogError(_("Can't read file '%s' included in "
+                                     "this message!"), filename.c_str());
+                     }
+
+                     delete [] buffer;
+                  }
+                  else
+                  {
+                     wxLogError(_("Can't open file '%s' included in "
+                                  "this message!"), filename.c_str());
+                  }
+               }
+               break;
+
+            case MimeContent::MIMECONTENT_DATA:
+               {
                   MessageParameterList dlist;
                   MessageParameter *p = new MessageParameter;
-                  p->name = "FILENAME"; p->value=wxFileNameFromPath(mc->m_FileName);
+                  p->name = "FILENAME";
+                  p->value = wxFileNameFromPath(mc->GetFileName());
                   dlist.push_back(p);
-                  if(! istr.fail())
-                     sm.AddPart(mc->m_NumericMimeType, buffer, size,
-                                strutil_after(mc->m_MimeType,'/'), //subtype
-                                "INLINE",&dlist,NULL
-                        );
-                  else
-                     SYSERRMESSAGE((_("Cannot read file."),this));
-                  delete [] buffer;
-                  istr.close();
-               }
-               else
-               {
-                  String dirtyHack = "Cannot open file: ";
-                  dirtyHack +=mc->m_FileName;
-                  SYSERRMESSAGE((_(Str(dirtyHack)),this));
-               }
-               break;
-            case MimeContent::MIMECONTENT_DATA:
-            {
-               MessageParameterList dlist;
-               MessageParameter *p = new MessageParameter;
-               p->name = "FILENAME"; p->value=wxFileNameFromPath(mc->m_FileName);
-               dlist.push_back(p);
-               sm.AddPart(mc->m_NumericMimeType, mc->m_Data, mc->m_Length,
-                          strutil_after(mc->m_MimeType,'/'),  //subtype
-                          "INLINE",&dlist,NULL
+
+                  sm.AddPart
+                  (
+                     mc->GetMimeCategory(),
+                     mc->GetData(), mc->GetSize(),
+                     strutil_after(mc->GetMimeType(),'/'),  //subtype
+                     "INLINE"
+                     ,&dlist,
+                     NULL
                   );
+               }
                break;
-            }
+
+            default:
+               FAIL_MSG("Unknwown part type");
             }
          }
       }
+
       delete export;
    }
+
+   // FIXME no error return???
    sm.Send();
+
    if(READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
    {
       String file;

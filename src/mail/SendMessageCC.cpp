@@ -142,7 +142,8 @@ SendMessageCC::Create(ProfileBase *iprof,
 }
 
 void
-SendMessageCC::AddPart(int type, const char *buf, size_t len,
+SendMessageCC::AddPart(Message::ContentType type,
+                       const char *buf, size_t len,
                        String const &subtype,
                        String const &disposition,
                        MessageParameterList const *dlist,
@@ -169,6 +170,7 @@ SendMessageCC::AddPart(int type, const char *buf, size_t len,
       bdy->contents.text.size = len;
       bdy->encoding = ENC8BIT;
       break;
+
    default:
       bdy->type = type;
       bdy->subtype = (char *) fs_get(subtype.length()+1);

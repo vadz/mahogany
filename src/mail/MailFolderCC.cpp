@@ -73,8 +73,7 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
       mboxpath = "INBOX";
       break;
    case MailFolder::MF_FILE:
-      ASSERT(name.c_str());
-      if(*name.c_str() != DIR_SEPARATOR)
+      if ( !IsAbsPath(name) )
          mboxpath << READ_APPCONFIG(MP_MBOXDIR) << '/';
       mboxpath << name;
       break;
@@ -167,23 +166,20 @@ MailFolderCC::FindFolder(String const &path)
 void
 MailFolderCC::Ping(void)
 {
-#if DEBUG
-   String tmp = "MailFolderCC::Ping() on Folder " + m_MailboxPath;
-   LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
-#endif
+   DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.", m_MailboxPath.c_str()));
+
    mail_ping(m_MailStream);
 }
 
 MailFolderCC::~MailFolderCC()
 {
-   StreamConnectionList::iterator i;
-   for(i = streamList.begin(); i != streamList.end(); i++)
-      if( (*i)->folder == this )
-      {
-         streamList.erase(i);
-         if(m_MailStream) mail_close(m_MailStream);
-         RemoveFromMap(m_MailStream);
-      }
+   if ( m_MailStream )
+      mail_close(m_MailStream);
+   RemoveFromMap(m_MailStream);
+
+   // note that RemoveFromMap already removed our node from streamList, so
+   // do not do it here again!
+
    GetProfile()->DecRef();
 }
 
@@ -368,13 +364,16 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
 {
    StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
+   {
       if( (*i)->stream == stream )
       {
          StreamConnection *conn = *i;
          delete conn;
          streamList.erase(i);
+
          break;
       }
+   }
 
    if(streamListDefaultObj == this)
       SetDefaultObj(false);

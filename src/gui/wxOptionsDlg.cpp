@@ -31,6 +31,8 @@
 #include   <wx/notebook.h>
 #include   <wx/dynarray.h>
 
+#include   <wx/persctrl.h>
+
 #include   "MDialogs.h"
 #include   "Mdefaults.h"
 
@@ -176,16 +178,16 @@ public:
   void OnCancel(wxCommandEvent& event);
 
 private:
-  wxNotebook *m_notebook;
-  wxButton   *m_btnOk,
-             *m_btnApply;
+  wxPNotebook *m_notebook;
+  wxButton    *m_btnOk,
+              *m_btnApply;
 
   bool        m_bDirty;     // any changes?
 
   DECLARE_EVENT_TABLE()
 };
 
-class wxOptionsNotebook : public wxNotebook
+class wxOptionsNotebook : public wxPNotebook
 {
 public:
   enum Icon
@@ -1297,7 +1299,7 @@ void wxBrowseButton::DoBrowse()
 
 // create the control and add pages too
 wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
-                 : wxNotebook(parent, -1)
+                 : wxPNotebook("OptionsNotebook", parent, -1)
 {
   // create and fill the imagelist
   static const char *aszImages[] =

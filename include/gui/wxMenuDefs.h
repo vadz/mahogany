@@ -45,17 +45,20 @@ extern void AppendToMenu(wxMenu *menu, int nFirst, int nLast);
 enum
 {
    WXMENU_SEPARATOR = -1,
-   WXMENU_LAYOUT_CLICK = 0,
 
-   WXMENU_FILE_BEGIN = WXMENU_LAYOUT_CLICK,
+   WXMENU_FILE_BEGIN = 0,
    WXMENU_FILE_OPEN,
    WXMENU_FILE_OPENANY,
    WXMENU_FILE_COMPOSE,
    WXMENU_FILE_CREATE,
    WXMENU_FILE_CLOSE,
    WXMENU_FILE_SEP,
+
+#ifdef USE_PYTHON
    WXMENU_FILE_SCRIPT,
    WXMENU_FILE_SEP2,
+#endif // USE_PYTHON
+
    WXMENU_FILE_EXIT,
    WXMENU_FILE_END = WXMENU_FILE_EXIT,
 
@@ -130,6 +133,13 @@ enum
    WXMENU_MIME_SAVE,
    WXMENU_MIME_DISMISS,
    WXMENU_MIME_END,
+
+   // mouse events on embedded objects in wxLayoutWindow
+   WXMENU_LAYOUT_BEGIN = WXMENU_MIME_END,
+   WXMENU_LAYOUT_LCLICK,            // left click
+   WXMENU_LAYOUT_RCLICK,            // right click
+   WXMENU_LAYOUT_DBLCLICK,          // left button only
+   WXMENU_LAYOUT_END,
 
    WXMENU_POPUP_MIME_OFFS = 1000
 };

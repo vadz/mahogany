@@ -173,6 +173,19 @@ strutil_findurl(String &str, String &url);
 /// extracts the last path component from a path
 String strutil_getfilename(const String& path);
 
+/*
+   This function is used to verify that a given string may be used to pass it
+   to printf(). The requirment is that the number and types of format
+   specificators really correspond to the arguments we will pass to printf().
+   It's clear, however, that it makes no sense to distinguish between 'o' and
+   'u' and 'x' or 'X' format specificators because they all accept the same
+   argument. So this function extracts the format specificators from the given
+   format string and returns the "canonical form" of them (as a suite of
+   characters), which means that only 'c', 'h', 'd', 'l', 'e', 's' and 'p'
+   chars will be returned (where 'h' and 'l' stand for short and long int).
+ */
+String strutil_extract_formatspec(const char *format);
+
 /// checks a character to be a valid part of an URL
 #define strutil_isurlchar(c) \
    (isalnum(c)  || c == '.' || c == '/' || c == ':' \

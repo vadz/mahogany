@@ -16,16 +16,18 @@
 #ifndef   USE_PCH
 #   include   "Mcommon.h"
 #   include   "Mdefaults.h"
+
+#   include   "kbList.h"
+#   include   "PathFinder.h"
+#   include   "Profile.h"
+
+#   include   "guidef.h"
 #   include   "MFrame.h"
 #   include   "gui/wxMFrame.h"
-#   include   "PathFinder.h"
-#   include   "MimeList.h"
-#   include   "MimeTypes.h"
-#   include   "guidef.h"
-#   include   "Profile.h"
 #   include   "MLogFrame.h"
-#   include   "kbList.h"
 #endif
+
+class wxMimeTypesManager;
 
 /**
    Application class, doing all non-GUI application specific stuff
@@ -34,22 +36,24 @@
 class MAppBase
 {
 protected:
+   // global variables stored in the application object
+   // -------------------------------------------------
+
    /// the application's toplevel window
-   MFrame *m_topLevelFrame;
+   MFrame  *m_topLevelFrame;
+
    /// the directory of the M global data tree
    String   m_globalDir;
+
    /// the directory of the User's M data files
    String   m_localDir;
+
    /// a list of all known mime types
-   MimeList *m_mimeList;
-   /// a list mapping extensions to mime types
-   MimeTypes  *m_mimeTypes;
+   wxMimeTypesManager *m_mimeManager;
    
    /// a profile wrapper object for the global configuration
    ProfileBase *m_profile;
 
-   // global variables stored in the application object
-   // -------------------------------------------------
 
    /** Checks some global configuration settings and makes sure they
        have sensible values. Especially important when M is run for
@@ -103,47 +107,43 @@ public:
    /** gets toplevel frame
        @return the toplevel window of the application
    */
-   MFrame *TopLevelFrame(void) { return m_topLevelFrame; }
+   MFrame *TopLevelFrame(void) const { return m_topLevelFrame; }
 
    /**  translate a string to national language:
         @param in the text to translate
         @return the translated text
    */
-   const char *GetText(const char *in);
+   const char *GetText(const char *in) const;
    
    /** return the global directory
        @return the path to the global M data files
    */
-   String const & GetGlobalDir(void) { return m_globalDir; }
+   String const & GetGlobalDir(void) const { return m_globalDir; }
 
    /** return the local path
        @return the path to the local user's M data directory
    */
-   String const & GetLocalDir(void) { return m_localDir; }
+   String const & GetLocalDir(void) const { return m_localDir; }
 
    /** Get a pointer to the list of known Mime types.
-       @return the MimeList reference
+       @return the wxMimeTypesManager reference
    */
-   MimeList * GetMimeList(void) { return m_mimeList; }
-
-   /** Get a pointer to the list of known Mime types and extensions.
-       @return the MimeTypes reference
-   */
-   MimeTypes * GetMimeTypes(void) { return m_mimeTypes; }
+   wxMimeTypesManager& GetMimeManager(void) const { return *m_mimeManager; }
 
    /** Get this object's profile.
        @return a pointer to the profile.
    */
-   ProfileBase *GetProfile(void) { return m_profile; }
+   ProfileBase *GetProfile(void) const { return m_profile; }
 
    /** Toggle display of log output window
        @param display true to show it
    */
-   void   ShowConsole(bool display = true);
+   void ShowConsole(bool display = true);
 
    /// return a pointer to the IconManager:
    virtual class wxIconManager *GetIconManager(void) const = 0;
 };
 
 extern MAppBase *mApplication;
-#endif
+
+#endif   // MAPPLICATION_H

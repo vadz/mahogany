@@ -111,7 +111,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
    
    if(m_FolderView)
    {
-      if(WXMENU_CONTAINS(MSG,id) || id == WXMENU_LAYOUT_CLICK)
+      if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id) )
          m_FolderView->OnCommandEvent(event);
 #if 0 // VZ: why? (FIXME)
       else if(id == WXMENU_EDIT_PREF)

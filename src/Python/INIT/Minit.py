@@ -44,7 +44,7 @@ def GetUserName():
 
 def Minit():
     msg = "Welcome, " + GetUserName() + ", to the wonderful world of M/Python integration!"
-    MAppBase.MDialog_Message(msg)
+    MAppBase.MDialog_StatusMessage(msg)
 
 ####################################################################
 #                                                                  #

@@ -76,12 +76,6 @@ public:
    */
    wxIcon GetIconFromMimeType(const String& type);
 
-#ifdef OS_WIN
-   /** Get the icon for given file extension
-   */
-   wxIcon GetIconFromExtension(const String& ext);
-#endif //Windows
-
    /** Add a name/icon pair to the list
        @param iconName the name for the icon
        @param data the xpm data array (Unix) or the icon resource name (Win)

@@ -45,6 +45,58 @@ BEGIN_EVENT_TABLE(wxPNotebook, wxNotebook)
     EVT_SIZE(wxPNotebook::OnSize)
 END_EVENT_TABLE()
 
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+// This is a helper class for all "persistent" window classes, i.e. the classes
+// which save their last state in a wxConfig object. The information saved
+// depends on each derived class, the base class only provides the functions to
+// change to the path in the config object where the information is saved (use
+// them to ensure that all derived classes behave in a consistent way).
+class wxPHelper
+{
+public:
+    // static functions
+        // set the default prefix for storing the configuration settings
+    static void SetSettingsPath(const wxString& path) { ms_pathPrefix = path; }
+        // retrieve the default prefix for storing the configuration settings
+    static const wxString& GetSettingsPath() { return ms_pathPrefix; }
+
+    // ctors and dtor
+        // default: need to use Set() functions later
+    wxPHelper() { }
+        // the 'path' parameter may be either an absolute path or a relative
+        // path, in which case it will go under wxPHelper::GetSettingsPath()
+        // branch. If the config object is not given the global application one
+        // is used.
+    wxPHelper(const wxString& path, wxConfigBase *config = NULL);
+        // dtor automatically restores the path if not done yet
+    ~wxPHelper();
+
+    // accessors
+        // get our config object
+    wxConfigBase *GetConfig() const { return m_config; }
+        // set the config object to use (must be !NULL)
+    void SetConfig(wxConfigBase *config) { m_config = config; }
+        // set the path to use (either absolute or relative)
+    void SetPath(const wxString& path) { m_path = path; }
+
+    // operations
+        // change path to the place where we will write our values, returns
+        // FALSE if path couldn't be changed (e.g. no config object)
+    bool ChangePath();
+        // restore the old path (also done implicitly in dtor)
+    void RestorePath();
+
+private:
+    static wxString ms_pathPrefix;
+
+    bool          m_pathRestored;
+    wxString      m_path, m_oldPath;
+    wxConfigBase *m_config;
+};
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -58,6 +110,7 @@ wxString wxPHelper::ms_pathPrefix = "/Settings/";
 wxPHelper::wxPHelper(const wxString& path, wxConfigBase *config)
          : m_path(path), m_config(config)
 {
+   m_pathRestored = TRUE;  // it's not changed yet...
 }
 
 wxPHelper::~wxPHelper()
@@ -85,17 +138,19 @@ bool wxPHelper::ChangePath()
     path += m_path;
     m_config->SetPath(path);
 
+    m_pathRestored = FALSE;
+
     return TRUE;
 }
 
 void wxPHelper::RestorePath()
 {
-    if ( !m_oldPath.IsEmpty() ) {
+    if ( !m_pathRestored ) {
         wxCHECK_RET( m_config, "can't restore path without config!" );
 
         m_config->SetPath(m_oldPath);
 
-        m_oldPath.Empty();  // to avoid restoring it next time
+        m_pathRestored = TRUE;  // to avoid restoring it next time
     }
     //else: path wasn't changed or was already restored since then
 }
@@ -107,6 +162,23 @@ void wxPHelper::RestorePath()
 // the key where we store our last selected page
 const char *wxPNotebook::ms_pageKey = "Page";
 
+wxPNotebook::wxPNotebook()
+{
+    m_persist = new wxPHelper;
+}
+
+wxPNotebook::wxPNotebook(const wxString& configPath,
+                         wxWindow *parent,
+                         wxWindowID id,
+                         const wxPoint& pos,
+                         const wxSize& size,
+                         long style,
+                         wxConfigBase *config)
+          : wxNotebook(parent, id, pos, size, style)
+{
+    m_persist = new wxPHelper(configPath, config);
+}
+
 bool wxPNotebook::Create(const wxString& configPath,
                          wxWindow *parent,
                          wxWindowID id,
@@ -115,16 +187,16 @@ bool wxPNotebook::Create(const wxString& configPath,
                          long style,
                          wxConfigBase *config)
 {
-   m_persist.SetConfig(config);
-   m_persist.SetPath(configPath);
+   m_persist->SetConfig(config);
+   m_persist->SetPath(configPath);
 
    return wxNotebook::Create(parent, id, pos, size, style);
 }
 
 void wxPNotebook::RestorePage()
 {
-    if ( m_persist.ChangePath() ) {
-        int nPage = (int)m_persist.GetConfig()->Read(ms_pageKey, 0l);
+    if ( m_persist->ChangePath() ) {
+        int nPage = (int)m_persist->GetConfig()->Read(ms_pageKey, 0l);
         if ( (nPage > 0) && (nPage < GetPageCount()) ) {
             SetSelection(nPage);
         }
@@ -133,16 +205,18 @@ void wxPNotebook::RestorePage()
             wxLogDebug("Couldn't restore wxPNotebook page %d.", nPage);
         }
 
-        m_persist.RestorePath();
+        m_persist->RestorePath();
     }
 }
 
 wxPNotebook::~wxPNotebook()
 {
-    if ( m_persist.ChangePath() ) {
-        m_persist.GetConfig()->Write(ms_pageKey, (long)m_nSelection);
+    if ( m_persist->ChangePath() ) {
+        m_persist->GetConfig()->Write(ms_pageKey, (long)m_nSelection);
     }
     //else: couldn't change path, probably because there is no config object.
+
+    delete m_persist;
 }
 
 void wxPNotebook::OnSize(wxSizeEvent& event)
@@ -159,12 +233,51 @@ void wxPNotebook::OnSize(wxSizeEvent& event)
     event.Skip();
 }
 
+void wxPNotebook::SetConfigObject(wxConfigBase *config)
+{
+    m_persist->SetConfig(config);
+}
+
+void wxPNotebook::SetConfigPath(const wxString& path)
+{
+    m_persist->SetPath(path);
+}
+
 // ----------------------------------------------------------------------------
 // wxPTextEntry
 // ----------------------------------------------------------------------------
 
 // how many strings do we save?
 size_t wxPTextEntry::ms_countSaveDefault = 16;
+
+wxPTextEntry::wxPTextEntry()
+{
+    m_persist = new wxPHelper;
+    m_countSaveMax = ms_countSaveDefault;
+}
+
+wxPTextEntry::wxPTextEntry(const wxString& configPath,
+                           wxWindow *parent,
+                           wxWindowID id,
+                           const wxString& value,
+                           const wxPoint& pos,
+                           const wxSize& size,
+                           long style,
+                           wxConfigBase *config)
+           : wxComboBox(parent, id, value, pos, size, style)
+{
+    m_persist = new wxPHelper(configPath, config);
+    m_countSaveMax = ms_countSaveDefault;
+
+    RestoreStrings();
+}
+
+wxPTextEntry::~wxPTextEntry()
+{
+    SaveSettings();
+
+    delete m_persist;
+}
 
 wxPTextEntry::Create(const wxString& configPath,
                      wxWindow *parent,
@@ -175,8 +288,8 @@ wxPTextEntry::Create(const wxString& configPath,
                      long style,
                      wxConfigBase *config)
 {
-   m_persist.SetConfig(config);
-   m_persist.SetPath(configPath);
+   m_persist->SetConfig(config);
+   m_persist->SetPath(configPath);
 
    if ( wxComboBox::Create(parent, id, value, pos, size, style) ) {
        RestoreStrings();
@@ -191,12 +304,14 @@ wxPTextEntry::Create(const wxString& configPath,
 
 void wxPTextEntry::SaveSettings()
 {
-    if ( m_persist.ChangePath() ) {
-        wxConfigBase *config = m_persist.GetConfig();
+    if ( m_persist->ChangePath() ) {
+        wxConfigBase *config = m_persist->GetConfig();
 
         // save it compare later with other strings
         wxString text = GetValue();
-        config->Write("0", text);
+        if ( !text.IsEmpty() ) {
+            config->Write("0", text);
+        }
 
         size_t count = (size_t)Number();
         if ( count > m_countSaveMax ) {
@@ -218,17 +333,17 @@ void wxPTextEntry::SaveSettings()
             //else: don't store duplicates
         }
 
-        m_persist.RestorePath();
+        m_persist->RestorePath();
     }
 }
 
 void wxPTextEntry::RestoreStrings()
 {
-    if ( m_persist.ChangePath() ) {
-        wxConfigBase *config = m_persist.GetConfig();
+    if ( m_persist->ChangePath() ) {
+        wxConfigBase *config = m_persist->GetConfig();
 
         // read them all
-        wxString key, val;
+        wxString key, val, text;
         for ( size_t n = 0; ; n++ ) {
             key.Printf("%d", n);
             if ( !config->HasEntry(key) )
@@ -237,12 +352,23 @@ void wxPTextEntry::RestoreStrings()
 
             // the first one is the text zone itself
             if ( n == 0 ) {
-                SetValue(val);
+                text = val;
             }
 
             Append(val);
         }
 
-        m_persist.RestorePath();
+        SetValue(text);
+        m_persist->RestorePath();
     }
+}
+
+void wxPTextEntry::SetConfigObject(wxConfigBase *config)
+{
+    m_persist->SetConfig(config);
+}
+
+void wxPTextEntry::SetConfigPath(const wxString& path)
+{
+    m_persist->SetPath(path);
 }

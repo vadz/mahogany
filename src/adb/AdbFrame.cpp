@@ -36,7 +36,7 @@
 #   include "MApplication.h"
 #   include "gui/wxMApp.h"
 #   include "gui/wxMFrame.h"
-#   include   "kbList.h"
+#   include "kbList.h"
 #endif //USE_PCH
 
 #include   "MDialogs.h"
@@ -46,14 +46,16 @@
 #undef   CreateListBox
 
 // wxWindows
-#include "wx/wx.h"
-#include "wx/log.h"
-#include "wx/intl.h"
-#include "wx/dynarray.h"
-#include "wx/notebook.h"
-#include "wx/treectrl.h"
-#include "wx/toolbar.h"
-#include "wx/file.h"
+#include <wx/wx.h>
+#include <wx/log.h>
+#include <wx/intl.h>
+#include <wx/dynarray.h>
+#include <wx/notebook.h>
+#include <wx/treectrl.h>
+#include <wx/toolbar.h>
+#include <wx/file.h>
+
+#include <wx/persctrl.h>
 
 #include "adb/AdbManager.h"
 #include "adb/AdbEntry.h"
@@ -447,7 +449,7 @@ class wxADBFindDialog : public wxDialog
 public:
   // if the dialog is not cancelled, it will store the new values in where and
   // how parameters and also update the text in text control
-  wxADBFindDialog(wxWindow *parent, wxTextCtrl *text, int *where, int *how);
+  wxADBFindDialog(wxWindow *parent, wxPTextEntry *text, int *where, int *how);
 
   // base class virtuals implemented
   virtual bool TransferDataToWindow();
@@ -455,7 +457,7 @@ public:
 
 private:
   // data
-  wxTextCtrl *m_text;
+  wxPTextEntry *m_text;
   int        *m_where,
              *m_how;
 
@@ -649,7 +651,7 @@ private:
   // --------------
   wxAdbNotebook *m_notebook;
   wxAdbTree     *m_treeAdb;
-  wxTextCtrl    *m_textKey;
+  wxPTextEntry  *m_textKey;
 
   wxButton *m_btnCancel,
            *m_btnDelete;
@@ -686,10 +688,8 @@ private:
   wxString m_strLastAdbDir,     // last values of fields in "Open ADB..."
            m_strLastAdbFile,    //  dialog
            m_strLastNewEntry,   // last value of "New..." prompt
-           m_strSelection,      // the full name of the entry which is selected
-           m_strLastSearch;     // last search string
-  long  m_bLastNewWasGroup,     // kind of last created entry (entry or group)
-        m_nLastPage;            // the notebook page
+           m_strSelection;      // the full name of the entry which is selected
+  long  m_bLastNewWasGroup;     // kind of last created entry (entry or group)
 
   // address books to load on startup
   wxArrayString m_astrAdb;
@@ -1012,9 +1012,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // ----------------------------
   wxPanel *panel = new wxPanel(this, -1);
   wxStaticText *label = new wxStaticText(panel, -1, _("&Lookup:"));
-  m_textKey = new wxTextCtrl(panel, AdbView_Lookup, "",
-                             wxDefaultPosition, wxDefaultSize,
-                             wxTE_PROCESS_ENTER);
+  m_textKey = new wxPTextEntry("/AdbEditor/FindKey", panel, AdbView_Lookup);
   m_treeAdb = new wxAdbTree(this, panel, AdbView_Tree);
   m_notebook = new wxAdbNotebook(panel, AdbView_Notebook);
 
@@ -1102,8 +1100,6 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     ConfigName_AddressBookProviders,
     ConfigName_ExpandedBranches,
     ConfigName_TreeSelection,
-    ConfigName_LastSearch,
-    ConfigName_LastPage,
     ConfigName_LastLookup,
     ConfigName_FindOptions
   };
@@ -1118,8 +1114,6 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     "Providers",
     "ExpandedBranches",
     "TreeSelection",
-    "LastSearch",
-    "LastPage",
     "FindWhere",
     "FindOptions"
   };
@@ -1155,10 +1149,8 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
   TRANSFER_STRING(m_strLastAdbFile, ConfigName_LastAdbFile);
   TRANSFER_STRING(m_strLastNewEntry, ConfigName_LastNewEntry);
   TRANSFER_STRING(m_strSelection, ConfigName_TreeSelection);
-  TRANSFER_STRING(m_strLastSearch, ConfigName_LastSearch);
 
   TRANSFER_INT(m_bLastNewWasGroup, ConfigName_LastNewWasGroup);
-  TRANSFER_INT(m_nLastPage, ConfigName_LastPage);
   TRANSFER_INT(m_FindWhere, ConfigName_LastLookup);
   TRANSFER_INT(m_FindHow, ConfigName_FindOptions);
 
@@ -1178,12 +1170,6 @@ void wxAdbEditFrame::SaveSettings()
   // save all expanded branches
   m_astrBranches.Empty();
   SaveExpandedBranches(m_root);
-
-  // save the last search string value
-  m_strLastSearch = m_textKey->GetValue();
-
-  // and the current notebook page
-  m_nLastPage = m_notebook->GetSelection();
 
   TransferSettings(TRUE /* save */);
 }
@@ -1287,12 +1273,6 @@ void wxAdbEditFrame::RestoreSettings2()
   // select the element which had the selection last time
   if ( !m_strSelection.IsEmpty() )
     MoveSelection(m_strSelection);
-
-  // and the notebook page
-  m_notebook->SetSelection(m_nLastPage);
-
-  // ... and the search text
-  m_textKey->SetValue(m_strLastSearch);
 }
 
 void wxAdbEditFrame::UpdateNotebook()
@@ -2139,7 +2119,7 @@ wxAdbEditFrame::~wxAdbEditFrame()
 // wxADBFindDialog dialog
 // ----------------------------------------------------------------------------
 wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
-                                 wxTextCtrl *text,
+                                 wxPTextEntry *text,
                                  int *where,
                                  int *how)
                : wxDialog(parent, -1, _("Find address book entry"),

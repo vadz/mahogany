@@ -79,10 +79,10 @@ public:
 wxMLogWindow::wxMLogWindow(wxFrame *pParent, const char *szTitle)
             : wxLogWindow(pParent, szTitle, FALSE)
 {
-  int x, y, w, h;
-  wxMFrame::RestorePosition(LOG_FRAME_SECTION, &x, &y, &w, &h);
-  GetFrame()->SetSize(x, y, w, h);
-  Show();
+   int x, y, w, h;
+   wxMFrame::RestorePosition(LOG_FRAME_SECTION, &x, &y, &w, &h);
+   GetFrame()->SetSize(x, y, w, h);
+   Show();
 }
 
 void wxMLogWindow::OnFrameDelete(wxFrame *frame)
@@ -125,14 +125,16 @@ wxMApp::OnInit()
    m_IconManager = new wxIconManager();
    
    if ( OnStartup() ) {
+      // for the persistent controls to work (wx/persctrl.h) we must have
+      // a global wxConfig object
+      wxConfigBase::Set(mApplication->GetProfile()->GetConfig());
+
       // now we can create the log window
       if ( READ_APPCONFIG(MC_SHOWLOG) ) {
          (void)new wxMLogWindow(m_topLevelFrame, _("M Activity Log"));
          
          // we want it to be above the log frame
-#        ifndef __WXGTK__      
-            m_topLevelFrame->Raise(); // FIXME: no wxWindow::Raise in wxGTK
-#        endif
+         m_topLevelFrame->Raise();
       }
 
       return true;
@@ -150,11 +152,6 @@ MFrame *wxMApp::CreateTopLevelFrame()
    m_topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
    m_topLevelFrame->Show(true);
 
-   // can't do it in OnInit() because profile is not yet created
-   if ( READ_APPCONFIG(MC_SHOWSPLASH) ) {
-      MDialog_AboutDialog(NULL);
-   }
-
    return m_topLevelFrame;
 }
 
@@ -171,12 +168,10 @@ int wxMApp::OnExit()
 
    MObjectRC::CheckLeaks();
 
-   wxLog *log = wxLog::GetActiveTarget();
-   wxLog::SetActiveTarget(NULL);
-
    // delete the previously active log target (it's the one we had set before
    // here, but in fact it doesn't even matter: if somebody installed another
    // one, we will delete his log object and his code will delete ours)
+   wxLog *log = wxLog::SetActiveTarget(NULL);
    delete log;
  
    // as c-client lib doesn't seem to think that deallocating memory is

@@ -62,6 +62,11 @@ class wxFont;
 class wxLayoutObjectBase
 {
 public:
+   struct UserData
+   {
+      virtual ~UserData() { }
+   };
+
    /// return the type of this object
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_INVALID; } ;
    /** Draws an object.
@@ -93,8 +98,9 @@ public:
 
    /// constructor
    wxLayoutObjectBase() { m_UserData = NULL; }
-   /// note: any user data will be freed at the time the object is deleted
-   virtual ~wxLayoutObjectBase() { if(m_UserData) delete m_UserData; }
+   /// delete the user data
+   virtual ~wxLayoutObjectBase() { delete m_UserData; }
+
 #ifdef WXLAYOUT_DEBUG
    virtual void Debug(void);
 #endif
@@ -102,12 +108,13 @@ public:
    /** Tells the object about some user data. This data is associated
        with the object and will be deleted at destruction time.
    */
-   void   SetUserData(void *data) { m_UserData = data; }
+   void   SetUserData(UserData *data) { m_UserData = data; }
    /** Return the user data. */
    void * GetUserData(void) const { return m_UserData; }
+
 private:
    /// optional data for application's use
-   void * m_UserData;
+   UserData *m_UserData;
 };
 
 /// Define a list type of wxLayoutObjectBase pointers.
@@ -118,6 +125,8 @@ KBLIST_DEFINE(wxLayoutObjectList, wxLayoutObjectBase);
 class wxLayoutObjectText : public wxLayoutObjectBase
 {
 public:
+   wxLayoutObjectText(const String &txt);
+
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_TEXT; }
    virtual void Draw(wxDC &dc, wxPoint position, CoordType baseLine,
                      bool draw = true);
@@ -127,19 +136,18 @@ public:
    */
    virtual wxPoint GetSize(CoordType *baseLine = NULL) const;
 
-   virtual wxPoint GetPosition(void) const
-      { return m_Position; }
+   virtual wxPoint GetPosition(void) const { return m_Position; }
 
 #ifdef WXLAYOUT_DEBUG
    virtual void Debug(void);
 #endif
 
-   wxLayoutObjectText(const String &txt);
    virtual CoordType CountPositions(void) const { return strlen(m_Text.c_str()); }
 
    // for editing:
    String & GetText(void) { return m_Text; }
    void SetText(String const &text) { m_Text = text; }
+
 private:
    String m_Text;
    /// size of the box containing text
@@ -154,14 +162,16 @@ private:
 class wxLayoutObjectIcon : public wxLayoutObjectBase
 {
 public:
+   wxLayoutObjectIcon(wxIcon *icon);
+   wxLayoutObjectIcon(wxIcon const &icon);
+
+   ~wxLayoutObjectIcon() { delete m_Icon; }
+
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_ICON; }
    virtual void Draw(wxDC &dc, wxPoint position, CoordType baseLine,
                      bool draw = true);
    virtual wxPoint GetSize(CoordType *baseLine = NULL) const;
-   virtual wxPoint GetPosition(void) const
-      { return m_Position; }
-   wxLayoutObjectIcon(wxIcon *icon);
-   wxLayoutObjectIcon(wxIcon const &icon);
+   virtual wxPoint GetPosition(void) const { return m_Position; }
 
 private:
    wxIcon *m_Icon;

@@ -47,6 +47,36 @@ KBLIST_DEFINE(MessageParameterList, MessageParameter);
 class Message 
 {   
 public:
+   /**@name Constants (correspoding to c-client's mail.h */
+   //@{
+   /** Primary body types 
+       If you change any of these you must also change body_types in
+       rfc822.c */ 
+   enum ContentType
+   {
+      /// unformatted text
+      MSG_TYPETEXT = 0,
+      /// multipart content
+      MSG_TYPEMULTIPART = 1,
+      /// encapsulated message 
+      MSG_TYPEMESSAGE = 2,
+      /// application data 
+      MSG_TYPEAPPLICATION = 3,
+      /// audio 
+      MSG_TYPEAUDIO = 4,
+      /// static image 
+      MSG_TYPEIMAGE = 5,
+      /// video 
+      MSG_TYPEVIDEO = 6,
+      /// model 
+      MSG_TYPEMODEL = 7,
+      /// unknown 
+      MSG_TYPEOTHER = 8,
+      /// maximum type code 
+      MSG_TYPEMAX = 15
+   };
+   //@}
+
    /** get any header line
        @line name of header line
        @value string where result will be stored, or empty string
@@ -104,7 +134,7 @@ public:
        @param  n part number
        @return content type ID
    */
-   virtual int GetPartType(int n = 0) = 0;
+   virtual ContentType GetPartType(int n = 0) = 0;
 
    /** Query the type of the content.
        @param  n part number
@@ -180,36 +210,6 @@ public:
    /// return class name
    const char *GetClassName(void) const
       { return "MailFolder"; }
-
-   /**@name Constants (correspoding to c-client's mail.h */
-   //@{
-   /** Primary body types 
-       If you change any of these you must also change body_types in
-       rfc822.c */ 
-   enum ContentType
-   {
-      /// unformatted text
-      MSG_TYPETEXT = 0,
-      /// multipart content
-      MSG_TYPEMULTIPART = 1,
-      /// encapsulated message 
-      MSG_TYPEMESSAGE = 2,
-      /// application data 
-      MSG_TYPEAPPLICATION = 3,
-      /// audio 
-      MSG_TYPEAUDIO = 4,
-      /// static image 
-      MSG_TYPEIMAGE = 5,
-      /// video 
-      MSG_TYPEVIDEO = 6,
-      /// model 
-      MSG_TYPEMODEL = 7,
-      /// unknown 
-      MSG_TYPEOTHER = 8,
-      /// maximum type code 
-      MSG_TYPEMAX = 15
-   };
-   //@}
 };
 
 #endif

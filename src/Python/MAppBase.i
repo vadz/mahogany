@@ -15,12 +15,11 @@
 #include   "Profile.h"
 #include   "MFrame.h"
 #include   "gui/wxMFrame.h"
-#include   "MimeList.h"
-#include   "MimeTypes.h"
 #include   "Mdefaults.h"
 #include   "MApplication.h"
 #include   "gui/wxMApp.h"
 #include   "MDialogs.h"
+#include   <wx/mimetype.h>
 
 // SWIG bug: it generates code which assignes the default argument to "char *"
 // variable. To make it compile we need this hack
@@ -46,13 +45,12 @@ class MAppBase
 {
 public:
    void Exit(bool force);
-   MFrame *TopLevelFrame(void) ;
-    char *GetText( char *in);
-   String  GetGlobalDir(void);
-   String  GetLocalDir(void);
-   MimeList * GetMimeList(void);
-   MimeTypes * GetMimeTypes(void);
-   ProfileBase *GetProfile(void);
+   MFrame *TopLevelFrame(void) const;
+   const char *GetText(const char *in) const;
+   String  GetGlobalDir(void) const;
+   String  GetLocalDir(void) const;
+   wxMimeTypesManager& GetMimeManager(void) const;
+   ProfileBase *GetProfile(void) const;
 //   Adb *GetAdb(void) ;
 };
 
