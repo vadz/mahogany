@@ -670,7 +670,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    else
       wxLogInfo(_("BBDB: file format version '%s'"), version.c_str());
 
-   MProgressDialog status_frame("M: BBDB import", "Importing...",
+   MProgressDialog status_frame("BBDB import", "Importing...",
                                  length, NULL);// open a status window:
    do
    {
@@ -736,7 +736,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
          int length = 0, count = 0;
          for(i = m_entries->begin(); i != m_entries->end(); i++)
             length++;
-         MProgressDialog status_frame("M: BBDB", "Saving...",
+         MProgressDialog status_frame("BBDB", "Saving...",
                                       length, NULL);// open a status window:
 
          String str;

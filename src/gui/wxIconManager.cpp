@@ -143,7 +143,7 @@ wxIconManager::LoadImage(String filename, bool *success)
 #ifdef DEBUG
          else
             formats << HandlerNames[i] << ',';
-      formats << "XPM";
+      formats << "xpm";
       wxLogDebug(formats);
 #endif
       m_knowHandlers = true;

@@ -156,34 +156,38 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    MailFolderCC *mf;
    String mboxpath;
 
+   ASSERT(profile);
+   
    int flags = GetFolderFlags(typeAndFlags);
    int type = GetFolderType(typeAndFlags);
 
+   String path = READ_CONFIG(profile, MP_FOLDER_PATH);
+   
    switch( type )
    {
    case MF_INBOX:
       mboxpath = "INBOX";
       break;
    case MF_FILE:
-      mboxpath = name;
+      mboxpath = path;
       break;
    case MF_MH:
-      mboxpath << "#mh/" << name;
+      mboxpath << "#mh/" << path;
       break;
    case MF_POP:
       mboxpath << '{' << server << "/pop3}";
       break;
    case MF_IMAP:  // do we need /imap flag?
       if(flags & MF_FLAGS_ANON)
-         mboxpath << '{' << server << "/anonymous}" << name;
+         mboxpath << '{' << server << "/anonymous}" << path;
       else
-         mboxpath << '{' << server << "/user=" << login << '}'<< name;
+         mboxpath << '{' << server << "/user=" << login << '}'<< path;
       break;
    case MF_NEWS:
-      mboxpath << "#news." << name;
+      mboxpath << "#news." << path;
       break;
    case MF_NNTP:
-      mboxpath << '{' << server << "/nntp}" << name;
+      mboxpath << '{' << server << "/nntp}" << path;
       break;
    default:
       FAIL_MSG("Unsupported folder type.");
@@ -585,7 +589,7 @@ MailFolderCC::BuildListing(void)
    {
       String msg;
       msg.Printf(_("Reading %lu message headers..."), (unsigned long) m_NumOfMessages);
-      m_ProgressDialog = new MProgressDialog(_("M: Progress"),
+      m_ProgressDialog = new MProgressDialog(GetName(),
                                              msg,
                                              100, NULL);// open a status window:
    }

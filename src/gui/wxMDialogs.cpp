@@ -163,7 +163,7 @@ MProgressDialog::MProgressDialog(wxString const &title,
    int height = 70;     // FIXME arbitrary numbers
    if ( abortButton )
       height += 35;
-   wxFrame::Create(parent, -1, _(title),
+   wxFrame::Create(parent, -1, wxString("Mahogany : ")+_(title),
                    wxPoint(0, 0), wxSize(220, height),
                    wxCAPTION | wxSTAY_ON_TOP | wxTHICK_FRAME);
 
