@@ -50,8 +50,14 @@ fi
 CFLAGS="$RPM_OPT_FLAGS" ./configure --without-threads \
 	--prefix=$RPM_BUILD_ROOT/%prefix
 
+# we have to fix M_PREFIX in config.h because the package will be later
+# installed in just %prefix, so fallback paths hardcoded into the binary
+# shouldn't contain RPM_BUILD_ROOT
+sed "s@$RPM_BUILD_ROOT/@@g" include/config.h > include/config.h.new &&
+mv include/config.h.new include/config.h
+
 # if MAKE is not set, find the best value ourselves
-if [ -z $MAKE ]; then
+if [ "x$MAKE" = "x" ]; then
   if [ "$SMP" != "" ]; then
     export MAKE="make -j $SMP"
   else
@@ -71,10 +77,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 
-export MCONF_FILE=%prefix/share/Mahogany/M.conf
-echo "# added by rpm installation" >> $(MCONF_FILE)
-echo "[M/Profiles]" >> $(MCONF_FILE)
-echo "GlobalDir=$MCONF_FILE" >> $(MCONF_FILE)
+echo -e "# added by rpm installation\nGlobalDir=%prefix" >> %prefix/share/Mahogany/M.conf
 
 %postun
 
