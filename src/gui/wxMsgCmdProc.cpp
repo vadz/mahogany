@@ -151,6 +151,8 @@ protected:
    void OpenMessages(const UIdArray& selections);
    void EditMessages(const UIdArray& selections);
 
+   void BounceMessages(const UIdArray& selections);
+
    void PrintOrPreviewMessages(const UIdArray& selections, bool preview);
    void PrintMessages(const UIdArray& selections);
    void PrintPreviewMessages(const UIdArray& selections);
@@ -787,40 +789,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          break;
 
       case WXMENU_MSG_BOUNCE:
-         {
-            // FIXME: bounce all messages, not just one
-            Message *msg = GetMessage(messages[0]);
-
-            if ( !msg )
-               break;
-
-            // TODO: should use a generic address entry control
-            String address;
-            if ( !MInputBox(&address,
-                            _("Please enter the address"),
-                            _("Bounce the message to:"),
-                            GetFrame(),
-                            "BounceAddress") )
-            {
-               // cancelled by user
-               break;
-            }
-
-            SendMessage_obj sendMsg = SendMessage::CreateResent
-                                      (
-                                       m_asmf->GetProfile(),
-                                       msg,
-                                       GetFrame()
-                                      );
-
-            sendMsg->SetAddresses(address);
-            if ( !sendMsg->SendOrQueue() )
-            {
-               ERRORMESSAGE((_("Failed to bounce the message.")));
-            }
-
-            msg->DecRef();
-         }
+         BounceMessages(messages);
          break;
 
 
@@ -997,6 +966,52 @@ MsgCmdProcImpl::EditMessages(const UIdArray& selections)
          new AsyncStatusHandler(this, _("Retrieving messages..."));
 
       status->Monitor(t, _("Failed to retrieve messages to edit them."));
+   }
+}
+
+void
+MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
+{
+   // TODO: should use a generic address entry control
+   String address;
+   if ( !MInputBox(&address,
+                   _("Please enter the address"),
+                   _("Bounce the message to:"),
+                   GetFrame(),
+                   "BounceAddress") )
+   {
+      // cancelled by user
+      return;
+   }
+
+   size_t count = messages.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      Message *msg = GetMessage(messages[n]);
+      if ( !msg )
+      {
+         ERRORMESSAGE((_("Failed to bounce the message %ld"), messages[n]));
+         continue;
+      }
+
+      SendMessage_obj sendMsg = SendMessage::CreateResent
+                                (
+                                 m_asmf->GetProfile(),
+                                 msg,
+                                 GetFrame()
+                                );
+
+      sendMsg->SetAddresses(address);
+      if ( !sendMsg->SendOrQueue() )
+      {
+         ERRORMESSAGE((_("Failed to bounce the message.")));
+      }
+      else
+      {
+         STATUSMESSAGE((_("Message bounced to '%s'."), address.c_str()));
+      }
+
+      msg->DecRef();
    }
 }
 
