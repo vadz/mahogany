@@ -7,12 +7,12 @@ wxlwindow.cpp wxllist.cpp wxlparser.cpp wxMenuDefs.cpp wxOptionsDlg.cpp \
 wxFolderTree.cpp wxDialogLayout.cpp wxMFolderDialogs.cpp wxBrowseButton.cpp \
 wxHeadersDialogs.cpp wxTemplateDialog.cpp wxModulesDlg.cpp \
 wxSubfoldersDialog.cpp wxFiltersDialog.cpp wxWizards.cpp wxFolderMenu.cpp \
-Mdnd.cpp MImport.cpp wxMEditCtrl.cpp
+Mdnd.cpp MImport.cpp
 
 include ../../makeopts
 
 ifdef EXPERIMENTAL
-SRC += wxMessageViewNew.cpp
+SRC += wxMessageViewNew.cpp wxMEditCtrl.cpp
 else
 SRC += wxMessageView.cpp
 endif
