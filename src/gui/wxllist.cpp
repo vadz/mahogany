@@ -3198,7 +3198,7 @@ bool wxLayoutPrintout::OnPrintPage(int page)
 
    // SetDeviceOrigin() doesn't work here, so we need to manually
    // translate all coordinates.
-   wxPoint translate(marginX, - top - marginY);  // HACK ALERT
+   wxPoint translate(marginX, - top + marginY);  // HACK ALERT
    m_llist->ForceTotalLayout(TRUE);  // for the first time, do all
    m_llist->Draw(*dc, translate, top, bottom, TRUE /* clip strictly */);
 
@@ -3229,10 +3229,6 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
 
    // leave margins
    psdc->GetSize(&m_PageWidth, &m_PageHeight);
-
-   // HACK ALERT 
-   m_PageWidth -= 40;
-   m_PageHeight -= 40;
 
    // This is the length of the printable area.
    m_PrintoutHeight = m_PageHeight;
