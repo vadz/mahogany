@@ -529,11 +529,10 @@ then
   $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc && \
   (cd $NAME-$VERSION && make rpm RPM_ROOT=$RPM_ROOT 2>/dev/null 2>&1) && \ 
   (  if [ "$DOINSTALL" = "yes" ] ; then \
-	echo "Uploading rpms..." \
-	$SCP $RPM_ROOT/RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm \
-	  $SCP $RPM/ROOT/SRPMS/$NAME*.rpm $FTPLOCATION && rm SRPMS/$NAME*.rpm \
+	echo "Uploading rpms..." ; \
+	$SCP $RPM_ROOT/RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm ;\
+	  $SCP $RPM/ROOT/SRPMS/$NAME*.rpm $FTPLOCATION && rm SRPMS/$NAME*.rpm ;\
   fi )
-
   echo "Building RedHat package finished."
 fi
 
