@@ -918,7 +918,7 @@ wxMApp::OnInit()
       else // the user specified a locale
       {
 #if wxCHECK_VERSION(2, 5, 0)
-         const wxLanguageInfo *info = 0;// wxLocale::FindLanguageInfo(locale);
+         const wxLanguageInfo *info = wxLocale::FindLanguageInfo(locale);
          if ( info )
          {
             m_Locale = new wxLocale(info->Language);
@@ -946,7 +946,14 @@ wxMApp::OnInit()
             // now load the message catalogs
 #ifdef OS_UNIX
             String localePath;
-            localePath << M_BASEDIR << DIR_SEPARATOR << _T("locale");
+
+            // if we're installed in a non-standard prefix, look for our
+            // locale files in correct place
+            if ( wxStrcmp(M_PREFIX, _T("/usr")) &&
+                     wxStrcmp(M_PREFIX, _T("/usr/local")) )
+            {
+               localePath << M_PREFIX << _T("/share/locale");
+            }
 #elif defined(OS_WIN)
             // the program directory is not initialized yet so we can't do much
             // more than looking in the current directory...
@@ -973,7 +980,10 @@ wxMApp::OnInit()
             #error "don't know where to find message catalogs on this platform"
 #endif // OS
 
-            m_Locale->AddCatalogLookupPathPrefix(localePath);
+            if ( !localePath.empty() )
+            {
+               m_Locale->AddCatalogLookupPathPrefix(localePath);
+            }
 
             if ( !m_Locale->AddCatalog(M_APPLICATIONNAME) )
             {
