@@ -3029,7 +3029,7 @@ private:
 };
 
 BEGIN_EVENT_TABLE(MPasswordDialog, wxSMDialog)
-   EVT_UPDATE_UI(wxID_OK, OnUpdateOk)
+   EVT_UPDATE_UI(wxID_OK, MPasswordDialog::OnUpdateOk)
 END_EVENT_TABLE()
 
 MPasswordDialog::MPasswordDialog(wxWindow *parent,
