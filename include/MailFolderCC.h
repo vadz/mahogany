@@ -341,6 +341,9 @@ public:
    */
    static const String& InitializeNewsSpool();
 
+   /// VZ: adding this decl as it doesn't compile otherwise
+   void Checkpoint(void);
+
 private:
    /// private constructor, does basic initialisation
    MailFolderCC(int typeAndFlags,

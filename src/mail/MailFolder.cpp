@@ -539,8 +539,9 @@ MailFolder::ConvertMessageStatusToString(int status, MailFolder *mf)
    open until a timeout occurs.
 */
 
-struct MfCloseEntry
+class MfCloseEntry
 {
+public:
    MailFolderCmn * m_mf;
    wxDateTime m_dt;
    ~MfCloseEntry()

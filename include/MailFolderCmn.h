@@ -196,6 +196,10 @@ public:
 
    /// decrement and delete if reached 0, return TRUE if item wasn't deleted
    virtual bool DecRef();
+
+   /// VZ: adding this decl as it doesn't compile otherwise
+   virtual void Checkpoint(void) = 0;
+
 protected:
    /**@name Config information used */
    //@{
