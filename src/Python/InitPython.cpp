@@ -25,6 +25,9 @@
 
 #include "MDialogs.h"
 
+extern const MOption MP_PYTHONPATH;
+extern const MOption MP_USEPYTHON;
+
 // the module initialisations
 extern "C"
 {

@@ -6,6 +6,7 @@
  * $Id$
  *******************************************************************/
 
+%nodefault
 %module MailFolder
 
 %{
@@ -78,11 +79,26 @@ public:
       MSG_STAT_FLAGGED = 64
    };
 
-   /** Flags for several operations. */
-   enum Flags
+   /**
+     Different ways to reply to a message
+
+     NB: don't change the numeric values of the enum elements, they are
+         stored in the profile and also because wxOptionsDlg relies on
+         them being what they are!
+    */
+   enum ReplyKind
    {
-      NONE = 0,
-      REPLY_FOLLOWUP
+      /// reply to the sender of this message only
+      REPLY_SENDER,
+
+      /// reply to all recipients of this message
+      REPLY_ALL,
+
+      /// reply to the mailing list this message was sent to
+      REPLY_LIST,
+
+      /// default reply: may go to the sender, all or list
+      REPLY
    };
    //@}
 
@@ -439,28 +455,3 @@ public:
    virtual ~FolderListing() {}
 };
 
-/** Sort order enum for sorting message listings. */
-enum MessageSortOrder
-{
-   MSO_NONE, MSO_NONE_REV,
-   MSO_DATE, MSO_DATE_REV,
-   MSO_SUBJECT, MSO_SUBJECT_REV,
-   MSO_AUTHOR, MSO_AUTHOR_REV,
-   MSO_STATUS, MSO_STATUS_REV,
-   MSO_SCORE, MSO_SCORE_REV,
-   MSO_SIZE, MSO_SIZE_REV
-};
-
-/** Search criterium for searching folder for certain messages. */
-class SearchCriterium
-{
-public:
-   SearchCriterium()
-      {
-         m_What = SC_ILLEGAL;
-      }
-
-   SearchCriterium::Type m_What;
-   bool m_Invert;
-   String m_Key;
-};

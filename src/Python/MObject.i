@@ -11,6 +11,7 @@
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
+%nodefault
 %module   MObject
 %{
 #include "Mswig.h"

@@ -19,7 +19,7 @@ OBJS := $(IFACES:.i=.o)
 %.py-swig: %.py %.i
 	cp $(basename $@).py $@
 
-all: $(OBJS)
+all: swig
 
 swig: $(IFACES:.i=.cpp-swig) $(IFACES:.i=.py-swig)
 

@@ -6,6 +6,7 @@
  * $Id$                *
  *******************************************************************/
 
+%nodefault
 %module Message
 
 %{
@@ -22,9 +23,6 @@
 // ----------------------------------------------------------------------------
 // Message class
 // ----------------------------------------------------------------------------
-
-/// a type used by Address():
-enum MessageAddressType { MAT_FROM, MAT_SENDER, MAT_REPLYTO };
 
 /// a type to store parameters and their values
 class MessageParameter
@@ -58,14 +56,6 @@ public:
        @return Subject entry
    */
    virtual String Subject(void);
-
-   /** get an address line
-       @param name where to store personal name if available
-       @param type which address
-       @return address entry
-   */
-   virtual String Address(String &name,
-                                MessageAddressType type = MAT_FROM);
 
    /** get From line
        @return From entry

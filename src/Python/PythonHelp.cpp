@@ -23,14 +23,32 @@
 
 #include   "Mdefaults.h"
 
+extern const MOption MP_USEPYTHON;
+
 // from InitPython.cc:
 extern PyObject *Python_MinitModule;
 
 PyObject *PyH_LoadModule(const char *modname);            /* returns module object */
 
-extern "C"
-{
-   void SWIG_MakePtr(char *_c, const void *_ptr, const char *type);
+static void SWIG_MakePtr(char *c, void *ptr, const char *name) {
+  static char hex[17] = "0123456789abcdef";
+  unsigned long p, s;
+  char result[32], *r; 
+  r = result;
+  p = (unsigned long) ptr;
+  if (p > 0) {
+    while (p > 0) {
+      s = p & 0xf;
+      *(r++) = hex[s];
+      p = p >> 4;
+    }
+    *r = '_';
+    while (r >= result)
+      *(c++) = *(r--);
+    strcpy (c, name);
+  } else {
+    strcpy (c, "NULL");
+  }
 }
 
 int

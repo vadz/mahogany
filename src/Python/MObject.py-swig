@@ -1,11 +1,14 @@
 # This file was created automatically by SWIG.
 import MObjectc
-
-from MString import *
+import MString
 class MObject:
     def __init__(self,this):
         self.this = this
 
+    __setmethods__ = {}
+    for _s in []: __setmethods__.update(_s.__setmethods__)
+    __getmethods__ = {}
+    for _s in []: __getmethods__.update(_s.__getmethods__)
     def __repr__(self):
         return "<C MObject instance at %s>" % (self.this,)
 class MObjectPtr(MObject):
@@ -26,6 +29,10 @@ class MObjectRC(MObject):
     def DecRef(*args):
         val = apply(MObjectc.MObjectRC_DecRef,args)
         return val
+    __setmethods__ = {}
+    for _s in [MObject]: __setmethods__.update(_s.__setmethods__)
+    __getmethods__ = {}
+    for _s in [MObject]: __getmethods__.update(_s.__getmethods__)
     def __repr__(self):
         return "<C MObjectRC instance at %s>" % (self.this,)
 class MObjectRCPtr(MObjectRC):

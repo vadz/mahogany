@@ -18,21 +18,6 @@
 class Profile : public MObjectRC
 {
 public:
-
-   /** An enum explaining the possible types of profiles. In fact,
-       just a number stored as a normal profile entry which must be
-       maintained manually.
-   */
-   enum Type
-   {
-      /// No profile type specified.
-      PT_Unknown = -1,
-      /// Any profile, default argument for ListProfiles().
-      PT_Any = -1,  // PT_Unknown
-      /// This profile belongs to a folder.
-      PT_FolderProfile = 1
-   };
-
    /// Creates the one global config object.
    static Profile * CreateGlobalConfig(const String & filename);
    /// Create a normal Profile object

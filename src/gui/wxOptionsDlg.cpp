@@ -1226,7 +1226,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 // FIXME ugly, ugly, ugly... config settings should be living in an array from
 //       the beginning which would avoid us all these contorsions
 #define CONFIG_ENTRY(name)  ConfigValueDefault(name##_NAME, name##_DEFVAL)
-// even worse: dummy entries for message fields
+// worse: dummy entries for message fields
 #define CONFIG_NONE()  ConfigValueNone()
 
 // if you modify this array, search for DONT_FORGET_TO_MODIFY and modify data
@@ -1360,11 +1360,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USEPYTHON),
    CONFIG_ENTRY(MP_PYTHONPATH),
    CONFIG_ENTRY(MP_STARTUPSCRIPT),
-   CONFIG_ENTRY(MCB_FOLDEROPEN),
-   CONFIG_ENTRY(MCB_FOLDERUPDATE),
-   CONFIG_ENTRY(MCB_FOLDEREXPUNGE),
-   CONFIG_ENTRY(MCB_FOLDERSETMSGFLAG),
-   CONFIG_ENTRY(MCB_FOLDERCLEARMSGFLAG),
+   ConfigValueDefault(MCB_FOLDEROPEN, ""),
+   ConfigValueDefault(MCB_FOLDERUPDATE, ""),
+   ConfigValueDefault(MCB_FOLDEREXPUNGE, ""),
+   ConfigValueDefault(MCB_FOLDERSETMSGFLAG, ""),
+   ConfigValueDefault(MCB_FOLDERCLEARMSGFLAG, ""),
 #endif // USE_PYTHON
 
    // message views

@@ -1,19 +1,14 @@
 # This file was created automatically by SWIG.
 import MProfilec
-
-from MObject import *
-
-from MString import *
-class Profile(MObjectRC):
-    PT_Unknown = MProfilec.Profile_PT_Unknown
-    PT_Any = MProfilec.Profile_PT_Any
-    PT_FolderProfile = MProfilec.Profile_PT_FolderProfile
+import MObject
+import MString
+class Profile(MObject.MObjectRC):
     def __init__(self,this):
         self.this = this
 
     def readEntry(*args):
         val = apply(MProfilec.Profile_readEntry,args)
-        if val: val = StringPtr(val) ; val.thisown = 1
+        if val: val = MString.StringPtr(val) ; val.thisown = 1
         return val
     def writeEntry(*args):
         val = apply(MProfilec.Profile_writeEntry,args)
@@ -29,7 +24,7 @@ class Profile(MObjectRC):
         return val
     def GetName(*args):
         val = apply(MProfilec.Profile_GetName,args)
-        if val: val = StringPtr(val) ; val.thisown = 1
+        if val: val = MString.StringPtr(val) ; val.thisown = 1
         return val
     def IsExpandingEnvVars(*args):
         val = apply(MProfilec.Profile_IsExpandingEnvVars,args)
@@ -37,6 +32,13 @@ class Profile(MObjectRC):
     def SetExpandEnvVars(*args):
         val = apply(MProfilec.Profile_SetExpandEnvVars,args)
         return val
+    def __del__(self,MProfilec=MProfilec):
+        if getattr(self,'thisown',0):
+            MProfilec.delete_Profile(self)
+    __setmethods__ = {}
+    for _s in [MObject.MObjectRC]: __setmethods__.update(_s.__setmethods__)
+    __getmethods__ = {}
+    for _s in [MObject.MObjectRC]: __getmethods__.update(_s.__getmethods__)
     def __repr__(self):
         return "<C Profile instance at %s>" % (self.this,)
 class ProfilePtr(Profile):
