@@ -228,7 +228,7 @@ static void VerifyThreadData(const ThreadData *thrData)
 
       ASSERT_MSG( thrData->m_children[idx] == m - n - 1,
                   "inconsistent thread data" );
-   }  
+   }
 }
 
 // dump a table
@@ -817,7 +817,15 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
             m_tablePos = NULL;
          }
 
+         // we must have the correct (i.e. updated) value of m_count for
+         // BuildPosTable() to work properly
+         m_count--;
+
          BuildPosTable();
+
+         // but now restore it back as it is decremented in the end of this
+         // function
+         m_count++;
       }
       else // the trans tables are independent of the other ones, do update
       {
@@ -874,18 +882,18 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
          {
             RemoveElementFromTable(m_tablePos, n, m_count);
          }
+      }
 
 #ifdef DEBUG_SORTING
-         // last index is invalid now, don't let CHECK_TABLES() check it
-         m_count--;
+      // last index is invalid now, don't let CHECK_TABLES() check it
+      m_count--;
 
-         DUMP_TRANS_TABLES(("after removing"));
-         CHECK_TABLES();
+      DUMP_TRANS_TABLES(("after removing"));
+      CHECK_TABLES();
 
-         // restore for -- below
-         m_count++;
+      // restore for -- below
+      m_count++;
 #endif // DEBUG_SORTING
-      }
    }
 
    // always update the count
@@ -1076,7 +1084,7 @@ static void ApplyOrdering(THREADNODE* th) {
       // No children to sort
       return;
    }
-   
+
    // Count the children of this node, and sort their own children
    size_t nbKids = 0;
    THREADNODE* kid = th->next;
@@ -1084,15 +1092,15 @@ static void ApplyOrdering(THREADNODE* th) {
       nbKids++;
       ApplyOrdering(kid);
    }
-   
+
    if (nbKids < 2) {
       // no need to sort if only one child
       return;
    }
-   
+
    // Build an array to store all the children of this node
    THREADNODE** kids = new THREADNODE*[nbKids];
-   
+
    // Store them
    nbKids = 0;
    for (kid = th->next; kid; kid = kid->branch) {
@@ -1100,24 +1108,24 @@ static void ApplyOrdering(THREADNODE* th) {
    }
    // And sort the resulting array.
    qsort(kids, nbKids, sizeof(THREADNODE*), CompareThreadNodes);
-   
+
    // Rebuild the links
    th->next = kids[0];
    for (size_t i = 0; i < nbKids-1; i++) {
       kids[i]->branch = kids[i+1];
    }
    kids[nbKids-1]->branch = 0;
-   
+
    // We're done. Clean up.
    delete [] kids;
 }
 
 
 
-THREADNODE* ReOrderTree(THREADNODE* thrNode, MsgnoType *sortTable, 
+THREADNODE* ReOrderTree(THREADNODE* thrNode, MsgnoType *sortTable,
                         bool reverseOrder, size_t count) {
 
-   // FIXME: Have a mutex to protect the globalInvSortTable ? 
+   // FIXME: Have a mutex to protect the globalInvSortTable ?
 
    // First compute the inverse of the sort table.
    globalInvSortTable = new size_t[count];
@@ -1136,7 +1144,7 @@ THREADNODE* ReOrderTree(THREADNODE* thrNode, MsgnoType *sortTable,
    fakeRoot.branch = 0;
    fakeRoot.next = thrNode;
    ApplyOrdering(&fakeRoot);
-      
+
    // Clean up
    delete [] globalInvSortTable;
    globalInvSortTable = 0;
@@ -1158,10 +1166,10 @@ static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
    if (node->next != 0)
    {
       if (indentIfDummyNode)
-         nbChildren = FillThreadTables(node->next, thrData, threadedIndex, 
+         nbChildren = FillThreadTables(node->next, thrData, threadedIndex,
                                        indent+1, indentIfDummyNode);
       else
-         nbChildren = FillThreadTables(node->next, thrData, threadedIndex, 
+         nbChildren = FillThreadTables(node->next, thrData, threadedIndex,
                                        indent+((node->num == 0) ? 0 : 1),
                                        indentIfDummyNode);
    }
@@ -1169,7 +1177,7 @@ static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
       thrData->m_children[node->num-1] = nbChildren;
    }
    if (node->branch != 0)
-      nbChildren += FillThreadTables(node->branch, thrData, threadedIndex, 
+      nbChildren += FillThreadTables(node->branch, thrData, threadedIndex,
                                      indent, indentIfDummyNode);
    return nbChildren + (node->num == 0 ? 0 : 1);  // + 1 for oneself if not dummy
 }
@@ -1191,24 +1199,24 @@ void HeaderInfoListImpl::CombineSortAndThread()
      Actually, maybe we do not have the sorting table (because no
      sorting order is defined). In this case, we build a fake one
      before reordering.
-   
+
      First, we reorder the tree so that all the children of each
      node are sorted according to the sorted array, then we map
      the tree structure to the tables.
      */
-   
+
    m_thrData->m_root =
       ReOrderTree(m_thrData->m_root, m_tableSort, m_reverseOrder, m_count);
-   
+
    size_t threadedIndex = 0;
-   (void)FillThreadTables(m_thrData->m_root, m_thrData, threadedIndex, 
+   (void)FillThreadTables(m_thrData->m_root, m_thrData, threadedIndex,
                           0, m_thrParams.indentIfDummyNode);
-   
+
    DUMP_TABLE(m_thrData->m_tableThread, ("after threading"));
 
    m_tableMsgno = m_thrData->m_tableThread;
    m_dontFreeMsgnos = true;
-   
+
    m_tablePos = AllocTable();
    for (size_t i = 0; i < m_count; ++i)
    {
