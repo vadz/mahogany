@@ -302,45 +302,49 @@ MAppBase::OnStartup()
    // find our directories
    // --------------------
    String tmp;
-#ifdef OS_UNIX
-   bool   found;
-   if(PathFinder::IsDir(M_BASEDIR))
-      m_globalDir = M_BASEDIR;
-   else
+   m_globalDir = READ_APPCONFIG(MP_GLOBALDIR);
+   if(strutil_isempty(m_globalDir) || ! PathFinder::IsDir(m_globalDir))
    {
-      PathFinder pf(MP_PREFIXPATH_D);
-      pf.AddPaths(M_PREFIX,false,true);
-      m_globalDir = pf.FindDir(MP_ROOTDIRNAME_D, &found);
-      if(!found)
+#ifdef OS_UNIX
+      bool   found;
+      if(PathFinder::IsDir(M_BASEDIR))
+         m_globalDir = M_BASEDIR;
+      else
       {
-         String msg;
-         msg.Printf(_("Cannot find global directory \"%s\" in\n"
-                      "\"%s\"\n"
-                      "Would you like to specify its location now?"),
-                      MP_ROOTDIRNAME_D, MP_ETCPATH_D);
-         if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
-                                  TRUE /* yes default */, "AskSpecifyDir") )
+         PathFinder pf(MP_PREFIXPATH_D);
+         pf.AddPaths(M_PREFIX,false,true);
+         m_globalDir = pf.FindDir(MP_ROOTDIRNAME_D, &found);
+         if(!found)
          {
-            wxDirDialog dlg(NULL, _("Specify global directory for M"));
-            if ( dlg.ShowModal() )
+            String msg;
+            msg.Printf(_("Cannot find global directory \"%s\" in\n"
+                         "\"%s\"\n"
+                         "Wo   uld you like to specify its location now?"),
+                       MP_ROOTDIRNAME_D, MP_ETCPATH_D);
+            if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
+                                     TRUE /* yes default */, "AskSpecifyDir") )
             {
-               m_globalDir = dlg.GetPath();
+               wxDirDialog dlg(NULL, _("Specify global directory for M"));
+               if ( dlg.ShowModal() )
+               {
+                  m_globalDir = dlg.GetPath();
+               }
             }
          }
       }
-   }
 #else  //Windows
-   // under Windows our directory is always the one where the executable is
-   // located. At least we're sure that it exists this way...
-   wxString strPath;
-   ::GetModuleFileName(::GetModuleHandle(NULL),
-                       strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
-   strPath.UngetWriteBuf();
-
-   // extract the dir name
-   wxSplitPath(strPath, &m_globalDir, NULL, NULL);
+      // under Windows our directory is always the one where the executable is
+      // located. At least we're sure that it exists this way...
+      wxString strPath;
+      ::GetModuleFileName(::GetModuleHandle(NULL),
+                          strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
+      strPath.UngetWriteBuf();
+      
+      // extract the dir name
+      wxSplitPath(strPath, &m_globalDir, NULL, NULL);
 #endif //Unix
-
+      m_profile->writeEntry(MP_GLOBALDIR, m_globalDir);
+   }
 
    // show the splash screen (do it as soon as we have profile to read
    // MP_SHOWSPLASH from)
