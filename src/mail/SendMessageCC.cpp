@@ -1060,8 +1060,13 @@ SendMessageCC::Build(bool forStorage)
       m_Envelope->date = cpystr(tmpbuf);
    }
 
-   // Message-Id:
-   m_Envelope->message_id = cpystr(BuildMessageId(m_DefaultHost));
+   // Message-Id: we should always generate it ourselves (section 3.6.4 of RFC
+   // 2822) but at least some MTAs (exim) reject it if the id-right part of it
+   // is not a FQDN so don't do it in this case
+   if ( m_DefaultHost.find('.') != String::npos )
+   {
+      m_Envelope->message_id = cpystr(BuildMessageId(m_DefaultHost));
+   }
 
    // don't add any more headers to the message being resent
    if ( m_Envelope->remail )
