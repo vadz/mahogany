@@ -204,7 +204,10 @@ ON_CLOSE_TYPE wxMFrame::OnClose(void)
       return FALSE;
    }
    else   // we can safely close this
+   {
+      Show(FALSE);
       return TRUE;
+   }
 }
 
 void
@@ -260,8 +263,9 @@ wxMFrame::OnMenuCommand(int id)
    }
    case WXMENU_FILE_CLOSE:
    {
-      if(OnClose())
-         delete this;
+      //if(OnClose())
+      //   Destroy();
+      Close();
       break;
    }
    case WXMENU_FILE_COMPOSE:
