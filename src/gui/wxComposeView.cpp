@@ -2995,17 +2995,23 @@ wxComposeView::InsertFileAsText(const String& filename,
       lenFile = file.Length();
       if ( lenFile == 0 )
       {
-         wxLogVerbose(_("File '%s' is empty, no text to insert."),
-                      filename.c_str());
-         return true;
+         if ( insMode != MessageEditor::Insert_Replace )
+         {
+            wxLogVerbose(_("File '%s' is empty, no text to insert."),
+                         filename.c_str());
+            return true;
+         }
+         //else: replace old text with new (empty) one
       }
+      else // non empty file
+      {
+         char *p = text.GetWriteBuf(lenFile + 1);
+         p[lenFile] = '\0';
 
-      char *p = text.GetWriteBuf(lenFile + 1);
-      p[lenFile] = '\0';
+         ok = file.Read(p, lenFile) != wxInvalidOffset;
 
-      ok = file.Read(p, lenFile) != wxInvalidOffset;
-
-      text.UngetWriteBuf();
+         text.UngetWriteBuf();
+      }
    }
 
    if ( !ok )
