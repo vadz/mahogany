@@ -4421,9 +4421,8 @@ MailFolderCC::RequestUpdate()
               GetName().c_str());
 
    // the number of unread/marked/... messages may have changed (there could be
-   // some more of them among the new ones), so update it
-   MailFolderStatus status;
-   (void)CountAllMessages(&status);
+   // some more of them among the new ones), so forget the old values
+   MfStatusCache::Get()->InvalidateStatus(GetName());
 
    // tell all interested that the folder changed
    MEventManager::Send(new MEventFolderUpdateData(this));
@@ -4639,10 +4638,6 @@ void MailFolderCC::OnNewMail()
                {
                   hil->CacheMsgnos(m_nMessages - count + 1, m_nMessages);
                }
-
-               // TODO: update the status using SearchByFlag() to look only at
-               //       the messages in uidsNew instead of discarding it!
-               MfStatusCache::Get()->InvalidateStatus(GetName());
 
                // process the new mail, whatever it means (collecting,
                // filtering, just reporting, ...)
