@@ -575,6 +575,15 @@ static const MenuItemInfo g_aMenuItems[] =
 wxCOMPILE_TIME_ASSERT( WXSIZEOF(g_aMenuItems) == WXMENU_END - WXMENU_BEGIN,
                        WrongMenuDataCount );
 
+// we don't have the menu id field for the submenus so generate "unique" ids
+// for them (can't use wxID_ANY as FindMenu() wouldn't work then)
+static inline SubmenuId(int n)
+{
+   // this is really a hack: to avoid conflicts with the real menu items, put
+   // submenus after WXMENU_END
+   return WXMENU_END + (n - WXMENU_BEGIN);
+}
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -616,11 +625,7 @@ void AppendToMenu(wxMenu *menu, int& n)
 
             const MenuItemInfo& mii = GetMenuItem(nSubMenu);
 
-            // we don't have the menu id field for the submenus so use their
-            // offset in the menu item array
-            //
-            // note that if this changes, FindSubmenu() will have to change too!
-            menu->Append(WXMENU_BEGIN + n,
+            menu->Append(SubmenuId(n),
                          wxGetTranslation(mii.label),
                          submenu,
                          wxGetTranslation(mii.helpstring));
@@ -821,7 +826,7 @@ FindSubmenu(wxWindow *win, int id)
 
    // we use the index in the array/enum as id for the submenus, see
    // AppendToMenu()
-   wxMenuItem *menuitem = mb->FindItem(WXMENU_BEGIN + id);
+   wxMenuItem *menuitem = mb->FindItem(SubmenuId(id));
    CHECK( menuitem, NULL, _T("no such menuitem in FindSubmenu") );
 
    ASSERT_MSG( menuitem->IsSubMenu(),
