@@ -9,6 +9,7 @@
 Release 0.67 'Constance' ??? ??, 2004
 ------------------------------------
 
+2004-09-18 VZ: implemented support for Python functions in message templates
 2004-09-13 VZ: added "Folder|Where is filter..." command
 2004-08-13 VZ: "Show MIME Structure" allows to save multiple attachments at once
 2004-07-17 VZ: full support for showing PGP/MIME encoded messages

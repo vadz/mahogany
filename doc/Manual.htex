@@ -1974,7 +1974,23 @@ arguments are passed to the command as command line parameters.
 \subsubsection{Python category}
 
 Very similar to the previous category, this one allows to execute arbitrary
-Python scripts. Currently this is not implemented.
+Python scripts. The syntax is \texttt{"python:\texttt{function}"} and you may
+additional string arguments which will be passed to the function.
+
+Possibility to use Python functions allows to do almost anything in the message
+expansion. For example, to use different signatures in replies to different
+people all you have to do is to append \texttt{"\$\{python:sig?\$to\}"} at the
+end of your reply template and add a Python function like this to your
+\texttt{Minit.py} file:
+\begin{verbatim}
+   def sig(to):
+      if to = "someone@some.where":
+         return "Hello someone!"
+      elif to = "someoneelse@...":
+         return "Goodbye someone else"
+      else # general case
+         return "No special signature for you, sorry"
+\end{verbatim}
 
 
 \subsubsection{Header category}

@@ -44,6 +44,10 @@
 
 #include "Mpers.h"
 
+#ifdef USE_PYTHON
+   #include "PythonHelp.h"
+#endif // USE_PYTHON
+
 #include <wx/confbase.h>      // for wxExpandEnvVars()
 #include <wx/file.h>            // for wxFile
 #include <wx/ffile.h>
@@ -322,7 +326,9 @@ protected:
                       const wxArrayString& arguments,
                       String *value) const;
 #ifdef USE_PYTHON
-   bool ExpandPython(const String& name, String *value) const;
+   bool ExpandPython(const String& name,
+                     const wxArrayString& arguments,
+                     String *value) const;
 #endif // USE_PYTHON
    bool ExpandMessage(const String& name, String *value) const;
    bool ExpandOriginal(const String& name, String *value) const;
@@ -445,6 +451,8 @@ static TemplatePopupMenuItem gs_popupSubmenuOriginal[] =
 };
 
 // the whole menu
+//
+// Available accels: ABCDEGIJKLNQRSTUVWYZ
 static TemplatePopupMenuItem gs_popupMenu[] =
 {
    TemplatePopupMenuItem(gettext_noop("&Miscellaneous"),
@@ -460,7 +468,10 @@ static TemplatePopupMenuItem gs_popupMenu[] =
                          gs_popupSubmenuFile,
                          WXSIZEOF(gs_popupSubmenuFile)),
    TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(gettext_noop("&Execute command..."), _T("${cmd:%s}"), FALSE),
+#ifdef USE_PYTHON
+   TemplatePopupMenuItem(gettext_noop("Run &Python function..."), _T("${python:%s}"), FALSE),
+#endif // USE_PYTHON
+   TemplatePopupMenuItem(gettext_noop("E&xecute command..."), _T("${cmd:%s}"), FALSE),
 };
 
 const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =
@@ -932,7 +943,7 @@ VarExpander::Expand(const String& category,
 
 #ifdef USE_PYTHON
       case Category_Python:
-         return ExpandPython(name, value);
+         return ExpandPython(name, arguments, value);
 #endif // USE_PYTHON
 
       case Category_Message:
@@ -1187,12 +1198,21 @@ VarExpander::SetHeaderValue(const String& name,
 }
 
 #ifdef USE_PYTHON
+
 bool
-VarExpander::ExpandPython(const String& /* name */, String * /* value */) const
+VarExpander::ExpandPython(const String& name,
+                          const wxArrayString& arguments,
+                          String *value) const
 {
-   // TODO
-   return FALSE;
+   // call Python function with the given name
+   if ( !PythonStringFunction(name, arguments, value) )
+   {
+      return FALSE;
+   }
+
+   return TRUE;
 }
+
 #endif // USE_PYTHON
 
 bool
