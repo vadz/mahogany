@@ -536,17 +536,32 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
 
 #if EXPERIMENTAL
 int 
-PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group)
+PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_TopGroup)
 {
   struct Address a;
-  int i,j,l;
+  struct CategoryAppInfo cats;
+  
+  int i,j,k,l;
   char buf[0xffff];
   int category, attribute;
 
+  cats = aai->category;
+  
+  PalmEntryGroup** catGroups = new PalmEntryGroup*[16];
+  
+  for (k = 0; k<16; k++) {
+    if (cats.name[k] != "") {
+      catGroups[k] = (PalmEntryGroup*)p_TopGroup->CreateGroup(cats.name[k]);
+    }
+  }
+  
   for(i=0;
-      (j=dlp_ReadRecordByIndex(m_PiSocket, db, i, (unsigned char *)buf, 0, &l, &attribute, &category)) >= 0;
+     (j=dlp_ReadRecordByIndex(m_PiSocket, db, i, (unsigned char *)buf, 0, &l, &attribute, &category)) >= 0;
       i++)
-      {
+  {
+    // to which category does it belong?
+    PalmEntryGroup* p_Group = catGroups[category];
+    
     if (attribute & dlpRecAttrDeleted)
       continue;
     unpack_Address(&a, (unsigned char *)buf, l);
@@ -564,7 +579,6 @@ PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup*
     // add entry
     p_Group->AddEntry(p_Entry);
   }
-  
   return 0;
 }
 #endif
