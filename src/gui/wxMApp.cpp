@@ -455,6 +455,17 @@ wxMApp::OnAssert(const wxChar *file, int line, const wxChar *msg)
    wxApp::OnAssert(file, line, msg);
 }
 
+bool
+wxMApp::Yield(bool onlyIfNeeded)
+{
+   // don't allow any calls to c-client from inside wxYield() neither as it is
+   // implicitly (!) called by wxProgressDialog which is shown from inside some
+   // c-client handlers and so calling c-client now would result in a crash
+   MLocker lock(gs_mutexBlockBg);
+
+   return wxApp::Yield(onlyIfNeeded);
+}
+
 void
 wxMApp::OnAbnormalTermination()
 {

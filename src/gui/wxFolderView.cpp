@@ -1811,7 +1811,11 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 {
    event.Skip();
 
-   if ( !m_mutexHeaders.IsLocked() && !m_headersToGet.IsEmpty() )
+   // there are many various reasons which can prevent us from being able to
+   // call c-client (safely) from here
+   if ( !m_headersToGet.IsEmpty() &&
+        !m_mutexHeaders.IsLocked() &&
+        mApplication->AllowBgProcessing() )
    {
       CHECK_RET( m_headers, "can't get headers without listing" );
 

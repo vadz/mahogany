@@ -132,8 +132,10 @@ public:
    wxDialUpManager *GetDialUpManager() const { return m_OnlineManager; }
 
 #ifdef __WXDEBUG__
-    virtual void OnAssert(const wxChar *file, int line, const wxChar *msg);
+   virtual void OnAssert(const wxChar *file, int line, const wxChar *msg);
 #endif // __WXDEBUG__
+
+   virtual bool Yield(bool onlyIfNeeded = FALSE);
 
 protected:
    /// makes sure the status bar has enough fields
