@@ -2445,12 +2445,13 @@ static MsgStatus AnalyzeStatus(int stat)
 }
 
 // update the folder status to take a new message with this status into account
+// (this is called from OverviewHeaderEntry for all headers we add to the
+// listing)
 void MailFolderCC::UpdateFolderStatus(int stat)
 {
    if ( m_statusNew )
    {
-      // total number of messages always increases
-      m_statusNew->total++;
+      // total number of messages is already set
 
       // deal with recent/new
       bool isRecent = (stat & MailFolder::MSG_STAT_RECENT) != 0;
@@ -2532,8 +2533,13 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
    // do we already have the number of messages?
    if ( mfStatusCache->GetStatus(GetName(), status) )
    {
+      // we can retrieve less than the total number of messages from the server
+      // (for example because the user interrupted header retrieval) but
+      // status->total is always the real total number, so compare with the real
+      // total
+
       // do at least a simple consistency check
-      ASSERT_MSG( status->total == m_nMessages,
+      ASSERT_MSG( status->total == m_msgnoMax,
                   "caching of number of messages broken" );
    }
    else // need to really calculate
@@ -2552,7 +2558,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
                  "Counting all interesting messages in '%s' (%lu all)",
                  GetName().c_str(), m_nMessages);
 
-      status->total = m_nMessages;
+      status->total = m_msgnoMax;
       for ( size_t idx = 0; idx < m_nMessages; idx++ )
       {
          int stat = hil->GetItemByIndex(idx)->GetStatus();
@@ -3222,7 +3228,7 @@ MailFolderCC::BuildListing(void)
 
    // remember the status of the new messages
    m_statusNew = new MailFolderStatus;
-   m_statusNew->total = 0;
+   m_statusNew->total = m_msgnoMax;
 
    // do we have any messages to get?
    if ( m_nMessages )

@@ -108,12 +108,7 @@ struct MailFolderStatus
 
    bool operator==(const MailFolderStatus& status)
    {
-      return total == status.total &&
-             newmsgs == status.newmsgs &&
-             recent == status.recent &&
-             unread == status.unread &&
-             flagged == status.flagged &&
-             searched == status.searched;
+      return memcmp(this, &status, sizeof(MailFolderStatus)) == 0;
    }
 
    // the total number of messages and the number of new, recent, unread,
