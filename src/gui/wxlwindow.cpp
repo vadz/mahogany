@@ -61,7 +61,7 @@
 // ----------------------------------------------------------------------------
 
 #ifdef WXLAYOUT_DEBUG
-#  define   WXLO_DEBUG(x)      wxLogDebug x
+#  define WXLO_DEBUG(x)      wxLogDebug x
 #else
 #  define WXLO_DEBUG(x)
 #endif
@@ -279,7 +279,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
       ViewStart(&left, &top);
       wxSize size = GetClientSize();
       int xdelta, ydelta;
-      
+
       if(event.GetX() < WXLO_SCROLLMARGIN_X)
          xdelta = -(WXLO_SCROLLMARGIN_X-event.GetX());
       else if(event.GetX() > size.x-WXLO_SCROLLMARGIN_X)
@@ -380,7 +380,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
                m_Selecting = false;
                RequestUpdate();     // TODO: we don't have to redraw everything!
             }
-                  
+
             // Calculate where the top of the visible area is:
             int x0, y0;
             ViewStart(&x0,&y0);
@@ -433,7 +433,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
          {
             // paste selected text from primary selection without
             // invalidating it:
-            Paste(FALSE, TRUE); 
+            Paste(FALSE, TRUE);
          }
          break;
 
@@ -485,7 +485,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    int keyCode = event.KeyCode();
    bool ctrlDown = event.ControlDown();
    bool shiftDown = event.ShiftDown();
-   
+
 #ifdef WXLAYOUT_DEBUG
    if(keyCode == WXK_F1)
    {
@@ -504,7 +504,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       // VS - no, it would make selecting text with keyboard a NOP
       Copy(FALSE,FALSE,TRUE);
    }
-   
+
    // If we deleted the selection here, we must not execute the
    // deletion in Delete/Backspace handling.
    bool deletedSelection = false;
@@ -512,7 +512,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    if(m_AutoDeleteSelection
       && IsEditable()
       && !m_Selecting
-      && m_llist->HasSelection() 
+      && m_llist->HasSelection()
       && ! IsDirectionKey(keyCode)
       && ! (event.AltDown() || ctrlDown)
       )
@@ -521,7 +521,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       deletedSelection = true;
       SetDirty();
    }
-   
+
    // <Shift>+<arrow> starts selection
    if ( IsDirectionKey(keyCode) )
    {
@@ -539,7 +539,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
          }
       }
    }
-   
+
    // If needed, make cursor visible:
    if(m_CursorVisibility == -1)
       m_CursorVisibility = 1;
@@ -753,7 +753,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                      SetDirty();
                   }
                   break;
-                  
+
                default:
                   if((!(event.ControlDown() || event.AltDown()
                      ))
@@ -850,7 +850,7 @@ wxLayoutWindow::ScrollToCursor(void)
    if ( cc.y < y0 || cc.y >= y0 + y1 - cs.y )
    {
       ny = cc.y - y1/2;
-      if ( ny < 0) 
+      if ( ny < 0)
          ny = 0;
    }
 
@@ -910,12 +910,12 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    // Calculate where the top of the visible area is:
    ViewStart(&x0,&y0);
    GetScrollPixelsPerUnit(&dx, &dy);
-   x0 *= dx; y0 *= dy;
+   x0 *= dx;
+   y0 *= dy;
 
    // Get the size of the visible window:
    GetClientSize(&x1,&y1);
-   wxASSERT(x1 >= 0);
-   wxASSERT(y1 >= 0);
+   wxASSERT(x1 >= 0 && y1 >= 0);
 
    if(updateRect)
    {
@@ -949,7 +949,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    m_memDC->SetLogicalFunction(wxCOPY);
    m_memDC->Clear();
    WXLO_TIMER_STOP(TmpTimer);
-   
+
    // fill the background with the background bitmap
    if(m_BGbitmap)
    {
@@ -1066,7 +1066,7 @@ wxLayoutWindow::OnSize(wxSizeEvent &event)
 /*
 Change the range and position of scrollbars. Has evolved into a
 generic Update function which will at some time later cause a repaint
-as needed. 
+as needed.
 */
 
 void
@@ -1087,7 +1087,7 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
    m_llist->Layout(dc, -1);
    WXLO_TIMER_STOP(LayoutTimer);
    ResetDirty();
-   
+
    wxPoint max = m_llist->GetSize();
    wxSize size = GetClientSize();
 
@@ -1146,7 +1146,7 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
             m_hasVScrollbar = true;
 //         ScrollToCursor();
       }
-      
+
       m_maxx = max.x + X_SCROLL_PAGE;
       m_maxy = max.y + Y_SCROLL_PAGE;
    }
@@ -1279,7 +1279,7 @@ if(! primary) // always copy as text-only to primary selection
    }
    else
       delete wldo;
-   
+
    return FALSE;
 }
 
@@ -1307,7 +1307,7 @@ wxLayoutWindow::Find(const wxString &needle,
 {
 #ifdef M_BASEDIR
    wxPoint found;
-   
+
    if(needle.Length() == 0)
    {
       if( ! MInputBox(&m_FindString,
@@ -1320,7 +1320,7 @@ wxLayoutWindow::Find(const wxString &needle,
    }
    else
       m_FindString = needle;
-   
+
    if(fromWhere == NULL)
       found = m_llist->FindText(m_FindString, m_llist->GetCursorPos());
    else
