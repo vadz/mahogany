@@ -8,6 +8,8 @@ SRC = AdbFrame.cpp AdbManager.cpp AdbProvider.cpp AdbEntry.cpp \
       ImportText.cpp ImportXFMail.cpp ImportMailrc.cpp ImportPine.cpp \
       ExportPalm.cpp ExportText.cpp 
 
+MOD = ModulesSample.cpp
+
 ifdef DEBUG
 SRC += ProvDummy.cpp
 endif
@@ -15,9 +17,9 @@ endif
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 
-TARGETS = $(SRC:.cpp=.o)
+TARGETS = $(SRC:.cpp=.o) $(MODOBJS)
 
-all: $(TARGETS)
+all: $(TARGETS) modules
 
 clean: stdclean
 

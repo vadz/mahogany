@@ -14,6 +14,10 @@ ifdef USE_LEAKTRACER
 MOBJS := $(MOBJS) util/LeakTracer.o
 endif
 
+#
+# List all directories which create modules (.so files) to be installed:
+#
+MODULES_DIRS = adb
 
 ifdef USE_PYTHON
 SUB_DIRS += Python
@@ -72,7 +76,7 @@ clean:
 dep depend:
 	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -C $$i $@; done
 
-install: 
+install: modules-install
 	strip M
 	$(INSTALL_PROGRAM) M $(DATADIR)/$(CANONICAL_HOST)/bin
 	$(RM) -f $(BINDIR)/M $(DATADIR)/bin/M
@@ -87,11 +91,19 @@ ifdef USE_PYTHON
 	$(MAKE) -C Python $@
 endif
 
+#
+# This must call modules-install for all modules directories:
+#
+modules-install:
+ifeq ($(USE_MODULES),dynamic)
+	for i in $(MODULES_DIRS); do $(INSTALL) -d $$i modules-install; done
+endif
+
 msgcat:
 	set -e; for i in $(SUB_DIRS) modules ; do $(MAKE) -C $$i $@; done
 #	$(MAKE) -C $(BUILDDIR)/locale mergecat
 
-.PHONY: all dep clean doc semistatic static allclean install msgcat subdirs
+.PHONY: all dep clean doc semistatic static allclean install msgcat subdirs modules-install
 
 
 

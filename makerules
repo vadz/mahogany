@@ -1,6 +1,21 @@
 # -*-makefile-*-
 # rules to create object files:
 #
+
+# modules: MODOBJS get linked in statically, MODULES installed as shared libs
+ifeq ($(USE_MODULES),static)
+MODULES = 
+MODOBJS = $(MOD:.cpp=.o)
+else
+ifeq ($(USE_MODULES),dynamic)
+MODULES = $(MOD:.cpp=.so) $(MOD:.cpp=.mmd)
+MODOBJS =
+else
+MODULES =
+MODOBJS =
+endif
+endif
+
 ifdef USE_LIBTOOL
 %.o: %.cc
 	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CXXFLAGS) -c $<
@@ -67,11 +82,19 @@ dep depend:
 tags:
 	etags --c++ $(SRC) $(CXXSRC)
 
-.PHONY: stdclean dep depend tags msgcat
+.PHONY: stdclean dep depend tags msgcat modules modules-install
 
 msgcat:
 	@touch $(BUILDDIR)/messages.po
 	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i ; done
 
 stdclean:
-	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a $(ODIR)/*.lo $(ODIR)/.libs
+	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a $(ODIR)/*.lo $(ODIR)/.libs $(MODULES) §(MODOBJS)
+
+modules:	$(MODULES)
+
+modules-install: modules
+ifeq ($(USE_MODULES),dynamic)
+	$(INSTALL) -d $(MODULEDIR)
+	for i in $(MODULES); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
+endif
