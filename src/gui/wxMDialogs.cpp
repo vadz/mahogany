@@ -1174,81 +1174,108 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
 #define HTML_WARNING "<font color=#ff0000><b>WARNING: </b></font>"
 
-   bottom->SetPage("<body text=#000000 bgcolor=#ffffff>"
+   // build the page text from several strings to be able to translate them
+   // ---------------------------------------------------------------------
+
+#ifdef USE_I18N
+   // make special provision for the translators name
+   static const char *TRANSLATOR_NAME =
+      gettext_noop("Translate this into your name (for About dialog)");
+   wxString translator = _(TRANSLATOR_NAME);
+   if ( translator == TRANSLATOR_NAME )
+   {
+      // not translated, don't show
+      translator.clear();
+   }
+   else
+   {
+      wxString tmp;
+      tmp << " (" << _("translations by ") << translator << ')';
+      translator = tmp;
+   }
+#endif // USE_I18N
+
+   wxString pageHtmlText;
+
+   pageHtmlText << "<body text=#000000 bgcolor=#ffffff>"
                    "<font face=\"Times New Roman,times\">"
 
-                   "<h4>Mahogany information</h4>"
-                   "Version " M_VERSION_STRING
-                   "  built with " wxVERSION_STRING "<br>"
+                   "<h4>" << _("Mahogany information") << "</h4>"
+                << _("Version ") << M_VERSION_STRING
+                << _("  built with ") << wxVERSION_STRING "<br>"
 #ifdef DEBUG
-                   HTML_WARNING "This is a debug build<br>"
+                   HTML_WARNING << _("This is a debug build") << "<br>"
 #else
-                   "Release build "
+                << _("Release build ")
 #endif
-                   "(compiled at " __DATE__ ", " __TIME__ ")<br>"
+                << _("(compiled at ") << __DATE__ ", " __TIME__ ")<br>"
 
 #if defined(USE_SSL) || defined(USE_THREADS) || defined(USE_PYTHON)
-                   "<h4>Extra features:</h4>"
+                   "<h4>" << _("Extra features:") << "</h4>"
 #ifdef USE_SSL
-                   "SSL support<br>"
+                << _("SSL support") << _("<br>")
 #endif
 #ifdef USE_THREADS
-                   "Threads<br>"
+                << _("Threads") << _("<br>")
 #endif
 #ifdef USE_PYTHON
-                   "Python<br>"
+                << _("Python") << _("<br>")
 #endif
 #ifdef USE_DIALUP
-                   "Dial-up support<br>"
+                << _("Dial-up support") << _("<br>")
 #endif
 #ifdef USE_I18N
-                   "Internationalization<br>"
+                << _("Internationalization") << translator << _("<br>")
 #endif
 #endif // USE_XXX
 
 #ifdef EXPERIMENTAL
-                   HTML_WARNING "Includes experimental code (" EXPERIMENTAL ")"
+                << HTML_WARNING << _("Includes experimental code")
+                                << " (" EXPERIMENTAL ")"
 #endif
 
-                   "<p>"
-                   "<h4>List of contributors:</h4>"
+                << "<p>"
+                   "<h4>" << _("List of contributors:") << "</h4>"
                    "<p>"
                    "Karsten Ball&uuml;der, Vadim Zeitlin,<br> "
                    "Greg Noel, Nerijus Bali&#363;nas, Xavier Nodet,<br>"
                    "Vaclav Slavik, Daniel Seifert, Michele Ravani,<br>"
-                   "Michael A Chase and many others<br>"
+                   "Michael A Chase " << _("and many others") << "<br>"
                    "<br>"
-                   "<i>The Mahogany team</i><br>"
+                   "<i>" << _("The Mahogany team") << "</i><br>"
                    "<font size=2>"
                    "(<tt>mahogany-developers@lists.sourceforge.net</tt>)"
                    "</font>"
                    "<hr>"
                    HTML_IMAGE(wxlogo)
-                   "Mahogany is built on the cross-platform C++ framework "
-                   "wxWindows (http://www.wxwindows.org/)."
-                   "<p>"
-                   "This product includes software developed and copyright "
-                   "by the University of Washington written by Mark Crispin."
+                << _("Mahogany is built on the cross-platform C++ framework "
+                     "wxWindows (http://www.wxwindows.org/).")
+                << "<p>"
+                << _("This product includes software developed and copyright "
+                     "by the University of Washington written by Mark Crispin.")
+                <<
 #ifdef USE_SSL
                    "<p>"
                    HTML_IMAGE(ssllogo)
-                   "This product includes software developed by the OpenSSL Project "
-                   "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
-                   "This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)<br>"
-                   "This product includes software written by Tim Hudson (tjh@cryptsoft.com)<br>"
+                << _("This product includes software developed by the OpenSSL Project "
+                     "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
+                     "This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)<br>"
+                     "This product includes software written by Tim Hudson (tjh@cryptsoft.com)<br>")
+                <<
 #endif // USE_SSL
 
 #ifdef USE_PYTHON
                    "<p>"
                    HTML_IMAGE(pythonpowered)
-                   "This program contains an embedded Python interpreter."
+                << _("This program contains an embedded Python interpreter.")
+                <<
 #endif // USE_PYTHON
                    "<hr>"
-                   "Special thanks to Daniel Lord for hardware donations."
-                   "<p>"
-                   "The Mahogany Team would also like to acknowledge "
-                   "the support of "
-                   "Anthemion Software, "
+                << _("Special thanks to Daniel Lord for hardware donations.")
+                << "<p>"
+                << _("The Mahogany Team would also like to acknowledge "
+                     "the support of ")
+                << "Anthemion Software, "
                    "Heriot-Watt University, "
                    "SourceForge.net, "
                    "SourceGear.com, "
@@ -1256,10 +1283,12 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "Simon Shapiro, "
                    "VA Linux, "
                    "and SuSE GmbH."
-                  );
+                  ;
 
 #undef HTML_IMAGE
 #undef HTML_WARNING
+
+   bottom->SetPage(pageHtmlText);
 
    wxMemoryFSHandler::RemoveFile("splash" MEMORY_FS_FILE_EXT);
    wxMemoryFSHandler::RemoveFile("wxlogo" MEMORY_FS_FILE_EXT);
