@@ -667,7 +667,8 @@ static swig_type_info *swig_types[2];
 
 #define SWIG_name    "_MString"
 
-#include  "Mswig.h"
+//#include  "Mswig.h"
+#include "Mcommon.h"
 
 #ifdef __cplusplus
 extern "C" {

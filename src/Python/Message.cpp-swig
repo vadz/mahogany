@@ -672,7 +672,7 @@ static swig_type_info *swig_types[7];
 
 #define SWIG_name    "_Message"
 
-#include   "Mswig.h"
+//#include   "Mswig.h"
 #include   "Mcommon.h"
 #include   "Message.h"
 

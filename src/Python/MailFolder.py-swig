@@ -54,14 +54,8 @@ class MailFolder(MObject.MObjectRC):
     if _newclass:OpenFolder = staticmethod(_MailFolder.MailFolder_OpenFolder)
     __swig_getmethods__["DeleteFolder"] = lambda x: _MailFolder.MailFolder_DeleteFolder
     if _newclass:DeleteFolder = staticmethod(_MailFolder.MailFolder_DeleteFolder)
-    __swig_getmethods__["CreateFolder"] = lambda x: _MailFolder.MailFolder_CreateFolder
-    if _newclass:CreateFolder = staticmethod(_MailFolder.MailFolder_CreateFolder)
     __swig_getmethods__["CanExit"] = lambda x: _MailFolder.MailFolder_CanExit
     if _newclass:CanExit = staticmethod(_MailFolder.MailFolder_CanExit)
-    __swig_getmethods__["ConvertMessageStatusToString"] = lambda x: _MailFolder.MailFolder_ConvertMessageStatusToString
-    if _newclass:ConvertMessageStatusToString = staticmethod(_MailFolder.MailFolder_ConvertMessageStatusToString)
-    __swig_getmethods__["Subscribe"] = lambda x: _MailFolder.MailFolder_Subscribe
-    if _newclass:Subscribe = staticmethod(_MailFolder.MailFolder_Subscribe)
     def ListFolders(*args): return apply(_MailFolder.MailFolder_ListFolders,args)
     def GetName(*args): return apply(_MailFolder.MailFolder_GetName,args)
     def CountNewMessages(*args): return apply(_MailFolder.MailFolder_CountNewMessages,args)
@@ -72,7 +66,6 @@ class MailFolder(MObject.MObjectRC):
     def UnDeleteMessage(*args): return apply(_MailFolder.MailFolder_UnDeleteMessage,args)
     def SetMessageFlag(*args): return apply(_MailFolder.MailFolder_SetMessageFlag,args)
     def SetFlag(*args): return apply(_MailFolder.MailFolder_SetFlag,args)
-    def SetSequenceFlag(*args): return apply(_MailFolder.MailFolder_SetSequenceFlag,args)
     def AppendMessage(*args): return apply(_MailFolder.MailFolder_AppendMessage,args)
     def ExpungeMessages(*args): return apply(_MailFolder.MailFolder_ExpungeMessages,args)
     def SearchMessages(*args): return apply(_MailFolder.MailFolder_SearchMessages,args)
@@ -106,13 +99,7 @@ MailFolder_OpenFolder = _MailFolder.MailFolder_OpenFolder
 
 MailFolder_DeleteFolder = _MailFolder.MailFolder_DeleteFolder
 
-MailFolder_CreateFolder = _MailFolder.MailFolder_CreateFolder
-
 MailFolder_CanExit = _MailFolder.MailFolder_CanExit
-
-MailFolder_ConvertMessageStatusToString = _MailFolder.MailFolder_ConvertMessageStatusToString
-
-MailFolder_Subscribe = _MailFolder.MailFolder_Subscribe
 
 
 class HeaderInfo(_object):
@@ -159,27 +146,5 @@ class HeaderInfoListPtr(HeaderInfoList):
         if not hasattr(self,"thisown"): _swig_setattr(self, HeaderInfoList, 'thisown', 0)
         _swig_setattr(self, HeaderInfoList,self.__class__,HeaderInfoList)
 _MailFolder.HeaderInfoList_swigregister(HeaderInfoListPtr)
-
-class FolderListingEntry(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, FolderListingEntry, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, FolderListingEntry, name)
-    def GetName(*args): return apply(_MailFolder.FolderListingEntry_GetName,args)
-    def GetAttribute(*args): return apply(_MailFolder.FolderListingEntry_GetAttribute,args)
-    def __del__(self, destroy= _MailFolder.delete_FolderListingEntry):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
-    def __init__(self): raise RuntimeError, "No constructor defined"
-    def __repr__(self):
-        return "<C FolderListingEntry instance at %s>" % (self.this,)
-
-class FolderListingEntryPtr(FolderListingEntry):
-    def __init__(self,this):
-        _swig_setattr(self, FolderListingEntry, 'this', this)
-        if not hasattr(self,"thisown"): _swig_setattr(self, FolderListingEntry, 'thisown', 0)
-        _swig_setattr(self, FolderListingEntry,self.__class__,FolderListingEntry)
-_MailFolder.FolderListingEntry_swigregister(FolderListingEntryPtr)
 
 

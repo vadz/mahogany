@@ -668,7 +668,8 @@ static swig_type_info *swig_types[3];
 
 #define SWIG_name    "_MObject"
 
-#include "Mswig.h"
+//#include "Mswig.h"
+#include "Mcommon.h"
 #include "MObject.h"
 
 #ifdef __cplusplus

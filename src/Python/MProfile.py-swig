@@ -42,22 +42,15 @@ class Profile(MObject.MObjectRC):
     if _newclass:CreateProfile = staticmethod(_MProfile.Profile_CreateProfile)
     __swig_getmethods__["CreateModuleProfile"] = lambda x: _MProfile.Profile_CreateModuleProfile
     if _newclass:CreateModuleProfile = staticmethod(_MProfile.Profile_CreateModuleProfile)
-    __swig_getmethods__["CreateEmptyProfile"] = lambda x: _MProfile.Profile_CreateEmptyProfile
-    if _newclass:CreateEmptyProfile = staticmethod(_MProfile.Profile_CreateEmptyProfile)
     __swig_getmethods__["DeleteGlobalConfig"] = lambda x: _MProfile.Profile_DeleteGlobalConfig
     if _newclass:DeleteGlobalConfig = staticmethod(_MProfile.Profile_DeleteGlobalConfig)
     def readEntry(*args): return apply(_MProfile.Profile_readEntry,args)
     def writeEntry(*args): return apply(_MProfile.Profile_writeEntry,args)
-    def SetPath(*args): return apply(_MProfile.Profile_SetPath,args)
     def HasEntry(*args): return apply(_MProfile.Profile_HasEntry,args)
     def DeleteGroup(*args): return apply(_MProfile.Profile_DeleteGroup,args)
     def GetName(*args): return apply(_MProfile.Profile_GetName,args)
     def IsExpandingEnvVars(*args): return apply(_MProfile.Profile_IsExpandingEnvVars,args)
     def SetExpandEnvVars(*args): return apply(_MProfile.Profile_SetExpandEnvVars,args)
-    def __del__(self, destroy= _MProfile.delete_Profile):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
     def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C Profile instance at %s>" % (self.this,)
@@ -73,8 +66,6 @@ Profile_CreateGlobalConfig = _MProfile.Profile_CreateGlobalConfig
 Profile_CreateProfile = _MProfile.Profile_CreateProfile
 
 Profile_CreateModuleProfile = _MProfile.Profile_CreateModuleProfile
-
-Profile_CreateEmptyProfile = _MProfile.Profile_CreateEmptyProfile
 
 Profile_DeleteGlobalConfig = _MProfile.Profile_DeleteGlobalConfig
 

@@ -30,43 +30,4 @@ except AttributeError:
 import MString
 import MProfile
 import MObject
-class MAppBase(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, MAppBase, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, MAppBase, name)
-    def Exit(*args): return apply(_MAppBase.MAppBase_Exit,args)
-    def TopLevelFrame(*args): return apply(_MAppBase.MAppBase_TopLevelFrame,args)
-    def GetText(*args): return apply(_MAppBase.MAppBase_GetText,args)
-    def GetGlobalDir(*args): return apply(_MAppBase.MAppBase_GetGlobalDir,args)
-    def GetLocalDir(*args): return apply(_MAppBase.MAppBase_GetLocalDir,args)
-    def GetMimeManager(*args): return apply(_MAppBase.MAppBase_GetMimeManager,args)
-    def GetProfile(*args): return apply(_MAppBase.MAppBase_GetProfile,args)
-    def __init__(self): raise RuntimeError, "No constructor defined"
-    def __repr__(self):
-        return "<C MAppBase instance at %s>" % (self.this,)
-
-class MAppBasePtr(MAppBase):
-    def __init__(self,this):
-        _swig_setattr(self, MAppBase, 'this', this)
-        if not hasattr(self,"thisown"): _swig_setattr(self, MAppBase, 'thisown', 0)
-        _swig_setattr(self, MAppBase,self.__class__,MAppBase)
-_MAppBase.MAppBase_swigregister(MAppBasePtr)
-
-wxGetApp = _MAppBase.wxGetApp
-
-MDialog_ErrorMessage = _MAppBase.MDialog_ErrorMessage
-
-MDialog_SystemErrorMessage = _MAppBase.MDialog_SystemErrorMessage
-
-MDialog_FatalErrorMessage = _MAppBase.MDialog_FatalErrorMessage
-
-MDialog_Message = _MAppBase.MDialog_Message
-
-MDialog_YesNoDialog = _MAppBase.MDialog_YesNoDialog
-
-MDialog_FileRequester = _MAppBase.MDialog_FileRequester
-
-MInputBox = _MAppBase.MInputBox
-
 

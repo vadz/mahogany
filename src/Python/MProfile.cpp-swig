@@ -670,7 +670,8 @@ static swig_type_info *swig_types[5];
 
 #define SWIG_name    "_MProfile"
 
-#include "Mswig.h"
+#include "Mcommon.h"
+// #include "Mswig.h"
 #include "Profile.h"
 
 #ifdef __cplusplus
@@ -734,23 +735,6 @@ static PyObject *_wrap_Profile_CreateModuleProfile(PyObject *self, PyObject *arg
     }
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_Profile,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = (Profile *)Profile::CreateModuleProfile((String const &)*arg1,(Profile const *)arg2);
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_Profile, 0);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_Profile_CreateEmptyProfile(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    Profile *arg1 = (Profile *) 0 ;
-    Profile *result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:Profile_CreateEmptyProfile",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Profile,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (Profile *)Profile::CreateEmptyProfile((Profile const *)arg1);
     
     resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_Profile, 0);
     return resultobj;
@@ -823,28 +807,6 @@ static PyObject *_wrap_Profile_writeEntry(PyObject *self, PyObject *args) {
     result = (bool)(arg1)->writeEntry(*arg2,*arg3);
     
     resultobj = PyInt_FromLong((long)result);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_Profile_SetPath(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    Profile *arg1 = (Profile *) 0 ;
-    String *arg2 = 0 ;
-    PyObject * obj0 = 0 ;
-    PyObject * obj1 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"OO:Profile_SetPath",&obj0,&obj1)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Profile,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
-    }
-    (arg1)->SetPath(*arg2);
-    
-    Py_INCREF(Py_None); resultobj = Py_None;
     return resultobj;
     fail:
     return NULL;
@@ -956,22 +918,6 @@ static PyObject *_wrap_Profile_SetExpandEnvVars(PyObject *self, PyObject *args) 
 }
 
 
-static PyObject *_wrap_delete_Profile(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    Profile *arg1 = (Profile *) 0 ;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:delete_Profile",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Profile,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    delete arg1;
-    
-    Py_INCREF(Py_None); resultobj = Py_None;
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
 static PyObject * Profile_swigregister(PyObject *self, PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
@@ -983,17 +929,14 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Profile_CreateGlobalConfig", _wrap_Profile_CreateGlobalConfig, METH_VARARGS },
 	 { (char *)"Profile_CreateProfile", _wrap_Profile_CreateProfile, METH_VARARGS },
 	 { (char *)"Profile_CreateModuleProfile", _wrap_Profile_CreateModuleProfile, METH_VARARGS },
-	 { (char *)"Profile_CreateEmptyProfile", _wrap_Profile_CreateEmptyProfile, METH_VARARGS },
 	 { (char *)"Profile_DeleteGlobalConfig", _wrap_Profile_DeleteGlobalConfig, METH_VARARGS },
 	 { (char *)"Profile_readEntry", _wrap_Profile_readEntry, METH_VARARGS },
 	 { (char *)"Profile_writeEntry", _wrap_Profile_writeEntry, METH_VARARGS },
-	 { (char *)"Profile_SetPath", _wrap_Profile_SetPath, METH_VARARGS },
 	 { (char *)"Profile_HasEntry", _wrap_Profile_HasEntry, METH_VARARGS },
 	 { (char *)"Profile_DeleteGroup", _wrap_Profile_DeleteGroup, METH_VARARGS },
 	 { (char *)"Profile_GetName", _wrap_Profile_GetName, METH_VARARGS },
 	 { (char *)"Profile_IsExpandingEnvVars", _wrap_Profile_IsExpandingEnvVars, METH_VARARGS },
 	 { (char *)"Profile_SetExpandEnvVars", _wrap_Profile_SetExpandEnvVars, METH_VARARGS },
-	 { (char *)"delete_Profile", _wrap_delete_Profile, METH_VARARGS },
 	 { (char *)"Profile_swigregister", Profile_swigregister, METH_VARARGS },
 	 { NULL, NULL }
 };
