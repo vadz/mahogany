@@ -304,6 +304,11 @@ extern const MOption MP_EXTERNALEDITOR;
 extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
 extern const MOption MP_USE_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAILCOMMAND;
+extern const MOption MP_NEWMAIL_PLAY_SOUND;
+extern const MOption MP_NEWMAIL_SOUND_FILE;
+#ifdef OS_UNIX
+extern const MOption MP_NEWMAIL_SOUND_PROGRAM;
+#endif // OS_UNIX
 extern const MOption MP_SHOW_NEWMAILMSG;
 extern const MOption MP_SHOW_NEWMAILINFO;
 extern const MOption MP_COLLECT_INBOX;
@@ -949,6 +954,16 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_USE_NEWMAILCOMMAND_NAME      "CommandOnNewMail"
 /// command to execute when new mail arrives
 #define   MP_NEWMAILCOMMAND_NAME      "OnNewMail"
+
+/// play a sound on new mail?
+#define MP_NEWMAIL_PLAY_SOUND_NAME "NewMailPlaySound"
+/// which sound to play?
+#define MP_NEWMAIL_SOUND_FILE_NAME "NewMailSound"
+#ifdef OS_UNIX
+/// the program to use to play this sound
+#define MP_NEWMAIL_SOUND_PROGRAM_NAME "NewMailSoundProg"
+#endif // OS_UNIX
+
 /// show new mail messages?
 #define   MP_SHOW_NEWMAILMSG_NAME      "ShowNewMail"
 /// show detailed info about how many new mail messages?
@@ -1810,13 +1825,22 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_ALWAYS_USE_EXTERNALEDITOR_DEFVAL    0l
 
 /// command to execute when new mail arrives
-#ifdef  OS_UNIX
-#   define   MP_USE_NEWMAILCOMMAND_DEFVAL   1
-#   define   MP_NEWMAILCOMMAND_DEFVAL   "/usr/bin/play "M_BASEDIR"/newmail.wav"
-#else
-#   define   MP_USE_NEWMAILCOMMAND_DEFVAL   0l
-#   define   MP_NEWMAILCOMMAND_DEFVAL   M_EMPTYSTRING
-#endif
+#define   MP_USE_NEWMAILCOMMAND_DEFVAL   0l
+#define   MP_NEWMAILCOMMAND_DEFVAL   M_EMPTYSTRING
+
+/// play a sound on new mail?
+#define MP_NEWMAIL_PLAY_SOUND_DEFVAL 1
+
+#ifdef OS_UNIX
+/// which sound to play?
+#define MP_NEWMAIL_SOUND_FILE_DEFVAL M_BASEDIR "/newmail.wav"
+/// the program to use to play this sound
+#define MP_NEWMAIL_SOUND_PROGRAM_DEFVAL "/usr/bin/play %s"
+#else // !OS_UNIX
+/// which sound to play?
+#define MP_NEWMAIL_SOUND_FILE_DEFVAL ""
+#endif // OS_UNIX/!OS_UNIX
+
 /// show new mail messages?
 #define   MP_SHOW_NEWMAILMSG_DEFVAL      1
 /// show detailed info about how many new mail messages?

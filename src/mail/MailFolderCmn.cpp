@@ -70,6 +70,11 @@ extern const MOption MP_MOVE_NEWMAIL;
 extern const MOption MP_MSGS_RESORT_ON_CHANGE;
 extern const MOption MP_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAIL_FOLDER;
+extern const MOption MP_NEWMAIL_PLAY_SOUND;
+extern const MOption MP_NEWMAIL_SOUND_FILE;
+#ifdef OS_UNIX
+extern const MOption MP_NEWMAIL_SOUND_PROGRAM;
+#endif // OS_UNIX
 extern const MOption MP_SAFE_FILTERS;
 extern const MOption MP_SHOW_NEWMAILINFO;
 extern const MOption MP_SHOW_NEWMAILMSG;
@@ -1687,18 +1692,61 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
       }
    }
 
+   // step 2: play a sound
+   if ( READ_CONFIG(profile, MP_NEWMAIL_PLAY_SOUND) )
+   {
+      String sound = READ_CONFIG(profile, MP_NEWMAIL_SOUND_FILE);
+
+#if defined(OS_WIN)
+      DWORD flags = SND_ASYNC;
+
+      if ( sound.empty() )
+      {
+         // use the system default sound
+         sound = "MailBeep";
+         flags |= SND_ALIAS;
+      }
+      else // file configured
+      {
+         flags |= SND_FILENAME;
+      }
+
+      if ( !::PlaySound(sound, NULL, flags) )
+#elif defined(OS_UNIX)
+      String soundCmd = READ_CONFIG(profile, MP_NEWMAIL_SOUND_PROGRAM);
+
+      // we have a handy function in wxFileType which will replace
+      // '%s' with the file name or add the file name at the end if
+      // there is no '%s'
+      wxFileType::MessageParameters params(tmpFileName.GetName(), "");
+      String command = wxFileType::ExpandCommand(soundCmd, params);
+
+      wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ReportNewMail(): playing '%s'",
+                 folder->GetFullName().c_str(), command.c_str());
+
+      if ( !wxExecute(command, false /* async */) )
+#else // other platform
+   #error "don't know how to play sounds on this platform"
+#endif
+      {
+         // TODO ask whether the user wants to disable it
+         wxLogWarning(_("Failed to play new mail sound."));
+      }
+   }
+
 #ifdef USE_PYTHON
-   // step 2: folder specific Python callback
+   // step 3: folder specific Python callback
    //
    // FIXME: "this" should be folder below!
    if ( !PythonCallback(MCB_FOLDER_NEWMAIL, 0, this, GetClassName(), profile) )
 
-      // step 3: global python callback
+      // step 4: global python callback
       if ( !PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0,
                            mApplication, "MApplication",
                            mApplication->GetProfile()) )
 #endif //USE_PYTHON
       {
+         // step 5: show notification
          if ( READ_CONFIG(profile, MP_SHOW_NEWMAILMSG) )
          {
             String message;

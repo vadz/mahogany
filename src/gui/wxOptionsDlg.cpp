@@ -192,6 +192,12 @@ enum ConfigFields
    ConfigField_NewMailNotifyHelp,
    ConfigField_NewMailNotifyUseCommand,
    ConfigField_NewMailNotifyCommand,
+   ConfigField_NewMailSoundHelp,
+   ConfigField_NewMailPlaySound,
+   ConfigField_NewMailSoundFile,
+#ifdef OS_UNIX
+   ConfigField_NewMailSoundProgram,
+#endif // OS_UNIX
    ConfigField_NewMailNotify,
    ConfigField_NewMailNotifyThresholdHelp,
    ConfigField_NewMailNotifyDetailsThreshold,
@@ -890,6 +896,17 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("E&xecute new mail command"),    Field_Bool,    -1 },
    { gettext_noop("New mail &command"),            Field_File,
                                                    ConfigField_NewMailNotifyUseCommand },
+
+   { gettext_noop("In addition to running an external program, Mahogany may\n"
+                  "also play a sound when a new message arrives. Leave the\n"
+                  "sound file empty to play the default sound."),
+                                                   Field_Message,    -1 },
+   { gettext_noop("Play a &sound on new mail"),    Field_Bool,    -1 },
+   { gettext_noop("Sound &file"),                  Field_File,    ConfigField_NewMailPlaySound },
+#ifdef OS_UNIX
+   { gettext_noop("&Program to play the sound"),   Field_File,    ConfigField_NewMailPlaySound },
+#endif // OS_UNIX
+
    { gettext_noop("Show new mail &notification"),  Field_Bool,    -1 },
    { gettext_noop("If there are not too many new messages, Mahogany will\n"
                   "show a detailed notification message with the subjects\n"
@@ -1405,6 +1422,14 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // notify help
    CONFIG_ENTRY(MP_USE_NEWMAILCOMMAND),
    CONFIG_ENTRY(MP_NEWMAILCOMMAND),
+
+   CONFIG_NONE(), // play sound help
+   CONFIG_ENTRY(MP_NEWMAIL_PLAY_SOUND),
+   CONFIG_ENTRY(MP_NEWMAIL_SOUND_FILE),
+#ifdef OS_UNIX
+   CONFIG_ENTRY(MP_NEWMAIL_SOUND_PROGRAM),
+#endif // OS_UNIX
+
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
    CONFIG_NONE(), // details threshold help
    CONFIG_ENTRY(MP_SHOW_NEWMAILINFO),
