@@ -1688,12 +1688,14 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
 
                      // don't copy the messages to the trash, they had been
                      // already copied somewhere
-                     Ticket t = m_asmf->DeleteOrTrashMessages
-                                        (
-                                          seq,
-                                          MailFolder::DELETE_NO_TRASH,
-                                          this
-                                        );
+                     Ticket t = m_asmf
+                                 ? m_asmf->DeleteOrTrashMessages
+                                   (
+                                    seq,
+                                    MailFolder::DELETE_NO_TRASH,
+                                    this
+                                   )
+                                 : ILLEGAL_TICKET;
 
                      if ( t != ILLEGAL_TICKET )
                      {
