@@ -427,6 +427,9 @@ private:
 
    //@}
 
+   /// printing helper, called by Print() and PrintPreview()
+   void PrepareForPrinting();
+
    /** @name Options
 
        Message view uses the options from the profile of the folder it

@@ -134,6 +134,8 @@ protected:
    //@{
 
    void OpenMessages(const UIdArray& selections);
+
+   void PrintOrPreviewMessages(const UIdArray& selections, bool preview);
    void PrintMessages(const UIdArray& selections);
    void PrintPreviewMessages(const UIdArray& selections);
 
@@ -680,16 +682,60 @@ MsgCmdProcImpl::OpenMessages(const UIdArray& selections)
 }
 
 void
+MsgCmdProcImpl::PrintOrPreviewMessages(const UIdArray& selections, bool view)
+{
+   // this doesn't work because ShowMessage() is async and so the message is not
+   // shown yet when Print() or PrintPreview() is called - we'd need to do
+   // everything asynchronously in fact, but I don't have time for it now
+   //
+   // FIXME: we shouldn't tell the user to do something we can do ourselves, of
+   //        course... and we should allow printing many messages at once
+#if 0
+   UIdType uidPreviewedOld = m_msgView->GetUId();
+
+   size_t n = selections.Count();
+   for ( size_t i = 0; i < n; i++ )
+   {
+      m_msgView->ShowMessage(selections[i]);
+
+      if ( view )
+         m_msgView->PrintPreview();
+      else
+         m_msgView->Print();
+   }
+
+   if ( uidPreviewedOld != UID_ILLEGAL )
+   {
+      // restore previously previewed message
+      m_msgView->ShowMessage(uidPreviewedOld);
+   }
+#else // 1
+   UIdType uidPreviewedOld = m_msgView->GetUId();
+   if ( uidPreviewedOld == UID_ILLEGAL )
+   {
+      wxLogError(_("Please preview a message before printing it."));
+
+      return;
+   }
+
+   // so print just the previewed message
+   if ( view )
+      m_msgView->PrintPreview();
+   else
+      m_msgView->Print();
+#endif // 0/1
+}
+
+void
 MsgCmdProcImpl::PrintMessages(const UIdArray& selections)
 {
-   // FIXME: should allow printing many messages at once
-   m_msgView->Print();
+   PrintOrPreviewMessages(selections, false /* print */);
 }
 
 void
 MsgCmdProcImpl::PrintPreviewMessages(const UIdArray& selections)
 {
-   m_msgView->PrintPreview();
+   PrintOrPreviewMessages(selections, true /* preview */);
 }
 
 // ----------------------------------------------------------------------------

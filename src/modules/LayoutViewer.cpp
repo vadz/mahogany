@@ -420,31 +420,8 @@ String LayoutViewer::GetSelection() const
 
 bool LayoutViewer::Print()
 {
-   const ProfileValues& profileValues = GetOptions();
-
-#ifdef OS_WIN
-   wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#else // Unix
-   bool found;
-   wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-
-   // set AFM path
-   PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
-   pf.AddPaths(profileValues.afmpath, false);
-   pf.AddPaths(mApplication->GetLocalDir(), true);
-   String afmpath = pf.FindDirFile("Cour.afm", &found);
-   if(found)
-   {
-      ((wxMApp *)mApplication)->GetPrintData()->SetFontMetricPath(afmpath);
-      wxThePrintSetupData->SetAFMPath(afmpath);
-   }
-#endif // Win/Unix
-
    wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
    wxPrinter printer(& pdd);
-#ifndef OS_WIN
-   wxThePrintSetupData->SetAFMPath(afmpath);
-#endif
    wxLayoutPrintout printout(m_window->GetLayoutList(), _("Mahogany: Printout"));
 
    if ( !printer.Print(m_window, &printout, TRUE)
@@ -465,22 +442,6 @@ bool LayoutViewer::Print()
 
 void LayoutViewer::PrintPreview()
 {
-   const ProfileValues& profileValues = GetOptions();
-
-#ifdef OS_WIN
-   wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#else // Unix
-   wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-   // set AFM path
-   PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
-   pf.AddPaths(profileValues.afmpath, false);
-   pf.AddPaths(mApplication->GetLocalDir(), true);
-   bool found;
-   String afmpath = pf.FindDirFile("Cour.afm", &found);
-   if(found)
-      wxSetAFMPath(afmpath);
-#endif // in/Unix
-
    // Pass two printout objects: for preview, and possible printing.
    wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
    wxPrintPreview *preview = new wxMVPreview(

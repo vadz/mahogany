@@ -379,14 +379,16 @@ String TextViewer::GetSelection() const
 
 bool TextViewer::Print()
 {
-   // TODO
+   // just to give the error message...
+   PrintPreview();
 
    return false;
 }
 
 void TextViewer::PrintPreview()
 {
-   // TODO
+   wxLogError(_("Sorry, printing is not supposed by the text viewer.\n"
+                "Please change to another viewer to print this message."));
 }
 
 wxWindow *TextViewer::GetWindow() const

@@ -39,6 +39,7 @@
 #include <wx/fontmap.h>
 #include <wx/fs_mem.h>
 #include <wx/wxhtml.h>
+#include <wx/html/htmprint.h>
 
 class HtmlViewerWindow;
 
@@ -136,6 +137,9 @@ private:
    // free all images we created in memory
    void FreeMemoryFS();
 
+   // printing helper: creates m_printHtml object if not done yet
+   void InitPrinting();
+
    // emulate a key press: this is the only way I found to scroll
    // wxScrolledWindow
    void EmulateKeyPress(int keycode);
@@ -163,6 +167,9 @@ private:
 
    // do we have a non default font?
    bool m_hasGlobalFont;
+
+   // the object which does all printing for us
+   wxHtmlEasyPrinting *m_printHtml;
 
    DECLARE_MESSAGE_VIEWER()
 };
@@ -417,12 +424,16 @@ HtmlViewer::HtmlViewer()
    m_nPart =
    m_nImage = 0;
 
+   m_printHtml = NULL;
+
    m_htmlText.reserve(4096);
 }
 
 HtmlViewer::~HtmlViewer()
 {
    FreeMemoryFS();
+
+   delete m_printHtml;
 }
 
 // ----------------------------------------------------------------------------
@@ -487,16 +498,27 @@ String HtmlViewer::GetSelection() const
 // HtmlViewer printing
 // ----------------------------------------------------------------------------
 
+void HtmlViewer::InitPrinting()
+{
+   if ( !m_printHtml )
+   {
+      m_printHtml = new wxHtmlEasyPrinting(_("Mahogany Printing"),
+                                           GetFrame(m_window));
+   }
+}
+
 bool HtmlViewer::Print()
 {
-   // TODO
+   InitPrinting();
 
-   return false;
+   return m_printHtml->PrintText(m_htmlText);
 }
 
 void HtmlViewer::PrintPreview()
 {
-   // TODO
+   InitPrinting();
+
+   (void)m_printHtml->PreviewText(m_htmlText);
 }
 
 wxWindow *HtmlViewer::GetWindow() const
