@@ -2410,6 +2410,7 @@ BuiltinFunctions(void)
 // FilterRuleImpl - the class representing a program
 // ----------------------------------------------------------------------------
 
+// TODO: this function should be factorized into several smaller ones
 int
 FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
 {
@@ -2500,7 +2501,19 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
 
          String subject = m_MailMessage->Subject(),
                 from = m_MailMessage->From();
-         textPD.Printf(_("Filtering message %u/%u ("), idx + 1, count);
+
+         // make the string shorter for the progress dialog as there is not
+         // much space in it
+         if ( pd )
+         {
+            textPD = _("Message ");
+         }
+         else
+         {
+            // but more informative for the status bar text
+            textPD.Printf(_("Filtering message %u/%u ("), idx + 1, count);
+         }
+
          if ( !from.empty() )
          {
             textPD << _("from ") << from << ' ';
@@ -2515,8 +2528,6 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
             textPD << _("without subject");
          }
 
-         textPD << ')';
-
          if ( pd )
          {
             if ( !pd->Update(idx, textPD) )
@@ -2529,6 +2540,9 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          }
          else // no progress dialog
          {
+            // close the parenthesis from Printf() above
+            textPD << ')';
+
             // don't pass it as the first argument because the string might
             // contain '%' characters!
             wxLogStatus("%s", textPD.c_str());
