@@ -667,6 +667,9 @@ private:
    /// Used by the subscription management.
    class FolderListingCC *m_FolderListing;
 
+   /// Counts the number of new mails
+   UIdType CountNewMessages(void);
+   
    /**@name only used for ListFolders: */
    //@{
    UserData m_UserData;

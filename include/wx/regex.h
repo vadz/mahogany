@@ -65,6 +65,7 @@ class wxRegExPOSIX : public wxRegExBase
                 Flags flags = RE_DEFAULT)
       {
          SetFlags(flags);
+         m_Valid = FALSE;
          m_Valid = Compile(expr);
          m_nMatches = WX_REGEX_MAXMATCHES;
          m_Matches = new regmatch_t[m_nMatches];

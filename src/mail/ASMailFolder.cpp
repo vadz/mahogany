@@ -509,7 +509,7 @@ public:
       { }
    virtual void WorkFunction(void)
       {
-         int result = m_MailFolder->ApplyFilterRules(m_Seq);
+         int result = m_MailFolder->ApplyFilterRules(*m_Seq);
          SendEvent(ASMailFolder::ResultInt::Create(
             m_ASMailFolder, m_Ticket, ASMailFolder::Op_ApplyFilterRules, m_Seq,
             result, m_UserData));

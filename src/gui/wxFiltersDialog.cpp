@@ -903,6 +903,11 @@ wxFiltersDialog::OnButton( wxCommandEvent &event )
 void
 wxFiltersDialog::DoUpdate(void )
 {
+   // First, make sure we have the activation flags set correctly:
+   for(int i = 0; i < m_ListBox->Number(); i++)
+      m_FilterData[i].SetActive(
+         m_ListBox->IsChecked(i) );
+
    int selection = m_ListBox->GetSelection();
    m_ListBox->Clear();
    for(size_t i = 0; i < m_FilterDataCount; i++)
@@ -948,9 +953,10 @@ wxFiltersDialog::UpdateButtons(void)
 bool
 wxFiltersDialog::TransferDataFromWindow()
 {
+   DoUpdate();
+   
    /* We need to remove all old subgroups and write the new
       settings. */
-
    size_t i;
    wxArrayString groups;
    wxString name;

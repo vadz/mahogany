@@ -1082,18 +1082,21 @@ wxLayoutWindow::ResizeScrollbars(bool exact, CoordType bottom)
          done = TRUE;
       }
       if(! done &&
-         (max.x > X_SCROLL_PAGE || max.y > Y_SCROLL_PAGE)
+//         (max.x > X_SCROLL_PAGE || max.y > Y_SCROLL_PAGE)
+         (max.x > size.x - X_SCROLL_PAGE|| max.y > size.y - Y_SCROLL_PAGE)
          )
       {
          ViewStart(&m_ViewStartX, &m_ViewStartY);
          SetScrollbars(X_SCROLL_PAGE,
                        Y_SCROLL_PAGE,
-                       max.x / X_SCROLL_PAGE + 1,
-                       max.y / Y_SCROLL_PAGE + 1,
-                       m_ViewStartX, m_ViewStartY,
+                       max.x / X_SCROLL_PAGE + 2,
+                       max.y / Y_SCROLL_PAGE + 2,
+                       m_ViewStartX,
+                       m_ViewStartY,
                        true);
          m_hasHScrollbar =
             m_hasVScrollbar = true;
+//         ScrollToCursor();
       }
       
       m_maxx = max.x + X_SCROLL_PAGE;

@@ -1252,6 +1252,25 @@ MailFolderCC::GetMessage(unsigned long uid)
 }
 
 
+/// Counts the number of new mails
+UIdType
+MailFolderCC::CountNewMessages(void)
+{
+   const int mask = MSG_STAT_RECENT | MSG_STAT_SEEN;
+   const int value = MSG_STAT_RECENT;
+   
+   UIdType num = 0;
+   if( m_Listing )
+   {
+      for ( UIdType msgno = 0; msgno < m_Listing->Count(); msgno++ )
+      {
+         int status = (*m_Listing)[msgno]->GetStatus();
+         if( (status & mask) == value )
+            num ++;
+      }
+   }
+   return num;
+}
 
 class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
@@ -1260,6 +1279,8 @@ MailFolderCC::GetHeaders(void) const
    {
       // remove const from this:
       MailFolderCC *that = (MailFolderCC *)this;
+
+      UIdType old_nNewMessages = that->CountNewMessages();
 
       that->UpdateStatus();
       
@@ -1279,6 +1300,10 @@ MailFolderCC::GetHeaders(void) const
       // check if we need to update our data structures or send new
       // mail events:
       that->CheckForNewMail(m_Listing);
+
+      UIdType new_nNewMessages = that->CountNewMessages();
+      if(new_nNewMessages != old_nNewMessages)
+         MEventManager::Send( new MEventFolderStatusData (this) );
    }
 
    m_Listing->IncRef(); // for the caller who uses it
