@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.22\n"
 "POT-Creation-Date: 2000-01-11 15:32-0800\n"
-"PO-Revision-Date: 1999-06-15 19:50+0200\n"
+"PO-Revision-Date: 2000-01-30 19:50+0200\n"
 "Last-Translator: Arthur Muller <muller@cybercomm.nl>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
 "MIME-Version: 1.0\n"
@@ -11,12 +11,12 @@ msgstr ""
 
 #: Filters.cpp:359
 msgid "Parser output"
-msgstr ""
+msgstr "Parser uitvoer"
 
 #: Filters.cpp:363
 #, fuzzy
 msgid "Parser: "
-msgstr "&Paswoord: "
+msgstr "Parser: "
 
 #: Filters.cpp:1053
 #, c-format
@@ -25,256 +25,246 @@ msgid ""
 "  %s\n"
 "%s<error> %s"
 msgstr ""
+"Parse fout op invoer positie %lu:\n"
+"  %s\n"
+"%s<error> %s"
 
 #: Filters.cpp:1056
 #, fuzzy
 msgid "Parse error!"
-msgstr "Hier plakken"
+msgstr "Parser fout!"
 
 #: Filters.cpp:1110
 msgid "Unterminated string."
-msgstr ""
+msgstr "Niet afgesloten string."
 
 #: Filters.cpp:1157
 #, fuzzy
 msgid "'(' expected after 'if'."
-msgstr "Map '%s' geselecteerd."
+msgstr "'(' verwachter na 'if'."
 
 #: Filters.cpp:1169
 msgid "')' expected after condition in if statement."
-msgstr ""
+msgstr "')' verwacht na conditie in if statement"
 
 #: Filters.cpp:1244
 #, c-format
 msgid "Functioncall expected '(' after '%s'."
-msgstr ""
+msgstr "Functieaanroep verwacht '(' na '%s'."
 
 #: Filters.cpp:1269
 #, c-format
 msgid "Attempt to call undefined function '%s'."
-msgstr ""
+msgstr "Poging om ongedefinieerde functie '%s' aan te roepen."
 
 #: Filters.cpp:1315
 msgid "Expected Factor after negation operator."
-msgstr ""
+msgstr "Verwachtte Factor na negatie operator."
 
 #: Filters.cpp:1335
 msgid "Expected a number or a function call."
-msgstr ""
+msgstr "Verwachtte een getal of een functieaanroep."
 
 #: Filters.cpp:1371 Filters.cpp:1561
 msgid "Expected Condition after conditional operator."
-msgstr ""
+msgstr "Verwachtte Voorwaarde na voorwaardelijke operator."
 
 #: Filters.cpp:1410
 msgid "Expected expression after operator."
-msgstr ""
+msgstr "Verwachtte uitdrukking na operator."
 
 #: Filters.cpp:1448
 msgid "Expected term after operator."
-msgstr ""
+msgstr "Verwachtte term na operator."
 
 #: Filters.cpp:1520
 msgid "Parse error, cannot find valid program."
-msgstr ""
+msgstr "Parse fout, kan geen geldig programma vinden."
 
 #: Filters.cpp:1554
 msgid "Expected Block after '{'"
-msgstr ""
+msgstr "Verwachtte Blok na '{'"
 
 #: Filters.cpp:1577
 msgid "Expected ';' at end of condition."
-msgstr ""
+msgstr "Verwachtte ';' aan einde voorwaarde."
 
 #: Filters.cpp:2178
 msgid "This plug-in provides a filtering language for Mahogany."
-msgstr ""
+msgstr "Deze plug-in levert een filter taal voor Mahogany."
 
 #: PalmOS.cpp:141
-#, fuzzy, c-format
 msgid "Could not obtain lock for '/dev/%s'"
-msgstr "Kan map '%s' niet openen."
+msgstr "Kon geen lock krijgen voor '/dev/%s'."
 
 #: PalmOS.cpp:326 PalmOS.cpp:405
-#, c-format
 msgid "Executing command ´%s´ returned an error code (%d)."
-msgstr ""
+msgstr "Uitvoer van commando '%s' levert een foutcode (%d)."
 
 #: PalmOS.cpp:338
 msgid "Please press HotSync button and click on OK."
-msgstr ""
+msgstr "Druk op de HotSync knop en klik op OK."
 
 #: PalmOS.cpp:341
-#, fuzzy
 msgid "Cannot get connection."
 msgstr "Kan geen verbinding openen met een server"
 
 #: PalmOS.cpp:356
 msgid "pi_bind() failed"
-msgstr ""
+msgstr "pi_bind() mislukt"
 
 #: PalmOS.cpp:365
 msgid "pi_listen() failed"
-msgstr ""
+msgstr "pi_list() mislukt"
 
 #: PalmOS.cpp:374
 msgid "pi_accept() failed"
-msgstr ""
+msgstr "pi_accept() mislukt"
 
 #: PalmOS.cpp:415
 msgid "Do you want synchronise with your PalmOS device?"
-msgstr ""
+msgstr "Wilt u synchroniseren met uw PalmOS apparaat?"
 
 #: PalmOS.cpp:432
 msgid "Addressbook synchronisation not yet implemented."
-msgstr ""
+msgstr "Adresboek synchronisatie nog niet geïmplementeerd."
 
 #: PalmOS.cpp:455
 msgid "Unable to open MailDB"
-msgstr ""
+msgstr "Kon MailDB niet openen"
 
 #: PalmOS.cpp:456
 msgid "Unable to open MailDB.\n"
-msgstr ""
+msgstr "Kon MailDB niet openen.\n"
 
 #: PalmOS.cpp:546
-#, c-format
 msgid "Transferred message %d: \"%s\" for \"%s\"."
-msgstr ""
+msgstr "Overdracht bericht %d: \"%s\" voor \"%s\"."
 
 #: PalmOS.cpp:567
-#, fuzzy, c-format
 msgid ""
 "Failed to transfer message\n"
 "\"%s\"\n"
 "for \"%s\"."
-msgstr "Bewaren van bericht mislukt."
+msgstr "Berichtoverdracht mislukt\n"
+"\"%s\"\n"
+"voor \"%s\"."
 
 #: PalmOS.cpp:577
-#, fuzzy, c-format
 msgid "Transferred %d/%d messages."
-msgstr "Bewaren van %d berichten..."
+msgstr "Overgedragen %d/%d berichten."
 
 #: PalmOS.cpp:584
 msgid "No messages found in PalmOS-Outbox."
-msgstr ""
+msgstr "Geen berichten in PalmOS-Outbox gevonden."
 
 #: PalmOS.cpp:602
-#, c-format
 msgid "Cannot open PalmOS synchronisation mailbox ´%s´"
-msgstr ""
+msgstr "Kan PalmOS synchronisatie mailbox '%s' niet openen"
 
 #: PalmOS.cpp:630
-#, fuzzy, c-format
 msgid "Skipping deleted message %lu/%lu"
-msgstr "Maak verwijdering ongedaan"
+msgstr "Overslaan van verwijderd bericht %lu/%lu"
 
 #: PalmOS.cpp:651
-#, c-format
 msgid "Storing message %lu/%lu: %s"
-msgstr ""
+msgstr "Opslaan van bericht %lu/%lu: %s"
 
 #: PalmOS.cpp:686
-#, c-format
 msgid "Could not store message %lu/%lu: %s"
-msgstr ""
+msgstr "Kon bericht %lu/%lu niet opslaan: %s"
 
 #: PalmOS.cpp:702
-#, c-format
 msgid "Stored %lu/%lu messages on PalmOS device."
-msgstr ""
+msgstr "Opgeslagen; %lu/%lu berichten op PalmOS apparaat."
 
 #: PalmOS.cpp:711
-#, fuzzy, c-format
 msgid "Could not obtain lock for mailbox '%s'."
-msgstr "Kan map '%s' niet openen."
+msgstr "Kon geen lock krijgen voor mailbox '%s'."
 
 #: PalmOS.cpp:768
 msgid "PalmOS module"
-msgstr ""
+msgstr "PalmOS module"
 
 #: PalmOS.cpp:771
 msgid "PalmOS"
-msgstr ""
+msgstr "PalmOS"
 
 #: PalmOS.cpp:776
 msgid ""
 "This module can synchronise your e-Mail and Addressbook\n"
 "contents with a PalmOS based device."
 msgstr ""
+"Deze module kan uw e-mail en adresboek synchroniseren met\n"
+"de inhoud van uw op PalmOS gebaseerd apparaat."
 
 #: PalmOS.cpp:785 PalmOS.cpp:977
 msgid "Synchronise Mail"
-msgstr ""
+msgstr "Mail synchroniseren"
 
 #: PalmOS.cpp:795
 msgid "kept in Outbox"
-msgstr ""
+msgstr "in Outbox laten staan"
 
 #: PalmOS.cpp:796
-#, fuzzy
 msgid "deleted"
 msgstr "Verwijderen"
 
 #: PalmOS.cpp:797
-#, fuzzy
 msgid "filed"
-msgstr "Bestand"
+msgstr "opgeslagen"
 
 #: PalmOS.cpp:802
-#, fuzzy
 msgid "Sent messages will be"
-msgstr "geen berichten"
+msgstr "Verzonden berichten zullen"
 
 #: PalmOS.cpp:820
-#, fuzzy
 msgid "Synchronise Addressbooks"
-msgstr "Adresboek"
+msgstr "Adresboek synchroniseren"
 
 #: PalmOS.cpp:828
-#, fuzzy
 msgid "Mahogany Palm-mailbox"
-msgstr "Mahogany: Afdruk"
+msgstr "Mahogany Palm-mailbox"
 
 #: PalmOS.cpp:844
 msgid "Serial device"
-msgstr ""
+msgstr "Serieel apparaat"
 
 #: PalmOS.cpp:860
 msgid "Serial speed"
-msgstr ""
+msgstr "Seriele snelheid"
 
 #: PalmOS.cpp:883
 msgid "Attempt to lock device"
-msgstr ""
+msgstr "Poging apparaat te locken"
 
 #: PalmOS.cpp:891
 msgid "Optional script to run before opening device"
-msgstr ""
+msgstr "Optioneel script, te starten voor openen van apparaat"
 
 #: PalmOS.cpp:907
 msgid "Optional script to run after closing device"
-msgstr ""
+msgstr "Optioneel script, te starten na afsluiten van apparaat"
 
 #: PalmOS.cpp:983
-#, fuzzy
 msgid "PalmOS module preferences"
-msgstr "Voorkeuren bewerken"
+msgstr "PalmOS module voorkeuren"
 
 #: strutil.cpp:764
 msgid "Re"
-msgstr ""
+msgstr "Re"
 
 #: upgrade.cpp:357
-#, fuzzy
 msgid "Do you really want to abort the wizard?"
-msgstr "Wilt u Mahogany werkelijk beëindigen?"
+msgstr "Wilt u de wizard werkelijk beëindigen?"
 
 #: upgrade.cpp:365
 msgid ""
 "Please use the 'Options' dialog to configure\n"
 "the program before using it!"
 msgstr ""
+"Gebruik de 'Opties' dialoog om het programma in te\n"
+"stellen alvorens het te gebruiken!"
 
 #: upgrade.cpp:424
 msgid ""
@@ -290,26 +280,37 @@ msgid ""
 "If you decide to not use the dialog, just check\n"
 "the box below or press [Cancel] at any moment."
 msgstr ""
+"Welkom bij Mahogany!\n"
+"\n"
+"Deze wizard zal u helpen met de belangrijkste\n"
+"instellingen nodig om het programma correct te\n"
+"gebruiken. U hoeft niet alles hier in te vullen\n"
+"- dit kan ook later door het openen van het dialoog-\n"
+"venster 'Opties'. Vult u wel alles in dan kunt u\n"
+"het programma meteen gaan gebruiken.\n"
+"\n"
+"Als u dit venster niet wilt gebruiken, kruis het vakje\n"
+"aan of druk op [Annuleren] op ieder gewenst moment."
 
 #: upgrade.cpp:442
 msgid "I'm an &expert and don't need the wizard"
-msgstr ""
+msgstr "Ik ben een expert en heb de wizard niet nodig"
 
 #: upgrade.cpp:472
 msgid ""
 "Please specify your name and e-mail address:\n"
 "they will be used for sending the messages"
 msgstr ""
+"Geef uw naam en e-mail adres:\n"
+"deze zullen worden gebruikt bij het versturen van mail"
 
 #: upgrade.cpp:479
-#, fuzzy
 msgid "&Personal name:"
-msgstr "&Persoonlijke naam"
+msgstr "&Persoonlijke naam:"
 
 #: upgrade.cpp:480
-#, fuzzy
 msgid "&E-mail:"
-msgstr "&E-mail"
+msgstr "&E-mail:"
 
 #: upgrade.cpp:497
 msgid ""
@@ -324,26 +325,32 @@ msgid ""
 "All of these fields may be filled later as well\n"
 "(and you will be able to specify multiple servers too)"
 msgstr ""
+"Om e-mail te ontvangen moet u tenminste 1 mail\n"
+"server hebben. Dat kunnen POP3 of IMAP4 servers zijn,\n"
+"maar u heeft er slechts een nodig (IMAP4 is beter).\n"
+"\n"
+"Om Usenet discussiegroepen te lezen moet u een\n"
+"NNTP (nieuws) server opgeven en om e-mail te kunnen\n"
+"versturen, is een SMTP server vereist.\n"
+"\n"
+"U kunt deze velden ook later invullen\n"
+"(en u kunt ook meerdere servers invullen)"
 
 #: upgrade.cpp:512
-#, fuzzy
 msgid "&POP server:"
-msgstr "&Server: "
+msgstr "&POP server: "
 
 #: upgrade.cpp:513
-#, fuzzy
 msgid "&IMAP server:"
-msgstr "&Server: "
+msgstr "&IMAP server: "
 
 #: upgrade.cpp:514
-#, fuzzy
 msgid "&SMTP server:"
-msgstr "&Server: "
+msgstr "&SMTP server: "
 
 #: upgrade.cpp:515
-#, fuzzy
 msgid "&NNTP server:"
-msgstr "NNTP (&news) server"
+msgstr "&NNTP server:"
 
 #: upgrade.cpp:582
 msgid ""
@@ -359,11 +366,21 @@ msgid ""
 "We hope you will enjoy Mahogany!\n"
 "                    M-Team"
 msgstr ""
+"Gefeliciteerd! U hebt Mahogany succesvol geconfigureerd\n"
+"en kunt het nu beginnen te gebruiken..\n"
+"\n"
+"In geval van problemen kunt u de online help en documentatie\n"
+"gebruiken die bijgevoegd zijn bij de distributie, en kunt\n"
+"u uiteraard gebruik maken van de Mahogany gebruikers mailing list.\n"
+"\n"
+"\n"
+"\n"
+"Wij hopen dat u plezier zult hebben van Mahogany!\n"
+"                    M-Team"
 
 #: upgrade.cpp:624
-#, fuzzy
 msgid "Mahogany Installation"
-msgstr "Mahogany: Afdruk"
+msgstr "Mahogany Installatie"
 
 #: upgrade.cpp:656
 msgid ""
@@ -371,13 +388,15 @@ msgid ""
 "time, you should probably set up some of the options\n"
 "needed by the program (especially network parameters)."
 msgstr ""
+"Het lijkt er op dat u Mahogany voor het eerst hebt\n"
+"gestart, u moet nu enkele van de opties nodig voor het\n"
+"programma invullen (met name de netwerk parameters)."
 
 #: upgrade.cpp:851
 msgid "Deleted illegal folder profile: '"
 msgstr "Illegaal mapprofiel verwijderd: '"
 
 #: upgrade.cpp:963
-#, c-format
 msgid ""
 "Configuration information and program files were successfully upgraded from "
 "the version '%s'."
@@ -386,7 +405,6 @@ msgstr ""
 "versie '%s'."
 
 #: upgrade.cpp:967
-#, c-format
 msgid ""
 "Configuration information and program files could not be upgraded from "
 "version '%s', some settings might be lost.\n"
@@ -409,19 +427,22 @@ msgstr ""
 "deze. Kan niet opwaarderen."
 
 #: upgrade.cpp:1009
-#, c-format
 msgid ""
 "Found additional folder '%s'\n"
 "marked as central new mail folder. Ignoring it."
 msgstr ""
+"Extra map '%s' gevonden\n"
+"gemarkeerd als centrale nieuwe mailmap. Wordt genegeerd."
 
 #: upgrade.cpp:1019
-#, c-format
 msgid ""
 "Cannot auto-collect mail from the new mail folder\n"
 "'%s'\n"
 "Corrected configuration data."
 msgstr ""
+"Kan mail niet automatisch ophalen uit nieuwe mail map\n"
+"'%s'\n"
+"Heb configuratie data aangepast."
 
 #: upgrade.cpp:1055
 msgid ""
@@ -465,28 +486,24 @@ msgid "Default system folder for incoming mail."
 msgstr "Standaard mailbox voor inkomende post."
 
 #: upgrade.cpp:1112
-#, fuzzy
 msgid "Folder where Mahogany will collect all new mail."
-msgstr "Map om nieuwe post in te verzamelen"
+msgstr "Map waar Mahogany alle nieuwe post in verzamelt."
 
 #: upgrade.cpp:1151
 msgid "Folder where Mahogany will store copies of outgoing messages."
-msgstr ""
+msgstr "Map waar Mahogany kopiën van uitgaande berichten bewaard."
 
 #: upgrade.cpp:1173
-#, c-format
 msgid "The name for the trash folder was empty, using default '%s'."
-msgstr ""
+msgstr "De naam voor de map met verwijderde berichten was leeg, '%s' wordt gebruikt."
 
 #: upgrade.cpp:1186
-#, fuzzy
 msgid "Folder where Mahogany will store deleted messages."
-msgstr "Map om nieuwe post in te verzamelen"
+msgstr "Map waar Mahogany verwijderde berichten zal bewaren."
 
 #: upgrade.cpp:1211
-#, fuzzy
 msgid "Sent Mail"
-msgstr "Nieuwe berichten"
+msgstr "Mail verzonden"
 
 #: MApplication.cpp:837 MailCollector.cpp:255 upgrade.cpp:1212
 msgid "New Mail"
@@ -524,14 +541,12 @@ msgid "Testing your configuration"
 msgstr "Instellingen worden getest"
 
 #: miscutil.cpp:82
-#, c-format
 msgid ""
 "Failed to create the address book '%s' for autocollected e-mail addresses."
 msgstr ""
 "Creëren van het adresboek '%s' voor automatisch verzamelde adressen mislukt."
 
 #: miscutil.cpp:105
-#, c-format
 msgid "Auto collected e-mail address '%s' (added to the entry '%s')."
 msgstr "E-mail adres '%s' automatisch verzameld (toegevoegd onder '%s')"
 
@@ -540,7 +555,6 @@ msgid "Add new e-mail entry to database?"
 msgstr "Nieuwe e-mail vermelding aan database toevoegen?"
 
 #: miscutil.cpp:144
-#, c-format
 msgid ""
 "Couldn't create an entry in the address book '%s' for autocollected address."
 msgstr ""
@@ -548,12 +562,10 @@ msgstr ""
 "adres."
 
 #: miscutil.cpp:167
-#, c-format
 msgid "This entry was automatically added on %s."
 msgstr "Deze vermelding is automatisch toegevoegd op %s."
 
 #: miscutil.cpp:176
-#, c-format
 msgid ""
 "Auto collected e-mail address '%s' (created new entry '%s' in group '%s')."
 msgstr ""
@@ -561,7 +573,6 @@ msgstr ""
 "'%s')."
 
 #: miscutil.cpp:237
-#, c-format
 msgid "'%s': the name is missing, address was not autocollected."
 msgstr "'%s': de naam ontbreekt, adres niet automatisch verzameld."
 
@@ -584,12 +595,10 @@ msgid ", %lu new"
 msgstr ", %lu nieuw"
 
 #: miscutil.cpp:324
-#, c-format
 msgid "RGB(%d, %d, %d)"
 msgstr "RGB(%d, %d, %d)"
 
 #: miscutil.cpp:377
-#, c-format
 msgid ""
 "Cannot find a colour named '%s', using default instead.\n"
 "(please check the settings)"
@@ -616,17 +625,14 @@ msgid ""
 msgstr ""
 
 #: MApplication.cpp:317
-#, c-format
 msgid "Cannot create the directory for configuration files '%s'."
 msgstr "Kan de directory voor de configuratie bestanden niet maken '%s'."
 
 #: MApplication.cpp:322
-#, c-format
 msgid "Created directory '%s' for configuration files."
 msgstr "Directory '%s' voor configuratie bestanden gemaakt."
 
 #: MApplication.cpp:332
-#, c-format
 msgid ""
 "Could not create initial empty configuration file\n"
 "'%s'\n"
@@ -637,13 +643,12 @@ msgstr ""
 "%s"
 
 #: MApplication.cpp:347
-#, c-format
 msgid ""
 "Configuration directory '%s' was writable for other users.\n"
 "Passwords may have been compromised, please consider changing them.\n"
 msgstr ""
 "Andere gebruikers kunnen in configuratie directory '%s' schrijven.\n"
-"Paswoorden kunnen gecompromiteerd zijn, overweeg ze te veranderen.\n"
+"Wachtwoorden kunnen gecompromiteerd zijn, overweeg ze te veranderen.\n"
 
 #: MApplication.cpp:351
 msgid ""
@@ -652,7 +657,6 @@ msgstr ""
 "Dit is nu verholpen, de directory is niet langer beschrijfbaar voor anderen."
 
 #: MApplication.cpp:355
-#, c-format
 msgid ""
 "The attempt to make the directory unwritable for others has failed.\n"
 "(%s)"
@@ -661,20 +665,18 @@ msgstr ""
 "(%s)"
 
 #: MApplication.cpp:378
-#, c-format
 msgid ""
 "Configuration file '%s' was readable for other users.\n"
 "Passwords may have been compromised, please consider changing them.\n"
 msgstr ""
 "Configuratie bestand '%s' was leesbaar voor andere gebruikers.\n"
-"Paswoorden kunnen zijn gecompromiteerd, overweeg ze te veranderen.\n"
+"Wachtwoorden kunnen zijn gecompromiteerd, overweeg ze te veranderen.\n"
 
 #: MApplication.cpp:382
 msgid "This has been fixed now, the file is no longer readable for others."
 msgstr "Dit is nu verholpen, het bestand is niet langer leesbaar voor anderen."
 
 #: MApplication.cpp:386
-#, c-format
 msgid ""
 "The attempt to make the file unreadable for others has failed.\n"
 "(%s)"
@@ -683,7 +685,6 @@ msgstr ""
 "(%s)"
 
 #: MApplication.cpp:423
-#, c-format
 msgid ""
 "Cannot find global directory \"%s\" in\n"
 "\"%s\"\n"
@@ -702,9 +703,8 @@ msgid "Program execution aborted due to installation problems."
 msgstr "Starten van programma afgebroken vanwege installatie problemen."
 
 #: MApplication.cpp:558
-#, fuzzy
 msgid "Cannot build list of folders to keep open."
-msgstr "Kan geen lijst maken van inkomende post mappen."
+msgstr "Kan geen lijst maken van open te houden mappen."
 
 #: MApplication.cpp:678
 msgid ""
@@ -729,12 +729,10 @@ msgid "Do you want to exit anyway?"
 msgstr "Wilt u Mahogany werkelijk beëindigen?"
 
 #: MApplication.cpp:778
-#, c-format
 msgid "Could not collect mail from incoming folder '%s'."
 msgstr "Kon post niet verzamelen uit In map '%s'"
 
 #: MApplication.cpp:790 MailCollector.cpp:232
-#, c-format
 msgid "Command '%s' (to execute on new mail reception) failed."
 msgstr "Commando '%s' (te starten bij ontvangst nieuwe post) mislukt."
 
@@ -751,7 +749,6 @@ msgid "in folder '"
 msgstr "in map '"
 
 #: MApplication.cpp:834
-#, c-format
 msgid ""
 "You have received %lu new messages\n"
 "in folder '%s'."
@@ -762,12 +759,11 @@ msgstr ""
 #: MApplication.cpp:884
 #, fuzzy
 msgid "Checking for queued messages..."
-msgstr "Bewaren van %d berichten..."
+msgstr "Controleren op berichten in wachtrij..."
 
 #: MApplication.cpp:900 MApplication.cpp:931
-#, fuzzy, c-format
 msgid "Cannot open outbox ´%s´"
-msgstr "Kan URL '%s' niet openen"
+msgstr "Kan Postvak uit '%s' niet openen"
 
 #: MApplication.cpp:945
 msgid ""
@@ -776,47 +772,38 @@ msgid ""
 msgstr ""
 
 #: MApplication.cpp:951
-#, fuzzy
 msgid "Going online..."
-msgstr "Plaatje wordt geladen..."
+msgstr "Verbinding maken..."
 
 #: MApplication.cpp:975
-#, c-format
 msgid "Sending message %lu/%lu: %s"
-msgstr ""
+msgstr "Bericht %lu/%lu versturen: %s"
 
 #: MApplication.cpp:990
-#, fuzzy, c-format
 msgid "Cannot send message ´%s´."
-msgstr "Kan bericht niet schrijven naar bestand '%s'."
+msgstr "Kan bericht '%s' niet versturen."
 
 #: MApplication.cpp:991
-#, fuzzy, c-format
 msgid "Cannot post article ´%s´."
-msgstr "Kan map '%s' niet openen."
+msgstr "Kan artikel '%s' niet posten."
 
 #: MApplication.cpp:1003
-#, c-format
 msgid "Sent %lu messages from outbox ´%s´."
-msgstr ""
+msgstr "%lu berichten uit postvak Uit '%s' verstuurd."
 
 #: MApplication.cpp:1010
-#, fuzzy, c-format
 msgid "Could not obtain lock for outbox '%s'."
-msgstr "Kan map '%s' niet openen."
+msgstr "Kon geen lock krijgen voor postvak Uit '%s'."
 
 #: XFace.cpp:196
-#, fuzzy, c-format
 msgid "Could not load XFace file '%s'."
-msgstr "Kan map '%s' niet openen."
+msgstr "Kon XFace bestand '%s' niet laden."
 
 #: MFolder.cpp:245
-#, c-format
 msgid "Cannot create a folder '%s' which already exists."
-msgstr "U kunt map '%s' niet maken, deze bestaat al."
+msgstr "Kon map '%s' niet maken, deze bestaat al."
 
 #: MFolder.cpp:360
-#, c-format
 msgid ""
 "Cannot create profile folder '%s' because a group with this name already "
 "exists."
@@ -824,7 +811,6 @@ msgstr ""
 "Kan profielmap '%s' niet maken omdat een groep met deze naam al bestaat."
 
 #: MFolder.cpp:537
-#, c-format
 msgid "Cannot create subfolder '%s': folder with this name already exists."
 msgstr "Kan submap '%s' niet maken: map met deze naam bestaat al."
 
@@ -837,15 +823,14 @@ msgstr ""
 "hernoemd worden."
 
 #: MFolder.cpp:586
-#, c-format
 msgid ""
 "Cannot rename folder '%s' to '%s': the folder with the new name already "
 "exists."
 msgstr ""
-"Kan map '%s' nieuw omnoemen naar '%s': de map met de nieuwe naam bestaat al."
+"Kan map '%s' nieuw hernoemen naar '%s': de map met de nieuwe naam bestaat "
+"al."
 
 #: MailCollector.cpp:141
-#, c-format
 msgid "Cannot open incoming folder '%s'."
 msgstr "Kan Inkomende post-map '%s' niet openen."
 
@@ -858,7 +843,6 @@ msgid "Cannot collect mail without New Mail folder."
 msgstr "Kan geen post verzamelen zonder Nieuwe Post map."
 
 #: MailCollector.cpp:250
-#, c-format
 msgid "You have %lu new messages in folder '%s'.\n"
 msgstr "U heeft %lu nieuw berichten in map '%s'.\n"
 
@@ -871,13 +855,12 @@ msgstr ""
 "Dit is niet logisch. Corrigeer aub. de instellingen."
 
 #: MailCollector.cpp:291
-#, c-format
 msgid "Auto-collecting mail from incoming folder '%s'."
 msgstr "Automatisch verzamelen van post uit Inkomende post-map '%s'."
 
 #: MailCollector.cpp:308
 msgid "From folder '"
-msgstr "Van map'"
+msgstr "Van map '"
 
 #: MailCollector.cpp:314
 msgid "  Subject: "
@@ -888,44 +871,38 @@ msgid "  From: "
 msgstr "  Van:"
 
 #: MModule.cpp:204
-#, fuzzy, c-format
 msgid "Cannot initialise module '%s', error code %d."
-msgstr "Kan map '%s' niet openen."
+msgstr "Kon module '%s' niet initialiseren, foutcode %d."
 
 #: MModule.cpp:415
 msgid " (builtin)"
-msgstr ""
+msgstr " (ingebouwd)"
 
 #: MModule.cpp:537
-#, fuzzy, c-format
 msgid "Cannot parse MMD file for module '%s'."
-msgstr "Kan map '%s' niet openen."
+msgstr "Kon MMD bestand voor module '%s' niet parsen."
 
 #: MessageTemplate.cpp:140
-#, fuzzy, c-format
 msgid "Unexpected end of file '%s'."
-msgstr "Bestand '%s' ingevoegd."
+msgstr "Onverwacht einde van bestand '%s'."
 
 #: MessageTemplate.cpp:152
-#, c-format
 msgid "Unexpected character at position %d in line %d in the file '%s'."
-msgstr ""
+msgstr "Onverwacht karakter op positie %d in regel %d in bestand '%s'."
 
 #: MessageTemplate.cpp:206 MessageTemplate.cpp:289
-#, c-format
 msgid "Unexpected character '%c' at line %d, position %d in the file '%s'."
-msgstr ""
+msgstr "Onverwacht karakter '%c' op regel %d, positie %d in bestand '%s'."
 
 #: MessageTemplate.cpp:249
-#, c-format
 msgid ""
 "Incorrect alignment width value at line %d, position %d in the file '%s'."
 msgstr ""
+"Incorrecte uitlijnbreedte waarde op regel %d, positie %d in bestand '%s'."
 
 #: MessageTemplate.cpp:315
-#, c-format
 msgid "Unknown variable '%s' at line %d, position %d in the file '%s'."
-msgstr ""
+msgstr "Onbekende variabele '%s' op regel %d, positie %d in bestand '%s'."
 
 #: MessageTemplate.cpp:440
 msgid ""
@@ -934,6 +911,10 @@ msgid ""
 "$QUOTE\n"
 "$CURSOR"
 msgstr ""
+"Op $(ORIGINAL:DATE) schreef je:\n"
+"\n"
+"$QUOTE\n"
+"$CURSOR"
 
 #: MessageTemplate.cpp:448
 msgid ""
@@ -942,10 +923,14 @@ msgid ""
 "$QUOTE\n"
 "$CURSOR"
 msgstr ""
+"Op $(ORIGINAL:DATE) $SENDER wrote in $(ORIGINAL:NEWSGROUPS)\n"
+"\n"
+"$QUOTE\n"
+"$CURSOR"
 
 #: wxMApp.cpp:242
 msgid "Dial-Up network connection established."
-msgstr ""
+msgstr "Inbelverbinding gemaakt."
 
 #: wxMApp.cpp:244 wxMApp.cpp:257
 msgid "Information"
@@ -953,7 +938,7 @@ msgstr "Informatie"
 
 #: wxMApp.cpp:255
 msgid "Dial-Up network shut down."
-msgstr ""
+msgstr "Inbelverbinding verbroken."
 
 #: wxMApp.cpp:288
 msgid ""
@@ -970,7 +955,6 @@ msgid "Do you really want to exit Mahogany?"
 msgstr "Wilt u Mahogany werkelijk beëindigen?"
 
 #: wxMApp.cpp:537
-#, fuzzy
 msgid "Mahogany : Activity Log"
 msgstr "Mahogany: Activiteitenlog"
 
@@ -995,7 +979,6 @@ msgid "Search help for keyword"
 msgstr "Zoek naar sleutelwoord in help"
 
 #: wxMApp.cpp:759
-#, c-format
 msgid "No help found for current context (%d)."
 msgstr "Geen hulp gevonden voor huidige context (%d)."
 
@@ -1004,44 +987,40 @@ msgid "Sorry"
 msgstr "Sorry"
 
 #: wxMApp.cpp:782
-#, fuzzy, c-format
 msgid "Cannot load module '%s'."
-msgstr "Kan map '%s' niet openen."
+msgstr "Kan module '%s' niet laden."
 
 #: wxMApp.cpp:989
-#, fuzzy
 msgid "Online"
-msgstr " regels"
+msgstr "Online"
 
 #: wxMApp.cpp:989
-#, fuzzy
 msgid "Offline"
-msgstr " regels"
+msgstr "Offline"
 
 #: wxMApp.cpp:1032
 msgid "Outbox empty"
-msgstr ""
+msgstr "Postvak Uit leeg"
 
 #: wxMApp.cpp:1034
-#, c-format
 msgid "Outbox %lu, %lu"
-msgstr ""
+msgstr "Postbak Uit %lu, %lu"
 
 #: wxMApp.cpp:1054
 msgid "Cannot activate auto-check for dial-up network status."
-msgstr ""
+msgstr "Kan auto-controle voor status inbelverbinding niet activeren."
 
 #: wxMApp.cpp:1096
 msgid "Dial-up network is already online."
-msgstr ""
+msgstr "Inbelverbinding is al gemaakt."
 
 #: wxMApp.cpp:1108
 msgid "Dial-up network is already offline."
-msgstr ""
+msgstr "Inbelverbinding is al verbroken."
 
 #: wxMApp.cpp:1114
 msgid "Attempt to shut down network seems to have failed."
-msgstr ""
+msgstr "Poging om netwerk af te sluiten is mogelijk mislukt."
 
 #: wxMFrame.cpp:154
 msgid "&File"
@@ -1122,12 +1101,10 @@ msgid "Subject"
 msgstr "Onderwerp"
 
 #: wxFolderView.cpp:209
-#, fuzzy
 msgid "DUXCSMRFOPHVG "
-msgstr "DUXCSMRFOPHV "
+msgstr "DUXCSMRFOPHVG "
 
 #: wxFolderView.cpp:579
-#, fuzzy, c-format
 msgid ""
 "Mark all articles in\n"
 "'%s'\n"
@@ -1138,12 +1115,10 @@ msgstr ""
 "als gelezen markeren?"
 
 #: wxFolderView.cpp:866
-#, c-format
 msgid "Folder '%s'"
 msgstr "Map '%s'"
 
 #: wxFolderView.cpp:894
-#, c-format
 msgid "The folder '%s' could not be opened, please check its settings."
 msgstr "De map '%s' kon niet worden geopend, controleer de instellingen."
 
@@ -1152,7 +1127,6 @@ msgid "Deleted messages were expunged"
 msgstr "Verwijderde berichten zijn uitgewist"
 
 #: wxFolderView.cpp:1146
-#, c-format
 msgid "%d messages saved"
 msgstr "%d berichten bewaard"
 
@@ -1161,34 +1135,28 @@ msgid "Saving messages failed."
 msgstr "Berichten bewaren mislukt."
 
 #: wxFolderView.cpp:1167
-#, c-format
 msgid "Closing folder '%s' because the underlying mail folder was deleted."
 msgstr "Map '%s' gesloten omdat de onderliggende post map is verwijderd."
 
 #: wxFolderView.cpp:1205
-#, fuzzy, c-format
 msgid "Saved %lu messages."
-msgstr "Bewaren van %d berichten..."
+msgstr "%lu berichten bewaard."
 
 #: wxFolderView.cpp:1215
-#, fuzzy, c-format
 msgid "Copied %lu messages."
-msgstr "geen berichten"
+msgstr "%lu berichten gekopiëerd."
 
 #: wxFolderView.cpp:1218
-#, fuzzy
 msgid "Copying messages failed."
-msgstr "Berichten bewaren mislukt."
+msgstr "Berichten kopiëren mislukt."
 
 #: wxFolderView.cpp:1232
-#, fuzzy, c-format
 msgid "Found %lu messages."
-msgstr "geen berichten"
+msgstr "%lu berichten gevonden."
 
 #: wxFolderView.cpp:1241
-#, fuzzy
 msgid "No matching messages found."
-msgstr "Berichten bewaren mislukt."
+msgstr "Geen berichten gevonden."
 
 #: wxMessageView.cpp:190
 msgid "MIME Menu"
@@ -1207,7 +1175,6 @@ msgid "&Save..."
 msgstr "&Bewaren..."
 
 #: wxMessageView.cpp:431
-#, c-format
 msgid ""
 "Temporary file '%s' left because it is still in use by an external process"
 msgstr ""
@@ -1266,7 +1233,6 @@ msgid "Cannot get attachment content."
 msgstr "Kan inhoud van aanhang niet krijgen."
 
 #: wxMessageView.cpp:1015
-#, c-format
 msgid "Please enter the command to handle '%s' data:"
 msgstr "Geef het commando om '%s' data te verwerken:"
 
@@ -1275,7 +1241,6 @@ msgid "Unknown MIME type"
 msgstr "Onbekend MIME type"
 
 #: wxMessageView.cpp:1026
-#, c-format
 msgid "Do not know how to handle data of type '%s'."
 msgstr "Weet niet hoe om te gaan met data van type '%s'."
 
@@ -1284,7 +1249,6 @@ msgid "Cannot rename temporary file."
 msgstr "Kan tijdelijk bestand niet hernoemen."
 
 #: wxMessageView.cpp:1070
-#, c-format
 msgid "Error opening attachment: command '%s' failed"
 msgstr "Fout bij openen aanhang: commando '%s' mislukt"
 
@@ -1293,7 +1257,6 @@ msgid "Save attachment as:"
 msgstr "Aanhang bewaren als:"
 
 #: wxMessageView.cpp:1125
-#, c-format
 msgid "Wrote %lu bytes to file '%s'"
 msgstr "%lu bytes bewaard in bestand '%s'"
 
@@ -1302,7 +1265,6 @@ msgid "Could not save the attachment."
 msgstr "Kon aanhang niet bewaren."
 
 #: wxMessageView.cpp:1255
-#, c-format
 msgid "Cannot open URL '%s'"
 msgstr "Kan URL '%s' niet openen"
 
@@ -1319,22 +1281,18 @@ msgid "No command configured to view URLs."
 msgstr "Geen commando ingesteld om URLs te bekijken."
 
 #: wxMessageView.cpp:1299
-#, c-format
 msgid "Could not launch browser: '%s' failed."
 msgstr "Kon browser niet starten: '%s' mislukt."
 
 #: wxMessageView.cpp:1312
-#, c-format
 msgid "Couldn't launch browser: '%s' failed"
 msgstr "Kon browser niet starten: '%s' mislukt."
 
 #: wxMessageView.cpp:1321
-#, c-format
 msgid "Opening URL '%s'... done."
 msgstr "Openen URL '%s'... klaar."
 
 #: wxMessageView.cpp:1324
-#, c-format
 msgid "Opening URL '%s' failed."
 msgstr "Openen URL '%s' mislukt."
 
@@ -1347,7 +1305,6 @@ msgid "Raw message text"
 msgstr "Ruwe berichttekst"
 
 #: wxMessageView.cpp:1478
-#, c-format
 msgid ""
 "The selected message is %u Kbytes long which is more than the current "
 "threshold of %d Kbytes.\n"
@@ -1396,104 +1353,88 @@ msgid "Print Preview"
 msgstr "Afdrukvoorbeeld"
 
 #: wxMessageView.cpp:1634 wxMessageView.cpp:1645
-#, fuzzy, c-format
 msgid "Calling external viewer '%s'"
-msgstr "Externe editor aanroepen"
+msgstr "Externe viewer '%s' aanroepen"
 
 #: wxMessageView.cpp:1685
-#, c-format
 msgid "%s (external viewer exited with non null exit code)"
 msgstr "%s (externe viewer is gestopt met een non null exit code)"
 
 #: wxMessageView.cpp:1723
-#, fuzzy
 msgid " , from "
-msgstr "  Van:"
+msgstr " ,  van"
 
 #: wxComposeView.cpp:453
 msgid "Put &cursor here"
-msgstr ""
+msgstr "&Cursor hier zetten"
 
 #: wxComposeView.cpp:455
-#, fuzzy
 msgid "Insert &quoted text"
-msgstr "Invoegen tek&st..."
+msgstr "Invoegen aangehaalde tekst"
 
 #: wxComposeView.cpp:456
 msgid "&Attach original text"
-msgstr ""
+msgstr "Originele tekst bijvoegen"
 
 #: wxComposeView.cpp:462 wxComposeView.cpp:475 wxHeadersDialogs.cpp:343
 msgid "&To"
 msgstr "&Aan"
 
 #: wxComposeView.cpp:463 wxComposeView.cpp:473
-#, fuzzy
 msgid "&Subject"
 msgstr "Onderwerp"
 
 #: wxComposeView.cpp:464
-#, fuzzy
 msgid "&CC"
-msgstr "Cc:"
+msgstr "&Cc:"
 
 #: wxComposeView.cpp:465
-#, fuzzy
 msgid "&BCC"
-msgstr "Bcc:"
+msgstr "&Bcc:"
 
 #: wxComposeView.cpp:471
-#, fuzzy
 msgid "&Date"
-msgstr "Datum"
+msgstr "&Datum"
 
 #: wxComposeView.cpp:472
-#, fuzzy
 msgid "&From"
 msgstr "Van"
 
 #: wxComposeView.cpp:474
-#, fuzzy
 msgid "&Full name"
-msgstr "&Volledige naam"
+msgstr "Volledige naam"
 
 #: wxComposeView.cpp:476
-#, fuzzy
 msgid "&Reply to"
 msgstr "Antwoo&rden"
 
 #: wxComposeView.cpp:477
-#, fuzzy
 msgid "&Newsgroups"
 msgstr "Nieuwsgroepen:"
 
 #: wxComposeView.cpp:483
-#, fuzzy
 msgid "&Miscellaneous"
 msgstr "Diversen"
 
 #: wxComposeView.cpp:486
-#, fuzzy
 msgid "Message &headers"
-msgstr "Berichtenviewer"
+msgstr "Berichtenkoppen"
 
 #: wxComposeView.cpp:489
-#, fuzzy
 msgid "&Original message"
-msgstr "Bericht afdrukken"
+msgstr "&Originele bericht "
 
 #: wxComposeView.cpp:492 wxMenuDefs.cpp:300
 msgid "&Insert file..."
 msgstr "&Invoegen bestand..."
 
 #: wxComposeView.cpp:493
-#, fuzzy
 msgid "&Attach file..."
-msgstr "&Invoegen bestand..."
+msgstr "Bestand &aanhangen..."
 
 #: wxComposeView.cpp:494
 msgid "&Execute command..."
-msgstr ""
+msgstr "Commando uitvoeren..."
 
 #: wxComposeView.cpp:648
 msgid "Nothing to expand - please enter something."
@@ -1501,7 +1442,7 @@ msgstr "Niets om uit te breiden - voer iets in."
 
 #: wxComposeView.cpp:772
 msgid "RO"
-msgstr ""
+msgstr "RO"
 
 #: wxComposeView.cpp:794
 msgid "Article Composition"
@@ -1513,11 +1454,11 @@ msgstr "Bericht samenstellen"
 
 #: wxComposeView.cpp:896
 msgid "template"
-msgstr ""
+msgstr "template"
 
 #: wxComposeView.cpp:911
 msgid "There were errors in the template. Would you like to edit it now?"
-msgstr ""
+msgstr "Er zaten fouten in de template. Wilt u deze nu bewerken?"
 
 #: wxComposeView.cpp:949
 msgid "&Compose"
@@ -1544,9 +1485,8 @@ msgid "BCC:"
 msgstr "Bcc:"
 
 #: wxComposeView.cpp:1056
-#, fuzzy
 msgid "Expand"
-msgstr "Uitwissen (definitief verwijderen)"
+msgstr "Uitbreiden"
 
 #: wxComposeView.cpp:1065
 msgid "Expand the address using address books"
@@ -1557,7 +1497,6 @@ msgid "You haven't configured your signature file."
 msgstr "U heeft uw handtekeningenbestand niet ingesteld."
 
 #: wxComposeView.cpp:1148
-#, c-format
 msgid "Signature file '%s' couldn't be opened."
 msgstr "Handtekeningen bestand '%s' kon niet worden geopend."
 
@@ -1577,7 +1516,6 @@ msgid "Choose signature file"
 msgstr "Kies handtekeningbestand"
 
 #: wxComposeView.cpp:1199
-#, c-format
 msgid "Your signature is %stoo long: it should not be more than %d lines."
 msgstr "Uw handtekening is %ste lang: hij moet niet langer dan %d regels zijn."
 
@@ -1586,7 +1524,6 @@ msgid "way "
 msgstr "veel "
 
 #: wxComposeView.cpp:1310
-#, c-format
 msgid ""
 "Please terminate the external editor (PID %d) before closing this window."
 msgstr "Sluit de externe editor (PID %d) alvorens dit venster te sluiten."
@@ -1612,12 +1549,10 @@ msgid "Cancelled"
 msgstr "Geannuleerd"
 
 #: wxComposeView.cpp:1394
-#, c-format
 msgid "Inserted file '%s'."
 msgstr "Bestand '%s' ingevoegd."
 
 #: wxComposeView.cpp:1398
-#, c-format
 msgid "Failed to insert the text file '%s'."
 msgstr "Invoegen van bestand '%s' mislukt."
 
@@ -1626,7 +1561,6 @@ msgid "Choose file to save message to"
 msgstr "Kies bestand om bericht in te bewaren"
 
 #: wxComposeView.cpp:1419
-#, c-format
 msgid "Message text saved to file '%s'."
 msgstr "Berichttekst bewaard in bestand '%s'."
 
@@ -1635,7 +1569,6 @@ msgid "Failed to save the message."
 msgstr "Bewaren van bericht mislukt."
 
 #: wxComposeView.cpp:1433
-#, c-format
 msgid "External editor is already running (PID %d)"
 msgstr "Externe editor is al gestart (PID %d)"
 
@@ -1652,12 +1585,10 @@ msgid "Failed to pass message to external editor."
 msgstr "Bericht doorgeven aan externe editor mislukt."
 
 #: wxComposeView.cpp:1485
-#, c-format
 msgid "Execution of '%s' failed."
 msgstr "Uitvoeren van '%s' mislukt."
 
 #: wxComposeView.cpp:1492
-#, c-format
 msgid "Started external editor (PID %d)"
 msgstr "Externe editor gestart (PID %d)"
 
@@ -1677,9 +1608,8 @@ msgstr ""
 "bestand):"
 
 #: wxComposeView.cpp:1555
-#, fuzzy, c-format
 msgid "Added custom header '%s' to the message."
-msgstr "Bewaren van bericht mislukt."
+msgstr "Eigengemaakte header '%s' toegevoegd."
 
 #: wxComposeView.cpp:1596
 msgid "External editor terminated with non null exit code."
@@ -1694,17 +1624,18 @@ msgid "Inserted text from external editor."
 msgstr "Tekst van externe editor ingevoegd."
 
 #: wxComposeView.cpp:1619
-#, c-format
 msgid "The text was left in the file '%s'."
 msgstr "De tekst is achtergebleven in bestand '%s'."
 
 #: wxComposeView.cpp:1710
-#, c-format
 msgid ""
 "File '%s' seems to contain data of\n"
 "MIME type '%s'.\n"
 "Is this correct?"
 msgstr ""
+"File '%s' lijkt gegevens te bevatten van\n"
+"MIME type '%s'.\n"
+"Is dit correct?"
 
 #: wxComposeView.cpp:1714
 #, fuzzy
@@ -1712,26 +1643,22 @@ msgid "Content MIME type"
 msgstr "Onbekend MIME type"
 
 #: wxComposeView.cpp:1720
-#, fuzzy
 msgid "MIME type"
 msgstr "MIME type: "
 
 #: wxComposeView.cpp:1721
 msgid "Please enter new MIME type:"
-msgstr ""
+msgstr "Voer nieuw MIME type in:"
 
 #: wxComposeView.cpp:1736
-#, c-format
 msgid "Inserted file '%s' (as '%s')"
 msgstr "Bestand '%s' ingevoegd (als '%s')"
 
 #: wxComposeView.cpp:1818
-#, c-format
 msgid "Cannot read file '%s' included in this message!"
 msgstr "Kan bestand '%s' in dit bericht niet lezen!"
 
 #: wxComposeView.cpp:1826
-#, c-format
 msgid "Cannot open file '%s' included in this message!"
 msgstr "Kan bestand '%s' in dit bericht niet openen!"
 
@@ -1744,7 +1671,8 @@ msgid ""
 "The external editor is still opened, please close it before sending the "
 "message."
 msgstr ""
-"De externe editor is nog geopend, sluit het aub. voor u het bericht vestuurd."
+"De externe editor is nog geopend, sluit het aub. voor u het bericht"
+"verstuurd."
 
 #: wxComposeView.cpp:2040
 msgid ""
@@ -1771,22 +1699,18 @@ msgid "Cannot insert text file into the message."
 msgstr "Kan tekstbestand niet invoegen in bericht."
 
 #: wxComposeView.cpp:2202
-#, c-format
 msgid "Cannot write message to file '%s'."
 msgstr "Kan bericht niet schrijven naar bestand '%s'."
 
 #: wxComposeView.cpp:2509
-#, fuzzy, c-format
 msgid "Failed to insert file '%s' into the message."
 msgstr "Kan tekstbestand niet invoegen in bericht."
 
 #: wxComposeView.cpp:2524
-#, fuzzy, c-format
 msgid "Failed to attach file '%s' to the message."
 msgstr "Kan tekstbestand niet invoegen in bericht."
 
 #: wxComposeView.cpp:2559
-#, fuzzy, c-format
 msgid "Failed to execute the command '%s'"
 msgstr "Invoegen van bestand '%s' mislukt."
 
@@ -1795,27 +1719,26 @@ msgid ""
 "The variables using the original message cannot be used in this template; "
 "variable ignored."
 msgstr ""
+"De variabelen die het originele bericht gebruiken kunnen niet gebruikt worden; "
+"variabele genegeerd."
 
 #: wxMainFrame.cpp:93
 msgid "Plugin Modules"
-msgstr ""
+msgstr "Plugin Modules"
 
 #: wxMainFrame.cpp:113
 msgid "No modules to run or configure!"
-msgstr ""
+msgstr "Geen modules om te starten of configureren!"
 
 #: wxMainFrame.cpp:127
-#, fuzzy
 msgid " module..."
-msgstr "&Nieuw"
+msgstr " module..."
 
 #: wxMainFrame.cpp:143
-#, fuzzy, c-format
 msgid "Configure %s module..."
-msgstr "&Headers instellen..."
+msgstr "Configureer %s module..."
 
 #: wxMainFrame.cpp:195
-#, c-format
 msgid "Selected folder '%s'."
 msgstr "Map '%s' geselecteerd."
 
@@ -1832,7 +1755,6 @@ msgid "Would you like to change folder settings before trying to open it?"
 msgstr "Wilt u de mapinstellingen veranderen alvorens deze te openen"
 
 #: wxMainFrame.cpp:396
-#, c-format
 msgid "Opened folder '%s'"
 msgstr "Map '%s' geopend"
 
@@ -1845,7 +1767,6 @@ msgid "Loading image..."
 msgstr "Plaatje wordt geladen..."
 
 #: wxIconManager.cpp:207
-#, c-format
 msgid ""
 "Unsupported intermediary image format '%s' specified,\n"
 "reset to '%s'."
@@ -1867,7 +1788,7 @@ msgstr ""
 
 #: wxIconManager.cpp:431
 msgid "default"
-msgstr ""
+msgstr "standaard"
 
 #: AdbFrame.cpp:2549 AdbFrame.cpp:2669 persctrl.cpp:1192
 #: wxDialogLayout.cpp:890 wxMDialogs.cpp:360 wxMDialogs.cpp:973
@@ -1906,32 +1827,26 @@ msgid "Expansion options"
 msgstr "Uitbreiding opties"
 
 #: wxMDialogs.cpp:787 wxModulesDlg.cpp:158
-#, fuzzy
 msgid "Version: "
-msgstr "    Versie: "
+msgstr "Versie: "
 
 #: wxMDialogs.cpp:793
-#, fuzzy
 msgid "compiled for "
-msgstr " , gecompileerd onder "
+msgstr "gecompileerd onder "
 
 #: wxMDialogs.cpp:809
-#, fuzzy
 msgid "Copyright (c) 1999 by Karsten Ballüder"
-msgstr "  Copyright (c) 1999 by Karsten Ballüder"
+msgstr "Copyright (c) 1999 by Karsten Ballüder"
 
 #: wxMDialogs.cpp:814
-#, fuzzy
 msgid "Written by Karsten Ballüder"
-msgstr "          Geschreven door Karsten Ballüder"
+msgstr "Geschreven door Karsten Ballüder"
 
 #: wxMDialogs.cpp:818
-#, fuzzy
 msgid "and Vadim Zeitlin"
-msgstr "                       en Vadim Zeitlin"
+msgstr "en Vadim Zeitlin"
 
 #: wxMDialogs.cpp:823
-#, fuzzy
 msgid "This software is provied 'as is' and without any expressed or implied"
 msgstr ""
 "Deze software wordt geleverd zonder enige uitdrukkelijke of geïmpliceerde"
@@ -1957,94 +1872,88 @@ msgid "Choose folder"
 msgstr "Kies map"
 
 #: wxMDialogs.cpp:986 wxMFolderDialogs.cpp:2041
-#, fuzzy
 msgid "File..."
-msgstr "Bestand"
+msgstr "Bestand..."
 
 #: wxDialogLayout.cpp:910 wxMDialogs.cpp:995 wxMenuDefs.cpp:94
 msgid "Help"
 msgstr "Help"
 
 #: wxMDialogs.cpp:1031
-#, fuzzy
 msgid "Mahogany: Please choose a folder file"
-msgstr "Kies aub. een map"
+msgstr "Mahogany: Kies aub. een mapbestand"
 
 #: wxMDialogs.cpp:1098
 msgid "Mahogany: folder selection"
-msgstr ""
+msgstr "Mahogany: map selectie"
 
 #: wxMDialogs.cpp:1099
-#, c-format
 msgid ""
 "Sorry, the folder '%s' already exists and corresponds to another file, "
 "please choose a different name for the folder which will correspond to the "
 "file '%s'."
 msgstr ""
+"Sorry, de map '%s' bestaat al en correspondeert met een ander bestand, "
+"kiese een andere naam voor de map die zal corresponderen met het bestand "
+"'%s'."
 
 #: wxMDialogs.cpp:1170
-#, fuzzy
 msgid "None"
-msgstr "Nee"
+msgstr "Geen"
 
 #: wxMDialogs.cpp:1172
 msgid "Date (reverse)"
-msgstr ""
+msgstr "Datum (omgekeerd)"
 
 #: wxMDialogs.cpp:1174
-#, fuzzy
 msgid "Subject (reverse)"
-msgstr "Onderwerp: "
+msgstr "Onderwerp (omgekeerd)"
 
 #: wxMDialogs.cpp:1175
 msgid "Author"
-msgstr ""
+msgstr "Auteur"
 
 #: wxMDialogs.cpp:1176
 msgid "Author (reverse)"
-msgstr ""
+msgstr "Auteur (omgekeerd)"
 
 #: wxMDialogs.cpp:1178
 msgid "Status (reverse)"
-msgstr ""
+msgstr "Status (omgekeerd)"
 
 #: wxMDialogs.cpp:1179
 msgid "Score"
-msgstr ""
+msgstr "Score"
 
 #: wxMDialogs.cpp:1180
 msgid "Score (reverse)"
-msgstr ""
+msgstr "Score (omgekeerd)"
 
 #: wxMDialogs.cpp:1189
 msgid "First, sort by"
-msgstr ""
+msgstr "Eerst sorteren op"
 
 #: wxMDialogs.cpp:1190
 msgid "then, sort by"
-msgstr ""
+msgstr "daarna sorteren op"
 
 #: wxMDialogs.cpp:1214
-#, fuzzy
 msgid "Message sorting"
-msgstr "Bericht verstuurd"
+msgstr "Berichten sorteren"
 
 #: wxMDialogs.cpp:1217
-#, fuzzy
 msgid "Sort messages by"
-msgstr "geen berichten"
+msgstr "Berichten sorteren op"
 
 #: wxMDialogs.cpp:1265
-#, fuzzy
 msgid "Thread messages"
-msgstr "geen berichten"
+msgstr "Berichten per thread"
 
 #: wxMDialogs.cpp:1273
 msgid "Re-sort on status change"
-msgstr ""
+msgstr "Hersorteren na statusverandering"
 
 #: wxMDialogs.cpp:1318
-#, c-format
 msgid ""
 "You have selected message score as a sort criterium\n"
 "but not loaded any scoring plugin module yet.\n"
@@ -2052,161 +1961,155 @@ msgid ""
 "module providing the '%s' interface.\n"
 "Otherwise all messages will have score 0."
 msgstr ""
+"U heeft de berichtscore als sorteercriterium gekozen\n"
+"maar geen plugin module voor scoring geladen.\n"
+"Scoring zal alleen werken als u een uitbreidingsmodule\n"
+"laadt voor de '%s' interface.\n"
+"Anders krijgen alle berichten score 0."
 
 #: wxMDialogs.cpp:1374
-#, fuzzy
 msgid "Full Message"
-msgstr "geen berichten"
+msgstr "Volledig bericht"
 
 #: wxMDialogs.cpp:1375
-#, fuzzy
 msgid "Message Content"
-msgstr "Bericht verstuurd"
+msgstr "Berichtinhoud"
 
 #: wxMDialogs.cpp:1376
-#, fuzzy
 msgid "Message Header"
-msgstr "Berichtenviewer"
+msgstr "Berichtkop"
 
 #: wxMDialogs.cpp:1377
-#, fuzzy
 msgid "Subject Field"
-msgstr "Onderwerp: "
+msgstr "Onderwerpveld"
 
 #: wxMDialogs.cpp:1378
 msgid "To Field"
-msgstr ""
+msgstr "Aan Veld"
 
 #: wxMDialogs.cpp:1379
-#, fuzzy
 msgid "From Field"
-msgstr "Van: "
+msgstr "Van Veld"
 
 #: wxMDialogs.cpp:1380
 msgid "CC Field"
-msgstr ""
+msgstr "CC Veld"
 
 #: wxMDialogs.cpp:1421
-#, fuzzy
 msgid "Search folder for messages"
-msgstr "&Mapbestand voor verstuurde berichten"
+msgstr "Zoekmap voor berichten"
 
 #: wxMDialogs.cpp:1426
-#, fuzzy
 msgid "Message search criteria"
-msgstr "Bericht verstuurd"
+msgstr "Berichten zoekcriteria"
 
 #: wxMDialogs.cpp:1434
-#, fuzzy
 msgid "Search for text in"
-msgstr "Zoeken naar?"
+msgstr "Zoeken naar tekst in"
 
 #: wxMDialogs.cpp:1452
-#, fuzzy
 msgid "Search for"
-msgstr "Zoeken naar?"
+msgstr "Zoeken naar"
 
 #: wxMDialogs.cpp:1468
-#, fuzzy
 msgid "Invert selection"
-msgstr "Geen selectie"
+msgstr "Selectie omkeren"
 
 #: wxMDialogs.cpp:1528
 msgid "31 (Day)"
-msgstr ""
+msgstr "31 (Dag)"
 
 #: wxMDialogs.cpp:1529
 msgid "Mon"
-msgstr ""
+msgstr "Maa"
 
 #: wxMDialogs.cpp:1530
 msgid "Monday"
-msgstr ""
+msgstr "Maandag"
 
 #: wxMDialogs.cpp:1531
 msgid "12 (Month)"
-msgstr ""
+msgstr "12 (Maand)"
 
 #: wxMDialogs.cpp:1532
-#, fuzzy
 msgid "Nov"
-msgstr "Nee"
+msgstr "Nov"
 
 #: wxMDialogs.cpp:1533
 msgid "November"
-msgstr ""
+msgstr "November"
 
 #: wxMDialogs.cpp:1534
 msgid "99 (year)"
-msgstr ""
+msgstr "99 (jaar)"
 
 #: wxMDialogs.cpp:1535
 msgid "1999 (year)"
-msgstr ""
+msgstr "1999 (jaar)"
 
 #: wxMDialogs.cpp:1536
 msgid "24 (hour)"
-msgstr ""
+msgstr "24 (uur)"
 
 #: wxMDialogs.cpp:1537
 msgid "12 (hour)"
-msgstr ""
+msgstr "12 (uur)"
 
 #: wxMDialogs.cpp:1538
 msgid "am/pm"
-msgstr ""
+msgstr "am/pm"
 
 #: wxMDialogs.cpp:1539
 msgid "59 (minutes)"
-msgstr ""
+msgstr "59 (minuten)"
 
 #: wxMDialogs.cpp:1540
 msgid "29 (seconds)"
-msgstr ""
+msgstr "29 (seconden)"
 
 #: wxMDialogs.cpp:1541
 msgid "EST (timezone)"
-msgstr ""
+msgstr "EST (tijdzone)"
 
 #: wxMDialogs.cpp:1542
 msgid "Default format including time"
-msgstr ""
+msgstr "Standaard formaat met tijd"
 
 #: wxMDialogs.cpp:1543
 msgid "Default format without time"
-msgstr ""
+msgstr "Standaard formaat zonder tijd"
 
 #: wxMDialogs.cpp:1580
 msgid "Format Specifiers:"
-msgstr ""
+msgstr "Formaataangevers:"
 
 #: wxMDialogs.cpp:1668 wxMDialogs.cpp:1673
 msgid "Date Format"
-msgstr ""
+msgstr "Datumformaat"
 
 #: wxMDialogs.cpp:1682
 msgid ""
 "Press the right mouse button over the input field to insert format "
 "specifiers.\n"
 msgstr ""
+"Klik op de rechter muistoets over het invoerveld om de formaat- "
+"aangevers in te voegen.\n"
 
 #: wxMDialogs.cpp:1700
 msgid "Here is how it will look like: "
-msgstr ""
+msgstr "Zo zal het er uit zien: "
 
 #: wxMDialogs.cpp:1716
 msgid "Display time in GMT/UST."
-msgstr ""
+msgstr "Weergave tijd in GMT/UST."
 
 #: wxMDialogs.cpp:1852
-#, fuzzy
 msgid "Choose a XFace"
-msgstr "G&ebruik XFace"
+msgstr "Gebruik XFace"
 
 #: wxMDialogs.cpp:1855
-#, fuzzy
 msgid "XFace"
-msgstr "G&ebruik XFace"
+msgstr "XFace"
 
 #: wxMDialogs.cpp:1860
 msgid ""
@@ -2218,32 +2121,36 @@ msgid ""
 "\n"
 "Click on the button to change it."
 msgstr ""
+"XFaces zijn kleine plaatjes die meegestuurd\n"
+"kunnen worden met berichten.\n"
+"Ze zijn gelimiteerd op 48*48 pixels zwart/wit,\n"
+"maar Mahogany zal automatisch ieder bestand\n"
+"hier naar converteren.\n"
+"\n"
+"Klik op de knop om het te veranderen."
 
 #: wxMDialogs.cpp:1883
-#, fuzzy
 msgid "Use XFace."
-msgstr "G&ebruik XFace"
+msgstr "Gebruik XFace."
 
 #: wxMDialogs.cpp:1918
 msgid "Please pick an image file"
-msgstr ""
+msgstr "Kies een bestand met plaatje"
 
 #: wxMDialogs.cpp:1958
-#, fuzzy, c-format
 msgid ""
 "Do you want to expunge all deleted messages\n"
 "in folder '%s'?"
-msgstr "Wilt u werkelijk map '%s' verwijderen?"
+msgstr "Wilt u werkelijk alle verwijderde berichten\n"
+"in map '%s' verwijderen?"
 
 #: wxlwindow.cpp:978
-#, fuzzy, c-format
 msgid "Ln:%d Col:%d"
 msgstr "R:%d K:%d"
 
 #: wxlwindow.cpp:1230
-#, fuzzy
 msgid "Find text"
-msgstr "Volgende zoeken"
+msgstr "Tekst zoeken"
 
 #: wxlwindow.cpp:1231
 msgid "   Find:"
@@ -2270,34 +2177,28 @@ msgid "Switch to smaller font."
 msgstr "Schakel naar kleiner lettertype."
 
 #: wxlwindow.cpp:1280
-#, fuzzy
 msgid "&Underline"
 msgstr "&Onderlijnen aan"
 
 #: wxlwindow.cpp:1280
-#, fuzzy
 msgid "Underline mode."
-msgstr "&Onderlijnen aan"
+msgstr "&Onderlijnmodus"
 
 #: wxlwindow.cpp:1281
-#, fuzzy
 msgid "&Bold"
 msgstr "&Vet aan"
 
 #: wxlwindow.cpp:1281
-#, fuzzy
 msgid "Bold mode."
-msgstr "&Vet aan"
+msgstr "Vetmodus."
 
 #: wxlwindow.cpp:1282
-#, fuzzy
 msgid "&Italics"
 msgstr "&Cursief aan"
 
 #: wxlwindow.cpp:1282
-#, fuzzy
 msgid "Italics mode."
-msgstr "&Cursief aan"
+msgstr "Cursiefmodus"
 
 #: wxlwindow.cpp:1284
 msgid "&Roman"
@@ -2309,7 +2210,7 @@ msgstr "Omschakelen naar roman lettertype."
 
 #: wxlwindow.cpp:1285
 msgid "&Typewriter"
-msgstr "&Courier"
+msgstr "&Schrijfmachine"
 
 #: wxlwindow.cpp:1285
 msgid "Switch to typewriter font."
@@ -2317,11 +2218,11 @@ msgstr "Omschakelen naar Courier lettertype."
 
 #: wxlwindow.cpp:1286
 msgid "&Sans Serif"
-msgstr "&Helvetica"
+msgstr "&Schreefloos"
 
 #: wxlwindow.cpp:1286
 msgid "Switch to sans serif font."
-msgstr "Schakel naar Helvetica lettertype."
+msgstr "Schakel naar schreefloos lettertype."
 
 #: wxMenuDefs.cpp:87 wxMenuDefs.cpp:249
 msgid "Close this window"
@@ -2368,9 +2269,8 @@ msgid "Send Message"
 msgstr "Bericht versturen"
 
 #: wxMenuDefs.cpp:105 wxMenuDefs.cpp:279
-#, fuzzy
 msgid "Select next unread message"
-msgstr "Alle berichten selecteren"
+msgstr "Volgende niet gelezen bericht selecteren"
 
 #: wxMenuDefs.cpp:106
 msgid "Open message"
@@ -2410,7 +2310,7 @@ msgstr "Volgende zoeken"
 
 #: wxMenuDefs.cpp:119
 msgid "Run or configure plugin modules"
-msgstr ""
+msgstr "Starten of configureren plugin modules"
 
 #: wxMenuDefs.cpp:221
 msgid "&Open Folder..."
@@ -2438,11 +2338,11 @@ msgstr "Nieuw nieuwsartikel schrijven en posten"
 
 #: wxMenuDefs.cpp:224
 msgid "Check &mail"
-msgstr ""
+msgstr "&Mail controleren"
 
 #: wxMenuDefs.cpp:224
 msgid "Check all incoming folder for new mail and download it now"
-msgstr ""
+msgstr "Alle Inkomende mail mappen controleren op nieuwe mail en nu downloaden"
 
 #: wxMenuDefs.cpp:226
 msgid "P&rint Setup"
@@ -2477,38 +2377,36 @@ msgid "Creates a new folder definition"
 msgstr "Nieuw mapdefinitie maken"
 
 #: wxMenuDefs.cpp:238
-#, fuzzy
 msgid "R&un Script..."
-msgstr "&Script starten..."
+msgstr "Script starten..."
 
 #: wxMenuDefs.cpp:238
 msgid "Run a simple python script"
 msgstr "Een eenvoudig python script starten"
 
 #: wxMenuDefs.cpp:242
-#, fuzzy
 msgid "&Send messages..."
-msgstr "Bewaren van %d berichten..."
+msgstr "Berichten ver&sturen..."
 
 #: wxMenuDefs.cpp:242
 msgid "Sends messages still in outgoing mailbox"
-msgstr ""
+msgstr "Vestuur bericht uit Uitgaande mailbox"
 
 #: wxMenuDefs.cpp:244
 msgid "Conn&ect to Network"
-msgstr ""
+msgstr "V&erbinden met netwerk"
 
 #: wxMenuDefs.cpp:245
 msgid "Activate dial-up networking"
-msgstr ""
+msgstr "Inbelverbinding activeren"
 
 #: wxMenuDefs.cpp:246
 msgid "Shut&down Network"
-msgstr ""
+msgstr "Netwerk afsluiten"
 
 #: wxMenuDefs.cpp:247
 msgid "Shutdown dial-up networking"
-msgstr ""
+msgstr "Inbelverbinding verbreken"
 
 #: wxMenuDefs.cpp:249
 msgid "&Close Window"
@@ -2555,7 +2453,6 @@ msgid "Edit the address book(s)"
 msgstr "Adresboek(en) bewerken"
 
 #: wxMenuDefs.cpp:260
-#, fuzzy
 msgid "Pre&ferences..."
 msgstr "&Voorkeuren..."
 
@@ -2564,13 +2461,12 @@ msgid "Change options"
 msgstr "Instellingen wijzigen"
 
 #: wxMenuDefs.cpp:261
-#, fuzzy
 msgid "&Modules..."
-msgstr "&Nieuw"
+msgstr "&Modules..."
 
 #: wxMenuDefs.cpp:261
 msgid "Choose which extension modules to use"
-msgstr ""
+msgstr "Kies de extensie gebruikt door modules"
 
 #: wxMenuDefs.cpp:263
 msgid "&Restore defaults..."
@@ -2634,12 +2530,11 @@ msgstr "Antwoorden op dit bericht"
 
 #: wxMenuDefs.cpp:276
 msgid "&Group reply"
-msgstr ""
+msgstr "Allen beantwoorden"
 
 #: wxMenuDefs.cpp:276
-#, fuzzy
 msgid "Followup/group-reply to this message"
-msgstr "Antwoorden op dit bericht"
+msgstr "Allen beantwoorden op dit bericht"
 
 #: wxMenuDefs.cpp:277
 msgid "&Forward"
@@ -2651,10 +2546,9 @@ msgstr "Stuur dit bericht verder"
 
 #: wxMenuDefs.cpp:279
 msgid "Next &unread"
-msgstr ""
+msgstr "Volgende ongelezen"
 
 #: wxMenuDefs.cpp:281
-#, fuzzy
 msgid "Save as F&ile"
 msgstr "Op&slaan als bestand"
 
@@ -2697,11 +2591,11 @@ msgstr "Maak verwijdering ongedaan"
 
 #: wxMenuDefs.cpp:287
 msgid "Ex&punge"
-msgstr "&Uitwissen"
+msgstr "Definitief verwijderen"
 
 #: wxFiltersDialog.cpp:202 wxMenuDefs.cpp:287
 msgid "Expunge"
-msgstr "Uitwissen (definitief verwijderen)"
+msgstr "Definitief verwijderen"
 
 #: wxMenuDefs.cpp:289
 msgid "Select &all"
@@ -2720,19 +2614,16 @@ msgid "Unselect all messages"
 msgstr "Deselecteer alle berichten"
 
 #: wxMenuDefs.cpp:291
-#, fuzzy
 msgid "&Search..."
-msgstr "&Zoeken"
+msgstr "&Zoeken..."
 
 #: wxMenuDefs.cpp:292
-#, fuzzy
 msgid "Search and select messages"
-msgstr "Bekijk geselecteerd bericht"
+msgstr "Zoeken en selecteren berichten"
 
 #: wxMenuDefs.cpp:294
-#, fuzzy
 msgid "Show &headers"
-msgstr "Laat &header zien"
+msgstr "Laat &headers zien"
 
 #: wxMenuDefs.cpp:294
 msgid "Toggle display of message header"
@@ -2747,9 +2638,8 @@ msgid "Show the raw message text"
 msgstr "Laat de ruwe berichttekst zien"
 
 #: wxMenuDefs.cpp:296
-#, fuzzy
 msgid "Fi&nd..."
-msgstr "&Zoeken"
+msgstr "Zoeken..."
 
 #: wxMenuDefs.cpp:296
 msgid "Find text in message"
@@ -2768,12 +2658,10 @@ msgid "Send the message now"
 msgstr "Verstuur het bericht nu"
 
 #: wxMenuDefs.cpp:302
-#, fuzzy
 msgid "Send and &keep"
 msgstr "Ver&sturen en bewaren"
 
 #: wxMenuDefs.cpp:303
-#, fuzzy
 msgid "Send the message now and keep the editor open"
 msgstr "Verstuur het bericht nu en hou de editor open"
 
@@ -2814,13 +2702,12 @@ msgid "Invoke alternative editor"
 msgstr "Alternatieve editor starten"
 
 #: wxMenuDefs.cpp:312
-#, fuzzy
 msgid "Custom &header..."
-msgstr "&Headers instellen..."
+msgstr "Eigengemaakte &header..."
 
 #: wxMenuDefs.cpp:312
 msgid "Add/edit header fields not shown on the screen"
-msgstr ""
+msgstr "Toevoegen/bewerken niet op scherm getoonde headervelden"
 
 #: AdbFrame.cpp:1090 wxMenuDefs.cpp:315
 msgid "&New..."
@@ -2839,22 +2726,20 @@ msgid "Open an address book file"
 msgstr "Open een adresboekbestand"
 
 #: wxMenuDefs.cpp:318
-#, fuzzy
 msgid "&Export..."
-msgstr "&Informatie..."
+msgstr "&Exporteren..."
 
 #: wxMenuDefs.cpp:318
 msgid "Export address book data to another programs format"
-msgstr ""
+msgstr "Exporteer adresboek gegevens naar ander formaat"
 
 #: wxMenuDefs.cpp:319
-#, fuzzy
 msgid "&Import..."
-msgstr "&Informatie..."
+msgstr "&Importeren..."
 
 #: wxMenuDefs.cpp:319
 msgid "Import data from an address book in another programs format"
-msgstr ""
+msgstr "Gegevens importeren uit adresboek van ander programma"
 
 #: wxMenuDefs.cpp:325
 msgid "&Properties..."
@@ -2937,7 +2822,6 @@ msgid "&About..."
 msgstr "&Over..."
 
 #: wxMenuDefs.cpp:345
-#, fuzzy
 msgid "Displays the program information and copyright"
 msgstr "Laat programmainformatie en licentie zien"
 
@@ -2970,9 +2854,8 @@ msgid "Contents of help system..."
 msgstr "Inhoud van het helpsysteem..."
 
 #: wxMenuDefs.cpp:355
-#, fuzzy
 msgid "&Search Help..."
-msgstr "&Zoeken"
+msgstr "Zoeken in Help"
 
 #: wxMenuDefs.cpp:355
 msgid "Search help system for keyword..."
@@ -3037,11 +2920,11 @@ msgstr ""
 
 #: wxOptionsDlg.cpp:423
 msgid "&POP server"
-msgstr ""
+msgstr "&POP server"
 
 #: wxOptionsDlg.cpp:424
 msgid "&IMAP server"
-msgstr ""
+msgstr "&IMAP server"
 
 #: wxOptionsDlg.cpp:425
 msgid "SMTP (&mail) server"
@@ -3059,22 +2942,27 @@ msgid ""
 "host which should only be reachable if the network is up, e.g. the WWW\n"
 "server of your ISP. Leave it empty to use the SMTP server for this."
 msgstr ""
+"Mahogany contains support for dial-up networks and can detect if the\n"
+"network is up or not. It can also be used to connect and disconnect the\n"
+"network. To aid in detecting the network status, you can specify a beacon\n"
+"host which should only be reachable if the network is up, e.g. the WWW\n"
+"server of your ISP. Leave it empty to use the SMTP server for this."
 
 #: wxOptionsDlg.cpp:434
 msgid "&Dial-up network support"
-msgstr ""
+msgstr "&Dial-up network support"
 
 #: wxOptionsDlg.cpp:435
 msgid "&Beacon host (e.g. www.yahoo.com)"
-msgstr ""
+msgstr "&Beacon host (e.g. www.yahoo.com)"
 
 #: wxOptionsDlg.cpp:436
 msgid "Command to &activate network"
-msgstr ""
+msgstr "Command to &activate network"
 
 #: wxOptionsDlg.cpp:437
 msgid "Command to &deactivate network"
-msgstr ""
+msgstr "Command to &deactivate network"
 
 #: wxOptionsDlg.cpp:438
 msgid ""
@@ -3108,7 +2996,7 @@ msgstr "&rsh timeout"
 
 #: wxOptionsDlg.cpp:450 wxOptionsDlg.cpp:489
 msgid "Store outgoing messages and send only when asked to"
-msgstr ""
+msgstr "Store outgoing messages and send only when asked to"
 
 #: wxOptionsDlg.cpp:452
 #, fuzzy
@@ -3152,9 +3040,8 @@ msgid "Use signature se&parator"
 msgstr "Gebruik &afscheiding voor handtekening"
 
 #: wxOptionsDlg.cpp:467
-#, fuzzy
 msgid "Configure &XFace..."
-msgstr "&Headers instellen..."
+msgstr "&XFace instellen..."
 
 #: wxOptionsDlg.cpp:468
 msgid "Mail alias substring ex&pansion"
@@ -3181,9 +3068,8 @@ msgid "Configure &headers..."
 msgstr "&Headers instellen..."
 
 #: wxOptionsDlg.cpp:478
-#, fuzzy
 msgid "Configure &templates..."
-msgstr "&Headers instellen..."
+msgstr "&Templates configureren..."
 
 #: wxOptionsDlg.cpp:481
 msgid "Folders to open on &startup"
@@ -3210,19 +3096,16 @@ msgid "&Threshold for displaying progress dialog"
 msgstr "&Drempelwaarde voor laten zien van voortgangsdialoog"
 
 #: wxOptionsDlg.cpp:491
-#, fuzzy
 msgid "Folder where to store &outgoing messages"
-msgstr "Map om nieuwe post in te verzamelen"
+msgstr "Map om uitgaande p&ost in te verzamelen"
 
 #: wxOptionsDlg.cpp:493
-#, fuzzy
 msgid "Move &deleted messages to Trash folder"
-msgstr "Bericht naar andere map verplaatsen"
+msgstr "Verwijderde berichten naar Trash map verplaatsen"
 
 #: wxOptionsDlg.cpp:494
-#, fuzzy
 msgid "&Trash folder name"
-msgstr "Mapnaam"
+msgstr "&Trash folder name"
 
 #: wxOptionsDlg.cpp:499
 msgid "Python is the built-in scripting language which can be\n"
@@ -3269,9 +3152,8 @@ msgid "Flag &clear callback"
 msgstr "Post-status verwijder-routine"
 
 #: wxOptionsDlg.cpp:513
-#, fuzzy
 msgid "&Configure filters..."
-msgstr "&Headers instellen..."
+msgstr "Filters instellen..."
 
 #: wxOptionsDlg.cpp:514
 msgid "Preview message when &selected"
@@ -3334,13 +3216,12 @@ msgid "Configure &headers to show..."
 msgstr "Welke &headers laten zien..."
 
 #: wxOptionsDlg.cpp:546
-#, fuzzy
 msgid "&Sort messages by..."
-msgstr "geen berichten"
+msgstr "Berichten &sorteren op..."
 
 #: wxOptionsDlg.cpp:547
 msgid "Configure &format for displaying dates"
-msgstr ""
+msgstr "&Formaat voor weergave datums instellen"
 
 #: wxOptionsDlg.cpp:551
 msgid ""
@@ -3351,7 +3232,8 @@ msgid ""
 msgstr ""
 "Mahogany kan alle adressen uit berichten die u ontvangt\n"
 "opslaan in een special adresboek. Dit heet 'automatisch\n"
-"verzamelen' van adressen en kan op deze pagina aan of uit worden gezet."
+"verzamelen' van adressen en kan op deze pagina aan of uit\n"
+"worden gezet."
 
 #: wxOptionsDlg.cpp:555
 msgid "&Autocollect addresses"
@@ -3422,9 +3304,8 @@ msgid "&Image format converter"
 msgstr "&Grafiekformaat converteerprogramma"
 
 #: wxOptionsDlg.cpp:577
-#, fuzzy
 msgid "Conversion &graphics format:XPM:PNG:BMP:JPG:GIF:PCX:PNM"
-msgstr "Conversie &graphics formaat:XPM:PNG:BMP:JPG"
+msgstr "Conversie &graphics formaat:XPM:PNG:BMP:JPG:GIF:PCX:PNM"
 
 #: wxOptionsDlg.cpp:580
 msgid "The following line will be executed each time new mail is received:"
@@ -3475,40 +3356,43 @@ msgstr "&Pad voor het vinden van AFM bestanden"
 
 #: wxOptionsDlg.cpp:596
 msgid "Use &detachable tear-off menus"
-msgstr ""
+msgstr "Use &detachable tear-off menus"
 
 #: wxOptionsDlg.cpp:597
 msgid "&Focus follows mouse"
-msgstr ""
+msgstr "&Focus follows mouse"
 
 #: wxOptionsDlg.cpp:599
 msgid "Use floating &menu-bars"
-msgstr ""
+msgstr "Use floating &menu-bars"
 
 #: wxOptionsDlg.cpp:600
 msgid "Use floating &tool-bars"
-msgstr ""
+msgstr "Zwevende gereedschapsbalken gebruiken"
 
 #: wxOptionsDlg.cpp:601
 msgid "Tool-bars with f&lat buttons"
-msgstr ""
+msgstr "Gereedschapsbalken met p&latte knoppen"
 
 #: wxOptionsDlg.cpp:603
 msgid "&Icon style:default:GNOME:KDE:small"
-msgstr ""
+msgstr "&Icon stijl:standaard:GNOME:KDE:small"
 
 #: wxOptionsDlg.cpp:1261
 msgid "Compose"
 msgstr "Samenstellen"
 
 #: wxOptionsDlg.cpp:1331
-#, c-format
 msgid ""
 "You set the name of the outbox for temporarily storing messages\n"
 "before sending them to be ´%s´. This is different from the\n"
 "setting in the global options, which is ´%s´. A you can have\n"
 "only a single outbox, the value has been restored to be ´%s´."
 msgstr ""
+"You set the name of the outbox for temporarily storing messages\n"
+"before sending them to be ´%s´. This is different from the\n"
+"setting in the global options, which is ´%s´. A you can have\n"
+"only a single outbox, the value has been restored to be ´%s´."
 
 #: wxOptionsDlg.cpp:1349
 msgid "Message Viewer"
@@ -3520,14 +3404,13 @@ msgstr "Identiteit"
 
 #: wxOptionsDlg.cpp:1408
 msgid "Network"
-msgstr ""
+msgstr "Netwerk"
 
 #: wxOptionsDlg.cpp:1425
 msgid "Python"
 msgstr "Python"
 
 #: wxOptionsDlg.cpp:1443
-#, fuzzy
 msgid "Addressbook"
 msgstr "Adresboek"
 
@@ -3537,7 +3420,7 @@ msgstr "Diversen"
 
 #: wxOptionsDlg.cpp:1500
 msgid "Invalid delay value for autosave timer."
-msgstr ""
+msgstr "Ongeldige vertraging voor autobewaar timer."
 
 #: wxOptionsDlg.cpp:1517
 msgid "Helpers"
@@ -3549,7 +3432,7 @@ msgstr "Mappen"
 
 #: wxOptionsDlg.cpp:1596
 msgid "Failed to restart the timers, please change the delay to a valid value."
-msgstr ""
+msgstr "Herstarten timers mislukt, geen een geldige waarde voor vertraging."
 
 #: wxOptionsDlg.cpp:1627
 msgid "Folders to open on startup"
@@ -3560,7 +3443,6 @@ msgid "Folder name"
 msgstr "Mapnaam"
 
 #: wxOptionsDlg.cpp:1635
-#, c-format
 msgid "Folder '%s' is already present in the list, not added."
 msgstr "Map '%s' staat al in de lijst, is niet toegevoegd."
 
@@ -3625,25 +3507,22 @@ msgid "&Rename folder..."
 msgstr "Map he&rnoemen..."
 
 #: wxFolderTree.cpp:252
-#, fuzzy
 msgid "Browse &subfolders..."
-msgstr "Bladeren (map zoeken)"
+msgstr "Bladeren &submappen..."
 
 #: wxFolderTree.cpp:256
 msgid "&Properties"
 msgstr "&Eigenschappen"
 
 #: wxFolderTree.cpp:487
-#, fuzzy, c-format
 msgid "You cannot delete the '%s' folder.\n"
-msgstr "Kan deze map niet openen."
+msgstr "U kunt de '%s' map niet verwijderen.\n"
 
 #: wxFolderTree.cpp:493
 msgid "The root folder can not be deleted."
 msgstr "De hoofdmap kan niet verwijderd worden."
 
 #: wxFolderTree.cpp:502
-#, c-format
 msgid ""
 "Do you really want to delete folder '%s' and all of its\n"
 "subfolders? You will permanently lose all the settings\n"
@@ -3654,7 +3533,6 @@ msgstr ""
 "permanent verliezen!"
 
 #: wxFolderTree.cpp:509
-#, c-format
 msgid "Do you really want to delete folder '%s'?"
 msgstr "Wilt u werkelijk map '%s' verwijderen?"
 
@@ -3667,7 +3545,6 @@ msgid "Please select the folder to delete first."
 msgstr "Selecteer map om als eerste te verwijderen."
 
 #: wxFolderTree.cpp:729
-#, c-format
 msgid "Folder '%s' deleted"
 msgstr "Map '%s' verwijderd"
 
@@ -3757,7 +3634,7 @@ msgstr "&Gebruikersnaam: "
 
 #: wxMFolderDialogs.cpp:904
 msgid "&Password: "
-msgstr "&Paswoord: "
+msgstr "&Wachtwoord: "
 
 #: wxMFolderDialogs.cpp:905
 msgid "&File name: "
@@ -3784,13 +3661,12 @@ msgid "C&ollect all mail from this folder: "
 msgstr "Verzamel alle p&ost uit deze map:"
 
 #: wxMFolderDialogs.cpp:911
-#, fuzzy
 msgid "&Keep folder always open: "
-msgstr "&Deze map altijd open houden"
+msgstr "Deze map altijd open houden: "
 
 #: wxMFolderDialogs.cpp:912
 msgid "Force &re-open on ping: "
-msgstr ""
+msgstr "Force &re-open on ping: "
 
 #: wxMFolderDialogs.cpp:913
 msgid "&Anonymous access: "
@@ -3798,17 +3674,15 @@ msgstr "&Anonieme toegang: "
 
 #: wxMFolderDialogs.cpp:914
 msgid "Folder can be accessed &without network "
-msgstr ""
+msgstr "Map is toegankelijk zonder netwerk "
 
 #: wxMFolderDialogs.cpp:915
-#, fuzzy
 msgid "Folder sub&type "
-msgstr "Map Type"
+msgstr "Map sub&type"
 
 #: wxMFolderDialogs.cpp:916
-#, fuzzy
 msgid "&Icon for this folder: "
-msgstr "Kan deze map niet openen."
+msgstr "&Icoon voor deze map: "
 
 #: wxMFolderDialogs.cpp:947
 msgid ""
@@ -3817,6 +3691,10 @@ msgid ""
 "This is needed for some broken POP3 servers.\n"
 "Normally this is not needed."
 msgstr ""
+"Tick this box if Mahogany appears to have problems updating the folder "
+"listing.\n"
+"This is needed for some broken POP3 servers.\n"
+"Normally this is not needed."
 
 #: wxMFolderDialogs.cpp:957
 #, fuzzy
@@ -3832,39 +3710,41 @@ msgid ""
 "values will be used as defaults for all folders created under\n"
 "this group folder."
 msgstr ""
+"All the fields shown in this dialog have a slightly different\n"
+"meaning for the folders of type \"Group\". Instead of applying\n"
+"to this folder (which wouldn't make sense, as such folders don't\n"
+"contain any mail messages at all, but only other folders) these\n"
+"values will be used as defaults for all folders created under\n"
+"this group folder."
+
 
 #: wxMFolderDialogs.cpp:1185
-#, fuzzy
 msgid "Group folders hint"
-msgstr "Van map'"
+msgstr "Hint voor groepmappen"
 
 #: wxMFolderDialogs.cpp:1331
-#, fuzzy
 msgid "MBOX folder"
-msgstr "Open map"
+msgstr "MBOX map"
 
 #: wxMFolderDialogs.cpp:1332
-#, fuzzy
 msgid "MH folder"
-msgstr "in map '"
+msgstr "MH map"
 
 #: wxMFolderDialogs.cpp:1339
-#, fuzzy
 msgid "Simple group"
-msgstr "in group '"
+msgstr "Simpele groep"
 
 #: wxMFolderDialogs.cpp:1340
 msgid "News hierarchy"
-msgstr ""
+msgstr "Nieuws hierachie"
 
 #: wxMFolderDialogs.cpp:1341
 msgid "IMAP directory"
-msgstr ""
+msgstr "IMAP directory"
 
 #: wxMFolderDialogs.cpp:1697
-#, fuzzy, c-format
 msgid "Impossible to create MH folder '%s'."
-msgstr "Map '%s' geselecteerd."
+msgstr "Onmogelijk om MH map '%s' te maken."
 
 #: wxMFolderDialogs.cpp:1739
 msgid "a login name"
@@ -3872,18 +3752,17 @@ msgstr "een login naam"
 
 #: wxMFolderDialogs.cpp:1744
 msgid "a password"
-msgstr "een paswoord"
+msgstr "een wachtwoord"
 
 #: wxMFolderDialogs.cpp:1751
-#, fuzzy, c-format
 msgid ""
 "You have not specified %s for this folder, although it requires one.\n"
 "Alternatively, you might want to select anonymous access.\n"
 "Would you like to do change this now?"
 msgstr ""
 "U heeft %s niet aangegeven voor deze map, hoewel dit wel nodig is.\n"
-"\n"
-"Wilt u het nu aangeven?"
+"Als alternatief kunt u anonieme toegang selecteren.\n"
+"Wilt u het nu veranderen?"
 
 #: wxMFolderDialogs.cpp:1758
 msgid ""
@@ -3895,7 +3774,7 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Denk er om dat het paswoord geplaatst zal worden in uw configuratie met\n"
+"Denk er om dat het wachtwoord geplaatst zal worden in uw configuratie met\n"
 "een zwakke versleuteling. Als u dit niet wilt, laat het dan leeg\n"
 "en Mahogany zal er om vragen wanneer het nodig is."
 
@@ -3904,36 +3783,32 @@ msgid "Please choose a folder"
 msgstr "Kies aub. een map"
 
 #: wxBrowseButton.cpp:160
-#, fuzzy
 msgid "Please choose a directory"
-msgstr "Kies een vermelding:"
+msgstr "Kies een directory"
 
 #: wxBrowseButton.cpp:190
-#, fuzzy, c-format
 msgid "Browse for a %s"
-msgstr "Bladeren (map zoeken)"
+msgstr "Bladeren voor een %s"
 
 #: wxBrowseButton.cpp:190
-#, fuzzy
 msgid "file"
-msgstr "Bestand"
+msgstr "bestand"
 
 #: wxBrowseButton.cpp:191
 msgid "directory"
-msgstr ""
+msgstr "directory"
 
 #: wxBrowseButton.cpp:202
 msgid "Browse for folder"
 msgstr "Bladeren (map zoeken)"
 
 #: wxBrowseButton.cpp:323
-#, fuzzy
 msgid "Choose icon"
-msgstr "Kies map"
+msgstr "Kies icoon"
 
 #: wxBrowseButton.cpp:478
 msgid "&Current icon"
-msgstr ""
+msgstr "Huidige icoon"
 
 #: wxHeadersDialogs.cpp:344
 msgid "&Cc"
@@ -3952,9 +3827,8 @@ msgid "&Headers"
 msgstr "&Headers"
 
 #: wxHeadersDialogs.cpp:381
-#, fuzzy
 msgid "&More..."
-msgstr "&Nieuw"
+msgstr "&Meer..."
 
 #: wxHeadersDialogs.cpp:393
 msgid "Show the field?"
@@ -3977,326 +3851,292 @@ msgid "&Up"
 msgstr "Om&hoog"
 
 #: wxHeadersDialogs.cpp:708
-#, fuzzy
 msgid "Edit custom header"
-msgstr "Laat &header zien"
+msgstr "Eigen header aanpassen"
 
 #: wxHeadersDialogs.cpp:724
-#, fuzzy, c-format
 msgid "Header value for folder '%s'"
-msgstr "Map '%s' geselecteerd."
+msgstr "Header waarde voor map '%s'"
 
 #: wxHeadersDialogs.cpp:726
-#, fuzzy
 msgid "Default value for header"
-msgstr "Standaard waarde"
+msgstr "Standaard waarde voor header"
 
 #: wxHeadersDialogs.cpp:730
-#, fuzzy
 msgid "&Name: "
-msgstr "&Gebruikersnaam: "
+msgstr "&Naam: "
 
 #: wxHeadersDialogs.cpp:731
 msgid "&Value: "
-msgstr ""
+msgstr "&Waarde"
 
 #: wxHeadersDialogs.cpp:782
-#, fuzzy
 msgid "news postins"
-msgstr "Instellingen wijzigen"
+msgstr "nieuws postings"
 
 #: wxHeadersDialogs.cpp:783
-#, fuzzy
 msgid "mail messages"
-msgstr "geen berichten"
+msgstr "emailberichten"
 
 #: wxHeadersDialogs.cpp:784
-#, fuzzy
 msgid "all messages"
-msgstr "geen berichten"
+msgstr "alle berichten"
 
 #: wxHeadersDialogs.cpp:797
 msgid "Use this header for:"
-msgstr ""
+msgstr "Gebruik deze kop voor:"
 
 #: wxHeadersDialogs.cpp:824
 msgid "Save these values "
-msgstr ""
+msgstr "Deze waarden bewaren"
 
 #: wxHeadersDialogs.cpp:891
-#, fuzzy
 msgid "Configure custom headers"
-msgstr "&Headers instellen..."
+msgstr "Aangepaste headers configureren"
 
 #: wxHeadersDialogs.cpp:906
-#, c-format
 msgid "Custom &headers for folder '%s'"
-msgstr ""
+msgstr "Aangepaste &headers voor map '%s'"
 
 #: wxHeadersDialogs.cpp:908
-#, fuzzy
 msgid "Default custom headers"
-msgstr "&Headers instellen..."
+msgstr "Standaard aangepaste headers"
 
 #: wxHeadersDialogs.cpp:921
-#, fuzzy
 msgid "&Add..."
-msgstr "&FAQ..."
+msgstr "Toevoegen..."
 
 #: wxHeadersDialogs.cpp:929
-#, fuzzy
 msgid "&Edit..."
-msgstr "B&ewerken"
+msgstr "B&ewerken..."
 
 #: wxHeadersDialogs.cpp:969
 msgid "Name"
-msgstr ""
+msgstr "Naam"
 
 #: wxHeadersDialogs.cpp:970
 msgid "Value"
-msgstr ""
+msgstr "Waarde"
 
 #: wxTemplateDialog.cpp:186
-#, fuzzy
 msgid "Please choose a file"
-msgstr "Kies aub. een map"
+msgstr "Kies aub. een bestand"
 
 #: wxTemplateDialog.cpp:202
 msgid "Value for template variable"
-msgstr ""
+msgstr "Waarde voor template variabele"
 
 #: wxTemplateDialog.cpp:306
 msgid "Please choose"
 msgstr "Kies aub."
 
 #: wxTemplateDialog.cpp:320
-#, fuzzy
 msgid "New message"
-msgstr "1 bericht"
+msgstr "Nieuw bericht"
 
 #: wxTemplateDialog.cpp:321
-#, fuzzy
 msgid "New article"
-msgstr "Nieuwe berichten"
+msgstr "Nieuw artikel"
 
 #: wxTemplateDialog.cpp:322
-#, fuzzy
 msgid "Reply"
-msgstr "Antwoo&rden"
+msgstr "Antwoorden"
 
 #: wxTemplateDialog.cpp:323
 msgid "Follow-up"
-msgstr ""
+msgstr "Follow-up"
 
 #: wxTemplateDialog.cpp:324
-#, fuzzy
 msgid "Forward"
-msgstr "&Forward"
+msgstr "Doorsturen"
 
 #: wxTemplateDialog.cpp:331
-#, fuzzy
 msgid "Configure message templates"
-msgstr "Pagina instelligen aanpassen"
+msgstr "Berichtentemplaten instellen"
 
 #: wxTemplateDialog.cpp:351
 msgid ""
 "Please select the template to edit in the list first. Then right click the "
 "mouse in the text control to get the list of all available macros"
 msgstr ""
+"Please select the template to edit in the list first. Then right click the "
+"mouse in the text control to get the list of all available macros"
 
 #: wxTemplateDialog.cpp:414
-#, fuzzy, c-format
 msgid ""
 "You have modified the template for message of type '%s', would you like to "
 "save it?"
-msgstr "Het onderwerp van uw bericht is leeg, wilt u het veranderen?"
+msgstr ""
+"You have modified the template for message of type '%s', would you like to "
+"save it?"
 
 #: wxModulesDlg.cpp:75
-#, fuzzy
 msgid "Extension Modules Configuration"
-msgstr "Instellingen worden getest"
+msgstr "Configuratie Uitbreidings Modules"
 
 #: wxModulesDlg.cpp:87
 msgid "Available modules"
-msgstr ""
+msgstr "Beschikbare modules"
 
 #: wxModulesDlg.cpp:92
 msgid ""
 "The selected modules will be loaded\n"
 "into Mahogany at the next program start."
 msgstr ""
+"De geselecteerde modules zullen worden geladen\n"
+"wanneer Mahogany de volgende keer wordt gestart."
 
 #: wxModulesDlg.cpp:156
 msgid "Module: "
-msgstr ""
+msgstr "Module: "
 
 #: wxModulesDlg.cpp:157
 msgid "Interface: "
-msgstr ""
+msgstr "Interface: "
 
 #: wxModulesDlg.cpp:159
 msgid "Author: "
-msgstr ""
+msgstr "Auteur:"
 
 #: wxSubfoldersDialog.cpp:147
-#, fuzzy, c-format
 msgid "Subfolders of folder '%s'"
-msgstr "Map '%s' geselecteerd."
+msgstr "Submappen van map '%s'"
 
 #: wxSubfoldersDialog.cpp:152
-#, fuzzy
 msgid "Subfolders"
-msgstr "Mappen"
+msgstr "Submappen"
 
 #: wxSubfoldersDialog.cpp:250
-#, fuzzy
 msgid "No subfolders"
-msgstr "Alle mappen"
+msgstr "Geen submappen"
 
 #: wxFiltersDialog.cpp:135
 msgid "Match"
-msgstr ""
+msgstr "Overeenkomst"
 
 #: wxFiltersDialog.cpp:135
 msgid "Match substring"
-msgstr ""
+msgstr "Overeenkomst met substring"
 
 #: wxFiltersDialog.cpp:136
 msgid "Match RegExp"
-msgstr ""
+msgstr "Overeenkomst met RegExp"
 
 #: wxFiltersDialog.cpp:136
-#, fuzzy
 msgid "Larger than"
-msgstr "&Groter"
+msgstr "Groter dan"
 
 #: wxFiltersDialog.cpp:137
-#, fuzzy
 msgid "Smaller than"
-msgstr "&Kleiner"
+msgstr "Kleiner dan"
 
 #: wxFiltersDialog.cpp:137
 msgid "Older than"
-msgstr ""
+msgstr "Ouder dan"
 
 #: wxFiltersDialog.cpp:138
 msgid "Is SPAM"
-msgstr ""
+msgstr "Is SPAM"
 
 #: wxFiltersDialog.cpp:146
-#, fuzzy
 msgid "in Subject"
-msgstr "Onderwerp"
+msgstr "in Onderwerp"
 
 #: wxFiltersDialog.cpp:147
-#, fuzzy
 msgid "in header"
-msgstr "Laat &header zien"
+msgstr "in header"
 
 #: wxFiltersDialog.cpp:148
-#, fuzzy
 msgid "in From"
-msgstr "Van"
+msgstr "in Van"
 
 #: wxFiltersDialog.cpp:149
 msgid "in body"
-msgstr ""
+msgstr "n body"
 
 #: wxFiltersDialog.cpp:150
-#, fuzzy
 msgid "in message"
-msgstr "Bericht afdrukken"
+msgstr "in bericht"
 
 #: wxFiltersDialog.cpp:151
 msgid "in To"
-msgstr ""
+msgstr "in Aan"
 
 #: wxFiltersDialog.cpp:168
-#, fuzzy
 msgid "Not"
-msgstr "Nee"
+msgstr "Niet"
 
 #: wxFiltersDialog.cpp:200
-#, fuzzy
 msgid "Copy to"
-msgstr "&Kopiëren"
+msgstr "Kopiëren naar"
 
 #: wxFiltersDialog.cpp:201
-#, fuzzy
 msgid "Move to"
-msgstr "&Verplaats naar map"
+msgstr "Verplaatsen naar"
 
 #: wxFiltersDialog.cpp:203
-#, fuzzy
 msgid "MessageBox"
-msgstr "&Bericht"
+msgstr "BerichtenBox"
 
 #: wxFiltersDialog.cpp:204
-#, fuzzy
 msgid "Log Entry"
 msgstr "Vermelding"
 
 #: wxFiltersDialog.cpp:235
 msgid "Filter rule"
-msgstr ""
+msgstr "Filter regel"
 
 #: wxFiltersDialog.cpp:238
 msgid "Filter Rule"
-msgstr ""
+msgstr "Filter regel"
 
 #: wxFiltersDialog.cpp:255
 msgid "Filter Criteria"
-msgstr ""
+msgstr "Filter Criteria"
 
 #: wxFiltersDialog.cpp:276
 msgid "Action Rules"
-msgstr ""
+msgstr "Actie Regels"
 
 #: wxFiltersDialog.cpp:334
-#, fuzzy
 msgid "New"
-msgstr "Nieuws"
+msgstr "Nieuw"
 
 #: wxFiltersDialog.cpp:334
-#, fuzzy
 msgid "Edit"
-msgstr "B&ewerken"
+msgstr "Bewerken"
 
 #: wxFiltersDialog.cpp:335
-#, fuzzy
 msgid "Up"
-msgstr "Om&hoog"
+msgstr "Omhoog"
 
 #: wxFiltersDialog.cpp:335
-#, fuzzy
 msgid "Down"
-msgstr "&Omlaag"
+msgstr "Omlaag"
 
 #: wxFiltersDialog.cpp:385
 msgid "DO NOT USE - CODE UNDER DEVELOPMENT!!! Filter rules"
-msgstr ""
+msgstr "DO NOT USE - CODE UNDER DEVELOPMENT!!! Filter rules"
 
 #: wxFiltersDialog.cpp:390
 msgid "Filter Rules"
-msgstr ""
+msgstr "Filter Regels"
 
 #: wxFiltersDialog.cpp:450
-#, fuzzy
 msgid "New Filter"
-msgstr "Nieuwe berichten"
+msgstr "Nieuw filter"
 
 #: MailFolder.cpp:199
-#, c-format
 msgid "Password for '%s':"
-msgstr "Paswoord voor '%s':"
+msgstr "Wachtwoord voor '%s':"
 
 #: MailFolder.cpp:202
 msgid "Password prompt"
-msgstr "Paswoordvraag"
+msgstr "Wachtwoordvraag"
 
 #: MailFolder.cpp:208 MailFolderCC.cpp:682
 msgid "Cannot access this folder without a password."
-msgstr "Kan deze map niet openen zonder paswoord"
+msgstr "Kan deze map niet openen zonder wachtwoord."
 
 #: MailFolder.cpp:333
 msgid "re"
@@ -4307,12 +4147,10 @@ msgid "Could not truncate the existing file."
 msgstr "Kon bestaand bestand niet afkappen."
 
 #: MailFolder.cpp:554 MailFolder.cpp:631
-#, c-format
 msgid "Saving %d messages..."
 msgstr "Bewaren van %d berichten..."
 
 #: MailFolder.cpp:616
-#, c-format
 msgid "Cannot open folder '%s'."
 msgstr "Kan map '%s' niet openen."
 
@@ -4321,34 +4159,30 @@ msgid "All files (*.*)|*.*"
 msgstr "Alle bestanden (*.*)|*.*"
 
 #: MailFolder.cpp:909
-#, fuzzy, c-format
 msgid "Threading %lu messages..."
-msgstr "%lu berichtkoppen worden gelezen..."
+msgstr "Threading %lu messages..."
 
 #: MailFolder.cpp:967
-#, fuzzy, c-format
 msgid "Threading %lu messages...done."
-msgstr "%lu berichtkoppen worden gelezen..."
+msgstr "Threading %lu messages...done."
 
 #: MailFolderCC.cpp:676
-#, fuzzy, c-format
 msgid "Please enter the password for folder '%s':"
-msgstr "Geef het commando om '%s' data te verwerken:"
+msgstr "Geef het wachtwoord voor map '%s':"
 
 #: MailFolderCC.cpp:678
-#, fuzzy
 msgid "Password needed"
-msgstr "&Paswoord: "
+msgstr "Wachtwoord nodig"
 
 #: MailFolderCC.cpp:693
-#, c-format
 msgid ""
 "Dial-Up network is down.\n"
 "Do you want to try and open folder '%s' anyway?"
 msgstr ""
+"Dial-Up network is down.\n"
+"Do you want to try and open folder '%s' anyway?"
 
 #: MailFolderCC.cpp:783
-#, c-format
 msgid ""
 "Found lock-file:\n"
 "'%s'\n"
@@ -4375,16 +4209,17 @@ msgid "Cannot open the folder while lock-file exists."
 msgstr "Kan map niet openen zolang lock-file bestaat."
 
 #: MailFolderCC.cpp:940
-#, c-format
 msgid ""
 "Dial-Up network is down.\n"
 "Do you want to try and check folder '%s' anyway?"
 msgstr ""
+"Dial-Up network is down.\n"
+"Do you want to try and check folder '%s' anyway?"
 
 #: MailFolderCC.cpp:958
 #, c-format
 msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
-msgstr "Poststream voor map '%s' is afgesloten, probeer hem te heropenen."
+msgstr "Poststroom voor map '%s' is afgesloten, probeer hem te heropenen."
 
 #: MailFolderCC.cpp:963
 #, c-format
@@ -4392,49 +4227,38 @@ msgid "Re-opening closed folder '%s' failed."
 msgstr "Heropenen van gesloten map '%s' mislukt."
 
 #: MailFolderCC.cpp:971
-#, c-format
 msgid "Folder '%s' is alive."
 msgstr "Map '%s' is actief."
 
 #: MailFolderCC.cpp:1000
-#, c-format
 msgid "System is offline, cannot access mailbox ´%s´"
-msgstr ""
+msgstr "Systeem is offline, kan mailbox '%s' niet openen"
 
 #: MailFolderCC.cpp:1251 MailFolderCC.cpp:1309
-#, fuzzy, c-format
 msgid "Searching in %lu messages..."
-msgstr "Bewaren van %d berichten..."
+msgstr "Zoeken in %lu berichten..."
 
 #: MailFolderCC.cpp:1315
-#, c-format
 msgid " - %lu matches found."
-msgstr ""
+msgstr " - %lu matches gevonden."
 
 #: MailFolderCC.cpp:1506
-#, fuzzy, c-format
 msgid "How many messages to retrieve from folder '%s'?"
-msgstr "U heeft %lu nieuw berichten in map '%s'.\n"
+msgstr "Hoeveel berichten ophalen uit map '%s'?"
 
 #: MailFolderCC.cpp:1508
-#, fuzzy, c-format
 msgid ""
 "This folder contains %lu messages, which is greater than\n"
 "the current threshold of %lu (set it to 0 to avoid this question)."
 msgstr ""
-"Deze map (%s) bevat %lu berichten, dit is meer dan de huidige drempelwaarde "
-"van %lu.\n"
-"\n"
-"Wilt u slechts de eerste %lu berichten ophalen?\n"
-"(als u [Nee] selecteert worden alle berichten opgehaald)"
+"This folder contains %lu messages, which is greater than\n"
+"the current threshold of %lu (set it to 0 to avoid this question)."
 
 #: MailFolderCC.cpp:1512
-#, fuzzy
 msgid "How many of them do you want to retrieve?"
-msgstr "Wat voor soort adresboek wilt u maken?"
+msgstr "Hoeveel daarvan wilt u ophalen?"
 
 #: MailFolderCC.cpp:1533
-#, c-format
 msgid "Reading %lu message headers..."
 msgstr "%lu berichtkoppen worden gelezen..."
 
@@ -4444,16 +4268,16 @@ msgstr "<adres ontbreekt>"
 
 #: MailFolderCC.cpp:1748
 msgid "Sorry, support for MH folders is disabled."
-msgstr ""
+msgstr "Sorry, ondersteuning voor MH mappen is uitgezet."
 
 #: MailFolderCC.cpp:1798
 #, c-format
 msgid ""
 "Invalid MH folder name '%s' - all MH folders should be under '%s' directory."
 msgstr ""
+"Invalid MH folder name '%s' - all MH folders should be under '%s' directory."
 
 #: MailFolderCC.cpp:2105
-#, c-format
 msgid "Folder '%s' : "
 msgstr "Map '%s' : "
 
@@ -4490,29 +4314,31 @@ msgid ""
 "MIME type specified without subtype and\n"
 "no default subtype for this type."
 msgstr ""
+"MIME type specified without subtype and\n"
+"no default subtype for this type."
 
 #: SendMessageCC.cpp:538
 msgid ""
 "No network connection available at present.\n"
 "Message will be queued in outbox."
 msgstr ""
+"No network connection available at present.\n"
+"Message will be queued in outbox."
+
 
 #: SendMessageCC.cpp:562
-#, fuzzy, c-format
 msgid "Message queued in ´%s´."
-msgstr "Bericht is verstuurd."
+msgstr "Bericht in wachtrij '%s'."
 
 #: SendMessageCC.cpp:565 SendMessageCC.cpp:634
 msgid "Article posted."
 msgstr "Artikel gepost."
 
 #: SendMessageCC.cpp:634
-#, fuzzy
 msgid "Message sent."
 msgstr "Bericht verstuurd"
 
 #: SendMessageCC.cpp:641
-#, c-format
 msgid "Failed to send - %s"
 msgstr "Kon - %s niet versturen"
 
@@ -4637,7 +4463,6 @@ msgid "Address Book Editor"
 msgstr "Adresboek editor"
 
 #: AdbFrame.cpp:1291
-#, c-format
 msgid ""
 "Address book '%s' couldn't be opened:\n"
 "this format is not supported."
@@ -4654,7 +4479,6 @@ msgid "Not all tree branches could be reopened."
 msgstr "Niet alle takken van boom konden worden heropend"
 
 #: AdbFrame.cpp:1389
-#, c-format
 msgid "The address book '%s' is already opened."
 msgstr "Het adresboek '%s' is al geopend"
 
@@ -4663,17 +4487,14 @@ msgid "New entry creation cancelled."
 msgstr "Maken van nieuwe vermelding geannuleerd."
 
 #: AdbFrame.cpp:1477
-#, c-format
 msgid "%s '%s' already exists %s."
 msgstr "%s '%s' bestaat al %s."
 
 #: AdbFrame.cpp:1486
-#, c-format
 msgid "Can't create %s named '%s' %s."
 msgstr "Kan %s genaamd '%s' niet maken %s."
 
 #: AdbFrame.cpp:1494
-#, c-format
 msgid "Created new %s '%s' %s."
 msgstr "Nieuwe %s '%s' gemaakt %s."
 
@@ -4682,32 +4503,26 @@ msgid "Address book"
 msgstr "Adresboek"
 
 #: AdbFrame.cpp:1537
-#, c-format
 msgid "Really delete the %s '%s'?"
 msgstr "Werkelijk de %s '%s' verwijderen?"
 
 #: AdbFrame.cpp:1540
-#, fuzzy
 msgid "Address book editor"
 msgstr "Adresboek editor"
 
 #: AdbFrame.cpp:1543
-#, c-format
 msgid "Cancelled: '%s' not deleted."
 msgstr "Geannuleerd: '%s' niet verwijderd."
 
 #: AdbFrame.cpp:1559
-#, c-format
 msgid "%s '%s' deleted."
 msgstr "%s '%s' verwijderd."
 
 #: AdbFrame.cpp:1571
-#, c-format
 msgid "Cannot find any matches for '%s'."
 msgstr "Kan '%s' nergens mee matchen."
 
 #: AdbFrame.cpp:1576
-#, c-format
 msgid "Search for '%s' found %d entries."
 msgstr "Zoeken naar '%s' leverde %d vermeldingen."
 
@@ -4716,7 +4531,6 @@ msgid "Search wrapped to the beginning."
 msgstr "Zoeken weer bij begin begonnen."
 
 #: AdbFrame.cpp:1641
-#, c-format
 msgid "Changes to '%s' undone"
 msgstr "Verandering aan '%s' ongedaan gemaakt"
 
@@ -4761,7 +4575,6 @@ msgid "Enter the address book name"
 msgstr "Geef de naam van het adresboek"
 
 #: AdbFrame.cpp:1877
-#, c-format
 msgid ""
 "Address book '%s' was created, but could not be flushed. It might be "
 "unaccessible until the program is restarted."
@@ -4771,25 +4584,22 @@ msgstr ""
 
 #: AdbFrame.cpp:1899
 msgid "Successfully exported address book data."
-msgstr ""
+msgstr "Adresboekgegevens succesvol geëxporteerd."
 
 #: AdbFrame.cpp:1903
-#, fuzzy
 msgid "Address book export failed."
-msgstr "Adresboek editor"
+msgstr "Adresboek export mislukt."
 
 #: AdbFrame.cpp:1941
 #, c-format
 msgid "Address book successfully imported into book '%s'."
-msgstr ""
+msgstr "Adresboek succesvol geïmporteerd in boek '%s'."
 
 #: AdbFrame.cpp:1946
-#, fuzzy
 msgid "Address book import abandoned."
-msgstr "Adresboek editor"
+msgstr "Adresboek importeren opgegeven."
 
 #: AdbFrame.cpp:2007
-#, c-format
 msgid ""
 "Cannot paste entry '%s' %s: an entry with\n"
 "the same name already exists."
@@ -4802,7 +4612,6 @@ msgid "Cannot paste the clipboard contents here."
 msgstr "Kan inhoud van klembord niet hier plakken."
 
 #: AdbFrame.cpp:2051
-#, c-format
 msgid "Editing entry '%s'"
 msgstr "Vermelding '%s' wordt bewerkt"
 
@@ -4811,7 +4620,6 @@ msgid "This group has no entries"
 msgstr "Deze groep heeft geen vermeldingen"
 
 #: AdbFrame.cpp:2224
-#, c-format
 msgid ""
 "No entry '%s':\n"
 "'%s' has no entry/subgroup '%s'."
@@ -4820,7 +4628,6 @@ msgstr ""
 "'%s' heeft geen vermelding/subgroep '%s'."
 
 #: AdbFrame.cpp:2232
-#, c-format
 msgid "Entry '%s' cannot have subgroup/entry '%s'!"
 msgstr "Vermelding '%s' kan geen subgroep/vermelding '%s' hebben!"
 
@@ -4849,12 +4656,10 @@ msgid "Create a &group"
 msgstr "Maak een &groep"
 
 #: AdbFrame.cpp:2580
-#, c-format
 msgid "Please specify a name for the new %s!"
 msgstr "Geef een naam voor de nieuwe %s!"
 
 #: AdbFrame.cpp:2682
-#, c-format
 msgid "Properties for '%s'"
 msgstr "Eigenschappen voor '%s'"
 
@@ -4863,7 +4668,6 @@ msgid "No selection"
 msgstr "Geen selectie"
 
 #: AdbFrame.cpp:2860
-#, c-format
 msgid "Entry '%s' saved."
 msgstr "Vermelding '%s' bewaard."
 
@@ -4909,29 +4713,24 @@ msgid "in group '"
 msgstr "in group '"
 
 #: AdbManager.cpp:206
-#, c-format
 msgid "Expanded '%s' using entries from group '%s'"
 msgstr "'%s' uitgebreid mbv. vermeldingen uit groep '%s'"
 
 #: AdbManager.cpp:218
-#, c-format
 msgid "Expanded '%s' using entry '%s'"
 msgstr "'%s' uitgebreid mbv. vermelding '%s'"
 
 #: AdbManager.cpp:234
-#, c-format
 msgid "No matches for '%s'."
 msgstr "Niets gevonden for '%s'"
 
 #: AdbManager.cpp:355
-#, c-format
 msgid "Can't open the address book '%s'."
 msgstr "Kan adresboek '%s' niet openen."
 
 #: AdbDialogs.cpp:136
-#, fuzzy
 msgid "Import address book"
-msgstr "Adresboek bewerken"
+msgstr "Adresboek importeren"
 
 #: AdbDialogs.cpp:181 AdbDialogs.cpp:210
 msgid ""
@@ -4939,100 +4738,91 @@ msgid ""
 "from or select the import format and check the\n"
 "'location' checkbox below"
 msgstr ""
+"Select the file or directory to import the data\n"
+"from or select the import format and check the\n"
+"'location' checkbox below"
 
 #: AdbDialogs.cpp:223
-#, fuzzy
 msgid "&File:"
 msgstr "&Bestand"
 
 #: AdbDialogs.cpp:229
 msgid "Determine the &location automatically"
-msgstr ""
+msgstr "De &locatie automatisch bepalen"
 
 #: AdbDialogs.cpp:238
 msgid "Determine the &format automatically"
-msgstr ""
+msgstr "Het &formaat automatisch bepalen"
 
 #: AdbDialogs.cpp:356
-#, c-format
 msgid ""
 "Sorry, impossible to determine the location of the default address book file "
 "for the format '%s' - please specify the file manually in the next dialog."
 msgstr ""
+"Sorry, impossible to determine the location of the default address book file "
+"for the format '%s' - please specify the file manually in the next dialog."
 
 #: AdbDialogs.cpp:373
-#, fuzzy
 msgid "Please select source address book file"
-msgstr "Open een adresboekbestand"
+msgstr "Selecteer een adresboek bronbestand"
 
 #: AdbDialogs.cpp:403 AdbImport.cpp:163
-#, fuzzy
 msgid "Address book import"
-msgstr "Adresboek editor"
+msgstr "Import Adresboek"
 
 #: AdbDialogs.cpp:404
-#, fuzzy
 msgid "Native address book to create: "
-msgstr "Te gebruiken adres&boek"
+msgstr "Te maken adresboek: "
 
 #: AdbDialogs.cpp:442
-#, fuzzy
 msgid "Please choose an export format:"
-msgstr "Kies een vermelding:"
+msgstr "Kies een exportformaat:"
 
 #: AdbDialogs.cpp:443
-#, fuzzy
 msgid "ADB export options"
-msgstr "Uitbreiding opties"
+msgstr "ADB export opties"
 
 #: AdbDialogs.cpp:465
 msgid ""
 "Cannot export address book - the functionality is missing in this version of "
 "the program."
 msgstr ""
+"Kan adresboek niet exporteren - de functie ontbreekt in deze versie van het "
+"programma."
 
 #: ProvFC.cpp:342
-#, c-format
 msgid "Entry '%s' has too many fields, extra ones ignored."
 msgstr "Vermelding '%s' heeft te veel velden, extra velden genegeerd."
 
 #: ProvFC.cpp:352
-#, c-format
 msgid "Trailing backslash discarded in entry '%s'."
 msgstr "Backslash aan einde van vermelding '%s' genegeerd."
 
 #: ProvFC.cpp:722
-#, c-format
 msgid "Couldn't create or write address book file '%s'."
 msgstr "Kan adresboekbestand '%s' niet creëren of beschrijven."
 
 #: ProvBbdb.cpp:464
-#, c-format
 msgid "Bbdb::ReadListOfVectors expected ')', found '%s'"
 msgstr "Bbdb::ReadListOfVectors verwachtte ')', '%s' gevonden"
 
 #: ProvBbdb.cpp:665
-#, c-format
 msgid "BBDB: file has wrong header line: '%s'"
 msgstr "BBDB: bestand heeft foute koplijn: '%s'"
 
 #: ProvBbdb.cpp:672
-#, c-format
 msgid "BBDB: file format version '%s'"
 msgstr "BBDB: bestandsformaat versie '%s'"
 
 #: ProvBbdb.cpp:693
-#, c-format
 msgid "BBDB: read %d entries."
 msgstr "BBDB: %d vermeldingen gelezen."
 
 #: ProvBbdb.cpp:695
-#, c-format
 msgid "BBDB: ignored %d entries with neither first nor last names."
 msgstr "BBDB: %d vermeldingen zonder voor- noch achternaam genegeerd."
 
 #: ProvBbdb.cpp:723
-#, c-format
 msgid ""
 "Save BBDB address book '%s'?\n"
 "This might lead to loss of some of the original data."
@@ -5045,213 +4835,188 @@ msgid "BBDB"
 msgstr "BBDB"
 
 #: AdbImport.cpp:76
-#, fuzzy, c-format
 msgid "Nameless entry %d"
-msgstr "&Naam voor naamloze vermeldingen"
+msgstr "Naamloze vermelding %d"
 
 #: AdbImport.cpp:82
-#, c-format
 msgid "Import error: cannot create entry '%s/%s'."
-msgstr ""
+msgstr "Import fout: kan vermelding '%s/%s' niet maken."
 
 #: AdbImport.cpp:108
-#, c-format
 msgid "Import error: cannot create group '%s/%s'."
-msgstr ""
+msgstr "Import fout: kan groep '%s/%s' niet maken."
 
 #: AdbImport.cpp:159
-#, c-format
 msgid ""
 "It seems that the file '%s' is not in the format '%s',\n"
 "do you still want to try to import it?"
 msgstr ""
+"It seems that the file '%s' is not in the format '%s',\n"
+"do you still want to try to import it?"
 
 #: AdbImport.cpp:185
 msgid "unsupported format."
-msgstr ""
+msgstr "niet ondersteund formaat."
 
 #: AdbImport.cpp:203
-#, fuzzy, c-format
 msgid "cannot create native address book '%s'."
-msgstr "Kan adresboek '%s' niet openen."
+msgstr "Kan adresboek '%s' niet maken."
 
 #: AdbImport.cpp:217
-#, fuzzy, c-format
 msgid "couldn't start importing from file '%s'."
-msgstr "Kan adresboekbestand '%s' niet creëren of beschrijven."
+msgstr "kon importeren niet starten uit bestand '%s'."
 
 #: AdbImport.cpp:238
-#, c-format
 msgid "Successfully imported address book from file '%s' (format '%s')"
-msgstr ""
+msgstr "Adresboek succesvol geïmporteerd uit bestand '%s' (formaat '%s')"
 
 #: AdbImport.cpp:245
-#, fuzzy, c-format
 msgid "Import of address book from file '%s' failed"
-msgstr "Kan adresboekbestand '%s' niet creëren of beschrijven."
+msgstr "Import van adresboek uit bestand '%s' mislukt"
 
 #: ImportText.cpp:113
 msgid "Comma separated values"
-msgstr ""
+msgstr "Komma gescheiden waarden"
 
 #: ImportText.cpp:114
 msgid "TAB separated values"
-msgstr ""
+msgstr "TAB gescheiden waarden"
 
 #: ImportXFMail.cpp:74
-#, fuzzy
 msgid "XFMail address book"
-msgstr "Adresboek bewerken"
+msgstr "XFMail adresboek"
 
 #: ImportXFMail.cpp:91
-#, c-format
 msgid "Didn't find the XFMail address book in the default location (%s)."
-msgstr ""
+msgstr "XFMail adresboek niet op standaard locatie gevonden (%s)."
 
 #: ImportMailrc.cpp:87
 msgid "Unix .mailrc file"
-msgstr ""
+msgstr "Unix .mailrc bestand"
 
 #: ImportMailrc.cpp:128
-#, c-format
 msgid "Invalid mailrc alias entry '%s' discarded."
-msgstr ""
+msgstr "Foute mailrc alias ingang '%s' genegeerd."
 
 #: ImportMailrc.cpp:186
-#, c-format
 msgid "Mailrc entry '%s' doesn't have any addresses and will be ignored."
-msgstr ""
+msgstr "Mailrc ingang '%s' bevat geen adressen en wordt genegeerd."
 
 #: ImportMailrc.cpp:211
-#, c-format
 msgid "Didn't find the mailrc address book in the default location (%s)."
-msgstr ""
+msgstr "mailrc adresboek niet op standaard locatie gevonden (%s)."
 
 #: ImportPine.cpp:129
-#, fuzzy
 msgid "PINE addressbook file"
-msgstr "Open een adresboekbestand"
+msgstr "PINE adresboek bestand"
 
 #: ImportPine.cpp:167
-#, c-format
 msgid ""
 "Unterminated mailing address list at line %d in the PINE address book file "
 "'%s'."
 msgstr ""
+"Niet afgesloten lijst mailadressen gevonden op regel %d in het PINE adresboek bestand "
+"'%s'."
 
 #: ImportPine.cpp:187
-#, c-format
 msgid ""
 "TAB character expected at position %d in line %d of the address book file "
 "'%s'; the entry will be ignored."
 msgstr ""
+"Tab karakter verwacht op positite %d op regel %d van het adresboek bestand "
+"'%s'; vermelding wordt genegeerd."
 
 #: ImportPine.cpp:231
-#, c-format
 msgid ""
 "Unexpected line end at position %d in line %d of the address book file '%s'; "
 "the entry will be ignored."
 msgstr ""
+"Onverwacht regeleinde op positie %d op regel %d van adresboek bestand '%s'; "
+"de vermelding wordt genegeerd."
 
 #: ImportPine.cpp:272
-#, fuzzy, c-format
 msgid "Unreckognized address book entry '%s'."
-msgstr "Zoek een adresboekvermelding"
+msgstr "Niet herkende vermelding '%s' in adresboek."
 
 #: ImportPine.cpp:409
-#, c-format
 msgid "Invalid format for list of addresses of PINE mailing list entry: '%s'."
-msgstr ""
+msgstr "Fout formaat voor adreslijst in PINE mailing list: '%s'."
 
 #: ImportPine.cpp:446
-#, fuzzy, c-format
 msgid "No matching '>' in the address '%s'."
-msgstr "Kan adresboek '%s' niet openen."
+msgstr "Geen afsluitende '>' in adres '%s'."
 
 #: ExportPalm.cpp:135
-#, fuzzy
 msgid "PalmOS addressbook format"
-msgstr "Open een adresboekbestand"
+msgstr "PalmOS adresboek formaat"
 
 #: ExportPalm.cpp:316 ExportText.cpp:261
-#, fuzzy, c-format
 msgid "Successfully exported address book data to file '%s'"
-msgstr "Kan adresboekbestand '%s' niet creëren of beschrijven."
+msgstr "Exporteren van adresboek data naar bestand '%s' succesvol."
 
 #: ExportPalm.cpp:323 ExportText.cpp:268
 msgid "Export failed."
-msgstr ""
+msgstr "Exporteren mislukt."
 
 #: ExportPalm.cpp:351 ExportText.cpp:287
-#, fuzzy
 msgid "Mahogany: Exporting address book"
-msgstr "Adresboek bewerken"
+msgstr "Mahogany: Adresboek wordt geexporteerd"
 
 #: ExportPalm.cpp:359 ExportText.cpp:295
-#, fuzzy
 msgid "Configure export"
-msgstr "Afdrukken instellen"
+msgstr "Exporteren configureren"
 
 #: ExportPalm.cpp:376 ExportText.cpp:359
-#, fuzzy
 msgid "&Filename to export to: "
-msgstr "&Bestandsnaam: "
+msgstr "&Bestandsnaam om naar te exporteren: "
 
 #: ExportPalm.cpp:384
-#, fuzzy
 msgid "&Addressbook Category: "
-msgstr "Adresboek editor"
+msgstr "&Adresboek Categorie: "
 
 #: ExportPalm.cpp:388
-#, fuzzy
 msgid "&Include entries with no name: "
-msgstr "Vermeld&ingen zonder naam negeren"
+msgstr "Vermeld&ingen zonder naam bijvoegen: "
 
 #: ExportPalm.cpp:392
-#, fuzzy
 msgid "&Include comments: "
-msgstr "&Commentaar: "
+msgstr "Commentaar bijvoegen: "
 
 #: ExportPalm.cpp:425 ExportText.cpp:383
-#, fuzzy
 msgid "Please specify the file name!"
-msgstr "Geef aan waar te zoeken!"
+msgstr "Geef de bestandsnaam!"
 
 #: ExportPalm.cpp:436
-#, fuzzy
 msgid "Please specify the category name!"
-msgstr "Geef aan waar te zoeken!"
+msgstr "Geef de categorienaam!"
 
 #: ExportText.cpp:138
 msgid "Simple text format"
-msgstr ""
+msgstr "Eenvoudig tekstformaat"
 
 #: ExportText.cpp:312
 msgid "Use &commas"
-msgstr ""
+msgstr "Gebruik &comma's"
 
 #: ExportText.cpp:313
 msgid "Use &tabs"
-msgstr ""
+msgstr "Gebruik &tabs"
 
 #: ExportText.cpp:314
-#, fuzzy
 msgid "&Use custom character"
-msgstr "Aanhaal&karakter"
+msgstr "Gebr&uik eigen karakter"
 
 #: ExportText.cpp:317
-#, fuzzy
 msgid "&Delimiter"
-msgstr "&Verwijderen"
+msgstr "&Scheidingsteken"
 
 #: ExportText.cpp:330
 msgid "Field &separator:"
-msgstr ""
+msgstr "Veld &scheidingsteken:"
 
 #: ExportText.cpp:405
-#, fuzzy
 msgid "Please enter specify the delimiter character!"
-msgstr "Geef aan waar te zoeken!"
+msgstr "Voer een scheidingsteken in!"
 
 #: persctrl.cpp:1222
 msgid "Don't show this message again "
