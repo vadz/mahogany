@@ -254,10 +254,21 @@ class wxDeviceLock *m_Lock;
 class PiConnection
 {
 public:
-   PiConnection(class PalmOSModule *mi) { m=mi; m->Connect(); }
-   ~PiConnection() { m->Disconnect(); }
+   PiConnection(class PalmOSModule *mi)
+      {
+         m=mi;
+         if(! m->IsConnected()) 
+         {
+            m->Connect();
+            cleanup = true;
+         }
+         else
+            cleanup = false;
+      }
+   ~PiConnection() { if(cleanup) m->Disconnect(); }
 private:
    PalmOSModule *m;
+   bool cleanup;
 };
 
 
@@ -329,13 +340,14 @@ PalmOSModule::Entry(int arg, ...)
 void
 PalmOSModule::GetConfig(void)
 {
-   ASSERT(m_Profile == NULL);
    ProfileBase * appConf = m_MInterface->GetGlobalProfile();
 
    // mail related values get read from the PALMBOX mailfolder profile:
-   m_Profile = m_MInterface->CreateProfile(
-      appConf->readEntry(MP_MOD_PALMOS_BOX,MP_MOD_PALMOS_BOX_D));
-
+   if(m_Profile == NULL)
+   {
+      m_Profile = m_MInterface->CreateProfile(
+         appConf->readEntry(MP_MOD_PALMOS_BOX,MP_MOD_PALMOS_BOX_D));
+   }
    // all other values get read from the module profile:
    ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
 
