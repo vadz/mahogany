@@ -1893,7 +1893,6 @@ wxSizer *wxComposeView::CreateHeaderFields()
    CreatePlaceHolder();
 
    m_panelRecipients->GetCanvas()->SetSizer(m_sizerRcpts);
-   m_panelRecipients->GetCanvas()->SetAutoLayout(TRUE);
 
    sizerTop->Add(m_panelRecipients, 1, wxEXPAND);
 
@@ -1931,7 +1930,6 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
                                       wxSP_3D);
 
    m_panel = new wxPanel(m_splitter, -1);
-   m_panel->SetAutoLayout(TRUE);
 
    // the sizer containing all header fields
    wxSizer *sizerHeaders = CreateHeaderFields();
