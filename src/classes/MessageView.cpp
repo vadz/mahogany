@@ -325,6 +325,37 @@ MailMessageParameters::GetParamValue(const wxString& name) const
 // MessageView::AllProfileValues
 // ----------------------------------------------------------------------------
 
+MessageView::AllProfileValues::AllProfileValues()
+{
+   // init everything to some default values, even if they're not normally
+   // used before ReadAllSettings() is called it is still better not to leave
+   // junk in the struct fields
+
+   fontFamily = wxDEFAULT;
+   fontSize = 12;
+
+   quotedColourize =
+   quotedCycleColours = false;
+
+   quotedMaxWhitespace =
+   quotedMaxAlpha = 0;
+
+   showHeaders =
+   inlineRFC822 =
+   inlinePlainText =
+   showFaces =
+   highlightURLs = false;
+
+   inlineGFX = -1;
+
+#ifdef OS_UNIX
+   browserIsNS =
+#endif // Unix
+   browserInNewWindow = false;
+
+   autocollect = false;
+}
+
 bool MessageView::AllProfileValues::operator==(const AllProfileValues& other)
 {
    #define CMP(x) (x == other.x)

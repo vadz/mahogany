@@ -455,6 +455,8 @@ private:
       String afmpath;
 #endif // Unix
 
+      AllProfileValues();
+
       bool operator==(const AllProfileValues& other);
    } m_ProfileValues;
 
