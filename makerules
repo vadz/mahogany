@@ -19,14 +19,20 @@ M_FLAGS_s := -S
 # well.
 ##############################################################################
 
-# common initial flags
+# cpp (C preprocessor) flags:
+#  - first line is for global flags, can't be overridden (M_FLAGS_xxx is set
+#    above)
+#  - second line is for per-directory flags (e.g. CPPFLAGS_Python)
+#  - final line is for the current ($@) file (e.g. CPPFLAGS_Python_MDialogs_o)
 define M_COMPILE_CPP
 $(M_FLAGS$(subst .,_,$(suffix $@))) $(CPPFLAGS) \
 $(CPPFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) \
 $(CPPFLAGS_$(subst .,_,$(subst /,_,$@)))
 endef
 
-# common C flags
+# C compiler flags
+#
+# VZ: I have no idea why do we need unfiltered version...
 define M_COMPILE_CC_unfiltered
 $(M_COMPILE_CPP) $(CFLAGS) \
 $(CFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) \
@@ -39,7 +45,7 @@ $(FILTER_IN$(subst /,_,$(subst /$(notdir $*),,/$*))) \
 $(FILTER_IN_$(subst .,_,$(subst /,_,$@)))
 endef
 
-# common C++ flags
+# C++ compiler flags
 define M_COMPILE_CXX_unfiltered
 $(M_COMPILE_CPP) $(CXXFLAGS) \
 $(CXXFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) \
@@ -52,7 +58,7 @@ $(FILTER_IN$(subst /,_,$(subst /$(notdir $*),,/$*))) \
 $(FILTER_IN_$(subst .,_,$(subst /,_,$@)))
 endef
 
-# common loader flags
+# linker flags
 define M_LD_FLAGS
 $(LDFLAGS) $(LDFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) \
 $(LDFLAGS_$(subst .,_,$(subst /,_,$@)))
