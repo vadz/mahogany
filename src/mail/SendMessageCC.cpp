@@ -1628,12 +1628,24 @@ SendMessageCC::WriteToString(String& output)
 bool
 SendMessageCC::WriteToFile(const String &filename, bool append)
 {
-   ofstream *ostr = new ofstream(filename.c_str(),
-                                 append ? ios::out : ios::out | ios::trunc);
+   int flags = ios::out | ios::binary;
+   if ( !append )
+      flags |= ios::trunc;
 
-   bool ok = !(!ostr || ostr->bad());
+   ofstream ostr(filename.c_str(), flags);
+
+   bool ok = !(!ostr || ostr.bad());
    if ( ok )
-      ok = WriteMessage(write_stream_output, ostr);
+   {
+      // we need a valid "From " line or c-client wouldn't recognize this file
+      // as a MBOX one
+      time_t t = time(NULL);
+      ostr << "From Mahogany-AutoSave " << ctime(&t);
+      ok = !ostr.fail();
+   }
+
+   if ( ok )
+      ok = WriteMessage(write_stream_output, &ostr);
 
    if ( !ok )
    {
@@ -1681,10 +1693,10 @@ static long write_stream_output(void *stream, char *string)
 {
    ostream *o = (ostream *)stream;
    *o << string;
-   if( o->fail() )
+   if ( o->fail() )
       return NIL;
-   else
-      return T;
+
+   return T;
 }
 
 // rfc822_output() callback for writing to a string
