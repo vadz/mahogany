@@ -266,11 +266,11 @@ public:
        Get the index of the first header with[out] the given flag after the
        given position.
 
-       @return the index or INDEX_ILLEGAL if none found
+       @return the position or INDEX_ILLEGAL if none found
     */
    virtual size_t FindHeaderByFlag(MailFolder::MessageStatus flag,
                                    bool set = true,
-                                   long indexFrom = -1) = 0;
+                                   long posFrom = -1) = 0;
 
    /**
        Same as GetHeaderByFlag() but wraps to the start if the header is not
@@ -278,7 +278,7 @@ public:
     */
    virtual size_t FindHeaderByFlagWrap(MailFolder::MessageStatus flag,
                                        bool set = true,
-                                       long indexFrom = -1) = 0;
+                                       long posFrom = -1) = 0;
 
    /**
        Return the array containing all headers with[out] the given flag.

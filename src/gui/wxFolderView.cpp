@@ -438,7 +438,7 @@ protected:
     */
    //@{
 
-   /// get the header info for this index
+   /// get the header info for the header at this position
    HeaderInfo *GetHeaderInfo(size_t index) const;
 
    /// the listing to use
@@ -453,7 +453,7 @@ protected:
    /// the last headers list modification "date"
    HeaderInfoList::LastMod m_cacheLastMod;
 
-   /// the headers we need to get
+   /// the positions of the headers we need to get
    wxArrayInt m_headersToGet;
 
    //@}
@@ -1370,8 +1370,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
          if ( pos > posMax )
             posMax = pos;
 
-         // make it a msgno
-         seq.Add(pos + 1);
+         seq.Add(pos);
       }
 
       m_headersToGet.Empty();

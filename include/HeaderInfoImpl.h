@@ -73,9 +73,9 @@ public:
    virtual size_t GetIndentation(size_t n) const;
 
    virtual size_t FindHeaderByFlag(MailFolder::MessageStatus flag,
-                                   bool set, long indexFrom);
+                                   bool set, long posFrom);
    virtual size_t FindHeaderByFlagWrap(MailFolder::MessageStatus  flag,
-                                       bool set, long indexFrom);
+                                       bool set, long posFrom);
    virtual MsgnoArray *GetAllHeadersByFlag(MailFolder::MessageStatus flag,
                                            bool set);
 
@@ -119,7 +119,27 @@ private:
    /// the number of messages in the folder
    size_t m_count;
 
-   /// last modification "date"
+   /**
+     @name Sorting/threading data
+
+     We maintain 2 tables which define the correspondence between the indices
+     (which are just msgnos, i.e. the internal message indices in the folder)
+     and the position on the screen where they should appear.
+
+     The tables below are synhronized if not NULL (they are both NULL if no
+     sorting/threading is done)
+    */
+   //@{
+
+   /// the translation table allowing to get msgno (index) from position
+   size_t *m_tableMsgno;
+
+   /// the translation table allowing to get position from msgno (index)
+   size_t *m_tablePos;
+
+   //@}
+
+   /// last modification "date": incremented each time the listing changes
    LastMod m_lastMod;
 
    // let it create us

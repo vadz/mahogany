@@ -158,7 +158,7 @@ String Sequence::GetString() const
 // other operations on the sequence
 // ----------------------------------------------------------------------------
 
-Sequence Sequence::Apply(UIdType (*map)(const UIdType& uid)) const
+Sequence Sequence::Apply(UIdType (*map)(UIdType uid)) const
 {
    Flush();
 
@@ -168,7 +168,7 @@ Sequence Sequence::Apply(UIdType (*map)(const UIdType& uid)) const
    size_t n;
    for ( UIdType i = GetFirst(n); i != UID_ILLEGAL; i = GetNext(i, n) )
    {
-      seqCopy.Add(i);
+      seqCopy.Add(map(i));
    }
 
    seqCopy.Flush();

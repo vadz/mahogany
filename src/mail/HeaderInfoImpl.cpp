@@ -3,18 +3,13 @@
 // File name:   mail/HeaderInfoImpl.cpp - implements HeaderInfo(List) classes
 // Purpose:     implements HI in the simplest way: just store all data in
 //              memory
-// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Author:      Karsten Ballüder, Vadim Zeitlin
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$
 // Copyright:   (c) 1997-2001 Mahogany team
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
-   Look for FIXME-SORTING to see the things which must be changed to implement
-   sorting/threading
- */
 
 // ============================================================================
 // declarations
@@ -40,6 +35,19 @@
 #include "HeaderInfoImpl.h"
 
 #include "Sequence.h"
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+static UIdType MapIndexToMsgno(UIdType uid)
+{
+   return uid + 1;
+}
+
+// ============================================================================
+// implementation
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // HeaderInfo
@@ -121,8 +129,24 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    // invalidate the pointers in m_headers
    m_lastMod = 0;
 
+   // preallocate the memory for headers
    m_count = (size_t)mf->GetMessageCount();
    m_headers.Alloc(m_count);
+
+#if 1
+   // no sorting/threading yet
+   m_tableMsgno =
+   m_tablePos = NULL;
+#else // testing code
+   m_tableMsgno = (size_t *)malloc(m_count * sizeof(size_t));
+   m_tablePos = (size_t *)malloc(m_count * sizeof(size_t));
+
+   for ( size_t n = 0; n < m_count; n++ )
+   {
+      m_tableMsgno[n] = m_count - n;
+      m_tablePos[n] = m_count - n - 1;
+   }
+#endif
 }
 
 void HeaderInfoListImpl::CleanUp()
@@ -133,6 +157,15 @@ void HeaderInfoListImpl::CleanUp()
    WX_CLEAR_ARRAY(m_headers);
 
    m_lastMod++;
+
+   if ( m_tableMsgno )
+   {
+      free(m_tableMsgno);
+      free(m_tablePos);
+
+      m_tableMsgno =
+      m_tablePos = NULL;
+   }
 }
 
 HeaderInfoListImpl::~HeaderInfoListImpl()
@@ -194,16 +227,14 @@ size_t HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 // HeaderInfoListImpl index to/from position mapping
 // ----------------------------------------------------------------------------
 
-// FIXME-SORTING: this is trivial without sorting/threading
-
 size_t HeaderInfoListImpl::GetIdxFromPos(size_t pos) const
 {
-   return pos;
+   return m_tableMsgno ? m_tableMsgno[pos] - 1 : pos;
 }
 
 size_t HeaderInfoListImpl::GetPosFromIdx(size_t n) const
 {
-   return n;
+   return m_tablePos ? m_tablePos[n] : n;
 }
 
 // ----------------------------------------------------------------------------
@@ -263,6 +294,8 @@ size_t HeaderInfoListImpl::GetIndentation(size_t n) const
 // HeaderInfoListImpl searching
 // ----------------------------------------------------------------------------
 
+// FIXME: all this is totally bogus when we do sorting/threading
+
 class FindHeaderHelper
 {
 public:
@@ -302,7 +335,7 @@ FindElementInRange(const MsgnoArray& array, MsgnoType from, MsgnoType to)
 size_t
 HeaderInfoListImpl::FindHeaderByFlag(MailFolder::MessageStatus flag,
                                      bool set,
-                                     long indexFrom)
+                                     long posFrom)
 {
    FindHeaderHelper helper(m_mf, flag, set);
 
@@ -310,8 +343,14 @@ HeaderInfoListImpl::FindHeaderByFlag(MailFolder::MessageStatus flag,
    if ( !results )
       return UID_ILLEGAL;
 
-   // +1 to transform indexFrom in msgno
-   return GetIdxFromMsgno(FindElementInRange(*results, indexFrom + 1, m_count));
+   MsgnoType msgno = FindElementInRange
+                     (
+                        *results,
+                        GetIdxFromPos(posFrom) + 1, // +1 to make it msgno
+                        m_count
+                     );
+
+   return msgno ? GetPosFromIdx(GetIdxFromMsgno(msgno)) : (size_t)-1;
 }
 
 size_t
@@ -414,8 +453,41 @@ void HeaderInfoListImpl::Cache(const Sequence& seq)
 
 void HeaderInfoListImpl::CachePositions(const Sequence& seq)
 {
-   // FIXME-SORTING: transform sequence of positions into sequence of msgnos
-   Cache(seq);
+   // transform sequence of positions into sequence of msgnos
+   Sequence seqMsgnos;
+   if ( m_tableMsgno )
+   {
+      // a contiguous range of positions doesn't correspond in general to a
+      // contiguous set of msgnos so the best we can do (or at least the best
+      // thing I see) is to retreieve all messages between the two extreme
+      // positions
+      MsgnoType msgnoMin = 0,
+                msgnoMax = 0;
+
+      size_t n;
+      for ( UIdType pos = seq.GetFirst(n);
+            pos != UID_ILLEGAL;
+            pos = seq.GetNext(pos, n) )
+      {
+         ASSERT_MSG( pos < m_count, "invalid position in the sequence" );
+
+         MsgnoType msgno = m_tableMsgno[pos];
+
+         if ( !msgnoMin || msgno < msgnoMin )
+            msgnoMin = msgno;
+
+         if ( !msgnoMax || msgno > msgnoMax )
+            msgnoMax = msgno;
+      }
+
+      seqMsgnos.AddRange(msgnoMin, msgnoMax);
+   }
+   else // no sorting/threading at all
+   {
+      seqMsgnos = seq.Apply(MapIndexToMsgno);
+   }
+
+   Cache(seqMsgnos);
 }
 
 void HeaderInfoListImpl::CacheMsgnos(MsgnoType msgnoFrom, MsgnoType msgnoTo)

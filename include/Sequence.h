@@ -41,7 +41,7 @@ public:
    void AddRange(UIdType from, UIdType to);
 
    /// apply the given function to all elements of the sequence, return result
-   Sequence Apply(UIdType (*map)(const UIdType& uid)) const;
+   Sequence Apply(UIdType (*map)(UIdType uid)) const;
 
    /// get the string representing the sequence in IMAP format
    String GetString() const;
