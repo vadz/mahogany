@@ -44,9 +44,11 @@ Finnish
 
 French
 	Vadim Zeitlin
+	Kevin Hatry
 
 German
 	Karsten Ballüder
+	Martin Jost
 
 Italian
 	Luca Ferraro
@@ -57,12 +59,13 @@ Portuguese
 Spanish
 	Leandro Lucarella
 
-Beta-Testing:
-=============
+Testing:
+========
 
 Volker Apelt (IMAP)
 Michela Tonioni
 Michel Talon (FreeBSD)
+Alan G Isaac
 
 3rd party libraries:
 ====================
