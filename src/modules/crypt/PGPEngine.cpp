@@ -495,7 +495,8 @@ PGPEngine::ExecCommand(const String& options,
       }
       else if ( out->CanRead() )
       {
-         buf[out->Read(buf, WXSIZEOF(buf)).LastRead()] = '\0';
+         // leave space for terminating NUL
+         buf[out->Read(buf, WXSIZEOF(buf) - 1).LastRead()] = '\0';
 
          messageOut += buf;
       }
