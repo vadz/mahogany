@@ -331,7 +331,7 @@ bool ContainsOwnAddress(const String& str, Profile *profile)
 extern String FilterAddressList(const String& original)
 {
    String result;
-   
+
    size_t each = 0;
    while( each < original.size() )
    {
@@ -343,9 +343,14 @@ extern String FilterAddressList(const String& original)
          if( colon != String::npos )
          {
             bool alpha = true;
-            for( size_t word = each+1; word < colon; ++word )
-               alpha &= wxIsalpha(original[word]) != 0;
-            
+            for( size_t word = each+1; alpha && word < colon; ++word )
+            {
+               // VZ: not sure that we want to use (locale-dependent)
+               //     wxIsalpha() here, please check
+               if ( !wxIsalpha(original[word]) )
+                  alpha = false;
+            }
+
             if( alpha )
             {
                size_t right = original.find(_T('>'),colon);
@@ -355,18 +360,18 @@ extern String FilterAddressList(const String& original)
                      == _T("mailto") )
                   {
                      size_t parameters = original.find(_T('?'),colon);
-                     
+
                      size_t end;
                      if( parameters != String::npos && parameters < right )
                         end = parameters;
                      else
                         end = right;
-                        
+
                      result += _T('<');
                      result += original.substr(colon+1,end-(colon+1));
                      result += _T('>');
                   }
-   
+
                   match = true;
                   each = right+1;
                }
@@ -380,6 +385,6 @@ extern String FilterAddressList(const String& original)
          ++each;
       }
    }
-   
+
    return result;
 }
