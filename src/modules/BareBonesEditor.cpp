@@ -37,8 +37,12 @@
 #include <wx/listctrl.h>     // for wxListEvent
 
 #include "Composer.h"
-#include "MessageEditor.h"
+#ifdef OS_WIN
+#include "Mpers.h"
+#endif // OS_WIN
 #include "gui/wxMDialogs.h"
+
+#include "MessageEditor.h"
 
 class WXDLLEXPORT wxListCtrl;
 
@@ -54,6 +58,7 @@ extern const MOption MP_REPLY_MSGPREFIX;
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_FORMAT_PARAGRAPH_BEFORE_EXIT;
+extern const MPersMsgBox *M_MSGBOX_8BIT_WARN;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -119,6 +124,8 @@ public:
    // for wxBareBonesTextControl only: we have to use
    bool OnFirstTimeFocus() { return MessageEditor::OnFirstTimeFocus(); }
    void OnFirstTimeModify() { MessageEditor::OnFirstTimeModify(); }
+
+   bool HasEncoding() const { return m_encoding != wxFONTENCODING_SYSTEM; }
 
    friend class FormattedParagraph;
    friend class wxBareBonesEditorNotebook;
@@ -215,6 +222,9 @@ public:
 protected:
    // event handlers
    void OnKeyDown(wxKeyEvent& event);
+#ifdef OS_WIN
+   void OnChar(wxKeyEvent& event);
+#endif // OS_WIN
    void OnFocus(wxFocusEvent& event);
 
 private:
@@ -222,6 +232,10 @@ private:
 
    bool m_firstTimeModify;
    bool m_firstTimeFocus;
+
+#ifdef OS_WIN
+   bool m_warning8bitShown;
+#endif // OS_WIN
 
    DECLARE_EVENT_TABLE()
 };
@@ -704,6 +718,9 @@ void wxBareBonesAttachments::OnKeyDown(wxKeyEvent& event)
 
 BEGIN_EVENT_TABLE(wxBareBonesTextControl, wxTextCtrl)
    EVT_KEY_DOWN(wxBareBonesTextControl::OnKeyDown)
+#ifdef OS_WIN
+   EVT_CHAR(wxBareBonesTextControl::OnChar)
+#endif // OS_WIN
    EVT_SET_FOCUS(wxBareBonesTextControl::OnFocus)
 END_EVENT_TABLE()
 
@@ -718,15 +735,19 @@ wxBareBonesTextControl::wxBareBonesTextControl(BareBonesEditor *editor,
 {
    m_editor = editor;
 
-   m_firstTimeModify = TRUE;
-   m_firstTimeFocus = TRUE;
+   m_firstTimeModify = true;
+   m_firstTimeFocus = true;
+
+#ifdef OS_WIN
+   m_warning8bitShown = false;
+#endif // OS_WIN
 }
 
 void wxBareBonesTextControl::OnKeyDown(wxKeyEvent& event)
 {
    if ( m_firstTimeModify )
    {
-      m_firstTimeModify = FALSE;
+      m_firstTimeModify = false;
 
       m_editor->OnFirstTimeModify();
    }
@@ -734,17 +755,46 @@ void wxBareBonesTextControl::OnKeyDown(wxKeyEvent& event)
    event.Skip();
 }
 
+#ifdef OS_WIN
+
+void wxBareBonesTextControl::OnChar(wxKeyEvent& event)
+{
+   if ( event.GetKeyCode() > 0x7f && event.GetKeyCode() < WXK_START )
+   {
+      if ( !m_editor->HasEncoding() && !m_warning8bitShown )
+      {
+         m_warning8bitShown = true;
+
+         MDialog_Message
+         (
+            _("You should specify the language if you want to use non"
+              "ASCII characters in your message.\n"
+              "\n"
+              "Please choose one in the \"Languages\" menu, otherwise "
+              "the non-ASCII characters could be lost."),
+            this,
+            MDIALOG_MSGTITLE,
+            GetPersMsgBoxName(M_MSGBOX_8BIT_WARN)
+         );
+      }
+   }
+
+   event.Skip();
+}
+
+#endif // OS_WIN
+
 void wxBareBonesTextControl::OnFocus(wxFocusEvent& event)
 {
    if ( m_firstTimeFocus )
    {
-      m_firstTimeFocus = FALSE;
+      m_firstTimeFocus = false;
 
       if ( m_editor->OnFirstTimeFocus() )
       {
          // composer doesn't need first modification notification any more
          // because it modified the text itself
-         m_firstTimeModify = FALSE;
+         m_firstTimeModify = false;
       }
    }
 

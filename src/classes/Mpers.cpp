@@ -161,6 +161,8 @@ static const struct
    { "SearchAgainIfNoMatch",     gettext_noop("propose to search again if no matches were found") },
    { "UseCreateFolderWizard",    gettext_noop("use wizard when creating a new folder") },
    { "FormatParagraphBeforeExit",gettext_noop("format all paragraphs in composer before exit") },
+   { "8BitWarn",                 gettext_noop("warn if 8bit characters are used in composer and language is not set") },
+   //{ "", gettext_noop("") },
 };
 
 // ============================================================================
