@@ -277,6 +277,37 @@ private:
    DECLARE_NO_COPY_CLASS(AwayTimer)
 };
 
+#if 0 // def OS_WIN
+
+static struct WatchDog
+{
+   WatchDog()
+   {
+      HANDLE hThread = ::CreateThread(NULL, 0, &WatchDog::Run, 0, 0, NULL);
+      if ( hThread )
+      {
+         ::CloseHandle(hThread);
+      }
+   }
+
+   static DWORD WINAPI Run(void *)
+   {
+      HANDLE hEvent = ::CreateEvent(NULL, FALSE, FALSE, _T("Mahogany_Die"));
+      if ( !hEvent )
+         return (DWORD)-1;
+
+      if ( ::WaitForSingleObject(hEvent, INFINITE) == WAIT_OBJECT_0 )
+      {
+         // crash
+         int *p = 0;
+         *p = 17;
+      }
+
+      return 0;
+   }
+} g_watchDog;
+#endif // OS_WIN
+
 // ----------------------------------------------------------------------------
 // global vars
 // ----------------------------------------------------------------------------
