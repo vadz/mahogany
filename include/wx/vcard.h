@@ -85,11 +85,21 @@ public:
     // return property by name or NULL if no such property
     wxVCardObject *GetProperty(const wxString& name) const;
 
-    // virtual dtor for any base class
-    virtual ~wxVCardObject();
+    // add a property, with or without value
+    void AddProperty(const wxString& name);
+    void AddProperty(const wxString& name, const wxString& value);
+
+    // return the output form of the object as a string
+    wxString Write() const;
+
+    // write the object to a file, return TRUE on success
+    bool Write(const wxString& filename) const;
 
     // dump the internal representation to the given filename
     void Dump(const wxString& filename);
+
+    // virtual dtor for any base class
+    virtual ~wxVCardObject();
 
 protected:
     // ctors
@@ -259,10 +269,13 @@ public:
     // create an array of card objects from the contents of the given file
     static wxArrayCards CreateFromFile(const wxString& filename);
 
+    // default ctor creates an empty vCard
+    wxVCard();
+
     // ctor creates an object containing the first vCard in a file
     wxVCard(const wxString& filename);
 
-    // destroyes the vCard object and invalidates all wxVCardObject which are
+    // destroys the vCard object and invalidates all wxVCardObject which are
     // subobjects of this one
     virtual ~wxVCard();
 
@@ -327,6 +340,37 @@ public:
 
     wxVCardEMail *GetFirstEMail(void **cookie) const;
     wxVCardEMail *GetNextEMail(void **cookie) const;
+
+    // setters for the standard properties
+    void SetFullName(const wxString& fullName);
+    void SetName(const wxString& familyName,
+                 const wxString& givenName = wxEmptyString,
+                 const wxString& additionalNames = wxEmptyString,
+                 const wxString& namePrefix = wxEmptyString,
+                 const wxString& nameSuffix = wxEmptyString);
+    void SetPhoto(const wxVCardImage& image);
+    void SetBirthDay(const wxDateTime& datetime);
+
+    void SetEMail(const wxString& email); // internet email
+    void SetMailer(const wxString& mailer);
+
+    void SetTimeZone(long offsetInSeconds);
+    void SetGeoPosition(float longitude, float latitude);
+
+    void SetTitle(const wxString& title);
+    void SetBusinessRole(const wxString& role);
+    void SetLogo(const wxVCardImage& image);
+    void SetOrganization(const wxString& name,
+                         const wxString& unit = wxEmptyString);
+
+    void SetComment(const wxString& comment);
+    void SetLastRev(const wxDateTime& last);
+    void SetSound(const wxVCardSound& sound);
+    void SetURL(const wxString& url);
+    void SetUID(const wxString& uid);
+    void SetVersion(const wxString& version);
+
+    void SetPublicKey(const wxString& key);
 
 protected:
     // ctor which takes ownership of the vObject

@@ -64,6 +64,12 @@ endif
 %.pdf: %.ps
 	$(PSTOPDF) $< $@
 
+%.c: %.y
+	$(YACC) $(YFLAGS) $< && mv y.tab.c $*.c
+	if test -f y.tab.h; then \
+	if cmp -s y.tab.h $*.h; then rm -f y.tab.h; else mv y.tab.h $*.h; fi; \
+	else :; fi
+
 ifdef HAVE_SGMLTOOLS
 %.html: %.sgml
 	sgml2html $<

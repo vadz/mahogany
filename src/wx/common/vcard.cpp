@@ -37,7 +37,7 @@
     #include "wx/filefn.h"
 #endif //WX_PRECOMP
 
-#include "vcard/vcc.h"
+#include "../vcard/vcc.h"
 
 #define VOBJECT_DEFINED
 
@@ -55,6 +55,12 @@
 wxVCardObject::wxVCardObject(VObject *vObj)
 {
     m_vObj = vObj;
+}
+
+// create a new, empty vObject
+wxVCard::wxVCard()
+{
+    m_vObj = newVObject(VCCardProp);
 }
 
 // construct a new sub object
@@ -340,14 +346,130 @@ bool wxVCard::GetComment(wxString *comment) const
     return GetNamedPropValue(VCCommentProp, comment);
 }
 
+bool wxVCard::GetURL(wxString *url) const
+{
+    return GetNamedPropValue(VCURLProp, url);
+}
+
+bool wxVCard::GetUID(wxString *uid) const
+{
+    return GetNamedPropValue(VCUniqueStringProp, uid);
+}
+
 bool wxVCard::GetVersion(wxString *version) const
 {
     return GetNamedPropValue(VCVersionProp, version);
 }
 
 // ----------------------------------------------------------------------------
+// adding properties
+// ----------------------------------------------------------------------------
+
+void wxVCardObject::AddProperty(const wxString& name)
+{
+    (void)addProp(m_vObj, name);
+}
+
+void wxVCardObject::AddProperty(const wxString& name, const wxString& value)
+{
+    VObject *vObj = addPropValue(m_vObj, name, value);
+
+    // mark multiline properties as being encoded in QP
+    if ( value.Find(_T('\n')) != wxNOT_FOUND )
+    {
+        addProp(vObj, VCQuotedPrintableProp);
+    }
+}
+
+// ----------------------------------------------------------------------------
+// setting standard properties
+// ----------------------------------------------------------------------------
+
+void wxVCard::SetFullName(const wxString& fullName)
+{
+    AddProperty(VCFullNameProp, fullName);
+}
+
+void wxVCard::SetName(const wxString& familyName,
+                      const wxString& givenName,
+                      const wxString& additionalNames,
+                      const wxString& namePrefix,
+                      const wxString& nameSuffix)
+{
+    VObject *prop = addProp(m_vObj, VCNameProp);
+    if ( !!familyName )
+        addPropValue(prop, VCFamilyNameProp, familyName);
+    if ( !!givenName )
+        addPropValue(prop, VCGivenNameProp, givenName);
+    if ( !!additionalNames )
+        addPropValue(prop, VCAdditionalNamesProp, additionalNames);
+    if ( !!namePrefix )
+        addPropValue(prop, VCNamePrefixesProp, namePrefix);
+    if ( !!nameSuffix )
+        addPropValue(prop, VCNameSuffixesProp, nameSuffix);
+}
+
+void wxVCard::SetTitle(const wxString& title)
+{
+    AddProperty(VCTitleProp, title);
+}
+
+void wxVCard::SetBusinessRole(const wxString& role)
+{
+    AddProperty(VCBusinessRoleProp, role);
+}
+
+void wxVCard::SetOrganization(const wxString& name,
+                              const wxString& unit)
+{
+    VObject *prop = addProp(m_vObj, VCOrgProp);
+    if ( !!name )
+        addPropValue(prop, VCOrgNameProp, name);
+    if ( !!unit )
+        addPropValue(prop, VCOrgUnitProp, unit);
+}
+
+void wxVCard::SetComment(const wxString& comment)
+{
+    AddProperty(VCCommentProp, comment);
+}
+
+void wxVCard::SetURL(const wxString& url)
+{
+    AddProperty(VCURLProp, url);
+}
+
+void wxVCard::SetUID(const wxString& uid)
+{
+    AddProperty(VCUniqueStringProp, uid);
+}
+
+void wxVCard::SetVersion(const wxString& version)
+{
+    AddProperty(VCVersionProp, version);
+}
+
+// ----------------------------------------------------------------------------
 // outputing vObjects
 // ----------------------------------------------------------------------------
+
+// write out the object
+wxString wxVCardObject::Write() const
+{
+    char* p = writeMemVObject(NULL, 0, m_vObj);
+    wxString s = p;
+    free(p);
+
+    return s;
+}
+
+// Write() to a file
+bool wxVCardObject::Write(const wxString& filename) const
+{
+    writeVObjectToFile((char *)filename.mb_str(), m_vObj);
+
+    return TRUE; // writeVObjectToFile() is void @#$@#$@!!
+}
 
 // write out the internal representation
 void wxVCardObject::Dump(const wxString& filename)

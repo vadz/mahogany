@@ -6,7 +6,7 @@
 # Makefile2 which includes the usual standard rules.
 # This is needed to avoid warnings.
 
-SUBDIRS=generic common
+SUBDIRS=generic common vcard
 
 all:
 	set -e ; for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
