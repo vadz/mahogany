@@ -19,6 +19,8 @@
 
 #include "MObject.h"
 
+#include "FolderType.h"    // for UIdType
+
 /**
    MEvent ids for all kinds of events used in M. The name in the comment is the
    MEventData-derived class which is used with this event
@@ -149,7 +151,7 @@ public:
    */
    MEventNewMailData(MailFolder *folder,
                      unsigned long n,
-                     unsigned long *messageIDs);
+                     UIdType *messageIDs);
    ~MEventNewMailData();
 
    /**@name accessors */
@@ -157,13 +159,13 @@ public:
    /// get the number of new messages
    unsigned long GetNumber(void) const { return m_number; }
    /// get the index of the Nth new message (for calling GetMessage)
-   unsigned long GetNewMessageIndex(unsigned long n) const
+   UIdType GetNewMessageIndex(unsigned long n) const
       {
          return m_messageIDs[n];
       }
    //@}
 private:
-   unsigned long *m_messageIDs;
+   UIdType *m_messageIDs;
    unsigned long  m_number;
 };
 

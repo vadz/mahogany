@@ -314,11 +314,11 @@ MEventOptionsChangeData::~MEventOptionsChangeData()
 
 MEventNewMailData::MEventNewMailData(MailFolder *folder,
                                      unsigned long n,
-                                     unsigned long *messageIDs)
+                                     UIdType *messageIDs)
                  : MEventWithFolderData(MEventId_NewMail, folder)
 {
    m_number = n;
-   m_messageIDs = new unsigned long [n];
+   m_messageIDs = new UIdType [n];
    for(size_t i = 0; i < n; i++)
       m_messageIDs[i] = messageIDs[i];
 }

@@ -35,7 +35,7 @@ public:
    virtual const String &GetNewsgroups(void) const { return m_NewsGroups; }
    virtual time_t GetDate(void) const { return m_Date; }
    virtual String const & GetId(void) const { return m_Id; }
-   virtual unsigned long GetUId(void) const { return m_UId; }
+   virtual UIdType GetUId(void) const { return m_UId; }
    virtual String const &GetReferences(void) const { return m_References; }
    virtual int GetStatus(void) const { return m_Status; }
    virtual unsigned long GetSize(void) const { return m_Size; }
