@@ -383,15 +383,22 @@ MailFolderCC::HasInferiors(const String &imapSpec,
    MCclientLocker lock;
 
    SetLoginData(login, passwd);
-   gs_HasInferiorsFlag = -1;
-   gs_mmListRedirect = HasInferiorsMMList;
-   mail_list (NIL, NULL, (char *) imapSpec.c_str());
-   gs_mmListRedirect = NULL;
-   /* This does happen for for folders where the server does not know
-      if they have inferiors, i.e. if they don't exist yet.
-      I.e. -1 is an unknown/undefined status 
-      ASSERT(gs_HasInferiorsFlag != -1);
-   */
+   MAILSTREAM *mailStream = mail_open(NIL, (char *)imapSpec.c_str(),
+                                      OP_HALFOPEN);
+   ProcessEventQueue();
+   if(mailStream != NIL)
+   {
+     gs_HasInferiorsFlag = -1;
+     gs_mmListRedirect = HasInferiorsMMList;
+     mail_list (mailStream, NULL, (char *) imapSpec.c_str());
+     gs_mmListRedirect = NULL;
+     /* This does happen for for folders where the server does not know
+        if they have inferiors, i.e. if they don't exist yet.
+        I.e. -1 is an unknown/undefined status 
+        ASSERT(gs_HasInferiorsFlag != -1);
+     */
+     mail_close(mailStream);
+   }
    return gs_HasInferiorsFlag == 1;
 }
 

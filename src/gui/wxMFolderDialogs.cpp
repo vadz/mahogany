@@ -2232,7 +2232,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    switch ( folderType )
    {
       case MF_IMAP:
-#if 0 // VZ: commenting out as calling HasInferiors() crashes right now
+         // VZ: commenting out as calling HasInferiors() crashes right now
          // for IMAP we can auto detect MF_FLAGS_GROUP flag
          if ( folderType == MF_IMAP )
          {
@@ -2259,7 +2259,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
                }
             }
          }
-#endif // 0
+
 
       case MF_POP:
          WriteEntryIfChanged(Path, m_mailboxname->GetValue());
