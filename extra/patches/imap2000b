@@ -84,3 +84,13 @@
 >       /*printf("rfc822_size = %d\n", elt->rfc822_size);*/
 67a68
 > unsigned long pop3_cache_header (MAILSTREAM *stream,MESSAGECACHE *elt);
+24a25,31
+> 
+> /* sys/dir.h is deprecated under FreeBSD and shouldn't be used */
+> #ifdef __FreeBSD__
+> #include <dirent.h>
+> #define	direct		dirent
+> #define	DIRSIZ(dp)	_GENERIC_DIRSIZ(dp)
+> #else /* !FreeBSD */
+25a33
+> #endif /* FreeBSD/!FreeBSD */
