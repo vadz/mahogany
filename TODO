@@ -19,7 +19,7 @@ VZ:
   but insists on
   Key = Value
 
-
+- wxComboBox textctrl allows editing!
 - MTempFileName is broken: all files remain in /tmp!!!
 - .mailcap should override /etc/mailcap, not other way round
 - MimeManager::ReadXXX should have returncode and not print error
