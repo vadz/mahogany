@@ -3,5 +3,10 @@ $Id$
 List of tagged revisions in M CVS repository
 ============================================
 
-02.06.1998   wxXt       compiles/runs with wxXt under Linux,
-                        probably also under Solaris (not tested recently)
+02.06.1998   wxXt          compiles/runs with wxXt under Linux,
+                           probably also under Solaris (not tested recently)
+
+18.08.1998   RELEASE_0_01  release 0.01 for Unix as published
+
+
+
