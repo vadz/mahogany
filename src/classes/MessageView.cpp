@@ -252,17 +252,6 @@ public:
    virtual bool CanInlineImages() const { return false; }
    virtual bool CanProcess(const String& mimetype) const { return false; }
 
-   // implement MModule pure virtuals "manually" as we don't use the usual
-   // macros for this class
-   virtual const char *GetName(void) const { return NULL; }
-   virtual const char *GetInterface(void) const { return NULL; }
-   virtual const char *GetDescription(void) const { return NULL; }
-   virtual const char *GetVersion(void) const { return NULL; }
-   virtual void GetMVersion(int *version_major,
-                            int *version_minor,
-                            int *version_release) const { }
-   virtual int Entry(int /* MMOD_FUNC */, ... ) { return 0; }
-
 private:
    wxWindow *m_window;
 };
@@ -461,38 +450,41 @@ MessageView::CreateViewer(wxWindow *parent)
       if ( name.empty() )
          name = MP_MSGVIEW_VIEWER_D;
 
-      MModule *viewer = MModule::LoadModule(name);
-      if ( viewer )
-      {
-         m_viewer = (MessageViewer *)viewer;
-      }
-      else // failed to load the configured viewer
+      MModule *viewerFactory = MModule::LoadModule(name);
+      if ( !viewerFactory ) // failed to load the configured viewer
       {
          // try any other
          String nameFirst = (*listing)[0].GetName();
 
          if ( name != nameFirst )
          {
-            wxLogError(_("Failed to load the configured message viewer '%s'.\n"
-                         "\n"
-                         "Reverting to the default message viewer."),
-                       name.c_str());
+            wxLogWarning(_("Failed to load the configured message viewer '%s'.\n"
+                           "\n"
+                           "Reverting to the default message viewer."),
+                         name.c_str());
 
-            viewer = MModule::LoadModule(nameFirst);
+            viewerFactory = MModule::LoadModule(nameFirst);
 
-            if ( viewer )
+            if ( viewerFactory )
             {
-               // oops, our real viewer is not "name" at all
+               // remember this one as our real viewer or the code reacting to
+               // the options change would break down
                m_ProfileValues.msgViewer = nameFirst;
             }
          }
 
-         if ( !viewer )
+         if ( !viewerFactory )
          {
             wxLogError(_("Failed to load the default message viewer '%s'.\n"
                          "\n"
                          "Message preview will not work!"), nameFirst.c_str());
          }
+      }
+
+      if ( viewerFactory )
+      {
+         m_viewer = ((MessageViewerFactory *)viewerFactory)->Create();
+         viewerFactory->DecRef();
       }
 
       listing->DecRef();
@@ -512,7 +504,7 @@ MessageView::CreateViewer(wxWindow *parent)
    OnViewerChange(viewerOld, m_viewer);
    if ( viewerOld )
    {
-      viewerOld->DecRef();
+      delete viewerOld;
    }
 }
 
@@ -526,7 +518,7 @@ MessageView::~MessageView()
    SafeDecRef(m_mailMessage);
    SafeDecRef(m_asyncFolder);
 
-   m_viewer->DecRef();
+   delete m_viewer;
 }
 
 // ----------------------------------------------------------------------------

@@ -33,7 +33,7 @@ typedef wxTextAttr TextStyle;
 // MessageViewer: interface for GUI viewers
 // ----------------------------------------------------------------------------
 
-class MessageViewer : public MModule
+class MessageViewer
 {
 public:
    /** @name Creation, updating
@@ -214,28 +214,39 @@ protected:
 // Loading the viewers from the modules
 // ----------------------------------------------------------------------------
 
+class MessageViewerFactory : public MModule
+{
+public:
+   virtual MessageViewer *Create() = 0;
+};
+
 // this macro must be used inside MessageViewer-derived class declaration
 //
-// note that GetName() and GetDescription() declarations are inside
-// MMODULE_DEFINE macro
-#define DECLARE_MESSAGE_VIEWER()                                           \
-   MMODULE_DEFINE();                                                       \
-   DEFAULT_ENTRY_FUNC
+// not any more
+#define DECLARE_MESSAGE_VIEWER()
 
 // parameters of this macro are:
 //    cname    - the name of the class (derived from MessageViewer)
 //    desc     - the short description shown in the viewers dialog
 //    cpyright - the module author/copyright string
 #define IMPLEMENT_MESSAGE_VIEWER(cname, desc, cpyright)                    \
-   MMODULE_BEGIN_IMPLEMENT(cname, #cname,                                  \
+   class cname##Factory : public MessageViewerFactory                      \
+   {                                                                       \
+   public:                                                                 \
+      virtual MessageViewer *Create() { return new cname; }                \
+                                                                           \
+      MMODULE_DEFINE();                                                    \
+      DEFAULT_ENTRY_FUNC;                                                  \
+   };                                                                      \
+   MMODULE_BEGIN_IMPLEMENT(cname##Factory, #cname,                         \
                            MESSAGE_VIEWER_INTERFACE, desc, "1.00")         \
       MMODULE_PROP("author", cpyright)                                     \
-   MMODULE_END_IMPLEMENT(cname)                                            \
-   MModule *cname::Init(int version_major, int version_minor,              \
+   MMODULE_END_IMPLEMENT(cname##Factory)                                   \
+   MModule *cname##Factory::Init(int version_major, int version_minor,     \
                         int version_release, MInterface *minterface,       \
                         int *errorCode)                                    \
    {                                                                       \
-      return new cname();                                                  \
+      return new cname##Factory();                                         \
    }
 
 #endif // _MESSAGEVIEWER_H_
