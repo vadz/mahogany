@@ -14,14 +14,13 @@ $Id$
 9		wxLayout PS printing text overlaps as font sizes are
 		wrong. Install different AFM set?
 
-6		implement temporary/fake Profile mode
-		--> add Suspend()/Discard()/Commit() methods to normal 
-		    profile which work with a temporary subgroup
 
 3		wxDialUpManager ping method is broken and does not
 		work, need source code of ping command.
 
-7	KB	selecting/deselecting only message in folder
+9	KB	implement temporary/fake Profile mode
+		--> add Suspend()/Discard()/Commit() methods to normal 
+		    profile which work with a temporary subgroup
 
 9	KB	wxLayout:
 		- speed up by only running Layout() for recalculations 
@@ -44,6 +43,9 @@ $Id$
 
 	KB	properties/access shows wrong help
 	KB	properties/custom headers/more shows corrupted title
+
+7	KB	selecting/deselecting only message in folder
+
 9		exiting program does not call auto-expunge
 		functionality in main folder
 

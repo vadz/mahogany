@@ -605,6 +605,9 @@ wxMApp::OnInit()
       // restore the normal behaviour (see the comments above)
       SetExitOnFrameDelete(TRUE);
 
+      // reflect settings in menu and statusbar:
+      UpdateOnlineDisplay();
+      
       /// Load any modules requested.
       LoadModules();
 
@@ -961,27 +964,37 @@ wxMApp::GetStdIcon(int which) const
 void
 wxMApp::UpdateOnlineDisplay(void)
 {
-   if(! m_DialupSupport || ! m_topLevelFrame || ! m_topLevelFrame->GetStatusBar() )
-      return; // nothing to update
-
-   bool online = IsOnline();
+   // Can be called during  application startup, in this case do
+   // nothing: 
+   if(! m_topLevelFrame)
+      return; 
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
    wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
+   ASSERT(sbar);
+   ASSERT(mbar);
 
-   if(online)
+   if(! m_DialupSupport)
    {
-      mbar->Enable((int)WXMENU_FILE_NET_OFF, m_DialupSupport);
-//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
+      mbar->Enable((int)WXMENU_FILE_NET_ON, FALSE);
+      mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
    }
    else
    {
-      mbar->Enable((int)WXMENU_FILE_NET_ON, m_DialupSupport);
+      bool online = IsOnline();
+      if(online)
+      {
+         mbar->Enable((int)WXMENU_FILE_NET_OFF, m_DialupSupport);
+//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
+      }
+      else
+      {
+         mbar->Enable((int)WXMENU_FILE_NET_ON, m_DialupSupport);
 //    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
+      }
+      int field = GetStatusField(SF_ONLINE);
+      UpdateStatusBar(field+1, TRUE);
+      sbar->SetStatusText(online ? _("Online"):_("Offline"), field);
    }
-
-   int field = GetStatusField(SF_ONLINE);
-   UpdateStatusBar(field+1, TRUE);
-   sbar->SetStatusText(online ? _("Online"):_("Offline"), field);
 }
 
 void

@@ -590,8 +590,10 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    if ( FolderTypeHasUserName( (FolderType) GetFolderType(typeAndFlags))
         && !(GetFolderType(typeAndFlags) & MF_FLAGS_ANON) && ! pword)
    {
-      String prompt;
-      prompt.Printf(_("Please enter the password for folder '%s':"), name.c_str());
+      String prompt, fname;
+      fname = name;
+      if(! fname) fname = mboxpath;
+      prompt.Printf(_("Please enter the password for folder '%s':"), fname.c_str());
       if(! MInputBox(&pword,
                      _("Password needed"),
                      prompt, NULL,

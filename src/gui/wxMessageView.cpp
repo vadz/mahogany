@@ -1497,11 +1497,17 @@ wxMessageView::Print(void)
    pf.AddPaths(mApplication->GetLocalDir(), true);
    String afmpath = pf.FindDirFile("Cour.afm", &found);
    if(found)
-      wxSetAFMPath(afmpath);
+//      wxSetAFMPath(afmpath);
+   {
+      ((wxMApp *)mApplication)->GetPrintData()->SetFontMetricPath(afmpath);
+      wxThePrintSetupData->SetAFMPath(afmpath);
+   }
 #endif // Win/Unix
-
    wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
    wxPrinter printer(& pdd);
+#ifndef OS_WIN
+   wxThePrintSetupData->SetAFMPath(afmpath);
+#endif
    wxLayoutPrintout printout(GetLayoutList(), _("Mahogany: Printout"));
    if ( !printer.Print(this, &printout, TRUE) )
       wxMessageBox(_("There was a problem with printing the message:\n"
