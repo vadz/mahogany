@@ -1,7 +1,8 @@
 # Names.mk for wx/generic directory
 # $Id$
 
-SRC :=	$(patsubst .src/%,%,$(wildcard .src/modules/viewflt/*.cpp))
+SRC	:= $(patsubst .src/%,%,$(wildcard .src/modules/viewflt/*.cpp))
+MOD	:= $(SRC:.cpp=.so)
 
-MOBJS	+= $(SRC:.cpp=.o)
+MSOS	+= $(MOD)
 MSGSRC	+= $(SRC)
