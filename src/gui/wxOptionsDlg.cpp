@@ -2652,7 +2652,8 @@ bool wxOptionsPage::TransferDataToWindow()
                                        &readResult);
          strValue.Printf(_T("%ld"), lValue);
       }
-      else {
+      else
+      {
          // it's a string
          strValue = m_Profile->readEntry(m_aDefaults[n].name,
                                          m_aDefaults[n].szValue,
@@ -2673,7 +2674,8 @@ bool wxOptionsPage::TransferDataToWindow()
 
                strValue.Printf(_T("%ld"), lValue);
             }
-            else {
+            else
+            {
                wxASSERT( !m_aDefaults[n].IsNumeric() );
             }
 
@@ -2793,12 +2795,12 @@ bool wxOptionsPage::TransferDataToWindow()
                      : _("Inherited from parent");
 #endif // wxUSE_TOOLTIPS
          }
+#if wxUSE_TOOLTIPS
          else // this control has default value
          {
             ttip = _("Default value");
          }
 
-#if wxUSE_TOOLTIPS
          // don't overwrite an existing tooltip, if any
          if ( !control->GetToolTip() )
             control->SetToolTip(ttip);

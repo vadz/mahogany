@@ -17,6 +17,7 @@
 #  include "Mdefaults.h"
 
 #  include "wx/colour.h"
+#  include "wx/gdicmn.h"
 #endif // USE_PCH
 
 #include "ColourNames.h"

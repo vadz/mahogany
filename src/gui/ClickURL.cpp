@@ -28,6 +28,7 @@
    #include "MApplication.h"
 
    #include <wx/menu.h>
+   #include <wx/dataobj.h>
    #ifdef OS_WIN // cygwin and mingw
       #include <wx/msw/registry.h>
    #endif

@@ -45,6 +45,7 @@
 #  include <wx/menu.h>
 #  include <wx/filedlg.h>
 #  include <wx/stattext.h>
+#  include <wx/dataobj.h>
 #endif // USE_PCH
 
 #ifdef __CYGWIN__
