@@ -6,6 +6,7 @@
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+02.11.01 VZ: show "busy info" dialog during long uninterruptible operations
 28.10.01 VZ: added Portuguese translation by Jorge Resende
 27.10.01 VZ: added possibility to remember password for current session only
 22.10.01 VZ: added HTML printing

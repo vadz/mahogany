@@ -43,6 +43,12 @@
 #include "MDialogs.h"         // for MProgressInfo
 
 // ----------------------------------------------------------------------------
+// options we use
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_SHOWBUSY_DURING_SORT;
+
+// ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
 
@@ -119,7 +125,7 @@ public:
 
 protected:
    // just for derived classes, they must call Init() themselves
-   StatusIndicator() { }
+   StatusIndicator() { m_frame = NULL; }
 
    // ctor version which can be also called by derived classes
    void Init(wxFrame *frame, const char *fmt, va_list argptr);
@@ -138,7 +144,7 @@ protected:
 class BusyIndicator : public StatusIndicator
 {
 public:
-   BusyIndicator(wxFrame *frame, const char *fmt, ...);
+   BusyIndicator(MailFolder *mf, const char *fmt, ...);
    ~BusyIndicator();
 
 private:
@@ -318,15 +324,22 @@ StatusIndicator::~StatusIndicator()
 // BusyIndicator
 // ----------------------------------------------------------------------------
 
-BusyIndicator::BusyIndicator(wxFrame *frame, const char *fmt, ...)
+BusyIndicator::BusyIndicator(MailFolder *mf, const char *fmt, ...)
 {
-   va_list argptr;
-   va_start(argptr, fmt);
-   Init(frame, fmt, argptr);
-   va_end(argptr);
+   if ( READ_CONFIG(mf->GetProfile(), MP_SHOWBUSY_DURING_SORT) )
+   {
+      va_list argptr;
+      va_start(argptr, fmt);
+      Init(mf->GetInteractiveFrame(), fmt, argptr);
+      va_end(argptr);
 
-   m_progInfo = new MProgressInfo(m_frame, m_msgInitial);
-   wxYield();
+      m_progInfo = new MProgressInfo(m_frame, m_msgInitial);
+      wxYield();
+   }
+   else // busy indicator disabled
+   {
+      m_progInfo = NULL;
+   }
 }
 
 BusyIndicator::~BusyIndicator()
@@ -1426,8 +1439,7 @@ void HeaderInfoListImpl::Sort()
             m_sortParams.sortOrder &= ~1;
          }
 
-         BusyIndicator status(m_mf->GetInteractiveFrame(),
-                              _("Sorting %lu messages..."), m_count);
+         BusyIndicator status(m_mf, _("Sorting %lu messages..."), m_count);
 
          if ( m_mf->SortMessages(m_tableSort, m_sortParams) )
          {
@@ -1577,8 +1589,7 @@ void HeaderInfoListImpl::Thread()
    // the caller must check that we need to be threaded
    ASSERT_MSG( (!m_thrData || !m_thrData->m_root) && IsThreading(), "shouldn't be called" );
 
-   BusyIndicator status(m_mf->GetInteractiveFrame(),
-                        _("Threading %lu messages..."), m_count);
+   BusyIndicator status(m_mf, _("Threading %lu messages..."), m_count);
 
    delete m_thrData;
    m_thrData = new ThreadData(m_count);

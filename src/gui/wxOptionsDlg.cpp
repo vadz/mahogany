@@ -221,6 +221,7 @@ enum ConfigFields
    ConfigField_MainFolder,
    ConfigField_FolderProgressHelpText,
    ConfigField_FolderProgressThreshold,
+   ConfigField_ShowBusyInfo,
    ConfigField_FolderMaxHelpText,
    ConfigField_FolderMaxHeadersNumHard,
    ConfigField_FolderMaxHeadersNum,
@@ -305,6 +306,11 @@ enum ConfigFields
    ConfigField_FolderViewShowFirst,
    ConfigField_FolderViewShowFirstUnread,
    ConfigField_FolderViewPreviewOnSelect,
+
+   ConfigField_FolderViewAutoNextHelp,
+   ConfigField_FolderViewAutoNextMsg,
+   ConfigField_FolderViewAutoNextFolder,
+
    ConfigField_FolderViewHelpText2,
    ConfigField_FolderViewOnlyNames,
    ConfigField_FolderViewReplaceFrom,
@@ -317,10 +323,6 @@ enum ConfigFields
    ConfigField_FolderViewUnreadColour,
    ConfigField_FolderViewDeletedColour,
    ConfigField_FolderViewFlaggedColour,
-
-   ConfigField_FolderViewAutoNextHelp,
-   ConfigField_FolderViewAutoNextMsg,
-   ConfigField_FolderViewAutoNextFolder,
 
    ConfigField_FolderViewSortThreadHelp,
    ConfigField_FolderViewThread,
@@ -902,6 +904,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "the specified number of messages. Set it to 0 to never\n"
                   "show the progress dialog at all."), Field_Message, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
+   { gettext_noop("Show bus&y dialog while sorting/threading"), Field_Bool, -1},
    { gettext_noop("The following settings allow to limit the amount of data\n"
                   "retrieved from remote server: if the message size or\n"
                   "number is greater than the value specified here, you\n"
@@ -1012,7 +1015,15 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Select first message (or the last one)"), Field_Bool, -1 },
    { gettext_noop("Select first &unread"), Field_Bool, -1 },
    { gettext_noop("Preview message when &selected"), Field_Bool,    -1 },
-   { gettext_noop("\nThe following settings control appearance of the messages list:"), Field_Message,  -1 },
+
+   { gettext_noop("What happens message when you try to scroll down beyond\n"
+                  "the end of the current message in the current folder?\n"
+                  "Mahogany may automatically select..."),
+                                                   Field_Message, -1},
+   { gettext_noop("    next unread &message"),     Field_Bool,    -1},
+   { gettext_noop("    next unread &folder"),      Field_Bool,
+                                                   ConfigField_FolderViewAutoNextMsg},
+   { gettext_noop("\n\nThe following settings control appearance of the messages list:"), Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
    { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
    { gettext_noop("Font famil&y"
@@ -1027,13 +1038,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for &deleted messages" ),Field_Color,   -1},
    { gettext_noop("Colour for &flagged messages" ),Field_Color,   -1},
 
-   { gettext_noop("Mahogany may automatically select the next unread\n"
-                  "message when you try to scroll down beyond the end of\n"
-                  "the current message. Automatically select:"),
-                                                   Field_Message, -1},
-   { gettext_noop("    next unread &message"),     Field_Bool,    -1},
-   { gettext_noop("    next unread &folder"),      Field_Bool,
-                                                   ConfigField_FolderViewAutoNextMsg},
    { gettext_noop("You may configure how (and if) Mahogany sorts and threads\n"
                   "messages in the folder using the buttons below. To access\n"
                   "these configuration dialogs faster, just right click on\n"
@@ -1334,6 +1338,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MAINFOLDER),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
+   CONFIG_ENTRY(MP_SHOWBUSY_DURING_SORT),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM_HARD),
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
@@ -1406,10 +1411,16 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USE_NEWMAILCOMMAND),
    CONFIG_ENTRY(MP_NEWMAILCOMMAND),
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
+
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTUNREADMESSAGE),
    CONFIG_ENTRY(MP_PREVIEW_ON_SELECT),
+
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_MSG),
+   CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_FOLDER),
+
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_NAMES_ONLY),
    CONFIG_ENTRY(MP_FVIEW_FROM_REPLACE),
@@ -1422,10 +1433,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_UNREADCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_DELETEDCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_FLAGGEDCOLOUR),
-
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_MSG),
-   CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_FOLDER),
 
    CONFIG_NONE(), // sorting/threading help
    CONFIG_ENTRY(MP_MSGS_USE_THREADING),

@@ -164,6 +164,7 @@ extern const MOption MP_SHOWBCC;
 extern const MOption MP_FOLDER_LOGIN;
 extern const MOption MP_FOLDER_PASSWORD;
 extern const MOption MP_LOGLEVEL;
+extern const MOption MP_SHOWBUSY_DURING_SORT;
 extern const MOption MP_FOLDERPROGRESS_THRESHOLD;
 extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_SIZE;
 extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_TIME;
@@ -669,6 +670,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FOLDER_PASSWORD_NAME      "Password"
 /// log level
 #define   MP_LOGLEVEL_NAME      "LogLevel"
+/// show busy info while sorting/threading?
+#define   MP_SHOWBUSY_DURING_SORT_NAME "BusyDuringSort"
 /// threshold for displaying mailfolder progress dialog
 #define   MP_FOLDERPROGRESS_THRESHOLD_NAME   "FolderProgressThreshold"
 /// size threshold for displaying message retrieval progress dialog
@@ -1407,6 +1410,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FOLDER_PASSWORD_DEFVAL      M_EMPTYSTRING
 /// log level
 #define   MP_LOGLEVEL_DEFVAL         0l
+/// show busy info while sorting/threading?
+#define   MP_SHOWBUSY_DURING_SORT_DEFVAL 1l
 /// threshold for displaying mailfolder progress dialog
 #define   MP_FOLDERPROGRESS_THRESHOLD_DEFVAL 20L
 /// threshold for displaying message retrieval progress dialog (kbytes)
