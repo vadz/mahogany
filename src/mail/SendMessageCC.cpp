@@ -549,6 +549,8 @@ SendMessageCC::SendOrQueue(void)
       else
       {
          WriteToFolder(outbox, MF_PROFILE_OR_FILE);
+         // increment counter in statusbar immediately
+         mApplicaton->UpdateOutboxStatus();
          success = TRUE;
       }
 
