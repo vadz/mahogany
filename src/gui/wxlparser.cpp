@@ -189,41 +189,7 @@ void wxLayoutImportText(wxLayoutList *list,
    {
       // Convert from UTF-8 to environment's default encoding
       str = wxString(str.wc_str(wxConvUTF8), wxConvLocal);
-
-//the following code is taken from strconv.cpp:
-#ifdef __UNIX__
-#if defined(HAVE_LANGINFO_H) && defined(CODESET)
-        // GNU libc provides current character set this way
-        char *alang = nl_langinfo(CODESET);
-        if (alang)
-        {
-            encoding = wxTheFontMapper->CharsetToEncoding( wxConvLibc.cMB2WX(alang) );
-        }
-        else
-#endif
-        {
-            // if we can't get at the character set directly,
-            // try to see if it's in the environment variables
-            // (in most cases this won't work, but I was out of ideas)
-            wxChar *lang = wxGetenv(wxT("LC_ALL"));
-            wxChar *dot = lang ? wxStrchr(lang, wxT('.')) : (wxChar *)NULL;
-            if (!dot)
-            {
-                lang = wxGetenv(wxT("LC_CTYPE"));
-                dot = lang ? wxStrchr(lang, wxT('.')) : (wxChar *)NULL;
-            }
-            if (!dot)
-            {
-                lang = wxGetenv(wxT("LANG"));
-                dot = lang ? wxStrchr(lang, wxT('.')) : (wxChar *)NULL;
-            }
-            if (dot)
-            {
-                encoding = wxTheFontMapper->CharsetToEncoding( dot+1 );
-            }
-        }
-        if ( !encoding ) encoding = wxFONTENCODING_ISO8859_1; //FIXME
-#endif // __UNIX__
+      encoding = wxLocale::GetSystemEncoding();
    }
 #endif // 2.3.0
    SetEncoding(list, encoding, &useConverter, &conv);
