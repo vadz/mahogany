@@ -1,5 +1,6 @@
 (next release) on (date of next release)
 
+25.07.99 VZ: ADB export added (currently CSV/text only)
 25.07.99 KB: date format configurable, sorting configurable and complete,
              help and modal dialogs work, mailfolder update improvements,
              abort button for reading folder listings, retrieving listings

@@ -48,7 +48,6 @@ $Id$
 		"headers for folder "xpm" in the dialog when called
 		from toplevel window.
 
->>>>>>> 1.306
 8	VZ?     After a dialog was opened (e.g. wxModulesDialog), the
 		app won't termiante but keeps running without windows.
 

@@ -146,7 +146,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    m_llist = new wxLayoutList();
    m_BGbitmap = NULL;
    m_ScrollToCursor = false;
-#ifdef __WXMSW__
+#ifndef __WXMSW__
    m_FocusFollowMode = false;
 #endif
    SetWrapMargin(0);

@@ -329,12 +329,15 @@ wxMApp::DoExit()
          frame->Close(TRUE);
       }
    }
+
+#if wxUSE_HELP && wxUSE_HTML
    /// Close the help frame if it is open:
    wxFrame *hf = NULL;
    if(m_HelpController
       && m_HelpController->IsKindOf(CLASSINFO(wxHelpControllerHtml)))
       hf = ((wxHelpControllerHtml *)m_HelpController)->GetFrameParameters();
    if(hf) hf->Close(TRUE);
+#endif // wxHTML-based help
 }
 
 // app initilization
