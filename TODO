@@ -90,6 +90,8 @@ VZ:
 
 ******* Priorities for KB: ******************************
 
+- add closing delay for sentmail folder to avoid reopening it each time
+
 - add configure option for python path
 - before doing ping, change to logging for window only and restore(!)
   old settings(!) afterwards to suppress error messages for closed POP
