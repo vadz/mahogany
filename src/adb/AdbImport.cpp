@@ -181,6 +181,8 @@ AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
                                    FALSE, "ConfirmAdbImporter") )
          {
             // cancelled by user
+            mApplication->SetLastError(M_ERROR_CANCEL);
+
             return FALSE;
          }
       }
@@ -225,6 +227,9 @@ bool AdbImport(const String& filename,
                const String& username,
                AdbImporter *importer)
 {
+   // reset the last error first as we check it below
+   mApplication->SetLastError(M_ERROR_OK);
+
    importer = FindImporter(filename, importer);
 
    AdbBook *adbBook = NULL;
@@ -296,22 +301,27 @@ exit:
                    adbname.c_str(),
                    importer->GetFormatDesc());
    }
-   else
+   else // an error occured
    {
-      wxString errImport = _("Import of address book from file '%s' failed");
-      if ( !errMsg )
+      // only give the message if the operation wasn't cancelled by the user,
+      // otherwise it's superfluous
+      if ( mApplication->GetLastError() != M_ERROR_CANCEL )
       {
-         // nothing else...
-         errImport += '.';
+         wxString errImport = _("Import of address book from file '%s' failed");
+         if ( !errMsg )
+         {
+            // nothing else...
+            errImport += '.';
 
-         wxLogError(errImport, adbname.c_str());
-      }
-      else
-      {
-         // add the detailed error message
-         errImport += ": %s";
+            wxLogError(errImport, adbname.c_str());
+         }
+         else
+         {
+            // add the detailed error message
+            errImport += ": %s";
 
-         wxLogError(errImport, adbname.c_str(), errMsg.c_str());
+            wxLogError(errImport, adbname.c_str(), errMsg.c_str());
+         }
       }
    }
 

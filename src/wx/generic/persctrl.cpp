@@ -931,7 +931,7 @@ void wxPListBox::RestoreSelection()
     if ( m_persist->ChangePath() ) {
         long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
 
-        if ( sel < Number() ) {
+        if ( (sel != -1) && (sel < Number()) ) {
             SetSelection(sel);
 
             // emulate the event which would have resulted if the user selected

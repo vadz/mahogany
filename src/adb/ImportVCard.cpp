@@ -107,6 +107,10 @@ bool AdbVCardImporter::CanImport(const String& filename)
       m_filename = filename;
       DeleteCards(); // if we had any old ones, harmles otherwise
 
+      // suppress possible error messages from CreateFromFile(), we only want
+      // to check if it succeeded
+      wxLogNull nolog;
+
       m_cards = wxVCard::CreateFromFile(filename);
    }
    // else: we already tried loading cards from this file
