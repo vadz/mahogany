@@ -1137,7 +1137,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
    { gettext_noop("Foreground c&olour"),           Field_Color | Field_Global,   -1},
    { gettext_noop("Back&ground colour"),           Field_Color | Field_Global,   -1},
-   { gettext_noop("Use these settings for &headers too:"),
+   { gettext_noop("Use these settings for &headers too"),
                                                    Field_Bool | Field_Global,   -1},
 
    { gettext_noop("\n"
