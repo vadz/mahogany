@@ -37,7 +37,7 @@
 // ----------------------------------------------------------------------------
 
 // define the function to return the name of the Python library
-inline String GetDllName(const String& version)
+inline String GetPythonDllBaseName(const String& version)
 {
    String
 #if defined(OS_WIN)
@@ -46,7 +46,7 @@ inline String GetDllName(const String& version)
       basename = _T("libpython");
 #endif // Win/!Win
 
-   return basename + version + wxDynamicLibrary::GetDllExt();
+   return basename + version;
 }
 
 // ----------------------------------------------------------------------------
@@ -211,11 +211,17 @@ extern bool InitPythonDll()
    // don't give errors about missing DLL here
    {
       wxLogNull noLog;
-      for ( size_t nVer = 0;
-            nVer < WXSIZEOF(versions) && !dllPython.IsLoaded();
-            nVer++ )
+      for ( size_t nVer = 0; nVer < WXSIZEOF(versions); nVer++ )
       {
-         dllPython.Load(GetDllName(versions[nVer]));
+         String name = GetPythonDllBaseName(versions[nVer]);
+         if ( dllPython.Load(name + wxDynamicLibrary::GetDllExt()) )
+            break;
+
+#ifdef OS_WIN
+         // also try debug version of the DLL
+         if ( dllPython.Load(name + _T("_d") + wxDynamicLibrary::GetDllExt()) )
+            break;
+#endif // OS_WIN
       }
    }
 
