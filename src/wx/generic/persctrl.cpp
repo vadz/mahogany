@@ -80,6 +80,14 @@ BEGIN_EVENT_TABLE(wxPNotebook, wxNotebook)
     EVT_SIZE(wxPNotebook::OnSize)
 END_EVENT_TABLE()
 
+#if wxUSE_LISTBOOK
+
+BEGIN_EVENT_TABLE(wxPListbook, wxListbook)
+    EVT_SIZE(wxPListbook::OnSize)
+END_EVENT_TABLE()
+
+#endif // wxUSE_LISTBOOK
+
 BEGIN_EVENT_TABLE(wxPListCtrl, wxListCtrl)
     EVT_SIZE(wxPListCtrl::OnSize)
 END_EVENT_TABLE()
@@ -310,7 +318,7 @@ void wxPNotebook::RestorePage()
 {
     if ( m_persist->ChangePath() ) {
         int nPage = (int)m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
-        if ( (nPage >= 0) && (nPage < GetPageCount()) ) {
+        if ( (nPage >= 0) && (nPage < (int)GetPageCount()) ) {
             SetSelection(nPage);
         }
         else {
@@ -357,6 +365,102 @@ void wxPNotebook::SetConfigPath(const wxString& path)
 {
     m_persist->SetPath(path, ms_path);
 }
+
+// ----------------------------------------------------------------------------
+// wxPListbook
+// ----------------------------------------------------------------------------
+
+#if wxUSE_LISTBOOK
+
+// the key where we store our last selected page
+const char *wxPListbook::ms_path = "ListbookPages";
+
+wxPListbook::wxPListbook()
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper;
+}
+
+wxPListbook::wxPListbook(const wxString& configPath,
+                         wxWindow *parent,
+                         wxWindowID id,
+                         const wxPoint& pos,
+                         const wxSize& size,
+                         long style,
+                         wxConfigBase *config)
+          : wxListbook(parent, id, pos, size, style)
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper(configPath, ms_path, config);
+}
+
+bool wxPListbook::Create(const wxString& configPath,
+                         wxWindow *parent,
+                         wxWindowID id,
+                         const wxPoint& pos,
+                         const wxSize& size,
+                         long style,
+                         wxConfigBase *config)
+{
+   m_persist->SetConfig(config);
+   m_persist->SetPath(configPath, ms_path);
+
+   return wxListbook::Create(parent, id, pos, size, style);
+}
+
+void wxPListbook::RestorePage()
+{
+    if ( m_persist->ChangePath() ) {
+        int nPage = (int)m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
+        if ( (nPage >= 0) && (nPage < (int)GetPageCount()) ) {
+            SetSelection(nPage);
+        }
+        else {
+            // invalid page index, (almost) silently ignore
+            wxLogDebug(_T("Couldn't restore wxPListbook page %d."), nPage);
+        }
+
+        m_persist->RestorePath();
+    }
+}
+
+wxPListbook::~wxPListbook()
+{
+    if ( m_persist->ChangePath() ) {
+        int nSelection = GetSelection();
+        m_persist->GetConfig()->Write(m_persist->GetKey(), (long)nSelection);
+    }
+    //else: couldn't change path, probably because there is no config object.
+
+    delete m_persist;
+}
+
+// first time our OnSize() is called we restore the page: there is no other
+// event sent specifically after window creation and we can't do in the ctor
+// (too early) - this should change in wxWin 2.1...
+void wxPListbook::OnSize(wxSizeEvent& event)
+{
+    if ( m_bFirstTime ) {
+        RestorePage();
+
+        m_bFirstTime = FALSE;
+    }
+
+    // important things are done in the base class version!
+    event.Skip();
+}
+
+void wxPListbook::SetConfigObject(wxConfigBase *config)
+{
+    m_persist->SetConfig(config);
+}
+
+void wxPListbook::SetConfigPath(const wxString& path)
+{
+    m_persist->SetPath(path, ms_path);
+}
+
+#endif // wxUSE_LISTBOOK
 
 // ----------------------------------------------------------------------------
 // wxPTextEntry

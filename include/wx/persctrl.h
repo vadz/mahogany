@@ -32,6 +32,9 @@ class wxPHelper;
 #include <wx/listbox.h>
 #include <wx/radiobox.h>
 #include <wx/treectrl.h>
+#if wxUSE_LISTBOOK
+    #include <wx/listbook.h>
+#endif
 
 // we can be compiled inside wxWin or not
 #ifdef WXMAKINGDLL
@@ -134,6 +137,61 @@ private:
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxPNotebook)
 };
+
+// ----------------------------------------------------------------------------
+// exactly the same as wxPNotebook but for wxListbook
+// ----------------------------------------------------------------------------
+
+#if wxUSE_LISTBOOK
+
+class WXDLLMAYEXP wxPListbook : public wxListbook
+{
+public:
+    // ctors and dtor
+    wxPListbook();
+
+    wxPListbook(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long style = 0,
+                wxConfigBase *config = NULL);
+
+    bool Create(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long style = 0,
+                wxConfigBase *config = NULL);
+
+    ~wxPListbook();
+
+    // accessors
+        // set the config object to use (must be !NULL)
+    void SetConfigObject(wxConfigBase *config);
+        // set the path to use (either absolute or relative)
+    void SetConfigPath(const wxString& path);
+
+    // callbacks
+        // when we're resized the first time we restore our page
+    void OnSize(wxSizeEvent& event);
+
+protected:
+    static const char *ms_path;
+
+    void RestorePage();
+
+    bool       m_bFirstTime;  // FIXME hack used in OnSize()
+    wxPHelper *m_persist;
+
+private:
+    DECLARE_EVENT_TABLE()
+    DECLARE_NO_COPY_CLASS(wxPListbook)
+};
+
+#endif // wxUSE_LISTBOOK
 
 // ----------------------------------------------------------------------------
 // persistent text entry zone: it remembers a given number of strings entered
