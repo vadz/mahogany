@@ -22,24 +22,15 @@ $Id$
 - New Mail indicator
 - Check for new mail button
 
+- look into wxListCtrl reset after dialog box popup
+
 - why is $HOME/.signature sometimes not found?
-- folders should remember whether they were opened on program shutdown and
-  reopen automatically in this case (/Folders/<FolderName>/AutoOpen = TRUE)
-  KB: WHY? We have the "list of open folders". Better: have a "Reopen
-      Folder" menu to toggle this behavious, i.e. add/remove it from that
-      list.
 
 - rearrange some preferences pages, distinguish between compose options
   and compose window layout (BCC label etc)
+
 - Add the real folder create panel to the folder create notebook
 
-- Python
-  + fix Python problems -- what's wrong? No idea why Setup.py doesn't work.
-  + add remaining (important) interface definitions
-  + user/global Minit files, security issues
-  + add OnNewMail callback by counting messages in mailbox
-    + add sample callback showing new messages
-  + merge in wxPython
 
 - DND with gmc (dead easy, see dnd example :-) )
 
@@ -61,12 +52,6 @@ KB: Vadim, could you check the following ADB-wxOptionsDlg please?
     - cut-&-paste
     - drag-&-drop
 
-- wxOptionsDlg: two conversions from (long) to (int) .... is that ok?
-  + should have "restore defaults", would be nice to be able to do it for
-    one setting only (and not for all of them which is trivial)
-  KB: I will add the following through python asap:
-  + Preferences editor should mail oneself for test (MAppBase::VerifySettings)
-
 - UI things
   + we should somehow merge the toolbars into the main frame toolbar if it
     shows the folder view, for example
@@ -76,6 +61,14 @@ KB: Vadim, could you check the following ADB-wxOptionsDlg please?
 - Expand in ComposeView is broken: should insert "Formatted_Name <EMail>" and
   must not treat the whole To: as a single name but properly parse it. How can
   we expand CC/BCC fields?
+
+- Python
+  + fix Python problems -- what's wrong? No idea why Setup.py doesn't work.
+  + add remaining (important) interface definitions
+  + user/global Minit files, security issues
+  + add OnNewMail callback by counting messages in mailbox
+    + add sample callback showing new messages
+  + merge in wxPython
 
 
 *** to implement in near future ***
