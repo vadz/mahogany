@@ -134,9 +134,10 @@ Ticket MailThread::ms_Ticket = ILLEGAL_TICKET;
 void *
 MailThread::Entry()
 {
-   LockFolder();
+   //FIXME-MT: IS THIS TRUE? MailFolderCC does sufficient locking
+   //LockFolder();
    WorkFunction();
-   UnLockFolder();
+   //UnLockFolder();
    return NULL; // no return value
 }
 
@@ -186,7 +187,11 @@ public:
            UserData ud)
       : MailThread(mf, ud) {}
    virtual void WorkFunction(void)
-      { m_MailFolder->Ping(); }
+      {  // Ping() does its own locking
+         //m_MailFolder->UnLock();
+         m_MailFolder->Ping();
+         //m_MailFolder->Lock();
+      }
 };
 
 class MT_SetSequenceFlag : public MailThread
@@ -880,19 +885,17 @@ public:
    inline ProfileBase *GetProfile(void) const
       { AScheck(); return m_MailFolder->GetProfile(); }
 
-   /** Toggle sending of new mail events.
-       @param send if true, send them
-       @param update if true, update internal message count
-   */
-   virtual void EnableNewMailEvents(bool send = true,
-                                    bool update = true)
-      { AScheck(); m_MailFolder->EnableNewMailEvents(send, update); }
 
-   /** Query whether folder is sending new mail events.
-       @return if true, folder sends them
+
+
+   /** Toggle update behaviour flags.
+       @param updateFlags the flags to set
    */
-   virtual bool SendsNewMailEvents(void) const
-      { AScheck(); return m_MailFolder->SendsNewMailEvents(); }
+   virtual void SetUpdateFlags(int updateFlags)
+      { AScheck(); m_MailFolder->SetUpdateFlags(updateFlags); }
+   /// Get the current update flags
+   virtual int  GetUpdateFlags(void) const
+      { AScheck(); return m_MailFolder->GetUpdateFlags(); }
 
    /**@name Functions to get an overview of messages in the folder. */
    //@{

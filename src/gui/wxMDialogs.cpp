@@ -812,9 +812,9 @@ BEGIN_EVENT_TABLE(MyHtmlWindow, wxHtmlWindow)
   EVT_LEFT_DOWN(MyHtmlWindow::OnClick)
   EVT_MIDDLE_DOWN(MyHtmlWindow::OnClick)
   EVT_RIGHT_DOWN(MyHtmlWindow::OnClick)
-//  EVT_CHAR(MyHtmlWindow::OnChar)
+  EVT_CHAR(MyHtmlWindow::OnChar)
 END_EVENT_TABLE()
-
+   
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxWindow(parent, -1, wxDefaultPosition, parent->GetClientSize())
 {
@@ -825,7 +825,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                                                GetSize());
    wxHtmlWindow *top = new MyHtmlWindow(this, sp);
    wxHtmlWindow *bottom = new MyHtmlWindow(this,sp);
-   sp->SplitHorizontally(top,bottom,200);
+   sp->SplitHorizontally(top,bottom,240);
 
    wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Mahogany),
                               wxBITMAP_TYPE_PNG); 
@@ -836,9 +836,6 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    
    top->SetPage("<body text=#000000 bgcolor=#ffffff>"
                 "<center><img src=\"memory:splash.png\"><br>"
-#ifdef USE_PYTHON
-                "<img src=\"memory:pythonpowered.png\">"
-#endif
                 "</center>");
 
    bottom->SetPage("<body text=#000000 bgcolor=#ffffff>"
@@ -890,7 +887,8 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #endif
                    "<p>"
                    "The Mahogany Team would like to acknowledge the support of "
-                   "Heriot-Watt University, GDev.net, Simon Shapiro, VA Linux and SuSE GmbH."
+                   "Anthemion Software, Heriot-Watt University, Sourceforge.net, SourceGear.com, "
+                   "GDev.net, Simon Shapiro, VA Linux and SuSE GmbH."
       );
    
 
@@ -915,9 +913,9 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
                       wxDefaultPosition,
                       // this is ugly, but having scrollbars is even uglier
 #ifdef __WXMSW__
-                      wxSize(400, 350),
+                      wxSize(400, 400),
 #else  // !MSW
-                      wxSize(400, 370),
+                      wxSize(400, 400),
 #endif // MSW/!MSW
                       /* no border styles at all */ wxSTAY_ON_TOP )
 {
@@ -948,8 +946,9 @@ extern void CloseSplash()
 void
 MDialog_AboutDialog( const MWindow * /* parent */, bool bCloseOnTimeout)
 {
-   (void)new wxAboutFrame(bCloseOnTimeout);
-   wxSafeYield(); // to make sure it gets displayed at startup
+   if(g_pSplashScreen == NULL)
+      (void)new wxAboutFrame(bCloseOnTimeout);
+   wxYield();
 }
 
 

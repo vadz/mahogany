@@ -1377,6 +1377,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
       }
    }
    result->DecRef();
+   m_ASMailFolder->Ping(); // make sure our listing is updated if needed
 }
 
 

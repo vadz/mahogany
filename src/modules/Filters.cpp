@@ -2150,7 +2150,6 @@ int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid) const
    m_Parser->SetMessage(mf, uid);
    Value rc = m_Program->Evaluate();
    m_Parser->SetMessage(NULL);
-   mf->UnLock();
    mf->DecRef();
    return (int) rc.GetNumber();
 }

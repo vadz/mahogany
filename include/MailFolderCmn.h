@@ -150,22 +150,15 @@ public:
        @return Pointer to the profile.
    */
    virtual inline ProfileBase *GetProfile(void) { return m_Profile; }
-   /** Toggle sending of new mail events.
-       @param send if true, send them
-       @param update if true, update internal message count
-   */
-   virtual void EnableNewMailEvents(bool send = true, bool update = true)
-      {
-         m_GenerateNewMailEvents = send;
-         m_UpdateMsgCount = update;
-      }
 
-   /** Query whether foldre is sending new mail events.
-       @return if true, folder sends them
+   /** Toggle update behaviour flags.
+       @param updateFlags the flags to set
    */
-   virtual bool SendsNewMailEvents(void) const
-      { return m_GenerateNewMailEvents; }
-
+   virtual void SetUpdateFlags(int updateFlags)
+      { m_UpdateFlags = updateFlags; }
+   /// Get the current update flags
+   virtual int  GetUpdateFlags(void) const
+      { return m_UpdateFlags; }
    //@}
    /** Apply any filter rules to the folder. Only does anything if a
        filter module is loaded and a filter configured.
@@ -181,8 +174,6 @@ protected:
    ~MailFolderCmn();
    /**@name All used to build listings */
    //@{
-   /** This function is called to update the folder listing. */
-   void UpdateListing(void);
 
    /** This function takes a header listing and sorts it or applies
        filters to it. Will eventually replace the UpdateListing
@@ -208,11 +199,6 @@ protected:
    */
    void UpdateMessageStatus(UIdType uid);
    
-   /** This function must be implemented by the driver and return a
-       newly built listing of all messages in the folder.
-   */
-   virtual HeaderInfoList *BuildListing(void) = 0;
-
    /// To display progress while reading message headers:
    class MProgressDialog *m_ProgressDialog;
 
@@ -222,12 +208,8 @@ protected:
    UIdType m_OldMessageCount;
    /// The last seen new UID, to check for new mails:
    UIdType  m_LastNewMsgUId;
-   /** Do we want to generate new mail events?
-       Used to supporess new mail events when first opening the folder
-       and when copying to it. */
-   bool m_GenerateNewMailEvents;
-   /** Do we want to update the message count? */
-   bool m_UpdateMsgCount;
+   /// The current update flags
+   int     m_UpdateFlags;
    //@}
    /**@name Common variables might or might not be used */
    //@{

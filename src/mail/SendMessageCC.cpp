@@ -735,11 +735,11 @@ SendMessageCC::WriteToFolder(String const &name, MailFolder::Type type)
    CHECK_RET(mf,String(_("Cannot open folder to save to:")+name));
 
    // we don't want this to create new mail events
-   bool events = mf->SendsNewMailEvents();
-   mf->EnableNewMailEvents(false, true);
+   int updateFlags = mf->GetUpdateFlags();
+   mf->SetUpdateFlags( MailFolder::UF_UpdateCount);
    mf->AppendMessage(str);
    mf->Ping();
-   mf->EnableNewMailEvents(events, true);
+   mf->SetUpdateFlags(updateFlags);
    mf->DecRef();
 }
 

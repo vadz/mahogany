@@ -64,9 +64,6 @@ extern "C"
 
 #include <ctype.h>   // isspace()
 
-// activate new folder update code
-#define NEW_UPDATE
-
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -1106,16 +1103,13 @@ MailFolderCC::Ping(void)
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
       return;
    }
+   UIdType count = CountMessages();
+   DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.",
+               GetName().c_str()));
+
    if(Lock())
    {
-      UIdType count = CountMessages();
-      DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.",
-                  GetName().c_str()));
-
       int ccl = CC_SetLogLevel(M_LOG_WINONLY);
-
-      ProcessEventQueue();
-
       // This is terribly inefficient to do, but needed for some sick
       // POP3 servers.
       if(m_FolderFlags & MF_FLAGS_REOPENONPING)
@@ -1128,13 +1122,19 @@ MailFolderCC::Ping(void)
       if(PingReopen())
       {
          mail_check(m_MailStream); // update flags, etc, .newsrc
+         UnLock();
          ProcessEventQueue();
+         Lock();
       }
       CC_SetLogLevel(ccl);
       if(CountMessages() != count)
          RequestUpdate();
-      ProcessEventQueue();
       UnLock();
+      ProcessEventQueue();
+   }
+   else
+   {
+      ASSERT_MSG(0,"Ping() called on locked folder");
    }
 }
 
@@ -1169,6 +1169,7 @@ MailFolderCC::Lock(void) const
    ((MailFolderCC *)this)->m_Mutex->Lock();
    return true;
 #else
+   ASSERT_MSG((!m_Mutex), "Attempt to lock locked folder.");
    if(m_Mutex == false)
    {
       ((MailFolderCC *)this)->m_Mutex = true;
@@ -1195,6 +1196,7 @@ MailFolderCC::UnLock(void) const
 #ifdef USE_THREADS
    ((MailFolderCC *)this)->m_Mutex->Unlock();
 #else
+   ASSERT_MSG(m_Mutex, "Attempt to unlock unlocked folder.");
    ((MailFolderCC *)this)->m_Mutex = false;
 #endif
 }
@@ -1273,56 +1275,33 @@ MailFolderCC::GetMessage(unsigned long uid)
 class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
-#ifdef NEW_UPDATE
    if(m_NeedFreshListing)
    {
-      UpdateStatus();
-      
-      unsigned long nMessages, nRecent;
-      UIdType lastUId;
-      nMessages = m_MailStream->nmsgs;
-      nRecent = m_MailStream->recent;
-      lastUId = m_MailStream->uid_last;
+      // remove const from this:
+      MailFolderCC *that = (MailFolderCC *)this;
 
+      that->UpdateStatus();
+      
       // we need to re-generate the listing:
-      SafeDecRef(m_Listing);
-      ((MailFolderCC *)this)->m_Listing = NULL;
-      // the following hil pointer isn't needed as we have control
-      // over it by means of m_Listing:
-      HeaderInfoList * hil = ((MailFolderCC *)this)->BuildListing();
-      hil->DecRef();
+      that->BuildListing();
+
+      // Apply filters.
+      if( that->ApplyFilterRules(true) )
+      {
+         // we need to re-generate the listing:
+         that->BuildListing();
+      }
       
-      // one extra incref, to make sure it won't go away:
-      // BuildListing() does not incref it internally!
-      m_Listing->IncRef();
+      // sort/thread listing:
+      that->ProcessHeaderListing(m_Listing);
 
-      CheckForNewMail(m_Listing);
+      // check if we need to update our data structures or send new
+      // mail events:
+      that->CheckForNewMail(m_Listing);
+   }
 
-#ifdef DEBUG
-      String msg;
-      msg.Printf("GetHeaders() for '%s': %ld/%ld/%lu --> %ld/%ld/%lu",
-                 GetName().c_str(), nMessages, nRecent,
-                 (long unsigned) lastUId,
-                 m_MailStream->nmsgs,
-                 m_MailStream->recent,
-                 (long unsigned) m_MailStream->uid_last);
-      LOGMESSAGE((M_LOG_DEBUG, msg.c_str()));
-#endif
-      ((MailFolderCC *)this)->m_NeedFreshListing = false;
-      // do filters etc:
-      ((MailFolderCC *)this)->ProcessHeaderListing(m_Listing);
-   }
-   else
-      m_Listing->IncRef();
+   m_Listing->IncRef(); // for the caller who uses it
    return m_Listing;
-#else
-   if(! m_Listing && m_nMessages > 0)
-   {
-      ((MailFolderCC *)this)->UpdateListing();
-   }
-   if(m_Listing) m_Listing->IncRef();
-   return m_Listing;
-#endif
 }
 
 bool
@@ -1640,13 +1619,13 @@ MailFolderCC::IsNewMessage(const HeaderInfo *hi)
 }
 
 /* This is called by the UpdateListing method of the common code. */
-HeaderInfoList *
+void
 MailFolderCC::BuildListing(void)
 {
    m_BuildListingSemaphore = true;
    m_UpdateNeeded = false;
 
-   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
+   CHECK_DEAD("Cannot access closed folder\n'%s'.");
 
    if ( m_FirstListing )
    {
@@ -1754,9 +1733,7 @@ MailFolderCC::BuildListing(void)
 
    m_FirstListing = false;
    m_BuildListingSemaphore = false;
-
-   m_Listing->IncRef();
-   return m_Listing;
+   m_NeedFreshListing = false;
 }
 
 int
@@ -2092,12 +2069,6 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 void
 MailFolderCC::UpdateStatus(void)
 {
-   unsigned long
-      nMessages = m_nMessages,
-      nRecent = m_nRecent;
-   UIdType lastUId = m_LastUId;
-   
-   
       m_nMessages = m_MailStream->nmsgs;
       m_nRecent = m_MailStream->recent;
       m_LastUId = m_MailStream->uid_last;
@@ -2582,12 +2553,11 @@ MailFolderCC::ProcessEventQueue(void)
 void
 MailFolderCC::RequestUpdate(void)
 {
-#ifdef NEW_UPDATE
    // invalidate current folder listing and queue at least one folder
    // update event.
    if(! m_NeedFreshListing)
       m_NeedFreshListing = true;
-#endif
+
    // we want to queue only one update event:
    if(! m_UpdateNeeded)
    {

@@ -22,11 +22,10 @@ $Id$
 (I am keeping a list of threading problems here, which I will use for
 keeping track of them. No need to pass it all through the
 bugtracker. KB)
-SaveMessagesToFolder() should take a list of actual messages as it
-cannot obtain the messages *and* store them to a folder if the two
-folders are identical, i.e. copying from "xx" to "xx" leads to a
-deadlock. 
 
+TRUE?
+The threads in ASMailFolderCC don't really need to lock anything, 
+as the MailFolderCC.cpp code should take care of that itself.
 
 
 

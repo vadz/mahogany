@@ -457,15 +457,13 @@ public:
    */
    virtual ProfileBase *GetProfile(void) const = 0;
 
-   /** Toggle sending of new mail events.
-       @param send if true, send them
-       @param update if true, update internal message count
+   /** Toggle update behaviour flags.
+       @param updateFlags the flags to set
    */
-   virtual void EnableNewMailEvents(bool send = true, bool update = true) = 0;
-   /** Query whether folder is sending new mail events.
-       @return if true, folder sends them
-   */
-   virtual bool SendsNewMailEvents(void) const = 0;
+   virtual void SetUpdateFlags(int updateFlags) = 0;
+   /// Get the current update flags
+   virtual int  GetUpdateFlags(void) const = 0;
+
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /** Returns a listing of the folder. Must be DecRef'd by caller. */

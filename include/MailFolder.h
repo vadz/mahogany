@@ -304,17 +304,25 @@ public:
    const char *GetClassName(void) const
       { return "MailFolder"; }
 
-   /** Toggle sending of new mail events.
-       @param send if true, send them
-       @param update if true, update internal message count
+   /// Flags controlling update behaviour
+   enum UpdateFlags
+   {
+      /// undefined flags, used as default arg
+      UF_Undefined   =   1,
+      /// update the message counter
+      UF_UpdateCount =   2,
+      /// detect new messages as new
+      UF_DetectNewMail = 4,
+      /// default setting
+      UF_Default = (UF_UpdateCount+UF_DetectNewMail)
+   };
+   /** Toggle update behaviour flags.
+       @param updateFlags the flags to set
    */
-   virtual void EnableNewMailEvents(bool send = true, bool update = true) = 0;
-   /** Query whether folder is sending new mail events.
-       @return if true, folder sends them
-   */
-   virtual bool SendsNewMailEvents(void) const = 0;
-
-
+   virtual void SetUpdateFlags(int updateFlags) = 0;
+   /// Get the current update flags
+   virtual int  GetUpdateFlags(void) const = 0;
+   
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.
       These functions are not used by anything else in the MailFolder

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailCollector class                                              *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *                                                                  *
@@ -229,18 +229,20 @@ MailCollectorImpl::Collect(MailFolder *mf)
    m_Message = "";
    m_Count = 0;
    bool rc = true;
-
+   
    CHECK(m_NewMailFolder,false,_("Cannot collect mail without New Mail folder."));
 
    UpdateFolderList(); 
 
+   int updateFlags = m_NewMailFolder->GetUpdateFlags();
    if(mf == NULL)
    {
       MailCollectorFolderList::iterator i;
       for(i = m_list->begin();i != m_list->end();i++)
       {
          // set flags each time because they get reset by SaveMessages()
-         m_NewMailFolder->EnableNewMailEvents(false,false);
+         m_NewMailFolder->SetUpdateFlags(0 /* no updates, no new mail
+                                              detection */);
 	 if ((*i)->m_folder)
              rc &= CollectOneFolder((*i)->m_folder);
       }
@@ -250,51 +252,11 @@ MailCollectorImpl::Collect(MailFolder *mf)
 
    /* We might have filter rules set on the NewMail folder, so we
       apply these as well: */
-   m_NewMailFolder->ApplyFilterRules(true);
+//   m_NewMailFolder->ApplyFilterRules(true);
+
+   m_NewMailFolder->SetUpdateFlags(updateFlags);
    m_NewMailFolder->RequestUpdate();
 
-/*
-   m_NewMailFolder->EnableNewMailEvents(true,true);
-   m_NewMailFolder->Ping();
-*/ 
-#if 0
-   if(m_Count)
-   {
-      // step 1: execute external command if it's configured
-      String command = READ_CONFIG(m_NewMailFolder->GetProfile(), MP_NEWMAILCOMMAND);
-      if(! command.IsEmpty())
-      {
-         if ( ! SYSTEM(command) )
-         {
-            // TODO ask whether the user wants to disable it
-            wxLogError(_("Command '%s' (to execute on new mail reception)"
-                         " failed."), command.c_str());
-         }
-      }
-
-#ifdef   USE_PYTHON
-      // step 2: folder specific Python callback
-      if(! PythonCallback(MCB_FOLDER_NEWMAIL, 0, m_NewMailFolder, m_NewMailFolder->GetClassName(),
-                          m_NewMailFolder->GetProfile())
-         && 
-      // step 3: global python callback
-         ! PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0, mApplication, "MApplication",
-                          mApplication->GetProfile()))
-#endif //USE_PYTHON   
-         if(READ_CONFIG(m_NewMailProfile, MP_SHOW_NEWMAILMSG))
-         {
-            String
-               text, title;
-            text.Printf(_("You have %lu new messages in folder '%s'.\n"),
-                        m_Count, m_NewMailFolder->GetName().c_str());
-            if ( m_Count <= (unsigned long) READ_CONFIG(m_NewMailProfile,MP_SHOW_NEWMAILINFO)) 
-               text << m_Message;
-            // TODO make it a wxPMessageBox to let the user shut if off from here?
-            MDialog_Message(text, NULL, _("New Mail"));
-         }
-   }
-#endif
-   
    return rc;
 }
 
@@ -323,17 +285,14 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
    mf->ApplyFilterRules(false);
 
    /* Obtain exclusive access: */
-   MailFolderLock lock(mf);
-   if(lock.Locked())
+   if(mf->Lock())
    {
       wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
-               mf->GetName().c_str());
+                  mf->GetName().c_str());
       wxYield(); // normal wxYield() should be ok here, this code never
       // gets called from a menu or such
-//      long oldcount = m_NewMailFolder->CountMessages();
-      bool sendsEvents = mf->SendsNewMailEvents();
-      mf->EnableNewMailEvents(false,true);
-      mf->Ping(); //update it
+      int updateFlags = mf->GetUpdateFlags();
+      mf->SetUpdateFlags(MailFolder::UF_UpdateCount);
       INTARRAY selections;
 
       const HeaderInfo *hi;
@@ -372,9 +331,11 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
       else
          rc = true;
 
-      mf->EnableNewMailEvents(sendsEvents);
-      mf->Ping(); //update it
+      mf->SetUpdateFlags(updateFlags);
    }
+   mf->UnLock();
+   mf->Ping(); //update it
+
    Lock(locked);
 
    return rc;

@@ -633,6 +633,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
 
    // create an image list and associate it with this control
    size_t nIcons = GetNumberOfFolderIcons();
+
    wxImageList *imageList = new wxImageList(16, 16, FALSE, nIcons);
 
    wxIconManager *iconManager = mApplication->GetIconManager();
@@ -642,7 +643,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    }
 
    SetImageList(imageList);
-
+  
    // create the root item
    MFolder *folderRoot = MFolder::Get("");
    m_current = new wxFolderTreeNode(this, folderRoot);

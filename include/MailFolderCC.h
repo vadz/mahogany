@@ -498,7 +498,7 @@ public:
 
 protected:
    /// Gets a complete folder listing from the stream.
-   HeaderInfoList * BuildListing(void);
+   void BuildListing(void);
    /// The list of events to be processed.
    static EventQueue ms_EventQueue;
    /** The index of the next entry in list to fill. Only used for

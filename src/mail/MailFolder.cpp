@@ -64,7 +64,7 @@ public:
    }
 
    /// get called on timeout and pings the mailfolder
-   void Notify(void) { m_mf->Ping(); }
+   void Notify(void) { if(! m_mf->IsLocked() ) m_mf->Ping(); }
 
 protected:
    /// the mailfolder to update
@@ -553,8 +553,7 @@ MailFolderCmn::MailFolderCmn(ProfileBase *profile)
    // or not, to suppress NewMail events.
    m_FirstListing = true;
    m_ProgressDialog = NULL;
-   m_GenerateNewMailEvents = true; // for now don't!
-   m_UpdateMsgCount = true; // normal operation
+   m_UpdateFlags = UF_Default;
    ASSERT(profile);
    m_Profile = profile;
    if(m_Profile) m_Profile->IncRef();
@@ -671,7 +670,16 @@ MailFolderCmn::SaveMessages(const INTARRAY *selections,
    if(strutil_isempty(folderName))
       return false;
 
-   mf = MailFolder::OpenFolder(isProfile ? MF_PROFILE : MF_FILE, folderName);
+   /* It could be that we are trying to open the very folder we are
+      getting our messages from, so we need to temporarily unlock this 
+      folder. */
+   bool locked = IsLocked();
+   if(locked)
+      UnLock(); // release our own lock
+
+
+   mf = MailFolder::OpenFolder(isProfile ? MF_PROFILE : MF_FILE,
+                               folderName);
    if(! mf)
    {
       String msg;
@@ -680,8 +688,9 @@ MailFolderCmn::SaveMessages(const INTARRAY *selections,
       return false;
    }
    Message *msg;
-   bool events = mf->SendsNewMailEvents();
-   mf->EnableNewMailEvents(false, updateCount);
+
+   int updateFlags = mf->GetUpdateFlags();
+   mf->SetUpdateFlags( updateCount ? UF_UpdateCount : 0 );
 
    MProgressDialog *pd = NULL;
    int threshold = mf->GetProfile() ?
@@ -695,22 +704,32 @@ MailFolderCmn::SaveMessages(const INTARRAY *selections,
                                              msg,
                                              2*n, NULL);// open a status window:
    }
+
    bool rc = true;
-   for(i = 0; i < n; i++)
+   if(Lock()) // we don't want anything to happen in here
    {
-      msg = GetMessage((*selections)[i]);
-      if(msg)
+      for(i = 0; i < n; i++)
       {
-         if(pd) pd->Update( 2*i + 1 );
-         rc &= mf->AppendMessage(*msg);
-         if(pd) pd->Update( 2*i + 2);
-         msg->DecRef();
+         msg = GetMessage((*selections)[i]);
+         if(msg)
+         {
+            if(pd) pd->Update( 2*i + 1 );
+            rc &= mf->AppendMessage(*msg);
+            if(pd) pd->Update( 2*i + 2);
+            msg->DecRef();
+         }
       }
+      UnLock();
+      mf->Ping(); // with our flags
+      mf->SetUpdateFlags(updateFlags); // restore old flags
    }
-   mf->Ping(); // update any views
-   mf->EnableNewMailEvents(events, updateCount);
+   else
+      rc = false;
+   
    mf->DecRef();
    if(pd) delete pd;
+   if(locked)
+      Lock();
    return rc;
 }
 
@@ -1048,6 +1067,11 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
    gs_SortListingMutex.Unlock();
 }
 
+/*
+  This function is called by GetHeaders() immediately after building a 
+  new folder listing. It checks for new mails and, if required, sends
+  out new mail events.
+*/
 void
 MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 {
@@ -1075,14 +1099,14 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
             highestId = uid;
       }
    }
-   if(highestId != UID_ILLEGAL && m_UpdateMsgCount)
+   if(highestId != UID_ILLEGAL && (m_UpdateFlags & UF_UpdateCount) )
       m_LastNewMsgUId = highestId;
    ASSERT(nextIdx <= n);
    
    DBGMESSAGE(("CheckForNewMail() after test: folder: %s highest seen uid: %lu.",
                GetName().c_str(), (unsigned long) highestId));
 
-   if( m_GenerateNewMailEvents )
+   if( (m_UpdateFlags & UF_DetectNewMail) )
    {
       if( nextIdx != 0)
          MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
@@ -1095,8 +1119,6 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 /* This will do the work in the new mechanism:
 
    - For now it only sorts or threads the headerinfo list
-   - Filtering will be done before this is caused and is independent
-     of the header listing processing.
  */
 void
 MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
@@ -1111,6 +1133,7 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
    hilp->DecRef();
 }
 
+#if 0
 /* This will disappear: */
 void
 MailFolderCmn::UpdateListing(void)
@@ -1146,6 +1169,7 @@ MailFolderCmn::UpdateListing(void)
       m_FirstListing = false;
    }
 }
+#endif
 
 void
 MailFolderCmn::UpdateMessageStatus(UIdType uid)
@@ -1229,13 +1253,9 @@ MailFolderCmn::DeleteMessages(const INTARRAY *selections, bool expunge)
 int
 MailFolderCmn::ApplyFilterRules(bool newOnly)
 {
-#if 0
-   // This test does not work, as CountNewMessages() might not return
-   // the updated count yet.
    // Maybe we are lucky and have nothing to do?
    if(newOnly && CountNewMessages() == 0)
          return 0;
-#endif
 
    // Obtain pointer to the filtering module:
    MModule_Filters *filterModule = MModule_Filters::GetModule();
@@ -1257,11 +1277,7 @@ MailFolderCmn::ApplyFilterRules(bool newOnly)
             // This might change the folder contents,
             // so we must set this flag:
             m_FiltersCausedChange = true;
-            if(Lock())
-            {
-               rc = filterRule->Apply(this, newOnly);
-               UnLock();
-            }
+            rc = filterRule->Apply(this, newOnly);
             filterRule->DecRef();
          }
       }
