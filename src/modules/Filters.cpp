@@ -1863,10 +1863,14 @@ static bool findIP(String &header,
    return false;
 }
 
-#endif
+#endif // USE_RBL
 
-// func_isspam() helper: check the given MIME part and all of its children
-// for Korean charset, return true if any of them has it
+// ----------------------------------------------------------------------------
+// SPAM tests: different functions below are all used by func_isspam()
+// ----------------------------------------------------------------------------
+
+// check the given MIME part and all of its children for Korean charset, return
+// true if any of them has it
 static bool CheckMimePartForKoreanCSet(const MimePart *part)
 {
    while ( part )
@@ -1886,19 +1890,17 @@ static bool CheckMimePartForKoreanCSet(const MimePart *part)
    return false;
 }
 
-// another func_isspam() helper: check the value of X-Spam-Status
-// header and return true if we believe it indicates that this is a spam
+// check the value of X-Spam-Status header and return true if we believe it
+// indicates that this is a spam
 static bool CheckXSpamStatus(const String& value)
 {
-   // check for "^.*^X-Spam-Status: Yes+$" regex manually
-   if ( value.Lower().StartsWith("yes") )
-      return true;
-
-   return false;
+   // SpamAssassin adds header "X-Spam-Status: Yes" for the messages it
+   // believes to be spams, so simply check if the header value looks like this
+   return value.Lower().StartsWith("yes");
 }
 
-// another func_isspam() helper: check the value of X-Authentication-Warning
-// header and return true if we believe it indicates that this is a spam
+// check the value of X-Authentication-Warning header and return true if we
+// believe it indicates that this is a spam
 static bool CheckXAuthWarning(const String& value)
 {
    // check for "^.*Host.+claimed to be.+$" regex manually
@@ -1937,6 +1939,53 @@ static bool CheckXAuthWarning(const String& value)
 
    // did the host names match?
    return *pc == '.' && *pc2 == '\r';
+}
+
+// check if we have an HTML-only message
+static bool CheckForHTMLOnly(const Message *msg)
+{
+   const MimePart *part = msg->GetTopMimePart();
+   if ( !part )
+   {
+      // no MIME info at all?
+      return false;
+   }
+
+   // we accept the multipart/alternative messages with a text/plain and
+   // a text/html part but not the top level text/html messages
+   //
+   // the things are further complicated by the fact that some spammers send
+   // HTML messages without MIME-Version header which results in them
+   // [correctly] not being recognizad as MIME by c-client at all and so they
+   // have the default type of text/plain and we have to check for this
+   // (common) case specially
+   const MimeType type = part->GetType();
+   if ( type.GetPrimary() == MimeType::TEXT )
+   {
+      String subtype = type.GetSubType();
+
+      if ( subtype == "PLAIN" )
+      {
+         // check if it was really in the message or returned by c-client in
+         // absence of MIME-Version
+         String value;
+         if ( !msg->GetHeaderLine("MIME-Version", value) )
+         {
+            if ( msg->GetHeaderLine("Content-Type", value) )
+            {
+               if ( strstr(value.MakeLower(), "text/html") )
+                  return true;
+            }
+         }
+      }
+      else if ( subtype == "HTML" )
+      {
+         return true;
+      }
+   }
+   //else: it's a MIME message but of non TEXT type
+
+   return false;
 }
 
 static Value func_isspam(ArgList *args, FilterRuleImpl *p)
@@ -2027,10 +2076,7 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       }
       else if ( test == SPAM_TEST_HTML )
       {
-         // we accept the multipart/alternative messages with a text/plain and
-         // a text/html part but not the top level text/html messages
-         const MimePart *part = msg->GetTopMimePart();
-         rc = part && part->GetType().GetFull() == "TEXT/HTML";
+         rc = CheckForHTMLOnly(msg.operator->());
       }
 #ifdef USE_RBL
       else if ( test == SPAM_TEST_RBL )
