@@ -62,7 +62,7 @@ dep depend:
 #	$(CC) -MM $(CXXFLAGS) $(CSRC) >>.depend
 
 .depend:
-	touch .depend ; $(MAKE) dep
+	touch .depend ; $(MAKE) -i dep
 
 tags:
 	etags --c++ $(SRC) $(CXXSRC)
