@@ -1091,11 +1091,8 @@ wxFolderView::Update(HeaderInfoList *listing)
       if(focusedIndex != -1)
          m_FolderCtrl->SetItemState(focusedIndex,
                                     wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
-   String statusMsg;
-   statusMsg.Printf(_("Folder '%s'"), m_folderName.c_str());
 
-   UpdateTitleAndStatusBars(m_folderName, statusMsg, GetFrame(m_Parent),
-                            m_MailFolder);
+   UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
 
 #ifdef __WXMSW__
    m_FolderCtrl->Show();
@@ -1529,10 +1526,7 @@ wxFolderView::OnFolderStatusEvent(MEventFolderStatusData &event)
 {
    if(event.GetFolder() == m_MailFolder)
    {
-      String statusMsg;
-      statusMsg.Printf(_("Folder '%s'"), m_folderName.c_str());
-      UpdateTitleAndStatusBars(m_folderName, statusMsg, GetFrame(m_Parent),
-                               m_MailFolder);
+      UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
    }
 }
 

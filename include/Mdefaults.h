@@ -265,6 +265,11 @@
 /// the global path for template files used for message composition
 #define MP_COMPOSETEMPLATEPATH_GLOBAL   "CompooseTemplatePath"
 
+/// the format string for status bar folder status display
+#define MP_FOLDERSTATUS_STATBAR "StatusBarFmt"
+/// the format string for title bar folder status display
+#define MP_FOLDERSTATUS_TITLEBAR "TitleBarFmt"
+
 /**@name Printer settings */
 //@{
 /// Command
@@ -750,6 +755,11 @@
 #define   MP_CONVERTPROGRAM_D      "convert %s -compress None %s"
 /// list of modules to load at startup
 #define MP_MODULES_D   ""
+/// the format string for status bar folder status display
+#define MP_FOLDERSTATUS_STATBAR_D "%f (%t messages, %r recent, %n new)"
+/// the format string for title bar folder status display
+#define MP_FOLDERSTATUS_TITLEBAR_D "%f (%t messages, %n new)"
+
 /**@name Printer settings */
 //@{
 /// Command

@@ -481,6 +481,7 @@ SOURCE=.\src\adb\AdbProvider.cpp
 # Begin Source File
 
 SOURCE=.\src\adb\ExportPalm.cpp
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -522,6 +523,8 @@ SOURCE=.\src\adb\ImportMailrc.cpp
 # PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 

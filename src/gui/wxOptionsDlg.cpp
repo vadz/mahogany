@@ -176,7 +176,10 @@ enum ConfigFields
    ConfigField_OutboxName,
    ConfigField_UseTrash,
    ConfigField_TrashName,
-   ConfigField_FoldersLast = ConfigField_TrashName,
+   ConfigField_StatusFormatHelp,
+   ConfigField_StatusFormat_StatusBar,
+   ConfigField_StatusFormat_TitleBar,
+   ConfigField_FoldersLast = ConfigField_StatusFormat_TitleBar,
 
 #ifdef USE_PYTHON
    // python
@@ -521,12 +524,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_TCP_TIMEOUTS
 
    // compose
-#if 0
-   { gettext_noop("Store outgoing messages and send only when asked to"),
-     Field_Bool, -1 },
-   { gettext_noop("Folder where to store outgoing messages"),
-     Field_Text, ConfigField_UseOutbox },
-#endif // 0
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),
                                                    Field_File,    ConfigField_UseOutgoingFolder },
@@ -562,12 +559,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
-   { gettext_noop("Store outgoing messages and send only when asked to"),
-     Field_Bool, -1 },
-   { gettext_noop("Folder where to store &outgoing messages"),
-     Field_Text, ConfigField_UseOutbox },
+   { gettext_noop("Send outgoing messages later"), Field_Bool, -1 },
+   { gettext_noop("Folder for &outgoing messages"), Field_Text, ConfigField_UseOutbox },
    { gettext_noop("Move &deleted messages to Trash folder"), Field_Bool, -1},
    { gettext_noop("&Trash folder name"), Field_Text, ConfigField_UseTrash},
+   { gettext_noop("You can specify the format for the strings shown in the\n"
+                  "status and title bars. Use %f for the folder name and\n"
+                  "%t, %r and %n for the number of all, recent and new\n"
+                  "messages respectively."), Field_Message, -1 },
+   { gettext_noop("Status &bar format"), Field_Text, -1 },
+   { gettext_noop("T&itle bar format"), Field_Text, -1 },
 
 
 #ifdef USE_PYTHON
@@ -778,6 +779,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_OUTBOX_NAME),
    CONFIG_ENTRY(MP_USE_TRASH_FOLDER),
    CONFIG_ENTRY(MP_TRASH_FOLDER),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FOLDERSTATUS_STATBAR),
+   CONFIG_ENTRY(MP_FOLDERSTATUS_TITLEBAR),
 
    // python
 #ifdef USE_PYTHON
@@ -1777,6 +1781,16 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
       {
          wxLogError(_("Failed to restart the timers, please change the "
                       "delay to a valid value."));
+      }
+   }
+
+   if ( rc )
+   {
+      // update the frame title/status bar if needed
+      if ( IsDirty(ConfigField_StatusFormat_StatusBar) ||
+           IsDirty(ConfigField_StatusFormat_TitleBar) )
+      {
+         // TODO: send the folder statyus change event
       }
    }
 

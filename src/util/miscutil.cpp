@@ -27,6 +27,7 @@
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"
 
+#include "MDefaults.h"
 #include "MDialogs.h"
 #include "MailFolder.h"    // UpdateTitleAndStatusBars uses it
 #include "ASMailFolder.h"
@@ -241,12 +242,76 @@ AutoCollectAddresses(const String &email,
    }
 }
 
+// helper function to parse a string for foldr status messages
+static String ParseStatusFormat(const String& format,
+                                unsigned long total,
+                                unsigned long recent,
+                                unsigned long newmsgs,
+                                const String& name)
+{
+   String result;
+   const char *start = format.c_str();
+   for ( const char *p = start; *p; p++ )
+   {
+      if ( *p == '%' )
+      {
+         switch ( *++p )
+         {
+            case '\0':
+               wxLogWarning(_("Unexpected end of string in the status format "
+                              "string '%s'."), start);
+               p--; // avoid going beyond the end of string
+               break;
+
+            case 'f':
+               result += name;
+               break;
+
+            case 't':
+               result += wxString::Format("%lu", total);
+               break;
+
+            case 'r':
+               result += wxString::Format("%lu", recent);
+               break;
+
+            case 'n':
+               result += wxString::Format("%lu", newmsgs);
+               break;
+
+            case '%':
+               result += '%';
+               break;
+
+            default:
+               wxLogWarning(_("Unknown macro '%c%c' in the status format "
+                              "string '%s'."), *(p-1), *p, start);
+         }
+      }
+      else // not a format spec
+      {
+         result += *p;
+      }
+   }
+
+   return result;
+}
+
 // show the number of new/unread/total messages in the title and status bars
 void UpdateTitleAndStatusBars(const String& title,
                               const String& status,
                               wxFrame *frame,
                               const MailFolder *mailFolder)
 {
+#ifdef OS_WIN
+   // the MP_FOLDERSTATUS_STATBAR/TOOLBAR entries contain '%' which shouldn't
+   // be handled as var expansions under Windows
+   ProfileEnvVarSave disableExpansion(mApplication->GetProfile());
+#endif // Win
+
+   // we could probably optimize this somewhat by only counting the messages if
+   // we need them, but is it worth it?
+   String folderName = mailFolder->GetName();
    unsigned long total = mailFolder->CountMessages(),
                  recent =  mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
                                                      MailFolder::MSG_STAT_SEEN,
@@ -258,59 +323,17 @@ void UpdateTitleAndStatusBars(const String& title,
                                                      MailFolder::MSG_STAT_RECENT);
 
    // contruct the messages
-   wxString tmp; // string we use for numeric => string conversion
    wxString titleMsg(title), statusMsg(status);
+   statusMsg += ParseStatusFormat(READ_APPCONFIG(MP_FOLDERSTATUS_STATBAR),
+                                  total, recent, newmsgs, folderName);
+   titleMsg += ParseStatusFormat(READ_APPCONFIG(MP_FOLDERSTATUS_TITLEBAR),
+                                 total, recent, newmsgs, folderName);
 
-   if ( total > 1 )
-   {
-      tmp.Printf("%lu messages", total);
-   }
-   else if ( total == 1 )
-   {
-      tmp = _("1 message");
-   }
-   else // total == 0
-   {
-      tmp = _("no messages");
-   }
-   statusMsg << " (" << tmp;
-
-   // don't say "0 recent messages", just don't include this part of the
-   // message if there are none of them
-   if ( recent > 0 )
-   {
-      tmp.Printf(_(", %lu recent"), recent);
-
-      statusMsg += tmp;
-   }
-
-#if 0
-   // and the same for new messages. Also, in the title bar we show
-   // either "new/total" or just "total" (or nothing at all if there are
-   // no messages)
-   if ( newmsgs > 0 )
-   {
-      tmp.Printf(_(", %lu new"), newmsgs);
-      statusMsg += tmp;
-
-      tmp.Printf(" (%lu/%lu)", newmsgs, total);
-      titleMsg += tmp;
-   }
-   else if ( total > 0 )
-   {
-      tmp.Printf(" (%lu)", total);
-
-      titleMsg += tmp;
-   }
-#endif
-   tmp.Printf(" (%lu/%lu)", total, newmsgs);
-   titleMsg += tmp;
-   statusMsg << ')';
-
+   // show them
    wxLogStatus(frame, statusMsg);
    frame->SetTitle(titleMsg);
 
-   if(newmsgs > 0)
+   if ( newmsgs > 0 )
       frame->SetIcon( frame == mApplication->TopLevelFrame() ?
                       ICON("MainFrameNewMail") : ICON("MFrameNewMail"));
    else
@@ -319,7 +342,7 @@ void UpdateTitleAndStatusBars(const String& title,
 }
 
 // ---------------------------------------------------------------------------
-// colour to strign conversion
+// colour to string conversion
 // ---------------------------------------------------------------------------
 
 static const char *rgbSpecificationString = gettext_noop("RGB(%d, %d, %d)");

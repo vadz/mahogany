@@ -398,10 +398,7 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
          // had
          folder->ResetFlags(MF_FLAGS_MODIFIED | MF_FLAGS_UNACCESSIBLE);
 
-         String statusMsg;
-         statusMsg.Printf(_("Opened folder '%s'"), m_folderName.c_str());
-
-         UpdateTitleAndStatusBars(m_folderName, statusMsg, this, mailFolder);
+         UpdateTitleAndStatusBars("", _("Opened folder: "), this, mailFolder);
          mailFolder->DecRef();
       }
       else if ( mApplication->GetLastError() == M_ERROR_CANCEL )
