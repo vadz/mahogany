@@ -123,6 +123,9 @@ foldertree	BITMAP "foldertree.bmp"
 sync		BITMAP "sync.bmp"
 miscopt		BITMAP "miscopt.bmp"
 access		BITMAP "access.bmp"
+#ifdef USE_MODULES
+calendar	BITMAP "calendar.bmp"
+#endif
 
 // Folder tree bitmaps (16x16)
 folder_inbox		BITMAP "folder_inbox.bmp"
