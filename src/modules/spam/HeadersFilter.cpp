@@ -27,6 +27,7 @@
    #include "Moptions.h"
    #include "strutil.h"       // for strutil_restore_array
    #include "Mdefaults.h"     // for READ_APPCONFIG_TEXT
+   #include "Profile.h"       // for readEntry
 
    #include <wx/filefn.h>     // for wxSplitPath
 #endif //USE_PCH
