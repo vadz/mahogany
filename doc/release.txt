@@ -2,7 +2,7 @@ File:		doc/release.txt
 Summary:	what to do to make a new Mahogany release
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	2001.06.14
+Last modified:	2001.06.15
 Version:	the information in this file applies to the cvs sources
 
 1. Updating the version
@@ -15,6 +15,8 @@ b) makeversion.in
 c) in the future we should also have version in configure.in
 
 d) Manual.lyx and the files generated from it
+
+e) Bugzilla
 
 2. Updating the files
 ---------------------
