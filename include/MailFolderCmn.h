@@ -170,7 +170,7 @@ public:
    virtual wxFrame *GetInteractiveFrame() const;
 
    virtual void SuspendUpdates() { m_suspendUpdates++; }
-   virtual void ResumeUpdates() { if ( !--m_suspendUpdates ) RequestUpdate(); }
+   virtual void ResumeUpdates();
    virtual void RequestUpdate();
 
    /** @name Delayed folder closing

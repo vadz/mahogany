@@ -99,7 +99,9 @@ protected:
       ~name() { Destroy(); } \
    \
       void Initialize(); \
+      void Initialize(HostType *pointer); \
       type *operator->() { return m_pointer; } \
+      operator bool() const { return m_pointer != NULL; } \
    \
    private: \
       void Destroy(); \
@@ -107,14 +109,26 @@ protected:
       type *m_pointer; \
    }
 
-#define IMPLEMENT_BOUND_POINTER(name) \
+#define IMPLEMENT_BOUND_POINTER_COMMON(name) \
    void name::Destroy() { delete m_pointer; } \
    \
-   void name::Initialize() \
+   void name::Initialize(name::HostType *pointer) \
    { \
       ASSERT( !m_pointer ); \
-      m_pointer = new name::HostType; \
+      m_pointer = pointer; \
    } \
+
+#define IMPLEMENT_BOUND_POINTER_DEFAULT(name) \
+   IMPLEMENT_BOUND_POINTER_COMMON(name) \
+   \
+   void name::Initialize() \
+      { Initialize(new name::HostType); } \
+
+#define IMPLEMENT_BOUND_POINTER(name) \
+   IMPLEMENT_BOUND_POINTER_COMMON(name) \
+   \
+   void name::Initialize() \
+      { FAIL_MSG(_T("No default constructor")); } \
 
 
 class TreeIteratorNode

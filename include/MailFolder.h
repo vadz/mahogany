@@ -1015,6 +1015,18 @@ private:
    friend class HeaderInfoList;
 };
 
+class SuspendFolderUpdates
+{
+public:
+   SuspendFolderUpdates(MailFolder *mf)
+      : m_mf(mf)
+      { m_mf->SuspendUpdates(); }
+   ~SuspendFolderUpdates()
+      { m_mf->ResumeUpdates(); }
+private:
+   MailFolder *m_mf;
+};
+
 // MailFolder_obj is a smart reference to MailFolder
 DECLARE_AUTOPTR_WITH_CONVERSION(MailFolder);
 

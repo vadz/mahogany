@@ -768,6 +768,9 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    return rc;
 }
 
+BOUND_POINTER(MProgressDialog,MProgressDialogPointer);
+IMPLEMENT_BOUND_POINTER(MProgressDialogPointer)
+
 bool
 MailFolderCmn::SaveMessages(const UIdArray *selections,
                             MFolder *folder)
@@ -787,7 +790,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    int n = selections->Count();
    CHECK( n, true, _T("SaveMessages(): nothing to save") );
 
-   MailFolder *mf = MailFolder::OpenFolder(folder);
+   MailFolder_obj mf(MailFolder::OpenFolder(folder));
    if ( !mf )
    {
       String msg;
@@ -800,13 +803,10 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    if ( mf->IsLocked() )
    {
       FAIL_MSG( _T("Can't SaveMessages() to locked folder") );
-
-      mf->DecRef();
-
       return false;
    }
 
-   MProgressDialog *pd = NULL;
+   MProgressDialogPointer pd;
    long threshold = GetProgressThreshold(mf->GetProfile());
 
    if ( threshold > 0 && n > threshold )
@@ -816,21 +816,18 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       msg.Printf(_("Saving %d messages to the folder '%s'..."),
                  n, folder->GetName().c_str());
 
-      pd = new MProgressDialog(
+      pd.Initialize(new MProgressDialog(
                                mf->GetName(),   // title
                                msg,             // label message
                                2*n,             // range
                                NULL,            // parent
                                false,           // disable parent only
                                true             // allow aborting
-                              );
+                              ));
    }
 
-   if ( n > 1 )
-   {
-      // minimize the number of updates by only doing it once
-      mf->SuspendUpdates();
-   }
+   // minimize the number of updates by only doing it once
+   SuspendFolderUpdates suspend(mf);
 
    bool rc = true;
    for ( int i = 0; i < n; i++ )
@@ -838,8 +835,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       if ( pd && !pd->Update(2*i + 1) )
       {
          // cancelled
-         rc = false;
-         break;
+         return false;
       }
 
       Message *msg = GetMessage((*selections)[i]);
@@ -851,8 +847,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
          if ( pd && !pd->Update(2*i + 2) )
          {
             // cancelled
-            rc = false;
-            break;
+            return false;
          }
       }
       else
@@ -860,19 +855,6 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
          FAIL_MSG( _T("copying inexistent message?") );
       }
    }
-
-   if ( n > 1 )
-   {
-      // make it notice new messages as we disabled them above
-      mf->ResumeUpdates();
-   }
-
-   // force the folder status update as the number of messages in it changed
-   mf->Ping();
-
-   mf->DecRef();
-
-   delete pd;
 
    return rc;
 }
@@ -1339,6 +1321,19 @@ bool MailFolderCmn::ThreadMessages(const ThreadParams& thrParams,
 // ----------------------------------------------------------------------------
 // MailFolderCmn misc
 // ----------------------------------------------------------------------------
+
+void
+MailFolderCmn::ResumeUpdates()
+{
+   if ( !--m_suspendUpdates )
+   {
+      RequestUpdate();
+      
+      // make the folder notice the new messages
+      // This step was skipped in MailFolderCC::UpdateAfterAppend
+      Ping();
+   }
+}
 
 void
 MailFolderCmn::RequestUpdate()

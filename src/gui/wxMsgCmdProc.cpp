@@ -541,9 +541,6 @@ AsyncStatusHandler::~AsyncStatusHandler()
       // also put it into the status bar to overwrite the previous message
       // there
       wxLogStatus(GetFrame(), m_msgError);
-
-      // and show the error to the user
-      wxLogError(m_msgError);
    }
    else // success
    {
