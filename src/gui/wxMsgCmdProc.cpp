@@ -586,14 +586,28 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
 
             if ( quote == M_ACTION_PROMPT )
             {
-               if ( !MDialog_YesNoDialog
-                     (
-                        _("Do you want to include the original message "
-                          "text in your reply?"),
-                        GetFrame()
-                     ) )
+               switch ( MDialog_YesNoCancel
+                        (
+                           _("Do you want to include the original message "
+                             "text in your reply?"),
+                           GetFrame()
+                        ) )
                {
-                  quote = M_ACTION_NEVER;
+                  default:
+                     FAIL_MSG( _T("unexpected MDialog_YesNoCancel return") );
+                     // fall through
+
+                  case MDlg_Cancel:
+                     // don't reply to the message at all
+                     return true;
+
+                  case MDlg_No:
+                     quote = M_ACTION_NEVER;
+                     break;
+
+                  case MDlg_Yes:
+                     quote = M_ACTION_ALWAYS;
+                     break;
                }
             }
 
