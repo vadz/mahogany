@@ -132,6 +132,7 @@ Platforms:      Unix/GTK+, Win32, Mac OS X
 Copying-policy: Mahogany Artistic License or GPL
 End
 
+h) submit a project news item on SF about the new release
 
 ----------------------------------------------------------------------------
 vi: ts=8 nolist:
