@@ -520,6 +520,9 @@ wxFolderView::Update(HeaderInfoList *listing)
    }
    else
       listing->IncRef();
+
+   if(! listing)
+      return;
    
    wxBeginBusyCursor();// wxSafeYield();
 

@@ -884,6 +884,10 @@ MailFolderCC::GetMessage(unsigned long uid)
 class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
+   if(! m_Listing && m_NumOfMessages > 0)
+   {
+      ((MailFolderCC *)this)->UpdateListing();
+   }
    if(m_Listing) m_Listing->IncRef();
    return m_Listing;
 }
@@ -1099,7 +1103,8 @@ MailFolderCC::BuildListing(void)
       m_ProgressDialog = new MProgressDialog(GetName(),
                                              msg,
                                              numMessages,
-                                             NULL);// open a status window:
+                                             NULL,
+                                             false, true);// open a status window:
    }
 
    // mail_fetch_overview() will now fill the m_Listing array with
@@ -1179,7 +1184,14 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    */
    if(m_BuildNextEntry >= m_NumOfMessages)
       return;
-   
+
+   // This is 1 if we don't want any further updates.
+   if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
+   {
+      if(! m_ProgressDialog->Update( m_BuildNextEntry ))
+         return;
+   }
+
    HeaderInfoCC & entry = *(HeaderInfoCC *)(*m_Listing)[m_BuildNextEntry];
 
    char tmp[MAILTMPLEN];

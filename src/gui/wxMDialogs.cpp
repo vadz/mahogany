@@ -911,7 +911,8 @@ void MDialog_ShowText(MWindow *parent,
 
 #include "gui/wxDialogLayout.h"
 
-#define NUM_CRITERIA   9
+#define NUM_SORTLEVELS 6
+#define NUM_CRITERIA   11
 static wxString sortCriteria[NUM_CRITERIA] =
 {
    gettext_noop("None"),
@@ -922,7 +923,10 @@ static wxString sortCriteria[NUM_CRITERIA] =
    gettext_noop("Author"),
    gettext_noop("Author (reverse)"),
    gettext_noop("Status"),
-   gettext_noop("Status (reverse)")
+   gettext_noop("Status (reverse)"),
+   gettext_noop("Score"),
+   gettext_noop("Score (reverse)"),
+   gettext_noop("Thread")
 };
 
 #define NUM_LABELS 2
@@ -970,7 +974,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile, wxWindow *p
    }
 
    wxLayoutConstraints *c;
-   for( n = 0; n < NUM_CRITERIA; n++)
+   for( n = 0; n < NUM_SORTLEVELS; n++)
    {
       wxStaticText *txt = new wxStaticText(this, -1,
                                            n < NUM_LABELS ? _(labels[n]) :
