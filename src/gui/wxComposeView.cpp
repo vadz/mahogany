@@ -2397,7 +2397,9 @@ bool wxComposeView::IsRecipientEnabled(size_t index) const
    return m_rcptExtra[index]->IsEnabled();
 }
 
-// helper of GetRecipients()
+// helper of GetRecipients(): add the address from this control if it is of
+// correct type, to the address string, separating it from the previous
+// addresses if necessary
 static void
 GetRecipientFromControl(wxComposeView::RecipientType type,
                         wxRcptControl *rcpt,
@@ -2405,10 +2407,14 @@ GetRecipientFromControl(wxComposeView::RecipientType type,
 {
    if ( rcpt->GetType() == type )
    {
-      if ( !address.empty() )
-         address += CANONIC_ADDRESS_SEPARATOR;
+      wxString value = rcpt->GetValue();
+      if ( !value.empty() )
+      {
+         if ( !address.empty() )
+            address += CANONIC_ADDRESS_SEPARATOR;
 
-      address += rcpt->GetValue();
+         address += rcpt->GetValue();
+      }
    }
 }
 
