@@ -369,8 +369,8 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
                                           FALSE, m_menuFolders);
    wxMenuItem *menuItemSep = wxMenuItem::New(m_menu);
 #if 1
-   m_menu->Insert(0, menuItem);
-   m_menu->Insert(1, menuItemSep);
+   m_menu->Insert(1, menuItem);
+   m_menu->Insert(2, menuItemSep);
 #else
    m_menu->Append(menuItemSep);
    m_menu->Append(menuItem);
