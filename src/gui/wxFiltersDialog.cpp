@@ -764,7 +764,11 @@ OneActionControl::LayoutControls(wxWindow **last)
 */
 
 static const char * wxOneFButtonLabels[] =
-{ gettext_noop("More"), gettext_noop("Less") };
+{
+   gettext_noop("More"),
+   gettext_noop("Less"),
+   NULL
+};
 
 wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
                                      wxWindow *parent)
