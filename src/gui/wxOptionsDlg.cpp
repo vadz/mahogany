@@ -3340,7 +3340,7 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
 
    bool bRc = wxOptionsPage::TransferDataToWindow();
 
-#ifdef USE_DIALUP
+#if defined(OS_WIN) && defined(USE_DIALUP)
    if ( bRc )
    {
       wxControl *control = GetControl(ConfigField_NetConnection);

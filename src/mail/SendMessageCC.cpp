@@ -1671,8 +1671,8 @@ SendMessageCC::Send(int flags)
 
             // do we need to disable any authentificators (presumably because
             // they're incorrectly implemented by the server)?
-            const String
-               authsToDisable(READ_CONFIG(m_profile, MP_SMTP_DISABLED_AUTHS));
+            const String authsToDisable(READ_CONFIG_TEXT(m_profile,
+                                                         MP_SMTP_DISABLED_AUTHS));
             if ( !authsToDisable.empty() )
             {
                smtp_parameters(SET_SMTPDISABLEDAUTHS,
