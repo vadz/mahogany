@@ -258,6 +258,9 @@ public:
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
+
+protected:
+   long m_nAutosaveDelay;
 };
 
 #endif // _GUI_WXOPTIONSPAGE_H

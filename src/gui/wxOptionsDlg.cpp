@@ -128,7 +128,7 @@ enum ConfigFields
    ConfigField_FoldersFirst = ConfigField_ComposeLast,
    ConfigField_OpenFolders,
    ConfigField_MainFolder,
-//   ConfigField_NewMailFolder,
+// ConfigField_NewMailFolder,
    ConfigField_PollIncomingDelay,
    ConfigField_UpdateInterval,
    ConfigField_FolderProgressThreshold,
@@ -206,6 +206,7 @@ enum ConfigFields
    ConfigField_ShowLog,
    ConfigField_Splash,
    ConfigField_SplashDelay,
+   ConfigField_AutosaveHelp,
    ConfigField_AutosaveDelay,
    ConfigField_ConfirmExit,
    ConfigField_OpenOnClick,
@@ -515,7 +516,10 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Show &log window"),             Field_Bool,    -1,                    },
    { gettext_noop("&Splash screen at startup"),    Field_Bool | Field_Restart, -1,                    },
    { gettext_noop("Splash screen &delay"),         Field_Number,  ConfigField_Splash     },
-   { gettext_noop("&Autosave delay"),              Field_Number | Field_Restart, -1                     },
+   { gettext_noop("If autosave delay is not 0, the program will periodically\n"
+                  "save all unsaved information which reduces the risk of loss\n"
+                  "of information"),               Field_Message, -1                     },
+   { gettext_noop("&Autosave delay"),              Field_Number, -1                      },
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Open folder on single &click"), Field_Bool,    -1                     },
    { gettext_noop("&Format for the date"),         Field_Text,    -1                     },
@@ -648,6 +652,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SHOWLOG),
    CONFIG_ENTRY(MP_SHOWSPLASH),
    CONFIG_ENTRY(MP_SPLASHDELAY),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOSAVEDELAY),
    CONFIG_ENTRY(MP_CONFIRMEXIT),
    CONFIG_ENTRY(MP_OPEN_ON_CLICK),
@@ -1238,6 +1243,7 @@ wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
                                    ConfigField_OthersLast,
                                    MH_OPAGE_OTHERS)
 {
+   m_nAutosaveDelay = -1;
 }
 
 bool wxOptionsPageOthers::TransferDataToWindow()
@@ -1248,7 +1254,13 @@ bool wxOptionsPageOthers::TransferDataToWindow()
    // TODO this should be table based too probably...
    m_Profile->writeEntry(MP_CONFIRMEXIT, wxPMessageBoxEnabled(MP_CONFIRMEXIT));
 
-   return wxOptionsPage::TransferDataToWindow();
+   bool rc = wxOptionsPage::TransferDataToWindow();
+   if ( rc )
+   {
+      m_nAutosaveDelay = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);
+   }
+
+   return rc;
 }
 
 bool wxOptionsPageOthers::TransferDataFromWindow()
@@ -1260,6 +1272,17 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
       // the message box by erasing the stored answer to it
       wxPMessageBoxEnable(MP_CONFIRMEXIT,
                           READ_CONFIG(m_Profile, MP_CONFIRMEXIT) != 0);
+
+      long nAutosaveDelay = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);
+      if ( nAutosaveDelay != m_nAutosaveDelay )
+      {
+         if ( !mApplication->RestartTimer(MAppBase::Timer_Autosave) )
+         {
+            wxLogError(_("Invalid delay value for autosave timer."));
+
+            rc = false;
+         }
+      }
    }
 
    return rc;
@@ -1293,6 +1316,8 @@ wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
                    ConfigField_FoldersLast,
                    MH_OPAGE_FOLDERS)
 {
+   m_nIncomingDelay =
+   m_nPingDelay = -1;
 }
 
 bool wxOptionsPageFolders::TransferDataToWindow()
@@ -1350,7 +1375,7 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
       if ( !rc )
       {
          wxLogError(_("Failed to restart the timers, please change the "
-                      "delay to a valid value"));
+                      "delay to a valid value."));
       }
    }
 
