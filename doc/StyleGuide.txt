@@ -155,3 +155,18 @@ Example:
 
 Do not define a global macro such as SIZE(x), but call it mylibSIZE(x)
 or mSIZE(x).
+
+4.3 Indentation
+
+4.3.1 Tabulators and Spaces
+
+To make cooperation easier we have agreed to not to use any tabulator
+characters in the sources. Instead three spaces should be used. The
+basic indentation depth is three spaces per level.
+
+4.3.2 Braces
+
+Braces should always be on a line by themselves. If following a control
+statement, they should be on the same indentation level as that statement.
+E.g. the brace after an if() statement should be directly under the
+``i''
