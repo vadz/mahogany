@@ -6,9 +6,9 @@
 Release 0.63 'Saugus' June ???, 2001
 -------------------------------------------------------------------------------
 
-12.06.01 VZ: added possibilitiy to sort on "To: " in folder view
+12.06.01 VZ: added possibility to sort on "To: " in folder view
 10.06.01 VZ: fixed opening of files as folders
-06.06.01 NB: added support for showing folder names containing letters encoded
+06.06.01 NB: added support for displaying folder names containing letters encoded
              in modified UTF-7 (converts text to current locale's encoding only,
              requires wxWindows 2.3.x)
 06.06.01 VZ: show progress dialog while extracting addresses
