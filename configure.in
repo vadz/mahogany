@@ -460,7 +460,6 @@ case "$USE_SSL" in
 		$ssl_inc \
 		$prefix/include \
 		/include \
-		/usr/include \
 		/usr/ssl/include \
 		/usr/local/include \
 		/usr/local/ssl/include \
@@ -469,7 +468,7 @@ case "$USE_SSL" in
 	],
         [
 	   ssl_option=yes
-           ssl_inc=`echo $headerpath_openssl_ssl_h | sed 's/^-I//'`
+           ssl_inc=m_cv_header_dir_openssl_ssl_h
         ],
 	   ssl_option=no
 	)
@@ -605,13 +604,9 @@ case "$USE_PYTHON" in 1)
    M_CHECK_MYHEADER(Python.h,
        [ \
        	 $prefix/include \
-       	 /usr \
-         /usr/include \
          /usr/include/python1.5 \
-         /usr/local \
          /usr/local/include \
          /usr/local/include/python1.5 \
-         /home/local \
          /home/local/include \
          /home/local/include/python1.5 \
        ],

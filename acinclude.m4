@@ -93,7 +93,7 @@ AC_DEFUN(M_CHECK_MYHEADER,
         for j in "." $2 ; do
            CPPFLAGS="-I$j $CPPFLAGS"
            AC_TRY_CPP(dnl
-             [#include <$1>], 
+             [#include <$1>],
              [ dnl Do NOT allow -I/usr/include as include path since gcc might get problems
                if test "$j" != "/usr/include" ; then
                   eval "m_cv_header_$m_safe=\"headerpath_$m_safe=-I$j\""
@@ -109,6 +109,10 @@ AC_DEFUN(M_CHECK_MYHEADER,
       ]
     )
     if eval "test \"`echo '$m_cv_header_'$m_safe`\" != no"; then
+       if test "$j" = "."; then
+          j="usr/include"
+       fi
+       eval "$m_cv_header_dir_$m_safe=$j"
        AC_MSG_RESULT(yes (in $j))
        eval eval "`echo '$m_cv_header_'$m_safe`"
        eval "CPPFLAGS=\"`echo '$headerpath_'$m_safe` $CPPFLAGS\""
