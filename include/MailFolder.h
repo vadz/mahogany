@@ -69,7 +69,7 @@ public:
       /// use this with AND to obtain pure type
       MF_TYPEMASK = 255,
       /// from here on it's flags
-      MF_FLAGS = 256,  // this doesn't make much sense
+      MF_FLAGSMASK = 0xff00,
       /// use anonymous access
       MF_FLAGS_ANON = 0x100
    };
