@@ -148,38 +148,40 @@ MailCollector::Collect(MailFolder *mf)
    m_NewMailFolder->EnableNewMailEvents(true,true);
    m_NewMailFolder->Ping();
 
-   // step 1: execute external command if it's configured
-   String command = READ_CONFIG(m_NewMailFolder->GetProfile(), MP_NEWMAILCOMMAND);
-   if(! command.IsEmpty())
+   if(m_Count)
    {
-      if ( ! SYSTEM(command) )
+      // step 1: execute external command if it's configured
+      String command = READ_CONFIG(m_NewMailFolder->GetProfile(), MP_NEWMAILCOMMAND);
+      if(! command.IsEmpty())
       {
-         // TODO ask whether the user wants to disable it
-         wxLogError(_("Command '%s' (to execute on new mail reception)"
-                      " failed."), command.c_str());
+         if ( ! SYSTEM(command) )
+         {
+            // TODO ask whether the user wants to disable it
+            wxLogError(_("Command '%s' (to execute on new mail reception)"
+                         " failed."), command.c_str());
+         }
       }
-   }
 
 #ifdef   USE_PYTHON
-   // step 2: folder specific Python callback
-   if(! PythonCallback(MCB_FOLDER_NEWMAIL, 0, m_NewMailFolder, m_NewMailFolder->GetClassName(),
-                       m_NewMailFolder->GetProfile()))
-
-   // step 3: global python callback
-   if(! PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0, mApplication, "MApplication",
-                       mApplication->GetProfile()))
-#endif //USE_PYTHON
-
-   if(m_Count && READ_CONFIG(m_NewMailProfile, MP_SHOW_NEWMAILMSG))
-   {
-      String
-         text, title;
-      text.Printf(_("You have %lu new messages in folder '%s'.\n"),
-                  m_Count, m_NewMailFolder->GetName().c_str());
-      if ( m_Count <= (unsigned long) READ_CONFIG(m_NewMailProfile,MP_SHOW_NEWMAILINFO)) 
-         text << m_Message;
-      // TODO make it a wxPMessageBox to let the user shut if off from here?
-      MDialog_Message(text, NULL, _("New Mail"));
+      // step 2: folder specific Python callback
+      if(! PythonCallback(MCB_FOLDER_NEWMAIL, 0, m_NewMailFolder, m_NewMailFolder->GetClassName(),
+                          m_NewMailFolder->GetProfile())
+         && 
+      // step 3: global python callback
+         ! PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0, mApplication, "MApplication",
+                          mApplication->GetProfile()))
+#endif //USE_PYTHON   
+         if(READ_CONFIG(m_NewMailProfile, MP_SHOW_NEWMAILMSG))
+         {
+            String
+               text, title;
+            text.Printf(_("You have %lu new messages in folder '%s'.\n"),
+                        m_Count, m_NewMailFolder->GetName().c_str());
+            if ( m_Count <= (unsigned long) READ_CONFIG(m_NewMailProfile,MP_SHOW_NEWMAILINFO)) 
+               text << m_Message;
+            // TODO make it a wxPMessageBox to let the user shut if off from here?
+            MDialog_Message(text, NULL, _("New Mail"));
+         }
    }
    return rc;
 }
@@ -191,6 +193,14 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    bool rc = true;
    
    m_IsCollecting = true;
+   if(mf == m_NewMailFolder)
+   {
+      wxLogError(_(
+         "You are trying to collect mail from your central New Mail folder.\n"
+         "This makes no sense. Please correct its settings."));
+      RemoveIncomingFolder(mf->GetName());
+      return false;
+   }
    wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
                mf->GetName().c_str());
    wxYield(); // normal wxYield() should be ok here, this code never
@@ -290,6 +300,8 @@ MailCollector::RemoveIncomingFolder(const String &name)
          return true;
       }
    }
+
+   wxASSERT_MSG(0,"Cannot remove non-existing incoming folder from list.");
    return false;
 }
 

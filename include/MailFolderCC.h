@@ -297,6 +297,8 @@ private:
 
    /// PingReopen() protection against recursion
    bool m_PingReopenSemaphore;
+   /// BuildListing() protection against recursion
+   bool m_BuildListingSemaphore;
    /// Do we need to update folder listing?
    bool m_UpdateNeeded;
    /// Request update

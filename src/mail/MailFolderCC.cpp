@@ -166,6 +166,8 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_UpdateNeeded = true;
    m_ProgressDialog = 0;
    m_PingReopenSemaphore = false;
+   m_BuildListingSemaphore = false;
+
    FolderType type = GetFolderType(typeAndFlags);
    SetType(type);
    m_Timer = NULL;
@@ -775,6 +777,13 @@ extern "C"
 void
 MailFolderCC::BuildListing(void)
 {
+//FIXME: leads to missing updates??
+   if(m_BuildListingSemaphore)
+      return;
+
+   m_BuildListingSemaphore = true;
+   m_UpdateNeeded = false;
+
    CHECK_DEAD("Cannot access closed folder\n'%s'.");
    m_NumOfMessages = m_MailStream->nmsgs;
 
@@ -858,29 +867,31 @@ MailFolderCC::BuildListing(void)
    //ASSERT(m_BuildNextEntry == m_NumOfMessages || m_folderType == MF_NNTP);
    m_NumOfMessages = m_BuildNextEntry;
 
+   unsigned long oldNum = m_OldNumOfMessages;
+   if(m_UpdateMsgCount) // this will suppress more new mail events
+      m_OldNumOfMessages = m_NumOfMessages;
+   
    // now we sent an update event to update folderviews etc
    MEventFolderUpdateData data(this);
    MEventManager::Send(data);
 
    /* Now check whether we need to send new mail notifications: */
-   if(m_GenerateNewMailEvents && m_NumOfMessages > m_OldNumOfMessages) // new mail has arrived
+   if(m_GenerateNewMailEvents && m_NumOfMessages > oldNum) // new mail has arrived
    {
-      unsigned long n = m_NumOfMessages - m_OldNumOfMessages;
+      unsigned long n = m_NumOfMessages - oldNum;
       unsigned long *messageIDs = new unsigned long[n];
 
       // actually these are no IDs, but indices into the listing
       for ( unsigned long i = 0; i < n; i++ )
-         messageIDs[i] = m_Listing[m_OldNumOfMessages + i].GetUId();
+         messageIDs[i] = m_Listing[oldNum + i].GetUId();
 
       MEventNewMailData data(this, n, messageIDs);
       MEventManager::Send(data);
 
       delete [] messageIDs;
    }
-   if(m_UpdateMsgCount) // this will suppress more new mail events
-      m_OldNumOfMessages = m_NumOfMessages;
-   m_UpdateNeeded = false;
    m_FirstListing = false;
+   m_BuildListingSemaphore = false;
 }
 
 void
