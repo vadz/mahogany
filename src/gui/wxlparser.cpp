@@ -51,11 +51,11 @@ static void SetEncoding(wxLayoutList *list,
    *useConverter = FALSE;
    if ( encoding != wxFONTENCODING_SYSTEM )
    {
-      if ( !wxTheFontMapper->IsEncodingAvailable(encoding) )
+      if ( !wxFontMapper::Get()->IsEncodingAvailable(encoding) )
       {
          // try to find another encoding
          wxFontEncoding encAlt;
-         if ( wxTheFontMapper->GetAltForEncoding(encoding, &encAlt) )
+         if ( wxFontMapper::Get()->GetAltForEncoding(encoding, &encAlt) )
          {
             if ( conv->Init(encoding, encAlt) )
             {

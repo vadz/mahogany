@@ -1395,7 +1395,7 @@ String MailFolder::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
 
          if ( encoding == wxFONTENCODING_SYSTEM )
          {
-            encoding = wxTheFontMapper->CharsetToEncoding(csName);
+            encoding = wxFontMapper::Get()->CharsetToEncoding(csName);
          }
 
          // get the encoding in RFC 2047 sense

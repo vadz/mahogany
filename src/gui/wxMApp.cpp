@@ -2165,11 +2165,11 @@ extern bool EnsureAvailableTextEncoding(wxFontEncoding *enc,
 {
    CHECK( enc, false, "CheckEncodingAvailability: NULL encoding" );
 
-   if ( !wxTheFontMapper->IsEncodingAvailable(*enc) )
+   if ( !wxFontMapper::Get()->IsEncodingAvailable(*enc) )
    {
       // try to find another encoding
       wxFontEncoding encAlt;
-      if ( wxTheFontMapper->GetAltForEncoding(*enc, &encAlt, "", mayAskUser) )
+      if ( wxFontMapper::Get()->GetAltForEncoding(*enc, &encAlt, "", mayAskUser) )
       {
          // translate the text (if any) to the equivalent encoding
          if ( text )

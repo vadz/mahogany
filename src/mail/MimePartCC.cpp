@@ -373,6 +373,6 @@ wxFontEncoding MimePartCC::GetTextEncoding() const
    String charset = GetParam("charset");
 
    return charset.empty() ? wxFONTENCODING_SYSTEM
-                          : wxTheFontMapper->CharsetToEncoding(charset);
+                          : wxFontMapper::Get()->CharsetToEncoding(charset);
 }
 
