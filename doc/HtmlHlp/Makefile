@@ -23,9 +23,7 @@ Manual.hhc: Manual.html
 	$(PERL) -w .src/makehhc.pl
 
 install: htmlhlp
-	$(INSTALL_DATA) Manual.hhc .src/Manual.hhp Manual.html $(DOCDIR)
-	@# this file must exist or HTML help controller complains
-	touch $(DOCDIR)/Manual.hhk
+	$(INSTALL_DATA) Manual.chm Manual.hhc Manual.hhk .src/Manual.hhp Manual.html $(DOCDIR)
 
 .src/Manual.html: Manual.html
 	cp $< $@
