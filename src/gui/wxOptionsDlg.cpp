@@ -1628,8 +1628,6 @@ void wxOptionsPage::OnChange(wxEvent& event)
 void wxOptionsPage::OnControlChange(wxEvent& event)
 {
    OnChange(event);
-
-   Refresh();
 }
 
 void wxOptionsPage::UpdateUI()
