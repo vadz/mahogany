@@ -34,6 +34,7 @@
 
 #include "MHelp.h"
 #include "gui/wxMIds.h"
+#include "Mpers.h"
 
 #include <wx/window.h>
 #include <wx/confbase.h>
@@ -1035,6 +1036,8 @@ public:
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
 
+   /// checks if dialog and text listing are in sync
+   void CheckSync();
    // returns TRUE if the format string was changed
    bool WasChanged(void) { return m_Filter != m_OriginalFilter;}
 
@@ -1060,7 +1063,8 @@ protected:
    wxTextCtrl     *m_ProgramListing;
    
    wxButton       *m_Buttons[WXSIZEOF(ButtonLabels)];
-
+   bool            m_OverrideFromDialog;
+   
 // data
    wxString m_Filter, m_OriginalFilter;
    Profile *m_FiltersProfile, *m_Profile;
@@ -1086,6 +1090,8 @@ wxFiltersDialog::wxFiltersDialog(Profile *profile, wxWindow *parent)
    m_Profile = profile;
    m_Profile->IncRef();
 
+   m_OverrideFromDialog = TRUE;
+   
    wxLayoutConstraints *c;
    wxString name, pname;
    const char * prefix = "/M/Profiles/";
@@ -1147,7 +1153,7 @@ wxFiltersDialog::wxFiltersDialog(Profile *profile, wxWindow *parent)
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(m_Buttons[0], wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->height.PercentOf(box, wxHeight, 50);
    m_ListBox = new wxCheckListBox(this, -1);
    m_ListBox->SetConstraints(c);
 
@@ -1155,12 +1161,13 @@ wxFiltersDialog::wxFiltersDialog(Profile *profile, wxWindow *parent)
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(m_Buttons[0], wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->top.Below(m_ListBox, 2*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
-   // m_ProgramListing = new wxTextCtrl(this, -1, );
-   // m_ProgramListing->SetConstraints(c);
+    m_ProgramListing = new wxTextCtrl(this, -1, "", wxDefaultPosition,
+                                      wxDefaultSize, wxTE_MULTILINE);
+    m_ProgramListing->SetConstraints(c);
 
-   SetDefaultSize(380, 280, TRUE);
+   SetDefaultSize(380, 380, TRUE);
    TransferDataToWindow();
 
    for(size_t i = 0; i < m_FilterDataCount; i++)
@@ -1264,6 +1271,7 @@ wxFiltersDialog::DoUpdate(void )
    if(selection > -1 && selection < m_ListBox->Number())
       m_ListBox->SetSelection(selection);
    UpdateButtons();
+   CheckSync();
 }
 
 void
@@ -1329,10 +1337,70 @@ wxFiltersDialog::TransferDataFromWindow()
             TranslateOneRuleToProgram(m_FilterData[i].GetCriterium(),
                                       m_FilterData[i].GetAction());
    }
+
+   CheckSync();
+   
    m_Profile->writeEntry("Filter", m_Filter);
    return TRUE;
 }
 
+
+void
+wxFiltersDialog::CheckSync()
+{
+   /* We now check if the rules read back actually match the filter
+      program stored there. */
+   String filterCheck;
+   for(unsigned i = 0; i < m_FilterDataCount; i++)
+   {
+      if(m_FilterData[i].GetActive())
+         filterCheck <<
+            TranslateOneRuleToProgram(m_FilterData[i].GetCriterium(),
+                                      m_FilterData[i].GetAction());
+   }
+
+   if(filterCheck != m_ProgramListing->GetValue()
+      && m_ProgramListing->IsModified()) //FIXME: wxGTK bug?
+   {
+      if(
+         MDialog_YesNoDialog(_("You have modified the filter rule"
+                               " listing. Do you want to override the"
+                               " dialog settings with the rule program"
+                               " from the textbox?"),
+                             NULL,
+                             _("Overwrite dialog settings with program?"),
+                             TRUE,
+                             GetPersMsgBoxName(M_MSGBOX_RULESMISMATCHWARN2))
+         )
+      {
+         m_OverrideFromDialog = FALSE;
+         m_Filter = m_ProgramListing->GetValue();
+         return;
+      }
+      else
+      {
+         m_OverrideFromDialog = TRUE;
+         m_Filter = filterCheck;
+         return;
+      }
+   }
+   // dialog mismatch, without textctrl editing:
+   if(MDialog_YesNoDialog(_("The filter rule dialog settings stored"
+                            " in the configuration settings" 
+                            " do not match the actual filter rules"
+                            " there. Maybe you have edited the" 
+                            " filter rules manually?\n" 
+                            " Do you want to override the filter rules"
+                            " with the settings from this dialog?"), 
+                          NULL,
+                          _("Overwrite with dialog settings?"),
+                          TRUE,
+                          GetPersMsgBoxName(M_MSGBOX_RULESMISMATCHWARN1)))
+   {
+      m_OverrideFromDialog = TRUE;
+      m_Filter = filterCheck;
+   }
+}
 
 bool
 wxFiltersDialog::TransferDataToWindow()
@@ -1371,27 +1439,8 @@ wxFiltersDialog::TransferDataToWindow()
       m_FilterDataCount++;
    }
 
-   /* We now check if the rules read back actually match the filter
-      program stored there. */
-   String filterCheck;
-   for(i = 0; i < m_FilterDataCount; i++)
-   {
-      if(m_FilterData[i].GetActive())
-         filterCheck <<
-            TranslateOneRuleToProgram(m_FilterData[i].GetCriterium(),
-                                      m_FilterData[i].GetAction());
-   }
-
-   if(filterCheck != m_Filter)
-   {
-      MDialog_Message(_("The filter rule dialog settings stored in the configuration settings\n"
-                        "do not match the actual filter rules there. Maybe you have edited the\n"
-                        "filter rules manually?\n"
-                        "If you make any changes here, the old rules will be overwritten."),
-                      NULL,
-                      _("Manually set Filterrules?")
-                      );
-   }
+   m_ProgramListing->SetValue(m_Filter);
+   CheckSync();
    DoUpdate();
    return true;
 }

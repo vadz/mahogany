@@ -52,6 +52,7 @@
 #   include <wx/wizard.h>
 #else
 #   include "gui/wxOptionsDlg.h" // for ShowOptionsDialog()
+#   include "gui/wxMDialogs.h"
 #endif
 
 #include "gui/wxDialogLayout.h"
@@ -223,28 +224,6 @@ class InstallWizardIdentityPage : public InstallWizardPage
 public:
    InstallWizardIdentityPage(wxWizard *wizard);
 
-   virtual bool TransferDataFromWindow()
-   {
-      wxString email = m_email->GetValue();
-      gs_installWizardData.name = m_name->GetValue();
-      gs_installWizardData.email = email;
-
-      // if the email is user@some.where, then suppose that the servers are
-      // pop.some.where &c - be sure to check that some.where is really a
-      // domain and not just a hostname by checking the number of dots in it
-      wxString domain = email.AfterFirst('@').AfterFirst('.');
-      if ( !!domain )
-      {
-         AddDomain(gs_installWizardData.pop, domain);
-         AddDomain(gs_installWizardData.smtp, domain);
-         AddDomain(gs_installWizardData.imap, domain);
-         AddDomain(gs_installWizardData.nntp, domain);
-      }
-      //else: no domain specified
-
-      return TRUE;
-   }
-
    virtual bool TransferDataToWindow()
    {
       m_name->SetValue(gs_installWizardData.name);
@@ -252,13 +231,6 @@ public:
       return TRUE;
    }
 
-   void AddDomain(wxString& server, const wxString& domain)
-   {
-      if ( server.Find('.') == wxNOT_FOUND )
-      {
-         server << '.' << domain;
-      }
-   }
 
 private:
    wxTextCtrl *m_name,
@@ -282,7 +254,18 @@ public:
                          "to send email, please do it!"));
             return FALSE;
          }
-         else
+         // if the email is user@some.where, then suppose that the servers are
+         // pop.some.where &c - be sure to check that some.where is really a
+         // domain and not just a hostname by checking the number of dots in it
+         wxString domain =
+            gs_installWizardData.email.AfterFirst('@').AfterFirst('.'); 
+         if ( !!domain )
+         {
+            AddDomain(gs_installWizardData.pop, domain);
+            AddDomain(gs_installWizardData.smtp, domain);
+            AddDomain(gs_installWizardData.imap, domain);
+            AddDomain(gs_installWizardData.nntp, domain);
+         }
             return TRUE;
       }
 
@@ -295,6 +278,17 @@ public:
          return TRUE;
       }
 
+   void AddDomain(wxString& server, const wxString& domain)
+      {
+         if ( server.Find('.') != wxNOT_FOUND )
+            return;
+         wxString msg;
+         msg.Printf(_("You have no domain specified for the server '%s'.\n"
+                      "Do you want to add the domain '%s'?"),
+                    server.c_str(), domain.c_str());
+         if(MDialog_YesNoDialog(msg,this, MDIALOG_YESNOTITLE, TRUE))
+         server << '.' << domain;
+      }
 private:
    wxTextCtrl *m_pop,
               *m_imap,
@@ -347,6 +341,7 @@ public:
 
    virtual bool TransferDataToWindow()
       {
+#ifdef OS_WIN
          if(gs_installWizardData.useDialUp == -1) // no setting yet
          {
             wxDialUpManager *man = wxDialUpManager::Create();
@@ -354,6 +349,7 @@ public:
             // networking, but if we don't, then we probably do
             gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
          }
+#endif
          m_FolderTypeChoice->SetSelection(gs_installWizardData.folderType);
 #ifdef USE_PYTHON
          m_UsePythonCheckbox->SetValue(gs_installWizardData.usePython != 0);
@@ -855,6 +851,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
       _("Default format for mailbox files"
         ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
       widthMax,last);
+   last = m_FolderTypeChoice;
 #ifdef USE_PYTHON
    wxStaticText *text6 = panel->CreateMessage(
       _(
@@ -1049,12 +1046,15 @@ bool RunInstallWizard()
 #endif // USE_PISOCK
       gs_installWizardData.collectAllMail = false;
 
+      // These are set up above.
+#if 0
       // don't touch the SMTP server: it won't lead to creation of any
       // (unwanted) folders, so it doesn't hurt to have the default value
       gs_installWizardData.pop =
       gs_installWizardData.imap =
       gs_installWizardData.nntp = "";
-
+#endif
+      
       // also, don't show the tips for the users who skip the wizard
       profile->writeEntry(MP_SHOWTIPS, 0l);
    }
@@ -2061,6 +2061,8 @@ VerifyMailConfig(void)
 // FIXME we should make sure that hostname can be resolved - otherwise this
 // message will stay in sendmail queue _forever_ (at least it does happen
 // here with sendmail 8.8.8 running under Solaris 2.6)
+   // You have a broken sendmail setup. Messages that cannot be sent
+   // do get returned by sendmail if set up properly. It's not our job.
    String nil;
    SendMessageCC  sm(mApplication->GetProfile());
    sm.SetSubject(_("Mahogany Test Message"));

@@ -600,9 +600,11 @@ MDialog_YesNoDialog(const char *message,
    //MGuiLocker lock;
    CloseSplash();
    NoBusyCursor no;
-   return wxPMessageBox(configPath, message, caption,
-                        style,
-                        GetDialogParent(parent)) == wxYES;
+   // gcc 2.95.2 complains about void return if I don't use rc
+   bool rc = wxPMessageBox(configPath, message, caption,
+                           style,
+                           GetDialogParent(parent)) == wxYES;
+   return rc;
 }
 
 
@@ -2124,7 +2126,8 @@ static const struct
    const char *desc;
 } gs_persMsgBoxData[] =
 {
-   { "AskSpecifyDir",            gettext_noop("prompt for global directory if not found") },
+   { "AskSpecifyDir",
+        gettext_noop("prompt for global directory if not found") },
 #ifdef OS_UNIX
    { "AskRunAsRoot",             gettext_noop("warn if Mahogany is run as root") },
 #endif // OS_UNIX
@@ -2170,7 +2173,10 @@ static const struct
    { "ShowLogWinHint",           gettext_noop("show the hint about reopening the log window when it is being closed") },
    { "AutoExpunge",              gettext_noop("ask to expunge deleted messages before closing the folder") },
       { "SuspendAutoCollectFolder", gettext_noop("ask to suspend auto-collecting messages from failed incoming folder") },
-   {"RulesMismatchWarn", gettext_noop("warn that filter rules do not match dialog")}
+         {"RulesMismatchWarn1",
+             gettext_noop("Warning that filter rules do not match dialog")},
+      { "RulesMismatchWarn2",
+           gettext_noop("Warning that filter rules have been edited") },
    //{ "", gettext_noop("") },
 };
 

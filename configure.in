@@ -108,18 +108,6 @@ M_OVERRIDES(ssl,ssl,
 --with-ssl      compile in SSL support (requires openSSL),
 USE_SSL)
 
-M_OVERRIDES(no_dsa,no_dsa,
---with-no_dsa      use SSL without DSA,
-USE_NO_DSA)
-
-M_OVERRIDES(no_idea,no_idea,
---with-no_idea      use SSL without IDEA,
-USE_NO_IDEA)
-
-M_OVERRIDES(no_rsa,no_rsa,
---with-no_rsa      use SSL without RSA,
-USE_NO_RSA)
-
 M_OVERRIDES(wxconfigprg,wxconfigprg,
 --with-wxconfigprg=xxx    use wx-config program named xxx e.g. wxgtkd-config,
 USE_WXCONFIGPRG)
