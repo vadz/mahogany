@@ -370,13 +370,6 @@ inline bool HeaderInfoListImpl::HasTransTable() const
    return m_tableMsgno != NULL;
 }
 
-inline bool HeaderInfoListImpl::IsTranslatingIndices() const
-{
-   // if we must rebuild the tables, it means that we are going to have them
-   // and we will do the index translations
-   return MustRebuildTables() || HasTransTable() || m_reverseOrder;
-}
-
 inline bool HeaderInfoListImpl::MustRebuildTables() const
 {
    // if we already have the tables, we don't have to rebuild them
@@ -390,6 +383,13 @@ inline bool HeaderInfoListImpl::MustRebuildTables() const
           m_count >= 2 &&
           (IsThreading() ||
            GetSortCritDirect(m_sortParams.sortOrder) != MSO_NONE);
+}
+
+inline bool HeaderInfoListImpl::IsTranslatingIndices() const
+{
+   // if we must rebuild the tables, it means that we are going to have them
+   // and we will do the index translations
+   return MustRebuildTables() || HasTransTable() || m_reverseOrder;
 }
 
 // ----------------------------------------------------------------------------
