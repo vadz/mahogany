@@ -10,14 +10,21 @@ $Id$
 
 ************ optimize
 
-MFolderCache and MfStatusCache should use sorted arrays!
-
 ************ possible cclient improvements (from reading PINE sources)
 
-1. mail_fetch_overview_x() could be made obsolete by using SET_IMAPEXTRAHEADERS
+1. filtering is awfully slow because:
+  a) message is recreated several times instead of being created only once
+     and kept throughout
+
+  b) usage of GetHeaderLine() which retrieves the entire header completely
+     unnecessarily: instead it should save ENVELOPE information (i.e. from
+     listing) in the Message and access it - we already have everything we
+     need, why ask the server!!
+
+2. mail_fetch_overview_x() could be made obsolete by using SET_IMAPEXTRAHEADERS
    to tell cclient to fetch "Newsgroup" header too
 
-2. must install SET_BLOCKNOTIFY handler (it's not clear when exactly is it
+3. must install SET_BLOCKNOTIFY handler (it's not clear when exactly is it
    called and with which args, so have to test it first, but it might be a
    good place to show the busy cursor and such...)
 

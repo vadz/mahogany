@@ -2394,7 +2394,8 @@ void wxFolderView::SelectAllUnread()
    HeaderInfoList_obj hil = GetFolder()->GetHeaders();
    CHECK_RET( hil, "can't select unread messages without folder listing" );
 
-   for ( size_t n = 0; n < m_NumOfMessages; n++ )
+   size_t count = hil->Count();
+   for ( size_t n = 0; n < count; n++ )
    {
       if ( !(hil[n]->GetStatus() & MailFolder::MSG_STAT_SEEN) )
       {
@@ -3117,6 +3118,11 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
          // restore the selection
          m_FolderCtrl->SelectFocused();
       }
+
+      // update the count of messages and deleted messages (of which there
+      // shouldn't be left any)
+      m_NumOfMessages -= count;
+      m_nDeleted = 0;
    }
 }
 
