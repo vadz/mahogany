@@ -254,10 +254,22 @@ bool Message::CompareAddresses(const String& adr1, const String& adr2)
 
    ExtractAddress(adr1, &email1);
    ExtractAddress(adr2, &email2);
- 
-   strutil_tolower(email1);
-   strutil_tolower(email2);
 
+   String mailbox, host;
+
+   // turn the hostname part to lower case:
+   mailbox = strutil_before(email1,'@');
+   host    = strutil_after(email1, '@');
+   strutil_tolower(host);
+   email1 = mailbox;
+   if(host[0]) email1 << '@' << host;
+
+   mailbox = strutil_before(email2,'@');
+   host    = strutil_after(email2, '@');
+   strutil_tolower(host);
+   email2 = mailbox;
+   if(host[0]) email2 << '@' << host;
+   
    // TODO the address foo.bar@baz.com should be considered the same as
    //      bar@baz.com, for now it is not...
 

@@ -331,8 +331,8 @@ MessageCC::Address(String &name, MessageAddressType type) const
 
    ADDRESS
       * addr = NULL;
-   String
-      email;
+   String email0, name0;
+   String email;
 
    name = "";
    switch(type)
@@ -377,19 +377,32 @@ MessageCC::Address(String &name, MessageAddressType type) const
    if(! addr)
       return "";
 
-   email = String(addr->mailbox);
-   if(addr->host && strlen(addr->host)
-      && (strcmp(addr->host,BADHOST) != 0))
-      email += String("@") + String(addr->host);
+   while(addr)
+   {
+      email0 = String(addr->mailbox);
+      if(addr->host && strlen(addr->host)
+         && (strcmp(addr->host,BADHOST) != 0))
+         email0 += String("@") + String(addr->host);
+      email0 = MailFolderCC::DecodeHeader(email);
+      if(addr->personal && strlen(addr->personal))
+      {
+         name0 = String(addr->personal);
+         name0 = MailFolderCC::DecodeHeader(name0);
+      }
+      else
+         name0 = "";
+      if(strchr(name0, ',') || strchr(name0,'<') || strchr(name0,'>'))
+         name0 = String("\"") + name0 + String("\"");
 
-   if(addr->personal && strlen(addr->personal))
-      name = String(addr->personal);
+      if(email[0]) email += ", ";
+      email += email0;
 
-   name = MailFolderCC::DecodeHeader(name);
-
-   if(strchr(name, ',') || strchr(name,'<') || strchr(name,'>'))
-      name = String("\"") + name + String("\"");
-   return MailFolderCC::DecodeHeader(email);
+      // for now: use first name found:
+      if(name[0] == '\0') name = name0;
+      
+      addr = addr->next;
+   }
+   return email;
 }
 
 String const &

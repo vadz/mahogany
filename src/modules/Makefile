@@ -31,7 +31,7 @@ SRC := $(SRC) PalmOS.cpp
 
 # for MAL:
 ifdef HAVE_LIBMAL
-CPPFLAGS := $(CPPFLAGS) -DHAVE_LIBMAL -I$(LIBMAL_DIR)/malsync_src/mal/client/common -I$(LIBMAL_DIR)/malsync_src/mal/common -I$(LIBMAL_DIR) 
+CPPFLAGS := $(CPPFLAGS) -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_DIR)/malsync_src/mal/client/common -I$(LIBMAL_DIR)/malsync_src/mal/common -I$(LIBMAL_DIR) 
 endif
 
 endif
