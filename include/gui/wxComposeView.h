@@ -190,7 +190,7 @@ public:
 
    /// adds recepients from addr (Recepient_Max means to reuse the last)
    void AddRecipients(const String& addr,
-                      RecepientType rcptType = Recepient_Max);
+                      RecipientType rcptType = Recipient_Max);
 
    /// adds a "To" recipient
    void AddTo(const String& addr) { AddRecipients(addr, Recipient_To); }
