@@ -587,7 +587,7 @@ QuoteURLFilter::DoProcess(String& text,
 
    int lenURL;
    const wxChar *startURL = FindURLIfNeeded(lineCur, lenURL);
-   for ( ;; )
+   while ( *lineCur )
    {
       if ( m_options.quotedColourize )
       {
@@ -600,7 +600,7 @@ QuoteURLFilter::DoProcess(String& text,
       }
 
       // find the start of the next line
-      const wxChar *lineNext = wxStrchr(lineCur + 1, _T('\n'));
+      const wxChar *lineNext = wxStrchr(lineCur, _T('\n'));
 
       // and look for all URLs on the current line
       const wxChar *endURL = lineCur;
