@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Project:     M
 // File name:   modules/XFMailImport.cpp - import everything from XFMail
-// Purpose:     import confi settings from XFMail
+// Purpose:     import config settings from XFMail
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     23.05.00
@@ -186,9 +186,9 @@ bool MXFMailImporter::ImportSettings()
 
 bool MXFMailImporter::ImportFolders()
 {
-   wxString filename = GetXFMailDir() + ".xfmfolders";
-   wxTextFile file(filename);
-   if ( !file.Open() )
+   wxString foldersfilename = GetXFMailDir() + ".xfmfolders";
+   wxTextFile foldersfile(foldersfilename);
+   if ( !foldersfile.Open() )
    {
       wxLogError(_("Failed to open %s folders file"), "XFMail");
 
@@ -235,10 +235,10 @@ bool MXFMailImporter::ImportFolders()
 
    bool error = FALSE;
    size_t nImported = 0;
-   size_t nLines = file.GetLineCount();
+   size_t nLines = foldersfile.GetLineCount();
    for ( size_t nLine = 0; nLine < nLines; nLine++ )
    {
-      const wxString& line = file[nLine];
+      const wxString& line = foldersfile[nLine];
 
       if ( line.length() < 3 || line[0] != '@' || line[1] != ' ' )
       {
@@ -256,7 +256,7 @@ bool MXFMailImporter::ImportFolders()
       if ( !folderName )
       {
          wxLogDebug("%s(%u): empty folder name, skipping.",
-                    filename.c_str(), nLine + 1);
+                    foldersfilename.c_str(), nLine + 1);
          continue;
       }
 
@@ -274,13 +274,14 @@ bool MXFMailImporter::ImportFolders()
          if ( folderName[0u] == '/' )
          {
             wxLogDebug("%s(%u): folder '%s' assumed to be a spool, skipping.",
-                       filename.c_str(), nLine + 1, folderName.c_str());
+                       foldersfilename.c_str(), nLine + 1, folderName.c_str());
             continue;
          }
 
          name = folderName;
          path << m_mailDir << name;
       }
+      folderName = name; //now name==folderName in both cases
 
       // now get the folder type
 
@@ -296,7 +297,7 @@ bool MXFMailImporter::ImportFolders()
       if ( !typeString.ToULong(&nType) || (nType != 1 && nType != 8) )
       {
          wxLogDebug("%s(%u): unreckognized folder type %s, skipping.",
-                    filename.c_str(), nLine + 1, typeString.c_str());
+                    foldersfilename.c_str(), nLine + 1, typeString.c_str());
          continue;
       }
 
@@ -338,22 +339,23 @@ bool MXFMailImporter::ImportFolders()
       if ( !flagsString.ToULong(&flags) )
       {
          wxLogDebug("%s(%u): not numeric folder flags %s, skipping.",
-                    filename.c_str(), nLine + 1, flagsString.c_str());
+                    foldersfilename.c_str(), nLine + 1, flagsString.c_str());
          continue;
       }
 
       MFolder *parent;
-      if ( (flags & SYSTEM) ||
+      /*if ( (flags & SYSTEM) ||
             folderName == "inbox" ||
             folderName == "outbox" ||
             folderName == "trash" ||
             folderName == "sent_mail" ||
             folderName == "draft" ||
             folderName == "template" )
-      {
+      {*/ //by Nerijus
          // we put the XFMail system folder under a common parent
+	 // I'd like to put ALL folders under a common parent - Nerijus
          wxLogDebug("%s(%u): folder %s has system flag set.",
-                    filename.c_str(), nLine + 1, folderName.c_str());
+                    foldersfilename.c_str(), nLine + 1, folderName.c_str());
 
          if ( !folderXFMail )
          {
@@ -366,14 +368,16 @@ bool MXFMailImporter::ImportFolders()
                             "",
                             FALSE
                            );
+                           if ( !folderXFMail )
+                           folderXFMail = MFolder::Get("XFMail");
          }
 
          parent = folderXFMail;
-      }
+      /*}
       else
       {
          parent = NULL;
-      }
+      }*/ //by Nerijus
 
       // do create the folder
       FolderType type = nType == 1 ? MF_MH : MF_FILE;
