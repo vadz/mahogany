@@ -79,7 +79,9 @@ public:
    void Select(long index, bool on=true)
       { SetItemState(index,on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
 
-   int GetSelections(INTARRAY &selections) const;
+   /// if nofocused == true the focused entry will not be substituted
+   /// for an empty list of selections
+   int GetSelections(INTARRAY &selections, bool nofocused = false) const;
    UIdType GetFocusedUId(void) const;
    bool IsSelected(long index)
       { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
@@ -146,8 +148,6 @@ END_EVENT_TABLE()
 
 void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
-//   wxLogDebug("FolderListCtrl::OnChar, this=%p", this);
-
    if(! m_FolderView || ! m_FolderView->m_MessagePreview
       || event.AltDown() || event.ControlDown()
       || ! m_FolderView->GetFolder()
@@ -156,7 +156,8 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       event.Skip();
       return; // nothing to do
    }
-
+   m_FolderView->UpdateSelectionInfo();
+   
    if(! event.ControlDown())
    {
       long keyCode = event.KeyCode();
@@ -316,7 +317,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
    // check if there is already a selected message, if so, don´t
    // update the message view:
    INTARRAY selections;
-   if(GetSelections(selections) == 0 
+   if(GetSelections(selections, true) == 1 // we are the only one
       && m_SelectionCallbacks)
    {
       HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
@@ -415,7 +416,7 @@ wxFolderListCtrl::~wxFolderListCtrl()
 }
 
 int
-wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
+wxFolderListCtrl::GetSelections(wxArrayInt &selections, bool nofocused) const
 {
    selections.Empty();
    long item = -1;
@@ -432,7 +433,7 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
             selections.Add(hi->GetUId());
       }
       // If none is selected, use the focused entry
-      if(selections.Count() == 0)
+      if(selections.Count() == 0 && ! nofocused)
       {
          item = -1;
          item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
@@ -805,14 +806,20 @@ wxFolderView::SearchMessages(void)
 }
 
 void
+wxFolderView::UpdateSelectionInfo(void)
+{
+   // record this for the later Update:
+   m_FolderCtrl->GetSelections(m_SelectedUIds, true);
+   m_FocusedUId = m_FolderCtrl->GetFocusedUId();
+}
+
+void
 wxFolderView::OnCommandEvent(wxCommandEvent &event)
 {
    int n;
    INTARRAY selections;
 
-   // record this for the later Update:
-   GetSelections(m_SelectedUIds);
-   m_FocusedUId = m_FolderCtrl->GetFocusedUId();
+   UpdateSelectionInfo();
    
    switch(event.GetId())
    {

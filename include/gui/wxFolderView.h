@@ -154,6 +154,8 @@ public:
    /// for use by the listctrl only:
    bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
 
+   /// Update the idea of which messages are selected.
+   void UpdateSelectionInfo(void);
 protected:
    /** Save messages to a folder.
        @param n number of messages
