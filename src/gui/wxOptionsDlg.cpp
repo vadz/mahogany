@@ -98,9 +98,6 @@ extern const MPersMsgBox *M_MSGBOX_OPT_STOREREMOTENOW;
    // define this to allow using MTA (typically only for Unix)
    #define USE_SENDMAIL
 
-   // we use externabl browser for HTML help under Unix
-   #define USE_EXT_HTML_HELP
-
    // BBDB support only makes sense for Unix
    #define USE_BBDB
 
@@ -494,11 +491,12 @@ enum ConfigFields
 #endif // !Win
    ConfigField_BrowserInNewWindow,
 
-#ifdef USE_EXT_HTML_HELP
+#ifdef OS_UNIX
    ConfigField_HelpersHelp2,
+   ConfigField_HelpBrowserKind,
    ConfigField_HelpBrowser,
    ConfigField_HelpBrowserIsNetscape,
-#endif // USE_EXT_HTML_HELP
+#endif // OS_UNIX
 
 #ifdef OS_UNIX
    ConfigField_ImageConverter,
@@ -1554,11 +1552,14 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   ConfigField_BrowserIsNetscape
 #endif // Win/Unix
    },
-#ifdef USE_EXT_HTML_HELP
+#ifdef OS_UNIX
    { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
-   { gettext_noop("&Help viewer"),                Field_File,    -1                      },
+   { gettext_noop("&Help viewer"
+                  ":internal"
+                  ":external"),                Field_Combo,    -1                      },
+   { gettext_noop("&External viewer"),                Field_File,    -1                      },
    { gettext_noop("Help &viewer is Netscape"),    Field_Bool,    -1                      },
-#endif // USE_EXT_HTML_HELP
+#endif // OS_UNIX
 
 #ifdef OS_UNIX
    { gettext_noop("&Image format converter"),     Field_File,    -1                      },
@@ -2005,11 +2006,12 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // OS_WIN
    CONFIG_ENTRY(MP_BROWSER_INNW),
 
-#ifdef USE_EXT_HTML_HELP
+#ifdef OS_UNIX
    CONFIG_NONE(),
+   CONFIG_ENTRY(MP_HELPBROWSER_KIND),
    CONFIG_ENTRY(MP_HELPBROWSER),
    CONFIG_ENTRY(MP_HELPBROWSER_ISNS),
-#endif // USE_EXT_HTML_HELP
+#endif // OS_UNIX
 
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_CONVERTPROGRAM),

@@ -33,6 +33,7 @@ extern const MOption MP_DEBUG_CCLIENT;
 extern const MOption MP_SHOWADBEDITOR;
 extern const MOption MP_SHOWTIPS;
 extern const MOption MP_LASTTIP;
+extern const MOption MP_HELPBROWSER_KIND;
 extern const MOption MP_HELPBROWSER;
 extern const MOption MP_HELPBROWSER_ISNS;
 extern const MOption MP_HELPFRAME_WIDTH;
@@ -459,6 +460,8 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 /// flat tool bars?
 #define   MP_FLAT_TOOLBARS_NAME   "ToolBarsFlat"
 
+/// help browser kind
+#define   MP_HELPBROWSER_KIND_NAME   "HelpBrowserKind"
 /// help browser name
 #define   MP_HELPBROWSER_NAME   "HelpBrowser"
 /// is help browser of netscape type?
@@ -1257,6 +1260,8 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 #define MP_SHOWTIPS_DEFVAL 1L
 /// the index of the last tip which was shown
 #define MP_LASTTIP_DEFVAL 0L
+/// help browser kind
+#define   MP_HELPBROWSER_KIND_DEFVAL 0l // internal
 /// help browser name
 #define   MP_HELPBROWSER_DEFVAL   "netscape"
 /// is help browser of netscape type?

@@ -47,6 +47,7 @@
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 #include <wx/fs_mem.h>
+#include <wx/fs_zip.h>
 #include <wx/fs_inet.h>
 #include <wx/cmdline.h>
 
@@ -122,6 +123,7 @@ extern const MOption MP_CONFIRMEXIT;
 #ifdef USE_DIALUP
 extern const MOption MP_DIALUP_SUPPORT;
 #endif // USE_DIALUP
+extern const MOption MP_HELPBROWSER_KIND;
 extern const MOption MP_HELPBROWSER;
 extern const MOption MP_HELPBROWSER_ISNS;
 extern const MOption MP_HELPDIR;
@@ -953,6 +955,7 @@ wxMApp::OnInit()
 
    wxInitAllImageHandlers();
    wxFileSystem::AddHandler(new wxMemoryFSHandler);
+   wxFileSystem::AddHandler(new wxZipFSHandler);
 
    // we need to reference wxInternetFSHandler or it might not be linked into
    // the program at all when linking statically!
@@ -1308,13 +1311,23 @@ bool wxMApp::InitHelp()
       helpdir = GetHelpDir();
    }
 
+#ifdef OS_UNIX
+   bool helpBrowserIsExternal = READ_APPCONFIG(MP_HELPBROWSER_KIND);
+#endif // OS_UNIX
    while ( !m_HelpController )
    {
       // we hardcode the help controller class we use instead of using the
       // default wxHelpController everywhere as we don't have docs in all
       // possible formats, just HTML and CHM
 #ifdef OS_UNIX
-      m_HelpController = new wxExtHelpController;
+      if ( !helpBrowserIsExternal )
+      {
+         m_HelpController = new wxHtmlHelpController;
+      }
+      else
+      {
+         m_HelpController = new wxExtHelpController;
+      }
 #else // Windows
       m_HelpController = new wxBestHelpController;
 #endif // Unix/Windows
@@ -1361,11 +1374,14 @@ bool wxMApp::InitHelp()
 
    // set help viewer options
 
-#if defined(OS_UNIX) // && !wxUSE_WXHTML_HELP
-   ((wxExtHelpController *)m_HelpController)->SetBrowser(
-      READ_APPCONFIG(MP_HELPBROWSER),
-      READ_APPCONFIG(MP_HELPBROWSER_ISNS));
-#endif // using wxExtHelpController
+#ifdef OS_UNIX
+   if ( helpBrowserIsExternal )
+   {
+      ((wxExtHelpController *)m_HelpController)->SetBrowser(
+         READ_APPCONFIG(MP_HELPBROWSER),
+         READ_APPCONFIG(MP_HELPBROWSER_ISNS));
+   }
+#endif // OS_UNIX
 
    wxSize size = wxSize(READ_APPCONFIG(MP_HELPFRAME_WIDTH),
                         READ_APPCONFIG(MP_HELPFRAME_HEIGHT));
@@ -1373,6 +1389,13 @@ bool wxMApp::InitHelp()
                          READ_APPCONFIG(MP_HELPFRAME_YPOS));
 
    m_HelpController->SetFrameParameters("Mahogany : %s", size, pos);
+
+#ifdef OS_UNIX
+   if ( !helpBrowserIsExternal )
+   {
+      m_HelpController->DisplayContents();
+   }
+#endif // OS_UNIX
 
    // remember the dir where we found the files
    if ( helpdir != GetHelpDir() )
