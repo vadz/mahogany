@@ -19,6 +19,8 @@
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
 WX_DEFINE_ARRAY(bool, ArrayBool);
 
+class MFolder;
+
 // -----------------------------------------------------------------------------
 // constants
 // -----------------------------------------------------------------------------
@@ -99,12 +101,14 @@ public:
 
    enum FieldFlags
    {
-      Field_Vital   = 0x10000000, // vital setting, test after change
-      Field_Restart = 0x20000000, // will only take effect during next run
-      Field_Advanced= 0x40000000, // don't show this field in novice mode
-      Field_Global  = 0x80000000, // no identity override for this field
-      Field_AppWide = 0x01000000, // same setting for all folders
-      Field_Flags   = 0xff000000  // bit mask selecting the flags
+      Field_Vital    = 0x10000000, // vital setting, test after change
+      Field_Restart  = 0x20000000, // will only take effect during next run
+      Field_Advanced = 0x40000000, // don't show this field in novice mode
+      Field_Global   = 0x80000000, // no identity override for this field
+      Field_AppWide  = 0x01000000, // same setting for all folders
+      Field_Inverse  = 0x02000000, // invert the value (Field_Bool only)
+      Field_NotApp   = 0x04000000, // per folder option, opposite of AppWide
+      Field_Flags    = 0xff000000  // bit mask selecting the flags
    };
 
    struct FieldInfo
@@ -362,6 +366,51 @@ struct wxOptionsPageDesc
 // standard pages
 // ----------------------------------------------------------------------------
 
+// user identity
+class wxOptionsPageIdent : public wxOptionsPageStandard
+{
+public:
+   wxOptionsPageIdent(wxNotebook *parent, Profile *profile);
+
+   void OnButton(wxCommandEvent&);
+private:
+   DECLARE_EVENT_TABLE()
+};
+
+// network configuration page
+class wxOptionsPageNetwork : public wxOptionsPageStandard
+{
+public:
+   wxOptionsPageNetwork(wxNotebook *parent, Profile *profile);
+
+#ifdef OS_WIN
+   virtual bool TransferDataToWindow();
+#endif // OS_WIN
+};
+
+// new mail handling options
+class wxOptionsPageNewMail : public wxOptionsPageStandard
+{
+public:
+   wxOptionsPageNewMail(wxNotebook *parent, Profile *profile);
+   virtual ~wxOptionsPageNewMail();
+
+   void OnButton(wxCommandEvent&);
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
+private:
+   // create m_folder for our m_Profile
+   bool GetFolderFromProfile();
+
+   bool m_collectOld;
+
+   MFolder *m_folder;
+
+   DECLARE_EVENT_TABLE()
+};
+
 // settings concerning the compose window
 class wxOptionsPageCompose : public wxOptionsPageStandard
 {
@@ -413,28 +462,6 @@ class wxOptionsPageFolderTree : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageFolderTree(wxNotebook *parent, Profile *profile);
-};
-
-// user identity
-class wxOptionsPageIdent : public wxOptionsPageStandard
-{
-public:
-   wxOptionsPageIdent(wxNotebook *parent, Profile *profile);
-
-   void OnButton(wxCommandEvent&);
-private:
-   DECLARE_EVENT_TABLE()
-};
-
-// network configuration page
-class wxOptionsPageNetwork : public wxOptionsPageStandard
-{
-public:
-   wxOptionsPageNetwork(wxNotebook *parent, Profile *profile);
-
-#ifdef OS_WIN
-   virtual bool TransferDataToWindow();
-#endif // OS_WIN
 };
 
 // global folder settings (each folder has its own settings which are changed

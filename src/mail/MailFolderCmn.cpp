@@ -1595,9 +1595,13 @@ MailFolderCmn::ReportNewMail(const UIdArray& uidsNew, const MFolder *folder)
       {
          if ( READ_CONFIG(profile, MP_SHOW_NEWMAILMSG) )
          {
-            String message;
-
             unsigned long number = uidsNew.GetCount();
+
+            String message;
+            message.Printf(_("You have received %lu new messages "
+                             "in the folder '%s'"),
+                           number, folder->GetFullName().c_str());
+
 
             // we give the detailed new mail information when there are few new
             // mail messages, otherwise we just give a brief message with their
@@ -1609,8 +1613,7 @@ MailFolderCmn::ReportNewMail(const UIdArray& uidsNew, const MFolder *folder)
             if ( detailsThreshold == -1 ||
                  number < (unsigned long)detailsThreshold )
             {
-               message.Printf(_("You have received new mail in folder '%s':"),
-                              folder->GetFullName().c_str());
+               message += ':';
 
                for( unsigned long i = 0; i < number; i++)
                {
@@ -1650,11 +1653,8 @@ MailFolderCmn::ReportNewMail(const UIdArray& uidsNew, const MFolder *folder)
             }
             else // too many new messages
             {
-               // it seems like a better idea to give this brief message in case
-               // of several messages
-               message.Printf(_("You have received %lu new messages "
-                                "in the folder '%s'."),
-                              number, folder->GetFullName().c_str());
+               // don't give the details
+               message += '.';
             }
 
             LOGMESSAGE((M_LOG_WINONLY, message));

@@ -47,6 +47,11 @@
 
 struct MailCollectorFolderEntry
 {
+   MailCollectorFolderEntry(const String& name) : m_name(name)
+   {
+      m_failcount = 0;
+   }
+
    String m_name;
 
    /** Failcount is 0 initially, when it reaches MC_MAX_FAIL a warning is
@@ -133,6 +138,37 @@ MailCollector::Create(void)
    return new MailCollectorImpl;
 }
 
+/* static */
+bool
+MailCollector::AddOrRemoveIncoming(MFolder *folder, bool isIncoming)
+{
+   MailCollector *collector = mApplication->GetMailCollector();
+
+   bool rc;
+
+   if ( collector )
+   {
+      if ( isIncoming )
+      {
+         rc = collector->AddIncomingFolder(folder->GetFullName());
+         folder->AddFlags(MF_FLAGS_INCOMING);
+      }
+      else
+      {
+         rc = collector->RemoveIncomingFolder(folder->GetFullName());
+         folder->ResetFlags(MF_FLAGS_INCOMING);
+      }
+   }
+   else
+   {
+      wxFAIL_MSG("can't set the isIncoming setting: no mail collector");
+
+      rc = false;
+   }
+
+   return rc;
+}
+
 /// only used by MailCollector to find incoming folders
 class MAppFolderTraversal : public MFolderTraversal
 {
@@ -149,9 +185,8 @@ public:
          {
             wxLogDebug("Found incoming folder '%s'.",
                        folderName.c_str());
-            MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
-            e->m_name = folderName;
-            e->m_failcount = 0;
+            MailCollectorFolderEntry *e =
+               new MailCollectorFolderEntry(folderName);
             m_list->push_back(e);
          }
          if(f) f->DecRef();
@@ -343,12 +378,11 @@ MailCollectorImpl::AddIncomingFolder(const String &name)
    if ( !folder )
       return false;
 
-   MailFolder *mf = MailFolder::OpenFolder(folder);
-   if(mf == NULL)
+   MailFolder_obj mf = MailFolder::OpenFolder(folder);
+   if ( !mf )
       return false;
 
-   MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
-   e->m_name = name;
+   MailCollectorFolderEntry *e = new MailCollectorFolderEntry(name);
    m_list->push_back(e);
 
    return true;

@@ -30,6 +30,7 @@ enum OptionsPage
    OptionsPage_Default = -1,     // open at default page, must be -1
    OptionsPage_Ident,
    OptionsPage_Network,
+   OptionsPage_NewMail,
    OptionsPage_Compose,
    OptionsPage_Folders,
 #ifdef USE_PYTHON

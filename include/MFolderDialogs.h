@@ -31,6 +31,7 @@ enum FolderCreatePage
 {
    FolderCreatePage_Default = -1, // default must have value -1
    FolderCreatePage_Folder,
+   FolderCreatePage_NewMail,
    FolderCreatePage_Compose,
    FolderCreatePage_MsgView,
    FolderCreatePage_FolderView,

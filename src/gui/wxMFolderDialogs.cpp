@@ -428,8 +428,6 @@ protected:
    wxTextCtrl *m_mailboxname;
    /// comment for the folder
    wxTextCtrl *m_comment;
-   /// Is incoming folder?
-   wxCheckBox *m_isIncoming;
    /// Keep it always open?
    wxCheckBox *m_keepOpen;
    /// Is folder hidden?
@@ -478,8 +476,6 @@ protected:
    /// the initial value of the "accept unsigned certificates" flag
    bool m_originalAcceptUnsignedSSL;
 #endif // USE_SSL
-   /// the initial value of the "is incoming" flag
-   bool m_originalIncomingValue;
    /// the initial value of the "force re-open" flag
    bool m_originalForceReOpenValue;
 #ifdef USE_LOCAL_CHECKBOX
@@ -1017,7 +1013,6 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_Mailboxname,
       Label_Newsgroup,
       Label_Comment,
-      Label_IsIncoming,
       Label_KeepOpen,
       Label_ForceReOpen,
       Label_IsAnonymous,
@@ -1047,7 +1042,6 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Mailbox"),
       gettext_noop("&Newsgroup"),
       gettext_noop("&Comment"),
-      gettext_noop("C&ollect all mail from this folder"),
       gettext_noop("&Keep server connection when idle"),
       gettext_noop("Force &re-open on ping"),
       gettext_noop("Anon&ymous access"),
@@ -1086,8 +1080,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                  TRUE,    // open
                                  FALSE);  // allow non existing files
 
-   m_isIncoming = CreateCheckBox(labels[Label_IsIncoming], widthMax, m_path);
-   m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
+   m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_path);
    m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_keepOpen);
    m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax,
                                   m_forceReOpen);
@@ -2011,21 +2004,6 @@ wxFolderPropertiesPage::SetDefaultValues()
    int flags = GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
    m_originalIsHiddenValue = (flags & MF_FLAGS_HIDDEN) != 0;
 
-   if ( m_isCreating && (selRadio == Radio_Pop) )
-   {
-      // we want to collect mail from POP3 folders by default as they don't
-      // work well otherwise (i.e. the message status can't be changed which
-      // leads to all sorts of problems), so always start by checking the
-      // checkbox
-      m_originalIncomingValue = TRUE;
-   }
-   else
-   {
-      m_originalIncomingValue = (flags & MF_FLAGS_INCOMING) != 0;
-   }
-
-   m_isIncoming->SetValue(m_originalIncomingValue);
-
    m_keepOpen->SetValue((flags & MF_FLAGS_KEEPOPEN) != 0);
 
    m_originalForceReOpenValue = (flags & MF_FLAGS_REOPENONPING) != 0;
@@ -2211,8 +2189,6 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    bool canBeOpened = m_canBeOpened->GetValue();
 
    int flags = 0;
-   if ( m_isIncoming->GetValue() )
-      flags |= MF_FLAGS_INCOMING;
    if ( m_keepOpen->GetValue() )
       flags |= MF_FLAGS_KEEPOPEN;
    if ( m_forceReOpen->GetValue() )
@@ -2472,31 +2448,6 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          wxFAIL_MSG("Unexpected folder type.");
    }
 
-   // mark the folder as being autocollectable or not
-   bool isIncoming = m_isIncoming->GetValue();
-   if ( m_originalIncomingValue != isIncoming )
-   {
-      MailCollector *collector = mApplication->GetMailCollector();
-
-      if ( collector )
-      {
-         if ( isIncoming )
-         {
-            collector->AddIncomingFolder(fullname);
-            folder->AddFlags(MF_FLAGS_INCOMING);
-         }
-         else
-         {
-            collector->RemoveIncomingFolder(fullname);
-            folder->ResetFlags(MF_FLAGS_INCOMING);
-         }
-      }
-      else
-      {
-         wxFAIL_MSG("can't set the isIncoming setting: no mail collector");
-      }
-   }
-
    bool isAnonymous = m_isAnonymous->GetValue();
    if ( isAnonymous != m_originalIsAnonymous )
    {
@@ -2581,6 +2532,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 const char *wxFolderCreateNotebook::s_aszImages[] =
 {
    "access",
+   "newmail",
    "compose",
    "msgview",
    "folderview",
@@ -2593,6 +2545,7 @@ const char *wxFolderCreateNotebook::s_aszImagesAdvanced[] =
    "access",
    "ident",
    "network",
+   "newmail",
    "compose",
    "folders",
    "msgview",
@@ -2628,6 +2581,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
       (void)new wxOptionsPageIdent(this, profile);
       (void)new wxOptionsPageNetwork(this, profile);
    }
+   (void)new wxOptionsPageNewMail(this, profile);
    (void)new wxOptionsPageCompose(this, profile);
    if ( isAdvancedUser )
    {

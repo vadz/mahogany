@@ -65,6 +65,12 @@
 #include "Mdefaults.h"
 #include "Moptions.h"            // we need all MP_XXX for our arrays
 
+// we have to include these 3 headers just for wxOptionsPageNewMail... move it
+// to another file maybe?
+#include "MFolder.h"
+#include "gui/wxFiltersDialog.h"
+#include "MailCollector.h"
+
 #include "MessageView.h" // for list of available viewers
 
 #include "gui/wxBrowseButton.h"  // for wxStaticCast(wxColorBrowseButton) only
@@ -175,8 +181,24 @@ enum ConfigFields
    ConfigField_RshTimeout,
    ConfigField_NetworkLast = ConfigField_RshTimeout,
 
+   // new mail handling
+   ConfigField_NewMailFirst = ConfigField_NetworkLast,
+   ConfigField_NewMailHelpAppWide,
+   ConfigField_NewMailHelpFolder,
+   ConfigField_NewMailConfigFilters,
+   ConfigField_NewMailCollect,
+   ConfigField_NewMailCollectToFolder,
+   ConfigField_NewMailLeaveOnServer,
+   ConfigField_NewMailNotifyHelp,
+   ConfigField_NewMailNotifyUseCommand,
+   ConfigField_NewMailNotifyCommand,
+   ConfigField_NewMailNotify,
+   ConfigField_NewMailNotifyThresholdHelp,
+   ConfigField_NewMailNotifyDetailsThreshold,
+   ConfigField_NewMailLast = ConfigField_NewMailNotifyDetailsThreshold,
+
    // compose
-   ConfigField_ComposeFirst = ConfigField_NetworkLast,
+   ConfigField_ComposeFirst = ConfigField_NewMailLast,
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
@@ -226,13 +248,11 @@ enum ConfigFields
    ConfigField_FolderMaxHeadersNumHard,
    ConfigField_FolderMaxHeadersNum,
    ConfigField_FolderMaxMsgSize,
-   ConfigField_NewMailFolder,
    ConfigField_PollIncomingDelay,
    ConfigField_CollectAtStartup,
    ConfigField_UpdateInterval,
    ConfigField_CloseDelay_HelpText,
    ConfigField_CloseDelay,
-   ConfigField_AutocollectFolder,
    ConfigField_UseOutbox,
    ConfigField_OutboxName,
    ConfigField_UseTrash,
@@ -298,10 +318,6 @@ enum ConfigFields
 
    // folder view options
    ConfigField_FolderViewFirst = ConfigField_MessageViewLast,
-   ConfigField_FolderViewNewMailHelp,
-   ConfigField_FolderViewNewMailUseCommand,
-   ConfigField_FolderViewNewMailCommand,
-   ConfigField_FolderViewNewMailShowMsg,
    ConfigField_FolderViewShowHelpText,
    ConfigField_FolderViewShowFirst,
    ConfigField_FolderViewShowFirstUnread,
@@ -385,18 +401,16 @@ enum ConfigFields
    ConfigField_HelpBrowserIsNetscape,
 #endif // USE_EXT_HTML_HELP
 
-   ConfigField_HelpExternalEditor,
-   ConfigField_ExternalEditor,
-   ConfigField_AutoLaunchExtEditor,
-
 #ifdef OS_UNIX
    ConfigField_ImageConverter,
    ConfigField_ConvertGraphicsFormat,
 #endif // OS_UNIX
 
-   ConfigField_HelpNewMailCommand,
-   ConfigField_NewMailCommand,
-   ConfigField_HelpersLast = ConfigField_NewMailCommand,
+   ConfigField_HelpExternalEditor,
+   ConfigField_ExternalEditor,
+   ConfigField_AutoLaunchExtEditor,
+
+   ConfigField_HelpersLast = ConfigField_AutoLaunchExtEditor,
 
    // other options
    ConfigField_OthersFirst = ConfigField_HelpersLast,
@@ -675,6 +689,15 @@ BEGIN_EVENT_TABLE(wxOptionsPage, wxNotebookPageBase)
    EVT_UPDATE_UI(wxOptionsPage_BtnDelete, wxOptionsPage::OnUpdateUIListboxBtns)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxOptionsPageIdent, wxOptionsPage)
+   // buttons invoke subdialogs
+   EVT_BUTTON(-1, wxOptionsPageIdent::OnButton)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxOptionsPageNewMail, wxOptionsPage)
+   EVT_BUTTON(-1, wxOptionsPageNewMail::OnButton)
+END_EVENT_TABLE()
+
 BEGIN_EVENT_TABLE(wxOptionsPageCompose, wxOptionsPage)
    // buttons invoke subdialogs
    EVT_BUTTON(-1, wxOptionsPageCompose::OnButton)
@@ -691,11 +714,6 @@ BEGIN_EVENT_TABLE(wxOptionsPageFolderView, wxOptionsPage)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxOptionsPageFolders, wxOptionsPage)
-END_EVENT_TABLE()
-
-BEGIN_EVENT_TABLE(wxOptionsPageIdent, wxOptionsPage)
-   // buttons invoke subdialogs
-   EVT_BUTTON(-1, wxOptionsPageIdent::OnButton)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxOptionsPageSync, wxOptionsPage)
@@ -830,6 +848,56 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "lead to unneeded delays."),     Field_Message | Field_Global | Field_Advanced,    -1,                        },
    { gettext_noop("&Rsh timeout"),                 Field_Number | Field_Global | Field_Advanced,    -1,                        },
 
+   // new mail handling
+   { gettext_noop("Please note that the details of new mail handling must be\n"
+                  "set separately for each folder, you should select a folder\n"
+                  "in the tree and choose the \"Properties\" command from the\n"
+                  "\"Folder\" menu to do this."),  Field_Message |
+                                                   Field_AppWide, -1 },
+
+   { gettext_noop("Mahogany processes the new mail in several steps:\n"
+                  "first it applies the filters, if any, to it. Then,\n"
+                  "if any new messages are left, it may collect (or download\n"
+                  "in case of remote server) them to the central new mail folder\n"
+                  "Finally, if any new messages are still left in this folder,\n"
+                  "Mahogany may notify you about them either by running an\n"
+                  "external program or by performing an internal action."),
+                                                   Field_Message |
+                                                   Field_NotApp, -1 },
+
+   { gettext_noop("Configure &filters..."),        Field_SubDlg |
+                                                   Field_NotApp, -1 },
+   { gettext_noop("&Collect new mail from this folder"),
+                                                   Field_Bool | Field_NotApp,
+                                                   -1 },
+   { gettext_noop("Central ne&w mail folder"),     Field_Folder |
+                                                   Field_Advanced |
+                                                   Field_NotApp,
+                                                   ConfigField_NewMailCollect },
+   { gettext_noop("&Leave mail in this folder"),   Field_Bool |
+                                                   Field_Inverse |
+                                                   Field_NotApp,
+                                                   ConfigField_NewMailCollect },
+
+   { gettext_noop("When new mail message appears in this folder Mahogany\n"
+                  "may execute an external command and/or show a message "
+                  "about it."),                    Field_Message,    -1 },
+   { gettext_noop("E&xecute new mail command"),    Field_Bool,    -1 },
+   { gettext_noop("New mail &command"),            Field_File,
+                                                   ConfigField_NewMailNotifyUseCommand },
+   { gettext_noop("Show new mail &notification"),  Field_Bool,    -1 },
+   { gettext_noop("If there are not too many new messages, Mahogany will\n"
+                  "show a detailed notification message with the subjects\n"
+                  "and senders of all messages. Otherwise it will just\n"
+                  "show the number of the new messages in the folder.\n"
+                  "You may set the threshold to -1 to always see the details\n"
+                  "or to 0 to always show just the number of messages."),
+                                                   Field_Message,
+                                                   ConfigField_NewMailNotify },
+   { gettext_noop("&Threshold for detailed notification"), 
+                                                   Field_Number,
+                                                   ConfigField_NewMailNotify },
+
    // compose
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder for sent messages"),
@@ -915,7 +983,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Hard message limit"),  Field_Number,   -1 },
    { gettext_noop("Ask if &number of messages >"),  Field_Number,   -1 },
    { gettext_noop("Ask if size of &message (in Kb) >"), Field_Number,   -1 },
-   { gettext_noop("Folder where to collect &new mail"), Field_Folder | Field_AppWide, -1},
    { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
    { gettext_noop("Poll for new mail at s&tartup"), Field_Bool | Field_AppWide, -1},
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
@@ -923,7 +990,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "for some time to make reopening the folder faster.\n"
                   "This is useful for folders you often reopen."), Field_Message, -1 },
    { gettext_noop("&Keep open for (seconds)"), Field_Number, -1},
-   { gettext_noop("Folder to save &collected messages to"), Field_Folder | Field_AppWide, -1 },
    { gettext_noop("Send outgoing messages later"), Field_Bool, -1 },
    { gettext_noop("Folder for &outgoing messages"), Field_Folder, ConfigField_UseOutbox },
    { gettext_noop("Use &Trash folder"), Field_Bool, -1},
@@ -1001,13 +1067,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Title of message view frame"),         Field_Text,    -1                     },
 
    // folder view
-   { gettext_noop("When new mail message appears in this folder Mahogany\n"
-                  "may execute an external command and/or show a message "
-                  "about it."), Field_Message,    -1 },
-   { gettext_noop("E&xecute new mail command"), Field_Bool,    -1 },
-   { gettext_noop("New mail &command"), Field_File, ConfigField_FolderViewNewMailUseCommand},
-   { gettext_noop("Show new mail &notification"), Field_Bool,    -1 },
-   { gettext_noop("\nWhat happens when the folder is opened? If selecting\n"
+   { gettext_noop("What happens when the folder is opened? If selecting\n"
                   "unread message is on, Mahogany will select the first or\n"
                   "last unread message depending on the next option. If there\n"
                   "are no unread messages, it will just select first or last\n"
@@ -1139,18 +1199,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Help viewer"),                Field_File,    -1                      },
    { gettext_noop("Help &viewer is Netscape"),    Field_Bool,    -1                      },
 #endif // USE_EXT_HTML_HELP
+
+#ifdef OS_UNIX
+   { gettext_noop("&Image format converter"),     Field_File,    -1                      },
+   { gettext_noop("Conversion &graphics format"
+                  ":XPM:PNG:BMP:JPG:GIF:PCX:PNM"),    Field_Combo,   -1 },
+#endif // OS_UNIX
+
    { gettext_noop("You may configure the external editor to be used when composing the messages\n"
                   "and optionally choose to launch it automatically."),
                                                   Field_Message, -1                      },
    { gettext_noop("&External editor"),            Field_Text,    -1                      },
    { gettext_noop("Always &use it"),              Field_Bool, ConfigField_ExternalEditor },
-#ifdef OS_UNIX
-   { gettext_noop("&Image format converter"),     Field_File,    -1                      },
-   { gettext_noop("Conversion &graphics format"
-                  ":XPM:PNG:BMP:JPG:GIF:PCX:PNM"),    Field_Combo,   -1 },
-#endif
-   { gettext_noop("The following line will be executed each time new mail is received:"),       Field_Message, -1                      },
-   { gettext_noop("&New Mail Command"),           Field_File,    -1                      },
 
    // other options
    { gettext_noop("Mahogany may log everything into the log window, a file\n"
@@ -1297,6 +1357,22 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // rsh help
    CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
 
+   // new mail handling
+   CONFIG_NONE(), // new mail handling help (for the app)
+   CONFIG_NONE(), // new mail handling help (for the folder)
+   CONFIG_NONE(), // configure filters
+
+   CONFIG_NONE(), // collect mail (MF_FLAGS_INCOMING)
+   CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
+   CONFIG_ENTRY(MP_MOVE_NEWMAIL),
+
+   CONFIG_NONE(), // notify help
+   CONFIG_ENTRY(MP_USE_NEWMAILCOMMAND),
+   CONFIG_ENTRY(MP_NEWMAILCOMMAND),
+   CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
+   CONFIG_NONE(), // details threshold help
+   CONFIG_ENTRY(MP_SHOW_NEWMAILINFO),
+
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of messages sent
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
@@ -1343,13 +1419,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM_HARD),
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
    CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
-   CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
    CONFIG_ENTRY(MP_COLLECTATSTARTUP),
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
-   CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before sending them
    CONFIG_ENTRY(MP_OUTBOX_NAME),
    CONFIG_ENTRY(MP_USE_TRASH_FOLDER),
@@ -1407,11 +1481,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MVIEW_TITLE_FMT),
 
    // folder view
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_USE_NEWMAILCOMMAND),
-   CONFIG_ENTRY(MP_NEWMAILCOMMAND),
-   CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
-
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTUNREADMESSAGE),
@@ -1479,20 +1548,21 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_BROWSER_ISNS),
 #endif // OS_WIN
    CONFIG_ENTRY(MP_BROWSER_INNW),
+
 #ifdef USE_EXT_HTML_HELP
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_HELPBROWSER),
    CONFIG_ENTRY(MP_HELPBROWSER_ISNS),
 #endif // USE_EXT_HTML_HELP
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_EXTERNALEDITOR),
-   CONFIG_ENTRY(MP_ALWAYS_USE_EXTERNALEDITOR),
+
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_CONVERTPROGRAM),
    CONFIG_ENTRY(MP_TMPGFXFORMAT),
 #endif
+
    CONFIG_NONE(),
-   CONFIG_ENTRY(MP_NEWMAILCOMMAND),
+   CONFIG_ENTRY(MP_EXTERNALEDITOR),
+   CONFIG_ENTRY(MP_ALWAYS_USE_EXTERNALEDITOR),
 
    // other
    CONFIG_NONE(),
@@ -1612,9 +1682,15 @@ void wxOptionsPage::CreateControls()
 
       // don't show the global settings when editing the identity dialog and
       // don't show the advanced ones in the novice mode
+      //
+      // also don't show app-wide settings when editing the folder proprieties
+      // nor the folder settings when editing the global options
+      //
+      // NB: when modifying this code, don't forget to update the code below!
       if ( (!isAdvanced && (flags & Field_Advanced)) ||
            (isIdentDialog && (flags & Field_Global)) ||
-           (isFolderDialog && (flags & Field_AppWide)) )
+           (isFolderDialog && (flags & Field_AppWide)) ||
+           (!isFolderDialog && (flags & Field_NotApp)) )
       {
          // skip this one
          continue;
@@ -1652,7 +1728,8 @@ void wxOptionsPage::CreateControls()
       int flags = GetFieldFlags(n);
       if ( (!isAdvanced && (flags & Field_Advanced)) ||
            (isIdentDialog && (flags & Field_Global)) ||
-           (isFolderDialog && (flags & Field_AppWide)) )
+           (isFolderDialog && (flags & Field_AppWide)) ||
+           (!isFolderDialog && (flags & Field_NotApp)) )
       {
          // skip this one
          m_aControls.Add(NULL);
@@ -1984,6 +2061,12 @@ bool wxOptionsPage::TransferDataToWindow()
 
       case Field_Bool:
          wxASSERT( m_aDefaults[n].IsNumeric() );
+
+         if ( GetFieldFlags(n) & Field_Inverse )
+         {
+            lValue = !lValue;
+         }
+
          wxStaticCast(control, wxCheckBox)->SetValue(lValue != 0);
          break;
 
@@ -2086,6 +2169,11 @@ bool wxOptionsPage::TransferDataFromWindow()
             wxASSERT( m_aDefaults[n].IsNumeric() );
 
             lValue = wxStaticCast(control, wxCheckBox)->GetValue();
+
+            if ( GetFieldFlags(n) & Field_Inverse )
+            {
+               lValue = !lValue;
+            }
             break;
 
          case Field_Action:
@@ -2681,6 +2769,110 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
 #endif // OS_WIN
 
 // ----------------------------------------------------------------------------
+// wxOptionsPageNewMail
+// ----------------------------------------------------------------------------
+
+wxOptionsPageNewMail::wxOptionsPageNewMail(wxNotebook *parent,
+                                           Profile *profile)
+                    : wxOptionsPageStandard(parent,
+                                    _("New Mail"),
+                                    profile,
+                                    ConfigField_NewMailFirst,
+                                    ConfigField_NewMailLast,
+                                    MH_OPAGE_NEWMAIL)
+{
+   m_folder = NULL;
+}
+
+wxOptionsPageNewMail::~wxOptionsPageNewMail()
+{
+   if ( m_folder )
+      m_folder->DecRef();
+}
+
+bool wxOptionsPageNewMail::GetFolderFromProfile()
+{
+   CHECK( !m_folder, true, "creating the folder twice" );
+
+   String name;
+   if ( m_Profile->GetName().StartsWith
+                             (
+                              String(M_PROFILE_CONFIG_SECTION) + '/',
+                              &name
+                             ) )
+   {
+      m_folder = MFolder::Get(name);
+   }
+
+   return m_folder != NULL;
+}
+
+bool wxOptionsPageNewMail::TransferDataToWindow()
+{
+   bool bRc = wxOptionsPage::TransferDataToWindow();
+
+   if ( bRc )
+   {
+      // the "collect new mail" checkbox corresponds to the value of
+      // MF_FLAGS_INCOMING flag
+      wxWindow *win = GetControl(ConfigField_NewMailCollect);
+      if ( win )
+      {
+         if ( GetFolderFromProfile() )
+         {
+            m_collectOld = (m_folder->GetFlags() & MF_FLAGS_INCOMING) != 0;
+         }
+         else
+         {
+            // may happen if we're creating the folder (but didn't yet)
+            m_collectOld = false;
+         }
+
+         wxStaticCast(win, wxCheckBox)->SetValue(m_collectOld);
+      }
+      //else: happens when editing the global settings
+   }
+
+   return bRc;
+}
+
+bool wxOptionsPageNewMail::TransferDataFromWindow()
+{
+   wxCheckBox *checkbox = wxStaticCast(GetControl(ConfigField_NewMailCollect),
+                                       wxCheckBox);
+
+   if ( checkbox && checkbox->GetValue() != m_collectOld )
+   {
+      // by now we must have a valid folder
+      if ( !m_folder )
+      {
+         if ( !GetFolderFromProfile() )
+         {
+            FAIL_MSG( "failed to create the folder in new mail page" );
+         }
+      }
+
+      // remember that it was toggled
+      MailCollector::AddOrRemoveIncoming(m_folder, !m_collectOld);
+   }
+
+   return wxOptionsPage::TransferDataFromWindow();
+}
+
+void wxOptionsPageNewMail::OnButton(wxCommandEvent& event)
+{
+   wxObject *obj = event.GetEventObject();
+   if ( obj != GetControl(ConfigField_NewMailConfigFilters) )
+   {
+      event.Skip();
+
+      return;
+   }
+
+   ConfigureFiltersForFolder(m_folder, this);
+}
+
+// ----------------------------------------------------------------------------
 // wxOptionsPagePython
 // ----------------------------------------------------------------------------
 
@@ -3203,6 +3395,7 @@ const char *wxOptionsNotebook::ms_aszImages[] =
 {
    "ident",
    "network",
+   "newmail",
    "compose",
    "folders",
 #ifdef USE_PYTHON
@@ -3230,6 +3423,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    // create and add the pages
    new wxOptionsPageIdent(this, profile);
    new wxOptionsPageNetwork(this, profile);
+   new wxOptionsPageNewMail(this, profile);
    new wxOptionsPageCompose(this, profile);
    new wxOptionsPageFolders(this, profile);
 #ifdef USE_PYTHON
