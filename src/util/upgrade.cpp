@@ -156,7 +156,7 @@ UpgradeFrom010()
             ok2 ;
             ok2 = p->GetNextEntry(entry, index2))
       {
-         value = p->readEntry(entry, NULL);
+         value = p->readEntry(entry, "");
          p2->writeEntry(entry, value);
          wxLogDebug("converted entry '%s'='%s'", entry.c_str(), value.c_str());
       }
