@@ -1216,16 +1216,21 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
 
       // we're passed a folder specification - extract the folder name from it
       wxString name;
-      if ( spec.StartsWith(m_reference, &name) && !!name )
+      if ( spec.StartsWith(m_reference, &name) )
       {
+         // remove the leading delimiter to get a relative name
          if ( name[0u] == chDelimiter && chDelimiter != '\0')
          {
             name = name.c_str() + 1;
          }
+      }
 
-         wxString path = name;
-         if(chDelimiter != '\0')
+      if ( !name.empty() )
+      {
+         wxString relpath = name;
+         if ( chDelimiter != '\0' )
             name.Replace(wxString(chDelimiter), "/");
+
          MFolder *folderNew = m_folder->GetSubfolder(name);
          if ( !folderNew )
          {
@@ -1255,9 +1260,10 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
 
             Profile_obj profile(folderNew->GetFullName());
             String fullpath;
-            fullpath << m_folder->GetPath() << chDelimiter << path;
-            profile->writeEntry(MP_FOLDER_PATH, path);
+            fullpath << m_folder->GetPath() << chDelimiter << relpath;
+            profile->writeEntry(MP_FOLDER_PATH, fullpath);
          }
+         //else: folder already exists
 
          folderNew->DecRef();
       }

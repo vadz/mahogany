@@ -1489,6 +1489,14 @@ MailFolder *
 wxFolderView::OpenFolder(String const &profilename)
 {
    MFolder_obj folder(profilename);
+   if ( !folder.IsOk() )
+   {
+      wxLogError(_("The folder '%s' doesn't exist and can't be opened."),
+                 profilename.c_str());
+
+      return NULL;
+   }
+
    int flags = folder->GetFlags();
    if ( (flags & MF_FLAGS_UNACCESSIBLE) && !(flags & MF_FLAGS_MODIFIED) )
    {
