@@ -93,6 +93,38 @@ private:
    MsgnoArray *m_msgnosFound;
 };
 
+// small class which puts the given message into the frame status bar (if we
+// have any interactive frame associated with us) and then either appends
+// "done" to it if Fail() is not called or replaces it with the Fail() message
+// otherwise
+//
+// the objects of this class are meant to be created on stack and not kept
+// between function invocations
+class StatusIndicator
+{
+public:
+   // show the status message specified by the remaining arguments if frame is
+   // not NULL
+   StatusIndicator(MFrame *frame, const char *fmt, ...);
+
+   // append "done" to the message given by the ctor if Fail() hadn't been
+   // called
+   ~StatusIndicator();
+
+   // put an error message into the status bar
+   void Fail(const String& msgError) { m_msgFinal = msgError; }
+
+private:
+   // our frame - may be NULL!
+   wxFrame *m_frame;
+
+   // the message given in the ctor
+   String m_msgInitial;
+
+   // the message given to Fail() or empty
+   String m_msgFinal;
+};
+
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
@@ -222,6 +254,39 @@ static void DumpTransTables(MsgnoType count,
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// StatusIndicator
+// ----------------------------------------------------------------------------
+
+StatusIndicator::StatusIndicator(MFrame *frame, const char *fmt, ...)
+{
+   m_frame = (wxFrame *)frame;
+   if ( m_frame )
+   {
+      va_list argptr;
+      va_start(argptr, fmt);
+      m_msgInitial.PrintfV(fmt, argptr);
+      va_end(argptr);
+
+      wxLogStatus(m_frame, m_msgInitial);
+   }
+}
+
+StatusIndicator::~StatusIndicator()
+{
+   if ( m_frame )
+   {
+      if ( m_msgFinal.empty() )
+      {
+         // give success message by default
+         m_msgFinal << m_msgInitial << _(" done.");
+      }
+      //else: we have the failure message in m_msgFinal
+
+      wxLogStatus(m_frame, m_msgFinal);
+   }
+}
 
 // ----------------------------------------------------------------------------
 // HeaderInfo
@@ -406,7 +471,7 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(MsgnoType n) const
 
       // get header info for the new header
       Sequence seq;
-      seq.Add(n + 1);
+      seq.Add(n + 1);   // make msgno from index
       m_mf->GetHeaderInfo(self->m_headers, seq);
    }
 
@@ -1297,6 +1362,9 @@ void HeaderInfoListImpl::Sort()
             m_sortParams.sortOrder &= ~1;
          }
 
+         StatusIndicator status(m_mf->GetInteractiveFrame(),
+                                _("Sorting %lu messages..."), m_count);
+
          if ( m_mf->SortMessages(m_tableSort, m_sortParams) )
          {
             DUMP_TABLE(m_tableSort,
@@ -1306,6 +1374,8 @@ void HeaderInfoListImpl::Sort()
          else // sort failed
          {
             FreeSortData();
+
+            status.Fail(_("Sorting failed!"));
          }
 
          if ( m_reverseOrder )
@@ -1436,6 +1506,9 @@ void HeaderInfoListImpl::Thread()
    // the caller must check that we need to be threaded
    ASSERT_MSG( !m_thrData && IsThreading(), "shouldn't be called" );
 
+   StatusIndicator status(m_mf->GetInteractiveFrame(),
+                          _("Threading %lu messages..."), m_count);
+
    m_thrData = new ThreadData(m_count);
 
    if ( m_mf->ThreadMessages(m_thrData, m_thrParams) )
@@ -1447,6 +1520,8 @@ void HeaderInfoListImpl::Thread()
    else // threading failed
    {
       FreeThreadData();
+
+      status.Fail(_("Threading failed!"));
    }
 }
 
@@ -1544,6 +1619,9 @@ void HeaderInfoListImpl::Cache(const Sequence& seq)
    // cache the headers now if needed
    if ( countNotInCache )
    {
+      StatusIndicator status(m_mf->GetInteractiveFrame(),
+                             _("Retrieving %u headers..."), countNotInCache);
+
       m_mf->GetHeaderInfo(m_headers, seq);
    }
 }

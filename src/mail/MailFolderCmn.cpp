@@ -1035,12 +1035,6 @@ MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
    ASSERT_MSG( count > 1,
                "nothing to sort in Sort() - shouldn't be called" );
 
-   MFrame *frame = GetInteractiveFrame();
-   if ( frame )
-   {
-      wxLogStatus(frame, _("Sorting %u messages..."), count);
-   }
-
    // we need all headers, prefetch them
    hil->CacheMsgnos(1, count);
 
@@ -1060,11 +1054,6 @@ MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 
    // don't leave dangling pointers around
    gs_SortData.hil = NULL;
-
-   if ( frame )
-   {
-      wxLogStatus(frame, _("Sorting %u messages... done."), count);
-   }
 
    return true;
 }
@@ -1089,22 +1078,11 @@ bool MailFolderCmn::ThreadMessages(ThreadData *thrData,
    ASSERT_MSG( count > 1,
                "nothing to sort in ThreadMessages() - shouldn't be called" );
 
-   MFrame *frame = GetInteractiveFrame();
-   if ( frame )
-   {
-      wxLogStatus(frame, _("Threading %u messages..."), count);
-   }
-
    // we need all headers, prefetch them
    hil->CacheMsgnos(1, count);
 
    // do thread!
    JWZThreadMessages(thrParams, hil.operator->(), thrData);
-
-   if ( frame )
-   {
-      wxLogStatus(frame, _("Threading %u messages... done."), count);
-   }
 
    return true;
 }

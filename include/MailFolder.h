@@ -941,6 +941,44 @@ private:
 DECLARE_AUTOPTR_WITH_CONVERSION(MailFolder);
 
 // ----------------------------------------------------------------------------
+// MFInteractiveLock: sets the interactive frame to the one provided for the
+// life time of this object
+// ----------------------------------------------------------------------------
+
+class MFInteractiveLock
+{
+public:
+   // we will DecRef() the mail folder which must be !NULL - but the frame may
+   // be NULL, although it's probably not very useful
+   MFInteractiveLock(MailFolder *mf, MFrame *frame)
+   {
+      m_mf = mf;
+      if ( m_mf )
+      {
+         m_frameOld = mf->SetInteractiveFrame(frame);
+      }
+      else
+      {
+         FAIL_MSG( "NULL folder in MFInteractiveLock" );
+      }
+   }
+
+   ~MFInteractiveLock()
+   {
+      if ( m_mf )
+      {
+         (void)m_mf->SetInteractiveFrame(m_frameOld);
+
+         m_mf->DecRef();
+      }
+   }
+
+private:
+   MailFolder *m_mf;
+   MFrame *m_frameOld;
+};
+
+// ----------------------------------------------------------------------------
 // Various helper classes
 // ----------------------------------------------------------------------------
 

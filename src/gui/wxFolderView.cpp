@@ -1633,6 +1633,9 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
       // might have changed if the sort order in the folder changed
       if ( m_uidFocus != UID_ILLEGAL )
       {
+         MFInteractiveLock lock(m_FolderView->GetMailFolder(),
+                                (MFrame *)GetFrame(this));
+
          size_t idx = m_headers->GetIdxFromUId(m_uidFocus);
          if ( idx != INDEX_ILLEGAL )
          {
@@ -1762,7 +1765,12 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 
       m_headersToGet.Empty();
 
-      m_headers->CachePositions(seq);
+      {
+         MFInteractiveLock lock(m_FolderView->GetMailFolder(),
+                                (MFrame *)GetFrame(this));
+
+         m_headers->CachePositions(seq);
+      }
 
       // we may now (quickly!) update m_uidFocus, see comment in UpdateFocus()
       // to understand why we do it here
@@ -1972,11 +1980,6 @@ void wxFolderListCtrl::UpdateFocus()
 
    m_itemFocus = itemFocus;
 
-   // we can't call GetUIdFromIndex() from here as the item might not be
-   // cached and we don't want to block now - we'll set it later when we
-   // retrieve the focused item anyhow
-   m_uidFocus = UID_ILLEGAL;
-
    // if there is no focus, we can notify the folder view immediately as it
    // doesn't cost much - but if there is, it will be done later, when
    // m_uidFocus will have been set
@@ -1984,6 +1987,21 @@ void wxFolderListCtrl::UpdateFocus()
    {
       m_FolderView->OnFocusChange(-1, UID_ILLEGAL);
    }
+   else
+   {
+      if ( m_headers->IsInCache(m_itemFocus) )
+      {
+         m_uidFocus = GetUIdFromIndex(m_itemFocus);
+      }
+      else
+      {
+         // we can't call GetUIdFromIndex() from here if the item is not
+         // cached as we don't want to block now - we'll set it later when we
+         // retrieve the focused item anyhow
+         m_uidFocus = UID_ILLEGAL;
+      }
+   }
+
 }
 
 void wxFolderListCtrl::UpdateUniqueSelFlag()
