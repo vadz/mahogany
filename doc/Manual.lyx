@@ -3229,7 +3229,7 @@ This is used as the default hostname for your username.
 
 
 \series bold 
-Return/Reply address
+Reply address
 \series default 
  
 \newline 
@@ -3248,7 +3248,7 @@ uglier
 
 
 \series bold 
-Return return address from To: field
+Reply return address from To: field
 \series default 
 
 \newline 
@@ -3272,9 +3272,9 @@ John.Doe@mycompany.com
 .
  If you reply to this message, it will appear as coming from 
 \family typewriter 
-John.Doe@mycompany.org
+John.Doe@mycompany.
 \family default 
-, even if you read this mail from home, on a machine called 
+com, even if you read this mail from home, on a machine called 
 \family typewriter 
 MyBox.fun.org
 \family default 
@@ -6827,7 +6827,7 @@ is directory
  open, but a directory which can be browsed for entries via the popup menu.
 \layout Subsection
 
-Can I have multiple POP or IMAP accounts?
+Can I have multiple POP3 or IMAP accounts?
 \layout Standard
 
 
@@ -7030,4 +7030,12 @@ Simple, press '#' or 'x' or select Message/Expunge from the menu.
  folder.
  If you use the Trash folder, this only applies to that one as all other
  folders will move messages straight to Trash instead of marking them deleted.
+\layout Subsection
+
+How can I forward a message with attachments?
+\layout Standard
+
+Do "Forward with template" and create a new template containing $quote822
+ - this will forward the entire message.
+ You can also change the default forward template to do it.
 \the_end

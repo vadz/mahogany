@@ -1273,18 +1273,18 @@ it is overridden by explicit setting of the return address.
 This is used as the default hostname for your username. If you do
 not specify a return address, this must form a valid mail address
 when used together with your username.
-\item \textbf{Return/Reply address} \\
+\item \textbf{Reply address} \\
 Here you can specify a return mail address where you want to receive
 mail and replies to your mails from other users. By using this you
 can hide your original (possibly {}``uglier{}'') return address.
-\item \textbf{Return return address from To: field}\\
+\item \textbf{Reply return address from To: field}\\
 If set, Mahogany will use the original \texttt{To:} address field
 values for the \texttt{Reply-To:} header entry of any message replies
 that you send. This makes sure that the same person sending you mail
 will always see the same mail address for you. It is especially useful,
 if you collect mail from several different incoming mail folders.
 An example: Someone sends you mail to \texttt{John.Doe@mycompany.com}.
-If you reply to this message, it will appear as coming from \texttt{John.Doe@mycompany.org},
+If you reply to this message, it will appear as coming from \texttt{John.Doe@mycompany.}com,
 even if you read this mail from home, on a machine called \texttt{MyBox.fun.org}.
 On the other hand, if someone sends you mail to \texttt{MyAlias@writeme.com},
 your reply will carry that as a return address, so that person will
@@ -2644,7 +2644,7 @@ ticked, which tells Mahogany that it is not a mailbox file to open,
 but a directory which can be browsed for entries via the popup menu.
 
 
-\subsection{Can I have multiple POP or IMAP accounts?}
+\subsection{Can I have multiple POP3 or IMAP accounts?}
 
 \textit{Can I access multiple different POP3 or IMAP accounts?}
 
@@ -2728,4 +2728,11 @@ Mahogany will also ask you if you want to expunge them when closing
 the folder. If you use the Trash folder, this only applies to that
 one as all other folders will move messages straight to Trash instead
 of marking them deleted.
+
+
+\subsection{How can I forward a message with attachments?}
+
+Do \char`\"{}Forward with template\char`\"{} and create a new template
+containing \$quote822 - this will forward the entire message. You
+can also change the default forward template to do it.
 \end{document}
