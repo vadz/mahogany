@@ -14,6 +14,7 @@ echo "####################################################################"
 
 DOWXWIN=yes  # no or yes
 DOINSTALL=yes
+DOSHARED=no
 DEBUG=no
 while [ ! -z "$1" ]
 do
@@ -28,6 +29,10 @@ do
 	;;
 	"x--noinst")
 		DOINSTALL=no
+		shift
+	;;
+	"x--shared")
+		DOSHARED=yes
 		shift
 	;;
 	*)
@@ -59,14 +64,12 @@ export DESTDIR
 USESTABLE=no
 
 FTPLOCATION="karsten@ronnie.phy.hw.ac.uk:/usr/local/ftp/pub/Mahogany/daily"
-DOCSLOCATION="karsten@ronnie.phy.hw.ac.uk:/usr/local/ftp/pub/Mahogany/daily/Mdocs.tar.gz"
 
 # Need to hardwire this as we run it as root for rpm/deb generation:
 REALHOME=$HOME
 KBHOME=/home/karsten
 HOME=$KBHOME
 WWWDIR=$HOME/WWW/Mahogany/daily
-
 LOGNAME="karsten"
 export LOGNAME
 
@@ -75,6 +78,13 @@ MVERSION=0.23a
 
 WXNAME=wxGTK
 WXVERSION=2.1.11
+
+DOCHOST=ronnie
+
+# This should be set to "yes" by the Mahogany compilation if it
+# succeeds. Used in the debian compilation only for now.
+UPLOADWXGTK=no
+
 
 if [ -f /etc/debian_version ]
 then
@@ -96,12 +106,14 @@ CXX=gcc
 TMPDIR=/tmp
 export TMPDIR
 
+MCONFOPT="--with-modules=static"
+
 #################################################################################
 ##
 ## Host/OS specific setups
 ##
 #################################################################################
-if [ `hostname` = dearg ]
+if [ `hostname` = bidean ]
 then
   OSTYPE=SunOS
 fi
@@ -153,7 +165,7 @@ then
   export CC CXX OSTYPE LDFLAGS
   USESTABLE=yes
   SCP=scp1
-  MCONFOPT=--without-opt
+  MCONFOPT="$MCONFOPT --without-opt"
 fi
 
 if [ ! -d $BUILDDIR ] ; then  mkdir $BUILDDIR ; fi
@@ -182,6 +194,8 @@ echo "CVSUSERID=$CVSUSERID"
 echo "DOWXWIN=$DOWXWIN"
 echo "DEBUG=$DEBUG"
 echo "SCP=$SCP"
+echo "DOSHARED=$DOSHARED"
+echo "MCONFOPT=$MCONFOPT"
 
 export OSTYPE
 
@@ -235,12 +249,19 @@ else
 	DEBUGOPTS="--disable-debug_flag --disable-debug_info"
 fi
 
+if [ "$DOSHARED" = yes ]
+then
+	SHAREDFLAG="--with-shared --without-static"
+else
+	SHAREDFLAG="--without-shared --with-static"
+fi
+
 rm -f wxWindows/*.cache
 cd wxWindows && \
 autoconf && \
 	./configure \
-	--enable-threads \
-        --disable-shared \
+	--disable-threads \
+	$SHAREDFLAG \
 	--enable-static \
         --enable-wxprintfv \
         --enable-html \
@@ -294,11 +315,11 @@ fi
 PATH="/sbin:/usr/sbin:$PATH:$WXPREFIX/bin"
 export PATH
 
-# Docs are only generated on our master doc host "ronnie":
-if [ `hostname` != ronnie ]
+# Docs are only generated on our master doc host "$DOCHOST":
+if [ `hostname` != $DOCHOST ]
 then
   echo "Copying documentation Mdocs.tar.gz to $BUILDDIR/$NAME-$VERSION/doc"
-  $SCP $DOCSLOCATION $BUILDDIR/$NAME-$VERSION/doc
+  $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc
 fi
 rm -f $NAME-$VERSION/*.cache
 
@@ -319,11 +340,12 @@ then
 	# do not install locally        (cd $NAME-$VERSION && super debi)
         $SCP mahogany_* $FTPLOCATION
         #mv ${NAME}_$VERSION*deb ${NAME}_$VERSION.tar.gz  /usr/local/ftp/pub/Mahogany/daily
-        cd /usr/share/Mahogany/doc && \
-        (cp -r * $HOME/WWW/Mahogany/doc ; tar czf $WWWDIR/Mdocs.tar.gz * )
-        $SCP -r /usr/share/Mahogany/doc/* karsten@phy.hw.ac.uk:WWW/Mahogany/doc/
+#        cd /usr/share/Mahogany/doc && \
+#        ($SCP -r * karsten@nevis.phy.hw.ac.uk:$HOME/WWW/Mahogany/doc ; tar czf $WWWDIR/Mdocs.tar.gz * )
+#        $SCP -r /usr/share/Mahogany/doc/* karsten@nevis.phy.hw.ac.uk:WWW/Mahogany/doc/
     fi
     echo "Build of $NAME-$VERSION, debian, successful."
+    UPLOADWXGTK=yes # cause wxWindow snapshot to be generated
   fi
 fi
 
@@ -347,6 +369,14 @@ then
   cd $NAME-$VERSION && $MAKE install DESTDIR=$DESTDIR  >/dev/null && \
   cd $DESTDIR && tar cvf $BUILDDIR/$NAME-$VERSION-$OSTYPE.tar * && \
   gzip -f -9 $BUILDDIR/$NAME-$VERSION-$OSTYPE.tar
+
+  if [ `hostname` = $DOCHOST ]
+  then
+    cd $DESTDIR/share/Mahogany/doc && \
+    ( $SCP -r * karsten@nevis.phy.hw.ac.uk:$HOME/WWW/Mahogany/doc ; \
+      (tar czf Mdocs.tar.gz * && $SCP Mdocs.tar.gz $FTPLOCATION) ; \
+    rm -f Mdocs.tar.gz )
+  fi
 else
   echo "Build of $NAME-$VERSION.tar.gz, failed."
 fi
@@ -364,7 +394,7 @@ then
   cd $BUILDDIR && \
   (cd $NAME-$VERSION && make allclean 2>/dev/null 2>&1 || true) && \
 #  $SCP $DOCSLOCATION $BUILDDIR/$NAME-$VERSION/doc && \
-  cp $WWWDIR/Mdocs.tar.gz $NAME-$VERSION/doc && \
+  $SCP $FTPLOCATION/Mdocs.tar.gz $NAME-$VERSION/doc && \
   tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
   cp $BUILDDIR/$NAME-$VERSION/extra/scripts/M.spec /usr/src/redhat/SPECS/M.spec && \
   cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
@@ -379,4 +409,17 @@ then
 	#  $SCP SRPMS/$NAME*.rpm $FTPLOCATION && \
 	#	rm SRPMS/$NAME*.rpm
   fi
+fi
+
+
+############################
+## Upload wxWindows to ftp
+############################
+if [ $UPLOADWXGTK = yes ]
+then
+  echo "Cleaning and uploading wxGTK snapshot"
+  cd $BUILDDIR/wxWindows && ($MAKE clean; rm -f *cache ) >/dev/null 2>&1
+  cd $BUILDDIR && \
+    (tar cf wxWindows.tar wxWindows && gzip -f -9 wxWindows.tar) && \
+    $SCP wxWindows.tar.gz $FTPLOCATION && rm -f wxWindows.tar.gz
 fi
