@@ -245,6 +245,10 @@ SOURCE=.\src\classes\Profile.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\classes\Sequence.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\classes\XFace.cpp
 # ADD CPP /D "SYSV32" /D "__STDC__"
 # End Source File
