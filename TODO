@@ -65,3 +65,13 @@ $Id$
 
 - creation of separate index files for mail folders
 
+
+********************* known wxWindows bugs **********************
+
+- wxWindow position not updated when frame is moved (wxGTK)
+- drawing of transparent icons on wxDC gives undefined background (wxGTK)
+- wxDC::GetTextExtent() does not set descent value (wxGTK)
+- font mess (wxGTK)
+- constraints
+
+
