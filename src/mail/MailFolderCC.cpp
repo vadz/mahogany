@@ -432,23 +432,35 @@ public:
    }
 
    // tell us to use the progress dialog
-   void SetProgressDialog(MProgressDialog *progdlg)
+   void SetProgressDialog(const String& name)
    {
       ASSERT_MSG( !m_progdlg, "SetProgressDialog() can only be called once" );
 
-      m_progdlg = progdlg;
+      MGuiLocker locker;
+
+      m_msgProgress.Printf(_("Retrieving %lu message headers..."), m_nTotal);
+
+      m_progdlg = new MProgressDialog(name, m_msgProgress + "\n\n", m_nTotal,
+                                      NULL, false, true);
    }
 
    // get the progress dialog we use (may be NULL)
    MProgressDialog *GetProgressDialog() const { return m_progdlg; }
 
    // update the progress dialog and return false if it was cancelled
-   bool UpdateProgress() const
+   bool UpdateProgress(const HeaderInfo& entry) const
    {
       if ( m_progdlg )
       {
          MGuiLocker locker;
-         if ( !m_progdlg->Update(m_nRetrieved) )
+
+         // construct the label
+         String label;
+         label << m_msgProgress << '\n'
+               << _("From: ") << entry.GetFrom() << '\n'
+               << _("Subject: ") << entry.GetSubject();
+
+         if ( !m_progdlg->Update(m_nRetrieved, label) )
          {
             // cancelled by user
             return false;
@@ -480,6 +492,9 @@ private:
 
    // the progress dialog if we use one, NULL otherwise
    MProgressDialog *m_progdlg;
+
+   // the base label of the progress dialog
+   String m_msgProgress;
 };
 
 // ----------------------------------------------------------------------------
@@ -4322,15 +4337,9 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
       long threshold = READ_CONFIG(m_Profile, MP_FOLDERPROGRESS_THRESHOLD);
       if ( threshold > 0 && nMessages > (unsigned long)threshold )
       {
-         String msg;
-         msg.Printf(_("Retrieving %lu message headers..."), nMessages);
-         MGuiLocker locker;
-
          // create the progress meter which we will just have to Update() from
          // OverviewHeaderEntry() later
-         overviewData.SetProgressDialog(
-               new MProgressDialog(GetName(), msg, nMessages,
-                                   NULL, false, true));
+         overviewData.SetProgressDialog(GetName());
       }
    }
    //else: no progress dialog
@@ -4397,14 +4406,6 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
                  "ignored.");
 
       // stop overviewing
-      return false;
-   }
-
-   // update the progress dialog and also check if it wasn't cancelled by the
-   // user in the meantime
-   if ( !overviewData->UpdateProgress() )
-   {
-      // cancelled by user
       return false;
    }
 
@@ -4490,6 +4491,14 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
 
    // set the font encoding to be used for displaying this entry
    entry.m_Encoding = encodingMsg;
+
+   // update the progress dialog and also check if it wasn't cancelled by the
+   // user in the meantime
+   if ( !overviewData->UpdateProgress(entry) )
+   {
+      // cancelled by user
+      return false;
+   }
 
    overviewData->Next();
 
