@@ -112,6 +112,6 @@ private:
 };
 
 /// show a dialog allowing to choose the order of headers in the folder view
-extern bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent);
+extern bool ConfigureFolderViewHeaders(class Profile *profile, class wxWindow *parent);
 
 #endif // FOLDERVIEW_H
