@@ -657,10 +657,11 @@ void ThreadContainer::addAsChild(ThreadContainer *c)
    // Takes into account the indices so that the new kid
    // is inserted in the correct position
    CHECK_RET(c->getThreadable(), "No threadable in ThreadContainer::addAsChild()");
-   size_t cIndex = c->getThreadable()->getIndex();
    ThreadContainer *prev = 0;
    ThreadContainer *current = getChild();
+
 #if 0
+   size_t cIndex = c->getThreadable()->getIndex();
    // If this part is compiled, the child will be inserted at
    // the correct position so that they all are still ordered
    // by increasing index. This is to be used if the input of
@@ -677,7 +678,8 @@ void ThreadContainer::addAsChild(ThreadContainer *c)
       prev = current;
       current = current->getNext();
    }
-#endif
+#endif // 0
+
    c->setParent(this);
    c->setNext(current);
    if (prev != 0)
@@ -863,6 +865,8 @@ Threader::Threader(const ThreadParams& thrParams)
    , m_idTable(0)
    , m_bogusIdCount(0)
    , m_gatherSubjects(thrParams.gatherSubjects)
+   , m_breakThreadsOnSubjectChange(thrParams.breakThread)
+   , m_indentIfDummyNode(thrParams.indentIfDummyNode)
 #if wxUSE_REGEX
    , m_replyRemover(0)
    , m_replacementString()
@@ -870,8 +874,6 @@ Threader::Threader(const ThreadParams& thrParams)
    , m_removeListPrefixGathering(true)
    , m_removeListPrefixBreaking(true)
 #endif
-   , m_breakThreadsOnSubjectChange(thrParams.breakThread)
-   , m_indentIfDummyNode(thrParams.indentIfDummyNode)
 {
 #if wxUSE_REGEX
    setSimplifyingRegex(thrParams.simplifyingRegex);
