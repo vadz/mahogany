@@ -9,6 +9,7 @@
 Release 0.67 'Constance' ??? ??, 2004
 ------------------------------------
 
+14.05.04 XN: implemented UUdecoding of files
 12.05.04 VZ: fixed bug with slashes and colons not working in the user names
 22.04.04 VZ: improved signature/trailer detection when replying to messages
 21.04.04 VZ: show subfolders not in the tree in bold in browse subfolders dialog
