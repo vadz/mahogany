@@ -217,8 +217,16 @@ wxMLogWindow::wxMLogWindow(wxFrame *pParent, const char *szTitle)
    frame->SetSize(x, y, w, h);
    frame->SetIcon(ICON("MLogFrame"));
    m_hasWindow = true;
+
+   // normally we want to iconize the frame before showing it to avoid
+   // flicker, but it doesn't seem to work under GTK
+#ifdef __WXGTK__
+   Show();
+   frame->Iconize(i);
+#else // !GTK
    frame->Iconize(i);
    Show();
+#endif // GTK/!GTK
 }
 
 bool wxMLogWindow::IsShown() const
