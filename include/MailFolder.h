@@ -29,6 +29,7 @@ class FolderView;
 class ProfileBase;
 class INTARRAY;
 class MWindow;
+class Message;
 
 /**
    MailFolder base class, represents anything containig mails.
@@ -145,7 +146,7 @@ public:
        @param uid message uid
        @return message handler
    */
-   virtual class Message *GetMessage(unsigned long uid) = 0;
+   virtual Message *GetMessage(unsigned long uid) = 0;
 
    /** Delete a message.
        @param uid the message uid

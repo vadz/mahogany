@@ -369,7 +369,7 @@ wxMFrame::OnPrintSetup()
       //data.SetOrientation(orientation);
 
       wxPrintDialog printerDialog(this, & data);
-      printerDialog.GetPrintData().SetSetupDialog(TRUE);
+      printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
       printerDialog.ShowModal();
 
       //FIXME orientation = printerDialog.GetPrintData().GetOrientation();
@@ -383,7 +383,7 @@ void wxMFrame::OnPrintSetupPS()
       //FIXMEdata.SetOrientation(orientation);
 
       wxPrintDialog printerDialog(this, & data);
-      printerDialog.GetPrintData().SetSetupDialog(TRUE);
+      printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
       printerDialog.ShowModal();
 
       //FIXME orientation = printerDialog.GetPrintData().GetOrientation();

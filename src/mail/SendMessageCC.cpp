@@ -469,11 +469,11 @@ SendMessageCC::Send(void)
       switch(m_protocol)
       {
       case Prot_SMTP:
-         success = smtp_mail (stream,"MAIL",env,body);
+         success = smtp_mail (stream,"MAIL",env,body) != 0;
          smtp_close (stream);
          break;
       case Prot_NNTP:
-         success = nntp_mail (stream,env,body); 
+         success = nntp_mail (stream,env,body) != 0;
          nntp_close (stream);
          break;
       }

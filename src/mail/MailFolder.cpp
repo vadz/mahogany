@@ -19,7 +19,11 @@
 #   include  "Profile.h"
 #endif
 
+#include  <wx/file.h>
+
 #include  "Mdefaults.h"
+
+#include  "Message.h"
 
 #include  "MailFolder.h"
 #include  "MailFolderCC.h"
@@ -232,8 +236,10 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
    if(filename)
    {
       // truncate the file
-      int fd = open(filename, O_CREAT|O_TRUNC, 0666);
-      if(fd != -1) close(fd);
+      wxFile fd;
+      if ( !fd.Create(filename, TRUE /* overwrite */) )
+          wxLogError(_("Couldn't truncate the existing file."));
+
       return SaveMessages(selections,filename);
    }
    else

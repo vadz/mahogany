@@ -73,7 +73,7 @@ inline bool IsMimeType(const wxString& str) { return str.Find('/') != -1; }
 // constants
 // ----------------------------------------------------------------------------
 
-static const int wxTraceIconLoading = 0x000;
+static const char *wxTraceIconLoading = "iconload";
 
 // ============================================================================
 // implementation
