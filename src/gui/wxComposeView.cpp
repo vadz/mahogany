@@ -553,7 +553,7 @@ public:
       {
          m_rcptControls = rcptControls;
 
-         SetToolTip(_("Delete this address from\nthe message recipients list"));
+         SetToolTip(_("Delete this address from the message recipients list"));
       }
 
    // callback
