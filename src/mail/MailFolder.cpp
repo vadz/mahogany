@@ -1532,45 +1532,6 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
    }
 }
 
-
-#if 0
-/* This will disappear: */
-void
-MailFolderCmn::UpdateListing(void)
-{
-   ASSERT_MSG(0,"obsolete UpdateListing() called");
-
-   // We must make sure that we have called BuildListing() at least
-   // once, or ApplyFilterRules() will get into an endless recursion
-   // when it tries to obtain a listing and then gets called from
-   // here.
-   HeaderInfoList * hilp = BuildListing();
-   if(CountNewMessages() > 0)
-   {
-      m_FiltersCausedChange = false;
-      // before updating the listing, we need to filter any new messages:
-      ApplyFilterRules(true);
-      if(m_FiltersCausedChange)
-      {
-        // need to re-build it as it might have changed:
-         SafeDecRef(hilp);
-         hilp = BuildListing();
-      }
-   }
-   if(hilp)
-   {
-      ProcessHeaderListing(hilp);
-      // now we sent an update event to update folderviews etc
-      MEventManager::Send( new MEventFolderUpdateData (this) );
-
-      CheckForNewMail(hilp);
-
-      hilp->DecRef();
-      m_FirstListing = false;
-   }
-}
-#endif
-
 void
 MailFolderCmn::UpdateMessageStatus(UIdType uid)
 {
@@ -1580,15 +1541,6 @@ MailFolderCmn::UpdateMessageStatus(UIdType uid)
       tell the folder to send a single event and invalidate the
       listing. That is more economical. */
    RequestUpdate();
-#if 0
-   if(m_Config.m_ReSortOnChange)
-      RequestUpdate(); // we need a complete new listing
-   else
-   {
-      /// just tell them that we have an updated listing:
-      MEventManager::Send( new MEventFolderUpdateData (this) );
-   }
-#endif
 }
 
 void

@@ -967,6 +967,7 @@ wxMApp::ThrEnterLeave(bool /* enter */, SectionId /*what*/ , bool /*testing */)
 {
    // nothing to do
 }
+
 #else
 
 // this mutex must be acquired before any call to a critical c-client function
@@ -985,7 +986,7 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what, bool
    switch(what)
    {
    case GUI:
-   /* case EVENTS: -- avoid multiple case value warning (EVENTS == GUI) */
+      /* case EVENTS: -- avoid multiple case value warning (EVENTS == GUI) */
       if(enter)
          wxMutexGuiEnter();
       else
@@ -1014,7 +1015,9 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what, bool
          which->Unlock();
    }
 }
+
 #endif
+
 
 wxIcon
 wxMApp::GetStdIcon(int which) const

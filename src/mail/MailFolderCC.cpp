@@ -435,7 +435,6 @@ static bool mm_show_debug = false;
 // be quiet
 static inline void CCQuiet(bool disableCallbacks = false)
 {
-   MCclientLocker lock;
    mm_ignore_errors = true;
    if(disableCallbacks) mm_disable_callbacks = true;
 }
@@ -443,7 +442,6 @@ static inline void CCQuiet(bool disableCallbacks = false)
 // normal logging
 static inline void CCVerbose(void)
 {
-   MCclientLocker lock;
    mm_ignore_errors = mm_disable_callbacks = false;
 }
 
@@ -1015,6 +1013,9 @@ MailFolderCC::Open(void)
 
    STATUSMESSAGE((_("Mailbox %s opened."), GetName().c_str()));
 
+   /// apply filter rules to all new messages
+   ApplyFilterRules(true);
+   
    PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
    return true;   // success
 }
@@ -1279,6 +1280,12 @@ MailFolderCC::AppendMessage(String const &msg)
          m_LastNewMsgUId = m_MailStream->uid_last+1;
       }
    }
+   /// apply filter rules to the new message, it might be moved
+   /// somewhere straightaway
+   UIdArray uidarr;
+   uidarr.Add(m_LastNewMsgUId);
+   (void) ApplyFilterRules(uidarr);
+
    ProcessEventQueue();
    return rc;
 }
@@ -1417,7 +1424,9 @@ MailFolderCC::GetHeaders(void) const
       // we need to re-generate the listing:
       that->BuildListing();
 
-      // Apply filters.
+
+      /// filter the newly arrived messages
+      if(old_nNewMessages < that->CountNewMessages())
       {
          /* Suppress recursion from changes caused by filter code. */
          that->m_ListingFrozen = TRUE;
@@ -1430,6 +1439,7 @@ MailFolderCC::GetHeaders(void) const
          else
             that->m_ListingFrozen = FALSE;
       }
+
       // sort/thread listing:
       that->ProcessHeaderListing(m_Listing);
 
@@ -1439,7 +1449,10 @@ MailFolderCC::GetHeaders(void) const
 
       UIdType new_nNewMessages = that->CountNewMessages();
       if(new_nNewMessages != old_nNewMessages)
-         MEventManager::Send( new MEventFolderStatusData ((MailFolderCC*)this) );
+      {
+         MEventManager::Send( new MEventFolderStatusData
+                              ((MailFolderCC*)this) );
+      }
    }
 
    m_Listing->IncRef(); // for the caller who uses it

@@ -250,6 +250,7 @@ public:
        @param testing if true, allow unlock on unlocked thread
    */
    virtual void ThrLeave(SectionId what, bool testing = false) = 0;
+
    //@}
    bool SupportsDialUpNetwork(void) const
       { return m_DialupSupport; }
