@@ -209,8 +209,9 @@ void MModule_AddStaticModule(const char *Name,
 static
 MModule *LoadModuleInternal(const String & name, const String &pathname)
 {
-   wxDynamicLibrary dll(pathname);
-   if ( !dll.IsLoaded() )
+   // FIXME: this pointer is never freed/unloaded!
+   wxPluginLibrary *dll = wxPluginManager::LoadLibrary(pathname);
+   if ( !dll )
    {
       wxLogTrace(M_TRACE_MODULES, _T("Failed to load module '%s' from '%s'."),
                  name.c_str(), pathname.c_str());
@@ -222,7 +223,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
               name.c_str(), pathname.c_str());
 
    MModule_InitModuleFuncType initFunc =
-      (MModule_InitModuleFuncType)dll.GetSymbol(MMODULE_INITMODULE_FUNCTION);
+      (MModule_InitModuleFuncType)dll->GetSymbol(MMODULE_INITMODULE_FUNCTION);
 
 
    int errorCode = 255;
@@ -241,7 +242,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
       me->m_Module = module;
       MModule_GetModulePropFuncType propFunc =
          (MModule_GetModulePropFuncType)
-         dll.GetSymbol(MMODULE_GETPROPERTY_FUNCTION);
+         dll->GetSymbol(MMODULE_GETPROPERTY_FUNCTION);
       if(propFunc)
          me->m_Interface = GetMModuleProperty((*propFunc)(),
                                               MMODULE_INTERFACE_PROP);
