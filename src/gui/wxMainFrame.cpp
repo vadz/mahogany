@@ -426,6 +426,8 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
 
          // ... and it is unacessible because we couldn't open it
          folder->AddFlags(MF_FLAGS_UNACCESSIBLE);
+
+         m_folderName.clear();
       }
   }
 #ifdef HAS_DYNAMIC_MENU_SUPPORT

@@ -2217,7 +2217,7 @@ SetupServers(void)
    {
       mfolder = CreateFolderTreeEntry(NULL,
                                       _("IMAP Server"),
-                                      MF_IMAP                   ,
+                                      MF_IMAP,
                                       MF_FLAGS_GROUP,
                                       "",
                                       FALSE);

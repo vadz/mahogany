@@ -119,7 +119,6 @@ private:
 
    wxStaticBox *m_box;
    wxTreeCtrl *m_treectrl;
-   wxStaticText *m_msgBusy;
    wxTextCtrl *m_textFind;
 
    // the variables used for "quick search"
@@ -147,6 +146,9 @@ private:
 
    // total number of subfolders
    size_t m_nSubfolders;
+
+   // the progress meter
+   MProgressInfo *m_progressInfo;
 
    DECLARE_EVENT_TABLE()
 };
@@ -303,23 +305,12 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
    // instead
    m_treectrl->Hide();
 
-   // create a temp static text to occupy the place of the tree control
-   m_msgBusy = new wxStaticText(this, -1, _("Retrieving the folder list..."));
-   c = new wxLayoutConstraints;
-   c->top.SameAs(m_treectrl, wxTop);
-   c->left.SameAs(m_treectrl, wxLeft);
-   c->right.SameAs(m_treectrl, wxRight);
-   c->bottom.SameAs(m_treectrl, wxBottom);
-   m_msgBusy->SetConstraints(c);
-
-   // don't allow to do anything until all foders are retrieved (reenabled in
-   // OnNoMoreFolders)
+   // it will be enabled back in OnNoMoreFolders)
    Disable();
 
-   // but leave the static text enabled
-   m_msgBusy->Enable();
-
    SetDefaultSize(4*wBtn, 10*hBtn);
+
+   m_progressInfo = (MProgressInfo *)NULL;
 }
 
 wxSubscriptionDialog::~wxSubscriptionDialog()
@@ -580,13 +571,15 @@ wxTreeItemId wxSubscriptionDialog::InsertInOrder(wxTreeItemId parent,
 
 void wxSubscriptionDialog::OnNewFolder(String& name)
 {
+   // create the progress indicator if not done yet
+   if ( !m_progressInfo )
+      m_progressInfo = new MProgressInfo(this, _("Retrieving the folder list: "));
+
    // count the number of folders retrieved and show progress
    m_nSubfolders++;
    if ( !(m_nSubfolders % 100) )
    {
-      m_msgBusy->SetLabel(wxString::Format(_("%u folders retrieved"), m_nSubfolders));
-
-      wxYield();
+      m_progressInfo->SetValue(m_nSubfolders);
    }
 
    // remove trailing backslashes if any
@@ -605,6 +598,9 @@ void wxSubscriptionDialog::OnNewFolder(String& name)
 
 void wxSubscriptionDialog::OnNoMoreFolders()
 {
+   delete m_progressInfo;
+   m_progressInfo = NULL;
+
    Enable();
 
    // expand the root or add it if it's not there
@@ -627,7 +623,6 @@ void wxSubscriptionDialog::OnNoMoreFolders()
       m_box->SetLabel(_("No subfolders"));
    }
 
-   m_msgBusy->Hide();
    m_treectrl->Show();
 }
 
@@ -899,6 +894,15 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       return FALSE;
    }
 
+   if ( !(folder->GetFlags() & MF_FLAGS_GROUP) )
+   {
+      // how did we get here at all?
+      wxLogMessage(_("The folder '%s' has no subfolders."),
+                   folder->GetPath().c_str());
+
+      return FALSE;
+   }
+
    wxSubscriptionDialog dlg(GetFrame(parent), folder);
 
    UserData ud = &dlg;
@@ -914,6 +918,6 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
 
    dlg.ShowModal();
 
-   return FALSE;
+   return TRUE;
 }
 

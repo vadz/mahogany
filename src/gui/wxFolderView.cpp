@@ -1452,11 +1452,28 @@ wxFolderView::OpenFolder(String const &profilename)
    
    wxEndBusyCursor();
 
-   if ( !mf && (mApplication->GetLastError() != M_ERROR_CANCEL) )
+   if ( !mf )
    {
-      // FIXME propose to show the folder properties dialog right here
-      wxLogError(_("The folder '%s' could not be opened, please check "
-                   "its settings."), profilename.c_str());
+      switch ( mApplication->GetLastError() )
+      {
+         case M_ERROR_CANCEL:
+            // don't say anything
+            break;
+
+         case M_ERROR_HALFOPENED_ONLY:
+            // FIXME propose to show the subfolders dialog from here
+            wxLogWarning(_("The folder '%s' cannot be opened, it only contains "
+                           "the other folders and not the messages.\n"
+                           "Please select \"Browse\" from the menu instead "
+                           "to add its subfolders to the folder tree."),
+                         profilename.c_str());
+            break;
+
+         default:
+            // FIXME propose to show the folder properties dialog right here
+            wxLogError(_("The folder '%s' could not be opened, please check "
+                         "its settings."), profilename.c_str());
+      }
    }
 
    return mf;

@@ -335,6 +335,9 @@ protected:
    // enable the controls which make sense for an POP or IMAP folder
    void EnableControlsForImapOrPop(bool isIMAP = TRUE);
 
+   // enable the controls which make sense for MBOX or MH folder
+   void EnableControlsForFileFolder(FolderType folderType);
+
    // hack: this flag tells whether we're in process of creating the folder or
    // just showing the properties for it. Ultimately, it shouldn't be
    // necessary, but for now we use it to adjust our behaviour depending on
@@ -386,8 +389,10 @@ protected:
    /// Is folder local?
    wxCheckBox *m_isLocal;
 #endif // USE_LOCAL_CHECKBOX
-   /// Is this a directory (IMAP) or hierarchy (NNTP/News) and not a folder?
-   wxCheckBox *m_isDir;
+   /// Can this folder be opened?
+   wxCheckBox *m_canBeOpened;
+   /// Can this folder have subfolders?
+   wxCheckBox *m_isGroup;
    /// The combobox for folder subtype
    wxChoice *m_folderSubtype;
    /// browse button for the icon
@@ -420,8 +425,10 @@ protected:
 #endif // USE_LOCAL_CHECKBOX
    /// the initial value of the "hidden" flag
    bool m_originalIsHiddenValue;
+   /// the initial value of the "can be opened" flag
+   bool m_originalCanBeOpened;
    /// the initial value of the "is group" flag
-   bool m_originalIsDir;
+   bool m_originalIsGroup;
 
    /// the original value for the folder icon index (-1 if nothing special)
    int m_originalFolderIcon;
@@ -977,12 +984,15 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_IsLocal,
 #endif // USE_LOCAL_CHECKBOX
       Label_IsHidden,
-      Label_IsDir,
+      Label_CanBeOpened,
+      Label_IsGroup,
       Label_FolderSubtype,
       Label_FolderIcon,
       Label_Max
    };
 
+   // the remaining unused accel letters (remove one if you add new label):
+   //    ADGJQVXZ
    static const char *szLabels[Label_Max] =
    {
       gettext_noop("&User name: "),
@@ -997,13 +1007,14 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("Force &re-open on ping: "),
       gettext_noop("Anon&ymous access: "),
 #ifdef USE_SSL
-      gettext_noop("Use &Secure Sockets Layer (SSL): "),
+      gettext_noop("Use Secure Sockets Layer (SS&L): "),
 #endif
 #ifdef USE_LOCAL_CHECKBOX
-      gettext_noop("Folder can be accessed &without network "),
+      gettext_noop("Folder can be accessed &without network: "),
 #endif // USE_LOCAL_CHECKBOX
       gettext_noop("&Hide folder in tree"),
-      gettext_noop("Is &directory: "),
+      gettext_noop("Can &be opened: "),
+      gettext_noop("Contains subfold&ers: "),
       gettext_noop("Folder sub&type "),
       gettext_noop("&Icon for this folder: "),
    };
@@ -1036,17 +1047,17 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                   m_forceReOpen);
    wxControl *lastCtrl = m_isAnonymous;
 #ifdef USE_SSL
-   m_useSSL = CreateCheckBox(labels[Label_UseSSL], widthMax,
-                             lastCtrl);
+   m_useSSL = CreateCheckBox(labels[Label_UseSSL], widthMax, lastCtrl);
    lastCtrl = m_useSSL;
 #endif
 #ifdef USE_LOCAL_CHECKBOX
    m_isLocal = CreateCheckBox(labels[Label_IsLocal], widthMax, lastCtrl);
    lastCtrl = m_isLocal;
 #endif // USE_LOCAL_CHECKBOX/!USE_LOCAL_CHECKBOX
-   m_isDir = CreateCheckBox(labels[Label_IsDir], widthMax, lastCtrl);
-   m_isHidden = CreateCheckBox(labels[Label_IsHidden], widthMax, m_isDir);
-   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isHidden);
+   m_isHidden = CreateCheckBox(labels[Label_IsHidden], widthMax, lastCtrl);
+   m_canBeOpened = CreateCheckBox(labels[Label_CanBeOpened], widthMax, m_isHidden);
+   m_isGroup = CreateCheckBox(labels[Label_IsGroup], widthMax, m_canBeOpened);
+   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isGroup);
 
    // the checkboxes might not be very clear, so add some explanations in the
    // form of tooltips
@@ -1062,9 +1073,6 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_useSSL->SetToolTip(_("This will use SSL authentication and encryption\n"
                           "for communication with the server."));
 #endif
-   m_isDir->SetToolTip(_("Some folders are like directories and may only "
-                         "contain other folders and not the messages.\n"
-                         "Check this to create a folder of this kind."));
 
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
    ASSERT_MSG( dlgParent, "should have a parent dialog!" );
@@ -1242,8 +1250,14 @@ wxFolderPropertiesPage::EnableControlsForNewsGroup(bool isNNTP)
    m_isLocal->Enable(isNNTP);
 #endif // USE_LOCAL_CHECKBOX
 
-   // "directory" here means a news hierarchy
-   m_isDir->Enable(TRUE);
+   // "group" here means a news hierarchy
+   m_isGroup->Enable(TRUE);
+
+   // the news hierarchies can't be opened, but sometimes a newsgroup is a
+   // hierarchy too (news.groups is a group, but there is also
+   // news.groups.questions, so it is a hierarchy as well), so we need to
+   // allow the user to set this flag as well
+   m_canBeOpened->Enable(TRUE);
 }
 
 // enable the controls which make sense for an IMAP folder
@@ -1262,8 +1276,74 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
 
    // this makes no sense for POP and for IMAP we will detect it ourselves and
    // reset the MF_FLAGS_GROUP if the folder has \Noinferiors flag
-   m_isDir->SetValue(isIMAP);
-   m_isDir->Enable(FALSE);
+   m_isGroup->SetValue(isIMAP);
+   m_isGroup->Enable(FALSE);
+}
+
+void
+wxFolderPropertiesPage::EnableControlsForFileFolder(FolderType folderType)
+{
+   EnableTextWithLabel(m_mailboxname, FALSE);
+   EnableTextWithLabel(m_server, FALSE);
+   EnableTextWithLabel(m_newsgroup, FALSE);
+
+   // the path can't be changed for an already existing folder
+   EnableTextWithButton(m_path, m_isCreating);
+
+   // file folders are always local
+   m_forceReOpen->SetValue(FALSE);
+   m_forceReOpen->Disable();
+
+#ifdef USE_LOCAL_CHECKBOX
+   m_isLocal->SetValue(FALSE);
+   m_isLocal->Disable();
+#endif // USE_LOCAL_CHECKBOX
+
+   // all file folders can be opened
+   m_canBeOpened->SetValue(TRUE);
+   m_canBeOpened->Disable();
+
+   // file folders come in several flavours
+   int subtype;
+   switch ( m_folderType )
+   {
+      default:
+         FAIL_MSG( "new file folder type?" );
+         // fall through
+
+      case MF_FILE:
+#ifdef EXPERIMENTAL
+      case MF_MFILE:
+         subtype = m_folderType == MF_MFILE ? FileFolderSubtype_MFile
+                                            : FileFolderSubtype_Mbox;
+#else
+         subtype = FileFolderSubtype_Mbox;
+#endif
+         m_browsePath->BrowseForFiles();
+
+         m_isGroup->SetValue(FALSE);
+         break;
+
+      case MF_MH:
+#ifdef EXPERIMENTAL
+      case MF_MDIR:
+         subtype = m_folderType == MF_MFILE ? FileFolderSubtype_MDir
+                                            : FileFolderSubtype_MH;
+#else
+         subtype = FileFolderSubtype_MH;
+#endif
+         {
+            m_browsePath->BrowseForDirectories();
+
+            m_isGroup->SetValue(TRUE);
+         }
+         break;
+   }
+
+   // the value is fixed (whatever it is) by the folder type
+   m_isGroup->Disable();
+
+   m_folderSubtype->SetSelection(subtype);
 }
 
 // called when radiobox/choice selection changes
@@ -1357,65 +1437,26 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 
    switch ( m_folderType )
    {
-   case MF_IMAP:
-   case MF_POP:
-      EnableControlsForImapOrPop(m_folderType == MF_IMAP);
-      break;
+      case MF_IMAP:
+      case MF_POP:
+         EnableControlsForImapOrPop(m_folderType == MF_IMAP);
+         break;
 
-   case MF_NNTP:
-   case MF_NEWS:
-      EnableControlsForNewsGroup(m_folderType == MF_NNTP);
-      break;
+      case MF_NNTP:
+      case MF_NEWS:
+         EnableControlsForNewsGroup(m_folderType == MF_NNTP);
+         break;
 
-   case MF_FILE:
-   case MF_MH:
+      case MF_FILE:
+      case MF_MH:
 #ifdef EXPERIMENTAL
-   case MF_MFILE:
-   case MF_MDIR:
-#endif
+      case MF_MFILE:
+      case MF_MDIR:
+#endif // EXPERIMENTAL
+         EnableControlsForFileFolder(m_folderType);
 
-      EnableTextWithLabel(m_mailboxname, FALSE);
-      EnableTextWithLabel(m_server, FALSE);
-      EnableTextWithLabel(m_newsgroup, FALSE);
-
-      // this can not be changed for an already existing folder
-      EnableTextWithButton(m_path, m_isCreating);
-      m_forceReOpen->SetValue(FALSE);
-      m_forceReOpen->Enable(FALSE);
-
-#ifdef USE_LOCAL_CHECKBOX
-      m_isLocal->Enable(FALSE);
-      m_isLocal->SetValue(FALSE);
-#endif // USE_LOCAL_CHECKBOX
-
-      // file folders come in several flavours
-      switch ( m_folderType )
-      {
-         case MF_FILE:
-#ifdef EXPERIMENTAL
-         case MF_MFILE:
-            m_folderSubtype->SetSelection(
-               m_folderType == MF_MFILE ? FileFolderSubtype_MFile
-               : FileFolderSubtype_Mbox);
-#else
-            m_folderSubtype->SetSelection(FileFolderSubtype_Mbox);
-#endif
-            m_browsePath->BrowseForFiles();
-            m_isDir->Enable(FALSE);
-            break;
-
-         case MF_MH:
-#ifdef EXPERIMENTAL
-         case MF_MDIR:
-            m_folderSubtype->SetSelection(
-               m_folderType == MF_MFILE ? FileFolderSubtype_MDir
-               : FileFolderSubtype_MH);
-#else
-            m_folderSubtype->SetSelection(FileFolderSubtype_MH);
-#endif
+         if ( m_folderType == MF_MH || m_folderType == MF_MDIR )
          {
-            m_browsePath->BrowseForDirectories();
-
             // set the path to MHROOT by default
             if ( !m_path->GetValue() )
             {
@@ -1431,34 +1472,29 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 
                m_path->SetValue(path);
             }
-
-            m_isDir->Enable(TRUE);
          }
+
+         // not yet
+         m_userModifiedPath = false;
          break;
 
-         default:
-            FAIL_MSG( "new file folder type?" );
-      }
+      case MF_GROUP:
+         // for a simple grouping folder, all fields make sense because
+         // they will be inherited by the children and the children
+         // folders may have any type
+         EnableTextWithLabel(m_mailboxname, TRUE);
+         EnableTextWithLabel(m_server, TRUE);
+         EnableTextWithLabel(m_newsgroup, TRUE);
+         EnableTextWithButton(m_path, TRUE);
+         m_forceReOpen->Enable(TRUE);
+         m_isGroup->Enable(TRUE);
 
-      // not yet
-      m_userModifiedPath = false;
+         // a group can never be opened
+         m_canBeOpened->Enable(FALSE);
+         break;
 
-      break;
-
-   case MF_GROUP:
-      // for a simple grouping folder, all fields make sense because
-      // they will be inherited by the children and the children
-      // folders may have any type
-      EnableTextWithLabel(m_mailboxname, TRUE);
-      EnableTextWithLabel(m_server, TRUE);
-      EnableTextWithLabel(m_newsgroup, TRUE);
-      EnableTextWithButton(m_path, TRUE);
-      m_forceReOpen->Enable(TRUE);
-      m_isDir->Enable(TRUE);
-      break;
-
-   default:
-      wxFAIL_MSG("Unexpected folder type.");
+      default:
+         wxFAIL_MSG("Unexpected folder type.");
    }
 
    // enable folder subtype combobox only if we're creating because (folder
@@ -1835,9 +1871,22 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_isLocal->SetValue(m_originalIsLocalValue);
 #endif // USE_LOCAL_CHECKBOX
 
-   m_originalIsDir = (flags & MF_FLAGS_GROUP) != 0;
+   if ( m_isCreating )
+   {
+      // always create folders which can be opened by default (i.e. even if
+      // our parent can't be opened, it doesn't mean that we can't)
+      m_originalCanBeOpened = true;
+   }
+   else
+   {
+      // use the current value
+      m_originalCanBeOpened = (flags & MF_FLAGS_NOSELECT) == 0;
+   }
+   m_originalIsGroup = (flags & MF_FLAGS_GROUP) != 0;
+
+   m_canBeOpened->SetValue(m_originalCanBeOpened);
    m_isHidden->SetValue(m_originalIsHiddenValue);
-   m_isDir->SetValue(m_originalIsDir);
+   m_isGroup->SetValue(m_originalIsGroup);
 
    // although NNTP servers do support password-protected access, this
    // is so rare that anonymous should really be the default
@@ -1876,7 +1925,7 @@ wxFolderPropertiesPage::IsOk() const
          // it's valid to have an empty name for the newsgroup hierarchy - the
          // entry will represent the whole news server - but not for a
          // newsgroup
-         return m_isDir->GetValue() || !!m_newsgroup->GetValue();
+         return m_isGroup->GetValue() || !!m_newsgroup->GetValue();
 
       case File:
          // file should have a non empty name
@@ -1987,6 +2036,10 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    }
 
    // folder flags
+
+   bool isGroup = m_isGroup->GetValue();
+   bool canBeOpened = m_canBeOpened->GetValue();
+
    int flags = 0;
    if ( m_isIncoming->GetValue() )
       flags |= MF_FLAGS_INCOMING;
@@ -1994,10 +2047,12 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       flags |= MF_FLAGS_KEEPOPEN;
    if ( m_forceReOpen->GetValue() )
       flags |= MF_FLAGS_REOPENONPING;
-   if ( m_isDir->GetValue() )
-      flags |= MF_FLAGS_GROUP;
    if ( m_isHidden->GetValue() )
       flags |= MF_FLAGS_HIDDEN;
+   if ( isGroup )
+      flags |= MF_FLAGS_GROUP;
+   if ( canBeOpened )
+      flags |= MF_FLAGS_NOSELECT;
 
 #ifdef USE_LOCAL_CHECKBOX
    if ( m_isLocal->GetValue() )
@@ -2147,43 +2202,43 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    switch ( folderType )
    {
-   case MF_POP:
-   case MF_IMAP:
-      WriteEntryIfChanged(Path, m_mailboxname->GetValue());
-      break;
-
-   case MF_NNTP:
-   case MF_NEWS:
-      WriteEntryIfChanged(Path, m_newsgroup->GetValue());
-      break;
-
-   case MF_FILE:
-#ifdef EXPERIMENTAL
-   case MF_MFILE:
-#endif
-      path = m_path->GetValue();
-      // fall through
-
-   case MF_MH:
-#ifdef EXPERIMENTAL
-   case MF_MDIR:
-#endif
-      WriteEntryIfChanged(Path, path);
-      break;
-
-   case MF_INBOX:
-      if ( !m_dlgCreate )
+      case MF_POP:
+      case MF_IMAP:
+         WriteEntryIfChanged(Path, m_mailboxname->GetValue());
          break;
-      //else: can't create INBOX folder!
 
-   case MF_GROUP:
-      WriteEntryIfChanged(Path, m_mailboxname->GetValue());
-      WriteEntryIfChanged(Path, m_newsgroup->GetValue());
-      WriteEntryIfChanged(Path, m_path->GetValue());
-      break;
+      case MF_NNTP:
+      case MF_NEWS:
+         WriteEntryIfChanged(Path, m_newsgroup->GetValue());
+         break;
 
-   default:
-      wxFAIL_MSG("Unexpected folder type.");
+      case MF_FILE:
+#ifdef EXPERIMENTAL
+      case MF_MFILE:
+#endif
+         path = m_path->GetValue();
+         // fall through
+
+      case MF_MH:
+#ifdef EXPERIMENTAL
+      case MF_MDIR:
+#endif
+         WriteEntryIfChanged(Path, path);
+         break;
+
+      case MF_INBOX:
+         if ( !m_dlgCreate )
+            break;
+         //else: can't create INBOX folder!
+
+      case MF_GROUP:
+         WriteEntryIfChanged(Path, m_mailboxname->GetValue());
+         WriteEntryIfChanged(Path, m_newsgroup->GetValue());
+         WriteEntryIfChanged(Path, m_path->GetValue());
+         break;
+
+      default:
+         wxFAIL_MSG("Unexpected folder type.");
    }
 
    // mark the folder as being autocollectable or not
@@ -2246,10 +2301,17 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    }
 #endif
 
-   bool isDir = m_isDir->GetValue();
-   if ( isDir != m_originalIsDir )
+   if ( canBeOpened != m_originalCanBeOpened )
    {
-      if ( isDir )
+      if ( canBeOpened )
+         folder->ResetFlags(MF_FLAGS_NOSELECT);
+      else
+         folder->AddFlags(MF_FLAGS_NOSELECT);
+   }
+
+   if ( isGroup != m_originalIsGroup )
+   {
+      if ( isGroup )
          folder->AddFlags(MF_FLAGS_GROUP);
       else
          folder->ResetFlags(MF_FLAGS_GROUP);

@@ -78,12 +78,29 @@ enum FolderType
 static const int MF_FLAGSMASK = 0xffffff00;
 
 // the flags of a mail folder
+//
+// Notice the difference between MF_FLAGS_UNACCESSIBLE, MF_FLAGS_GROUP and
+// MF_FLAGS_NOSELECT: UNACCESSIBLE means that, although the folder is just a
+// "normal" folder, we failed to open it when we tried to do it the last time
+// (for example, because of a network problem). OTOH, MF_FLAGS_NOSELECT means
+// that the folder can't be opened at all: for example, it is a NNTP folder
+// "comp.programming" which is really a news hierarchy and not a newsgroup.
+// The name comes from cclient which marks such folders with \Noselect flag.
+//
+// Finally, MF_FLAGS_GROUP now doesn't anything at all about whether the
+// folder can or can't be opened: it was used instead of MF_FLAGS_NOSELECT
+// before as for some kinds of folders (notable NNTP) they are (usually, but
+// even here not always) related, however for the IMAP folders they are really
+// independent and MF_FLAGS_GROUP just means that this folder may have sub
+// folders. It is always TRUE for MH folders and always false for MBOX and
+// POP3. NNTP and IMAP folders may have it or not.
 enum FolderFlags
 {
    MF_FLAGS_DEFAULT       = 0x00000000, // empty flags
    MF_FLAGS_ANON          = 0x00000100, // use anonymous access
    MF_FLAGS_INCOMING      = 0x00000200, // collect all new mail from it
-   MF_FLAGS_UNACCESSIBLE  = 0x00000400, // folder can't be opened
+   MF_FLAGS_UNACCESSIBLE  = 0x00000400, // folder couldn't be opened when we
+                                        // tried the last time
    MF_FLAGS_MODIFIED      = 0x00000800, // [essential] folder settings have been
                                         // modified (invalidates "unaccessible"
                                         // flag) since the last attempt to open it
@@ -93,8 +110,9 @@ enum FolderFlags
    MF_FLAGS_REOPENONPING  = 0x00008000, // force a close and re-open on a ping
    MF_FLAGS_ISLOCAL       = 0x00010000, // can be accessed even without network
    MF_FLAGS_HIDDEN        = 0x00020000, // don't show in the folder tree
-   MF_FLAGS_GROUP         = 0x00040000, // can be only half opened, not opened
-   MF_FLAGS_SSLAUTH       = 0x00080000  // use SSL authentication/encryption
+   MF_FLAGS_GROUP         = 0x00040000, // contains subfolders
+   MF_FLAGS_SSLAUTH       = 0x00080000, // use SSL authentication/encryption
+   MF_FLAGS_NOSELECT      = 0x00100000  // folder can't be opened
 };
 
 /** SendMessageCC supports two different protocols:
@@ -130,7 +148,6 @@ inline static int GetFolderFlags(int typeAndFlags)
    return typeAndFlags & MF_FLAGSMASK;
 }
 
-
 #ifdef USE_SSL
 /// is this a folder type for which username/password make sense?
 inline bool FolderTypeSupportsSSL(FolderType type)
@@ -146,7 +163,7 @@ inline bool FolderTypeSupportsSSL(FolderType type)
       return false;
    }
 }
-#endif
+#endif // USE_SSL
 
 /// is this a folder type for which username/password make sense?
 inline bool FolderTypeHasUserName(FolderType type)
@@ -222,20 +239,6 @@ inline bool CanHaveSubfolders(FolderType folderType,
 
       case MF_NEWS:
       case MF_NNTP:
-         if ( flags & MF_FLAGS_GROUP )
-         {
-            if ( subtype )
-            {
-               *subtype = folderType;
-            }
-
-            return TRUE;
-         }
-         else
-         {
-            return FALSE;
-         }
-
       case MF_IMAP:
          if ( flags & MF_FLAGS_GROUP )
          {
@@ -278,9 +281,7 @@ inline bool CanDeleteFolderOfType(FolderType folderType)
 inline bool IsFileOrDirFolder(FolderType folderType)
 {
    FolderType ft = GetFolderType(folderType);
-   return ft == MF_FILE || ft == MF_MH
-      || ft == MF_MFILE || ft == MF_MDIR
-      ;
+   return ft == MF_FILE || ft == MF_MH || ft == MF_MFILE || ft == MF_MDIR;
 }
 
 /// can the messages in this folder be deleted by user?
@@ -326,7 +327,8 @@ inline bool CanOpenFolder(FolderType folderType, int folderFlags)
    {
       case MF_NNTP:
       case MF_NEWS:
-         if ( !(folderFlags & MF_FLAGS_GROUP) )
+      case MF_IMAP:
+         if ( !(folderFlags & MF_FLAGS_NOSELECT) )
          {
             // can open
             break;
@@ -347,7 +349,6 @@ inline bool CanOpenFolder(FolderType folderType, int folderFlags)
       case MF_INBOX:
       case MF_FILE:
       case MF_MH:
-      case MF_IMAP:
       case MF_POP:
       case MF_MFILE:
       case MF_MDIR:

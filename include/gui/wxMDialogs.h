@@ -74,6 +74,22 @@ public:
    }
 };
 
+/// use this instead of MProgressDialog when maximum is unknown
+class MProgressInfo
+{
+public:
+   MProgressInfo(wxWindow *parent,
+                 const String& label,
+                 const String& title = wxEmptyString);
+  ~MProgressInfo();
+
+   /// change the second part of the label
+   void SetValue(size_t numDone);
+
+private:
+   class WXDLLEXPORT wxFrame *m_frame;
+   class WXDLLEXPORT wxStaticText *m_label;
+};
 
 /// This allows us to call them from modules.
 extern "C"

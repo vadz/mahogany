@@ -64,10 +64,7 @@ static bool ShowHiddenFolders()
 // can this folder be opened?
 static bool CanOpen(const MFolder *folder)
 {
-  return folder &&
-         folder->GetType() != MF_ROOT &&
-         folder->GetType() != MF_GROUP &&
-         !(folder->GetFlags() & MF_FLAGS_GROUP);
+  return folder && CanOpenFolder(folder->GetType(), folder->GetFlags());
 }
 
 // ----------------------------------------------------------------------------
@@ -234,9 +231,7 @@ protected:
 
       CHECK( node, FALSE, "shouldn't be called if no selection" );
 
-      MFolder *folder = node->GetFolder();
-
-      return CanOpenFolder(folder->GetType(), folder->GetFlags());
+      return ::CanOpen(node->GetFolder());
    }
 
    // this is the real handler for double-click and enter events
@@ -966,8 +961,7 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
       }
 
       FolderType folderType = folder->GetType();
-      bool isRoot = folderType == MF_ROOT,
-           isGroup = folderType == MF_GROUP;
+      bool isRoot = folderType == MF_ROOT;
 
       FolderMenu **menu = isRoot ? &m_menuRoot : &m_menu;
 
@@ -989,14 +983,16 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
       }
       else
       {
+         int folderFlags = folder->GetFlags();
+
          // disable the items which don't make sense for some kinds of folders:
          // groups can't be opened
-         (*menu)->Enable(FolderMenu::Open, !isGroup);
+         (*menu)->Enable(FolderMenu::Open, CanOpenFolder(folderType, folderFlags));
 
          // these items only make sense when a folder can, in principle, have
          // inferiors (and browsing doesn't make sense for "simple" groups - what
          // would we browse for?)
-         bool mayHaveSubfolders = CanHaveSubfolders(folderType, folder->GetFlags());
+         bool mayHaveSubfolders = CanHaveSubfolders(folderType, folderFlags);
          (*menu)->Enable(FolderMenu::New, mayHaveSubfolders);
       }
 

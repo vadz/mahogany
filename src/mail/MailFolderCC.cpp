@@ -771,10 +771,14 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    // try to really open it
    if ( ok )
    {
+      // reset the last error
+      mApplication->SetLastError(M_ERROR_OK);
+
       ok = halfopen ? mf->HalfOpen() : mf->Open();
 
-      if ( !ok )
+      if ( !ok && !mApplication->GetLastError() )
       {
+         // catch all error code
          mApplication->SetLastError(M_ERROR_CCLIENT);
       }
    }
@@ -840,6 +844,9 @@ bool MailFolderCC::HalfOpen()
    // well, we're not going to tell the user we're half opening it...
    STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
 
+   if( FolderTypeHasUserName(GetType()) )
+      SetLoginData(m_Login, m_Password);
+
    MCclientLocker lock;
    SetDefaultObj();
    CCVerbose();
@@ -867,7 +874,7 @@ MailFolderCC::Open(void)
    */
    UpdateTimeoutValues();
 
-   if(GetType() == MF_POP || GetType() == MF_IMAP)
+   if( FolderTypeHasUserName(GetType()) )
       SetLoginData(m_Login, m_Password);
 
    // for files, check whether mailbox is locked, c-client library is
@@ -1000,10 +1007,10 @@ MailFolderCC::Open(void)
       SetDefaultObj(false);
    }
 
-   if(m_MailStream == NIL)
+   if ( m_MailStream == NIL )
    {
-         STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
-         return false;
+      STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
+      return false;
    }
 
    AddToMap(m_MailStream); // now we are known
@@ -1011,13 +1018,28 @@ MailFolderCC::Open(void)
 
    // listing already built
 
-   STATUSMESSAGE((_("Mailbox %s opened."), GetName().c_str()));
+   // for some folders (notably the IMAP ones), mail_open() will return a
+   // NULL pointer but set halfopen flag if it couldn't be SELECTed - as we
+   // really want to open it here and not halfopen, this is an error for us
+   if ( m_MailStream->halfopen )
+   {
+      MFolder_obj(m_Profile)->AddFlags(MF_FLAGS_NOSELECT);
 
-   /// apply filter rules to all new messages
-   ApplyFilterRules(true);
-   
-   PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
-   return true;   // success
+      mApplication->SetLastError(M_ERROR_HALFOPENED_ONLY);
+
+      return false;
+   }
+   else // folder really opened
+   {
+      STATUSMESSAGE((_("Mailbox %s opened."), GetName().c_str()));
+
+      // apply filter rules to all new messages
+      ApplyFilterRules(true);
+      
+      PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
+
+      return true;   // success
+   }
 }
 
 MailFolderCC *
@@ -1047,6 +1069,11 @@ MailFolderCC::Checkpoint(void)
 {
    if(m_MailStream == NULL)
      return; // nothing we can do anymore
+
+   // nothing to do for halfopened folders (and doing CHECK on a half opened
+   // IMAP folder is a protocol error, too)
+   if ( m_MailStream->halfopen )
+      return;
 
    DBGMESSAGE(("MailFolderCC::Checkpoint() on %s.", GetName().c_str()));
    if(NeedsNetwork() && ! mApplication->IsOnline())
@@ -1186,7 +1213,7 @@ MailFolderCC::Close(void)
 {
    /*
      DO NOT SEND EVENTS FROM HERE, ITS CALLED FROM THE DESTRUCTOR AND
-     THE OBJECT *WIL* DISAPPEAR!
+     THE OBJECT *WILL* DISAPPEAR!
    */
 
    // can cause references to this folder, cannot be allowd:
@@ -1202,7 +1229,12 @@ MailFolderCC::Close(void)
    {
       if(!NeedsNetwork() || mApplication->IsOnline())
       {
-         mail_check(m_MailStream); // update flags, etc, .newsrc
+         if ( !m_MailStream->halfopen )
+         {
+            // update flags, etc, .newsrc
+            mail_check(m_MailStream);
+         }
+
          mail_close(m_MailStream);
       }
       else
@@ -1545,7 +1577,7 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
    unsigned long lastcount = 0;
    MProgressDialog *progDlg = NULL;
    if ( m_nMessages > (unsigned)READ_CONFIG(m_Profile,
-                                                MP_FOLDERPROGRESS_THRESHOLD) )
+                                            MP_FOLDERPROGRESS_THRESHOLD) )
    {
       String msg;
       msg.Printf(_("Searching in %lu messages..."),
@@ -2431,9 +2463,9 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
 void
 MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
 {
-   //we are ignoring the errflg and always put these at level 1
+   // we are ignoring the errflg and always put these at level 1
    // don't know exactly what to do with them
-   mm_log(str,1, MailFolderCC::LookupObject(stream));
+   mm_log(str, 1, MailFolderCC::LookupObject(stream));
 }
 
 
@@ -2524,6 +2556,16 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
 void
 MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 {
+   if ( str.StartsWith("SELECT failed") )
+   {
+      // send this to the debug window anyhow, but don't show it to the user
+      // as this message can only result from trying to open a folder which
+      // has a \Noselect flag and we handle this ourselves
+      mm_dlog(str);
+
+      return;
+   }
+
    GetLogCircle().Add(str);
    String  msg;
    if(mf)

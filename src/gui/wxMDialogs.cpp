@@ -35,6 +35,7 @@
 #   include "MHelp.h"
 
 #   include <wx/sizer.h>
+#   include <wx/minifram.h>
 #endif
 
 #include "Mpers.h"
@@ -2907,5 +2908,47 @@ extern wxChoice *CreateIdentCombo(wxWindow *parent)
    combo->SetToolTip(_("Change the identity"));
 
    return combo;
+}
+
+// ----------------------------------------------------------------------------
+// MProgressInfo
+// ----------------------------------------------------------------------------
+
+MProgressInfo::MProgressInfo(wxWindow *parent,
+                             const String& text,
+                             const String& title)
+{
+   wxString caption = title;
+   if ( !caption )
+      caption = _("Mahogany: please wait");
+
+   m_frame = new wxMiniFrame(parent, -1, caption);
+   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+   sizer->Add(new wxStaticText(m_frame, -1, text), 0, wxALL & ~wxRIGHT, 10);
+   m_label = new wxStaticText(m_frame, -1, _("please wait ..."));
+   sizer->Add(m_label, 0, wxALL, 10);
+
+   m_frame->SetAutoLayout(TRUE);
+   m_frame->SetSizer(sizer);
+   sizer->Fit(m_frame);
+   sizer->SetSizeHints(m_frame);
+
+   m_frame->CentreOnParent();
+   m_frame->Show();
+
+   wxYield();
+}
+
+void MProgressInfo::SetValue(size_t numDone)
+{
+   m_label->SetLabel(wxString::Format(_("%u done"), numDone));
+   wxYield();
+}
+
+MProgressInfo::~MProgressInfo()
+{
+   m_frame->Show(FALSE);
+   m_frame->Close();
+   wxYield();
 }
 

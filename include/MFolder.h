@@ -185,7 +185,23 @@ class MFolder_obj
 public:
    // ctor & dtor
       // creates a new folder
-   MFolder_obj(const String& name) { m_folder = MFolder::Get(name); }
+   MFolder_obj(const String& name) { Init(name); }
+      // creates a folder corresponding to the profile
+   MFolder_obj(const Profile *profile)
+      {
+         String name;
+         if ( profile->GetName().
+               StartsWith(String(M_PROFILE_CONFIG_SECTION) + '/', &name) )
+         {
+            Init(name);
+         }
+         else
+         {
+            wxFAIL_MSG( "attempt to create MFolder from non folder profile" );
+
+            m_folder = NULL;
+         }
+      }
       // takes ownership of the existing object
    MFolder_obj(MFolder *folder) { m_folder = folder; }
       // release folder
@@ -208,6 +224,9 @@ private:
    // no copy ctor/assignment operator
    MFolder_obj(const MFolder_obj&);
    MFolder_obj& operator=(const MFolder_obj&);
+
+   // create folder by name
+   void Init(const String& name) { m_folder = MFolder::Get(name); }
 
    MFolder *m_folder;
 };
