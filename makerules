@@ -21,6 +21,7 @@
 %.ps: %.dvi
 	$(DVIPS) $< -o $@
 
+
 ifdef HAVE_SGMLTOOLS
 %.html: %.sgml
 	sgml2html $<
@@ -39,7 +40,11 @@ dep depend:
 tags:
 	etags --c++ $(SRC) $(CXXSRC)
 
-.PHONY: stdclean doc dep depend tags
+.PHONY: stdclean doc dep depend tags msgcat
+
+msgcat:
+	@touch $(BUILDDIR)/messages.po
+	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -a -j -o $(BUILDDIR)/messages.po $$i ; done
 
 stdclean:
 	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a

@@ -37,6 +37,7 @@
 #include   "Mdefaults.h"
 #include   "Mupgrade.h"
 #include   "gui/wxIconManager.h"
+#include   "MailFolder.h"
 
 #define MCB_FOLDEROPEN_D            ""
 #define MCB_FOLDERUPDATE_D          ""
@@ -559,6 +560,10 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 // ============================================================================
 // implementation
 // ============================================================================
+
+// OK, there is no working dialog editor and resizing doesn't work, so
+// how about manually creating this panel? All others resize well.
+#if 0
 #include   "wxr/FOPanel.wxr"
 //----------------------------------------------------------------------------
 // a panel loading from a .wxr file
@@ -634,6 +639,224 @@ wxFolderOpenPanel::TranferDataFromWindow(void)
    return true;
 }
 #endif
+
+#endif
+
+//----------------------------------------------------------------------------
+// A panel for defining a new Folder
+//----------------------------------------------------------------------------
+class wxFolderPropertiesPage : public wxPanel
+{
+public:
+   wxFolderPropertiesPage(wxNotebook *notebook, ProfileBase *profile);
+
+   virtual bool TransferDataToWindow(void);
+   virtual bool TransferDataFromWindow(void);
+   /// update controls
+   void UpdateUI(void);
+   void OnEvent(wxCommandEvent& event);
+
+protected:
+   wxNotebook *  m_notebook;
+   ProfileBase * m_profile;
+   /// type of the folder
+   int m_type;
+   /// folder type
+   wxRadioBox * m_radio;
+   /// user name
+   wxTextCtrl * m_login;
+   /// password
+   wxTextCtrl * m_password;
+   /// folder path
+   wxTextCtrl * m_path;
+   /// and a browse button for it
+   wxBrowseButton * m_browsePath;
+   /// server name
+   wxTextCtrl * m_server;
+   /// newsgroup name
+   wxTextCtrl * m_newsgroup;
+
+   wxTextCtrl *MakeTextCtrl(wxString const &label, wxWindow *last = NULL);
+
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxPanel)
+   EVT_BUTTON(-1, wxFolderPropertiesPage::OnCommand)
+END_EVENT_TABLE()
+
+wxTextCtrl *
+wxFolderPropertiesPage::MakeTextCtrl(wxString const &label, wxWindow *last)
+{
+   int widthMax = 100;
+   wxLayoutConstraints *c;
+   
+   wxStaticText *l = new wxStaticText(this, -1, label, wxDefaultPosition,
+                                      wxDefaultSize, wxALIGN_RIGHT);
+   c = new wxLayoutConstraints;
+   if(last)
+      c->top.SameAs(last, wxBottom, LAYOUT_Y_MARGIN);
+   else
+      c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   l->SetConstraints(c);
+
+   wxTextCtrl *t = new wxTextCtrl(this, -1, "");
+   c = new wxLayoutConstraints;
+   c->top.SameAs(l, wxTop);
+   c->left.RightOf(l, LAYOUT_X_MARGIN);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   t->SetConstraints(c);
+   return t;
+}
+
+
+wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *nb,
+                                               ProfileBase *p)
+   : wxPanel(nb, -1)
+{
+   m_notebook = nb;
+   m_profile = p;
+
+   wxLayoutConstraints *c;
+   
+   // radiobox of folder type
+   wxString radioChoices[5];
+   radioChoices[0] = _("INBOX");
+   radioChoices[1] = _("File");
+   radioChoices[2] = _("POP3");
+   radioChoices[3] = _("IMAP");
+   radioChoices[4] = _("Newsgroup");
+   m_radio = new wxRadioBox(this,-1,_("Folder Type"),
+                            wxDefaultPosition,wxDefaultSize,
+                            5, radioChoices,3,wxRA_HORIZONTAL);
+
+   c = new wxLayoutConstraints();
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->bottom.AsIs();
+   m_radio->SetConstraints(c);
+
+   m_login = MakeTextCtrl(_("User name"), m_radio);
+   m_password = MakeTextCtrl(_("Passsword"),m_login);
+   m_path = MakeTextCtrl(_("Filename"), m_password);
+   m_server = MakeTextCtrl(_("Server"), m_path);
+   m_newsgroup = MakeTextCtrl(_("Newsgroup"), m_server);
+
+
+   wxStaticText *l = new wxStaticText(this, -1, _("Filename"),
+                                      wxDefaultPosition,
+                                      wxDefaultSize, wxALIGN_RIGHT);
+   c = new wxLayoutConstraints;
+   c->top.SameAs(m_newsgroup, wxBottom, LAYOUT_Y_MARGIN);
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->width.Absolute(100);
+   c->height.AsIs();
+   l->SetConstraints(c);
+
+   wxTextCtrl *t = new wxTextCtrl(this, -1, "");
+   c = new wxLayoutConstraints;
+   c->top.SameAs(l, wxTop);
+   c->left.RightOf(l, LAYOUT_X_MARGIN);
+   c->right.AsIs();
+   c->height.AsIs();
+   t->SetConstraints(c);
+
+   m_browsePath = new wxBrowseButton(t,this);
+   c = new wxLayoutConstraints;
+   c->top.SameAs(l, wxTop);
+   c->left.RightOf(t, LAYOUT_X_MARGIN);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   m_browsePath->SetConstraints(c);
+
+   SetAutoLayout(TRUE);
+}
+
+void
+wxFolderPropertiesPage::OnEvent(wxCommandEvent& event)
+{
+   UpdateUI();
+}
+
+void
+wxFolderPropertiesPage::UpdateUI(void)
+{
+   m_profile->writeEntry(MP_FOLDER_TYPE,m_radio->GetSelection());
+
+   switch(m_radio->GetSelection())
+   {
+   case MailFolder::MF_POP:
+   case MailFolder::MF_IMAP:
+      m_login->Enable(TRUE);
+      m_password->Enable(TRUE);
+      m_server->Enable(TRUE);
+      m_path->Enable(FALSE);
+      m_newsgroup->Enable(FALSE);
+      m_browsePath->Enable(FALSE);
+      break;
+   case MailFolder::MF_NNTP:
+      m_profile->writeEntry(MP_FOLDER_PATH,m_path->GetValue());
+      m_login->Enable(FALSE);
+      m_password->Enable(FALSE);
+      m_server->Enable(TRUE);
+      m_path->Enable(FALSE);
+      m_newsgroup->Enable(TRUE);
+      m_browsePath->Enable(FALSE);
+      break;
+   case MailFolder::MF_FILE:
+      m_profile->writeEntry(MP_FOLDER_PATH,m_path->GetValue());
+      break;
+   case MailFolder::MF_INBOX:
+      break;
+   default:
+      wxFAIL_MSG("Unexpected folder type.");
+   }
+}
+
+
+bool
+wxFolderPropertiesPage::TransferDataToWindow(void)
+{
+   m_login->SetValue(READ_CONFIG(m_profile,MP_POP_LOGIN));
+   m_password->SetValue(READ_CONFIG(m_profile,MP_POP_PASSWORD));
+   m_server->SetValue(READ_CONFIG(m_profile,MP_POP_HOST));
+   m_path->SetValue(READ_CONFIG(m_profile,MP_FOLDER_PATH));
+   m_newsgroup->SetValue(READ_CONFIG(m_profile,MP_FOLDER_PATH));
+   return true;
+}
+
+bool
+wxFolderPropertiesPage::TransferDataFromWindow(void)
+{
+   switch(m_radio->GetSelection())
+   {
+   case MailFolder::MF_POP:
+   case MailFolder::MF_IMAP:
+      m_profile->writeEntry(MP_POP_LOGIN,m_login->GetValue());
+      m_profile->writeEntry(MP_POP_PASSWORD,m_password->GetValue());
+      m_profile->writeEntry(MP_POP_HOST,m_server->GetValue());
+      break;
+   case MailFolder::MF_NNTP:
+      m_profile->writeEntry(MP_NNTPHOST,m_server->GetValue());
+      m_profile->writeEntry(MP_FOLDER_PATH,m_newsgroup->GetValue());
+      break;
+   case MailFolder::MF_FILE:
+      m_profile->writeEntry(MP_FOLDER_PATH,m_newsgroup->GetValue());
+      break;
+   case MailFolder::MF_INBOX:
+      m_path->SetValue("INBOX");
+      break;
+   default:
+      wxFAIL_MSG("Unexpected folder type.");
+   }
+   return true;
+}
+
 
 wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
                              const char *title,
@@ -1591,7 +1814,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent)
    static const char *aszImages[] =
    {
       // should be in sync with the corresponding enum
-      "compose","FIXME"
+      "compose","access"
    };
 
    wxASSERT( WXSIZEOF(aszImages) == Icon_Max );  // don't forget to update both!
@@ -1607,8 +1830,10 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent)
    ProfileBase *profile = mApplication->GetProfile();
    // create and add the pages
    (void)new wxOptionsPageCompose(this,profile);
-   wxResourceParseData(FolderOpenPanel);
-   AddPage(new wxResourcePanel("FolderOpenPanel",this), _("Folder"),FALSE,1);
+//   wxResourceParseData(FolderOpenPanel);
+//   AddPage(new wxResourcePanel("FolderOpenPanel",this),
+   //   _("Folder"),FALSE,1);
+   AddPage(new wxFolderPropertiesPage(this,profile), _("Access"),FALSE,1);
 }
 
 

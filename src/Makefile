@@ -51,7 +51,10 @@ install: M
 	for i in icons/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons; done
 	$(MAKE) -C Python $@
 
-.PHONY: all dep clean doc semistatic static allclean install
+msgcat:
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
+
+.PHONY: all dep clean doc semistatic static allclean install msgcat
 
 
 

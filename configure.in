@@ -349,6 +349,24 @@ then
   AC_MSG_WARN("Building M without Python leads to reduced functionality!")
 fi
 
+dnl check for xgettext
+AC_PATH_PROG(XGETTEXT,xgettext)
+if test "x$XGETTEXT" = x
+then
+  AC_MSG_WARN("Cannot generate messages.po for translations.")
+  XGETTEXT="echo xgettext "
+  AC_SUBST(XGETTEXT)
+fi
+
+dnl check for msgfmt
+AC_PATH_PROG(MSGFMT,msgfmt)
+if test "x$MSGFMT" = x
+then
+AC_MSG_WARN("Cannot translate messages.")
+  MSGFMT="echo msgfmt "
+  AC_SUBST(MSGFMT)
+fi
+
 dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------

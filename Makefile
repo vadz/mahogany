@@ -4,7 +4,7 @@
 
 
 CWD = 
-SUB_DIRS = extra src include
+SUB_DIRS = extra src include locale
 FILES = makeopts makerules Makefile makeopts.in configure.in configure
 EXTRA = extra
 
@@ -69,8 +69,15 @@ install:
 
 install_doc:
 	$(MAKE) -C doc install
-	
+
 install_all: install install_doc
-	
-.PHONY: all dep clean bak backup config program doc install install_doc install_all
+
+msgcat:
+	$(MAKE) -C src msgcat
+
+locales:
+	$(MAKE) -C locale all
+
+.PHONY: all dep clean bak backup config program doc install install_doc \
+        install_all msgcat locales
 
