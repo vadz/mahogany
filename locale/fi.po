@@ -1,13 +1,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.21\n"
-"POT-Creation-Date: 1999-08-12 10:04+0100\n"
+"POT-Creation-Date: 1999-08-20 10:21+0100\n"
 "PO-Revision-Date: 1999-07-07 16:30+0200\n"
 "Last-Translator: Lauri Jutila <ljuti@hangar.keskiespoo.net>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
+
+#: strutil.cpp:738
+msgid "Re"
+msgstr ""
 
 #: upgrade.cpp:275
 msgid "Deleted illegal folder profile: '"
@@ -460,20 +464,16 @@ msgstr "  Aihe: "
 msgid "  From: "
 msgstr "  L‰hett‰j‰: "
 
-#: AdbFrame.cpp:2702 MModule.cpp:116 MModule.cpp:123
-msgid "unknown"
-msgstr "tuntematon"
+#: MModule.cpp:167
+#, fuzzy, c-format
+msgid "Cannot initialise module '%s', error code %d."
+msgstr "Moduulin '%s' lataaminen ep‰onnistui."
 
-#: MModule.cpp:118
-#, fuzzy
-msgid "no description"
-msgstr "Kuvaus: "
-
-#: MModule.cpp:501
+#: MModule.cpp:340
 msgid " (builtin)"
 msgstr ""
 
-#: MModule.cpp:598
+#: MModule.cpp:437
 #, fuzzy, c-format
 msgid "Cannot parse MMD file for module '%s'."
 msgstr "Moduulin '%s' lataaminen ep‰onnistui."
@@ -625,11 +625,11 @@ msgstr "Kyseiselle asiayhteydelle ei ole viel‰ apua."
 msgid "Mahogany Toolbar"
 msgstr "Mahogany Tyˆkalupalkki"
 
-#: wxFolderView.cpp:72 wxMDialogs.cpp:1141
+#: wxFolderView.cpp:72 wxMDialogs.cpp:1139
 msgid "Status"
 msgstr "Tila"
 
-#: wxFolderView.cpp:73 wxMDialogs.cpp:1135
+#: wxFolderView.cpp:73 wxMDialogs.cpp:1133
 msgid "Date"
 msgstr "P‰iv‰ys"
 
@@ -641,7 +641,7 @@ msgstr "Koko"
 msgid "From"
 msgstr "L‰hett‰j‰"
 
-#: wxFolderView.cpp:76 wxMDialogs.cpp:1137
+#: wxFolderView.cpp:76 wxMDialogs.cpp:1135
 msgid "Subject"
 msgstr "Aihe"
 
@@ -650,7 +650,7 @@ msgstr "Aihe"
 msgid "DUXCSMRFOPHVG "
 msgstr "DUXCSMRFOPHV "
 
-#: wxFolderView.cpp:425
+#: wxFolderView.cpp:433
 #, c-format
 msgid ""
 "Mark all articles in\n"
@@ -661,49 +661,49 @@ msgstr ""
 "%s\n"
 "luetuiksi?"
 
-#: wxFolderView.cpp:454
+#: wxFolderView.cpp:462
 msgid "Do you want to expunge all deleted messages?"
 msgstr ""
 
-#: wxFolderView.cpp:708
+#: wxFolderView.cpp:716
 #, c-format
 msgid "Folder '%s'"
 msgstr "Kansio '%s'"
 
-#: wxFolderView.cpp:736
+#: wxFolderView.cpp:744
 #, c-format
 msgid "The folder '%s' could not be opened, please check its settings."
 msgstr "Kansiota '%s' ei voida avata, tarkista sen asetukset."
 
-#: wxFolderView.cpp:766
+#: wxFolderView.cpp:774
 msgid "Deleted messages were expunged"
 msgstr "Poistetut viestit tuhottu"
 
-#: wxFolderView.cpp:959
+#: wxFolderView.cpp:967
 #, c-format
 msgid "%d messages saved"
 msgstr "%d viesti‰ talletettu"
 
-#: wxFolderView.cpp:961 wxFolderView.cpp:1020
+#: wxFolderView.cpp:969 wxFolderView.cpp:1028
 msgid "Saving messages failed."
 msgstr "Viestien tallennus ep‰onnistui."
 
-#: wxFolderView.cpp:980
+#: wxFolderView.cpp:988
 #, c-format
 msgid "Closing folder '%s' because the underlying mail folder was deleted."
 msgstr "Kansio '%s' suljetaan, koska allaoleva kansio tuhottiin."
 
-#: wxFolderView.cpp:1017
+#: wxFolderView.cpp:1025
 #, fuzzy, c-format
 msgid "Saved %lu messages."
 msgstr "Tallennetaan %d viesti‰..."
 
-#: wxFolderView.cpp:1026
+#: wxFolderView.cpp:1034
 #, fuzzy, c-format
 msgid "Copied %lu messages."
 msgstr "ei viestej‰"
 
-#: wxFolderView.cpp:1029
+#: wxFolderView.cpp:1037
 #, fuzzy
 msgid "Copying messages failed."
 msgstr "Viestien tallennus ep‰onnistui."
@@ -732,35 +732,35 @@ msgstr ""
 "V‰liaikainen tiedosto '%s' s‰ilytettiin, sill‰ jokin ulkoinen prosessi "
 "k‰ytt‰‰ sit‰"
 
-#: wxMessageView.cpp:710 wxMessageView.cpp:804
+#: wxMessageView.cpp:712 wxMessageView.cpp:810
 msgid " bytes"
 msgstr " bytes"
 
-#: wxMessageView.cpp:763
+#: wxMessageView.cpp:769
 msgid "Find string in message"
 msgstr "Etsi viestist‰ merkkijono"
 
-#: wxMessageView.cpp:764
+#: wxMessageView.cpp:770
 msgid "   Find:"
 msgstr "   Etsi:"
 
-#: wxMessageView.cpp:789
+#: wxMessageView.cpp:795
 msgid "MIME type: "
 msgstr "MIME Tyyppi:"
 
-#: wxMessageView.cpp:795
+#: wxMessageView.cpp:801
 msgid "Description: "
 msgstr "Kuvaus: "
 
-#: wxMessageView.cpp:797
+#: wxMessageView.cpp:803
 msgid "Size: "
 msgstr "Koko: "
 
-#: wxMessageView.cpp:802
+#: wxMessageView.cpp:808
 msgid " lines"
 msgstr " rivi‰"
 
-#: wxMessageView.cpp:812
+#: wxMessageView.cpp:818
 msgid ""
 "\n"
 "Parameters:\n"
@@ -768,7 +768,7 @@ msgstr ""
 "\n"
 "Parametrit:\n"
 
-#: wxMessageView.cpp:825
+#: wxMessageView.cpp:831
 msgid ""
 "\n"
 "Disposition: "
@@ -776,7 +776,7 @@ msgstr ""
 "\n"
 "Luonne (?): "
 
-#: wxMessageView.cpp:828
+#: wxMessageView.cpp:834
 msgid ""
 "\n"
 "Disposition Parameters:\n"
@@ -784,56 +784,56 @@ msgstr ""
 "\n"
 "Luonteen parametrit (?):\n"
 
-#: wxMessageView.cpp:835
+#: wxMessageView.cpp:841
 msgid "MIME information"
 msgstr "MIME informaatio"
 
-#: wxMessageView.cpp:983
+#: wxMessageView.cpp:989
 #, c-format
 msgid "Please enter the command to handle '%s' data:"
 msgstr "Anna komento k‰sitell‰ksesi '%s' tietoa:"
 
-#: wxMessageView.cpp:985
+#: wxMessageView.cpp:991
 msgid "Unknown MIME type"
 msgstr "Tuntematon MIME-tyyppi"
 
-#: wxMessageView.cpp:994
+#: wxMessageView.cpp:1000
 #, c-format
 msgid "Do not know how to handle data of type '%s'."
 msgstr "Ei osaa k‰sitell‰ dataa, joka on tyyppi‰ '%s'."
 
-#: wxMessageView.cpp:1031
+#: wxMessageView.cpp:1037
 msgid "Cannot rename temporary file."
 msgstr "V‰liaikaistiedoston nime‰minen ep‰onnistui."
 
-#: wxMessageView.cpp:1038
+#: wxMessageView.cpp:1044
 #, c-format
 msgid "Error opening attachment: command '%s' failed"
 msgstr "Liitetiedoston avaus ep‰onnistui: komento '%s' pys‰htyi."
 
-#: wxMessageView.cpp:1063
+#: wxMessageView.cpp:1069
 msgid "Save attachment as:"
 msgstr "Tallenna liitetiedosto nimell‰:"
 
-#: wxMessageView.cpp:1080
+#: wxMessageView.cpp:1086
 msgid "Cannot get attachment content."
 msgstr "Liitetiedoston sis‰ltˆ‰ ei voida hakea."
 
-#: wxMessageView.cpp:1093
+#: wxMessageView.cpp:1099
 #, c-format
 msgid "Wrote %lu bytes to file '%s'"
 msgstr "Kirjoitettu %lu bytes tiedostoon '%s'"
 
-#: wxMessageView.cpp:1102
+#: wxMessageView.cpp:1108
 msgid "Could not save the attachment."
 msgstr "Liitetiedoston tallennus ep‰onnistui."
 
-#: wxMessageView.cpp:1238
+#: wxMessageView.cpp:1244
 #, c-format
 msgid "Cannot open URL '%s'"
 msgstr "Ei voida avata URL:‰‰ '%s'"
 
-#: wxMessageView.cpp:1246
+#: wxMessageView.cpp:1252
 msgid ""
 "No command configured to view URLs.\n"
 "Would you like to choose one now?"
@@ -841,39 +841,39 @@ msgstr ""
 "URL:i‰ k‰sittelev‰‰ komentoa ei ole m‰‰ritelty.\n"
 "Haluatko m‰‰ritell‰ sen nyt?"
 
-#: wxMessageView.cpp:1258
+#: wxMessageView.cpp:1264
 msgid "No command configured to view URLs."
 msgstr "URL:i‰ k‰sittelev‰‰ komentoa ei ole m‰‰ritelty."
 
-#: wxMessageView.cpp:1282
+#: wxMessageView.cpp:1288
 #, c-format
 msgid "Could not launch browser: '%s' failed."
 msgstr "Selaimen k‰ynnistys pys‰htynyt: '%s' ep‰onnistui."
 
-#: wxMessageView.cpp:1295
+#: wxMessageView.cpp:1301
 #, c-format
 msgid "Couldn't launch browser: '%s' failed"
 msgstr "Selaimen k‰ynnistys pys‰htynyt: '%s' ep‰onnistui."
 
-#: wxMessageView.cpp:1304
+#: wxMessageView.cpp:1310
 #, c-format
 msgid "Opening URL '%s'... done."
 msgstr "Avataan URL '%s'... valmis."
 
-#: wxMessageView.cpp:1307
+#: wxMessageView.cpp:1313
 #, c-format
 msgid "Opening URL '%s' failed."
 msgstr "Ei voida avata URL:‰‰ '%s'."
 
-#: wxMessageView.cpp:1326
+#: wxMessageView.cpp:1332
 msgid "Failed to get the raw text of the message."
 msgstr "Viestin tekstin haku ep‰onnistui."
 
-#: wxMessageView.cpp:1330
+#: wxMessageView.cpp:1336
 msgid "Raw message text"
 msgstr "Viestiteksti"
 
-#: wxMessageView.cpp:1456
+#: wxMessageView.cpp:1462
 #, c-format
 msgid ""
 "The selected message is %u Kbytes long which is more than the current "
@@ -885,11 +885,11 @@ msgstr ""
 "\n"
 "Haluatko silti hakea sen?"
 
-#: wxComposeView.cpp:1993 wxMessageView.cpp:1524
+#: wxComposeView.cpp:1994 wxMessageView.cpp:1530
 msgid "Mahogany: Printout"
 msgstr "Mahogany: Listaus"
 
-#: wxComposeView.cpp:1996 wxMessageView.cpp:1526
+#: wxComposeView.cpp:1997 wxMessageView.cpp:1532
 msgid ""
 "There was a problem with printing the message:\n"
 "perhaps your current printer is not set up correctly?"
@@ -897,11 +897,11 @@ msgstr ""
 "Viestin tulostuksessa ongelmia:\n"
 "ehk‰ tulostimesi ei ole oikein asennettu?"
 
-#: wxComposeView.cpp:1998 wxMessageView.cpp:1528
+#: wxComposeView.cpp:1999 wxMessageView.cpp:1534
 msgid "Printing"
 msgstr "Tulostetaan"
 
-#: wxMessageView.cpp:1584
+#: wxMessageView.cpp:1590
 msgid ""
 "There was a problem with showing the preview:\n"
 "perhaps your current printer is not set correctly?"
@@ -909,175 +909,175 @@ msgstr ""
 "Viestin esikatselu ep‰onnistui:\n"
 "ehk‰ tulostimesi ei ole oikein asennettu?"
 
-#: wxMessageView.cpp:1586
+#: wxMessageView.cpp:1592
 msgid "Previewing"
 msgstr "Avataan esikatselua varten"
 
-#: wxMessageView.cpp:1594
+#: wxMessageView.cpp:1600
 msgid "Print Preview"
 msgstr "Esikatselu"
 
-#: wxMessageView.cpp:1649
+#: wxMessageView.cpp:1655
 #, c-format
 msgid "%s (external viewer exited with non null exit code)"
 msgstr "%s (erillinen katseluohjelma lopetti)"
 
-#: wxMessageView.cpp:1754
+#: wxMessageView.cpp:1692
 #, fuzzy
 msgid " , from "
 msgstr "  L‰hett‰j‰: "
 
-#: wxComposeView.cpp:452
+#: wxComposeView.cpp:453
 msgid "Put &cursor here"
 msgstr ""
 
-#: wxComposeView.cpp:454
+#: wxComposeView.cpp:455
 #, fuzzy
 msgid "Insert &quoted text"
 msgstr "&Lis‰‰ teksti‰..."
 
-#: wxComposeView.cpp:455
+#: wxComposeView.cpp:456
 msgid "&Attach original text"
 msgstr ""
 
-#: wxComposeView.cpp:461 wxComposeView.cpp:474 wxHeadersDialogs.cpp:343
+#: wxComposeView.cpp:462 wxComposeView.cpp:475 wxHeadersDialogs.cpp:343
 msgid "&To"
 msgstr "&Vastaanottaja"
 
-#: wxComposeView.cpp:462 wxComposeView.cpp:472
+#: wxComposeView.cpp:463 wxComposeView.cpp:473
 #, fuzzy
 msgid "&Subject"
 msgstr "Aihe"
 
-#: wxComposeView.cpp:463
+#: wxComposeView.cpp:464
 #, fuzzy
 msgid "&CC"
 msgstr "CC:"
 
-#: wxComposeView.cpp:464
+#: wxComposeView.cpp:465
 #, fuzzy
 msgid "&BCC"
 msgstr "BCC:"
 
-#: wxComposeView.cpp:470
+#: wxComposeView.cpp:471
 #, fuzzy
 msgid "&Date"
 msgstr "P‰iv‰ys"
 
-#: wxComposeView.cpp:471
+#: wxComposeView.cpp:472
 #, fuzzy
 msgid "&From"
 msgstr "L‰hett‰j‰"
 
-#: wxComposeView.cpp:473
+#: wxComposeView.cpp:474
 #, fuzzy
 msgid "&Full name"
 msgstr "Koko &nimi"
 
-#: wxComposeView.cpp:475
+#: wxComposeView.cpp:476
 #, fuzzy
 msgid "&Reply to"
 msgstr "&Vastaa"
 
-#: wxComposeView.cpp:476
+#: wxComposeView.cpp:477
 #, fuzzy
 msgid "&Newsgroups"
 msgstr "Uutisryhm‰:"
 
-#: wxComposeView.cpp:482
+#: wxComposeView.cpp:483
 #, fuzzy
 msgid "&Miscellaneous"
 msgstr "Sekalainen"
 
-#: wxComposeView.cpp:485
+#: wxComposeView.cpp:486
 #, fuzzy
 msgid "Message &headers"
 msgstr "Viestin n‰yttˆ"
 
-#: wxComposeView.cpp:488
+#: wxComposeView.cpp:489
 #, fuzzy
 msgid "&Original message"
 msgstr "Tulosta viesti"
 
-#: wxComposeView.cpp:491 wxMenuDefs.cpp:281
+#: wxComposeView.cpp:492 wxMenuDefs.cpp:281
 msgid "&Insert file..."
 msgstr "&Lis‰‰ tiedosto..."
 
-#: wxComposeView.cpp:492
+#: wxComposeView.cpp:493
 #, fuzzy
 msgid "&Attach file..."
 msgstr "&Lis‰‰ tiedosto..."
 
-#: wxComposeView.cpp:493
+#: wxComposeView.cpp:494
 msgid "&Execute command..."
 msgstr ""
 
-#: wxComposeView.cpp:647
+#: wxComposeView.cpp:648
 msgid "Nothing to expand - please enter something."
 msgstr "Ei mit‰‰n laajennettavissa - kirjoita jotain."
 
-#: wxComposeView.cpp:771
+#: wxComposeView.cpp:772
 msgid "RO"
 msgstr ""
 
-#: wxComposeView.cpp:793
+#: wxComposeView.cpp:794
 msgid "Article Composition"
 msgstr "Artikkelin kirjoitus"
 
-#: wxComposeView.cpp:813
+#: wxComposeView.cpp:814
 msgid "Message Composition"
 msgstr "Viestin kirjoitus"
 
-#: wxComposeView.cpp:895
+#: wxComposeView.cpp:896
 msgid "template"
 msgstr ""
 
-#: wxComposeView.cpp:910
+#: wxComposeView.cpp:911
 msgid "There were errors in the template. Would you like to edit it now?"
 msgstr ""
 
-#: wxComposeView.cpp:948
+#: wxComposeView.cpp:949
 msgid "&Compose"
 msgstr "&Kirjoita viesti"
 
-#: wxComposeView.cpp:1007
+#: wxComposeView.cpp:1008
 msgid "To:"
 msgstr "Vastaanottaja:"
 
-#: wxComposeView.cpp:1007
+#: wxComposeView.cpp:1008
 msgid "Newsgroups:"
 msgstr "Uutisryhm‰:"
 
-#: wxComposeView.cpp:1008
+#: wxComposeView.cpp:1009
 msgid "Subject:"
 msgstr "Aihe:"
 
-#: wxComposeView.cpp:1009
+#: wxComposeView.cpp:1010
 msgid "CC:"
 msgstr "CC:"
 
-#: wxComposeView.cpp:1010
+#: wxComposeView.cpp:1011
 msgid "BCC:"
 msgstr "BCC:"
 
-#: wxComposeView.cpp:1055
+#: wxComposeView.cpp:1056
 msgid "Expand"
 msgstr "Laajenna"
 
-#: wxComposeView.cpp:1064
+#: wxComposeView.cpp:1065
 msgid "Expand the address using address books"
 msgstr "Laajenna osoite k‰ytt‰en osoitekirjaa"
 
-#: wxComposeView.cpp:1138
+#: wxComposeView.cpp:1139
 msgid "You haven't configured your signature file."
 msgstr "Et ole asettanut allekirjoitustasi."
 
-#: wxComposeView.cpp:1147
+#: wxComposeView.cpp:1148
 #, c-format
 msgid "Signature file '%s' couldn't be opened."
 msgstr "Allekirjoitusta '%s' ei voida avata."
 
-#: wxComposeView.cpp:1151
+#: wxComposeView.cpp:1152
 msgid ""
 "\n"
 "\n"
@@ -1089,163 +1089,163 @@ msgstr ""
 "Haluatko valita allekirjoituksesi nyt?\n"
 "(muuten allekirjoitusta ei k‰ytet‰)"
 
-#: wxComposeView.cpp:1157
+#: wxComposeView.cpp:1158
 msgid "Choose signature file"
 msgstr "Valitse allekirjoitus"
 
-#: MailFolder.cpp:689 wxBrowseButton.cpp:134 wxComposeView.cpp:1159
-#: wxComposeView.cpp:1381 wxComposeView.cpp:1406 wxComposeView.cpp:1670
+#: MailFolder.cpp:689 wxBrowseButton.cpp:134 wxComposeView.cpp:1160
+#: wxComposeView.cpp:1382 wxComposeView.cpp:1407 wxComposeView.cpp:1671
 #: wxMFolderDialogs.cpp:1977
 msgid "All files (*.*)|*.*"
 msgstr "Kaikki tiedostot (*.*)|*.*"
 
-#: wxComposeView.cpp:1198
+#: wxComposeView.cpp:1199
 #, c-format
 msgid "Your signature is %stoo long: it should not be more than %d lines."
 msgstr ""
 "Allekirjoituksesi on liian pitk‰: sen ei tulisi olla kuin %d rivi‰ pitk‰"
 
-#: wxComposeView.cpp:1200
+#: wxComposeView.cpp:1201
 msgid "way "
 msgstr "way "
 
-#: wxComposeView.cpp:1309
+#: wxComposeView.cpp:1310
 #, c-format
 msgid ""
 "Please terminate the external editor (PID %d) before closing this window."
 msgstr "Lopeta ulkoinen muistio (PID %d) ennen kuin suljet t‰m‰n ikkunan."
 
-#: wxComposeView.cpp:1319
+#: wxComposeView.cpp:1320
 msgid "There are unsaved changes, close anyway?"
 msgstr "Et ole tallentanut kaikkia muutoksia, sulje kuitenkin?"
 
-#: wxComposeView.cpp:1359
+#: wxComposeView.cpp:1360
 msgid "Message has been sent."
 msgstr "Viesti on l‰hetetty."
 
-#: wxComposeView.cpp:1360
+#: wxComposeView.cpp:1361
 msgid "Message sent"
 msgstr "Viesti l‰hetetty."
 
-#: wxComposeView.cpp:1379 wxComposeView.cpp:1668
+#: wxComposeView.cpp:1380 wxComposeView.cpp:1669
 msgid "Please choose a file to insert."
 msgstr "Valitse lis‰tt‰v‰ tiedosto."
 
-#: wxComposeView.cpp:1387 wxComposeView.cpp:1412
+#: wxComposeView.cpp:1388 wxComposeView.cpp:1413
 msgid "Cancelled"
 msgstr "Peruutettu"
 
-#: wxComposeView.cpp:1391
+#: wxComposeView.cpp:1392
 #, c-format
 msgid "Inserted file '%s'."
 msgstr "Tiedosto '%s' lis‰tty."
 
-#: wxComposeView.cpp:1395
+#: wxComposeView.cpp:1396
 #, c-format
 msgid "Failed to insert the text file '%s'."
 msgstr "Tekstitiedosto '%s' lis‰ys ep‰onnistui."
 
-#: MailFolder.cpp:687 wxComposeView.cpp:1404
+#: MailFolder.cpp:687 wxComposeView.cpp:1405
 msgid "Choose file to save message to"
 msgstr "Valitse tiedosto johon viesti tallennetaan"
 
-#: wxComposeView.cpp:1416
+#: wxComposeView.cpp:1417
 #, c-format
 msgid "Message text saved to file '%s'."
 msgstr "Viesti tallennettu tiedostoon '%s'."
 
-#: wxComposeView.cpp:1421
+#: wxComposeView.cpp:1422
 msgid "Failed to save the message."
 msgstr "Viestin tallennus ep‰onnistui."
 
-#: wxComposeView.cpp:1430
+#: wxComposeView.cpp:1431
 #, c-format
 msgid "External editor is already running (PID %d)"
 msgstr "Ulkoinen muistio on jo p‰‰ll‰ (PID %d)"
 
-#: wxComposeView.cpp:1449
+#: wxComposeView.cpp:1450
 msgid "External editor not configured."
 msgstr "Ulkoista muistiota ei ole m‰‰ritelty."
 
-#: wxComposeView.cpp:1457
+#: wxComposeView.cpp:1458
 msgid "Cannot create temporary file"
 msgstr "V‰liaikaisen tiedoston luonti ep‰onnistui."
 
-#: wxComposeView.cpp:1465
+#: wxComposeView.cpp:1466
 msgid "Failed to pass message to external editor."
 msgstr "Viestin siirto ulkoiselle muistiolle ep‰onnistui."
 
-#: wxComposeView.cpp:1482
+#: wxComposeView.cpp:1483
 #, c-format
 msgid "Execution of '%s' failed."
 msgstr "Komennon '%s' ajo ep‰onnistui."
 
-#: wxComposeView.cpp:1489
+#: wxComposeView.cpp:1490
 #, c-format
 msgid "Started external editor (PID %d)"
 msgstr "Ulkoinen muistio k‰ynnistetty (PID %d)"
 
-#: wxComposeView.cpp:1508
+#: wxComposeView.cpp:1509
 msgid "Would you like to change the external editor setting now?"
 msgstr "Haluatko muuttaa ulkoisen muistion asetuksia?"
 
-#: wxComposeView.cpp:1514
+#: wxComposeView.cpp:1515
 msgid "Set up external editor"
 msgstr "Asenna ulkoinen muistio"
 
-#: wxComposeView.cpp:1515
+#: wxComposeView.cpp:1516
 msgid ""
 "Enter the command name (%%s will be replaced with the name of the file):"
 msgstr "Anna komentonimi (%%s korvataan tiedostonimell‰):"
 
-#: wxComposeView.cpp:1552
+#: wxComposeView.cpp:1553
 #, fuzzy, c-format
 msgid "Added custom header '%s' to the message."
 msgstr "Muokattu otsikko '%s' lis‰ttiin viestiin."
 
-#: wxComposeView.cpp:1593
+#: wxComposeView.cpp:1594
 msgid "External editor terminated with non null exit code."
 msgstr "Ulkoinen muistio keskeytettin."
 
-#: wxComposeView.cpp:1600
+#: wxComposeView.cpp:1601
 msgid "Failed to insert back the text from external editor."
 msgstr "Tekstin siirto ulkoisesta muistiosta ep‰onnistui."
 
-#: wxComposeView.cpp:1610
+#: wxComposeView.cpp:1611
 msgid "Inserted text from external editor."
 msgstr "Teksti siirretty ulkoisesta muistiosta."
 
-#: wxComposeView.cpp:1616
+#: wxComposeView.cpp:1617
 #, c-format
 msgid "The text was left in the file '%s'."
 msgstr "Teksti j‰tettiin tiedostoon '%s'."
 
-#: wxComposeView.cpp:1717
+#: wxComposeView.cpp:1718
 #, c-format
 msgid "Inserted file '%s' (as '%s')"
 msgstr "Tiedosto '%s' lis‰tty (nimell‰ '%s')"
 
-#: wxComposeView.cpp:1799
+#: wxComposeView.cpp:1800
 #, c-format
 msgid "Cannot read file '%s' included in this message!"
 msgstr "Viestiss‰ olevan tiedoston '%s' luku ep‰onnistui!"
 
-#: wxComposeView.cpp:1807
+#: wxComposeView.cpp:1808
 #, c-format
 msgid "Cannot open file '%s' included in this message!"
 msgstr "Viestiss‰ olevan tiedoston '%s' luku ep‰onnistui!"
 
-#: wxComposeView.cpp:1836
+#: wxComposeView.cpp:1837
 msgid "Unknwown part type"
 msgstr "Tuntematon MIME-tyyppi"
 
-#: wxComposeView.cpp:2014
+#: wxComposeView.cpp:2015
 msgid ""
 "The external editor is still opened, please close it before sending the "
 "message."
 msgstr "Ulkoinen muistio on edelleen auki, sulje se ennen viestin l‰hetyst‰."
 
-#: wxComposeView.cpp:2028
+#: wxComposeView.cpp:2029
 msgid ""
 "The message can not be sent because the network settings are either not "
 "configured or incorrect. Would you like to change them now?"
@@ -1253,43 +1253,43 @@ msgstr ""
 "Viesti‰ ei voida l‰hett‰‰ sill‰ verkkoasetukset ovat v‰‰rin tai niit‰ ei ole "
 "tehty. Haluatko muuttaa niit‰ nyt?"
 
-#: wxComposeView.cpp:2040
+#: wxComposeView.cpp:2041
 msgid "Cannot send message - network is not configured."
 msgstr "Viestin l‰hetys ep‰onnistui - verkkoasetuksia ei ole tehty."
 
-#: wxComposeView.cpp:2055
+#: wxComposeView.cpp:2056
 msgid "Please specify at least one recipient in the \"To:\" field!"
 msgstr "M‰‰rit‰ ainakin yksi vastaanottaja!"
 
-#: wxComposeView.cpp:2067
+#: wxComposeView.cpp:2068
 msgid "The subject of your message is empty, would you like to change it?"
 msgstr "Viestill‰si ei ole aihetta, haluatko muuttaa sit‰?"
 
-#: wxComposeView.cpp:2105
+#: wxComposeView.cpp:2106
 msgid "Cannot insert text file into the message."
 msgstr "Tekstitiedoston liitt‰minen viestiin ep‰onnistui."
 
-#: wxComposeView.cpp:2190
+#: wxComposeView.cpp:2191
 #, c-format
 msgid "Cannot write message to file '%s'."
 msgstr "Viestin kirjoittaminen tiedostoon '%s' ep‰onnistui."
 
-#: wxComposeView.cpp:2497
+#: wxComposeView.cpp:2498
 #, fuzzy, c-format
 msgid "Failed to insert file '%s' into the message."
 msgstr "Tekstitiedoston liitt‰minen viestiin ep‰onnistui."
 
-#: wxComposeView.cpp:2512
+#: wxComposeView.cpp:2513
 #, fuzzy, c-format
 msgid "Failed to attach file '%s' to the message."
 msgstr "Tekstitiedoston liitt‰minen viestiin ep‰onnistui."
 
-#: wxComposeView.cpp:2547
+#: wxComposeView.cpp:2548
 #, fuzzy, c-format
 msgid "Failed to execute the command '%s'"
 msgstr "Tekstitiedosto '%s' lis‰ys ep‰onnistui."
 
-#: wxComposeView.cpp:2590
+#: wxComposeView.cpp:2591
 msgid ""
 "The variables using the original message cannot be used in this template; "
 "variable ignored."
@@ -1350,13 +1350,13 @@ msgid "default"
 msgstr ""
 
 #: AdbFrame.cpp:2549 AdbFrame.cpp:2669 persctrl.cpp:1192
-#: wxDialogLayout.cpp:879 wxMDialogs.cpp:370 wxMDialogs.cpp:937
+#: wxDialogLayout.cpp:879 wxMDialogs.cpp:370 wxMDialogs.cpp:935
 #: wxMFolderDialogs.cpp:1935
 msgid "OK"
 msgstr "OK"
 
 #: AdbFrame.cpp:2553 AdbFrame.cpp:2673 persctrl.cpp:1199
-#: wxDialogLayout.cpp:888 wxMDialogs.cpp:374 wxMDialogs.cpp:927
+#: wxDialogLayout.cpp:888 wxMDialogs.cpp:374 wxMDialogs.cpp:925
 #: wxMFolderDialogs.cpp:1944
 msgid "Cancel"
 msgstr "Peruuta"
@@ -1425,29 +1425,29 @@ msgstr "This is OpenSource(TM) Software."
 msgid "Welcome"
 msgstr "Tervetuloa"
 
-#: wxMDialogs.cpp:909
+#: wxMDialogs.cpp:907
 msgid "Choose folder"
 msgstr "Valitse kansio"
 
-#: wxMDialogs.cpp:950 wxMFolderDialogs.cpp:1926
+#: wxMDialogs.cpp:948 wxMFolderDialogs.cpp:1926
 #, fuzzy
 msgid "File..."
 msgstr "Tiedosto..."
 
-#: wxDialogLayout.cpp:899 wxMDialogs.cpp:959 wxMenuDefs.cpp:94
+#: wxDialogLayout.cpp:899 wxMDialogs.cpp:957 wxMenuDefs.cpp:94
 msgid "Help"
 msgstr "Help"
 
-#: wxMDialogs.cpp:995
+#: wxMDialogs.cpp:993
 #, fuzzy
 msgid "Mahogany: Please choose a folder file"
 msgstr "Valitse kansio"
 
-#: wxMDialogs.cpp:1062
+#: wxMDialogs.cpp:1060
 msgid "Mahogany: folder selection"
 msgstr ""
 
-#: wxMDialogs.cpp:1063
+#: wxMDialogs.cpp:1061
 #, c-format
 msgid ""
 "Sorry, the folder '%s' already exists and corresponds to another file, "
@@ -1455,68 +1455,68 @@ msgid ""
 "file '%s'."
 msgstr ""
 
-#: wxMDialogs.cpp:1134
+#: wxMDialogs.cpp:1132
 #, fuzzy
 msgid "None"
 msgstr "Ei"
 
-#: wxMDialogs.cpp:1136
+#: wxMDialogs.cpp:1134
 msgid "Date (reverse)"
 msgstr ""
 
-#: wxMDialogs.cpp:1138
+#: wxMDialogs.cpp:1136
 #, fuzzy
 msgid "Subject (reverse)"
 msgstr "Aihe: "
 
-#: wxMDialogs.cpp:1139
+#: wxMDialogs.cpp:1137
 msgid "Author"
 msgstr ""
 
-#: wxMDialogs.cpp:1140
+#: wxMDialogs.cpp:1138
 msgid "Author (reverse)"
 msgstr ""
 
-#: wxMDialogs.cpp:1142
+#: wxMDialogs.cpp:1140
 msgid "Status (reverse)"
 msgstr ""
 
-#: wxMDialogs.cpp:1143
+#: wxMDialogs.cpp:1141
 msgid "Score"
 msgstr ""
 
-#: wxMDialogs.cpp:1144
+#: wxMDialogs.cpp:1142
 msgid "Score (reverse)"
 msgstr ""
 
-#: wxMDialogs.cpp:1153
+#: wxMDialogs.cpp:1151
 msgid "First, sort by"
 msgstr ""
 
-#: wxMDialogs.cpp:1154
+#: wxMDialogs.cpp:1152
 msgid "then, sort by"
 msgstr ""
 
-#: wxMDialogs.cpp:1178
+#: wxMDialogs.cpp:1176
 #, fuzzy
 msgid "Message sorting"
 msgstr "Viesti l‰hetetty."
 
-#: wxMDialogs.cpp:1181
+#: wxMDialogs.cpp:1179
 #, fuzzy
 msgid "Sort messages by"
 msgstr "ei viestej‰"
 
-#: wxMDialogs.cpp:1229
+#: wxMDialogs.cpp:1227
 #, fuzzy
 msgid "Thread messages"
 msgstr "ei viestej‰"
 
-#: wxMDialogs.cpp:1237
+#: wxMDialogs.cpp:1235
 msgid "Re-sort on status change"
 msgstr ""
 
-#: wxMDialogs.cpp:1282
+#: wxMDialogs.cpp:1280
 #, c-format
 msgid ""
 "You have selected message score as a sort criterium\n"
@@ -1526,186 +1526,193 @@ msgid ""
 "Otherwise all messages will have score 0."
 msgstr ""
 
-#: wxMDialogs.cpp:1337
+#: wxMDialogs.cpp:1335
 msgid "31 (Day)"
 msgstr ""
 
-#: wxMDialogs.cpp:1338
+#: wxMDialogs.cpp:1336
 msgid "Mon"
 msgstr ""
 
-#: wxMDialogs.cpp:1339
+#: wxMDialogs.cpp:1337
 msgid "Monday"
 msgstr ""
 
-#: wxMDialogs.cpp:1340
+#: wxMDialogs.cpp:1338
 msgid "12 (Month)"
 msgstr ""
 
-#: wxMDialogs.cpp:1341
+#: wxMDialogs.cpp:1339
 #, fuzzy
 msgid "Nov"
 msgstr "Ei"
 
-#: wxMDialogs.cpp:1342
+#: wxMDialogs.cpp:1340
 msgid "November"
 msgstr ""
 
-#: wxMDialogs.cpp:1343
+#: wxMDialogs.cpp:1341
 msgid "99 (year)"
 msgstr ""
 
-#: wxMDialogs.cpp:1344
+#: wxMDialogs.cpp:1342
 msgid "1999 (year)"
 msgstr ""
 
-#: wxMDialogs.cpp:1345
+#: wxMDialogs.cpp:1343
 msgid "24 (hour)"
 msgstr ""
 
-#: wxMDialogs.cpp:1346
+#: wxMDialogs.cpp:1344
 msgid "12 (hour)"
 msgstr ""
 
-#: wxMDialogs.cpp:1347
+#: wxMDialogs.cpp:1345
 msgid "am/pm"
 msgstr ""
 
-#: wxMDialogs.cpp:1348
+#: wxMDialogs.cpp:1346
 msgid "59 (minutes)"
 msgstr ""
 
-#: wxMDialogs.cpp:1349
+#: wxMDialogs.cpp:1347
 msgid "29 (seconds)"
 msgstr ""
 
-#: wxMDialogs.cpp:1350
+#: wxMDialogs.cpp:1348
 msgid "EST (timezone)"
 msgstr ""
 
-#: wxMDialogs.cpp:1351
+#: wxMDialogs.cpp:1349
 msgid "Default format including time"
 msgstr ""
 
-#: wxMDialogs.cpp:1352
+#: wxMDialogs.cpp:1350
 msgid "Default format without time"
 msgstr ""
 
-#: wxMDialogs.cpp:1389
+#: wxMDialogs.cpp:1387
 msgid "Format Specifiers:"
 msgstr ""
 
-#: wxMDialogs.cpp:1476 wxMDialogs.cpp:1482
+#: wxMDialogs.cpp:1475 wxMDialogs.cpp:1480
 msgid "Date Format"
 msgstr ""
 
-#: wxMDialogs.cpp:1491
+#: wxMDialogs.cpp:1489
 msgid ""
 "Press the right mouse button over the input field to insert format "
 "specifiers.\n"
 msgstr ""
 
-#: wxMDialogs.cpp:1509
+#: wxMDialogs.cpp:1507
 msgid "Here is how it will look like: "
 msgstr ""
 
-#: wxMDialogs.cpp:1525
+#: wxMDialogs.cpp:1523
 msgid "Display time in GMT/UST."
 msgstr ""
 
-#: wxMDialogs.cpp:1657
+#: wxMDialogs.cpp:1659
 #, fuzzy
 msgid "Choose a XFace"
 msgstr "K‰yt‰ &XFacea"
 
-#: wxMDialogs.cpp:1660
+#: wxMDialogs.cpp:1662
 #, fuzzy
 msgid "XFace"
 msgstr "K‰yt‰ &XFacea"
 
-#: wxMDialogs.cpp:1665
-msgid "Click on the button to change it."
+#: wxMDialogs.cpp:1667
+msgid ""
+"XFaces are small images that can be included\n"
+"in your mail message to help recognise you.\n"
+"They are limited to 48*48 pixels black and white,\n"
+"but Mahogany will automatically convert any file\n"
+"to this specification automatically.\n"
+"\n"
+"Click on the button to change it."
 msgstr ""
 
-#: wxMDialogs.cpp:1682
+#: wxMDialogs.cpp:1690
 #, fuzzy
 msgid "Use XFace."
 msgstr "K‰yt‰ &XFacea"
 
-#: wxMDialogs.cpp:1717
+#: wxMDialogs.cpp:1725
 msgid "Please pick an image file"
 msgstr ""
 
-#: wxlwindow.cpp:900
+#: wxlwindow.cpp:946
 #, c-format
 msgid "Ln:%d Col:%d"
 msgstr "Rivi:%d Kolumni:%d"
 
-#: wxlwindow.cpp:1135
+#: wxlwindow.cpp:1183
 msgid "Layout Menu"
 msgstr "Ulkoasuvalikko"
 
-#: wxlwindow.cpp:1137
+#: wxlwindow.cpp:1185
 msgid "&Larger"
 msgstr "&Suurempi"
 
-#: wxlwindow.cpp:1137
+#: wxlwindow.cpp:1185
 msgid "Switch to larger font."
 msgstr "Vaihda suurempaan kirjasimeen."
 
-#: wxlwindow.cpp:1138
+#: wxlwindow.cpp:1186
 msgid "&Smaller"
 msgstr "&Pienempi"
 
-#: wxlwindow.cpp:1138
+#: wxlwindow.cpp:1186
 msgid "Switch to smaller font."
 msgstr "Vaihda pienemp‰‰n kirjasimeen."
 
-#: wxlwindow.cpp:1140
+#: wxlwindow.cpp:1188
 msgid "&Underline"
 msgstr "&Alleviivaa"
 
-#: wxlwindow.cpp:1140
+#: wxlwindow.cpp:1188
 msgid "Underline mode."
 msgstr "Alleviivaus"
 
-#: wxlwindow.cpp:1141
+#: wxlwindow.cpp:1189
 msgid "&Bold"
 msgstr "&Lihavoitu"
 
-#: wxlwindow.cpp:1141
+#: wxlwindow.cpp:1189
 msgid "Bold mode."
 msgstr "Lihavointi"
 
-#: wxlwindow.cpp:1142
+#: wxlwindow.cpp:1190
 msgid "&Italics"
 msgstr "Kursivoitu"
 
-#: wxlwindow.cpp:1142
+#: wxlwindow.cpp:1190
 msgid "Italics mode."
 msgstr "Kursiivinen"
 
-#: wxlwindow.cpp:1144
+#: wxlwindow.cpp:1192
 msgid "&Roman"
 msgstr "&Roman"
 
-#: wxlwindow.cpp:1144
+#: wxlwindow.cpp:1192
 msgid "Switch to roman font."
 msgstr "Vaihda Roman-kirjasimeen."
 
-#: wxlwindow.cpp:1145
+#: wxlwindow.cpp:1193
 msgid "&Typewriter"
 msgstr "&Courier"
 
-#: wxlwindow.cpp:1145
+#: wxlwindow.cpp:1193
 msgid "Switch to typewriter font."
 msgstr "Vaihda Courier-kirjasimeen."
 
-#: wxlwindow.cpp:1146
+#: wxlwindow.cpp:1194
 msgid "&Sans Serif"
 msgstr "&Sans Serif"
 
-#: wxlwindow.cpp:1146
+#: wxlwindow.cpp:1194
 msgid "Switch to sans serif font."
 msgstr "Vaihda Sans Serif -kirjasimeen."
 
@@ -2930,12 +2937,12 @@ msgstr "Kaikki kansiot"
 msgid "Please select the folder to delete first."
 msgstr "Valitse ensiksi poistettava kansio."
 
-#: wxFolderTree.cpp:715
+#: wxFolderTree.cpp:717
 #, c-format
 msgid "Folder '%s' deleted"
 msgstr "Kansio '%s' poistettu"
 
-#: wxFolderTree.cpp:805
+#: wxFolderTree.cpp:807
 msgid "Cannot open this folder."
 msgstr "Kansion avaus ep‰onnistui."
 
@@ -3572,28 +3579,28 @@ msgstr ""
 "MIME-tyyppi m‰‰ritelty ilman alatyyppi‰\n"
 "ja oletustyyppi‰ ei ole."
 
-#: SendMessageCC.cpp:515
+#: SendMessageCC.cpp:531
 msgid "Mail sent."
 msgstr "Viesti l‰hetetty."
 
-#: SendMessageCC.cpp:515
+#: SendMessageCC.cpp:531
 msgid "Article posted."
 msgstr "Artikkeli l‰hetetty."
 
-#: SendMessageCC.cpp:522
+#: SendMessageCC.cpp:538
 #, c-format
 msgid "Failed to send - %s"
 msgstr "L‰hetys ep‰onnistui - %s."
 
-#: SendMessageCC.cpp:523
+#: SendMessageCC.cpp:539
 msgid "unknown error"
 msgstr "tuntematon virhe"
 
-#: SendMessageCC.cpp:530
+#: SendMessageCC.cpp:546
 msgid "Cannot open connection to any server"
 msgstr "Yhteyden avaus palvelimeen ep‰onnistui"
 
-#: SendMessageCC.cpp:594
+#: SendMessageCC.cpp:610
 msgid "Cannot open folder to save to:"
 msgstr "Kansion avaus tallennusta varten ep‰onnistui:"
 
@@ -3927,6 +3934,10 @@ msgstr "M‰‰rittele nimi uudelle %s!"
 msgid "Properties for '%s'"
 msgstr "'%s' asetukset"
 
+#: AdbFrame.cpp:2702
+msgid "unknown"
+msgstr "tuntematon"
+
 #: AdbFrame.cpp:2796
 msgid "No selection"
 msgstr "Ei valintaa"
@@ -3997,54 +4008,54 @@ msgstr "Ei lˆytynyt: '%s'."
 msgid "Can't open the address book '%s'."
 msgstr "Osoitekirjaa '%s' ei voi avata."
 
-#: AdbDialogs.cpp:136
+#: AdbDialogs.cpp:135
 #, fuzzy
 msgid "Import address book"
 msgstr "Muokkaa osoitekirjaa"
 
-#: AdbDialogs.cpp:180
+#: AdbDialogs.cpp:180 AdbDialogs.cpp:209
 msgid ""
 "Select the file or directory to import the data\n"
 "from or select the import format and check the\n"
 "'location' checkbox below"
 msgstr ""
 
-#: AdbDialogs.cpp:210
+#: AdbDialogs.cpp:222
 #, fuzzy
 msgid "&File:"
 msgstr "&Tiedosto"
 
-#: AdbDialogs.cpp:216
+#: AdbDialogs.cpp:228
 msgid "Determine the &location automatically"
 msgstr ""
 
-#: AdbDialogs.cpp:225
+#: AdbDialogs.cpp:237
 msgid "Determine the &format automatically"
 msgstr ""
 
-#: AdbDialogs.cpp:343
+#: AdbDialogs.cpp:355
 #, c-format
 msgid ""
 "Sorry, impossible to determine the location of the default address book file "
 "for the format '%s' - please specify the file manually in the next dialog."
 msgstr ""
 
-#: AdbDialogs.cpp:360
+#: AdbDialogs.cpp:372
 #, fuzzy
 msgid "Please select source address book file"
 msgstr "Avaa osoitekirja"
 
-#: AdbDialogs.cpp:390 AdbImport.cpp:163
+#: AdbDialogs.cpp:402 AdbImport.cpp:163
 #, fuzzy
 msgid "Address book import"
 msgstr "Osoitekirjan muokkaus"
 
-#: AdbDialogs.cpp:391
+#: AdbDialogs.cpp:403
 #, fuzzy
 msgid "Native address book to create: "
 msgstr "Luotava osoitekirja: "
 
-#: AdbDialogs.cpp:423
+#: AdbDialogs.cpp:435
 msgid ""
 "Cannot export address book - this functionality is missing in this version "
 "of the program."
@@ -4291,11 +4302,11 @@ msgstr "Tarkenna hakusi kohdetta!"
 msgid "Don't show this message again "
 msgstr "ƒl‰ n‰yt‰ en‰‰ t‰t‰ viesti‰ "
 
-#: Filters.cpp:352
+#: Filters.cpp:309
 msgid "Parser output"
 msgstr ""
 
-#: Filters.cpp:797
+#: Filters.cpp:754
 #, c-format
 msgid ""
 "Parse error at input position %lu:\n"
@@ -4303,46 +4314,50 @@ msgid ""
 "%s<error> %s"
 msgstr ""
 
-#: Filters.cpp:800
+#: Filters.cpp:757
 #, fuzzy
 msgid "Parse error!"
 msgstr "Liit‰ t‰h‰n"
 
-#: Filters.cpp:854
+#: Filters.cpp:811
 msgid "Unterminated string."
 msgstr ""
 
-#: Filters.cpp:918
+#: Filters.cpp:875
 #, c-format
 msgid "Functioncall expected '(' after '%s'."
 msgstr ""
 
-#: Filters.cpp:973
+#: Filters.cpp:930
 msgid "Expected Factor after negation operator."
 msgstr ""
 
-#: Filters.cpp:993
+#: Filters.cpp:950
 msgid "Expected a number or a function call."
 msgstr ""
 
-#: Filters.cpp:1028 Filters.cpp:1169
+#: Filters.cpp:985 Filters.cpp:1126
 msgid "Expected Condition after conditional operator."
 msgstr ""
 
-#: Filters.cpp:1067
+#: Filters.cpp:1024
 msgid "Expected expression after operator."
 msgstr ""
 
-#: Filters.cpp:1105
+#: Filters.cpp:1062
 msgid "Expected term after operator."
 msgstr ""
 
-#: Filters.cpp:1162
+#: Filters.cpp:1119
 msgid "Expected Block after '{'"
 msgstr ""
 
-#: Filters.cpp:1181
+#: Filters.cpp:1138
 msgid "Expected ';' at end of condition."
+msgstr ""
+
+#: Filters.cpp:1354
+msgid "This plug-in provides a filtering language for Mahogany."
 msgstr ""
 
 #: PythonHelp.cpp:380
@@ -4362,6 +4377,10 @@ msgstr "Tuhoisa virhe"
 
 msgid "Information"
 msgstr "Informaatio"
+
+#, fuzzy
+#~ msgid "no description"
+#~ msgstr "Kuvaus: "
 
 #~ msgid ""
 #~ "Invalid value '%s' for the date format: it should contain exacty 3 %%u "
