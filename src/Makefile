@@ -6,7 +6,7 @@ CWD = src
 UTILOBJ:=util/strutil.o util/sysutil.o util/miscutil.o util/upgrade.o
 SUB_DIRS =  util classes gui mail adb wx # modules
 MOBJS:=$(UTILOBJ) classes/*.o gui/*.o  mail/*.o adb/*.o \
-      wx/generic/*.o wx/common/*.o
+      wx/generic/*.o wx/common/*.o wx/vcard/*.o
 
 include ../makeopts
 

@@ -46,6 +46,17 @@
 
 #include "wx/vcard.h"
 
+
+// - required by vcard parser:
+extern "C" {
+void Parse_Debug(const char *s)
+{
+#ifdef DEBUG
+	wxLogDebug(s);
+#endif
+}
+};
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
