@@ -43,6 +43,9 @@ public:
    // add the folder menu to the menu bar
    void AddFolderMenu(void);
 
+   // update the UI of the folder menu depending on the current folder
+   void UpdateFolderMenuUI(MFolder *folderSelected);
+
    // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &event);
    void OnIdentChange(wxCommandEvent &event);

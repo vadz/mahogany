@@ -81,7 +81,7 @@ public:
          wxLogStatus(m_frame, _("Selected folder '%s'."),
                      newsel->GetFullName().c_str());
 
-         UpdateMenu(m_frame->GetMenuBar()->GetMenu(MMenu_Folder), newsel);
+         m_frame->UpdateFolderMenuUI(newsel);
       }
 
       wxFolderTree::OnSelectionChange(oldsel, newsel);
@@ -204,11 +204,24 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    m_splitter->SetMinimumPaneSize(10);
    m_splitter->SetFocus();
+
+   // update the menu to match the initial selection
+   MFolder_obj folder = m_FolderTree->GetSelection();
+   if ( folder.IsOk() )
+   {
+      UpdateFolderMenuUI(folder);
+   }
 }
 
 void wxMainFrame::AddFolderMenu(void)
 {
    WXADD_MENU(GetMenuBar(), FOLDER, _("&Folder"));
+}
+
+void
+wxMainFrame::UpdateFolderMenuUI(MFolder *sel)
+{
+   m_FolderTree->UpdateMenu(GetMenuBar()->GetMenu(MMenu_Folder), sel);
 }
 
 void
