@@ -20,14 +20,15 @@
 
 #ifndef  USE_PCH
 #   include  "kbList.h"
-#   include   <wx/config.h>
 #   ifdef  OS_WIN
 #      include   <wx/msw/regconf.h>
 #   else
+#      include   <wx/confbase.h>
 #      include   <wx/file.h>
 #      include   <wx/textfile.h>
 #      include   <wx/fileconf.h>
 #   endif
+#   include   <wx/config.h>
 #endif
 
 // ----------------------------------------------------------------------------
