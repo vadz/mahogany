@@ -265,7 +265,7 @@ strutil_findurl(String &str, String &url)
 String
 strutil_extract_formatspec(const char *format)
 {
-   // TODO doesn't reckognize all possible formats nor backslashes (!)
+   // TODO doesn't recognize all possible formats nor backslashes (!)
    String specs;
    while ( *format != '\0' ) {
       if ( *format == '%' ) {
@@ -375,6 +375,6 @@ strutil_getfilename(const String& path)
    if ( nPos1 == 0 )
       return path;
    else
-      return path.Right(path.Len() - nPos1 - 1);
+      return path.c_str()-(path.length() - nPos1 - 1);
 }
 
