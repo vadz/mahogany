@@ -2742,9 +2742,9 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
 void
 MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
 {
-   // we are ignoring the errflg and always put these at level 1
+   // we are ignoring the errflg and always put these at level 1 (WARN)
    // don't know exactly what to do with them
-   mm_log(str, 1, MailFolderCC::LookupObject(stream));
+   mm_log(str, WARN, MailFolderCC::LookupObject(stream));
 }
 
 
@@ -2865,10 +2865,33 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 #ifdef DEBUG
    msg << _(", error level: ") << strutil_ultoa(errflg);
 #endif
-   if(errflg > 1)
-      LOGMESSAGE((CC_GetLogLevel(), msg));
-   else
-      STATUSMESSAGE((msg)); // goes to window anyway
+
+   wxLogLevel loglevel;
+   switch ( errflg )
+   {
+      case 0: // a.k.a INFO
+         loglevel = wxLOG_User;
+         break;
+
+      case BYE:
+      case WARN:
+         loglevel = wxLOG_Warning;
+         break;
+
+      default:
+         FAIL_MSG( "unknown cclient log level" );
+         // fall through
+
+      case ERROR:
+         loglevel = wxLOG_Error;
+         break;
+
+      case PARSE:
+         loglevel = wxLOG_Status; // goes to window anyway
+         break;
+   }
+
+   wxLogGeneric(loglevel, msg);
 }
 
 /** log a debugging message
