@@ -2522,6 +2522,7 @@ wxComposeView::InsertFileAsText(const String& filename,
    wxLayoutImportText(m_LayoutWindow->GetLayoutList(), text);
    m_LayoutWindow->ResizeScrollbars(true);
    m_LayoutWindow->SetModified();
+   m_LayoutWindow->SetDirty();
    m_LayoutWindow->Refresh();
    delete [] text;
    return true;
