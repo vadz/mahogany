@@ -1132,7 +1132,7 @@ wxLayoutLine::Break(CoordType xpos, wxLayoutList *llist)
 void
 wxLayoutLine::MergeNextLine(wxLayoutList *llist)
 {
-   wxASSERT(GetNextLine());
+   wxCHECK_RET(GetNextLine(),"wxLayout internal error: no next line to merge");
    wxLayoutObjectList &list = GetNextLine()->m_ObjectList;
    wxLOiterator i;
    //FIXME: this could be optimised, for now be prudent:
@@ -1147,6 +1147,7 @@ wxLayoutLine::MergeNextLine(wxLayoutList *llist)
    wxLayoutLine *oldnext = GetNextLine();
    SetNext(GetNextLine()->GetNextLine());
    delete oldnext;
+   GetNextLine()->MoveLines(-1);
    RecalculatePositions(1, llist);
 }
 
@@ -1749,7 +1750,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll)
          // little    condition to speed up redrawing:
          if(bottom != -1 && line->GetPosition().y > bottom) break;
       }
-      line->RecalculatePosition(this);
+      line->RecalculatePositions(1,this);
       line = line->GetNextLine();
    }
 
@@ -2072,6 +2073,7 @@ wxLayoutList::StartHighlighting(wxDC &dc)
 #if SHOW_SELECTIONS
    dc.SetTextForeground(m_CurrentSetting.m_bg);
    dc.SetTextBackground(m_CurrentSetting.m_fg);
+   dc.SetBackgroundMode(wxSOLID);
 #endif
 }
 
@@ -2082,6 +2084,7 @@ wxLayoutList::EndHighlighting(wxDC &dc)
 #if SHOW_SELECTIONS
    dc.SetTextForeground(m_CurrentSetting.m_fg);
    dc.SetTextBackground(m_CurrentSetting.m_bg);
+   dc.SetBackgroundMode(wxTRANSPARENT);
 #endif
 }
 
@@ -2155,8 +2158,8 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
 
    wxLayoutList *llist = Copy( m_Selection.m_CursorA,
                                m_Selection.m_CursorB );
-
-   if(wxlo) // export as data object, too
+   
+   if(llist && wxlo) // export as data object, too
    {
       wxString string;
 
@@ -2233,6 +2236,9 @@ wxLayoutPrintout::wxLayoutPrintout(wxLayoutList *llist,
 {
    m_llist = llist;
    m_title = title;
+   // remove any highlighting which could interfere with printing:
+   m_llist->StartSelection();
+   m_llist->EndSelection(); 
 }
 
 wxLayoutPrintout::~wxLayoutPrintout()
