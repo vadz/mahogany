@@ -364,7 +364,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
    { gettext_noop("Co&llapse reply markers"
                   ":no:collapse:collapse & count"),            Field_Combo,   -1,                        },
-   { gettext_noop("Reply &character"),             Field_Text,    -1,                        },
+   { gettext_noop("Quote &character"),             Field_Text,    -1,                        },
 
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
@@ -394,7 +394,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 #ifdef USE_PYTHON
    // python
    { gettext_noop("Python is the built-in scripting language which can be\n")
-     gettext_noop("used to extend M's functionality. It is not essential\n")
+     gettext_noop("used to extend Mahogany's functionality. It is not essential\n")
      gettext_noop("for the program's normal operation."), Field_Message, -1},
    { gettext_noop("&Enable Python"),               Field_Bool,    -1,                        },
    { gettext_noop("Python &Path"),                 Field_Text,    ConfigField_EnablePython   },
@@ -1240,7 +1240,7 @@ bool wxOptionsPageHelpers::TransferDataFromWindow()
 wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
                                            ProfileBase *profile)
    : wxOptionsPage(parent,
-                   _("Mail boxes"),
+                   _("Folders"),
                    profile,
                    ConfigField_FoldersFirst,
                    ConfigField_FoldersLast,
@@ -1561,6 +1561,7 @@ void ShowOptionsDialog(wxFrame *parent, OptionsPage page)
    wxOptionsDialog dlg(parent);
    dlg.CreateAllControls();
    dlg.SetNotebookPage(page);
+   dlg.Layout();
    (void)dlg.ShowModal();
 }
 

@@ -22,6 +22,7 @@
 #  include  "strutil.h"
 #  include  "kbList.h"
 #  include  "MApplication.h"
+#  include   "MPython.h"
 
 #  include  <wx/dynarray.h>
 #  include  <wx/utils.h> // wxYield
@@ -36,6 +37,10 @@
 #include "MailCollector.h"
 
 #include "gui/wxMDialogs.h"   // MDialog_YesNoDialog
+
+// instead of writing our own wrapper for wxExecute()
+#include  <wx/utils.h>
+#define   SYSTEM(command) wxExecute(command, FALSE)
 
 struct MailFolderEntry
 {
@@ -142,7 +147,29 @@ MailCollector::Collect(MailFolder *mf)
 
    m_NewMailFolder->EnableNewMailEvents(true,true);
    m_NewMailFolder->Ping();
-   
+
+   // step 1: execute external command if it's configured
+   String command = READ_CONFIG(m_NewMailFolder->GetProfile(), MP_NEWMAILCOMMAND);
+   if(! command.IsEmpty())
+   {
+      if ( ! SYSTEM(command) )
+      {
+         // TODO ask whether the user wants to disable it
+         wxLogError(_("Command '%s' (to execute on new mail reception)"
+                      " failed."), command.c_str());
+      }
+   }
+
+#ifdef   USE_PYTHON
+   // step 2: folder specific Python callback
+   if(! PythonCallback(MCB_FOLDER_NEWMAIL, 0, m_NewMailFolder, m_NewMailFolder->GetClassName(),
+                       m_NewMailFolder->GetProfile()))
+
+   // step 3: global python callback
+   if(! PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0, mApplication, "MApplication",
+                       mApplication->GetProfile()))
+#endif //USE_PYTHON
+
    if(m_Count && READ_CONFIG(m_NewMailProfile, MP_SHOW_NEWMAILMSG))
    {
       String

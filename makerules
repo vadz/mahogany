@@ -17,6 +17,10 @@
 %cmodule.so: %.o
 	$(CXX) -shared $< -lswigpy -o $(ODIR)/$@
 
+%.dvi: %.htex
+	cp $< tmp.tex ; $(BUILDDIR)/extra/scripts/striphelpids tmp.tex ; $(LATEX) tmp.tex ; $(MAKEINDEX) tmp.idx; \
+        $(LATEX) tmp.tex ; $(LATEX) tmp.tex ; mv tmp.dvi `basename $< .htex`.dvi; mv tmp.aux `basename $< .htex`.aux ;rm -f tmp.*
+
 %.dvi: %.tex
 	$(LATEX) $< ; $(MAKEINDEX) `basename $< .tex`.idx; $(LATEX) $< ; $(LATEX) $<
 

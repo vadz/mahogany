@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sat Apr 10 17:01:06 1999
+#This file was created by <karsten> Sat Apr 24 21:41:17 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -31,20 +31,30 @@
 \added_space_top vfill \added_space_bottom vfill 
 
 \shape slanted 
-Mahogany Mail
+Mahogany
 \shape default 
 
 \newline 
-User Manual
+User Manual for Version 0.21a
+\newline 
+
+\begin_inset Quotes eld
+\end_inset 
+
+Polwarth II
+\begin_inset Quotes erd
+\end_inset 
+
+
 \layout Author
 
-Copyright 1999 by Karsten Ballüder <
-\family typewriter 
-Ballueder@usa.net
-\family default 
->
+Copyright 1997-1999 by Karsten Ballüder 
 \newline 
-Written by Karsten Ballüder and Vadim Zeitlin
+ Written by Karsten Ballüder and Vadim Zeitlin
+\newline 
+
+\family typewriter 
+<m-developers@egroups.com>
 \layout Standard
 
 
@@ -55,13 +65,65 @@ Written by Karsten Ballüder and Vadim Zeitlin
 
 \layout Chapter
 
-Using Mahogany Mail
+Using Mahogany 
 \layout Section
 
 Release Notes_1001_
 \layout Standard
 
-Some quick notes about this release of Mahogany.
+This is the third public release of Mahogany.
+ As with the previous release we make binaries available for Linux-x86,
+ Linux-alpha and Solaris-sparc.
+ A Windows version will be released four to six weeks later, probably together
+ with an updated unix release.
+ Mahogany is also reported to compile and run on FreeBSD and should generally
+ work on any Unix flavour.
+\layout Standard
+
+Due to the fact that it is a cross-platform effort, the compilation and
+ make system are a bit more complex than the average package.
+ However, the source code is provided and you can attempt to compile it
+ yourself.
+ If you are trying to port it to a new platform, let us know and we will
+ be happy to help you.
+\layout Subsection
+
+Changes against the previous version
+\layout Standard
+
+First, there are some user-visible changes against the latest version, most
+ notably the much improved message editor.
+ This is still work in progress and the next release should add the sorely
+ missed cut and paste support which only recently became functional in the
+ underlying wxGTK toolkit.
+ Also, configurability has been much extended.
+ For the first time, Mahogany now defaults to collecting all mail from the
+ system's INBOX (whatever that is) to a central 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ folder.
+ It can easily be set up to watch any number of different mail accounts
+ or newsgroups and collect mail from them.
+\layout Standard
+
+This release got a bit delayed because we decided to finish some long planned
+ changes under the hood, mainly a complete rewrite of the internal configuration
+ system which now provides the inheriting configuration settings we had
+ planned, something that will become obvious in the next release when full
+ GUI support for it will be added.
+ Also, we seriously improved the mailfolder handling code to reliably handle
+ all kinds of error conditions, such as modified or disappearing mailboxes
+ or terminated connections and recover from them safely.
+ Also, Mahogany now has full working support for IMAP, NNTP and newsspools.
+\layout Standard
+
+Apart from this there were many minor fixes and changes, both GUI and mail
+ code, documented in detail at the end of the TODO file.
 \layout Subsection
 
 Which features are implemented?
@@ -134,7 +196,22 @@ Full internationalisation support, Mahogany speaks multiple languages.
 Known bugs
 \layout Itemize
 
-some
+At present, sometimes dialog boxes appear with minimal size or corrupted
+ layout.
+ This is likely a bug in the underlying toolkit and difficult to reproduce.
+ For now the easiest solution is to resize or simply close the dialog and
+ try again.
+\layout Itemize
+
+Newsspool support will not work with newsgroups not listed in the 
+\begin_inset Quotes eld
+\end_inset 
+
+active
+\begin_inset Quotes erd
+\end_inset 
+
+ file and is little configurable.
 \layout Subsection
 
 TODO, features to implement
@@ -151,6 +228,10 @@ We are currently working on the implementation of the following:
 Easy to use and powerful filtering system for mails.
 \layout Itemize
 
+Finishing rewrite of message editor: clipboard support, selections, rich
+ text editing & HTML
+\layout Itemize
+
 Threading and scoring of messages and news articles.
 \layout Itemize
 
@@ -158,18 +239,22 @@ Multi-threaded folder access, to avoid blocking while retrieving slow remote
  folders/servers.
 \layout Itemize
 
+Subscription management for news and IMAP servers.
+\layout Itemize
+
+Templates for message composition and replies.
+\layout Itemize
+
 Support for PGP and GNU Privacy Guard to encrypt mails.
  
 \layout Itemize
 
-Full Drag and Drop interaction with filemanagers of Windows and Gnome/KDE
- (will be added real soon, depends on wxGTK progress).
+Full Drag and Drop interaction with filemanagers of Windows and Gnome/KDE,
+ recently added to wxWindows.
 \layout Itemize
 
-Better Clipboard support (depends on wxGTK progress)
-\layout Itemize
-
-Wide character (Unicode) support and other character sets.
+Wide character (Unicode) support and other character sets, currently being
+ added to wxWindows.
 \layout Subsubsection
 
 Further we plan the following:
@@ -189,9 +274,6 @@ Support for V-cards.
 \layout Itemize
 
 Spam-Ex spam fighting/auto-complaint function.
-\layout Itemize
-
-Rich-text editing and HTML mail support
 \layout Itemize
 
 Compression of mail folders.
@@ -226,8 +308,8 @@ Python
 support for further mail protocols, LDAP
 \layout Itemize
 
-The wxQt project, a port of wxWindows to the Qt toolkit, will also be happy
- for any help.
+The wxQt project, a port of wxWindows to the Qt toolkit, can also use any
+ help.
  We are not directly involved in this, but being involved with wxWindows,
  we are happy to support that port.
 \layout Itemize
@@ -484,6 +566,45 @@ THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES
  
 \layout Section
 
+Introduction
+\layout Standard
+
+To get started on Mahogany, you should look at the following sections of
+ this manual:
+\layout Itemize
+
+The Folder Tree (
+\begin_inset LatexCommand \ref{FolderTreeCtrl}
+
+\end_inset 
+
+) and how to create new folders (
+\begin_inset LatexCommand \ref{CreateNewFolderDialog}
+
+\end_inset 
+
+).
+\layout Itemize
+
+The explanation of the INBOX (
+\begin_inset LatexCommand \ref{INBOX Folder}
+
+\end_inset 
+
+) and New Mail (
+\begin_inset LatexCommand \ref{New Mail Folder}
+
+\end_inset 
+
+) folders.
+\layout Standard
+
+Obviously, the more of this manual you read, the better use you can make
+ of Mahogany.
+ Once the manual has grown too large, we will provide a short tutorial,
+ but for now we go on coding instead.
+\layout Section
+
 The User Interface
 \layout Subsection
 
@@ -520,7 +641,258 @@ The folder tree shows a hierarchical view of all folders managed by Mahogany,
  folders (e.g.
  the server host).
  Clicking the right mouse button on any tree node will pop up a menu with
- options.
+ some options.
+ To open a folder or connection to a server for the first time, choose 
+\begin_inset Quotes eld
+\end_inset 
+
+Create New Folder
+\begin_inset Quotes erd
+\end_inset 
+
+ which will show you a dialog (
+\begin_inset LatexCommand \ref{CreateNewFolderDialog}
+
+\end_inset 
+
+).
+\layout Subsection
+
+Create New Folder Dialog
+\layout Standard
+
+
+\begin_inset LatexCommand \label{CreateNewFolderDialog}
+
+\end_inset 
+
+This menu entry allows you to open a connection to a server or view a mailfolder.
+ No matter whether it is a POP, IMAP, NNTP connection , a file based mailfolder,
+ a newsgroup or whatever, Mahogany treats them all the same and calls them
+ all 
+\begin_inset Quotes eld
+\end_inset 
+
+folder
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ The dialog has (when the user level is set to 
+\begin_inset Quotes eld
+\end_inset 
+
+novice
+\begin_inset Quotes erd
+\end_inset 
+
+) three tabs, 
+\series bold 
+Access
+\series default 
+ (
+\begin_inset LatexCommand \ref{FolderAccessPage}
+
+\end_inset 
+
+), 
+\series bold 
+Compose
+\series default 
+ (
+\begin_inset LatexCommand \ref{ComposePage}
+
+\end_inset 
+
+) and 
+\series bold 
+MessageViewer
+\series default 
+ (
+\begin_inset LatexCommand \ref{MessageViewerPage}
+
+\end_inset 
+
+).
+ 
+\layout Subsubsection
+
+Access_2005_
+\layout Itemize
+
+
+\series bold 
+
+\begin_inset LatexCommand \label{FolderAccessPage}
+
+\end_inset 
+
+Folder Type
+\series default 
+
+\newline 
+Here you can choose from the currently supported folder types.
+ The 
+\begin_inset Quotes eld
+\end_inset 
+
+News
+\begin_inset Quotes erd
+\end_inset 
+
+ type is for reading a local newsspool, it is only partially supported at
+ present but should work fine in most circumstances.
+ 
+\begin_inset Quotes eld
+\end_inset 
+
+NNTP
+\begin_inset Quotes erd
+\end_inset 
+
+ is for reading news from a remote newsserver.
+ 
+\begin_inset Quotes eld
+\end_inset 
+
+IMAP
+\begin_inset Quotes erd
+\end_inset 
+
+ and 
+\begin_inset Quotes eld
+\end_inset 
+
+POP3
+\begin_inset Quotes erd
+\end_inset 
+
+ are for accessing remote mail server.
+ If possible, prefer IMAP over POP, it is much more powerful and significantly
+ faster, saving modem time.
+\layout Itemize
+
+
+\series bold 
+User name
+\series default 
+
+\newline 
+For those folder types where it is required, the user name or login to get
+ access to them.
+\layout Itemize
+
+
+\series bold 
+Password
+\series default 
+
+\newline 
+For those folder types where it is required, you can specify the password
+ here.
+ If you leave it empty, Mahogany will prompt you for the password whenever
+ it is needed.
+ If you want to auto-collect mail from this folder, you should really specify
+ it.
+ 
+\series bold 
+This is a potential security risk!
+\series default 
+ The password typed in here will get stored in your $HOME/.M/config configuration
+ file on Unix or in the registry on Windows.
+ While this file will be created as only readable by you and the passwords
+ be encrypted (using very weak encryption), it is nevertheless a certain
+ risk.
+ If you accidentially change the permissions of that file, someone else
+ could obtain your passwords, though Mahogany would detect this the next
+ time it starts and warn you about it.
+ Generally this should not pose a problem, but you should be aware of this.
+ Previous versions of Mahogany had the passwords world-readable, so if you
+ used it before this release, you might want to change them.
+\layout Itemize
+
+
+\series bold 
+Server
+\series default 
+
+\newline 
+For the folders which require a server setting, you can specify the server
+ host here.
+ If unspecified they will inherit the setting from the global preferences.
+\layout Itemize
+
+
+\series bold 
+Newsgroup
+\series default 
+
+\newline 
+For NNTP and Newsspool folders, the name of the newsgroup, e.g.
+ comp.os.linux.announce .
+\layout Itemize
+
+
+\series bold 
+Comment
+\series default 
+
+\newline 
+Whatever you like to add.
+\layout Itemize
+
+
+\series bold 
+File name
+\series default 
+
+\newline 
+For folders of type 
+\begin_inset Quotes eld
+\end_inset 
+
+File
+\begin_inset Quotes erd
+\end_inset 
+
+, the filename or MH directory.
+\layout Itemize
+
+
+\series bold 
+Collect all mail from this folder
+\series default 
+
+\newline 
+Makes this folder 
+\begin_inset Quotes eld
+\end_inset 
+
+incoming
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ Mahogany will regularly check the folder for new mail and move any messages
+ to the global folder for new mail, usually the 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ folder.
+\layout Itemize
+
+
+\series bold 
+Anonymous access
+\series default 
+
+\newline 
+This marks the folder as anonymous, such as for anonymous IMAP access, telling
+ Mahogany that no user name or password are required to access it.
 \layout Subsection
 
 Folder Views_2002_
@@ -548,19 +920,34 @@ When the top window, the list of messages, is active, certain keyboard bindings
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
 multicol5
-8 2 0 0 -1 -1 -1 -1
+13 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
 1 0 0 0
 1 0 0 0
 1 0 0 0
 1 1 0 0
+0 1 0 0
+0 1 0 0
+0 1 0 0
+0 1 0 0
+0 1 0 0
 0 1 0 0
 0 1 0 0
 8 1 0 "" ""
-8 1 1 "" ""
+2 1 1 "" ""
 0 8 1 0 0 0 0 "" ""
 0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
 0 8 1 0 0 0 0 "" ""
 0 8 1 0 0 0 0 "" ""
 0 8 1 0 0 0 0 "" ""
@@ -584,7 +971,7 @@ SPACE
 \newline 
 select/deselect message
 \newline 
-D
+D or DELETE
 \newline 
 mark selected messages for deletion
 \newline 
@@ -607,6 +994,26 @@ move marked messages to another folder
 S
 \newline 
 save marked messages to files
+\newline 
+P
+\newline 
+print marked messages
+\newline 
+R
+\newline 
+reply to messages
+\newline 
+F
+\newline 
+forward messages
+\newline 
+O
+\newline 
+open messages in separate window
+\newline 
+H
+\newline 
+toggle display of headers
 \layout Section
 
 Reading Mail
@@ -615,14 +1022,54 @@ Reading Mail
 The INBOX Folder
 \layout Standard
 
+
+\begin_inset LatexCommand \label{INBOX Folder}
+
+\end_inset 
+
 The folder named INBOX has a special meaning.
  It is the main system mailbox and cannot be deleted or renamed.
  All new mail will arrive in here.
  At present, Mahogany leaves all messages in the system inbox.
- Future versions of Mahogany will be able to collect mail from several different
- incoming mailboxes, e.g.
+ Mahogany will collect mail from several different incoming mailboxes, e.g.
  the INBOX and some additional POP3 accounts, and move them to a new folder.
  
+\layout Subsection
+
+The 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ Folder
+\layout Standard
+
+
+\begin_inset LatexCommand \label{New Mail Folder}
+
+\end_inset 
+
+Created by Mahogany the first time you start it, this is a file mailbox
+ which by default receives all new mail.
+ If you mark any folder as incoming, its contents will be checked regularly
+ and any new mail in it moved to the 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ folder.
+ If you do not like this name, you can change it in the preferences dialog.
+ Mahogany should in all situations recover from closed connections or disappeari
+ng mailboxes, so it is safe to let it run over long periods of time.
+ If a server connection times out, you will receive one or possibly a few
+ error messages but Mahogany will reopen the connection and continue as
+ usual.
 \layout Subsection
 
 Other Folders
@@ -633,6 +1080,19 @@ e of the user, so any folder may contain as many other folders as needed.
  Folders can be managed either from the top level menu or from the popup
  menu in the folder control invoked by pressing the right mouse button in
  it.
+ You can group folders together by making the sub folders of another folder.
+ This builds no physical connection between the folders but makes the sub
+ folder inherit certain configuration defaults settings from their parent
+ folder.
+ We will soon add a 
+\begin_inset Quotes eld
+\end_inset 
+
+folder group
+\begin_inset Quotes erd
+\end_inset 
+
+ folder type not representing any mailbox but just being a group of folders.
 \layout Section
 
 Sending Mail
@@ -889,9 +1349,19 @@ One of the goals of the Mahogany project is to be as configurably as possible.
  that it doesn't make the program more difficult to use because you have
  the complete liberty to ignore all options until you need to use them.
  Moreover, some program options are completely transparent to the user because
- they're automatically remembered by the program.
+ they are automatically remembered by the program.
  All the other ones may be changed from the main options dialog which may
  be invoked from the main window toolbar or from the menu.
+ Generally, Mahogany configuration settings are inherited in a logical fashion.
+ The settings in the preferences dialog are the global default settings
+ and can be overridden on a per-folder basis.
+ Subfolders inherit from their parent folders.
+ Currently there is no full GUI support for this, but the next release will
+ have the full set of program options available on the per-folder basis.
+ Currently you can already achieve this by editing the configuration file
+ manually.
+ Also, system administrators can provide other defaults in a global /etc/Mahogan
+y.conf file (also found in /usr/etc, /usr/local/etc, /opt/etc, ...).
 \layout Subsection
 
 Automatically remembered options
@@ -925,7 +1395,7 @@ Identity page_4102_
 
 
 \latex latex 
-
+%%disabled!
 \backslash 
 begin{figure}{
 \backslash 
@@ -933,7 +1403,9 @@ htmlimage{scale=1}
 \backslash 
 centering
 \backslash 
-epsfig{file=pics/Identity.eps}}
+epsfig{file=pics/Identity.eps,width=0.6
+\backslash 
+textwidth}}
 \backslash 
 end{figure}
 \layout Standard
@@ -959,9 +1431,28 @@ This is used as (default) login name for the accounts which require one
 Hostname
 \layout Itemize
 
+This is used as the default hostname for your username.
+ If you do not specify a return address, this must form a valid mail address
+ when used together with your username.
+\layout Itemize
+
 
 \series bold 
 Return address
+\series default 
+ 
+\newline 
+Here you can specify a return mail address where you want to receive mail
+ and replies to your mails from other users.
+ By using this you can hide your original (possibly 
+\begin_inset Quotes eld
+\end_inset 
+
+uglier
+\begin_inset Quotes erd
+\end_inset 
+
+) return address.
 \layout Itemize
 
 
@@ -981,29 +1472,254 @@ NNTP server
 \series default 
 
 \newline 
-This is the server used for reading USENET newsgroups.
+This is the server used for reading USENET newsgroups and posting news articles.
 \layout Itemize
 
 
 \series bold 
 Personal name
+\newline 
+
+\series default 
+ Your full personal name to be included in your address.
+\layout Itemize
+
+
+\series bold 
+User level
+\series default 
+
+\newline 
+Setting it to advance will allow you more detailed configuration of Mahogany,
+ allowing you to make changes to the configuration which potentially make
+ no sense.
+ Not supported at present.
 \layout Subsubsection
 
-Compose Page_4100_
-\layout Standard
+Compose Page_4100_ 
+\layout Itemize
 
+
+\series bold 
 
 \begin_inset LatexCommand \label{ComposePage}
 
 \end_inset 
 
+Save sent messages
+\series default 
 
+\newline 
+If enabled, Mahogany will keep a copy of each message you send.
+\layout Itemize
+
+
+\series bold 
+Folder file for sent messages
+\series default 
+
+\newline 
+Where you want Mahogany to save the copies of sent messages.
+\layout Itemize
+
+
+\series bold 
+Wrap margin
+\series default 
+
+\newline 
+If set to a value greater than zero, the message editor will wrap lines
+ for you at that margin.
+\layout Itemize
+
+
+\series bold 
+Reply string in subject
+\series default 
+
+\newline 
+The prefix for subject lines in message replies, usually set to 
+\begin_inset Quotes eld
+\end_inset 
+
+Re:
+\begin_inset Quotes eld
+\end_inset 
+
+
+\layout Itemize
+
+
+\series bold 
+Collapse reply marker
+\series default 
+
+\newline 
+Mahogany can collapse multiple reply markers (such as 
+\begin_inset Quotes eld
+\end_inset 
+
+Re:
+\begin_inset Quotes eld
+\end_inset 
+
+) into one in three different ways:
+\begin_deeper 
+\layout Itemize
+
+no : do not collapse reply markers
+\layout Itemize
+
+collapse : collapse them into one
+\layout Itemize
+
+count : collapse them into one and add a counter for the reply level, such
+ as 
+\begin_inset Quotes eld
+\end_inset 
+
+Re[2]:
+\begin_inset Quotes eld
+\end_inset 
+
+
+\end_deeper 
+\layout Itemize
+
+
+\series bold 
+Quote character
+\series default 
+
+\newline 
+The text inserted before each quoted character.
+\layout Itemize
+
+
+\series bold 
+Use signature
+\series default 
+
+\newline 
+If enabled, Mahogany will append the contents of your signature file to
+ each message sent.
+\layout Itemize
+
+
+\series bold 
+Use XFace
+\series default 
+
+\newline 
+XFaces are small black and white bitmaps which can be added to the message
+ header to identify the sender.
+ Mahogany will recognise and display them if enabled.
+ It will also attempt to load your XFace from the file specified and send
+ it with messages you write.
+ If you do not have your own XFace file, Mahogany will use its own default
+ XFace.
+\layout Itemize
+
+
+\series bold 
+XFace file
+\series default 
+
+\newline 
+This file must contain a 48x48 pixel black and white image.
+ Most image formats should be recognised, XPM is recommended.
+ If the file cannot be loaded, the default XFace will be substituted.
+\layout Itemize
+
+
+\series bold 
+Mail alias substring expansion
+\series default 
+
+\newline 
+If enabled, the EXPAND button will search the mail address databases using
+ substring search rather than just comparing the text against the beginning
+ of addresses and aliases.
+ Produces many more matches than the default search and might take a bit
+ longer.
+\layout Itemize
+
+
+\series bold 
+Font family, font sizes, foreground colour, background colour
+\series default 
+
+\newline 
+These settings determine the appearance of the composition window's message
+ editor.
+\layout Itemize
+
+
+\series bold 
+Configure headers
+\series default 
+
+\newline 
+Allows you to specify default values for the To:, CC: and BCC: fields and
+ whether to display them in the compose view or not.
 \layout Subsubsection
 
 Folders page_4107_
-\layout Standard
+\layout Itemize
 
-TODO
+
+\series bold 
+Folders to open on startup
+\series default 
+
+\newline 
+Mahogany will open these folders on program startup.
+\layout Itemize
+
+
+\series bold 
+Folder opened in main frame
+\series default 
+
+\newline 
+This specifies the folder to open in the main frame on program startup.
+ It will automatically remembered each time you exit Mahogany.
+\layout Itemize
+
+
+\series bold 
+Folder where to collect new mail
+\series default 
+
+\newline 
+The mail from all folders which are marked as incoming (INBOX by default)
+ will automatically be collected in this file folder.
+\layout Itemize
+
+
+\series bold 
+Poll for new mail delay
+\series default 
+
+\newline 
+Mahogany will check all incoming mailboxes for new mail.
+ Specify the time between checks in seconds here.
+ Notice that each check causes a short delay as Mahogany polls the folders,
+ set it to a longer value to reduce the annoying screen updates, set it
+ to a shorter value if you care about receiving your new mail with little
+ delay.
+\layout Itemize
+
+
+\series bold 
+Threshold for displaying progress dialog
+\series default 
+
+\newline 
+Mahogany will display progress dialogs when parsing mail folders or querying
+ servers.
+ If the number of messages is less than this threshold value, the progress
+ dialog will be suppressed.
 \layout Subsubsection
 
 Python page_4103_
@@ -1018,6 +1734,210 @@ Python page_4103_
 \end_inset 
 
 
+\layout Itemize
+
+
+\series bold 
+Enable Python
+\series default 
+
+\newline 
+Enables the built-in python interpreter which can be used to extend Mahogany.
+ It is not essential for normal operation, but if you want to do unusual
+ things, python gives you the power to do practically anything you want
+ with the program.
+\layout Itemize
+
+
+\series bold 
+Python Path
+\series default 
+
+\newline 
+Where to search for python files.
+\layout Itemize
+
+
+\series bold 
+Startup script
+\series default 
+
+\newline 
+The name of a python script which will be executed at program startup.
+\layout Paragraph
+
+Callbacks
+\layout Standard
+
+Callbacks are python functions that can be called from different parts of
+ Mahogany's code.
+ See the Scripting and Extending chapter (
+\begin_inset LatexCommand \ref{Scripting}
+
+\end_inset 
+
+) and the Hacker's guide (
+\begin_inset LatexCommand \ref{HackersGuide}
+
+\end_inset 
+
+) for more information on this.
+\layout Itemize
+
+
+\series bold 
+Folder open callback
+\layout Itemize
+
+
+\series bold 
+Folder update callback
+\layout Itemize
+
+
+\series bold 
+Folder expunge callback
+\layout Itemize
+
+
+\series bold 
+Flag set callback
+\layout Itemize
+
+
+\series bold 
+Flag clear callback
+\layout Subsubsection
+
+Message Viewer_4101_
+\layout Itemize
+
+
+\series bold 
+
+\begin_inset LatexCommand \label{MessageViewerPage}
+
+\end_inset 
+
+Font family, font size, foreground colour, background colour, colour for
+ URLs, colour for header names, colour for header values
+\series default 
+
+\newline 
+These settings control the appearance of messages in the message viewer
+ window.
+ Mahogany will detect URLs embedded in messages and by using a different
+ colour for them, can highlight them.
+ When the user clicks on a URL, it will be opened in an external browser.
+\layout Itemize
+
+
+\series bold 
+Inline graphics
+\series default 
+
+\newline 
+If enabled, Mahogany will display images included as MIME content in the
+ message window.
+ If disabled, images will be represented by a filetype icon like any other
+ MIME content.
+\layout Itemize
+
+
+\series bold 
+Conversion graphics format
+\series default 
+
+\newline 
+Mahogany uses an external conversion program (
+\begin_inset LatexCommand \ref{HelpersPage}
+
+\end_inset 
+
+) for image formats which it does not support natively.
+ Here you can chose one of the natively supported formats to use for the
+ conversion.
+ At present, the most reliable format appears to be XPM.
+ If configured properly and all libraries are available, Mahogany should
+ support XPM, PNG, JPEG and BMP.
+ Notice that XPM files are extremely large, so you might want to change
+ this setting to one of the other formats.
+ 
+\layout Itemize
+
+
+\series bold 
+Support special fax mailers
+\series default 
+
+\newline 
+This enables support for domains sending faxes by email, such as the 
+\latex latex 
+
+\backslash 
+htmladdnormallink{EFAX}{http://www.efax.com/}
+\latex default 
+ fax to email gateway.
+ Faxes are sent as MIME attachments and need treatment different from normal
+ images.
+\layout Itemize
+
+
+\series bold 
+Domains sending faxes
+\series default 
+
+\newline 
+This is a colon-separated list of domains sending faxes.
+ All IMAGE/TIFF or APPLICATION/OCTET-STREAM MIME content in mails coming
+ from these domains will be treated as TIFF-G3 faxes.
+ Note that the strings in this field do not need to be real domain names
+ but are substrings looked for in the sender's email address.
+\layout Itemize
+
+
+\series bold 
+Maximum size of message
+\series default 
+
+\newline 
+If you attempt to view a message larger than this limit, Mahogany will prompt
+ you for confirmation.
+ This is to prevent you from accidentally downloading large messages over
+ a slow remote connection.
+ Setting it to 0 will disable this.
+ The limit is not applied to mailfolder files.
+\layout Itemize
+
+
+\series bold 
+Maximum number of messages
+\series default 
+
+\newline 
+If you open a folder with more than this limit of messages, Mahogany will
+ ask you whether you want to limit the amount of messages downloaded (or
+ partially downloaded).
+ Again, this is to prevent you from accidentally downloading huge numbers
+ of messages over a slow remote connection.
+ Setting it to 0 disables this.
+ It does not apply to mailfolder files.
+ Also, for NNTP connections, this might be triggered although there could
+ be less messages in the newsgroup, as at the time of testing the number
+ of unread messages is not know yet.
+\layout Itemize
+
+
+\series bold 
+Configure headers to show
+\series default 
+
+\newline 
+This allows you to chose from a list of the most commonly viewed header
+ lines, which you would like to display together with the message contents.
+ By default, To:, From:, Subject: and Date: are shown.
+ Note that you can always view the complete header information or the raw
+ message text, no matter what you chose here.
 \layout Subsubsection
 
 Addressbook page_4104_
@@ -1034,6 +1954,12 @@ and, as almost any other feature of Mahogany can be turned on and off as
  In this page you may choose whether you want to use this feature at all
  (it is on by default) and, if so, where should be the autocollected addresses
  be put and other settings.
+ See the Adressbook section (
+\begin_inset LatexCommand \ref{AdressDatabase}
+
+\end_inset 
+
+) for more information on Mahogany's built-in adrdressbook.
 \layout Itemize
 
 
@@ -1092,9 +2018,17 @@ autocollect.adb
 
  and so the default autocollect book will be created in 
 \noun on 
+
+\newline 
 $HOME/.M/autocollect.adb
 \noun default 
- under Unix.
+ 
+\noun on 
+
+\newline 
+
+\noun default 
+under Unix.
 \layout Itemize
 
 
@@ -1180,6 +2114,11 @@ As saving BBDB addressbook can potentially lead to some loss of information
 
 Helpers_4106_
 \layout Standard
+
+
+\begin_inset LatexCommand \label{HelpersPage}
+
+\end_inset 
 
 On this page you can customise which external helper applications Mahogany
  uses for different action that it does not perform itself.
@@ -1372,9 +2311,25 @@ Show new mail notification
 \series default 
 If this option is on, a message box will be shown each time new messages
  are received.
+\layout Itemize
+
+
+\series bold 
+Path where to find AFM files
+\series default 
+ (Unix version only)
+\newline 
+To properly scale printing under Unix, Mahogany needs access to a set of
+ AFM files.
+ The searchpath where to look for them can be modified here.
 \layout Section
 
 The Address Database_3000_
+\begin_inset LatexCommand \label{AdressDatabase}
+
+\end_inset 
+
+
 \layout Subsection
 
 Introduction
@@ -1440,6 +2395,11 @@ Therefore, reading a BBDB file and saving it back to disk may lead to a
 Scripting and Extending 
 \shape slanted 
 Mahogany
+\begin_inset LatexCommand \label{Scripting}
+
+\end_inset 
+
+
 \layout Section
 
 Introduction
@@ -1928,8 +2888,8 @@ If your help browser understands HTML forms, you will find to forms below
 \latex latex 
 
 \backslash 
-begin{rawhtml}<form method=GET action="http://www.findmail.com/cgi-bin/subscribe.py
-"><input 
+begin{rawhtml}<form method=GET action="http://www.egroups.com/cgi-bin/subscribe.py"
+><input 
 \protected_separator 
 type=hidden name="listname" value="m-announce"><table BORDER=0 CELLSPACING=0
  BGCOLOR="#000000" ><tr><td><table BORDER=0 CELLSPACING=0 CELLPADDING=3
@@ -1938,8 +2898,8 @@ ace="arial,helvetica"><font color="#FFFFFF">Subscribe to M-announcements
  list&nbsp;</font></font></b></td></tr><tr><td>Enter your e-mail address:&nbsp;<
 /td></tr><tr><td><input type=text name="emailaddr" value="your e-mail" size=21><
 input type=submit name="SubmitAction" VALUE="Subscribe"></td></tr><tr><td><a
- href="http://www.findmail.com/list/m-annouce/">FindMail List Archive</a></td></tr
-><tr><td><font face="arial,helvetica"><font size=-1>A mailing list hosted
+ href="http://www.egroups.com/list/m-annouce/">FindMail List Archive</a></td></tr>
+<tr><td><font face="arial,helvetica"><font size=-1>A mailing list hosted
  by<a href="http://www.makelist.com/">MakeList!</a></font></font></td></tr></table
 ></td></tr></table> </form>
 \backslash 
@@ -1950,8 +2910,8 @@ end{rawhtml}
 \latex latex 
 
 \backslash 
-begin{rawhtml}<form method=GET action="http://www.findmail.com/cgi-bin/subscribe.py
-"><input 
+begin{rawhtml}<form method=GET action="http://www.egroups.com/cgi-bin/subscribe.py"
+><input 
 \protected_separator 
 type=hidden name="listname" value="m-users BORDER=0 CELLSPACING=0 BGCOLOR="#0000
 00" ><tr><td><table BORDER=0 CELLSPACING=0 CELLPADDING=3 WIDTH="300" BGCOLOR="#F
@@ -1959,10 +2919,10 @@ FFFCC" ><tr><td ALIGN=CENTER BGCOLOR="#000000"><b><fontface="arial,helvetica"><f
 ont color="#FFFFFF">Subscribe to M-users forum&nbsp;</font></font></b></td></tr>
 <tr><td>Enter your e-mail address:&nbsp;</td></tr><tr><td><input type=text
  name="emailaddr" value="your e-mail" size=21><input type=submit name="SubmitAct
-ion" VALUE="Subscribe"></td></tr><tr><td><a href="http://www.findmail.com/list/m-a
-nnouce/">FindMail List Archive</a></td></tr><tr><td><font face="arial,helvetica"
-><font size=-1>A mailing list hosted by<a href="http://www.makelist.com/">MakeList
-!</a></font></font></td></tr></table></td></tr></table> </form>
+ion" VALUE="Subscribe"></td></tr><tr><td><a href="http://www.egroups.com/list/m-an
+nouce/">FindMail List Archive</a></td></tr><tr><td><font face="arial,helvetica">
+<font size=-1>A mailing list hosted by<a href="http://www.makelist.com/">MakeList!
+</a></font></font></td></tr></table></td></tr></table> </form>
 \backslash 
 end{rawhtml}
 \layout Standard
@@ -2082,6 +3042,11 @@ Of course, feel free to change the two debug options to
 --with-debug
 \family default 
 , or it will fail.
+ If you experience problems with thread support, configure it 
+\family typewriter 
+--without-threads
+\family default 
+, they are not used currently.
  
 \shape italic 
 Note: the --with/--without arguments are prefixed with a double hyphen,
@@ -2705,6 +3670,11 @@ Mahogany
 Mahogany
 \shape default 
  Hacker's Guide
+\begin_inset LatexCommand \label{HackersGuide}
+
+\end_inset 
+
+
 \layout Standard
 
 Here we are trying to provide some information for existing and potential
@@ -6475,6 +7445,4 @@ You should be able to right-click on the folder treecontrol on the left
  Your normal mailspool /var/spool/mail/username is available under the name
  INBOX anyway, but I guess you have fetchpop/procmail deliver your mail
  to some other place.
-\layout Standard
-
 \the_end

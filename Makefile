@@ -14,13 +14,18 @@ all:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
 
 doc:
-	set -e; for i in include extra ; do $(MAKE) -C $$i doc; done
+	set -e; for i in include extra doc ; do $(MAKE) -C $$i doc; done
 
 clean:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
-allclean:
+allclean: clean
 	find . -name .depend -exec rm {} \;
+	find . -name \*.bak -exec rm {} \;
+	find . -name \*~ -exec rm {} \; 
+	find . -name .\\\#* -exec rm {} \; || true
+	$(RM) config.status *cache* makeopts *.po config.log src/M
+	find . -name .xvpics -exec rm -r -f {} \; 
 
 dep depend: 
 	@echo "The first time \"make depend\" will print lots of warnings"

@@ -23,6 +23,8 @@ doc:
 	$(DOCHTML) *.h
 	$(DOCTEX) *.h
 
+scandoc:
+	$(SCANDOCHTML) *.h
 
-.PHONY: clean doc doc2 dep all install msgcat
+.PHONY: clean doc doc2 dep all install msgcat scandoc
 

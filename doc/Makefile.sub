@@ -3,8 +3,8 @@
 #
 
 CWD = doc
-FILES_TEX=../$(DIR).tex
-FILES_PS=$(FILES_TEX:.tex=.ps)
+FILES_TEX=../$(DIR).htex
+FILES_PS=$(FILES_TEX:.htex=.ps)
 
 include ../../makeopts
 
@@ -17,8 +17,9 @@ install:
 
 ps: $(FILES_PS)
 
-index: ../$(DIR).tex
-	$(LATEX2HTML) -debug ../$(DIR).tex
+index: ../$(DIR).htex
+	cp ../$(DIR).aux .
+	$(LATEX2HTML) -debug ../$(DIR).htex
 
 wxhelp.map: index
 	( cd $(DIR); ../../../extra/scripts/html2wxhelp > ../wxhelp.map)

@@ -1,12 +1,40 @@
 $Id$
 
-Preliminary README file for M.
-------------------------------
-
-
+--------------------------------------------------------------------
+README file for Mahogany, Release 0.21a "Polwarth II"
+--------------------------------------------------------------------
 
 --------------------------------------------------------------------
-INTERNET RESOURCES
+Issues with the current release
+--------------------------------------------------------------------
+
+Mahogany now compiles with gtk 1.2.1, however the underlying wxGTK
+toolkit still exhibits a few minor bugs:
+   - with gtk 1.2.1: Preferences dialogs layout is corrupted, but 
+                     resizing them corrects the layout, labels
+                     are centred.
+   - with gtk 1.0.6: Occasionally (depending on the windowmanager),
+                     dialogs flicker and resize themselves to the
+                     minimal size of approx. 1x1 pixels. All you can
+                     do in that situation is to either press a key to
+                     select it or close it manually.
+
+   Depending on how soon these two problems get fixed, we will relink
+   the current release of Mahogany with wxGTK and re-release it.
+   The next release is planned for the end of May/first week of June
+   and will be for Unix and Windows.
+
+More detailed information about Mahogany, how to get support for it,
+how to contribute it, and last not least, how to use it, can be found
+in the user manual, included in HTML and PostScript format, or the
+online help system. Some quick compilation notes can be found below,
+more in the manual.
+
+Be not confused by references to a program called "M", that was the
+original working title for "Mahogany".
+
+--------------------------------------------------------------------
+Internet resources
 --------------------------------------------------------------------
 
 The Mahogany web page is at:
@@ -39,7 +67,7 @@ http://www.wxwindows.org/
 
 
 --------------------------------------------------------------------
-COMPILATION NOTES
+Compilation notes
 --------------------------------------------------------------------
 
 These are some very brief notes about how to compile M.
@@ -70,9 +98,22 @@ Required software:
         from the cvs. If you want to make sure that you don't have any 
         problems in compiling and linking M against it, you should
         download the wxGTK snapshot used by us to compile the binary release
-	of M. It is available from:
+	of Mahogany. It is available from:
 	http://www.phy.hw.ac.uk/~karsten/M/dl/wxGTK.tar.gz
 
    - libgtk 1.0.x, libglib 1.0.x, or gtk/glib 1.2.x
 
 
+- wxGTK should be configured with the following options:
+    ./configure \
+    --with-gtk \
+    --with-static \
+    --without-shared \
+    --with-dmalloc \
+    --without-odbc \
+    --with-threads \
+    --with-libpng \
+    --with-libjpeg 
+
+If you experience a problem with thread support, you can just as well
+compile it --without-threads, they are not currently required.
