@@ -925,7 +925,7 @@ HeaderInfoListImpl::GetAllHeadersByFlag(MailFolder::MessageStatus flag,
 
 MsgnoType *HeaderInfoListImpl::AllocTable() const
 {
-   return (MsgnoType *)malloc(m_count * sizeof(MsgnoType));
+   return new MsgnoType[m_count];
 }
 
 MsgnoType HeaderInfoListImpl::GetNthSortedMsgno(MsgnoType n) const
@@ -1132,6 +1132,7 @@ void HeaderInfoListImpl::CombineSortAndThread()
    for ( level = 0; level < depthMax; level++ )
    {
       delete [] indicesAtLevel[level];
+      delete [] parentsAtLevel[level];
    }
 
    delete [] indicesAtLevel;
@@ -1238,13 +1239,13 @@ void HeaderInfoListImpl::FreeTables()
       if ( m_dontFreeMsgnos )
          m_dontFreeMsgnos = false;
       else
-         free(m_tableMsgno);
+         delete [] m_tableMsgno;
       m_tableMsgno = NULL;
    }
 
    if ( m_tablePos )
    {
-      free(m_tablePos);
+      delete [] m_tablePos;
       m_tablePos = NULL;
    }
 }
@@ -1257,7 +1258,7 @@ void HeaderInfoListImpl::FreeSortData()
 {
    if ( m_tableSort )
    {
-      free(m_tableSort);
+      delete [] m_tableSort;
       m_tableSort = NULL;
    }
 }
