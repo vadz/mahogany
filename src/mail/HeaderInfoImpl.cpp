@@ -3,7 +3,7 @@
 // File name:   mail/HeaderInfoImpl.cpp - implements HeaderInfo(List) classes
 // Purpose:     implements HI in the simplest way: just store all data in
 //              memory
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Vadim Zeitlin, Karsten Ballüder
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$
@@ -20,8 +20,8 @@
 // ----------------------------------------------------------------------------
 
 #ifdef __GNUG__
-#   pragma implementation "HeaderInfoImpl.h"
-#   pragma implementation "HeaderInfo.h"
+   #pragma implementation "HeaderInfoImpl.h"
+   #pragma implementation "HeaderInfo.h"
 #endif
 
 #include  "Mpch.h"
@@ -37,6 +37,25 @@
 #include "HeaderInfoImpl.h"
 
 #include "Sequence.h"
+
+// ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
+
+// define this to do some (expensive!) run-time checks for translation tables
+// consistency
+#define DEBUG_SORTING
+
+#ifdef DEBUG_SORTING
+   #define CHECK_TABLES() VerifyTables(m_count, m_tableMsgno, m_tablePos)
+   #define DUMP_TABLES(msg) \
+      printf("Translation tables (count = %ld) state ", m_count); \
+      printf msg ; \
+      DumpTables(m_count, m_tableMsgno, m_tablePos)
+#else
+   #define CHECK_TABLES()
+   #define DUMP_TABLES(msg)
+#endif
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -76,6 +95,62 @@ static UIdType MapIndexToMsgno(UIdType uid)
 {
    return uid + 1;
 }
+
+#ifdef DEBUG_SORTING
+
+// verify that msgno/pos tables are at least consistent
+static void VerifyTables(MsgnoType count,
+                         const MsgnoType *msgnos,
+                         const MsgnoType *pos)
+{
+   wxArrayInt msgnosFound;
+
+   for ( size_t n = 0; n < count; n++ )
+   {
+      MsgnoType msgno = msgnos[n];
+
+      ASSERT_MSG( msgno > 0 && msgno <= count,
+                  "invalid msgno in the translation table" );
+
+      if ( pos[msgno - 1] != n )
+      {
+         FAIL_MSG( "translation tables are in inconsistent state!" );
+      }
+
+      if ( msgnosFound.Index(msgno) != wxNOT_FOUND )
+      {
+         FAIL_MSG( "duplicate msgno in translation table!" );
+      }
+      else
+      {
+         msgnosFound.Add(msgno);
+      }
+   }
+
+   ASSERT_MSG( msgnosFound.GetCount() == count,
+               "missing msgnos in translation table!?" );
+}
+
+// dump a table
+static void DumpTable(MsgnoType count, const MsgnoType *table)
+{
+   for ( size_t n = 0; n < count; n++ )
+      printf(" %2ld", table[n]);
+}
+
+// dump the translation tables
+static void DumpTables(MsgnoType count,
+                       const MsgnoType *msgnos,
+                       const MsgnoType *pos)
+{
+   printf("\n\tmsgnos:");
+   DumpTable(count, msgnos);
+   printf("\n\tpos   :");
+   DumpTable(count, pos);
+   puts("");
+}
+
+#endif // DEBUG_SORTING
 
 // ============================================================================
 // implementation
@@ -152,6 +227,11 @@ inline bool HeaderInfoListImpl::IsHeaderValid(MsgnoType n) const
    return (n < m_headers.GetCount()) && (m_headers[n] != NULL);
 }
 
+inline bool HeaderInfoListImpl::HaveTables() const
+{
+   return m_tableMsgno != NULL;
+}
+
 // ----------------------------------------------------------------------------
 // HeaderInfoListImpl creation and destruction
 // ----------------------------------------------------------------------------
@@ -200,7 +280,7 @@ void HeaderInfoListImpl::CleanUp()
 
 void HeaderInfoListImpl::FreeSortTables()
 {
-   if ( m_tableMsgno )
+   if ( HaveTables() )
    {
       free(m_tableMsgno);
       free(m_tablePos);
@@ -319,12 +399,17 @@ MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
 // HeaderInfoListImpl methods called by MailFolder
 // ----------------------------------------------------------------------------
 
-// TODO: OnRemove() is very inefficient for array!
+// TODO: OnRemove() is very inefficient, there are a few possible
+//       optimizations:
+//
+// 1. call it for a bunch of messages when there are several messages
+//    being expunged
+//
+// 2. don't modify the array but just mark the index being removed as
+//    being invalid (somehow...) and ignore it later
 
 void HeaderInfoListImpl::OnRemove(MsgnoType n)
 {
-   ASSERT_MSG( !IsSorting(), "FIXME-SORTING" );
-
    CHECK_RET( n < m_count, "invalid index in HeaderInfoList::OnRemove" );
 
    if ( n < m_headers.GetCount() )
@@ -332,12 +417,82 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       delete m_headers[n];
       m_headers.RemoveAt(n);
 
-      // the indices are shifted (and one is even removed completely)
+      // the indices are shifted (and one is even removed completely), so
+      // invalidate the pointers into m_headers
       m_lastMod++;
    }
    //else: we have never looked that far
 
-   // update the count anyhow
+   if ( HaveTables() )
+   {
+      DUMP_TABLES(("before removing element %ld", n));
+
+      // we will determine the index of the message being expunged (in
+      // m_tableMsgno) below
+      MsgnoType idxRemovedInMsgnos = INDEX_ILLEGAL;
+
+      MsgnoType posRemoved = m_tablePos[n];
+
+      // update the translation tables
+      for ( MsgnoType i = 0; i < m_count; i++ )
+      {
+         // first work with msgnos table
+         MsgnoType msgno = m_tableMsgno[i];
+         if ( msgno == n + 1 ) // +1 because n is an index, not msgno
+         {
+            // found the position of msgno which was expunged, store it
+            idxRemovedInMsgnos = i;
+         }
+         else if ( msgno > n )
+         {
+            // indices are shifted
+            m_tableMsgno[i]--;
+         }
+         //else: leave it as is
+
+         // and also update the positions table
+         MsgnoType pos = m_tablePos[i];
+         if ( pos > posRemoved )
+         {
+            // here the indices shift too
+            m_tablePos[i]--;
+         }
+      }
+
+      // delete the removed element from the translation tables
+
+      ASSERT_MSG( idxRemovedInMsgnos != INDEX_ILLEGAL,
+                  "expunged item not found in m_tableMsgno?" );
+
+      if ( idxRemovedInMsgnos < m_count - 1 )
+      {
+         // shift everything
+         MsgnoType *p = m_tableMsgno + idxRemovedInMsgnos;
+         memmove(p, p + 1,
+                 sizeof(MsgnoType)*(m_count - idxRemovedInMsgnos - 1));
+      }
+      //else: the expunged msgno was the last one
+
+      if ( n < m_count - 1 )
+      {
+         MsgnoType *p = m_tablePos + n;
+         memmove(p, p + 1, sizeof(MsgnoType)*(m_count - n - 1));
+      }
+      //else: the removed element was at the last position
+
+#ifdef DEBUG_SORTING
+      // last index is invalid now, don't let CHECK_TABLES() check it
+      m_count--;
+
+      DUMP_TABLES(("after removing"));
+      CHECK_TABLES();
+
+      // restore for -- below
+      m_count++;
+#endif // DEBUG_SORTING
+   }
+
+   // always update the count
    m_count--;
 }
 
@@ -465,30 +620,11 @@ void HeaderInfoListImpl::Sort()
    }
    else // we do need to sort messages
    {
-      // not yet
-#if 1
+      FreeSortTables();
+
       m_tableMsgno = (MsgnoType *)malloc(m_count * sizeof(MsgnoType));
       m_tablePos = (MsgnoType *)malloc(m_count * sizeof(MsgnoType));
 
-#if 0 // testing code
-      if ( m_sortParams.sortOrder & 1 )
-      {
-         // reverse
-         for ( size_t n = 0; n < m_count; n++ )
-         {
-            m_tableMsgno[n] = m_count - n;
-            m_tablePos[n] = m_count - n - 1;
-         }
-      }
-      else // normal
-      {
-         for ( size_t n = 0; n < m_count; n++ )
-         {
-            m_tableMsgno[n] = n + 1;
-            m_tablePos[n] = n;
-         }
-      }
-#else
       if ( m_mf->SortMessages((MsgnoType *)m_tableMsgno, m_sortParams) )
       {
          // build the inverse table
@@ -496,13 +632,16 @@ void HeaderInfoListImpl::Sort()
          {
             m_tablePos[m_tableMsgno[n] - 1] = n;
          }
+
+         DUMP_TABLES(("after sorting with sort order %08lx",
+                     m_sortParams.sortOrder));
+
+         CHECK_TABLES();
       }
       else // sort failed
       {
          FreeSortTables();
       }
-#endif // 0/1
-#endif // 0
    }
 }
 

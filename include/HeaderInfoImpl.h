@@ -116,6 +116,9 @@ private:
    /// do we sort messages at all?
    inline bool IsSorting() const;
 
+   /// do we have the translation tables?
+   inline bool HaveTables() const;
+
    /// get the msgno which should appear at the given display position
    MsgnoType GetMsgnoFromPos(MsgnoType pos) const;
 
