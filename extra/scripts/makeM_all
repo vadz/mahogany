@@ -258,24 +258,26 @@ then
 
   if [ "$DOSHARED" = yes ]
   then
- 	SHAREDFLAG="--with-shared --without-static"
+ 	SHAREDFLAG="--enable-shared --disable-static"
   else
-	SHAREDFLAG="--without-shared --with-static"
+	SHAREDFLAG="--disable-shared --enable-static"
   fi
- 
+
+# I don't think they are still needed:
+#	--disable-threads \
+#        --enable-wxprintfv \
+#        --enable-html \
+#	--enable-controls \
+#	--with-libpng \
+#	--without-dnd \
+#        --enable-accel \
+
   rm -f wxWindows/*.cache
   cd wxWindows && \
   autoconf && \
 	./configure \
-	--disable-threads \
 	$SHAREDFLAG \
 	--enable-static \
-        --enable-wxprintfv \
-        --enable-html \
-	--enable-controls \
-	--with-libpng \
-	--without-dnd \
-        --enable-accel \
 	--with-gtk \
 	$DEBUGOPTS \
 	--prefix=$WXPREFIX \
