@@ -125,6 +125,12 @@ M_OVERRIDES(no_rsa,no_rsa,
 --with-no_rsa      use SSL without RSA,
 USE_NO_RSA)
 
+M_OVERRIDES(WXCONFIGPRG,WXCONFIGPRG,
+--with-wxconfigprg=xxx    use wx-config program named xxx e.g. wxgtkd-config,
+USE_WXCONFIGPRG)
+
+
+
 M_OVERRIDES_DONE
 
 dnl --------------------------------------------------------------------------
@@ -350,10 +356,14 @@ MAKE_DEBUG=
 
 if test "$USE_WXDEBUG" = 1; then
 	DBGFLAGS="-D__WXDEBUG__"
-	WXCONFIG_NAME="wxd-config"
+	WXCONFIG_NAME="wxgtkd-config"
 else
 	WXCONFIG_NAME="wx-config"
 fi
+
+if test "x$USE_WXCONFIGPRG" != "x"; then
+	WXCONFIG_NAME="$USE_WXCONFIGPRG"
+else
 
 if test "$USE_DEBUG" = 1; then
 	DBGFLAGS="$DBGFLAGS -DDEBUG"
@@ -562,7 +572,7 @@ dnl --------------------------------------------------------------------------
 
 GTK_LDFLAGS=
 dnl check for wx-config
-AC_PATH_PROG(WX_CONFIG,WXCONFIG_NAME)
+AC_PATH_PROG(WX_CONFIG,$WXCONFIG_NAME)
 if test "x$WX_CONFIG" != "x"
 then
 	GTK_CFLAGS=`$WX_CONFIG --cflags`
