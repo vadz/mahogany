@@ -129,21 +129,23 @@ MFDialogComponent::WriteSettings(void)
 static
 const char * ORC_T_Names[] =
 {
-   "1", // ORC_T_Always = 0,
-   "matchi(", // ORC_T_Match,
-   "containsi(", // ORC_T_Contains,
-   "match(", // ORC_T_MatchC,
-   "contains(", // ORC_T_ContainsC,
-   "matchregex(", // ORC_T_MatchRegExC,
-   "size() > ", // ORC_T_LargerThan,
-   "size() < ", // ORC_T_SmallerThan,
+   // NB: if the string is terminated with a '(' a matching ')' will be
+   //     automatically added when constructing the filter expression
+   "1",                 // ORC_T_Always = 0,
+   "matchi(",           // ORC_T_Match,
+   "containsi(",        // ORC_T_Contains,
+   "match(",            // ORC_T_MatchC,
+   "contains(",         // ORC_T_ContainsC,
+   "matchregex(",       // ORC_T_MatchRegExC,
+   "size() > ",         // ORC_T_LargerThan,
+   "size() < ",         // ORC_T_SmallerThan,
    "(now()-date()) > ", // ORC_T_OlderThan,
    "(now()-date()) < ", // ORC_T_NewerThan,
-   "isspam()", // ORC_T_IsSpam,
-   "python(", // ORC_T_Python,
-   "matchregexi(", // ORC_T_MatchRegEx,
-   "score() > ", // ORC_T_ScoreAbove,
-   "score() < ", // ORC_T_ScoreBelow,
+   "isspam()",          // ORC_T_IsSpam,
+   "python(",           // ORC_T_Python,
+   "matchregexi(",      // ORC_T_MatchRegEx,
+   "score() > ",        // ORC_T_ScoreAbove,
+   "score() < ",        // ORC_T_ScoreBelow,
    NULL
 };
 
@@ -230,12 +232,16 @@ MFDialogComponent::WriteTest(void)
    bool needsTarget = ORC_T_Flags[m_Test] & ORC_F_NeedsTarget;
    bool needsArgument = (ORC_T_Flags[m_Test] & ORC_F_NeedsArg) != 0;
    program << ORC_T_Names[m_Test];
+   bool needsClosingParen = program.Last() == '(';
    if(needsTarget)
    {
       if(m_Target != ORC_W_Illegal && m_Target < ORC_W_Max)
          program << ORC_W_Names[ m_Target ];
       else
-      { ASSERT_MSG(0,"This must not happen!"); return ""; }
+      {
+         FAIL_MSG("This must not happen!");
+         return "";
+      }
    }
    if(needsTarget && needsArgument)
       program << ',';
@@ -245,7 +251,7 @@ MFDialogComponent::WriteTest(void)
       // embedded into m_Argument as string terminator characters
       program << '"' << strutil_escapeString(m_Argument) << '"';
    }
-   if(needsTarget || needsArgument)
+   if ( needsClosingParen )
       program << ')'; // end of function call
    program << ')';
    return program;
