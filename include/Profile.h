@@ -22,7 +22,6 @@
 // ----------------------------------------------------------------------------
 
 #include "MObject.h"
-#include "Mdefaults.h"     // for M_PROFILE_CONFIG_SECTION &c
 
 class kbStringList;
 
