@@ -195,6 +195,10 @@ SOURCE=.\src\classes\ComposeTemplate.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\classes\ConfigSource.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\classes\FolderMonitor.cpp
 # End Source File
 # Begin Source File
