@@ -60,6 +60,8 @@ enum FolderIcon
    iconNews,
    iconRoot,
    iconGroup,
+   iconGroupNews,
+   iconGroupIMAP,
    iconNewMail,
    iconSentMail,
    iconFolderMax
@@ -1110,6 +1112,8 @@ String GetFolderIconName(size_t n)
       "folder_news",
       "folder_root",
       "folder_group",
+      "folder_newshierarchy",
+      "folder_imapdir",
       "folder_newmail",
       "folder_sentmail",
    };
@@ -1147,15 +1151,17 @@ int GetDefaultFolderTypeIcon(FolderType folderType)
       FolderType type;
    } FolderIcons[] =
    {
-      { iconInbox, Inbox      },
-      { iconFile,  File       },
-      { iconMH,    MF_MH      },
-      { iconPOP,   POP        },
-      { iconIMAP,  IMAP       },
-      { iconNNTP,  Nntp       },
-      { iconNews,  News       },
-      { iconRoot,  FolderRoot },
-      { iconGroup, FolderGroup},
+      { iconInbox,      Inbox          },
+      { iconFile,       File           },
+      { iconMH,         MF_MH          },
+      { iconPOP,        POP            },
+      { iconIMAP,       IMAP           },
+      { iconNNTP,       Nntp           },
+      { iconNews,       News           },
+      { iconRoot,       FolderRoot     },
+      { iconGroup,      FolderGroup    },
+      { iconGroupNews,  MF_GROUP_NEWS  },
+      { iconGroupIMAP,  MF_GROUP_IMAP  },
    };
 
    int image = -1;

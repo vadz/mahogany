@@ -82,6 +82,8 @@ $Id$
 		"headers for folder "xpm" in the dialog when called
 		from toplevel window.
 
+5	VZ	the type of the last created folder not remembered any more
+
 8	VZ?     After a dialog was opened (e.g. wxModulesDialog), the
 		app won't termiante but keeps running without windows.
 

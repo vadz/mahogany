@@ -52,10 +52,14 @@ enum FolderType
 
    // pseudo types
    MF_GROUP = 50,
-   FolderGroup = MF_GROUP,     // doesn't contain mail, but other folders
-   FolderInvalid = MF_ILLEGAL, // folder not initialized properly
-   FolderRoot,                 // this is the the special pseudo-folder
-   MF_ROOT = FolderRoot
+   FolderGroup = MF_GROUP,     // doesn't contain mail, but (any) other folders
+   MF_GROUP_NEWS,              // a news hierarchy
+   MF_GROUP_IMAP,              // a directory on an IMAP server
+
+   FolderRoot,                 // this is the the special root pseudo-folder
+   MF_ROOT = FolderRoot,
+
+   FolderInvalid = MF_ILLEGAL  // folder not initialized properly
 };
 
 // ----------------------------------------------------------------------------
@@ -68,17 +72,18 @@ static const int MF_FLAGSMASK = 0xff00;
 // the flags of a mail folder
 enum FolderFlags
 {
-   MF_FLAGS_ANON = 0x100,           // use anonymous access
-   MF_FLAGS_INCOMING = 0x200,       // collect all new mail from it
-   MF_FLAGS_UNACCESSIBLE = 0x400,   // folder can't be opened
-   MF_FLAGS_MODIFIED = 0x800,       // [essential] folder settings have been
-                                    // modified: invalidates "unaccessible"
-                                    // flag
+   MF_FLAGS_ANON          = 0x0100, // use anonymous access
+   MF_FLAGS_INCOMING      = 0x0200, // collect all new mail from it
+   MF_FLAGS_UNACCESSIBLE  = 0x0400, // folder can't be opened
+   MF_FLAGS_MODIFIED      = 0x0800, // [essential] folder settings have been
+                                    // modified (invalidates "unaccessible"
+                                    // flag) since the last attempt to open it
    MF_FLAGS_NEWMAILFOLDER = 0x1000, // the central new mail folder
    MF_FLAGS_DONTDELETE    = 0x2000, // forbid deletion of this folder
    MF_FLAGS_KEEPOPEN      = 0x4000, // keep this folder open at all times
    MF_FLAGS_REOPENONPING  = 0x8000  // force a close and re-open on a ping
 };
+
 // ----------------------------------------------------------------------------
 // For asynchronous operations:
 // ----------------------------------------------------------------------------
@@ -111,10 +116,33 @@ inline static int GetFolderFlags(int typeAndFlags)
 /// is this a folder type for which username/password make sense?
 inline bool FolderTypeHasUserName(FolderType type)
 {
-   if ( type == POP || type == IMAP || type == Nntp )
-      return true;
-   else
-      return false;
+   switch ( type )
+   {
+      case MF_POP:
+      case MF_IMAP:
+      case MF_NNTP:
+      case MF_GROUP:
+      case MF_GROUP_IMAP:
+      case MF_GROUP_NEWS:
+         return true;
+
+      // don't use "default:" - like this, the compiler will warn us if we add
+      // a new type to the FolderType enum and forget to add it here
+      case MF_ROOT:
+      case MF_ILLEGAL:
+      case MF_PROFILE_OR_FILE:
+      case MF_PROFILE:
+         FAIL_MSG("this is not supposed to be called for this type");
+         // fall through nevertheless
+
+      case MF_INBOX:
+      case MF_FILE:
+      case MF_MH:
+      case MF_NEWS:
+         ;
+   }
+
+   return false;
 }
 
 /// is this a folder type for which server field makes sense?
@@ -122,11 +150,9 @@ inline bool FolderTypeHasServer(FolderType type)
 {
    // currently it's the same as FolderTypeHasUserName(), but it's not
    // impossible that there are some protocols which don't have
-   // authentification, yet may have the server name associated with them
-   if ( type == POP || type == IMAP || type == Nntp )
-      return true;
-   else
-      return false;
+   // authentification, yet may have the server name associated with them -
+   // this will have to be changed then
+   return FolderTypeHasUserName(type);
 }
 
 /// combine type and flags into one int
@@ -156,10 +182,17 @@ inline bool CanHaveSubfolders(FolderType type, FolderType *subtype = NULL)
          }
          return TRUE;
 
-      case MF_IMAP:
+      case MF_GROUP_NEWS:
          if ( subtype )
          {
-            // IMAP folders only have IMAP subfolders
+            // FIXME they may also contain MF_NEWS
+            *subtype = MF_NNTP;
+         }
+         return TRUE;
+
+      case MF_GROUP_IMAP:
+         if ( subtype )
+         {
             *subtype = MF_IMAP;
          }
          return TRUE;
