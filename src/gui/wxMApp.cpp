@@ -405,6 +405,7 @@ wxMApp::DoExit()
 bool
 wxMApp::OnInit()
 {
+   m_topLevelFrame = NULL;
    // Set up locale first, so everything is in the right language.
    bool hasLocale = false;
 
@@ -597,8 +598,6 @@ wxMApp::OnInit()
       gs_timerAutoSave = new AutoSaveTimer;
       gs_timerMailCollection = new MailCollectionTimer;
 
-      SetupOnlineManager();
-
       // start a timer to autosave the profile entries
       StartTimer(Timer_Autosave);
 
@@ -698,14 +697,6 @@ int wxMApp::OnExit()
    // one, we will delete his log object and his code will delete ours)
    wxLog *log = wxLog::SetActiveTarget(NULL);
    delete log;
-
-   // as c-client lib doesn't seem to think that deallocating memory is
-   // something good to do, do it at it's place...
-//#ifdef OS_WIN
-   free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
-   free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
-//#endif // OS_WIN
-
    return 0;
 }
 
@@ -977,13 +968,15 @@ wxMApp::SetupOnlineManager(void)
 {
    ASSERT(m_OnlineManager);
    m_DialupSupport = READ_APPCONFIG(MP_DIALUP_SUPPORT) != 0;
-   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, m_DialupSupport);
-   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, m_DialupSupport);
-//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
-//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
-
-   static int widths[2] = { -1, 80 };
-   m_topLevelFrame->GetStatusBar()->SetFieldsCount(2, widths);
+   if(m_topLevelFrame)
+   {
+      m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, m_DialupSupport);
+      m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, m_DialupSupport);
+//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
+//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
+      static int widths[2] = { -1, 80 };
+      m_topLevelFrame->GetStatusBar()->SetFieldsCount(2, widths);
+   }
    
    String beaconhost = READ_APPCONFIG(MP_BEACONHOST);
    strutil_delwhitespace(beaconhost);
@@ -999,7 +992,7 @@ wxMApp::SetupOnlineManager(void)
       READ_APPCONFIG(MP_NET_ON_COMMAND),
       READ_APPCONFIG(MP_NET_OFF_COMMAND));
 
-   if(m_DialupSupport)
+   if(m_DialupSupport && m_topLevelFrame)
    {
       m_IsOnline = m_OnlineManager->IsOnline();
       bool online = IsOnline();

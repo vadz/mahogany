@@ -96,6 +96,7 @@ private:
 BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
   EVT_MENU(-1,    wxMainFrame::OnCommandEvent)
   EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
+  EVT_IDLE( wxMainFrame::OnIdle ) 
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -177,6 +178,17 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
      SetSize(x,y);
    }
 #endif // GTK
+}
+
+void
+wxMainFrame::OnIdle(wxIdleEvent &event)
+{
+   // only enable menu item if outbox contains messages:
+#if 0 //FIXME - don´t call quite so often!
+   if(m_MenuBar)
+      m_MenuBar->Enable((int)WXMENU_FILE_SEND_OUTBOX, mApplication->CheckOutbox());
+#endif
+   event.Skip();
 }
 
 void

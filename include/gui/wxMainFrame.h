@@ -40,6 +40,7 @@ public:
    // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
+   void OnIdle(wxIdleEvent &event);
 
 protected:
    /// the splitter window holding the treectrl and folder view

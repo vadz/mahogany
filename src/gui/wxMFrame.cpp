@@ -372,6 +372,16 @@ wxMFrame::OnMenuCommand(int id)
       mApplication->GoOnline();
       break;
    case WXMENU_FILE_NET_OFF:
+      if(mApplication->CheckOutbox())
+      {
+         if ( MDialog_YesNoDialog(
+         _("You have outgoing messages queued.\n"
+           "Do you want to send them before going offline?"),
+         this,
+         MDIALOG_YESNOTITLE,
+         TRUE /* yes default */, "GoOfflineSendFirst") )
+            mApplication->SendOutbox();
+      }
       mApplication->GoOffline();
       break;
    }

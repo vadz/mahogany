@@ -40,6 +40,11 @@ extern "C"
 #include  "FolderView.h"
 #include  "MFolder.h"
 
+
+/// To really clean up left over memory, call this function at program 
+/// end:
+extern void CC_Cleanup();
+
 // fwd decl needed to define StreamListType before MailFolderCC
 // (can't be defined inside the class - VC++ 5.0 can't compile it)
 class MailFolderCC;

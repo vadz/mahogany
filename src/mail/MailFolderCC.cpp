@@ -67,6 +67,82 @@ extern "C"
 
 typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW *ov);
 
+
+
+/** This is a list of all mailstreams which were left open because the 
+    dialup connection broke before we could close them.
+    We remember them and try to close them at program exit. */
+KBLIST_DEFINE(StreamList, MAILSTREAM);
+
+class CCStreamCleaner
+{
+public:
+   void Add(MAILSTREAM *stream) { if(stream) m_List.push_back(stream); }
+   ~CCStreamCleaner();
+private:
+   StreamList  m_List;
+};
+
+CCStreamCleaner::~CCStreamCleaner()
+{
+#ifdef DEBUG
+      LOGMESSAGE((M_LOG_DEBUG, "CCStreamCleaner: checking for left-over streams"));
+#endif
+
+   if(! mApplication->IsOnline())
+   {
+      // brutally free all memory without closing stream:
+      MAILSTREAM *stream;
+      StreamList::iterator i;
+      for(i = m_List.begin(); i != m_List.end(); i++)
+      {
+#ifdef DEBUG
+         LOGMESSAGE((M_LOG_DEBUG, "CCStreamCleaner: freeing stream offline"));
+#endif
+         stream = *i;
+         // copied from c-client mail.c:
+         if (stream->mailbox) fs_give ((void **) &stream->mailbox);
+         stream->sequence++;		/* invalidate sequence */
+				        /* flush user flags */
+         for (int n = 0; n < NUSERFLAGS; n++)
+            if (stream->user_flags[n]) fs_give ((void **) &stream->user_flags[n]);
+         mail_free_cache (stream);	/* finally free the stream's storage */
+         /*if (!stream->use)*/ fs_give ((void **) &stream);
+      }
+   }
+   else
+   {
+      // we are online, so we can close it properly:
+      StreamList::iterator i;
+      for(i = m_List.begin(); i != m_List.end(); i++)
+      {
+#ifdef DEBUG
+         LOGMESSAGE((M_LOG_DEBUG, "CCStreamCleaner: closing stream"));
+#endif
+         mail_close(*i);
+      }
+   }
+}
+
+/// exactly one object
+static CCStreamCleaner *gs_CCStreamCleaner = NULL;
+
+
+
+extern void CC_Cleanup(void)
+{
+   // as c-client lib doesn't seem to think that deallocating memory is
+   // something good to do, do it at it's place...
+   free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
+   free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
+
+   if(gs_CCStreamCleaner)
+   {
+      delete gs_CCStreamCleaner;
+      gs_CCStreamCleaner = NULL;
+   }
+}
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -360,6 +436,8 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
                            String const &password)
    : MailFolderCmn(profile)
 {
+   if(! cclientInitialisedFlag)
+      CClientInit();
    Create(typeAndFlags);
    m_MailboxPath = path;
    m_Login = login;
@@ -558,10 +636,6 @@ MailFolderCC::UpdateTimeoutValues(void)
 bool
 MailFolderCC::Open(void)
 {
-   // make sure we can use the library
-   if(! cclientInitialisedFlag)
-      CClientInit();
-
    /** Now, we apply the very latest c-client timeout values, in case
        they have changed.
    */
@@ -771,6 +845,7 @@ MailFolderCC::PingReopen(void) const
                                NULL, MDIALOG_YESNOTITLE,
                                false, GetName()+"/NoNetPingAnyway"))
    {
+      ((MailFolderCC *)this)->Close(); // now folder is dead
       return false;
    }
 
@@ -820,6 +895,11 @@ MailFolderCC::PingReopenAll(void)
 void
 MailFolderCC::Ping(void)
 {
+   if(NeedsNetwork() && ! mApplication->IsOnline())
+   {
+      ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
+      return;
+   }
    if(Lock())
    {
       DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.",
@@ -859,9 +939,14 @@ MailFolderCC::Close(void)
    // that's a pity.
    if( m_MailStream )
    {
-       mail_check(m_MailStream); // update flags, etc, .newsrc
-       mail_close(m_MailStream);
-       m_MailStream = NIL;
+      if(!NeedsNetwork() || mApplication->IsOnline())
+      {
+         mail_check(m_MailStream); // update flags, etc, .newsrc
+         mail_close(m_MailStream);
+      }
+      else
+         gs_CCStreamCleaner->Add(m_MailStream); // delay closing
+      m_MailStream = NIL;
    }
    CCVerbose();
    RemoveFromMap();
@@ -1499,8 +1584,13 @@ MailFolderCC *MailFolderCC::streamListDefaultObj = NULL;
 void
 MailFolderCC::CClientInit(void)
 {
+   if(cclientInitialisedFlag == true)
+      return;
+   // do further initialisation
 #include <linkage.c>
    cclientInitialisedFlag = true;
+   ASSERT(gs_CCStreamCleaner == NULL);
+   gs_CCStreamCleaner = new CCStreamCleaner();
 }
 
 String MailFolderCC::ms_MHpath;

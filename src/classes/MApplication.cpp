@@ -470,10 +470,13 @@ MAppBase::OnStartup()
    if(wxFileExists(GetGlobalDir()+"/mime.types"))
       m_mimeManager->ReadMimeTypes(GetGlobalDir()+"/mime.types");
 
+   // must be done before using the network
+   SetupOnlineManager();
+
    // create and show the main program window
    CreateTopLevelFrame();
 
-   // it doesn't seem to do anything under Windows (though it should...)
+      // it doesn't seem to do anything under Windows (though it should...)
 #  ifndef OS_WIN
       // extend path for commands, look in M's dirs first
       tmp = "";
@@ -607,6 +610,10 @@ MAppBase::OnShutDown()
    // Try to send outgoing messages:
    
    SendOutbox();
+
+   // clean up CClient driver memory
+   extern void CC_Cleanup(void);
+   CC_Cleanup();
    
    // don't want events any more
    if ( m_eventNewMailReg )
@@ -826,8 +833,31 @@ MAppBase::SendOutbox(void)
    SendOutbox(outbox, Prot_NNTP, false);
 }
 
+bool MAppBase::CheckOutbox(const String &outbox)
+{
+   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
+   if(! mf)
+   {
+      String msg;
+      msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
+      ERRORMESSAGE((msg));
+      return FALSE;
+   }
+   bool rc = mf->CountMessages() != 0;
+   mf->DecRef();
+   return rc;
+}
+
+bool MAppBase::CheckOutbox(void)
+{
+   String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
+   return
+      CheckOutbox(outbox)
+      || CheckOutbox(outbox+M_NEWSOUTBOX_POSTFIX);
+}
+
 void
-MAppBase::SendOutbox(String outbox, Protocol protocol,
+MAppBase::SendOutbox(const String & outbox, Protocol protocol,
                      bool checkOnline )
 {
    UIdType count = 0;

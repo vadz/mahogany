@@ -165,6 +165,9 @@ public:
 
    /// Send all messages from the outbox
    virtual void SendOutbox(void);
+   /// Check if we have messages to send.
+   virtual bool CheckOutbox(void);
+   
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
 
@@ -208,7 +211,10 @@ public:
       { return m_DialupSupport; }
 protected:
    /// Send all messages from the outbox "name"
-   void SendOutbox(String name, Protocol prot, bool checkOnline);
+   void SendOutbox(const String &name, Protocol prot, bool checkOnline);
+   /// Check if we have messages to send.
+   virtual bool CheckOutbox(const String &name);
+   
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
 

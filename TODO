@@ -137,6 +137,8 @@ $Id$
 
 4	KB	Tidy up menus/toolbars.
 
+3		add mf locking to Outbox code
+
 5		intelligent followup/post article when reading
 		NNTP/NEWS groups
 
