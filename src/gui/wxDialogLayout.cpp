@@ -138,20 +138,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxManuallyLaidOutDialog, wxDialog)
 IMPLEMENT_ABSTRACT_CLASS(wxOptionsEditDialog, wxManuallyLaidOutDialog)
 
 // ----------------------------------------------------------------------------
-// global functions
+// control creation functions
 // ----------------------------------------------------------------------------
-
-// FIXME this has nothing to do here...
-wxWindow *GetParentOfClass(const wxWindow *win, wxClassInfo *classinfo)
-{
-   // find the frame we're in
-   while ( win && !win->IsKindOf(classinfo) ) {
-      win = win->GetParent();
-   }
-
-   // may be NULL!
-   return (wxWindow *)win; // const_cast
-}
 
 long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win)
 {
@@ -168,6 +156,205 @@ long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win)
    }
 
    return widthMax;
+}
+
+static void SetTopConstraint(wxWindow *parent,
+                             wxLayoutConstraints *c,
+                             wxControl *last,
+                             size_t extraSpace)
+{
+   if ( last == NULL )
+      c->top.SameAs(parent, wxTop, 2*LAYOUT_Y_MARGIN + extraSpace);
+   else {
+      size_t margin = LAYOUT_Y_MARGIN;
+      if ( last->IsKindOf(CLASSINFO(wxListBox)) ) {
+         // listbox has a surrounding box, so leave more space
+         margin *= 4;
+      }
+
+      c->top.Below(last, margin + extraSpace);
+   }
+}
+
+wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
+                                const char *label,
+                                long widthMax,
+                                wxControl *last,
+                                wxCoord nRightMargin,
+                                int style)
+{
+   wxLayoutConstraints *c;
+
+   // for the label
+   c = new wxLayoutConstraints;
+   c->left.SameAs(parent, wxLeft, LAYOUT_X_MARGIN);
+   SetTopConstraint(parent, c, last, 3); // FIXME shouldn't hardcode this!
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   wxStaticText *pLabel = new wxStaticText(parent, -1, label,
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_RIGHT);
+   pLabel->SetConstraints(c);
+
+   // for the text control
+   c = new wxLayoutConstraints;
+   c->centreY.SameAs(pLabel, wxCentreY);
+   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
+   c->right.SameAs(parent, wxRight, LAYOUT_X_MARGIN + nRightMargin);
+   c->height.AsIs();
+   wxTextCtrl *pText = new wxTextCtrl(parent, -1, "", wxDefaultPosition,
+                                      wxDefaultSize, style);
+   pText->SetConstraints(c);
+
+   return pText;
+}
+
+wxRadioBox *CreateRadioBox(wxWindow *parent,
+                           const char *labelFull,
+                           long widthMax,
+                           wxControl *last,
+                           wxCoord nRightMargin)
+{
+   // split the "label" into the real label and the choices:
+   wxString label = labelFull;
+   wxArrayString choices = SplitLabelWithChoices(&label);
+   wxString *strings = choices.GetStringArray();
+
+   wxLayoutConstraints *c;
+
+   // for the radiobox
+   c = new wxLayoutConstraints;
+   SetTopConstraint(parent, c, last,
+#ifdef __WXMSW__
+                    LAYOUT_Y_MARGIN
+#else
+                    0
+#endif // __WXMSW__
+                    );
+   c->left.SameAs(parent, wxLeft, widthMax);
+   c->width.AsIs();
+   c->height.AsIs();
+
+   // FIXME we assume that if there other controls dependent on this one in
+   //       the options dialog, then only the first choice ("No" for the action
+   //       choice) means that they should be disabled but this is really just
+   //       a dirty hack
+   wxRadioBox *radiobox = new wxRadioBox(parent, -1, "",
+                                         wxDefaultPosition, wxDefaultSize,
+                                         choices.GetCount(), strings,
+                                         1, wxRA_SPECIFY_ROWS);
+
+   delete [] strings;
+
+   radiobox->SetConstraints(c);
+
+   // for the label
+   c = new wxLayoutConstraints;
+   c->left.SameAs(parent, wxLeft, LAYOUT_X_MARGIN);
+   c->centreY.SameAs(radiobox, wxCentreY
+                     // needed to make it look right under wxGTK
+#ifdef __WXGTK__
+                     , 4
+#endif // __WXGTK__
+                     );
+   c->width.Absolute(widthMax - 2*LAYOUT_X_MARGIN); // looks better like this
+   c->height.AsIs();
+   wxStaticText *pLabel = new wxStaticText(parent, -1, label,
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_RIGHT);
+   pLabel->SetConstraints(c);
+
+   return radiobox;
+}
+
+wxTextCtrl *
+CreateEntryWithButton(wxWindow *parent,
+                      const char *label,
+                      long widthMax,
+                      wxControl *last,
+                      wxCoord nRightMargin,
+                      BtnKind kind,
+                      wxTextBrowseButton **ppButton)
+{
+   // create the label and text zone, as usually
+   wxTextCtrl *text = CreateTextWithLabel(parent,
+                                          label, widthMax, last,
+                                          GetBrowseButtonWidth(parent) +
+                                          2*LAYOUT_X_MARGIN + nRightMargin);
+
+   // and also create a button for browsing for file
+   wxTextBrowseButton *btn;
+   switch ( kind )
+   {
+      case FileBtn:
+      case FileNewBtn:
+      case FileSaveBtn:
+         btn = new wxFileBrowseButton(text, parent,
+                                      kind != FileSaveBtn, // open
+                                      kind != FileNewBtn); // existing only
+         break;
+
+      case FileOrDirBtn:
+      case FileOrDirNewBtn:
+      case FileOrDirSaveBtn:
+         btn = new wxFileOrDirBrowseButton(text, parent,
+                                           kind != FileOrDirSaveBtn,
+                                           kind != FileOrDirNewBtn);
+         break;
+
+      case ColorBtn:
+         btn = new wxColorBrowseButton(text, parent);
+         break;
+
+      case FontBtn:
+         btn = new wxFontBrowseButton(text, parent);
+         break;
+
+      case FolderBtn:
+         btn = new wxFolderBrowseButton(text, parent);
+         break;
+
+      case DirBtn:
+         btn = new wxDirBrowseButton(text, parent);
+         break;
+
+      default:
+         wxFAIL_MSG("unknown browse button kind");
+         return NULL;
+   }
+
+   wxLayoutConstraints *c = new wxLayoutConstraints;
+   c->centreY.SameAs(text, wxCentreY);
+   c->left.RightOf(text, LAYOUT_X_MARGIN);
+   c->right.SameAs(parent, wxRight, LAYOUT_X_MARGIN + nRightMargin);
+   c->height.SameAs(text, wxHeight);
+   btn->SetConstraints(c);
+
+   if ( ppButton )
+   {
+      *ppButton = btn;
+   }
+
+   return text;
+}
+
+wxTextCtrl *
+CreateFileEntry(wxWindow *parent,
+                const char *label,
+                long widthMax,
+                wxControl *last,
+                wxCoord nRightMargin,
+                wxFileBrowseButton **ppButton,
+                int flags)
+{
+   BtnKind btn;
+   if ( flags & FileEntry_Save )
+      btn = FileSaveBtn;
+   else
+      btn = flags & FileEntry_ExistingOnly ? FileBtn : FileNewBtn;
+
+   return CreateEntryWithButton(parent, label, widthMax, last, nRightMargin,
+                                btn, (wxTextBrowseButton **)ppButton);
 }
 
 // ----------------------------------------------------------------------------
@@ -356,20 +543,10 @@ void wxEnhancedPanel::RefreshScrollbar(const wxSize& size)
 // the top item is positioned near the top of the page, the others are
 // positioned from top to bottom, i.e. under the last one
 void wxEnhancedPanel::SetTopConstraint(wxLayoutConstraints *c,
-                                          wxControl *last,
-                                          size_t extraSpace)
+                                       wxControl *last,
+                                       size_t extraSpace)
 {
-   if ( last == NULL )
-      c->top.SameAs(GetCanvas(), wxTop, 2*LAYOUT_Y_MARGIN + extraSpace);
-   else {
-      size_t margin = LAYOUT_Y_MARGIN;
-      if ( last->IsKindOf(CLASSINFO(wxListBox)) ) {
-         // listbox has a surrounding box, so leave more space
-         margin *= 4;
-      }
-
-      c->top.Below(last, margin + extraSpace);
-   }
+   ::SetTopConstraint(GetCanvas(), c, last, extraSpace);
 }
 
 // create a text entry with some browse button
@@ -377,68 +554,11 @@ wxTextCtrl *
 wxEnhancedPanel::CreateEntryWithButton(const char *label,
                                        long widthMax,
                                        wxControl *last,
-                                       wxEnhancedPanel::BtnKind kind,
+                                       BtnKind kind,
                                        wxTextBrowseButton **ppButton)
 {
-   // create the label and text zone, as usually
-   wxTextCtrl *text = CreateTextWithLabel(label, widthMax, last,
-                                          GetBrowseButtonWidth(this) +
-                                          2*LAYOUT_X_MARGIN);
-
-   // and also create a button for browsing for file
-   wxTextBrowseButton *btn;
-   switch ( kind )
-   {
-      case FileBtn:
-      case FileNewBtn:
-      case FileSaveBtn:
-         btn = new wxFileBrowseButton(text, GetCanvas(),
-                                      kind != FileSaveBtn, // open
-                                      kind != FileNewBtn); // existing only
-         break;
-
-      case FileOrDirBtn:
-      case FileOrDirNewBtn:
-      case FileOrDirSaveBtn:
-         btn = new wxFileOrDirBrowseButton(text, GetCanvas(),
-                                           kind != FileOrDirSaveBtn,
-                                           kind != FileOrDirNewBtn);
-         break;
-
-      case ColorBtn:
-         btn = new wxColorBrowseButton(text, GetCanvas());
-         break;
-
-      case FontBtn:
-         btn = new wxFontBrowseButton(text, GetCanvas());
-         break;
-
-      case FolderBtn:
-         btn = new wxFolderBrowseButton(text, GetCanvas());
-         break;
-
-      case DirBtn:
-         btn = new wxDirBrowseButton(text, GetCanvas());
-         break;
-
-      default:
-         wxFAIL_MSG("unknown browse button kind");
-         return NULL;
-   }
-
-   wxLayoutConstraints *c = new wxLayoutConstraints;
-   c->centreY.SameAs(text, wxCentreY);
-   c->left.RightOf(text, LAYOUT_X_MARGIN);
-   c->right.SameAs(GetCanvas(), wxRight, LAYOUT_X_MARGIN);
-   c->height.SameAs(text, wxHeight);
-   btn->SetConstraints(c);
-
-   if ( ppButton )
-   {
-      *ppButton = btn;
-   }
-
-   return text;
+   return ::CreateEntryWithButton(GetCanvas(), label, widthMax, last, 0,
+                                  kind, ppButton);
 }
 
 // create a static bitmap with a label and position them and the browse button
@@ -490,35 +610,13 @@ wxStaticBitmap *wxEnhancedPanel::CreateIconEntry(const char *label,
 
 // create a single-line text control with a label
 wxTextCtrl *wxEnhancedPanel::CreateTextWithLabel(const char *label,
-                                                    long widthMax,
-                                                    wxControl *last,
-                                                    size_t nRightMargin,
-                                                    int style)
+                                                 long widthMax,
+                                                 wxControl *last,
+                                                 wxCoord nRightMargin,
+                                                 int style)
 {
-   wxLayoutConstraints *c;
-
-   // for the label
-   c = new wxLayoutConstraints;
-   c->left.SameAs(GetCanvas(), wxLeft, LAYOUT_X_MARGIN);
-   SetTopConstraint(c, last, 3); // FIXME shouldn't hardcode this!
-   c->width.Absolute(widthMax);
-   c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(GetCanvas(), -1, label,
-                                           wxDefaultPosition, wxDefaultSize,
-                                           wxALIGN_RIGHT);
-   pLabel->SetConstraints(c);
-
-   // for the text control
-   c = new wxLayoutConstraints;
-   c->centreY.SameAs(pLabel, wxCentreY);
-   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
-   c->right.SameAs(GetCanvas(), wxRight, LAYOUT_X_MARGIN + nRightMargin);
-   c->height.AsIs();
-   wxTextCtrl *pText = new wxTextCtrl(GetCanvas(), -1, "", wxDefaultPosition,
-                                      wxDefaultSize, style);
-   pText->SetConstraints(c);
-
-   return pText;
+   return ::CreateTextWithLabel(GetCanvas(), label, widthMax, last,
+                                nRightMargin, style);
 }
 
 // create just some text
@@ -637,7 +735,7 @@ wxRadioBox *
 wxEnhancedPanel::CreateActionChoice(const char *label,
                                     long widthMax,
                                     wxControl *last,
-                                    size_t nRightMargin)
+                                    wxCoord nRightMargin)
 {
    wxString labelFull = label;
    labelFull << ':' << _("No") << ':' << _("Ask") << ':' << _("Yes");
@@ -647,50 +745,12 @@ wxEnhancedPanel::CreateActionChoice(const char *label,
 
 // create a generic radiobox control
 wxRadioBox *
-wxEnhancedPanel::CreateRadioBox(const char *labelFull,
+wxEnhancedPanel::CreateRadioBox(const char *label,
                                 long widthMax,
                                 wxControl *last,
-                                size_t nRightMargin)
+                                wxCoord nRightMargin)
 {
-   // split the "label" into the real label and the choices:
-   wxString label = labelFull;
-   wxArrayString choices = SplitLabelWithChoices(&label);
-   wxString *strings = choices.GetStringArray();
-
-   wxLayoutConstraints *c;
-
-   // for the radiobox
-   c = new wxLayoutConstraints;
-   SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
-   c->left.SameAs(GetCanvas(), wxLeft, widthMax);
-   c->width.AsIs();
-   c->height.AsIs();
-
-   // FIXME we assume that if there other controls dependent on this one in
-   //       the options dialog, then only the first choice ("No" for the action
-   //       choice) means that they should be disabled but this is really just
-   //       a dirty hack
-   wxRadioBox *radiobox = new wxRadioBox(GetCanvas(), -1, "",
-                                         wxDefaultPosition, wxDefaultSize,
-                                         choices.GetCount(), strings,
-                                         1, wxRA_SPECIFY_ROWS);
-
-   delete [] strings;
-
-   radiobox->SetConstraints(c);
-
-   // for the label
-   c = new wxLayoutConstraints;
-   c->left.SameAs(GetCanvas(), wxLeft, LAYOUT_X_MARGIN);
-   c->centreY.SameAs(radiobox, wxCentreY);
-   c->width.Absolute(widthMax - 2*LAYOUT_X_MARGIN); // looks better like this
-   c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(GetCanvas(), -1, label,
-                                           wxDefaultPosition, wxDefaultSize,
-                                           wxALIGN_RIGHT);
-   pLabel->SetConstraints(c);
-
-   return radiobox;
+   return ::CreateRadioBox(GetCanvas(), label, widthMax, last, nRightMargin);
 }
 
 // create a combobox
@@ -698,7 +758,7 @@ wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
                                                    const char *labelFull,
                                                    long widthMax,
                                                    wxControl *last,
-                                                   size_t nRightMargin)
+                                                   wxCoord nRightMargin)
 {
    // split the "label" into the real label and the choices:
    wxString label = labelFull;

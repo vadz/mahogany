@@ -46,6 +46,37 @@ class WXDLLEXPORT wxRadioBox;
 class WXDLLEXPORT wxChoice;
 class WXDLLEXPORT wxComboBox;
 
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+/// flags for CreateFileEntry()
+enum
+{
+   FileEntry_Open = 0,
+   FileEntry_Save = 1,
+   FileEntry_ExistingOnly = 2       // makes sense with Open only
+};
+
+/// the kinds of browse buttons created by CreateEntryWithButton()
+enum BtnKind
+{
+   // the following 3 values must be consecutive, GetBtnType() relies on it
+   FileBtn,             // open an existing file
+   FileNewBtn,          // choose any file (might not exist)
+   FileSaveBtn,         // save to a file
+
+   // the following 3 values must be consecutive, GetBtnType() relies on it
+   FileOrDirBtn,        // open an existing file or directory
+   FileOrDirNewBtn,     // choose any file or directory
+   FileOrDirSaveBtn,    // save to a file or directory
+
+   DirBtn,              // choose a directory
+   ColorBtn,            // choose a colour
+   FontBtn,             // choose a font
+   FolderBtn            // choose a folder
+};
+
 // =============================================================================
 // GUI classes declared in this file
 // =============================================================================
@@ -337,21 +368,21 @@ public:
    wxRadioBox *CreateActionChoice(const char *label,
                                   long widthMax,
                                   wxControl *last,
-                                  size_t nRightMargin = 0);
+                                  wxCoord nRightMargin = 0);
 
       // a radiobox, the entries are taken from the label string which is
       // composed as: "LABEL:entry1:entry2:entry3:...."
    wxRadioBox *CreateRadioBox(const char *label,
                               long widthMax,
                               wxControl *last,
-                              size_t nRightMargin = 0);
+                              wxCoord nRightMargin = 0);
 
       // nRightMargin is the distance to the right edge of the panel to leave
-      // (0 means deafult)
+      // (0 means default)
    wxTextCtrl *CreateTextWithLabel(const char *label,
                                    long widthMax,
                                    wxControl *last,
-                                   size_t nRightMargin = 0,
+                                   wxCoord nRightMargin = 0,
                                    int style = wxALIGN_RIGHT);
 
       // create a simple static text control
@@ -362,7 +393,7 @@ public:
    wxComboBox *CreateComboBox(const char *label,
                               long widthMax,
                               wxControl *last,
-                              size_t nRightMargin = 0)
+                              wxCoord nRightMargin = 0)
    {
       return (wxComboBox *)CreateComboBoxOrChoice(TRUE, label, widthMax,
                                                   last, nRightMargin);
@@ -373,7 +404,7 @@ public:
    wxChoice *CreateChoice(const char *label,
                           long widthMax,
                           wxControl *last,
-                          size_t nRightMargin = 0)
+                          wxCoord nRightMargin = 0)
    {
       return (wxChoice *)CreateComboBoxOrChoice(FALSE, label, widthMax,
                                                 last, nRightMargin);
@@ -492,7 +523,7 @@ public:
        return m_canvas ? m_canvas : (wxWindow *)this;   // const_cast
    }
 
-   // forces a call to layout() to get everything nicely laid out
+   // forces a call to Layout() to get everything nicely laid out
    virtual bool Layout() { return DoLayout(GetClientSize()); }
 
    // show or hide the vertical scrollbar depending on whether there is enough
@@ -506,25 +537,6 @@ private:
    void SetTopConstraint(wxLayoutConstraints *c,
                          wxControl *last,
                          size_t extraSpace = 0);
-
-   // create an entry with a browse button
-   enum BtnKind
-   {
-      // the following 3 values must be consecutive, GetBtnType() relies on it
-      FileBtn,             // open an existing file
-      FileNewBtn,          // choose any file (might not exist)
-      FileSaveBtn,         // save to a file
-
-      // the following 3 values must be consecutive, GetBtnType() relies on it
-      FileOrDirBtn,        // open an existing file or directory
-      FileOrDirNewBtn,     // choose any file or directory
-      FileOrDirSaveBtn,    // save to a file or directory
-
-      DirBtn,              // choose a directory
-      ColorBtn,            // choose a colour
-      FontBtn,             // choose a font
-      FolderBtn            // choose a folder
-   };
 
    // return the right btn type for the given "base" type and parameters
    static BtnKind GetBtnType(BtnKind base, bool open, bool existing)
@@ -553,7 +565,7 @@ private:
                                      const char *label,
                                      long widthMax,
                                      wxControl *last,
-                                     size_t nRightMargin = 0);
+                                     wxCoord nRightMargin = 0);
 
    // event handlers
    void OnSize(wxSizeEvent& event);
@@ -610,11 +622,43 @@ public:
 };
 
 // =============================================================================
-// helper functions
+// helper functions to create/layout controls
 // =============================================================================
 
 // determine the maximal width of the given strings (win is the window to use
 // for font calculations)
 extern long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win);
+
+// all these functions correspond to the wxEnhancedPanel methods except that
+// they take an additional parent parameter
+extern wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
+                                       const char *label,
+                                       long widthMax,
+                                       wxControl *last,
+                                       wxCoord nRightMargin = 0,
+                                       int style = wxALIGN_RIGHT);
+
+extern wxRadioBox *CreateRadioBox(wxWindow *parent,
+                                  const char *label,
+                                  long widthMax,
+                                  wxControl *last,
+                                  wxCoord nRightMargin = 0);
+
+extern wxTextCtrl *CreateEntryWithButton(wxWindow *parent,
+                                         const char *label,
+                                         long widthMax,
+                                         wxControl *last,
+                                         wxCoord nRightMargin = 0,
+                                         BtnKind kind = FileBtn,
+                                         wxTextBrowseButton **ppButton = NULL);
+
+extern wxTextCtrl *CreateFileEntry(wxWindow *parent,
+                                   const char *label,
+                                   long widthMax,
+                                   wxControl *last,
+                                   wxCoord nRightMargin = 0,
+                                   wxFileBrowseButton **ppButton = NULL,
+                                   int flags = FileEntry_Open |
+                                               FileEntry_ExistingOnly);
 
 #endif // _GUI_WXDIALOGLAYOUT_H
