@@ -59,13 +59,13 @@ Required software
    - wxGTK (GTK+ port of wxWindows) 2.3.2 or above
      (2.3.2 is the latest released version as of this writing)
 
-   - GTK+ 1.2.3 or above, at leats 1.2.10 recommended
+   - GTK+ 1.2.3 or above, at least 1.2.10 recommended
 
 If you want to compile Mahogany with SSL support, you must also
 have OpenSSL libraries and headers, see http://www.openssl.org/.
 
 If you want to compile Mahogany with Python support, you need Python
-libraries and headers installed. Python 1.5x, 2.0 and 2.1 is
+libraries and headers installed. Python 1.5x, 2.0 and 2.1 are
 currently supported.
 
 - Before you can compile Mahogany, you will need to have installed
