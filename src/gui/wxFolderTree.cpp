@@ -769,9 +769,12 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
    //      default 'All folders' label for it, but for now we don't
    menu->Enable(WXMENU_FOLDER_RENAME, !isRoot && folderType != MF_INBOX);
 
-   // can't associate filters to a group folder - there are never any messages
-   // in it anyhow
-   menu->Enable(WXMENU_FOLDER_FILTERS, !isGroup);
+   if ( menu->FindItem(WXMENU_FOLDER_FILTERS) )
+   {
+      // can't associate filters to a group folder - there are never any
+      // messages in it anyhow
+      menu->Enable(WXMENU_FOLDER_FILTERS, !isGroup);
+   }
 
    if ( menu->FindItem(WXMENU_FOLDER_REMOVE) )
    {
