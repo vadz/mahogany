@@ -23,6 +23,7 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "MApplication.h"
+#   include <wx/filefn.h>      // for wxSplitPath
 #endif //USE_PCH
 
 #include <wx/bitmap.h>
