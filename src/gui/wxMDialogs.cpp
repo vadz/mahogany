@@ -3166,17 +3166,22 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
    if ( !caption )
       caption = _("Mahogany: please wait");
 
-   m_frame = new wxMiniFrame(parent, -1, caption,
-                             wxDefaultPosition, wxDefaultSize,
-   // this is ugly but needed as we don't have wxDEFAULT_MINIFRAME_STYLE :-(
-#ifdef __WXMSW__
-                             wxDEFAULT_FRAME_STYLE |
-                             wxTINY_CAPTION_HORIZ |
-#else // wxGTK
-                             wxCAPTION |
-                             wxRESIZE_BORDER |
-#endif // MSW/GTK
-                             wxSTAY_ON_TOP);
+   // create the frame which stays either on top of its parent or, if there is
+   // no parent, on top of all the windows
+   if ( !parent )
+      parent = mApplication->TopLevelFrame();
+
+   m_frame = new wxMiniFrame
+                 (
+                     parent,
+                     -1,
+                     caption,
+                     wxDefaultPosition,
+                     wxDefaultSize,
+                     wxDEFAULT_FRAME_STYLE |
+                     wxTINY_CAPTION_HORIZ |
+                     (parent ? wxFRAME_FLOAT_ON_PARENT : wxSTAY_ON_TOP)
+                 );
 
 #ifdef __WXMSW__
    m_frame->SetBackgroundColour(wxSystemSettings::
