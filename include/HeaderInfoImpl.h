@@ -105,53 +105,24 @@ public:
    ///@name Implementation
    //@{
    /// Returns the n-th entry.
-   virtual HeaderInfo * operator[](size_t n)
-      {
-         MOcheck();
-         ASSERT(n < m_NumEntries);
-         if(n >= m_NumEntries)
-            return NULL;
-         else
-         {
-            if(m_TranslationTable)
-               return & m_Listing[ m_TranslationTable[n] ];
-            else
-               return & m_Listing[n];
-         }
-         return & m_Listing[n];
-      }
+   virtual HeaderInfo * operator[](size_t n);
 
    /// Returns pointer to entry with this UId
-   virtual HeaderInfo * GetEntryUId(UIdType uid)
-      {
-         MOcheck();
-         for(size_t i = 0; i < m_NumEntries; i++)
-         {
-            if( m_Listing[i].GetUId() == uid )
-               return & m_Listing[i];
-         }
-         return NULL;
-      }
+   virtual HeaderInfo * GetEntryUId(UIdType uid);
 
    /** Returns the index in the list for a UId or UID_ILLEGAL */
-   virtual UIdType GetIdxFromUId(UIdType uid) const
-      {
-         MOcheck();
-         for(size_t i = 0; i < m_NumEntries; i++)
-         {
-            if( m_Listing[i].GetUId() == uid )
-               return i;
-         }
-         return UID_ILLEGAL;
-      }
+   virtual UIdType GetIdxFromUId(UIdType uid) const;
 
    /// Returns pointer to array of data:
    virtual HeaderInfo *GetArray(void) { MOcheck(); return m_Listing; }
 
    /// For use by folder only: corrects size downwards:
    void SetCount(size_t newcount)
-      { MOcheck(); ASSERT(newcount <= m_NumEntries);
-      m_NumEntries = newcount; }
+      {
+         MOcheck();
+         CHECK_RET( newcount <= m_NumEntries, "invalid headers count" );
+         m_NumEntries = newcount;
+      }
    //@}
 
    /// Returns an empty list of same size.
@@ -163,49 +134,34 @@ public:
    static HeaderInfoListImpl * Create(size_t n)
       { return new HeaderInfoListImpl(n); }
    /// Swaps two elements:
-   virtual void Swap(size_t index1, size_t index2)
-      {
-         MOcheck();
-         ASSERT(index1 < m_NumEntries);
-         ASSERT(index2 < m_NumEntries);
-         HeaderInfoImpl hicc;
-         hicc = m_Listing[index1];
-         m_Listing[index1] = m_Listing[index2];
-         m_Listing[index2] = hicc;
-      }
+   virtual void Swap(size_t index1, size_t index2);
+
    /** Sets a translation table re-mapping index values.
        Will be freed in destructor.
        @param array an array of indices or NULL to remove it.
    */
    virtual void SetTranslationTable(size_t array[] = NULL)
       {
-         if(m_TranslationTable)
-            delete [] m_TranslationTable;
+         delete [] m_TranslationTable;
          m_TranslationTable = array;
       }
 
+   virtual void Remove(size_t n);
+
 protected:
-   HeaderInfoListImpl(size_t n)
-      {
-         m_Listing = n == 0 ? NULL : new HeaderInfoImpl[n];
-         m_NumEntries = n;
-         m_TranslationTable = NULL;
-      }
-   ~HeaderInfoListImpl()
-      {
-         MOcheck();
-         if ( m_Listing ) delete [] m_Listing;
-         if ( m_TranslationTable ) delete [] m_TranslationTable;
-      }
+   HeaderInfoListImpl(size_t n);
+   ~HeaderInfoListImpl();
+
    /// The current listing of the folder
-   class HeaderInfoImpl *m_Listing;
+   HeaderInfoImpl *m_Listing;
+
    /// number of entries
-   size_t              m_NumEntries;
+   size_t m_NumEntries;
+
    /// translation of indices
    size_t *m_TranslationTable;
 
    MOBJECT_DEBUG(HeaderInfoListImpl)
 };
 
-
-#endif
+#endif // HEADERINFOIMPL_H

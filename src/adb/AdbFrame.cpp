@@ -1642,7 +1642,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
         bookname = mApplication->GetLocalDir() + '/' + bookname;
       }
 #ifdef __WXMSW__
-      bookname.Replace('\\', '/');
+      bookname.Replace("\\", "/");
 #endif
       if ( strName == bookname ) {
         nIndex = n;

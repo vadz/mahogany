@@ -28,11 +28,12 @@
 
    // windows.h included from osdep.h #defines all these
 #  undef   DrawText
-#  undef   GetMessage
 #  undef   FindWindow
 #  undef   GetCharWidth
-#  undef   LoadAccelerators
 #  undef   GetClassInfo
+#  undef   GetMessage
+#  undef   LoadAccelerators
+#  undef   SendMessage
 #  undef   StartDoc
 
 #include <wx/config.h>

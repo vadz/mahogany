@@ -1293,8 +1293,9 @@ strutil_freeRegEx(class strutil_RegEx *regex)
    delete regex;
 }
 #else // WX_HAVE_REGEX
+
 class strutil_RegEx *
-strutil_compileRegEx(const String &pattern)
+strutil_compileRegEx(const String &pattern, int flags)
 {
    ERRORMESSAGE((_("Regular expression matching not implemented.")));
    return NULL;
@@ -1312,6 +1313,7 @@ strutil_freeRegEx(class strutil_RegEx *regex)
 {
    // nothing
 }
+
 #endif // WX_HAVE_REGEX
 
 // ----------------------------------------------------------------------------

@@ -19,7 +19,6 @@
 #   include "Profile.h"
 #   include "MEvent.h"
 #   include "MModule.h"
-#   include "MThread.h"
 #   include <stdlib.h>
 #   include <errno.h>
 #endif
@@ -34,6 +33,7 @@
 #include "Mdefaults.h"
 
 #include "MFilter.h"
+#include "MThread.h"
 
 #include "Message.h"
 #include "MailFolder.h"

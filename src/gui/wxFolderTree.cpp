@@ -1786,6 +1786,7 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
 
    delete GetImageList();
 
+   delete m_menuRoot;
    delete m_menu;
 }
 

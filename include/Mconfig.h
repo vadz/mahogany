@@ -158,16 +158,11 @@
 #   endif
 #endif
 
-/// make sure NULL is define properly
-#undef  NULL
-#define NULL    0
-
-
 // you can't mix iostream.h and iostream, the former doesn't compile
 // with "using namespace std", the latter doesn't compile with wxWin
 // make your choice...
 #ifndef USE_IOSTREAMH
-# define USE_IOSTREAMH   1
+#  define USE_IOSTREAMH   1
 #endif
 
 // Microsoft Visual C++

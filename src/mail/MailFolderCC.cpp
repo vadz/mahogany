@@ -15,7 +15,7 @@
    1. is mm_status() ever called? we never use mail_status(), but maybe
       cclient does this internally?
 
-   2. mm_expunged() definitely shouldn't rebuild the entire listing (by
+  +2. mm_expunged() definitely shouldn't rebuild the entire listing (by
       callling RequestUpdate) but should just remove the expunged entries from
       the existing one
 
@@ -74,7 +74,6 @@
 #   include "strutil.h"
 #   include "MApplication.h"
 #   include "Profile.h"
-#   include "MThread.h"
 #endif // USE_PCH
 
 #include "Mdefaults.h"
@@ -86,6 +85,7 @@
 #include "MessageCC.h"
 
 #include "MEvent.h"
+#include "MThread.h"
 #include "ASMailFolder.h"
 #include "Mpers.h"
 
@@ -919,9 +919,9 @@ MailFolderCC::~MailFolderCC()
    // list to make sure no more events get routed to this (now dead) object
    RemoveFromMap();
 
-#ifdef USE_THREADS
    delete m_Mutex;
-#endif
+   delete m_PingReopenSemaphore;
+   delete m_InListingRebuild;
 
    SafeDecRef(m_Listing);
    SafeDecRef(m_Profile);
@@ -2840,25 +2840,25 @@ const String& MailFolder::InitializeNewsSpool()
 /// this message matches a search
 void
 MailFolderCC::mm_searched(MAILSTREAM * stream,
-                          unsigned long number)
+                          unsigned long msgno)
 {
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
    {
       ASSERT(mf->m_SearchMessagesFound);
-      mf->m_SearchMessagesFound->Add(number);
+      mf->m_SearchMessagesFound->Add(msgno);
    }
 }
 
 /// tells program that there are this many messages in the mailbox
 void
-MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
+MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
 {
    MailFolderCC *mf = LookupObject(stream);
    if ( mf )
    {
       // if a new message has arrived, we need to reapply the filters
-      if ( number > mf->m_nMessages )
+      if ( msgno > mf->m_nMessages )
          mf->m_GotNewMessages = true;
 
       // TODO: if the messages were only expunged, we could avoid rebuilding
@@ -3089,30 +3089,33 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
 
 /* static */
 void
-MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long number)
+MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
 {
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf, "mm_expunged for non existent folder");
 
    if ( mf->HaveListing() )
    {
-      // TODO: we shouldn't need to rebuild the listing entirely, we could
-      //       just remove the specified entry from it
-      mf->RequestUpdate();
+      // message numbers are counted from 1
+      mf->m_Listing->Remove(msgno - 1);
+
+      // tell all interested that the listing changed
+      DBGMESSAGE(("Sending FolderUpdate event for folder '%s'",
+                  mf->GetName().c_str()));
+
+      MEventManager::Send(new MEventFolderUpdateData(mf));
    }
-   //else: it is not the first mm_expunged() we as we had to have the listing
-   //      when it was called for the first time - hence, we don't need to
-   //      generate any more update requests, one is enough
+   //else: no need to react to this
 }
 
 /* static */
 void
-MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long number)
+MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long msgno)
 {
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf, "mm_flags for non existent folder");
 
-   mf->UpdateMessageStatus(number);
+   mf->UpdateMessageStatus(msgno);
 }
 
 /** alert that c-client will run critical code
@@ -3185,7 +3188,7 @@ MailFolderCC::mm_fatal(char *str)
 // ----------------------------------------------------------------------------
 
 void
-MailFolderCC::UpdateMessageStatus(unsigned long seqno)
+MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 {
    /* If a new listing is required, we don't need to do anything to
       update the old one. Only exception is if the listing is frozen,
@@ -3198,7 +3201,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long seqno)
    HeaderInfoList_obj hil(GetHeaders());
 
    // Find the listing entry for this message:
-   UIdType uid = mail_uid(m_MailStream, seqno);
+   UIdType uid = mail_uid(m_MailStream, msgno);
    size_t i,
           count = hil->Count();
    for ( i = 0; i < count && hil[i]->GetUId() != uid; i++ )
@@ -3206,7 +3209,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long seqno)
 
    CHECK_RET(i < count, "message not found in the listing");
 
-   MESSAGECACHE *elt = mail_elt (m_MailStream, seqno);
+   MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
 
    HeaderInfo *hi = hil[i];
    ((HeaderInfoImpl *)hi)->m_Status = GetMsgStatus(elt);
@@ -3598,35 +3601,35 @@ extern "C"
 {
 
 void
-mm_searched(MAILSTREAM *stream, unsigned long number)
+mm_searched(MAILSTREAM *stream, unsigned long msgno)
 {
    if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK1(mm_searched, "%lu", number);
+      TRACE_CALLBACK1(mm_searched, "%lu", msgno);
 
-      MailFolderCC::mm_searched(stream,  number);
+      MailFolderCC::mm_searched(stream,  msgno);
    }
 }
 
 void
-mm_expunged(MAILSTREAM *stream, unsigned long number)
+mm_expunged(MAILSTREAM *stream, unsigned long msgno)
 {
    if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK1(mm_expunged, "%lu", number);
+      TRACE_CALLBACK1(mm_expunged, "%lu", msgno);
 
-      MailFolderCC::mm_expunged(stream, number);
+      MailFolderCC::mm_expunged(stream, msgno);
    }
 }
 
 void
-mm_flags(MAILSTREAM *stream, unsigned long number)
+mm_flags(MAILSTREAM *stream, unsigned long msgno)
 {
    if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK1(mm_flags, "%lu", number);
+      TRACE_CALLBACK1(mm_flags, "%lu", msgno);
 
-      MailFolderCC::mm_flags(stream, number);
+      MailFolderCC::mm_flags(stream, msgno);
    }
 }
 
@@ -3658,13 +3661,13 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 }
 
 void
-mm_exists(MAILSTREAM *stream, unsigned long number)
+mm_exists(MAILSTREAM *stream, unsigned long msgno)
 {
    if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK1(mm_exists, "%lu", number);
+      TRACE_CALLBACK1(mm_exists, "%lu", msgno);
 
-      MailFolderCC::mm_exists(stream, number);
+      MailFolderCC::mm_exists(stream, msgno);
    }
 }
 
@@ -3687,16 +3690,16 @@ mm_log(char *str, long errflg)
 
    TRACE_CALLBACK_NOSTREAM_2(mm_log, "%s (%s)", str, GetErrorLevel(errflg));
 
-   String *msg = new String(str);
+   String msg(str);
 
    // TODO: what's going on here?
    if(errflg >= 4) // fatal imap error, reopen-mailbox
    {
       if(!MailFolderCC::PingReopenAll())
-         *msg << _("\nAttempt to re-open all folders failed.");
+         msg << _("\nAttempt to re-open all folders failed.");
    }
 
-   MailFolderCC::mm_log(str, errflg);
+   MailFolderCC::mm_log(msg, errflg);
 }
 
 void

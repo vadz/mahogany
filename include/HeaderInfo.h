@@ -88,26 +88,38 @@ class HeaderInfoList : public MObjectRC
 public:
    /// Count the number of messages in listing.
    virtual size_t Count(void) const = 0;
+
    /// Returns the n-th entry.
    virtual const HeaderInfo * operator[](size_t n) const = 0;
    const HeaderInfo *GetItem(size_t n) const { return (*this)[n]; }
    /// Returns the n-th entry.
    virtual HeaderInfo * operator[](size_t n) = 0;
+
    /// Returns pointer to array of data:
    virtual HeaderInfo * GetArray(void) = 0;
+
    /// Returns pointer to entry with this UId
    virtual HeaderInfo * GetEntryUId(UIdType uid) = 0;
-   /** Returns the index in the info list sequence number for a UId or UID_ILLEGAL */
+
+   /** Returns the index in the info list sequence number for a UId or
+       UID_ILLEGAL */
    virtual UIdType GetIdxFromUId(UIdType uid) const= 0;
+
    /// Swaps two elements:
    virtual void Swap(size_t index1, size_t index2) = 0;
+
    /** Sets a translation table re-mapping index values.
        Will be freed in destructor.
        @param array an array of indices or NULL to remove it.
    */
    virtual void SetTranslationTable(size_t array[] = NULL) = 0;
+
    /// For use by folder only: corrects size downwards:
    virtual void SetCount(size_t newcount) = 0;
+
+   /// Removes the given element from the listing
+   virtual void Remove(size_t n) = 0;
+
    MOBJECT_NAME(HeaderInfoList)
 };
 
