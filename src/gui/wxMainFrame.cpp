@@ -19,11 +19,17 @@
 #   include   "MFrame.h"
 #   include   "Mdefaults.h"
 #endif
+
 #include   "gui/wxMainFrame.h"
 
-
 #ifdef    OS_WIN
-#   define MainFrame_xpm   "MainFrame"
+#   define   MainFrame_xpm          "MainFrame"
+#   define   tb_exit                "tb_exit"
+#   define   tb_help                "tb_help"
+#   define   tb_open                "tb_open"
+#   define   tb_mail_compose        "tb_mail_compose"
+#   define   tb_book_open           "tb_book_open"
+#   define   tb_preferences         "tb_preferences"
 #else   //real XPMs
 #   include   "../src/icons/MainFrame.xpm"
 #   include   "../src/icons/tb_exit.xpm"
@@ -32,7 +38,6 @@
 #   include   "../src/icons/tb_mail_compose.xpm"
 #   include   "../src/icons/tb_book_open.xpm"
 #   include   "../src/icons/tb_preferences.xpm"
-  
 #endif  //Win/Unix
 
 #ifdef   USE_WXWINDOWS2
@@ -70,6 +75,8 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    TB_AddTool(m_ToolBar, tb_help, WXMENU_HELP_ABOUT, "Help");
    m_ToolBar->AddSeparator();
    TB_AddTool(m_ToolBar, tb_exit, WXMENU_FILE_EXIT, "Exit M");
+
+   m_ToolBar->CreateTools();
 #endif
    
 #ifndef  USE_WXWINDOWS2
