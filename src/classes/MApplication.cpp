@@ -985,7 +985,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
       }
    }
 
-   if(mf->CountMessages() > 0)
+   if( mf->IsEmpty() )
    {
       HeaderInfoList *hil = mf->GetHeaders();
       if( hil )
@@ -1032,7 +1032,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
       return;
    }
 
-   if(mf->CountMessages() == 0)
+   if( mf->IsEmpty() )
    {  // nothing to do
       mf->DecRef();
       return;

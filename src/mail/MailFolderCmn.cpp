@@ -414,9 +414,18 @@ void MfCloseTimer::Notify(void)
 // MailFolderCmn folder closing
 // ----------------------------------------------------------------------------
 
-void
-MailFolderCmn::PreClose(void)
+void MailFolderCmn::Close(void)
 {
+   if ( gs_MailFolderCloser )
+   {
+      MfCloseEntry *entry = gs_MailFolderCloser->GetCloseEntry(this);
+      if ( entry )
+      {
+         gs_MailFolderCloser->Remove(entry);
+      }
+      //else: it is not an error if this folder is not in the list
+   }
+
    if ( m_headers )
    {
       m_headers->DecRef();
@@ -430,19 +439,6 @@ MailFolderCmn::PreClose(void)
 #ifdef DEBUG_FOLDER_CLOSE
    m_PreCloseCalled = true;
 #endif // DEBUG_FOLDER_CLOSE
-}
-
-void MailFolderCmn::Close(void)
-{
-   if ( gs_MailFolderCloser )
-   {
-      MfCloseEntry *entry = gs_MailFolderCloser->GetCloseEntry(this);
-      if ( entry )
-      {
-         gs_MailFolderCloser->Remove(entry);
-      }
-      //else: it is not an error if this folder is not in the list
-   }
 }
 
 bool
@@ -3281,19 +3277,25 @@ MailFolderCmn::DeleteDuplicates()
 // MailFolderCmn message counting
 // ----------------------------------------------------------------------------
 
-bool MailFolderCmn::CountInterestingMessages(MailFolderStatus *status) const
+bool MailFolderCmn::CountAllMessages(MailFolderStatus *status) const
 {
+   CHECK( status, false, "CountAllMessages: NULL pointer" );
+
    String name = GetName();
    MfStatusCache *mfStatusCache = MfStatusCache::Get();
    if ( !mfStatusCache->GetStatus(name, status) )
    {
       if ( !DoCountMessages(status) )
+      {
+         // failed to get the message count, don't update status cache with
+         // bogus values
          return false;
+      }
 
       mfStatusCache->UpdateStatus(name, *status);
    }
 
-   return true;
+   return status->HasSomething();
 }
 
 // ----------------------------------------------------------------------------

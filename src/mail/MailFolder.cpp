@@ -665,7 +665,7 @@ String FormatFolderStatusString(const String& format,
 
             if ( mf )
             {
-               mf->CountInterestingMessages(m_status);
+               mf->CountAllMessages(m_status);
                mf->DecRef();
             }
          }

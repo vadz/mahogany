@@ -102,6 +102,19 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    m_headers.Alloc(m_count);
 }
 
+void HeaderInfoListImpl::CleanUp()
+{
+   // TODO: maintain first..last range of allocated headers to avoid iterating
+   //       over the entire array just to call delete for many NULL pointers?
+
+   WX_CLEAR_ARRAY(m_headers);
+}
+
+HeaderInfoListImpl::~HeaderInfoListImpl()
+{
+   CleanUp();
+}
+
 // ----------------------------------------------------------------------------
 // HeaderInfoListImpl item access
 // ----------------------------------------------------------------------------
@@ -150,10 +163,10 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
 
 UIdType HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 {
-   // TODO: we should use SEARCH here
-   FAIL_MSG( "TODO" );
+   MsgnoType msgno = m_mf->GetMsgnoFromUID(uid);
 
-   return UID_ILLEGAL;
+   // this will return UID_ILLEGAL if msgno == MSGNO_ILLEGAL
+   return GetIdxFromMsgno(msgno);
 }
 
 // ----------------------------------------------------------------------------
@@ -173,7 +186,7 @@ size_t HeaderInfoListImpl::GetPosFromIdx(size_t n) const
 }
 
 // ----------------------------------------------------------------------------
-// HeaderInfoListImpl message adding/removing
+// HeaderInfoListImpl methods called by MailFolder
 // ----------------------------------------------------------------------------
 
 // TODO: OnRemove() is very inefficient for array!
@@ -196,6 +209,13 @@ void HeaderInfoListImpl::OnAdd(size_t countNew)
 
    // we probably don't need to do m_headers.Alloc() as countNew shouldn't be
    // much bigger than old count
+}
+
+void HeaderInfoListImpl::OnClose()
+{
+   CleanUp();
+
+   m_count = 0;
 }
 
 // ----------------------------------------------------------------------------

@@ -34,7 +34,7 @@ class MailFolderCmn : public MailFolder
 {
 public:
    /// do status caching and call DoCountMessages() to do the real work
-   virtual bool CountInterestingMessages(MailFolderStatus *status) const;
+   virtual bool CountAllMessages(MailFolderStatus *status) const;
 
    /**@name Some higher level functionality implemented by the
       MailFolderCmn class on top of the other functions.
@@ -138,14 +138,6 @@ public:
 
    virtual HeaderInfoList *GetHeaders(void) const;
 
-   /// Count number of new messages.
-   virtual unsigned long CountNewMessages(void) const
-      {
-         return
-            CountMessages(MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN,
-                          MailFolder::MSG_STAT_RECENT);
-      }
-
    virtual inline void GetAuthInfo(String *login, String *password) const
       { *login = m_Login; *password = m_Password; }
 
@@ -174,9 +166,6 @@ public:
 protected:
    /// remove the folder from our "closer" list
    virtual void Close(void);
-
-   /// This function must be called before actually closing the folder.
-   void PreClose(void);
 
    /// is updating currently suspended?
    bool IsUpdateSuspended() const { return m_suspendUpdates != 0; }
@@ -255,9 +244,6 @@ protected:
    /// Read options from profile into the options struct
    virtual void ReadConfig(MailFolderCmn::MFCmnOptions& config);
    //@}
-
-   /// Update the folder status, number of messages, etc
-   virtual void UpdateStatus(void) = 0;
 
    /// Constructor
    MailFolderCmn();

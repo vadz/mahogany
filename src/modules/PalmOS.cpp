@@ -1738,7 +1738,7 @@ PalmOSModule::StoreEMails(void)
       return;
    }
 
-   if(mf->CountMessages() == 0)
+   if(mf->IsEmpty())
    {  // nothing to do
       mf->DecRef();
       return;

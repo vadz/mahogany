@@ -68,8 +68,11 @@ public:
 
    virtual void OnRemove(size_t n);
    virtual void OnAdd(size_t countNew);
+   virtual void OnClose();
 
    virtual size_t GetIndentation(size_t n) const;
+
+   virtual ~HeaderInfoListImpl();
 
 private:
    /// private ctor for use of HeaderInfoList::Create()
@@ -80,6 +83,9 @@ private:
 
    /// no assignment operator
    HeaderInfoListImpl& operator=(const HeaderInfoListImpl&);
+
+   /// perform the clean up (called from dtor)
+   void CleanUp();
 
    /// is the given entry valid (i.e. already cached)?
    inline bool IsHeaderValid(size_t n) const;

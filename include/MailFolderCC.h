@@ -147,16 +147,18 @@ public:
    */
    static bool CanExit(String *which);
 
+   virtual bool IsOpened(void) const { return m_MailStream != NULL; }
+
    /** return a symbolic name for mail folder
        @return the folder's name
    */
-   String GetName(void) const { return m_Name; }
+   virtual String GetName(void) const { return m_Name; }
 
    /// return the folder type
-   FolderType GetType(void) const { return m_folderType; }
+   virtual FolderType GetType(void) const { return m_folderType; }
 
    /// return the folder flags
-   int GetFlags(void) const { return m_FolderFlags; }
+   virtual int GetFlags(void) const { return m_FolderFlags; }
 
    /// Return IMAP spec
    virtual String GetImapSpec(void) const { return m_ImapSpec; }
@@ -169,14 +171,14 @@ public:
    /// Checks if the folder is in a critical section.
    bool InCritical(void) const { return m_InCritical; }
 
-   /** Get number of messages which have a message status of value
-       when combined with the mask. When mask = 0, return total
-       message count.
-       @param mask is a (combination of) MessageStatus value(s) or 0 to test against
-       @param value the value of MessageStatus AND mask to be counted
-       @return number of messages
-   */
-   virtual unsigned long CountMessages(int mask = 0, int value = 0) const;
+   // count various kinds of messages
+   virtual unsigned long CountNewMessages(void) const;
+   virtual unsigned long CountRecentMessages(void) const;
+   virtual unsigned long CountUnseenMessages(void) const;
+   virtual unsigned long CountDeletedMessages(void) const;
+
+   // uid -> msgno
+   virtual MsgnoType GetMsgnoFromUID(UIdType uid) const;
 
    /** get message header
        @param uid mesage uid
@@ -367,6 +369,8 @@ public:
    MAILSTREAM *Stream(void) const { return m_MailStream; }
 
 private:
+   /** @name Constructors and such */
+   //@{
    /// private constructor, does basic initialisation
    MailFolderCC(int typeAndFlags,
                 String const &path,
@@ -381,6 +385,12 @@ private:
    /// code common to Create() and Close()
    void Init();
 
+   /// destructor closes the folder automatically
+   ~MailFolderCC();
+   //@}
+
+   /** @name Opening/closing the folders */
+   //@{
    /** Try to open the mailstream for this folder.
        @return true on success
    */
@@ -389,14 +399,26 @@ private:
    /// half open the folder
    bool HalfOpen(void);
 
+   /// physically create the file (MF_FILE or MF_MH) folder
+   void CreateFileFolder();
+
+   /// Close the folder
+   virtual void Close(void);
+   //@}
+
    /// Called to notify the folder that its listing changed "from outside"
    virtual void RequestUpdate(void);
 
-   virtual void UpdateStatus(void);
-
    virtual bool IsAlive(void) const;
 
+   /** @name Message counting */
+   //@{
+   /// perform the search, return number of messages found
+   unsigned long SearchAndCountResults(struct search_program *pgm) const;
+
+   /// called by CountAllMessages() to perform actual counting
    virtual bool DoCountMessages(MailFolderStatus *status) const;
+   //@}
 
    /// Update the timeout values from a profile
    void UpdateTimeoutValues(void);
@@ -411,26 +433,17 @@ private:
    static String ParseAddress(struct mail_address *adr);
 
    /**
-     Handles the mm_overview_header callback on a per folder basis.
-     It returns 0 to abort overview generation, 1 to continue.
+     Called from GetHeaderInfo() to process one header
+
+     @return 0 to abort overview generation, 1 to continue.
    */
-   int OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov);
-
-   /// Handles the mm_overview_header callback on a per folder basis
-   static int OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW_X *ov);
-
-   /// Close the folder
-   virtual void Close(void);
-
-   /// destructor
-   ~MailFolderCC();
+   int OverviewHeaderEntry(class OverviewData *overviewData,
+                           struct message_cache *elt,
+                           struct mail_envelope *env);
 
    /** We remember the last folder to enter a critical section, helps
        to find crashes.*/
    static String ms_LastCriticalFolder;
-
-   /// physically create the file (MF_FILE or MF_MH) folder
-   void CreateFileFolder();
 
    /// Build the sequence string from the array of message uids
    static String BuildSequence(const UIdArray& messages);
@@ -471,10 +484,16 @@ private:
    /// update the folder after appending messages to it
    void UpdateAfterAppend();
 
-   /// return TRUE if it is safe to send update events to GUI right now
-   bool CanSendUpdateEvents() const;
-
    virtual void ReadConfig(MailFolderCmn::MFCmnOptions& config);
+
+   /** @name Notification handlers */
+   //@{
+   /// called when the number of the messages in the folder changes
+   void OnMailExists(MsgnoType msgnoMax);
+
+   /// called when the given msgno is expunged from the folder
+   void OnMailExpunge(MsgnoType msgno);
+   //@}
 
    // members (mostly) from here on
    // -----------------------------
@@ -527,20 +546,12 @@ private:
    /// mailstream associated with this folder
    MAILSTREAM *m_MailStream;
 
-   /// total number of messages last time we looked
-   unsigned long m_msgnoMax;
-
-   /// number or recent messages in mailbox
-   unsigned long m_nRecent;
-
    /// last seen UID, all messages above this one are new
    UIdType m_LastUId;
+   //@}
 
    /** @name Temporary operation parameters */
    //@{
-   /// struct used by GetHeaderInfo() and OverviewHeaderEntry() only
-   class OverviewData *m_overviewData;
-
    /// the array containing indices of expunged messages or NULL
    wxArrayInt *m_expungedIndices;
 

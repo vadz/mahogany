@@ -2764,9 +2764,10 @@ bool RetrieveRemoteConfigSettings(bool confirm)
       return FALSE;
    }
 
-   if(mf->CountMessages() != 1)
+   unsigned long nMessages = mf->GetMessageCount();
+   if ( nMessages != 1 )
    {
-      if(mf->CountMessages() == 0)
+      if ( nMessages == 0 )
          wxLogError(_("Configuration mailbox '%s' does not contain any "
                       "information."), mf->GetName().c_str());
       else
@@ -2901,7 +2902,8 @@ bool SaveRemoteConfigSettings(bool confirm)
    if(! mf)
       return FALSE;
 
-   if(mf->CountMessages() > 1)
+   unsigned long nMessages = mf->GetMessageCount();
+   if( nMessages > 1 )
    {
       wxLogError(
          _("Configuration mailbox '%s' contains more than\n"
@@ -2912,7 +2914,7 @@ bool SaveRemoteConfigSettings(bool confirm)
       return FALSE;
    }
    // If we have information stored there, delete it:
-   if(mf->CountMessages() != 0)
+   if( nMessages != 0 )
    {
       HeaderInfoList *hil = mf->GetHeaders();
       Message * msg = mf->GetMessage( (*hil)[0]->GetUId() );

@@ -2441,7 +2441,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
    }
 
    MailFolderStatus mfStatus;
-   (void)folder->CountInterestingMessages(&mfStatus);
+   (void)folder->CountAllMessages(&mfStatus);
 
    wxFolderTreeNode *node = GetFolderTreeNode(item);
    node->SetStatus(this, mfStatus);

@@ -24,6 +24,7 @@
 #include "FolderType.h"    // for MsgnoType
 
 class wxArrayString;
+class MailFolder;
 
 /**
    This class contains all the information from message header
@@ -241,7 +242,26 @@ public:
 
    /// Called when the number of messages in the folder increases
    virtual void OnAdd(size_t countNew) = 0;
+
+   /// Called when the underlying folder is closed
+   virtual void OnClose() = 0;
    //@}
+
+   // currently unused
+#if 0
+   /** @name Cache control
+
+       HintCache() is supposed to be called by GUI while IsInCache() is for
+       MailFolder usage
+    */
+   //@{
+   /// Prepare to access the items in this range of positions (NOT indices!)
+   virtual void HintCache(size_t posFrom, size_t posTo) = 0;
+
+   /// Is the item with this msgno already cached?
+   virtual bool IsInCache(MsgnoType msgno) const = 0;
+   //@}
+#endif // 0
 
    MOBJECT_NAME(HeaderInfoList)
 };

@@ -142,8 +142,6 @@ extern "C"
 // private types
 // ----------------------------------------------------------------------------
 
-typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW_X *ov);
-
 // extended OVERVIEW struct additionally containing the destination address
 struct OVERVIEW_X : public mail_overview
 {
@@ -156,11 +154,6 @@ struct OVERVIEW_X : public mail_overview
    // the "In-Reply-To:" header
    const char *inReplyTo;
 };
-
-// type of the callback for mail_fetch_overview()
-typedef int (*overview_x_t) (MAILSTREAM *stream,
-                             unsigned long uid,
-                             OVERVIEW_X *ov);
 
 /** This is a list of all mailstreams which were left open because the
     dialup connection broke before we could close them.
@@ -182,10 +175,6 @@ private:
 
 extern "C"
 {
-   static int mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW_X *ov);
-   void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t ofn);
-   void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn);
-
 #ifdef USE_READ_PROGRESS
    void mahogany_read_progress(GETS_DATA *md, unsigned long count);
 #endif
@@ -220,7 +209,7 @@ static mm_status_handler gs_mmStatusRedirect = NULL;
 // a variable telling c-client to shut up
 static bool mm_ignore_errors = false;
 
-/// a variable disabling most events (not mm_list, mm_lsub, mm_overview_header)
+/// a variable disabling most events (not mm_list or mm_lsub though)
 static bool mm_disable_callbacks = false;
 
 /// show cclient debug output
@@ -284,8 +273,8 @@ public:
       }
    }
 
-   // get the msgno we're currently retrieving
-   MsgnoType GetCurrentMsgno() const { return m_msgnoStart + m_nRetrieved; }
+   // get the current HeaderInfo object
+   HeaderInfo *GetCurrent() const { return m_hi + m_nRetrieved; }
 
    // get the number of messages retrieved so far
    size_t GetRetrievedCount() const { return m_nRetrieved; }
@@ -1210,11 +1199,8 @@ void
 MailFolderCC::Create(int typeAndFlags)
 {
    m_MailStream = NIL;
-   m_Listing = NULL;
 
    UpdateTimeoutValues();
-
-   SetRetrievalLimits(0, 0); // no limits by default
 
    Init();
 
@@ -1233,32 +1219,19 @@ MailFolderCC::Create(int typeAndFlags)
 
 void MailFolderCC::Init()
 {
-   m_msgnoMax = 0;
-   m_nRecent = UID_ILLEGAL;
    m_LastUId = UID_ILLEGAL;
 
-   m_overviewData = NULL;
-
    m_expungedIndices = NULL;
-
-   // currently not used, but might be in the future
-   m_GotNewMessages = false;
 
    m_InCritical = false;
 }
 
 MailFolderCC::~MailFolderCC()
 {
-   PreClose();
-
-   CCAllDisabler ccDis;
-
    Close();
 
    // these should have been deleted before
    ASSERT(m_SearchMessagesFound == NULL);
-
-   ASSERT_MSG( !m_overviewData, "should have been reset in GetHeaderInfo" );
 
    // normally this one should be deleted as well but POP3 server never sends
    // us mm_expunged() (well, because it never expunges the messages until we
@@ -1279,7 +1252,6 @@ MailFolderCC::~MailFolderCC()
    delete m_Mutex;
    delete m_InFilterCode;
 
-   SafeDecRef(m_Listing);
    SafeDecRef(m_Profile);
 }
 
@@ -1749,6 +1721,62 @@ MailFolderCC::Open(void)
    return true;   // success
 }
 
+// ----------------------------------------------------------------------------
+// MailFolderCC closing
+// ----------------------------------------------------------------------------
+
+void
+MailFolderCC::Close()
+{
+   MailFolderCmn::Close();
+
+   if ( m_MailStream )
+   {
+      /*
+         DO NOT SEND EVENTS FROM HERE, ITS CALLED FROM THE DESTRUCTOR AND
+         THE OBJECT *WILL* DISAPPEAR!
+       */
+      CCAllDisabler no;
+
+      if ( !NeedsNetwork() || mApplication->IsOnline() )
+      {
+         // it is wrong to do this as it may result in mm_exists() callbacks
+         // which we ignore (per above), so we miss new mail
+#if 0
+         if ( !m_MailStream->halfopen )
+         {
+            // update flags, etc, .newsrc
+            mail_check(m_MailStream);
+         }
+#endif // 0
+
+         mail_close(m_MailStream);
+      }
+      else // a remote folder but we're not connected
+      {
+         // delay closing
+         gs_CCStreamCleaner->Add(m_MailStream);
+      }
+
+      m_MailStream = NIL;
+   }
+
+   if ( m_headers )
+   {
+      // in case someone else holds to it
+      m_headers->OnClose();
+
+      m_headers->DecRef();
+      m_headers = NULL;
+   }
+
+   if ( m_expungedIndices )
+   {
+      delete m_expungedIndices;
+      m_expungedIndices = NULL;
+   }
+}
+
 /* static */
 bool
 MailFolderCC::CloseFolder(const MFolder *folder)
@@ -1761,23 +1789,7 @@ MailFolderCC::CloseFolder(const MFolder *folder)
       return false;
    }
 
-   // do it first to remove the folder from the gs_MailFolderCloser list, we
-   // don't want to keep it opened any more (FIXME this is too ugly)
-   mf->MailFolderCmn::Close();
-
    mf->Close();
-
-   if ( mf->m_Listing )
-   {
-      mf->m_Listing->DecRef();
-      mf->m_Listing = NULL;
-   }
-
-   if ( mf->m_expungedIndices )
-   {
-      delete mf->m_expungedIndices;
-      mf->m_expungedIndices = NULL;
-   }
 
    mf->Init();
    mf->DecRef();
@@ -2260,16 +2272,11 @@ MailFolderCC::PingReopenAll(bool fullPing)
       // don't ping locked folders, they will have to wait for the next time
       if ( !mf->IsLocked() )
       {
-         if ( fullPing ? mf->PingReopen() : mf->Ping() )
-         {
-            wxLogTrace("collect",
-                       "Checking for new mail in folder '%s'...",
-                       mf->GetName().c_str());
+         wxLogTrace("collect",
+                    "Checking for new mail in folder '%s'...",
+                    mf->GetName().c_str());
 
-            // retrieving the folder listing filters new messages
-            SafeDecRef(mf->GetHeaders());
-         }
-         else
+         if ( !(fullPing ? mf->PingReopen() : mf->Ping()) )
          {
             // failed to ping at least one folder
             rc = false;
@@ -2299,41 +2306,6 @@ MailFolderCC::Ping(void)
    // timer event and so if folder pinging taks too long, we will be called
    // again and again and again ... before we get the chance to do anything
    return m_MailStream ? PingReopen() : true;
-}
-
-// ----------------------------------------------------------------------------
-// MailFolderCC closing
-// ----------------------------------------------------------------------------
-
-void
-MailFolderCC::Close()
-{
-   if ( m_MailStream )
-   {
-      /*
-         DO NOT SEND EVENTS FROM HERE, ITS CALLED FROM THE DESTRUCTOR AND
-         THE OBJECT *WILL* DISAPPEAR!
-       */
-      CCAllDisabler no;
-
-      if ( !NeedsNetwork() || mApplication->IsOnline() )
-      {
-         if ( !m_MailStream->halfopen )
-         {
-            // update flags, etc, .newsrc
-            mail_check(m_MailStream);
-         }
-
-         mail_close(m_MailStream);
-      }
-      else // a remote folder but we're not connected
-      {
-         // delay closing
-         gs_CCStreamCleaner->Add(m_MailStream);
-      }
-
-      m_MailStream = NIL;
-   }
 }
 
 // ----------------------------------------------------------------------------
@@ -2592,7 +2564,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       MailFolder *mfDst = FindFolder(folder);
       if ( mfDst )
       {
-         mfDst->RequestUpdate();
+         mfDst->Ping();
          mfDst->DecRef();
       }
       //else: not opened
@@ -2610,6 +2582,15 @@ MailFolderCC::ExpungeMessages(void)
    if ( PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()) )
    {
       mail_expunge(m_MailStream);
+
+      // for some types of folders (IMAP) mm_exists() is called from
+      // mail_expunge() but for the others (POP) it isn't and we have to call
+      // it ourselves: check is based on the fact that m_expungedIndices is
+      // reset in mm_exists handler
+      if ( m_expungedIndices )
+      {
+         mail_ping(m_MailStream);
+      }
    }
 }
 
@@ -2617,35 +2598,6 @@ MailFolderCC::ExpungeMessages(void)
 // ----------------------------------------------------------------------------
 // Counting messages
 // ----------------------------------------------------------------------------
-
-// msg status info
-//
-// NB: name MessageStatus is already taken by MailFolder
-struct MsgStatus
-{
-   bool recent;
-   bool unread;
-   bool newmsgs;
-   bool flagged;
-   bool searched;
-};
-
-// is this message recent/new/unread/...?
-static MsgStatus AnalyzeStatus(int stat)
-{
-   MsgStatus status;
-
-   // deal with recent and new (== recent and !seen)
-   status.recent = (stat & MailFolder::MSG_STAT_RECENT) != 0;
-   status.unread = !(stat & MailFolder::MSG_STAT_SEEN);
-   status.newmsgs = status.recent && status.unread;
-
-   // and also count flagged and searched messages
-   status.flagged = (stat & MailFolder::MSG_STAT_FLAGGED) != 0;
-   status.searched = (stat & MailFolder::MSG_STAT_SEARCHED ) != 0;
-
-   return status;
-}
 
 #ifdef BROKEN_BY_VZ
 
@@ -2680,161 +2632,154 @@ void MailFolderCC::UpdateFolderStatus(int stat)
 
 #endif // BROKEN_BY_VZ
 
-// are we asked to count recent messages in WantRecent()?
-static bool WantRecent(int mask, int value)
+unsigned long MailFolderCC::GetMessageCount() const
 {
-   return mask == MailFolder::MSG_STAT_RECENT && value == mask;
+   CHECK( m_MailStream, 0, "GetMessageCount: folder is closed" );
+
+   return m_MailStream->nmsgs;
 }
 
 unsigned long
-MailFolderCC::CountMessages(int mask, int value) const
+MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
 {
-   // we need to rebuild listing if we don't have it because either we use it
-   // anyhow or we need to ensure that m_nMessages and m_nRecent have correct
-   // values
-   HeaderInfoList_obj hil = GetHeaders();
-   CHECK( hil, UID_ILLEGAL, "no listing in CountMessages" );
+   CHECK( m_MailStream, 0, "SearchAndCountResults: folder is closed" );
 
-   size_t numOfMessages;
-   if ( mask == MSG_STAT_NONE )
+   ASSERT_MSG( !m_SearchMessagesFound, "DoCountMessages: reentrancy?" );
+
+   MailFolderCC *self = (MailFolderCC *)this; // const_cast
+   self->m_SearchMessagesFound = new UIdArray;
+
+   mail_search_full (m_MailStream,
+                     NIL /* charset: use default (US-ASCII) */,
+                     pgm,
+                     SE_UID | SE_FREE | SE_NOPREFETCH);
+
+   unsigned long count;
+   if ( m_SearchMessagesFound )
    {
-      // total number of messages
-      numOfMessages = m_nMessages;
+      count = m_SearchMessagesFound->Count();
+
+      delete m_SearchMessagesFound;
+      self->m_SearchMessagesFound = NULL;
    }
-   else if ( WantRecent(mask, value) && m_nRecent != UID_ILLEGAL )
+   else
    {
-      // asked for recent messages and we have them already
-      return m_nRecent;
-   }
-   else // general case or we asked for recent messages and we don't have them
-   {
-      wxLogTrace("count",
-                 "Counting all messages with given mask in '%s' (%lu all)",
-                 GetName().c_str(), m_nMessages);
+      FAIL_MSG( "DoCountMessages: who deleted m_SearchMessagesFound?" );
 
-      // FIXME there should probably be a much more efficient way (using
-      //       mail_search()?) to do it
-      numOfMessages = 0;
-      for ( size_t idx = 0; idx < m_nMessages; idx++ )
-      {
-         if ( (hil->GetItemByIndex(idx)->GetStatus() & mask) == value )
-            numOfMessages++;
-      }
-
-      // if we were asked for recent messages, cache them
-      if ( WantRecent(mask, value) )
-      {
-         ((MailFolderCC *)this)->m_nRecent = numOfMessages;
-      }
+      count = 0;
    }
 
-   return numOfMessages;
+   return count;
+}
+
+unsigned long MailFolderCC::CountNewMessages() const
+{
+   MailFolderStatus status;
+   if ( !CountAllMessages(&status) )
+      return 0;
+
+   return status.newmsgs;
+}
+
+unsigned long MailFolderCC::CountRecentMessages() const
+{
+   CHECK( m_MailStream, 0, "CountRecentMessages: folder is closed" );
+
+   return m_MailStream->recent;
+}
+
+unsigned long MailFolderCC::CountUnseenMessages() const
+{
+   // we can't use mail_status here because the mailbox is opened and IMAP
+   // doesn't like STATUS on SELECTed mailbox
+
+   SEARCHPGM *pgm = mail_newsearchpgm();
+   pgm->unseen = 1;
+
+   return SearchAndCountResults(pgm);
+}
+
+unsigned long MailFolderCC::CountDeletedMessages() const
+{
+   SEARCHPGM *pgm = mail_newsearchpgm();
+   pgm->deleted = 1;
+
+   return SearchAndCountResults(pgm);
 }
 
 bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
 {
-   CHECK( status, false, "NULL pointer in CountInterestingMessages" );
+   CHECK( status, false, "DoCountMessages: NULL pointer" );
 
-   MfStatusCache *mfStatusCache = MfStatusCache::Get();
+   CHECK( m_MailStream, false, "DoCountMessages: folder is closed" );
 
-   // do we already have the number of messages?
-   if ( mfStatusCache->GetStatus(GetName(), status) )
+   status->Init();
+
+   status->total = m_MailStream->nmsgs;
+   status->recent = m_MailStream->recent;
+
+   status->unread = CountUnseenMessages();
+
+   if ( status->recent || status->unread )
    {
-      // we can retrieve less than the total number of messages from the server
-      // (for example because the user interrupted header retrieval) but
-      // status->total is always the real total number, so compare with the real
-      // total
-
-      // do at least a simple consistency check
-      ASSERT_MSG( status->total == m_msgnoMax,
-                  "caching of number of messages broken" );
+      // ok, here is the explanation of this kludge: DoCountMessages() is
+      // supposed to be called very soon after opening the mailbox and never
+      // again because the status is cached and later we just update all
+      // status fields manually
+      //
+      // hence, all recent messages must be new: we didn't have time to read
+      // any of them yet!
+      status->newmsgs = status->recent;
    }
-   else // need to really calculate
+   else // no recent or no unseen
    {
-      status->Init();
-
-      HeaderInfoList_obj hil = GetHeaders();
-      if ( !hil )
-      {
-         // this is not a (programming) error - maybe we just failed to open
-         // the folder - so don't assert here
-         return false;
-      }
-
-      wxLogTrace("count",
-                 "Counting all interesting messages in '%s' (%lu all)",
-                 GetName().c_str(), m_nMessages);
-
-      status->total = m_msgnoMax;
-      for ( MsgnoType idx = 0; idx < m_nMessages; idx++ )
-      {
-         int stat = hil->GetItemByIndex(idx)->GetStatus();
-
-         // ignore deleted messages
-         if ( stat & MSG_STAT_DELETED )
-            continue;
-
-         MsgStatus msgStat = AnalyzeStatus(stat);
-
-         #define INC_NUM_OF(what)   if ( msgStat.what ) status->what++
-
-         INC_NUM_OF(recent);
-         INC_NUM_OF(unread);
-         INC_NUM_OF(newmsgs);
-         INC_NUM_OF(flagged);
-         INC_NUM_OF(searched);
-
-         #undef INC_NUM_OF
-      }
-
-      // cache the number of messages
-      mfStatusCache->UpdateStatus(GetName(), *status);
-
-      MailFolderCC *self = (MailFolderCC *)this; // const_cast
-      self->m_nRecent = status->recent;
+      // hence no new
+      status->newmsgs = 0;
    }
 
-   // only return true if we have at least something "interesting"
-   return status->newmsgs ||
-          status->recent ||
-          status->unread ||
-          status->flagged ||
-          status->searched;
+   // then get the number of flagged messages
+   SEARCHPGM *pgm = mail_newsearchpgm();
+   pgm->flagged = 1;
+   // do we want to do this too?
+   //pgm->undeleted = 1;
+
+   status->flagged = SearchAndCountResults(pgm);
+
+   // TODO: get the number of searched ones
+   status->searched = 0;
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------
 // Getting messages
 // ----------------------------------------------------------------------------
 
+MsgnoType
+MailFolderCC::GetMsgnoFromUID(UIdType uid) const
+{
+   // garbage in, garbage out
+   CHECK( uid != UID_ILLEGAL, MSGNO_ILLEGAL, "GetMsgnoFromUID: bad uid" );
+
+   CHECK( m_MailStream, MSGNO_ILLEGAL, "GetMsgnoFromUID: folder closed" );
+
+   // mail_msgno() is a slow function because it iterates over entire c-client
+   // internal cache but I don't see how to make it faster
+   return mail_msgno(m_MailStream, uid);
+}
+
 Message *
 MailFolderCC::GetMessage(unsigned long uid)
 {
    CHECK_DEAD_RC("Cannot access closed folder '%s'.", NULL);
 
-   HeaderInfoList_obj hil = GetHeaders();
-   CHECK( hil, NULL, "no listing in GetMessage" );
+   HeaderInfoList_obj headers = GetHeaders();
+   CHECK( headers, NULL, "GetMessage: failed to get headers" );
 
-   // find the header info object for this message: like this we can reuse
-   // information it already has
-   HeaderInfo *hi = NULL;
-   size_t count = hil->Count();
-   for ( size_t idx = 0; idx < count && !hi; idx++ )
-   {
-      hi = hil->GetItemByIndex(idx);
-      if ( !hi )
-      {
-         FAIL_MSG( "missign HeaderInfo in HeaderInfoList??" );
+   UIdType idx = headers->GetIdxFromUId(uid);
+   CHECK( idx != UID_ILLEGAL, NULL, "GetMessage: no UID with this message" );
 
-         continue;
-      }
-
-      if ( hi->GetUId() != uid )
-      {
-         // continue searching
-         hi = NULL;
-      }
-   }
-
+   HeaderInfo *hi = headers->GetItemByIndex((size_t)idx);
    CHECK( hi, NULL, "invalid UID in GetMessage" );
 
    return MessageCC::Create(this, *hi);
@@ -2849,58 +2794,78 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
    HeaderInfoList_obj hil = GetHeaders();
    CHECK( hil, NULL, "no listing in SearchMessages" );
 
-   unsigned long lastcount = 0;
-   MProgressDialog *progDlg = NULL;
    m_SearchMessagesFound = new UIdArray;
 
-   // Error is set to true if we cannot handle it on the server side
-   // or later, if a real error occurs.
-   bool error = false;
+   // server side searching doesn't support all possible search criteria,
+   // check if it can do this search first
 
-   // attempt server side search first: this currently only works for IMAP and
-   // NNTP but maybe it will work for other folders too later
+   SEARCHPGM *pgm = mail_newsearchpgm();
+   STRINGLIST **slistMatch;
+
+   switch ( crit->m_What )
    {
-      SEARCHPGM *pgm = mail_newsearchpgm();
-      STRINGLIST *slist = mail_newstringlist();
+      case SearchCriterium::SC_FULL:
+         slistMatch = &pgm->text;
+         break;
 
-      slist->text.data = (unsigned char *)strdup(crit->m_Key);
-      slist->text.size = crit->m_Key.length();
+      case SearchCriterium::SC_BODY:
+         slistMatch = &pgm->body;
+         break;
 
-      switch ( crit->m_What )
-      {
-         case SearchCriterium::SC_FULL:
-            pgm->text = slist; break;
-         case SearchCriterium::SC_BODY:
-            pgm->body = slist; break;
-         case SearchCriterium::SC_SUBJECT:
-            pgm->subject = slist; break;
-         case SearchCriterium::SC_TO:
-            pgm->to = slist; break;
-         case SearchCriterium::SC_FROM:
-            pgm->from = slist; break;
-         case SearchCriterium::SC_CC:
-            pgm->cc = slist; break;
+      case SearchCriterium::SC_SUBJECT:
+         slistMatch = &pgm->subject;
+         break;
 
-         default:
-            error = true;
-            mail_free_searchpgm(&pgm);
-      }
+      case SearchCriterium::SC_TO:
+         slistMatch = &pgm->to;
+         break;
 
-      if ( !error )
-      {
-         mail_search_full (m_MailStream,
-                           NIL /* charset: use default (US-ASCII) */,
-                           pgm,
-                           SE_UID | SE_FREE | SE_NOPREFETCH);
-      }
+      case SearchCriterium::SC_FROM:
+         slistMatch = &pgm->from;
+         break;
+
+      case SearchCriterium::SC_CC:
+         slistMatch = &pgm->cc;
+         break;
+
+      default:
+         slistMatch = NULL;
+         mail_free_searchpgm(&pgm);
    }
 
-   // our own search for all other folder types or unsuppported server
-   // searches
-   if ( error )
+   if ( slistMatch )
    {
-      String what;
-      error = false;
+      *slistMatch = mail_newstringlist();
+
+      (*slistMatch)->text.data = (unsigned char *)strdup(crit->m_Key);
+      (*slistMatch)->text.size = crit->m_Key.length();
+
+      if ( crit->m_Invert )
+      {
+         // represent the inverted search as "TRUE && !pgm"
+         SEARCHPGM *pgmReal = pgm;
+
+         pgm = mail_newsearchpgm();
+         pgm->msgno = mail_newsearchset();
+         pgm->msgno->first = 1;
+         pgm->msgno->last = GetMessageCount();
+
+         pgm->not = mail_newsearchpgmlist();
+         pgm->not->pgm = pgmReal;
+      }
+
+      // the m_SearchMessagesFound array is filled from mm_searched
+      mail_search_full (m_MailStream,
+                        NIL /* charset: use default (US-ASCII) */,
+                        pgm,
+                        SE_UID | SE_FREE | SE_NOPREFETCH);
+   }
+   else // can't do server side search
+   {
+      // how many did we find?
+      unsigned long countFound = 0;
+
+      MProgressDialog *progDlg = NULL;
 
       MsgnoType nMessages = GetMessageCount();
       if ( nMessages > (unsigned long)READ_CONFIG(m_Profile,
@@ -2918,61 +2883,70 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
          }
       }
 
+      String what;
       for ( size_t idx = 0; idx < nMessages; idx++ )
       {
+         HeaderInfo *hi = hil->GetItemByIndex(idx);
+
+         if ( !hi )
+         {
+            FAIL_MSG( "SearchMessages: can't get header info" );
+
+            continue;
+         }
+
          if ( crit->m_What == SearchCriterium::SC_SUBJECT )
          {
-            what = hil->GetItemByIndex(idx)->GetSubject();
+            what = hi->GetSubject();
+         }
+         else if ( crit->m_What == SearchCriterium::SC_FROM )
+         {
+            what = hi->GetFrom();
+         }
+         else if ( crit->m_What == SearchCriterium::SC_TO )
+         {
+            what = hi->GetTo();
          }
          else
          {
-            if ( crit->m_What == SearchCriterium::SC_FROM )
+            Message *msg = GetMessage(hi->GetUId());
+            switch ( crit->m_What )
             {
-               what = hil->GetItemByIndex(idx)->GetFrom();
+               case SearchCriterium::SC_FULL:
+               case SearchCriterium::SC_BODY:
+                  // FIXME: wrong for body as it checks the whole message
+                  // including header
+                  what = msg->FetchText();
+                  break;
+
+               case SearchCriterium::SC_HEADER:
+                  what = msg->GetHeader();
+                  break;
+
+               case SearchCriterium::SC_CC:
+                  msg->GetHeaderLine("CC", what);
+                  break;
+
+               default:
+                  FAIL_MSG("Unknown search criterium!");
             }
-            else
-            {
-               Message *msg = GetMessage(hil->GetItemByIndex(idx)->GetUId());
-               ASSERT(hil);
-               switch(crit->m_What)
-               {
-                  case SearchCriterium::SC_FULL:
-                  case SearchCriterium::SC_BODY:
-                     // wrong for body as it checks the whole message
-                     // including header
-                     what = msg->FetchText();
-                     break;
-                  case SearchCriterium::SC_HEADER:
-                     what = msg->GetHeader();
-                     break;
-                  case SearchCriterium::SC_TO:
-                     msg->GetHeaderLine("To", what);
-                     break;
-                  case SearchCriterium::SC_CC:
-                     msg->GetHeaderLine("CC", what);
-                     break;
-                  default:
-                     FAIL_MSG("Unknown search criterium!");
-                     error = true;
-               }
-               msg->DecRef();
-            }
+
+            msg->DecRef();
          }
 
-         bool found =  what.Contains(crit->m_Key);
+         bool found = what.Contains(crit->m_Key);
          if(crit->m_Invert)
-            found = ! found;
+            found = !found;
          if(found)
             m_SearchMessagesFound->Add(hil->GetItemByIndex(idx)->GetUId());
 
          if(progDlg)
          {
             String msg;
-            msg.Printf(_("Searching in %lu messages..."),
-                       (unsigned long) m_nMessages);
+            msg.Printf(_("Searching in %lu messages..."), nMessages);
             String msg2;
             unsigned long cnt = m_SearchMessagesFound->Count();
-            if(cnt != lastcount)
+            if(cnt != countFound)
             {
                msg2.Printf(_(" - %lu matches found."), cnt);
                msg = msg + msg2;
@@ -2982,7 +2956,7 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
                   break;
                }
 
-               lastcount = cnt;
+               countFound = cnt;
             }
             else if( !progDlg->Update(idx) )
             {
@@ -2991,21 +2965,20 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
             }
          }
       }
-      hil->DecRef();
+
+      delete progDlg;
    }
 
    UIdArray *rc = m_SearchMessagesFound; // will get freed by caller!
    m_SearchMessagesFound = NULL;
 
-   if(progDlg)
-      delete progDlg;
    return rc;
 }
 
 String
 MailFolderCC::GetMessageUID(unsigned long msgno) const
 {
-   CHECK( m_MailStream, "", "can't get message UID - folder is closed" );
+   CHECK( m_MailStream, "", "GetMessageUID(): folder is closed" );
 
    String uidString;
 
@@ -3057,16 +3030,66 @@ MailFolderCC::GetMessageUID(unsigned long msgno) const
 /* static */
 String MailFolderCC::BuildSequence(const UIdArray& messages)
 {
-   // TODO: generate 1:5 instead of 1,2,3,4,5!
+   // generate the sequence of the form "1:10,12,13,17:19,27"
+
+   // current, first and last msgnos in the sequence we're generating
+   MsgnoType msgno = MSGNO_ILLEGAL,
+             msgnoFirst = MSGNO_ILLEGAL,
+             msgnoLast = MSGNO_ILLEGAL;
 
    String sequence;
-   size_t n = messages.GetCount();
-   for ( size_t i = 0; i < n; i++ )
-   {
-      if ( i > 0 )
-         sequence += ',';
 
-      sequence += strutil_ultoa(messages[i]);
+   // we do one extra iteration to flush the last range at the end
+   size_t count = messages.GetCount();
+   for ( size_t n = 0; n <= count; n++ )
+   {
+      if ( n < count )
+         msgno = messages[n];
+
+      if ( msgnoFirst != MSGNO_ILLEGAL )
+      {
+         if ( n < count && msgno == msgnoLast + 1 )
+         {
+            // continue this range
+            msgnoLast = msgno;
+
+            // skip starting of the new range below
+            continue;
+         }
+         else
+         {
+            // flush the previous range
+            if ( !sequence.empty() )
+               sequence << ',';
+
+            sequence << msgnoFirst;
+
+            switch ( msgnoLast - msgnoFirst )
+            {
+               case 0:
+                  // single msg
+                  break;
+
+               case 1:
+                  // 2 messages, still don't generate a range for this
+                  sequence << ',' << msgnoLast;
+                  break;
+
+               default:
+                  // real range
+                  sequence << ':' << msgnoLast;
+            }
+
+            // start the new range below
+         }
+      }
+      //else: this is the first message, start the new range below
+
+      if ( n < count )
+      {
+         msgnoFirst =
+         msgnoLast = msgno;
+      }
    }
 
    return sequence;
@@ -3177,13 +3200,6 @@ MailFolderCC::DebugDump() const
 // MailFolderCC working with the headers
 // ----------------------------------------------------------------------------
 
-unsigned long MailFolderCC::GetMessageCount() const
-{
-   CHECK( m_MailStream, 0, "GetMessageCount: folder is closed" );
-
-   return m_MailStream->nmsgs;
-}
-
 size_t MailFolderCC::GetHeaderInfo(HeaderInfo *arrayHI,
                                    MsgnoType msgnoFrom, MsgnoType msgnoTo)
 {
@@ -3197,14 +3213,11 @@ size_t MailFolderCC::GetHeaderInfo(HeaderInfo *arrayHI,
    wxLogTrace(TRACE_MF_CALLS, "Retrieving info for headers %lu..%lu for '%s'...",
               msgnoFrom, msgnoTo, GetName().c_str());
 
-   // prepare m_overviewData to be used by OverviewHeaderEntry()
-   // ----------------------------------------------------------
-
-   // normally we NULL it before exiting the function
-   CHECK( !m_overviewData, "GetHeaderInfo: reentrancy detected" );
+   // prepare overviewData to be used by OverviewHeaderEntry()
+   // --------------------------------------------------------
 
    MsgnoType nMessages = msgnoTo - msgnoFrom + 1;
-   m_overviewData = new OverviewData(arrayHI, nMessages, msgnoFrom);
+   OverviewData overviewData(arrayHI, nMessages, msgnoFrom);
 
    // don't show the progress dialog if we're not in interactive mode
    if ( GetInteractiveFrame() && !mApplication->IsInAwayMode() )
@@ -3221,7 +3234,7 @@ size_t MailFolderCC::GetHeaderInfo(HeaderInfo *arrayHI,
 
          // create the progress meter which we will just have to Update() from
          // OverviewHeaderEntry() later
-         m_overviewData->SetProgressDialog(
+         overviewData.SetProgressDialog(
                new MProgressDialog(GetName(), msg, nMessages,
                                    NULL, false, true));
       }
@@ -3243,55 +3256,92 @@ size_t MailFolderCC::GetHeaderInfo(HeaderInfo *arrayHI,
       sequence << ':' << strutil_ultoa(to);
    }
 
-   // for MH folders this call generates mm_exists notification
-   // resulting in an infinite recursion, so disable processing them
+   if ( !mail_uid_sequence(m_MailStream, (char *)sequence.c_str()) )
    {
-      CCCallbackDisabler noCB;
+      FAIL_MSG( "mail_uid_sequence() failed" );
 
-      // do fill the listing by calling mail_fetch_overview_x() which will
-      // call mm_overview_header -> OverviewHeader -> OverviewHeaderEntry
-      // for each header
-      mail_fetch_overview_x(m_MailStream,
-                            (char *)sequence.c_str(),
-                            mm_overview_header);
+      return 0;
    }
 
-   // only we're supposed to do it!
-   CHECK( m_overviewData, 0, "GetHeaderInfo: who deleted m_overviewData?" );
+   // do fill the listing
+   for ( MsgnoType i = msgnoFrom; i <= msgnoTo; i++ )
+   {
+      MESSAGECACHE *elt = mail_elt(m_MailStream, i);
+      if ( !elt )
+      {
+         FAIL_MSG( "failed to get sequence element?" );
+         continue;
+      }
 
-   size_t nRetrieved = m_overviewData->GetRetrievedCount();
+      if ( !elt->sequence )
+      {
+         FAIL_MSG( "the element is supposed to be in the sequence" );
 
-   delete m_overviewData;
+         continue;
+      }
 
-   // we shouldn't overwrite the provided buffer
-   ASSERT_MSG( nRetrieved <= nMessages, "GetHeaderInfo: got too many msgs?" );
+      ENVELOPE *env = mail_fetch_structure(m_MailStream, i, NIL, NIL);
+      if ( !env )
+      {
+         FAIL_MSG( "failed to get sequence element envelope?" );
 
-   return nRetrieved;
+         continue;
+      }
+
+      if ( !OverviewHeaderEntry(&overviewData, elt, env) )
+      {
+         // cancelled
+         break;
+      }
+   }
+
+   return overviewData.GetRetrievedCount();
 }
 
-// called from mm_overview_header() callback, route it to the right folder
-int
-MailFolderCC::OverviewHeader(MAILSTREAM *stream,
-                             unsigned long uid,
-                             OVERVIEW_X *ov)
+/* static */
+String
+MailFolderCC::ParseAddress(ADDRESS *adr)
 {
-   CHECK_STREAM_LIST();
+   String from;
 
-   MailFolderCC *mf = MailFolderCC::LookupObject(stream);
-   CHECK(mf, 0, "trying to build overview for non-existent folder");
+   /* get first from address from envelope */
+   while ( adr && !adr->host )
+      adr = adr->next;
 
-   return mf->OverviewHeaderEntry(uid, ov);
+   if(adr)
+   {
+      from = "";
+      if (adr->personal) // a personal name is given
+         from << adr->personal;
+      if(adr->mailbox)
+      {
+         if(adr->personal)
+            from << " <";
+         from << adr->mailbox;
+         if(adr->host && strlen(adr->host)
+            && (strcmp(adr->host,BADHOST) != 0))
+            from << '@' << adr->host;
+         if(adr->personal)
+            from << '>';
+      }
+   }
+   else
+      from = _("<address missing>");
+
+   return from;
 }
 
 int
-MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
+MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
+                                  MESSAGECACHE *elt,
+                                  ENVELOPE *env)
 {
-   // m_overviewData must have been created in GetHeaderInfo()
-   CHECK( m_overviewData, 0, "OverviewHeaderEntry: no overview data?" );
+   // overviewData must have been created in GetHeaderInfo()
+   CHECK( overviewData, 0, "OverviewHeaderEntry: no overview data?" );
 
    // it is possible that new messages have arrived in the meantime, ignore
    // them (FIXME: is it really normal?)
-   if ( m_overviewData->Done() )
+   if ( overviewData->Done() )
    {
       wxLogDebug("New message(s) appeared in folder while overviewing it, "
                  "ignored.");
@@ -3302,116 +3352,157 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
 
    // update the progress dialog and also check if it wasn't cancelled by the
    // user in the meantime
-   if ( !m_overviewData->UpdateProgress() )
+   if ( !overviewData->UpdateProgress() )
    {
       // cancelled by user
       return 0;
    }
 
-   // see what we've got
-   MsgnoType msgno = m_overviewData->GetCurrentMsgno();
-   MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
+   // store what we've got
+   HeaderInfo& entry = *overviewData->GetCurrent();
 
-   CHECK( elt, 0, "OverviewHeaderEntry: mail_elt() failed" );
+   // status
+   entry.m_Status = GetMsgStatus(elt);
 
-   if ( ov )
+   // date
+   MESSAGECACHE selt;
+   mail_parse_date(&selt, env->date);
+   entry.m_Date = (time_t) mail_longdate(&selt);
+
+   // from and to
+   entry.m_From = ParseAddress(env->from);
+
+   if ( m_folderType == MF_NNTP || m_folderType == MF_NEWS )
    {
-      // status
-      entry.m_Status = GetMsgStatus(elt);
-
-      // date
-      MESSAGECACHE selt;
-      mail_parse_date(&selt, ov->date);
-      entry.m_Date = (time_t) mail_longdate(&selt);
-
-      // from and to
-      entry.m_From = ParseAddress(ov->from);
-
-      if ( m_folderType == MF_NNTP || m_folderType == MF_NEWS )
-      {
-         entry.m_NewsGroups = ov->newsgroups;
-      }
-      else
-      {
-         entry.m_To = ParseAddress( ov->to );
-      }
-
-      // deal with encodings for the text header fields
-      wxFontEncoding encoding;
-      if ( !entry.m_To.empty() )
-      {
-         entry.m_To = DecodeHeader(entry.m_To, &encoding);
-      }
-      else
-      {
-         encoding = wxFONTENCODING_SYSTEM;
-      }
-
-      wxFontEncoding encodingMsg = encoding;
-
-      entry.m_From = DecodeHeader(entry.m_From, &encoding);
-      if ( (encoding != wxFONTENCODING_SYSTEM) &&
-           (encoding != encodingMsg) )
-      {
-         if ( encodingMsg != wxFONTENCODING_SYSTEM )
-         {
-            // VZ: I just want to know if this happens, we can't do anything
-            //     smart about this so far anyhow as we can't display the
-            //     different fields in different encodings
-            wxLogDebug("Different encodings for From and To fields, "
-                       "From may be displayed incorrectly.");
-         }
-         else
-         {
-            encodingMsg = encoding;
-         }
-      }
-
-      // subject
-
-      entry.m_Subject = DecodeHeader(ov->subject, &encoding);
-      if ( (encoding != wxFONTENCODING_SYSTEM) &&
-           (encoding != encodingMsg) )
-      {
-         if ( encodingMsg != wxFONTENCODING_SYSTEM )
-         {
-            wxLogDebug("Different encodings for From and Subject fields, "
-                       "subject may be displayed incorrectly.");
-         }
-         else
-         {
-            encodingMsg = encoding;
-         }
-      }
-
-      // all the other fields
-      entry.m_Size = ov->optional.octets;
-      entry.m_Lines = ov->optional.lines;
-      entry.m_Id = ov->message_id;
-      entry.m_References = ov->references;
-      entry.m_InReplyTo = ov->inReplyTo;
-      entry.m_UId = uid;
-
-      // set the font encoding to be used for displaying this entry
-      entry.m_Encoding = encodingMsg;
-
-      m_overviewData->Next();
+      entry.m_NewsGroups = env->newsgroups;
    }
    else
    {
-      // parsing the message failed in c-client lib. Why?
-      wxLogDebug("Parsing folder overview failed for message %lu", uid);
-
-      // don't do anything
+      entry.m_To = ParseAddress(env->to);
    }
+
+   // deal with encodings for the text header fields
+   wxFontEncoding encoding;
+   if ( !entry.m_To.empty() )
+   {
+      entry.m_To = DecodeHeader(entry.m_To, &encoding);
+   }
+   else
+   {
+      encoding = wxFONTENCODING_SYSTEM;
+   }
+
+   wxFontEncoding encodingMsg = encoding;
+
+   entry.m_From = DecodeHeader(entry.m_From, &encoding);
+   if ( (encoding != wxFONTENCODING_SYSTEM) &&
+        (encoding != encodingMsg) )
+   {
+      if ( encodingMsg != wxFONTENCODING_SYSTEM )
+      {
+         // VZ: I just want to know if this happens, we can't do anything
+         //     smart about this so far anyhow as we can't display the
+         //     different fields in different encodings
+         wxLogDebug("Different encodings for From and To fields, "
+                    "From may be displayed incorrectly.");
+      }
+      else
+      {
+         encodingMsg = encoding;
+      }
+   }
+
+   // subject
+
+   entry.m_Subject = DecodeHeader(env->subject, &encoding);
+   if ( (encoding != wxFONTENCODING_SYSTEM) &&
+        (encoding != encodingMsg) )
+   {
+      if ( encodingMsg != wxFONTENCODING_SYSTEM )
+      {
+         wxLogDebug("Different encodings for From and Subject fields, "
+                    "subject may be displayed incorrectly.");
+      }
+      else
+      {
+         encodingMsg = encoding;
+      }
+   }
+
+   // all the other fields
+   entry.m_Size = elt->rfc822_size;
+   entry.m_Lines = 0;   // TODO: calculate them?
+   entry.m_Id = env->message_id;
+   entry.m_References = env->references;
+   entry.m_InReplyTo = env->in_reply_to;
+   entry.m_UId = mail_uid(m_MailStream, elt->msgno);
+
+   // set the font encoding to be used for displaying this entry
+   entry.m_Encoding = encodingMsg;
+
+   overviewData->Next();
 
    // continue
    return 1;
 }
 
 // ----------------------------------------------------------------------------
+// MailFolderCC handling of message number changes
+// ----------------------------------------------------------------------------
+
+void MailFolderCC::OnMailExists(MsgnoType msgnoMax)
+{
+   // ignore any callbacks for closed or half opened folders: normally we
+   // shouldn't get them at all but somehow we do (ask c-client why...)
+   if ( !m_MailStream || m_MailStream->halfopen )
+   {
+      wxLogDebug("mm_exists() for not opened folder '%s' ignored.",
+                 GetName().c_str());
+   }
+
+   // update the number of headers
+   if ( m_headers )
+   {
+      m_headers->OnAdd(msgnoMax);
+   }
+
+   // the high level code may decide to group several mm_exists() together
+   // (for example, when adding a lot of messages to this folder), it will
+   // call ResumeUpdates() later which will call RequestUpdate()
+   if ( !IsUpdateSuspended() )
+   {
+      // tell everyone that something changed
+      RequestUpdate();
+   }
+}
+
+void MailFolderCC::OnMailExpunge(MsgnoType msgno)
+{
+   // remove the message from the header info list
+   if ( m_headers )
+   {
+      m_headers->OnRemove(m_headers->GetIdxFromMsgno(msgno));
+   }
+
+   // let all the others know that some messages were expunged: we don't do it
+   // right now but wait until mm_exists() which is sent after all
+   // mm_expunged() as it is much faster to delete all messages at once
+   // instead of one at a time
+   if ( !m_expungedIndices )
+   {
+      // create a new array
+      m_expungedIndices = new wxArrayInt;
+   }
+
+   // add the msgno to the list of expunged messages
+   m_expungedIndices->Add(msgno);
+}
+
+// ----------------------------------------------------------------------------
 // MailFolderCC new mail handling
 // ----------------------------------------------------------------------------
+
+#ifdef BROKEN_BY_VZ
 
 void MailFolderCC::FilterNewMailAndUpdate()
 {
@@ -3468,38 +3559,7 @@ void MailFolderCC::FilterNewMailAndUpdate()
    }
 }
 
-/* static */
-String
-MailFolderCC::ParseAddress(ADDRESS *adr)
-{
-   String from;
-
-   /* get first from address from envelope */
-   while ( adr && !adr->host )
-      adr = adr->next;
-
-   if(adr)
-   {
-      from = "";
-      if (adr->personal) // a personal name is given
-         from << adr->personal;
-      if(adr->mailbox)
-      {
-         if(adr->personal)
-            from << " <";
-         from << adr->mailbox;
-         if(adr->host && strlen(adr->host)
-            && (strcmp(adr->host,BADHOST) != 0))
-            from << '@' << adr->host;
-         if(adr->personal)
-            from << '>';
-      }
-   }
-   else
-      from = _("<address missing>");
-
-   return from;
-}
+#endif // BROKEN_BY_VZ
 
 // ----------------------------------------------------------------------------
 // CClient initialization and clean up
@@ -3674,168 +3734,22 @@ const String& MailFolder::InitializeNewsSpool()
 
 /// tells program that there are this many messages in the mailbox
 void
-MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
+MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgnoMax)
 {
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET( mf, "number of messages changed in unknown mail folder" );
 
-   // be careful to avoid infinite recursion or other troubles when called from
-   // ExpungeMessages() called from FilterNewMailAndUpdate() above: in this
-   // case we don't need to do much as the listing was just rebuilt anyhow, but
-   // we still need to update the number of messages in the folder status cache
-   bool insideFilterCode = mf->m_InFilterCode->IsLocked();
-
-   // normally msgno should never be less than m_nMessages because we adjust
-   // the latter in mm_expunged immediately when a message is expunged and so
-   // we used to test here for "msgno > m_msgnoMax" which is more logical, but
-   // it seems that "msgno < m_msgnoMax" case does happen with IMAP servers if
-   // we send "EXPUNGE" and the server replies with "* EXISTS" untagged reply
-   // before returning tagged "EXPUNGE completed" - then mm_exists() is called
-   // before mm_expunged() is and mf->m_msgnoMax hadn't been updated yet!
-   //
-   // IMHO it's really stupid to do it like this in cclient, but life being
-   // what it is, we can't change it so we just rebuild the listing
-   // completely in this case as the messages have been both deleted and
-   // added
-   if ( msgno != mf->m_msgnoMax )
-   {
-      if ( !insideFilterCode )
-      {
-         // number of msgs must be always in sync
-         mf->m_msgnoMax = msgno;
-
-         // new message(s) arrived, we need to reapply the filters
-         mf->m_GotNewMessages = true;
-
-         // rebuild the listing completely
-         //
-         // TODO: should just add new messages to it!
-         if ( mf->m_Listing )
-         {
-            mf->m_Listing->DecRef();
-            mf->m_Listing = NULL;
-
-            // no need to send event about deleted messages as the listing is
-            // going to be regenerated anyhow
-            //
-            // moreover, the indices become invalid now as they were for the
-            // old listing
-            if ( mf->m_expungedIndices )
-            {
-               delete mf->m_expungedIndices;
-               mf->m_expungedIndices = NULL;
-            }
-         }
-      }
-   }
-   else // the messages were expunged
-   {
-      // only request update below if something happened: the only thing which
-      // can happen to us in this case is that messages were expunged from the
-      // folder, so check for this, otherwise we just got mm_exists() because
-      // of a checkpoint or something and it just confirms that the number of
-      // messages in the folder didn't change (why send it then? ask
-      // cclient author...)
-      if ( !mf->m_expungedIndices )
-      {
-         // no, they were not - don't refresh everything!
-         return;
-      }
-
-      // it is not necessary to update the other status fields because they
-      // were already updated when the message was deleted, but this one must
-      // be kept in sync manually as it wasn't updated before
-      MailFolderStatus status;
-      MfStatusCache *mfStatusCache = MfStatusCache::Get();
-      if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
-      {
-         size_t numExpunged = mf->m_expungedIndices->GetCount();
-         ASSERT_MSG( status.total >= numExpunged,
-                     "total number of messages miscached" );
-
-         status.total -= numExpunged;
-
-         mfStatusCache->UpdateStatus(mf->GetName(), status);
-      }
-   }
-
-   // never request update from inside the filter code
-   if ( insideFilterCode )
-   {
-      // we need to delete m_expungedIndices here: normally it is done by
-      // RequestUpdate() but we don't call it in this case
-      if ( mf->m_expungedIndices )
-      {
-         delete mf->m_expungedIndices;
-         mf->m_expungedIndices = NULL;
-      }
-   }
-   else // not inside filter code
-   {
-      // don't request update if we are only half opened: this will cause
-      // another attempt to open the folder (which will fail because it can't
-      // be opened) and so lead to an infinite loop - besides it's plainly not
-      // needed as we don't have any messages in a half open folder anyhow
-      if ( stream && !stream->halfopen )
-      {
-         mf->RequestUpdate();
-      }
-   }
+   mf->OnMailExists(msgnoMax);
 }
 
 /* static */
 void
-MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
+MailFolderCC::mm_expunged(MAILSTREAM *stream, unsigned long msgno)
 {
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf, "mm_expunged for non existent folder");
 
-   if ( mf->HaveListing() )
-   {
-      // remove one message from listing
-      wxLogTrace(TRACE_MF_CALLBACK,
-                 "Removing element %lu from listing", msgno);
-
-      HeaderInfoList_obj hil = mf->GetHeaders();
-
-      size_t idx = hil->GetIdxFromMsgno(msgno);
-      CHECK_RET( idx < mf->m_nMessages, "invalid msgno in mm_expunged()" );
-
-      if ( !mf->m_expungedIndices )
-      {
-         // create a new array
-         mf->m_expungedIndices = new wxArrayInt;
-      }
-
-      // add the msgno to the list of expunged messages
-      int msgnoExp;
-      if ( mf->m_InFilterCode->IsLocked() )
-      {
-         // we don't need the real msgno as it won't be used in mm_exists()
-         // anyhow (see code and comment there), but we do need to have the
-         // correct number of elements in m_expungedIndices array to update the
-         // total number of messages properly, so add a dummy element
-         msgnoExp = 0;
-      }
-      else // not in filter code
-      {
-         // find the msgno which we expunged
-         msgnoExp = hil->GetPosFromIdx(idx);
-      }
-
-      mf->m_expungedIndices->Add(msgnoExp);
-
-      // remove it now (do it after calling GetPosFromIdx() above or the
-      // position would be wrong!)
-      mf->m_Listing->Remove(idx);
-
-      ASSERT_MSG( mf->m_nMessages > 0,
-                  "expunged a message when we don't have any?" );
-
-      mf->m_nMessages--;
-      mf->m_msgnoMax--;
-   }
-   //else: no need to do anything right now
+   mf->OnMailExpunge(msgno);
 }
 
 /// this message matches a search
@@ -3930,7 +3844,7 @@ MailFolderCC::mm_lsub(MAILSTREAM * stream,
 */
 void
 MailFolderCC::mm_status(MAILSTREAM *stream,
-                        String mailbox ,
+                        String mailbox,
                         MAILSTATUS *status)
 {
    MailFolderCC *mf = LookupObject(stream, mailbox);
@@ -3939,8 +3853,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
    wxLogTrace(TRACE_MF_CALLBACK, "mm_status: folder '%s', %lu messages",
               mf->m_ImapSpec.c_str(), status->messages);
 
-   if ( status->flags & SA_MESSAGES )
-      mf->RequestUpdate();
+   // do nothing here for now
 }
 
 /** log a verbose message
@@ -4100,7 +4013,7 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
 
 /* static */
 void
-MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long msgno)
+MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long msgno)
 {
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf, "mm_flags for non existent folder");
@@ -4110,8 +4023,8 @@ MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long msgno)
 }
 
 /** alert that c-client will run critical code
-       @param  stream   mailstream
-   */
+    @param  stream   mailstream
+ */
 void
 MailFolderCC::mm_critical(MAILSTREAM *stream)
 {
@@ -4178,41 +4091,52 @@ MailFolderCC::mm_fatal(char *str)
 }
 
 // ----------------------------------------------------------------------------
-// listing updating
+// MailFolderCC: message status updating
 // ----------------------------------------------------------------------------
 
-bool MailFolderCC::CanSendUpdateEvents() const
+// msg status info
+//
+// NB: name MessageStatus is already taken by MailFolder
+struct MsgStatus
 {
-   // we never send update events while the listing is being changed by filter
-   // code as it's at the very best inefficient (the listing is going to be
-   // regenerated anyhow after we're done with filters) and in the worst case
-   // can be fatal
-   //
-   // also, if the application is shutting down, there is no point in sending
-   // events
-   return !m_InFilterCode->IsLocked() && !mApplication->IsShuttingDown();
+   bool recent;
+   bool unread;
+   bool newmsgs;
+   bool flagged;
+   bool searched;
+};
+
+// is this message recent/new/unread/...?
+static MsgStatus AnalyzeStatus(int stat)
+{
+   MsgStatus status;
+
+   // deal with recent and new (== recent and !seen)
+   status.recent = (stat & MailFolder::MSG_STAT_RECENT) != 0;
+   status.unread = !(stat & MailFolder::MSG_STAT_SEEN);
+   status.newmsgs = status.recent && status.unread;
+
+   // and also count flagged and searched messages
+   status.flagged = (stat & MailFolder::MSG_STAT_FLAGGED) != 0;
+   status.searched = (stat & MailFolder::MSG_STAT_SEARCHED ) != 0;
+
+   return status;
 }
 
 void
 MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 {
-   if( !HaveListing() )
-   {
-      // will be regenerated anyway
-      return;
-   }
+   MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
+   CHECK_RET( elt, "UpdateMessageStatus: no elt for the given msgno?" );
 
-   // Otherwise: update the current listing information:
-   HeaderInfoList_obj hil = GetHeaders();
+   HeaderInfoList_obj headers = GetHeaders();
+   CHECK_RET( headers, "UpdateMessageStatus: couldn't get headers" );
 
-   // Get the listing entry for this message:
-   size_t idx = hil->GetIdxFromMsgno(msgno);
-   HeaderInfo *hi = hil->GetItemByIndex(idx);
+   size_t idx = headers->GetIdxFromMsgno(msgno);
 
-   // this should never happen - we must have this message somewhere!
-   CHECK_RET( hi, "no HeaderInfo in mm_flags" );
+   HeaderInfo *hi = headers->GetItemByIndex(idx);
+   CHECK_RET( hi, "UpdateMessageStatus: no header info for the given msgno?" );
 
-   MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
    int statusNew = GetMsgStatus(elt),
        statusOld = hi->GetStatus();
    if ( statusNew != statusOld )
@@ -4220,7 +4144,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
       // update the cached status
       MailFolderStatus status;
       MfStatusCache *mfStatusCache = MfStatusCache::Get();
-      if ( mfStatusCache->GetStatus(GetName(), &status) )
+      if ( !mfStatusCache->GetStatus(GetName(), &status) )
       {
          bool wasDeleted = (statusOld & MSG_STAT_DELETED) != 0,
               isDeleted = (statusNew & MSG_STAT_DELETED) != 0;
@@ -4253,8 +4177,14 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 
          mfStatusCache->UpdateStatus(GetName(), status);
       }
+      else
+      {
+         // if it isn't, our status calculations elsewhere are going to be
+         // wrong!
+         FAIL_MSG( "status of opened folder SHOULD be cached" );
+      }
 
-      ((HeaderInfoImpl *)hi)->m_Status = statusNew;
+      hi->m_Status = statusNew;
 
       // tell all interested that status changed unless we're inside the
       // filtering code: in this case we stay silent as the listing is
@@ -4265,37 +4195,31 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
          wxLogTrace(TRACE_MF_EVENTS, "Sending MsgStatus event for folder '%s'",
                     GetName().c_str());
 
-         size_t pos = hil->GetPosFromIdx(idx);
-         MEventManager::Send(new MEventMsgStatusData(this, pos, hi->Clone()));
+         size_t pos = headers->GetPosFromIdx(idx);
+         MEventManager::Send(new MEventMsgStatusData(this, pos, *hi));
       }
    }
    //else: flags didn't really change
 }
 
-void
-MailFolderCC::UpdateStatus(void)
-{
-   // TODO: what is this supposed to do?
-}
+// ----------------------------------------------------------------------------
+// MailFolderCC::RequestUpdate
+// ----------------------------------------------------------------------------
 
 void
 MailFolderCC::RequestUpdate()
 {
-   // don't do anything while executing the filter code, the listing is going
-   // to be rebuilt anyhow
-   if ( !CanSendUpdateEvents() )
-   {
-      DBGMESSAGE(("Can't request update for folder '%s'",
-                 GetName().c_str()));
+   // it is the caller's responsibility to check for this
+   CHECK_RET( !IsUpdateSuspended(), "shouldn't call RequestUpdate() now" );
 
-      return;
-   }
-
-   // if we have m_expungedIndices and the listing is valid it can only mean
-   // that some messages were expunged but no new ones arrived (as then we'd
-   // have invalidated the listing), in which case we don't send the "total
-   // refresh" event but just one telling that the messages were expunged
-   if ( HaveListing() && m_expungedIndices )
+   // we distinguish between the special case when we just deleted some
+   // messages and anything else (basicly new mail but we can also get
+   // something more complicated as we can get mm_exists from inside
+   // mail_expunge so it can be a combination of two)
+   //
+   // expunging messages is done interactively, so it should be handled as
+   // fast as possible
+   if ( m_expungedIndices )
    {
       wxLogTrace(TRACE_MF_EVENTS, "Sending FolderExpunged event for folder '%s'",
                  GetName().c_str());
@@ -4305,22 +4229,13 @@ MailFolderCC::RequestUpdate()
       // MEventFolderExpungeData() will delete it
       m_expungedIndices = NULL;
    }
-   else // new mail
+   else // some new messages
    {
-      // we don't need to send the expunge event if we don't have the listing,
-      // just reset m_expungedIndices
+      // as we don't send the expunge event we have to delete them ourselves
       if ( m_expungedIndices )
       {
          delete m_expungedIndices;
          m_expungedIndices = NULL;
-      }
-
-      // throw away the old listing so that the next call to GetHeaders() will
-      // rebuild it
-      if ( m_Listing )
-      {
-         m_Listing->DecRef();
-         m_Listing = NULL;
       }
 
       // tell all interested that the listing changed
@@ -4505,7 +4420,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
    if ( mf )
    {
       stream = mf->m_MailStream;
-      nmsgs = mf->m_msgnoMax;
+      nmsgs = mf->GetMessageCount();
       mf->DecRef();
 
       noCCC = NULL;
@@ -4700,95 +4615,6 @@ void MailFolderCC::EndReading()
    }
    //else: we didn't create it in StartReading()
 #endif // USE_READ_PROGRESS
-}
-
-// ----------------------------------------------------------------------------
-// replacements of some cclient functions
-// ----------------------------------------------------------------------------
-
-/*
- We have our version of cclient mail_fetch_overview() because:
-
- 1. we need the "To" header which is not retrieved by mail_fetch_overview()
-    (and also "Newsgroups" now)
-
- 2. we want to allow the user to abort retrieving the headers
-
- 3. we want to retrieve the headers from larger msgnos down to lower ones,
-    i.e. in the reverse order to mail_fetch_overview() - this is useful if
-    we're aborted as the user will see the most recent messages then and not
-    the oldest ones
-
- Note that now the code elsewhere relies on messages being fetched in reverse
- order, so it shouldn't be changed!
-
- Note II: we assume we have sequences of one interval only, this allows us to
- optimize the loop slightly using insideSequence (see below)
-*/
-
-void mail_fetch_overview_x(MAILSTREAM *stream, char *sequence, overview_x_t ofn)
-{
-   CHECK_RET( ofn, "must have overview function in mail_fetch_overview_x" );
-
-   if ( mail_uid_sequence (stream,sequence) && mail_ping (stream) )
-   {
-      bool insideSequence = false;
-
-      OVERVIEW_X ov;
-      ov.optional.lines = 0;
-      ov.optional.xref = NIL;
-
-      for ( unsigned long i = stream->nmsgs; i >= 1; i-- )
-      {
-         MESSAGECACHE *elt = mail_elt(stream, i);
-         if ( !elt )
-         {
-            FAIL_MSG( "failed to get sequence element?" );
-            continue;
-         }
-
-         if ( elt->sequence )
-         {
-            // set the flag used by the code below
-            insideSequence = true;
-         }
-         else // it's not in the sequence we're overviewing, ignore it
-         {
-            // we assume here that we only have the sequences of one interval
-            // and so if we had already had an element from the sequence and
-            // this one is not from it, then all the next elements are not in
-            // it neither, so we can skip them safely
-            if ( insideSequence )
-               break;
-
-            // just skip this one
-            continue;
-         }
-
-         ENVELOPE *env = mail_fetch_structure(stream, i, NIL, NIL);
-         if ( !env )
-         {
-            FAIL_MSG( "failed to get sequence element envelope?" );
-
-            continue;
-         }
-
-         ov.subject = env->subject;
-         ov.from = env->from;
-         ov.to = env->to;
-         ov.newsgroups = env->newsgroups; // no need to strcpy()
-         ov.date = env->date;
-         ov.message_id = env->message_id;
-         ov.references = env->references;
-         ov.inReplyTo = env->in_reply_to;
-         ov.optional.octets = elt->rfc822_size;
-         if(! (*ofn) (stream,mail_uid (stream,i),&ov))
-         {
-            // cancelled
-            break;
-         }
-      }
-   }
 }
 
 // ----------------------------------------------------------------------------
@@ -5016,15 +4842,6 @@ void
 mm_fatal(char *str)
 {
    MailFolderCC::mm_fatal(str);
-}
-
-static int
-mm_overview_header (MAILSTREAM *stream, unsigned long uid, OVERVIEW_X *ov)
-{
-   // this one is never ignored as it always is generated at our request
-   TRACE_CALLBACK1(mm_overview_header, "%lu", uid);
-
-   return MailFolderCC::OverviewHeader(stream, uid, ov);
 }
 
 // ----------------------------------------------------------------------------

@@ -19,7 +19,7 @@
 
 #include "MObject.h"
 
-#include "FolderType.h"    // for UIdType
+#include "HeaderInfo.h"    // for MEventMsgStatusData
 
 /**
    MEvent ids for all kinds of events used in M. The name in the comment is the
@@ -240,23 +240,22 @@ public:
    // ctor
    MEventMsgStatusData(MailFolder *folder,
                        size_t index,
-                       HeaderInfo *hi)
-      : MEventWithFolderData(MEventId_MsgStatus, folder)
+                       const HeaderInfo& hi)
+      : MEventWithFolderData(MEventId_MsgStatus, folder), m_hi(hi)
       {
          m_index = index;
-         m_hi = hi;
       }
    ~MEventMsgStatusData();
 
    /// Get the changed header info
-   const HeaderInfo *GetHeaderInfo() const { return m_hi; }
+   const HeaderInfo *GetHeaderInfo() const { return &m_hi; }
 
    /// Get the index of the changed header in the listing
    size_t GetIndex() const { return m_index; }
 
 private:
    size_t      m_index;
-   HeaderInfo *m_hi;
+   HeaderInfo  m_hi;
 };
 
 /**

@@ -161,6 +161,12 @@ struct MailFolderStatus
 
    bool IsValid() const { return total != UID_ILLEGAL; }
 
+   // do we have any "interesting" messages at all?
+   bool HasSomething() const
+   {
+      return newmsgs || recent || unread || flagged || searched;
+   }
+
    bool operator==(const MailFolderStatus& status)
    {
       return memcmp(this, &status, sizeof(MailFolderStatus)) == 0;
@@ -505,45 +511,42 @@ public:
 
    /**
       Get the total number of messages in the folder. This should be a fast
-      operation unlike (possibly) CountMessages() below.
+      operation unlike (possibly) CountXXXMessages() below.
 
       @return number of messages
     */
    virtual unsigned long GetMessageCount() const = 0;
 
-   /** Get number of messages which have a message status of value
-       when combined with the mask. When mask = 0, return total
-       message count.
-       @param mask is a (combination of) MessageStatus value(s) or 0 to test against
-       @param value the value of MessageStatus AND mask to be counted
-       @return number of messages
-   */
-   virtual unsigned long CountMessages(int mask = 0, int value = 0) const = 0;
-
-   /** Count the number of new, recent and unseen messages: this is equivelent
-       to calling CountNewMessages(), CountRecentMessages() and
-       CountUnseenMessages() in succession but may be 3 times faster.
-
-       NB: this is pure virtual although could be implemented in the base class
-
-       @param status is the struct to fill with the folder info
-       @return true if any new/recent/unseen messages found, false otherwise
-   */
-   virtual bool CountInterestingMessages(MailFolderStatus *status) const = 0;
+   /// return true if the mailbox is empty
+   bool IsEmpty() const { return GetMessageCount() == 0; }
 
    /// Count number of new messages (== RECENT && !SEEN)
-   unsigned long CountNewMessages(void) const
-   {
-      return CountMessages(MSG_STAT_RECENT | MSG_STAT_SEEN, MSG_STAT_RECENT);
-   }
+   virtual unsigned long CountNewMessages(void) const = 0;
 
    /// Count number of recent messages.
-   unsigned long CountRecentMessages(void) const
-      { return CountMessages(MSG_STAT_RECENT, MSG_STAT_RECENT); }
+   virtual unsigned long CountRecentMessages(void) const = 0;
 
    /// Count number of unread messages
-   unsigned long CountUnseenMessages(void) const
-      { return CountMessages(MSG_STAT_SEEN, 0); }
+   virtual unsigned long CountUnseenMessages(void) const = 0;
+
+   /// Count number of deleted messages
+   virtual unsigned long CountDeletedMessages(void) const = 0;
+
+   /** Count the number of all interesting messages, i.e. any with non default
+       flags (except for delete).
+
+       @param status is the struct to fill with the folder info
+       @return true if any interesting messages found, false otherwise
+   */
+   virtual bool CountAllMessages(MailFolderStatus *status) const = 0;
+
+   /** Get the msgno corresponding to the given UID.
+
+       NB: this is a slow function which may involve a round trip to server
+
+       @return msgno for the given UID or MSGNO_ILLEGAL if not found
+   */
+   virtual MsgnoType GetMsgnoFromUID(UIdType uid) const = 0;
    //@}
 
    /** @name Operations on the folder */
@@ -804,16 +807,6 @@ public:
 
    /** @name Interactivity control */
    //@{
-   /** Sets limits for the number of headers to retrieve: if hard limit is not
-       0, we will never retrieve more than that many messages even without
-       asking the user (soft limit is ignored). Otherwise, we will ask the
-       user if the soft limit is exceeded.
-
-       @param soft maximum number of messages to retrieve without askin
-       @param hard maximum number of messages to retrieve, 0 for no limit
-   */
-   virtual void SetRetrievalLimits(unsigned long soft, unsigned long hard) = 0;
-
    /**
       Folder opening functions work differently if SetInteractive() is set:
       they will put more messages into status bar and possibly ask questions to
