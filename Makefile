@@ -107,11 +107,19 @@ install_locale:
 
 # prepare the scene for building the RPM
 rpm_prep:
-	if test -z "$$RPM_ROOT" ; then echo "You must set the RPM_ROOT first."; exit 1; fi
-	echo "Preparing to build the RPM under $$RPM_ROOT..."; \
+	if test -z "$$RPM_ROOT" ; then \
+		export RPM_TOP_DIR=`rpm --showrc | grep topdir | cut -d: -f 2 | sed 's/^ //'`; \
+	else \
+		export RPM_TOP_DIR=$(RPM_ROOT); \
+	fi; \
+	if test -z "$$RPM_TOP_DIR" ; then \
+   	echo "You must set the RPM_ROOT first."; \
+      exit 1; \
+   fi; \
+	echo "*** Preparing to build the RPM in $$RPM_TOP_DIR..."; \
 	cd ..; \
 	mv M $(M); \
-	tar cvzf $$RPM_ROOT/SOURCES/$(M).tar.gz \
+	tar cvzf $$RPM_TOP_DIR/SOURCES/$(M).tar.gz \
 		--exclude="*.o" --exclude="M" --exclude="CVS" \
 		--exclude=".cvsignore" --exclude="*~" --exclude="*.swp" \
 		--exclude="Python" --exclude="*.mo" --exclude="*.a" \
@@ -122,13 +130,20 @@ rpm_prep:
 		$(M)/extra/scripts $(M)/extra/src; \
 	mv $(M) M; \
 	cd M; \
-	cp redhat/mahogany.gif $$RPM_ROOT/SOURCES; \
-	cp redhat/M.spec $$RPM_ROOT/SPECS
+	cp redhat/mahogany.gif $$RPM_TOP_DIR/SOURCES; \
+	cp redhat/M.spec $$RPM_TOP_DIR/SPECS
 
+# build the source and binary RPMs
 rpm: rpm_prep
-	@#export RPM_ROOT=`rpm --showrc | grep topdir | cut -d: -f 2 | sed 's/^ //'`; \
-	echo "Building the RPM under $$RPM_ROOT..."; \
-	cd $(RPM_ROOT)/SPECS && rpm --buildroot $(RPM_ROOT)/ROOT -bb M.spec
+	@if test -z "$$RPM_ROOT" ; then \
+		export RPM_TOP_DIR=`rpm --showrc | grep topdir | cut -d: -f 2 | sed 's/^ //'`; \
+		export RPM_BUILD_ROOT=`rpm --showrc | grep buildroot | cut -d: -f 2 | sed 's/^ //'`; \
+	else \
+		export RPM_TOP_DIR=$(RPM_ROOT); \
+		export RPM_BUILD_ROOT=$(RPM_ROOT)/ROOT; \
+	fi; \
+	echo "*** Building the RPM under $$RPM_BUILD_ROOT..."; \
+	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bb M.spec
 
 msgcat:
 	$(MAKE) -C src msgcat
