@@ -161,13 +161,13 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    parent = iparent;
    m_NumOfMessages = 0; // At the beginning there was nothing.
    m_UpdateSemaphore = false;
+   m_SplitterWindow = 0;
    
    mailFolder = MailFolderCC::OpenFolder(folderName);
-   if ( !mailFolder ) {
+   if ( !mailFolder )
+   {
       ERRORMESSAGE((_("Can't open folder '%s'."), folderName.c_str()));
-
       wxASSERT( !initialised );
-
       return;
    }
 
@@ -507,7 +507,8 @@ wxFolderView::SetSize(const int x, const int y, const int width, int
                       height)
 {
 //   wxPanel::SetSize(x,y,width,height);
-   m_SplitterWindow->SetSize( x, y, width, height );
+   if(m_SplitterWindow)
+      m_SplitterWindow->SetSize( x, y, width, height );
 }
 
 BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)

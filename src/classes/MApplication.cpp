@@ -161,7 +161,7 @@ MAppBase::OnStartup()
       strConfFile << "wxWindows\\" << M_APPLICATIONNAME;
 #     endif // Unix
 
-         m_profile = new wxConfigProfile(strConfFile.c_str());
+      m_profile = new wxConfigProfile(strConfFile.c_str());
 
    // do we have gettext()?
    // ---------------------

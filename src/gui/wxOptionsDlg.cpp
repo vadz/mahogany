@@ -24,6 +24,7 @@
 #   include   "MApplication.h"
 #   include   "Profile.h"
 #   include   "guidef.h"
+#   include   "gui/wxIconManager.h"
 #endif
 
 //FIXME which headers are required?
@@ -1299,7 +1300,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
   wxImageList *imageList = new wxImageList(32, 32, FALSE, WXSIZEOF(aszImages));
   size_t n;
   for ( n = 0; n < Icon_Max; n++ ) {
-    imageList->Add(wxBitmap(aszImages[n]));
+    imageList->Add(mApplication->GetIconManager()->GetBitmap(String(aszImages[n])));
   }
 
   SetImageList(imageList);

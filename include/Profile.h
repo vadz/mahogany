@@ -47,7 +47,7 @@ class wxConfigBase;
     @see ProfileAppConfig
     @see AppConfig
 */
-class ProfileBase : public CommonBase
+class ProfileBase : public MObject
 {
 public:
    /**@name Reading and writing entries.
@@ -55,10 +55,10 @@ public:
    */
    //@{
    /// Read a character entry.
-   virtual String const & readEntry(String const &key, String const
+   virtual String readEntry(String const &key, String const
                             &defaultvalue = (const char *)NULL) const = 0;
    /// Read a character entry.
-   String const & readEntry(String const &key,
+   String readEntry(String const &key,
                             const char *defaultvalue = NULL) const
       { return readEntry(key, String(defaultvalue)); }
    /// Read an integer value.
@@ -78,8 +78,8 @@ public:
 /// Write back the bool value.
    virtual bool writeEntry(String const &key, bool Value) = 0;
    //@}
-   virtual void SetPath(String const &path) = 0;
-   virtual String const &GetPath(void) const = 0;
+   virtual void   SetPath(String const &path) = 0;
+   virtual String GetPath(void) const = 0;
    virtual bool HasEntry(String const &key) const = 0;
    virtual void DeleteGroup(String const &path) = 0;
 };
@@ -114,11 +114,6 @@ public:
    */
    ~Profile();
 
-   /** Query if Profile has been initialised successfully.
-       @return true if everything is fine
-   */
-   bool IsInitialised(void) const { return isOk; }
-
    /// get the associated config object
    wxConfigBase *GetConfig() const { return fileConfig; }
 
@@ -130,7 +125,7 @@ public:
    */
    //@{
       /// Read a character entry.
-   String const &readEntry(String const &key,
+   String readEntry(String const &key,
                     String const &defaultvalue = (const char *)NULL) const;
    /// Read an integer value.   
    long readEntry(String const &key, long defaultvalue) const;
@@ -148,7 +143,7 @@ public:
    //@}
 
    void SetPath(String const &path);
-   String const &GetPath(void) const;
+   String GetPath(void) const;
    virtual bool HasEntry(String const &key) const;
    virtual void DeleteGroup(String const &path);
 
@@ -178,8 +173,8 @@ public:
    */
    //@{
    /// Read a character entry.
-   String const & readEntry(String const &key,
-                            String const &defaultvalue = (const char *) NULL) const;
+   String readEntry(String const &key,
+                    String const &defaultvalue = (const char *) NULL) const;
    /// Read an integer value.
    long readEntry(String const &key, long defaultvalue) const;
    /// Read an integer value.
@@ -198,7 +193,7 @@ public:
    ~wxConfigProfile();
 
    void SetPath(String const &path);
-   String const &GetPath(void) const;
+   String GetPath(void) const;
    virtual bool HasEntry(String const &key) const;
    virtual void DeleteGroup(String const &path);
 

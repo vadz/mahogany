@@ -83,7 +83,7 @@ void wxConfigProfile::SetPath(String const &path)
    m_Config->SetPath(path);
 }
 
-String const &
+String 
 wxConfigProfile::GetPath(void) const
 {
    return m_Config->GetPath();
@@ -106,22 +106,23 @@ wxConfigProfile::~wxConfigProfile(String const &appName)
    delete m_Config;
 }
 
-String const &
+String 
 wxConfigProfile::readEntry(String const &key, String const &def) const
 {
-   return m_Config->Read(key,def);
+
+   return m_Config->Read(key.c_str(),def.c_str());
 }
 
 long
 wxConfigProfile::readEntry(String const &key, long def) const
 {
-   return m_Config->Read(key,def);
+   return m_Config->Read(key.c_str(),def);
 }
 
 bool
 wxConfigProfile::readEntry(String const &key, bool def) const
 {
-   return m_Config->Read(key,def);
+   return m_Config->Read(key.c_str(),def);
 }
 
 bool
@@ -199,13 +200,13 @@ Profile::~Profile()
 }
 
 
-String const &
+String 
 Profile::readEntry(String const &key, String const &defaultvalue) const
 {
    // config object must be created
    CHECK( fileConfig != NULL, "", "no fileConfig in Profile" );
 
-   wxString &rc = fileConfig->Read(key, String((const char *)NULL));
+   wxString &rc = fileConfig->Read(key.c_str(), String((const char *)NULL));
 
    if( strutil_isempty(rc) && parentProfile != NULL)
    {
@@ -272,7 +273,7 @@ void Profile::SetPath(String const &path)
    fileConfig->SetPath(path);
 }
 
-String const &
+String 
 Profile::GetPath(void) const
 {
    return fileConfig->GetPath();
@@ -362,11 +363,8 @@ ConfigFileManager::GetConfig(String const &fileName, bool isApp)
    FCData   *newEntry = new FCData;
    newEntry->fileName = fileName;
 
-   if ( isApp )
-      newEntry->fileConfig = GLOBAL_NEW wxConfig(newEntry->fileName);
-   else
-      newEntry->fileConfig = GLOBAL_NEW wxConfig(newEntry->fileName,
-                                                 wxString(""));
+   newEntry->fileConfig = new wxConfig(newEntry->fileName,
+                                       wxString(""));
    fcList->push_front(newEntry);
    
    return newEntry->fileConfig;
