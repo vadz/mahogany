@@ -1929,12 +1929,16 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
    // Do the work
    threadableRoot = threader->thread(threadableRoot);
 
-   // Map to needed output format
-   thrData->m_root =  MapToThreadNode(threadableRoot);
+   if ( threadableRoot )
+   {
+      // Map to needed output format
+      thrData->m_root =  MapToThreadNode(threadableRoot);
 
-   // Clean up
-   threadableRoot->destroy();
-   delete threadableRoot;
+      // Clean up
+      threadableRoot->destroy();
+      delete threadableRoot;
+   }
+
    delete threader;
    wxLogTrace(TRACE_JWZ, "Leaving JWZThreadMessages");
 }
