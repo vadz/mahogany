@@ -485,6 +485,9 @@ protected:
    virtual bool IsAlive(void) const;
    virtual bool DoCountMessages(MailFolderStatus *status) const;
 
+   /// Called to notify the folder that its listing changed "from outside"
+   void OnExternalUpdate();
+
    /// Update the timeout values from a profile
    void UpdateTimeoutValues(void);
 

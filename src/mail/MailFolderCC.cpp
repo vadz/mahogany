@@ -2547,11 +2547,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       MailFolder *mfDst = FindFolder(folder);
       if ( mfDst )
       {
-         wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate for dst folder '%s'",
-                    mfDst->GetName().c_str());
-
-         MEventManager::Send(new MEventFolderUpdateData(mfDst));
-
+         ((MailFolderCC *)mfDst)->OnExternalUpdate();
          mfDst->DecRef();
       }
       //else: not opened
@@ -4446,6 +4442,21 @@ void
 MailFolderCC::UpdateStatus(void)
 {
    // TODO: what is this supposed to do?
+}
+
+void
+MailFolderCC::OnExternalUpdate()
+{
+   wxLogTrace(TRACE_MF_EVENTS, "OnExternalUpdate() for folder '%s'",
+              GetName().c_str());
+
+   if ( m_Listing )
+   {
+      m_Listing->DecRef();
+      m_Listing = NULL;
+   }
+
+   RequestUpdate();
 }
 
 void
