@@ -47,6 +47,13 @@
 #include "MInterface.cpp"
 
 // ----------------------------------------------------------------------------
+// function prototypes
+// ----------------------------------------------------------------------------
+
+// return the array of paths to search for modules
+static wxArrayString BuildListOfModulesDirs();
+
+// ----------------------------------------------------------------------------
 // Actual MModule code
 // ----------------------------------------------------------------------------
 
@@ -158,7 +165,8 @@ MModule *FindModule(const String & name)
                &gs_MInterface, &errorCode);
          }
 #endif
-         SafeIncRef((**i).m_Module);
+         (**i).m_Module->SafeIncRef();
+
          return (**i).m_Module;
       }
    return NULL; // not found
@@ -240,36 +248,14 @@ MModule::LoadModule(const String & name)
    else
    {
 #ifndef USE_MODULES_STATIC
-      const int nDirs = 3;
-      wxString
-         pathname,
-         dirs[nDirs];
+      wxArrayString dirs = BuildListOfModulesDirs();
+      size_t nDirs = dirs.GetCount();
 
-      /* We search for modules in three places:
-      Global directory:
-      prefix/share/Mahogany/CANONICAL_HOST/modules/
-      Local:
-      $HOME/.M/CANONICAL_HOST/modules/
-      $HOME/.M/modules/
-   */
-      dirs[0] = mApplication->GetGlobalDir();
-      dirs[0] << DIR_SEPARATOR << M_CANONICAL_HOST
-              << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-      dirs[1] = mApplication->GetLocalDir();
-      dirs[1] << DIR_SEPARATOR << M_CANONICAL_HOST
-              << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-      dirs[2] = mApplication->GetLocalDir();
-      dirs[2] << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
 
-#if defined( OS_WIN )
-      const wxString moduleExt = ".dll";
-#elif defined( OS_UNIX )
-      const wxString moduleExt = ".so" ;
-#else
-#   error   "No DLL extension known on this platform."
-#endif
+      const wxString moduleExt = wxDllLoader::GetDllExt();
 
-      for(int i = 0; i < nDirs && ! module; i++)
+      wxString pathname;
+      for ( size_t i = 0; i < nDirs && ! module; i++ )
       {
          pathname = dirs[i];
          pathname << name << moduleExt;
@@ -277,9 +263,9 @@ MModule::LoadModule(const String & name)
             module = LoadModuleInternal(name, pathname);
       }
       return module;
-#else
+#else // USE_MODULES_STATIC
       return NULL;
-#endif
+#endif // !USE_MODULES_STATIC/USE_MODULES_STATIC
    }
 }
 
@@ -322,7 +308,7 @@ public:
       { return m_Author; }
    virtual MModule *GetModule(void) const
       {
-         SafeIncRef(m_Module);
+         m_Module->SafeIncRef();
          return m_Module;
       }
    MModuleListingEntryImpl(const String &name = "",
@@ -340,7 +326,7 @@ public:
          m_Version = version;
          m_Author = author;
          m_Module = module;
-         SafeIncRef(m_Module);
+         m_Module->SafeIncRef();
          strutil_delwhitespace(m_Name);
          strutil_delwhitespace(m_Interface);
          strutil_delwhitespace(m_Desc);
@@ -350,19 +336,19 @@ public:
       }
    ~MModuleListingEntryImpl()
       {
-         SafeDecRef(m_Module);
+         m_Module->SafeDecRef();
       }
    /// must be implemented to handle refcount of MModule pointer:
    MModuleListingEntryImpl & operator=(
       const MModuleListingEntryImpl & newval)
       {
-         SafeDecRef(m_Module);
+         m_Module->SafeDecRef();
          m_Name = newval.m_Name; m_Interface = newval.m_Interface;
          m_ShortDesc = newval.m_ShortDesc;
          m_Desc = newval.m_Desc; m_Author = newval.m_Author;
          m_Version = newval.m_Version;
          m_Module = newval.m_Module;
-         SafeIncRef(m_Module);
+         m_Module->SafeIncRef();
          return *this;
       }
 private:
@@ -469,36 +455,12 @@ MModule::ListAvailableModules(const String& interfaceName)
 #else // !USE_MODULES_STATIC
    kbStringList modules;
 
-   // look under extra M_CANONICAL_HOST directory under Unix, but not for other
-   // platforms (doesn't make much sense under Windows)
-#ifdef OS_UNIX
-   const int nDirs = 3;
-#else
-   const int nDirs = 2;
-#endif
-
-   wxString
-      pathname,
-      filename,
-      dirs[nDirs];
-
-   dirs[0] = mApplication->GetGlobalDir();
-   dirs[0] << DIR_SEPARATOR << M_CANONICAL_HOST
-           << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-
-   int i = 1;
-#ifdef OS_UNIX
-   dirs[i] = mApplication->GetLocalDir();
-   dirs[i] << DIR_SEPARATOR << M_CANONICAL_HOST
-           << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-   i++
-#endif // Unix
-
-   dirs[i] = mApplication->GetLocalDir();
-   dirs[i] << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+   wxString pathname, filename;
+   wxArrayString dirs = BuildListOfModulesDirs();
+   size_t nDirs = dirs.GetCount();
 
    /// First, build list of all .mmd files:
-   for(i = 0; i < nDirs ; i++)
+   for( size_t i = 0; i < nDirs ; i++ )
    {
          pathname = dirs[i];
          if(wxDirExists(pathname))
@@ -507,8 +469,7 @@ MModule::ListAvailableModules(const String& interfaceName)
             filename = wxFindFirstFile(pathname);
             while(filename.Length())
             {
-               modules.push_back(new // without ".mmd" :
-                                 String(filename.Mid(0,filename.Length()-4)));
+               modules.push_back(new wxString(filename));
                filename = wxFindNextFile();
             }
          }
@@ -545,7 +506,6 @@ MModule::ListAvailableModules(const String& interfaceName)
    for(it = modules.begin(); it != modules.end(); it ++)
    {
       filename = **it;
-      filename << ".mmd";
       errorflag = false;
       wxTextFile tf(filename);
       if(! tf.Open())
@@ -572,17 +532,18 @@ MModule::ListAvailableModules(const String& interfaceName)
 
             if ( !errorflag )
             {
-               String interfaceModule = tf[MMD_LINE_INTERFACE].Mid(strlen("Interface:"));
+               String interfaceModule = headerValues[MMD_LINE_INTERFACE];
 
                // take all modules if interfaceName is empty, otherwise only
                // take those which implement the given interface
-               if ( !!interfaceName || interfaceName == interfaceModule )
+               if ( !interfaceName || interfaceName == interfaceModule )
                {
                   String description;
                   for(size_t l = MMD_LINE_LAST + 1; l < tf.GetLineCount(); l++)
                      description << tf[l] << '\n';
-                  String name = (**it).AfterLast(DIR_SEPARATOR);
-                  name = name.Mid(0, filename.Length()-strlen(".mmd"));
+
+                  String name;
+                  wxSplitPath((**it), NULL, &name, NULL);
                   MModuleListingEntryImpl entry(
                      name, // module name
 
@@ -607,4 +568,42 @@ MModule::ListAvailableModules(const String& interfaceName)
    listing->SetCount(count);
    return listing;
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
+}
+
+static wxArrayString BuildListOfModulesDirs()
+{
+   // look under extra M_CANONICAL_HOST directory under Unix, but not for other
+   // platforms (doesn't make much sense under Windows)
+
+   wxString path1, path2;
+   wxArrayString dirs;
+
+   path1 << mApplication->GetGlobalDir()
+#ifdef OS_UNIX
+         << DIR_SEPARATOR << M_CANONICAL_HOST
+#endif // Unix
+         << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+
+   path2 << mApplication->GetLocalDir()
+#ifdef OS_UNIX
+         << DIR_SEPARATOR << M_CANONICAL_HOST
+#endif // Unix
+         << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+
+   dirs.Add(path1);
+
+   // under Windows, the global and local dirs might be the same
+   if ( path2 != path1 )
+   {
+      dirs.Add(path2);
+   }
+
+   // under Windows this owuld be the same as (1)
+#ifdef OS_UNIX
+   path1 << mApplication->GetLocalDir();
+         << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+   dirs.Add(path1);
+#endif // Unix
+
+   return dirs;
 }

@@ -62,7 +62,7 @@ enum MModule_Errors
 //@}
 
 
-/** This class is used as an entry in the MModuleListing and describes 
+/** This class is used as an entry in the MModuleListing and describes
     a single module. */
 class MModuleListingEntry
 {
@@ -110,13 +110,29 @@ public:
 
 /**
    Small class to ensure proper deregistration of modules on
-   deletion.
+   deletion and to make them ref counted.
+
+   NB: this class can't derive from MObjectRC because the implementation of the
+       latter is in the main program and so the module DLLs wouldn't link then!
  */
-class MModuleCommon : public MObjectRC
+class MModuleCommon
 {
+public:
+   /// ctor sets the ref count to 1 to make the object alive
+   MModuleCommon() { m_nRef = 1; }
+
+   virtual void IncRef() { wxASSERT(m_nRef > 0); m_nRef++; }
+   virtual bool DecRef() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
+
+   void SafeIncRef() { if ( this ) IncRef(); }
+   void SafeDecRef() { if ( this ) DecRef(); }
+
 protected:
    /// Removes the module from the global list
-   virtual ~MModuleCommon() { }
+   virtual ~MModuleCommon() { wxASSERT(!m_nRef); }
+
+private:
+   size_t m_nRef;
 };
 
 /**
@@ -145,7 +161,7 @@ public:
    /// Set arg to a function number and call the function if it exists.
    virtual int Entry(int arg, ... ) = 0;
    //@}
-   
+
    /** These static functions handle the loading of modules. */
    //@{
    /** This will load the module of a given name if not already
@@ -158,12 +174,12 @@ public:
        DecRef()´d by the caller. */
    static MModuleListing * ListLoadedModules(void);
    /** Returns a pointer to a listing of available modules. Must be
-       DecRef()'d by the caller. Does not check if modules are loaded, 
+       DecRef()'d by the caller. Does not check if modules are loaded,
        i.e. GetModule() from these entries will return NULL.
        If interfaceName is not empty, will only return modules implementing
        the given interface.
    */
-   static MModuleListing * ListAvailableModules(const String& interfaceName);
+   static MModuleListing * ListAvailableModules(const String& interfaceName = "");
    /** Finds a module which provides the given interface. Only
        searches already loaded modules.
        @param interface name of the interface
@@ -183,10 +199,10 @@ extern "C"
    /** Function type for InitModule() function.
        Each module DLL must implement a function CreateMModule of this
        type which will be called to initialise it. That function must
-       @param version_major major version number of Mahogany 
-       @param version_minor minor version number of Mahogany 
+       @param version_major major version number of Mahogany
+       @param version_minor minor version number of Mahogany
        @param version_release release version number of Mahogany
-       @param interface pointer to dummy class providing the interface 
+       @param interface pointer to dummy class providing the interface
        to Mahogany
        @param errorCode set this to 0 if no error
        @return a pointer to the module or NULL in case of error
@@ -215,7 +231,7 @@ int MModule_AddStaticModule(const char *Name,
                                                Description, Version, InitMModule);
 #else
 #   define MMODULE_INITIALISE(a,b,c,d)
-#endif   
+#endif
 
 
 #define MMODULE_DEFINE_CMN(ClassName) \
@@ -228,7 +244,7 @@ virtual void GetMVersion(int *version_major, \
                          int *version_minor, \
                          int *version_release) const; \
 virtual ~ClassName(); \
-static  MModule *Init(int, int, int, MInterface *, int *); 
+static  MModule *Init(int, int, int, MInterface *, int *);
 
 #define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */, ...) { return 0; }
 

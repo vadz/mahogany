@@ -86,5 +86,5 @@ DummyModule::DummyModule(MInterface *minterface)
 
 DummyModule::~DummyModule()
 {
-    m_Minterface->GetMApplication()->RemoveModule(this);
+    m_Minterface->RemoveModule(this);
 }

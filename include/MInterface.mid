@@ -58,7 +58,7 @@ ARG(STRING, message)
 )
 ,
 `
-	wxLogGeneric(level, message);
+   wxLogGeneric(level, message);
 ')
 
 FUNCTION(YesNoDialog, bool , (
@@ -68,7 +68,7 @@ ARG(bool, yesdefault, =true),
 ARG(STRING, configPath, =NULL) )
 ,
 `
-	return MDialog_YesNoDialog(message,parent,title,yesdefault, configPath);
+   return MDialog_YesNoDialog(message,parent,title,yesdefault, configPath);
 ')
 
 FUNCTION(StatusMessage, void , ( ARG(STRING, message) )
@@ -107,6 +107,9 @@ ARG(int, flags)
 `return ::strutil_matchRegEx(regex, str, flags);')
 FUNCTION(strutil_freeRegEx, void, (
 ARG(strutil_RegEx *, re)), `::strutil_freeRegEx(re);')
+
+FUNCTION(RemoveModule, void, (ARG(MModuleCommon *, module)),
+      `mApplication->RemoveModule(module);')
 
 /* The following line is the end of the MInterface interface definition. */
 ')

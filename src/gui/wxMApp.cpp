@@ -440,7 +440,9 @@ wxMApp::DoExit()
 bool
 wxMApp::OnInit()
 {
+#ifndef DEBUG
    wxHandleFatalExceptions();
+#endif
 
    m_topLevelFrame = NULL;
    // Set up locale first, so everything is in the right language.

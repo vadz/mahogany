@@ -50,12 +50,15 @@ class wxModulesDialog : public wxManuallyLaidOutDialog
 public:
    wxModulesDialog(wxWindow *parent);
 
-   // reset the selected options to their default values
+   // check the modules which are been currently loaded
+   virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
    bool Update(wxCommandEvent & ev);
    bool InternalUpdate(size_t n);
-   ~wxModulesDialog();
+
+   virtual ~wxModulesDialog();
+
 protected:
    MModuleListing *m_Listing;
    kbStringList    m_Modules;
@@ -80,11 +83,7 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
 
    m_Listing = MModule::ListAvailableModules();
 
-   // get list of configured modules
-   wxString modules = READ_APPCONFIG(MP_MODULES);
-   char *tmp = strutil_strdup(modules);
-   strutil_tokenise(tmp, ":", m_Modules);
-
+   // create controls
    wxStaticBox *box = CreateStdButtonsAndBox(_("Available modules"), FALSE,
                                              MH_DIALOG_MODULES);
    wxLayoutConstraints *c;
@@ -119,20 +118,6 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    c->top.Below(m_checklistBox, 2*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_textCtrl->SetConstraints(c);
-   
-   size_t count = m_Listing ? m_Listing->Count() : 0;
-
-   kbStringList::iterator i;
-   // add the items to the checklistbox
-   for ( size_t n = 0; n < count; n++ )
-   {
-      m_checklistBox->Append((*m_Listing)[n].GetShortDescription());
-      i = FindInList((*m_Listing)[n].GetName());
-      if(i != m_Modules.end())
-         m_checklistBox->Check(n, TRUE);
-   }
-   if(count)
-      InternalUpdate(0);
 }
 
 wxModulesDialog::~wxModulesDialog()
@@ -164,8 +149,31 @@ wxModulesDialog::InternalUpdate(size_t n)
    m_textCtrl->SetInsertionPoint(0);
    return TRUE;
 }
-   
 
+bool wxModulesDialog::TransferDataToWindow()
+{
+   // get list of configured modules
+   wxString modules = READ_APPCONFIG(MP_MODULES);
+   char *tmp = strutil_strdup(modules);
+   strutil_tokenise(tmp, ":", m_Modules);
+
+   size_t count = m_Listing ? m_Listing->Count() : 0;
+
+   // add the items to the checklistbox
+   for ( size_t n = 0; n < count; n++ )
+   {
+      m_checklistBox->Append((*m_Listing)[n].GetShortDescription());
+      if( FindInList((*m_Listing)[n].GetName()) != m_Modules.end() )
+         m_checklistBox->Check(n, TRUE);
+   }
+
+   if(count)
+      InternalUpdate(0);
+
+   delete [] tmp;
+
+   return TRUE;
+}
 
 bool wxModulesDialog::TransferDataFromWindow()
 {
