@@ -414,6 +414,9 @@ protected:
    /// read the column width string from profile or default one
    wxString GetColWidths() const;
 
+   /// draw the sort direction arrow on the column used for sorting
+   void UpdateSortIndicator();
+
    /// enable/disable handling of select events (returns old value)
    bool EnableOnSelect(bool enable)
    {
@@ -512,6 +515,9 @@ protected:
 
    /// string containing current column widths
    wxString m_widthsOld;
+
+   /// the column where the sort indicator is currently drawn or WXFLC_NONE
+   wxFolderListCtrlFields m_colSort;
 
    /// do we preview a message on a single mouse click?
    bool m_PreviewOnSingleClick;
@@ -652,6 +658,34 @@ static wxFolderListCtrlFields GetColumnByName(const wxString& name)
    }
 
    return (wxFolderListCtrlFields)n;
+}
+
+static wxFolderListCtrlFields ColFromSortOrder(MessageSortOrder sortOrder)
+{
+   switch ( sortOrder )
+   {
+      case MSO_DATE:
+         return WXFLC_DATE;
+
+      case MSO_SENDER:
+         return WXFLC_FROM;
+
+      case MSO_SUBJECT:
+         return WXFLC_SUBJECT;
+
+      case MSO_SIZE:
+         return WXFLC_SIZE;
+
+      case MSO_STATUS:
+         return WXFLC_STATUS;
+
+      default:
+         wxFAIL_MSG( "invalid column" );
+         // fall through
+
+      case MSO_NONE:
+         return WXFLC_NONE;
+   }
 }
 
 static MessageSortOrder SortOrderFromCol(wxFolderListCtrlFields col)
@@ -801,6 +835,7 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
 
    EVT_LIST_COL_CLICK(-1, wxFolderListCtrl::OnColumnClick)
    EVT_LIST_COL_RIGHT_CLICK(-1, wxFolderListCtrl::OnColumnRightClick)
+
    EVT_LIST_KEY_DOWN(-1, wxFolderListCtrl::OnListKeyDown)
 
    EVT_IDLE(wxFolderListCtrl::OnIdle)
@@ -827,6 +862,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_menu = NULL;
    m_menuFolders = NULL;
 
+   m_colSort = WXFLC_NONE;
+
    m_isInPopupMenu = false;
 
    // start in frozen state, wxFolderView should call Thaw() later
@@ -849,6 +886,18 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    Create(parent, M_WXID_FOLDERVIEW_LISTCTRL,
           wxDefaultPosition, parent->GetClientSize(),
           wxLC_REPORT | wxLC_VIRTUAL | wxNO_BORDER);
+
+   // add the images to use for the columns
+   wxIcon iconDown = ICON("sortdown"),
+          iconUp = ICON("sortup");
+   wxImageList *imagelist = new wxImageList(iconDown.GetWidth(),
+                                            iconDown.GetHeight());
+
+   // this must be consistent with logic in UpdateSortIndicator(): first icon
+   // is used for the reversed sort, second for the normal one
+   imagelist->Add(iconDown);
+   imagelist->Add(iconUp);
+   AssignImageList(imagelist, wxIMAGE_LIST_SMALL);
 
    // create a drop target for dropping messages on us
    new MMessagesDropTarget(new FolderViewMessagesDropWhere(m_FolderView), this);
@@ -922,6 +971,8 @@ void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
          }
       }
    }
+
+   UpdateSortIndicator();
 }
 
 // ----------------------------------------------------------------------------
@@ -1281,6 +1332,8 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
 
    profile->writeEntry(MP_MSGS_SORTBY, sortOrder);
 
+   UpdateSortIndicator();
+
    MEventManager::Send(new MEventOptionsChangeData
                            (
                             profile,
@@ -1574,6 +1627,39 @@ void wxFolderListCtrl::CreateColumns()
          width = -1;
 
       InsertColumn(n, GetColumnName(col), wxLIST_FORMAT_LEFT, width);
+   }
+}
+
+void wxFolderListCtrl::UpdateSortIndicator()
+{
+   // which column do we use now?
+   long sortOrder = READ_CONFIG(m_FolderView->m_Profile, MP_MSGS_SORTBY);
+   MessageSortOrder orderPrimary = GetSortCritDirect(sortOrder);
+
+   wxFolderListCtrlFields colSort = ColFromSortOrder(orderPrimary);
+
+   // if it's not the same as the old one, clear the indicator in the prev
+   // column
+   if ( colSort != m_colSort )
+   {
+      if ( m_colSort != WXFLC_NONE )
+      {
+         int colIdx = m_columns[m_colSort];
+         if ( colIdx != -1 )
+            ClearColumnImage(colIdx);
+      }
+
+      m_colSort = colSort;
+   }
+
+   // sorting by something? if yes, show it
+   if ( m_colSort != WXFLC_NONE )
+   {
+      int colIdx = m_columns[m_colSort];
+      if ( colIdx != -1 )
+      {
+         SetColumnImage(colIdx, IsSortCritReversed(sortOrder));
+      }
    }
 }
 
