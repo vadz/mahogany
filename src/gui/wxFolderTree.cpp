@@ -2589,8 +2589,9 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
       {
          // with Alt => show properties (Windows standard...)
          DoFolderProperties();
+         break;
       }
-      break;
+      //else: fall through to let it generate the ACTIVATED event
 
     default:
       event.Skip();
