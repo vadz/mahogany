@@ -265,6 +265,9 @@ public:
    // get the currently selected address type
    wxComposeView::RecipientType GetType() const;
 
+   // change the address type
+   void SetType(wxComposeView::RecipientType rcptType);
+
    // get the current value of the text field
    wxString GetValue() const;
 
@@ -746,6 +749,13 @@ bool wxRcptControl::IsEnabled() const
 wxComposeView::RecipientType wxRcptControl::GetType() const
 {
    return (wxComposeView::RecipientType)m_choice->GetSelection();
+}
+
+void wxRcptControl::SetType(wxComposeView::RecipientType rcptType)
+{
+   m_choice->SetSelection(rcptType);
+
+   OnTypeChange(rcptType);
 }
 
 wxString wxRcptControl::GetValue() const
@@ -1839,46 +1849,49 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
    // look if we don't already have it
    size_t count = m_rcptExtra.GetCount();
 
-   bool foundWithAnotherType = false;
    for ( size_t n = 0; n < count; n++ )
    {
-      if ( !IsRecipientEnabled(n) )
-      {
-         // type "none" doesn't count
-         continue;
-      }
-
       if ( Message::CompareAddresses(m_rcptExtra[n]->GetValue(), addr) )
       {
          // ok, we already have this address - is it of the same type?
-         if ( m_rcptExtra[n]->GetType() == addrType )
+         RecipientType existingType = m_rcptExtra[n]->GetType();
+         if ( existingType == addrType )
          {
             // yes, don't add it again
             wxLogStatus(this,
                         _("Address '%s' is already in the recipients list, "
                           "not added."),
                         addr.c_str());
-            return;
+         }
+         else // found with a different type
+         {
+            // use the "stronger" recipient type, i.e. if the address was
+            // previously in "Cc" but is now added as "To", make the existing
+            // address "To"
+            if ( existingType > addrType )
+            {
+               wxLogStatus(this,
+                           _("Address '%s' was already in the recipients list "
+                             "with a different type, just changed the type."),
+                           addr.c_str());
+
+               m_rcptExtra[n]->SetType(addrType);
+            }
+            else
+            {
+               wxLogStatus(this,
+                           _("Address '%s' was already in the recipients list "
+                             "with a different type, not added."),
+                           addr.c_str());
+            }
          }
 
-         foundWithAnotherType = true;
-
-         // continue - we may yet find it with the same typ later
+         // don't add it again
+         return;
       }
    }
 
-   if ( foundWithAnotherType )
-   {
-      // warn the user that the address is already present but add it
-      // nevertheless - I think this is the most reasonable thing to do,
-      // anything better?
-      wxLogStatus(this,
-                  _("Address '%s' is already in the recipients list but "
-                    "with a different type - will be duplicated."),
-                  addr.c_str());
-   }
-
-   // do add it (either not found or found with a different address)
+   // do add it if not found
    AddRecipientControls(addr, addrType);
 }
 
