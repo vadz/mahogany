@@ -9,19 +9,15 @@ SUB_DIRS += src/libmal
 endif
 
 all: 
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i; done
 	$(MAKE) -j1 -C src/c-client -f .src/Makefile.M
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i; done
 
 doc: ; @true
 
 clean:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 	$(MAKE) -C src/c-client -f .src/Makefile.M $@
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 	$(RM) core
-ifdef HAVE_LIBMAL
-# make clean in libmal is incomplete:
-	${RM} -r x `find src/libmal -depth -name '*.o' -o -name '*.lo' -o -name '*.a' -o -name '.libs' -print`
-endif
 
 install: 
 	$(MAKE) -C install install

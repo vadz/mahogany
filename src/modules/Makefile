@@ -32,7 +32,7 @@ SRC = $(wildcard .src/*.cpp)
 ifdef PISOCK_LIB
 MOD += PalmOS.cpp
 ifdef LIBMAL_SRC
-PalmOS.o PalmOS.so: CPPFLAGS += -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC)/malsync_src/mal/client/common -I$(LIBMAL_SRC)/malsync_src/mal/common -I$(LIBMAL_SRC) 
+PalmOS.o PalmOS.so: CPPFLAGS += -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC) 
 endif
 PalmOS.so: SO_LIBS += $(PISOCK_LIB)
 endif

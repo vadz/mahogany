@@ -632,30 +632,16 @@ AC_CHECK_HEADER(pi-source.h,
 )
 AC_SUBST(MAKE_PISOCKLIB)    
 
-MAKE_HAVE_LIBMAL=
 dnl Check if we have libmal source in extra/src
+MAKE_HAVE_LIBMAL=
 case "$MAKE_PISOCKLIB" in '') ;; *)
 	AC_MSG_CHECKING(for libmal in extra/src)
 	if test ! -d $srcdir/extra/src/libmal 
-	then
-		AC_MSG_RESULT(not found - no MAL synch for PalmOS)
-	elif test "$SOURCEDIR" != "$BUILDDIR"
-	then
-		##### TODO
-		AC_MSG_RESULT(not supported for separate build tree)
-	else
-		AC_MSG_RESULT(found - MAL synch for PalmOS activiated)
-		dnl the following settings are used by the libmal/Makefile
-		dnl MALTOP=$SOURCEDIR/extra/src/libmal/malsync_src
-		MALTOP=malsync_src
-		AC_SUBST(MALTOP)
-		cflags="$CFLAGS -I$MALTOP/mal/client/common -I$MALTOP/mal/common"
-		PILOT_LIBS=$PISOCK_LIB
-		AC_SUBST(cflags) AC_SUBST(PILOT_LIBS)
-		libs=
-		llibs=
-		ccoptions=
-		AC_SUBST(libs) AC_SUBST(llibs) AC_SUBST(ccoptions)
+	then	AC_MSG_RESULT(not found - no MAL synch for PalmOS)
+	elif test -f $srcdir/extra/src/libmal/Makefile.in \
+		-a "$SOURCEDIR" != "$BUILDDIR"
+	then	AC_MSG_RESULT(old-style libmal not supported in separate build tree)
+	else	AC_MSG_RESULT(found - MAL synch for PalmOS activiated)
 		MAKE_HAVE_LIBMAL="HAVE_LIBMAL=yes"
 	fi
 esac
@@ -799,8 +785,12 @@ do	case "$dir" in
 		DIR="$DIR $dir"
 	fi
 done
+# HACK for backward compatibility; clean it up when old libmal is dead
 case "$MAKE_HAVE_LIBMAL" in '') ;; *)
-	OUTPUT="$OUTPUT extra/src/libmal/Makefile" ;;
+	if test -f $srcdir/extra/src/libmal/Makefile.in
+	then	OUTPUT="$OUTPUT extra/src/libmal/Makefile"
+	else	COPY="$COPY extra/src/libmal/Makefile"
+	fi ;;
 esac
 
 AC_OUTPUT_COMMANDS(
@@ -829,10 +819,7 @@ AC_OUTPUT_COMMANDS(
 		rm -f $mf
 		ln -s .src/Makefile $mf
 	done
-	if  test -d extra/src/libmal/.
-	then	: ln -s .src/malsync_src extra/src/libmal/malsync_src
-		######## TODO
-	fi ;;
+	;;
 esac
 sh .src/makeversion.in],
 src="$srcdir" SRC="$SOURCEDIR" OBJ="$BUILDDIR"

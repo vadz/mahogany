@@ -28,7 +28,7 @@ ICONDIR=$(SOURCEDIR)/src/icons
 
 ifdef HAVE_LIBMAL
 LIBMAL_SRC := $(SOURCEDIR)/extra/src/libmal
-PISOCK_LIB += -L$(BUILDDIR)/extra/src/libmal/.libs -lmal
+PISOCK_LIB += -L$(BUILDDIR)/extra/src/libmal -lmal
 endif
 
 # libraries needed by the modules, linked against individually in the modules
