@@ -39,7 +39,6 @@
 #include "wx/persctrl.h" // for wxPMessageBoxEnable
 #include <wx/ffile.h>
 #include <wx/fs_mem.h>
-#include <wx/fs_inet.h>
 #include <wx/cmdline.h>
 #include <wx/encconv.h>         // for wxEncodingConverter
 
@@ -992,10 +991,6 @@ wxMApp::OnInit()
    wxInitAllImageHandlers();
    wxFileSystem::AddHandler(new wxMemoryFSHandler);
 //   wxFileSystem::AddHandler(new wxZipFSHandler); // for zipped docs
-
-   // we need to reference wxInternetFSHandler or it might not be linked into
-   // the program at all when linking statically!
-   { wxInternetFSHandler inetfsh; }
 
    // this is necessary to avoid that the app closes automatically when we're
    // run for the first time and show a modal dialog before opening the main
