@@ -368,6 +368,8 @@ public:
 #ifdef __WXMSW__
        Layout();
 #endif
+
+       m_text->SetFocus();
     }
 
 private:
