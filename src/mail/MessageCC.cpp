@@ -160,8 +160,8 @@ MessageCC::~MessageCC()
    {
       delete [] m_msgText;
 
-      mail_free_envelope(&m_env);
-      mail_free_body(&m_body);
+      mail_free_envelope(&m_Envelope);
+      mail_free_body(&m_Body);
    }
 
    SafeDecRef(m_Profile);
