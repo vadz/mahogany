@@ -210,7 +210,7 @@ MProgressDialog::EnableDisableEvents(bool enable)
    }
    else
    {
-      wxNode *node;
+      wxwxWindowListNode *node;
       for ( node = wxTopLevelWindows.GetFirst();
             node;
             node = node->GetNext() )
