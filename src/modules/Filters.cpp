@@ -1866,23 +1866,35 @@ static bool findIP(String &header,
 
 // func_isspam() helper: check the given MIME part and all of its children
 // for Korean charset, return true if any of them has it
-static bool CheckMimePartForKoreanCSet(const MimePart *mimePart)
+static bool CheckMimePartForKoreanCSet(const MimePart *part)
 {
-   while ( mimePart )
+   while ( part )
    {
-      if ( CheckMimePartForKoreanCSet(mimePart->GetNested()) )
+      if ( CheckMimePartForKoreanCSet(part->GetNested()) )
          return true;
 
-      String cset = mimePart->GetParam("charset").Lower();
+      String cset = part->GetParam("charset").Lower();
       if ( cset == "ks_c_5601-1987" || cset == "euc-kr" )
       {
          return true;
       }
 
-      mimePart = mimePart->GetNext();
+      part = part->GetNext();
    }
 
    return false;
+}
+
+// another func_isspam() helper: check the value of X-Authentication-Warning
+// header and return true if we believe it indicates that this is a spam
+static bool CheckXAuthWarning(const String& value)
+{
+   // check for "^.*Host.+claimed to be.+$" regex manually
+   const char *pc = strstr(value, "Host");
+   if ( !pc )
+      return false;
+
+   return strstr(pc + 1, "claimed to be") != NULL;
 }
 
 static Value func_isspam(ArgList *args, FilterRuleImpl *p)
@@ -1962,7 +1974,14 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
          // unfortunately not only spams have this header but we consider that
          // only spammers change their address in such way
          rc = msg->GetHeaderLine("X-Authentication-Warning", value) &&
-                  value.Matches("Host * claimed to be *");
+                  CheckXAuthWarning(value);
+      }
+      else if ( test == "html" )
+      {
+         // we accept the multipart/alternative messages with a text/plain and
+         // a text/html part but not the top level text/html messages
+         const MimePart *part = msg->GetTopMimePart();
+         rc = part && part->GetType().GetFull() == "TEXT/HTML";
       }
 #ifdef USE_RBL
       else if ( test == "rbl" )
@@ -2009,6 +2028,8 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
          /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
       }
 #endif // USE_RBL
+      //else: simply ignore unknown tests, don't complain as it would be
+      //      too annoying probably
    }
 
    return rc;

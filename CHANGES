@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+27.06.02 VZ: added an HTML SPAM test
 18.06.02 VZ: added additional filter tests for the SPAM messages
 12.06.02 VZ: fixes for working with read only folders
 11.06.02 VZ: added "Bounce" (a.k.a. redirect) command
