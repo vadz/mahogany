@@ -306,6 +306,12 @@ public:
        sizerTop->SetSizeHints(this);
        SetSizer(sizerTop);
        SetAutoLayout(TRUE);
+
+       // FIXME: bug in wxMSW? without Layout() the buttons are not positioned
+       //        correctly initially
+#ifdef __WXMSW__
+       Layout();
+#endif
     }
 
 private:
