@@ -967,11 +967,9 @@ MFolder *wxFolderTree::OnCreate(MFolder *parent)
       // users wants to use the dialog directly instead of the wizard
       newfolder = ShowFolderCreateDialog(winTop, FolderCreatePage_Default, parent);
    }
-   else
-   {
-      // RunCreateFolderWizard() doesn't dec ref it
+
+   if ( parent )
       parent->DecRef();
-   }
 
    return newfolder;
 }

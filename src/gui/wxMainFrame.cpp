@@ -852,8 +852,9 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                   // wizard
                   newfolder = ShowFolderCreateDialog(winTop,
                                                      FolderCreatePage_Default,
-                                                     NULL);
+                                                     parent);
                }
+
                SafeDecRef(newfolder);
             }
             break;

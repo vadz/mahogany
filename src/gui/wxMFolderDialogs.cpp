@@ -126,9 +126,9 @@ extern const MPersMsgBox *M_MSGBOX_ASK_PWD;
 // private classes
 // ============================================================================
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // dialog classes
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // base class for folder creation and properties dialog
 class wxFolderBaseDialog : public wxOptionsEditDialog
@@ -143,16 +143,23 @@ public:
    }
 
    // initialization (should be called before the dialog is shown)
-   // set folder we're working with
+      // set folder we're working with
    void SetFolder(MFolder *folder)
-      { m_newFolder = folder; SafeIncRef(m_newFolder); }
-   // set the parent folder: if it's !NULL, it can't be changed by user
+      { SafeIncRef(m_newFolder = folder); }
+      // set the parent folder
    void SetParentFolder(MFolder *parentFolder)
-      { m_parentFolder = parentFolder; }
+      { SafeIncRef(m_parentFolder = parentFolder); }
 
-   // get the parent folder name
+   // accessors
+      // get the parent folder (may return NULL)
+   MFolder *GetParentFolder() const
+   {
+      m_parentFolder->IncRef();
+      return m_parentFolder;
+   }
+      // get the parent folder name
    wxString GetParentFolderName() const { return m_parentName->GetValue(); }
-   // get the folder name
+      // get the folder name
    wxString GetFolderName() const { return m_folderName->GetValue(); }
 
    // after the dialog is closed, retrieve the folder which was created or
@@ -340,6 +347,12 @@ protected:
    // react to any event - update all the controls
    void OnEvent();
 
+   // hack: this method tells whether we're in process of creating the folder
+   // or just showing the properties for it. Ultimately, it shouldn't be
+   // necessary, but for now we use it to adjust our behaviour depending on
+   // what we're doing
+   bool IsCreating() const { return m_dlgCreate != NULL; }
+
    // the radiobox indices
    enum RadioIndex
    {
@@ -424,12 +437,6 @@ protected:
 
    // enable the controls which make sense for MBOX or MH folder
    void EnableControlsForFileFolder(MFolderType folderType);
-
-   // hack: this flag tells whether we're in process of creating the folder or
-   // just showing the properties for it. Ultimately, it shouldn't be
-   // necessary, but for now we use it to adjust our behaviour depending on
-   // what we're doing
-   bool m_isCreating;
 
    /// the parent notebook control
    wxNotebook *m_notebook;
@@ -566,9 +573,9 @@ private:
 // implementation
 // ============================================================================
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // event tables
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxFolderBaseDialog, wxOptionsEditDialog)
 IMPLEMENT_DYNAMIC_CLASS(wxFolderCreateDialog, wxFolderBaseDialog)
@@ -666,17 +673,10 @@ wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
                              wxALIGN_RIGHT);
    pLabel->SetConstraints(c);
 
-   // don't allow changing it if parent folder is fixed
+   m_parentName = new wxTextCtrl(panel, -1, "");
    if ( m_parentFolder )
    {
-      m_parentName = new wxTextCtrl(panel, -1,
-                                    m_parentFolder->GetFullName(),
-                                    wxDefaultPosition, wxDefaultSize,
-                                    wxTE_READONLY);
-   }
-   else
-   {
-      m_parentName = new wxTextCtrl(panel, -1, "");
+      m_parentName->SetValue(m_parentFolder->GetFullName());
    }
 
    c = new wxLayoutConstraints;
@@ -696,7 +696,10 @@ wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
    c->height.SameAs(m_parentName, wxHeight);
    m_btnParentFolder->SetConstraints(c);
 
-   m_btnParentFolder->Enable(FALSE);
+   // for the "Show folder properties" dialog it doesn't make sense to keep it
+   // enabled as the parent of an existing folder cannot be changed -- and for
+   // the "Create folder" dialog it is reenabled later
+   m_btnParentFolder->Disable();
 
    // return the last control created
    return m_parentName;
@@ -756,9 +759,9 @@ bool wxFolderBaseDialog::ShouldEnableOk() const
    return enable;
 }
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // wxFolderCreateDialog
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 wxFolderCreateDialog::wxFolderCreateDialog(wxWindow *parent,
                                            MFolder *parentFolder)
@@ -863,15 +866,13 @@ bool wxFolderCreateDialog::TransferDataToWindow()
       page->SetFolderPath(m_parentFolder->GetFullName());
    }
 
-   if ( !m_parentFolder )
-   {
-      // enable changing the parent folder to choose one
-      m_btnParentFolder->Enable(TRUE);
-   }
-   //else: the parent folder is fixed, don't let user change it
-
    if ( !wxOptionsEditDialog::TransferDataToWindow() )
       return FALSE;
+
+   // enable changing the parent folder -- this can't be done for an
+   // already existing folder so the base class ctor disables it, but we are
+   // creating a new folder and so can choose its parent to be whatever we want
+   m_btnParentFolder->Enable(TRUE);
 
    m_folderName->SetFocus();
 
@@ -939,9 +940,9 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
    return ok;
 }
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // wxFolderPropertiesDialog
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 wxFolderPropertiesDialog::wxFolderPropertiesDialog(wxWindow *frame,
                                                    MFolder *folder)
@@ -975,9 +976,9 @@ bool wxFolderPropertiesDialog::TransferDataFromWindow()
    return wxFolderBaseDialog::TransferDataFromWindow();
 }
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // wxFolderPropertiesPage
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                                Profile *profile,
@@ -990,7 +991,6 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 
    // are we in "view properties" or "create" mode?
    m_dlgCreate = dlg;
-   m_isCreating = m_dlgCreate != NULL;
 
    // init members
    // ------------
@@ -1145,7 +1145,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 
    (void)CreateIconEntry(labels[Label_FolderIcon], widthMax, m_folderSubtype, m_browseIcon);
 
-   m_radio->Enable(m_isCreating);
+   m_radio->Enable(IsCreating());
 }
 
 void
@@ -1183,7 +1183,7 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
 
    // the rest doesn't make any sense for the "properties" dialog because the
    // text in the path field can't change anyhow
-   if ( !m_isCreating )
+   if ( !IsCreating() )
    {
       // OTOH, call SetDirty() only we're changing the properites of an already
       // existing folder - when we create a new folder it is always dirty
@@ -1278,15 +1278,17 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
 
       CHECK_RET( dlg, "we should be only called when creating" );
 
-      wxString parentName = dlg->GetParentFolderName();
+      MFolder_obj parent(dlg->GetParentFolder());
 
       // NB: we modify the text even if the folder name is empty because
       //     otherwise entering a character into "Folder name" field and
       //     erasing it wouldn't restore the original "Path" value
       wxString folderName;
+      if ( parent )
+         folderName = parent->GetPath();
 
       // the control whose value we will automatically set
-      wxTextCtrl *text = NULL;
+      wxTextCtrl *textToSet = NULL;
 
       MFolderType folderType = GetCurrentFolderType();
       switch ( folderType )
@@ -1295,7 +1297,8 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
             // MH folder should be created under its parent by default
             //
             // AfterFirst() removes the MH root prefix
-            folderName = parentName.AfterFirst('/');
+            folderName = folderName.AfterFirst('/');
+
             if ( !folderName.empty() )
               folderName += '/';
 
@@ -1303,19 +1306,18 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
 
          case MF_FILE:
             // MBOX folders don't have hierarchical structure, use as is
-            text = m_path;
+            textToSet = m_path;
             break;
 
          case MF_NNTP:
          case MF_NEWS:
-            text = m_newsgroup;
+            textToSet = m_newsgroup;
             // fall through
 
          case MF_IMAP:
-            if ( !text )
-               text = m_mailboxname;
+            if ( !textToSet )
+               textToSet = m_mailboxname;
 
-            folderName = parentName;
             if ( !folderName.empty() )
             {
                // we have a problem with the IMAP delimiters here as don't
@@ -1364,7 +1366,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
             return;
       }
 
-      CHECK_RET( text, "must have been set above" );
+      CHECK_RET( textToSet, "must have been set above" );
 
       folderName += dlg->GetFolderName();
 
@@ -1378,7 +1380,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
       // this will tell SetValue() that we modified it ourselves, not the user
       m_userModifiedPath = -1;
 
-      text->SetValue(folderName);
+      textToSet->SetValue(folderName);
    }
 }
 
@@ -1421,7 +1423,7 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
    // this makes no sense for POP
    if ( isIMAP )
    {
-      if ( m_isCreating )
+      if ( IsCreating() )
       {
          // we can't change this setting when creating an IMAP folder
          m_isGroup->Enable(FALSE);
@@ -1455,7 +1457,7 @@ wxFolderPropertiesPage::EnableControlsForFileFolder(MFolderType folderType)
    EnableTextWithLabel(m_newsgroup, FALSE);
 
    // the path can't be changed for an already existing folder
-   EnableTextWithButton(m_path, m_isCreating);
+   EnableTextWithButton(m_path, IsCreating());
 
    // file folders are always local
 #ifdef USE_LOCAL_CHECKBOX
@@ -1647,7 +1649,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
    // enable folder subtype combobox only if we're creating because (folder
    // type can't be changed later) and if there are any subtypes
    EnableControlWithLabel(m_folderSubtype,
-                          m_isCreating &&
+                          IsCreating() &&
 #if wxCHECK_VERSION(2, 3, 2)
                              m_folderSubtype->GetCount() > 0
 #else
@@ -1821,7 +1823,7 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(MFolderType type,
 
                case MF_INBOX:
                case MF_FILE:
-                  if ( m_isCreating )
+                  if ( IsCreating() )
                   {
                      subtype = READ_CONFIG(m_profile, MP_FOLDER_FILE_DRIVER);
                      if ( subtype < 0  ||
@@ -1906,7 +1908,7 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
       else
          m_profile->writeEntry(profileKeys[property], value);
 
-      if ( !m_isCreating )
+      if ( !IsCreating() )
       {
          // this function has a side effect: it also sets the "modified" flag
          // so that the other functions know that the folder settings have
@@ -2042,11 +2044,12 @@ wxFolderPropertiesPage::SetDefaultValues()
       }
    }
 
+   wxTextCtrl *textToSet;
    value = READ_CONFIG_TEXT(profile, MP_FOLDER_PATH);
    switch ( selRadio )
    {
       case Radio_File:
-         if ( m_isCreating )
+         if ( IsCreating() )
          {
             // switch the browse to the correct mode
             if ( folderType == MF_MH )
@@ -2055,6 +2058,7 @@ wxFolderPropertiesPage::SetDefaultValues()
                m_browsePath->BrowseForFiles();
 
             // don't need to set anything
+            textToSet = NULL;
             break;
          }
 
@@ -2073,25 +2077,31 @@ wxFolderPropertiesPage::SetDefaultValues()
          // fall through
 
       case Radio_Group:
-         m_path->SetValue(value);
+         textToSet = m_path;
          break;
 
       case Radio_News:
-         m_newsgroup->SetValue(value);
+         textToSet = m_newsgroup;
          break;
 
       case Radio_Imap:
-         m_mailboxname->SetValue(value);
+         textToSet = m_mailboxname;
          break;
 
       default:
          // nothing special to do
-         ;
+         textToSet = NULL;
+   }
+
+   if ( textToSet )
+   {
+      m_userModifiedPath = -1;
+      textToSet->SetValue(value);
    }
 
    m_originalValues[Path] = value;
 
-   if ( !m_isCreating )
+   if ( !IsCreating() )
       m_comment->SetValue(READ_CONFIG(profile, MP_FOLDER_COMMENT));
 
    // remember the original folder type
@@ -2118,7 +2128,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_isLocal->SetValue(m_originalIsLocalValue);
 #endif // USE_LOCAL_CHECKBOX
 
-   if ( m_isCreating )
+   if ( IsCreating() )
    {
       // always create folders which can be opened by default (i.e. even if
       // our parent can't be opened, it doesn't mean that we can't)
@@ -2139,7 +2149,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    // although NNTP servers do support password-protected access, this
    // is so rare that anonymous should really be the default
    m_originalIsAnonymous = (flags & MF_FLAGS_ANON) ||
-                           (m_isCreating && folderType == MF_NNTP);
+                           (IsCreating() && folderType == MF_NNTP);
    m_isAnonymous->SetValue(m_originalIsAnonymous);
 
 #ifdef USE_SSL
@@ -2151,7 +2161,7 @@ wxFolderPropertiesPage::SetDefaultValues()
 #endif // USE_SSL
 
    // update the folder icon
-   if ( m_isCreating )
+   if ( IsCreating() )
    {
       // use default icon for the chosen folder type
       m_originalFolderIcon = GetDefaultFolderTypeIcon(folderType);
@@ -2194,15 +2204,29 @@ wxFolderPropertiesPage::IsOk() const
 bool
 wxFolderPropertiesPage::TransferDataToWindow(void)
 {
-   Profile_obj profile("");
-   if ( !m_folderPath.empty() )
-      profile->SetPath(m_folderPath);
+   Profile_obj profile(m_folderPath);
 
-   if ( m_isCreating )
+   if ( IsCreating() )
    {
-      // use the type of the folder last created
-      m_folderType =
-         (MFolderType)(long)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
+      // if we're creating a folder under a parent with some defined
+      // hierarchical type (i.e. not root or group but IMAP or NNTP, for
+      // example), default to the parents type initially
+      MFolderType typeOfParentChildren;
+      MFolder_obj folderParent(m_dlgCreate->GetParentFolder());
+      if ( folderParent &&
+            CanHaveSubfolders(folderParent->GetType(),
+                              folderParent->GetFlags(),
+                              &typeOfParentChildren) &&
+            typeOfParentChildren != MF_ILLEGAL )
+      {
+         m_folderType = typeOfParentChildren;
+      }
+      else
+      {
+         // use the type of the folder last created
+         m_folderType =
+            (MFolderType)(long)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
+      }
    }
    else
    {
@@ -2210,7 +2234,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       m_folderType = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
    }
 
-   if ( (m_folderType == MF_INBOX) && m_isCreating )
+   if ( (m_folderType == MF_INBOX) && IsCreating() )
    {
       // FAIL_MSG("how did we manage to create an INBOX folder?"); --
       // obviously by using a corrupted config file... no need to crash though
@@ -2222,7 +2246,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
    if ( m_folderType == MF_INBOX )
    {
       // this is checked for above!
-      wxASSERT_MSG( !m_isCreating, "can't create INBOX" );
+      wxASSERT_MSG( !IsCreating(), "can't create INBOX" );
 
       // we don't have any special properties for INBOX, so just treat it as
       // file folder
@@ -2239,7 +2263,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       m_folderSubtype->SetSelection(selChoice);
    }
 
-   if ( m_isCreating && (selRadio == Radio_File) )
+   if ( IsCreating() && (selRadio == Radio_File) )
    {
       // set the default value for m_path field
       UpdateOnFolderNameChange();
@@ -2644,9 +2668,9 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    return true;
 }
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // wxFolderCreateNotebook
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // should be in sync with the enum FolderCreatePage!
 const char *wxFolderCreateNotebook::s_aszImages[] =
@@ -2719,9 +2743,9 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
    }
 }
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // our public interface
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // helper function: common part of ShowFolderCreateDialog and
 // ShowFolderPropertiesDialog

@@ -540,7 +540,8 @@ public:
    };
 
    FolderParams *GetParams() { return &m_Params; }
-   MFolder *GetParentFolder() { m_ParentFolder->IncRef(); return m_ParentFolder; }
+   MFolder *GetParentFolder() const
+      { if ( m_ParentFolder ) m_ParentFolder->IncRef(); return m_ParentFolder; }
 
    void SetUserWantsDialog() { m_wantsDialog = true; }
    bool UserWantsDialog() const { return m_wantsDialog; }
@@ -1081,8 +1082,20 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
    CreateFolderWizard::FolderParams *params = wiz->GetParams();
 
    MFolder_obj f = wiz->GetParentFolder();
-   Profile_obj p(f->GetProfile());
-   CHECK(p, false, "No profile?");
+   Profile *profile;
+   if ( f )
+   {
+      profile = f->GetProfile();
+   }
+   else
+   {
+      profile = mApplication->GetProfile();
+      profile->IncRef();
+   }
+
+   CHECK(profile, false, "No profile?");
+
+   Profile_obj p(profile);
 
    // don't overwrite the settings previously entered by user
    if ( m_Name->GetValue().empty() )
@@ -1382,7 +1395,6 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
       return NULL;
    }
 
-   CHECK(parent,NULL, "No parent folder?");
    CreateFolderWizard *wizard = new CreateFolderWizard(parent, parentWin);
    MFolder *newfolder = NULL;
    if ( wantsDialog )
@@ -1406,7 +1418,7 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
          }
 
          newfolder = CreateFolderTreeEntry(
-            NULL,    // don't use parent for the folders created with wizard
+            parent,
             params->m_Name,
             type,
             params->m_FolderFlags,

@@ -54,9 +54,7 @@ enum FolderCreatePage
 /**
   shows folder creation dialog, returns a pointer to created folder or NULL.
 
-  @param if parentFolder is NULL, any parent folder may be chosen, otherwise
-         the new folder can only be created under parentFolder.
-
+  @param parentFolder is the default parent folder or NULL
   @return the returned folder object must be DecRef()d by the caller (if !NULL)
 */
 extern MFolder *ShowFolderCreateDialog
