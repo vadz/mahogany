@@ -456,10 +456,9 @@ AC_CHECK_LIB(shadow,main)
 
 dnl libresolv or libbind (or simply libc under FreeBSD)
 USE_RBL=1
-AC_CHECK_FUNC(res_init,,
-AC_CHECK_LIB(resolv,res_init,,
-	AC_CHECK_LIB(bind,res_init,,
-      AC_CHECK_LIB(c,res_init,,
+AC_CHECK_LIB(resolv,res_query,,
+	AC_CHECK_LIB(bind,res_query,,
+      AC_CHECK_FUNC(res_query,,
          [
             AC_MSG_WARN(cannot use RBL spam checker.)
             USE_RBL=0
