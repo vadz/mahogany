@@ -955,7 +955,7 @@ strutil_encrypt(const String &original)
       strutil_encrypt_pair(pair);
       // now we have the encrypted pair, which could be binary data,
       // so we write hex values instead:
-      tmpstr.Printf(_T("%02x%02x"), (wxChar)pair[0], (wxChar)pair[1]);
+      tmpstr.Printf(_T("%02x%02x"), (int)pair[0], (int)pair[1]);
       newstr << tmpstr;
       cptr ++;
       if(*cptr) cptr++;
