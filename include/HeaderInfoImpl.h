@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
-// File name:   include/HeaderInfoCC.h: HeaderInfoListImpl class
+// File name:   include/HeaderInfoImpl.h: HeaderInfoListImpl class
 // Purpose:     provide implementation of the ABC HeaderInfoList
 // Author:      Karsten Ballüder, Vadim Zeitlin
 // Modified by:
@@ -31,26 +31,19 @@ WX_DEFINE_ARRAY(HeaderInfo *, ArrayHeaderInfo);
 
 /**
   This is a very simple HeaderInfoList implementation. It preallocates an
-  array big enough to store the info for all the messages and doesn't support
-  sorting nor threading.
+  array big enough to store the info for all the messages.
 
   It should be considered just as a prototype. The final version should
   support folders with up to 100000 messages efficiently (probably not
   sorting/threading them though?).
 
   TODO:
-   1. combine sorting and threading: we need to thread messages first and then
-      to sort the siblings _separately_ (i.e. first sort the roots, then the
-      children of the first root, &c) - but for this we need to store the
-      parent-children relationships and not only the order of the threaded
-      messages...
-
-   2. although there is nothing wrong with preallocating all the memory we need
+   1. although there is nothing wrong with preallocating all the memory we need
       (even for 100000 message we take just 400Kb), it would still be nice to
       have some smart way of storing HeaderInfo objects as using array is less
       than ideal because adding/removing messages is a common operation.
 
-   3. batch processing of OnRemove() calls: instead of removing the item
+   2. batch processing of OnRemove() calls: instead of removing the item
       immediately, remember the range of items to be removed. If the new
       item to remove is not contiguous to the existing range, DoRemove()
       immediately and start new range. Also call DoRemove() in the beginning
@@ -182,7 +175,7 @@ private:
    MsgnoType FindFirstInRange(const MsgnoArray& array,
                               MsgnoType posFrom, MsgnoType posTo) const;
 
-   /// the folder we contain the listinf for
+   /// the folder we contain the listing for
    MailFolder *m_mf;
 
    /// the array of headers

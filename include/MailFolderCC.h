@@ -178,7 +178,7 @@ public:
                                                 SEARCH_UNDELETED,
                                     MsgnoType last = 0) const;
 
-   virtual UIdArray *SearchMessages(const SearchCriterium *crit);
+   virtual UIdArray *SearchMessages(const SearchCriterium *crit, int flags);
 
 
    virtual bool ThreadMessages(const ThreadParams& thrParams,
@@ -360,8 +360,16 @@ private:
    /// perform the search, return number of messages found
    unsigned long SearchAndCountResults(struct search_program *pgm) const;
 
-   /// helper of SearchAndCountResults() and SearchByFlag()
-   MsgnoArray *DoSearch(struct search_program *pgm, int ccSearchFlags) const;
+   /**
+     common part of the various Search() functions: calls c-client
+     mail_search()
+
+     @param pgm the search program
+     @param flags either SEARCH_UID or SEARCH_MSGNO
+     @return array containing either UIDs or msgnos of the found messages
+   */
+   MsgnoArray *DoSearch(struct search_program *pgm,
+                        int flags = SEARCH_MSGNO) const;
 
    /// called by CountAllMessages() to perform actual counting
    virtual bool DoCountMessages(MailFolderStatus *status) const;

@@ -128,6 +128,9 @@ public:
    /// flags for SearchByFlag()
    enum
    {
+      /// return the msgnos, not UIDs of the messages (default)
+      SEARCH_MSGNO = 0,
+
       /// search messages with the given flag set (default)
       SEARCH_SET = 0,
 
@@ -614,9 +617,12 @@ public:
    /**
      Search messages for certain criteria.
 
+     @param crit the search criterium
+     @param flags the search flags, only SEARCH_UID and SEARCH_MSGNO allowed
      @return UIdArray with UIds of matching messages, caller must free it
    */
-   virtual UIdArray *SearchMessages(const SearchCriterium *crit) = 0;
+   virtual UIdArray *SearchMessages(const SearchCriterium *crit,
+                                    int flags = SEARCH_UID) = 0;
 
    //@}
 

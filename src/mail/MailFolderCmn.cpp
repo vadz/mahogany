@@ -2,12 +2,14 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   mail/MailFolderCmn.cpp: generic MailFolder methods which don't
 //              use cclient (i.e. don't really work with mail folders)
-// Purpose:     handling of mail folders with c-client lib
+// Purpose:     functions common to all MailFolder implementations, in
+//              particular handling of folder closing (including keep alive
+//              logic) and the new mail processing (filtering, collecting, ...)
 // Author:      Karsten Ballüder
 // Modified by:
 // Created:     02.04.01 (extracted from mail/MailFolder.cpp)
 // CVS-ID:      $Id$
-// Copyright:   (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)
+// Copyright:   (C) 1997-2002 Mahogany Team
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -42,6 +44,8 @@
 
 #include "Sequence.h"
 #include "UIdArray.h"
+
+#include "MSearch.h"
 
 #include "MFolder.h"
 #include "MFilter.h"
@@ -916,6 +920,135 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
 }
 
 // ----------------------------------------------------------------------------
+// MailFolderCmn searching
+// ----------------------------------------------------------------------------
+
+UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
+{
+   HeaderInfoList_obj hil = GetHeaders();
+   CHECK( hil, NULL, "no listing in SearchMessages" );
+
+   // the search results
+   UIdArray *results = new UIdArray;
+
+   // how many did we find?
+   unsigned long countFound = 0;
+
+   MProgressDialog *progDlg = NULL;
+
+   MsgnoType nMessages = GetMessageCount();
+
+   // show the progress dialog if the search is going to take a long time
+   if ( nMessages > (unsigned long)READ_CONFIG(GetProfile(),
+                                               MP_FOLDERPROGRESS_THRESHOLD) )
+   {
+      String msg;
+      msg.Printf(_("Searching in %lu messages..."), nMessages);
+
+      progDlg = new MProgressDialog(GetName(),
+                                    msg,
+                                    nMessages,
+                                    NULL,
+                                    false /* disable parent only */,
+                                    true /* allow to abort */);
+   }
+
+   // check all messages
+   bool cont = true;
+   String what;
+   for ( size_t idx = 0; idx < nMessages && cont; idx++ )
+   {
+      HeaderInfo *hi = hil->GetItemByIndex(idx);
+
+      if ( !hi )
+      {
+         FAIL_MSG( "SearchMessages: can't get header info" );
+
+         continue;
+      }
+
+      if ( crit->m_What == SearchCriterium::SC_SUBJECT )
+      {
+         what = hi->GetSubject();
+      }
+      else if ( crit->m_What == SearchCriterium::SC_FROM )
+      {
+         what = hi->GetFrom();
+      }
+      else if ( crit->m_What == SearchCriterium::SC_TO )
+      {
+         what = hi->GetTo();
+      }
+      else
+      {
+         Message_obj msg = GetMessage(hi->GetUId());
+         if ( !msg )
+         {
+            FAIL_MSG( "SearchMessages: can't get message" );
+
+            continue;
+         }
+
+         switch ( crit->m_What )
+         {
+            case SearchCriterium::SC_FULL:
+            case SearchCriterium::SC_BODY:
+               // FIXME: wrong for body as it checks the whole message
+               //        including header
+               what = msg->FetchText();
+               break;
+
+            case SearchCriterium::SC_HEADER:
+               what = msg->GetHeader();
+               break;
+
+            case SearchCriterium::SC_CC:
+               msg->GetHeaderLine("CC", what);
+               break;
+
+            default:
+               FAIL_MSG("Unknown search criterium!");
+         }
+
+         msg->DecRef();
+      }
+
+      bool found = strstr(what, crit->m_Key) != NULL;
+      if ( found != crit->m_Invert )
+      {
+         // really found, remember its UID or msgno depending on the flags
+         results->Add(flags & SEARCH_UID ? hi->GetUId() : idx + 1);
+      }
+
+      // update the progress dialog and check for abort
+      if ( progDlg )
+      {
+         String msg;
+         msg.Printf(_("Searching in %lu messages..."), nMessages);
+
+         unsigned long cnt = results->Count();
+         if ( cnt != countFound )
+         {
+            String msg2;
+            msg2.Printf(_(" - %lu matches found."), cnt);
+
+            cont = progDlg->Update(idx, msg + msg2);
+
+            countFound = cnt;
+         }
+         else
+         {
+            cont = progDlg->Update(idx);
+         }
+      }
+   }
+
+   delete progDlg;
+
+   return results;
+}
+
+// ----------------------------------------------------------------------------
 // MailFolderCmn sorting
 // ----------------------------------------------------------------------------
 
@@ -1495,7 +1628,12 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
 
    3. we have new mail in some not opened folder and it wasn't copied there by
       us - this is like (2) except that mfNew is also NULL and uidsNew is NULL
-      is well but countNew is provided instead
+      as well but countNew is provided instead
+
+      The only difference between this case and (2) is that we can't even give
+      detailed new mail notification (i.e. showing the subjects and senders of
+      the new messages) but we just tersely say that "N new messages" were
+      received.
  */
 
 /* static */
@@ -1895,78 +2033,6 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
       }
    //else: new mail reported by the Python code
 }
-
-// ----------------------------------------------------------------------------
-// eliminating duplicate messages code
-// ----------------------------------------------------------------------------
-
-// VZ: disabling this stuff - it is a workaround for the bug which doesn't exist
-//     any more
-#if 0
-struct Dup_MsgInfo
-{
-   Dup_MsgInfo(const String &s, UIdType id, unsigned long size)
-      { m_Id = s; m_UId = id; m_Size = size; }
-   String m_Id;
-   UIdType m_UId;
-   unsigned long m_Size;
-};
-
-KBLIST_DEFINE(Dup_MsgInfoList, Dup_MsgInfo);
-
-UIdType
-MailFolderCmn::DeleteDuplicates()
-{
-   HeaderInfoList *hil = GetHeaders();
-   if(! hil)
-      return 0;
-
-   Dup_MsgInfoList mlist;
-
-   UIdArray toDelete;
-
-   for(size_t idx = 0; idx < hil->Count(); idx++)
-   {
-      String   id = (*hil)[idx]->GetId();
-      UIdType uid = (*hil)[idx]->GetUId();
-      size_t size = (*hil)[idx]->GetSize();
-      bool found = FALSE;
-      for(Dup_MsgInfoList::iterator i = mlist.begin();
-          i != mlist.end();
-          i++)
-         if( (**i).m_Id == id )
-         {
-            /// if new message is larger, keep it instead
-            if( (**i).m_Size < size )
-            {
-               toDelete.Add((**i).m_UId);
-               (**i).m_UId = uid;
-               (**i).m_Size = size;
-               found = FALSE;
-            }
-            else
-               found = TRUE;
-            break;
-         }
-      if(found)
-         toDelete.Add(uid);
-      else
-      {
-         Dup_MsgInfo *mi = new Dup_MsgInfo(id, uid, size);
-         mlist.push_back(mi);
-      }
-   }
-   hil->DecRef();
-
-   if(toDelete.Count() == 0)
-      return 0; // nothing to do
-
-   if(DeleteMessages(&toDelete,FALSE))
-      return toDelete.Count();
-   // else - uncommented or compiler thinks there's return without value
-   return UID_ILLEGAL; // an error happened
-}
-#endif // 0
 
 // ----------------------------------------------------------------------------
 // MailFolderCmn message counting

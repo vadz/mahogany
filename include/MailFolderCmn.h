@@ -142,6 +142,7 @@ public:
                                 const Params& params,
                                 wxWindow *parent = NULL);
 
+   virtual UIdArray *SearchMessages(const SearchCriterium *crit, int flags);
    virtual bool ThreadMessages(const ThreadParams& thrParams,
                                ThreadData *thrData);
 

@@ -3869,10 +3869,13 @@ MailFolderCC::GetMessage(unsigned long uid)
 // MailFolderCC: searching
 // ----------------------------------------------------------------------------
 
-MsgnoArray *MailFolderCC::DoSearch(struct search_program *pgm,
-                                   int ccSearchFlags) const
+MsgnoArray *
+MailFolderCC::DoSearch(struct search_program *pgm, int flags) const
 {
-   CHECK( m_MailStream, NULL, "SearchAndCountResults: folder is closed" );
+   ASSERT_MSG( flags == SEARCH_UID || flags == SEARCH_MSGNO,
+               "DoSearch(): invalid flags value" );
+
+   CHECK( m_MailStream, NULL, "DoSearch(): folder is closed" );
 
    // at best we're going to have a memory leak, at worse c-client is locked
    // and we will just crash
@@ -3881,11 +3884,18 @@ MsgnoArray *MailFolderCC::DoSearch(struct search_program *pgm,
    MailFolderCC *self = (MailFolderCC *)this; // const_cast
    self->m_SearchMessagesFound = new UIdArray;
 
-   // never prefetch the results as we often want to just count them
-   //
+   // never prefetch the results as we often want to just count them and
    // prefetching messages may also result in unwanted reentrancies so it's
    // safer to avoid it
-   mail_search_full(m_MailStream, NIL, pgm, ccSearchFlags | SE_NOPREFETCH);
+   //
+   // also, as we never reuse the program, we always free it immediately
+   mail_search_full
+   (
+      m_MailStream,
+      NIL,   // charset: use the default US-ASCII
+      pgm,
+      (flags & SEARCH_UID ? SE_UID : 0) | SE_FREE | SE_NOPREFETCH
+   );
 
    CHECK( m_SearchMessagesFound, NULL, "who deleted m_SearchMessagesFound?" );
 
@@ -3898,7 +3908,7 @@ MsgnoArray *MailFolderCC::DoSearch(struct search_program *pgm,
 unsigned long
 MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
 {
-   MsgnoArray *searchResults = DoSearch(pgm, SE_FREE);
+   MsgnoArray *searchResults = DoSearch(pgm);
 
    unsigned long count;
    if ( searchResults )
@@ -4011,23 +4021,16 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
          pgm->msgno = set;
    }
 
-   return DoSearch(pgm, SE_FREE | (flags & SEARCH_UID ? SE_UID : 0));
+   return DoSearch(pgm, flags);
 }
 
 UIdArray *
-MailFolderCC::SearchMessages(const SearchCriterium *crit)
+MailFolderCC::SearchMessages(const SearchCriterium *crit, int flags)
 {
-   CHECK( !m_SearchMessagesFound, NULL, "SearchMessages reentered" );
    CHECK( crit, NULL, "no criterium in SearchMessages" );
-
-   HeaderInfoList_obj hil = GetHeaders();
-   CHECK( hil, NULL, "no listing in SearchMessages" );
-
-   m_SearchMessagesFound = new UIdArray;
 
    // server side searching doesn't support all possible search criteria,
    // check if it can do this search first
-
    SEARCHPGM *pgm = mail_newsearchpgm();
    STRINGLIST **slistMatch;
 
@@ -4062,148 +4065,32 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
          mail_free_searchpgm(&pgm);
    }
 
-   if ( slistMatch )
+   if ( !slistMatch )
    {
-      *slistMatch = mail_newstringlist();
-
-      (*slistMatch)->text.data = (unsigned char *)strdup(crit->m_Key);
-      (*slistMatch)->text.size = crit->m_Key.length();
-
-      if ( crit->m_Invert )
-      {
-         // represent the inverted search as "TRUE && !pgm"
-         SEARCHPGM *pgmReal = pgm;
-
-         pgm = mail_newsearchpgm();
-         pgm->msgno = mail_newsearchset();
-         pgm->msgno->first = 1;
-         pgm->msgno->last = GetMessageCount();
-
-         pgm->cc_not = mail_newsearchpgmlist();
-         pgm->cc_not->pgm = pgmReal;
-      }
-
-      CHECK( m_MailStream, 0, "SearchMessages: folder is closed" );
-
-      // the m_SearchMessagesFound array is filled from mm_searched
-      mail_search_full (m_MailStream,
-                        NIL /* charset: use default (US-ASCII) */,
-                        pgm,
-                        SE_UID | SE_FREE | SE_NOPREFETCH);
-   }
-   else // can't do server side search
-   {
-      // how many did we find?
-      unsigned long countFound = 0;
-
-      MProgressDialog *progDlg = NULL;
-
-      MsgnoType nMessages = GetMessageCount();
-      if ( nMessages > (unsigned long)READ_CONFIG(m_Profile,
-                                                  MP_FOLDERPROGRESS_THRESHOLD) )
-      {
-         String msg;
-         msg.Printf(_("Searching in %lu messages..."), nMessages);
-         {
-            MGuiLocker locker;
-            progDlg = new MProgressDialog(GetName(),
-                                          msg,
-                                          nMessages,
-                                          NULL,
-                                          false, true);// open a status window:
-         }
-      }
-
-      String what;
-      for ( size_t idx = 0; idx < nMessages; idx++ )
-      {
-         HeaderInfo *hi = hil->GetItemByIndex(idx);
-
-         if ( !hi )
-         {
-            FAIL_MSG( "SearchMessages: can't get header info" );
-
-            continue;
-         }
-
-         if ( crit->m_What == SearchCriterium::SC_SUBJECT )
-         {
-            what = hi->GetSubject();
-         }
-         else if ( crit->m_What == SearchCriterium::SC_FROM )
-         {
-            what = hi->GetFrom();
-         }
-         else if ( crit->m_What == SearchCriterium::SC_TO )
-         {
-            what = hi->GetTo();
-         }
-         else
-         {
-            Message *msg = GetMessage(hi->GetUId());
-            switch ( crit->m_What )
-            {
-               case SearchCriterium::SC_FULL:
-               case SearchCriterium::SC_BODY:
-                  // FIXME: wrong for body as it checks the whole message
-                  //        including header
-                  what = msg->FetchText();
-                  break;
-
-               case SearchCriterium::SC_HEADER:
-                  what = msg->GetHeader();
-                  break;
-
-               case SearchCriterium::SC_CC:
-                  msg->GetHeaderLine("CC", what);
-                  break;
-
-               default:
-                  FAIL_MSG("Unknown search criterium!");
-            }
-
-            msg->DecRef();
-         }
-
-         bool found = what.Contains(crit->m_Key);
-         if(crit->m_Invert)
-            found = !found;
-         if(found)
-            m_SearchMessagesFound->Add(hil->GetItemByIndex(idx)->GetUId());
-
-         if(progDlg)
-         {
-            String msg;
-            msg.Printf(_("Searching in %lu messages..."), nMessages);
-            String msg2;
-            unsigned long cnt = m_SearchMessagesFound->Count();
-            if(cnt != countFound)
-            {
-               msg2.Printf(_(" - %lu matches found."), cnt);
-               msg = msg + msg2;
-               if ( ! progDlg->Update(idx, msg ) )
-               {
-                  // abort searching
-                  break;
-               }
-
-               countFound = cnt;
-            }
-            else if( !progDlg->Update(idx) )
-            {
-               // abort searching
-               break;
-            }
-         }
-      }
-
-      delete progDlg;
+      // can't do server side search, fall back to the generic version
+      return MailFolderCmn::SearchMessages(crit, flags);
    }
 
-   UIdArray *rc = m_SearchMessagesFound; // will get freed by caller!
-   m_SearchMessagesFound = NULL;
+   *slistMatch = mail_newstringlist();
 
-   return rc;
+   (*slistMatch)->text.data = (unsigned char *)strdup(crit->m_Key);
+   (*slistMatch)->text.size = crit->m_Key.length();
+
+   if ( crit->m_Invert )
+   {
+      // represent the inverted search as "TRUE && !pgm"
+      SEARCHPGM *pgmReal = pgm;
+
+      pgm = mail_newsearchpgm();
+      pgm->msgno = mail_newsearchset();
+      pgm->msgno->first = 1;
+      pgm->msgno->last = GetMessageCount();
+
+      pgm->cc_not = mail_newsearchpgmlist();
+      pgm->cc_not->pgm = pgmReal;
+   }
+
+   return DoSearch(pgm, flags);
 }
 
 // ----------------------------------------------------------------------------
