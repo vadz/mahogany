@@ -26,7 +26,7 @@ a) Web pages in MahoganyWeb module: at least download.ht4, status.ht4 and
 
 b) doc/Mannounce.txt
 
-c) README, CHANGES, doc/relnotes.txt, roc/RoadMap.txt
+c) README, CHANGES, doc/relnotes.txt, doc/RoadMap.txt
 
 d) doc/release.txt to add any steps which are not yet in this file :-)
 
