@@ -586,8 +586,17 @@ wxMessageView::OnCommandEvent(wxCommandEvent &event)
          case ClickableInfo::CI_ICON:
          {
             int x,y;
-            GetPosition(&x,&y);
             wxPoint pos = GetClickPosition();
+            wxWindow *p = m_parent;
+            while(p)
+            {
+               p->GetPosition(&x,&y);
+               pos.x += x; pos.y += y;
+               if(p->IsKindOf(CLASSINFO(wxFrame)))
+                  break;
+               p = p->GetParent();
+            }
+            GetPosition(&x,&y);
             pos.x += x; pos.y += y;
             if(m_MimePopup)
                delete m_MimePopup;

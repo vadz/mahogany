@@ -143,9 +143,10 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
       appConfig->SET_PATH(tmp.c_str());
    }
 
-   if( strutil_isempty(rc) && READ_APPCONFIG(MC_RECORDDEFAULTS) )
+   if( strutil_isempty(rc))
    {
-      fileConfig->WRITE_ENTRY(szKey,szDefault); // so default value can be recorded
+      if(READ_APPCONFIG(MC_RECORDDEFAULTS) )
+          fileConfig->WRITE_ENTRY(szKey,szDefault); // so default value can be recorded
       rc = szDefault;
    }
 

@@ -33,8 +33,8 @@
 
 BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
 //  EVT_SIZE    (wxMFrame::OnSize)
-  EVT_MENU(-1,    wxMFrame::OnCommandEvent)
-  EVT_TOOL(-1,    wxMFrame::OnCommandEvent)
+  EVT_MENU(-1,    wxMainFrame::OnCommandEvent)
+  EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
 END_EVENT_TABLE()
 #endif // wxWin2
 
@@ -102,6 +102,16 @@ void
 wxMainFrame::OnMenuCommand(int id)
 {
    wxMFrame::OnMenuCommand(id);
+}
+
+void
+wxMainFrame::OnCommandEvent(wxCommandEvent &event)
+{
+   int id = event.GetId();
+   if(WXMENU_CONTAINS(MSG,id) || id == WXMENU_LAYOUT_CLICK)
+      m_FolderView->OnCommandEvent(event);
+   else
+      wxMFrame::OnMenuCommand(id);
 }
 
 #if 0

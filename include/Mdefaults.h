@@ -234,7 +234,7 @@
 /** @name default values of configuration entries */
 //@{
 /// shall we record default values in configuration files
-#define   MC_RECORDDEFAULTS_D      0
+#define   MC_RECORDDEFAULTS_D      0L
 /// default window position x
 #define   MC_XPOS_D        20L
 /// default window position y

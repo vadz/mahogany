@@ -146,10 +146,22 @@ public:
       unsigned int *month = NULL,
       unsigned int *year = NULL);
 
+   /** Set a message flag
+       @param index the sequence number
+       @param flag flag to be set, e.g. MSG_STAT_DELETED
+       @param set if true, set the flag, if false, clear it
+   */
+   void SetMessageFlag(unsigned long index, int flag, bool set = true);
+
    /** Delete a message.
        @param index the sequence number
    */
-   void DeleteMessage(unsigned long index);
+   void DeleteMessage(unsigned long index) { SetMessageFlag(index, MSG_STAT_DELETED); }
+
+   /** UnDelete a message.
+       @param index the sequence number
+   */
+   void UnDeleteMessage(unsigned long index) { SetMessageFlag(index,MSG_STAT_DELETED, false); }
 
    /** Expunge messages.
      */

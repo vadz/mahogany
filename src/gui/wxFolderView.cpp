@@ -50,6 +50,12 @@ END_EVENT_TABLE()
 
 #define   LCFIX ((wxFolderListCtrl *)this)->
 
+
+static const char *wxFLC_ColumnNames[] =
+{
+   "Status","Date","Size","From","Subject"
+};
+   
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
    m_FolderView->PreviewMessage(event.m_itemIndex);
@@ -78,7 +84,10 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    for(int i = 0; i < WXFLC_NUMENTRIES; i++)
       if(m_columns[i] == 0)
+      {
          m_firstColumn = i;
+         break;
+      }
    
    Clear();
 }
@@ -111,26 +120,18 @@ wxFolderListCtrl::Clear(void)
    GetClientSize(&x,&y);
    
    DeleteAllItems();
-   for (int i = 0; i < 5; i++)
+   for (int i = 0; i < WXFLC_NUMENTRIES; i++)
       DeleteColumn( i );
+   
    if (m_Style & wxLC_REPORT)
    {
-      InsertColumn( m_columns[WXFLC_STATUS], _("Status"),
-                    wxLIST_FORMAT_LEFT,
-                    (m_columnWidths[WXFLC_STATUS]*x)/100 );
-      InsertColumn( m_columns[WXFLC_FROM], _("From"),
-                    wxLIST_FORMAT_LEFT,
-                    (m_columnWidths[WXFLC_FROM]*x)/100 );  
-      InsertColumn( m_columns[WXFLC_DATE], _("Date"),
-                    wxLIST_FORMAT_LEFT,
-                    (m_columnWidths[WXFLC_DATE]*x)/100 );  
-      InsertColumn( m_columns[WXFLC_SIZE], _("Size"),
-                    wxLIST_FORMAT_LEFT,
-                    (m_columnWidths[WXFLC_SIZE]*x)/100 );  
-      InsertColumn( m_columns[WXFLC_SUBJECT], _("Subject"),
-                    wxLIST_FORMAT_LEFT,
-                    (m_columnWidths[WXFLC_SUBJECT]*x)/100 );  
-   };
+      for(int c = 0; c < WXFLC_NUMENTRIES; c++)
+         for (int i = 0; i < WXFLC_NUMENTRIES; i++)
+            if(m_columns[i] == c)
+               InsertColumn( c, _(wxFLC_ColumnNames[i]),
+                             wxLIST_FORMAT_LEFT,
+                             (m_columnWidths[i]*x)/100 );
+   }
 }
 
 void
@@ -245,6 +246,10 @@ wxFolderView::~wxFolderView()
 {
    if(initialised)
    {
+      if(mailFolder) // mark messages as \seen
+         for(int i = 0; i < m_NumOfMessages; i++)
+            mailFolder->SetMessageFlag(i, MSG_STAT_UNREAD, false);
+               
       timer->Stop();
       GLOBAL_DELETE timer;
       mailFolder->RegisterView(this,false);
@@ -253,13 +258,16 @@ wxFolderView::~wxFolderView()
 }
 
 void
-wxFolderView::OnMenuCommand(int id)
+wxFolderView::OnCommandEvent(wxCommandEvent &event)
 {
    int n;
    wxArrayInt selections;
-   
-   switch(id)
+
+   switch(event.GetId())
    {
+   case WXMENU_LAYOUT_CLICK:
+      m_MessagePreview->OnCommandEvent(event);
+      break;
    case  WXMENU_MSG_EXPUNGE:
       mailFolder->ExpungeMessages();
       Update();
@@ -490,8 +498,8 @@ void
 wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 {
    int id = event.GetId();
-   if(WXMENU_CONTAINS(MSG,id))
-      m_FolderView->OnMenuCommand(id);
+   if(WXMENU_CONTAINS(MSG,id) || id == WXMENU_LAYOUT_CLICK)
+      m_FolderView->OnCommandEvent(event);
    else
       wxMFrame::OnMenuCommand(id);
 }

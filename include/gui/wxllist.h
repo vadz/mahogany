@@ -241,6 +241,8 @@ public:
    //@{
    /// set list editable or read only
    void SetEditable(bool editable = true) { m_Editable = true; }
+   /// return true if list is editable
+   bool IsEditable(void) const { return m_Editable; }
    /// move cursor
    void MoveCursor(int dx = 0, int dy = 0);
    void SetCursor(wxPoint const &p) { m_CursorPosition = p; }

@@ -60,6 +60,12 @@ wxLayoutWindow::OnMouse(wxMouseEvent& event)
 void
 wxLayoutWindow::OnChar(wxKeyEvent& event)
 {
+   if(! m_llist.IsEditable()) // do nothing
+   {
+      event.Skip();
+      return;
+   }
+   
    long keyCode = event.KeyCode();
 
    switch(event.KeyCode())

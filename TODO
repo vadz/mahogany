@@ -9,12 +9,6 @@ $Id$
   + add a "save as html" option, using wxLayoutWindow functionality
   + add a "save" option first
 
-- wxFolderView:
-   + complete ForwardMessages
-   + add other functionality such as undelete messages or stripMime
-   + delete and forward don't work properly
-   + correct handling of message flags: NEW flag must be reset, Read/Replied flags?
-
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
   + backspace sometimes goes wrong, occasional editing problems ??

@@ -109,6 +109,19 @@ public:
    */
    virtual void DeleteMessage(unsigned long index) = 0;
 
+   /** UnDelete a message.
+       @param index the sequence number
+   */
+   virtual void UnDeleteMessage(unsigned long index) = 0;
+
+   /** Set a message flag. Possible flag values are MSG_STAT_xxx
+       @param index the sequence number
+       @param flag flag to be set, e.g. "\\Deleted"
+       @param set if true, set the flag, if false, clear it
+   */
+   virtual void SetMessageFlag(unsigned long index, int flag, bool set =
+                true) = 0;
+   
    /** Expunge messages.
      */
    virtual void ExpungeMessages(void) = 0;

@@ -235,11 +235,11 @@ MailFolderCC::GetMessageStatus(unsigned int msgno,
    if(month)   *month = mc->month;
    if(year) *year = mc->year + BASEYEAR;
    status = 0;
-   if(!mc->seen)  status += MSG_STAT_UNREAD;
+   if(!mc->seen)     status += MSG_STAT_UNREAD;
    if(mc->answered)  status += MSG_STAT_REPLIED;
    if(mc->deleted)   status += MSG_STAT_DELETED;
    if(mc->searched)  status += MSG_STAT_SEARCHED;
-   if(mc->recent) status += MSG_STAT_RECENT;
+   if(mc->recent)    status += MSG_STAT_RECENT;
    return status;
 }
 
@@ -251,15 +251,40 @@ MailFolderCC::GetMessage(unsigned long index)
 
 
 void
-MailFolderCC::DeleteMessage(unsigned long index)
+MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
 {
    String
       seq = strutil_ultoa(index);
-   if(PY_CALLBACKVA((MCB_FOLDERDELMSG, this, this->GetClassName(),
-                     1, profile, "l", (signed long) index),1)  )
-      mail_setflag(mailstream, (char *)seq.c_str(), "\\Deleted");
-}
 
+   const char *flagstr;
+   
+   switch(flag)
+   {
+   case MSG_STAT_UNREAD:
+      flagstr = "\\SEEN"; set = set ? false : true; 
+      break;
+   case MSG_STAT_REPLIED:
+      flagstr = "\\ANSWERED";
+      break;
+   case MSG_STAT_DELETED:
+      flagstr = "\\DELETED";
+      break;
+   default:
+      return;
+   }
+
+   const char *callback = set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG;
+
+   if(PY_CALLBACKVA((callback, 1, this, this->GetClassName(),
+                     profile, "l", (signed long) index),1)  )
+   {
+      if(set)
+         mail_setflag(mailstream, (char *)seq.c_str(), (char *)flagstr);
+      else
+         mail_clearflag(mailstream, (char *)seq.c_str(), (char *)flagstr);
+   }
+}
+                      
 void
 MailFolderCC::ExpungeMessages(void)
 {
@@ -411,8 +436,8 @@ MailFolderCC::mm_expunged(MAILSTREAM *stream, unsigned long number)
 void
 MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long number)
 {
-   String msg = "Flags changed for msg no. " + strutil_ltoa(number);
-   LOGMESSAGE((M_LOG_DEFAULT, Str(msg)));
+   //String msg = "Flags changed for msg no. " + strutil_ltoa(number);
+   //LOGMESSAGE((M_LOG_DEFAULT, Str(msg)));
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
       mf->UpdateViews();

@@ -29,7 +29,7 @@ class wxMessageView;
 enum wxFolderListCtrlFields
 {
    WXFLC_STATUS = 0, WXFLC_DATE, WXFLC_SIZE, WXFLC_FROM,
-   WXFLC_SUBJECT, WXFLC_DUMMY, WXFLC_NUMENTRIES
+   WXFLC_SUBJECT, WXFLC_NUMENTRIES
 };
 
 /** a timer class for the FolderView */
@@ -74,7 +74,7 @@ public:
    bool  IsInitialised(void) const { return initialised; }
 
    /// called on Menu selection
-   void OnMenuCommand(int id);
+   void OnCommandEvent(wxCommandEvent &event);
 
 
    /** Open some messages.

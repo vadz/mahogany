@@ -38,6 +38,7 @@ public:
                wxFrame *parent = NULL);
    
    void OnMenuCommand(int id);
+   void OnCommandEvent(wxCommandEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 //   void OnSize( wxSizeEvent &event );
 

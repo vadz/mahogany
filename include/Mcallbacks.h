@@ -17,10 +17,12 @@
 #define   MCB_FOLDEROPEN   "FolderOpenHook"
 /// called when folder got changed
 #define   MCB_FOLDERUPDATE "FolderUpdateHook"
-/// called before message gets deleted
-#define   MCB_FOLDERDELMSG "FolderDeleteMessageHook"
 /// called before messages get expunged
 #define   MCB_FOLDEREXPUNGE "FolderExpungeHook"
+/// called when flag for message gets set
+#define   MCB_FOLDERSETMSGFLAG "FolderSetMessageFlagHook"
+/// called when flag for message gets cleared
+#define   MCB_FOLDERCLEARMSGFLAG "FolderClearMessageFlagHook"
 //@}                                           
 
 #endif
