@@ -50,6 +50,11 @@ extern "C"
 
 #include <ctype.h>   // isspace()
 
+
+#ifdef USE_EXPERIMENTAL
+#   define NEW_UPDATE
+#endif
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -543,6 +548,7 @@ MailFolderCC::Create(int typeAndFlags)
    m_NumOfMessages = 0;
    m_OldNumOfMessages = 0;
    m_Listing = NULL;
+   m_NeedFreshListing = true;
    m_FirstListing = true;
    m_UpdateNeeded = true;
    m_PingReopenSemaphore = false;
@@ -1261,12 +1267,25 @@ MailFolderCC::GetMessage(unsigned long uid)
 class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
+#ifdef NEW_UPDATE
+   if(m_NeedFreshListing)
+   {
+      // we need to re-generate the listing:
+      SafeDecRef(m_Listing);
+      ((MailFolderCC *)this)->UpdateListing();
+      m_NeedFreshListing = false;
+   }
+   else
+      m_Listing->IncRef();
+   return m_Listing;
+#else
    if(! m_Listing && m_NumOfMessages > 0)
    {
       ((MailFolderCC *)this)->UpdateListing();
    }
    if(m_Listing) m_Listing->IncRef();
    return m_Listing;
+#endif
 }
 
 bool
@@ -2489,6 +2508,12 @@ MailFolderCC::ProcessEventQueue(void)
 void
 MailFolderCC::RequestUpdate(void)
 {
+#ifdef NEW_UPDATE
+   // invalidate current folder listing and queue at least one folder
+   // update event.
+   if(! m_NeedFreshListing)
+      m_NeedFreshListing = true;
+#else
    // we want only one update event
    if(! m_UpdateNeeded)
    {
@@ -2496,6 +2521,7 @@ MailFolderCC::RequestUpdate(void)
       MailFolderCC::QueueEvent(evptr);
       m_UpdateNeeded = true;
    }
+#endif
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */

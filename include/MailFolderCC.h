@@ -598,6 +598,8 @@ private:
 
    /// The current listing of the folder
    class HeaderInfoListCC *m_Listing;
+   /// Do we need to generate a new listing?
+   bool m_NeedFreshListing;
    /// Is this folder in a critical c-client section?
    bool m_InCritical;
    /// folder flags

@@ -1330,8 +1330,11 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    size_t xpos = llist->GetCursorPos().x;
    // by how much did we shorten the current line:
    size_t shorter = 0;
+   // remember cursor location of object
+   size_t objectCursorPos = 0;
    
    size_t breakpos = offset;
+
    if( (**i).GetType() != WXLO_TYPE_TEXT )
    {
       // break before a non-text object
@@ -1355,15 +1358,25 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
             {
                i--;
                while(i != m_ObjectList.begin()
-                     && (**i).GetType() != WXLO_TYPE_TEXT ) 
+                     && (**i).GetType() != WXLO_TYPE_TEXT )
+               {
                   i--;
+               }
                breakpos = (**i).GetLength();
             }
          }
       }while(! foundSpace);
+      // before we actually break the object, we need to know at which
+      // cursorposition it starts, so we can restore the cursor if needed:
+      if( this == llist->GetCursorLine() && xpos >= breakpos )
+      {
+         for(wxLOiterator j = m_ObjectList.begin();
+             j != NULLIT && j != i; j++)
+            objectCursorPos += (**j).GetLength();
+      }
       // now we know where to break it:
       wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
-      shorter = tobj->GetLength() - breakpos;
+      shorter = tobj->GetLength() - breakpos - 1;
       // remember text to copy from this object
       prependText = tobj->GetText().Mid(breakpos+1);
       tobj->SetText(tobj->GetText().Left(breakpos));
@@ -1371,13 +1384,12 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
       copyObject = i; copyObject ++;
    }
 
-   // make sure there is a m_Next line:
+   // make sure there is an m_Next line:
    if(! m_Next)
    {
       (void) new wxLayoutLine(this, llist);
       wxASSERT(m_Next);
    }
-   
    // We need to move this and all following objects to the next
    // line. Starting from the end of line, to keep the order right. 
    if(copyObject != NULLIT)
@@ -1401,8 +1413,9 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    // do we need to adjust the cursor position?
    if( this == llist->GetCursorLine() && xpos >= breakpos)
    {
-      xpos = xpos - breakpos - 1;
-      wxASSERT(xpos > 0);
+      xpos = objectCursorPos + (xpos - objectCursorPos - breakpos -
+                                ((xpos > breakpos) ? 1 : 0 ));
+      wxASSERT(xpos >= 0);
       llist->MoveCursorTo( wxPoint( xpos, m_Next->GetLineNumber()) );
    }
    return TRUE; // we wrapped the line

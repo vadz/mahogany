@@ -699,13 +699,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                break;
             case WXK_RETURN:
                if(m_WrapMargin > 0)
-               {
-                  if(! m_llist->WrapLine(m_WrapMargin)
-                     || m_llist->GetCursorPos().x > 0)
-                     m_llist->LineBreak();
-               }
-               else
-                  m_llist->LineBreak();
+                  m_llist->WrapLine(m_WrapMargin);
+               m_llist->LineBreak();
                SetDirty();
                break;
 
@@ -729,13 +724,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   )
                {
                   if(m_WrapMargin > 0 && isspace(keyCode))
-                  {
-                     if(! m_llist->WrapLine(m_WrapMargin)
-                        || m_llist->GetCursorPos().x > 0)
-                        m_llist->Insert((char)keyCode);
-                  }
-                  else
-                     m_llist->Insert((char)keyCode);
+                     m_llist->WrapLine(m_WrapMargin);
+                  m_llist->Insert((char)keyCode);
                   SetDirty();
                }
                else
