@@ -168,11 +168,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    SetDirty();
 
    // at least under Windows, this should be the default behaviour
-#ifdef __WXMSW__
    m_AutoDeleteSelection = TRUE;
-#else // !Windows
-   m_AutoDeleteSelection = FALSE;
-#endif // Win/!Win
 }
 
 wxLayoutWindow::~wxLayoutWindow()
@@ -925,9 +921,9 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
 
    // in the absence of scrollbars we should compare with the client size
    if ( !m_hasHScrollbar )
-      m_maxx = size.x - WXLO_ROFFSET;
+      m_maxx = size.x;// - WXLO_ROFFSET;
    if ( !m_hasVScrollbar )
-      m_maxy = size.y - WXLO_BOFFSET;
+      m_maxy = size.y;// - WXLO_BOFFSET;
 
    // check if the text hasn't become too big
    // TODO why do we set both at once? they're independent...
