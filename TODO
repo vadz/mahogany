@@ -60,14 +60,12 @@ GENERAL ROADMAP/ORDER OF THINGS:
 - when user level is >=1 (advanced) show full preferences pages in
   folder notbook
 
-- If any top level window is open (messageview/composeview), the
-  application will not exit. Happened after you changed the exit
-  behaviour, has been a bug for months.
-    VZ: can't reproduce this
-
 - closing splashscreen calls wxApp::ExitMainLoop() which is wrong!
   VZ: can't reproduce this
   KB: only if no other window is open
+
+- Clicking on splashscreen or closing it while M starts up leads to
+  segfault
 
 - foldertreectrl in folder selection dialog should have keyboard focus 
   and should not open folder when pressed return, but select it :-)
@@ -99,6 +97,8 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *** KB:
 *********************************************************************
 
+- check handling of missing hostnames,
+  suppress missing hostname c-client error message
 - test if root test works.
 - create profile entry for SentMail folder by default
 
