@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sun Aug 16 15:42:13 1998
+#This file was created by <karsten> Sun Aug 16 17:03:39 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -91,6 +91,12 @@ Quite some already, but more are still missing.
 Cross-platform.
  M compiles on a variety of Unix systems and on Microsoft Windows.
  Use one mail client, no matter what system you use.
+ The source and binary for Windows 95/98/NT are available on request (
+\family typewriter 
+m-developers@makelist.com
+\family default 
+).
+ Mailbox file formats are the same on both platforms.
 \layout Itemize
 
 Based on the c-client library from the University of Washington, therefore
@@ -142,9 +148,6 @@ selection in the folder view sometimes behaves strange, selecting all messages
 message and composition view don't automatically scroll to the cursor
 \layout Itemize
 
-printing doesn't work yet
-\layout Itemize
-
 tab traversal in dialogs doesn't work (wxGTK problem)
 \layout Section
 
@@ -167,7 +170,9 @@ First comes a rewrite of the class hierarchy.
 Plug the (very few remaining) memory holes.
 \layout Standard
 
-Then we fix some GUI issues:
+Then we fix some GUI issues.
+ Many of these depend on wxGTK which is still evolving speedily.
+ 
 \layout Itemize
 
 add keyboard accelerators and proper tab traversal

@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sat Aug 15 15:12:04 1998
+#This file was created by <karsten> Sun Aug 16 17:04:42 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -115,6 +115,7 @@ Cross-platform.
 Based on the c-client library from the University of Washington, therefore
  full access to a wide range of protocols and file formats, including SMTP,
  MAP, POP3, NNTP and several mailbox formats.
+ This is the same library as used by PINE, so it is well tested and reliable.
 \layout Itemize
 
 Wide (extreme?) user configurability.
@@ -217,6 +218,10 @@ Support for Drag and Drop interaction with KDE, once that wxQt is available.
 \layout Itemize
 
 CORBA support, possible cooperation with PINN project.
+\layout Itemize
+
+Most of the GUI issues will disappear as wxGTK evolves, which is still in
+ ALPHA stage und under heavy development itself.
 \layout Subsection
 
 Help Needed

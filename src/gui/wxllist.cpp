@@ -1049,7 +1049,7 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    *selPageFrom = 1;
    *selPageTo = 1000;
 
-   m_maxpage = -1;
+   m_maxPage = -1;
    
 }
 

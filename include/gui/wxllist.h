@@ -236,14 +236,17 @@ public:
        @param findObject if true, return the object occupying the
        position specified by coords
        @param coords position where to find the object
-       @pageNo if > 0, print only that page of a document (for
+       @param pageNo if > 0, print only that page of a document (for
        printing)
-       @reallyDraw set this to false if you don't want to draw but just calculate the coordinates
+       @param reallyDraw set this to false if you don't want to draw but
+       just calculate the coordinates
+       @param hasDrawn set to true if a page has been printed
        @return if findObject == true, the object or NULL
    */
    wxLayoutObjectBase *Draw(wxDC &dc, bool findObject = false,
                             wxPoint const &coords = wxPoint(0,0),
-                            int pageNo = -1, bool reallyDraw = true);
+                            int pageNo = -1, bool reallyDraw = true,
+                            bool *hasDrawn = 0);
 
 #ifdef WXLAYOUT_DEBUG
    void Debug(void);
@@ -326,9 +329,9 @@ class wxLayoutPrintout: public wxPrintout
  public:
    wxLayoutPrintout(wxLayoutList &llist, wxString const & title = "My printout"):wxPrintout(title)
       { m_llist = &llist; m_maxPage = 0; }
-  bool OnPrintPage(int page);
-  bool HasPage(int page);
-  bool OnBeginDocument(int startPage, int endPage);
+   bool OnPrintPage(int page);
+   bool HasPage(int page);
+   bool OnBeginDocument(int startPage, int endPage);
    void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int
                     *selPageTo);
 private:

@@ -39,6 +39,7 @@ PYTHON_INCLUDE = @PYTHON_INCLUDE@
 # this will be set or unset
 @MAKE_USE_PYTHON@
 @MAKE_USE_WXTAB@
+@MAKE_LOCAL_LIBS_DEFINE@
 
 # canonical host
 CANONICAL_HOST=@host@

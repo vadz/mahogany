@@ -21,6 +21,7 @@ install:
 	$(INSTALL) $(BUILDDIR)/doc/*.tex $(DATADIR)/doc/
 	$(INSTALL) $(BUILDDIR)/doc/*.ps $(DATADIR)/doc/
 	$(INSTALL) $(BUILDDIR)/src/Python/*.doc $(DATADIR)/doc/python
+	$(INSTALL) $(LOCAL_LIBS) $(DATADIR)/$(CANONICAL_HOST)/lib
 
 include ../../makerules
 

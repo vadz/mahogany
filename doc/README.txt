@@ -2,7 +2,7 @@
 
 M - README
 
-Karsten Ballüder \\(Ballueder@usa.net)\\Contact us: m-developers@findmail.com
+Karsten Ballüder \\(Ballueder@usa.net)\\Contact us: m-developers@makelistcom
 
 Abstract
 
@@ -37,7 +37,10 @@ for it.
 Quite some already, but more are still missing. What we have so far:
 
 * Cross-platform. M compiles on a variety of Unix systems and on Microsoft
-  Windows. Use one mail client, no matter what system you use.
+  Windows. Use one mail client, no matter what system you use. The
+  source and binary for Windows 95/98/NT are available on request
+  (m-developers@makelist.com). Mailbox file formats are the same on
+  both platforms.
 
 * Based on the c-client library from the University of Washington,
   therefore full access to a wide range of protocols and file formats,
@@ -66,7 +69,16 @@ Quite some already, but more are still missing. What we have so far:
 * Full internationalisation support, M speaks multiple languages, but
   no translations yet.
 
-3 TODO, features to implement
+3 Known bugs
+
+* selection in the folder view sometimes behaves strange, selecting
+  all messages doesn't work
+
+* message and composition view don't automatically scroll to the cursor
+
+* tab traversal in dialogs doesn't work (wxGTK problem)
+
+4 TODO, features to implement
 
 This is a list of features on our TODO list that we are currently working
 on. Before adding new features, we'll clean up a few things:
@@ -80,7 +92,8 @@ on. Before adding new features, we'll clean up a few things:
 
 * Plug the (very few remaining) memory holes.
 
-Then we fix some GUI issues:
+Then we fix some GUI issues. Many of these depend on wxGTK which is
+still evolving speedily. 
 
 * add keyboard accelerators and proper tab traversal
 
@@ -136,7 +149,7 @@ After that we reach the list of serious improvements:
 
 * ANY OTHER SUGGESTION
 
-3.1 Help Needed
+4.1 Help Needed
 
 As you can see, we have big plans for M. To achieve all this, we need
 some help. Areas where we would use some help are
@@ -153,7 +166,7 @@ some help. Areas where we would use some help are
   you are very welcome to help us port M to those platforms, or to
   other hardware than Intel.
 
-4 Online resources
+5 Online resources
 
 * M has a homepage at http://Ballueder.home.ml.org/M/ 
 
@@ -161,6 +174,6 @@ some help. Areas where we would use some help are
 
 * wxGTK, the GTK port of wxWindows, is available from http://www.freiburg.linux.de/~wxxt/
 
-5 FAQ
+6 FAQ
 
 There will be some after this release - surely.

@@ -158,7 +158,7 @@ DEFAULT_USE_LIBINTL=0
 DEFAULT_USE_THREADS=1
 
 MAKE_USE_WXTAB="USE_WXTAB=1"
-
+MAKE_LOCAL_LIBS_DEFINE="junk"
 
 dnl ================ User editable settings ============================
 dnl where to find Python source
@@ -436,7 +436,8 @@ if test "$USE_WXGTK" = 1; then
       WX_DEFS=-D__WXGTK__
       AC_MSG_RESULT(yes)
       WX_DEFS=-D__WXGTK__
-    else
+      MAKE_LOCAL_LIBS_DEFINE="LOCAL_LIBS=$ac_path_to_link/libwx_gtk*"
+  else
       AC_MSG_RESULT(no)
       AC_MSG_ERROR("Cannot find the wxGtk libraries."
                    "Make a link to the library files in extra/lib .")
@@ -507,6 +508,7 @@ AC_SUBST(WX_SLINK)
 AC_SUBST(WX_DEFS)
 
 
+AC_SUBST(MAKE_LOCAL_LIBS_DEFINE)
 
 dnl Checks for libraries.
 dnl =====================
