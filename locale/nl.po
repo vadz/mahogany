@@ -993,7 +993,7 @@ msgstr ""
 # ImportPine.cpp:272
 #: adb/ImportPine.cpp:276
 #, c-format
-msgid "Unreckognized address book entry '%s'."
+msgid "Unrecognized address book entry '%s'."
 msgstr "Niet herkende vermelding '%s' in adresboek."
 
 # ImportPine.cpp:409

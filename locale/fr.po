@@ -825,7 +825,7 @@ msgstr ""
 
 #: adb/ImportPine.cpp:276
 #, fuzzy, c-format
-msgid "Unreckognized address book entry '%s'."
+msgid "Unrecognized address book entry '%s'."
 msgstr "Trouver une entrée dans le carnet d'adresses"
 
 #: adb/ImportPine.cpp:413

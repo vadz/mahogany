@@ -970,7 +970,7 @@ msgstr ""
 # AdbFrame.cpp:2210
 #: adb/ImportPine.cpp:276
 #, fuzzy, c-format
-msgid "Unreckognized address book entry '%s'."
+msgid "Unrecognized address book entry '%s'."
 msgstr "Buscar entrada de libro de direcciones"
 
 #: adb/ImportPine.cpp:413

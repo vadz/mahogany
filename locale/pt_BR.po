@@ -843,7 +843,7 @@ msgstr ""
 
 #: adb/ImportPine.cpp:276
 #, c-format
-msgid "Unreckognized address book entry '%s'."
+msgid "Unrecognized address book entry '%s'."
 msgstr "Item %s não reconhecido do livro de endereços."
 
 #: adb/ImportPine.cpp:413

@@ -805,7 +805,7 @@ msgstr "Unerwartetes Zeichen an Position %d in Zeile %d in Datei '%s'."
 
 #: adb/ImportPine.cpp:276
 #, fuzzy, c-format
-msgid "Unreckognized address book entry '%s'."
+msgid "Unrecognized address book entry '%s'."
 msgstr "Suche Adreﬂbucheintrag"
 
 #: adb/ImportPine.cpp:413

@@ -977,7 +977,7 @@ msgstr "Carattere inaspettato alla posizione %d della riga %d nel file '%s'."
 
 #: adb/ImportPine.cpp:276
 #, c-format
-msgid "Unreckognized address book entry '%s'."
+msgid "Unrecognized address book entry '%s'."
 msgstr "Trovato un ingresso dell'agenda non riconosciuto '%s'."
 
 #: adb/ImportPine.cpp:413
