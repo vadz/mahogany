@@ -1651,7 +1651,7 @@ MailFolderCC::BuildListing(void)
          m_nMessages = m_MailStream->nmsgs;
    }
 
-   if(m_Listing && m_nMessages > m_OldNumOfMessages)
+   if(m_Listing)
    {
       m_Listing->DecRef();
       m_Listing = NULL;
