@@ -538,14 +538,21 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
    Message *msg;
    
    int n = selections.Count();
+   mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,folderName);
+   if(! mf)
+   {
+      wxString msg;
+      msg << _("Cannot open folder '") << folderName << "'.";
+      wxLogError(msg);
+      return;
+   }
    for(i = 0; i < n; i++)
    {
-      mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,folderName);
       msg = m_MailFolder->GetMessage(selections[i]+1);
       mf->AppendMessage(*msg);
       SafeDecRef(msg);
    }
-
+   mf->DecRef();
    wxLogStatus(GetFrame(m_Parent), _("%d messages saved"), n);
 }
 
