@@ -1972,7 +1972,8 @@ extern "C"
       if(args->Count() != 1)
          return 0;
       Message * msg = p->GetMessage();
-      if(! msg) return Value("");
+      if(! msg)
+         return Value("");
       String funcName = args->GetArg(0)->Evaluate().ToString();
 
       int result = 0;
@@ -1982,7 +1983,7 @@ extern "C"
                                  "%d", &result,
                                  NULL);
       msg->DecRef();
-      p->SetChanged(); // worst case guess
+      p->SetExpunged(); // worst case guess
       return rc ? (result != 0) : false;
 #else
       return 0;
