@@ -7,9 +7,14 @@ SUBDIRS   = $(FILES_TEX:.htex=.dir)
 SUB_MAPS  = $(FILES_TEX:.htex=/wxhelp.map)
 
 include ../makeopts
+include ../makeversion
+
+# Mdocs.tar.gz file may be put into this directory if you don't want to rebuild
+# the docs but want to use the prebuilt version
+MDOCS_TGZ := Mdocs-$(M_VERSION_MAJOR).$(M_VERSION_MINOR).tar.gz
 
 all:	test
-	if [ ! -f Mdocs.tar.gz ]; then $(MAKE) makemap; fi
+	if [ ! -f $(MDOCS_TGZ) ]; then $(MAKE) makemap; fi
 
 test:
 	@if test -f Manual.tex; then \
@@ -37,15 +42,15 @@ makemap: .src/wxhelp.map0 $(SUBDIRS)
 else
 makemap:
 	@echo "  # One of the tools required to build documentation is missing."
-	@echo "  # Please either install the required tool(s) or download a"
-	@echo "  # a pre-built Mdocs.tar.gz and place it in the doc directory"
-	@echo "  # before running \"make install\"."
+	@echo "  # Please either install the required tool(s) and rerun configure"
+	@echo "  # or download a pre-built $(MDOCS_TGZ) and place it in the"
+	@echo "  # doc directory before running \"make install\"."
 	@false
 endif
 
 install: test
-	if [ -f Mdocs.tar.gz ]; \
-	then gzip -dc < Mdocs.tar.gz | (cd $(DOCDIR) && tar xvf -); \
+	if [ -f $(MDOCS_TGZ) ]; \
+	then gzip -dc < $(MDOCS_TGZ) | (cd $(DOCDIR) && tar xvf -); \
 	else $(MAKE) install2; \
 	fi
 
@@ -56,7 +61,6 @@ install2: makemap
 	do $(MAKE) DIR=$$i -f ../.src/Makefile.sub -C $$i install; \
 	done
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
-#??	ln -sf ../share/Mahogany/doc $(DESTDIR)/doc/Mahogany
 
 clean:
 	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab *.ps *.toc *.pdf tmp.*
@@ -70,4 +74,7 @@ classdoc:
 	$(MAKE) -C ../include doc
 	cp ../src/icons/Micon.jpg ../extra/scandoc/images/*.gif ../extra/scandoc/images/*.jpg classes
 
-.PHONY: all doc install clean makemap install2 test classdoc install_classdoc
+mdocs_targz: install
+	(cd $(DOCDIR) && tar cvf - *) | gzip -c9 > $(MDOCS_TGZ)
+
+.PHONY: all doc install clean makemap install2 test classdoc install_classdoc mdocs_targz
