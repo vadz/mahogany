@@ -772,7 +772,7 @@ void EditTemplates(wxWindow *parent,
                (
                 _("What kind of templates would you like to edit?\n"
                   "Mahogany uses different templates for:"),
-                _("Mahogany: edit templates"),
+                _("Mahogany : edit templates"),
                 WXSIZEOF(templateKinds), templateKinds,
                 parent
                );

@@ -382,11 +382,11 @@ public:
    virtual void Error(const String &error);
    virtual void Output(const String &msg)
       {
-         m_MInterface->MessageDialog(msg,NULL,_("Parser output"));
+         m_MInterface->MessageDialog(msg,NULL,_("Filters output"));
       }
    virtual void Log(const String &imsg, int level)
       {
-         String msg = _("Parser: ");
+         String msg = _("Filters: ");
          msg << imsg;
          m_MInterface->Log(level, msg);
       }
@@ -1971,7 +1971,7 @@ extern "C"
 
    static Value func_python(ArgList *args, Parser *p)
    {
-      p->Error(_("Python-Unterstützung für Filter ist nicht verfügbar."));
+      p->Error(_("Python support for filters is not available."));
       return false;
    }
 #endif

@@ -486,7 +486,7 @@ CalendarFrame::AddReminder(void)
 {
    wxString text =
       wxGetTextFromUser(_("Please enter the text for the reminder:"),
-                        _("Mahogany: Create Reminder"),
+                        _("Mahogany : Create Reminder"),
                         ""/* default */,
                         this,
                         -1,-1, TRUE);
@@ -733,7 +733,7 @@ CalendarModule::CalendarModule(MInterface *minterface)
 
    MAppBase *mapp = m_MInterface->GetMApplication();
    ((wxMainFrame *)mapp->TopLevelFrame())->AddModulesMenu(_("&Calendar Module"),
-                                        _("Functionality to interact with your Calendar based palmtop."),
+                                        _("Functionality to schedule messages and reminders."),
                                         m_CalendarMenu,
                                         -1);
    m_Today = wxDateTime::Today();

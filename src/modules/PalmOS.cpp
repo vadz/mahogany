@@ -990,7 +990,7 @@ PalmOSModule::Backup(void)
       name.Printf("%s%s", m_BackupDir.c_str(), fname.c_str());
 
       // update progress dialog, exit on "cancel"
-      StatusMessage(_("Backup´ing ..."));
+      StatusMessage(_("Backing up..."));
       if( ! pd->Update(max++, name) )
       {
          delete pd;
@@ -1736,6 +1736,7 @@ PalmOSModule::SyncMAL(void)
     /* are we using a proxy? */
     if(m_MALUseProxy)
     {
+       StatusMessage(_("Setting up MAL proxy..."));
        setHttpProxy ((char *) m_MALProxyHost.c_str());
        setHttpProxyPort ( m_MALProxyPort);
        setProxyUsername ((char *) m_MALProxyLogin.c_str());
@@ -1745,9 +1746,11 @@ PalmOSModule::SyncMAL(void)
     /* are we using a SOCKS proxy? */
     if(m_MALUseSocks)
     {
+       StatusMessage(_("Setting up SOCKS proxy..."));
        setSocksProxy ((char *) m_MALSocksHost.c_str());
        setSocksProxyPort ( m_MALSocksPort );
     }    
+    StatusMessage(_("Synchronising MAL server/AvantGo..."));
     malsync (m_PiSocket, pInfo);
     syncInfoFree(pInfo);
 }

@@ -58,7 +58,7 @@ public:
    MCEventReceiver(class MailCollector *mc)
       {
          m_MC = mc;
-         m_MEventCookie = MEventManager::Register(*this, MEventId_Ping);
+         m_MEventCookie = MEventManager::Register(*this, MEventId_FolderStatus);
          ASSERT_MSG( m_MEventCookie, "can't reg mail collector with event manager");
     }
    ~MCEventReceiver()

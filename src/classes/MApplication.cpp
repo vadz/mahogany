@@ -476,9 +476,13 @@ MAppBase::OnStartup()
       ERRORMESSAGE((_("Cannot build list of folders to keep open.")));
    }
 
+   // Load any modules requested: notice that this must be done before
+   // restoring the ADB editor as it uses the modules
+   // must also be done before calling mailcollector
+   LoadModules();
+
    // initialise collector object for incoming mails
    // ----------------------------------------------
-
    // only do it if we are using the NewMail folder at all
    if ( READ_APPCONFIG(MP_MAINFOLDER) == READ_APPCONFIG(MP_NEWMAIL_FOLDER) )
    {
@@ -486,9 +490,6 @@ MAppBase::OnStartup()
       m_MailCollector->Collect(); // empty all at beginning
    }
 
-   // Load any modules requested: notice that this must be done before
-   // restoring the ADB editor as it uses the modules
-   LoadModules();
 
    // show the ADB editor if it had been shown the last time when we ran
    // ------------------------------------------------------------------

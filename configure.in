@@ -92,9 +92,10 @@ M_OVERRIDES(experimental,experimental,
 --with-experimental    use experimental code,
 USE_EXPERIMENTAL)
 
-M_OVERRIDES(libtool,libtool,
---with-libtool    use GNU libtool,
-USE_LIBTOOL)
+dnl no longer updated in makefiles
+dnl M_OVERRIDES(libtool,libtool,
+dnl --with-libtool    use GNU libtool,
+dnl USE_LIBTOOL)
 
 M_OVERRIDES(ccostype,ccostype,
 --with-ccostype=xxx    use OS type xxx for c-client compilation,
@@ -196,6 +197,7 @@ AC_ISC_POSIX
 
 AC_LANG_CPLUSPLUS
 
+AC_PROG_YACC
 
 dnl Are we using libtool?
 MAKE_LIBTOOL=	

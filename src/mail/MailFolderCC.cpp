@@ -1716,7 +1716,8 @@ MailFolderCC::IsNewMessage(const HeaderInfo *hi)
    int status = hi->GetStatus();
 
    if( (status & MSG_STAT_SEEN) == 0
-       && ( status & MSG_STAT_RECENT))
+       && ( status & MSG_STAT_RECENT)
+       && ! ( status & MSG_STAT_DELETED) )
       isNew = true;
    if(m_LastNewMsgUId != UID_ILLEGAL
       && m_LastNewMsgUId >= msgId)
