@@ -200,7 +200,7 @@ HeaderIterator::GetAll(wxArrayString *names, wxArrayString *values, int flags)
       else // another occurence of a previously seen header
       {
          // append to the existing value
-         (*values)[(size_t)idxName] << _T("\r\n") << value;
+         (*values)[(size_t)idxName] << _T("\n") << value;
       }
    }
 
