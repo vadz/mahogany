@@ -316,9 +316,8 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    m_listbox->SetConstraints(c);
 
    // final steps
-   String file = mApplication->GetProfile()->readEntry(GetFileProfilePath(),
-                                                       "");
-   if ( !!file )
+   String file = wxConfigBase::Get()->Read(GetFileProfilePath(), "");
+   if ( !file.empty() )
    {
       m_text->SetValue(file);
    }
@@ -393,8 +392,7 @@ bool wxAdbImportDialog::TransferDataFromWindow()
 wxAdbImportDialog::~wxAdbImportDialog()
 {
    // save the file entry zone value in the profile
-   mApplication->GetProfile()->writeEntry(GetFileProfilePath(),
-                                          m_text->GetValue());
+   wxConfigBase::Get()->Write(GetFileProfilePath(), m_text->GetValue());
 }
 
 // ----------------------------------------------------------------------------

@@ -877,8 +877,11 @@ void EditTemplates(wxWindow *parent,
    String path;
    path << '/' << M_SETTINGS_CONFIG_SECTION << "/TemplateEditKind";
 
-   Profile *profile = mApplication->GetProfile();
-   long kindLastEdited = profile->readEntry(path, (long)MessageTemplate_Reply);
+   wxConfigBase *config = wxConfigBase::Get();
+
+   long
+      kindLastEdited = config ? config->Read(path, (long)MessageTemplate_Reply)
+                              : MessageTemplate_Reply;
    if ( kindLastEdited < 0 || kindLastEdited >= MessageTemplate_Max )
    {
       wxLogDebug(_T("Corrupted TemplateEditKind entry in config."));
@@ -888,9 +891,9 @@ void EditTemplates(wxWindow *parent,
 
    wxAllTemplatesDialog dlg((MessageTemplateKind)kindLastEdited, menu, parent);
 
-   if ( dlg.ShowModal() == wxID_OK )
+   if ( dlg.ShowModal() == wxID_OK && config )
    {
-      profile->writeEntry(path, dlg.GetTemplateKind());
+      config->Write(path, dlg.GetTemplateKind());
    }
 }
 

@@ -1200,18 +1200,21 @@ void AddBookToAdbEditor(const String& adbname, const String& provname)
     // write to the profile, the editor will load the books the next time it
     // shows up
 
-    wxConfigBase *conf = mApplication->GetProfile()->GetConfig();
-    conf->SetPath(GetAdbEditorConfigPath());
+    wxConfigBase *conf = wxConfigBase::Get();
+    if ( conf )
+    {
+      conf->SetPath(GetAdbEditorConfigPath());
 
-    wxArrayString books;
-    RestoreArray(conf, books, aszConfigNames[ConfigName_AddressBooks]);
-    books.Add(adbname);
-    SaveArray(conf, books, aszConfigNames[ConfigName_AddressBooks]);
+      wxArrayString books;
+      RestoreArray(conf, books, aszConfigNames[ConfigName_AddressBooks]);
+      books.Add(adbname);
+      SaveArray(conf, books, aszConfigNames[ConfigName_AddressBooks]);
 
-    wxArrayString providers;
-    RestoreArray(conf, providers, aszConfigNames[ConfigName_AddressBookProviders]);
-    providers.Add(provname);
-    SaveArray(conf, providers, aszConfigNames[ConfigName_AddressBookProviders]);
+      wxArrayString providers;
+      RestoreArray(conf, providers, aszConfigNames[ConfigName_AddressBookProviders]);
+      providers.Add(provname);
+      SaveArray(conf, providers, aszConfigNames[ConfigName_AddressBookProviders]);
+    }
   }
 }
 
@@ -1366,19 +1369,22 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     else                                          \
       RestoreArray(conf, var, aszConfigNames[i])
 
-  wxConfigBase *conf = mApplication->GetProfile()->GetConfig();
-  conf->SetPath(GetAdbEditorConfigPath());
+  wxConfigBase *conf = wxConfigBase::Get();
+  if ( conf )
+  {
+    conf->SetPath(GetAdbEditorConfigPath());
 
-  TRANSFER_STRING(m_strLastNewEntry, ConfigName_LastNewEntry);
-  TRANSFER_STRING(m_strSelection, ConfigName_TreeSelection);
+    TRANSFER_STRING(m_strLastNewEntry, ConfigName_LastNewEntry);
+    TRANSFER_STRING(m_strSelection, ConfigName_TreeSelection);
 
-  TRANSFER_INT(m_bLastNewWasGroup, ConfigName_LastNewWasGroup);
-  TRANSFER_INT(m_FindWhere, ConfigName_LastLookup);
-  TRANSFER_INT(m_FindHow, ConfigName_FindOptions);
+    TRANSFER_INT(m_bLastNewWasGroup, ConfigName_LastNewWasGroup);
+    TRANSFER_INT(m_FindWhere, ConfigName_LastLookup);
+    TRANSFER_INT(m_FindHow, ConfigName_FindOptions);
 
-  TRANSFER_ARRAY(m_astrAdb, ConfigName_AddressBooks);
-  TRANSFER_ARRAY(m_astrProviders, ConfigName_AddressBookProviders);
-  TRANSFER_ARRAY(m_astrBranches, ConfigName_ExpandedBranches);
+    TRANSFER_ARRAY(m_astrAdb, ConfigName_AddressBooks);
+    TRANSFER_ARRAY(m_astrProviders, ConfigName_AddressBookProviders);
+    TRANSFER_ARRAY(m_astrBranches, ConfigName_ExpandedBranches);
+  }
 
   // keep your namespace clean
   #undef TRANSFER_STRING

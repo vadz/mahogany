@@ -1467,23 +1467,25 @@ wxString MFolderDialog::GetConfigPath()
 
 bool MFolderDialog::TransferDataToWindow()
 {
-   // restore last folder from config
-   wxString folderName = mApplication->
-                           GetProfile()->readEntry(GetConfigPath(), "");
-   if ( !folderName.empty() )
+   // restore last folder from config (not Profile as we put it in
+   // M_SETTINGS_CONFIG_SECTION, i.e. outside M_PROFILE_CONFIG_SECTION)
+   wxConfigBase *config = wxConfigBase::Get();
+   if ( config )
    {
-      // select folder in the tree
-      MFolder *folder = MFolder::Get(folderName);
-      if ( folder )
+      wxString folderName = config->Read(GetConfigPath(), "");
+      if ( !folderName.empty() )
       {
-         if ( !m_tree->SelectFolder(folder) )
+         // select folder in the tree
+         MFolder_obj folder(folderName);
+         if ( folder )
          {
-            wxLogDebug(_T("Couldn't restore the last selected folder in the tree."));
+            if ( !m_tree->SelectFolder(folder) )
+            {
+               wxLogDebug(_T("Couldn't restore the last selected folder in the tree."));
+            }
          }
-
-         folder->DecRef();
+         //else: the folder was probably destroyed since the last time
       }
-      //else: the folder was probably destroyed since the last time
    }
 
    // we can only do it now as wxGTK doesn't allow us to set the focus from
@@ -1502,11 +1504,14 @@ bool MFolderDialog::TransferDataFromWindow()
       if ( m_folder != NULL )
       {
          // save the folder name to config
-         mApplication->GetProfile()->
-            writeEntry(GetConfigPath(), m_folder->GetFullName());
+         wxConfigBase *config = wxConfigBase::Get();
+         if ( config )
+         {
+            config->Write(GetConfigPath(), m_folder->GetFullName());
+         }
       }
    }
-   else
+   else // file has been chosen
    {
       // the name of the folder can't contain '/' and such, so take just the
       // name, not the full name as the folder name
@@ -3138,7 +3143,7 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
 
    // hack: use a long label for sizer calculations
    m_labelValue = new wxStaticText(m_frame, -1, _("XXXXXX done"));
-   sizer->Add(m_labelValue, 0, wxALL, 10);
+   sizer->Add(m_labelValue, 0, wxLEFT | wxRIGHT, 10);
 
    m_frame->SetAutoLayout(TRUE);
    m_frame->SetSizer(sizer);
