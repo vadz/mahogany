@@ -543,6 +543,8 @@ private:
    /// get the full path of our entry/subgroup with this name in config
    String GetFullPath(const String& name) const
    {
+      ASSERT_MSG( !name.empty(), _T("empty name in Profile::GetFullPath()?") );
+
       return GetName() + _T('/') + name;
    }
 
@@ -602,8 +604,7 @@ private:
    */
    Identity(const String & name)
       {
-         m_ProfileName = GetRootPath();
-         m_ProfileName << '/' << name;
+         m_ProfileName << GetRootPath() << _T('/') << name;
       }
 
    DECLARE_NO_COPY_CLASS(Identity)
@@ -637,8 +638,7 @@ private:
    */
    FilterProfile(const String & name)
       {
-         m_ProfileName = GetRootPath();
-         m_ProfileName << '/' << name;
+         m_ProfileName << GetRootPath() << _T('/') << name;
       }
 
    DECLARE_NO_COPY_CLASS(FilterProfile)
@@ -747,6 +747,9 @@ AllConfigSources::AllConfigSources(const String& filename)
 bool AllConfigSources::Read(const String& path, LookupData& data) const
 {
    const String& key = data.GetKey();
+   ASSERT_MSG( !key.empty() && key[0u] != _T('/'),
+                  _T("invalid key in AllConfigSources::Read()") );
+
    String fullpath = path + _T('/') + key;
    const bool isNumeric = data.GetType() == LookupData::LD_LONG;
 
