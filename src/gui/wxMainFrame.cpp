@@ -242,6 +242,9 @@ wxMainFrame::OpenFolder(MFolder *folder)
    {
       if ( m_splitter->IsSplit() )
          m_splitter->Unsplit();
+
+      if ( winOldFolderView )
+         delete winOldFolderView;
    }
 
    if ( !hasFolder )
