@@ -233,7 +233,9 @@ private:
    /// Do we need an update?
    bool UpdateNeeded(void) const { return m_UpdateNeeded; }
    /// number of messages in mailbox
-   unsigned long m_numOfMessages;
+   unsigned long m_NumOfMessages;
+   /// last number of messages
+   unsigned long m_OldNumOfMessages;
    /** Do we want to generate new mail events?
        Used to supporess new mail events when first opening the folder 
        and when copying to it. */

@@ -91,7 +91,8 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_MailboxPath = path;
    m_Login = login;
    m_Password = password;
-   m_numOfMessages = 0;
+   m_NumOfMessages = 0;
+   m_OldNumOfMessages = 0;
    m_Listing = NULL;
    m_GenerateNewMailEvents = false; // for now don't!
    m_UpdateNeeded = true;
@@ -387,13 +388,13 @@ MailFolderCC::GetName(void) const
 long
 MailFolderCC::CountMessages(void) const
 {
-   return m_numOfMessages;
+   return m_NumOfMessages;
 }
 
 Message *
 MailFolderCC::GetMessage(unsigned long index)
 {
-   ASSERT(index <= m_numOfMessages && index >= 1);
+   ASSERT(index <= m_NumOfMessages && index >= 1);
    MessageCC *m = MessageCC::CreateMessageCC(this,m_Listing[index-1].m_Uid);
    ProcessEventQueue();
    return m;
@@ -502,13 +503,13 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */)
 void
 MailFolderCC::UpdateCount(void)
 {
-   unsigned long oldnum = m_numOfMessages;
+   unsigned long oldnum = m_NumOfMessages;
 
    UpdateViews();
 
-   if(m_GenerateNewMailEvents && m_numOfMessages  > oldnum) // new mail has arrived
+   if(m_GenerateNewMailEvents && m_NumOfMessages  > oldnum) // new mail has arrived
    {
-      unsigned long n = m_numOfMessages - oldnum;
+      unsigned long n = m_NumOfMessages - oldnum;
       unsigned long *messageIDs = new unsigned long[n];
 
       // actually these are no IDs, but sequence numbers, which is fine.
@@ -520,7 +521,7 @@ MailFolderCC::UpdateCount(void)
 
       delete [] messageIDs;
    }
-   oldnum = m_numOfMessages;
+   oldnum = m_NumOfMessages;
 }
 
 extern "C"
@@ -532,26 +533,24 @@ extern "C"
 void
 MailFolderCC::BuildListing(void)
 {
-   unsigned long oldNumOfMessages = m_numOfMessages;
-
-   m_numOfMessages = m_MailStream->nmsgs;
+   m_NumOfMessages = m_MailStream->nmsgs;
    // now we know how many messages there are
 
-   if(m_Listing && m_numOfMessages > oldNumOfMessages)
+   if(m_Listing && m_NumOfMessages > oldNumOfMessages)
    {
       delete [] m_Listing;
       m_Listing = NULL;
    }
       
-   if(! m_Listing && m_numOfMessages > 0)
-      m_Listing = new HeaderInfoCC[m_numOfMessages];
+   if(! m_Listing && m_NumOfMessages > 0)
+      m_Listing = new HeaderInfoCC[m_NumOfMessages];
 
    m_BuildNextEntry = 0;
 
    if(m_ProgressDialog == NULL)
    {
       String msg;
-      msg.Printf(_("Reading %lu message headers..."), (unsigned long) m_numOfMessages);
+      msg.Printf(_("Reading %lu message headers..."), (unsigned long) m_NumOfMessages);
       m_ProgressDialog = new MProgressDialog(_("M: Progress"),
                                              msg,
                                              100, NULL);// open a status window:
@@ -571,7 +570,7 @@ MailFolderCC::BuildListing(void)
 #if 0
    /* This can actually happen if no overview information is
       available, for NNTP sometimes. */
-   if(m_BuildNextEntry != m_numOfMessages)
+   if(m_BuildNextEntry != m_NumOfMessages)
    {
       ASSERT(m_BuildNextEntry == 0); // otherwise I misunderstood something
 
@@ -580,7 +579,7 @@ MailFolderCC::BuildListing(void)
       Message *msg;
       unsigned int day, month, year;
       unsigned long size;
-      for(;m_BuildNextEntry < m_numOfMessages; m_BuildNextEntry++)
+      for(;m_BuildNextEntry < m_NumOfMessages; m_BuildNextEntry++)
       {
          HeaderInfoCC & entry = m_Listing[m_BuildNextEntry];
          msg = GetMessage(m_BuildNextEntry+1);
@@ -598,29 +597,29 @@ MailFolderCC::BuildListing(void)
 #endif   
 
    // for NNTP, it will not show all messages
-   //ASSERT(m_BuildNextEntry == m_numOfMessages || m_folderType == MF_NNTP);
-   m_numOfMessages = m_BuildNextEntry;
+   //ASSERT(m_BuildNextEntry == m_NumOfMessages || m_folderType == MF_NNTP);
+   m_NumOfMessages = m_BuildNextEntry;
    
    // now we sent an update event to update folderviews etc
    MEventFolderUpdateData data(this);
    MEventManager::Send(data);
 
    /* Now check whether we need to send new mail notifications: */
-
-   if(m_GenerateNewMailEvents && m_numOfMessages  > oldNumOfMessages) // new mail has arrived
+   if(m_GenerateNewMailEvents && m_NumOfMessages  > m_OldNumOfMessages) // new mail has arrived
    {
-      unsigned long n = m_numOfMessages - oldNumOfMessages;
+      unsigned long n = m_NumOfMessages - m_OldNumOfMessages;
       unsigned long *messageIDs = new unsigned long[n];
 
       // actually these are no IDs, but sequence numbers, which is fine.
       for ( unsigned long i = 0; i < n; i++ )
-         messageIDs[i] = oldNumOfMessages + i + 1;
+         messageIDs[i] = m_OldNumOfMessages + i + 1;
 
       MEventNewMailData data(this, messageIDs);
       MEventManager::Send(data);
 
       delete [] messageIDs;
    }
+   m_OldNumOfMessages = m_NumOfMessages;
    m_UpdateNeeded = false;
 }
 
@@ -691,7 +690,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 
    // This is 1 if we don't want any further updates.
    if(m_ProgressDialog != (MProgressDialog *)1)
-      m_ProgressDialog->Update( (100 * m_BuildNextEntry)/m_numOfMessages);
+      m_ProgressDialog->Update( (100 * m_BuildNextEntry)/m_NumOfMessages);
 }
 
 
@@ -699,7 +698,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 HeaderInfo const *
 MailFolderCC::GetFirstHeaderInfo(void) const
 {
-   return (m_numOfMessages > 0 ) ? m_Listing : NULL;
+   return (m_NumOfMessages > 0 ) ? m_Listing : NULL;
 }
 
 /// Return a pointer to the next message's header info.
@@ -709,7 +708,7 @@ MailFolderCC::GetNextHeaderInfo(HeaderInfo const* last) const
    ASSERT(m_Listing);
    HeaderInfoCC const *lastCC = (HeaderInfoCC *)last;
    
-   if(lastCC >= m_Listing+m_numOfMessages-1) return NULL;
+   if(lastCC >= m_Listing+m_NumOfMessages-1) return NULL;
    return (lastCC+1);
 }
 
@@ -811,7 +810,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
                    + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
-      mf->m_numOfMessages = number;
+      mf->m_NumOfMessages = number;
    }
    else
    {
@@ -881,7 +880,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
               mf->m_MailboxPath.c_str(), status->messages);
 
    if(status->flags & SA_MESSAGES)
-      mf->m_numOfMessages  = status->messages;
+      mf->m_NumOfMessages  = status->messages;
    mf->UpdateViews();
 }
 
