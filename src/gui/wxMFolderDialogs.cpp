@@ -1169,12 +1169,16 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
 
    wxObject *objEvent = event.GetEventObject();
 
-   dlg->SetDirty();
-
    // the rest doesn't make any sense for the "properties" dialog because the
    // text in the path field can't change anyhow
    if ( !m_isCreating )
+   {
+      // OTOH, call SetDirty() only we're changing the properites of an already
+      // existing folder - when we create a new folder it is always dirty
+      dlg->SetDirty();
+
       return;
+   }
 
    // does the event come from the user or from ourselves?
    if ( m_userModifiedPath == -1 )
