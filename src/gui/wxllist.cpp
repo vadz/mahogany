@@ -25,6 +25,8 @@
 #include "Mpch.h"
 #include "gui/wxllist.h"
 
+//#include "wxllist.h"
+
 #ifndef USE_PCH
 #  include   "iostream.h"
 
@@ -266,7 +268,8 @@ wxLayoutList::GetSize(CoordType *max_x, CoordType *max_y,
 
 wxLayoutObjectBase *
 wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const
-                   &findCoords, int pageNo, bool reallyDraw)
+                   &findCoords, int pageNo, bool reallyDraw,
+                   bool *hasDrawn)
 {
    wxLayoutObjectList::iterator i;
 
@@ -320,10 +323,10 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const
    {
       dc.GetSize(&pageWidth, &pageHeight);
       WXL_VAR(pageHeight);
-      margins.top = 0;   //(1*pageHeight)/10;    // 10%
-      margins.bottom = pageHeight;// (9*pageHeight)/10; // 90%
-      margins.left = 0;  //(1*pageWidth)/10;
-      margins.right = pageWidth; //(9*pageWidth)/10;
+      margins.top = pageHeight/10;    // 10%
+      margins.bottom = (9*pageHeight)/10; // 90%
+      margins.left = pageWidth/10;
+      margins.right = (9*pageWidth)/10;
    }
    else
    {
@@ -369,11 +372,14 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const
       if(draw)
       {
          (*i)->Draw(dc, position, baseLine, draw && (pageNo == -1
-                                                     || pageNo == currentPage));
+                                                     || pageNo ==
+                                                     currentPage));
 #ifdef   WXLAYOUT_DEBUG
          if(i == begin())
             wxLogDebug("first position = (%d,%d)",(int) position.x, (int)position.y);
 #endif
+         if(hasDrawn && pageNo == currentPage)
+            *hasDrawn = true;
       }
       // update coordinates for next object:
       size = (*i)->GetSize(&objBaseLine);
@@ -389,7 +395,7 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const
          }
       }
       // draw the cursor
-      if(m_Editable && draw && i == cursorObject)
+      if(m_Editable && draw && pageNo == -1 && i == cursorObject)
       {
          WXL_VAR((**cursorObject).GetType());
          WXL_VAR(m_CursorPosition.x); WXL_VAR(m_CursorPosition.y);
@@ -460,7 +466,7 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const
             {
                currentPage++;
                position_HeadOfLine.y = margins.top;
-               position.y = position_HeadOfLine;
+               position = position_HeadOfLine;
                i = headOfLine;
                continue;
             }
@@ -1018,10 +1024,7 @@ bool wxLayoutPrintout::OnPrintPage(int page)
 {
   wxDC *dc = GetDC();
   if (dc)
-  {
-     m_llist->Draw(*dc,false,wxPoint(0,0),page);
-     return TRUE;
-  }
+     return m_llist->Draw(*dc,false,wxPoint(0,0),page);
   else
     return FALSE;
 }
@@ -1046,32 +1049,15 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    *selPageFrom = 1;
    *selPageTo = 1000;
 
-#if 0
-   CoordType height;
-   int pageWidth, pageHeight;
-
-   wxDC *dc = GetDC();
-   wxASSERT(dc);
-
-   dc->GetSize(&pageWidth, &pageHeight);
-// don't draw but just recalculate sizes:
-   m_llist->Draw(*dc,false,wxPoint(0,0),-1,false);
-   m_llist->GetSize(NULL,&height,NULL);
-   
-   *minPage = 1;
-   *maxPage = height/pageHeight+1;
-
-   *selPageFrom = 1;
-   *selPageTo = *maxPage;
-   m_maxPage = *maxPage;
-#endif
+   m_maxpage = -1;
    
 }
 
 bool wxLayoutPrintout::HasPage(int pageNum)
 {
+   if(m_maxPage != -1)
+      return pageNum <= m_maxPage;
    return true;
-//   return m_maxPage >= pageNum;
 }
 
 
