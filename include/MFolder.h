@@ -242,9 +242,8 @@ public:
       // creates a folder corresponding to the profile
    MFolder_obj(const Profile *profile)
       {
-         String name;
-         if ( profile->GetName().
-               StartsWith(String(M_PROFILE_CONFIG_SECTION) + '/', &name) )
+         String name = profile->GetFolderName();
+         if ( !name.empty() )
          {
             Init(name);
          }

@@ -570,7 +570,7 @@ static String GetTemplateNamePath(MessageTemplateKind kind)
 static String GetTemplateKindSection(MessageTemplateKind kind)
 {
    String path;
-   path << M_TEMPLATES_CONFIG_SECTION << '/' << GetTemplateKindPath(kind);
+   path << Profile::GetTemplatesPath() << '/' << GetTemplateKindPath(kind);
 
    return path;
 }

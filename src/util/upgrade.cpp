@@ -2472,8 +2472,8 @@ UpgradeFrom061()
 
    pathOld.clear();
    pathNew.clear();
-   pathOld << '/' << M_PROFILE_CONFIG_SECTION << "/Templates";
-   pathNew << M_TEMPLATES_CONFIG_SECTION;
+   pathOld << '/' << Profile::GetProfilePath() << "/Templates";
+   pathNew << Profile::GetTemplatesPath();
    if ( CopyEntries(config, pathOld, pathNew) == -1 )
    {
       wxLogWarning(_("Template settings couldn't be updated."));
@@ -3329,13 +3329,14 @@ bool RetrieveRemoteConfigSettings(bool confirm)
 
    bool rc = true;
 
-   // the config file is supposed to be in Unix format, so we use _UNIX
-   // versions of profile paths as from parameter
+   // note that the first path given to CopyEntries() is always in Unix format,
+   // while the second path should be the real path we use in our config now
+   // (may be different under Windows)
    if ( READ_APPCONFIG_BOOL(MP_SYNC_FILTERS) )
    {
       int nFilters = CopyEntries(&fc,
-                                 M_FILTERS_CONFIG_SECTION_UNIX,
-                                 M_FILTERS_CONFIG_SECTION);
+                                 M_FILTERS_CONFIG_SECTION,
+                                 Profile::GetFiltersPath());
       if ( nFilters == -1 )
       {
          rc = false;
@@ -3351,8 +3352,8 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    if ( READ_APPCONFIG_BOOL(MP_SYNC_IDS) )
    {
       int nIds = CopyEntries(&fc,
-                             M_IDENTITY_CONFIG_SECTION_UNIX,
-                             M_IDENTITY_CONFIG_SECTION);
+                             M_IDENTITY_CONFIG_SECTION,
+                             Profile::GetIdentityPath());
       if ( nIds == -1 )
       {
          rc = false;
@@ -3369,8 +3370,8 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    {
       String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
       String src, dest;
-      src << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
-      dest << M_PROFILE_CONFIG_SECTION << '/' << group;
+      src << M_PROFILE_CONFIG_SECTION << '/' << group;
+      dest << Profile::GetProfilePath() << '/' << group;
 
       int nFolders = CopyEntries(&fc, src, dest);
       if ( nFolders == -1 )
@@ -3498,8 +3499,8 @@ bool SaveRemoteConfigSettings(bool confirm)
    if ( READ_APPCONFIG_BOOL(MP_SYNC_FILTERS) )
    {
       rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
+                         Profile::GetFiltersPath(),
                          M_FILTERS_CONFIG_SECTION,
-                         M_FILTERS_CONFIG_SECTION_UNIX,
                          true,
                          &fc) != -1);
    }
@@ -3507,8 +3508,8 @@ bool SaveRemoteConfigSettings(bool confirm)
    if ( READ_APPCONFIG_BOOL(MP_SYNC_IDS) )
    {
       rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
+                         Profile::GetIdentityPath(),
                          M_IDENTITY_CONFIG_SECTION,
-                         M_IDENTITY_CONFIG_SECTION_UNIX,
                          true,
                          &fc) != -1);
    }
@@ -3517,8 +3518,8 @@ bool SaveRemoteConfigSettings(bool confirm)
    {
       String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
       String src, dest;
-      src << M_PROFILE_CONFIG_SECTION << '/' << group;
-      dest << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
+      src << Profile::GetProfilePath() << '/' << group;
+      dest << M_PROFILE_CONFIG_SECTION << '/' << group;
 
       rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
                          src, dest, true,

@@ -1,10 +1,15 @@
-/*-*- c++ -*-********************************************************
- * Profile - managing configuration options on a per class basis    *
- *                                                                  *
- * (C) 1998,1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
- *                                                                  *
- * $Id$
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   Profile.h: Mahogany Profile class
+// Purpose:     Profiles are used for storing all program options and much more
+// Author:      Karsten Ballüder
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2002 Mahogany team
+// Licence:     M licence
+///////////////////////////////////////////////////////////////////////////////
+
 #ifndef PROFILE_H
 #define PROFILE_H
 
@@ -17,6 +22,7 @@
 // ----------------------------------------------------------------------------
 
 #include "MObject.h"
+#include "Mdefaults.h"     // for M_PROFILE_CONFIG_SECTION &c
 
 class kbStringList;
 
@@ -183,9 +189,42 @@ public:
    /// get the name of the folder his profile is for or an empty string
    virtual String GetFolderName() const = 0;
 
+   /**
+     @name Return config paths used
+
+     Returns the paths we use in wxConfig object for various entities stored in
+     the profiles.
+    */
+   //@{
+
+   /// return the path used for the normal config info (folders options &c)
+   static String GetProfilePath()
+      { return GetSectionPath(M_PROFILE_CONFIG_SECTION); }
+
+   /// return the path under which the identities are stored
+   static String GetIdentityPath() 
+      { return GetSectionPath(M_IDENTITY_CONFIG_SECTION); }
+
+   /// return the path under which the filters are stored
+   static String GetFiltersPath() 
+      { return GetSectionPath(M_FILTERS_CONFIG_SECTION); }
+
+   /// return the path under which the frame options are stored
+   static String GetFramesPath() 
+      { return GetSectionPath(M_FRAMES_CONFIG_SECTION); }
+
+   /// return the path under which the templates are stored
+   static String GetTemplatesPath() 
+      { return GetSectionPath(M_TEMPLATES_CONFIG_SECTION); }
+
+   //@}
+
 protected:
-   /// why does egcs want this?
-   Profile() {}
+   // egcs wants this
+   Profile() { }
+
+   /// helper of all GetXXXPath() functions
+   static String GetSectionPath(const String& section);
 
    /// global wxConfig object, shared by all profiles
    static wxConfigBase *ms_GlobalConfig;
@@ -197,7 +236,7 @@ private:
    /// forbid copy construction
    Profile(const Profile &);
    /// forbid assignments
-   Profile & operator=(const Profile & );
+   Profile& operator=(const Profile & );
 };
 
 

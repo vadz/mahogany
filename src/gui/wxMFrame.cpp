@@ -409,7 +409,7 @@ bool wxMFrame::RestorePosition(const char *name,
    if ( pConf != NULL )
    {
       String path;
-      path << M_FRAMES_CONFIG_SECTION << '/' << name;
+      path << Profile::GetFramesPath() << '/' << name;
       pConf->SetPath(path);
       *x = GetOptionValue(pConf, MP_XPOS);
       *y = GetOptionValue(pConf, MP_YPOS);
@@ -459,7 +459,7 @@ wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
    if ( pConf != NULL )
    {
       String path;
-      path << M_FRAMES_CONFIG_SECTION << '/' << name;
+      path << Profile::GetFramesPath() << '/' << name;
 
       pConf->SetPath(path);
 
@@ -944,7 +944,7 @@ wxMFrame::OnMenuCommand(int id)
                // FIXME: will this really work? if there are objects which
                //        use this identity the section will be recreated...
                String identSection;
-               identSection << M_IDENTITY_CONFIG_SECTION << '/' << ident;
+               identSection << Profile::GetIdentityPath() << '/' << ident;
                profile->DeleteGroup(identSection);
 
                // update the identity combo in the toolbar if any

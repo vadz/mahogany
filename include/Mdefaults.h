@@ -25,27 +25,11 @@
   profiles (without trailing '/')
 */
 #ifndef M_PROFILE_CONFIG_SECTION
-#  ifdef OS_WIN
-#     define   M_PROFILE_CONFIG_SECTION   "/Profiles"
-#     define   M_IDENTITY_CONFIG_SECTION  "/Ids"
-#     define   M_FILTERS_CONFIG_SECTION   "/Filters"
-#     define   M_FRAMES_CONFIG_SECTION    "/Frames"
-#     define   M_TEMPLATES_CONFIG_SECTION "/Templates"
-#  else  // Unix
-#     define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
-#     define   M_IDENTITY_CONFIG_SECTION  "/M/Ids"
-#     define   M_FILTERS_CONFIG_SECTION   "/M/Filters"
-#     define   M_FRAMES_CONFIG_SECTION    "/M/Frames"
-#     define   M_TEMPLATES_CONFIG_SECTION "/M/Templates"
-#  endif // Unix/Win
-
-   // these are used for remote IMAP sync: we have to use the same format for
-   // the remote settings and we choose to use Unix one
-#  define   M_PROFILE_CONFIG_SECTION_UNIX   "/M/Profiles"
-#  define   M_IDENTITY_CONFIG_SECTION_UNIX  "/M/Ids"
-#  define   M_FILTERS_CONFIG_SECTION_UNIX   "/M/Filters"
-#  define   M_FRAMES_CONFIG_SECTION_UNIX    "/M/Frames"
-#  define   M_TEMPLATES_CONFIG_SECTION_UNIX "/M/Templates"
+   #define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
+   #define   M_IDENTITY_CONFIG_SECTION  "/M/Ids"
+   #define   M_FILTERS_CONFIG_SECTION   "/M/Filters"
+   #define   M_FRAMES_CONFIG_SECTION    "/M/Frames"
+   #define   M_TEMPLATES_CONFIG_SECTION "/M/Templates"
 #endif
 
 /**

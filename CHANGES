@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+14.04.02 VZ: option to use config files under Windows (not only registry)
 14.04.02 VZ: implemented remote control of Mahogany processes
 12.04.02 VZ: updated the composer layout to be simpler in use
 29.03.02 VZ: added command line options to open the composer immediately

@@ -1,12 +1,13 @@
-File:		tech/options.txt
-Summary:	how to add a new program option to Mahogany
-Audience:	Mahogany developers
-Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Created:	21.01.02
-Version:	accurate for 0.64
+File:           tech/options.txt
+Summary:        how to add a new program option to Mahogany
+Audience:       Mahogany developers
+Author:         Vadim Zeitlin <vadim@wxwindows.org>
+Created:        21.01.02
+Modified:       14.04.02
+Version:        accurate for 0.64.2
 
-		     How to add a new option to Mahogany
-		     ===================================
+                     How to add a new option to Mahogany
+                     ===================================
 
 0. About this note
 ------------------
@@ -38,9 +39,9 @@ the following trick is done: for each option FOO there are
 
 a) a line "extern const MOption MP_FOO" in include/Moptions.h
 b) a line
-	#define MP_FOO_NAME "NameOfOptionInConfig"
+        #define MP_FOO_NAME "NameOfOptionInConfig"
    and
-	#define MP_FOO_DEFVAL 17
+        #define MP_FOO_DEFVAL 17
    in the same header
 c) definition in src/classes/Moptions.cpp: "const MOption MP_FOO;"
 d) and finally an entry in MOptions[]: DEFINE_OPTION(MP_FOO)
@@ -69,21 +70,21 @@ mApplication->GetProfile() bnecause this one should _not_ be DecRef()'d).
    Now that you have a Profile (or Profile_obj) "profile" you may just do the
 following:
 
-	long myfoo = READ_CONFIG(profile, MP_FOO);
+        long myfoo = READ_CONFIG(profile, MP_FOO);
 
 or
 
-	bool myfoo = READ_CONFIG_BOOL(profile, MP_FOO);
+        bool myfoo = READ_CONFIG_BOOL(profile, MP_FOO);
 
 or
 
-	String myfoo = READ_CONFIG_TEXT(profile, MP_FOO);
+        String myfoo = READ_CONFIG_TEXT(profile, MP_FOO);
 
 These macros will read the value from profile and return the default value
 that you defined above (in Moptions.h). To be able to use them you should
 insert a
 
-	extern const MOption MP_FOO;
+        extern const MOption MP_FOO;
 
 somewhere in the declarations section of your file. Please do *NOT* include
 Moptions.h but declare the individual options you use like this - this avoids
@@ -125,9 +126,15 @@ triggered if this is not the case - please do pay attention to them if this
 happens.
 
    The steps (a) and (c) should be obvious, for the step (b) please look at
-wxOptionsPage.h for the Field_XXX constants descriptions.
-
-   TODO: the dependency fields
+wxOptionsPage.h for the Field_XXX constants descriptions. The types should be
+self explanatory (they simply correspond to the controls shown in the dialog),
+for the flags please see the desscriptions in the comments. Finally, this
+struct also has a dependency field: if it is -1, it is not used at all. If it
+is positive, this field is only enabled if the field with id equal to the given
+number is "on" which means being checked for a checkbox, non empty for a text
+zone and so on. And if the dependency field is negative (but not -1) it is
+interpreted in the "opposite" way: the field is only enabled when the field
+specified by the absolute value of the dependency field is "off".
 
 
    You may want to add 2 other kinds of entries to these arrays: first, an
@@ -150,3 +157,17 @@ above.
 existing code in MessageView or FolderView classes, for example, which shows
 how this should be done.
 
+5. Advanced notes
+-----------------
+
+   Mahogany uses different profile paths under Unix and Windows or, to be more
+precise, when using registry under Windows (which is the default) and using
+config files (which is the only possibility under Unix and may be also done
+under Windows). In the latter case, all Mahogany profile paths start with "/M",
+e.g. "/M/Profiles". In the former case, the "/M" prefix is removed as it is
+superfluous under Windows: the registry key is already called "M". This means
+that the path used in the program and the actual path in wxConfig may be
+different. Normally, it shouldn't matter as Profile class takes care of it but
+it will break down if you access the config directly using wxConfig. For this
+reason you must use Profile::GetXXXPath() methods to retrieve the actual path
+in config.

@@ -1975,17 +1975,7 @@ wxOptionsPage::~wxOptionsPage()
 
 String wxOptionsPage::GetFolderName() const
 {
-   String name;
-   if ( !m_Profile->GetName().StartsWith
-                              (
-                                 String(M_PROFILE_CONFIG_SECTION) + '/',
-                                 &name
-                              ) )
-   {
-      FAIL_MSG( "unexpected profile name!" );
-   }
-
-   return name;
+   return m_Profile->GetFolderName();
 }
 
 void wxOptionsPage::CreateControls()

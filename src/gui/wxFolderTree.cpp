@@ -2667,14 +2667,10 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          return true;
       }
 
-      int pos = profileName.Find(M_PROFILE_CONFIG_SECTION);
+      wxString folderName = profileChanged->GetFolderName();
 
-      // don't know how to get folder name...
-      CHECK( pos == 0, true, "weird profile path" )
-
-      // skip the M_PROFILE_CONFIG_SECTION prefix
-      wxString folderName = profileName.c_str() +
-                            strlen(M_PROFILE_CONFIG_SECTION);
+      // we should have a valid folder name
+      CHECK( !folderName.empty(), true, "weird profile path" );
 
       wxTreeItemId item = GetTreeItemFromName(folderName);
 

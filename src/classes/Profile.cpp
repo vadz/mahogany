@@ -421,16 +421,19 @@ public:
    virtual void ClearIdentity(void);
    virtual String GetIdentity(void) const;
 
-   MOBJECT_DEBUG(ProfileImpl)
-
    virtual bool IsAncestor(Profile *profile) const;
+
+   String GetRootPath(void) const
+   {
+      return GetSectionPath(GetProfileSection());
+   }
 
    virtual String GetFolderName() const;
 
-   virtual const char * GetRootPath(void) const
-      {
-         return M_PROFILE_CONFIG_SECTION;
-      }
+#ifdef OS_WIN
+   /// true if we use reg config under Windows, false otherwise
+   static bool ms_usingRegConfig;
+#endif // OS_WIN
 
 protected:
    ProfileImpl()
@@ -441,6 +444,11 @@ protected:
 
    /// Destructor, writes back those entries that got changed.
    ~ProfileImpl();
+
+   virtual const char * GetProfileSection(void) const
+      {
+         return M_PROFILE_CONFIG_SECTION;
+      }
 
    /// Name of this profile == path in wxConfig
    String   m_ProfileName;
@@ -471,10 +479,14 @@ private:
    /// the count of all suspended profiles: if 0, nothing is suspended
    static size_t ms_suspendCount;
 
+   MOBJECT_DEBUG(ProfileImpl)
+
    GCC_DTOR_WARN_OFF
 };
 
 size_t ProfileImpl::ms_suspendCount = 0;
+
+bool ProfileImpl::ms_usingRegConfig = true;
 
 //@}
 
@@ -492,7 +504,7 @@ public:
    static Profile * CreateIdentity(const String &name)
       { return new Identity(name); }
 
-   virtual const char * GetRootPath(void) const
+   virtual const char * GetProfileSection(void) const
       {
          return M_IDENTITY_CONFIG_SECTION;
       }
@@ -524,7 +536,7 @@ public:
    static FilterProfile * CreateFilterProfile(const String &name)
       { return new FilterProfile(name); }
 
-   virtual const char * GetRootPath(void) const
+   virtual const char * GetProfileSection(void) const
       {
          return M_FILTERS_CONFIG_SECTION;
       }
@@ -671,12 +683,12 @@ ProfileImpl::GetIdentity(void) const
 
 wxArrayString Profile::GetAllFilters()
 {
-   return GetAllGroupsUnder(M_FILTERS_CONFIG_SECTION);
+   return GetAllGroupsUnder(GetFiltersPath());
 }
 
 wxArrayString Profile::GetAllIdentities()
 {
-   return GetAllGroupsUnder(M_IDENTITY_CONFIG_SECTION);
+   return GetAllGroupsUnder(GetIdentityPath());
 }
 
 wxArrayString Profile::GetAllGroupsUnder(const String& path)
@@ -920,23 +932,33 @@ Profile::CreateGlobalConfig(const String& filename)
       }
       //else: not an error, file may be simply not there yet
    }
-#else  // Windows
-   // no such concerns here, just use the registry
-   if ( strConfFile.empty() )
-   {
-      strConfFile = M_APPLICATIONNAME;
-   }
-#endif // Win/Unix
+#endif // Unix
 
 #ifdef OS_WIN
-   // don't give explicit name, but rather use the default logic (it's
-   // perfectly ok, for the registry case our keys are under
-   // vendor\appname)
+   // no such concerns here, we just use the registry if the filename is not
+   // specified
+   if ( strConfFile.empty() )
+   {
+      // don't give explicit name, but rather use the default logic (it's
+      // perfectly ok, for the registry case our keys are under
+      // vendor\appname)
+      ms_GlobalConfig = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+                                     "", "",
+                                     wxCONFIG_USE_LOCAL_FILE |
+                                     wxCONFIG_USE_GLOBAL_FILE);
+   }
+   else // we do have the config file name
+   {
+      // use the config file: this allows to use the same file for Windows and
+      // Unix Mahogany installations
+      ms_GlobalConfig = new wxFileConfig(M_APPLICATIONNAME, M_VENDORNAME,
+                                         strConfFile, "",
+                                         wxCONFIG_USE_LOCAL_FILE|
+                                         wxCONFIG_USE_GLOBAL_FILE);
 
-   ms_GlobalConfig = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                                  "", "",
-                                  wxCONFIG_USE_LOCAL_FILE |
-                                  wxCONFIG_USE_GLOBAL_FILE);
+      // we need to modify the path handling under Windows in this case
+      ProfileImpl::ms_usingRegConfig = false;
+   }
 #else  // Unix
    // look for the global config file in the following places in order:
    //    1. compile-time specified installation dir
@@ -1095,10 +1117,16 @@ ProfileImpl::DeleteGroup(const String & path)
 {
    PCHECK();
 
-   String root = GetName();
-   if ( !m_ProfilePath.empty() )
-       root  << '/' << m_ProfilePath;
-   ms_GlobalConfig->SetPath(root);
+   CHECK( !path.empty(), false, "must have a valid group name to delete it" );
+
+   if ( path[0u] != '/' )
+   {
+      String root = GetName();
+      if ( !m_ProfilePath.empty() )
+          root  << '/' << m_ProfilePath;
+      ms_GlobalConfig->SetPath(root);
+   }
+
    return ms_GlobalConfig->DeleteGroup(path);
 }
 
@@ -1559,23 +1587,47 @@ bool ProfileImpl::IsAncestor(Profile *profile) const
 
 String ProfileImpl::GetFolderName() const
 {
-   String folderName,
-          profileName = GetName();
-   size_t lenPrefix = strlen(M_PROFILE_CONFIG_SECTION);
-   if ( strncmp(profileName, M_PROFILE_CONFIG_SECTION, lenPrefix) == 0 )
+   String folderName;
+   if ( GetName().StartsWith(GetProfilePath(), &folderName) )
    {
-      const char *p = profileName.c_str() + lenPrefix;
+      const char *p = folderName.c_str();
 
       if ( *p )
       {
          ASSERT_MSG( *p == '/', "profile path must start with slash" );
 
-         // +1 to skip following '/'
-         folderName = p + 1;
+         // erase the slash
+         folderName.erase(0, 1);
       }
       //else: leave empty
    }
 
    return folderName;
+}
+
+/* static */
+String Profile::GetSectionPath(const String& section)
+{
+   String path = section;
+
+   // we don't use "/M" prefix when working with wxRegConfig as it would be
+   // superfluous: our config key is already Mahogany-Team/M
+   //
+   // but for the file based config formats (both local and remote) we do use
+   // it for mostly historical reasons - even though if it probably would be
+   // better to never use it, it's simply too much trouble to write the upgrade
+   // code to deal with the existing config files
+#ifdef OS_WIN
+   if ( ProfileImpl::ms_usingRegConfig )
+   {
+      // remove "/M" prefix
+      ASSERT_MSG( path[0u] == '/' && path[1u] == 'M',
+                  "all profile sections must start with \"/M\"" );
+
+      path.erase(0, 2);
+   }
+#endif // Windows
+
+   return path;
 }
 

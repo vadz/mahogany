@@ -831,8 +831,11 @@ MDialog_YesNoDialog(const char *message,
             // M_PROFILE_CONFIG_SECTION - which it doesn't do any more, but we
             // should still honour the old settings
 
+            String pathOld = Profile::GetProfilePath().c_str();
+
             // skip the leading slash
-            String pathOld = M_PROFILE_CONFIG_SECTION + 1;
+            pathOld.erase(0, 1);
+
             pathOld.Replace("/", "_");
             pathOld << "_" << path;
 

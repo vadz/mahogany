@@ -991,19 +991,7 @@ inline bool CheckStatusBit(int status, int bit, bool isSet)
 
 static String GetShortFolderNameFromProfile(const Profile *profile)
 {
-   String name = profile->GetName();
-   if ( !name.StartsWith(String(M_PROFILE_CONFIG_SECTION) + '/', &name) )
-   {
-      if ( name != M_PROFILE_CONFIG_SECTION )
-      {
-         FAIL_MSG( "unexpected profile - what folder does it correspond to?" );
-      }
-      else
-      {
-         // editing global settings
-         name.clear();
-      }
-   }
+   String name = profile->GetFolderName();
 
    if ( name.empty() )
    {
