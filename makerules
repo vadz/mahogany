@@ -91,12 +91,21 @@ vpath %.cpp .src
 	$(CXX) -o $@ $(strip $(M_COMPILE_CXX) $< $(M_LD_FLAGS))
 	@f=$(notdir $*); test ! -f $$f.d || { sed "s,^$$f\.o:,$@:," $$f.d >$*.o && rm -f $$f.d && mv $*.o $*.d; }
 
+ifdef YACC
 vpath %.y .src
 %.o: %.y
 	$(YACC) $(YFLAGS) $< && mv y.tab.c $*.c
 	$(CC) -o $@ $(M_COMPILE_CC) $*.c
 	@f=$(notdir $*); test ! -f $$f.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.c,$<," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
 	@rm -f $*.c
+else
+vpath %.c-yacc .src
+%.o: %.c-yacc
+	@mv $< $*.c
+	$(CC) -o $@ $(M_COMPILE_CC) $*.c
+	@f=$(notdir $*); test ! -f $$f.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.c,$<," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
+	@rm -f $*.c
+endif
 
 # this syntax is for exuberant ctags
 tags:

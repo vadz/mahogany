@@ -419,8 +419,13 @@ AC_PROG_RANLIB
 dnl check for M4
 AC_PATH_PROG(M4, m4)
 
-dnl set YACC to yacc location
-AC_PROG_YACC
+dnl set YACC to yacc location: don't use AC_PROG_YACC as it does *not* fail if
+dnl yacc is not available (!)
+AC_CHECK_PROGS(YACC, byacc yacc 'bison -y', none)
+if test "$YACC" = "none"; then
+    AC_MSG_WARN([yacc not found, you will not be able to modify *.y files.])
+    YACC=
+fi
 
 AC_PROG_INSTALL
 
