@@ -64,7 +64,7 @@ be very appreciated!}\large \par}
 Welcome to the new Mahogany release! If you haven't installed the
 program yet, you probably want to start by doing it. Please check
 if we don't have prebuilt binaries for your platform (currently we
-only provide binaries for Linux andWin32). If not, you'll have to
+only provide binaries for Linux and Win32). If not, you'll have to
 build it from the sources: please refer to the README file for the
 compilation instructions. Mahogany should generally work on any modern
 Unix flavour but, of course, you can always contact us if you have
