@@ -81,9 +81,17 @@ public:
    // override wxWindows default icons
    virtual wxIcon GetStdIcon(int which) const;
 
-   // OnIdle() handler to process Mahogany-specific MEvents which are
-   // asynchronous.
-   void OnIdle(wxIdleEvent &event);
+   /**
+     OnIdle() handler to process Mahogany-specific MEvents which are
+     asynchronous.
+   */
+   void OnIdle(wxIdleEvent& event);
+
+   /**
+     Handles the session termination confirmation event by asking all top level
+     windows if they can close.
+    */
+   void OnQueryEndSession(wxCloseEvent& event);
 
    /** Gets help for a specific topic.
        @param id help id from MHelp.h

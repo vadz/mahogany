@@ -65,6 +65,8 @@
 #include "MThread.h"
 #include "Mpers.h"
 
+#include "Composer.h"       // for SaveAll()
+
 #include "MFCache.h"
 
 #ifdef OS_WIN
@@ -177,6 +179,8 @@ public:
    virtual void Notify()
    {
       wxLogTrace(TRACE_TIMER, "Autosaving options and folder status.");
+
+      Composer::SaveAll();
 
       Profile::FlushAll();
 
@@ -406,6 +410,8 @@ BEGIN_EVENT_TABLE(wxMApp, wxApp)
    EVT_DIALUP_CONNECTED    (wxMApp::OnConnected)
    EVT_DIALUP_DISCONNECTED (wxMApp::OnDisconnected)
 #endif // USE_DIALUP
+
+   EVT_QUERY_END_SESSION   (wxMApp::OnQueryEndSession)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -582,10 +588,20 @@ wxMApp::CanClose() const
    // it until here. Attemps to close the toplevel frame will lead to
    // this function being evaluated anyway. The frame itself does not
    // do any tests.
-   ((MAppBase *)this)->AddToFramesOkToClose(m_topLevelFrame);
+   wxMApp *self = (wxMApp *)this;
+   self->AddToFramesOkToClose(m_topLevelFrame);
 
-   ((wxMApp *)this)->m_CanClose = MAppBase::CanClose();
+   self->m_CanClose = MAppBase::CanClose();
+
    return m_CanClose;
+}
+
+void wxMApp::OnQueryEndSession(wxCloseEvent& event)
+{
+   m_CanClose = false;
+
+   if ( !CanClose() )
+      event.Veto();
 }
 
 // do close the app by closing all frames
