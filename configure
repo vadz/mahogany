@@ -566,7 +566,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.303 2004/01/11 22:21:16 vadz Exp 
+# From configure.in Id: configure.in,v 1.304 2004/05/02 12:32:57 vadz Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -5361,7 +5361,7 @@ esac
 CPPFLAGS="$CPPFLAGS -I$BUILDDIR/lib/imap/c-client"
 LIBS="$BUILDDIR/lib/imap/c-client/c-client.a $LIBS"
 CPPFLAGS="$CPPFLAGS -I$SOURCEDIR/lib/compface -I$SOURCEDIR/src/wx/vcard"
-LIBS="$BUILDDIR/lib/compface/compface.a $LIBS"
+LIBS="$BUILDDIR/lib/compface/libcompface.a $LIBS"
 
 
 CFLAGS="$CFLAGS $CODE_GEN_FLAGS"
@@ -5976,7 +5976,7 @@ echo "	wxWindows port used:			${WX_NAME} ${WX_VERSION}"
 echo "	Debug mode:				${debug_option}"
 echo "	SSL support:				${ssl_option}"
 echo "	Modules support:			${m_cv_USE_MODULES}"
-echo "	Embedded Python:			${PYTHON_VER-none}"
+echo "	Embedded Python:			${PYTHON_VER:-none}"
 if test "$USE_PYTHON" != 0 -a "$USE_SWIG" = 1; then
     echo "	      with swig:			${SWIG}"
 fi
