@@ -271,7 +271,7 @@ Release 0.50 'Meadows' March 27, 2000
 03.03.00 VZ: all expanded branches of the folder tree are now saved/restored
 03.03.00 VZ: subscription dialog starts to work
 23.02.00 KB: IMAP code fixes plugging possible memory corruption, message editor fixes.
-             Fixed empty names for BBDB and PalmOS adressbooks.
+             Fixed empty names for BBDB and PalmOS addressbooks.
 05.02.00 KB: Folderlisting now uses colour highlighting.
              Imap4.7a integrated and patches simplified.
              POP3 headers cache patch added

@@ -4021,7 +4021,7 @@ and, as almost any other feature of Mahogany can be turned on and off as
  (it is on by default) and, if so, where should be the autocollected addresses
  be put and other settings.
  See the Addressbook section (
-\begin_inset LatexCommand \ref{AdressDatabase}
+\begin_inset LatexCommand \ref{AddressDatabase}
 
 \end_inset 
 
@@ -4651,7 +4651,7 @@ Any changes to the plugin module settings will only take effect after you
 \layout Section
 
 The Address Database_3000_
-\begin_inset LatexCommand \label{AdressDatabase}
+\begin_inset LatexCommand \label{AddressDatabase}
 
 \end_inset 
 

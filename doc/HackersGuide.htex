@@ -568,7 +568,7 @@ function which needs to check for mail-loops. Though, all this can actually
 be achieved with Filters, there shouldn't really be a need for a MatchTest class. 
 
 
-\section{Adressbook (ADB) classes}
+\section{Addressbook (ADB) classes}
 
 Tech documentation of address book related classes.
 

@@ -1280,7 +1280,7 @@ A Filter object would be an abstract representation of a set of rules parsed
  
 \layout Section
 
-Adressbook (ADB) classes
+Addressbook (ADB) classes
 \layout Standard
 
 Tech documentation of address book related classes.

@@ -1552,7 +1552,7 @@ called \emph{address autocollection} and, as almost any other feature
 of Mahogany can be turned on and off as desired. In this page you
 may choose whether you want to use this feature at all (it is on by
 default) and, if so, where should be the autocollected addresses be
-put and other settings. See the Addressbook section (\ref{AdressDatabase})
+put and other settings. See the Addressbook section (\ref{AddressDatabase})
 for more information on Mahogany's built-in addressbook.
 
 \begin{itemize}
@@ -1820,7 +1820,7 @@ by the program to find the right plugin for a given operation.
 after you re-started Mahogany!}
 
 
-\section{The Address Database\_3000\_\label{AdressDatabase}}
+\section{The Address Database\_3000\_\label{AddressDatabase}}
 
 Mahogany has a built-in address book system with flexible support
 for different addressbook formats. It can easily expanded to handle

@@ -57,7 +57,7 @@
 
 #include <fstream.h>
 
-/** BBDB Adressbook format:
+/** BBDB Addressbook format:
     Record Vectors
 ..............
 
