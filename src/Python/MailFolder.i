@@ -364,8 +364,8 @@ public:
        @parent parent window for dialog
        @return true if messages got saved
    */
-   virtual bool SaveMessagesToFile(const UIdArray *messages, MWindow
-                                   *parent);
+   virtual bool SaveMessagesToFile(const UIdArray *messages,
+                                   MWindow *parent);
 
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers
@@ -376,19 +376,20 @@ public:
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
+       @param params is the Params struct to use
        @param parent window for dialog
-       @param profile pointer for environment
-       @param flags 0, or REPLY_FOLLOWUP
    */
    virtual void ReplyMessages(const UIdArray *messages,
-                              MWindow *parent,
-                              int flags);
+                              const MailFolder::Params& params,
+                              MWindow *parent);
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
+       @param params is the Params struct to use
        @param parent window for dialog
    */
    virtual void ForwardMessages(const UIdArray *messages,
+                                const MailFolder::Params& params,
                                 MWindow *parent);
 
    //@}

@@ -199,7 +199,6 @@ public:
                               MWindow *parent = NULL);
    /** Reply to one message.
        @param message message to reply to
-       @param flags 0, or REPLY_FOLLOWUP
        @param params is the Params struct to use
        @param profile environment
        @param parent window for dialog
@@ -441,9 +440,8 @@ public:
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
+       @param params is the Params struct to use
        @param parent window for dialog
-       @param profile pointer for environment
-       @param flags 0, or REPLY_FOLLOWUP
    */
    virtual void ReplyMessages(const UIdArray *messages,
                               const Params& params,
@@ -451,6 +449,7 @@ public:
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
+       @param params is the Params struct to use
        @param parent window for dialog
    */
    virtual void ForwardMessages(const UIdArray *messages,
