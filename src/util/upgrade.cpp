@@ -2815,7 +2815,7 @@ VerifyEMailSendingWorks(void)
    sm->SetSubject(_("Mahogany Test Message"));
    sm->SetAddresses(me);
    String msg =
-      _("If you have received this mail, your Mahogany configuration works.\n"
+      _("If you have received this mail, your Mahogany configuration works.\r\n"
         "You should also try to reply to this mail and check that your reply arrives.");
    sm->AddPart(MimeType::TEXT, msg.c_str(), msg.length());
    bool ok = sm->SendOrQueue();
