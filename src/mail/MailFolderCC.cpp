@@ -855,7 +855,8 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
          if(adr->host && strlen(adr->host)
             && (strcmp(adr->host,BADHOST) != 0))
             entry.m_From << '@' << adr->host;
-         entry.m_From << '>';
+         if(adr->personal)
+            entry.m_From << '>';
       }
    }
    else
