@@ -57,10 +57,10 @@
 #define MP_MOD_PALMOS_SYNCADDR_D 1l
 #define MP_MOD_PALMOS_BACKUP     "Backup"
 #define MP_MOD_PALMOS_BACKUP_D   0l
-#define MP_MOD_PALMOS_BACKUPDIR     "BackupDir"
-#define MP_MOD_PALMOS_BACKUPDIR_D   ""
-#define MP_MOD_PALMOS_BACKUP_SYNC     "BackupSync"
-#define MP_MOD_PALMOS_BACKUP_SYNC_D   0l
+#define MP_MOD_PALMOS_BACKUPDIR              "BackupDir"
+#define MP_MOD_PALMOS_BACKUPDIR_D            ""
+#define MP_MOD_PALMOS_BACKUP_SYNC            "BackupSync"
+#define MP_MOD_PALMOS_BACKUP_SYNC_D          0l
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL     "BackupIncremental"
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL_D   1l
 #define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
@@ -406,7 +406,6 @@ PalmOSModule::GetConfig(void)
       && m_BackupDir[m_BackupDir.Length()-1] != DIR_SEPARATOR)
       m_BackupDir << DIR_SEPARATOR;
 
-   
    String dev;
    dev = m_PilotDev;
    if(strncmp(m_PilotDev,"/dev/",5)==0)
@@ -954,13 +953,13 @@ PalmOSModule::InstallFiles(char **fnames, int files_total)
 
       // remember filename
       sprintf(db[dbcount]->name, "%s", fnames[j]);
+      ErrorMessage(_(fnames[j]));
 
       f = pi_file_open(db[dbcount]->name);
 
       if (f==0) {
          // TODO: show filename
          ErrorMessage(_("Unable to open file!"));
-         delete pd;
          break;
       }
   	
@@ -1071,6 +1070,7 @@ PalmOSModule::Restore()
    DeleteFileList(fnames, ofile_total);
 }
 
+
 void
 PalmOSModule::Install()
 {
@@ -1085,7 +1085,7 @@ PalmOSModule::Install()
                             "","","","*.p*|*",wxOPEN|wxMULTIPLE,
                             (wxMainFrame *)mapp->TopLevelFrame());
    */
-   
+
    wxFileDialog fileDialog((wxMainFrame *)mapp->TopLevelFrame() ,
                            _("Please pick databases to install"),
                            "","", "*.p*|*", wxOPEN|wxMULTIPLE);
@@ -1093,7 +1093,7 @@ PalmOSModule::Install()
       return;
 
    wxArrayString fileNames;
-   fileDialog.GetFilenames(fileNames);
+   fileDialog.GetPaths(fileNames);
 
    ofile_total = (int) fileNames.Count();
    fnames = (char **) malloc( sizeof(char *) * ofile_total );
@@ -1106,6 +1106,7 @@ PalmOSModule::Install()
       InstallFiles(fnames, ofile_total);
    DeleteFileList(fnames, ofile_total);
 }
+
 
 void
 PalmOSModule::GetAddresses(PalmBook *palmbook)
