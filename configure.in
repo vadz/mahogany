@@ -721,7 +721,7 @@ static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
 	)
 	;;
 
-0)
+none|0)
 	USE_PYTHON=0
 	;;
 

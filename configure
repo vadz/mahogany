@@ -561,7 +561,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.251 2001/12/03 23:05:21 vadz Exp 
+# From configure.in Id: configure.in,v 1.252 2001/12/11 20:27:39 vadz Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -3958,7 +3958,7 @@ fi
 
 	;;
 
-0)
+none|0)
 	USE_PYTHON=0
 	;;
 
