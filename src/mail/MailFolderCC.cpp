@@ -133,6 +133,8 @@ extern const MOption MP_IMAP_LOOKAHEAD;
 extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_SIZE;
 extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_TIME;
 extern const MOption MP_MSGS_SERVER_SORT;
+extern const MOption MP_MSGS_SERVER_THREAD;
+extern const MOption MP_MSGS_SERVER_THREAD_REF_ONLY;
 extern const MOption MP_NEWS_SPOOL_DIR;
 extern const MOption MP_RSH_PATH;
 extern const MOption MP_SSH_PATH;
@@ -3596,15 +3598,143 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
    return MailFolderCmn::SortMessages(msgnos, sortParams);
 }
 
+static void ThreadMessagesHelper(THREADNODE *thr,
+                                 size_t level,
+                                 MsgnoType& n,
+                                 MsgnoType *msgnos,
+                                 size_t *indents,
+                                 const ThreadParams& params)
+{
+   while ( thr )
+   {
+      MsgnoType msgno = thr->num;
+
+      size_t indentChildren;
+      if ( msgno == 0 )
+      {
+         // dummy message, representing the thread root which is not in the
+         // mailbox: ignore it but don't forget to indent messages under it
+         // if the corresponding option is set
+         indentChildren = params.indentIfDummyNode;
+      }
+      else // valid message
+      {
+         // save this message details
+         msgnos[n++] = msgno;
+         indents[msgno - 1] = level;   // -1 to convert to index
+
+         // always indent children below
+         indentChildren = 1;
+      }
+
+      // do we have subtree?
+      if ( thr->next )
+      {
+         // process it
+         ThreadMessagesHelper(thr->next, level + indentChildren, n,
+                              msgnos, indents, params);
+      }
+
+      // pass to the next sibling
+      thr = thr->branch;
+   }
+}
+
+static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
+{
+   IMAPLOCAL *imapLocal = (IMAPLOCAL *)stream->local;
+   THREADER *thr;
+   for ( thr = imapLocal->threader;
+         thr && mail_compare_cstring(thr->name, (char *)thrName);
+         thr = thr->next )
+      ;
+
+   return thr != NULL;
+}
+
 bool MailFolderCC::ThreadMessages(MsgnoType *msgnos,
                                   size_t *indents,
                                   const ThreadParams& thrParams)
 {
    CHECK( m_MailStream, false, "can't thread closed folder" );
 
-   if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) )
+   // does the server support threading at all?
+   if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) &&
+        READ_CONFIG(m_Profile, MP_MSGS_SERVER_THREAD) )
    {
-      // TODO: implement server side threading
+      const char *threadingAlgo;
+
+      // it does, but maybe we want only threading by references (best) and it
+      // only provides dumb threading by subject?
+      if ( !MailStreamHasThreader(m_MailStream, "REFERENCES") )
+      {
+         if ( READ_CONFIG(m_Profile, MP_MSGS_SERVER_THREAD_REF_ONLY) )
+         {
+            // don't use server side threading at all if it only provides the
+            // dumb way to do it
+            threadingAlgo = NULL;
+         }
+         else // we are allowed to fall back to subject threading
+         {
+            if ( MailStreamHasThreader(m_MailStream, "ORDEREDSUBJECT") )
+            {
+               threadingAlgo = "ORDEREDSUBJECT";
+            }
+            else // no ORDEREDSUBJECT neither?
+            {
+               // well, it does have to support something if it announced
+               // threading support in its CAPABILITY reply, so just use the
+               // first threading method available
+               IMAPLOCAL *imapLocal = (IMAPLOCAL *)m_MailStream->local;
+               threadingAlgo = imapLocal->threader->name;
+            }
+         }
+      }
+      else // have REFERENCES threading
+      {
+         // this is the best method available, just use it
+         threadingAlgo = "REFERENCES";
+      }
+
+      if ( threadingAlgo )
+      {
+         // do server side threading
+
+         wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::ThreadMessages()",
+                    GetName().c_str());
+
+         THREADNODE *thrRoot = mail_thread
+                               (
+                                 m_MailStream,
+                                 (char *)threadingAlgo,
+                                 NULL,                // default charset
+                                 mail_newsearchpgm(), // thread all messages
+                                 SE_FREE
+                               );
+
+         if ( thrRoot )
+         {
+            // traverse the entire tree filling the arrays: the indent of the
+            // message is the depth at which it occurs in the tree while the
+            // msgnos table is simply filled by the messages in traversal order
+            MsgnoType n = 0;
+            ThreadMessagesHelper(thrRoot, 0, n, msgnos, indents, thrParams);
+
+            ASSERT_MSG( n == m_MailStream->nmsgs,
+                        "error in the thread tree traversal?" );
+
+            mail_free_threadnode(&thrRoot);
+
+            // everything done
+            return true;
+         }
+         else
+         {
+            wxLogWarning(_("Server side threading failed, trying to thread "
+                            "messages locally."));
+         }
+      }
+      //else: no appropriate thread method
    }
 
    // call base class version to do local sorting

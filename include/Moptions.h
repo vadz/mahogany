@@ -274,7 +274,10 @@ extern const MOption MP_CVIEW_BGCOLOUR;
 extern const MOption MP_MSGS_SERVER_SORT;
 extern const MOption MP_MSGS_SORTBY;
 extern const MOption MP_MSGS_RESORT_ON_CHANGE;
+
 extern const MOption MP_MSGS_USE_THREADING;
+extern const MOption MP_MSGS_SERVER_THREAD;
+extern const MOption MP_MSGS_SERVER_THREAD_REF_ONLY;
 extern const MOption MP_MSGS_GATHER_SUBJECTS;
 extern const MOption MP_MSGS_BREAK_THREAD;
 extern const MOption MP_MSGS_INDENT_IF_DUMMY;
@@ -890,6 +893,10 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_MSGS_RESORT_ON_CHANGE_NAME         "ReSortMessagesOnChange"
 /// use threading
 #define MP_MSGS_USE_THREADING_NAME  "ThreadMessages"
+/// use server side threading?
+#define MP_MSGS_SERVER_THREAD_NAME "ThreadOnServer"
+/// only use server side threading by references (best threading method)?
+#define MP_MSGS_SERVER_THREAD_REF_ONLY_NAME "ThreadByRefOnly"
 
 /// Gather messages with same subject in one thread
 #define MP_MSGS_GATHER_SUBJECTS_NAME "GatherSubjectsWhenThreading"
@@ -1727,6 +1734,10 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_MSGS_RESORT_ON_CHANGE_DEFVAL 0l
 /// use threading
 #define MP_MSGS_USE_THREADING_DEFVAL  1l
+/// use server side threading?
+#define MP_MSGS_SERVER_THREAD_DEFVAL 1L
+/// only use server side threading by references (best threading method)?
+#define MP_MSGS_SERVER_THREAD_REF_ONLY_DEFVAL 0L
 
 /// Gather messages with same subject in one thread
 #define MP_MSGS_GATHER_SUBJECTS_DEFVAL 1l
