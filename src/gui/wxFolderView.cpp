@@ -181,7 +181,11 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    if(parent)
       parent->GetClientSize(&w,&h);
 
-   wxPListCtrl::Create("FolderView", parent, -1,
+   wxString name = fv->GetFullName();
+   name.Replace("/", "_");
+   if ( name.IsEmpty() )
+      name = "FolderView";
+   wxPListCtrl::Create(name, parent, -1,
                        wxDefaultPosition, wxSize(w,h), wxLC_REPORT);
 
    m_columns[WXFLC_STATUS] = READ_CONFIG(p,MP_FLC_STATUSCOL);
