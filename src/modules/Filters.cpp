@@ -13,7 +13,6 @@
 
 #include   "Mpch.h"
 #ifndef USE_PCH
-#   include   "strutil.h"
 #   include   "Mcommon.h"
 #   include   "kbList.h"
 #   include   "Message.h"
@@ -237,6 +236,8 @@ public:
        @param input the input string holding the text to parse
    */
    static Parser * Create(const String &input, MInterface *interface);
+
+   virtual MInterface * GetInterface(void) = 0;
    MOBJECT_NAME(Parser)
 };
 
@@ -383,6 +384,7 @@ public:
    virtual class Message * GetMessage(void)
       { return m_MailFolder->GetMessage(m_MessageUId); }
    //@}
+   virtual MInterface * GetInterface(void) { return m_MInterface; }
 
 protected:
    inline void EatWhiteSpace(void)
@@ -1748,7 +1750,8 @@ extern "C"
       Value v2 = args->GetArg(1)->Evaluate();
       String haystack = v1.ToString();
       String needle = v2.ToString();
-      strutil_tolower(haystack); strutil_tolower(needle);
+      p->GetInterface()->strutil_tolower(haystack);
+      p->GetInterface()->strutil_tolower(needle);
       return haystack.Find(needle) != -1;
    }
 

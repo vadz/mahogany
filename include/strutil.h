@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * strutil.h : utility functions for string handling                *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-2000 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *
@@ -77,10 +77,11 @@ void strutil_delwhitespace(String &str);
 void strutil_toupper(String &str);
 
 /** Convert string to lower case.
-
     @param str string to change
 */
 void strutil_tolower(String &str);
+
+
 
 /** Compare two strings, starting at an offset each.
 

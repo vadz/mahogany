@@ -25,6 +25,8 @@
 #include "SendMessageCC.h"
 
 
+/* Define the MInterface ABC: */
+
 /* Interface MInterface*/
 
 class MInterface
@@ -98,7 +100,14 @@ const char *  path
 ) = 0;
 
 
-};
 
+
+virtual void strutil_tolower ( String & str ) = 0;
+
+
+
+/* The following line is the end of the MInterface interface definition. */
+
+};
 
 

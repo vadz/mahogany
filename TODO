@@ -42,7 +42,7 @@ $Id$
 	KB	properties/custom headers/more shows corrupted title
 
 	KB	wxMessageView: message/rfc822 display via MessageCC(string)
-
+9	KB	copyright display accept/cancel dialog at fist startup
 KB		add python hook for filters
 
 7	KB	selecting/deselecting only message in folder

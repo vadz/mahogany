@@ -13,6 +13,8 @@ INCLUDE(`"MessageCC.h"')
 INCLUDE(`"SendMessageCC.h"')
 FILE_HEADER
 
+/* Define the MInterface ABC: */
+
 INTERFACE(MInterface,`
 
 FUNCTION(GetMApplication, MAppBase *, `(void)',
@@ -90,7 +92,12 @@ ARG(STRING , path)
 `
  return MailFolder::OpenFolder(typeAndFlags,path);
 ')
-')
 
+
+FUNCTION(strutil_tolower, void, ( ARG(String &, str)), `strutil_tolower(str);')
+
+
+/* The following line is the end of the MInterface interface definition. */
+')
 
 FILE_FOOTER

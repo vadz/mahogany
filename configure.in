@@ -378,7 +378,17 @@ AC_CHECK_LIB(dl,main,,AC_MSG_WARN("dl library might be needed."))
 dnl c-client library needs the crypt() function which is either in the 
 dnl c library or in libcrypt
 AC_CHECK_LIB(c,crypt,,
-	AC_CHECK_LIB(crypt,crypt,,AC_MSG_ERROR("Cannot find crypt function.")))
+  AC_CHECK_LIB(crypt,crypt,,[
+    AC_MSG_ERROR(
+    "Cannot find crypt function."
+    "It appears that the c library does not contain it nor is libcrypt"
+     "installed on your system. Before compiling Mahogany you need to"
+     "install libcrypt which is needed for password authentication."
+     "You can download the source for a suitable libcrypt from the"
+     "Mahogany ftp server: ftp://ronnie.phy.hw.ac.uk/pub/Mahogany/Libraries"
+)
+]
+))
 
 dnl If we have a libshadow, link with it. I am not sure whether we
 dnl really need this.

@@ -116,6 +116,24 @@ bool ConfigureOneFilter(const wxString &name,
 
 
 
+class OneRuleControls
+{
+public:
+   OneRuleControls(wxWindow *parent)
+      {
+         m_Parent = parent;
+         m_Not = new wxCheckBox(m_Parent, -1, _("Not"));
+//         m_Type = new wxChoice(m_Parent, -1, wxDefaultPosition, 
+//	                       wxDefaultSize,n,strings);
+      }
+private:
+   wxCheckBox *m_Not; // Not
+   wxChoice   *m_Type; // "Match", "Match substring", "Match RegExp",
+   // "Greater than", "Smaller than", "Older than"; "Newer than"
+   wxTextCtrl  *m_Argument; // string, number of days or bytes
+   wxChoice   *m_Where; // "In Header", "In Subject", "In From..."
+   wxWindow   *m_Parent;
+};
 
 wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
                                      wxWindow *parent)
@@ -256,7 +274,7 @@ END_EVENT_TABLE()
 wxFiltersDialog::wxFiltersDialog(ProfileBase *profile, wxWindow *parent)
    : wxOptionsPageSubdialog(profile,
                             parent,
-                            _("Filter rules"),
+                            _("DO NOT USE - CODE UNDER DEVELOPMENT!!! Filter rules"), //FIXME
                             "FilterDialog")
 {
    wxLayoutConstraints *c;
