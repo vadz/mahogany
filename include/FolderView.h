@@ -46,9 +46,10 @@ public:
    /**
       Move to the next unread message, if any.
 
-      @return true if we moved to next unread message, false if no more
+      @param takeNextIfNoUnread if true, select next msg if no more unread
+      @return true if we moved to another message, false otherwise
     */
-   virtual bool MoveToNextUnread() = 0;
+   virtual bool MoveToNextUnread(bool takeNextIfNoUnread = true) = 0;
 
    //@}
 

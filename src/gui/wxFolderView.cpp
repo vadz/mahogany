@@ -2899,7 +2899,7 @@ unsigned long wxFolderView::GetDeletedCount() const
    return m_nDeleted;
 }
 
-bool wxFolderView::MoveToNextUnread()
+bool wxFolderView::MoveToNextUnread(bool takeNextIfNoUnread)
 {
    if ( !READ_CONFIG(m_Profile, MP_FVIEW_AUTONEXT_UNREAD_MSG) )
    {
@@ -2907,10 +2907,10 @@ bool wxFolderView::MoveToNextUnread()
       return false;
    }
 
-   return SelectNextUnread();
+   return SelectNextUnread(takeNextIfNoUnread);
 }
 
-bool wxFolderView::SelectNextUnread()
+bool wxFolderView::SelectNextUnread(bool takeNextIfNoUnread)
 {
    HeaderInfoList_obj hil = m_ASMailFolder->GetHeaders();
 
@@ -2924,8 +2924,19 @@ bool wxFolderView::SelectNextUnread()
    // no unread?
    if ( idx == UID_ILLEGAL )
    {
-      if ( idxFocused == m_FolderCtrl->GetItemCount() - 1 )
+      // don't even try going to the next one
+      if ( !takeNextIfNoUnread )
+      {
+         // nothing to do
          return false;
+      }
+
+      // is there another message in the folder?
+      if ( idxFocused == m_FolderCtrl->GetItemCount() - 1 )
+      {
+         // no, don't do anything
+         return false;
+      }
 
       // take just the next one
       idx = idxFocused + 1;

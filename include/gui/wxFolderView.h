@@ -67,7 +67,7 @@ public:
    /// Destructor
    virtual ~wxFolderView();
 
-   virtual bool MoveToNextUnread();
+   virtual bool MoveToNextUnread(bool takeNextIfNoUnread = true);
 
    /** Set the associated folder.
        @param folder the folder to display or NULL
@@ -194,7 +194,7 @@ protected:
    void SelectInitialMessage();
 
    /// select the next unread message, return false if no more
-   bool SelectNextUnread();
+   bool SelectNextUnread(bool takeNextIfNoUnread = true);
 
    /// called to process messages from the sorting/threading popup menu
    void OnHeaderPopupMenu(int cmd);

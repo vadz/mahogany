@@ -156,9 +156,9 @@ public:
       m_mainFrame = mainFrame;
    }
 
-   virtual bool MoveToNextUnread()
+   virtual bool MoveToNextUnread(bool takeNextIfNoUnread = true)
    {
-      if ( wxFolderView::MoveToNextUnread() )
+      if ( wxFolderView::MoveToNextUnread(false /* don't take next */) )
       {
          // we moved to the next message in this folder, ok
          return true;
