@@ -680,6 +680,35 @@ static MimeEncoding GetMimeEncodingForFontEncoding(wxFontEncoding enc)
    }
 }
 
+// Check if text can be sent without encoding it (using QP or Base64): for
+// this it must not contain 8bit chars and must not have too long lines
+static bool NeedsToBeEncoded(const unsigned char *text)
+{
+   if ( !text )
+      return false;
+
+   size_t lenLine = 0;
+   while ( *text )
+   {
+      if ( *text == '\n' )
+      {
+         lenLine = 0;
+         text++;
+         continue;
+      }
+
+      if ( !isascii(*text++) )
+         return true;
+
+      // the real limit is bigger (~990) but chances are that anything with
+      // lines of such length is not plain text
+      if ( ++lenLine > 800 )
+         return true;
+   }
+
+   return false;
+}
+
 // ----------------------------------------------------------------------------
 // SendMessageCC header stuff
 // ----------------------------------------------------------------------------
@@ -1456,7 +1485,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       case TYPETEXT:
          // if the actual message text is in 7 bit, avoid encoding it even if
          // some charset which we would have normally encoded was used
-         if ( enc == wxFONTENCODING_SYSTEM || strutil_is7bit(data) )
+         if ( enc == wxFONTENCODING_SYSTEM && !NeedsToBeEncoded(data) )
          {
             bdy->encoding = ENC7BIT;
          }
