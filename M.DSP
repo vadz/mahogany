@@ -258,6 +258,14 @@ SOURCE=.\src\classes\XFace.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\src\mail\Address.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\mail\AddressCC.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\mail\ASMailFolder.cpp
 # End Source File
 # Begin Source File
