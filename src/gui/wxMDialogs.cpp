@@ -1163,7 +1163,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "Karsten Ball&uuml;der, Vadim Zeitlin,<br> "
                    "Greg Noel, Nerijus Bali&#363;nas, Xavier Nodet,<br>"
                    "Vaclav Slavik, Daniel Seifert, Michele Ravani,<br>"
-                   "Michael A Chase " << _("and many others") << "<br>"
+                   "Michael A Chase, Robert Vazan " << _("and many others") << "<br>"
                    "<br>"
                    "<i>" << _("The Mahogany team") << "</i><br>"
                    "<font size=2>"
