@@ -75,7 +75,7 @@ enum wxLayoutObjectType
 };
 
 /// Type used for coordinates in drawing. Must be signed.
-typedef wxCoord CoordType;
+typedef long CoordType;
 
 // Forward declarations.
 class wxLayoutList;
@@ -1215,17 +1215,19 @@ private:
    own format.
 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#if 0 //FIXME CLIPBOARD
 class wxLayoutDataObject : public wxCustomDataObject
 {
 public:
-   wxLayoutDataObject(void)
+   wxLayoutDataObject()
       {
-         //SetId("application/wxlayoutlist");
-         //m_format.SetAtom((GdkAtom) 222222);
+         SetFormat("application/wxlayoutlist");
       }
+
+   // type safe wrappers
+   void SetLayoutData(const wxString& text)
+      { SetData(text.length() + 1, text.c_str()); }
+   const char *GetLayoutData() const { return (const char *)GetData(); }
 };
-#endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

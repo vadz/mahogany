@@ -82,7 +82,9 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
 //   wxLogDebug("FolderListCtrl::OnChar, this=%p", this);
 
-   if(! m_FolderView || ! m_FolderView->m_MessagePreview)
+   if(! m_FolderView || ! m_FolderView->m_MessagePreview
+      || event.AltDown() || event.ControlDown()
+      )
    {
       event.Skip();
       return; // nothing to do
@@ -93,7 +95,9 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       long keyCode = event.KeyCode();
       if(keyCode == WXK_F1) // help
       {
-         mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS, m_FolderView->GetWindow());
+         mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS,
+                            m_FolderView->GetWindow());
+         event.Skip();
          return;
       }
       wxArrayInt selections;
@@ -102,7 +106,10 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
       long nMsgs = m_FolderView->GetFolder()->CountMessages();
       if(focused == -1 || focused >= nMsgs)
-            return;
+      {
+         event.Skip();
+         return;
+      }
       // in this case we operate on the highlighted  message
       UIdType focused_uid = UID_ILLEGAL;
       HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
@@ -190,15 +197,13 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
                idx++;
             }
          }
-         event.Skip();
          break;
       default:
-         event.Skip();
+         ;
       }
    }
-   else
-      event.Skip();
    //SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
+   event.Skip();
 }
 
 void wxFolderListCtrl::OnMouse(wxMouseEvent& event)

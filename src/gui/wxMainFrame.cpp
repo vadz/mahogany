@@ -284,6 +284,8 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
 bool
 wxMainFrame::CanClose() const
 {
+   // make sure folder is closed before we close the window
+   m_FolderView->SetFolder(NULL);
    // closing the main frame will close the app so ask the other frames
    // whether it's ok to close them
    return mApplication->CanClose();

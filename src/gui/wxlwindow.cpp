@@ -457,6 +457,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    if(keyCode == WXK_F1)
    {
       m_llist->Debug();
+      event.skip();
       return;
    }
 #endif
@@ -728,6 +729,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    ScrollToCursor();
    // refresh the screen
    RequestUpdate(m_llist->GetUpdateRect());
+   event.Skip();
 }
 
 void

@@ -329,6 +329,16 @@ wxLayoutObjectText::Layout(wxDC &dc, class wxLayoutList *llist)
              heightOld = m_Height;
 #endif // 0
 
+#ifdef __WXDEBUG__
+   CoordType a,b,c,d,e,f;
+   dc.GetTextExtent("test ", &a, &b, &c);
+   dc.GetTextExtent("test", &d, &e, &f);
+   wxASSERT(a != d);
+   wxASSERT(b == e);
+   wxASSERT(c == f);
+   dc.GetTextExtent(" ", &d, &e, &f);
+   wxASSERT(a > 0);
+#endif
    dc.GetTextExtent(m_Text, &m_Width, &m_Height, &descent);
 
 #if 0
@@ -378,7 +388,7 @@ wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap const &icon)
 {
    if ( !icon.Ok() )
    {
-      FAIL_MSG("invalid icon");
+      wxFAIL_MSG("invalid icon");
 
       m_Icon = NULL;
 
@@ -2382,10 +2392,23 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos,
        cursorPos->y = line->GetLineNumber();
 
    bool foundinline = true;
+   long cx = 0;
+
    // Now, find the object in the line:
-   wxLOiterator i = line->FindObjectScreen(dc, this,
+   wxLOiterator i;
+
+   if (cursorPos)
+   {
+     i = line->FindObjectScreen(dc, this,
                                            pos.x,
-                                           cursorPos ? &cursorPos->x : NULL,
+                                           &cx,
+                                           &foundinline);
+     cursorPos->x = cx;
+   }
+   else
+     i = line->FindObjectScreen(dc, this,
+                                           pos.x,
+                                           NULL,
                                            &foundinline);
    if ( found )
       *found = didFind && foundinline;
@@ -2832,7 +2855,7 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
          delete exp;
       }
 
-//FIXME CLIPBOARD      wxlo->SetData(string.c_str(), string.Length()+1);
+      wxlo->SetLayoutData(string);
    }
    return llist;
 }
