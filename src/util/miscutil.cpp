@@ -30,7 +30,7 @@ AutoCollectAddresses(const String &email,
                      int autocollectFlag,
                      bool collectNamed,
                      const String &bookName,
-                     MFrame *frame = 0)
+                     MFrame *frame)
 {
    // we need an address and a name
    bool hasEmailAndName = true;
