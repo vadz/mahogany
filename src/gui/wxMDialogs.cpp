@@ -269,6 +269,7 @@ private:
    wxString      m_FileName;
    MFolder      *m_folder;
    wxFolderTree *m_tree;
+   wxWindow     *m_winTree;
 
    // has the user chosen a folder?
    bool m_userChoseFolder;
@@ -1310,9 +1311,8 @@ MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder, bool open)
    c->right.SameAs(box, wxRight, LAYOUT_X_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
 
-   wxWindow *winTree = m_tree->GetWindow();
-   winTree->SetConstraints(c);
-   winTree->SetFocus();
+   m_winTree = m_tree->GetWindow();
+   m_winTree->SetConstraints(c);
 
    // position the dialog
    SetDefaultSize(6*wBtn, 20*hBtn);
@@ -1384,6 +1384,10 @@ bool MFolderDialog::TransferDataToWindow()
       }
       //else: the folder was probably destroyed since the last time
    }
+
+   // we can only do it now as wxGTK doesn't allow us to set the focus from
+   // ctor
+   m_winTree->SetFocus();
 
    return true;
 }
