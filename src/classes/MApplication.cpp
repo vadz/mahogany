@@ -378,9 +378,6 @@ MAppBase::OnStartup()
    // give the user a possibility to disable it
    if ( READ_CONFIG(m_profile, MP_USEPYTHON) && ! InitPython() )
    {
-      // otherwise it would hide our message box
-      CloseSplash();
-
       static const char *msg =
        "Detected a possible problem with your Python installation.\n"
        "A properly installed Python system is required for using\n"
@@ -388,7 +385,7 @@ MAppBase::OnStartup()
        "be missing without it, however the core functions will be\n"
        "unaffected.\n"
        "Would you like to disable Python support for now?\n"
-       " (You can set " MP_USEPYTHON " to 1 to re-enable it later)";
+       "(You can re-enable it later from the options dialog)";
       if ( MDialog_YesNoDialog(_(msg)) )
       {
          // disable it

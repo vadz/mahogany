@@ -1,6 +1,6 @@
 File: readme_win.txt, the README file for MS Windows version
-Date: 26.06.99
-Version: the information in this file applies to alpha 0.23
+Date: 10.03.01
+Version: the information in this file applies to alpha 0.62
 
 0. Requirments
 --------------
@@ -11,7 +11,12 @@ Version: the information in this file applies to alpha 0.23
  b) You need a POP3 or IMAP4 (recommended, especially for slow connection!)
     server to read e-mail and an SMTP server to send it. Reading and sending
     USENET news is also supported (although this alpha version doesn't have
-    the "advanced" newsreader features).
+    the "advanced" newsreader features) and you will need a NNTP server if you
+    want to try it out.
+
+ c) If you plan to use Python scripting with Mahogany, you need to have Python
+    2.0 installed on your system, please refer to http://www.python.org/ for
+    details.
 
 1. Installation
 ---------------
@@ -34,7 +39,7 @@ Version: the information in this file applies to alpha 0.23
     later want to uninstall the program.
 
  c) installation over previous versions: if you're one of courageous people
-    who have tried pre-alpha 0.10, please delete/uninstall it before
+    who have tried pre-alpha 0.23, please delete/uninstall it before
     installing this version. The registry settings will be updated
     automatically and so may be left, but you should not try to install the
     program in the same directory.
@@ -52,47 +57,23 @@ Version: the information in this file applies to alpha 0.23
     context-sensitive help. The help file is included in the distribution
     though - it's a translation to Windows help format of Mahogany HTML
     documentation which may always be found at
-       http://mahogany.sourceforge.net/doc/Manual/Manual.html.
 
-    The future versions of the program will include help in MS HTML format and
-    the context-sensitive help will work too, of course.
+       http://mahogany.sourceforge.net/doc/Manual/Manual.html
+
+    The context-sensitive help will work in the future versions.
 
     Generally speaking, documentation is far from complete, so if you have any
     questions please feel free to ask them on the Mahogany mailing lists (see
     the help file for details on how subscribe to/access them)
 
- c) working off-line: there are no special support for off-line mode in
-    Mahogany yet, but you may use it as off-line reader too.
-
 3. Differences from the Unix version
 ------------------------------------
 
- All of features enumerated below already work in the Unix version, but are not
-yet implemented under Windows.
+ All of features enumerated below work in the Unix version, but are not
+yet implemented under Windows:
 
- a) there is no XFace support yet.
+ a) there is no XFace support yet
 
- b) this release comes without Python support due to lack of its usefullness
-    so far.
+ b) Windows version doesn't support encrypted communications using SSL
 
- c) there is unfortunately no context-sensitive help yet.
-
-4. Items from our TODO list
----------------------------
-
- In addition to the common TODO list which may be consulted at Mahogany Web
-page, the following items are scheduled for implementation under Windows in
-the near future:
-
- a) import of "foreign" address books from Eudora, MS Outlook and The Bat!
-    programs.
-
- b) import of folder information from the same programs.
-
- c) converting of the online HTML help into Microsoft HTML help format.
-
- d) better support for working off-line
-
- e) the icons are really ugly - we will improve them. If you would like to
-    help us design nice looking icons for Mahogany, any help would be greatly
-    appreciated!
+ c) no Palm support (synchronization with hand held devices)

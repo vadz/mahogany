@@ -39,24 +39,10 @@
 
 #ifdef USE_ICONS_FROM_RESOURCES
 #  define   unknown_xpm     "unknown"
-#  define   txt_xpm         "txt"
-#  define   audio_xpm       "audio"
-#  define   application_xpm "application"
-#  define   image_xpm       "image"
-#  define   video_xpm       "video"
-#  define   postscript_xpm  "postscript"
-#  define   dvi_xpm         "dvi"
 #  define   hlink_xpm       "hlink"
 #  define   ftplink_xpm     "ftplink"
 #  define   MFrame_xpm      "mframe"
 #  define   MainFrame_xpm   "MainFrame"
-#  define   MainFrame_xpm   "MainFrame"
-#  define   tb_exit         "tb_exit"
-#  define   tb_help         "tb_help"
-#  define   tb_open         "tb_open"
-#  define   tb_mail_compose "tb_mail_compose"
-#  define   tb_book_open    "tb_book_open"
-#  define   tb_preferences  "tb_preferences"
 #else   //real XPMs
 #  include  "../src/icons/unknown.xpm"
 #  include  "../src/icons/hlink.xpm"
@@ -606,7 +592,7 @@ wxIconManager::GetIcon(const String &iconNameOrig)
      } // for all extensions
    } // if globaldir is not empty
 
-#  ifdef    USE_ICONS_FROM_RESOURCES
+#ifdef OS_WIN
    // last, look in the resources
    {
       wxIcon icon(iconNameOrig);
@@ -617,7 +603,7 @@ wxIconManager::GetIcon(const String &iconNameOrig)
 
       // ok, it failed - now do all the usual stuff
    }
-#  endif  //Windows
+#endif  //Windows
 
    wxLogTrace(wxTraceIconLoading, "... icon not found.");
 

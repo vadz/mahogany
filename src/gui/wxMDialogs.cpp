@@ -1069,7 +1069,8 @@ extern void CloseSplash()
    {
       // do close the splash
       wxAboutFrame *frameSplash = (wxAboutFrame *)g_pSplashScreen;
-      frameSplash->Close();
+      frameSplash->Hide(); // immediately
+      frameSplash->Close(); // will happen later
 
 #if !wxCHECK_VERSION(2, 3, 0)
       // and also unset the splash screen as the main app window: otherwise we
@@ -1113,7 +1114,11 @@ MDialog_ShowTip(const MWindow *parent)
       dir = "..";
    }
 
-   dir << DIR_SEPARATOR << "doc" << DIR_SEPARATOR << "Tips" << DIR_SEPARATOR;
+   dir << DIR_SEPARATOR << "doc" << DIR_SEPARATOR
+#ifndef OS_WIN
+       << "Tips" << DIR_SEPARATOR
+#endif // !Windows
+       ;
 
    // Tips files are either Tips_LOCALENAME.txt, e.g. Tips_de.txt or
    // simply Tips.txt

@@ -7,10 +7,8 @@
  *
  *******************************************************************/
 
-
-
 #ifndef MDEFAULTS_H
-#define   MDEFAULTS_H
+#define MDEFAULTS_H
 
 #include "Mcallbacks.h"
 #include "Mversion.h"
@@ -867,7 +865,6 @@ enum MFolderIndex
 #define   MP_MAILCAP_D         "mailcap"
 /// the name of the mime types file
 #define   MP_MIMETYPES_D         "mime.types"
-/// the label for the From: field
 /// the strftime() format for dates
 #define   MP_DATE_FMT_D         "%c"
 /// display all dates as GMT?
@@ -884,8 +881,13 @@ enum MFolderIndex
 #define   MP_MAINFOLDER_D        "INBOX"
 /// path for Python
 #define   MP_PYTHONPATH_D         M_EMPTYSTRING
+#ifdef OS_WIN
+// under Windows, the setup program will create the appropriate registry key
+#define   MP_USEPYTHON_D         0l
+#else
 /// is Python enabled (this is a run-time option)?
 #define   MP_USEPYTHON_D         1
+#endif
 /// start-up script to run
 #define     MP_STARTUPSCRIPT_D            "Minit"
 /// show splash screen on startup?

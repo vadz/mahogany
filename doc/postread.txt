@@ -1,9 +1,15 @@
 Please consult files in the doc subdirectory (in particular, the list
 of known bugs in bugs.txt) and the help file for further details.
 
-We also hope that Mahogany interface is simple enough that you may
+We also believe that Mahogany interface is simple enough that you may
 start using it right now.
 
 And don't forget that the most up-to-date documentation is always
-available online at M home page: please see
-http://mahogany.sourceforge.net/doc/Manual/index.html.
+available online at M home page:
+
+                http://mahogany.sourceforge.net/
+
+ Hope you will enjoy this program!
+
+M-Team
+

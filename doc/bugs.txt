@@ -1,40 +1,6 @@
-Known issues with release 0.23a (pre-alpha)
-===========================================
+Known issues with Mahogany 0.62a (alpha) 'Mars'
+===============================================
 
-(see also readme_win.txt for Windows-specific problems)
-
-Missing/not fully implemented features:
------------------------------------
-
-1. Many "standard" features are still lacking in this pre-alpha release, such
-   as sorting. threading, scoring of messages; filters; newsgroup subscription
-   support &c. Almost all of them are scheduled for implementation in the next
-   release.
-
-2. Some of the settings are not yet configurable on per-folder basis - this
-   will be changed a.s.a.p.
-
-Bugs:
------
-
-1. Choosing "Cancel" from the options dialog sometimes doesn't remember the
-   old values, i.e., although it seems to work, the settings will be wrong the
-   next time the program is run.
-
-2. When retrieving messages from a newsgroup which has more than the
-   specified threshold of messages in total, but less of unread/new messages
-   than the threshold, you will still be asked about retrieving only the last
-   <N> messages (this question is unnecessary in this case)
-
-UI glitches:
-------------
-
-1. No keyboard accelerators - yet.
-
-2. Compose screen sometimes doesn't refresh (especially when scrolling fast),
-   clicking it with a mouse usually corrects the problem.
-
-3. Windows icons are ugly.
-
-4. [Expand] button in "Post newsgroup article" window does nothing and
-   shouldn't be there at all.
+There are no Windows-specific bugs known right now. Please
+consult http://mahogany.sourceforge.net/bugz/ for the full
+list of open bugs an/or if you wish to report a new one.

@@ -20,6 +20,7 @@
 #  include  <wx/dialup.h>
 
 // fwd decl
+class WXDLLEXPORT wxDialUpManager;
 class WXDLLEXPORT wxLog;
 class WXDLLEXPORT wxHelpControllerBase;
 class WXDLLEXPORT wxPrintData;
@@ -116,6 +117,9 @@ public:
    /// Report a fatal error:
    virtual void FatalError(const char *message);
 
+   /// access the wxDialUpManager directly (wxMApp-specific method)
+   wxDialUpManager *GetDialUpManager() const { return m_OnlineManager; }
+
 protected:
    /// makes sure the status bar has enough fields
    virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) const;
@@ -161,7 +165,7 @@ private:
    /// timer used to call OnIdle for MEvent handling
    class wxTimer *m_IdleTimer;
    /// online manager
-   class wxDialUpManager *m_OnlineManager;
+   wxDialUpManager *m_OnlineManager;
    /// are we currently online?
    bool m_IsOnline;
 

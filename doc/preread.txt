@@ -1,17 +1,17 @@
-                                        WARNING
+                                        *** WARNING ***
 
- This is an alpha version of the Mahogany e-mail client. "Alpha" means that
-many of the features which the finished product will have are still lacking
-and that you may (and probably will) find bugs in it. We release this
-version only as a demonstration of how Mahogany will look like in the
-future and do NOT recommend using it as your main e-mail client (although
-it is possible and the authors do use it).
+ This is the 0.62 alpha version of the Mahogany e-mail client. "Alpha" means
+that many of the features which the finished product will have are still
+lacking and that you may (and probably will) find bugs in it. We release this
+version only as a demonstration of how Mahogany will look like in the future
+and do NOT recommend using it as your main e-mail client just yet (although it
+is possible and one of the authors does use it), however we do recommend that
+you try it out and tell us what do you think.
 
- We release this version hoping that it will attract interest to Mahogany
-and that, may be, you can even already find it useful. Of course, we would
-also like to get your feedback, so don't hesitate to contact us at
-mahogany-users@lists.sourceforge.net with any questions, ideas or bug reports.
+ Please send your impressions, questions, feature requests and bug reports to
+                             mahogany-users@lists.sourceforge.net
+and help us to improve this program.
 
- Enjoy!
+ Thanks for trying Mahogany!
 
 M-Team

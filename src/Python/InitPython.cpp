@@ -68,22 +68,33 @@ InitPython(void)
    bool didntHavePath = path.empty();
    if ( didntHavePath )
    {
-      path << mApplication->GetLocalDir() << "/scripts" << PATH_SEPARATOR;
+      String pythondir;
       String globaldir = mApplication->GetGlobalDir();
       if ( globaldir.empty() )
       {
-          // not installed
-          path << mApplication->GetDataDir() << "/Python" << PATH_SEPARATOR
-               << mApplication->GetDataDir() << "/Python/Scripts"
-#ifdef M_TOP_BUILDDIR
-               << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python"
-               << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python/Scripts"
-#endif
-              ;
+         // not installed
+         pythondir = mApplication->GetDataDir();
       }
       else
       {
-          path << globaldir << "/scripts";
+         pythondir = globaldir;
+      }
+
+      pythondir << DIR_SEPARATOR << "Python";
+
+      path << pythondir << PATH_SEPARATOR
+           << pythondir << DIR_SEPARATOR << "Scripts"
+           // add also the uninstalled locations
+#ifdef M_TOP_BUILDDIR
+           << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python"
+           << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python/Scripts"
+#endif
+           ;
+
+      String localdir = mApplication->GetLocalDir();
+      if ( localdir != globaldir )
+      {
+         path << localdir << DIR_SEPARATOR << "Scripts" << PATH_SEPARATOR;
       }
    }
 

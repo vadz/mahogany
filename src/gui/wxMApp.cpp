@@ -353,8 +353,12 @@ wxMApp::OnAbnormalTermination()
 
    static const char *msg =
       gettext_noop("The application is terminating abnormally.\n"
+                   "\n"
                    "Please report the bug via our bugtracker at\n"
                    "http://mahogany.sourceforge.net/bugz\n"
+                   "Be sure to mention your OS version and what\n"
+                   "exactly you were doing before this message\n"
+                   "box appeared.\n"
                    "\n"
                    "Thank you!");
    static const char *title = gettext_noop("Fatal application error");

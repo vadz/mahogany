@@ -323,7 +323,8 @@ public:
          // check all the hostnames unless we use dial up - we can't call
          // MApp::IsOnline() here yet because this stuff is not yet
          // configured, so use wxDialUpManager directly
-         wxDialUpManager *dialupMan = wxDialUpManager::Create();
+         wxDialUpManager *dialupMan =
+                  ((wxMApp *)mApplication)->GetDialUpManager();;
          if ( dialupMan->IsOnline() )
          {
             String check, tmp;
@@ -373,8 +374,6 @@ public:
                   return FALSE;
             }
          }
-
-         delete dialupMan;
 
          return TRUE;
       }
@@ -464,13 +463,26 @@ public:
 
    virtual bool TransferDataToWindow()
       {
-         if(gs_installWizardData.useDialUp == -1) // no setting yet
+         // no setting yet?
+         if ( gs_installWizardData.useDialUp == -1 )
          {
-            wxDialUpManager *man = wxDialUpManager::Create();
-            // if we have a LAN connection, then we don't need to configure dial-up
-            // networking, but if we don't, then we probably do
-            gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
+#ifdef OS_WIN
+            // disabling this code for Windows because the program crashes in
+            // release version after returning from IsAlwaysOnline(): I
+            // strongly suspect an optimizer bug (it doesn't happen without
+            // optimizations) but I can't fix it right now otherwise
+            gs_installWizardData.useDialUp = FALSE;
+#else // !Win
+            wxDialUpManager *dialupMan =
+                  ((wxMApp *)mApplication)->GetDialUpManager();
+
+            // if we have a LAN connection, then we don't need to configure
+            // dial-up networking, but if we don't, then we probably do
+            gs_installWizardData.useDialUp = dialupMan &&
+                                                !dialupMan->IsAlwaysOnline();
+#endif // Win/!Win
          }
+
          m_FolderTypeChoice->SetSelection(gs_installWizardData.folderType);
 #ifdef USE_PYTHON
          m_UsePythonCheckbox->SetValue(gs_installWizardData.usePython != 0);
@@ -897,10 +909,10 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
 
 #if defined(OS_WIN)
    // get all existing RAS connections
-   wxDialUpManager *dial = wxDialUpManager::Create();
+   wxDialUpManager *dial =
+      ((wxMApp *)mApplication)->GetDialUpManager();;
    wxArrayString connections;
    size_t nCount = dial->GetISPNames(connections);
-   delete dial;
 
    // concatenate all connection names into one ':' separated string
    wxString comboChoices = _("&Dial up connection to use");
@@ -1190,7 +1202,7 @@ bool RunInstallWizard()
    gs_installWizardData.collectAllMail = TRUE;
    gs_installWizardData.folderType = 0; /* mbx */
 #ifdef USE_PYTHON
-   gs_installWizardData.usePython = FALSE;
+   gs_installWizardData.usePython = READ_APPCONFIG(MP_USEPYTHON) != 0;
 #endif
 #ifdef USE_PISOCK
    gs_installWizardData.usePalmOs = TRUE;
@@ -2922,6 +2934,8 @@ CheckConfiguration(void)
    String version = profile->readEntry(MP_VERSION, "");
    if ( version != M_VERSION )
    {
+      CloseSplash();
+
       if ( ! Upgrade(version) )
          return false;
       // write the new version

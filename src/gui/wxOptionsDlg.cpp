@@ -1366,10 +1366,10 @@ void wxOptionsPage::CreateControls()
             {
                wxString title = _(m_aFields[n].label);
 
-               wxDialUpManager *dial = wxDialUpManager::Create();
+               wxDialUpManager *dial =
+                  ((wxMApp *)mApplication)->GetDialUpManager();;
                wxArrayString aConnections;
                dial->GetISPNames(aConnections);
-               delete dial;
 
                if ( !aConnections.IsEmpty() )
                {

@@ -4,6 +4,7 @@
 ;; Purpose:     Inno Setup Script for M
 ;; Author:      Vadim Zeitlin
 ;; Modified by: VZ at 20.06.99 for InnoSetup 1.1
+;;              VZ at 09.03.01 for InnoSetup 2.0
 ;; Created:     23.08.98
 ;; CVS-ID:      $Id$
 ;; Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -11,86 +12,91 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 [Setup]
-Bits=32
+; --- app info
 AppName=Mahogany
-AppVerName=Mahogany pre-alpha 0.23 'Polwarth III'
-AppCopyright=Copyright © 1998 Karsten Ballüder and Vadim Zeitlin
+AppVerName=Mahogany alpha 0.62 'Mars'
+
+; --- setup compiler params
+OutputBaseFilename=Mahogany-0.62a
 DefaultDirName={pf}\Mahogany
 DefaultGroupName=Mahogany
+AllowRootDirectory=1
 AllowNoIcons=1
+
+SourceDir=f:\Progs\M
+OutputDir=extra\setup\output
+
+; TODO: use AppMutex to check whether the program is running
+
+; --- app publisher info (for W2K only)
+AppPublisher=Mahogany Dev-Team
+AppPublisherURL=http://mahogany.sourceforge.net/
+AppVersion=0.62
+
+; --- appearance parameters
 
 ; hmm... what's RGB value of mahogany?
 BackColor=$037ebd
+AppCopyright=Copyright © 1997-2001 Karsten Ballüder and Vadim Zeitlin
+WizardImageFile=res\install1.bmp
+WizardSmallImageFile=res\install_small.bmp
 
-SourceDir=f:\Progs\M
+; --- doc files
 LicenseFile=doc\license.txt
-
 InfoBeforeFile=doc\preread.txt
 InfoAfterFile=doc\postread.txt
 
-[Dirs]
-Name: "{app}\doc"
-Name: "{app}\locale"
-
-;Name: "{app}\lib"
+[Components]
+Name: "main"; Description: "Required Program Files"; Types: full compact custom; Flags: fixed
+Name: "help"; Description: "Help Files"; Types: full compact
+Name: "python"; Description: "Python Support (Requires Python 2.0)"; Types: full
+Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
 
 [Files]
-; --- program files
+; --- EXEs and DLLs
 Source: "Release\M.EXE"; DestDir: "{app}"
+Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
+Source: "doc\Mahogany.url"; DestDir: "{app}"; Components: misc
+Source: "doc\Bug.url"; DestDir: "{app}"; Components: misc
+
+; --- docs
+Source: "doc\Tips\tips.txt"; DestDir: "{app}\doc"
+Source: "doc\bugs.txt"; DestDir: "{app}\doc"; Components: misc
+Source: "doc\License*.txt"; DestDir: "{app}\doc"; Components: misc
+Source: "doc\Mannounce.txt"; DestDir: "{app}\doc"; DestName: "announce.txt"; Components: misc
+Source: "doc\readme_win.txt"; DestDir: "{app}\doc"; DestName: "readme.txt"; Flags: "isreadme"
 
 ; --- help
-Source: "doc\Hlp\Mahogany.hlp"; DestDir: "{app}\doc"
-Source: "doc\Hlp\Mahogany.cnt"; DestDir: "{app}\doc"
+Source: "doc\HtmlHlp\Manual.*"; DestDir: "{app}\help"; Components: help
+
+; icons
+Source: "src\icons\tb*.xpm"; DestDir: "{app}\icons"
 
 ; --- python support
-; "python15.dll";   "{app}\python15.dll"; copy_normal; 
 
-; Python modules: the corresponding pyc files should be specified
-; in the next section for deletion
+Source: "src\Python\MailFolder.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MAppBase.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\Message.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MObject.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MProfile.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MString.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MTest.py"; DestDir: "{app}\Python"; Components: python
 
-; M python support
-;"Minit.py";    "{app}\lib\Minit.py"; copy_normal; 
-;"MailFolder.py";  "{app}\lib\MailFolder.py"; copy_normal; 
-;"MAppBase.py";    "{app}\lib\MAppBase.py"; copy_normal; 
-;"Message.py";    "{app}\lib\Message.py"; copy_normal; 
-;"MString.py";    "{app}\lib\MString.py"; copy_normal; 
-;"MProfile.py";    "{app}\lib\MProfile.py"; copy_normal; 
+; case is important (should be Minit) or Python complains!!
+Source: "src\Python\Scripts\MInit.py"; DestDir: "{app}\Python"; DestName: "Minit.py"; Components: python
 
-; standard Python modules used
-;"exceptions.py";  "{app}\lib\exceptions.py"; copy_normal; 
-;"ntpath.py";    "{app}\lib\ntpath.py"; copy_normal; 
-;"os.py";    "{app}\lib\os.py"; copy_normal; 
-;"stat.py";    "{app}\lib\stat.py"; copy_normal; 
-;"string.py";    "{app}\lib\string.py"; copy_normal; 
-;"UserDict.py";    "{app}\lib\UserDict.py"; copy_normal; 
-
-; --- documentation
-Source: "doc\readme_win.txt"; DestDir: "{app}"; Flags: "isreadme"
-Source: "doc\bugs.txt"; DestDir: "{app}\doc"
-Source: "doc\copying"; DestDir: "{app}\doc"
-
-;Source: "doc\readme.txt"; DestDir: "{app}\doc"
-;Source: "information.txt"; DestDir: "{app}\doc"
-;Source: "license.html"; DestDir: "{app}\doc"
-
-[DeleteFiles]
+[UninstallDelete]
 ; delete all precompiled python files
-{app}\lib\Minit.pyc
-{app}\lib\MailFolder.pyc
-{app}\lib\MAppBase.pyc
-{app}\lib\Message.pyc
-{app}\lib\MString.pyc
-{app}\lib\MProfile.pyc
-{app}\lib\exceptions.pyc
-{app}\lib\ntpath.pyc
-{app}\lib\os.pyc
-{app}\lib\stat.pyc
-{app}\lib\string.pyc
-{app}\lib\UserDict.pyc
+Type: files; Name: "{app}\Python\*.pyc"; Components: python
 
 [Icons]
 Name: "{group}\Mahogany"; Filename: "{app}\M.EXE"; WorkingDir: "{app}"
-Name: "{group}\Mahogany Help"; Filename: "{app}\doc\Mahogany.hlp"
+Name: "{group}\Mahogany Help"; Filename: "{app}\help\Manual.chm"; Components: help
+Name: "{group}\Visit Mahogany Home Page"; Filename: "{app}\Mahogany.url"; Components: misc
+Name: "{group}\Report a Bug"; Filename: "{app}\Bug.url"; Components: misc
 
 [Registry]
-Root: HKCU; Subkey: "Software\Mahogany-Team"; ValueType: none; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Mahogany-Team"; ValueType: none; Flags: uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\Mahogany-Team\M"; ValueType: none; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: string; ValueName: "GlobalDir"; ValueData: "{app}"; Components: python
+Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: dword; ValueName: "UsePython"; ValueData: 1; Components: python
