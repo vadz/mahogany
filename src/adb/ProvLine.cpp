@@ -376,8 +376,33 @@ FileError:
 int LineBook::IndexByName(const String& name) const
 {
    LineEntry *key = new LineEntry(NULL,name);
-   
+
+#if wxCHECK_VERSION(2,5,0) // Bug in wxWindows 2.4 version of Index()
    int index = m_entries.Index(key);
+#else
+   int low = 0; // Key is at position greater or equal to "low"
+   int high = m_entries.GetCount(); // Key is below "high"
+   while ( low < high - 1 ) // There are items to compare
+   {
+      int middle = (low + high) / 2; // Candidate key match
+      int compare = LineEntryCompare(key,m_entries.Item(middle));
+      if ( compare < 0 ) // Key is below "middle"
+         high = middle; // "high" changes
+      else if ( compare > 0 ) // Key is above "middle"
+         low = middle + 1; // "low" changes
+      else // Key is at "middle", we can set "low" and "high" exactly
+      {
+         low = middle;
+         high = middle + 1;
+      }
+   }
+   
+   int index;
+   if ( low < high && LineEntryCompare(key,m_entries.Item(low)) == 0 )
+      index = low;
+   else
+      index = wxNOT_FOUND;
+#endif
    key->DecRef();
    
    return index;
