@@ -319,6 +319,8 @@ enum ConfigFields
    ConfigField_FolderViewAutoNextFolder,
 
    ConfigField_FolderViewThreadMessages,
+   ConfigField_FolderViewThreadOnServer,
+   ConfigField_FolderViewThreadByRefOnly,
 #if wxUSE_REGEX
    ConfigField_FolderViewSimplifyingRegex,
    ConfigField_FolderViewReplacementString,
@@ -1025,6 +1027,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    ConfigField_FolderViewAutoNextMsg},
 
    { gettext_noop("&Thread messages"),             Field_Bool,    -1},
+   { gettext_noop("Thread messages on server"), Field_Bool | Field_Advanced,    ConfigField_FolderViewThreadMessages},
+   { gettext_noop("Thread messages by references only"), Field_Bool | Field_Advanced,    ConfigField_FolderViewThreadOnServer},
 
 #if wxUSE_REGEX
    { gettext_noop("Regex used to &simplify subjects"), Field_Text | Field_Advanced,    ConfigField_FolderViewThreadMessages},
@@ -1407,6 +1411,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_FOLDER),
 
    CONFIG_ENTRY(MP_MSGS_USE_THREADING),
+   CONFIG_ENTRY(MP_MSGS_SERVER_THREAD),
+   CONFIG_ENTRY(MP_MSGS_SERVER_THREAD_REF_ONLY),
 
 #if wxUSE_REGEX
    CONFIG_ENTRY(MP_MSGS_SIMPLIFYING_REGEX),
