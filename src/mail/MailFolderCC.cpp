@@ -95,6 +95,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_Listing = NULL;
    m_GenerateNewMailEvents = false; // for now don't!
    m_UpdateNeeded = true;
+   m_ProgressDialog = 0;
    FolderType type = GetFolderType(typeAndFlags);
    SetType(type);
    
@@ -547,19 +548,26 @@ MailFolderCC::BuildListing(void)
 
    m_BuildNextEntry = 0;
 
-   String msg;
-   msg.Printf(_("Reading %lu message headers..."), (unsigned long) m_numOfMessages);
-   m_ProgressDialog = new MProgressDialog(_("M: Progress"),
-                                          msg,
-                                          100, NULL);// open a status window:
-   
+   if(m_ProgressDialog == NULL)
+   {
+      String msg;
+      msg.Printf(_("Reading %lu message headers..."), (unsigned long) m_numOfMessages);
+      m_ProgressDialog = new MProgressDialog(_("M: Progress"),
+                                             msg,
+                                             100, NULL);// open a status window:
+   }
    // mail_fetch_overview() will now fill the m_Listing array with
    // info on the messages
    /* stream, sequence, header structure to fill */
    mail_fetch_overview (m_MailStream, (char *)"1:*", mm_overview_header);
 
-   delete m_ProgressDialog;
-   
+   if(m_ProgressDialog != (MProgressDialog *)1)
+      delete m_ProgressDialog;
+   // We set it to an illegal address here to suppress further
+   // updating. This value is checked against in OverviewHeader().
+   // The reason is that we only want it the first time that the
+   // folder is being opened.   
+   m_ProgressDialog = (MProgressDialog *)1;
 #if 0
    /* This can actually happen if no overview information is
       available, for NNTP sometimes. */
@@ -681,7 +689,9 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    entry.m_Uid = uid;
    m_BuildNextEntry++;
 
-   m_ProgressDialog->Update( (100 * m_BuildNextEntry)/m_numOfMessages);
+   // This is 1 if we don't want any further updates.
+   if(m_ProgressDialog != (MProgressDialog *)1)
+      m_ProgressDialog->Update( (100 * m_BuildNextEntry)/m_numOfMessages);
 }
 
 

@@ -55,7 +55,7 @@ M_OVERRIDES(debug,debug,
 --with-debug    use debug info/code,
 USE_DEBUG)
 
-M_OVERRIDES(debug,debug,
+M_OVERRIDES(experimental,experimental,
 --with-experimental    use experimental code,
 USE_EXPERIMENTAL)
 
@@ -452,6 +452,8 @@ dnl --------------------------------------------------------------------------
 dnl set up generators for class documentation
 dnl --------------------------------------------------------------------------
 
+AC_PATH_PROG(PERL,perl)
+
 DOCHTML="echo \"No doc generator(html) available.\""
 DOCTEX="echo \"No doc generator(tex) available.\""
 
@@ -471,14 +473,13 @@ else
 		DOCTEX="\$(KDOCTEX)"
 	else
 		dnl fall back to scandoc
-		AC_PATH_PROG(PERL,perl)
 		if test "x$PERL" = "x"
 		then
 			AC_MSG_WARN("Cannot generate class documentation!")
 		else 
 			dnl use scandoc
-			DOCHTML="\$(SCANDOCHTML)"
-			DOCTEX="\$(SCANDOCTEX)"
+			DOCHTML="\$(PERL) \$(SCANDOCHTML)"
+			DOCTEX="\$(PERL) \$(SCANDOCTEX)"
 		fi
 	fi
 fi

@@ -733,15 +733,15 @@ fi
 
 
 
-echo $ac_n "checking "for debug"""... $ac_c" 1>&6
-echo "configure:738: checking "for debug"" >&5
-# Check whether --with-debug or --without-debug was given.
-if test "${with_debug+set}" = set; then
-  withval="$with_debug"
-  if test "x$with_debug" = xyes; then
-  ac_cv_use_debug='USE_EXPERIMENTAL="1"'
+echo $ac_n "checking "for experimental"""... $ac_c" 1>&6
+echo "configure:738: checking "for experimental"" >&5
+# Check whether --with-experimental or --without-experimental was given.
+if test "${with_experimental+set}" = set; then
+  withval="$with_experimental"
+  if test "x$with_experimental" = xyes; then
+  ac_cv_use_experimental='USE_EXPERIMENTAL="1"'
 else
-  ac_cv_use_debug='USE_EXPERIMENTAL="0"'
+  ac_cv_use_experimental='USE_EXPERIMENTAL="0"'
 fi
 else
   
@@ -749,12 +749,12 @@ else
   if test "x$LINE" != x ; then
     eval "DEFAULT_$LINE"
   fi
-  ac_cv_use_debug='USE_EXPERIMENTAL='$DEFAULT_USE_EXPERIMENTAL
+  ac_cv_use_experimental='USE_EXPERIMENTAL='$DEFAULT_USE_EXPERIMENTAL
 
 fi
 
-eval "$ac_cv_use_debug"
-echo $ac_cv_use_debug >> ${OSTYPE}.system.cache.tmp
+eval "$ac_cv_use_experimental"
+echo $ac_cv_use_experimental >> ${OSTYPE}.system.cache.tmp
 if test "$USE_EXPERIMENTAL" = 1; then
   echo "$ac_t""yes" 1>&6
 else
@@ -3724,6 +3724,38 @@ fi
 
 
 
+# Extract the first word of "perl", so it can be a program name with args.
+set dummy perl; ac_word=$2
+echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
+echo "configure:3731: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_path_PERL'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  case "$PERL" in
+  /*)
+  ac_cv_path_PERL="$PERL" # Let the user override the test with a path.
+  ;;
+  *)
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
+  for ac_dir in $PATH; do
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
+      ac_cv_path_PERL="$ac_dir/$ac_word"
+      break
+    fi
+  done
+  IFS="$ac_save_ifs"
+  ;;
+esac
+fi
+PERL="$ac_cv_path_PERL"
+if test -n "$PERL"; then
+  echo "$ac_t""$PERL" 1>&6
+else
+  echo "$ac_t""no" 1>&6
+fi
+
+
 DOCHTML="echo \"No doc generator(html) available.\""
 DOCTEX="echo \"No doc generator(tex) available.\""
 
@@ -3731,7 +3763,7 @@ DOCTEX="echo \"No doc generator(tex) available.\""
 # Extract the first word of "doc++", so it can be a program name with args.
 set dummy doc++; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3735: checking for $ac_word" >&5
+echo "configure:3767: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DOCXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3767,7 +3799,7 @@ else
 		# Extract the first word of "kdoc", so it can be a program name with args.
 set dummy kdoc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3771: checking for $ac_word" >&5
+echo "configure:3803: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_KDOC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3800,43 +3832,12 @@ fi
 		DOCHTML="\$(KDOCHTML)"
 		DOCTEX="\$(KDOCTEX)"
 	else
-				# Extract the first word of "perl", so it can be a program name with args.
-set dummy perl; ac_word=$2
-echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3807: checking for $ac_word" >&5
-if eval "test \"`echo '$''{'ac_cv_path_PERL'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  case "$PERL" in
-  /*)
-  ac_cv_path_PERL="$PERL" # Let the user override the test with a path.
-  ;;
-  *)
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
-  for ac_dir in $PATH; do
-    test -z "$ac_dir" && ac_dir=.
-    if test -f $ac_dir/$ac_word; then
-      ac_cv_path_PERL="$ac_dir/$ac_word"
-      break
-    fi
-  done
-  IFS="$ac_save_ifs"
-  ;;
-esac
-fi
-PERL="$ac_cv_path_PERL"
-if test -n "$PERL"; then
-  echo "$ac_t""$PERL" 1>&6
-else
-  echo "$ac_t""no" 1>&6
-fi
-
-		if test "x$PERL" = "x"
+				if test "x$PERL" = "x"
 		then
 			echo "configure: warning: "Cannot generate class documentation!"" 1>&2
 		else 
-						DOCHTML="\$(SCANDOCHTML)"
-			DOCTEX="\$(SCANDOCTEX)"
+						DOCHTML="\$(PERL) \$(SCANDOCHTML)"
+			DOCTEX="\$(PERL) \$(SCANDOCTEX)"
 		fi
 	fi
 fi
@@ -3847,7 +3848,7 @@ fi
 # Extract the first word of "latex", so it can be a program name with args.
 set dummy latex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3851: checking for $ac_word" >&5
+echo "configure:3852: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3878,7 +3879,7 @@ fi
 # Extract the first word of "makeindex", so it can be a program name with args.
 set dummy makeindex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3882: checking for $ac_word" >&5
+echo "configure:3883: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MAKEINDEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3909,7 +3910,7 @@ fi
 # Extract the first word of "dvips", so it can be a program name with args.
 set dummy dvips; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3913: checking for $ac_word" >&5
+echo "configure:3914: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DVIPS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3952,7 +3953,7 @@ LATEX2HTML="echo \"No doc generator(html) available.\""
 # Extract the first word of "latex2html", so it can be a program name with args.
 set dummy latex2html; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3956: checking for $ac_word" >&5
+echo "configure:3957: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX2HTML'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4164,9 +4165,9 @@ s%@X_PRE_LIBS@%$X_PRE_LIBS%g
 s%@X_LIBS@%$X_LIBS%g
 s%@X_EXTRA_LIBS@%$X_EXTRA_LIBS%g
 s%@CCOSTYPE@%$CCOSTYPE%g
+s%@PERL@%$PERL%g
 s%@DOCXX@%$DOCXX%g
 s%@KDOC@%$KDOC%g
-s%@PERL@%$PERL%g
 s%@DOCHTML@%$DOCHTML%g
 s%@DOCTEX@%$DOCTEX%g
 s%@LATEX@%$LATEX%g

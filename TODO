@@ -14,6 +14,11 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
+- do not redraw messageview if the message is the one currently being
+  shown
+- show status dialog while importing graphics into messageview
+- Fix occacions "Sequence invalid" (when marking/replying message) or
+  segfault in folder update code
 - add TO: field to folderview
 - speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to

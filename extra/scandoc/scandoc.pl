@@ -57,8 +57,14 @@ foreach $className (keys %subclasses) {
     my $class = &class_record( $className );
     
     if ($class) {
-#	print STDERR $className, " ", join( ',', @{$subclasses{ $className }} ), "\n";
-	$class->{ 'subs' } = $subclasses{ $className };
+      my @subs = ();
+      # print STDERR "$className ", join( ',', @{$subclasses{ $className }} ), "\n";
+      foreach $subName ($subclasses{ $className }) {
+	if (&class_record( $subName )) {
+	  push @subs, $subName;
+	}
+	$class->{ 'subs' } = @subs;
+      }
     }
 }
 
@@ -459,13 +465,14 @@ sub parse_declaration {
 	    }
  
 	    my $fullName = "$baseScope$className$tmplParams";
-#	    print STDERR "CLASS $fullName";
+	    # print STDERR "CLASS $fullName\n";
 			
 	    my @bases = ();
 
 	    if (&matchColon) {
 		
 		for (;;) {
+		    my $p;
 		    &matchKW( "virtual" );
 		    $perm = "private";
 		    if ($p = &matchKW( "public|private|protected" )) { $perm = $p; }
@@ -475,7 +482,7 @@ sub parse_declaration {
 					
 		    push @bases, $base;
 		    push @{ $subclasses{ $base } }, $fullName;
-		    # print STDERR " : $perm $base";
+		    # print STDERR " : $perm $base\n";
 		    last if !&matchComma;
 		}
 	    }
@@ -513,6 +520,7 @@ sub parse_declaration {
 
 		while (!&matchLBracket)
 		{
+		    my $p;
 		    if ($p = &matchKW( "public\:|private\:|protected\:" ))
 		    {
 			$perm = $p;
@@ -611,7 +619,7 @@ sub parse_declaration {
 			last if !$nest;
 			$args .= ")";
 		    }
-		    elsif ($d = &matchKW( "[\,\=\.\:]" )) { $args .= $d; }
+		    elsif ($d = &matchKW( "[\,\=\.\:\-]" )) { $args .= $d; }
 		    elsif ($d = &matchDecl) { $args .= $d; }
 		    elsif ($d = &matchAngleArgs) { $args .= $d; }
 		    elsif ($d = &matchString) { $args .= "\"$d\""; }
@@ -912,7 +920,7 @@ sub package_url {
 # Get the see-also list for an object
 sub get_seealso_list {
     my $self = shift;
-    my $see, $name, $url, @r = (), $_;
+    my $see, $name, $url, $p, @r = (), $_;
 
     foreach $_ (split(/\n/,$self->{ 'see' })) {
        

@@ -42,6 +42,7 @@ DVIPS=@DVIPS@
 LATEX2HTML=@LATEX2HTML@ -local_icons
 XGETTEXT=@XGETTEXT@
 MSGFMT=@MSGFMT@
+PERL=@PERL@
 
 # compiler stuff
 CC = @CC@
