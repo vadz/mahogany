@@ -350,6 +350,8 @@ MAppBase::OnStartup()
          GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
    }
 #endif
+   // cause it to re-read our global dir
+   GetIconManager()->SetSubDirectory("");
 
    // show the splash screen (do it as soon as we have profile to read
    // MP_SHOWSPLASH from)
