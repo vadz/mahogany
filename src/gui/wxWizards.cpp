@@ -21,14 +21,22 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include "Mcommon.h"
-#   include "strutil.h"
-#   include "Mdefaults.h"
-#   include "MApplication.h"
-#   include "guidef.h"
-#   include "gui/wxIconManager.h"
+   #include "Mcommon.h"
+   #include "strutil.h"
+   #include "Mdefaults.h"
+   #include "MApplication.h"
+   #include "guidef.h"
+   #include "gui/wxIconManager.h"
 
-#   include <wx/stattext.h>        // for wxStaticText
+   // under Mac it may happen that wx is built with PCH but we -- without and
+   // hence don't include wx/wxprec.h while wx/wizard.h relies on it being
+   // included when WX_PRECOMP is on
+   #ifdef WX_PRECOMP
+      #include "wx/dialog.h"
+      #include "wx/panel.h"
+   #endif
+
+   #include <wx/stattext.h>        // for wxStaticText
 #endif // USE_PCH
 
 #include "Mpers.h"
