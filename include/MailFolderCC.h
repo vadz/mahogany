@@ -169,8 +169,17 @@ public:
    virtual bool SetSequenceFlag(String const &sequence,
                                 int flag,
                                 bool set = true);
+   /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
+       @param sequence the IMAP sequence of uids
+       @param flag flag to be set, e.g. "\\Deleted"
+       @param set if true, set the flag, if false, clear it
+       @return true on success
+   */
+   virtual bool SetFlag(const INTARRAY *sequence,
+                        int flag,
+                        bool set = true);
 
-  /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
+   /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
        @param uid mesage uid
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it

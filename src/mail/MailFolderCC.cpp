@@ -716,6 +716,19 @@ MailFolderCC::SetMessageFlag(unsigned long uid,
    return true; /* not supported by c-client */
 }
 
+bool
+MailFolderCC::SetFlag(const INTARRAY *selections, int flag, bool set)
+{
+   int n = selections->Count();
+   int i;
+   String sequence;
+   for(i = 0; i < n-1; i++)
+      sequence << strutil_ultoa((*selections)[i]) << ',';
+   if(n)
+      sequence << strutil_ultoa((*selections)[n-1]);
+   return SetSequenceFlag(sequence, flag, set);
+}
+
 void
 MailFolderCC::ExpungeMessages(void)
 {

@@ -37,7 +37,7 @@
 #include <wx/notebook.h>
 #include <wx/menuitem.h>
 #include <wx/checklst.h>
-
+#include <wx/utils.h>  // wxMax()
 #include <wx/persctrl.h>
 
 #include "Mdefaults.h"

@@ -280,7 +280,7 @@ private:
 
    FunctionPointer m_function;
    ArgList *m_args;
-   String      m_name;
+   String  m_name;
    static FunctionDefinition ms_Functions[];
 };
 
@@ -544,7 +544,7 @@ ParserImpl::ParseFunctionCall(void)
    Token t = GetToken();
    ASSERT(t.GetType() == TT_Identifier);
 
-   const String & functionName = t.GetIdentifier();
+   String functionName = t.GetIdentifier();
    
    // Need to swallow argument list?
    t = PeekToken();
@@ -604,24 +604,32 @@ ParserImpl::ParseExpression(void)
 {
    MOcheck();
    /* Expression :=
-        | FunctonOrConstant
-        | ( Expression )
-        | Expression LogicalOperator Expression
+      | FunctionOrConstant   
+      | ( Expression )
+      | Expression LogicalOperator Expression
    */
    SyntaxNode *sn = NULL;
-   bool needParan = false;
    
    Token t = PeekToken();
-   if(t.GetType() == TT_Char)
+   
+   /* First case, expression in brackets: */
+   if(t.GetType() == TT_Char && t.GetChar() == '(')
    {
-      if(t.GetChar() == '(')
+      t = GetToken();
+      sn = ParseExpression();
+      t = PeekToken();
+      if(t.GetType() == TT_Char && t.GetChar() == ')')
+         GetToken();
+      else
       {
-         needParan = true;
-         t = GetToken();
+         if(sn) delete sn;
+         Error("Expected ')' after expression.");
+         return NULL;
       }
    }
-
-   sn = ParseFunctionOrConstant();
+   else
+      /* Either a FunctionOrConstant or an Expression: */
+      sn = ParseFunctionOrConstant();
    
    t = PeekToken();
    if(t.GetType() == TT_Char)
@@ -644,18 +652,7 @@ ParserImpl::ParseExpression(void)
       case ';':
          GetToken(); sn = new Expression(sn, new OperatorNone, ParseExpression());break;
       case ')':
-         if(needParan)
-         {
-            Token t = PeekToken();
-            if(t.GetType() == TT_Char && t.GetChar() == ')')
-               GetToken();
-            else
-            {
-               Error("   ')' needed after expression.");
-               if(sn) delete sn;
-               return NULL;
-            }
-         }
+         return sn;
          break;
       default:
          Error("Unexpected character.");
@@ -709,7 +706,7 @@ Condition::Create(Token &token, Parser &p)
 
 /** FOR TESTING ONLY, called from MAppBase::OnStartup(): **/
 
-static const char *testprogram = " 5 + 4 * ( 3 * 4 ) + print() ";
+static const char *testprogram = " 5 + 4 * ( 3 * 4 ) + 5 * print() ";
 
 void FilterTest(void)
 {

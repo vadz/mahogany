@@ -18,7 +18,6 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-#include "MObject.h"
 
 #include <wx/dynlib.h>
 // ----------------------------------------------------------------------------
@@ -28,8 +27,17 @@
 /**@name Mahogany Module management classes. */
 //@{
 
+/// Error values returned when loading
+enum MModule_Errors
+{
+   /// no error
+   MMODULE_ERR_NONE = 0,
+   /// incompatible versions
+   MMODULE_ERR_INCOMPATIBLE_VERSIONS
+};
+
 /**
-   This is the interface that every MModule must implement.
+   This is the interface for Mahogany extension modules.
 */
 class MModule : public MObjectRC
 {
@@ -42,30 +50,52 @@ public:
    static MModule * LoadModule(const String & name);
 
    /// Returns the Module's name as used in LoadModule().
-   virtual const char * GetName(void) const = 0;
+   virtual const char * GetName(void) = 0;
    /// Returns a brief description of the module.
-   virtual const char * GetDescription(void) const = 0;
+   virtual const char * GetDescription(void) = 0;
    /// Returns a textual representation of the particular version of the module.
-   virtual const char * GetVersion(void) const = 0;
+   virtual const char * GetVersion(void) = 0;
    /// Returns the Mahogany version this module was compiled for.
    virtual void GetMVersion(int *version_major, int *version_minor,
-                            int *version_release) const = 0;
+                            int *version_release) = 0;
 };
 
-/** Function type for CreateModule() function.
-    Each module DLL must implement a function CreateMModule of this
-    type which will be called to initialise it. That function must
-    @param version_major major version number of Mahogany 
-    @param version_minor minor version number of Mahogany 
-    @param version_release release version number of Mahogany 
-    @return NULL if it could not initialise the module.
-*/
+/** @name This is the API that each MModule shared lib must
+    implement. */
+//@{
 extern "C"
 {
-   typedef class MModule * (* CreateModuleFuncType) (int version_major,
-                                                     int version_minor,
-                                                     int version_release);
-};
+   /** Function type for InitModule() function.
+       Each module DLL must implement a function CreateMModule of this
+       type which will be called to initialise it. That function must
+       @param version_major major version number of Mahogany 
+       @param version_minor minor version number of Mahogany 
+       @param version_release release version number of Mahogany 
+       @return 0 if it initialise the module, errno otherwise
+   */
+   typedef int (* MModule_InitModuleFuncType) (int version_major,
+                                               int version_minor,
+                                               int version_release);
+   /** Function type for GetName() function.
+       @return pointer to a static buffer with the module name
+   */
+   typedef const char  * (* MModule_GetNameFuncType ) (void);
+   /** Function type for GetDescription() function.
+       @return pointer to a static buffer with the module description
+   */
+   typedef const char  * (* MModule_GetDescriptionFuncType ) (void);
+   /** Function type for GetVersion() function.
+       @return pointer to a static buffer with the module description
+   */
+   typedef const char  * (* MModule_GetVersionFuncType ) (void);
+   /** Function type for GetMVersion() function.
+       @return pointer to a static buffer with the module description
+   */
+   typedef const char  * (* MModule_GetMVersionFuncType )
+      (int *version_major, int *version_minor,
+       int *version_release);
+}
+//@}
 
 /** Function to resolve main program symbols from modules.
  */
@@ -80,7 +110,7 @@ extern "C"
 /** Test whether version_xxx is identical to the one a module is
     compiled for.
     The two macros require the version parameters to be names as in
-    the prototype for CreateMModule.
+    the prototype for InitMModule.
 */
 #define MMODULE_SAME_VERSION() (version_major == M_VERSION_MAJOR && \
                                 version_minor == M_VERSION_MINOR && \

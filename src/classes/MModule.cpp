@@ -31,6 +31,72 @@ struct ModuleEntry
    MModule *m_Module;
 };
 
+
+class MModuleImpl : public MModule
+{
+public:
+   /// Create an MModuleImpl from a Dll handle
+   static MModule *Create(wxDllType);
+   
+   /// Returns the Module's name as used in LoadModule().
+   virtual const char * GetName(void)
+      { return (*m_GetName)(); }
+   /// Returns a brief description of the module.
+   virtual const char * GetDescription(void)
+      { return (*m_GetDescription)(); }
+   /// Returns a textual representation of the particular version of the module.
+   virtual const char * GetVersion(void)
+      { return (*m_GetVersion)(); }
+   /// Returns the Mahogany version this module was compiled for.
+   virtual void GetMVersion(int *version_major, int *version_minor,
+                            int *version_release)
+      {
+         (*m_GetMVersion)(version_major, version_minor, version_release);
+      }
+
+private:
+   MModuleImpl(wxDllType dll);
+private:
+   MModule_GetNameFuncType m_GetName;
+   MModule_GetDescriptionFuncType m_GetDescription;
+   MModule_GetVersionFuncType m_GetVersion;
+   MModule_GetMVersionFuncType m_GetMVersion;
+};
+
+
+MModule *
+MModuleImpl::Create(wxDllType dll)
+{
+   MModule_InitModuleFuncType
+      initModuleFunc = (MModule_InitModuleFuncType)
+      wxDllLoader::GetSymbol(dll, "InitMModule"); 
+   if(! initModuleFunc)
+   {
+      //FIXME unload the DLL
+      return NULL;
+   }
+   if( (*initModuleFunc)(M_VERSION_MAJOR,
+                         M_VERSION_MINOR,
+                         M_VERSION_RELEASE) == MMODULE_ERR_NONE)
+   {
+      return new MModuleImpl(dll);
+   }
+   else
+      return NULL;
+}
+
+MModuleImpl::MModuleImpl(wxDllType dll)
+{
+   m_GetName = (MModule_GetNameFuncType)
+      wxDllLoader::GetSymbol(dll, "GetName"); ;
+   m_GetDescription  = (MModule_GetDescriptionFuncType)
+      wxDllLoader::GetSymbol(dll, "GetDescription"); 
+   m_GetVersion = (MModule_GetVersionFuncType)
+      wxDllLoader::GetSymbol(dll, "GetVersion"); 
+   m_GetMVersion = (MModule_GetMVersionFuncType)
+      wxDllLoader::GetSymbol(dll, "GetMVersion"); 
+}
+
 /// A list of all loaded modules.
 KBLIST_DEFINE(ModuleList, ModuleEntry);
 
@@ -70,19 +136,8 @@ MModule::LoadModule(const String & name)
       bool success = false;
       wxDllType dll = wxDllLoader::LoadLibrary(name, &success);
       if(! success) return NULL;
-      
-      CreateModuleFuncType
-         createModuleFunc = (CreateModuleFuncType)
-         wxDllLoader::GetSymbol(dll, "CreateMModule"); 
-      if(! createModuleFunc)
-      {
-         //FIXME unload the DLL
-         return NULL;
-      }
-      
-      module = createModuleFunc(M_VERSION_MAJOR,
-                                M_VERSION_MINOR,
-                                M_VERSION_RELEASE);
+
+      module = MModuleImpl::Create(dll);
       if(module)
       {
          ModuleEntry *me = new ModuleEntry;
@@ -90,6 +145,8 @@ MModule::LoadModule(const String & name)
          me->m_Module = module;
          gs_ModuleList.push_back(module);
       }
+      else
+         wxDllLoader::UnloadLibrary(dll);
       return module;
    }
 }

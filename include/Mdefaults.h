@@ -206,6 +206,9 @@
 #define   MP_PREVIEW_ON_SELECT     "PreviewOnSelect"
 /// program used to convert image files?
 #define   MP_CONVERTPROGRAM      "ImageConverter"
+/// list of modules to load at startup
+#define MP_MODULES               "Modules"
+
 /**@name Printer settings */
 //@{
 /// Command
@@ -582,6 +585,8 @@
 #define   MP_PREVIEW_ON_SELECT_D     1l
 /// program used to convert image files?
 #define   MP_CONVERTPROGRAM_D      "convert %s -compress None %s"
+/// list of modules to load at startup
+#define MP_MODULES_D   ""
 /**@name Printer settings */
 //@{
 /// Command

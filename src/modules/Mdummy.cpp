@@ -17,74 +17,75 @@
 
 #include "MDialogs.h"
 
-class DummyModule : public MModule
-{
-public:
-   static MModule *Create(void);
 
-   /// Returns the Module's name as used in LoadModule().
-   virtual const char * GetName(void) const;
-   /// Returns a brief description of the module.
-   virtual const char * GetDescription(void) const;
-   /// Returns a textual representation of the particular version of the module.
-   virtual const char * GetVersion(void) const;
-   /// Returns the Mahogany version this module was compiled for.
-   virtual void GetMVersion(int *version_major, int *version_minor,
-                            int *version_release) const;
-private:
-   DummyModule();
-};
+void DummyFunc(void);
 
 ///------------------------------
 /// MModule interface:
 ///------------------------------
 
-const char *
-DummyModule::GetName(void) const
+extern "C"
 {
-   return "DummyModule";
-}
+   int InitMModule(int version_major,
+                   int version_minor,
+                   int version_release)
+   {
+      /* This test is done here rather than in the MModule.cpp loading 
+         code, as a module can be more flexible in accepting certain
+         versions as compatible than Mahogany.
+         I.e. the module knows Mahogany, but Mahogany doesn't
+         necesarily know the module.
+      */
+      if(! MMODULE_VERSION_COMPATIBLE() )
+         return MMODULE_ERR_INCOMPATIBLE_VERSIONS;
 
-const char *
-DummyModule::GetDescription(void) const
-{
-   return "A simple demonstration of Mahogany's plugin modules.";
-}
 
-const char *
-DummyModule::GetVersion(void) const
-{
-   return "0.00";
-}
+      // Call own initialisation functions here.
+      DummyFunc();
+      
+      return MMODULE_ERR_NONE;;
+   }
 
-void
-DummyModule::GetMVersion(int *version_major, int *version_minor,
-                         int *version_release) const
-{
-   ASSERT(version_major);
-   ASSERT(version_minor);
-   ASSERT(version_release);
-   *version_major = M_VERSION_MAJOR;
-   *version_minor = M_VERSION_MINOR;
-   *version_release = M_VERSION_RELEASE;
-}
+   const char *
+   GetName(void)
+   {
+      return "DummyModule";
+   }
+
+   const char *
+   GetDescription(void)
+   {
+      return "A simple demonstration of Mahogany's plugin modules.";
+   }
+
+   const char *
+   GetVersion(void)
+   {
+      return "0.00";
+   }
+
+   void
+   GetMVersion(int *version_major, int *version_minor,
+               int *version_release)
+   {
+      ASSERT(version_major);
+      ASSERT(version_minor);
+      ASSERT(version_release);
+      *version_major = M_VERSION_MAJOR;
+      *version_minor = M_VERSION_MINOR;
+      *version_release = M_VERSION_RELEASE;
+   }
+} // extern "C"
+
+
 
 ///------------------------------
 /// Own functionality:
 ///------------------------------
 
-DummyModule::DummyModule(void)
+void
+DummyFunc(void)
 {
-/*
-   FIXME:
-   This currently does not work, as we cannot access symbols
-   inside the main executable. So I will split the main program
-   up into a tiny "dummy" executable and a large shared library,
-   against which we will link this module, too. That should do the
-   trick.
-   Though, I'm still trying to find a more intelligent solution...
-*/
-
    typedef void (*FptrT)(const char *msg, void *dummy, const char *title);
 
    FptrT fptr = (FptrT) MModule_GetSymbol("MDialog_Message");
@@ -98,32 +99,3 @@ DummyModule::DummyModule(void)
       "Welcome from DummyModule!");
 
 }
-
-///------------------------------
-/// Loader functions:
-///------------------------------
-
-/* static */
-MModule *DummyModule::Create(void)
-{
-   return new DummyModule();
-}
-
-
-extern "C"
-{
-   MModule * CreateMModule(int version_major,
-                           int version_minor,
-                           int version_release)
-   {
-      /* This test is done here rather than in the MModule.cpp loading 
-         code, as a module can be more flexible in accepting certain
-         versions as compatible than Mahogany.
-         I.e. the module knows Mahogany, but Mahogany doesn't
-         necesarily know the module.
-      */
-      if(! MMODULE_VERSION_COMPATIBLE() )
-         return NULL;
-      return DummyModule::Create();
-   }
-};

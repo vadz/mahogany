@@ -70,6 +70,11 @@ public:
    /// get the page setup data
    wxPageSetupData * GetPageSetupData(void) { return m_PageSetupData; }
 
+protected:
+   /// Load modules at startup
+   void LoadModules(void);
+   /// Unload modules loaded at startup
+   void UnloadModules(void);
 private:
    // implement base class pure virtual
    virtual void DoExit();

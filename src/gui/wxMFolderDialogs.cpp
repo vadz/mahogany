@@ -1011,7 +1011,9 @@ wxFolderPropertiesPage::SetDefaultValues()
             case IMAP:
                value = READ_CONFIG(profile, MP_IMAPHOST);
                break;
-         }
+         default:
+            ; // suppress warnings
+            break;}
       }
 
       if ( !value )

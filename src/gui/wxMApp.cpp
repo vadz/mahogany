@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * wxMApp class: do all GUI specific  application stuff             *
  *                                                                  *
- * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
- * $Id$                *
+ * $Id$
  *
  *******************************************************************/
 
@@ -21,7 +21,7 @@
 #  include "guidef.h"
 #  include "MFrame.h"
 #  include "gui/wxMFrame.h"
-
+#  include "strutil.h"
 #  include "kbList.h"
 #  include "PathFinder.h"
 #  include "MimeList.h"
@@ -52,9 +52,10 @@
 #include "gui/wxMainFrame.h"
 #include "gui/wxIconManager.h"
 #include "MailCollector.h"
+#include "MModule.h"
 
 #ifdef OS_WIN
-   #include <winnls.h>
+#   include <winnls.h>
 #endif
 
 // ----------------------------------------------------------------------------
@@ -132,6 +133,17 @@ public:
 static AutoSaveTimer gs_timerAutoSave;
 // a (unique) timer for polling for new mail
 static MailCollectionTimer gs_timerMailCollection;
+
+
+struct MModuleEntry
+{
+   MModuleEntry(MModule *m) { m_Module = m; }
+   MModule *m_Module;
+};
+
+KBLIST_DEFINE(ModulesList, MModuleEntry);
+// a list of modules loaded at startup:
+static ModulesList gs_GlobalModulesList;
 
 // this creates the one and only application object
 IMPLEMENT_APP(wxMApp);
@@ -487,6 +499,9 @@ wxMApp::OnInit()
       // restore the normal behaviour (see the comments above)
       SetExitOnFrameDelete(TRUE);
 
+      /// Load any modules requested.
+      LoadModules();
+
       return true;
    }
    else
@@ -532,6 +547,7 @@ int wxMApp::OnExit()
    delete m_PrintData;
    delete m_PageSetupData;
 
+   UnloadModules();
    MAppBase::OnShutDown();
 
    delete m_IconManager;
@@ -624,6 +640,75 @@ wxMApp::Help(int id, wxWindow *parent)
       }
       break;
    }
+}
+
+void
+wxMApp::LoadModules(void)
+{
+   wxString
+      pathname,
+      globalDir,
+      localDir;
+   char *modulestring;
+   kbStringList modules;
+   kbStringList::iterator i;
+   MModule *module;
+
+#if defined( OS_WIN )
+   const wxString moduleExt = ".dll";
+#elif defined( OS_UNIX )
+   const wxString moduleExt = ".so" ;
+#else
+#   error   "No DLL extension known on this platform."
+#endif
+      
+   modulestring = strutil_strdup(READ_APPCONFIG(MP_MODULES));
+   strutil_tokenise(modulestring, ":", modules);
+   delete [] modulestring;
+   
+   globalDir = GetGlobalDir();
+   globalDir << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+   localDir = GetLocalDir();
+   localDir << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+   
+   for(i = modules.begin(); i != modules.end(); i++)
+   {
+      pathname = globalDir + **i + moduleExt;
+      module = NULL;
+      if(wxFileExists(pathname))
+         module = MModule::LoadModule(pathname);
+      else
+      {
+         pathname = localDir + **i + moduleExt; 
+         if(wxFileExists(pathname))
+            module = MModule::LoadModule(pathname);
+      }
+      if(module == NULL)
+         ERRORMESSAGE((_("Cannot load module '%s'."),
+                       (**i).c_str()));
+      else
+      {
+         // remember it so we can decref it before exiting
+         gs_GlobalModulesList.push_back(new MModuleEntry(module));
+#ifdef DEBUG
+         INFOMESSAGE(("Successfully loaded module:\nName: %s\nDescr: %s\nVersion: %s\n",
+                   module->GetName(),
+                   module->GetDescription(),
+                   module->GetVersion()));
+         
+#endif
+      }
+   }
+}
+
+void
+wxMApp::UnloadModules(void)
+{
+   ModulesList::iterator i;
+   for(i = gs_GlobalModulesList.begin();
+       i != gs_GlobalModulesList.end();
+       i++)
+      (**i).m_Module->DecRef();
 }
 
 // ----------------------------------------------------------------------------

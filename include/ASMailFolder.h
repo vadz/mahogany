@@ -30,6 +30,7 @@ class FolderView;
 class ProfileBase;
 class INTARRAY;
 class MWindow;
+class MailFolder;
 
 #include "Message.h"
 //class Message;
@@ -102,8 +103,9 @@ public:
       Op_UnDeleteMessages,
       Op_SaveMessages,
       Op_SaveMessagesToFolder,
-      Op_SaveMessagesToFile
-      
+      Op_SaveMessagesToFile,
+      Op_ReplyMessages,
+      Op_ForwardMessages
    };
     /** A structure containing the return values from an operation.
         This will get passed in an MEvent to notify other parts of the
@@ -114,8 +116,6 @@ public:
    public:
       /// Returns the user data.
       virtual UserData GetUserData(void) const = 0;
-      /// Returns the ticket id.
-      virtual Ticket GetTicket(void) const = 0;
       /** Returns a pointer to the ASMailFolder from which this
           event originated.
       */
@@ -207,7 +207,6 @@ public:
 
    static ASMailFolder * Create(MailFolder *mf);
 
-   
    /**@name Asynchronous Access Functions, returning results in events.*/
    //@{
    /** Check whether mailbox has changed.
@@ -217,12 +216,12 @@ public:
    /** Delete a message.
        @param uid the message uid
    */
-   virtual void DeleteMessage(unsigned long uid) = 0;
+   virtual Ticket DeleteMessage(unsigned long uid) = 0;
 
    /** UnDelete a message.
        @param uid the message uid
    */
-   virtual void UnDeleteMessage(unsigned long uid) = 0;
+   virtual Ticket UnDeleteMessage(unsigned long uid) = 0;
 
    /** get the message with unique id uid
        @param uid message uid
@@ -243,14 +242,14 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual void SetSequenceFlag(const String &sequence,
+   virtual Ticket SetSequenceFlag(const String &sequence,
                                 int flag,
                                 bool set = true) = 0;
    /** Appends the message to this folder.
        @param msg the message to append
        @return ResultInt with boolean success value
    */
-   virtual Ticket AppendMessage( /* const */ Message *msg, UserData ud = 0) = 0;
+   virtual Ticket AppendMessage(const Message *msg, UserData ud = 0) = 0;
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
@@ -260,7 +259,7 @@ public:
 
    /** Expunge messages.
      */
-   virtual void ExpungeMessages(void) = 0;
+   virtual Ticket ExpungeMessages(void) = 0;
 
    
 
@@ -318,18 +317,20 @@ public:
        @param parent window for dialog
        @param profile pointer for environment
    */
-   virtual void ReplyMessages(const INTARRAY *messages,
-                      MWindow *parent = NULL,
-                      ProfileBase *profile = NULL) = 0;
+   virtual Ticket ReplyMessages(const INTARRAY *messages,
+                                MWindow *parent = NULL,
+                                ProfileBase *profile = NULL,
+                                UserData ud = 0) = 0;
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
        @param profile pointer for environment
    */
-   virtual void ForwardMessages(const INTARRAY *messages,
-                                MWindow *parent = NULL,
-                                ProfileBase *profile = NULL) = 0;
+   virtual Ticket ForwardMessages(const INTARRAY *messages,
+                                  MWindow *parent = NULL,
+                                  ProfileBase *profile = NULL,
+                                  UserData ud = 0) = 0;
 
    //@}   
    //@}
@@ -385,7 +386,16 @@ public:
    virtual void SetRetrievalLimit(unsigned long nmax) = 0;
    /// Set update interval in seconds, 0 to disable
    virtual void SetUpdateInterval(int secs) = 0;
+   /// Returns the underlying MailFolder object.
+   virtual MailFolder *GetMailFolder(void) const = 0;
    //@}
+
+   /**@name Function for access control and event handling. */
+   //@{
+   virtual void LockFolder(void) = 0;
+   virtual void UnLockFolder(void) = 0;
+   //@}
+
 };
 
 #endif
