@@ -113,7 +113,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(WXWIN)\debug\wxWindows.lib $(WXWIN)\src\xpm\debug\xpm.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 $(WXWIN)\lib\wxmsw233d.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(WXWIN)\DebugDll\wxWinDll.lib $(WXWIN)\src\xpm\debug\xpm.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib src\wx\vcard\debug\versit.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib"
+# ADD LINK32 $(WXWIN)\lib\wxmsw240d.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(WXWIN)\DebugDll\wxWinDll.lib $(WXWIN)\src\xpm\debug\xpm.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib src\wx\vcard\debug\versit.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
@@ -141,7 +141,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 extra\src\c-client\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib /nologo /subsystem:windows /machine:I386
 # SUBTRACT BASE LINK32 /debug
-# ADD LINK32 $(WXWIN)\lib\wxmsw233.lib extra\src\c-client\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib /nologo /subsystem:windows /machine:I386 /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib"
+# ADD LINK32 $(WXWIN)\lib\wxmsw240.lib extra\src\c-client\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib /nologo /subsystem:windows /machine:I386 /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib"
 # SUBTRACT LINK32 /debug
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
@@ -254,6 +254,10 @@ SOURCE=.\src\classes\Mpers.cpp
 # Begin Source File
 
 SOURCE=.\src\classes\PathFinder.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\classes\PGPClickInfo.cpp
 # End Source File
 # Begin Source File
 
