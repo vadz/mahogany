@@ -29,6 +29,8 @@
 #   include "MApplication.h"
 #   include "strutil.h"
 #   include "kbList.h"
+
+#   include "Mdefaults.h"
 #endif // USE_PCH
 
 #include "modules/Filters.h"    // for FilterRule
