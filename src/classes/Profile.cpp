@@ -835,11 +835,17 @@ ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent)
    m_Suspended = 0;
    m_Identity = NULL;
 
+#if 0
+   /* I want to see if it doesn't behave better like this: If we don't set 
+      an identity per profile by default, then the global identity is always
+      used unless overridden by folder settings or a locally set identity.
+   */
    String id = readEntry(MP_PROFILE_IDENTITY, MP_PROFILE_IDENTITY_D);
    if ( !id && mApplication->GetProfile() )
       id = READ_APPCONFIG(MP_CURRENT_IDENTITY);
    if ( !!id )
       SetIdentity(id);
+#endif
 }
 
 
