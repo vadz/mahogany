@@ -80,8 +80,8 @@ VC++ 6 but can be imported without problems in VC++ 7.x) in PCbuild
 subdirectory and add the path to include subdirectory to your global VC++
 settings.
 
-   Otherwise you may set USE_PYTHON to 0 in include/config_nt.h to disable
-embedded Python.
+   Otherwise you may simply remove or comment out the line #defining USE_PYTHON
+in include/config_nt.h to disable embedded Python.
 
 
 d) Build process
