@@ -36,19 +36,7 @@
    #endif // USE_PYTHON_DYNAMIC
 #endif // OS_WIN
 
-// Python.h detects _DEBUG setting and changes its behaviour depending on this,
-// we don't want this to happen as we don't need to debug Python code
-#ifdef _DEBUG
-   #undef _DEBUG
-   #define _DEBUG_WAS_DEFINED
-#endif
-
 #include <Python.h>
-
-#ifdef _DEBUG_WAS_DEFINED
-   #undef _DEBUG_WAS_DEFINED
-   #define _DEBUG
-#endif
 
 #ifdef USE_PYTHON_DYNAMIC
 
@@ -91,6 +79,15 @@ extern "C"
    // longs
    extern PyTypeObject *M_PyLong_Type;
 
+   // strings
+   extern char *(*M_PyString_AsString)(PyObject *);
+   extern int (*M_PyString_AsStringAndSize)(PyObject *, char **, int *);
+   extern PyObject *(*M_PyString_FromString)(const char *);
+   extern PyObject *(*M_PyString_FromStringAndSize)(const char *, int);
+   extern PyObject *(*M_PyString_InternFromString)(const char *);
+   extern int (*M_PyString_Size)(PyObject *);
+   extern PyTypeObject* M_PyString_Type;
+
    // tuples
    extern PyObject *(*M_PyTuple_GetItem)(PyObject *, int);
 
@@ -110,11 +107,6 @@ extern "C"
    extern PyObject*(*M_PyImport_ImportModule)(const char *);
    extern PyObject*(*M_PyDict_GetItemString)(PyObject *, const char *);
    extern PyObject*(*M_PyModule_GetDict)(PyObject *);
-   extern char*(*M_PyString_AsString)(PyObject *);
-   extern PyObject*(*M_PyString_FromString)(const char *);
-   extern PyObject*(*M_PyString_FromStringAndSize)(const char *, int);
-   extern int(*M_PyString_Size)(PyObject *);
-   extern PyTypeObject* M_PyString_Type;
    extern int(*M_PySys_SetObject)(char *, PyObject *);
    extern PyTypeObject* M_PyType_Type;
    extern PyObject*(*M_Py_BuildValue)(char *, ...);
@@ -127,7 +119,6 @@ extern "C"
    extern PyObject *(*M_PyImport_GetModuleDict)(void);
    extern PyObject *(*M_PyImport_ReloadModule)(PyObject *);
    extern PyObject *(*M_PyRun_String)(const char *, int, PyObject *, PyObject *);
-   extern PyObject *(*M_PyString_InternFromString)(const char *);
 
    extern int (*M_PyType_IsSubtype)(PyTypeObject *, PyTypeObject *);
    extern void (*M__Py_NegativeRefcount)(const char *fname, int lineno, PyObject *op);
@@ -157,7 +148,11 @@ extern "C"
 #define PyObject_CallObject M_PyObject_CallObject
 #define PyObject_GetAttr M_PyObject_GetAttr
 #define PyObject_GetAttrString M_PyObject_GetAttrString
-#define PyObject_Malloc M_PyObject_Malloc
+#if defined(WITH_PYMALLOC) && defined(PYMALLOC_DEBUG)
+   #define _PyObject_DebugMalloc M_PyObject_Malloc
+#else
+   #define PyObject_Malloc M_PyObject_Malloc
+#endif
 #define PyObject_SetAttrString M_PyObject_SetAttrString
 #define PyObject_Size M_PyObject_Size
 
@@ -168,6 +163,14 @@ extern "C"
 
 // longs
 #define PyLong_Type (*M_PyLong_Type)
+
+// strings
+#define PyString_AsString M_PyString_AsString
+#define PyString_AsStringAndSize M_PyString_AsStringAndSize
+#define PyString_FromString M_PyString_FromString
+#define PyString_FromStringAndSize M_PyString_FromStringAndSize
+#define PyString_InternFromString M_PyString_InternFromString
+#define PyString_Type (*M_PyString_Type)
 
 // tuples
 #define PyTuple_GetItem M_PyTuple_GetItem
@@ -185,9 +188,6 @@ extern "C"
 #define PyDict_SetItemString M_PyDict_SetItemString
 #define PyImport_ImportModule M_PyImport_ImportModule
 #define PyModule_GetDict M_PyModule_GetDict
-#define PyString_AsString M_PyString_AsString
-#define PyString_FromString M_PyString_FromString
-#define PyString_Type (*M_PyString_Type)
 #define PyType_Type (*M_PyType_Type)
 #define PyEval_CallObjectWithKeywords M_PyEval_CallObjectWithKeywords
 #define PyExc_NameError M_PyExc_NameError
@@ -197,7 +197,6 @@ extern "C"
 #define PyImport_GetModuleDict M_PyImport_GetModuleDict
 #define PyImport_ReloadModule M_PyImport_ReloadModule
 #define PyRun_String M_PyRun_String
-#define PyString_InternFromString M_PyString_InternFromString
 
 // Python 2.3+
 #define PyType_IsSubtype M_PyType_IsSubtype
