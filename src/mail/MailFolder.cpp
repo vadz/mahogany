@@ -1776,29 +1776,29 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
       MFolder_obj folder(GetName());
       wxArrayString filters = folder->GetFilters();
       size_t count = filters.GetCount();
+      
       for ( size_t n = 0; n < count; n++ )
       {
          MFilter_obj filter(filters[n]);
          MFilterDesc fd = filter->GetDesc();
-         filterString = fd.GetRule();
-
-         FilterRule * filterRule = filterModule->GetFilter(filterString);
-         if ( filterRule )
-         {
-            wxLogVerbose("Applying filter rule '%s'", fd.GetName().c_str());
-
-            // This might change the folder contents, so we must set this
-            // flag:
-            m_FiltersCausedChange = true;
-            if(msgs)
-               rc = filterRule->Apply(this, *msgs);
-            else
-               rc = filterRule->Apply(this, newOnly);
-
-            filterRule->DecRef();
-         }
+         wxLogVerbose("Using filter rule '%s'", fd.GetName().c_str());
+         filterString += fd.GetRule();
       }
-
+      
+      FilterRule * filterRule = filterModule->GetFilter(filterString);
+      if ( filterRule )
+      {
+         
+         // This might change the folder contents, so we must set this
+         // flag:
+         m_FiltersCausedChange = true;
+         if(msgs)
+            rc = filterRule->Apply(this, *msgs);
+         else
+            rc = filterRule->Apply(this, newOnly);
+         
+         filterRule->DecRef();
+      }
       filterModule->DecRef();
 
       return rc;
