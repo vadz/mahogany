@@ -401,6 +401,7 @@ SendMessageCC::AddPart(Message::ContentType type,
    data = (unsigned char *) fs_get (len);
    memcpy(data,buf,len);
 
+   if(subtype.length() == 0) subtype = "PLAIN";
    bdy = &(nextpart->body);
    
    switch(type)
@@ -410,7 +411,7 @@ SendMessageCC::AddPart(Message::ContentType type,
       bdy->nested.msg = mail_newmsg();
    case TYPETEXT:
       bdy->type = type;
-      bdy->subtype = (char *) fs_get(subtype.length()+1);
+      bdy->subtype = (char *) fs_get( subtype.length()+1);
       strcpy(bdy->subtype,(char *)subtype.c_str());
       bdy->contents.text.data = data;
       bdy->contents.text.size = len;
