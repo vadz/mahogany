@@ -611,7 +611,9 @@ wxLayoutObjectCmd::Read(wxString &istr)
    ReadString(tmp, istr);
    sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->m_bg_valid);
    ReadString(tmp, istr);
-   sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->enc);
+   int enc;
+   sscanf(tmp.c_str(),"%d", &enc);
+   obj->m_StyleInfo->enc = (wxFontEncoding)enc;
 
    if(obj->m_StyleInfo->m_fg_valid)
    {
