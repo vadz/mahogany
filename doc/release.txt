@@ -10,18 +10,19 @@ Version:	the information in this file applies to the cvs sources
 
 a) include/Mversion.h
 
-b) Manual.htex
+b) Bugzilla (create new version, check that there are no bugs for this one)
 
-c) Bugzilla (create new version, check that there are no bugs for this one)
+c) redhat/M.spec
 
-e) redhat/M.spec
+d) extra/setup/M.iss and extra/setup/{post|pre}read.txt
+
+e) "cvs rtag" the files
 
 
 2. Updating the files
 ---------------------
 
-a) Web pages in MahoganyWeb module: at least download.ht4, status.ht4 and
-   ChangeLog.ht4
+a) Manual.htex
 
 b) doc/Mannounce.txt
 
@@ -29,20 +30,18 @@ c) README, CHANGES, doc/relnotes.txt, doc/RoadMap.txt
 
 d) doc/release.txt to add any steps which are not yet in this file :-)
 
-e) redhat/M.spec
+e) po files: make -C locale mergecat
 
-f) extra/setup/M.iss and extra/setup/{post|pre}read.txt
-
-g) po files: make -C locale mergecat
-
-h) "cvs rtag" the files
+f) Web pages in MahoganyWeb module: at least download.ht4, status.ht4 and
+   ChangeLog.ht4
 
 
 3. Testing
 ------------------------
 
-a) test wizard with empty config
+a) test installation under Unix
 
+b) test Win32 install under Win9x/NT
 
 
 4. Preparing the release
@@ -51,7 +50,7 @@ a) test wizard with empty config
 a) tarball
 
 Just do a fresh checkout, rename the directory to mahogany-%{VERSION} and tar
-gzip. The script extra/scripts/makeMtgz automates it.
+gzip. The script extra/scripts/makeMtgz automates it (also creates .tar.bz2)
 
 b) RPM
 
@@ -122,7 +121,7 @@ Update the following template and send it to lsm@execpc.com:
 
 Begin4
 Title:          Mahogany
-Version:        0.64
+Version:        0.65
 Entered-date:   2002-01-14
 Description:    A powerful and flexible cross-platform GUI email client
 Keywords:       mail news SMTP POP IMAP NNTP MIME Python vCard Palm
