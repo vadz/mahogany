@@ -527,19 +527,15 @@ then
   cd $BUILDDIR && \
   (cd $NAME-$VERSION && make allclean 2>/dev/null 2>&1 || true) && \
   $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc && \
-  (cd $NAME-$VERSION && make rpm RPM_ROOT=$RPM_ROOT 2>/dev/null 2>&1) && \  
-  if [ "$DOINSTALL" = "yes" ] ; then
-	  $SCP $RPM_ROOT/RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm
-	  $SCP $RPM/ROOT/SRPMS/$NAME*.rpm $FTPLOCATION && rm SRPMS/$NAME*.rpm
-  fi
-fi
+  (cd $NAME-$VERSION && make rpm RPM_ROOT=$RPM_ROOT 2>/dev/null 2>&1) && \ 
+  (  if [ "$DOINSTALL" = "yes" ] ; then \
+	echo "Uploading rpms..." \
+	$SCP $RPM_ROOT/RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm \
+	  $SCP $RPM/ROOT/SRPMS/$NAME*.rpm $FTPLOCATION && rm SRPMS/$NAME*.rpm \
+  fi )
 
-# old stuff
-#  tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
-#  cp $BUILDDIR/$NAME-$VERSION/redhat/M.spec /usr/src/redhat/SPECS/M.spec && \
-#  cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
-#  cd /usr/src/redhat/ && \
-#  rpm -ba SPECS/M.spec
+  echo "Building RedHat package finished."
+fi
 
 ###########################
 # .tar.gz
