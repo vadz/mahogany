@@ -30,9 +30,11 @@ install2:
 	$(INSTALL) -d $(DOCDIR)
 	$(INSTALL) -d $(DOCDIR)/Pdf
 	$(INSTALL_DATA) $(FILES_PDF) $(DOCDIR)/Pdf
+	$(INSTALL) -d $(DOCDIR)/Tips
+	$(INSTALL) Tips/Tips*.txt  $(DOCDIR)/Tips
 	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i install ; done
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
-	$(INSTALL) -d $(DESTDIR)/doc
+#	$(INSTALL) -d $(DESTDIR)/doc
 #	ln -f -s ../share/Mahogany/doc $(DESTDIR)/doc/Mahogany
 
 install_classdoc:

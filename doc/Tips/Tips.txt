@@ -1,0 +1,8 @@
+Pressing the hash key '#' or 'x' in the list of messages expunges all deleted ones.
+If you set your user level to "advanced" in the identity tab in the preferences, you can set *all* options on a per-folder level.
+You can tell Mahogany to include a little picture of you with every message sent, by setting up an "XFace" in the preferences.
+Mahogany allows you to use SSL encryption for secure access to all servers. But you will have to re-compile it yourself (for legal reasons). 
+If you need help or support with using Mahogany, you can joing the Mahogany users' forum by sending a message to m-users-subscribe@egroups.com . Of course, you can also subscribe to that forum via our web pages at http://www.wxwindows.org/Mahogany/.
+When reading news, you can mark messages as read by pressing 'D'. Deleted news articles will not be shown to you again.
+As Mahogany is an OpenSource project, you can add your own favorite feature to it. We are always happy to welcome new developers to help us improve it. Just get in touch with us by sending an email to m-developers@egroups.com .
+If you find a bug in Mahogany or have a suggestion for an improvement, the best thing to do is to go to http://www.wxwindows.org/m-bugs/ and report it to our bug-tracking system. You will then be notified once we have dealt with it.\nThis is much better than just sending us an e-mail, as the bug-tracker makes sure that we will not forget it.
