@@ -22,6 +22,8 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "gui/wxIconManager.h"  // for GetBitmap
+   #include "pointers.h"           // for RefCounter
 #endif // USE_PCH
 
 #include <wx/imaglist.h>
