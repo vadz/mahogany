@@ -73,7 +73,7 @@ the next run
 Many bugs have been fixed:
 
 \begin{itemize}
-\item sending mail with local MDA (sendmail) respects BCC settings
+\item sending mail with local MTA (sendmail) respects BCC settings
 \item temporary files with mail messages are not created world readable
 any more
 \item language autodetection fixed
@@ -118,7 +118,7 @@ more, contact us if this is really a serious problem for you)
 \item charset and encoding support for message contents and headers (including
 autodetecting the charset of incoming messages and setting it for
 the outgoing ones)
-\item mail can be sent using local MDA (sendmail) in addition to SMTP
+\item mail can be sent using local MTA (sendmail) in addition to SMTP
 \item import of settings and folder collections from Pine and XFMail, vCard
 support (import/export from addess book, attach to messages)
 \item drag and drop for message copying and moving - \char`\"{}Quick Move\char`\"{}

@@ -138,7 +138,7 @@ hard limit on number of retrieved messages was added (see
 Many bugs have been fixed:
 \layout Itemize
 
-sending mail with local MDA (sendmail) respects BCC settings
+sending mail with local MTA (sendmail) respects BCC settings
 \layout Itemize
 
 temporary files with mail messages are not created world readable any more
@@ -240,7 +240,7 @@ charset and encoding support for message contents and headers (including
  ones)
 \layout Itemize
 
-mail can be sent using local MDA (sendmail) in addition to SMTP
+mail can be sent using local MTA (sendmail) in addition to SMTP
 \layout Itemize
 
 import of settings and folder collections from Pine and XFMail, vCard support

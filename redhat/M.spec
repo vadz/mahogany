@@ -33,7 +33,7 @@ Icon: mahogany.gif
 %description
 This package contains Mahogany, a powerful, scriptable GUI mail and news client
 using GTK+ toolkit. Mahogany supports remote POP3, IMAP4, NNTP servers as well
-as local MBOX and news spool folders and sending mail using SMTP or local MDA.
+as local MBOX and news spool folders and sending mail using SMTP or local MTA.
 
 %prep
 # the name is the same whether the package name is mahogany or mahogany-dynamic

@@ -61,7 +61,7 @@ Key changes are:
    (including autodetecting the charset of incoming messages and
     setting it for the outgoing ones)
 
- - mail can be sent using local MDA (sendmail) in addition to SMTP
+ - mail can be sent using local MTA (sendmail) in addition to SMTP
 
  - import of settings and folder collections from Pine and XFMail,
    vCard support (import/export from addess book, attach to messages)

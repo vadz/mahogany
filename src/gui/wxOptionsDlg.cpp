@@ -73,7 +73,7 @@
 // conditional compilation
 // ----------------------------------------------------------------------------
 
-// define this to allow using MDA (typically on under Unix, but off under Win)
+// define this to allow using MTA (typically on under Unix, but off under Win)
 #ifdef OS_UNIX
    #define USE_SENDMAIL
 #endif
@@ -697,7 +697,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif
 #ifdef USE_SENDMAIL
    { gettext_noop("Use local mail delivery a&gent"), Field_Bool, -1,           },
-   { gettext_noop("Local MDA &command"), Field_Text, ConfigField_UseSendmail },
+   { gettext_noop("Local MTA &command"), Field_Text, ConfigField_UseSendmail },
 #endif
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"

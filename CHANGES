@@ -33,7 +33,7 @@ Release 0.61 'Hawkins' [UNRELEASED]
 22.01.01 VZ: open autocollect address book in the editor the first time
 22.01.01 NB: fix attachment name and language autodetection
 19.01.01 VZ: serious server side searching on IMAP servers bug fixed
-16.01.01 VZ: sending mail with local MDA respects BCC
+16.01.01 VZ: sending mail with local MTA respects BCC
              temp mail files are not world readable any more
 15.01.01 VZ: serious bug in parsing embedded MIME message parts fixed
 08.01.01 VZ: added option to reopen all folders which were opened the last time
