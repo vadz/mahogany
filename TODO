@@ -71,6 +71,13 @@ GENERAL ROADMAP/ORDER OF THINGS:
 - foldertreectrl in folder selection dialog should have keyboard focus 
   and should not open folder when pressed return, but select it :-)
 
+- Could you please add a file-browse button/dialog to the folder
+  selection dialog and modify its return value to somehow indicate that
+  a file rather than a folder name was selected?
+  I'll then add support for that to the Copy/Move Messages functions.
+
+- Preferences on per-folder basis, please..... :-)
+
 - Would it be possible to set the icon in the treectrl on a per-folder 
   basis? I'd like to read the iconname from the folder profile, that
   would allow nice things such as a "trash/junk" folder, etc.
@@ -88,24 +95,29 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *** KB:
 *********************************************************************
 
-- document proper folder name for FCC
-- generally: think of a way to modularise and load plug-ins
-  (Especially useful as we add more functionality such as the calendar 
-   or more addressbook formats.)
+- test whether retrievallimit works backwards now
+- test whether dialog for collecting from INBOX works
+- add goto_next_unread to folderview
+- add more buttons to folderview, such as
+      next/previous/goto_next_unread
+- improve key bindings for message editor, page up/down whole page
+- check whether focus handling in folderview is fine now, does it get
+  lost after update() ?
+- add button to browse for filename in folder selection dialog (asked
+  vadim for this)
+- TUTORIAL, how to keep multiple folders open
+- if time permits: vcard-import
+- use mm_critical() and delay application exit if necessary
+- add a popup dialog to edit message headers in composeview
+
 - drop classes documentation from archive/docs!!
-- finish and fix message view/editor: recalcuating/re-layout should be 
-  one function, operating on lines marked as dirty. This might also
-  fix the cursor bugs.
 - add icons to doc++ generated docs
 - document python callback behaviour for incoming folders, possibly do 
   testing for callback results in CollectOneFolder!!
 - add configure option for python path
-- when sending message failed, don't make composeview readonly but rebuild it
-  after editing
 - more configurability for news
 - do we really need to scan /var/lib/news/active?
 - add address auto collection to compose view
-- add a popup dialog to edit message headers in composeview
 - some html mail import/filtering of tags (easy, quick and dirty)
 - Problem: mail uids and nums are long, WXARRAYINT.Count() is int,
   content is int.
@@ -115,17 +127,7 @@ GENERAL ROADMAP/ORDER OF THINGS:
 - when inserting filetype of unknown MIME type, prompt for it
 - speed up copy mail to folder by cusing c-client functionality
 - wxComposeView: if replying, only mark message as answered if reply
-  got sent --> difficult
-- if time permits: vcard-import
-- use mm_critical() and delay application exit if necessary
-- enable/disable edit menu entries as needed
-- check whether the test in MailFolderCC.cpp, line 949 really works as 
-  expected 
-- add translation macros to unmodified c-client lib and submit it to
-  MRC. Use two macros, a translating one _() and a non-translating one 
-  __() to easily find new strings later. Use common header for defines.
-- fix alpha related c-client bugs?
-- Ask again on c-client@u.washington.edu about the last two points.
+  got sent --> difficult/ after ASMailFolder is there
 *********************************************************************
 *** Miscellaneous Todo:
 *********************************************************************
