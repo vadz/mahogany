@@ -25,18 +25,8 @@ allclean:
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
-config.status: configure
-	@ ./config.status --recheck || \
-	echo "\n"; \
-	echo "********************************************************" ; \
-	echo "* You should run configure with appropriate arguments  *" ; \
-	echo "* Refer to doc/Information.txt or use configure --help *" ; \
-	echo "* If running 'make config' does not work, try running  *" ; \
-	echo "* 'configure' manually. See config.log for output from *" ; \
-	echo "* configure, which might help you find the problem.    *" ; \
-	echo "********************************************************" ; \
-	echo "\n"; \
-	exit 1;
+config.status: 
+	$(MAKE) config
 
 config: configure makeopts.in
 	./configure || $(RM) config.status
@@ -45,7 +35,7 @@ configure: configure.in aclocal.m4
 	autoconf && $(RM) config.status
 
 makeopts: makeopts.in config.status
-	CONFIG_FILES=$@ CONFIG_HEADERS=./config.status
+	./config.status
 
 include/config.h: include/config.h.in configure
 	./configure
