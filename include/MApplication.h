@@ -37,20 +37,28 @@ class MAppBase : public CommonBase
 {
 protected:
    /// the application's toplevel window
-   MFrame *topLevelFrame;
+   MFrame *m_topLevelFrame;
    /// the directory of the M global data tree
-   String   globalDir;
+   String   m_globalDir;
    /// the directory of the User's M data files
-   String   localDir;
+   String   m_localDir;
    /// a list of all known mime types
-   MimeList *mimeList;
+   MimeList *m_mimeList;
    /// a list mapping extensions to mime types
-   MimeTypes  *mimeTypes;
+   MimeTypes  *m_mimeTypes;
    
    /// a profile wrapper object for this object
-   Profile *profile;
+   Profile *m_profile;
+
+   // global variables stored in the application object
+   // -------------------------------------------------
+
    /// the address database
    Adb *adb;
+
+   /// the config manager which creates/retrieves file config objects
+   ConfigFileManager *m_cfManager;
+
    /** Checks some global configuration settings and makes sure they
        have sensible values. Especially important when M is run for
        the first time.
@@ -86,7 +94,7 @@ public:
    /** gets toplevel frame
        @return the toplevel window of the application
    */
-   MFrame *TopLevelFrame(void) { return topLevelFrame; }
+   MFrame *TopLevelFrame(void) { return m_topLevelFrame; }
 
    /**  translate a string to national language:
         @param in the text to translate
@@ -97,32 +105,35 @@ public:
    /** return the global directory
        @return the path to the global M data files
    */
-   String const & GetGlobalDir(void) { return globalDir; }
+   String const & GetGlobalDir(void) { return m_globalDir; }
 
    /** return the local path
        @return the path to the local user's M data directory
    */
-   String const & GetLocalDir(void) { return localDir; }
+   String const & GetLocalDir(void) { return m_localDir; }
 
    /** Get a pointer to the list of known Mime types.
        @return the MimeList reference
    */
-   MimeList * GetMimeList(void) { return mimeList; }
+   MimeList * GetMimeList(void) { return m_mimeList; }
 
    /** Get a pointer to the list of known Mime types and extensions.
        @return the MimeTypes reference
    */
-   MimeTypes * GetMimeTypes(void) { return mimeTypes; }
+   MimeTypes * GetMimeTypes(void) { return m_mimeTypes; }
 
    /** Get this object's profile.
        @return a pointer to the profile.
    */
-   ProfileBase *GetProfile(void) { return profile; }
+   ProfileBase *GetProfile(void) { return m_profile; }
 
    /** Get this object's address database.
        @return a pointer to the adb object.
    */
    Adb *GetAdb(void) { return adb; }
+
+   /** Get the global config manager */
+   ConfigFileManager& GetConfigManager() const { return *m_cfManager; }
 
    /** Toggle display of log output window
        @param display true to show it

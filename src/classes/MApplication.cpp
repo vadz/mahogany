@@ -113,25 +113,29 @@ MAppBase::VerifySettings(void)
 
 MAppBase::~MAppBase()
 {
-   GLOBAL_DELETE mimeList;
-   GLOBAL_DELETE mimeTypes;
+   GLOBAL_DELETE m_mimeList;
+   GLOBAL_DELETE m_mimeTypes;
    GLOBAL_DELETE adb;
+   GLOBAL_DELETE m_cfManager;
+   GLOBAL_DELETE m_profile;
 }
 
 bool
 MAppBase::OnStartup()
 {
-   // initialise the profile
+   // initialise the profile(s)
+   m_cfManager = new ConfigFileManager;
+
 #  if USE_WXCONFIG
-      String strConfFile = Str(wxFileConfig::GetLocalFileName(M_APPLICATIONNAME));
+      String strConfFile = wxFileConfig::GetLocalFileName(M_APPLICATIONNAME);
 #     if OS_UNIX
          strConfFile += "/config";
 #     endif // Unix
 
-      profile = GLOBAL_NEW Profile(strConfFile);
+      m_profile = GLOBAL_NEW Profile(strConfFile);
 #  else
       // FIXME @@@@ config file location?
-      profile = GLOBAL_NEW Profile(M_APPLICATIONNAME);
+      m_profile = GLOBAL_NEW Profile(M_APPLICATIONNAME);
 
       //  activate recording of configuration entries
       if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
@@ -139,7 +143,7 @@ MAppBase::OnStartup()
 #  endif
 
    // set the default path for configuration entries
-   profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
+   m_profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
 
    // do we have gettext() ?
 #  ifdef  USE_GETTEXT
@@ -160,7 +164,7 @@ MAppBase::OnStartup()
       // don't know how to get it from makeopts under Windows...
 #  endif
 
-   globalDir = pf.FindDir(strRootDir, &found);
+   m_globalDir = pf.FindDir(strRootDir, &found);
 
    if(! found)
    {
@@ -172,11 +176,11 @@ MAppBase::OnStartup()
    }
 
 #  ifdef   USE_WXCONFIG
-   localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
+      m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
 #  else
-   char *cptr = ExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
-   localDir = String(cptr);
-   GLOBAL_DELETE [] cptr;
+      char *cptr = ExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
+      m_localDir = String(cptr);
+      GLOBAL_DELETE [] cptr;
 #  endif
 
    // create and show the main program window
@@ -202,14 +206,14 @@ MAppBase::OnStartup()
 #  endif //Python
 
 
-   mimeList = GLOBAL_NEW MimeList();
-   mimeTypes = GLOBAL_NEW MimeTypes();
+   m_mimeList = GLOBAL_NEW MimeList();
+   m_mimeTypes = GLOBAL_NEW MimeTypes();
 
    // load address database
-   PathFinder lpf(localDir);
+   PathFinder lpf(m_localDir);
    String adbName = lpf.FindFile(READ_APPCONFIG(MC_ADBFILE), &found);
    if(! found)
-      adbName = localDir + '/' + READ_APPCONFIG(MC_ADBFILE);
+      adbName = m_localDir + '/' + READ_APPCONFIG(MC_ADBFILE);
    adb = GLOBAL_NEW Adb(adbName);
 
    // open all default mailboxes:
@@ -223,7 +227,7 @@ MAppBase::OnStartup()
       if((*i)->length() == 0) // empty token
          continue;
       wxLogDebug("Opening folder '%s'...", (*i)->c_str());
-      (void) new wxFolderViewFrame((**i),topLevelFrame);
+      (void) new wxFolderViewFrame((**i), m_topLevelFrame);
    }
 
    // now that we have the local dir, we can set up a default mail
@@ -254,17 +258,10 @@ MAppBase::GetText(const char *in)
 void
 MAppBase::Exit(bool force)
 {
-   if(force || MDialog_YesNoDialog(_("Really exit M?")))
+   if ( force || MDialog_YesNoDialog(_("Really exit M?")) )
    {
-      // FIXME @@@@ this doesn't terminate the application in wxWin2
-      // (other frames are still left on screen)
-      if ( topLevelFrame != NULL )
-      {
-         GLOBAL_DELETE topLevelFrame;
-         topLevelFrame = NULL;
-      }
-      else
-         exit(0);
+      m_topLevelFrame->Close(TRUE);
+      m_topLevelFrame = NULL;
    }
 }
 

@@ -32,13 +32,13 @@
 #define HAVE_STRSTR 1
 
 /** Define if you have the strsep function.  */
-#define  HAVE_STRSEP 1
+#undef HAVE_STRSEP
 
 /** Define if you have the <libintl.h> header file.  */
 #undef HAVE_LIBINTL_H
 
 /** Define if you have the <compface.h> header file.  */
-#define  HAVE_COMPFACE_H 1
+#undef HAVE_COMPFACE_H
 
 /** Define if you have the <strings.h> header file.  */
 #define HAVE_STRINGS_H 1
@@ -51,7 +51,7 @@
 #define HAVE_STDLIB_H 1
 
 /** Define if you have the <unistd.h> header file.  */
-#define HAVE_UNISTD_H 1
+#undef HAVE_UNISTD_H
 
 /** Define if you use wxWindows. */
 #define USE_WXWINDOWS 1
@@ -65,7 +65,7 @@
 #undef USE_WXXT
 
 /** Define if you use wxWindows, wxGTK port. */
-#define USE_WXGTK 1
+#undef USE_WXGTK
 
 /** Define if you want to use wxString instead of C++ string */
 #define USE_WXSTRING 1

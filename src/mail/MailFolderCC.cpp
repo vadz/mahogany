@@ -101,6 +101,9 @@ MailFolderCC::Close(void)
          (*i)->refcount--;
          if((*i)->refcount == 0)
          {
+            StreamConnection *conn = *i;
+            delete conn;
+
             streamList.erase(i);
             mail_close(mailstream);
             RemoveFromMap(mailstream);
@@ -126,7 +129,7 @@ MailFolderCC::Create(String const & iname)
    if(iname == String("INBOX"))
    {
       SetType(MF_INBOX);
-      Open("INBOX");
+      Open(iname);
    }
    else
    {
@@ -167,15 +170,16 @@ MailFolderCC::Ping(void)
    mail_ping(mailstream);
 }
 
-
-
+// NB: viewList shouldn't own elements because they're deleted in ~wxFolderView
 MailFolderCC::MailFolderCC(String const & iname)
+            : viewList(FALSE) // doesn't own elements
 {
    Create(iname);
 }
 
 MailFolderCC::~MailFolderCC()
 {
+   delete profile;
 }
 
 void
@@ -344,9 +348,12 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
    for(i = streamList.begin(); i != streamList.end(); i++)
       if( (*i)->stream == stream )
       {
-    streamList.erase(i);
-    break;
+         StreamConnection *conn = *i;
+         delete conn;
+         streamList.erase(i);
+         break;
       }
+
    if(streamListDefaultObj == this)
       SetDefaultObj(false);
 }
@@ -356,7 +363,7 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
 // static class member functions:
 //-------------------------------------------------------------------
 
-StreamConnectionList MailFolderCC::streamList;
+StreamConnectionList MailFolderCC::streamList(FALSE);
 
 bool MailFolderCC::cclientInitialisedFlag = false;
 

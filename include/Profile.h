@@ -167,11 +167,6 @@ private:
    // true if the object was successfully initialized
    bool isOk;
 
-   /** Common to all Profile objects: a manager class taking care of
-       allocating the FileConfig objects.
-   */
-   static ConfigFileManager cfManager;
-
    /** This static member variable contains the global (application-level)
        config object where the entries are searched if not found everywhere
        else.
@@ -228,8 +223,7 @@ public:
    //@}
 
    /// return class name
-   const char *GetClassName(void) const
-      { return "MailFolder"; }
+   const char *GetClassName(void) const { return "MailFolder"; }
    
    CB_DECLARE_CLASS(Profile, CommonBase);
 };

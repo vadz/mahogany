@@ -195,7 +195,10 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
   // wxLayoutWindow:
   SetEventId(WXMENU_LAYOUT_CLICK);
   SetFocus();
+
+#ifndef __WXMSW__
   SetBackgroundColour( wxColour("White") ); 
+#endif
 
   m_Profile = new Profile(iname, folder ? folder->GetProfile() : NULL);
   initialised = true;
@@ -423,16 +426,14 @@ wxMessageView::HighLightURLs(const char *input, String &out)
 
 wxMessageView::~wxMessageView()
 {
-   if(! initialised)
+   if( !initialised )
       return;
-   if(mailMessage)
-      GLOBAL_DELETE mailMessage;
-   if(xface)
-      GLOBAL_DELETE xface;
-   if(xfaceXpm)
-      GLOBAL_DELETE [] xfaceXpm;
-   if(m_MimePopup)
-      delete m_MimePopup;
+
+   GLOBAL_DELETE mailMessage;
+   GLOBAL_DELETE xface;
+   GLOBAL_DELETE [] xfaceXpm;
+   delete m_MimePopup;
+   delete m_Profile;
 }
 
 void

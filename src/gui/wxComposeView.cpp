@@ -349,8 +349,10 @@ wxComposeView::wxComposeView(const String &iname,
 
 wxComposeView::~wxComposeView()
 {
-   if(! initialised)
+   if(!initialised)
       return;
+
+   delete m_Profile;
    delete m_LayoutWindow;
 }
 

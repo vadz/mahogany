@@ -72,7 +72,7 @@ Profile::Profile(const String& appConfigFile)
 
    parentProfile = NULL;
 
-   fileConfig = cfManager.GetConfig(appConfigFile);
+   fileConfig = mApplication.GetConfigManager().GetConfig(appConfigFile);
    isOk = fileConfig != NULL;
    if ( isOk )
       appConfig = fileConfig;
@@ -103,7 +103,7 @@ Profile::Profile(String const &iClassName, ProfileBase const *Parent)
    if( !isOk )
       fullFileName = mApplication.GetLocalDir() + DIR_SEPARATOR + fileName;
 
-   fileConfig = cfManager.GetConfig(fullFileName);
+   fileConfig = mApplication.GetConfigManager().GetConfig(fullFileName);
    
    isOk = fileConfig != NULL;
 }
@@ -113,9 +113,6 @@ Profile::~Profile()
 {
    if ( appConfig == fileConfig )
       appConfig = NULL;
-
-   if(fileConfig)
-      delete fileConfig;
 }
 
 
@@ -213,17 +210,14 @@ Profile::writeEntry(const char *szKey, bool Value)
 // ConfigFileManager
 // ----------------------------------------------------------------------------
 
-ConfigFileManager Profile::cfManager;
-
 ConfigFileManager::ConfigFileManager()
 {
-   fcList = new FCDataList;
+   fcList = new FCDataList(FALSE);
 }
 
 ConfigFileManager::~ConfigFileManager()
 {
    FCDataList::iterator i;
-   FileConfig *fcp;
    
 #  ifdef DEBUG
       Debug();
@@ -231,10 +225,13 @@ ConfigFileManager::~ConfigFileManager()
 
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
-      fcp = (*i)->fileConfig;
+      FCData *data = *i;
+      FileConfig *fcp = data->fileConfig;
       fcp->FLUSH();
       delete fcp;
+      delete data;
    }
+
    delete fcList;
 }
 

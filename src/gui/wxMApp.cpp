@@ -17,26 +17,25 @@
 #include "Mpch.h"
 
 #ifndef  USE_PCH
-#  include  "Mcommon.h"
-#  include  "guidef.h"
-#  include  "MFrame.h"
-#  include  "gui/wxMFrame.h"
-#  include  "MLogFrame.h"
+#  include "Mcommon.h"
+#  include "guidef.h"
+#  include "MFrame.h"
+#  include "gui/wxMFrame.h"
 
-#  include  "kbList.h"
-#  include  "PathFinder.h"
-#  include  "MimeList.h"
-#  include  "MimeTypes.h"
-#  include  "Profile.h"
+#  include "kbList.h"
+#  include "PathFinder.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "Profile.h"
 #  include "Mdefaults.h"
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
+
+#  include <wx/log.h>
 #endif
 
 #include "gui/wxMainFrame.h"
 #include "gui/wxIconManager.h"
-
-#include <wx/log.h>
 
 // ----------------------------------------------------------------------------
 // constants
@@ -45,9 +44,34 @@
 // the name of config section where the log window position is saved
 #define  LOG_FRAME_SECTION    "LogWindow"
 
+// ----------------------------------------------------------------------------
+// classes
+// ----------------------------------------------------------------------------
+
+// a small class implementing saving/restoring position for the log frame
+class wxMLogWindow : public wxLogWindow
+{
+public:
+   // ctor (it creates the frame hidden)
+   wxMLogWindow(const char *szTitle) : wxLogWindow(szTitle, FALSE) { }
+
+   // override base class virtual to implement saving the frame position
+   virtual void OnFrameDelete(wxFrame *frame);
+};
+
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// wxMLogWindow
+// ----------------------------------------------------------------------------
+void wxMLogWindow::OnFrameDelete(wxFrame *frame)
+{
+   wxMFrame::SavePosition(LOG_FRAME_SECTION, frame);
+
+   wxLogWindow::OnFrameDelete(frame);
+}
 
 // ----------------------------------------------------------------------------
 // wxMApp
@@ -71,7 +95,7 @@ wxFrame *
 wxMApp::OnInit()
 {
    // first of all, create the log
-   wxLogWindow *log = new wxLogWindow(_("M Activity Log"), FALSE /* !show */);
+   wxLogWindow *log = new wxMLogWindow(_("M Activity Log"));
 
    m_IconManager = new wxIconManager();
 
@@ -88,7 +112,7 @@ wxMApp::OnInit()
 #     ifdef  USE_WXWINDOWS2
          return true;
 #     else
-         return topLevelFrame;
+         return m_topLevelFrame;
 #     endif
    }
    else {
@@ -100,19 +124,16 @@ wxMApp::OnInit()
 
 MFrame *wxMApp::CreateTopLevelFrame()
 {
-   topLevelFrame = GLOBAL_NEW wxMainFrame();
-   topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
-   topLevelFrame->Show(true);
+   m_topLevelFrame = GLOBAL_NEW wxMainFrame();
+   m_topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
+   m_topLevelFrame->Show(true);
 
-   return topLevelFrame;
+   return m_topLevelFrame;
 }
 
 int wxMApp::OnExit()
 {
-   // save log window position
-   wxFrame *frame = ((wxLogWindow *)wxLog::GetActiveTarget())->GetFrame();
-   if(frame)
-      wxMFrame::SavePosition(LOG_FRAME_SECTION, frame);
+   delete wxLog::SetActiveTarget(NULL);
 
    return 0;
 }

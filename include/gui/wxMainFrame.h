@@ -33,21 +33,24 @@ public:
 class wxMainFrame : public wxMFrame
 {
 public:
-   /// Constructor
+   /// constructor & dtor
    wxMainFrame(const String &iname = String("wxMainFrame"),
                wxFrame *parent = NULL);
-   
+
+   // callbacks
    void OnMenuCommand(int id);
    void OnCommandEvent(wxCommandEvent &);
+   void OnCloseWindow(wxCloseEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 //   void OnSize( wxSizeEvent &event );
 
-   DECLARE_EVENT_TABLE()
 private:
    /// the splitter window holding the treectrl and folder view
    wxSplitterWindow *m_splitter;
    /// the folder view
    wxFolderView     *m_FolderView;
+
+   DECLARE_EVENT_TABLE()
 };
 
 #endif

@@ -10,26 +10,38 @@
 #   pragma implementation "wxlwindow.h"
 #endif
 
-#include   "wxlwindow.h"
+#include "Mpch.h"
 
-#define   VAR(x)   cout << #x"=" << x << endl;
+#include "gui/wxlwindow.h"
 
 BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
-   EVT_PAINT  (wxLayoutWindow::OnPaint)
-   EVT_CHAR   (wxLayoutWindow::OnChar)
+   EVT_PAINT(wxLayoutWindow::OnPaint)
+   EVT_CHAR(wxLayoutWindow::OnChar)
    EVT_LEFT_DOWN(wxLayoutWindow::OnMouse)
 END_EVENT_TABLE()
 
 wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
-   : wxScrolledWindow(parent)
+              : wxScrolledWindow(parent, -1, wxDefaultPosition, wxDefaultSize,
+                                 wxHSCROLL | wxVSCROLL | wxBORDER)
 {
    m_ScrollbarsSet = false;
    m_EventId = -1;
 }
 
+#ifdef __WXMSW__
+long
+wxLayoutWindow::MSWGetDlgCode()
+{
+   // if we don't return this, we won't get OnChar() events
+   return DLGC_WANTCHARS | DLGC_WANTARROWS | DLGC_WANTMESSAGE;
+}
+#endif //MSW
+
 void
 wxLayoutWindow::OnMouse(wxMouseEvent& event)
 {
+   SetFocus();
+
    if(m_EventId == -1) // nothing to do
       return;
    

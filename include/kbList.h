@@ -116,7 +116,7 @@ public:
        false, the entries themselves will not get deleted. Do not use
        this with array types!
    */
-   kbList(bool ownsEntriesFlag = true);
+   kbList(bool ownsEntriesFlag = false);
 
    /** Destructor.
        If entries are owned, they will all get deleted from here.
@@ -243,7 +243,7 @@ public: \
          /* the cast is needed for MS VC++ 5.0 */ \
          { return (type *)((kbList::iterator *)this)->operator*() ; } \
    }; \
-   inline name(bool ownsEntriesFlag = true) \
+   inline name(bool ownsEntriesFlag = FALSE) \
       : kbList(ownsEntriesFlag) {} \
    \
    inline void push_back(type *element) \

@@ -60,10 +60,11 @@ static const char *wxIconManagerFileExtensions[] =
 };
 
 
-// hide the difference
 wxIconManager::wxIconManager()
 {
-   m_iconList = new IconDataList;
+   // NB: IconData has a dtor, we must call it ourselves and not let ~kbList
+   //     do it (which leads to memory leaks)
+   m_iconList = new IconDataList(FALSE);
 
    AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
    AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
@@ -76,11 +77,14 @@ wxIconManager::wxIconManager()
 wxIconManager::~wxIconManager()
 {
    IconDataList::iterator i;
+   for ( i = m_iconList->begin(); i != m_iconList->end(); i++ ) {
+      // against what your common sense may tell you, the icons we manage
+      // should *not* be deleted here because wxWindows does it too!
+      IconData *id = *i;
+      delete id;
+   }
 
-   for(i = m_iconList->begin(); i != m_iconList->end(); i++)
-      delete (*i)->iconPtr;
-
-   delete m_unknownIcon;
+   delete m_iconList;
 }
 
 wxBitmap *
@@ -186,10 +190,19 @@ wxIconManager::GetIcon(String const &_iconName)
 void
 wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
 {
+   // load icon
+   wxIcon *icon = new wxIcon(data);
+   if ( !icon->Ok() ) {
+      delete icon;
+
+      return;
+   }
+
+   // only loaded icons should be added to the list
    IconData *id = new IconData;
 
    id->iconName = iconName;
-   id->iconPtr = GLOBAL_NEW wxIcon(data);
+   id->iconPtr  = icon;
    m_iconList->push_front(id);
 }
 

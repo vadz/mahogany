@@ -6,6 +6,9 @@
  * $Id$            *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/08/08 22:29:15  VZ
+ * memory leaks and crashes and memory corruptio and ... fixes
+ *
  * Revision 1.4  1998/05/24 14:47:58  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -49,7 +52,7 @@
 
 PathFinder::PathFinder(String const &ipathlist, bool recursive)
 {
-   pathList = new kbStringList;
+   pathList = new kbStringList(FALSE);
    AddPaths(ipathlist,recursive);
 }
 
@@ -206,6 +209,12 @@ PathFinder::IsFile(String const &pathname)
 
 PathFinder::~PathFinder()
 {
+   kbStringList::iterator i;
+   for ( i = pathList->begin(); i != pathList->end(); i++ ) {
+      String *data = *i;
+      delete data;
+   }
+
    delete pathList;
 }
 

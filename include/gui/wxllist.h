@@ -23,7 +23,7 @@
 #   endif
 #else
     // for testing only:
-#   define WXLAYOUT_DEBUG
+//#   define WXLAYOUT_DEBUG
     // The wxLayout classes can be compiled with std::string instead of wxString
     //#   define USE_STD_STRING
 #endif
@@ -231,8 +231,8 @@ public:
 
 #ifdef WXLAYOUT_DEBUG
    void Debug(void);
+   void ShowCurrentObject();
 #endif
-
    
    /// for access by wxLayoutWindow:
    void GetSize(CoordType *max_x, CoordType *max_y,

@@ -6,7 +6,11 @@
  * $Id$              *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/08/08 22:29:14  VZ
+ * memory leaks and crashes and memory corruptio and ... fixes
+ *
  * Revision 1.7  1998/06/05 16:56:11  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -123,7 +127,6 @@ MimeEntry::Parse(String const & str)
 
 
 MimeList::MimeList(void)
-   : MimeEntryList(true) // own entries
 {
    bool   found;
    MimeEntry   *newEntry;
@@ -217,6 +220,11 @@ String MimeList::ExpandCommand(String const &commandline,
 
 MimeList::~MimeList()
 {
+   MimeEntryList::iterator i;
+   for ( i = begin(); i != end(); i++ ) {
+      MimeEntry *entry = *i;
+      delete entry;
+   }
 }
 
 

@@ -15,14 +15,15 @@
 #include "Mcommon.h"
 
 #ifndef  USE_PCH
-#  include "Adb.h"
 #  include "strutil.h"
 
 #  include "wx/log.h"
+
+#  include "MFrame.h"
+#  include "MApplication.h"
 #endif // USE_PCH
 
-#include "MFrame.h"
-#include "MApplication.h"
+#include "Adb.h"
 #include "MDialogs.h"
 
 void

@@ -34,6 +34,7 @@
 BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
   EVT_MENU(-1,    wxMainFrame::OnCommandEvent)
   EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
+  EVT_CLOSE(wxMainFrame::OnCloseWindow)
 END_EVENT_TABLE()
 #endif // wxWin2
 
@@ -98,6 +99,15 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    
    m_splitter->SetMinimumPaneSize(0);
    m_splitter->SetFocus();
+}
+
+void
+wxMainFrame::OnCloseWindow(wxCloseEvent&)
+{
+   // FIXME: ask user if he really wants to exit...
+   delete m_FolderView;
+
+   Destroy();
 }
 
 void
