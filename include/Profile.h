@@ -84,6 +84,9 @@ public:
    /// Create a normal Profile object
    static ProfileBase * CreateProfile(String const & classname,
                                       ProfileBase const *parent = NULL);
+   /// Create a Profile object for a plugin module
+   static ProfileBase * CreateModuleProfile(String const & classname,
+                                            ProfileBase const *parent = NULL);
    /// Create a dummy Profile just inheriting from the top level
    static ProfileBase * CreateEmptyProfile(ProfileBase const *parent = NULL);
 

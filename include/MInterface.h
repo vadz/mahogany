@@ -48,6 +48,13 @@ virtual ProfileBase * GetGlobalProfile (void) = 0;
 
 
 
+virtual ProfileBase * CreateModuleProfile (
+const char * classname ,
+ProfileBase * parent =NULL
+) = 0;
+
+
+
 virtual void  Message (
 const char * message , const MWindow * parent =NULL,
 const char * title =MDIALOG_MSGTITLE,

@@ -328,6 +328,16 @@ ProfileBase::CreateProfile(const String & classname, ProfileBase const *parent)
    return p;
 }
 
+ProfileBase *
+ProfileBase::CreateModuleProfile(const String & classname, ProfileBase const *parent)
+{
+   ASSERT(classname.Length() == 0 ||  // only relative paths allowed
+          (classname[0u] != '.' && classname[0u] != '/'));
+   String newName = "Modules/" + classname;
+   ProfileBase *p =  Profile::CreateProfile(newName, parent);
+   EnforcePolicy(p);
+   return p;
+}
 
 
 ProfileBase *

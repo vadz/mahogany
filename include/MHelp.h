@@ -58,4 +58,10 @@
 
 #define MH_PYTHON            5000
 
+/** All modules related help should be from this value on and be
+    reported to the main authors for inclusion in the docs. */
+#define MH_MODULES          10000
+/// PalmOS connectivity module help range: (10-19)
+#define MH_MODULES_PALMOS          10010
+#define MH_MODULES_PALMOS_CONFIG   10011
 #endif // MHELP_H

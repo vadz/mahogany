@@ -3,13 +3,6 @@
  *                                                                  *
  * (C) 1999 by Karsten Ballüder (Ballueder@gmx.net)                 *
  *                                                                  *
- *
- * Due to being based and linked against the pisock library, this
- * module is (C) under the GNU GENERIC PUBLIC LICENSE, Version 2.
- * This does not affect the copyright of any other parts of the
- * Mahogany source code and relates only to the PalmOS connectivity
- * module.
- *
  * $Id$
  *******************************************************************/
 
@@ -28,6 +21,7 @@
 #endif
 
 #ifdef USE_PISOCK
+
 #include "MModule.h"
 #include "modules/PalmOS.h"
 
@@ -38,14 +32,127 @@
 #include "SendMessageCC.h"
 
 
+#define MODULE_NAME   "PalmOS"
+
 #define DISPOSE_KEEP   0
 #define DISPOSE_DELETE 1
 #define DISPOSE_FILE   2
 
-#define MP_MOD_PALM_BOX "PalmBox"
-#define MP_MOD_PALM_BOX_D "PalmBox"
-#define MP_MOD_PALM_DISPOSE "PalmDispose"
-#define MP_MOD_PALM_DISPOSE_D DISPOSE_FILE
+#define MP_MOD_PALMOS_BOX "PalmBox"
+#define MP_MOD_PALMOS_BOX_D "PalmBox"
+#define MP_MOD_PALMOS_DISPOSE "Dispose"
+#define MP_MOD_PALMOS_DISPOSE_D 2  // 0=keep 1=delete 2=file
+#define MP_MOD_PALMOS_SYNCMAIL "SyncMail"
+#define MP_MOD_PALMOS_SYNCMAIL_D 1l
+#define MP_MOD_PALMOS_SYNCADDR "SyncAddr"
+#define MP_MOD_PALMOS_SYNCADDR_D 0l
+#define MP_MOD_PALMOS_PILOTDEV "PilotDev"
+#define MP_MOD_PALMOS_PILOTDEV_D "/dev/pilot"
+#define MP_MOD_PALMOS_SPEED "Speed"
+#define MP_MOD_PALMOS_SPEED_D "57600"
+#define MP_MOD_PALMOS_LOCK "Lock"
+#define MP_MOD_PALMOS_LOCK_D 0l
+#define MP_MOD_PALMOS_SCRIPT1 "Script1"
+#define MP_MOD_PALMOS_SCRIPT1_D ""
+#define MP_MOD_PALMOS_SCRIPT2 "Script2"
+#define MP_MOD_PALMOS_SCRIPT2_D ""
+
+
+
+
+// to prevent a warning from linux headers
+#define __STRICT_ANSI__
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <pi-source.h>
+#include <pi-socket.h>
+#include <pi-file.h>
+#include <pi-mail.h>
+#include <pi-dlp.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <time.h>
+
+#include <wx/log.h>
+#include <wx/textfile.h>
+
+class wxDeviceLock
+{
+public:
+   wxDeviceLock(const wxString &dev)
+      {
+         m_Device = dev;
+         m_Locked = FALSE;
+      }
+   ~wxDeviceLock()
+      {
+         if(m_Locked) Unlock();
+      }
+   bool Lock()
+      {
+         wxASSERT(! m_Locked);
+         m_LockFile = "/var/lock/LCK..";
+         m_LockFile << m_Device;
+         int fd =
+            open(m_LockFile,O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+         if(fd == -1) // lock exists already
+         {
+            wxTextFile tf(m_LockFile);
+            if(tf.Open())
+            {
+               pid_t pid = atoi(tf[0]);
+               if(kill(pid,0) == ESRCH) // process no longer exists
+               {
+                  if(remove(m_LockFile) == 0)
+                  {
+                     // try again
+                     fd = open(m_LockFile,
+                               O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);  
+                  }
+                  
+               }
+            }
+         }
+         if(fd != -1)
+         {
+            m_Locked = TRUE;
+            wxString pidstr;
+            pidstr.Printf("%lu", (unsigned long) getpid());
+            write(fd, (char *)pidstr.c_str(),pidstr.Length());
+            close(fd);
+         }
+         else
+         {
+            wxString msg;
+            msg.Printf(_("Could not obtain lock for '/dev/%s'"),
+                       m_Device.c_str());
+            wxLogSysError(msg);
+         }
+         return m_Locked;
+      }
+   void Unlock()
+      {
+         wxASSERT(m_Locked);
+         remove(m_LockFile);
+      }
+   bool IsLocked() const { return m_Locked; }
+private:
+   wxString m_Device;
+   wxString m_LockFile;
+   bool     m_Locked;
+};
 
 
 ///------------------------------
@@ -88,19 +195,18 @@ private:
       { m_MInterface->Message(msg,NULL,"PalmOS module"); wxYield(); }
    inline void StatusMessage(const String &msg)
       { m_MInterface->StatusMessage(msg);wxYield();}
-   struct PalmOSModuleConfig
-   {
-      /// The device
-      String m_PilotPort;
-
-   } m_Config;
    MInterface * m_MInterface;
 
 private:
    int m_PiSocket;
    int m_MailDB;
    ProfileBase *m_Profile;
+
    int m_Dispose;
+   bool m_SyncMail, m_SyncAddr, m_LockPort;
+   String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
+   int m_Speed;
+   class wxDeviceLock *m_Lock;
 };
 
 /// small helper class
@@ -130,20 +236,30 @@ PalmOSModule::Entry(int arg)
    }
 }
 
-void Configure(void)
-{
-}
-
 void
 PalmOSModule::GetConfig(void)
 {
-   m_Config.m_PilotPort = "/dev/pilot";
-
    ASSERT(m_Profile == NULL);
    ProfileBase * appConf = m_MInterface->GetGlobalProfile();
    m_Profile = m_MInterface->CreateProfile(
-      appConf->readEntry(MP_MOD_PALM_BOX,MP_MOD_PALM_BOX_D));
-   m_Dispose = READ_CONFIG(m_Profile, MP_MOD_PALM_DISPOSE);
+      appConf->readEntry(MP_MOD_PALMOS_BOX,MP_MOD_PALMOS_BOX_D));
+
+   m_SyncMail = (READ_CONFIG(m_Profile, MP_MOD_PALMOS_SYNCMAIL) != 0);
+   m_SyncAddr = (READ_CONFIG(m_Profile, MP_MOD_PALMOS_SYNCADDR) != 0);
+   m_LockPort = (READ_CONFIG(m_Profile, MP_MOD_PALMOS_LOCK) != 0);
+   m_PilotDev = READ_CONFIG(m_Profile, MP_MOD_PALMOS_PILOTDEV);
+   m_PalmBox = READ_CONFIG(m_Profile, MP_MOD_PALMOS_BOX);
+   m_Dispose = READ_CONFIG(m_Profile,MP_MOD_PALMOS_DISPOSE);
+   m_Speed = atoi(READ_CONFIG(m_Profile,MP_MOD_PALMOS_SPEED));
+   m_Script1 = READ_CONFIG(m_Profile, MP_MOD_PALMOS_SCRIPT1);
+   m_Script2 = READ_CONFIG(m_Profile, MP_MOD_PALMOS_SCRIPT2);
+
+   String dev;
+   dev = m_PilotDev;
+   if(strncmp(m_PilotDev,"/dev/",5)==0)
+      dev = m_PilotDev.c_str()+5;
+   if(m_Lock) delete m_Lock;
+   m_Lock = new wxDeviceLock(dev);
 }
 
 MMODULE_IMPLEMENT(PalmOSModule,
@@ -178,33 +294,16 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
    m_MInterface = minterface;
    m_PiSocket = -1;
    m_Profile = NULL;
+   m_Lock = NULL;
 }
 
 PalmOSModule::~PalmOSModule()
 {
    if(IsConnected())
       Disconnect();
+   if(m_Lock) delete m_Lock;
    SafeDecRef(m_Profile);
 }
-
-// to prevent a warning from linux headers
-#define __STRICT_ANSI__
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-#include <pi-source.h>
-#include <pi-socket.h>
-#include <pi-file.h>
-#include <pi-mail.h>
-#include <pi-dlp.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 
 bool
 PalmOSModule::Connect(void)
@@ -215,24 +314,46 @@ PalmOSModule::Connect(void)
       struct PilotUser pilotUser;
       int rc;
 
+      
+      if(m_Script1.Length())
+      {
+         int rc;
+         if((rc = wxExecute(m_Script1, TRUE)) != 0)
+         {
+            String msg;
+            msg.Printf(_("Executing command ´%s´ returned an error code (%d)."),
+                       m_Script1.c_str(), rc);
+            ErrorMessage(msg);
+         }
+      }
+
+      if(m_LockPort)
+      {
+         if(! m_Lock->Lock())
+            return false;
+      }
+
       Message(_("Please press HotSync button and click on OK."));
       if (!(m_PiSocket = pi_socket(PI_AF_SLP, PI_SOCK_STREAM, PI_PF_PADP)))
       {
          ErrorMessage(_("Cannot get connection."));
+         if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
       }
       
       addr.pi_family = PI_AF_SLP;
       strncpy(addr.pi_device,
-              m_Config.m_PilotPort.c_str(),
+              m_PilotDev.c_str(),
               sizeof(addr.pi_device)); 
-      
+
+      pi_setmaxspeed(m_PiSocket, m_Speed, 0 /* overclock */); 
       
       rc = pi_bind(m_PiSocket, (struct sockaddr*)&addr, sizeof(addr));
       if(rc == -1)
       {
          ErrorMessage(_("pi_bind() failed"));
          pi_close(m_PiSocket); m_PiSocket = -1;
+         if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
       }
       
@@ -241,6 +362,7 @@ PalmOSModule::Connect(void)
       {
          ErrorMessage(_("pi_listen() failed"));
          pi_close(m_PiSocket); m_PiSocket = -1;
+         if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
       }
       
@@ -249,6 +371,7 @@ PalmOSModule::Connect(void)
       {
          ErrorMessage(_("pi_accept() failed"));
          pi_close(m_PiSocket); m_PiSocket = -1;
+         if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
       }
       
@@ -258,6 +381,8 @@ PalmOSModule::Connect(void)
       /* Tell user (via Pilot) that we are starting things up */
       dlp_OpenConduit(m_PiSocket);
    }
+   if(m_PiSocket == -1)
+      if(m_Lock->IsLocked()) m_Lock->Unlock();
    return m_PiSocket != -1;
 }
 
@@ -268,6 +393,18 @@ PalmOSModule::Disconnect(void)
    {
       pi_close(m_PiSocket);
       m_PiSocket = -1;
+      if(m_Lock->IsLocked()) m_Lock->Unlock();
+      if(m_Script2.Length())
+      {
+         int rc;
+         if((rc = wxExecute(m_Script2, TRUE)) != 0)
+         {
+            String msg;
+            msg.Printf(_("Executing command ´%s´ returned an error code (%d)."),
+                       m_Script2.c_str(), rc);
+            ErrorMessage(msg);
+         }
+      }
    }
 }
 
@@ -283,8 +420,15 @@ void PalmOSModule::Synchronise(void)
         m_Profile=NULL;
         return;
      }
-     SendEMails();
-     StoreEMails();
+     if(m_SyncMail)
+     {
+        SendEMails();
+        StoreEMails();
+     }
+     if(m_SyncAddr)
+     {
+        ErrorMessage(_("Addressbook synchronisation not yet implemented."));
+     }
      Disconnect();
      m_Profile->DecRef();
      m_Profile=NULL;
@@ -403,9 +547,9 @@ PalmOSModule::SendEMails(void)
         StatusMessage(msg);
         switch(m_Dispose)
         {
-           case DISPOSE_KEEP:
-              // do nothing
-              break;
+        case DISPOSE_KEEP:
+           // do nothing
+           break;
         case DISPOSE_DELETE:
            dlp_DeleteRecord(m_PiSocket, m_MailDB, 0, id);
            break;
@@ -435,7 +579,7 @@ PalmOSModule::SendEMails(void)
   }
   if(! numMessages)
   {
-     Message(_("No messages found in PalmOS-Outbox."));
+     StatusMessage(_("No messages found in PalmOS-Outbox."));
   }
 }
 
@@ -443,18 +587,17 @@ PalmOSModule::SendEMails(void)
 void
 PalmOSModule::StoreEMails(void)
 {
-   String palmbox = READ_CONFIG(m_Profile,MP_MOD_PALM_BOX);
-   if(! palmbox)
+   if(! m_PalmBox)
       return; // nothing to do
 
    unsigned char buffer[0xffff];
 
    UIdType count = 0;
-   MailFolder *mf = m_MInterface->OpenFolder(MF_PROFILE_OR_FILE,palmbox);
+   MailFolder *mf = m_MInterface->OpenFolder(MF_PROFILE_OR_FILE,m_PalmBox);
    if(! mf)
    {
       String tmpstr;
-      tmpstr.Printf(_("Cannot open PalmOS synchronisation mailbox ´%s´"), palmbox.c_str());
+      tmpstr.Printf(_("Cannot open PalmOS synchronisation mailbox ´%s´"), m_PalmBox.c_str());
       ErrorMessage((tmpstr));
       return;
    }
@@ -509,8 +652,28 @@ PalmOSModule::StoreEMails(void)
                          msg->Subject().c_str());
             StatusMessage(tmpstr);
             String content;
-            msg->WriteToString(content, true);
-            strncpy((char *)buffer, content, 0xffff);
+            msg->GetHeaderLine("From",content);
+            t.from = strutil_strdup(content);
+            t.subject = strutil_strdup(msg->Subject());
+            msg->GetHeaderLine("To",content);
+            t.to = strutil_strdup(content);
+            msg->Address(content, MAT_REPLYTO);
+            t.replyTo = strutil_strdup(content);
+            t.dated = 1;
+            time_t tt;
+            time(&tt);
+            t.date = *localtime(&tt);
+
+            msg->WriteToString(content, false /* headers */);
+            String content2;
+            const char *cptr = content.c_str();
+            while(*cptr)
+            {
+               if(*cptr != '\r')
+                  content2 << *cptr;
+               cptr++;
+            }
+            strncpy((char *)buffer, content2, 0xffff);
             buffer[0xfffe] = '\0';
             t.body = (char *) malloc( strlen((char *)buffer) + 1 );
             strcpy(t.body, (char *)buffer);
@@ -548,4 +711,266 @@ PalmOSModule::StoreEMails(void)
    }
    SafeDecRef(mf);
 }
+
+//---------------------------------------------------------
+// The configuration dialog
+//---------------------------------------------------------
+
+#include <wx/statbox.h>
+#include <wx/layout.h>
+#include "gui/wxDialogLayout.h"
+#include "MHelp.h"
+
+class wxPalmOSDialog : public wxOptionsPageSubdialog
+{
+public:
+   wxPalmOSDialog(ProfileBase *profile, wxWindow *parent = NULL);
+
+   // reset the selected options to their default values
+   virtual bool TransferDataFromWindow();
+   virtual bool TransferDataToWindow();
+   bool WasChanged(void)
+      {
+         return
+            m_OldSyncAddr != m_SyncAddr->GetValue()
+            || m_OldSyncMail != m_SyncMail->GetValue()
+            || m_OldPilotDev != m_PilotDev->GetValue()
+            || m_OldSpeed != m_Speed->GetStringSelection()
+            || m_OldDispose != m_Dispose->GetSelection()
+            || m_OldLockPort != m_LockPort->GetValue()
+            || m_OldScript1 != m_Script1->GetValue()
+            || m_OldScript2 != m_Script2->GetValue()
+            || m_OldPalmBox != m_PalmBox->GetValue();
+      };
+protected:
+   wxCheckBox *m_SyncMail, *m_SyncAddr, *m_LockPort;
+   wxChoice *m_Dispose, *m_Speed;
+   wxTextCtrl *m_PilotDev, *m_Script1, *m_Script2, *m_PalmBox;
+   
+   bool m_OldSyncMail, m_OldSyncAddr, m_OldLockPort;
+   wxString m_OldPilotDev, m_OldScript1, m_OldScript2, m_OldSpeed,
+      m_OldPalmBox; 
+   int m_OldDispose;
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(wxPalmOSDialog, wxOptionsPageSubdialog)
+//   EVT_BUTTON(-1, wxPalmOSDialog::OnButton)
+//   EVT_CHECKBOX(-1, wxPalmOSDialog::OnButton)
+END_EVENT_TABLE()
+
+
+wxPalmOSDialog::wxPalmOSDialog(ProfileBase *profile,
+                               wxWindow *parent)
+   : wxOptionsPageSubdialog(profile,parent,
+                            _("PalmOS module"),
+                            "Modules/PalmOS/ConfDialog")
+{
+   wxStaticBox *box = CreateStdButtonsAndBox(_("PalmOS"), FALSE,
+                                             MH_MODULES_PALMOS_CONFIG);
+   wxLayoutConstraints *c;
+   
+   wxStaticText *stattext = new wxStaticText(this, -1,
+                                             _("This module can synchronise your e-Mail and Addressbook\n"
+                                               "contents with a PalmOS based device.")); 
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   stattext->SetConstraints(c);
+
+   m_SyncMail = new wxCheckBox(this, -1, _("Synchronise Mail"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.Below(stattext, 2*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_SyncMail->SetConstraints(c);
+
+   static wxString dispValues[] =
+   {
+      gettext_noop("kept in Outbox"),
+      gettext_noop("deleted"),
+      gettext_noop("filed")
+   };
+   static const size_t NUM_DISPVALUES  = WXSIZEOF(dispValues);
+
+
+   wxStaticText *dispLabel = new wxStaticText(this, -1,_("Sent messages will be")); 
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->top.Below(m_SyncMail, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   dispLabel->SetConstraints(c);
+
+   m_Dispose = new wxChoice(this, -1, wxDefaultPosition,
+                            wxDefaultSize, NUM_DISPVALUES,dispValues);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(dispLabel, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_SyncMail, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   m_Dispose->SetConstraints(c);
+
+
+   m_SyncAddr = new wxCheckBox(this, -1, _("Synchronise Addressbooks"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_Dispose, 2*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_SyncAddr->SetConstraints(c);
+
+   wxStaticText *mboxLabel = new wxStaticText(this, -1,_("Mahogany Palm-mailbox"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.AsIs();
+   c->top.Below(m_SyncAddr, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   mboxLabel->SetConstraints(c);
+
+   m_PalmBox = new wxTextCtrl(this, -1);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(mboxLabel, 4*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(mboxLabel, wxTop, 0);
+   c->height.AsIs();
+   m_PalmBox->SetConstraints(c);
+
+   wxStaticText *devLabel = new wxStaticText(this, -1,_("Serial device"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 4*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->top.Below(m_PalmBox, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   devLabel->SetConstraints(c);
+
+   m_PilotDev = new wxTextCtrl(this, -1);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(devLabel, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(devLabel, wxTop, 0);
+   c->height.AsIs();
+   m_PilotDev->SetConstraints(c);
+   
+   wxStaticText *spdLabel = new wxStaticText(this, -1,_("Serial speed"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.AsIs();
+   c->top.Below(m_PilotDev, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   spdLabel->SetConstraints(c);
+
+   static wxString spdValues[] =
+   {
+      "9600","19200","38400","57600","115200","230400","460800"
+   };
+   static const size_t NUM_SPDVALUES  = WXSIZEOF(spdValues);
+
+   m_Speed = new wxChoice(this, -1, wxDefaultPosition,
+                            wxDefaultSize, NUM_SPDVALUES,spdValues);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(devLabel, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->top.SameAs(spdLabel, wxTop, 0);
+   c->height.AsIs();
+   m_Speed->SetConstraints(c);
+   
+   m_LockPort = new wxCheckBox(this, -1, _("Attempt to lock device"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_Speed, 2*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_LockPort->SetConstraints(c);
+
+   wxStaticText *scr1Label = new wxStaticText(this, -1,_("Optional script to run before opening device"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.AsIs();
+   c->top.Below(m_LockPort, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   scr1Label->SetConstraints(c);
+   
+   m_Script1 = new wxTextCtrl(this, -1);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(devLabel, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(scr1Label, wxTop, 0);
+   c->height.AsIs();
+   m_Script1->SetConstraints(c);
+   
+   wxStaticText *scr2Label = new wxStaticText(this, -1,_("Optional script to run after closing device"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.AsIs();
+   c->top.Below(m_Script1, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   scr2Label->SetConstraints(c);
+   
+   m_Script2 = new wxTextCtrl(this, -1);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(devLabel, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(scr2Label, wxTop, 0);
+   c->height.AsIs();
+   m_Script2->SetConstraints(c);
+
+   SetDefaultSize(280, 220, FALSE /* not minimal */);
+   TransferDataToWindow();
+   // Register old values:
+   m_OldSyncMail = m_SyncMail->GetValue();
+   m_OldSyncAddr = m_SyncAddr->GetValue();
+   m_OldPilotDev = m_PilotDev->GetValue();
+   m_OldLockPort = m_LockPort->GetValue();
+   m_OldDispose = m_Dispose->GetSelection();
+   m_OldSpeed = m_Speed->GetStringSelection();
+   m_OldPilotDev = m_PilotDev->GetValue();
+   m_OldScript1 = m_Script1->GetValue();
+   m_OldScript2 = m_Script2->GetValue();
+   m_OldPalmBox = m_PalmBox->GetValue();
+}
+
+bool
+wxPalmOSDialog::TransferDataToWindow()
+{
+   m_SyncMail->SetValue( READ_CONFIG(GetProfile(), MP_MOD_PALMOS_SYNCMAIL) != 0);
+   m_SyncAddr->SetValue( READ_CONFIG(GetProfile(), MP_MOD_PALMOS_SYNCADDR) != 0);
+   m_LockPort->SetValue( READ_CONFIG(GetProfile(), MP_MOD_PALMOS_LOCK) != 0);
+   m_PilotDev->SetValue( READ_CONFIG(GetProfile(), MP_MOD_PALMOS_PILOTDEV));
+   m_PalmBox->SetValue( READ_CONFIG(GetProfile(), MP_MOD_PALMOS_BOX));
+   m_Dispose->SetSelection(READ_CONFIG(GetProfile(),MP_MOD_PALMOS_DISPOSE));
+   m_Speed->SetStringSelection(READ_CONFIG(GetProfile(),MP_MOD_PALMOS_SPEED));
+   m_Script1->SetValue(READ_CONFIG(GetProfile(), MP_MOD_PALMOS_SCRIPT1));
+   m_Script2->SetValue(READ_CONFIG(GetProfile(), MP_MOD_PALMOS_SCRIPT2));
+   return TRUE;
+}
+
+bool
+wxPalmOSDialog::TransferDataFromWindow()
+{
+   GetProfile()->writeEntry(MP_MOD_PALMOS_SYNCMAIL, m_SyncMail->GetValue());
+   GetProfile()->writeEntry(MP_MOD_PALMOS_SYNCADDR, m_SyncAddr->GetValue());
+   GetProfile()->writeEntry(MP_MOD_PALMOS_LOCK, m_LockPort->GetValue());
+   GetProfile()->writeEntry(MP_MOD_PALMOS_PILOTDEV,m_PilotDev->GetValue());
+   GetProfile()->writeEntry(MP_MOD_PALMOS_BOX, m_PalmBox->GetValue());
+   GetProfile()->writeEntry(MP_MOD_PALMOS_DISPOSE,m_Dispose->GetSelection());
+   GetProfile()->writeEntry(MP_MOD_PALMOS_SPEED,m_Speed->GetStringSelection());
+   GetProfile()->writeEntry(MP_MOD_PALMOS_SCRIPT1,m_Script1->GetValue());
+   GetProfile()->writeEntry(MP_MOD_PALMOS_SCRIPT1, m_Script2->GetValue());
+   return TRUE;
+}
+
+void
+PalmOSModule::Configure(void)
+{
+   ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
+   wxPalmOSDialog dlg(p);
+   p->DecRef();
+   (void) dlg.ShowModal();
+}
+
+
 #endif

@@ -33,6 +33,14 @@ FUNCTION(GetGlobalProfile, ProfileBase *, `(void)',
  return mApplication->GetProfile();
 ')
 
+FUNCTION(CreateModuleProfile, ProfileBase *, (
+ARG(STRING, classname),
+ARG(ProfileBase *, parent, =NULL)
+),
+`
+ return ProfileBase::CreateModuleProfile(classname,parent);
+')
+
 FUNCTION(Message, void , (
 ARG(STRING, message), ARG(const MWindow *, parent, =NULL),
 ARG(STRING, title, =MDIALOG_MSGTITLE),

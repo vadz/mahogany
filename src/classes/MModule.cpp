@@ -296,7 +296,23 @@ public:
       {
          SafeDecRef(m_Module);
       }
+   /// must be implemented to handle refcount of MModule pointer:
+   MModuleListingEntryImpl & operator=(
+      const MModuleListingEntryImpl & newval)
+      {
+         SafeDecRef(m_Module);
+         m_Name = newval.m_Name; m_Interface = newval.m_Interface;
+         m_ShortDesc = newval.m_ShortDesc;
+         m_Desc = newval.m_Desc; m_Author = newval.m_Author;
+         m_Version = newval.m_Version;
+         m_Module = newval.m_Module;
+         SafeIncRef(m_Module);
+         return *this;
+      }
 private:
+   /// forbidden:
+   MModuleListingEntryImpl(const MModuleListingEntryImpl &);
+   
    String m_Name, m_Interface, m_ShortDesc,
          m_Desc, m_Version, m_Author;
    MModule *m_Module;

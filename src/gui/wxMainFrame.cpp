@@ -71,7 +71,7 @@ public:
 private:
    wxModulePopup();
    MModuleListing *m_Listing;
-   size_t m_CountMain, m_CountConfig;
+   size_t m_CountModules, m_CountMain, m_CountConfig;
    DECLARE_EVENT_TABLE()
 };
 
@@ -97,7 +97,8 @@ wxModulePopup::wxModulePopup()
    m_CountConfig = 0;
    
    m_Listing = MModule::ListLoadedModules();
-   for(size_t i = 0; i < m_Listing->Count(); i++)
+   m_CountModules = m_Listing->Count();
+   for(size_t i = 0; i < m_CountModules; i++)
    {
       MModule *mod = (*m_Listing)[i].GetModule();
       if(mod->Entry(MMOD_FUNC_GETFLAGS) & MMOD_FLAG_HASMAIN)
@@ -119,9 +120,14 @@ wxModulePopup::wxModulePopup()
       {
          for(size_t i = 0; i < m_Listing->Count(); i++)
          {
-            MModule *mod = (*m_Listing)[i].GetModule();
+            wxString entry;
+	    MModule *mod = (*m_Listing)[i].GetModule();
             if(mod->Entry(MMOD_FUNC_GETFLAGS) & MMOD_FLAG_HASMAIN)
-               Append(WXMENU_POPUP_MODULES_OFFS+i, (*m_Listing)[i].GetName());
+            {
+	       entry = (*m_Listing)[i].GetName();
+	       entry << _(" module...");
+	       Append(WXMENU_POPUP_MODULES_OFFS+i, entry);
+	    }       
             mod->DecRef();
          }
       }
@@ -137,7 +143,7 @@ wxModulePopup::wxModulePopup()
             {
                entry.Printf(_("Configure %s module..."),
                             (*m_Listing)[i].GetName().c_str());
-               Append(WXMENU_POPUP_MODULES_OFFS+i+m_CountMain, entry);
+               Append(WXMENU_POPUP_MODULES_OFFS+i+m_CountModules, entry);
             }
             mod->DecRef();
          }
@@ -150,12 +156,11 @@ wxModulePopup::OnCommandEvent(wxCommandEvent &event)
 {
    if(event.GetId() < 0) // wxGTK menu title (how stupid!)
       return;
-   
-   size_t id = (size_t) event.GetId();
-   size_t count = 0;
 
+   size_t id = (size_t) event.GetId();
+   
    id = id-WXMENU_POPUP_MODULES_OFFS;
-   if(id < m_CountMain)
+   if(id < m_CountModules)
    {
       MModule *mod = (*m_Listing)[id].GetModule();
       mod->Entry(MMOD_FUNC_MAIN);
@@ -164,7 +169,7 @@ wxModulePopup::OnCommandEvent(wxCommandEvent &event)
    }
    else
    {
-      id -= m_CountMain;
+      id -= m_CountModules;
       MModule *mod = (*m_Listing)[id].GetModule();
       mod->Entry(MMOD_FUNC_CONFIG);
       mod->DecRef();
@@ -437,7 +442,13 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
          delete m_ModulePopup;
       m_ModulePopup = wxModulePopup::Create();
       if(m_ModulePopup)
-         PopupMenu(m_ModulePopup, 100, 100 );
+      {
+         int xpos, ypos;
+         int fxpos, fypos;
+         wxGetMousePosition(&xpos,&ypos);
+         GetPosition(&fxpos,&fypos);
+         PopupMenu(m_ModulePopup, xpos-fxpos, ypos-fypos);
+      }
    }
    else if(m_FolderView &&
       (WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
