@@ -1166,7 +1166,8 @@ void HtmlViewer::EndBody()
 
    m_window->SetPage(m_htmlText);
 
-#if defined(wxCHECK_VERSION_FULL) && wxCHECK_VERSION_FULL(2, 5, 2, 1)
+#if defined(wxCHECK_VERSION_FULL)
+#if wxCHECK_VERSION_FULL(2, 5, 2, 1)
    // if we display HTML text, we need to let the msg view know about the text
    // we have so that it could be quoted later -- normally this is done by
    // TransparentFilter which intercepts all InsertText() calls, but it can't
@@ -1182,6 +1183,7 @@ void HtmlViewer::EndBody()
       m_hasHtmlContents = false;
    }
 #endif // wx >= 2.5.2
+#endif
 }
 
 // ----------------------------------------------------------------------------
