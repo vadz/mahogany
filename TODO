@@ -63,6 +63,8 @@ $Id$
 
 - Use configure to check for utilities, like help browser. "ReConfigure" menu.
 
+- Edit-CC, CC messages to others but edit the individual copies before sending
+
 - !!! non-blocking message retrieval !!!
 
 - REMOTE-CONTROL: add support for popping window open and reading a folder of one's choice
