@@ -164,7 +164,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    STRINGLIST  slist;
    slist.next = NULL;
    slist.text.size = line.length();
-   slist.text.data = strutil_strdup(line);
+   slist.text.data = TEXT_DATA_CAST(strutil_strdup(line));
 
    char *
       rc = mail_fetchheader_full (folder->Stream(),
