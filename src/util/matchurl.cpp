@@ -557,7 +557,8 @@ match:
          // even with all the checks below we still get too many false
          // positives so consider that only "long" URLs are wrapped where long
          // URLs are defined as the ones containing the CGI script parameters
-         if ( strcspn(start + len, "?&\r") == (size_t)(p - start - len) )
+         // or some '%' chars (i.e. escaped characters)
+         if ( strcspn(start + len, "%?&\r") == (size_t)(p - start - len) )
          {
             // no CGI parameters, suppose it can't wrap
             break;
@@ -589,10 +590,12 @@ match:
                break;
          }
 
-         if ( q >= text && *q != '\n' )
+         // Does the URL start at the beginning of the line, or does it have
+         // a '<' just in front?
+         if ( q >= text && *q != '\n' && *q != '<')
             break;
 
-         // it did occur at the start, suppose the URL is wrapped and so
+         // it did occur at the start (or after '<'), suppose the URL is wrapped and so
          // continue on the next line (no need to test the first character,
          // it had been already done above)
          p += 3;
