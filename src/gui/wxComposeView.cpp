@@ -1036,7 +1036,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
    ASSERT( event.GetEventObject() == this ); // how can we get anything else?
 
    // we're only interested in TABs and only it's not a second TAB in a row
-   if ( event.KeyCode() == WXK_TAB )
+   if ( event.GetKeyCode() == WXK_TAB )
    {
       if ( IsModified() &&
            !event.ControlDown() && !event.ShiftDown() && !event.AltDown() )
