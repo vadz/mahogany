@@ -97,10 +97,10 @@ SignatureFilter::ReadOptions(Profile *profile)
 // ----------------------------------------------------------------------------
 
 // this filter has a high priority as it should be normally applied before
-// all the filters working on the message body -- but after TrailerFilter which
-// has Priority_High + 5
+// all the filters working on the message body -- but after the filters
+// modifying the message "structure" such as TrailerFilter or PGPFilter
 IMPLEMENT_VIEWER_FILTER(SignatureFilter,
-                        ViewFilter::Priority_High + 4,
+                        ViewFilter::Priority_Default + 10,
                         true,      // initially enabled
                         _("Signature"),
                         "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
