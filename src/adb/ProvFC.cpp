@@ -653,6 +653,10 @@ FCBook::FCBook(const String& filename)
   m_pConfig = new wxFileConfig(wxGetEmptyString(), wxGetEmptyString(),
                                m_strFile);
 
+  // the ADB files contain arbitrary data, don't try to expand env vars in
+  // them
+  m_pConfig->SetExpandEnvVars(FALSE);
+
   // create the root group
   m_pRootGroup = new FCEntryGroup(m_pConfig);
 }
