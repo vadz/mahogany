@@ -12,16 +12,19 @@
 #endif
 
 #include   "Mpch.h"
-#include   "Mcommon.h"
 
 #ifndef USE_PCH
+#   include "Mcommon.h"
 #   include "strutil.h"
-#   include "miscutil.h"
+
+#   include "MApplication.h"
+#   include "MDialogs.h"
+#   include "gui/wxMFrame.h"
 #endif // USE_PCH
 
 #include <wx/fontmap.h>
 
-#include "gui/wxMFrame.h"
+#include "miscutil.h"
 #include "FolderView.h"
 
 #include "Mdefaults.h"
@@ -33,9 +36,6 @@
 #include "MessageCC.h"
 
 #include "SendMessageCC.h"
-
-#include "MApplication.h"
-#include "MDialogs.h"
 
 #include <ctype.h>
 
