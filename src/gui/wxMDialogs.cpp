@@ -1771,7 +1771,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    c->height.AsIs();
    critlabel->SetConstraints(c);
 
-   m_Choices = new wxChoice("SearchWhere", this, -1, wxDefaultPosition,
+   m_Choices = new wxPChoice("SearchWhere", this, -1, wxDefaultPosition,
                              wxDefaultSize, NUM_SEARCHCRITERIA,
                              searchCriteria);
    c = new wxLayoutConstraints;

@@ -45,6 +45,7 @@ FolderView::FolderView()
             this,
             MEventId_FolderTreeChange,  &m_regCookieTreeChange,
             MEventId_FolderUpdate,      &m_regCookieFolderUpdate,
+            MEventId_FolderExpunge,     &m_regCookieFolderExpunge,
             MEventId_MsgStatus,         &m_regCookieMsgStatus,
             MEventId_ASFolderResult,    &m_regCookieASFolderResult,
             MEventId_AppExit,           &m_regCookieAppExit,
@@ -59,6 +60,7 @@ void FolderView::DeregisterEvents(void)
 {
     MEventManager::DeregisterAll(&m_regCookieTreeChange,
                                  &m_regCookieFolderUpdate,
+                                 &m_regCookieFolderExpunge,
                                  &m_regCookieMsgStatus,
                                  &m_regCookieASFolderResult,
                                  &m_regCookieAppExit,
@@ -75,18 +77,20 @@ FolderView::~FolderView()
 
 bool FolderView::OnMEvent(MEventData& ev)
 {
-    if ( ev.GetId() == MEventId_FolderTreeChange )
+    if ( ev.GetId() == MEventId_MsgStatus )
+        OnMsgStatusEvent((MEventMsgStatusData&)ev );
+    else if ( ev.GetId() == MEventId_FolderExpunge )
+        OnFolderExpungeEvent((MEventFolderExpungeData&)ev );
+    else if ( ev.GetId() == MEventId_FolderUpdate )
+        OnFolderUpdateEvent((MEventFolderUpdateData&)ev );
+    else if ( ev.GetId() == MEventId_ASFolderResult )
+        OnASFolderResultEvent((MEventASFolderResultData &) ev );
+    else if ( ev.GetId() == MEventId_FolderTreeChange )
     {
         MEventFolderTreeChangeData& event = (MEventFolderTreeChangeData &)ev;
         if ( event.GetChangeKind() == MEventFolderTreeChangeData::Delete )
             OnFolderDeleteEvent(event.GetFolderFullName());
     }
-    else if ( ev.GetId() == MEventId_ASFolderResult )
-        OnASFolderResultEvent((MEventASFolderResultData &) ev );
-    else if ( ev.GetId() == MEventId_MsgStatus )
-        OnMsgStatusEvent((MEventMsgStatusData&)ev );
-    else if ( ev.GetId() == MEventId_FolderUpdate )
-        OnFolderUpdateEvent((MEventFolderUpdateData&)ev );
     else if ( ev.GetId() == MEventId_AppExit )
         OnAppExit();
 

@@ -27,15 +27,17 @@ enum MEventId
    MEventId_Null = -1,
    /// MEventMailData
    MEventId_NewMail = 100,
-   /// MEventFolderTreeChangeData
+   /// MEventFolderTreeChangeData - a change in folder tree
    MEventId_FolderTreeChange = 200,
-   /// MEventFolderUpdateData -- there's a new folder listing
+   /// MEventFolderUpdateData - there's a new folder listing
    MEventId_FolderUpdate = 400,
-   /// MEventMsgStatusData
-   MEventId_MsgStatus = 402,
-   /// MEventASFolderResult
+   /// MEventFolderExpunge - messages were expunged from the folder
+   MEventId_FolderExpunge,
+   /// MEventMsgStatusData - message status changed
+   MEventId_MsgStatus,
+   /// MEventASFolderResult - async operation terminated
    MEventId_ASFolderResult = 800,
-   /// MEventOptionsChangeData
+   /// MEventOptionsChangeData - the program options changed
    MEventId_OptionsChange,
    /// MEventPing - causes folders to ping themselves
    MEventId_Ping,
@@ -167,7 +169,37 @@ public:
    // ctor
    MEventFolderUpdateData(MailFolder *folder)
       : MEventWithFolderData(MEventId_FolderUpdate, folder)
-      { }
+      {
+      }
+};
+
+/**
+ MEventFolderExpungeData: notifies about message expunge
+ */
+class MEventFolderExpungeData : public MEventWithFolderData
+{
+public:
+   // ctor takes the array of deleted msgnos which will be deleted by us
+   MEventFolderExpungeData(MailFolder *folder, wxArrayInt *delMsgnos)
+      : MEventWithFolderData(MEventId_FolderExpunge, folder)
+      {
+         m_delMsgnos = delMsgnos;
+      }
+
+   // free msgno array
+   virtual ~MEventFolderExpungeData()
+   {
+      delete m_delMsgnos;
+   }
+
+   // return the number of messages deleted
+   size_t GetCount() const { return m_delMsgnos ? m_delMsgnos->GetCount() : 0; }
+
+   // return the n-th deleted item
+   size_t GetItem(size_t n) const { return m_delMsgnos->Item(n); }
+
+private:
+   wxArrayInt *m_delMsgnos;
 };
 
 /**
@@ -210,7 +242,7 @@ private:
    can't be followed by Cancel. The profile pointer is the profile being
    modified and generally it should be safe to ignore all changes to the
    profile if it's not a parent of the profile in use.
-  
+
    In response to "Apply" event (only) the event handler may prevent it from
    taking place by calling Veto() on the event object.
  */

@@ -994,7 +994,7 @@ MailFolderCC::Create(int typeAndFlags)
    m_nRecent = UID_ILLEGAL;
    m_LastUId = UID_ILLEGAL;
    m_Listing = NULL;
-   m_expunged = false;
+   m_expungedMsgnos = NULL;
 
    // currently not used, but might be in the future
    m_GotNewMessages = false;
@@ -1032,6 +1032,8 @@ MailFolderCC::~MailFolderCC()
 
    Close();
 
+   // these should have been deleted before
+   ASSERT(m_expungedMsgnos == NULL);
    ASSERT(m_SearchMessagesFound == NULL);
 
    // we might still be listed, so we better remove ourselves from the
@@ -3322,14 +3324,11 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
       // of a checkpoint or something and it just confirms that the number of
       // messages in the folder didn't change (why send it then? ask
       // cclient author...)
-      if ( !mf->m_expunged )
+      if ( !mf->m_expungedMsgnos )
       {
          // no, they were not - don't refresh everything!
          return;
       }
-
-      // as we're going to update it below, we can clear the flag
-      mf->m_expunged = false;
    }
 
    // don't request update if we are only half opened: this will cause another
@@ -3594,12 +3593,21 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
       size_t idx = hil->GetIdxFromMsgno(msgno);
       CHECK_RET( idx < mf->m_nMessages, "invalid msgno in mm_expunged()" );
 
+      if ( !mf->m_expungedMsgnos )
+      {
+         // create a new array
+         mf->m_expungedMsgnos = new wxArrayInt;
+      }
+
+      // add the msgno to the list of expunged messages
+      mf->m_expungedMsgnos->Add(hil->GetPosFromIdx(idx));
+
+      // remove it now (do it after calling GetPosFromIdx() above or the
+      // position would be wrong!)
       mf->m_Listing->Remove(idx);
 
       ASSERT_MSG( mf->m_nMessages > 0,
                   "expunged a message when we don't have any?" );
-
-      mf->m_expunged = true;
 
       mf->m_nMessages--;
       mf->m_msgnoMax--;
@@ -3791,17 +3799,34 @@ MailFolderCC::RequestUpdate()
    // to be rebuilt anyhow
    if ( !CanSendUpdateEvents() )
    {
-      DBGMESSAGE(("Ignoring mm_exists() for folder '%s'",
+      DBGMESSAGE(("Can't request update for folder '%s'",
                  GetName().c_str()));
 
       return;
    }
 
-   // tell all interested that the listing changed
-   wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
-              GetName().c_str());
+   // if we have m_expungedMsgnos and the listing is valid it can only mean that
+   // some messages were expunged but no new ones arrived (as then we'd have
+   // invalidated the listing), in which case we don't send the "total refresh"
+   // event but just one telling that the messages were expunged
+   if ( HaveListing() && m_expungedMsgnos )
+   {
+      wxLogTrace(TRACE_MF_EVENTS, "Sending FolderExpunged event for folder '%s'",
+                 GetName().c_str());
 
-   MEventManager::Send(new MEventFolderUpdateData(this));
+      MEventManager::Send(new MEventFolderExpungeData(this, m_expungedMsgnos));
+
+      // MEventFolderExpungeData() will delete it
+      m_expungedMsgnos = NULL;
+   }
+   else // new mail
+   {
+      // tell all interested that the listing changed
+      wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
+                 GetName().c_str());
+
+      MEventManager::Send(new MEventFolderUpdateData(this));
+   }
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */

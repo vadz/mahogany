@@ -2907,7 +2907,50 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
    }
 }
 
-// This function gets called when the folder contents changed
+// this function is called when messages are deleted from folder but no new
+// ones appear
+void
+wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
+{
+   if ( event.GetFolder() == m_MailFolder )
+   {
+      HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+      CHECK_RET( hil, "no headers list in OnFolderExpungeEvent" );
+
+      // we might need to move focus if the focused item was deleted
+      long focus = m_FolderCtrl->GetFocusedItem();
+      bool focusDeleted = false;
+
+      size_t count = event.GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         long item = event.GetItem(n);
+         if ( item < focus )
+            focus--;
+         else if ( item == focus )
+            focusDeleted = true;
+
+         m_FolderCtrl->DeleteItem(item);
+      }
+
+      // restore focus if needed - otherwise there would be no focused item left
+      // at all in the control
+      if ( focusDeleted )
+      {
+         // last valid index
+         long last = m_FolderCtrl->GetItemCount() - 1;
+         if ( focus > last )
+         {
+            // go to last item - not ideal, but what else can we do?
+            focus = last;
+         }
+
+         m_FolderCtrl->Focus(focus);
+      }
+   }
+}
+
+// this function gets called when new mail appears in the folder
 void
 wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 {
@@ -2917,7 +2960,7 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
    }
 }
 
-/// update only one entry in listing:
+// this is called when the status of one message changes
 void
 wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
 {

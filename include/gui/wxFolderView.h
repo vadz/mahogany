@@ -181,6 +181,8 @@ public:
    /// update the folderview
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
    /// update the folderview
+   virtual void OnFolderExpungeEvent(MEventFolderExpungeData &event);
+   /// update the folderview
    virtual void OnMsgStatusEvent(MEventMsgStatusData &event);
    /// the derived class should react to the result to an asynch operation
    virtual void OnASFolderResultEvent(MEventASFolderResultData &event);

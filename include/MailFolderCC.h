@@ -388,8 +388,8 @@ private:
    /// number or recent messages in mailbox
    unsigned long m_nRecent;
 
-   /// were the messages expunged from this folder since the last update?
-   bool m_expunged;
+   /// the array containing msgnos of expunged messages or NULL
+   wxArrayInt *m_expungedMsgnos;
 
    /// last seen UID
    UIdType m_LastUId;
