@@ -88,6 +88,10 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *** KB:
 *********************************************************************
 
+- generally: think of a way to modularise and load plug-ins
+  (Especially useful as we add more functionality such as the calendar 
+   or more addressbook formats.)
+- drop classes documentation from archive/docs!!
 - finish and fix message view/editor: recalcuating/re-layout should be 
   one function, operating on lines marked as dirty. This might also
   fix the cursor bugs.
@@ -120,11 +124,14 @@ GENERAL ROADMAP/ORDER OF THINGS:
 - add translation macros to unmodified c-client lib and submit it to
   MRC. Use two macros, a translating one _() and a non-translating one 
   __() to easily find new strings later. Use common header for defines.
-
+- fix alpha related c-client bugs?
+- Ask again on c-client@u.washington.edu about the last two points.
 *********************************************************************
 *** Miscellaneous Todo:
 *********************************************************************
 
+- move to scandoc instead of doc++??
+- add calendar tool/plugin
 - if exists, use /etc/M.conf or /etc/Mahogany.conf instead of
   prefix/Mahogany/M.conf.
 - merge in settings from some remote location, possibly using ftp/http 
