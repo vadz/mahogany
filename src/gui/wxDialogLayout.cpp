@@ -164,15 +164,28 @@ static void SetTopConstraint(wxWindow *parent,
                              size_t extraSpace)
 {
    if ( last == NULL )
+   {
       c->top.SameAs(parent, wxTop, 2*LAYOUT_Y_MARGIN + extraSpace);
-   else {
-      size_t margin = LAYOUT_Y_MARGIN;
-      if ( last->IsKindOf(CLASSINFO(wxListBox)) ) {
-         // listbox has a surrounding box, so leave more space
-         margin *= 4;
+   }
+   else // have last control above
+   {
+      if ( wxDynamicCast(last, wxStaticBox) )
+      {
+         // special case: last is not the control above us but the static box
+         // containing us
+         c->top.SameAs(last, wxTop, 3*LAYOUT_Y_MARGIN);
       }
+      else
+      {
+         size_t margin = LAYOUT_Y_MARGIN;
+         if ( last->IsKindOf(CLASSINFO(wxListBox)) )
+         {
+            // listbox has a surrounding box, so leave more space
+            margin *= 4;
+         }
 
-      c->top.Below(last, margin + extraSpace);
+         c->top.Below(last, margin + extraSpace);
+      }
    }
 }
 
@@ -226,13 +239,13 @@ wxRadioBox *CreateRadioBox(wxWindow *parent,
    c = new wxLayoutConstraints;
    SetTopConstraint(parent, c, last,
 #ifdef __WXMSW__
-                    LAYOUT_Y_MARGIN
+                    -LAYOUT_Y_MARGIN
 #else
                     0
 #endif // __WXMSW__
                     );
-   c->left.SameAs(parent, wxLeft, widthMax);
-   c->width.AsIs();
+   c->left.SameAs(parent, wxLeft, 2*LAYOUT_X_MARGIN + widthMax);
+   c->right.SameAs(parent, wxRight, LAYOUT_X_MARGIN + nRightMargin);
    c->height.AsIs();
 
    // FIXME we assume that if there other controls dependent on this one in
