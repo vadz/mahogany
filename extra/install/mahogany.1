@@ -1,27 +1,67 @@
-.\".\" $Id$
-.\"
-.Dd September, 2000
-.Dt MAHOGANY 1
-.Os "Linux"
-.Sh NAME
-.Nm mahogany
-.Nd mail and news client with X11 interface
-.Sh SYNOPSIS
-.Nm mahogany
-.Sh DESCRIPTION
-.Nm Mahogany
-is an email and news client for Unix and MS Windows, featuring a rich
-set of features including powerful filter rules, an embedded Python
-interpreter for extensibility, loadable extension modules and full
-POP3 and IMAP support.
-.br
+.TH "mahogany" "1" "1.2" "" "X11"
+.SH "NAME"
+.LP 
+\fBmahogany\fR \- mail and news client with X11 interface
+.SH "SYNTAX"
+.LP 
+\fBmahogany\fR  [\-h] [\-\-verbose] [\-b <str>] [\-\-body <str>] [\-c <str>]
+ [\-\-userdir <str>] [\-\-config <str>] [\-\-debug] [\-f <str>] 
+ [\-\-lang <str>] [\-\-newsgroup <str>] [\-\-safe] [\-s <str>] 
+ [address(es) to start composing the message to...]
+
+.SH "DESCRIPTION"
+\fBmahogany\fR is an email and news client for Unix and MS
+Windows,featuring a rich set of features including powerful filter
+rules, an embedded Python interpreter for extensibility, loadable
+extension modules and full POP3 and IMAP support.
+
+.SH "OPTIONS"
+\-h, \-\-help            show this help message
+   
+\-\-verbose             generate verbose log messages
+
+\-b, \-\-bcc=<str>       specify the blind carbon\-copy (BCC) recipients
+
+\-\-body=<str>          specify the body of the message
+
+\-c, \-\-cc=<str>        specify the carbon\-copy (CC) recipients
+
+\-\-userdir=<str>       specify a non default directory for user files
+
+\-\-config=<str>        specify the alternative configuration file to use
+
+\-\-debug               enable mail subsystem debug message logging
+
+\-f, \-\-folder=<str>    specify the folder to open in the main window
+
+\-\-lang=<str>          the language to use for the program messages
+
+\-\-newsgroup=<str>     the newsgroup to post the message to
+
+\-\-safe                don't perform any operations on startup
+
+\-s, \-\-subject=<str>   specify the subject
+
+.SH "FILES"
+.LP 
+\fI$HOME/.M/config\fP
+.br 
+\fI/usr/share/mahogany/M.conf\fP 
+.br 
+\fI/usr/bin/mahogany\fP
+.br 
+\fI/usr/bin/M\fP
+.SH "AUTHORS"
+.LP 
+Original authors are Karsten Ballüder and Vadim Zeitlin.
+Now maintained and developed by a team of volunteers.
+.SH "SEE ALSO"
+.LP 
 More information is available in the online manual accessible from
 within the application.
-.Sh AUTHORS
-Original authors are Karsten Ballüder and Vadim Zeitlin.
-.br
-Now maintained and developed by a team of volunteers.
-.Sh FURTHER INFORMATION
-.br
+
+Manual: /usr/share/mahogany/doc
+
 See http://mahogany.sourceforge.net/ for more information and user
 support mailing lists.
+
