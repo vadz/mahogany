@@ -2313,8 +2313,7 @@ MailFolderCC::AppendMessage(const String& msg, bool update)
 }
 
 bool
-MailFolderCC::SaveMessages(const UIdArray *selections,
-                           MFolder *folder)
+MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 {
    CHECK( folder, false, "SaveMessages() needs a valid folder pointer" );
 
@@ -2415,7 +2414,21 @@ MailFolderCC::SaveMessages(const UIdArray *selections,
       status.total++;
    }
 
+   // always send this one to update the number of messages in the tree
    mfStatusCache->UpdateStatus(nameDst, status);
+
+   // if the folder is opened, we must also update the display
+   MailFolder *mfDst = FindFolder(folder);
+   if ( mfDst )
+   {
+      wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate for dst folder '%s'",
+                 mfDst->GetName().c_str());
+
+      MEventManager::Send(new MEventFolderUpdateData(mfDst));
+
+      mfDst->DecRef();
+   }
+   //else: not opened
 
    return true;
 }
