@@ -2668,6 +2668,8 @@ VerifyInbox(void)
          p->writeEntry("Icon", wxFolderTree::iconOutbox);
       p->DecRef();
    }
+
+   return true;
 }
 
 
