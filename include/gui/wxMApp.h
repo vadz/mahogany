@@ -41,7 +41,7 @@ public:
 
    /// return a pointer to the IconManager:
    wxIconManager *GetIconManager(void) { return m_IconManager; }
-   
+
    /// Destructor
    ~wxMApp();
 private:
