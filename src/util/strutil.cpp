@@ -1380,7 +1380,7 @@ wxArrayString strutil_uniq_array(const wxSortedArrayString& addrSorted)
 }
 
 // guess the charset of the given Unicode text
-static wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
+extern wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
 {
    typedef const unsigned short *codepage;
    struct CodePageInfo

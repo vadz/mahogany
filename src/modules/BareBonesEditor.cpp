@@ -328,52 +328,6 @@ IMPLEMENT_MESSAGE_EDITOR(BareBonesEditor,
                          _T("(c) 2003 Mahogany Team"));
 
 // ----------------------------------------------------------------------------
-// some global helper functions
-// ----------------------------------------------------------------------------
-
-#if wxUSE_WCHAR_T && defined(OS_WIN)
-
-// this very simple minded function tries to determine the encoding we should
-// use from the given Unicode character code (http://www.unicode.org/charts/)
-static wxFontEncoding GetEncoding(wchar_t wch)
-{
-   // basic latin
-   if ( wch < 0x7f )
-      return wxFONTENCODING_SYSTEM;
-
-   // latin-1 supplement
-   if ( wch < 0x100 )
-      return wxFONTENCODING_CP1252;
-
-   // greek
-   if ( wch >= 0x370 && wch < 0x400 )
-      return wxFONTENCODING_CP1253;
-
-   // cyrillic
-   if ( wch >= 0x400 && wch < 0x530 )
-      return wxFONTENCODING_CP1251;
-
-   // hebrew
-   if ( wch >= 0x590 && wch < 0x600 )
-      return wxFONTENCODING_CP1255;
-
-   // arabic
-   if ( wch >= 0x600 && wch < 0x700 )
-      return wxFONTENCODING_CP1255;
-
-   // unknown
-   return wxFONTENCODING_UTF8;
-}
-
-static bool CanConvert(wxFontEncoding encIn, wxFontEncoding encOut)
-{
-   return
-      wxEncodingConverter::GetAllEquivalents(encIn).Index(encOut) != wxNOT_FOUND;
-}
-
-#endif // wxUSE_WCHAR_T
-
-// ----------------------------------------------------------------------------
 // FormattedParagraph
 // ----------------------------------------------------------------------------
 
@@ -1256,6 +1210,9 @@ void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
 // BareBonesEditor contents: enumerating the different parts
 // ----------------------------------------------------------------------------
 
+// from strutil.cpp
+extern wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz);
+
 EditorContentPart *BareBonesEditor::GetFirstPart()
 {
    m_getNextAttachement = 0;
@@ -1268,7 +1225,10 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
 
    for ( const wchar_t *pwc = wbuf; *pwc; pwc++ )
    {
-      const wxFontEncoding encThis = GetEncoding(*pwc);
+      static wchar_t wbuf2[2] = { L'\0', L'\0' };
+      wbuf2[0] = *pwc;
+
+      const wxFontEncoding encThis = GuessUnicodeCharset(wbuf2);
       if ( encThis != wxFONTENCODING_SYSTEM && encThis != encPart )
       {
          if ( encPart != wxFONTENCODING_SYSTEM )
@@ -1326,8 +1286,9 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
             {
                // is it possible to convert to the desired encoding?
                wxEncodingConverter conv;
-               if ( CanConvert(encPart, m_encoding) &&
-                        conv.Init(encPart, m_encoding) )
+               if ( wxEncodingConverter::GetAllEquivalents(encPart).
+                        Index(m_encoding) != wxNOT_FOUND &&
+                           conv.Init(encPart, m_encoding) )
                {
                   // yes, do it
                   text = conv.Convert(text);
@@ -1368,7 +1329,7 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
    // think twice before changing it.
    //
    // VZ: see above (FIXME)
-   return new EditorContentPart(strutil_enforceCRLF(text), encPart);
+   return new EditorContentPart(strutil_enforceCRLF(text), m_encoding);
 }
 
 EditorContentPart *BareBonesEditor::GetNextPart()
