@@ -354,17 +354,10 @@ void
 ParserImpl::Error(const String &error)
 {
    unsigned long pos = GetPos();
-   String tmp, before, after;
-   if(pos < 40)
-      before = m_Input.Left(pos-1);
-   else
-      before = m_Input.Mid(pos-40,39);
-   if(m_Input.Length() >= pos+40)
-      after = m_Input.Mid(pos, 40);
-   else
-      after = m_Input.Mid(pos);
-   
-   tmp.Printf(_("Parse error at input position %lu:\n  %s\n%s|%s"),
+   String before, after, tmp;
+   before = m_Input.Left(pos);
+   after = m_Input.Mid(pos);
+   tmp.Printf(_("Parse error at input position %lu:\n  %s\n%s<error> %s"),
               pos, error.c_str(), before.c_str(), after.c_str());
 
    ERRORMESSAGE((tmp));
@@ -553,7 +546,7 @@ ParserImpl::ParseExpression(void)
             GetToken();
          else
          {
-            Error("')' expected after expression.");
+            Error("unexpected ')' after expression.");
             if(sn) delete sn;
             return NULL;
          }

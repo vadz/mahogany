@@ -6,8 +6,10 @@
 # Makefile2 which includes the usual standard rules.
 # This is needed to avoid warnings.
 
+SUBDIRS=generic
+
 all:
-	@$(MAKE) -f Makefile2 $@
+	for i in $(SUBDIRS); do $(MAKE) -C $$i $@ ; done
 
 clean:
 	$(RM) common/*.o generic/*.o

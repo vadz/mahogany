@@ -19,9 +19,6 @@ class MailFolderPtr(MObjectRCPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def RegisterView(self,arg0,*args):
-        val = apply(MailFolderc.MailFolder_RegisterView,(self.this,arg0.this,)+args)
-        return val
     def GetName(self):
         val = MailFolderc.MailFolder_GetName(self.this)
         val = StringPtr(val)
