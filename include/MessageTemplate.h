@@ -176,7 +176,8 @@ enum MessageTemplateKind
    MessageTemplate_Reply,
    MessageTemplate_Followup,
    MessageTemplate_Forward,
-   MessageTemplate_Max
+   MessageTemplate_Max,
+   MessageTemplate_None = MessageTemplate_Max
 };
 
 // get the value of the named template

@@ -1400,35 +1400,32 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    int cmd = event.GetId();
 
    // first process commands which can be reduced to other commands
-   bool askForTemplate;
+   MessageTemplateKind templKind;
    switch ( cmd )
    {
       case WXMENU_MSG_REPLY_WITH_TEMPLATE:
          cmd = WXMENU_MSG_REPLY;
-         askForTemplate = TRUE;
+         templKind = MessageTemplate_Reply;
          break;
 
       case WXMENU_MSG_FORWARD_WITH_TEMPLATE:
          cmd = WXMENU_MSG_FORWARD;
-         askForTemplate = TRUE;
+         templKind = MessageTemplate_Forward;
          break;
 
       case WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE:
          cmd = WXMENU_MSG_FOLLOWUP;
-         askForTemplate = TRUE;
+         templKind = MessageTemplate_Followup;
          break;
 
       default:
-         askForTemplate = FALSE;
+         templKind = MessageTemplate_None;
    }
 
    String templ;
-   if ( askForTemplate )
+   if ( templKind != MessageTemplate_None )
    {
-      templ = ChooseTemplateFor(cmd == WXMENU_MSG_REPLY
-                                 ? MessageTemplate_Reply
-                                 : MessageTemplate_Forward,
-                                GetFrame(m_Parent));
+      templ = ChooseTemplateFor(templKind, GetFrame(m_Parent));
    }
 
    switch ( cmd )
