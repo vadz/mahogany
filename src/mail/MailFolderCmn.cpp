@@ -1318,7 +1318,7 @@ String RemoveListPrefix(const String &subject)
 // Reply prefixes are removed only at the start of the
 // string or just after a list prefix (i.e. [ListName]).
 // 
-#if !defined(WX_HAVE_REGEX)
+#if !wxUSE_REGEX
 String
 strutil_removeAllReplyPrefixes(const String &isubject,
                                bool &replyPrefixSeen)
