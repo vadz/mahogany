@@ -259,7 +259,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             , FALSE },
 
    // msg
-   { WXMENU_MSG_OPEN,      gettext_noop("&Open\tO"),             gettext_noop("View selected message")    , FALSE },
+   { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message")    , FALSE },
    { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print this message")       , FALSE },
    { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       , FALSE },
 #ifdef USE_PS_PRINTING
@@ -275,21 +275,21 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_FORWARD,   gettext_noop("Next &unread\tCtrl-U"), gettext_noop("Select next unread message")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as F&ile\tS"),
+   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as F&ile"),
      gettext_noop("Export message to a file")   , FALSE },
-   { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to Folder\tC"),gettext_noop("Save message to another folder")   , FALSE },
-   { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to Folder\tM"),gettext_noop("Move message to another folder")   , FALSE },
-   { WXMENU_MSG_DELETE,    gettext_noop("&Delete\tD"),           gettext_noop("Delete this message")      , FALSE },
-   { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete\tU"),         gettext_noop("Undelete message")         , FALSE },
-   { WXMENU_MSG_EXPUNGE,   gettext_noop("Ex&punge\tX"),          gettext_noop("Expunge")                  , FALSE },
+   { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to Folder"),gettext_noop("Save message to another folder")   , FALSE },
+   { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to Folder"),gettext_noop("Move message to another folder")   , FALSE },
+   { WXMENU_MSG_DELETE,    gettext_noop("&Delete"),           gettext_noop("Delete this message")      , FALSE },
+   { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
+   { WXMENU_MSG_EXPUNGE,   gettext_noop("Ex&punge"),          gettext_noop("Expunge")                  , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_SELECTALL, gettext_noop("Select &all\tCtrl-A"),       gettext_noop("Select all messages")      , FALSE },
    { WXMENU_MSG_DESELECTALL,gettext_noop("D&eselect all\tCtrl-B"),    gettext_noop("Deselect all messages")    , FALSE },
    { WXMENU_MSG_SEARCH,  gettext_noop("&Search..."),
      gettext_noop("Search and select messages") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_TOGGLEHEADERS,gettext_noop("Show &headers\tH"), gettext_noop("Toggle display of message header") , TRUE },
-   { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tw"), gettext_noop("Show the raw message text") , FALSE },
+   { WXMENU_MSG_TOGGLEHEADERS,gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
+   { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message"), gettext_noop("Show the raw message text") , FALSE },
    { WXMENU_MSG_FIND,  gettext_noop("Fi&nd..."), gettext_noop("F&ind text in message\tCtrl-I") , FALSE },
 
    // compose
