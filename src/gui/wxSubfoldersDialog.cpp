@@ -1190,13 +1190,14 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
       wxString name;
       if ( spec.StartsWith(m_reference, &name) && !!name )
       {
-         if ( name[0u] == chDelimiter )
+         if ( name[0u] == chDelimiter && chDelimiter != '\0')
          {
             name = name.c_str() + 1;
          }
 
          wxString path = name;
-         name.Replace(wxString(chDelimiter), "/");
+         if(chDelimiter != '\0')
+            name.Replace(wxString(chDelimiter), "/");
          MFolder *folderNew = m_folder->GetSubfolder(name);
          if ( !folderNew )
          {

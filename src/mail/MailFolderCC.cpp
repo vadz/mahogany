@@ -217,7 +217,7 @@ MailFolderCC::HasInferiors(const String &imapSpec,
    mail_list (NIL, NULL, (char *) imapSpec.c_str());
    gs_mmListRedirect = NULL;
    ASSERT(gs_HasInferiorsFlag != -1);
-   return gs_HasInferiorsFlag != 0;
+   return gs_HasInferiorsFlag == 1;
 }
 
 /*
@@ -720,6 +720,8 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                          String const &symname,
                          bool halfopen)
 {
+   CClientInit();
+
    MailFolderCC *mf;
    String mboxpath;
 

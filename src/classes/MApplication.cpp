@@ -553,6 +553,12 @@ MAppBase::OnAbnormalTermination()
 void
 MAppBase::OnShutDown()
 {
+   // Try to store our remotely synchronised configuration settings
+   extern bool SaveRemoteConfigSettings();
+   if(! SaveRemoteConfigSettings() )
+      wxLogError(_("Synchronised configuration information could not "
+                   "be stored remotely."));
+   
    // don't want events any more
    if ( m_eventNewMailReg )
    {

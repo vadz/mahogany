@@ -22,14 +22,14 @@
 \vfill{}
 \title{\textsl{Mahogany User Manual}\\
 for Version 0.60\\
-``???''}
+``Redmond''}
 \vfill{}
 
 
 \author{Copyright 1997-2000 by The Mahogany Development Team\\
  Written by Karsten Ballüder, Vadim Zeitlin et.al.\\
-\texttt{http://www.wxwindows.org/Mahogany/}\\
-\texttt{<m-developers@egroups.com>}}
+\texttt{http://mahogany.sourceforge.net/}\\
+\texttt{<mahogany-developers@lists.sourceforge.net>}}
 
 \maketitle
 \tableofcontents{}
@@ -347,7 +347,7 @@ FITNESS FOR A PARTICULAR PURPOSE.
 When you start Mahogany for the first time, it will display the license and
 conditions of use and ask you to accept or reject the license. If you do not
 accept it, Mahogany will terminate. If you have any questions about the license
-or want to otherwise comment on it, please email the development team at \texttt{m-developers@egroups.com}
+or want to otherwise comment on it, please email the development team at \texttt{mahogany-developers@lists.sourceforge.net}
 .
 
 
@@ -1351,6 +1351,42 @@ received.
 \item \textbf{Path where to find AFM files} (Unix version only)\\
 To properly scale printing under Unix, Mahogany needs access to a set of AFM
 files. The searchpath where to look for them can be modified here.
+\item \textbf{Remote configuration synchronisation settings}\\
+Please refer to the section below for a detailed explanation.
+\end{itemize}
+
+\subsection{Remot configuration synchronisation}
+
+Mahogany can automatically save a subset of its configuration settings in a
+mailbox at program exit and automatically retrieve that information the next
+time it is started up. This option becomes useful if you are using the program
+from different systems, e.g. if sometimes from the office and some other times
+from home over a dialup link. In this case, you can save some settings in a
+special IMAP mailbox and tell the program to use this for some of the settings.
+Like that, you can share the program settings no matter from where you run Mahogany
+and you do not need to manually adjust both configurations.
+
+To use this option, first create a mailbox on an IMAP server. Do not use a POP3
+server, as the program cannot store information via POP3, IMAP is required for
+this to work. Then, activate the ``Sync options with remote server'' setting
+and choose which settings you wish to share. Currently supported are:
+
+\begin{itemize}
+\item \textbf{Sync Filter Rules}: This keeps the global list of all filter rules synchronised
+via the IMAP mailbox. Very useful if you want to use the same set of filter
+rules no matter where you run Mahogany.
+\item \textbf{Sync Identities}: This keeps the list of available identity settings
+synchronised. Be careful: some things such as server settings might cause problems
+if they are used on a machine with different network settings.
+\item \textbf{Sync part of the folder tree}: This allows you to synchronise a complete
+sub-tree of the mailbox/folder tree. Activate this and pick a group of folders
+from the tree (Click on the {[}>\textcompwordmark{}>{]} button to choose one.)
+and this tree of folders will be available no matter from where you run Mahogany.
+Note: this only makes sense if the folder group contains networked folders which
+are accessible from both machines. It synchronises configuration information,
+not folder contents. So you cannot access a mailbox file residing on one machine
+via this mechanism, but you can share configuration entries for remote mailboxes,
+such as IMAP, POP3 or newsgroups.
 \end{itemize}
 
 \subsection{Some Other Dialogs You May Encounter}
@@ -1931,67 +1967,19 @@ menu points in the plugin menu.
 \section{WWW Support}
 
 Mahogany has a home on the world wide web where you can get up to date information
-about development and the last releases. Come and visit us at the \htmladdnormallinkfoot{Mahogany Homepage}{http://www.phy.hw.ac.uk/~karsten/M/}
+about development and the last releases. Come and visit us at the \htmladdnormallinkfoot{Mahogany Homepage}{http://mahogany.sourceforge.net/}
 
 
 \section{Mailing Lists}
 
-Currently there exist three different mailing lists to help support Mahogany
-users:
+Several mailing lists exist to contact the developers, to receive updates of
+new releases and to exchange information and experiences with other users. Please
+visit the \htmladdnormallinkfoot{Mahogany Project Page}{http://sourceforge.net/projects/mahogany}for
+more information and to join the lists.
 
-
-\paragraph{m-announce:}
-
-\begin{itemize}
-\item M-announce is a moderated list which distributes announcements of new releases
-of Mahogany. It is a low volume mailing list.
-\item To subscribe send an e-mail to: \htmladdnormallinkfoot{m-announce-subscribe@egroups.com}{mailto:m-announce-subscribe@egroups.com}
-\item To unsubscribe send an e-mail to: \htmladdnormallinkfoot{m-announce-unsubscribe@egroups.com}{mailto:m-announce-unsubscribe@egroups.com}
-\end{itemize}
-m-users:
-
-\begin{itemize}
-\item M-Users is an unmoderated list for users of Mahogany to discuss problems and
-enhancements. All announcements will be sent to this list, too. It carries any
-kind of general discussion about Mahogany. If you just have simple questions
-which might not constitute a real bug report, try asking for help on m-users.
-\item To subscribe send an e-mail to: \htmladdnormallinkfoot{m-users-subscribe@egroups.com}{mailto:m-users-subscribe@egroups.com}
-\item To unsubscribe send an e-mail to: \htmladdnormallinkfoot{m-users-unsubscribe@egroups.com}{mailto:m-users-unsubscribe@egroups.com}
-\end{itemize}
-m-developers:
-
-\begin{itemize}
-\item M-developers is a moderated mailing list for the people involved in Mahogany's
-development and testing. There are generally two reasons why you would want
-to send an e-mail here: \htmladdnormallinkfoot{m-developers@egroups.com}{mailto:m-developers@egroups.com}
-
-\begin{enumerate}
-\item You have discovered a bug or problem in Mahogany and want to tell the developers
-about, or, even better, you want to submit a patch to fix it.
-\item You want to help develop, translate or test Mahogany. This is highly welcome
-and encouraged. Please, if you want to add a feature, get in touch with us.
-\end{enumerate}
-\item If you want to contact the developers, send an e-mail to the address above.
-\item Subscription to this list is by invitation only. If you would like to join the
-team, contact the developers and we will be happy to add you to the list.
-\end{itemize}
-
-\paragraph{Subscribe Directly}
-
-If your help browser understands HTML forms, you will find to forms below where
-you can directly subscribe to the support mailing lists.
-
-\begin{rawhtml}<form method=GET action="http://www.egroups.com/cgi-bin/subscribe.py"><input  type=hidden name="listname" value="m-announce"><table BORDER=0 CELLSPACING=0 BGCOLOR="#000000" ><tr><td><table BORDER=0 CELLSPACING=0 CELLPADDING=3 WIDTH="300" BGCOLOR="#FFFFCC" ><tr><td ALIGN=CENTER BGCOLOR="#000000"><b><fontface="arial,helvetica"><font color="#FFFFFF">Subscribe to M-announcements list&nbsp;</font></font></b></td></tr><tr><td>Enter your e-mail address:&nbsp;</td></tr><tr><td><input type=text name="emailaddr" value="your e-mail" size=21><input type=submit name="SubmitAction" VALUE="Subscribe"></td></tr><tr><td><a href="http://www.egroups.com/list/m-annouce/">FindMail List Archive</a></td></tr><tr><td><font face="arial,helvetica"><font size=-1>A mailing list hosted by<a href="http://www.makelist.com/">MakeList!</a></font></font></td></tr></table></td></tr></table> </form>\end{rawhtml}
-
-\begin{rawhtml}<form method=GET action="http://www.egroups.com/cgi-bin/subscribe.py"><input  type=hidden name="listname" value="m-users BORDER=0 CELLSPACING=0 BGCOLOR="#000000" ><tr><td><table BORDER=0 CELLSPACING=0 CELLPADDING=3 WIDTH="300" BGCOLOR="#FFFFCC" ><tr><td ALIGN=CENTER BGCOLOR="#000000"><b><fontface="arial,helvetica"><font color="#FFFFFF">Subscribe to M-users for1um&nbsp;</font></font></b></td></tr><tr><td>Enter your e-mail address:&nbsp;</td></tr><tr><td><input type=text name="emailaddr" value="your e-mail" size=21><input type=submit name="SubmitAction" VALUE="Subscribe"></td></tr><tr><td><a href="http://www.egroups.com/list/m-annouce/">FindMail List Archive</a></td></tr><tr><td><font face="arial,helvetica"><font size=-1>A mailing list hosted by<a href="http://www.makelist.com/">MakeList!</a></font></font></td></tr></table></td></tr></table> </form>\end{rawhtml}
-
-If there are no forms above this line, you need to subscribe by email or visit
-the \htmladdnormallinkfoot{Mahogany Homepage}{http://www.phy.hw.ac.uk/~karsten/M/}
-
-
-\subsection*{Mailing List Archives}
-
-All three mailing lists are archived at \htmladdnormallinkfoot{Egroups.com}{http://www.egroups.com/}
+If you want to help further development of Mahogany, please go to the same place
+and you will find all the information you need about how to contribute or how
+to contact us.
 
 
 \chapter{Compiling \textsl{Mahogany} from source}

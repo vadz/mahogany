@@ -948,6 +948,7 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
       && GetPageId() != MWizard_CreateFolder_File
       && GetPageId() != MWizard_CreateFolder_News
       && GetPageId() != MWizard_CreateFolder_NewsHier
+      && GetPageId() != MWizard_CreateFolder_Group
       )
    {
       switch(GetPageId())

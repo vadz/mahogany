@@ -1103,6 +1103,42 @@ bool InstallWizardFinalPage::TransferDataFromWindow()
 // private functions
 // ----------------------------------------------------------------------------
 
+static wxString GetRFC822Time(void)
+{
+   // we don't use strftime() here as we need the untranslated month
+   // names
+   time_t tt;
+   time(&tt);
+   struct tm *ourtime = localtime(&tt);
+   String timeStr;
+   switch(ourtime->tm_mon)
+   {
+   case  0: timeStr = "Jan"; break;
+   case  1: timeStr = "Feb"; break;
+   case  2: timeStr = "Mar"; break;
+   case  3: timeStr = "Apr"; break;
+   case  4: timeStr = "May"; break;
+   case  5: timeStr = "Jun"; break;
+   case  6: timeStr = "Jul"; break;
+   case  7: timeStr = "Aug"; break;
+   case  8: timeStr = "Sep"; break;
+   case  9: timeStr = "Oct"; break;
+   case 10: timeStr = "Nov"; break;
+   case 11: timeStr = "Dec"; break;
+   default:
+      ; // suppress warning
+   }
+   timeStr.Printf("%02d %s %d %02d:%02d:%02d",
+                  ourtime->tm_mday,
+                  timeStr.c_str(),
+                  ourtime->tm_year+1900,
+                  ourtime->tm_hour,
+                  ourtime->tm_min,
+                  ourtime->tm_sec);
+   return timeStr;
+}
+
+
 #ifdef USE_WIZARD
 static
 void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData);
@@ -1254,7 +1290,7 @@ bool RunInstallWizard()
       if ( mf )
       {
          String msgFmt =
-            _("From: m-users-subscribe@egroups.com\n"
+            _("From: mahogany-users-help@lists.sourceforge.net\n"
               "Subject: Welcome to Mahogany!\n"
               "Date: %s\n"
               "\n"
@@ -1278,37 +1314,7 @@ bool RunInstallWizard()
               "Your Mahogany Developers Team\n"
               );
 
-         // we don't use strftime() here as we need the untranslated month
-         // names
-         time_t tt;
-         time(&tt);
-         struct tm *ourtime = localtime(&tt);
-         String timeStr;
-         switch(ourtime->tm_mon)
-         {
-         case  0: timeStr = "Jan"; break;
-         case  1: timeStr = "Feb"; break;
-         case  2: timeStr = "Mar"; break;
-         case  3: timeStr = "Apr"; break;
-         case  4: timeStr = "May"; break;
-         case  5: timeStr = "Jun"; break;
-         case  6: timeStr = "Jul"; break;
-         case  7: timeStr = "Aug"; break;
-         case  8: timeStr = "Sep"; break;
-         case  9: timeStr = "Oct"; break;
-         case 10: timeStr = "Nov"; break;
-         case 11: timeStr = "Dec"; break;
-         default:
-            ; // suppress warning
-         }
-         timeStr.Printf("%02d %s %d %02d:%02d:%02d",
-                        ourtime->tm_mday,
-                        timeStr.c_str(),
-                        ourtime->tm_year+1900,
-                        ourtime->tm_hour,
-                        ourtime->tm_min,
-                        ourtime->tm_sec);
-
+         String timeStr = GetRFC822Time();
          String msgString = wxString::Format(msgFmt, timeStr.c_str());
 
          msgString = strutil_enforceCRLF(msgString);
@@ -2482,46 +2488,227 @@ SetupMinimalConfig(void)
 }
 
 
-#ifdef EXPERIMENTAL_sync
 /*
  * This doesn't strictly belong here(?) but for now it's the easiest
  * place to put it.
  * This function exports a configurable subset of the configuration
  * settings to a file.
  */
+
+#define M_SYNCMAIL_SUBJECT   "DO NOT DELETE! Mahogany remote configuration info"
+#define M_SYNCMAIL_CONFIGSTART "Mahogany configuration info:"
 static
-bool SynchroniseConfigSettings(void)
+bool RetrieveRemoteConfigSettings(void)
 {
    if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
       return TRUE; // nothing to do
+
+   MailFolder *mf =
+      MailFolder::OpenFolder(READ_APPCONFIG(MP_SYNC_FOLDER));
+
+   if(! mf)
+      return FALSE;
+
+   if(mf->CountMessages() != 1)
+   {
+      if(mf->CountMessages() == 0)
+         wxLogError(_("Configuration mailbox '%s' does not contain any "
+                      "information."), mf->GetName().c_str());
+      else
+         wxLogError(
+            _("Configuration mailbox '%s' contains more than\n"
+              "one message. Possibly wrong mailbox specified?\n"
+              "If this mailbox is the correct one, please remove\n"
+              "the extra messages and try again."), mf->GetName().c_str());
+      mf->DecRef();
+      return FALSE;
+   }
+   HeaderInfoList *hil = mf->GetHeaders();
+   Message * msg = mf->GetMessage( (*hil)[0]->GetUId() );
+   hil->DecRef();
+   if( msg == NULL)
+      return FALSE; // what happened?
+   if(msg->Subject() != M_SYNCMAIL_SUBJECT)
+   {
+      wxLogError(
+         _("The message in the configuration mailbox '%s' does not\n"
+           "contain configuration settings. Please remove it."),
+         mf->GetName().c_str());
+      mf->DecRef();
+      msg->DecRef();
+      return FALSE;
+   }
+
+   wxString msgText = msg->FetchText();
+   msg->DecRef();
+   mf->DecRef();
+
+   msgText = msgText.Mid( msgText.Find(M_SYNCMAIL_CONFIGSTART) +
+                          strlen( M_SYNCMAIL_CONFIGSTART) );
+   wxString filename = wxGetTempFileName("MTemp");
+   wxFile tmpfile(filename, wxFile::write);
+   tmpfile.Write(msgText, msgText.Length());
+   tmpfile.Close();
    
    wxFileConfig *fc = new
-      wxFileConfig("","","/tmp/EXPORTCONFIG","",wxCONFIG_USE_LOCAL_FILE);
-   if(!fc) return FALSE;
-
+      wxFileConfig("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
+   
    bool rc = TRUE;
+   if(fc)
+   {
+      if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
+         rc &= CopyEntries(fc,
+                           M_FILTERS_CONFIG_SECTION,
+                           M_FILTERS_CONFIG_SECTION_UNIX, TRUE,
+                           mApplication->GetProfile()->GetConfig());
+      
+      if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
+         rc &= CopyEntries(fc,
+                           M_IDENTITY_CONFIG_SECTION,
+                           M_IDENTITY_CONFIG_SECTION_UNIX, TRUE,
+                           mApplication->GetProfile()->GetConfig());
+      
+      if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
+      {
+         String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
+         String src, dest;
+         src << M_PROFILE_CONFIG_SECTION << '/' << group;
+         dest << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
+         rc &= CopyEntries(fc,
+                           src, dest, TRUE,
+                           mApplication->GetProfile()->GetConfig());
+      }
+   }
+   else
+      rc = FALSE;
+   delete  fc;
+   wxRemoveFile(filename);
+   return rc;
+}
 
+extern
+bool SaveRemoteConfigSettings(void)
+{
+   if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
+      return TRUE; // nothing to do
+
+   MailFolder *mf =
+      MailFolder::OpenFolder(READ_APPCONFIG(MP_SYNC_FOLDER));
+
+   if(! mf)
+      return FALSE;
+
+   if(mf->CountMessages() > 1)
+   {
+      wxLogError(
+         _("Configuration mailbox '%s' contains more than\n"
+           "one message. Possibly wrong mailbox specified?\n"
+           "If this mailbox is the correct one, please remove\n"
+           "the extra messages and try again."), mf->GetName().c_str());
+      mf->DecRef();
+      return FALSE;
+   }
+   // If we have information stored there, delete it:
+   if(mf->CountMessages() != 0)
+   {
+      HeaderInfoList *hil = mf->GetHeaders();
+      Message * msg = mf->GetMessage( (*hil)[0]->GetUId() );
+      hil->DecRef();
+      if( msg == NULL)
+         return FALSE; // what happened?
+      if(msg->Subject() != M_SYNCMAIL_SUBJECT)
+      {
+         wxLogError(
+            _("The message in the configuration mailbox '%s' does not\n"
+              "contain configuration settings. Please remove it."),
+            mf->GetName().c_str());
+         mf->DecRef();
+         msg->DecRef();
+         return FALSE;
+      }
+      if(! mf->DeleteMessage(msg->GetUId()))
+      {
+         wxLogError(
+            _("Cannot remove old configuration information from\n"
+              "mailbox '%s'."), mf->GetName().c_str());
+         mf->DecRef();
+         msg->DecRef();
+         return FALSE;
+      }
+      msg->DecRef();
+      mf->ExpungeMessages();
+   }
+   
+   wxString filename = wxGetTempFileName("MTemp");
+   wxFileConfig *fc = new
+      wxFileConfig("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
+   if(!fc)
+   {
+      mf->DecRef();
+      return FALSE;
+   }
+   
+   bool rc = TRUE;
    if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
       rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
-                        M_FILTERS_CONFIG_SECTION, M_FILTERS_CONFIG_SECTION_UNIX, TRUE, fc);
+                        M_FILTERS_CONFIG_SECTION_UNIX,
+                        M_FILTERS_CONFIG_SECTION, TRUE,
+                        fc); 
       
    if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
       rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
-                        M_IDENTITY_CONFIG_SECTION, M_IDENTITY_CONFIG_SECTION_UNIX, TRUE, fc);
+                        M_IDENTITY_CONFIG_SECTION_UNIX,
+                        M_IDENTITY_CONFIG_SECTION, TRUE,
+                        fc);
 
    if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
    {
       String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
-      String src = M_PROFILE_CONFIG_SECTION + '/' + group;
-      String dest = M_PROFILE_CONFIG_SECTION_UNIX + '/' + group;
+      String src, dest;
+      src << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
+      dest << M_PROFILE_CONFIG_SECTION << '/' << group;
       rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
-                        src, dest, TRUE, fc);
+                        src, dest, TRUE,
+                        fc);
    }
    delete  fc;
+   if(rc == FALSE)
+   {
+      wxLogError(_("Could not export configuration information."));
+      mf->DecRef();
+      return FALSE;
+   }
+   wxFile tmpfile(filename, wxFile::read);
+   char * buffer = new char [ tmpfile.Length() + 1];
+   if(tmpfile.Read(buffer, tmpfile.Length()) != tmpfile.Length())
+   {
+      wxLogError(_("Cannot read configuration info from temporary file\n"
+                   "'%s'."), filename.c_str());
+      tmpfile.Close();
+      delete [] buffer;
+      mf->DecRef();
+      return FALSE;
+   }
+   buffer[tmpfile.Length()] = '\0';
+   tmpfile.Close();
+   
+   wxString msgText;
+   msgText << "From: mahogany-developers@lists.sourceforge.net\n"
+           << "Subject: " << M_SYNCMAIL_SUBJECT << "\n"
+           << "Date: " << GetRFC822Time() << "\n" 
+           << "\n"
+           << M_SYNCMAIL_CONFIGSTART << "\n"
+           << buffer << "\n";
+   delete [] buffer;
+   if( ! mf->AppendMessage(msgText) )
+   {
+      wxLogError(_("Storing configuration information in mailbox\n"
+                   "'%s' failed."), mf->GetName().c_str());
+      rc = FALSE;
+   }
+   mf->DecRef();
    return rc;
 }
-
-#endif
 
 extern bool
 CheckConfiguration(void)
@@ -2571,10 +2758,8 @@ CheckConfiguration(void)
    if ( !VerifyInbox() )
       wxLogDebug("Evil user corrupted his profile settings - restored.");
 
-#ifdef EXPERIMENTAL_sync
-   bool rc = SynchroniseConfigSettings();
-   ASSERT(rc == TRUE);
-#endif
+   if(! RetrieveRemoteConfigSettings() )
+      wxLogError(_("Remote configuration information could not be retrieved."));
    
    return true;
 }

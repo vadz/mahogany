@@ -1,4 +1,6 @@
 (next release) on (date of next release)
+03.09.00 KB: fixed endless recursion in INBOX listing callback which caused IMAP server
+             mailbox import to never complete, updated splash screen, finished config sync
 28.08.00 KB: fixed auto-creation of non-existent folders on IMAP etc
              reorganised the options dialog for the PalmOS module and documented
 	     it better

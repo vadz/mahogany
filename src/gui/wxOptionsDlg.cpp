@@ -884,22 +884,22 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Use floating &tool-bars"), Field_Bool,    -1                     },
    { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     },
    { gettext_noop("&Reenable disabled message boxes..."), Field_SubDlg, -1 },
-#ifdef EXPERIMENTAL
    { gettext_noop("Mahogany can synchronise part of its configuration\n"
                   "with settings stored in a special folder. This can\n"
                   "be used to share settings between machines by storing\n"
-                  "them in a special IMAP mailbox on the server."),
+                  "them in a special IMAP mailbox on the server.\n"
+                  "Please read the documentation first! It is accessible\n"
+                  "via the Help button below."),
 		  Field_Message, -1 },
-   { gettext_noop("Sync options with remote server"), Field_Bool, -1 },
-   { gettext_noop(" (IMAP) folder for synchronisation"), Field_Folder,
+   { gettext_noop("Sync options with remote server"), Field_Bool|Field_Global, -1 },
+   { gettext_noop(" (IMAP) folder for synchronisation"), Field_Folder|Field_Global,
    ConfigField_RSynchronise },
-   { gettext_noop(" Sync Filter rules"), Field_Bool, ConfigField_RSynchronise
+   { gettext_noop(" Sync Filter rules"), Field_Bool|Field_Global, ConfigField_RSynchronise
    },
-   { gettext_noop(" Sync Identities"), Field_Bool, ConfigField_RSynchronise },
-   { gettext_noop(" Sync part of the folder tree"), Field_Bool,
+   { gettext_noop(" Sync Identities"), Field_Bool|Field_Global, ConfigField_RSynchronise },
+   { gettext_noop(" Sync part of the folder tree"), Field_Bool|Field_Global,
    ConfigField_RSynchronise },
-   { gettext_noop(" Folder group to synchronise"), Field_Folder, ConfigField_RSynchronise }
-#endif
+   { gettext_noop(" Folder group to synchronise"), Field_Folder|Field_Global, ConfigField_RSynchronise }
 };
 
 // FIXME ugly, ugly, ugly... config settings should be living in an array from
