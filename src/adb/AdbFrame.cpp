@@ -1767,8 +1767,8 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
       return;
     }
 
-    m_astrAdb.Remove((size_t)nIndex);
-    m_astrProviders.Remove((size_t)nIndex);
+    m_astrAdb.RemoveAt(nIndex);
+    m_astrProviders.RemoveAt(nIndex);
   }
   else {
     // it's a normal entry or group
