@@ -1256,9 +1256,18 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
       // called yet
       m_itemFocus = GetFocusedItem();
 
+      // interestingly enough, wxMSW returns -1 from GetFocusedItem() when the
+      // item had been selected with Ctrl-click and not a simple click
+      if ( m_itemFocus == -1 )
+      {
+         m_itemFocus = event.GetIndex();
+
+         CHECK_RET( m_itemFocus != -1, "must have a valid item" );
+      }
+
       // check if we already have this item - maybe we need to retrieve it
       // from server? this may happen if the header retrieval was cancelled
-      UIdType uid = GetFocusedUId();
+      UIdType uid = GetUIdFromIndex(m_itemFocus);
 
       if ( uid == UID_ILLEGAL )
       {
@@ -1270,7 +1279,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
             return;
          }
 
-         uid = GetFocusedUId();
+         uid = GetUIdFromIndex(m_itemFocus);
 
          ASSERT_MSG( uid != UID_ILLEGAL, "invalid uid after ReallyGet()?" );
       }
