@@ -161,7 +161,8 @@ wxFolderViewColumnsDialog(const String& folderName,
    wxLayoutConstraints *c;
 
    // add another static box below the existing one
-   wxStaticBox *boxLower = new wxStaticBox(this, -1, _("Set column &widths"));
+   wxStaticBox *boxLower = new wxStaticBox(this, -1,
+                                           _("Set column &widths (in pixels)"));
    c = new wxLayoutConstraints();
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
    c->top.Below(m_box, 2*LAYOUT_Y_MARGIN);
