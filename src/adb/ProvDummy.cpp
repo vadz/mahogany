@@ -77,7 +77,7 @@ public:
     { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }
   virtual void ClearExtraEMails();
 
-  virtual bool Matches(const char *str, int where, int how);
+  virtual int Matches(const char *str, int where, int how) const;
 
   // an easier to use GetName()
   const char *GetName() const { return m_astrFields[0]; }
@@ -268,9 +268,9 @@ void DummyEntry::ClearExtraEMails()
 {
 }
 
-bool DummyEntry::Matches(const char *what, int where, int how)
+int DummyEntry::Matches(const char *what, int where, int how) const
 {
-  return FALSE;
+  return 0;
 }
 
 // ----------------------------------------------------------------------------

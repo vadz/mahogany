@@ -59,6 +59,7 @@ static wxArrayString gs_provCache;
 // paramaters)
 static void GroupLookup(
                         ArrayAdbEntries& aEntries,
+                        ArrayAdbEntries *aMoreEntries,
                         AdbEntryGroup *pGroup,
                         const String& what,
                         int where,
@@ -67,12 +68,23 @@ static void GroupLookup(
                        );
 
 // search in the books specified or in all loaded books otherwise
-static bool AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
+static bool AdbLookupForEntriesOrGroups(
+                                        ArrayAdbEntries& aEntries,
+                                        ArrayAdbEntries *aMoreEntries,
                                         const String& what,
                                         int where,
                                         int how,
                                         const ArrayAdbBooks *paBooks,
-                                        ArrayAdbGroups *aGroups = NULL);
+                                        ArrayAdbGroups *aGroups = NULL
+                                       );
+
+#define CLEAR_ADB_ARRAY(entries)            \
+  {                                         \
+    size_t nCount = entries.GetCount();     \
+    for ( size_t n = 0; n < nCount; n++ ) { \
+      entries[n]->DecRef();                 \
+    }                                       \
+  }
 
 // ============================================================================
 // implementation
@@ -84,6 +96,7 @@ static bool AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
 
 // recursive (depth first) search
 static void GroupLookup(ArrayAdbEntries& aEntries,
+                        ArrayAdbEntries *aMoreEntries,
                         AdbEntryGroup *pGroup,
                         const String& what,
                         int where,
@@ -114,7 +127,7 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
   for ( size_t nGroup = 0; nGroup < nGroupCount; nGroup++ ) {
     AdbEntryGroup *pSubGroup = pGroup->GetGroup(aNames[nGroup]);
 
-    GroupLookup(aEntries, pSubGroup, what, where, how);
+    GroupLookup(aEntries, aMoreEntries, pSubGroup, what, where, how);
 
     // groups are matched by name only (case-insensitive)
     if ( aGroups && aNames[nGroup].Lower().Matches(nameMatch) ) {
@@ -130,21 +143,36 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
   for ( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ ) {
     AdbEntry *pEntry = pGroup->GetEntry(aNames[nEntry]);
 
-    if ( pEntry->Matches(what, where, how) ) {
-      aEntries.Add(pEntry);
-    }
-    else {
-      pEntry->DecRef();
+    // we put the entries which match with their nick name in one array and
+    // the entries which match anywhere else in the other one: see AdbExpand()
+    // to see why
+    switch ( pEntry->Matches(what, where, how) ) {
+      default:                  // matches elsewhere
+        if ( aMoreEntries ) {
+          aMoreEntries->Add(pEntry);
+          break;
+        }
+        // else: fall through
+
+      case AdbLookup_NickName:  // match in the entry name
+        aEntries.Add(pEntry);
+        break;
+
+      case 0:                   // not found at all
+        pEntry->DecRef();
+        break;
     }
   }
 }
 
-static bool AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
-                                        const String& what,
-                                        int where,
-                                        int how,
-                                        const ArrayAdbBooks *paBooks,
-                                        ArrayAdbGroups *aGroups)
+static bool
+AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
+                            ArrayAdbEntries *aMoreEntries,
+                            const String& what,
+                            int where,
+                            int how,
+                            const ArrayAdbBooks *paBooks,
+                            ArrayAdbGroups *aGroups)
 {
   wxASSERT( aEntries.IsEmpty() );
 
@@ -153,7 +181,8 @@ static bool AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
 
   size_t nBookCount = paBooks->Count();
   for ( size_t nBook = 0; nBook < nBookCount; nBook++ ) {
-    GroupLookup(aEntries, (*paBooks)[nBook], what, where, how, aGroups);
+    GroupLookup(aEntries, aMoreEntries,
+                (*paBooks)[nBook], what, where, how, aGroups);
   }
 
   // return true if something found
@@ -167,16 +196,16 @@ bool AdbLookup(ArrayAdbEntries& aEntries,
                AdbEntryGroup *group)
 {
    if ( !group )
-      return AdbLookupForEntriesOrGroups(aEntries, what, where, how, NULL);
+      return AdbLookupForEntriesOrGroups(aEntries, NULL, what, where, how, NULL);
 
    // look just in this group
-   GroupLookup(aEntries, group, what, where, how);
+   GroupLookup(aEntries, NULL, group, what, where, how);
 
    return !aEntries.IsEmpty();
 }
 
-bool AdbExpand(wxArrayString& results, const String& what,
-               int how, wxFrame *frame)
+bool
+AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
 {
   AdbManager_obj manager;
   CHECK( manager, FALSE, "can't expand address: no AdbManager" );
@@ -194,7 +223,8 @@ bool AdbExpand(wxArrayString& results, const String& what,
 
   // check for a group match too
   ArrayAdbGroups aGroups;
-  ArrayAdbEntries aEntries;
+  ArrayAdbEntries aEntries,
+                  aMoreEntries;
 
   // expansion may take a long time ...
   if ( frame )
@@ -206,8 +236,18 @@ bool AdbExpand(wxArrayString& results, const String& what,
 
   wxBusyCursor bc;
 
-  if ( AdbLookupForEntriesOrGroups(aEntries, what, lookupMode,
+  if ( AdbLookupForEntriesOrGroups(aEntries, &aMoreEntries, what, lookupMode,
                                    how, NULL, &aGroups ) ) {
+    // first of all, if we had any nick name matches, ignore all the other ones
+    // but otherwise use them as well
+    if ( aEntries.IsEmpty() ) {
+      aEntries = aMoreEntries;
+    }
+    else {
+      // we don't need them at all
+      CLEAR_ADB_ARRAY(aMoreEntries);
+    }
+
     // merge both arrays into one big one: notice that the order is important,
     // the groups should come first (see below)
     ArrayAdbElements aEverything;
@@ -277,11 +317,7 @@ bool AdbExpand(wxArrayString& results, const String& what,
     //else: cancelled by user
 
     // free all entries and groups
-    size_t nCount = aEverything.Count();
-    for ( n = 0; n < nCount; n++ )
-    {
-      aEverything[n]->DecRef();
-    }
+    CLEAR_ADB_ARRAY(aEverything);
   }
   else {
     if ( frame )
@@ -516,6 +552,7 @@ AdbBook *AdbManager::FindInCache(const String& name,
 // ----------------------------------------------------------------------------
 // AdbManager debugging support
 // ----------------------------------------------------------------------------
+
 #ifdef DEBUG
 
 String AdbManager::DebugDump() const
@@ -526,4 +563,6 @@ String AdbManager::DebugDump() const
   return str;
 }
 
-#endif
+#endif // DEBUG
+
+/* vi: set ts=2 sw=2: */

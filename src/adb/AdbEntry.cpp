@@ -97,7 +97,8 @@ void AdbEntryStoredInMemory::ClearExtraEMails()
   //else: don't set dirty flag if it didn't change anything
 }
 
-bool AdbEntryStoredInMemory::Matches(const char *szWhat, int where, int how)
+int
+AdbEntryStoredInMemory::Matches(const char *szWhat, int where, int how) const
 {
   wxString strWhat;
 
@@ -122,7 +123,7 @@ bool AdbEntryStoredInMemory::Matches(const char *szWhat, int where, int how)
       if ( (how & AdbLookup_CaseSensitive) == 0 )                   \
         strField.MakeLower();                                       \
       if ( strField.Matches(strWhat) )                              \
-        return TRUE;                                                \
+        return AdbLookup_##field;                                   \
     }
 
   CHECK_MATCH(NickName);
@@ -137,7 +138,7 @@ bool AdbEntryStoredInMemory::Matches(const char *szWhat, int where, int how)
       strField = m_astrFields[AdbField_EMail];
       strField.MakeLower();
       if ( strField.Matches(strWhat) )
-        return TRUE;
+        return AdbLookup_EMail;
     }
 
     // look in additional email addresses too
@@ -146,9 +147,10 @@ bool AdbEntryStoredInMemory::Matches(const char *szWhat, int where, int how)
       strField = m_astrEmails[n];
       strField.MakeLower();
       if ( strField.Matches(strWhat) )
-        return TRUE;
+        return AdbLookup_EMail;
     }
   }
 
-  return FALSE;
+  // not found
+  return 0;
 }

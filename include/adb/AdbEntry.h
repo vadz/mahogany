@@ -161,7 +161,7 @@ public:
 
   // other operations
     /// check whether we match the given string (see AdbLookup_xxx constants)
-  virtual bool Matches(const char *str, int where, int how) = 0;
+  virtual int Matches(const char *str, int where, int how) const = 0;
     /// description of an item is the name and the address
 
   virtual String GetDescription() const
@@ -259,7 +259,7 @@ public:
   virtual void GetEMail(size_t n, String *p) const { *p = m_astrEmails[n]; }
   virtual void ClearDirty() { m_bDirty = FALSE; }
   virtual bool IsDirty() const { return m_bDirty; }
-  virtual bool Matches(const char *str, int where, int how);
+  virtual int Matches(const char *str, int where, int how) const;
 
 protected:
   wxArrayString m_astrFields; // all text entries (some may be not present)
