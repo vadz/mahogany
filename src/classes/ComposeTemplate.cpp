@@ -1098,12 +1098,6 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             // others
             if ( name == "text" || name == "quote" )
             {
-               if ( m_msgview == MailFolder::Params::NO_QUOTE )
-               {
-                  // we don't want to quote anything at all
-                  break;
-               }
-
                // insert the original text (optionally prefixed by reply
                // string)
                String prefix;

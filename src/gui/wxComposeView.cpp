@@ -2072,6 +2072,49 @@ wxComposeView::DoInitText(Message *mailmsg, const MessageView *msgview)
          break;
       }
 
+      if ( msgview == MailFolder::Params::NO_QUOTE )
+      {
+         // we don't want to quote anything at all, so remove all occurences of
+         // $QUOTE and/or $TEXT templates in the string -- and also remove
+         // anything preceding them assuming that it can only be the
+         // attribution line which shouldn't be left if we don't quote anything
+         //
+         // this is surely not ideal, but I don't see how to do what we want
+         // otherwise with the existing code
+
+         const char *pcEnd = NULL;
+         const char *pcStart = templateValue.c_str();
+         for ( const char *pc = pcStart; ; )
+         {
+            // find and skip over the next macro occurence
+            pc = strchr(pc, '$');
+            if ( !pc++ )
+               break;
+
+            static const char *QUOTE = "quote";
+            static const size_t LEN_QUOTE = strlen(QUOTE);
+
+            static const char *TEXT = "text";
+            static const size_t LEN_TEXT = strlen(TEXT);
+
+            if ( wxStrnicmp(pc, QUOTE, LEN_QUOTE) == 0 )
+            {
+               pc += LEN_QUOTE;
+               pcEnd = pc;
+            }
+            else if ( wxStrnicmp(pc, TEXT, LEN_TEXT) == 0 )
+            {
+               pc += LEN_TEXT;
+               pcEnd = pc;
+            }
+         }
+
+         if ( pcEnd )
+         {
+            templateValue.erase(0, pcEnd - pcStart);
+         }
+      }
+
       // we will only run this loop once unless there are erros in the template
       // and the user changed it
       templateChanged = FALSE;
