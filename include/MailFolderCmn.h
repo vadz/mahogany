@@ -56,8 +56,6 @@ public:
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param folderName the name of the folder to save to
-       @param isProfile if true, the folderName will be interpreted as
-       a symbolic folder name, otherwise as a filename
        @return true on success
    */
    virtual bool SaveMessages(const UIdArray *selections,

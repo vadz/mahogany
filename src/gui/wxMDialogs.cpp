@@ -1429,55 +1429,8 @@ bool MFolderDialog::TransferDataFromWindow()
       wxString name;
       wxSplitPath(m_FileName, NULL, &name, NULL);
 
-      // verify that the folder with this name doesn't already exist
       SafeDecRef(m_folder);
-      m_folder = NULL;
-      MFolder *folder;
-      while ( (folder = MFolder::Get(name)) != NULL )
-      {
-         // it does exist - may be it's already the same file?
-         if ( folder->GetType() == MF_FILE )
-         {
-            Profile_obj profile(name);
-            wxString filename = READ_CONFIG(profile, MP_FOLDER_PATH);
-            if ( sysutil_compare_filenames(filename, m_FileName) )
-            {
-               m_folder = folder;
-
-               break;
-            }
-         }
-
-         folder->DecRef();
-
-         if (
-              !MInputBox
-               (
-                &name,
-                _("Mahogany: folder selection"),
-                wxString::Format(
-                _("Sorry, the folder '%s' already exists "
-                  "and corresponds to another file,\n"
-                  "please choose a different name for the folder "
-                  "which will correspond to the file '%s'."),
-                name.c_str(), m_FileName.c_str()
-                ),
-                this,
-                "FileFolderName"
-               )
-            )
-         {
-            // can't continue
-            return false;
-         }
-      }
-
-      if ( !m_folder )
-      {
-         m_folder = MFolder::CreateTemp(name, MF_FILE, 0, m_FileName,
-                                        "", "", ""); // no server/login/pwd
-      }
-      //else: it already existed before with the same filename
+      m_folder = MFolder::CreateTemp(name, MF_FILE, 0, m_FileName);
    }
 
    m_userChoseFolder = true;

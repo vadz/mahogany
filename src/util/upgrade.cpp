@@ -1438,7 +1438,15 @@ bool RunInstallWizard()
    // case we assume he is so advanced that he doesn't need this stuff)
    if ( wizardDone )
    {
-      MailFolder *mf = MailFolder::OpenFolder(MF_FILE, mainFolderName);
+      MFolder_obj folderMain(MFolder::CreateTemp
+                             (
+                              "",            // no name
+                              MF_FILE,
+                              0,             // no flags
+                              mainFolderName
+                             ));
+
+      MailFolder *mf = MailFolder::OpenFolder(folderMain);
 
       if ( mf )
       {
@@ -1591,15 +1599,6 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       MFolder_obj folder(foldername);
       folder->SetTreeIndex(MFolderIndex_NewMail);
    }
-
-   // VZ: MP_SHOW_NEWMAILMSG is now on by default for all folders, so this code
-   //     is not needed any more
-#if 0
-   // by default, activate new mail notification for the folder which
-   // is used and user visible, default for all other folders is "off"
-   Profile_obj prof(GetMainMailFolderName());
-   prof->writeEntry(MP_SHOW_NEWMAILMSG, 1);
-#endif // 0
 
    // TRASH
    if(gs_installWizardData.useTrash)

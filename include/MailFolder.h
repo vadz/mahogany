@@ -193,19 +193,6 @@ struct MailFolderStatus
    This class defines the interface for all MailFolder classes. It can
    represent anything which contains messages, e.g. folder files, POP3
    or IMAP connections or even newsgroups.
-
-
-   To open a MailFolder via OpenFolder() one must do either of the
-   following:
-   <ul>
-   <li>New and preferred way which will soon be the only one: pass it
-       a pointer to MFolder
-   <li>Use it with a MF_PROFILE type and provide a profile name to be
-       used.
-   <li>Use it with a different type and set other options such as
-       login/password manually. This will use a dummy profile
-       inheriting from the global profile section.
-   </ul>
 */
 class MailFolder : public MObjectRC
 {
@@ -278,40 +265,20 @@ public:
    /** @name Opening folders */
    //@{
    /**
-      Opens an existing mail folder of a certain type.
-      The path argument is as follows:
-      <ul>
-      <li>MF_INBOX: unused
-      <li>MF_FILE:  filename, either relative to MP_MBOXDIR (global
-                    profile) or absolute
-      <li>MF_POP:   unused
-      <li>MF_IMAP:  folder path
-      <li>MF_NNTP:  newgroup
-      </ul>
-      @param type one of the supported types
-      @param path either a hostname or filename depending on type
-      @param profile parent profile
-      @param server hostname
-      @param login only used for POP,IMAP and NNTP (as the newsgroup name)
-      @param password only used for POP, IMAP
-      @param openmode specifies how to open the folder (RW/RO/...)
-   */
-   static MailFolder * OpenFolder(int typeAndFlags,
-                                  const String &path,
-                                  Profile *profile = NULL,
-                                  const String &server = NULLstring,
-                                  const String &login = NULLstring,
-                                  const String &password = NULLstring,
-                                  const String &symbolicname = NULLstring,
-                                  OpenMode openmode = Normal);
+     Open the specified mail folder. May create the folder if it doesn't exist
+     yet.
 
-   /** The same OpenFolder function, but taking all arguments from a
-       MFolder object.
+     @param mfolder the MFolder object identifying the folder to use
+     @param openmode the mode for opening the folder, read/write by default
+     @return the opened MailFolder object or NULL if opening failed
     */
    static MailFolder * OpenFolder(const MFolder *mfolder,
                                   OpenMode openmode = Normal);
 
-   /** Half open the folder using paremeters from MFolder object. */
+   /**
+     Half open the folder using paremeters from MFolder object. This is a
+     simple wrapper around OpenFolder()
+    */
    static MailFolder * HalfOpenFolder(const MFolder *mfolder)
       { return OpenFolder(mfolder, HalfOpen); }
 
@@ -478,7 +445,7 @@ public:
    /** Get the profile used by this folder
        @return Pointer to the profile.
    */
-   virtual Profile *GetProfile(void) = 0;
+   virtual Profile *GetProfile(void) const = 0;
 
    /// return class name
    const char *GetClassName(void) const

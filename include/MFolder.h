@@ -125,6 +125,18 @@ public:
    virtual int GetTreeIndex() const { return -1; }
       /// set the position in the tree (used by wxFolderTree only)
    virtual void SetTreeIndex(int pos) { }
+
+      /**
+        Get the profile associated with this folder: it will never be NULL and
+        can be used to read the other (than the ones we have explicit
+        functions for accessing them) settings associated with this folder.
+
+        Avoid using this function in the new code, it is mainly for backwards
+        compatibility!
+
+        @return profile object to be DecRef()d by caller
+       */
+   virtual Profile *GetProfile() const = 0;
    //@}
 
    /**@name flags */

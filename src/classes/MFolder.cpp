@@ -116,6 +116,13 @@ public:
    virtual int GetFlags() const { return m_flags; }
    virtual void SetFlags(int flags) { m_flags = flags; }
 
+   virtual Profile *GetProfile() const
+   {
+      Profile *profile = mApplication->GetProfile();
+      profile->IncRef();
+      return profile;
+   }
+
    virtual wxArrayString GetFilters() const { return wxArrayString(); }
    virtual void SetFilters(const wxArrayString& /* filters */) { }
    virtual void AddFilter(const String& /* filter */) { }
@@ -204,6 +211,12 @@ public:
 
    virtual int GetFlags() const;
    virtual void SetFlags(int flags);
+
+   virtual Profile *GetProfile() const
+   {
+      m_profile->IncRef();
+      return m_profile;
+   }
 
    virtual wxArrayString GetFilters() const;
    virtual void SetFilters(const wxArrayString& filters);

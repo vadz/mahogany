@@ -1201,7 +1201,7 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
 
 String wxFolderTreeNode::GetLabelSuffix(const MailFolderStatus& mfStatus) const
 {
-   Profile_obj profile(GetFolder()->GetFullName());
+   Profile_obj profile(GetFolder()->GetProfile());
 
    String fmt = READ_CONFIG(profile, MP_FTREE_FORMAT);
    if ( fmt.empty() )
@@ -1354,7 +1354,7 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
    Status statusShown = GetShownStatus();
    if ( statusShown != statusShownBefore )
    {
-      Profile_obj profile(GetFolder()->GetFullName());
+      Profile_obj profile(GetFolder()->GetProfile());
 
       const MOption *opt;
       switch ( statusShown )
@@ -1964,8 +1964,9 @@ wxFolderTreeImpl::FindNextUnreadFolder(wxTreeItemId id, bool next) const
    // check first this item, then the next one(s)
    do
    {
-      wxString name = GetFolderTreeNode(id)->GetFolder()->GetFullName();
-      Profile_obj profile(name);
+      MFolder *folder = GetFolderTreeNode(id)->GetFolder();
+      wxString name = folder->GetFullName();
+      Profile_obj profile(folder->GetProfile());
 
       // this folder may be explicitly excluded from this search (it makes
       // sense for folders such as Trash...), check for it
@@ -2762,18 +2763,16 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
    node->SetStatus(this, status);
 }
 
-void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
+void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *mf)
 {
-   Profile_obj profile(folder->GetName());
-
-   if ( READ_CONFIG_TEXT(profile, MP_FTREE_FORMAT).empty() )
+   if ( READ_CONFIG_TEXT(mf->GetProfile(), MP_FTREE_FORMAT).empty() )
    {
       // don't bother counting the messages - it may be time consuming, so
       // don't do it just to throw away the result later anyhow
       return;
    }
 
-   wxTreeItemId item = GetTreeItemFromName(folder->GetName());
+   wxTreeItemId item = GetTreeItemFromName(mf->GetName());
 
    // it's not an error: MTempFolder objects are not in the tree, yet they
    // generate MEventId_FolderUpdate events as well
@@ -2783,7 +2782,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
    }
 
    MailFolderStatus mfStatus;
-   (void)folder->CountAllMessages(&mfStatus);
+   (void)mf->CountAllMessages(&mfStatus);
 
    wxFolderTreeNode *node = GetFolderTreeNode(item);
    node->SetStatus(this, mfStatus);

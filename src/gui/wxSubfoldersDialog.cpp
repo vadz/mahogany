@@ -1072,7 +1072,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
             }
 
             // set up the just created folder
-            Profile_obj profile(folderNew->GetFullName());
+            Profile_obj profile(folderNew->GetProfile());
             profile->writeEntry(MP_FOLDER_PATH, fullpath);
 
             // copy folder flags from its parent handling MF_FLAGS_GROUP
@@ -1272,7 +1272,7 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
 
             folderNew->SetFlags(flags);
 
-            Profile_obj profile(folderNew->GetFullName());
+            Profile_obj profile(folderNew->GetProfile());
             String fullpath = m_folder->GetPath();
             if ( !fullpath.empty() )
             {

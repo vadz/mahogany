@@ -968,7 +968,7 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
    CreateFolderWizard::FolderParams *params = wiz->GetParams();
 
    MFolder_obj f = wiz->GetParentFolder();
-   Profile_obj p(f->GetName());
+   Profile_obj p(f->GetProfile());
    CHECK(p, FALSE, "No profile?");
 
    // don't overwrite the settings previously entered by user
@@ -1183,7 +1183,7 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
 
          if ( newfolder )
          {
-            Profile_obj p(newfolder->GetFullName());
+            Profile_obj p(newfolder->GetProfile());
 
             String serverKey;
             switch ( type )

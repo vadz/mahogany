@@ -1494,7 +1494,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
             if ( !m_path->GetValue() )
             {
                MFolder_obj folderParent(dlg->GetParentFolderName());
-               Profile_obj profile(folderParent->GetFullName());
+               Profile_obj profile(folderParent->GetProfile());
 
                wxString path;
                path << MailFolder::InitializeMH()
@@ -2083,7 +2083,7 @@ bool
 wxFolderPropertiesPage::TransferDataToWindow(void)
 {
    Profile_obj profile("");
-   if ( !!m_folderPath )
+   if ( !m_folderPath.empty() )
       profile->SetPath(m_folderPath);
 
    if ( m_isCreating )

@@ -417,15 +417,15 @@ class FolderListingEntryCC : public FolderListingEntry
 public:
    /// The folder's name.
    virtual const String &GetName(void) const
-      { return m_Name;}
+      { return m_folderName;}
    /// The folder's attribute.
    virtual long GetAttribute(void) const
       { return m_Attr; }
    FolderListingEntryCC(const String &name, long attr)
-      : m_Name(name)
+      : m_folderName(name)
       { m_Attr = attr; }
 private:
-   const String &m_Name;
+   const String &m_folderName;
    long          m_Attr;
 };
 
@@ -1278,28 +1278,19 @@ MailFolderCC::SetLoginData(const String &user, const String &pw)
 // MailFolderCC construction/opening
 // ----------------------------------------------------------------------------
 
-MailFolderCC::MailFolderCC(int typeAndFlags,
-                           String const &path,
-                           Profile *profile,
-                           String const &server,
-                           String const &login,
-                           String const &password)
+MailFolderCC::MailFolderCC(const MFolder *mfolder)
 {
-   m_Profile = profile;
-   if(m_Profile)
-      m_Profile->IncRef();
-   else
-      m_Profile = Profile::CreateEmptyProfile();
+   m_mfolder = mfolder;
+   m_mfolder->IncRef();
 
-   if(! ms_CClientInitialisedFlag)
-      CClientInit();
-   Create(typeAndFlags);
-   if(GetType() == MF_FILE)
-      m_ImapSpec = strutil_expandpath(path);
-   else
-      m_ImapSpec = path;
-   m_Login = login;
-   m_Password = password;
+   m_Profile = mfolder->GetProfile();
+
+   Create(mfolder->GetType(), mfolder->GetFlags());
+
+   m_ImapSpec = ::GetImapSpec(mfolder);
+
+   m_Login = mfolder->GetLogin();
+   m_Password = mfolder->GetPassword();
 
    // do this at the very end as it calls RequestUpdate() and so anything may
    // happen from now on
@@ -1307,7 +1298,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
 }
 
 void
-MailFolderCC::Create(int typeAndFlags)
+MailFolderCC::Create(FolderType type, int flags)
 {
    m_MailStream = NIL;
    m_nMessages = 0;
@@ -1320,10 +1311,7 @@ MailFolderCC::Create(int typeAndFlags)
 
    m_ASMailFolder = NULL;
 
-   FolderType type = GetFolderType(typeAndFlags);
-   m_FolderFlags = GetFolderFlags(typeAndFlags);
    m_SearchMessagesFound = NULL;
-   m_folderType = type;
 
    m_Mutex = new MMutex;
    m_InFilterCode = new MMutex;
@@ -1372,7 +1360,8 @@ MailFolderCC::~MailFolderCC()
    delete m_Mutex;
    delete m_InFilterCode;
 
-   SafeDecRef(m_Profile);
+   m_Profile->DecRef();
+   m_mfolder->DecRef();
 }
 
 /* static */
@@ -1408,25 +1397,17 @@ bool MailFolderCC::AskPasswordIfNeeded(const String& name,
 }
 
 /* static */
-bool MailFolderCC::CreateIfNeeded(Profile *profile)
+bool MailFolderCC::CreateIfNeeded(const MFolder *folder)
 {
+   Profile_obj profile(folder->GetProfile());
+
    if ( !profile->readEntryFromHere(MP_FOLDER_TRY_CREATE, false) )
    {
       // don't even try
       return true;
    }
 
-   MFolder_obj folder(profile);
-   CHECK( folder, false, "invalid profile in CreateIfNeeded" );
-
-   String imapspec = MailFolder::GetImapSpec
-                     (
-                      folder->GetType(),
-                      folder->GetFlags(),
-                      folder->GetPath(),
-                      folder->GetServer(),
-                      folder->GetLogin()
-                     );
+   String imapspec = ::GetImapSpec(folder);
 
    wxLogTrace(TRACE_MF_CALLS, "Trying to create MailFolderCC '%s'.",
               imapspec.c_str());
@@ -1452,31 +1433,13 @@ bool MailFolderCC::CreateIfNeeded(Profile *profile)
    return stream != NULL;
 }
 
-/*
-  This gets called with a folder path as its name, NOT with a symbolic
-  folder/profile name.
-*/
-
 /* static */
 MailFolderCC *
-MailFolderCC::OpenFolder(int typeAndFlags,
-                         String const &name,
-                         Profile *profile,
-                         String const &server,
-                         String const &loginGiven,
-                         String const &passwordGiven,
-                         String const &symname,
+MailFolderCC::OpenFolder(const MFolder* mfolder,
                          OpenMode openmode)
 {
-   CHECK( profile, NULL, "no profile in OpenFolder" );
-
-   CClientInit();
-
-   int flags = GetFolderFlags(typeAndFlags);
-   int type = GetFolderType(typeAndFlags);
-
-   String login = loginGiven;
-   String mboxpath = MailFolder::GetImapSpec(type, flags, name, server, login);
+   String login = mfolder->GetLogin();
+   String mboxpath = ::GetImapSpec(mfolder);
 
    //FIXME: This should somehow be done in MailFolder.cpp
    MailFolderCC *mf = FindFolder(mboxpath, login);
@@ -1491,20 +1454,22 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    // ask the password for the folders which need it but for which it hadn't
    // been specified during creation
    bool userEnteredPwd = false;
-   String password = passwordGiven;
-   if ( !AskPasswordIfNeeded(symname,
-                             GetFolderType(typeAndFlags),
-                             GetFolderFlags(typeAndFlags),
+   String password = mfolder->GetPassword();
+   if ( !AskPasswordIfNeeded(mfolder->GetFullName(),
+                             mfolder->GetType(),
+                             mfolder->GetFlags(),
                              &login,
                              &password,
                              &userEnteredPwd) )
    {
       // can't continue
+      mApplication->SetLastError(M_ERROR_CANCEL);
+
       return NULL;
    }
 
-   mf = new MailFolderCC(typeAndFlags, mboxpath, profile, server, login, password);
-   mf->m_Name = symname;
+   // create the mail folder and init its members
+   mf = new MailFolderCC(mfolder);
 
    bool ok = TRUE;
    if ( mf->NeedsNetwork() && !mApplication->IsOnline() )
@@ -1558,7 +1523,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       mf->DecRef();
       mf = NULL;
    }
-   else if ( profile && userEnteredPwd )
+   else if ( userEnteredPwd )
    {
       // ask the user if he'd like to remember the password for the future:
       // this is especially useful for the folders created initially by the
@@ -1572,6 +1537,8 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                                TRUE, /* [Yes] default */
                                GetPersMsgBoxName(M_MSGBOX_REMEMBER_PWD)) )
       {
+         // MFolder doesn't have methods to set them
+         Profile *profile = mfolder->GetProfile();
          profile->writeEntry(MP_FOLDER_LOGIN, login);
          profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(password));
       }
@@ -1797,7 +1764,7 @@ MailFolderCC::Open(OpenMode openmode)
             {
                // check if this is the first time we're opening this folder: in
                // this case, try creating it first
-               if ( !CreateIfNeeded(m_Profile) )
+               if ( !CreateIfNeeded(m_mfolder) )
                {
                   // CreateIfNeeded() returns false only if the folder couldn't
                   // be opened at all, no need to retry again
@@ -2338,7 +2305,7 @@ MailFolderCC::Checkpoint(void)
 
    // an MBOX file created by wxMessageView::MimeHandle() is deleted
    // immediately afterwards, so don't try to access it from here
-   if ( (m_folderType == MF_FILE) )
+   if ( GetType() == MF_FILE )
    {
       if ( !wxFile::Exists(m_MailStream->mailbox) )
       {
@@ -2379,7 +2346,7 @@ MailFolderCC::PingReopen(void)
 
       // This is terribly inefficient to do, but needed for some sick
       // POP3 servers which don't report new mail otherwise
-      if( (m_FolderFlags & MF_FLAGS_REOPENONPING)
+      if( (GetFlags() & MF_FLAGS_REOPENONPING)
           // c-client 4.7-bug: MH folders don't immediately notice new
           // messages:
           || GetType() == MF_MH )
@@ -2670,8 +2637,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       {
          // before trying to copy messages to this folder, create it if hadn't
          // been done yet
-         Profile_obj profile(folder->GetFullName());
-         if ( CreateIfNeeded(profile) )
+         if ( CreateIfNeeded(folder) )
          {
             String sequence = BuildSequence(*selections);
             String pathDst = GetPathFromImapSpec(specDst);
@@ -3526,7 +3492,7 @@ String
 MailFolderCC::DebugDump() const
 {
    String str = MObjectRC::DebugDump();
-   str << "mailbox '" << m_ImapSpec << "' of type " << (int) m_folderType;
+   str << "mailbox '" << m_ImapSpec << "' of type " << (int) GetType();
 
    return str;
 }
@@ -3958,7 +3924,8 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
    // from and to
    entry.m_From = ParseAddress(env->from);
 
-   if ( m_folderType == MF_NNTP || m_folderType == MF_NEWS )
+   FolderType folderType = GetType();
+   if ( folderType == MF_NNTP || folderType == MF_NEWS )
    {
       entry.m_NewsGroups = env->newsgroups;
    }

@@ -20,6 +20,8 @@
 #ifndef   USE_PCH
 #  include "kbList.h"
 
+#  include "MFolder.h"
+
 #  include "Mcclient.h"
 #endif
 
@@ -78,34 +80,7 @@ class MailFolderCC : public MailFolderCmn
 public:
    /** @name Constructors and destructor */
    //@{
-
-   /**
-      Opens an existing mail folder of a certain type.
-      The path argument is as follows:
-      <ul>
-      <li>MF_INBOX: unused
-      <li>MF_FILE:  filename, either relative to MP_MBOXDIR (global
-                    profile) or absolute
-      <li>MF_POP:   unused
-      <li>MF_IMAP:  path
-      <li>MF_NNTP:  newsgroup
-      </ul>
-      @param type one of the supported types
-      @param path either a hostname or filename depending on type
-      @param profile parent profile
-      @param server server host
-      @param login only used for POP,IMAP and NNTP (as the newsgroup name)
-      @param password only used for POP, IMAP
-      @param openmode specifies how top open the folder (RW/RO/...)
-
-   */
-   static MailFolderCC * OpenFolder(int typeAndFlags,
-                                    String const &path,
-                                    Profile *profile,
-                                    String const &server,
-                                    String const &login,
-                                    String const &password,
-                                    String const &symname,
+   static MailFolderCC * OpenFolder(const MFolder *mfolder,
                                     OpenMode openmode);
 
    static bool CloseFolder(const MFolder *mfolder);
@@ -141,13 +116,13 @@ public:
    /** return the full folder name
        @return the folder's name
    */
-   virtual String GetName(void) const { return m_Name; }
+   virtual String GetName(void) const { return m_mfolder->GetFullName(); }
 
    /// return the folder type
-   virtual FolderType GetType(void) const { return m_folderType; }
+   virtual FolderType GetType(void) const { return m_mfolder->GetType(); }
 
    /// return the folder flags
-   virtual int GetFlags(void) const { return m_FolderFlags; }
+   virtual int GetFlags(void) const { return m_mfolder->GetFlags(); }
 
    /// Return IMAP spec
    virtual String GetImapSpec(void) const { return m_ImapSpec; }
@@ -155,7 +130,7 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   virtual Profile *GetProfile(void) { return m_Profile; }
+   virtual Profile *GetProfile(void) const { return m_Profile; }
 
    /// Checks if the folder is in a critical section.
    bool InCritical(void) const { return m_InCritical; }
@@ -181,7 +156,7 @@ public:
        @param set if true, set the flag, if false, clear it
        @return always true UNSUPPORTED!
    */
-   virtual bool SetSequenceFlag(String const &sequence,
+   virtual bool SetSequenceFlag(const String& sequence,
                                 int flag,
                                 bool set = true);
 
@@ -380,15 +355,10 @@ private:
    /** @name Constructors and such */
    //@{
    /// private constructor, does basic initialisation
-   MailFolderCC(int typeAndFlags,
-                String const &path,
-                Profile *profile,
-                String const &server,
-                String const &login,
-                String const &password);
+   MailFolderCC(const MFolder *mfolder);
 
    /// Common code for constructors
-   void Create(int typeAndFlags);
+   void Create(FolderType type, int flags);
 
    /// code common to Create() and Close()
    void Init();
@@ -484,7 +454,7 @@ private:
       Try to create folder if it hadn't been created yet, returns true if the
       folder could be created and opened successfully or NULL if it failed.
    */
-   static bool CreateIfNeeded(Profile *profile);
+   static bool CreateIfNeeded(const MFolder *folder);
 
    /// Updates the status of a single message.
    void UpdateMessageStatus(unsigned long seqno);
@@ -531,19 +501,12 @@ private:
 
    /** @name Mail folder parameters */
    //@{
-   /// Full IMAP spec
+
+   /// the object containing all our parameters
+   MFolder *m_mfolder;
+
+   /// Full folder spec for c-client
    String m_ImapSpec;
-
-   // TODO: m_Name and m_folderType/Flags should be replaced with an MFolder!
-
-   /// The full folder name
-   String m_Name;
-
-   /// Type of this folder
-   FolderType m_folderType;
-
-   /// folder flags
-   int m_FolderFlags;
 
    /// the folder name delimiter, (char)-1 if unknown yet
    char m_chDelimiter;
