@@ -97,7 +97,7 @@ $Id$
 		filled with data immediately. The current behaviour is
 		unintuitive and confusing. 
 
-6	VZ	Adbframe: When listing addressbooktypes, show native
+6	VZ	Adbframe: When listing addressbook types, show native
 		format first.
 
 6	VZ	double click on new folder in treectrl opens not the

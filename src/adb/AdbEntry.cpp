@@ -33,11 +33,39 @@
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// AdbEntryCommon class
+// ----------------------------------------------------------------------------
+
+void
+AdbEntryCommon::GetField(size_t n, wxString *pstr) const
+{
+   if(n != AdbField_FirstName
+      && n != AdbField_FamilyName)
+      GetFieldInternal(n, pstr);
+   else
+   {
+      GetFieldInternal(n, pstr);
+      if(pstr->Length()) // not empty
+         return; // nothing to do
+      GetFieldInternal(AdbField_FullName, pstr);
+      if(! pstr->Length()) // empty, try nick name
+         GetFieldInternal(AdbField_NickName, pstr);
+      if(! pstr->Length()) // empty, nothing we can do about
+         return;
+      // not empty:
+      if(n == AdbField_FirstName)
+         *pstr = pstr->BeforeLast(' ');
+      else if(n == AdbField_FamilyName)
+         *pstr = pstr->AfterLast(' ');
+   }   
+}
+
+// ----------------------------------------------------------------------------
 // AdbEntryStoredInMemory class
 // ----------------------------------------------------------------------------
 
 // we store only the fields which were non-empty, so check the index
-void AdbEntryStoredInMemory::GetField(size_t n, String *pstr) const
+void AdbEntryStoredInMemory::GetFieldInternal(size_t n, String *pstr) const
 {
   if ( n < m_astrFields.Count() )
     *pstr = m_astrFields[n];

@@ -15,7 +15,7 @@
 #define _ADBEXPORT_H
 
 #ifdef __GNUG__
-   #pragma interface "AdbExport.h"
+#   pragma interface "AdbExport.h"
 #endif
 
 #include "MObject.h"    // the base class declaration

@@ -281,14 +281,16 @@ void wxIconBrowseButton::SetIcon(size_t nIcon)
       int w2 = bmp.GetWidth(),
           h2 = bmp.GetHeight();
 
+#if 0
+      //UGLY! disabled for now         image.Rescale(w1, h1);
       if ( (w1 != w2) || (h1 != h2) )
       {
          wxImage image(bmp);
-         image.Rescale(w1, h1);
          bmp = image.ConvertToBitmap();
       }
       //else: the size is already correct
-
+#endif
+      
       m_staticBitmap->SetBitmap(bmp);
    }
 }
@@ -401,9 +403,7 @@ void wxIconView::OnPaint(wxPaintEvent& WXUNUSED(event))
    }
 
    for ( int n = nIconFirst; n <= nIconLast; n++ )
-   {
       DoDrawIcon(dc, (size_t)n);
-   }
 }
 
 void wxIconView::OnClick(wxMouseEvent& event)

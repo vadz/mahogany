@@ -131,6 +131,8 @@ class AdbEntry : public AdbElement
 public:
   // accessors
     /// retrieve the value of a field (see enum AdbField for index values)
+  virtual void GetFieldInternal(size_t n, String *pstr) const = 0;
+    /// retrieve the value of a field (see enum AdbField for index values)
   virtual void GetField(size_t n, String *pstr) const = 0;
     /// get the count of additional e-mail addresses (i.e. except the 1st one)
   virtual size_t GetEMailCount() const = 0;
@@ -171,6 +173,14 @@ public:
   }
 };
 
+class AdbEntryCommon : public AdbEntry
+{
+ public:
+   /** Retrieve the value of a field (see enum AdbField for index
+       values). Tries to generate meaningful return values for empty
+       FirstName/FamilyName fields. */
+  virtual void GetField(size_t n, wxString *pstr) const;
+};
 /**
   A group of ADB entries which contains the entries and other groups.
 
@@ -219,14 +229,14 @@ public:
 // data is stored in memory
 // ============================================================================
 
-class AdbEntryStoredInMemory : public AdbEntry
+class AdbEntryStoredInMemory : public AdbEntryCommon
 {
 public:
   AdbEntryStoredInMemory() { m_bDirty = FALSE; }
 
   // we can implement some of the base class functions in the manner independent
   // of the exact nature of the derived class
-  virtual void GetField(size_t n, String *pstr) const;
+  virtual void GetFieldInternal(size_t n, String *pstr) const;
   virtual void SetField(size_t n, const String& strValue);
   virtual void AddEMail(const String& strEMail)
     { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }

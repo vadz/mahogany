@@ -29,6 +29,7 @@
 #   include <wx/listbox.h>
 #   include <wx/stattext.h>
 #   include <wx/statbmp.h>
+#   include <wx/choicdlg.h>
 #endif //USE_PCH
 
 #include "Mdefaults.h"
@@ -427,12 +428,41 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
 
 bool AdbShowExportDialog(const AdbEntryGroup& group)
 {
+   wxArrayString names, descs;
+   size_t n = AdbExporter::EnumExporters(names,descs);
+   wxString name;
+   if(n > 1)
+   {
+      int
+         w = 400,
+         h = 400;
+
+      int idx = wxGetSingleChoiceIndex
+         (
+            _("Please choose an export format:"),
+            wxString("Mahogany : ")+_("ADB export options"),
+            n,
+            &descs[0],
+            NULL,
+            -1, -1, // x,y
+            TRUE,   //centre
+            w, h
+            );
+      if(idx >= 0)
+         name = names[idx];
+      else
+         return FALSE; // cancelled
+
+   }
+   else
+      name = "AdbTextExporter";
+   
    // no exporter choice for now (there is exactly one of them), but this
    // should be done when we have more of them (TODO)
-   AdbExporter *exporter = AdbExporter::GetExporterByName("AdbTextExporter");
+   AdbExporter *exporter = AdbExporter::GetExporterByName(name);
    if ( !exporter )
    {
-      wxLogError(_("Cannot export address book - this functionality "
+      wxLogError(_("Cannot export address book - the functionality "
                    "is missing in this version of the program."));
 
       return FALSE;

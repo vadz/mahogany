@@ -64,6 +64,7 @@ enum FolderIcon
    iconGroupIMAP,
    iconNewMail,
    iconSentMail,
+   iconPalmPilot,
    iconFolderMax
 };
 
@@ -1118,6 +1119,7 @@ String GetFolderIconName(size_t n)
       "folder_imapdir",
       "folder_newmail",
       "folder_sentmail",
+      "folder_palmpilot"
    };
 
    ASSERT_MSG( iconFolderMax == WXSIZEOF(aszImages),
