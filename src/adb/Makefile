@@ -1,5 +1,7 @@
 # Makefile for src/adb directory
 
+include ../../makeopts
+
 SRC :=	AdbFrame.cpp AdbManager.cpp AdbProvider.cpp AdbEntry.cpp \
 	AdbDialogs.cpp ProvFC.cpp ProvBbdb.cpp ProvPalm.cpp \
 	AdbModule.cpp AdbImport.cpp AdbExport.cpp
@@ -12,11 +14,8 @@ ifdef DEBUG
 SRC += ProvDummy.cpp
 endif
 
-include ../../makeopts
-
 # indirection to pick up definitions in makerules
 all:	binaries
-	@true
 
 include ../../makerules $(wildcard *.d)
 
@@ -24,6 +23,6 @@ include ../../makerules $(wildcard *.d)
 binaries: $(SRC:.cpp=.o) $(MODOBJS) $(MODULES)
 	@true
 
-clean: stdclean
+clean:	stdclean
 
-.PHONY: clean all
+.PHONY:	binaries clean

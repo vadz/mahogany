@@ -24,7 +24,8 @@ include ../../makeopts
 # aren't fully C++ compliant on RH6.1
 CXXFLAGS:=$(CXXFLAGS_RELAXED)
 
-MOD :=	$(filter-out PalmOS.cpp, $(wildcard *.cpp))
+MOD :=	$(patsubst .src/%, %, $(wildcard .src/*.cpp))
+MOD :=	$(filter-out PalmOS.cpp, $(MOD))
 
 ifdef PISOCK_LIB
 MOD += PalmOS.cpp
@@ -51,4 +52,4 @@ binaries: $(MODOBJS) $(MODULES)
 
 clean:	stdclean
 
-.PHONY: clean
+.PHONY:	binaries clean
