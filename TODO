@@ -19,7 +19,8 @@ $Id$
 		  moved with mouse instead of keys, everything is fine.
 		- temparily disable layout while inserting/clearing
 		  window? Should speed up things N*(N-1) fold...
-
+		- scrollbars don't appear immediately in long
+		  composeview messages
 9	KB	check password prompt in mailfolder
 5	KB	make MailFolder timer react to options change
 5	KB	(optionally, but on by default) expunge deleted messages when
