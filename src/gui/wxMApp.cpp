@@ -612,7 +612,7 @@ wxMApp::Help(int id, wxWindow *parent)
       m_HelpController = new wxHelpController;
       wxString helpfile;
 #ifdef OS_UNIX
-#ifndef wxUSE_HTML
+#if !wxUSE_HTML
       ((wxExtHelpController *)m_HelpController)->SetBrowser(
          READ_APPCONFIG(MP_HELPBROWSER),
          READ_APPCONFIG(MP_HELPBROWSER_ISNS));

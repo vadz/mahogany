@@ -82,8 +82,6 @@ $Id$
 5		integrate wxHTML for HTML viewing
 
 
-8	VZ	make the message templates work: GUI suport for configuring them
-		and (many) more macros should be added.
 7	VZ	document the new properties dialog entries/pages,
 		please - I've started extending the docs
 6	VZ	Could you please check the file-browse button/dialog to
@@ -94,6 +92,11 @@ $Id$
 		"checklist" (however that thing was called) box to
 		choose the fields and their order and which separator
 		to use would be nice.
+
+4	VZ	templates enhancements:
+		a) take them from files
+		b) "Apply template" command in compose view
+
 8		Find out where Mahogany is when laying out really long 
 		text messages. How can we speed this up? Why do
 		redraws take long, too?

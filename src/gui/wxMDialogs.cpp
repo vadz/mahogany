@@ -59,7 +59,7 @@
 #include <wx/textdlg.h>
 #include <wx/treectrl.h>
 
-#include <wx/generic/helpwxht.h>
+#include <wx/help.h>
 
 #include "MFolderDialogs.h"
 
@@ -110,6 +110,7 @@ wxSMDialog::ShowModal()
 {
    m_modalShowing = TRUE;
 
+#if wxUSE_HELP && wxUSE_HTML
    /* Disable all other windows apart from the help frame and this
       one. */
    
@@ -117,6 +118,9 @@ wxSMDialog::ShowModal()
    wxHelpController *hc = ((wxMApp *)mApplication)->GetHelpController();
    if(hc && hc->IsKindOf(CLASSINFO(wxHelpControllerHtml)))
       hf = ((wxHelpControllerHtml *)hc)->GetFrameParameters();
+#else
+   wxWindow *hf = NULL;
+#endif
 
    wxWindowList::Node *node;
    for ( node = wxTopLevelWindows.GetFirst(); node; node = node->GetNext() )
