@@ -40,11 +40,13 @@ public:
   KeywordDetectorCell(char c) :
       _c(c), _son(NULL), _brother(NULL), _isKey(0), _back(NULL) {}
 
-  ~KeywordDetectorCell()
-  {
-     delete _son;
-     //delete _brother; -- this results in infinite recursion somehow
-  }
+   ~KeywordDetectorCell() {  
+      if (_c != '\000') {
+         delete _son;
+         delete _brother;
+      } // else: this is a back-node, and thus it points up in the
+        // tree, to a node that is already deleted, or will soon be.
+   }
 
 private:
   char _c;
@@ -66,7 +68,9 @@ private:
 class KeywordDetector {
 public:
   KeywordDetector() : _root(NULL) { }
-  ~KeywordDetector() { delete _root; }
+  ~KeywordDetector() { 
+     delete _root; 
+  }
 
 public:
 
@@ -363,7 +367,7 @@ inline bool IsURLChar(char c)
    // this is bogus, of course... we basicly assume that anything at all can be
    // an URL except for '>' which, together with '<' is often used for
    // delimiting the URLs
-   return IsAlnum(c) || !(iscntrl(c) || isspace(c) || c == '>' );
+   return IsAlnum(c) || !(iscntrl(c) || isspace(c) || c == '>' || c == '*');
 }
 
 /// check if this is this atext as defined in RFC 2822
@@ -547,8 +551,8 @@ strutil_findurl(String& str, String& url)
    if ( !len )
    {
       // no URLs found
-      before.swap(str);
-      url.clear();
+      str.swap(before);
+      str.clear();
    }
    else // found an URL
    {
