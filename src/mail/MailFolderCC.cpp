@@ -852,7 +852,7 @@ MailFolderCC::BuildListing(void)
       msg.Printf(_("This folder (%s) contains %lu messages, which is greater than "
                    "the current threshold of %lu.\n"
                    "\n"
-                   "Would you like to retrieve only the first %lu messages?\n"
+                   "Would you like to retrieve only the last %lu messages?\n"
                    "(selecting [No] will retrieve all messages)"),
                  GetName().c_str(),
                  m_NumOfMessages, m_RetrievalLimit, m_RetrievalLimit);
