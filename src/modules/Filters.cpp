@@ -2356,7 +2356,8 @@ static bool CheckWhiteList(const Message *msg)
 
    wxArrayString values = msg->GetHeaderLines(headers);
    wxString list = strutil_flatten_array(values, ',');
-   RefCounter<AddressList> parser(AddressList::Create(list));
+   RefCounter<AddressList> parser(
+      AddressList::Create(FilterAddressList(list)));
 
    AdbManager *manager = AdbManager::Get();
    manager->LoadAll(); // HACK: So that AdbEditor's provider list is utilized

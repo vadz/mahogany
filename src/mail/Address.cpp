@@ -328,3 +328,42 @@ bool ContainsOwnAddress(const String& str, Profile *profile)
    return false;
 }
 
+extern String FilterAddressList(const String& original)
+{
+   String result;
+   
+   size_t each = 0;
+   while( each < original.size() )
+   {
+      bool match = false;
+
+      if( original[each] == _T('<') )
+      {
+         size_t colon = original.find(_T(':'),each);
+         if( colon != String::npos )
+         {
+            size_t right = original.find(_T('>'),colon);
+            if( right != String::npos )
+            {
+               if( original.substr(each+1,colon-(each+1)) == _T("mailto") )
+               {
+                  result += _T('<');
+                  result += original.substr(colon+1,right-(colon+1));
+                  result += _T('>');
+               }
+
+               match = true;
+               each = right+1;
+            }
+         }
+      }
+
+      if( !match )
+      {
+         result += original[each];
+         ++each;
+      }
+   }
+   
+   return result;
+}

@@ -155,5 +155,8 @@ extern bool operator==(const AddressList_obj& addrList1,
 /// check whether the given string contains at least one of our own addresses
 extern bool ContainsOwnAddress(const String& str, Profile *profile);
 
+/// Modifies <mailto:(.*)> to <$1> and removes other <[a-z]+:.*> parts
+extern String FilterAddressList(const String& original);
+
 #endif // _ADDRESS_H_
 
