@@ -27,7 +27,8 @@ $Id$
 
 		MessageView:
 		 - should show cursor only on demand
-
+		 - remember focused message not by index but by UID
+		   and find it again after re-sort
 		properties/access shows wrong help
 		properties/custom headers/more shows corrupted title
 		main window hides about-splash - not nice
