@@ -124,6 +124,11 @@ public:
    friend class wxBareBonesEditorNotebook;
 
 private:
+   // must be called when the encoding changes to reflect it at wxTextCtrl
+   // level
+   void SetFontEncoding();
+
+
    wxBareBonesEditorNotebook *m_notebook;
    wxTextCtrl *m_textControl;
    wxListCtrl *m_attachments;
@@ -883,9 +888,33 @@ void BareBonesEditor::ResetDirty()
    m_textControl->DiscardEdits();
 }
 
+void BareBonesEditor::SetFontEncoding()
+{
+   wxFont fontOld = m_textControl->GetFont();
+#if 0 // FIXME: wxGtk2.4/wxFont::SetEncoding doesn't work for some reason
+   wxFont fontNew(fontOld);
+   fontNew.SetEncoding(m_encoding);
+#else
+   wxFont fontNew(fontOld.GetPointSize(),
+                  fontOld.GetFamily(),
+                  fontOld.GetStyle(),
+                  fontOld.GetWeight(),
+                  fontOld.GetUnderlined(),
+                  fontOld.GetFaceName(),
+                  m_encoding);
+#endif
+
+   if ( fontNew.Ok() )
+   {
+      m_textControl->SetFont(fontNew);
+   }
+}
+
 void BareBonesEditor::SetEncoding(wxFontEncoding encoding)
 {
    m_encoding = encoding;
+
+   SetFontEncoding();
 }
 
 void BareBonesEditor::MoveCursorTo(unsigned long x, unsigned long y)
@@ -989,26 +1018,7 @@ void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
    // is not available (but equivalent one is)
    if ( EnsureAvailableTextEncoding(&m_encoding, &text, true /* may ask */) )
    {
-      wxFont fontOld = m_textControl->GetFont();
-#if 0 // FIXME: wxGtk2.4/wxFont::SetEncoding doesn't work for some reason
-      wxFont fontNew(fontOld);
-      fontNew.SetEncoding(m_encoding);
-#else
-      wxFont fontNew(
-         fontOld.GetPointSize(),
-         fontOld.GetFamily(),
-         fontOld.GetStyle(),
-         fontOld.GetWeight(),
-         fontOld.GetUnderlined(),
-         fontOld.GetFaceName(),
-         m_encoding
-      );
-#endif
-
-      if ( fontNew.Ok() )
-      {
-         m_textControl->SetFont(fontNew);
-      }
+      SetFontEncoding();
    }
    //else: don't change the font, encoding is not supported anyhow
 
