@@ -161,7 +161,30 @@ MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
       String specParent;
 
       MimeType::Primary mt = m_parent->GetType().GetPrimary();
+#if 1
+      if ( mt == MimeType::MULTIPART ) 
+      {
+         MimePartCC *grandparent = m_parent->m_parent;
 
+         // it shouldn't be the top level part (note that it is non NULL
+         // because of the test in the enclosing if)
+         if ( grandparent->m_parent )
+         {
+            mt = grandparent->GetType().GetPrimary();
+
+            if ( mt == MimeType::MESSAGE ||
+                 ( ( mt == MimeType::MULTIPART ) &&
+                   ( String(m_parent->m_body->subtype) == _T("ALTERNATIVE") )
+                 )
+               )
+            {
+               // our parent part doesn't have its own part number, use the
+               // grand parent spec as the base
+               specParent = grandparent->m_spec;
+            }
+         }
+      }
+#else   
       if ( mt == MimeType::MULTIPART || mt == MimeType::MESSAGE )
       {
          MimePartCC *grandparent = m_parent->m_parent;
@@ -180,6 +203,7 @@ MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
             }
          }
       }
+#endif
 
       if ( specParent.empty() )
       {
