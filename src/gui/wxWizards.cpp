@@ -923,7 +923,7 @@ bool
 MWizard_CreateFolder_ServerPage::TransferDataToWindow()
 {
    MFolder *f = ((CreateFolderWizard*)GetWizard())->GetPFolder();
-   ProfileBase * p = ProfileBase::CreateProfile(f->GetName());
+   Profile * p = Profile::CreateProfile(f->GetName());
    CHECK(p,FALSE,"No profile?");
 
    m_Name->SetValue(_("New Folder"));
@@ -1128,8 +1128,8 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
             params->m_Path, TRUE);
          if(newfolder)
          {
-            ProfileBase *p =
-               ProfileBase::CreateProfile(newfolder->GetName());
+            Profile *p =
+               Profile::CreateProfile(newfolder->GetName());
             p->writeEntry(MP_FOLDER_PASSWORD, params->m_Password);
             FolderType type = (FolderType) params->m_FolderType;
             switch(type)

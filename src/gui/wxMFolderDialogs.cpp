@@ -123,12 +123,12 @@ protected:
    bool ShouldEnableOk() const;
 
    // base class pure virtual - return the profile we're working with
-   virtual ProfileBase *GetProfile() const
+   virtual Profile *GetProfile() const
    {
       if ( m_newFolder && !m_profile )
       {
          ((wxFolderBaseDialog *)this)->m_profile = // const_cast
-            ProfileBase::CreateProfile(m_newFolder->GetFullName());
+            Profile::CreateProfile(m_newFolder->GetFullName());
       }
 
       SafeIncRef(m_profile);
@@ -139,7 +139,7 @@ protected:
 
    // tell all notebook pages (except the first one) which profile we're
    // working with
-   void SetPagesProfile(ProfileBase *profile);
+   void SetPagesProfile(Profile *profile);
 
    wxTextCtrl  *m_folderName,
                *m_parentName;
@@ -149,7 +149,7 @@ protected:
    MFolder *m_parentFolder,
            *m_newFolder;
 
-   ProfileBase *m_profile;
+   Profile *m_profile;
 
    // FALSE if at least one of the pages contains incorrect information, if
    // it's TRUE it doesn't mean that the buttons are enabled - the global
@@ -224,7 +224,7 @@ class wxFolderPropertiesPage : public wxNotebookPageBase
 {
 public:
    wxFolderPropertiesPage(wxNotebook *notebook,
-                          ProfileBase *profile,
+                          Profile *profile,
                           wxFolderCreateDialog *dlg = NULL);
 
    ~wxFolderPropertiesPage() { m_profile->DecRef(); }
@@ -345,7 +345,7 @@ protected:
    wxNotebook *m_notebook;
 
    /// the profile we use to read our settings from/write them to
-   ProfileBase *m_profile;
+   Profile *m_profile;
 
    /// type of the folder
    int m_type;
@@ -681,7 +681,7 @@ void wxFolderBaseDialog::CreateNotebook(wxPanel *panel)
                     );
 }
 
-void wxFolderBaseDialog::SetPagesProfile(ProfileBase *profile)
+void wxFolderBaseDialog::SetPagesProfile(Profile *profile)
 {
    // we assume that the first page is the "Access" one which is a bit special,
    // this is why we start from the second one
@@ -754,7 +754,7 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType folderType)
 
       // tell the other pages that we now have a folder (and hence a profile)
       String folderName = m_newFolder->GetFullName();
-      m_profile = ProfileBase::CreateProfile(folderName);
+      m_profile = Profile::CreateProfile(folderName);
 
       SetPagesProfile(m_profile);
    }
@@ -885,7 +885,7 @@ bool wxFolderPropertiesDialog::TransferDataToWindow()
    CHECK( m_newFolder, FALSE, "no folder in folder properties dialog" );
 
    wxString folderName = m_newFolder->GetFullName();
-   ProfileBase *profile = GetProfile();
+   Profile *profile = GetProfile();
 
    // use SetFolderPath() so the page will read its data from the profile
    // section corresponding to our folder
@@ -910,7 +910,7 @@ bool wxFolderPropertiesDialog::TransferDataFromWindow()
 // -----------------------------------------------------------------------------
 
 wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
-                                               ProfileBase *profile,
+                                               Profile *profile,
                                                wxFolderCreateDialog *dlg)
                       : wxNotebookPageBase(notebook)
 {
@@ -2086,7 +2086,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    String fullname = folder->GetFullName();
    m_profile->DecRef();
-   m_profile = ProfileBase::CreateProfile(fullname);
+   m_profile = Profile::CreateProfile(fullname);
 
    // common for all folders: remember the login info for the folders for which
    // it makes sense or for folder groups (for which we always remember
@@ -2305,7 +2305,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
    // don't forget to update both the array above and the enum!
    wxASSERT( WXSIZEOF(s_aszImages) == FolderCreatePage_Max + 1 );
 
-   ProfileBase *profile = ProfileBase::CreateProfile("");
+   Profile *profile = Profile::CreateProfile("");
 
    // create and add the pages: some are always present, others are only shown
    // to "advanced" users (because they're not generally useful and may confuse

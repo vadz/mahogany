@@ -1464,7 +1464,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
       MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
 
-      ProfileBase *profileChanged = event.GetProfile();
+      Profile *profileChanged = event.GetProfile();
       if ( !profileChanged )
       {
          // it's some profile which has nothing to do with us

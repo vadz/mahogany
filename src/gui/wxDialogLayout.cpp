@@ -176,7 +176,7 @@ wxPDialog::~wxPDialog()
 // shown from the options dialog (i.e. whose parent is an options page)
 // ----------------------------------------------------------------------------
 
-wxOptionsPageSubdialog::wxOptionsPageSubdialog(ProfileBase *profile,
+wxOptionsPageSubdialog::wxOptionsPageSubdialog(Profile *profile,
                                                wxWindow *parent,
                                                const wxString& label,
                                                const wxString& windowName)
@@ -1104,7 +1104,7 @@ wxNotebookDialog::SendOptionsChangeEvent()
                "this should be only called when a button is pressed" );
 
    // notify everybody who cares about the change
-   ProfileBase *profile = GetProfile();
+   Profile *profile = GetProfile();
 
    if ( !profile )
    {

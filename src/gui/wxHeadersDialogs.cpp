@@ -96,7 +96,7 @@ enum
 
 // get the folder name from the profile (may return empty string if editing
 // global settings)
-static String GetFolderNameFromProfile(ProfileBase *profile);
+static String GetFolderNameFromProfile(Profile *profile);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -107,7 +107,7 @@ class wxComposeHeadersDialog : public wxOptionsPageSubdialog
 {
 public:
    // ctor which takes the profile whose settings we will edit
-   wxComposeHeadersDialog(ProfileBase *profile, wxWindow *parent);
+   wxComposeHeadersDialog(Profile *profile, wxWindow *parent);
 
    // transfer data to/from window
    virtual bool TransferDataToWindow();
@@ -150,7 +150,7 @@ class wxMsgViewHeadersDialog  : public wxOptionsPageSubdialog
 {
 public:
    // ctor which takes the profile whose settings we will edit
-   wxMsgViewHeadersDialog(ProfileBase *profile, wxWindow *parent);
+   wxMsgViewHeadersDialog(Profile *profile, wxWindow *parent);
 
    // transfer data to/from window
    virtual bool TransferDataToWindow();
@@ -177,7 +177,7 @@ class wxCustomHeaderDialog : public wxOptionsPageSubdialog
 {
 public:
    // ctor
-   wxCustomHeaderDialog(ProfileBase *profile,
+   wxCustomHeaderDialog(Profile *profile,
                         wxWindow *parent,
                         bool letUserChooseType);
 
@@ -228,7 +228,7 @@ class wxCustomHeadersDialog : public wxOptionsPageSubdialog
 {
 public:
    // ctor & dtor
-   wxCustomHeadersDialog(ProfileBase *profile, wxWindow *parent);
+   wxCustomHeadersDialog(Profile *profile, wxWindow *parent);
    virtual ~wxCustomHeadersDialog();
 
    // transfer data to/from window
@@ -277,7 +277,7 @@ private:
 
    // our profile: the headers info is stored under
    // M_CUSTOM_HEADERS_CONFIG_SECTION in it
-   ProfileBase *m_profile;
+   Profile *m_profile;
 
    // the types of the headers (not ints, but CustomHeaderTypes, in fact)
    wxArrayInt m_headerTypes;
@@ -361,7 +361,7 @@ const char *wxComposeHeadersDialog::ms_profileNamesShow[] =
    MP_SHOWBCC
 };
 
-wxComposeHeadersDialog::wxComposeHeadersDialog(ProfileBase *profile,
+wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
                                                wxWindow *parent)
                       : wxOptionsPageSubdialog(profile, parent,
                                                _("Configure headers for "
@@ -541,7 +541,7 @@ bool wxComposeHeadersDialog::TransferDataFromWindow()
 // wxMessageHeadersDialog - configure the headers in the message view
 // ----------------------------------------------------------------------------
 
-wxMsgViewHeadersDialog::wxMsgViewHeadersDialog(ProfileBase *profile,
+wxMsgViewHeadersDialog::wxMsgViewHeadersDialog(Profile *profile,
                                                wxWindow *parent)
                       : wxOptionsPageSubdialog(profile, parent,
                                                _("Configure headers to show "
@@ -703,7 +703,7 @@ void wxMsgViewHeadersDialog::OnButtonMove(bool up)
 // wxCustomHeaderDialog - edit the value of one custom header field
 // ----------------------------------------------------------------------------
 
-wxCustomHeaderDialog::wxCustomHeaderDialog(ProfileBase *profile,
+wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
                                            wxWindow *parent,
                                            bool letUserChooseType)
                      : wxOptionsPageSubdialog(profile, parent,
@@ -887,7 +887,7 @@ void wxCustomHeaderDialog::OnUpdateUI(wxUpdateUIEvent& event)
 // wxCustomHeadersDialog - edit all custom headers for the given profile
 // ----------------------------------------------------------------------------
 
-wxCustomHeadersDialog::wxCustomHeadersDialog(ProfileBase *profile,
+wxCustomHeadersDialog::wxCustomHeadersDialog(Profile *profile,
                                              wxWindow *parent)
                      : wxOptionsPageSubdialog(profile, parent,
                                               _("Configure custom headers"),
@@ -1178,7 +1178,7 @@ void wxCustomHeadersDialog::OnDelete(wxCommandEvent& WXUNUSED(event))
 // private functions
 // ----------------------------------------------------------------------------
 
-static String GetFolderNameFromProfile(ProfileBase *profile)
+static String GetFolderNameFromProfile(Profile *profile)
 {
    String folderName, profileName = profile->GetName();
    size_t lenPrefix = strlen(M_PROFILE_CONFIG_SECTION);
@@ -1202,21 +1202,21 @@ static String GetFolderNameFromProfile(ProfileBase *profile)
 // our public interface
 // ----------------------------------------------------------------------------
 
-bool ConfigureComposeHeaders(ProfileBase *profile, wxWindow *parent)
+bool ConfigureComposeHeaders(Profile *profile, wxWindow *parent)
 {
    wxComposeHeadersDialog dlg(profile, parent);
 
    return (dlg.ShowModal() == wxID_OK) && dlg.HasChanges();
 }
 
-bool ConfigureMsgViewHeaders(ProfileBase *profile, wxWindow *parent)
+bool ConfigureMsgViewHeaders(Profile *profile, wxWindow *parent)
 {
    wxMsgViewHeadersDialog dlg(profile, parent);
 
    return (dlg.ShowModal() == wxID_OK) && dlg.HasChanges();
 }
 
-bool ConfigureCustomHeader(ProfileBase *profile, wxWindow *parent,
+bool ConfigureCustomHeader(Profile *profile, wxWindow *parent,
                            String *headerName, String *headerValue,
                            bool *storedInProfile,
                            CustomHeaderType type)
@@ -1258,7 +1258,7 @@ bool ConfigureCustomHeader(ProfileBase *profile, wxWindow *parent,
    }
 }
 
-bool ConfigureCustomHeaders(ProfileBase *profile, wxWindow *parent)
+bool ConfigureCustomHeaders(Profile *profile, wxWindow *parent)
 {
    wxCustomHeadersDialog dlg(profile, parent);
 
@@ -1266,7 +1266,7 @@ bool ConfigureCustomHeaders(ProfileBase *profile, wxWindow *parent)
 }
 
 // TODO we should implement inheritance!!
-size_t GetCustomHeaders(ProfileBase *profile,
+size_t GetCustomHeaders(Profile *profile,
                         CustomHeaderType typeWanted,
                         wxArrayString *names,
                         wxArrayString *values,

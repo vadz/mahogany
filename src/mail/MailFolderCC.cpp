@@ -511,7 +511,7 @@ protected:
 
 MailFolderCC::MailFolderCC(int typeAndFlags,
                            String const &path,
-                           ProfileBase *profile,
+                           Profile *profile,
                            String const &server,
                            String const &login,
                            String const &password)
@@ -521,7 +521,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    if(m_Profile)
       m_Profile->IncRef();
    else
-      m_Profile = ProfileBase::CreateEmptyProfile();
+      m_Profile = Profile::CreateEmptyProfile();
    UpdateConfig();
    
    if(! cclientInitialisedFlag)
@@ -710,7 +710,7 @@ static String GetImapSpec(int type, int flags,
 MailFolderCC *
 MailFolderCC::OpenFolder(int typeAndFlags,
                          String const &name,
-                         ProfileBase *profile,
+                         Profile *profile,
                          String const &server,
                          String const &login,
                          String const &password,
@@ -857,7 +857,7 @@ MailFolderCC::ApplyTimeoutValues(void)
 void
 MailFolderCC::UpdateTimeoutValues(void)
 {
-   ProfileBase *p = GetProfile();
+   Profile *p = GetProfile();
    // int to;
    //UPDATE_TO(OPENTIMEOUT, ms_TcpOpenTimeout);
 

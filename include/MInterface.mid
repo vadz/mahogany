@@ -25,25 +25,25 @@ FUNCTION(GetMApplication, MAppBase *, `(void)',
  return mApplication;
 ')
 
-FUNCTION(CreateProfile, ProfileBase *, (
+FUNCTION(CreateProfile, Profile *, (
 ARG(STRING, classname),
-ARG(ProfileBase *, parent, =NULL)
+ARG(Profile *, parent, =NULL)
 ),
 `
- return ProfileBase::CreateProfile(classname,parent);
+ return Profile::CreateProfile(classname,parent);
 ')
 
-FUNCTION(GetGlobalProfile, ProfileBase *, `(void)',
+FUNCTION(GetGlobalProfile, Profile *, `(void)',
 `
  return mApplication->GetProfile();
 ')
 
-FUNCTION(CreateModuleProfile, ProfileBase *, (
+FUNCTION(CreateModuleProfile, Profile *, (
 ARG(STRING, classname),
-ARG(ProfileBase *, parent, =NULL)
+ARG(Profile *, parent, =NULL)
 ),
 `
- return ProfileBase::CreateModuleProfile(classname,parent);
+ return Profile::CreateModuleProfile(classname,parent);
 ')
 
 FUNCTION(CreatePListCtrl, wxPListCtrl *, (
@@ -61,7 +61,7 @@ wxDefaultSize, style);
 FUNCTION(CreateMessage, Message *, (
 ARG(STRING, text),
 ARG(UIDTYPE, uid, = UID_ILLEGAL),
-ARG(ProfileBase *, profile, =NULL)
+ARG(Profile *, profile, =NULL)
 ),
 `
  return Message::Create(text, uid, profile);
@@ -102,7 +102,7 @@ FUNCTION(StatusMessage, void , ( ARG(STRING, message) )
 ')
 
 FUNCTION(CreateSendMessageCC, SendMessageCC *, (
-ARG(ProfileBase, *profile),
+ARG(Profile, *profile),
 ARG(Protocol , protocol, =Prot_SMTP)
 ),
 `

@@ -105,7 +105,7 @@ public:
       { m_started = TRUE; return wxTimer::Start(millisecs, oneShot); }
 
    virtual void Notify()
-      { wxLogTrace("Autosaving everything."); ProfileBase::FlushAll(); }
+      { wxLogTrace("Autosaving everything."); Profile::FlushAll(); }
 
     virtual void Stop()
       { if ( m_started ) wxTimer::Stop(); }
@@ -605,7 +605,7 @@ wxMApp::OnInit()
          wxString configPath;
          configPath << "UseLocale_" << locale;
 
-         ProfileBase *profile = GetProfile();
+         Profile *profile = GetProfile();
          if ( profile->readEntry(configPath, 1l) != 0l )
          {
             CloseSplash();
@@ -772,7 +772,7 @@ int wxMApp::OnExit()
    delete m_OnlineManager;
    // FIXME this is not the best place to do it, but at least we're safe
    //       because we now that by now it's unused any more
-   ProfileBase::DeleteGlobalConfig();
+   Profile::DeleteGlobalConfig();
 
    MObjectRC::CheckLeaks();
    MObject::CheckLeaks();

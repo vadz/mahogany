@@ -44,7 +44,7 @@ enum CustomHeaderType
 
     @return the number of headers
  */
-extern size_t GetCustomHeaders(ProfileBase *profile,
+extern size_t GetCustomHeaders(Profile *profile,
                                CustomHeaderType type,
                                wxArrayString *names,
                                wxArrayString *values,
@@ -54,13 +54,13 @@ extern size_t GetCustomHeaders(ProfileBase *profile,
 
     @return true if Ok button was pressed, false otherwise
  */
-extern bool ConfigureComposeHeaders(ProfileBase *profile, wxWindow *parent);
+extern bool ConfigureComposeHeaders(Profile *profile, wxWindow *parent);
 
 /** Show the dialog to configure message view headers for given profile
 
     @return true if Ok button was pressed, false otherwise
  */
-extern bool ConfigureMsgViewHeaders(ProfileBase *profile, wxWindow *parent);
+extern bool ConfigureMsgViewHeaders(Profile *profile, wxWindow *parent);
 
 /** Show the dialog to allow the user change a value for a custom header,
     returns the header name and value in output variables.
@@ -82,7 +82,7 @@ extern bool ConfigureMsgViewHeaders(ProfileBase *profile, wxWindow *parent);
     @parent type [in] for which messages should we remember this header?
     @return true if Ok button was pressed, false otherwise
  */
-extern bool ConfigureCustomHeader(ProfileBase *profile, wxWindow *parent,
+extern bool ConfigureCustomHeader(Profile *profile, wxWindow *parent,
                                   String *headerName, String *headerValue,
                                   bool *storedInProfile = (bool *)NULL,
                                   CustomHeaderType type = CustomHeader_Both);
@@ -93,6 +93,6 @@ extern bool ConfigureCustomHeader(ProfileBase *profile, wxWindow *parent,
 
     @return true if Ok button was pressed, false otherwise
  */
-extern bool ConfigureCustomHeaders(ProfileBase *profile, wxWindow *parent);
+extern bool ConfigureCustomHeaders(Profile *profile, wxWindow *parent);
 
 #endif // _HEADERDIALOGS_H

@@ -202,7 +202,7 @@ MMailFolder::ConvertMessageStatusToString(int status,
 void
 MMailFolder::ForwardMessage(class Message *msg,
                             const MailFolder::Params& params,
-                            ProfileBase *profile = NULL,
+                            Profile *profile = NULL,
                             MWindow *parent = NULL){ MMAILFOLDER_MISSING(); }
 /** Reply to one message.
     @param message message to reply to
@@ -214,7 +214,7 @@ MMailFolder::ForwardMessage(class Message *msg,
 void
 MMailFolder::ReplyMessage(class Message *msg,
                           const MailFolder::Params& params,
-                          ProfileBase *profile = NULL,
+                          Profile *profile = NULL,
                           MWindow *parent = NULL){ MMAILFOLDER_MISSING(); }
 
 /**@name Subscription management */

@@ -155,7 +155,7 @@ private:
    /// the folder to save new mail to
    MailFolder     *m_NewMailFolder;
    /// profile for the new mail folder
-   ProfileBase    *m_NewMailProfile;
+   Profile    *m_NewMailProfile;
    /// are we not supposed to collect anything?
    bool           m_IsLocked;
    /// The message for the new mail dialog.
@@ -396,7 +396,7 @@ MailCollectorImpl::SetNewMailFolder(const String &name)
       m_NewMailFolder->DecRef();
       m_NewMailProfile->DecRef();
    }
-   m_NewMailProfile = ProfileBase::CreateProfile(name);
+   m_NewMailProfile = Profile::CreateProfile(name);
    m_NewMailFolder = MailFolder::OpenFolder(name);
 }
 

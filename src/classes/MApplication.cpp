@@ -272,7 +272,7 @@ MAppBase::OnStartup()
    strConfFile = M_APPLICATIONNAME;
 #endif // Win/Unix
 
-   m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
+   m_profile = Profile::CreateGlobalConfig(strConfFile);
 
 #ifdef OS_UNIX
    /* Check whether other users can read our config file. This must
@@ -581,11 +581,11 @@ MAppBase::OnShutDown()
 
    // clean up
    AdbManager::Delete();
-   ProfileBase::FlushAll();
+   Profile::FlushAll();
    // The following little hack allows us to decref and delete the
    // global profile without triggering an assert, as this is not
    // normally allowed.
-   ProfileBase *p = m_profile;
+   Profile *p = m_profile;
    m_profile = NULL;
    p->DecRef();
    delete m_mimeManager;

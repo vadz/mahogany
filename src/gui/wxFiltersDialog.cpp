@@ -172,7 +172,7 @@ static wxString GetActionString(OAC_Types_Enum action,
 }
 
 // write one filter into profile
-static bool SaveFilter(ProfileBase *profile,
+static bool SaveFilter(Profile *profile,
                        const wxString& name,
                        const wxString& criterium,
                        const wxString& action,
@@ -213,7 +213,7 @@ public:
    inline bool GetActive(void) const
       { return m_Active; }
 
-   FilterEntryData(ProfileBase *profile)
+   FilterEntryData(Profile *profile)
       {
          SetName( profile->readEntry(FILTER_NAME,_("unnamed")) );
          SetCriterium( profile->readEntry(FILTER_CRITERIUM,"") );
@@ -1006,7 +1006,7 @@ class wxFiltersDialog : public wxOptionsPageSubdialog
 {
 public:
    // ctor & dtor
-   wxFiltersDialog(ProfileBase *profile, wxWindow *parent);
+   wxFiltersDialog(Profile *profile, wxWindow *parent);
    virtual ~wxFiltersDialog()
       {
          m_FiltersProfile->DecRef();
@@ -1043,7 +1043,7 @@ protected:
 
 // data
    wxString m_Filter, m_OriginalFilter;
-   ProfileBase *m_FiltersProfile, *m_Profile;
+   Profile *m_FiltersProfile, *m_Profile;
 private:
    DECLARE_EVENT_TABLE()
 };
@@ -1056,13 +1056,13 @@ END_EVENT_TABLE()
 
 
 
-wxFiltersDialog::wxFiltersDialog(ProfileBase *profile, wxWindow *parent)
+wxFiltersDialog::wxFiltersDialog(Profile *profile, wxWindow *parent)
    : wxOptionsPageSubdialog(profile,
                             parent,
                             _("Configure Filter Rules"),
                             "FilterDialog")
 {
-   m_FiltersProfile = ProfileBase::CreateProfile("Filters", profile);
+   m_FiltersProfile = Profile::CreateProfile("Filters", profile);
    m_Profile = profile;
    m_Profile->IncRef();
 
@@ -1350,14 +1350,14 @@ wxFiltersDialog::TransferDataToWindow()
 // ----------------------------------------------------------------------------
 
 extern
-bool ConfigureFilterRules(ProfileBase *profile, wxWindow *parent)
+bool ConfigureFilterRules(Profile *profile, wxWindow *parent)
 {
    wxFiltersDialog dlg(profile, parent);
    return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
 }
 
 extern
-bool SaveSimpleFilter(ProfileBase *profile,
+bool SaveSimpleFilter(Profile *profile,
                       const wxString& name,
                       ORC_Types_Enum condType,
                       ORC_Where_Enum condWhere,

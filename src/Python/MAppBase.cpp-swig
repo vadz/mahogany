@@ -250,7 +250,7 @@ static PyObject *_wrap_MDialog_FileRequester(PyObject *self, PyObject *args) {
     String * _arg4 = &NULLstring;
     String * _arg5 = &NULLstring;
     bool  _arg6 = false;
-    ProfileBase * _arg7 = NULL;
+    Profile * _arg7 = NULL;
     char * _argc0 = 0;
     char * _argc1 = 0;
     char * _argc2 = 0;
@@ -301,8 +301,8 @@ static PyObject *_wrap_MDialog_FileRequester(PyObject *self, PyObject *args) {
     }
     _arg6 = (bool ) tempbool6;
     if (_argc7) {
-        if (SWIG_GetPtr(_argc7,(void **) &_arg7,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 8 of MDialog_FileRequester. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc7,(void **) &_arg7,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 8 of MDialog_FileRequester. Expected _Profile_p.");
         return NULL;
         }
     }
@@ -482,7 +482,7 @@ static PyObject *_wrap_MAppBase_GetMimeManager(PyObject *self, PyObject *args) {
 #define MAppBase_GetProfile(_swigobj)  (_swigobj->GetProfile())
 static PyObject *_wrap_MAppBase_GetProfile(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    ProfileBase * _result;
+    Profile * _result;
     MAppBase * _arg0;
     char * _argc0 = 0;
     char _ptemp[128];
@@ -496,8 +496,8 @@ static PyObject *_wrap_MAppBase_GetProfile(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    _result = (ProfileBase *)MAppBase_GetProfile(_arg0);
-    SWIG_MakePtr(_ptemp, (char *) _result,"_ProfileBase_p");
+    _result = (Profile *)MAppBase_GetProfile(_arg0);
+    SWIG_MakePtr(_ptemp, (char *) _result,"_Profile_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
@@ -536,7 +536,7 @@ SWIGEXPORT(void,initMAppBasec)() {
  */
 	 SWIG_RegisterMapping("_signed_long","_long",0);
 	 SWIG_RegisterMapping("_MAppBase","_class_MAppBase",0);
-	 SWIG_RegisterMapping("_ProfileBase","_class_ProfileBase",0);
+	 SWIG_RegisterMapping("_Profile","_class_Profile",0);
 	 SWIG_RegisterMapping("_long","_unsigned_long",0);
 	 SWIG_RegisterMapping("_long","_signed_long",0);
 	 SWIG_RegisterMapping("_unsigned_long","_long",0);
@@ -547,7 +547,7 @@ SWIGEXPORT(void,initMAppBasec)() {
 	 SWIG_RegisterMapping("_signed_short","_short",0);
 	 SWIG_RegisterMapping("_MObjectRC","_class_MObjectRC",0);
 	 SWIG_RegisterMapping("_unsigned_int","_int",0);
-	 SWIG_RegisterMapping("_class_ProfileBase","_ProfileBase",0);
+	 SWIG_RegisterMapping("_class_Profile","_Profile",0);
 	 SWIG_RegisterMapping("_short","_unsigned_short",0);
 	 SWIG_RegisterMapping("_short","_signed_short",0);
 	 SWIG_RegisterMapping("_String","_class_String",0);

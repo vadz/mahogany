@@ -73,7 +73,7 @@ public:
                  wxWindow  *parent = NULL);
 
    /// Tell it a new parent profile - in case folder changed.
-   void SetParentProfile(ProfileBase *profile);
+   void SetParentProfile(Profile *profile);
 
    /// Destructor
    ~wxMessageView();
@@ -164,7 +164,7 @@ private:
    /// string used for last search in message
    wxString m_FindString;
    /// Profile
-   ProfileBase *m_Profile;
+   Profile *m_Profile;
    /// the MIME popup menu
    wxMenu *m_MimePopup;
 

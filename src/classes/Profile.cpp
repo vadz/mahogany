@@ -79,7 +79,7 @@
 #endif
 
 /**
-   Profile class, managing configuration options on a per class basis.
+   ProfileImpl class, managing configuration options on a per class basis.
    This class does essentially the same as the wxConfig class, but
    when initialised gets passed the name of the class it is related to
    and a parent profile. It then tries to load the class configuration
@@ -88,20 +88,20 @@
    If no corresponding profile file is found, the profile will not
    have a wxConfig object associated with it but only refer to its
    parent or the global config.
-   @see ProfileBase
+   @see Profile
    @see wxConfig
 */
 
-class Profile : public ProfileBase
+class ProfileImpl : public Profile
 {
 public:
-   /// creates a normal Profile
-   static ProfileBase * CreateProfile(const String & ipathname,
-                                      ProfileBase const *Parent,
+   /// creates a normal ProfileImpl
+   static Profile * CreateProfile(const String & ipathname,
+                                      Profile const *Parent,
                                       const String & root);
    
    /// creates an empty profile, not linked to a configuration entry
-   static ProfileBase * CreateEmptyProfile(const ProfileBase *Parent);
+   static Profile * CreateEmptyProfile(const Profile *Parent);
 
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
@@ -135,7 +135,7 @@ public:
    virtual String GetUniqueGroupName(void) const;
 
       /// Returns a pointer to the parent profile.
-   virtual ProfileBase *GetParent(void) const;
+   virtual Profile *GetParent(void) const;
 
    virtual bool HasEntry(const String & key) const;
    virtual bool HasGroup(const String & name) const;
@@ -179,9 +179,9 @@ public:
    virtual void ClearIdentity(void);
    virtual String GetIdentity(void) const;
    
-   MOBJECT_DEBUG(Profile)
+   MOBJECT_DEBUG(ProfileImpl)
 
-   virtual bool IsAncestor(ProfileBase *profile) const;
+   virtual bool IsAncestor(Profile *profile) const;
 
 private:
    /** Constructor.
@@ -192,21 +192,21 @@ private:
        by GetAppConfig()->readEntry(MP_PROFILEPATH).
 
    */
-   Profile(const String & iClassName, ProfileBase const *Parent,
+   ProfileImpl(const String & iClassName, Profile const *Parent,
            const String &root);
    /// Name of this profile == path in wxConfig
    String   m_ProfileName;
    /// If not empty, temporarily modified path for this profile.
    String   m_ProfilePath;
    /// Destructor, writes back those entries that got changed.
-   ~Profile();
+   ~ProfileImpl();
    GCC_DTOR_WARN_OFF
    /// this is an empty dummy profile, readonly
    bool     m_IsEmpty;
    /// Is the profile operating in suspended mode?
    bool m_Suspended;
    /// Is this profile using a different Identity at present?
-   ProfileBase * m_Identity;
+   Profile * m_Identity;
 };
 //@}
 
@@ -215,23 +215,23 @@ private:
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// ProfileBase
+// Profile
 // ----------------------------------------------------------------------------
 
-void ProfileBase::FlushAll()
+void Profile::FlushAll()
 {
    ASSERT(ms_GlobalConfig);
 
    ms_GlobalConfig->Flush();
 }
 
-bool ProfileBase::IsExpandingEnvVars() const
+bool Profile::IsExpandingEnvVars() const
 {
    PCHECK();
    return ms_GlobalConfig->IsExpandingEnvVars();
 }
 
-void ProfileBase::SetExpandEnvVars(bool bDoIt)
+void Profile::SetExpandEnvVars(bool bDoIt)
 {
    PCHECK();
    ms_GlobalConfig->SetExpandEnvVars(bDoIt);
@@ -240,7 +240,7 @@ void ProfileBase::SetExpandEnvVars(bool bDoIt)
 /// does a profile/config group with this name exist?
 /* static */
 bool
-ProfileBase::ProfileExists(const String &name)
+Profile::ProfileExists(const String &name)
 {
    ms_GlobalConfig->SetPath("");
    return ms_GlobalConfig->HasGroup(name);
@@ -271,7 +271,7 @@ ListProfilesHelper(wxConfigBase *config,
       config->Read(name + '/' + MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
       wxString pathname = path;
       pathname << '/' << name;
-      if(type == ProfileBase::PT_Any || ptype == type)
+      if(type == Profile::PT_Any || ptype == type)
          list->push_back(new String(pathname));
       ListProfilesHelper(config, list, type, pathname);
 
@@ -283,7 +283,7 @@ ListProfilesHelper(wxConfigBase *config,
 }
 
 kbStringList *
-ProfileBase::ListProfiles(int type)
+Profile::ListProfiles(int type)
 {
    ASSERT(ms_GlobalConfig);
    kbStringList *list = new kbStringList;
@@ -298,7 +298,7 @@ ProfileBase::ListProfiles(int type)
 
 
 //FIXME:MT calling wxWindows from possibly non-GUI code
-bool Profile::GetFirstGroup(String& s, long& l) const
+bool ProfileImpl::GetFirstGroup(String& s, long& l) const
 {
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
@@ -310,7 +310,7 @@ bool Profile::GetFirstGroup(String& s, long& l) const
       return success;
 }
 
-bool Profile::GetNextGroup(String& s, long& l) const
+bool ProfileImpl::GetNextGroup(String& s, long& l) const
 {
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
@@ -321,7 +321,7 @@ bool Profile::GetNextGroup(String& s, long& l) const
    return success;
 }
 
-String Profile::GetUniqueGroupName(void) const
+String ProfileImpl::GetUniqueGroupName(void) const
 {
    PCHECK();
    String name; // We use hex numbers
@@ -339,7 +339,7 @@ String Profile::GetUniqueGroupName(void) const
 }
 
 
-bool Profile::GetFirstEntry(String& s, long& l) const
+bool ProfileImpl::GetFirstEntry(String& s, long& l) const
 {
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
@@ -347,7 +347,7 @@ bool Profile::GetFirstEntry(String& s, long& l) const
    return ms_GlobalConfig->GetFirstEntry(s, l);
 }
 
-bool Profile::GetNextEntry(String& s, long& l) const
+bool ProfileImpl::GetNextEntry(String& s, long& l) const
 {
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
@@ -357,21 +357,21 @@ bool Profile::GetNextEntry(String& s, long& l) const
 
 
 void
-Profile::SetIdentity(const String & idName)
+ProfileImpl::SetIdentity(const String & idName)
 {
    PCHECK();
    if(m_Identity) ClearIdentity();
-   m_Identity = ProfileBase::CreateIdentity(idName);
+   m_Identity = Profile::CreateIdentity(idName);
 }
 void
-Profile::ClearIdentity(void)
+ProfileImpl::ClearIdentity(void)
 {
    PCHECK();
    if(m_Identity) m_Identity->DecRef();
 }
 
 String
-Profile::GetIdentity(void) const
+ProfileImpl::GetIdentity(void) const
 {
    PCHECK();
    return m_Identity ? m_Identity->GetName() : String("");
@@ -379,51 +379,51 @@ Profile::GetIdentity(void) const
 
 
 // ----------------------------------------------------------------------------
-// ProfileBase
+// Profile
 // ----------------------------------------------------------------------------
 
-wxConfigBase * ProfileBase::ms_GlobalConfig;
+wxConfigBase * Profile::ms_GlobalConfig;
 
 /** This function sets profile parameters and is applied
     to all profiles directly after creation.
 */
 inline static
-void EnforcePolicy(ProfileBase *p)
+void EnforcePolicy(Profile *p)
 {
    p->SetExpandEnvVars(true);
 }
 
-ProfileBase *
-ProfileBase::CreateProfile(const String & classname,
-                           ProfileBase const *parent)
+Profile *
+Profile::CreateProfile(const String & classname,
+                           Profile const *parent)
 {
    ASSERT(classname.Length() == 0 ||  // only relative paths allowed
           (classname[0u] != '.' && classname[0u] != '/'));
-   ProfileBase *p =  Profile::CreateProfile(classname, parent,
+   Profile *p =  ProfileImpl::CreateProfile(classname, parent,
                                             M_PROFILE_CONFIG_SECTION);
    
    EnforcePolicy(p);
    return p;
 }
 
-ProfileBase *
-ProfileBase::CreateIdentity(const String & idName)
+Profile *
+Profile::CreateIdentity(const String & idName)
 {
    ASSERT(idName.Length() == 0 ||  // only relative paths allowed
           (idName[0u] != '.' && idName[0u] != '/'));
-   ProfileBase *p =  Profile::CreateProfile(idName, NULL,
+   Profile *p =  ProfileImpl::CreateProfile(idName, NULL,
                                             M_IDENTITY_CONFIG_SECTION);  
    EnforcePolicy(p);
    return p;
 }
 
-ProfileBase *
-ProfileBase::CreateModuleProfile(const String & classname, ProfileBase const *parent)
+Profile *
+Profile::CreateModuleProfile(const String & classname, Profile const *parent)
 {
    ASSERT(classname.Length() == 0 ||  // only relative paths allowed
           (classname[0u] != '.' && classname[0u] != '/'));
    String newName = "Modules/" + classname;
-   ProfileBase *p =  Profile::CreateProfile(newName, parent,
+   Profile *p =  ProfileImpl::CreateProfile(newName, parent,
                                             M_PROFILE_CONFIG_SECTION);
    
    EnforcePolicy(p);
@@ -431,16 +431,16 @@ ProfileBase::CreateModuleProfile(const String & classname, ProfileBase const *pa
 }
 
 
-ProfileBase *
-ProfileBase::CreateEmptyProfile(ProfileBase const *parent)
+Profile *
+Profile::CreateEmptyProfile(Profile const *parent)
 {
-   ProfileBase *p =  Profile::CreateEmptyProfile(parent);
+   Profile *p =  ProfileImpl::CreateEmptyProfile(parent);
    EnforcePolicy(p);
    return p;
 }
 
-ProfileBase *
-ProfileBase::CreateGlobalConfig(const String & filename)
+Profile *
+Profile::CreateGlobalConfig(const String & filename)
 {
    ASSERT( ! strutil_isempty(filename) );
 #  ifdef OS_WIN
@@ -468,20 +468,20 @@ ProfileBase::CreateGlobalConfig(const String & filename)
    // among other things, the passwords
    ((wxFileConfig *)ms_GlobalConfig)->SetUmask(0077);
 #  endif // Unix/Windows
-   ProfileBase *p = Profile::CreateProfile("",NULL,M_PROFILE_CONFIG_SECTION);
+   Profile *p = ProfileImpl::CreateProfile("",NULL,M_PROFILE_CONFIG_SECTION);
    EnforcePolicy(p);
    return p;
 }
 
 void
-ProfileBase::DeleteGlobalConfig()
+Profile::DeleteGlobalConfig()
 {
    if ( ms_GlobalConfig )
       delete ms_GlobalConfig;
 }
 
 String
-ProfileBase::readEntry(const String & key,
+Profile::readEntry(const String & key,
                        const char *defaultvalue,
                        bool * found) const
 {
@@ -492,18 +492,18 @@ ProfileBase::readEntry(const String & key,
 }
 
 // ----------------------------------------------------------------------------
-// Profile
+// ProfileImpl
 // ----------------------------------------------------------------------------
 
 /**
-   Profile class, managing configuration options on a per class basis.
+   ProfileImpl class, managing configuration options on a per class basis.
    This class does essentially the same as the wxConfig class, but
    when initialised gets passed the name of the class it is related to
    and a parent profile. It then tries to load the class configuration
    file. If an entry is not found, it tries to get it from its parent
    profile. Thus, an inheriting profile structure is created.
 */
-Profile::Profile(const String & iName, ProfileBase const *Parent,
+ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent,
                  const String & root)
 {
    m_ProfileName = ( Parent && Parent->GetName().Length()) ?
@@ -520,23 +520,23 @@ Profile::Profile(const String & iName, ProfileBase const *Parent,
 }
 
 
-ProfileBase *
-Profile::CreateProfile(const String & iClassName,
-                       ProfileBase const *parent,
+Profile *
+ProfileImpl::CreateProfile(const String & iClassName,
+                       Profile const *parent,
                        const String & root)
 {
-   return new Profile(iClassName, parent, root);
+   return new ProfileImpl(iClassName, parent, root);
 }
 
-ProfileBase *
-Profile::CreateEmptyProfile(ProfileBase const *parent)
+Profile *
+ProfileImpl::CreateEmptyProfile(Profile const *parent)
 {
-   Profile * p = new Profile("", parent, M_PROFILE_CONFIG_SECTION);
+   ProfileImpl * p = new ProfileImpl("", parent, M_PROFILE_CONFIG_SECTION);
    p->m_IsEmpty = true;
    return p;
 }
 
-Profile::~Profile()
+ProfileImpl::~ProfileImpl()
 {
    PCHECK();
    ASSERT(this != mApplication->GetProfile());
@@ -545,8 +545,8 @@ Profile::~Profile()
    if(m_Identity) m_Identity->DecRef();
 }
 
-ProfileBase *
-Profile::GetParent(void) const
+Profile *
+ProfileImpl::GetParent(void) const
 {
    return CreateProfile(GetName().BeforeLast('/'), NULL,
                         /* not an error as root doesn't matter */
@@ -554,7 +554,7 @@ Profile::GetParent(void) const
 }
 
 bool
-Profile::HasGroup(const String & name) const
+ProfileImpl::HasGroup(const String & name) const
 {
    PCHECK();
    if(m_IsEmpty) return false;
@@ -563,7 +563,7 @@ Profile::HasGroup(const String & name) const
 }
 
 bool
-Profile::HasEntry(const String & key) const
+ProfileImpl::HasEntry(const String & key) const
 {
    PCHECK();
    if(m_IsEmpty) return false;
@@ -572,7 +572,7 @@ Profile::HasEntry(const String & key) const
 }
 
 bool
-Profile::Rename(const String& oldName, const String& newName)
+ProfileImpl::Rename(const String& oldName, const String& newName)
 {
    PCHECK();
    if(m_IsEmpty) return false;
@@ -581,7 +581,7 @@ Profile::Rename(const String& oldName, const String& newName)
 }
 
 void
-Profile::DeleteEntry(const String& key)
+ProfileImpl::DeleteEntry(const String& key)
 {
    PCHECK();
 
@@ -593,7 +593,7 @@ Profile::DeleteEntry(const String& key)
 }
 
 void
-Profile::DeleteGroup(const String & path)
+ProfileImpl::DeleteGroup(const String & path)
 {
    PCHECK();
    if(m_IsEmpty)
@@ -616,7 +616,7 @@ Profile::DeleteGroup(const String & path)
 // it.
 
 String
-Profile::readEntry(const String & key, const String & def, bool * found) const
+ProfileImpl::readEntry(const String & key, const String & def, bool * found) const
 {
    PCHECK();
 
@@ -677,7 +677,7 @@ Profile::readEntry(const String & key, const String & def, bool * found) const
 }
 
 long
-Profile::readEntry(const String & key, long def, bool * found) const
+ProfileImpl::readEntry(const String & key, long def, bool * found) const
 {
    PCHECK();
 
@@ -737,7 +737,7 @@ Profile::readEntry(const String & key, long def, bool * found) const
 }
 
 bool
-Profile::writeEntry(const String & key, const String & value)
+ProfileImpl::writeEntry(const String & key, const String & value)
 {
    PCHECK();
    if(m_IsEmpty) return false;
@@ -752,7 +752,7 @@ Profile::writeEntry(const String & key, const String & value)
 }
 
 bool
-Profile::writeEntry(const String & key, long value)
+ProfileImpl::writeEntry(const String & key, long value)
 {
    PCHECK();
    if(m_IsEmpty) return false;
@@ -768,7 +768,7 @@ Profile::writeEntry(const String & key, long value)
 
 
 void
-Profile::Commit(void)
+ProfileImpl::Commit(void)
 {
    PCHECK();
 
@@ -826,7 +826,7 @@ Profile::Commit(void)
 }
 
 void
-Profile::Discard(void)
+ProfileImpl::Discard(void)
 {
    PCHECK();
 
@@ -852,7 +852,7 @@ Profile::Discard(void)
 
 #ifdef DEBUG
 String
-Profile::DebugDump() const
+ProfileImpl::DebugDump() const
 {
    PCHECK();
 
@@ -873,7 +873,7 @@ Profile::DebugDump() const
 // ----------------------------------------------------------------------------
 
 // all settings are saved as entries 0, 1, 2, ... of group key
-void SaveArray(ProfileBase * conf, const wxArrayString& astr, const String & key)
+void SaveArray(Profile * conf, const wxArrayString& astr, const String & key)
 {
    // save all array entries
    conf->DeleteGroup(key);    // remove all old entries
@@ -890,7 +890,7 @@ void SaveArray(ProfileBase * conf, const wxArrayString& astr, const String & key
 }
 
 // restores array saved by SaveArray
-void RestoreArray(ProfileBase * conf, wxArrayString& astr, const String & key)
+void RestoreArray(Profile * conf, wxArrayString& astr, const String & key)
 {
    wxASSERT( astr.IsEmpty() ); // should be called in the very beginning
 
@@ -913,7 +913,7 @@ void RestoreArray(ProfileBase * conf, wxArrayString& astr, const String & key)
 
 // some characters are invalid in the profile name, replace them
 String
-ProfileBase::FilterProfileName(const String& profileName)
+Profile::FilterProfileName(const String& profileName)
 {
    // the list of characters which are allowed in the profile names (all other
    // non alphanumeric chars are not)
@@ -943,7 +943,7 @@ ProfileBase::FilterProfileName(const String& profileName)
 // misc
 // ----------------------------------------------------------------------------
 
-bool Profile::IsAncestor(ProfileBase *profile) const
+bool ProfileImpl::IsAncestor(Profile *profile) const
 {
    if ( !profile )
       return false;
@@ -951,7 +951,7 @@ bool Profile::IsAncestor(ProfileBase *profile) const
    // can't compare as strings because '/' are sometimes duplicated...
    wxArrayString aMyComponents, aOtherComponents;
    wxSplitPath(aMyComponents, m_ProfileName);
-   wxSplitPath(aOtherComponents, ((Profile *)profile)->m_ProfileName);
+   wxSplitPath(aOtherComponents, ((ProfileImpl *)profile)->m_ProfileName);
 
    if ( aOtherComponents.GetCount() < aMyComponents.GetCount() )
       return false;

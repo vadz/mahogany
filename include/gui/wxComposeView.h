@@ -93,7 +93,7 @@ public:
     */
    static wxComposeView * CreateNewArticle(const MailFolder::Params& params,
                                            wxWindow *parent = NULL,
-                                           ProfileBase *parentProfile = NULL,
+                                           Profile *parentProfile = NULL,
                                            bool hide = false);
 
    /** Constructor for sending mail.
@@ -104,7 +104,7 @@ public:
     */
    static wxComposeView * CreateNewMessage(const MailFolder::Params& params,
                                            wxWindow *parent = NULL,
-                                           ProfileBase *parentProfile = NULL,
+                                           Profile *parentProfile = NULL,
                                            bool hide = false);
 
 
@@ -118,7 +118,7 @@ public:
     */
    static wxComposeView * CreateReplyMessage(const MailFolder::Params& params,
                                              wxWindow *parent,
-                                             ProfileBase *parentProfile,
+                                             Profile *parentProfile,
                                              Message * original = NULL,
                                              bool hide = false);
 
@@ -132,7 +132,7 @@ public:
     */
    static wxComposeView * CreateFwdMessage(const MailFolder::Params& params,
                                            wxWindow *parent,
-                                           ProfileBase *parentProfile,
+                                           Profile *parentProfile,
                                            bool hide = false);
 
    /** Initializes the composer text: for example, if this is a reply, inserts
@@ -229,7 +229,7 @@ public:
    void SetLastAddressEntry(AddressField field) { m_fieldLast = field; }
 
    // for wxAddressTextCtrl usage:
-   ProfileBase *GetProfile(void) const { return m_Profile; }
+   Profile *GetProfile(void) const { return m_Profile; }
 
    /** Adds an extra header line.
        @param entry name of header entry
@@ -242,7 +242,7 @@ public:
 
    // these functions are for backwards compatibility only
    static wxComposeView * CreateNewArticle(wxWindow *parent = NULL,
-                                           ProfileBase *parentProfile = NULL,
+                                           Profile *parentProfile = NULL,
                                            bool hide = false)
    {
       return CreateNewArticle(MailFolder::Params(""),
@@ -252,7 +252,7 @@ public:
    }
 
    static wxComposeView * CreateNewMessage(wxWindow *parent = NULL,
-                                           ProfileBase *parentProfile = NULL,
+                                           Profile *parentProfile = NULL,
                                            bool hide = false)
    {
       return CreateNewMessage(MailFolder::Params(""),
@@ -271,7 +271,7 @@ protected:
        @param hide if true, do not show frame
    */
    void Create(wxWindow *parent = NULL,
-               ProfileBase *parentProfile = NULL,
+               Profile *parentProfile = NULL,
                bool hide = false);
 
    /** Constructor
@@ -307,7 +307,7 @@ protected:
 
 private:
    /// a profile
-   ProfileBase * m_Profile;
+   Profile * m_Profile;
    /// the name of the class
    String m_name;
 

@@ -233,7 +233,7 @@ MEventManager::Suspend(bool suspend)
 // different MEvent derivations
 // ----------------------------------------------------------------------------
 
-MEventOptionsChangeData::MEventOptionsChangeData(class ProfileBase
+MEventOptionsChangeData::MEventOptionsChangeData(class Profile
                                                  *profile, ChangeKind
                                                  what)
 

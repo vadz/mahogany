@@ -45,7 +45,7 @@ protected:
       {
          m_MFolder = mfolder;
          SafeIncRef((MFolder *)m_MFolder);
-         m_Profile = ProfileBase::CreateProfile(mfolder->GetName());
+         m_Profile = Profile::CreateProfile(mfolder->GetName());
          UpdateConfig();
       }
 
@@ -59,12 +59,12 @@ protected:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   virtual inline ProfileBase *GetProfile(void)
+   virtual inline Profile *GetProfile(void)
       { return m_Profile; }
       
 private:
    const MFolder *m_MFolder;
-   ProfileBase *m_Profile;
+   Profile *m_Profile;
 };
 
 /**
@@ -117,7 +117,7 @@ public:
    */
    static void ForwardMessage(class Message *msg,
                               const Params& params,
-                              ProfileBase *profile = NULL,
+                              Profile *profile = NULL,
                               MWindow *parent = NULL);
    /** Reply to one message.
        @param message message to reply to
@@ -127,7 +127,7 @@ public:
    */
    static void ReplyMessage(class Message *msg,
                             const Params& params,
-                            ProfileBase *profile = NULL,
+                            Profile *profile = NULL,
                             MWindow *parent = NULL);
    /**@name Subscription management */
    //@{

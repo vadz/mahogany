@@ -400,7 +400,7 @@ public:
    // category.
    VarExpander(ExpansionSink& sink,
                wxComposeView& cv,
-               ProfileBase *profile = NULL,
+               Profile *profile = NULL,
                Message *msg = NULL)
       : m_sink(sink), m_cv(cv)
    {
@@ -461,7 +461,7 @@ private:
    Message *m_msg;
 
    // the profile to use for everything (global one by default)
-   ProfileBase *m_profile;
+   Profile *m_profile;
 
    // this array contains the list of all categories
    static const char *ms_templateVarCategories[Category_Max];
@@ -842,7 +842,7 @@ void wxComposeView::EnableEditing(bool enable)
 wxComposeView *
 wxComposeView::CreateNewArticle(const MailFolder::Params& params,
                                 wxWindow *parent,
-                                ProfileBase *parentProfile,
+                                Profile *parentProfile,
                                 bool hide)
 {
    wxComposeView *cv = new wxComposeView("ComposeViewNews", parent);
@@ -864,7 +864,7 @@ wxComposeView::CreateNewArticle(const MailFolder::Params& params,
 wxComposeView *
 wxComposeView::CreateNewMessage(const MailFolder::Params& params,
                                 wxWindow *parent,
-                                ProfileBase *parentProfile,
+                                Profile *parentProfile,
                                 bool hide)
 {
    wxComposeView *cv = new wxComposeView("ComposeViewMail", parent);
@@ -880,7 +880,7 @@ wxComposeView::CreateNewMessage(const MailFolder::Params& params,
 wxComposeView *
 wxComposeView::CreateReplyMessage(const MailFolder::Params& params,
                                   wxWindow *parent,
-                                  ProfileBase *parentProfile,
+                                  Profile *parentProfile,
                                   Message *original,
                                   bool hide)
 {
@@ -898,7 +898,7 @@ wxComposeView::CreateReplyMessage(const MailFolder::Params& params,
 wxComposeView *
 wxComposeView::CreateFwdMessage(const MailFolder::Params& params,
                                 wxWindow *parent,
-                                ProfileBase *parentProfile,
+                                Profile *parentProfile,
                                 bool hide)
 {
    wxComposeView *cv = CreateNewMessage(parent, parentProfile, hide);
@@ -1213,7 +1213,7 @@ wxComposeView::DoInitText(Message *msg)
 
 void
 wxComposeView::Create(wxWindow * WXUNUSED(parent),
-                      ProfileBase *parentProfile,
+                      Profile *parentProfile,
                       bool hide)
 {
    CHECK_RET( !initialised, "wxComposeView created twice" );
@@ -2641,7 +2641,7 @@ VarExpander::GetAbsFilename(const String& name)
    String filename = wxExpandEnvVars(name);
    if ( !IsAbsPath(filename) )
    {
-      ProfileBase *profile = mApplication->GetProfile();
+      Profile *profile = mApplication->GetProfile();
       String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_USER,
                                        mApplication->GetLocalDir());
       if ( !path || path.Last() != '/' )

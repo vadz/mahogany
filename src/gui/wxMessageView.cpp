@@ -495,17 +495,17 @@ wxMessageView::GetFolder(void)
 
 /// Tell it a new parent profile - in case folder changed.
 void
-wxMessageView::SetParentProfile(ProfileBase *profile)
+wxMessageView::SetParentProfile(Profile *profile)
 {
    SafeDecRef(m_Profile);
 
    if(profile)
    {
-      m_Profile = profile;/*ProfileBase::CreateProfile("MessageView", profile);*/
+      m_Profile = profile;/*Profile::CreateProfile("MessageView", profile);*/
       m_Profile->IncRef();
    }
    else
-      m_Profile = ProfileBase::CreateEmptyProfile();
+      m_Profile = Profile::CreateEmptyProfile();
 
    UpdateProfileValues();
 
@@ -1240,7 +1240,7 @@ wxMessageView::OnMEvent(MEventData& ev)
       MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
 
       // first of all, are we interested in this profile or not?
-      ProfileBase *profileChanged = event.GetProfile();
+      Profile *profileChanged = event.GetProfile();
       if ( !profileChanged || !profileChanged->IsAncestor(m_Profile) )
       {
          // it's some profile which has nothing to do with us
@@ -1672,7 +1672,7 @@ wxMessageView::Print(void)
 class wxMVPreview : public wxPrintPreview
 {
 public:
-   wxMVPreview(ProfileBase *prof,
+   wxMVPreview(Profile *prof,
                wxPrintout *p1, wxPrintout *p2,
                wxPrintDialogData *dd)
       : wxPrintPreview(p1, p2, dd)
@@ -1688,7 +1688,7 @@ public:
          m_Profile->DecRef();
       }
 private:
-   ProfileBase *m_Profile;
+   Profile *m_Profile;
 };
 
 void

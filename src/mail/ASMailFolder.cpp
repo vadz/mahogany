@@ -931,7 +931,7 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   inline ProfileBase *GetProfile(void) const
+   inline Profile *GetProfile(void) const
       { AScheck(); return m_MailFolder->GetProfile(); }
 
 

@@ -17,7 +17,7 @@
 
 #include "FolderType.h"
 
-class ProfileBase;
+class Profile;
 
 /// another scandoc fix
 #define   SM_INLINE "INLINE"
@@ -32,7 +32,7 @@ public:
        @param iprof optional pointer for a parent profile
        @param protocol which protocol to use for sending
    */
-   SendMessageCC(ProfileBase *iprof,
+   SendMessageCC(Profile *iprof,
                  Protocol protocol = Prot_Default);
 
    /** Sets the message subject.
@@ -152,7 +152,7 @@ private:
    String m_DefaultHost;
    
    /// 2nd stage constructor, see constructor
-   void	Create(Protocol protocol, ProfileBase *iprof);
+   void	Create(Protocol protocol, Profile *iprof);
    /// Protocol used for sending
    Protocol m_Protocol;
    /** @name variables managed by Build() */

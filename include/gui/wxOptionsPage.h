@@ -126,7 +126,7 @@ public:
                  size_t nFirst, size_t nLast,
                  wxNotebook *parent,
                  const char *title,
-                 ProfileBase *profile,
+                 Profile *profile,
                  int helpID = -1,
                  int image = -1);
    virtual ~wxOptionsPage() { SafeDecRef(m_Profile); }
@@ -136,7 +136,7 @@ public:
    virtual bool TransferDataFromWindow();
 
    // to change the profile associated with the page:
-   void SetProfile(ProfileBase *profile)
+   void SetProfile(Profile *profile)
    {
       SafeDecRef(m_Profile);
       m_Profile = profile;
@@ -170,7 +170,7 @@ protected:
    void CreateControls();
 
    // we need a pointer to the profile to write to
-   ProfileBase *m_Profile;
+   Profile *m_Profile;
 
    // get the control with "right" index
    wxControl *GetControl(size_t /* ConfigFields */ n) const
@@ -227,7 +227,7 @@ public:
    // nLast in ms_aFields
    wxOptionsPageStandard(wxNotebook *parent,
                          const char *title,
-                         ProfileBase *profile,
+                         Profile *profile,
                          size_t nFirst,
                          size_t nLast,
                          int helpID = -1);
@@ -257,7 +257,7 @@ public:
    // the aFields array contains the controls descriptions
    wxOptionsPageDynamic(wxNotebook *parent,
                         const char *title,
-                        ProfileBase *profile,
+                        Profile *profile,
                         FieldInfoArray aFields,
                         ConfigValuesArray aDefaults,
                         size_t nFields,
@@ -289,7 +289,7 @@ struct wxOptionsPageDesc
 class wxOptionsPageCompose : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageCompose(wxNotebook *parent, ProfileBase *profile);
+   wxOptionsPageCompose(wxNotebook *parent, Profile *profile);
 
    void OnButton(wxCommandEvent&);
    virtual bool TransferDataFromWindow();
@@ -302,7 +302,7 @@ private:
 class wxOptionsPageMessageView : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageMessageView(wxNotebook *parent, ProfileBase *profile);
+   wxOptionsPageMessageView(wxNotebook *parent, Profile *profile);
 
    void OnButton(wxCommandEvent&);
 
@@ -314,14 +314,14 @@ private:
 class wxOptionsPageIdent : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageIdent(wxNotebook *parent, ProfileBase *profile);
+   wxOptionsPageIdent(wxNotebook *parent, Profile *profile);
 };
 
 // network configuration page
 class wxOptionsPageNetwork : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageNetwork(wxNotebook *parent, ProfileBase *profile);
+   wxOptionsPageNetwork(wxNotebook *parent, Profile *profile);
 };
 
 // global folder settings (each folder has its own settings which are changed
@@ -329,7 +329,7 @@ public:
 class wxOptionsPageFolders : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageFolders(wxNotebook *parent, ProfileBase *profile);
+   wxOptionsPageFolders(wxNotebook *parent, Profile *profile);
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
@@ -355,7 +355,7 @@ private:
 class wxOptionsPagePython : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPagePython(wxNotebook *parent, ProfileBase *profile);
+   wxOptionsPagePython(wxNotebook *parent, Profile *profile);
 };
 #endif // USE_PYTHON
 
@@ -363,7 +363,7 @@ public:
 class wxOptionsPageAdb : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageAdb(wxNotebook *parent, ProfileBase *profile);
+   wxOptionsPageAdb(wxNotebook *parent, Profile *profile);
 };
 
 
@@ -371,14 +371,14 @@ public:
 class wxOptionsPageHelpers : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageHelpers(wxNotebook *parent, ProfileBase *profile);
+   wxOptionsPageHelpers(wxNotebook *parent, Profile *profile);
 };
 
 // miscellaneous settings
 class wxOptionsPageOthers : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageOthers(wxNotebook *parent, ProfileBase *profile);
+   wxOptionsPageOthers(wxNotebook *parent, Profile *profile);
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();

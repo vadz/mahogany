@@ -477,7 +477,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 
 wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 {
-   ProfileBase *p = fv->GetProfile();
+   Profile *p = fv->GetProfile();
 
    m_Parent = parent;
    m_FolderView = fv;
@@ -509,7 +509,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
           || entry == "80:80:80:80:80")
       {
          String newMailFolder = READ_APPCONFIG(MP_MAINFOLDER);
-         ProfileBase   *p = ProfileBase::CreateProfile(newMailFolder);
+         Profile   *p = Profile::CreateProfile(newMailFolder);
          //p->SetPath("FolderView");
          entry = p->readEntry("FolderListCtrl","");
          if(entry.Length() == 0)
@@ -740,7 +740,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
                                    m_Parent,
                                    MDIALOG_YESNOTITLE,
                                    true,
-                                   ProfileBase::FilterProfileName(m_Profile->GetName())+"MarkRead"))
+                                   Profile::FilterProfileName(m_Profile->GetName())+"MarkRead"))
          {
             UIdArray *seq = GetAllMessagesSequence(m_ASMailFolder);
             m_ASMailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
@@ -771,7 +771,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
    if(m_ASMailFolder)
    {
-/*      m_Profile = ProfileBase::CreateProfile("FolderView",
+/*      m_Profile = Profile::CreateProfile("FolderView",
                                              m_ASMailFolder ?
                                              m_ASMailFolder->GetProfile() :
                                              NULL);
@@ -780,7 +780,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       if(m_Profile)
          m_Profile->IncRef();
       else
-         m_Profile = ProfileBase::CreateEmptyProfile();
+         m_Profile = Profile::CreateEmptyProfile();
 
       m_MessagePreview->SetParentProfile(m_Profile);
       m_MessagePreview->Clear(); // again, to reflect profile changes
@@ -847,7 +847,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_NumOfMessages = 0;
    m_previewUId = UID_ILLEGAL;
    m_Parent->GetClientSize(&x, &y);
-   m_Profile = ProfileBase::CreateEmptyProfile(); //no longer "folderview"
+   m_Profile = Profile::CreateEmptyProfile(); //no longer "folderview"
    m_SplitterWindow = new wxPSplitterWindow("FolderSplit", m_Parent, -1,
                                             wxDefaultPosition, wxSize(x,y),
                                             wxSP_3D|wxSP_BORDER);
@@ -1679,7 +1679,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                   if ( toDelete )
                   {
                      // delete right now
-                     ProfileBase *p = m_ASMailFolder->GetProfile();
+                     Profile *p = m_ASMailFolder->GetProfile();
                      m_TicketList->Add(m_ASMailFolder->DeleteMessages(
                         result->GetSequence(),
                         (p && READ_CONFIG(p,  MP_USE_TRASH_FOLDER)),

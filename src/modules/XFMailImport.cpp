@@ -418,7 +418,7 @@ bool MXFMailImporter::ImportFilters()
    if ( !newmail )
       newmail = "INBOX";
    newmail += "/Filters";
-   ProfileBase *profileNewMailFilters = ProfileBase::CreateProfile(newmail);
+   Profile *profileNewMailFilters = Profile::CreateProfile(newmail);
 
    // find the first "unused" filter number
    size_t nFilter = 0;
@@ -561,7 +561,7 @@ typedef struct _xf_rule {
 
       // now create our rule from this data
       wxString filterName = wxString::Format("%u", nFilter++);
-      ProfileBase *profile = ProfileBase::CreateProfile(filterName,
+      Profile *profile = Profile::CreateProfile(filterName,
                                                         profileNewMailFilters);
       wxString program;
       SaveSimpleFilter(

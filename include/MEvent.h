@@ -248,14 +248,14 @@ public:
    };
 
    // ctor
-   MEventOptionsChangeData(class ProfileBase *profile,
+   MEventOptionsChangeData(class Profile *profile,
                            ChangeKind what);
 
    // what happened?
    ChangeKind GetChangeKind() const { return m_what; }
 
    // which profile was modified?
-   class ProfileBase *GetProfile() const { return m_profile; }
+   class Profile *GetProfile() const { return m_profile; }
 
    // veto the event - "Apply" will be forbidden (logging a message explaining
    // why this happened together with calling this function is probably a good
@@ -269,7 +269,7 @@ public:
    virtual ~MEventOptionsChangeData();
 
 private:
-   class ProfileBase *m_profile;
+   class Profile *m_profile;
    ChangeKind         m_what;
    bool               m_vetoed;
 };

@@ -521,7 +521,7 @@ static String GetTemplateValuePath(MessageTemplateKind kind, const String& name)
 // Template/<kind> in the given profile and then reads the corresponding
 // template value from /Templates/<kind>
 extern String
-GetMessageTemplate(MessageTemplateKind kind, ProfileBase *profile)
+GetMessageTemplate(MessageTemplateKind kind, Profile *profile)
 {
    // first read the template name
    String name = profile->readEntry(GetTemplateNamePath(kind), STANDARD_TEMPLATE_NAME);
@@ -534,7 +534,7 @@ extern String
 GetMessageTemplate(MessageTemplateKind kind, const String& name)
 {
    // the templates contain '$'s so disable variable expansion for now
-   ProfileBase *profile = mApplication->GetProfile();
+   Profile *profile = mApplication->GetProfile();
    ProfileEnvVarSave noEnvVarExpansion(profile);
 
    String value = profile->readEntry(GetTemplateValuePath(kind, name), "");
@@ -574,7 +574,7 @@ extern void
 SetMessageTemplate(const String& name,
                    const String& value,
                    MessageTemplateKind kind,
-                   ProfileBase *profile)
+                   Profile *profile)
 {
    if ( profile )
    {
@@ -601,7 +601,7 @@ GetMessageTemplateNames(MessageTemplateKind kind)
    // always add the "Standard" template to the list as it is always present
    names.Add(STANDARD_TEMPLATE_NAME);
 
-   ProfileBase *profile = mApplication->GetProfile();
+   Profile *profile = mApplication->GetProfile();
 
    wxString path;
    path << M_TEMPLATES_SECTION << GetTemplateKindPath(kind);

@@ -80,11 +80,11 @@ enum ORC_Logical_Enum
 
 /// configure the filters
 extern
-bool ConfigureFilterRules(ProfileBase *profile, wxWindow *parent);
+bool ConfigureFilterRules(Profile *profile, wxWindow *parent);
 
 /// write the filter to the given profile
 extern
-bool SaveSimpleFilter(ProfileBase *profile,
+bool SaveSimpleFilter(Profile *profile,
                       const wxString& name,
                       ORC_Types_Enum cond,
                       ORC_Where_Enum condWhere,

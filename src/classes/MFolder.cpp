@@ -159,7 +159,7 @@ public:
 protected:
    // helpers
       // common part of Create() and Exists()
-   static bool GroupExists(ProfileBase *profile, const String& fullname);
+   static bool GroupExists(Profile *profile, const String& fullname);
    /** Get the full name of the subfolder.
        As all folder names are relative profile names, we need to
        check for m_folderName not being empty before appending a slash
@@ -362,7 +362,7 @@ MFolderFromProfile::~MFolderFromProfile()
 }
 
 bool
-MFolderFromProfile::GroupExists(ProfileBase *profile, const String& fullname)
+MFolderFromProfile::GroupExists(Profile *profile, const String& fullname)
 {
    // split path into '/' separated components
    wxArrayString components;
@@ -393,7 +393,7 @@ bool MFolderFromProfile::Exists(const String& fullname)
 
    bool found;
    bool exists = profile->readEntry(MP_PROFILE_TYPE, MP_PROFILE_TYPE_D, &found)
-                 == ProfileBase::PT_FolderProfile;
+                 == Profile::PT_FolderProfile;
    if ( !found )
    {
       // if the value was just inherited from parent, it doesn't count
@@ -434,7 +434,7 @@ bool MFolderFromProfile::Create(const String& fullname)
       return FALSE;
    }
 
-   profile->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+   profile->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
 
    return TRUE;
 }
@@ -804,7 +804,7 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
          ProfilePathChanger changePath2(profile, name);
          if ( (profile->readEntry(MP_PROFILE_TYPE,
                                   0l,
-                                  &found) == ProfileBase::PT_FolderProfile)
+                                  &found) == Profile::PT_FolderProfile)
               && found )
          {
             wxString fullname(rootName);

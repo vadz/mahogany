@@ -59,79 +59,79 @@ extern PyObject *SWIG_newvarlink(void);
 // we don't want to export our functions as we don't build a shared library
 #undef SWIGEXPORT
 #define SWIGEXPORT(a,b) a b
-static void *SwigProfileBaseToMObjectRC(void *ptr) {
-    ProfileBase *src;
+static void *SwigProfileToMObjectRC(void *ptr) {
+    Profile *src;
     MObjectRC *dest;
-    src = (ProfileBase *) ptr;
+    src = (Profile *) ptr;
     dest = (MObjectRC *) src;
     return (void *) dest;
 }
 
-static void *SwigProfileBaseToMObject(void *ptr) {
-    ProfileBase *src;
+static void *SwigProfileToMObject(void *ptr) {
+    Profile *src;
     MObject *dest;
-    src = (ProfileBase *) ptr;
+    src = (Profile *) ptr;
     dest = (MObject *) src;
     return (void *) dest;
 }
 
-static PyObject *_wrap_ProfileBase_CreateProfile(PyObject *self, PyObject *args) {
+static PyObject *_wrap_Profile_CreateProfile(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    ProfileBase * _result;
+    Profile * _result;
     String * _arg0;
-    ProfileBase * _arg1;
+    Profile * _arg1;
     char * _argc0 = 0;
     char * _argc1 = 0;
     char _ptemp[128];
 
     self = self;
-    if(!PyArg_ParseTuple(args,"ss:ProfileBase_CreateProfile",&_argc0,&_argc1)) 
+    if(!PyArg_ParseTuple(args,"ss:Profile_CreateProfile",&_argc0,&_argc1)) 
         return NULL;
     if (_argc0) {
         if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_String_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_CreateProfile. Expected _String_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_CreateProfile. Expected _String_p.");
         return NULL;
         }
     }
     if (_argc1) {
-        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of ProfileBase_CreateProfile. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of Profile_CreateProfile. Expected _Profile_p.");
         return NULL;
         }
     }
-    _result = (ProfileBase *)ProfileBase::CreateProfile(*_arg0,_arg1);
-    SWIG_MakePtr(_ptemp, (char *) _result,"_ProfileBase_p");
+    _result = (Profile *)Profile::CreateProfile(*_arg0,_arg1);
+    SWIG_MakePtr(_ptemp, (char *) _result,"_Profile_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
 
-static PyObject *_wrap_ProfileBase_CreateGlobalConfig(PyObject *self, PyObject *args) {
+static PyObject *_wrap_Profile_CreateGlobalConfig(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    ProfileBase * _result;
+    Profile * _result;
     String * _arg0;
     char * _argc0 = 0;
     char _ptemp[128];
 
     self = self;
-    if(!PyArg_ParseTuple(args,"s:ProfileBase_CreateGlobalConfig",&_argc0)) 
+    if(!PyArg_ParseTuple(args,"s:Profile_CreateGlobalConfig",&_argc0)) 
         return NULL;
     if (_argc0) {
         if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_String_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_CreateGlobalConfig. Expected _String_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_CreateGlobalConfig. Expected _String_p.");
         return NULL;
         }
     }
-    _result = (ProfileBase *)ProfileBase::CreateGlobalConfig(*_arg0);
-    SWIG_MakePtr(_ptemp, (char *) _result,"_ProfileBase_p");
+    _result = (Profile *)Profile::CreateGlobalConfig(*_arg0);
+    SWIG_MakePtr(_ptemp, (char *) _result,"_Profile_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
 
-#define ProfileBase_readEntry(_swigobj,_swigarg0,_swigarg1)  (_swigobj->readEntry(_swigarg0,_swigarg1))
-static PyObject *_wrap_ProfileBase_readEntry(PyObject *self, PyObject *args) {
+#define Profile_readEntry(_swigobj,_swigarg0,_swigarg1)  (_swigobj->readEntry(_swigarg0,_swigarg1))
+static PyObject *_wrap_Profile_readEntry(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     String * _result;
-    ProfileBase * _arg0;
+    Profile * _arg0;
     String * _arg1;
     char * _arg2;
     char * _argc0 = 0;
@@ -139,31 +139,31 @@ static PyObject *_wrap_ProfileBase_readEntry(PyObject *self, PyObject *args) {
     char _ptemp[128];
 
     self = self;
-    if(!PyArg_ParseTuple(args,"sss:ProfileBase_readEntry",&_argc0,&_argc1,&_arg2)) 
+    if(!PyArg_ParseTuple(args,"sss:Profile_readEntry",&_argc0,&_argc1,&_arg2)) 
         return NULL;
     if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_readEntry. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_readEntry. Expected _Profile_p.");
         return NULL;
         }
     }
     if (_argc1) {
         if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of ProfileBase_readEntry. Expected _String_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of Profile_readEntry. Expected _String_p.");
         return NULL;
         }
     }
-    _result = new String (ProfileBase_readEntry(_arg0,*_arg1,_arg2));
+    _result = new String (Profile_readEntry(_arg0,*_arg1,_arg2));
     SWIG_MakePtr(_ptemp, (void *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
 
-#define ProfileBase_writeEntry(_swigobj,_swigarg0,_swigarg1)  (_swigobj->writeEntry(_swigarg0,_swigarg1))
-static PyObject *_wrap_ProfileBase_writeEntry(PyObject *self, PyObject *args) {
+#define Profile_writeEntry(_swigobj,_swigarg0,_swigarg1)  (_swigobj->writeEntry(_swigarg0,_swigarg1))
+static PyObject *_wrap_Profile_writeEntry(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     bool  _result;
-    ProfileBase * _arg0;
+    Profile * _arg0;
     String * _arg1;
     String * _arg2;
     char * _argc0 = 0;
@@ -171,197 +171,197 @@ static PyObject *_wrap_ProfileBase_writeEntry(PyObject *self, PyObject *args) {
     char * _argc2 = 0;
 
     self = self;
-    if(!PyArg_ParseTuple(args,"sss:ProfileBase_writeEntry",&_argc0,&_argc1,&_argc2)) 
+    if(!PyArg_ParseTuple(args,"sss:Profile_writeEntry",&_argc0,&_argc1,&_argc2)) 
         return NULL;
     if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_writeEntry. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_writeEntry. Expected _Profile_p.");
         return NULL;
         }
     }
     if (_argc1) {
         if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of ProfileBase_writeEntry. Expected _String_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of Profile_writeEntry. Expected _String_p.");
         return NULL;
         }
     }
     if (_argc2) {
         if (SWIG_GetPtr(_argc2,(void **) &_arg2,"_String_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of ProfileBase_writeEntry. Expected _String_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of Profile_writeEntry. Expected _String_p.");
         return NULL;
         }
     }
-    _result = (bool )ProfileBase_writeEntry(_arg0,*_arg1,*_arg2);
+    _result = (bool )Profile_writeEntry(_arg0,*_arg1,*_arg2);
     _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
 
-#define ProfileBase_SetPath(_swigobj,_swigarg0)  (_swigobj->SetPath(_swigarg0))
-static PyObject *_wrap_ProfileBase_SetPath(PyObject *self, PyObject *args) {
+#define Profile_SetPath(_swigobj,_swigarg0)  (_swigobj->SetPath(_swigarg0))
+static PyObject *_wrap_Profile_SetPath(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    ProfileBase * _arg0;
+    Profile * _arg0;
     String * _arg1;
     char * _argc0 = 0;
     char * _argc1 = 0;
 
     self = self;
-    if(!PyArg_ParseTuple(args,"ss:ProfileBase_SetPath",&_argc0,&_argc1)) 
+    if(!PyArg_ParseTuple(args,"ss:Profile_SetPath",&_argc0,&_argc1)) 
         return NULL;
     if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_SetPath. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_SetPath. Expected _Profile_p.");
         return NULL;
         }
     }
     if (_argc1) {
         if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of ProfileBase_SetPath. Expected _String_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of Profile_SetPath. Expected _String_p.");
         return NULL;
         }
     }
-    ProfileBase_SetPath(_arg0,*_arg1);
+    Profile_SetPath(_arg0,*_arg1);
     Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
 }
 
-#define ProfileBase_HasEntry(_swigobj,_swigarg0)  (_swigobj->HasEntry(_swigarg0))
-static PyObject *_wrap_ProfileBase_HasEntry(PyObject *self, PyObject *args) {
+#define Profile_HasEntry(_swigobj,_swigarg0)  (_swigobj->HasEntry(_swigarg0))
+static PyObject *_wrap_Profile_HasEntry(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     bool  _result;
-    ProfileBase * _arg0;
+    Profile * _arg0;
     String * _arg1;
     char * _argc0 = 0;
     char * _argc1 = 0;
 
     self = self;
-    if(!PyArg_ParseTuple(args,"ss:ProfileBase_HasEntry",&_argc0,&_argc1)) 
+    if(!PyArg_ParseTuple(args,"ss:Profile_HasEntry",&_argc0,&_argc1)) 
         return NULL;
     if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_HasEntry. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_HasEntry. Expected _Profile_p.");
         return NULL;
         }
     }
     if (_argc1) {
         if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of ProfileBase_HasEntry. Expected _String_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of Profile_HasEntry. Expected _String_p.");
         return NULL;
         }
     }
-    _result = (bool )ProfileBase_HasEntry(_arg0,*_arg1);
+    _result = (bool )Profile_HasEntry(_arg0,*_arg1);
     _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
 
-#define ProfileBase_DeleteGroup(_swigobj,_swigarg0)  (_swigobj->DeleteGroup(_swigarg0))
-static PyObject *_wrap_ProfileBase_DeleteGroup(PyObject *self, PyObject *args) {
+#define Profile_DeleteGroup(_swigobj,_swigarg0)  (_swigobj->DeleteGroup(_swigarg0))
+static PyObject *_wrap_Profile_DeleteGroup(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    ProfileBase * _arg0;
+    Profile * _arg0;
     String * _arg1;
     char * _argc0 = 0;
     char * _argc1 = 0;
 
     self = self;
-    if(!PyArg_ParseTuple(args,"ss:ProfileBase_DeleteGroup",&_argc0,&_argc1)) 
+    if(!PyArg_ParseTuple(args,"ss:Profile_DeleteGroup",&_argc0,&_argc1)) 
         return NULL;
     if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_DeleteGroup. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_DeleteGroup. Expected _Profile_p.");
         return NULL;
         }
     }
     if (_argc1) {
         if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of ProfileBase_DeleteGroup. Expected _String_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of Profile_DeleteGroup. Expected _String_p.");
         return NULL;
         }
     }
-    ProfileBase_DeleteGroup(_arg0,*_arg1);
+    Profile_DeleteGroup(_arg0,*_arg1);
     Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
 }
 
-#define ProfileBase_GetName(_swigobj)  (_swigobj->GetName())
-static PyObject *_wrap_ProfileBase_GetName(PyObject *self, PyObject *args) {
+#define Profile_GetName(_swigobj)  (_swigobj->GetName())
+static PyObject *_wrap_Profile_GetName(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     String * _result;
-    ProfileBase * _arg0;
+    Profile * _arg0;
     char * _argc0 = 0;
     char _ptemp[128];
 
     self = self;
-    if(!PyArg_ParseTuple(args,"s:ProfileBase_GetName",&_argc0)) 
+    if(!PyArg_ParseTuple(args,"s:Profile_GetName",&_argc0)) 
         return NULL;
     if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_GetName. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_GetName. Expected _Profile_p.");
         return NULL;
         }
     }
-    _result = new String (ProfileBase_GetName(_arg0));
+    _result = new String (Profile_GetName(_arg0));
     SWIG_MakePtr(_ptemp, (void *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
 
-#define ProfileBase_IsExpandingEnvVars(_swigobj)  (_swigobj->IsExpandingEnvVars())
-static PyObject *_wrap_ProfileBase_IsExpandingEnvVars(PyObject *self, PyObject *args) {
+#define Profile_IsExpandingEnvVars(_swigobj)  (_swigobj->IsExpandingEnvVars())
+static PyObject *_wrap_Profile_IsExpandingEnvVars(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     bool  _result;
-    ProfileBase * _arg0;
+    Profile * _arg0;
     char * _argc0 = 0;
 
     self = self;
-    if(!PyArg_ParseTuple(args,"s:ProfileBase_IsExpandingEnvVars",&_argc0)) 
+    if(!PyArg_ParseTuple(args,"s:Profile_IsExpandingEnvVars",&_argc0)) 
         return NULL;
     if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_IsExpandingEnvVars. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_IsExpandingEnvVars. Expected _Profile_p.");
         return NULL;
         }
     }
-    _result = (bool )ProfileBase_IsExpandingEnvVars(_arg0);
+    _result = (bool )Profile_IsExpandingEnvVars(_arg0);
     _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
 
-#define ProfileBase_SetExpandEnvVars(_swigobj,_swigarg0)  (_swigobj->SetExpandEnvVars(_swigarg0))
-static PyObject *_wrap_ProfileBase_SetExpandEnvVars(PyObject *self, PyObject *args) {
+#define Profile_SetExpandEnvVars(_swigobj,_swigarg0)  (_swigobj->SetExpandEnvVars(_swigarg0))
+static PyObject *_wrap_Profile_SetExpandEnvVars(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    ProfileBase * _arg0;
+    Profile * _arg0;
     bool  _arg1 = TRUE;
     char * _argc0 = 0;
     int tempbool1;
 
     self = self;
-    if(!PyArg_ParseTuple(args,"s|i:ProfileBase_SetExpandEnvVars",&_argc0,&tempbool1)) 
+    if(!PyArg_ParseTuple(args,"s|i:Profile_SetExpandEnvVars",&_argc0,&tempbool1)) 
         return NULL;
     if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_SetExpandEnvVars. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_SetExpandEnvVars. Expected _Profile_p.");
         return NULL;
         }
     }
     _arg1 = (bool ) tempbool1;
-    ProfileBase_SetExpandEnvVars(_arg0,_arg1);
+    Profile_SetExpandEnvVars(_arg0,_arg1);
     Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
 }
 
 static PyMethodDef MProfilecMethods[] = {
-	 { "ProfileBase_SetExpandEnvVars", _wrap_ProfileBase_SetExpandEnvVars, 1 },
-	 { "ProfileBase_IsExpandingEnvVars", _wrap_ProfileBase_IsExpandingEnvVars, 1 },
-	 { "ProfileBase_GetName", _wrap_ProfileBase_GetName, 1 },
-	 { "ProfileBase_DeleteGroup", _wrap_ProfileBase_DeleteGroup, 1 },
-	 { "ProfileBase_HasEntry", _wrap_ProfileBase_HasEntry, 1 },
-	 { "ProfileBase_SetPath", _wrap_ProfileBase_SetPath, 1 },
-	 { "ProfileBase_writeEntry", _wrap_ProfileBase_writeEntry, 1 },
-	 { "ProfileBase_readEntry", _wrap_ProfileBase_readEntry, 1 },
-	 { "ProfileBase_CreateGlobalConfig", _wrap_ProfileBase_CreateGlobalConfig, 1 },
-	 { "ProfileBase_CreateProfile", _wrap_ProfileBase_CreateProfile, 1 },
+	 { "Profile_SetExpandEnvVars", _wrap_Profile_SetExpandEnvVars, 1 },
+	 { "Profile_IsExpandingEnvVars", _wrap_Profile_IsExpandingEnvVars, 1 },
+	 { "Profile_GetName", _wrap_Profile_GetName, 1 },
+	 { "Profile_DeleteGroup", _wrap_Profile_DeleteGroup, 1 },
+	 { "Profile_HasEntry", _wrap_Profile_HasEntry, 1 },
+	 { "Profile_SetPath", _wrap_Profile_SetPath, 1 },
+	 { "Profile_writeEntry", _wrap_Profile_writeEntry, 1 },
+	 { "Profile_readEntry", _wrap_Profile_readEntry, 1 },
+	 { "Profile_CreateGlobalConfig", _wrap_Profile_CreateGlobalConfig, 1 },
+	 { "Profile_CreateProfile", _wrap_Profile_CreateProfile, 1 },
 	 { NULL, NULL }
 };
 static PyObject *SWIG_globals;
@@ -378,31 +378,31 @@ SWIGEXPORT(void,initMProfilec)() {
  * (Used by the SWIG pointer type-checker).
  */
 	 SWIG_RegisterMapping("_signed_long","_long",0);
-	 SWIG_RegisterMapping("_ProfileBase","_class_ProfileBase",0);
+	 SWIG_RegisterMapping("_Profile","_class_Profile",0);
 	 SWIG_RegisterMapping("_long","_unsigned_long",0);
 	 SWIG_RegisterMapping("_long","_signed_long",0);
 	 SWIG_RegisterMapping("_unsigned_long","_long",0);
 	 SWIG_RegisterMapping("_signed_int","_int",0);
-	 SWIG_RegisterMapping("_MObject","_class_ProfileBase",SwigProfileBaseToMObject);
-	 SWIG_RegisterMapping("_MObject","_ProfileBase",SwigProfileBaseToMObject);
+	 SWIG_RegisterMapping("_MObject","_class_Profile",SwigProfileToMObject);
+	 SWIG_RegisterMapping("_MObject","_Profile",SwigProfileToMObject);
 	 SWIG_RegisterMapping("_MObject","_class_MObject",0);
 	 SWIG_RegisterMapping("_unsigned_short","_short",0);
 	 SWIG_RegisterMapping("_signed_short","_short",0);
-	 SWIG_RegisterMapping("_MObjectRC","_class_ProfileBase",SwigProfileBaseToMObjectRC);
-	 SWIG_RegisterMapping("_MObjectRC","_ProfileBase",SwigProfileBaseToMObjectRC);
+	 SWIG_RegisterMapping("_MObjectRC","_class_Profile",SwigProfileToMObjectRC);
+	 SWIG_RegisterMapping("_MObjectRC","_Profile",SwigProfileToMObjectRC);
 	 SWIG_RegisterMapping("_MObjectRC","_class_MObjectRC",0);
 	 SWIG_RegisterMapping("_unsigned_int","_int",0);
-	 SWIG_RegisterMapping("_class_ProfileBase","_ProfileBase",0);
+	 SWIG_RegisterMapping("_class_Profile","_Profile",0);
 	 SWIG_RegisterMapping("_short","_unsigned_short",0);
 	 SWIG_RegisterMapping("_short","_signed_short",0);
 	 SWIG_RegisterMapping("_String","_class_String",0);
 	 SWIG_RegisterMapping("_int","_unsigned_int",0);
 	 SWIG_RegisterMapping("_int","_signed_int",0);
-	 SWIG_RegisterMapping("_class_MObjectRC","_class_ProfileBase",SwigProfileBaseToMObjectRC);
-	 SWIG_RegisterMapping("_class_MObjectRC","_ProfileBase",SwigProfileBaseToMObjectRC);
+	 SWIG_RegisterMapping("_class_MObjectRC","_class_Profile",SwigProfileToMObjectRC);
+	 SWIG_RegisterMapping("_class_MObjectRC","_Profile",SwigProfileToMObjectRC);
 	 SWIG_RegisterMapping("_class_MObjectRC","_MObjectRC",0);
-	 SWIG_RegisterMapping("_class_MObject","_class_ProfileBase",SwigProfileBaseToMObject);
-	 SWIG_RegisterMapping("_class_MObject","_ProfileBase",SwigProfileBaseToMObject);
+	 SWIG_RegisterMapping("_class_MObject","_class_Profile",SwigProfileToMObject);
+	 SWIG_RegisterMapping("_class_MObject","_Profile",SwigProfileToMObject);
 	 SWIG_RegisterMapping("_class_MObject","_MObject",0);
 	 SWIG_RegisterMapping("_class_String","_String",0);
 }

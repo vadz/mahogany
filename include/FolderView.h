@@ -13,7 +13,7 @@
 #include "MEvent.h"
 
 class MailFolder;
-class ProfileBase;
+class Profile;
 class ASMailFolder;
 
 /**
@@ -78,7 +78,7 @@ public:
    const String& GetFullName() { return m_folderName; }
 
    /// return a profile pointer:
-   ProfileBase *GetProfile(void) const { return m_Profile; }
+   Profile *GetProfile(void) const { return m_Profile; }
 
    /// return pointer to folder
    ASMailFolder * GetFolder(void) const { return m_ASMailFolder; }
@@ -96,7 +96,7 @@ protected:
    virtual void OnASFolderResultEvent(MEventASFolderResultData &event) = 0;
 
    /// the profile we use for our settings
-   ProfileBase *m_Profile;
+   Profile *m_Profile;
    /// full folder name of the folder we show
    String m_folderName;
    /// the mail folder being displayed

@@ -165,7 +165,7 @@ public:
    /** Get this object's profile, not reference counted.
        @return a pointer to the profile.
    */
-   virtual ProfileBase *GetProfile(void) const { return m_profile; }
+   virtual Profile *GetProfile(void) const { return m_profile; }
 
    /** Get the MailCollector object, not reference counted.
        @return reference to the mailcollector object.
@@ -319,7 +319,7 @@ protected:
    wxMimeTypesManager *m_mimeManager;
 
    /// a profile wrapper object for the global configuration
-   ProfileBase *m_profile;
+   Profile *m_profile;
 
    /// the last error code
    MError m_error;

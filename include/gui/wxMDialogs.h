@@ -29,7 +29,7 @@
 #include <wx/bmpbuttn.h>
 
 // fwd decl
-class ProfileBase;
+class Profile;
 class ArrayAdbElements;
 class wxString;
 class MFolder;
@@ -158,7 +158,7 @@ const char *MDialog_FileRequester(String const &message,
                                   String extension = NULLstring,
                                   String wildcard = NULLstring,
                                   bool save = false,
-                                  ProfileBase *profile = NULL
+                                  Profile *profile = NULL
    );
 
 /**
@@ -268,19 +268,19 @@ extern
 void ShowModulesDialog(wxFrame *parent);
 /// Configure message/folder sorting
 extern
-bool ConfigureSorting(ProfileBase *profile, wxWindow *parent);
+bool ConfigureSorting(Profile *profile, wxWindow *parent);
 /* Configuration dialog for searching for messages. */
 extern
 bool
 ConfigureSearchMessages(class SearchCriterium *crit,
-                        ProfileBase *profile,
+                        Profile *profile,
                         wxWindow *parent);
 
 extern
-bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent);
+bool ConfigureDateFormat(Profile *profile, wxWindow *parent);
 /** Pick an icon file: for XFace */
 extern
-bool PickXFaceDialog(ProfileBase *profile, wxWindow *parent);
+bool PickXFaceDialog(Profile *profile, wxWindow *parent);
 
 /** Asks the user if he wants to expunge the deleted messages. */
 extern
@@ -290,7 +290,7 @@ void CheckExpungeDialog(class ASMailFolder *mf, wxWindow *parent = NULL);
  This takes the sub-groups under "Filters/" and assembles a filter
  program from them. */
 extern
-String GetFilterProgram(ProfileBase *profile);
+String GetFilterProgram(Profile *profile);
 
 /// Shows the dialog allowing to reenable disabled wxPMesageBox()es
 extern

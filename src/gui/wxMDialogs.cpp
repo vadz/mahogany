@@ -625,7 +625,7 @@ MDialog_FileRequester(String const & message,
                       String extension,
                       String wildcard,
                       bool save,
-                      ProfileBase * /* profile */)
+                      Profile * /* profile */)
 {
    //MGuiLocker lock;
    CloseSplash();
@@ -1011,7 +1011,7 @@ MDialog_ShowTip(const MWindow *parent)
 
    bool showOnStarup = wxShowTip((wxWindow *)parent, tipProvider);
 
-   ProfileBase *profile = mApplication->GetProfile();
+   Profile *profile = mApplication->GetProfile();
    if ( showOnStarup != (READ_APPCONFIG(MP_SHOWTIPS) != 0) )
    {
       profile->writeEntry(MP_SHOWTIPS, showOnStarup);
@@ -1354,7 +1354,7 @@ static wxString labels[NUM_LABELS] =
 class wxMessageSortingDialog : public wxOptionsPageSubdialog
 {
 public:
-   wxMessageSortingDialog(ProfileBase *profile, wxWindow *parent);
+   wxMessageSortingDialog(Profile *profile, wxWindow *parent);
 
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
@@ -1369,7 +1369,7 @@ protected:
    long         m_SortOrder;
 };
 
-wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
+wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                                                wxWindow *parent)
                       : wxOptionsPageSubdialog(profile,parent,
                                                _("Message sorting"),
@@ -1514,7 +1514,7 @@ bool wxMessageSortingDialog::TransferDataToWindow()
 
 /* Configuration dialog for sorting messages. */
 extern
-bool ConfigureSorting(ProfileBase *profile, wxWindow *parent)
+bool ConfigureSorting(Profile *profile, wxWindow *parent)
 {
    wxMessageSortingDialog dlg(profile, parent);
    if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
@@ -1551,7 +1551,7 @@ class wxMessageSearchDialog : public wxOptionsPageSubdialog
 {
 public:
    wxMessageSearchDialog(SearchCriterium *crit,
-                         ProfileBase *profile, wxWindow *parent);
+                         Profile *profile, wxWindow *parent);
 
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
@@ -1581,7 +1581,7 @@ protected:
 };
 
 wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
-                                             ProfileBase *profile,
+                                             Profile *profile,
                                              wxWindow *parent)
                       : wxOptionsPageSubdialog(profile,parent,
                                                _("Search folder for messages"),
@@ -1676,7 +1676,7 @@ bool wxMessageSearchDialog::TransferDataToWindow()
 /* Configuration dialog for sorting messages. */
 extern
 bool ConfigureSearchMessages(class SearchCriterium *crit,
-                             ProfileBase *profile, wxWindow *parent)
+                             Profile *profile, wxWindow *parent)
 {
    wxMessageSearchDialog dlg(crit, profile, parent);
    if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
@@ -1772,7 +1772,7 @@ class wxDateFmtDialog : public wxOptionsPageSubdialog
 {
 public:
    // ctor & dtor
-   wxDateFmtDialog(ProfileBase *profile, wxWindow *parent);
+   wxDateFmtDialog(Profile *profile, wxWindow *parent);
    virtual ~wxDateFmtDialog() { m_timer->Stop(); delete m_timer; }
 
    // transfer data to/from dialog
@@ -1828,7 +1828,7 @@ END_EVENT_TABLE()
 #   pragma warning(disable:4355)
 #endif
 
-wxDateFmtDialog::wxDateFmtDialog(ProfileBase *profile, wxWindow *parent)
+wxDateFmtDialog::wxDateFmtDialog(Profile *profile, wxWindow *parent)
                : wxOptionsPageSubdialog(profile,
                                         parent,
                                         _("Date Format"),
@@ -1940,7 +1940,7 @@ wxDateFmtDialog::TransferDataToWindow()
 
 /* Configuration dialog for sorting messages. */
 extern
-bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent)
+bool ConfigureDateFormat(Profile *profile, wxWindow *parent)
 {
    wxDateFmtDialog dlg(profile, parent);
    if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
@@ -1983,7 +1983,7 @@ wxXFaceButton::SetFile(const wxString &filename)
 class wxXFaceDialog : public wxOptionsPageSubdialog
 {
 public:
-   wxXFaceDialog(ProfileBase *profile, wxWindow *parent);
+   wxXFaceDialog(Profile *profile, wxWindow *parent);
 
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
@@ -2012,7 +2012,7 @@ BEGIN_EVENT_TABLE(wxXFaceDialog, wxOptionsPageSubdialog)
 END_EVENT_TABLE()
 
 
-wxXFaceDialog::wxXFaceDialog(ProfileBase *profile,
+wxXFaceDialog::wxXFaceDialog(Profile *profile,
                              wxWindow *parent)
    : wxOptionsPageSubdialog(profile,parent,
                             _("Choose a XFace"),
@@ -2107,7 +2107,7 @@ wxXFaceDialog::TransferDataFromWindow()
 }
 
 extern
-bool PickXFaceDialog(ProfileBase *profile, wxWindow *parent)
+bool PickXFaceDialog(Profile *profile, wxWindow *parent)
 {
    wxXFaceDialog dlg(profile, parent);
    return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
@@ -2132,7 +2132,7 @@ void CheckExpungeDialog(ASMailFolder *mf, wxWindow *parent)
 
          // the profile key should be relative, so skip the leading slash
          String profileName = mf->GetProfile()->GetName();
-         String key = ProfileBase::FilterProfileName(profileName.c_str() + 1);
+         String key = Profile::FilterProfileName(profileName.c_str() + 1);
          key += "/AutoExpunge";
 
          if ( MDialog_YesNoDialog(msg, parent, MDIALOG_YESNOTITLE, true, key) )
@@ -2347,7 +2347,7 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
       }
       else
       {
-         // it's a name returned by ProfileBase::FilterProfileName(), so
+         // it's a name returned by Profile::FilterProfileName(), so
          // unfilter it back after removing the leading M_Profiles_ from it
          if ( !folder.StartsWith("M_Profiles_", &folderName) )
          {
@@ -2490,10 +2490,10 @@ extern "C"
 class wxLicenseDialog : public wxOptionsPageSubdialog
 {
 public:
-   wxLicenseDialog(ProfileBase *profile, wxWindow *parent);
+   wxLicenseDialog(Profile *profile, wxWindow *parent);
 };
 
-wxLicenseDialog::wxLicenseDialog(ProfileBase *profile, wxWindow *parent)
+wxLicenseDialog::wxLicenseDialog(Profile *profile, wxWindow *parent)
    : wxOptionsPageSubdialog(profile,parent,
                             _("Mahogany Licensing Conditions"),
                             "LicensingDialog")
@@ -2533,7 +2533,7 @@ wxLicenseDialog::wxLicenseDialog(ProfileBase *profile, wxWindow *parent)
 extern
 bool ShowLicenseDialog(wxWindow *parent)
 {
-   ProfileBase *p = mApplication->GetProfile();
+   Profile *p = mApplication->GetProfile();
    wxLicenseDialog dlg(p, parent);
    return ( dlg.ShowModal() == wxID_OK );
 }

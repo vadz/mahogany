@@ -23,7 +23,7 @@
 
 // forward declarations
 class FolderView;
-class ProfileBase;
+class Profile;
 class MWindow;
 class MailFolder;
 
@@ -267,7 +267,7 @@ public:
 
    /// and a function to create a half opened folder
    static ASMailFolder *HalfOpenFolder(MFolder *mfolder,
-                                       ProfileBase *profile)
+                                       Profile *profile)
    {
       MailFolder *mf = MailFolder::HalfOpenFolder(mfolder, profile);
       if ( !mf ) return NULL;
@@ -485,7 +485,7 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   virtual ProfileBase *GetProfile(void) const = 0;
+   virtual Profile *GetProfile(void) const = 0;
 
    /** Toggle update behaviour flags.
        @param updateFlags the flags to set

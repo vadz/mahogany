@@ -33,7 +33,7 @@ WX_DEFINE_ARRAY(UIdType, UIdArray);
 
 // forward declarations
 class FolderView;
-class ProfileBase;
+class Profile;
 class MWindow;
 class Message;
 
@@ -150,7 +150,7 @@ public:
    */
    static MailFolder * OpenFolder(int typeAndFlags,
                                   const String &path,
-                                  ProfileBase *profile = NULL,
+                                  Profile *profile = NULL,
                                   const String &server = NULLstring,
                                   const String &login = NULLstring,
                                   const String &password = NULLstring,
@@ -166,11 +166,11 @@ public:
        Profile parameter is only used when name is a filename.
    */
    static MailFolder * OpenFolder(const String &name,
-                                  ProfileBase *profile = NULL);
+                                  Profile *profile = NULL);
    
    /** Half open the folder using paremeters from MFolder object. */
    static MailFolder * HalfOpenFolder(const class MFolder *mfolder,
-                                      ProfileBase *profile = NULL);
+                                      Profile *profile = NULL);
 
    /** Phyically deletes this folder.
        @return true on success
@@ -214,7 +214,7 @@ public:
    */
    static void ForwardMessage(class Message *msg,
                               const Params& params,
-                              ProfileBase *profile = NULL,
+                              Profile *profile = NULL,
                               MWindow *parent = NULL);
    /** Reply to one message.
        @param message message to reply to
@@ -224,7 +224,7 @@ public:
    */
    static void ReplyMessage(class Message *msg,
                             const Params& params,
-                            ProfileBase *profile = NULL,
+                            Profile *profile = NULL,
                             MWindow *parent = NULL);
    /**@name Subscription management */
    //@{
@@ -363,7 +363,7 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   virtual inline ProfileBase *GetProfile(void) = 0;
+   virtual inline Profile *GetProfile(void) = 0;
 
    /// return class name
    const char *GetClassName(void) const

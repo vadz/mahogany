@@ -411,7 +411,7 @@ wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
    String filename = filenameOrig;
    if ( !filename )
    {
-      ProfileBase *appProfile = mApplication->GetProfile();
+      Profile *appProfile = mApplication->GetProfile();
       filename = appProfile->readEntry(ms_profilePathLastFile, "mahogany.txt");
    }
 

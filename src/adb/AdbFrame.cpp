@@ -1135,7 +1135,7 @@ void AddBookToAdbEditor(const String& adbname, const String& provname)
     // write to the profile, the editor will load the books the next time it
     // shows up
 
-    ProfileBase *conf = ProfileBase::CreateProfile(ADB_CONFIG_PATH);
+    Profile *conf = Profile::CreateProfile(ADB_CONFIG_PATH);
 
     wxArrayString books;
     RestoreArray(conf, books, aszConfigNames[ConfigName_AddressBooks]);
@@ -1302,7 +1302,7 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     else                                          \
       RestoreArray(conf, var, aszConfigNames[i])
 
-  ProfileBase *conf = ProfileBase::CreateProfile(ADB_CONFIG_PATH);
+  Profile *conf = Profile::CreateProfile(ADB_CONFIG_PATH);
 
   TRANSFER_STRING(m_strLastNewEntry, ConfigName_LastNewEntry);
   TRANSFER_STRING(m_strSelection, ConfigName_TreeSelection);

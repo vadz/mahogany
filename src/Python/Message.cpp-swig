@@ -795,7 +795,7 @@ SWIGEXPORT(void,initMessagec)() {
  */
 	 SWIG_RegisterMapping("_signed_long","_long",0);
 	 SWIG_RegisterMapping("_Message","_class_Message",0);
-	 SWIG_RegisterMapping("_ProfileBase","_class_ProfileBase",0);
+	 SWIG_RegisterMapping("_Profile","_class_Profile",0);
 	 SWIG_RegisterMapping("_long","_unsigned_long",0);
 	 SWIG_RegisterMapping("_long","_signed_long",0);
 	 SWIG_RegisterMapping("_class_Message","_Message",0);
@@ -806,7 +806,7 @@ SWIGEXPORT(void,initMessagec)() {
 	 SWIG_RegisterMapping("_signed_short","_short",0);
 	 SWIG_RegisterMapping("_MObjectRC","_class_MObjectRC",0);
 	 SWIG_RegisterMapping("_unsigned_int","_int",0);
-	 SWIG_RegisterMapping("_class_ProfileBase","_ProfileBase",0);
+	 SWIG_RegisterMapping("_class_Profile","_Profile",0);
 	 SWIG_RegisterMapping("_short","_unsigned_short",0);
 	 SWIG_RegisterMapping("_short","_signed_short",0);
 	 SWIG_RegisterMapping("_String","_class_String",0);

@@ -82,7 +82,7 @@ MessageCC::~MessageCC()
    SafeDecRef(m_Profile);
 }
 
-MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
+MessageCC::MessageCC(const char * itext, UIdType uid, Profile *iprofile)
 {
    char
       *header = NULL,
@@ -98,7 +98,7 @@ MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
    if(m_Profile)
       m_Profile->IncRef();
    else
-      m_Profile = ProfileBase::CreateEmptyProfile();
+      m_Profile = Profile::CreateEmptyProfile();
    partInfos = NULL; // this vector gets initialised when needed
    numOfParts = -1;
    partContentPtr = NULL;
@@ -854,7 +854,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
 class Message *
 Message::Create(const char * itext,
                UIdType uid,
-               ProfileBase *iprofile)
+               Profile *iprofile)
 {
    return MessageCC::Create(itext, uid, iprofile);
 }

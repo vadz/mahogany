@@ -304,7 +304,7 @@ public:
    wxOptionsNotebook(wxWindow *parent);
 
    // the profile we use - just the global one here
-   ProfileBase *GetProfile() const { return ProfileBase::CreateProfile(""); }
+   Profile *GetProfile() const { return Profile::CreateProfile(""); }
 };
 
 // notebook for the given options page
@@ -313,7 +313,7 @@ class wxCustomOptionsNotebook : public wxNotebookWithImages
 public:
    wxCustomOptionsNotebook(wxWindow *parent,
                            const wxOptionsPageDesc& pageDesc,
-                           ProfileBase *profile);
+                           Profile *profile);
 
 private:
    const char **GetImagesArray(const char *iconName);
@@ -353,7 +353,7 @@ protected:
    virtual void ResetDirty();
 
    // implement base class pure virtual
-   virtual ProfileBase *GetProfile() const
+   virtual Profile *GetProfile() const
    {
       return ((wxOptionsNotebook *)m_notebook)->GetProfile();
    }
@@ -371,7 +371,7 @@ class wxCustomOptionsDialog : public wxOptionsDialog
 {
 public:
    wxCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
-                         ProfileBase *profile,
+                         Profile *profile,
                          wxFrame *parent)
       : wxOptionsDialog(parent), m_pageDesc(pageDesc)
       {
@@ -391,13 +391,13 @@ private:
    // the description of the page we show
    const wxOptionsPageDesc& m_pageDesc;
    // the profile
-   ProfileBase *m_profile;
+   Profile *m_profile;
 };
 
 class wxRestoreDefaultsDialog : public wxProfileSettingsEditDialog
 {
 public:
-   wxRestoreDefaultsDialog(ProfileBase *profile, wxFrame *parent);
+   wxRestoreDefaultsDialog(Profile *profile, wxFrame *parent);
 
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
@@ -896,7 +896,7 @@ wxOptionsPage::wxOptionsPage(FieldInfoArray aFields,
                              size_t nLast,
                              wxNotebook *notebook,
                              const char *title,
-                             ProfileBase *profile,
+                             Profile *profile,
                              int helpId,
                              int image)
              : wxNotebookPageBase(notebook)
@@ -1386,7 +1386,7 @@ bool wxOptionsPage::TransferDataFromWindow()
 
 wxOptionsPageDynamic::wxOptionsPageDynamic(wxNotebook *parent,
                                            const char *title,
-                                           ProfileBase *profile,
+                                           Profile *profile,
                                            FieldInfoArray aFields,
                                            ConfigValuesArray aDefaults,
                                            size_t nFields,
@@ -1403,7 +1403,7 @@ wxOptionsPageDynamic::wxOptionsPageDynamic(wxNotebook *parent,
 
 wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
                                              const char *title,
-                                             ProfileBase *profile,
+                                             Profile *profile,
                                              size_t nFirst,
                                              size_t nLast,
                                              int helpId)
@@ -1424,7 +1424,7 @@ wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
 // ----------------------------------------------------------------------------
 
 wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
-                                           ProfileBase *profile)
+                                           Profile *profile)
                     : wxOptionsPageStandard(parent,
                                     _("Compose"),
                                     profile,
@@ -1512,7 +1512,7 @@ bool wxOptionsPageCompose::TransferDataFromWindow()
 // ----------------------------------------------------------------------------
 
 wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
-                                                   ProfileBase *profile)
+                                                   Profile *profile)
    : wxOptionsPageStandard(parent,
                    _("Message Viewer"),
                    profile,
@@ -1551,7 +1551,7 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
 // ----------------------------------------------------------------------------
 
 wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
-                                       ProfileBase *profile)
+                                       Profile *profile)
                   : wxOptionsPageStandard(parent,
                                   _("Identity"),
                                   profile,
@@ -1566,7 +1566,7 @@ wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
 // ----------------------------------------------------------------------------
 
 wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
-                                           ProfileBase *profile)
+                                           Profile *profile)
                     : wxOptionsPageStandard(parent,
                                     _("Network"),
                                     profile,
@@ -1583,7 +1583,7 @@ wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
 #ifdef USE_PYTHON
 
 wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
-                                         ProfileBase *profile)
+                                         Profile *profile)
                    : wxOptionsPageStandard(parent,
                                    _("Python"),
                                    profile,
@@ -1601,7 +1601,7 @@ wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
 
 
 wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
-                                    ProfileBase *profile)
+                                    Profile *profile)
                 : wxOptionsPageStandard(parent,
                                 _("Addressbook"),
                                 profile,
@@ -1617,7 +1617,7 @@ wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
 // ----------------------------------------------------------------------------
 
 wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
-                                         ProfileBase *profile)
+                                         Profile *profile)
                    : wxOptionsPageStandard(parent,
                                    _("Miscellaneous"),
                                    profile,
@@ -1701,7 +1701,7 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
 // ----------------------------------------------------------------------------
 
 wxOptionsPageHelpers::wxOptionsPageHelpers(wxNotebook *parent,
-                                         ProfileBase *profile)
+                                         Profile *profile)
    : wxOptionsPageStandard(parent,
                    _("Helpers"),
                    profile,
@@ -1716,7 +1716,7 @@ wxOptionsPageHelpers::wxOptionsPageHelpers(wxNotebook *parent,
 // ----------------------------------------------------------------------------
 
 wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
-                                           ProfileBase *profile)
+                                           Profile *profile)
    : wxOptionsPageStandard(parent,
                    _("Folders"),
                    profile,
@@ -1956,7 +1956,7 @@ void wxOptionsDialog::ResetDirty()
 wxOptionsDialog::~wxOptionsDialog()
 {
    // save settings
-   ProfileBase::FlushAll();
+   Profile::FlushAll();
 }
 
 // ----------------------------------------------------------------------------
@@ -1967,7 +1967,7 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
                          (
                           wxWindow *parent,
                           const wxOptionsPageDesc& pageDesc,
-                          ProfileBase *profile
+                          Profile *profile
                          )
                        : wxNotebookWithImages(
                                               "CustomNotebook",
@@ -1978,7 +1978,7 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
    if(profile)
       profile->IncRef();
    else
-      profile = ProfileBase::CreateProfile("");
+      profile = Profile::CreateProfile("");
 
 
    // the page ctor will add it to the notebook
@@ -2034,7 +2034,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    // don't forget to update both the array above and the enum!
    wxASSERT( WXSIZEOF(s_aszImages) == OptionsPage_Max + 1);
 
-   ProfileBase *profile = GetProfile();
+   Profile *profile = GetProfile();
 
    // create and add the pages
    new wxOptionsPageIdent(this, profile);
@@ -2056,7 +2056,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 // wxRestoreDefaultsDialog implementation
 // ----------------------------------------------------------------------------
 
-wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(ProfileBase *profile,
+wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(Profile *profile,
                                                  wxFrame *parent)
                        : wxProfileSettingsEditDialog
                          (
@@ -2157,7 +2157,7 @@ void ShowOptionsDialog(wxFrame *parent, OptionsPage page)
    (void)dlg.ShowModal();
 }
 
-bool ShowRestoreDefaultsDialog(ProfileBase *profile, wxFrame *parent)
+bool ShowRestoreDefaultsDialog(Profile *profile, wxFrame *parent)
 {
    wxRestoreDefaultsDialog dlg(profile, parent);
    (void)dlg.ShowModal();
@@ -2166,7 +2166,7 @@ bool ShowRestoreDefaultsDialog(ProfileBase *profile, wxFrame *parent)
 }
 
 void ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
-                             ProfileBase *profile,
+                             Profile *profile,
                              wxFrame *parent)
 {
    wxCustomOptionsDialog dlg(pageDesc, profile, parent);

@@ -210,7 +210,7 @@ protected:
    wxPNotebook *m_notebook;
 
    // get the profile for event sending
-   virtual ProfileBase *GetProfile() const = 0;
+   virtual Profile *GetProfile() const = 0;
 
 private:
    // send a notification event about options change using m_lastBtn value
@@ -224,7 +224,7 @@ private:
    // once and then it is reused so that [Cancel] will call Discard() on the
    // same profile as [Apply] called Suspend() on and not on some other profile
    // with the same path
-   ProfileBase *m_profileForButtons;
+   Profile *m_profileForButtons;
 
    bool m_bDirty;
 
@@ -244,7 +244,7 @@ private:
 class wxProfileSettingsEditDialog : public wxManuallyLaidOutDialog
 {
 public:
-   wxProfileSettingsEditDialog(ProfileBase *profile,
+   wxProfileSettingsEditDialog(Profile *profile,
                                        const wxString& profileKey,
                                        wxWindow *parent,
                                        const wxString& title)
@@ -259,13 +259,13 @@ public:
       {
          m_profile->DecRef();
       }
-   virtual ProfileBase *GetProfile() const { return m_profile; }
+   virtual Profile *GetProfile() const { return m_profile; }
 
    virtual bool HasChanges() const { return m_hasChanges; }
    virtual void MarkDirty() { m_hasChanges = TRUE; }
 
 protected:
-   ProfileBase *m_profile;
+   Profile *m_profile;
    bool         m_hasChanges;
 };
 
@@ -279,7 +279,7 @@ protected:
 class wxOptionsPageSubdialog : public wxProfileSettingsEditDialog
 {
 public:
-   wxOptionsPageSubdialog(ProfileBase *profile,
+   wxOptionsPageSubdialog(Profile *profile,
                                   wxWindow *parent,
                                   const wxString& label,
                                   const wxString& windowName);

@@ -513,7 +513,7 @@ protected:
 private:
    MInterface * m_MInterface;
    /// profile settings
-   ProfileBase *m_Profile;
+   Profile *m_Profile;
    String m_FolderName;
    String m_MyEmail;
    String m_DateFormat;
@@ -701,7 +701,7 @@ CalendarFrame::GetConfig(void)
                                  MP_MOD_CALENDAR_SHOWONSTARTUP_D);
 
    // settings read from folder profile:
-   ProfileBase *fp = m_MInterface->CreateProfile(m_FolderName);
+   Profile *fp = m_MInterface->CreateProfile(m_FolderName);
    m_MyEmail = fp->readEntry(MP_RETURN_ADDRESS,
                              MP_RETURN_ADDRESS_D);
    if(m_MyEmail.Length() == 0)
@@ -1241,7 +1241,7 @@ struct wxOptionsPageDesc  gs_OptionsPageDesc =
 void
 CalendarModule::Configure(void)
 {
-   ProfileBase *p = m_MInterface->CreateModuleProfile(MODULE_NAME);
+   Profile *p = m_MInterface->CreateModuleProfile(MODULE_NAME);
    ShowCustomOptionsDialog(gs_OptionsPageDesc, p, NULL);
    p->DecRef();
 }

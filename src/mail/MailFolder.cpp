@@ -183,9 +183,9 @@ MLogCircle::Clear(void)
  
 /* static */
 MailFolder *
-MailFolder::OpenFolder(const String &name, ProfileBase *parentProfile)
+MailFolder::OpenFolder(const String &name, Profile *parentProfile)
 {
-   if(1) //FIXME: broken//if(ProfileBase::ProfileExists(name))
+   if(1) //FIXME: broken//if(Profile::ProfileExists(name))
    {
       MFolder *mf = MFolder::Get(name);
       if(mf )
@@ -200,7 +200,7 @@ MailFolder::OpenFolder(const String &name, ProfileBase *parentProfile)
    else // attempt to open file
    {
       // profile entry does not exist
-      ProfileBase *profile = ProfileBase::CreateEmptyProfile(parentProfile);
+      Profile *profile = Profile::CreateEmptyProfile(parentProfile);
       MailFolder *m = OpenFolder( MF_FILE, name, profile);
       profile->DecRef();
       return m;
@@ -235,7 +235,7 @@ MailFolder::OpenFolder(const MFolder *mfolder)
 
 /* static */
 MailFolder *
-MailFolder::HalfOpenFolder(const MFolder *mfolder, ProfileBase *profile)
+MailFolder::HalfOpenFolder(const MFolder *mfolder, Profile *profile)
 {
    CHECK( mfolder, NULL, "NULL MFolder in OpenFolder()" );
 
@@ -256,7 +256,7 @@ MailFolder::HalfOpenFolder(const MFolder *mfolder, ProfileBase *profile)
 MailFolder *
 MailFolder::OpenFolder(int folderType,
                        String const &i_path,
-                       ProfileBase *parentProfile,
+                       Profile *parentProfile,
                        String const &i_server,
                        String const &i_login,
                        String const &i_passwd,
@@ -270,7 +270,7 @@ MailFolder::OpenFolder(int folderType,
 #endif
    
 // open a folder:
-   ProfileBase *profile = NULL;
+   Profile *profile = NULL;
    String login, passwd, name, server;
    int flags = GetFolderFlags(folderType);
 
@@ -281,11 +281,11 @@ MailFolder::OpenFolder(int folderType,
    if ( type == MF_PROFILE )
    {
       if(type == MF_PROFILE)
-         profile = ProfileBase::CreateProfile(i_path, parentProfile);
+         profile = Profile::CreateProfile(i_path, parentProfile);
       else
       {
          String pname = (i_path[0] == '/') ? String(i_path.c_str()+1) : i_path;
-         profile = ProfileBase::CreateProfile(pname, parentProfile);
+         profile = Profile::CreateProfile(pname, parentProfile);
       }
       CHECK(profile, NULL, "can't create profile");   // return if it fails
       int typeflags = READ_CONFIG(profile, MP_FOLDER_TYPE);
@@ -310,7 +310,7 @@ MailFolder::OpenFolder(int folderType,
    else // type != PROFILE
    {
       String pname = (symbolicName[0] == '/') ? String(symbolicName.c_str()+1) : symbolicName;
-      profile = ProfileBase::CreateProfile(symbolicName, parentProfile);
+      profile = Profile::CreateProfile(symbolicName, parentProfile);
       CHECK(profile, NULL, "can't create profile");   // return if it fails
 
       server = i_server;
@@ -438,8 +438,8 @@ MailFolder::CreateFolder(const String &name,
 
    ASSERT( (iflags & MF_FLAGSMASK) == iflags);
    FolderFlags flags = (FolderFlags) ( iflags & MF_FLAGSMASK ) ;
-   ProfileBase * p = ProfileBase::CreateProfile(name);
-   p->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+   Profile * p = Profile::CreateProfile(name);
+   p->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
    p->writeEntry(MP_FOLDER_TYPE, type|flags);
    if(path.Length() > 0)
       p->writeEntry(MP_FOLDER_PATH, path);
@@ -513,7 +513,7 @@ MailFolder::Subscribe(const String &host, FolderType protocol,
 void
 MailFolder::ReplyMessage(class Message *msg,
                          const MailFolder::Params& params,
-                         ProfileBase *profile,
+                         Profile *profile,
                          MWindow *parent)
 {
    ASSERT_RET(msg);
@@ -690,7 +690,7 @@ MailFolder::ReplyMessage(class Message *msg,
 void
 MailFolder::ForwardMessage(class Message *msg,
                            const MailFolder::Params& params,
-                           ProfileBase *profile,
+                           Profile *profile,
                            MWindow *parent)
 {
    ASSERT_RET(msg);

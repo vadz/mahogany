@@ -381,7 +381,7 @@ AdbBook *AdbManager::GetBook(size_t n) const
 // the time to do it right now...
 void AdbManager::LoadAll()
 {
-   ProfileBase * conf = ProfileBase::CreateProfile("AdbEditor");
+   Profile * conf = Profile::CreateProfile("AdbEditor");
 
   wxArrayString astrAdb, astrProv;
   RestoreArray(conf, astrAdb, "AddressBooks");

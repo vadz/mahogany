@@ -83,7 +83,7 @@ static PyObject *_wrap_MailFolder_OpenFolder(PyObject *self, PyObject *args) {
     MailFolder * _result;
     int  _arg0;
     String * _arg1;
-    ProfileBase * _arg2 = NULL;
+    Profile * _arg2 = NULL;
     String * _arg3 = &NULLstring;
     String * _arg4 = &NULLstring;
     String * _arg5 = &NULLstring;
@@ -108,8 +108,8 @@ static PyObject *_wrap_MailFolder_OpenFolder(PyObject *self, PyObject *args) {
         }
     }
     if (_argc2) {
-        if (SWIG_GetPtr(_argc2,(void **) &_arg2,"_ProfileBase_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of MailFolder_OpenFolder. Expected _ProfileBase_p.");
+        if (SWIG_GetPtr(_argc2,(void **) &_arg2,"_Profile_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of MailFolder_OpenFolder. Expected _Profile_p.");
         return NULL;
         }
     }
@@ -721,7 +721,7 @@ static PyObject *_wrap_MailFolder_SearchMessages(PyObject *self, PyObject *args)
 #define MailFolder_GetProfile(_swigobj)  (_swigobj->GetProfile())
 static PyObject *_wrap_MailFolder_GetProfile(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    ProfileBase * _result;
+    Profile * _result;
     MailFolder * _arg0;
     char * _argc0 = 0;
     char _ptemp[128];
@@ -735,8 +735,8 @@ static PyObject *_wrap_MailFolder_GetProfile(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    _result = (ProfileBase *)MailFolder_GetProfile(_arg0);
-    SWIG_MakePtr(_ptemp, (char *) _result,"_ProfileBase_p");
+    _result = (Profile *)MailFolder_GetProfile(_arg0);
+    SWIG_MakePtr(_ptemp, (char *) _result,"_Profile_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
@@ -2287,7 +2287,7 @@ SWIGEXPORT(void,initMailFolderc)() {
 	 SWIG_RegisterMapping("_signed_long","_long",0);
 	 SWIG_RegisterMapping("_Message","_class_Message",0);
 	 SWIG_RegisterMapping("_Type","_FolderType",0);
-	 SWIG_RegisterMapping("_ProfileBase","_class_ProfileBase",0);
+	 SWIG_RegisterMapping("_Profile","_class_Profile",0);
 	 SWIG_RegisterMapping("_long","_unsigned_long",0);
 	 SWIG_RegisterMapping("_long","_signed_long",0);
 	 SWIG_RegisterMapping("_class_MailFolderLock","_MailFolderLock",0);
@@ -2317,7 +2317,7 @@ SWIGEXPORT(void,initMailFolderc)() {
 	 SWIG_RegisterMapping("_MObjectRC","_MailFolder",SwigMailFolderToMObjectRC);
 	 SWIG_RegisterMapping("_MObjectRC","_class_MObjectRC",0);
 	 SWIG_RegisterMapping("_unsigned_int","_int",0);
-	 SWIG_RegisterMapping("_class_ProfileBase","_ProfileBase",0);
+	 SWIG_RegisterMapping("_class_Profile","_Profile",0);
 	 SWIG_RegisterMapping("_short","_unsigned_short",0);
 	 SWIG_RegisterMapping("_short","_signed_short",0);
 	 SWIG_RegisterMapping("_String","_class_String",0);

@@ -184,7 +184,7 @@ public:
    static class MessageCC * Create(
       const char * itext,
       UIdType uid = UID_ILLEGAL,
-      ProfileBase *iprofile = NULL)
+      Profile *iprofile = NULL)
       {
          return new MessageCC(itext, uid, iprofile);
       }
@@ -207,7 +207,7 @@ protected:
    MessageCC(MailFolderCC *folder,UIdType uid);
    MessageCC(const char * itext,
              UIdType uid = UID_ILLEGAL,
-             ProfileBase *iprofile = NULL);
+             Profile *iprofile = NULL);
    /** destructor */
    ~MessageCC();
 private:
@@ -238,7 +238,7 @@ private:
    */
    BODY * GetBody(void);
    /// Profile pointer, may be NULL
-   ProfileBase *m_Profile;
+   Profile *m_Profile;
    
    /** A temporarily allocated buffer for GetPartContent().
        It holds the information returned by that function and is only

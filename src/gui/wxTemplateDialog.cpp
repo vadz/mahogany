@@ -111,7 +111,7 @@ class wxFolderTemplatesDialog : public wxOptionsPageSubdialog
 {
 public:
    wxFolderTemplatesDialog(const TemplatePopupMenuItem& menu,
-                           ProfileBase *profile,
+                           Profile *profile,
                            wxWindow *parent);
 
    // did the user really change anything?
@@ -130,7 +130,7 @@ private:
    // updates the contents of the text control
    void UpdateText();
 
-   ProfileBase        *m_profile;
+   Profile        *m_profile;
    MessageTemplateKind m_kind;         // of template being edited
    wxTextCtrl         *m_textctrl;
    bool                m_wasChanged;
@@ -396,7 +396,7 @@ void TemplateEditor::CreatePopupMenu()
 // ----------------------------------------------------------------------------
 
 wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& menu,
-                                   ProfileBase *profile,
+                                   Profile *profile,
                                    wxWindow *parent)
                 : wxOptionsPageSubdialog(profile, parent,
                                          _("Configure message templates"),
@@ -783,7 +783,7 @@ bool wxAllTemplatesDialog::TransferDataFromWindow()
 // ----------------------------------------------------------------------------
 
 // edit the templates for the given folder/profile
-bool ConfigureTemplates(ProfileBase *profile,
+bool ConfigureTemplates(Profile *profile,
                         wxWindow *parent,
                         const TemplatePopupMenuItem& menu)
 {

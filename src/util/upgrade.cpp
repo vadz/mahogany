@@ -1012,7 +1012,7 @@ bool RunInstallWizard()
    // make sure we have some _basic_ things set up whether the wizard ran or
    // not (basic here meaning that the program will not operate properly
    // without any of them)
-   ProfileBase *profile = mApplication->GetProfile();
+   Profile *profile = mApplication->GetProfile();
    if ( wizardDone )
    {
       // load all modules by default:
@@ -1161,7 +1161,7 @@ bool RunInstallWizard()
 static
 void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
 {
-   ProfileBase * profile = mApplication->GetProfile();
+   Profile * profile = mApplication->GetProfile();
 
    // OUTBOX
    if(gs_installWizardData.useOutbox)
@@ -1292,7 +1292,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    // PalmOS-box
    if(gs_installWizardData.usePalmOs)
    {
-      ProfileBase *pp = ProfileBase::CreateModuleProfile("PalmOS");
+      Profile *pp = Profile::CreateModuleProfile("PalmOS");
       pp->writeEntry("PalmBox", "PalmBox");
       pp->DecRef();
       if(! MailFolder::CreateFolder("PalmBox",
@@ -1305,7 +1305,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
          wxLogError(_("Could not create PalmOS mailbox."));
       else
       {
-         pp = ProfileBase::CreateProfile("PalmBox");
+         pp = Profile::CreateProfile("PalmBox");
          pp->writeEntry("Icon", wxFolderTree::iconPalmPilot);
          pp->DecRef();
          MDialog_Message(_(
@@ -1466,8 +1466,8 @@ UpgradeFrom010()
    rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
                      "/AdbEditor","/M/Profiles/AdbEditor", true);
 
-   ProfileBase
-      *p = ProfileBase::CreateProfile(""),
+   Profile
+      *p = Profile::CreateProfile(""),
       *p2;
    kbStringList
       folders;
@@ -1504,7 +1504,7 @@ UpgradeFrom010()
    {
       tmp = group;
       tmp << '/' << MP_PROFILE_TYPE;
-      if(p->readEntry(tmp, MP_PROFILE_TYPE_D) == ProfileBase::PT_FolderProfile)
+      if(p->readEntry(tmp, MP_PROFILE_TYPE_D) == Profile::PT_FolderProfile)
          folders.push_back(new String(group));
    }
    for(kbStringList::iterator i = folders.begin(); i != folders.end();i++)
@@ -1513,7 +1513,7 @@ UpgradeFrom010()
       p->SetPath(group);
       if(p->readEntry(MP_FOLDER_TYPE, MP_FOLDER_TYPE_D) != MP_FOLDER_TYPE_D)
       {
-         p2 = ProfileBase::CreateProfile(group);
+         p2 = Profile::CreateProfile(group);
          pw = p2->readEntry(MP_FOLDER_PASSWORD, MP_FOLDER_PASSWORD_D);
          if(pw.Length()) // only if we have a password
             p2->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pw));
@@ -1633,7 +1633,7 @@ public:
                entryNew << M_TEMPLATES_SECTION
                         << templateKinds[n] << '/'
                         << folderName;
-               ProfileBase *profileApp = mApplication->GetProfile();
+               Profile *profileApp = mApplication->GetProfile();
                if ( profileApp->HasEntry(entryNew) )
                {
                   wxLogWarning("A profile entry '%s' already exists, "
@@ -1835,7 +1835,7 @@ extern bool
 VerifyInbox(void)
 {
    bool rc = TRUE;
-   ProfileBase *parent = mApplication->GetProfile();
+   Profile *parent = mApplication->GetProfile();
    // INBOX has no meaning under Windows
 #ifndef OS_WIN
    // Do we need to create the INBOX (special folder for incoming mail)?
@@ -1844,8 +1844,8 @@ VerifyInbox(void)
    else
    {
       rc = FALSE;
-      ProfileBase *ibp = ProfileBase::CreateProfile("INBOX");
-      ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+      Profile *ibp = Profile::CreateProfile("INBOX");
+      ibp->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
       if(READ_APPCONFIG(MP_NEWMAIL_FOLDER) != "INBOX"
          && MDialog_YesNoDialog(
             _("Normally Mahogany will automatically collect all mail\n"
@@ -1897,10 +1897,10 @@ VerifyInbox(void)
                                     MF_FLAGS_KEEPOPEN;
 
    // Do we need to create the NewMailFolder?
-   ProfileBase *ibp = ProfileBase::CreateProfile(foldername);
+   Profile *ibp = Profile::CreateProfile(foldername);
    if (!  parent->HasEntry(foldername) )
    {
-      ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+      ibp->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
       ibp->writeEntry(MP_FOLDER_TYPE,
                       CombineFolderTypeAndFlags(MF_FILE, flagsNewMail));
       ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
@@ -1937,10 +1937,10 @@ VerifyInbox(void)
       if(foldername.Length() == 0)
          foldername = "SentMail";
       mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, foldername);
-      ProfileBase *ibp = ProfileBase::CreateProfile(foldername);
+      Profile *ibp = Profile::CreateProfile(foldername);
       if (!  parent->HasEntry(foldername) )
       {
-         ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+         ibp->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
          ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_KEEPOPEN);
          ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
          ibp->writeEntry(MP_FOLDER_COMMENT,
@@ -1973,11 +1973,11 @@ VerifyInbox(void)
                     foldername.c_str());
       }
       mApplication->GetProfile()->writeEntry(MP_TRASH_FOLDER, foldername);
-      ProfileBase *p = ProfileBase::CreateProfile(foldername);
+      Profile *p = Profile::CreateProfile(foldername);
       // Don't overwrite settings if entry already exists:
       if (!  parent->HasEntry(foldername) )
       {
-         p->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+         p->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
          p->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_KEEPOPEN);
          p->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
          p->writeEntry(MP_FOLDER_COMMENT,
@@ -2010,11 +2010,11 @@ VerifyInbox(void)
                     foldername.c_str());
       }
       mApplication->GetProfile()->writeEntry(MP_OUTBOX_NAME, foldername);
-      ProfileBase *p = ProfileBase::CreateProfile(foldername);
+      Profile *p = Profile::CreateProfile(foldername);
       // Don't overwrite settings if entry already exists:
       if (!  parent->HasEntry(foldername) )
       {
-         p->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+         p->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
          p->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_KEEPOPEN);
          p->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
          p->writeEntry(MP_FOLDER_COMMENT,
@@ -2078,7 +2078,7 @@ void VerifyUserDir(void)
    String userdir = READ_APPCONFIG(MP_USERDIR);
    if ( !userdir )
    {
-      ProfileBase *profile = mApplication->GetProfile();
+      Profile *profile = mApplication->GetProfile();
 #if defined(OS_UNIX)
       userdir = getenv("HOME");
       userdir << DIR_SEPARATOR << READ_APPCONFIG(MP_USER_MDIR);
@@ -2115,7 +2115,7 @@ SetupServers(void)
 {
    String serverName;
    MFolder *mfolder;
-   ProfileBase *p;
+   Profile *p;
 
    /* The NNTP server: */
    serverName = READ_APPCONFIG(MP_NNTPHOST);
@@ -2127,7 +2127,7 @@ SetupServers(void)
                                       MF_FLAGS_ANON|MF_FLAGS_GROUP,
                                       "",
                                       FALSE);
-      p = ProfileBase::CreateProfile(mfolder->GetName());
+      p = Profile::CreateProfile(mfolder->GetName());
       //inherit default instead p->writeEntry(MP_NNTPHOST, serverName);
       p->DecRef();
       SafeDecRef(mfolder);
@@ -2143,7 +2143,7 @@ SetupServers(void)
                                       MF_FLAGS_GROUP,
                                       "",
                                       FALSE);
-      p = ProfileBase::CreateProfile(mfolder->GetName());
+      p = Profile::CreateProfile(mfolder->GetName());
       //inherit default instead p->writeEntry(MP_IMAPHOST, serverName);
       p->DecRef();
       SafeDecRef(mfolder);
@@ -2159,7 +2159,7 @@ SetupServers(void)
                                       0,
                                       "",
                                       FALSE);
-      p = ProfileBase::CreateProfile(mfolder->GetName());
+      p = Profile::CreateProfile(mfolder->GetName());
       //inherit default instead p->writeEntry(MP_POPHOST, serverName);
       //inherit default instead p->writeEntry(MP_USERNAME, READ_APPCONFIG(MP_USERNAME));
       p->DecRef();
@@ -2183,7 +2183,7 @@ SetupMinimalConfig(void)
    const size_t bufsize = 200;
    char  buffer[bufsize];
 
-   ProfileBase *profile = mApplication->GetProfile();
+   Profile *profile = mApplication->GetProfile();
 
    if( strutil_isempty(READ_APPCONFIG(MP_USERNAME)) )
    {
@@ -2266,7 +2266,7 @@ SetupMinimalConfig(void)
 extern bool
 CheckConfiguration(void)
 {
-   ProfileBase *profile = mApplication->GetProfile();
+   Profile *profile = mApplication->GetProfile();
 
    if ( READ_APPCONFIG(MP_LICENSE_ACCEPTED) == 0 ) // not accepted
    {

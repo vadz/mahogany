@@ -145,5 +145,5 @@ String Message::GetAddressLastName(MessageAddressType type) const
 /*
   The following function is implemented in MessageCC.cpp:
   static class Message *Message::Create(const char * itext,
-                       UIdType uid, ProfileBase *iprofile)
+                       UIdType uid, Profile *iprofile)
 */

@@ -93,7 +93,7 @@ public:
    */
    static MailFolderCC * OpenFolder(int typeAndFlags,
                                     String const &path,
-                                    ProfileBase *profile,
+                                    Profile *profile,
                                     String const &server,
                                     String const &login,
                                     String const &password,
@@ -128,7 +128,7 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   virtual inline ProfileBase *GetProfile(void) { return m_Profile; }
+   virtual inline Profile *GetProfile(void) { return m_Profile; }
 
    /// Checks if the folder is in a critical section.
    inline bool InCritical(void) const { return m_InCritical; }
@@ -337,7 +337,7 @@ private:
    /// private constructor, does basic initialisation
    MailFolderCC(int typeAndFlags,
                 String const &path,
-                ProfileBase *profile,
+                Profile *profile,
                 String const &server,
                 String const &login,
                 String const &password);
@@ -657,7 +657,7 @@ private:
    ~MailFolderCC();
 
    /// a profile
-   ProfileBase *m_Profile;
+   Profile *m_Profile;
    /// The current listing of the folder
    class HeaderInfoListCC *m_Listing;
    /// Do we need to generate a new listing?

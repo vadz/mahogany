@@ -72,7 +72,7 @@ SWIG_MakePtr(char *_c, const void *_ptr, char *type)
 
 int
 PythonCallback(const char *name, int def, void *obj, const char *classname,
-               ProfileBase *profile, const char *argfmt,
+               Profile *profile, const char *argfmt,
                ...)
 {
    String

@@ -185,14 +185,14 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name);
 
 // get the value of the message template for the given profile
 extern String
-GetMessageTemplate(MessageTemplateKind kind, ProfileBase *profile);
+GetMessageTemplate(MessageTemplateKind kind, Profile *profile);
 
 // save the value as the template with the given name for the given profile
 extern void
 SetMessageTemplate(const String& name,
                    const String& value,
                    MessageTemplateKind kind,
-                   ProfileBase *profile);
+                   Profile *profile);
 
 // delete the message template
 extern bool

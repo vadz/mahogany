@@ -87,7 +87,7 @@ extern const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu;
     @param parent the parent window
     @return true if something was changed, false otherwise
  */
-extern bool ConfigureTemplates(ProfileBase *profile,
+extern bool ConfigureTemplates(Profile *profile,
                                wxWindow *parent,
                                const TemplatePopupMenuItem& menu
                                = g_ComposeViewTemplatePopupMenu);

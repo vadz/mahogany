@@ -97,7 +97,7 @@ public:
    static class Message * Create(
       const char * itext,
       UIdType uid = UID_ILLEGAL,
-      class ProfileBase *iprofile = NULL);
+      class Profile *iprofile = NULL);
    
    // used by GetAddressFirstName()
    static String GetFirstNameFromAddress(const String& address);

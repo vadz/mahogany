@@ -24,7 +24,7 @@
 */
 int
 PythonCallback(const char *name, int def, void *obj, const char *classname,
-               ProfileBase *profile = NULL, const char *argfmt = NULL,
+               Profile *profile = NULL, const char *argfmt = NULL,
                ...);
 
 

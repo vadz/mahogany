@@ -69,7 +69,7 @@ extern "C"
 /// temporary buffer for storing message headers, be generous:
 #define   HEADERBUFFERSIZE 100*1024
 
-SendMessageCC::SendMessageCC(ProfileBase *iprof,
+SendMessageCC::SendMessageCC(Profile *iprof,
                              Protocol protocol)
 {
    Create(protocol, iprof);
@@ -77,7 +77,7 @@ SendMessageCC::SendMessageCC(ProfileBase *iprof,
 
 void
 SendMessageCC::Create(Protocol protocol,
-                      ProfileBase *prof)
+                      Profile *prof)
 {
    String tmpstr;
 

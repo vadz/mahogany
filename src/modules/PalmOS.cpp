@@ -319,7 +319,7 @@ private:
    int m_PiSocket;
    int m_MailDB;
    int m_AddrDB;
-   ProfileBase *m_Profile;
+   Profile *m_Profile;
 
    // variables to store configuration values
    int   m_Dispose;
@@ -452,7 +452,7 @@ PalmOSModule::Entry(int arg, ...)
 void
 PalmOSModule::GetConfig(void)
 {
-   ProfileBase * appConf = m_MInterface->GetGlobalProfile();
+   Profile * appConf = m_MInterface->GetGlobalProfile();
 
    // mail related values get read from the PALMBOX mailfolder profile:
    if(m_Profile == NULL)
@@ -462,7 +462,7 @@ PalmOSModule::GetConfig(void)
    }
 
    // all other values get read from the module profile:
-   ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
+   Profile * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
 
    // must be in sync with the combobox values in config table
    //further down:
@@ -1859,7 +1859,7 @@ struct wxOptionsPageDesc  gs_OptionsPageDesc =
 void
 PalmOSModule::Configure(void)
 {
-   ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
+   Profile * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
    ShowCustomOptionsDialog(gs_OptionsPageDesc, p, NULL);
    p->DecRef();
 }

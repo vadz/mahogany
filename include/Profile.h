@@ -41,13 +41,13 @@ class kbStringList;
 class wxConfigBase;
 
 
-/** ProfileBase, an abstract base class for all Profile classes.
+/** Profile, an abstract base class for all Profile classes.
     This class serves as a common base class for the ProfileAppConfig
     and Profile classes. The real implementation is class Profile. In
     order to allow it to inherit values from an AppConfig class
     instance, the wrapper class ProfileAppConfig is available.
 */
-class ProfileBase : public MObjectRC
+class Profile : public MObjectRC
 {
 public:
    /** An enum explaining the possible types of profiles. In fact,
@@ -65,18 +65,18 @@ public:
    };
 
    /// Creates the one global config object.
-   static ProfileBase * CreateGlobalConfig(const String & filename);
+   static Profile * CreateGlobalConfig(const String & filename);
    /// Create a normal Profile object
-   static ProfileBase * CreateProfile(const String & classname,
-                                      const ProfileBase *parent = NULL);
+   static Profile * CreateProfile(const String & classname,
+                                      const Profile *parent = NULL);
    /// Create a Profile object for a plugin module
-   static ProfileBase * CreateModuleProfile(const String & classname,
-                                            const ProfileBase *parent = NULL);
+   static Profile * CreateModuleProfile(const String & classname,
+                                            const Profile *parent = NULL);
    /// Create a dummy Profile just inheriting from the top level
-   static ProfileBase * CreateEmptyProfile(const ProfileBase *parent = NULL);
+   static Profile * CreateEmptyProfile(const Profile *parent = NULL);
 
    /// creates an Identity entry in the configuration
-   static ProfileBase * CreateIdentity(const String &name);
+   static Profile * CreateIdentity(const String &name);
 
    /// Delete the global config object
    static void DeleteGlobalConfig();
@@ -157,7 +157,7 @@ public:
    virtual String GetUniqueGroupName(void) const = 0;
    
    /// Returns a pointer to the parent profile.
-   virtual ProfileBase *GetParent(void) const = 0;
+   virtual Profile *GetParent(void) const = 0;
    /** @name Managing environment variables
        just expose wxConfig methods (we do need them to be able to read the
        real config values, i.e. to disable expansion, sometimes)
@@ -168,7 +168,7 @@ public:
    void SetExpandEnvVars(bool bDoIt = TRUE);
 
    // for internal use by wxWindows related code only: get the pointer to the
-   // underlying wxConfig object. ProfileBase readEntry() functions should be
+   // underlying wxConfig object. Profile readEntry() functions should be
    // used for reading/writing the entries!
    wxConfigBase *GetConfig() const { return ms_GlobalConfig; }
 
@@ -185,19 +185,19 @@ public:
    virtual void Discard(void) = 0;
 
    /// is this profile a (grand) parent of the given one?
-   virtual bool IsAncestor(ProfileBase *profile) const = 0;
+   virtual bool IsAncestor(Profile *profile) const = 0;
 
 protected:
    /// why does egcs want this?
-   ProfileBase() {}
+   Profile() {}
 
    /// global wxConfig object, shared by all profiles
    static wxConfigBase *ms_GlobalConfig;
 private:
    /// forbid copy construction
-   ProfileBase(const ProfileBase &);
+   Profile(const Profile &);
    /// forbid assignments
-   ProfileBase & operator=(const ProfileBase & );
+   Profile & operator=(const Profile & );
 };
 
 
@@ -214,23 +214,23 @@ class Profile_obj
 public:
    // ctor & dtor
    Profile_obj(const String& name)
-      { m_profile = ProfileBase::CreateProfile(name); }
+      { m_profile = Profile::CreateProfile(name); }
    ~Profile_obj()
       { SafeDecRef(m_profile); }
 
    // provide access to the real thing via operator->
-   ProfileBase *operator->() const { return m_profile; }
+   Profile *operator->() const { return m_profile; }
 
    // implicit conversion to the real pointer (dangerous, but necessary for
    // backwards compatibility)
-   operator ProfileBase *() const { return m_profile; }
+   operator Profile *() const { return m_profile; }
 
 private:
    // no assignment operator/copy ctor
    Profile_obj(const Profile_obj&);
    Profile_obj& operator=(const Profile_obj&);
 
-   ProfileBase *m_profile;
+   Profile *m_profile;
 };
 
 // ----------------------------------------------------------------------------
@@ -239,10 +239,10 @@ private:
 class ProfileEnvVarSave
 {
 public:
-   ProfileEnvVarSave(const ProfileBase *profile, bool expand = false)
+   ProfileEnvVarSave(const Profile *profile, bool expand = false)
    {
       // we don't really change it, just temporarily change its behaviour
-      m_profile = (ProfileBase *)profile;
+      m_profile = (Profile *)profile;
       m_wasExpanding = profile->IsExpandingEnvVars();
       m_profile->SetExpandEnvVars(expand);
    }
@@ -253,7 +253,7 @@ public:
    }
 
 private:
-  ProfileBase *m_profile;
+  Profile *m_profile;
   bool         m_wasExpanding;
 };
 
@@ -271,23 +271,23 @@ private:
 class ProfilePathChanger
 {
 public:
-   ProfilePathChanger(const ProfileBase *config, const String& path)
+   ProfilePathChanger(const Profile *config, const String& path)
       {
          // we don't really change it, just temporarily change the path
-         m_config = (ProfileBase *)config;
+         m_config = (Profile *)config;
          m_config->SetPath(path);
       }
 
    ~ProfilePathChanger() { m_config->ResetPath(); }
 
 private:
-   ProfileBase *m_config;
+   Profile *m_config;
 };
 
 // ----------------------------------------------------------------------------
 // two handy functions for savings/restoring arrays of strings to/from config
 // ----------------------------------------------------------------------------
-void SaveArray(ProfileBase *conf, const wxArrayString& astr, const String & key);
-void RestoreArray(ProfileBase * conf, wxArrayString& astr, const String & key);
+void SaveArray(Profile *conf, const wxArrayString& astr, const String & key);
+void RestoreArray(Profile * conf, wxArrayString& astr, const String & key);
 //@}
 #endif // PROFILE_H
