@@ -2027,13 +2027,34 @@ static bool CheckXAuthWarning(const String& value)
 // indicate that this is a spam
 static bool CheckReceivedHeaders(const String& value)
 {
-   // "Received: from unknown" is very suspicious
-   const char *pc = strstr(value, "from unknown");
+   static const char *FROM_UNKNOWN_STR = "from unknown";
+   static const size_t FROM_UNKNOWN_LEN = strlen(FROM_UNKNOWN_STR);
+
+   // "Received: from unknown" is very suspicious, especially if it appears in
+   // the last "Received:" header, i.e. the first one in chronological order
+   const char *pc = strstr(value, FROM_UNKNOWN_STR);
    if ( !pc )
       return false;
 
    // it should be in the beginning of the header line
-   return pc == value.c_str() || *(pc - 1) == '\n';
+   if ( pc != value.c_str() && *(pc - 1) != '\n' )
+      return false;
+
+   // and it should be the last Received: header -- unfortunately there are
+   // sometimes "from unknown" warnings for legitimate mail so we try to reduce
+   // the number of false positives by checking the last header only as this is
+   // normally the only one which the spammer directly controls
+   pc = strstr(pc + FROM_UNKNOWN_LEN, "\r\n");
+   if ( !pc )
+   {
+      // the header must always be "\r\n" terminated anyhow!
+      FAIL_MSG( "no \"\\r\\n\" at the end of header?" );
+
+      return false;
+   }
+
+   // and there shouldn't be any more lines after this one
+   return !pc[2];
 }
 
 // check if we have an HTML-only message
