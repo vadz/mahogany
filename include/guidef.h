@@ -24,8 +24,9 @@ class WXDLLEXPORT wxClassInfo;
 // minimal space to leave between dialog/panel items: tune them if you want,
 // but use these constants everywhere instead of raw numbers to make the look
 // of all dialogs consistent
-#define LAYOUT_X_MARGIN       5
-#define LAYOUT_Y_MARGIN       5
+#define LAYOUT_MARGIN       5
+#define LAYOUT_X_MARGIN       LAYOUT_MARGIN
+#define LAYOUT_Y_MARGIN       LAYOUT_MARGIN
 
 // this function is obsolete
 inline long AdjustCharHeight(long h)
