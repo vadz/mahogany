@@ -1052,7 +1052,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       if(m_Profile)
          m_Profile->IncRef();
       else
-         m_Profile = Profile::CreateEmptyProfile();
+         m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
 
       m_MessagePreview->SetParentProfile(m_Profile);
       m_MessagePreview->Clear(); // again, to reflect profile changes
@@ -1127,7 +1127,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_NumOfMessages = 0;
    m_previewUId = UID_ILLEGAL;
    m_Parent->GetClientSize(&x, &y);
-   m_Profile = Profile::CreateEmptyProfile(); //no longer "folderview"
+   m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
    m_SplitterWindow = new wxPSplitterWindow("FolderSplit", m_Parent, -1,
                                             wxDefaultPosition, wxSize(x,y),
                                             wxSP_3D|wxSP_BORDER);

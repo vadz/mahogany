@@ -229,6 +229,7 @@ MailCollectorImpl::InternalCreate(void)
       wxLogError(_("Cannot build list of incoming mail folders."));
    m_ReInit = false;
    m_NewMailFolder = NULL;
+   m_NewMailProfile = NULL;
 
    // keep it open all the time to speed things up if we have any folders to
    // monitor
