@@ -810,7 +810,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Command to &activate network"),   Field_Text | Field_Global, ConfigField_DialUpSupport},
    { gettext_noop("Command to &deactivate network"), Field_Text | Field_Global, ConfigField_DialUpSupport},
 #endif // platform
-   { gettext_noop("The following timeout value is used for TCP connections to\n"
+   { gettext_noop("The following timeout values are used for TCP connections to\n"
                   "remote mail or news servers."), Field_Message | Field_Global | Field_Advanced, -1 },
    { gettext_noop("&Open timeout (in seconds)"),  Field_Number | Field_Global | Field_Advanced,    -1,                        },
 #ifdef USE_TCP_TIMEOUTS
