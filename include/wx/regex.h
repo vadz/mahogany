@@ -78,7 +78,8 @@ class wxRegExPOSIX : public wxRegExBase
          int myflags = 0;
          if(flags & RE_NOTBOL) myflags |= REG_NOTBOL;
          if(flags & RE_NOTEOL) myflags |= REG_NOTEOL;
-         regcomp((regex_t *)&m_RegEx, str.c_str(), myflags);
+	return 
+          regexec((regex_t *)&m_RegEx, str.c_str(), 0, NULL, myflags) == 0;
       }
 
 
