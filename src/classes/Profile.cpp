@@ -415,7 +415,7 @@ Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
    {
       String tmp = READ_APPCONFIG(MC_PROFILE_PATH);
       PathFinder pf(tmp);
-      
+
       String fileName = profileName + READ_APPCONFIG(MC_PROFILE_EXTENSION);
       fullFileName = pf.FindFile(fileName, &isOk);
       if( !isOk )
@@ -463,96 +463,166 @@ Profile::~Profile()
    delete m_config;
 }
 
+// we can't use readEntry(String) to implement readEntry(long) because some
+// wxConfig implementations don't allow reading string values from keys storing
+// numeric data (especially wxRegConfig - the Win32 registry is typed). To avoid
+// code duplication we use this hack (we might use templates too...)
+
+// this strucutre holds either a string or a number
+class KeyValue
+{
+public:
+   // ctors
+   KeyValue() { /* don't initialize anything */ }
+   KeyValue(long l) : m_lValue(l) { m_isString = false; }
+   KeyValue(const String& str) : m_strValue(str) { m_isString = true; }
+
+   // assignment
+   void SetValue(const String& str) { m_isString = true; m_strValue = str; }
+   void SetValue(long l) { m_isString = false; m_lValue = l; }
+
+   // accessors
+   bool IsString() const { return m_isString; }
+
+   String GetString() const { ASSERT( m_isString ); return m_strValue; }
+   long GetNumber() const { ASSERT( !m_isString ); return m_lValue; }
+
+private:
+   // can't use the union to hold this data because of String
+   String m_strValue;
+   long   m_lValue;
+
+   bool   m_isString; // type selector for the union
+};
+
+// read the value from the given profile, return false if not found
+static bool
+readEntryFromProfile(KeyValue& value,
+                     const ProfileBase *profile,
+                     STRINGARG key,
+                     const KeyValue& defaultValue)
+{
+   if ( defaultValue.IsString() )
+   {
+      String strValue = profile->readEntry(key, (const char *)NULL);
+      value.SetValue(strValue);
+      return !strutil_isempty(strValue);
+   }
+   else
+   {
+      // FIXME I don't know how to distinguish between the default value and
+      //       "real" dummyValue here.
+      static const long dummyValue = 17;
+      long lValue = profile->readEntry(key, dummyValue);
+      value.SetValue(lValue);
+      return lValue != dummyValue;
+   }
+}
+
+// read the value from the specified key and return it in KeyValue
+static KeyValue
+readEntryHelper(wxConfigBase *config,
+                const ProfileBase *parentProfile,
+                const String& profileName,
+                STRINGARG key,
+                const KeyValue& defaultValue)
+{
+   KeyValue value;
+   String strValue;
+   long   lValue;
+
+   bool bRead = false;
+
+   // first, try our own config
+   if ( config )
+   {
+      if ( defaultValue.IsString() )
+      {
+         bRead = config->Read(key, &strValue);
+         if ( bRead )
+            value.SetValue(strValue);
+      }
+      else
+      {
+         bRead = config->Read(key, &lValue);
+         if ( bRead )
+            value.SetValue(lValue);
+      }
+   }
+
+   // second, try the parent profile
+   if ( !bRead && parentProfile != NULL )
+   {
+      bRead = readEntryFromProfile(value, parentProfile, key, defaultValue);
+   }
+
+   // third, try our name in the global config file:
+   if ( !bRead )
+   {
+      ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
+      mApplication->GetProfile()->SetPath(profileName);
+
+      bRead = readEntryFromProfile(value, mApplication->GetProfile(),
+                                   key, defaultValue);
+   }
+
+   // record the default value back into config if asked for
+   if( !bRead )
+   {
+      if ( config && READ_APPCONFIG(MC_RECORDDEFAULTS) )
+      {
+         if ( defaultValue.IsString() )
+            config->Write(key, defaultValue.GetString());
+         else
+            config->Write(key, defaultValue.GetNumber());
+      }
+
+      value = defaultValue;
+   }
+
+#  ifdef DEBUG
+      String dbgtmp = "Profile(" + profileName + String(")::readEntry(") +
+                      String(key) + ") returned: ";
+      if ( value.IsString() )
+         dbgtmp += value.GetString();
+      else
+         dbgtmp += strutil_ltoa(value.GetNumber());
+
+      DBGLOG(Str(dbgtmp));
+#  endif
+
+   return value;
+}
 
 String
 Profile::readEntry(STRINGARG key, STRINGARG defaultvalue) const
 {
-   MOcheck(); 
-   String rc;
-   
-   // first, try our own config
-   if(m_config)
-      rc = m_config->Read(key.c_str());
-   // second, try the parent profile
+   MOcheck();
 
-   if( strutil_isempty(rc) && parentProfile != NULL)
-      rc = parentProfile->readEntry(key, (const char *)NULL);
-   
-   //third, try our name in the global config file:
-   if( strutil_isempty(rc) )
-   {
-      ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
-      mApplication->GetProfile()->SetPath(profileName.c_str());
-      rc = mApplication->GetProfile()->readEntry(key, (const char *)NULL);
-      if( strutil_isempty(rc))
-      {
-         mApplication->GetProfile()->SetPath(M_PROFILE_CONFIG_SECTION);
-         rc = mApplication->GetProfile()->readEntry(key, (const char *)NULL);
-      }
-   }
-
-   if( strutil_isempty(rc) )
-   {
-      if(m_config && READ_APPCONFIG(MC_RECORDDEFAULTS) )
-         m_config->Write(key,defaultvalue); // so default value can be recorded
-      rc = defaultvalue;
-   }
-
-#  ifdef DEBUG
-   String dbgtmp = "Profile(" + profileName + String(")::readEntry(") +
-      String(key) + ") returned: " + rc;
-   DBGLOG(Str(dbgtmp));
-#  endif
-
-   return rc;
+   return readEntryHelper(m_config, parentProfile, profileName,
+                          key, KeyValue(defaultvalue)).GetString();
 }
 
 long
 Profile::readEntry(STRINGARG key, long defaultvalue) const
 {
-   long rc;
    MOcheck();
 
-   String defaultstr, result;
-   defaultstr << strutil_ltoa(defaultvalue);
-
-   result = readEntry(key, defaultstr);
-   return atol(result.c_str());
-
-#if 0
-   // this is completely broken!! Don't mess with my inheritance. :-)
-   
-   if ( ! (m_config && m_config->Read(key, &rc, defaultvalue)) )
-   {
-      if ( !parentProfile ||
-           (rc = parentProfile->readEntry(key, defaultvalue)) == defaultvalue
-         )
-      {
-         if ( mApplication->GetProfile() )
-         {
-            rc = mApplication->GetProfile()->readEntry(key,defaultvalue);
-            {
-               if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
-                  m_config->Write(key, defaultvalue);
-            }
-         }
-      }
-   }
-#endif
-   return rc;
+   return readEntryHelper(m_config, parentProfile, profileName,
+                          key, KeyValue(defaultvalue)).GetNumber();
 }
 
 
 void Profile::SetPath(STRINGARG path)
 {
-   MOcheck(); 
+   MOcheck();
    if(m_config) m_config->SetPath(path);
 }
 
 String
 Profile::GetPath(void) const
 {
-   MOcheck(); 
+   MOcheck();
    if(m_config)
       return m_config->GetPath();
    else
@@ -562,14 +632,14 @@ Profile::GetPath(void) const
 bool
 Profile::HasEntry(STRINGARG key) const
 {
-   MOcheck(); 
+   MOcheck();
    return m_config && m_config->HasEntry(key);
 }
 
 void
 Profile::DeleteGroup(STRINGARG path)
 {
-   MOcheck(); 
+   MOcheck();
    if(m_config) m_config->DeleteGroup(path);
 }
 

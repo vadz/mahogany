@@ -45,7 +45,7 @@ MailFolderCC::MailFolderCC(MailFolder::Type type,
                            String const &password)
 {
    m_MailStream = NIL;
-   
+
    m_Profile = profile;
    m_Profile->IncRef(); // we use it now
    m_MailboxPath = path;
@@ -64,7 +64,7 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
 
    MailFolderCC *mf;
    String mboxpath;
-   
+
    type = (MailFolder::Type)(type & MailFolder::MF_TYPEMASK);
 
    switch(type)
@@ -97,7 +97,7 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
       mf->IncRef();
       return mf;
    }
-   
+
    mf = new MailFolderCC(type,mboxpath,profile,login,password);
    if(mf->Open())
       return mf;
@@ -138,14 +138,14 @@ MailFolderCC::Open(void)
       SetDefaultObj(false);
    }
    if(m_MailStream == NIL)
-      return false; 
+      return false;
 
    AddToMap(m_MailStream); // now we are known
 
    mail_status(m_MailStream, (char *)m_MailboxPath.c_str(), SA_MESSAGES|SA_RECENT|SA_UNSEEN);
    String sequence = String("1:") + strutil_ultoa(numOfMessages);
    mail_fetchfast(m_MailStream, (char *)sequence.c_str());
-   
+
    okFlag = true;
    if(okFlag)
       PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
@@ -157,8 +157,10 @@ MailFolderCC::FindFolder(String const &path)
 {
    StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
+   {
       if( (*i)->name == path )
          return (*i)->folder;
+   }
    return NULL;
 }
 
@@ -191,13 +193,13 @@ MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
    FolderViewList::iterator
       i;
    if(reg)
-      viewList.push_front(view);
-   else  
-      for(i = viewList.begin(); i != viewList.end(); i++)
+      m_viewList.push_front(view);
+   else
+      for(i = m_viewList.begin(); i != m_viewList.end(); i++)
       {
          if((*i) == view)
          {
-            viewList.erase(i);
+            m_viewList.erase(i);
             return;
          }
       }
@@ -229,7 +231,7 @@ MailFolderCC::UpdateViews(void)
 {
    FolderViewList::iterator
       i;
-   for(i = viewList.begin(); i != viewList.end(); i++)
+   for(i = m_viewList.begin(); i != m_viewList.end(); i++)
       (*i)->Update();
    PY_CALLBACK(MCB_FOLDERUPDATE, 0, GetProfile());
 }
@@ -302,11 +304,11 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
    seq << index;
 
    const char *flagstr;
-   
+
    switch(flag)
    {
    case MSG_STAT_UNREAD:
-      flagstr = "\\SEEN"; set = set ? false : true; 
+      flagstr = "\\SEEN"; set = set ? false : true;
       break;
    case MSG_STAT_REPLIED:
       flagstr = "\\ANSWERED";
@@ -329,7 +331,7 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
          mail_clearflag(m_MailStream, (char *)seq.c_str(), (char *)flagstr);
    }
 }
-                      
+
 void
 MailFolderCC::ExpungeMessages(void)
 {
@@ -337,7 +339,7 @@ MailFolderCC::ExpungeMessages(void)
       mail_expunge (m_MailStream);
 }
 
-   
+
 #ifdef DEBUG
 void
 MailFolderCC::Debug(void) const
@@ -432,9 +434,9 @@ MailFolderCC::SetDefaultObj(bool setit)
    else
       streamListDefaultObj = NULL;
 }
-   
 
-           
+
+
 /// this message matches a search
 void
 MailFolderCC::mm_searched(MAILSTREAM *stream, unsigned long number)
@@ -455,7 +457,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
     + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
-     
+
       mf->numOfMessages = number;
       mf->UpdateViews();
    }
@@ -500,7 +502,7 @@ MailFolderCC::mm_notify(MAILSTREAM *stream, char *str, long
    mm_log(str,errflg);
 }
 
-   
+
 /** this mailbox name matches a listing request
        @param stream mailstream
        @param delim  character that separates hierarchies
@@ -545,7 +547,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
    String   tmp = "MailFolderCC::mm_status() for folder " + mf->m_MailboxPath;
    LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
-   
+
    if(status->flags & SA_MESSAGES)
       mf->numOfMessages  = status->messages;
    mf->UpdateViews();
@@ -560,7 +562,7 @@ void
 MailFolderCC::mm_log(const char *str, long errflg)
 {
    if(mm_ignore_errors)
-      return;   
+      return;
    String   msg = (String) "c-client " + (String) str;
    LOGMESSAGE((M_LOG_INFO, Str(msg)));
 }
@@ -656,7 +658,7 @@ MailFolderPopCC::Open(void)
    String mboxname = "{";
    mboxname += READ_CONFIG(GetProfile(), MP_POP_HOST);
    mboxname +="/pop3}";
-   
+
    return MailFolderCC::Open(mboxname.c_str());
 }
 #endif
@@ -665,7 +667,7 @@ MailFolderPopCC::Open(void)
 // the callbacks:
 extern "C"
 {
-   
+
 void
 mm_searched(MAILSTREAM *stream, unsigned long number)
 {
@@ -762,7 +764,7 @@ mm_fatal(char *str)
 
 } // extern "C"
 
-//#define TESTCLASS  
+//#define TESTCLASS
 
 #ifdef   TESTCLASS
 
@@ -773,23 +775,23 @@ int main(void)
    MailFolderCC   mf("DemoBox");
    if(! mf.Open("/home/karsten/src/Projects/M/test/testbox"))
       cerr << "Open() returned error." << endl;
-   
+
    mf.DoDebug();  // enable debugging
-   
+
    if(mf.IsOk())
       cerr << "Object initialised correctly." << endl;
    else
       cerr << "Object initialisation failed." << endl;
    mf.Debug();    // show debug info
    cout << "----------------------------------------------------------" << endl;
-   
+
    MailFolder &m = mf;
 
    cout
       << "Name: " << m.GetName()
       << "# of Messages: " << m.CountMessages()
       << endl;
-   
+
 #if USE_CLASSINFO
    cout << "m is of class " << m.GetClassName() << endl;
 #endif

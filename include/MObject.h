@@ -5,7 +5,7 @@
 //              itself when it's ref count reaches 0. As a consequence, it
 //              should only be allocated with "new" and never deleted.
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -36,7 +36,7 @@ public:
    MObject()
       { m_magic = MOBJECT_MAGIC; }
    /** Check validity of this object.
-       This function should be called wherever such an object is used, 
+       This function should be called wherever such an object is used,
        especially at the beginning of all methods.
    */
    void MOcheck(void) const
@@ -61,7 +61,7 @@ protected:
    /// virtual destructor
    virtual ~MObject() {}
    /// empty MOcheck() method
-   void MOcheck(void) const {} 
+   void MOcheck(void) const {}
 #endif
 };
 
@@ -120,21 +120,23 @@ public:
     static void CheckLeaks() { }
 #endif
 
-    // ref counting
-    // increment
-  void IncRef()   { MOcheck(); wxASSERT(m_nRef > 0); m_nRef++; }
-    // decrement and delete if reached 0, return TRUE if item wasn't deleted
+  // ref counting
 #ifdef   DEBUG
+    // increment
+  void IncRef();
+    // decrement and delete if reached 0, return TRUE if item wasn't deleted
   bool DecRef();
-#else
-  bool DecRef() { MOcheck(); if ( --m_nRef ) return TRUE; delete this; return FALSE; }
-#endif
-
+#else  //release
+  void IncRef()
+    { MOcheck(); wxASSERT(m_nRef > 0); m_nRef++; }
+  bool DecRef()
+    { MOcheck(); if ( --m_nRef ) return TRUE; delete this; return FALSE; }
+#endif //debug/release
 
 protected:
   /// dtor is protected because only DecRef() can delete us
   virtual ~MObjectRC() {}
-  
+
 #ifndef DEBUG // we may use m_nRef only for diagnostic functions
 private:
 #endif

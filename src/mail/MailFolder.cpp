@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$ 
+ * $Id$
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -14,11 +14,11 @@
 
 #ifndef USE_PCH
 #   include  "Mcommon.h"
-#   include   "Mdefaults.h"
-#   include   "strutil.h"
-#   include   "Profile.h"
-#   include   "MailFolder.h"
-#   include   "MailFolderCC.h"
+#   include  "Mdefaults.h"
+#   include  "strutil.h"
+#   include  "Profile.h"
+#   include  "MailFolder.h"
+#   include  "MailFolderCC.h"
 #endif
 
 
@@ -33,11 +33,12 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
    ProfileBase *profile = NULL;
    String login, passwd, name;
    MailFolder::Type type;
-   
+
    if(i_type == MF_PROFILE)
    {
-      profile = ProfileBase::CreateProfile(name,parentProfile);
-      ASSERT(profile);
+      profile = ProfileBase::CreateProfile(i_name,parentProfile);
+      CHECK(profile, NULL, "can't create profile");   // return if it fails
+
       login = READ_CONFIG(profile, MP_POP_LOGIN);
       passwd = READ_CONFIG(profile, MP_POP_PASSWORD);
       type = (MailFolder::Type)READ_CONFIG(profile, MP_FOLDER_TYPE);
@@ -51,17 +52,21 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
             type = (MailFolder::Type) MP_FOLDER_TYPE_D;
       }
    }
-   else
+   else // type != PROFILE
    {
       profile = ProfileBase::CreateEmptyProfile(parentProfile);
-      ASSERT(profile);
+      CHECK(profile, NULL, "can't create profile");   // return if it fails
+
       login = i_login;
       passwd = i_passwd;
       type = i_type;
       name = i_name;
    }
+
+   // @@ calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
    MailFolder *mf = MailFolderCC::OpenFolder(type, name, profile, login, passwd);
    mf->m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
    profile->DecRef();
+
    return mf;
 }

@@ -247,8 +247,7 @@ wxFolderView::Update(void)
 
             wxLogError(_("Invalid value '%s' for the date format: it should "
                          "contain exactyly 3 %u format specificators. Default "
-                         "value '%s' "
-                         "will be used instead."),
+                         "value '%s' will be used instead."),
                          dateFormat.c_str(), MC_DATE_FMT_D);
          }
 

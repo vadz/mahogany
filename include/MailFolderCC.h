@@ -21,7 +21,7 @@
 extern "C"
 {
 #     include <stdio.h>
-#     include <mail.h>      
+#     include <mail.h>
 #     include <osdep.h>
 #     include <rfc822.h>
 #     include <smtp.h>
@@ -91,14 +91,14 @@ public:
       @param profile parent profile
       @param login only used for POP,IMAP and NNTP (as the newsgroup name)
       @param password only used for POP, IMAP
-      
+
    */
    static MailFolderCC * OpenFolder(MailFolder::Type type,
                                     String const &path,
                                     ProfileBase *profile,
                                     String const &login,
                                     String const &password);
-   
+
    /// assume object to only be initialised when stream is ok
    bool IsInitialised(void) const { return okFlag; }
 
@@ -109,14 +109,14 @@ public:
 
    // checks whether a folder with that path exists
    static MailFolderCC *FindFolder(String const &path);
-      
+
 public:
 
    /** Is mailbox ok to use? Did the last operation succeed?
        @return true if everything is fine
    */
    bool   IsOk(void) const { return okFlag; }
-   
+
    /** Register a FolderViewBase derived class to be notified when
        folder contents change.
        @param    view the FolderView to register
@@ -188,10 +188,10 @@ public:
 
    /** Check whether mailbox has changed. */
    void Ping(void);
-   
+
    /** Updates the associated FolderViews */
    void UpdateViews(void);
-   
+
 private:
    /// private constructor, does basic initialisation
    MailFolderCC(MailFolder::Type type,
@@ -209,10 +209,10 @@ private:
    static String MF_user;
    /// for POP/IMAP boxes, this holds the password for the callback
    static String MF_pwd;
-   
+
    /// a list of FolderViews to be notified when this folder changes
-   FolderViewList   viewList;
-   
+   FolderViewList   m_viewList;
+
    /// which type is this mailfolder?
    MailFolder::Type   m_folderType;
    ///   mailstream associated with this folder
@@ -220,13 +220,13 @@ private:
 
    /// is the MAILSTREAM ok or was there an error?
    bool      okFlag;
-   
+
    /// number of messages in mailbox
    long      numOfMessages;
 
    /// Path to mailbox
    String   m_MailboxPath;
-   
+
    /// do we want c-client's debug messages?
    bool   debugFlag;
 
@@ -238,16 +238,16 @@ private:
 
    /// a pointer to the object to use as default if lookup fails
    static MailFolderCC   *streamListDefaultObj;
-   
+
    /// mapping MAILSTREAM* to objects of this class and their names
    static StreamConnectionList   streamList;
 
    /// has c-client library been initialised?
    static bool   cclientInitialisedFlag;
-   
+
    /// initialise c-client library
    static void CClientInit(void);
-   
+
    /// adds this object to Map
    void   AddToMap(MAILSTREAM const *stream);
 
@@ -257,9 +257,9 @@ private:
    /** set the default object in Map
        @param setit if false, erase default object
    */
-   
+
    void SetDefaultObj(bool setit = true);
-      
+
    /// lookup object in Map
    static MailFolderCC *LookupObject(MAILSTREAM const *stream);
    //@}
@@ -298,7 +298,7 @@ public:
        */
    static void mm_notify(MAILSTREAM *stream, char *str, long
                          errflg);
-   
+
    /** this mailbox name matches a listing request
        @param stream mailstream
        @param delim   character that separates hierarchies

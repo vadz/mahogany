@@ -26,9 +26,6 @@
 #   include   "guidef.h"
 #endif
 
-//FIXME which headers are required?
-
-#include   <wx/wx.h>
 #include   <wx/log.h>
 #include   <wx/imaglist.h>
 #include   <wx/notebook.h>

@@ -3,7 +3,7 @@
 // File name:   MObject.cpp - implementation of MObjectRC
 // Comment:     the only non inline MObjectRC functions are diagnostic ones
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -19,6 +19,9 @@
 // ----------------------------------------------------------------------------
 #include "Mpch.h"
 
+// note: this source file is intentionally empty in release mode, all the code
+// here is only for the debugging support, otherwise the functions are inline in
+// the header.
 #ifdef DEBUG
 
 #include "MObject.h"
@@ -32,6 +35,12 @@
 WX_DEFINE_ARRAY(MObjectRC *, ArrayObjects);
 
 static ArrayObjects gs_aObjects;
+
+// we don't want to trace all Inc/DecRef()s - there are too many of them. But
+// sometimes we want to trace the lifetime of a selected object. For this, you
+// should change these variable under debugger - all operations on this object
+// will be logged.
+static void *gs_traceObject = NULL;
 
 // ============================================================================
 // implementation
@@ -74,19 +83,38 @@ MObjectRC::MObjectRC()
    m_nRef = 1;
 }
 
+void MObjectRC::IncRef()
+{
+   MOcheck();
+   wxASSERT(m_nRef > 0);
+   m_nRef++;
+
+   if ( this == gs_traceObject )
+   {
+      wxLogTrace("Object %x: IncRef() called, m_nRef = %u.", this, m_nRef);
+   }
+}
+
 bool MObjectRC::DecRef()
-{ 
+{
    MOcheck();
    wxASSERT(m_nRef > 0);
 
-   if ( !--m_nRef )
+   m_nRef--;
+
+   if ( this == gs_traceObject )
+   {
+      wxLogTrace("Object %x: DecRef() called, m_nRef = %u.", this, m_nRef);
+   }
+
+   if ( m_nRef == 0 )
    {
       gs_aObjects.Remove(this);
       delete this;
 
       return FALSE;
    }
-  
+
    return TRUE;
 }
 
