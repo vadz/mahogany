@@ -166,7 +166,7 @@ long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win)
 static void SetTopConstraint(wxWindow *parent,
                              wxLayoutConstraints *c,
                              wxControl *last,
-                             size_t extraSpace)
+                             int extraSpace)
 {
    if ( last == NULL )
    {

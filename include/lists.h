@@ -329,8 +329,8 @@ public: \
    public: \
       typedef name##_common::iterator iterator_common; \
       \
-      iterator(ListNode *n = NULL) : iterator_common(n) {} \
-      iterator(const iterator_common &i) : iterator_common(i) {} \
+      iterator(ListNode *n = NULL) : name##_common::iterator(n) {} \
+      iterator(const iterator_common &i) : name##_common::iterator(i) {} \
       inline value_type operator->(void) \
          { return GetData(); } \
       inline value_type operator*(void) \

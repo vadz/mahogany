@@ -1436,8 +1436,6 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
 #if wxUSE_DRAG_AND_DROP
    bool didDrop = false;
 
-   size_t countSel = selections.Count();
-
    MailFolder_obj mf = GetMailFolder();
    CHECK( mf, false, _T("no mail folder to drag messages from?") );
 
@@ -1450,8 +1448,8 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
                            wxCursor("msg_move"));
 #else // Unix
    wxIconManager *iconManager = mApplication->GetIconManager();
-   wxIcon icon = iconManager->GetIcon(countSel > 1 ? "dnd_msgs"
-                                                   : "dnd_msg");
+   wxIcon icon = iconManager->GetIcon(selections.Count() > 1 ? "dnd_msgs"
+                                                             : "dnd_msg");
    wxDropSource dropSource(dropData, m_winForDnd, icon);
 #endif // OS
 

@@ -397,9 +397,18 @@ MailMessageParameters::GetParamValue(const wxString& name) const
    {
       // if all else failed, call the base class
 
-      // typedef is needed for VC++ 5.0 - otherwise you get a compile error!
+      // typedef is needed for VC++ -- otherwise you get a compile error --
+      // but with it you get this warning
+      #ifdef _MSC_VER
+         #pragma warning(disable:4097)
+      #endif
+
       typedef wxFileType::MessageParameters BaseMessageParameters;
       value = BaseMessageParameters::GetParamValue(name);
+
+      #ifdef _MSC_VER
+         #pragma warning(default:4097)
+      #endif
    }
 
    return value;
@@ -2156,9 +2165,9 @@ MessageView::MimeHandle(const MimePart *mimepart)
    // have we already saved the file to disk?
    bool saved = false;
 
-   Profile *profile = GetProfile();
-
 #ifdef OS_UNIX
+   Profile * const profile = GetProfile();
+
    /* For IMAGE/TIFF content, check whether it comes from one of the
       fax domains. If so, change the mimetype to "IMAGE/TIFF-G3" and
       proceed in the usual fashion. This allows the use of a special
