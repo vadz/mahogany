@@ -51,7 +51,7 @@
 class AdbTextImporter : public AdbImporter
 {
 public:
-   AdbTextImporter(char delimiter);
+   AdbTextImporter();
 
    // implement base class pure virtuals
    virtual String GetDefaultFilename() const { return ""; }
@@ -74,6 +74,11 @@ protected:
    // the number of fields
    size_t SplitLine(const wxString& line, wxArrayString *fields) const;
 
+   // try to find the correct delimiter by looking at the first few lines of
+   // m_textfile - if we think we found one, return TRUE and set m_chDelimiter,
+   // otherwise return FALSE
+   bool TestDelimiter(char chDelimiter);
+
 private:
    // the character delimiting different fields
    char m_chDelimiter;
@@ -83,22 +88,6 @@ private:
 
    // the last result of CanImport()
    bool m_lastTestResult;
-};
-
-// a specialization for CSV format (comma separated values)
-class AdbCSVImporter : public AdbTextImporter
-{
-public:
-   AdbCSVImporter() : AdbTextImporter(',') { }
-
-   DECLARE_ADB_IMPORTER();
-};
-
-// a specialization for TAB format (tab separated values)
-class AdbTABImporter : public AdbTextImporter
-{
-public:
-   AdbTABImporter() : AdbTextImporter('\t') { }
 
    DECLARE_ADB_IMPORTER();
 };
@@ -111,23 +100,18 @@ public:
 // macros for dynamic importer creation
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ADB_IMPORTER(AdbCSVImporter,
-                       gettext_noop("Comma separated text format address book import module"),
-                       gettext_noop("Comma separated values"),
-                       "Vadim Zeitlin <vadim@wxwindows.org>");
-
-IMPLEMENT_ADB_IMPORTER(AdbTABImporter,
-                       gettext_noop("TAB separated text format address book import module"),
-                       gettext_noop("TAB separated values"),
+IMPLEMENT_ADB_IMPORTER(AdbTextImporter,
+                       gettext_noop("Comma/TAB separated text format address book import module"),
+                       gettext_noop("Comma/TAB separated values"),
                        "Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // AdbTextImporter
 // ----------------------------------------------------------------------------
 
-AdbTextImporter::AdbTextImporter(char delimiter)
+AdbTextImporter::AdbTextImporter()
 {
-   m_chDelimiter = delimiter;
+   m_chDelimiter = 0;
 }
 
 wxString AdbTextImporter::SplitField(const char *start,
@@ -194,6 +178,54 @@ size_t AdbTextImporter::SplitLine(const wxString& line,
    return fields->GetCount();
 }
 
+bool AdbTextImporter::TestDelimiter(char chDelimiter)
+{
+   // test first few lines
+   size_t nLine, nLines = wxMin(10, m_textfile.GetLineCount());
+   size_t nDelimitersTotal = 0;
+   size_t *nDelimiters = new size_t[nLines];
+   for ( nLine = 0; nLine < nLines; nLine++ )
+   {
+      // count the number of delimiter chars in this line
+      size_t nDelimitersInLine = 0;
+      wxString line = m_textfile[nLine];
+      for ( const char *pc = line.c_str(); *pc; pc++ )
+      {
+         if ( *pc == chDelimiter )
+            nDelimitersInLine++;
+      }
+
+      nDelimitersTotal += nDelimitersInLine;
+      nDelimiters[nLine] = nDelimitersInLine;
+   }
+
+   if ( (nLines > 0) && (nDelimitersTotal > nLines) )
+   {
+      // if there are more or less the same number of the delmiters per
+      // line, assume it's ok
+      size_t nDelimitersAverage = nDelimitersTotal / nLines;
+      size_t maxDiff = nDelimitersAverage / 10;
+      for ( nLine = 0; m_lastTestResult && (nLine < nLines); nLine++ )
+      {
+         if ( abs(nDelimiters[nLine] - nDelimitersAverage) > (int)maxDiff )
+         {
+            // this line looks strange...
+            return FALSE;
+         }
+      }
+   }
+   else
+   {
+      // the file is empty or has too few delimiters
+      return FALSE;
+   }
+
+   // looks ok
+   m_chDelimiter = chDelimiter;
+
+   return TRUE;
+}
+
 bool AdbTextImporter::CanImport(const String& filename)
 {
    if ( filename == m_textfile.GetName() )
@@ -208,46 +240,8 @@ bool AdbTextImporter::CanImport(const String& filename)
    }
    else
    {
-      // test first few lines
-      size_t nLine, nLines = wxMin(10, m_textfile.GetLineCount());
-      size_t nDelimitersTotal = 0;
-      size_t *nDelimiters = new size_t[nLines];
-      for ( nLine = 0; nLine < nLines; nLine++ )
-      {
-         // count the number of delimiter chars in this line
-         size_t nDelimitersInLine = 0;
-         wxString line = m_textfile[nLine];
-         for ( const char *pc = line.c_str(); *pc; pc++ )
-         {
-            if ( *pc == m_chDelimiter )
-               nDelimitersInLine++;
-         }
-
-         nDelimitersTotal += nDelimitersInLine;
-         nDelimiters[nLine] = nDelimitersInLine;
-      }
-
-      if ( (nLines > 0) && (nDelimitersTotal > nLines) )
-      {
-         // if there are more or less the same number of the delmiters per
-         // line, assume it's ok
-         m_lastTestResult = TRUE;
-         size_t nDelimitersAverage = nDelimitersTotal / nLines;
-         size_t maxDiff = nDelimitersAverage / 10;
-         for ( nLine = 0; m_lastTestResult && (nLine < nLines); nLine++ )
-         {
-            if ( abs(nDelimiters[nLine] - nDelimitersAverage) > (int)maxDiff )
-            {
-               // this line looks strange...
-               m_lastTestResult = FALSE;
-            }
-         }
-      }
-      else
-      {
-         // the file is empty or has too few delimiters
-         m_lastTestResult = FALSE;
-      }
+      // try first TABs, then commas
+      m_lastTestResult = TestDelimiter('\t') || TestDelimiter(',');
    }
 
    return m_lastTestResult;
@@ -312,7 +306,7 @@ bool AdbTextImporter::ImportEntry(const String& path,
       State,
       Email,
       Title,
-      Unknown,      // this field is always empty, asm uch as I try...
+      Unknown,      // this field is always empty, as much as I try...
       Address,
       Zip,
       Country,
