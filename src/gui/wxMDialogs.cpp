@@ -2066,22 +2066,28 @@ bool PickXFaceDialog(ProfileBase *profile, wxWindow *parent)
 extern
 void CheckExpungeDialog(ASMailFolder *mf, wxWindow *parent)
 {
-   /// For all non-NNTP folders, check if the user wants to
-   /// auto-expunge the messages?
-   String msg;
-   msg.Printf(_("Do you want to expunge all deleted messages\n"
-                "in folder '%s'?"),
-              mf->GetName().c_str());
-   if(mf->GetType() != MF_NNTP
-      && mf->GetType() != MF_NEWS
-      && mf->CountMessages(MailFolder::MSG_STAT_DELETED,MailFolder::MSG_STAT_DELETED)
-      && MDialog_YesNoDialog(msg,
-                             parent,
-                             MDIALOG_YESNOTITLE,
-                             true,
-                             mf->GetProfile()->GetName()+"/AutoExpunge"))
+   // For all non-NNTP folders, check if the user wants to auto-expunge the
+   // messages?
+   if( CanDeleteMessagesInFolder(mf->GetType()) )
    {
-      (void) mf->ExpungeMessages();
+      // are there any messages to expunge?
+      if ( mf->CountDeletedMessages() )
+      {
+         String msg;
+         msg.Printf(_("Do you want to expunge all deleted messages\n"
+                      "in folder '%s'?"),
+                    mf->GetName().c_str());
+
+         // the profile key should be relative, so skip the leading slash
+         String profileName = mf->GetProfile()->GetName();
+         String key = ProfileBase::FilterProfileName(profileName.c_str() + 1);
+         key += "/AutoExpunge";
+
+         if ( MDialog_YesNoDialog(msg, parent, MDIALOG_YESNOTITLE, true, key) )
+         {
+            (void) mf->ExpungeMessages();
+         }
+      }
    }
 }
 
@@ -2277,7 +2283,27 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
       }
 
       m_listctrl->SetItem(index, 1, value);
-      m_listctrl->SetItem(index, 2, !folder ? String(_("all folders")) : folder);
+
+      String folderName;
+      if ( !folder )
+      {
+         folderName = _("all folders");
+      }
+      else
+      {
+         // it's a name returned by ProfileBase::FilterProfileName(), so
+         // unfilter it back after removing the leading M_Profiles_ from it
+         if ( !folder.StartsWith("M_Profiles_", &folderName) )
+         {
+            folderName.Printf(_("unknown folder '%s'"), folder.c_str());
+         }
+         else
+         {
+            folderName.Replace("_", "/");
+         }
+      }
+
+      m_listctrl->SetItem(index, 2, folderName);
 
       // and remember the config path in case we'll delete it later
       if ( !!folder )

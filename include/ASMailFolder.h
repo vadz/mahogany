@@ -457,7 +457,7 @@ public:
                       bool subscribed_only = false,
                       const String &reference = "",
                       UserData ud = 0);
-   //@}   
+   //@}
    //@}
    //@}
    /**@name Synchronous Access Functions */
@@ -474,6 +474,13 @@ public:
        @return number of messages
    */
    virtual unsigned long CountMessages(int mask = 0, int value = 0) const = 0;
+   /// return the number of deleted messages in the folder
+   unsigned long CountDeletedMessages()
+   {
+      return CountMessages(MailFolder::MSG_STAT_DELETED,
+                           MailFolder::MSG_STAT_DELETED);
+   }
+
    /** Get the profile.
        @return Pointer to the profile.
    */

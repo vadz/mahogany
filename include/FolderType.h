@@ -286,6 +286,13 @@ inline bool IsFileOrDirFolder(FolderType folderType)
 #endif
       ;
 }
+
+/// can the messages in this folder be deleted by user?
+inline bool CanDeleteMessagesInFolder(FolderType folderType)
+{
+   return folderType != MF_NNTP && folderType != MF_NEWS;
+}
+
 // ----------------------------------------------------------------------------
 // Icon functions: the associated icon for the folder is shown in the folder
 // tree control, folder options dialog &c

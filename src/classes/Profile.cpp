@@ -819,6 +819,7 @@ ProfileBase::FilterProfileName(const String& profileName)
 
    String filteredName;
    size_t len = profileName.Len();
+   filteredName.Alloc(len);
    for ( size_t n = 0; n < len; n++ )
    {
       char ch = profileName[n];
