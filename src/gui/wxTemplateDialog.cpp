@@ -235,6 +235,12 @@ END_EVENT_TABLE()
 
 void TemplateEditor::OnRClick(wxMouseEvent& event)
 {
+   if ( !IsEnabled() )
+   {
+      // don't allow inserting the text into a disabled control
+      return;
+   }
+
    // create the menu if it hadn't been created yet
    CreatePopupMenu();
 
