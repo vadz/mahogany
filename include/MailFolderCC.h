@@ -193,9 +193,13 @@ public:
 
    /** Toggle sending of new mail events.
        @param send if true, send them
+       @param update if true, update internal message count
    */
-   virtual void EnableNewMailEvents(bool send = true)
-      { m_GenerateNewMailEvents = send; }
+   virtual void EnableNewMailEvents(bool send = true, bool update = true)
+      {
+         m_GenerateNewMailEvents = send;
+         m_UpdateMsgCount = update;
+      }
 
    /** Query whether foldre is sending new mail events.
        @return if true, folder sends them
@@ -266,6 +270,8 @@ private:
        Used to supporess new mail events when first opening the folder 
        and when copying to it. */
    bool m_GenerateNewMailEvents;
+   /** Do we want to update the message count? */
+   bool m_UpdateMsgCount;
    /// Path to mailbox
    String   m_MailboxPath;
 

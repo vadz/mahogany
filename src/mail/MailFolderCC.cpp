@@ -353,7 +353,7 @@ MailFolderCC::Ping(void)
 
    if(! mail_ping(m_MailStream))
    {
-      LOGMESSAGE((M_LOG_DEBUG, _("Mailstream for folder '%s' has been closed, trying to reopen it."),
+      DBGMESSAGE(( _("Mailstream for folder '%s' has been closed, trying to reopen it."),
                   GetName().c_str()));
       bool rc = Open();
       if(rc == false)

@@ -210,8 +210,9 @@ public:
 
    /** Toggle sending of new mail events.
        @param send if true, send them
+       @param update if true, update internal message count
    */
-   virtual void EnableNewMailEvents(bool send = true) = 0;
+   virtual void EnableNewMailEvents(bool send = true, bool update = true) = 0;
    /** Query whether folder is sending new mail events.
        @return if true, folder sends them
    */
