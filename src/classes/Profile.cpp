@@ -72,7 +72,7 @@
 #ifdef DEBUG
 #   define   PCHECK() MOcheck(); ASSERT(ms_GlobalConfig)
 #else
-#   define   PCHECK() 
+#   define   PCHECK()
 #endif
 
 /**
@@ -130,7 +130,7 @@ public:
    virtual bool Rename(const String& oldName, const String& newName);
 
    virtual const String & GetName(void) const { return m_ProfileName;}
-   
+
    virtual void SetPath(const String &path)
       {
          PCHECK();
@@ -143,7 +143,7 @@ public:
          PCHECK();
          m_ProfilePath = "";
       }
-   
+
    MOBJECT_DEBUG(Profile)
 
 private:
@@ -166,13 +166,6 @@ private:
 };
 //@}
 
-// ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-// some characters are invalid in the profile name, replace them
-static String FilterProfileName(const String& profileName);
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -185,13 +178,7 @@ void ProfileBase::FlushAll()
 {
    ASSERT(ms_GlobalConfig);
 
-#ifdef OS_UNIX
-   // FIXME! wxFileConfig is too dumb to accept an umaks value or to preserve 
-   // one.
-   mode_t um = umask(0077);
    ms_GlobalConfig->Flush();
-   umask(um);
-#endif // Unix
 }
 
 bool ProfileBase::IsExpandingEnvVars() const
@@ -210,7 +197,7 @@ void ProfileBase::SetExpandEnvVars(bool bDoIt)
     @param type Type of profile to list or PT_Any for all.
     @return a pointer to kbStringList of profile names to be freed by caller.
 */
-static void 
+static void
 ListProfilesHelper(wxConfigBase *config,
                    kbList *list,
                    int type,
@@ -430,7 +417,7 @@ Profile::DeleteGroup(const String & path)
 String
 Profile::readEntry(const String & key, const String & def, bool * found) const
 {
-   PCHECK(); 
+   PCHECK();
 
    ms_GlobalConfig->SetPath(GetName());
 
@@ -446,14 +433,14 @@ Profile::readEntry(const String & key, const String & def, bool * found) const
       ms_GlobalConfig->SetPath("..");
       f = ms_GlobalConfig->Read(keypath,&str, def);
    }
-   if(found) *found = ff; 
+   if(found) *found = ff;
    return str;
 }
 
 long
 Profile::readEntry(const String & key, long def, bool * found) const
 {
-   PCHECK(); 
+   PCHECK();
 
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
@@ -468,14 +455,14 @@ Profile::readEntry(const String & key, long def, bool * found) const
       ms_GlobalConfig->SetPath("..");
       ms_GlobalConfig->Read(keypath,&val,def);
    }
-   if(found) *found = ff; 
+   if(found) *found = ff;
    return val;
 }
 
 bool
 Profile::writeEntry(const String & key, const String & value)
 {
-   PCHECK(); 
+   PCHECK();
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
    if(m_ProfilePath.Length())
@@ -487,7 +474,7 @@ Profile::writeEntry(const String & key, const String & value)
 bool
 Profile::writeEntry(const String & key, long value)
 {
-   PCHECK(); 
+   PCHECK();
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
    if(m_ProfilePath.Length())

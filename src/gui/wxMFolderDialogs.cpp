@@ -35,6 +35,7 @@
 #include <wx/notebook.h>
 #include <wx/persctrl.h>
 
+#include "MDialogs.h"
 #include "MFolderDialogs.h"
 #include "MailFolder.h"
 #include "MFolder.h"
@@ -735,60 +736,62 @@ wxFolderPropertiesPage::UpdateUI(int sel)
 
    SetDefaultValues();
 
+   // if it has user name, it has password as well
+   bool hasPassword = FolderTypeHasUserName((FolderType)selection);
+
+   m_isAnonymous->Enable(hasPassword);
+   // only enable password field if anonymous access is disabled
+   m_password->Enable(hasPassword && !m_isAnonymous->GetValue());
+
    switch ( selection )
    {
-   case MF_IMAP:
-      m_mailboxname->Enable(TRUE); //only difference from POP
-   case MF_POP:
-      m_login->Enable(TRUE);
-      m_password->Enable(TRUE);
-      m_server->Enable(TRUE);
-      m_newsgroup->Enable(FALSE);
-      m_browsePath->Enable(FALSE);
-      break;
+      case MF_IMAP:
+         m_mailboxname->Enable(TRUE); //only difference from POP
+         // fall through
 
-   case MF_NEWS:
-   case MF_NNTP:
-      m_mailboxname->Enable(FALSE);
-      m_login->Enable(FALSE);
-      m_password->Enable(FALSE);
-      m_server->Enable(TRUE);
-      m_newsgroup->Enable(TRUE);
-      m_browsePath->Enable(FALSE);
-      break;
+      case MF_POP:
+         m_login->Enable(TRUE);
+         m_server->Enable(TRUE);
+         m_newsgroup->Enable(FALSE);
+         m_browsePath->Enable(FALSE);
+         break;
 
-   case MF_FILE:
-      m_mailboxname->Enable(FALSE);
-      m_login->Enable(FALSE);
-      m_password->Enable(FALSE);
-      m_server->Enable(FALSE);
-      m_newsgroup->Enable(FALSE);
+      case MF_NEWS:
+      case MF_NNTP:
+         m_mailboxname->Enable(FALSE);
+         m_login->Enable(FALSE);
+         m_server->Enable(TRUE);
+         m_newsgroup->Enable(TRUE);
+         m_browsePath->Enable(FALSE);
+         break;
 
-      // this can not be changed for an already existing folder
-      m_browsePath->Enable(TRUE & m_isCreating);
-      break;
+      case MF_FILE:
+         m_mailboxname->Enable(FALSE);
+         m_login->Enable(FALSE);
+         m_server->Enable(FALSE);
+         m_newsgroup->Enable(FALSE);
 
-   case MF_INBOX:
-      m_mailboxname->Enable(FALSE);
-      m_login->Enable(FALSE);
-      m_password->Enable(FALSE);
-      m_server->Enable(FALSE);
-      m_newsgroup->Enable(FALSE);
+         // this can not be changed for an already existing folder
+         m_browsePath->Enable(TRUE & m_isCreating);
+         break;
 
-      m_browsePath->Enable(FALSE);
-      if ( m_isCreating )
-      {
-         // INBOX folder can't be created by the user
-         enableOk = false;
-      }
-      break;
+      case MF_INBOX:
+         m_mailboxname->Enable(FALSE);
+         m_login->Enable(FALSE);
+         m_server->Enable(FALSE);
+         m_newsgroup->Enable(FALSE);
 
-   default:
-      wxFAIL_MSG("Unexpected folder type.");
+         m_browsePath->Enable(FALSE);
+         if ( m_isCreating )
+         {
+            // INBOX folder can't be created by the user
+            enableOk = false;
+         }
+         break;
+
+      default:
+         wxFAIL_MSG("Unexpected folder type.");
    }
-
-   // only enable password field if anonymous access is disabled
-   m_password->Enable(!m_isAnonymous->GetValue());
 
    dlg->SetMayEnableOk(enableOk);
 }
@@ -818,15 +821,15 @@ wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
 
    if ( FolderTypeHasUserName(typeFolder) )
    {
-      String value = READ_CONFIG(profile,MP_POP_LOGIN);
+      String value = READ_CONFIG(profile,MP_FOLDER_LOGIN);
       if ( !value )
          value = READ_APPCONFIG(MP_USERNAME);
       m_login->SetValue(value);
 
-      m_password->SetValue(strutil_decrypt(READ_CONFIG(profile,MP_POP_PASSWORD)));
+      m_password->SetValue(strutil_decrypt(READ_CONFIG(profile,MP_FOLDER_PASSWORD)));
 
       if ( typeFolder == POP || typeFolder == IMAP )
-         value = READ_CONFIG(profile, MP_POP_HOST);
+         value = READ_CONFIG(profile, MP_FOLDER_HOST);
       else if ( typeFolder == News )
          value = READ_CONFIG(profile, MP_NNTPHOST);
       else
@@ -864,6 +867,54 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    CHECK( !m_dlgCreate || typeFolder != Inbox, false,
           "Ok button should be disabled" );
 
+   // 0th step: verify if the settings are self-consistent
+
+   // folder flags
+   int flags = 0;
+
+   // check that we have the username/password
+   String loginName = m_login->GetValue(),
+          password = m_password->GetValue();
+   bool hasUsername = FolderTypeHasUserName(typeFolder);
+   if ( hasUsername )
+   {
+      // anonymous access?
+      bool anonymous = m_isAnonymous->GetValue() || loginName == "anonymous";
+
+      if ( anonymous )
+         flags |= MF_FLAGS_ANON;
+      else
+      {
+         wxString what,    // what did the user forget to specify
+                  keyname; // for MDialog_YesNoDialog
+         if ( !loginName )
+         {
+            what = _("login name");
+            keyname = "AskLogin";
+         }
+         else if ( !m_password->GetValue() )
+         {
+            what = _("password");
+            keyname = "AskPwd";
+         }
+
+         if ( !!what )
+         {
+            wxString msg;
+            msg.Printf(_("You didn't specify the %s for this folder "
+                         "although it requires one.\n"
+                         "\n"
+                         "Would you like to do it now?"), what.c_str());
+
+            if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
+                                     true, keyname) )
+            {
+               return false;
+            }
+         }
+      }
+   }
+
    // 1st step: create the folder in the MFolder sense. For this we need only
    // the name and the type
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
@@ -897,53 +948,46 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // in the profile
    m_profile->writeEntry(MP_FOLDER_IS_INCOMING, m_isIncoming->GetValue());
 
-   // anonymous access (assume so if no login name given)?
-   String loginName = m_login->GetValue();
-   bool anonymous = m_isAnonymous->GetValue() ||
-                    !loginName || loginName == "anonymous";
-
    String fullname = folder->GetFullName();
    m_profile->DecRef();
    m_profile = ProfileBase::CreateProfile(fullname);
+
+   // common for all folders
+   if ( hasUsername && !(flags & MF_FLAGS_ANON) )
+   {
+      m_profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(password));
+      m_profile->writeEntry(MP_FOLDER_LOGIN, loginName);
+   }
+
+   m_profile->writeEntry(MP_FOLDER_TYPE, typeFolder | flags);
+
    switch ( typeFolder )
    {
-   case POP:
-   case IMAP:
-      // anonymous IMAP access?
-      if( typeFolder == IMAP && anonymous )
-      {
-         m_profile->writeEntry(MP_FOLDER_TYPE, typeFolder | MF_FLAGS_ANON);
-      }
-      else
-      {
-         m_profile->writeEntry(MP_FOLDER_TYPE,typeFolder);
-         m_profile->writeEntry(MP_POP_LOGIN, loginName);
-      }
-
-      m_profile->writeEntry(MP_POP_PASSWORD,
-                            strutil_encrypt(m_password->GetValue()));
-      m_profile->writeEntry(MP_POP_HOST,m_server->GetValue());
-      m_profile->writeEntry(MP_FOLDER_PATH,m_mailboxname->GetValue());
-      break;
-   case MF_NNTP:
-      m_profile->writeEntry(MP_NNTPHOST,m_server->GetValue());
-      m_profile->writeEntry(MP_FOLDER_PATH,m_newsgroup->GetValue());
-      break;
-   case News:
-      m_profile->writeEntry(MP_FOLDER_PATH,m_newsgroup->GetValue());
-      break;
-
-   case File:
-      m_profile->writeEntry(MP_FOLDER_PATH,m_path->GetValue());
-      break;
-
-   case Inbox:
-      if ( !m_dlgCreate )
+      case POP:
+      case IMAP:
+         m_profile->writeEntry(MP_FOLDER_HOST,m_server->GetValue());
+         m_profile->writeEntry(MP_FOLDER_PATH,m_mailboxname->GetValue());
          break;
-      //else: can't create INBOX folder!
 
-   default:
-      wxFAIL_MSG("Unexpected folder type.");
+      case MF_NNTP:
+         m_profile->writeEntry(MP_NNTPHOST,m_server->GetValue());
+         // fall through
+
+      case News:
+         m_profile->writeEntry(MP_FOLDER_PATH,m_newsgroup->GetValue());
+         break;
+
+      case File:
+         m_profile->writeEntry(MP_FOLDER_PATH,m_path->GetValue());
+         break;
+
+      case Inbox:
+         if ( !m_dlgCreate )
+            break;
+         //else: can't create INBOX folder!
+
+      default:
+         wxFAIL_MSG("Unexpected folder type.");
    }
 
    if ( m_dlgCreate )

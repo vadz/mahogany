@@ -238,11 +238,11 @@
 /// show BCC field in message composition?
 #define   MP_SHOWBCC         "ShowBCC"
 /// hostname for mailbox
-#define   MP_POP_HOST      "HostName"
+#define   MP_FOLDER_HOST      "HostName"
 /// login for mailbox
-#define   MP_POP_LOGIN      "Login"
+#define   MP_FOLDER_LOGIN      "Login"
 /// password for mailbox
-#define   MP_POP_PASSWORD      "Password"
+#define   MP_FOLDER_PASSWORD      "Password"
 /// log level
 #define   MP_LOGLEVEL      "LogLevel"
 /// add extra headers
@@ -556,11 +556,11 @@
 /// show BCC field in message composition?
 #define   MP_SHOWBCC_D         1
 /// hostname for mailbox
-#define   MP_POP_HOST_D      "localhost"
+#define   MP_FOLDER_HOST_D      "localhost"
 /// login for mailbox
-#define   MP_POP_LOGIN_D      M_EMPTYSTRING
+#define   MP_FOLDER_LOGIN_D      M_EMPTYSTRING
 /// passwor for mailbox
-#define   MP_POP_PASSWORD_D      M_EMPTYSTRING
+#define   MP_FOLDER_PASSWORD_D      M_EMPTYSTRING
 /// log level
 #define   MP_LOGLEVEL_D         0l
 /// add extra headers
@@ -759,4 +759,4 @@
 #define   LOCK_PREFIX         "M-lock"
 
 //@}
-#endif
+#endif // MDEFAULTS_H

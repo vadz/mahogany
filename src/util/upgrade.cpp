@@ -260,9 +260,9 @@ UpgradeFrom010()
          MP_FOLDER_TYPE_D)
       {
          p2 = ProfileBase::CreateProfile(group);
-         pw = p2->readEntry(MP_POP_PASSWORD, MP_POP_PASSWORD_D);
+         pw = p2->readEntry(MP_FOLDER_PASSWORD, MP_FOLDER_PASSWORD_D);
          if(pw.Length()) // only if we have a password
-            p2->writeEntry(MP_POP_PASSWORD, strutil_encrypt(pw));
+            p2->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pw));
          p2->DecRef();
          p->ResetPath();
       }
@@ -318,8 +318,8 @@ UpgradeFrom010()
          p2->writeEntry(entry, value);
          wxLogDebug("converted entry '%s'='%s'", entry.c_str(), value.c_str());
       }
-      pw = p2->readEntry(MP_POP_PASSWORD, MP_POP_PASSWORD_D);
-      p2->writeEntry(MP_POP_PASSWORD, strutil_encrypt(pw));
+      pw = p2->readEntry(MP_FOLDER_PASSWORD, MP_FOLDER_PASSWORD_D);
+      p2->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pw));
       p2->DecRef();
       p->ResetPath();
       //FIXME causes assert in wxConfig code p->DeleteGroup(group);

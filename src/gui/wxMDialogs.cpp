@@ -987,8 +987,8 @@ wxPEP_Folder::TransferDataFromWindow(void)
 
    if ( FolderTypeHasUserName(type) )
    {
-      m_Profile->writeEntry(MP_POP_LOGIN,m_UserIdTextCtrl->GetValue());
-      m_Profile->writeEntry(MP_POP_PASSWORD, strutil_encrypt(m_PasswordTextCtrl->GetValue()));
+      m_Profile->writeEntry(MP_FOLDER_LOGIN,m_UserIdTextCtrl->GetValue());
+      m_Profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(m_PasswordTextCtrl->GetValue()));
    }
 
    // if we return FALSE, it means that entered data is invalid and the dialog
@@ -1013,8 +1013,8 @@ wxPEP_Folder::TransferDataToWindow(void)
    m_UpdateIntervalTextCtrl->SetValue(strutil_ltoa(READ_CONFIG(m_Profile,MP_UPDATEINTERVAL)));
    if ( FolderTypeHasUserName(type) )
    {
-      m_UserIdTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_POP_LOGIN));
-      m_PasswordTextCtrl->SetValue(strutil_encrypt(READ_CONFIG(m_Profile,MP_POP_PASSWORD)));
+      m_UserIdTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_FOLDER_LOGIN));
+      m_PasswordTextCtrl->SetValue(strutil_encrypt(READ_CONFIG(m_Profile,MP_FOLDER_PASSWORD)));
    }
    UpdateUI();
 

@@ -28,7 +28,7 @@
 #   include "MailFolder.h"
 #   include "Message.h"
 
-#   include "wx/confbase.h"
+#   include <wx/confbase.h>
 #endif
 
 #ifdef USE_PYTHON

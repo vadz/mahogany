@@ -43,7 +43,7 @@ MailFolder::OpenFolder(int typeAndFlags,
    String login, passwd, name, server;
    FolderType type = GetFolderType(typeAndFlags);
    int flags = GetFolderFlags(typeAndFlags);
-   
+
    if ( type == MF_PROFILE || type == MF_PROFILE_OR_FILE )
    {
       profile = ProfileBase::CreateProfile(i_name, parentProfile);
@@ -59,8 +59,8 @@ MailFolder::OpenFolder(int typeAndFlags,
       {
          type = GetFolderType(typeflags);
          flags = GetFolderFlags(typeflags);
-         login = READ_CONFIG(profile, MP_POP_LOGIN);
-         passwd = strutil_decrypt(READ_CONFIG(profile, MP_POP_PASSWORD));
+         login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
+         passwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
          name = READ_CONFIG(profile, MP_FOLDER_PATH);
          if(strutil_isempty(name))
             name = i_name;
@@ -70,13 +70,13 @@ MailFolder::OpenFolder(int typeAndFlags,
    {
       profile = ProfileBase::CreateEmptyProfile(parentProfile);
       CHECK(profile, NULL, "can't create profile");   // return if it fails
-      
+
       server = i_server;
       name = i_name;
       passwd = i_passwd;
       login = i_login;
    }
-   
+
    switch( type )
    {
       case MF_NNTP:
@@ -96,11 +96,11 @@ MailFolder::OpenFolder(int typeAndFlags,
       case MF_POP:
       case MF_IMAP:
          if(strutil_isempty(server))
-            server = READ_CONFIG(profile, MP_POP_HOST);
+            server = READ_CONFIG(profile, MP_FOLDER_HOST);
          if(strutil_isempty(login))
-            login = READ_CONFIG(profile, MP_POP_LOGIN);
+            login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
          if(strutil_isempty(passwd))
-            passwd = strutil_decrypt(READ_CONFIG(profile, MP_POP_PASSWORD));
+            passwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
          if(strutil_isempty(name))
             name = READ_CONFIG(profile, MP_FOLDER_PATH);
          break;
@@ -133,7 +133,7 @@ MailFolder::OpenFolder(int typeAndFlags,
          return NULL;
       }
    }
-   
+
    // FIXME calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
    typeAndFlags = CombineFolderTypeAndFlags(type, flags);
 
@@ -147,15 +147,15 @@ MailFolder::OpenFolder(int typeAndFlags,
    return mf;
 }
 
-/* static */ String 
+/* static */ String
 MailFolder::ConvertMessageStatusToString(int status)
 {
    String strstatus = "";
-   
+
    if(status & MSG_STAT_RECENT)
    {
       if(status & MSG_STAT_SEEN)
-         strstatus << 'R'; // seen but not read -->RECENT 
+         strstatus << 'R'; // seen but not read -->RECENT
       else
          strstatus << 'N'; // not seen yet  --> really new
    }
@@ -171,7 +171,7 @@ MailFolder::ConvertMessageStatusToString(int status)
 /*-------------------------------------------------------------------*
  * Higher level functionality, nothing else depends on this.
  *-------------------------------------------------------------------*/
- 
+
 
 #include "wx/dynarray.h"
 #include "gui/wxComposeView.h"
@@ -188,7 +188,7 @@ MailFolder::SaveMessages(const INTARRAY *selections,
       i;
    MailFolder
       *mf;
-   
+
    if(strutil_isempty(folderName))
       return false;
 
@@ -272,7 +272,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
 
 void
 MailFolder::ReplyMessages(const INTARRAY *selections,
-                          MWindow *parent, 
+                          MWindow *parent,
                           ProfileBase *profile)
 {
    int i,np,p;
@@ -334,7 +334,7 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
       references << messageid;
       cv->AddHeaderEntry("In-Reply-To",messageid);
       cv->AddHeaderEntry("References",references);
-      
+
       SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
       SafeDecRef(msg);
    }
