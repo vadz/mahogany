@@ -63,7 +63,11 @@ b) RPM
      to contain extra arguments to pass to M configure (e.g. --with-wxdir or
      --with-ssl and, when using static wxWindows, --with-modules=dynamic!)
 
-c) DEB: ???
+c) DEB
+
+Under Debian. unpack the tarball from (a), go inside it and do
+"fakeroot ./debian/rules binary", this will create the .deb.
+You may set CONFIG_FLAGS to contain any extra configure arguments.
 
 d) Win32 binaries: build with debug info, save the PDB and MAP files
 
