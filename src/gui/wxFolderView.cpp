@@ -316,13 +316,11 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
 
-#if 0
    //FIXME: is this needed? I thought OnSelected() should do it?
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
    const HeaderInfo *hi = (*hil)[event.m_itemIndex];
    m_FolderView->PreviewMessage(hi->GetUId());
    hil->DecRef();
-#endif
 }
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
