@@ -66,6 +66,9 @@ enum CacheFileFormat
    CacheFile_Max
 };
 
+// trace mask for logging MfStatusCache methods
+#define M_TRACE_MFSTATUSCACHE "statuscache"
+
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
@@ -157,8 +160,11 @@ bool MfStatusCache::GetStatus(const String& folderName,
    CHECK( status, false, "NULL pointer in MfStatusCache::GetStatus" );
 
    int n = m_folderNames.Index(folderName);
-   if ( n == wxNOT_FOUND )
+   if ( n == wxNOT_FOUND || !m_folderData[(size_t)n]->IsValid() )
+   {
+      // no status or at least no valid status
       return false;
+   }
 
    *status = *m_folderData[(size_t)n];
 
@@ -173,6 +179,9 @@ void MfStatusCache::UpdateStatus(const String& folderName,
    int n = m_folderNames.Index(folderName);
    if ( n == wxNOT_FOUND )
    {
+      wxLogTrace(M_TRACE_MFSTATUSCACHE, "Added status for '%s' (%lu msgs)",
+                 folderName.c_str(), status.total);
+
       // add it
       n = m_folderNames.Add(folderName);
       m_folderData.Insert(new MailFolderStatus, (size_t)n);
@@ -185,6 +194,9 @@ void MfStatusCache::UpdateStatus(const String& folderName,
          // no, avoid sending the event below
          return;
       }
+
+      wxLogTrace(M_TRACE_MFSTATUSCACHE, "Changed status for '%s' (%lu msgs)",
+                 folderName.c_str(), status.total);
    }
 
    // update
@@ -197,11 +209,17 @@ void MfStatusCache::UpdateStatus(const String& folderName,
 
 void MfStatusCache::InvalidateStatus(const String& folderName)
 {
+   wxLogTrace(M_TRACE_MFSTATUSCACHE, "Invalidated status for '%s'",
+              folderName.c_str());
+
    int n = m_folderNames.Index(folderName);
    if ( n != wxNOT_FOUND )
    {
-      m_folderNames.RemoveAt((size_t)n);
-      m_folderData.RemoveAt((size_t)n);
+      // don't remove it because chances are that an UpdateStatus() for the
+      // same folder will follow soon (as we typically invalidate the status
+      // when noticing new mail in the folder and then update it as soon as we
+      // know how many new messages we have got) but just invalidate for now
+      m_folderData[(size_t)n]->total = UID_ILLEGAL;
 
       m_isDirty = true;
    }
@@ -432,7 +450,7 @@ bool MfStatusCache::Save(const String& filename)
       // write data
       for ( size_t n = 0; ok && (n < count); n++ )
       {
-         MailFolderStatus *status = m_folderData[n];
+         const MailFolderStatus *status = m_folderData[n];
 
          // double all delimiters in the folder name
          name = m_folderNames[n];
