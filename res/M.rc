@@ -1,0 +1,53 @@
+unknown 	ICON	"unknown.ico"
+txt		ICON	"txt.ico"
+audio		ICON	"audio.ico"
+application	ICON	"application.ico"
+image		ICON	"image.ico"
+video		ICON	"video.ico"
+postscript	ICON	"postscript.ico"
+dvi		ICON	"dvi.ico"
+
+MainFrame	ICON	"mainframe.ico"
+MFrame		ICON	"mframe.ico"
+adbedit 	ICON	"adbedit.ico"
+
+tb_book_open	BITMAP	"tb_book_open.bmp"
+tb_close	BITMAP	"tb_close.bmp"
+tb_exit		BITMAP	"tb_exit.bmp"
+tb_help		BITMAP	"tb_help.bmp"
+tb_mail		BITMAP  "tb_mail.bmp"
+tb_mail_compose	BITMAP	"tb_mail_compose.bmp"
+tb_mail_forward	BITMAP	"tb_mail_forward.bmp"
+tb_mail_reply	BITMAP	"tb_mail_reply.bmp"
+tb_open		BITMAP	"tb_open.bmp"
+tb_paste	BITMAP	"tb_paste.bmp"
+tb_preferences	BITMAP	"tb_preferences.bmp"
+tb_print	BITMAP	"tb_print.bmp"
+tb_refresh	BITMAP	"tb_refresh.bmp"
+tb_trash	BITMAP	"tb_trash.bmp"
+tb_new		BITMAP	"tb_new.bmp"
+tb_mail_send	BITMAP	"tb_mail_send.bmp"
+
+// ADB tree ctrl image list (16x16) bitmaps
+address	BITMAP "address.bmp"
+book	BITMAP "book.bmp"
+library	BITMAP "library.bmp"
+closed	BITMAP "closed.bmp"
+opened	BITMAP "opened.bmp"	
+
+// ADB notebook image list (32x32)
+general BITMAP "general.bmp"
+email   BITMAP "email.bmp"
+home    BITMAP "home.bmp"
+work    BITMAP "work.bmp"
+
+// ADB toolbar images (16x15)
+open	BITMAP "open.bmp"
+new	BITMAP "new.bmp"
+delete	BITMAP "delete.bmp"
+undo	BITMAP "undo.bmp"
+lookup	BITMAP "lookup.bmp"
+help	BITMAP "help.bmp"
+
+#include "wx/msw/wx.rc"
+
