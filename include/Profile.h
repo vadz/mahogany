@@ -125,8 +125,8 @@ public:
    /// Delete the global config object
    static void DeleteGlobalConfig();
 
-   /// Flush all (disk-based) profiles now
-   static void FlushAll();
+   /// Flush all (disk-based) profiles now, return true if ok, false on error
+   static bool FlushAll();
 
    /// some characters are invalid in the profile name, replace them
    static String FilterProfileName(const String& profileName);

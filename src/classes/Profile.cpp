@@ -1205,10 +1205,9 @@ wxArrayString Profile::GetAllGroupsUnder(const String& path)
 // other Profile methods
 // ----------------------------------------------------------------------------
 
-void Profile::FlushAll()
+bool Profile::FlushAll()
 {
-   if ( gs_allConfigSources )
-      gs_allConfigSources->FlushAll();
+   return gs_allConfigSources ? gs_allConfigSources->FlushAll() : true;
 }
 
 String Profile::ExpandEnvVarsIfNeeded(const String& val) const
