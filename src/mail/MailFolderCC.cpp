@@ -717,7 +717,8 @@ MailFolderCC::BuildListing(void)
 
       delete [] messageIDs;
    }
-   m_OldNumOfMessages = m_NumOfMessages;
+   if(m_UpdateMsgCount) // this will suppress more new mail events
+      m_OldNumOfMessages = m_NumOfMessages;
    m_UpdateNeeded = false;
 }
 
@@ -1008,9 +1009,9 @@ MailFolderCC::mm_log(String str, long errflg )
    msg << _(" error level: ") << strutil_ultoa(errflg);
 #endif
    if(errflg)
-      LOGMESSAGE((M_LOG_VERBOSE, Str(msg)));
-   else
       INFOMESSAGE((msg));
+   else
+      LOGMESSAGE((M_LOG_VERBOSE, Str(msg)));
    const char *unexpected = "Unexpected change";
    if(strstr(str,unexpected) != NULL)
    {

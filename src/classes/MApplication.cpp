@@ -92,7 +92,7 @@ public:
    bool OnVisitFolder(const wxString& folderName)
       {
          MFolder *f = MFolder::Get(folderName);
-         if(f->GetFlags() & MF_FLAGS_INCOMING)
+         if(f && f->GetFlags() & MF_FLAGS_INCOMING)
          {
             wxLogDebug("Found incoming folder '%s'.",
                        folderName.c_str());
@@ -102,7 +102,7 @@ public:
             e->m_folder = mf;
             m_list->push_back(e);
          }
-         f->DecRef();
+         if(f)f->DecRef();
          return true;
       }
 
@@ -151,7 +151,7 @@ MailCollector::Collect(MailFolder *mf)
    bool rc = true;
    if(m_NewMailFolder)
    {
-      m_NewMailFolder->EnableNewMailEvents(false);
+      m_NewMailFolder->EnableNewMailEvents(false,false);
       m_NewMailFolder->Ping();
    }
 
@@ -165,7 +165,7 @@ MailCollector::Collect(MailFolder *mf)
       rc = CollectOneFolder(mf);
    if(m_NewMailFolder)
    {
-      m_NewMailFolder->EnableNewMailEvents(true);
+      m_NewMailFolder->EnableNewMailEvents(true,true);
       m_NewMailFolder->Ping();
    }
    return rc;
@@ -180,7 +180,9 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    m_IsCollecting = true;
    wxLogDebug(_("Auto-collecting mail from incoming folder '%s'."),
                 mf->GetName().c_str());
+   long oldcount = m_NewMailFolder->CountMessages();
    bool sendsEvents = mf->SendsNewMailEvents();
+   mf->EnableNewMailEvents(false,true);
    mf->Ping(); //update it
    INTARRAY selections;
 
@@ -201,6 +203,22 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    }
    else
       rc = false;
+   long i = 0;
+   String seq;
+   for(hi = m_NewMailFolder->GetFirstHeaderInfo();
+       hi;
+       hi = m_NewMailFolder->GetNextHeaderInfo(hi))
+   {
+      if(i >= oldcount)
+      {
+         if(seq.Length()) seq << ',';
+         seq << strutil_ultoa(hi->GetUId());
+      }
+      i++;
+   }
+   // mark new messages as new:
+   m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
+   m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
    mf->EnableNewMailEvents(sendsEvents);
    m_IsCollecting = false;
    return rc;
