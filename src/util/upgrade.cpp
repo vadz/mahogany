@@ -110,6 +110,7 @@ extern const MOption MP_LICENSE_ACCEPTED;
 extern const MOption MP_MAINFOLDER;
 extern const MOption MP_MBOXDIR;
 extern const MOption MP_MODULES;
+extern const MOption MP_MOVE_NEWMAIL;
 extern const MOption MP_NET_CONNECTION;
 extern const MOption MP_NET_OFF_COMMAND;
 extern const MOption MP_NET_ON_COMMAND;
@@ -237,6 +238,9 @@ struct InstallWizardData
           smtp,
           nntp;
 
+   // POP3 server option
+   bool leaveOnServer;
+
    // operations page:
 #ifdef USE_DIALUP
    int    useDialUp; // initially -1
@@ -267,7 +271,7 @@ struct InstallWizardData
    String browser;
 #endif // OS_UNIX
 #endif // USE_DIALUP
-   
+
    // did we run the wizard at all?
    bool done;
 
@@ -315,11 +319,11 @@ public:
    virtual InstallWizardPageId GetNextPageId() const;
 
 #ifdef USE_DIALUP
-   // the dial up page should be shown only if this function returns TRUE
+   // the dial up page should be shown only if this function returns true
    static bool ShouldShowDialUpPage();
 #endif // USE_DIALUP
 
-   // the import page should be shown only if this function returns TRUE
+   // the import page should be shown only if this function returns true
    static bool ShouldShowImportPage();
 
    // implement the wxWizardPage pure virtuals in terms of our ones
@@ -388,7 +392,7 @@ public:
       m_name->SetValue(gs_installWizardData.name);
       m_email->SetValue(gs_installWizardData.email);
 
-      return TRUE;
+      return true;
    }
 
    virtual bool TransferDataFromWindow()
@@ -400,10 +404,10 @@ public:
          wxLogError(_("Please specify a valid email address."));
          m_email->SetFocus();
 
-         return FALSE;
+         return false;
       }
 
-      return TRUE;
+      return true;
    }
 
 private:
@@ -416,130 +420,23 @@ class InstallWizardServersPage : public InstallWizardPage
 public:
    InstallWizardServersPage(wxWizard *wizard);
 
-   virtual bool TransferDataFromWindow()
-      {
-         gs_installWizardData.pop  = m_pop->GetValue();
-         gs_installWizardData.imap = m_imap->GetValue();
-         gs_installWizardData.smtp = m_smtp->GetValue();
-         gs_installWizardData.nntp = m_nntp->GetValue();
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
 
-         if ( gs_installWizardData.smtp.empty() )
-         {
-#ifdef OS_UNIX
-            // we could use an MTA under Unix instead...
-            wxLogWarning(_("You will need to specify the MTA to use for "
-                           "mail delivery later to be able to send email "
-                           "as you didn't choose the SMTP server."));
-#else // !Unix
-            wxLogError(_("You need to specify the SMTP server to be able "
-                         "to send email, please do it!"));
-            return FALSE;
-#endif // Unix/!Unix
-         }
+protected:
+   void AddDomain(wxString& server, const wxString& domain);
 
-#ifdef USE_DNS
-         // check all the hostnames unless we use dial up - we can't call
-         // MApp::IsOnline() here yet because this stuff is not yet
-         // configured, so use wxDialUpManager directly
-         wxDialUpManager *dialupMan =
-                  ((wxMApp *)mApplication)->GetDialUpManager();
-         if ( dialupMan->IsOnline() )
-         {
-            String check, tmp;
-            int failed = 0;
-            if( !CheckHostName(gs_installWizardData.pop) )
-            {
-               failed++;
-               tmp.Printf(_("POP3 server '%s'.\n"),
-                          gs_installWizardData.pop.c_str());
-               check += tmp;
-            }
-            if( !CheckHostName(gs_installWizardData.smtp) )
-            {
-               failed++;
-               tmp.Printf(_("SMTP server '%s'.\n"),
-                          gs_installWizardData.smtp.c_str());
-               check += tmp;
-            }
-            if( !CheckHostName(gs_installWizardData.imap) )
-            {
-               failed++;
-               tmp.Printf(_("IMAP server '%s'.\n"),
-                          gs_installWizardData.imap.c_str());
-               check += tmp;
-            }
-            if( !CheckHostName(gs_installWizardData.nntp) )
-            {
-               failed++;
-               tmp.Printf(_("NNTP server '%s'.\n"),
-                          gs_installWizardData.nntp.c_str());
-               check += tmp;
-            }
-            if(failed)
-            {
-               tmp.Printf(_("%d of the server names specified could not\n"
-                            "be resolved. This could be due to a temporary\n"
-                            "network problem, or because the server name really\n"
-                            "does not exist. If you use dialup-networking and\n"
-                            "are not currently connected, this is perfectly normal.\n"
-                            "The failed server name(s) were:\n"),
-                          failed);
-               check = tmp + check;
-               check += _("\nDo you want to change these settings?");
-               if( MDialog_YesNoDialog(check,this,
-                                       _("Potentially wrong server names"),
-                                       TRUE, NULL) )
-                  return FALSE;
-            }
-         }
-#endif // USE_DNS
-
-         return TRUE;
-      }
-
-   virtual bool TransferDataToWindow()
-      {
-         // use the user email address as the default domain for the servers -
-         // this i not ideal but has the best chance to work
-         wxString domain = gs_installWizardData.email.AfterFirst('@');
-         if ( !domain.empty() )
-         {
-            AddDomain(gs_installWizardData.pop, domain);
-            AddDomain(gs_installWizardData.imap, domain);
-            AddDomain(gs_installWizardData.smtp, domain);
-            AddDomain(gs_installWizardData.nntp, domain);
-         }
-
-         m_pop->SetValue(gs_installWizardData.pop);
-         m_imap->SetValue(gs_installWizardData.imap);
-         m_smtp->SetValue(gs_installWizardData.smtp);
-         m_nntp->SetValue(gs_installWizardData.nntp);
-         return TRUE;
-      }
-
-   void AddDomain(wxString& server, const wxString& domain)
-      {
-         // don't add the domain to the host names which already contain it
-         // and for the empty host names
-         if ( !server || server.Find('.') != wxNOT_FOUND )
-            return;
-
-#if 0 // VZ: this is annoying! either don't do it all or do without asking
-         wxString msg;
-         msg.Printf(_("You have no domain specified for the server '%s'.\n"
-                      "Do you want to add the domain '%s'?"),
-                    server.c_str(), domain.c_str());
-         if(MDialog_YesNoDialog(msg,this, MDIALOG_YESNOTITLE, TRUE))
-#endif // 0
-
-         server << '.' << domain;
-      }
+   void OnText(wxCommandEvent& event);
 
 private:
    wxTextCtrl *m_pop,
               *m_imap,
               *m_smtp,
               *m_nntp;
+
+   wxCheckBox *m_leaveOnServer;
+
+   DECLARE_EVENT_TABLE()
 };
 
 #ifdef USE_DIALUP
@@ -558,7 +455,7 @@ public:
       gs_installWizardData.hangupCommand = m_disconnect->GetValue();
 #endif // platform
 
-      return TRUE;
+      return true;
    }
 
    virtual bool TransferDataToWindow()
@@ -570,7 +467,7 @@ public:
       m_disconnect->SetValue(gs_installWizardData.hangupCommand);
 #endif // platform
 
-      return TRUE;
+      return true;
    }
 
 private:
@@ -600,7 +497,7 @@ public:
             // release version after returning from IsAlwaysOnline(): I
             // strongly suspect an optimizer bug (it doesn't happen without
             // optimizations) but I can't fix it right now otherwise
-            gs_installWizardData.useDialUp = FALSE;
+            gs_installWizardData.useDialUp = false;
 #else // !Win
             wxDialUpManager *dialupMan =
                   ((wxMApp *)mApplication)->GetDialUpManager();
@@ -629,7 +526,7 @@ public:
          m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail != 0);
 #endif // USE_INBOX
 
-         return TRUE;
+         return true;
       }
 
    virtual bool TransferDataFromWindow()
@@ -650,7 +547,7 @@ public:
          gs_installWizardData.collectAllMail = m_CollectCheckbox->GetValue();
 #endif // USE_INBOX
 
-         return TRUE;
+         return true;
       }
 private:
    wxChoice *m_FolderTypeChoice;
@@ -753,7 +650,7 @@ bool InstallWizardPage::ShouldShowImportPage()
 InstallWizardPageId InstallWizardPage::GetPrevPageId() const
 {
    int id = m_id - 1;
-   if ( 
+   if (
 #ifdef USE_DIALUP
         (id == InstallWizard_DialUpPage && !ShouldShowDialUpPage()) ||
 #endif // USE_DIALUP
@@ -847,10 +744,10 @@ wxEnhancedPanel *InstallWizardPage::CreateEnhancedPanel(wxStaticText *text)
 //   wxSize sizePage = ((wxWizard *)GetParent())->GetSize();
    wxCoord y = sizeLabel.y + 2*LAYOUT_Y_MARGIN;
 
-   wxEnhancedPanel *panel = new wxEnhancedPanel(this, TRUE /* scrolling */);
+   wxEnhancedPanel *panel = new wxEnhancedPanel(this, true /* scrolling */);
    panel->SetSize(0, y, sizePage.x, sizePage.y - y);
 
-   panel->SetAutoLayout(TRUE);
+   panel->SetAutoLayout(true);
 
    return panel;
 }
@@ -986,15 +883,17 @@ InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
 // InstallWizardServersPage
 // ----------------------------------------------------------------------------
 
+BEGIN_EVENT_TABLE(InstallWizardServersPage, InstallWizardPage)
+   EVT_TEXT(-1, InstallWizardServersPage::OnText)
+END_EVENT_TABLE()
+
 InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
                         : InstallWizardPage(wizard, InstallWizard_ServersPage)
 {
    wxStaticText *text = new wxStaticText(this, -1, _(
-      "You can receive e-mail from remote mail\n"
-      "servers using either POP3 or IMAP4 protocols\n"
-      "but you usually need only one of them\n"
-      "(IMAP is more secure and much more efficient,\n"
-      "so please use it if you can).\n"
+      "You need an IMAP4 (preferred) or a POP3 server\n"
+      "to be able to receieve email and an SMTP server\n"
+      "to be able to send it.\n"
       "\n"
       "All of these fields may be filled later as well\n"
       "and you may add additional servers later too.\n"
@@ -1005,19 +904,153 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
 
    wxArrayString labels;
-   labels.Add(_("&POP server:"));
    labels.Add(_("&IMAP server:"));
+   labels.Add(_("&POP server:"));
+   labels.Add(_("&Leave mail on it:"));
    labels.Add(_("&SMTP server:"));
    labels.Add(_("&NNTP server:"));
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
-   m_pop = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
-   m_imap = panel->CreateTextWithLabel(labels[1], widthMax, m_pop);
-   m_smtp = panel->CreateTextWithLabel(labels[2], widthMax, m_imap);
-   m_nntp = panel->CreateTextWithLabel(labels[3], widthMax, m_smtp);
+   m_imap = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
+   m_pop = panel->CreateTextWithLabel(labels[1], widthMax, m_imap);
+   m_leaveOnServer = panel->CreateCheckBox(labels[2], widthMax, m_pop);
+   m_smtp = panel->CreateTextWithLabel(labels[3], widthMax, m_leaveOnServer);
+   m_nntp = panel->CreateTextWithLabel(labels[4], widthMax, m_smtp);
 
    panel->Layout();
+}
+
+bool InstallWizardServersPage::TransferDataToWindow()
+{
+   // use the user email address as the default domain for the servers -
+   // this i not ideal but has the best chance to work
+   wxString domain = gs_installWizardData.email.AfterFirst('@');
+   if ( !domain.empty() )
+   {
+      AddDomain(gs_installWizardData.pop, domain);
+      AddDomain(gs_installWizardData.imap, domain);
+      AddDomain(gs_installWizardData.smtp, domain);
+      AddDomain(gs_installWizardData.nntp, domain);
+   }
+
+   m_pop->SetValue(gs_installWizardData.pop);
+   m_imap->SetValue(gs_installWizardData.imap);
+   m_smtp->SetValue(gs_installWizardData.smtp);
+   m_nntp->SetValue(gs_installWizardData.nntp);
+
+   return true;
+}
+
+bool InstallWizardServersPage::TransferDataFromWindow()
+{
+   gs_installWizardData.imap = m_imap->GetValue();
+   gs_installWizardData.pop  = m_pop->GetValue();
+   gs_installWizardData.leaveOnServer = m_leaveOnServer->GetValue();
+   gs_installWizardData.smtp = m_smtp->GetValue();
+   gs_installWizardData.nntp = m_nntp->GetValue();
+
+   if ( gs_installWizardData.smtp.empty() )
+   {
+#ifdef OS_UNIX
+      // we could use an MTA under Unix instead...
+      wxLogWarning(_("You will need to specify the MTA to use for "
+                     "mail delivery later to be able to send email "
+                     "as you didn't choose the SMTP server."));
+#else // !Unix
+      wxLogError(_("You need to specify the SMTP server to be able "
+                   "to send email, please do it!"));
+      return false;
+#endif // Unix/!Unix
+   }
+
+#ifdef USE_DNS
+   // check all the hostnames unless we use dial up - we can't call
+   // MApp::IsOnline() here yet because this stuff is not yet
+   // configured, so use wxDialUpManager directly
+   wxDialUpManager *dialupMan =
+            ((wxMApp *)mApplication)->GetDialUpManager();
+   if ( dialupMan->IsOnline() )
+   {
+      String check, tmp;
+      int failed = 0;
+      if( !CheckHostName(gs_installWizardData.pop) )
+      {
+         failed++;
+         tmp.Printf(_("POP3 server '%s'.\n"),
+                    gs_installWizardData.pop.c_str());
+         check += tmp;
+      }
+      if( !CheckHostName(gs_installWizardData.smtp) )
+      {
+         failed++;
+         tmp.Printf(_("SMTP server '%s'.\n"),
+                    gs_installWizardData.smtp.c_str());
+         check += tmp;
+      }
+      if( !CheckHostName(gs_installWizardData.imap) )
+      {
+         failed++;
+         tmp.Printf(_("IMAP server '%s'.\n"),
+                    gs_installWizardData.imap.c_str());
+         check += tmp;
+      }
+      if( !CheckHostName(gs_installWizardData.nntp) )
+      {
+         failed++;
+         tmp.Printf(_("NNTP server '%s'.\n"),
+                    gs_installWizardData.nntp.c_str());
+         check += tmp;
+      }
+      if(failed)
+      {
+         tmp.Printf(_("%d of the server names specified could not\n"
+                      "be resolved. This could be due to a temporary\n"
+                      "network problem, or because the server name really\n"
+                      "does not exist. If you use dialup-networking and\n"
+                      "are not currently connected, this is perfectly normal.\n"
+                      "The failed server name(s) were:\n"),
+                    failed);
+         check = tmp + check;
+         check += _("\nDo you want to change these settings?");
+         if( MDialog_YesNoDialog(check,this,
+                                 _("Potentially wrong server names"),
+                                 true, NULL) )
+            return false;
+      }
+   }
+#endif // USE_DNS
+
+   return true;
+}
+
+void
+InstallWizardServersPage::AddDomain(wxString& server, const wxString& domain)
+{
+   // don't add the domain to the host names which already contain it
+   // and for the empty host names
+   if ( !server || server.Find('.') != wxNOT_FOUND )
+      return;
+
+#if 0 // VZ: this is annoying! either don't do it all or do without asking
+   wxString msg;
+   msg.Printf(_("You have no domain specified for the server '%s'.\n"
+                "Do you want to add the domain '%s'?"),
+              server.c_str(), domain.c_str());
+   if(MDialog_YesNoDialog(msg,this, MDIALOG_YESNOTITLE, true))
+#endif // 0
+
+   server << '.' << domain;
+}
+
+void InstallWizardServersPage::OnText(wxCommandEvent& event)
+{
+   if ( event.GetEventObject() == m_pop )
+   {
+      m_leaveOnServer->Enable(!m_pop->GetValue().empty());
+   }
+
+   event.Skip();
 }
 
 #ifdef USE_DIALUP
@@ -1302,7 +1335,7 @@ bool InstallWizardFinalPage::TransferDataToWindow()
       m_checkboxSendTestMsg->SetValue(gs_installWizardData.sendTestMsg);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool InstallWizardFinalPage::TransferDataFromWindow()
@@ -1311,7 +1344,7 @@ bool InstallWizardFinalPage::TransferDataFromWindow()
                                        ? m_checkboxSendTestMsg->GetValue()
                                        : false;
 
-   return TRUE;
+   return true;
 }
 
 #endif // USE_WIZARD
@@ -1394,21 +1427,23 @@ bool RunInstallWizard()
    gs_installWizardData.useOutbox = GetNumericDefault(MP_USE_OUTBOX) != 0;
    gs_installWizardData.useTrash = GetNumericDefault(MP_USE_TRASH_FOLDER) != 0;
 #ifdef USE_INBOX
-   gs_installWizardData.collectAllMail = TRUE;
+   gs_installWizardData.collectAllMail = true;
 #endif // USE_INBOX
    gs_installWizardData.folderType = 0; /* mbx */
 #ifdef USE_PYTHON
    gs_installWizardData.usePython = READ_APPCONFIG_BOOL(MP_USEPYTHON);
 #endif
 #ifdef USE_PISOCK
-   gs_installWizardData.usePalmOs = TRUE;
+   gs_installWizardData.usePalmOs = true;
 #endif
-   gs_installWizardData.sendTestMsg = TRUE;
+   gs_installWizardData.sendTestMsg = true;
 
    gs_installWizardData.pop  = READ_APPCONFIG_TEXT(MP_POPHOST);
    gs_installWizardData.imap = READ_APPCONFIG_TEXT(MP_IMAPHOST);
    gs_installWizardData.smtp = READ_APPCONFIG_TEXT(MP_SMTPHOST);
    gs_installWizardData.nntp = READ_APPCONFIG_TEXT(MP_NNTPHOST);
+
+   gs_installWizardData.leaveOnServer = false;
 
    // assume we don't skip the wizard by default
    gs_installWizardData.done = true;
@@ -1498,6 +1533,11 @@ bool RunInstallWizard()
    profile->writeEntry(MP_IMAPHOST, gs_installWizardData.imap);
    profile->writeEntry(MP_NNTPHOST, gs_installWizardData.nntp);
    profile->writeEntry(MP_SMTPHOST, gs_installWizardData.smtp);
+
+   if ( gs_installWizardData.leaveOnServer )
+   {
+      profile->writeEntry(MP_MOVE_NEWMAIL, false);
+   }
 
    CompleteConfiguration(gs_installWizardData);
 
@@ -1722,7 +1762,7 @@ static int
 CopyEntries(wxConfigBase *src,
             const wxString &from,
             const wxString &to,
-            bool recursive = TRUE,
+            bool recursive = true,
             wxConfigBase *dest = NULL)
 {
    wxString oldPath = src->GetPath();
@@ -1797,7 +1837,7 @@ CopyEntries(wxConfigBase *src,
    {
       size_t
          idx = 0,
-         n = src->GetNumberOfGroups(FALSE);
+         n = src->GetNumberOfGroups(false);
       if(n > 0)
       {
          wxString *groups = new wxString[n];
@@ -1976,7 +2016,7 @@ public:
             profile->writeEntry(MP_POPHOST, hostname);
          }
 
-         return TRUE;
+         return true;
       }
 };
 
@@ -1996,7 +2036,7 @@ UpgradeFrom020()
    //      because the older versions wrote everything to it and it has only
    //      been fixed in 0.21a -- but this seems a bit too complicated
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -2008,7 +2048,7 @@ class TemplateFixFolderTraversal : public MFolderTraversal
 public:
    TemplateFixFolderTraversal(MFolder* folder) : MFolderTraversal(*folder)
    {
-      m_ok = TRUE;
+      m_ok = true;
    }
 
    bool IsOk() const { return m_ok; }
@@ -2072,7 +2112,7 @@ public:
       //else: no custom templates for this folder
 
       // continue with enumeration
-      return TRUE;
+      return true;
    }
 
 private:
@@ -2452,7 +2492,7 @@ Upgrade(const String& fromVersion)
          oldVersion = Version_Unknown;
    }
 
-   bool success = TRUE;
+   bool success = true;
    switch ( oldVersion )
    {
       case Version_None:
@@ -2516,10 +2556,10 @@ Upgrade(const String& fromVersion)
          wxLogError(_("The previously installed version of Mahogany (%s) was "
                       "probably newer than this one. Cannot upgrade."),
                     fromVersion.c_str());
-         return FALSE;
+         return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 
@@ -2679,7 +2719,7 @@ SetReplaceFromOption(const String& folderName)
   and creates them if it doesn't. Also checks that they have the correct flags
   and fixes them if they don't.
 
-  Returns TRUE if ok, FALSE if we failed
+  Returns true if ok, false if we failed
  */
 static bool
 VerifyStdFolders(void)
@@ -2978,7 +3018,7 @@ SetupServers(void)
                                          MF_IMAP,
                                          MF_FLAGS_DEFAULT,
                                          "INBOX",
-                                         FALSE);
+                                         false);
 
          SafeDecRef(imapInbox);
 #endif // 0
@@ -3128,13 +3168,13 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    if ( confirm )
    {
       if ( !READ_APPCONFIG_BOOL(MP_SYNC_REMOTE) )
-         return TRUE; // nothing to do
+         return true; // nothing to do
 
       if (! MDialog_YesNoDialog(
          _("Retrieve remote configuration settings now?"), NULL,
          _("Retrieve remote settings?"), true,
                GetPersMsgBoxName(M_MSGBOX_RETRIEVE_REMOTE) ) )
-           return TRUE;
+           return true;
    }
 
    String foldername = READ_APPCONFIG(MP_SYNC_FOLDER);
@@ -3143,7 +3183,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    {
       wxLogError(_("Folder '%s' for storing remote configuration "
                    "doesn't exist."), foldername.c_str());
-      return FALSE;
+      return false;
    }
 
    MailFolder *mf = MailFolder::OpenFolder(folder);
@@ -3153,7 +3193,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
       wxLogError(_("Please check that the folder '%s' where the remote "
                    "configuration is stored exists."), foldername.c_str());
 
-      return FALSE;
+      return false;
    }
 
    unsigned long nMessages = mf->GetMessageCount();
@@ -3169,12 +3209,12 @@ bool RetrieveRemoteConfigSettings(bool confirm)
               "If this mailbox is the correct one, please remove\n"
               "the extra messages and try again."), mf->GetName().c_str());
       mf->DecRef();
-      return FALSE;
+      return false;
    }
    HeaderInfoList *hil = mf->GetHeaders();
    Message * msg = mf->GetMessage( (*hil)[0]->GetUId() );
    if( msg == NULL)
-      return FALSE; // what happened?
+      return false; // what happened?
    if(msg->Subject() != M_SYNCMAIL_SUBJECT)
    {
       wxLogError(
@@ -3184,7 +3224,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
       mf->DecRef();
       msg->DecRef();
       hil->DecRef();
-      return FALSE;
+      return false;
    }
 
    wxString msgText = msg->FetchText();
@@ -3279,23 +3319,23 @@ bool SaveRemoteConfigSettings(bool confirm)
    if ( confirm )
    {
       if ( !READ_APPCONFIG_BOOL(MP_SYNC_REMOTE) )
-         return TRUE; // nothing to do
+         return true; // nothing to do
 
       if (! MDialog_YesNoDialog(
          _("Store remote configuration settings now?"), NULL,
          _("Store remote settings?"), true,
                GetPersMsgBoxName(M_MSGBOX_STORE_REMOTE) ) )
-           return TRUE;
+           return true;
    }
 
    MFolder_obj folderSync(READ_APPCONFIG(MP_SYNC_FOLDER));
    if ( !folderSync )
-      return FALSE;
+      return false;
 
    MailFolder *mf = MailFolder::OpenFolder(folderSync);
 
    if(! mf)
-      return FALSE;
+      return false;
 
    unsigned long nMessages = mf->GetMessageCount();
    if( nMessages > 1 )
@@ -3306,7 +3346,7 @@ bool SaveRemoteConfigSettings(bool confirm)
            "If this mailbox is the correct one, please remove\n"
            "the extra messages and try again."), mf->GetName().c_str());
       mf->DecRef();
-      return FALSE;
+      return false;
    }
    // If we have information stored there, delete it:
    if( nMessages != 0 )
@@ -3316,7 +3356,7 @@ bool SaveRemoteConfigSettings(bool confirm)
       time_t storedDate = (*hil)[0]->GetDate();
       hil->DecRef();
       if( msg == NULL)
-         return FALSE; // what happened?
+         return false; // what happened?
       if(msg->Subject() != M_SYNCMAIL_SUBJECT)
       {
          wxLogError(
@@ -3325,7 +3365,7 @@ bool SaveRemoteConfigSettings(bool confirm)
             mf->GetName().c_str());
          mf->DecRef();
          msg->DecRef();
-         return FALSE;
+         return false;
       }
       if(gs_RemoteSyncDate != 0 &&
          storedDate > gs_RemoteSyncDate)
@@ -3341,7 +3381,7 @@ bool SaveRemoteConfigSettings(bool confirm)
          {
             mf->DecRef();
             msg->DecRef();
-            return FALSE;
+            return false;
          }
       }
       if(! mf->DeleteMessage(msg->GetUId()))
@@ -3351,7 +3391,7 @@ bool SaveRemoteConfigSettings(bool confirm)
               "mailbox '%s'."), mf->GetName().c_str());
          mf->DecRef();
          msg->DecRef();
-         return FALSE;
+         return false;
       }
       msg->DecRef();
       mf->ExpungeMessages();
@@ -3360,7 +3400,7 @@ bool SaveRemoteConfigSettings(bool confirm)
    wxString filename = wxGetTempFileName("MTemp");
    wxFileConfig fc("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
 
-   bool rc = TRUE;
+   bool rc = true;
 
    // always create the config file in Unix format
    if ( READ_APPCONFIG_BOOL(MP_SYNC_FILTERS) )
@@ -3368,7 +3408,7 @@ bool SaveRemoteConfigSettings(bool confirm)
       rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
                          M_FILTERS_CONFIG_SECTION,
                          M_FILTERS_CONFIG_SECTION_UNIX,
-                         TRUE,
+                         true,
                          &fc) != -1);
    }
 
@@ -3377,7 +3417,7 @@ bool SaveRemoteConfigSettings(bool confirm)
       rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
                          M_IDENTITY_CONFIG_SECTION,
                          M_IDENTITY_CONFIG_SECTION_UNIX,
-                         TRUE,
+                         true,
                          &fc) != -1);
    }
 
@@ -3389,15 +3429,15 @@ bool SaveRemoteConfigSettings(bool confirm)
       dest << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
 
       rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
-                         src, dest, TRUE,
+                         src, dest, true,
                          &fc) != -1);
    }
 
-   if(rc == FALSE)
+   if(rc == false)
    {
       wxLogError(_("Could not export configuration information."));
       mf->DecRef();
-      return FALSE;
+      return false;
    }
 
    // flush the config into file before reading it
@@ -3412,7 +3452,7 @@ bool SaveRemoteConfigSettings(bool confirm)
       tmpfile.Close();
       delete [] buffer;
       mf->DecRef();
-      return FALSE;
+      return false;
    }
    buffer[tmpfile.Length()] = '\0';
    tmpfile.Close();
@@ -3429,7 +3469,7 @@ bool SaveRemoteConfigSettings(bool confirm)
    {
       wxLogError(_("Storing configuration information in mailbox\n"
                    "'%s' failed."), mf->GetName().c_str());
-      rc = FALSE;
+      rc = false;
    }
    mf->DecRef();
 
@@ -3464,7 +3504,7 @@ CheckConfiguration(void)
 
          mApplication->SetLastError(M_ERROR_CANCEL);
 
-         return FALSE;
+         return false;
       }
    }
 

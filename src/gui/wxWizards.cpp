@@ -1,10 +1,14 @@
-/*-*- c++ -*-********************************************************
- * wxWizards.cpp : Wizards for various tasks                        *
- *                                                                  *
- * (C) 2000 by Karsten Ballüder (ballueder@gmx.net)                 *
- *                                                                  *
- * $Id$
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M
+// File name:   wizards.cpp - various GUI wizards
+// Purpose:
+// Author:      Karsten Ballüder (ballueder@gmx.net)
+// Modified by:
+// Created:     2000
+// CVS-ID:      $Id$
+// Copyright:   (c) 2000-2002 M-Team
+// License:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
@@ -65,6 +69,7 @@
 extern const MOption MP_FOLDER_PASSWORD;
 extern const MOption MP_FOLDER_PATH;
 extern const MOption MP_IMAPHOST;
+extern const MOption MP_MOVE_NEWMAIL;
 extern const MOption MP_NNTPHOST;
 extern const MOption MP_POPHOST;
 extern const MOption MP_USERLEVEL;
@@ -244,10 +249,10 @@ wxEnhancedPanel *MWizardPage::CreateEnhancedPanel(wxStaticText *text)
 //   wxSize sizePage = ((wxWizard *)GetParent())->GetSize();
    wxCoord y = sizeLabel.y + 2*LAYOUT_Y_MARGIN;
 
-   wxEnhancedPanel *panel = new wxEnhancedPanel(this, FALSE /* no scrolling */);
+   wxEnhancedPanel *panel = new wxEnhancedPanel(this, false /* no scrolling */);
    panel->SetSize(0, y, sizePage.x, sizePage.y - y);
 
-   panel->SetAutoLayout(TRUE);
+   panel->SetAutoLayout(true);
 
    return panel;
 }
@@ -363,7 +368,7 @@ MWizard_ImportFolders_ChoicePage::MWizard_ImportFolders_ChoicePage(MWizard *wiza
       m_checkMH = panel->CreateCheckBox(labels[0], maxwidth, NULL);
 
       // by default, import them all
-      m_checkMH->SetValue(TRUE);
+      m_checkMH->SetValue(true);
    }
 
    panel->Layout();
@@ -439,7 +444,7 @@ MWizard_ImportFolders_MHPage::MWizard_ImportFolders_MHPage(MWizard *wizard)
 
    // init controls
    m_textTop->SetValue(MailFolderCC::InitializeMH());
-   m_checkAll->SetValue(TRUE);
+   m_checkAll->SetValue(true);
 
    panel->Layout();
 }
@@ -453,7 +458,7 @@ bool MWizard_ImportFolders_MHPage::TransferDataFromWindow()
    params.takeAllMH = m_checkAll->GetValue();
    params.pathRootMH = m_textTop->GetValue();
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -487,6 +492,7 @@ public:
       {
          m_FolderType =
          m_FolderFlags = 0;
+         m_LeaveOnServer = false;
       }
 
       int m_FolderType;
@@ -496,6 +502,7 @@ public:
       wxString m_Server;
       wxString m_Login;
       wxString m_Password;
+      bool m_LeaveOnServer;
    };
 
    FolderParams * GetParams() { return &m_Params; }
@@ -546,7 +553,7 @@ MWizard_CreateFolder_WelcomePage::MWizard_CreateFolder_WelcomePage(MWizard *wiza
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
    wxArrayString labels;
-   labels.Add(_("don't use the wizard"));
+   labels.Add(_("Don't use the wizard"));
 
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
 
@@ -622,7 +629,7 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
                                       "Local Mailbox File:"
                                       "Local MH Folder:"
                                       "IMAP Mailbox:"
-                                      "POP3 Mailbox:"
+                                      "POP3 Server:"
                                       "NNTP Newsgroup:"
                                       "Local Newsgroup:"
                                       "Folder Group"),
@@ -675,6 +682,8 @@ private:
               *m_Password,
               *m_Path;
 
+   wxCheckBox *m_LeaveOnServer;
+
    wxFileOrDirBrowseButton *m_browsePath;
 
    FolderEntryType m_Type;
@@ -699,6 +708,7 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
    bool needsServer = false,
         needsUserId = false,
         needsPath = false,
+        needsLeaveOnServer = false,
         canBrowse = false;
 
    switch(type)
@@ -708,27 +718,28 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
          // fall through
 
       case FOLDERTYPE_GROUP:
-         needsServer = FALSE; // don't know which server :-)
-         needsUserId = TRUE;
-         needsPath = FALSE;
-         canBrowse = FALSE;
+         needsServer = false; // don't know which server :-)
+         needsUserId = true;
+         needsPath = false;
+         canBrowse = false;
          break;
 
          // IMAP server, mailbox or group
       case FOLDERTYPE_IMAP:
          entry = _("an IMAP folder");
-         needsServer = TRUE;
-         needsUserId = TRUE;
-         needsPath = TRUE;
-         canBrowse = TRUE;
+         needsServer = true;
+         needsUserId = true;
+         needsPath = true;
+         canBrowse = true;
          break;
 
       case FOLDERTYPE_POP3:
-         entry = _("a POP3 mailbox");
-         needsServer = TRUE;
-         needsUserId = TRUE;
-         needsPath = FALSE;
-         canBrowse = FALSE;
+         entry = _("a POP3 server");
+         needsServer = true;
+         needsUserId = true;
+         needsPath = false;
+         needsLeaveOnServer = true;
+         canBrowse = false;
          break;
 
       case FOLDERTYPE_NNTP:
@@ -736,19 +747,19 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
          if ( type == FOLDERTYPE_NEWS )
          {
             entry = _("a local newsgroup");
-            needsServer = FALSE;
+            needsServer = false;
          }
          else // NNTP
          {
             entry = _("a NNTP newsgroup");
-            needsServer = TRUE;
+            needsServer = true;
          }
 
          // NNTP may have authentification, but it is an advanced setting, don't
          // present it here
-         needsUserId = FALSE;
-         needsPath = TRUE;
-         canBrowse = TRUE;
+         needsUserId = false;
+         needsPath = true;
+         canBrowse = true;
 
          pathName = _("Newsgroup");
          msg += _("\n"
@@ -761,9 +772,9 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
       case FOLDERTYPE_FILE:
          entry = type == FOLDERTYPE_FILE ? _("a local mailbox file")
                                          : _("a local MH mailbox");
-         needsServer = FALSE;
-         needsUserId = FALSE;
-         needsPath = TRUE;
+         needsServer = false;
+         needsUserId = false;
+         needsPath = true;
          canBrowse = type == FOLDERTYPE_MH;
          break;
    }
@@ -796,16 +807,35 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(msgCtrl);
 
+   // keep this enum in sync with the array
+   enum
+   {
+      Label_Server,
+      Label_Username,
+      Label_Password,
+      Label_Mailbox,
+      Label_Name,
+      Label_LeaveOnServer,
+      Label_Max
+   };
+
    wxArrayString labels;
    labels.Add(_("Server Host"));
    labels.Add(_("Your Login"));
    labels.Add(_("Your Password"));
    labels.Add(pathName);
    labels.Add(_("Entry Name"));
+   labels.Add(_("Leave mail on server"));
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
 
 #define CREATE_CTRL(name, creat) \
-if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
+   if ( needs##name ) \
+   { \
+      m_##name = creat; \
+      last = m_##name; \
+   } \
+   else \
+      m_##name = NULL
 
    // if we ask for login name, we ask for password as well
    // (and we do need this var to be able to use the macro above)
@@ -813,26 +843,40 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
 
    wxControl *last = NULL;
    CREATE_CTRL(Server,
-               panel->CreateTextWithLabel(labels[0], maxwidth,last));
+               panel->CreateTextWithLabel(labels[Label_Server],
+                                          maxwidth,
+                                          last));
    CREATE_CTRL(UserId,
-               panel->CreateTextWithLabel(labels[1], maxwidth,last));
+               panel->CreateTextWithLabel(labels[Label_Username],
+                                          maxwidth,
+                                          last));
+
    CREATE_CTRL(Password,
-               panel->CreateTextWithLabel(labels[2], maxwidth,last, 0,
+               panel->CreateTextWithLabel(labels[Label_Password],
+                                          maxwidth,
+                                          last,
+                                          0,
                                           wxPASSWORD));
-   CREATE_CTRL(Path, panel->CreateFileOrDirEntry(labels[3], maxwidth,
-                                                 last,
-                                                 canBrowse ?
-                                                 &m_browsePath : NULL,
-                                                 TRUE,FALSE));
+
+   CREATE_CTRL(Path,
+               panel->CreateFileOrDirEntry(labels[Label_Mailbox],
+                                           maxwidth,
+                                           last,
+                                           canBrowse ? &m_browsePath : NULL,
+                                           true,
+                                           false));
+
+   CREATE_CTRL(LeaveOnServer,
+               panel->CreateCheckBox(labels[Label_LeaveOnServer],
+                                     maxwidth,
+                                     last));
+
 #undef CREATE_CTRL
 
-   last = panel->CreateMessage(
-      _("\n"
-        "You also need to give your new entry\n"
-        "a name to appear in the tree."
-        ), last);
+   last = panel->CreateMessage(_("\nThe name which will appear in the tree:"),
+                              last);
 
-   m_Name = panel->CreateTextWithLabel(labels[4], maxwidth, last);
+   m_Name = panel->CreateTextWithLabel(labels[Label_Name], maxwidth, last);
 
    switch ( type )
    {
@@ -846,7 +890,7 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
       case FOLDERTYPE_NNTP:
       case FOLDERTYPE_IMAP:
          // we don't support browsing the remote servers yet (TODO)
-         m_browsePath->wxButton::Enable(FALSE);
+         m_browsePath->wxButton::Enable(false);
          break;
 
       default:
@@ -882,6 +926,11 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
       msg << _("\nDo you want to save the password anyway?");
       if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE, true, "AskPwd") )
          params->m_Password = m_Password->GetValue();
+   }
+
+   if ( m_LeaveOnServer )
+   {
+      params->m_LeaveOnServer = m_LeaveOnServer->GetValue();
    }
 
    params->m_FolderType = 0;
@@ -961,7 +1010,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
          break;
    }
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -972,7 +1021,7 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
 
    MFolder_obj f = wiz->GetParentFolder();
    Profile_obj p(f->GetProfile());
-   CHECK(p, FALSE, "No profile?");
+   CHECK(p, false, "No profile?");
 
    // don't overwrite the settings previously entered by user
    if ( m_Name->GetValue().empty() )
@@ -1031,7 +1080,7 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
 
    // store our page id for use by the final page:
    ((CreateFolderWizard*)GetWizard())->m_ServerPageId = GetPageId();
-   return TRUE;
+   return true;
 }
 
 // CreateFolderWizardXXXPage - the various folder types
@@ -1094,7 +1143,11 @@ MWizard_CreateFolder_FinalPage::MWizard_CreateFolder_FinalPage(MWizard *wizard)
       "complete set of parameters by invoking\n"
       "the folder properties dialog. Simply\n"
       "click the right mouse button on the\n"
-      "entry in the tree."));
+      "entry in the tree and choose \"Properties\".\n"
+      "\n"
+      "In particular, you may tell Mahogany to\n"
+      "monitor this folder for new mail automatically\n"
+      "from the \"New Mail\" page of that dialog."));
 }
 
 
@@ -1181,7 +1234,7 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
             type,
             params->m_FolderFlags,
             params->m_Path,
-            TRUE // notify about folder creation
+            true // notify about folder creation
          );
 
          if ( newfolder )
@@ -1221,6 +1274,11 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
                   p->writeEntry(MP_FOLDER_PASSWORD,
                                 strutil_encrypt(params->m_Password));
                }
+            }
+
+            if ( params->m_LeaveOnServer )
+            {
+               p->writeEntry(MP_MOVE_NEWMAIL, false);
             }
          }
       }
