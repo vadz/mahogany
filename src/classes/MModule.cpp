@@ -559,6 +559,20 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
    wxArrayString dirs = BuildListOfModulesDirs();
    size_t nDirs = dirs.GetCount();
 
+#ifdef DEBUG
+   String path;
+   for ( size_t n = 0; n < nDirs; n++ )
+   {
+      if ( !path.empty() )
+         path += ':';
+      path += dirs[n];
+   }
+
+   wxLogTrace(M_TRACE_MODULES,
+              _T("Looking for modules of type \"%s\" in the path '%s'."),
+              interfaceName.c_str(), path.c_str());
+#endif // DEBUG
+
    // First, build list of all .mmd and .so files in module directories
    wxString extDll = DLL_EXTENSION;
 
@@ -764,6 +778,9 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
       }
    }
 
+   wxLogTrace(M_TRACE_MODULES, _T("\t%lu modules found."),
+              (unsigned long)count);
+
    listing->SetCount(count);
 
    return listing;
@@ -788,6 +805,20 @@ static wxArrayString BuildListOfModulesDirs()
    path0 << M_TOP_BUILDDIR
          << DIR_SEPARATOR << "src"
          << DIR_SEPARATOR << "adb" << DIR_SEPARATOR;
+   dirs.Add(path0);
+
+   path0.clear();
+   path0 << M_TOP_BUILDDIR
+         << DIR_SEPARATOR << "src"
+         << DIR_SEPARATOR << "modules"
+         << DIR_SEPARATOR << "crypt" << DIR_SEPARATOR;
+   dirs.Add(path0);
+
+   path0.clear();
+   path0 << M_TOP_BUILDDIR
+         << DIR_SEPARATOR << "src"
+         << DIR_SEPARATOR << "modules"
+         << DIR_SEPARATOR << "viewflt" << DIR_SEPARATOR;
    dirs.Add(path0);
 #endif // Unix
 
