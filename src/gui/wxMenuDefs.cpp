@@ -84,7 +84,7 @@ static const TbarItemInfo g_aToolBarData[] =
 
    // main frame
    { "tb_open",          WXMENU_FILE_OPEN,     "Open folder"           },
-   { "tb_open",          WXMENU_FILE_OPENANY,     "Open any folder"   },
+   { "tb_openany",       WXMENU_FILE_OPENANY,  "Open any folder"       },
    { "tb_mail_compose",  WXMENU_FILE_COMPOSE,  "Compose a new message" },
    { "tb_help",          WXMENU_HELP_ABOUT,    "About"                 },
    { "tb_exit",          WXMENU_FILE_EXIT,     "Exit the program"      },
@@ -118,6 +118,7 @@ static const TbarItemInfo g_aToolBarData[] =
 static const int g_aMainTbar[] =
 {
    WXTBAR_MAIN_OPEN,
+   WXTBAR_MAIN_OPENANY,
    WXTBAR_MAIN_COMPOSE,
    WXTBAR_SEP,
    WXTBAR_ADB,
@@ -204,14 +205,14 @@ static const MenuItemInfo g_aMenuItems[] =
    // file
    { WXMENU_FILE_OPEN,     "&Open Folder...",   "Open an existing message "
      " folder"                  },
-   { WXMENU_FILE_OPENANY,  "&Open Any Folder...",   "Open any existing message "
+   { WXMENU_FILE_OPENANY,  "Open &Any Folder...",   "Open any existing message "
      " folder"                  },
    { WXMENU_FILE_CREATE,   "Create &Folder...", "Creates a new folder "
      "definition"               },
    { WXMENU_FILE_COMPOSE,  "&Compose Message",  "Start a new message"      },
    { WXMENU_FILE_CLOSE,    "&Close Window",     "Close this window"        },
    { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_FILE_SCRIPT,   "Run &Script",       "Run a simple python script"},
+   { WXMENU_FILE_SCRIPT,   "Run &Script...",    "Run a simple python script"},
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_FILE_EXIT,     "E&xit",             "Quit the application"     },
 
