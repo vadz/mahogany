@@ -318,8 +318,8 @@ void ClickableURL::OpenInBrowser(int options) const
                         // magic incantation understood by wxMSW
 #ifndef __CYGWIN__ // FIXME
                         command << "WX_DDE#"
-                                << wxString(wxRegKey(key, "command")) << '#'
-                                << wxString(wxRegKey(keyDDE, "application"))
+                                << wxRegKey(key, "command").QueryDefaultValue() << '#'
+                                << wxRegKey(keyDDE, "application").QueryDefaultValue()
                                 << '#' << ddeTopic << '#'
                                 << ddeCmd;
 #endif
