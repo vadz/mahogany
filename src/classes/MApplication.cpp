@@ -155,8 +155,6 @@ MAppBase::OnStartup()
       textdomain (M_APPLICATIONNAME);
 #  endif // USE_GETTEXT
 
-   // create and show the main program window
-   CreateTopLevelFrame();
 
    // create log window
    logFrame = new wxMLogFrame;
@@ -169,8 +167,6 @@ MAppBase::OnStartup()
 
    globalDir = pf.FindDir(strRootDir, &found);
 
-   VerifySettings();
-   
    if(! found)
    {
       String msg = _("Cannot find global directory \"");
@@ -181,13 +177,18 @@ MAppBase::OnStartup()
    }
 
 #  ifdef   USE_WXCONFIG
-      localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
+   localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
 #  else
-      char *cptr = ExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
-      localDir = String(cptr);
-      GLOBAL_DELETE [] cptr;
+   char *cptr = ExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
+   localDir = String(cptr);
+   GLOBAL_DELETE [] cptr;
 #  endif
 
+   // create and show the main program window
+   CreateTopLevelFrame();
+
+   VerifySettings();
+   
    // extend path for commands, look in M's dirs first
    tmp = "";
    tmp += GetLocalDir();

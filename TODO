@@ -38,8 +38,6 @@ $Id$
 
 - write some first configuration dialogs and for opening a folder
 
-- make saving of window positions optional
-
 - configure: USE_WXCONFIG does not get defined!
 
 - not all windows get closed when application exits.

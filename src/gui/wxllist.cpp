@@ -23,17 +23,13 @@
 #endif
 
 #include   "wxllist.h"
-#include   "iostream"
+#include   "iostream.h"
 
 #include   <wx/dc.h>
 #include   <wx/postscrp.h>
 #include   <wx/print.h>
 
 #define   BASELINESTRETCH   12
-
-#define   VAR(x)   cerr << #x"=" << x << endl;
-#define   DBG_POINT(p)   cerr << #p << ": " << p.x << ',' << p.y << endl
-#define   TRACE(f)   cerr << #f":" << endl;
 
 #ifdef WXLAYOUT_DEBUG
 static const char *_t[] = { "invalid", "text", "cmd", "icon",
@@ -46,6 +42,14 @@ wxLayoutObjectBase::Debug(void)
    cerr << _t[GetType()] << ": size=" << GetSize(&bl).x << ","
         << GetSize(&bl).y << " bl=" << bl; 
 }
+
+#  define   VAR(x)   cerr << #x"=" << x << endl;
+#  define   DBG_POINT(p)   cerr << #p << ": " << p.x << ',' << p.y << endl
+#  define   TRACE(f)   cerr << #f":" << endl;
+#else 
+#  define   VAR(x)   
+#  define   DBG_POINT(p)   
+#  define   TRACE(f)   
 #endif
 
 //-------------------------- wxLayoutObjectText
@@ -322,11 +326,15 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const &findCoords)
 
    // setting up the default:
    dc.SetTextForeground( *wxBLACK );
+   dc.SetTextBackground( *wxWHITE );
+   dc.SetBackgroundMode( wxSOLID ); // to enable setting of text background
    dc.SetFont( *wxNORMAL_FONT );
 
+
+   //FIXME: who frees the brush, how long does it need to exist?
    if(m_DefaultSetting)
       m_DefaultSetting->Draw(dc,wxPoint(0,0),0,true);
-   
+
    // we calculate everything for drawing a line, then rewind to the
    // begin of line and actually draw it
    i = begin();
@@ -393,6 +401,8 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const &findCoords)
 
       // calculate next object's position:
       position.x += size.x;
+      if(position.x > m_MaxX)
+         m_MaxX = position.x;
       
       // do we need to increase the line's height?
       if(size.y > baseLineSkip)
@@ -436,8 +446,6 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const &findCoords)
             draw = false;
       }
 
-      if(position.x+size.x > m_MaxX)
-         m_MaxX = position.x+size.x;
       // is it a linebreak?
       if(type == WXLO_TYPE_LINEBREAK || i == tail())
       {
@@ -499,6 +507,9 @@ wxLayoutList::Debug(void)
 #endif
 
 /******************** editing stuff ********************/
+
+// don't change this, I know how to optimise this and will do it real 
+// soon (KB)
 
 wxLayoutObjectList::iterator 
 wxLayoutList::FindObjectCursor(wxPoint const &cpos, CoordType *offset)
@@ -850,6 +861,7 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
    m_LineHeight = (BASELINESTRETCH*m_FontPtSize)/10;
    m_MaxX = 0; m_MaxY = 0;
 
+   
    if(m_DefaultSetting)
       delete m_DefaultSetting;
    m_DefaultSetting = new

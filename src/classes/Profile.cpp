@@ -244,7 +244,7 @@ ConfigFileManager::GetConfig(String const &fileName)
    newEntry->fileName = fileName;
 
 #  ifdef  USE_WXCONFIG
-      newEntry->fileConfig = GLOBAL_NEW wxFileConfig(Str(newEntry->fileName));
+   newEntry->fileConfig = GLOBAL_NEW wxFileConfig(Str(newEntry->fileName),wxString(""));
 #  else
       newEntry->fileConfig = GLOBAL_NEW FileConfig;
       newEntry->fileConfig->readFile(newEntry->fileName->c_str());

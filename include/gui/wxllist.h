@@ -157,8 +157,10 @@ public:
                 bool underline,
                 wxColour const *fg, wxColour const *bg);
    ~wxLayoutObjectCmd();
-   // caller must free pointer:
+   /// caller must free pointer:
    wxLayoutStyleInfo *GetStyle(void) const ;
+   /// return the background colour for setting colour of window
+   wxColour const *GetBGColour(void) const { return m_ColourBG; }
 private:
    /// the font to use
    wxFont *m_font;
@@ -243,6 +245,9 @@ public:
    void Insert(wxLayoutObjectBase *obj);
    void Clear(int family = wxROMAN, int size=12, int style=wxNORMAL, int weight=wxNORMAL,
                     int underline=0, char const *fg="black", char const *bg="white");
+
+   /// return a pointer to the default settings:
+   wxLayoutObjectCmd const *GetDefaults(void) const { return m_DefaultSetting ; }
 
    //@}
 protected:
