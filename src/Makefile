@@ -44,8 +44,12 @@ include ../makerules
 # now actually specify the dependencies.
 binary:	M $(MSOS)
 	@true
+
 M:	$(MOBJS)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
+ifdef USE_MAC
+	$(REZ) -t APPL Carbon.r -o M
+endif
 
 Mdll:	libM.so
 	$(LINK) -o M $(LDFLAGS) libM.so

@@ -35,6 +35,7 @@ ICONDIR=$(SOURCEDIR)/src/icons
 @MAKE_HAVE_DOCTOOLS@
 @MAKE_HAVE_LIBMAL@
 @MAKE_PISOCKLIB@
+@MAKE_USE_MAC@
 
 ifdef HAVE_LIBMAL
 LIBMAL_SRC := $(SOURCEDIR)/extra/src/libmal
@@ -88,6 +89,8 @@ SWIG	:= @SWIG@
 # other stuff
 RM	:= rm -f
 M4	:= @M4@ 
+
+REZ	:= @REZ@
 
 # install stuff
 INSTALL	:= @INSTALL@

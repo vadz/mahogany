@@ -17,6 +17,18 @@ if test "x$OSTYPE" = "x"; then
         OSTYPE=`uname`
 fi
 
+case "$OSTYPE" in
+    darwin* | Darwin*)
+	USE_MAC=1
+	MAKE_USE_MAC="USE_MAC=yes"
+	;;
+    *)
+	USE_MAC=0
+	MAKE_USE_MAC=""
+	;;
+esac
+AC_SUBST(MAKE_USE_MAC)
+
 echo ""
 echo "*** Configuring Mahogany for $OSTYPE ***"
 echo ""
@@ -81,8 +93,11 @@ case "$USE_PYTHON" in
 	;;
 esac
 
-M_OVERRIDES(dialup,special dial-up support,USE_DIALUP,1,
---disable-dialup        disable dial-up support for modem users)
+dnl dialup is not currently supported under Mac OS X
+if test "$USE_MAC" = 0; then
+    M_OVERRIDES(dialup,special dial-up support,USE_DIALUP,1,
+    --disable-dialup        disable dial-up support for modem users)
+fi
 
 M_OVERRIDES(experimental,experimental code,USE_EXPERIMENTAL,0,
 --with-experimental     compile experimental code)
@@ -382,6 +397,10 @@ AC_PROG_INSTALL
 
 AC_PROG_MAKE_SET
 
+if test "$USE_MAC" = 1; then
+    AC_CHECK_PROG(REZ, Rez, Rez, /Developer/Tools/Rez)
+fi
+
 dnl --------------------------------------------------------------------------
 dnl check for features and functions
 dnl --------------------------------------------------------------------------
@@ -521,16 +540,7 @@ esac
 AC_SUBST(MAKE_EXPERIMENTAL)
 
 if test "x$USE_DIALUP" = "x1"; then
-    case "$OSTYPE" in
-	darwin*)
-	    AC_MSG_WARN([Dialup support is not available under Mac OS X])
-	    USE_DIALUP=0
-	    ;;
-
-	*)
-	    AC_DEFINE(USE_DIALUP)
-	    ;;
-    esac
+    AC_DEFINE(USE_DIALUP)
 fi
 
 dnl --------------------------------------------------------------------------
