@@ -764,8 +764,13 @@ InitRecipients(Composer *cv,
    // REPLY_LIST overrides any Reply-To in the header
    if ( replyKind != MailFolder::REPLY_LIST )
    {
-      // otherwise reply to Reply-To address, if any, by default
-      if ( !countReplyTo )
+      // reply to Reply-To address, if any, by default except if REPLY_SENDER
+      // had been explicitly chosen - in this case we want to allow using it to
+      // make it possible to reply to the sender of the message only even if
+      // the Reply-To address had been mangled by the mailing list to point to
+      // it instead
+      if ( (explicitReplyKind && replyKind == MailFolder::REPLY_SENDER) ||
+            !countReplyTo )
       {
          // try from address
          //
