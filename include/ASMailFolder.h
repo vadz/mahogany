@@ -80,7 +80,6 @@ public:
       Op_Ping,
       Op_GetMessage,
       Op_AppendMessage,
-      Op_DeleteOrTrashMessages,
       Op_DeleteMessages,
       Op_UnDeleteMessages,
       Op_SaveMessages,

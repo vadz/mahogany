@@ -306,7 +306,7 @@ public:
                    (
                      m_ASMailFolder,
                      m_Ticket,
-                     ASMailFolder::Op_DeleteOrTrashMessages,
+                     ASMailFolder::Op_DeleteMessages,
                      m_Seq,
                      rc,
                      m_UserData

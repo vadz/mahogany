@@ -1760,7 +1760,6 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
          case ASMailFolder::Op_ReplyMessages:
          case ASMailFolder::Op_ForwardMessages:
          case ASMailFolder::Op_DeleteMessages:
-         case ASMailFolder::Op_DeleteOrTrashMessages:
          case ASMailFolder::Op_UnDeleteMessages:
          case ASMailFolder::Op_MarkRead:
          case ASMailFolder::Op_MarkUnread:
