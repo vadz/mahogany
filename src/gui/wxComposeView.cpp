@@ -2170,7 +2170,7 @@ wxComposeView::CanClose() const
       MDlgResult rc = MDialog_YesNoCancel
                       (
                         _("There are unsaved changes, would you like to save the "
-                          "as a draft?\n"
+                          "message as a draft?\n"
                           "\n"
                           "You may also choose \"Cancel\" to not close this "
                           "window at all."),
