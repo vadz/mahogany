@@ -467,6 +467,9 @@ protected:
    /// the array with the initial values of the settings for this folder
    wxString m_originalValues[MaxProperty];
 
+   /// the original folder type for file-based folders
+   FileMailboxFormat m_originalMboxFormat;
+
    /// the initial value of the "anonymous" flag
    bool m_originalIsAnonymous;
 #ifdef USE_SSL
@@ -1980,6 +1983,18 @@ wxFolderPropertiesPage::SetDefaultValues()
    if ( !m_isCreating )
       m_comment->SetValue(READ_CONFIG(profile, MP_FOLDER_COMMENT));
 
+   // remember the original folder type
+   bool found;
+   long l = profile->readEntry(GetOptionName(MP_FOLDER_FILE_DRIVER), 0l, &found);
+   if ( found )
+   {
+      m_originalMboxFormat = (FileMailboxFormat)l;
+   }
+   else
+   {
+      m_originalMboxFormat = FileMbox_Max;
+   }
+
    // set the initial values for all checkboxes and remember them: we will only
    // write it back if it changes later
    int flags = GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
@@ -2405,7 +2420,14 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
             ASSERT_MSG( format >= 0 && format < FileMbox_Max,
                         "invalid folder format selection" );
 
-            if ( format != READ_CONFIG(m_profile, MP_FOLDER_FILE_DRIVER) )
+            // we used to only write the entry if it was different from the
+            // value inherited from parent but it was wrong as a folder of
+            // incorrect type risked to be created if the user changed the
+            // default folder type after creating a folder but before
+            // accessing it - so now always do it (if it changed, of course)
+            //
+            //if ( format != READ_CONFIG(m_profile, MP_FOLDER_FILE_DRIVER) )
+            if ( format != m_originalMboxFormat )
             {
                m_profile->writeEntry(MP_FOLDER_FILE_DRIVER, format);
             }
