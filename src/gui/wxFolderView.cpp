@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/13 19:02:17  KB
+ * added kbList, adapted MimeTypes for it, more python, new icons
+ *
  * Revision 1.3  1998/05/11 20:57:30  VZ
  * compiles again under Windows + new compile option USE_WXCONFIG
  *
@@ -245,11 +248,11 @@ wxFolderView::SaveMessages(int n, int *selections)
    int i;
    String str;
 
-   #ifdef  USE_WXWINDOWS2
+#ifdef  USE_WXWINDOWS2
     wxString 
-   #else
+#else
     char *
-   #endif
+#endif
    folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
 	                                _("Save Message"),"",this);
    MailFolderCC	*mf;

@@ -13,28 +13,28 @@
 #pragma interface "Adb.h"
 #endif
 
-#ifndef	USE_PCH
-#include	<list>
-
-#include	<Mcommon.h>
-#include	<CommonBase.h>
-#include	<MFrame.h>
-#include	<guidef.h>
-#include	"gui/wxMFrame.h"
-#include	<time.h>
-#include	<iostream.h>
+#ifndef   USE_PCH
+#   include   <list>
+#   include   <Mcommon.h>
+#   include   <CommonBase.h>
+#   include   <MFrame.h>
+#   include   <guidef.h>
+#   include   "gui/wxMFrame.h"
+#   include   <time.h>
+#   include   <iostream.h>
 #endif
+
 
 /**@name Adb classes */
 //@{
 
 struct AdbNameStruct
    {
-      String	family;
-      String	first;
-      String	other;
-      String	prefix;
-      String	suffix;
+      String   family;
+      String   first;
+      String   other;
+      String   prefix;
+      String   suffix;
 
       void parse(String const &in);
       void write(String &out) const;
@@ -42,13 +42,13 @@ struct AdbNameStruct
 
 struct AdbAddrStruct
 {
-   String	poBox;
-   String	extra;
-   String	street;
-   String	locality;
-   String	region;
-   String	postcode;
-   String	country;
+   String   poBox;
+   String   extra;
+   String   street;
+   String   locality;
+   String   region;
+   String   postcode;
+   String   country;
 
    void parse(String const &in);
    void write(String &out) const;
@@ -56,9 +56,9 @@ struct AdbAddrStruct
 
 struct AdbTelStruct
 {
-   String	country;
-   String	area;
-   String	local;
+   String   country;
+   String   area;
+   String   local;
 
    void parse(String const &in);
    void write(String &out) const;
@@ -66,9 +66,9 @@ struct AdbTelStruct
 
 struct AdbEmailStruct
 {
-   String	preferred;
+   String   preferred;
    std::list<String> other;
-
+   
    void parse(String const &in);
    void write(String &out) const;
 };
@@ -76,22 +76,22 @@ struct AdbEmailStruct
 class AdbEntry
 {
 public:
-   String	 formattedName;
+   String    formattedName;
    AdbNameStruct structuredName;
-   String	 title;
-   String	 organisation;
+   String    title;
+   String    organisation;
    AdbAddrStruct homeAddress;
    AdbAddrStruct workAddress;
-   AdbTelStruct	 workPhone;
-   AdbTelStruct	 workFax;
-   AdbTelStruct	 homePhone;
-   AdbTelStruct	 homeFax;
+   AdbTelStruct    workPhone;
+   AdbTelStruct    workFax;
+   AdbTelStruct    homePhone;
+   AdbTelStruct    homeFax;
    AdbEmailStruct email;
-   String	  alias;
-   String	 url;
-   struct tm	 lastChangedDate;
-   struct tm	 birthDay;
-   bool		 empty;
+   String     alias;
+   String    url;
+   struct tm    lastChangedDate;
+   struct tm    birthDay;
+   bool       empty;
    
    bool load(istream &istream);
    bool save(ostream &istream);
@@ -101,11 +101,10 @@ public:
 };
 
 
+
 typedef  STL_LIST<AdbEntry *>          AdbEntryListType;
 typedef  AdbEntryListType::iterator    AdbEntryIterator;
 
-typedef  STL_LIST<AdbEntry *>          AdbExpandListType;
-typedef  AdbExpandListType::iterator   AdbExpandListIterator;
 
 /**
    Adb: an address database class
@@ -113,7 +112,7 @@ typedef  AdbExpandListType::iterator   AdbExpandListIterator;
 class Adb : public CommonBase , public AdbEntryListType
 {
 private:
-   String	fileName;
+   String   fileName;
 public:
    /**
       Constructor.
@@ -133,11 +132,11 @@ public:
    void AddEntry(AdbEntry *eptr);
    /// creates a new entry if it doesn't exist yet
    void UpdateEntry(String email, String name = "", MFrame *parent = NULL);
-   void Update(AdbEntry *eptr) {};	// mark it as changed
+   void Update(AdbEntry *eptr) {};   // mark it as changed
    void Delete(AdbEntry *eptr);
    AdbEntry *Lookup(String const &key, MFrame *parent = NULL); 
    /// initialised == there is a list of paths
-   bool	IsInitialised(void) const { return true; }
+   bool   IsInitialised(void) const { return true; }
 
    CB_DECLARE_CLASS(Adb, CommonBase);
 };

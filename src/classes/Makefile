@@ -2,7 +2,7 @@
 
 CWD = classes
 SRC = CommonBase.cc MApplication.cc appconf.cc PathFinder.cc Profile.cc MimeList.cc MimeTypes.cc \
-Adb.cc XFace.cc Script.cc
+Adb.cc XFace.cc Script.cc kbList.cc
 HDR = $(SRC:.cc=.h)
 DEP = $(SRC:.cc=.d)
 

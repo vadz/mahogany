@@ -19,13 +19,10 @@ EXTRALIBS=@LIBINTL_LINK@ @COMPFACE_LINK@
 OPT = -Wall -pedantic #-posix
 DBG = -g2 -DDEBUG
 
-#WXLIBS=-lwxgtk -lgtk
-#WXDEFS=-DwxPanel=wxWindow -DwxItem=wxObject -Dwx_gtk -D__NO_MATH_INLINES -DWXWIN2 
-
 GUI_SLINK=@WX_SLINK@ 
 GUI_INCLUDE=@WX_INCLUDE@ -I$(ICONDIR)
 GUI_LINK=@WX_LINK@
-GUI_DEFS=$(WXDEFS)
+GUI_DEFS=@WX_DEFS@
 
 
 

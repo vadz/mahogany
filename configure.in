@@ -65,7 +65,7 @@ AC_DEFUN(AC_PATH_FIND_INCLUDES,
 ac_find_includes=
 for ac_dir in $1;
   do
-    if test -f "$ac_dir/$2" ; then #|| test -L "$ac_dir/lib$2.$ac_extension"; then
+    if test -f "$ac_dir/$2" || test -L "$ac_dir/lib$2.$ac_extension"; then
       ac_find_includes=$ac_dir
       break
     fi
@@ -78,7 +78,7 @@ ac_find_libraries=
 for ac_dir in $1;
   do
     for ac_extension in a so sl; do
-      if test -f "$ac_dir/lib$2.$ac_extension" ; then #|| test -L "$ac_dir/lib$2.$ac_extension"; then
+      if test -f "$ac_dir/lib$2.$ac_extension" || test -L "$ac_dir/lib$2.$ac_extension"; then
         ac_find_libraries=$ac_dir
         break 2
       fi
@@ -155,11 +155,10 @@ dnl ================ do not edit below here ============================
 dnl search path for includes and libraries
 
 SEARCH_INCLUDE="\
-    ./extra/include              \
-    ./extra                   \
+    ./extra/include	      \
     /usr/include              \
     /usr/Motif1.2/include     \
-                              \
+			      \
     /usr/X11R6/include        \
     /usr/X11R5/include        \
     /usr/X11R4/include        \
@@ -175,8 +174,8 @@ SEARCH_INCLUDE="\
     /usr/local/include/X11R6  \
     /usr/local/include/X11R5  \
     /usr/local/include/X11R4  \
-    /usr/local/include        \        
-    /usr/local/src            \        
+    /usr/local/include        \	
+    /usr/local/src            \	
                               \
     /usr/X11/include          \
     /usr/include/X11          \
@@ -252,7 +251,7 @@ dnl   defines CFLAGS
 CFLAGS=`echo "$CFLAGS" | sed 's/-g//g'`
 if test "$GCC" = "yes"
 then
-        CFLAGS="$CFLAGS -DCC_GCC"
+	CFLAGS="$CFLAGS -DCC_GCC"
 fi
 
 dnl does compiler support -c and -o simultaniously
@@ -295,12 +294,12 @@ AC_MSG_CHECKING(for variable length prototypes and stdarg.h)
 AC_TRY_COMPILE([
 #include <stdarg.h>
 int foo(int x, ...) {
-        va_list va;
-        va_start(va, x);
-        va_arg(va, int);
-        va_arg(va, char *);
-        va_arg(va, double);
-        return 0;
+	va_list va;
+	va_start(va, x);
+	va_arg(va, int);
+	va_arg(va, char *);
+	va_arg(va, double);
+	return 0;
 }
 ], [return foo(10, "", 3.14);],
 AC_DEFINE(HAVE_STDARG_PROTOTYPES) works=yes)
@@ -310,7 +309,7 @@ if test "$have_prototypes" = yes; then
 bad_prototypes=no
 AC_MSG_CHECKING(for bad exec* prototypes)
 AC_TRY_COMPILE([#include <unistd.h>], [char **t;execve("@",t,t);], ,
-        AC_DEFINE(BAD_EXEC_PROTOTYPES) bad_prototypes=yes)
+	AC_DEFINE(BAD_EXEC_PROTOTYPES) bad_prototypes=yes)
 AC_MSG_RESULT($bad_prototypes)
 fi
 
@@ -345,6 +344,7 @@ if test "$USE_WXGTK" = 1; then
       WX_LINK="$ac_path_to_link -lwx_gtk"
       WX_INCLUDE="$ac_path_to_include/wxGTK/include $ac_path_to_include/wxGTK/setup/${OSTYPE}"
       AC_MSG_RESULT(yes)
+      WX_DEFS=-D__GTK__
     else
       AC_MSG_RESULT(no)
     fi
@@ -388,9 +388,8 @@ else
         CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
         WX_LINK="$ac_path_to_link -lwx_xt -lwx_xtwidgets $XT_LIBS $XLIBS"
         WX_SLINK="$ac_pure_path_to_link/libwx_xt.a $ac_pure_path_to_link/libwx_xtwidgets.a $XT_LIBS $XLIBS"
-        WX_INCLUDE="$ac_path_to_include/wxxt $ac_path_to_include/wxxt/setup/${OSTYPE}"
-        WX_DEFS=-D__GTK__
-        AC_MSG_RESULT(yes)
+	WX_INCLUDE="$ac_path_to_include/wxxt $ac_path_to_include/wxxt/setup/${OSTYPE}"
+	AC_MSG_RESULT(yes)
       else
         AC_MSG_RESULT(no)
       fi

@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/13 19:02:10  KB
+ * added kbList, adapted MimeTypes for it, more python, new icons
+ *
  * Revision 1.3  1998/04/22 19:55:49  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -29,25 +32,25 @@
 #include  "Mpch.h"
 #include  "Mcommon.h"
 
-#if       !USE_PCH
-  #include <strutil.h>
+#ifndef USE_PCH
+#   include <strutil.h>
+#   include <string.h>
 
-  #include <string.h>
+extern "C" {
+#   include   <mail.h>
+           }
 
-  extern "C" {
-    #include	<mail.h>
-	}
 #endif
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#include   "MFrame.h"
+#include   "MLogFrame.h"
 
-#include	"Mdefaults.h"
+#include   "Mdefaults.h"
 
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#include   "PathFinder.h"
+#include   "MimeList.h"
+#include   "MimeTypes.h"
+#include   "Profile.h"
 
 #include  "MApplication.h"
 
@@ -56,13 +59,18 @@ MimeTEntry::MimeTEntry(void)
    type = "";
 }
 
+MimeTEntry::MimeTEntry(String const & str)
+{
+   Parse(str);
+}
+
 bool
 MimeTEntry::Parse(String const & str)
 {
    if(*str.c_str() == '#')
       return false;
    const char *cptr = str.c_str();
-   String	entry;
+   String   entry;
 
    type = "";
    
@@ -70,8 +78,8 @@ MimeTEntry::Parse(String const & str)
       cptr++;
 
    while(*cptr &&
-	 *cptr != ' '  && *cptr != '\t' &&
-	 *cptr != '\n' && *cptr != '\r')
+         *cptr != ' '  && *cptr != '\t' &&
+         *cptr != '\n' && *cptr != '\r')
       type += *cptr++;
    strutil_toupper(type);
    
@@ -82,12 +90,12 @@ MimeTEntry::Parse(String const & str)
    {
       entry = "";
       while(*cptr != ' ' && *cptr != '\n' && *cptr && *cptr != '\n' &&
-	    *cptr != '\r')
-	 entry += *cptr++;
+            *cptr != '\r')
+         entry += *cptr++;
       strutil_toupper(entry);
-      extensions.push_back(entry);
+      extensions.push_back(new String(entry));
       while(*cptr == ' ' || *cptr == '\t' && *cptr)
-	 cptr++;
+         cptr++;
    }
    return true;
 }
@@ -95,21 +103,21 @@ MimeTEntry::Parse(String const & str)
 bool
 MimeTEntry::Match(String const & extension, String &mimeType)
 {
-   std::list<String>::iterator i;
+//   std::list<String>::iterator i;
+   kbListIterator i;
    for(i = extensions.begin(); i != extensions.end(); i++)
-      if((*i) == extension)
+      if( *((String *)(*i)) == extension)
       {
-	 mimeType = type;
-	 return true;
+         mimeType = type;
+         return true;
       }
    return false;
 }
 
 MimeTypes::MimeTypes(void) // why? should be default : STL_LIST<MimeTEntry>()
 {
-   bool	found;
-   MimeTEntry	newEntry;
-   String	tmp;
+   bool   found;
+   String   tmp;
    
    PathFinder
       pf(mApplication.readEntry(MC_ETCPATH,MC_ETCPATH_D));
@@ -125,10 +133,16 @@ MimeTypes::MimeTypes(void) // why? should be default : STL_LIST<MimeTEntry>()
       strutil_delwhitespace(tmp);
       if(! str.eof())
       {
-	 if(newEntry.Parse(tmp))
-	    push_back(newEntry);
+         push_back(new MimeTEntry(tmp));  // this will add an empty
+                                          // entry as the last one
       }
    }
+   /* debugging: */
+#ifndef   DDEBUG
+   kbListIterator i;
+   for(i = begin(); i != end(); i++)
+      fprintf(stderr,"%p\n", *i);
+#endif
 }
 
 bool
@@ -136,35 +150,36 @@ MimeTypes::Lookup(String const & filename, String &mimeType, int *numericType)
 {
    const char *ext = strrchr(filename.c_str(),'.');
    String extension;
-   iterator i;
-
+   //iterator i;
+   kbListIterator i;
+   
    if(ext)
       extension = ext+1;
 
    strutil_toupper(extension);
    for(i = begin(); i != end() ; i++)
-      if((*i).Match(extension, mimeType))
+      if(((MimeTEntry *)*i)->Match(extension, mimeType))
       {
-	 if(numericType)
-	 {
-	    if(strncmp("VIDEO", mimeType.c_str(), 5) == 0)
-	       *numericType = TYPEVIDEO;
-	    else if(strncmp("AUDIO", mimeType.c_str(), 5) == 0)
-	       *numericType = TYPEAUDIO;
-	    else if(strncmp("IMAGE", mimeType.c_str(), 5) == 0)
-	       *numericType = TYPEIMAGE;
-	    else if(strncmp("TEXT", mimeType.c_str(), 4) == 0)
-	       *numericType = TYPETEXT;
-	    else if(strncmp("MESSAGE", mimeType.c_str(), 7) == 0)
-	       *numericType = TYPEMESSAGE;
-	    else if(strncmp("APPLICATION", mimeType.c_str(), 11) == 0)
-	       *numericType = TYPEAPPLICATION;
-	    else if(strncmp("MODEL", mimeType.c_str(), 5) == 0)
-	       *numericType = TYPEMODEL;
-	    else
-	       *numericType = TYPEOTHER;
-	 }
-	 return true;
+         if(numericType)
+         {
+            if(strncmp("VIDEO", mimeType.c_str(), 5) == 0)
+               *numericType = TYPEVIDEO;
+            else if(strncmp("AUDIO", mimeType.c_str(), 5) == 0)
+               *numericType = TYPEAUDIO;
+            else if(strncmp("IMAGE", mimeType.c_str(), 5) == 0)
+               *numericType = TYPEIMAGE;
+            else if(strncmp("TEXT", mimeType.c_str(), 4) == 0)
+               *numericType = TYPETEXT;
+            else if(strncmp("MESSAGE", mimeType.c_str(), 7) == 0)
+               *numericType = TYPEMESSAGE;
+            else if(strncmp("APPLICATION", mimeType.c_str(), 11) == 0)
+               *numericType = TYPEAPPLICATION;
+            else if(strncmp("MODEL", mimeType.c_str(), 5) == 0)
+               *numericType = TYPEMODEL;
+            else
+               *numericType = TYPEOTHER;
+         }
+         return true;
       }
    return false;
 }

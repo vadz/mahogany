@@ -1,11 +1,14 @@
 /*-*- c++ -*-********************************************************
  * MApplication class: all non GUI specific application stuff       *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/05/13 19:01:54  KB
+ * added kbList, adapted MimeTypes for it, more python, new icons
+ *
  * Revision 1.1  1998/04/29 19:55:42  KB
  * some more scripting and configure changes for python
  *
@@ -38,26 +41,26 @@ public:
    void	Exit(int force);
    MFrame *TopLevelFrame(void) ;
     char *GetText( char *in);
-   void	ErrorMessage(string &message, MFrame *parent, bool modal);
-   void	SystemErrorMessage(string  &message,
+   void	ErrorMessage(String &message, MFrame *parent, bool modal);
+   void	SystemErrorMessage(String  &message,
 		     MFrame *parent,
 			int modal);
-   void	FatalErrorMessage(string  &message,
+   void	FatalErrorMessage(String  &message,
 		   MFrame *parent);
-   void	Message(string  &message,
+   void	Message(String  &message,
 		MFrame *parent,
 		int modal);
-   int	YesNoDialog(string  &message,
+   int	YesNoDialog(String  &message,
 		    MFrame *parent,
 		    int modal,
 		    int YesDefault = true);
-   string  & GetGlobalDir(void) ;
-   string  & GetLocalDir(void) ;
+   String  & GetGlobalDir(void) ;
+   String  & GetLocalDir(void) ;
    MimeList * GetMimeList(void) ;
    MimeTypes * GetMimeTypes(void) ;
    ProfileBase *GetProfile(void) ;
    Adb *GetAdb(void) ;
    void	ShowConsole(int display = true);
-   void Log(int level, string  &message);
+   void Log(int level, String  &message);
 };
 

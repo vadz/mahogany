@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/13 19:01:40  KB
+ * added kbList, adapted MimeTypes for it, more python, new icons
+ *
  * Revision 1.3  1998/04/22 19:54:47  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -29,18 +32,24 @@
 #pragma interface "MimeTypes.h"
 #endif
 
+#include   "kbList.h"
+
 /**
    MimeTypes - maps file extensions to mime types.
 */
 class MimeTEntry
 {
    /// type
-   String	type;
+   String type;
    /// list of extensions for this type
-   std::list<String> extensions;
+   kbList extensions;
    friend class MimeTypes;
 public:
    MimeTEntry();
+   /** Create an entry from a mime.types line
+       @param str the line from mime.types
+   */
+   MimeTEntry(String const & str);
    /** Create an entry from a mime.types line
        @param str the line from mime.types
        @return true if a new entry was created
@@ -55,7 +64,8 @@ public:
    MimeTypes - mapping of Mime types to icons and handlers
 */
 
-class MimeTypes : public STL_LIST<MimeTEntry>, public CommonBase
+//class MimeTypes : public STL_LIST<MimeTEntry>, public CommonBase
+class MimeTypes : public kbList, public CommonBase
 {
 public:
    /** Constructor

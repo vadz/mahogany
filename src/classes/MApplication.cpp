@@ -3,7 +3,12 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$          *
+ * $Id$         *
+ *                                                                  *
+ * $Log$
+ * Revision 1.11  1998/05/13 19:02:08  KB
+ * added kbList, adapted MimeTypes for it, more python, new icons
+ *         *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -11,6 +16,7 @@
 #endif
 
 #include     "Mpch.h"
+
 #ifndef   USE_PCH
 #   include   "Mcommon.h"
 #   include   "strutil.h"
@@ -22,6 +28,7 @@
 #   include   "Mdefaults.h"
 #   include   "MApplication.h"
 #endif
+
 
 #include   <locale.h>
 #include   <errno.h>
@@ -63,29 +70,29 @@ MApplication::MApplication(void) CALL_APPCONF_CTOR
    initialisedFlag = false;
    logFrame = NULL;
    
-   #ifdef USE_WXCONFIG
+#ifdef USE_WXCONFIG
       wxConfig::Set(GLOBAL_NEW wxFileConfig(M_APPLICATIONNAME));
 
       // TODO: recordDefaults & expandVariables
-   #else
+#else
       //  activate recording of configuration entries
       if(readEntry(MC_RECORDDEFAULTS,MC_RECORDDEFAULTS_D))
          recordDefaults(TRUE);
 
       // activate variable expansion as default
       expandVariables(TRUE);
-   #endif
+#endif
 
    // set the default path for configuration entries
    setCurrentPath(M_APPLICATIONNAME);
    VAR(readEntry("TestEntry","DefaultValue"));
 
    // initialise the profile
-   #ifdef   USE_WXCONFIG
+#ifdef   USE_WXCONFIG
       profile = GLOBAL_NEW ProfileAppConfig();
-   #else
+#else
       profile = GLOBAL_NEW ProfileAppConfig(this);
-   #endif
+#endif
 
    adb = NULL;
    // do we have gettext() ?

@@ -7,7 +7,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/13 19:02:47  KB
+ * added kbList, adapted MimeTypes for it, more python, new icons
+ *
  * Revision 1.3  1998/05/12 12:19:04  VZ
+ *
  * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
  *
  * Revision 1.2  1998/03/26 23:05:43  VZ
@@ -172,7 +176,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    STRINGLIST	slist;
    slist.next = NULL;
    slist.text.size = line.length();
-   slist.text.data = strutil_strdup(line);
+   slist.text.data = (char *)strutil_strdup(line);
 
    char *
       rc = mail_fetchheader_full (folder->Stream(),

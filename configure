@@ -2298,6 +2298,7 @@ for ac_dir in $SEARCH_LIB;
       WX_LINK="$ac_path_to_link -lwx_gtk"
       WX_INCLUDE="$ac_path_to_include/wxGTK/include $ac_path_to_include/wxGTK/setup/${OSTYPE}"
       echo "$ac_t""yes" 1>&6
+      WX_DEFS=-D__GTK__
     else
       echo "$ac_t""no" 1>&6
     fi
@@ -2305,7 +2306,7 @@ for ac_dir in $SEARCH_LIB;
     echo "$ac_t""no" 1>&6
   fi
   echo $ac_n "checking for gtk libraries""... $ac_c" 1>&6
-echo "configure:2309: checking for gtk libraries" >&5
+echo "configure:2310: checking for gtk libraries" >&5
   
 ac_find_includes=
 for ac_dir in $SEARCH_INCLUDE;
@@ -2377,7 +2378,7 @@ EOF
 
     WX_LINK=
     echo $ac_n "checking for wxWindows(Xt) libraries""... $ac_c" 1>&6
-echo "configure:2381: checking for wxWindows(Xt) libraries" >&5
+echo "configure:2382: checking for wxWindows(Xt) libraries" >&5
     
 ac_find_includes=
 for ac_dir in $SEARCH_INCLUDE;
@@ -2428,7 +2429,6 @@ for ac_dir in $SEARCH_LIB;
         WX_LINK="$ac_path_to_link -lwx_xt -lwx_xtwidgets $XT_LIBS $XLIBS"
         WX_SLINK="$ac_pure_path_to_link/libwx_xt.a $ac_pure_path_to_link/libwx_xtwidgets.a $XT_LIBS $XLIBS"
 	WX_INCLUDE="$ac_path_to_include/wxxt $ac_path_to_include/wxxt/setup/${OSTYPE}"
-	WX_DEFS=-D__GTK__
 	echo "$ac_t""yes" 1>&6
       else
         echo "$ac_t""no" 1>&6

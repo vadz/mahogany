@@ -14,17 +14,17 @@
 #endif
 
 #ifndef	USE_PCH
-#include	<Mcommon.h>
-#include	<appconf.h>
-#include	<Mdefaults.h>
-#include	<Adb.h>
-#include	<MFrame.h>
-#include	<PathFinder.h>
-#include	<MimeList.h>
-#include	<MimeTypes.h>
-#include	<guidef.h>
-#include	<Profile.h>
-#include	<MLogFrame.h>
+#   include	<Mcommon.h>
+#   include	<appconf.h>
+#   include	<Mdefaults.h>
+#   include	<Adb.h>
+#   include	<MFrame.h>
+#   include	<PathFinder.h>
+#   include	<MimeList.h>
+#   include	<MimeTypes.h>
+#   include	<guidef.h>
+#   include	<Profile.h>
+#   include	<MLogFrame.h>
 #endif
 
 class MApplication;
