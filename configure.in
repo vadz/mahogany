@@ -1,4 +1,4 @@
-dnl Process this file with autoconf to produce a configure script.
+nl Process this file with autoconf to produce a configure script.
 
 AC_INIT(configure.in)
 AC_REVISION([$Id$])
@@ -287,19 +287,6 @@ case "$m_cv_cxx_opernames" in yes)
 	esac
 esac
 
-dnl how to generate dependencies...
-dnl for now, we just support -MD on g++
-case "$GXX" in
-yes)	CXXFLAGS="$CXXFLAGS -MD" ;;
-*)	AC_MSG_WARN([*** dependencies not supported ***
-	Dependencies are not supported for this compiler.  If this
-	message appears, then we need to talk---we think we know
-	how to fix this, but we don't have a machine where we can
-	test it.  Please go to http://mahogany.sourceforge.net/bugz
-	and submit a bug against the Build component so we can give
-	you some code to try.]);;
-esac
-
 dnl Various other commands needed
 dnl =============================
 
@@ -465,7 +452,7 @@ case "$USE_SSL" in
 	*)	ssl_inc="$prefix/include" ;;
 	esac
 
-	M_CHECK_HEADER(openssl/ssl.h,
+	M_CHECK_MYHEADER(openssl/ssl.h,
 	[ \
 		$ssl_inc \
 		/include \
@@ -484,7 +471,7 @@ case "$USE_SSL" in
 
 	if test "$ssl_option" != "no"; then
 	    ssl_lib=`echo $ssl_inc | sed 's/include$/lib/'`
-	    M_CHECK_LIB(ssl, main,
+	    M_CHECK_MYLIB(ssl, main,
 		    [ \
 			$ssl_lib \
 			/usr/lib \
@@ -625,7 +612,7 @@ dnl check for python (a bit lengthy thanks to its stupid installation)
 dnl --------------------------------------------------------------------------
 
 case "$USE_PYTHON" in 1)
-   M_CHECK_HEADER(Python.h,
+   M_CHECK_MYHEADER(Python.h,
        [ \
        	 $prefix/include \
          /usr/include/python1.5 \
@@ -634,7 +621,7 @@ case "$USE_PYTHON" in 1)
          /home/local/include \
          /home/local/include/python1.5 \
        ],
-       [ M_CHECK_LIB(python1.5,main,
+       [ M_CHECK_MYLIB(python1.5,main,
            [ /usr \
              /usr/lib \
              /usr/lib/python1.5 \
@@ -946,6 +933,21 @@ case "$GCC" in yes)
 	*)	CFLAGS="$CFLAGS -Wall" ;;
 	esac ;;	
 esac
+
+dnl Only now can we add them, or otherwise some tests would have failed
+dnl how to generate dependencies...
+dnl for now, we just support -MD on g++
+case "$GXX" in
+yes)	CXXFLAGS="$CXXFLAGS -MD" ;;
+*)	AC_MSG_WARN([*** dependencies not supported ***
+	Dependencies are not supported for this compiler.  If this
+	message appears, then we need to talk---we think we know
+	how to fix this, but we don't have a machine where we can
+	test it.  Please go to http://mahogany.sourceforge.net/bugz
+	and submit a bug against the Build component so we can give
+	you some code to try.]);;
+esac
+
 dnl Python code produces warnings, so don't break compilation:
 CXXFLAGS_RELAXED="$CXXFLAGS"
 case "$GXX" in yes)
