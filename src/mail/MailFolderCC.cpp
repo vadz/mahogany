@@ -5148,11 +5148,16 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 {
    CHECK_DEAD(_T("Cannot list subfolder of the closed folder '%s'."));
 
+   CHECK_RET( asmf, _T("no ASMailFolder in ListFolders") );
+
    String spec = m_ImapSpec;
 
-   // make sure that there is a folder name delimiter before pattern - this
-   // only makes sense for non empty spec
-   if ( !spec.empty() )
+   // make sure that there is a folder name delimiter before pattern -- this is
+   // convenient for the calling code however it makes it impossible to
+   // enumerate all folders under the given one including itself, so we use a
+   // dirty hack: empty pattern is just like "*" except that we don't add the
+   // delimiter before it
+   if ( !spec.empty() && !pattern.empty() )
    {
       char ch = spec.Last();
 
@@ -5165,9 +5170,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
       }
    }
 
-   spec << reference << pattern;
-
-   ASSERT(asmf);
+   spec << reference << (pattern.empty() ? String(_T("*")) : pattern);
 
    // set user data (retrieved by mm_list)
    m_UserData = ud;
