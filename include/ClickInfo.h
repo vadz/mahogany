@@ -45,6 +45,9 @@ public:
    /// get the label to be shown in the viewer
    virtual String GetLabel() const = 0;
 
+   /// get the message view this clickable object is situated in (may be NULL)
+   MessageView *GetMessageView() const { return m_msgView; }
+
    //@}
 
    /**
