@@ -333,9 +333,12 @@ esac
 
 case "$USE_DEBUG" in
 1)	AC_DEFINE(DEBUG)
-	if test -x /usr/bin/whoami
-	then	CPPFLAGS="$CPPFLAGS -DDEBUG_`/usr/bin/whoami`"
-	fi
+	CPPFLAGS="$CPPFLAGS -DDEBUG"
+	if test -z "$DEBUGUSER" ; then DEBUGUSER="$USER"; fi
+	for i in $DEBUGUSER
+	do
+		CPPFLAGS="$CPPFLAGS -DDEBUG_$i"
+	done  
 	USE_DEBUG_INFO=1
 	MAKE_DEBUG="DEBUG=yes" ;;
 *)	MAKE_DEBUG='' ;;
