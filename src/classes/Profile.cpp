@@ -549,27 +549,25 @@ Profile::readEntry(const String & key, const String & def, bool * found) const
 {
    PCHECK();
 
-   ms_GlobalConfig->SetPath(GetName());
+   String pathProfile = GetName();
 
-   String keypath;
+   if( m_ProfilePath.length() )
+      pathProfile << '/' << m_ProfilePath;
 
-   if(m_ProfilePath.Length())
-      keypath << m_ProfilePath << '/';
+   ms_GlobalConfig->SetPath(pathProfile);
 
-   keypath << key;
-
-   String keypathSuspended;
-   keypathSuspended << SUSPEND_PATH << '/' << keypath;
+   String keySuspended;
+   keySuspended << SUSPEND_PATH << '/' << key;
 
    String str;
    bool foundHere = FALSE;
    if ( m_Suspended )
    {
-      foundHere = ms_GlobalConfig->Read(keypathSuspended, &str, def);
+      foundHere = ms_GlobalConfig->Read(keySuspended, &str, def);
    }
    if ( !foundHere )
    {
-      foundHere = ms_GlobalConfig->Read(keypath, &str, def);
+      foundHere = ms_GlobalConfig->Read(key, &str, def);
    }
 
    bool foundAnywhere = foundHere;
@@ -577,10 +575,10 @@ Profile::readEntry(const String & key, const String & def, bool * found) const
            (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
    {
       ms_GlobalConfig->SetPath("..");
-      foundAnywhere = ms_GlobalConfig->Read(keypathSuspended, &str, def);
+      foundAnywhere = ms_GlobalConfig->Read(keySuspended, &str, def);
       if ( !foundAnywhere )
       {
-         foundAnywhere = ms_GlobalConfig->Read(keypath, &str, def);
+         foundAnywhere = ms_GlobalConfig->Read(key, &str, def);
       }
    }
 
@@ -595,25 +593,25 @@ Profile::readEntry(const String & key, long def, bool * found) const
 {
    PCHECK();
 
-   ms_GlobalConfig->SetPath(GetName());
-   String keypath, localpath;
-   if(m_ProfilePath.Length())
-      keypath << m_ProfilePath << '/';
+   String pathProfile = GetName();
 
-   keypath << key;
+   if( m_ProfilePath.length() )
+      pathProfile << '/' << m_ProfilePath;
 
-   String keypathSuspended;
-   keypathSuspended << SUSPEND_PATH << '/' << keypath;
+   ms_GlobalConfig->SetPath(pathProfile);
+
+   String keySuspended;
+   keySuspended << SUSPEND_PATH << '/' << key;
 
    long val;
    bool foundHere = FALSE;
    if ( m_Suspended )
    {
-      foundHere = ms_GlobalConfig->Read(localpath, &val, def);
+      foundHere = ms_GlobalConfig->Read(keySuspended, &val, def);
    }
    if ( !foundHere )
    {
-      foundHere = ms_GlobalConfig->Read(keypath, &val, def);
+      foundHere = ms_GlobalConfig->Read(key, &val, def);
    }
 
    bool foundAnywhere = foundHere;
@@ -621,10 +619,10 @@ Profile::readEntry(const String & key, long def, bool * found) const
            (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
    {
       ms_GlobalConfig->SetPath("..");
-      foundAnywhere = ms_GlobalConfig->Read(keypathSuspended, &val, def);
+      foundAnywhere = ms_GlobalConfig->Read(keySuspended, &val, def);
       if ( !foundAnywhere )
       {
-         foundAnywhere = ms_GlobalConfig->Read(keypath, &val, def);
+         foundAnywhere = ms_GlobalConfig->Read(key, &val, def);
       }
    }
 
