@@ -561,7 +561,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.247 2001/11/23 17:05:35 vadz Exp 
+# From configure.in Id: configure.in,v 1.248 2001/11/23 22:31:55 vadz Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -4176,7 +4176,7 @@ esac
 
 case "$USE_PYTHON" in
 0)	MAKE_USE_PYTHON=''
-	echo "configure: warning: Building M without Python leads to reduced functionality!" 1>&2
+	echo "configure: warning: Mahogany will be built without embedded Python interpreter" 1>&2
 	PYTHON_LIBS=''
 	;;
 
