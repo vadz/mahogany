@@ -57,6 +57,7 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_FOLDER_PATH;
+extern const MOption MP_FOLDER_TYPE;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1266,7 +1267,7 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
             Profile_obj profile(folderNew->GetProfile());
 
             // check if the folder really already exists, if not - create it
-            if ( READ_CONFIG_TEXT(profile, MP_FOLDER_PATH).empty() )
+            if ( READ_CONFIG(profile, MP_FOLDER_TYPE) == MF_ILLEGAL )
             {
                int flags = m_flagsParent;
                long attr = result->GetAttributes();
