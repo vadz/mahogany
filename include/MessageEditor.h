@@ -158,6 +158,9 @@ public:
    /// get the next part, returns NULL if no more
    virtual EditorContentPart *GetNextPart() = 0;
 
+   /// edit the properties of the given attachment when the user clicks on it
+   virtual void EditAttachmentProperties(EditorContentPart *part);
+
    //@}
 
 protected:

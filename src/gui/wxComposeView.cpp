@@ -3982,3 +3982,16 @@ bool Composer::RestoreAll()
    return true;
 }
 
+// ----------------------------------------------------------------------------
+// MessageEditor attachment properties editing dialog
+// ----------------------------------------------------------------------------
+
+void
+MessageEditor::EditAttachmentProperties(EditorContentPart *part)
+{
+   CHECK_RET( part, "no attachment to edit in EditAttachmentProperties" );
+
+   wxLogMessage("Attachment '%s' of type '%s' clicked",
+                part->GetFileName().c_str(), part->GetMimeType().c_str());
+}
+

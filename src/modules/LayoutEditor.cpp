@@ -112,44 +112,13 @@ private:
 class wxComposerLayoutWindow : public wxLayoutWindow
 {
 public:
-   wxComposerLayoutWindow(LayoutEditor *editor, wxWindow *parent)
-      : wxLayoutWindow(parent)
-   {
-      m_editor = editor;
-
-      m_firstTimeModify =
-      m_firstTimeFocus = TRUE;
-   }
+   wxComposerLayoutWindow(LayoutEditor *editor, wxWindow *parent);
 
 protected:
-   void OnKeyDown(wxKeyEvent& event)
-   {
-      if ( m_firstTimeModify )
-      {
-         m_firstTimeModify = FALSE;
-
-         m_editor->OnFirstTimeModify();
-      }
-
-      event.Skip();
-   }
-
-   void OnFocus(wxFocusEvent& event)
-   {
-      if ( m_firstTimeFocus )
-      {
-         m_firstTimeFocus = FALSE;
-
-         if ( m_editor->OnFirstTimeFocus() )
-         {
-            // composer doesn't need first modification notification any more
-            // because it modified the text itself
-            m_firstTimeModify = FALSE;
-         }
-      }
-
-      event.Skip();
-   }
+   // event handlers
+   void OnKeyDown(wxKeyEvent& event);
+   void OnFocus(wxFocusEvent& event);
+   void OnMouseLClick(wxCommandEvent& event);
 
 private:
    LayoutEditor *m_editor;
@@ -211,7 +180,68 @@ IMPLEMENT_MESSAGE_EDITOR(LayoutEditor,
 BEGIN_EVENT_TABLE(wxComposerLayoutWindow, wxLayoutWindow)
    EVT_KEY_DOWN(wxComposerLayoutWindow::OnKeyDown)
    EVT_SET_FOCUS(wxComposerLayoutWindow::OnFocus)
+
+   EVT_MENU(WXLOWIN_MENU_LCLICK, wxComposerLayoutWindow::OnMouseLClick)
 END_EVENT_TABLE()
+
+wxComposerLayoutWindow::wxComposerLayoutWindow(LayoutEditor *editor,
+                                               wxWindow *parent)
+                      : wxLayoutWindow(parent)
+{
+   m_editor = editor;
+
+   // we want to get the notifications about mouse clicks
+   SetMouseTracking();
+
+   m_firstTimeModify =
+   m_firstTimeFocus = TRUE;
+}
+
+void wxComposerLayoutWindow::OnKeyDown(wxKeyEvent& event)
+{
+   if ( m_firstTimeModify )
+   {
+      m_firstTimeModify = FALSE;
+
+      m_editor->OnFirstTimeModify();
+   }
+
+   event.Skip();
+}
+
+void wxComposerLayoutWindow::OnFocus(wxFocusEvent& event)
+{
+   if ( m_firstTimeFocus )
+   {
+      m_firstTimeFocus = FALSE;
+
+      if ( m_editor->OnFirstTimeFocus() )
+      {
+         // composer doesn't need first modification notification any more
+         // because it modified the text itself
+         m_firstTimeModify = FALSE;
+      }
+   }
+
+   event.Skip();
+}
+
+void wxComposerLayoutWindow::OnMouseLClick(wxCommandEvent& event)
+{
+   wxLayoutObject *obj = (wxLayoutObject *)event.GetClientData();
+   LayoutEditData *data = (LayoutEditData *)obj->GetUserData();
+   if ( data )
+   {
+      EditorContentPart *part = data->GetContentPart();
+      if ( part )
+      {
+         m_editor->EditAttachmentProperties(part);
+         part->DecRef();
+      }
+
+      data->DecRef();
+   }
+}
 
 // ----------------------------------------------------------------------------
 // LayoutEditor ctor/dtor
