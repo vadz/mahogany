@@ -2244,7 +2244,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
                wxString msg;
                msg.Printf(_("You have not specified %s for this folder, although it requires one.\n"
                         "Alternatively, you might want to select anonymous access.\n"
-                        "Would you like to do change this now?"),
+                        "Would you like to change this now?"),
                      what.c_str());
 
                if ( keyname == "AskPwd" )
