@@ -835,6 +835,10 @@ SOURCE=.\src\adb\ProvPalm.cpp
 !ENDIF 
 
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\adb\ProvLine.cpp
+# End Source File
 # End Group
 # Begin Group "python"
 
@@ -1953,6 +1957,10 @@ SOURCE=.\src\modules\TextViewer.cpp
 # Begin Source File
 
 SOURCE=.\src\modules\LayoutEditor.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\modules\BareBonesEditor.cpp
 # End Source File
 # End Group
 # Begin Source File
