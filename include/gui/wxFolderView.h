@@ -37,7 +37,8 @@ enum wxFolderListCtrlFields
    WXFLC_SIZE,
    WXFLC_FROM,
    WXFLC_SUBJECT,
-   WXFLC_NUMENTRIES
+   WXFLC_NUMENTRIES,
+   WXFLC_NONE = WXFLC_NUMENTRIES // must be equal for GetColumnByIndex()
 };
 
 

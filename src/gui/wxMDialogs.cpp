@@ -2634,3 +2634,188 @@ size_t MDialog_GetSelections(const wxString& message,
 
    return dlg.ShowModal() == wxID_OK ? selections->GetCount() : 0;
 }
+
+// ----------------------------------------------------------------------------
+// wxSelectionsOrderDialog
+// ----------------------------------------------------------------------------
+
+// control ids for wxSelectionsOrderDialog
+enum
+{
+   Button_Up = 1000,
+   Button_Down
+};
+
+BEGIN_EVENT_TABLE(wxSelectionsOrderDialog, wxManuallyLaidOutDialog)
+   EVT_BUTTON(Button_Up, wxSelectionsOrderDialog::OnButtonUp)
+   EVT_BUTTON(Button_Down, wxSelectionsOrderDialog::OnButtonDown)
+
+   EVT_CHECKLISTBOX(-1, wxSelectionsOrderDialog::OnCheckLstBoxToggle)
+
+   EVT_UPDATE_UI(Button_Up,   wxSelectionsOrderDialog::OnUpdateUI)
+   EVT_UPDATE_UI(Button_Down, wxSelectionsOrderDialog::OnUpdateUI)
+END_EVENT_TABLE()
+
+wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
+                                                 const wxString& message,
+                                                 const wxString& caption,
+                                                 const wxString& profileKey)
+                       : wxManuallyLaidOutDialog(parent, caption, profileKey)
+{
+   m_hasChanges = false;
+
+   // layout the controls
+   // -------------------
+   wxLayoutConstraints *c;
+
+   // Ok and Cancel buttons and a static box around everything else
+   wxStaticBox *box = CreateStdButtonsAndBox(message);
+
+   // buttons to move items up/down
+   wxButton *btnDown = new wxButton(this, Button_Down, _("&Down"));
+   c = new wxLayoutConstraints();
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   btnDown->SetConstraints(c);
+
+   // FIXME: we also assume that "Down" is longer than "Up" - which may, of
+   //        course, be false after translation
+   wxButton *btnUp = new wxButton(this, Button_Up, _("&Up"));
+   c = new wxLayoutConstraints();
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
+   c->width.SameAs(btnDown, wxWidth);
+   c->height.AsIs();
+   btnUp->SetConstraints(c);
+
+   // a checklistbox with headers on the space which is left
+   m_checklstBox = new wxCheckListBox(this, -1);
+   c = new wxLayoutConstraints();
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.LeftOf(btnDown, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_checklstBox->SetConstraints(c);
+
+   // set the minimal window size
+   SetDefaultSize(3*wBtn, 7*hBtn);
+}
+
+void wxSelectionsOrderDialog::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   // only enable buttons if there is something selected
+   event.Enable( m_checklstBox->GetSelection() != -1 );
+}
+
+void wxSelectionsOrderDialog::OnButtonMove(bool up)
+{
+    int selection = m_checklstBox->GetSelection();
+    if ( selection != -1 )
+    {
+        wxString label = m_checklstBox->GetString(selection);
+
+        int positionNew = up ? selection - 1 : selection + 2;
+        if ( positionNew >= 0 && positionNew < m_checklstBox->Number() )
+        {
+            bool wasChecked = m_checklstBox->IsChecked(selection);
+
+            int positionOld = up ? selection + 1 : selection;
+
+            // insert the item
+            m_checklstBox->InsertItems(1, &label, positionNew);
+
+            // and delete the old one
+            m_checklstBox->Delete(positionOld);
+
+            int selectionNew = up ? positionNew : positionNew - 1;
+            m_checklstBox->Check(selectionNew, wasChecked);
+            m_checklstBox->SetSelection(selectionNew);
+
+            // something changed, remember it
+            m_hasChanges = true;
+        }
+        //else: out of range, silently ignore
+    }
+}
+
+// ----------------------------------------------------------------------------
+// MDialog_GetSelectionsInOrder()
+// ----------------------------------------------------------------------------
+
+// a simple class deriving from wxSelectionsOrderDialog which just passes the
+// strings around
+class wxSelectionsOrderDialogSimple : public wxSelectionsOrderDialog
+{
+public:
+   wxSelectionsOrderDialogSimple(const wxString& message,
+                                 const wxString& caption,
+                                 wxArrayString* choices,
+                                 wxArrayInt* status,
+                                 const wxString& profileKey,
+                                 wxWindow *parent)
+      : wxSelectionsOrderDialog(parent, message, caption, profileKey)
+   {
+      m_choices = choices;
+      m_status = status;
+   }
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
+private:
+   wxArrayString *m_choices;
+   wxArrayInt    *m_status;
+};
+
+bool wxSelectionsOrderDialogSimple::TransferDataToWindow()
+{
+   size_t count = m_choices->GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      m_checklstBox->Append(m_choices->Item(n));
+      if ( m_status->Item(n) )
+         m_checklstBox->Check(n);
+   }
+
+   return TRUE;
+}
+
+bool wxSelectionsOrderDialogSimple::TransferDataFromWindow()
+{
+   // we're a bit dumb here as we assume that if the user changed something, it
+   // should matter (this is not always the case: clicking on thecheck list box
+   // twice doesn't cange anything...) -- we could instead compare the old
+   // state with the new one
+   if ( m_hasChanges )
+   {
+      // discard old values
+      m_choices->Empty();
+      m_status->Empty();
+
+      // go through the check list box and fill the arrays
+      size_t count = m_checklstBox->GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         m_choices->Add(m_checklstBox->GetString(n));
+         m_status->Add(m_checklstBox->IsChecked(n));
+      }
+   }
+
+   return TRUE;
+}
+
+bool MDialog_GetSelectionsInOrder(const wxString& message,
+                                  const wxString& caption,
+                                  wxArrayString* choices,
+                                  wxArrayInt* status,
+                                  const wxString& profileKey,
+                                  wxWindow *parent)
+{
+   wxSelectionsOrderDialogSimple dlg(message, caption,
+                                     choices, status,
+                                     profileKey, parent);
+
+   return dlg.ShowModal() == wxID_OK && dlg.HasChanges();
+}

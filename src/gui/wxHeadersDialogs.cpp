@@ -75,13 +75,6 @@ enum
    Button_EditCustom = 1100
 };
 
-// for wxMsgViewHeadersDialog
-enum
-{
-   Button_Up = 1000,
-   Button_Down
-};
-
 // for wxCustomHeadersDialog
 enum
 {
@@ -146,30 +139,19 @@ private:
 };
 
 // dialog to configure headers shown in the message view
-class wxMsgViewHeadersDialog  : public wxOptionsPageSubdialog
+class wxMsgViewHeadersDialog  : public wxSelectionsOrderDialog
 {
 public:
    // ctor which takes the profile whose settings we will edit
    wxMsgViewHeadersDialog(Profile *profile, wxWindow *parent);
+   virtual ~wxMsgViewHeadersDialog();
 
    // transfer data to/from window
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
-   // update UI: disable the text boxes which shouldn't be edited
-   void OnUpdateUI(wxUpdateUIEvent& event);
-
-   // up/down buttons notifications
-   void OnButtonUp(wxCommandEvent& event) { OnButtonMove(TRUE); }
-   void OnButtonDown(wxCommandEvent& event) { OnButtonMove(FALSE); }
-
 private:
-   // real button events handler
-   void OnButtonMove(bool up);
-
-   wxCheckListBox *m_checklstBox;
-
-   DECLARE_EVENT_TABLE()
+   Profile *m_profile;
 };
 
 // dialog allowing editing one custom header
@@ -309,13 +291,6 @@ BEGIN_EVENT_TABLE(wxComposeHeadersDialog, wxOptionsPageSubdialog)
                        TextCtrlId + wxComposeHeadersDialog::Header_Max,
                        wxComposeHeadersDialog::OnUpdateUI)
    EVT_BUTTON(Button_EditCustom, wxComposeHeadersDialog::OnEditCustomHeaders)
-END_EVENT_TABLE()
-
-BEGIN_EVENT_TABLE(wxMsgViewHeadersDialog, wxOptionsPageSubdialog)
-   EVT_BUTTON(Button_Up, wxMsgViewHeadersDialog::OnButtonUp)
-   EVT_BUTTON(Button_Down, wxMsgViewHeadersDialog::OnButtonDown)
-
-   EVT_UPDATE_UI_RANGE(Button_Up, Button_Down, wxMsgViewHeadersDialog::OnUpdateUI)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxCustomHeaderDialog, wxOptionsPageSubdialog)
@@ -543,48 +518,19 @@ bool wxComposeHeadersDialog::TransferDataFromWindow()
 
 wxMsgViewHeadersDialog::wxMsgViewHeadersDialog(Profile *profile,
                                                wxWindow *parent)
-                      : wxOptionsPageSubdialog(profile, parent,
+                      : wxSelectionsOrderDialog(parent,
+                                               _("&Headers"),
                                                _("Configure headers to show "
                                                  "in message view"),
                                                "MsgViewHeaders")
 {
-   // layout the controls
-   // -------------------
-   wxLayoutConstraints *c;
+   m_profile = profile;
+   SafeIncRef(profile);
+}
 
-   // Ok and Cancel buttons and a static box around everything else
-   wxStaticBox *box = CreateStdButtonsAndBox(_("&Headers"));
-
-   // buttons to move items up/down
-   wxButton *btnDown = new wxButton(this, Button_Down, _("&Down"));
-   c = new wxLayoutConstraints();
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
-   c->width.AsIs();
-   c->height.AsIs();
-   btnDown->SetConstraints(c);
-
-   // FIXME: we also assume that "Down" is longer than "Up" - which may, of
-   //        course, be false after translation
-   wxButton *btnUp = new wxButton(this, Button_Up, _("&Up"));
-   c = new wxLayoutConstraints();
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
-   c->width.SameAs(btnDown, wxWidth);
-   c->height.AsIs();
-   btnUp->SetConstraints(c);
-
-   // a checklistbox with headers on the space which is left
-   m_checklstBox = new wxCheckListBox(this, -1);
-   c = new wxLayoutConstraints();
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.LeftOf(btnDown, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
-   m_checklstBox->SetConstraints(c);
-
-   // set the minimal window size
-   SetDefaultSize(3*wBtn, 7*hBtn);
+wxMsgViewHeadersDialog::~wxMsgViewHeadersDialog()
+{
+   SafeDecRef(m_profile);
 }
 
 bool wxMsgViewHeadersDialog::TransferDataToWindow()
@@ -648,7 +594,8 @@ bool wxMsgViewHeadersDialog::TransferDataFromWindow()
    }
 
    // update the headers which we show
-   if ( shownHeaders != READ_CONFIG(m_profile, MP_MSGVIEW_HEADERS) )
+   m_hasChanges = shownHeaders != READ_CONFIG(m_profile, MP_MSGVIEW_HEADERS);
+   if ( m_hasChanges )
    {
       m_hasChanges = TRUE;
 
@@ -658,45 +605,11 @@ bool wxMsgViewHeadersDialog::TransferDataFromWindow()
    // update the list of known entries too
    if ( allHeaders != READ_CONFIG(m_profile, MP_MSGVIEW_ALL_HEADERS) )
    {
-      // it shouldn't cound as "change" really, so we don't set the flag
+      // it shouldn't count as "change" really, so we don't set the flag
       m_profile->writeEntry(MP_MSGVIEW_ALL_HEADERS, allHeaders);
    }
 
    return TRUE;
-}
-
-void wxMsgViewHeadersDialog::OnUpdateUI(wxUpdateUIEvent& event)
-{
-   // only enable buttons if there is something selected
-   event.Enable( m_checklstBox->GetSelection() != -1 );
-}
-
-void wxMsgViewHeadersDialog::OnButtonMove(bool up)
-{
-    int selection = m_checklstBox->GetSelection();
-    if ( selection != -1 )
-    {
-        wxString label = m_checklstBox->GetString(selection);
-
-        int positionNew = up ? selection - 1 : selection + 2;
-        if ( positionNew >= 0 && positionNew < m_checklstBox->Number() )
-        {
-            bool wasChecked = m_checklstBox->IsChecked(selection);
-
-            int positionOld = up ? selection + 1 : selection;
-
-            // insert the item
-            m_checklstBox->InsertItems(1, &label, positionNew);
-
-            // and delete the old one
-            m_checklstBox->Delete(positionOld);
-
-            int selectionNew = up ? positionNew : positionNew - 1;
-            m_checklstBox->Check(selectionNew, wasChecked);
-            m_checklstBox->SetSelection(selectionNew);
-        }
-        //else: out of range, silently ignore
-    }
 }
 
 // ----------------------------------------------------------------------------

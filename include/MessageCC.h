@@ -33,9 +33,9 @@ public:
    void GetHeaderLine(const String &line, String &value);
 
    /** Get a complete header text.
-       @return pointer to an internal buffer
+       @return string with multiline text containing the message headers
    */
-   const char * GetHeader(void) const;
+   String GetHeader(void) const;
 
    /** get Subject line
        @return Subject entry

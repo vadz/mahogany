@@ -93,9 +93,12 @@ public:
    wxFolderListCtrl(wxWindow *parent, wxFolderView *fv);
    ~wxFolderListCtrl();
    void Clear(void);
-   void SetEntry(long index,String const &status, String const &sender, String
-                 const &subject, String const &date, String const
-                 &size);
+   void SetEntry(long index,
+                 String const &status,
+                 String const &sender,
+                 String const &subject,
+                 String const &date,
+                 String const &size);
 
    void Select(long index, bool on=true)
       { SetItemState(index,on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
@@ -201,6 +204,63 @@ public:
 private:
    wxFolderView *m_folderView;
 };
+
+// ----------------------------------------------------------------------------
+// priate functions
+// ----------------------------------------------------------------------------
+
+// return the n-th shown column (WXFLC_NONE if no more columns)
+static wxFolderListCtrlFields GetColumnByIndex(const int *columns, size_t n)
+{
+   size_t col;
+   for ( col = 0; col < WXFLC_NUMENTRIES; col++ )
+   {
+      if ( columns[col] == (int)n )
+         break;
+   }
+
+   // WXFLC_NONE == WXFLC_NUMENTRIES so the return value is always correct
+   return (wxFolderListCtrlFields)col;
+}
+
+// read the columns info from profile into provided array
+static void ReadColumnsInfo(Profile *profile, int columns[WXFLC_NUMENTRIES])
+{
+   columns[WXFLC_STATUS]   = READ_CONFIG(profile, MP_FLC_STATUSCOL);
+   columns[WXFLC_DATE]     = READ_CONFIG(profile, MP_FLC_DATECOL);
+   columns[WXFLC_SUBJECT]  = READ_CONFIG(profile, MP_FLC_SUBJECTCOL);
+   columns[WXFLC_SIZE]     = READ_CONFIG(profile, MP_FLC_SIZECOL);
+   columns[WXFLC_FROM]     = READ_CONFIG(profile, MP_FLC_FROMCOL);
+}
+
+// write the columns to profile
+static void WriteColumnsInfo(Profile *profile, const int columns[WXFLC_NUMENTRIES])
+{
+   profile->writeEntry(MP_FLC_STATUSCOL, columns[WXFLC_STATUS]);
+   profile->writeEntry(MP_FLC_DATECOL,   columns[WXFLC_DATE]);
+   profile->writeEntry(MP_FLC_SUBJECTCOL,columns[WXFLC_SUBJECT]);
+   profile->writeEntry(MP_FLC_SIZECOL,   columns[WXFLC_SIZE]);
+   profile->writeEntry(MP_FLC_FROMCOL,   columns[WXFLC_FROM]);
+}
+
+// return the name of the n-th columns
+static inline wxString GetColumnName(size_t n)
+{
+   return _(wxFLC_ColumnNames[n]);
+}
+
+// return the columns index from name
+static wxFolderListCtrlFields GetColumnByName(const wxString& name)
+{
+   size_t n;
+   for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
+   {
+      if ( name == GetColumnName(n) )
+         break;
+   }
+
+   return (wxFolderListCtrlFields)n;
+}
 
 // ============================================================================
 // implementation
@@ -525,20 +585,9 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    wxPListCtrl::Create(name, parent, M_WXID_FOLDERVIEW_LISTCTRL,
                        wxDefaultPosition, wxSize(w,h), wxLC_REPORT | wxNO_BORDER);
 
-   m_columns[WXFLC_STATUS] = READ_CONFIG(p,MP_FLC_STATUSCOL);
-   m_columns[WXFLC_DATE] = READ_CONFIG(p,MP_FLC_DATECOL);
-   m_columns[WXFLC_SUBJECT] = READ_CONFIG(p,MP_FLC_SUBJECTCOL);
-   m_columns[WXFLC_SIZE] = READ_CONFIG(p,MP_FLC_SIZECOL);
-   m_columns[WXFLC_FROM] = READ_CONFIG(p,MP_FLC_FROMCOL);
+   ReadColumnsInfo(p, m_columns);
 
-   for(int i = 0; i < WXFLC_NUMENTRIES; i++)
-   {
-      if(m_columns[i] == 0)
-      {
-         m_firstColumn = i;
-         break;
-      }
-   }
+   m_firstColumn = GetColumnByIndex(m_columns, 0);
 
    // Create popup menu:
    m_menu = new wxMenu("", wxMENU_TEAROFF);
@@ -636,7 +685,7 @@ wxFolderListCtrl::Clear(void)
       for(int c = 0; c < WXFLC_NUMENTRIES; c++)
          for (int i = 0; i < WXFLC_NUMENTRIES; i++)
             if(m_columns[i] == c)
-               InsertColumn( c, _(wxFLC_ColumnNames[i]), wxLIST_FORMAT_LEFT);
+               InsertColumn( c, GetColumnName(i), wxLIST_FORMAT_LEFT);
    }
 
    RestoreWidths();
@@ -651,14 +700,19 @@ wxFolderListCtrl::SetEntry(long index,
                            String const &date,
                            String const &size)
 {
-   if(index >= GetItemCount())
+   if ( index >= GetItemCount() )
       InsertItem(index, status); // column 0
 
-   SetItem(index, m_columns[WXFLC_STATUS], status);
-   SetItem(index, m_columns[WXFLC_FROM], sender);
-   SetItem(index, m_columns[WXFLC_DATE], date);
-   SetItem(index, m_columns[WXFLC_SIZE], size);
-   SetItem(index, m_columns[WXFLC_SUBJECT], subject);
+   if ( m_columns[WXFLC_STATUS] != -1 )
+      SetItem(index, m_columns[WXFLC_STATUS], status);
+   if ( m_columns[WXFLC_FROM] != -1 )
+      SetItem(index, m_columns[WXFLC_FROM], sender);
+   if ( m_columns[WXFLC_DATE] != -1 )
+      SetItem(index, m_columns[WXFLC_DATE], date);
+   if ( m_columns[WXFLC_SIZE] != -1 )
+      SetItem(index, m_columns[WXFLC_SIZE], size);
+   if ( m_columns[WXFLC_SUBJECT] != -1 )
+      SetItem(index, m_columns[WXFLC_SUBJECT], subject);
 }
 
 void
@@ -1909,3 +1963,68 @@ wxFolderViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 }
 
 IMPLEMENT_DYNAMIC_CLASS(wxFolderViewFrame, wxMFrame)
+
+// ----------------------------------------------------------------------------
+// other public functions
+// ----------------------------------------------------------------------------
+
+bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
+{
+   // prepare the data for the dialog: we need the array of columns in order
+   int columns[WXFLC_NUMENTRIES];
+   ReadColumnsInfo(profile, columns);
+
+   wxArrayString choices;
+   wxArrayInt status;
+   size_t n;
+   for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
+   {
+      // find the n-th column shown currently
+      wxFolderListCtrlFields col = GetColumnByIndex(columns, n);
+      if ( col == WXFLC_NONE )
+      {
+         break;
+      }
+      else
+      {
+         choices.Add(GetColumnName(col));
+         status.Add(true);
+      }
+   }
+
+   // all columns which are shown are already in choices array, add all the
+   // ones which are not shown to the end of it too
+   for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
+   {
+      wxString colName = GetColumnName(n);
+      if ( choices.Index(colName) == wxNOT_FOUND )
+      {
+         choices.Add(colName);
+         status.Add(false);
+      }
+   }
+
+   // do show the dialog
+   if ( !MDialog_GetSelectionsInOrder(_("All &columns:"),
+                                      _("Choose the columns to be shown"),
+                                      &choices,
+                                      &status,
+                                      "FolderViewCol",
+                                      parent) )
+   {
+      // nothing changed
+      return false;
+   }
+
+   // now write the arrays back to the profile
+   size_t index = 0;
+   for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
+   {
+      wxFolderListCtrlFields col = GetColumnByName(choices[n]);
+      columns[col] = status[n] ? index++ : -1;
+   }
+
+   WriteColumnsInfo(profile, columns);
+
+   return true;
+}

@@ -102,10 +102,16 @@ protected:
    /// the mail folder being displayed
    ASMailFolder *m_ASMailFolder;
    MailFolder *m_MailFolder;
-   
+
 private:
-   void *m_regCookieTreeChange, *m_regCookieFolderUpdate,
-      *m_regCookieASFolderResult, *m_regCookieMsgStatus,
-      *m_regCookieFolderStatus;
+   void *m_regCookieTreeChange,
+        *m_regCookieFolderUpdate,
+        *m_regCookieASFolderResult,
+        *m_regCookieMsgStatus,
+        *m_regCookieFolderStatus;
 };
-#endif
+
+/// show a dialog allowing to choose the order of headers in the folder view
+extern bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent);
+
+#endif // FOLDERVIEW_H

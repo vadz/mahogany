@@ -344,6 +344,26 @@ size_t MDialog_GetSelections(const wxString& message,
                              wxArrayInt *selections,
                              wxWindow *parent = NULL);
 
+/**
+  Show a dialog allowing the user to show a subset of a set of strings and the
+  order of them. The choices array contains all strings and status array
+  contains their on/off status. If the function returns TRUE, the arrays will
+  contain the new configuration as selected by user.
+
+  @param message a single line explanation message
+  @param caption is the dialog title
+  @param choices
+  @param status
+  @param profileKey is the key to be used to stor dialog position &c
+  @param parent is the parent window
+*/
+bool MDialog_GetSelectionsInOrder(const wxString& message,
+                                  const wxString& caption,
+                                  wxArrayString* choices,
+                                  wxArrayInt* status,
+                                  const wxString& profileKey,
+                                  wxWindow *parent = NULL);
+
 #ifdef OS_WIN
 #  undef USE_SEMIMODAL
 

@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "Mpch.h"
 
 #ifndef USE_PCH
@@ -62,6 +63,7 @@
 #include "gui/wxOptionsPage.h"
 
 #include "HeadersDialogs.h"
+#include "FolderView.h"
 #include "TemplateDialog.h"
 
 // ----------------------------------------------------------------------------
@@ -232,6 +234,7 @@ enum ConfigFields
    ConfigField_MessageViewMaxMsgSize,
    ConfigField_MessageViewMaxHeadersNum,
    ConfigField_MessageViewHeaders,
+   ConfigField_FolderViewHeaders,
    ConfigField_MessageViewSortMessagesBy,
    ConfigField_MessageViewDateFormat,
    ConfigField_MessageViewLast = ConfigField_MessageViewDateFormat,
@@ -736,6 +739,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Number,   -1 },
    { gettext_noop("Maximum &number of messages"),  Field_Number,   -1 },
    { gettext_noop("Configure &headers to show..."),Field_SubDlg,   -1 },
+   { gettext_noop("Configure &columns to show..."),Field_SubDlg,   -1 },
    { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
    { gettext_noop("Configure &format for displaying dates"),         Field_SubDlg,    -1                     },
 
@@ -954,6 +958,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
    CONFIG_ENTRY(MP_MSGVIEW_HEADERS),
+   CONFIG_NONE(), // no such thing as MP_FOLDERVIEW_COLUMNS
    CONFIG_ENTRY(MP_MSGS_SORTBY),
    CONFIG_ENTRY(MP_DATE_FMT),
 
@@ -1689,20 +1694,25 @@ wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
 
 void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
 {
-   bool dirty = false;
+   bool dirty;
 
    wxObject *obj = event.GetEventObject();
    if ( obj == GetControl(ConfigField_MessageViewSortMessagesBy) )
       dirty = ConfigureSorting(m_Profile, this);
    else if ( obj == GetControl(ConfigField_MessageViewDateFormat) )
       dirty = ConfigureDateFormat(m_Profile, this);
-   else if(obj == GetControl(ConfigField_MessageViewHeaders))
+   else if ( obj == GetControl(ConfigField_MessageViewHeaders) )
       dirty = ConfigureMsgViewHeaders(m_Profile, this);
+   else if ( obj == GetControl(ConfigField_FolderViewHeaders) )
+      dirty = ConfigureFolderViewHeaders(m_Profile, this);
    else
    {
-      wxASSERT_MSG( 0, "alien button" );
+      wxFAIL_MSG( "alien button" );
+
+      dirty = false;
    }
-   if(dirty)
+
+   if ( dirty )
    {
       // something changed - make us dirty
       wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);

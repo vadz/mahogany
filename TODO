@@ -70,7 +70,6 @@ as the MailFolderCC.cpp code should take care of that itself.
                    (currently does preview on delete)
 
 	KB	properties/access shows wrong help
-	KB	properties/custom headers/more shows corrupted title
 
 	KB	wxMessageView: message/rfc822 display via MessageCC(string)
 

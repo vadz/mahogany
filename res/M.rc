@@ -20,6 +20,7 @@ aaa		ICON	"Micon.ico"
 
 // global icons
 Micon		ICON	"Micon.ico"
+MLogFrame	ICON	"MLogIcon.ico"
 mahogany	BITMAP	"mahogany.bmp"
 #ifdef USE_PYTHON
 PythonPowered	BITMAP	"pythonpower.bmp"

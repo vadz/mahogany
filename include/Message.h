@@ -112,9 +112,9 @@ public:
    virtual void GetHeaderLine(const String &line, String &value) = 0;
 
    /** Get the complete header text.
-       @return pointer to an internal buffer
+       @return string with multiline text containing the message headers
    */
-   virtual const char * GetHeader(void) const = 0;
+   virtual String  GetHeader(void) const = 0;
 
    /** get Subject line
        @return Subject entry

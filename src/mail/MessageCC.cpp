@@ -108,7 +108,7 @@ MessageCC::MessageCC(const char * itext, UIdType uid, Profile *iprofile)
 
    // move \n --> \r\n convention
    text = strutil_strdup(strutil_enforceCRLF(itext));
-   
+
    unsigned long pos = 0;
    // find end of header "\012\012"
    while(text[pos])
@@ -184,7 +184,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
       default:
          FAIL_MSG("unknown protocol");
    }
-   
+
    for(int i = 0; i < CountParts(); i++)
    {
       unsigned long len;
@@ -200,7 +200,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
                        &dlist, &plist);
    }
 
-   const char *header = GetHeader();
+   String header = GetHeader();
    String headerLine;
    const char *cptr = header;
    String value;
@@ -223,7 +223,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
          sendMsg.AddHeaderEntry(name, value);
       headerLine = "";
    }while(*cptr && *cptr != '\012');
-   
+
    if(send)
       return sendMsg.Send();
    else
@@ -255,24 +255,24 @@ MessageCC::From(void) const
    return Address(tmp, MAT_REPLYTO);
 }
 
-const char *
+String
 MessageCC::GetHeader(void) const
 {
-   CHECK_DEAD_RC(NULL);
-   if(! folder)
-      return NULL;
+   String str;
 
-   if(folder->Lock())
+   CHECK_DEAD_RC(str);
+
+   if( folder && folder->Lock() )
    {
       unsigned long len = 0;
       const char *cptr = mail_fetchheader_full(folder->Stream(), m_uid,
                                                NULL, &len, FT_UID);
       folder->UnLock();
-      String str(cptr, (size_t)len);
+      str = String(cptr, (size_t)len);
       MailFolderCC::ProcessEventQueue();
-      return str.c_str();
    }
-   return NULL;
+
+   return str;
 }
 
 void
@@ -289,7 +289,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
 
    if(!folder->Lock())
       return ;
-   
+
    unsigned long len;
    char *
       rc = mail_fetchheader_full (folder->Stream(),
@@ -354,7 +354,7 @@ MessageCC::Address(String &name, MessageAddressType type) const
       if(addr && addr->personal && strlen(addr->personal))
          name = String(addr->personal);
 /*
-  This is a rather nice hack which takes the "From:" personal name and 
+  This is a rather nice hack which takes the "From:" personal name and
   combines it with the reply-to to return a complete mail address
   including name and email, but it seems to cause too much confusion
   to others if used on mailing lists.
@@ -380,7 +380,7 @@ MessageCC::Address(String &name, MessageAddressType type) const
 
    if(addr->personal && strlen(addr->personal))
       name = String(addr->personal);
-   
+
    name = MailFolderCC::qprint(name);
 
    if(strchr(name, ',') || strchr(name,'<') || strchr(name,'>'))
@@ -590,10 +590,10 @@ MessageCC::GetStatus(
       || ! folder->Lock())
       return MailFolder::MSG_STAT_NONE;
 
-   
+
    MESSAGECACHE *mc = mail_elt(folder->Stream(), mail_msgno(folder->Stream(),m_uid));
    folder->UnLock();
-   
+
    if(size)    *size = mc->rfc822_size;
    if(day)  *day = mc->day;
    if(month)   *month = mc->month;
@@ -608,7 +608,7 @@ MessageCC::GetStatus(
    if(mc->flagged)   status |= MailFolder::MSG_STAT_FLAGGED;
    return (MailFolder::MessageStatus) status;
 }
-   
+
 
 void
 MessageCC::DecodeMIME(void)
@@ -681,9 +681,9 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
    //fs_give(&cptr); // c-client's free() function
 
    /* This bit is a bit suspicious, it fails sometimes in
-      rfc822_qprint() when HTML code is fed into it and while Mahogany 
+      rfc822_qprint() when HTML code is fed into it and while Mahogany
       has long done all this, it seems to be not significantly worse
-      if I comment it all out. So what I do now, is to just return the 
+      if I comment it all out. So what I do now, is to just return the
       plain text if the decoding failed.
       FIXME I should really find out whether this is correct :-)
    */
@@ -692,11 +692,11 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
    {
    case ENCBASE64:      // base-64 encoded data
       returnVal = (const char *) rfc822_base64((unsigned char
-                                                *)partContentPtr,GetPartSize(n),lenptr); 
+                                                *)partContentPtr,GetPartSize(n),lenptr);
       break;
    case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
       returnVal = (const char *) rfc822_qprint((unsigned char
-                                                *)partContentPtr,GetPartSize(n,true),lenptr); 
+                                                *)partContentPtr,GetPartSize(n,true),lenptr);
       break;
    case  ENCBINARY:     // 8 bit binary data
       *lenptr = GetPartSize(n);
@@ -806,7 +806,7 @@ MessageCC::GetId(void) const
       return "";
 }
 
-String 
+String
 MessageCC::GetReferences(void) const
 {
    if(m_Body == NULL)
