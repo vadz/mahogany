@@ -1680,7 +1680,16 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
       // TODO: should keep the currently selected items selected - but for
       //       this we need to store UIDs for all of them which we don't do
       //       currently :-(
-      m_FolderView->SelectAll(false);
+
+      {
+         wxFolderListCtrlBlockOnSelect dontHandleOnSelect(this);
+
+         long numMessages = GetItemCount();
+         for ( long n = 0; n < numMessages; n++ )
+         {
+            Select(n, false);
+         }
+      }
 
       // so for now just make sure that the unique selected message, if any, is
       // updated correctly
