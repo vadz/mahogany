@@ -54,6 +54,9 @@ public:
    wxSubscriptionDialog(wxWindow *parent, MFolder *folder);
    virtual ~wxSubscriptionDialog();
 
+   // called when [Ok] is pressed, may veto it
+   virtual bool TransferDataFromWindow();
+
    // event processing function
    virtual bool OnMEvent(MEventData& event);
 
@@ -66,6 +69,9 @@ private:
 
    // the type of the folders we're enumerating
    FolderType m_folderType;
+
+   // and the folder itself
+   MFolder *m_folder;
 
    // to find out under which item to add a new folder we maintain a stack
    // which contains the current branch. This stack is implemented using 2
@@ -140,6 +146,9 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
    m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
    ASSERT_MSG( m_regCookie, "can't register with event manager");
 
+   m_folder = folder;
+   m_folder->IncRef();
+
    m_folderPath = folder->GetPath();
    m_folderType = folder->GetType();
 
@@ -168,6 +177,8 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
 
 wxSubscriptionDialog::~wxSubscriptionDialog()
 {
+   m_folder->DecRef();
+
    MEventManager::Deregister(m_regCookie);
 }
 
@@ -310,6 +321,99 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
 
    // we don't want anyone else to receive this message - it was for us only
    return FALSE;
+}
+
+bool wxSubscriptionDialog::TransferDataFromWindow()
+{
+   // will be set to TRUE if we need to refresh the tree
+   bool createdSomething = FALSE;
+
+   wxTreeItemId idRoot = m_treectrl->GetRootItem();
+
+   wxArrayTreeItemIds selections;
+   size_t countSel = m_treectrl->GetSelections(selections);
+   for ( size_t sel = 0; sel < countSel; sel++ )
+   {
+      // construct the full folder name by going upwars the tree and
+      // concatenating everything
+      wxArrayString components;
+      wxTreeItemId id = selections[sel];
+      while ( id != idRoot )
+      {
+         components.Add(m_treectrl->GetItemText(id));
+         id = m_treectrl->GetParent(id);
+      }
+
+      size_t levelMax = components.GetCount();
+      if ( !levelMax )
+      {
+         // doh... it was root...
+         continue;
+      }
+
+      char separator = (m_folderType == MF_NNTP) || (m_folderType == MF_NEWS)
+                       ? '.'
+                       : '/';
+
+      MFolder *parent = m_folder;
+      parent->IncRef();
+
+      wxString fullpath = m_folderPath;
+      for ( int level = levelMax - 1; level >= 0; level-- )
+      {
+         wxString name = components[level];
+         fullpath << separator << name;
+
+         // to create a a/b/c, we must first create a, then b and then c, so
+         // we create a folder during each loop iteration - unless it already
+         // exists
+         MFolder *folderNew = parent->GetSubfolder(name);
+         if ( !folderNew )
+         {
+            folderNew = parent->CreateSubfolder(name, m_folderType);
+            if ( !folderNew )
+            {
+               wxLogError(_("Failed to subscribe to '%s'."), fullpath.c_str());
+
+               // can't create children if parent creation failed...
+               break;
+            }
+            else
+            {
+               // set up the just created folder
+               Profile_obj profile(folderNew->GetFullName());
+               profile->writeEntry(MP_FOLDER_PATH, fullpath);
+
+               // copy folder flags from its parent
+               folderNew->SetFlags(parent->GetFlags());
+
+               // we created a new folder, set the flag to refresh the tree
+               createdSomething = TRUE;
+            }
+         }
+
+         parent->DecRef();
+         parent = folderNew;
+      }
+
+      parent->DecRef();
+   }
+
+   if ( createdSomething )
+   {
+      // generate an event notifying everybody that a new folder has been
+      // created
+      MEventManager::Send(
+         new MEventFolderTreeChangeData(m_folderPath,
+                                        MEventFolderTreeChangeData::Create)
+         );
+      MEventManager::DispatchPending();
+   }
+
+   // show all errors which could have been accumulated
+   wxLog::FlushActive();
+
+   return TRUE;
 }
 
 // ----------------------------------------------------------------------------

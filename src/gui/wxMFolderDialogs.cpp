@@ -1853,7 +1853,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          wxLogError(_("Impossible to create MH folder '%s'."),
                     path.c_str());
 
-         wxLog::GetActiveTarget()->Flush();
+         wxLog::FlushActive();
 
          return FALSE;
       }
