@@ -34,7 +34,7 @@ dep depend: all
 
 doc:
 	if [ ! -d ../doc/classes ] ; then mkdir ../doc/classes ; fi
-	$(DOCHTML) *.h
+	$(DOCHTML) *.h || true # always succeed
 
 .PHONY: clean doc dep all install msgcat interface
 
