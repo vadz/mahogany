@@ -510,31 +510,6 @@ public:
    /// for wxFolderView
    wxFolderMenu *GetFolderMenu() const { return m_menuFolders; }
 
-   /// freeze the control: it won't draw the headers until Thaw() is called
-   void Freeze()
-   {
-      ASSERT_MSG( !m_isFrozen, "freezing already frozen control?" );
-
-      m_isFrozen = true;
-   }
-
-   /// reenable redrawing
-   void Thaw()
-   {
-      ASSERT_MSG( m_isFrozen, "thawing unfrozen control?" );
-
-      m_isFrozen = false;
-
-      // FIXME: there seems to be some horrible bug in wxGTK - refreshing
-      //        from here simply doesn't do anything at all!!
-#ifndef __WXGTK__
-      Refresh();
-#else
-      Hide();
-      Show();
-#endif
-   }
-
 protected:
    /// go to the next unread message or to the next folder
    void MoveToNextUnread()
@@ -617,14 +592,6 @@ protected:
 
    /// the associated folder view
    wxFolderView *m_FolderView;
-
-   /**
-     While m_isFrozen != 0, OnGetItemXXX() methods don't try to retrieve the
-     real items text so that we don't retrieve the headers (which may be very
-     slow) for the items which are going to be scrolled out of view when
-     SelectInitialMessage() is called later anyhow.
-    */
-   bool m_isFrozen;
 
    /**
      @name Currently selected item data
@@ -1013,8 +980,6 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_colSort = WXFLC_NONE;
 
    m_isInPopupMenu = false;
-
-   m_isFrozen = false;
 
    // no items focused/previewed yet
    m_uidFocus =
@@ -2212,11 +2177,6 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
 {
    wxString text;
 
-   if ( m_isFrozen )
-   {
-      return text;
-   }
-
    // this does happen because the number of messages in m_headers is
    // decremented first and our OnFolderExpungeEvent() is called much later
    // (during idle time), so we have no choice but to ignore the requests for
@@ -2418,11 +2378,6 @@ wxFolderListCtrl::GetEntryColour(const HeaderInfo *hi) const
 
 wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
 {
-   if ( m_isFrozen )
-   {
-      return NULL;
-   }
-
    // see comment in the beginning of OnGetItemText()
    if ( (size_t)item >= GetHeadersCount() )
    {
