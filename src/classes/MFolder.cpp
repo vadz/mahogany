@@ -1093,7 +1093,6 @@ bool MFolderFromProfile::Move(MFolder *newParent)
 
    // There are things that do not make sense at all
    CHECK( GetFolderType(GetType()) != MF_ILLEGAL, false, _T("How did you manage to try to move an MF_ILLEGAL folder ?") );
-   CHECK( GetFolderType(GetType()) != MF_NNTP, false, _T("can't move NNTP folders") );
    CHECK( GetFolderType(GetType()) != MF_NEWS, false, _T("can't move News folders") );
    CHECK( GetFolderType(GetType()) != MF_INBOX, false, _T("can't move system Inbox") );
    CHECK( GetFolderType(GetType()) != MF_ROOT, false, _T("can't move the root pseudo-folder") );
