@@ -126,12 +126,9 @@
 
 /// basic M installation directory
 #ifdef OS_UNIX
-#   define   M_BASEDIR M_PREFIX"share/Mahogany"
+#   define   M_BASEDIR M_PREFIX"/share/Mahogany"
 #else
 #   define   M_BASEDIR M_PREFIX"\\Mahogany"
-#endif
-#ifdef   HAVE_COMPFACE_H
-#   define   HAVE_XFACES
 #endif
 
 #ifdef   HAVE_COMPFACE_H
