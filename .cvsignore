@@ -25,7 +25,9 @@ FreeBSD.system.cache.tmp
 FreeBSD.system.cache
 tmp
 Release
+release
 Debug
+debug
 ReleaseDebug
 imessages.po
 messages.po
