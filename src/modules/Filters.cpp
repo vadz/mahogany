@@ -348,7 +348,8 @@ public:
 #ifdef DEBUG
    Value(const Value& val) : m_Type(val.m_Type), m_String(val.m_String)
    {
-      Init();
+      m_abort = val.m_abort;
+
       if ( m_Type == Type_Number )
          m_Num = val.m_Num;
    }
