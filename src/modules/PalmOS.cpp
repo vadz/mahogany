@@ -38,8 +38,6 @@
 
 #include <wx/menu.h>
 
-class PalmBook;
-
 #include "adb/ProvPalm.h"
 
 #define MODULE_NAME    "PalmOS"
@@ -56,14 +54,14 @@ class PalmBook;
 #define MP_MOD_PALMOS_SYNCMAIL_D 1l
 #define MP_MOD_PALMOS_SYNCADDR   "SyncAddr"
 #define MP_MOD_PALMOS_SYNCADDR_D 1l
-#define MP_MOD_PALMOS_BACKUP     "Backup"      
-#define MP_MOD_PALMOS_BACKUP_D   0l            
-#define MP_MOD_PALMOS_BACKUPDIR     "BackupDir"   
-#define MP_MOD_PALMOS_BACKUPDIR_D   ""            
+#define MP_MOD_PALMOS_BACKUP     "Backup"
+#define MP_MOD_PALMOS_BACKUP_D   0l
+#define MP_MOD_PALMOS_BACKUPDIR     "BackupDir"
+#define MP_MOD_PALMOS_BACKUPDIR_D   ""
 #define MP_MOD_PALMOS_BACKUP_SYNC     "BackupSync"
-#define MP_MOD_PALMOS_BACKUP_SYNC_D   1l          
+#define MP_MOD_PALMOS_BACKUP_SYNC_D   1l
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL     "BackupIncremental"
-#define MP_MOD_PALMOS_BACKUP_INCREMENTAL_D   1l          
+#define MP_MOD_PALMOS_BACKUP_INCREMENTAL_D   1l
 #define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
 #define MP_MOD_PALMOS_PILOTDEV_D "/dev/pilot"
 #define MP_MOD_PALMOS_SPEED      "Speed"
@@ -75,6 +73,7 @@ class PalmBook;
 #define MP_MOD_PALMOS_SCRIPT2    "Script2"
 #define MP_MOD_PALMOS_SCRIPT2_D  ""
 
+#define pi_mktag(c1,c2,c3,c4) (((c1)<<24)|((c2)<<16)|((c3)<<8)|(c4))
 
 // to prevent a warning from linux headers
 //#define __STRICT_ANSI__
@@ -116,65 +115,73 @@ extern "C" {
 };
 #endif
 
+// ---------------------------------------------------
+// Implementation
+// ---------------------------------------------------
+
 class wxDeviceLock
 {
 public:
    wxDeviceLock(const wxString &dev)
-      {
-         m_Device = dev;
-         m_Locked = FALSE;
-      }
+   {
+      m_Device = dev;
+      m_Locked = FALSE;
+   }
+
    ~wxDeviceLock()
-      {
-         if(m_Locked) Unlock();
-      }
+   {
+      if(m_Locked) Unlock();
+   }
+
    bool Lock()
+   {
+      wxASSERT(! m_Locked);
+      m_LockFile = "/var/lock/LCK..";
+      m_LockFile << m_Device;
+      int fd = open(m_LockFile,O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+
+      if(fd == -1) // lock exists already
       {
-         wxASSERT(! m_Locked);
-         m_LockFile = "/var/lock/LCK..";
-         m_LockFile << m_Device;
-         int fd =
-            open(m_LockFile,O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-         if(fd == -1) // lock exists already
+         wxTextFile tf(m_LockFile);
+         if(tf.Open())
          {
-            wxTextFile tf(m_LockFile);
-            if(tf.Open())
+            pid_t pid = atoi(tf[0]);
+            if(kill(pid,0) == ESRCH) // process no longer exists
             {
-               pid_t pid = atoi(tf[0]);
-               if(kill(pid,0) == ESRCH) // process no longer exists
+               if(remove(m_LockFile) == 0)
                {
-                  if(remove(m_LockFile) == 0)
-                  {
-                     // try again
-                     fd = open(m_LockFile,
-                               O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);  
-                  }
-                  
+                  // try again
+                  fd = open(m_LockFile,
+                            O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);  
                }
             }
          }
-         if(fd != -1)
-         {
-            m_Locked = TRUE;
-            wxString pidstr;
-            pidstr.Printf("%lu", (unsigned long) getpid());
-            write(fd, (char *)pidstr.c_str(),pidstr.Length());
-            close(fd);
-         }
-         else
-         {
-            wxString msg;
-            msg.Printf(_("Could not obtain lock for '/dev/%s'"),
-                       m_Device.c_str());
-            wxLogSysError(msg);
-         }
-         return m_Locked;
       }
-   void Unlock()
+
+      if (fd != -1)
       {
-         wxASSERT(m_Locked);
-         remove(m_LockFile);
+         m_Locked = TRUE;
+         wxString pidstr;
+         pidstr.Printf("%lu", (unsigned long) getpid());
+         write(fd, (char *)pidstr.c_str(),pidstr.Length());
+         close(fd);
       }
+      else
+      {
+         wxString msg;
+         msg.Printf(_("Could not obtain lock for '/dev/%s'"),
+                       m_Device.c_str());
+         wxLogSysError(msg);
+      }
+      return m_Locked;
+   }
+
+   void Unlock()
+   {
+      wxASSERT(m_Locked);
+      remove(m_LockFile);
+   }
+
    bool IsLocked() const { return m_Locked; }
 
 private:
@@ -190,7 +197,6 @@ private:
 
 class PalmOSModule : public MModule
 {
-
    /** Override the Entry() function to allow Main() and Config()
        functions. */
    virtual int Entry(int arg, ...);
@@ -198,7 +204,7 @@ class PalmOSModule : public MModule
    void Configure(void);
    MMODULE_DEFINE(PalmOSModule)
 
-      private:
+private:
    /** PalmOS constructor.
        As the class has no usable interface, this doesn´t do much, but 
        it displays a small dialog to say hello.
@@ -235,12 +241,12 @@ class PalmOSModule : public MModule
       { m_MInterface->Message(msg,NULL,"PalmOS module"); wxYield(); }
    inline void StatusMessage(const String &msg)
       { m_MInterface->StatusMessage(msg);wxYield();}
-MInterface * m_MInterface;
 
-private:
+   MInterface * m_MInterface;
 
    int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
    int CreateFileList(char *** list, DIR * dir);
+   void DeleteFileList(char **list, int filecount);
    void RemoveFromList(char *name, char **list, int max);
 
    int m_PiSocket;
@@ -249,11 +255,13 @@ private:
    ProfileBase *m_Profile;
    
    int m_Dispose;
-   bool m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
-   String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
    int m_Speed;
-   class wxDeviceLock *m_Lock;
+   bool m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
+   bool m_IncrBackup, m_BackupSync
+   String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
    String m_BackupDir;
+
+   class wxDeviceLock *m_Lock;
 };
 
 /// small helper class
@@ -261,17 +269,19 @@ class PiConnection
 {
 public:
    PiConnection(class PalmOSModule *mi)
+   {
+      m=mi;
+      if(! m->IsConnected()) 
       {
-         m=mi;
-         if(! m->IsConnected()) 
-         {
-            m->Connect();
-            cleanup = true;
-         }
-         else
-            cleanup = false;
+         m->Connect();
+         cleanup = true;
       }
+      else
+         cleanup = false;
+   }
+
    ~PiConnection() { if(cleanup) m->Disconnect(); }
+
 private:
    PalmOSModule *m;
    bool cleanup;
@@ -283,24 +293,24 @@ PalmOSModule::ProcessMenuEvent(int id)
 {
    switch(id)
    {
-   case WXMENU_MODULES_PALMOS_SYNC:
-      Synchronise(NULL);
-      return TRUE;
-   case WXMENU_MODULES_PALMOS_BACKUP:
-      Backup();
-      return TRUE;
+      case WXMENU_MODULES_PALMOS_SYNC:
+         Synchronise(NULL);
+         return TRUE;
+      case WXMENU_MODULES_PALMOS_BACKUP:
+         Backup();
+         return TRUE;
 #ifdef EXPERIMENTAL
-   case WXMENU_MODULES_PALMOS_RESTORE:
-      Restore();
-      return TRUE;
-   case WXMENU_MODULES_PALMOS_INSTALL:
-      return TRUE;
+      case WXMENU_MODULES_PALMOS_RESTORE:
+         Restore();
+         return TRUE;
+      case WXMENU_MODULES_PALMOS_INSTALL:
+         return TRUE;
 #endif
-   case WXMENU_MODULES_PALMOS_CONFIG:
-      Configure();
-      return TRUE;
-   default:
-      return FALSE;
+      case WXMENU_MODULES_PALMOS_CONFIG:
+         Configure();
+         return TRUE;
+      default:
+         return FALSE;
    }
 }
 
@@ -310,41 +320,46 @@ PalmOSModule::Entry(int arg, ...)
    switch(arg)
    {
       // GetFlags():
-   case MMOD_FUNC_GETFLAGS:
-      return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
+      case MMOD_FUNC_GETFLAGS:
+         return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
 
       // Main():
-   case MMOD_FUNC_MAIN:
-      Synchronise(NULL);
-      return 0;
+      case MMOD_FUNC_MAIN:
+         Synchronise(NULL);
+         return 0;
 
       // Configure():
-   case MMOD_FUNC_CONFIG:
-      Configure();
-      return 0;
-   case MMOD_FUNC_MENUEVENT:
-   {
-      va_list ap;
-      va_start(ap, arg);
-      int id = va_arg(ap, int);
-      va_end(ap);
-      return ProcessMenuEvent(id);
-   }
-   // module specific functions:
-   // MMOD_FUNC_USER : Synchronise ADB
-   case MMOD_FUNC_USER:
-   {
-      va_list ap;
-      va_start(ap, arg);
-      PalmBook *pbp = va_arg(ap, PalmBook *);
-      va_end(ap);
-      Synchronise(pbp);
-      return 0;
-   }      
-   default:
-      return 0;
+      case MMOD_FUNC_CONFIG:
+         Configure();
+         return 0;
+
+      // Menu event
+      case MMOD_FUNC_MENUEVENT:
+      {
+         va_list ap;
+         va_start(ap, arg);
+         int id = va_arg(ap, int);
+         va_end(ap);
+         return ProcessMenuEvent(id);
+      }
+
+      // module specific functions:
+      // MMOD_FUNC_USER : Synchronise ADB
+      case MMOD_FUNC_USER:
+      {
+         va_list ap;
+         va_start(ap, arg);
+         PalmBook *pbp = va_arg(ap, PalmBook *);
+         va_end(ap);
+         Synchronise(pbp);
+         return 0;
+      }      
+
+      default:
+         return 0;
    }
 }
+
 
 void
 PalmOSModule::GetConfig(void)
@@ -357,6 +372,7 @@ PalmOSModule::GetConfig(void)
       m_Profile = m_MInterface->CreateProfile(
          appConf->readEntry(MP_MOD_PALMOS_BOX,MP_MOD_PALMOS_BOX_D));
    }
+
    // all other values get read from the module profile:
    ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
 
@@ -364,19 +380,23 @@ PalmOSModule::GetConfig(void)
    //further down:
    static int speeds[] = { 9600,19200,38400,57600,115200 };
    
-   m_Backup   = (READ_CONFIG(p, MP_MOD_PALMOS_BACKUP) != 0);
-   m_BackupDir= READ_CONFIG(p, MP_MOD_PALMOS_BACKUPDIR);
-   m_SyncMail = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCMAIL) != 0);
-   m_SyncAddr = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCADDR) != 0);
-   m_LockPort = (READ_CONFIG(p, MP_MOD_PALMOS_LOCK) != 0);
-   m_PilotDev = READ_CONFIG(p, MP_MOD_PALMOS_PILOTDEV);
-   m_PalmBox = READ_CONFIG(p, MP_MOD_PALMOS_BOX);
-   m_Dispose = READ_CONFIG(p,MP_MOD_PALMOS_DISPOSE);
-   m_Speed = READ_CONFIG(p,MP_MOD_PALMOS_SPEED);
+   m_Backup     = (READ_CONFIG(p, MP_MOD_PALMOS_BACKUP) != 0);
+   m_BackupDir  = READ_CONFIG(p, MP_MOD_PALMOS_BACKUPDIR);
+   m_SyncMail   = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCMAIL) != 0);
+   m_SyncAddr   = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCADDR) != 0);
+   m_LockPort   = (READ_CONFIG(p, MP_MOD_PALMOS_LOCK) != 0);
+   m_PilotDev   = READ_CONFIG(p, MP_MOD_PALMOS_PILOTDEV);
+   m_PalmBox    = READ_CONFIG(p, MP_MOD_PALMOS_BOX);
+   m_Dispose    = READ_CONFIG(p, MP_MOD_PALMOS_DISPOSE);
+   m_Speed      = READ_CONFIG(p, MP_MOD_PALMOS_SPEED);
+   m_IncrBackup = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_INCREMENTAL);
+   m_BackupSync = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_SYNC)
+   
    if(m_Speed < 0  || m_Speed > (signed) WXSIZEOF(speeds))
       m_Speed = speeds[0];
    else
       m_Speed = speeds[m_Speed];
+
    m_Script1 = READ_CONFIG(p, MP_MOD_PALMOS_SCRIPT1);
    m_Script2 = READ_CONFIG(p, MP_MOD_PALMOS_SCRIPT2);
    p->DecRef();
@@ -395,13 +415,13 @@ MMODULE_IMPLEMENT(PalmOSModule,
                   "This module provides PalmOS connectivity.",
                   "0.00")
 
-
 ///------------------------------
 /// Own functionality:
 ///------------------------------
 
 /* static */
-   MModule *
+
+MModule *
 PalmOSModule::Init(int version_major, int version_minor, 
                    int version_release, MInterface *interface,
                    int *errorCode)
@@ -412,6 +432,7 @@ PalmOSModule::Init(int version_major, int version_minor,
       if(errorCode) *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
       return NULL;
    }
+
    return new PalmOSModule(interface);
 }
 
@@ -445,6 +466,7 @@ PalmOSModule::~PalmOSModule()
 {
    if(IsConnected())
       Disconnect();
+
    if(m_Lock) delete m_Lock;
    SafeDecRef(m_Profile);
 }
@@ -454,19 +476,21 @@ class PalmOSAcceptThread : public wxThread
 {
 public:
    PalmOSAcceptThread(int *piSocket)
-      {
-         m_PiSocketPtr = piSocket;
-         m_NewSocket = *piSocket;
-         *m_PiSocketPtr = -1; // -2: thread is running, -1: failure
-      }
-    // thread execution starts here
-    virtual void *Entry()
-      {
-         *m_PiSocketPtr = -2;
-         m_NewSocket = pi_accept(m_NewSocket, 0, 0);
-         *m_PiSocketPtr = m_NewSocket;
-         return NULL;
-      }
+   {
+      m_PiSocketPtr = piSocket;
+      m_NewSocket = *piSocket;
+      *m_PiSocketPtr = -1; // -2: thread is running, -1: failure
+   }
+
+   // thread execution starts here
+   virtual void *Entry()
+   {
+      *m_PiSocketPtr = -2;
+      m_NewSocket = pi_accept(m_NewSocket, 0, 0);
+      *m_PiSocketPtr = m_NewSocket;
+      return NULL;
+   }
+
 private:
    int * m_PiSocketPtr;
    int m_NewSocket;
@@ -479,12 +503,11 @@ PalmOSModule::Connect(void)
    if(m_PiSocket == -1)
    {
       GetConfig();
-      
+
       struct pi_sockaddr addr;
       struct PilotUser pilotUser;
       int rc;
 
-      
       if(m_Script1.Length())
       {
          int rc;
@@ -498,10 +521,8 @@ PalmOSModule::Connect(void)
       }
 
       if(m_LockPort)
-      {
          if(! m_Lock->Lock())
             return false;
-      }
 
       Message(_("Please press HotSync button and click on OK."));
       if (!(m_PiSocket = pi_socket(PI_AF_SLP, PI_SOCK_STREAM, PI_PF_PADP)))
@@ -525,7 +546,9 @@ PalmOSModule::Connect(void)
       {
          ErrorMessage(_("Failed to connect to PalmOS device."));
          pi_close(m_PiSocket); m_PiSocket = -1;
-         if(m_Lock->IsLocked()) m_Lock->Unlock();
+         if (m_Lock->IsLocked()) 
+            m_Lock->Unlock();
+            
          return false;
       }
       
@@ -534,9 +557,12 @@ PalmOSModule::Connect(void)
       {
          ErrorMessage(_("Failed to connect to PalmOS device."));
          pi_close(m_PiSocket); m_PiSocket = -1;
-         if(m_Lock->IsLocked()) m_Lock->Unlock();
+         if (m_Lock->IsLocked()) 
+            m_Lock->Unlock();
+
          return false;
       }
+
       // the following code is unsafe under Windows:
 #if defined( wxUSE_THREADS ) && defined( OS_UNIX )
       // We interrupt the connection attempt after some seconds, to
@@ -556,6 +582,7 @@ PalmOSModule::Connect(void)
          while(time(NULL)-now < 5)
             ;
          //wxThread::Sleep(5000);
+
          if(m_PiSocket < 0)
          {
             //acceptThread->Kill();
@@ -569,7 +596,9 @@ PalmOSModule::Connect(void)
       {
          ErrorMessage(_("Failed to connect to PalmOS device."));
          pi_close(m_PiSocket);
-         if(m_Lock->IsLocked()) m_Lock->Unlock();
+         if (m_Lock->IsLocked()) 
+            m_Lock->Unlock();
+            
          return false;
       }
       
@@ -579,8 +608,10 @@ PalmOSModule::Connect(void)
       /* Tell user (via Pilot) that we are starting things up */
       dlp_OpenConduit(m_PiSocket);
    }
+
    if(m_PiSocket == -1)
       if(m_Lock->IsLocked()) m_Lock->Unlock();
+
    return m_PiSocket != -1;
 }
 
@@ -591,7 +622,10 @@ PalmOSModule::Disconnect(void)
    {
       pi_close(m_PiSocket);
       m_PiSocket = -1;
-      if(m_Lock->IsLocked()) m_Lock->Unlock();
+
+      if(m_Lock->IsLocked())
+         m_Lock->Unlock();
+
       if(m_Script2.Length())
       {
          int rc;
@@ -609,21 +643,21 @@ PalmOSModule::Disconnect(void)
 void PalmOSModule::SyncMail(void)
 {
    PiConnection conn(this);
-   if( IsConnected())
+   if ( IsConnected())
    {
       SendEMails();
       StoreEMails();
+
       // here we close the opened database
       if (m_MailDB) 
          dlp_CloseDB(m_PiSocket, m_MailDB);
-        
    }
 }
 
 void PalmOSModule::SyncAddresses(PalmBook *pBook)
 {
    PiConnection conn(this);
-   if( IsConnected() )
+   if ( IsConnected() )
    {
       GetAddresses(pBook);
       
@@ -632,10 +666,9 @@ void PalmOSModule::SyncAddresses(PalmBook *pBook)
          dlp_CloseDB(m_PiSocket, m_AddrDB);
    }
 }
- 
+
 void PalmOSModule::Synchronise(PalmBook *pBook)
 {
-   // TODO: add option to skip question 
    if(m_MInterface->YesNoDialog(_("Do you want synchronise with your PalmOS device?")))
    {
       PiConnection conn(this);
@@ -649,9 +682,8 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
          SyncAddresses(pBook);
      
       if(m_Backup)
-      {
          Backup();
-      }
+
       m_Profile->DecRef();
       m_Profile=NULL;
    }
@@ -663,25 +695,25 @@ static void protect_name(char *d, char *s)
 {
    while(*s) {
       switch(*s) {
-      case '/': *(d++) = '=';
-         *(d++) = '2';
-         *(d++) = 'F';
-         break;
-      case '=': *(d++) = '=';
-         *(d++) = '3';
-         *(d++) = 'D';
-         break;
-      case '\x0A':
-         *(d++) = '=';
-         *(d++) = '0';
-         *(d++) = 'A';
-         break;
-      case '\x0D': 
-         *(d++) = '=';
-         *(d++) = '0';
-         *(d++) = 'D';
-         break;
-      default: *(d++) = *s;
+         case '/': *(d++) = '=';
+            *(d++) = '2';
+            *(d++) = 'F';
+            break;
+         case '=': *(d++) = '=';
+            *(d++) = '3';
+            *(d++) = 'D';
+            break;
+         case '\x0A':
+            *(d++) = '=';
+            *(d++) = '0';
+            *(d++) = 'A';
+            break;
+         case '\x0D': 
+            *(d++) = '=';
+            *(d++) = '0';
+            *(d++) = 'D';
+            break;
+         default: *(d++) = *s;
       }
       s++;
    }
@@ -691,47 +723,63 @@ static void protect_name(char *d, char *s)
 int
 PalmOSModule::CreateFileList(char ***list, DIR * dir) 
 {
-  char **filelist = 0;
-  struct dirent * dirent;
+   char **filelist = 0;
+   struct dirent * dirent;
 
-  int file_len;
-  int filecount;
-  filecount = 0;
-  file_len = 0;
-  
-  while( (dirent = readdir(dir)) ) {
-    char name[256];
-    if (dirent->d_name[0] == '.')
-      continue;
+   int file_len;
+   int filecount;
+   filecount = 0;
+   file_len = 0;
 
-    if (!filelist) {
-      file_len += 256;
-      filelist = (char **) malloc(sizeof(char*) * file_len);
-    } else if (filecount >= file_len) {
-      file_len += 256;
-      filelist = (char **) realloc(filelist, sizeof(char*) * file_len);
-    }
+   while( (dirent = readdir(dir)) ) {
+      char name[256];
+      if (dirent->d_name[0] == '.')
+         continue;
 
-    sprintf(name, "%s/%s", m_BackupDir.c_str(), dirent->d_name);
-    filelist[filecount++] = strdup(name);
-  }
-  
-  *list = filelist;
-  return filecount;
+      if (!filelist) {
+         file_len += 256;
+         filelist = (char **) malloc(sizeof(char*) * file_len);
+      } else if (filecount >= file_len) {
+         file_len += 256;
+         filelist = (char **) realloc(filelist, sizeof(char*) * file_len);
+      }
+
+      sprintf(name, "%s/%s", m_BackupDir.c_str(), dirent->d_name);
+      filelist[filecount++] = strdup(name);
+   }
+
+   *list = filelist;
+   return filecount;
 }
+
 
 void
 PalmOSModule::RemoveFromList(char *name, char **list, int max)
 {
-   int i;
-
-   for (i = 0; i < max; i++) {
-      if (list[i] != NULL && strcmp(name, list[i]) == 0) {
+   for (int i = 0; i < max; i++) 
+   {
+      if (list[i] != NULL && strcmp(name, list[i]) == 0) 
+      {
          free(list[i]);
          list[i] = NULL;
       }
    }
 }
+
+
+void
+PalmOSModule::DeleteFileList(char **list, int filecount)
+{
+   if (list) {
+      for (int i = 0; i < filecount; i++)
+         if (list[i] != NULL)
+            free(list[i]);
+
+      if (list)
+         free(list);
+   }
+}
+
 
 void
 PalmOSModule::Backup(void) 
@@ -740,12 +788,6 @@ PalmOSModule::Backup(void)
    if( ! IsConnected())
       return;
 
-   /* It will be necessary to add several options to the PalmOSModule
-   ** configuration dialog, like ...
-   */
-
-   bool removeDeleted = FALSE;     // really delete deleted entries on the Palm
-   bool onlyChanged   = TRUE;     // backup only changed files or always all?
    DIR * dir;
 
    dir = opendir(m_BackupDir);
@@ -753,17 +795,17 @@ PalmOSModule::Backup(void)
        ErrorMessage(_("Couldn´t access backup directory."));
        return;
    }
-   
+
    // Read original list of files in the backup dir
-   int i, ofile_total;
+   int     ofile_total;
    char ** orig_files = 0;
 
-   if (onlyChanged)
+   if (m_IncrBackup)
      ofile_total = CreateFileList(&orig_files, dir);
 
    closedir(dir);
 
-   i = 0;
+   int i = 0;
    while (true) {
       struct DBInfo   info;
       struct pi_file *f;
@@ -789,7 +831,7 @@ PalmOSModule::Backup(void)
       else
          strcat(name, ".pdb");
          
-      if (onlyChanged) {
+      if (m_IncrBackup) {
          if (stat(name, &statb) == 0) {
             if (info.modifyDate == statb.st_mtime) {
                RemoveFromList(name, orig_files, ofile_total);
@@ -817,25 +859,22 @@ PalmOSModule::Backup(void)
          actually match the GMT times on the Pilot. We only check to
          see whether they are the same or different, and do not treat
          them as real times. */
-
       times.actime = info.createDate;
       times.modtime = info.modifyDate;
       utime(name, &times);
 
       RemoveFromList(name, orig_files, ofile_total);
    }
-   
-   // All files are backed up now. 
-   if (orig_files) {
+
+   // Remaining files are outdated
+   if (orig_files)
       for (i = 0; i < ofile_total; i++)
-         if (orig_files[i] != NULL) {
-            if (removeDeleted)
-               unlink(orig_files[i]);
-            free(orig_files[i]);
-         }
-      if (orig_files)
-         free(orig_files);
-   }
+         if (orig_files[i] != NULL)
+            if (m_BackupSync)
+               unlink(orig_files[i]);  // delete
+
+   // All files are backed up now. 
+   DeleteFileList(orig_files, ofile_total);
 }
 
 struct db {
@@ -846,139 +885,142 @@ struct db {
   	int maxblock;
 };
 
-#define pi_mktag(c1,c2,c3,c4) (((c1)<<24)|((c2)<<16)|((c3)<<8)|(c4))
-
-int compare(struct db * d1, struct db * d2)
+int 
+pdbCompare(struct db * d1, struct db * d2)
 {
-  /* types of 'appl' sort later then other types */
-  if(d1->creator == d2->creator)
-    if(d1->type != d2->type) {
-      if(d1->type == pi_mktag('a','p','p','l'))
-        return 1;
-      if(d2->type == pi_mktag('a','p','p','l'))
-        return -1;
-    }
-  return d1->maxblock < d2->maxblock;
+   /* types of 'appl' sort later then other types */
+   if(d1->creator == d2->creator)
+      if(d1->type != d2->type) {
+         if(d1->type == pi_mktag('a','p','p','l'))
+            return 1;
+         if(d2->type == pi_mktag('a','p','p','l'))
+            return -1;
+      }
+
+   return d1->maxblock < d2->maxblock;
 }
 
 void
 PalmOSModule::InstallFiles(char **fnames, unsigned int files_total)
 {
-  struct DBInfo info;
-  struct db * db[256];
-  int    dbcount = 0;
-  int    max, size;
-  unsigned i, j;
-  struct pi_file * f;
+   struct DBInfo info;
+   struct db * db[256];
+   int    dbcount = 0;
+   int    max, size;
+   unsigned i, j;
+   struct pi_file * f;
 
-  for ( j = 0; j < files_total; j++) {
-	db[dbcount] = (struct db*)malloc(sizeof(struct db));
+   for ( j = 0; j < files_total; j++) {
+   	db[dbcount] = (struct db*)malloc(sizeof(struct db));
 
-    // remember filename
-    sprintf(db[dbcount]->name, "%s", fnames[j]);
-    	
-	f = pi_file_open(db[dbcount]->name);
+      // remember filename
+      sprintf(db[dbcount]->name, "%s", fnames[j]);
 
-  	if (f==0) {
-      // TODO: show filename
-  	  ErrorMessage(_("Unable to open file!"));
-  	  break;
-  	}
+      f = pi_file_open(db[dbcount]->name);
+
+  	   if (f==0) {
+         // TODO: show filename
+         ErrorMessage(_("Unable to open file!"));
+         break;
+      }
   	
-  	pi_file_get_info(f, &info);
+  	   pi_file_get_info(f, &info);
   	
-  	db[dbcount]->creator = info.creator;
-  	db[dbcount]->type = info.type;
-  	db[dbcount]->flags = info.flags;
-  	db[dbcount]->maxblock = 0;
+     	db[dbcount]->creator = info.creator;
+  	   db[dbcount]->type = info.type;
+     	db[dbcount]->flags = info.flags;
+     	db[dbcount]->maxblock = 0;
   	
-  	pi_file_get_entries(f, &max);
+  	   pi_file_get_entries(f, &max);
   	
-  	for (i=0; i<max; i++) {
-  	  if (info.flags & dlpDBFlagResource)
-  	    pi_file_read_resource(f, i, 0, &size, 0, 0);
-  	  else
-  	    pi_file_read_record(f, i, 0, &size, 0, 0,0 );
+     	for (i=0; i<max; i++) {
+  	      if (info.flags & dlpDBFlagResource)
+  	         pi_file_read_resource(f, i, 0, &size, 0, 0);
+  	      else
+            pi_file_read_record(f, i, 0, &size, 0, 0,0 );
   	    
-  	  if (size > db[dbcount]->maxblock)
-  	    db[dbcount]->maxblock = size;
-  	}
+        if (size > db[dbcount]->maxblock)
+           db[dbcount]->maxblock = size;
+      }
   	
-  	pi_file_close(f);
-  	dbcount++;
-  }
+      pi_file_close(f);
+      dbcount++;
+   }
 
-  // sort list in alphabetical order
-  for (i=0; i < dbcount; i++)
-    for (j = i+1; j<dbcount; j++) 
-      if (compare(db[i], db[j]) > 0) {
-        struct db * temp = db[i];
-        db[i] = db[j];
-        db[j] = temp;
+   // sort list in alphabetical order
+   for (i=0; i < dbcount; i++)
+      for (j = i+1; j<dbcount; j++) 
+         if (compare(db[i], db[j]) > 0) {
+            struct db * temp = db[i];
+            db[i] = db[j];
+            db[j] = temp;
+         }
+
+   // todo: opening status window
+  
+   // Install files
+   for (i=0; i<dbcount; i++) {
+      if ( dlp_OpenConduit(m_PiSocket) < 0) {
+         ErrorMessage(_("Exiting on cancel, all data not restored"));
+         return;
       }
 
-  // todo: opening status window
-  
-  // Install files
-  for (i=0; i<dbcount; i++) {
-	if ( dlp_OpenConduit(m_PiSocket) < 0) {
-	   ErrorMessage(_("Exiting on cancel, all data not restored"));
-	   return;
-	}
+      f = pi_file_open(db[i]->name);
+     	if (f == 0) {
+         // TODO: display filename
+  	      ErrorMessage(_("Unable to open file."));
+         break;
+      }
 
-  	f = pi_file_open(db[i]->name);
-  	if (f == 0) {
-      // TODO: display filename
-  	  ErrorMessage(_("Unable to open file."));
-  	  break;
-  	}
+      // TODO: update status window
 
-    // TODO: update status window
-    
-  	fflush(stdout);
-  	pi_file_install(f, m_PiSocket, 0);
-  	pi_file_close(f);
-  }
-  
-  struct PilotUser U;
-  if (dlp_ReadUserInfo(m_PiSocket, &U)>=0) {
-    U.lastSyncPC = 0x00000000; /* Hopefully unique constant, to tell
-                                  any Desktop software that databases
-                                  have been altered, and that a slow
-                                  sync is necessary */
-    U.lastSyncDate = U.successfulSyncDate = time(0);
-    dlp_WriteUserInfo(m_PiSocket, &U);
-  } 
+      fflush(stdout);
+      pi_file_install(f, m_PiSocket, 0);
+      pi_file_close(f);
+   }
 
-  // TODO: close status window
+   // save time of last hotsync
+   struct PilotUser U;
+   if (dlp_ReadUserInfo(m_PiSocket, &U)>=0) {
+      U.lastSyncPC = 0x00000000;  /* Hopefully unique constant, to tell
+                                    any Desktop software that databases
+                                    have been altered, and that a slow
+                                    sync is necessary */
+      U.lastSyncDate = U.successfulSyncDate = time(0);
+      dlp_WriteUserInfo(m_PiSocket, &U);
+   } 
 
+   // TODO: close status window
 }
+
 
 void
 PalmOSModule::Restore() 
 {
-  PiConnection conn(this);
-  if( ! IsConnected())
-     return;
+   PiConnection conn(this);
+   if( ! IsConnected())
+      return;
 
-  DIR*   dir;
-  int    ofile_total; 
-  char ** fnames = 0;
+   DIR*   dir;
+   int    ofile_total; 
+   char ** fnames = 0;
 
-  dir = opendir(m_BackupDir);
-  if (dir <= 0) {
-    ErrorMessage(_("Couldn´t access backup directory."));
-    return;
-  }
+   dir = opendir(m_BackupDir);
+   if (dir <= 0) {
+      ErrorMessage(_("Couldn´t access backup directory."));
+      return;
+   }
 
-  ofile_total = CreateFileList(&fnames, dir);
+   ofile_total = CreateFileList(&fnames, dir);
 
-  // we´ve finished reading the filelist
-  closedir(dir);
+   // we´ve finished reading the filelist
+   closedir(dir);
 
-  // install files
-  InstallFiles(fnames, ofile_total);
+   // install files
+   InstallFiles(fnames, ofile_total);
+   DeleteFileList(fnames, ofile_total);
 }
+
 
 void
 PalmOSModule::GetAddresses(PalmBook *palmbook)
