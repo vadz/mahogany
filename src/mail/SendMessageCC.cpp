@@ -202,8 +202,8 @@ SendMessageCC::Build(void)
    delete [] headers;
 
    // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the last NULL entry
-   m_headerNames = new const char*[m_headerList.size()+2];
-   m_headerValues = new const char*[m_headerList.size()+2];
+   m_headerNames = new const char*[m_headerList.size()+4];
+   m_headerValues = new const char*[m_headerList.size()+4];
    for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, h++)
    {
       m_headerNames[h] = strutil_strdup(StringCast(i)->c_str());
