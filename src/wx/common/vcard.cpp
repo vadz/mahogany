@@ -258,6 +258,8 @@ bool wxVCardObject::GetNamedPropValue(const char *name, wxString *val) const
     }
     else
     {
+        val->clear();
+
         return FALSE;
     }
 }

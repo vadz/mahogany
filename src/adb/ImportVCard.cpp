@@ -132,17 +132,42 @@ size_t AdbVCardImporter::GetEntryNames(const String& path,
 
    // how to construct a nick name for a vCard? there doesn't seem to be any
    // natural choice for this, so just take the family name instead
-   wxString familyname;
+   wxString familyname, givenname;
    size_t countImported = 0,
           countAll = m_cards.GetCount();
    for ( size_t n = 0; n < countAll; n++ )
    {
-      if ( m_cards[n]->GetName(&familyname) )
+      if ( m_cards[n]->GetName(&familyname, &givenname) )
       {
-         countImported++;
-         entries.Add(familyname);
+         // it may happen that we do have the name property but without the
+         // family name field
+         if ( familyname.empty() )
+         {
+            if ( givenname.empty() )
+            {
+               // what else can we do?
+               wxLogDebug("Skipping vCard without name.");
+
+               continue;
+            }
+            else
+            {
+               familyname = givenname;
+            }
+         }
+
+         if ( entries.Index(familyname) != wxNOT_FOUND )
+         {
+            // TODO: ask to rename it?
+            wxLogDebug("Skipping vCard with duplicate name.");
+         }
+         else
+         {
+            countImported++;
+            entries.Add(familyname);
+         }
       }
-      //else: what to do with unnamed properties?
+      //else: what to do with unnamed properties? (TODO: try full name?)
    }
 
    return countImported;
