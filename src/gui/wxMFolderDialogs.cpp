@@ -1713,7 +1713,12 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
           "Ok button should be disabled" );
 
    // 0th step: verify if the settings are self-consistent
-
+   {
+       wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
+       if (folderType == MF_FILE && dlg->GetFolderName() == "INBOX")
+           folderType = MF_INBOX;
+   }
+   
    // is the folder name valid?
    wxString path;
    if ( folderType == MF_MH )
