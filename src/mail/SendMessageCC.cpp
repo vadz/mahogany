@@ -498,8 +498,7 @@ SendMessageCC::Send(void)
          LOGMESSAGE((M_LOG_DEFAULT,m_protocol==Prot_SMTP?_("Mail sent."):_("Article posted.")));
       else
       {
-         sprintf (tmpbuf, _("Failed to send - %s"), stream->reply ?
-                  stream->reply : _("unknown error"));
+         sprintf (tmpbuf, _("Failed to send - %s"), stream->reply);
          ERRORMESSAGE((tmpbuf));
          success = false;
       }

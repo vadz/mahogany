@@ -1206,7 +1206,7 @@ wxComposeView::Send(void)
    wxLayoutExportObject *export;
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
 
-   if(m_sent) // already sent once, just recycle old SendMessageCC
+   if(! m_sent) // if sent once, just recycle old SendMessageCC
    {
       while((export = wxLayoutExport( &status,
                                       WXLO_EXPORT_AS_TEXT,
