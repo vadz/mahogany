@@ -218,9 +218,6 @@ then
 	else
 		AC_MSG_RESULT(no)
 	fi
-	if test "$USE_STRICT" = 1; then
-		CXXFLAGS="$CXXFLAGS -Werror -pedantic"
-	fi
 fi
 
 dnl --------------------------------------------------------------------------
@@ -738,6 +735,14 @@ MAKE_LOCAL_LIBS_DEFINE="junk"
 
 dnl compface is included in M source
 LIBS="$LIBS -lMcompface $EXTRALIBS"
+
+dnl Only now can we add them, or otherwise some tests would have failed
+if test "$GCC" = "yes"
+then
+	if test "$USE_STRICT" = 1; then
+		CXXFLAGS="$CXXFLAGS -Werror -pedantic"
+	fi
+fi
 
 dnl add other flags
 LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PNG $LIB_JPEG"
