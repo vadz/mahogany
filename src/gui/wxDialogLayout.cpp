@@ -255,6 +255,15 @@ void wxEnhancedPanel::OnSize(wxSizeEvent& event)
    }
 #endif // wxGTK
 
+   // first lay out the controls or RefreshScrollbar() won't work properly
+   Layout();
+   RefreshScrollbar(event.GetSize());
+
+   // don't call Skip() as we already did what wxPanel::OnSize() does
+}
+
+void wxEnhancedPanel::RefreshScrollbar(const wxSize& size)
+{
    // find the total height of this panel
    int height = 0;
    for ( wxWindowList::Node *node = GetCanvas()->GetChildren().GetFirst();
@@ -276,7 +285,7 @@ void wxEnhancedPanel::OnSize(wxSizeEvent& event)
    // a small margin to aviod that the canvas just fits into the panel
    height += 2*LAYOUT_Y_MARGIN;
 
-   if ( height > event.GetSize().y )
+   if ( height > size.y )
    {
       // why 10? well, it seems a reasonable value and changing it doesn't
       // change much anyhow...
@@ -290,7 +299,7 @@ void wxEnhancedPanel::OnSize(wxSizeEvent& event)
       m_canvas->EnableScrolling(FALSE, FALSE);
    }
 
-   GetCanvas()->SetSize(event.GetSize());
+   GetCanvas()->SetSize(size);
 
    GetCanvas()->Layout();
 }

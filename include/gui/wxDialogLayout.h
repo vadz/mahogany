@@ -433,6 +433,10 @@ public:
        return m_canvas ? m_canvas->Layout() : wxPanel::Layout();
    }
 
+   // show or hide the vertical scrollbar depending on whether there is enough
+   // place or not
+   void RefreshScrollbar(const wxSize& size);
+
 private:
    // called from CreateXXX() functions to set up the top constraint which is
    // either just below the "last", or below the page top (with some
@@ -502,7 +506,7 @@ private:
 
 // ----------------------------------------------------------------------------
 // a base class for notebook pages which provides some handy functions for
-// layin out the controls inside the page. It is well suited for the pages
+// laying out the controls inside the page. It is well suited for the pages
 // showing the controls in a row (text fields with labels for example).
 // ----------------------------------------------------------------------------
 
@@ -524,6 +528,7 @@ private:
 // ----------------------------------------------------------------------------
 // a notebook with images
 // ----------------------------------------------------------------------------
+
 class wxNotebookWithImages : public wxPNotebook
 {
 public:
