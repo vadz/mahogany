@@ -635,7 +635,7 @@ SendMessageCC::EncodingToCharset(wxFontEncoding enc)
       case wxFONTENCODING_ISO8859_13:
       case wxFONTENCODING_ISO8859_14:
       case wxFONTENCODING_ISO8859_15:
-         cs.Printf("iso-8859-%d", enc + 1 - wxFONTENCODING_ISO8859_1);
+         cs.Printf("ISO-8859-%d", enc + 1 - wxFONTENCODING_ISO8859_1);
          break;
 
       case wxFONTENCODING_CP1250:
