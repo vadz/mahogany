@@ -68,6 +68,9 @@ static const char *wxFLC_ColumnNames[] =
 
 void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 {
+   if(! m_FolderView || ! m_FolderView->m_MessagePreview)
+      return; // nothing to do
+   
    if(! event.ControlDown())
    {
       long keyCode = event.KeyCode();
@@ -83,9 +86,9 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 
       /** To    allow translations:
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
-          Movetofolder, ReplyTo, Forward, Open, Print
+          Movetofolder, ReplyTo, Forward, Open, Print, Show Headers
       */
-      const char keycodes_en[] = gettext_noop("DUXCSMRFOP ");
+      const char keycodes_en[] = gettext_noop("DUXCSMRFOPH ");
       const char *keycodes = _(keycodes_en);
       
       int idx = 0;
@@ -128,6 +131,9 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
          break;
       case 'P':
          m_FolderView->PrintMessages(selections);
+         break;
+      case 'H':
+         m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
          break;
       case ' ':
          // If shift is not used, deselect all items before having

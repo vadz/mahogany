@@ -211,6 +211,9 @@ private:
    ProfileBase *m_Profile;
    /// full folder name
    String m_folderName;
+
+   /// allow it to access m_MessagePreview;
+   friend class wxFolderListCtrl;
 };
 
 class wxFolderViewFrame : public wxMFrame
@@ -240,7 +243,7 @@ private:
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);
    wxFolderViewFrame(String const &name, wxMFrame *parent);
    wxFolderView *m_FolderView;
-
+   
    DECLARE_EVENT_TABLE()
 };
 
