@@ -1,11 +1,16 @@
-/*-*- c++ -*-********************************************************
- * MailFolderCmn class: common code for all MailFolder classes      *
- *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)      *
- *                                                                  *
- * $Id$
- *******************************************************************/
-
+//////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   MailFolderCmn.h: provide some meat on MailFolder bones
+// Purpose:     MailFolderCmn is a normal base class implementing the methods
+//              of MailFolder ABC for which we can write a reasonable generic
+//              implementation
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (C) 1998-2000 by Karsten Ballüder (ballueder@gmx.net)
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef MAILFOLDERCMN_H
 #define MAILFOLDERCMN_H
@@ -129,10 +134,9 @@ public:
    virtual void ForwardMessages(const UIdArray *messages,
                                 const Params& params,
                                 MWindow *parent = NULL);
-
-   virtual void ProcessHeaderListing(HeaderInfoList *hilp);
    //@}
 
+   virtual HeaderInfoList *GetHeaders(void) const;
 
    /// Count number of new messages.
    virtual unsigned long CountNewMessages(void) const
@@ -161,12 +165,18 @@ public:
    /// VZ: adding this decl as it doesn't compile otherwise
    virtual void Checkpoint(void) = 0;
 
+   virtual MFrame *SetInteractiveFrame(MFrame *frame);
+   virtual MFrame *GetInteractiveFrame() const;
+
    virtual void SuspendUpdates() { m_suspendUpdates++; }
    virtual void ResumeUpdates() { if ( !--m_suspendUpdates ) RequestUpdate(); }
 
 protected:
    /// remove the folder from our "closer" list
    virtual void Close(void);
+
+   /// This function must be called before actually closing the folder.
+   void PreClose(void);
 
    /// is updating currently suspended?
    bool IsUpdateSuspended() const { return m_suspendUpdates != 0; }
@@ -182,7 +192,7 @@ protected:
    /// really count messages
    virtual bool DoCountMessages(MailFolderStatus *status) const = 0;
 
-   /**@name Config information used */
+   /** @name Config management */
    //@{
    struct MFCmnOptions
    {
@@ -235,7 +245,6 @@ protected:
       /// if m_replaceFromWithTo, the list of our addresses
       wxArrayString m_ownAddresses;
    } m_Config;
-   //@}
 
    /// Use the new options from m_Config
    virtual void DoUpdate();
@@ -245,9 +254,11 @@ protected:
 
    /// Read options from profile into the options struct
    virtual void ReadConfig(MailFolderCmn::MFCmnOptions& config);
+   //@}
 
    /// Update the folder status, number of messages, etc
    virtual void UpdateStatus(void) = 0;
+
    /// Constructor
    MailFolderCmn();
 
@@ -263,18 +274,28 @@ protected:
        mail event. */
    virtual bool IsNewMessage(const HeaderInfo * hi) = 0;
 
-   /// Call this before actually closing the folder.
-   void PreClose(void);
+#ifdef DEBUG_FOLDER_CLOSE
+   virtual void IncRef(void);
+#endif // DEBUG_FOLDER_CLOSE
+
+   /// decrement and delete if reached 0, return TRUE if item wasn't deleted
+   virtual bool DecRef();
+   virtual bool RealDecRef();
 
    /// To display progress while reading message headers:
    class MProgressDialog *m_ProgressDialog;
-
-   /// Have we not build a listing before?
-   bool m_FirstListing;
-   /// The last seen new UID, to check for new mails:
-   UIdType  m_LastNewMsgUId;
    //@}
-   /**@name Common variables might or might not be used */
+
+   /** @name The listing information */
+   //@{
+   /// our listing or NULL if not created yet
+   HeaderInfoList *m_headers;
+
+   /// The last seen new UID, to check for new mails:
+   UIdType m_LastNewMsgUId;
+   //@}
+
+   /** @name Auth info */
    //@{
    /// Login for password protected mail boxes.
    String m_Login;
@@ -285,14 +306,6 @@ protected:
    /// a timer to update information
    class MailFolderTimer *m_Timer;
 
-#ifdef DEBUG_FOLDER_CLOSE
-   virtual void IncRef(void);
-#endif // DEBUG_FOLDER_CLOSE
-
-   /// decrement and delete if reached 0, return TRUE if item wasn't deleted
-   virtual bool DecRef();
-   virtual bool RealDecRef();
-
 private:
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;
@@ -300,13 +313,12 @@ private:
    /// suspend update count (updating is suspended if it is > 0)
    size_t m_suspendUpdates;
 
-   /** gcc 2.7.2.1 on FreeBSD 2.8.8-stable is reported to need this to
-       link correctly: */
-   MailFolderCmn(const MailFolderCmn &) { ASSERT(0); }
-
 #ifdef DEBUG_FOLDER_CLOSE
    bool m_PreCloseCalled;
 #endif // DEBUG_FOLDER_CLOSE
+
+   /// the frame to which messages for this folder go by default
+   MFrame *m_frame;
 
    friend class MfCloseEntry;
    friend class MFCmnEventReceiver;

@@ -414,6 +414,24 @@ void MfCloseTimer::Notify(void)
 // MailFolderCmn folder closing
 // ----------------------------------------------------------------------------
 
+void
+MailFolderCmn::PreClose(void)
+{
+   if ( m_headers )
+   {
+      m_headers->DecRef();
+
+      m_headers = NULL;
+   }
+
+   if ( m_Timer )
+      m_Timer->Stop();
+
+#ifdef DEBUG_FOLDER_CLOSE
+   m_PreCloseCalled = true;
+#endif // DEBUG_FOLDER_CLOSE
+}
+
 void MailFolderCmn::Close(void)
 {
    if ( gs_MailFolderCloser )
@@ -529,14 +547,13 @@ MailFolderCmn::MailFolderCmn()
    m_PreCloseCalled = false;
 #endif // DEBUG_FOLDER_CLOSE
 
-   // We need to know if we are building the first folder listing ever
-   // or not, to suppress NewMail events.
-   m_FirstListing = true;
    m_ProgressDialog = NULL;
    m_Timer = new MailFolderTimer(this);
    m_LastNewMsgUId = UID_ILLEGAL;
 
    m_suspendUpdates = 0;
+
+   m_headers = NULL;
 
    m_MEventReceiver = new MfCmnEventReceiver(this);
 }
@@ -554,15 +571,21 @@ MailFolderCmn::~MailFolderCmn()
    delete m_MEventReceiver;
 }
 
-void
-MailFolderCmn::PreClose(void)
-{
-   if ( m_Timer )
-      m_Timer->Stop();
+// ----------------------------------------------------------------------------
+// MailFolderCmn headers
+// ----------------------------------------------------------------------------
 
-#ifdef DEBUG_FOLDER_CLOSE
-   m_PreCloseCalled = true;
-#endif // DEBUG_FOLDER_CLOSE
+HeaderInfoList *MailFolderCmn::GetHeaders(void) const
+{
+   if ( !m_headers )
+   {
+      MailFolderCmn *self = wxConstCast(this, MailFolderCmn);
+      self->m_headers = HeaderInfoList::Create(self);
+   }
+
+   m_headers->IncRef();
+
+   return m_headers;
 }
 
 // ----------------------------------------------------------------------------
@@ -997,7 +1020,10 @@ extern "C"
                break;
 
             case MSO_SCORE:
+               // we don't store score any more in HeaderInfo
+#ifdef BROKEN_BY_VZ
                result = CmpNumeric(i1->GetScore(), i2->GetScore());
+#endif
                break;
 
             default:
@@ -1022,6 +1048,9 @@ extern "C"
       return result;
    }
 }
+
+// sorting/threading is going to be done by HeaderInfoList itself now
+#ifdef BROKEN_BY_VZ
 
 // ----------------------------------------------------------------------------
 // MailFolderCmn threading
@@ -2536,9 +2565,6 @@ static void ComputeThreadedIndicesWithJWZ(MailFolder *mf,
 
 #endif //EXPERIMENTAL_JWZ_THREADING
 
-
-
-
 static void AddDependents(size_t &idx,
                           int level,
                           int i,
@@ -2728,6 +2754,40 @@ static void SortListing(MailFolder *mf,
    hil->DecRef();
 }
 
+void
+MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
+{
+   CHECK_RET( hilp, "no listing to process" );
+
+   hilp->IncRef();
+
+   SortParams sortParams;
+   sortParams.order = m_Config.m_ListingSortOrder;
+   sortParams.replaceFromWithTo = m_Config.m_replaceFromWithTo;
+   if ( sortParams.replaceFromWithTo )
+      sortParams.ownAddresses = &m_Config.m_ownAddresses;
+   else
+      sortParams.ownAddresses = NULL;
+
+   SortListing(this, hilp, sortParams);
+
+   if ( m_Config.m_UseThreading )
+   {
+      hilp->IncRef();
+      ThreadMessages(this, hilp);
+   }
+   else // reset indentation as it may have been set by threading code before
+   {
+      size_t count = hilp->Count();
+      for ( size_t i = 0; i < count; i++ )
+      {
+         (*hilp)[i]->SetIndentation(0);
+      }
+   }
+}
+
+#endif // BROKEN_BY_VZ
+
 // ----------------------------------------------------------------------------
 // MailFolderCmn new mail check
 // ----------------------------------------------------------------------------
@@ -2799,43 +2859,6 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
    delete [] messageIDs;
 }
 
-
-/* This will do the work in the new mechanism:
-
-   - For now it only sorts or threads the headerinfo list
- */
-void
-MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
-{
-   CHECK_RET( hilp, "no listing to process" );
-
-   hilp->IncRef();
-
-   SortParams sortParams;
-   sortParams.order = m_Config.m_ListingSortOrder;
-   sortParams.replaceFromWithTo = m_Config.m_replaceFromWithTo;
-   if ( sortParams.replaceFromWithTo )
-      sortParams.ownAddresses = &m_Config.m_ownAddresses;
-   else
-      sortParams.ownAddresses = NULL;
-
-   SortListing(this, hilp, sortParams);
-
-   if ( m_Config.m_UseThreading )
-   {
-      hilp->IncRef();
-      ThreadMessages(this, hilp);
-   }
-   else // reset indentation as it may have been set by threading code before
-   {
-      size_t count = hilp->Count();
-      for ( size_t i = 0; i < count; i++ )
-      {
-         (*hilp)[i]->SetIndentation(0);
-      }
-   }
-}
-
 // ----------------------------------------------------------------------------
 // MailFolderCmn options handling
 // ----------------------------------------------------------------------------
@@ -2879,16 +2902,6 @@ MailFolderCmn::DoUpdate()
 
       if ( interval > 0 ) // interval of zero == disable ping timer
          m_Timer->Start(interval);
-   }
-
-   if ( HasHeaders() )
-   {
-      HeaderInfoList *hil = GetHeaders();
-      if ( hil )
-      {
-         ProcessHeaderListing(hil);
-         hil->DecRef();
-      }
    }
 }
 
@@ -3282,6 +3295,32 @@ bool MailFolderCmn::CountInterestingMessages(MailFolderStatus *status) const
    }
 
    return true;
+}
+
+// ----------------------------------------------------------------------------
+// MailFolderCmn interactive frame functions
+// ----------------------------------------------------------------------------
+
+MFrame *MailFolderCmn::SetInteractiveFrame(MFrame *frame)
+{
+   MFrame *frameOld = m_frame;
+   m_frame = frame;
+   return frameOld;
+}
+
+MFrame *MailFolderCmn::GetInteractiveFrame() const
+{
+   if ( !mApplication->IsInAwayMode() )
+   {
+      if ( m_frame )
+         return m_frame;
+
+      if ( GetName() == ms_interactiveFolder )
+         return ms_interactiveFrame;
+   }
+   //else: no interactivity in away mode at all
+
+   return NULL;
 }
 
 // ----------------------------------------------------------------------------

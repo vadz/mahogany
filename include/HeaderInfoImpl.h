@@ -1,11 +1,15 @@
-/*-*- c++ -*-********************************************************
- * HeaderInfoImpl : header info listing for mailfolders
- *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
- *                                                                  *
- * $Id$
- *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   include/HeaderInfoCC.h: HeaderInfoListImpl class
+// Purpose:     provide implementation of the ABC HeaderInfoList
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
 
 #ifndef HEADERINFOIMPL_H
 #define HEADERINFOIMPL_H
@@ -16,185 +20,84 @@
 
 #include "HeaderInfo.h"
 
-/** This class essentially maps to the c-client Overview structure,
-    which holds information for showing lists of messages.
-    The m_uid member is also used to map any access to the n-th message in
-    the folder to the correct message. I.e. when requesting
-    GetMessage(5), it will use the message with the m_uid from the 6th
-    entry in the list.
-*/
-class HeaderInfoImpl : public HeaderInfo
-{
-public:
-   HeaderInfoImpl();
+#include <wx/dynarray.h>
 
-   // implement base class pure virtuals
-   virtual String const &GetSubject(void) const { return m_Subject; }
-   virtual String const &GetFrom(void) const { return m_From; }
-   virtual String const &GetTo(void) const { return m_To; }
-   virtual const String &GetNewsgroups(void) const { return m_NewsGroups; }
-   virtual time_t GetDate(void) const { return m_Date; }
-   virtual String const & GetId(void) const { return m_Id; }
-   virtual UIdType GetUId(void) const { return m_UId; }
-   virtual String const &GetReferences(void) const { return m_References; }
-   virtual String const &GetInReplyTo(void) const { return m_InReplyTo; }
-   virtual int GetStatus(void) const { return m_Status; }
-   virtual unsigned long GetSize(void) const { return m_Size; }
-   virtual unsigned long GetLines(void) const { return m_Lines; }
+WX_DEFINE_ARRAY(HeaderInfo *, ArrayHeaderInfo);
 
-   /// Return the indentation level for message threading.
-   virtual unsigned GetIndentation() const { return m_Indentation; }
-   /// Set the indentation level for message threading.
-   virtual void SetIndentation(unsigned level) { m_Indentation = level; }
+/**
+  This is a very simple HeaderInfoList implementation. It preallocates an
+  array big enough to store the info for all the messages and doesn't support
+  sorting nor threading.
 
-   /// Get Colour setting (name or empty string)
-   virtual String GetColour(void) const { return m_Colour; }
-   /// Set Colour setting (name or empty string)
-   virtual void SetColour(const String &col) { m_Colour = col; }
+  It should be considered just as a prototype. The final version should
+  support folders with up to 100000 messages efficiently (probably not
+  sorting/threading them though?).
 
-   /// Get Score setting (name or empty string)
-   virtual int GetScore(void) const { return m_Score; }
-   /// Change Score setting (default = 0)
-   virtual void AddScore(int delta) { m_Score += delta; }
+  TODO:
+   1. sorting/threading support, obviously: this involves using
+      MailFolder::CanSort/Thread() and server-side threading if it can and
+      falling back to the existing sorting/threading code otherwise. We also
+      should handle the "smart sorting" option, i.e. sort the messages only if
+      there are reasonably few of them (as we have to retrieve all of them to
+      sort!) and leave them unsorted otherwise.
 
-   /// set encoding to use for display
-   virtual void SetEncoding(wxFontEncoding enc) { m_Encoding = enc; }
-   /// get encoding to use for display
-   virtual wxFontEncoding GetEncoding() const { return m_Encoding; }
+   2. although there is nothing wrong with preallocating all the memory we need
+      (even for 100000 message we take just 400Kb), it would still be nice to
+      have some smart way of storing HeaderInfo objects as using array is less
+      than ideal because adding/removing messages is a common operation.
 
-   /// create a copy of this object
-   virtual HeaderInfo *Clone() const;
+   3. batch processing of OnRemove() calls: instead of removing the item
+      immediately, remember the range of items to be removed. If the new
+      item to remove is not contiguous to the existing range, DoRemove()
+      immediately and start new range. Also call DoRemove() in the beginning
+      of each call using the actual listing.
 
-   /// folder internal use:
-   virtual FolderDataType GetFolderData(void) const { return m_FolderData; }
-   virtual void SetFolderData(const FolderDataType & fd) { m_FolderData = fd; }
-
-protected:
-   /// header values
-   String m_Subject,
-          m_From,
-          m_To,
-          m_NewsGroups,
-          m_References,
-          m_InReplyTo;
-
-   String m_Id;
-
-   /// MailFolder::Flags combination
-   int m_Status;
-
-   /// size in bytes
-   unsigned long m_Size;
-
-   /// size in lines for text messages, 0 otherwise
-   unsigned long m_Lines;
-
-   /// as returned by cclient
-   unsigned long m_UId;
-
-   /// from headers
-   time_t m_Date;
-
-   /// @name appearance paramaters
-   //@{
-   unsigned int m_Indentation;
-   String m_Colour;
-   int m_Score;
-   wxFontEncoding m_Encoding;
-   //@}
-
-   FolderDataType m_FolderData;
-
-   friend class MailFolderCC;
-};
-
-/** This class holds a complete list of all messages in the folder. */
+      this should speed up things dramatically as messages are often removed in
+      bunches...
+ */
 class HeaderInfoListImpl : public HeaderInfoList
 {
-protected:
-   // helper function
-   HeaderInfo *GetItemAt(size_t n) const
-   {
-      CHECK( n < m_NumEntries, NULL, "invalid index in HeaderInfoList" );
-
-      return &m_Listing[n];
-   }
-
 public:
-   virtual size_t Count(void) const { return m_NumEntries; }
+   virtual size_t Count(void) const;
 
-   virtual HeaderInfo *GetItemByIndex(size_t n) const
-   {
-      return GetItemAt(n);
-   }
-
-   virtual size_t GetIdxFromMsgno(size_t msgno) const
-   {
-      return m_msgnoMax - msgno;
-   }
-
-   virtual size_t GetIdxFromPos(size_t pos) const
-   {
-      return GetTranslatedIndex(pos);
-   }
-
-   virtual size_t GetPosFromIdx(size_t n) const
-   {
-      return GetUntranslatedIndex(n);
-   }
-
-   virtual HeaderInfo *GetEntryUId(UIdType uid);
-
+   virtual HeaderInfo *GetItemByIndex(size_t n) const;
    virtual UIdType GetIdxFromUId(UIdType uid) const;
 
-   virtual void SetTranslationTable(size_t *array);
-   virtual void AddTranslationTable(const size_t *array);
+   virtual size_t GetIdxFromPos(size_t pos) const;
+   virtual size_t GetPosFromIdx(size_t n) const;
 
-   virtual void Remove(size_t n);
+   virtual void OnRemove(size_t n);
+   virtual void OnAdd(size_t countNew);
 
-   virtual void SetCount(size_t newcount);
+   /// dtor frees memory
+   virtual ~HeaderInfoListImpl();
 
-   /// Returns an empty list of same size.
-   virtual HeaderInfoListImpl *DuplicateEmpty(void) const
-      { return Create(m_NumEntries, m_msgnoMax); }
+private:
+   /// private ctor for use of HeaderInfoList::Create()
+   HeaderInfoListImpl(MailFolder *mf);
 
-   /// Creates a list of given size
-   static HeaderInfoListImpl * Create(size_t nRetrieve, size_t nTotal)
-      { return new HeaderInfoListImpl(nRetrieve, nTotal); }
+   /// no copy ctor
+   HeaderInfoListImpl(const HeaderInfoListImpl&);
 
-protected:
-   HeaderInfoListImpl(size_t nRetrieve, size_t nTotal);
-   ~HeaderInfoListImpl();
+   /// no assignment operator
+   HeaderInfoListImpl& operator=(const HeaderInfoListImpl&);
 
-   /// get the real index after translation
-   size_t GetTranslatedIndex(size_t n) const
-   {
-      if ( m_TranslationTable )
-      {
-         ASSERT_MSG( n < m_NumEntries, "invalid index" );
+   /// is the given entry valid (i.e. already cached)?
+   inline bool IsHeaderValid(size_t n) const;
 
-         n = m_TranslationTable[n];
-      }
 
-      ASSERT_MSG( n < m_NumEntries, "invalid index" );
+   /// the folder we contain the listinf for
+   MailFolder *m_mf;
 
-      return n;
-   }
+   /// the array of headers
+   ArrayHeaderInfo m_headers;
 
-   /// get the index which will translate into the given one
-   size_t GetUntranslatedIndex(size_t n) const;
+   /// the number of messages in the folder
+   size_t m_count;
 
-   /// The current listing of the folder
-   HeaderInfoImpl *m_Listing;
 
-   /// translation of indices
-   size_t *m_TranslationTable;
-
-   /// number of entries == number of messages we have
-   size_t m_NumEntries;
-
-   /// the msgno of the first entry (the last msgno) == total number of msgs
-   size_t m_msgnoMax;
+   // let it create us
+   friend HeaderInfoList *HeaderInfoList::Create(MailFolder *mf);
 
    MOBJECT_DEBUG(HeaderInfoListImpl)
 };

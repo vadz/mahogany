@@ -150,5 +150,41 @@
 #endif
 //@}
 
+// ----------------------------------------------------------------------------
+// misc types
+// ----------------------------------------------------------------------------
+
+/**
+  @name Mail-related typedefs
+ */
+//@{
+// we must define it to be different from size_t to avoid compilation problems
+// with UIdArray which has both methods Remove(UIdType) and Remove(size_t), so
+// if configure determined that size_t was the same type as unsigned long we
+// define it as unsigned int instead
+#if !defined(wxSIZE_T_IS_ULONG)
+   /// A Type used for message UIds
+   typedef unsigned long UIdType;
+
+   /// An illegal, never happening UId number:
+   #define UID_ILLEGAL   ULONG_MAX
+#elif !defined(wxSIZE_T_IS_UINT)
+   /// A Type used for message UIds
+   typedef unsigned int UIdType;
+
+   /// An illegal, never happening UId number:
+   #define UID_ILLEGAL   UINT_MAX
+#else
+   // how can size_t be both uint and ulong simultaneously??
+   #error "Don't know how to define UIdType!"
+#endif
+
+/// type for msgno numbers
+typedef unsigned long MsgnoType;
+
+/// an illegal msgno value (0 because msgnos are counted from 1)
+#define MSGNO_ILLEGAL 0
+//@}
+
 #endif // MCOMMON_H
 

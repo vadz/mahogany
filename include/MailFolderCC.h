@@ -18,17 +18,15 @@
 #endif
 
 #ifndef   USE_PCH
-#   include  "kbList.h"
-#   include  "MObject.h"
+#  include "kbList.h"
 
-// includes for c-client library
-#include "Mcclient.h"
+#  include "Mcclient.h"
 #endif
 
-#include  "MailFolderCmn.h"
-#include  "FolderView.h"
+#include "MailFolderCmn.h"
+#include "FolderView.h"
 
-#include  <wx/fontenc.h>
+#include <wx/fontenc.h>    // enum wxFontEncoding can't be fwd declared
 
 // fwd decls
 class HeaderInfoList;
@@ -37,7 +35,7 @@ class MMutex;
 struct mail_address;
 struct OVERVIEW_X;
 
-// supported formats for the local mailboxes (MH not counted)
+// supported formats for the local file mailboxes (hence MH not counted)
 enum FileMailboxFormat
 {
    FileMbox_MBX,   // the default format, must be 0!
@@ -758,4 +756,5 @@ public:
    MOBJECT_DEBUG(MailFolderCC)
 };
 
-#endif
+#endif // MAILFOLDERCC_H
+

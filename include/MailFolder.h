@@ -1,16 +1,14 @@
-/*-*- c++ -*-********************************************************
- * MailFolder class: ABC defining the interface to mail folders     *
- *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
- *                                                                  *
- * $Id$
- *******************************************************************/
-
-/**
-   @package Mailfolder access
-   @version $Revision$
-   @author  Karsten Ballüder
-*/
+//////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   MailFolder.h: MailFolder class declaration
+// Purpose:     MailFolder is the ABC defining the interface to mail folders
+// Author:      Karsten Ballüder
+// Modified by: Vadim Zeitlin at 24.01.01: complete rewrite of update logic
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef MAILFOLDER_H
 #define MAILFOLDER_H
@@ -22,6 +20,62 @@
 #include "MObject.h"
 #include "FolderType.h"
 #include "kbList.h"
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+/// how to show the message size in the viewer?
+enum MessageSizeShow
+{
+   /// choose lines/bytes/kbytes/mbytes automatically
+   MessageSize_Automatic,
+   /// always show bytes/kbytes/mbytes
+   MessageSize_AutoBytes,
+   /// always show size in bytes
+   MessageSize_Bytes,
+   /// always show size in Kb
+   MessageSize_KBytes,
+   /// always show size in Mb
+   MessageSize_MBytes,
+   /// end of enum marker
+   MessageSize_Max
+};
+
+/** Sort order enum for sorting message listings. */
+enum MessageSortOrder
+{
+   /// no sorting (i.e. sorting in the arrival order or reverse arrival order)
+   MSO_NONE, MSO_NONE_REV,
+
+   /// date or reverse date
+   MSO_DATE, MSO_DATE_REV,
+
+   /// subject
+   MSO_SUBJECT, MSO_SUBJECT_REV,
+
+   // old, deprecated name for MSO_SENDER
+   MSO_AUTHOR, MSO_AUTHOR_REV,
+
+   /// sender (or recipient for messages from oneself)
+   MSO_SENDER = MSO_AUTHOR,
+   MSO_SENDER_REV = MSO_AUTHOR_REV,
+
+   /// status (deleted < answered < unread < new)
+   MSO_STATUS, MSO_STATUS_REV,
+
+   /// score
+   MSO_SCORE, MSO_SCORE_REV,
+
+   /// size in bytes
+   MSO_SIZE, MSO_SIZE_REV
+
+   // NB: the code in wxFolderListCtrl::OnColumnClick() and ComparisonFunction()
+   //     relies on MSO_XXX_REV immediately following MSO_XXX, so don't change
+   //     the values of the elements of this enum and always add MSO_XXX and
+   //     MSO_XXX in this order.
+   // Don't forget to add to sortCriteria[] in wxMDialogs.cpp
+};
 
 class HeaderInfoList;
 
@@ -61,6 +115,7 @@ public:
 
 // forward declarations
 class FolderView;
+class HeaderInfo;
 class Profile;
 class MFolder;
 class MFrame;
@@ -86,7 +141,7 @@ private:
 };
 
 /**
-  MailFolderStatus contains the "interesting" and often changign information
+  MailFolderStatus contains the "interesting" and often changing information
   about the folder such as the number of new/unread messages in it
 */
 
@@ -126,17 +181,6 @@ struct MailFolderStatus
                  searched;
 };
 
-// how to show the message size in the viewer?
-enum MessageSizeShow
-{
-   MessageSize_Automatic,  // choose lines/bytes/kbytes/mbytes automatically
-   MessageSize_AutoBytes,  // always show bytes/kbytes/mbytes
-   MessageSize_Bytes,      // always show size in bytes
-   MessageSize_KBytes,     //                     Kb
-   MessageSize_MBytes,     //                     Mb
-   MessageSize_Max
-};
-
 /**
    MailFolder base class, represents anything containig mails.
 
@@ -162,9 +206,6 @@ class MailFolder : public MObjectRC
 public:
    /** @name Constants and Types */
    //@{
-   // compatibility
-   typedef FolderType Type;
-
    /** What is the status of a given message in the folder?
        Recent messages are those that we never saw in a listing
        before. Once we open a folder, the messages will no longer be
@@ -205,9 +246,6 @@ public:
       String templ;     // the template to use for the new message
    };
    //@}
-
-   /// default ctor
-   MailFolder() { m_frame = NULL; }
 
    /** @name Static functions, implemented in MailFolder.cpp */
    //@{
@@ -273,6 +311,11 @@ public:
       @return the number of folders closed, -1 on error
     */
    static int CloseAll();
+
+   /**
+     Call Ping() on all opened mailboxes.
+    */
+   static bool PingAllOpened(void);
    //@}
 
    /** Phyically deletes this folder.
@@ -382,11 +425,11 @@ public:
    //@}
    //@}
 
-   /// Returns the shared logcircle object
-   static MLogCircle & GetLogCircle(void)
-      {
-         return ms_LogCircle;
-      }
+   /** @name Accessors */
+   //@{
+   /// is the folder opened
+   virtual bool IsOpened(void) const = 0;
+
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
    */
@@ -394,6 +437,79 @@ public:
 
    /// Return IMAP spec
    virtual String GetImapSpec(void) const = 0;
+
+   /// Return the folder's type.
+   virtual FolderType GetType(void) const = 0;
+
+   /// return the folder flags
+   virtual int GetFlags(void) const = 0;
+
+   /** Get the profile used by this folder
+       @return Pointer to the profile.
+   */
+   virtual Profile *GetProfile(void) = 0;
+
+   /// return class name
+   const char *GetClassName(void) const
+      { return "MailFolder"; }
+
+   /** Get authorisation information
+    */
+   virtual void GetAuthInfo(String *login, String *password) const = 0;
+
+   /**
+      Returns the delimiter used to separate the components of the folder
+      name
+
+      @return character dependind on the folder type and server
+    */
+   virtual char GetFolderDelimiter() const;
+   //@}
+
+   /** Folder capabilities querying */
+   //@{
+   /// Does the folder need a working network to be accessed?
+   virtual bool NeedsNetwork(void) const
+   {
+      return FolderNeedsNetwork(GetType(), GetFlags());
+   }
+
+   /// can we sort messages on server?
+   virtual bool CanSort() const;
+
+   /// can we thread messages on server?
+   virtual bool CanThread() const;
+   //@}
+
+   /** @name Functions working with message headers */
+   //@{
+   /** Returns the object which is used to retrieve the headers of this
+       folder.
+
+       @return pointer to HeaderInfoList which must be DecRef()d by caller
+    */
+   virtual HeaderInfoList *GetHeaders(void) const = 0;
+
+   /**
+      Get the header info for the specified range of headers. This is for
+      use of HeaderInfoList only!
+
+      @param arrayHI pointer to a sufficiently big array of HeaderInfos
+      @param msgnoFrom starting header to retrieve
+      @param msgnoTo last header to retrieve (inclusive)
+      @return the number of headers retrieved (may be less than requested if
+              cancelled or an error occured)
+    */
+   virtual size_t GetHeaderInfo(HeaderInfo *arrayHI,
+                                MsgnoType msgnoFrom, MsgnoType msgnoTo) = 0;
+
+   /**
+      Get the total number of messages in the folder. This should be a fast
+      operation unlike (possibly) CountMessages() below.
+
+      @return number of messages
+    */
+   virtual unsigned long GetMessageCount() const = 0;
 
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total
@@ -428,16 +544,19 @@ public:
    /// Count number of unread messages
    unsigned long CountUnseenMessages(void) const
       { return CountMessages(MSG_STAT_SEEN, 0); }
+   //@}
 
+   /** @name Operations on the folder */
+   //@{
    /** Check whether mailbox has changed.
        @return FALSE on error, TRUE otherwise
    */
    virtual bool Ping(void) = 0;
 
-   /** Call Ping() on all opened mailboxes. */
-   static bool PingAllOpened(void);
-
-   /** Perform a checkpoint on the folder. */
+   /** Perform a checkpoint on the folder. What this does depends on the server
+       but, quoting from RFC 2060: " A checkpoint MAY take a non-instantaneous
+       amount of real time to complete."
+    */
    virtual void Checkpoint(void) = 0;
 
    /** get the message with unique id uid
@@ -516,15 +635,7 @@ public:
        @return string uniquely identifying the message in this folder
    */
    virtual String GetMessageUID(unsigned long msgno) const = 0;
-
-   /** Get the profile.
-       @return Pointer to the profile.
-   */
-   virtual Profile *GetProfile(void) = 0;
-
-   /// return class name
-   const char *GetClassName(void) const
-      { return "MailFolder"; }
+   //@}
 
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.
@@ -595,11 +706,6 @@ public:
    virtual void ForwardMessages(const UIdArray *messages,
                                 const Params& params,
                                 MWindow *parent = NULL) = 0;
-
-   /** This function takes a header listing and sorts and threads it.
-   */
-   virtual void ProcessHeaderListing(HeaderInfoList *hilp) = 0;
-
    //@}
 
    /**@name Access control */
@@ -610,50 +716,13 @@ public:
        @return TRUE if we have obtained the lock
    */
    virtual bool Lock(void) const = 0;
-   /** Releases the lock on the mailfolder. */
+
+   /** Releases the lock on the mailfolder.
+    */
    virtual void UnLock(void) const = 0;
+
    /// Is folder locked?
    virtual bool IsLocked(void) const = 0;
-   //@}
-   /**@name Functions to get an overview of messages in the folder. */
-   //@{
-   /// returns true if the folder is opened
-   virtual bool HasHeaders() const = 0;
-   /** Returns a listing of the folder. Must be DecRef'd by caller. */
-   virtual HeaderInfoList *GetHeaders(void) const = 0;
-   //@}
-   /// Return the folder's type.
-   virtual FolderType GetType(void) const = 0;
-   /// return the folder flags
-   virtual int GetFlags(void) const = 0;
-
-   /// Does the folder need a working network to be accessed?
-   virtual bool NeedsNetwork(void) const
-   {
-      return FolderNeedsNetwork(GetType(), GetFlags());
-   }
-
-   /** Sets limits for the number of headers to retrieve: if hard limit is not
-       0, we will never retrieve more than that many messages even without
-       asking the user (soft limit is ignored). Otherwise, we will ask the
-       user if the soft limit is exceeded.
-
-       @param soft maximum number of messages to retrieve without askin
-       @param hard maximum number of messages to retrieve, 0 for no limit
-   */
-   virtual void SetRetrievalLimits(unsigned long soft, unsigned long hard) = 0;
-
-   /**@name Accessor methods */
-   //@{
-   /// Get authorisation information
-   virtual void GetAuthInfo(String *login, String *password) const = 0;
-   /**
-      Returns the delimiter used to separate the components of the folder
-      name
-
-      @return character dependind on the folder type and server
-    */
-   virtual char GetFolderDelimiter() const;
    //@}
 
    /** Apply any filter rules to the folder.
@@ -661,11 +730,6 @@ public:
        @return -1 if no filter module exists, return code otherwise
    */
    virtual int ApplyFilterRules(UIdArray msgs) = 0;
-
-   /** Request update: sends an event telling everyone that the mail folder
-       listing has changed.
-   */
-   virtual void RequestUpdate() = 0;
 
    /** @name Various static functions
 
@@ -740,6 +804,16 @@ public:
 
    /** @name Interactivity control */
    //@{
+   /** Sets limits for the number of headers to retrieve: if hard limit is not
+       0, we will never retrieve more than that many messages even without
+       asking the user (soft limit is ignored). Otherwise, we will ask the
+       user if the soft limit is exceeded.
+
+       @param soft maximum number of messages to retrieve without askin
+       @param hard maximum number of messages to retrieve, 0 for no limit
+   */
+   virtual void SetRetrievalLimits(unsigned long soft, unsigned long hard) = 0;
+
    /**
       Folder opening functions work differently if SetInteractive() is set:
       they will put more messages into status bar and possibly ask questions to
@@ -762,12 +836,15 @@ public:
 
       @return the old interactive frame for this folder
    */
-   MFrame *SetInteractiveFrame(MFrame *frame);
+   virtual MFrame *SetInteractiveFrame(MFrame *frame) = 0;
 
    /**
       Get the frame to use for interactive messages. May return NULL.
    */
-   MFrame *GetInteractiveFrame() const;
+   virtual MFrame *GetInteractiveFrame() const = 0;
+
+   /// Returns the shared log circle object used for error analysis
+   static MLogCircle& GetLogCircle(void) { return ms_LogCircle; }
    //@}
 
    /** @name Update control
@@ -777,6 +854,12 @@ public:
        of times as Suspend()!
     */
    //@{
+   /** Request update: sends an event telling everyone that the messages in the
+       mail folder have changed, i.e. either we have new messages or some
+       messages were deleted.
+   */
+   virtual void RequestUpdate() = 0;
+
    /// Suspend folder updates (call ResumeUpdates() soon!)
    virtual void SuspendUpdates() = 0;
 
@@ -797,8 +880,9 @@ protected:
    /// the frame to which interactive messages for ms_interactiveFolder go
    static MFrame *ms_interactiveFrame;
 
-   /// the frame to which messages for this folder go by default
-   MFrame *m_frame;
+private:
+   /// this is the only class which can call our GetHeaderInfo()
+   friend class HeaderInfoList;
 };
 
 /** This class temporarily locks a mailfolder */
@@ -850,41 +934,6 @@ public:
    virtual ~FolderListing() {}
 };
 
-/** Sort order enum for sorting message listings. */
-enum MessageSortOrder
-{
-   /// no sorting (i.e. sorting in the arrival order or reverse arrival order)
-   MSO_NONE, MSO_NONE_REV,
-
-   /// date or reverse date
-   MSO_DATE, MSO_DATE_REV,
-
-   /// subject
-   MSO_SUBJECT, MSO_SUBJECT_REV,
-
-   // old, deprecated name for MSO_SENDER
-   MSO_AUTHOR, MSO_AUTHOR_REV,
-
-   /// sender (or recipient for messages from oneself)
-   MSO_SENDER = MSO_AUTHOR,
-   MSO_SENDER_REV = MSO_AUTHOR_REV,
-
-   /// status (deleted < answered < unread < new)
-   MSO_STATUS, MSO_STATUS_REV,
-
-   /// score
-   MSO_SCORE, MSO_SCORE_REV,
-
-   /// size in bytes
-   MSO_SIZE, MSO_SIZE_REV
-
-   // NB: the code in wxFolderListCtrl::OnColumnClick() and ComparisonFunction()
-   //     relies on MSO_XXX_REV immediately following MSO_XXX, so don't change
-   //     the values of the elements of this enum and always add MSO_XXX and
-   //     MSO_XXX in this order.
-   // Don't forget to add to sortCriteria[] in wxMDialogs.cpp
-};
-
 /// split a long value (as read from profile) into (several) sort orders
 extern wxArrayInt SplitSortOrder(long sortOrder);
 
@@ -928,10 +977,10 @@ public:
    @param mf the mail folder to use, may be NULL (then folderName is used)
    @return the formatted string
  */
-String FormatFolderStatusString(const String& format,
-                                const String& folderName,
-                                MailFolderStatus *status,
-                                const MailFolder *mf = NULL);
+extern String FormatFolderStatusString(const String& format,
+                                       const String& folderName,
+                                       MailFolderStatus *status,
+                                       const MailFolder *mf = NULL);
 
 // ----------------------------------------------------------------------------
 // global (but private to MailFolder) functions

@@ -23,38 +23,9 @@
 // Type of a mail folder
 // ----------------------------------------------------------------------------
 
-/** The UIdArray define is a class which is an integer array. It needs
-    to provide a int Count() method to return the number of elements
-    and an int operator[int] to access them.
-    We use wxArrayInt for this.
-    @deffunc UIdArray
-*/
-class UIdArray;
-
-/// A Type used for message UIds
-
-// we must define it to be different from size_t to avoid compilation problems
-// with UIdArray which has both methods Remove(UIdType) and Remove(size_t), so
-// if configure determined that size_t was the same type as unsigned long we
-// define it as unsigned int instead
-#if !defined(wxSIZE_T_IS_ULONG)
-   typedef unsigned long UIdType;
-
-   /// An illegal, never happening UId number:
-   #define UID_ILLEGAL   ULONG_MAX
-#elif !defined(wxSIZE_T_IS_UINT)
-   typedef unsigned int UIdType;
-
-   /// An illegal, never happening UId number:
-   #define UID_ILLEGAL   UINT_MAX
-#else
-   // how can size_t be both uint and ulong simultaneously??
-   #error "Don't know how to define UIdType!"
-#endif
-
 // use this with AND to obtain pure type from an int which also contains
 // the folder flags (see FolderFlags enum)
-static const int MF_TYPEMASK = 0x00ff;
+#define MF_TYPEMASK 0x00ff
 
 enum FolderType
 {

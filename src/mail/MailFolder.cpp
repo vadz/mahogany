@@ -1164,25 +1164,3 @@ void MailFolder::ResetInteractive()
    SetInteractive(NULL, "");
 }
 
-MFrame *MailFolder::SetInteractiveFrame(MFrame *frame)
-{
-   MFrame *frameOld = m_frame;
-   m_frame = frame;
-   return frameOld;
-}
-
-MFrame *MailFolder::GetInteractiveFrame() const
-{
-   if ( !mApplication->IsInAwayMode() )
-   {
-      if ( m_frame )
-         return m_frame;
-
-      if ( GetName() == ms_interactiveFolder )
-         return ms_interactiveFrame;
-   }
-   //else: no interactivity in away mode at all
-
-   return NULL;
-}
-

@@ -1,16 +1,16 @@
-/*-*- c++ -*-********************************************************
- * HeaderInfo : header info listing for mailfolders
- *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
- *                                                                  *
- * $Id$
- *******************************************************************/
-
-/**
-   @package Mailfolder access
-   @version $Revision$
-   @author  Karsten Ballüder
-*/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   include/HeaderInfo.h: HeaderInfo and HeaderInfoList classes
+// Purpose:     HeaderInfo contains all envelope information for one message,
+//              HeaderInfoList knows how to retrieve HeaderInfos for the given
+//              folder
+// Author:      Karsten Ballüder
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef HEADERINFO_H
 #define HEADERINFO_H
@@ -19,61 +19,80 @@
 #   pragma interface "HeaderInfo.h"
 #endif
 
-/// type for user data
-typedef unsigned long FolderDataType;
+#include <wx/fontenc.h>
+
+#include "FolderType.h"    // for MsgnoType
+
+class wxArrayString;
 
 /**
-   This class contains all the information about the message such as its
-   (important) headers and its appearance parameters (colour, indent, font
-   encoding to use)
+   This class contains all the information from message header
+
+   It doesn't contain any GUI-specific info (like the message colour, score or
+   indentation level), this is now handled internally in FolderView.
+
+   Also, now, this is a POD structure unlike an ABC it used to be.
 */
 class HeaderInfo
 {
 public:
-   // we have to have the default ctor even though it doesn't do anything
-   // because of copy ctor declaration below
-   HeaderInfo() { }
+   /** @name Access header information */
+   //@{
 
-   // accessors
-   virtual const String &GetSubject(void) const = 0;
-   virtual const String &GetFrom(void) const = 0;
-   virtual const String &GetTo(void) const = 0;
-   virtual const String &GetNewsgroups(void) const = 0;
-   virtual time_t GetDate(void) const = 0;
-   virtual const String &GetId(void) const = 0;
-   virtual const String &GetReferences(void) const = 0;
-   virtual const String &GetInReplyTo(void) const = 0;
-   virtual UIdType GetUId(void) const = 0;
-   virtual int GetStatus(void) const = 0;
-   virtual unsigned long GetSize(void) const = 0;
-   virtual unsigned long GetLines(void) const = 0;
+   /// return the message subject
+   const String& GetSubject(void) const { return m_Subject; }
 
-   /// Return the indentation level for message threading.
-   virtual unsigned GetIndentation() const = 0;
-   /// Set the indentation level for message threading.
-   virtual void SetIndentation(unsigned level) = 0;
-   /// Get Colour setting (name or empty string)
-   virtual String GetColour(void) const = 0;
-   /// Get Score setting (default = 0)
-   virtual int GetScore(void) const = 0;
-   /// Change Score setting (default = 0)
-   virtual void AddScore(int delta) = 0;
-   /// Set Colour setting (name or empty string)
-   virtual void SetColour(const String &col) = 0;
+   /// return the message From header
+   const String& GetFrom(void) const { return m_From; }
 
-   /// Set the encoding used (wxFONTENCODING_SYSTEM for default)
-   virtual void SetEncoding(wxFontEncoding encoding) = 0;
-   /// Get the encoding used (wxFONTENCODING_SYSTEM for default)
-   virtual wxFontEncoding GetEncoding() const = 0;
+   /// return the message To header
+   const String& GetTo(void) const { return m_To; }
+
+   /// return the message Newsgroups header
+   const String& GetNewsgroups(void) const { return m_NewsGroups; }
+
+   /// return the time from the message header
+   time_t GetDate(void) const { return m_Date; }
+
+   /// return Message-Id
+   const String& GetId(void) const { return m_Id; }
+
+   /// return the unique identifier
+   UIdType GetUId(void) const { return m_UId; }
+
+   /// return References header (if any)
+   const String& GetReferences(void) const { return m_References; }
+
+   /// return In-Reply-To header (if any)
+   const String& GetInReplyTo(void) const { return m_InReplyTo; }
+
+   /// return msg status (combination of MailFolder::MSG_STAT_XXX flags)
+   int GetStatus(void) const { return m_Status; }
+
+   /// return message size in bytes
+   unsigned long GetSize(void) const { return m_Size; }
+
+   /// return (text) message size in lines or 0 if not text or unknown
+   unsigned long GetLines(void) const { return m_Lines; }
+   //@}
+
+   /** @name Font encoding
+
+       FIXME we suppose that all headers have the same encoding but it is
+             perfectly valid to have "To" in one encoding and "From" in another
+             and even have multiple encodings inside one header.
+
+             probably the only way to handle it in a sane way is to use Unicode
+             though and then we won't need m_Encoding at all...
+    */
+   //@{
+   /// set encoding to use for display
+   void SetEncoding(wxFontEncoding enc) { m_Encoding = enc; }
+   /// get encoding to use for display
+   wxFontEncoding GetEncoding() const { return m_Encoding; }
    /// Return true if we have non default encoding
    bool HasEncoding() const { return GetEncoding() != wxFONTENCODING_SYSTEM; }
-   /// Return some extra data which is folder driver specific
-   virtual FolderDataType GetFolderData(void) const = 0;
-
-   /// Create and return the copy of this object (allocated with new)
-   virtual HeaderInfo *Clone() const = 0;
-
-   virtual ~HeaderInfo() {}
+   //@}
 
    /// the kind of header returned by GetFromOrTo()
    enum HeaderKind
@@ -101,39 +120,62 @@ public:
                                  String *value);
 
 private:
-   /// Disallow copy construction, use Clone() instead
-   HeaderInfo(const HeaderInfo &);
+   /// header values
+   String m_Subject,
+          m_From,
+          m_To,
+          m_NewsGroups,
+          m_References,
+          m_InReplyTo,
+          m_Id;
 
-   GCC_DTOR_WARN_OFF
+   /// MailFolder::Flags combination
+   int m_Status;
+
+   /// size in bytes
+   unsigned long m_Size;
+
+   /// size in lines for text messages, 0 otherwise
+   unsigned long m_Lines;
+
+   /// as returned by cclient
+   unsigned long m_UId;
+
+   /// from headers
+   time_t m_Date;
+
+   /// the encoding of the headers
+   wxFontEncoding m_Encoding;
+
+   // it is the only one which can create these objects for now, later we
+   // should find some better way to allow other classes do it as well
+   friend class MailFolderCC;
 };
 
 /**
-   This class holds a complete list of all messages in the folder.
+   This class provides access to HeaderInfo objects for the given folder
 
-   The messages are stored internally in the order they were retrieved by the
-   folder but their displayed order may be different because of sorting and/or
-   threading. So GetItem(n) (and operators[]) return the header info
-   corresponding to the message which should appear in the n-th position when
-   displayed, while all other functions taking index value (Remove())
-   interpret the index as internal index. There is also GetItemByMsgno() which
-   returns the item from its msgno in the cclient sense. They correspond to the
-   internal index in the following sense:
+   The messages are stored internally in the same order as they appear in the
+   folder (i.e. by msgno) folder but their displayed order may be different
+   because of sorting and/or threading.
 
-   1. msgnos are consecutive
+   So GetItem(n) (and operators[]) return the header info corresponding to the
+   message which should appear in the n-th position when displayed, while all
+   other functions taking index value (Remove()) interpret the index as
+   internal index which is == msgno - 1 (msgnos start with 1, indices - with 0).
 
-   2. but they decrease while index increases (this is because we build the
-      listing in reversed order to allow the user to retrieve only some headers
-      from server and abort without having to retrieve the older ones)
-
-   3. the msgno of the first message would usually be just Count(), but it may
-      be greater if the listing building was aborted
-
-   To allow sorting of messages, we provide direct access to the translation
-   table used to map internal indices to the displayed ones:
+   Finally, a message also has an UID i.e. a unique identifier which doesn't
+   change even as messages are added/deleted to/from the folder. We provide a
+   function to find a message by UID (the reverse is simple as HeaderInfo has
+   GetUId() method) but it for now it is implemented as linear search in all
+   messages, i.e. it is very slow and should never be called.
 */
 class HeaderInfoList : public MObjectRC
 {
 public:
+   /// creator function
+   static HeaderInfoList *Create(MailFolder *mf);
+
    /** @name Elements access */
    //@{
    /// Count the number of messages in listing.
@@ -143,61 +185,54 @@ public:
    virtual HeaderInfo *GetItemByIndex(size_t n) const = 0;
 
    /// Returns the entry for the n-th msgno (msgnos are counted from 1)
-   HeaderInfo *GetItemByMsgno(size_t msgno) const
+   HeaderInfo *GetItemByMsgno(MsgnoType msgno) const
       { return GetItemByIndex(GetIdxFromMsgno(msgno)); }
 
    /// Returns the entry which should be shown in the given position.
    HeaderInfo *GetItem(size_t pos) const
       { return GetItemByIndex(GetIdxFromPos(pos)); }
-   /// Returns the n-th entry.
+
+   /// Operator version of GetItem()
    HeaderInfo *operator[](size_t pos) const { return GetItem(pos); }
    //@}
 
-   /// Returns pointer to entry with this UId
-   virtual HeaderInfo *GetEntryUId(UIdType uid) = 0;
-
+   /** @name UID/msgno to index mapping */
+   //@{
    /** Returns the (internal) index for this UId or UID_ILLEGAL */
-   virtual UIdType GetIdxFromUId(UIdType uid) const= 0;
+   virtual UIdType GetIdxFromUId(UIdType uid) const = 0;
+
+   /// Returns pointer to entry with this UId
+   virtual HeaderInfo *GetEntryUId(UIdType uid) const
+   {
+      return GetItemByIndex(GetIdxFromUId(uid));
+   }
 
    /** Returns the (internal) index for the given msgno. */
-   virtual size_t GetIdxFromMsgno(size_t msgno) const = 0;
+   size_t GetIdxFromMsgno(MsgnoType msgno) const
+   {
+      ASSERT_MSG( msgno != MSGNO_ILLEGAL, "invalid msgno" );
 
+      return msgno - 1;
+   }
+   //@}
+
+   /** @name Position to/from index mapping */
+   //@{
    /** Returns the (internal) index for the given display position. */
    virtual size_t GetIdxFromPos(size_t pos) const = 0;
 
    /** Returns the position at which this item should be displayed. */
    virtual size_t GetPosFromIdx(size_t n) const = 0;
-
-   /** @name Translation table
-
-       As explained above, we use a translation table to get the real message
-       index of the message which is displayed in the given position. You can
-       set a translation table, replacing any existing one, or add a table
-       combining it with the existing one.
-   */
-   //@{
-   /**
-       Sets a translation table re-mapping index values or removes the table if
-       the pointer is NULL (otherwise it will be delete[]d in destructor).
-
-       @param array an array of indices allocated with new[] or NULL
-   */
-   virtual void SetTranslationTable(size_t *array) = 0;
-
-   /**
-       Adds a translation table. The pointer will not be deallocated by this
-       class and can be deleted by caller after this function returns.
-
-       @param array an array of indices
-   */
-   virtual void AddTranslationTable(const size_t *array) = 0;
    //@}
 
-   /// For use by folder only: corrects size downwards:
-   virtual void SetCount(size_t newcount) = 0;
+   /** @name Functions called by MailFolder */
+   //@{
+   /// Called when the given (by index) message is expunged
+   virtual void OnRemove(size_t n) = 0;
 
-   /// Removes the given element from the listing
-   virtual void Remove(size_t n) = 0;
+   /// Called when the number of messages in the folder increases
+   virtual void OnAdd(size_t countNew) = 0;
+   //@}
 
    MOBJECT_NAME(HeaderInfoList)
 };
@@ -209,4 +244,5 @@ public:
    HeaderInfo *operator[](size_t n) { return (*m_ptr)[n]; }
 END_DECLARE_AUTOPTR();
 
-#endif
+#endif // HEADERINFO_H
+

@@ -10,66 +10,7 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-/* TODO: several things are still unclear ("+" means "solved now")
-
-  +1. is mm_status() ever called? we never use mail_status(), but maybe
-      cclient does this internally?
-
-      we do call mail_status() now ourselves and we will do it in the future to
-      update the number of msgs regularly, so it is needed
-
-  +2. mm_expunged() definitely shouldn't rebuild the entire listing (by
-      callling RequestUpdate) but should just remove the expunged entries from
-      the existing one
-
-   3. moreover, maybe mm_exists() doesn't need to do it neither but just add
-      the entries to the existing listing?
-
-   4. there might be problems with limiting number of messages in
-      BuildListing(), this has to be tested
- */
-
 /*
-   Update logic documentation (accurate as of 30.01.01):
-
-   The mail folder maintains the listing containing the information about all
-   messages in the folder in m_Listing. The listing is modified only by
-   BuildListing() function or, more precisely, by OverviewHeaderEntry() called
-   from it through a number of others (partly ours, partly c-client)
-   functions. While the listing is being built, m_InListingRebuild is locked
-   and nothing else can be done!
-
-   The listing has to be rebuilt when the number of the messages in the
-   mailbox changes (either because the new messages arrived or because the
-   existing messages are expunged). In this case mm_exists is called - note
-   that it happens after mm_expunged is called one or more times in the latter
-   case.
-
-   mm_exists() deletes the current listing and any mailbox operation on this
-   folder will rebuild it the next time it is called.
-
-   So we have 3 states for the folder:
-
-   a) normal: we have a valid listing and can use it
-   b) dirty: we don't have listing, we will build it the next it is needed
-   c) busy: we're building the listing right now
-
-   The folder is created in the dirty state and transits to the normal state
-   via the busy state when it is used for the first time non trivially. A call
-   to mm_exists() puts it to the dirty state again.
-
-   Further, there is another subtlety related to the filters: the filters must
-   be executed from GetHeaders() as we want to apply them to all new messages.
-   However filters can modify the folder resulting in more mm_expunged() calls
-   and also call GUI code (message boxes) reentering the GUI event loop
-   implicitly and thus the events may be dispatched from isnide a call to
-   ApplyFilterRules(). Because of this we just don't send any events while the
-   filters are being executed.
-
-   The last twist is that we also avoid sending events when the application is
-   being shut down as it results in the calls to the obejcts which don't exist
-   any more later from the GUI code [FIXME: this might be a kludge and could
-   change]
  */
 
 // ============================================================================

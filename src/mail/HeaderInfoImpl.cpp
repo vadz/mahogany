@@ -27,12 +27,9 @@
 #include  "Mpch.h"
 
 #ifndef  USE_PCH
-#   include "strutil.h"
-#   include "MApplication.h"
-#   include "Profile.h"
+   #include "MailFolder.h"
 #endif // USE_PCH
 
-#include "Mdefaults.h"
 #include "HeaderInfoImpl.h"
 
 // ----------------------------------------------------------------------------
@@ -83,229 +80,126 @@ HeaderInfo::GetFromOrTo(const HeaderInfo *hi,
 }
 
 // ----------------------------------------------------------------------------
-// HeaderInfoImpl
+// HeaderInfoListImpl creation and destruction
 // ----------------------------------------------------------------------------
 
-HeaderInfoImpl::HeaderInfoImpl()
+/* static */
+HeaderInfoList *HeaderInfoList::Create(MailFolder *mf)
 {
-   m_Indentation = 0;
-   m_Score = 0;
-   m_Encoding = wxFONTENCODING_SYSTEM;
-   m_UId = UID_ILLEGAL;
+   CHECK( mf, NULL, "NULL mailfolder in HeaderInfoList::Create" );
 
-   // all other fields are filled in by the MailFolderCC when creating it
+   return new HeaderInfoListImpl(mf);
 }
 
-HeaderInfo * HeaderInfoImpl::Clone() const
+HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
 {
-   HeaderInfoImpl *hi = new HeaderInfoImpl();
+   // we do *not* IncRef() the mail folder as this would create a circular
+   // reference (it holds on us too), instead it is supposed to delete us (and
+   // so prevent us from using invalid mf pointer) when it is being deleted
+   m_mf = mf;
 
-   hi->m_Subject = GetSubject();
-   hi->m_From = GetFrom();
-   hi->m_To = GetTo();
-   hi->m_NewsGroups = GetNewsgroups();
-   hi->m_Date = GetDate();
-   hi->m_UId = GetUId();
-   hi->m_References = GetReferences();
-   hi->m_InReplyTo = GetInReplyTo();
-   hi->m_Status = GetStatus();
-   hi->m_Size = GetSize();
-   hi->m_Lines = GetLines();
-   hi->SetIndentation(GetIndentation());
-   hi->SetEncoding(GetEncoding());
-   hi->m_Colour = GetColour();
-   hi->m_Score = GetScore();
-   hi->SetFolderData(GetFolderData());
-
-   return hi;
-}
-
-// ----------------------------------------------------------------------------
-// HeaderInfoListImpl creation
-// ----------------------------------------------------------------------------
-
-HeaderInfoListImpl::HeaderInfoListImpl(size_t n, size_t nTotal)
-{
-   m_Listing = n == 0 ? NULL : new HeaderInfoImpl[n];
-
-   // this is the number of entries we have
-   m_NumEntries = n;
-
-   // this is the total number of messages in the folder (>= n)
-   m_msgnoMax = nTotal;
-
-   m_TranslationTable = NULL;
+   m_count = (size_t)mf->GetMessageCount();
+   m_headers.Alloc(m_count);
 }
 
 HeaderInfoListImpl::~HeaderInfoListImpl()
 {
-   MOcheck();
-
-   delete [] m_Listing;
-   delete [] m_TranslationTable;
 }
 
 // ----------------------------------------------------------------------------
-// HeaderInfoImpl translation table stuff
+// HeaderInfoListImpl item access
 // ----------------------------------------------------------------------------
 
-void HeaderInfoListImpl::SetTranslationTable(size_t *array)
+inline bool HeaderInfoListImpl::IsHeaderValid(size_t n) const
 {
-   delete [] m_TranslationTable;
-   m_TranslationTable = array;
+   return (n < m_headers.GetCount()) && (m_headers[n] != NULL);
 }
 
-void HeaderInfoListImpl::AddTranslationTable(const size_t *array)
+size_t HeaderInfoListImpl::Count(void) const
 {
-   // it doesn't make sense to call us with NULL table
-   CHECK_RET( array, "NULL translation table" );
+   return m_headers.GetCount();
+}
 
-   size_t *transTable = new size_t[m_NumEntries];
-   for ( size_t n = 0; n < m_NumEntries; n++ )
+HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
+{
+   CHECK( n < m_count, NULL, "invalid index in HeaderInfoList::GetItemByIndex" );
+
+   if ( !IsHeaderValid(n) )
    {
-      size_t i = array[n];
-      if ( m_TranslationTable )
+      // we need to make n a valid index into array and we do this by filling
+      // it up to n with NULLs
+      //
+      // TODO: add SetCount() to wxArray instead
+      for ( size_t count = m_headers.GetCount(); count <= n; count++ )
       {
-         // combine with existing table
-         i = m_TranslationTable[i];
+         wxConstCast(this, HeaderInfoListImpl)->m_headers.Add(NULL);
       }
 
-      transTable[n] = i;
+      // alloc space for new header
+      m_headers[n] = new HeaderInfo;
+
+      // turn index into msgno
+      n++;
+
+      // get header info for the new header
+      m_mf->GetHeaderInfo(m_headers[n], n, n);
    }
 
-   SetTranslationTable(transTable);
+   return m_headers[n];
 }
 
 // ----------------------------------------------------------------------------
-// HeaderInfoListImpl lookup by UID
+// HeaderInfoListImpl UID to index
 // ----------------------------------------------------------------------------
-
-HeaderInfo *HeaderInfoListImpl::GetEntryUId(UIdType uid)
-{
-   UIdType idx = GetIdxFromUId(uid);
-   if ( idx == UID_ILLEGAL )
-      return NULL;
-
-   return &m_Listing[idx];
-}
 
 UIdType HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 {
-   MOcheck();
-
-   for ( size_t i = 0; i < m_NumEntries; i++ )
-   {
-      if ( m_Listing[i].GetUId() == uid )
-         return i;
-   }
-
-   return UID_ILLEGAL;
-}
-
-size_t HeaderInfoListImpl::GetUntranslatedIndex(size_t n) const
-{
-   // FIXME: very inefficient - would it be better to keep the inverse
-   //        translation table to speed it up?
-   for ( size_t i = 0; i < m_NumEntries; i++ )
-   {
-      if ( GetTranslatedIndex(i) == n )
-         return i;
-   }
-
-   FAIL_MSG("invalid index in GetUntranslatedIndex");
+   // TODO: we should use SEARCH here
+   FAIL_MSG( "TODO" );
 
    return UID_ILLEGAL;
 }
 
 // ----------------------------------------------------------------------------
-// modifying the listing
+// HeaderInfoListImpl index to/from position mapping
 // ----------------------------------------------------------------------------
 
-void HeaderInfoListImpl::SetCount(size_t newcount)
+// this is trivial without sorting/threading
+
+size_t HeaderInfoListImpl::GetIdxFromPos(size_t pos) const
 {
-   MOcheck();
-   CHECK_RET( newcount <= m_NumEntries, "invalid headers count" );
-
-   m_NumEntries = newcount;
-
-   // m_msgnoMax stays unchanged
+   return pos;
 }
 
-void HeaderInfoListImpl::Remove(size_t n)
+size_t HeaderInfoListImpl::GetPosFromIdx(size_t n) const
 {
-   MOcheck();
-   CHECK_RET( n < m_NumEntries, "invalid index in HeaderInfoList::Remove" );
+   return n;
+}
 
-   // the total number of messages in the folder decrements too
-   m_msgnoMax--;
+// ----------------------------------------------------------------------------
+// HeaderInfoListImpl message adding/removing
+// ----------------------------------------------------------------------------
 
-   // calc the position of the element being deleted before changing
-   // m_NumEntries below
-   size_t pos = GetUntranslatedIndex(n);
+// TODO: OnRemove() is very inefficient for array!
 
-   // we'd like to use memmove() as efficiently as for m_TranslationTable for
-   // m_Listing too here but it doesn't work because m_Listing is array of
-   // objects, not pointers -- we really should change this though (TODO)
-#if 0
-   // first delete the entry
-   m_Listing[n].~HeaderInfoImpl();
+void HeaderInfoListImpl::OnRemove(size_t n)
+{
+   CHECK_RET( n < m_count, "invalid index in HeaderInfoList::OnRemove" );
 
-   if ( n < m_NumEntries - 1 )
+   if ( n < m_headers.GetCount() )
    {
-      // remove the entry from the array
-      memmove(&m_Listing[n], &m_Listing[n + 1],
-              (m_NumEntries - n - 1)*sizeof(HeaderInfoImpl));
-
-      // then delete the corresponding entry in the translation table
-      memmove(&m_TranslationTable[n], &m_TranslationTable[n + 1],
-              (m_NumEntries - n - 1)*sizeof(size_t));
+      delete m_headers[n];
+      m_headers.RemoveAt(n);
    }
+   //else: we have never looked that far
+}
 
-   // finally adjust the number of items
-   m_NumEntries--;
-#else // 1
-   m_NumEntries--;
+void HeaderInfoListImpl::OnAdd(size_t countNew)
+{
+   m_count = countNew;
 
-   // first deal with the header objects: here we simply have to remove the
-   // object from the list - unfortunately, because we use an array of objects
-   // and not pointers we have to copy it around
-   HeaderInfoImpl *listingNew =
-      m_NumEntries == 0 ? NULL : new HeaderInfoImpl[m_NumEntries];
-   HeaderInfoImpl *p1 = listingNew,
-                  *p2 = m_Listing;
-   size_t entry;
-   for ( entry = 0; entry <= m_NumEntries; entry++, p2++ )
-   {
-      if ( entry != n )
-      {
-         *p1++ = *p2; // p2++ is done anyhow in the loop line
-      }
-   }
-
-   delete [] m_Listing;
-   m_Listing = listingNew;
-
-   if ( m_TranslationTable )
-   {
-      // then with the translation table: here the situation is more
-      // complicated as we need to not only remove the entry, but to adjust
-      // indices as well: all indices greater than the one being removed must
-      // be decremented to account for the index shift
-      if ( pos < m_NumEntries )
-      {
-         // deleting is easy in this case
-         memmove(&m_TranslationTable[pos], &m_TranslationTable[pos + 1],
-                 (m_NumEntries - pos)*sizeof(size_t));
-      }
-      //else: no need to memmove(), last element can be just discarded
-
-      for ( entry = 0; entry < m_NumEntries; entry++ )
-      {
-         if ( m_TranslationTable[entry] >= n )
-            m_TranslationTable[entry]--;
-      }
-   }
-#endif // 0/1
+   // we probably don't need to do m_headers.Alloc() as countNew shouldn't be
+   // much bigger than old count
 }
 
 // ----------------------------------------------------------------------------

@@ -56,7 +56,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo /o"Debug/M.bsc"
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 $(wx)\Release\wxWindows.lib extra\src\c-client\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib $(WX)\src\zlib\Release\zlib.lib $(WX)\src\png\Release\png.lib $(WX)\src\jpeg\Release\jpeg.lib $(WX)\src\tiff\Release\tiff.lib /nologo /subsystem:windows /machine:I386 /libpath:"e:\python20\libs" /fixed:no
+# ADD LINK32 $(wx)\Release\wxWindows.lib extra\src\c-client\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib $(WX)\src\regex\Release\regex.lib $(WX)\src\zlib\Release\zlib.lib $(WX)\src\png\Release\png.lib $(WX)\src\jpeg\Release\jpeg.lib $(WX)\src\tiff\Release\tiff.lib /nologo /subsystem:windows /machine:I386 /libpath:"e:\python20\libs" /fixed:no
 # SUBTRACT LINK32 /pdb:none /debug
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
@@ -84,7 +84,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(wx)\debug\wxWindows.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib src\wx\vcard\debug\versit.lib $(WX)\src\zlib\Debug\zlib.lib $(WX)\src\png\Debug\png.lib $(WX)\src\jpeg\Debug\jpeg.lib $(WX)\src\tiff\Debug\tiff.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs"
+# ADD LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(wx)\debug\wxWindows.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib src\wx\vcard\debug\versit.lib $(WX)\src\regex\Debug\regex.lib $(WX)\src\zlib\Debug\zlib.lib $(WX)\src\png\Debug\png.lib $(WX)\src\jpeg\Debug\jpeg.lib $(WX)\src\tiff\Debug\tiff.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
