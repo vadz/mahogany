@@ -3625,11 +3625,12 @@ FilterRuleApply::CopyToOneFolder()
       ++copiedIndex )
    {
       // don't try to copy it when we reach it
-      m_allOperations[copiedIndex] &= ~FilterRuleImpl::Copy;
+      m_allOperations[indexesToCopy[copiedIndex]] &= ~FilterRuleImpl::Copy;
 
       if ( !copyOk )
       {
-         m_allOperations[copiedIndex] &= ~FilterRuleImpl::Delete;
+         m_allOperations[indexesToCopy[copiedIndex]]
+            &= ~FilterRuleImpl::Delete;
       }
    }
 
