@@ -57,6 +57,11 @@ static wxString Col2Html(const wxColour& col);
 // filter out special HTML characters from the text
 static wxString MakeHtmlSafe(const wxString& text);
 
+// escape all double quotes in a string by replacing them with HTML entity
+//
+// this is useful for the HTML attributes values
+static wxString EscapeQuotes(const wxString& text);
+
 // ----------------------------------------------------------------------------
 // HtmlViewer: a wxHTML-based MessageViewer implementation
 // ----------------------------------------------------------------------------
@@ -771,6 +776,22 @@ static wxString MakeHtmlSafe(const wxString& text)
    return textSafe;
 }
 
+static wxString EscapeQuotes(const wxString& text)
+{
+   wxString textSafe;
+   textSafe.reserve(text.length());
+
+   for ( const wxChar *p = text.c_str(); *p; p++ )
+   {
+      if ( *p == '"' )
+         textSafe += _T("&quot;");
+      else
+         textSafe += *p;
+   }
+
+   return textSafe;
+}
+
 void HtmlViewer::AddColourAttr(const wxChar *attr, const wxColour& col)
 {
    if ( col.Ok() )
@@ -933,7 +954,7 @@ void HtmlViewer::EndHeaders()
       wxString filename = CreateImageInMemoryFS(m_bmpXFace.ConvertToImage());
       m_htmlText << _T("</td><td width=")
                  << wxString::Format(_T("%d"), m_bmpXFace.GetWidth()) << _T(">")
-                    _T("<img src=\"memory:") << filename << _T("\">"
+                    _T("<img src=\"memory:") << EscapeQuotes(filename) << _T("\">"
                     "</td>"
                     "</table>");
    }
@@ -973,8 +994,8 @@ void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
    url << _T("memory:") << CreateImageInMemoryFS(icon.ConvertToImage());
 
    m_htmlText << _T("<a href=\"") << url << _T("\">"
-                 "<img alt=\"") << ci->GetLabel() << _T("\" src=\"") << url
-              << _T("\"></a>");
+                 "<img alt=\"") << EscapeQuotes(ci->GetLabel())
+              << _T("\" src=\"") << url << _T("\"></a>");
 
    m_window->StoreClickable(ci, url);
 }
@@ -992,8 +1013,8 @@ void HtmlViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
    url << _T("memory:") << CreateImageInMemoryFS(wxImage(image));
 
    m_htmlText << _T("<a href=\"") << url << _T("\">"
-                 "<p><img alt=\"") << ci->GetLabel() << _T("\" "
-                 "src=\"") << url << _T("\"></a>");
+                 "<p><img alt=\"") << EscapeQuotes(ci->GetLabel())
+              << _T("\" src=\"") << url << _T("\"></a>");
 
    m_window->StoreClickable(ci, url);
 }
