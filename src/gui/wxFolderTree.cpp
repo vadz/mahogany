@@ -780,7 +780,6 @@ wxTreeItemId
 wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
 {
    ASSERT_MSG( !!fullname, "folder name can't be empty" );
-   ASSERT_MSG( fullname[0] != '/', "folder name shouldn't start with slash" );
 
    // tokenize the fullname in components treating subsequent slashes as one
    // delimiter
@@ -792,6 +791,8 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
    {
       // find the child with the given name
       wxString name = tk.GetNextToken();
+
+      ASSERT_MSG( !!name, "token can't be empty here" );
 
       long cookie;
       wxTreeItemId child = GetFirstChild(current, cookie);
@@ -1267,7 +1268,12 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       wxString folderName = folder->GetName();
       wxTreeItemId item = GetTreeItemFromName(folderName);
 
-      CHECK( item.IsOk(), false, "no such folder in the tree" );
+      // it's not an error: MTempFolder objects are not in the tree, yet they
+      // generate MEventId_FolderStatus events as well
+      if ( !item.IsOk() )
+      {
+         return true;
+      }
 
       // change the folder colour depending on whether it has any recent
       // messages, any new messages or neither at all

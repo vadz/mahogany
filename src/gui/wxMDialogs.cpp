@@ -814,12 +814,12 @@ BEGIN_EVENT_TABLE(MyHtmlWindow, wxHtmlWindow)
   EVT_RIGHT_DOWN(MyHtmlWindow::OnClick)
   EVT_CHAR(MyHtmlWindow::OnChar)
 END_EVENT_TABLE()
-   
+
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxWindow(parent, -1, wxDefaultPosition, parent->GetClientSize())
 {
-   
-   
+
+
    wxSplitterWindow *sp = new wxSplitterWindow(this, -1,
                                                wxDefaultPosition,
                                                GetSize());
@@ -828,12 +828,12 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    sp->SplitHorizontally(top,bottom,240);
 
    wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Mahogany),
-                              wxBITMAP_TYPE_PNG); 
+                              wxBITMAP_TYPE_PNG);
 #ifdef USE_PYTHON
    wxMemoryFSHandler::AddFile("pythonpowered.png", wxBITMAP(PythonPowered),
-                              wxBITMAP_TYPE_PNG); 
+                              wxBITMAP_TYPE_PNG);
 #endif
-   
+
    top->SetPage("<body text=#000000 bgcolor=#ffffff>"
                 "<center><img src=\"memory:splash.png\"><br>"
                 "</center>");
@@ -867,7 +867,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #ifdef EXPERIMENTAL
                    "Experimental Code "
 #endif
-                   
+
                    "<p>"
 #endif
                    "<b>List of contributors:</b><p>"
@@ -877,12 +877,12 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "Daniel Seifert (dseifert@gmx.de)<br>"
                    "<i>The wxWindows team</i><br><hr>"
                    "<p>This Product includes software developed and copyright "
-                   "by the University of Washington.<br>" 
+                   "by the University of Washington.<br>"
 #ifdef USE_SSL
                    "<p>"
                    "This product includes software developed by the OpenSSL Project "
                    "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
-                   "This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)<br>" 
+                   "This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)<br>"
                    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)<br>"
 #endif
                    "<p>"
@@ -890,13 +890,13 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "Anthemion Software, Heriot-Watt University, Sourceforge.net, SourceGear.com, "
                    "GDev.net, Simon Shapiro, VA Linux and SuSE GmbH."
       );
-   
+
 
    wxMemoryFSHandler::RemoveFile("splash.png");
 #ifdef USE_PYTHON
    wxMemoryFSHandler::RemoveFile("pythonpowered.png");
 #endif
-   
+
    bottom->SetFocus();
    // start a timer which will close us (if not disabled)
    if ( bCloseOnTimeout ) {
@@ -1159,10 +1159,8 @@ bool MFolderDialog::TransferDataFromWindow()
 
       if ( !m_folder )
       {
-         m_folder = CreateFolderTreeEntry(NULL, name,
-                                          MF_FILE, 0,
-                                          m_FileName,
-                                          FALSE);
+         m_folder = MFolder::CreateTemp(name, MF_FILE, 0, m_FileName,
+                                        "", "", ""); // no server/login/pwd
       }
       //else: it already existed before with the same filename
    }
@@ -1536,7 +1534,7 @@ bool wxMessageSearchDialog::TransferDataFromWindow()
    m_Criterium = m_Choices->GetSelection();
    if(m_Invert->GetValue() != 0)
       m_Criterium |= SEARCH_CRIT_INVERT_FLAG;
-   
+
    GetProfile()->writeEntry(MP_MSGS_SEARCH_CRIT, m_Criterium);
    GetProfile()->writeEntry(MP_MSGS_SEARCH_ARG, m_Keyword->GetValue());
 
@@ -1880,7 +1878,7 @@ public:
 protected:
    wxString     m_OldXFace;
    bool          m_OldUseXFace;
-   
+
    wxXFaceButton *m_Button;
    wxCheckBox    *m_Checkbox;
    bool m_Changed;
@@ -1902,7 +1900,7 @@ wxXFaceDialog::wxXFaceDialog(ProfileBase *profile,
    wxStaticBox *box = CreateStdButtonsAndBox(_("XFace"), FALSE,
                                              MH_DIALOG_XFACE);
    wxLayoutConstraints *c;
-   
+
    wxStaticText *stattext = new wxStaticText(this, -1,
                                              _("XFaces are small images that can be included\n"
                                                "in your mail message to help recognise you.\n"
@@ -1910,7 +1908,7 @@ wxXFaceDialog::wxXFaceDialog(ProfileBase *profile,
                                                "but Mahogany will automatically convert any file\n"
                                                "to this specification automatically.\n"
                                                "\n"
-                                               "Click on the button to change it.")); 
+                                               "Click on the button to change it."));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
@@ -1936,7 +1934,7 @@ wxXFaceDialog::wxXFaceDialog(ProfileBase *profile,
    m_Checkbox->SetConstraints(c);
 
    m_Changed = FALSE;
-   
+
    SetDefaultSize(280, 220, FALSE /* not minimal */);
    TransferDataToWindow();
    m_OldXFace = m_Button->GetFile();
@@ -2351,7 +2349,7 @@ wxLicenseDialog::wxLicenseDialog(ProfileBase *profile, wxWindow *parent)
    wxHtmlWindow *license = new wxHtmlWindow(this);
 
    wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Mahogany),
-                              wxBITMAP_TYPE_PNG); 
+                              wxBITMAP_TYPE_PNG);
 
    license->SetPage("<body text=#000000 bgcolor=#ffffff>"
                 "<center><img src=\"memory:splash.png\"><br>"
@@ -2370,7 +2368,7 @@ wxLicenseDialog::wxLicenseDialog(ProfileBase *profile, wxWindow *parent)
 
    wxButton *button = (wxButton *) FindWindow(wxID_OK);
    button->SetLabel(_("Accept"));
-   
+
    button = (wxButton *) FindWindow(wxID_CANCEL);
    button->SetLabel(_("Reject"));
 

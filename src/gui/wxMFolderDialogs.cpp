@@ -93,8 +93,6 @@ public:
    wxString GetParentFolderName() const { return m_parentName->GetValue(); }
    // get the folder name
    wxString GetFolderName() const { return m_folderName->GetValue(); }
-   // set the folder name
-   void SetFolderName(const String& name) { m_folderName->SetValue(name); }
 
    // after the dialog is closed, retrieve the folder which was created or
    // NULL if the user cancelled us without creating anything
@@ -192,6 +190,13 @@ public:
    // called by the page to create the new folder
    MFolder *DoCreateFolder(FolderType folderType);
 
+   // set the folder name
+   void SetFolderName(const String& name)
+   {
+      m_nameModifiedByUser = -1;
+      m_folderName->SetValue(name);
+   }
+
    // callbacks
    void OnFolderNameChange(wxCommandEvent& event);
    void OnUpdateButton(wxUpdateUIEvent& event);
@@ -200,6 +205,10 @@ public:
    wxFolderCreateDialog() { wxFAIL_MSG("not reached"); }
 
 private:
+   // set to TRUE if the user changed the folder name, FALSE otherwise and -1
+   // if we're changing it programmatically
+   int m_nameModifiedByUser;
+
    DECLARE_DYNAMIC_CLASS(wxFolderCreateDialog)
    DECLARE_EVENT_TABLE()
 };
@@ -415,9 +424,8 @@ protected:
    /// the current folder type or MF_ILLEGAL if none
    FolderType m_folderType;
 
-   // true if the user modified manually the filename, false if not and -1 if
-   // we the next notification will come from us and not from the user
-   // (effectively disables setting the flag to TRUE when doing SetValue)
+   // true if the user modified manually the filename, false otherwise and may
+   // have temporary value of -1 if we modified it programmatically
    int m_userModifiedPath;
 
 private:
@@ -713,6 +721,8 @@ wxFolderCreateDialog::wxFolderCreateDialog(wxWindow *parent,
    : wxFolderBaseDialog(parent, _("Create new folder"))
 {
    SetParentFolder(parentFolder);
+
+   m_nameModifiedByUser = false;
 }
 
 MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType folderType)
@@ -751,8 +761,21 @@ void wxFolderCreateDialog::OnFolderNameChange(wxCommandEvent& event)
 {
    SetDirty();
 
-   wxFolderPropertiesPage *page = GET_FOLDER_PAGE(m_notebook);
-   page->UpdateOnFolderNameChange();
+   if ( m_nameModifiedByUser != -1 )
+   {
+      // the user changed it, take note of it and notify the page too
+      m_nameModifiedByUser = true;
+
+      wxFolderPropertiesPage *page = GET_FOLDER_PAGE(m_notebook);
+      page->UpdateOnFolderNameChange();
+
+   }
+   else
+   {
+      // it comes from a call to SetFolderName() called by the page itself, no
+      // need to update it
+      m_nameModifiedByUser = false;
+   }
 
    event.Skip();
 }
@@ -1058,12 +1081,6 @@ wxFolderPropertiesPage::SetFolderName(const wxString& name)
    CHECK_RET( dlg, "SetFolderName() can be only called when creating" );
 
    dlg->SetFolderName(name);
-
-   // FIXME this should go away as soon as wxGTK changes to wxMSW behaviour
-#if 0 // def __WXGTK__ --- did it already?
-   wxEvent event;
-   dlg->OnFolderNameChange(event);
-#endif
 }
 
 void
@@ -1089,21 +1106,21 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
 
    wxObject *objEvent = event.GetEventObject();
 
-   // is this event due to a user's action or to something we did ourselves?
-   if ( (objEvent == m_path) && (m_userModifiedPath == -1) )
-   {
-      // this was done by our own UpdateOnFolderNameChange(), not by user
-      m_userModifiedPath = false;
-
-      return;
-   }
-
    dlg->SetDirty();
 
    // the rest doesn't make any sense for the "properties" dialog because the
    // text in the path field can't change anyhow
    if ( !m_isCreating )
       return;
+
+   // does the event come from the user or from ourselves?
+   if ( m_userModifiedPath == -1 )
+   {
+      // from the program, nothing to do
+      m_userModifiedPath = false;
+
+      return;
+   }
 
    // if the path text changed, try to set the folder name automatically
    switch ( GetCurrentFolderType() )
@@ -1174,10 +1191,20 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
          // modify the text even if the folder name is empty because
          // otherwise entering a character into "Folder name" field and
          // erasing it wouldn't restore the original "Path" value
-         wxString folderName = dlg->GetFolderName();
+         wxString folderName;
 
-         // so that the OnChange() handler will know that it comes from
-         // us, not from the user
+         // MH folder should be created under its parent by default
+         if ( folderType == MF_MH )
+         {
+            // AfterFirst() removes the MH root prefix
+            folderName << dlg->GetParentFolderName().AfterFirst('/') << '/';
+         }
+         //else: MBOX folders don't have hierarchical structure
+
+         folderName += dlg->GetFolderName();
+
+         // this will tell SetValue() that we modified it ourselves, not the
+         // user
          m_userModifiedPath = -1;
 
          m_path->SetValue(strutil_expandfoldername(folderName, folderType));
