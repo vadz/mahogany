@@ -558,9 +558,6 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
       str = text;
       fulllen = strlen(text);
    }
-
-   cerr << str << endl;
-   cerr << "Len: " << fulllen << endl;
 }
 
 

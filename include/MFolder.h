@@ -20,7 +20,8 @@
 #include "Mdefaults.h"
 
 #ifndef USE_PCH
-   #include "Profile.h"
+#   include "Profile.h"
+#   include "MailFolder.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -52,15 +53,15 @@ public:
    enum Type
    {
       // real folder types
-      Inbox,     // system inbox
-      File,      // local file (MBOX format)
-      POP,       // POP3 server
-      IMAP,      // IMAP4 server
-      News,      // NNTP server
+      Inbox = MailFolder::MF_INBOX,     // system inbox
+      File = MailFolder::MF_FILE,      // local file (MBOX format)
+      POP = MailFolder::MF_POP,       // POP3 server
+      IMAP = MailFolder::MF_IMAP,      // IMAP4 server
+      News = MailFolder::MF_NNTP,      // NNTP server
 
       // pseudo types
-      Invalid,   // folder not initialized properly
-      Root,      // this is the the special pseudo-folder
+      Invalid = MailFolder::MF_ILLEGAL,   // folder not initialized properly
+      Root = 999,      // this is the the special pseudo-folder
       Max        // end of enum marker
    };
 

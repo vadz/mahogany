@@ -79,8 +79,10 @@ public:
    
    /** Writes the message to a folder.
        @param foldername file where to write to
+       @param type folder type
    */
-   void WriteToFolder(String const &foldername);
+   void WriteToFolder(String const &foldername,
+                      MailFolder::Type type = MailFolder::MF_PROFILE );
    
    /** Sends the message.
        @return true on success

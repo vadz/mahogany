@@ -423,7 +423,7 @@ SendMessageCC::WriteToFile(String const &filename, bool append)
 }
 
 void
-SendMessageCC::WriteToFolder(String const &name)
+SendMessageCC::WriteToFolder(String const &name, MailFolder::Type type)
 {
    Build();
 
@@ -435,7 +435,7 @@ SendMessageCC::WriteToFolder(String const &name)
    if(! mf) // there is no profile folder called name
    {
       String filename = strutil_expandfoldername(name);
-      mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,name);
+      mf = MailFolder::OpenFolder(type,name);
    }
    CHECK_RET(mf,String(_("Cannot open folder to save to:")+name));
    mf->AppendMessage(str);

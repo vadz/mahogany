@@ -48,6 +48,8 @@ public:
    */
    enum Type
    {
+      /// illegal type
+      MF_ILLEGAL = -1,
       /// system inbox
       MF_INBOX = 0,
       /// mbox file
@@ -60,6 +62,8 @@ public:
       MF_NNTP = 4,
       /// read type etc from profile
       MF_PROFILE = 5,
+      // profile, if it doesn't work, file
+      MF_PROFILE_OR_FILE = 6,
       /// use this with AND to obtain pure type
       MF_TYPEMASK = 255,
       /// from here on it's flags

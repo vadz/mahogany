@@ -1252,7 +1252,8 @@ wxComposeView::Send(void)
    success = sm.Send();  // true if sent
 
    if(success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
-      sm.WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
+      sm.WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER), 
+                       MailFolder::MF_PROFILE_OR_FILE);
 
    return success;
 }
