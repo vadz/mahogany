@@ -1972,7 +1972,7 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
       {
          // as we're going to change the global one but this profiles settings
          // will override it!
-         wxLogDebug("Changing the sort order won't take effect.");
+         wxLogDebug(_T("Changing the sort order won't take effect."));
       }
    }
 
@@ -2127,7 +2127,7 @@ bool wxFolderListCtrl::SetPreviewMsg(long idx, UIdType uid)
    m_uidPreviewed = uid;
 
    wxLogTrace(M_TRACE_FV_SELECTION,
-              "SetPreviewMsg(): index = %ld, UID = %08lx",
+              _T("SetPreviewMsg(): index = %ld, UID = %08lx"),
               idx, (unsigned long)uid);
 
    // as folder view calls us itself, no need to notify it
@@ -2148,7 +2148,7 @@ void wxFolderListCtrl::InvalidatePreview()
    m_itemPreviewed = -1;
    m_uidPreviewed = UID_ILLEGAL;
 
-   wxLogTrace(M_TRACE_FV_SELECTION, "Invalidated preview");
+   wxLogTrace(M_TRACE_FV_SELECTION, _T("Invalidated preview"));
 }
 
 // ----------------------------------------------------------------------------
@@ -2317,7 +2317,7 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
             self->m_uidFocus = GetUIdFromIndex(index);
 
             wxLogTrace(M_TRACE_FV_SELECTION,
-                       "Updated focused UID, now %08lx (index = %ld)",
+                       _T("Updated focused UID, now %08lx (index = %ld)"),
                        (unsigned long)m_uidFocus, (unsigned long)index);
          }
       }
@@ -2385,8 +2385,8 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
                m_uidFocus = GetUIdFromIndex(m_itemFocus);
 
                wxLogTrace(M_TRACE_FV_SELECTION,
-                          "Updated focused UID from OnIdle(), now %08lx "
-                          "(index = %ld)",
+                          _T("Updated focused UID from OnIdle(), now %08lx "
+                          "(index = %ld)"),
                           (unsigned long)m_uidFocus, m_itemFocus);
 
                m_FolderView->OnFocusChange(m_itemFocus, m_uidFocus);
@@ -2646,7 +2646,7 @@ void wxFolderListCtrl::UpdateFocus()
       }
 
       wxLogTrace(M_TRACE_FV_SELECTION,
-                 "UpdateFocus(): index = %ld, UID = %08lx",
+                 _T("UpdateFocus(): index = %ld, UID = %08lx"),
                  itemFocus, (unsigned long)m_uidFocus);
    }
 }
@@ -3551,7 +3551,7 @@ wxFolderView::Update()
 
    m_FolderCtrl->UpdateListing(mf->GetHeaders());
 
-   wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Update(): %d headers.",
+   wxLogTrace(M_TRACE_FV_UPDATE, _T("wxFolderView::Update(): %d headers."),
               m_FolderCtrl->GetItemCount());
 
    m_nDeleted = UID_ILLEGAL;
@@ -4569,7 +4569,7 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
 void
 wxFolderView::OnFocusChange(long idx, UIdType uid)
 {
-   wxLogTrace(M_TRACE_FV_SELECTION, "item %ld (uid = %lx) is now focused",
+   wxLogTrace(M_TRACE_FV_SELECTION, _T("item %ld (uid = %lx) is now focused"),
               idx, uid);
 
    if ( uid != UID_ILLEGAL && m_settings.updateStatus )
@@ -4629,7 +4629,7 @@ void wxFolderView::OnFolderClosedEvent(MEventFolderClosedData& event)
 
    if ( event.GetFolder() == mf )
    {
-      wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Clear()");
+      wxLogTrace(M_TRACE_FV_UPDATE, _T("wxFolderView::Clear()"));
 
       Clear();
    }
@@ -4676,7 +4676,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
    size_t n,
           count = event.GetCount();
 
-   wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Expunge(%lu items), now %d",
+   wxLogTrace(M_TRACE_FV_UPDATE, _T("wxFolderView::Expunge(%lu items), now %d"),
               (unsigned long)count, m_FolderCtrl->GetItemCount());
 
    HeaderInfoList_obj hil = GetFolder()->GetHeaders();
@@ -5093,7 +5093,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
       unsigned long w;
       if ( !strWidths[col].ToULong(&w) )
       {
-         wxLogDebug("Invalid width for the column %u", (unsigned)n);
+         wxLogDebug(_T("Invalid width for the column %u"), (unsigned)n);
 
          w = 0;
       }

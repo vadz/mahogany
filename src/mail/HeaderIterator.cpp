@@ -72,7 +72,7 @@ bool HeaderIterator::GetNext(String *name, String *value)
             if ( m_pcCurrent[1] != '\n' )
             {
                // this is not supposed to happen in RFC822 headers!
-               wxLogDebug("Bare '\\r' in header ignored");
+               wxLogDebug(_T("Bare '\\r' in header ignored"));
                continue;
             }
 
@@ -86,7 +86,7 @@ bool HeaderIterator::GetNext(String *name, String *value)
                if ( !m_str.empty() )
                {
                   // but have seen something -- this is not normal
-                  wxLogDebug("Header line '%s' is malformed; ignored.",
+                  wxLogDebug(_T("Header line '%s' is malformed; ignored."),
                              m_str.c_str());
                }
                else // no name neither
@@ -97,7 +97,7 @@ bool HeaderIterator::GetNext(String *name, String *value)
                   // fatal anyhow, but report it as this is weird
                   if ( m_pcCurrent[1] != '\0' )
                   {
-                     wxLogDebug("Blank line inside header?");
+                     wxLogDebug(_T("Blank line inside header?"));
                   }
                }
             }
@@ -106,7 +106,7 @@ bool HeaderIterator::GetNext(String *name, String *value)
                if ( m_str.empty() )
                {
                   // suspicious...
-                  wxLogDebug("Empty header value?");
+                  wxLogDebug(_T("Empty header value?"));
                }
 
                // this header may continue on the next line if it begins
@@ -143,7 +143,7 @@ bool HeaderIterator::GetNext(String *name, String *value)
                   // although this is allowed by the RFC 822 (but not
                   // 822bis), it is quite uncommon and so may indicate a
                   // problem -- log it
-                  wxLogDebug("Header without space after colon?");
+                  wxLogDebug(_T("Header without space after colon?"));
                }
 
                m_str.clear();
@@ -162,7 +162,7 @@ bool HeaderIterator::GetNext(String *name, String *value)
    if ( !inName )
    {
       // make values and names arrays always of the same size
-      wxLogDebug("Last header didn't have a valid value!");
+      wxLogDebug(_T("Last header didn't have a valid value!"));
 
       if ( value )
          value->clear();

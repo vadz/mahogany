@@ -69,7 +69,7 @@ size_t AdbModule::EnumModules(const char *kind,
       }
       else
       {
-         wxLogDebug("Failed to load ADB importer '%s'.", info->name.c_str());
+         wxLogDebug(_T("Failed to load ADB importer '%s'."), info->name.c_str());
       }
 
       info = info->next;
@@ -97,7 +97,7 @@ AdbModule *AdbModule::GetModuleByName(const char *kind, const String& name)
       }
       else
       {
-         wxLogDebug("Failed to load ADB importer '%s'.", info->name.c_str());
+         wxLogDebug(_T("Failed to load ADB importer '%s'."), info->name.c_str());
       }
 
       importer = NULL;
@@ -162,11 +162,11 @@ void AdbModule::FreeAdbModuleInfo(AdbModule::AdbModuleInfo *info)
 
 AdbModule::AdbModuleInfo *AdbModule::ms_listModules = NULL;
 
-AdbModule::AdbModuleInfo::AdbModuleInfo(const char *name_,
+AdbModule::AdbModuleInfo::AdbModuleInfo(const wxChar *name_,
 #ifndef USE_ADB_MODULES
                                         Constructor ctor,
 #endif // !USE_ADB_MODULES
-                                        const char *desc_)
+                                        const wxChar *desc_)
 {
    // init member vars
    name = name_;

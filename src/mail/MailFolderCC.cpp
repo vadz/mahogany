@@ -429,7 +429,7 @@ static void CloseOrKeepStream(MAILSTREAM *stream,
    }
    else
    {
-      wxLogTrace(TRACE_MF_CALLS, "Closing connection to '%s'",
+      wxLogTrace(TRACE_MF_CALLS, _T("Closing connection to '%s'"),
                  folder->GetFullName().c_str());
 
       mail_close(stream);
@@ -1478,7 +1478,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 
          if ( !*p )
          {
-            wxLogDebug("Invalid encoded word syntax in '%s': missing charset.",
+            wxLogDebug(_T("Invalid encoded word syntax in '%s': missing charset."),
                        pEncWordStart);
             out += pEncWordStart;
 
@@ -1510,14 +1510,14 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 
          if ( enc2047 == Encoding_Unknown )
          {
-            wxLogDebug("Unrecognized header encoding in '%s'.",
+            wxLogDebug(_T("Unrecognized header encoding in '%s'."),
                        pEncWordStart);
 
             // scan until the end of the encoded word
             const char *pEncWordEnd = strstr(p, "?=");
             if ( !pEncWordEnd )
             {
-               wxLogDebug("Missing encoded word end marker in '%s'.",
+               wxLogDebug(_T("Missing encoded word end marker in '%s'."),
                           pEncWordStart);
                out += pEncWordStart;
 
@@ -1551,7 +1551,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 
          if ( !*p )
          {
-            wxLogDebug("Missing encoded word end marker in '%s'.",
+            wxLogDebug(_T("Missing encoded word end marker in '%s'."),
                        pEncWordStart);
             out += pEncWordStart;
 
@@ -1772,7 +1772,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
    // disable the errors during the first try as it's normal for it to not
    // exist
    {
-      wxLogTrace(TRACE_MF_CALLS, "Trying to open MailFolderCC '%s' first.",
+      wxLogTrace(TRACE_MF_CALLS, _T("Trying to open MailFolderCC '%s' first."),
                  imapspec.c_str());
 
       CCErrorDisabler noErrs;
@@ -1792,7 +1792,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
    // stream to allow us to reuse the connection here
    if ( !stream || stream->halfopen )
    {
-      wxLogTrace(TRACE_MF_CALLS, "Creating MailFolderCC '%s'.",
+      wxLogTrace(TRACE_MF_CALLS, _T("Creating MailFolderCC '%s'."),
                  imapspec.c_str());
 
       // stream may be NIL or not here
@@ -1805,7 +1805,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
       }
 
       // and try to open it again now
-      wxLogTrace(TRACE_MF_CALLS, "Opening MailFolderCC '%s' after creating it.",
+      wxLogTrace(TRACE_MF_CALLS, _T("Opening MailFolderCC '%s' after creating it."),
                  imapspec.c_str());
 
       stream = MailOpen(stream, imapspec);
@@ -1930,7 +1930,7 @@ void MailFolderCC::CreateFileFolder()
          tmp = "#driver.";
          tmp << cclient_drivers[format] << '/';
 
-         wxLogDebug("Trying to create folder '%s' in %s format.",
+         wxLogDebug(_T("Trying to create folder '%s' in %s format."),
                     GetName().c_str(), cclient_drivers[format]);
       }
       else // MF_MH folder
@@ -2071,7 +2071,7 @@ MailFolderCC::CheckForFileLock()
 bool
 MailFolderCC::Open(OpenMode openmode)
 {
-   wxLogTrace(TRACE_MF_CALLS, "%s \"'%s'\"",
+   wxLogTrace(TRACE_MF_CALLS, _T("%s \"'%s'\""),
               GetOperationName(openmode).c_str(), GetName().c_str());
 
    wxFrame *frame = GetInteractiveFrame();
@@ -2190,7 +2190,7 @@ MailFolderCC::Open(OpenMode openmode)
             }
          }
 
-         wxLogTrace(TRACE_MF_CALLS, "Opening MailFolderCC '%s'.",
+         wxLogTrace(TRACE_MF_CALLS, _T("Opening MailFolderCC '%s'."),
                     m_ImapSpec.c_str());
 
          m_MailStream = MailOpen(stream, m_ImapSpec, ccOptions);
@@ -2216,7 +2216,7 @@ MailFolderCC::Open(OpenMode openmode)
          SetLoginData(m_login, m_password);
       }
 
-      wxLogTrace(TRACE_MF_CALLS, "Half opening MailFolderCC '%s'.",
+      wxLogTrace(TRACE_MF_CALLS, _T("Half opening MailFolderCC '%s'."),
                  m_ImapSpec.c_str());
 
       // redirect all notifications to us again
@@ -2324,7 +2324,7 @@ MailFolderCC::Open(OpenMode openmode)
 void
 MailFolderCC::Close()
 {
-   wxLogTrace(TRACE_MF_CALLS, "Closing folder '%s'", GetName().c_str());
+   wxLogTrace(TRACE_MF_CALLS, _T("Closing folder '%s'"), GetName().c_str());
 
    MailFolderCmn::Close();
 
@@ -2591,7 +2591,7 @@ MailFolderCC::Checkpoint(void)
    MailFolderLocker lock(this);
    if ( lock )
    {
-      wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Checkpoint() on %s.",
+      wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC::Checkpoint() on %s."),
                  GetName().c_str());
 
       mail_check(m_MailStream); // update flags, etc, .newsrc
@@ -2620,7 +2620,7 @@ MailFolderCC::Ping(void)
       if ( GetType() == MF_POP || GetType() == MF_MH )
       {
          wxLogTrace(TRACE_MF_CALLS,
-                    "MailFolderCC::Ping() forcing close on folder %s.",
+                    _T("MailFolderCC::Ping() forcing close on folder %s."),
                     GetName().c_str());
 
          Close();
@@ -2679,7 +2679,7 @@ MailFolderCC::PingOpenedFolder()
    // caller must check for this
    CHECK( m_MailStream, false, _T("PingOpenedFolder() called for closed folder") );
 
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Ping(%s)", GetName().c_str());
+   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC::Ping(%s)"), GetName().c_str());
 
    return mail_ping(m_MailStream) != NIL;
 }
@@ -2766,7 +2766,7 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
    // finally call mail_status()
    MMStatusRedirector statusRedir(spec, mailstatus);
 
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::CheckStatus() on %s.",
+   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC::CheckStatus() on %s."),
               spec.c_str());
 
    mail_status(stream, (char *)spec.c_str(), STATUS_FLAGS);
@@ -2908,7 +2908,7 @@ MailFolderCC::UpdateAfterAppend()
 bool
 MailFolderCC::AppendMessage(const String& msg)
 {
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::AppendMessage(string)",
+   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::AppendMessage(string)"),
               GetName().c_str());
 
    CHECK_DEAD_RC(_T("Appending to closed folder '%s' failed."), false);
@@ -2932,7 +2932,7 @@ MailFolderCC::AppendMessage(const String& msg)
 bool
 MailFolderCC::AppendMessage(const Message& msg)
 {
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::AppendMessage(Message)",
+   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::AppendMessage(Message)"),
               GetName().c_str());
 
    String date;
@@ -2993,7 +2993,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    size_t count = selections->Count();
    CHECK( count, true, _T("SaveMessages(): nothing to save") );
 
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SaveMessages(%s)",
+   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SaveMessages(%s)"),
               GetName().c_str(), folder->GetFullName().c_str());
 
    /*
@@ -3237,7 +3237,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
 
    CHECK( m_MailStream, false, _T("DoCountMessages: folder is closed") );
 
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::DoCountMessages()",
+   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::DoCountMessages()"),
               GetName().c_str());
 
    status->Init();
@@ -3600,7 +3600,7 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
 
       CHECK( m_MailStream, 0, _T("SetSequenceFlag: folder is closed") );
 
-      wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SetFlags(%s) = %s",
+      wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SetFlags(%s) = %s"),
                  GetName().c_str(), sequence.c_str(), flags.c_str());
 
       mail_flag(m_MailStream,
@@ -3824,7 +3824,7 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
                // but as the user can currently create such sort orders using
                // the controls in the sort dialog (there are no checks there,
                // just ignore it here instead of giving an error)
-               wxLogDebug("Unexpected MSO_NONE in the sort order");
+               wxLogDebug(_T("Unexpected MSO_NONE in the sort order"));
                continue;
 
             default:
@@ -3853,7 +3853,7 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
       // call mail_sort() to do server side sorting if we can
       if ( pgmSort )
       {
-         wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SortMessages()",
+         wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SortMessages()"),
                     GetName().c_str());
 
          // if any new messages appear in the folder during sorting, nmsgs is
@@ -4027,7 +4027,7 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
       {
          // do server side threading
 
-         wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::ThreadMessages()",
+         wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::ThreadMessages()"),
                     GetName().c_str());
 
          THREADNODE *thrRoot = mail_thread
@@ -4085,7 +4085,7 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
    MailFolderLocker lockFolder(this);
 
    String sequence = seq.GetString();
-   wxLogTrace(TRACE_MF_CALLS, "Retrieving headers %s for '%s'...",
+   wxLogTrace(TRACE_MF_CALLS, _T("Retrieving headers %s for '%s'..."),
               sequence.c_str(), GetName().c_str());
 
    // prepare overviewData to be used by OverviewHeaderEntry()
@@ -4182,8 +4182,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
    // them (FIXME: is it really normal?)
    if ( overviewData->Done() )
    {
-      wxLogDebug("New message(s) appeared in folder while overviewing it, "
-                 "ignored.");
+      wxLogDebug(_T("New message(s) appeared in folder while overviewing it, ignored."));
 
       // stop overviewing
       return false;
@@ -4235,8 +4234,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
          // VZ: I just want to know if this happens, we can't do anything
          //     smart about this so far anyhow as we can't display the
          //     different fields in different encodings
-         wxLogDebug("Different encodings for From and To fields, "
-                    "From may be displayed incorrectly.");
+         wxLogDebug(_T("Different encodings for From and To fields, From may be displayed incorrectly."));
       }
       else
       {
@@ -4252,8 +4250,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
    {
       if ( encodingMsg != wxFONTENCODING_SYSTEM )
       {
-         wxLogDebug("Different encodings for From and Subject fields, "
-                    "subject may be displayed incorrectly.");
+         wxLogDebug(_T("Different encodings for From and Subject fields, subject may be displayed incorrectly."));
       }
       else
       {
@@ -4299,7 +4296,7 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
    // shouldn't get them at all but somehow we do (ask c-client why...)
    if ( !stream || stream->halfopen )
    {
-      wxLogDebug("mm_exists() for not opened folder '%s' ignored.",
+      wxLogDebug(_T("mm_exists() for not opened folder '%s' ignored."),
                  GetName().c_str());
 
       return;
@@ -4315,7 +4312,7 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       // update the number of headers in the listing
       if ( m_headers )
       {
-         wxLogTrace(TRACE_MF_EVENTS, "Adding msgno %u to headers", (unsigned int)msgnoMax);
+         wxLogTrace(TRACE_MF_EVENTS, _T("Adding msgno %u to headers"), (unsigned int)msgnoMax);
 
          m_headers->OnAdd(msgnoMax);
       }
@@ -4420,7 +4417,7 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
             m_expungeData->positions.Add(m_headers->GetPosFromIdx(idx));
          }
 
-         wxLogTrace(TRACE_MF_EVENTS, "Removing msgno %u from headers", (unsigned int)msgno);
+         wxLogTrace(TRACE_MF_EVENTS, _T("Removing msgno %u from headers"), (unsigned int)msgno);
 
          m_headers->OnRemove(idx);
       }
@@ -4463,7 +4460,7 @@ void MailFolderCC::OnNewMail()
    // reset?
    ASSERT_MSG( m_gotUnprocessedNewMail, _T("OnNewMail: why are we called?") );
 
-   wxLogTrace(TRACE_MF_EVENTS, "Got new mail notification for '%s'",
+   wxLogTrace(TRACE_MF_EVENTS, _T("Got new mail notification for '%s'"),
               GetName().c_str());
 
    // should we notify the GUI about the new mail in the folder? initially we
@@ -4496,7 +4493,7 @@ void MailFolderCC::OnNewMail()
          {
             // use "%ld" to print UID_ILLEGAL as -1 although it's really
             // unsigned
-            wxLogTrace(TRACE_MF_NEWMAIL, "Folder %s: last new UID %ld -> %ld",
+            wxLogTrace(TRACE_MF_NEWMAIL, _T("Folder %s: last new UID %ld -> %ld"),
                        GetName().c_str(), m_uidLastNew, uidsNew->Last());
 
             // update m_uidLastNew to avoid finding the same messages again the
@@ -4646,7 +4643,7 @@ MailFolderCC::CClientInit(void)
 
 CCStreamCleaner::~CCStreamCleaner()
 {
-   wxLogTrace(TRACE_MF_CALLS, "CCStreamCleaner: checking for left-over streams");
+   wxLogTrace(TRACE_MF_CALLS, _T("CCStreamCleaner: checking for left-over streams"));
 
    // don't send us any notifications any more
    delete gs_CCEventReflector;
@@ -4870,7 +4867,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf, _T("mm_status for non existent folder"));
 
-   wxLogTrace(TRACE_MF_CALLBACK, "mm_status: folder '%s', %lu messages",
+   wxLogTrace(TRACE_MF_CALLBACK, _T("mm_status: folder '%s', %lu messages"),
               mf->m_ImapSpec.c_str(), status->messages);
 
    // do nothing here for now
@@ -5282,7 +5279,7 @@ char MailFolderCC::GetFolderDelimiter() const
 bool
 MailFolderCC::Rename(const MFolder *mfolder, const String& name)
 {
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Rename(): %s -> %s",
+   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC::Rename(): %s -> %s"),
               mfolder->GetPath().c_str(), name.c_str());
 
    // I'm unsure if this is needed but I suppose we're going to have problems
@@ -5324,7 +5321,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
                                              mfolder->GetServer(),
                                              login);
 
-   wxLogTrace(TRACE_MF_CALLS, "Clearing folder '%s'", fullname.c_str());
+   wxLogTrace(TRACE_MF_CALLS, _T("Clearing folder '%s'"), fullname.c_str());
 
    // if this folder is opened, use its stream - and also notify about message
    // deletion
@@ -5449,7 +5446,7 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
    SetLoginData(login, password);
 
    wxLogTrace(TRACE_MF_CALLS,
-              "MailFolderCC::DeleteFolder(%s)", mboxpath.c_str());
+              _T("MailFolderCC::DeleteFolder(%s)"), mboxpath.c_str());
 
    return mail_delete(NIL, (char *) mboxpath.c_str()) != NIL;
 }
@@ -5581,37 +5578,37 @@ void MailFolderCC::EndReading()
    }
 
    #define TRACE_CALLBACK0(name) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s)%s", \
+      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(%s)%s"), \
                  #name, GetStreamMailbox(stream), \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK1(name, fmt, parm) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")%s", \
+      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(%s, " fmt ")%s"), \
                  #name, GetStreamMailbox(stream), parm, \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK2(name, fmt, parm1, parm2) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")%s", \
+      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(%s, " fmt ")%s"), \
                  #name, GetStreamMailbox(stream), parm1, parm2, \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK3(name, fmt, parm1, parm2, parm3) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")%s", \
+      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(%s, " fmt ")%s"), \
                  #name, GetStreamMailbox(stream), parm1, parm2, parm3, \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK_NOSTREAM_1(name, fmt, parm1) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")%s", \
+      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(" fmt ")%s"), \
                  #name, parm1, \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK_NOSTREAM_2(name, fmt, parm1, parm2) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")%s", \
+      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(" fmt ")%s"), \
                  #name, parm1, parm2, \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK_NOSTREAM_5(name, fmt, parm1, parm2, parm3, parm4, parm5) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")%s", \
+      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(" fmt ")%s"), \
                  #name, parm1, parm2, parm3, parm4, parm5, \
                  mm_disable_callbacks ? " [disabled]" : "")
 #else // !EXPERIMENTAL_log_callbacks
@@ -5871,7 +5868,7 @@ ServerInfoEntryCC::ServerInfoEntryCC(const MFolder *folder)
 ServerInfoEntryCC::~ServerInfoEntryCC()
 {
    wxLogTrace(TRACE_SERVER_CACHE,
-              "Deleting server entry for %s(%s).",
+              _T("Deleting server entry for %s(%s)."),
               m_netmbx.host, m_netmbx.user);
 
    // close all connections we may still have
@@ -5957,7 +5954,7 @@ void ServerInfoEntryCC::KeepStream(MAILSTREAM *stream, const MFolder *folder)
    time_t delay = READ_CONFIG(profile, MP_CONN_CLOSE_DELAY);
 
    wxLogTrace(TRACE_SERVER_CACHE,
-              "Keeping connection to %s alive for %d seconds.",
+              _T("Keeping connection to %s alive for %d seconds."),
               stream->mailbox, (int)delay);
 
    m_timeouts.push_back(t + delay);
@@ -5971,7 +5968,7 @@ void ServerInfoEntryCC::KeepStream(MAILSTREAM *stream, const MFolder *folder)
            (ms_connCloseTimer->GetInterval() / 1000 > delay) )
    {
       wxLogTrace(TRACE_SERVER_CACHE,
-                 "Starting connection clean up timer (delay = %ds)", (int)delay);
+                 _T("Starting connection clean up timer (delay = %ds)"), (int)delay);
 
       // we want to use a smaller interval
       ms_connCloseTimer->Start(delay * 1000);
@@ -6002,7 +5999,7 @@ bool ServerInfoEntryCC::CheckTimeout()
          MAILSTREAM *stream = *i;
 
          wxLogTrace(TRACE_SERVER_CACHE,
-                    "Connection to %s timed out, closing.", stream->mailbox);
+                    _T("Connection to %s timed out, closing."), stream->mailbox);
 
          // we're not interested in getting mail_close() babble
          CCCallbackDisabler cc;
@@ -6041,7 +6038,7 @@ void ServerInfoEntryCC::CheckTimeoutAll()
    if ( !hasAnyConns )
    {
       // timer will be restarted in KeepStream() when/if neecessary
-      wxLogTrace(TRACE_SERVER_CACHE, "Stopping connection clean up timer");
+      wxLogTrace(TRACE_SERVER_CACHE, _T("Stopping connection clean up timer"));
 
       ms_connCloseTimer->Stop();
    }

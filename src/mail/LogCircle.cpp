@@ -54,7 +54,7 @@ MLogCircle:: Find(const String needle, String *store) const
    if(m_Next > 0)
       for(int i = m_Next-1; i >= 0 ; i--)
       {
-         wxLogTrace("logcircle", "checking msg %d, %s", i, m_Messages[i].c_str());
+         wxLogTrace(_T("logcircle"), _T("checking msg %d, %s"), i, m_Messages[i].c_str());
          if(m_Messages[i].Contains(needle))
          {
             if(store) *store = m_Messages[i];
@@ -64,7 +64,7 @@ MLogCircle:: Find(const String needle, String *store) const
    // search from m_N-1 down to m_Next:
    for(int i = m_N-1; i >= m_Next; i--)
    {
-      wxLogTrace("logcircle", "checking msg %d, %s", i, m_Messages[i].c_str());
+      wxLogTrace(_T("logcircle"), _T("checking msg %d, %s"), i, m_Messages[i].c_str());
       if(m_Messages[i].Contains(needle))
       {
          if(store) *store = m_Messages[i];

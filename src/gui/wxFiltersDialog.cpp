@@ -759,7 +759,7 @@ OneCritControl::InitSpamOptions(const String& rule)
             m_checkReceived = true;
 #endif
          else
-            wxLogDebug("Unknown spam test \"%s\"", t.c_str());
+            wxLogDebug(_T("Unknown spam test \"%s\""), t.c_str());
       }
    }
 }

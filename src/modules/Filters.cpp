@@ -2872,8 +2872,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          if ( !m_MailMessage )
          {
             // maybe another session deleted it?
-            wxLogDebug("Filter error: message with UID %ld in folder '%s'"
-                       "doesn't exist any more.",
+            wxLogDebug(_T("Filter error: message with UID %ld in folder '%s' doesn't exist any more."),
                        m_MessageUId, m_MailFolder->GetName().c_str());
             continue;
          }

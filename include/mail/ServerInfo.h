@@ -76,7 +76,7 @@ public:
          if ( i->CanBeUsedFor(folder) )
          {
             wxLogTrace(TRACE_SERVER_CACHE,
-                       "Reusing existing server entry for %s(%s).",
+                       _T("Reusing existing server entry for %s(%s)."),
                        folder->GetFullName().c_str(), i->m_login.c_str());
 
             // found
@@ -86,7 +86,7 @@ public:
 
       // not found
       wxLogTrace(TRACE_SERVER_CACHE,
-                 "No server entry for %s found.",
+                 _T("No server entry for %s found."),
                  folder->GetFullName().c_str());
 
       return NULL;
@@ -108,7 +108,7 @@ public:
       if ( !serverInfo )
       {
          wxLogTrace(TRACE_SERVER_CACHE,
-                    "Creating new server entry for %s(%s).",
+                    _T("Creating new server entry for %s(%s)."),
                     folder->GetFullName().c_str(), folder->GetLogin().c_str());
 
          serverInfo = mf->CreateServerInfo(folder);
@@ -207,7 +207,7 @@ protected:
       m_hasAuthInfo = !m_login.empty() && !m_password.empty();
 
       wxLogTrace(TRACE_SERVER_CACHE,
-                 "Created server entry for %s(%s).",
+                 _T("Created server entry for %s(%s)."),
                  folder->GetFullName().c_str(), m_login.c_str());
    }
 

@@ -188,7 +188,7 @@ bool   MDialog_Message(char const *message,
 
     @return true if yes was selected
 */
-bool   MDialog_YesNoDialog(char const *message,
+bool   MDialog_YesNoDialog(wxChar const *message,
                            const wxWindow *parent = NULL,
                            wxChar const *title = MDIALOG_YESNOTITLE,
                            int flags = M_DLG_YES_DEFAULT,
@@ -306,7 +306,7 @@ bool MInputBox(wxString *pstr,
                const wxString& prompt,
                const wxWindow *parent = NULL,
                const char *key = NULL,
-               const char *def = NULL,
+               const wxChar *def = NULL,
                bool passwordflag = false);
 
 /**

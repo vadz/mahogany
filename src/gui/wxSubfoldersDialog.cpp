@@ -575,7 +575,7 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
       }
       else
       {
-         wxLogDebug("Folder specification '%s' unexpected.", spec.c_str());
+         wxLogDebug(_T("Folder specification '%s' unexpected."), spec.c_str());
       }
    }
 
@@ -1319,7 +1319,7 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
       }
       else
       {
-         wxLogDebug("Folder specification '%s' unexpected.", spec.c_str());
+         wxLogDebug(_T("Folder specification '%s' unexpected."), spec.c_str());
       }
    }
 

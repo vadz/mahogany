@@ -135,7 +135,7 @@ MEventManager::DispatchPending(void)
 void
 MEventManager::Send(MEventData * data)
 {
-   wxLogTrace("event", "Queuing event %d", data->GetId());
+   wxLogTrace(_T("event"), _T("Queuing event %d"), data->GetId());
 
    MEventLocker mutex;
    gs_EventList.push_back(data);
@@ -155,7 +155,7 @@ bool MEventManager::Dispatch(MEventData *dataptr)
    MEventData & data = *dataptr;
    MEventId id = data.GetId();
 
-   wxLogTrace("event", "Dispatching event %d", id);
+   wxLogTrace(_T("event"), _T("Dispatching event %d"), id);
 
    // make a copy of the array because some event handlers might remove
    // themselves from our list while we send the event

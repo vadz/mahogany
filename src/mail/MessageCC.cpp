@@ -745,7 +745,7 @@ void MessageCC::DecodeMIME(MimePartCC *mimepart, BODY *body)
          {
             // this is not fatal but not expected neither - I don't know if it
             // can ever happen, in fact
-            wxLogDebug("Embedded message/rfc822 without body structure?");
+            wxLogDebug(_T("Embedded message/rfc822 without body structure?"));
          }
       }
    }

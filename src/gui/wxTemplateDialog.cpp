@@ -884,7 +884,7 @@ void EditTemplates(wxWindow *parent,
    long kindLastEdited = profile->readEntry(path, (long)MessageTemplate_Reply);
    if ( kindLastEdited < 0 || kindLastEdited >= MessageTemplate_Max )
    {
-      wxLogDebug("Corrupted TemplateEditKind entry in config.");
+      wxLogDebug(_T("Corrupted TemplateEditKind entry in config."));
 
       kindLastEdited = MessageTemplate_Reply;
    }

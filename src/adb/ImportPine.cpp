@@ -429,7 +429,7 @@ size_t AdbPineImporter::SplitMailingListAddresses(const wxString& addresses,
          // split one address
          if ( !address )
          {
-            wxLogDebug("Empty address in the PINE mailing list entry ignored.");
+            wxLogDebug(_T("Empty address in the PINE mailing list entry ignored."));
          }
          else
          {

@@ -15,6 +15,6 @@
 #define	PATH_SEPARATOR	':'
 
 /// under Unix it's quite simple
-#define IsAbsPath(path)    (((const char *)path)[0] == '/')
+#define IsAbsPath(path)    (((const wxChar *)path)[0] == '/')
 
 #endif

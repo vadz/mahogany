@@ -1740,7 +1740,7 @@ MessageView::ShowPart(const MimePart *mimepart)
       }
       else
       {
-         wxLogDebug("Invalid MIME type '%s'!", typeName.c_str());
+         wxLogDebug(_T("Invalid MIME type '%s'!"), typeName.c_str());
       }
    }
 
@@ -2180,7 +2180,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
       // Windows creates the temp file even if we didn't use it yet
       if ( !wxRemoveFile(filename) )
       {
-         wxLogDebug("Warning: stale temp file '%s' will be left.",
+         wxLogDebug(_T("Warning: stale temp file '%s' will be left."),
                     filename.c_str());
       }
 
@@ -2226,7 +2226,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
       if(isfax
          && MimeSave(mimepart, filename))
       {
-         wxLogDebug("Detected image/tiff fax content.");
+         wxLogDebug(_T("Detected image/tiff fax content."));
          // use TIFF2PS command to create a postscript file, open that
          // one with the usual ps viewer
          String filenamePS = filename.BeforeLast('.') + ".ps";
@@ -2357,7 +2357,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
       // Windows creates the temp file even if we didn't use it yet
       if ( !wxRemoveFile(filename) )
       {
-         wxLogDebug("Warning: stale temp file '%s' will be left.",
+         wxLogDebug(_T("Warning: stale temp file '%s' will be left."),
                     filename.c_str());
       }
 

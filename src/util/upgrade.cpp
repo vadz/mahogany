@@ -2080,7 +2080,7 @@ public:
             {
                config->DeleteEntry(MP_OLD_FOLDER_HOST);
 
-               wxLogTrace("Successfully converted folder '%s'",
+               wxLogTrace(_T("Successfully converted folder '%s'"),
                           folderName.c_str());
             }
             else
@@ -2145,7 +2145,7 @@ public:
             MP_TEMPLATE_FORWARD,
          };
 
-         wxLogTrace("Updating templates for the folder '%s'...",
+         wxLogTrace(_T("Updating templates for the folder '%s'..."),
                     folderName.c_str());
 
          for ( size_t n = 0; n < WXSIZEOF(templateKinds); n++ )
@@ -2174,7 +2174,7 @@ public:
                }
                else
                {
-                  wxLogTrace("\t%s/%s/%s upgraded to %s",
+                  wxLogTrace(_T("\t%s/%s/%s upgraded to %s"),
                              folderName.c_str(),
                              group.c_str(),
                              entry.c_str(),

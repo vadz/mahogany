@@ -460,7 +460,7 @@ ExtractListPostAddress(const String& listPostHeader)
                // start of an URL, get it
                if ( strncmp(++p, "mailto:", MAILTO_LEN) != 0 )
                {
-                  wxLogDebug("Unknown URL scheme in List-Post (%s)",
+                  wxLogDebug(_T("Unknown URL scheme in List-Post (%s)"),
                              listPostHeader.c_str());
                   return "";
                }
@@ -514,7 +514,7 @@ ExtractListPostAddress(const String& listPostHeader)
          default:
             // this is just for me, so that I could check for possible bugs in
             // this code
-            wxLogDebug("Malformed List-Post header '%s'!",
+            wxLogDebug(_T("Malformed List-Post header '%s'!"),
                        listPostHeader.c_str());
             return "";
       }
@@ -537,7 +537,7 @@ GetReplyKind(const MailFolder::Params& params,
 
       if ( rk < 0 || rk >= MailFolder::REPLY )
       {
-         wxLogDebug("Corrupted config data: invalid MP_DEFAULT_REPLY_KIND!");
+         wxLogDebug(_T("Corrupted config data: invalid MP_DEFAULT_REPLY_KIND!"));
 
          rk = MailFolder::REPLY_SENDER;
       }
@@ -1148,7 +1148,7 @@ bool MailFolder::SaveMessageAsMBOX(const String& filename, const char *content)
       if ( !p )
       {
          // this shouldn't normally happen, but if it does just make it up
-         wxLogDebug("Couldn't find from header in the message");
+         wxLogDebug(_T("Couldn't find from header in the message"));
 
          fromLine += "MAHOGANY-DUMMY-SENDER";
       }

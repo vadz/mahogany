@@ -1083,7 +1083,7 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
      // lines which do not contain a key-value pair will log a message
       if ( nEq == wxNOT_FOUND )
       {
-         wxLogDebug("%s(%u): missing variable identifier ('%s').", filename.c_str(), nLine + 1,g_VarIdent.c_str());
+         wxLogDebug(_T("%s(%u): missing variable identifier ('%s')."), filename.c_str(), nLine + 1,g_VarIdent.c_str());
 
          // skip line
          continue;

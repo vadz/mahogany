@@ -1306,7 +1306,7 @@ Composer::EditMessage(Profile *profile, Message *msg)
                }
                else // bad header format
                {
-                  wxLogDebug("Corrupted " HEADER_GEOMETRY " header '%s'.",
+                  wxLogDebug(_T("Corrupted " HEADER_GEOMETRY " header '%s'."),
                              value.c_str());
                }
             }
@@ -3025,7 +3025,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
       {
          if ( remove(m_tmpFileName) != 0 )
          {
-            wxLogDebug("Stale temp file '%s' left.", m_tmpFileName.c_str());
+            wxLogDebug(_T("Stale temp file '%s' left."), m_tmpFileName.c_str());
          }
 
          ok = true;

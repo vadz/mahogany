@@ -1235,7 +1235,7 @@ MsgCmdProcImpl::ToggleMessages(const UIdArray& messages)
       UIdType idx = hil->GetIdxFromUId(uid);
       if ( idx == UID_ILLEGAL )
       {
-         wxLogDebug("Inexistent message (uid = %lu) selected?", uid);
+         wxLogDebug(_T("Inexistent message (uid = %lu) selected?"), uid);
 
          continue;
       }
@@ -1410,14 +1410,14 @@ void
 MsgCmdProcImpl::DropMessagesToFolder(const UIdArray& selections,
                                      MFolder *folder)
 {
-   wxLogTrace(M_TRACE_DND, "Saving %d message(s) to folder '%s'",
+   wxLogTrace(M_TRACE_DND, _T("Saving %d message(s) to folder '%s'"),
               selections.Count(), folder->GetFullName().c_str());
 
    Ticket t = SaveMessagesToFolder(selections, folder);
 
    if ( !m_TicketsDroppedList )
    {
-      wxLogTrace(M_TRACE_DND, "Creating m_TicketsDroppedList");
+      wxLogTrace(M_TRACE_DND, _T("Creating m_TicketsDroppedList"));
 
       m_TicketsDroppedList = ASTicketList::Create();
    }
@@ -1464,12 +1464,12 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
       case wxDragError:
          // always give this one in debug mode, it is not supposed to
          // happen!
-         wxLogDebug("An error occured during drag and drop operation");
+         wxLogDebug(_T("An error occured during drag and drop operation"));
          break;
 
       case wxDragNone:
       case wxDragCancel:
-         wxLogTrace(M_TRACE_DND, "Drag and drop aborted by user.");
+         wxLogTrace(M_TRACE_DND, _T("Drag and drop aborted by user."));
          break;
 
       case wxDragMove:
@@ -1495,13 +1495,13 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
                );
                m_UIdsCopiedOk.Empty();
 
-               wxLogTrace(M_TRACE_DND, "Deleted previously dropped msgs.");
+               wxLogTrace(M_TRACE_DND, _T("Deleted previously dropped msgs."));
             }
             else
             {
                // maybe we didn't have time to really copy the messages
                // yet, then they will be deleted later
-               wxLogTrace(M_TRACE_DND, "Dropped msgs will be deleted later");
+               wxLogTrace(M_TRACE_DND, _T("Dropped msgs will be deleted later"));
             }
          }
          break;
@@ -1518,11 +1518,11 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
       m_TicketsDroppedList->DecRef();
       m_TicketsDroppedList = NULL;
 
-      wxLogTrace(M_TRACE_DND, "DragAndDropMessages() done ok");
+      wxLogTrace(M_TRACE_DND, _T("DragAndDropMessages() done ok"));
    }
    else
    {
-      wxLogTrace(M_TRACE_DND, "Nothing dropped");
+      wxLogTrace(M_TRACE_DND, _T("Nothing dropped"));
    }
 
    if ( !m_UIdsCopiedOk.IsEmpty() )
@@ -1641,7 +1641,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                {
                   m_TicketsDroppedList->Remove(t);
 
-                  wxLogTrace(M_TRACE_DND, "Dropped msgs copied ok");
+                  wxLogTrace(M_TRACE_DND, _T("Dropped msgs copied ok"));
                }
 
                if ( !ok )

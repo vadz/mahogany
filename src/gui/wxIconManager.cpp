@@ -227,7 +227,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
          String command;
          command.Printf(strConvertProgram, filename.c_str(), tempfile.c_str());
          wxLogTrace(wxTraceIconLoading,
-                    "wxIconManager::LoadImage() calling '%s'...",
+                    _T("wxIconManager::LoadImage() calling '%s'..."),
                     command.c_str());
          if(system(command) == 0)
          {
@@ -299,7 +299,7 @@ wxIconManager::LoadImageXpm(String filename)
    String oldfilename = filename;
    char **cpptr = NULL;
 
-   wxLogTrace(wxTraceIconLoading, "wxIconManager::LoadImage(%s) called...",
+   wxLogTrace(wxTraceIconLoading, _T("wxIconManager::LoadImage(%s) called..."),
               filename.c_str());
 
    // lets convert to xpm using image magick:
@@ -321,7 +321,7 @@ wxIconManager::LoadImageXpm(String filename)
       command.Printf(READ_APPCONFIG_TEXT(MP_CONVERTPROGRAM),
                      filename.c_str(), tempfile.c_str());
       wxLogTrace(wxTraceIconLoading,
-                 "wxIconManager::LoadImage() calling '%s'...",
+                 _T("wxIconManager::LoadImage() calling '%s'..."),
                  command.c_str());
       if(system(command) == 0)
          cpptr = LoadXpm(tempfile);
@@ -507,7 +507,7 @@ bool wxIconManager::FindInCache(const String& iconName, wxIcon *icon) const
    {
       if (strcmp((*i)->iconName.c_str(), iconName.c_str()) == 0 )
       {
-         wxLogTrace(wxTraceIconLoading, "... icon was in the cache.");
+         wxLogTrace(wxTraceIconLoading, _T("... icon was in the cache."));
          *icon = (*i)->iconRef;
 
          return true;
@@ -535,7 +535,7 @@ wxIconManager::GetIcon(const String &iconNameOrig)
    String iconName = iconNameOrig;
 
    strutil_tolower(iconName);
-   wxLogTrace(wxTraceIconLoading, "wxIconManager::GetIcon(%s) called...",
+   wxLogTrace(wxTraceIconLoading, _T("wxIconManager::GetIcon(%s) called..."),
               iconNameOrig.c_str());
 
    wxIcon icon;
@@ -579,7 +579,7 @@ wxIconManager::GetIcon(const String &iconNameOrig)
                id = new IconData;
                id->iconRef = icon;
                id->iconName = iconName;
-               wxLogTrace(wxTraceIconLoading, "... icon found in '%s'",
+               wxLogTrace(wxTraceIconLoading, _T("... icon found in '%s'"),
                           name.c_str());
                m_iconList->push_front(id);
                return icon;
@@ -593,7 +593,7 @@ wxIconManager::GetIcon(const String &iconNameOrig)
    {
       wxIcon icon(iconNameOrig);
       if ( icon.Ok() ) {
-         wxLogTrace(wxTraceIconLoading, "... icon found in the ressources.");
+         wxLogTrace(wxTraceIconLoading, _T("... icon found in the ressources."));
          return icon;
       }
 
@@ -601,7 +601,7 @@ wxIconManager::GetIcon(const String &iconNameOrig)
    }
 #endif  //Windows
 
-   wxLogTrace(wxTraceIconLoading, "... icon not found.");
+   wxLogTrace(wxTraceIconLoading, _T("... icon not found."));
 
    return m_unknownIcon;
 }

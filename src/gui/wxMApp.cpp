@@ -216,7 +216,7 @@ public:
 
    virtual void Notify()
    {
-      wxLogTrace(TRACE_TIMER, "Autosaving options and folder status.");
+      wxLogTrace(TRACE_TIMER, _T("Autosaving options and folder status."));
 
       (void)SaveAll();
    }
@@ -251,7 +251,7 @@ class AwayTimer : public wxTimer
 public:
    virtual void Notify()
    {
-      wxLogTrace(TRACE_TIMER, "Going away on timer");
+      wxLogTrace(TRACE_TIMER, _T("Going away on timer"));
 
       mApplication->SetAwayMode(TRUE);
    }
@@ -300,7 +300,7 @@ void MailCollectionTimer::Notify()
    if ( !mApplication->AllowBgProcessing() )
       return;
 
-   wxLogTrace(TRACE_TIMER, "Collection timer expired.");
+   wxLogTrace(TRACE_TIMER, _T("Collection timer expired."));
 
    mApplication->UpdateOutboxStatus();
 
@@ -589,8 +589,7 @@ wxMApp::CanClose() const
       if ( !MDialog_YesNoDialog("", NULL, "",
                                 M_DLG_NO_DEFAULT, M_MSGBOX_CONFIRM_EXIT) )
       {
-         wxLogDebug("Exit confirmation msg box has been disabled on [No], "
-                    "reenabling it.");
+         wxLogDebug(_T("Exit confirmation msg box has been disabled on [No], reenabling it."));
 
          wxPMessageBoxEnable(path);
       }

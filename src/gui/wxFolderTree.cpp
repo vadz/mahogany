@@ -1501,7 +1501,7 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
       {
          if ( !ParseColourString(colorName, &col) )
          {
-            wxLogDebug("Invalid colour string '%s'.", colorName.c_str());
+            wxLogDebug(_T("Invalid colour string '%s'."), colorName.c_str());
             col = *wxBLACK;
          }
       }
@@ -1555,7 +1555,7 @@ wxString wxFolderTreeNode::GetName() const
       if (s & 0x80)
       {
          /* reserved for future use with UTF-8 */
-         wxLogDebug("mailbox name with 8-bit character");
+         wxLogDebug(_T("mailbox name with 8-bit character"));
          isValid = false;
          break;
       }
@@ -1570,13 +1570,13 @@ wxString wxFolderTreeNode::GetName() const
             switch (s)
             {
                case '\0':
-                  wxLogDebug("unterminated modified UTF-7 name");
+                  wxLogDebug(_T("unterminated modified UTF-7 name"));
                   isValid = false;
                   break;
                default:    /* must be alphanumeric */
                   if (!isalnum (s))
                   {
-                     wxLogDebug("invalid modified UTF-7 name");
+                     wxLogDebug(_T(_T("invalid modified UTF-7 name")));
                      isValid = false;
                      break;
                   }
@@ -2982,7 +2982,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
 
 void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
 {
-   wxLogTrace(M_TRACE_MFSTATUS, "Folder tree: status changed for '%s'.",
+   wxLogTrace(M_TRACE_MFSTATUS, _T("Folder tree: status changed for '%s'."),
               folderName.c_str());
 
    // check if we need to react to this event at all
@@ -2998,7 +2998,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
       //
       // just ignore them as we don't show their status anyhow
       wxLogTrace(M_TRACE_MFSTATUS,
-                 "Folder tree: ignoring it because the folder is not in tree");
+                 _T("Folder tree: ignoring it because the folder is not in tree"));
 
       return;
    }
@@ -3013,7 +3013,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
    if ( READ_CONFIG_TEXT(profile, MP_FTREE_FORMAT).empty() )
    {
       wxLogTrace(M_TRACE_MFSTATUS,
-                 "Folder tree: ignoring it because we don't show status");
+                 _T("Folder tree: ignoring it because we don't show status"));
 
       return;
    }
@@ -3026,14 +3026,14 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
    if ( !MfStatusCache::Get()->GetStatus(folderName, &status) )
    {
       wxLogTrace(M_TRACE_MFSTATUS,
-                 "Folder tree: no cached status, calling CountAllMessages()");
+                 _T("Folder tree: no cached status, calling CountAllMessages()"));
 
       // we don't have the status right now, count the messages (the folder
       // should be already opened, we don't want to open it just for this)
       MailFolder_obj mf = MailFolder::GetOpenedFolderFor(folder);
       if ( !mf )
       {
-         wxLogDebug("Failed to update status for '%s'", folderName.c_str());
+         wxLogDebug(_T("Failed to update status for '%s'"), folderName.c_str());
       }
       else
       {
@@ -3059,7 +3059,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
    wxFolderTreeNode *node = GetFolderTreeNode(item);
    node->SetStatus(this, status);
 
-   wxLogTrace(M_TRACE_MFSTATUS, "Folder tree: updated status for '%s'",
+   wxLogTrace(M_TRACE_MFSTATUS, _T("Folder tree: updated status for '%s'"),
               folderName.c_str());
 }
 

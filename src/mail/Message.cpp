@@ -107,7 +107,7 @@ ExtractAddress(const String& address, String *email)
    Address *addr = addrList->GetFirst();
    if ( !addr )
    {
-      wxLogDebug("Invalid address '%s'", address.c_str());
+      wxLogDebug(_T("Invalid address '%s'"), address.c_str());
 
       email->clear();
    }

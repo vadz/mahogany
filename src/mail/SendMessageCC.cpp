@@ -1332,7 +1332,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
             if ( hasCharset )
             {
                // although not fatal, this shouldn't happen
-               wxLogDebug("Multiple CHARSET parameters!");
+               wxLogDebug(_T("Multiple CHARSET parameters!"));
             }
 
             hasCharset = true;
@@ -1458,7 +1458,7 @@ SendMessageCC::SendOrQueue(int flags)
                i != m_FccList.end();
                i++ )
          {
-            wxLogTrace(TRACE_SEND, "FCCing message to %s", (*i)->c_str());
+            wxLogTrace(TRACE_SEND, _T("FCCing message to %s"), (*i)->c_str());
 
             WriteToFolder(**i);
          }
@@ -1589,7 +1589,7 @@ SendMessageCC::Send(int flags)
    switch ( m_Protocol )
    {
       case Prot_SMTP:
-         wxLogTrace(TRACE_SEND, "Trying to open connection to SMTP server '%s'",
+         wxLogTrace(TRACE_SEND, _T("Trying to open connection to SMTP server '%s'"),
                     m_ServerHost.c_str());
          if ( READ_CONFIG(m_profile, MP_SMTP_USE_8BIT) )
          {
@@ -1604,7 +1604,7 @@ SendMessageCC::Send(int flags)
          break;
 
       case Prot_NNTP:
-         wxLogTrace(TRACE_SEND, "Trying to open connection to NNTP server '%s'",
+         wxLogTrace(TRACE_SEND, _T("Trying to open connection to NNTP server '%s'"),
                     m_ServerHost.c_str());
 
          stream = nntp_open_full(NIL,

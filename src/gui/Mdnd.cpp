@@ -128,7 +128,7 @@ MMessagesDropTargetBase::OnData(wxCoord x, wxCoord y, wxDragResult def)
 {
    if ( !GetData() )
    {
-      wxLogDebug("Failed to get drag and drop data");
+      wxLogDebug(_T("Failed to get drag and drop data"));
 
       return wxDragNone;
    }

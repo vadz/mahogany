@@ -309,7 +309,7 @@ void wxPNotebook::RestorePage()
         }
         else {
             // invalid page index, (almost) silently ignore
-            wxLogDebug("Couldn't restore wxPNotebook page %d.", nPage);
+            wxLogDebug(_T("Couldn't restore wxPNotebook page %d."), nPage);
         }
 
         m_persist->RestorePath();
@@ -1953,10 +1953,10 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
 
 wxString wxPFileSelector(const wxString& configPath,
                          const wxString& title,
-                         const char *defpath,
-                         const char *defname,
-                         const char *defext,
-                         const char *filter,
+                         const wxChar *defpath,
+                         const wxChar *defname,
+                         const wxChar *defext,
+                         const wxChar *filter,
                          int flags,
                          wxWindow *parent,
                          wxConfigBase *config)

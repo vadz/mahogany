@@ -259,7 +259,7 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
       }
       else
       {
-         wxLogDebug(".pinerc(%u): non numeric composer-wrap-column value.",
+         wxLogDebug(_T(".pinerc(%u): non numeric composer-wrap-column value."),
                     line);
       }
    }
@@ -285,7 +285,7 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
       }
       else
       {
-         wxLogDebug(".pinerc(%u): non numeric mail-check-interval value.",
+         wxLogDebug(_T(".pinerc(%u): non numeric mail-check-interval value."),
                     line);
       }
    }
@@ -364,7 +364,7 @@ bool MPineImporter::ImportSettingsFromFile(const wxString& filename)
       int nEq = line.Find('=');
       if ( nEq == wxNOT_FOUND )
       {
-         wxLogDebug("%s(%u): missing '=' sign.", filename.c_str(), nLine + 1);
+         wxLogDebug(_T("%s(%u): missing '=' sign."), filename.c_str(), nLine + 1);
 
          // skip line
          continue;

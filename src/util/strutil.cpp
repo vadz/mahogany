@@ -1398,7 +1398,7 @@ ConvertUnicodeToSystem(wxString *strUtf, wxFontEncoding enc)
       {
          // conversion failed - use original text (and display incorrectly,
          // unfortunately)
-         wxLogDebug("conversion from UTF-8 to default encoding failed");
+         wxLogDebug(_T("conversion from UTF-8 to default encoding failed"));
       }
       else
       {

@@ -1205,10 +1205,10 @@ Threadable *Threader::thread(Threadable *threadableRoot)
       if (thr->getThreadable() == 0)
          thr->setThreadable(thr->getChild()->getThreadable()->makeDummy());
 
-   wxLogTrace(TRACE_JWZ, "Entering BreakThreads");
+   wxLogTrace(TRACE_JWZ, _T("Entering BreakThreads"));
    if (m_breakThreadsOnSubjectChange)
       breakThreads(m_root);
-   wxLogTrace(TRACE_JWZ, "Leaving BreakThreads");
+   wxLogTrace(TRACE_JWZ, _T("Leaving BreakThreads"));
 
    // If asked to, gather all the messages that have the same
    // non-empty subject in the same thread.
@@ -1382,7 +1382,7 @@ void Threader::buildContainer(Threadable *th)
 
 void Threader::findRootSet()
 {
-   wxLogTrace(TRACE_JWZ, "Entering Threader::findRootSet()");
+   wxLogTrace(TRACE_JWZ, _T("Entering Threader::findRootSet()"));
    m_root = new ThreadContainer();
    HASHENT *ent;
    size_t i;
@@ -1493,7 +1493,7 @@ void Threader::pruneEmptyContainers(ThreadContainer *parent,
 //
 void Threader::gatherSubjects()
 {
-   wxLogTrace(TRACE_JWZ, "Entering GatherSubjects");
+   wxLogTrace(TRACE_JWZ, _T("Entering GatherSubjects"));
    size_t count = 0;
    ThreadContainer *c = m_root->getChild();
    for (; c != 0; c = c->getNext())
@@ -1504,10 +1504,10 @@ void Threader::gatherSubjects()
    // thread) subject changes.
    HASHTAB *subjectTable = create(count*2);
 
-   wxLogTrace(TRACE_JWZ, "Entering collectSubjects");
+   wxLogTrace(TRACE_JWZ, _T("Entering collectSubjects"));
    // Collect the subjects in all the tree
    count = collectSubjects(subjectTable, m_root, true);
-   wxLogTrace(TRACE_JWZ, "Leaving collectSubjects");
+   wxLogTrace(TRACE_JWZ, _T("Leaving collectSubjects"));
 
    if (count == 0)            // If the table is empty, we're done.
    {
@@ -1678,7 +1678,7 @@ void Threader::gatherSubjects()
    }
 
    destroy(&subjectTable);
-   wxLogTrace(TRACE_JWZ, "Leaving GatherSubjects");
+   wxLogTrace(TRACE_JWZ, _T("Leaving GatherSubjects"));
 }
 
 
@@ -1837,7 +1837,7 @@ void Threader::breakThreads(ThreadContainer* c)
 // of all the messages to thread.
 static Threadable *BuildThreadableList(const HeaderInfoList *hilp)
 {
-   wxLogTrace(TRACE_JWZ, "Entering BuildThreadableList");
+   wxLogTrace(TRACE_JWZ, _T("Entering BuildThreadableList"));
    Threadable *root = 0;
    size_t count = hilp->Count();
    for (size_t i = 0; i < count; ++i) {
@@ -1846,7 +1846,7 @@ static Threadable *BuildThreadableList(const HeaderInfoList *hilp)
       item->setNext(root);
       root = item;
    }
-   wxLogTrace(TRACE_JWZ, "Leaving BuildThreadableList");
+   wxLogTrace(TRACE_JWZ, _T("Leaving BuildThreadableList"));
    return root;
 }
 
@@ -1926,7 +1926,7 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
                               const HeaderInfoList *hilp,
                               ThreadData *thrData)
 {
-   wxLogTrace(TRACE_JWZ, "Entering JWZThreadMessages");
+   wxLogTrace(TRACE_JWZ, _T("Entering JWZThreadMessages"));
    Threadable *threadableRoot = BuildThreadableList(hilp);
 
    Threader *threader = new Threader(thrParams);
@@ -1945,7 +1945,7 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
    }
 
    delete threader;
-   wxLogTrace(TRACE_JWZ, "Leaving JWZThreadMessages");
+   wxLogTrace(TRACE_JWZ, _T("Leaving JWZThreadMessages"));
 }
 
 #endif // TEST_SUBJECT_NORMALIZE/!TEST_SUBJECT_NORMALIZE

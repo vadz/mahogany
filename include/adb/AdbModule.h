@@ -64,7 +64,7 @@ public:
 #ifdef USE_ADB_MODULES
       AdbModule *CreateModule() const;
 
-      AdbModuleInfo(const char *name, const char *desc);
+      AdbModuleInfo(const wxChar *name, const wxChar *desc);
 #else // !USE_ADB_MODULES
       Constructor CreateModule;   // creator function
 

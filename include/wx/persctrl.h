@@ -641,10 +641,10 @@ enum
 
 extern WXDLLMAYEXP wxString wxPFileSelector(const wxString& configPath,
                                             const wxString& title,
-                                            const char *defpath = NULL,
-                                            const char *defname = NULL,
-                                            const char *extension = NULL,
-                                            const char *filter = NULL,
+                                            const wxChar *defpath = NULL,
+                                            const wxChar *defname = NULL,
+                                            const wxChar *extension = NULL,
+                                            const wxChar *filter = NULL,
                                             int flags = 0,
                                             wxWindow *parent = NULL,
                                             wxConfigBase *config = NULL);

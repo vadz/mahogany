@@ -357,40 +357,40 @@ public:
 
       // a listbox with 3 standard buttons: Add, Modify and Delete
       // (TODO: this is probably not flexible enough)
-   wxListBox  *CreateListbox(const char *label, wxControl *last);
+   wxListBox  *CreateListbox(const wxChar *label, wxControl *last);
 
       // a checkbox with a label
-   wxCheckBox *CreateCheckBox(const char *label,
+   wxCheckBox *CreateCheckBox(const wxChar *label,
                               long widthMax,
                               wxControl *last);
 
       // a label with three choices: No, Ask, Yes
-   wxRadioBox *CreateActionChoice(const char *label,
+   wxRadioBox *CreateActionChoice(const wxChar *label,
                                   long widthMax,
                                   wxControl *last,
                                   wxCoord nRightMargin = 0);
 
       // a radiobox, the entries are taken from the label string which is
       // composed as: "LABEL:entry1:entry2:entry3:...."
-   wxRadioBox *CreateRadioBox(const char *label,
+   wxRadioBox *CreateRadioBox(const wxChar *label,
                               long widthMax,
                               wxControl *last,
                               wxCoord nRightMargin = 0);
 
       // nRightMargin is the distance to the right edge of the panel to leave
       // (0 means default)
-   wxTextCtrl *CreateTextWithLabel(const char *label,
+   wxTextCtrl *CreateTextWithLabel(const wxChar *label,
                                    long widthMax,
                                    wxControl *last,
                                    wxCoord nRightMargin = 0,
                                    int style = wxALIGN_RIGHT);
 
       // create a simple static text control
-   wxStaticText *CreateMessage(const char *label, wxControl *last);
+   wxStaticText *CreateMessage(const wxChar *label, wxControl *last);
 
       // a combobox, the entries are taken from the label string which is
       // composed as: "LABEL:entry1:entry2:entry3:...."
-   wxComboBox *CreateComboBox(const char *label,
+   wxComboBox *CreateComboBox(const wxChar *label,
                               long widthMax,
                               wxControl *last,
                               wxCoord nRightMargin = 0)
@@ -401,7 +401,7 @@ public:
 
       // a choice control, the entries are taken from the label string which is
       // composed as: "LABEL:entry1:entry2:entry3:...."
-   wxChoice *CreateChoice(const char *label,
+   wxChoice *CreateChoice(const wxChar *label,
                           long widthMax,
                           wxControl *last,
                           wxCoord nRightMargin = 0)
@@ -421,7 +421,7 @@ public:
 
       // if ppButton != NULL, it's filled with the pointer to the ">>" browse
       // button created by this function (it will be a wxFileBrowseButton)
-   wxTextCtrl *CreateFileEntry(const char *label,
+   wxTextCtrl *CreateFileEntry(const wxChar *label,
                                long widthMax,
                                wxControl *last,
                                wxFileBrowseButton **ppButton = NULL,
@@ -434,7 +434,7 @@ public:
    }
       // if ppButton != NULL, it's filled with the pointer to the ">>" browse
       // button created by this function (it will be wxFileOrDirBrowseButton)
-   wxTextCtrl *CreateFileOrDirEntry(const char *label,
+   wxTextCtrl *CreateFileOrDirEntry(const wxChar *label,
                                     long widthMax,
                                     wxControl *last,
                                     wxFileOrDirBrowseButton **ppButton = NULL,
@@ -447,7 +447,7 @@ public:
    }
 
       // create an entry with a button to browse for the directories
-   wxTextCtrl *CreateDirEntry(const char *label,
+   wxTextCtrl *CreateDirEntry(const wxChar *label,
                               long widthMax,
                               wxControl *last,
                               wxDirBrowseButton **ppButton = NULL)
@@ -457,19 +457,19 @@ public:
                                    (wxTextBrowseButton **)ppButton);
    }
       // another entry with a browse button
-   wxColorBrowseButton *CreateColorEntry(const char *label,
+   wxColorBrowseButton *CreateColorEntry(const wxChar *label,
                                          long widthMax,
                                          wxControl *last);
 
       // creates a static bitmap with a label and a browse button
-   wxStaticBitmap *CreateIconEntry(const char *label,
+   wxStaticBitmap *CreateIconEntry(const wxChar *label,
                                    long widthMax,
                                    wxControl *last,
                                    wxIconBrowseButton *btnIcon);
 
       // create a text control with a browse button allowing to browse for
       // folders
-   wxTextCtrl *CreateFolderEntry(const char *label,
+   wxTextCtrl *CreateFolderEntry(const wxChar *label,
                                  long widthMax,
                                  wxControl *last,
                                  wxFolderBrowseButton **ppButton = NULL)
@@ -481,7 +481,7 @@ public:
 
       // create a text control with a browse button allowing to browse for
       // fonts
-   wxTextCtrl *CreateFontEntry(const char *label,
+   wxTextCtrl *CreateFontEntry(const wxChar *label,
                                long widthMax,
                                wxControl *last,
                                wxFontBrowseButton **ppButton = NULL)
@@ -554,7 +554,7 @@ private:
       return (BtnKind)(base + ofs);
    }
 
-   wxTextCtrl *CreateEntryWithButton(const char *label,
+   wxTextCtrl *CreateEntryWithButton(const wxChar *label,
                                      long widthMax,
                                      wxControl *last,
                                      BtnKind kind,
@@ -562,7 +562,7 @@ private:
 
    // create a wxComboBox or wxChoice
    wxControl *CreateComboBoxOrChoice(bool createCombobox,
-                                     const char *label,
+                                     const wxChar *label,
                                      long widthMax,
                                      wxControl *last,
                                      wxCoord nRightMargin = 0);
@@ -616,7 +616,7 @@ public:
    // terminated array of the icon names (image size should be 32x32)
    wxNotebookWithImages(const wxString& configPath,
                         wxWindow *parent,
-                        const char *aszImages[]);
+                        const wxChar *aszImages[]);
 
    virtual ~wxNotebookWithImages();
 };
@@ -632,20 +632,20 @@ extern long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win);
 // all these functions correspond to the wxEnhancedPanel methods except that
 // they take an additional parent parameter
 extern wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
-                                       const char *label,
+                                       const wxChar *label,
                                        long widthMax,
                                        wxControl *last,
                                        wxCoord nRightMargin = 0,
                                        int style = wxTE_LEFT);
 
 extern wxRadioBox *CreateRadioBox(wxWindow *parent,
-                                  const char *label,
+                                  const wxChar *label,
                                   long widthMax,
                                   wxControl *last,
                                   wxCoord nRightMargin = 0);
 
 extern wxTextCtrl *CreateEntryWithButton(wxWindow *parent,
-                                         const char *label,
+                                         const wxChar *label,
                                          long widthMax,
                                          wxControl *last,
                                          wxCoord nRightMargin = 0,
@@ -653,7 +653,7 @@ extern wxTextCtrl *CreateEntryWithButton(wxWindow *parent,
                                          wxTextBrowseButton **ppButton = NULL);
 
 extern wxTextCtrl *CreateFileEntry(wxWindow *parent,
-                                   const char *label,
+                                   const wxChar *label,
                                    long widthMax,
                                    wxControl *last,
                                    wxCoord nRightMargin = 0,

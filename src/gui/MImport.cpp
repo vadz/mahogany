@@ -401,7 +401,7 @@ static bool FindAllImporters(wxArrayImporters& importers,
       }
       else
       {
-         wxLogDebug("Couldn't load importer module '%s'.",
+         wxLogDebug(_T("Couldn't load importer module '%s'."),
                     entry.GetName().c_str());
       }
    }

@@ -327,7 +327,7 @@ public:
   void DeleteChild(AdbTreeElement *child);
 
     // find child by name (returns NULL if not found)
-  virtual AdbTreeElement *FindChild(const char *szName);
+  virtual AdbTreeElement *FindChild(const wxChar *szName);
 
     // load all children from the config file (but don't add them to the tree).
     // This function loads only immediate subgroups and entries (and the
@@ -390,7 +390,7 @@ public:
 
   // accessors
     // return the file name (NB: not really always a file name...)
-  const char *GetName() const { return m_pBook->GetName(); }
+  const wxChar *GetName() const { return m_pBook->GetName(); }
 
   size_t GetNumberOfEntries() const { return m_pBook->GetNumberOfEntries(); }
 
@@ -714,7 +714,7 @@ public:
   void DoFind();
   // find all entries which match the string under "root" (or the current
   // entry if root == NULL). '*' and '?' are recognized, case sensitive.
-  void DoFind(const char *szFindWhat, AdbTreeNode *root = NULL);
+  void DoFind(const wxChar *szFindWhat, AdbTreeNode *root = NULL);
   // moves selection to the next item (previously found by DoFind())
   void AdvanceToNextFound();
 
@@ -727,7 +727,7 @@ public:
   // the specified (or any for the default NULL value) provider
   bool OpenAdb(const wxString& strPath,
                AdbDataProvider *pProvider = NULL,
-               const char *szProvName = NULL);
+               const wxChar *szProvName = NULL);
   // ask the user for filename and create or open the address book
   bool CreateOrOpenAdb(bool bDoCreate);
 
@@ -923,7 +923,7 @@ WX_DEFINE_ARRAY(wxControl *, ArrayControls);
 class wxAdbPage : public wxPanel
 {
 public:
-  wxAdbPage(wxNotebook *notebook, const char *title, int idImage,
+  wxAdbPage(wxNotebook *notebook, const wxChar *title, int idImage,
             size_t nFirstField, size_t nLastField);
 
   // notify the notebook that we became dirty
@@ -953,10 +953,10 @@ protected:
   void SetTopConstraint(wxLayoutConstraints *c, wxControl *last);
 
   // all the functions should be given translated label!
-  wxTextCtrl *CreateMultiLineText(const char *label, wxControl *last);
-  wxListBox  *CreateListBox(const char *label, wxControl *last);
-  wxCheckBox *CreateCheckBox(const char *label, wxControl *last);
-  wxTextCtrl *CreateTextWithLabel(const char *label, long w, wxControl *last);
+  wxTextCtrl *CreateMultiLineText(const wxChar *label, wxControl *last);
+  wxListBox  *CreateListBox(const wxChar *label, wxControl *last);
+  wxCheckBox *CreateCheckBox(const wxChar *label, wxControl *last);
+  wxTextCtrl *CreateTextWithLabel(const wxChar *label, long w, wxControl *last);
 
   ArrayControls  m_aEntries;
 
@@ -971,7 +971,7 @@ class wxAdbNamePage : public wxAdbPage
 {
 public:
   wxAdbNamePage(wxNotebook *notebook)
-    : wxAdbPage(notebook, "General", wxAdbNotebook::General,
+    : wxAdbPage(notebook, _T("General"), wxAdbNotebook::General,
                 AdbField_NamePageFirst, AdbField_NamePageLast) { }
 };
 
@@ -980,7 +980,7 @@ class wxAdbEMailPage : public wxAdbPage
 {
 public:
   wxAdbEMailPage(wxNotebook *notebook)
-    : wxAdbPage(notebook, "Email", wxAdbNotebook::EMail,
+    : wxAdbPage(notebook, _T("Email"), wxAdbNotebook::EMail,
                 AdbField_EMailPageFirst, AdbField_EMailPageLast) { }
 
   virtual void SetData(const AdbEntry& data);
@@ -1009,7 +1009,7 @@ private:
 class wxAdbAddrPage : public wxAdbPage
 {
 public:
-  wxAdbAddrPage(wxNotebook *notebook, const char *title,
+  wxAdbAddrPage(wxNotebook *notebook, const wxChar *title,
                 int idImage, bool bOffice);
 };
 
@@ -1018,7 +1018,7 @@ class wxAdbOfficeAddrPage : public wxAdbAddrPage
 {
 public:
   wxAdbOfficeAddrPage(wxNotebook *notebook)
-    : wxAdbAddrPage(notebook, "Office", wxAdbNotebook::Work, TRUE) { }
+    : wxAdbAddrPage(notebook, _T("Office"), wxAdbNotebook::Work, TRUE) { }
 };
 
 // home address
@@ -1026,7 +1026,7 @@ class wxAdbHomeAddrPage : public wxAdbAddrPage
 {
 public:
   wxAdbHomeAddrPage(wxNotebook *notebook)
-    : wxAdbAddrPage(notebook, "Home", wxAdbNotebook::Home, FALSE) { }
+    : wxAdbAddrPage(notebook, _T("Home"), wxAdbNotebook::Home, FALSE) { }
 };
 
 // -----------------------------------------------------------------------------
@@ -1376,7 +1376,7 @@ void wxAdbEditFrame::RestoreSettings1()
   if ( !m_astrAdb.Count() ) {
     String bookAutoCollect = READ_APPCONFIG_TEXT(MP_AUTOCOLLECT_ADB);
     if ( !IsAbsPath(bookAutoCollect) ) {
-      bookAutoCollect.Prepend(mApplication->GetLocalDir() + '/');
+      bookAutoCollect.Prepend(mApplication->GetLocalDir() + _T('/'));
     }
     m_astrAdb.Add(bookAutoCollect);
 
@@ -1418,7 +1418,7 @@ void wxAdbEditFrame::RestoreSettings1()
 
   // there should be one provider name for each address book
   if ( nCountAdb != m_astrProviders.Count() ) {
-    wxLogDebug("different number of address books and providers!");
+    wxLogDebug(_T("different number of address books and providers!"));
 
     // try to correct it somehow (our method is not the best, but it's simple
     // and we really don't know what went wrong - this can only happen if the
@@ -1436,7 +1436,7 @@ void wxAdbEditFrame::RestoreSettings1()
     strProv = m_astrProviders[nAdb];
     // GetProviderByName would return NULL anyhow, but why call it in the
     // first place?
-    if ( IsEmpty(strProv) )
+    if ( wxIsEmpty(strProv) )
       pProvider = NULL;
     else
       pProvider = AdbDataProvider::GetProviderByName(strProv);
@@ -1552,7 +1552,7 @@ void wxAdbEditFrame::LayoutButtons(wxPanel *panel,
 
 bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
                              AdbDataProvider *pProvider,
-                             const char *szProvName)
+                             const wxChar *szProvName)
 {
   // check that we don't already have it
   if ( IsAdbOpened(strPath) ) {
@@ -1641,7 +1641,7 @@ ask_name:
 
   // prepare strings for diagnostic messages
   wxString strWhere, strGroup = group->GetWhere();
-  wxString strWhat = wxGetTranslation(m_bLastNewWasGroup ? "group" : "entry");
+  wxString strWhat = wxGetTranslation(m_bLastNewWasGroup ? _T("group") : _T("entry"));
 
   // first check that it doesn't already exist
   wxASSERT( !m_strLastNewEntry.IsEmpty() ); // don't add empty entries
@@ -1709,7 +1709,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
       for ( size_t n = 0; n < count; n++ ) {
         wxString bookname = m_astrAdb[n];
         if ( !IsAbsPath(bookname) ) {
-          bookname = mApplication->GetLocalDir() + '/' + bookname;
+          bookname = mApplication->GetLocalDir() + _T('/') + bookname;
         }
 #ifdef __WXMSW__
         bookname.Replace("\\", "/");
@@ -1734,7 +1734,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
   }
   else {
     // it's a normal entry or group
-    strWhat = wxGetTranslation(m_current->IsGroup() ? "group" : "entry");
+    strWhat = wxGetTranslation(m_current->IsGroup() ? _T("group") : _T("entry"));
     strName = m_current->GetName();
 
     if ( bAskConfirmation ) {
@@ -1841,7 +1841,7 @@ void wxAdbEditFrame::DoFind()
 }
 
 // find all entries which match the given string
-void wxAdbEditFrame::DoFind(const char *szFindWhat, AdbTreeNode *root)
+void wxAdbEditFrame::DoFind(const wxChar *szFindWhat, AdbTreeNode *root)
 {
   // start from the current group if root is not specified
   if ( root == NULL )
@@ -2021,12 +2021,12 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
          AdbTreeBook *book = (AdbTreeBook *)m_current;
          wxString name = book->GetName();
          if ( !book->Flush() )
-            wxLogError("Couldn't flush book '%s'!", name.c_str());
+            wxLogError(_T("Couldn't flush book '%s'!"), name.c_str());
          else
-            wxLogStatus(this, "Book '%s' flushed.", name.c_str());
+            wxLogStatus(this, _T("Book '%s' flushed."), name.c_str());
       }
       else {
-         wxLogError("Select a book to flush");
+         wxLogError(_T("Select a book to flush"));
       }
       break;
 #endif // debug
@@ -2122,8 +2122,8 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
                       ADB_CONFIG_PATH "/AdbFile",
                       strTitle,
                       READ_APPCONFIG_TEXT(MP_USERDIR),
-                      "M.adb",
-                      "adb",
+                      _T("M.adb"),
+                      _T("adb"),
                       _("Address books (*.adb)|*.adb|All files (*.*)|*.*"),
                       wxHIDE_READONLY | (bDoCreate ? 0 : wxFILE_MUST_EXIST),
                       this
@@ -2150,7 +2150,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 
   AdbDataProvider *pProvider = info->CreateProvider();
 
-  bool ok = OpenAdb(strAdbName, pProvider, info->szName);
+  bool ok = OpenAdb(strAdbName, pProvider, String(info->szName)); //FIXME Nerijus String()?
 
   if ( ok ) {
      // the book is in the cache, it won't be really recreated
@@ -2227,8 +2227,8 @@ void wxAdbEditFrame::ExportVCardEntry()
                         ADB_CONFIG_PATH "/AdbVCardFile",
                         _("Choose the name of vCard file"),
                         READ_APPCONFIG_TEXT(MP_USERDIR),
-                        "vcard.vcf",
-                        "vcf",
+                        _T("vcard.vcf"),
+                        _T("vcf"),
                         _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
                         wxHIDE_READONLY,
                         this
@@ -2274,8 +2274,8 @@ bool wxAdbEditFrame::ImportVCardEntry()
                         ADB_CONFIG_PATH "/AdbVCardFile",
                         _("Choose the name of vCard file"),
                         READ_APPCONFIG_TEXT(MP_USERDIR),
-                        "vcard.vcf",
-                        "vcf",
+                        _T("vcard.vcf"),
+                        _T("vcf"),
                         _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
                         wxHIDE_READONLY | wxFILE_MUST_EXIST,
                         this
@@ -2728,7 +2728,7 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   // determine dialog size
   // ---------------------
 
-  const char *label = _("Find &what:");
+  const wxChar *label = _("Find &what:");
   long widthLabel, heightLabel;
   wxClientDC dc(this);
   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
@@ -2881,7 +2881,7 @@ wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
               wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
      m_strName(strName), m_bGroup(bGroup)
 {
-  const char *label = _("&New entry/group name:");
+  const wxChar *label = _("&New entry/group name:");
 
   // layout
   long widthLabel, heightLabel;
@@ -2955,7 +2955,7 @@ bool wxADBCreateDialog::TransferDataFromWindow()
   m_bGroup = m_checkGroup->GetValue();
   if ( m_strName.IsEmpty() ) {
     wxLogError(_("Please specify a name for the new %s!"),
-               wxGetTranslation(m_bGroup ? "group" : "entry"));
+               wxGetTranslation(m_bGroup ? _T("group") : _T("entry")));
     return FALSE;
   }
 
@@ -2976,16 +2976,16 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   // layout
   // ------
 
-  static const char *labels[] = {
-    "&Name:",
-    "File name:",
-    "File size:",
-    "&Description: ",
-    "Number of entries: "
+  static const wxChar *labels[] = {
+    _T("&Name:"),
+    _T("File name:"),
+    _T("File size:"),
+    _T("&Description: "),
+    _T("Number of entries: ")
   };
 
   // translated lables
-  const char *labelsT[WXSIZEOF(labels)];
+  const wxChar *labelsT[WXSIZEOF(labels)];
 
   size_t n, x, y, dy;
 
@@ -3076,7 +3076,7 @@ bool wxADBPropertiesDialog::TransferDataToWindow()
     wxLogNull nolog;
     wxFile file(filename);
     if ( file.IsOpened() ) {
-      str.Printf("%lu", (unsigned long)file.Length());
+      str.Printf(_T("%lu"), (unsigned long)file.Length());
     }
     else {
       str = _("unknown");
@@ -3090,7 +3090,7 @@ bool wxADBPropertiesDialog::TransferDataToWindow()
   m_staticFileSize->SetLabel(str);
   m_staticFileName->SetLabel(filename);
 
-  str.Printf("%ld", (unsigned long)m_book->GetNumberOfEntries());
+  str.Printf(_T("%ld"), (unsigned long)m_book->GetNumberOfEntries());
   m_staticNumEntries->SetLabel(str);
 
   m_textName->SetValue(m_book->GetBook()->GetName());
@@ -3333,7 +3333,7 @@ wxAdbNotebook::~wxAdbNotebook()
 // -----------------------------------------------------------------------------
 // base notebook page
 // -----------------------------------------------------------------------------
-wxAdbPage::wxAdbPage(wxNotebook *notebook, const char *title, int idImage,
+wxAdbPage::wxAdbPage(wxNotebook *notebook, const wxChar *title, int idImage,
                      size_t nFirstField, size_t nLastField)
          : wxPanel(notebook, -1)
 {
@@ -3432,7 +3432,7 @@ void wxAdbPage::SetTopConstraint(wxLayoutConstraints *c, wxControl *last)
 }
 
 // create a single-line text control with a label
-wxTextCtrl *wxAdbPage::CreateTextWithLabel(const char *label,
+wxTextCtrl *wxAdbPage::CreateTextWithLabel(const wxChar *label,
                                            long widthMax,
                                            wxControl *last)
 {
@@ -3462,7 +3462,7 @@ wxTextCtrl *wxAdbPage::CreateTextWithLabel(const char *label,
 }
 
 // create a multi-line text control with a label
-wxTextCtrl *wxAdbPage::CreateMultiLineText(const char *label, wxControl *last)
+wxTextCtrl *wxAdbPage::CreateMultiLineText(const wxChar *label, wxControl *last)
 {
   wxStaticText *pLabel = new wxStaticText(this, -1, label);
   wxTextCtrl *textComments = new wxTextCtrl(this, -1, "",
@@ -3476,7 +3476,7 @@ wxTextCtrl *wxAdbPage::CreateMultiLineText(const char *label, wxControl *last)
 // create a listbox and the buttons to work with it
 // NB: we consider that there is only one listbox (at most) per page, so
 //     the button ids are always the same
-wxListBox *wxAdbPage::CreateListBox(const char *label, wxControl *last)
+wxListBox *wxAdbPage::CreateListBox(const wxChar *label, wxControl *last)
 {
   // a box around all this stuff
   wxStaticBox *box = new wxStaticBox(this, -1, label);
@@ -3491,13 +3491,13 @@ wxListBox *wxAdbPage::CreateListBox(const char *label, wxControl *last)
 
   // the buttons vertically on the right of listbox
   wxButton *button = NULL;
-  static const char *aszLabels[] =
+  static const wxChar *aszLabels[] =
   {
-    "&Add",
-    "&Modify",
-    "&Delete",
+    _T("&Add"),
+    _T("&Modify"),
+    _T("&Delete"),
   };
-  const char *aszLabelsT[WXSIZEOF(aszLabels)];  // translated labels
+  const wxChar *aszLabelsT[WXSIZEOF(aszLabels)];  // translated labels
 
   // should be in sync with enum!
   wxASSERT(
@@ -3543,7 +3543,7 @@ wxListBox *wxAdbPage::CreateListBox(const char *label, wxControl *last)
 }
 
 // create a checkbox
-wxCheckBox *wxAdbPage::CreateCheckBox(const char *label, wxControl *last)
+wxCheckBox *wxAdbPage::CreateCheckBox(const wxChar *label, wxControl *last)
 {
   wxCheckBox *checkbox = new wxCheckBox(this, -1, label);
 
@@ -3586,7 +3586,7 @@ void wxAdbPage::LayoutControls(size_t nCount,
         continue;
     }
 
-    dc.GetTextExtent(_(fields[n].label), &width, NULL);
+    dc.GetTextExtent(wxGetTranslation(String(fields[n].label)), &width, NULL);
     if ( width > widthMax )
       widthMax = width;
   }
@@ -3601,19 +3601,19 @@ void wxAdbPage::LayoutControls(size_t nCount,
       case AdbTreeEntry::FieldNum:
         // fall through -- for now they're the same as text
       case AdbTreeEntry::FieldText:
-        last = CreateTextWithLabel(_(fields[n].label), widthMax, last);
+        last = CreateTextWithLabel(wxGetTranslation(String(fields[n].label)), widthMax, last);
         break;
 
       case AdbTreeEntry::FieldMemo:
-        last = CreateMultiLineText(_(fields[n].label), last);
+        last = CreateMultiLineText(wxGetTranslation(String(fields[n].label)), last);
         break;
 
       case AdbTreeEntry::FieldList:
-        last = CreateListBox(_(fields[n].label), last);
+        last = CreateListBox(wxGetTranslation(String(fields[n].label)), last);
         break;
 
       case AdbTreeEntry::FieldBool:
-        last = CreateCheckBox(_(fields[n].label), last);
+        last = CreateCheckBox(wxGetTranslation(String(fields[n].label)), last);
         break;
 
       default:
@@ -3737,7 +3737,7 @@ void wxAdbEMailPage::OnDeleteEMail(wxCommandEvent&)
   m_bListboxModified = TRUE;
 }
 
-wxAdbAddrPage::wxAdbAddrPage(wxNotebook *notebook, const char *title,
+wxAdbAddrPage::wxAdbAddrPage(wxNotebook *notebook, const wxChar *title,
                              int idImage, bool bOffice)
              : wxAdbPage(notebook, title, idImage,
                          bOffice ? AdbField_O_AddrPageFirst
@@ -4095,7 +4095,7 @@ void AdbTreeNode::Refresh(wxTreeCtrl& tree)
   ExpandFirstTime(tree);
 }
 
-AdbTreeElement *AdbTreeNode::FindChild(const char *szName)
+AdbTreeElement *AdbTreeNode::FindChild(const wxChar *szName)
 {
   // TODO we should sort the items in alphabetical order and use binary search
   //      instead of linear search
@@ -4209,7 +4209,7 @@ AdbTreeElement *AdbTreeRoot::FindChild(const char *szName)
   for ( size_t n = 0; n < nCount; n++ ) {
     strAdbName = ((AdbTreeBook *)m_children[n])->GetName();
 
-    if ( strAdbName.IsSameAs(szName, wxARE_FILENAMES_CASE_SENSITIVE) )
+    if ( strAdbName.IsSameAs(String(szName)/*FIXME Nerijus*/, wxARE_FILENAMES_CASE_SENSITIVE) )
       return m_children[n];
   }
 

@@ -278,7 +278,7 @@ static bool Pop3_GetUIDLs(MAILSTREAM *stream, wxArrayString& uidls)
 
          if ( !ok )
          {
-            wxLogDebug("Unexpected line in UIDL response (%s) skipped.", t);
+            wxLogDebug(_T("Unexpected line in UIDL response (%s) skipped."), t);
 
             uidl.clear();
          }

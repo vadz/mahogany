@@ -60,7 +60,7 @@ public:
       {
          if ( remove(m_name) != 0 )
          {
-            wxLogDebug("Stale temp file '%s' left.", m_name.c_str());
+            wxLogDebug(_T("Stale temp file '%s' left."), m_name.c_str());
          }
       }
    }

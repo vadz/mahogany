@@ -108,7 +108,7 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
   String nameMatch;
   if ( aGroups ) {
      // we'll use it below
-     nameMatch = what.Lower() + '*';
+     nameMatch = what.Lower() + _T('*');
 
      // is it a book?
      if ( !((AdbElement *)pGroup)->GetGroup() ) {
@@ -355,7 +355,7 @@ AdbManager *AdbManager::Get()
     // calling code behaves properly) until the very end of the application
     ms_pManager->IncRef();
 
-    wxLogTrace("adb", "AdbManager created.");
+    wxLogTrace(_T("adb"), _T("AdbManager created."));
   }
   else {
     // just inc ref count on the existing one
@@ -377,7 +377,7 @@ void AdbManager::Unget()
     // the object deleted itself
     ms_pManager = NULL;
 
-    wxLogTrace("adb", "AdbManager deleted.");
+    wxLogTrace(_T("adb"), _T("AdbManager deleted."));
   }
 }
 

@@ -155,7 +155,7 @@ public:
    {
       m_timeNext = time(NULL) + (time_t)GetPollInterval();
 
-      wxLogTrace(TRACE_MONITOR, "Next check for %s scheduled for %s",
+      wxLogTrace(TRACE_MONITOR, _T("Next check for %s scheduled for %s"),
                  m_folder->GetFullName().c_str(),
                  ctime(&m_timeNext));
    }
@@ -204,7 +204,7 @@ public:
 
          if ( folder->GetFlags() & MF_FLAGS_MONITOR )
          {
-            wxLogTrace(TRACE_MONITOR, "Found folder to monitor: %s",
+            wxLogTrace(TRACE_MONITOR, _T("Found folder to monitor: %s"),
                        folderName.c_str());
 
             m_list.push_back(new FolderMonitorFolderEntry(folder));
@@ -534,7 +534,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
       MailFolder *mf = MailFolder::GetOpenedFolderFor(folder);
       if ( !mf )
       {
-         wxLogTrace(TRACE_MONITOR, "Skipping not opened folder %s",
+         wxLogTrace(TRACE_MONITOR, _T("Skipping not opened folder %s"),
                     folder->GetFullName().c_str());
          return true;
       }
@@ -556,7 +556,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
    }
 #endif // USE_DIALUP
 
-   wxLogTrace(TRACE_MONITOR, "Checking for new mail in '%s'.",
+   wxLogTrace(TRACE_MONITOR, _T("Checking for new mail in '%s'."),
               i->GetName().c_str());
 
    if ( progInfo )

@@ -3400,14 +3400,14 @@ bool wxOptionsPageNewMail::TransferDataFromWindow()
 
       if ( nIncomingDelay != m_nIncomingDelay )
       {
-         wxLogTrace("timer", "Restarting timer for polling incoming folders");
+         wxLogTrace(_T("timer"), _T("Restarting timer for polling incoming folders"));
 
          rc = mApplication->RestartTimer(MAppBase::Timer_PollIncoming);
       }
 
       if ( rc && (nPingDelay != m_nPingDelay) )
       {
-         wxLogTrace("timer", "Restarting timer for pinging folders");
+         wxLogTrace(_T("timer"), _T("Restarting timer for pinging folders"));
 
          rc = mApplication->RestartTimer(MAppBase::Timer_PingFolder);
       }

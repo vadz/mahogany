@@ -172,7 +172,7 @@ public:
 
   // other operations
     /// check whether we match the given string (see AdbLookup_xxx constants)
-  virtual int Matches(const char *str, int where, int how) const = 0;
+  virtual int Matches(const wxChar *str, int where, int how) const = 0;
     /// description of an item is the name and the address
 
   /// return the full address, i.e. "personal-part <address-part>" string

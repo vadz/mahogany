@@ -96,7 +96,7 @@ static int ExecPGP(const wxString & command,
       return MCrypt::OUT_OF_ENV_SPACE_ERROR;
    }
 
-   wxLogTrace(MCRYPT_TRM, "Executing: %s %s", command.c_str(),
+   wxLogTrace(MCRYPT_TRM, _T("Executing: %s %s"), command.c_str(),
 	      args.c_str());
 
    if(wxExecute(command + " " + args, FALSE, &process))
@@ -112,7 +112,7 @@ static int ExecPGP(const wxString & command,
 
       // send the message to PGP
       if(input) {
-	 wxLogTrace(MCRYPT_TRM, "Sending the following text to PGP\n%s",
+	 wxLogTrace(MCRYPT_TRM, _T("Sending the following text to PGP\n%s"),
 		    input->c_str());
 	 outStream.Write(input->c_str(), input->Len());
 	    
@@ -140,7 +140,7 @@ static int ExecPGP(const wxString & command,
 	 process.UnsetEnv(PGPPASSFD);
       }
 
-      wxLogTrace(MCRYPT_TRM, "PGP exited with status: %i",
+      wxLogTrace(MCRYPT_TRM, _T("PGP exited with status: %i"),
 		 process.GetStatus());
 
       return convertExitStatus(process.GetStatus());

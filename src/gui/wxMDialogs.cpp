@@ -1526,7 +1526,7 @@ bool MFolderDialog::TransferDataToWindow()
       {
          if ( !m_tree->SelectFolder(folder) )
          {
-            wxLogDebug("Couldn't restore the last selected folder in the tree.");
+            wxLogDebug(_T("Couldn't restore the last selected folder in the tree."));
          }
 
          folder->DecRef();

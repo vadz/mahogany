@@ -138,7 +138,7 @@ wxString AdbTextImporter::SplitField(const char *start,
          {
             // we don't give any message to the user because we don't have
             // enough info to say anything clever here
-            wxLogDebug("AdbTextImporter: unterminated quote.");
+            wxLogDebug(_T("AdbTextImporter: unterminated quote."));
 
             break;
          }

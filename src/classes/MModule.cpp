@@ -212,13 +212,13 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
    wxDllType dll = wxDllLoader::LoadLibrary(pathname);
    if ( !dll )
    {
-      wxLogTrace(M_TRACE_MODULES, "Failed to load module '%s' from '%s'.",
+      wxLogTrace(M_TRACE_MODULES, _T("Failed to load module '%s' from '%s'."),
                  name.c_str(), pathname.c_str());
 
       return NULL;
    }
 
-   wxLogTrace(M_TRACE_MODULES, "Successfully loaded module '%s' from '%s'.",
+   wxLogTrace(M_TRACE_MODULES, _T("Successfully loaded module '%s' from '%s'."),
               name.c_str(), pathname.c_str());
 
    MModule_InitModuleFuncType initFunc =
@@ -289,7 +289,7 @@ MModule::LoadModule(const String & name)
       path += dirs[n];
    }
 
-   wxLogTrace(M_TRACE_MODULES, "Looking for module '%s' in the path '%s'.",
+   wxLogTrace(M_TRACE_MODULES, _T("Looking for module '%s' in the path '%s'."),
               name.c_str(), path.c_str());
 #endif // DEBUG
 

@@ -910,7 +910,7 @@ void HtmlViewer::EndBody()
    m_htmlText += "</body></html>";
 
    // makes cut-&-pasting into Netscape easier
-   //wxLogTrace("html", "Generated HTML output:\n%s\n", m_htmlText.c_str());
+   //wxLogTrace(_T("html"), _T("Generated HTML output:\n%s\n"), m_htmlText.c_str());
 
    m_window->SetPage(m_htmlText);
 }

@@ -146,7 +146,7 @@ size_t AdbVCardImporter::GetEntryNames(const String& path,
             if ( givenname.empty() )
             {
                // what else can we do?
-               wxLogDebug("Skipping vCard without name.");
+               wxLogDebug(_T("Skipping vCard without name."));
 
                continue;
             }
@@ -159,7 +159,7 @@ size_t AdbVCardImporter::GetEntryNames(const String& path,
          if ( entries.Index(familyname) != wxNOT_FOUND )
          {
             // TODO: ask to rename it?
-            wxLogDebug("Skipping vCard with duplicate name.");
+            wxLogDebug(_T("Skipping vCard with duplicate name."));
          }
          else
          {
