@@ -1094,7 +1094,7 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
 
 bool MFolderDialog::TransferDataToWindow()
 {
-   // restore last folder from config
+   // TODO restore last folder from config
    return true;
 }
 
@@ -1105,7 +1105,7 @@ bool MFolderDialog::TransferDataFromWindow()
       m_folder = m_tree->GetSelection();
       if ( m_folder != NULL )
       {
-         // save the folder to config
+         // TODO save the folder name to config
       }
    }
    else
@@ -1133,15 +1133,20 @@ bool MFolderDialog::TransferDataFromWindow()
             }
          }
 
+         folder->DecRef();
+
          if (
               !MInputBox
                (
                 &name,
                 _("Mahogany: folder selection"),
+                wxString::Format(
                 _("Sorry, the folder '%s' already exists "
                   "and corresponds to another file, please "
                   "choose a different name for the folder "
                   "which will correspond to the file '%s'."),
+                name.c_str(), m_FileName.c_str()
+                ),
                 this,
                 "FileFolderName"
                )
@@ -1154,9 +1159,12 @@ bool MFolderDialog::TransferDataFromWindow()
 
       if ( !m_folder )
       {
-         m_folder = MFolder::Create(name, MF_FILE);
+         m_folder = CreateFolderTreeEntry(NULL, name,
+                                          MF_FILE, 0,
+                                          m_FileName,
+                                          FALSE);
       }
-      //else: it already existed before
+      //else: it already existed before with the same filename
    }
 
    return true;

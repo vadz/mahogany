@@ -706,3 +706,32 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
 
    return TRUE;
 }
+
+// ----------------------------------------------------------------------------
+// functions to work with folder tree
+// ----------------------------------------------------------------------------
+
+extern MFolder *CreateFolderTreeEntry(MFolder *parent,
+                                      const String& name,
+                                      FolderType folderType,
+                                      long folderFlags,
+                                      const String& path,
+                                      bool notify)
+{
+   MFolder *folder = parent ? parent->CreateSubfolder(name, folderType)
+                            : MFolder::Create(name, folderType);
+
+   Profile_obj profile(folder->GetFullName());
+   profile->writeEntry(MP_FOLDER_PATH, path);
+
+   // copy folder flags from its parent
+   folder->SetFlags(folderFlags);
+
+   if ( notify )
+   {
+      MEventManager::Send(
+         new MEventFolderTreeChangeData(name,
+                                        MEventFolderTreeChangeData::Create)
+         );
+   }
+}

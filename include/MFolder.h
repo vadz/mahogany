@@ -193,4 +193,21 @@ private:
    wxString m_folderName;
 };
 
+// ----------------------------------------------------------------------------
+// functions to work with folder tree
+// ----------------------------------------------------------------------------
+
+/**
+   Creates a new folder in the folder tree under parent (if given or at the
+   top level otherwise) with the given name (this is what is shown to the
+   user) and the specified type, flags and path (folder properties). Unless
+   notify parameter is FALSE, a notification message about the new folder
+   creation will be sent via MEventManager.
+ */
+extern MFolder *CreateFolderTreeEntry(MFolder *parent,
+                                      const String& name,
+                                      FolderType folderType,
+                                      long folderFlags,
+                                      const String& path,
+                                      bool notify = TRUE);
 #endif // _MFOLDER_H

@@ -195,8 +195,8 @@ public:
    virtual bool OnMEvent(MEventData& event);
 
 #ifdef __WXGTK__
-   void OnMouseMove(wxMouseEvent &event) 
-   { 
+   void OnMouseMove(wxMouseEvent &event)
+   {
       if(m_FocusFollowMode && FindFocus() != this) SetFocus();
    }
 #endif // wxGTK
@@ -222,7 +222,7 @@ protected:
       MFolder *folder = node->GetFolder();
 
       return (folder->GetType() != MF_GROUP) &&
-            !(folder->GetFlags() & MF_GROUP);
+            !(folder->GetFlags() & MF_FLAGS_GROUP);
    }
 
    // this is the real handler for double-click and enter events
@@ -643,7 +643,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    }
 
    SetImageList(imageList);
-  
+
    // create the root item
    MFolder *folderRoot = MFolder::Get("");
    m_current = new wxFolderTreeNode(this, folderRoot);
