@@ -2,21 +2,55 @@ $Id$
 
 --------------- Roadmap for M releases ----------------------------------
 
-First Alpha release "Fountainbridge":
--------------------------------------
+Here is the rough plan for the future of the M development:
 
-Feature freeze:  August  3, 1998
-Release date:    August 17, 1998
-Release number:  0.1 (?)
 
-Supported platforms: Linux intel, Win32, Solaris(?)
-Binary only, 3 month expiration date?
+* 0.65-0.70: 2 main tasks are
 
-Features that have to be added before:
+   + compose classes split similar to the message view one, i.e. separate
+     the GUI-independent logic from the GUI stuff and make it modularizable
+     to allow for having multiple compose implementations (e.g. a simple
+     wxTextCtrl instead of wxLayout-based composer)
 
-adb & edit, initial config dialog, opening screen,
-expiration control, new FolderView with listCtrl, possibly new
-main window layout, more Python callbacks and interface definitions
-(at the last moment)
+     There should be also provision for spell checker in the new interface!
 
-Fixes as from TODO file.
+     And smart line wrap.
+
+   + ADB lift up:
+   
+      - it becomes very slow with big books and the autocollect book grows
+        really fast (~1000 entries in mine) and the books are also way too
+        big. We need a more efficient and more compact format.
+
+      - GUI side: we need a reusable ADB-tree control like the folder tree
+        one which could be reused from other places (composer, extract
+        addresses dialog, ...) and it should also support multiple selection
+
+
+   Also it would be very nice to:
+
+   + implement Drafts folder and save messages in it in case of a crash
+     or interrupt
+
+
+* 0.75:
+
+   + real MIME types editor
+
+   + allow using the config file under Windows as well, sync with it
+     at startup/shutdown
+     
+   + store ADB on IMAP server and sync it
+
+* 1.00:
+
+   + fully MT - this is the hard part
+
+   + PGP/GPG support
+
+* 2.00 should have decent news reading support:
+
+   + handling multipart messages
+
+   + different convenience features such as ROT-13, spoiler space, ...
+

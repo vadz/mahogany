@@ -39,8 +39,6 @@ We *must* cache the result - the problem is how to update this cache?
 
 Very high priority:
 
-1. mail collection
-
 High priority:
 
 1. split compose classes like the message view ones into the purely GUI
@@ -114,41 +112,17 @@ as the MailFolderCC.cpp code should take care of that itself.
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 
-2		Option to set central new mail folder is missing -
-		changing option manually in config file does not work
-
-5		changing password on remote folder while open results
-		in empty folder, but no error message, as login no
-		longer works.  (still true_??)
-
 	VZ	templates need "First Name" field
 	VZ	icons in icons-dialog are scaled --> ugly
-
-5		intelligent followup/post article when reading
-		NNTP/NEWS groups
 
 	VZ	Clicking on "header dialog/More button" produces
 		"headers for folder "xpm" in the dialog when called
 		from toplevel window.
 
 6	VZ	All Folder create dialog pages have no HelpIDs set.
-5		File/Page Setup does nothing
-3		foldername in password prompt seems wrong
 3		URL highlighting in headers is missing (e.g. X-Url)
-? win	VZ	lock files are sometimes left
 
 ------------------ not release critical:
-
-3	KB	timeout settings in MailFolderCC totally thread-unsafe 
-		need protection
-8	KB	ComposeView/header dialog: remove my old-style
-		mechanism for setting custom headers. Move Vadim's
-		code to SendMessaggeCC. Introduce SendMessage??
-
-5	KB	let all message sorting use the translation table
-
-5	KB	subject in embedded rfc822 messages shows filename
-		instead???
 
 		Printing multiple messages should only use one config
 		dialog.
@@ -166,114 +140,48 @@ as the MailFolderCC.cpp code should take care of that itself.
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
-		add acknowledge/approve button for replying-default
-		text to messages
 
-9		Add option to import a directory of mailfolder files.
 8		filters import
 
 7	VZ	Config and wxWin support for different character sets
 
-	KB	wxModulesDialog: add decref/load as reaction to check/uncheck?
-
-		MFrame classname obsolete?
-
 9	KB	add xface button to composeview
 
 		configure "From" format
-		align headers in messageview (separation line?)
-		colour settings for listctrl/treectrl
+
 		optional thin-cursor for message editor
 
 5		highlight messages in listing in different colours
 		based on filters?
 
-9	KB	nice dialog for selecting and pre-viewing xface
 8	KB	line-wrap in compose view before sending
 
 		Option to start up iconified.
 
-9	KB	Add a "find text in folder" method, too, trivial.
-
-5	KB	forward text-only messages as text rather than rfc822
-4	KB	add threading
-
-8		support of different charsets:
-		a) allow configuring them for outgoing messages
-		b) automatically choose the correct one and display the message using
-		   the right encoding for the incoming ones
-		---> HOW DO I SET CHARSETS FOR WXWINDOWS???
-
-7	KB	Find all possible MT problems in MailFolder.cpp and
-		put mutexes around them.
-	KB	which ones are undocumented? It seems like everything is there...
-
 7	KB	write more on tutorial bit in Manual.lyx
-6		simple HTML import for wxLayout
-6		threading via References header
-5		integrate wxHTML for HTML viewing
-		config option for iconmanager sub directory
-		More icons needed: INBOX, PopServer, IMAPServer,
-		FolderGroup, NewMail, SentMail, small icons (16x16) for the
-		custom headers dialog, AdbImport.
-
-7	VZ	document the new properties dialog entries/pages,
-		please - I've started extending the docs
-6	VZ	Could you please check the file-browse button/dialog to
-		the folder selection dialog?
-		I'll then add support for that to the Copy/Move
-		Messages functions. (KB)
 
 4	VZ	configure fields and their order when exporting with
 		AdbExportText
 
-4	VZ	templates enhancements:
-		a) take them from files
-		b) "Apply template" command in compose view
-
-7		dnd for messages between folders and treectrl
-
-5		add goto_next_unread to folderview
 5		add more buttons to folderview, such as
 		next/previous/goto_next_unread/catch up
 
-
-5	VZ?	Add DND for messages between folders
 5	?	Add DND for MIME content from composeView/messageView
                 to file managers
+
 6	KB	completion of filtering rules/scoring code
 6	KB	implement listing of folders on remote
 		servers/subscription API
 4	CB	GPG/PGP support
-5	KB	Fix MessageCC(const String &) constructor.
-4	KB	eval wxHTML for help system and as built-in HTML viewer
-4		add option to force wrapping of messages in viewer
-5	VZ	when installing, create a welcome message in "New
-		Mail". Also, create a default address book with
-		m-users/m-developers entries in it. Also add entry for
-		autocollect book. Wait for MessageCC(const String &)
-		constructor.
-4	VZ	add wxWizard for the first time run
-3	VZ	add tips on startup (a wxTipDialog class?)
 
 4		improve key bindings for message editor, page up/down
 		whole page
-
-3	VZ	XFaces under Windows?
-		KB: no problem if you can read XPMs, use the lib included
-
-2		different icon for activity log frame
-2	VZ?	make activity log frame appear on demand only
 
 2	VZ	printing from ADB
 3	VZ	"GoTo"  the entry should expand the branch which contains it
 3	VZ	LDIF format import
 3	VZ	UseCount field and sorting using it when there is more than one
 		match in AdbExpand()
-
-3		a useful feature: change POP/IMAP password for the folder.
-
-2	KB	optionally activate tearoff menus
 
 from 32bitsonline review:
 4		add option to hide messages marked as deleted
@@ -282,7 +190,6 @@ from 32bitsonline review:
 		multiple messages and decode it.
 
 4		reply unquoted, too
-4		composeview clear should re-insert signature
 
 ********************* possible additions to *************************
 ?		idea after seeing a standalone program on freshmeat which does
@@ -356,30 +263,12 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 - support for working offline (will need wxWin API modifications?)
 - subscription management for NNTP/IMAP/newsspool
 - DND with KDE/Gnome filemanagers (now supported by wxGTK)
-- Templates/style-sheets for message composition and flexible reply
-  handling
-- Messages sorting, threading, scoring and searching
 - there should be no [Expand] button in "Post news message" window,
   or may be there should be [choose newsgroup] one instead.
--HTML mail
 - eventually add a Drafts folder and toggable Online/Offline mode
-- add icons to doc++ generated docs
-- add new mail and group reply/followup buttons (and menu entry for
-   the latter) to folderview
-- move setting of -fPIC to configure
 
-
-- check whether focus handling in folderview is fine now, does it get
-  lost after update() ?
-
-- add button to browse for filename in folder selection dialog (asked
-  vadim for this)
 - TUTORIAL, how to keep multiple folders open
-- if time permits: vcard-import
 
-- document python callback behaviour for incoming folders, possibly do
-  testing for callback results in CollectOneFolder!!
-- add configure option for python path
 - more configurability for news
 - do we really need to scan /var/lib/news/active?
 - add address auto collection to compose view
@@ -400,24 +289,16 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 - if exists, use /etc/M.conf or /etc/Mahogany.conf instead of
   prefix/Mahogany/M.conf.
 - merge in settings from some remote location, possibly using ftp/http
-- use wxHtmlHelp classes ? use gtkxmhtml widget?
-
-- add SIGSEGV handler for safe exit, to attempt and safe things
-  + VZ: this should pass by wxWindows, my old idea about wxApp::OnException().
 
 - when inserting filetype of unknown MIME type, prompt for it,
   possibly have a MIME types editor (similar to netscape's?)
- - possibly have a MIME types editor (similar to netscape's?)
+
  - easy: add support for email-to-fax gateway at www.tpc.int and
    their coverpage
  - document scripts in extra/scripts
  - somehow allow different configs for different hosts, maybe a
    [M/HOSTNAME/Profiles] section overriding [M/Profiles]?
  - toggle readonly status of mailboxes?
- - GUI problems:
-  - folder tree control should (configurable on a per-folder basis)
-    highlight and count the number of new messages
-  - add "Inline" option for MIME popup on graphics
 
 - ADB:
   + add "add current address to ADB" to compose view
@@ -425,36 +306,15 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
     elsewhere for now...), add an event for this
   - fix remaining BBDB/ADB problems (low priority)
 
-- alternative treecontrol instead of listctrl for folderview
-  + VZ: don't think it's a good idea, too confusing to the user
-
 - use wxURL to retrieve remote configuration files and import them,
   maybe even retrieve files to use as folders or address books`?
-
-- wxFolderCreateNotebook should be split into base class and 2 derivations:
-  wxFolderCreateNotebook and wxFolderPropNotebook
-
-- drag and drop of messages between folders
-- Are wxConfig/Profile GetNextGroup()/GetFirstGroup()  thread-safe??
-  I started marking possible problems for multi-threaded code with
-  //FIXME:MT
-  VZ: ok, I usually do it too (always) except for the "obvious" problems, e.g.
-      usage of static vars. I always name them with "s_" prefix (for this
-      reason too) so it should be quite easy to do a grep for them later
-  - MT-problem: rfc822_extraheaders()
 
 - add "Send Digest"
 - add "Send bug report"
 
-- detect one's own messages (i.e. mark "Myself" in "From:" or, as XFMail
-  does, mark "To: ..." in "From:" column for them) and optionally suppress them
-  completely.
-
 - add !(command) expansion to wxConfig, i.e.
   VAR=!(hostname):me would execute "hostname" and return "hydra.medieval.de:me"
 
-- only quote the selected text in reply/forward if there is any selection
-  (as in XFMail) - very handy
 - "Syntax highlighting" for replies
 
   + implement "internal clipboard" for
@@ -465,18 +325,6 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
   + we should somehow merge the toolbars into the main frame toolbar if it
     shows the folder view, for example
   + session management --> should be done on wxWindows level
-
-- Python
-  + fix Python problems -- what's wrong? No idea why Setup.py doesn't work.
-  + add remaining (important) interface definitions
-  + user/global Minit files, security issues
-  + merge in wxPython (Robin Dunn wanted to help...)
-
-- event subsystem
-  + write some macros for safe casting of the event param in the handlers to
-    the correct type
-  + separate "folder tree change" event in "pre" and "post" kind
-  + maybe introduce return values?
 
 - news reader functions
   + get the list of newsgroup and allow to choose from them
@@ -492,9 +340,6 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 
 - Edit-CC, CC messages to others but edit the individual copies before sending
 
-- threading of messages via MessageId/References header lines
-  Follow examples in SunExpert journal.
-
 - "Power Search": search all (even compressed?) folders for a keyword
   and when found, open the folder and display the message.
 
@@ -506,9 +351,6 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 - message integrity verification support
   + PGP
   + MD5 (see RFC-1544 for details)
-
-- Support for different charsets (Unicode/utf-7/8?)
-  Being added to wxWindows at present.
 
 - REMOTE-CONTROL: add support for popping window open and reading a folder of one's choice
   (for being controlled from xbiff like programs)
@@ -524,69 +366,5 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 
 - compressed mail folders / possibly together with index files
 
-
-
-DONE - TO BE TESTED:
-9	VZ	Selecting a folder group tries to open it and produces a
-		dialog that it couldn't be opened. Gets expanded anyway.
-		As a consequence of this, it is not possible to create new
-		entries under a group as "Create..." is disabled in the
-		popup.
-		VZ: can't reproduce. It's an old one, I think it's gone.
-
-9	VZ	FolderTree: changing folder hidden flag is not
-		reflected, tried to react to it in options change event, but doesn't
-		work, see wxFolderTree.cpp:1061 //FIXME
-		VZ: fixed and optimized most of its occurences away. Works here.
-
-6	VZ	constraints in the notebooks half broken again, both GTK and
-                Windows (well, they actually work but give warnings)
-
-9    W  VZ      wxStaticBox bug makes it impossible to work with most dialogs
-
-7       VZ	We need a generic way to re-enable disabled pControls
-
-6    W  VZ	splash screen disappears immediately
-
-
-9	VZ	Folder Properties dialog: OK disabled, Apply sometimes 
-		enabled... impossible to change settings for existing
-		folders. 
-9	VZ	Creating a new entry under "all Folders" is possible, i.e.
-		you get the dialog, but, clicking on "OK" does not close it,
-		the only way out is "Cancel" so at present one cannot create
-		new folders in Mahogany.
-
-5	VZ	the type of the last created folder not remembered any more
-
-9	VZ	When trying to create a new NNTP folder, the anonymous
-		flag should really be on by default.
-
-9	VZ	can we have *all* log messages (incl status) appear in 
-		the log window?
-
-8	VZ	MH folder name <-> path confusion in wxMFolderDialogs.cpp
-
-5	VZ	"hidden" flag for folder treecontrol
-
-6	VZ	double click on new folder in treectrl opens not the
-		folder clicked on but the one previously selected
-
-9	KB	implement temporary/fake Profile mode
-		--> add Suspend()/Discard()/Commit() methods to normal 
-		    profile which work with a temporary subgroup
-
-fixed?	KB	only one new mail dialog at any given time, suppress
-		them while showing it
-9  	KB	check mm_list, use debugging wxWindows
-
-6	KB	wxFolderView.cpp:123 in wxFolderListCtrl::ApplyOptions()
-		leaks memory - the font will be never freed.
-9	KB	only Filters appear in list of statically linked
-                modules -why?
-
-8	KB	integrate imap 4.7 and recently received patches
-
-	
 
 vi: set si ts=8 sw=8 noet nolist tw=80:
