@@ -1785,7 +1785,8 @@ MessageView::ShowPart(const MimePart *mimepart)
       // if it is not too big before doing this
       if ( CheckMessagePartSize(mimepart) )
       {
-         const void *data = mimepart->GetContent();
+         unsigned long len;
+         const void *data = mimepart->GetContent(&len);
 
          if ( !data )
          {
@@ -1793,7 +1794,7 @@ MessageView::ShowPart(const MimePart *mimepart)
          }
          else
          {
-            String s(data, (const char *)data + partSize);
+            String s((const char *)data, len);
 
             m_viewer->InsertRawContents(s);
          }
