@@ -65,42 +65,14 @@ Add choice of intermediary image format:
 - retrieve messages starting from last one
 - fix bitmap allocation in SetBackgroundBitmap() calls (seems ok now)
 
-
+- fix occasional segfault/memory corruption in MailfolderCC.cpp
+   + this might have been caused by the bug with rfc822_extraheaders
+     and be fixed now -- wait and see (seems gone, 22.3.99)
 
 TODO:
 
-- modify wxIconManager to recycle last found path for icons first, to
-  avoid unnecessary filesystem traversals
-
-- folderview listctrl has extra Subject column behind Size field ???
-
-= wxLayout:
-  - fix initial scrollbar sizes
-  - update rectangle
-
-  - fix(simplify) cursor size calculation
-  - font optimisations(?)
-  - cut&paste (paste is there but broken in wxGTK)
-  - copy/cut/selections
-  - DragNDrop (waiting for GNOME 1.0 / Debian Slink)
-  - occasionally wraps lines wongly (twice)
-
-  x- reset scrollbars on Clear()
-  x- add setting of background colour and/or image
-  x- composeview: after inserting text (reply), update scrollbars
-
-- IMAP progress updates don't appear because there is too much to be
-  done in wxYield()?
-- add progress indicator to image loading
-- add ext editor icon to toolbar in composeview, nicer icon for insert file
-
-- make mailfolders collectable:
-  - have a "collect" flag
-  - have a global "NewMail" folder setting and ensure its existence
-    (and the one of SentFolder) in VerifySettings()
-
-- when inserting filetype of unknown MIME type, prompt for it,
-  possibly have a MIME types editor (similar to netscape's?)
+- add msgview.xpm icon to repository (forgot it at home)
+- save and restore printer settings in profile
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message.
 - speed up copy mail to folder by cusing c-client functionality
@@ -109,56 +81,70 @@ TODO:
   got sent
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
+
+- modify wxIconManager to recycle last found path for icons first, to
+  avoid unnecessary filesystem traversals
+
+- folderview listctrl has extra Subject column behind Size field ???
+
+= wxLayout:
+  - fix initial scrollbar sizes
+  - update rectangle (needs support in wxllist and wxWindows)
+  - fix(simplify) cursor size calculation
+  - font optimisations(?)
+  - copy/cut/selections
+  - occasionally wraps lines wongly (twice)
+  - UNDO
+  later:
+    - DragNDrop (waiting for wxGTK/gtk1.2 & GNOME 1.0 / Debian Slink)
+    - cut&paste (paste is there but broken in wxGTK)
+  done:
+    x- reset scrollbars on Clear()
+    x- add setting of background colour and/or image
+    x- composeview: after inserting text (reply), update scrollbars
+
+- add a message/delivery-status icon (like message, but with a red 'S' ?)
+- IMAP progress updates don't appear because there is too much to be
+  done in wxYield()?
+- add progress indicator to image loading
+- add ext editor icon to toolbar in composeview
+
+- make mailfolders collectable:
+  - have a "collect" flag
+  - have a global "NewMail" folder setting and ensure its existence
+    (and the one of SentFolder) in VerifySettings()
+
+- when inserting filetype of unknown MIME type, prompt for it,
+  possibly have a MIME types editor (similar to netscape's?)
 - do not redraw messageview if the message is the one currently being
   shown
   -- option to keep wxLayoutList around for reuse?
 - show status dialog while importing graphics into messageview
- - save and restore printer settings in profile
 - if time permits: vcard-import
 
-- support for local news spool
+- support for local news spool (ask on c-client list how to do this)
+
 - implement Compose/Reply templates
 - Let Iconmanager chose handler by format! JPEG crashes program if fed 
   the wrong filetype! Handler can return extension, caller should do
   the same.
 **************** end of KB priorities :-) *********************
 
-- fix occasional segfault/memory corruption in MailfolderCC.cpp
-   + this might have been caused by the bug with rfc822_extraheaders
-     and be fixed now -- wait and see
 
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
 - cannot select only message in a folder or first message without
   chosing a different one first
 
-<<<<<<< TODO
-- finish efax support
 - make message view use the new font settings.
-=======
-- improve header support
->>>>>>> 1.149
 
-<<<<<<< TODO
-- add support for faxing mails via efax
-
-- folderview listctrl has extra Subject column behind Size field ???
-- when inserting filetype of unknown MIME type, prompt for it,
-  possibly have a MIME types editor (similar to netscape's?)
-- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
-  SendMessageCC::AddPart()
 - add "double click to open" profile option support to folder list ctrl
-=======
-- add "double click to open" profile option support to folder list
-ctrl
-
->>>>>>> 1.149
 - Things like CopyMessagesToFolder need a return code indicating
   whether they were successful or not, otherwise MoveMessagesToFolder
   deletes them in any case. Trivial to add.
 - allow angle brackets and full name <> in reply-to field.
 - folder set message flag update hook takes too long for really large folders
- ==> code commented out in MailFolderCC.cpp
+   ==> code commented out in MailFolderCC.cpp
 
  - merge many Re: into one, optionally Re[n]:
  - easy to implement but useful features:
