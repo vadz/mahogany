@@ -193,11 +193,14 @@ public:
    // the next page depends on whether the user want or not to use the wizard
    virtual InstallWizardPageId GetNextPageId() const;
 
-   virtual bool TransferDataFromWindow();
+   // process check box click
+   void OnUseWizardCheckBox(wxCommandEvent& event);
 
 private:
    wxCheckBox *m_checkbox;
    bool        m_useWizard;
+
+   DECLARE_EVENT_TABLE()
 };
 
 // second page: ask the basic info about the user (name, e-mail)
@@ -521,6 +524,10 @@ wxEnhancedPanel *InstallWizardPage::CreateEnhancedPanel(wxStaticText *text)
 // InstallWizardWelcomePage
 // ----------------------------------------------------------------------------
 
+BEGIN_EVENT_TABLE(InstallWizardWelcomePage, InstallWizardPage)
+   EVT_CHECKBOX(-1, InstallWizardWelcomePage::OnUseWizardCheckBox)
+END_EVENT_TABLE()
+
 InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
                         : InstallWizardPage(wizard, InstallWizard_WelcomePage)
 {
@@ -547,22 +554,29 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
                 );
 
    wxSize sizeBox = m_checkbox->GetSize(),
-   sizePage = wizard->GetPageSize();
+          sizePage = wizard->GetPageSize();
 
    // adjust the vertical position
-   m_checkbox->Move(-1, sizePage.y - 2*sizeBox.y);
-}
-
-bool InstallWizardWelcomePage::TransferDataFromWindow()
-{
-   m_useWizard = !m_checkbox->GetValue();
-
-   return TRUE;
+   m_checkbox->Move(5, sizePage.y - 2*sizeBox.y);
 }
 
 InstallWizardPageId InstallWizardWelcomePage::GetNextPageId() const
 {
    return m_useWizard ? InstallWizard_IdentityPage : InstallWizard_Done;
+}
+
+void InstallWizardWelcomePage::OnUseWizardCheckBox(wxCommandEvent& event)
+{
+   m_useWizard = !m_checkbox->GetValue();
+
+   wxButton *btn = (wxButton *)GetParent()->FindWindow(wxID_FORWARD);
+   if ( btn )
+   {
+      if ( m_useWizard )
+         btn->SetLabel(_("&Next >"));
+      else
+         btn->SetLabel(_("&Finish"));
+   }
 }
 
 // InstallWizardIdentityPage
@@ -738,7 +752,10 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          ), m_UseOutboxCheckbox);
    m_UseDialUpCheckbox = panel->CreateCheckBox(labels[3], widthMax, text4);
 
+#if defined(USE_PISOCK) || defined(USE_PYTHON)
    wxControl *last = m_UseDialUpCheckbox;
+#endif // USE_PISOCK || USE_PYTHON
+
 #ifdef USE_PISOCK
    wxStaticText *text5 = panel->CreateMessage(
       _(
@@ -749,7 +766,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          ), last);
    m_UsePalmOsCheckbox = panel->CreateCheckBox(labels[4], widthMax, text5);
    last = m_UsePalmOsCheckbox;
-#endif
+#endif // USE_PISOCK
 #ifdef USE_PYTHON
    wxStaticText *text6 = panel->CreateMessage(
       _(
@@ -760,7 +777,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          "expand Mahogany.\n"
          "Would you like to enable it?"), last);
    m_UsePythonCheckbox = panel->CreateCheckBox(labels[5], widthMax, text6);
-#endif
+#endif // USE_PYTHON
 
    panel->ForceLayout();
 }
@@ -969,12 +986,12 @@ bool RunInstallWizard()
    if(gs_installWizardData.collectAllMail)
    {
       mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, READ_APPCONFIG(MP_NEWMAIL_FOLDER));
-      mf = MailFolder::OpenFolder(READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+      mf = MailFolder::OpenFolder(MF_FILE, READ_APPCONFIG(MP_NEWMAIL_FOLDER));
    }
    else
    {
       mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, "INBOX");
-      mf = MailFolder::OpenFolder(MF_INBOX,"INBOX");
+      mf = MailFolder::OpenFolder(MF_INBOX, "INBOX");
    }
    ASSERT_MSG(mf,"Cannot get main folder?");
    if(mf)
