@@ -76,6 +76,7 @@
 #endif
 
 #ifdef USE_WIZARD
+#   include <wx/panel.h>
 #   include <wx/wizard.h>
 #else
 #   include "gui/wxOptionsDlg.h" // for ShowOptionsDialog()
