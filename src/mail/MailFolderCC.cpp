@@ -5152,6 +5152,8 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
    if ( nmsgs > 0 )
    {
+      wxBusyCursor busyCursor;
+
       String seq;
       seq << "1:" << nmsgs;
 
