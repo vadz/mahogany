@@ -193,7 +193,7 @@ UUDecodeFilter::~UUDecodeFilter()
 // ----------------------------------------------------------------------------
 
 // check if c is valid in uuencoded text
-static inline IsUUValid(wxChar c)
+static inline bool IsUUValid(wxChar c)
 {
    return c >= _T(' ') && c <= _T('`');
 }
