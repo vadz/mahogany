@@ -37,7 +37,7 @@
 #include <wx/mimetype.h>
 #include <wx/file.h>
 
-#ifdef    OS_WIN
+#ifdef USE_ICONS_FROM_RESOURCES
 #  define   unknown_xpm     "unknown"
 #  define   txt_xpm         "txt"
 #  define   audio_xpm       "audio"
@@ -445,7 +445,6 @@ wxIconManager::~wxIconManager()
 void
 wxIconManager::SetSubDirectory(wxString subDir)
 {
-   wxASSERT(this);
    // We cannot do this in the constructor as the global dir might not
    // be set yet.
    if(mApplication && ! m_GlobalDir.Length())
@@ -456,6 +455,9 @@ wxIconManager::SetSubDirectory(wxString subDir)
       m_GlobalDir = mApplication->GetGlobalDir();
       if ( !!m_GlobalDir )
          m_GlobalDir += '/';
+#ifdef OS_WIN
+      m_GlobalDir += "src/";
+#endif
       m_GlobalDir += "icons";
 
       m_LocalDir = mApplication->GetLocalDir();
@@ -489,8 +491,13 @@ wxIconManager::SetSubDirectory(wxString subDir)
 wxBitmap
 wxIconManager::GetBitmap(const String& bmpName)
 {
-#  ifdef    OS_WIN
+   // note that this one always looks in the resources first, regardless of the
+   // value of USE_ICONS_FROM_RESOURCES
+#  ifdef OS_WIN
    {
+      // suppress the log messages from bitmap ctor which may fail
+      wxLogNull nolog;
+
       // look in the ressources
       wxBitmap bmp(bmpName);
       if ( bmp.Ok() )
@@ -518,8 +525,6 @@ wxIconManager::GetBitmap(const String& bmpName)
 wxIcon
 wxIconManager::GetIcon(String const &_iconName)
 {
-   wxASSERT(this);
-
    IconDataList::iterator i;
    String iconName = _iconName;
    String key;
@@ -570,8 +575,7 @@ wxIconManager::GetIcon(String const &_iconName)
    bool found = false;
    if(m_GlobalDir.Length())
    {
-      PathFinder pf(READ_APPCONFIG(MP_ICONPATH),
-                    false /* non-recursive */);
+      PathFinder pf(READ_APPCONFIG(MP_ICONPATH), false /* non-recursive */);
       pf.AddPaths(m_GlobalDir, false);
       if(ms_IconPath.Length() > 0)
          pf.AddPaths(ms_IconPath,false, true /*prepend */);
@@ -591,38 +595,14 @@ wxIconManager::GetIcon(String const &_iconName)
          name = _iconName + wxIconManagerFileExtensions[c];
          name = pf.FindFile(name, &found);
 
-#if 0
-         if ( !found && IsMimeType(iconName) )
-         {
-            key = strutil_after(iconName,'/');
-            name = key + wxIconManagerFileExtensions[c];
-            name = pf.FindFile(name, &found);
-
-            if ( !found )
-            {
-               key  = strutil_before(iconName,'/');
-               name = key + wxIconManagerFileExtensions[c];
-               name = pf.FindFile(name, &found);
-            }
-         }
-#endif
-
-
          if( found )
          {
-#ifdef   OS_UNIX
             ms_IconPath = name.BeforeLast('/');
             char **ptr = LoadImageXpm(name);
             if(ptr)
             {
                icn = wxIcon(ptr);
                FreeImage(ptr);
-#else
-            // Windows:
-            ms_IconPath = name.BeforeLast('\\');
-            if(icn.LoadFile(Str(name),0))
-            {
-#endif
                id = new IconData;
                id->iconRef = icn;
                id->iconName = iconName;
@@ -635,7 +615,7 @@ wxIconManager::GetIcon(String const &_iconName)
      } // for
    }// if globaldir
 
-#  ifdef    OS_WIN
+#  ifdef    USE_ICONS_FROM_RESOURCES
    // last, look in the resources
    {
       wxIcon icon(_iconName);
@@ -657,8 +637,6 @@ wxIconManager::GetIcon(String const &_iconName)
 wxIcon wxIconManager::GetIconFromMimeType(const String& type,
                                           const String &ext)
 {
-   wxASSERT(this);
-
    // the order of actions is important: we first try to find "exact" match,
    // but if we can't, we fall back to a standard icon and look for partial
    // matches only if there is none
@@ -719,8 +697,6 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
 void
 wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
 {
-   wxASSERT(this);
-
    // load icon
    wxIcon icon(data);
    if ( icon.Ok() )

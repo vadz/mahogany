@@ -21,13 +21,17 @@
 
 #include <wx/image.h>
 
+// under Windows we can use resources as "normal" windows programs do or we can
+// use XPMs as under Unix
+//#define USE_ICONS_FROM_RESOURCES
+
 /**
    IconManager class, this class allocates and deallocates icons for
    the application.
 */
 
 /// IconResourceType is XPM under Unix and name of ICO resource under Windows
-#ifdef  OS_WIN
+#ifdef  USE_ICONS_FROM_RESOURCES
   typedef const char *IconResourceType;
 #else   //Unix
   typedef char *IconResourceType[];

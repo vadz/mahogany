@@ -33,13 +33,13 @@
 
 #  include <wx/confbase.h>    // for wxSplitPath
 #  include <wx/dynarray.h>
-
-#  include <wx/dir.h>
 #endif // USE_PCH
 
 #include "Mdefaults.h"
 
 #include "MFolder.h"
+
+#include <wx/dir.h>
 
 // ----------------------------------------------------------------------------
 // template classes

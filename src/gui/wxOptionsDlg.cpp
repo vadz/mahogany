@@ -74,6 +74,11 @@
 // conditional compilation
 // ----------------------------------------------------------------------------
 
+// define this to allow using MDA (typically on under Unix, but off under Win)
+#ifdef OS_UNIX
+   #define USE_SENDMAIL
+#endif
+
 // define this to have additional TCP parameters in the options dialog
 #undef USE_TCP_TIMEOUTS
 
@@ -127,7 +132,7 @@ enum ConfigFields
    ConfigField_SmtpServerSSL,
    ConfigField_NntpServerSSL,
 #endif
-#ifdef OS_UNIX
+#ifdef USE_SENDMAIL
    ConfigField_UseSendmail,
    ConfigField_SendmailCmd,
 #endif
@@ -663,8 +668,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&POP server"),                  Field_Text,    -1,                        },
    { gettext_noop("&IMAP server"),                 Field_Text,    -1,                        },
    { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,
-#ifdef OS_UNIX
+#ifdef USE_SENDMAIL
                                                    -ConfigField_UseSendmail,
+#else
+                                                   -1
 #endif
    },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,
@@ -676,8 +683,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
       "by your ISP as it is not usually required."),
      Field_Message, -1,                        },
    { gettext_noop("SMTP server &user ID"),         Field_Text,
-#ifdef OS_UNIX
+#ifdef USE_SENDMAIL
                                                    -ConfigField_UseSendmail,
+#else
+                                                   -1
 #endif
    },
    { gettext_noop("SMTP server pa&ssword"),        Field_Passwd, ConfigField_MailServerLogin,           },
@@ -690,7 +699,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("SMTP server uses SS&L"), Field_Bool,    -1,                        },
    { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
 #endif
-#ifdef OS_UNIX
+#ifdef USE_SENDMAIL
    { gettext_noop("Use local mail delivery a&gent"), Field_Bool, -1,           },
    { gettext_noop("Local MDA &command"), Field_Text, ConfigField_UseSendmail },
 #endif
@@ -938,7 +947,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "them in a special IMAP mailbox on the server.\n"
                   "Please read the documentation first! It is accessible\n"
                   "via the Help button below."),
-		  Field_Message, -1 },
+                  Field_Message, -1 },
    { gettext_noop("Sync options with remote server"), Field_Bool|Field_Global, -1 },
    { gettext_noop(" (IMAP) folder for synchronisation"), Field_Folder|Field_Global,
    ConfigField_RSynchronise },

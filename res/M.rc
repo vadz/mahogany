@@ -52,6 +52,7 @@ ftplink		ICON	"ftplink.ico"
 unknown 	ICON	"unknown.ico"
 
 // toolbar bitmaps (32x32)
+#if 0 // we now use XPMs for those
 tb_adrbook	BITMAP	"tb_adrbook.bmp"
 tb_book_open	BITMAP	"tb_book_open.bmp"
 tb_open		BITMAP	"tb_open.bmp"
@@ -77,6 +78,7 @@ tb_undo		BITMAP	"tb_undo.bmp"
 tb_lookup	BITMAP	"tb_lookup.bmp"
 tb_editor	BITMAP	"tb_editor.bmp"
 tb_modules	BITMAP	"tb_modules.bmp"
+#endif // 0
 
 // ADB tree ctrl image list (16x16) bitmaps
 adb_address	BITMAP "address.bmp"

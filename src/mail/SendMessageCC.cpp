@@ -958,7 +958,7 @@ SendMessageCC::Send(void)
    }
    else
    {
-      confirmSend = READ_APPCONFIG(MP_CONFIRM_SEND);
+      confirmSend = READ_APPCONFIG(MP_CONFIRM_SEND) != 0;
    }
 
    if ( confirmSend )

@@ -389,7 +389,6 @@ wxMEditCtrl::AppendXFace(const wxString &face)
 {
 #ifdef HAVE_XFACES
    // need real XPM support in windows
-#ifndef OS_WIN
    char **xfaceXpm = NULL;
    XFace *xface = new XFace();
    xface->CreateFromXFace(face.c_str());
@@ -399,7 +398,6 @@ wxMEditCtrl::AppendXFace(const wxString &face)
       NewLine();
    }
    if(xfaceXpm) wxIconManager::FreeImage(xfaceXpm);
-#endif // !Windows
 #endif // HAVE_XFACES
 }
 
