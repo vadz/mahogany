@@ -77,6 +77,9 @@
    // define this to allow using MTA (typically only for Unix)
    #define USE_SENDMAIL
 
+   // we use externabl browser for HTML help under Unix
+   #define USE_EXT_HTML_HELP
+
    // BBDB support only makes sense for Unix
    #define USE_BBDB
 #endif
@@ -318,9 +321,11 @@ enum ConfigFields
    ConfigField_HelpersHelp1,
    ConfigField_Browser,
    ConfigField_BrowserIsNetscape,
+#ifdef USE_EXT_HTML_HELP
    ConfigField_HelpersHelp2,
    ConfigField_HelpBrowser,
    ConfigField_HelpBrowserIsNetscape,
+#endif // USE_EXT_HTML_HELP
    ConfigField_HelpExternalEditor,
    ConfigField_ExternalEditor,
    ConfigField_AutoLaunchExtEditor,
@@ -501,7 +506,7 @@ public:
    // overloaded base class virtual
    virtual void CreateNotebook(wxPanel *panel)
    {
-      m_notebook = new wxCustomOptionsNotebook(this,
+      m_notebook = new wxCustomOptionsNotebook(panel,
                                                m_nPages,
                                                m_pageDesc,
                                                m_configForNotebook,
@@ -948,9 +953,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("The following program will be used to open URLs embedded in messages:"),       Field_Message, -1                      },
    { gettext_noop("Open &URLs with"),             Field_File,    -1                      },
    { gettext_noop("URL &browser is Netscape"),    Field_Bool,    -1                      },
+#ifdef USE_EXT_HTML_HELP
    { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
    { gettext_noop("&Help viewer"),                Field_File,    -1                      },
    { gettext_noop("Help &viewer is Netscape"),    Field_Bool,    -1                      },
+#endif // USE_EXT_HTML_HELP
    { gettext_noop("You may configure the external editor to be used when composing the messages\n"
                   "and optionally choose to launch it automatically."),
                                                   Field_Message, -1                      },
@@ -1225,9 +1232,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_BROWSER),
    CONFIG_ENTRY(MP_BROWSER_ISNS),
+#ifdef USE_EXT_HTML_HELP
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_HELPBROWSER),
    CONFIG_ENTRY(MP_HELPBROWSER_ISNS),
+#endif // USE_EXT_HTML_HELP
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_EXTERNALEDITOR),
    CONFIG_ENTRY(MP_ALWAYS_USE_EXTERNALEDITOR),
@@ -1415,14 +1424,18 @@ void wxOptionsPage::CreateControls()
             {
                wxString title = _(m_aFields[n].label);
 
+               // may be NULL if we don't use dial up manager at all
                wxDialUpManager *dial =
                   ((wxMApp *)mApplication)->GetDialUpManager();;
-               wxArrayString aConnections;
-               dial->GetISPNames(aConnections);
-
-               if ( !aConnections.IsEmpty() )
+               if ( dial )
                {
-                  title << ':' << strutil_flatten_array(aConnections);
+                  wxArrayString aConnections;
+                  dial->GetISPNames(aConnections);
+
+                  if ( !aConnections.IsEmpty() )
+                  {
+                     title << ':' << strutil_flatten_array(aConnections);
+                  }
                }
 
                last = CreateComboBox(title, widthMax, last);
