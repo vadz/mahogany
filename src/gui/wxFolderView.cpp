@@ -551,6 +551,11 @@ void
 wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 {
    int id = event.GetId();
+   if(id == WXMENU_EDIT_PREF) // edit folder profile
+   {
+      MDialog_FolderProfile(this, m_FolderView->GetProfile());
+      return;
+   }
    if(WXMENU_CONTAINS(MSG,id) || id == WXMENU_LAYOUT_CLICK)
       m_FolderView->OnCommandEvent(event);
    else

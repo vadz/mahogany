@@ -1053,7 +1053,8 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
       m_toolbar->AddSeparator();
     else
       m_toolbar->AddTool(nId,
-                         new wxBitmap(aToolBarData[nButton].bmp),
+                         //new wxBitmap(aToolBarData[nButton].bmp),
+                         BMP(aToolBarData[nButton].bmp),
                          wxNullBitmap,  // "pushed" bitmap (means use the same)
                          FALSE,         // can't be toggled
                          -1, -1,        // position
@@ -2058,7 +2059,7 @@ void wxAdbEditFrame::OnTextLookupEnter(wxCommandEvent& event)
 void wxAdbEditFrame::OnTextLookupChange(wxCommandEvent& event)
 {
   // @@ should do it in UpdateUI handler
-  m_toolbar->EnableTool(WXMENU_ADBFIND_FIND, !m_textKey->GetValue().IsEmpty());
+//FIXME  m_toolbar->EnableTool(WXMENU_ADBFIND_FIND, !m_textKey->GetValue().IsEmpty());
 }
 
 void wxAdbEditFrame::OnUpdateCancel(wxUpdateUIEvent& event)
@@ -2069,7 +2070,7 @@ void wxAdbEditFrame::OnUpdateCancel(wxUpdateUIEvent& event)
 
   event.Enable(bDoEnable);
   m_btnCancel->Enable(bDoEnable);
-  m_toolbar->EnableTool(WXMENU_ADBEDIT_UNDO, bDoEnable);
+//FIXME  m_toolbar->EnableTool(WXMENU_ADBEDIT_UNDO, bDoEnable);
 }
 
 void wxAdbEditFrame::OnUpdateProp(wxUpdateUIEvent& event)
@@ -2085,7 +2086,7 @@ void wxAdbEditFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 
   event.Enable(bDoEnable);
   m_btnDelete->Enable(bDoEnable);
-  m_toolbar->EnableTool(WXMENU_ADBEDIT_DELETE, bDoEnable);
+//FIXME  m_toolbar->EnableTool(WXMENU_ADBEDIT_DELETE, bDoEnable);
 }
 
 void wxAdbEditFrame::OnUpdatePaste(wxUpdateUIEvent& event)

@@ -451,14 +451,14 @@ public:
    /// virtual destructor
    virtual ~wxProfileEditPanel() {}
 protected:
-   Profile  *m_Profile;
+   ProfileBase  *m_Profile;
    wxWindow *m_Parent;
 };
 
 class wxPEP_Folder : public wxProfileEditPanel
 {
 public:
-   wxPEP_Folder(Profile *profile, wxWindow *parent);
+   wxPEP_Folder(ProfileBase *profile, wxWindow *parent);
    /// transfer settings from panel to profile
    void    UpdateProfile(void);
    /// transfer settings from profile to panel
@@ -480,7 +480,15 @@ private:
    wxString choices[5];
 };
 
-wxPEP_Folder::wxPEP_Folder(Profile *profile, wxWindow *parent)
+#define   MkTextCtrl(control,label) \
+  (void) new wxStaticText(this, -1, _(label), pos, wxSize(labelWidth,labelHeight)); \
+  control = new wxTextCtrl(this, -1, "",wxPoint(pos.x+labelWidth,pos.y)); \
+  pos.y += labelHeight;\
+  
+#define   labelWidth 200
+#define   labelHeight 20
+
+wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    : wxProfileEditPanel(parent)
 {
    m_Profile = profile;
@@ -488,22 +496,23 @@ wxPEP_Folder::wxPEP_Folder(Profile *profile, wxWindow *parent)
    wxASSERT(m_Profile);
    wxASSERT(m_Parent);
 
+   wxPoint  pos = wxPoint(10,10);
+
+   MkTextCtrl(m_FolderPathTextCtrl, "Path or name of folder");
+   MkTextCtrl(m_UpdateIntervalTextCtrl, "Update interval in seconds");
+   MkTextCtrl(m_UserIdTextCtrl, "User ID");
+   MkTextCtrl(m_PasswordTextCtrl, "Password");
+   
    choices[0] = _("INBOX");
    choices[1] = _("Message box file");
    choices[2] = _("POP3");
    choices[3] = _("IMAP");
    choices[4] = _("NNTP/News");
    m_FolderTypeRadioBox = new wxRadioBox( this, -1, _("Folder Type"),
-                                          wxDefaultPosition,
+                                          pos,
                                           wxSize(-1,-1),
                                           5, choices,
                                           1, wxRA_VERTICAL );
-
-   m_FolderPathTextCtrl = new wxTextCtrl(this,-1);
-   m_UpdateIntervalTextCtrl = new wxTextCtrl(this,-1);
-   m_UserIdTextCtrl = new wxTextCtrl(this,-1);
-   m_PasswordTextCtrl = new wxTextCtrl(this,-1);
-
 }
 
 void
@@ -519,7 +528,12 @@ wxPEP_Folder::UpdatePanel(void)
 
 
 void
-MDialog_FolderProfile(MWindow *parent)
+MDialog_FolderProfile(MWindow *parent, ProfileBase *profile)
 {
+   // for now, open a frame and display the panel, return immediately
+   wxMFrame *frame = new wxMFrame("FolderProfileFrame",parent);
    
+   wxPEP_Folder *panel = new wxPEP_Folder(profile,frame);
+
+   frame->Show(TRUE);
 }

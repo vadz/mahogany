@@ -178,7 +178,7 @@ MDialog_AboutDialog( MWindow *parent);
 
 
 void
-MDialog_FolderProfile(MWindow *parent);
+MDialog_FolderProfile(MWindow *parent, ProfileBase *profile);
 
 // @@@ the coeffecients are purely empirical...
 #define TEXT_HEIGHT_FROM_LABEL(h)   (23*(h)/13)

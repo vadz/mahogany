@@ -129,19 +129,6 @@ wxIconManager::GetBitmap(const String& bmpName)
 wxIcon *
 wxIconManager::GetIcon(String const &_iconName)
 {
-#  ifdef    OS_WIN
-   {
-      // first, look in the ressources
-      wxIcon *icon = new wxIcon(_iconName);
-      if ( icon->Ok() )
-         return  icon;
-      else
-         delete icon;
-
-      // ok, it failed - now do all the usual stuff
-   }
-#  endif  //Windows
-
    IconDataList::iterator i;
    String key;
    String iconName = _iconName;
@@ -204,6 +191,20 @@ wxIconManager::GetIcon(String const &_iconName)
          return new wxIcon(icn);
       }
    }   
+#  ifdef    OS_WIN
+   {
+      // last, look in the ressources
+      wxIcon *icon = new wxIcon(_iconName);
+      if ( icon->Ok() )
+         return  icon;
+      else
+         delete icon;
+
+      // ok, it failed - now do all the usual stuff
+   }
+#  endif  //Windows
+
+
    return new wxIcon(m_unknownIcon);
 }
 
