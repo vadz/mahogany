@@ -48,11 +48,6 @@
 #include "gui/wxMainFrame.h"
 
 // ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -65,8 +60,27 @@ static bool ShowHiddenFolders()
 // can this folder be opened?
 static bool CanOpen(const MFolder *folder)
 {
-  return folder && CanOpenFolder(folder->GetType(), folder->GetFlags());
+   return folder && CanOpenFolder(folder->GetType(), folder->GetFlags());
 }
+
+// used to sort wxArrayFolder
+int CompareFoldersByTreePos(MFolder **pf1, MFolder **pf2)
+{
+   int pos1 = (*pf1)->GetTreeIndex(),
+       pos2 = (*pf2)->GetTreeIndex();
+
+   // -1 means to put it in the end, so anything is less than -1
+   if ( pos1 == -1 )
+      return pos2 == -1 ? 0 : 1;
+
+   return pos2 == -1 ? -1 : pos1 - pos2;
+}
+
+// ----------------------------------------------------------------------------
+// pseudo template classes
+// ----------------------------------------------------------------------------
+
+WX_DEFINE_ARRAY(MFolder *, wxArrayFolder);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -106,7 +120,8 @@ public:
    // the ctor creates the element and inserts it in the tree
    wxFolderTreeNode(wxTreeCtrl *tree,
                     MFolder *folder,
-                    wxFolderTreeNode *parent = NULL);
+                    wxFolderTreeNode *parent = NULL,
+                    size_t nChildren = 0);
 
    // dtor
    //
@@ -776,7 +791,8 @@ bool wxFolderTree::OnDoubleClick()
 
 wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
                                    MFolder *folder,
-                                   wxFolderTreeNode *parent)
+                                   wxFolderTreeNode *parent,
+                                   size_t nChildren)
 {
    // init member vars
    m_parent = parent;
@@ -789,15 +805,18 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    int image = GetFolderIconForDisplay(folder);
 
    // add this item to the tree
+   int id;
    if ( folder->GetType() == MF_ROOT )
    {
-      SetId(tree->AddRoot(_("All folders"), image, image, this));
+      id = tree->AddRoot(_("All folders"), image, image, this);
    }
-   else
+   else // not root
    {
-      SetId(tree->AppendItem(GetParent()->GetId(), folder->GetName(),
-                             image, image, this));
+      id = tree->AppendItem(GetParent()->GetId(), folder->GetName(),
+                            image, image, this);
    }
+
+   SetId(id);
 
    // allow the user to expand us if we have any children
    if ( folder )
@@ -1208,35 +1227,58 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
 
    MFolder *folder = parent->GetFolder();
    size_t nSubfolders = folder->GetSubfolderCount();
-   for ( size_t n = 0; n < nSubfolders; n++ )
-   {
-      MFolder *subfolder = folder->GetSubfolder(n);
-      if ( !subfolder )
-      {
-         FAIL_MSG( "no subfolder?" );
-
-         continue;
-      }
-
-      // if the folder is marked as being "hidden", we don't show it in the
-      // tree (but still use for all other purposes), this is useful for
-      // "system" folders like INBOX
-      if ( !ShowHiddenFolders() && (subfolder->GetFlags() & MF_FLAGS_HIDDEN) )
-      {
-         subfolder->DecRef();
-
-         continue;
-      }
-
-      // ok, create the new tree item
-      (void)new wxFolderTreeNode(this, subfolder, parent);
-   }
 
    // if there are no subfolders, indicate it to user by removing the [+]
    // button from this node
    if ( nSubfolders == 0 )
    {
       SetItemHasChildren(itemId, FALSE);
+   }
+   else // we do have children
+   {
+      // we first collect all subfolders we should display in this array
+      // because we need to sort them before really creating the tree nodes
+      wxArrayFolder subfolders;
+
+      size_t n;
+      for ( n = 0; n < nSubfolders; n++ )
+      {
+         MFolder *subfolder = folder->GetSubfolder(n);
+         if ( !subfolder )
+         {
+            // this is not expected to happen
+            FAIL_MSG( "no subfolder?" );
+
+            continue;
+         }
+
+         // if the folder is marked as being "hidden", we don't show it in the
+         // tree (but still use for all other purposes), this is useful for
+         // "system" folders like INBOX
+         if ( !ShowHiddenFolders() && (subfolder->GetFlags() & MF_FLAGS_HIDDEN) )
+         {
+            subfolder->DecRef();
+
+            continue;
+         }
+
+         // remember this one
+         subfolders.Add(subfolder);
+      }
+
+      // sort the array by tree item position
+      subfolders.Sort(CompareFoldersByTreePos);
+
+      // now do fill the tree
+      nSubfolders = subfolders.GetCount();
+      for ( n = 0; n < nSubfolders; n++ )
+      {
+         MFolder *subfolder = subfolders[n];
+
+         // note that we give subfolder to wxFolderTreeNode: it will DecRef()
+         // it later
+         (void)new wxFolderTreeNode(this, subfolder, parent, nSubfolders);
+      }
    }
 }
 

@@ -114,6 +114,11 @@ public:
    virtual String GetComment() const = 0;
       /// change the comment
    virtual void SetComment(const String& comment) = 0;
+
+      /// a folder may have a fixed position (by default it doesn't have any)
+   virtual int GetTreeIndex() const { return -1; }
+      /// set the position in the tree (used by wxFolderTree only)
+   virtual void SetTreeIndex(int pos) { }
    //@}
    /**@name flags */
    //@{

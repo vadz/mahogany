@@ -4,8 +4,11 @@
 Release 0.61 'Hawkins'
 -------------------------------------------------------------------------------
 
+01.12.00 VZ: "system" folders are now on the top of the folder tree
+             fixed bug with messages boxes which couldn't be disabled in 0.61
 27.11.00 VZ: added "Import file folders" from directory command
 09.11.00 VZ: added "Save addresses from message" command
+08.11.00 VZ: "Preview message before sending" setting (no GUI support though)
 
 Release 0.60 'Redmond' November 9, 2000
 -------------------------------------------------------------------------------

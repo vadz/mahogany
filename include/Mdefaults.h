@@ -111,6 +111,26 @@
 #define   M_ACTION_ALWAYS   2
 //@}
 
+/// the positions of the standard folders in the tree
+enum MFolderIndex
+{
+   // system folders
+   MFolderIndex_Inbox,
+   MFolderIndex_NewMail,
+   MFolderIndex_SentMail,
+   MFolderIndex_Trash,
+   MFolderIndex_Outbox,
+   MFolderIndex_Draft,
+
+   // initial servers
+   MFolderIndex_IMAP,
+   MFolderIndex_POP,
+   MFolderIndex_NNTP,
+
+   // anything else goes here
+   MFolderIndex_Max
+};
+  
 /**
  NOTICE: the distinction between MP_xxx and MP_xxx config entries no
  longer exists. They are now treated identically.
@@ -441,6 +461,8 @@
 #define   MP_FOLDER_TYPE         "Type"
 /// the folder icon for a mailbox (see icon functions in FolderType.h)
 #define   MP_FOLDER_ICON         "Icon"
+/// the position of the folder in the tree
+#define MP_FOLDER_TREEINDEX "Index"
 /// Where to store all new mail (obsolete)
 #define MP_NEWMAIL_FOLDER      "NewMailFolder"
 /// Where to store outgoing mail
@@ -1029,9 +1051,11 @@
 /// Name from where to read XFace
 #define   MP_COMPOSE_XFACE_FILE_D   "$HOME/.xface"
 /// the folder type for a mailbox
-#define   MP_FOLDER_TYPE_D         (int)(0x00ff)  // MF_ILLEGAL
+#define   MP_FOLDER_TYPE_D         (long)(0x00ff)  // MF_ILLEGAL
 /// the folder icon for a mailbox (see icon functions in FolderType.h)
-#define   MP_FOLDER_ICON_D         (int)-1        // no special icon
+#define   MP_FOLDER_ICON_D         (long)-1        // no special icon
+/// the position of the folder in the tree
+#define MP_FOLDER_TREEINDEX_D      (long)-1        // see enum MFolderIndex
 /// Where to store all new mail
 #define MP_NEWMAIL_FOLDER_D      "" // obsolete
 /// Which folder to use as Outbox

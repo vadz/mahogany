@@ -70,6 +70,16 @@
 // constants
 // ----------------------------------------------------------------------------
 
+/*
+   IMPORTANT when changing Mahogany version, you need to do the following:
+
+   0. edit Mversion.h
+   1. add a new Version_XXX constant to enum MVersion below
+   2. add logic for detecting it to the beginning of Upgrade()
+   3. write new UpgradeFromXXX() function
+   4. call it from Upgrade() (add another case to the switch)
+*/
+
 // this enum contains only versions with incompatible changes between them
 enum MVersion
 {
@@ -79,6 +89,7 @@ enum MVersion
    Version_Alpha020, // folder host name is now ServerName, not HostName
    Version_050,      // nothing really changed against 0.2x config-wise
    Version_060,      // templates are organised differently
+   Version_061,      // system folders have non default positions in tree
    Version_NoChange, // any version from which we don't need to upgrade
    Version_Unknown   // some unrecognized version
 };
@@ -1358,8 +1369,15 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
                                     MF_FLAGS_KEEPOPEN,
                                     name,
                                     _("Queue of messages to be sent.")))
+      {
          wxLogError(_("Could not create the outgoing mailbox '%'."),
                     name.c_str());
+      }
+      else
+      {
+         MFolder_obj folder(name);
+         folder->SetTreeIndex(MFolderIndex_Outbox);
+      }
    }
    else
    {
@@ -1383,7 +1401,8 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    }
 
    // create INBOX
-   if(! MailFolder::CreateFolder("INBOX",
+   static const char *INBOX_NAME = "INBOX";
+   if(! MailFolder::CreateFolder(INBOX_NAME,
                                  MF_INBOX,
                                  MF_FLAGS_DONTDELETE |
                                  flagInbox,
@@ -1392,7 +1411,11 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    {
       wxLogError(_("Could not create INBOX mailbox."));
    }
-
+   else
+   {
+      MFolder_obj folder(INBOX_NAME);
+      folder->SetTreeIndex(MFolderIndex_Inbox);
+   }
 
    // create New Mail folder:
    wxString foldername = READ_CONFIG(profile, MP_NEWMAIL_FOLDER);
@@ -1411,6 +1434,11 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    {
       wxLogError(_("Could not create central incoming mailbox '%s'."), foldername.c_str());
    }
+   else
+   {
+      MFolder_obj folder(foldername);
+      folder->SetTreeIndex(MFolderIndex_NewMail);
+   }
 
    // by default, activate new mail notification for the folder which
    // is used and user visible, default for all other folders is "off"
@@ -1422,14 +1450,24 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    // TRASH
    if(gs_installWizardData.useTrash)
    {
+      // VZ: why is this one translated and all others are not?
+      String nameTrash = _("Trash");
       profile->writeEntry(MP_USE_TRASH_FOLDER, 1l);
-      profile->writeEntry(MP_TRASH_FOLDER, _("Trash"));
-      if(! MailFolder::CreateFolder(_("Trash"),
+      profile->writeEntry(MP_TRASH_FOLDER, nameTrash);
+      if(! MailFolder::CreateFolder(nameTrash,
                                     MF_FILE,
                                     MF_FLAGS_DONTDELETE,
-                                    _("Trash"),
+                                    nameTrash,
                                     _("Trash folder for deleted messages.") ) )
+      {
          wxLogError(_("Could not create Trash mailbox."));
+      }
+      else
+      {
+         MFolder_obj folder(nameTrash);
+         folder->SetTreeIndex(MFolderIndex_Trash);
+      }
+
       // the rest is done in Update()
    }
    else
@@ -1908,6 +1946,43 @@ UpgradeFrom050()
    return true;
 }
 
+static bool
+UpgradeFrom060()
+{
+   // FIXME: this won't work if the user has changed the names of the system
+   //        folders or even if they are just translated (but then I think
+   //        only trash is translated anyhow)
+
+   static const struct
+   {
+      const char *name;
+      int pos;
+   } SystemFolders[] =
+   {
+      { "INBOX",     MFolderIndex_Inbox   },
+      { "New Mail",  MFolderIndex_NewMail },
+      { "SentMail",  MFolderIndex_SentMail},
+      { "Trash",     MFolderIndex_Trash   },
+      { "Outbox",    MFolderIndex_Outbox  },
+      { "Draft",     MFolderIndex_Draft   },
+   };
+
+   // position the system folders in the tree correctly (we can't reposition
+   // the IMAP/POP/NNTP servers as we don't know what they are)
+   MFolder *folder;
+   for ( size_t n = 0; n < WXSIZEOF(SystemFolders); n++ )
+   {
+      folder = MFolder::Get(SystemFolders[n].name);
+      if ( folder )
+      {
+         folder->SetTreeIndex(SystemFolders[n].pos);
+         folder->DecRef();
+      }
+   }
+
+   return true;
+}
+
 // ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
@@ -1939,6 +2014,8 @@ Upgrade(const String& fromVersion)
                 version == "0.23" || version == "0.50" )
          oldVersion = Version_050;
       else if ( version == "0.60" )
+         oldVersion = Version_060;
+      else if ( version == "0.61" )
          oldVersion = Version_NoChange;
       else
          oldVersion = Version_Unknown;
@@ -1967,7 +2044,12 @@ Upgrade(const String& fromVersion)
       // fall through
 
    case Version_050:
-      if ( success && UpgradeFrom050() )
+      if ( success )
+         success = UpgradeFrom050();
+      // fall through
+
+   case Version_060:
+      if ( success && UpgradeFrom060() )
          wxLogMessage(_("Configuration information and program files were "
                         "successfully upgraded from the version '%s'."),
                       fromVersion.c_str());
@@ -1981,7 +2063,7 @@ Upgrade(const String& fromVersion)
                     fromVersion.c_str());
       break;
 
-   case Version_060:
+   case Version_061:
    case Version_NoChange:
       break;
 
@@ -2165,6 +2247,7 @@ VerifyInbox(void)
          ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
          ibp->writeEntry(MP_FOLDER_COMMENT,
                          _("Folder where Mahogany will store copies of outgoing messages."));
+         ibp->writeEntry(MP_FOLDER_TREEINDEX, MFolderIndex_SentMail);
          rc = FALSE;
       }
       // Make sure the flags are valid:
@@ -2349,6 +2432,8 @@ SetupServers(void)
                                       MF_FLAGS_ANON|MF_FLAGS_GROUP,
                                       "",
                                       FALSE);
+      mfolder->SetTreeIndex(MFolderIndex_NNTP);
+
       p = Profile::CreateProfile(mfolder->GetName());
       //inherit default instead p->writeEntry(MP_NNTPHOST, serverName);
       p->DecRef();
@@ -2365,6 +2450,8 @@ SetupServers(void)
                                       MF_FLAGS_GROUP,
                                       "",
                                       FALSE);
+      mfolder->SetTreeIndex(MFolderIndex_IMAP);
+
       MFolder *imapInbox = CreateFolderTreeEntry(mfolder,
                                       _("IMAP INBOX"),
                                       MF_IMAP,
@@ -2406,6 +2493,7 @@ SetupServers(void)
                                       0,
                                       "",
                                       FALSE);
+      mfolder->SetTreeIndex(MFolderIndex_POP);
       p = Profile::CreateProfile(mfolder->GetName());
       //inherit default instead p->writeEntry(MP_POPHOST, serverName);
       //inherit default instead p->writeEntry(MP_USERNAME, READ_APPCONFIG(MP_USERNAME));

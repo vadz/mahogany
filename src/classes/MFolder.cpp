@@ -161,6 +161,9 @@ public:
    virtual String GetComment() const;
    virtual void SetComment(const String& comment);
 
+   virtual int GetTreeIndex() const;
+   virtual void SetTreeIndex(int pos);
+
    virtual int GetFlags() const;
    virtual void SetFlags(int flags);
 
@@ -568,9 +571,7 @@ int MFolderFromProfile::GetFlags() const
    Profile_obj profile(m_folderName);
    CHECK( profile, FolderInvalid, "panic in MFolder: no profile" );
 
-   int f = GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
-
-   return f;
+   return GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
 }
 
 void MFolderFromProfile::SetFlags(int flags)
@@ -582,6 +583,22 @@ void MFolderFromProfile::SetFlags(int flags)
    typeAndFlags = CombineFolderTypeAndFlags(GetFolderType(typeAndFlags),
                                             flags);
    profile->writeEntry(MP_FOLDER_TYPE, typeAndFlags);
+}
+
+int MFolderFromProfile::GetTreeIndex() const
+{
+   Profile_obj profile(m_folderName);
+   CHECK( profile, MP_FOLDER_TREEINDEX_D, "panic in MFolder: no profile" );
+
+   return (int)READ_CONFIG(profile, MP_FOLDER_TREEINDEX);
+}
+
+void MFolderFromProfile::SetTreeIndex(int pos)
+{
+   Profile_obj profile(m_folderName);
+   CHECK_RET( profile, "panic in MFolder: no profile" );
+
+   profile->writeEntry(MP_FOLDER_TREEINDEX, (long)pos);
 }
 
 // ----------------------------------------------------------------------------
