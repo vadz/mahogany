@@ -480,13 +480,14 @@ private:
    int GetFlags(void) const { return m_FolderFlags; }
 
 protected:
-   virtual void RequestUpdate(void);
-   virtual void UpdateStatus(void);
-   virtual bool IsAlive(void) const;
-   virtual bool DoCountMessages(MailFolderStatus *status) const;
-
    /// Called to notify the folder that its listing changed "from outside"
-   void OnExternalUpdate();
+   virtual void RequestUpdate(void);
+
+   virtual void UpdateStatus(void);
+
+   virtual bool IsAlive(void) const;
+
+   virtual bool DoCountMessages(MailFolderStatus *status) const;
 
    /// Update the timeout values from a profile
    void UpdateTimeoutValues(void);

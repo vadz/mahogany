@@ -2550,7 +2550,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       MailFolder *mfDst = FindFolder(folder);
       if ( mfDst )
       {
-         ((MailFolderCC *)mfDst)->OnExternalUpdate();
+         mfDst->RequestUpdate();
          mfDst->DecRef();
       }
       //else: not opened
@@ -4449,21 +4449,6 @@ MailFolderCC::UpdateStatus(void)
 }
 
 void
-MailFolderCC::OnExternalUpdate()
-{
-   wxLogTrace(TRACE_MF_EVENTS, "OnExternalUpdate() for folder '%s'",
-              GetName().c_str());
-
-   if ( m_Listing )
-   {
-      m_Listing->DecRef();
-      m_Listing = NULL;
-   }
-
-   RequestUpdate();
-}
-
-void
 MailFolderCC::RequestUpdate()
 {
    // don't do anything while executing the filter code, the listing is going
@@ -4498,6 +4483,14 @@ MailFolderCC::RequestUpdate()
       {
          delete m_expungedIndices;
          m_expungedIndices = NULL;
+      }
+
+      // throw away the old listing so that the next call to GetHeaders() will
+      // rebuild it
+      if ( m_Listing )
+      {
+         m_Listing->DecRef();
+         m_Listing = NULL;
       }
 
       // tell all interested that the listing changed
