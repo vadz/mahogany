@@ -930,7 +930,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "set the originating address of a reply to a message\n"
                   "sent to a given address to the same address.\n"
                   "The option below allows to do it automatically."), Field_Message | Field_Advanced, -1, },
-   { gettext_noop("Set \"From\" header from &To: field"), Field_Bool | Field_Advanced, -1, },
+   { gettext_noop("Set \"From:\" header from \"&To:\" field"), Field_Bool | Field_Advanced, -1, },
    { gettext_noop(
       "You may want to attach your personal information card (vCard)\n"
       "to all outoing messages. In this case you will need to specify\n"
