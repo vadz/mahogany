@@ -42,8 +42,6 @@
 
 #ifdef USE_PISOCK
 
-#define HAVE_LIBMAL
-
 #ifdef HAVE_LIBMAL
  extern "C"
  {
