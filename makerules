@@ -57,7 +57,8 @@ endif
 # We use the _PYCODE CXXFLAGS here, as we want to ignore all warnings
 # when making depend. Otherwise make would fail.
 dep depend:
-	$(CXX) -MM $(CXXFLAGS_RELAXED) $(SRC) >.depend
+	$(CXX) -M $(CXXFLAGS_RELAXED) $(SRC) >.depend
+#	$(CXX) -MM $(CXXFLAGS_RELAXED) $(SRC) >.depend
 #	$(CC) -MM $(CXXFLAGS) $(CSRC) >>.depend
 
 .depend:
