@@ -582,7 +582,8 @@ wxMessageView::Update(void)
       }
    }
    llist->LineBreak();
-   Refresh();
+   llist->MoveCursorTo(wxPoint(0,0));
+   Refresh(FALSE);
    ResizeScrollbars(true);
 }
 
