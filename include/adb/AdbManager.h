@@ -13,11 +13,15 @@
 #ifndef   _ADBMANAGER_H
 #define   _ADBMANAGER_H
 
-#include "MObject.h"    // the base class declaration
+#include "MObject.h"        // the base class declaration
+
+#include "adb/AdbEntry.h"   // for AdbLookup_xxx constants
 
 // forward declaration for classes we use
 class AdbBook;
 class AdbDataProvider;
+class ArrayAdbEntries;
+class ArrayAdbBooks;
 
 /**
   A book corresponds to a physical medium (disk file, database...), the 
@@ -83,5 +87,27 @@ private:
 
   static AdbManager *ms_pManager;
 };
+
+/**
+  Looks in the specified address book(s) for the match for the given string.
+  If the array of books is empty (or the pointer is NULL), all currently
+  opened books are searched.
+
+  All pointers returned in aEntries must be Unlock()ed by the caller (as usual)
+
+  @param aEntries will be filled with the results (should be empty on input)
+  @param what - what to look for
+  @param where - in which fields to look for this string? default is everywhere
+  @param how - search options, default is case insensitive substring search
+  @param paBooks is the array of books to search the entry in and may be NULL
+
+  @return FALSE if no matches, TRUE otherwise
+*/
+bool AdbLookup(ArrayAdbEntries& aEntries,
+               const String& what,
+               int where = AdbLookup_Everywhere,
+               int how = AdbLookup_Substring,
+               const ArrayAdbBooks *paBooks = NULL);
+
 
 #endif  //_ADBMANAGER_H

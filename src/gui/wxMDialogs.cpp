@@ -42,9 +42,17 @@
 #include "MDialogs.h"
 #include "gui/wxlwindow.h"
 
+#include "adb/AdbEntry.h"
+#include "adb/AdbBook.h"
+
+#include <wx/dynarray.h>
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
+
+// an array of AdbEntries
+WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
 
 // better looking wxTextEntryDialog
 class MTextInputDialog : public wxDialog
@@ -364,69 +372,43 @@ MDialog_YesNoDialog(String const &message,
                        GetParent(parent)) == wxYES;
 }
 
-#if 0
-AdbEntry *
-MDialog_AdbLookupList(AdbExpandListType *adblist, MWindow *parent)
+int
+MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
+                      MWindow *parent)
 {
-   AdbExpandListType::iterator i;
+   wxArrayString aChoices;
+   wxString strName, strEMail;
 
-   int
-      idx = 0,
-      val,
-      n = adblist->size();
-   String
-      tmp;
-   char
-      ** choices = new char *[n];
-   AdbEntry
-      ** entries = new AdbEntry *[n],
-      *result;
-
-   if(parent == NULL)
-      parent = mApplication.TopLevelFrame();
-   
-   
-   for(i = adblist->begin(); i != adblist->end(); i++, idx++)
+   uint nEntryCount = aEntries.Count();
+   AdbEntry *pEntry;
+   for( uint nEntry = 0; nEntry < nEntryCount; nEntry++ )
    {
-      tmp =(*i)->formattedName + String(" <")
-	 + (*i)->email.preferred.c_str() + String(">");
-      choices[idx] = strutil_strdup(tmp);
-      entries[idx] = (*i);
+      pEntry = aEntries[nEntry];
+      pEntry->GetField(AdbField_FullName, &strName);
+      pEntry->GetField(AdbField_EMail, &strEMail);
+
+      aChoices.Add(strName + " <" + strEMail + ">");
    }
+
    int w,h;
-   if(parent)
-   {
-      parent->GetClientSize(&w,&h);
-      w = (int) (w*0.8);
-      h = (int) (h*0.8);
-   }
-   else
-   {
-      w = 200;
-      h = 250;
-   }  
-   val = wxGetSingleChoiceIndex(
-      _("Please choose an entry:"),
-      _("Expansion options"),
-      n, (char **)choices, parent,
-      -1,-1, // x,y
-      TRUE,//centre
-      w,h);
+   parent = GetParent(parent);
+   parent->GetClientSize(&w,&h);
+   w = (w * 8) / 10;
+   h = (h * 8) / 10;
 
-   if(val == -1)
-      result = NULL;
-   else
-      result = entries[val];
-
-   for(idx = 0; idx < n; idx++)
-      delete [] choices[idx];
-   
-   delete [] choices;
-   delete [] entries;
-  
-   return result;
+   return wxGetSingleChoiceIndex
+          (
+            _("Please choose an entry:"),
+            _("Expansion options"),
+            nEntryCount,
+            &aChoices[0],
+            parent,
+            -1, -1, // x,y
+            TRUE,   //centre
+            w, h
+          );
 }
-#endif
+
 // simple AboutDialog to be displayed at startup
 void
 MDialog_AboutDialog( MWindow *parent)

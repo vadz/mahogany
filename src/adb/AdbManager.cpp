@@ -23,6 +23,7 @@
 #include <wx/log.h>
 #include <wx/dynarray.h>
  
+#include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 #include "adb/AdbManager.h"
 #include "adb/AdbDataProvider.h"
@@ -31,16 +32,84 @@
 // types
 // ----------------------------------------------------------------------------
 
-// array of AdbBooks
-WX_DEFINE_ARRAY(AdbBook *, ArrayBooks);
+// arrays
+WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
+WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
 
 // cache: we store pointers to all already created ADBs here (it means that
 // once created they're not deleted until the next call to ClearCache)
-static ArrayBooks gs_cache;
+static ArrayAdbBooks gs_cache;
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// AdbLookup helper
+static void GroupLookup(ArrayAdbEntries& aEntries,
+                        AdbEntryGroup *pGroup, 
+                        const String& what,
+                        int where,
+                        int how);
 
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// global functions
+// ----------------------------------------------------------------------------
+
+// recursive (depth first) search
+static void GroupLookup(ArrayAdbEntries& aEntries,
+                        AdbEntryGroup *pGroup, 
+                        const String& what,
+                        int where,
+                        int how)
+{
+  wxArrayString aNames;
+  uint nGroupCount = pGroup->GetGroupNames(aNames);
+  for ( uint nGroup = 0; nGroup < nGroupCount; nGroup++ ) {
+    AdbEntryGroup *pSubGroup = pGroup->GetGroup(aNames[nGroup]);
+
+    GroupLookup(aEntries, pSubGroup, what, where, how);
+
+    pSubGroup->Unlock();
+  }
+
+  aNames.Empty();
+  uint nEntryCount = pGroup->GetEntryNames(aNames);
+  for ( uint nEntry = 0; nEntry < nEntryCount; nEntry++ ) {
+    AdbEntry *pEntry = pGroup->GetEntry(aNames[nEntry]);
+
+    if ( pEntry->Matches(what, where, how) ) {
+      aEntries.Add(pEntry);
+    }
+    else {
+      pEntry->Unlock();
+    }
+  }
+}
+
+bool AdbLookup(ArrayAdbEntries& aEntries,
+               const String& what,
+               int where,
+               int how,
+               const ArrayAdbBooks *paBooks)
+{
+  wxASSERT( aEntries.IsEmpty() );
+
+  if ( paBooks == NULL || paBooks->IsEmpty() )
+    paBooks = &gs_cache;
+
+  uint nBookCount = paBooks->Count();
+  for ( uint nBook = 0; nBook < nBookCount; nBook++ ) {
+    GroupLookup(aEntries, (*paBooks)[nBook], what, where, how);
+  }
+
+  // return true if something found
+  return !aEntries.IsEmpty();
+}
+
 
 // ----------------------------------------------------------------------------
 // AdbManager static functions and variables

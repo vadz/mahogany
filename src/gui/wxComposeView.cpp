@@ -53,6 +53,9 @@
 #include "gui/wxlparser.h"
 #include "gui/wxComposeView.h"
 
+#include "adb/AdbEntry.h"
+#include "adb/AdbManager.h"
+
 #include <wx/textfile.h>
 
 // ----------------------------------------------------------------------------
@@ -67,6 +70,11 @@ enum
 
 // margin between controls on the panel
 #define LAYOUT_MARGIN 5
+
+// ----------------------------------------------------------------------------
+// other types
+// ----------------------------------------------------------------------------
+WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
 
 // ----------------------------------------------------------------------------
 // event tables &c
@@ -235,15 +243,15 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
             c->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
          if ( n == Field_To ) {
             // the [Expand] button
-            wxButton *aliasButton = new wxButton(m_panel, -1, "Expand");
+            wxButton *btnExpand = new wxButton(m_panel, IDB_EXPAND, "Expand");
             wxLayoutConstraints *c2 = new wxLayoutConstraints;
             c2->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
             c2->right.SameAs(box, wxRight, LAYOUT_MARGIN);
             c2->width.AsIs();
             c2->height.AsIs();
-            aliasButton->SetConstraints(c2);
+            btnExpand->SetConstraints(c2);
 
-            c->right.LeftOf(aliasButton, LAYOUT_MARGIN);
+            c->right.LeftOf(btnExpand, LAYOUT_MARGIN);
          }
          else
             c->right.SameAs(box, wxRight, LAYOUT_MARGIN);
@@ -368,49 +376,34 @@ wxComposeView::ProcessMouse(wxMouseEvent &event)
 void
 wxComposeView::OnExpand(wxCommandEvent &event)
 {
-#if 0
-   Adb * adb = mApplication.GetAdb();
-   AdbEntry *entry = NULL;
+   String what = Str(m_txtFields[Field_To]->GetValue());
+   int l = what.length();
 
-   String   tmp = Str(m_txtFields[Field_To]->GetValue());
-   int l = tmp.length();
+   if ( l == 0 ) {
+     wxLogStatus(this, _("Nothing to expand - please enter something."));
 
-   // FIXME @@@ VZ: I don't know what this test does, so I disabled it
-   //if ( tmp.substr(l - 1, 1) == " " )
-
-   const char *expStr = NULL;
-   if(l > 0)
-   {
-      tmp = tmp.substr(0,l-1);
-      m_txtFields[Field_To]->SetValue(WXCPTR tmp.c_str());
-      expStr = strrchr(tmp.c_str(),',');
-      if(expStr)
-      {
-         tmp = tmp.substr(0,l-strlen(expStr));
-         expStr ++;
-      }
-      else
-         expStr = tmp.c_str();
-      entry = adb->Lookup(expStr, this);
-      if(! entry)
-         wxBell();
+     return;
    }
-   if(entry)
-   {
-      String
-         tmp2 = entry->formattedName + String(" <")
-         + entry->email.preferred.c_str() + String(">");
 
-      if(expStr == tmp.c_str())
-         tmp = tmp2;
-      else
-      {
-         tmp += ',';
-         tmp += tmp2;
-      }
-      m_txtFields[Field_To]->SetValue(WXCPTR tmp.c_str());
+   ArrayAdbEntries aEntries;
+   if ( AdbLookup(aEntries, what) ) {
+     int rc = MDialog_AdbLookupList(aEntries, this);
+
+     if ( rc != -1 ) {
+        wxString strEMail;
+        aEntries[rc]->GetField(AdbField_EMail, &strEMail);
+        m_txtFields[Field_To]->SetValue(strEMail);
+     }
+
+     // free all entries
+     uint nCount = aEntries.Count();
+     for ( uint n = 0; n < nCount; n++ ) {
+       aEntries[n]->Unlock();
+     }
    }
-#endif
+   else {
+     wxLogStatus(this, _("No matches for '%s'."), what.c_str());
+   }
 }
 
 #ifndef USE_WXWINDOWS2

@@ -17,20 +17,14 @@
 #   include	<MApplication.h>
 #   include	<MFrame.h>
 #   include	<MDialogs.h>
-class AdbEntry;
 #else
   // fwd decl
   class ProfileBase;
-  class AdbEntry;
-
-  // don't fwd decl typedef if it's already defined
-#   ifndef   ADB_H
-    class AdbExpandListType;
-#   endif
 #endif
 
+class ArrayAdbEntries;
 class wxString;
-class wxWindow;
+class MWindow;
 
 /**
    Dialog Boxes 
@@ -164,14 +158,20 @@ bool MDialog_YesNoDialog(String const &message,
 bool MInputBox(wxString *pstr,
                const wxString& caption,
                const wxString& prompt,
-               wxWindow *parent = NULL,
+               MWindow *parent = NULL,
                const char *key = NULL,
                const char *def = NULL);
-#if 0
-AdbEntry *
-MDialog_AdbLookupList(AdbExpandListType *adblist,
-		      MWindow *parent = NULL);
-#endif
+
+
+/**
+ Let the user choose an element from aEntries. If there is exactly one element
+ in the array (and we shouldn't be called with 0), 0 is always returned and
+ user is not asked at all. If the dialog is shown, the user may cancel it and
+ in this case -1 is returned. Otherwise, it's the index of selected item.
+*/
+int MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
+                          MWindow *parent = NULL);
+
 /// simple AboutDialog to be displayed at startup
 void
 MDialog_AboutDialog( MWindow *parent);
