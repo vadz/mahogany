@@ -3311,10 +3311,38 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                         m_msg->Address(name, MAT_REPLYTO);
                      }
 
-                     wxStringTokenizer tk(name);
-                     while ( tk.HasMoreTokens() )
+                     // it's (quite) common to have quotes around the personal
+                     // part of the address, remove them if so
+
+                     // remove spaces
+                     name.Trim(TRUE);
+                     name.Trim(FALSE);
+                     if ( !name.empty() )
                      {
-                        prefix += tk.GetNextToken()[0u];
+                        if ( name[0u] == '"' && name.Last() == '"' )
+                        {
+                           name = name.Mid(1, name.length() - 2);
+                        }
+
+                        // take the first letter of each word
+                        wxStringTokenizer tk(name);
+                        while ( tk.HasMoreTokens() )
+                        {
+                           char chInitial = tk.GetNextToken()[0u];
+
+                           if ( chInitial == '<' )
+                           {
+                              // this must be the start of embedded "<...>"
+                              // address, skip it completely
+                              break;
+                           }
+
+                           // only take letters as initials
+                           if ( isalpha(chInitial) )
+                           {
+                              prefix += chInitial;
+                           }
+                        }
                      }
                   }
 
