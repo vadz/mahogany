@@ -20,6 +20,7 @@
 // includes for c-client library
 extern "C"
 {
+#   include <mail.h>
 #   include <osdep.h>
 #   include <rfc822.h>
 #   include <smtp.h>

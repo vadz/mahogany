@@ -226,14 +226,16 @@ dnl --------------------------------------------------------------------------
 dnl check for the overridable options
 dnl --------------------------------------------------------------------------
 
+dnl memory debug libraries get tested last to make sure they are linked last
+
 dnl electric fence
 if test "$USE_EFENCE" = 1; then
-	AC_CHECK_LIB(efence,main,,AC_MSG_WARN("efence library configured but not available."))
+	AC_CHECK_LIB(efence,main,LIB_EFENCE="-lefence",AC_MSG_WARN("efence library configured but not available."))
 fi
 
 dnl dmalloc debugging lib
 if test "$USE_DMALLOC" = 1; then
-	AC_CHECK_LIB(dmalloc,main,,AC_MSG_WARN("dmalloc library configured but not available."))
+	AC_CHECK_LIB(dmalloc,main,LIB_DMALLOC="-ldmalloc",AC_MSG_WARN("dmalloc library configured but not available."))
 fi
 
 if test "$USE_THREADS" = 1
@@ -469,7 +471,7 @@ dnl compface is included in M source
 LIBS="$LIBS -lcompface"
 
 dnl add other flags
-LIBS="$LIBS $PYTHON_LIBS $GTK_LDFLAGS"
+LIBS="$LIBS $PYTHON_LIBS $GTK_LDFLAGS $LIB_EFENCE $LIB_DMALLOC"
 CXXFLAGS="$CXXFLAGS $DBGFLAGS"
 CFLAGS="$CFLAGS $DBGFLAGS"
 

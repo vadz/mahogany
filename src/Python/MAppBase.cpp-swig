@@ -54,6 +54,7 @@ extern PyObject *SWIG_newvarlink(void);
 #define SWIG_name    "MAppBasec"
 
 #include   "Mcommon.h"
+#include   <wx/config.h>
 #include   "kbList.h"
 #include   "guidef.h"
 #include   "strutil.h"

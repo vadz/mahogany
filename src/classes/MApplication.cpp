@@ -143,7 +143,6 @@ MAppBase::OnStartup()
    // initialise the profile(s)
    // -------------------------
 
-<<<<<<< MApplication.cpp
    String strConfFile;
 #ifdef OS_UNIX
    strConfFile = getenv("HOME");
@@ -154,26 +153,9 @@ MAppBase::OnStartup()
       if ( mkdir(strConfFile, 0777) != 0 ) {
          wxLogError(_("Can't create the directory for configuration"
                       "files '%s'."), strConfFile.c_str());
-=======
-   String strConfFile;
-#  ifdef OS_UNIX
-      strConfFile = getenv("HOME");
-      strConfFile << "/." << M_APPLICATIONNAME;
-      // FIXME must create the directory ourselves!
-      struct stat st;
-      if ( stat(strConfFile, &st) != 0 || !S_ISDIR(st.st_mode) ) {
-         if ( mkdir(strConfFile, 0777) != 0 ) {
-            wxLogError(_("Can't create the directory for configuration"
-                         "files '%s'."), strConfFile.c_str());
-            
-            return FALSE;
-         }
->>>>>>> 1.44
-         
          return FALSE;
       }
       
-<<<<<<< MApplication.cpp
       wxLogInfo(_("Created directory '%s' for configuration files."),
                 strConfFile.c_str());
    }
@@ -182,19 +164,7 @@ MAppBase::OnStartup()
 #else  // Windows
    strConfFile << "wxWindows\\" << M_APPLICATIONNAME;
 #endif // Unix
-=======
-      strConfFile += "/config";
-#  else  // Windows
-      strConfFile << "wxWindows\\" << M_APPLICATIONNAME;
-#  endif // Unix
->>>>>>> 1.44
-
    m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
-
-#  ifndef OS_WIN
-      // set the default path for configuration entries
-      m_profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
-#  endif
 
    // do we have gettext()?
    // ---------------------
@@ -264,7 +234,6 @@ MAppBase::OnStartup()
 
    // initialise python interpreter
 #  ifdef  USE_PYTHON
-<<<<<<< MApplication.cpp
    // having the same error message each time M is started is annoying, so
    // give the user a possibility to disable it
    if ( READ_APPCONFIG(MC_USEPYTHON) && !InitPython() ) {
@@ -278,22 +247,6 @@ MAppBase::OnStartup()
       {
          // disable it
          m_profile->writeEntry(MC_USEPYTHON, FALSE);
-=======
-      // having the same error message each time M is started is annoying, so
-      // give the user a possibility to disable it
-      if ( READ_APPCONFIG(MC_USEPYTHON) && !InitPython() ) {
-         CloseSplash();
-
-         const char *msg = "It's possible that you have problems with Python\n"
-                           "installation. Would you like to disable Python\n"
-                           "support for now (set " MC_USEPYTHON " to 1 to "
-                           "reenable it later)?";
-         if ( MDialog_YesNoDialog(_(msg)) )
-         {
-            // disable it
-            m_profile->writeEntry(MC_USEPYTHON, FALSE);
-         }
->>>>>>> 1.44
       }
    }
 #  endif //USE_PYTHON
@@ -356,11 +309,6 @@ MAppBase::OnShutDown()
    m_profile->DecRef();
    GLOBAL_DELETE m_mimeList;
    GLOBAL_DELETE m_mimeTypes;
-<<<<<<< MApplication.cpp
-   m_profile->DecRef();
-=======
-   GLOBAL_DELETE m_cfManager;
->>>>>>> 1.44
 }
 
 const char *

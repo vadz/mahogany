@@ -54,6 +54,7 @@ extern PyObject *SWIG_newvarlink(void);
 #define SWIG_name    "MProfilec"
 
 #include  "Mcommon.h"
+#include  <wx/config.h>
 #include  "kbList.h"
 #include  "Profile.h"
 #include  "strutil.h"

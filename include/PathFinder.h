@@ -14,8 +14,8 @@
 #endif
 
 #ifndef STRINGARG
-//#   define   STRINGARG String const &
-#   define   STRINGARG String
+#   define   STRINGARG String const &
+//#   define   STRINGARG String
 #endif
 
 /**@name PathFinder class for finding files */

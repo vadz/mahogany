@@ -22,10 +22,15 @@
 // macros
 // ----------------------------------------------------------------------------
 
+/// read from the global config section
 #define   READ_APPCONFIG(key) (mApplication->GetProfile()->readEntry(String(key), key##_D))
+/// read from a normal profile   
 #define   READ_CONFIG(profile, key) profile->readEntry(key, key##_D)
-//#define   STRINGARG String const &
-#define   STRINGARG String
+
+#ifndef STRINGARG
+#define   STRINGARG String const &
+//#define   STRINGARG String
+#endif
 
 // ----------------------------------------------------------------------------
 // classes

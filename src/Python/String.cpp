@@ -55,6 +55,8 @@ extern PyObject *SWIG_newvarlink(void);
 
 #include  "Mcommon.h"
 
+#include  <wx/config.h>
+
 // we don't want to export our functions as we don't build a shared library
 #undef SWIGEXPORT
 #define SWIGEXPORT(a,b) a b
