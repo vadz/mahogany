@@ -1118,6 +1118,14 @@ wxColour MessageView::GetQuoteColour(size_t qlevel) const
 
 void MessageView::ShowTextPart(const MimePart *mimepart)
 {
+   // as we're going to need its contents, we'll have to download it: check if
+   // it is not too big before doing this
+   if ( !CheckMessagePartSize(mimepart) )
+   {
+      // don't download this part
+      return;
+   }
+
    // get the encoding of the text
    wxFontEncoding encPart;
    if ( m_encodingUser != wxFONTENCODING_SYSTEM )
@@ -1344,7 +1352,8 @@ void MessageView::ShowImage(const MimePart *mimepart)
    }
 }
 
-ClickableInfo *MessageView::GetClickableInfo(const MimePart *mimepart) const
+/* static */
+String MessageView::GetLabelFor(const MimePart *mimepart)
 {
    wxString label = mimepart->GetFilename();
    if ( !label.empty() )
@@ -1363,7 +1372,12 @@ ClickableInfo *MessageView::GetClickableInfo(const MimePart *mimepart) const
       label << strutil_ultoa(mimepart->GetSize()) << _(" bytes");
    }
 
-   return new ClickableInfo(mimepart, label);
+   return label;
+}
+
+ClickableInfo *MessageView::GetClickableInfo(const MimePart *mimepart) const
+{
+   return new ClickableInfo(mimepart, GetLabelFor(mimepart));
 }
 
 // ----------------------------------------------------------------------------
@@ -1428,9 +1442,15 @@ MessageView::ShowPart(const MimePart *mimepart)
 
    if ( !isAttachment && m_viewer->CanProcess(mimeType) )
    {
-      String data = mimepart->GetContent();
+      // as we're going to need its contents, we'll have to download it: check
+      // if it is not too big before doing this
+      if ( !CheckMessagePartSize(mimepart) )
+      {
+         String data = mimepart->GetContent();
 
-      m_viewer->InsertRawContents(data);
+         m_viewer->InsertRawContents(data);
+      }
+      //else: skip this part
    }
    else if ( !isAttachment &&
              ((mimeType == "TEXT/PLAIN" &&
@@ -2305,7 +2325,11 @@ MessageView::DoMenuCommand(int id)
 
    switch ( id )
    {
-      case WXMENU_MSG_FIND:
+      case WXMENU_EDIT_COPY:
+         m_viewer->Copy();
+         break;
+
+      case WXMENU_EDIT_FIND:
          {
             String text;
             if ( MInputBox(&text,
@@ -2319,7 +2343,7 @@ MessageView::DoMenuCommand(int id)
          }
          break;
 
-      case WXMENU_MSG_FINDAGAIN:
+      case WXMENU_EDIT_FINDAGAIN:
          m_viewer->FindAgain();
          break;
 
@@ -2421,8 +2445,8 @@ MessageView::DoMenuCommand(int id)
          }
          break;
 
-      case WXMENU_EDIT_COPY:
-         m_viewer->Copy();
+      case WXMENU_MSG_SHOWMIME:
+         ShowMIMEDialog(m_mailMessage->GetTopMimePart());
          break;
 
       default:
@@ -2452,7 +2476,7 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
          switch ( id )
          {
             case WXMENU_LAYOUT_RCLICK:
-               PopupMIMEMenu(ci->GetPart(), pt);
+               PopupMIMEMenu(GetWindow(), ci->GetPart(), pt);
                break;
 
             case WXMENU_LAYOUT_LCLICK:
@@ -2488,7 +2512,7 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
 
          if ( id == WXMENU_LAYOUT_RCLICK )
          {
-            PopupURLMenu(url, pt);
+            PopupURLMenu(GetWindow(), url, pt);
          }
          else // left or double click
          {
@@ -2585,45 +2609,68 @@ MessageView::ShowMessage(UIdType uid)
    }
 }
 
+bool
+MessageView::CheckMessageOrPartSize(unsigned long size, bool part) const
+{
+   unsigned long maxSize = (unsigned long)READ_CONFIG(GetProfile(),
+                                                      MP_MAX_MESSAGE_SIZE);
+
+   // translate to Kb before comparing with MP_MAX_MESSAGE_SIZE which is in Kb
+   size /= 1024;
+   if ( size <= maxSize )
+   {
+      // it's ok, don't ask
+      return true;
+   }
+   //else: big message, ask
+
+   wxString msg;
+   msg.Printf(_("The selected message%s is %u Kbytes long which is "
+                "more than the current threshold of %d Kbytes.\n"
+                "\n"
+                "Do you still want to download it?"),
+              part ? _(" part") : "", size, maxSize);
+
+   return MDialog_YesNoDialog(msg, GetParentFrame());
+}
+
+bool
+MessageView::CheckMessagePartSize(const MimePart *mimepart) const
+{
+   // only check for IMAP here: for POP/NNTP we had already checked it in
+   // CheckMessageSize() below and the local folders are fast
+   return (m_asyncFolder->GetType() != MF_IMAP) ||
+               CheckMessageOrPartSize(mimepart->GetSize(), true);
+}
+
+bool
+MessageView::CheckMessageSize(const Message *message) const
+{
+   // we check the size here only for POP3 and NNTP because the local folders
+   // are supposed to be fast and for IMAP we don't retrieve the whole message
+   // at once so we'd better ask only if we're going to download it
+   //
+   // for example, if the message has text/plain part of 100 bytes and
+   // video/mpeg one of 2Mb, we don't want to ask the user before downloading
+   // 100 bytes (and then, second time, before downloading 2b!)
+   FolderType folderType = m_asyncFolder->GetType();
+   return (folderType != MF_POP && folderType != MF_NNTP) ||
+               CheckMessageOrPartSize(message->GetSize(), false);
+}
+
 void
 MessageView::DoShowMessage(Message *mailMessage)
 {
    CHECK_RET( mailMessage, "no message to show in MessageView" );
+   CHECK_RET( m_asyncFolder, "no folder in MessageView::DoShowMessage()" );
+
+   if ( !CheckMessageSize(mailMessage) )
+   {
+      // too big, don't show it
+      return;
+   }
 
    mailMessage->IncRef();
-
-   // size is measured in KBytes
-   unsigned long size = mailMessage->GetSize() / 1024,
-                 maxSize = (unsigned long)READ_CONFIG(GetProfile(),
-                                                      MP_MAX_MESSAGE_SIZE);
-
-   if ( size > maxSize )
-   {
-      MailFolder *mf = mailMessage->GetFolder();
-      CHECK_RET( mf, "message without folder?" );
-
-      // local folders are supposed to be fast
-      if ( !IsLocalQuickFolder(mf->GetType()) )
-      {
-         // FIXME: this check should probably be replaced by a check in
-         //        Update() as for an IMAP folder message can be very large but
-         //        the text part we show can still be small so the question
-         //        doesn't make sense... and only Update() knows exactly what
-         //        we really show, ShowMessage() doesn't
-         wxString msg;
-         msg.Printf(_("The selected message is %u Kbytes long which is "
-                      "more than the current threshold of %d Kbytes.\n"
-                      "\n"
-                      "Do you still want to download it?"),
-                    size, maxSize);
-         if ( !MDialog_YesNoDialog(msg, GetParentFrame()) )
-         {
-            // don't do anything
-            mailMessage->DecRef();
-            return;
-         }
-      }
-   }
 
    // ok, make this our new current message
    SafeDecRef(m_mailMessage);

@@ -53,12 +53,18 @@ public:
    virtual void OnViewerChange(const MessageViewer *viewerOld,
                                const MessageViewer *viewerNew);
 
-private:
    /// show the URL popup menu
-   virtual void PopupURLMenu(const String& url, const wxPoint& pt);
+   virtual void PopupURLMenu(wxWindow *window,
+                             const String& url,
+                             const wxPoint& pt);
 
    /// show the MIME popup menu for this message part
-   virtual void PopupMIMEMenu(const MimePart *part, const wxPoint& pt);
+   virtual void PopupMIMEMenu(wxWindow *window,
+                              const MimePart *part,
+                              const wxPoint& pt);
+
+   /// show the MIME tree
+   virtual void ShowMIMEDialog(const MimePart *part);
 };
 
 // ----------------------------------------------------------------------------

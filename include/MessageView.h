@@ -79,6 +79,9 @@ public:
    /// get the underlying window
    wxWindow *GetWindow() const;
 
+   /// get the parent frame of the viewer
+   wxFrame *GetParentFrame() const;
+
    /// get the UID of the currently shown message (UID_ILLEGAL if none)
    UIdType GetUId() const { return m_uid; }
 
@@ -179,6 +182,9 @@ public:
    static size_t GetAllAvailableViewers(wxArrayString *names,
                                         wxArrayString *descs);
 
+   /// return a descriptive label for this MIME part
+   static String GetLabelFor(const MimePart *mimepart);
+
 protected:
    /** @name Initialization
     */
@@ -220,9 +226,6 @@ protected:
    /// get the folder we use: DO NOT CALL DecRef() ON RESULT
    ASMailFolder *GetFolder() const { return m_asyncFolder; }
 
-   /// get the parent frame of the viewer
-   wxFrame *GetParentFrame() const;
-
    //@}
 
    /** @name External processes
@@ -260,7 +263,7 @@ protected:
 
    //@}
 
-   /** @name Popup menus
+   /** @name GUI hooks
 
        MessageView doesn't know anything about GUI so these methods must be
        implemented in the derived class
@@ -268,10 +271,17 @@ protected:
    //@{
 
    /// show the URL popup menu
-   virtual void PopupURLMenu(const String& url, const wxPoint& pt) = 0;
+   virtual void PopupURLMenu(wxWindow *window,
+                             const String& url,
+                             const wxPoint& pt) = 0;
 
    /// show the MIME popup menu for this message part
-   virtual void PopupMIMEMenu(const MimePart *part, const wxPoint& pt) = 0;
+   virtual void PopupMIMEMenu(wxWindow *window,
+                              const MimePart *part,
+                              const wxPoint& pt) = 0;
+
+   /// show the MIME structure dialog
+   virtual void ShowMIMEDialog(const MimePart *part) = 0;
 
    //@}
 
@@ -382,6 +392,28 @@ private:
 
    /// the auto detected encoding for the current message so far
    wxFontEncoding m_encodingAuto;
+
+   //@}
+
+   /** @name Message size checks
+
+       We have an option to limit the size of the messages we download, but
+       checking for it is less trivial as it seems as for some protocols (POP,
+       NNTP) we always download the whole message at once while for IMAP we
+       only download the parts we need to show inline, so we have 2 methods to
+       check for both cases and one method containing their common code (which
+       shouldn't be called directly)
+    */
+   //@{
+
+   /// ask user if it's ok to download this message/part if size > limit
+   bool CheckMessageOrPartSize(unsigned long size, bool part) const;
+
+   /// call CheckMessageOrPartSize(true) for IMAP
+   bool CheckMessagePartSize(const MimePart *part) const;
+
+   /// call CheckMessageOrPartSize(false) for POP/NNTP
+   bool CheckMessageSize(const Message *message) const;
 
    //@}
 

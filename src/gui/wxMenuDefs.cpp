@@ -204,14 +204,14 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // file
    // available accels: BFGHJKLOQVWZ
-   { WXMENU_FILE_COMPOSE,  gettext_noop("Compose &New Message\tCtrl-N"),  gettext_noop("Start a new message")      , FALSE },
+   { WXMENU_FILE_COMPOSE,  gettext_noop("Compose &new message\tCtrl-N"),  gettext_noop("Start a new message")      , FALSE },
    { WXMENU_FILE_COMPOSE_WITH_TEMPLATE,
                            gettext_noop("Compose with &template...\tShift-Ctrl-N"),  gettext_noop("Compose a new message using after choosing a temple for it")      , FALSE },
-   { WXMENU_FILE_POST,     gettext_noop("Post News &Article"),   gettext_noop("Write a news article and post it")      , FALSE },
+   { WXMENU_FILE_POST,     gettext_noop("Post news &article"),   gettext_noop("Write a news article and post it")      , FALSE },
    { WXMENU_FILE_COLLECT,  gettext_noop("&Check mail\tShift-Ctrl-C"), gettext_noop("Check all incoming folders for new mail and download it now") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_PRINT_SETUP,    gettext_noop("P&rint Setup"),     gettext_noop("Configure printing")  , FALSE },
-   { WXMENU_FILE_PAGE_SETUP,    gettext_noop("P&age Setup"),     gettext_noop("Configure page setup")  , FALSE },
+   { WXMENU_FILE_PRINT_SETUP,    gettext_noop("P&rint setup"),     gettext_noop("Configure printing")  , FALSE },
+   { WXMENU_FILE_PAGE_SETUP,    gettext_noop("Pa&ge setup"),     gettext_noop("Configure page setup")  , FALSE },
 #ifdef USE_PS_PRINTING
    // extra postscript printing
    { WXMENU_FILE_PRINT_SETUP_PS,    gettext_noop("&Print PS Setup"),     gettext_noop("Configure PostScript printing")  , FALSE },
@@ -227,8 +227,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tShift-Ctrl-S"), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network"), gettext_noop("Activate dial-up networking")        , FALSE },
-   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down Network"), gettext_noop("Shutdown dial-up networking")        , FALSE },
+   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to network"), gettext_noop("Activate dial-up networking")        , FALSE },
+   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down network"), gettext_noop("Shutdown dial-up networking")        , FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_SUBMENU,       gettext_noop("&Identity"), "", FALSE },
@@ -242,7 +242,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_IMPORT,   gettext_noop("I&mport..."),  gettext_noop("Import settings from another e-mail program")        , FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window\tCtrl-W"),     gettext_noop("Close this window")        , FALSE },
+   { WXMENU_FILE_CLOSE,    gettext_noop("&Close window\tCtrl-W"),     gettext_noop("Close this window")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_AWAY_MODE,gettext_noop("Awa&y mode\tCtrl-Y"),        gettext_noop("Toggle unattended mode on/off"), TRUE },
    { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tCtrl-Q"),             gettext_noop("Quit the application")     , FALSE },
@@ -267,25 +267,30 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FOLDER_PROP,      gettext_noop("&Properties..."), gettext_noop("Show the properties of the current folder")               , FALSE },
 
    // normal edit
+
+   // the available accelerators for this menu:
+   // BHIJKLNOQVWXYZ
    { WXMENU_EDIT_CUT,  gettext_noop("C&ut\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , FALSE },
    { WXMENU_EDIT_COPY, gettext_noop("&Copy\tCtrl-C"), gettext_noop("Copy selection to clipboard")           , FALSE },
    { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_EDIT_ADB,      gettext_noop("&Address books...\tCtrl-D"), gettext_noop("Edit the address book(s)") , FALSE },
+   { WXMENU_EDIT_FIND,  gettext_noop("&Find...\tF3"), gettext_noop("Find text in message") , FALSE },
+   { WXMENU_EDIT_FINDAGAIN, gettext_noop("Find a&gain\tCtrl-F3"), gettext_noop("Find the same text again") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_EDIT_ADB,      gettext_noop("&Address books...\tCtrl-D"), gettext_noop("Edit the address book(s)") , FALSE },
    { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences..."),   gettext_noop("Change options")           , FALSE },
    { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           , FALSE },
-   { WXMENU_EDIT_FILTERS,  gettext_noop("&Filter Rules..."), gettext_noop("Edit rules for message filtering")   , FALSE },
+   { WXMENU_EDIT_FILTERS,  gettext_noop("Filter &rules..."), gettext_noop("Edit rules for message filtering")   , FALSE },
    { WXMENU_EDIT_TEMPLATES,gettext_noop("&Templates..."), gettext_noop("Edit templates used for message composition")   , FALSE },
-   { WXMENU_EDIT_RESTORE_PREF,
-                           gettext_noop("&Restore defaults..."), gettext_noop("Restore default options values") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             , FALSE },
+   { WXMENU_EDIT_RESTORE_PREF,
+                           gettext_noop("Restore &defaults..."), gettext_noop("Restore default options values") , FALSE },
 
    // msg
 
    // the available accelerators for this menu:
-   // BJZ
+   // bijqwz
 
    { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message")    , FALSE },
    { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print this message")       , FALSE },
@@ -294,45 +299,50 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       , FALSE },
    { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       , FALSE },
 #endif // USE_PS_PRINTING
-   { WXMENU_MSG_REPLY,     gettext_noop("&Reply\tCtrl-R"),            gettext_noop("Reply to this message")    , FALSE },
-   { WXMENU_MSG_REPLY_WITH_TEMPLATE, gettext_noop("Reply with &template...\tShift-Ctrl-R"), gettext_noop("Reply to this message after choosing a template to use ")    , FALSE },
-   { WXMENU_MSG_FOLLOWUP,  gettext_noop("Reply to a&ll\tCtrl-G"), gettext_noop("Reply to all recipients of this message")    , FALSE },
-   { WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE,
-                           gettext_noop("Repl&y to all with template...\tShift-Ctrl-G"),      gettext_noop("Reply to all recipients of this message after choosing a template to use ")    , FALSE },
-   { WXMENU_MSG_FORWARD,   gettext_noop("&Forward\tCtrl-F"),          gettext_noop("Forward this message")     , FALSE },
-   { WXMENU_MSG_FORWARD_WITH_TEMPLATE,
-                           gettext_noop("Forward with te&mplate...\tShift-Ctrl-F"), gettext_noop("Forward this message after choosing a template to use ")     , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_SUBMENU,       gettext_noop("&Send"), "", FALSE },
+      { WXMENU_MSG_REPLY,     gettext_noop("&Reply\tCtrl-R"),            gettext_noop("Reply to this message")    , FALSE },
+      { WXMENU_MSG_REPLY_WITH_TEMPLATE, gettext_noop("Reply with &template...\tShift-Ctrl-R"), gettext_noop("Reply to this message after choosing a template to use ")    , FALSE },
+      { WXMENU_MSG_FOLLOWUP,  gettext_noop("Reply to a&ll\tCtrl-G"), gettext_noop("Reply to all recipients of this message")    , FALSE },
+      { WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE,
+                              gettext_noop("Repl&y to all with template...\tShift-Ctrl-G"),      gettext_noop("Reply to all recipients of this message after choosing a template to use ")    , FALSE },
+      { WXMENU_MSG_FORWARD,   gettext_noop("&Forward\tCtrl-F"),          gettext_noop("Forward this message")     , FALSE },
+      { WXMENU_MSG_FORWARD_WITH_TEMPLATE,
+                              gettext_noop("Forward with &template...\tShift-Ctrl-F"), gettext_noop("Forward this message after choosing a template to use ")     , FALSE },
+   { WXMENU_SUBMENU,       "", "", FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_FILTER,    gettext_noop("&Apply filter rules..."), gettext_noop("Apply filter rules to selected messages")     , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , FALSE },
-   { WXMENU_MSG_NEXT_FLAGGED,   gettext_noop("Ne&xt flagged"), gettext_noop("Select next flagged message")     , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as f&ile..."), gettext_noop("Export message to a file")   , FALSE },
+   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as &file..."), gettext_noop("Export message to a file")   , FALSE },
    { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to folder..."),gettext_noop("Save message to another folder")   , FALSE },
    { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to folder..."),gettext_noop("Move message to another folder")   , FALSE },
    { WXMENU_MSG_DELETE,    gettext_noop("&Delete"),           gettext_noop("Delete this message")      , FALSE },
    { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
+   { WXMENU_MSG_EXPUNGE,   gettext_noop("E&xpunge"), gettext_noop("Remove all messages marked as deleted from the folder.")                  , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , FALSE },
+   { WXMENU_MSG_NEXT_FLAGGED,   gettext_noop("N&ext flagged"), gettext_noop("Select next flagged message")     , FALSE },
+   { WXMENU_MSG_SEARCH,  gettext_noop("Searc&h..."), gettext_noop("Search and select messages") , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_FLAG,      gettext_noop("Fla&g\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , FALSE },
-   { WXMENU_MSG_EXPUNGE,   gettext_noop("Ex&punge"),          gettext_noop("Expunge")                  , FALSE },
-#if defined(EXPERIMENTAL_MARK_READ)
-   { WXMENU_MSG_MARK_READ,   gettext_noop("Mar&k read"), gettext_noop("Mark message as read"), FALSE },
-   { WXMENU_MSG_MARK_UNREAD,   gettext_noop("Mark unread (&q)\tShift-Ctrl-U"), gettext_noop("Mark message as unread"), FALSE },
-#endif // EXPERIMENTAL_MARK_READ
+   { WXMENU_MSG_MARK_READ,   gettext_noop("Mark &read"), gettext_noop("Mark message as read"), FALSE },
+   { WXMENU_MSG_MARK_UNREAD,   gettext_noop("Mar&k unread\tShift-Ctrl-U"), gettext_noop("Mark message as unread"), FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_SELECTALL, gettext_noop("Select &all\tCtrl-A"),       gettext_noop("Select all messages")      , FALSE },
-   { WXMENU_MSG_SELECTUNREAD, gettext_noop("Select all &unread\tShift-Ctrl-A"), gettext_noop("Select all unread messages")      , FALSE },
-   { WXMENU_MSG_SELECTFLAGGED, gettext_noop("Select all &flagged"), gettext_noop("Select all flagged messages")      , FALSE },
-   { WXMENU_MSG_DESELECTALL,gettext_noop("D&eselect all\tCtrl-B"),    gettext_noop("Deselect all messages")    , FALSE },
-   { WXMENU_MSG_SEARCH,  gettext_noop("&Search..."), gettext_noop("Search and select messages") , FALSE },
+   { WXMENU_SUBMENU,       gettext_noop("Se&lect"), "", FALSE },
+      { WXMENU_MSG_SELECTALL, gettext_noop("Select &all\tCtrl-A"),       gettext_noop("Select all messages")      , FALSE },
+      { WXMENU_MSG_SELECTUNREAD, gettext_noop("Select all &unread\tShift-Ctrl-A"), gettext_noop("Select all unread messages")      , FALSE },
+      { WXMENU_MSG_SELECTFLAGGED, gettext_noop("Select all &flagged"), gettext_noop("Select all flagged messages")      , FALSE },
+      { WXMENU_MSG_DESELECTALL,gettext_noop("&Deselect all\tCtrl-B"),    gettext_noop("Deselect all messages")    , FALSE },
+   { WXMENU_SUBMENU,       "", "", FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extra&ct addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), FALSE },
-   { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
-   { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-W"), gettext_noop("Show the raw message text") , FALSE },
+   { WXMENU_SUBMENU,       gettext_noop("&Yet more commands"), "", FALSE },
+      { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extra&ct addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), FALSE },
+      { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
+      { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-W"), gettext_noop("Show the raw message text") , FALSE },
 #ifdef EXPERIMENTAL_show_uid
-   { WXMENU_MSG_SHOWUID, "Show message UID&L", "", FALSE },
+      { WXMENU_MSG_SHOWUID, "Show message UID&L", "", FALSE },
 #endif // EXPERIMENTAL_show_uid
-   { WXMENU_MSG_FIND,  gettext_noop("Fi&nd...\tF3"), gettext_noop("Find text in message") , FALSE },
-   { WXMENU_MSG_FINDAGAIN, gettext_noop("Find again (&z)\tCtrl-F3"), gettext_noop("Find the same text again") , FALSE },
+      { WXMENU_MSG_SHOWMIME,  gettext_noop("Show &MIME structure...\tShift-Ctrl-W"), gettext_noop("Show the MIME structure of the message") , FALSE },
+   { WXMENU_SUBMENU,       "", "", FALSE },
 
    // compose
    { WXMENU_COMPOSE_INSERTFILE, gettext_noop("&Insert file...\tCtrl-I"),
@@ -497,7 +507,7 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
 #endif
 
    for ( int n = nFirst; n <= nLast; n++ ) {
-#     ifdef DEBUG
+#ifdef DEBUG
       const char *label = wxGetTranslation(g_aMenuItems[n].label);
       if ( !IsEmpty(label) ) {
          const char *p = strchr(label, '&');
@@ -506,7 +516,7 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
                          label);
          }
          else {
-            char c = *++p;
+            char c = toupper(*++p);
             if ( strAccels.Find(c) != -1 ) {
                wxLogWarning("Duplicate accelerator %c (in '%s')", c, label);
             }
@@ -516,7 +526,7 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
       }
       // else: it must be a separator
 
-#     endif //DEBUG
+#endif //DEBUG
 
       AppendToMenu(menu, n);
    }

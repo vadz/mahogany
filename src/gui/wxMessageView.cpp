@@ -38,6 +38,7 @@
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 #  include "gui/wxIconManager.h"
+#  include "gui/wxDialogLayout.h"
 #endif //USE_PCH
 
 #include "Mdefaults.h"
@@ -68,6 +69,7 @@
 #include <wx/fontmap.h>
 #include <wx/clipbrd.h>
 #include <wx/splitter.h>
+#include <wx/treectrl.h>
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -173,6 +175,65 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// dialog classes
+// ----------------------------------------------------------------------------
+
+class wxMIMETreeCtrl : public wxTreeCtrl
+{
+public:
+   wxMIMETreeCtrl(wxWindow *parent) : wxTreeCtrl(parent, -1)
+   {
+      InitImageLists();
+   }
+
+private:
+   void InitImageLists();
+};
+
+class wxMIMETreeData : public wxTreeItemData
+{
+public:
+   wxMIMETreeData(const MimePart *mimepart) { m_mimepart = mimepart; }
+
+   const MimePart *GetMimePart() const { return m_mimepart; }
+
+private:
+   const MimePart *m_mimepart;
+};
+
+class wxMIMETreeDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxMIMETreeDialog(wxMessageView *msgView, const MimePart *partRoot);
+
+protected:
+   // event handlers
+   void OnTreeItemRightClick(wxTreeEvent& event)
+   {
+      wxMIMETreeData *data =
+         (wxMIMETreeData *)m_treectrl->GetItemData(event.GetItem());
+
+      m_msgView->PopupMIMEMenu(m_treectrl, data->GetMimePart(), event.GetPoint());
+   }
+
+private:
+   // fill the tree
+   void AddToTree(wxTreeItemId id, const MimePart *mimepart);
+
+   // total number of parts
+   size_t m_countParts;
+
+   // GUI controls
+   wxStaticBox *m_box;
+   wxTreeCtrl *m_treectrl;
+
+   // the parent message view
+   wxMessageView *m_msgView;
+
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
 
@@ -184,8 +245,12 @@ BEGIN_EVENT_TABLE(UrlPopup, wxMenu)
    EVT_MENU(-1, UrlPopup::OnCommandEvent)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxMIMETreeDialog, wxManuallyLaidOutDialog)
+   EVT_TREE_ITEM_RIGHT_CLICK(-1, wxMIMETreeDialog::OnTreeItemRightClick)
+END_EVENT_TABLE()
+
 // ============================================================================
-// implementation
+// implementation of misc private classes
 // ============================================================================
 
 // ----------------------------------------------------------------------------
@@ -258,7 +323,88 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
 }
 
 // ----------------------------------------------------------------------------
-// wxMessageView
+// wxMIMETreeCtrl
+// ----------------------------------------------------------------------------
+
+void wxMIMETreeCtrl::InitImageLists()
+{
+   wxIconManager *iconManager = mApplication->GetIconManager();
+
+   wxImageList *imaglist = new wxImageList(32, 32);
+
+   for ( int i = MimeType::TEXT; i <= MimeType::OTHER; i++ )
+   {
+      // this is a big ugly: we need to get just the 
+      MimeType mt((MimeType::Primary)i, "");
+      wxIcon icon = iconManager->GetIconFromMimeType(mt.GetType());
+      imaglist->Add(icon);
+   }
+
+   AssignImageList(imaglist);
+}
+
+// ----------------------------------------------------------------------------
+// wxMIMETreeDialog
+// ----------------------------------------------------------------------------
+
+wxMIMETreeDialog::wxMIMETreeDialog(wxMessageView *msgView,
+                                   const MimePart *partRoot)
+                : wxManuallyLaidOutDialog(msgView->GetParentFrame(),
+                                          _("MIME structure of the message"),
+                                          "MimeTreeDialog")
+{
+   // init members
+   m_msgView = msgView;
+   m_countParts = 0;
+   m_box = NULL;
+   m_treectrl = NULL;
+
+   // create controls
+   wxLayoutConstraints *c;
+   m_box = CreateStdButtonsAndBox(""); // label will be set later
+
+   m_treectrl = new wxMIMETreeCtrl(this);
+   c = new wxLayoutConstraints;
+   c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_treectrl->SetConstraints(c);
+
+   // initialize them
+   AddToTree(wxTreeItemId(), partRoot);
+
+   m_box->SetLabel(wxString::Format(_("%u MIME parts"), m_countParts));
+
+   SetDefaultSize(4*wBtn, 10*hBtn);
+}
+
+void
+wxMIMETreeDialog::AddToTree(wxTreeItemId idParent, const MimePart *mimepart)
+{
+   int image = mimepart->GetType().GetPrimary();
+   wxTreeItemId id  = m_treectrl->AppendItem(idParent,
+                                             MessageView::GetLabelFor(mimepart),
+                                             image, image,
+                                             new wxMIMETreeData(mimepart));
+
+   m_countParts++;
+
+   const MimePart *partChild = mimepart->GetNested();
+   while ( partChild )
+   {
+      AddToTree(id, partChild);
+
+      partChild = partChild->GetNext();
+   }
+}
+
+// ============================================================================
+// wxMessageView implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// ctor/dtor
 // ----------------------------------------------------------------------------
 
 wxMessageView::wxMessageView(wxWindow *parent)
@@ -274,18 +420,32 @@ wxMessageView::~wxMessageView()
 // popup menus
 // ----------------------------------------------------------------------------
 
-void wxMessageView::PopupURLMenu(const String& url, const wxPoint& pt)
+void wxMessageView::PopupURLMenu(wxWindow *window,
+                                 const String& url,
+                                 const wxPoint& pt)
 {
    UrlPopup menu(this, url);
 
-   GetWindow()->PopupMenu(&menu, pt);
+   window->PopupMenu(&menu, pt);
 }
 
-void wxMessageView::PopupMIMEMenu(const MimePart *part, const wxPoint& pt)
+void wxMessageView::PopupMIMEMenu(wxWindow *window,
+                                  const MimePart *part,
+                                  const wxPoint& pt)
 {
    MimePopup mimePopup(this, part);
 
-   GetWindow()->PopupMenu(&mimePopup, pt);
+   window->PopupMenu(&mimePopup, pt);
+}
+
+// ----------------------------------------------------------------------------
+// MIME structure dialog
+// ----------------------------------------------------------------------------
+
+void wxMessageView::ShowMIMEDialog(const MimePart *part)
+{
+   wxMIMETreeDialog dialog(this, part);
+   dialog.ShowModal();
 }
 
 // ----------------------------------------------------------------------------

@@ -391,7 +391,6 @@ public:
       { m_MailFolder->ExpungeMessages(); }
 };
 
-#if defined(EXPERIMENTAL_MARK_READ)
 class MT_MarkRead : public MailThreadSeq
 {
 private:
@@ -423,7 +422,6 @@ public:
 #endif
    }
 };
-#endif // EXPERIMENTAL_MARK_READ
 
 class MT_SearchMessages : public MailThread
 {
@@ -743,7 +741,6 @@ public:
          return (new MT_Expunge(this))->Start();
       }
 
-#if defined(EXPERIMENTAL_MARK_READ)
    /** Mark messages read/unread.
        @param selections the message indices which will be converted using the current listing
        @param read true if messages must be marked read
@@ -755,7 +752,6 @@ public:
          //return SetFlag(selections, MailFolder::MSG_STAT_SEEN, read);
          return (new MT_MarkRead(this, ud, selections, read))->Start();
       }
-#endif // EXPERIMENTAL_MARK_READ
 
    /** Search Messages.
        @return a Result with a sequence of matching uids.

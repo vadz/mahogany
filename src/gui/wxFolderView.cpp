@@ -2702,9 +2702,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          SearchMessages();
          break;
 
-      case WXMENU_MSG_FIND:
-      case WXMENU_MSG_TOGGLEHEADERS:
+      case WXMENU_EDIT_FIND:
+      case WXMENU_EDIT_FINDAGAIN:
       case WXMENU_EDIT_COPY:
+      case WXMENU_MSG_TOGGLEHEADERS:
          if ( m_MessagePreview )
          {
             (void)m_MessagePreview->DoMenuCommand(cmd);
@@ -2725,7 +2726,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          ExpungeMessages();
          break;
 
-#if defined(EXPERIMENTAL_MARK_READ)
       case WXMENU_MSG_MARK_READ:
          MarkRead(GetSelections(), true);
          break;
@@ -2733,7 +2733,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
       case WXMENU_MSG_MARK_UNREAD:
          MarkRead(GetSelections(), false);
          break;
-#endif // EXPERIMENTAL_MARK_READ
 
       case WXMENU_MSG_OPEN:
          OpenMessages(GetSelections());
@@ -2999,10 +2998,16 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 #endif // EXPERIMENTAL_show_uid
 
       default:
-         if ( WXMENU_CONTAINS(LANG, cmd) )
+         if ( m_MessagePreview )
          {
-            if ( m_MessagePreview )
+            if ( WXMENU_CONTAINS(MSG, cmd) )
+            {
+               m_MessagePreview->DoMenuCommand(cmd);
+            }
+            else if ( WXMENU_CONTAINS(LANG, cmd) )
+            {
                m_MessagePreview->SetLanguage(cmd);
+            }
          }
          else if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
          {
@@ -3270,7 +3275,6 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections, MFolder *folder)
    return t;
 }
 
-#if defined(EXPERIMENTAL_MARK_READ)
 Ticket
 wxFolderView::MarkRead(const UIdArray& selections, bool read)
 {
@@ -3289,7 +3293,6 @@ wxFolderView::MarkRead(const UIdArray& selections, bool read)
 
       return t;
 }
-#endif // EXPERIMENTAL_MARK_READ
 
 Ticket
 wxFolderView::MoveMessagesToFolder(const UIdArray& messages, MFolder *folder)
@@ -3794,10 +3797,8 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          case ASMailFolder::Op_DeleteMessages:
          case ASMailFolder::Op_DeleteOrTrashMessages:
          case ASMailFolder::Op_UnDeleteMessages:
-#if defined(EXPERIMENTAL_MARK_READ)
          case ASMailFolder::Op_MarkRead:
          case ASMailFolder::Op_MarkUnread:
-#endif // EXPERIMENTAL_MARK_READ
             break;
 
          case ASMailFolder::Op_GetMessage:

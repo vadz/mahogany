@@ -517,26 +517,6 @@ wxIconManager::GetIcon(const String &iconNameOrig)
    if ( FindInCache(iconName, &icon) )
       return icon;
 
-   // for the MIME icons of the form type/subtype we also look up the generic
-   // version
-   if ( IsMimeType(iconName) )
-   {
-      // VZ: why do we do this? replacing a particular icon (i.e. image/xyz)
-      //     with a generic one (image) makes sense, but not the other way
-      //     round (why should text/xyz have the same icon as image/xyz?)
-#if 0
-      // not found, now look for MIME subtype, after '/':
-      icon = GetIcon(strutil_after(iconName, '/'));
-      if ( icon != m_unknownIcon )
-         return icon;
-#endif // 0
-
-      // not found, now look for iconName without '/':
-      icon = GetIcon(strutil_before(iconName, '/'));
-      if ( icon != m_unknownIcon )
-         return icon;
-   }
-
    // next step: try to load the icon files .png,.xpm,.gif:
    bool found = false;
    if(m_GlobalDir.Length())
@@ -601,12 +581,12 @@ wxIconManager::GetIcon(const String &iconNameOrig)
 
 
 wxIcon wxIconManager::GetIconFromMimeType(const String& type,
-                                          const String &ext)
+                                          const String& ext)
 {
    // the order of actions is important: we first try to find "exact" match,
    // but if we can't, we fall back to a standard icon and look for partial
    // matches only if there is none
-   wxIcon icon = GetIcon(type);
+   wxIcon icon = GetIcon(type.Lower());
 
    // the following code will never yield anything under Windows, so save the
    // efforts
@@ -654,7 +634,7 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
    if ( icon == m_unknownIcon )
    {
       // the generic icon for this class of things
-      icon = GetIcon(type.Before('/'));
+      icon = GetIcon(type.Before('/').Lower());
    }
 
    return icon;

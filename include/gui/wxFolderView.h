@@ -151,13 +151,11 @@ public:
     */
    void ExpungeMessages();
 
-#if defined(EXPERIMENTAL_MARK_READ)
    /**
        Mark messages read/unread
        @param read whether message should be marked read (true) or unread
     */
    Ticket MarkRead(const UIdArray& messages, bool read);
-#endif // EXPERIMENTAL_MARK_READ
 
    /** Toggle the "flagged" status of the messages.
        @param pointer to an array holding the message numbers
