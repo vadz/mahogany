@@ -206,7 +206,7 @@ private:
    void ReadProfile(Profile *profile);
    void DeleteProfile(Profile *profile);
 
-   size_t ConfigEntryCount() const { return ms_count; }
+   size_t ConfigEntryCount() const { return ms_count+1; }
    
    ConfigValueDefault *m_configValues;
    wxOptionsPage::FieldInfo *m_fieldInfo;
