@@ -195,7 +195,7 @@ then
 	dnl now check for exception disabling
 	AC_MSG_CHECKING(for gcc with 2.8 style options)
 	CFLAGS="$CFLAGS -DCC_GCC -Wall "
-	CXXFLAGS="$CXXFLAGS -DCC_GCC -Wall "
+	CXXFLAGS="$CXXFLAGS -DCC_GCC -Wall -Werror"
 	newgcc=
 	dnl is it gcc 2.8 or newer?
 	$CXX -v 2>&1 | $GREP 2.8 >/dev/null
