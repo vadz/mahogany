@@ -50,7 +50,7 @@
 #include "UIdArray.h"
 #include "HeaderInfo.h"
 
-#include "ASMailFolder.h"
+#include "ASMailFolder.h"               // for ATT_NOINFERIORS
 
 #include "gui/wxDialogLayout.h"
 #include "gui/wxMainFrame.h"

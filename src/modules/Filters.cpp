@@ -45,7 +45,7 @@
 #include "UIdArray.h"
 #include "Message.h"
 
-#include "gui/wxMDialogs.h"
+#include "gui/wxMDialogs.h"             // for MProgressDialog
 
 #include <wx/regex.h>   // wxRegEx::Flags
 

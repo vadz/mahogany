@@ -25,6 +25,7 @@
 #   include "Mcommon.h"
 #   include "strutil.h"
 #   include "Mdefaults.h"
+#   include "guidef.h"                  // for EnsureAvailableTextEncoding
 
 #   include <wx/sizer.h>
 #   include <wx/textctrl.h>
