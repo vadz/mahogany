@@ -79,7 +79,7 @@ static const struct
    { "GoOnlineToSendOutbox",     gettext_noop("go online to send Outbox") },
    { "FixTemplate",              gettext_noop("propose to fix template with errors") },
    { "AskForSig",                gettext_noop("ask for signature if none found") },
-   { "UnsavedCloseAnyway",       gettext_noop("propose to save message before closing") },
+   { "AskSaveHeaders",           gettext_noop("ask for confirmation before closing if the headers were modified in the composer") },
    { "MessageSent",              gettext_noop("show notification after sending the message") },
    { "AskForExtEdit",            gettext_noop("propose to change external editor settings if unset") },
    { "MimeTypeCorrect",          gettext_noop("ask confirmation for guessed MIME types") },
