@@ -45,12 +45,6 @@
 #include "SendMessage.h"
 #include "MessageCC.h"
 
-#ifdef USE_PYTHON
-#  include <Python.h>
-#  include "PythonHelp.h"
-#  include "MScripts.h"
-#endif
-
 #include "Mdefaults.h"
 
 #include <wx/log.h>

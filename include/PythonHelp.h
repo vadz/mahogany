@@ -10,8 +10,6 @@
 #ifndef PYTHONHELP_H
 #define PYTHONHELP_H
 
-#include "Mconfig.h"    // for String
-
 class Profile;
 
 /** Function to call a callback function.
