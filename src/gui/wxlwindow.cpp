@@ -10,17 +10,24 @@
 #   pragma implementation "wxlwindow.h"
 #endif
 
-#include "Mpch.h"
+#include   "wxlwindow.h"
 
-#include <wx/log.h>
-
-#include "gui/wxlwindow.h"
+#define   VAR(x)   cout << #x"=" << x << endl;
 
 BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
-   EVT_PAINT  (wxLayoutWindow::OnPaint)
-   EVT_CHAR   (wxLayoutWindow::OnChar)
+   EVT_PAINT    (wxLayoutWindow::OnPaint)
+   EVT_CHAR     (wxLayoutWindow::OnChar)
    EVT_LEFT_DOWN(wxLayoutWindow::OnMouse)
 END_EVENT_TABLE()
+
+wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
+   : wxScrolledWindow(parent, -1, wxDefaultPosition, wxDefaultSize,
+                      wxHSCROLL | wxVSCROLL | wxBORDER)
+
+{
+   m_ScrollbarsSet = false;
+   m_EventId = -1;
+}
 
 #ifdef __WXMSW__
 long
@@ -31,12 +38,6 @@ wxLayoutWindow::MSWGetDlgCode()
 }
 #endif //MSW
 
-wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
-              : wxScrolledWindow(parent)
-{
-   m_ScrollbarsSet = false;
-   m_EventId = -1;
-}
 
 void
 wxLayoutWindow::OnMouse(wxMouseEvent& event)
@@ -51,7 +52,8 @@ wxLayoutWindow::OnMouse(wxMouseEvent& event)
    m_FoundObject = NULL;
 
 #ifdef   WXLAYOUT_DEBUG
-   wxLogTrace("OnMouse: (%d, %d)", m_FindPos.x, m_FindPos.y);
+   //doesn't work, undefined functions
+   //wxLogTrace("OnMouse: (%d, %d)", m_FindPos.x, m_FindPos.y);
 #endif
    Refresh();
    if(m_FoundObject)
