@@ -1,4 +1,4 @@
-#This file was created by <karsten> Wed May 19 16:23:30 1999
+#This file was created by <karsten> Wed May 19 16:27:18 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -230,6 +230,19 @@ Full internationalisation support, Mahogany speaks multiple languages.
 \layout Subsection
 
 Known bugs
+\layout Itemize
+
+Some configuration settings will only take effect after the program got
+ restarted or a folder has been reopened.
+ For example, changing message viewer text colours won't take effect until
+ a new folder view has been opened.
+ 
+\layout Itemize
+
+Cursor movement in the message editor (deleting/inserting empty lines) can
+ occasionally behave a bit funny.
+ Using CTRL-Y reliably deletes lines, just pressing DELETE in an empty line
+ doesn't always do so.
 \layout Itemize
 
 Newsspool support will not work with newsgroups not listed in the 
