@@ -59,11 +59,12 @@ void MObjectRC::CheckLeaks()
    size_t nCount = gs_aObjects.Count();
 
    if ( nCount > 0 ) {
-      wxLogDebug("MEMORY LEAK: %lu object leaked:", nCount);
+      wxLogDebug("MEMORY LEAK: %lu object leaked:", (unsigned long)nCount);
    }
 
    for ( size_t n = 0; n < nCount; n++ ) {
-      wxLogDebug("Object %lu: %s", n, gs_aObjects[n]->DebugDump().c_str());
+      wxLogDebug("Object %lu: %s",
+                 (unsigned long)n, gs_aObjects[n]->DebugDump().c_str());
    }
 }
 

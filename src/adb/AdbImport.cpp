@@ -93,7 +93,7 @@ static bool AdbImportGroup(AdbImporter   *importer,  // from
       if ( !entryName )
       {
          wxLogDebug("Autogenerating nickname for nameless address "
-                    "entry %lu in '%s'", nEntry, path.c_str());
+                    "entry %lu in '%s'", (unsigned long)nEntry, path.c_str());
 
          entryName.Printf(_("Nameless entry %d"), ++nAnonIndex);
       }
