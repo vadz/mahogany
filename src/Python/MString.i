@@ -26,4 +26,3 @@ public:
    String(const char *);
    const char *c_str(void);
 };
-

@@ -67,5 +67,10 @@ install:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
 	$(INSTALL_DATA) `find doc \! -type d` $(DOCDIR)
 
-.PHONY: all dep clean bak backup config program doc
+install_doc:
+	$(MAKE) -C doc install
+	
+install_all: install install_doc
+	
+.PHONY: all dep clean bak backup config program doc install install_doc install_all
 

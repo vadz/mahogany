@@ -40,6 +40,7 @@ inline void MDialog_StatusMessage(const char *message, MFrame *frame = NULL)
 %}
 
 %import MString.i
+%import MProfile.i
 
 class MAppBase 
 {

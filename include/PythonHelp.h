@@ -84,6 +84,15 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
 void
 PyH_RunScript(FILE *file, const char *filename);
 
+/** Function to run a simple python script in the global namespace.
+    The scriptname is relative to M's script directory. Really just a
+    convenient wrapper around PyH_RunScript().
+    @param scriptname
+*/
+void
+PyH_RunMScript(const char *scriptname);
+
+
 
 /// macro to run an expression
 #define   PyH_Expression(exp,module,resfmt,cresult) \

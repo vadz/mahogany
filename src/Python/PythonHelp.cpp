@@ -362,6 +362,26 @@ PyH_RunScript(FILE *file, const char *filename)
 }
 
 
+void
+PyH_RunMScript(const char *scriptname)
+{
+   wxString filename = mApplication->GetGlobalDir();
+
+   filename << DIR_SEPARATOR << "scripts";
+
+   FILE *file = fopen(filename,"rb");
+   if(file)
+   {
+      PyH_RunScript(file,filename);
+      fclose(file);
+   }
+   else
+   {
+      filename = _("Cannot run script: ") + filename;
+      ERRORMESSAGE((filename));
+   }
+}
+
 #define GPEM_ERROR(what) {errorMsg = "<Error getting traceback - " ##what ## ">";goto done;}
 
 

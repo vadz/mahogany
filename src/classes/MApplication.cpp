@@ -125,7 +125,7 @@ MAppBase::VerifySettings(void)
       // do we need to upgrade something?
       String version = m_profile->readEntry(MC_VERSION, "");
       if ( version != M_VERSION ) {
-         if ( !Upgrade(version) )
+         if ( ! Upgrade(version) )
             return false;
 
          // next time won't be the first one any more
