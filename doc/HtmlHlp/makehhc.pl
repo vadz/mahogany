@@ -57,12 +57,12 @@ EOF
 				# latex2html may generate either just the anchor in the link
 				# or the file name with the anchor but we always need the
 				# latter for HTML Help Workshop to work
-				my $link = $1;
-				$link = "Manual.html$link" unless $link =~ /^Manual.html#/;
+				my ($link, $value) = ($1, $2);
+				$link = "Manual.html$link" unless $link =~ /^Manual.html/;
 				print OUT_HHC <<EOF
 \t<LI> <OBJECT type=\"text/sitemap\">
 <param name=\"Local\" value=\"$link\">
-<param name=\"Name\" value=\"$2\">
+<param name=\"Name\" value=\"$value\">
 </OBJECT>
 EOF
 			}
