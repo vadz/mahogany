@@ -21,6 +21,8 @@
 #endif
 
 #include   "gui/wxMainFrame.h"
+#include   "gui/wxMApp.h"
+#include   "gui/wxIconManager.h"
 
 #ifdef    OS_WIN
 #   define   MainFrame_xpm          "MainFrame"
