@@ -1822,7 +1822,7 @@ extern const MOption MP_AWAY_STATUS;
 /// which background colour for the font
 #define   MP_CVIEW_BGCOLOUR_DEFVAL      "white"
 //@}
-/// highlight URLS?
+/// highlight signature?
 #define   MP_HIGHLIGHT_SIGNATURE_DEFVAL      1
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_DEFVAL      1
