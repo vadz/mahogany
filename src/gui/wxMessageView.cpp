@@ -1482,7 +1482,7 @@ bool
 wxMessageView::ShowRawText(void)
 {
    if ( !m_mailMessage )
-      return;
+      return false;
 
    String text;
    m_mailMessage->WriteToString(text, true);
