@@ -165,6 +165,7 @@ enum ConfigFields
 
    // message view
    ConfigField_MessageViewFirst = ConfigField_PythonLast,
+   ConfigField_ConfigureFilters, // will move!!
    ConfigField_MessageViewPreviewOnSelect,
    ConfigField_MessageViewFontFamily,
    ConfigField_MessageViewFontSize,
@@ -509,7 +510,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_PYTHON
 
    // message views:
-   { gettext_noop("Preview message when &selected"), Field_Bool,    -1                     },
+   { gettext_noop("&Configure filters..."), Field_SubDlg,    -1  },
+   { gettext_noop("Preview message when &selected"), Field_Bool,    -1 },
    { gettext_noop("&Font family"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1 },
@@ -690,6 +692,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_PYTHON
 
    // message views
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_PREVIEW_ON_SELECT),
    CONFIG_ENTRY(MP_MVIEW_FONT),
    CONFIG_ENTRY(MP_MVIEW_FONT_SIZE),
@@ -1362,6 +1365,11 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
       dirty = ConfigureDateFormat(m_Profile, this);
    else if(obj == GetControl(ConfigField_MessageViewHeaders))
       dirty = ConfigureMsgViewHeaders(m_Profile, this);
+   else if ( obj == GetControl(ConfigField_ConfigureFilters) )
+   {
+      dirty = ConfigureFilterRules(m_Profile, this);
+   }
+
    else
    {
       wxASSERT_MSG( 0, "alien button" );

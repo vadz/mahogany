@@ -888,7 +888,7 @@
 /**@name  Font settings for message view */
 //@{
 /// which font to use
-#define   MP_FVIEW_FONT_D         0L
+#define   MP_FVIEW_FONT_D         6L
 /// which font size
 #define   MP_FVIEW_FONT_SIZE_D         12L
 // which foreground colour for the font
@@ -914,7 +914,7 @@
 /// re-sort messages on status change?
 #define MP_MSGS_RESORT_ON_CHANGE_D 0l
 /// use threading
-#define MP_MSGS_USE_THREADING_D  0l
+#define MP_MSGS_USE_THREADING_D  1l
 /// search criterium for searching in folders
 #define MP_MSGS_SEARCH_CRIT_D   0l
 /// search argument

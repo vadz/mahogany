@@ -1,0 +1,367 @@
+/*-*- c++ -*-********************************************************
+ * wxMFilterDialog.cpp : dialog for setting up filter rules         *
+ *                                                                  *
+ * (C) 1998-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ *                                                                  *
+ * $Id$
+ *******************************************************************/
+
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
+#include "Mpch.h"
+
+#ifndef USE_PCH
+#   include "Mcommon.h"
+#   include "Mdefaults.h"
+#   include "guidef.h"
+#   include "strutil.h"
+#   include "MFrame.h"
+#   include "MDialogs.h"
+#   include "Profile.h"
+#   include "MApplication.h"
+#   include "MailFolder.h"
+#   include "Profile.h"
+#   include "MModule.h"
+#   include "MHelp.h"
+#endif
+
+#include "MHelp.h"
+#include "gui/wxMIds.h"
+
+#include <wx/window.h>
+#include <wx/confbase.h>
+#include <wx/persctrl.h>
+#include <wx/stattext.h>
+#include <wx/layout.h>
+#include <wx/checklst.h>
+#include <wx/statbox.h>
+
+#include "gui/wxDialogLayout.h"
+
+// ----------------------------------------------------------------------------
+// global vars and functions
+// ----------------------------------------------------------------------------
+
+/* Calculates a common button size for buttons with labels when given 
+   an array with their labels. */
+wxSize GetButtonSize(const char * labels[], wxWindow *win)
+{
+   long widthLabel, heightLabel;
+   long heightBtn, widthBtn;
+   long maxWidth = 0, maxHeight = 0;
+   
+   wxClientDC dc(win);
+   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+   for(size_t idx = 0; labels[idx]; idx++)
+   {
+      dc.GetTextExtent(_(labels[idx]), &widthLabel, &heightLabel);
+      heightBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel);
+      widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
+      if(widthBtn > maxWidth) maxWidth = widthBtn;
+      if(heightBtn > maxHeight) maxHeight = heightBtn;
+   }
+   return wxSize(maxWidth, maxHeight);
+}
+
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+
+/** A class representing the configuration GUI for a single filter. */
+class wxOneFilterDialog : public wxManuallyLaidOutDialog
+{
+public:
+   // ctor & dtor
+   wxOneFilterDialog(const wxString & filterName,
+                     wxWindow *parent);
+   virtual ~wxOneFilterDialog() { }
+
+   // transfer data to/from dialog
+   virtual bool TransferDataFromWindow();
+   virtual bool TransferDataToWindow();
+
+   // returns TRUE if the format string was changed
+   bool WasChanged(void) { return m_Filter != m_OldFilter;}
+
+   // event handlers
+   void OnUpdate(wxCommandEvent& event) { }
+protected:
+   // data
+   wxTextCtrl *m_NameCtrl;
+   wxString m_Name;
+   wxString  m_Filter,
+             m_OldFilter;
+private:
+   DECLARE_EVENT_TABLE()
+};
+BEGIN_EVENT_TABLE(wxOneFilterDialog, wxManuallyLaidOutDialog)
+END_EVENT_TABLE()
+
+
+
+static
+bool ConfigureOneFilter(const wxString &name,
+                        wxWindow *parent)
+{
+   wxOneFilterDialog dlg(name, parent);
+   return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
+}
+
+
+
+
+wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
+                                     wxWindow *parent)
+   : wxManuallyLaidOutDialog(parent,
+                            _("Filter rule"),
+                            "OneFilterDialog")
+{
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rule"), FALSE,
+                                             MH_DIALOG_FILTERS);
+
+   m_Name = filterName;
+
+   SetDefaultSize(380, 240, FALSE /* not minimal */);
+
+   wxLayoutConstraints *c;
+
+   m_NameCtrl = new wxTextCtrl(this, -1);
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   m_NameCtrl->SetConstraints(c);
+
+   wxStaticBox *criteria = new wxStaticBox(this, -1, _("Filter Criteria"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_NameCtrl, 2*LAYOUT_Y_MARGIN);
+   c->height.PercentOf(box, wxHeight, 45);
+   criteria->SetConstraints(c);
+
+/*
+  Add a scrolled window with
+   [test to apply] [where to apply] [match what]
+   [logical operator] [test] [where] [what]
+   ...
+   [more rules] [less rules]
+
+   E.g.
+   [Match substring] [Subject] ["Mahogany"]
+   [ AND ] [Match substring] [Subject] ["bug"]
+
+   ["More Tests"] [ "Less Tests" ]
+*/
+   wxStaticBox *actions = new wxStaticBox(this, -1, _("Action Rules"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.Below(criteria, 2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 4*LAYOUT_Y_MARGIN);
+   actions->SetConstraints(c);
+
+   TransferDataToWindow();
+   m_OldFilter = m_Filter;
+}
+
+bool
+wxOneFilterDialog::TransferDataFromWindow()
+{
+#if 0
+   m_Filter = m_textctrl->GetValue();
+   GetProfile()->writeEntry(MP_DATE_FMT, m_Filter);
+   GetProfile()->writeEntry(MP_DATE_GMT, m_UseGMT->GetValue());
+#endif
+   
+   return TRUE;
+}
+
+bool
+wxOneFilterDialog::TransferDataToWindow()
+{
+   m_NameCtrl->SetValue(m_Name);
+#if 0
+   m_Filter = READ_CONFIG(GetProfile(), MP_DATE_FMT);
+   m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
+   m_textctrl->SetValue(m_Filter);
+#endif
+   
+   return TRUE;
+}
+
+
+
+
+
+
+
+static const char *ButtonLabels [] =
+{ gettext_noop("New"), gettext_noop("Delete"), gettext_noop("Edit"),
+  gettext_noop("Up"), gettext_noop("Down"), NULL };
+
+enum ButtonIndices
+{
+   Button_New = 0,
+   Button_Delete,
+   Button_Edit,
+   Button_Up,
+   Button_Down
+};
+
+class wxFiltersDialog : public wxOptionsPageSubdialog
+{
+public:
+   // ctor & dtor
+   wxFiltersDialog(ProfileBase *profile, wxWindow *parent);
+   virtual ~wxFiltersDialog() {}
+
+   // transfer data to/from dialog
+   virtual bool TransferDataFromWindow();
+   virtual bool TransferDataToWindow();
+
+   // returns TRUE if the format string was changed
+   bool WasChanged(void) { return m_Filter != m_OldFilter;}
+
+   // event handlers
+   void Update(wxCommandEvent& event) { }
+   void OnButton(wxCommandEvent & event );
+protected:
+
+   wxCheckListBox *m_ChecklistBox;
+   wxButton       *m_Buttons[WXSIZEOF(ButtonLabels)];
+   
+// data
+   wxString  m_Filter,
+m_OldFilter;
+private:
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(wxFiltersDialog, wxOptionsPageSubdialog)
+   EVT_LISTBOX(-1, wxFiltersDialog::Update)
+   EVT_BUTTON(-1,  wxFiltersDialog::OnButton)
+END_EVENT_TABLE()
+
+
+   
+wxFiltersDialog::wxFiltersDialog(ProfileBase *profile, wxWindow *parent)
+   : wxOptionsPageSubdialog(profile,
+                            parent,
+                            _("Filter rules"),
+                            "FilterDialog")
+{
+   wxLayoutConstraints *c;
+   
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rules"), FALSE,
+                                             MH_DIALOG_FILTERS);
+
+   /* This dialog is supposed to look like this:
+
+      +------------------+  [new]
+      |checklistbox of   |  [del]
+      |existing filters  |  [edit]
+      |                  |  
+      |                  |  [up]
+      +------------------+  [down]
+
+      [help][ok][cancel]
+   */
+
+   wxSize ButtonSize = ::GetButtonSize(ButtonLabels, this);
+   for(size_t idx = 0; ButtonLabels[idx]; idx++)
+   {
+      c = new wxLayoutConstraints;
+      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+      c->width.Absolute(ButtonSize.GetX());
+      if(idx == 0)
+         c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+      else
+      {
+         if(idx == 3) // the up button, add more space
+            c->top.Below(m_Buttons[idx-1],
+                         ButtonSize.GetY()+4*LAYOUT_Y_MARGIN);
+         else            
+            c->top.Below(m_Buttons[idx-1], 2*LAYOUT_Y_MARGIN);
+      }
+      c->height.AsIs();
+      m_Buttons[idx] = new wxButton(this, -1, _(ButtonLabels[idx]),
+                                    wxDefaultPosition, ButtonSize);
+      m_Buttons[idx]->SetConstraints(c);
+   }
+
+   // create the checklistbox in the area which is left
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(m_Buttons[0], wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_ChecklistBox = new wxCheckListBox(this, -1);
+   m_ChecklistBox->SetConstraints(c);
+
+   SetDefaultSize(380, 240, FALSE /* not minimal */);
+   TransferDataToWindow();
+   m_OldFilter = m_Filter;
+}
+
+void
+wxFiltersDialog::OnButton( wxCommandEvent &event )
+{
+   wxObject *obj = event.GetEventObject();
+   
+   for(size_t idx = 0; ButtonLabels[idx]; idx++)
+      if(obj == m_Buttons[idx])
+      {
+         if(idx == Button_New)
+            ConfigureOneFilter(_("New Filter"), this);
+         else if(idx == Button_Edit)
+            ConfigureOneFilter("XXX", this);
+         else
+            return;
+      }
+   event.Skip();
+}
+
+bool
+wxFiltersDialog::TransferDataFromWindow()
+{
+#if 0
+   m_Filter = m_textctrl->GetValue();
+   GetProfile()->writeEntry(MP_DATE_FMT, m_Filter);
+   GetProfile()->writeEntry(MP_DATE_GMT, m_UseGMT->GetValue());
+#endif
+   
+   return TRUE;
+}
+
+bool
+wxFiltersDialog::TransferDataToWindow()
+{
+#if 0
+   m_Filter = READ_CONFIG(GetProfile(), MP_DATE_FMT);
+   m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
+   m_textctrl->SetValue(m_Filter);
+#endif
+   
+   return TRUE;
+}
+
+// ----------------------------------------------------------------------------
+// exported function
+// ----------------------------------------------------------------------------
+/** Set up filters rules. In wxMFilterDialog.cpp */
+extern
+bool ConfigureFilterRules(ProfileBase *profile, wxWindow *parent)
+{
+   wxFiltersDialog dlg(profile, parent);
+   return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
+}
+

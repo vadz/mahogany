@@ -274,13 +274,23 @@ ConfigureSearchMessages(class SearchCriterium *crit,
 
 extern
 bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent);
-/* Pick an icon file: for XFace */
+/** Pick an icon file: for XFace */
 extern
 bool PickXFaceDialog(ProfileBase *profile, wxWindow *parent);
 
 /** Asks the user if he wants to expunge the deleted messages. */
 extern
 void CheckExpungeDialog(class ASMailFolder *mf, wxWindow *parent = NULL);
+
+/** Set up filters rules. In wxMFilterDialog.cpp */
+extern
+bool ConfigureFilterRules(ProfileBase *profile, wxWindow *parent);
+
+
+#ifdef OS_WIN
+#  undef USE_SEMIMODAL
+#else
+#  define USE_SEMIMODAL
 
 /** Semi-modal dialog to allow pop-up help to work.
     (Yes, I know it's a funny name, but so is the whole Help/Modal 
@@ -306,6 +316,7 @@ public:
    virtual int ShowModal();
    virtual void EndModal(int rc);
 };
+#endif
 
 
 class wxXFaceButton : public wxBitmapButton

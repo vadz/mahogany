@@ -1010,10 +1010,8 @@ MailFolderCmn::UpdateListing(void)
    if(hilp)
    {
       SortListing(this, hilp, m_Config.m_ListingSortOrder);
-#ifdef EXPERIMENTAL
       if(m_Config.m_UseThreading)
          ThreadMessages(this, hilp);
-#endif
       
       /* Now check whether we need to send new mail notifications: */
       if(!m_FirstListing && m_GenerateNewMailEvents

@@ -952,11 +952,10 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
    ASSERT_MSG( dlgParent, "should have a parent dialog!" );
 
-   m_browseIcon = new wxFolderIconBrowseButtonInDialog(
-                                                       dlgParent,
+   m_browseIcon = new wxFolderIconBrowseButtonInDialog(dlgParent,
                                                        GetCanvas(),
-                                                       _("Choose folder icon")
-                                                      );
+                                                       _("Choose folder icon"));
+
    (void)CreateIconEntry(labels[Label_FolderIcon], widthMax, m_folderSubtype, m_browseIcon);
 
    m_radio->Enable(m_isCreating);
