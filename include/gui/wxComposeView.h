@@ -305,6 +305,9 @@ protected:
    /// A list of all extra headerslines to add to header.
    kbStringList m_ExtraHeaderLinesValues;
 
+   /// Launch the external editor
+   bool StartExternalEditor();
+
 private:
    /// a profile
    Profile * m_Profile;

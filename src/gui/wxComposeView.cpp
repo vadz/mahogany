@@ -1209,6 +1209,16 @@ wxComposeView::DoInitText(Message *msg)
    }
 
    m_LayoutWindow->Refresh();
+
+   // now we can launch the ext editor if configured to do it
+   if ( READ_CONFIG(m_Profile, MP_ALWAYS_USE_EXTERNALEDITOR) )
+   {
+      if ( !StartExternalEditor() )
+      {
+         // disable it for the next time
+         m_Profile->writeEntry(MP_ALWAYS_USE_EXTERNALEDITOR, 0l);
+      }
+   }
 }
 
 void
@@ -1648,113 +1658,7 @@ wxComposeView::OnMenuCommand(int id)
       break;
 
    case WXMENU_COMPOSE_EXTEDIT:
-      {
-         if ( m_procExtEdit )
-         {
-            wxLogError(_("External editor is already running (PID %d)"),
-                       m_pidEditor);
-
-            break;
-         }
-
-         // if the editor can't be started we ask the user if he wantes to
-         // reconfigure it and in this case we retry with the new setting
-         bool tryAgain = true;
-         while ( !m_procExtEdit && tryAgain )
-         {
-            tryAgain = false;
-
-            // this entry is supposed to contain '%s' - not to be expanded
-            ProfileEnvVarSave envVarDisable(mApplication->GetProfile());
-
-            String extEdit = READ_APPCONFIG(MP_EXTERNALEDITOR);
-            if ( !extEdit )
-            {
-               wxLogStatus(this, _("External editor not configured."));
-            }
-            else
-            {
-               // first write the text we already have into a temp file
-               MTempFileName tmpFileName;
-               if ( !tmpFileName.IsOk() )
-               {
-                  wxLogSysError(_("Cannot create temporary file"));
-
-                  break;
-               }
-
-               // 'false' means that it's ok to leave the file empty
-               if ( !SaveMsgTextToFile(tmpFileName.GetName(), false) )
-               {
-                  wxLogError(_("Failed to pass message to external editor."));
-
-                  break;
-               }
-
-               // we have a handy function in wxFileType which will replace
-               // '%s' with the file name or add the file name at the end if
-               // there is no '%s'
-               wxFileType::MessageParameters params(tmpFileName.GetName(), "");
-               String command = wxFileType::ExpandCommand(extEdit, params);
-
-               // do start the external process
-               m_procExtEdit = new wxProcess(this, HelperProcess_Editor);
-               m_pidEditor = wxExecute(command, FALSE, m_procExtEdit);
-
-               if ( !m_pidEditor  )
-               {
-                  wxLogError(_("Execution of '%s' failed."), command.c_str());
-               }
-               else
-               {
-                  tmpFileName.Ok();
-                  m_tmpFileName = tmpFileName.GetName();
-
-                  wxLogStatus(this, _("Started external editor (PID %d)"),
-                              m_pidEditor);
-
-                  // disable editing with the internal editor to avoid
-                  // interference with the external one
-                  EnableEditing(false);
-               }
-            }
-
-            if ( !m_pidEditor  )
-            {
-               if ( m_procExtEdit )
-               {
-                  delete m_procExtEdit;
-                  m_procExtEdit = NULL;
-               }
-
-               // either it wasn't configured at all, or the configured editor
-               // couldn't be started - propose to change it
-               String msg = _("Would you like to change the external "
-                              "editor setting now?");
-               if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
-                                        true, "AskForExtEdit") )
-               {
-                  if ( MInputBox(&extEdit,
-                                 _("Set up external editor"),
-                                 _("Enter the command name (%%s will be "
-                                   "replaced with the name of the file):"),
-                                 this,
-                                 NULL,
-                                 extEdit) )
-                  {
-                     // the ext editor setting is global, don't write it in
-                     // our profile
-                     mApplication->GetProfile()->writeEntry(MP_EXTERNALEDITOR,
-                                                            extEdit);
-
-                     tryAgain = true;
-                  }
-                  //else: the dialog was cancelled, don't retry
-               }
-               //else: user doesn't want to set up ext editor, don't retry
-            }
-         }
-      }
+      StartExternalEditor();
       break;
 
    case WXMENU_COMPOSE_CUSTOM_HEADERS:
@@ -1800,6 +1704,126 @@ wxComposeView::OnMenuCommand(int id)
    default:
       wxMFrame::OnMenuCommand(id);
    }
+}
+
+// ----------------------------------------------------------------------------
+// external editor support
+// ----------------------------------------------------------------------------
+
+bool wxComposeView::StartExternalEditor()
+{
+   if ( m_procExtEdit )
+   {
+      wxLogError(_("External editor is already running (PID %d)"),
+                 m_pidEditor);
+
+      // ext editor is running
+      return true;
+   }
+
+   bool launchedOk = false;
+
+   // if the editor can't be started we ask the user if he wantes to
+   // reconfigure it and in this case we retry with the new setting
+   bool tryAgain = true;
+   while ( !m_procExtEdit && tryAgain )
+   {
+      tryAgain = false;
+
+      // this entry is supposed to contain '%s' - not to be expanded
+      ProfileEnvVarSave envVarDisable(mApplication->GetProfile());
+
+      String extEdit = READ_APPCONFIG(MP_EXTERNALEDITOR);
+      if ( !extEdit )
+      {
+         wxLogStatus(this, _("External editor not configured."));
+      }
+      else
+      {
+         // first write the text we already have into a temp file
+         MTempFileName tmpFileName;
+         if ( !tmpFileName.IsOk() )
+         {
+            wxLogSysError(_("Cannot create temporary file"));
+
+            break;
+         }
+
+         // 'false' means that it's ok to leave the file empty
+         if ( !SaveMsgTextToFile(tmpFileName.GetName(), false) )
+         {
+            wxLogError(_("Failed to pass message to external editor."));
+
+            break;
+         }
+
+         // we have a handy function in wxFileType which will replace
+         // '%s' with the file name or add the file name at the end if
+         // there is no '%s'
+         wxFileType::MessageParameters params(tmpFileName.GetName(), "");
+         String command = wxFileType::ExpandCommand(extEdit, params);
+
+         // do start the external process
+         m_procExtEdit = new wxProcess(this, HelperProcess_Editor);
+         m_pidEditor = wxExecute(command, FALSE, m_procExtEdit);
+
+         if ( !m_pidEditor  )
+         {
+            wxLogError(_("Execution of '%s' failed."), command.c_str());
+         }
+         else
+         {
+            tmpFileName.Ok();
+            m_tmpFileName = tmpFileName.GetName();
+
+            wxLogStatus(this, _("Started external editor (PID %d)"),
+                        m_pidEditor);
+
+            // disable editing with the internal editor to avoid
+            // interference with the external one
+            EnableEditing(false);
+
+            launchedOk = true;
+         }
+      }
+
+      if ( !m_pidEditor  )
+      {
+         if ( m_procExtEdit )
+         {
+            delete m_procExtEdit;
+            m_procExtEdit = NULL;
+         }
+
+         // either it wasn't configured at all, or the configured editor
+         // couldn't be started - propose to change it
+         String msg = _("Would you like to change the external "
+                        "editor setting now?");
+         if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
+                                  true, "AskForExtEdit") )
+         {
+            if ( MInputBox(&extEdit,
+                           _("Set up external editor"),
+                           _("Enter the command name (%%s will be "
+                             "replaced with the name of the file):"),
+                           this,
+                           NULL,
+                           extEdit) )
+            {
+               // the ext editor setting is global, don't write it in
+               // our profile
+               mApplication->GetProfile()->writeEntry(MP_EXTERNALEDITOR,
+                                                      extEdit);
+
+               tryAgain = true;
+            }
+            //else: the dialog was cancelled, don't retry
+         }
+         //else: user doesn't want to set up ext editor, don't retry
+      }
+   }
+
+   return launchedOk;
 }
 
 void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
@@ -2439,6 +2463,12 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
 
    // write the text part of the message into a file
    wxFile file(filename, wxFile::write_append);
+   if ( !file.IsOpened() )
+   {
+      wxLogError(_("Cannot open file for the message."));
+
+      return false;
+   }
 
    // export first text part of the message
 
@@ -2451,8 +2481,7 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
       if(exp->type == WXLO_EXPORT_TEXT)
          if ( !file.Write(*exp->content.text) )
          {
-            wxLogError(_("Cannot write message to file '%s'."),
-                       filename.c_str());
+            wxLogError(_("Cannot write message to file."));
 
             return false;
          }

@@ -531,6 +531,8 @@
 #define   MP_BROWSER_ISNS    "BrowserIsNetscape"
 /// external editor to use for message composition (use %s for filename)
 #define MP_EXTERNALEDITOR    "ExternalEditor"
+/// start external editor automatically?
+#define MP_ALWAYS_USE_EXTERNALEDITOR    "AlwaysUseExtEditor"
 /// execute a command when new mail arrives?
 #define   MP_USE_NEWMAILCOMMAND      "CommandOnNewMail"
 /// command to execute when new mail arrives
@@ -1040,6 +1042,9 @@
 #else
 #  define   MP_EXTERNALEDITOR_D  "notepad %s"
 #endif // Unix/Win
+
+/// start external editor automatically?
+#define MP_ALWAYS_USE_EXTERNALEDITOR_D    0l
 
 /// command to execute when new mail arrives
 #ifdef  OS_UNIX

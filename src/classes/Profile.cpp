@@ -245,6 +245,8 @@ private:
       {
          if(m_Parent) m_Parent->DecRef();
       }
+
+   GCC_DTOR_WARN_OFF
 };
 
 
@@ -835,7 +837,10 @@ ProfileImpl::readEntry(const String & key, const String & def,
    LookupData ld(key, def);
    readEntry(ld);
    if(found) *found = ld.GetFound();
-   return ld.GetString();
+
+   // normally wxConfig does this for us, but if we didn't find the entry at
+   // all, it won't happen, so do it here
+   return ms_GlobalConfig->ExpandEnvVars(ld.GetString());
 }
 
 long

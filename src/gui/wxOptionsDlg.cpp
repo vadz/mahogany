@@ -158,7 +158,7 @@ enum ConfigFields
    ConfigField_AdbSubstring,
    ConfigField_ComposeViewFontFamily,
    ConfigField_ComposeViewFontSize,
-   ConfigField_CopmposViewFGColour,
+   ConfigField_ComposeViewFGColour,
    ConfigField_ComposeViewBGColour,
 
    ConfigField_ComposeHeaders,
@@ -257,12 +257,14 @@ enum ConfigFields
    ConfigField_HelpersHelp2,
    ConfigField_HelpBrowser,
    ConfigField_HelpBrowserIsNetscape,
-   ConfigField_HelpersHelp3,
+   ConfigField_HelpExternalEditor,
    ConfigField_ExternalEditor,
+   ConfigField_AutoLaunchExtEditor,
 #ifdef OS_UNIX
    ConfigField_ImageConverter,
    ConfigField_ConvertGraphicsFormat,
 #endif
+   ConfigField_HelpNewMailCommand,
    ConfigField_NewMailCommand,
    ConfigField_HelpersLast = ConfigField_NewMailCommand,
 
@@ -637,6 +639,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
+
    { gettext_noop("Configure &XFace..."),                  Field_XFace,  -1          },
    { gettext_noop("Mail alias substring ex&pansion"),
                                                    Field_Bool,    -1,                        },
@@ -755,7 +758,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
    { gettext_noop("&Help viewer"),                Field_File,    -1                      },
    { gettext_noop("Help &viewer is Netscape"),    Field_Bool,    -1                      },
-   { gettext_noop("&External editor"),            Field_File,    -1                      },
+   { gettext_noop("You may configure the external editor to be used "
+                  "when composing the messages and optionally choose "
+                  "to launch it automatically."),       Field_Message, -1                      },
+   { gettext_noop("&External editor"),            Field_Text,    -1                      },
+   { gettext_noop("Always &use it"),              Field_Bool, ConfigField_ExternalEditor },
 #ifdef OS_UNIX
    { gettext_noop("&Image format converter"),     Field_File,    -1                      },
    { gettext_noop("Conversion &graphics format"
@@ -949,7 +956,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_HELPBROWSER),
    CONFIG_ENTRY(MP_HELPBROWSER_ISNS),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_EXTERNALEDITOR),
+   CONFIG_ENTRY(MP_ALWAYS_USE_EXTERNALEDITOR),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_CONVERTPROGRAM),
    CONFIG_ENTRY(MP_TMPGFXFORMAT),
@@ -1938,7 +1947,8 @@ void wxOptionsPageFolders::OnButton(wxCommandEvent& event)
    }
 
    wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
-   if(dirty) dialog->SetDirty();
+   if ( dirty && dialog )
+      dialog->SetDirty();
 }
 
 

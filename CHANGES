@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+09.06.00 VZ: Added option to autolaunch the ext editor
 08.06.00 KB: added OpenSSL dynamic loading
              improvements/streamlining of Profile code
              wxMessageView fixes, Mime detection improved
