@@ -596,11 +596,11 @@ strutil_expandpath(const String &ipath)
 String
 strutil_path_parent(String const &path, char separator)
 {
-   char *cptr = strrchr(path.c_str(),separator);
+   const char *cptr = strrchr(path.c_str(),separator);
    if(cptr == NULL) // not found
       return "";
-   else
-      return path.Left((int)(cptr-path.c_str()));
+
+   return path.Left(cptr - path.c_str());
 }
 
 /** Cut off last name from path and return string that (filename).
@@ -612,11 +612,11 @@ strutil_path_parent(String const &path, char separator)
 String
 strutil_path_filename(String const &path, char separator)
 {
-   char *cptr = strrchr(path.c_str(),separator);
+   const char *cptr = strrchr(path.c_str(),separator);
    if(cptr == NULL) // not found
       return "";
-   else
-      return String(cptr+1);
+
+   return String(cptr+1);
 }
 
 
