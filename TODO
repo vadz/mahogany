@@ -75,6 +75,8 @@ VZ:
 
 doc: add note about news active file
 
+- change main frame icon when new mail in mainframe folder
+- searching in messageview
 - more configurability for news
 - do we really need to scan /var/lib/news/active?
 - add address auto collection to compose view
@@ -95,7 +97,7 @@ doc: add note about news active file
   - fix(simplify) cursor size calculation
   - font optimisations(!)
   - copy/cut/selections
-  - occasionally wraps lines wongly (twice) ??
+  - occasionally wraps lines wongly (twice) (fixed now?)
   - UNDO
   later:
     - DragNDrop (waiting for wxGTK/gtk1.2 & GNOME 1.0 / Debian Slink)

@@ -35,8 +35,8 @@
 #define   HEADERBUFFERSIZE 100*1024
 
 /// check for dead mailstream
-#define CHECK_DEAD()   if( folder->Stream() == NIL) { ERRORMESSAGE((_("Cannot access inactive folder '%s'."), folder->GetName().c_str())); return; }
-#define CHECK_DEAD_RC(rc)   if( folder->Stream() == NIL) {   ERRORMESSAGE((_("Cannot access inactive folder '%s'."), folder->GetName().c_str())); return rc; }
+#define CHECK_DEAD()   if( folder->Stream() == NIL && ! folder->PingReopen() ) { ERRORMESSAGE((_("Cannot access inactive folder '%s'."), folder->GetName().c_str())); return; }
+#define CHECK_DEAD_RC(rc)   if( folder->Stream() == NIL && ! folder->PingReopen()) {   ERRORMESSAGE((_("Cannot access inactive folder '%s'."), folder->GetName().c_str())); return rc; }
 
 MessageCC *
 MessageCC::CreateMessageCC(MailFolderCC *ifolder,
@@ -379,14 +379,26 @@ MessageCC::decode_body (BODY *body, String & pfx,long i,
 BODY *
 MessageCC::GetBody(void)
 {
-   if(body == NULL && folder)
-   {
-      CHECK_DEAD_RC(NULL);
-      envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &body,
-                                          FT_UID);
-   }
-   MailFolderCC::ProcessEventQueue();
+   int retry = 1;
    
+   do
+   {
+      if(body == NULL && folder)
+      {
+         if(folder->Stream())
+            envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &body,
+                                                FT_UID);
+         else
+         {
+            folder->PingReopen();
+            MailFolderCC::ProcessEventQueue();
+         }
+      }
+      else
+         retry = 0;
+   }while(retry-- && ! (envelope && body));
+   MailFolderCC::ProcessEventQueue();
+
    CHECK(body && envelope, NULL, _("Non-existent message data."));
 
    return body;

@@ -1,6 +1,46 @@
 $Id$
 
 Preliminary README file for M.
+------------------------------
+
+
+
+--------------------------------------------------------------------
+INTERNET RESOURCES
+--------------------------------------------------------------------
+
+The Mahogany web page is at:
+
+http://mahogany.home.dhs.org/
+http://www.phy.hw.ac.uk/~karsten/Mahogany/
+
+
+Mahogany and wxWindows/wxGTK are available via anonymous ftp from the
+following places:
+
+UK/Europe:
+ftp://ronnie.phy.hw.ac.uk/pub/Mahogany
+ftp://ronnie.phy.hw.ac.uk/pub/wxGTK
+
+US mirror:
+
+ftp://ftp.gdev.net/pub/Mahogany
+ftp://ftp.gdev.net/pub/wxGTK
+
+
+A web frontend to the developers' cvs archive is available at:
+
+http://cvs.gdev.net/mahogany.cgi
+http://cvs.gdev.net/wxgtk.cgi
+
+The wxWindows home page is at:
+
+http://www.wxwindows.org/
+
+
+--------------------------------------------------------------------
+COMPILATION NOTES
+--------------------------------------------------------------------
 
 These are some very brief notes about how to compile M.
 More detailed, step for step, instructions can be found in the Manual,
@@ -33,5 +73,6 @@ Required software:
 	of M. It is available from:
 	http://www.phy.hw.ac.uk/~karsten/M/dl/wxGTK.tar.gz
 
-   - libgtk 1.0.x, libglib 1.0.x, wxGTK does not work with gtk-1.1 (yet)
+   - libgtk 1.0.x, libglib 1.0.x, or gtk/glib 1.2.x
+
 
