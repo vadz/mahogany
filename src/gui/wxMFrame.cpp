@@ -127,12 +127,16 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
 void
 wxMFrame::AddFileMenu(void)
 {
-   wxMenu *fileMenu = new wxMenu(
-#ifdef wxMENU_TEAROFF
-      //FIXME WXWIN_COMPATIBILITY
-      wxMENU_TEAROFF
+#ifndef wxMENU_TEAROFF
+   // FIXME WXWIN-COMPATIBILITY
+   wxMenu *fileMenu = new wxMenu(); 
+#else
+   int style = 0;
+   if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
+      style = wxMENU_TEAROFF;
+   wxMenu *fileMenu = new wxMenu(style); 
 #endif
-      );
+
    AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE - 1);
 
 #ifdef USE_WXWINDOWS2
