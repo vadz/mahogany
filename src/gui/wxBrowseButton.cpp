@@ -318,9 +318,16 @@ void wxColorBrowseButton::DoBrowse()
 
 void wxColorBrowseButton::SetValue(const wxString& text)
 {
+   // we might be given "RGB(r,g,b)" string but if it corresponds to a known
+   // colour, we want to show the colour name to the user, not RGB values
+   wxString nameCol;
+
    if ( !text.empty() )
    {
-      (void)ParseColourString(text, &m_color);
+      if ( !ParseColourString(text, &m_color) )
+      {
+         nameCol = text;
+      }
    }
    else // no valid colour, use default one
    {
@@ -329,7 +336,12 @@ void wxColorBrowseButton::SetValue(const wxString& text)
 
    UpdateColor();
 
-   SetText(text);
+   if ( nameCol.empty() && m_color.Ok() )
+   {
+      nameCol = GetColourName(m_color);
+   }
+
+   SetText(nameCol);
 }
 
 void wxColorBrowseButton::UpdateColorFromText()
