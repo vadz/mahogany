@@ -735,19 +735,25 @@ PGPEngine::DoExecCommand(const String& options,
    switch (status) 
    {
       case OK:
-         wxLogStatus(_("Valid signature from \"%s\""), log->GetUserID());
+         wxLogStatus(_("Valid signature from \"%s\""),
+                     log->GetUserID().c_str());
          break;
+
       case SIGNATURE_UNTRUSTED_WARNING:
-         wxLogStatus(_("Valid signature from (invalid) \"%s\""), log->GetUserID());
+         wxLogStatus(_("Valid signature from (invalid) \"%s\""),
+                     log->GetUserID().c_str());
          break;
+
       case SIGNATURE_EXPIRED_ERROR:
-         wxLogWarning(_("Expired signature from \"%s\""), log->GetUserID());
+         wxLogWarning(_("Expired signature from \"%s\""),
+                      log->GetUserID().c_str());
          break;
+
       default:
          if ( encryptedForSomeoneElse )
          {
             wxLogWarning(_("Secret key needed to decrypt this message is "
-                                    "not available"));
+                           "not available"));
          }
    }
 
