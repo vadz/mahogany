@@ -1855,7 +1855,7 @@ MessageView::MimeInfo(const MimePart *mimepart)
    }
 
    String title;
-   title << _("MIME information for attachment #") << mimepart->GetPartSpec();
+   title << _("Attachment #") << mimepart->GetPartSpec();
 
    MDialog_Message(message, GetParentFrame(), title);
 }
@@ -1921,13 +1921,13 @@ MessageView::MimeHandle(const MimePart *mimepart)
       if ( MimeSave(mimepart, filename) )
       {
          wxString name;
-         name.Printf(_("Attached message '%s'"),
-                     filenameOrig.c_str());
+         name.Printf(_("Attached message '%s'"), filenameOrig.c_str());
 
          MFolder_obj mfolder = MFolder::CreateTemp
                                (
                                  name,
-                                 MF_FILE, 0,
+                                 MF_FILE,
+                                 MF_FLAGS_TEMPORARY,  // delete file on close
                                  filename
                                );
 
@@ -1936,7 +1936,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
             ASMailFolder *asmf = ASMailFolder::OpenFolder(mfolder);
             if ( asmf )
             {
-               // FIXME: assume UID of the first message in new MBX folder is
+               // FIXME: assume UID of the first message in a new MBX folder is
                //        always 1
                ShowMessageViewFrame(GetParentFrame(), asmf, 1);
 
@@ -1945,14 +1945,18 @@ MessageView::MimeHandle(const MimePart *mimepart)
                asmf->DecRef();
             }
          }
+         else
+         {
+            // note that if we succeeded with folder creation, it will delete
+            // the file itself (because of MF_FLAGS_TEMPORARY)
+            wxRemoveFile(filename);
+         }
       }
 
       if ( !ok )
       {
          wxLogError(_("Failed to open attached message."));
       }
-
-      wxRemoveFile(filename);
 #endif // 0/1
 
       return;
