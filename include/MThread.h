@@ -66,7 +66,8 @@ public:
    MLocker(MMutex *mutex) : m_mutex(*mutex) { m_mutex.Lock(); }
    ~MLocker() { m_mutex.Unlock(); }
 
-   operator bool() const { return m_mutex.IsLocked(); }
+   bool IsLocked() const { return m_mutex.IsLocked(); }
+   operator bool() const { return IsLocked(); }
 
 private:
    MMutex& m_mutex;

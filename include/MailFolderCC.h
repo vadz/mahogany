@@ -374,8 +374,10 @@ private:
    /// set to true before we get the very first folder info
    bool m_FirstListing;
 
-   /// number of messages in mailbox
+   /// number of (retrieved) messages in mailbox
    unsigned long m_nMessages;
+   /// total number of messages (less could be retrieved if listing aborted)
+   unsigned long m_msgnoMax;
    /// number or recent messages in mailbox
    unsigned long m_nRecent;
    /// last seen UID

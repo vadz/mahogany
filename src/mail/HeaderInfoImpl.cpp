@@ -57,13 +57,16 @@ HeaderInfo * HeaderInfoImpl::Clone() const
 }
 
 // ----------------------------------------------------------------------------
-// HeaderInfoListImpl
+// HeaderInfoListImpl creation
 // ----------------------------------------------------------------------------
 
 HeaderInfoListImpl::HeaderInfoListImpl(size_t n)
 {
    m_Listing = n == 0 ? NULL : new HeaderInfoImpl[n];
-   m_NumEntries = n;
+
+   m_NumEntries =
+   m_msgnoMax = n;
+
    m_TranslationTable = NULL;
 }
 
@@ -75,41 +78,48 @@ HeaderInfoListImpl::~HeaderInfoListImpl()
    delete [] m_TranslationTable;
 }
 
-HeaderInfo *HeaderInfoListImpl::operator[](size_t n)
+// ----------------------------------------------------------------------------
+// HeaderInfoImpl translation table stuff
+// ----------------------------------------------------------------------------
+
+void HeaderInfoListImpl::SetTranslationTable(size_t *array)
 {
-   MOcheck();
-
-   CHECK( n < m_NumEntries, NULL, "invalid index in HeaderInfoList" );
-
-   return &m_Listing[GetTranslatedIndex(n)];
+   delete [] m_TranslationTable;
+   m_TranslationTable = array;
 }
 
-// FIXME: this is awfully inefficient :-(
-size_t HeaderInfoListImpl::GetUntranslatedIndex(size_t n) const
+void HeaderInfoListImpl::AddTranslationTable(const size_t *array)
 {
-   if ( m_TranslationTable )
+   // it doesn't make sense to call us with NULL table
+   CHECK_RET( array, "NULL translation table" );
+
+   size_t *transTable = new size_t[m_NumEntries];
+   for ( size_t n = 0; n < m_NumEntries; n++ )
    {
-      for ( size_t i = 0; i < m_NumEntries; i++ )
+      size_t i = array[n];
+      if ( m_TranslationTable )
       {
-         if ( m_TranslationTable[i] == n )
-         {
-            return i;
-         }
+         // combine with existing table
+         i = m_TranslationTable[i];
       }
+
+      transTable[n] = i;
    }
 
-   return n;
+   SetTranslationTable(transTable);
 }
+
+// ----------------------------------------------------------------------------
+// HeaderInfoListImpl lookup by UID
+// ----------------------------------------------------------------------------
 
 HeaderInfo *HeaderInfoListImpl::GetEntryUId(UIdType uid)
 {
-   MOcheck();
-   for(size_t i = 0; i < m_NumEntries; i++)
-   {
-      if( m_Listing[i].GetUId() == uid )
-         return & m_Listing[i];
-   }
-   return NULL;
+   UIdType idx = GetIdxFromUId(uid);
+   if ( idx == UID_ILLEGAL )
+      return NULL;
+
+   return &m_Listing[idx];
 }
 
 UIdType HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
@@ -119,33 +129,56 @@ UIdType HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
    for ( size_t i = 0; i < m_NumEntries; i++ )
    {
       if ( m_Listing[i].GetUId() == uid )
-         return GetUntranslatedIndex(i);
+         return i;
    }
 
    return UID_ILLEGAL;
 }
 
-void HeaderInfoListImpl::Swap(size_t index1, size_t index2)
+size_t HeaderInfoListImpl::GetUntranslatedIndex(size_t n) const
+{
+   // FIXME: very inefficient - would it be better to keep the inverse
+   //        translation table to speed it up?
+   for ( size_t i = 0; i < m_NumEntries; i++ )
+   {
+      if ( GetTranslatedIndex(i) == n )
+         return i;
+   }
+
+   FAIL_MSG("invalid index in GetUntranslatedIndex");
+
+   return UID_ILLEGAL;
+}
+
+// ----------------------------------------------------------------------------
+// modifying the listing
+// ----------------------------------------------------------------------------
+
+void HeaderInfoListImpl::SetCount(size_t newcount)
 {
    MOcheck();
-   CHECK_RET( index1 < m_NumEntries && index2 < m_NumEntries,
-              "invalid index in HeaderInfoList::Swap" );
+   CHECK_RET( newcount <= m_NumEntries, "invalid headers count" );
 
-   HeaderInfoImpl hicc;
-   hicc = m_Listing[index1];
-   m_Listing[index1] = m_Listing[index2];
-   m_Listing[index2] = hicc;
+   m_NumEntries = newcount;
+
+   // m_msgnoMax stays unchanged
 }
 
 void HeaderInfoListImpl::Remove(size_t n)
 {
+   MOcheck();
    CHECK_RET( n < m_NumEntries, "invalid index in HeaderInfoList::Remove" );
+
+   // the msgno must be updated to account for the message removal
+   m_msgnoMax--;
+
+   // calc the position of the element being deleted before changing
+   // m_NumEntries below
+   size_t pos = GetUntranslatedIndex(n);
 
    // we'd like to use memmove() as efficiently as for m_TranslationTable for
    // m_Listing too here but it doesn't work because m_Listing is array of
-   // objects, not pointers, and it can't be an array of pointers because there
-   // is HeaderInfoList::GetArray() which is used by MailFolderCmn for sorting
-
+   // objects, not pointers -- we really should change this though (TODO)
 #if 0
    // first delete the entry
    m_Listing[n].~HeaderInfoImpl();
@@ -189,12 +222,13 @@ void HeaderInfoListImpl::Remove(size_t n)
    // as we need to not only remove the entry, but to adjust indices as well:
    // all indices greater than the one being removed must be decremented
    // to account for the index shift
-   if ( n < m_NumEntries )
+   if ( pos < m_NumEntries )
    {
       // deleting is easy in this case
-      memmove(&m_TranslationTable[n], &m_TranslationTable[n + 1],
-              (m_NumEntries - n)*sizeof(size_t));
+      memmove(&m_TranslationTable[pos], &m_TranslationTable[pos + 1],
+              (m_NumEntries - pos)*sizeof(size_t));
    }
+   //else: no need to memmove(), last element can be just discarded
 
    for ( entry = 0; entry < m_NumEntries; entry++ )
    {
@@ -203,6 +237,10 @@ void HeaderInfoListImpl::Remove(size_t n)
    }
 #endif // 0/1
 }
+
+// ----------------------------------------------------------------------------
+// HeaderInfoListImpl debugging
+// ----------------------------------------------------------------------------
 
 #ifdef DEBUG
 

@@ -1469,30 +1469,50 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
 // MailFolderCmn sorting
 // ----------------------------------------------------------------------------
 
-static MMutex gs_SortListingMutex;
-
-static long gs_SortOrder = 0;
-static MailFolder * gs_MailFolder = NULL;
-
-static int CompareStatus(int stat1, int stat2, int flag)
+// we can only sort one listing at a time currently as we use global data to
+// pass information to the C callback used by qsort() - if this proves to be a
+// significant limitation, we should reimplement sorting ourselves
+static struct SortData
 {
-   int
-      score1 = 0,
-      score2 = 0;
+   // the struct must be locked while in use
+   MMutex mutex;
 
-   if( stat1 & MailFolder::MSG_STAT_DELETED )
+   // the sort order to use
+   long order;
+
+   // the listing which we're sorting
+   HeaderInfoList *hil;
+} gs_SortData;
+
+// return negative number if a < b, 0 if a == b and positive number if a > b
+#define CmpNumeric(a, b) ((a)-(b))
+
+static int CompareStatus(int stat1, int stat2)
+{
+   // deleted messages are considered to be less important than undeleted ones
+   if ( stat1 & MailFolder::MSG_STAT_DELETED )
    {
-      if( ! (stat2 & MailFolder::MSG_STAT_DELETED ))
-         return flag;
+      if ( ! (stat2 & MailFolder::MSG_STAT_DELETED ) )
+         return -1;
    }
-   else if( stat2 & MailFolder::MSG_STAT_DELETED )
-      return -flag;
+   else if ( stat2 & MailFolder::MSG_STAT_DELETED )
+   {
+      return 1;
+   }
 
-   /* We use a scoring system:
+   /*
+      We use a scoring system:
+
       recent = +1
       unseen   = +1
       answered = -1
+
+      (by now, messages are either both deleted or neither one is)
    */
+
+   int
+      score1 = 0,
+      score2 = 0;
 
    if(stat1 & MailFolder::MSG_STAT_RECENT)
       score1 += 1;
@@ -1508,95 +1528,91 @@ static int CompareStatus(int stat1, int stat2, int flag)
    if( stat2 & MailFolder::MSG_STAT_ANSWERED )
       score2 -= 1;
 
-   return (score1 > score2) ? -flag : (score1 < score2) ? flag : 0;
+   return CmpNumeric(score1, score2);
 }
 
 extern "C"
 {
-   static int ComparisonFunction(const void *a, const void *b)
+   static int ComparisonFunction(const void *p1, const void *p2)
    {
-      HeaderInfo
-         *i1 = (HeaderInfo *)a,
-         *i2 = (HeaderInfo *)b;
+      // check that the caller didn't forget to acquire the global data lock
+      ASSERT_MSG( gs_SortData.mutex.IsLocked(), "using unlocked gs_SortData" );
 
-      long sortOrder = gs_SortOrder, criterium;
+      size_t n1 = *(size_t *)p1,
+             n2 = *(size_t *)p2;
+
+      HeaderInfo *i1 = gs_SortData.hil->GetItemByIndex(n1),
+                 *i2 = gs_SortData.hil->GetItemByIndex(n2);
+
+      // copy it as we're going to modify it while processing
+      long sortOrder = gs_SortData.order;
 
       int result = 0;
-      int flag;
-
-      while(result == 0 && sortOrder != 0 )
+      while ( result == 0 && sortOrder != 0 )
       {
-         criterium = sortOrder & 0xF;
+         long criterium = sortOrder & 0xF;
          sortOrder >>= 4;
 
-         switch(criterium)
+         // we rely on MessageSortOrder values being what they are: as _REV
+         // version immediately follows the normal order constant, we should
+         // reverse the comparison result for odd values of MSO_XXX
+         int reverse = criterium % 2;
+         switch ( criterium - reverse )
          {
-         case MSO_NONE:
-            break;
-         case MSO_NONE_REV:
-            result = 1; // reverse the order
-            break;
-         case MSO_DATE:
-         case MSO_DATE_REV:
-            flag = criterium == MSO_DATE ? 1 : -1;
-            if(i1->GetDate() > i2->GetDate())
-               result = flag;
-            else
-               if(i1->GetDate() < i2->GetDate())
-                  result = -flag;
-               else
-                  result = 0;
-         break;
-         case MSO_SUBJECT:
-         case MSO_SUBJECT_REV:
-         {
-            String
-               subj1 = strutil_removeReplyPrefix(i1->GetSubject()),
-               subj2 = strutil_removeReplyPrefix(i2->GetSubject());
+            case MSO_NONE:
+               break;
 
-            result = criterium == MSO_SUBJECT ?
-               Stricmp(subj1, subj2) : -Stricmp(subj1, subj2);
+            case MSO_DATE:
+               result = CmpNumeric(i1->GetDate(), i2->GetDate());
+               break;
+
+            case MSO_SUBJECT:
+               {
+                  String
+                     subj1 = strutil_removeReplyPrefix(i1->GetSubject()),
+                     subj2 = strutil_removeReplyPrefix(i2->GetSubject());
+
+                  result = Stricmp(subj1, subj2);
+               }
+               break;
+
+            case MSO_AUTHOR:
+               result = Stricmp(i1->GetFrom(), i2->GetFrom());
+               break;
+
+            case MSO_STATUS:
+               result = CompareStatus(i1->GetStatus(), i2->GetStatus());
+               break;
+
+            case MSO_SIZE:
+               result = CmpNumeric(i1->GetSize(), i2->GetSize());
+               break;
+
+            case MSO_SCORE:
+               result = CmpNumeric(i1->GetScore(), i2->GetScore());
+               break;
+
+            default:
+               FAIL_MSG("unknown sorting criterium");
          }
-         break;
-         case MSO_AUTHOR:
-         case MSO_AUTHOR_REV:
-            result = criterium == MSO_AUTHOR ?
-               -Stricmp(i1->GetFrom(), i2->GetFrom())
-               : Stricmp(i1->GetFrom(), i2->GetFrom());
-            break;
-         case MSO_STATUS_REV:
-         case MSO_STATUS:
-             flag = criterium == MSO_STATUS_REV ? -1 : 1;
-             {
-                int
-                   stat1 = i1->GetStatus(),
-                   stat2 = i2->GetStatus();
-                // ms   g1 new?
-                result = CompareStatus(stat1, stat2, flag);
-             }
-             break;
-         case MSO_SCORE:
-         case MSO_SCORE_REV:
-            flag = criterium == MSO_SCORE_REV ? -1 : 1;
+
+         if ( reverse )
+         {
+            if ( criterium == MSO_NONE )
             {
-               int score1 = i1->GetScore(),
-                  score2 = i2->GetScore();
-               result = score1 > score2 ?
-                  flag : score2 > score1 ?
-                  -flag : 0;
+               // special case: result is 0 for MSO_NONE but -1 (reversed order)
+               // for MSO_NONE_REV
+               result = -1;
             }
-         break;
-         case MSO_THREAD:
-         case MSO_THREAD_REV:
-            ASSERT_MSG(0,"reverse threading not implemented yet");
-            break;
-         default:
-            ASSERT_MSG(0,"unknown sorting criterium");
-            break;
+            else // for all other cases just revert the result value
+            {
+               result = -result;
+            }
          }
       }
+
       return result;
-     }
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -1644,6 +1660,8 @@ static void AddDependents(size_t &idx,
 
 static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
 {
+   CHECK_RET( hilp, "no listing to thread" );
+
    HeaderInfoList_obj hil(hilp);
 
    size_t count = hil->Count();
@@ -1701,47 +1719,62 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
       if ( hil[i]->GetIndentation() == 0 )
       {
          ASSERT(idx < (*hilp).Count());
+
          indices[idx++] = i;
          hil[i]->SetIndentation(MFCMN_INDENT1_MARKER);
          AddDependents(idx, 1, i, indices, indents, hilp, dependents);
       }
    }
-   ASSERT(idx == hilp->Count());
 
-   hilp->SetTranslationTable(indices);
+   // we should have found all the messages
+   ASSERT_MSG( idx == hilp->Count(), "logic error in threading code" );
+
+   // we use AddTranslationTable() instead of SetTranslationTable() as this one
+   // should be combined with the existing table from sorting
+   hilp->AddTranslationTable(indices);
 
    for ( i = 0; i < hilp->Count(); i++ )
    {
       hil[i]->SetIndentation(indents[i]);
    }
 
-
-   //delete [] indices; // freed by ~HeaderInfoList()
+   delete [] indices;
    delete [] indents;
    delete [] dependents;
 
    STATUSMESSAGE((_("Threading %lu messages...done."), count));
 }
 
-static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
+static void SortListing(MailFolder *mf, HeaderInfoList *hil, long sortOrder)
 {
-   gs_SortListingMutex.Lock();
-   gs_MailFolder = mf;
-   gs_SortOrder = SortOrder;
+   CHECK_RET( hil, "no listing to sort" );
 
    size_t count = hil->Count();
    if ( count >= 1 )
    {
-      qsort(hil->GetArray(),
-            count,
-            (*hil)[0]->SizeOf(),
-            ComparisonFunction);
+      MLocker lock(gs_SortData.mutex);
+      gs_SortData.order = sortOrder;
+      gs_SortData.hil = hil;
+
+      // start with unsorted listing
+      size_t *transTable = new size_t[count];
+      for ( size_t n = 0; n < count; n++ )
+      {
+         transTable[n] = n;
+      }
+
+      // now sort it
+      qsort(transTable, count, sizeof(size_t), ComparisonFunction);
+
+      // and tell the listing to use it (it will delete it)
+      hil->SetTranslationTable(transTable);
+
+      // just in case
+      gs_SortData.hil = NULL;
    }
+   //else: avoid sorting empty listing or listing of 1 element
 
    hil->DecRef();
-
-   gs_MailFolder = NULL;
-   gs_SortListingMutex.Unlock();
 }
 
 // ----------------------------------------------------------------------------

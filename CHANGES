@@ -4,6 +4,7 @@
 Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+15.02.01 VZ: added message sorting by status and by size
 13.02.01 VZ: added an option to not open any folders at startup at all
 10.02.01 VZ: better error msg when opening POP3 folder opened from elsewhere
 09.02.01 VZ: added "Edit" button to folder filters dlg, also edit on dbl click

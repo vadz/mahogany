@@ -752,14 +752,26 @@ enum MessageSortOrder
 
    /// date or reverse date
    MSO_DATE, MSO_DATE_REV,
-   MSO_SUBJECT, MSO_SUBJECT_REV,
-   MSO_AUTHOR, MSO_AUTHOR_REV,
-   MSO_STATUS, MSO_STATUS_REV,
-   MSO_SCORE, MSO_SCORE_REV,
-   MSO_THREAD, MSO_THREAD_REV
 
-   // NB: the code in wxFolderListCtrl::OnColumnClick() relies on MSO_XXX_REV
-   //     immediately following MSO_XXX
+   /// subject
+   MSO_SUBJECT, MSO_SUBJECT_REV,
+
+   /// from
+   MSO_AUTHOR, MSO_AUTHOR_REV,
+
+   /// status (deleted < answered < unread < new)
+   MSO_STATUS, MSO_STATUS_REV,
+
+   /// score
+   MSO_SCORE, MSO_SCORE_REV,
+
+   /// size in bytes
+   MSO_SIZE, MSO_SIZE_REV
+
+   // NB: the code in wxFolderListCtrl::OnColumnClick() and ComparisonFunction()
+   //     relies on MSO_XXX_REV immediately following MSO_XXX, so don't change
+   //     the values of the elements of this enum and always add MSO_XXX and
+   //     MSO_XXX in this order
 };
 
 /// split a long value (as read from profile) into (several) sort orders

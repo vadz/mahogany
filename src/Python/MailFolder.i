@@ -506,26 +506,14 @@ private:
    HeaderInfo(const HeaderInfo &);
 };
 
-/** This class holds a complete list of all messages in the folder.
-    It must be an array!*/
+/** This class holds a complete list of all messages in the folder. */
 class HeaderInfoList : public MObjectRC
 {
 public:
    /// Count the number of messages in listing.
    virtual size_t Count(void);
-   /// Returns the n-th entry.
-//   virtual const HeaderInfo * operator[](size_t n);
-   /// Returns the n-th entry.
-//   virtual HeaderInfo * operator[](size_t n);
-   /// Returns pointer to array of data:
-   virtual HeaderInfo * GetArray(void);
-   /// Swaps two elements:
-   virtual void Swap(size_t index1, size_t index2);
-   /** Sets a translation table re-mapping index values.
-       Will be freed in destructor.
-       @param array an array of indices or NULL to remove it.
-   */
-   virtual void SetTranslationTable(size_t array[]);
+   /// Get the item displayed at given position
+   virtual HeaderInfo *GetItem(size_t n);
 };
 
 /** This class holds information about a single folder. */
@@ -562,15 +550,13 @@ public:
 /** Sort order enum for sorting message listings. */
 enum MessageSortOrder
 {
-   /// no sorting
-   MSO_NONE,
-   /// date or reverse date
+   MSO_NONE, MSO_NONE_REV,
    MSO_DATE, MSO_DATE_REV,
    MSO_SUBJECT, MSO_SUBJECT_REV,
    MSO_AUTHOR, MSO_AUTHOR_REV,
    MSO_STATUS, MSO_STATUS_REV,
    MSO_SCORE, MSO_SCORE_REV,
-   MSO_THREAD, MSO_THREAD_REV
+   MSO_SIZE, MSO_SIZE_REV
 };
 
 /** Search criterium for searching folder for certain messages. */

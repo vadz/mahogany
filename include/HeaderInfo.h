@@ -19,14 +19,10 @@
 #   pragma interface "HeaderInfo.h"
 #endif
 
-/** This class essentially maps to the c-client Overview structure,
-    which holds information for showing lists of messages.
-
-    IMPORTANT: When sorting messages, the instances of this class will
-    be copied around in memory bytewise, but not duplicates of the
-    object will be created. So the reference counting in wxString
-    objects should be compatible with this, as at any time only one
-    object exists.
+/**
+   This class contains all the information about the message such as its
+   (important) headers and its appearance parameters (colour, indent, font
+   encoding to use)
 */
 class HeaderInfo
 {
@@ -81,38 +77,91 @@ private:
    GCC_DTOR_WARN_OFF
 };
 
-/** This class holds a complete list of all messages in the folder.
-    It must be an array!*/
+/**
+   This class holds a complete list of all messages in the folder.
+
+   The messages are stored internally in the order they were retrieved by the
+   folder but their displayed order may be different because of sorting and/or
+   threading. So GetItem(n) (and operators[]) return the header info
+   corresponding to the message which should appear in the n-th position when
+   displayed, while all other functions taking index value (Remove())
+   interpret the index as internal index. There is also GetItemByMsgno() which
+   returns the item from its msgno in the cclient sense. They correspond to the
+   internal index in the following sense:
+
+   1. msgnos are consecutive
+
+   2. but they decrease while index increases (this is because we build the
+      listing in reversed order to allow the user to retrieve only some headers
+      from server and abort without having to retrieve the older ones)
+
+   3. the msgno of the first message would usually be just Count(), but it may
+      be greater if the listing building was aborted
+
+   To allow sorting of messages, we provide direct access to the translation
+   table used to map internal indices to the displayed ones:
+*/
 class HeaderInfoList : public MObjectRC
 {
 public:
+   /** @name Elements access */
+   //@{
    /// Count the number of messages in listing.
    virtual size_t Count(void) const = 0;
 
-   /// Returns the n-th entry.
-   virtual const HeaderInfo * operator[](size_t n) const = 0;
-   const HeaderInfo *GetItem(size_t n) const { return (*this)[n]; }
-   /// Returns the n-th entry.
-   virtual HeaderInfo * operator[](size_t n) = 0;
+   /// Returns the entry for the given internal index
+   virtual HeaderInfo *GetItemByIndex(size_t n) const = 0;
 
-   /// Returns pointer to array of data:
-   virtual HeaderInfo * GetArray(void) = 0;
+   /// Returns the entry for the n-th msgno (msgnos are counted from 1)
+   HeaderInfo *GetItemByMsgno(size_t msgno) const
+      { return GetItemByIndex(GetIdxFromMsgno(msgno)); }
+
+   /// Returns the entry which should be shown in the given position.
+   HeaderInfo *GetItem(size_t pos) const
+      { return GetItemByIndex(GetIdxFromPos(pos)); }
+   /// Returns the n-th entry.
+   HeaderInfo *operator[](size_t pos) const { return GetItem(pos); }
+   //@}
 
    /// Returns pointer to entry with this UId
-   virtual HeaderInfo * GetEntryUId(UIdType uid) = 0;
+   virtual HeaderInfo *GetEntryUId(UIdType uid) = 0;
 
-   /** Returns the index in the info list sequence number for a UId or
-       UID_ILLEGAL */
+   /** Returns the (internal) index for this UId or UID_ILLEGAL */
    virtual UIdType GetIdxFromUId(UIdType uid) const= 0;
 
-   /// Swaps two elements:
-   virtual void Swap(size_t index1, size_t index2) = 0;
+   /** Returns the (internal) index for the given msgno. */
+   virtual size_t GetIdxFromMsgno(size_t msgno) const = 0;
 
-   /** Sets a translation table re-mapping index values.
-       Will be freed in destructor.
-       @param array an array of indices or NULL to remove it.
+   /** Returns the (internal) index for the given display position. */
+   virtual size_t GetIdxFromPos(size_t pos) const = 0;
+
+   /** Returns the position at which this item should be displayed. */
+   virtual size_t GetPosFromIdx(size_t n) const = 0;
+
+   /** @name Translation table
+
+       As explained above, we use a translation table to get the real message
+       index of the message which is displayed in the given position. You can
+       set a translation table, replacing any existing one, or add a table
+       combining it with the existing one.
    */
-   virtual void SetTranslationTable(size_t array[] = NULL) = 0;
+   //@{
+   /**
+       Sets a translation table re-mapping index values or removes the table if
+       the pointer is NULL (otherwise it will be delete[]d in destructor).
+
+       @param array an array of indices allocated with new[] or NULL
+   */
+   virtual void SetTranslationTable(size_t *array) = 0;
+
+   /**
+       Adds a translation table. The pointer will not be deallocated by this
+       class and can be deleted by caller after this function returns.
+
+       @param array an array of indices
+   */
+   virtual void AddTranslationTable(const size_t *array) = 0;
+   //@}
 
    /// For use by folder only: corrects size downwards:
    virtual void SetCount(size_t newcount) = 0;

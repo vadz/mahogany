@@ -953,6 +953,7 @@ MailFolderCC::Create(int typeAndFlags)
 
    SetRetrievalLimit(0); // no limit
    m_nMessages = 0;
+   m_msgnoMax = 0;
    m_nRecent = UID_ILLEGAL;
    m_LastUId = UID_ILLEGAL;
    m_Listing = NULL;
@@ -2017,7 +2018,7 @@ MailFolderCC::CountMessages(int mask, int value) const
    HeaderInfoList_obj hil = GetHeaders();
    CHECK( hil, UID_ILLEGAL, "no listing in CountMessages" );
 
-   unsigned long numOfMessages;
+   size_t numOfMessages;
    if ( mask == MSG_STAT_NONE )
    {
       // total number of messages
@@ -2033,9 +2034,9 @@ MailFolderCC::CountMessages(int mask, int value) const
       // FIXME there should probably be a much more efficient way (using
       //       mail_search()?) to do it
       numOfMessages = 0;
-      for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
+      for ( size_t idx = 0; idx < m_nMessages; idx++ )
       {
-         if ( (hil[msgno]->GetStatus() & mask) == value )
+         if ( (hil->GetItemByIndex(idx)->GetStatus() & mask) == value )
             numOfMessages++;
       }
 
@@ -2064,9 +2065,9 @@ bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
    }
 
    status->total = m_nMessages;
-   for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
+   for ( size_t idx = 0; idx < m_nMessages; idx++ )
    {
-      int stat = hil[msgno]->GetStatus();
+      int stat = hil->GetItemByIndex(idx)->GetStatus();
 
       // ignore deleted messages (FIXME should we?)
       if ( stat & MSG_STAT_DELETED )
@@ -2104,10 +2105,10 @@ MailFolderCC::GetMessage(unsigned long uid)
 
    // test to see if the UID is valid:
    bool uidValid = false;
-   unsigned long count = hil->Count();
-   for ( unsigned long msgno = 0; msgno < count && !uidValid; msgno++ )
+   size_t count = hil->Count();
+   for ( size_t idx = 0; idx < count && !uidValid; idx++ )
    {
-      if ( hil[msgno]->GetUId() == uid )
+      if ( hil->GetItemByIndex(idx)->GetUId() == uid )
          uidValid = true;
    }
 
@@ -2195,16 +2196,21 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
          }
       }
 
-      for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
+      for ( size_t idx = 0; idx < m_nMessages; idx++ )
       {
-         if(crit->m_What == SearchCriterium::SC_SUBJECT)
-            what = (*hil)[msgno]->GetSubject();
+         if ( crit->m_What == SearchCriterium::SC_SUBJECT )
+         {
+            what = hil->GetItemByIndex(idx)->GetSubject();
+         }
          else
-            if(crit->m_What == SearchCriterium::SC_FROM)
-               what = (*hil)[msgno]->GetFrom();
+         {
+            if ( crit->m_What == SearchCriterium::SC_FROM )
+            {
+               what = hil->GetItemByIndex(idx)->GetFrom();
+            }
             else
             {
-               Message *msg = GetMessage((*hil)[msgno]->GetUId());
+               Message *msg = GetMessage(hil->GetItemByIndex(idx)->GetUId());
                ASSERT(hil);
                switch(crit->m_What)
                {
@@ -2229,11 +2235,13 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
                }
                msg->DecRef();
             }
+         }
+
          bool found =  what.Contains(crit->m_Key);
          if(crit->m_Invert)
             found = ! found;
          if(found)
-            m_SearchMessagesFound->Add((*hil)[msgno]->GetUId());
+            m_SearchMessagesFound->Add(hil->GetItemByIndex(idx)->GetUId());
 
          if(progDlg)
          {
@@ -2246,12 +2254,19 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
             {
                msg2.Printf(_(" - %lu matches found."), cnt);
                msg = msg + msg2;
-               if(! progDlg->Update( msgno, msg ))
-                  break;  // abort searching
+               if ( ! progDlg->Update(idx, msg ) )
+               {
+                  // abort searching
+                  break;
+               }
+
                lastcount = cnt;
             }
-            else if(! progDlg->Update( msgno ))
-               break;  // abort searching
+            else if( !progDlg->Update(idx) )
+            {
+               // abort searching
+               break;
+            }
          }
       }
       hil->DecRef();
@@ -2758,11 +2773,19 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
       }
    }
 
-   HeaderInfoImpl& entry = *(HeaderInfoImpl *)(*m_Listing)[m_BuildNextEntry];
-
    unsigned long msgno = mail_msgno (m_MailStream, uid);
+
+   // as we overview the messages in the reversed order (see comments before
+   // mail_fetch_overview_x()) and msgnos are consecutive we should always have
+   // this -- and maybe we can even save the call to mail_msgno() above
+   ASSERT_MSG( msgno == m_nMessages - m_BuildNextEntry,
+               "msgno and listing index out of sync" );
+
    MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
    MESSAGECACHE selt;
+
+   HeaderInfoImpl& entry = *(HeaderInfoImpl *)
+                              m_Listing->GetItemByIndex(m_BuildNextEntry);
 
    // STATUS:
    entry.m_Status = GetMsgStatus(elt);
@@ -3026,8 +3049,10 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET( mf, "number of messages changed in unknown mail folder" );
 
-   if ( msgno > mf->m_nMessages )
+   if ( msgno > mf->m_msgnoMax )
    {
+      mf->m_msgnoMax = msgno;
+
       // new message(s) arrived, we need to reapply the filters
       mf->m_GotNewMessages = true;
 
@@ -3044,7 +3069,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    {
       // msgno should never be less than m_nMessages because we adjust the
       // latter in mm_expunged immediately when a message is expunged
-      ASSERT_MSG( msgno == mf->m_nMessages, "msg number unexpected changed" );
+      ASSERT_MSG( msgno == mf->m_msgnoMax, "msg number unexpected changed" );
    }
 
    mf->RequestUpdate();
@@ -3283,19 +3308,15 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
 
    if ( mf->HaveListing() )
    {
-      // find the index of the message in the listing
-      UIdType uid = mail_uid(mf->m_MailStream, msgno);
-      UIdType idx = mf->m_Listing->GetIdxFromUId(uid);
-
-      wxCHECK_RET( idx != UID_ILLEGAL, "expunged a non existent message?" );
-
       // remove one message from listing
       wxLogTrace(TRACE_MF_CALLBACK,
-                 "Removing element %lu (uid=%lu) from listing",
-                 idx, uid);
+                 "Removing element %lu from listing", msgno);
 
-      mf->m_Listing->Remove(idx);
+      HeaderInfoList_obj hil = mf->GetHeaders();
+
+      mf->m_Listing->Remove(hil->GetIdxFromMsgno(msgno));
       mf->m_nMessages--;
+      mf->m_msgnoMax--;
    }
    //else: no need to do anything right now
 }
@@ -3409,12 +3430,9 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
    // Otherwise: update the current listing information:
    HeaderInfoList_obj hil = GetHeaders();
 
-   // Find the listing entry for this message:
-   UIdType uid = mail_uid(m_MailStream, msgno);
-   UIdType i = hil->GetIdxFromUId(uid);
-   CHECK_RET( i != UID_ILLEGAL, "message not found in the listing" );
-
-   HeaderInfo *hi = hil[i];
+   // Get the listing entry for this message:
+   size_t idx = hil->GetIdxFromMsgno(msgno);
+   HeaderInfo *hi = hil->GetItemByIndex(idx);
 
    MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
    int status = GetMsgStatus(elt);
@@ -3426,7 +3444,8 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
       wxLogTrace(TRACE_MF_EVENTS, "Sending MsgStatus event for folder '%s'",
                  GetName().c_str());
 
-      MEventManager::Send(new MEventMsgStatusData(this, i, hi->Clone()));
+      size_t pos = hil->GetPosFromIdx(idx);
+      MEventManager::Send(new MEventMsgStatusData(this, pos, hi->Clone()));
    }
    //else: flags didn't really change
 }
@@ -3668,58 +3687,49 @@ MailFolderCC::HasInferiors(const String &imapSpec,
 // replacements of some cclient functions
 // ----------------------------------------------------------------------------
 
-// we need to do all this because we want the "To" header in the overview and
-// cclient doesn't put it there, if it ever changes, we wouldn't need all this
-// any more
+/*
+ We have our version of cclient mail_fetch_overview() because:
 
-extern "C"
+ 1. we need the "To" header which is not retrieved by mail_fetch_overview()
+
+ 2. we want to allow the user to abort retrieving the headers
+
+ 3. we want to retrieve the headers from larger msgnos down to lower ones,
+    i.e. in the reverse order to mail_fetch_overview() - this is useful if we're
+    aborted
+
+ Note that now the code elsewhere relies on messages being fetched in reverse
+ order, so it shouldn't be changed!
+*/
+
+void mail_fetch_overview_x(MAILSTREAM *stream, char *sequence, overview_x_t ofn)
 {
-
-/* Mail fetch message overview
- * Accepts: mail stream
- *            UID sequence to fetch
- *            pointer to overview return function
-
- -- Modified to evaluate "continue" return code of callback to allow
-    user to abort it.
- -- Also modified to fetch messages backwards, useful if aborted.
- */
-
-void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn)
-{
-   if (stream->dtb
-//
-// We are not using the driver's overview function as we need the
-// OVERVIEW_X structure with the extra To field. This might be
-// a bit inefficient, but the alternative would be to patch all
-// c-client drivers or to check somehow which structure we get.
-//
-// && !(stream->dtb->overview && (*stream->dtb->overview)(stream,sequence,(overview_t)ofn))
-       && mail_uid_sequence (stream,sequence) && mail_ping (stream))
+   if ( mail_uid_sequence (stream,sequence) && mail_ping (stream) )
    {
-    MESSAGECACHE *elt;
-    ENVELOPE *env = NULL;  // initialisation not needed but keeps compiler happy
-    OVERVIEW_X ov;
-    unsigned long i;
-    ov.optional.lines = 0;
-    ov.optional.xref = NIL;
-    for (i = stream->nmsgs; i>= 1; i--)
-      if (((elt = mail_elt (stream,i))->sequence) &&
-          (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn)
-      {
-         ov.subject = env->subject;
-         ov.from = env->from;
-         ov.to = env->to;
-         ov.date = env->date;
-         ov.message_id = env->message_id;
-         ov.references = env->references;
-         ov.optional.octets = elt->rfc822_size;
-         if(! (*ofn) (stream,mail_uid (stream,i),&ov))
-            break;
-      }
-  }
-}
+      OVERVIEW_X ov;
+      ov.optional.lines = 0;
+      ov.optional.xref = NIL;
 
+      for ( unsigned long i = stream->nmsgs; i>= 1; i-- )
+      {
+         MESSAGECACHE *elt;
+         ENVELOPE *env = NULL;
+         if (((elt = mail_elt (stream,i))->sequence) &&
+               (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn)
+         {
+            ov.subject = env->subject;
+            ov.from = env->from;
+            ov.to = env->to;
+            ov.date = env->date;
+            ov.message_id = env->message_id;
+            ov.references = env->references;
+            ov.optional.octets = elt->rfc822_size;
+            if(! (*ofn) (stream,mail_uid (stream,i),&ov))
+               break;
+         }
+      }
+   }
+}
 
 /* Mail fetch message overview using sequence numbers instead of UIDs!
  * Accepts: mail stream
@@ -3755,8 +3765,6 @@ void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t of
          }
    }
 }
-
-} // extern "C"
 
 // ----------------------------------------------------------------------------
 // C-Client callbacks

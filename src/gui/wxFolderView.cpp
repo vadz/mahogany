@@ -390,13 +390,15 @@ static MessageSortOrder SortOrderFromCol(wxFolderListCtrlFields col)
       case WXFLC_SUBJECT:
          return MSO_SUBJECT;
 
-      default:
-      case WXFLC_NUMENTRIES:
-         wxFAIL_MSG( "invalid column" );
-
       case WXFLC_SIZE:
+         return MSO_SIZE;
+
       case WXFLC_STATUS:
-         // we don't support sorting by size or status [yet]
+         return MSO_STATUS;
+
+      case WXFLC_NUMENTRIES: // suppress gcc warning
+      default:
+         wxFAIL_MSG( "invalid column" );
          return MSO_NONE;
    }
 }
@@ -1729,7 +1731,7 @@ wxFolderView::Update(HeaderInfoList *listing)
 
    size_t n = listing->Count();
 
-   static const THRESHOLD = 100;
+   static const size_t THRESHOLD = 100;
    if ( n > THRESHOLD )
    {
       wxBeginBusyCursor();
@@ -1908,7 +1910,8 @@ wxFolderView::UpdateSelectionInfo(void)
    // record this for the later Update:
    m_FolderCtrl->GetSelections(m_SelectedUIds, true);
 
-   UIdType uid = m_FolderCtrl->GetFocusedUId();
+   long idx;
+   UIdType uid = m_FolderCtrl->GetFocusedUId(&idx);
    if ( uid != m_FocusedUId )
    {
       m_FocusedUId = uid;
@@ -1919,15 +1922,11 @@ wxFolderView::UpdateSelectionInfo(void)
          HeaderInfoList_obj hil = GetFolder()->GetHeaders();
          if ( hil )
          {
-            UIdType n = hil->GetIdxFromUId(m_FocusedUId);
-            if ( n != UID_ILLEGAL )
-            {
-               wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
-               HeaderVarExpander expander(hil[n],
-                                          m_settings.dateFormat,
-                                          m_settings.dateGMT);
-               msg = ParseMessageTemplate(fmt, expander);
-            }
+            wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
+            HeaderVarExpander expander(hil[idx],
+                                       m_settings.dateFormat,
+                                       m_settings.dateGMT);
+            msg = ParseMessageTemplate(fmt, expander);
          }
       }
 
@@ -2469,7 +2468,11 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
 {
    if ( event.GetFolder() == m_MailFolder )
    {
-      SetEntry(event.GetHeaderInfo(), event.GetIndex());
+      size_t index = event.GetIndex();
+      CHECK_RET( index < (size_t)m_FolderCtrl->GetItemCount(),
+                 "invalid index in wxFolderView::OnMsgStatusEvent" );
+
+      SetEntry(event.GetHeaderInfo(), index);
       UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
    }
 }
