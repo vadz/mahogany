@@ -283,8 +283,6 @@
 #define   MP_COMPOSE_XFACE_FILE   "XFace"
 /// the folder type for a mailbox (see enum in MFolder class)
 #define   MP_FOLDER_TYPE         "Type"
-/// the folder flags (see MFolder)
-#define   MP_FOLDER_FLAGS        "Flags"
 /// Where to store all new mail
 #define MP_NEWMAIL_FOLDER      "NewMailFolder"
 /// the filename for a mailbox
@@ -603,8 +601,6 @@
 #define   MP_FOLDER_TYPE_D         (int)(0x00ff)  // MF_ILLEGAL
 /// Where to store all new mail
 #define MP_NEWMAIL_FOLDER_D      "New Mail"
-/// the folder flags (see MFolder)
-#define   MP_FOLDER_FLAGS_D       0l
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// comment
