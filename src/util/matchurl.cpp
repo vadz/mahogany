@@ -412,10 +412,17 @@ KeywordDetectorCell::computeBackArcs(KeywordDetectorCell* root,
 /// a locale-independent isalnum()
 static inline bool IsAlnum(char c)
 {
-   // we do *not* use isalnum() as we want to be locale-independent
+   // normally URLs should be in plain ASCII (7bit) but in practice some broken
+   // programs (people?) apparently write them using 8bit chars too so be
+   // liberal here and suppose that any 8 bit char can be part of the URL as
+   // there is no way for us to check it more precisely...
+   //
+   // OTOH we still don't use alnum() here because we don't want to depend on
+   // the current locale
    return (c >= 'a' && c <= 'z') ||
           (c >= 'A' && c <= 'Z') ||
-          (c >= '0' && c <= '9');
+          (c >= '0' && c <= '9') ||
+          (c > 0x7f);
 }
 
 /// checks a character to be a 'mark' as from RFC2396
