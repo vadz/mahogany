@@ -48,9 +48,8 @@
 #   define   WXFRAME_HEIGHT_DELTA   64
 
 /// convenience macro to add a button to a toolbar
-#define   TB_AddTool(tb,xpm,id,helptext) \
-    tb->AddTool( id, new wxBitmap(xpm), wxNullBitmap, FALSE, -1, -1, \
-                  NULL, _(helptext) );
+#define   TB_AddTool(tb, bmp, id, helptext) \
+    tb->AddTool(id, BMP(bmp), wxNullBitmap, FALSE, -1, -1, NULL, _(helptext))
 
 #else
 #  error "Implemented only for wxWindows."
