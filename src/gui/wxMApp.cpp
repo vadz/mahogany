@@ -133,9 +133,9 @@ public:
 // ----------------------------------------------------------------------------
 
 // a (unique) autosave timer instance
-static AutoSaveTimer gs_timerAutoSave;
+static AutoSaveTimer *gs_timerAutoSave = NULL;
 // a (unique) timer for polling for new mail
-static MailCollectionTimer gs_timerMailCollection;
+static MailCollectionTimer *gs_timerMailCollection = NULL;
 
 
 struct MModuleEntry
@@ -519,6 +519,10 @@ wxMApp::OnInit()
          READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X)));
 #endif // wxUSE_POSTSCRIPT
 
+      // create timers
+      gs_timerAutoSave = new AutoSaveTimer;
+      gs_timerMailCollection = new MailCollectionTimer;
+
       // start a timer to autosave the profile entries
       StartTimer(Timer_Autosave);
 
@@ -559,6 +563,13 @@ int wxMApp::OnExit()
    StopTimer(Timer_Autosave);
    StopTimer(Timer_PollIncoming);
 
+   // delete timers
+   delete gs_timerAutoSave;
+   delete gs_timerMailCollection;
+
+   gs_timerAutoSave = NULL;
+   gs_timerMailCollection = NULL;
+
 #if wxUSE_POSTSCRIPT
    // save our preferred printer settings
    m_profile->writeEntry(MP_PRINT_COMMAND, GetPrintData()->GetPrinterCommand());
@@ -573,6 +584,7 @@ int wxMApp::OnExit()
    m_profile->writeEntry(MP_PRINT_BOTTOMMARGIN_X, GetPageSetupData()->GetMarginBottomRight().x);
    m_profile->writeEntry(MP_PRINT_BOTTOMMARGIN_Y, GetPageSetupData()->GetMarginBottomRight().y);
 #endif // wxUSE_POSTSCRIPT
+
    delete m_PrintData;
    delete m_PageSetupData;
 
@@ -729,12 +741,12 @@ bool wxMApp::StartTimer(Timer timer)
       case Timer_Autosave:
          delay = READ_APPCONFIG(MP_AUTOSAVEDELAY)*1000;
 
-         return (delay == 0) || gs_timerAutoSave.Start(delay);
+         return (delay == 0) || gs_timerAutoSave->Start(delay);
 
       case Timer_PollIncoming:
          delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY)*1000;
 
-         return (delay == 0) || gs_timerMailCollection.Start(delay);
+         return (delay == 0) || gs_timerMailCollection->Start(delay);
 
       case Timer_PingFolder:
          // TODO - just sending an event "restart timer" which all folders
@@ -752,11 +764,11 @@ bool wxMApp::StopTimer(Timer timer)
    switch ( timer )
    {
       case Timer_Autosave:
-         gs_timerAutoSave.Stop();
+         gs_timerAutoSave->Stop();
          break;
 
       case Timer_PollIncoming:
-         gs_timerMailCollection.Stop();
+         gs_timerMailCollection->Stop();
          break;
 
       case Timer_PingFolder:

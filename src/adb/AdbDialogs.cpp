@@ -35,6 +35,8 @@
 #include "Mdefaults.h"
 
 #include "adb/AdbImport.h"
+#include "adb/AdbExport.h"
+#include "adb/AdbImpExp.h"
 
 #include "gui/wxIconManager.h"
 #include "gui/wxBrowseButton.h"
@@ -407,6 +409,25 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
 
    // release it only if we created it
    SafeDecRef(importer);
+
+   return ok;
+}
+
+bool AdbShowExportDialog(const AdbEntryGroup& group)
+{
+   // no exporter choice for now (there is exactly one of them), but this
+   // should be done when we have more of them (TODO)
+   AdbExporter *exporter = AdbExporter::GetExporterByName("AdbTextExporter");
+   if ( !exporter )
+   {
+      wxLogError(_("Cannot export address book - this functionality "
+                   "is missing in this version of the program."));
+
+      return FALSE;
+   }
+
+   bool ok = AdbExport(group, *exporter);
+   exporter->DecRef();
 
    return ok;
 }

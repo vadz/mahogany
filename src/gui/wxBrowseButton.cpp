@@ -132,7 +132,8 @@ void wxFileBrowseButton::DoBrowse()
    wxFileDialog dialog(this, "",
                        strLastDir, strLastFile,
                        _("All files (*.*)|*.*"),
-                       wxHIDE_READONLY | wxFILE_MUST_EXIST);
+                       m_open ? wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST
+                              : wxSAVE | wxOVERWRITE_PROMPT);
 
    if ( dialog.ShowModal() == wxID_OK )
    {

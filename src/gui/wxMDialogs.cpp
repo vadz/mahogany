@@ -108,12 +108,15 @@ extern void CloseSplash()
 int
 wxSMDialog::ShowModal()
 {
+#ifdef OS_WIN
+   return wxDialog::ShowModal();
+#else // !Windows
    m_modalShowing = TRUE;
 
 #if wxUSE_HELP && wxUSE_HTML
    /* Disable all other windows apart from the help frame and this
       one. */
-   
+
    wxFrame *hf = NULL;
    wxHelpController *hc = ((wxMApp *)mApplication)->GetHelpController();
    if(hc && hc->IsKindOf(CLASSINFO(wxHelpControllerHtml)))
@@ -124,8 +127,10 @@ wxSMDialog::ShowModal()
 
    wxWindowList::Node *node;
    for ( node = wxTopLevelWindows.GetFirst(); node; node = node->GetNext() )
+   {
       if(node->GetData() != hf && node->GetData() != this)
          node->GetData()->Enable(FALSE);
+   }
 
    Show( TRUE );
 
@@ -134,10 +139,14 @@ wxSMDialog::ShowModal()
 
    wxEnableTopLevelWindows(TRUE);
    return GetReturnCode();
+#endif // Win/!Win
 }
 
 void wxSMDialog::EndModal( int retCode )
 {
+#ifdef OS_WIN
+    wxDialog::EndModal(retCode);
+#else // !Win
     SetReturnCode( retCode );
 
     if (!IsModal())
@@ -147,6 +156,7 @@ void wxSMDialog::EndModal( int retCode )
     }
     m_modalShowing = FALSE;
     Show( FALSE );
+#endif // Win/!Win
 }
 
 
@@ -199,7 +209,6 @@ public:
    virtual bool TransferDataFromWindow();
 
    void OnButton(wxCommandEvent &ev);
-   void OnTree(wxTreeEvent &ev);
 
 private:
    wxString     m_FileName;
@@ -211,7 +220,6 @@ private:
 
 BEGIN_EVENT_TABLE(MFolderDialog, wxSMDialog)
     EVT_BUTTON(-1, MFolderDialog::OnButton)
-    EVT_TREE_SEL_CHANGED(-1, MFolderDialog::OnTree)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -961,22 +969,28 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
 {
    switch(ev.GetId())
    {
-   case wxID_OPEN:
-      m_FileName = wxPFileSelector("FolderDialogFile",
-                                   _("Mahogany: Please choose a folder file"),
-                                   NULL, NULL, NULL, NULL, 0, this);
-      break;
-   case wxID_HELP:
-      mApplication->Help(MH_DIALOG_FOLDERDLG);
-      break;
-   default:
-      ev.Skip();
+      case wxID_OPEN:
+         m_FileName = wxPFileSelector("FolderDialogFile",
+                                      _("Mahogany: Please choose a folder file"),
+                                      NULL, NULL, NULL, NULL,
+                                      0, this);
+         if ( !!m_FileName )
+         {
+            // folder (file) chosen
+            if ( TransferDataFromWindow() )
+            {
+               EndModal(wxID_OK);
+            }
+         }
+         break;
+
+      case wxID_HELP:
+         mApplication->Help(MH_DIALOG_FOLDERDLG);
+         break;
+
+      default:
+         ev.Skip();
    }
-}
-void
-MFolderDialog::OnTree(wxTreeEvent &ev)
-{
-   m_FileName = ""; // we use the tree selection
 }
 
 bool MFolderDialog::TransferDataToWindow()
@@ -987,8 +1001,7 @@ bool MFolderDialog::TransferDataToWindow()
 
 bool MFolderDialog::TransferDataFromWindow()
 {
-
-   if(m_FileName.Length() == 0)
+   if ( m_FileName.Length() == 0 )
    {
       m_folder = m_tree->GetSelection();
       if ( m_folder != NULL )
@@ -997,7 +1010,56 @@ bool MFolderDialog::TransferDataFromWindow()
       }
    }
    else
-      m_folder = MFolder::Create(m_FileName, MF_FILE);
+   {
+      // the name of the folder can't contain '/' and such, so take just the
+      // name, not the full name as the folder name
+      wxString name;
+      wxSplitPath(m_FileName, NULL, &name, NULL);
+
+      // verify that the folder with this name doesn't already exist
+      m_folder = NULL;
+      MFolder *folder;
+      while ( (folder = MFolder::Get(name)) != NULL )
+      {
+         // it does exist - may be it's already the same file?
+         if ( folder->GetType() == MF_FILE )
+         {
+            Profile_obj profile(name);
+            wxString filename = READ_CONFIG(profile, MP_FOLDER_PATH);
+            if ( sysutil_compare_filenames(filename, m_FileName) )
+            {
+               m_folder = folder;
+
+               break;
+            }
+         }
+
+         if (
+              !MInputBox
+               (
+                &name,
+                _("Mahogany: folder selection"),
+                _("Sorry, the folder '%s' already exists "
+                  "and corresponds to another file, please "
+                  "choose a different name for the folder "
+                  "which will correspond to the file '%s'."),
+                this,
+                "FileFolderName"
+               )
+            )
+         {
+            // can't continue
+            return FALSE;
+         }
+      }
+
+      if ( !m_folder )
+      {
+         m_folder = MFolder::Create(name, MF_FILE);
+      }
+      //else: it already existed before
+   }
+
    return true;
 }
 
@@ -1080,7 +1142,7 @@ public:
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
    bool WasChanged(void) { return m_SortOrder != m_OldSortOrder;};
-   
+
 protected:
    wxChoice    *m_Choices[NUM_CRITERIA];
    wxCheckBox  *m_UseThreading;
@@ -1095,13 +1157,16 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
                                                _("Message sorting"),
                                                "MessageSortingDialog")
 {
-   SetDefaultSize(380,280);
-
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Sort messages by"),MH_DIALOG_SORTING);
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Sort messages by"), FALSE,
+                                             MH_DIALOG_SORTING);
 
    wxClientDC dc(this);
    dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
    long width, widthMax = 0;
+
+   // see the comment near NUM_CRITERIA definition
+   ASSERT_MSG( NUM_LABELS < 16, "too many search criteria" );
+
    size_t n;
    for ( n = 0; n < NUM_LABELS; n++ )
    {
@@ -1113,9 +1178,9 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
    for( n = 0; n < NUM_SORTLEVELS; n++)
    {
       wxStaticText *txt = new wxStaticText(this, -1,
-                                           n < NUM_LABELS ? _(labels[n]) :
-                                           _(labels[NUM_LABELS-1]),
-                                           wxDefaultPosition);
+                                           n < NUM_LABELS
+                                           ? _(labels[n])
+                                           : _(labels[NUM_LABELS-1]));
       c = new wxLayoutConstraints;
       c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
       c->width.Absolute(widthMax);
@@ -1147,7 +1212,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
    c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
    c->height.AsIs();
    m_UseThreading->SetConstraints(c);
-   
+
    m_ReSortOnChange = new wxCheckBox(this, -1, _("Re-sort on status change"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -1155,7 +1220,9 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
    c->top.Below(m_UseThreading, 2*LAYOUT_Y_MARGIN);
    c->height.AsIs();
    m_ReSortOnChange->SetConstraints(c);
+
    Layout();
+   SetDefaultSize(380,280);
 }
 
 
@@ -1243,22 +1310,40 @@ bool ConfigureSorting(ProfileBase *profile, wxWindow *parent)
 
 static wxString DateFormatsLabels[] =
 {
-   gettext_noop("31 (Day)"), gettext_noop("Mon"),gettext_noop("Monday"),
-   gettext_noop("12 (Month)"),gettext_noop("Nov"),gettext_noop("November"),
-   gettext_noop("99 (year)"),gettext_noop("1999 (year)"),gettext_noop("24 (hour)"),
-   gettext_noop("12 (hour)"),"am/pm", gettext_noop("59 (minutes)"),
-   gettext_noop("29 (seconds)"), "EST (timezone)",
+   gettext_noop("31 (Day)"),
+   gettext_noop("Mon"),
+   gettext_noop("Monday"),
+   gettext_noop("12 (Month)"),
+   gettext_noop("Nov"),
+   gettext_noop("November"),
+   gettext_noop("99 (year)"),
+   gettext_noop("1999 (year)"),
+   gettext_noop("24 (hour)"),
+   gettext_noop("12 (hour)"),
+   gettext_noop("am/pm"),
+   gettext_noop("59 (minutes)"),
+   gettext_noop("29 (seconds)"),
+   gettext_noop("EST (timezone)"),
    gettext_noop("Default format including time"),
    gettext_noop("Default format without time")
 };
 
 static wxString DateFormats[] =
 {
-   "%d","%a","%A",
-   "%m","%b","%B",
-   "%y","%Y","%I",
-   "%H","%p","%M",
-   "%S","%Z",
+   "%d",
+   "%a",
+   "%A",
+   "%m",
+   "%b",
+   "%B",
+   "%y",
+   "%Y",
+   "%I",
+   "%H",
+   "%p",
+   "%M",
+   "%S",
+   "%Z",
    "%c",
    "%x"
 };
@@ -1273,19 +1358,15 @@ class wxDateTextCtrl : public wxTextCtrl
 public:
    wxDateTextCtrl(wxWindow *parent) : wxTextCtrl(parent,-1)
       {
-#ifndef wxMENU_TEAROFF
-   ///FIXME WXWIN-COMPATIBILITY
-         m_menu = new wxMenu(); 
-#else
-   int style = 0;
-   if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
-      style = wxMENU_TEAROFF;
-   m_menu = new wxMenu("", style); 
-#endif
+         int style = 0;
+         if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
+            style = wxMENU_TEAROFF;
+         m_menu = new wxMenu("", style);
          m_menu->SetTitle(_("Format Specifiers:"));
          for ( int n = 0; n < NUM_DATE_FMTS;n++ )
             m_menu->Append(n, _(DateFormatsLabels[n]));
       }
+
    void OnRClick(wxMouseEvent& event)
       { (void)PopupMenu(m_menu, event.GetPosition()); }
    void OnMenu(wxCommandEvent &event)
@@ -1293,10 +1374,12 @@ public:
          ASSERT(event.GetId() >= 0 && event.GetId() < NUM_DATE_FMTS);
          WriteText(DateFormats[event.GetId()]);
       }
+
 protected:
    wxMenu *m_menu;
+
    DECLARE_EVENT_TABLE()
-      };
+};
 
 BEGIN_EVENT_TABLE(wxDateTextCtrl, wxTextCtrl)
    EVT_MENU(-1, wxDateTextCtrl::OnMenu)
@@ -1306,33 +1389,83 @@ END_EVENT_TABLE()
 class wxDateFmtDialog : public wxOptionsPageSubdialog
 {
 public:
+   // ctor & dtor
    wxDateFmtDialog(ProfileBase *profile, wxWindow *parent);
+   virtual ~wxDateFmtDialog() { m_timer.Stop(); }
 
-   // reset the selected options to their default values
+   // transfer data to/from dialog
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
+
+   // returns TRUE if the format string was changed
    bool WasChanged(void) { return m_DateFmt != m_OldDateFmt;}
+
+   // update the example control to show the current type
+   void UpdateExample();
+
+   // event handlers
+   void OnUpdate(wxCommandEvent& event) { UpdateExample(); }
+
 protected:
-   wxString  m_DateFmt, m_OldDateFmt;
-   wxCheckBox *m_UseGMT;
-   wxTextCtrl *m_textctrl;
+   // update timer
+   class ExampleUpdateTimer : public wxTimer
+   {
+   public:
+      ExampleUpdateTimer(wxDateFmtDialog *dialog)
+      {
+         m_dialog = dialog;
+      }
+
+      virtual void Notify() { m_dialog->UpdateExample(); }
+
+   private:
+      wxDateFmtDialog *m_dialog;
+   } m_timer;
+
+   // data
+   wxString  m_DateFmt,
+             m_OldDateFmt;
+
+   // GUI controls
+   wxCheckBox   *m_UseGMT;       // checked => use GMT for time display
+   wxStaticText *m_statExample;  // shows the example of current format
+   wxTextCtrl   *m_textctrl;     // the time/date format to use
+
+private:
+   DECLARE_EVENT_TABLE()
 };
 
+BEGIN_EVENT_TABLE(wxDateFmtDialog, wxOptionsPageSubdialog)
+   EVT_TEXT(-1, wxDateFmtDialog::OnUpdate)
+   EVT_CHECKBOX(-1, wxDateFmtDialog::OnUpdate)
+END_EVENT_TABLE()
 
+#ifdef _MSC_VER
+   // 'this' : used in base member initializer list (so what??)
+   #pragma warning(disable:4355)
+#endif
 
 wxDateFmtDialog::wxDateFmtDialog(ProfileBase *profile, wxWindow *parent)
-   : wxOptionsPageSubdialog(profile, parent, _("Date Format"), "DateFormatDialog")
+               : wxOptionsPageSubdialog(profile,
+                                        parent,
+                                        _("Date Format"),
+                                        "DateFormatDialog"),
+                 m_timer(this)
 {
    wxASSERT(NUM_DATE_FMTS == NUM_DATE_FMTS_LABELS);
 
-   SetDefaultSize(380,220);
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Date Format"), MH_DIALOG_DATEFMT);
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Date Format"), FALSE,
+                                             MH_DIALOG_DATEFMT);
 
    wxLayoutConstraints *c;
 
-   wxStaticText *stattext = new wxStaticText(this, -1,
-                                             _("Press the right mouse button over the input field\n"
-                                               "to insert format specifiers.\n"));
+   wxStaticText *stattext = new wxStaticText
+                                (
+                                 this,
+                                 -1,
+                                 _("Press the right mouse button over the "
+                                   "input field to insert format specifiers.\n")
+                                );
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
@@ -1348,32 +1481,75 @@ wxDateFmtDialog::wxDateFmtDialog(ProfileBase *profile, wxWindow *parent)
    c->height.AsIs();
    m_textctrl->SetConstraints(c);
 
-   m_UseGMT = new wxCheckBox(this, -1,_("Display time in GMT/UST."));
+   stattext = new wxStaticText(this, -1, _("Here is how it will look like: "));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.Below(m_textctrl, 2*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
+   stattext->SetConstraints(c);
+
+   m_statExample = new wxStaticText(this, -1, "");
+   c = new wxLayoutConstraints;
+   c->left.RightOf(stattext);
+   c->top.Below(m_textctrl, 2*LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   m_statExample->SetConstraints(c);
+
+   m_UseGMT = new wxCheckBox(this, -1, _("Display time in GMT/UST."));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_statExample, 4*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
    m_UseGMT->SetConstraints(c);
+
+   SetDefaultSize(380, 220, FALSE /* not minimal */);
 }
 
+#ifdef _MSC_VER
+   #pragma warning(default:4355)
+#endif
+
+void
+wxDateFmtDialog::UpdateExample()
+{
+   time_t ltime;
+   (void)time(&ltime);
+
+   m_statExample->SetLabel(strutil_ftime(ltime,
+                                         m_textctrl->GetValue(),
+                                         m_UseGMT->GetValue()));
+}
 
 bool
 wxDateFmtDialog::TransferDataFromWindow()
 {
    m_DateFmt = m_textctrl->GetValue();
-   GetProfile()->writeEntry(MP_DATE_FMT,m_DateFmt);
-   GetProfile()->writeEntry(MP_DATE_GMT, m_UseGMT->GetValue() != 0);
+   GetProfile()->writeEntry(MP_DATE_FMT, m_DateFmt);
+   GetProfile()->writeEntry(MP_DATE_GMT, m_UseGMT->GetValue());
+
    return TRUE;
 }
 
 bool
 wxDateFmtDialog::TransferDataToWindow()
 {
+#ifdef OS_WIN
+   // MP_DATE_FMT contains '%' which are being (mis)interpreted as env var
+   // expansion characters under Windows
+   ProfileEnvVarSave noEnvVars(GetProfile());
+#endif // OS_WIN
+
    m_DateFmt = READ_CONFIG(GetProfile(), MP_DATE_FMT);
    m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
    m_OldDateFmt = m_DateFmt;
    m_textctrl->SetValue(m_DateFmt);
+
+   // update each second
+   m_timer.Start(1000);
+
    return TRUE;
 }
 

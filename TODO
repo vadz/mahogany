@@ -41,12 +41,14 @@ $Id$
 		--> rewrite it in MailFolderCC.cpp like I did with the 
 		fetch_overview functions
 8	VZ	Opening NNTP folders suddenly asks for password - what 
-		happened?
+		happened? --> doesn't do it here, please explain how to
+		reproduce.
 
 	VZ	Clicking on "header dialog/More button" produces
 		"headers for folder "xpm" in the dialog when called
 		from toplevel window.
 
+>>>>>>> 1.306
 8	VZ?     After a dialog was opened (e.g. wxModulesDialog), the
 		app won't termiante but keeps running without windows.
 
@@ -109,10 +111,11 @@ $Id$
 		the folder selection dialog?
 		I'll then add support for that to the Copy/Move
 		Messages functions. (KB)
-3	VZ	Could you add an ADB/export function, too? A
-		"checklist" (however that thing was called) box to
-		choose the fields and their order and which separator
-		to use would be nice.
+
+4	VZ	templates enhancements:
+		a) take them from files
+		b) "Apply template" command in compose view
+
 8		Find out where Mahogany is when laying out really long 
 		text messages. How can we speed this up? Why do
 		redraws take long, too?
@@ -203,6 +206,7 @@ from 32bitsonline review:
 				.... working on it right now
 
 4	VZ	test ADB importing more
+3	VZ	test ADB exporting more
 
 5	KB	Could you have a look at the setting of the default
 		columns sizes in wxFolderView.cpp, please?
@@ -226,7 +230,7 @@ if it is likely to depend on a post-release wxWindows version. Such
 code should be protected with a suitable #ifdef which should be
 removed later when wxWindows has been updated.
 
-
+VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 
 *********************************************************************
 *** GENERAL TODO

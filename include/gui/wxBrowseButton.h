@@ -97,12 +97,24 @@ private:
 class wxFileBrowseButton : public wxTextBrowseButton
 {
 public:
-   wxFileBrowseButton(wxTextCtrl *text, wxWindow *parent)
-      : wxTextBrowseButton(text, parent, _("Browse for the file")) { }
+   // if open parameter is TRUE, it means that we only want to open an existing
+   // file, so the file dialog won't allow selecting the non existing filename.
+   // OTOH, if open is FALSE, we're using this button for choosing the name of
+   // the file to save something to, so any filename (even a non existing one
+   // may be specified) and the user will have to confirm the file overwrite if
+   // he does specify an existing file name
+   wxFileBrowseButton(wxTextCtrl *text, wxWindow *parent, bool open = TRUE)
+      : wxTextBrowseButton(text, parent, _("Browse for the file"))
+   {
+      m_open = open;
+   }
 
    // show the file selection dialog and fill the associated text control with
    // the name of the selected file
    virtual void DoBrowse();
+
+private:
+   bool m_open;
 };
 
 // ----------------------------------------------------------------------------

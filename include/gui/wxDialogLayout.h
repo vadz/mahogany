@@ -86,8 +86,10 @@ public:
    // get the buttons size
    wxSize GetButtonSize() const { return wxSize(wBtn, hBtn); }
 
+   // event handlers
    void OnHelp(wxCommandEvent & /*ev*/)
-      { mApplication->Help(m_helpId,this); }
+      { mApplication->Help(m_helpId, this); }
+
 protected:
    // set the diaqlog size if it wasn't restored from profile
    void SetDefaultSize(int width, int height,
@@ -95,10 +97,10 @@ protected:
 
    // create Ok and Cancel buttons and a static box around all other ctrls
    // (if noBox is TRUE, the returned value is NULL and wxStaticBox is not
-   // created) If helpId != -1, add a Help button.
+   // created). If helpId != -1, add a Help button.
    wxStaticBox *CreateStdButtonsAndBox(const wxString& boxTitle,
-                                       int helpId = -1,
-                                       bool noBox = FALSE);
+                                       bool noBox = FALSE,
+                                       int helpId = -1);
 
    // these variables are set in the ctor and are the basic measurement unites
    // for us (we allow direct access to them for derived classes for
@@ -108,7 +110,10 @@ protected:
 private:
    // the minimal size (only if SetDefaultSize() was called)
    wxSize m_sizeMin;
+
+   // the helpId or -1
    int    m_helpId;
+
    DECLARE_DYNAMIC_CLASS(wxManuallyLaidOutDialog)
    DECLARE_EVENT_TABLE()
 };
@@ -286,7 +291,7 @@ private:
 class wxEnhancedPanel : public wxPanel
 {
 public:
-   wxEnhancedPanel(wxWindow *parent);
+   wxEnhancedPanel(wxWindow *parent, bool enableScrolling = TRUE);
 
    // all these functions create the corresponding control and position it
    // below the "last" which may be NULL in which case the new control is put
@@ -333,9 +338,11 @@ public:
    wxTextCtrl *CreateFileEntry(const char *label,
                                long widthMax,
                                wxControl *last,
-                               wxFileBrowseButton **ppButton = NULL)
+                               wxFileBrowseButton **ppButton = NULL,
+                               bool open = TRUE)
    {
-      return CreateEntryWithButton(label, widthMax, last, FileBtn,
+      return CreateEntryWithButton(label, widthMax, last,
+                                   open ? FileBtn : FileSaveBtn,
                                    (wxTextBrowseButton **)ppButton);
    }
 
@@ -378,7 +385,10 @@ public:
 
    // get the canvas - all the controls should be created as children of this
    // canvas, not of the page itself
-   wxScrolledWindow *GetCanvas() const { return m_canvas; }
+   wxWindow *GetCanvas() const
+   {
+       return m_canvas ? m_canvas : (wxWindow *)this;   // const_cast
+   }
 
 private:
    // called from CreateXXX() functions to set up the top constraint which is
@@ -389,7 +399,7 @@ private:
                          size_t extraSpace = 0);
 
    // create an entry with a browse button
-   enum BtnKind { FileBtn, FileOrDirBtn, ColorBtn };
+   enum BtnKind { FileBtn, FileSaveBtn, FileOrDirBtn, ColorBtn };
    wxTextCtrl *CreateEntryWithButton(const char *label,
                                      long widthMax,
                                      wxControl *last,

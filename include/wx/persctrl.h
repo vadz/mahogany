@@ -415,6 +415,72 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// persistent radiobox remembers its last selection
+// ----------------------------------------------------------------------------
+
+class WXDLLEXPORT wxPRadioBox : public wxRadioBox
+{
+public:
+    // ctors
+        // default, use Create() after it
+    wxPRadioBox();
+        // standard ctor
+    wxPRadioBox(const wxString& configPath,
+               wxWindow *parent,
+               wxWindowID id = -1,
+               const wxString& title = "",
+               const wxPoint &pos = wxDefaultPosition,
+               const wxSize &size = wxDefaultSize,
+               int n = 0,
+               const wxString *items = NULL,
+               int majorDim = 0,
+               long style = wxRA_HORIZONTAL,
+               const wxValidator& validator = wxDefaultValidator,
+               wxConfigBase *config = NULL);
+        // pseudo ctor
+    bool Create(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxString& title = "",
+                const wxPoint &pos = wxDefaultPosition,
+                const wxSize &size = wxDefaultSize,
+                int n = 0,
+                const wxString *items = NULL,
+                int majorDim = 0,
+                long style = wxRA_HORIZONTAL,
+                const wxValidator& validator = wxDefaultValidator,
+                wxConfigBase *config = NULL);
+
+    // dtor saves the settings
+    virtual ~wxPRadioBox();
+
+    // accessors
+        // set the config object to use (must be !NULL)
+    void SetConfigObject(wxConfigBase *config);
+        // set the path to use (either absolute or relative)
+    void SetConfigPath(const wxString& path);
+
+    // callbacks
+        // when we're resized the first time we restore our page
+    void OnSize(wxSizeEvent& event);
+
+protected:
+    bool       m_bFirstTime;  // FIXME hack used in OnSize()
+    wxPHelper *m_persist;
+
+    // do remember/restore the selection
+       // retrieve the column widths from config
+    void RestoreSelection();
+       // save the column widths to config
+    void SaveSelection();
+
+private:
+    static const char *ms_path;
+
+    DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
 // Persistent file selector functions: remember the last directory and file
 // name used.
 //

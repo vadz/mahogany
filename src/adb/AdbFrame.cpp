@@ -225,7 +225,7 @@ protected:
   TreeElement   m_kind;   // what kind of item we are
   wxString      m_name;   // the name which is the same as label
   AdbTreeNode  *m_parent; // the group which contains us
-  AdbData      *m_data;   // our AdbEntry if we don't gave parent
+  AdbData      *m_data;   // our AdbEntry if we don't have parent
 };
 
 // an array of pointers to the entries
@@ -591,6 +591,7 @@ public:
   void OnUpdateCopy(wxUpdateUIEvent& event);
   void OnUpdatePaste(wxUpdateUIEvent& event);
   void OnUpdateDelete(wxUpdateUIEvent& event);
+  void OnUpdateExport(wxUpdateUIEvent& event);
 
   void OnActivate(wxActivateEvent&);
 
@@ -634,7 +635,10 @@ public:
   // ask the user for filename and create or open the address book
   bool CreateOrOpenAdb(bool bDoCreate);
 
-  // ask the user for filename and import the ADB from this file
+  // import/export
+    // export the selected group/book
+  void ExportAdb();
+    // ask the user for filename and import the ADB from this file
   bool ImportAdb();
 
   // show the current ADB statistics
@@ -987,6 +991,8 @@ BEGIN_EVENT_TABLE(wxAdbEditFrame, wxFrame)
     // root is selected
   EVT_UPDATE_UI(WXMENU_ADBEDIT_DELETE, OnUpdateDelete)
   EVT_UPDATE_UI(WXMENU_ADBEDIT_RENAME, OnUpdateDelete)
+    // exporting is only possible when a group or book is selected
+  EVT_UPDATE_UI(WXMENU_ADBBOOK_EXPORT, OnUpdateExport)
 
   // other
     // need to intercept this to prevent default implementation to give the
@@ -1651,6 +1657,10 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
       ImportAdb();
       break;
 
+    case WXMENU_ADBBOOK_EXPORT:
+      ExportAdb();
+      break;
+
     case WXMENU_ADBBOOK_PROP:
       DoShowAdbProperties();
       break;
@@ -1877,6 +1887,21 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
   }
 
   return ok;
+}
+
+void wxAdbEditFrame::ExportAdb()
+{
+  wxCHECK_RET( m_current->IsGroup() && !m_current->IsRoot(),
+               "command should be disabled" );
+
+  if ( AdbShowExportDialog(*(GetCurNode()->AdbGroup())) )
+  {
+    wxLogStatus(_("Successfully exported address book data."));
+  }
+  else
+  {
+    wxLogStatus(_("Address book export failed."));
+  }
 }
 
 bool wxAdbEditFrame::ImportAdb()
@@ -2159,6 +2184,12 @@ void wxAdbEditFrame::OnUpdateCopy(wxUpdateUIEvent& event)
 
 // keep your namespace clean
 #undef CHECK_INIT_DONE
+
+// can only export books or groups, not entries or root
+void wxAdbEditFrame::OnUpdateExport(wxUpdateUIEvent& event)
+{
+  event.Enable( m_current->IsGroup() && !m_current->IsRoot() );
+}
 
 void wxAdbEditFrame::OnActivate(wxActivateEvent& event)
 {

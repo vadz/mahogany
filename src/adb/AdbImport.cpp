@@ -17,7 +17,7 @@
 // ============================================================================
 
 #ifdef __GNUG__
-#	pragma implementation "AdbImport.h"
+   #pragma implementation "AdbImport.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -335,6 +335,5 @@ AdbImporter::AdbImporterInfo::AdbImporterInfo(const char *name_,
    // undefined anyhow)
    next = AdbImporter::ms_listImporters;
    AdbImporter::ms_listImporters = this;
-   
 }
 

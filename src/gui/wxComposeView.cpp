@@ -2447,16 +2447,14 @@ VarExpander::ExpandMisc(const String& name, String *value) const
          {
             time_t ltime;
             (void)time(&ltime);
-#if 0
-            char buf[256];
-            tm *now = localtime(&ltime);
 
-            (void)strftime(buf, WXSIZEOF(buf), "%x", now);
-            *value = buf;
-#endif
-            *value = strutil_ftime(
-               ltime,
-               READ_CONFIG(m_profile, MP_DATE_FMT));
+#ifdef OS_WIN
+            // MP_DATE_FMT contains '%' which are being (mis)interpreted as
+            // env var expansion characters under Windows
+            ProfileEnvVarSave noEnvVars(m_profile);
+#endif // OS_WIN
+
+            *value = strutil_ftime(ltime, READ_CONFIG(m_profile, MP_DATE_FMT));
          }
          break;
 

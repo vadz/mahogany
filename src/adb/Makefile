@@ -3,8 +3,10 @@
 CWD = adb
 SRC = AdbFrame.cpp AdbManager.cpp AdbProvider.cpp AdbEntry.cpp \
       AdbDialogs.cpp \
-      ProvFC.cpp ProvBbdb.cpp AdbImport.cpp \
-      ImportText.cpp ImportXFMail.cpp ImportMailrc.cpp ImportPine.cpp
+      ProvFC.cpp ProvBbdb.cpp \
+      AdbImport.cpp AdbExport.cpp \
+      ImportText.cpp ImportXFMail.cpp ImportMailrc.cpp ImportPine.cpp \
+      ExportText.cpp
 
 ifdef DEBUG
 SRC += ProvDummy.cpp

@@ -84,7 +84,8 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    char *tmp = strutil_strdup(modules);
    strutil_tokenise(tmp, ":", m_Modules);
 
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Available modules"),MH_DIALOG_MODULES);
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Available modules"), FALSE,
+                                             MH_DIALOG_MODULES);
    wxLayoutConstraints *c;
 
    // create a short help message above

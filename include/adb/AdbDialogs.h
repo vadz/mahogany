@@ -14,6 +14,7 @@
 #define _ADB_DIALOGS_H
 
 class wxWindow;
+class AdbEntryGroup;
 
 // ----------------------------------------------------------------------------
 // show dialog allowing the user to import any address book, return the name of
@@ -23,5 +24,11 @@ class wxWindow;
 
 extern bool AdbShowImportDialog(wxWindow *parent = NULL,
                                 String *nameOfNativeAdb = NULL);
+
+// ----------------------------------------------------------------------------
+// export the given address book, returns TRUE on success
+// ----------------------------------------------------------------------------
+
+extern bool AdbShowExportDialog(const AdbEntryGroup& group);
 
 #endif // _ADB_DIALOGS_H

@@ -293,6 +293,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_ADBBOOK_NEW,   gettext_noop("&New..."),           gettext_noop("Create a new address book")},
    { WXMENU_ADBBOOK_OPEN,  gettext_noop("&Open..."),          gettext_noop("Open an address book file")},
    { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_ADBBOOK_EXPORT,gettext_noop("&Export..."),        gettext_noop("Export address book data to another programs format")},
    { WXMENU_ADBBOOK_IMPORT,gettext_noop("&Import..."),        gettext_noop("Import data from an address book in another programs format")},
    { WXMENU_SEPARATOR,     "",                  ""                         },
 #ifdef DEBUG

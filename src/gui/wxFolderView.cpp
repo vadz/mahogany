@@ -578,8 +578,18 @@ wxFolderView::Update(HeaderInfoList *listing)
    bool   dateGMT;
    
    n = listing->Count();
+
+   {
+#ifdef OS_WIN
+   // MP_DATE_FMT contains '%' which are being (mis)interpreted as env var
+   // expansion characters under Windows
+   ProfileEnvVarSave noEnvVars1(m_Profile),
+                     noEnvVars2(mApplication->GetProfile());
+#endif // OS_WIN
+
    dateFormat = READ_APPCONFIG(MP_DATE_FMT);
    dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT) != 0;
+   }
    
    if(n < m_NumOfMessages)  // messages have been deleted, start over
    {

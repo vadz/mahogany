@@ -75,6 +75,10 @@ BEGIN_EVENT_TABLE(wxPListBox, wxListBox)
     EVT_SIZE(wxPListBox::OnSize)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxPRadioBox, wxRadioBox)
+    EVT_SIZE(wxPRadioBox::OnSize)
+END_EVENT_TABLE()
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -933,6 +937,127 @@ void wxPListBox::RestoreSelection()
 
 // save the selection to config
 void wxPListBox::SaveSelection()
+{
+    if ( m_persist->ChangePath() ) {
+        wxConfigBase *config = m_persist->GetConfig();
+        config->Write(m_persist->GetKey(), (long)GetSelection());
+
+        m_persist->RestorePath();
+    }
+}
+
+// ----------------------------------------------------------------------------
+// wxPRadioBox
+// ----------------------------------------------------------------------------
+
+const char *wxPRadioBox::ms_path = "RadioBoxSelection";
+
+// default ctor
+wxPRadioBox::wxPRadioBox()
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper;
+}
+
+// standard ctor
+wxPRadioBox::wxPRadioBox(const wxString& configPath,
+                       wxWindow *parent,
+                       wxWindowID id,
+                       const wxString& title,
+                       const wxPoint &pos,
+                       const wxSize &size,
+                       int n,
+                       const wxString *items,
+                       int majorDim,
+                       long style,
+                       const wxValidator& validator,
+                       wxConfigBase *config)
+           : wxRadioBox(parent, id, title, pos, size, n, items,
+                        majorDim, style, validator)
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper(configPath, ms_path, config);
+}
+
+// pseudo ctor
+bool wxPRadioBox::Create(const wxString& configPath,
+                        wxWindow *parent,
+                        wxWindowID id,
+                        const wxString& title,
+                        const wxPoint &pos,
+                        const wxSize &size,
+                        int n,
+                        const wxString *items,
+                        int majorDim,
+                        long style,
+                        const wxValidator& validator,
+                        wxConfigBase *config)
+{
+   m_persist->SetConfig(config);
+   m_persist->SetPath(configPath, ms_path);
+
+   return wxRadioBox::Create(parent, id, title, pos, size, n, items,
+                             majorDim, style, validator);
+}
+
+// dtor saves the settings
+wxPRadioBox::~wxPRadioBox()
+{
+    SaveSelection();
+
+    delete m_persist;
+}
+
+// set the config object to use (must be !NULL)
+void wxPRadioBox::SetConfigObject(wxConfigBase *config)
+{
+    m_persist->SetConfig(config);
+}
+
+// set the path to use (either absolute or relative)
+void wxPRadioBox::SetConfigPath(const wxString& path)
+{
+    m_persist->SetPath(path, ms_path);
+}
+
+// first time our OnSize() is called we restore the seection: we can't do it
+// before because we don't know when all the items will be added to the radiobox
+// (surely they may be added after ctor call)
+void wxPRadioBox::OnSize(wxSizeEvent& event)
+{
+    if ( m_bFirstTime ) {
+        RestoreSelection();
+
+        m_bFirstTime = FALSE;
+    }
+
+    // important things may be done in the base class version!
+    event.Skip();
+}
+
+// retrieve the selection from config
+void wxPRadioBox::RestoreSelection()
+{
+    if ( m_persist->ChangePath() ) {
+        long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
+
+        if ( sel < Number() ) {
+            SetSelection(sel);
+
+            // emulate the event which would have resulted if the user selected
+            // the radiobox
+            wxCommandEvent event(wxEVT_COMMAND_RADIOBOX_SELECTED, GetId());
+            event.SetInt(sel);
+            event.SetEventObject(this);
+            (void)ProcessEvent(event);
+        }
+
+        m_persist->RestorePath();
+    }
+}
+
+// save the selection to config
+void wxPRadioBox::SaveSelection()
 {
     if ( m_persist->ChangePath() ) {
         wxConfigBase *config = m_persist->GetConfig();

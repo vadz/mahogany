@@ -43,7 +43,7 @@ extern "C"
 }
 
 #include <wx/config.h>
-#include <wx/helpbase.h>
+#include <wx/help.h>
 
 #include "kbList.h"
 #include "guidef.h"

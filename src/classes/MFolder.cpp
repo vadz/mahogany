@@ -336,6 +336,19 @@ bool MFolderFromProfile::Create(const String& fullname)
    Profile_obj profile(fullname);
    CHECK( profile, FALSE, "panic in MFolder: no profile" );
 
+   // check that the name is valid
+   if (
+        fullname.Find('/')
+#ifdef OS_WIN
+        || fullname.Find('\\')
+#endif
+      )
+   {
+      FAIL_MSG("invalid characters in the folder name (callers bug)");
+
+      return FALSE;
+   }
+
    //PFIXME
    if ( GroupExists(profile, fullname) )
    {
@@ -430,12 +443,12 @@ class CountTraversal : public MFolderTraversal
 public:
   CountTraversal(const MFolderFromProfile *folder) : MFolderTraversal(*folder)
     { m_count = 0; }
-  
+
   virtual bool OnVisitFolder(const wxString& /* folderName */)
     { m_count++; return TRUE; }
-  
+
   size_t GetCount() const { return m_count; }
-  
+
 private:
   size_t m_count;
 };

@@ -25,21 +25,6 @@ class wxArrayString;
 class AdbEntry;
 
 // ----------------------------------------------------------------------------
-// public interface
-// ----------------------------------------------------------------------------
-
-// try to import the data from the given file using the specified AdbImporter
-// or the first one which is capable of doing it if importer == NULL. return
-// TRUE if succeeded or FALSE if failed.
-//
-// if the function succeeds, it transfers the data to the native ADB called
-// adbname (which may have existed or not before the call to this function: if
-// it did exist, it won't be deleted even if import fails).
-bool AdbImport(const String& filename,
-               const String& adbname,
-               class AdbImporter *importer = NULL);
-
-// ----------------------------------------------------------------------------
 // AdbImporter - this class imports data from ADBs in foreign formats.
 //
 // TODO: currently we only know about file-based address books, no attempt
