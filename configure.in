@@ -202,7 +202,8 @@ SEARCH_INCLUDE="\
                               \
     /usr/openwin/include      \
     /usr/openwin/share/include \
-    "
+    /opt/include              \
+"
 
 # add additional src directories:
 for p in `pwd`/extra/src/*
