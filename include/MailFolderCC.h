@@ -33,6 +33,20 @@
 
 #include  <wx/fontenc.h>
 
+// ----------------------------------------------------------------------------
+// global functions
+// ----------------------------------------------------------------------------
+
+// build the IMAP spec for its components
+extern String GetImapSpec(int type, int flags,
+                          const String &name,
+                          const String &iserver,
+                          const String &login);
+
+// ----------------------------------------------------------------------------
+// helper classes
+// ----------------------------------------------------------------------------
+
 /// To really clean up left over memory, call this function at program
 /// end:
 extern void CC_Cleanup();
@@ -357,6 +371,13 @@ public:
    */
    static const String& InitializeNewsSpool();
 
+   /**
+      check whether a folder can have subfolders 
+   */
+   static bool HasInferiors(const String &imapSpec,
+                            const String &user,
+                            const String &pw);
+
 private:
    /// private constructor, does basic initialisation
    MailFolderCC(int typeAndFlags,
@@ -380,8 +401,6 @@ private:
 
    /// The following is also called by SendMessageCC for ESMTP authentication
    static void SetLoginData(const String &user, const String &pw);
-   static bool HasInferiors(const String &imapSpec, const String
-                            &user, const String &pw);
    
    friend class SendMessageCC;
 

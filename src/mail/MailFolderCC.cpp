@@ -192,7 +192,7 @@ static String GetImapFlags(int flag)
    return flags;
 }
 
-static String GetImapSpec(int type, int flags,
+extern String GetImapSpec(int type, int flags,
                           const String &name,
                           const String &iserver,
                           const String &login)
@@ -1540,7 +1540,7 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
          {
             String sequence;
             sequence.Printf("%lu", msg.GetUId());
-	    String path = GetPathFromImapSpec(GetImapSpec());
+            String path = GetPathFromImapSpec(GetImapSpec());
             rc =
                mail_copy_full (ms,
                                (char *)sequence.c_str(),
