@@ -843,7 +843,7 @@ struct SortParams
    // the sort order to use
    long order;
 
-   // replace to addresses with from for messages from oneself?
+   // replace From addresses with To for messages from oneself?
    bool replaceFromWithTo;
 
    // if replaceFromWithTo, the pointer to our own addresses
