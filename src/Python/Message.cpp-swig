@@ -9,6 +9,7 @@
  * ----------------------------------------------------------------------------- */
 
 #define SWIGPYTHON
+#define SWIG_NOINCLUDE
 
 #ifdef __cplusplus
 template<class T> class SwigValueWrapper {
