@@ -2813,12 +2813,23 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
    if ( !MfStatusCache::Get()->GetStatus(folderName, &status) )
    {
       wxLogTrace(M_TRACE_MFSTATUS,
-                 "Folder tree: no cached status, calling CheckFolder().");
+                 "Folder tree: no cached status, calling CountAllMessages()");
 
-      // we don't have the status right now, go open/ping/whatever the folder:
-      // this will result in another status update sent to us later but then
-      // the status cache should already be cached
-      MailFolder::CheckFolder(folder);
+      // we don't have the status right now, count the messages now: this will
+      // result in another status update sent to us later but then the status
+      // cache should already be cached
+      MailFolder *mf = MailFolder::OpenFolder(folder, MailFolder::ReadOnly);
+      if ( mf )
+      {
+         MailFolderStatus status;
+         (void)mf->CountAllMessages(&status);
+
+         mf->DecRef();
+      }
+      else
+      {
+         wxLogDebug("Failed to update status for '%s'", folderName.c_str());
+      }
 
       return;
    }

@@ -208,6 +208,9 @@ void MfStatusCache::InvalidateStatus(const String& folderName)
       m_folderData[(size_t)n]->total = UID_ILLEGAL;
 
       m_isDirty = true;
+
+      // if anybody has the status info for this folder, it must be updated
+      MEventManager::Send(new MEventFolderStatusData(folderName));
    }
 }
 
