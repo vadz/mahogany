@@ -16,6 +16,7 @@
 
 #ifndef USE_PCH
 #   include "strutil.h"
+#   include "miscutil.h"
 #endif // USE_PCH
 
 #include <wx/fontmap.h>
@@ -252,8 +253,9 @@ MessageCC::Subject(void) const
 String const
 MessageCC::From(void) const
 {
-   String tmp;
-   return Address(tmp, MAT_FROM);
+   String name;
+   String email = Address(name, MAT_FROM);
+   return GetFullEmailAddress(name, email);
 }
 
 String

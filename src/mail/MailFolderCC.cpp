@@ -1337,7 +1337,7 @@ MailFolderCC::PingReopenAll(bool fullPing)
       iterators into the list. Instead, we traverse a copy of the list */
    CHECK_STREAM_LIST();
 
-   StreamConnectionList streamListCopy;
+   StreamConnectionList streamListCopy(FALSE);
    StreamConnectionList::iterator i;
    for ( i = ms_StreamList.begin(); i != ms_StreamList.end(); i++ )
    {
@@ -1352,6 +1352,8 @@ MailFolderCC::PingReopenAll(bool fullPing)
       rc &= fullPing ? mf->PingReopen() : mf->Ping();
    }
 
+#if 0
+   // KB: told the list not to own the entries -- IS THIS OK?
    // we have put copies of pointers from ms_StreamList into streamListCopy so
    // we must clear the list to prevent it from deleting these pointers in its
    // dtor!
@@ -1359,7 +1361,7 @@ MailFolderCC::PingReopenAll(bool fullPing)
    {
       streamListCopy.remove(streamListCopy.begin());
    }
-
+#endif
    return rc;
 }
 
