@@ -1952,24 +1952,31 @@ static bool CheckSubjectForJunkAtEnd(const String& subject)
    static const size_t NUM_SPACES = 6;
 
    // and the tail should have at least that many symbols
-   static const size_t LEN_TAIL = 8;
+   static const size_t LEN_TAIL = 4;
+
+   // and the sumb of both should be at least equal to this (very short tails
+   // without many preceding spaces could occur in a legal message)
+   static const size_t LEN_SPACES_AND_TAIL = 15;
 
    const wxChar *p = wxStrstr(subject, String(_T(' '), NUM_SPACES));
    if ( !p )
       return false;
 
    // skip all whitespace
+   const wxChar * const startSpaces = p;
    p += NUM_SPACES;
    while ( isspace(*p) )
       p++;
 
    // start of the tail
-   const wxChar * const start = p;
+   const wxChar * const startTail = p;
    while ( *p && (wxIsalnum(*p) || wxStrchr(_T("-_{}+"), *p)) )
       p++;
 
    // only junk (and enough of it) until the end?
-   return !*p && p - start > LEN_TAIL;
+   return !*p &&
+            p - startTail >= LEN_TAIL &&
+               p - startSpaces >= LEN_SPACES_AND_TAIL;
 }
 
 // check the given MIME part and all of its children for Korean charset, return
@@ -2174,8 +2181,12 @@ static bool CheckForHTMLOnly(const Message *msg)
                // although multipart/alternative messages with a text/plain and a
                // text/html type are legal, spammers sometimes send them with an
                // empty text part -- which is not
+               //
+               // note that a text line with 2 blank lines is going to have
+               // size 4 and as no valid message is probably going to have just
+               // 2 letters, let's consider messages with small size empty too
                if ( subpart1->GetType() == _T("TEXT/PLAIN") &&
-                           !subpart1->GetSize() )
+                           subpart1->GetSize() < 5 )
                {
                   const MimePart *subpart2 = subpart1->GetNext();
                   if ( subpart2 &&
