@@ -504,6 +504,7 @@ XFace::CreateXpm(char ***xpm)
       }
       (*xpm)[line++] = strutil_strdup(tmp);
    }
+   delete [] buf;
    (*xpm)[line++] = NULL;
    return true;
 #endif

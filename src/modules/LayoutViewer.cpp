@@ -611,7 +611,11 @@ void LayoutViewer::InsertText(const String& text, const TextStyle& style)
 void LayoutViewer::InsertURL(const String& url)
 {
    wxLayoutObject *obj = new wxLayoutObjectText(url);
-   obj->SetUserData(new LayoutUserData(new ClickableInfo(url)));
+   LayoutUserData* data = new LayoutUserData(new ClickableInfo(url));
+   obj->SetUserData(data);
+   // SetUserData has incremented the refCount, which is now 2
+   // (it was already 1 right after creation)
+   data->DecRef();
 
    SetTextColour(GetOptions().UrlCol);
    m_window->GetLayoutList()->Insert(obj);
