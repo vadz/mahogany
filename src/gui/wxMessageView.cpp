@@ -42,6 +42,7 @@
 #include "MHelp.h"
 #include "Message.h"
 #include "FolderView.h"
+#include "MailFolderCC.h"     // for DecodeHeader() only
 #include "ASMailFolder.h"
 #include "MDialogs.h"
 #include "MessageView.h"
@@ -251,29 +252,11 @@ END_EVENT_TABLE()
 static String
 GetParameter(Message *msg, int partno, const String &param)
 {
-   const MessageParameterList &plist = msg->GetParameters(partno);
-   MessageParameterList::iterator plist_it;
-   if(plist.size() > 0)
-   {
-      for(plist_it = plist.begin(); plist_it != plist.end();
-          plist_it++)
-      {
-         if(Stricmp((*plist_it)->name, param) == 0)
-            return (*plist_it)->value;
-      }
-   }
+   String value;
+   if ( !msg->ExpandParameter(msg->GetParameters(partno), param, &value) )
+      (void)msg->ExpandParameter(msg->GetDisposition(partno), param, &value);
 
-   const MessageParameterList &plist2 = msg->GetDisposition(partno);
-   if(plist2.size() > 0)
-   {
-      for(plist_it = plist2.begin(); plist_it != plist2.end();
-          plist_it++)
-      {
-         if(Stricmp((*plist_it)->name, param) == 0)
-            return (*plist_it)->value;
-      }
-   }
-   return "";
+   return value;
 }
 
 
@@ -397,14 +380,14 @@ void
 wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 {
    m_mailMessage = NULL;
-   mimeDisplayPart = 0;
+   // mimeDisplayPart = 0; -- unused
    xface = NULL;
    xfaceXpm = NULL;
    m_Parent = parent;
    m_FolderView = fv;
    m_MimePopup = NULL;
    m_uid = UID_ILLEGAL;
-   m_encoding = wxFONTENCODING_SYSTEM;
+   m_encodingUser = wxFONTENCODING_SYSTEM;
    SetMouseTracking();
    SetParentProfile(fv ? fv->GetProfile() : NULL);
 
@@ -572,89 +555,16 @@ wxMessageView::Clear(void)
                          &m_ProfileValues.FgCol,
                          &m_ProfileValues.BgCol);
    SetBackgroundColour( m_ProfileValues.BgCol );
-   GetLayoutList()->SetAutoFormatting(FALSE); // speeds up insertion
-   // of text
+   GetLayoutList()->SetAutoFormatting(FALSE); // speeds up insertion of text
    m_uid = UID_ILLEGAL;
 }
 
 void
-wxMessageView::SetEncoding(wxFontEncoding enc)
+wxMessageView::SetEncoding(wxFontEncoding encoding)
 {
-   SetFontForEncoding(enc);
+   m_encodingUser = encoding;
 
    Update();
-}
-
-void
-wxMessageView::SetFontForEncoding(wxFontEncoding enc)
-{
-   wxCHECK_RET( m_mailMessage, "shouldn't be called without message" );
-
-   if ( enc == wxFONTENCODING_SYSTEM )
-   {
-      // find charset name from the headers
-      wxString charsetName;
-      if ( m_mailMessage->GetHeaderLine("Content-Type", charsetName) )
-      {
-         // TODO we don't check that we have "text/..." MIME type here as for
-         //      now this code is used for the entire message, not for each
-         //      part - this will be changed
-         charsetName.MakeUpper();
-         int charsetStart = charsetName.Find("CHARSET=");
-         if ( charsetStart != wxNOT_FOUND )
-         {
-            // strlen("charset=") == 8
-            wxString cs;
-            for ( const char *p = charsetName.c_str() + charsetStart + 8;
-                  isalnum(*p) || *p == '_' || *p == '-';
-                  p++ )
-            {
-               cs += *p;
-            }
-
-            charsetName = cs;
-         }
-         else
-         {
-            charsetName = "";
-         }
-      }
-
-      // convert it to encoding
-      if ( !!charsetName )
-      {
-         enc = wxTheFontMapper->CharsetToEncoding(charsetName);
-         if ( enc == wxFONTENCODING_SYSTEM )
-         {
-            wxLogStatus(GetFrame(this),
-                        _("Unsupport charset '%s', message may be shown incorrectly."));
-
-            CheckLanguageInMenu(this, wxFONTENCODING_DEFAULT);
-         }
-         else
-         {
-            // remember it
-            m_encoding = enc;
-         }
-      }
-   }
-
-   if ( enc != wxFONTENCODING_SYSTEM )
-   {
-      // before setting the font for the layout list, make sure that we can
-      // create fonts with such encodings - otherwise, we would pop up a
-      // message box asking for replacement from wxLayoutWindow::OnPaint()
-      // which is a recipe for disaster (infinite loop in this case)
-      wxFont font(12, wxDEFAULT, wxNORMAL, wxNORMAL, FALSE, "", enc);
-      wxClientDC dc(this);
-      dc.SetFont(font);
-      dc.GetTextExtent("foo", (wxCoord *)NULL, (wxCoord *)NULL);
-
-      // and update the menu to reflect the current charset
-      CheckLanguageInMenu(this, enc);
-
-      GetLayoutList()->SetFontEncoding(enc);
-   }
 }
 
 void
@@ -675,11 +585,6 @@ wxMessageView::Update(void)
       return;
 
    m_uid = m_mailMessage->GetUId();
-
-   if ( m_encoding != wxFONTENCODING_SYSTEM )
-   {
-      SetFontForEncoding(m_encoding);
-   }
 
    // if wanted, display all header lines
    if(m_ProfileValues.showHeaders)
@@ -710,6 +615,7 @@ wxMessageView::Update(void)
 #endif // HAVE_XFACES
 
    // show the configurable headers
+   wxFontEncoding encInHeaders = wxFONTENCODING_SYSTEM;
    String headersString(READ_CONFIG(m_Profile, MP_MSGVIEW_HEADERS));
    String headerName, headerValue;
    for ( const char *p = headersString.c_str(); *p != '\0'; p++ )
@@ -717,7 +623,8 @@ wxMessageView::Update(void)
       if ( *p == ':' )
       {
          // first get the value of this header
-         m_mailMessage->GetHeaderLine(headerName, headerValue);
+         wxFontEncoding encHeader;
+         m_mailMessage->GetHeaderLine(headerName, headerValue, &encHeader);
 
          // check for several special cases
          if ( headerName == "From" )
@@ -749,9 +656,19 @@ wxMessageView::Update(void)
             llist->SetFontWeight(wxNORMAL);
             llist->SetFontColour(&m_ProfileValues.HeaderValueCol);
 
-            wxLayoutImportText(llist,headerValue);
+            wxLayoutImportText(llist, headerValue, encHeader);
 
             llist->LineBreak();
+
+            if ( encHeader != wxFONTENCODING_SYSTEM )
+            {
+               // remember that we had such encoding in the headers
+               if ( encInHeaders == wxFONTENCODING_SYSTEM )
+                  encInHeaders = encHeader;
+
+               // restore the default encoding
+               GetLayoutList()->SetFontEncoding(wxFONTENCODING_DEFAULT);
+            }
          }
 
          headerName.Empty();
@@ -765,13 +682,39 @@ wxMessageView::Update(void)
    // restore the normal colour
    llist->SetFontColour(&m_ProfileValues.FgCol);
 
+   // get the encoding rom the message headers
+   wxFontEncoding encBody;
+   if ( m_encodingUser != wxFONTENCODING_SYSTEM )
+   {
+      // user-specified encoding overrides everything
+      encBody = m_encodingUser;
+   }
+   else // auto-detect
+   {
+      // FIXME how to get the params of the top level message?
+#if 0
+      encBody = m_mailMessage->GetTextPartEncoding(-1);
+      if ( encBody == wxFONTENCODING_SYSTEM )
+#endif
+      {
+         // some broken mailers don't create correct "Content-Type" header,
+         // but they may yet give us the necessary info in the other headers
+         encBody = encInHeaders;
+      }
+   }
+
    // iterate over all parts
    n = m_mailMessage->CountParts();
    for(i = 0; i < n; i++)
    {
       t = m_mailMessage->GetPartType(i);
       if(m_mailMessage->GetPartSize(i) == 0)
-         continue; // ignore empty parts
+      {
+         // ignore empty parts
+         wxLogVerbose("Skipping the empty MIME part #%d.", i);
+
+         continue;
+      }
 
       mimeType = m_mailMessage->GetPartMimeType(i);
       strutil_tolower(mimeType);
@@ -782,7 +725,7 @@ wxMessageView::Update(void)
       obj = NULL;
 #endif
 
-      if( t == Message::MSG_TYPEAPPLICATION) // let's guess a little
+      if ( t == Message::MSG_TYPEAPPLICATION ) // let's guess a little
       {
          wxString ext = fileName.AfterLast('.');
          wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
@@ -814,6 +757,28 @@ wxMessageView::Update(void)
             )
          )
       {
+         // get the encoding of the text
+         wxFontEncoding encPart;
+         if ( m_encodingUser != wxFONTENCODING_SYSTEM )
+         {
+            // user-specified encoding overrides everything
+            encPart = m_encodingUser;
+         }
+         else
+         {
+            encPart = m_mailMessage->GetTextPartEncoding(i);
+            if ( encPart == wxFONTENCODING_SYSTEM )
+            {
+               // use the encoding of the last part which had it
+               encPart = encBody;
+            }
+            else if ( encBody == wxFONTENCODING_SYSTEM )
+            {
+               // remember the encoding for the next parts
+               encBody = encPart;
+            }
+         }
+
          unsigned long len;
          cptr = m_mailMessage->GetPartContent(i, &len);
          if(cptr == NULL)
@@ -827,8 +792,8 @@ wxMessageView::Update(void)
 
             do
             {
-               before =  strutil_findurl(tmp,url);
-               wxLayoutImportText(llist,before);
+               before =  strutil_findurl(tmp, url);
+               wxLayoutImportText(llist, before, encPart);
                if(!strutil_isempty(url))
                {
                   ci = new ClickableInfo(url);
@@ -897,6 +862,12 @@ wxMessageView::Update(void)
          lastObjectWasIcon = true;
       }
    }
+
+   // update the menu of the frame containing us to show the encoding used
+   CheckLanguageInMenu(this, encBody == wxFONTENCODING_SYSTEM
+                              ? wxFONTENCODING_DEFAULT
+                              : encBody);
+
    llist->LineBreak();
    llist->MoveCursorTo(wxPoint(0,0));
    // we have modified the list directly, so we need to mark the
@@ -1011,26 +982,6 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
 {
    // we'll need this filename later
    wxString filenameOrig = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
-
-#if 0
-   // look for "FILENAME" parameter:
-   (void)m_mailMessage->ExpandParameter
-         (
-            m_mailMessage->GetDisposition(mimeDisplayPart),
-            "FILENAME",
-            &filenameOrig
-         );
-   if(filenameOrig.Length() == 0)
-   {
-      // look for "NAME" parameter:
-      (void)m_mailMessage->ExpandParameter
-         (
-            m_mailMessage->GetDisposition(mimeDisplayPart),
-            "NAME",
-            &filenameOrig
-            );
-   }
-#endif // 0
 
    String mimetype = m_mailMessage->GetPartMimeType(mimeDisplayPart);
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
@@ -1702,8 +1653,6 @@ wxMessageView::ShowMessage(Message *mailMessage)
                            folderName,
                            (MFrame *)GetFrame(this));
    }
-
-   SetFontForEncoding();
 
    Update();
 }

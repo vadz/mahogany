@@ -48,7 +48,7 @@ static void SplitAddress(const String& addr,
 bool
 Message::ExpandParameter(MessageParameterList const & list, String
                          const &parameter,
-                         String *value)
+                         String *value) const
 {
    MessageParameterList::iterator i;
    String par = parameter;

@@ -12,6 +12,8 @@
 #   pragma interface "wxlparser.h"
 #endif
 
+#include <wx/fontenc.h> // enum wxFontEncoding declaration
+
 #ifndef   NULL
 #   define   NULL 0
 #endif
@@ -68,8 +70,10 @@ struct wxLayoutExportStatus
 #   define WXLO_DEFAULT_EXPORT_MODE WXLO_EXPORT_WITH_LF_ONLY
 #endif // Win/Unix
 
-/// import text into a wxLayoutList (including linefeeds):
-void wxLayoutImportText(wxLayoutList *list, wxString const &str);
+/// import text in given encoding into a wxLayoutList (including linefeeds):
+extern void wxLayoutImportText(wxLayoutList *list,
+                               wxString const &str,
+                               wxFontEncoding encoding = wxFONTENCODING_SYSTEM);
 
 /// export text in a given format
 wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,

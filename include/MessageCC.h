@@ -30,7 +30,9 @@ public:
        @line name of header line
        @value string where result will be stored, or empty string
    */
-   bool GetHeaderLine(const String &line, String &value);
+   bool GetHeaderLine(const String &line,
+                      String &value,
+                      wxFontEncoding *encoding = NULL);
 
    /** Get a complete header text.
        @return string with multiline text containing the message headers
@@ -101,7 +103,9 @@ public:
        @param  n part number
        @return encoding type ID
    */
-   int GetPartEncoding(int n = 0);
+   int GetPartTransferEncoding(int n = 0);
+
+   virtual wxFontEncoding GetTextPartEncoding(int n = 0);
 
    /** Query the size of the content.
        @param  n part number

@@ -18,6 +18,8 @@
 #   include "strutil.h"
 #endif // USE_PCH
 
+#include <wx/fontmap.h>
+
 #include "gui/wxMFrame.h"
 #include "FolderView.h"
 
@@ -275,7 +277,8 @@ MessageCC::GetHeader(void) const
 }
 
 bool
-MessageCC::GetHeaderLine(const String &line, String &value)
+MessageCC::GetHeaderLine(const String &line,
+                         String &value, wxFontEncoding *encoding)
 {
    CHECK_DEAD_RC(false);
    if(! folder)
@@ -313,7 +316,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    value = strutil_after(val,':');
    delete [] val;
    strutil_delwhitespace(value);
-   value = MailFolderCC::DecodeHeader(value);
+   value = MailFolderCC::DecodeHeader(value, encoding);
    delete [] slist.text.data;
    MailFolderCC::ProcessEventQueue();
 
@@ -689,7 +692,7 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
       FIXME I should really find out whether this is correct :-)
    */
    const char * returnVal = NULL;
-   switch(GetPartEncoding(n))
+   switch(GetPartTransferEncoding(n))
    {
    case ENCBASE64:      // base-64 encoded data
       returnVal = (const char *) rfc822_base64((unsigned char
@@ -753,10 +756,20 @@ MessageCC::GetPartType(int n)
 }
 
 int
-MessageCC::GetPartEncoding(int n)
+MessageCC::GetPartTransferEncoding(int n)
 {
    DecodeMIME();
    return partInfos[n].numericalEncoding;
+}
+
+wxFontEncoding
+MessageCC::GetTextPartEncoding(int n)
+{
+   String charset;
+   if ( GetParameter(n, "charset", &charset) )
+      return wxTheFontMapper->CharsetToEncoding(charset);
+   else
+      return wxFONTENCODING_SYSTEM;
 }
 
 size_t

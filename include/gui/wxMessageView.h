@@ -159,7 +159,7 @@ private:
    /// the folder view, which handles some actions for us
    wxFolderView *m_FolderView;
    /// the message part selected for MIME display
-   int      mimeDisplayPart;
+   // -- unused? int      mimeDisplayPart;
    /// this can hold an xface
    XFace   *xface;
    /// and the xpm for it
@@ -193,9 +193,6 @@ protected:
    /// launch a process and wait for its termination, returns FALSE it
    /// exitcode != 0
    bool RunProcess(const String& command);
-
-   /// set the font encoding for viewing the current message
-   void SetFontForEncoding(wxFontEncoding enc = wxFONTENCODING_SYSTEM);
 
    /// All values read from the profile
    struct AllProfileValues
@@ -234,8 +231,8 @@ protected:
 
    void ReadAllSettings(AllProfileValues *settings);
 
-   /// the current encoding
-   wxFontEncoding m_encoding;
+   /// the encoding specified by the user or wxFONTENCODING_SYSTEM if none
+   wxFontEncoding m_encodingUser;
 
 private:
    /// array of process info for all external viewers we have launched

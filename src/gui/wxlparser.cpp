@@ -26,6 +26,9 @@
 #   include "wxlparser.h"
 #endif
 
+#include <wx/fontmap.h>
+#include <wx/encconv.h>
+
 #define   BASE_SIZE 12
 
 inline static bool IsEndOfLine(const char *p)
@@ -36,10 +39,47 @@ inline static bool IsEndOfLine(const char *p)
    return (*p == '\n') || ((*p == '\r') && (*(p + 1) == '\n'));
 }
 
-void wxLayoutImportText(wxLayoutList *list, wxString const &str)
+void wxLayoutImportText(wxLayoutList *list,
+                        wxString const &str,
+                        wxFontEncoding encoding)
 {
    if ( !str )
       return;
+
+   // check that we have fonts available for this encoding if it is a non
+   // default one
+   bool useConverter = FALSE;
+   wxEncodingConverter conv;
+   if ( encoding != wxFONTENCODING_SYSTEM )
+   {
+      if ( !wxTheFontMapper->IsEncodingAvailable(encoding) )
+      {
+         // try to find another encoding
+         wxFontEncoding encAlt;
+         if ( wxTheFontMapper->GetAltForEncoding(encoding, &encAlt) )
+         {
+            if ( conv.Init(encoding, encAlt) )
+            {
+               useConverter = TRUE;
+
+               encoding = encAlt;
+            }
+            else
+            {
+               // TODO give an error message here
+
+               // don't attempt to do anything with this encoding
+               encoding = wxFONTENCODING_SYSTEM;
+            }
+         }
+      }
+
+      if ( encoding != wxFONTENCODING_SYSTEM )
+      {
+         // set the font for this encoding
+         list->SetFontEncoding(encoding);
+      }
+   }
 
    // we change the string only temporarily inside this function
    // VZ: I still don't like it... the string data may be shared...
@@ -54,7 +94,10 @@ void wxLayoutImportText(wxLayoutList *list, wxString const &str)
          cptr++;
       backup = *cptr;
       *cptr = '\0';
-      list->Insert(begin);
+      if ( useConverter )
+         list->Insert(conv.Convert(begin));
+      else
+         list->Insert(begin);
       *cptr = backup;
 
       // check if it's the end of this line

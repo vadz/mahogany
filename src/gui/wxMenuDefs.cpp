@@ -586,69 +586,80 @@ EnableMMenu(MMenuId id, wxWindow *win, bool enable)
 /// Check the entry corresponding to this encoding in LANG submenu
 extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
 {
-   // the id of the current charset item in the menu
-   static int s_idCurrent = -1;
-
    wxFrame *frame = GetFrame(win);
    CHECK_RET(frame, "no parent frame in EnableMMenu");
    wxMenuBar *mb = frame->GetMenuBar();
    CHECK_RET(mb, "no menu bar in EnableMMenu");
 
-   if ( encoding == wxFONTENCODING_SYSTEM )
+   int id;
+   switch ( encoding )
    {
-      wxASSERT_MSG( s_idCurrent == -1,
-                    "CheckLanguageInMenu(wxFONTENCODING_SYSTEM) can "
-                    "only be called once!" );
+      case wxFONTENCODING_ISO8859_1:
+      case wxFONTENCODING_ISO8859_2:
+      case wxFONTENCODING_ISO8859_3:
+      case wxFONTENCODING_ISO8859_4:
+      case wxFONTENCODING_ISO8859_5:
+      case wxFONTENCODING_ISO8859_6:
+      case wxFONTENCODING_ISO8859_7:
+      case wxFONTENCODING_ISO8859_8:
+      case wxFONTENCODING_ISO8859_9:
+      case wxFONTENCODING_ISO8859_10:
+         id = WXMENU_LANG_ISO8859_1 + encoding - wxFONTENCODING_ISO8859_1;
+         break;
 
-      s_idCurrent = WXMENU_LANG_US_ASCII;
-   }
-   else
-   {
-      wxASSERT_MSG( s_idCurrent != -1, "no currently selected charset?" );
+      case wxFONTENCODING_CP1250:
+      case wxFONTENCODING_CP1251:
+      case wxFONTENCODING_CP1252:
+      case wxFONTENCODING_CP1253:
+      case wxFONTENCODING_CP1254:
+      case wxFONTENCODING_CP1255:
+      case wxFONTENCODING_CP1256:
+      case wxFONTENCODING_CP1257:
+         id = WXMENU_LANG_CP1250 + encoding - wxFONTENCODING_CP1250;
+         break;
 
-      mb->Check(s_idCurrent, FALSE);
+      case wxFONTENCODING_KOI8:
+         id = WXMENU_LANG_KOI8;
+         break;
 
-      switch ( encoding )
-      {
-         case wxFONTENCODING_ISO8859_1:
-         case wxFONTENCODING_ISO8859_2:
-         case wxFONTENCODING_ISO8859_3:
-         case wxFONTENCODING_ISO8859_4:
-         case wxFONTENCODING_ISO8859_5:
-         case wxFONTENCODING_ISO8859_6:
-         case wxFONTENCODING_ISO8859_7:
-         case wxFONTENCODING_ISO8859_8:
-         case wxFONTENCODING_ISO8859_9:
-         case wxFONTENCODING_ISO8859_10:
-            s_idCurrent = WXMENU_LANG_ISO8859_1 +
-                          encoding - wxFONTENCODING_ISO8859_1;
-            break;
+      default:
+         wxFAIL_MSG( "Unexpected encoding in CheckLanguageInMenu" );
 
-         case wxFONTENCODING_CP1250:
-         case wxFONTENCODING_CP1251:
-         case wxFONTENCODING_CP1252:
-         case wxFONTENCODING_CP1253:
-         case wxFONTENCODING_CP1254:
-         case wxFONTENCODING_CP1255:
-         case wxFONTENCODING_CP1256:
-         case wxFONTENCODING_CP1257:
-            s_idCurrent = WXMENU_LANG_CP1250 +
-                          encoding - wxFONTENCODING_CP1250;
-            break;
-
-         case wxFONTENCODING_KOI8:
-            s_idCurrent = WXMENU_LANG_KOI8;
-            break;
-
-         default:
-            wxFAIL_MSG( "Unexpected encoding in CheckLanguageInMenu" );
-
-         case wxFONTENCODING_DEFAULT:
-            s_idCurrent = WXMENU_LANG_US_ASCII;
-      }
+      case wxFONTENCODING_DEFAULT:
+      case wxFONTENCODING_SYSTEM:
+         id = WXMENU_LANG_US_ASCII;
    }
 
-   mb->Check(s_idCurrent, TRUE);
+   // emulate the "radio menu items" as wxWin doesn't yet have this
+   static const int menuIds[] =
+   {
+      WXMENU_LANG_US_ASCII,
+      WXMENU_LANG_ISO8859_1,
+      WXMENU_LANG_ISO8859_2,
+      WXMENU_LANG_ISO8859_3,
+      WXMENU_LANG_ISO8859_4,
+      WXMENU_LANG_ISO8859_5,
+      WXMENU_LANG_ISO8859_6,
+      WXMENU_LANG_ISO8859_7,
+      WXMENU_LANG_ISO8859_8,
+      WXMENU_LANG_ISO8859_9,
+      WXMENU_LANG_ISO8859_10,
+      WXMENU_LANG_CP1250,
+      WXMENU_LANG_CP1251,
+      WXMENU_LANG_CP1252,
+      WXMENU_LANG_CP1253,
+      WXMENU_LANG_CP1254,
+      WXMENU_LANG_CP1255,
+      WXMENU_LANG_CP1256,
+      WXMENU_LANG_CP1257,
+      WXMENU_LANG_KOI8,
+   };
+
+   for ( size_t nId = 0; nId < WXSIZEOF(menuIds); nId++ )
+   {
+      int idCur = menuIds[nId];
+      mb->Check(idCur, idCur == id);
+   }
 }
 
 /* vi: set tw=0 */

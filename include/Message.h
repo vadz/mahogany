@@ -109,11 +109,14 @@ public:
    static String GetNameFromAddress(const String& address);
 
    /** get any header line
-       @line name of header line
-       @value string where result will be stored, or empty string
+       @param line name of header line
+       @param value string where result will be stored, or empty string
+       @param encoding will hold the encoding used in header if not NULL
        @return true if header was found in the headers
    */
-   virtual bool GetHeaderLine(const String &line, String &value) = 0;
+   virtual bool GetHeaderLine(const String &line,
+                              String &value,
+                              wxFontEncoding *encoding = NULL) = 0;
 
    /** Get the complete header text.
        @return string with multiline text containing the message headers
@@ -192,9 +195,15 @@ public:
 
    /** Query the type of the content.
        @param  n part number
-       @return content type ID
+       @return content type ID (ENCBASE64, ENCQUOTEDPRINTABLE, ...)
    */
-   virtual int GetPartEncoding(int n = 0) = 0;
+   virtual wxFontEncoding GetTextPartEncoding(int n = 0) = 0;
+
+   /** Query the type of the content.
+       @param  n part number
+       @return content type ID (ENCBASE64, ENCQUOTEDPRINTABLE, ...)
+   */
+   virtual int GetPartTransferEncoding(int n = 0) = 0;
 
    /** Query the size of the content, either in lines (TYPETEXT/TYPEMESSAGE) or bytes.
        @param  n part number
@@ -215,6 +224,7 @@ public:
        @return list of parameters, must be freed by caller.
    */
    virtual MessageParameterList const & GetDisposition(int n = -1, String *disptype = NULL) = 0;
+
    /** Get a parameter value from the list.
        @param list a MessageParameterList
        @param parameter parameter to look up
@@ -223,7 +233,16 @@ public:
    */
    bool ExpandParameter(MessageParameterList const & list,
                         String const &parameter,
-                        String *value);
+                        String *value) const;
+
+   /** Get parameter by name.
+       @param n part number, if -1, for the top level.
+       @return true if parameter was found
+   */
+   bool GetParameter(int n, const String& param, String *value)
+   {
+      return ExpandParameter(GetParameters(n), param, value);
+   }
 
    /** Query the MimeType of the content.
        @param  n part number
