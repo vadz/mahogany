@@ -80,9 +80,6 @@ extern const MOption MP_COMPOSE_CC;
 extern const MOption MP_COMPOSE_TO;
 extern const MOption MP_MSGVIEW_ALL_HEADERS;
 extern const MOption MP_MSGVIEW_HEADERS;
-extern const MOption MP_SHOWBCC;
-extern const MOption MP_SHOWCC;
-extern const MOption MP_SHOW_TO;
 extern const MOption MP_USERLEVEL;
 
 // ----------------------------------------------------------------------------
@@ -142,10 +139,10 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
+protected:
    // event handlers
-      // update UI: disable the text boxes which shouldn't be edited
-   void OnUpdateUI(wxUpdateUIEvent& event);
-      // show "custom headers" dialog
+
+   // show "custom headers" dialog
    void OnEditCustomHeaders(wxCommandEvent& event);
 
 private:
@@ -162,14 +159,9 @@ private:
 
    // profile key names
    static const char *ms_profileNamesDefault[Header_Max];
-   static const char *ms_profileNamesShow[Header_Max];
 
    // the dialog controls
-   wxCheckBox *m_checkboxes[Header_Max];
    wxTextCtrl *m_textvalues[Header_Max];
-
-   // dirty flag for the checkboxes (textctrls have their own)
-   bool        m_oldCheckboxValues[Header_Max];
 
    static void InitStaticArrays();
 
@@ -315,20 +307,7 @@ private:
 // event tables
 // ----------------------------------------------------------------------------
 
-#ifndef EVT_UPDATE_UI_RANGE
-#define EVT_UPDATE_UI_RANGE(id1, id2, func) \
-   {\
-      wxEVT_UPDATE_UI,\
-      id1, id2,\
-      (wxObjectEventFunction)(wxEventFunction)(wxUpdateUIEventFunction)&func,\
-      (wxObject *) NULL\
-   },
-#endif
-
 BEGIN_EVENT_TABLE(wxComposeHeadersDialog, wxOptionsPageSubdialog)
-   EVT_UPDATE_UI_RANGE(TextCtrlId,
-                       TextCtrlId + wxComposeHeadersDialog::Header_Max,
-                       wxComposeHeadersDialog::OnUpdateUI)
    EVT_BUTTON(Button_EditCustom, wxComposeHeadersDialog::OnEditCustomHeaders)
 END_EVENT_TABLE()
 
@@ -362,7 +341,6 @@ const char *wxComposeHeadersDialog::ms_headerNames[] =
 };
 
 const char *wxComposeHeadersDialog::ms_profileNamesDefault[Header_Max];
-const char *wxComposeHeadersDialog::ms_profileNamesShow[Header_Max];
 
 void wxComposeHeadersDialog::InitStaticArrays()
 {
@@ -371,10 +349,6 @@ void wxComposeHeadersDialog::InitStaticArrays()
       ms_profileNamesDefault[0] = MP_COMPOSE_TO;
       ms_profileNamesDefault[1] = MP_COMPOSE_CC;
       ms_profileNamesDefault[2] = MP_COMPOSE_BCC;
-
-      ms_profileNamesShow[0] = NULL; // no MP_SHOW_TO - always true
-      ms_profileNamesShow[1] = MP_SHOWCC;
-      ms_profileNamesShow[2] = MP_SHOWBCC;
    }
 }
 
@@ -392,7 +366,13 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
    wxLayoutConstraints *c;
 
    // Ok and Cancel buttons and a static box around everything else
-   wxStaticBox *box = CreateStdButtonsAndBox(_("&Headers"));
+   wxString foldername = GetFolderNameFromProfile(profile);
+   wxString labelBox;
+   if ( !foldername.empty() )
+      labelBox.Printf(_("&Headers for folder '%s'"), foldername.c_str());
+   else
+      labelBox.Printf(_("Default headers"));
+   wxStaticBox *box = CreateStdButtonsAndBox(labelBox);
 
    // for advanced users only: a button to invoke the dialog for configuring
    // other headers
@@ -403,7 +383,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
 
       wxWindow *btnOk = FindWindow(wxID_OK);
       c = new wxLayoutConstraints();
-      c->right.LeftOf(btnOk, LAYOUT_X_MARGIN);
+      c->right.LeftOf(btnOk, 2*LAYOUT_X_MARGIN);
       c->top.SameAs(btnOk, wxTop);
       c->width.Absolute(wBtn);
       c->height.Absolute(hBtn);
@@ -411,7 +391,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
    }
 
    // a static message telling where is what
-   wxStaticText *msg1 = new wxStaticText(this, -1, _("Show the field?"));
+   wxStaticText *msg1 = new wxStaticText(this, -1, _("Recipient"));
    wxStaticText *msg2 = new wxStaticText(this, -1, _("Default value"));
 
    c = new wxLayoutConstraints();
@@ -432,7 +412,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
    wxControl *last = NULL;
    for ( size_t header = 0; header < Header_Max; header++ )
    {
-      m_checkboxes[header] = new wxCheckBox(this, -1, ms_headerNames[header]);
+      wxStaticText *label = new wxStaticText(this, -1, ms_headerNames[header]);
       m_textvalues[header] = new wxTextCtrl(this, TextCtrlId + header);
 
       // set the constraints
@@ -444,7 +424,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
       c->height.AsIs();
       c->centreY.SameAs(m_textvalues[header], wxCentreY);
 
-      m_checkboxes[header]->SetConstraints(c);
+      label->SetConstraints(c);
 
       c = new wxLayoutConstraints();
       if ( !last )
@@ -455,7 +435,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
       {
          c->top.Below(last, LAYOUT_Y_MARGIN);
       }
-      c->left.RightOf(m_checkboxes[header], 3*LAYOUT_X_MARGIN);
+      c->left.RightOf(label, 3*LAYOUT_X_MARGIN);
       c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
       c->height.AsIs();
 
@@ -463,17 +443,8 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
       last->SetConstraints(c);
    }
 
-   // the "To" field is always shown
-   m_checkboxes[Header_To]->SetValue(TRUE);
-   m_checkboxes[Header_To]->Enable(FALSE);
-
    // set the minimal and initial window size
    SetDefaultSize(4*wBtn, 8*hBtn);
-}
-
-void wxComposeHeadersDialog::OnUpdateUI(wxUpdateUIEvent& event)
-{
-   event.Enable( m_checkboxes[event.GetId() - TextCtrlId]->GetValue() );
 }
 
 void wxComposeHeadersDialog::OnEditCustomHeaders(wxCommandEvent& event)
@@ -489,33 +460,15 @@ bool wxComposeHeadersDialog::TransferDataToWindow()
    // edit the real value stored in the config
    ProfileEnvVarSave suspend(m_profile, false);
 
-   bool show;     // show the header or not (checkbox value)
-   wxString def;  // default value (text ctrl value)
+   // default value for the text ctrl
+   wxString def;
 
    for ( size_t header = 0; header < Header_Max; header++ )
    {
-      if ( header == Header_To )
-      {
-         // there is no such setting for this field and the checkbox value has
-         // been already set in the ctor
-         show = TRUE;
-      }
-      else
-      {
-         show = m_profile->readEntry(ms_profileNamesShow[header], 1) != 0;
+      def = m_profile->readEntry(ms_profileNamesDefault[header], "");
 
-         m_checkboxes[header]->SetValue(show != 0);
-      }
-
-      m_oldCheckboxValues[header] = show;
-
-      if ( show )
-      {
-         def = m_profile->readEntry(ms_profileNamesDefault[header], "");
-
-         m_textvalues[header]->SetValue(def);
-         m_textvalues[header]->DiscardEdits();
-      }
+      m_textvalues[header]->SetValue(def);
+      m_textvalues[header]->DiscardEdits();
    }
 
    return TRUE;
@@ -523,27 +476,11 @@ bool wxComposeHeadersDialog::TransferDataToWindow()
 
 bool wxComposeHeadersDialog::TransferDataFromWindow()
 {
-   bool show;
    wxString def;
 
    for ( size_t header = 0; header < Header_Max; header++ )
    {
-      if ( header == Header_To )
-      {
-         show = TRUE;
-      }
-      else
-      {
-         show = m_checkboxes[header]->GetValue();
-         if ( show != m_oldCheckboxValues[header] )
-         {
-            m_hasChanges = TRUE;
-
-            m_profile->writeEntry(ms_profileNamesShow[header], show);
-         }
-      }
-
-      if ( show && m_textvalues[header]->IsModified() )
+      if ( m_textvalues[header]->IsModified() )
       {
          def = m_textvalues[header]->GetValue();
 
@@ -917,7 +854,7 @@ wxCustomHeadersDialog::wxCustomHeadersDialog(Profile *profile,
    // now the listctrl
    m_listctrl = new wxPListCtrl("HeaderEditList", this, -1,
                                 wxDefaultPosition, wxDefaultSize,
-                                wxLC_REPORT);
+                                wxLC_REPORT | wxBORDER_SUNKEN);
    c = new wxLayoutConstraints;
    c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -1193,9 +1130,10 @@ static String GetFolderNameFromProfile(Profile *profile)
 
       if ( *p )
       {
+         ASSERT_MSG( *p == '/', "profile path must start with slash" );
+
          // +1 to skip following '/'
          folderName = p + 1;
-         folderName = folderName.BeforeFirst('/');
       }
       //else: leave empty
    }
