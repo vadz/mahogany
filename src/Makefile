@@ -25,10 +25,12 @@ MOBJS += modules/*.o
 endif
 
 # build the dynamically linked binary by default
-all: subdirs
+all:	M
+
+M:	$(MOBJS)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 
-M:	all
+$(MOBJS): subdirs
 
 #
 #left over from my attempt to create a M.so shared lib
@@ -62,12 +64,12 @@ doc:
 
 clean:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-	$(RM) core libM.so
+	$(RM) core libM.so M M.static
 
 dep depend:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
-install: M
+install: 
 	strip M
 	$(INSTALL_PROGRAM) M $(DATADIR)/$(CANONICAL_HOST)/bin
 	$(RM) -f $(BINDIR)/M $(DATADIR)/bin/M
