@@ -438,14 +438,25 @@ VerifyInbox(void)
               "from your system's default mail folder (INBOX,\n"
               "representing your mail spool entry),\n"
               "and move it to a special 'New Mail' folder.\n"
+              "This is generally considered good practice as you\n"
+              "should not leave your new mail in INBOX.\n"
               "\n"
-              "Is this ok? If you select No, your mail will remain in\n"
-              "INBOX and you need to check that folder manually."
+              "Please confirm this. If you select No, your mail\n"
+              "will remain in INBOX and you need to check that\n"
+              "folder manually."
                ),
             NULL, _("Collect mail from INBOX?"), true))
          ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX|MF_FLAGS_INCOMING);
       else
+      {
          ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX);
+         MDialog_Message(_(
+            "Mahogany will not automatically collect mail from your\n"
+            "system's default INBOX.\n"
+            "You can change this in the INBOX folder's preferences\n"
+            "dialog at any time."));
+
+      }
       ibp->writeEntry(MP_FOLDER_COMMENT, _("Default system folder for incoming mail."));
       ibp->DecRef();
    }
