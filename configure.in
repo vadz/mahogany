@@ -773,7 +773,7 @@ AC_SUBST(LIBS_STATIC)
 
 OUTPUT="makeopts"
 COPY=Makefile DIR=
-for dir in `cd $srcdir; find * -type d -print`
+for dir in `cd $srcdir; find include extra src doc -type d -print`
 do	case "$dir" in
 	CVS | */CVS)		continue ;;
 	extra/src)		DIR="$DIR $dir" ;;
