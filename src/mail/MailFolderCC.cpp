@@ -40,6 +40,7 @@
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking
 #include <wx/filefn.h>
 
+#ifdef OS_UNIX
 // including mh.h doesn't seem to work...
 extern "C"
 {
@@ -47,6 +48,12 @@ extern "C"
 
    char *mh_getpath(void);
 }
+#else // Windows
+   // no MH support for now
+   static int mh_isvalid(char *name, char *tmp, long synonly) { return FALSE; }
+
+   static char *mh_getpath(void) { return ""; }
+#endif // Unix/Win
 
 #include <ctype.h>   // isspace()
 
