@@ -1221,6 +1221,15 @@ wxOptionsEditDialog::SendOptionsChangeEvent()
    }
 }
 
+void wxOptionsEditDialog::EnableButtons(bool enable)
+{
+   if ( m_btnApply )
+   {
+       m_btnApply->Enable(enable);
+       m_btnOk->Enable(enable);
+   }
+}
+
 // button event handlers
 // ---------------------
 

@@ -193,14 +193,7 @@ public:
    wxOptionsEditDialog() { wxFAIL_MSG("unaccessible"); }
 
    // disable or reenable Ok and Apply buttons
-   void EnableButtons(bool enable)
-   {
-      if ( m_btnApply )
-      {
-          m_btnApply->Enable(enable);
-          m_btnOk->Enable(enable);
-      }
-   }
+   virtual void EnableButtons(bool enable);
 
 protected:
    // clear the dirty flag

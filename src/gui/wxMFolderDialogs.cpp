@@ -168,6 +168,15 @@ public:
       m_mayEnableOk = may;
    }
 
+   // don't let the base class to enable the buttons if we can't allow it
+   // because some entries are missing/incorrect
+   virtual void EnableButtons(bool enable)
+   {
+      if ( !enable || ShouldEnableOk() )
+         wxOptionsEditDialog::EnableButtons(enable);
+      //else: ignore
+   }
+
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
    wxFolderBaseDialog() { }
 
