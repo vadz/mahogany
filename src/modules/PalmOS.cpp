@@ -358,6 +358,7 @@ extern "C" { int register_printErrorHook (printErrorHook); }
 static
 int MAL_PrintFunc(bool errorflag, const char * format, va_list args)
 {
+   ASSERT(gs_MInterface != NULL);
    wxString msg;
    int rc = msg.PrintfV(format, args);
    if(errorflag)
