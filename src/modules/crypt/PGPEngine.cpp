@@ -564,11 +564,14 @@ PGPEngine::ExecCommand(const String& options,
                  code == _T("DECRYPTION_OKAY") )
             {
                status = OK;
+               wxLogStatus(_("Valid signature for public key \"%s\""), pc);
+
             }
             else if ( code == _T("EXPSIG") || code == _T("EXPKEYSIG") )
             {
                // FIXME: at least give a warning
                status = OK;
+               wxLogWarning(_("Expired signature for public key \"%s\""), pc);
             }
             else if ( code == _T("BADSIG") )
             {
