@@ -26,6 +26,7 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "MailFolder.h"    // for DecodeHeader
 #endif // USE_PCH
 
 #include <wx/fontmap.h>
@@ -33,6 +34,8 @@
 #include "MimePartCC.h"
 
 #include "Mcclient.h" // for body_types
+
+#undef MESSAGE
 
 // ============================================================================
 // MimeType implementation
@@ -130,14 +133,60 @@ MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
 
    m_parent = parent;
 
-   // IMAP specs are a bit weird: normally the children of the MULTIPART part
-   // have its spec as their spec prefix, but not if the main message is a
-   // MULTIPART entity itself - see the example in comments in MimePart.h
-   //
-   // so check that our parent is not the top level [pseudo] part
+   /*
+      Nasty hack: c-client (and so probably IMAP as well) doesn't seem to
+      number the multipart parts whose parent and grand parent are multipart
+      as well and this part is the only part at this level
+     
+      For example, the part numbers are assigned like this in this example
+      message:
+
+         MULTIPART/MIXED
+            TEXT/PLAIN                          1
+            MESSAGE/RFC822                      2
+               MULTIPART/MIXED                  2.1
+                  MULTIPART/ALTERNATIVE
+                     TEXT/PLAIN                 2.1.1
+                     TEXT/HTML                  2.1.2
+                  MESSAGE/RFC822                2.2
+                     MULTIPART/MIXED
+                        TEXT/PLAIN              2.2.1
+                        IMAGE/JPEG              2.2.2
+
+      I.e. the MULTIPART/ALTERNATIVE and the last MIXED parts don't have the
+      part numbers (or rather have the same number as their parent).
+    */
    if ( m_parent && m_parent->GetParent() )
    {
-      m_spec << m_parent->GetPartSpec() << '.';
+      String specParent;
+
+      MimeType::Primary mt = m_parent->GetType().GetPrimary();
+
+      if ( mt == MimeType::MULTIPART || mt == MimeType::MESSAGE )
+      {
+         MimePartCC *grandparent = m_parent->m_parent;
+
+         // it shouldn't be the top level part (note that it is non NULL
+         // because of the test in the enclosing if)
+         if ( grandparent->m_parent )
+         {
+            mt = grandparent->GetType().GetPrimary();
+
+            if ( mt == MimeType::MULTIPART || mt == MimeType::MESSAGE )
+            {
+               // our parent part doesn't have its own part number, use the
+               // grand parent spec as the base
+               specParent = grandparent->m_spec;
+            }
+         }
+      }
+
+      if ( specParent.empty() )
+      {
+         specParent = m_parent->m_spec;
+      }
+
+      m_spec << specParent << '.';
    }
 
    m_spec << wxString::Format("%u", nPart);
@@ -183,7 +232,9 @@ MimeType MimePartCC::GetType() const
 
 String MimePartCC::GetDescription() const
 {
-   return m_body->description;
+   // FIXME: we lose the encoding info here - but we don't have any way to
+   //        return it from here currently
+   return MailFolder::DecodeHeader(m_body->description);
 }
 
 String MimePartCC::GetFilename() const
@@ -231,7 +282,9 @@ String MimePartCC::FindParam(const MimeParameterList& list, const String& name)
       }
    }
 
-   return value;
+   // FIXME: we lose the encoding info here - but we don't have any way to
+   //        return it from here currently
+   return MailFolder::DecodeHeader(value);
 }
 
 String MimePartCC::GetParam(const String& name) const
