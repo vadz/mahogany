@@ -40,6 +40,9 @@ extern "C"
    // and it also thinks it's ok to redefine a symbol as common as "write"!
 #  undef write
 
+   //  this is defined as a struct while we use it as a MimeType enum value
+#  undef MESSAGE
+
    // windows.h included from osdep.h under Windows #defines all these
 #  undef   CreateDialog
 #  undef   DrawText
