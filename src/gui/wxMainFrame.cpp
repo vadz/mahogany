@@ -509,7 +509,7 @@ wxMainFrame::MakeModulesMenu(void)
    if(! m_ModulesMenu)
    {
       // create the modules menu:
-      m_ModulesMenu = new wxMenu();
+      m_ModulesMenu = new wxMenu("", wxMENU_TEAROFF);
       int pos = menuBar->GetMenuCount();
       wxASSERT(pos  > 1);
       // pos is the Help menu, so insert at pos-1:

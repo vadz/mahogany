@@ -55,6 +55,7 @@ extern bool ShowRestoreDefaultsDialog(ProfileBase *profile, wxFrame *parent);
 
 /// creates and shows the options dialog with the given options page
 extern void ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
+                                    ProfileBase *profile = NULL,
                                     wxFrame *parent = NULL);
 
 #endif  //_WXOPTIONSDLG_H

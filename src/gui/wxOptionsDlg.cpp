@@ -284,7 +284,8 @@ class wxCustomOptionsNotebook : public wxNotebookWithImages
 {
 public:
    wxCustomOptionsNotebook(wxWindow *parent,
-                           const wxOptionsPageDesc& pageDesc);
+                           const wxOptionsPageDesc& pageDesc,
+                           ProfileBase *profile);
 
 private:
    const char **GetImagesArray(const char *iconName);
@@ -342,19 +343,27 @@ class wxCustomOptionsDialog : public wxOptionsDialog
 {
 public:
    wxCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
+                         ProfileBase *profile,
                          wxFrame *parent)
       : wxOptionsDialog(parent), m_pageDesc(pageDesc)
-   {
-   }
-
+      {
+         m_profile = profile;
+         SafeIncRef(m_profile);
+      }
+   ~wxCustomOptionsDialog()
+      {
+         SafeDecRef(m_profile);
+      }
    virtual void CreateNotebook(wxPanel *panel)
    {
-      m_notebook = new wxCustomOptionsNotebook(this, m_pageDesc);
+      m_notebook = new wxCustomOptionsNotebook(this, m_pageDesc, m_profile);
    }
 
 private:
    // the description of the page we show
    const wxOptionsPageDesc& m_pageDesc;
+   // the profile
+   ProfileBase *m_profile;
 };
 
 class wxRestoreDefaultsDialog : public wxProfileSettingsEditDialog
@@ -797,7 +806,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
-   CONFIG_ENTRY(MP_TEAROFF_MENUS),
    CONFIG_ENTRY(MP_FOCUS_FOLLOWSMOUSE),
 #endif
    CONFIG_ENTRY(MP_DOCKABLE_MENUBARS),
@@ -1822,7 +1830,8 @@ wxOptionsDialog::~wxOptionsDialog()
 wxCustomOptionsNotebook::wxCustomOptionsNotebook
                          (
                           wxWindow *parent,
-                          const wxOptionsPageDesc& pageDesc
+                          const wxOptionsPageDesc& pageDesc,
+                          ProfileBase *profile
                          )
                        : wxNotebookWithImages(
                                               "CustomNotebook",
@@ -1830,7 +1839,11 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
                                               GetImagesArray(pageDesc.image)
                                              )
 {
-   ProfileBase *profile = ProfileBase::CreateProfile("");
+   if(profile)
+      profile->IncRef();
+   else
+      profile = ProfileBase::CreateProfile("");
+   
 
    // the page ctor will add it to the notebook
    wxOptionsPageDynamic *page = new wxOptionsPageDynamic(
@@ -2017,9 +2030,10 @@ bool ShowRestoreDefaultsDialog(ProfileBase *profile, wxFrame *parent)
 }
 
 void ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
+                             ProfileBase *profile,
                              wxFrame *parent)
 {
-   wxCustomOptionsDialog dlg(pageDesc, parent);
+   wxCustomOptionsDialog dlg(pageDesc, profile, parent);
    dlg.CreateAllControls();
    dlg.Layout();
 
