@@ -18,10 +18,6 @@
 
 #include "Mpch.h"
 
-#ifndef USE_PCH
-#   include "strutil.h"    // for ConvertUnicodeToSystem()
-#endif
-
 #include "gui/wxllist.h"
 #include "gui/wxlparser.h"
 
@@ -175,19 +171,11 @@ void wxLayoutImportHTML(wxLayoutList *list,
 }
 
 void wxLayoutImportText(wxLayoutList *list,
-                        const wxString& strOrig,
+                        const wxString& str,
                         wxFontEncoding encoding)
 {
-   if ( strOrig.empty() )
+   if ( str.empty() )
       return;
-
-   wxString str = strOrig;
-
-   if ( encoding == wxFONTENCODING_UTF8 || encoding == wxFONTENCODING_UTF7 )
-   {
-      // Convert from UTF-8|7 to environment's default encoding
-      encoding = ConvertUnicodeToSystem(&str, encoding);
-   }
 
    bool useConverter = FALSE;
    wxEncodingConverter conv;

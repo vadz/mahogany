@@ -484,13 +484,12 @@ void TextViewer::ShowRawHeaders(const String& header)
 }
 
 void TextViewer::ShowHeader(const String& headerName,
-                            const String& headerValueOrig,
+                            const String& headerValue,
                             wxFontEncoding encHeader)
 {
-   if ( headerValueOrig.empty() )
+   if ( headerValue.empty() )
       return;
 
-   String headerValue = headerValueOrig;
    const ProfileValues& profileValues = GetOptions();
 
    InsertText(headerName + ": ", wxTextAttr(profileValues.HeaderNameCol));
@@ -502,12 +501,6 @@ void TextViewer::ShowHeader(const String& headerName,
    wxTextAttr attr(col);
    if ( encHeader != wxFONTENCODING_SYSTEM )
    {
-      if ( encHeader == wxFONTENCODING_UTF8 || encHeader == wxFONTENCODING_UTF7 )
-      {
-         // convert from UTF-8|7 to environment's default encoding
-         // FIXME it won't be needed when full Unicode support is available
-         encHeader = ConvertUnicodeToSystem(&headerValue, encHeader);
-      }
       wxFont font = profileValues.GetFont(encHeader);
       attr.SetFont(font);
    }

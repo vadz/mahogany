@@ -1141,7 +1141,10 @@ MessageView::ShowHeaders()
       }
 
       wxString value = headerValues[n];
+#if 0
+      // does not work - EnsureAvailableTextEncoding for UTF-8 always succeeds
       if ( !EnsureAvailableTextEncoding(&encHeader, &value) )
+#endif
       {
          // special handling for the UTF-7|8 if it's not supported natively
          if ( encHeader == wxFONTENCODING_UTF8 ||

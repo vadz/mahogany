@@ -725,11 +725,11 @@ void HtmlViewer::ShowRawHeaders(const String& header)
 }
 
 void HtmlViewer::ShowHeader(const String& headerName,
-                            const String& headerValueOrig,
+                            const String& headerValue,
                             wxFontEncoding encHeader)
 {
    // don't show empty headers at all
-   if ( headerValueOrig.empty() )
+   if ( headerValue.empty() )
       return;
 
    if ( m_firstheader )
@@ -740,7 +740,6 @@ void HtmlViewer::ShowHeader(const String& headerName,
       m_firstheader = false;
    }
 
-   String headerValue = headerValueOrig;
    const ProfileValues& profileValues = GetOptions();
 
    // first column: header names (width=1 means minimal width)
@@ -757,12 +756,6 @@ void HtmlViewer::ShowHeader(const String& headerName,
    m_htmlText += "</td><td>";
 
    {
-      if ( encHeader == wxFONTENCODING_UTF8 || encHeader == wxFONTENCODING_UTF7 )
-      {
-         // convert from UTF-8|7 to environment's default encoding
-         // FIXME it won't be needed when full Unicode support is available
-         encHeader = ConvertUnicodeToSystem(&headerValue, encHeader);
-      }
       FontColourChanger colChanger(profileValues.HeaderValueCol, m_htmlText);
 
       EncodingChanger encChanger(encHeader, m_htmlText);
