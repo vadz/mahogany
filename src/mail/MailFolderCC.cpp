@@ -1619,11 +1619,30 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder)
    wxLogTrace(TRACE_MF_CALLS, "Trying to create MailFolderCC '%s'.",
               imapspec.c_str());
 
+   String login, password;
+   if ( !GetAuthInfoForFolder(folder, login, password) )
+   {
+      // can't continue without login/password
+      return false;
+   }
+
+   if ( !login.empty() )
+   {
+      SetLoginData(login, password);
+   }
+
    // disable callbacks as we don't have the folder to redirect them to
    CCAllDisabler noCallbacks;
 
    // and create the mailbox
    mail_create(NIL, (char *)imapspec.c_str());
+
+   // login data was reset by mm_login() called from mail_create(), set it once
+   // again
+   if ( !login.empty() )
+   {
+      SetLoginData(login, password);
+   }
 
    // try to open it now
    MAILSTREAM *stream = mail_open(NULL, (char *)imapspec.c_str(),
@@ -1943,11 +1962,6 @@ MailFolderCC::Open(OpenMode openmode)
       return false;
    }
 
-   if ( HasLogin() )
-   {
-      SetLoginData(m_login, m_password);
-   }
-
    // lock cclient inside this block
    {
       MCclientLocker lock;
@@ -1991,6 +2005,11 @@ MailFolderCC::Open(OpenMode openmode)
 
       if ( tryOpen )
       {
+         if ( HasLogin() )
+         {
+            SetLoginData(m_login, m_password);
+         }
+
          m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(), ccOptions);
 
          if ( m_MailStream && GetType() == MF_POP )
