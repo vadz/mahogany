@@ -2288,6 +2288,13 @@ MailFolderCC::Open(OpenMode openmode)
    // so did we eventually succeed in opening it or not?
    if ( m_MailStream == NIL )
    {
+      // can we give the user a hint as to why did it fail?
+      String err = GetLogCircle().GuessError();
+      if ( !err.empty() )
+      {
+         ERRORMESSAGE((err));
+      }
+
       wxLogError(_("Could not open mailbox '%s'."), GetName().c_str());
       return false;
    }
