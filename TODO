@@ -4,6 +4,9 @@ $Id$
 
 *** things to fix/implement next ***
 
+- Expand in ComposeView is broken: should insert "Formatted_Name <EMail>" and
+  must not treat the whole To: as a single name but properly parse it. How can
+  we expand CC/BCC fields?
 - tons of cclient lib errors (mainly "invalid sequence") whatever I do under
   Windows - I have no clue :-(
 - sequence invalid bug on close of folder
