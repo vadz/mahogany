@@ -136,6 +136,9 @@ private:
    /// free the thread data (thread table and indent data)
    void FreeThreadData();
 
+   /// free sort and thread data and the translation tables
+   void FreeSortAndThreadData();
+
    /// is the given entry valid (i.e. already cached)?
    inline bool IsHeaderValid(MsgnoType n) const;
 
@@ -201,6 +204,9 @@ private:
      m_tableSort == m_tablePos == NULL!
     */
    //@{
+
+   /// the number of sorted/threaded messages, may be (briefly) != m_count
+   MsgnoType m_sizeTables;
 
    /// the translation table containing the msgnos in sorted order
    MsgnoType *m_tableSort;
