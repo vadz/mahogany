@@ -125,9 +125,9 @@ MailFolder::ConvertMessageStatusToString(int status)
    if(status & MSG_STAT_RECENT)
    {
       if(status & MSG_STAT_SEEN)
-         strstatus << 'U'; // seen but not read 
+         strstatus << 'R'; // seen but not read -->RECENT 
       else
-         strstatus << 'N'; // not seen yet
+         strstatus << 'N'; // not seen yet  --> really new
    }
    else
       strstatus << ' ';
