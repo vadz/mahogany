@@ -488,6 +488,9 @@ MAppBase::OnStartup()
    // give the user a possibility to disable it
    if ( READ_CONFIG(m_profile, MP_USEPYTHON) && ! InitPython() )
    {
+      // show the error messages generated before first
+      wxLog::FlushActive();
+
       static const char *msg =
        "Detected a possible problem with your Python installation.\n"
        "A properly installed Python system is required for using\n"
