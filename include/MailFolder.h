@@ -389,6 +389,15 @@ public:
    //@}
    /// Return the folder's type.
    virtual FolderType GetType(void) const = 0;
+
+   /// Does the folder need a working network to be accessed?
+   virtual bool NeedsNetwork(void) const
+      {
+         return
+            GetType() == MF_NNTP
+            || GetType() == MF_IMAP
+            || GetType() == MF_POP;
+      }
    /** Sets a maximum number of messages to retrieve from server.
        @param nmax maximum number of messages to retrieve, 0 for no limit
    */

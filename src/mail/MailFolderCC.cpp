@@ -510,6 +510,18 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    mf->SetName(symname);
    if(mf && profile)
       mf->SetRetrievalLimit(READ_CONFIG(profile, MP_MAX_HEADERS_NUM));
+
+   String msg;
+   msg.Printf(_("Dial-Up network is down.\n"
+                "Do you want to try and open folder '%s' anyway?"), mf->GetName().c_str());
+   if(mf->NeedsNetwork()
+      && ! mApplication->IsOnline()
+      && ! MDialog_YesNoDialog(msg,NULL, MDIALOG_YESNOTITLE,mf->GetName()+"/NetDownOpenAnyway"))
+      {
+         mf->DecRef();
+         return NULL;
+      }
+   //else
    if( mf->Open() )
       return mf;
    else
@@ -748,6 +760,19 @@ MailFolderCC::PingReopen(void) const
    t->m_PingReopenSemaphore = true;
    bool rc = true;
 
+   String msg;
+   msg.Printf(_("Dial-Up network is down.\n"
+                "Do you want to try and check folder '%s' anyway?"), GetName().c_str());
+   if(NeedsNetwork()
+      && ! mApplication->IsOnline()
+      && ! MDialog_YesNoDialog(msg,
+                               NULL, MDIALOG_YESNOTITLE,
+                               false, GetName()+"/NoNetPingAnyway"))
+   {
+      return false;
+   }
+
+   
    if(! m_MailStream || ! mail_ping(m_MailStream))
    {
       if(m_MailStream)

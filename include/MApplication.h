@@ -205,6 +205,9 @@ protected:
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
 
+   /// sets up the class handling dial up networking
+   virtual void SetupOnlineManager(void) = 0;
+
    /** Checks some global configuration settings and makes sure they
        have sensible values. Especially important when M is run for
        the first time.
@@ -241,8 +244,8 @@ protected:
    /// the list of all constantly open folders to check for new mail
    class MailCollector *m_MailCollector;
    /// registration seed for EventManager
-   void *m_eventReg;
-
+   void *m_eventNewMailReg;
+   void *m_eventOptChangeReg;
    /// do we support dialup networking
    bool m_DialupSupport;
    /// list of frames to not ask again in CanClose()

@@ -9,7 +9,6 @@
 #define WXMAPP_H
 
 #ifndef USE_PCH
-#  define   Uses_wxApp
 #  include  <wx/app.h>
 #  include  <wx/help.h>
 #  include  <wx/icon.h>
@@ -17,6 +16,8 @@
 
 #  include <wx/cmndata.h>  // for wxPageSetupData, can't fwd declare it
 #endif  //USE_PCH
+
+#  include  <wx/dialup.h>
 
 // fwd decl
 class WXDLLEXPORT wxLog;
@@ -88,10 +89,12 @@ public:
    virtual bool IsOnline(void);
    virtual void GoOnline(void);
    virtual void GoOffline(void);
-   
-protected:
 
-   void SetupOnlineManager(void);
+   void OnConnected(wxDialUpEvent &event);
+   void OnDisconnected(wxDialUpEvent &event);
+protected:
+   /// sets up the class handling dial up networking
+   virtual void SetupOnlineManager(void);
    /** Common code for ThrEnter and ThrLeave, if enter==TRUE, enter,
        otherwise leave.
    */

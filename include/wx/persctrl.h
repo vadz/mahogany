@@ -16,6 +16,7 @@
 #   pragma interface "persctrl.h"
 #endif
 
+
 // forward declarations
 class wxConfigBase;
 class wxPHelper;

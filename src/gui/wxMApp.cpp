@@ -223,7 +223,27 @@ void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 
 BEGIN_EVENT_TABLE(wxMApp, wxApp)
    EVT_IDLE              (wxMApp::OnIdle)
+   EVT_DIALUP_CONNECTED (wxMApp::OnConnected)
+   EVT_DIALUP_DISCONNECTED (wxMApp::OnDisconnected)
 END_EVENT_TABLE()
+
+void
+wxMApp::OnConnected(wxDialUpEvent &event)
+{
+   MDialog_Message(_("Dial-Up network connection established."),
+                   m_topLevelFrame,
+                   _("Information"),
+                   "DialUpConnectedMsg");
+}
+
+void
+wxMApp::OnDisconnected(wxDialUpEvent &event)
+{
+   MDialog_Message(_("Dial-Up network shut down."),
+                   m_topLevelFrame,
+                   _("Information"),
+                   "DialUpDisconnectedMsg");
+}
 
 wxMApp::wxMApp(void)
 {
@@ -468,6 +488,11 @@ wxMApp::OnInit()
 
    m_OnlineManager = wxDialUpManager::Create();
    
+   if(! m_OnlineManager->EnableAutoCheckOnlineStatus(60))
+   {
+      wxLogError(_("Cannot activate auto-check for dial-up network status."));
+   }
+
    // this is necessary to avoid that the app closes automatically when we're
    // run for the first time and show a modal dialog before opening the main
    // frame - if we don't do it, when the dialog (which is the last app window
@@ -557,6 +582,8 @@ wxMApp::OnInit()
       // create timers
       gs_timerAutoSave = new AutoSaveTimer;
       gs_timerMailCollection = new MailCollectionTimer;
+
+      SetupOnlineManager();
 
       // start a timer to autosave the profile entries
       StartTimer(Timer_Autosave);
@@ -959,7 +986,6 @@ wxMApp::SetupOnlineManager(void)
 bool
 wxMApp::IsOnline(void)
 {
-   SetupOnlineManager();
    if(! m_DialupSupport)
       return TRUE; // no dialup--> always connected
    else
@@ -969,7 +995,6 @@ wxMApp::IsOnline(void)
 void
 wxMApp::GoOnline(void)
 {
-   SetupOnlineManager();
    if(m_OnlineManager->IsOnline())
    {
       ERRORMESSAGE((_("Dial-up network is already online.")));
@@ -988,7 +1013,6 @@ wxMApp::GoOnline(void)
 void
 wxMApp::GoOffline(void)
 {
-   SetupOnlineManager();
    if(! m_OnlineManager->IsOnline())
    {
       ERRORMESSAGE((_("Dial-up network is already offline.")));

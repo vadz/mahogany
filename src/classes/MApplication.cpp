@@ -118,7 +118,8 @@ KBLIST_DEFINE(MailFolderList, MailFolderEntry);
 // ----------------------------------------------------------------------------
 MAppBase::MAppBase()
 {
-   m_eventReg = NULL;
+   m_eventNewMailReg = NULL;
+   m_eventOptChangeReg = NULL;
    m_topLevelFrame = NULL;
    m_framesOkToClose = NULL;
    m_MailCollector = NULL;
@@ -550,11 +551,13 @@ MAppBase::OnStartup()
 
    // register with the event subsystem
    // ---------------------------------
-   m_eventReg = MEventManager::Register(*this, MEventId_NewMail);
-
+   m_eventNewMailReg = MEventManager::Register(*this, MEventId_NewMail);
    // should never fail...
-   CHECK( m_eventReg, FALSE,
+   CHECK( m_eventNewMailReg, FALSE,
           "failed to register event handler for new mail event " );
+   m_eventOptChangeReg = MEventManager::Register(*this, MEventId_OptionsChange);
+   CHECK( m_eventOptChangeReg, FALSE,
+          "failed to register event handler for options change event " );
 
    return TRUE;
 }
@@ -602,10 +605,15 @@ void
 MAppBase::OnShutDown()
 {
    // don't want events any more
-   if ( m_eventReg )
+   if ( m_eventNewMailReg )
    {
-      MEventManager::Deregister(m_eventReg);
-      m_eventReg = NULL;
+      MEventManager::Deregister(m_eventNewMailReg);
+      m_eventNewMailReg = NULL;
+   }
+   if ( m_eventOptChangeReg )
+   {
+      MEventManager::Deregister(m_eventOptChangeReg);
+      m_eventOptChangeReg = NULL;
    }
    if(m_MailCollector) delete m_MailCollector;
    delete m_KeepOpenFolders;
@@ -690,84 +698,95 @@ MAppBase::Exit(bool ask)
 bool
 MAppBase::OnMEvent(MEventData& event)
 {
-   // we're only registered for new mail events
-   CHECK( event.GetId() == MEventId_NewMail, TRUE, "unexpected event" );
+   if(event.GetId() == MEventId_NewMail)
+   {
+      // we're only registered for new mail events
+      CHECK( event.GetId() == MEventId_NewMail, TRUE, "unexpected event" );
 
-   // get the folder in which the new mail arrived
-   MEventNewMailData& mailevent = (MEventNewMailData &)event;
-   MailFolder *folder = mailevent.GetFolder();
+      // get the folder in which the new mail arrived
+      MEventNewMailData& mailevent = (MEventNewMailData &)event;
+      MailFolder *folder = mailevent.GetFolder();
 
    /* First, we need to check whether it is one of our incoming mail
       folders and if so, move it to the global new mail folder and
       ignore the event. */
-   if(m_MailCollector->IsIncoming(folder))
-   {
-      if(m_MailCollector->IsLocked())
-         return false;
-      if(! m_MailCollector->Collect(folder))
-         wxLogError(_("Could not collect mail from incoming folder '%s'."),
-                    folder->GetName().c_str());
-      return false;
-   }
-
-   // step 1: execute external command if it's configured
-   String command = READ_CONFIG(folder->GetProfile(), MP_NEWMAILCOMMAND);
-   if(! command.IsEmpty())
-   {
-      if ( ! SYSTEM(command) )
+      if(m_MailCollector->IsIncoming(folder))
       {
-         // TODO ask whether the user wants to disable it
-         wxLogError(_("Command '%s' (to execute on new mail reception)"
-                      " failed."), command.c_str());
+         if(m_MailCollector->IsLocked())
+            return false;
+         if(! m_MailCollector->Collect(folder))
+            wxLogError(_("Could not collect mail from incoming folder '%s'."),
+                       folder->GetName().c_str());
+         return false;
       }
-   }
+
+      // step 1: execute external command if it's configured
+      String command = READ_CONFIG(folder->GetProfile(), MP_NEWMAILCOMMAND);
+      if(! command.IsEmpty())
+      {
+         if ( ! SYSTEM(command) )
+         {
+            // TODO ask whether the user wants to disable it
+            wxLogError(_("Command '%s' (to execute on new mail reception)"
+                         " failed."), command.c_str());
+         }
+      }
 
 #ifdef   USE_PYTHON
-   // step 2: folder specific Python callback
-   if(! PythonCallback(MCB_FOLDER_NEWMAIL, 0, folder, folder->GetClassName(),
-                       folder->GetProfile()))
+      // step 2: folder specific Python callback
+      if(! PythonCallback(MCB_FOLDER_NEWMAIL, 0, folder, folder->GetClassName(),
+                          folder->GetProfile()))
 
-   // step 3: global python callback
-   if(! PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0, this, "MApplication",
-                       GetProfile()))
+         // step 3: global python callback
+         if(! PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0, this, "MApplication",
+                             GetProfile()))
 #endif //USE_PYTHON
-   {
-      if(READ_CONFIG(GetProfile(), MP_SHOW_NEWMAILMSG))
-      {
-         String message;
-
-         unsigned long number = mailevent.GetNumber();
-         unsigned i;
-         if ( number <= (unsigned long) READ_CONFIG(GetProfile(),
-                                                    MP_SHOW_NEWMAILINFO))
          {
-            for(i = 0; i < number; i++)
+            if(READ_CONFIG(GetProfile(), MP_SHOW_NEWMAILMSG))
             {
-               Message *msg =
-                  folder->GetMessage(mailevent.GetNewMessageIndex(i));
-               if ( msg )
+               String message;
+
+               unsigned long number = mailevent.GetNumber();
+               unsigned i;
+               if ( number <= (unsigned long) READ_CONFIG(GetProfile(),
+                                                          MP_SHOW_NEWMAILINFO))
                {
-                  message << _("Subject: ") << msg->Subject() << ' '
-                          << _("From: ") << msg->From()
-                          << '\n'
-                          << _("in folder '") << folder->GetName() << "'\n\n";
-                  msg->DecRef();
+                  for(i = 0; i < number; i++)
+                  {
+                     Message *msg =
+                        folder->GetMessage(mailevent.GetNewMessageIndex(i));
+                     if ( msg )
+                     {
+                        message << _("Subject: ") << msg->Subject() << ' '
+                                << _("From: ") << msg->From()
+                                << '\n'
+                                << _("in folder '") << folder->GetName() << "'\n\n";
+                        msg->DecRef();
+                     }
+                     else
+                        FAIL_MSG("new mail received but no new message?");
+                  }
                }
                else
-                  FAIL_MSG("new mail received but no new message?");
+               {
+                  // it seems like a better idea to give this brief message in case
+                  // of several messages
+                  message.Printf(_("You have received %lu new messages\nin folder '%s'."),
+                                 number, folder->GetName().c_str());
+               }
+               MDialog_Message(message, m_topLevelFrame, _("New Mail"));
             }
          }
-         else
-         {
-            // it seems like a better idea to give this brief message in case
-            // of several messages
-            message.Printf(_("You have received %lu new messages\nin folder '%s'."),
-                           number, folder->GetName().c_str());
-         }
-         MDialog_Message(message, m_topLevelFrame, _("New Mail"));
-      }
-   }
 
+      return TRUE;
+   }
+   else if (event.GetId() == MEventId_OptionsChange)
+   {
+      SetupOnlineManager(); // make options change effective
+      return TRUE;
+   }
+   // else
+   ASSERT(0); // unexpected
    return TRUE;
 }
 
