@@ -92,13 +92,14 @@ public:
       <li>MF_INBOX: unused
       <li>MF_FILE:  filename, either relative to MP_MBOXDIR (global
                     profile) or absolute
-      <li>MF_POP:   hostname
-      <li>MF_IMAP:  hostname
-      <li>MF_NNTP:  newshost
+      <li>MF_POP:   unused
+      <li>MF_IMAP:  folder path
+      <li>MF_NNTP:  newgroup
       </ul>
       @param type one of the supported types
       @param path either a hostname or filename depending on type
       @param profile parent profile
+      @param server hostname
       @param login only used for POP,IMAP and NNTP (as the newsgroup name)
       @param password only used for POP, IMAP
       
@@ -106,6 +107,7 @@ public:
    static MailFolder * OpenFolder(MailFolder::Type type,
                                   String const &path,
                                   ProfileBase *profile = NULL,
+                                  String const &server = NULLstring,
                                   String const &login = NULLstring,
                                   String const &password = NULLstring);
 

@@ -46,11 +46,13 @@ static inline void CCVerbose(void) { mm_ignore_errors = false; }
 MailFolderCC::MailFolderCC(MailFolder::Type type,
                            String const &path,
                            ProfileBase *profile,
+                           String const &server,
                            String const &login,
                            String const &password)
 {
    m_MailStream = NIL;
 
+   //fixme: server is ignored for now
    m_Profile = profile;
    m_Profile->IncRef(); // we use it now
    m_MailboxPath = path;
@@ -68,6 +70,7 @@ MailFolderCC *
 MailFolderCC::OpenFolder(MailFolder::Type type,
                          String const &name,
                          ProfileBase *profile,
+                         String const &server,
                          String const &login,
                          String const &password)
 {
@@ -86,13 +89,13 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
       mboxpath = strutil_expandfoldername(name);
       break;
    case MailFolder::MF_POP:
-      mboxpath << '{' << name << "/pop3}";
+      mboxpath << '{' << server << "/pop3}";
       break;
-   case MailFolder::MF_IMAP:
-      mboxpath << '{' << name << "/imap}";
+   case MailFolder::MF_IMAP:  // do we need /imap flag?
+      mboxpath << '{' << server << "/user=" << login << '}'<< name;
       break;
    case MailFolder::MF_NNTP:
-      mboxpath << '{' << name << "/nntp}" << login;
+      mboxpath << '{' << server << "/nntp}" << name;
       break;
    default:
       FAIL_MSG("Unsupported folder type.");
@@ -105,7 +108,7 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
       return mf;
    }
 
-   mf = new MailFolderCC(type,mboxpath,profile,login,password);
+   mf = new MailFolderCC(type,mboxpath,profile,server,login,password);
    if(mf->Open())
       return mf;
    else

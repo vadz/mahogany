@@ -19,7 +19,9 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
- - wxListCtrl selection gets reset if message has to be fetched, if it 
+- fix my OpenAnyFolderDialog to take hostname and folderpath, as
+  required for imap
+- wxListCtrl selection gets reset if message has to be fetched, if it 
    was already clicked on once, it won't reset the
    selection. Apparently fetching a message resets the listctrl. Maybe  
    some c-client update event?
