@@ -105,8 +105,14 @@ public:
    /** For use by the listctrl: get last previewed uid: */
    UIdType GetPreviewUId(void) const;
 
-   /** Are we previewing anything? */
-   bool HasPreview() const { return GetPreviewUId() != UID_ILLEGAL; }
+   /**
+      Are we previewing anything?
+
+      Note that this can be called very early, possibly even before
+      m_FolderCtrl has been created yet, so check for it.
+    */
+   bool HasPreview() const
+      { return m_FolderCtrl && GetPreviewUId() != UID_ILLEGAL; }
 
    /** Returns false if no items are selected
     */
