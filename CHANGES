@@ -9,6 +9,16 @@ Release 0.61 'Hawkins'
 01.12.00 VZ: "system" folders are now on the top of the folder tree
              fixed bug with messages boxes which couldn't be disabled in 0.61
 27.11.00 VZ: added "Import file folders" from directory command
+23.11.00 KB: Ping() requests now get ignored while folder listing is frozen, so that
+             we don't unnecessarily delay things when the Ping timer calls.
+             Ping timer interval <= 0 is now interpreted as "don't ping"
+20.11.00 KB: Added a miniframe with timeout as the dialog for starting PalmOS
+             synchronisation. No more any need to press [OK] button.
+08.11.00 KB: Simplifications to folder update and filtering mechanism. Visible 
+             results are:
+             outbox status inconsistency is gone, filtering should be faster 
+             as unnecessary updates are gone, filtering policy can be set per 
+             folder
 09.11.00 VZ: added "Save addresses from message" command
 08.11.00 VZ: "Preview message before sending" setting (no GUI support though)
 
