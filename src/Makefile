@@ -3,7 +3,7 @@
 #
 
 CWD = src
-SUB_DIRS = util classes gui mail adb wx
+SUB_DIRS = util classes gui mail adb wx modules
 MOBJS=util/*.o classes/*.o gui/*.o  mail/*.o adb/*.o \
       wx/generic/*.o #wx/common/*.o
 

@@ -40,6 +40,7 @@
 #  include <wx/config.h>
 #  include <wx/intl.h>
 #  include <wx/generic/dcpsg.h>
+#  include <wx/thread.h>
 #endif
 
 #include "Mdefaults.h"
@@ -404,7 +405,16 @@ wxMApp::OnInit()
 #endif
 
    m_IconManager = new wxIconManager();
-
+#if 0
+#ifndef OS_WIN
+   /* Set our icons for the dialogs. */
+   wxGenericMessageDialog::SetIcon(wxICON_HAND,        ICON("msg_error"));
+   wxGenericMessageDialog::SetIcon(wxICON_EXCLAMATION, ICON("msg_warning"));
+   wxGenericMessageDialog::SetIcon(wxICON_QUESTION,    ICON("msg_question"));
+   wxGenericMessageDialog::SetIcon(wxICON_INFORMATION, ICON("msg_info"));
+#endif
+#endif
+   
    // this is necessary to avoid that the app closes automatically when we're
    // run for the first time and show a modal dialog before opening the main
    // frame - if we don't do it, when the dialog (which is the last app window
@@ -764,3 +774,39 @@ bool wxMApp::StopTimer(Timer timer)
 
    return true;
 }
+
+#ifndef USE_THREADS
+
+void
+wxMApp::ThrEnterLeave(bool enter, SectionId what)
+{
+   // nothing to do
+}
+#else
+
+// this mutex must be acquired before any call to a critical c-client function
+static wxMutex *gs_CclientMutex;
+
+void
+wxMApp::ThrEnterLeave(bool enter, SectionId what)
+{
+   switch(what)
+   {
+   case GUI:
+   case EVENTS:
+      if(enter)
+         wxMutexGuiEnter();
+      else
+         wxMutexGuiLeave();         
+      break;
+   case CCLIENT:
+      if(enter)
+         gs_CclientMutex->Lock();
+      else
+         gs_CclientMutex->UnLock();
+      break;
+   default:
+      FAIL("unsupported mutex id");
+   }
+}
+#endif

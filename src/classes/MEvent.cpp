@@ -27,6 +27,7 @@
 #include "MEvent.h"
 #include "Profile.h"
 #include "MailFolder.h"
+#include "MApplication.h"
 
 // ----------------------------------------------------------------------------
 // private types
@@ -77,6 +78,7 @@ MEventManager::MEventManager()
 {
 }
 
+/* static */
 void
 MEventManager::DispatchPending(void)
 {
@@ -90,14 +92,19 @@ MEventManager::DispatchPending(void)
    }
 }
 
+/* static */
 void
 MEventManager::Send(MEventData * data)
 {
+   MEventLocker mutex;
    gs_EventList.push_back(data);
 }
 
+/* static */
 void MEventManager::Dispatch(MEventData * dataptr)
 {
+   MEventLocker mutex;
+
    MEventData & data = *dataptr;
    
    MEventId id = data.GetId();
@@ -127,10 +134,12 @@ void MEventManager::Dispatch(MEventData * dataptr)
    }
 }
 
-// the return value is justthe pointer to the structure we add to the array
+// the return value is just the pointer to the structure we add to the array
 // (it's opaque for the caller)
 void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
 {
+   MEventLocker mutex;
+
    MEventReceiverInfo *info = new MEventReceiverInfo(who, eventId);
 
 #ifdef DEBUG
@@ -154,6 +163,8 @@ void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
 
 bool MEventManager::Deregister(void *handle)
 {
+   MEventLocker mutex;
+
    int index = gs_receivers.Index((MEventReceiverInfo *)handle);
 
    CHECK( index != wxNOT_FOUND, false,

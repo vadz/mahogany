@@ -361,10 +361,10 @@ MDialog_ErrorMessage(const char *msg,
                      const char *title,
                      bool /* modal */)
 {
+   MGuiLocker lock;
    CloseSplash();
-
-   wxPMessageBox(msg, wxString("Mahogany : ") + title, "",
-                 Style(wxOK|wxICON_EXCLAMATION),
+   wxMessageBox(msg, wxString("Mahogany : ") + title,
+                Style(wxOK|wxICON_EXCLAMATION),
                  GetDialogParent(parent));
 }
 
@@ -387,6 +387,7 @@ MDialog_SystemErrorMessage(const char *message,
    msg = String(message) + String(_("\nSystem error: "))
       + String(strerror(errno));
 
+   MGuiLocker lock;
    MDialog_ErrorMessage(msg.c_str(), parent, wxString("Mahogany : ")+title, modal);
 }
 
@@ -403,7 +404,10 @@ MDialog_FatalErrorMessage(const char *message,
 {
    String msg = String(message) + _("\nExiting application...");
 
-   MDialog_ErrorMessage(message,parent, wxString("Mahogany : ")+title,true);
+   {
+      MGuiLocker lock;
+      MDialog_ErrorMessage(message,parent, wxString("Mahogany : ")+title,true);
+   }
    mApplication->Exit();
 }
 
@@ -423,11 +427,16 @@ MDialog_Message(const char *message,
    wxString caption = "Mahogany : ";
    caption += title;
 
+   MGuiLocker lock;
    CloseSplash();
-
-   wxPMessageBox(configPath?configPath:"", message, caption,
-                 Style(wxOK | wxICON_INFORMATION),
-                 GetDialogParent(parent));
+   if(configPath)
+      wxPMessageBox(configPath, message, caption,
+                    Style(wxOK | wxICON_INFORMATION),
+                   GetDialogParent(parent));
+   else
+      wxMessageBox(message, caption,
+                   Style(wxOK | wxICON_INFORMATION),
+                   GetDialogParent(parent));
 }
 
 
@@ -446,17 +455,22 @@ MDialog_YesNoDialog(const char *message,
                     bool yesDefault,
                     const char *configPath)
 {
-   CloseSplash();
-
    wxString caption = "Mahogany : ";
    caption += title;
 
    int style = Style(wxYES_NO | wxICON_QUESTION | wxCENTRE);
    if(! yesDefault) style |= wxNO_DEFAULT;
    
-   return wxPMessageBox(configPath, message, caption,
+   MGuiLocker lock;
+   CloseSplash();
+   if(configPath)
+      return wxPMessageBox(configPath, message, caption,
                         style,
-                        GetDialogParent(parent)) == wxID_YES;
+                           GetDialogParent(parent)) == wxID_YES;
+   else
+      return wxMessageBox(message, caption,
+                          style,
+                          GetDialogParent(parent)) == wxID_YES;
 }
 
 
@@ -480,6 +494,7 @@ MDialog_FileRequester(String const & message,
                       bool save,
                       ProfileBase * /* profile */)
 {
+   MGuiLocker lock;
    CloseSplash();
 
    // VZ: disabling this code because it is almost useless now with the advent
@@ -521,6 +536,7 @@ int
 MDialog_AdbLookupList(ArrayAdbElements& aEntries,
                       const MWindow *parent)
 {
+   MGuiLocker lock;
    CloseSplash();
 
    wxArrayString aChoices;

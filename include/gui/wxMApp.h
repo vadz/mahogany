@@ -70,7 +70,17 @@ public:
    /// get the page setup data
    wxPageSetupData * GetPageSetupData(void) { return m_PageSetupData; }
 
+   /** @name Thread control */
+   //@{
+   virtual void ThrEnter(SectionId what) { ThrEnterLeave(TRUE, what); }
+   virtual void ThrLeave(SectionId what) { ThrEnterLeave(FALSE, what); }
+   //@}
+
 protected:
+   /** Common code for ThrEnter and ThrLeave, if enter==TRUE, enter,
+       otherwise leave.
+   */
+   void ThrEnterLeave(bool enter, SectionId what);
    /// Load modules at startup
    void LoadModules(void);
    /// Unload modules loaded at startup

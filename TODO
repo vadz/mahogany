@@ -20,7 +20,6 @@ $Id$
 9		changing properties for IMAP folder (auto-collect)
 		occasionally dumps core on [OK] click
 7 gtk	VZ?	message boxes have broken icons under wxGTK
-7	KB	why does Message/Find no longer work?
 7 gtk		Mahogany occasionally doesn't terminate but remains in
 		gtk event loop without any open windows.
 5		wxLayout editing glitches & cursor positioning bug

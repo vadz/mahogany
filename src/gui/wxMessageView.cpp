@@ -440,7 +440,6 @@ wxMessageView::Clear(void)
 
    // be sure that we don't keep the old m_uid, otherwise we won't update later
    // (if the new uid will be the same...)
-   m_uid = -1;
 }
 
 void

@@ -161,3 +161,11 @@ extern "C"
       return (void *) wxDllLoader::GetSymbol(prog, name);
    }
 }
+
+
+// ----------------------------------------------------------------------------
+// Implementation of the MInterface 
+// ----------------------------------------------------------------------------
+
+#define MINTERFACE_IMPLEMENTATION
+#include "MInterface.h"

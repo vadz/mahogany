@@ -18,6 +18,7 @@
 #   include "strutil.h"
 #   include "Profile.h"
 #   include "MEvent.h"
+#   include "MApplication.h"
 #endif
 
 #include "Mdefaults.h"
@@ -116,7 +117,6 @@ protected:
    MailFolder            *m_MailFolder;
    ASMailFolder::UserData m_UserData;
    ASMailFolder::Ticket   m_Ticket;
-
    static ASMailFolder::Ticket ms_Ticket;
 };
 
@@ -353,12 +353,14 @@ public:
    MT_ReplyForwardMessages(ASMailFolder *mf, ASMailFolder::UserData ud,
                            ASMailFolder::OperationId op,
                            const INTARRAY *selections,
-                           MWindow *parent, ProfileBase *profile)
+                           MWindow *parent, ProfileBase *profile,
+                           int flags )
       : MailThreadSeq(mf, ud, selections)
       {
          m_Profile = profile;
          if(m_Profile) m_Profile->IncRef();
          m_Parent = parent;
+         m_Flags = flags;
          m_Op = op;
          ASSERT(m_Op == ASMailFolder::Op_ReplyMessages ||
                 m_Op == ASMailFolder::Op_ForwardMessages);
@@ -368,7 +370,7 @@ public:
    virtual void WorkFunction(void)
       {
          if(m_Op == ASMailFolder::Op_ReplyMessages)
-            m_MailFolder->ReplyMessages(m_Seq, m_Parent, m_Profile);
+            m_MailFolder->ReplyMessages(m_Seq, m_Parent, m_Profile, m_Flags);
          else
             m_MailFolder->ForwardMessages(m_Seq, m_Parent, m_Profile);
       }
@@ -376,6 +378,7 @@ private:
    ASMailFolder::OperationId m_Op;
    ProfileBase *m_Profile;
    MWindow *m_Parent;
+   int m_Flags;
 };
 
 
@@ -570,140 +573,140 @@ public:
                                                    messages, parent))->Start();
       }
 
-/** Save messages to a folder.
-    @param messages pointer to an array holding the message numbers
-    @param parent window for dialog
-    @return true if messages got saved
-*/
-virtual Ticket SaveMessagesToFolder(const INTARRAY *messages,
-                                    MWindow *parent,
-                                    UserData ud)
-{
-   return (new MT_SaveMessagesToFileOrFolder(this, ud,
-                                             Op_SaveMessagesToFolder,
-                                             messages, parent))->Start();
-}
+   /** Save messages to a folder.
+       @param messages pointer to an array holding the message numbers
+       @param parent window for dialog
+       @return true if messages got saved
+   */
+   virtual Ticket SaveMessagesToFolder(const INTARRAY *messages,
+                                       MWindow *parent,
+                                       UserData ud)
+      {
+         return (new MT_SaveMessagesToFileOrFolder(this, ud,
+                                                   Op_SaveMessagesToFolder,
+                                                   messages, parent))->Start();
+      }
 
-/** Reply to selected messages.
-    @param messages pointer to an array holding the message numbers
-    @param parent window for dialog
-    @param profile pointer for environment
-*/
-virtual Ticket ReplyMessages(const INTARRAY *messages,
-                             MWindow *parent,
-                             ProfileBase *profile,
-                             UserData ud)
-{
-   return (new MT_ReplyForwardMessages(this, ud,
-                                       Op_ReplyMessages,
-                                       messages, parent,
-                                       profile))->Start();
-}
+   /** Reply to selected messages.
+       @param messages pointer to an array holding the message numbers
+       @param parent window for dialog
+       @param profile pointer for environment
+   */
+   virtual Ticket ReplyMessages(const INTARRAY *messages,
+                                MWindow *parent,
+                                ProfileBase *profile,
+                                int flags,
+                                UserData ud)
+   {
+      return (new MT_ReplyForwardMessages(this, ud,
+                                          Op_ReplyMessages,
+                                          messages, parent,
+                                          profile, flags))->Start();
+   }
 
-/** Forward selected messages.
-    @param messages pointer to an array holding the message numbers
-    @param parent window for dialog
-    @param profile pointer for environment
-*/
-virtual Ticket ForwardMessages(const INTARRAY *messages,
-                               MWindow *parent,
-                               ProfileBase *profile,
-                               UserData ud)
-{
-   return (new MT_ReplyForwardMessages(this, ud,
-                                       Op_ForwardMessages,
-                                       messages, parent,
-                                       profile))->Start();
-}
-
-//@}   
-//@}
-/**@name Synchronous Access Functions */
-//@{
-/** Get name of mailbox.
-    @return the symbolic name of the mailbox
-*/
-virtual String GetName(void) const
-{ AScheck(); return m_MailFolder->GetName(); }
-/** Get number of messages which have a message status of value
-    when combined with the mask. When mask = 0, return total
-    message count.
-    @param mask is a (combination of) MessageStatus value(s) or 0 to test against
-    @param value the value of MessageStatus AND mask to be counted
-    @return number of messages
-*/
-virtual unsigned long CountMessages(int mask, int value) const
-{ AScheck(); return m_MailFolder->CountMessages(); }
+   /** Forward selected messages.
+       @param messages pointer to an array holding the message numbers
+       @param parent window for dialog
+       @param profile pointer for environment
+   */
+   virtual Ticket ForwardMessages(const INTARRAY *messages,
+                                  MWindow *parent,
+                                  ProfileBase *profile,
+                                  UserData ud)
+   {
+      return (new MT_ReplyForwardMessages(this, ud,
+                                          Op_ForwardMessages,
+                                          messages, parent,
+                                          profile, 0))->Start();
+   }
+   //@}   
+   //@}
+   /**@name Synchronous Access Functions */
+   //@{
+   /** Get name of mailbox.
+       @return the symbolic name of the mailbox
+   */
+   virtual String GetName(void) const
+      { AScheck(); return m_MailFolder->GetName(); }
+   /** Get number of messages which have a message status of value
+       when combined with the mask. When mask = 0, return total
+       message count.
+       @param mask is a (combination of) MessageStatus value(s) or 0 to test against
+       @param value the value of MessageStatus AND mask to be counted
+       @return number of messages
+   */
+   virtual unsigned long CountMessages(int mask, int value) const
+      { AScheck(); return m_MailFolder->CountMessages(); }
    
-/** Returns a HeaderInfo structure for a message with a given
-    sequence number. This can be used to obtain the uid.
-    @param msgno message sequence number, starting from 0
-    @return a pointer to the messages current header info entry
-*/
-virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno)
-   const
-{ AScheck(); return m_MailFolder->GetHeaderInfo(msgno); }
+   /** Returns a HeaderInfo structure for a message with a given
+       sequence number. This can be used to obtain the uid.
+       @param msgno message sequence number, starting from 0
+       @return a pointer to the messages current header info entry
+   */
+   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno) const
+      { AScheck(); return m_MailFolder->GetHeaderInfo(msgno); }
+
+   /** Get the profile.
+       @return Pointer to the profile.
+   */
+   inline ProfileBase *GetProfile(void) const
+      { AScheck(); return m_MailFolder->GetProfile(); }
+
+   /// Get update interval in seconds
+   virtual int GetUpdateInterval(void) const
+      { AScheck(); return m_MailFolder->GetUpdateInterval(); }
+
+   /** Toggle sending of new mail events.
+       @param send if true, send them
+       @param update if true, update internal message count
+   */
+   virtual void EnableNewMailEvents(bool send = true,
+                                    bool update = true)
+      { AScheck(); m_MailFolder->EnableNewMailEvents(send, update); }
+
+   /** Query whether folder is sending new mail events.
+       @return if true, folder sends them
+   */
+   virtual bool SendsNewMailEvents(void) const
+      { AScheck(); return m_MailFolder->SendsNewMailEvents(); }
    
-/** Get the profile.
-    @return Pointer to the profile.
-*/
-inline ProfileBase *GetProfile(void) const
-{ AScheck(); return m_MailFolder->GetProfile(); }
-
-/// Get update interval in seconds
-virtual int GetUpdateInterval(void) const
-{ AScheck(); return m_MailFolder->GetUpdateInterval(); }
-
-/** Toggle sending of new mail events.
-    @param send if true, send them
-    @param update if true, update internal message count
-*/
-virtual void EnableNewMailEvents(bool send = true, bool update =
-                                 true)
-{ AScheck(); m_MailFolder->EnableNewMailEvents(send, update); }
-
-/** Query whether folder is sending new mail events.
-    @return if true, folder sends them
-*/
-virtual bool SendsNewMailEvents(void) const
-{ AScheck(); return m_MailFolder->SendsNewMailEvents(); }
-   
-/**@name Functions to get an overview of messages in the folder. */
-//@{
-/// Return a pointer to the first message's header info.
-virtual const class HeaderInfo *GetFirstHeaderInfo(void) const
-{ AScheck(); return m_MailFolder->GetFirstHeaderInfo(); }
-/// Return a pointer to the next message's header info.
-virtual const class HeaderInfo *GetNextHeaderInfo(const class
-                                                  HeaderInfo* hi)
-   const
-{ AScheck(); return m_MailFolder->GetNextHeaderInfo(hi); }
-//@}
-/// Return the folder's type.
-virtual FolderType GetType(void) const
-{ AScheck(); return m_MailFolder->GetType(); }
-/** Sets a maximum number of messages to retrieve from server.
-    @param nmax maximum number of messages to retrieve, 0 for no limit
-*/
-virtual void SetRetrievalLimit(unsigned long nmax)
-{ AScheck(); m_MailFolder->SetRetrievalLimit(nmax); }
-/// Set update interval in seconds, 0 to disable
-virtual void SetUpdateInterval(int secs)
-{ AScheck(); m_MailFolder->SetUpdateInterval(secs); }
-/// Returns the underlying MailFolder object.
-virtual MailFolder *GetMailFolder(void) const
-{ AScheck(); return m_MailFolder;}
-//@}
+   /**@name Functions to get an overview of messages in the folder. */
+   //@{
+   /// Return a pointer to the first message's header info.
+   virtual const class HeaderInfo *GetFirstHeaderInfo(void) const
+      { AScheck(); return m_MailFolder->GetFirstHeaderInfo(); }
+   /// Return a pointer to the next message's header info.
+   virtual const class HeaderInfo *GetNextHeaderInfo(const class
+                                                     HeaderInfo* hi) const
+      { AScheck(); return m_MailFolder->GetNextHeaderInfo(hi); }
+   //@}   
+   /// Return the folder's type.
+   virtual FolderType GetType(void) const
+      { AScheck(); return m_MailFolder->GetType(); }
+   /** Sets a maximum number of messages to retrieve from server.
+       @param nmax maximum number of messages to retrieve, 0 for no limit
+   */
+   virtual void SetRetrievalLimit(unsigned long nmax)
+      { AScheck(); m_MailFolder->SetRetrievalLimit(nmax); }
+   /// Set update interval in seconds, 0 to disable
+   virtual void SetUpdateInterval(int secs)
+      { AScheck(); m_MailFolder->SetUpdateInterval(secs); }
+   /// Returns the underlying MailFolder object.
+   virtual MailFolder *GetMailFolder(void) const
+      { AScheck(); return m_MailFolder;}
+   //@}
 protected:
-/** Used to obtain the next Ticked id for events. */
-static Ticket GetTicket(void);
+   /** Used to obtain the next Ticked id for events. */
+   static Ticket GetTicket(void);
 private:
-/// The synchronous mailfolder that we map to.
-MailFolder *m_MailFolder;
-/// Temporary, to control access:
-bool m_Locked;
-/// Next ticket Id to use.
-static Ticket ms_Ticket;
+   /// The synchronous mailfolder that we map to.
+   MailFolder *m_MailFolder;
+   /// Temporary, to control access:
+   bool m_Locked;
+   /// Next ticket Id to use.
+   static Ticket ms_Ticket;
+   /// A mutex to control access to the folder
+   MMutex m_Mutex;
 };
 
 
@@ -739,6 +742,7 @@ ASMailFolderImpl::LockFolder(void)
    AScheck();
    ASSERT(m_Locked == false);
    m_Locked = true;
+   m_Mutex.Lock();
 }
 
 void
@@ -747,6 +751,7 @@ ASMailFolderImpl::UnLockFolder(void)
    AScheck();
    ASSERT(m_Locked == true);
    m_Locked = false;
+   m_Mutex.Unlock();
 }
 
 

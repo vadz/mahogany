@@ -18,7 +18,7 @@ all: $(IDLFILES) $(INTERFACES)
 
 install: $(INSTALLTARGET)
 
-$(IDLFILES) $(INTERFACES): $(MID) $(MIDDEF)
+$(IDLFILES) $(INTERFACES): $(MID) $(M4DEF)
 
 msgcat:
 	@touch $(BUILDDIR)/imessages.po
@@ -39,8 +39,8 @@ scandoc:
 .PHONY: clean doc doc2 dep all install msgcat scandoc
 
 %.h: %.mid
-	$(M4) -DINCLUDE=mid2h.m4 >$(ODIR)/$@ $<
+	$(M4) -DM4FILE=mid2h.m4 >$(ODIR)/$@ $<
 
 %.idl: %.mid
-	$(M4) -DINCLUDE=mid2idl.m4 >$(ODIR)/$@ $<
+	$(M4) -DM4FILE=mid2idl.m4 >$(ODIR)/$@ $<
 

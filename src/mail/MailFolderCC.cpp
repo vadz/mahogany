@@ -133,9 +133,18 @@ static bool mm_ignore_errors = false;
 static bool mm_disable_callbacks = false;
 
 // be quiet
-static inline void CCQuiet(bool disableCallbacks = false) { mm_ignore_errors = true; if(disableCallbacks) mm_disable_callbacks = true;}
+static inline void CCQuiet(bool disableCallbacks = false)
+{
+   MCclientLocker lock;
+   mm_ignore_errors = true;
+   if(disableCallbacks) mm_disable_callbacks = true;
+}
 // normal logging
-static inline void CCVerbose(void) { mm_ignore_errors = mm_disable_callbacks = false; }
+static inline void CCVerbose(void)
+{
+   MCclientLocker lock;
+   mm_ignore_errors = mm_disable_callbacks = false;
+}
 
 // loglevel for cclient error messages:
 static int cc_loglevel = wxLOG_Error;
@@ -143,6 +152,7 @@ static int cc_loglevel = wxLOG_Error;
 static int CC_GetLogLevel(void) { return cc_loglevel; }
 static int CC_SetLogLevel(int arg)
 {
+   MCclientLocker lock;
    int ccl = cc_loglevel;
    cc_loglevel =  arg;
    return ccl;
@@ -195,7 +205,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    
    m_InCritical = false;
 
-   #define SET_TO(setting, var) var = MP_TCP_##setting##_D
+#define SET_TO(setting, var) var = MP_TCP_##setting##_D
 
    SET_TO(OPENTIMEOUT, ms_TcpOpenTimeout);
    SET_TO(READTIMEOUT, ms_TcpReadTimeout);
@@ -203,7 +213,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    SET_TO(CLOSETIMEOUT, ms_TcpCloseTimeout);
    SET_TO(RSHTIMEOUT, ms_TcpRshTimeout);
 
-   #undef SET_TO
+#undef SET_TO
 
    //FIXME: server is ignored for now
    SetRetrievalLimit(0); // no limit
@@ -361,27 +371,30 @@ MailFolderCC::Open(void)
       MF_pwd = m_Password;
    }
 
-   SetDefaultObj();
-   // for files, check whether mailbox is locked, c-client library is
-   // to dumb to handle this properly
-   if(GetType() == MF_FILE
+      // for files, check whether mailbox is locked, c-client library is
+      // to dumb to handle this properly
+      if(GetType() == MF_FILE
 #ifdef OS_UNIX
-      || GetType() == MF_INBOX
+         || GetType() == MF_INBOX
 #endif
-      )
-   {
-      String lockfile;
-      if(GetType() == MF_FILE)
-         lockfile = strutil_expandpath(m_MailboxPath);
-#ifdef OS_UNIX
-      else // INBOX
+         )
       {
-         // get INBOX path name
-         lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
-         if(lockfile.IsEmpty()) // another c-client stupidity
-            lockfile = (char *) sysinbox();
-         ProcessEventQueue();
-      }
+         String lockfile;
+         if(GetType() == MF_FILE)
+            lockfile = strutil_expandpath(m_MailboxPath);
+#ifdef OS_UNIX
+         else // INBOX
+         {
+            // get INBOX path name
+            {
+               MCclientLocker lock;
+               SetDefaultObj();
+               lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
+               if(lockfile.IsEmpty()) // another c-client stupidity
+                  lockfile = (char *) sysinbox();
+            ProcessEventQueue();
+            }
+         }
 #endif
       lockfile << ".lock*"; //FIXME: is this fine for MS-Win?
       lockfile = wxFindFirstFile(lockfile, wxFILE);
@@ -423,17 +436,21 @@ MailFolderCC::Open(void)
 
    if(GetType() == MF_FILE && ! wxFileExists(m_MailboxPath))
       mail_create(NIL, (char *)m_MailboxPath.c_str());
-   if(m_MailStream != NIL)
-      m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
-                               debugFlag ? OP_DEBUG : NIL);
-   // if we didn't have a mailstream or the re-use of the old one
-   // failed, we try again:
-   if(m_MailStream == NIL)
-      m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
-                               debugFlag ? OP_DEBUG : NIL);
-
-   ProcessEventQueue();
-   SetDefaultObj(false);
+   {
+      MCclientLocker lock;
+      SetDefaultObj();
+      if(m_MailStream != NIL)
+         m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
+                                  debugFlag ? OP_DEBUG : NIL);
+      // if we didn't have a mailstre   am or the re-use of the old one
+      // failed, we try again:   
+      if(m_MailStream == NIL)
+         m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
+                                  debugFlag ? OP_DEBUG : NIL);
+      
+      ProcessEventQueue();
+      SetDefaultObj(false);
+   }
    CCVerbose();
    if(m_MailStream == NIL)
    {

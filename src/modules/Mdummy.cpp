@@ -18,6 +18,8 @@
 #include "MDialogs.h"
 
 
+#include "MInterface.h"
+
 void DummyFunc(void);
 
 ///------------------------------

@@ -316,10 +316,12 @@ public:
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
        @param profile pointer for environment
+       @param flags 0, or REPLY_FOLLOWUP
    */
    virtual Ticket ReplyMessages(const INTARRAY *messages,
                                 MWindow *parent = NULL,
                                 ProfileBase *profile = NULL,
+                                int flags = 0,
                                 UserData ud = 0) = 0;
 
    /** Forward selected messages.

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MApplication class: all non GUI specific application stuff       *
  *                                                                  *
- * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -180,6 +180,23 @@ public:
    bool RestartTimer(Timer timer)
       { return StopTimer(timer) && StartTimer(timer); }
 
+   /** @name Thread control */
+   //@{
+   /** An enum holding the possible sections that we can lock in
+       Mahogany.
+   */
+   enum SectionId
+   {
+      /// Un/Lock the GUI
+      GUI,
+      /// The event subsystem:
+      EVENTS = GUI,     // if changed, change wxMApp.cpp, too!
+      /// UnLock the critical c-client code
+      CCLIENT
+   };
+   virtual void ThrEnter(SectionId what) = 0;
+   virtual void ThrLeave(SectionId what) = 0;
+   //@}
 protected:
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
@@ -227,5 +244,45 @@ protected:
 };
 
 extern MAppBase *mApplication;
+
+/** A small class that locks the given Mutex during its existence. */
+class MMutexLocker
+{
+public:
+   MMutexLocker(MAppBase::SectionId id)
+      {
+         m_Id = id;
+         mApplication->ThrEnter(m_Id);
+      }
+   ~MMutexLocker()
+      {
+         mApplication->ThrLeave(m_Id);
+      }
+private:
+   MAppBase::SectionId m_Id;
+};
+
+/// lock the GUI
+class MGuiLocker : public MMutexLocker
+{
+public:
+   MGuiLocker() : MMutexLocker(MAppBase::GUI) {};
+};
+
+/// lock the events subsystem
+#define MEventLocker MGuiLocker
+
+/// lock the Cclient critical sections
+class MCclientLocker : public MMutexLocker
+{
+public:
+   MCclientLocker() : MMutexLocker(MAppBase::CCLIENT) {};
+};
+
+/** Our own Mutex type, must support the calls
+    Lock() and Unlock().
+*/
+typedef wxMutex MMutex;
+
 
 #endif   // MAPPLICATION_H
