@@ -41,7 +41,7 @@ AppVersion=0.64
 ; hmm... what's RGB value of mahogany?
 BackColor=$037ebd
 AppCopyright=Copyright © 1997-2001 Karsten Ballüder and Vadim Zeitlin
-WizardImageFile=res\install1.bmp
+WizardImageFile=res\wizard.bmp
 WizardSmallImageFile=res\install_small.bmp
 
 ; --- doc files
@@ -51,8 +51,8 @@ InfoAfterFile=extra\setup\postread.txt
 
 [Components]
 Name: "main"; Description: "Required Program Files"; Types: full compact custom; Flags: fixed
-Name: "help"; Description: "Help Files"; Types: full compact
-Name: "ssl"; Description: "SSL Support"; Types: full compact
+Name: "help"; Description: "Help Files"; Types: full
+Name: "ssl"; Description: "SSL Support"; Types: full
 ;Name: "python"; Description: "Python Support (Requires Python 2.0)"; Types: full
 Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
 
@@ -62,8 +62,8 @@ Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
 Source: "Release\M.EXE"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
 
-Source: "m:\Sources\openssl-0.9.6b\out32dll\libeay32.dll"; DestDir: "{sys}"; Components: ssl
-Source: "m:\Sources\openssl-0.9.6b\out32dll\ssleay32.dll"; DestDir: "{sys}"; Components: ssl
+Source: "m:\Sources\openssl-0.9.6b\out32dll\libeay32.dll"; DestDir: "{app}"; Components: ssl
+Source: "m:\Sources\openssl-0.9.6b\out32dll\ssleay32.dll"; DestDir: "{app}"; Components: ssl
 
 ; do we need to include VC++ run time?
 ;Source: "w:\winnt40\system32\msvcirt.dll"; DestDir: "{sys}"
