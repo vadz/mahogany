@@ -8,10 +8,9 @@ README file for Mahogany, Release 0.50 "Meadows"
 Issues with the current release
 --------------------------------------------------------------------
 
-Mahogany, just like wxGTK, works best with gtk+ 1.2.6. 
-gtk+ 1.2.7 might cause some minor problems. Please understand that
-this is not a Mahogany specific problem and that we cannot do
-anything about it. 
+Mahogany, just like wxGTK, works best with gtk+ 1.2.6.  gtk+ 1.2.7
+might cause some minor problems. Please understand that this is not
+a Mahogany-specific problem and that we cannot do anything about it.
 
 More detailed information about Mahogany, how to get support for it,
 how to contribute it, and last not least, how to use it, can be found
@@ -19,7 +18,7 @@ in the user manual, included in HTML and PostScript format, or the
 online help system. Some quick compilation notes can be found below,
 more in the manual. All the information, including the full online
 docs, are also available on the Mahogany web page:
-http://mahogany.home.dhs.org/
+http://wxwindows.org/Mahogany/
 
 Be not confused by references to a program called "M", which was the
 original working title for "Mahogany".
@@ -28,72 +27,68 @@ original working title for "Mahogany".
 Internet resources
 --------------------------------------------------------------------
 
-The Mahogany web page is at:
-
+The Mahogany web page is http://wxwindows.org/Mahogany/ or
 http://mahogany.home.dhs.org/
-http://www.wxwindows.org/Mahogany/
 
-The wxWindows home page is at:
+The wxWindows home page is http://wxwindows.org/
 
-http://www.wxwindows.org/
+--------------------------------------------------------------------
+Required software
+--------------------------------------------------------------------
 
+   - wxGTK, the gtk port of wxWindows
+   - libgtk 1.2.x, libglib 1.2.x
+
+If you want to compile Mahogany with SSL support, you must have OpenSSL
+installed first. Then you can configure Mahogany with the additional
+option --with-ssl.
 
 --------------------------------------------------------------------
 Compilation notes
 --------------------------------------------------------------------
 
-These are some very brief notes about how to compile Mahogany.
-More detailed, step for step, instructions can be found in the Manual,
-which is contained in the Mdoc.tar.gz file in the doc directory.
-You can also view it online at http://www.wxwindows.org/Mahogany/
+These are some very brief notes about how to compile Mahogany.  More
+detailed step-for-step instructions can be found in the Manual, which
+is contained in the Mdoc.tar.gz file in the doc directory.  You can
+also view it online at http://wxwindows.org/Mahogany/
 
-Mahogany is known to work with wxGTK 2.1.14 and should work with 2.1.15
-and 2.2.0 when they are officially released.
+Mahogany is known to work with wxGTK 2.2.0.  Some code uses functions
+from wxWindows 2.2, so it may not work with earlier versions, depending
+upon the configuration options chosen.
 
-Before you can compile Mahogany, you will need to get a copy of wxGTK and
-compile and install it.
+Before you can compile Mahogany, you will need to have installed
+wxWindows compiled for the GTK library (wxGTK).
 
-- wxGTK should be configured with the following option:
-     ./configure --with-gtk 
+- wxWindows should be configured with the following option:
+     ./configure --with-gtk
 
   If you experience compilation problems, add the option
   --disable-optimise     # this is also needed for gcc 2.8.0
 
-Doing a "make" and "make install" in the wxWindows directory should install
-the header files and libraries on your system. 
+Doing a "make" and "make install" in the wxWindows directory should
+install the header files and libraries on your system.
 
 - To compile and install Mahogany itself:
   ./configure --help
-  ./configure "with your appropriate options"
-  make depend
-  make             # or "make all" to try to build message catalogs as well
+  cd /some/build/dir
+  sh /the/source/dir/configure "with your appropriate options"
+  make    # or "make all" to try to build message catalogs as well
   make doc
   make install
 
-  If you built wxWindows with debug enabled, specify the --with-debug option
-  when configuring Mahogany. 
+  If you built wxWindows with debug enabled, specify the --with-debug
+  option when configuring Mahogany.
 
   Depending on whether you have installed all required programs in the
   right versions, "make doc" and "make install" might
   fail. Instead, you can do the following:
-    make install_bin     # this will install the program and required files
-    make install_doc     # this should install the documentation and
-                         # online help
+    make install_bin     # this will install the program and other
+                         # required files
     make install_locale  # this tries to build and install the message
                          # catalogs
+    make install_doc     # this should install the documentation and
+                         # online help
 
 Also, if you change into the src directory, the additional targets
-"make static" and "make semistatic" are available, to produce binaries 
+"make static" and "make semistatic" are available, to produce binaries
 with less dependencies on external libraries.
-
-Required software:
-
-   - wxGTK, the gtk port of wxWindows
-   - libgtk 1.2.x, libglib 1.2.x
-
-
-If you want to compile Mahogany with SSL support, you need to have
-OpenSSL installed first. Then you can configure Mahogany with the additional
-option --with-ssl.
-
-
