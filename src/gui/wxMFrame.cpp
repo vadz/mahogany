@@ -594,12 +594,7 @@ wxMFrame::OnMenuCommand(int id)
                                 );
             if ( !filename.empty() )
             {
-               wxFFile file(filename, "rb");
-               if ( file.IsOpened() )
-               {
-                  PyH_RunScript(file.fp(), filename);
-               }
-               //else: couldn't open the file
+               PyH_RunScript(filename);
             }
             //else: cancelled by user
          }
