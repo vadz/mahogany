@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  2002/10/19 17:40:39  nerijus
+ * using wxUSE_IOSTREAMH for including <iostream.h> or <iostream>
+ *
  * Revision 1.2  1998/03/26 23:05:39  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -21,10 +24,10 @@
 
 #include <PersistentList.h>
 
-#ifdef  USE_IOSTREAMH
-  #include <fstream>
+#if wxUSE_IOSTREAMH
+#  include <fstream.h>
 #else
-  #include <fstream.h>
+#  include <fstream>
 #endif
 
 PersistentList::PersistentList(String const &ifilename)

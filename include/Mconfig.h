@@ -147,25 +147,16 @@
 #endif
 
 // you can't mix iostream.h and iostream, the former doesn't compile
-// with "using namespace std", the latter doesn't compile with wxWin
-// make your choice...
-#ifndef USE_IOSTREAMH
-#  define USE_IOSTREAMH   1
-#endif
+// with "using namespace std", the latter doesn't compile with older
+// compilers.
 
-#ifdef USE_IOSTREAMH
+#if wxUSE_IOSTREAMH
 #  include <iostream.h>
 #  include <fstream.h>
 #else
 #  include <iostream>
 #  include <fstream>
-#endif
-
-#ifdef USE_IOSTREAMH
-  // can't use namespace std because old iostream doesn't compile with it
-  // and can't use std::list because it's a template class
-#else
-  using namespace std;
+   using namespace std;
 #endif
 
 // set the proper STL class names
