@@ -554,14 +554,14 @@ void wxOptionsPage::OnChange(wxEvent& event)
 {
    wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
 
+   UpdateUI();
+
    if ( !dialog )
    {
       // we don't put an assert here because this does happen when we're a
       // page in the folder properties dialog
       return;
    }
-
-   UpdateUI();
 
    wxControl *control = (wxControl *)event.GetEventObject();
    if ( m_aVitalControls.Index(control) != -1 )
@@ -1219,4 +1219,4 @@ void ShowOptionsDialog(wxFrame *parent, OptionPage page)
    (void)dlg.ShowModal();
 }
 
-/* vi: se tw=0 */
+/* vi: set tw=0 */
