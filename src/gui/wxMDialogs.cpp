@@ -2359,12 +2359,10 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
 {
    long dummy;
    String name;
-   bool cont = config->GetFirstEntry(name, dummy);
-   while ( cont )
+   for ( bool cont = config->GetFirstEntry(name, dummy);
+         cont;
+         cont = config->GetNextEntry(name, dummy) )
    {
-      int index = m_listctrl->GetItemCount();
-      m_listctrl->InsertItem(index, GetPersMsgBoxHelp(name));
-
       // decode the remembered value
       String value;
       long val = config->Read(name, 0l);
@@ -2380,6 +2378,11 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
             value = _("no");
             break;
 
+         case -1:
+            // this is a special hack used by persistent msg boxes, ignore it,
+            // this one is not really disabled
+            continue;
+
          default:
             FAIL_MSG( _T("unknown message box value") );
             // fall through
@@ -2389,6 +2392,8 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
             value = _("off");
       }
 
+      int index = m_listctrl->GetItemCount();
+      m_listctrl->InsertItem(index, GetPersMsgBoxHelp(name));
       m_listctrl->SetItem(index, 1, value);
 
       String folderName;
@@ -2423,8 +2428,6 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
          name.Prepend(folder + '/');
       }
       entries.Add(name);
-
-      cont = config->GetNextEntry(name, dummy);
    }
 }
 
