@@ -350,8 +350,10 @@ extern WXDLLEXPORT bool wxPMessageBoxEnabled(const wxString& configPath,
                                              wxConfigBase *config = NULL);
 
 // make sure that the next call to wxPMessageBox(configPath) will show the
-// message box (by erasing the stored answer in it)
+// message box (by erasing the stored answer in it) or disable it to now
+// show the message box
 extern WXDLLEXPORT void wxPMessageBoxEnable(const wxString& configPath,
+                                            bool enable = TRUE,
                                             wxConfigBase *config = NULL);
 
 #endif // _WX_PWINDOW_H_

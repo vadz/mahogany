@@ -755,6 +755,7 @@ BEGIN_EVENT_TABLE(wxPMessageDialog, wxDialog)
     EVT_BUTTON(wxID_YES,    wxPMessageDialog::OnButton)
     EVT_BUTTON(wxID_NO,     wxPMessageDialog::OnButton)
     EVT_BUTTON(wxID_CANCEL, wxPMessageDialog::OnButton)
+    EVT_BUTTON(wxID_OK,     wxPMessageDialog::OnButton)
 END_EVENT_TABLE()
 
 wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
@@ -1039,6 +1040,10 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
             EndModal(wxNO);
             break;
 
+        case wxID_OK:
+            EndModal(wxOK);
+            break;
+
         default:
             wxFAIL_MSG("unexpected button id in wxPMessageDialog.");
             // fall through nevertheless
@@ -1084,7 +1089,7 @@ int wxPMessageBox(const wxString& configPath,
         rc = dlg.ShowModal();
 
         // ignore checkbox value if the dialog was cancelled
-        if ( config && rc != wxID_CANCEL && dlg.DontShowAgain() ) {
+        if ( config && rc != wxCANCEL && dlg.DontShowAgain() ) {
             // next time we won't show it
             config->Write(configValue, rc);
         }
@@ -1105,7 +1110,9 @@ bool wxPMessageBoxEnabled(const wxString& configPath, wxConfigBase *config)
     return !(config && config->Exists(configValue));
 }
 
-void wxPMessageBoxEnable(const wxString& configPath, wxConfigBase *config)
+void wxPMessageBoxEnable(const wxString& configPath,
+                         bool enable, 
+                         wxConfigBase *config)
 {
     wxPHelper persist(configPath, gs_MessageBoxPath, config);
     persist.ChangePath();
@@ -1114,9 +1121,19 @@ void wxPMessageBoxEnable(const wxString& configPath, wxConfigBase *config)
     // if config was NULL, wxPHelper already has the global one
     config = persist.GetConfig();
 
-    if ( config && config->Exists(configValue) ) {
-       // delete stored value
-       config->DeleteEntry(configValue);
+    if ( enable ) {
+        // (re)enable
+        if ( config && config->Exists(configValue) ) {
+           // delete stored value
+           config->DeleteEntry(configValue);
+        }
+    }
+    else {
+       // disable
+       if ( config ) {
+           // assume it's a Yes/No dialog box
+           config->Write(configValue, (long)wxYES);
+       }
     }
 }
 

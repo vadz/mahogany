@@ -1210,8 +1210,7 @@ bool wxOptionsPageOthers::TransferDataToWindow()
    // these setting might be out of date - synchronize
 
    // TODO this should be table based too probably...
-   if ( !wxPMessageBoxEnabled(MP_CONFIRMEXIT) )
-      m_Profile->writeEntry(MP_CONFIRMEXIT, false);
+   m_Profile->writeEntry(MP_CONFIRMEXIT, wxPMessageBoxEnabled(MP_CONFIRMEXIT));
 
    return wxOptionsPage::TransferDataToWindow();
 }
@@ -1223,8 +1222,8 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
    {
       // now if the user checked "confirm exit" checkbox we must reenable
       // the message box by erasing the stored answer to it
-      if ( m_Profile->readEntry(MP_CONFIRMEXIT, false) )
-         wxPMessageBoxEnable(MP_CONFIRMEXIT);
+      wxPMessageBoxEnable(MP_CONFIRMEXIT,
+                          READ_CONFIG(m_Profile, MP_CONFIRMEXIT) != 0);
    }
 
    return rc;
@@ -1243,32 +1242,6 @@ wxOptionsPageHelpers::wxOptionsPageHelpers(wxNotebook *parent,
                    ConfigField_HelpersLast,
                    MH_OPAGE_HELPERS)
 {
-}
-
-bool wxOptionsPageHelpers::TransferDataToWindow()
-{
-   // if the user checked "don't ask me again" checkbox in the message box
-   // these setting might be out of date - synchronize
-
-   // TODO this should be table based too probably...
-   if ( !wxPMessageBoxEnabled(MP_CONFIRMEXIT) )
-      m_Profile->writeEntry(MP_CONFIRMEXIT, false);
-
-   return wxOptionsPage::TransferDataToWindow();
-}
-
-bool wxOptionsPageHelpers::TransferDataFromWindow()
-{
-   bool rc = wxOptionsPage::TransferDataFromWindow();
-   if ( rc )
-   {
-      // now if the user checked "confirm exit" checkbox we must reenable
-      // the message box by erasing the stored answer to it
-      if ( m_Profile->readEntry(MP_CONFIRMEXIT, false) )
-         wxPMessageBoxEnable(MP_CONFIRMEXIT);
-   }
-
-   return rc;
 }
 
 // ----------------------------------------------------------------------------

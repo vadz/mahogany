@@ -236,9 +236,6 @@ class wxOptionsPageHelpers : public wxOptionsPage
 {
 public:
    wxOptionsPageHelpers(wxNotebook *parent, ProfileBase *profile);
-
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
 };
 
 // miscellaneous settings
