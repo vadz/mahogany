@@ -6,7 +6,11 @@
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.8  1998/09/23 08:57:27  KB
+ * changed deletion behaviour
+ *
  * Revision 1.7  1998/08/16 21:21:29  VZ
+ *
  * 1) fixed config file bug: it was never created (attempt to create ~/.M/config
  *    always failed, must mkdir("~/.M") first)
  * 2) "redesign" of "Folder properties" dialog and bug corrected, small change to
@@ -198,7 +202,7 @@ kbList::insert(kbList::iterator & i, void *element)
 }
 
 void
-kbList::erase(kbList::iterator & i)
+kbList::doErase(kbList::iterator & i)
 {
    kbListNode
       *node = i.Node(),
@@ -223,8 +227,9 @@ kbList::erase(kbList::iterator & i)
       next->prev = prev;
 
    // delete this node and contents:
-   if(ownsEntries)
-      delete *i;
+   // now done separately
+   //if(ownsEntries)
+   //delete *i;
    delete i.Node();
 
    // change the iterator to next element:

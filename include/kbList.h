@@ -170,7 +170,8 @@ public:
        @param i iterator pointing to the element to be deleted
    */
    void erase(iterator & i);
-   
+      { deleteContent(i); doErase(i); }
+
    /* Get head of list.
       @return iterator pointing to head of list
    */
@@ -208,6 +209,18 @@ protected:
    kbListNode *first;
    /// pointer to last element in list
    kbListNode *last;
+protected:
+   /** Erase an element, move iterator to following element.
+       @param i iterator pointing to the element to be deleted
+   */
+   void doErase(iterator & i);
+
+   /** Deletes the actual content if ownsflag is set.
+       param iterator i
+   */
+   inline void deleteContent(iterator i)
+      { if(ownsEntries) delete *i; }
+   
 
 private:
    /// forbid copy construction
@@ -254,7 +267,7 @@ public: \
       { return (type *) kbList::pop_front(); } \
    \
    inline void erase(iterator & i) \
-      { kbList::erase(i); } \
+      { deleteContent(i); kbList::erase(i); } \
    \
    inline iterator begin(void) const \
       { return kbList::begin(); } \
@@ -276,6 +289,9 @@ public: \
          first = next; \
       } \
    } \
+protected: \
+   inline void deleteContent(iterator i) \
+      { if(ownsEntries) delete *i; } \
 }
 
 #ifdef   MCONFIG_H
