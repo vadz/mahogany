@@ -52,7 +52,7 @@
 // ----------------------------------------------------------------------------
 
 // the text window for editing templates: it has a popup menu which allows the
-// user to insert any of existing macors
+// user to insert any of existing macros
 class TemplateEditor : public wxTextCtrl
 {
 public:
@@ -442,6 +442,7 @@ bool wxTemplateDialog::TransferDataFromWindow()
 // our public interface
 // ----------------------------------------------------------------------------
 
+// edit the templates for the given folder/profile
 bool ConfigureTemplates(ProfileBase *profile,
                         wxWindow *parent,
                         const TemplatePopupMenuItem& menu)
@@ -457,3 +458,11 @@ bool ConfigureTemplates(ProfileBase *profile,
    }
 }
 
+// select a template from all existing ones
+String ChooseTemplateFor(MessageTemplateKind kind,
+                                wxWindow *parent)
+{
+    FAIL_MSG("TODO");
+
+    return "";
+}

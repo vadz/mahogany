@@ -14,6 +14,8 @@
 #ifndef _TEMPLATEDIALOG_H
 #define _TEMPLATEDIALOG_H
 
+#include "MessageTemplate.h"    // for MessageTemplateKind
+
 class wxWindow;
 
 /// describe one (top level) item of the template editing dialog popup menu
@@ -89,5 +91,16 @@ extern bool ConfigureTemplates(ProfileBase *profile,
                                wxWindow *parent,
                                const TemplatePopupMenuItem& menu
                                = g_ComposeViewTemplatePopupMenu);
+
+/** Show the dialog allowing the user to choose any of the existing templates
+    (for the given action - i.e. composing/replying/...) and return its value
+    or an empty string if the dialog was cancelled
+
+    @param kind the action for which the template is needed
+    @param parent the parent window
+    @return the chosen template or an empty string
+ */
+extern String ChooseTemplateFor(MessageTemplateKind kind,
+                                wxWindow *parent);
 
 #endif // _TEMPLATEDIALOG_H

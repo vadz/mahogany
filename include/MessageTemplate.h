@@ -11,7 +11,7 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-/* About message templates.
+/** About message templates.
 
    They may be configured by user to be used for message composition (different
    ones for a mail message and a news article) and reply/forward. They contain
@@ -42,7 +42,46 @@
    of width "number". If the number is followed by '!', the value is truncated
    if it doesn't fit into the given width instead of taking as much place as is
    required for it (default behaviour).
+ */
 
+/** A note about where the message templates are stored.
+
+    In the previous version of Mahogany, each profile folder had its own
+    templates for each value of MessageTemplateKind stored under
+    Templates/<kind> in the profile corresponding to the folder.
+
+    This, however, wasn't flexible enough and so, starting from 0.60a all
+    templates are stored in a separate section of the profile tree in a subtree
+    with one branch per each MessageTemplateKind value and each template now
+    has its own name, i.e.:
+
+    M/Templates/
+         NewMessage/
+            Standard = "..."
+            BugReply = "..."
+         NewArticle/
+            Standard = "..."
+            Announce = "..."
+         Reply/
+            ...
+         ...
+
+   The special template name "Standard" is used for the template used by
+   default. To determine the template to be used, the value in
+   <folder profile>/Templates/<kind> is read and is now interpreted as the
+   _name_ of the template in the tree shown above (and not as template value as
+   it used to be). The default values for all these keys are, of course, just
+   "Standard".
+
+   When a template for a folder is edited, it is given a new unique name. By
+   default it will be something like <folder name> and there are also
+   old_foldername entries which are created by the upgrade procedure when
+   upgrading from 0.50 or below.
+
+   In the future, the values of the templates may also be the file names
+   meaning that the template contents should be read from file (possibly
+   dynamically generated, for example), but the global structure is not
+   supposed to change any more.
  */
 
 #ifndef _MESSAGETEMPLATE_H_

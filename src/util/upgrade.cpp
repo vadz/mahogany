@@ -71,7 +71,8 @@ enum MVersion
    Version_Alpha001, // first public version
    Version_Alpha010, // some config strucutre changes (due to wxPTextEntry)
    Version_Alpha020, // folder host name is now ServerName, not HostName
-   Version_050,      // nothing really changed against 0.2x config-wise
+   Version_Alpha050, // nothing really changed against 0.2x config-wise
+   Version_Alpha060, // templates are organised differently
    Version_NoChange, // any version from which we don't need to upgrade
    Version_Unknown   // some unrecognized version
 };
@@ -1556,6 +1557,96 @@ UpgradeFrom020()
    return TRUE;
 }
 
+class TemplateFixFolderTraversal : public MFolderTraversal
+{
+public:
+   TemplateFixFolderTraversal(MFolder* folder) : MFolderTraversal(*folder)
+   {
+      m_ok = TRUE;
+   }
+
+   bool IsOk() const { return m_ok; }
+
+   virtual bool OnVisitFolder(const wxString& folderName)
+   {
+      Profile_obj profile(folderName);
+      String group = M_TEMPLATE_SECTION;
+      if ( profile->HasGroup(group) )
+      {
+         static const char *templateKinds[] =
+         {
+            MP_TEMPLATE_NEWMESSAGE,
+            MP_TEMPLATE_NEWARTICLE,
+            MP_TEMPLATE_REPLY,
+            MP_TEMPLATE_FOLLOWUP,
+            MP_TEMPLATE_FORWARD,
+         };
+
+         wxLogTrace("Updating templates for the folder '%s'...",
+                    folderName.c_str());
+
+         for ( size_t n = 0; n < WXSIZEOF(templateKinds); n++ )
+         {
+            String entry = group + templateKinds[n];
+            if ( profile->HasEntry(entry) )
+            {
+               String templateValue = profile->readEntry(entry, "");
+
+               String entryNew;
+               entryNew << entry << '/' << folderName;
+               ProfileBase *profileApp = mApplication->GetProfile();
+               if ( profileApp->HasEntry(entryNew) )
+               {
+                  wxLogWarning("A profile entry '%s' already exists, "
+                               "impossible to upgrade the existing template "
+                               "in '%s/%s/%s'",
+                               entryNew.c_str(),
+                               folderName.c_str(),
+                               group.c_str(),
+                               entry.c_str());
+
+                  m_ok = false;
+               }
+               else
+               {
+                  wxLogTrace("\t%s/%s/%s upgraded to %s",
+                             folderName.c_str(),
+                             group.c_str(),
+                             entry.c_str(),
+                             entryNew.c_str());
+
+                  profileApp->writeEntry(entryNew, templateValue);
+                  profile->writeEntry(entry, entryNew);
+               }
+            }
+         }
+      }
+      //else: no custom templates for this folder
+
+      // continue with enumeration
+      return TRUE;
+   }
+
+private:
+   bool m_ok;
+};
+
+static bool
+UpgradeFrom050()
+{
+   // See the comments in MessageTemplate.h about the changes in the templates
+   // location. Briefly, the templates now live in /Templates and not in each
+   // folder and the <folder>/Template/<kind> profile entry now contains the
+   // name of the template to use and not the contents of it
+
+   // enumerate all folders recursively
+   MFolder_obj folderRoot("");
+   TemplateFixFolderTraversal traverse(folderRoot);
+   traverse.Traverse();
+
+   return traverse.IsOk();
+}
+
 // ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
@@ -1575,7 +1666,9 @@ Upgrade(const String& fromVersion)
    else if ( fromVersion == "0.20a" )
       oldVersion = Version_Alpha020;
    else if ( fromVersion == "0.21a" || fromVersion == "0.22a" ||
-             fromVersion == "0.23a" || fromVersion == "0.50")
+             fromVersion == "0.23a" || fromVersion == "0.50a" )
+      oldVersion = Version_Alpha050;
+   else if ( fromVersion == "0.60a" )
       oldVersion = Version_NoChange;
    else
       oldVersion = Version_Unknown;
@@ -1598,7 +1691,12 @@ Upgrade(const String& fromVersion)
       // fall through
 
    case Version_Alpha020:
-      if ( success && UpgradeFrom020() )
+      if ( success )
+         success = UpgradeFrom020();
+      // fall through
+
+   case Version_Alpha050:
+      if ( success && UpgradeFrom050() )
          wxLogMessage(_("Configuration information and program files were "
                         "successfully upgraded from the version '%s'."),
                       fromVersion.c_str());
@@ -1611,9 +1709,11 @@ Upgrade(const String& fromVersion)
                       "the program before using it."),
                     fromVersion.c_str());
       break;
-   case Version_050:
+
+   case Version_Alpha060:
    case Version_NoChange:
       break;
+
    default:
       FAIL_MSG("invalid version value");
       // fall through
@@ -1626,8 +1726,6 @@ Upgrade(const String& fromVersion)
 
    return TRUE;
 }
-
-
 
 
 /// only used to find new mail folder

@@ -128,16 +128,21 @@ KBLIST_DEFINE(MailFolderList, MailFolderEntry);
 // ----------------------------------------------------------------------------
 // MAppBase - the class which defines the "application object" interface
 // ----------------------------------------------------------------------------
+
 MAppBase::MAppBase()
 {
    m_eventNewMailReg = NULL;
    m_eventOptChangeReg = NULL;
+   m_eventFolderStatusReg = NULL;
+
    m_topLevelFrame = NULL;
    m_framesOkToClose = NULL;
    m_MailCollector = NULL;
    m_KeepOpenFolders = new MailFolderList;
    m_profile = NULL;
    m_DialupSupport = FALSE;
+
+   m_mimeManager = NULL;
 
    ResetLastError();
 }
