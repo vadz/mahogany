@@ -221,7 +221,7 @@ public:
    /// get the number of items we show
    size_t GetHeadersCount() const { return m_headers ? m_headers->Count() : 0; }
 
-   /// invlaidate the cached header(s)
+   /// invalidate the cached header(s)
    void InvalidateCache();
 
    /// create the columns using order in m_columns and widths from profile
@@ -300,16 +300,16 @@ public:
    void OnPreview();
    //@}
 
+   /// change the profile we use
+   void SetProfile(Profile *profile);
+
    /// change the options governing our appearance
-   void ApplyOptions(const wxColour &fg, const wxColour &bg,
+   void ApplyOptions(const wxColour& fg, const wxColour& bg,
                      int fontFamily, int fontSize,
                      int columns[WXFLC_NUMENTRIES]);
 
    /// set m_PreviewOnSingleClick flag
-   void SetPreviewOnSingleClick(bool flag)
-      {
-         m_PreviewOnSingleClick = flag;
-      }
+   void SetPreviewOnSingleClick(bool flag) { m_PreviewOnSingleClick = flag; }
 
    /// save the widths of the columns in profile if needed
    void SaveColWidths();
@@ -421,8 +421,11 @@ protected:
    /// the profile used for storing columns widths
    Profile *m_profile;
 
-   /// column numbers
+   /// column order
    int m_columns[WXFLC_NUMENTRIES];
+
+   /// string containing current column widths
+   wxString m_widthsOld;
 
    /// do we preview a message on a single mouse click?
    bool m_PreviewOnSingleClick;
@@ -643,6 +646,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 {
    m_Parent = parent;
    m_profile = fv->GetProfile();
+   m_profile->IncRef(); // we wish to keep it until dtor
 
    m_headers = NULL;
    m_attr = NULL;
@@ -650,7 +654,6 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    m_PreviewOnSingleClick = false;
 
-   m_profile->IncRef(); // we wish to keep it until dtor
    m_FolderView = fv;
    m_enableOnSelect = true;
    m_menu = NULL;
@@ -678,12 +681,6 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
           wxDefaultPosition, parent->GetClientSize(),
           wxLC_REPORT | wxLC_VIRTUAL | wxNO_BORDER);
 
-   // set the initial column widths
-   ReadColumnsInfo(m_profile, m_columns);
-
-   // and create columns after this
-   CreateColumns();
-
    // create a drop target for dropping messages on us
    new MMessagesDropTarget(new FolderViewMessagesDropWhere(m_FolderView), this);
 }
@@ -700,6 +697,26 @@ wxFolderListCtrl::~wxFolderListCtrl()
 
    delete m_menuFolders;
    delete m_menu;
+}
+
+void wxFolderListCtrl::SetProfile(Profile *profile)
+{
+   CHECK_RET( profile, "NULL profile in wxFolderListCtrl?" );
+
+   SafeDecRef(m_profile);
+
+   m_profile = profile;
+   m_profile->IncRef();
+
+   // the profile changes, hence the folder we show changes too, don't keep the
+   // old headers
+   if ( m_headers )
+   {
+      m_headers->DecRef();
+      m_headers = NULL;
+
+      InvalidateCache();
+   }
 }
 
 void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
@@ -719,6 +736,22 @@ void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
       memcpy(m_columns, columns, sizeof(m_columns));
 
       CreateColumns();
+   }
+   else // same columns in same order
+   {
+      // but their widths could have changed, so update them
+      String widthsString = GetColWidths();
+      if ( widthsString != m_widthsOld )
+      {
+         m_widthsOld = widthsString;
+
+         wxArrayString widths = UnpackWidths(widthsString);
+         size_t count = widths.GetCount();
+         for ( size_t n = 0; n < count; n++ )
+         {
+            SetColumnWidth(n, atol(widths[n]));
+         }
+      }
    }
 }
 
@@ -1492,11 +1525,11 @@ void wxFolderListCtrl::CreateColumns()
    ClearAll();
 
    // read the widths array
-   String widthsString = GetColWidths();
+   m_widthsOld = GetColWidths();
 
    // complete the array if necessary - this can happen if the previous folder
    // had less columns than this one
-   wxArrayString widths = UnpackWidths(widthsString);
+   wxArrayString widths = UnpackWidths(m_widthsOld);
    wxArrayString widthsStd = UnpackWidths(FOLDER_LISTCTRL_WIDTHS_D);
 
    size_t n,
@@ -1959,12 +1992,8 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_msgCmdProc->SetFrame(GetFrame(m_FolderCtrl));
 
    ReadProfileSettings(&m_settings);
-   m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
-   m_FolderCtrl->ApplyOptions( m_settings.FgCol,
-                               m_settings.BgCol,
-                               m_settings.font,
-                               m_settings.size,
-                               m_settings.columns);
+   ApplyOptions();
+
    m_SplitterWindow->SplitHorizontally(m_FolderCtrl,
                                        m_MessagePreview->GetWindow(),
                                        m_Parent->GetClientSize().y/3);
@@ -2200,6 +2229,20 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 }
 
 void
+wxFolderView::ApplyOptions()
+{
+   m_FolderCtrl->DeleteAllItems();
+
+   m_FolderCtrl->ApplyOptions(m_settings.FgCol,
+                              m_settings.BgCol,
+                              m_settings.font,
+                              m_settings.size,
+                              m_settings.columns);
+
+   m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
+}
+
+void
 wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 {
    Profile *profile = GetProfile();
@@ -2222,12 +2265,7 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
       // yes: need to repopulate the list ctrl because its appearance changed
       m_settings = settings;
 
-      m_FolderCtrl->ApplyOptions( m_settings.FgCol,
-                                  m_settings.BgCol,
-                                  m_settings.font,
-                                  m_settings.size,
-                                  m_settings.columns);
-      m_FolderCtrl->DeleteAllItems();
+      ApplyOptions();
 
       if ( m_ASMailFolder )
          Update();
@@ -2318,10 +2356,6 @@ wxFolderView::Clear()
    // save the columns widths of the old folder view
    m_FolderCtrl->SaveColWidths();
 
-   // don't delete m_FolderCtrl, this would result in flicker when changing
-   // folder and it's probably preferable to leave an empty older ctrl rather
-   // than deleting it even when there is no new folder
-
    // disable the message menu as we have no folder
    EnableMMenu(MMenu_Message, m_FolderCtrl, false);
 }
@@ -2345,25 +2379,15 @@ wxFolderView::ShowFolder(MailFolder *mf)
 
    m_MessagePreview->SetFolder(m_ASMailFolder);
 
+   m_folderName = m_ASMailFolder->GetName();
+
    // read in our new profile settigns
    ReadProfileSettings(&m_settings);
 
-   m_folderName = m_ASMailFolder->GetName();
-
-   wxWindow *oldfolderctrl = m_FolderCtrl;
-
-   m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
-   m_FolderCtrl->ApplyOptions( m_settings.FgCol,
-                               m_settings.BgCol,
-                               m_settings.font,
-                               m_settings.size,
-                               m_settings.columns );
-   m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
-
-   m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
+   m_FolderCtrl->SetProfile(m_Profile);
+   ApplyOptions();
 
    m_msgCmdProc->SetWindowForDnD(m_FolderCtrl);
-   delete oldfolderctrl;
 
    // TODO: sometimes we already have an UpdateFolder event in the event
    //       queue and then we could avoid updating the folder view twice,

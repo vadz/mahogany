@@ -35,6 +35,7 @@
 #include "MFolder.h"
 #include "Mdnd.h"
 #include "MFolderDialogs.h"
+#include "FolderView.h"
 
 #include "miscutil.h" // for ParseColourString()
 
@@ -42,11 +43,11 @@
 #include <wx/treectrl.h>
 #include <wx/tokenzr.h>
 #include <wx/dnd.h>
+#include <wx/persctrl.h>
 
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxFolderTree.h"
 #include "gui/wxIconManager.h"
-#include "gui/wxFolderView.h"
 #include "gui/wxMainFrame.h"
 
 #include "MFCache.h"
@@ -852,7 +853,7 @@ void wxFolderTree::OnOpen(MFolder *folder)
 {
    if ( CanOpen(folder) )
    {
-      (void)wxFolderViewFrame::Create(folder);
+      OpenFolderViewFrame(folder, GetFrame(m_tree));
    }
    else
    {

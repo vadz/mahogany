@@ -75,13 +75,13 @@
 #include <wx/fs_mem.h> // memory filesystem for startup screen
 
 #include "MFolderDialogs.h"
+#include "FolderView.h"
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 #include "adb/AdbManager.h"
 
 #include "gui/wxFolderTree.h"
-#include "gui/wxFolderView.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxIdentityCombo.h"
 
@@ -1267,7 +1267,7 @@ MDialog_FolderOpen(const MWindow *parent)
    if ( folder != NULL )
    {
       // open a view on this folder
-      (void)wxFolderViewFrame::Create(folder);
+      OpenFolderViewFrame(folder, (wxWindow *)parent);
       folder->DecRef();
    }
    //else: cancelled

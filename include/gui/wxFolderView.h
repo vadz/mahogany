@@ -284,6 +284,9 @@ private:
    /// get the full key to use in persistent message boxes
    String GetFullPersistentKey(MPersMsgBox key);
 
+   /// tell the list ctrl to use the new options
+   void ApplyOptions();
+
    /// handler of options change event, refreshes the view if needed
    void OnOptionsChange(MEventOptionsChangeData& event);
 

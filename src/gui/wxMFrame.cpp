@@ -58,7 +58,6 @@
 #include "TemplateDialog.h"
 
 #include "Composer.h"
-#include "FolderView.h"
 #include "MDialogs.h"
 
 #include "MFolderDialogs.h"
@@ -70,7 +69,6 @@
 #include "gui/wxOptionsDlg.h"
 #include "adb/AdbFrame.h"
 #include "gui/wxMFrame.h"
-#include "gui/wxFolderView.h"
 #include "gui/wxIdentityCombo.h"
 
 #include <wx/fontmap.h>          // for GetEncodingDescription()

@@ -43,7 +43,6 @@
 #include "Mdefaults.h"
 #include "MHelp.h"
 #include "Message.h"
-#include "FolderView.h"
 #include "ASMailFolder.h"
 #include "MFolder.h"
 #include "MDialogs.h"
@@ -57,7 +56,6 @@
 
 #include "gui/wxIconManager.h"
 #include "gui/wxMessageView.h"
-#include "gui/wxFolderView.h"
 #include "gui/wxllist.h"
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"
