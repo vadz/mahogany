@@ -215,8 +215,6 @@ then
 	AC_CHECK_LIB(pthread,main,,AC_CHECK_LIB(pthreads,main))
 fi
 
-AC_CHECK_HEADERS(wx/wx.h)
-AC_CHECK_LIB(wx_gtk,main,,AC_MSG_ERROR("wx_gtk library is required."))
 
 AC_CHECK_LIB(c,crypt,,AC_CHECK_LIB(crypt,crypt,,AC_MSG_ERROR("Cannot find crypt function.")))
 
@@ -295,8 +293,10 @@ else
 fi
 LIBS="$LIBS $GTK_LDFLAGS"
 CXXFLAGS="$CXXFLAGS $GTK_CFLAGS"
-CFLAGS="$CXXFLAGS $GTK_CFLAGS"
-echo $CXXFLAGS
+CFLAGS="$CFLAGS $GTK_CFLAGS"
+
+AC_CHECK_HEADERS(wx/wx.h)
+AC_CHECK_LIB(wx_gtk,main,,AC_MSG_ERROR("wx_gtk library is required."))
 
 dnl set debug/optimisation flags
 dnl we don't use CFLAGS/CXXFLAGS from autoconf
