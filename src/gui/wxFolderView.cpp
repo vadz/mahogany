@@ -2619,40 +2619,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          mApplication->Help(MH_FOLDER_VIEW, GetWindow());
          break;
 
-         // FIXME: why should we have it here and not use code in wxMFrame?
-#if 0
-      case WXMENU_FILE_COMPOSE_WITH_TEMPLATE:
-      case WXMENU_FILE_COMPOSE:
-         {
-            wxFrame *frame = m_Frame;
-
-            wxString templ;
-            if ( cmd == WXMENU_FILE_COMPOSE_WITH_TEMPLATE )
-            {
-               templ = ChooseTemplateFor(MessageTemplate_NewMessage, frame);
-               if ( templ.empty() )
-               {
-                  // cancelled by user
-                  break;
-               }
-            }
-
-            Composer *composeView =
-               Composer::CreateNewMessage(templ, GetProfile());
-
-            composeView->InitText();
-         }
-         break;
-
-      case WXMENU_FILE_POST:
-         {
-            Composer *composeView = Composer::CreateNewArticle(GetProfile());
-
-            composeView->InitText();
-         }
-         break;
-#endif // 0
-
       default:
          if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
          {

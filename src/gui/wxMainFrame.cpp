@@ -498,10 +498,10 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
    else if ( m_FolderView &&
             (WXMENU_CONTAINS(MSG, id) ||
              WXMENU_CONTAINS(LAYOUT, id) ||
-             (WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT)) ||
-             id == WXMENU_FILE_COMPOSE ||
-             id == WXMENU_FILE_POST ||
-             id == WXMENU_EDIT_COPY ) )
+             WXMENU_CONTAINS(LANG, id) ||
+             id == WXMENU_EDIT_COPY ||
+             id == WXMENU_EDIT_FIND ||
+             id == WXMENU_EDIT_FINDAGAIN) )
    {
       m_FolderView->OnCommandEvent(event);
    }
