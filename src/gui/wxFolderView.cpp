@@ -4681,8 +4681,6 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
               WXMENU_CONTAINS(LAYOUT, id) ||
               (WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT)) ||
               id == WXMENU_HELP_CONTEXT ||
-              id == WXMENU_FILE_COMPOSE ||
-              id == WXMENU_FILE_POST ||
               id == WXMENU_EDIT_CUT ||
               id == WXMENU_EDIT_COPY ||
               id == WXMENU_EDIT_PASTE )
