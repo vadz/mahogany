@@ -68,7 +68,7 @@ class HeaderInfoList;
     @deffunc UIdArray
 */
 #include <wx/dynarray.h>
-WX_DEFINE_ARRAY(UIdType, UIdArray);
+WX_DEFINE_ARRAY_INT(UIdType, UIdArray);
 typedef UIdArray MsgnoArray;
 
 // this is unused so far

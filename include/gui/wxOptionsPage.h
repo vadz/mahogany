@@ -17,7 +17,7 @@
 #include <wx/dynarray.h>
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
-WX_DEFINE_ARRAY(bool, ArrayBool);
+WX_DEFINE_ARRAY_INT(bool, ArrayBool);
 
 class MFolder;
 

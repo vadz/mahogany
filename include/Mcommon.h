@@ -176,5 +176,10 @@ typedef unsigned long MsgnoType;
 #define MSGNO_ILLEGAL 0
 //@}
 
+/// for compilation with wxWindows versions < 2.3.3
+#ifndef WX_DEFINE_ARRAY_INT
+   #define WX_DEFINE_ARRAY_INT WX_DEFINE_ARRAY
+#endif // !defined(WX_DEFINE_ARRAY_INT)
+
 #endif // MCOMMON_H
 
