@@ -303,7 +303,6 @@ public:
 
        // set the sizer &c
        sizerTop->Fit(this);
-       sizerTop->SetSizeHints(this);
        SetSizer(sizerTop);
        SetAutoLayout(TRUE);
 
