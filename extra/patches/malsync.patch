@@ -1,0 +1,256 @@
+*** malsync.c.orig	Wed Sep 27 11:54:11 2000
+--- malsync.c	Wed Sep 27 12:13:53 2000
+***************
+*** 90,101 ****
+      
+      {0, 0, 0, 0}
+  };
+  #endif
+  
+  static int sd = 0;
+! static int verbose = 0;
+  static int threeone = 0;
+  static int lowres = 0;
+  
+  static int32 initAndOpenDatabase(void *out, AGDBConfig *theDatabase, 
+                                   int32 *errCode);
+--- 90,106 ----
+      
+      {0, 0, 0, 0}
+  };
+  #endif
+  
++ static int fatalError = 0;
++ #define exit(errorcode); { fatalError = errorcode; return 0; }
++ #define exitv(errorcode); { fatalError = errorcode; return; }
++ 
++ 
+  static int sd = 0;
+! static int verbose = 1;
+  static int threeone = 0;
+  static int lowres = 0;
+  
+  static int32 initAndOpenDatabase(void *out, AGDBConfig *theDatabase, 
+                                   int32 *errCode);
+***************
+*** 1256,1266 ****
+  static RETSIGTYPE SigHandler(int signal)
+  {
+    /*fprintf(stderr, "Abort on signal (%d)!", signal);*/
+    (*printerror) ("Abort on signal (%d)!", signal);
+    Disconnect();
+!   exit(3);
+  }
+  /*----------------------------------------------------------------------------*/
+  void Connect(PalmSyncInfo *pi)
+  {
+      struct pi_sockaddr addr;
+--- 1261,1271 ----
+  static RETSIGTYPE SigHandler(int signal)
+  {
+    /*fprintf(stderr, "Abort on signal (%d)!", signal);*/
+    (*printerror) ("Abort on signal (%d)!", signal);
+    Disconnect();
+!   exitv(3);
+  }
+  /*----------------------------------------------------------------------------*/
+  void Connect(PalmSyncInfo *pi)
+  {
+      struct pi_sockaddr addr;
+***************
+*** 1275,1295 ****
+      signal(SIGSEGV, SigHandler);
+  #endif
+      
+      if (!(sd = pi_socket(PI_AF_SLP, PI_SOCK_STREAM, PI_PF_PADP))) {
+          perror("pi_socket");
+!         exit(1);
+      }
+      
+      addr.pi_family = PI_AF_SLP;
+      strcpy(addr.pi_device, device);
+      
+      ret = pi_bind(sd, (struct sockaddr*)&addr, sizeof(addr));
+      if(ret == -1) {
+          /*fprintf(stderr, "Unable to bind to port '%s'.\n", device);*/
+          (*printerror) ("Unable to bind to port '%s'.\n", device);
+!         exit(1);
+      }
+      
+      if( verbose )
+        /*printf("Waiting for connection on %s (press the HotSync button now)...\n",
+  	     device);*/
+--- 1280,1300 ----
+      signal(SIGSEGV, SigHandler);
+  #endif
+      
+      if (!(sd = pi_socket(PI_AF_SLP, PI_SOCK_STREAM, PI_PF_PADP))) {
+          perror("pi_socket");
+!         exitv(1);
+      }
+      
+      addr.pi_family = PI_AF_SLP;
+      strcpy(addr.pi_device, device);
+      
+      ret = pi_bind(sd, (struct sockaddr*)&addr, sizeof(addr));
+      if(ret == -1) {
+          /*fprintf(stderr, "Unable to bind to port '%s'.\n", device);*/
+          (*printerror) ("Unable to bind to port '%s'.\n", device);
+!         exitv(1);
+      }
+      
+      if( verbose )
+        /*printf("Waiting for connection on %s (press the HotSync button now)...\n",
+  	     device);*/
+***************
+*** 1297,1318 ****
+                          device);
+      
+      ret = pi_listen(sd,1);
+      if(ret == -1) {
+          perror("pi_listen");
+!         exit(1);
+      }
+      
+      sd = pi_accept(sd,0,0);
+      if(sd == -1) {
+          /*
+  	if( daemon_mode )
+  	  return;
+          else {
+          */
+  	  perror("pi_accept");
+! 	  exit(1);
+  	/*}*/
+      }
+      
+      if( verbose )
+          /*puts("Connected");*/
+--- 1302,1323 ----
+                          device);
+      
+      ret = pi_listen(sd,1);
+      if(ret == -1) {
+          perror("pi_listen");
+!         exitv(1);
+      }
+      
+      sd = pi_accept(sd,0,0);
+      if(sd == -1) {
+          /*
+  	if( daemon_mode )
+  	  return;
+          else {
+          */
+  	  perror("pi_accept");
+! 	  exitv(1);
+  	/*}*/
+      }
+      
+      if( verbose )
+          /*puts("Connected");*/
+***************
+*** 1586,1619 ****
+  int malsync (int sd_hack, PalmSyncInfo *pInfo)
+  {
+      uint32 pilotID;
+      AGNetCtx *ctx;
+  
+      sd = sd_hack;
+  
+      if (loadSecLib()) {
+          ctx = calloc(1, (*secctxsize)());
+          (*secnetinit)(ctx);
+      } else {
+          ctx = calloc( 1, sizeof( AGNetCtx));
+          AGNetInit( ctx);
+      }
+  
+      if (setupPlatformCalls(pInfo))
+!         return -1;
+  
+      pInfo->userConfig = getUserConfig(&pilotID);
+  
+      doClientProcessorLoop(pInfo, ctx);
+  
+      storeDeviceUserConfig(pInfo->userConfig, pilotID);
+  
+      if (secnetclose) {
+          (*secnetclose)(ctx);
+      } else {
+          AGNetClose(ctx);
+      }
+- 
+      free(ctx);
+  
+      return 0;
+  }
+--- 1591,1658 ----
+  int malsync (int sd_hack, PalmSyncInfo *pInfo)
+  {
+      uint32 pilotID;
+      AGNetCtx *ctx;
+  
++     fatalError = 0;
+      sd = sd_hack;
+  
+      if (loadSecLib()) {
+          ctx = calloc(1, (*secctxsize)());
+          (*secnetinit)(ctx);
+      } else {
+          ctx = calloc( 1, sizeof( AGNetCtx));
+          AGNetInit( ctx);
+      }
+  
++     if(fatalError)
++     { 
++        free(ctx);
++        return -1;
++     }
++ 
+      if (setupPlatformCalls(pInfo))
+!     { 
+!        free(ctx);
+!        return -1;
+!     }
+! 
+!     if(fatalError)
+!       return -1;
+  
+      pInfo->userConfig = getUserConfig(&pilotID);
+  
++     if(fatalError)
++     { 
++        free(ctx);
++        return -1;
++     }
++ 
+      doClientProcessorLoop(pInfo, ctx);
+  
++     if(fatalError)
++     { 
++        free(ctx);
++        return -1;
++     }
++ 
+      storeDeviceUserConfig(pInfo->userConfig, pilotID);
+  
++     if(fatalError)
++     { 
++        free(ctx);
++        return -1;
++     }
++ 
+      if (secnetclose) {
+          (*secnetclose)(ctx);
+      } else {
+          AGNetClose(ctx);
+      }
+      free(ctx);
++ 
++     if(fatalError)
++       return -1;
++ 
+  
+      return 0;
+  }

@@ -890,9 +890,13 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir, wxString directory)
       // ignore .* files (especially . or ..)
       if (dirent->d_name[0] == '.')
          continue;
+// this test is broken and needs to be replaced with stat()
+#undef _DIRENT_HAVE_D_TYPE
 #ifdef _DIRENT_HAVE_D_TYPE
       // ignore directories
-      if ( dirent->d_type == DT_REG )
+      if ( (dirent->d_type & DT_REG) != 0 
+         || (dirent->d_type & DT_LNK) != 0 
+         || (dirent->d_type & DT_UNKNOWN) != 0 )
           name.Printf("%s%s", directory.c_str(), dirent->d_name);
       else
       {
