@@ -169,7 +169,7 @@ public:
    /** Erase an element, move iterator to following element.
        @param i iterator pointing to the element to be deleted
    */
-   void erase(iterator & i);
+   inline void erase(iterator & i);
       { deleteContent(i); doErase(i); }
 
    /* Get head of list.
@@ -199,7 +199,7 @@ public:
    /* Query whether list is empty.
       @return true if list is empty
    */
-   bool empty(void) const
+   inline bool empty(void) const
       { return first == NULL ; }
 
 protected:
