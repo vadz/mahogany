@@ -254,11 +254,11 @@ then
   BUILDDIR=/home/karsten/tmp
 fi
 
-if [ `hostname` = Matterhorn ]
+if [ `hostname` = phyw164 ]
 then
   SCP=scp1
-  OSTYPE_ADDON="-Corel"
-  DEBIAN_FLAVOUR=Corel
+  OSTYPE_ADDON="-Slink"
+  DEBIAN_FLAVOUR=Slink
 fi
 
 if [ `hostname` = ronnie ]
