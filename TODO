@@ -4,7 +4,10 @@ $Id$
 
 *** things to fix/implement next ***
 
+- tons of cclient lib errors (mainly "invalid sequence") whatever I do under
+  Windows - I have no clue :-(
 - sequence invalid bug on close of folder
+
 - test sl5/slx abiguity in c-client: use -lshadow on libc5 and -lcrypt on glibc2?
 - SentMail folder path should be relative - broken
 - reply mail does not quote original mail but inserts junk
@@ -13,19 +16,34 @@ $Id$
 - make AdbEdit textctrl accept pasted text
 - make AdbEdit auto-generate a formatted name from first/family-name and prefix/title.
 
+- folders should remember whether they were opened on program shutdown and
+  reopen automatically in this case (/Folders/<FolderName>/AutoOpen = TRUE)
 
-- wxOptionsDlg:
-	+ can easily get crashed/stuck in endless loop trying to satisfy constraints
-- Preferences editor should mail oneself for test (MAppBase::VerifySettings)
+- wxOptionsDlg: two conversions from (long) to (int) .... is that ok?
+  + should have "restore defaults", would be nice to be able to do it for
+    one setting only (and not for all of them which is trivial)
+  + can easily get crashed/stuck in endless loop trying to satisfy constraints
+  + Preferences editor should mail oneself for test (MAppBase::VerifySettings)
 
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
     + check printing example
   + scroll to cursor
-  + cut&paste, different cursor ofr focus/no focus
+  + cut&paste, different cursor for focus/no focus
   + URL highlighting is buggy: I don't know how should we fix it without first
     reading all the docs, but Profile::readEntry() definitely shouldn't be
     highlighted (well, "Pro" is not) :-)
+
+- UI things
+  + message-related commands should be disabled if there is no selection
+    (already works in standalone folder view, but not for main frame)
+  + we should somehow merge the toolbars into the main frame toolbar if it
+    shows the folder view, for example
+
+- Profile/wxMDialogs
+  + fix usage of readEntry to use String objects
+  + who cleans up CPYSTR() generated strings?
+  + find path to global configuration file and use it?
 
 - Python
   + in src/Python: improve rules to always redo .cpp/.py
