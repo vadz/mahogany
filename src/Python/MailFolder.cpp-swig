@@ -355,6 +355,7 @@ static PyObject *_wrap_MailFolder_SetSequenceFlag(PyObject *self, PyObject *args
 #define MailFolder_AppendMessage(_swigobj,_swigarg0)  (_swigobj->AppendMessage(_swigarg0))
 static PyObject *_wrap_MailFolder_AppendMessage(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
+    bool  _result;
     MailFolder * _arg0;
     Message * _arg1;
     char * _argc0 = 0;
@@ -375,9 +376,8 @@ static PyObject *_wrap_MailFolder_AppendMessage(PyObject *self, PyObject *args) 
         return NULL;
         }
     }
-    MailFolder_AppendMessage(_arg0,*_arg1);
-    Py_INCREF(Py_None);
-    _resultobj = Py_None;
+    _result = (bool )MailFolder_AppendMessage(_arg0,*_arg1);
+    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
 

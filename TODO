@@ -94,11 +94,9 @@ VZ:
 
 ******* Priorities for KB: ******************************
 
-- fixe m_UpdateNeeded handling/use in MailFolderCCx
 - before doing ping, change to logging for window only and restore(!)
   old settings(!) afterwards to suppress error messages for closed POP
   folders
-- add separate PING interval in folder config
 - when sending message failed, don't make it readonly but rebuild it
   after editing
 - change main frame icon when new mail in mainframe folder
