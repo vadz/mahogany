@@ -116,12 +116,12 @@ wxIconManager::LoadImage(String filename)
 #else
       return NULL; // fail
 #endif
-
+   }
    // this is the actual XPM loading:
    size_t maxlines = WXICONMANAGER_DEFAULTSIZE;
    size_t line = 0;
    
-   char **cpptr = malloc(maxlines * sizeof(char *));
+   char **cpptr = (char **) malloc(maxlines * sizeof(char *));
    ASSERT(cpptr);
 
    ifstream in(filename);
@@ -134,14 +134,14 @@ wxIconManager::LoadImage(String filename)
          if(line == maxlines)
          {
             maxlines = maxlines + maxlines/2;
-            cpptr = realloc(cpptr,maxlines * sizeof(char *));
+            cpptr = (char **) realloc(cpptr,maxlines * sizeof(char *));
             ASSERT(cpptr);
          }
          strutil_getstrline(in,str);
          cpptr[line++] = strutil_strdup(str);
       }while(! in.fail());
       cpptr[line++] = NULL;
-      cpptr = realloc(cpptr,line*sizeoff(char *));
+      cpptr = realloc(cpptr,line*sizeof(char *));
       ASSERT(cpptr);
    }
    else
