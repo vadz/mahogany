@@ -101,7 +101,6 @@ wxMApp::wxMApp(void)
 
 wxMApp::~wxMApp()
 {
-   if(m_IconManager) delete m_IconManager;
 }
 
 // app initilization
@@ -150,6 +149,8 @@ MFrame *wxMApp::CreateTopLevelFrame()
 
 int wxMApp::OnExit()
 {
+   if(m_IconManager) delete m_IconManager;
+
    MObject::CheckLeaks();
 
    wxLogWindow *log = (wxLogWindow *)wxLog::GetActiveTarget();
