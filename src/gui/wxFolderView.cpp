@@ -739,7 +739,7 @@ void
 wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
 {
    m_FolderView = fv;
-   SetTitle(String("Mahogany: " + m_FolderView->GetFolder()->GetName()));
+   SetTitle(m_FolderView->GetFolder()->GetName());
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands
    m_ToolBar = CreateToolBar();
@@ -781,7 +781,6 @@ wxFolderViewFrame::wxFolderViewFrame(String const &name, wxMFrame *parent)
 {
    m_FolderView = NULL;
 
-   SetTitle(String("M: " + name));
    // menu
    AddFileMenu();
    AddEditMenu();

@@ -777,7 +777,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
                                                  filename);
          wxMessageViewFrame * f = GLOBAL_NEW
             wxMessageViewFrame(mf, 0, NULL, m_Parent);
-         f->SetTitle("M : " + mimetype);
+         f->SetTitle(mimetype);
          mf->DecRef();
       }
       wxRemoveFile(filename);

@@ -334,7 +334,8 @@ wxToolBar *
 wxMFrame::CreateToolBar(void)
 {
    wxToolBar *tb =
-      wxFrame::CreateToolBar(wxTB_DOCKABLE|wxTB_FLAT|wxTB_HORIZONTAL);
+      wxFrame::CreateToolBar(wxTB_DOCKABLE|wxTB_FLAT|wxTB_HORIZONTAL,-1,
+                             _("Mahogany Toolbar"));
    tb->SetMargins(2,2);
    return tb;
 }
