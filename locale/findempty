@@ -1,0 +1,8 @@
+#!/bin/sh
+# $Id$
+# small script to find empty translations
+
+
+cat $1 |
+sed '1,$ s/msgstr ""/msgstr/g' |
+msgfmt -v - 2>&1 | sed "1,$ s/^.*:\(.*\):.*$/missing translation before line: \1/g"
