@@ -897,8 +897,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1, },
 
-   { "\n"
-     gettext_noop("If your SMTP server supports 8BITMIME ESMTP extension\n"
+   { gettext_noop("\n"
+                  "If your SMTP server supports 8BITMIME ESMTP extension\n"
                   "Mahogany may send 8 bit data without encoding it. If\n"
                   "the server doesn't support it, the data will be encoded\n"
                   "properly, so there is normally no risk in setting this "
@@ -919,12 +919,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif
    },
 
-   { "\n"
-     gettext_noop(
-      "Some SMTP or NNTP servers require a user name/login.\n"
-      "You might need to enter the e-mail address provided by\n"
-      "your ISP either with or without the part after '@':\n"
-      "please follow the ISP instructions about this."),
+   { gettext_noop("\n"
+                  "Some SMTP or NNTP servers require a user name/login.\n"
+                  "You might need to enter the e-mail address provided by\n"
+                  "your ISP either with or without the part after '@':\n"
+                  "please follow the ISP instructions about this."),
                                                    Field_Message, -1,                        },
    { gettext_noop("SMTP server &user ID"),         Field_Text,
 #ifdef USE_SENDMAIL
@@ -937,16 +936,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("NNTP server user &ID"),         Field_Text,   -1,           },
    { gettext_noop("NNTP server pass&word"),        Field_Passwd, ConfigField_NewsServerLogin,           },
 
-   { "\n"
-     gettext_noop("If you use SMTP authentification, you may also\n"
+   { gettext_noop("\n"
+                  "If you use SMTP authentification, you may also\n"
                   "have to specify a \"Sender:\" header.\n"
                   "Mahogany tries to guess it, but if it doesn't work\n"
                   "you can try to override it."),  Field_Message, ConfigField_MailServerLogin },
    { gettext_noop("Try to guess SMTP sender header"), Field_Bool | Field_Advanced, ConfigField_MailServerLogin,           },
    { gettext_noop("SMTP sender header"), Field_Text | Field_Advanced, -ConfigField_GuessSender,           },
 
-   { "\n"
-     gettext_noop("Final complication with SMTP authentification is that\n"
+   { gettext_noop("\n"
+                  "Final complication with SMTP authentification is that\n"
                   "some servers (notably qmail and Exim 3) advertise the\n"
                   "authentification mechanisms which they don't support.\n"
                   "To use such broken servers you need to explicitly disable\n"
@@ -986,8 +985,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_SSL
 
 #ifdef USE_DIALUP
-   { "\n"
-     gettext_noop("Mahogany has support for dial-up networks and can detect if the\n"
+   { gettext_noop("\n"
+                  "Mahogany has support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
                   "network. To aid in detecting the network status, you can specify a beacon\n"
                   "host which should only be reachable if the network is up, e.g. the WWW\n"
@@ -1003,10 +1002,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // platform
 #endif // USE_DIALUP
 
-   { "\n"
-    gettext_noop("The following timeout values are used for TCP connections to\n"
-                 "remote mail or news servers.\n"
-                 "Try increasing them if your connection is slow."),
+   { gettext_noop("\n"
+                  "The following timeout values are used for TCP connections to\n"
+                  "remote mail or news servers.\n"
+                  "Try increasing them if your connection is slow."),
                                                    Field_Message | Field_Global | Field_Advanced, -1 },
    { gettext_noop("&Open timeout (in seconds)"),   Field_Number | Field_Global | Field_Advanced,    -1,                        },
 #ifdef USE_TCP_TIMEOUTS
@@ -1550,16 +1549,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&External editor"),            Field_File,    -1                      },
    { gettext_noop("Always &use it"),              Field_Bool, ConfigField_ExternalEditor },
 #ifdef USE_OPENSSL
-   { "\n"
-     gettext_noop("Mahogany can use SSL (Secure Sockets Layer) for secure,\n"
+     gettext_noop("\n"
+                  "Mahogany can use SSL (Secure Sockets Layer) for secure,\n"
                   "encrypted communications, if you have the libssl and libcrypto\n"
                   "shared libraries (DLLs) on your system."),
      Field_Message, -1                     },
    { gettext_noop("Location of lib&ssl"),         Field_File,    -1                     },
    { gettext_noop("Location of libcr&ypto"),      Field_File,    -1                     },
 #endif // USE_OPENSSL
-   { "\n"
-     gettext_noop("GNU Privacy Guard or a compatible program may be used\n"
+   { gettext_noop("\n"
+                  "GNU Privacy Guard or a compatible program may be used\n"
                   "to verify the cryptographic signatures of the messages\n"
                   "you receive and decrypt them."), Field_Message, -1 },
    { gettext_noop("&GPG command"),                Field_File,    -1                      },
