@@ -1229,16 +1229,19 @@ strutil_readString(String &string, bool *success)
 
 /* Return an escaped string. */
 String
-strutil_escapeString(const String &string)
+strutil_escapeString(const String& string)
 {
    String newstr;
-   for(const char *cptr = string.c_str();
-       *cptr; cptr++)
+   newstr.reserve(string.length());
+
+   for ( const char *cptr = string.c_str(); *cptr; cptr++ )
    {
-      if(*cptr == '\\' || *cptr == '"')
+      if ( *cptr == '"' )
          newstr << '\\';
+
       newstr << *cptr;
    }
+
    return newstr;
 }
 
