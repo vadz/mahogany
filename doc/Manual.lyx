@@ -134,7 +134,7 @@ Open with...
 \begin_inset Quotes erd
 \end_inset 
 
- command for attachment context menu
+ command in attachment context menu
 \layout Itemize
 
 A new option to automatically select the units for message size (KB/MB)
