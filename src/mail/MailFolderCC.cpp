@@ -1921,7 +1921,7 @@ void MailFolderCC::CreateFileFolder()
 
          FileMailboxFormat format = m_mfolder->GetFileMboxFormat();
 
-         if ( format >= WXSIZEOF(cclient_drivers) )
+         if ( format >= (int)WXSIZEOF(cclient_drivers) )
          {
             FAIL_MSG( _T("invalid file mailbox format!") );
 
