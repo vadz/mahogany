@@ -1086,7 +1086,8 @@ wxString wxPFileSelector(const wxString& configPath,
         wxString path, name, ext;
         wxSplitPath(filename, &path, &name, &ext);
 
-        name << '.' << ext;
+        if(ext.Length())
+           name << '.' << ext;
         config->Write(configValueFile, name);
         config->Write(configValuePath, path);
     }
