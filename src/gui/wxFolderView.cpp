@@ -121,8 +121,11 @@ public:
          // leave it as it is SetForegroundColour( fg );
          // we want to use fg as the default item colour
          SetBackgroundColour( bg );
-         SetFont( * new wxFont( fontSize, fontFamily,
-                                wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL ) );
+         // I hate wxWindows using references! :-( KB
+         wxFont * font = new wxFont( fontSize, fontFamily,
+                                wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
+         SetFont( *font  );
+         delete font;
       }
 protected:
    long m_Style;
