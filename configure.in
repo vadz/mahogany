@@ -83,7 +83,7 @@ M_OVERRIDES(modules,modules,USE_MODULES,auto,
 --with-modules=xxx      one of static/none/dynamic)
 
 M_OVERRIDES(ssl,SSL support,USE_SSL,1,
---with-ssl=DIR          path to SSL directories (requires openSSL))
+--with-ssl=DIR          path to SSL directories (requires OpenSSL))
 
 AC_MSG_CHECKING(for install location)
 case "$prefix" in
@@ -375,8 +375,7 @@ case "$USE_SSL" in
 	[AC_MSG_CHECKING(for openssl/ssl.h in $USE_SSL/include)
 	if test -f "$USE_SSL"/include/openssl/ssl.h
 	then	AC_MSG_RESULT(yes)
-		ssl_option=oklib
-		CPPFLAGS="$CPPFLAGS -I$USE_SSL/include"
+		ssl_option=okdir
 	else	AC_MSG_RESULT(no)
 		ssl_option=fail
 	fi]) ;;
@@ -393,18 +392,20 @@ fail)	AC_MSG_WARN([Cannot find openssl/ssl.h - SSL support disabled])
 ok*)	AC_CHECK_FUNC(socket,, AC_CHECK_LIB(socket,socket))
 	AC_CHECK_FUNC(gethostname,, AC_CHECK_LIB(resolv,gethostname))
 	AC_CHECK_FUNC(gethostbyname,, AC_CHECK_LIB(nsl,gethostbyname))
-	LIBS="-lssl -lcrypto $LIBS" 
-	case "$ssl_option" in oklib) LIBS="-L$USE_SSL/lib $LIBS" ;; esac
 	MAKE_USESSL="USESSL=yes"
 	CCLIENT_EXTRAAUTHENTICATORS="\"EXTRAAUTHENTICATORS=ssl\""
-	AC_DEFINE(USE_SSL)
+	AC_DEFINE(USE_SSL)dnl
 	# We assume no idea/no dsa/no rsa as this is easiest
 	# to compile. It doesn't matter anyway as we load openssl
 	# later, but we must be able to compile the header file.
-	AC_DEFINE(NO_IDEA)
-	AC_DEFINE(NO_DSA)
-	AC_DEFINE(NO_RSA)
-	CCLIENT_EXTRACFLAGS="\"EXTRACFLAGS=-DNO_IDEA -DNO_DSA -DNO_RSA\""
+	AC_DEFINE(NO_IDEA)AC_DEFINE(NO_DSA)AC_DEFINE(NO_RSA)dnl
+	CCLIENT_EXTRACFLAGS="-DNO_IDEA -DNO_DSA -DNO_RSA"
+	LIBS="-lssl -lcrypto $LIBS" 
+	case "$ssl_option" in okdir)
+		CCLIENT_EXTRACFLAGS="-I$USE_SSL/include $CCLIENT_EXTRACFLAGS"
+		CPPFLAGS="$CPPFLAGS -I$USE_SSL/include"
+		LIBS="-L$USE_SSL/lib $LIBS"
+	;; esac
 esac
 AC_SUBST(MAKE_USESSL)
 AC_SUBST(CCLIENT_EXTRAAUTHENTICATORS)
