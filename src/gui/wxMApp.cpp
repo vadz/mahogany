@@ -217,8 +217,8 @@ wxMLogWindow::wxMLogWindow(wxFrame *pParent, const char *szTitle)
    frame->SetSize(x, y, w, h);
    frame->SetIcon(ICON("MLogFrame"));
    m_hasWindow = true;
-   Show();
    frame->Iconize(i);
+   Show();
 }
 
 bool wxMLogWindow::IsShown() const
