@@ -716,7 +716,7 @@ match:
          while ( wxIsalpha(*q) )
             q++;
 
-         if ( wxStrchr(_T(" .,:;"), *q) )
+         if ( *q == _T(' ') || (wxStrchr(_T(".,:;"), *q) && q[1] == _T(' ')) )
          {
             // looks like we've a word (i.e. sequence of letters terminated by
             // space or punctuation) at the start of the next line
