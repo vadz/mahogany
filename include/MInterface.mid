@@ -62,7 +62,7 @@ wxDefaultSize, style);
 
 
 FUNCTION(CreateMessage, Message *, (
-ARG(STRING, text),
+ARG(STRINGA, text),
 ARG(UIDTYPE, uid, = UID_ILLEGAL),
 ARG(Profile *, profile, =NULL)
 ),

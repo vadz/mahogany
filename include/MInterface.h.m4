@@ -48,7 +48,7 @@ virtual MAppBase * GetMApplication (void) = 0;
 
 
 virtual Profile * CreateProfile (
-const char * classname ,
+const wxChar * classname ,
 Profile * parent =NULL
 ) = 0;
 
@@ -59,7 +59,7 @@ virtual Profile * GetGlobalProfile (void) = 0;
 
 
 virtual Profile * CreateModuleProfile (
-const char * classname ,
+const wxChar * classname ,
 Profile * parent =NULL
 ) = 0;
 
@@ -76,7 +76,7 @@ long int style =0
 
 
 virtual Message * CreateMessage (
-const wxChar * text ,
+const char * text ,
 UIdType uid = UID_ILLEGAL,
 Profile * profile =NULL
 ) = 0;

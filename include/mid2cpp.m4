@@ -14,7 +14,8 @@ $2
 
 static PREFIX`'Impl gs_`'PREFIX;')
 
-define(STRING, const char *)
+define(STRING, const wxChar *)
+define(STRINGA, const char *)
 define(INT, long int)
 define(UIDTYPE, UIdType)
 define(ARG, $1 $2)

@@ -52,7 +52,7 @@ virtual MAppBase * GetMApplication (void)
 
 
 virtual Profile * CreateProfile (
-const char * classname,
+const wxChar * classname,
 Profile * parent
 )
 {
@@ -73,7 +73,7 @@ virtual Profile * GetGlobalProfile (void)
 
 
 virtual Profile * CreateModuleProfile (
-const char * classname,
+const wxChar * classname,
 Profile * parent
 )
 {
@@ -101,7 +101,7 @@ wxDefaultSize, style);
 
 
 virtual Message * CreateMessage (
-const wxChar * text,
+const char * text,
 UIdType uid,
 Profile * profile
 )
