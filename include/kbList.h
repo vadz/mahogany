@@ -3,24 +3,10 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$          *
- *                                                                  *
+ * $Id$
  * $Log$
- * Revision 1.5  1998/06/22 22:32:22  VZ
- * miscellaneous fixes for Windows compilation
- *
- * Revision 1.4  1998/06/14 12:24:03  KB
- * started to move wxFolderView to be a panel, Python improvements
- *
- * Revision 1.3  1998/05/24 14:47:17  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.2  1998/05/18 17:48:22  KB
- * more list<>->kbList changes, fixes for wxXt, improved makefiles
- *
- * Revision 1.1  1998/05/13 19:01:42  KB
- * added kbList, adapted MimeTypes for it, more python, new icons
+ * Revision 1.6  1998/06/27 20:06:10  KB
+ * Added my layout code.
  *
  *******************************************************************/
 
@@ -183,7 +169,7 @@ public:
    */
    void insert(iterator & i, void *element);
 
-   /** Erase an element.
+   /** Erase an element, move iterator to following element.
        @param i iterator pointing to the element to be deleted
    */
    void erase(iterator & i);
@@ -291,10 +277,9 @@ public: \
       { return kbList::tail(); } \
 }
 
-/// a simple define
-#define   KBLIST_SDEFINE(type)   KBLIST_DEFINE(kb##type##List, type)
-
+#ifdef   MCONFIG_H
 /// define the most commonly used list type once:
 KBLIST_DEFINE(kbStringList, String);
+#endif
 
 #endif // KBLIST_H

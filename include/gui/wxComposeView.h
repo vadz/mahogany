@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.10  1998/06/27 20:06:11  KB
+ * Added my layout code.
+ *
  * Revision 1.9  1998/06/14 21:33:38  KB
  * fixed the menu/callback problem, wxFolderView is now a panel
  *
@@ -57,6 +60,8 @@
 class wxFTOList;
 class wxComposeView;
 class wxFTCanvas;
+class wxLayoutWindow;
+
 
 
 /// just for now, FIXME!
@@ -191,7 +196,8 @@ private:
    wxText	*txtSubject;
    wxMessage	*txtSubjectLabel;
    /// the canvas for displaying the mail
-   wxFTCanvas	*ftCanvas;
+   //wxFTCanvas	*ftCanvas;
+   wxLayoutWindow *m_LayoutWindow;
    /// the alias expand button
    wxButton	*aliasButton;
    //@}
