@@ -813,10 +813,15 @@ extern "C"
          break;
          case MSO_SUBJECT:
          case MSO_SUBJECT_REV:
+         {
+            String
+               subj1 = strutil_removeReplyPrefix(i1->GetSubject()),
+               subj2 = strutil_removeReplyPrefix(i2->GetSubject());
+            
             result = criterium == MSO_SUBJECT ?
-               Stricmp(i1->GetSubject(), i2->GetSubject())
-               : -Stricmp(i1->GetSubject(), i2->GetSubject());
-            break;
+               Stricmp(subj1, subj2) : -Stricmp(subj1, subj2);
+         }
+         break;
          case MSO_AUTHOR:
          case MSO_AUTHOR_REV:
             result = criterium == MSO_SUBJECT ?

@@ -1,5 +1,6 @@
 (next release) on (date of next release)
 
+12.08.99 KB: message sorting now ignores reply prefix in sort by subject
 06.08.99 VZ: GUI support for IMAP directories and news hierarchies
 27.07.99 KB: XFaces load any kind of file, dialog for configuring it. New icons.
 25.07.99 VZ: ADB export added (currently CSV/text only)

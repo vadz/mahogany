@@ -303,6 +303,10 @@ String strutil_ftime(time_t time, const String & format = "%c",
                      bool gmtflag = false);
 
 
+/* Removes Re: Re[n]: Re(n): and the local translation of
+   it from the beginning of a subject line, used by sorting routines. */
+String
+strutil_removeReplyPrefix(const String &isubject);
     
 //@}
 
