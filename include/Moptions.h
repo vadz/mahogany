@@ -776,7 +776,7 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_COMPOSE_USE_SIGNATURE_NAME   "ComposeInsertSignature"
 /// filename of signature file
 #define   MP_COMPOSE_SIGNATURE_NAME      "SignatureFile"
-/// use "--" to separate signature in composition?
+/// use "-- " to separate signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_NAME   "ComposeSeparateSignature"
 
 /// use XFace in composition?
@@ -1570,7 +1570,7 @@ extern const MOption MP_AWAY_STATUS;
 #else
 #  define   MP_COMPOSE_SIGNATURE_DEFVAL      "$HOME/.signature"
 #endif
-/// use "--" to separate signature in composition?
+/// use "-- " to separate signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_DEFVAL   1
 
 /// use XFace in composition?
