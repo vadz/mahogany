@@ -530,6 +530,18 @@ wxMApp::AllowBgProcessing() const
    return !gs_mutexBlockBg.IsLocked();
 }
 
+void
+wxMApp::EnterCritical()
+{
+   gs_mutexBlockBg.Lock();
+}
+
+void
+wxMApp::LeaveCritical()
+{
+   gs_mutexBlockBg.Unlock();
+}
+
 #ifdef __WXDEBUG__
 
 void
@@ -558,9 +570,12 @@ wxMApp::OnAssert(const wxChar *file, int line,
 bool
 wxMApp::Yield(bool onlyIfNeeded)
 {
-   // try to not crash...
    if ( gs_mutexBlockBg.IsLocked() )
-      return false;
+   {
+      // background processing already disabled, hopefully it's ok to yield
+      // now...
+      return wxApp::Yield(onlyIfNeeded);
+   }
 
    // don't allow any calls to c-client from inside wxYield() neither as it is
    // implicitly (!) called by wxProgressDialog which is shown from inside some

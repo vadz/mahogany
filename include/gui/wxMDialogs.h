@@ -94,6 +94,13 @@ public:
    {
    }
 
+private:
+   // forbid background processing during the life time of the progress dialog
+   // object: this can lead to nasty reentrancies if, e.g. a timer fires while
+   // we're retrieving headers for the folder and results in a reentrant call
+   // to c-client
+   MAppCriticalSection m_appCS;
+
    DECLARE_NO_COPY_CLASS(MProgressDialog)
 };
 

@@ -155,6 +155,8 @@ public:
 #endif // USE_DIALUP
 
    virtual bool AllowBgProcessing() const;
+   virtual void EnterCritical();
+   virtual void LeaveCritical();
 
    /// updates display of outbox status
    virtual void UpdateOutboxStatus(class MailFolder *mf = NULL) const;

@@ -220,6 +220,23 @@ public:
     */
    virtual bool AllowBgProcessing() const = 0;
 
+   /**
+      Start critical section inside which background processing should be
+      disallowed.
+
+      EnterCritical() is not reentrant, it is an error to call it if
+      AllowBgProcessing() already returns false.
+
+      Consider using MAppCriticalSection instead of manually calling
+      EnterCritical() and LeaveCritical().
+    */
+   virtual void EnterCritical() = 0;
+
+   /**
+      Leave critical section entered by EnterCritical().
+    */
+   virtual void LeaveCritical() = 0;
+
    //@}
 
    /** @name "Away" or unattended mode support
@@ -581,6 +598,15 @@ extern "C"
    void FatalError(const wxChar *message);
 };
 
+/**
+   Call mApplication->EnterCritical() in ctor and LeaveCritical() in dtor.
+ */
+class MAppCriticalSection
+{
+public:
+   MAppCriticalSection() { mApplication->EnterCritical(); }
+   ~MAppCriticalSection() { mApplication->LeaveCritical(); }
+};
 
 /** A small class that locks the given Mutex during its existence. */
 class MMutexLocker
