@@ -2330,7 +2330,7 @@ wxFolderView::OpenFolder(MFolder *folder)
 
    int flags = folder->GetFlags();
 
-   // special check for IMAP servers (i.e. IMAP folders withotu path): we
+   // special check for IMAP servers (i.e. IMAP folders without path): we
    // create by default just the entry for the server but the user needs to
    // work with the mailboxes on the IMAP server, at least with INBOX, so ask
    // him if he wants to do it first
