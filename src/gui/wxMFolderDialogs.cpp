@@ -303,21 +303,44 @@ public:
 // folder selection dialog: contains the folder tree inside it
 // ----------------------------------------------------------------------------
 
+static const int wxID_FILE_SELECT = 100;
+
 class wxFolderSelectionDialog : public wxDialog
 {
 public:
-   wxFolderSelectionDialog(wxWindow *parent, MFolder *folder);
+   wxFolderSelectionDialog(wxWindow *parent,
+                           MFolder *folder,
+                           bool allowFiles = false);
    ~wxFolderSelectionDialog() { SafeDecRef(m_folder); }
+
+   // what was selected, a real folder or a filename?
+   bool IsFile() const { return !!m_filename; }
+
+   // get the chosen folder
+   MFolder *GetFolder() const
+   {
+      wxASSERT_MSG( !IsFile(), "file selected but retrieving folder" );
+
+      SafeIncRef(m_folder);
+      return m_folder;
+   }
+
+   // get the chosen file name
+   wxString GetFile() const
+   {
+      wxASSERT_MSG( IsFile(), "folder selected but retrieving file" );
+
+      return m_filename;
+   }
 
    // callbacks
    void OnOK(wxCommandEvent& event);
    void OnCancel(wxCommandEvent& event);
-
-   // get the chosen folder
-   MFolder *GetFolder() const { SafeIncRef(m_folder); return m_folder; }
+   void OnFile(wxCommandEvent& event);
 
 private:
-   MFolder *m_folder;
+   wxString      m_filename;  // if not empty, file was selected
+   MFolder      *m_folder;
    wxFolderTree *m_tree;
 
    DECLARE_EVENT_TABLE()
@@ -349,6 +372,7 @@ END_EVENT_TABLE()
 BEGIN_EVENT_TABLE(wxFolderSelectionDialog, wxDialog)
    EVT_BUTTON(wxID_OK,     wxFolderSelectionDialog::OnOK)
    EVT_BUTTON(wxID_CANCEL, wxFolderSelectionDialog::OnCancel)
+   EVT_BUTTON(wxID_FILE_SELECT, wxFolderSelectionDialog::OnFile)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -1338,12 +1362,16 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
 // -----------------------------------------------------------------------------
 // wxFolderSelectionDialog
 // -----------------------------------------------------------------------------
+
 wxFolderSelectionDialog::wxFolderSelectionDialog(wxWindow *parent,
-                                                 MFolder *folder)
+                                                 MFolder *folder,
+                                                 bool allowFiles)
                        : wxDialog(GET_PARENT_OF_CLASS(parent, wxFrame), -1,
                                   _("Please choose a folder"),
                                   wxDefaultPosition, wxDefaultSize,
-                                  wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+                                  wxDEFAULT_DIALOG_STYLE |
+                                  wxRESIZE_BORDER |
+                                  wxDIALOG_MODAL)
 {
    SetAutoLayout(TRUE);
    m_folder = folder;
@@ -1352,11 +1380,22 @@ wxFolderSelectionDialog::wxFolderSelectionDialog(wxWindow *parent,
    // other controls
    size_t heightLabel = AdjustCharHeight(GetCharHeight());
    int hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
-      wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
+       wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
 
    // layout the controls: the folder tree takes all the dialog except for the
    // buttons below it
    wxLayoutConstraints *c;
+
+   if ( allowFiles )
+   {
+      wxButton *btnFile = new wxButton(this, wxID_FILE_SELECT, _("File..."));
+      c = new wxLayoutConstraints;
+      c->left.SameAs(this, wxRight, -3*(LAYOUT_X_MARGIN + wBtn));
+      c->width.Absolute(wBtn);
+      c->height.Absolute(hBtn);
+      c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
+      btnFile->SetConstraints(c);
+   }
 
    wxButton *btnOk = new wxButton(this, wxID_OK, _("OK"));
    btnOk->SetDefault();
@@ -1383,9 +1422,32 @@ wxFolderSelectionDialog::wxFolderSelectionDialog(wxWindow *parent,
    c->bottom.SameAs(btnOk, wxTop, LAYOUT_Y_MARGIN);
    m_tree->GetWindow()->SetConstraints(c);
 
-   // set the (initial) window size
-   wxWindow::SetSize(4*wBtn, 10*hBtn);
+   // set the initial and minimal window size
+   int wDlg = 4*wBtn,
+       hDlg = 10*hBtn;
+
+   if ( allowFiles )
+   {
+      wDlg += 2*wBtn;
+   }
+
+   wxWindow::SetSize(wDlg, hDlg);
+   SetSizeHints(wDlg, hDlg);
    Centre(wxCENTER_FRAME | wxBOTH);
+}
+
+void wxFolderSelectionDialog::OnFile(wxCommandEvent& /* event */)
+{
+   wxFileDialog dialog(this, "", "", "",
+                       _("All files (*.*)|*.*"),
+                       wxHIDE_READONLY | wxFILE_MUST_EXIST);
+
+   if ( dialog.ShowModal() == wxID_OK )
+   {
+      m_filename = dialog.GetPath();
+
+      EndModal(TRUE);
+   }
 }
 
 void wxFolderSelectionDialog::OnOK(wxCommandEvent& /* event */)
@@ -1397,6 +1459,7 @@ void wxFolderSelectionDialog::OnOK(wxCommandEvent& /* event */)
 
 void wxFolderSelectionDialog::OnCancel(wxCommandEvent& /* event */)
 {
+   m_filename.Empty();
    m_folder = NULL;
 
    EndModal(FALSE);

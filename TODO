@@ -9,7 +9,7 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
-9		New Mail dialog for non-collected messages shows empty 
+9		New Mail dialog for non-collected messages shows empty
 		subject and from
 9		changing properties for IMAP folder (auto-collect)
 		occasionally dumps core on [OK] click
@@ -18,10 +18,10 @@ $Id$
 7 gtk		Mahogany occasionally doesn't terminate but remains in
 		gtk event loop without any open windows.
 6	KB	add a message status marker for "Unread"
-5		wxLayout editing glitches & cursor positioning bug	
+5		wxLayout editing glitches & cursor positioning bug
 		selections via keyboard still broken
 		speed up wxLayout scrollbar setting, *way* too slow
-		now 
+		now
 6	VZ	All Folder create dialog pages have no HelpIDs set.
 5	KB	for NNTP only count unread/new messages
 3		foldername in password prompt seems wrong
@@ -48,14 +48,14 @@ $Id$
 2	VZ	Would it be possible to set the icon in the treectrl
 		on a per-folder basis? I'd like to read the iconname
 		from the folder profile, that would allow nice things
-		such as a "trash/junk" folder, etc. 
+		such as a "trash/junk" folder, etc.
 
 5	VZ	Could you have a look at the setting of the default
 		columns sizes in wxFolderView.cpp, please?  Currently
 		it gets called in the constructor which doesn't work
 		properly, but moving that code to Clear(), using a
 		SetConfigPath(), just before RestoreWidths() is
-		called, didn't work either.  
+		called, didn't work either.
 
 7	KB	write tutorial bit in Manual.lyx
 7	KB	finish ASMailFolder classes
@@ -67,15 +67,15 @@ $Id$
 
 5	VZ	when installing, create a welcome message in "New
 		Mail". Also, create a default address book with
-		m-users/m-developers entries in it. Also add entry for 
+		m-users/m-developers entries in it. Also add entry for
 		autocollect book. Wait for MessageCC(const String &)
-		constructor. 
+		constructor.
 7	KB	add group reply/followup functionality
 5		add goto_next_unread to folderview
 5		add more buttons to folderview, such as
 		next/previous/goto_next_unread
 4		improve key bindings for message editor, page up/down
-		whole page 
+		whole page
 
 *********************************************************************
 *** TESTS
@@ -97,7 +97,7 @@ $Id$
 - subscription management for NNTP/IMAP/newsspool
 - DND with KDE/Gnome filemanagers (now supported by wxGTK)
 - Templates/style-sheets for message composition and flexible reply
-  handling 
+  handling
 - Messages sorting, threading, scoring and searching
 - add wxWizard for the first time run
 - add tips on startup (a wxTipDialog class?)
@@ -120,7 +120,7 @@ $Id$
 - if time permits: vcard-import
 - add a popup dialog to edit message headers in composeview
 
-- document python callback behaviour for incoming folders, possibly do 
+- document python callback behaviour for incoming folders, possibly do
   testing for callback results in CollectOneFolder!!
 - add configure option for python path
 - more configurability for news
@@ -142,7 +142,7 @@ $Id$
 - add calendar tool/plugin
 - if exists, use /etc/M.conf or /etc/Mahogany.conf instead of
   prefix/Mahogany/M.conf.
-- merge in settings from some remote location, possibly using ftp/http 
+- merge in settings from some remote location, possibly using ftp/http
 - use wxHtmlHelp classes ? use gtkxmhtml widget?
 
 - add SIGSEGV handler for safe exit, to attempt and safe things
