@@ -3426,7 +3426,7 @@ bool MailFolderCC::CanSendUpdateEvents() const
    //
    // also, if the application is shutting down, there is no point in send
    // events
-   return !m_InFilterCode->IsLocked() && mApplication->IsRunning();
+   return !m_InFilterCode->IsLocked() && !mApplication->IsShuttingDown();
 }
 
 void

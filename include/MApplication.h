@@ -46,6 +46,7 @@ public:
 #ifndef SWIGCODE
    MAppBase(void);
 #endif
+
    virtual ~MAppBase();
 
    /** create the main application window
@@ -187,10 +188,16 @@ public:
    /// called by the main frame when it's closed
    void OnMainFrameClose() { m_topLevelFrame = NULL; }
 
+   /// @name What are we doing?
+   //@{
    /** Returns TRUE if the application has been initialized and is not yet
        being shut down
    */
-   bool IsRunning() const { return m_topLevelFrame != NULL; }
+   bool IsRunning() const { return m_cycle == Running; }
+
+   /** Returns TRUE if the application has started to shut down */
+   bool IsShuttingDown() const { return m_cycle == ShuttingDown; }
+   //@}
 
    virtual bool IsOnline(void) const = 0;
    virtual void GoOnline(void) const = 0;
@@ -311,13 +318,13 @@ protected:
    // -------------------------------------------------
 
    /// the application's toplevel window
-   MFrame  *m_topLevelFrame;
+   MFrame *m_topLevelFrame;
 
    /// the directory of the M global data tree
-   String   m_globalDir;
+   String m_globalDir;
 
    /// the directory of the User's M data files
-   String   m_localDir;
+   String m_localDir;
 
    /// a list of all known mime types
    wxMimeTypesManager *m_mimeManager;
@@ -332,16 +339,27 @@ protected:
    class MailFolderList *m_KeepOpenFolders;
    /// the list of all constantly open folders to check for new mail
    class MailCollector *m_MailCollector;
+
    /// registration seed for EventManager
    void *m_eventNewMailReg;
    void *m_eventOptChangeReg;
    void *m_eventFolderUpdateReg;
+
    /// do we support dialup networking
    bool m_DialupSupport;
    /// do we use an Outbox?
    bool m_UseOutbox;
+
    /// list of frames to not ask again in CanClose()
    ArrayFrames *m_framesOkToClose;
+
+   /// where are we in the application life cycle?
+   enum LifeCycle
+   {
+      Initializing,
+      Running,
+      ShuttingDown
+   } m_cycle;
 };
 
 extern MAppBase *mApplication;

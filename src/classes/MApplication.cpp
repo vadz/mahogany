@@ -146,6 +146,8 @@ MAppBase::MAppBase()
 
    m_mimeManager = NULL;
 
+   m_cycle = Initializing;
+
    ResetLastError();
 }
 
@@ -414,6 +416,10 @@ MAppBase::OnStartup()
    // create and show the main program window
    CreateTopLevelFrame();
 
+   // now we have finished the vital initialization and so can assume
+   // everything mostly works
+   m_cycle = Running;
+
    // update status of outbox once:
    UpdateOutboxStatus();
 
@@ -451,6 +457,7 @@ MAppBase::OnStartup()
 
    // initialise collector object for incoming mails
    // ----------------------------------------------
+
    // only do it if we are using the NewMail folder at all
    m_MailCollector = MailCollector::Create();
    if( READ_CONFIG(m_profile, MP_COLLECTATSTARTUP) != 0)
@@ -466,7 +473,9 @@ MAppBase::OnStartup()
 
    // register with the event subsystem
    // ---------------------------------
+
    m_eventNewMailReg = MEventManager::Register(*this, MEventId_NewMail);
+
    // should never fail...
    CHECK( m_eventNewMailReg, FALSE,
           "failed to register event handler for new mail event " );
@@ -524,6 +533,8 @@ MAppBase::OnAbnormalTermination()
 void
 MAppBase::OnShutDown()
 {
+   m_cycle = ShuttingDown;
+
    // Try to store our remotely synchronised configuration settings
    extern bool SaveRemoteConfigSettings();
    if(! SaveRemoteConfigSettings() )
