@@ -54,7 +54,7 @@ protected:
 // this filter has a high priority as it should be normally applied before
 // all the filters working on the message body
 IMPLEMENT_VIEWER_FILTER(TrailerFilter,
-                        ViewFilter::Priority_High + 1,
+                        ViewFilter::Priority_High + 5,
                         true,      // initially enabled
                         _("Trailer"),
                         "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
