@@ -22,6 +22,8 @@
 
 #include "Mdefaults.h"
 
+#include "MDialogs.h"
+
 #include <wx/dynlib.h>
 
 extern const MOption MP_SSL_DLL_CRYPTO;
@@ -142,11 +144,13 @@ SSL_METHOD * SSLv23_client_method(void)
 
 } // extern "C"
 
-bool gs_SSL_loaded = FALSE;
-bool gs_SSL_available = FALSE;
+static bool gs_SSL_loaded = false;
+static bool gs_SSL_available = false;
 
 bool InitSSL(void) /* FIXME: MT */
 {
+   static bool s_errMsgGiven = false;
+
    if(gs_SSL_loaded)
       return gs_SSL_available;
 
@@ -199,7 +203,7 @@ bool InitSSL(void) /* FIXME: MT */
 #endif
 
    gs_SSL_available =
-   gs_SSL_loaded = TRUE;
+   gs_SSL_loaded = true;
 
    STATUSMESSAGE((_("Successfully loaded '%s' and '%s' - "
                     "SSL authentification is now available."),
@@ -208,7 +212,7 @@ bool InitSSL(void) /* FIXME: MT */
 
    ssl_onceonlyinit();
 
-   return TRUE;
+   return true;
 
 error:
    if ( cryptodll )
@@ -217,10 +221,46 @@ error:
    if ( ssldll )
       wxDllLoader::UnloadLibrary(ssldll);
 
-   return FALSE;
+   if ( !s_errMsgGiven )
+   {
+      ERRORMESSAGE((_("SSL authentication is not available.")));
+
+      s_errMsgGiven = true;
+
+      // show the log dialog first
+      wxLog::FlushActive();
+
+      MDialog_Message
+      (
+         _("You can change the locations of the SSL and crypto "
+           "libraries in the last page of the preferences dialog\n"
+           "if you have these libraries in non default location"
+           " or if they have some other names on your system."),
+         NULL,
+         "SSL tip",
+         "SSLLibTip"
+      );
+   }
+
+   return false;
 }
 
 #undef SSL_LOOKUP
 
-#endif // USE_SSL
+#else // !USE_SSL
+
+bool InitSSL(void)
+{
+   static bool s_errMsgGiven = false;
+   if ( !s_errMsgGiven )
+   {
+      s_errMsgGiven = true;
+
+      ERRORMESSAGE((_("This version of the program doesn't support SSL "
+                      "authentification.")));
+   }
+}
+
+#endif // USE_SSL/!USE_SSL
+
 

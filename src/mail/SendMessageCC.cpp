@@ -78,6 +78,8 @@
 #include <wx/file.h>
 #include <wx/fontmap.h> // for GetEncodingName()
 
+extern bool InitSSL(); // from src/util/ssl.cpp
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -1264,10 +1266,10 @@ SendMessageCC::Send(void)
          wxLogTrace(TRACE_SEND, "Trying to open connection to SMTP server '%s'",
                     m_ServerHost.c_str());
 #ifdef USE_SSL
-         if ( m_UseSSLforSMTP )
+         if ( m_UseSSLforSMTP && InitSSL() )
          {
             STATUSMESSAGE((_("Sending message via SSL...")));
-            service << "ssl";
+            service << "/ssl";
             if ( m_UseSSLUnsignedforSMTP )
                service << "/novalidate-cert";
          }
@@ -1289,10 +1291,10 @@ SendMessageCC::Send(void)
          wxLogTrace(TRACE_SEND, "Trying to open connection to NNTP server '%s'",
                     m_ServerHost.c_str());
 #ifdef USE_SSL
-         if ( m_UseSSLforNNTP )
+         if ( m_UseSSLforNNTP && InitSSL() )
          {
             STATUSMESSAGE((_("Posting message via SSL...")));
-            service << "ssl";
+            service << "/ssl";
             if ( m_UseSSLUnsignedforNNTP )
                service << "/novalidate-cert";
          }
