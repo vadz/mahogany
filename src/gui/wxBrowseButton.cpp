@@ -277,7 +277,10 @@ wxColorBrowseButton::~wxColorBrowseButton()
    }
    else
    {
-      // the text control had been already deleted
+      // the text control had been already deleted so the links in the event
+      // handler chain are broken but m_evtHandlerText still has m_text as next
+      // handler - reset it to avoid crashing in ~wxColorTextEvtHandler
+      m_evtHandlerText->SetNextHandler(NULL);
       delete m_evtHandlerText;
    }
 }
