@@ -602,9 +602,28 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
    wxFolderListCtrlFields col = GetColumnByIndex(m_columns, event.GetColumn());
    wxCHECK_RET( col != WXFLC_NONE, "should have a valid column" );
 
+   // we're going to change the sort order either for this profile in the
+   // advanced mode but the global sort order in the novice mode: otherwise,
+   // it would be surprizing for the novice user as he'd see one thing in the
+   // options dialog and another thing on the screen (the sorting page is not
+   // shown in the folder dialog in this mode)
+   Profile *profile = READ_APPCONFIG(MP_USERLEVEL) == M_USERLEVEL_NOVICE
+                        ? mApplication->GetProfile()
+                        : m_FolderView->GetProfile();
+
    // sort by this column: if we already do this, then toggle the sort
    // direction
-   long sortOrder = READ_CONFIG(m_FolderView->GetProfile(), MP_MSGS_SORTBY);
+   long sortOrder = READ_CONFIG(profile, MP_MSGS_SORTBY);
+   if ( profile != m_FolderView->GetProfile() )
+   {
+      if ( READ_CONFIG(m_FolderView->GetProfile(), MP_MSGS_SORTBY) != sortOrder )
+      {
+         // as we're going to change the global one but this profiles settings
+         // will override it!
+         wxLogDebug("Changing the sort order won't take effect.");
+      }
+   }
+
    wxArrayInt sortOrders = SplitSortOrder(sortOrder);
 
    MessageSortOrder orderCol = SortOrderFromCol(col);
@@ -655,11 +674,11 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
                sortOrders[0u] == orderCol ? "" :  _(" (reverse)"));
 
    sortOrder = BuildSortOrder(sortOrders);
-   m_FolderView->GetProfile()->writeEntry(MP_MSGS_SORTBY, sortOrder);
+   profile->writeEntry(MP_MSGS_SORTBY, sortOrder);
 
    MEventManager::Send(new MEventOptionsChangeData
                            (
-                            m_FolderView->GetProfile(),
+                            profile,
                             MEventOptionsChangeData::Ok
                            ));
 }
