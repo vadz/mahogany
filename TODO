@@ -8,8 +8,6 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9		first time message retrieval can happen twice, so all
-		new messages appear twice in NewMail
 
 6		implement temporary/fake Profile mode
 		--> add Suspend()/Discard()/Commit() methods to normal 
@@ -20,17 +18,11 @@ $Id$
 		  rather than the full RequestUpdate()
 		- reduce the scrollbar flickering somehow
 		- editing seems a bit slow (related to scrollbar flicker?)
-		- selections: do not exchange end/start while
-		  selecting but only at end, so moving selection
-		  across start behaves correctly
-		- selecting with keyboard uses mouse cursor as
-		  starting position :-)
-		- selection with cursor a bit funny
 		- editing leaks MObjects
 		- write editor plugin translating keysyms to actions
 		- scroll to cursor after Find()
 		- ctrl keys not recognised when CAPSLOCK is down
-
+		- accents don´t work
 		garbage at end of messages is back
 
 	KB	MessageView:
@@ -68,6 +60,9 @@ $Id$
 		changing option manually in config file does not work
 
 7	KB	adbframe: unknown icon
+
+9	VZ	deleting groups from an ADB book messes up the book and
+		deletes other non-selected groups and entries, too
 
 6	VZ	Adbframe: when creating new entry, the selection
 		should move to that, so it is displayed and can be
@@ -344,6 +339,14 @@ from 32bitsonline review:
 5	KB	(optionally, but on by default) expunge deleted messages when
 		the folder is closed - as noticed in 32bitonline comparison,
 		otherwise it's a nuisance.
+9		first time message retrieval can happen twice, so all
+		new messages appear twice in NewMail
+		- selections: do not exchange end/start while
+		  selecting but only at end, so moving selection
+		  across start behaves correctly
+		- selecting with keyboard uses mouse cursor as
+		  starting position :-)
+		- selection with cursor a bit funny
 
 
 

@@ -34,6 +34,9 @@
 #   endif // USE_PCH
 #   include "gui/wxlwindow.h"
 #   include "gui/wxlparser.h"
+
+#   include "MDialogs.h"
+#   include "strutil.h"
 #else
 #   ifdef   __WXMSW__
 #       include <wx/msw/private.h>
@@ -464,6 +467,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    {
       m_Selecting = false;
       m_llist->EndSelection();
+      m_llist->DiscardSelection(); //FIXME: correct?
    }
    
    // If we deleted the selection here, we must not execute the
@@ -550,13 +554,24 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       else
          m_llist->MoveCursorToEndOfLine();
       break;
-
    default:
-      if(keyCode == 'c' && ctrlDown)
-      {
-         // this should work even in read-only mode
-         Copy();
-      }
+      
+      if(ctrlDown && ! IsEditable())
+         switch(keyCode)
+         {
+         case 'c':
+            // this should work even in read-only mode
+            Copy();
+            break;
+         case 's': // search
+            Find("");
+            break;
+         case 't': // search again
+            FindAgain();
+            break;
+         default:
+            ;
+         }
       else if( IsEditable() )
       {
          /* First, handle control keys */
@@ -593,6 +608,12 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   m_llist->Delete(1);
                   SetDirty();
                }
+               break;
+            case 's': // search
+               Find("");
+               break;
+            case 't': // search again
+               FindAgain();
                break;
             case 'u':
                m_llist->DeleteToBeginOfLine();
@@ -668,13 +689,13 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
             case WXK_TAB:
                if ( !event.ShiftDown() )
                {
-                   // TODO should be configurable
-                   static const int tabSize = 8;
+                  // TODO should be configurable
+                  static const int tabSize = 8;
 
-                   CoordType x = m_llist->GetCursorPos().x;
-                   size_t numSpaces = tabSize - x % tabSize;
-                   m_llist->Insert(wxString(' ', numSpaces));
-                   SetDirty();
+                  CoordType x = m_llist->GetCursorPos().x;
+                  size_t numSpaces = tabSize - x % tabSize;
+                  m_llist->Insert(wxString(' ', numSpaces));
+                  SetDirty();
                }
                break;
 
@@ -684,7 +705,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                      ///FIXME: wxGTK reports MetaDown always
                      || event.MetaDown()
 //#endif
-                     ))
+                  ))
                   && (keyCode < 256 && keyCode >= 32)
                   )
                {
@@ -1153,16 +1174,31 @@ wxLayoutWindow::Cut(void)
 // searching
 // ----------------------------------------------------------------------------
 
+#ifdef M_BASEDIR
 bool
 wxLayoutWindow::Find(const wxString &needle,
-                     wxPoint * fromWhere)
+                     wxPoint * fromWhere,
+                     const wxString &configPath)
 {
    wxPoint found;
-
-   if(fromWhere == NULL)
-      found = m_llist->FindText(needle, m_llist->GetCursorPos());
+   
+   if(needle.Length() == 0)
+   {
+      if( ! MInputBox(&m_FindString,
+                      _("Find text"),
+                      _("   Find:"),
+                      this,
+                      configPath, "")
+          || strutil_isempty(m_FindString))
+         return true;
+   }
    else
-      found = m_llist->FindText(needle, *fromWhere);
+      m_FindString = needle;
+   
+   if(fromWhere == NULL)
+      found = m_llist->FindText(m_FindString, m_llist->GetCursorPos());
+   else
+      found = m_llist->FindText(m_FindString, *fromWhere);
    if(found.x != -1)
    {
       if(fromWhere)
@@ -1172,10 +1208,20 @@ wxLayoutWindow::Find(const wxString &needle,
       }
       m_llist->MoveCursorTo(found);
       ScrollToCursor();
+      RequestUpdate();
       return true;
    }
    return false;
 }
+
+
+bool
+wxLayoutWindow::FindAgain(void)
+{
+   bool rc = Find(m_FindString);
+   return rc;
+}
+#endif
 
 // ----------------------------------------------------------------------------
 // popup menu stuff

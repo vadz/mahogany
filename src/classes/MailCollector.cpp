@@ -198,6 +198,8 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    bool rc = true;
    
    bool locked = Lock();
+   if(locked) // was already locked
+      return true; // not an error, just recursion avoidance
    if(mf == m_NewMailFolder)
    {
       wxLogError(_(

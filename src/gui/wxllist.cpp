@@ -2521,17 +2521,17 @@ wxLayoutList::ContinueSelection(const wxPoint& cposOrig, const wxPoint& spos)
    wxASSERT(m_Selection.m_valid == false);
    WXLO_DEBUG(("Continuing selection at %ld/%ld", cpos.x, cpos.y));
 
-   if ( m_Selection.m_CursorB <= cpos )
-   {
       m_Selection.m_ScreenB = spos;
-      m_Selection.m_CursorB = cpos;
-   }
-   else
-   {
-      m_Selection.m_ScreenA = spos;
-      m_Selection.m_CursorA = cpos;
-   }
+      m_Selection.m_CursorB = cpos;}
 
+void
+wxLayoutList::EndSelection(const wxPoint& cposOrig, const wxPoint& spos)
+{
+   wxPoint cpos(cposOrig);
+   if(cpos.x == -1)
+      cpos = m_CursorPos;
+   ContinueSelection(cpos);
+   WXLO_DEBUG(("Ending selection at %ld/%ld", cpos.x, cpos.y));
    // we always want m_CursorA <= m_CursorB!
    if( m_Selection.m_CursorA > m_Selection.m_CursorB )
    {
@@ -2544,16 +2544,6 @@ wxLayoutList::ContinueSelection(const wxPoint& cposOrig, const wxPoint& spos)
       m_Selection.m_ScreenB = m_Selection.m_ScreenA;
       m_Selection.m_ScreenA = help;
    }
-}
-
-void
-wxLayoutList::EndSelection(const wxPoint& cposOrig, const wxPoint& spos)
-{
-   wxPoint cpos(cposOrig);
-   if(cpos.x == -1)
-      cpos = m_CursorPos;
-   ContinueSelection(cpos);
-   WXLO_DEBUG(("Ending selection at %ld/%ld", cpos.x, cpos.y));
    m_Selection.m_selecting = false;
    m_Selection.m_valid = true;
    /// In case we just clicked somewhere, the selection will have zero 
@@ -2585,7 +2575,12 @@ wxLayoutList::IsSelected(const wxPoint &cursor) const
    if ( !HasSelection() )
       return false;
 
-   return m_Selection.m_CursorA <= cursor && cursor <= m_Selection.m_CursorB;
+   return (
+      (m_Selection.m_CursorA <= cursor
+       && cursor <= m_Selection.m_CursorB) 
+      || (m_Selection.m_CursorB <= cursor
+          && cursor <= m_Selection.m_CursorA)
+      );
 }
 
 
@@ -2605,7 +2600,10 @@ wxLayoutList::IsSelected(const wxLayoutLine *line, CoordType *from,
       return 0;
 
    CoordType y = line->GetLineNumber();
-   if(m_Selection.m_CursorA.y < y && m_Selection.m_CursorB.y > y)
+   if(
+      (m_Selection.m_CursorA.y < y && m_Selection.m_CursorB.y > y)
+      || (m_Selection.m_CursorB.y < y && m_Selection.m_CursorA.y > y)
+      )
       return 1;
    else if(m_Selection.m_CursorA.y == y)
    {
@@ -2613,7 +2611,18 @@ wxLayoutList::IsSelected(const wxLayoutLine *line, CoordType *from,
       if(m_Selection.m_CursorB.y == y)
          *to = m_Selection.m_CursorB.x;
       else
-         *to = line->GetLength();
+      {
+         if(m_Selection.m_CursorB > m_Selection.m_CursorA)
+            *to = line->GetLength();
+         else
+            *to = 0;
+      }
+      if(*to < *from)
+      {
+         CoordType help = *to;
+         *to = *from;
+         *from = help;
+      }
       return -1;
    }
    else if(m_Selection.m_CursorB.y == y)
@@ -2622,7 +2631,18 @@ wxLayoutList::IsSelected(const wxLayoutLine *line, CoordType *from,
       if(m_Selection.m_CursorA.y == y)
          *from = m_Selection.m_CursorA.x;
       else
-         *from = 0;
+      {
+         if(m_Selection.m_CursorB > m_Selection.m_CursorA)
+            *from = 0;
+         else
+            *from = line->GetLength();
+      }
+      if(*to < *from)
+      {
+         CoordType help = *to;
+         *to = *from;
+         *from = help;
+      }
       return -1;
    }
    else
@@ -2650,7 +2670,10 @@ wxLayoutList::DeleteSelection(void)
    wxLayoutLine
       * firstLine = GetLine(m_Selection.m_CursorA.y),
       * lastLine = GetLine(m_Selection.m_CursorB.y);
-
+   // be a bit paranoid:
+   if(! firstLine || ! lastLine)
+      return;
+   
    // First, delete what's left of this line:
    MoveCursorTo(m_Selection.m_CursorA);
    DeleteToEndOfLine();

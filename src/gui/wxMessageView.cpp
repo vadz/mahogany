@@ -760,31 +760,6 @@ wxMessageView::HighLightURLs(const char *input)
 
    return out;
 }
-bool
-wxMessageView::Find(const wxString &what)
-{
-   if(what.Length() == 0)
-   {
-      if( ! MInputBox(&m_FindString,
-                      _("Find string in message"),
-                      _("   Find:"),
-                      this,
-                      "MsgViewFindString", "")
-          || strutil_isempty(m_FindString))
-         return true;
-   }
-   else
-      m_FindString = what;
-   return FindAgain();
-}
-
-bool
-wxMessageView::FindAgain(void)
-{
-   bool rc = wxLayoutWindow::Find(m_FindString);
-   Refresh(FALSE);
-   return rc;
-}
 
 
 // show information about an attachment
@@ -1349,7 +1324,7 @@ wxMessageView::DoMenuCommand(int id)
    {
    case WXMENU_MSG_FIND:
       if(m_uid != UID_ILLEGAL)
-         Find();
+         Find("");
       break;
    case WXMENU_MSG_REPLY:
       if(m_uid != UID_ILLEGAL)

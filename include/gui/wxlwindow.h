@@ -106,8 +106,15 @@ public:
    bool Cut(void);
    //@}
 
+#ifdef M_BASEDIR
+   /// find string in buffer
    bool Find(const wxString &needle,
-             wxPoint * fromWhere = NULL);
+             wxPoint * fromWhere = NULL,
+             const wxString &configPath = "MsgViewFindString");
+   /// find the same string again
+   bool FindAgain(void);
+#endif
+   
 
    void EnablePopup(bool enable = true) { m_DoPopupMenu = enable; }
 
@@ -276,6 +283,8 @@ private:
    /// Do we want the focus to follow the mouse?
    bool m_FocusFollowMode;
 #endif
+   /// For finding text and finding it again:
+   wxString m_FindString;
 //@}
    DECLARE_EVENT_TABLE()
 };

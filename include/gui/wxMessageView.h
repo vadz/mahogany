@@ -123,11 +123,6 @@ public:
    /// returns the mail folder
    ASMailFolder *GetFolder(void);
 
-   /// Find a string in message, true if found
-   bool Find(const wxString &what = "");
-   /// Find last string again.
-   bool FindAgain(void);
-
    UIdType GetUId(void) const { return m_uid; }
    /// the derived class should react to the result to an asynch operation
    void OnASFolderResultEvent(MEventASFolderResultData &event);
