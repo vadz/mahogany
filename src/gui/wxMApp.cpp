@@ -53,6 +53,10 @@
 #include "gui/wxIconManager.h"
 #include "MailCollector.h"
 
+#ifdef OS_WIN
+   #include <winnls.h>
+#endif
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -290,12 +294,63 @@ bool
 wxMApp::OnInit()
 {
    // Set up locale first, so everything is in the right language.
-   const char * locale = getenv("LANG");
-   if( locale && (strcmp(locale, "C") != 0) )
+   bool hasLocale = false;
+
+#ifdef OS_UNIX
+   const char *locale = getenv("LANG");
+   hasLocale = locale && (strcmp(locale, "C") != 0);
+#elif defined(OS_WIN)
+   // this variable is not usually set under Windows, but give the user a
+   // chance to override our locale detection logic in case it doesn't work
+   // (which is well possible because it's totally untested)
+   const char *locale = getenv("LANG");
+   if ( locale )
+   {
+      // setting LANG to "C" disables all this
+      hasLocale = (locale[0] != 'C') || (locale[1] != '\0');
+   }
+   else
+   {
+      // try to detect locale ourselves
+      LCID lcid = GetThreadLocale(); // or GetUserDefaultLCID()?
+      WORD idLang = PRIMARYLANGID(LANGIDFROMLCID(lcid));
+      hasLocale = idLang != LANG_ENGLISH;
+      if ( hasLocale )
+      {
+         static char s_countryName[256];
+         int rc = GetLocaleInfo(lcid, LOCALE_SABBREVCTRYNAME,
+                                s_countryName, WXSIZEOF(s_countryName));
+         if ( !rc )
+         {
+            // this string is intentionally not translated
+            wxLogSysError("Can not get current locale setting.");
+
+            hasLocale = FALSE;
+         }
+         else
+         {
+            // TODO what if the buffer was too small?
+            locale = s_countryName;
+         }
+      }
+   }
+#else // Mac?
+   #error "don't know how to get the current locale on this platform."
+#endif // OS
+
+   if ( hasLocale )
    {
       m_Locale = new wxLocale(locale, locale, NULL, false);
-      String localePath ;
+#ifdef OS_UNIX
+      String localePath;
       localePath << M_BASEDIR << "/locale";
+#elif defined(OS_WIN)
+      InitGlobalDir();
+      String localePath;
+      localePath << m_globalDir << "/locale";
+#else
+      #error "don't know where to find message catalogs on this platform"
+#endif // OS
       m_Locale->AddCatalogLookupPathPrefix(localePath);
       m_Locale->AddCatalog("wxstd");
       m_Locale->AddCatalog(M_APPLICATIONNAME);
@@ -437,7 +492,7 @@ int wxMApp::OnExit()
 
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
-#  ifdef OS_WIN
+#  if 0 // def OS_WIN
       free(sysinbox());
       free(myhomedir());
       free(myusername());

@@ -247,7 +247,7 @@ MAppBase::VerifySettings(void)
    }
 
    if ( !VerifyInbox() )
-      wxLogDebug("Evil user removed his /Profiles/INBOX - restored.");
+      wxLogDebug("Evil user corrupted his profile settings - restored.");
 
    return true;
 }
@@ -429,16 +429,9 @@ MAppBase::OnStartup()
          }
       }
 #else  //Windows
-      // under Windows our directory is always the one where the executable is
-      // located. At least we're sure that it exists this way...
-      wxString strPath;
-      ::GetModuleFileName(::GetModuleHandle(NULL),
-                          strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
-      strPath.UngetWriteBuf();
-
-      // extract the dir name
-      wxSplitPath(strPath, &m_globalDir, NULL, NULL);
+      InitGlobalDir();
 #endif //Unix
+
       m_profile->writeEntry(MP_GLOBALDIR, m_globalDir);
    }
 
@@ -459,6 +452,12 @@ MAppBase::OnStartup()
 
       return false;
    }
+
+#ifdef OS_WIN
+   // cclient extra initialization under Windows
+   wxString strHome;
+   mail_parameters((MAILSTREAM *)NULL, SET_HOMEDIR, (void *)wxGetHomeDir(&strHome));
+#endif // OS_WIN
 
    /* Initialise mailcap/mime.types managing subsystem. */
    m_mimeManager = new wxMimeTypesManager();
@@ -784,3 +783,20 @@ MAppBase::OnMEvent(MEventData& event)
    return TRUE;
 }
 
+void
+MAppBase::InitGlobalDir()
+{
+   if ( !m_globalDir )
+   {
+      // under Windows our directory is always the one where the executable is
+      // located. At least we're sure that it exists this way...
+      wxString strPath;
+      ::GetModuleFileName(::GetModuleHandle(NULL),
+                          strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
+      strPath.UngetWriteBuf();
+
+      // extract the dir name
+      wxSplitPath(strPath, &m_globalDir, NULL, NULL);
+   }
+   //else: already done once
+}

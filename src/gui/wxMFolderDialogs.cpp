@@ -1202,7 +1202,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 #ifdef DEBUG
          ASSERT(mApplication->RemoveKeepOpenFolder(fullname));
 #else
-         mApplication->RemoveKeepOpenFolder(fullname)
+         mApplication->RemoveKeepOpenFolder(fullname);
 #endif
       }
    }
