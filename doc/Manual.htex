@@ -84,9 +84,10 @@ powerful than the old one as the new one is text-only and not rich text but it
 is also significantly less buggy and simpler to use. Another big internal
 change is that the built in Python interpreter now works again and you can use
 it to write filter functions and do other nifty things (see section
-\ref{python}). Other than that, the focus of the new release is yet again
-more bug fixing than adding new features. As usual, some of them were still
-added:
+\ref{python}). Finally, we now have a working version for Mac OS X.
+
+Other than that, the focus of the new release is yet again more bug fixing
+than adding new features. As usual, some of them were still added:
 \begin{itemize}
 \item Quick search commands in the folder view (see \ref{keybindings} and
       \ref{searching})
@@ -2512,7 +2513,7 @@ is accessible in read-only mode. Restarting \emph{Mahogany} requires
 to download the addressbook again.
 
 
-\chapter{Scripting and Extending \textsl{Mahogany\label{Scripting}}}
+\chapter{Scripting and Extending Mahogany\label{Scripting}}
 
 
 \section{Python Scripting}\label{python}
@@ -2661,7 +2662,7 @@ Called when new mail arrived anywhere.\\
 Python has access to Mahogany's internal class hierarchy. At present
 we supply interface definitions and Python modules for only a small
 number of classes, however if there is need for more classes being
-supported, we can easily extend the list - please ask us if you want
+supported, we can easily extend the list -- please ask us if you want
 more support!
 
 Some automatically generated documentation of the Python interface
@@ -3044,12 +3045,10 @@ on the mailing lists.
 
 \subsection{All Mahogany icons show a question mark}
 
-\textit{I'm a linuxuser (redhat) who just found Mahogany and really
+\textit{I'm a linux user (redhat) who just found Mahogany and really
 likes it, but I have a problem, I can't get all the widgets to work,
 the pictures on the buttons and the ones before the mailboxes all
-appear as an questionmark. Do I need some library to make it look
-like your screenshot? If you would assist me in this matter I would
-be very grateful.}
+appear as an questionmark?}
 
 It depends how you installed it. If the icon with the question mark
 appears, it means that Mahogany didn't find its installation directory
@@ -3320,6 +3319,8 @@ for any other program, too. Under Windows: the environment variable
 LANG will be recognised if it is set, but in addition Mahogany will
 automatically detect which language your system is set to use.
 
+In addition, there is a \texttt{--lang} command line option, see
+\ref{cmdlineargs}.
 
 \subsection{How can I delete messages?}
 
