@@ -20,6 +20,11 @@ htmlhlp: .src/Manual.hhc
 .src/Manual.hhc: .src/Manual.html
 	cd .src && $(PERL) -w makehhc.pl
 
+install: htmlhlp
+	$(INSTALL_DATA) .src/Manual.hhc .src/Manual.hhp $(DOCDIR)/Manual
+	@# this file must exist or HTML help controller complains
+	touch $(DOCDIR)/Manual/Manual.hhk
+
 clean:
 	rm -rf .src/Manual .src/Manual.tex .src/Manual.html
 

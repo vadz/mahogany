@@ -60,6 +60,7 @@ install2: makemap
 	set -e; for i in $(SUB_DIRS); \
 	do $(MAKE) DIR=$$i -f ../.src/Makefile.sub -C $$i install; \
 	done
+	$(MAKE) -C HtmlHlp install
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
 
 clean:
