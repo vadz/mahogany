@@ -590,7 +590,7 @@ MailFolderCC::BuildListing(void)
       if(GetType() == MF_NNTP)
          // FIMXE: no idea why this works for NNTP 
          // but not for the other types
-         mail_fetch_overview (m_MailStream, (char *)"*", mm_overview_header);
+         mail_fetch_overview (m_MailStream, (char *)"1-", mm_overview_header);
       else
          mail_fetch_overview (m_MailStream, (char *)"1:*", mm_overview_header);
    }
