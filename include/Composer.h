@@ -289,6 +289,9 @@ protected:
 
       /// read the options from the given profile
       void Read(Profile *profile);
+
+      /// get the font using either m_font or m_fontFamily/Size
+      wxFont GetFont() const;
    };
 
 private:

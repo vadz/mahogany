@@ -264,6 +264,8 @@ enum ConfigFields
    ConfigField_SignatureSeparator,
    ConfigField_XFaceFile,
    // not very useful ConfigField_AdbSubstring,
+
+   ConfigField_ComposerAppearanceHelp,
 #ifdef USE_FONT_DESC
    ConfigField_ComposeViewFont,
 #else // !USE_FONT_DESC
@@ -272,6 +274,7 @@ enum ConfigFields
 #endif // USE_FONT_DESC/!USE_FONT_DESC
    ConfigField_ComposeViewFGColour,
    ConfigField_ComposeViewBGColour,
+   ConfigField_ComposeViewColourHeaders,
 
    ConfigField_ComposePreviewHelp,
    ConfigField_ComposePreview,
@@ -1119,6 +1122,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
    { gettext_noop("Configure &XFace..."),          Field_XFace,   -1          },
    // not very useful { gettext_noop("Mail alias substring ex&pansion"), Field_Bool,    -1,                        },
+
+   { gettext_noop("\n"
+                  "The following settings control the appearance\n"
+                  "of the composer window:"),      Field_Message, -1 },
 #ifdef USE_FONT_DESC
    { gettext_noop("&Font to use"),                 Field_Font | Field_Global, -1 },
 #else // !USE_FONT_DESC
@@ -1130,8 +1137,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
    { gettext_noop("Foreground c&olour"),           Field_Color | Field_Global,   -1},
    { gettext_noop("Back&ground colour"),           Field_Color | Field_Global,   -1},
+   { gettext_noop("Use these settings for &headers too:"),
+                                                   Field_Bool | Field_Global,   -1},
 
-   { gettext_noop("The settings below allow you to have a last look at the\n"
+   { gettext_noop("\n"
+                  "The settings below allow you to have a last look at the\n"
                   "message before sending it and/or change your mind about\n"
                   "sending it even after pressing the \"Send\" button."),
                                                    Field_Message |
@@ -1709,6 +1719,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
    CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),
    // not very useful: CONFIG_ENTRY(MP_ADB_SUBSTRINGEXPANSION),
+
+   CONFIG_NONE(),
 #ifdef USE_FONT_DESC
    CONFIG_ENTRY(MP_CVIEW_FONT_DESC),
 #else // !USE_FONT_DESC
@@ -1717,6 +1729,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_FONT_DESC/!USE_FONT_DESC
    CONFIG_ENTRY(MP_CVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_CVIEW_BGCOLOUR),
+   CONFIG_ENTRY(MP_CVIEW_COLOUR_HEADERS),
 
    CONFIG_NONE(), // preview help
    CONFIG_ENTRY(MP_PREVIEW_SEND),

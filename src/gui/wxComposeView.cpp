@@ -62,6 +62,7 @@
 #include <wx/mimetype.h>
 #include <wx/tokenzr.h>
 #include <wx/textbuf.h>
+#include <wx/fontutil.h>      // for wxNativeFontInfo
 
 #include "wx/persctrl.h"
 
@@ -108,6 +109,7 @@ extern const MOption MP_COMPOSE_CC;
 extern const MOption MP_COMPOSE_TO;
 extern const MOption MP_CURRENT_IDENTITY;
 extern const MOption MP_CVIEW_BGCOLOUR;
+extern const MOption MP_CVIEW_COLOUR_HEADERS;
 extern const MOption MP_CVIEW_FGCOLOUR;
 extern const MOption MP_CVIEW_FONT;
 extern const MOption MP_CVIEW_FONT_DESC;
@@ -424,14 +426,7 @@ class wxAddressTextCtrl : public wxTextCtrl
 {
 public:
    // ctor
-   wxAddressTextCtrl(wxWindow *parent,
-                     wxRcptControl *rcptControl)
-      : wxTextCtrl(parent, -1, "",
-                   wxDefaultPosition, wxDefaultSize,
-                   wxTE_PROCESS_ENTER | wxTE_PROCESS_TAB)
-   {
-      m_rcptControl = rcptControl;
-   }
+   wxAddressTextCtrl(wxWindow *parent, wxRcptControl *rcptControl);
 
    // expand the text in the control using the address book(s)
    Composer::RecipientType DoExpand();
@@ -655,6 +650,29 @@ void Composer::Options::Read(Profile *profile)
    }
 }
 
+wxFont Composer::Options::GetFont() const
+{
+   wxFont font;
+   if ( !m_font.empty() )
+   {
+      wxNativeFontInfo fontInfo;
+      if ( fontInfo.FromString(m_font) )
+      {
+         font.SetNativeFontInfo(fontInfo);
+      }
+   }
+
+   if ( !font.Ok() )
+   {
+      font = wxFont(m_fontSize,
+                    m_fontFamily,
+                    wxFONTSTYLE_NORMAL,
+                    wxFONTWEIGHT_NORMAL);
+   }
+
+   return font;
+}
+
 // ----------------------------------------------------------------------------
 // EditorContentPart
 // ----------------------------------------------------------------------------
@@ -744,6 +762,8 @@ wxSizer *wxRcptControl::CreateControls(wxWindow *parent)
    sizer->Add(m_choice, 0, wxRIGHT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
    sizer->Add(m_text, 1, wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
    sizer->Add(m_btnExpand, 0, wxLEFT, LAYOUT_MARGIN);
+
+   m_composeView->SetTextAppearance(m_text);
 
    return sizer;
 }
@@ -982,6 +1002,15 @@ void wxRcptTypeChoice::OnChoice(wxCommandEvent& event)
 // ----------------------------------------------------------------------------
 // wxAddressTextCtrl
 // ----------------------------------------------------------------------------
+
+wxAddressTextCtrl::wxAddressTextCtrl(wxWindow *parent,
+                                     wxRcptControl *rcptControl)
+                 : wxTextCtrl(parent, -1, "",
+                              wxDefaultPosition, wxDefaultSize,
+                              wxTE_PROCESS_ENTER | wxTE_PROCESS_TAB)
+{
+   m_rcptControl = rcptControl;
+}
 
 void wxAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
 {
@@ -1536,6 +1565,7 @@ wxSizer *wxComposeView::CreateHeaderFields()
 
       m_txtFrom = new wxTextCtrl(m_panel, -1, _T(""));
       sizerFrom->Add(m_txtFrom, 1, wxALIGN_CENTRE_VERTICAL);
+      SetTextAppearance(m_txtFrom);
 
       wxChoice *choiceIdent = CreateIdentCombo(m_panel);
       if ( choiceIdent )
@@ -1558,6 +1588,7 @@ wxSizer *wxComposeView::CreateHeaderFields()
 
    m_txtSubject = new wxTextCtrl(m_panel, -1, _T(""));
    sizerHeaders->Add(m_txtSubject, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
+   SetTextAppearance(m_txtSubject);
 
    sizerTop->Add(sizerHeaders, 0, wxALL | wxEXPAND, LAYOUT_MARGIN);
 
@@ -1712,6 +1743,26 @@ void
 wxComposeView::InitAppearance()
 {
    m_options.Read(m_Profile);
+}
+
+void wxComposeView::SetTextAppearance(wxTextCtrl *text)
+{
+   CHECK_RET( text, _T("NULL text in wxComposeView::SetTextAppearance") );
+
+   if ( READ_CONFIG(m_Profile, MP_CVIEW_COLOUR_HEADERS) )
+   {
+      text->SetForegroundColour(m_options.m_fg);
+      text->SetBackgroundColour(m_options.m_bg);
+      text->SetFont(m_options.GetFont());
+
+      wxSizer *sizer = text->GetContainingSizer();
+      if ( sizer )
+      {
+         // we need to relayout as the text height with the new font could be
+         // different
+         sizer->SetItemMinSize(text, text->GetBestSize());
+      }
+   }
 }
 
 void wxComposeView::DoClear()

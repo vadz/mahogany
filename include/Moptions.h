@@ -302,6 +302,7 @@ extern const MOption MP_CVIEW_FONT_DESC;
 extern const MOption MP_CVIEW_FONT_SIZE;
 extern const MOption MP_CVIEW_FGCOLOUR;
 extern const MOption MP_CVIEW_BGCOLOUR;
+extern const MOption MP_CVIEW_COLOUR_HEADERS;
 
 // sorting/threading
 extern const MOption MP_MSGS_SERVER_SORT;
@@ -958,7 +959,7 @@ extern const MOption MP_AWAY_STATUS;
 /// go to this folder when Ctrl-Home is pressed
 #define MP_FTREE_HOME_NAME "FTreeHome"
 //@}
-/**@name Font settings for compose view */
+/**@name Font and colour settings for composer */
 //@{
 /// which font to use
 #define   MP_CVIEW_FONT_NAME         "CViewFont"
@@ -969,7 +970,9 @@ extern const MOption MP_AWAY_STATUS;
 /// which foreground colour for the font
 #define   MP_CVIEW_FGCOLOUR_NAME      "CViewFGColour"
 /// which background colour for the font
-#define   MP_CVIEW_BGCOLOUR_NAME      "CViewBGColout"
+#define   MP_CVIEW_BGCOLOUR_NAME      "CViewBGColout" // typo but do *NOT* fix
+/// use the colours and font for the headers as well?
+#define   MP_CVIEW_COLOUR_HEADERS_NAME "CViewColourHeaders"
 //@}
 /// highlight signature?
 #define   MP_HIGHLIGHT_SIGNATURE_NAME      "HighlightSig"
@@ -1883,6 +1886,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_CVIEW_FGCOLOUR_DEFVAL      "black"
 /// which background colour for the font
 #define   MP_CVIEW_BGCOLOUR_DEFVAL      "white"
+/// use the colours and font for the headers as well?
+#define   MP_CVIEW_COLOUR_HEADERS_DEFVAL 0L
 //@}
 /// highlight signature?
 #define   MP_HIGHLIGHT_SIGNATURE_DEFVAL      1

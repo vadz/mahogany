@@ -231,6 +231,9 @@ public:
    virtual wxComposeView *GetComposeView() { return this; }
    virtual wxFrame *GetFrame() { return this; }
 
+   /// set the colours and fonts for a (freshly created) text control
+   void SetTextAppearance(wxTextCtrl *text);
+
 protected:
    /** quasi-Constructor
        @param parent parent window
