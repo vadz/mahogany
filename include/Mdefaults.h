@@ -447,6 +447,8 @@
 #define   MP_FVIEW_FONT         "FViewFont"
 /// which font size
 #define   MP_FVIEW_FONT_SIZE         "FViewFontSize"
+/// don't show full e-mail, only sender's name
+#define   MP_FVIEW_NAMES_ONLY         "FViewNamesOnly"
 // which foreground colour for the font
 #define   MP_FVIEW_FGCOLOUR      "FViewFgColour"
 // which background colour for the font
@@ -909,6 +911,8 @@
 #define   MP_FVIEW_FONT_D         6L
 /// which font size
 #define   MP_FVIEW_FONT_SIZE_D         12L
+/// don't show full e-mail, only sender's name
+#define   MP_FVIEW_NAMES_ONLY_D         0L
 // which foreground colour for the font
 #define   MP_FVIEW_FGCOLOUR_D      "black"
 // which background colour for the font

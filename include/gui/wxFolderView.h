@@ -228,6 +228,8 @@ private:
       int font, size;
       /// do we want to preview messages when activated?
       bool previewOnSingleClick;
+      /// strip e-mail address from sender and display only name?
+      bool senderOnlyNames;
    } m_settingsCurrent;
 
    /// read the values from the profile into AllProfileSettings structure
