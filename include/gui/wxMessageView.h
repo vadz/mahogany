@@ -25,45 +25,25 @@ class wxMessageViewPanel;
 class wxMessageView;
 class wxLayoutWindow;
 
-/** a wxWindows panel for the MessageView class */
-class wxMessageViewPanel : public wxPanel
-{
-   DECLARE_CLASS(wxMessageViewPanel)
-
-   /// the message view
-   wxMessageView *messageView;
-public:
-   /** constructor
-       @param parent the parent frame
-   */
-   wxMessageViewPanel(wxMessageView *parent);
-
-   /** gets called for events happening in the panel
-       @param win the window
-   */
-   void OnCommand(wxWindow &win, wxCommandEvent &ev);
-};
-
 /** A wxWindows MessageView class
   */
 
-class wxMessageView : public MessageViewBase , public wxMFrame
+class wxMessageView : public MessageViewBase , public wxPanel
 {
-   DECLARE_CLASS(wxMessageView)
 public:
    /** quasi-Constructor
        @param iname  name of windowclass
        @param parent parent window
    */
    void Create(const String &iname = String("wxMessageView"),
-     wxWindow *parent = NULL);
+     wxMFrame *parent = NULL);
 
    /** Constructor
        @param iname  name of windowclass
        @param parent parent window
    */
    wxMessageView(const String &iname = String("wxMessageView"),
-     wxWindow *parent = NULL);
+     wxMFrame *parent = NULL);
    
    /** Constructor
        @param folder the mailfolder
@@ -74,7 +54,7 @@ public:
    wxMessageView(MailFolder *folder,
        long num,
        const String &iname = String("wxMessageView"),
-       wxWindow  *parent = NULL);
+       wxMFrame  *parent = NULL);
    /// Destructor
    ~wxMessageView();
 
@@ -101,13 +81,12 @@ public:
 
    /// wxWin2 event system
    void OnCommandEvent(wxCommandEvent & event);
-   DECLARE_EVENT_TABLE()
 
 private:
    /// is initialised?
    bool initialised;
-   /// a panel to fill the frame
-   wxPanel   *panel;
+   /// the parent frame
+   wxMFrame   *m_Parent;
 
    /// the current message
    Message   *mailMessage;
@@ -141,6 +120,22 @@ protected:
    void MimeHandle(int num);
    /// saves the currently selected MIME content
    void MimeSave(int num, const char *filename = NULL);
+};
+
+
+class wxMessageViewFrame : public wxMFrame
+{
+public:
+   wxMessageViewFrame(MailFolder *folder,
+       long num, const String &iname = String("wxMessageView"),
+       wxMFrame  *parent = NULL);
+   void OnMenuCommand(int id);
+#ifdef USE_WXWINDOWS2
+      void OnSize( wxSizeEvent &WXUNUSED(event) );
+#endif
+private:
+   wxMessageView *m_MessageView;
+   DECLARE_EVENT_TABLE() 
 };
 
 #endif

@@ -196,7 +196,6 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    }
    widthMax += LAYOUT_MARGIN;
 
-   wxTextCtrl *m_txtFields[Field_Max];
    wxStaticText *label;
    wxWindow  *last = NULL;
    for ( n = 0; n < Field_Max; n++ ) {
@@ -418,9 +417,6 @@ wxComposeView::OnMenuCommand(int id)
 void
 wxComposeView::InsertFile(void)
 {
-   String
-      mimeType,
-      tmp;
    MimeContent 
       *mc = new MimeContent();
    const char
@@ -435,23 +431,10 @@ wxComposeView::InsertFile(void)
    if(! mApplication.GetMimeTypes()->Lookup(mc->m_FileName, mc->m_MimeType, &(mc->m_NumericMimeType)))
       mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
 
-   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(mApplication.GetIconManager()->GetIcon(mimeType));
+   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(mApplication.GetIconManager()->GetIcon(mc->m_MimeType));
    obj->SetUserData(mc);
 
-   m_LayoutWindow->GetLayoutList().Insert(tmp);
-   m_LayoutWindow->GetLayoutList().MoveCursor(1,0);
-   m_LayoutWindow->SetFocus();
-}
-
-// little helper function to turn kbList into a map:
-const char *
-wxComposeView::LookupFileName(unsigned long id)
-{
-   wxCVFileMapType::iterator i;
-   for(i = fileMap.begin(); i != fileMap.end(); i++)
-      if((*i)->id == id)
-         return (*i)->filename.c_str();
-   return NULL;
+   m_LayoutWindow->GetLayoutList().Insert(obj);
 }
 
 void

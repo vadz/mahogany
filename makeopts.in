@@ -47,10 +47,15 @@ ODIR = .
 DOCDIR = $(BUILDDIR)/doc/
 
 # DOC++
-DXX      = doc++
-DXXTBL   = #-a -b # set this to empty to avoid generation of tables
-DXXHFLAGS = -f -k -u -k $(DXXTBL) -H -d $(DOCDIR)/$(CWD)
-DXXTFLAGS = -f -k -u -k $(DXXTBL) -H -t -o $(DOCDIR)/$(CWD).tex
+DOCXXHTML=doc++ -f -k -u -k $(DXXTBL) -H -d $(BUILDDIR)/$(CWD)
+DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BUILDDIR)/M.tex
+
+# kdoc
+KDOCHTML = kdoc -H -d $(DOCDIR)/$(CWD) -u $(BUILDDIR)/$(CWD) -a -i -e M  
+KDOCTEX =  kdoc -T -d $(DOCDIR)/$(CWD) -u $(BUILDDIR)/$(CWD) -a -i -e M
+
+DOCHTML=@DOCHTML@
+DOCTEX=@DOCTEX@
 
 # c-compiler stuff
 CC = @CC@

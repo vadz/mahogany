@@ -54,7 +54,7 @@
 #  include <wx/dynarray.h>
 #endif
  
-wxFolderView::wxFolderView(String const & folderName, wxFrame *iparent)
+wxFolderView::wxFolderView(String const & folderName, wxMFrame *iparent)
             : wxPanel(iparent)
 {
    wxCHECK_RET(iparent, "NULL parent frame in wxFolderView ctor");
@@ -201,7 +201,7 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
 {
    String title;
    Message *mptr;
-   wxMessageView *mv;
+   wxMessageViewFrame *mv;
 
    int n = selections.Count();
    int i;
@@ -209,7 +209,7 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
    {
       mptr = mailFolder->GetMessage(selections[i]+1);
       title = mptr->Subject() + " - " + mptr->From();
-      mv = GLOBAL_NEW wxMessageView(mailFolder,selections[i]+1,
+      mv = GLOBAL_NEW wxMessageViewFrame(mailFolder,selections[i]+1,
               "wxMessageView",parent);
       mv->SetTitle(title);
    }

@@ -243,6 +243,10 @@
 
 #include "CommonBase.h"
 
+/// for convenience, get an icon:
+
+#define   ICON(name) (mApplication.GetIconManager()->GetIcon(name))
+
 /**@name Macros for calling callback functions.
 
   These macros do nothing and return the default returnvalue when

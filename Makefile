@@ -13,6 +13,9 @@ include makeopts
 all:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
 
+doc:
+	set -e; for i in include extra ; do $(MAKE) -C $$i doc; done
+
 clean:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
@@ -22,7 +25,7 @@ allclean:
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
-config: configure
+config: configure makeopts.in
 	./configure
 
 configure:	configure.in
@@ -47,5 +50,5 @@ install:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
 	$(INSTALL_DATA) `find doc -not -type d` $(DOCDIR)
 
-.PHONY: all dep clean bak backup config program 
+.PHONY: all dep clean bak backup config program doc
 

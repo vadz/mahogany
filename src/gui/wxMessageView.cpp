@@ -30,7 +30,6 @@
 #include "Mdefaults.h"
 
 #include "MApplication.h"
-#include "gui/wxMApp.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -43,6 +42,7 @@
 
 #include "XFace.h"
 
+#include "gui/wxMApp.h"
 #include "gui/wxFontManager.h"
 #include "gui/wxIconManager.h"
 #include "gui/wxMessageView.h"
@@ -74,8 +74,7 @@ struct ClickableInfo
   static void popup_callback(wxMenu& menu, wxCommandEvent& ev);
 #endif // wxWin 1/2
 
-IMPLEMENT_CLASS(wxMessageView, wxMFrame)
-IMPLEMENT_CLASS(wxMessageViewPanel, wxPanel)
+//do we need it?IMPLEMENT_CLASS(wxMessageView, wxPanel)
 
 class myPopup : public wxMenu
 {
@@ -177,13 +176,8 @@ MimeDialog::OnCommandEvent(wxCommandEvent &event)
 }
 
    
-BEGIN_EVENT_TABLE(wxMessageView, wxMFrame)
-   EVT_MENU(-1,    wxMessageView::OnCommandEvent)
-   EVT_TOOL(-1,    wxMessageView::OnCommandEvent)
-END_EVENT_TABLE()
-
 void
-wxMessageView::Create(const String &iname, wxWindow *parent)
+wxMessageView::Create(const String &iname, wxMFrame *parent)
 {
   if(initialised)
      return; // ERROR!
@@ -192,10 +186,12 @@ wxMessageView::Create(const String &iname, wxWindow *parent)
   mimeDisplayPart = 0;
   xface = NULL;
   xfaceXpm = NULL;
-
+  m_Parent = parent;
+  
   m_Profile = new Profile("MessageView",
                           folder ? folder->GetProfile() : NULL);
 
+#if 0
   wxMFrame::Create(iname, parent);
   
   AddFileMenu();
@@ -208,7 +204,8 @@ wxMessageView::Create(const String &iname, wxWindow *parent)
 
   AddHelpMenu();
   SetMenuBar(menuBar);
-
+#endif
+  
   m_MimePopup = NULL;
   m_LWindow = new wxLayoutWindow(this);
   m_LWindow->SetEventId(WXMENU_LAYOUT_CLICK);
@@ -217,11 +214,12 @@ wxMessageView::Create(const String &iname, wxWindow *parent)
   initialised = true;
 }
 
-wxMessageView::wxMessageView(const String &iname, wxWindow *parent)
-             : wxMFrame(iname)
+wxMessageView::wxMessageView(const String &iname, wxMFrame *parent)
+             : wxPanel(parent)
 {
    initialised = false;
    folder = NULL;
+   m_Parent = parent;
    Create(iname,parent);
    Show(TRUE);
 }
@@ -229,11 +227,12 @@ wxMessageView::wxMessageView(const String &iname, wxWindow *parent)
 wxMessageView::wxMessageView(MailFolder *ifolder,
                              long num,
                              const String &iname,
-                             wxWindow *parent)
-             : wxMFrame(iname)
+                             wxMFrame *parent)
+             : wxPanel(parent)
 {
    initialised = false;
    folder = ifolder;
+   m_Parent = parent;
    Create(iname,parent);
    ShowMessage(folder,num);
 
@@ -528,7 +527,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
        char *filename = wxGetTempFileName("Mtemp");
        MimeSave(mimeDisplayPart,filename);
        MailFolderCC *mf = MailFolderCC::OpenFolder(filename);
-       (void) GLOBAL_NEW wxMessageView(mf, 1, "message/rfc822",this);
+       (void) GLOBAL_NEW wxMessageViewFrame(mf, 1, "message/rfc822",m_Parent);
        wxRemoveFile(filename);//FIXME: does this work for non-UNIX systems?
        mf->Close();
      }
@@ -544,7 +543,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
   if(! ifilename)
   {
     message = _("Please choose a filename to save as:");
-    filename = MDialog_FileRequester((char *)message.c_str(),this,
+    filename = MDialog_FileRequester((char *)message.c_str(),m_Parent,
         NULL,NULL,NULL,NULL,true,
         folder ? folder->GetProfile() : NULL);
   }
@@ -639,8 +638,8 @@ wxMessageView::OnMenuCommand(int id)
    case WXMENU_MSG_FORWARD:
       //Forward();
       break;
-   default:
-      wxMFrame::OnMenuCommand(id);
+//   default:
+//      wxMFrame::OnMenuCommand(id);
    }
 }
 
@@ -662,13 +661,6 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
 
 }
 
-
-void
-wxMessageViewPanel::OnCommand(wxWindow &win, wxCommandEvent &event)
-{
-   wxPanel::OnCommand(win,event);
-   cerr << "OnCommand" << endl;
-}
 
 void
 wxMessageView::Print(void)
@@ -705,13 +697,86 @@ wxMessageView::Print(void)
       dc->EndDoc();
     }
     GLOBAL_DELETE dc;
-    #if USE_WXWINDOWS2
+#if USE_WXWINDOWS2
       // @@@@ GetDC()?
-    #else  // wxWin 1
+#else  // wxWin 1
       ftoList->SetDC(ftCanvas->GetDC());
-    #endif // wxWin 1/2ftoList->ReCalculateLines();
-  #else
+#endif // wxWin 1/2ftoList->ReCalculateLines();
+#else
       // FIXME TODO: printing for Windows
 #endif
 #endif
 } 
+
+
+#ifdef USE_WXWINDOWS2
+   BEGIN_EVENT_TABLE(wxMessageViewFrame, wxMFrame)
+      EVT_SIZE    (    wxMessageViewFrame::OnSize)
+   END_EVENT_TABLE()
+#endif // wxWin2
+
+wxMessageViewFrame::wxMessageViewFrame(
+         MailFolder *folder,
+       long num, const String &name,
+       wxMFrame  *parent)
+   : wxMFrame(name, parent)
+{
+   m_MessageView = NULL;
+   AddFileMenu();
+   AddEditMenu();
+   AddMessageMenu();
+   SetMenuBar(menuBar);
+
+   // add a toolbar to the frame
+   // NB: the buttons must have the same ids as the menu commands
+#ifdef USE_WXWINDOWS2
+   int width, height;
+   GetClientSize(&width, &height);
+   m_ToolBar = new wxMToolBar( this, /*id*/-1, wxPoint(2,60), wxSize(width-4,26) );
+   m_ToolBar->SetMargins( 2, 2 );
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, ICON("tb_open"), WXMENU_MSG_OPEN, "Open message");
+   TB_AddTool(m_ToolBar, ICON("tb_open"), WXMENU_MSG_OPEN, "Open message");
+   TB_AddTool(m_ToolBar, ICON("tb_close"), WXMENU_FILE_CLOSE, "Close folder");
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, ICON("tb_mail_compose"), WXMENU_FILE_COMPOSE, "Compose message");
+   TB_AddTool(m_ToolBar, ICON("tb_mail_forward"), WXMENU_MSG_FORWARD, "Forward message");
+   TB_AddTool(m_ToolBar, ICON("tb_mail_reply"), WXMENU_MSG_REPLY, "Reply to message");
+   TB_AddTool(m_ToolBar, ICON("tb_print"), WXMENU_MSG_PRINT, "Print message");
+   TB_AddTool(m_ToolBar, ICON("tb_trash"), WXMENU_MSG_DELETE, "Delete message");
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, ICON("tb_book_open"), WXMENU_EDIT_ADB, "Edit Database");
+   TB_AddTool(m_ToolBar, ICON("tb_preferences"), WXMENU_EDIT_PREFERENCES, "Edit Preferences");
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, ICON("tb_help"), WXMENU_HELP_ABOUT, "Help");
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, ICON("tb_exit"), WXMENU_FILE_EXIT, "Exit M");
+#endif
+
+   m_MessageView = new wxMessageView(folder, num, name, this);
+   Show(true);
+}
+   
+void
+wxMessageViewFrame::OnMenuCommand(int id)
+{
+   if(id == WXMENU_MSG_REPLY ||
+      id == WXMENU_MSG_FORWARD ||
+      id == WXMENU_MSG_PRINT )
+      m_MessageView->OnMenuCommand(id);
+   else
+      wxMFrame::OnMenuCommand(id);
+}
+
+void
+wxMessageViewFrame::OnSize( wxSizeEvent &event )
+   
+{
+  int x = 0;
+  int y = 0;
+  GetClientSize( &x, &y );
+  if(m_ToolBar)
+     m_ToolBar->SetSize( 1, 0, x-2, 30 );
+  if(m_MessageView)
+     m_MessageView->SetSize(1,30,x-2,y);
+};

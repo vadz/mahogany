@@ -149,6 +149,8 @@ DEFAULT_USE_WXCONFIG=1
 DEFAULT_USE_APPCONF=0
 DEFAULT_USE_EFENCE=0
 DEFAULT_USE_DEBUG=1
+DEFAULT_USE_DOCXX=0
+DEFAULT_USE_KDOC=1
 
 MAKE_USE_WXTAB="USE_WXTAB=1"
 
@@ -272,6 +274,14 @@ USE_THREADS)
 AC_OVERRIDES(debug,debug,
 --with-debug              use debug info/code,
 USE_DEBUG)
+
+AC_OVERRIDES(docxx,docxx,
+--with-docxx               use doc++,
+USE_DOCXX)
+
+AC_OVERRIDES(kdoc,kdoc,
+--with-kdoc               use kdoc,
+USE_KDOC)
 
 
 AC_CONFIG_AUX_DIR(extra/scripts)
@@ -630,6 +640,16 @@ if test "$USE_WXWINDOWS2" = 1; then
 	MAKE_USE_WXTAB=
 fi
 AC_SUBST(MAKE_USE_WXTAB)
+
+if test "$USE_DOCXX" = 1; then
+	DOCHTML="\$(DOCXXHTML)"
+	DOCTEX="\$(DOCXXTEX)"
+elif test "$USE_KDOC" = 1; then
+	DOCHTML="\$(KDOCHTML)"
+	DOCTEX="\$(KDOCTEX)"
+fi
+AC_SUBST(DOCHTML)
+AC_SUBST(DOCTEX)
 
 dnl set debug/optimisation flags
 dnl we don't use CFLAGS/CXXFLAGS from autoconf

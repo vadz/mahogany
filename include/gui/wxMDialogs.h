@@ -127,5 +127,9 @@ bool MDialog_YesNoDialog(String const &message,
 AdbEntry *
 MDialog_AdbLookupList(AdbExpandListType *adblist,
 		      MFrame *parent = NULL);
-		      
+
+/// simple AboutDialog to be displayed at startup
+void
+MDialog_AboutDialog( MFrame *parent);
+
 #endif

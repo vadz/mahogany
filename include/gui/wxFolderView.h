@@ -71,7 +71,7 @@ public:
        @param parent   the parent window
    */
    wxFolderView(String const & folderName,
-                wxFrame *parent = NULL);
+                wxMFrame *parent = NULL);
    /// Destructor
    ~wxFolderView();
 
@@ -140,7 +140,7 @@ private:
    /// a timer to update information
    wxFVTimer   *timer;
    /// its parent
-   wxWindow *parent;
+   wxMFrame *parent;
 }; 
 
 class wxFolderViewFrame : public wxMFrame

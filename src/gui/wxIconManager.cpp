@@ -51,7 +51,7 @@ static const char *wxIconManagerFileExtensions[] = { ".xpm", ".png", ".gif",
 
 wxIconManager::wxIconManager()
 {
-   iconList = GLOBAL_NEW IconDataList;
+   iconList = new IconDataList;
 
    AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
    AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
@@ -112,7 +112,7 @@ wxIconManager::GetIcon(String const &_iconName)
    pf.AddPaths(mApplication.GetLocalDir()+"/icons", true);
    pf.AddPaths(mApplication.GetGlobalDir()+"/icons", true);
 
-   IconData id;
+   IconData *id;
 
    String name;
    for(c = 0; wxIconManagerFileExtensions[c]; c++)
@@ -130,9 +130,10 @@ wxIconManager::GetIcon(String const &_iconName)
          continue;
       if(icn->LoadFile(Str(name),0))
       {
-         id.iconPtr = icn;
-         id.iconName = key;
-         iconList->push_front(&id);
+         id = new IconData;
+         id->iconPtr = icn;
+         id->iconName = key;
+         iconList->push_front(id);
          return icn;
       }
    }   
@@ -142,11 +143,11 @@ wxIconManager::GetIcon(String const &_iconName)
 void
 wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
 {
-   IconData id;
+   IconData *id = new IconData;
 
-   id.iconName = iconName;
-   id.iconPtr = GLOBAL_NEW wxIcon(data,-1,-1);
-   iconList->push_front(&id);
+   id->iconName = iconName;
+   id->iconPtr = GLOBAL_NEW wxIcon(data,-1,-1);
+   iconList->push_front(id);
 }
 
 

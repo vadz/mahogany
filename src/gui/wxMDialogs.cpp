@@ -7,7 +7,7 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma implementation "wxMDialogs.h"
+#   pragma implementation "wxMDialogs.h"
 #endif
 
 // ============================================================================
@@ -40,6 +40,7 @@
 
 #include "Adb.h"
 #include "MDialogs.h"
+#include "gui/wxlwindow.h"
 
 // ============================================================================
 // implementation
@@ -278,4 +279,29 @@ MDialog_AdbLookupList(AdbExpandListType *adblist, MFrame *parent)
    delete [] entries;
   
    return result;
+}
+
+// simple AboutDialog to be displayed at startup
+void
+MDialog_AboutDialog( MFrame *parent)
+{
+
+   wxFrame *frame = new wxFrame();
+
+   frame->Create(parent,-1, _("Welcome"));
+
+   wxLayoutWindow *lw = new wxLayoutWindow(frame);
+
+   wxLayoutList &ll = lw->GetLayoutList();
+   
+   frame->Show(FALSE);
+
+   ll.SetEditable(true);
+   ll.Insert("Welcome to M!");
+   ll.LineBreak();
+   
+   ll.SetEditable(false);
+
+   frame->Show(TRUE);
+   frame->Fit();
 }

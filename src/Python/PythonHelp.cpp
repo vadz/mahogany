@@ -5,21 +5,6 @@
  *                                                                  *
  * $Id$
  *
- * $Log$
- * Revision 1.4  1998/06/14 12:24:15  KB
- * started to move wxFolderView to be a panel, Python improvements
- *
- * Revision 1.3  1998/06/08 08:19:08  KB
- * Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
- *
- * Revision 1.2  1998/05/30 17:59:34  KB
- * some more python
- *
- * Revision 1.1  1998/05/24 14:47:34  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- *
  *******************************************************************/
 
 #include   "Mpch.h"  // config.h for correct evaluation of Python.h

@@ -3,45 +3,7 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.6  1998/06/22 22:32:27  VZ
- * miscellaneous fixes for Windows compilation
- *
- * Revision 1.5  1998/06/05 16:56:57  VZ
- *
- * many changes among which:
- *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
- *     i.e. there is wxMApp inheriting from AppBse and wxApp
- *  2) wxMLogFrame changed (but will probably change again because I wrote a
- *     generic wxLogFrame for wxWin2 - we can as well use it instead)
- *  3) Profile stuff simplified (but still seems to work :-), at least with
- *     wxConfig), no more AppProfile separate class.
- *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
- *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
- *     Classes
- *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
- *  6) constraints in wxComposeView changed to work under both wxGTK and
- *     wxMSW (but there is an annoying warning about unsatisfied constraints
- *     coming from I don't know where)
- *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
- *  8) many other minor changes I completely forgot about.
- *
- * Revision 1.4  1998/05/02 15:21:33  KB
- * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
- *
- * Revision 1.3  1998/05/01 14:02:41  KB
- * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
- * conventions.
- *
- * Revision 1.2  1998/03/26 23:05:38  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:15  karsten
- * first try at a complete archive
- *
+ * $Id$
  *******************************************************************/
 
 #ifndef WXICONMANAGER_H
@@ -81,8 +43,6 @@ struct  IconData
 {
   String  iconName;
   wxIcon  *iconPtr;
-
-  IMPLEMENT_DUMMY_COMPARE_OPERATORS(IconData);
 };
 
 KBLIST_DEFINE(IconDataList, IconData);
