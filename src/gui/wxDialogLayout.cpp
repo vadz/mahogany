@@ -217,6 +217,34 @@ wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
    return pText;
 }
 
+wxCheckBox *CreateCheckBox(wxWindow *parent,
+                           const wxChar *label,
+                           long widthMax,
+                           wxControl *last,
+                           wxCoord nRightMargin)
+{
+   static size_t widthCheck = 0;
+   if ( widthCheck == 0 ) {
+      // calculate it only once, it's almost a constant
+      widthCheck = AdjustCharHeight(parent->GetCharHeight()) + 1;
+   }
+
+   wxCheckBox *checkbox = new wxCheckBox(parent, -1, label,
+                                         wxDefaultPosition, wxDefaultSize,
+                                         wxALIGN_RIGHT);
+
+   wxLayoutConstraints *c = new wxLayoutConstraints;
+   SetTopConstraint(parent, c, last, 0);
+   c->width.AsIs();
+   c->right.SameAs(parent, wxLeft, -(int)(2*LAYOUT_X_MARGIN + widthMax
+                                           + widthCheck));
+   c->height.AsIs();
+
+   checkbox->SetConstraints(c);
+
+   return checkbox;
+}
+
 wxRadioBox *CreateRadioBox(wxWindow *parent,
                            const wxChar *labelFull,
                            long widthMax,
@@ -736,29 +764,10 @@ wxXFaceButton *wxEnhancedPanel::CreateXFaceButton(const wxString&
 
 // create a checkbox
 wxCheckBox *wxEnhancedPanel::CreateCheckBox(const wxChar *label,
-                                              long widthMax,
-                                              wxControl *last)
+                                            long widthMax,
+                                            wxControl *last)
 {
-   static size_t widthCheck = 0;
-   if ( widthCheck == 0 ) {
-      // calculate it only once, it's almost a constant
-      widthCheck = AdjustCharHeight(GetCharHeight()) + 1;
-   }
-
-   wxCheckBox *checkbox = new wxCheckBox(GetCanvas(), -1, label,
-                                         wxDefaultPosition, wxDefaultSize,
-                                         wxALIGN_RIGHT);
-
-   wxLayoutConstraints *c = new wxLayoutConstraints;
-   SetTopConstraint(c, last);
-   c->width.AsIs();
-   c->right.SameAs(GetCanvas(), wxLeft, -(int)(2*LAYOUT_X_MARGIN + widthMax
-                                        + widthCheck));
-   c->height.AsIs();
-
-   checkbox->SetConstraints(c);
-
-   return checkbox;
+   return ::CreateCheckBox(GetCanvas(), label, widthMax, last);
 }
 
 // create a radiobox control with 3 choices and a label for it

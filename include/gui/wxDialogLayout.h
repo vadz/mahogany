@@ -678,6 +678,12 @@ extern wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
                                        wxCoord nRightMargin = 0,
                                        int style = wxTE_LEFT);
 
+extern wxCheckBox *CreateCheckBox(wxWindow *parent,
+                                  const wxChar *label,
+                                  long widthMax,
+                                  wxControl *last,
+                                  wxCoord nRightMargin = 0);
+
 extern wxRadioBox *CreateRadioBox(wxWindow *parent,
                                   const wxChar *label,
                                   long widthMax,
