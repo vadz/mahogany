@@ -1,4 +1,4 @@
-#This file was created by <karsten> Mon Apr 27 13:25:22 1998
+#This file was created by <karsten> Mon May  4 17:03:54 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -170,7 +170,30 @@ ftp://ftp.cac.washington.edu/imap/imap.tar.Z
  
 \layout Standard
 
-First, install the 
+Unpack the archive in the main M directory, then change into the IMAP directory
+ and try a first 
+\family typewriter 
+make
+\family default 
+, i.e.
+ a 
+\family typewriter 
+make linux
+\family default 
+ or 
+\family typewriter 
+make gso
+\family default 
+.
+ This will create a source directory 
+\family typewriter 
+c-client
+\family default 
+ with lots of links to other source files in it.
+ 
+\layout Standard
+
+Then install the 
 \family typewriter 
 rfc822.c.patch
 \family default 
@@ -182,8 +205,7 @@ rfc822.c
 \family typewriter 
 extra/patches
 \family default 
- subdirectory of M.
- Then run the 
+ subdirectory of M and run the 
 \family typewriter 
 c-client++
 \family default 
@@ -193,6 +215,20 @@ extra/scripts
 \family default 
  subdirectory in the c-client source directory, which will rename variables
  in the c-client code to make it C++ compliant.
+ If there is any problem, it helps to edit the 
+\family typewriter 
+CCTYPE
+\family default 
+ or 
+\family typewriter 
+CFLAGS
+\family default 
+ files.
+ After creation of the library 
+\family typewriter 
+c-client.a
+\family default 
+, all object files can be deleted.
 \layout Subsubsection
 
 Python 

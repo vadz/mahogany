@@ -60,10 +60,18 @@ or gcc-2.8.
 The c-client library is required and is available from ftp://ftp.cac.washington.edu/imap/imap.tar.Z.
 Before compiling it with M, you need to patch it. 
 
-First, install the rfc822.c.patch on c-client's rfc822.c file from
-the extra/patches subdirectory of M. Then run the c-client++ script
-from the extra/scripts subdirectory in the c-client source directory,
-which will rename variables in the c-client code to make it C++ compliant.
+Unpack the archive in the main M directory, then change into the IMAP
+directory and try a first make, i.e. a make linux or make gso. This
+will create a source directory c-client with lots of links to other
+source files in it. 
+
+Then install the rfc822.c.patch on c-client's rfc822.c file from the
+extra/patches subdirectory of M and run the c-client++ script from
+the extra/scripts subdirectory in the c-client source directory, which
+will rename variables in the c-client code to make it C++ compliant.
+If there is any problem, it helps to edit the CCTYPE or CFLAGS files.
+After creation of the library c-client.a, all object files can be
+deleted.
 
 2.2.3 Python 
 
