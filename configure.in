@@ -407,11 +407,11 @@ ok*)	AC_CHECK_FUNC(socket,, AC_CHECK_LIB(socket,socket))
 	# later, but we must be able to compile the header file.
 	AC_DEFINE(NO_IDEA)AC_DEFINE(NO_DSA)AC_DEFINE(NO_RSA)dnl
 	CCLIENT_EXTRACFLAGS="-DNO_IDEA -DNO_DSA -DNO_RSA"
-	LIBS="-lssl -lcrypto $LIBS" 
+	dnl THIS IS NOT NEEDED (KB): LIBS="-lssl -lcrypto $LIBS" 
 	case "$ssl_option" in okdir)
 		CCLIENT_EXTRACFLAGS="-I$USE_SSL/include $CCLIENT_EXTRACFLAGS"
 		CPPFLAGS="$CPPFLAGS -I$USE_SSL/include"
-		LIBS="-L$USE_SSL/lib $LIBS"
+		dnl NO SSL LIB REQUIRED!! (KB) LIBS="-L$USE_SSL/lib $LIBS"
 	;; esac
 esac
 AC_SUBST(MAKE_USESSL)
