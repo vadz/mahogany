@@ -2450,7 +2450,7 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
             // we should quote the URL because otherwise Netscape barfs if it
             // contains a comma
             command << m_ProfileValues.browser
-                    << " -remote openURL(\"" << url << '"';
+                    << " -remote openURL('" << url << '\'';
             if ( inNewWindow )
             {
                command << ",new-window)";
