@@ -5393,18 +5393,19 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
       else // folder is not opened, just expunge quietly
       {
          mail_expunge(stream);
-
-         // we need to update the status manually in this case
-         MailFolderStatus status;
-
-         // all other members are already set to 0
-         status.total = 0;
-         MfStatusCache::Get()->UpdateStatus(fullname, status);
       }
-   }
+
+      // we need to update the status manually because we suppressed the normal
+      // notifications
+      MailFolderStatus status;
+
+      // all other members are already set to 0
+      status.total = 0;
+      MfStatusCache::Get()->UpdateStatus(fullname, status);
+}
    //else: no messages to delete
 
-   if ( stream )
+   if ( stream && !mf )
    {
       CloseOrKeepStream(stream, mfolder, server);
    }
