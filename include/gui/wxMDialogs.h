@@ -286,9 +286,6 @@ bool PickXFaceDialog(ProfileBase *profile, wxWindow *parent);
 extern
 void CheckExpungeDialog(class ASMailFolder *mf, wxWindow *parent = NULL);
 
-/** Set up filters rules. In wxMFilterDialog.cpp */
-extern
-bool ConfigureFilterRules(ProfileBase *profile, wxWindow *parent);
 /** Read a filter program from the data.
  This takes the sub-groups under "Filters/" and assembles a filter
  program from them. */
