@@ -315,6 +315,21 @@ bool wxMessageThreadingDialog::TransferDataToWindow()
    m_Break = READ_CONFIG_BOOL(profile, MP_MSGS_BREAK_THREAD);
    m_Indent = READ_CONFIG_BOOL(profile, MP_MSGS_INDENT_IF_DUMMY);
 
+   m_chkThrOnServer->SetValue(m_ThrOnServer);
+   m_chkThrByRefOnly->SetValue(m_ThrByRefOnly);
+
+#if wxUSE_REGEX
+   m_txtRegex->SetValue(m_Regex);
+   m_txtRegexRepl->SetValue(m_RegexRepl);
+#else // !wxUSE_REGEX
+   m_chkSubject1->SetValue(m_Subject1);
+   m_chkSubject2->SetValue(m_Subject2);
+#endif // wxUSE_REGEX/!wxUSE_REGEX
+
+   m_chkGather->SetValue(m_Gather);
+   m_chkBreak->SetValue(m_Break);
+   m_chkIndent->SetValue(m_Indent);
+
    DoUpdateUI();
 
    return TRUE;
