@@ -359,20 +359,6 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
    {
       wxLogStatus(_("Cannot get listing for incoming folder '%s'."),
                   mf->GetName().c_str());
-      if(MDialog_YesNoDialog(
-         _("Accessing the incoming folder\n"
-           "'%s' failed.\n\n"
-           "Do you want to stop collecting\n"
-           "mail from it in this session?"),
-         NULL,
-         _("Mail collection failed"),
-         TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
-      {
-         mf->SetUpdateFlags(updateFlags);
-         Lock(locked);
-         RemoveIncomingFolder(mf->GetName());
-         return false;
-      }
       rc = false;
    }
    if(selections.Count() > 0)
@@ -472,9 +458,19 @@ MailCollectorImpl::UpdateFolderList(void)
 	 {
             (**i).m_folder = MailFolder::OpenFolder((**i).m_name);
             if((**i).m_folder == NULL) // folder inaccessible:
-               ERRORMESSAGE((_("Cannot open incoming folder '%s'."), (**i).m_name.c_str()));
-	 }
-      }
+            {
+              ERRORMESSAGE((_("Cannot open incoming folder '%s'."), (**i).m_name.c_str()));
+              if(MDialog_YesNoDialog(
+	         _("Accessing the incoming folder\n"
+        	   "'%s' failed.\n\n"
+	           "Do you want to stop collecting\n"
+	           "mail from it in this session?"),
+	         NULL,
+	         _("Mail collection failed"),
+	         TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
+         		RemoveIncomingFolder((**i).m_name);
+            }
+	}
    }
    else // we are offline, do we need to disable some folder:
    {
