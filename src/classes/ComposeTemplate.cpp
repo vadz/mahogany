@@ -230,6 +230,7 @@ public:
       OriginalHeader_ReplyTo,
       OriginalHeader_Newsgroups,
       OriginalHeader_Domain,
+      OriginalHeader_All,
       OriginalHeader_Invalid,
       OriginalHeader_Max = OriginalHeader_Invalid
    };
@@ -388,9 +389,14 @@ private:
 // dialog.
 // ----------------------------------------------------------------------------
 
+// Leave this line here, it's a cut-&-paste buffer
+// Available accels: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+
 // NB: These menus should be kept in sync (if possible) with the variable names
 
 // the misc submenu
+//
+// Available accels: BEFGHIJKLMNOPRTUVWXYZ
 static TemplatePopupMenuItem gs_popupSubmenuMisc[] =
 {
    TemplatePopupMenuItem(gettext_noop("Put &cursor here"), _T("$cursor")),
@@ -403,15 +409,19 @@ static TemplatePopupMenuItem gs_popupSubmenuMisc[] =
 };
 
 // the file insert/attach sub menu
+//
+// Available accels: BCDEFGHJKLMNOPRSUVWXYZ
 static TemplatePopupMenuItem gs_popupSubmenuFile[] =
 {
    TemplatePopupMenuItem(gettext_noop("&Insert file..."), _T("${file:%s}"), TRUE),
    TemplatePopupMenuItem(gettext_noop("Insert &any file..."), _T("${file:%s?ask"), TRUE),
    TemplatePopupMenuItem(gettext_noop("Insert &quoted file..."), _T("${file:%s?quote}"), TRUE),
-   TemplatePopupMenuItem(gettext_noop("&Attach file..."), _T("${attach:%s}"), TRUE),
+   TemplatePopupMenuItem(gettext_noop("A&ttach file..."), _T("${attach:%s}"), TRUE),
 };
 
 // the message submenu
+//
+// Available accels: ADEGHIJKMNOPQRUVWXYZ
 static TemplatePopupMenuItem gs_popupSubmenuMessage[] =
 {
    TemplatePopupMenuItem(gettext_noop("&To"), _T("${message:to}")),
@@ -423,6 +433,8 @@ static TemplatePopupMenuItem gs_popupSubmenuMessage[] =
 };
 
 // the original message submenu
+//
+// Available accels: BCEHJKMOPVWXYZ
 static TemplatePopupMenuItem gs_popupSubmenuOriginal[] =
 {
    TemplatePopupMenuItem(gettext_noop("&Date"), _T("${original:date}")),
@@ -433,7 +445,8 @@ static TemplatePopupMenuItem gs_popupSubmenuOriginal[] =
    TemplatePopupMenuItem(gettext_noop("&Last name"), _T("${original:lastname}")),
    TemplatePopupMenuItem(gettext_noop("&To"), _T("${original:to}")),
    TemplatePopupMenuItem(gettext_noop("&Reply to"), _T("${original:replyto}")),
-   TemplatePopupMenuItem(gettext_noop("&Newsgroups"), _T("${original:newsgroups}")),
+   TemplatePopupMenuItem(gettext_noop("News&groups"), _T("${original:newsgroups}")),
+   TemplatePopupMenuItem(gettext_noop("Entire &header"), _T("${original:header}")),
    TemplatePopupMenuItem(),
    TemplatePopupMenuItem(gettext_noop("Insert &quoted text"), _T("$quote")),
    TemplatePopupMenuItem(gettext_noop("&Attach original text"), _T("$quote822")),
@@ -878,6 +891,7 @@ const wxChar *VarExpander::ms_templateOriginalVars[] =
    _T("replyto"),
    _T("newsgroups"),
    _T("domain"),
+   _T("header"),
 };
 
 int
@@ -1345,6 +1359,10 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                   *value = addr->GetDomain();
                }
             }
+            break;
+
+         case OriginalHeader_All:
+            *value = m_msg->GetHeader();
             break;
 
          default:
