@@ -118,7 +118,6 @@ rpm_prep:
    fi; \
 	echo "*** Preparing to build the RPM in $$RPM_TOP_DIR..."; \
 	cd ..; \
-	mv M $(M); \
 	tar cvzf $$RPM_TOP_DIR/SOURCES/$(M).tar.gz \
 		--exclude="*.o" --exclude="M" --exclude="CVS" \
 		--exclude=".cvsignore" --exclude="*~" --exclude="*.swp" \
@@ -128,10 +127,15 @@ rpm_prep:
 		$(M)/doc $(M)/extra/Makefile $(M)/include $(M)/locale \
 		$(M)/makeopts.in $(M)/makerules $(M)/src $(M)/extra/install \
 		$(M)/extra/scripts $(M)/extra/src; \
+	cd $(M); \
+	cp redhat/mahogany.gif $$RPM_ROOT/SOURCES; \
+	cp redhat/M.spec $$RPM_ROOT/SPECS
+=======
 	mv $(M) M; \
 	cd M; \
 	cp redhat/mahogany.gif $$RPM_TOP_DIR/SOURCES; \
 	cp redhat/M.spec $$RPM_TOP_DIR/SPECS
+>>>>>>> 1.40
 
 # build the source and binary RPMs
 rpm: rpm_prep
