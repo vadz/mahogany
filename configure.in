@@ -380,6 +380,7 @@ dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
+GTK_LDFLAGS=
 dnl check for wx-config
 if test $USE_WXCONFIG = 1
 then
@@ -387,7 +388,7 @@ then
 	then
 		AC_PATH_PROG(WX_CONFIG,wx-config)
 	fi
-	if test ! -x $WX_CONFIG
+	if test ! -x "$WX_CONFIG"
 	then
 		AC_MSG_ERROR("Cannot execute $WX_CONFIG!");
 	fi
@@ -404,7 +405,7 @@ else
 	then
 		AC_PATH_PROG(GTK_CONFIG,gtk-config)
 	fi
-	if test ! -x $GTK_CONFIG
+	if test ! -x "$GTK_CONFIG"
 	then
 		AC_MSG_ERROR("Cannot execute $GTK_CONFIG!");
 	fi
@@ -428,6 +429,11 @@ else
 	AC_CHECK_LIB(c,wcslen,,
 		AC_CHECK_LIB(w,wcslen,,AC_MSG_ERROR("Cannot find wcslen function.")))
 fi
+AC_SUBST(GTK_LDFLAGS)
+GUI_LIBS_STATIC=`echo $GTK_LDFLAGS | sed '
+s/-lgtk/-Wl,-B,static -lgtk/g
+s/-lglib/-lglib -Wl,-B,dynamic/g'`
+AC_SUBST(GUI_LIBS_STATIC)
 
 CPPFLAGS="$CPPFLAGS $GTK_CFLAGS"
 dnl only now can we check for wx.h because it would fail without the
@@ -563,9 +569,12 @@ dnl compface is included in M source
 LIBS="$LIBS -lcompface"
 
 dnl add other flags
-LIBS="$LIBS $PYTHON_LIBS $GTK_LDFLAGS $LIB_EFENCE $LIB_DMALLOC $LIB_PNG $LIB_JPEG"
+LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PNG $LIB_JPEG"
 CXXFLAGS="$CXXFLAGS $DBGFLAGS"
 CFLAGS="$CFLAGS $DBGFLAGS"
+
+LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk2/-Wl,-B,static -lwx_gtk2 -Wl,-B,dynamic/g'`
+AC_SUBST(LIBS_STATIC)
 
 
 AC_OUTPUT(makeopts)

@@ -14,22 +14,22 @@ SUB_DIRS += Python
 MOBJS += Python/*.o
 endif	
 
-all: 
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
-	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(LIBS)
+all: subdirs
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 #
 #left over from my attempt to create a M.so shared lib
 #
 #	$(CXX) -shared $(MOBJS) $(LDFLAGS) -lswigpy $(NONPLIBS) -o libM.so
 #	$(LINK) -o M -L. $(LDFLAGS) -lM $(SLIBS)
 
-#semistatic:
-#	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
-#	$(LINK) -o M.semistatic $(LDFLAGS) $(MOBJS) $(SLIBS) 
+semistatic: subdirs
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(LIBS_STATIC) $(GUI_LIBS_STATIC) 
 
-static:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
+static: subdirs
 	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(LIBS) -lcrypt
+
+subdirs:
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
 
 doc:
 	$(MAKE) -C ../include $@
@@ -55,7 +55,7 @@ msgcat:
 	set -e; for i in $(SUB_DIRS) ; do $(MAKE) -C $$i $@; done
 #	$(MAKE) -C $(BUILDDIR)/locale mergecat
 
-.PHONY: all dep clean doc semistatic static allclean install msgcat
+.PHONY: all dep clean doc semistatic static allclean install msgcat subdirs
 
 
 
