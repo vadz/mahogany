@@ -645,7 +645,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
 
    // create the root item
    MFolder *folderRoot = MFolder::Get("");
-   (void)new wxFolderTreeNode(this, folderRoot);
+   m_current = new wxFolderTreeNode(this, folderRoot);
 
    // register with the event manager
    m_eventFolderChange = MEventManager::Register(*this,
