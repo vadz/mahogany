@@ -25,7 +25,8 @@
 #include  "Mpch.h"
 
 #ifndef USE_PCH
-#   include "Mcommon.h"
+   #include "Mcommon.h"
+   #include "gui/wxIconManager.h"
 
    #include <wx/app.h>        // for wxPostEvent()
    // it includes windows.h which defines SendMessage under Windows
