@@ -4829,7 +4829,13 @@ void
 MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgnoMax)
 {
    MailFolderCC *mf = LookupObject(stream);
-   CHECK_RET( mf, _T("number of messages changed in unknown mail folder") );
+   // We can get callback for temporary c-client stream
+   // which of course doesn't exist in our folder list.
+   if(!mf)
+   {
+      wxLogDebug( _T("number of messages changed in unknown mail folder") );
+      return;
+   }
 
    mf->HandleMailExists(stream, msgnoMax);
 }
