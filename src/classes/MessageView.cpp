@@ -1864,14 +1864,15 @@ MessageView::ProcessPart(const MimePart *mimepart)
                {
                   MimePart *signedPart = mimepart->GetNested();
                   CHECK_RET( signedPart != 0, _T("Should have a signed part") );
-                  CHECK_RET( (signedPart->GetTransferEncoding() == MIME_ENC_7BIT ||
-                              signedPart->GetTransferEncoding() == MIME_ENC_BASE64 ||
-                              signedPart->GetTransferEncoding() == MIME_ENC_QUOTEDPRINTABLE),
-                             _T("Signed part should be 7 bits"));
                   MimePart *signaturePart = signedPart->GetNext();
                   CHECK_RET( signaturePart != 0, _T("Should have a signature part") );
-                  CHECK_RET( signaturePart->GetNext() == 0, _T("Signature should be the last part") );
-                  CHECK_RET( signaturePart->GetNested() == 0, _T("Signature should not have nested parts") );
+                  // Let's not be too strict on what we receive
+                  //CHECK_RET( (signedPart->GetTransferEncoding() == MIME_ENC_7BIT ||
+                  //            signedPart->GetTransferEncoding() == MIME_ENC_BASE64 ||
+                  //            signedPart->GetTransferEncoding() == MIME_ENC_QUOTEDPRINTABLE),
+                  //           _T("Signed part should be 7 bits"));
+                  //CHECK_RET( signaturePart->GetNext() == 0, _T("Signature should be the last part") );
+                  //CHECK_RET( signaturePart->GetNested() == 0, _T("Signature should not have nested parts") );
                   MimeType signatureType = signaturePart->GetType();
                   String fullSignatureType = signatureType.GetFull();
                   CHECK_RET( fullSignatureType == _T("APPLICATION/PGP-SIGNATURE"),
