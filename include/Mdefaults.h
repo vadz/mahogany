@@ -811,8 +811,8 @@
 //@}
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_D      1
-/// sort criterium for folder listing
-#define MP_MSGS_SORTBY_D         0l
+/// sort criterium for folder listing (55=0x37 = status/subject)
+#define MP_MSGS_SORTBY_D         55l 
 /// open URLs with
 #ifdef  OS_UNIX
 #  define   MP_BROWSER_D         "netscape"
