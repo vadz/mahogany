@@ -90,7 +90,7 @@ private:
 
 MailCollector::MailCollector()
 {
-   m_IsCollecting = false;
+   Lock(false);
    m_list = new MailFolderList;
    MAppFolderTraversal t (m_list);
    if(! t.Traverse(true))
@@ -132,6 +132,10 @@ MailCollector::Collect(MailFolder *mf)
 
    CHECK(m_NewMailFolder,false,_("Cannot collect mail without New Mail folder."));
 
+   if(IsLocked())
+      return true; // didn't collect, but no error
+   
+   bool locked = Lock();
    if(mf == NULL)
    {
       MailFolderList::iterator i;
@@ -183,6 +187,7 @@ MailCollector::Collect(MailFolder *mf)
             MDialog_Message(text, NULL, _("New Mail"));
          }
    }
+   Lock(locked);
    return rc;
 }
 
@@ -192,7 +197,7 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    ASSERT(mf);
    bool rc = true;
    
-   m_IsCollecting = true;
+   bool locked = Lock();
    if(mf == m_NewMailFolder)
    {
       wxLogError(_(
@@ -231,7 +236,6 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       {
          mf->DeleteMessages(&selections);
          mf->ExpungeMessages();
-         m_IsCollecting = false;
          rc = true;
       }
       else
@@ -255,7 +259,7 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    }
    mf->EnableNewMailEvents(sendsEvents);
    mf->Ping(); //update it
-   m_IsCollecting = false;
+   Lock(locked);
    return rc;
 }
 

@@ -646,7 +646,7 @@ MAppBase::OnMEvent(MEventData& event)
       ignore the event. */
    if(m_MailCollector->IsIncoming(folder))
    {
-      if(m_MailCollector->IsCollecting())
+      if(m_MailCollector->IsLocked())
          return false;
       if(! m_MailCollector->Collect(folder))
          wxLogError(_("Could not collect mail from incoming folder '%s'."),

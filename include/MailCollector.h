@@ -44,10 +44,17 @@ public:
        @return true on success, false if folder was not found
    */
    bool RemoveIncomingFolder(const String &name);
-   /** Returns true if the collector is currently collecting mail.
+   /** Returns true if the collector is locked.
        @return true if collecting
    */
-   bool IsCollecting(void) const { return m_IsCollecting; }
+   bool IsLocked(void) const { return m_IsLocked; }
+   /** Locks or unlocks the mail collector. If it is locked, it simly
+       does nothing.
+       @param lock true=lock, false=unlock
+       @return the old state
+   */
+   bool Lock(bool lock = true)
+      { bool rc = m_IsLocked; m_IsLocked =lock; return rc; }
 protected:
    /// Collect mail from this one folder.
    bool CollectOneFolder(MailFolder *mf);
@@ -58,8 +65,8 @@ private:
    MailFolder     *m_NewMailFolder;
    /// profile for the new mail folder
    ProfileBase    *m_NewMailProfile;
-   /// are we currently collecting?
-   bool           m_IsCollecting;
+   /// are we not supposed to collect anything?
+   bool           m_IsLocked;
    /// The message for the new mail dialog.
    String         m_Message;
    /// The number of new messages.
