@@ -7,7 +7,7 @@
 // Modified by:
 // Created:     02.12.02
 // CVS-ID:      $Id$
-// Copyright:   (c) 2002 Vadim Zeitlin <vadim@wxwindows.org>Á
+// Copyright:   (c) 2002 Vadim Zeitlin <vadim@wxwindows.org>
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -482,7 +482,11 @@ PGPEngine::ExecCommand(const String& options,
                wxString::Format
                (
                 "%s --status-fd=2 --command-fd 0 --output - -a %s",
+#ifdef OS_WIN
                 "G:\\Internet\\PGP\\GPG-1.2.1\\gpg.exe", // TODO
+#else
+                "/usr/bin/gpg", // TODO
+#endif
                 options.c_str()
                ),
                wxEXEC_ASYNC,
