@@ -1968,12 +1968,11 @@ wxLayoutList::MoveCursorWord(int n, bool untilNext)
    CoordType moveDistance = 0;
    CoordType offset;
    wxLayoutLine *lineCur = m_CursorLine;
-   wxLOiterator NULLIT = lineCur->NULLIT();
    for ( wxLOiterator i = lineCur->FindObject(m_CursorPos.x, &offset);
          n != 0;
          n > 0 ? ++i : --i )
    {
-      if ( i == NULLIT )
+      if ( i == lineCur->NULLIT() )
       {
          if ( n > 0 )
          {
@@ -1992,7 +1991,7 @@ wxLayoutList::MoveCursorWord(int n, bool untilNext)
                i = lineCur->GetLastObject();
          }
 
-         if ( i == NULLIT )
+         if ( i == lineCur->NULLIT() )
          {
             // moved to the end/beginning of text
             return false;
