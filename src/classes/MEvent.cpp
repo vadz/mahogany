@@ -136,7 +136,7 @@ void MEventManager::Dispatch(MEventData * dataptr)
    // themselves from our list while we send the event
    MEventReceiverInfoArray receivers = gs_receivers;
    size_t count = receivers.GetCount();
-   cerr << "MEvent::Dispatch() looking for receivers." << endl;
+//   cerr << "MEvent::Dispatch() looking for receivers." << endl;
 
    for ( size_t n = 0; n < count; n++ )
    {
@@ -148,9 +148,8 @@ void MEventManager::Dispatch(MEventData * dataptr)
 
       if ( info->id == id )
       {
-//temporary, just to trace down a bug:
-         cerr << "MEvent::Dispatch() sending to: " << info->receiver
-              << endl;
+//         cerr << "MEvent::Dispatch() sending to: " << &(info->receiver)
+//              << endl;
          // notify this one
          if ( !info->receiver.OnMEvent(data) )
          {
@@ -160,7 +159,7 @@ void MEventManager::Dispatch(MEventData * dataptr)
          //else: continue to search other receivers for this event
       }
    }
-   cerr << "MEvent::Dispatch() done." << endl;
+//   cerr << "MEvent::Dispatch() done." << endl;
 }
 
 // the return value is just the pointer to the structure we add to the array
