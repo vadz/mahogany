@@ -180,4 +180,12 @@
 #   include <dmalloc.h>
 #endif // USE_DMALLOC
 
+// missing macro in 2.4.x headers
+#include <wx/object.h>
+#ifndef DECLARE_DYNAMIC_CLASS_NO_COPY
+#  define DECLARE_DYNAMIC_CLASS_NO_COPY(name)                                 \
+    DECLARE_NO_COPY_CLASS(name)                                               \
+    DECLARE_DYNAMIC_CLASS(name)
+#endif
+
 #endif // MCONFIG_H
