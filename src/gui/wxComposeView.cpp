@@ -1538,7 +1538,7 @@ void wxComposeView::DeletePlaceHolder()
               _T("can't or shouldn't delete the place holder now!") );
 
    // remove the spacers and the static text we had added to it
-   m_sizerRcpts->Remove(0); // remove first spacer by position
+   m_sizerRcpts->Remove(0u); // remove first spacer by position
 
    wxSizerItem *item =
       (wxSizerItem *)m_sizerRcpts->GetChildren().First()->Data();
@@ -1546,9 +1546,9 @@ void wxComposeView::DeletePlaceHolder()
    ASSERT_MSG( item->IsWindow(), _T("should be the static text") );
 
    wxWindow *win = item->GetWindow();
-   m_sizerRcpts->Remove(0); // remove static text by position
+   m_sizerRcpts->Remove(0u); // remove static text by position
 
-   m_sizerRcpts->Remove(0); // remove second spacer by position
+   m_sizerRcpts->Remove(0u); // remove second spacer by position
    delete win;
 }
 
