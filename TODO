@@ -34,11 +34,11 @@ $Id$
 		text messages. How can we speed this up? Why do
 		redraws take long, too?
 
+9	KB	Find MEvent leaks in ASMailFolder/folder/msgview code
+9	KB	Find "cannot create INBOX" bug - trace it
+9	KB	Debug IconManager load path
 		Check before reopening a closed MailFolder in
 		MailCollector, some kind of MailFolder::IsOK()?
-
-		Auto-Expunge question appears even when we have no
-                deleted messages??
 
 9	KB	check new mail after startup -- should be done already
 		--> seems problem with first folder listing not
@@ -56,6 +56,9 @@ $Id$
 		message view properties page --> rename to "Viewer?"
 		Rename "File" menu to "Messages" or "Program"?
 		Tidy up menus/toolbars.
+
+5		intelligent followup/post article when reading
+		NNTP/NEWS groups
 
 4	KB	Also, why "hide" parameter to all wxComposeView::CreateXXX()
 		functions is ignored - is it used anywhere?
