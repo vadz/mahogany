@@ -471,7 +471,7 @@ MailFolderCC::UpdateCount(long n)
       //       over all messages and look at their "New" flag instead)
       // KB: I think it should be "New" AND "Unseen"
       for ( unsigned long i = 0; i < (unsigned long)n; i++ )
-         messageIDs[i] = oldnum + n;
+         messageIDs[i] = oldnum + i;
 
       EventMailData data(this, (unsigned long)n, messageIDs);
       EventManager::Send(data);
