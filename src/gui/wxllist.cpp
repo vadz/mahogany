@@ -24,10 +24,10 @@
 
 #ifdef M_BASEDIR
 #   include "gui/wxllist.h"
-#   define  SHOW_SELECTIONS 0
+#   undef  SHOW_SELECTIONS
 #else
 #   include "wxllist.h"
-#   define SHOW_SELECTIONS 1
+#   define SHOW_SELECTIONS
 #endif
 
 #ifndef USE_PCH
@@ -456,7 +456,7 @@ wxLayoutLine::FindObjectScreen(wxDC &dc,
       if( x <= xpos && xpos <= x + width )
       {
          *cxpos = cx + (**i).GetOffsetScreen(dc, xpos-x);
-         WXLO_DEBUG(("wxLayoutLine::FindObjectScreen: cursor xpos = %ld", *cxpos));
+         wxLogDebug("wxLayoutLine::FindObjectScreen: cursor xpos = %ld", *cxpos);
          if(found) *found = true;
          return i;
       }
@@ -971,10 +971,12 @@ wxLayoutLine::Debug(void)
 {
    wxString tmp;
    wxPoint pos = GetPosition();
-   WXLO_DEBUG(("Line %ld, Pos (%ld,%ld), Height %ld",
+   tmp.Printf("Line %ld, Pos (%ld,%ld), Height %ld",
               (long int) GetLineNumber(),
               (long int) pos.x, (long int) pos.y,
-              (long int) GetHeight()));
+              (long int) GetHeight());
+              
+   wxLogDebug(tmp);
 }
 #endif
 
@@ -1074,15 +1076,12 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
    m_FontFamily = family;
    m_FontStyle = style;
    m_FontWeight = weight;
-   if(fg)
-      m_ColourFG = *fg;
-   else
-      m_ColourFG = *wxBLACK;
-   if(bg)
-      m_ColourBG = *bg;
-   else
-      m_ColourBG = *wxWHITE;
-      
+   if(fg) m_ColourFG = *fg;
+   if(bg) m_ColourBG = *bg;
+
+   m_ColourFG = *wxBLACK;
+   m_ColourBG = *wxWHITE;
+   
    if(m_DefaultSetting)
       delete m_DefaultSetting;
 
@@ -1430,10 +1429,10 @@ wxLayoutList::Draw(wxDC &dc,
                                     m_CursorLine == m_FirstLine));
    InvalidateUpdateRect();
 
-   WXLO_DEBUG(("Selection is %s : l%d,%ld/%ld,%ld",
-               m_Selection.m_valid ? "valid" : "invalid",
-               m_Selection.m_CursorA.x, m_Selection.m_CursorA.y,
-               m_Selection.m_CursorB.x, m_Selection.m_CursorB.y));
+   wxLogDebug("Selection is %s : l%d,%ld/%ld,%ld",
+              m_Selection.m_valid ? "valid" : "invalid",
+              m_Selection.m_CursorA.x, m_Selection.m_CursorA.y,
+              m_Selection.m_CursorB.x, m_Selection.m_CursorB.y);
 }
 
 wxLayoutObject *
@@ -1514,11 +1513,19 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
    dc.SetLogicalFunction(wxXOR);
    dc.SetPen(wxPen(*wxBLACK,1,wxSOLID));
    if(active)
-      dc.DrawRectangle(coords.x, coords.y, m_CursorSize.x,
-                       m_CursorSize.y);
+   {
+      dc.DrawRectangle(coords.x, coords.y,
+                       m_CursorSize.x, m_CursorSize.y);
+      SetUpdateRect(coords.x, coords.y);
+      SetUpdateRect(coords.x+m_CursorSize.x, coords.y+m_CursorSize.y);
+   }
    else
+   {
       dc.DrawLine(coords.x, coords.y+m_CursorSize.y-1,
                   coords.x+m_CursorSize.x, coords.y+m_CursorSize.y-1);
+      SetUpdateRect(coords.x, coords.y+m_CursorSize.y-1);
+      SetUpdateRect(coords.x+m_CursorSize.x, coords.y+m_CursorSize.y-1);
+   }
    dc.SetLogicalFunction(wxCOPY);
    //dc.SetBrush(wxNullBrush);
 }
@@ -1541,7 +1548,7 @@ wxLayoutList::SetUpdateRect(CoordType x, CoordType y)
 void
 wxLayoutList::StartSelection(void)
 {
-   WXLO_DEBUG(("Starting selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y));
+   wxLogDebug("Starting selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y);
    m_Selection.m_CursorA = m_CursorPos;
    m_Selection.m_selecting = true;
    m_Selection.m_valid = false;
@@ -1552,7 +1559,7 @@ wxLayoutList::ContinueSelection(void)
 {
    wxASSERT(m_Selection.m_selecting == true);
    wxASSERT(m_Selection.m_valid == false);
-   WXLO_DEBUG(("Continuing selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y));
+   wxLogDebug("Continuing selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y);
    m_Selection.m_CursorB = m_CursorPos;
    // We always want m_CursorA <= m_CursorB!
    if(! (m_Selection.m_CursorA <= m_Selection.m_CursorB))
@@ -1567,7 +1574,7 @@ void
 wxLayoutList::EndSelection(void)
 {
    ContinueSelection();
-   WXLO_DEBUG(("Ending selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y));
+   wxLogDebug("Ending selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y);
    m_Selection.m_selecting = false;
    m_Selection.m_valid = true;
 }
@@ -1634,7 +1641,7 @@ wxLayoutList::IsSelected(const wxLayoutLine *line, CoordType *from,
 void
 wxLayoutList::StartHighlighting(wxDC &dc)
 {
-#if SHOW_SELECTIONS
+#ifdef SHOW_SELECTIONS
    dc.SetTextForeground(m_ColourBG);
    dc.SetTextBackground(m_ColourFG);
 #endif
@@ -1644,7 +1651,7 @@ wxLayoutList::StartHighlighting(wxDC &dc)
 void
 wxLayoutList::EndHighlighting(wxDC &dc)
 {
-#if SHOW_SELECTIONS
+#ifdef SHOW_SELECTIONS
    dc.SetTextForeground(m_ColourFG);
    dc.SetTextBackground(m_ColourBG);
 #endif
@@ -1654,7 +1661,7 @@ wxLayoutList::EndHighlighting(wxDC &dc)
 #ifdef WXLAYOUT_DEBUG
 
 void
-wxLayoutList::Debug(void) 
+wxLayoutList::Debug(void)
 {
    wxLayoutLine *line;
 

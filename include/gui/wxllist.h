@@ -29,8 +29,7 @@
 #   define WXMENU_LAYOUT_DBLCLICK   1113
 #endif
 
-// do not enable debug mode within Mahogany
-#if defined(__WXDEBUG__)  && ! defined(M_BASEDIR)
+#ifdef   __WXDEBUG__
 #   define   WXLAYOUT_DEBUG
 #endif
 
