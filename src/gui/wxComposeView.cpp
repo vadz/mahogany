@@ -2402,13 +2402,20 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
          }
 
          ok = true;
-         wxLogStatus(this, _("Inserted text from external editor."));
 
          // check if the text was really changed
          if ( ComputeTextHash() == m_oldTextHash )
          {
             // assume it wasn't
             ResetDirty();
+
+            // show it to the user so that he knows that there will be no
+            // question before closing the window
+            wxLogStatus(this, _("External editor terminated, text unchanged."));
+         }
+         else // text was changed
+         {
+            wxLogStatus(this, _("Inserted text from external editor."));
          }
       }
    }
