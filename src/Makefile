@@ -95,8 +95,10 @@ endif
 	for i in .src/icons/*.xpm; \
 	do $(INSTALL_DATA) $$i $(DATADIR)/icons; \
 	done
+	# using "set -e" instead of "for i in $INSTALL_DIRS" makes this work even
+	# when INSTALL_DIRS is empty - which it is if we don't use Python
 	set -e $(INSTALL_DIRS); \
-	for i in $(INSTALL_DIRS); do $(MAKE) -C $$i install; done
+	for i; do $(MAKE) -C $$i install; done
 
 # invoked from locale to build message catalog
 msgcat:
