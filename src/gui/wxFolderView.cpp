@@ -3230,21 +3230,19 @@ wxFolderView::SelectInitialMessage()
    /*
     select some "interesting" message initially: the logic here is a bit
     hairy, but, hopefully, this does what expected.
-   
+
     explanations:
 
-    1. if MP_AUTOSHOW_LASTSELECTED is on, we select the message which had
-       been selected last time we had this folder opened
+    1. If MP_AUTOSHOW_FIRSTUNREADMESSAGE is on and we have any unread messages,
+       we select the first unread
 
-    2. if not, or if there is no last message, we do the following:
+    2. Else:
 
-       a) if MP_AUTOSHOW_FIRSTUNREADMESSAGE is off, then we just select either
-          the first message (if MP_AUTOSHOW_FIRSTMESSAGE) or the last one
-          (otherwise).
+       a) if MP_AUTOSHOW_LASTSELECTED is on, we select the message which had
+          been selected last time we had this folder opened
 
-       b) if it is on and we have an unread message, we always select first
-          unread message, but if there are no unread messages, we revert to the
-          previous behaviour, i.e. select the first or the last one
+       b) if not, or if there is no last message, we select either the first
+          message (if MP_AUTOSHOW_FIRSTMESSAGE is on) or the last one otherwise
    */
    size_t numMessages = GetHeadersCount();
    if ( !numMessages )
@@ -3255,21 +3253,8 @@ wxFolderView::SelectInitialMessage()
 
    MsgnoType idx = INDEX_ILLEGAL;
 
-   // (1) step: check last selected
-   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_LASTSELECTED) )
-   {
-      int last = m_Profile->readEntryFromHere(MP_LASTSELECTED_MESSAGE, -1);
-      if ( last != -1 )
-      {
-         idx = (MsgnoType)last;
-
-         m_FolderCtrl->Focus(idx);
-      }
-   }
-
-   // (2a) step: check first unread
-   if ( idx == INDEX_ILLEGAL &&
-            READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
+   // step (1): check unread
+   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
    {
       // don't waste time looking for unread messages if we already know that
       // there are none (as we often do)
@@ -3291,12 +3276,25 @@ wxFolderView::SelectInitialMessage()
       }
    }
 
-   // (2b) step: take first or last
+   // step (2a): use last selected
    if ( idx == INDEX_ILLEGAL )
    {
-      // select first unread is off or no unread message, so select the first
-      // or the last one depending on the options
-      //
+      if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_LASTSELECTED) )
+      {
+         int last = m_Profile->readEntryFromHere(MP_LASTSELECTED_MESSAGE, -1);
+         if ( last != -1 )
+         {
+            idx = (MsgnoType)last;
+
+            m_FolderCtrl->Focus(idx);
+         }
+      }
+
+   }
+
+   // step (2b): just go to the first or last message
+   if ( idx == INDEX_ILLEGAL )
+   {
       // NB: idx is always a valid index because numMessages >= 1
       idx = READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTMESSAGE) ? 0
                                                              : numMessages - 1;
