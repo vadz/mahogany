@@ -1875,9 +1875,9 @@ static Value func_checkSpam(ArgList *args, FilterRuleImpl *p)
    Message_obj msg = p->GetMessage();
    if ( msg )
    {
-#ifdef USE_RBL
       String value;
 
+#ifdef USE_RBL
       msg->GetHeaderLine("Received", value);
 
       int a,b,c,d;
@@ -2049,9 +2049,10 @@ static Value func_subj8bit(ArgList *args, FilterRuleImpl *p)
    String subject = msg->Subject();
    size_t num8bit = 0,
           max8bit = subject.length() / 2;
-   for ( const unsigned char *p = (unsigned char *)subject.c_str(); *p; p++ )
+   for ( const unsigned char *pc = (const unsigned char *)subject.c_str();
+         *pc; pc++ )
    {
-      if ( *p > 127 || *p == '?' || *p == '!' )
+      if ( *pc > 127 || *pc == '?' || *pc == '!' )
       {
          if ( num8bit++ == max8bit )
          {
