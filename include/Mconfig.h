@@ -41,7 +41,7 @@
 #     define   OS_TRU64
 #     define   OS_SUBTYPE   "tru64"
 #  endif
-#endif 
+#endif
 
 /// Test for MS Windows:
 #if defined(__WIN__) || defined(__WINDOWS__) || defined(_WIN32)
@@ -53,13 +53,22 @@
 #endif
 
 /// Test for MacOS:
-//#if defined(applec) || defined(THINK_C) || ( defined( __MWERKS__ ) && !defined(__INTEL__) )
-#if defined( __POWERPC__ ) && ( defined( __MWERKS__ ) || defined ( THINK_C ) )
+#if defined( __POWERPC__ ) && ( defined( __MWERKS__ ) || defined ( THINK_C ))
 #   define   OS_MAC   1
 #   define   OS_TYPE      "MacOS"
 #   undef    OS_SUBTYPE
 #   define   OS_SUBTYPE   ""
 #endif
+
+/// Test for MacOS X
+#if defined (__APPLE__) && defined (__MACH__)
+    #define OS_UNIX   1
+    #define   OS_MAC   1
+    #define OS_TYPE   "unix"
+    #undef OS_SUBTYPE
+    #define OS_SUBTYPE   "mac-osx"
+#endif
+
 
 #if ! defined (OS_TYPE)
     // this reminder is important!
