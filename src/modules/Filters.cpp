@@ -2335,31 +2335,33 @@ static bool CheckWhiteList(const Message *msg)
 
    wxArrayString values = msg->GetHeaderLines(headers);
    wxString list = strutil_flatten_array(values, ',');
-   list.MakeLower();
+   RefCounter<AddressList> parser(AddressList::Create(list));
 
    AdbManager *manager = AdbManager::Get();
    manager->LoadAll(); // HACK: So that AdbEditor's provider list is utilized
-   AdbBook *book = manager->CreateBook(READ_APPCONFIG_TEXT(MP_WHITE_LIST));
+   RefCounter<AdbBook> book(
+      manager->CreateBook(READ_APPCONFIG_TEXT(MP_WHITE_LIST)));
    manager->Unget();
 
    wxArrayString names;
    book->GetEntryNames(names);
 
    bool found = false;
-   for( size_t each = 0; each < names.GetCount(); ++each )
+   for( Address *candidate = parser->GetFirst(); candidate;
+      candidate = parser->GetNext(candidate) )
    {
-      AdbEntry *entry = book->GetEntry(names[each]);
-
-      wxString address;
-      entry->GetField(AdbField_EMail,&address);
-      address.MakeLower();
-
-      found = found || list.find(address) != wxString::npos;
-
-      entry->DecRef();
+      for( size_t each = 0; each < names.GetCount(); ++each )
+      {
+         RefCounter<AdbEntry> entry(book->GetEntry(names[each]));
+   
+         // FIXME: Grammar without escape sequences
+         if( entry->Matches(String(_T("*@"))+candidate->GetDomain(),
+            AdbLookup_EMail,AdbLookup_Match) )
+         {
+            found = true;
+         }
+      }
    }
-
-   book->DecRef();
 
    return !found;
 }

@@ -544,11 +544,56 @@ static String Adr2String(ADDRESS *adr, Adr2StringWhich which, bool *error)
    return address;
 }
 
+static String RemoveEmptyListParts(const String &original)
+{
+   String result;
+   bool empty = true;
+   size_t index;
+   
+   // Add everything except commas following other commas
+   for( index = 0; index < original.size(); ++index )
+   {
+      wxChar byte = original[index];
+
+      if( byte != _T(',') )
+      {
+         empty &= wxIsspace(byte);
+         
+         result += byte;
+      }
+      else
+      {
+         if( !empty )
+            result += _T(',');
+         
+         empty = true;
+      }
+   }
+   
+   // Remove trailing comma
+   size_t last = result.rfind(_T(','));
+   if( last != String::npos )
+   {
+      bool trailing = true;
+      for( index = last+1; index < result.size(); ++index )
+      {
+         trailing &= wxIsspace(result[index]);
+      }
+      
+      if( trailing )
+      {
+         result.erase(last);
+      }
+   }
+   
+   return result;
+}
+
 extern ADDRESS *ParseAddressList(const String& address, const String& defhost)
 {
    // NB: rfc822_parse_adrlist() modifies the string passed in, copy them!
 
-   char *addressCopy = strdup(wxConvertWX2MB(address));
+   char *addressCopy = strdup(wxConvertWX2MB(RemoveEmptyListParts(address)));
 
    // use '@' to trick c-client into accepting addresses without host names
    char *defhostCopy = strdup(defhost.empty() ? "@" : wxConvertWX2MB(defhost.c_str()));

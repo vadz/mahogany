@@ -503,31 +503,22 @@ void LineEntryData::SetField(size_t n, const String& strValue)
 
 int LineEntryData::Matches(const wxChar *what, int /*where*/, int how) const
 {
-   wxString whatCopy(what);
+   wxString whatCopy;
    wxString addressCopy(m_address);
    
+   if ( how & AdbLookup_Substring )
+      whatCopy << _T('*');
+   whatCopy << what;
+   if ( how & AdbLookup_Substring || how & AdbLookup_StartsWith )
+      whatCopy << _T('*');
+
    if ( !(how & AdbLookup_CaseSensitive) )
    {
       whatCopy.MakeLower();
       addressCopy.MakeLower();
    }
 
-   bool match;
-   if ( how & AdbLookup_Substring )
-   {
-      match = addressCopy.find(whatCopy) != addressCopy.npos;
-   }
-   else if ( how & AdbLookup_StartsWith )
-   {
-      match = addressCopy.size() >= whatCopy.size()
-         && addressCopy.compare(0, whatCopy.size(), whatCopy);
-   }
-   else
-   {
-      match = addressCopy == whatCopy;
-   }
-   
-   return match ? AdbLookup_EMail : 0;
+   return addressCopy.Matches(whatCopy) ? AdbLookup_EMail : 0;
 }
 
 ostream& operator << (ostream& out, const LineEntryData& entry)
