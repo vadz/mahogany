@@ -72,10 +72,10 @@ bool	MDialog_YesNoDialog(char  *message,
 
 char *MDialog_FileRequester(String  &message,
                             MWindow *parent = NULL,
-                            String path = NULLstring,
-                            String filename = NULLstring,
-                            String extension = NULLstring,
-                            String wildcard = NULLstring,
+                            String &path = NULLstring,
+                            String &filename = NULLstring,
+                            String &extension = NULLstring,
+                            String &wildcard = NULLstring,
                             bool save = false,
                             ProfileBase *profile = NULL
    );
