@@ -1053,7 +1053,8 @@ void MessageView::ShowTextPart(wxFontEncoding encBody,
    else if ( READ_CONFIG(GetProfile(), MP_MSGVIEW_AUTO_ENCODING) )
    {
       encPart = m_mailMessage->GetTextPartEncoding(nPart);
-      if ( encPart == wxFONTENCODING_SYSTEM )
+      if ( encPart == wxFONTENCODING_SYSTEM ||
+            encPart == wxFONTENCODING_DEFAULT )
       {
          // use the encoding of the last part which had it
          encPart = encBody;
