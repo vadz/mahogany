@@ -107,7 +107,7 @@ wxMApp::OnInit()
       log->Show();
 
       // we want it to be above the log frame
-//FIXME      topLevelFrame->Raise();
+      topLevelFrame->Raise();
 
 #     ifdef  USE_WXWINDOWS2
          return true;

@@ -201,7 +201,7 @@ public:
    bool empty(void) const
       { return first == NULL ; }
 
-private:
+protected:
    /// if true, list owns entries
    bool        ownsEntries;
    /// pointer to first element in list
@@ -209,6 +209,7 @@ private:
    /// pointer to last element in list
    kbListNode *last;
 
+private:
    /// forbid copy construction
    kbList(kbList const &foo);
    /// forbid assignments

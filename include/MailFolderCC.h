@@ -27,7 +27,7 @@ extern "C"
 struct __docxxfix;
 
 #include  "MailFolder.h"
-class FolderViewBase;
+#include  "FolderView.h"
 
 // fwd decl needed to define StreamListType before MailFolderCC
 // (can't be defined inside the class - VC++ 5.0 can't compile it)

@@ -47,9 +47,6 @@ typedef long CoordType;
 class wxLayoutList;
 class wxLayoutObjectBase;
 
-/// Define a list type of wxLayoutObjectBase pointers.
-KBLIST_DEFINE(wxLayoutObjectList, wxLayoutObjectBase);
-
 /** The base class defining the interface to each object which can be
     part of the layout. Each object needs to draw itself and calculate 
     its size.
@@ -98,6 +95,9 @@ private:
    /// optional data for application's use
    void * m_UserData;
 };
+
+/// Define a list type of wxLayoutObjectBase pointers.
+KBLIST_DEFINE(wxLayoutObjectList, wxLayoutObjectBase);
 
 /// object for text block
 class wxLayoutObjectText : public wxLayoutObjectBase
