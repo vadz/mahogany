@@ -15,6 +15,7 @@
 #undef   OS_UNIX
 #undef   OS_WIN
 #undef   OS_TYPE
+#undef   OS_MAC
 #undef   OS_SUBTYPE
 #undef   CC_GCC
 #undef   CC_MSC
@@ -22,6 +23,7 @@
 
 #define   OS_SUBTYPE   "unknown"
 
+/// Test for unix flavours:
 #ifdef unix
 #  define  OS_UNIX    1
 #  define  OS_TYPE    "unix"
@@ -35,15 +37,28 @@
 #      undef    OS_SUBTYPE
 #      define   OS_SUBTYPE   "solaris"
 #   endif
-#elif defined(__WIN__) || defined(__WINDOWS__) || defined(_WIN32)
+#endif 
+
+/// Test for MS Windows:
+#if defined(__WIN__) || defined(__WINDOWS__) || defined(_WIN32)
 #  define  OS_WIN    1
 #  define  OS_TYPE    "windows"
-#   ifndef  __WINDOWS__
+#  ifndef  __WINDOWS__
 #       define  __WINDOWS__     // for wxWindows 2.x
-#   endif
-#else
-  // this reminder is important, it won't compile without it anyhow...
-# error   "Unknown platform (forgot to #define unix?)"
+#  endif
+#endif
+
+/// Test for MacOS:
+#if defined(applec) || defined(THINK_C) || ( defined( __MWERKS__ ) && !defined(__INTEL__) )
+#   define   OS_MAC   1
+#   define   OS_TYPE      "MacOS"
+#   undef    OS_SUBTYPE
+#   define   OS_SUBTYPE   ""
+#endif
+
+#if ! defined (OS_TYPE)
+    // this reminder is important!
+#   error   "Unknown platform (forgot to #define unix?)"
 #endif
 
 // Are we using GCC?

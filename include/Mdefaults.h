@@ -187,6 +187,8 @@
 #define   MP_UMASK               "Umask"
 /// automatically show first message in folderview?
 #define   MP_AUTOSHOW_FIRSTMESSAGE "AutoShowFirstMessage"
+/// open messages when they're clicked (otherwise - double clicked)
+#define   MP_PREVIEW_ON_SELECT     "PreviewOnSelect"
 /// program used to convert image files?
 #define   MP_CONVERTPROGRAM      "ImageConverter"
 /**@name Printer settings */
@@ -557,6 +559,8 @@
 #define   MP_UMASK_D               022
 /// automatically show first message in folderview?
 #define   MP_AUTOSHOW_FIRSTMESSAGE_D 0l
+/// open messages when they're clicked (otherwise - double clicked)
+#define   MP_PREVIEW_ON_SELECT_D     1l
 /// program used to convert image files?
 #define   MP_CONVERTPROGRAM_D      "convert %s -compress None %s"
 /**@name Printer settings */

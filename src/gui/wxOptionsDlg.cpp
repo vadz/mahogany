@@ -147,6 +147,7 @@ enum ConfigFields
 
    // message view
    ConfigField_MessageViewFirst = ConfigField_PythonLast,
+   ConfigField_MessageViewPreviewOnSelect,
    ConfigField_MessageViewFontFamily,
    ConfigField_MessageViewFontSize,
    ConfigField_MessageViewFGColour,
@@ -430,10 +431,11 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 #endif // USE_PYTHON
 
    // message views:
+   { gettext_noop("Preview message when &selected"), Field_Bool,    -1                     },
    { gettext_noop("&Font family"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1 },
-   { gettext_noop("Font &size"),                   Field_Number,  -1 },
+   { gettext_noop("Font si&ze"),                   Field_Number,  -1 },
    { gettext_noop("Foreground c&olour"),           Field_Color,   -1 },
    { gettext_noop("Back&ground colour"),           Field_Color,   -1 },
    { gettext_noop("Colour for &URLs"),             Field_Color,   -1 },
@@ -570,6 +572,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 #endif // USE_PYTHON
 
    // message views
+   CONFIG_ENTRY(MP_PREVIEW_ON_SELECT),
    CONFIG_ENTRY(MP_MVIEW_FONT),
    CONFIG_ENTRY(MP_MVIEW_FONT_SIZE),
    CONFIG_ENTRY(MP_MVIEW_FGCOLOUR),

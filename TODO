@@ -117,7 +117,6 @@ GENERAL ROADMAP/ORDER OF THINGS:
   got sent --> difficult
 - if time permits: vcard-import
 - use mm_critical() and delay application exit if necessary
-- add "double click to open" profile option support to folder list ctrl
 - enable/disable edit menu entries as needed
 - check whether the test in MailFolderCC.cpp, line 949 really works as 
   expected 
@@ -298,4 +297,6 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *********************************************************************
 *** Fixed and tested:
 *********************************************************************
- vi: set si tw=80:
+- add "double click to open" profile option support to folder list ctrl
+
+vi: set si tw=80:

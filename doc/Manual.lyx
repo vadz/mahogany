@@ -1,4 +1,4 @@
-#This file was created by <karsten> Fri May 21 13:04:47 1999
+#This file was created by <karsten> Fri Jun  4 19:57:27 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -1045,13 +1045,46 @@ The list of message headers at the top, showing message subjects, authors,
 The contents of the currently selected message below.
 \layout Standard
 
+The reaction to a mouse click in the list of messages depends on the preferences
+ setting 
+\begin_inset Quotes eld
+\end_inset 
+
+Preview message when selected
+\begin_inset Quotes eld
+\end_inset 
+
+.
+ When the option is selected, a single mouse click will select the message
+ and load it into the preview window.
+ If the option is not set, the message will only be selected but not previewed
+ automatically, which is very useful for accessing mail folders through
+ a slow connection.
+ The same setting effects the behavious of the space bar, it acts excatly
+ like a single mouse click in the window and will only cause a message to
+ be previewed if a single mouse click is configured to do so.
+ The key 
+\begin_inset Quotes eld
+\end_inset 
+
+V
+\begin_inset Quotes erd
+\end_inset 
+
+ can be used to view the message under the current cursor.
+ Also, using the mouse or the space bar together with the SHIFT or CTRL
+ keys, allows one to select multiple messages at once.
+\layout Standard
+
 When the top window, the list of messages, is active, certain keyboard bindings
  are active, the following keys are recognized:
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
 multicol5
-13 2 0 0 -1 -1 -1 -1
+15 2 0 0 -1 -1 -1 -1
 1 1 0 0
+1 0 0 0
+0 0 1 0
 1 0 0 0
 1 0 0 0
 1 0 0 0
@@ -1066,6 +1099,10 @@ multicol5
 0 1 0 0
 8 1 0 "" ""
 2 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 1 0 0 "" ""
 0 8 1 0 0 0 0 "" ""
 0 8 1 0 0 0 0 "" ""
 0 8 1 0 0 0 0 "" ""
@@ -1099,7 +1136,16 @@ Action performed
 \newline 
 SPACE
 \newline 
-select/deselect message
+select/deselect message under cursor
+\newline 
+
+\newline 
+If message are to be previewed on selection, this will also preview the
+ message.
+\newline 
+V
+\newline 
+preview message under cursor
 \newline 
 D or DELETE
 \newline 
@@ -2262,6 +2308,21 @@ Message Viewer_4101_
 
 \end_inset 
 
+Preview message when selected
+\newline 
+
+\series default 
+ When this option is set, any message that gets selected in the list of
+ messages will get pre-viewed automatically.
+ If using a modem connection, it makes sense to disable it, so messages
+ will only get loaded and pre-viewed when double-clicked upon or when the
+ 'V' key is pressed.
+ By default, this is enabled, so that clicking on a message or pressing
+ the spacebar to select it, will also pre-view it.
+\layout Itemize
+
+
+\series bold 
 Font family, font size, foreground colour, background colour, colour for
  URLs, colour for header names, colour for header values
 \series default 
@@ -3514,9 +3575,7 @@ make
 make install
 \family default 
 .
- wxGTK requires libgtk+, either version 1.0.x or 1.2.x.
- However, gtk+ version 1.2.x is highly recommended as it works significantly
- better.
+ wxGTK requires libgtk 1.0.x, it does not work with gtk-1.1/1.2 (yet).
  If you have both gtk 1.0 and 1.2 installed in separate locations, you can
  use the 
 \family typewriter 

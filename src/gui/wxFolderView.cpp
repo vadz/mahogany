@@ -52,8 +52,9 @@
 
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
-   EVT_CHAR              (wxFolderListCtrl::OnKey)
-   EVT_KEY_DOWN          (wxFolderListCtrl::OnKey)
+   EVT_CHAR              (wxFolderListCtrl::OnChar)
+   EVT_KEY_DOWN          (wxFolderListCtrl::OnChar)
+   EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnMouse)
    EVT_MOTION (wxFolderListCtrl::GrabFocus)
 END_EVENT_TABLE()
 
@@ -70,9 +71,9 @@ static const char *wxFLC_ColumnNames[] =
 
 #define wxFLC_DEFAULT_SIZES "80:80:80:80:80"
 
-void wxFolderListCtrl::OnKey(wxKeyEvent& event)
+void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
-   wxLogDebug("FolderListCtrl::OnKey, this=%p", this);
+   wxLogDebug("FolderListCtrl::OnChar, this=%p", this);
 
    if(! m_FolderView || ! m_FolderView->m_MessagePreview)
       return; // nothing to do
@@ -105,7 +106,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
           Movetofolder, ReplyTo, Forward, Open, Print, Show Headers
       */
-      const char keycodes_en[] = gettext_noop("DUXCSMRFOPH ");
+      const char keycodes_en[] = gettext_noop("DUXCSMRFOPHV ");
       const char *keycodes = _(keycodes_en);
 
       int idx = 0;
@@ -158,6 +159,9 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
       case 'H':
          m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
          break;
+      case 'V':
+         m_FolderView->PreviewMessage(focused);
+         break;
       case ' ':
          // If shift is not used, deselect all items before having
          // wxListCtrl selects this one.
@@ -169,7 +173,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
             {
                if(idx != focused)  // allow us to toggle the focused item
                   SetItemState(idx,0,wxLIST_STATE_SELECTED);
-                 idx++;//FIXME this should be wrong
+               idx++;
             }
          }
          event.Skip();
@@ -183,6 +187,11 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
    //SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
 }
 
+
+void wxFolderListCtrl::OnMouse(wxListEvent& event)
+{
+   m_FolderView->PreviewMessage(event.m_itemIndex);
+}
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
@@ -200,7 +209,10 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Style = wxLC_REPORT;
    m_Initialised = false;
 
-   EnableSelectionCallbacks(true);
+   if(READ_CONFIG(fv->GetProfile(), MP_PREVIEW_ON_SELECT))
+      EnableSelectionCallbacks(true);
+   else
+      EnableSelectionCallbacks(false);
 
    int
       w = 500,
@@ -619,17 +631,21 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       PrintPreviewMessages(selections);
       break;
    case WXMENU_MSG_SELECTALL:
-      m_FolderCtrl->EnableSelectionCallbacks(false);
+   {
+      bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
       for(n = 0; n < m_NumOfMessages; n++)
          m_FolderCtrl->Select(n,TRUE);
-      m_FolderCtrl->EnableSelectionCallbacks(true);
+      m_FolderCtrl->EnableSelectionCallbacks(tmp);
       break;
+   }
    case WXMENU_MSG_DESELECTALL:
-      m_FolderCtrl->EnableSelectionCallbacks(false);
+   {
+      bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
       for(n = 0; n < m_NumOfMessages; n++)
          m_FolderCtrl->Select(n,FALSE);
-      m_FolderCtrl->EnableSelectionCallbacks(true);
+      m_FolderCtrl->EnableSelectionCallbacks(tmp);
       break;
+   }
    case WXMENU_HELP_CONTEXT:
       mApplication->Help(MH_FOLDER_VIEW,GetWindow());
       break;

@@ -239,10 +239,15 @@ public:
       { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
 
    void OnSelected(wxListEvent& event);
-   void OnKey( wxKeyEvent &event);
+   void OnChar( wxKeyEvent &event);
+   void OnMouse(wxListEvent& event);
 
-   void EnableSelectionCallbacks(bool enabledisable = true)
-      { m_SelectionCallbacks = enabledisable; }
+   bool EnableSelectionCallbacks(bool enabledisable = true)
+      {
+         bool rc = m_SelectionCallbacks;
+         m_SelectionCallbacks = enabledisable;
+         return rc;
+      }
 
    void GrabFocus(wxMouseEvent &event)       { SetFocus(); }
 
