@@ -8,9 +8,10 @@ README file for Mahogany, Release 0.23a "Polwarth IV"
 Issues with the current release
 --------------------------------------------------------------------
 
-Mahogany, just like wxGTK, works best with gtk 1.2.x. It should still
-work with 1.0.6, but this depends on wxGTK which might or might not
-exhibit some problems with it.
+Mahogany, just like wxGTK, works best with gtk 1.2.6. Both, 1.2.5
+and 1.2.7 might cause some minor problems. Please understand that
+this is not a Mahogany specific problem and that we cannot do
+anything about it. 
 
 More detailed information about Mahogany, how to get support for it,
 how to contribute it, and last not least, how to use it, can be found
@@ -35,7 +36,7 @@ Internet resources
 The Mahogany web page is at:
 
 http://mahogany.home.dhs.org/
-http://www.phy.hw.ac.uk/~karsten/Mahogany/
+http://www.wxwindows.org/Mahogany/
 
 
 Mahogany and wxWindows/wxGTK are available via anonymous ftp from the
@@ -65,10 +66,10 @@ http://www.wxwindows.org/
 Compilation notes
 --------------------------------------------------------------------
 
-These are some very brief notes about how to compile M.
+These are some very brief notes about how to compile Mahogany.
 More detailed, step for step, instructions can be found in the Manual,
 which is contained in the Mdoc.tar.gz file in the doc directory.
-You can also view it online at http://www.phy.hw.ac.uk/~karsten/M/dl/Manual/
+You can also view it online at http://www.wxwindows.org/Mahogany/
 
 Before you can compile Mahogany, you will need to get a copy of wxGTK and
 compile and install it. It is important, that you use a very recent copy of
@@ -88,27 +89,13 @@ run ../configure. Running ../configure --help first is a good idea.
 - wxGTK should be configured with the following options:
   (You can vary these as you like, but these are recommended.)
 
-     ../configure \
-        --disable-shared \          # or --disable-static if you prefer
-	--enable-static \           # or --enable-shared if you prefer
-	--with-libjpeg \
-	--with-libpng \
-	--with-gtk \
-        --without-odbc \
-        --with-threads 		   # this isn't strictly needed, you can leave
-	                             it out
+     ../configure --with-gtk 
 
 For debugging, the following options should be added:
 
 	--enable-debug_flag \
 	--enable-debug_info \
 	--disable-optimise     # this is also needed for gcc 2.8.0
-
-If using gtk 1.0.6 rather than 1.2.x, you need to add --without-dnd .
-If you experience a problem with thread support, you can just as well
-compile it --without-threads, they are not currently required.
-If you like, you can change the without/with static/shared options above
-to generate a shared library instead of the static one.
 
 Doing a "make" and "make install" in the wxWindows/src directory should install
 the header files and libraries on your system. You can use the --prefix= option
@@ -153,14 +140,6 @@ toplevel directory.
 Required software:
 
    - wxGTK, the gtk port of wxWindows
-	available from http://web.ukonline.co.uk/julian.smart/wxwin/
-        M is not based on any of the earlier betas, but on a snapshot
-        from the cvs. If you want to make sure that you don't have any 
-        problems in compiling and linking M against it, you should
-        download the wxGTK snapshot used by us to compile the binary release
-	of Mahogany. It is available from:
-	http://www.phy.hw.ac.uk/~karsten/M/dl/wxGTK.tar.gz
-
-   - libgtk 1.0.x, libglib 1.0.x, or gtk/glib 1.2.x
+   - libgtk 1.2.x, libglib 1.2.x
 
 
