@@ -1,17 +1,25 @@
-%% LyX 1.1 created this file.  For more info, see http://www.lyx.org/.
-%% Do not edit unless you really know what you are doing.
-\documentclass[12pt,letterpaper,oneside,english]{book}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Project:     M
+% File name:   Manual.htex
+% Purpose:     Mahogany manual with context sensitive help ids
+% Author:      Karsten Ballüder
+% Modified by: Vadim Zeitlin: 11.04.03: now it is pure LaTeX, not LyX any more
+% Created:     1997
+% CVS-ID:      $Id$
+% Copyright:   (c) 1997-2003 M Dev Team
+% Licence:     M license
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt,oneside,english]{book}
 \usepackage{palatino}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
 
+\newcommand{\mailtolink}[1]{\htmladdnormallink{<#1>}{mailto:#1}}
 \makeatletter
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
-\providecommand{\LyX}{L\kern-.1667em\lower.25em\hbox{Y}\kern-.125emX\@}
 \newcommand{\noun}[1]{\textsc{#1}}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
 \usepackage{html, epsfig}
 \makeatletter
 
@@ -19,17 +27,19 @@
 \begin{document}
 
 \vfill{}
-\title{\textsl{Mahogany User Manual}\\
-{\Large Version 0.64 {}``Sparc{}''}}
+\title{{\LARGE \textsl{Mahogany User Manual}}\\
+{\Large Version 0.65 ``Claire''}}
 \vfill{}
 
 
-\author{Copyright 1997-2001 by The Mahogany Development Team\\
- Written by Karsten Ballüder, Vadim Zeitlin et.al.\\
-\texttt{http://mahogany.sourceforge.net/}\\
-\texttt{<mahogany-developers@lists.sourceforge.net>}}
+\author{Copyright 1997-2003 by The Mahogany Development Team\\
+\vspace{1cm}
+\mailtolink{mahogany-developers@lists.sourceforge.net} \\
+\vspace{1cm}
+Written by Vadim Zeitlin, Karsten Ballüder et.al.}
 
 \maketitle
+
 \tableofcontents{}
 
 
@@ -64,11 +74,58 @@ any problems with building it.
 \subsection{Changes against the previous versions}
 
 
+\subsubsection{0.65 against 0.64}
+
+First of all, too many bugs to be mentioned here were fixed. During more than a
+year since the last release we mainly concentrated on making Mahogany more
+stable and faster (or at least less slow) rather than on adding new features.
+
+Yet, inevitably, some of them still crept in and here is an incomplete list:
+\begin{itemize}
+\item It is now possible to postpone messages being composed and later resume
+      writing them by opening them in ``Drafts'' folder
+\item Mahogany tries to save messages being composed in case of crash or
+      interrupt
+\item TLS (as in \noun{STARTTLS}) is now supported for all protocols (SMTP,
+      IMAP and POP)
+\item Preliminary and limited support for PGP added: GNU Privacy Guard
+      may be used for decoding the PGP-encoded message and checking PGP
+      signatures.
+\item Message viewer now recognizes {\tt *bold*} and {\tt \_italic\_} markup,
+      can decode messages encoded in ROT13 and highlights signatures in a
+      different colour. More URLs are found and highlighted and detecting them
+      is much faster now.
+\item SMTP authentication now can be tweaked to work even with seriously
+      broken servers such as qmail and exim 3
+\item Mahogany now comes with many built-in spam tests which can be tweaked
+      to be more or less strict. It isn't comparable to Spam Assasin yet, but
+      it is better than nothing.
+\item Composer interface has been changed, hopefully for the better, once again
+\item It is now possible to control a remote instance of Mahogany using the
+      command line arguments (see \ref{cmdlineargs}) and also to directly open
+      the composer from the command line.
+\item ``Bounce'' (also known as ``Redirect'') command was added as well as
+      ``Resend message'' one.
+\item Search results are now shown in a so called virtual folder which makes
+      working with them much more convenient and it is now also possible to
+      search in many folders at once.
+\item More new commands in no special order: ``Move folder'', ``Follow up to
+      newsgroup'', ``Go to message'' (by number), ``Preview'' in composer
+\item Message viewer and composer support UTF-7 and UTF-8.
+\item Raw text view dialog now has a find button.
+\item It is now possible to use config files instead of the registry under
+      Windows too.
+\end{itemize}
+
+Finally not really a new feature but an important achievement in our struggle
+for world domination: Mahogany now runs under Mac OS X as well! Note that
+Mahogany is a real native (Carbon) application and doesn't require GTK+ or X11.
+
 \subsubsection{0.64 against 0.63}
 
 This time the most important changes have happened to the already
 existing features many of which were dramatically improved. Support
-for both IMAP4 andPOP3 has got better, many UI improvements were done
+for both IMAP4 andP OP3 has got better, many UI improvements were done
 and too many bugs to mention here were fixed.
 
 The main change without doubt is the complete reorganisation of the
@@ -76,7 +133,7 @@ program internals which now allows us to only download the headers
 shown on the screen from server instead of getting all of them. This
 means that the time needed to open a folder is now almost independent
 of the folder size and Mahogany can be used without troubles with
-folders containing 50000 messages (and maybe more - but this wasn't
+folders containing $50000$ messages (and maybe more - but this wasn't
 tested yet).
 
 But what would be a new release without some new features? So here
@@ -100,11 +157,11 @@ instead of downloading the entire messages.
 \item Support for List-Post header and the possibility to configure the
 program to automatically reply to the mailing list only.
 \item Added rename and copy buttons to the filter editing dialog.
-\item Added \char`\"{}Open as readonly\char`\"{} command - this can be significantly
+\item Added \char`\"{}Open as readonly\char`\"{} command -- this can be significantly
 faster than \char`\"{}Open\char`\"{} for the local folders and also
 works for the read only files.
 \item Added a command to permanently delete messages instead of moving them
-to theTrash folder - useful for dealing with spam.
+to the Trash folder -- useful for dealing with spam.
 \item Filters were sped up even more. They also show a nicer progress dialog
 now.
 \item Added commands to manually update the status of one or all folders.
@@ -251,31 +308,31 @@ the outgoing ones)
 \item import of settings and folder collections from Pine and XFMail, vCard
 support (import/export from addess book, attach to messages)
 \item drag and drop for message copying and moving - \char`\"{}Quick Move\char`\"{}
-and \char`\"{}Quick Filter\char`\"{} functions 
-\item folders now can (finally) be renamed 
-\item quoted text highlighting in the message viewer! 
+and \char`\"{}Quick Filter\char`\"{} functions
+\item folders now can (finally) be renamed
+\item quoted text highlighting in the message viewer!
 \item sort the messages display by simply clicking on the corresponding
-column, the sorting dialog also has been improved 
-\item folders with new/recent messages are highlighted in the folder tree 
-\item it is possible (although still discouraged) to run Mahogany as root 
-\item passwords in the config file are encrypted using TwoFish algorithm 
-\item option to always use external editor by default 
-\item messages from oneself are optionally marked as such 
-\item support for password protected SMTP and NNTP servers 
-\item more verbose error reporting and detection 
-\item OpenSSL loaded dynamically if available 
-\item PalmOS module supports AvantGo/MAL synchronisation 
-\item templates now may be used for replying/forwarding as well 
+column, the sorting dialog also has been improved
+\item folders with new/recent messages are highlighted in the folder tree
+\item it is possible (although still discouraged) to run Mahogany as root
+\item passwords in the config file are encrypted using TwoFish algorithm
+\item option to always use external editor by default
+\item messages from oneself are optionally marked as such
+\item support for password protected SMTP and NNTP servers
+\item more verbose error reporting and detection
+\item OpenSSL loaded dynamically if available
+\item PalmOS module supports AvantGo/MAL synchronisation
+\item templates now may be used for replying/forwarding as well
 \item many other various fixes
 \end{itemize}
 \textbf{New experimental features include:}
 
 \begin{itemize}
-\item supporting multiple-identities and easy switching between them 
+\item supporting multiple-identities and easy switching between them
 \item support of storing configuration settings on an IMAP server allowing
 to share them between different machines/accounts
 \end{itemize}
-\textbf{Known bugs:} 
+\textbf{Known bugs:}
 
 \begin{itemize}
 \item There are always some, listed on our bugtracker at http://mahogany.sourceforge.net/bugz/
@@ -303,7 +360,7 @@ release, but dynamically linkable) include a filtering language and
 PalmOS support. For the future, a calendar/timeplanner plugin is planned.
 \item Configurable filtering rules have been added.
 \item Message threading and configurable sort order is supported.
-\item An HTML-based help browser has been added. 
+\item An HTML-based help browser has been added.
 \item Configurable date format.
 \item Handling of dial-up networking and detection of connection status.
 \item Optional user of a Trash folder.
@@ -355,13 +412,13 @@ Expect them to appear in the next releases.
 Release 0.22a is mainly a bugfix release against 0.21a.
 
 \begin{itemize}
-\item All know (crash-inducing) bugs fixed. 
-\item Message editor/viewer improvements, adding clipboard support and selections. 
-\item wxGTK layout bug fixes - German, French, Spanish translations 
-\item Text-search in messages 
-\item Several minor usability fixes, sub-folder support fixed. 
-\item Addressbook fixes 
-\item TCP timeouts configurable 
+\item All know (crash-inducing) bugs fixed.
+\item Message editor/viewer improvements, adding clipboard support and selections.
+\item wxGTK layout bug fixes - German, French, Spanish translations
+\item Text-search in messages
+\item Several minor usability fixes, sub-folder support fixed.
+\item Addressbook fixes
+\item TCP timeouts configurable
 \item Support for setting the Reply-To: header from To: field in message
 replies.
 \end{itemize}
@@ -415,7 +472,7 @@ it the default behaviour.
 activated yet. Will be there very soon.)
 \item A faster mail folder format or support for storing messages in an
 ODBC database.
-\item Support for PGP and GNU Privacy Guard to encrypt mails. 
+\item Support for PGP and GNU Privacy Guard to encrypt mails.
 \item Wide character (Unicode) and UTF-8 support (waiting for GTK+ 2.0)
 \end{itemize}
 
@@ -426,7 +483,7 @@ we need some help. Areas where we would use some help are
 
 \begin{itemize}
 \item Updating this manual
-\item Python 
+\item Python
 \item support for other mail protocols and mailfolder file formats, LDAP
 \item If you have access to other systems apart from Linux/Solaris/FreeBSD/Windows,
 you are very welcome to help us port Mahogany to those platforms,
@@ -439,9 +496,10 @@ Naturally we tend to work on the features that we either need ourselves
 or find interesting to do. If your priorities are different, join
 our team and help us improve it. Mahogany is and will always be an
 OpenSource(TM) project and your involvement is wanted! If you have
-any questions about this, please contact the developers at \htmladdnormallinkfoot{mahogany-users@lists.sourceforge.net}{mailto:mahogany-users@lists.sourceforge.net}.
+any questions about this, please contact the developers at
+\mailtolink{mahogany-users@lists.sourceforge.net}.
 If you have questions about the Mahogany License, discuss them with
-us - we don't want the license to scare anyone.}
+us -- we don't want the license to scare anyone.}
 \end{itemize}
 
 \subsection{Copyright\_1003\_}
@@ -488,7 +546,7 @@ this software package may be copied, such that the Copyright Holder
 maintains some semblance of artistic control over the development
 of the package, while giving the users of the package the right to
 use and distribute the Package in a more-or-less customary fashion,
-plus the right to make reasonable modifications. 
+plus the right to make reasonable modifications.
 
 This license is based on Perl's ``Artistic License'' and has been
 adapted to better suit Mahogany. It aims to confirm with the Open-Source
@@ -501,28 +559,28 @@ get in touch with us.
 
 ``Package'' refers to the collection of files distributed by the Copyright
 Holder, and derivatives of that collection of files created through
-textual modification. 
+textual modification.
 
 ``Standard Version'' refers to such a Package if it has not been modified,
 or has been modified in accordance with the wishes of the Copyright
-Holder as specified below. 
+Holder as specified below.
 
 ``Copyright Holder'' is whoever is named in the copyright or copyrights
-for the package. 
+for the package.
 
 ``You'' is you, if you're thinking about copying or distributing this
-Package. 
+Package.
 
 ``Reasonable copying fee'' is whatever you can justify on the basis
 of media cost, duplication charges, time of people involved, and so
 on. (You will not be required to justify it to the Copyright Holder,
 but only to the computing community at large as a market that must
-bear the fee.) 
+bear the fee.)
 
 ``Freely Available'' means that no fee is charged for the item itself,
 though there may be fees involved in handling the item. It also means
 that recipients of the item may redistribute it under the same conditions
-they received it. 
+they received it.
 
 
 \paragraph{Conditions of Use}
@@ -531,14 +589,14 @@ they received it.
 \item You may make and give away verbatim copies of the source form of the
 Standard Version of this Package without restriction, provided that
 you duplicate all of the original copyright notices and associated
-disclaimers and only distribute the complete package as a whole. 
+disclaimers and only distribute the complete package as a whole.
 \item You may apply bug fixes, portability fixes and other modifications
 derived from the Public Domain or from the Copyright Holder. A Package
-modified in such a way shall still be considered the Standard Version. 
+modified in such a way shall still be considered the Standard Version.
 \item You may otherwise modify your copy of this Package in any way, provided
 that you insert a prominent notice in each changed file stating how
 and when you changed that file, and provided that you do at least
-ONE of the following: 
+ONE of the following:
 
 \begin{enumerate}
 \item place your modifications in the Public Domain or otherwise make them
@@ -552,27 +610,27 @@ a separate manual page for each non-standard executable that clearly
 documents how it differs from the Standard Version. You must not make
 the modified version depend on any other software or library if that
 software or library is not Freely Available or if it is covered under
-a license more restrictive than this. 
+a license more restrictive than this.
 \item use the modified Package only within your corporation or organisation.
-\item make other distribution arrangements with the Copyright Holder. 
+\item make other distribution arrangements with the Copyright Holder.
 \end{enumerate}
 \item You may distribute the programs of this Package in object code or
-executable form, provided that you do at least ONE of the following: 
+executable form, provided that you do at least ONE of the following:
 
 \begin{enumerate}
 \item distribute a Standard Version of the executables and library files,
 together with instructions (in the manual page or equivalent) on where
-to get the Standard Version. 
+to get the Standard Version.
 \item accompany the distribution with the machine-readable source of the
 Package with your modifications, including the complete machine-readable
 source of the unmodified Standard Version. You must not make the modified
 version depend on any other software or library if that software or
 library is not Freely Available or if it is covered under a license
-more restrictive than this. 
+more restrictive than this.
 \item give non-standard executables non-standard names, and clearly document
 the differences in manual pages (or equivalent), together with instructions
 on where to get the Standard Version. d.make other distribution arrangements
-with the Copyright Holder. 
+with the Copyright Holder.
 \end{enumerate}
 \item You may charge a reasonable copying fee for any distribution of this
 Package. You may charge any fee you choose for support of this Package.
@@ -580,14 +638,14 @@ You may not charge a fee for this Package itself. However, you may
 distribute this Package in aggregate with other (possibly commercial)
 programs as part of a larger (possibly commercial) software distribution
 provided that you do not advertise this Package as a product of your
-own. 
+own.
 \item The name of the Copyright Holder may not be used to endorse or promote
 products derived from this software without specific prior written
 permission. However, all products derived from this software must
-reproduce the original copyright notice as found in the Standard Version. 
+reproduce the original copyright notice as found in the Standard Version.
 \item THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES
-OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. 
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 \end{enumerate}
 
 \subsection{The License Dialog\_4270\_}
@@ -646,7 +704,7 @@ Hudson (tjh@cryptsoft.com)\char`\"{}
 
 We gratefully acknowledge the use of the \htmladdnormallinkfoot{wxWindows}{http://www.wxwindows.org/}
 cross-platform class library and the excellent work and support of
-the wxWindows developer team. 
+the wxWindows developer team.
 
 
 \section{Introduction / Tutorial}
@@ -839,6 +897,66 @@ explain here how to set up your accounts.
 
 \section{Setting up Mahogany, its configuration files}
 
+\subsection{Mahogany command line options}\label{cmdlineargs}
+
+The following options are accepted. When both short and long options are listed
+either one can be used and if the long options requires an argument, it must be
+specified for the short one as well. The delimiter for the short options is
+either {\tt /} or {\tt -} but only {\tt -{}-} can be used for the long ones.
+
+\vspace{0.5cm}
+{
+   \centering \begin{tabular}{|c|c|}
+   \hline
+   Option & Meaning \\
+   \hline
+   \hline
+   -h, --help     &  show the summary of the command line options \\
+   \hline
+   --verbose      &  generate verbose messages (off by default)   \\
+   \hline
+   --debug        &  enable debug logging \\
+   \hline
+   --safe         &  don't do anything automatically on startup \\
+                  &  may be useful if Mahogany crashes when trying \\
+                  &  to automatically do something after starting up \\
+   \hline
+   --config=file  &  specify the alternate configuration file to use \\
+                  &  may be also used to force using file instead of \\
+                  &  the registry under Windows \\
+   \hline
+   -b, --bcc=adr  &  specify a blind carbon-copy (BCC) recipient  \\
+   \hline
+   -c, --cc=adr   &  specify a carbon-copy (CC) recipient  \\
+   \hline
+   -s, --subject=str  &  specify the subject for the new message \\
+   \hline
+   --body=str     &  the initial text of the message \\
+   \hline
+   -f, --folder=str & the folder to open in the main frame on startup \\
+   \hline
+   --lang=lng     & the language to use for the program messages, \\
+                  & overrides the default language choice \\
+   \hline
+   --newsgroup=group &  the news group to post the message to \\
+   \hline
+   \end{tabular}
+}
+
+\vspace{0.5cm}
+
+The remaining command line arguments are taken as the recipients for the new
+message.
+
+If either of the {\tt --bcc}, {\tt --cc}, {\tt --subject}, {\tt --newsgroup} or
+{\tt --body} options is given or a command line argument follows the options,
+the composer will be automatically opened on startup. If the ``Always run only
+one instance'' option (see \ref{onlyoneinstance}) is set, the composer will be
+opened in the already running instance of the program, if any.
+
+Please do use {\tt --debug} option if something goes wrongly, it can give
+valuable information about the problem! See also the corresponding option
+(\ref{debugoption}).
 
 \subsection{User configuration files (Unix only)}
 
@@ -907,7 +1025,7 @@ is a POP, IMAP, NNTP connection , a file based mailfolder, a newsgroup
 or whatever, Mahogany treats them all the same and calls them all
 {}``folder{}''. The dialog has several pages which include at least:
 \textbf{Access} (\ref{FolderAccessPage}), \textbf{New Mail} ()\textbf{,
-Compose} (\ref{ComposePage}) and \textbf{MessageViewer} (\ref{MessageViewerPage}). 
+Compose} (\ref{ComposePage}) and \textbf{MessageViewer} (\ref{MessageViewerPage}).
 
 
 \subsubsection{Access\_2005\_}
@@ -938,7 +1056,7 @@ on Windows. While this file will be created as only readable by you
 and the passwords be encrypted (using very weak encryption), it is
 nevertheless a certain risk. If you accidentally change the permissions
 of that file, someone else could obtain your passwords, though Mahogany
-would detect this the next time it starts and warn you about it. 
+would detect this the next time it starts and warn you about it.
 \item \textbf{Server}\\
 For the folders which require a server setting, you can specify the
 server host here. If unspecified they will inherit the setting from
@@ -1045,26 +1163,26 @@ change the column order from the same page already mentioned above)
 may be empty or contain one or more flags:
 
 \begin{tabular}{|c|c|}
-\hline 
+\hline
 Symbol&
 Meaning\\
 \hline
-\hline 
+\hline
 {*}&
 message is flagged or important\\
-\hline 
+\hline
 A&
 message was answered to\\
-\hline 
+\hline
 D&
 message is marked as deleted and will disappear after expunge\\
-\hline 
+\hline
 U&
 message is unread: you haven't seen its body yet\\
-\hline 
+\hline
 R&
 message is recent: this is the first time you see it\\
-\hline 
+\hline
 N&
 message is new: it is recent and unread\\
 \hline
@@ -1101,56 +1219,56 @@ Other keyboard bindings are summarized in the following table:
 
 \vspace{0.3cm}
 {\centering \begin{tabular}{|c|c|}
-\hline 
+\hline
 Key&
 Action performed\\
 \hline
-\hline 
+\hline
 {*}&
 mark/unmark message under cursor\\
-\hline 
+\hline
 SPACE&
 preview message under cursor\\
-\hline 
+\hline
 D or DEL&
 mark selected messages for deletion\\
-\hline 
+\hline
 U&
 remove deletion mark from selected messages\\
-\hline 
+\hline
 X or \#&
 expunge messages marked for deletion\\
-\hline 
+\hline
 C&
 copy marked messages to another folder\\
-\hline 
+\hline
 M&
 move selected messages to another folder\\
-\hline 
+\hline
 S&
 save marked messages to files\\
-\hline 
+\hline
 P&
 print marked messages\\
-\hline 
+\hline
 R&
 reply to messages\\
-\hline 
+\hline
 F&
 forward messages\\
-\hline 
+\hline
 O&
 open messages in separate window\\
-\hline 
+\hline
 H&
 toggle display of all headers\\
-\hline 
+\hline
 BACK/PG UP&
 scroll the message preview one page up\\
-\hline 
+\hline
 PG DOWN&
 scroll the message preview one page down\\
-\hline 
+\hline
 Ctrl-U&
 view next unread message\\
 \end{tabular}\par}
@@ -1198,7 +1316,7 @@ It is the main system mailbox and cannot be deleted or renamed. All
 new mail will arrive in here. At present, Mahogany leaves all messages
 in the system inbox. Mahogany will collect mail from several different
 incoming mailboxes, e.g. the INBOX and some additional POP3 accounts,
-and move them to a new folder. 
+and move them to a new folder.
 
 
 \subsection{The {}``New Mail{}'' Folder}
@@ -1319,7 +1437,7 @@ edit dialog if you decide to add more conditions to it, for example.
 All of these fields accept either mail addresses, aliases or folder
 names. Aliases must be expanded by using the tabulator key or the
 Expand button next to the fields. If multiple entries match the text,
-you will be prompted with a list to choose from. 
+you will be prompted with a list to choose from.
 
 
 \subsubsection{Using Folder names as an address}
@@ -1348,7 +1466,7 @@ can be entered and must be comma-separated.
 \subsubsection{CC:}
 
 CC means Carbon Copy - copies of the message will get sent to the
-addresses listed here. 
+addresses listed here.
 
 
 \subsubsection{BCC:}
@@ -1363,44 +1481,44 @@ of the message knowing about it.
 
 \vspace{0.3cm}
 {\centering \begin{tabular}{|c|c|}
-\hline 
+\hline
 Key&
 Function\\
 \hline
-\hline 
+\hline
 ALT-D&
 delete word\\
-\hline 
+\hline
 CTRL-Y&
 delete line\\
-\hline 
+\hline
 CTRL-U&
 delete to begin of line\\
-\hline 
+\hline
 CTRL-K&
 delete to end of line\\
-\hline 
+\hline
 CTRL-C &
 copy selection to clipboard\\
-\hline 
+\hline
 SHIFT-INSERT&
 \\
-\hline 
+\hline
 CTRL-X&
 cut selection to clipboard\\
-\hline 
+\hline
 SHIFT-DELETE&
 \\
-\hline 
+\hline
 CTRL-V&
 paste text from clipboard\\
-\hline 
+\hline
 CTRL-INSERT&
 \\
-\hline 
+\hline
 CTRL-S&
 search for text\\
-\hline 
+\hline
 CTRL-T&
 search same text again\\
 \hline
@@ -1423,7 +1541,7 @@ will automatically replace them with the corresponding full e-mail
 address. Other possible cases: either there are no matches at all
 and a message in the status line of the window will tell you so, or
 there are more than one match in which case you will be presented
-with a choice of all possible completions. 
+with a choice of all possible completions.
 
 \emph{Hint:} if you press <TAB> immediately after the address expansion
 it will bring you to the next text entry zone and will not attempt
@@ -1460,7 +1578,7 @@ the message, while the {}``BCC{}'' (blind carbon copy) addresses
 will be suppressed in the message keeping them anonymous. If you enter
 an address like {}``\#myfolder{}'', Mahogany will interpret it as
 the name of a mailfolder and save a copy of the message to that folder
-(in this case {}``myfolder{}''). 
+(in this case {}``myfolder{}'').
 
 
 \subsection{The News Article Composition Window\_2101\_}
@@ -1831,7 +1949,7 @@ chose one of the natively supported formats to use for the conversion.
 At present, the most reliable format appears to be XPM. If configured
 properly and all libraries are available, Mahogany should support
 XPM, PNG, JPEG and BMP. Notice that XPM files are extremely large,
-so you might want to change this setting to one of the other formats. 
+so you might want to change this setting to one of the other formats.
 \item \textbf{Support special fax mailers}\\
 This enables support for domains sending faxes by email, such as the
 \htmladdnormallinkfoot{EFAX}{http://www.efax.com/} fax to email gateway.
@@ -1981,7 +2099,7 @@ If this option is on, the log window showing all program messages
 will be displayed during program execution. It is advised to leave
 it on because the log messages (which can be saved to a file from
 the log window menu) can be valuable for the bug reports.
-\item \textbf{Debug server and mail folder access}\\
+\item \textbf{Debug server and mail folder access}\label{debugoption}\\
 This is another troubleshooting option: please turn it on if you experience
 any mail-related problems (either sending or receiving). It slows
 down the program a lot but allows to see what exactly is going on
@@ -2013,6 +2131,14 @@ very big folders or on slow machines/network connections, so an alternative
 way is to uncheck this checkbox. Then double clicking a folder will
 be needed to open it in the integrated folder view - while {}``Open{}''
 popup menu item will still open it in a separate window.
+\item \textbf{Always run only one instance}\label{onlyoneinstance}\\
+If this option is on and you launch another instance of Mahogany, i.e. execute
+it again while another copy of it is still running, the control will be given
+to the already running instance instead of launching another one in parallel.
+
+This is especially useful when Mahogany is configured as your default mail
+client as otherwise another copy of it would have to be opened each time when
+you start writing a new message.
 \item \textbf{Format for the date}\\
 This controls how the dates are shown in the folder view window. The
 string here has the same format as an argument to strftime(), on a
@@ -2229,7 +2355,7 @@ entry you're looking for.
 
 You may import your existing address book file by choosing the {}``Import
 book...{}''entry from the {}``Book{}'' menu - this will open the
-address book import dialog proposing you to select the 
+address book import dialog proposing you to select the
 
 
 \subsection{Support for BBDB Address Books\_3002\_}
@@ -2321,7 +2447,7 @@ does not carry a useable type with it and needs to be converted in
 the callback, e.g. if the argument is called \texttt{arg} and the
 object is a \texttt{MailFolder}, the object must either be used as
 \texttt{MailFolder.MailFolder(arg)} or be converted as \texttt{mf
-= MailFolder.MailFolder(arg)}. 
+= MailFolder.MailFolder(arg)}.
 \item Some callbacks have a third argument. This is either a single value
 or a tuple holding several values.
 \end{enumerate}
@@ -2338,68 +2464,68 @@ must be explicitly named.
 
 \vspace{0.3cm}
 {\centering \begin{tabular}{|c|c|c|c|c|}
-\hline 
+\hline
 0 8 1 0 0 0 00 8 1 0 0 0 0Callback Name&
 Object Type&
 Additional Arguments/Types&
 Return Value&
 Documentation\\
 \hline
-\hline 
+\hline
 FolderOpenHook&
 MailFolder&
 &
 void&
 Called after a folder has been opened.\\
-\hline 
+\hline
 FolderUpdateHook&
 MailFolder&
 &
 void&
 Called after a folder has been updated.\\
-\hline 
+\hline
 FolderSetMessageFlag&
 MailFolder&
 (long) index of message&
 1 if changing flags is ok,0 otherwise&
 Called before changing flags for a message.\\
-\hline 
+\hline
 &
 &
 (string)name of flag&
 &
 \\
-\hline 
+\hline
 FolderClearMessageFlag&
 MailFolder&
 (long) index of message&
 1 if changing flags is ok,0 otherwise&
 Called before changing flags for a message.\\
-\hline 
+\hline
 &
 &
 (string) name of flag&
 &
 \\
-\hline 
+\hline
 FolderExpungeHook&
 MailFolder&
 &
 1 to expunge, 0 to abort&
 Called before expunging messages.\\
-\hline 
+\hline
 FolderNewMailHook&
 MailFolder&
 &
 1 to suppress default message, 0 else&
 Called when new mail arrived in folder.\\
-\hline 
+\hline
 GlobalNewMailHook&
 mApplication&
 (string) sender of mail&
 1 to suppress default message, 0 else&
 Called when new mail arrived anywhere.\\
-\hline 
+\hline
 &
 &
 (string) subject of mail&
@@ -2510,7 +2636,7 @@ expression specified
 \item Older Than - check if the message is older than this many days
 \item Newer Than - check if the message is newer than this many days
 \item Is SPAM - check if the message originates from a system blacklisted
-as sending unsolicited emails (SPAM). 
+as sending unsolicited emails (SPAM).
 \item Python - execute the text in the box in the built-in Python interpreter
 and proceed if it returns a non-0 result.
 \end{itemize}
@@ -2543,7 +2669,7 @@ The listbox on the left lists the existing filtering rules for the
 currently selected folder in the order in which they are executed.
 You can use the buttons to change the order or rules. You can also
 activate/deactivate rules by clicking on the litte checkbox ({[}X{]}
-or {[} {]}) next to their name. 
+or {[} {]}) next to their name.
 
 If you want to apply rules to all incoming messages and are collecting
 mail from different servers, simply apply the rules to the {}``New
@@ -2555,7 +2681,7 @@ for individual servers or INBOX.
 
 When 3Com released its first PalmPilots several years ago, many people
 did not believe in a success. But they were proven wrong, the Palm
-Pilot (or short: Palm) is today the most used handheld organizer. 
+Pilot (or short: Palm) is today the most used handheld organizer.
 
 For all the people possessing one of those´s little helpers, the PalmOS
 Module allows (or will allow) for an easy integration of the Palm´s
@@ -2582,7 +2708,7 @@ function
 To use this functionality, you must of course have the PalmOS module
 enabled. You can access the functions via the Plugin menu. In addition
 to the above mentioned tasks, you can specify quite a lot of options
-to adapt for instance the backup process to your personal needs. 
+to adapt for instance the backup process to your personal needs.
 
 There is an additional function not mentioned yet, labelled {}``Synchronize{}''.
 Via the configuration dialog you can specify what should happen during
@@ -2614,7 +2740,7 @@ address as set on the Palm are ignored when mails are sent with \emph{Mahogany}.
 be used for mail exchange when you have the {}``Synchronise Mail{}''
 feature enabled (see above).
 \item [Mail~disposal~mode]This specifies what to do with outgoing e-mails
-retrieved from the PalmPilot and sent. You have three options: 
+retrieved from the PalmPilot and sent. You have three options:
 
 \begin{itemize}
 \item file : move messages from Outbox to Filed mailbox on the Palm
@@ -2642,7 +2768,7 @@ ignore the backup flags of the databases. By default the PalmOS-Module
 does only backup files with a set backup flag. Use this option if
 you want all files to be backup´ed.
 \item [Exclude~these~databases]Here you can specify a comma separated
-list of databases (without spaces!) that should not be backup´ed. 
+list of databases (without spaces!) that should not be backup´ed.
 \item [Do~auto-install]Using this feature enables the auto-install feature
 and everytime you {}``Synchronize{}'' the module will check the
 auto-install directory for Palm databases. If databases are found
@@ -2657,7 +2783,7 @@ Besides that, some general options are available:
 residing (this ought to be /dev/pilot under Unix/Linux and Com1: or
 Com2: under MS Windows (not yet supported)).
 \item [Connection~speed]You have the choice beetween different hotsync
-speeds ({}``connection speed{}''), measured in baud. 
+speeds ({}``connection speed{}''), measured in baud.
 \item [Try~to~lock~device]You can force a lock of the above set device
 by enabling {}``Try to lock device{}''
 \end{description}
@@ -2830,7 +2956,7 @@ The distribution files for Solaris and some of the other ones are
 in compressed tar format, having the ending \texttt{.tar.gz} . To
 unpack them you need \texttt{gzip} and \texttt{tar}. Change to the
 directory where you want to install Mahogany, e.g to \texttt{/usr}
-or \texttt{/opt} or \texttt{/usr/local} and issue the following command: 
+or \texttt{/opt} or \texttt{/usr/local} and issue the following command:
 
 \begin{quote}
 \texttt{gzip -dc < thedistributionfile | tar xvof -}
@@ -2946,7 +3072,7 @@ addresses:
 \begin{itemize}
 \item The quick and dirty approach: Create an addressbook entry and simply
 list multiple, comma separated, addresses in its Email field. Mahogany
-will use the whole contents of this field when expanding aliases. 
+will use the whole contents of this field when expanding aliases.
 \item The more elegant method: Create a new group in your addressbook and
 add the individual addresses as sub-entries of this group. If you
 use the group name as a mail alias, Mahogany will expand it to the
@@ -2962,13 +3088,13 @@ is no section in the initial configuration utility for this. \label{POP3}}
 
 Mahogany allows you to have as many folders or mail accounts as you
 like. That's why it doesn't ask you at the beginning. To add a POP
-account: 
+account:
 
 \begin{enumerate}
-\item right click on the folder tree and choose \char`\"{}Create Folder\char`\"{} 
+\item right click on the folder tree and choose \char`\"{}Create Folder\char`\"{}
 \item give the folder a name, set its type to POP3 and fill in the required
-fields, such as server and login 
-\item Click on {[}OK{]}. The folder will now appear in the tree 
+fields, such as server and login
+\item Click on {[}OK{]}. The folder will now appear in the tree
 \item Double-click on the folder to open it.
 \end{enumerate}
 \begin{itemize}
