@@ -304,8 +304,16 @@ enum ConfigFields
    ConfigField_FolderViewStatusBarFormat,
    ConfigField_FolderViewLast = ConfigField_FolderViewStatusBarFormat,
 
+   // folder tree options
+   ConfigField_FolderTreeFirst = ConfigField_FolderViewLast,
+   ConfigField_FolderTreeFormatHelp,
+   ConfigField_FolderTreeFormat,
+   ConfigField_FolderTreePropagateHelp,
+   ConfigField_FolderTreePropagate,
+   ConfigField_FolderTreeLast = ConfigField_FolderTreePropagate,
+
    // autocollecting and address books options
-   ConfigField_AdbFirst = ConfigField_FolderViewLast,
+   ConfigField_AdbFirst = ConfigField_FolderTreeLast,
    ConfigField_AutoCollect_HelpText,
    ConfigField_AutoCollect,
    ConfigField_AutoCollectAdb,
@@ -948,6 +956,21 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Use status bar"),              Field_Bool,    -1 },
    { gettext_noop("&Status bar line format"),      Field_Text,    ConfigField_FolderViewUpdateStatus                     },
 
+   // folder tree
+   { gettext_noop("Mahogany can show the number of messages in the folder\n"
+                  "directly in the folder tree. You may wish to disable\n"
+                  "this feature to speed it up slightly by leaving the text\n"
+                  "below empty or enter a string containing %t and/or %u\n"
+                  "to be replaced with the total number of messages and the\n"
+                  "number of unseen messages respectively"),
+                  Field_Message, -1 },
+   { gettext_noop("Folder tree format:"), Field_Text, -1 },
+   { gettext_noop("By default, if the folder has new/recent/unread messages\n"
+                  "its parent is shown in the same state as well. Disable\n"
+                  "it below if you don't like it (this makes sense mostly\n"
+                  "folders such as \"Trash\" or \"Sent Mail\")"), Field_Message, -1 },
+   { gettext_noop("Parent shows status"), Field_Bool, -1 },
+
    // adb: autocollect and bbdb options
    { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
                   "receive in a special addresss book. This is called 'address\n"
@@ -1247,6 +1270,12 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // status/title format help
    CONFIG_ENTRY(MP_FVIEW_STATUS_UPDATE),
    CONFIG_ENTRY(MP_FVIEW_STATUS_FMT),
+
+   // folder tree
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FTREE_FORMAT),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FTREE_PROPAGATE),
 
    // autocollect
    CONFIG_NONE(),
@@ -2165,7 +2194,7 @@ bool wxOptionsPageCompose::TransferDataFromWindow()
 wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
                                                    Profile *profile)
    : wxOptionsPageStandard(parent,
-                   _("Message Viewer"),
+                   _("Message View"),
                    profile,
                    ConfigField_MessageViewFirst,
                    ConfigField_MessageViewLast,
@@ -2205,7 +2234,7 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
 wxOptionsPageFolderView::wxOptionsPageFolderView(wxNotebook *parent,
                                                  Profile *profile)
    : wxOptionsPageStandard(parent,
-                           _("Folder Viewer"),
+                           _("Folder View"),
                            profile,
                            ConfigField_FolderViewFirst,
                            ConfigField_FolderViewLast,
@@ -2271,6 +2300,20 @@ void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
       wxCHECK_RET( dialog, "options page without a parent dialog?" );
       dialog->SetDirty();
    }
+}
+
+// ----------------------------------------------------------------------------
+// wxOptionsPageFolderTree
+// ----------------------------------------------------------------------------
+
+wxOptionsPageFolderTree::wxOptionsPageFolderTree(wxNotebook *parent,
+                                                 Profile *profile)
+   : wxOptionsPageStandard(parent,
+                           _("Folder Tree"),
+                           profile,
+                           ConfigField_FolderTreeFirst,
+                           ConfigField_FolderTreeLast)
+{
 }
 
 // ----------------------------------------------------------------------------
@@ -2789,6 +2832,7 @@ const char *wxOptionsNotebook::ms_aszImages[] =
 #endif
    "msgview",
    "folderview",
+   "foldertree",
    "adrbook",
    "helpers",
    "sync",
@@ -2815,6 +2859,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 #endif
    new wxOptionsPageMessageView(this, profile);
    new wxOptionsPageFolderView(this, profile);
+   new wxOptionsPageFolderTree(this, profile);
    new wxOptionsPageAdb(this, profile);
    new wxOptionsPageHelpers(this, profile);
    new wxOptionsPageSync(this, profile);

@@ -1221,6 +1221,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
 wxFolderListCtrl::~wxFolderListCtrl()
 {
+   SaveColWidths();
+
    m_profile->DecRef();
 
    delete m_menuFolders;

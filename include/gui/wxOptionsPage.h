@@ -377,6 +377,13 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// settings concerning the folder tree
+class wxOptionsPageFolderTree : public wxOptionsPageStandard
+{
+public:
+   wxOptionsPageFolderTree(wxNotebook *parent, Profile *profile);
+};
+
 // user identity
 class wxOptionsPageIdent : public wxOptionsPageStandard
 {

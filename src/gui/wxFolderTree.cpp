@@ -159,16 +159,23 @@ public:
       // recreated)
    void ResetExpandedFlag() { m_wasExpanded = false; }
 
+      // get the associated folder
+      //
       // NB: DecRef() shouldn't be called on the pointer returned by this
       //     function
-   MFolder          *GetFolder() const { return m_folder; }
+   MFolder *GetFolder() const { return m_folder; }
+
+      // get out parent in the tree
    wxFolderTreeNode *GetParent() const { return m_parent; }
+
+      // get the name (basep art of the label) of this folder
+   String GetName() const { return m_folder->GetName(); }
 
    // the folder status functions
 
       // set the "own" status for this folder, this doesn't always change the
       // folder appearance as GetShownStatus() might stay unchanged
-   void SetStatus(wxTreeCtrl *tree, Status status);
+   void SetStatus(wxTreeCtrl *tree, const MailFolderStatus& status);
 
       // translate MailFolder status to tree item status
    static Status GetTreeStatusFromMf(const MailFolderStatus& status);
@@ -193,6 +200,10 @@ protected:
 
       // update the status of the folder shown on screen
    void UpdateShownStatus(wxTreeCtrl *tree, Status statusShownBefore);
+
+   // get the label suffix, i.e. the part which is added to the label in the
+   // tree to show the number of messages in the folder
+   String GetLabelSuffix(const MailFolderStatus& status) const;
 
 private:
    // not implemented
@@ -884,7 +895,7 @@ bool wxFolderTree::OnDoubleClick()
 }
 
 // ----------------------------------------------------------------------------
-// wxFolderTreeNode
+// wxFolderTreeNode ctor
 // ----------------------------------------------------------------------------
 
 wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
@@ -903,6 +914,11 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    m_nUnseenChildren =
    m_nFlaggedChildren = 0;
 
+   String fullname = folder->GetFullName();
+
+   MailFolderStatus status;
+   bool hasStatus = MfStatusCache::Get()->GetStatus(fullname, &status);
+
    int image = GetFolderIconForDisplay(folder);
 
    // add this item to the tree
@@ -913,8 +929,15 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    }
    else // not root
    {
-      id = tree->AppendItem(GetParent()->GetId(), folder->GetName(),
-                            image, image, this);
+      String label = GetName();
+      if ( hasStatus )
+      {
+         // show the number of messages in the tree
+         label += GetLabelSuffix(status);
+      }
+      //else: no status, don't show anything
+
+      id = tree->AppendItem(GetParent()->GetId(), label, image, image, this);
    }
 
    SetId(id);
@@ -926,11 +949,27 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    }
 
    // restore cached status
-   MailFolderStatus status;
-   if ( MfStatusCache::Get()->GetStatus(folder->GetFullName(), &status) )
+   if ( hasStatus )
    {
-      SetStatus(tree, GetTreeStatusFromMf(status));
+      SetStatus(tree, status);
    }
+}
+
+// ----------------------------------------------------------------------------
+// wxFolderTreeNode status code
+// ----------------------------------------------------------------------------
+
+String wxFolderTreeNode::GetLabelSuffix(const MailFolderStatus& mfStatus) const
+{
+   Profile_obj profile(GetFolder()->GetFullName());
+
+   return FormatFolderStatusString
+          (
+            READ_CONFIG(profile, MP_FTREE_FORMAT),
+            GetFolder()->GetFullName(),     // name
+            (MailFolderStatus *)&mfStatus,  // const_cast is harmless
+            NULL                            // don't use mail folder
+          );
 }
 
 /* static */
@@ -970,7 +1009,8 @@ wxFolderTreeNode::Status wxFolderTreeNode::GetChildrenStatus() const
 }
 
 void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
-                                           Status statusOld, Status statusNew)
+                                           Status statusOld,
+                                           Status statusNew)
 {
    if ( !GetParent() )
    {
@@ -1030,19 +1070,27 @@ void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
    UpdateShownStatus(tree, statusShownBefore);
 }
 
-void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree, Status status)
+void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree,
+                                 const MailFolderStatus& mfStatus)
 {
-   if ( status == m_status )
+   Status status = GetTreeStatusFromMf(mfStatus);
+
+   if ( status != m_status )
    {
-      // nothing changed
-      return;
+      Status statusShownBefore = GetShownStatus();
+
+      m_status = status;
+
+      UpdateShownStatus(tree, statusShownBefore);
    }
+   //else: status (i.e. colour) didn't change
 
-   Status statusShownBefore = GetShownStatus();
-
-   m_status = status;
-
-   UpdateShownStatus(tree, statusShownBefore);
+   // change label if we show the number of messages in it
+   String suffix = GetLabelSuffix(mfStatus);
+   if ( !suffix.empty() )
+   {
+      tree->SetItemText(GetId(), GetName() + suffix);
+   }
 }
 
 void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
@@ -1069,9 +1117,10 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
          MP_FVIEW_NEWCOLOUR_D,
       };
 
-      wxString colorName = mApplication->GetProfile()
-                              ->readEntry(colorNames[statusShown],
-                                          colorDefaults[statusShown]);
+      Profile_obj profile(GetFolder()->GetFullName());
+
+      wxString colorName = profile->readEntry(colorNames[statusShown],
+                                              colorDefaults[statusShown]);
       wxColour col;
       if ( !ParseColourString(colorName, &col) )
       {
@@ -1084,7 +1133,15 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
       // propagate the change to the parent: when the child status changes,
       // the parent status may change as well (if we just got new messages,
       // parent should show them, for example)
-      GetParent()->OnChildStatusChange(tree, statusShownBefore, statusShown);
+
+      // however this may be disabled for some particular folders (the reason
+      // for having this option is that I really don't want to have my IMAP
+      // server highlighted as new if there are new messages in the trash
+      // folder only)
+      if ( READ_CONFIG(profile, MP_FTREE_PROPAGATE) )
+      {
+         GetParent()->OnChildStatusChange(tree, statusShownBefore, statusShown);
+      }
    }
 }
 
@@ -1267,7 +1324,10 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
       wxTreeItemId child = GetFirstChild(current, cookie);
       while ( child.IsOk() )
       {
-         if ( GetItemText(child) == name )
+         // we can't use GetItemText() any more here because the tree item
+         // label can now have user-configured suffix showing the number of
+         // messages
+         if ( GetFolderTreeNode(child)->GetName() == name )
             break;
 
          child = GetNextChild(current, cookie);
@@ -1992,7 +2052,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
 
    // update the status of the item in the tree
    wxFolderTreeNode *node = GetFolderTreeNode(item);
-   node->SetStatus(this, wxFolderTreeNode::GetTreeStatusFromMf(status));
+   node->SetStatus(this, status);
 }
 
 void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
@@ -2006,23 +2066,11 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
       return;
    }
 
-   // change the folder colour depending on whether it has any unread
-   // messages, any new messages (unread and recent) or neither at all
-   wxFolderTreeNode::Status status;
-
    MailFolderStatus mfStatus;
-   if ( !folder->CountInterestingMessages(&mfStatus) )
-   {
-      // only "normal" messages, nothing interesting
-      status = wxFolderTreeNode::Folder_Normal;
-   }
-   else
-   {
-      status = wxFolderTreeNode::GetTreeStatusFromMf(mfStatus);
-   }
+   (void)folder->CountInterestingMessages(&mfStatus);
 
    wxFolderTreeNode *node = GetFolderTreeNode(item);
-   node->SetStatus(this, status);
+   node->SetStatus(this, mfStatus);
 }
 
 // ----------------------------------------------------------------------------

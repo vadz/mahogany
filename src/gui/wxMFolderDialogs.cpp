@@ -2386,6 +2386,7 @@ const char *wxFolderCreateNotebook::s_aszImages[] =
    "compose",
    "msgview",
    "folderview",
+   "foldertree",
    NULL
 };
 
@@ -2398,6 +2399,7 @@ const char *wxFolderCreateNotebook::s_aszImagesAdvanced[] =
    "folders",
    "msgview",
    "folderview",
+   "foldertree",
    "helpers",
    NULL
 };
@@ -2434,6 +2436,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
    }
    (void)new wxOptionsPageMessageView(this, profile);
    (void)new wxOptionsPageFolderView(this, profile);
+   (void)new wxOptionsPageFolderTree(this, profile);
    if ( isAdvancedUser )
    {
       (void)new wxOptionsPageHelpers(this, profile);

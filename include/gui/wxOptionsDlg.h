@@ -37,6 +37,7 @@ enum OptionsPage
 #endif
    OptionsPage_MessageView,
    OptionsPage_FolderView,
+   OptionsPage_FolderTree,
    OptionsPage_Adb,
    OptionsPage_Helpers,
    OptionsPage_Sync,

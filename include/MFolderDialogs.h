@@ -33,6 +33,7 @@ enum FolderCreatePage
    FolderCreatePage_Compose,
    FolderCreatePage_MsgView,
    FolderCreatePage_FolderView,
+   FolderCreatePage_FolderTree,
    FolderCreatePage_Max
 };
 

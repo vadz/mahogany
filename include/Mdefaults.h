@@ -612,6 +612,19 @@ enum MFolderIndex
 #define   MP_FVIEW_STATUS_UPDATE "FViewStatUpdate"
 /// folder view status bar string
 #define   MP_FVIEW_STATUS_FMT  "FViewStatFmt"
+// how to show the size (MessageSizeShow enum value)
+#define MP_FVIEW_SIZE_FORMAT   "SizeFormat"
+/// replace "From" address with "To" in messages from oneself?
+#define MP_FVIEW_FROM_REPLACE "ReplaceFrom"
+/// the ':' separated list of addresses which are "from oneself"
+#define MP_FROM_REPLACE_ADDRESSES "ReplaceFromAdr"
+//@}
+/**@name  Font settings for folder tree */
+//@{
+/// format for the folder tree entries
+#define MP_FTREE_FORMAT "FTreeFormat"
+/// reflect the folder status in its parent
+#define MP_FTREE_PROPAGATE "FTreePropagate"
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -632,8 +645,6 @@ enum MFolderIndex
 #define MP_MSGS_RESORT_ON_CHANGE         "ReSortMessagesOnChange"
 /// use threading
 #define MP_MSGS_USE_THREADING  "ThreadMessages"
-// how to show the size (MessageSizeShow enum value)
-#define MP_FVIEW_SIZE_FORMAT   "SizeFormat"
 /// search criterium for searching in folders
 #define MP_MSGS_SEARCH_CRIT   "SearchCriterium"
 /// search argument
@@ -677,11 +688,6 @@ enum MFolderIndex
 
 /// Use substrings in address expansion?
 #define   MP_ADB_SUBSTRINGEXPANSION   "ExpandWithSubstring"
-
-/// replace "From" address with "To" in messages from oneself?
-#define MP_FVIEW_FROM_REPLACE "ReplaceFrom"
-/// the ':' separated list of addresses which are "from oneself"
-#define MP_FROM_REPLACE_ADDRESSES "ReplaceFromAdr"
 
 /** @name maximal amounts of data to retrieve from remote servers */
 //@{
@@ -1387,6 +1393,13 @@ enum MFolderIndex
 #define   MP_FVIEW_STATUS_UPDATE_D 0L
 /// folder view status bar string
 #define   MP_FVIEW_STATUS_FMT_D _("Date: $date, Subject: $subject, From: $from")
+//@}
+/**@name  Font settings for folder tree */
+//@{
+/// format for the folder tree entries
+#define MP_FTREE_FORMAT_D " (%t, %u)"
+/// reflect the folder status in its parent?
+#define MP_FTREE_PROPAGATE_D 1L
 //@}
 /**@name Font settings for compose view */
 //@{

@@ -6,6 +6,7 @@
 Release 0.63 'Saugus'
 -------------------------------------------------------------------------------
 
+01.05.01 VZ: optionally show the number of messages in the folder tree
 25.04.01 VZ: added "Away" (or unattended) mode support
 19.04.01 VZ: added "Close" and "Close all" folder(s) commands
 17.04.01 VZ: added message progress display

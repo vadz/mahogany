@@ -36,6 +36,9 @@ class HeaderInfoList;
 #include <wx/dynarray.h>
 WX_DEFINE_ARRAY(UIdType, UIdArray);
 
+// this is unused so far
+#if 0
+
 /// UIdArray which maintains its items always sorted
 WX_DEFINE_SORTED_ARRAY(UIdType, UIdArraySortedBase);
 
@@ -53,6 +56,8 @@ class UIdArraySorted : public UIdArraySortedBase
 public:
    UIdArraySorted() : UIdArraySortedBase(UIdCompareFunction) { }
 };
+
+#endif // 0
 
 // forward declarations
 class FolderView;

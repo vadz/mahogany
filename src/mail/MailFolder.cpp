@@ -628,7 +628,8 @@ String FormatFolderStatusString(const String& format,
          m_mf = (MailFolder *)mf; // cast away const for IncRef()
          SafeIncRef(m_mf);
 
-         m_init = false;
+         // if we already have status, nothing to do
+         m_init = status->IsValid();
       }
 
       MailFolderStatus *operator->() const
