@@ -4573,8 +4573,7 @@ wxComposeView::AutoSave()
       return false;
    }
 
-   if ( !MailFolder::SaveMessageAsMBOX(m_filenameAutoSave,
-                                        contents.c_str(), contents.length()) )
+   if ( !MailFolder::SaveMessageAsMBOX(m_filenameAutoSave, contents) )
    {
       // TODO: disable autosaving? we risk to give many such messages if
       //       something is wrong...

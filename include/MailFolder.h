@@ -331,6 +331,18 @@ public:
                                  const void *contents,
                                  size_t len);
 
+   /**
+      Same as above but from a String.
+
+      Do not create a String just to call this function if you have a C
+      pointer, call the overload above directly as this avoids an unnecessary
+      copy of potentially big amounts of data!
+    */
+   static bool SaveMessageAsMBOX(const String& filename, const String& s)
+   {
+      return SaveMessageAsMBOX(filename, s.c_str(), s.length());
+   }
+
    //@}
 
    /**
