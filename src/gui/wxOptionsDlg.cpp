@@ -1100,7 +1100,7 @@ void wxOptionsPageFolders::OnModifyFolder(wxCommandEvent&)
 
   wxCHECK_RET( nSel != -1, "should be disabled" );
 
-  Profile *profile = new Profile(l->GetString(nSel), NULL);
+  ProfileBase *profile = ProfileBase::CreateProfile(l->GetString(nSel), NULL);
 
   MDialog_FolderProfile(GetFrame(), profile);
 }

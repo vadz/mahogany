@@ -145,7 +145,7 @@ public:
 
 private:
    /// a profile
-   Profile * m_Profile;
+   ProfileBase * m_Profile;
 
    /// the panel
    wxPanel *m_panel;

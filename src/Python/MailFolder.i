@@ -96,5 +96,5 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   inline Profile *GetProfile(void) { return profile; }
+   inline ProfileBase *GetProfile(void) { return profile; }
 };

@@ -54,7 +54,7 @@ private:
    BODY * GetBody(void);
 
    /// a profile:
-   Profile  *profile;
+   ProfileBase  *profile;
    
    /** A temporarily allocated buffer for GetPartContent().
        It holds the information returned by that function and is only
@@ -120,17 +120,17 @@ public:
 
    /** Constructor, creating an unitialised object.
      */
-   MessageCC(Profile *profile = NULL);
+   MessageCC(ProfileBase *profile = NULL);
 
    /** Constructor, creating an object from a text buffer.
        Incomplete!! There are still references to the folder pointer,
        so this won't work yet.
        */
-   MessageCC(const char *itext,  Profile *iprofile);
+   MessageCC(const char *itext,  ProfileBase *iprofile);
 
    /** 2nd stage constructor, used to initialise object.
      */
-   void Create(Profile *profile = NULL);
+   void Create(ProfileBase *profile = NULL);
 
    /** destructor */
    ~MessageCC();

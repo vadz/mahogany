@@ -248,7 +248,7 @@ public:
   void ClearDirty();
 
     // get the corresponding AdbEntryGroup
-    // NB: the pointer returned by this function shouldn't be Unlock()'d,
+    // NB: the pointer returned by this function shouldn't be DecRef()'d,
     //     that's why it's not called GetAdbGroup but just AdbGroup
   AdbEntryGroup *AdbGroup() const { return m_pGroup; }
 
@@ -1255,7 +1255,7 @@ void wxAdbEditFrame::RestoreSettings1()
       astrAdb.Add(strFile);
     }
 
-    SafeUnlock(pProvider);
+    SafeDecRef(pProvider);
   }
 
   m_astrAdb = astrAdb;
@@ -1583,7 +1583,7 @@ void wxAdbEditFrame::DoFind(const char *szFindWhat, AdbTreeNode *root)
         m_aFindResults.Add(current->GetFullName());
       }
 
-      pEntry->Unlock();
+      pEntry->DecRef();
     }
   }
 }
@@ -1594,7 +1594,7 @@ void wxAdbEditFrame::DoUndoChanges()
 {
   wxCHECK_RET( !m_current->IsGroup(), "command should be disabled" );
 
-  // the Lock() done by GetData() compensated with Unlock() in SetData()
+  // the IncRef() done by GetData() compensated with DecRef() in SetData()
   m_notebook->SetData(GetEntry());
 
   wxLogStatus(this, _("Changes to '%s' undone"), m_current->GetName().c_str());
@@ -1798,7 +1798,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 
   bool bRc = OpenAdb(strAdbName, pProvider, info->szName);
 
-  SafeUnlock(pProvider);
+  SafeDecRef(pProvider);
 
   return bRc;
 }
@@ -2676,7 +2676,7 @@ void wxAdbNotebook::SetData(AdbTreeEntry *pEntry)
 {
   // free old data if any
   if ( m_pAdbEntry )
-    m_pAdbEntry->Unlock();
+    m_pAdbEntry->DecRef();
 
   m_pTreeEntry = pEntry;
   if ( m_pTreeEntry ) {
@@ -3345,7 +3345,7 @@ AdbTreeElement *AdbTreeNode::CreateChild(const wxString& name, bool bGroup)
 
   // we don't need it for now
   if ( pAdbEntry )
-    pAdbEntry->Unlock();
+    pAdbEntry->DecRef();
 
   return pTreeEntry;
 }
@@ -3418,7 +3418,7 @@ AdbTreeNode::~AdbTreeNode()
     delete child;
   }
 
-  SafeUnlock(m_pGroup);
+  SafeDecRef(m_pGroup);
 }
 
 // -----------------------------------------------------------------------------
@@ -3449,7 +3449,7 @@ AdbTreeBook::~AdbTreeBook()
     delete m_children[n];
   m_children.Clear();
 
-  SafeUnlock(m_pBook);
+  SafeDecRef(m_pBook);
   m_pGroup = NULL;  // prevent it from being unlocked in ~AdbTreeNode
 }
 
@@ -3507,7 +3507,7 @@ void AdbTreeRoot::LoadChildren()
       m_astrProviders[nAdb] = strProv;
     }
     else {
-      pProvider->Unlock();
+      pProvider->DecRef();
     }
   }
 }

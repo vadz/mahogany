@@ -57,7 +57,7 @@ MessageCC::MessageCC(MailFolderCC *ifolder, unsigned long msgno,
    Refresh();
 }
 
-MessageCC::MessageCC(const char *itext,  Profile *iprofile)
+MessageCC::MessageCC(const char *itext,  ProfileBase *iprofile)
 {
    Create(iprofile);
    
@@ -95,13 +95,13 @@ MessageCC::MessageCC(const char *itext,  Profile *iprofile)
 #endif
 }
 
-MessageCC::MessageCC(Profile *iprofile)
+MessageCC::MessageCC(ProfileBase *iprofile)
 {
    Create(iprofile);
 }
 
 void
-MessageCC::Create(Profile *iprofile)
+MessageCC::Create(ProfileBase *iprofile)
 {
    initialisedFlag = false;
    folder = NULL;

@@ -3,8 +3,6 @@ $Id$
 
 *** things to fix/implement next ***
 
---!!! do not use wxConfig derived classes anywhere except in Profile.cpp
-
 - wxOptionsDlg: two conversions from (long) to (int) .... is that ok?
 
 - wxLayout:

@@ -590,7 +590,7 @@ wxLayoutObjectList::iterator
 wxLayoutList::FindObjectCursor(wxPoint *cpos, CoordType *offset)
 {
    wxPoint object = wxPoint(0,0);  // runs along the objects
-   CoordType width;
+   CoordType width = 0;
    wxLayoutObjectList::iterator i;
 
 #ifdef WXLAYOUT_DEBUG
@@ -622,7 +622,7 @@ wxLayoutList::FindObjectCursor(wxPoint *cpos, CoordType *offset)
             return i;
          }
       }
-// no overlap, increment coordinates
+      // no overlap, increment coordinates
       object.x += width;
       if((**i).GetType() == WXLO_TYPE_LINEBREAK)
       {

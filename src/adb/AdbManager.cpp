@@ -78,7 +78,7 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
 
     GroupLookup(aEntries, pSubGroup, what, where, how);
 
-    pSubGroup->Unlock();
+    pSubGroup->DecRef();
   }
 
   aNames.Empty();
@@ -90,7 +90,7 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
       aEntries.Add(pEntry);
     }
     else {
-      pEntry->Unlock();
+      pEntry->DecRef();
     }
   }
 }
@@ -131,7 +131,7 @@ AdbManager *AdbManager::Get()
   }
   else {
     // just inc ref count on the existing one
-    ms_pManager->Lock();
+    ms_pManager->IncRef();
   }
 
   wxASSERT( ms_pManager != NULL );
@@ -145,7 +145,7 @@ void AdbManager::Unget()
   wxCHECK_RET( ms_pManager,
                "AdbManager::Unget() called without matching Get()!" );
 
-  if ( !ms_pManager->Unlock() ) {
+  if ( !ms_pManager->DecRef() ) {
     // the object deleted itself
     ms_pManager = NULL;
   }
@@ -163,7 +163,7 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
   // first see if we don't already have it
   AdbBook *book = FindInCache(name);
   if ( book ) {
-    book->Lock();
+    book->IncRef();
 
     return book;
   }
@@ -183,7 +183,7 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
         break;
       }
 
-      prov->Unlock();
+      prov->DecRef();
       prov = NULL;
 
       info = info->pNext;
@@ -194,7 +194,7 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
     book = prov->CreateBook(name);
     if ( provider == NULL ) {
       // only if it's the one we created, not the one which was passed in!
-      prov->Unlock();
+      prov->DecRef();
     }
   }
 
@@ -202,7 +202,7 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
     wxLogError(_("Can't open the address book '%s'."), name.c_str());
   }
   else {
-    book->Lock();
+    book->IncRef();
     gs_cache.Add(book);
   }
 
@@ -217,7 +217,7 @@ size_t AdbManager::GetBookCount() const
 AdbBook *AdbManager::GetBook(size_t n) const
 {
   AdbBook *book = gs_cache[n];
-  book->Lock();
+  book->IncRef();
 
   return book;
 }
@@ -250,10 +250,10 @@ void AdbManager::LoadAll()
     
     // it's getting worse and worse... we're using our knowledge of internal
     // structure of AdbManager here: we know the book will not be deleted
-    // after this Unlock because the cache also has a lock on it
-    SafeUnlock(CreateBook(astrAdb[n], pProvider));
+    // after this DecRef because the cache also has a lock on it
+    SafeDecRef(CreateBook(astrAdb[n], pProvider));
 
-    SafeUnlock(pProvider);
+    SafeDecRef(pProvider);
   }
 }
 
@@ -261,7 +261,7 @@ void AdbManager::ClearCache()
 {
   size_t nCount = gs_cache.Count();
   for ( size_t n = 0; n < nCount; n++ ) {
-    gs_cache[n]->Unlock();
+    gs_cache[n]->DecRef();
   }
 
   gs_cache.Clear();

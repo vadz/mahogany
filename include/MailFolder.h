@@ -42,7 +42,7 @@ public:
 
    //@}
 
-   Profile 	*profile;
+   ProfileBase 	*profile;
    
 protected:
    /** open an existing mailbox:
@@ -139,7 +139,7 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   inline Profile *GetProfile(void) { return profile; }
+   inline ProfileBase *GetProfile(void) { return profile; }
 
    /// return class name
    const char *GetClassName(void) const

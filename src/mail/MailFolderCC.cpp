@@ -147,7 +147,7 @@ MailFolderCC::Create(String const & iname)
    mailstream = NIL;
    symbolicName = iname;
 
-   profile = new Profile(iname, NULL);
+   profile = ProfileBase::CreateProfile(iname, NULL);
 
    // make sure we can use the library
    if(! cclientInitialisedFlag)
@@ -206,7 +206,7 @@ MailFolderCC::MailFolderCC(String const & iname)
 
 MailFolderCC::~MailFolderCC()
 {
-   delete profile;
+   profile->DecRef();
 }
 
 void

@@ -641,7 +641,7 @@ AdbEntry *FCEntryGroup::GetEntry(const String& name) const
 {
   FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name);
   if ( !pEntry->IsOk() ) {
-    pEntry->Unlock();
+    pEntry->DecRef();
     pEntry = NULL;
   }
 
@@ -658,7 +658,7 @@ AdbEntryGroup *FCEntryGroup::GetGroup(const String& name) const
 {
   FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name);
   if ( !pGroup->IsOk() ) {
-    pGroup->Unlock();
+    pGroup->DecRef();
     pGroup = NULL;
   }
 
@@ -669,7 +669,7 @@ AdbEntry *FCEntryGroup::CreateEntry(const String& name)
 {
   FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name, TRUE /* new */);
   if ( !pEntry->IsOk() ) {
-    pEntry->Unlock();
+    pEntry->DecRef();
     pEntry = NULL;
   }
 
@@ -680,7 +680,7 @@ AdbEntryGroup *FCEntryGroup::CreateGroup(const String& name)
 {
   FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name, TRUE);
   if ( !pGroup->IsOk() ) {
-    pGroup->Unlock();
+    pGroup->DecRef();
     pGroup = NULL;
   }
 
@@ -722,7 +722,7 @@ FCBook::FCBook(const String& filename)
 
 FCBook::~FCBook()
 {
-  SafeUnlock(m_pRootGroup);
+  SafeDecRef(m_pRootGroup);
   delete m_pConfig;
 }
 

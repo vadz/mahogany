@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+// -*- c++ -*-/////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
 // File name:   MObject.h - the base class for all ref counted objects
 // Purpose:     MObject provides the standard lock/unlock methods and deletes
@@ -12,12 +12,15 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef   _MOBJECT_H
-#define   _MOBJECT_H
+#ifndef   MOBJECT_H
+#define   MOBJECT_H
 
 // ----------------------------------------------------------------------------
 // MObject: the mother of all reference counted classes
 // ----------------------------------------------------------------------------
+
+/// a magic value for MObject
+#define   MOBJECT_MAGIC   0x12345678
 
 /**
   This class uses reference counting.
@@ -27,13 +30,13 @@
        creating a global variable of this type will lead to a crash.
     1) you should never delete the objects of this class (in fact, you can't
        anyhow because dtor is private)
-    2) instead call Unlock() when you're finished with the object (so that it
+    2) instead call DecRef() when you're finished with the object (so that it
        may delete itself if it was the last reference)
-    3) call Lock() if you wish to have control over object's lifetime (i.e.
+    3) call IncRef() if you wish to have control over object's lifetime (i.e.
        before storing pointer to it - otherwise it may go away leaving you
-       with invalid pointer) and, of course, call Unlock() for any Lock().
+       with invalid pointer) and, of course, call DecRef() for any IncRef().
     4) any function returning "MObject *" locks it (according to 3), so you
-       should call Unlock() when you're done with the returned pointer.
+       should call DecRef() when you're done with the returned pointer.
 
   Of course, "objects of this class" also applies for objects of all classes
   derived from MObject.
@@ -60,7 +63,7 @@ public:
     void MOcheck(void) const
        {
           wxASSERT(this);
-          wxASSERT(m_magic);
+          wxASSERT(m_magic == MOBJECT_MAGIC);
        }
 
     // call this function on program termination to check for memory leaks
@@ -80,22 +83,22 @@ public:
 
     // ref counting
     // increment
-  void Lock()   { MOcheck(); wxASSERT(m_nRef > 0); m_nRef++; }
+  void IncRef()   { MOcheck(); wxASSERT(m_nRef > 0); m_nRef++; }
     // decrement and delete if reached 0, return TRUE if item wasn't deleted
 #ifdef   DEBUG
-  bool Unlock();
+  bool DecRef();
 #else
-  bool Unlock() { MOcheck(); if ( --m_nRef ) return TRUE; delete this; return FALSE; }
+  bool DecRef() { MOcheck(); if ( --m_nRef ) return TRUE; delete this; return FALSE; }
 #endif
 
 
 protected:
 #ifdef DEBUG
   int m_magic;
-  // dtor is protected because only Unlock() can delete us
+  // dtor is protected because only DecRef() can delete us
   virtual ~MObject() { MOcheck(); m_magic = 0; }
 #else
-  // dtor is protected because only Unlock() can delete us
+  // dtor is protected because only DecRef() can delete us
     virtual ~MObject() {}
 #endif
   
@@ -107,10 +110,10 @@ private:
 };
 
 #ifdef   DEBUG
-  // declare all diagnostic functions (you must still implement them!)
-  #define MOBJECT_DEBUG public: virtual String Dump() const;
+     /// declare all diagnostic functions (you must still implement them!)
+#   define MOBJECT_DEBUG public: virtual String Dump() const;
 #else
-  #define MOBJECT_DEBUG
+#   define MOBJECT_DEBUG
 #endif
 
 // ----------------------------------------------------------------------------
@@ -118,6 +121,6 @@ private:
 // ----------------------------------------------------------------------------
 
 // unlock the pointer only if it's empty
-inline void SafeUnlock(MObject *p) { if ( p != NULL ) p->Unlock(); }
+inline void SafeDecRef(MObject *p) { if ( p != NULL ) p->DecRef(); }
 
-#endif  //_MOBJECT_H
+#endif  //MOBJECT_H

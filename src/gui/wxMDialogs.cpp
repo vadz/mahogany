@@ -760,7 +760,7 @@ wxPEP_Folder::TransferDataToWindow(void)
    // the trouble is that if INBOX.profile doesn't exist (yet), we get the
    // wrong value here (FIXME: this is not the right solution neither!)
    if ( type == MP_FOLDER_TYPE_D && 
-        ((Profile *)m_Profile)->GetProfileName() == "INBOX" ) { // yuck (FIXME)
+        ((ProfileBase *)m_Profile)->GetProfileName() == "INBOX" ) { // yuck (FIXME)
       type = Folder_Inbox;
    }
 
@@ -800,7 +800,7 @@ MDialog_FolderCreate(MWindow *parent)
                   "NewFolder"))
       return;
 
-   ProfileBase *profile = new Profile(name, NULL);
+   ProfileBase *profile = ProfileBase::CreateProfile(name, NULL);
 
    MDialog_FolderProfile(parent, profile);
 

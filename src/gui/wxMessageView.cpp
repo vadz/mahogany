@@ -231,7 +231,7 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
   SetBackgroundColour( wxColour("White") ); 
 #endif
 
-  m_Profile = new Profile(iname, folder ? folder->GetProfile() : NULL);
+  m_Profile = ProfileBase::CreateProfile(iname, folder ? folder->GetProfile() : NULL);
   initialised = true;
 }
 
@@ -483,7 +483,7 @@ wxMessageView::~wxMessageView()
       delete [] xfaceXpm;
    if(m_MimePopup)
       delete m_MimePopup;
-   delete m_Profile;
+   m_Profile->DecRef();
 }
 
 void

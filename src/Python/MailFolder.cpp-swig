@@ -325,7 +325,7 @@ static PyObject *_wrap_MailFolder_ExpungeMessages(PyObject *self, PyObject *args
 #define MailFolder_GetProfile(_swigobj)  (_swigobj->GetProfile())
 static PyObject *_wrap_MailFolder_GetProfile(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    Profile * _result;
+    ProfileBase * _result;
     MailFolder * _arg0;
     char * _argc0 = 0;
     char _ptemp[128];
@@ -339,8 +339,8 @@ static PyObject *_wrap_MailFolder_GetProfile(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    _result = (Profile *)MailFolder_GetProfile(_arg0);
-    SWIG_MakePtr(_ptemp, (char *) _result,"_Profile_p");
+    _result = (ProfileBase *)MailFolder_GetProfile(_arg0);
+    SWIG_MakePtr(_ptemp, (char *) _result,"_ProfileBase_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }

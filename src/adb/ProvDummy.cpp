@@ -349,7 +349,7 @@ DummyBook::DummyBook(const String& name)
 
 DummyBook::~DummyBook()
 {
-  SafeUnlock(m_pRootGroup);
+  SafeDecRef(m_pRootGroup);
 }
 
 const char *DummyBook::GetName() const

@@ -73,10 +73,10 @@ MObject::MObject()
    gs_aObjects.Add(this);
 
    m_nRef = 1;
-   m_magic = 0x12345678;
+   m_magic = MOBJECT_MAGIC;
 }
 
-bool MObject::Unlock()
+bool MObject::DecRef()
 { 
    MOcheck();
    wxASSERT(m_nRef > 0);

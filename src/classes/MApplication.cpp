@@ -82,7 +82,13 @@ MAppBase::VerifySettings(void)
 {
    const size_t bufsize = 200;
    char  buffer[bufsize];
-   
+
+   String
+      str;
+
+   str = MP_USERNAME;
+   str = m_profile->readEntry(str, (const char *)MP_USERNAME_D);
+
    if( strutil_isempty(READ_APPCONFIG(MP_USERNAME)) )
    {
       wxGetUserId(buffer,bufsize);
@@ -161,7 +167,7 @@ MAppBase::OnStartup()
       strConfFile << "wxWindows\\" << M_APPLICATIONNAME;
 #     endif // Unix
 
-      m_profile = new wxConfigProfile(strConfFile.c_str());
+      m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
 
    // do we have gettext()?
    // ---------------------
@@ -175,19 +181,6 @@ MAppBase::OnStartup()
    // do any first-time specific initializations
    // ------------------------------------------
    bool bFirstRun = VerifySettings();
-
-   if ( bFirstRun ) {
-      wxLog *log = wxLog::GetActiveTarget();
-      if ( log ) {
-        wxLogMessage(_("As it seems that you're running M for the first\n"
-                       "time, you should probably set up some of the options\n"
-                       "needed by the program (especially network "
-                       "parameters)."));
-        log->Flush();
-      }
-
-      ShowOptionsDialog();
-   }
 
    // find our directories
    // --------------------
@@ -262,6 +255,19 @@ MAppBase::OnStartup()
       }
 #  endif //USE_PYTHON
 
+   if ( bFirstRun ) {
+      wxLog *log = wxLog::GetActiveTarget();
+      if ( log ) {
+        wxLogMessage(_("As it seems that you're running M for the first\n"
+                       "time, you should probably set up some of the options\n"
+                       "needed by the program (especially network "
+                       "parameters)."));
+        log->Flush();
+      }
+
+      ShowOptionsDialog();
+   }
+
 
    m_mimeList = GLOBAL_NEW MimeList();
    m_mimeTypes = GLOBAL_NEW MimeTypes();
@@ -307,7 +313,7 @@ MAppBase::OnShutDown()
    GLOBAL_DELETE m_mimeList;
    GLOBAL_DELETE m_mimeTypes;
    GLOBAL_DELETE m_cfManager;
-   GLOBAL_DELETE m_profile;
+   m_profile->DecRef();
 }
 
 const char *

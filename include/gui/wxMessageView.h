@@ -114,7 +114,7 @@ private:
    char **xfaceXpm;
 
    /// Profile
-   Profile *m_Profile;
+   ProfileBase *m_Profile;
    /// the MIME popup
    wxDialog *m_MimePopup;
    

@@ -135,7 +135,7 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    
    if(!parentProfile)
       parentProfile = mApplication->GetProfile();
-   m_Profile = new Profile(iname,parentProfile);
+   m_Profile = ProfileBase::CreateProfile(iname,parentProfile);
 
    // build menu
    // ----------
@@ -369,12 +369,12 @@ wxComposeView::wxComposeView(const String &iname,
 
 wxComposeView::~wxComposeView()
 {
-   SafeUnlock(m_pManager);
+   SafeDecRef(m_pManager);
 
    if(!initialised)
       return;
 
-   delete m_Profile;
+   m_Profile->DecRef();
    delete m_LayoutWindow;
 }
 
@@ -419,7 +419,7 @@ wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
      // free all entries
      size_t nCount = aEntries.Count();
      for ( size_t n = 0; n < nCount; n++ ) {
-       aEntries[n]->Unlock();
+       aEntries[n]->DecRef();
      }
    }
    else {

@@ -74,57 +74,57 @@ extern PyObject *SWIG_newvarlink(void);
 // we don't want to export our functions as we don't build a shared library
 #undef SWIGEXPORT
 #define SWIGEXPORT(a,b) a b
-#define Profile_readEntry(_swigobj,_swigarg0,_swigarg1)  (_swigobj->readEntry(_swigarg0,_swigarg1))
-static PyObject *_wrap_Profile_readEntry(PyObject *self, PyObject *args) {
+#define ProfileBase_readEntry(_swigobj,_swigarg0,_swigarg1)  (_swigobj->readEntry(_swigarg0,_swigarg1))
+static PyObject *_wrap_ProfileBase_readEntry(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     String * _result;
-    Profile * _arg0;
+    ProfileBase * _arg0;
     char * _arg1;
     char * _arg2 = NULL;
     char * _argc0 = 0;
     char _ptemp[128];
 
     self = self;
-    if(!PyArg_ParseTuple(args,"ss|s:Profile_readEntry",&_argc0,&_arg1,&_arg2)) 
+    if(!PyArg_ParseTuple(args,"ss|s:ProfileBase_readEntry",&_argc0,&_arg1,&_arg2)) 
         return NULL;
     if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Profile_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_readEntry. Expected _Profile_p.");
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_ProfileBase_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_readEntry. Expected _ProfileBase_p.");
         return NULL;
         }
     }
-    _result = new String (Profile_readEntry(_arg0,_arg1,_arg2));
+    _result = new String (ProfileBase_readEntry(_arg0,_arg1,_arg2));
     SWIG_MakePtr(_ptemp, (void *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
 
-#define Profile_writeEntry(_swigobj,_swigarg0,_swigarg1)  (_swigobj->writeEntry(_swigarg0,_swigarg1))
-static PyObject *_wrap_Profile_writeEntry(PyObject *self, PyObject *args) {
+#define ProfileBase_writeEntry(_swigobj,_swigarg0,_swigarg1)  (_swigobj->writeEntry(_swigarg0,_swigarg1))
+static PyObject *_wrap_ProfileBase_writeEntry(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     bool  _result;
-    Profile * _arg0;
+    ProfileBase * _arg0;
     char * _arg1;
     char * _arg2;
     char * _argc0 = 0;
 
     self = self;
-    if(!PyArg_ParseTuple(args,"sss:Profile_writeEntry",&_argc0,&_arg1,&_arg2)) 
+    if(!PyArg_ParseTuple(args,"sss:ProfileBase_writeEntry",&_argc0,&_arg1,&_arg2)) 
         return NULL;
     if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Profile_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Profile_writeEntry. Expected _Profile_p.");
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_ProfileBase_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of ProfileBase_writeEntry. Expected _ProfileBase_p.");
         return NULL;
         }
     }
-    _result = (bool )Profile_writeEntry(_arg0,_arg1,_arg2);
+    _result = (bool )ProfileBase_writeEntry(_arg0,_arg1,_arg2);
     _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
 
 static PyMethodDef MProfilecMethods[] = {
-	 { "Profile_writeEntry", _wrap_Profile_writeEntry, 1 },
-	 { "Profile_readEntry", _wrap_Profile_readEntry, 1 },
+	 { "ProfileBase_writeEntry", _wrap_ProfileBase_writeEntry, 1 },
+	 { "ProfileBase_readEntry", _wrap_ProfileBase_readEntry, 1 },
 	 { NULL, NULL }
 };
 static PyObject *SWIG_globals;
@@ -141,15 +141,15 @@ SWIGEXPORT(void,initMProfilec)() {
  * (Used by the SWIG pointer type-checker).
  */
 	 SWIG_RegisterMapping("_signed_long","_long",0);
-	 SWIG_RegisterMapping("_Profile","_class_Profile",0);
+	 SWIG_RegisterMapping("_ProfileBase","_class_ProfileBase",0);
 	 SWIG_RegisterMapping("_long","_unsigned_long",0);
 	 SWIG_RegisterMapping("_long","_signed_long",0);
-	 SWIG_RegisterMapping("_class_Profile","_Profile",0);
 	 SWIG_RegisterMapping("_unsigned_long","_long",0);
 	 SWIG_RegisterMapping("_signed_int","_int",0);
 	 SWIG_RegisterMapping("_unsigned_short","_short",0);
 	 SWIG_RegisterMapping("_signed_short","_short",0);
 	 SWIG_RegisterMapping("_unsigned_int","_int",0);
+	 SWIG_RegisterMapping("_class_ProfileBase","_ProfileBase",0);
 	 SWIG_RegisterMapping("_short","_unsigned_short",0);
 	 SWIG_RegisterMapping("_short","_signed_short",0);
 	 SWIG_RegisterMapping("_int","_unsigned_int",0);
