@@ -317,16 +317,20 @@ esac
 dnl set debug/optimisation flags
 
 case "$USE_DEBUG" in
-1)	AC_DEFINE(DEBUG)
+0|'')	DEBUG_OPTS="" ;;
+1)	DEBUG_OPTS="${USER-$LOGNAME}" ;;
+*)	DEBUG_OPTS="`echo $USE_DEBUG | tr -s -- '-,/:+ ' '_ '`" ;;
+esac
+
+MAKE_DEBUG='DEBUG :='
+case "$DEBUG_OPTS" in '') ;; *)
+	AC_DEFINE(DEBUG)
 	CPPFLAGS="$CPPFLAGS -DDEBUG"
-	if test -z "$DEBUGUSER" ; then DEBUGUSER="$USER"; fi
-	for i in $DEBUGUSER
-	do
-		CPPFLAGS="$CPPFLAGS -DDEBUG_$i"
+	for i in $DEBUG_OPTS
+	do	CPPFLAGS="$CPPFLAGS -DDEBUG_$i"
+		MAKE_DEBUG="$MAKE_DEBUG $i"
 	done  
 	USE_DEBUG_INFO=1
-	MAKE_DEBUG="DEBUG=yes" ;;
-*)	MAKE_DEBUG='' ;;
 esac
 AC_SUBST(MAKE_DEBUG)
 
@@ -358,28 +362,19 @@ case "$USE_PROFILER" in 1)
 esac
 
 case "$USE_EXPERIMENTAL" in
-1)	AC_DEFINE(EXPERIMENTAL)
- 	CPPFLAGS="$CPPFLAGS -DEXPERIMENTAL"
-        MAKE_EXPERIMENTAL="EXPERIMENTAL=yes"
-        EXPERIMENTAL="$USER"
-        ;;
-0)	MAKE_EXPERIMENTAL='' 
-	EXPERIMENTAL=""
-	;;
-*)	AC_DEFINE(EXPERIMENTAL)
-	CPPFLAGS="$CPPFLAGS -DEXPERIMENTAL"
-        MAKE_EXPERIMENTAL='EXPERIMENTAL=yes'
-        EXPERIMENTAL="$USE_EXPERIMENTAL"
-        ;;
+0|'')	EXPERIMENTAL="" ;;
+1)	EXPERIMENTAL="${USER-$LOGNAME}" ;;
+*)	EXPERIMENTAL="`echo $USE_EXPERIMENTAL | tr -s -- '-,/:+ ' '_ '`" ;;
 esac
 
-if test ! -z "$EXPERIMENTAL" ; then
-  EXPERIMENTAL=`echo $EXPERIMENTAL | sed '1,$ s/,/ /g'`
-  for i in $EXPERIMENTAL
-  do
-	CPPFLAGS="$CPPFLAGS -DEXPERIMENTAL_$i"
-  done  
-fi
+MAKE_EXPERIMENTAL='EXPERIMENTAL :='
+case "$EXPERIMENTAL" in '') ;; *)
+	CPPFLAGS="$CPPFLAGS -DEXPERIMENTAL"
+	for i in $EXPERIMENTAL
+	do	CPPFLAGS="$CPPFLAGS -DEXPERIMENTAL_$i"
+		MAKE_EXPERIMENTAL="$MAKE_EXPERIMENTAL $i"
+	done  
+esac
 AC_SUBST(MAKE_EXPERIMENTAL)
 
 dnl precompiled headers
