@@ -1787,8 +1787,9 @@ MailFolderCC::BuildListing(void)
    if(! Lock())
       return;
 
-   LOGMESSAGE((M_LOG_DEBUG, "Building listing for folder '%s'..."),
-              GetName().c_str());
+   String tmp;
+   tmp.Printf("Building listing for folder '%s'...", GetName().c_str());
+   LOGMESSAGE((M_LOG_DEBUG, tmp));
 
    // we don't want MEvents to be handled while we are in here, as
    // they might query this folder:
@@ -1932,8 +1933,9 @@ MailFolderCC::BuildListing(void)
    // now we must release the MEvent queue again:
    MEventManager::Suspend(false);
    UnLock();
-   LOGMESSAGE((M_LOG_DEBUG, "Finished building listing for folder '%s'..."),
+   tmp.Printf("Finished building listing for folder '%s'...",
               GetName().c_str());
+   LOGMESSAGE((M_LOG_DEBUG, tmp));
 
 }
 
