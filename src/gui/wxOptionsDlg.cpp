@@ -24,6 +24,7 @@
 #   include   "MApplication.h"
 #   include   "Profile.h"
 #   include   "guidef.h"
+#   include   "MHelp.h"
 #endif
 
 #include   <wx/log.h>
@@ -120,7 +121,9 @@ enum ConfigFields
    ConfigField_MessageViewFirst = ConfigField_PythonLast,
    ConfigField_MessageViewFontFamily,
    ConfigField_MessageViewFontSize,
+   ConfigField_MessageViewInlineGraphics,
 #ifdef OS_UNIX
+   ConfigField_MessageViewConvertGraphicsFormat,
    ConfigField_MessageViewFaxSupport,
    ConfigField_MessageViewFaxDomains,
    ConfigField_MessageViewLast = ConfigField_MessageViewFaxDomains,
@@ -167,9 +170,10 @@ enum ConfigFields
    ConfigField_ShowNewMail,
 #ifdef OS_UNIX
    ConfigField_AFMPath,
+   ConfigField_OthersLast = ConfigField_AFMPath,
+#else
+   ConfigField_OthersLast = ConfigField_ShowNewMail,
 #endif
-   ConfigField_TestCombo,
-   ConfigField_OthersLast = ConfigField_TestCombo,
 
    // the end
    ConfigField_Max
@@ -350,7 +354,9 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
                   ":Default:Decorative:Roman:Script:Swiss:Modern:Teletype"),
      Field_Combo,    -1 },
    { gettext_noop("Font &size"),                Field_Number, -1 },
+   { gettext_noop("&Inline graphics"),          Field_Bool, -1 },
 #ifdef OS_UNIX
+   { gettext_noop("Conversion &graphics format:XPM:PNG:BMP"), Field_Combo, ConfigField_MessageViewInlineGraphics },
    { gettext_noop("Support special &fax mailers"), Field_Bool, -1},
    { gettext_noop("&Domains sending faxes"), Field_Text,
      ConfigField_MessageViewFaxSupport},
@@ -398,8 +404,6 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Text,    -1                     },
 #endif
-   { gettext_noop("Does this combobox work?:yes:no:I don't know:maybe:never"),
-     Field_Combo,    -1                     },
 };
 
 // @@@ ugly, ugly, ugly... config settings should be living in an array from
@@ -458,7 +462,9 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    // message views
    CONFIG_ENTRY(MP_MV_FONT_FAMILY),
    CONFIG_ENTRY(MP_MV_FONT_SIZE),
+   CONFIG_ENTRY(MP_INLINE_GFX),
 #ifdef OS_UNIX
+   CONFIG_ENTRY(MP_TMPGFXFORMAT),
    CONFIG_ENTRY(MP_INCFAX_SUPPORT),
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),
 #endif
@@ -498,7 +504,6 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
 #endif
-   CONFIG_ENTRY(MP_TESTENTRY),
 };
 
 #undef CONFIG_ENTRY
@@ -516,7 +521,8 @@ wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
                              const char *title,
                              ProfileBase *profile,
                              size_t nFirst,
-                             size_t nLast)
+                             size_t nLast,
+                             int helpId)
    : wxNotebookPageBase(notebook)
 {
    int image = notebook->GetPageCount();
@@ -524,7 +530,7 @@ wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
    notebook->AddPage(this, title, FALSE /* don't select */, image);
 
    m_Profile = profile;
-
+   m_HelpId = helpId;
    // see enum ConfigFields for "+1"
    m_nFirst = nFirst + 1;
    m_nLast = nLast + 1;
@@ -917,7 +923,8 @@ wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
                    _("Compose"),
                    profile,
                    ConfigField_ComposeFirst,
-                   ConfigField_ComposeLast)
+                   ConfigField_ComposeLast,
+                   MH_OPAGE_COMPOSE)
 {
 }
 
@@ -931,7 +938,8 @@ wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
                    _("Message Viewer"),
                    profile,
                    ConfigField_MessageViewFirst,
-                   ConfigField_MessageViewLast)
+                   ConfigField_MessageViewLast,
+                   MH_OPAGE_MESSAGEVIEW)
 {
 }
 
@@ -945,7 +953,8 @@ wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
                    _("Identity"),
                    profile,
                    ConfigField_IdentFirst,
-                   ConfigField_IdentLast)
+                   ConfigField_IdentLast,
+                   MH_OPAGE_IDENT)
 {
 }
 
@@ -961,7 +970,8 @@ wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
                    _("Python"),
                    profile,
                    ConfigField_PythonFirst,
-                   ConfigField_PythonLast)
+                   ConfigField_PythonLast,
+                   MH_OPAGE_PYTHON)
 {
 }
 
@@ -978,7 +988,8 @@ wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
                    _("Adressbook"),
                    profile,
                    ConfigField_AdbFirst,
-                   ConfigField_AdbLast)
+                   ConfigField_AdbLast,
+                   MH_OPAGE_ADB)
 {
 }
 
@@ -993,7 +1004,8 @@ wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
                    _("Miscellaneous"),
                    profile,
                    ConfigField_OthersFirst,
-                   ConfigField_OthersLast)
+                   ConfigField_OthersLast,
+                   MH_OPAGE_OTHERS)
 {
 }
 
@@ -1033,7 +1045,8 @@ wxOptionsPageHelpers::wxOptionsPageHelpers(wxNotebook *parent,
                    _("Helpers"),
                    profile,
                    ConfigField_HelpersFirst,
-                   ConfigField_HelpersLast)
+                   ConfigField_HelpersLast,
+                   MH_OPAGE_HELPERS)
 {
 }
 
@@ -1073,7 +1086,8 @@ wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
                    _("Mail boxes"),
                    profile,
                    ConfigField_FoldersFirst,
-                   ConfigField_FoldersLast)
+                   ConfigField_FoldersLast,
+                   MH_OPAGE_FOLDERS)
 {
 }
 

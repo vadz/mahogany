@@ -698,6 +698,7 @@ wxLayoutLine::Layout(wxDC &dc, wxPoint *cursorPos,
    if(m_Next && objHeight != oldHeight)
       m_Next->RecalculatePositions();
 
+   // We need to check whether we found a valid cursor size:
    if(cursorPos)
    {
       // this might be the case if the cursor is at the end of the
@@ -1333,7 +1334,6 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
    dc.SetBrush(*wxBLACK_BRUSH);
    dc.SetLogicalFunction(wxXOR);
    dc.SetPen(wxPen(*wxBLACK,1,wxSOLID));
-   dc.SetLogicalFunction(wxXOR);
    if(active)
       dc.DrawRectangle(coords.x, coords.y, m_CursorSize.x,
                        m_CursorSize.y);

@@ -207,7 +207,12 @@ public:
    /// Return a pointer to the next message's header info.
    virtual const class HeaderInfo *GetNextHeaderInfo(const class HeaderInfo*) const = 0;
    //@}
-
+   /// Return the folder's type.
+   virtual FolderType GetType(void) const = 0;
+   /** Sets a maximum number of messages to retrieve from server.
+       @param nmax maximum number of messages to retrieve, 0 for no limit
+   */
+   virtual void SetRetrievalLimit(unsigned long nmax) = 0;
 protected:
    /**@name Accessor methods */
    //@{
@@ -241,6 +246,7 @@ public:
    virtual const String &GetDate(void) const = 0;
    virtual const String &GetId(void) const = 0;
    virtual const String &GetReferences(void) const = 0;
+   virtual unsigned long GetUId(void) const = 0;
    virtual int GetStatus(void) const = 0;
    virtual unsigned long const &GetSize(void) const = 0;
    virtual ~HeaderInfo() {}

@@ -167,7 +167,8 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
-   m_FolderView->PreviewMessage(event.m_itemIndex);
+   if(m_SelectionCallbacks)
+      m_FolderView->PreviewMessage(event.m_itemIndex);
 }
 
 
@@ -178,7 +179,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Parent = parent;
    m_FolderView = fv;
    m_Style = wxLC_REPORT;
-
+   EnableSelectionCallbacks(true);
+   
    int
       w = 500,
       h = 300;
@@ -275,11 +277,27 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    {
       m_timer->Stop();
       delete m_timer;
-//      m_MailFolder->RegisterView(this,false);
       
-      // These messages are no longer recent as we've seen their headers.
-      //if(m_NumOfMessages > 0)
-      //   m_MailFolder->SetSequenceFlag("1:*", MailFolder::MSG_STAT_RECENT, false);
+      if(m_NumOfMessages > 0 && m_MailFolder->GetType() == MF_NNTP
+         && MDialog_YesNoDialog(_("Mark all articles as read?"),
+                                m_Parent,
+                                MDIALOG_YESNOTITLE,
+                                true,
+                                m_Profile->GetPath()))
+      {
+         // build sequence
+         wxString sequence;
+         HeaderInfo const *hi;
+         for(hi = m_MailFolder->GetFirstHeaderInfo();
+             hi;
+             hi = m_MailFolder->GetNextHeaderInfo(hi))
+         {
+            sequence += strutil_ultoa(hi->GetUId());
+            sequence += ',';
+         }
+         sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
+         m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
+      }
       m_MailFolder->DecRef();
    }
 
@@ -523,12 +541,16 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       PrintPreviewMessages(selections);
       break;
    case WXMENU_MSG_SELECTALL:
+      m_FolderCtrl->EnableSelectionCallbacks(false);
       for(n = 0; n < m_NumOfMessages; n++)
          m_FolderCtrl->Select(n,TRUE);
+      m_FolderCtrl->EnableSelectionCallbacks(true);
       break;
    case WXMENU_MSG_DESELECTALL:
+      m_FolderCtrl->EnableSelectionCallbacks(false);
       for(n = 0; n < m_NumOfMessages; n++)
          m_FolderCtrl->Select(n,FALSE);
+      m_FolderCtrl->EnableSelectionCallbacks(true);
       break;
    case WXMENU_HELP_CONTEXT:
       mApplication->Help(MH_FOLDER_VIEW,GetWindow());

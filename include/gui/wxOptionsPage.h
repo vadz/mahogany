@@ -82,7 +82,8 @@ public:
                  const char *title,
                  ProfileBase *profile,
                  size_t nFirst,
-                 size_t nLast);
+                 size_t nLast,
+                 int helpID = -1);
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
@@ -98,6 +99,8 @@ public:
    // enable/disable controls (better than OnUpdateUI here)
    void UpdateUI();
 
+   /// Returns the numeric help id.
+   int HelpId(void) const { return m_HelpId; }
 protected:
    void CreateControls();
 
@@ -118,7 +121,8 @@ protected:
 
          return ((wxTextCtrl *)GetControl(n))->GetValue();
       }
-
+   /// numeric help id
+   int m_HelpId;
 private:
    // the controls themselves (indexes in this array are shifted by m_nFirst
    // with respect to ConfigFields enum!) - use GetControl()

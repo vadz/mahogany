@@ -66,6 +66,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    m_bitmap = new wxBitmap(4,4);
    m_bitmapSize = wxPoint(4,4);
    m_llist = new wxLayoutList();
+   m_BGbitmap = NULL;
    SetWrapMargin(0);
    wxPoint max = m_llist->GetSize();
    SetScrollbars(10, 20 /*lineHeight*/, max.x/10+1, max.y/20+1);
@@ -80,7 +81,8 @@ wxLayoutWindow::~wxLayoutWindow()
    delete m_memDC; // deletes bitmap automatically (?)
    delete m_bitmap;
    delete m_llist;
-   delete m_PopupMenu; 
+   delete m_PopupMenu;
+   SetBackgroundBitmap(NULL);
 }
 
 #ifdef __WXMSW__
@@ -354,16 +356,45 @@ wxLayoutWindow::InternalPaint(void)
    // Device origins on the memDC are suspect, we translate manually
    // with the translate parameter of Draw().
    m_memDC->SetDeviceOrigin(0,0);
-   //m_memDC->SetBackgroundColour(*GetLayoutList()->GetDefaults()->GetBGColour());
-   m_memDC->Clear();
+   m_memDC->SetBackgroundMode(wxTRANSPARENT);
+   m_memDC->SetBrush(wxBrush(*m_llist->GetDefaults()->GetBGColour(), wxSOLID));                                  
+   m_memDC->SetPen(wxPen(*m_llist->GetDefaults()->GetBGColour(),0,wxTRANSPARENT));                               
+   m_memDC->SetLogicalFunction(wxCOPY);
+   if(m_BGbitmap)
+   {
+      CoordType
+         y, x,
+         w = m_BGbitmap->GetWidth(),
+         h = m_BGbitmap->GetHeight();
+      for(y = 0; y < y1; y+=h)
+         for(x = 0; x < x1; x+=w)
+            m_memDC->DrawBitmap(*m_BGbitmap, x, y);
+   }
+   else
+      m_memDC->DrawRectangle(0,0,x1, y1);
 
    // The offsets give the window a tiny border on the left and top, looks nice.
    wxPoint offset(-x0+WXLO_XOFFSET,-y0+WXLO_YOFFSET);
    m_llist->Draw(*m_memDC,offset);
    if(IsEditable())
       m_llist->DrawCursor(*m_memDC,m_HaveFocus,offset);
+
    // Now copy everything to the screen:
-   dc.Blit(x0,y0,x1,y1,m_memDC,0,0,wxCOPY,FALSE);
+   wxRegionIterator ri ( GetUpdateRegion() );
+   if(ri)
+      while(ri)
+      {
+         dc.Blit(x0+ri.GetX(),y0+ri.GetY(),ri.GetW(),ri.GetH(),
+                 m_memDC,ri.GetX(),ri.GetY(),wxCOPY,FALSE);
+         ri++;
+      }
+   else
+      // If there are no update rectangles, we got called to reflect 
+      // a change in the list. Currently there is no mechanism to
+      // easily find out which bits need updating, so we update
+      // all. The wxLayoutList could handle this, creating a list or
+      // at least one large rectangle of changes. FIXME
+      dc.Blit(x0,y0,x1,y1,m_memDC,0,0,wxCOPY,FALSE);
 
    ResetDirty();
 }
@@ -378,8 +409,9 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
       || max.x > m_maxx-WXLO_ROFFSET || max.y > m_maxy-WXLO_BOFFSET
       || exact)
    {
-      if(! exact)  // add an extra bit to the sizes to avoid future updates
+      if(! exact) 
       {
+         // add an extra bit to the sizes to avoid future updates
          max.x = max.x+WXLO_ROFFSET;  
          max.y = max.y+WXLO_BOFFSET;
       }

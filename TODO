@@ -7,46 +7,37 @@ $Id$
 *********************************************************************
 
  - on Alpha: no XFace inserted, trying to convert ~/.xface to ~/.xface.xpm although already an Xpm
-- mAppBase::OnExit() gets called twice
-
- - is leading * for NNTP folders a good idea? NO - why does PINE do it?
+ - mAppBase::OnExit() gets called twice
 
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
 
+VZ:
+- wxConfig does not like entries like:
+  Key=Value
+  but insists on
+  Key = Value
+
+
+- MTempFileName is broken: all files remain in /tmp!!!
+- .mailcap should override /etc/mailcap, not other way round
+- MimeManager::ReadXXX should have returncode and not print error
+  message
+- wxExcute()/RunProcess() extremely slow (replaced by system() now)
+- help button and more fields for folder creation dialog
+
+- MailFolder now reads the "RetrievalLimit" config value and will not
+  retrieve more messages than that from server. Need support for it and
+  for anonymouse flag in folder creation/properties dialogs.
+
 ******* Priorities for KB: ******************************
 
-WXGTK:
-  - PNG library returns error for transparent PNG
-  - .mailcap should override /etc/mailcap, not other way round
-  - MimeManager::ReadXXX should have returncode and not print error
-    message
+DONE:
 
-- retrieve messages starting from last one
-- folderview listctrl has extra Subject column behind Size field ???
-
-= wxLayout:
-  - add setting of background colour and/or image
-  - update rectangle
-  - fix(simplify) cursor size calculation
-  - font optimisations(?)
-  - composeview: after inserting text (reply), update scrollbars
-  - cut&paste (paste is there but broken in wxGTK)
-  - copy/cut/selections
-  - DragNDrop (waiting for GNOME 1.0 / Debian Slink)
-  - occasionally wraps lines wongly (twice)
-  - reset scrollbars on Clear()
-
-
-- .newsrc read/write  --> should be there?!
-  For nntp folders, mark read messages as deleted. Somehow provide
-  feedback! At close, ask whether to mark all messages as read.
-  --> .newsrc does get updated! :-)
-
-- IMAP progress updates don't appear because there is too much to be
-  done in wxYield()?
-
+Add choice of intermediary image format:
+  PNG, JPG, XPM
+  --> prefer JPG, Imagemagick PNG support is faulty!
 - If mail is from efax.com and contains an application/octet-stream,
   use tiff2ps and ghostview to generate an application/postscript
   instead. (Just convert the type to image/tiff-g3 and implement our
@@ -54,16 +45,52 @@ WXGTK:
   EFAX now sends image/tiff!
   Configurable! Options for tiff2ps!
   >>> Finish this: have share/M/mime.types with tiff2ps/gv combo
+- .newsrc read/write  --> should be there?!
+  For nntp folders, mark read messages as deleted. Somehow provide
+  feedback! At close, ask whether to mark all messages as read.
+  --> .newsrc does get updated! :-)
 
 - check in new options panels
   - add help button in notebook, linked to help ids in panels
 
-- add ext editor icon to toolbar in composeview, nicer icon for insert file
-
 - when doing "select all", disable OnSelect() for folder listctrl
-  And disable events! When doing a Delete() etc, do not rebuild the
+
+
+- Is this needed?
+  And disable events!
+  When doing a Delete() etc, do not rebuild the
   listing between, this corrupts message numbers!
   Find a clever way to handle this, build a sequence first!
+
+- retrieve messages starting from last one
+
+
+TODO:
+
+- fix bitmap allocation in SetBackgroundBitmap() calls
+
+- modify wxIconManager to recycle last found path for icons first, to
+  avoid unnecessary filesystem traversals
+
+- folderview listctrl has extra Subject column behind Size field ???
+
+= wxLayout:
+  x- add setting of background colour and/or image
+  - update rectangle
+  x- reset scrollbars on Clear()
+
+  - fix(simplify) cursor size calculation
+  - font optimisations(?)
+  x- composeview: after inserting text (reply), update scrollbars
+  - cut&paste (paste is there but broken in wxGTK)
+  - copy/cut/selections
+  - DragNDrop (waiting for GNOME 1.0 / Debian Slink)
+  - occasionally wraps lines wongly (twice)
+
+- IMAP progress updates don't appear because there is too much to be
+  done in wxYield()?
+
+- add ext editor icon to toolbar in composeview, nicer icon for insert file
 
 - make mailfolders collectable:
   - have a "collect" flag
@@ -81,9 +108,6 @@ WXGTK:
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
 
-- modify wxIconManager to recycle last found path for icons first, to
-  avoid unnecessary filesystem traversals
-
 - implement Compose/Reply templates
 
 - do not redraw messageview if the message is the one currently being
@@ -97,6 +121,10 @@ WXGTK:
 - if time permits: vcard-import
 
 - support for local news spool
+
+- Let Iconmanager chose handler by format! JPEG crashes program if fed 
+  the wrong filetype! Handler can return extension, caller should do
+  the same.
 **************** end of KB priorities :-) *********************
 
 - fix occasional segfault/memory corruption in MailfolderCC.cpp

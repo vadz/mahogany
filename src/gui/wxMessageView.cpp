@@ -764,9 +764,29 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    if ( READ_CONFIG(m_Profile,MP_INCFAX_SUPPORT) &&
         wxMimeTypesManager::IsOfType(mimetype, "IMAGE/TIFF") )
    {
-      if(/*isfax*/ 1
+      kbStringList faxdomains;
+      char *faxlisting = strutil_strdup(READ_CONFIG(m_Profile,
+                                                    MP_INCFAX_DOMAINS));
+      strutil_tokenise(faxlisting, ":;,", faxdomains);
+      delete [] faxlisting;
+      bool isfax = false;
+      wxString domain;
+      wxString fromline = mailMessage->From();
+      strutil_tolower(fromline);
+      
+      for(kbStringList::iterator i = faxdomains.begin();
+          i != faxdomains.end(); i++)
+      {
+         domain = **i;
+         strutil_tolower(domain);
+         if(fromline.Find(domain) != -1)
+            isfax = true;
+      }
+      
+      if(isfax
          && MimeSave(mimeDisplayPart,filename))
       {
+         wxLogDebug("Detected image/tiff fax content.");
          // use TIFF2PS command to create a postscript file, open that 
          // one with the usual ps viewer
          filename2 = filename + ".ps";
@@ -775,7 +795,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
                         filename.c_str(), filename2.c_str());
          // we ignore the return code, because next viewer will fail
          // or succeed depending on this:
-         (void) RunProcess(command);  // this produces a postscript file on success
+         system(command);  // this produces a postscript file on success
          wxRemoveFile(filename);
          filename = filename2;
          mimetype = "application/postscript";
@@ -1447,13 +1467,15 @@ wxMessageView::OnProcessTermination(wxProcessEvent& event)
                  info->GetErrorMsg().c_str());
    }
 
+#if 0
    MTempFileName *tempfile = info->GetTempFile();
    if ( tempfile )
    {
       // tell it that it's ok to delete the temp file
-      tempfile->Ok();
+      //FIXME: Ok() tells it not to delete it!tempfile->Ok();
    }
-
+#endif
+   
    m_processes.Remove(n);
    delete info;
 }

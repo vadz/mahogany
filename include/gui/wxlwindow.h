@@ -66,13 +66,21 @@ public:
               char const *fg="black",
               char const *bg="white")
       {
-         SetModified(false);
          GetLayoutList()->Clear(family,size,style,weight,underline,fg,bg);
          SetBackgroundColour(*GetLayoutList()->GetDefaults()->GetBGColour());
+         ResizeScrollbars(true);
          SetDirty();
+         SetModified(false);
          DoPaint();
       }
-
+   /** Sets a background image, only used on screen, not on printouts.
+       @param bitmap a pointer to a wxBitmap or NULL to remove it
+   */
+   void SetBackgroundBitmap(wxBitmap *bitmap = NULL)
+      {
+         if(m_BGbitmap) delete m_BGbitmap;
+         m_BGbitmap = bitmap;
+      }
    /// Enable or disable editing, i.e. processing of keystrokes.
    void SetEditable(bool toggle) { m_Editable = toggle; }
    /// Query whether list can be edited by user.
@@ -170,7 +178,6 @@ protected:
 private:
    /// The layout list to be displayed.
    wxLayoutList *m_llist;
-
    /// Can user edit the window?
    bool m_Editable;
    /// wrap margin
@@ -182,7 +189,8 @@ private:
    wxMemoryDC  *m_memDC;
    wxBitmap    *m_bitmap;
    wxPoint      m_bitmapSize;
-
+   /// a pointer to a bitmap for the background
+   wxBitmap    *m_BGbitmap;
    DECLARE_EVENT_TABLE()
 };
 

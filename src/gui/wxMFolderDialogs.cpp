@@ -25,7 +25,6 @@
 #   include "MApplication.h"
 #   include "Profile.h"
 #   include "guidef.h"
-
 #   include <wx/wx.h>
 #endif
 

@@ -62,6 +62,7 @@ public:
    virtual String const &GetFrom(void) const { return m_From; }
    virtual String const &GetDate(void) const { return m_Date; }
    virtual String const &GetId(void) const { return m_Id; }
+   virtual unsigned long GetUId(void) const { return m_Uid; }
    virtual String const &GetReferences(void) const { return m_References; }
    virtual int GetStatus(void) const { return m_Status; }
    virtual unsigned long const &GetSize(void) const { return m_Size; }
@@ -86,6 +87,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_MailStream = NIL;
 
    //FIXME: server is ignored for now
+   SetRetrievalLimit(0); // no limit
    m_Profile = profile;
    m_Profile->IncRef(); // we use it now
    m_MailboxPath = path;
@@ -160,7 +162,10 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       return mf;
    }
 
-   mf = new MailFolderCC(typeAndFlags,mboxpath,profile,server,login,password);
+   mf = new
+      MailFolderCC(typeAndFlags,mboxpath,profile,server,login,password);
+   if(mf && profile)
+      mf->SetRetrievalLimit(READ_CONFIG(profile, MP_FOLDER_RETRIEVALLIMIT));
    if( mf->Open() )
       return mf;
    else
@@ -541,6 +546,9 @@ void
 MailFolderCC::BuildListing(void)
 {
    m_NumOfMessages = m_MailStream->nmsgs;
+//   if(GetType() == MF_NNTP) // only list RECENT messages
+//      m_NumOfMessages = m_MailStream->recent;
+   
    // now we know how many messages there are
 
    if(m_Listing && m_NumOfMessages > m_OldNumOfMessages)
@@ -565,8 +573,23 @@ MailFolderCC::BuildListing(void)
    // mail_fetch_overview() will now fill the m_Listing array with
    // info on the messages
    /* stream, sequence, header structure to fill */
-   mail_fetch_overview (m_MailStream, (char *)"1:*", mm_overview_header);
-
+   if(m_RetrievalLimit && m_NumOfMessages > m_RetrievalLimit)
+   {
+      String sequence =
+         strutil_ultoa(mail_uid(m_MailStream, m_NumOfMessages-m_RetrievalLimit));
+      sequence << ":*";
+      mail_fetch_overview (m_MailStream, (char *)sequence.c_str(), mm_overview_header);
+   }
+   else
+   {
+      if(GetType() == MF_NNTP)
+         // FIMXE: no idea why this works for NNTP 
+         // but not for the other types
+         mail_fetch_overview (m_MailStream, (char *)"*", mm_overview_header);
+      else
+         mail_fetch_overview (m_MailStream, (char *)"1:*", mm_overview_header);
+   }
+   
    if(m_ProgressDialog != (MProgressDialog *)1)
       delete m_ProgressDialog;
    // We set it to an illegal address here to suppress further
@@ -574,34 +597,6 @@ MailFolderCC::BuildListing(void)
    // The reason is that we only want it the first time that the
    // folder is being opened.   
    m_ProgressDialog = (MProgressDialog *)1;
-#if 0
-   /* This can actually happen if no overview information is
-      available, for NNTP sometimes. */
-   if(m_BuildNextEntry != m_NumOfMessages)
-   {
-      ASSERT(m_BuildNextEntry == 0); // otherwise I misunderstood something
-
-      String dateFormat = READ_APPCONFIG(MP_DATE_FMT);
-      /* Now we need to build the list ourselves, that's annoying */
-      Message *msg;
-      unsigned int day, month, year;
-      unsigned long size;
-      for(;m_BuildNextEntry < m_NumOfMessages; m_BuildNextEntry++)
-      {
-         HeaderInfoCC & entry = m_Listing[m_BuildNextEntry];
-         msg = GetMessage(m_BuildNextEntry+1);
-         entry.m_Status = msg->GetStatus(&size,&day,&month,&year);
-         entry.m_Subject = msg->Subject();
-         entry.m_From  = msg->From();
-         entry.m_Date.Printf(dateFormat, day, month, year);
-         entry.m_Size = size;
-         entry.m_References = msg->GetReferences();
-         entry.m_Id = ((MessageCC *)msg)->GetId();
-//         entry.m_id
-         msg->DecRef(); 
-      }
-   }
-#endif   
 
    // for NNTP, it will not show all messages
    //ASSERT(m_BuildNextEntry == m_NumOfMessages || m_folderType == MF_NNTP);

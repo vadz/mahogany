@@ -26,6 +26,8 @@
 #   include   "Profile.h"
 #   include   "guidef.h"
 #   include   "strutil.h"
+#   include   "gui/wxMIds.h"
+#   include   "MHelp.h"
 #endif
 
 #include   <wx/log.h>
@@ -60,6 +62,7 @@
 IMPLEMENT_ABSTRACT_CLASS(wxNotebookDialog, wxDialog)
 
 BEGIN_EVENT_TABLE(wxNotebookDialog, wxDialog)
+   EVT_BUTTON(M_WXID_HELP,   wxNotebookDialog::OnHelp)
    EVT_BUTTON(wxID_OK,     wxNotebookDialog::OnOK)
    EVT_BUTTON(wxID_APPLY,  wxNotebookDialog::OnApply)
    EVT_BUTTON(wxID_CANCEL, wxNotebookDialog::OnCancel)
@@ -483,7 +486,16 @@ void wxNotebookDialog::CreateAllControls()
 
    // we need to create them from left to right to have the correct tab order
    // (although it would have been easier to do it from right to left)
-   m_btnOk = new wxButton(panel, wxID_OK, _("OK"));
+   m_btnHelp = new wxButton(panel, M_WXID_HELP, _("&Help"));
+   c = new wxLayoutConstraints;
+   // 5 to have extra space:
+   c->left.SameAs(panel, wxLeft, (LAYOUT_X_MARGIN));
+   c->width.Absolute(wBtn);
+   c->height.Absolute(hBtn);
+   c->bottom.SameAs(panel, wxBottom, LAYOUT_Y_MARGIN);
+   m_btnHelp->SetConstraints(c);
+
+   m_btnOk = new wxButton(panel, wxID_OK, _("&OK"));
    m_btnOk->SetDefault();
    c = new wxLayoutConstraints;
    c->left.SameAs(panel, wxRight, -3*(LAYOUT_X_MARGIN + wBtn));
@@ -492,7 +504,7 @@ void wxNotebookDialog::CreateAllControls()
    c->bottom.SameAs(panel, wxBottom, LAYOUT_Y_MARGIN);
    m_btnOk->SetConstraints(c);
 
-   wxButton *btn = new wxButton(panel, wxID_CANCEL, _("Cancel"));
+   wxButton *btn = new wxButton(panel, wxID_CANCEL, _("&Cancel"));
    c = new wxLayoutConstraints;
    c->left.SameAs(panel, wxRight, -2*(LAYOUT_X_MARGIN + wBtn));
    c->width.Absolute(wBtn);
@@ -580,4 +592,13 @@ void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)
    // FIXME this should restore the old settings, even if "Apply" has been
    //       done!
    EndModal(FALSE);
+}
+
+void wxNotebookDialog::OnHelp(wxCommandEvent& /* event */)
+{
+   int pid = m_notebook->GetSelection();
+   if(pid == -1) // no page selected??
+      mApplication->Help(MH_OPTIONSNOTEBOOK,this);
+   else
+      mApplication->Help(((wxOptionsPage *)m_notebook->GetPage(pid))->HelpId(),this);
 }

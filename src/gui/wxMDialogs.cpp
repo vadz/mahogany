@@ -64,11 +64,7 @@
 #  define M_32x32         "Micon"
 #else   //real XPMs
 #  include "../src/icons/M_32x32.xpm"
-#if 0
-#  include "../src/icons/progress0.xpm"
-#  include "../src/icons/progress1.xpm"
-#  include "../src/icons/progress2.xpm"
-#endif
+#  include "../src/icons/background.xpm"
 #endif  //Win/Unix
 
 // ----------------------------------------------------------------------------
@@ -84,6 +80,28 @@ extern void CloseSplash()
     // and it will be closed when timeout elapses (it's the most fool proof
     // solution, if not the most direct one)
   }
+}
+
+void wxSafeYield(void)
+{
+   wxNode *node;
+   for ( node = wxTopLevelWindows.GetFirst();
+         node;
+         node = node->GetNext() )
+   {
+      wxWindow *win = ((wxWindow*)node->GetData());
+      win->Enable(false);
+   }
+
+   wxYield();
+
+   for ( node = wxTopLevelWindows.GetFirst();
+         node;
+         node = node->GetNext() )
+   {
+      wxWindow *win = ((wxWindow*)node->GetData());
+      win->Enable(true);
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -695,24 +713,16 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
    wxLayoutList *ll = GetLayoutList();
-   Clear(wxROMAN, 30, wxNORMAL, wxBOLD, FALSE, "white", "navy");
+   wxBitmap *bm = new wxBitmap(background);
+   SetBackgroundBitmap(bm);
+   Clear(wxROMAN, 30, wxNORMAL, wxBOLD, FALSE, "yellow");
 
    ll->LineBreak();
    ll->LineBreak();
-
-   ll->Insert(_("   Welcome"));
+   ll->Insert(_("   Mahogany Mail"));
    ll->LineBreak();
-   ll->Insert(_("         to"));
-   ll->LineBreak();
-   ll->Insert("         ");
-   ll->Insert(new wxLayoutObjectIcon(wxIcon(M_32x32)));
-   ll->Insert("!");
    ll->SetFontWeight(wxNORMAL);
    ll->SetFontSize(10);
-
-   ll->LineBreak();
-   ll->LineBreak();
-   ll->LineBreak();
 
    String version = _("    Version: ");
    version += M_VERSION_STRING;
@@ -751,7 +761,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
 wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
             : wxFrame(NULL, -1, _("Welcome"),
-                      wxDefaultPosition, wxSize(220, 300),
+                      wxDefaultPosition, wxSize(300, 300),
                       /* 0 style for borderless wxDOUBLE_BORDER |*/ wxSTAY_ON_TOP)
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );

@@ -96,15 +96,20 @@ long wxIconManager::m_wxBitmapHandlers[] =
    wxBITMAP_TYPE_PNG,  //wxGTK
    wxBITMAP_TYPE_GIF,
    wxBITMAP_TYPE_TIF,
-   wxBITMAP_TYPE_JPEG, //wxGTK optional
+   //wxBITMAP_TYPE_JPEG, //wxGTK optional -- dangerous, do not use
    wxBITMAP_TYPE_BMP,  //wxGTK
    wxBITMAP_TYPE_ANY,
    wxBITMAP_TYPE_CUR, 
-   wxBITMAP_TYPE_ICO,  //wxGTK
+   wxBITMAP_TYPE_ICO,  //wxGTK ??
    -1
 };
 
-   
+static const char *HandlerNames[]    =
+{
+   "XPM", "PNG", "GIF", "TIF",
+   // "JPG" is dangerous
+   "BMP", "ANY", "CUR", "ICO"
+};
 
 // ----------------------------------------------------------------------------
 // helper functions to load images
@@ -118,28 +123,53 @@ wxIconManager::LoadImage(String filename, bool *success)
    bool loaded = false;
    wxImage *img = new wxImage();
 
+   // If we haven't been called yet, find out which image handlers
+   // are supported:
+   if(! m_knowHandlers) // first time initialisation
+   {
+#ifdef DEBUG
+      wxLogDebug("Checking for natively supported image formats:");
+      wxString formats;
+#endif
+      
+      for(int i = 0; m_wxBitmapHandlers[i] != -1; i++)
+         if(wxImage::FindHandler( m_wxBitmapHandlers[i] ) == NULL)
+            m_wxBitmapHandlers[i] = 0; // not available
+#ifdef DEBUG
+         else
+            formats << HandlerNames[i] << ',';
+      formats << "XPM";
+      wxLogDebug(formats);
+#endif
+      m_knowHandlers = true;
+   }
+   
    // suppress any error logging from image handlers, some of them
    // will fail.
    {
       wxLogNull logNo;
       
-      if(! m_knowHandlers) // first time initialisation
-      {
-         for(int i = 0; m_wxBitmapHandlers[i] != -1; i++)
-            if(wxImage::FindHandler( m_wxBitmapHandlers[i] ) == NULL)
-               m_wxBitmapHandlers[i] = 0; // not available
-         m_knowHandlers = true;
-      }
-         
       for(int i = 0; (!loaded) && m_wxBitmapHandlers[i] != -1; i++)
          if(m_wxBitmapHandlers[i])
             loaded = img->LoadFile(filename, m_wxBitmapHandlers[i]);
    }// normal logging again
 #ifdef OS_UNIX
-   if(! loaded) // try to use imageMagick to convert image to PNG
+   if(! loaded) // try to use imageMagick to convert image to another format:
    {
       String oldfilename = filename;
-      String tempfile = filename + ".png";
+      String tempfile = filename;
+      int format = READ_APPCONFIG(MP_TMPGFXFORMAT);
+      switch(format)
+      {
+      case 0: // xpm
+         tempfile += ".xpm"; break;
+      case 1: // png
+         tempfile += ".png"; break;
+      case 2: // bmp
+         tempfile += ".bmp"; break;
+      default: // cannot happen
+         wxASSERT(0);
+      }
       // strip leading path
       int i = tempfile.Length();
       while(i && tempfile.c_str()[i] != '/')
@@ -150,15 +180,21 @@ wxIconManager::LoadImage(String filename, bool *success)
          ? getenv("TMP"):"/tmp"
          ) + String('/') + tempfile;
       String command;
-      command = READ_APPCONFIG(MP_CONVERTPROGRAM);
-      command << ' ' << filename << ' ' << tempfile;
+      command.Printf(READ_APPCONFIG(MP_CONVERTPROGRAM),
+                     filename.c_str(), tempfile.c_str());
       wxLogTrace(wxTraceIconLoading,
                  "wxIconManager::LoadImage() calling '%s'...",
                  command.c_str());
       if(system(command) == 0)
       {
          wxLogNull lo; // suppress error messages
-         loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_PNG);
+         if(format != 0) // not xpm which we handle internally
+         {
+            if(format == 1) // PNG!
+               loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_PNG);
+            else // format == 2 BMP
+               loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_BMP);
+         }
       }
       if(tempfile.length()) // using a temporary file
          wxRemoveFile(tempfile);

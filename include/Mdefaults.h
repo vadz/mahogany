@@ -114,6 +114,8 @@
 #define   MP_MBOXDIR         "FolderDir"
 /// command to convert tiff faxes to postscript
 #define   MP_TIFF2PS         "FaxToPS"
+/// preferred intermediary image format in conversions (0=xpm,1=png,2=bmp)
+#define MP_TMPGFXFORMAT      "ConvertGfxFormat"
 /// the user's M directory
 #   define   MP_USERDIR         "UserDirectory"
 
@@ -230,6 +232,8 @@
 #define   MP_SMTPHOST         "MailHost"
 /// the news server
 #define   MP_NNTPHOST         "NewsHost"
+//// the maximum number of messages to retrieve from mailbox or 0 for no limit
+#define MP_FOLDER_RETRIEVALLIMIT   "RetrievalLimit"
 /// show CC field in message composition?
 #define   MP_SHOWCC         "ShowCC"
 /// show BCC field in message composition?
@@ -416,7 +420,9 @@
 /// the directory for mbox folders
 #define   MP_MBOXDIR_D         M_EMPTYSTRING
 /// command to convert tiff faxes to postscript
-#define   MP_TIFF2PS_D         "tiff2ps -ap2 %s -O %s"
+#define   MP_TIFF2PS_D         "tiff2ps -ap %s -O %s"
+/// preferred intermediary image format in conversions
+#define MP_TMPGFXFORMAT_D      2
 /// expand folder tree control?
 #define   MP_EXPAND_TREECTRL_D   1
 
@@ -489,7 +495,7 @@
 /// automatically show first message in folderview?
 #define   MP_AUTOSHOW_FIRSTMESSAGE_D 1
 /// program used to convert image files?
-#define   MP_CONVERTPROGRAM_D      "convert"
+#define   MP_CONVERTPROGRAM_D      "convert %s -compress None %s"
 /**@name Printer settings */
 //@{
 /// Command
@@ -536,6 +542,8 @@
 #define   MP_NNTPHOST_D         ""
 /// the news server fallback
 #define   MP_NNTPHOST_FB        "news"
+//// the maximum number of messages to retrieve from mailbox or 0 for no limit
+#define MP_FOLDER_RETRIEVALLIMIT_D   0
 /// the username for returned mail
 #define   MP_RETURN_ADDRESS_D      M_EMPTYSTRING
 /// show CC field in message composition?

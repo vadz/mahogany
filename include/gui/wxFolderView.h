@@ -294,6 +294,8 @@ public:
    void OnSelected(wxListEvent& event);
    void OnKey( wxKeyEvent &event);
 
+   void EnableSelectionCallbacks(bool enabledisable = true)
+      { m_SelectionCallbacks = enabledisable; }
    DECLARE_EVENT_TABLE()
 
 protected:
@@ -307,6 +309,8 @@ protected:
    int m_columns[WXFLC_NUMENTRIES];
    /// which entry is in column 0?
    int m_firstColumn;
+   /// do we want OnSelect() callbacks?
+   bool m_SelectionCallbacks;
 };
 
 #endif // WXFOLDERVIEW_H

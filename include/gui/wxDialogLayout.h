@@ -93,6 +93,7 @@ public:
    virtual bool TransferDataFromWindow();
 
    // callbacks
+   void OnHelp(wxCommandEvent &event);
    void OnOK(wxCommandEvent& event);
    void OnApply(wxCommandEvent& event);
    void OnCancel(wxCommandEvent& event);
@@ -121,8 +122,10 @@ protected:
    wxPNotebook *m_notebook;
 
 private:
-   wxButton    *m_btnOk,
-               *m_btnApply;
+   wxButton
+      *m_btnHelp,
+      *m_btnOk,
+      *m_btnApply;
 
    bool m_bDirty;
 

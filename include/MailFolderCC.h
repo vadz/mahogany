@@ -208,6 +208,11 @@ public:
    /// Return a pointer to the next message's header info.
    virtual HeaderInfo const *GetNextHeaderInfo(HeaderInfo const*) const;
    //@}
+   /** Sets a maximum number of messages to retrieve from server.
+       @param nmax maximum number of messages to retrieve, 0 for no limit
+   */
+   virtual void SetRetrievalLimit(unsigned long nmax)
+   { m_RetrievalLimit = nmax; }
 
 private:
    /// private constructor, does basic initialisation
@@ -299,9 +304,10 @@ private:
 
    /// To display progress while reading message headers:
    class MProgressDialog *m_ProgressDialog;
+   // return the folder type
+   FolderType GetType(void) const { return m_folderType; }
 protected:
    void SetType(FolderType type) { m_folderType = type; }
-   FolderType GetType(void) const { return m_folderType; }
 
    /// Gets a complete folder listing from the stream.
    void BuildListing(void);
@@ -364,8 +370,9 @@ protected:
    /** The index of the next entry in list to fill. Only used for
        BuildListing()/OverviewHeader() interaction. */
    unsigned long      m_BuildNextEntry;
-
-   //@}
+   /// The maximum number of messages to retrive or 0
+   unsigned long m_RetrievalLimit;
+//@}
 public:
    /** @name common callback routines
        They all take a stram argument and the number of a message.
