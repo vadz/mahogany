@@ -2354,6 +2354,9 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 
    delete m_procExtEdit;
    m_procExtEdit = NULL;
+
+   // show the frame which might had been obscured by the other windows
+   Raise();
 }
 
 // ----------------------------------------------------------------------------
