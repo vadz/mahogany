@@ -209,6 +209,9 @@ public:
    /// for wxAddressTextCtrl usage: remember last focused field
    void SetLastAddressEntry(int field) { m_indexLast = field; }
 
+   /// for wxAddressTextCtrl usage: are we sending or posting?
+   Mode GetMode() const { return m_mode; }
+
    /// is the control with this index enabled?
    bool IsRecipientEnabled(size_t index) const;
 
