@@ -6,7 +6,8 @@
 // Modified by: Vadim Zeitlin at 24.01.01: complete rewrite of update logic
 // Created:     1997
 // CVS-ID:      $Id$
-// Copyright:   (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)
+// Copyright:   (c) 1997-2000 Karsten Ballüder (ballueder@gmx.net)
+//              (c) 2000-2004 Vadim Zeitlin
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -25,10 +26,10 @@
 #include  "Mpch.h"
 
 #ifdef USE_PYTHON
-#    include  "MPython.h"		// Python fix for Pyobject / presult
-#    include  "PythonHelp.h"		// Python fix for PythonCallback
-#    include  "Mcallbacks.h"		// Python fix for MCB_* declares
-#endif	//USE_PYTHON
+#    include  "MPython.h"        // Python fix for Pyobject / presult
+#    include  "PythonHelp.h"     // Python fix for PythonCallback
+#    include  "Mcallbacks.h"     // Python fix for MCB_* declares
+#endif //USE_PYTHON
 
 #ifndef  USE_PCH
 #   include "Mcommon.h"
