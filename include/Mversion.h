@@ -19,7 +19,7 @@
 
 /// version info
 #define M_VERSION_MAJOR   0
-#define M_VERSION_MINOR   65
+#define M_VERSION_MINOR   66
 #define M_VERSION_RELEASE 0
 #define M_VERSION_STATUS  "" // "a"=alpha
 
@@ -32,6 +32,6 @@
    M_MAKE_VERSION(M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE)
 
 /// full version string
-#define M_VERSION_STRING  M_VERSION " 'Claire'"
+#define M_VERSION_STRING  M_VERSION " 'Clio'"
 
 #endif  //_M_VERSION_H

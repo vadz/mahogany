@@ -211,7 +211,8 @@ enum MVersion
    Version_064_1,    // MF_FLAGS_MONITOR added, half-replaces INCOMING
    Version_064_2 = Version_064_1, // no changes
    Version_065,      // SSL flag is not boolean any more and not a flag at all
-   Version_Last = Version_065,// last existing version
+   Version_066,      // "/M/Profiles" -> "/Profiles"
+   Version_Last = Version_066,// last existing version
    Version_Unknown   // some unrecognized version
 };
 
@@ -2134,15 +2135,11 @@ UpgradeFrom010()
                     "/AdbEditor","/M/Profiles/AdbEditor") )
       rc = false;
 
-   Profile
-      *p = Profile::CreateProfile(""),
-      *p2;
+   Profile_obj p("");
    kbStringList
       folders;
    String
       group, pw, tmp;
-   long
-      index = 0;
 
    // We need to rename the old mainfolder, to remove its leading slash:
    String mainFolder = READ_CONFIG(p, MP_MAINFOLDER);
@@ -2164,10 +2161,10 @@ UpgradeFrom010()
 
    /* Encrypt passwords in new location and make sure we have no
       illegal old profiles around. */
-   p->ResetPath(); // to be safe
-   for ( bool ok = p->GetFirstGroup(group, index);
+   Profile::EnumData cookie;
+   for ( bool ok = p->GetFirstGroup(group, cookie);
          ok ;
-         ok = p->GetNextGroup(group, index))
+         ok = p->GetNextGroup(group, cookie))
    {
       tmp = group;
       tmp << '/' << GetOptionName(MP_PROFILE_TYPE);
@@ -2180,31 +2177,27 @@ UpgradeFrom010()
    for(kbStringList::iterator i = folders.begin(); i != folders.end();i++)
    {
       group = **i;
-      p->SetPath(group);
-      if( READ_CONFIG(p, MP_FOLDER_TYPE) != GetNumericDefault(MP_FOLDER_TYPE) )
+
+      Profile_obj profile(group);
+      if( READ_CONFIG(profile, MP_FOLDER_TYPE) !=
+               GetNumericDefault(MP_FOLDER_TYPE) )
       {
-         p2 = Profile::CreateProfile(group);
-         pw = READ_CONFIG_TEXT(p2, MP_FOLDER_PASSWORD);
-         if(pw.Length()) // only if we have a password
-            p2->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pw));
-         p2->DecRef();
-         p->ResetPath();
+         pw = READ_CONFIG_TEXT(profile, MP_FOLDER_PASSWORD);
+         if ( !pw.empty() )
+            profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pw));
       }
       else
       {
-         p->ResetPath();
          p->DeleteGroup(group);
          String msg = _("Deleted illegal folder profile: '");
          msg << p->GetName() << '/' << group << '\'';
          wxLogMessage(msg);
       }
    }
-   p->DecRef();
+
    //FIXME check returncodes!
 
-
    return rc;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -2798,6 +2791,26 @@ UpgradeFrom064_1()
 }
 
 // ----------------------------------------------------------------------------
+// 0.65 -> 0.66
+// ----------------------------------------------------------------------------
+
+static bool
+UpgradeFrom065()
+{
+#ifdef OS_UNIX
+   wxConfigBase *config = mApplication->GetProfile()->GetConfig();
+
+   if ( !CopyEntries(config, "/M", "/") > 0 )
+      return false;
+
+   if ( !config->DeleteGroup("/M") )
+      wxLogDebug("Old data was left in [M] config section.");
+#endif // OS_UNIX
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
 
@@ -2835,8 +2848,10 @@ Upgrade(const String& fromVersion)
          oldVersion = Version_064;
       else if ( version == "0.64.1" || version == "0.64.2" )
          oldVersion = Version_064_1;
-      else if ( version == "0.65" )
+      else if ( version == "0.65" || version == "0.65.0" )
          oldVersion = Version_065;
+      else if ( version == "0.66" )
+         oldVersion = Version_066;
       else
          oldVersion = Version_Unknown;
    }
@@ -2884,7 +2899,12 @@ Upgrade(const String& fromVersion)
          // fall through
 
       case Version_064_1:
-         if ( success && UpgradeFrom064_1() )
+         if ( success )
+            success = UpgradeFrom064_1();
+         // fall through
+
+      case Version_065:
+         if ( success && UpgradeFrom065() )
             wxLogMessage(_("Configuration information and program files were "
                            "successfully upgraded from the version '%s'."),
                          fromVersion.c_str());
