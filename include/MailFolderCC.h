@@ -62,7 +62,7 @@ struct mail_address;
 struct OVERVIEW_X;
 
 /// structure to hold MailFolder pointer and associated mailstream pointer
-class StreamConnection : public MObject
+class StreamConnection
 {
 public:
    /// pointer to a MailFolderCC object
@@ -75,11 +75,14 @@ public:
    String login;
 
    StreamConnection()
-      : MObject()
-      {
-         folder = NULL;
-         stream = NULL;
-      }
+   {
+      folder = NULL;
+      stream = NULL;
+   }
+
+#ifdef DEBUG
+   virtual ~StreamConnection();
+#endif // DEBUG
 };
 
 KBLIST_DEFINE(StreamConnectionList, StreamConnection);

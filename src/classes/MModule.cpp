@@ -108,13 +108,18 @@ void MAppBase::RemoveModule(MModuleCommon *module)
    if(gs_MModuleList)
    {
       MModuleList::iterator i;
-      for(i = gs_MModuleList->begin();
-          i != gs_MModuleList->end();
-          i++)
+      for ( i = gs_MModuleList->begin(); i != gs_MModuleList->end(); i++ )
       {
          MModuleListEntry *entry = *i;
          if( entry->m_Module == module )
-            gs_MModuleList->erase(i); // remove our entry
+         {
+            gs_MModuleList->erase(i);
+
+            // we must reset the iterator as it could be invalidated by the
+            // erase() above - this is very inefficient but we have quite small
+            // lists here (still FIXME?)
+            i = gs_MModuleList->begin();
+         }
       }
    }
 }

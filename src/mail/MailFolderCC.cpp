@@ -1352,6 +1352,14 @@ MailFolderCC::PingReopenAll(bool fullPing)
       rc &= fullPing ? mf->PingReopen() : mf->Ping();
    }
 
+   // we have put copies of pointers from ms_StreamList into streamListCopy so
+   // we must clear the list to prevent it from deleting these pointers in its
+   // dtor!
+   while ( !streamListCopy.empty() )
+   {
+      streamListCopy.remove(streamListCopy.begin());
+   }
+
    return rc;
 }
 
@@ -2005,6 +2013,11 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
 
 #ifdef DEBUG
 
+StreamConnection::~StreamConnection()
+{
+    wxLogDebug("deleting %s from stream list", name.c_str());
+}
+
 void
 MailFolderCC::Debug(void) const
 {
@@ -2029,7 +2042,6 @@ MailFolderCC::DebugStreams(void)
          continue;
       }
 
-      conn->MOcheck(); // integrity check on StreamConnection pointer
       wxLogDebug("\t%p -> %p \"%s\"",
                  conn->stream, conn->folder, conn->folder->GetName().c_str());
    }
@@ -2711,9 +2723,9 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
    StreamConnectionList::iterator i;
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
    {
-      (*i)->MOcheck();
-      if( (*i)->stream == stream )
-         return (*i)->folder;
+      StreamConnection *conn = *i;
+      if( conn->stream == stream )
+         return conn->folder;
    }
 
    /* Sometimes the IMAP code (imap4r1.c) allocates a temporary stream
@@ -2730,9 +2742,9 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
    {
       for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
       {
-         (*i)->MOcheck();
-         if( (*i)->name == name )  // (*i)->name is of type String,  so we can
-            return (*i)->folder;
+         StreamConnection *conn = *i;
+         if( conn->name == name )
+            return conn->folder;
       }
    }
    if(ms_StreamListDefaultObj)
