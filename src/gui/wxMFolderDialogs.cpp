@@ -1860,7 +1860,7 @@ wxFolderPropertiesPage::SetDefaultValues()
 
    m_keepOpen->SetValue((flags & MF_FLAGS_KEEPOPEN) != 0);
 
-   m_originalForceReOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
+   m_originalForceReOpenValue = (flags & MF_FLAGS_REOPENONPING) != 0;
    m_forceReOpen->SetValue(m_originalForceReOpenValue);
 
 #ifdef USE_LOCAL_CHECKBOX
