@@ -6,6 +6,8 @@
 Release 0.64 '???' ???, 2001
 -------------------------------------------------------------------------------
 
+30.08.01 VZ: added support for server-side sorting
+30.08.01 VZ: handle connection loss more gracefully
 25.08.01 VZ: auto select the next unread msg/folder with one key press
 21.08.01 VZ: added address book interface to /etc/passwd (Unix only)
 21.08.01 VZ: better colour selector control in the options dialog

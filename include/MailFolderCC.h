@@ -150,12 +150,6 @@ public:
    /// Return IMAP spec
    virtual String GetImapSpec(void) const { return m_ImapSpec; }
 
-   /// can we do server side sorting?
-   bool CanSort() const;
-
-   /// can we do server side threading?
-   bool CanThread() const;
-
    /** Get the profile.
        @return Pointer to the profile.
    */

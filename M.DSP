@@ -312,6 +312,10 @@ SOURCE=.\src\mail\MimePartCC.cpp
 
 SOURCE=.\src\mail\SendMessageCC.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\mail\Sorting.cpp
+# End Source File
 # End Group
 # Begin Group "gui"
 
@@ -469,6 +473,10 @@ SOURCE=.\src\gui\wxMsgCmdProc.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\wxOptionsDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\wxSortDialog.cpp
 # End Source File
 # Begin Source File
 

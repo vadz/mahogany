@@ -269,6 +269,7 @@ extern const MOption MP_CVIEW_FGCOLOUR;
 extern const MOption MP_CVIEW_BGCOLOUR;
 
 // sorting/threading
+extern const MOption MP_MSGS_SERVER_SORT;
 extern const MOption MP_MSGS_SORTBY;
 extern const MOption MP_MSGS_RESORT_ON_CHANGE;
 extern const MOption MP_MSGS_USE_THREADING;
@@ -877,6 +878,9 @@ extern const MOption MP_AWAY_STATUS;
 //@}
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_NAME      "HighlightURL"
+
+/// do we want to use server side sort?
+#define MP_MSGS_SERVER_SORT_NAME    "SortOnServer"
 /// sort criterium for folder listing
 #define MP_MSGS_SORTBY_NAME         "SortMessagesBy"
 /// re-sort messages on status change?
@@ -1712,6 +1716,8 @@ extern const MOption MP_AWAY_STATUS;
 //@}
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_DEFVAL      1
+/// do we want to use server side sort?
+#define MP_MSGS_SERVER_SORT_DEFVAL    1l
 /// sort criterium for folder listing (== MSO_NONE)
 #define MP_MSGS_SORTBY_DEFVAL         0l
 /// re-sort messages on status change?

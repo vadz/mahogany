@@ -13,6 +13,14 @@
 #ifndef _SORTING_H_
 #define _SORTING_H_
 
+#ifdef __GNUG__
+   #pragma interface "Sorting.h"
+#endif
+
+#include <wx/dynarray.h>   // for wxArrayInt
+
+class Profile;
+
 /**
    Sort order enum for sorting message listings.
 
@@ -66,7 +74,15 @@ struct SortParams
    /// if detectOwnAddresses, the list of the addresses for "oneself"
    wxArrayString ownAddresses;
 
-   SortParams() { sortOrder = MSO_NONE; detectOwnAddresses = false; }
+   /// def ctor
+   SortParams();
+
+   /// read the sort params from profile
+   void Read(Profile *profile);
+
+   /// compare SortParams
+   bool operator==(const SortParams& other) const;
+   bool operator!=(const SortParams& other) const { return !(*this == other); }
 };
 
 /// get a single sorting criterium from the sort order
@@ -79,6 +95,12 @@ inline MessageSortOrder GetSortCrit(long sortOrder)
 inline MessageSortOrder GetSortCritDirect(long sortOrder)
 {
     return (MessageSortOrder)(sortOrder & 0xE);
+}
+
+/// return true if the sort order specifies reversed sort
+inline bool IsSortCritReversed(long sortOrder)
+{
+   return (sortOrder & 1) != 0;
 }
 
 /// advance to the next sort criterium in the sort order

@@ -67,6 +67,11 @@ private:
 // private functions
 // ----------------------------------------------------------------------------
 
+int CMPFUNC_CONV MsgnoCmpFunc(UIdType *msgno1, UIdType *msgno2)
+{
+   return *msgno1 - *msgno2;
+}
+
 static UIdType MapIndexToMsgno(UIdType uid)
 {
    return uid + 1;
@@ -238,7 +243,8 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(MsgnoType n) const
       m_mf->GetHeaderInfo(self->m_headers, seq);
    }
 
-   ASSERT_MSG( m_headers[n]->IsValid(), "returning invalid HeaderInfo" );
+   // the caller will crash...
+   ASSERT_MSG( m_headers[n], "returning NULL HeaderInfo?" );
 
    return m_headers[n];
 }
@@ -500,43 +506,60 @@ void HeaderInfoListImpl::Sort()
    }
 }
 
-// change the sorting order
-bool HeaderInfoListImpl::SetSortOrder(long sortOrder,
-                                      bool detectOwnAddresses,
-                                      const wxArrayString& ownAddresses)
+void HeaderInfoListImpl::Reverse()
 {
-   // we are only called if some of the sorting parameters changed, but make
-   // sure this change will really affect us
-   if ( sortOrder == m_sortParams.sortOrder )
-   {
-      // something related to detectOwnAddresses changed, do we use this at
-      // all?
-      bool useSender = false;
-      while ( sortOrder != MSO_NONE )
-      {
-         if ( GetSortCritDirect(sortOrder) == MSO_SENDER )
-         {
-            useSender = true;
-            break;
-         }
+   m_reverseOrder = !m_reverseOrder;
+}
 
-         sortOrder = GetSortNextCriterium(sortOrder);
+// check if a sort order includes MSO_SENDER
+static bool UsesSenderForSorting(long sortOrder)
+{
+   while ( sortOrder != MSO_NONE )
+   {
+      if ( GetSortCritDirect(sortOrder) == MSO_SENDER )
+      {
+         return true;
       }
 
-      if ( !useSender )
+      sortOrder = GetSortNextCriterium(sortOrder);
+   }
+
+   return false;
+}
+
+// change the sorting order
+bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
+{
+   // we are only called if some of the sorting parameters changed, but make
+   // sure this change will really affect us before resorting
+
+   // if true, we can only reverse the existing sorting instead of doing full
+   // fledged sort
+   bool canReverseOnly = false;
+
+   // is the sort order the same (up to reversal if there is only one sort
+   // criterium)?
+   long sortOrder = sortParams.sortOrder;
+   if ( sortOrder == m_sortParams.sortOrder ||
+         (!GetSortNextCriterium(sortOrder) &&
+          (sortOrder & ~1) == (m_sortParams.sortOrder & ~1)) )
+   {
+      if ( !UsesSenderForSorting(sortOrder) )
       {
-         // nothing changes for us
-         return false;
+         if ( sortOrder == m_sortParams.sortOrder )
+         {
+            // nothing changes for us as we don't use the own addresses
+            return false;
+         }
+
+         // the sort order does change, but we can just reverse the existing
+         // tables instead of resorting everything
+         canReverseOnly = true;
       }
    }
 
-   // TODO: check if the new sort order is just the old one inversed, then
-   //       we can avoid calling Sort() but just flip the current tables!
-
    // remember new sort order
-   m_sortParams.sortOrder = sortOrder;
-   m_sortParams.detectOwnAddresses = detectOwnAddresses;
-   m_sortParams.ownAddresses = ownAddresses;
+   m_sortParams = sortParams;
 
    // sorting order can hardly change the listing if we have less than 2
    // elements
@@ -545,8 +568,15 @@ bool HeaderInfoListImpl::SetSortOrder(long sortOrder,
       return false;
    }
 
-   // recalculate the tables
-   Sort();
+   if ( canReverseOnly )
+   {
+      Reverse();
+   }
+   else
+   {
+      // recalculate the tables
+      Sort();
+   }
 
    // assume it changed
    m_lastMod++;
@@ -633,12 +663,10 @@ void HeaderInfoListImpl::CachePositions(const Sequence& seq)
    if ( IsSorting() )
    {
       // a contiguous range of positions doesn't correspond in general to a
-      // contiguous set of msgnos so the best we can do (or at least the best
-      // thing I see) is to retreieve all messages between the two extreme
-      // positions
-      MsgnoType msgnoMin = 0,
-                msgnoMax = 0;
+      // contiguous set of msgnos so constructing a new sequence is,
+      // potentially, quite time consuming - any way to optimize this?
 
+      UIdArray msgnos;
       size_t n;
       for ( UIdType pos = seq.GetFirst(n);
             pos != UID_ILLEGAL;
@@ -646,16 +674,12 @@ void HeaderInfoListImpl::CachePositions(const Sequence& seq)
       {
          ASSERT_MSG( pos < m_count, "invalid position in the sequence" );
 
-         MsgnoType msgno = GetMsgnoFromPos(pos);
-
-         if ( !msgnoMin || msgno < msgnoMin )
-            msgnoMin = msgno;
-
-         if ( !msgnoMax || msgno > msgnoMax )
-            msgnoMax = msgno;
+         msgnos.Add(GetMsgnoFromPos(pos));
       }
 
-      seqMsgnos.AddRange(msgnoMin, msgnoMax);
+      msgnos.Sort(MsgnoCmpFunc);
+
+      seqMsgnos.AddArray(msgnos);
    }
    else // no sorting/threading at all
    {

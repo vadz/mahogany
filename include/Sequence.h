@@ -21,6 +21,8 @@
    #pragma interface "Sequence.h"
 #endif
 
+class UIdArray;
+
 // ----------------------------------------------------------------------------
 // Sequence: an "optimized" sequence of numbers
 // ----------------------------------------------------------------------------
@@ -39,6 +41,9 @@ public:
 
    /// add number in the range (inclusive) to the sequence
    void AddRange(UIdType from, UIdType to);
+
+   /// add all numbers from a *sorted* array to the sequence
+   void AddArray(const UIdArray& array);
 
    /// apply the given function to all elements of the sequence, return result
    Sequence Apply(UIdType (*map)(UIdType uid)) const;

@@ -21,7 +21,11 @@
 
 #include "MailFolder.h" // the base class
 
-#include "MEvent.h"     // for MEventOptionsChangeData
+#ifndef USE_PCH
+#  include "MEvent.h"     // for MEventOptionsChangeData
+
+#  include "Sorting.h"
+#endif // USE_PCH
 
 // define this for some additional checks of folder closing logic
 #undef DEBUG_FOLDER_CLOSE
@@ -210,7 +214,7 @@ protected:
       }
 
       /// how to sort the list of messages
-      long m_ListingSortOrder;
+      SortParams m_SortParams;
       /// do we want to re-sort it on a status change?
       bool m_ReSortOnChange;
 
@@ -240,11 +244,6 @@ protected:
       /// Should we indent messages with missing ancestor
       bool m_IndentIfDummyNode;
 #endif // EXPERIMENTAL_JWZ_THREADING
-
-      /// do we use "To" instead of "From" for messages from oneself?
-      bool m_replaceFromWithTo;
-      /// if m_replaceFromWithTo, the list of the addresses for "oneself"
-      wxArrayString m_ownAddresses;
    } m_Config;
 
    /// Use the new options from m_Config

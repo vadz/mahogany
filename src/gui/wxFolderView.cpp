@@ -1146,6 +1146,32 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
    wxFolderListCtrlFields col = GetColumnByIndex(m_columns, event.GetColumn());
    wxCHECK_RET( col != WXFLC_NONE, "should have a valid column" );
 
+   MessageSortOrder orderCol = SortOrderFromCol(col);
+   if ( orderCol == MSO_NONE )
+   {
+      // we can't sort by this column
+      wxLogStatus(GetFrame(this),
+                  _("Impossible to sort messages using %s column"),
+                  GetColumnName(col).c_str());
+      return;
+   }
+
+   // give an explanatory message as this stuff mayb e quite confusing
+   //
+   // FIXME: we should allow accessing the sort dialog more easily!
+   MDialog_Message
+   (
+      _("Clicking on the column sorts messages in the folder by this\n"
+        "column or, if they were already sorted by it, reverses the\n"
+        "sort direction\n"
+        "\n"
+        "Please use \"Sort\" button in the \"Folder View\" page of the\n"
+        "preferences dialog to configure other sorting options."),
+      GetFrame(this),
+      MDIALOG_MSGTITLE,
+      GetPersMsgBoxName(M_MSGBOX_EXPLAIN_COLUMN_CLICK)
+   );
+
    // we're going to change the sort order either for this profile in the
    // advanced mode but the global sort order in the novice mode: otherwise,
    // it would be surprizing for the novice user as he'd see one thing in the
@@ -1168,14 +1194,14 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
       }
    }
 
+   // There are 2 possibilities when the column Y is clicked and we currently
+   // use the column X for sorting: either we resort using just Y or we sort
+   // by Y first and then by X. The latter is called "complex sort" here and
+   // is disabled for now because it is much less efficient than simple sort
+   // because it can be reversed instantaneously (reverse of "Y, then X" must
+   // be computed OTOH)
+#ifdef USE_COMPLEX_SORT
    wxArrayInt sortOrders = SplitSortOrder(sortOrder);
-
-   MessageSortOrder orderCol = SortOrderFromCol(col);
-   if ( orderCol == MSO_NONE )
-   {
-      // we can't sort by this column
-      return;
-   }
 
    size_t count = sortOrders.GetCount();
    if ( count == 0 )
@@ -1212,12 +1238,27 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
       }
    }
 
+   sortOrder = BuildSortOrder(sortOrders);
+#else // !USE_COMPLEX_SORT
+   MessageSortOrder orderCur = GetSortCritDirect(sortOrder);
+   if ( orderCur == orderCol )
+   {
+      // reverse the criterium specified by orderCol
+      //
+      // NB: MSO_XXX_REV == MSO_XXX + 1
+      sortOrder = IsSortCritReversed(sortOrder) ? orderCol : orderCol + 1;
+   }
+   else // sort by another column
+   {
+      sortOrder = orderCol;
+   }
+#endif // USE_COMPLEX_SORT/!USE_COMPLEX_SORT
+
    // save the new sort order and update everything
    wxLogStatus(GetFrame(this), _("Now sorting by %s%s"),
                GetColumnName(col).c_str(),
-               sortOrders[0u] == orderCol ? "" :  _(" (reverse)"));
+               GetSortCrit(sortOrder) == orderCol ? "" :  _(" (reverse)"));
 
-   sortOrder = BuildSortOrder(sortOrders);
    profile->writeEntry(MP_MSGS_SORTBY, sortOrder);
 
    MEventManager::Send(new MEventOptionsChangeData
@@ -1625,6 +1666,31 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
    }
 
    wxFolderListCtrlFields field = GetColumnByIndex(m_columns, column);
+
+   // deal with invalid headers first - these headers were not retrieved from
+   // server because the user aborted the operation
+   if ( !hi->IsValid() )
+   {
+      switch ( field )
+      {
+         case WXFLC_DATE:
+         case WXFLC_SIZE:
+         case WXFLC_STATUS:
+            text = "???";
+            break;
+
+         case WXFLC_FROM:
+         case WXFLC_SUBJECT:
+            // "???" here would look too weird, just leave them empty
+            break;
+
+         default:
+            wxFAIL_MSG( "unknown column" );
+      }
+
+      return text;
+   }
+
    switch ( field )
    {
       case WXFLC_STATUS:
@@ -1785,6 +1851,12 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
    if ( !hi )
    {
       // will get it later
+      return NULL;
+   }
+
+   if ( !hi->IsValid() )
+   {
+      // no attributes for the headers we didn't retrieve
       return NULL;
    }
 

@@ -33,7 +33,6 @@
 #  include "Profile.h"
 #  include "MModule.h"
 #  include "MHelp.h"
-#  include "Sorting.h"
 
 #  include <wx/layout.h>
 #  include <wx/sizer.h>
@@ -52,7 +51,7 @@
 #  include <wx/utils.h>
 #  include <wx/msgdlg.h>
 #  include <wx/choicdlg.h>
-#endif
+#endif // USE_PCH
 
 #include "Mpers.h"
 
@@ -105,10 +104,8 @@ extern const MOption MP_FOLDER_PASSWORD;
 extern const MOption MP_FOLDER_PATH;
 extern const MOption MP_HEIGHT;
 extern const MOption MP_LASTTIP;
-extern const MOption MP_MSGS_RESORT_ON_CHANGE;
 extern const MOption MP_MSGS_SEARCH_ARG;
 extern const MOption MP_MSGS_SEARCH_CRIT;
-extern const MOption MP_MSGS_SORTBY;
 extern const MOption MP_NNTPHOST_LOGIN;
 extern const MOption MP_SHOWTIPS;
 extern const MOption MP_SMTPHOST_PASSWORD;
@@ -1527,224 +1524,6 @@ void MDialog_ShowText(MWindow *parent,
 
 #include "gui/wxDialogLayout.h"
 
-#define NUM_SORTLEVELS 5
-
-/* These must not be more than 16, as they are stored in a 4-bit
-   value! They must be in sync with the enum in MailFolder.h.
-*/
-static wxString sortCriteria[] =
-{
-   gettext_noop("Arrival order"),
-   gettext_noop("Date"),
-   gettext_noop("Subject"),
-   gettext_noop("Author"),
-   gettext_noop("Status"),
-   gettext_noop("Score"),
-   gettext_noop("Size"),
-};
-
-static const size_t NUM_CRITERIA  = WXSIZEOF(sortCriteria);
-
-#define NUM_LABELS 2
-static wxString labels[NUM_LABELS] =
-{
-   gettext_noop("First, sort by"),
-   gettext_noop("then, sort by")
-};
-
-class wxMessageSortingDialog : public wxOptionsPageSubdialog
-{
-public:
-   wxMessageSortingDialog(Profile *profile, wxWindow *parent);
-
-   // reset the selected options to their default values
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
-   bool WasChanged(void) const { return m_wasChanged; }
-
-protected:
-   wxChoice    *m_Choices[NUM_CRITERIA];     // sort by what?
-   wxCheckBox  *m_Checkboxes[NUM_CRITERIA];  // reverse sort order?
-
-   wxCheckBox  *m_checkReSortOnChange;       // resort on msg status change?
-
-   // dirty flag
-   bool         m_wasChanged;
-
-   // the dialog data
-   bool         m_ReSortOnChange;
-   long         m_SortOrder;
-};
-
-wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
-                                               wxWindow *parent)
-                      : wxOptionsPageSubdialog(profile,parent,
-                                               _("Message sorting"),
-                                               "MessageSortingDialog")
-{
-   wxStaticBox *box = CreateStdButtonsAndBox(_("&Sort messages by"), FALSE,
-                                             MH_DIALOG_SORTING);
-
-   wxClientDC dc(this);
-   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
-   long width, widthMax = 0;
-
-   // see the comment near sortCriteria definition
-   ASSERT_MSG( NUM_CRITERIA < 16, "too many sort criteria" );
-
-   // should have enough space for them in a long
-   ASSERT_MSG( NUM_SORTLEVELS < 8, "too many sort levels" );
-
-   size_t n;
-   for ( n = 0; n < NUM_LABELS; n++ )
-   {
-      dc.GetTextExtent(labels[n], &width, NULL);
-      if ( width > widthMax ) widthMax = width;
-   }
-
-   wxLayoutConstraints *c;
-   for( n = 0; n < NUM_SORTLEVELS; n++)
-   {
-      wxStaticText *txt = new wxStaticText(this, -1,
-                                           n < NUM_LABELS
-                                           ? _(labels[n])
-                                           : _(labels[NUM_LABELS-1]));
-      c = new wxLayoutConstraints;
-      c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-      c->width.Absolute(widthMax);
-      if(n == 0)
-         c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
-      else
-         c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
-      c->height.AsIs();
-      txt->SetConstraints(c);
-
-      m_Checkboxes[n] = new wxCheckBox(this, -1, _("in &reverse order"),
-                                       wxDefaultPosition, wxDefaultSize);
-      c = new wxLayoutConstraints;
-      c->width.AsIs();
-      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-      c->centreY.SameAs(txt, wxCentreY);
-      c->height.AsIs();
-      m_Checkboxes[n]->SetConstraints(c);
-
-      m_Choices[n] = new wxChoice(this, -1,
-                                  wxDefaultPosition, wxDefaultSize,
-                                  NUM_CRITERIA, sortCriteria);
-      c = new wxLayoutConstraints;
-      c->left.RightOf(txt, 2*LAYOUT_X_MARGIN);
-      c->right.SameAs(m_Checkboxes[n], wxLeft, 2*LAYOUT_X_MARGIN);
-      c->centreY.SameAs(txt, wxCentreY);
-      c->height.AsIs();
-      m_Choices[n]->SetConstraints(c);
-   }
-
-   m_checkReSortOnChange = new wxCheckBox(this, -1, _("Re-sort on status change"));
-   c = new wxLayoutConstraints;
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.Below(m_Choices[n - 1], 2*LAYOUT_Y_MARGIN);
-   c->height.AsIs();
-   m_checkReSortOnChange->SetConstraints(c);
-
-   SetDefaultSize(380,310);
-
-   m_wasChanged = false;
-
-   TransferDataToWindow();
-}
-
-bool wxMessageSortingDialog::TransferDataToWindow()
-{
-   long sortOrder = READ_CONFIG(GetProfile(), MP_MSGS_SORTBY);
-
-   // remmeber the initial values
-   m_SortOrder = sortOrder;
-   m_ReSortOnChange = READ_CONFIG_BOOL(GetProfile(), MP_MSGS_RESORT_ON_CHANGE);
-
-   /* Sort order is stored as 4 bits per hierarchy:
-      0xdcba --> 1. sort by "a", then by "b", ...
-   */
-
-   long num;
-   for( int n = 0; n < NUM_SORTLEVELS; n++)
-   {
-      num = sortOrder & 0x00000F; // lowest four bits
-      ASSERT(n < NUM_SORTLEVELS);
-
-      if ( num % 2 )
-      {
-         // it is MSO_XXX_REV
-         m_Checkboxes[n]->SetValue(TRUE);
-         num--;
-      }
-
-      m_Choices[n]->SetSelection(num / 2);
-      sortOrder >>= 4;
-   }
-
-   m_checkReSortOnChange->SetValue(m_ReSortOnChange);
-
-   return TRUE;
-}
-
-bool wxMessageSortingDialog::TransferDataFromWindow()
-{
-   bool uses_scoring = false;
-   int selection;
-   long sortOrder = 0;
-   for( int n = NUM_SORTLEVELS-1; n >= 0; n--)
-   {
-      sortOrder <<= 4;
-      selection = 2*m_Choices[n]->GetSelection();
-      if( selection == MSO_SCORE )
-         uses_scoring = true;
-
-      if ( m_Checkboxes[n]->GetValue() )
-      {
-         // reverse the sort order: MSO_XXX_REV == MSO_XXX + 1
-         selection++;
-      }
-
-      sortOrder += selection;
-   }
-
-   // write the data to config if anything changed (and update the dirty flag)
-   if ( sortOrder != m_SortOrder )
-   {
-      m_SortOrder = sortOrder;
-      m_wasChanged = true;
-
-      GetProfile()->writeEntry(MP_MSGS_SORTBY, m_SortOrder);
-   }
-
-   if ( m_checkReSortOnChange->GetValue() != m_ReSortOnChange )
-   {
-      m_ReSortOnChange = !m_ReSortOnChange;
-      m_wasChanged = true;
-
-      GetProfile()->writeEntry(MP_MSGS_RESORT_ON_CHANGE, m_ReSortOnChange);
-   }
-
-   return TRUE;
-}
-
-/* Configuration dialog for sorting messages. */
-extern
-bool ConfigureSorting(Profile *profile, wxWindow *parent)
-{
-   wxMessageSortingDialog dlg(profile, parent);
-   if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
-   {
-      return TRUE;
-   }
-   else
-   {
-      return FALSE;
-   }
-}
-
-
 //-----------------------------------------------------------------------------
 
 static wxString searchCriteria[] =
@@ -1896,7 +1675,7 @@ bool wxMessageSearchDialog::TransferDataToWindow()
    return TRUE;
 }
 
-/* Configuration dialog for sorting messages. */
+/* Configuration dialog for searching messages. */
 extern
 bool ConfigureSearchMessages(class SearchCriterium *crit,
                              Profile *profile, wxWindow *parent)
@@ -2154,7 +1933,7 @@ wxDateFmtDialog::TransferDataToWindow()
 }
 
 
-/* Configuration dialog for sorting messages. */
+/* Configuration dialog for showing the date. */
 extern
 bool ConfigureDateFormat(Profile *profile, wxWindow *parent)
 {
@@ -2750,6 +2529,7 @@ static const struct
    { "BrowseImapServers",        gettext_noop("propose to get all folders from IMAP server") },
    { "GfxNotInlined",            gettext_noop("ask if big images should be inlined") },
    { "EditOnOpenFail",           gettext_noop("propose to edit folder settings if opening it failed") },
+   { "ExplainColClick",          gettext_noop("give explanation when clicking on a column in the folder view") },
    //{ "", gettext_noop() },
 };
 

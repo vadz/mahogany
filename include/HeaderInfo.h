@@ -25,6 +25,7 @@
 
 class WXDLLEXPORT wxArrayString;
 class Sequence;
+struct SortParams;
 
 /// illegal value of the message index (it nicely corresponds to 0 msgno)
 #define INDEX_ILLEGAL UID_ILLEGAL
@@ -297,14 +298,10 @@ public:
    /**
       Set the sort order to use for the messages.
 
-      @param sortOrder is a combination of (shifted) MSO_XXX flags
-      @param detectOwnAddresses if true, use "To", not "From" for own msgs
-      @param ownAddresses are the users own addresses
+      @param sortParams specifies the sorting to do
       @return true if the order of messages really changed
     */
-   virtual bool SetSortOrder(long sortOrder,
-                             bool detectOwnAddresses,
-                             const wxArrayString& ownAddresses) = 0;
+   virtual bool SetSortOrder(const SortParams& sortParams) = 0;
 
    /// TODO: threading
 

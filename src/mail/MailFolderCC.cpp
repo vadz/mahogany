@@ -132,6 +132,7 @@ extern const MOption MP_FOLDER_TRY_CREATE;
 extern const MOption MP_IMAP_LOOKAHEAD;
 extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_SIZE;
 extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_TIME;
+extern const MOption MP_MSGS_SERVER_SORT;
 extern const MOption MP_NEWS_SPOOL_DIR;
 extern const MOption MP_RSH_PATH;
 extern const MOption MP_SSH_PATH;
@@ -3464,32 +3465,129 @@ MailFolderCC::DebugDump() const
 // MailFolderCC sorting/threading
 // ----------------------------------------------------------------------------
 
-bool MailFolderCC::CanSort() const
-{
-   CHECK( m_MailStream, false, "MailFolderCC::CanSort(): folder closed" );
-
-   return GetType() == MF_IMAP && LEVELSORT(m_MailStream);
-}
-
-bool MailFolderCC::CanThread() const
-{
-   CHECK( m_MailStream, false, "MailFolderCC::CanThread(): folder closed" );
-
-   return GetType() == MF_IMAP && LEVELTHREAD(m_MailStream);
-}
-
 bool
 MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 {
+   CHECK( m_MailStream, false, "can't sort closed folder" );
+
    /*
-      if the server supports sorting at all
+      if we want to do server side sorting and the server supports it
          if it can sort with the criteria from sortParams
+            construct the sort program
             call mail_sort() to do server side sorting
             if ok
                return
 
       call base class version to do local sorting
     */
+
+   // does the server support sorting? and if so, do we want to use it?
+   if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) &&
+        READ_CONFIG(m_Profile, MP_MSGS_SERVER_SORT) )
+   {
+      // construct the sort program checking that all sort criteria are
+      // supported by the server side sort
+      SORTPGM *pgmSort = NULL;
+      SORTPGM **ppgmStep = &pgmSort;
+
+      long sortOrder = sortParams.sortOrder;
+      while ( sortOrder )
+      {
+         // c-client sort function
+         int sortFunction;
+
+         MessageSortOrder crit = GetSortCritDirect(sortOrder);
+         switch ( crit )
+         {
+            case MSO_DATE:
+               sortFunction = SORTDATE;
+               break;
+
+            case MSO_SUBJECT:
+               sortFunction = SORTSUBJECT;
+               break;
+
+            case MSO_SIZE:
+               sortFunction = SORTSIZE;
+               break;
+
+            case MSO_SENDER:
+               if ( !sortParams.detectOwnAddresses )
+                  sortFunction = SORTFROM;
+               //else: server side sorting doesn't support this, fall through
+
+            case MSO_STATUS:
+            case MSO_SCORE:
+               sortFunction = -1;
+               break;
+
+               // MSO_NONE is not supposed to occur in sortOrder except as the
+               // first (and only) criterium in which case we wouldn't get
+               // here because of the loop test
+            case MSO_NONE:
+            default:
+               FAIL_MSG("unexpected sort criterium");
+
+               sortFunction = -1;
+         }
+
+         if ( sortFunction == -1 )
+         {
+            // criterium not supported, don't do server side sorting
+            mail_free_sortpgm(&pgmSort);
+
+            break;
+         }
+
+         // either start of continue the program
+         *ppgmStep = mail_newsortpgm();
+
+         // fill in the sort struct
+         (*ppgmStep)->reverse = IsSortCritReversed(sortOrder);
+         (*ppgmStep)->function = sortFunction;
+         ppgmStep = &(*ppgmStep)->next;
+
+         // and check the next sort criterium
+         sortOrder = GetSortNextCriterium(sortOrder);
+      }
+
+      // call mail_sort() to do server side sorting if we can
+      if ( pgmSort )
+      {
+         wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SortMessages()",
+                    GetName().c_str());
+
+         // we need to provide a search program, otherwise c-client doesn't
+         // sort anything - but if we give it an uninitialized SEARCHPGM, it
+         // sorts all the messages [it's just a pleasure to use this library]
+         SEARCHPGM *pgmSrch = mail_newsearchpgm();
+         MsgnoType *results = mail_sort(m_MailStream,
+                                        "US-ASCII",
+                                        pgmSrch,
+                                        pgmSort,
+                                        SE_FREE | SO_FREE);
+         if ( !results )
+         {
+            wxLogWarning(_("Server side sorting failed, trying to sort "
+                           "messages locally."));
+         }
+         else // sorted ok
+         {
+            // we need to copy the results as we can't just reuse this buffer
+            // because c-client has its own memory allocation function which
+            // could be incompatible with our malloc/free
+            for ( MsgnoType n = 0; n < m_MailStream->nmsgs; n++ )
+            {
+               *msgnos++ = *results++;
+            }
+
+            // do we have to free them or not??
+            //fs_give((void **)&results);
+
+            return true;
+         }
+      }
+   }
 
    // call base class version to do local sorting
    return MailFolderCmn::SortMessages(msgnos, sortParams);
@@ -3552,6 +3650,12 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
       ENVELOPE *env = mail_fetch_structure(m_MailStream, i, NIL, NIL);
       if ( !env )
       {
+         if ( !m_MailStream )
+         {
+            // connection was broken, don't try to get the others
+            break;
+         }
+
          FAIL_MSG( "failed to get sequence element envelope?" );
 
          continue;
@@ -4226,8 +4330,19 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
 void
 MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
 {
-   // I don't really know what the difference with mm_log is...
-   mm_log(str, errflg, MailFolderCC::LookupObject(stream));
+   MailFolderCC *mf = MailFolderCC::LookupObject(stream);
+
+   // detect the notifications about stream being closed
+   if ( mf && errflg == BYE )
+   {
+      // reset it to prevent us from trying to close it - won't work
+      mf->m_MailStream = NULL;
+
+      wxLogWarning(_("Connection to the folder '%s' lost unexpectedly."),
+                   mf->GetName().c_str());
+   }
+
+   mm_log(str, errflg, mf);
 }
 
 /** log a message

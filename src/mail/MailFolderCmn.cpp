@@ -32,9 +32,7 @@
 #  include "Profile.h"
 #  include "MEvent.h"
 #  include "MApplication.h"
-
-#  include "Sorting.h"
-#endif
+#endif // USE_PCH
 
 #include "Mdefaults.h"
 
@@ -555,6 +553,8 @@ HeaderInfoList *MailFolderCmn::GetHeaders(void) const
    {
       MailFolderCmn *self = wxConstCast(this, MailFolderCmn);
       self->m_headers = HeaderInfoList::Create(self);
+
+      m_headers->SetSortOrder(m_Config.m_SortParams);
    }
 
    m_headers->IncRef();
@@ -921,13 +921,28 @@ extern "C"
       MsgnoType n1 = *(MsgnoType *)p1 - 1,
                 n2 = *(MsgnoType *)p2 - 1;
 
-      HeaderInfo *i1 = gs_SortData.hil->GetItemByIndex(n1),
-                 *i2 = gs_SortData.hil->GetItemByIndex(n2);
+      HeaderInfo *hi1 = gs_SortData.hil->GetItemByIndex(n1),
+                 *hi2 = gs_SortData.hil->GetItemByIndex(n2);
+
+      int result = 0;
+
+      // if one header is invalid (presumable because it wasn't retrieved from
+      // server at all because the user aborted it), assume it is always less
+      // than the other
+      if ( !hi1->IsValid() )
+      {
+         // even if the second one is invalid, we may still return 1, it's not
+         // like it changes anything
+         result = -1;
+      }
+      else if ( !hi2->IsValid() )
+      {
+         // as hi1 is valid, it is greater
+         result = 1;
+      }
 
       // copy it as we're going to modify it while processing
       long sortOrder = gs_SortData.sortParams.sortOrder;
-
-      int result = 0;
       while ( !result && sortOrder != 0 )
       {
          long criterium = GetSortCrit(sortOrder);
@@ -943,14 +958,14 @@ extern "C"
                break;
 
             case MSO_DATE:
-               result = CmpNumeric(i1->GetDate(), i2->GetDate());
+               result = CmpNumeric(hi1->GetDate(), hi2->GetDate());
                break;
 
             case MSO_SUBJECT:
                {
                   String
-                     subj1 = Address::NormalizeSubject(i1->GetSubject()),
-                     subj2 = Address::NormalizeSubject(i2->GetSubject());
+                     subj1 = Address::NormalizeSubject(hi1->GetSubject()),
+                     subj2 = Address::NormalizeSubject(hi2->GetSubject());
 
                   result = Stricmp(subj1, subj2);
                }
@@ -962,7 +977,7 @@ extern "C"
                   String value1, value2;
                   (void)HeaderInfo::GetFromOrTo
                                     (
-                                       i1,
+                                       hi1,
                                        gs_SortData.sortParams.detectOwnAddresses,
                                        gs_SortData.sortParams.ownAddresses,
                                        &value1
@@ -970,7 +985,7 @@ extern "C"
 
                   (void)HeaderInfo::GetFromOrTo
                                     (
-                                       i2,
+                                       hi2,
                                        gs_SortData.sortParams.detectOwnAddresses,
                                        gs_SortData.sortParams.ownAddresses,
                                        &value2
@@ -981,17 +996,17 @@ extern "C"
                break;
 
             case MSO_STATUS:
-               result = CompareStatus(i1->GetStatus(), i2->GetStatus());
+               result = CompareStatus(hi1->GetStatus(), hi2->GetStatus());
                break;
 
             case MSO_SIZE:
-               result = CmpNumeric(i1->GetSize(), i2->GetSize());
+               result = CmpNumeric(hi1->GetSize(), hi2->GetSize());
                break;
 
             case MSO_SCORE:
                // we don't store score any more in HeaderInfo
 #ifdef USE_HEADER_SCORE
-               result = CmpNumeric(i1->GetScore(), i2->GetScore());
+               result = CmpNumeric(hi1->GetScore(), hi2->GetScore());
 #else
                FAIL_MSG("unimplemented");
 #endif // USE_HEADER_SCORE
@@ -1041,6 +1056,9 @@ MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
    {
       wxLogStatus(frame, _("Sorting %u messages..."), count);
    }
+
+   // we need all headers, prefetch them
+   hil->CacheMsgnos(1, count);
 
    MLocker lock(gs_SortData.mutex);
    gs_SortData.sortParams = sortParams;
@@ -2836,6 +2854,8 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
 
    hilp->IncRef();
 
+/* unused old code
+
    SortParams sortParams;
    sortParams.sortOrder = m_Config.m_ListingSortOrder;
    sortParams.detectOwnAddresses = m_Config.m_replaceFromWithTo;
@@ -2843,6 +2863,7 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
       sortParams.ownAddresses = m_Config.m_ownAddresses;
 
    SortListing(this, hilp, sortParams);
+*/
 
    if ( m_Config.m_UseThreading )
    {
@@ -2938,7 +2959,6 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 
 MailFolderCmn::MFCmnOptions::MFCmnOptions()
 {
-   m_ListingSortOrder = MSO_NONE;
    m_ReSortOnChange = false;
 
    m_UpdateInterval = 0;
@@ -2954,17 +2974,17 @@ MailFolderCmn::MFCmnOptions::MFCmnOptions()
    m_BreakThread =
    m_IndentIfDummyNode = false;
 #endif // EXPERIMENTAL_JWZ_THREADING
-
-   m_replaceFromWithTo = false;
 }
 
 bool MailFolderCmn::MFCmnOptions::operator!=(const MFCmnOptions& other) const
 {
-   return m_ListingSortOrder != other.m_ListingSortOrder ||
+   return m_SortParams != other.m_SortParams ||
           m_ReSortOnChange != other.m_ReSortOnChange ||
           m_UpdateInterval != other.m_UpdateInterval ||
-          m_UseThreading != other.m_UseThreading ||
+          m_UseThreading != other.m_UseThreading
 #if defined(EXPERIMENTAL_JWZ_THREADING)
+          || (m_UseThreading &&
+           (
 #if wxUSE_REGEX
           m_SimplifyingRegex != other.m_SimplifyingRegex ||
           m_ReplacementString != other.m_ReplacementString ||
@@ -2974,10 +2994,11 @@ bool MailFolderCmn::MFCmnOptions::operator!=(const MFCmnOptions& other) const
 #endif // wxUSE_REGEX/!wxUSE_REGEX
           m_GatherSubjects != other.m_GatherSubjects ||
           m_BreakThread != other.m_BreakThread ||
-          m_IndentIfDummyNode != other.m_IndentIfDummyNode ||
+          m_IndentIfDummyNode != other.m_IndentIfDummyNode
+           )
+          )
 #endif // EXPERIMENTAL_JWZ_THREADING
-          m_replaceFromWithTo != other.m_replaceFromWithTo ||
-          (m_replaceFromWithTo && m_ownAddresses != other.m_ownAddresses);
+          ;
 }
 
 // ----------------------------------------------------------------------------
@@ -2999,17 +3020,9 @@ MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
       if ( m_headers )
       {
          // do we need to resort messages?
-         if ( config.m_ListingSortOrder != m_Config.m_ListingSortOrder ||
-              config.m_replaceFromWithTo != m_Config.m_replaceFromWithTo ||
-              (config.m_replaceFromWithTo &&
-               config.m_ownAddresses != m_Config.m_ownAddresses) )
+         if ( config.m_SortParams != m_Config.m_SortParams )
          {
-            listingChanged = m_headers->SetSortOrder
-                                        (
-                                          config.m_ListingSortOrder,
-                                          config.m_replaceFromWithTo,
-                                          config.m_ownAddresses
-                                        );
+            listingChanged = m_headers->SetSortOrder(config.m_SortParams);
          }
 
          // TODO: threading
@@ -3052,10 +3065,13 @@ void
 MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 {
    Profile *profile = GetProfile();
-   config.m_ListingSortOrder = READ_CONFIG(profile, MP_MSGS_SORTBY);
+
+   config.m_SortParams.Read(profile);
    config.m_ReSortOnChange =
        READ_CONFIG_BOOL(profile, MP_MSGS_RESORT_ON_CHANGE);
+
    config.m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
+
    config.m_UseThreading = READ_CONFIG_BOOL(profile, MP_MSGS_USE_THREADING);
 #if defined(EXPERIMENTAL_JWZ_THREADING)
    config.m_GatherSubjects =
@@ -3075,19 +3091,6 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
    config.m_IndentIfDummyNode =
        READ_CONFIG_BOOL(profile, MP_MSGS_INDENT_IF_DUMMY);
 #endif // EXPERIMENTAL_JWZ_THREADING
-   config.m_replaceFromWithTo =
-       READ_CONFIG_BOOL(profile, MP_FVIEW_FROM_REPLACE);
-   if ( config.m_replaceFromWithTo )
-   {
-      String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
-      if ( returnAddrs == GetStringDefault(MP_FROM_REPLACE_ADDRESSES) )
-      {
-         // the default for this option is just the return address
-         returnAddrs = READ_CONFIG_TEXT(profile, MP_FROM_ADDRESS);
-      }
-
-      config.m_ownAddresses = strutil_restore_array(':', returnAddrs);
-   }
 }
 
 // ----------------------------------------------------------------------------

@@ -83,9 +83,7 @@ public:
    virtual MsgnoArray *GetAllHeadersByFlag(MailFolder::MessageStatus flag,
                                            bool set);
 
-   virtual bool SetSortOrder(long sortOrder,
-                             bool detectOwnAddresses,
-                             const wxArrayString& ownAddresses);
+   virtual bool SetSortOrder(const SortParams& sortParams);
 
    virtual LastMod GetLastMod() const;
    virtual bool HasChanged(const LastMod since) const;
@@ -129,6 +127,9 @@ private:
 
    /// init the translation tables using the current searching criterium
    void Sort();
+
+   /// reverse the existing translation tables
+   void Reverse();
 
    /**
       Find first position in the given range containing a msgno from array

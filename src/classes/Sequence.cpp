@@ -32,6 +32,7 @@
    #include "Mcommon.h"
 #endif // USE_PCH
 
+#include "MailFolder.h"    // for UIdArray
 #include "Sequence.h"
 
 #include <ctype.h>
@@ -144,6 +145,16 @@ void Sequence::AddRange(UIdType from, UIdType to)
          //m_seq << ':' << to;
          m_count += to - from;
          m_last = to;
+   }
+}
+
+void Sequence::AddArray(const UIdArray& array)
+{
+   // TODO: this surely can be optimized
+   size_t count = array.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      Add(array[n]);
    }
 }
 
