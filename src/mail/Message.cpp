@@ -74,21 +74,26 @@ SplitAddress(const String& address, String *fullname)
 
    AddressList_obj addrList = address;
 
+   fullname->clear();
+
    Address *addr = addrList->GetFirst();
-   if ( !addr )
+   while ( addr )
    {
-      wxLogDebug("Invalid address '%s'", address.c_str());
+      String name = addr->GetName();
 
-      fullname->clear();
-   }
-   else // have at least one address
-   {
-      *fullname = addr->GetName();
+      // ignore addresses without names here
+      if ( !name.empty() )
+      {
+         // separate from the previous one
+         if ( !fullname->empty() )
+         {
+            *fullname += ", ";
+         }
 
-      // check that there are no more as this function doesn't work correctly
-      // (and shouldn't be used) with multiple addresses
-      ASSERT_MSG( !addrList->HasNext(addr),
-                  "extra addresses ignored in SplitAddress" );
+         *fullname += name;
+      }
+
+      addr = addrList->GetNext(addr);
    }
 }
 
