@@ -43,8 +43,8 @@ WizardSmallImageFile=res\install_small.bmp
 
 ; --- doc files
 LicenseFile=doc\license.txt
-InfoBeforeFile=doc\preread.txt
-InfoAfterFile=doc\postread.txt
+InfoBeforeFile=extra\setup\preread.txt
+InfoAfterFile=extra\setup\postread.txt
 
 [Components]
 Name: "main"; Description: "Required Program Files"; Types: full compact custom; Flags: fixed
@@ -53,9 +53,13 @@ Name: "python"; Description: "Python Support (Requires Python 2.0)"; Types: full
 Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
 
 [Files]
+
 ; --- EXEs and DLLs
 Source: "Release\M.EXE"; DestDir: "{app}"
 Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
+
+; --- misc stuff
+Source: "extra\setup\autocollect.adb"; DestDir: "{app}"
 Source: "doc\Mahogany.url"; DestDir: "{app}"; Components: misc
 Source: "doc\Bug.url"; DestDir: "{app}"; Components: misc
 

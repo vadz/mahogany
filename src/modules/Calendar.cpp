@@ -195,13 +195,15 @@ class CalendarModule : public MModule_Calendar
    bool OnASFolderResultEvent(MEventASFolderResultData & ev );
    bool OnFolderUpdateEvent(MEventFolderUpdateData &ev );
 
-
 private:
    /** Calendar constructor.
        As the class has no usable interface, this doesn´t do much, but
        it displays a small dialog to say hello.
    */
    CalendarModule(MInterface *mi);
+
+   /// register with the main frame
+   bool RegisterWithMainFrame();
 
    ~CalendarModule();
 
@@ -1073,7 +1075,20 @@ CalendarModule::CalendarModule(MInterface *minterface)
    m_Frame = NULL;
    m_Timer = NULL;
    m_EventReceiver = NULL;
+   m_CalendarMenu = NULL;
+}
 
+CalendarModule::~CalendarModule()
+{
+   delete m_Timer;
+   delete m_EventReceiver;
+   if(m_Frame)
+      m_Frame->Close();
+}
+
+bool
+CalendarModule::RegisterWithMainFrame()
+{
    m_CalendarMenu = new wxMenu("", wxMENU_TEAROFF);
    m_CalendarMenu->Append(WXMENU_MODULES_CALENDAR_SHOW, _("&Show"), "", TRUE);
    m_CalendarMenu->Break();
@@ -1082,7 +1097,7 @@ CalendarModule::CalendarModule(MInterface *minterface)
    MAppBase *mapp = m_MInterface->GetMApplication();
 
    MFrame *mframe = mapp->TopLevelFrame();
-   CHECK_RET( mframe, "can't load calendar module - no main window" );
+   CHECK( mframe, false, "can't init calendar module - no main window" );
 
    ((wxMainFrame *)mframe)->AddModulesMenu
                             (
@@ -1098,17 +1113,9 @@ CalendarModule::CalendarModule(MInterface *minterface)
    m_EventReceiver = new CalEventReceiver(this);
    CreateFrame();
    m_Frame->CheckUpdate();
+
+   return true;
 }
-
-CalendarModule::~CalendarModule()
-{
-   delete m_Timer;
-   delete m_EventReceiver;
-   if(m_Frame)
-      m_Frame->Close();
-}
-
-
 
 bool
 CalendarModule::ProcessMenuEvent(int id)
@@ -1138,6 +1145,9 @@ CalendarModule::Entry(int arg, ...)
 {
    switch(arg)
    {
+      case MMOD_FUNC_INIT:
+         return RegisterWithMainFrame() ? 0 : -1;
+
       // GetFlags():
       case MMOD_FUNC_GETFLAGS:
          return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;

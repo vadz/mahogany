@@ -77,19 +77,24 @@ enum MModule_Errors
 
 /**@name Function definitions as used by Entry() */
 //@{
-/// GetFlags(): Returns bitwise or of the MMOD_FLAG_ values
-#define MMOD_FUNC_GETFLAGS   0
-/// Main(): Run the main module functionality
-#define MMOD_FUNC_MAIN       1
-/// Config(): Run the module configuration function
-#define MMOD_FUNC_CONFIG     2
-/** ProcessMenuId(): Process the menu id passed as additional
-    argument. Return true if it processed it.
-*/
-#define MMOD_FUNC_MENUEVENT  3
-/** below this number are reserved, from this one on available for
-    module specific functions: */
-#define MMOD_FUNC_USER     0x100
+enum MMOD_FUNC
+{
+   /// GetFlags(): Returns bitwise or of the MMOD_FLAG_ values
+   MMOD_FUNC_GETFLAGS,
+   /// Main(): Run the main module functionality
+   MMOD_FUNC_MAIN,
+   /// Config(): Run the module configuration function
+   MMOD_FUNC_CONFIG,
+   /** ProcessMenuId(): Process the menu id passed as additional
+       argument. Return true if it processed it.
+   */
+   MMOD_FUNC_MENUEVENT,
+   /// perform module initialization, called after main frame creation
+   MMOD_FUNC_INIT,
+   /** below this number are reserved, from this one on available for
+       module specific functions: */
+   MMOD_FUNC_USER = 0x100
+};
 //@}
 
 // ----------------------------------------------------------------------------
@@ -146,7 +151,7 @@ public:
    void SetMInterface(MInterface *minterface) { m_MInterface = minterface; }
 
    virtual MInterface *GetMInterface() { return m_MInterface; }
-   
+
    virtual void IncRef() { m_nRef++; }
    virtual bool DecRef() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
 
@@ -191,7 +196,7 @@ public:
                             int *version_release) const = 0;
 
    /// Set arg to a function number and call the function if it exists.
-   virtual int Entry(int arg, ... ) = 0;
+   virtual int Entry(int /* MMOD_FUNC */ arg, ... ) = 0;
    //@}
 
    /** These static functions handle the loading of modules. */

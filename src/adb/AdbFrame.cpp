@@ -1447,6 +1447,11 @@ void wxAdbEditFrame::RestoreSettings2()
     }
   }
 
+  // if we are run for the first time, expand at least the root level to let the
+  // user see that there is something in the tree
+  if ( !nCountBranches )
+    m_treeAdb->Expand(m_treeAdb->GetRootItem());
+
   // don't give the message if some address books are missing
   if ( !bAllBranchesOk )
     wxLogWarning(_("Not all tree branches could be reopened."));

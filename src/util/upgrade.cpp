@@ -53,6 +53,14 @@
 
 #define USE_WIZARD
 
+#ifdef OS_UNIX
+   // mail collection from INBOX makes sense only under Unix
+   #define USE_MAIL_COLLECT
+
+   // as well as INBOX itself - there is no such thing under Windows
+   #define USE_INBOX
+#endif
+
 #ifdef USE_WIZARD
 #   include <wx/wizard.h>
 #else
@@ -134,6 +142,20 @@ static bool CheckHostName(const wxString& hostname)
    return hostname.empty() || wxIPV4address().Hostname(hostname.AfterLast(':'));
 }
 
+// return the name of the main mail folder
+static wxString GetMainMailFolderName()
+{
+   String mainFolderName;
+#ifdef USE_MAIL_COLLECT
+   if ( !gs_installWizardData.collectAllMail )
+      mainFolderName = "INBOX";
+   else
+#endif // USE_MAIL_COLLECT
+      mainFolderName = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
+
+   return mainFolderName;
+}
+
 // ----------------------------------------------------------------------------
 // wizardry
 // ----------------------------------------------------------------------------
@@ -169,7 +191,10 @@ struct InstallWizardData
 #ifdef USE_PYTHON
    bool   usePython;
 #endif
+#ifdef USE_MAIL_COLLECT
+   // mail collection from INBOX makes sense only under Unix
    bool   collectAllMail;
+#endif // USE_MAIL_COLLECT
 
    // dial up page
 #if defined(OS_WIN)
@@ -493,7 +518,10 @@ public:
 #endif
          m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox != 0);
          m_TrashCheckbox->SetValue(gs_installWizardData.useTrash != 0);
+#ifdef USE_MAIL_COLLECT
          m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail != 0);
+#endif // USE_MAIL_COLLECT
+
          return TRUE;
       }
 
@@ -509,15 +537,20 @@ public:
          gs_installWizardData.useDialUp  = m_UseDialUpCheckbox->GetValue();
          gs_installWizardData.useOutbox  = m_UseOutboxCheckbox->GetValue();
          gs_installWizardData.useTrash   = m_TrashCheckbox->GetValue();
+#ifdef USE_MAIL_COLLECT
          gs_installWizardData.collectAllMail = m_CollectCheckbox->GetValue();
+#endif // USE_MAIL_COLLECT
+
          return TRUE;
       }
 private:
    wxChoice *m_FolderTypeChoice;
-   wxCheckBox *m_CollectCheckbox,
-              *m_TrashCheckbox,
+   wxCheckBox *m_TrashCheckbox,
               *m_UseOutboxCheckbox,
               *m_UseDialUpCheckbox
+#ifdef USE_MAIL_COLLECT
+             , *m_CollectCheckbox,
+#endif // USE_MAIL_COLLECT
 #ifdef USE_PISOCK
              , *m_UsePalmOsCheckbox
 #endif
@@ -642,7 +675,9 @@ void InstallWizardPage::OnWizardCancel(wxWizardEvent& event)
    }
    else
    {
-      // wizard will be cancelled
+      // wizard will be cancelled, so don't try to test anything
+      gs_wizardPages;
+
       wxLogMessage(_("Please use the 'Options' dialog to configure\n"
                      "the program before using it!"));
    }
@@ -946,25 +981,57 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(itext);
 
+   // the enum should be synced with the labels below!
+   enum
+   {
+#ifdef USE_MAIL_COLLECT
+      Label_Collect,
+#endif // USE_MAIL_COLLECT
+      Label_UseTrash,
+      Label_UseOutbox,
+      Label_UseDialUp,
+#ifdef USE_PISOCK
+      Label_UsePalmOS,
+#endif // USE_PISOCK
+      Label_MbxFormat,
+#ifdef USE_PYTHON
+      Label_UsePython,
+#endif // USE_PYTHON
+      Label_Max
+   };
+
+   wxArrayString labels;
+#ifdef USE_MAIL_COLLECT
+   labels.Add(_("&Collect new mail:"));
+#endif // USE_MAIL_COLLECT
+   labels.Add(_("Use &Trash mailbox:"));
+   labels.Add(_("Use &Outbox queue:"));
+   labels.Add(_("&Use dial-up network:"));
+#ifdef USE_PISOCK
+   labels.Add(_("&Load PalmOS support:"));
+#endif // USE_PISOCK
+   labels.Add(_("Default &mailbox format"));
+#ifdef USE_PYTHON
+   labels.Add(_("Enable &Python:"));
+#endif // USE_PYTHON
+
+   long widthMax = GetMaxLabelWidth(labels, panel);
+
+   wxControl *last = NULL;
+
+#ifdef USE_MAIL_COLLECT
    wxStaticText *text = panel->CreateMessage(_(
       "Mahogany can either leave all messages in\n"
       "your system mailbox or create its own\n"
       "mailbox for new mail and move all new\n"
       "messages there. This is recommended,\n"
-      "especially in a multi-user environment."), NULL);
+      "especially in a multi-user environment."), last);
 
-   wxArrayString labels;
-   labels.Add(_("&Collect new mail:"));
-   labels.Add(_("Use &Trash mailbox:"));
-   labels.Add(_("Use &Outbox queue:"));
-   labels.Add(_("&Use dial-up network:"));
-   labels.Add(_("&Load PalmOS support:"));
-   labels.Add(_("Default &mailbox format"));
-   labels.Add(_("Enable &Python:"));
+   m_CollectCheckbox = panel->CreateCheckBox(labels[Label_Collect],
+                                             widthMax, text);
+   last = m_CollectCheckbox;
+#endif // USE_MAIL_COLLECT
 
-   long widthMax = GetMaxLabelWidth(labels, panel);
-
-   m_CollectCheckbox = panel->CreateCheckBox(labels[0], widthMax, text);
    wxStaticText *text2 = panel->CreateMessage(
       _(
          "\n"
@@ -973,18 +1040,21 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          "as deleted and leave them around to be\n"
          "expunged later, or you can use a Trash\n"
          "folder where to move them to."
-         ), m_CollectCheckbox);
-   m_TrashCheckbox = panel->CreateCheckBox(labels[1], widthMax, text2);
+         ), last);
+
+   m_TrashCheckbox = panel->CreateCheckBox(labels[Label_UseTrash],
+                                           widthMax, text2);
 
    wxStaticText *text3 = panel->CreateMessage(
       _(
          "\n"
          "Mahogany can either send messages\n"
          "immediately or queue them and only\n"
-         "send them on demand. This is especially\n"
-         "recommended for dial-up networking."
+         "send them on demand. This is mostly\n"
+         "useful for dial-up networking."
          ), m_TrashCheckbox);
-   m_UseOutboxCheckbox = panel->CreateCheckBox(labels[2], widthMax, text3);
+   m_UseOutboxCheckbox = panel->CreateCheckBox(labels[Label_UseOutbox],
+                                               widthMax, text3);
 
    wxStaticText *text4 = panel->CreateMessage(
       _(
@@ -993,9 +1063,9 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          "Mahogany may detect your connection status\n"
          "and optionally dial and hang-up."
          ), m_UseOutboxCheckbox);
-   m_UseDialUpCheckbox = panel->CreateCheckBox(labels[3], widthMax, text4);
-
-   wxControl *last = m_UseDialUpCheckbox;
+   m_UseDialUpCheckbox = panel->CreateCheckBox(labels[Label_UseDialUp],
+                                               widthMax, text4);
+   last = m_UseDialUpCheckbox;
 
 #ifdef USE_PISOCK
    wxStaticText *text5 = panel->CreateMessage(
@@ -1005,12 +1075,17 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          "Mahogany has special support build in to connect\n"
          "to these."
          ), last);
-   m_UsePalmOsCheckbox = panel->CreateCheckBox(labels[4], widthMax, text5);
+   m_UsePalmOsCheckbox = panel->CreateCheckBox(labels[Label_UsePalmOS],
+                                               widthMax, text5);
    last = m_UsePalmOsCheckbox;
 #endif // USE_PISOCK
-   wxString tmp = labels[5] + ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)";
+
+   wxString tmp;
+   tmp << labels[Label_MbxFormat]
+       << ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)";
    m_FolderTypeChoice = panel->CreateChoice(tmp, widthMax, last);
    last = m_FolderTypeChoice;
+
 #ifdef USE_PYTHON
    wxStaticText *text6 = panel->CreateMessage(
       _(
@@ -1021,7 +1096,8 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          "expand Mahogany.\n"
          "Would you like to enable it?"), last);
 
-   m_UsePythonCheckbox = panel->CreateCheckBox(labels[6], widthMax, text6);
+   m_UsePythonCheckbox = panel->CreateCheckBox(labels[Label_UsePython],
+                                               widthMax, text6);
 #endif // USE_PYTHON
 
    panel->ForceLayout();
@@ -1177,7 +1253,9 @@ bool RunInstallWizard()
 
    gs_installWizardData.useOutbox = TRUE;
    gs_installWizardData.useTrash = TRUE;
+#ifdef USE_MAIL_COLLECT
    gs_installWizardData.collectAllMail = TRUE;
+#endif // USE_MAIL_COLLECT
    gs_installWizardData.folderType = 0; /* mbx */
 #ifdef USE_PYTHON
    gs_installWizardData.usePython = READ_APPCONFIG(MP_USEPYTHON) != 0;
@@ -1250,7 +1328,9 @@ bool RunInstallWizard()
 #if USE_PISOCK
       gs_installWizardData.usePalmOs = false;
 #endif // USE_PISOCK
+#ifdef USE_MAIL_COLLECT
       gs_installWizardData.collectAllMail = false;
+#endif // USE_MAIL_COLLECT
 
       // These are set up above.
 #if 0
@@ -1260,6 +1340,10 @@ bool RunInstallWizard()
       gs_installWizardData.imap =
       gs_installWizardData.nntp = "";
 #endif
+
+      // don't try to send the test message if the SMTP server wasn't
+      // configured
+      gs_installWizardData.sendTestMsg = false;
 
       // also, don't show the tips for the users who skip the wizard
       profile->writeEntry(MP_SHOWTIPS, 0l);
@@ -1280,9 +1364,7 @@ bool RunInstallWizard()
 
    SetupServers();
 
-   String mainFolderName = gs_installWizardData.collectAllMail
-                              ? READ_APPCONFIG(MP_NEWMAIL_FOLDER)
-                              : String("INBOX");
+   String mainFolderName = GetMainMailFolderName();
    mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, mainFolderName);
 
    // create a welcome message unless the user didn't use the wizard (in which
@@ -1381,22 +1463,26 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       profile->writeEntry(MP_USE_OUTBOX, 0l);
    }
 
-   // INBOX/NEW MAIL: in any case, create both INBOX and NEW MAIL folders, but
-   // keep one of them hidden depending on "Collect all mail" setting
+   // INBOX/NEW MAIL: under Unix, always create both INBOX and NEW MAIL
+   // folders, but keep one of them hidden depending on "Collect all mail"
+   // setting; under Windows we never use INBOX at all
    int flagInbox, flagNewMail;
-   if ( gs_installWizardData.collectAllMail )
-   {
-      // hide INBOX and collect mail from it, show the New Mail folder
-      flagInbox = MF_FLAGS_HIDDEN | MF_FLAGS_INCOMING;
-      flagNewMail = 0;
-   }
-   else
+#ifdef USE_MAIL_COLLECT
+   if ( !gs_installWizardData.collectAllMail )
    {
       // hide NEW MAIL, show INBOX but don't collect mail from it
       flagInbox = 0;
       flagNewMail = MF_FLAGS_HIDDEN;
    }
+   else // collect all mail
+#endif // USE_MAIL_COLLECT
+   {
+      // hide INBOX and collect mail from it, show the New Mail folder
+      flagInbox = MF_FLAGS_HIDDEN | MF_FLAGS_INCOMING;
+      flagNewMail = 0;
+   }
 
+#ifdef USE_INBOX
    // create INBOX
    static const char *INBOX_NAME = "INBOX";
    if(! MailFolder::CreateFolder(INBOX_NAME,
@@ -1413,11 +1499,13 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       MFolder_obj folder(INBOX_NAME);
       folder->SetTreeIndex(MFolderIndex_Inbox);
    }
+#endif // USE_INBOX
 
    // create New Mail folder:
    wxString foldername = READ_CONFIG(profile, MP_NEWMAIL_FOLDER);
-   if(foldername.Length() == 0) // shouldn't happen unless run for the first time
+   if(foldername.Length() == 0)
    {
+      // shouldn't happen unless run for the first time
       foldername = _("New Mail");
       profile->writeEntry(MP_NEWMAIL_FOLDER, foldername);
    }
@@ -1437,12 +1525,14 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       folder->SetTreeIndex(MFolderIndex_NewMail);
    }
 
+   // VZ: MP_SHOW_NEWMAILMSG is now on by default for all folders, so this code
+   //     is not needed any more
+#if 0
    // by default, activate new mail notification for the folder which
    // is used and user visible, default for all other folders is "off"
-   Profile_obj prof(
-      gs_installWizardData.collectAllMail ? foldername : String("INBOX") );
+   Profile_obj prof(GetMainMailFolderName());
    prof->writeEntry(MP_SHOW_NEWMAILMSG, 1);
-
+#endif // 0
 
    // TRASH
    if(gs_installWizardData.useTrash)
@@ -1701,10 +1791,9 @@ UpgradeFrom010()
       group, pw, tmp;
    long
       index = 0;
-   // We need to rename the old mainfolder, to remove its leading
-   // slash:
-   String
-      mainFolder = p->readEntry(MP_MAINFOLDER,MP_MAINFOLDER_D);
+
+   // We need to rename the old mainfolder, to remove its leading slash:
+   String mainFolder = READ_CONFIG(p, MP_MAINFOLDER);
    if(mainFolder.Length())
    {
       if(mainFolder[0u] == '/')
@@ -2514,9 +2603,12 @@ SetupServers(void)
    MP_SMTPHOST, MP_NNTPHOST, MP_IMAPHOST, MP_POPHOST
 */
 static
-void
-SetupMinimalConfig(void)
+void SetupMinimalConfig(void)
 {
+   // DNS lookup in wxGetFullHostName() may take quiet some time, show
+   // something to the user while we're blocking in it
+   //MProgressInfo proginfo(NULL, _("One time only setup...")); TODO
+
    String str;
    const size_t bufsize = 200;
    char  buffer[bufsize];

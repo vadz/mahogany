@@ -840,7 +840,7 @@ wxString wxMApp::GetHelpDir()
       helpdir += wxFILE_SEP_PATH;
 
 #ifdef OS_WIN
-   helpdir += "\\doc\\HtmlHelp";
+   helpdir += "\\help";
 #else // !Windows
    helpdir += "/doc";
 #endif // Windows/!Windows
