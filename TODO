@@ -145,6 +145,8 @@ for release:
 - do we really need to scan /var/lib/news/active?
 - more configurability for news
 
+- add user levels, so Vadim can add full preferences for folders
+
 doc: add note about news active file
 
 
