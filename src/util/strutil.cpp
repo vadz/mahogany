@@ -387,7 +387,7 @@ bool
 strutil_isabsolutepath(const String &path)
 {
 #ifdef OS_UNIX
-   return !strutil_isempty(path) && (path[0] == DIR_SEPARATOR || path[1] == '~');
+   return !strutil_isempty(path) && (path[0u] == DIR_SEPARATOR || path[1u] == '~');
 #elif defined ( OS_WIN )
    // TODO copy the code from wxIsAbsolutePath() here if Karsten insists on it
    return wxIsAbsolutePath(path);
@@ -402,9 +402,9 @@ strutil_expandpath(const String &ipath)
    if(strutil_isempty(path))
       return "";
 
-   if(path.c_str()[0]=='~')
+   if(path[0u]=='~')
    {
-      if(path.c_str()[1] == DIR_SEPARRATOR)
+      if(path[1u] == DIR_SEPARATOR)
       {
          path = getenv("HOME");
          path << DIR_SEPARATOR;
@@ -413,7 +413,7 @@ strutil_expandpath(const String &ipath)
       {
          String user =
             strutil_before(String(path.c_str()+1),DIR_SEPARATOR);
-         // FIXME: crode fix, should go through /etc/passwd and look it 
+         // FIXME: crode fix, should use getpwent()
          // up... - but do we really need that?
          path << "/home/" << user << DIR_SEPARATOR;
       }
