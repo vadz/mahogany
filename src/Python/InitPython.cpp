@@ -36,6 +36,7 @@ extern "C"
    void init_MDialogs();
    void init_MailFolder();
    void init_MimePart();
+   void init_MimeType();
    void init_Message();
    void init_SendMessage();
 }
@@ -141,6 +142,7 @@ InitPython(void)
    init_MDialogs();
    init_MailFolder();
    init_MimePart();
+   init_MimeType();
    init_Message();
    init_SendMessage();
 
