@@ -44,7 +44,7 @@
 #include "ASMailFolder.h"
 #include "Mpers.h"
 
-#include "HeaderInfoImpl.h"
+#include "HeaderInfo.h"
 
 #include "modules/Filters.h"
 
