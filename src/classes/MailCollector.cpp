@@ -220,12 +220,12 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       mf->Ping(); //update it
       INTARRAY selections;
 
+      const HeaderInfo *hi;
+      size_t i;
       HeaderInfoList *hil = mf->GetHeaders();
       if(hil)
       {
-         const HeaderInfo *hi;
          m_Message << _("From folder '") << mf->GetName() << "':\n";
-         size_t i;
          for(i = 0; i < hil->Count(); i++)
          {
             hi=(*hil)[i];
