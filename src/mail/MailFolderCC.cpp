@@ -55,14 +55,6 @@
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking
 #include <wx/filefn.h>
 
-// including mh.h doesn't seem to work...
-extern "C"
-{
-   int mh_isvalid(char *name, char *tmp, long synonly);
-
-   char *mh_getpath(void);
-}
-
 #include <ctype.h>   // isspace()
 
 // ----------------------------------------------------------------------------
@@ -2001,7 +1993,6 @@ MailFolderCC::CClientInit(void)
    gs_CCStreamCleaner = new CCStreamCleaner();
 }
 
-String MailFolderCC::ms_MHpath;
 String MailFolderCC::ms_NewsPath;
 
 String MailFolderCC::ms_LastCriticalFolder = "";
@@ -2014,81 +2005,6 @@ MailFolderCC::GetNewsSpool(void)
    CClientInit();
    return (const char *)mail_parameters
       (NIL,GET_NEWSSPOOL,NULL);
-}
-
-const String&
-MailFolderCC::InitializeMH()
-{
-   if ( !ms_MHpath )
-   {
-      // first, init cclient
-      if ( !cclientInitialisedFlag )
-      {
-         CClientInit();
-      }
-
-      // normally, the MH path is read by MH cclient driver from the MHPROFIle
-      // file (~/.mh_profile under Unix), but we can't rely on this because if
-      // this file is not found, it results in an error and the MH driver is
-      // disabled - though it's perfectly ok for this file to be empty... So
-      // we can use cclient MH logic if this file exists - but not if it
-      // doesn't (and never under Windows)
-
-#ifdef OS_UNIX
-      String home = getenv("HOME");
-      String filenameMHProfile = home + "/.mh_profile";
-      FILE *fp = fopen(filenameMHProfile, "r");
-      if ( fp )
-      {
-         fclose(fp);
-      }
-      else
-#endif // OS_UNIX
-      {
-         // need to find MH path ourself
-#ifdef OS_UNIX
-         // the standard location under Unix
-         String pathMH = home + "/Mail";
-#else // !Unix
-         // use the user directory by default
-         String pathMH = READ_APPCONFIG(MP_USERDIR);
-#endif // Unix/!Unix
-
-         // const_cast is harmless
-         mail_parameters(NULL, SET_MHPATH, (char *)pathMH.c_str());
-      }
-
-      // force cclient to init the MH driver
-      char tmp[MAILTMPLEN];
-      if ( !mh_isvalid("#MHINBOX", tmp, TRUE /* syn only check */) )
-      {
-         wxLogError(_("Sorry, support for MH folders is disabled."));
-      }
-      else
-      {
-         // retrieve the MH path (notice that we don't always find it ourself -
-         // sometimes it's found only by the call to mh_isvalid)
-
-         // calling mail_parameters doesn't work because of a compiler bug: gcc
-         // mangles mh_parameters function completely and it never returns
-         // anything for GET_MHPATH - I didn't find another workaround
-#if 0
-         (void)mail_parameters(NULL, GET_MHPATH, &tmp);
-
-         ms_MHpath = tmp;
-#else // 1
-         ms_MHpath = mh_getpath();
-#endif // 0/1
-
-         // the path should have a trailing [back]slash
-         if ( !!ms_MHpath && !wxIsPathSeparator(ms_MHpath.Last()) )
-         {
-            ms_MHpath << wxFILE_SEP_PATH;
-         }
-      }
-   }
-
-   return ms_MHpath;
 }
 
 const String& MailFolderCC::InitializeNewsSpool()
@@ -2110,40 +2026,6 @@ const String& MailFolderCC::InitializeNewsSpool()
    }
 
    return ms_NewsPath;
-}
-
-bool
-MailFolderCC::GetMHFolderName(String *path)
-{
-   String& name = *path;
-
-   if ( wxIsAbsolutePath(name) )
-   {
-      if ( !InitializeMH() ) // it's harmless to call it more than once
-      {
-         // no MH support
-         return FALSE;
-      }
-
-      wxString pathFolder(name, ms_MHpath.length());
-      if ( strutil_compare_filenames(pathFolder, ms_MHpath) )
-      {
-         // skip MH path (and trailing slash which follows it)
-         name = name.c_str() + ms_MHpath.length();
-      }
-      else
-      {
-         wxLogError(_("Invalid MH folder name '%s' - all MH folders should "
-                      "be under '%s' directory."),
-                    name.c_str(),
-                    ms_MHpath.c_str());
-
-         return FALSE;
-      }
-   }
-   //else: relative path - leave as is
-
-   return TRUE;
 }
 
 bool MailFolderCC::SpecToFolderName(const String& specification,

@@ -364,6 +364,10 @@ wxEnhancedPanel::CreateEntryWithButton(const char *label,
          btn = new wxFolderBrowseButton(text, GetCanvas());
          break;
 
+      case DirBtn:
+         btn = new wxDirBrowseButton(text, GetCanvas());
+         break;
+
       default:
          wxFAIL_MSG("unknown browse button kind");
          return NULL;

@@ -29,6 +29,7 @@ class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxControl;
 class WXDLLEXPORT wxListBox;
 class WXDLLEXPORT wxCheckBox;
+class /* WXDLLEXPORT */ wxDirBrowseButton;
 class /* WXDLLEXPORT */ wxFileBrowseButton;
 class /* WXDLLEXPORT */ wxFileOrDirBrowseButton;
 class /* WXDLLEXPORT */ wxFolderBrowseButton;
@@ -390,6 +391,16 @@ public:
                                    (wxTextBrowseButton **)ppButton);
    }
 
+      // create an entry with a button to brose for the directories
+   wxTextCtrl *CreateDirEntry(const char *label,
+                              long widthMax,
+                              wxControl *last,
+                              wxDirBrowseButton **ppButton = NULL)
+   {
+      return CreateEntryWithButton(label, widthMax, last,
+                                   DirBtn,
+                                   (wxTextBrowseButton **)ppButton);
+   }
       // another entry with a browse button
    wxTextCtrl *CreateColorEntry(const char *label,
                                 long widthMax,
@@ -478,6 +489,7 @@ private:
       FileOrDirNewBtn,     // choose any file or directory
       FileOrDirSaveBtn,    // save to a file or directory
 
+      DirBtn,              // choose a directory
       ColorBtn,            // choose a colour
       FolderBtn            // choose a folder
    };

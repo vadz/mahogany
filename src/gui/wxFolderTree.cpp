@@ -533,7 +533,14 @@ void wxFolderTree::OnOpen(MFolder *folder)
 // browse subfolders of this folder
 void wxFolderTree::OnBrowseSubfolders(MFolder *folder)
 {
-   (void)ShowFolderSubfoldersDialog(folder, m_tree);
+   if ( folder->GetType() == MF_ROOT )
+   {
+      RunImportFoldersWizard();
+   }
+   else
+   {
+      (void)ShowFolderSubfoldersDialog(folder, m_tree);
+   }
 
    folder->DecRef();
 }

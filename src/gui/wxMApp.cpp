@@ -127,7 +127,9 @@ public:
       {
          wxLogTrace("Collection timer expired.");
          mApplication->UpdateOutboxStatus();
-         mApplication->GetMailCollector()->Collect();
+         MailCollector *collector = mApplication->GetMailCollector();
+         if ( collector )
+            collector->Collect();
       }
 
     virtual void Stop()
@@ -661,8 +663,9 @@ wxMApp::OnInit()
       // start a timer to autosave the profile entries
       StartTimer(Timer_Autosave);
 
-      // start another timer to poll for new mail:
-      StartTimer(Timer_PollIncoming);
+      // the timer to poll for new mail will be started when/if MailCollector
+      // is created
+      //StartTimer(Timer_PollIncoming);
 
       // another timer to do MEvent handling:
       m_IdleTimer = new IdleTimer;

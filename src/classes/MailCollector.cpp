@@ -170,6 +170,9 @@ private:
 MailCollector *
 MailCollector::Create(void)
 {
+   // also start the mail auto collection timer
+   mApplication->StartTimer(MAppBase::Timer_PollIncoming);
+
    return new MailCollectorImpl;
 }
 

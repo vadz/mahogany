@@ -94,17 +94,26 @@ enum MWizardPageId
    MWizard_CreateFolder_LastType = MWizard_CreateFolder_Group,
    MWizard_CreateFolder_Last = MWizard_CreateFolder_Final,
 
+   MWizard_ImportFolders_First,
+   MWizard_ImportFolders_Choice = MWizard_ImportFolders_First,
+   MWizard_ImportFolders_MH,
+   MWizard_ImportFolders_Last = MWizard_ImportFolders_MH,
+
    MWizard_PagesMax,  // the number of pages
 
    MWizard_PageNone = -1          // illegal value
 };
 
 
+enum MWizardType
+{
+   MWizardType_CreateFolder,
+   MWizardType_ImportFolders
+};
+
 class MWizard : public wxWizard
 {
 public:
-   enum MWizardType { MWizardType_CreateFolder };
-
    MWizard(MWizardType type,
            MWizardPageId first,
            MWizardPageId last,
@@ -143,6 +152,7 @@ private:
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
+
 // the base class for our wizards pages: it allows to return page ids (and not
 // the pointers themselves) from GetPrev/Next and processes [Cancel] in a
 // standard way an provides other useful functions for the derived classes
@@ -240,10 +250,205 @@ MWizard::Run()
    return RunWizard(GetPageById(GetFirstPageId()));
 }
 
+// ----------------------------------------------------------------------------
+// ImportFoldersWizard: propose to import existing folders
+// ----------------------------------------------------------------------------
 
+class ImportFoldersWizard : public MWizard
+{
+public:
+   ImportFoldersWizard()
+      : MWizard( MWizardType_ImportFolders,
+                 MWizard_ImportFolders_First,
+                 MWizard_ImportFolders_Last,
+                 _("Import existing mail folders"))
+      {
+      }
 
+   struct Params
+   {
+      // MH params
+      String pathRootMH;
+      bool takeAllMH;
+
+      // what to do?
+      bool importMH;
+
+      // def ctor
+      Params()
+      {
+         importMH = false;
+      }
+   };
+
+   Params& GetParams() { return m_params; }
+
+private:
+   Params m_params;
+};
+
+// MWizard_ImportFolders_ChoicePage
+// ----------------------------------------------------------------------------
+
+// first page: propose all folders we can import to the user
+class MWizard_ImportFolders_ChoicePage : public MWizardPage
+{
+public:
+   MWizard_ImportFolders_ChoicePage(MWizard *wizard);
+
+   virtual MWizardPageId GetPreviousPageId() const { return MWizard_PageNone; }
+   virtual MWizardPageId GetNextPageId() const;
+
+   void OnCheckBox(wxCommandEvent& event);
+
+private:
+   wxCheckBox *m_checkMH;
+
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(MWizard_ImportFolders_ChoicePage, MWizardPage)
+   EVT_CHECKBOX(-1, MWizard_ImportFolders_ChoicePage::OnCheckBox)
+END_EVENT_TABLE()
+
+MWizard_ImportFolders_ChoicePage::MWizard_ImportFolders_ChoicePage(MWizard *wizard)
+                             : MWizardPage(wizard,
+                                           MWizard_ImportFolders_Choice)
+{
+   m_checkMH = NULL;
+
+   bool hasMH = false,
+        hasSomethingToImport = false;
+
+   if ( MailFolderCC::ExistsMH() )
+   {
+      hasMH = true;
+      hasSomethingToImport = true;
+   }
+
+   wxString msgText;
+   if ( hasSomethingToImport )
+   {
+      msgText = _("Please choose what would you like to do.");
+   }
+   else
+   {
+      msgText = _("Mahogany didn't find any folders to import on this system.");
+   }
+
+   wxStaticText *msg = new wxStaticText(this, -1, msgText);
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
+   wxArrayString labels;
+   if ( hasMH )
+   {
+      labels.Add(_("Import MH folders"));
+   }
+
+   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
+
+   maxwidth += 10;
+
+   if ( hasMH )
+   {
+      m_checkMH = panel->CreateCheckBox(labels[0], maxwidth, NULL);
+
+      // by default, import them all
+      m_checkMH->SetValue(TRUE);
+   }
+
+   panel->ForceLayout();
+}
+
+MWizardPageId MWizard_ImportFolders_ChoicePage::GetNextPageId() const
+{
+   if ( m_checkMH && m_checkMH->GetValue() )
+      return MWizard_ImportFolders_MH;
+
+   //else if ( m_check && m_check->GetValue() ) ...
+
+   return MWizard_PageNone;
+}
+
+void MWizard_ImportFolders_ChoicePage::OnCheckBox(wxCommandEvent& event)
+{
+   wxButton *btn = (wxButton *)GetParent()->FindWindow(wxID_FORWARD);
+   if ( btn )
+   {
+      if ( GetNextPageId() != MWizard_PageNone )
+         btn->SetLabel(_("&Next >"));
+      else
+         btn->SetLabel(_("&Finish"));
+   }
+}
+
+// MWizard_ImportFolders_MHPage
+// ----------------------------------------------------------------------------
+
+// first page: propose all folders we can import to the user
+class MWizard_ImportFolders_MHPage : public MWizardPage
+{
+public:
+   MWizard_ImportFolders_MHPage(MWizard *wizard);
+
+   virtual MWizardPageId GetPreviousPageId() const
+      { return MWizard_ImportFolders_Choice; }
+   virtual MWizardPageId GetNextPageId() const
+      { return MWizard_PageNone; }
+
+   virtual bool TransferDataFromWindow();
+
+private:
+   wxTextCtrl *m_textTop;
+   wxCheckBox *m_checkAll;
+};
+
+MWizard_ImportFolders_MHPage::MWizard_ImportFolders_MHPage(MWizard *wizard)
+                         : MWizardPage(wizard, MWizard_ImportFolders_MH)
+{
+   wxStaticText *msg = new wxStaticText(this, -1, _(
+            "You may import either just the top level MH folder and\n"
+            "later create manually all or some of its subfolders using\n"
+            "the popup menu in the folder tree or import all existing\n"
+            "MH subfolders at once.\n"
+            "\n"
+            "Don't change the default location of the top of MH tree\n"
+            "(the MH root) unless you really know what you are doing."
+      ));
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
+   wxArrayString labels;
+   labels.Add(_("MH root"));
+   labels.Add(_("Import all"));
+
+   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
+
+   maxwidth += 5;
+
+   m_textTop = panel->CreateDirEntry(labels[0], maxwidth, NULL);
+   m_checkAll = panel->CreateCheckBox(labels[1], maxwidth, m_textTop);
+
+   // init controls
+   m_textTop->SetValue(MailFolderCC::InitializeMH());
+   m_checkAll->SetValue(TRUE);
+
+   panel->ForceLayout();
+}
+
+bool MWizard_ImportFolders_MHPage::TransferDataFromWindow()
+{
+   ImportFoldersWizard::Params& params =
+      ((ImportFoldersWizard *)GetWizard())->GetParams();
+   
+   params.importMH = true;
+   params.takeAllMH = m_checkAll->GetValue();
+   params.pathRootMH = m_textTop->GetValue();
+
+   return TRUE;
+}
+
+// ----------------------------------------------------------------------------
 // The CreateFolderWizard
-//
 // ----------------------------------------------------------------------------
 
 class CreateFolderWizard : public MWizard
@@ -375,7 +580,7 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
 {
    wxStaticText *msg = new wxStaticText(
       this, -1,
-      _("A mailbox entry can represent differnt\n"
+      _("A mailbox entry can represent different\n"
         "things: a mailbox file, remote servers\n"
         "or mailboxes, newsgroups or news hierarchies\n"
         "either locally or on a remote server.\n"
@@ -827,6 +1032,10 @@ MWizard::GetPageById(MWizardPageId id)
          CREATE_PAGE(CreateFolder_News);
          CREATE_PAGE(CreateFolder_NewsHier);
          CREATE_PAGE(CreateFolder_Group);
+
+         CREATE_PAGE(ImportFolders_Choice);
+         CREATE_PAGE(ImportFolders_MH);
+
       case MWizard_PageNone:
       case MWizard_PagesMax:
          ASSERT_MSG(0,"illegal MWizard PageId");
@@ -837,7 +1046,9 @@ MWizard::GetPageById(MWizardPageId id)
 }
 
 
-
+// ----------------------------------------------------------------------------
+// public API
+// ----------------------------------------------------------------------------
 
 MFolder *
 RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
@@ -903,4 +1114,19 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
    delete wizard;
 
    return newfolder;
+}
+
+void RunImportFoldersWizard()
+{
+   ImportFoldersWizard *wizard = new ImportFoldersWizard();
+   if ( wizard->Run() )
+   {
+      const ImportFoldersWizard::Params& params = wizard->GetParams();
+      if ( params.importMH )
+      {
+         MailFolderCC::ImportFoldersMH(params.pathRootMH, params.takeAllMH);
+      }
+   }
+
+   delete wizard;
 }

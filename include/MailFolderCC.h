@@ -308,6 +308,16 @@ public:
    static bool GetMHFolderName(String *path);
    //@}
 
+   /** @name MH folders support */
+   //@{
+   /// returns TRUE if we have any MH folders on this system
+   static bool ExistsMH();
+
+   /** imports either just the top-level MH folder or it and all MH subfolders
+       under it
+   */
+   static bool ImportFoldersMH(const String& root, bool allUnder = true);
+
    /**
       initialize the MH driver (it's safe to call it more than once) - has a
       side effect of returning the MHPATH which is the root path under which
@@ -315,6 +325,7 @@ public:
       failure.
    */
    static const String& InitializeMH();
+   //@}
 
    /**
       initialize the NEWS driver (it's safe to call it more than once).

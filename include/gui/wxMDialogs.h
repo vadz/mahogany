@@ -307,6 +307,9 @@ extern
 class MFolder *
 RunCreateFolderWizard(bool *cancelled, MFolder *parent, wxWindow *parWin);
 
+/// Run the wizard for folder import
+extern void RunImportFoldersWizard(void);
+
 #ifdef USE_SSL
 /// Accept or reject certificate
 extern "C"

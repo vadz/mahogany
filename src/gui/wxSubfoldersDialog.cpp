@@ -47,6 +47,17 @@
 #include "gui/wxDialogLayout.h"
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// control ids
+enum
+{
+   Button_SelectAll = 100,
+   Button_UnselectAll
+};
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -71,6 +82,10 @@ public:
 
    // events from "quick search" text control
    void OnText(wxCommandEvent& event);
+
+   // select/unselect all button handlers
+   void OnSelectAll(wxCommandEvent& event);
+   void OnUnselectAll(wxCommandEvent& event);
 
    // called by wxFolderNameTextCtrl (see below)
    bool OnComplete(wxTextCtrl *textctrl);
@@ -169,6 +184,11 @@ END_EVENT_TABLE()
 BEGIN_EVENT_TABLE(wxSubscriptionDialog, wxManuallyLaidOutDialog)
    EVT_TEXT(-1, wxSubscriptionDialog::OnText)
    EVT_TREE_SEL_CHANGED(-1, wxSubscriptionDialog::OnTreeSelect)
+
+#ifdef USE_SELECT_BUTTONS
+   EVT_BUTTON(Button_SelectAll, wxSubscriptionDialog::OnSelectAll)
+   EVT_BUTTON(Button_UnselectAll, wxSubscriptionDialog::OnUnselectAll)
+#endif // USE_SELECT_BUTTONS
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -263,6 +283,10 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
    c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_textFind->SetConstraints(c);
 
+#ifdef USE_SELECT_BUTTONS
+   m_btnSelectAll = new wxButton(this, , _("&Select all"));
+#endif // USE_SELECT_BUTTONS
+                                 
    m_treectrl = new wxTreeCtrl(this, -1,
                                wxDefaultPosition, wxDefaultSize,
                                wxTR_HAS_BUTTONS |
@@ -292,7 +316,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
    // OnNoMoreFolders)
    Disable();
 
-   SetDefaultSize(6*hBtn, 5*wBtn);
+   SetDefaultSize(4*wBtn, 10*hBtn);
 }
 
 wxSubscriptionDialog::~wxSubscriptionDialog()
@@ -652,6 +676,37 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
    // we don't want anyone else to receive this message - it was for us only
    return FALSE;
 }
+
+#ifdef USE_SELECT_BUTTONS
+
+void wxSubscriptionDialog::OnSelectAll(wxCommandEvent& event)
+{
+   wxTreeItemId root = m_treectrl->GetRootItem();
+   SelectAllUnder(root);
+}
+
+void wxSubscriptionDialog::SelectAllUnder(const wxTreeItemId& item)
+{
+   wxTreeItemId child = m_treectrl->GetFirstChild(item, cookie);
+   while ( child.IsOk() )
+   {
+      m_treectrl->Select(child);
+
+      if ( m_treectrl->ItemHasChildren() )
+      {
+         SelectAllUnder(child);
+      }
+
+      child = m_treectrl->GetNextChild(item, cookie);
+   }
+}
+
+void wxSubscriptionDialog::OnUnselectAll(wxCommandEvent& event)
+{
+   m_treectrl->UnselectAll();
+}
+
+#endif // USE_SELECT_BUTTONS
 
 void wxSubscriptionDialog::OnTreeSelect(wxTreeEvent& event)
 {
