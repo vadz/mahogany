@@ -2751,15 +2751,23 @@ bool wxOptionsPageMessageView::TransferDataFromWindow()
    bool bRc = wxOptionsPage::TransferDataFromWindow();
    if ( bRc )
    {
-      wxChoice *choice = wxStaticCast(GetControl(ConfigField_MsgViewer),
-                                                 wxChoice);
-
-      if ( choice )
+      wxWindow *win = GetControl(ConfigField_MsgViewer);
+      if ( win )
       {
-         int sel = choice->GetSelection();
-         if ( sel != -1 && sel != m_currentViewer )
+         wxChoice *choice = wxStaticCast(win, wxChoice);
+
+         if ( choice )
          {
-            m_Profile->writeEntry(MP_MSGVIEW_VIEWER, m_nameViewers[(size_t)sel]);
+            int sel = choice->GetSelection();
+            if ( sel != -1 && sel != m_currentViewer )
+            {
+               m_Profile->writeEntry(MP_MSGVIEW_VIEWER,
+                                     m_nameViewers[(size_t)sel]);
+            }
+         }
+         else
+         {
+            FAIL_MSG( "ConfigField_MsgViewer is not a wxChoice?" );
          }
       }
    }
