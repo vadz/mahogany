@@ -141,7 +141,7 @@ public:
          ASSERT(m_Type == LD_LONG);
          m_Long = l;
       }
-   void SetFound(bool found = TRUE)
+   void SetFound(bool found = true)
       {
          m_Found = found;
       }
@@ -180,7 +180,7 @@ public:
             return m_Parent->readEntry(key, defaultvalue, found);
 
          if ( found )
-            *found = FALSE;
+            *found = false;
 
          return defaultvalue;
       }
@@ -193,7 +193,7 @@ public:
             return m_Parent->readEntry(key, defaultvalue, found);
 
          if ( found )
-            *found = FALSE;
+            *found = false;
 
          return defaultvalue;
       }
@@ -205,30 +205,35 @@ public:
 
    /// Write back the character value.
    virtual bool writeEntry(const String & key, const String & Value)
-      { return FALSE ; }
+      { return false ; }
    /// Write back the int value.
    virtual bool writeEntry(const String & key, long Value)
-      { return FALSE; }
+      { return false; }
+
+   virtual bool writeEntryIfNeeded(const String& key,
+                                   long value,
+                                   long defvalue)
+      { return false; }
    //@}
 
    /// return true if the entry is defined
    virtual bool HasEntry(const String & key) const
-      { return FALSE; }
+      { return false; }
    /// return the type of entry
    virtual wxConfigBase::EntryType GetEntryType(const String & key) const
       { return wxConfigBase::Type_Unknown; }
    /// return true if the group exists
    virtual bool HasGroup(const String & name) const
-      { return FALSE; }
+      { return false; }
    /// delete the entry specified by path
    virtual bool DeleteEntry(const String& key)
-      { return FALSE; }
+      { return false; }
    /// delete the entry group specified by path
    virtual bool DeleteGroup(const String & path)
-      { return FALSE; }
+      { return false; }
    /// rename a group
    virtual bool Rename(const String& oldName, const String& newName)
-      { return FALSE; }
+      { return false; }
    /// return the name of the profile
    virtual const String GetName(void) const
       { return String(""); }
@@ -237,13 +242,13 @@ public:
        again, this is just directly forwarded to wxConfig
    */
    /// see wxConfig docs
-   virtual bool GetFirstGroup(String& s, long& l) const{ return FALSE; }
+   virtual bool GetFirstGroup(String& s, long& l) const{ return false; }
    /// see wxConfig docs
-   virtual bool GetNextGroup(String& s, long& l) const{ return FALSE; }
+   virtual bool GetNextGroup(String& s, long& l) const{ return false; }
    /// see wxConfig docs
-   virtual bool GetFirstEntry(String& s, long& l) const{ return FALSE; }
+   virtual bool GetFirstEntry(String& s, long& l) const{ return false; }
    /// see wxConfig docs
-   virtual bool GetNextEntry(String& s, long& l) const{ return FALSE; }
+   virtual bool GetNextEntry(String& s, long& l) const{ return false; }
 
    /// Returns a unique, not yet existing sub-group name: //MT!!
    virtual String GetUniqueGroupName(void) const
@@ -284,7 +289,7 @@ public:
    virtual bool IsAncestor(Profile *profile) const
       {
          // if our  parent is one, then so are we
-         return m_Parent ? m_Parent->IsAncestor(profile) : FALSE;
+         return m_Parent ? m_Parent->IsAncestor(profile) : false;
       };
 
    virtual String GetFolderName() const { return ""; }
@@ -350,6 +355,10 @@ public:
    /// Write back the int value.
    bool writeEntry(const String & key,
                    long Value);
+   virtual bool writeEntryIfNeeded(const String& key,
+                                   long value,
+                                   long defvalue);
+
    //@}
 
    /// see wxConfig docs
@@ -1236,7 +1245,7 @@ ProfileImpl::readEntry(LookupData &ld, int flags) const
    if ( !foundHere && (flags & Lookup_Identity) && m_Identity )
    {
       // try suspended path first:
-      bool idFound = FALSE;
+      bool idFound = false;
       if( ld.GetType() == LookupData::LD_STRING )
          strResult = m_Identity->readEntry(keySuspended, ld.GetString(),
                                            &idFound);
@@ -1256,7 +1265,7 @@ ProfileImpl::readEntry(LookupData &ld, int flags) const
             ld.SetResult(strResult);
          else
             ld.SetResult(longResult);
-         ld.SetFound(FALSE);
+         ld.SetFound(false);
          return;
       }
 
@@ -1353,6 +1362,20 @@ ProfileImpl::writeEntry(const String & key, long value)
       keypath << m_ProfilePath << '/';
    keypath << key;
    return ms_GlobalConfig->Write(keypath, (long) value);
+}
+
+bool
+ProfileImpl::writeEntryIfNeeded(const String& key,
+                                long value,
+                                long defvalue)
+{
+   if ( readEntry(key, defvalue) == value )
+   {
+      // nothing to do
+      return true;
+   }
+
+   return writeEntry(key, value);
 }
 
 

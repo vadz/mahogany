@@ -156,6 +156,23 @@ public:
    virtual bool writeEntry(const String & key, const String & Value) = 0;
    /// Write back the int value.
    virtual bool writeEntry(const String & key, long Value) = 0;
+
+   /**
+      Write the value in profile only if it is different from the current one.
+
+      This function will only modify the real storage (i.e. config file or the
+      registry) if the value specified is different from the one which would be
+      returned currently, i.e. different from the value inherited from parent.
+
+      @param key the key to modify
+      @param value the new value
+      @param defvalue the default value for this key
+      @return true if ok, false if an error occured
+    */
+   virtual bool writeEntryIfNeeded(const String& key,
+                                   long value,
+                                   long defvalue) = 0;
+
    //@}
 
    /// return true if the entry is defined
