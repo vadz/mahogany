@@ -478,6 +478,8 @@ private:
    /// the hash of text computed before it was passed to the ext editor
    unsigned long m_oldTextHash;
 
+   /// true if the ext editor had been already invoked before
+   bool       m_alreadyExtEdited;
    //@}
 
 private:

@@ -1166,6 +1166,7 @@ wxComposeView::wxComposeView(const String &name,
    m_mode = mode;
    m_kind = kind;
    m_pidEditor = 0;
+   m_alreadyExtEdited = false;
    m_procExtEdit = NULL;
    m_sending = false;
    m_OriginalMessage = NULL;
@@ -2026,6 +2027,11 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
 
 void wxComposeView::OnFirstTimeModify()
 {
+   // don't clear the text below if we already have something there - but
+   // normally we shouldn't
+   CHECK_RET( !IsModified(),
+              "shouldn't be called if we had been already changed!" );
+
    // evaluate the template right now if we have one and it hadn't been done
    // yet (for messages of kind other than new it is done on creation)
    if ( m_kind == Message_New && !m_template.empty() )
@@ -2394,6 +2400,10 @@ wxComposeView::OnMenuCommand(int id)
 
 bool wxComposeView::OnFirstTimeFocus()
 {
+   // if we had already edited the text, don't launch the editor
+   if ( m_alreadyExtEdited )
+      return true;
+
    // it may happen that the message is sent before the composer gets focus,
    // avoid starting the external editor by this time!
    if ( m_sending )
@@ -2434,6 +2444,10 @@ bool wxComposeView::StartExternalEditor()
       // ext editor is running
       return true;
    }
+
+   // even if we fail to launch it, don't even attempt to do it when we first
+   // get the focus (see OnFirstTimeFocus())
+   m_alreadyExtEdited = true;
 
    bool launchedOk = false;
 
