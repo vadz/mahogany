@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.50\n"
-"POT-Creation-Date: 2000-09-21 17:13+0100\n"
+"POT-Creation-Date: 2000-09-21 20:53+0100\n"
 "PO-Revision-Date: 1999-01-11 23:23+0000\n"
 "Last-Translator: Karsten Ballüder <karsten@phy.hw.ac.uk>\n"
 "Language-Team: M-Team <mahogany-developers@lists.sourceforge.net>\n"
@@ -128,7 +128,7 @@ msgstr "Erinnerung"
 msgid "&Show"
 msgstr "&Anzeigen"
 
-#: .src/Calendar.cpp:1076 .src/PalmOS.cpp:620
+#: .src/Calendar.cpp:1076 .src/PalmOS.cpp:623
 msgid "&Configure"
 msgstr "&Optionen"
 
@@ -272,53 +272,53 @@ msgstr ""
 "nach diversen Kriterien automatisch zu filtern, beantworten oder zu\n"
 "verschieben und sortieren."
 
-#: .src/PalmOS.cpp:232
+#: .src/PalmOS.cpp:235
 #, c-format
 msgid "Could not obtain lock for '/dev/%s'"
 msgstr "Kann keinen alleinigen Zugriff ('lock') auf Mailbox '%s' bekommen."
 
-#: .src/PalmOS.cpp:577
+#: .src/PalmOS.cpp:580
 msgid "This module provides PalmOS connectivity"
 msgstr "Dieses Modul kann mit Palm-OS Geräten synchronisieren."
 
-#: .src/PalmOS.cpp:614
+#: .src/PalmOS.cpp:617
 msgid "&Synchronise"
 msgstr "&Synchronisieren"
 
-#: .src/PalmOS.cpp:616
+#: .src/PalmOS.cpp:619
 msgid "&Backup"
 msgstr "&Sicherheitskopie"
 
-#: .src/PalmOS.cpp:617
+#: .src/PalmOS.cpp:620
 msgid "&Restore"
 msgstr "&Wiederherstellen"
 
-#: .src/PalmOS.cpp:618
+#: .src/PalmOS.cpp:621
 msgid "&Install"
 msgstr "&Installieren"
 
-#: .src/PalmOS.cpp:623
+#: .src/PalmOS.cpp:626
 msgid "&PalmOS Module"
 msgstr "&Palm-OS Modul"
 
-#: .src/PalmOS.cpp:624
+#: .src/PalmOS.cpp:627
 msgid "Functionality to interact with your PalmOS based palmtop."
 msgstr "Schnittstelle zu Ihrem Palm-OS basierten Handheld-Computer."
 
-#: .src/PalmOS.cpp:687 .src/PalmOS.cpp:792
+#: .src/PalmOS.cpp:690 .src/PalmOS.cpp:796
 #, c-format
 msgid "Executing command ´%s´ returned an error code (%d)."
 msgstr "Ausführen von Befehl '%s' lieferte Fehlercode (%d)."
 
-#: .src/PalmOS.cpp:697
+#: .src/PalmOS.cpp:700
 msgid "Please press HotSync button and click on OK!"
 msgstr "Bitte drücken sie den HotSync-Knopf und klicken Sie auf OK!"
 
-#: .src/PalmOS.cpp:698
+#: .src/PalmOS.cpp:701
 msgid "Please press HotSync button and click on OK."
 msgstr "Bitte drücken sie den HotSync-Knopf und klicken Sie auf OK!"
 
-#: .src/PalmOS.cpp:701
+#: .src/PalmOS.cpp:704
 msgid ""
 "Failed to connect to PalmOS device:\n"
 "Could not open socket."
@@ -326,11 +326,11 @@ msgstr ""
 "Verbindung mit dem Palm-OS Gerät konnte nicht hergestellt werden:\n"
 "Kann Socket nicht bekommen."
 
-#: .src/PalmOS.cpp:715
+#: .src/PalmOS.cpp:718
 msgid "Connecting to Palm ..."
 msgstr "Verbinde mit Palm-Pilot..."
 
-#: .src/PalmOS.cpp:719
+#: .src/PalmOS.cpp:722
 msgid ""
 "Failed to connect to PalmOS device:\n"
 "Could not bind to socket."
@@ -338,7 +338,7 @@ msgstr ""
 "Verbindung mit dem Palm-OS Gerät konnte nicht hergestellt werden:\n"
 "Keine Verbindung auf Socket."
 
-#: .src/PalmOS.cpp:730
+#: .src/PalmOS.cpp:733
 msgid ""
 "Failed to connect to PalmOS device:\n"
 "Listening on socket failed."
@@ -346,114 +346,114 @@ msgstr ""
 "Verbindung mit dem Palm-OS Gerät konnte nicht hergestellt werden:\n"
 "Verbindungsaufbau schlug fehl."
 
-#: .src/PalmOS.cpp:745
+#: .src/PalmOS.cpp:748
 msgid "Failed to connect to PalmOS device."
 msgstr "Verbindung mit dem Palm-OS Gerät konnte nicht hergestellt werden."
 
-#: .src/PalmOS.cpp:835
+#: .src/PalmOS.cpp:839
 msgid "Do you want synchronise with your PalmOS device?"
 msgstr "Möchten Sie mit Ihrem Palm-OS Gerät synchronisieren?"
 
-#: .src/PalmOS.cpp:882
+#: .src/PalmOS.cpp:886
 msgid "Reading local directory ..."
 msgstr "Lese lokales Verzeichnis..."
 
-#: .src/PalmOS.cpp:924 .src/PalmOS.cpp:984
+#: .src/PalmOS.cpp:928 .src/PalmOS.cpp:988
 msgid "Reading list of databases ..."
 msgstr "Lese Datenbankliste..."
 
-#: .src/PalmOS.cpp:968
+#: .src/PalmOS.cpp:972
 #, c-format
 msgid "Could not access backup directory '%s'."
 msgstr "Konnte Backupverzeichnis '%s' nicht anlegen."
 
-#: .src/PalmOS.cpp:995
+#: .src/PalmOS.cpp:999
 msgid "Palm Backup"
 msgstr "Palm-OS Sicherheitskopie"
 
-#: .src/PalmOS.cpp:995
+#: .src/PalmOS.cpp:999
 msgid "Backing up files"
 msgstr "Datenbanken werden gesichert"
 
-#: .src/PalmOS.cpp:1002
+#: .src/PalmOS.cpp:1006
 msgid "Backing up..."
 msgstr "Sichere..."
 
-#: .src/PalmOS.cpp:1017
+#: .src/PalmOS.cpp:1021
 msgid "Exiting on cancel, backup process incomplete!"
 msgstr "Abbruch durch Benutzer, Sicherheitskopie ist unvollständig!"
 
-#: .src/PalmOS.cpp:1094
+#: .src/PalmOS.cpp:1098
 #, c-format
 msgid "Unable to create file %s!"
 msgstr "Konnte Datei '%s' nicht anlegen!"
 
-#: .src/PalmOS.cpp:1102
+#: .src/PalmOS.cpp:1106
 #, c-format
 msgid "Unable to backup database %s!"
 msgstr "Konnte Datenbank '%s' nicht sichern."
 
-#: .src/PalmOS.cpp:1172
+#: .src/PalmOS.cpp:1176
 msgid "Checking files to install ..."
 msgstr "Prüfe auf Dateien zum installieren..."
 
-#: .src/PalmOS.cpp:1183
+#: .src/PalmOS.cpp:1187
 #, c-format
 msgid "Could not open file %s or file invalid."
 msgstr "Konnte Datei '%s' nicht öffnen."
 
-#: .src/PalmOS.cpp:1222
+#: .src/PalmOS.cpp:1226
 msgid "Palm Install"
 msgstr "Palm-OS Installation"
 
-#: .src/PalmOS.cpp:1222
+#: .src/PalmOS.cpp:1226
 msgid "Installing files"
 msgstr "Dateien werden installiert"
 
-#: .src/PalmOS.cpp:1226
+#: .src/PalmOS.cpp:1230
 msgid "Installing Files ..."
 msgstr "Dateien werden installiert"
 
-#: .src/PalmOS.cpp:1235
+#: .src/PalmOS.cpp:1239
 msgid "Exiting on cancel, all data not restored/installed"
 msgstr "Benutzerabbruch, nicht alle Daten wiederhergestellt"
 
-#: .src/PalmOS.cpp:1243
+#: .src/PalmOS.cpp:1247
 #, c-format
 msgid "Could not open file %s or file invalid!"
 msgstr "Konnte Datei '%s' nicht öffnen."
 
-#: .src/PalmOS.cpp:1288
+#: .src/PalmOS.cpp:1292
 #, c-format
 msgid "Could not access directory %s!"
 msgstr "Konnte Verzeichnis '%s' nicht öffnen!"
 
-#: .src/PalmOS.cpp:1319
+#: .src/PalmOS.cpp:1323
 msgid "Please pick databases to install"
 msgstr "Bitte wählen Sie die zu installierenden Datenbanken."
 
-#: .src/PalmOS.cpp:1371
+#: .src/PalmOS.cpp:1375
 msgid "Could not open AddressDB."
 msgstr "Konnte Adreßdatenbank nicht öffnen."
 
-#: .src/PalmOS.cpp:1381
+#: .src/PalmOS.cpp:1385
 msgid "ADB not correctly initialized!"
 msgstr "ADB ist nicht korrekt initialisiert!"
 
-#: .src/PalmOS.cpp:1482
+#: .src/PalmOS.cpp:1486
 msgid "Unable to open MailDB"
 msgstr "Kann Maildatenbank nicht öffnen"
 
-#: .src/PalmOS.cpp:1483
+#: .src/PalmOS.cpp:1487
 msgid "Unable to open MailDB.\n"
 msgstr "Kann Maildatenbank nicht öffnen.\n"
 
-#: .src/PalmOS.cpp:1577
+#: .src/PalmOS.cpp:1581
 #, c-format
 msgid "Transferred message %d: \"%s\" for \"%s\"."
 msgstr "Nachricht %d übertragen: \"%s\" an \"%s\"."
 
-#: .src/PalmOS.cpp:1598
+#: .src/PalmOS.cpp:1602
 #, c-format
 msgid ""
 "Failed to transfer message\n"
@@ -464,136 +464,139 @@ msgstr ""
 "\"%s\"\n"
 "an \"%s\"."
 
-#: .src/PalmOS.cpp:1608
+#: .src/PalmOS.cpp:1612
 #, c-format
 msgid "Transferred %d/%d messages."
 msgstr "%d aus %d Nachrichten übertragen."
 
-#: .src/PalmOS.cpp:1615
+#: .src/PalmOS.cpp:1619
 msgid "No messages found in PalmOS-Outbox."
 msgstr "Keine Nachrichten in Palm-OS Outbox."
 
-#: .src/PalmOS.cpp:1639
+#: .src/PalmOS.cpp:1643
 #, c-format
 msgid "Cannot open PalmOS synchronisation mailbox ´%s´"
 msgstr "Kann Synchronisationsmailbox '%s' nicht öffnen."
 
-#: .src/PalmOS.cpp:1667
+#: .src/PalmOS.cpp:1671
 #, c-format
 msgid "Skipping deleted message %lu/%lu"
 msgstr "Gelöschte Nachricht ignoriert %lu/%lu"
 
-#: .src/PalmOS.cpp:1688
+#: .src/PalmOS.cpp:1692
 #, c-format
 msgid "Storing message %lu/%lu: %s"
 msgstr "Sichere Nachricht %lu/%lu: %s"
 
-#: .src/PalmOS.cpp:1736
+#: .src/PalmOS.cpp:1740
 #, c-format
 msgid "Could not store message %lu/%lu: %s"
 msgstr "Konnte Nachricht %lu/%lu nicht sichern: %s"
 
-#: .src/PalmOS.cpp:1752
+#: .src/PalmOS.cpp:1756
 #, c-format
 msgid "Stored %lu/%lu messages on PalmOS device."
 msgstr "%lu/%lu Nachrichten auf Palm-OS Gerät gesichert."
 
-#: .src/PalmOS.cpp:1761
+#: .src/PalmOS.cpp:1765
 #, c-format
 msgid "Could not obtain lock for mailbox '%s'."
 msgstr "Kann keinen alleinigen Zugriff (lock) auf Mailbox '%s' bekommen."
 
-#: .src/PalmOS.cpp:1782
+#: .src/PalmOS.cpp:1786
 msgid "Setting up MAL proxy..."
 msgstr "MAL-Proxy wird aktiviert..."
 
-#: .src/PalmOS.cpp:1792
+#: .src/PalmOS.cpp:1796
 msgid "Setting up SOCKS proxy..."
 msgstr "SOCKS-Proxy wird aktiviert..."
 
-#: .src/PalmOS.cpp:1796
+#: .src/PalmOS.cpp:1800
 msgid "Synchronising MAL server/AvantGo..."
 msgstr "Synchronisiere MAL-Server/AvantGo..."
 
-#: .src/PalmOS.cpp:1838
+#: .src/PalmOS.cpp:1844
 msgid "Synchronise Mail"
 msgstr "Nachrichten synchronisieren"
 
-#: .src/PalmOS.cpp:1839
+#: .src/PalmOS.cpp:1846
 #, fuzzy
 msgid "Synchronise Time"
 msgstr "Nachrichten synchronisieren"
 
-#: .src/PalmOS.cpp:1841
+#: .src/PalmOS.cpp:1849
 #, fuzzy
 msgid "Always do Backup on sync"
 msgstr "Immer Sicherheitskopie machen"
 
-#: .src/PalmOS.cpp:1843
+#: .src/PalmOS.cpp:1851
 msgid "Sync to MAL server (e.g. AvantGo)"
 msgstr "Synchronisation mit MAL-Server (z.B. AvantGo)"
 
-#: .src/PalmOS.cpp:1845
+#: .src/PalmOS.cpp:1853
 msgid ""
 "The Auto-Install function will automatically\n"
 "install all databases from a given directory\n"
 "on the PalmPilot during synchronisation."
 msgstr ""
+"Die Auto-Installations-Funktion installliert automatisch\n"
+"alle Palm-Datenbanken (.PDB/.PRC Dateien) aus einem\n"
+"gegebenen Verzeichnis auf dem PalmPilot."
 
-#: .src/PalmOS.cpp:1849
+#: .src/PalmOS.cpp:1857
 #, fuzzy
 msgid "Do Auto-Install"
-msgstr "Automatische Installation"
+msgstr "Auto-Installation"
 
-#: .src/PalmOS.cpp:1850
+#: .src/PalmOS.cpp:1858
 #, fuzzy
 msgid "Directory for Auto-Install"
-msgstr "Verzeichnis für Automatische Installation"
+msgstr "Verzeichnis für Auto-Installation"
 
-#: .src/PalmOS.cpp:1851
+#: .src/PalmOS.cpp:1859
 msgid "Pilot device"
 msgstr "Palm-OS Port (device)"
 
-#: .src/PalmOS.cpp:1854
+#: .src/PalmOS.cpp:1862
 msgid "Connection speed:9600:19200:38400:57600:115200"
 msgstr "Portgeschwindigkeit:9600:19200:38400:57600:115200"
 
-#: .src/PalmOS.cpp:1855
+#: .src/PalmOS.cpp:1863
 msgid "Mailbox for exchange"
 msgstr "Mailbox zum Austausch"
 
-#: .src/PalmOS.cpp:1856
+#: .src/PalmOS.cpp:1864
 msgid "Mail disposal mode:keep:delete:file"
 msgstr "Mail auf Palm-OS Gerät:behalten:löschen:ablegen"
 
-#: .src/PalmOS.cpp:1857
+#: .src/PalmOS.cpp:1865
 msgid "Directory for backup files"
 msgstr "Verzeichnis für Sicherheitskopie"
 
-#: .src/PalmOS.cpp:1858
+#: .src/PalmOS.cpp:1866
 #, fuzzy
 msgid "Delete backups of no longer existing databases"
 msgstr "Nicht mehr existente Datenbanken in Kopie löschen"
 
-#: .src/PalmOS.cpp:1860
+#: .src/PalmOS.cpp:1868
 #, fuzzy
 msgid "Backup only modified databases"
 msgstr "Alle Datenbanken sichern"
 
-#: .src/PalmOS.cpp:1861
+#: .src/PalmOS.cpp:1869
 #, fuzzy
 msgid "Force total backup of all databases"
 msgstr "Alle Datenbanken sichern"
 
-#: .src/PalmOS.cpp:1862
+#: .src/PalmOS.cpp:1870
 msgid "Exclude these databases"
 msgstr "Diese Datenbanken nicht sichern"
 
-#: .src/PalmOS.cpp:1888
+#: .src/PalmOS.cpp:1896
 msgid "Try to lock device"
 msgstr "Geräte-lock anlegen"
 
-#: .src/PalmOS.cpp:1889
+#: .src/PalmOS.cpp:1897
 msgid ""
 "The following two settings can run other\n"
 "programs or scripts just before and after\n"
@@ -601,58 +604,66 @@ msgid ""
 "services using the serial port. Leave them\n"
 "empty unless you know what you are doing."
 msgstr ""
+"Die folgenden beiden Einstellungen können ein\n"
+"Skript oder Programm bevor oder nach der\n"
+"Synchronisations ausführen, z.B. um ein anderes\n"
+"Programm zu stoppen oder den seriellen Port zu\n"
+"belegen. Verwenden Sie dies nur, wenn Sie wissen\n"
+"was Sie tun."
 
-#: .src/PalmOS.cpp:1895
+#: .src/PalmOS.cpp:1903
 msgid "Script to run before"
 msgstr "Befehl vor Synch. ausführen"
 
-#: .src/PalmOS.cpp:1896
+#: .src/PalmOS.cpp:1904
 msgid "Script to run after"
 msgstr "Befehl nach Synch. ausführen."
 
-#: .src/PalmOS.cpp:1898
+#: .src/PalmOS.cpp:1906
 msgid ""
 "The following options affect only the\n"
 "MAL/AvantGo synchronisation:"
 msgstr ""
+"Die folgenden Einstellungen betreffen nur die\n"
+"MAL/AvantGo synchronisation:"
 
-#: .src/PalmOS.cpp:1901
+#: .src/PalmOS.cpp:1909
 msgid "Use Proxy host for MAL"
 msgstr "Verwende Proxy-Server für MAL"
 
-#: .src/PalmOS.cpp:1902
+#: .src/PalmOS.cpp:1910
 msgid "  Proxy host"
 msgstr "  Proxy-Server"
 
-#: .src/PalmOS.cpp:1903
+#: .src/PalmOS.cpp:1911
 msgid "  Proxy port number"
 msgstr "  Proxy-Portnummer"
 
-#: .src/PalmOS.cpp:1904
+#: .src/PalmOS.cpp:1912
 msgid "  Proxy login"
 msgstr "  Proxy-Benutzerkennung"
 
-#: .src/PalmOS.cpp:1905
+#: .src/PalmOS.cpp:1913
 msgid "  Proxy password"
 msgstr " Proxy-Paßwort"
 
-#: .src/PalmOS.cpp:1906
+#: .src/PalmOS.cpp:1914
 msgid "Use SOCKS server for MAL access"
 msgstr "SOCKS-Server für MAL/AvantGo verwenden"
 
-#: .src/PalmOS.cpp:1907
+#: .src/PalmOS.cpp:1915
 msgid "  SOCKS host"
 msgstr "  SOCKS-Server"
 
-#: .src/PalmOS.cpp:1908
+#: .src/PalmOS.cpp:1916
 msgid "  SOCKS port number"
 msgstr "  SOCKS-Portnummer"
 
-#: .src/PalmOS.cpp:1916
+#: .src/PalmOS.cpp:1924
 msgid "PalmOS module preferences"
 msgstr "Palm-OS Modul Einstellungen"
 
-#: .src/PalmOS.cpp:1928
+#: .src/PalmOS.cpp:1936
 #, fuzzy
 msgid "Advanced settings"
 msgstr "&Alle Einstellungen"
@@ -753,7 +764,7 @@ msgstr "SMTP Server aus %s übernommen: %s."
 #: .src/PineImport.cpp:328
 #, c-format
 msgid "Couldn't open %s configuration file '%s'."
-msgstr "Kann %s Konfigurationsdaei '%s' nicht öffnen."
+msgstr "Kann %s Konfigurationsdatei '%s' nicht öffnen."
 
 #: .src/XFMailImport.cpp:79
 msgid "Import settings from XFMail"
@@ -1550,32 +1561,44 @@ msgid ""
 "\n"
 "(Tick the box below to never see this message again.)"
 msgstr ""
+"Mahogany verwended ein globales Paßwort um sensible Informationen\n"
+"in Ihrer Konfigurationsdatei zu schützen.\n"
+"\n"
+"Der nächste Dialog wird Sie nach dem globablen Paßword fragen.\n"
+"Falls Sie bereits eins gewählt haben, geben Sie es an, andernfalls\n"
+"können Sie jetzt eins angeben.\n"
+"\n"
+"Falls Sie kein globales Paßwort verwenden möchten, brechen Sie den\n"
+"nächsten Dialog einfach ab.\n"
+"\n"
+"(Mit der untenstehenden Box können Sie diesen Dialog für die Zukunft vermeiden.)"
 
 #: strutil.cpp:738
 #, fuzzy
 msgid "Global Password"
-msgstr "ein Paßwort"
+msgstr "Globales Paßwort"
 
 #: strutil.cpp:745
 #, fuzzy
 msgid "Global Password:"
-msgstr "ein Paßwort"
+msgstr "Globales Paßwort:"
 
 #: strutil.cpp:746
 #, fuzzy
 msgid "Please enter the global password:"
-msgstr "Bitte geben Sie das Paßwort für Mailbox '%s' an:"
+msgstr "Bitte geben Sie das globale Paßwort an:"
 
 #: strutil.cpp:752
 msgid ""
 "The password is wrong.\n"
 "Do you want to try again?"
 msgstr ""
+"Das Paßword ist falsch.\n"
+"Möchten Sie es nochmal versuchen?"
 
 #: strutil.cpp:787
-#, fuzzy
 msgid "Strong encryption algorithm not available."
-msgstr "SSL-Authentifizierung ist nicht verfügbar."
+msgstr "Sichere Verschlüsselung ist nicht verfügbar."
 
 #: strutil.cpp:846
 msgid ""
@@ -1585,11 +1608,15 @@ msgid ""
 "Please report this as a bug to the Mahogany developers,\n"
 "so that we can fix it."
 msgstr ""
+"Die sichere Verschlüsselung in Mahogany funktioniert\n"
+"auf Ihrem System nicht, und wird mit unsicherer, einfacher\n"
+"Verschlüsselung ersetzt.\n"
+"Bitte berichten Sie dies als Bug den Mahogany Entwicklern,\n"
+"damit wir es beheben können."
 
 #: strutil.cpp:852
-#, fuzzy
 msgid "Missing feature"
-msgstr "Signaturdatei &verwenden"
+msgstr "Fehlende Funktion"
 
 #: strutil.cpp:1030
 msgid "Re"
@@ -1642,17 +1669,16 @@ msgid ""
 msgstr ""
 
 #: upgrade.cpp:361
-#, fuzzy
 msgid ""
 "\n"
 "Do you want to change these settings?"
 msgstr ""
 "\n"
-"Möchten Sie das Paßwort trotzdem speichern?"
+"Möchten Sie diese Einstellungen ändern?"
 
 #: upgrade.cpp:363
 msgid "Potentially wrong server names"
-msgstr ""
+msgstr "Möglicherweise falsche Server-Namen"
 
 #: upgrade.cpp:389
 #, c-format
@@ -1660,6 +1686,8 @@ msgid ""
 "You have no domain specified for the server '%s'.\n"
 "Do you want to add the domain '%s'?"
 msgstr ""
+"Sie haben keinen Domain für den Server '%s' angegeben.\n"
+"Möchten Sie den Domain '%s' anhängen?"
 
 #: upgrade.cpp:614 wxWizards.cpp:226
 msgid "Do you really want to abort the wizard?"
@@ -1809,7 +1837,7 @@ msgstr ""
 
 #: upgrade.cpp:852
 msgid "&Search for all IMAP folders:"
-msgstr ""
+msgstr "&Nach allen IMAP Mailboxen suchen:"
 
 #: upgrade.cpp:876
 msgid ""
@@ -1844,6 +1872,10 @@ msgid ""
 "a moment to check that these settings are as\n"
 "you prefer them."
 msgstr ""
+"Diese Seite enthält einige grundlegende Ein-"
+"stellungen.\n"
+"Bitte nehmen Sie sich einen Moment Zeit, diese\n"
+"zu prüfen und ggfs. zu korrigieren."
 
 #: upgrade.cpp:934
 #, fuzzy
@@ -2010,6 +2042,9 @@ msgid ""
 "Finally, you may want to test your configuration\n"
 "by sending a test message to yourself."
 msgstr ""
+"\n"
+"Sie möchten vermutlich Ihre Einstellungen prüfen\n"
+"indem Sie sich selbst eine Nachricht senden."
 
 #: upgrade.cpp:1200
 msgid "Mahogany Installation"
@@ -2331,7 +2366,7 @@ msgstr "Einstellungen werden geprüft"
 msgid ""
 "Send the test message failed, please recheck your configuration settings"
 msgstr ""
-
+"Senden der Testnachricht fehlgeschlagen. Bitte prüfen Sie die Einstellungen."
 #: upgrade.cpp:2318
 msgid ""
 "Cannot find your Mahogany directory, please specify it in the options dialog."
@@ -2367,17 +2402,17 @@ msgstr "Gesendete Nachrichten"
 
 #: upgrade.cpp:2539
 msgid "Retrieve remote configuration settings now?"
-msgstr ""
+msgstr "Konfigurationsdaten vom Server holen?"
 
 #: upgrade.cpp:2540
 #, fuzzy
 msgid "Retrieve remote settings?"
-msgstr "&Einstellungen importieren"
+msgstr "Konfigurationsdaten vom Server holen?"
 
 #: upgrade.cpp:2553
 #, c-format
 msgid "Configuration mailbox '%s' does not contain any information."
-msgstr ""
+msgstr "Konfigurations-Mailbox '%s' enhält keine Daten."
 
 #: upgrade.cpp:2557 upgrade.cpp:2650
 #, c-format
@@ -2387,6 +2422,11 @@ msgid ""
 "If this mailbox is the correct one, please remove\n"
 "the extra messages and try again."
 msgstr ""
+"Konfigurations-Mailbox '%s' enthält mehr als eine\n"
+"Nachricht. Möglicherweise haben Sie die falsche Mailbox\n"
+"angegeben? Falls dies die korrekte Mailbox ist,\n"
+"entfernen Sie bitte die extra Nachrichten und versuchen\n"
+"es nochmal."
 
 #: upgrade.cpp:2571 upgrade.cpp:2669
 #, c-format
@@ -2394,15 +2434,17 @@ msgid ""
 "The message in the configuration mailbox '%s' does not\n"
 "contain configuration settings. Please remove it."
 msgstr ""
+"Die Nachricht in der Konfigurations-Mailbox '%s' enhält\n"
+"keine Konfigurationsdaten. Bitte entfernen Sie die Nachricht."
 
 #: upgrade.cpp:2636
 msgid "Store remote configuration settings now?"
-msgstr ""
+msgstr "Konfigurationsdaten auf Server speichern?"
 
 #: upgrade.cpp:2637
 #, fuzzy
 msgid "Store remote settings?"
-msgstr "&Einstellungen importieren"
+msgstr "Konfigurationsdaten exportieren?"
 
 #: upgrade.cpp:2680
 msgid ""
@@ -2410,23 +2452,27 @@ msgid ""
 "since it was retrieved.\n"
 "Are you sure you want to overwrite it with the current settings?"
 msgstr ""
+"Die auf dem Server gespeicherten Konfigurationsdaten haben sich geändert\n"
+"seit sie abgeholt wurden.\n"
+"Möchten Sie sie wirklich mit den aktuellen Daten überschreiben?"
 
 #: upgrade.cpp:2684
 #, fuzzy
 msgid "Overwrite remote settings?"
-msgstr "&Einstellungen importieren"
+msgstr "Einstellungen überschreiben?"
 
 #: upgrade.cpp:2696
 #, fuzzy, c-format
 msgid ""
 "Cannot remove old configuration information from\n"
 "mailbox '%s'."
-msgstr "Kann Eintragsliste für geschlossene Mailbox '%s' nicht bekommen."
+msgstr "Kann alte Konfigurationsdaten aus Mailbox\n"
+"'%s' nicht entfernen."
 
 #: upgrade.cpp:2741
 #, fuzzy
 msgid "Could not export configuration information."
-msgstr "Kann %s Konfigurationsdaei '%s' nicht öffnen."
+msgstr "Kann Konfigurationsdaten nicht exportieren."
 
 #: upgrade.cpp:2749
 #, fuzzy, c-format
@@ -3061,7 +3107,7 @@ msgstr ""
 "Es gibt keine existierenden Identitäten.\n"
 "Bitte legen Sie erst eine Identität an."
 
-#: wxMDialogs.cpp:3233 wxMFrame.cpp:488
+#: wxMDialogs.cpp:3232 wxMDialogs.cpp:3233 wxMFrame.cpp:488
 #, fuzzy
 msgid "Default"
 msgstr "Vorgabe"
@@ -3600,6 +3646,7 @@ msgid "Set up external editor"
 msgstr "Externen Editor konfigurieren"
 
 #: wxComposeView.cpp:1902
+#, ycp-format
 msgid ""
 "Enter the command name (%%s will be replaced with the name of the file):"
 msgstr ""
@@ -4388,159 +4435,159 @@ msgstr ""
 msgid "Question whether to"
 msgstr ""
 
-#: wxMDialogs.cpp:2513
+#: wxMDialogs.cpp:2512 wxMDialogs.cpp:2513
 msgid "Question whether to store remote settings at startup."
 msgstr ""
 
-#: wxMDialogs.cpp:2513
+#: wxMDialogs.cpp:2512 wxMDialogs.cpp:2513
 msgid "Question whether to overwrite newer remote config settings"
 msgstr ""
 
-#: wxMDialogs.cpp:2542
+#: wxMDialogs.cpp:2541 wxMDialogs.cpp:2542
 #, c-format
 msgid "unknown (%s)"
 msgstr "unbekannt (%s)"
 
-#: wxMDialogs.cpp:2574
+#: wxMDialogs.cpp:2573 wxMDialogs.cpp:2574
 msgid "Mahogany"
 msgstr "Mahogany"
 
-#: wxMDialogs.cpp:2582
+#: wxMDialogs.cpp:2581 wxMDialogs.cpp:2582
 msgid "&Settings"
 msgstr "&Einstellungen"
 
-#: wxMDialogs.cpp:2586
+#: wxMDialogs.cpp:2585 wxMDialogs.cpp:2586
 msgid "Select the settings to reset"
 msgstr "Einträge zum Rücksetzen auswählen"
 
-#: wxMDialogs.cpp:2606
+#: wxMDialogs.cpp:2605 wxMDialogs.cpp:2606
 msgid "Setting"
 msgstr "Einstellung"
 
-#: wxHeadersDialogs.cpp:887 wxMDialogs.cpp:2607
+#: wxHeadersDialogs.cpp:887 wxMDialogs.cpp:2606 wxMDialogs.cpp:2607
 msgid "Value"
 msgstr "Wert"
 
-#: wxMDialogs.cpp:2608
+#: wxMDialogs.cpp:2607 wxMDialogs.cpp:2608
 msgid "Folder"
 msgstr "Mailbox"
 
-#: wxMDialogs.cpp:2638
+#: wxMDialogs.cpp:2637 wxMDialogs.cpp:2638
 msgid "yes"
 msgstr "ja"
 
-#: wxMDialogs.cpp:2643
+#: wxMDialogs.cpp:2642 wxMDialogs.cpp:2643
 msgid "no"
 msgstr "nein"
 
-#: wxMDialogs.cpp:2648
+#: wxMDialogs.cpp:2647 wxMDialogs.cpp:2648
 msgid "off"
 msgstr "aus"
 
-#: wxMDialogs.cpp:2656
+#: wxMDialogs.cpp:2655 wxMDialogs.cpp:2656
 msgid "all folders"
 msgstr "Alle Mailboxen"
 
-#: wxMDialogs.cpp:2664
+#: wxMDialogs.cpp:2663 wxMDialogs.cpp:2664
 #, c-format
 msgid "unknown folder '%s'"
 msgstr "Unbekannte Mailbox '%s'"
 
-#: wxMDialogs.cpp:2755
+#: wxMDialogs.cpp:2754 wxMDialogs.cpp:2755
 #, c-format
 msgid "Reenabled %d previously disabled message boxes."
 msgstr "Dialogbox %d wieder aktiviert."
 
-#: wxMDialogs.cpp:2762
+#: wxMDialogs.cpp:2761 wxMDialogs.cpp:2762
 msgid "No message boxes were reenabled."
 msgstr "Es wurden keine Dialogboxen aktiviert."
 
-#: wxMDialogs.cpp:2768
+#: wxMDialogs.cpp:2767 wxMDialogs.cpp:2768
 msgid "No message boxes have been disabled yet."
 msgstr "Bisher sind keine Dialogboxen deaktiviert."
 
-#: wxMDialogs.cpp:2782
+#: wxMDialogs.cpp:2781 wxMDialogs.cpp:2782
 msgid "The server presents the following certificate:\n"
 msgstr "Der Server präsentiert das folgende Zertifikat:\n"
 
-#: wxMDialogs.cpp:2784
+#: wxMDialogs.cpp:2783 wxMDialogs.cpp:2784
 msgid "Name : "
 msgstr "Name : "
 
-#: wxMDialogs.cpp:2785
+#: wxMDialogs.cpp:2784 wxMDialogs.cpp:2785
 msgid "Issuer : "
 msgstr "Aussteller : "
 
-#: wxMDialogs.cpp:2786
+#: wxMDialogs.cpp:2785 wxMDialogs.cpp:2786
 msgid "Fingerprint : "
 msgstr "Fingerprint : "
 
-#: wxMDialogs.cpp:2788
+#: wxMDialogs.cpp:2787 wxMDialogs.cpp:2788
 msgid "Do you accept this certificate?"
 msgstr "Akzeptieren Sie dieses Zertifikat?"
 
-#: wxMDialogs.cpp:2790
+#: wxMDialogs.cpp:2789 wxMDialogs.cpp:2790
 msgid "SSL certificate verification"
 msgstr "SSL-Zertifikatsüberprüfung"
 
-#: wxMDialogs.cpp:2809
+#: wxMDialogs.cpp:2808 wxMDialogs.cpp:2809
 msgid "Mahogany Licensing Conditions"
 msgstr "Mahogany: Nutzungsbedingungen"
 
-#: wxMDialogs.cpp:2812
+#: wxMDialogs.cpp:2811 wxMDialogs.cpp:2812
 msgid "Licensing Conditions"
 msgstr "Nutzungsbedingungen"
 
-#: wxMDialogs.cpp:2834
+#: wxMDialogs.cpp:2833 wxMDialogs.cpp:2834
 msgid "Accept"
 msgstr "Akzeptieren"
 
-#: wxMDialogs.cpp:2837
+#: wxMDialogs.cpp:2836 wxMDialogs.cpp:2837
 msgid "Reject"
 msgstr "Ablehnen"
 
-#: wxMDialogs.cpp:3016
+#: wxMDialogs.cpp:3015 wxMDialogs.cpp:3016
 msgid "&Down"
 msgstr "&Tiefer"
 
-#: wxMDialogs.cpp:3026
+#: wxMDialogs.cpp:3025 wxMDialogs.cpp:3026
 msgid "&Up"
 msgstr "&Höher"
 
-#: wxMDialogs.cpp:3245
+#: wxMDialogs.cpp:3244 wxMDialogs.cpp:3245
 #, fuzzy
 msgid "Change the identity"
 msgstr "Aktuelle Identität wechseln"
 
-#: wxMDialogs.cpp:3260
+#: wxMDialogs.cpp:3259 wxMDialogs.cpp:3260
 #, fuzzy
 msgid "Mahogany: please wait"
 msgstr "Mahogany : Neue Identität anlegen"
 
-#: wxMDialogs.cpp:3267
+#: wxMDialogs.cpp:3266 wxMDialogs.cpp:3267
 msgid "XXXXXX done"
 msgstr ""
 
-#: wxMDialogs.cpp:3286
+#: wxMDialogs.cpp:3285 wxMDialogs.cpp:3286
 #, fuzzy, c-format
 msgid "%u done"
 msgstr ", %lu neu"
 
-#: MailFolderCC.cpp:3224 wxMDialogs.cpp:3334
+#: MailFolderCC.cpp:3224 wxMDialogs.cpp:3333 wxMDialogs.cpp:3334
 msgid "Password required"
 msgstr "Passwort benötigt "
 
-#: wxMDialogs.cpp:3346
+#: wxMDialogs.cpp:3345 wxMDialogs.cpp:3346
 #, fuzzy, c-format
 msgid "Please enter login/password for the folder '%s'"
 msgstr "Bitte geben Sie das Paßwort für Mailbox '%s' an:"
 
-#: wxMDialogs.cpp:3350
+#: wxMDialogs.cpp:3349 wxMDialogs.cpp:3350
 #, fuzzy
 msgid "&Username: "
 msgstr "&Benutzername: "
 
-#: wxMDialogs.cpp:3351 wxMFolderDialogs.cpp:1009
+#: wxMDialogs.cpp:3350 wxMDialogs.cpp:3351 wxMFolderDialogs.cpp:1009
 msgid "&Password: "
 msgstr "&Passwort: "
 
@@ -8635,6 +8682,10 @@ msgstr "Die Datei '%s' enhält keine vCard-Daten."
 #: PythonHelp.cpp:380
 msgid "Cannot run script: "
 msgstr "Kann Skript nicht ausführen: "
+
+#: wxMDialogs.cpp:2511
+msgid "Question whether to retrieve remote settings at startup."
+msgstr ""
 
 msgid "Status: "
 msgstr "Status: "
