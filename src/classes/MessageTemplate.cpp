@@ -174,13 +174,11 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       String word = ExtractWord(&pc, bracketClose);
 
       // decide what we've got
-      enum
-      {
-         None,
-         Left,
-         Right,
-         Center
-      } alignment = None;
+      const int None   = 0;
+      const int Left   = 1;
+      const int Right  = 2;
+      const int Center = 3;
+      int alignment = None;
       unsigned int alignWidth = 0;
       bool truncate = FALSE;
       String name;
