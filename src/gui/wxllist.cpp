@@ -2244,10 +2244,10 @@ wxLayoutList::WrapAll(CoordType column)
    wxLayoutLine *line = m_FirstLine;
    if(! line)
       return FALSE;
-   bool rc = TRUE;
-   while(line && rc)
+   bool rc = FALSE;
+   while(line)
    {
-      rc &= line->Wrap(column, this);
+      rc |= line->Wrap(column, this);
       line = line->GetNextLine();
    }
    return rc;

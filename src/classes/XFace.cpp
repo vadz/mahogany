@@ -193,9 +193,9 @@ XFace::GetXFaceImg(const String &filename, bool *hasimg, class wxWindow *parent)
          {
             intensity = img.GetRed(x,y) + img.GetGreen(x,y) +
                img.GetBlue(x,y);
-            if(intensity >= (3*255)/2 && intensity != 3*255)
+            if(intensity >= (3*255)/2)
                img.SetRGB(x,y,255,255,255);
-            if(intensity <= (3*255)/2 && intensity != 0)
+            if(intensity <= (3*255)/2)
                img.SetRGB(x,y,0,0,0);
          }
       if(hasimg) *hasimg = true;

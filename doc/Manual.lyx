@@ -34,13 +34,13 @@ Mahogany User Manual
 \newline 
 
 \shape default 
-for Version 0.5
+for Version 0.60
 \newline 
 
 \begin_inset Quotes eld
 \end_inset 
 
-Meadows
+???
 \begin_inset Quotes erd
 \end_inset 
 
@@ -4445,34 +4445,44 @@ You can write them by hand, using a simple programming language remotely
 
 You can write complex rules yourself, save them to a file and tell Mahogany
  to read the rules from that file.
+\layout Standard
+
+The normal way to set up filters is to specify them in the filters dialog
+ (
+\begin_inset LatexCommand \ref{FiltersDialog}
+
+\end_inset 
+
+) and then tell Mahogany folder which of the filter rules to use for the
+ individual folders with athe folder filters dialog (
+\begin_inset LatexCommand \ref{FolderFiltersDialog}
+
+\end_inset 
+
+).
 \layout Subsubsection
+
+
+\begin_inset LatexCommand \label{FiltersDialog}
+
+\end_inset 
 
 The Filters Dialog_4260_
 \layout Standard
 
-You must have a mailbox selected in the tree before calling this dialog.
- It allows you to set up filtering rules for the folder selected.
- You can have different sets of rules for each folder.
- If you want to apply rules to all incoming messages and are collecting
- mail from different servers, simply apply the rules to the 
-\begin_inset Quotes eld
+This dialog allows you to define any number of filter rules available to
+ Mahogany.
+ In a seaparate dialog (
+\begin_inset LatexCommand \ref{FolderFiltersDialog}
+
 \end_inset 
 
-New Mail
-\begin_inset Quotes erd
-\end_inset 
-
- folder if you have one, alternatively you can set up rules for individual
- servers or INBOX.
-\layout Standard
-
-The main filters dialog allows you to edit existing rules, add new rules
- and change the order of the rules.
- The listbox on the left lists the existing filtering rules for the currently
- selected folder in the order in which they are executed.
- You can use the buttons to change the order or rules.
- If you decide to edit or create a new rule, you get into another dialog,
- the
+) you can then pick any rule from the list and assign it to a folder.
+ As you can have different sets of rules for each folder and might want
+ to share rules for some folders, this dialog simply sets up rules and you
+ can later specify for which folders to use them.
+ When editing or adding a new filter rule, you will get to the following
+ dialog:
 \layout Subsubsection
 
 The Filter-Rule Dialog_4261_
@@ -4593,6 +4603,43 @@ If you are not using a Trash folder, it is a good idea to add a rule at
  mailbox.
  Notice, if you are using a Trash folder, this does not apply, as messages
  won't be marked as deleted but moved straight to Trash.
+\layout Subsubsection
+
+
+\begin_inset LatexCommand \label{FolderFiltersDialog}
+
+\end_inset 
+
+The Folder Filters dialog_4262_
+\layout Standard
+
+This dialog allows you to assign filter rules to a folder.
+ You can pick them from the set of existing filter rules (set up via the
+ Filters Dialog (
+\begin_inset LatexCommand \ref{FiltersDialog}
+
+\end_inset 
+
+)) and change the order of the rules.
+ The listbox on the left lists the existing filtering rules for the currently
+ selected folder in the order in which they are executed.
+ You can use the buttons to change the order or rules.
+ You can also activate/deactivate rules by clicking on the litte checkbox
+ ([X] or [ ]) next to their name.
+ 
+\layout Standard
+
+If you want to apply rules to all incoming messages and are collecting mail
+ from different servers, simply apply the rules to the 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ folder if you have one, alternatively you can set up rules for individual
+ servers or INBOX.
 \layout Subsection
 
 The PalmOS Module
@@ -4902,6 +4949,8 @@ Try to lock device
 \begin_inset Quotes erd
 \end_inset 
 
+
+\layout Description
 
 \layout Subsubsection
 
