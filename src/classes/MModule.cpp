@@ -695,7 +695,7 @@ MModule::ListAvailableModules(const String& interfaceName)
          // use the file name, not MMODULE_NAME_PROP, so that we can
          // LoadModule() it later
          String name;
-         wxSplitPath(filename, NULL, &name, NULL),
+         wxSplitPath(filename, NULL, &name, NULL);
          MModuleListingEntryImpl entry(
             name,
             interfaceModule,
