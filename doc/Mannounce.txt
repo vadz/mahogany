@@ -72,63 +72,37 @@ use OpenSSL for SSL support and compface for X-Face support. We wish
 to thank all the people whose work has made writing Mahogany much
 simpler (and even possible at all)!
 
-Changes Since Release 0.63
+Changes Since Release 0.64
 =====================================================================
-
-Don't let the small difference of the version numbers fool you -
-many things have changed dramatically since 0.63. For example, do try
-this version if you had tried Mahogany before and were unhappy about
-the speed of accessing the IMAP folders or deficiencies of POP3
-support!
 
 Key changes are:
 
-* incomparably more efficient IMAP support:
-
-  - retrieve headers on-demand making it possible to work with huge
-    IMAP folders efficiently
-  - use server side sorting and threading when available
-
-* local cache for POP3 folders which makes it possible to reliably
-  detect new mail in them
+* messages may be postponed and are saved in case of crash/interrupt
+* added (START)TLS support for POP/IMAP/SMTP/NNTP
+* limited support for reading PGP signed/encrypted messages
+* viewer filters (*bold*, _italic_, signature highlihting, ...)
+* built-in configurable SPAM filters
+* search for messages in multiple folders
 
 Some of new features:
 
-* HTML viewing and printing support
-
-* Mailing list support: possibility to automatically send reply only to
-  the mailing list
-
-* Added possibility to monitor the folders in the background without
-  opening them (IMAP)
-
-* Several new commands: permanently delete messages (not to trash),
-  mark messages read/unread, open folder read-only, update/ping
-  folder
-
-* One key message reading: automatically pass to the next unread
-  message or folder after finishing reading the current one.
+* new "Migrate" tool for account migration
+* new commands: "Move Folder", "Resent Message", "Bounce",
+  "Follow-up to Newsgroup", "Jump to Message #"
+* UTF-7 support
+* Mahogany process may be controlled remotely
+* composer templates are now more powerful
 
 Other noticeable improvements:
 
-* Win32 version now has SSL support as well
-
-* Passwords can now be stored only for the current session duration
-
-* Many GUI fixes: more (optional) progress dialogs, improvement to
-  the filters dialog ("copy" and "rename" added), quickly change the
-  sort/thread options by right clicking on the folder window header
+* composer allows to edit the attachment properties
+* popup menus for the URLs in the message viewer
 
 Important bug fixes:
 
-* Sorting/threading work together
+* too many to be listed here, but if you had experienced (fatal)
+  problems with a previous Mahogany version, it should be fixed now
 
-* Handle connection loss more gracefully
-
-* Many fixes to the new mail reporting and processing
-
-* Big improvements in handling of sending and reading messages in charsets
-  other than ASCII
 
 Please see the CHANGES file in the distribution for an even more
 detailed list of changes.
