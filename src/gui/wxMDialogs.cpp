@@ -33,6 +33,9 @@
 #   include "Profile.h"
 #   include "MModule.h"
 #   include "MHelp.h"
+
+#   include <wx/sizer.h>
+#   include <wx/statline.h>
 #endif
 
 #include "Mpers.h"
@@ -63,7 +66,8 @@
 #include <wx/treectrl.h>
 #include <wx/utils.h>
 #include <wx/help.h>
-#include "wx/tipdlg.h"
+#include <wx/tipdlg.h>
+#include <wx/checklst.h>
 #include <wx/fs_mem.h> // memory filesystem for startup screen
 
 #include "MFolderDialogs.h"
@@ -2529,4 +2533,108 @@ bool ShowLicenseDialog(wxWindow *parent)
    ProfileBase *p = mApplication->GetProfile();
    wxLicenseDialog dlg(p, parent);
    return ( dlg.ShowModal() == wxID_OK );
+}
+
+// ----------------------------------------------------------------------------
+// MDialog_GetSelections() stuff
+// ----------------------------------------------------------------------------
+
+class wxMultipleChoiceDialog : public wxDialog
+{
+public:
+   wxMultipleChoiceDialog(wxWindow *parent,
+                          const wxString& message,
+                          const wxString& caption,
+                          const wxArrayString& choices,
+                          wxArrayInt *selections);
+
+   virtual bool TransferDataFromWindow();
+
+private:
+   wxArrayInt *m_selections;
+
+   wxCheckListBox *m_checklstbox;
+};
+
+wxMultipleChoiceDialog::wxMultipleChoiceDialog(wxWindow *parent,
+                                               const wxString& message,
+                                               const wxString& caption,
+                                               const wxArrayString& choices,
+                                               wxArrayInt *selections)
+                      : wxDialog(parent, -1, caption)
+{
+    m_selections = selections;
+
+    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+
+    topsizer->Add( CreateTextSizer( message ), 0, wxALL, 10 );
+
+    size_t count = choices.GetCount();
+    wxASSERT_MSG( count, _T("shouldn't be used without choices") );
+    wxString *aChoices = new wxString[count];
+    for ( size_t n = 0; n < count; n++ )
+    {
+       aChoices[n] = choices[n];
+    }
+
+    m_checklstbox = new wxCheckListBox(
+                                       this,
+                                       -1,
+                                       wxDefaultPosition,
+                                       wxDefaultSize,
+                                       count, aChoices
+                                      );
+
+    delete [] aChoices;
+
+    topsizer->Add( m_checklstbox, 1, wxEXPAND | wxLEFT|wxRIGHT, 15 );
+
+#if wxUSE_STATLINE
+    topsizer->Add( new wxStaticLine( this, -1 ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
+#endif
+
+    topsizer->Add( CreateButtonSizer( wxOK|wxCANCEL ), 0, wxCENTRE | wxALL, 10 );
+
+    SetAutoLayout( TRUE );
+    SetSizer( topsizer );
+
+    topsizer->SetSizeHints( this );
+    topsizer->Fit( this );
+
+    Centre( wxBOTH );
+
+    m_checklstbox->SetFocus();
+}
+
+bool wxMultipleChoiceDialog::TransferDataFromWindow()
+{
+   m_selections->Empty();
+
+   size_t count = m_checklstbox->GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( m_checklstbox->IsChecked(n) )
+         m_selections->Add(n);
+   }
+
+   return TRUE;
+}
+
+size_t MDialog_GetSelections(const wxString& message,
+                             const wxString& caption,
+                             const wxArrayString& choices,
+                             wxArrayInt *selections,
+                             MWindow *parent)
+{
+   wxCHECK_MSG( selections, 0, _T("selections pointer can't be NULL") );
+
+   if ( choices.IsEmpty() )
+   {
+      // nothing to choose from
+      return 0;
+   }
+
+   wxMultipleChoiceDialog dlg(parent, message, caption, choices, selections);
+
+   return dlg.ShowModal() == wxID_OK ? selections->GetCount() : 0;
 }

@@ -319,7 +319,21 @@ extern "C"
 }
 #endif
 
-                            
+/**
+  Propose the user to choose one or several of the strings in the choices
+  array, returns the number of strings chosen.
+
+  @param choices is the array of strings to choose from
+  @param selections is the array filled by function with selections
+  @param parent is the parent window
+  @return the number of selected items
+*/
+size_t MDialog_GetSelections(const wxString& message,
+                             const wxString& caption,
+                             const wxArrayString& choices,
+                             wxArrayInt *selections,
+                             wxWindow *parent = NULL);
+
 #ifdef OS_WIN
 #  undef USE_SEMIMODAL
 

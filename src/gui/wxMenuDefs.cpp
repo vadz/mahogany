@@ -224,7 +224,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // extra postscript printing
    { WXMENU_FILE_PRINT_SETUP_PS,    gettext_noop("&Print PS Setup"),     gettext_noop("Configure PostScript printing")  , FALSE },
 // { WXMENU_FILE_PAGE_SETUP_PS,    gettext_noop("P&age PS Setup"),     gettext_noop("Configure PostScript page setup")  , FALSE },
-#endif
+#endif // USE_PS_PRINTING
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_CREATE,   gettext_noop("Create &Folder..."), gettext_noop("Creates a new folder definition")               , FALSE },
 
@@ -235,11 +235,16 @@ static const MenuItemInfo g_aMenuItems[] =
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tCtrl-S"), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
+
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network\tCtrl-U"),
      gettext_noop("Activate dial-up networking")        , FALSE },
    { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down Network\tCtrl-D"),
      gettext_noop("Shutdown dial-up networking")        , FALSE },
+
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_FILE_IMPORT,   gettext_noop("&Import..."),  gettext_noop("Import settings from another e-mail program")        , FALSE },
+
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window\tCtrl-W"),     gettext_noop("Close this window")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },

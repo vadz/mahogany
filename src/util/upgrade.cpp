@@ -220,20 +220,11 @@ public:
       gs_installWizardData.name = m_name->GetValue();
       gs_installWizardData.email = email;
 
-#if 0
-      /* This goes horribly wrong. Typical situation
-         "user@hostname" without domain leads to hosts such as
-         "mail.hostname" - usually, if the entries have no
-         domainnames, then they work anyway. I.e. if the environment
-         tells us the mail server is "mail", then that is usually a
-         working alias.
-         Unless we find a more reliable method, I comment this out.
-         (KB)
-      */
       // if the email is user@some.where, then suppose that the servers are
-      // pop.some.where &c
+      // pop.some.where &c - be sure to check that some.where is really a
+      // domain and not just a hostname by checking the number of dots in it
       wxString domain = email.AfterFirst('@');
-      if ( !!domain )
+      if ( !!domain && (domain.Find('.') != wxNOT_FOUND) )
       {
          AddDomain(gs_installWizardData.pop, domain);
          AddDomain(gs_installWizardData.smtp, domain);
@@ -241,7 +232,6 @@ public:
          AddDomain(gs_installWizardData.nntp, domain);
       }
       //else: no domain specified
-#endif
       
       return TRUE;
    }
@@ -1081,8 +1071,8 @@ bool RunInstallWizard()
               "Your Mahogany Developers Team\n"
               );
 
-         // VZ: why do it in such complicated way? could use strftime(), too...
-#if 1
+         // we don't use strftime() here as we need the untranslated month
+         // names
          time_t tt;
          time(&tt);
          struct tm *ourtime = localtime(&tt);
@@ -1111,9 +1101,6 @@ bool RunInstallWizard()
                         ourtime->tm_hour,
                         ourtime->tm_min,
                         ourtime->tm_sec);
-#else // 1
-         wxString timeStr = wxDateTime::Now().Format("%d %b %Y %H:%M:%S");
-#endif // 0/1
 
          String msgString = wxString::Format(msgFmt, timeStr.c_str());
 

@@ -7,7 +7,7 @@ wxlwindow.cpp wxllist.cpp wxlparser.cpp wxMenuDefs.cpp wxOptionsDlg.cpp \
 wxFolderTree.cpp wxDialogLayout.cpp wxMFolderDialogs.cpp wxBrowseButton.cpp \
 wxHeadersDialogs.cpp wxTemplateDialog.cpp wxModulesDlg.cpp \
 wxSubfoldersDialog.cpp wxFiltersDialog.cpp wxWizards.cpp wxFolderMenu.cpp \
-Mdnd.cpp
+Mdnd.cpp MImport.cpp
 
 ifdef USE_WXTAB
 SRC += wxtab.cpp

@@ -340,7 +340,7 @@ const ClassName::Property ClassName::ms_properties[] = \
    { "version", Version }, \
    { "interface", Interface },
 
-#define MMODULE_PROP(name, value) { #name, value },
+#define MMODULE_PROP(name, value) { name, value },
 
 #define MMODULE_END_IMPLEMENT(ClassName) \
    }; \

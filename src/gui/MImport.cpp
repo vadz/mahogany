@@ -1,0 +1,254 @@
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   gui/MImport.cpp - GUI support for import operations
+// Purpose:     allow the user to select what and from where to import
+// Author:      Vadim Zeitlin
+// Modified by:
+// Created:     23.05.00
+// CVS-ID:      $Id$
+// Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
+#ifdef __GNUG__
+   #pragma implementation "MImport.h"
+#endif
+
+#include "Mpch.h"
+
+#ifndef USE_PCH
+#  include "Mcommon.h"
+
+#  include "guidef.h"
+
+#  include <wx/checkbox.h>
+#  include <wx/statline.h>
+#  include <wx/statbox.h>
+#endif // USE_PCH
+
+#include <wx/sizer.h>
+
+#include "MImport.h"
+
+// ----------------------------------------------------------------------------
+// array classes
+// ----------------------------------------------------------------------------
+
+WX_DEFINE_ARRAY(MImporter *, wxArrayImporters);
+
+// ----------------------------------------------------------------------------
+// wxImportDialog
+// ----------------------------------------------------------------------------
+
+class wxImportDialog : public wxDialog
+{
+public:
+   wxImportDialog(MImporter& importer, wxWindow *parent);
+
+   // did import succeed?
+   bool IsOk() const { return m_ok; }
+
+   // event handlers
+   void OnOk(wxCommandEvent& event);
+
+private:
+   void SetOkBtnLabel(const wxString& label)
+   {
+      wxWindow *btnOk = FindWindow(wxID_OK);
+      if ( btnOk )
+         btnOk->SetLabel(label);
+   }
+
+   MImporter& m_importer;
+
+   wxCheckBox *m_checkADB,
+              *m_checkFolders,
+              *m_checkSettings,
+              *m_checkFilters;
+
+   bool m_done, m_ok;
+
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// event tables
+// ----------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(wxImportDialog, wxDialog)
+   EVT_BUTTON(wxID_OK, wxImportDialog::OnOk)
+END_EVENT_TABLE()
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// wxImportDialog
+// ----------------------------------------------------------------------------
+
+wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
+              : wxDialog(parent, -1, _("Mahogany: Import Dialog")),
+                m_importer(importer)
+{
+   m_done = false;
+   m_ok = true;
+
+   wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+
+   topsizer->Add( CreateTextSizer(
+            _("Please choose the actions below you would like to perform\n"
+               "and then click the [Start] button to start importing.") ),
+         0, wxALL, 10 );
+
+   wxStaticBox *box = new wxStaticBox(this, -1, _("&What to do:"));
+   wxStaticBoxSizer *actionsSizer = new wxStaticBoxSizer(box, wxVERTICAL);
+   m_checkADB = new wxCheckBox(this, -1, _("import &address books"));
+   m_checkFolders = new wxCheckBox(this, -1, _("import &folders"));
+   m_checkSettings = new wxCheckBox(this, -1, _("import &settings"));
+   m_checkFilters = new wxCheckBox(this, -1, _("import filter &rules"));
+   actionsSizer->Add(m_checkADB, 0, wxEXPAND);
+   actionsSizer->Add(m_checkFolders, 0, wxEXPAND);
+   actionsSizer->Add(m_checkSettings, 0, wxEXPAND);
+   actionsSizer->Add(m_checkFilters, 0, wxEXPAND);
+
+   int flags = m_importer.GetFeatures();
+   m_checkADB->Enable( flags & MImporter::Import_ADB );
+   m_checkFolders->Enable( flags & MImporter::Import_Folders );
+   m_checkSettings->Enable( flags & MImporter::Import_Settings );
+   m_checkFilters->Enable( flags & MImporter::Import_Filters );
+
+   topsizer->Add( actionsSizer, 1, wxEXPAND | wxLEFT|wxRIGHT, 15 );
+
+   topsizer->Add( new wxStaticLine( this, -1 ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
+
+   topsizer->Add( CreateButtonSizer( wxOK|wxCANCEL ), 0, wxCENTRE | wxALL, 10 );
+   SetOkBtnLabel(_("&Start"));
+
+   SetAutoLayout( TRUE );
+   SetSizer( topsizer );
+
+   topsizer->SetSizeHints( this );
+   topsizer->Fit( this );
+
+   Centre( wxBOTH );
+}
+
+void wxImportDialog::OnOk(wxCommandEvent& event)
+{
+   if ( m_done )
+   {
+      // let the normal processing (dismiss dialog) to take place
+      event.Skip();
+   }
+   else
+   {
+      wxBusyCursor bc;
+
+      #define DO_IMPORT(what) \
+         if ( m_check##what->GetValue() ) \
+            if ( !m_importer.Import##what() ) \
+               m_ok = false
+
+      DO_IMPORT(ADB);
+      DO_IMPORT(Folders);
+      DO_IMPORT(Settings);
+      DO_IMPORT(Filters);
+
+      #undef DO_IMPORT
+
+      m_done = true;
+
+      SetOkBtnLabel(_("Ok"));
+
+      // can't cancel import any longer
+      wxWindow *btnCancel = FindWindow(wxID_CANCEL);
+      if ( btnCancel )
+         btnCancel->Disable();
+   }
+}
+
+// ----------------------------------------------------------------------------
+// public API
+// ----------------------------------------------------------------------------
+
+extern bool ShowImportDialog(MImporter& importer, wxWindow *parent)
+{
+   wxImportDialog dlg(importer, parent);
+
+   return dlg.ShowModal() == wxID_OK && dlg.IsOk();
+}
+
+extern bool ShowImportDialog(wxWindow *parent)
+{
+   // first, find all (applicable) importers
+   wxArrayImporters importers;
+   wxArrayString prognames;
+   MModuleListing *listing = MModule::ListAvailableModules(M_IMPORTER_INTERFACE);
+   if ( !listing )
+      return false;
+
+   size_t n, count = listing->Count();
+   for ( n = 0; n < count; n++ )
+   {
+      const MModuleListingEntry& entry = (*listing)[n];
+
+      // load the module
+      MImporter *importer = (MImporter *)MModule::LoadModule(entry.GetName());
+      if ( importer )
+      {
+         if ( importer->Applies() )
+         {
+            importers.Add(importer);
+            prognames.Add(importer->GetProgName());
+         }
+         else
+         {
+            importer->DecRef();
+         }
+      }
+      else
+      {
+         wxLogDebug("Couldn't load importer module '%s'.",
+                    entry.GetName().c_str());
+      }
+   }
+
+   listing->DecRef();
+
+   // then let the user choose which ones he wants to use
+   wxArrayInt selections;
+   count = MDialog_GetSelections(
+                                 _("Please select the programs you want to\n"
+                                   "import the settings from."),
+                                 _("Mahogany: Import Settings"),
+                                 prognames,
+                                 &selections,
+                                 parent
+                                );
+
+   // and do import from those he chose
+   bool doneSomething = false;
+   for ( n = 0; n < count; n++ )
+   {
+      if ( ShowImportDialog(*importers[selections[n]], parent) )
+         doneSomething  = true;
+   }
+
+   // clean up
+   count = importers.GetCount();
+   for ( n = 0; n < count; n++ )
+   {
+      importers[n]->DecRef();
+   }
+
+   return doneSomething;
+}

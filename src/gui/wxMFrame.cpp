@@ -49,6 +49,7 @@
 
 #include "MFolderDialogs.h"
 #include "MModule.h"
+#include "MImport.h"
 
 #include "gui/wxIconManager.h"
 #include "gui/wxOptionsDlg.h"
@@ -320,6 +321,11 @@ wxMFrame::OnMenuCommand(int id)
          mApplication->Exit();
       }
       break;
+
+   case WXMENU_FILE_IMPORT:
+      ShowImportDialog(this);
+      break;
+
    case WXMENU_EDIT_ADB:
       ShowAdbFrame(this);
       break;
