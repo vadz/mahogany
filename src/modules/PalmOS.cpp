@@ -52,7 +52,7 @@ class PalmBook;
 #define MP_MOD_PALMOS_SYNCMAIL   "SyncMail"
 #define MP_MOD_PALMOS_SYNCMAIL_D 1l
 #define MP_MOD_PALMOS_SYNCADDR   "SyncAddr"
-#define MP_MOD_PALMOS_SYNCADDR_D 0l
+#define MP_MOD_PALMOS_SYNCADDR_D 1l
 #define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
 #define MP_MOD_PALMOS_PILOTDEV_D "/dev/pilot"
 #define MP_MOD_PALMOS_SPEED      "Speed"
@@ -503,7 +503,8 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
    char   buf[0xffff];
    struct AddressAppInfo aai;
    char * defaultcategoryname = 0;
-
+   PalmEntryGroup *rootGroup;
+   
    // if no book specified where to save, we can skip it
    if (!palmbook) {
       ErrorMessage(_("No PalmBook specified."));
@@ -524,13 +525,14 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
       defaultcategory = match_category(defaultcategoryname,&aai);
    else
       defaultcategory = 0; /* Unfiled */
-  
-   if (!palmbook->GetGroup()) {
+      
+   rootGroup = (PalmEntryGroup*)(palmbook->GetGroup());
+   if (!rootGroup) {
       ErrorMessage(_("ADB not correctly initialized!"));
       return;
    }
 
-   createEntries(m_AddrDB, &aai, (PalmEntryGroup *)palmbook->GetGroup());
+   createEntries(m_AddrDB, &aai, rootGroup);
 #endif
 }
 
@@ -562,22 +564,17 @@ PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup*
     unpack_Address(&a, (unsigned char *)buf, l);
 
     // create new entry to the book ...
-    Message(_("Create Address"));
-    PalmEntry *p_Entry = new PalmEntry(p_Group, "alpha");
-//    Message(_("Address memory allocated."));
+    PalmEntry *p_Entry = new PalmEntry(p_Group, a.entry[0]);
 
     if (!p_Entry) {
-//        ErrorMessage(_("Couldn´t create Entry!"));
         return -1;
     }
   
     // ... and fill it
     p_Entry->Load(a);
-//    ErrorMessage(_("Address loaded."));
     
     // add entry
     p_Group->AddEntry(p_Entry);
-//    ErrorMessage(_("Entry added."));
   }
   
   return 0;
