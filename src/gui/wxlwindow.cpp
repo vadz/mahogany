@@ -460,9 +460,9 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    // <Shift>+<arrow> starts selection
    if ( IsDirectionKey(keyCode) )
    {
+      // just continue the old selection
       if ( m_Selecting )
       {
-         // just continue the old selection
          if( event.ShiftDown() )
             m_llist->ContinueSelection();
          else
@@ -476,7 +476,6 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
          m_Selecting = true;
          m_llist->StartSelection();
       }
-      
    }
    
    // If needed, make cursor visible:

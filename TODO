@@ -8,30 +8,14 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9	KB	wxLayout editing glitches & cursor positioning bug
-		selections via keyboard still broken
-		speed up wxLayout scrollbar setting, *way* too slow
-		now
-                1. Change RecalculatePositions() to be non-recursive,
-		   possibly from wxLayoutList, 11000 recursions take 
-		   just too long
-
-		--> new strategy: just mark lines as dirty, let
-		wxllist::Layout() re-layout all dirty lines and the ones
-		following as they are used
-
-                - deleting wxllist takes ages, calling MoveLines(,-1)
-		  recursively--> disable auto-layout? 
-                - delete lines at begin of window, then move cursor
-  		  down, next insert at wrong position. If cursor gets
-		  moved with mouse instead of keys, everything is fine.
+9	KB	wxLayout:
+		- scrollbars don't appear immediately in long
+		  composeview messages  
 		- temparily disable layout while inserting/clearing
 		  window? Should speed up things N*(N-1) fold...
-		- scrollbars don't appear immediately in long
-		  composeview messages
+		- scroll window if mouse is selecting outside
 
-9	KB	Find MEvent leaks in ASMailFolder/folder/msgview code
-		Check before reopening a closed MailFolder in
+9	KB	Check before reopening a closed MailFolder in
 		MailCollector, some kind of MailFolder::IsOK()?
 
 9	KB	check new mail after startup -- should be done already
@@ -56,14 +40,12 @@ $Id$
 		functions is ignored - is it used anywhere?
 
 
-3	KB	Filters: empty rest expression still causes abort of
-		parsing somehow, try FilterTest="5*4+3"
-
 7      ?        We need a generic way to re-enable disabled pControls
 
-8	?	ComposeView/header dialog: unify the way that custom
-		headers are stored and provide a sensible dialog to
-		change them. 
+8	KB	ComposeView/header dialog: remove my old-style
+		mechanism for setting custom headers. Move Vadim's
+		code to SendMessaggeCC. Introduce SendMessage??
+
 
 9	VZ	Folder Properties dialog: OK disabled, Apply sometimes 
 		enabled... impossible to change settings for existing

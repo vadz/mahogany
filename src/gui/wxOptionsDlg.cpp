@@ -167,7 +167,6 @@ enum ConfigFields
    ConfigField_MessageViewHeaderValuesColour,
    ConfigField_MessageViewInlineGraphics,
 #ifdef OS_UNIX
-   ConfigField_MessageViewConvertGraphicsFormat,
    ConfigField_MessageViewFaxSupport,
    ConfigField_MessageViewFaxDomains,
 #endif // Unix
@@ -202,7 +201,10 @@ enum ConfigFields
    ConfigField_HelpBrowserIsNetscape,
    ConfigField_HelpersHelp3,
    ConfigField_ExternalEditor,
+#ifdef OS_UNIX
    ConfigField_ImageConverter,
+   ConfigField_ConvertGraphicsFormat,
+#endif
    ConfigField_NewMailCommand,
    ConfigField_HelpersLast = ConfigField_NewMailCommand,
 
@@ -476,8 +478,6 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Colour for header &values"),    Field_Color,   -1 },
    { gettext_noop("&Inline graphics"),             Field_Bool,    -1 },
 #ifdef OS_UNIX
-   { gettext_noop("Conversion &graphics format"
-                  ":XPM:PNG:BMP:JPG"),             Field_Combo,   ConfigField_MessageViewInlineGraphics },
    { gettext_noop("Support special &fax mailers"), Field_Bool,    -1 },
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
 #endif // unix
@@ -519,7 +519,11 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Help viewer"),                Field_File,    -1                      },
    { gettext_noop("Help &viewer is Netscape"),    Field_Bool,    -1                      },
    { gettext_noop("&External editor"),            Field_File,    -1                      },
+#ifdef OS_UNIX
    { gettext_noop("&Image format converter"),     Field_File,    -1                      },
+   { gettext_noop("Conversion &graphics format"
+                  ":XPM:PNG:BMP:JPG"),             Field_Combo,   ConfigField_MessageViewInlineGraphics },
+#endif
    { gettext_noop("The following line will be executed each time new mail is received:"),       Field_Message, -1                      },
    { gettext_noop("&New Mail Command"),           Field_File,    -1                      },
 
@@ -634,7 +638,6 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MVIEW_HEADER_VALUES_COLOUR),
    CONFIG_ENTRY(MP_INLINE_GFX),
 #ifdef OS_UNIX
-   CONFIG_ENTRY(MP_TMPGFXFORMAT),
    CONFIG_ENTRY(MP_INCFAX_SUPPORT),
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),
 #endif
@@ -664,7 +667,10 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_HELPBROWSER),
    CONFIG_ENTRY(MP_HELPBROWSER_ISNS),
    CONFIG_ENTRY(MP_EXTERNALEDITOR),
+#ifdef OS_UNIX
    CONFIG_ENTRY(MP_CONVERTPROGRAM),
+   CONFIG_ENTRY(MP_TMPGFXFORMAT),
+#endif
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_NEWMAILCOMMAND),
 

@@ -1,5 +1,5 @@
 /*-*- c++ -*-********************************************************
- * Filters - Filtering code for M                                   *
+ * Filters - Filtering code for Mahogany                            *
  *                                                                  *
  * (C) 1999 by Karsten Ballüder (ballueder@gmx.net)                 *
  *                                                                  *
@@ -15,6 +15,7 @@
 #ifndef USE_PCH
 #   include   "strutil.h"
 #   include   "Mcommon.h"
+#   include   "kbList.h"
 #endif
 
 #include <stdlib.h>
@@ -113,6 +114,14 @@ private:
 
 /* The syntax:
 
+   STATEMENT :=
+     | CONDITION ;
+     | { STATEMENT ; RESTSTATEMENT}
+
+   RESTSTATEMENT :=
+     | STATEMENT ; RESTSTATEMENT  
+     | EMPTY
+     
    CONDITION :=
      | CONDITION & EXPRESSION  
      | CONDITION | EXPRESSION
@@ -126,7 +135,7 @@ private:
    TERM :=
      | TERM * CONDITION
      | TERM / CONDITION
-     | CONDITION
+     | FACTOR
 
      
    FACTOR :=
@@ -141,8 +150,8 @@ private:
        | EXPRESSION RESTCONDITION
 
      RESTCONDITION :=  
-       | & EXPRESSION
-       | | EXPRESSION
+       | & CONDITION
+       | | CONDITION
        | EMPTY
        
      EXPRESSION := TERM RESTEXPRESSION
@@ -174,7 +183,9 @@ public:
       }
    class SyntaxNode * Parse(void);
    class SyntaxNode * ParseExpression(void);
+   class Block      * ParseBlock(void);
    class SyntaxNode * ParseCondition(void);
+   void  ParseRestBlock(class Block *statement);
    void  ParseRestExpression(class Expression *expression);
    void  ParseRestTerm(class Expression *expression);
    void  ParseRestCondition(class Expression *expression);
@@ -240,7 +251,9 @@ enum OperatorPriorities
 class SyntaxNode : public MObject
 {
 public:
-   virtual long Evaluate() const = 0;
+   virtual long Evaluate(void) const = 0;
+   virtual String ToString(void) const
+      { String str; str.Printf("%ld", Evaluate()); return str; }
 #ifdef DEBUG
    virtual String Debug(void) const = 0;
 #endif
@@ -291,6 +304,42 @@ private:
 };
    
 
+KBLIST_DEFINE(NodeList, SyntaxNode);
+
+class Block : public SyntaxNode
+{
+public:
+   virtual long Evaluate() const
+      {
+         MOcheck();
+         long value;
+         for(NodeList::iterator i = m_Nodes.begin();
+             i != m_Nodes.end();
+             i++)
+            value = (**i).Evaluate();
+         return value;
+      }
+   void AddNode(SyntaxNode *node)
+      { m_Nodes.push_back(node); }
+#ifdef DEBUG
+   virtual String Debug(void) const
+      {
+         MOcheck();
+         String s;
+         s << '{';
+         for(NodeList::iterator i = m_Nodes.begin();
+             i != m_Nodes.end();
+             i++)
+            s << (**i).Debug();
+         s << '}';
+         return s;
+      }
+#endif    
+private:
+   NodeList  m_Nodes;
+};
+
+
 
 class Value : public SyntaxNode
 {
@@ -312,6 +361,9 @@ public:
    StringValue(String v) { m_Value = v; }
    virtual long Evaluate() const
       { MOcheck(); return m_Value.Length(); }
+   virtual String ToString(void) const
+      { MOcheck(); return m_Value; }
+
 #ifdef DEBUG
    virtual String Debug(void) const
       {
@@ -349,69 +401,102 @@ private:
 
 extern "C" {
    typedef long (*FunctionPointer)(ArgList *args);
-
-   static long echo_func(ArgList *args)
-      {  INFOMESSAGE(("echo_func")); return 1; }
-
-   static long func_rFive(ArgList *args)
-      {  return 5; }
 };
 
 struct FunctionDefinition
 {
-   const char *m_name;
+   String          m_Name;
    FunctionPointer m_FunctionPtr;
+   size_t          m_UseCount;
+
+   FunctionDefinition(const String &name, FunctionPointer fptr)
+      {
+         m_Name = name; m_FunctionPtr = fptr; m_UseCount = 0;
+         ASSERT(m_FunctionPtr);
+      }
+   ~FunctionDefinition()
+      {
+         ASSERT(m_UseCount == 0);
+      }
 };
+
+
+KBLIST_DEFINE(FunctionList, FunctionDefinition);
 
 class FunctionCall : public SyntaxNode
 {
 public:
    FunctionCall(const String &name, ArgList *args);
-   ~FunctionCall() { delete m_args; }
+   ~FunctionCall()
+      {
+         FunctionDefinition *fd = FindFunction(m_name);
+         ASSERT(fd && fd->m_UseCount > 0);
+         fd->m_UseCount--;// decref the function
+         delete m_args;
+      }
    virtual long Evaluate() const;
 #ifdef DEBUG
    virtual String Debug(void) const
       { MOcheck(); return String("FunctionCall(") + m_name + String(")"); }
 #endif    
-private:
-   FunctionPointer FindFunction(void);
 
+   static bool AddFunction(const String &name, FunctionPointer fptr);
+
+private:
+   static FunctionDefinition *FindFunction(const String &name);
+
+   static FunctionList *GetFunctionList(void)
+      {
+         if(ms_Functions == NULL)
+            ms_Functions = new FunctionList;
+         return ms_Functions;
+      }
+   
    FunctionPointer m_function;
    ArgList *m_args;
    String  m_name;
-   static FunctionDefinition ms_Functions[];
+
+   static FunctionList *ms_Functions;
 };
 
 FunctionCall::FunctionCall(const String &name, ArgList *args)
 {
    m_name = name;
    m_args = args;
-   m_function = FindFunction();
+   FunctionDefinition *fd = FindFunction(name);
+   m_function = fd->m_FunctionPtr;
+   fd->m_UseCount++;
 }
    
 
 /* static */
-FunctionDefinition
-FunctionCall::ms_Functions[] =
-{
-   { "print", echo_func },
-   { "returnFive", func_rFive },
-   { NULL, NULL }
-};
+FunctionList * FunctionCall::ms_Functions = NULL;
 
-FunctionPointer
-FunctionCall::FindFunction(void)
+/* static */
+FunctionDefinition *
+FunctionCall::FindFunction(const String &name)
 {
-   MOcheck();
-   FunctionDefinition *fd = ms_Functions;
-   while(fd->m_name != NULL)
-   {
-      if(m_name == fd->m_name)
-         return fd->m_FunctionPtr;
-      else
-         fd++;
-   }
+   FunctionList *fl = GetFunctionList();
+   
+   for(FunctionList::iterator i = fl->begin();
+       i != fl->end();
+       i++)
+      if(name == (**i).m_Name)
+         return *i;
    return NULL;
+}
+
+/* static */
+bool
+FunctionCall::AddFunction(const String &name, FunctionPointer fptr)
+{
+   FunctionList *fl = GetFunctionList();
+   FunctionDefinition *fd = FindFunction(name);
+   if(fd)
+      return false; // already exists
+   fd = new FunctionDefinition(name, fptr);
+   fl->push_back(fd);
+   return true;
 }
 
 long
@@ -596,7 +681,7 @@ SyntaxNode *
 ParserImpl::Parse(void)
 {
    MOcheck();
-   return ParseExpression();
+   return ParseBlock();
 }
 
 ArgList *
@@ -751,13 +836,13 @@ ParserImpl::ParseRestCondition(Expression *condition)
       return; 
 
    GetToken();
-   SyntaxNode * expr = ParseCondition();
-   if(! expr)
+   SyntaxNode * cond = ParseCondition();
+   if(! cond)
    {
       Error(_("Expected Condition after conditional operator."));
       return;
    }
-   condition->SetRight(expr);
+   condition->SetRight(cond);
    switch(t.GetChar())
    {
    case '&':
@@ -776,13 +861,9 @@ ParserImpl::ParseRestExpression(Expression *expression)
    ASSERT(expression);
    
    /* RESTEXPRESSION :=
-      | + TERM
-      | - TERM
+      | + EXPRESSION
+      | - EXPRESSION
       | EMPTY
-
-      The term passed as argument is the left side of the operator in
-      the original expression. We return not the rest expression but
-      the full expression here, so we need this.
    */
    Token t = PeekToken();
 
@@ -818,13 +899,9 @@ ParserImpl::ParseRestTerm(Expression *expression)
 {
    MOcheck();
    /* RESTTERM :=
-      | * FACTOR
-      | / FACTOR
+      | * TERM
+      | / TERM
       | EMPTY
-
-      The term passed as argument is the left side of the operator in
-      the original expression. We return not the rest expression but
-      the full expression here, so we need this.
    */
    Token t = PeekToken();
    if(t.GetType() == TT_EOF
@@ -880,6 +957,70 @@ ParserImpl::ParseCondition(void)
    return expr;
 }
 
+Block *
+ParserImpl::ParseBlock(void)
+{
+   MOcheck();
+   /* STATEMENT :=
+      | { STATEMENT RESTSTATEMENT }
+      | CONDITION;
+   */
+
+   Token t = PeekToken();
+   if(t.GetType() == TT_Char && t.GetChar() == '{')
+   {
+      GetToken();
+      Block * stmt = ParseBlock();
+      if(! stmt)
+      {
+         Error(_("Expected Block after '{'"));
+         return NULL;
+      }
+      ParseRestBlock(stmt);
+      t = GetToken();
+      if(t.GetType() != TT_Char || t.GetChar() != '}')
+      {
+         Error(_("Expected Condition after conditional operator."));
+         delete stmt;
+         return NULL;
+      }
+   }
+   // condition
+   SyntaxNode *cond = ParseCondition();
+   if(! cond)
+      return NULL;
+   t = PeekToken();
+   if(t.GetType() != TT_Char || t.GetChar() != ';')
+   {
+      Error(_("Expected ';' at end of condition."));
+      delete cond;
+      return NULL;
+   }
+   GetToken();
+   Block *block = new Block;
+   block->AddNode(cond);
+   return block;
+}
+      
+void
+ParserImpl::ParseRestBlock(Block *parent)
+{
+   MOcheck();
+   /* RESTSTATEMENT :=
+      | STATEMENT ; RESTSTATEMENT
+      | EMPTY
+   */
+
+   Block *stmt = ParseBlock();
+   if(! stmt)
+      return; // empty statement
+   // else:
+   do
+   {
+      parent->AddNode(stmt);
+      stmt = ParseBlock();
+   }while(stmt);
+}
 
 SyntaxNode *
 ParserImpl::ParseExpression(void)
@@ -952,14 +1093,41 @@ private:
 
 /** FOR TESTING ONLY, called from MAppBase::OnStartup(): **/
 
+
+#include "MDialogs.h"
+
 #if 0
 static const char *testprogram = " 5 + 4 * ( 3 * 4 ) + 5 * print() ";
 static const char *testprogram = " 5 + 4 * 4 -1";
 #endif
 
+extern "C"
+{
+   static long echo_func(ArgList *args)
+   {
+      ASSERT(args);
+      String msg = "Echo_Function: ";
+      for(size_t i = 0; i < args->Count(); i++)
+      {
+         msg << args->GetArg(i)->ToString();
+         if(i < args->Count()-1)
+            msg << ',';
+      }
+      MDialog_Message(msg);
+      return 1;
+   }
+   
+   static long func_rFive(ArgList *args)
+   {  return 5; }
+};
+
 
 void FilterTest(const String &program)
 {
+
+   FunctionCall::AddFunction("print", echo_func);
+   FunctionCall::AddFunction("Five", func_rFive);
+
    Parser *p = Parser::Create(program);
    SyntaxNode *sn = p->Parse();
    if(sn)

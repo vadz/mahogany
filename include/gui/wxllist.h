@@ -672,10 +672,6 @@ public:
 
       m_Dirty = true;
    }
-   /** Marks the following lines as dirty.
-       @param recurse if -1 recurse to end of list, otherwise depth of recursion.
-   */
-   void MarkNextDirty(int recurse = 0);
    /// Reset the dirty flag
    void MarkClean() { m_Dirty = false; m_updateLeft = -1; }
 
@@ -692,15 +688,8 @@ private:
    void SetHeight(CoordType height, wxLayoutList *llist)
       { m_Height = height; MarkDirty(); }
 
-   /** Moves the linenumbers one on, because a line has been inserted
-       or deleted.
-       @param delta either +1 or -1
-    */
-   void MoveLines(int delta)
-      {
-         m_LineNumber += delta;
-         if(m_Next) m_Next->MoveLines(delta);
-      }
+   /** Updates the line numbers. */
+   void ReNumber(void);
    //@}
 private:
    /// The line number.
@@ -1136,25 +1125,7 @@ public:
    void DecNumLines() { m_numLines--; }
 
    /// get the line by number
-   wxLayoutLine *GetLine(CoordType index) const
-   {
-       wxASSERT_MSG( (0 <= index) && (index < (CoordType)m_numLines),
-                     "invalid index" );
-
-       wxLayoutLine *line;
-       CoordType n = index;
-       for ( line = m_FirstLine; line && n-- > 0; line = line->GetNextLine() )
-           ;
-
-       if ( line )
-       {
-          // should be the right one
-          wxASSERT( line->GetLineNumber() == index );
-       }
-
-       return line;
-   }
-
+   wxLayoutLine *GetLine(CoordType index) const;
 private:
    /// Clear the list.
    void InternalClear(void);

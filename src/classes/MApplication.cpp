@@ -559,7 +559,7 @@ MAppBase::OnStartup()
    /* Test the Filtering subsystem. Completely disabled in release
       build. */
    extern void FilterTest(const String &program);
-   FilterTest(m_profile->readEntry("FilterTest"," 5 + 4 * ( 3 * 4 ) + 5 * print() "));
+   FilterTest(m_profile->readEntry("FilterTest"," 5 + 4 * ( 3 * 4 ) + 5 * print(); "));
 #endif
 
    return TRUE;

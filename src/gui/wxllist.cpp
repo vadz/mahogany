@@ -645,7 +645,7 @@ wxLayoutLine::wxLayoutLine(wxLayoutLine *prev, wxLayoutList *llist)
    if(m_Next)
    {
       m_Next->m_Previous = this;
-      m_Next->MoveLines(+1);
+      m_Next->ReNumber();
    }
 
    m_StyleInfo = llist->GetDefaultStyleInfo();
@@ -801,11 +801,6 @@ wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj)
 
    MarkDirty(xpos);
 
-   // If we insert a command object, we need to recalculate all lines
-   // to update their styleinfo structure.
-   if(obj->GetType() == WXLO_TYPE_CMD)
-      MarkNextDirty(-1);
-
    CoordType offset;
    wxLOiterator i = FindObject(xpos, &offset);
    if(i == NULLIT)
@@ -901,10 +896,6 @@ wxLayoutLine::Delete(CoordType xpos, CoordType npos)
          len = (**i).GetLength();
          m_Length -= len;
          npos -= len;
-         // If we delete a command object, we need to recalculate all lines
-         // to update their styleinfo structure.
-         if((**i).GetType() == WXLO_TYPE_CMD)
-            MarkNextDirty(-1);
          m_ObjectList.erase(i);
       }
       else
@@ -939,18 +930,6 @@ wxLayoutLine::Delete(CoordType xpos, CoordType npos)
    }
 
    return npos;
-}
-
-void
-wxLayoutLine::MarkNextDirty(int recurse)
-{
-   wxLayoutLine *line = GetNextLine();
-   while(line && (recurse == -1 || recurse >= 0))
-   {
-      line->MarkDirty();
-      line = line->GetNextLine();
-      if(recurse > 0) recurse --;
-   }
 }
 
 bool
@@ -1010,32 +989,17 @@ wxLayoutLine::DeleteLine(bool update, wxLayoutList *llist)
    if(m_Previous)
        m_Previous->m_Next = m_Next;
 
-   wxLayoutLine *next = m_Next;
-   if ( next )
-   {
-      // get the line numbers right again
-      next->MoveLines(-1);
-   }
+   // get the line numbers right again
+   if ( update && m_Next)
+      m_Next->ReNumber();
 
    MarkDirty();
-
-   if(update)
-   {
-      /* We assume that if we have more than one object in the list,
-         this means that we have a command object, so we need to
-         update the following lines. */
-      if(m_ObjectList.size() > 1 ||
-         ( m_ObjectList.begin() != NULLIT &&
-           (**m_ObjectList.begin()).GetType() == WXLO_TYPE_CMD)
-         )
-         MarkNextDirty(-1);
-   }
 
    delete this;
 
    llist->DecNumLines();
 
-   return next;
+   return m_Next;
 }
 
 void
@@ -1317,6 +1281,16 @@ wxLayoutLine::Break(CoordType xpos, wxLayoutList *llist)
    return newLine;
 }
 
+void
+wxLayoutLine::ReNumber(void)
+{
+   CoordType lineNo = m_Previous ? m_Previous->m_LineNumber+1 : 0;
+   m_LineNumber = lineNo++;
+   
+   for(wxLayoutLine *next = GetNextLine();
+       next; next = next->GetNextLine())
+      next->m_LineNumber = lineNo++;
+}
 
 void
 wxLayoutLine::MergeNextLine(wxLayoutList *llist)
@@ -1358,7 +1332,7 @@ wxLayoutLine::MergeNextLine(wxLayoutList *llist)
    SetNext(nextLine);
    if ( nextLine )
    {
-      nextLine->MoveLines(-1);
+      nextLine->ReNumber();
    }
    else
    {
@@ -2570,6 +2544,10 @@ wxLayoutList::EndSelection(const wxPoint& cposOrig, const wxPoint& spos)
    WXLO_DEBUG(("Ending selection at %ld/%ld", cpos.x, cpos.y));
    m_Selection.m_selecting = false;
    m_Selection.m_valid = true;
+   /// In case we just clicked somewhere, the selection will have zero 
+   /// size, so we discard it immediately.
+   if(m_Selection.m_CursorA == m_Selection.m_CursorB)
+      DiscardSelection();
 }
 
 void
@@ -2700,6 +2678,35 @@ wxLayoutList::EndHighlighting(wxDC &dc)
    dc.SetTextBackground(m_CurrentStyleInfo.m_bg);
    dc.SetBackgroundMode(wxTRANSPARENT);
 #endif
+}
+
+
+wxLayoutLine *
+wxLayoutList::GetLine(CoordType index) const
+{
+   wxASSERT_MSG( (0 <= index) && (index < (CoordType)m_numLines),
+                 "invalid index" );
+
+   wxLayoutLine *line;
+   CoordType n = index;
+#ifdef DEBUG
+   CoordType lineNo = 0;
+#endif
+       
+   for ( line = m_FirstLine; line && n-- > 0; line =
+            line->GetNextLine() )
+   {
+      wxASSERT(line->GetLineNumber() == lineNo );
+      lineNo++;
+   }
+
+   if ( line )
+   {
+      // should be the right one
+      wxASSERT( line->GetLineNumber() == index );
+   }
+
+   return line;
 }
 
 
