@@ -1279,6 +1279,12 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
          ASSERT_MSG( uid != UID_ILLEGAL, "invalid uid after ReallyGet()?" );
       }
 
+      // we need to update m_selIsUnique right now because usually it's updated
+      // lazily during the idle time but we need the real value of it in the
+      // test below, otherwise the second item selected would be previewed as
+      // well because at that moment m_selIsUnique would still be 1
+      UpdateUniqueSelFlag();
+
       // preview the message when it is the first one we select or if there is
       // exactly one currently selected message (which will be deselected by
       // PreviewItem then); selecting subsequent messages just extends the
