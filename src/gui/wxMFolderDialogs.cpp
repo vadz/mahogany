@@ -1169,11 +1169,9 @@ wxFolderPropertiesPage::OnChoice(wxCommandEvent& event)
    {
       m_acceptUnsignedSSL->Enable(m_useSSL->GetSelection() != SSLSupport_None);
    }
-   else
 #endif // USE_SSL
-   {
-      OnEvent();
-   }
+
+   OnEvent();
 }
 
 void
