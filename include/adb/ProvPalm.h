@@ -96,7 +96,7 @@ public:
   virtual AdbEntry *GetEntry(const String& name);
   virtual AdbEntryGroup *GetGroup(const String& name) const;
 
-  virtual bool Exists(const String& path) const;
+  virtual bool Exists(const String& path);
 
   virtual AdbEntry *CreateEntry(const String& strName);
   virtual void AddEntry(PalmEntry* p_Entry);
@@ -151,7 +151,7 @@ public:
   virtual AdbEntry *GetEntry(const String& name)
     { return m_pRootGroup->GetEntry(name); }
 
-  virtual bool Exists(const String& path) const
+  virtual bool Exists(const String& path)
     { return m_pRootGroup->Exists(path); }
 
   virtual size_t GetEntryNames(wxArrayString& aNames) const

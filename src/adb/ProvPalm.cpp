@@ -58,7 +58,7 @@ IMPLEMENT_ADB_PROVIDER(PalmDataProvider, TRUE, "PalmOS-ADB (ReadOnly)", Name_No)
 // PalmEntry
 // ----------------------------------------------------------------------------
 
-PalmEntry::PalmEntry(PalmEntryGroup *pGroup, const String& strName, bool bNew = false)
+PalmEntry::PalmEntry(PalmEntryGroup *pGroup, const String& strName, bool bNew)
 {
   m_pGroup = pGroup;
   m_astrFields.Add(strName);
@@ -302,11 +302,6 @@ String PalmBook::GetName() const
 void PalmBook::SetName(const String& strName)
 {
   m_strName = strName;
-}
-
-String PalmBook::GetName() const
-{
-  return m_strName;
 }
 
 void PalmBook::SetDescription(const String& strDesc)
