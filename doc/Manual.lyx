@@ -95,50 +95,53 @@ Changes against the previous version
 
 0.63 against 0.62
 \layout Standard
-Again, most of the effort went into optimizing the program for speed.
-Filtering and moving mail messages on IMAP servers is now an order of
-magnitude faster and startup time has been reduced too (especially under
-Windows). Several fatal buttons which had unfortunately crept into Win32
-release were fixed as well.
 
+Again, most of the effort went into optimizing the program for speed.
+ Filtering and moving mail messages on IMAP servers is now an order of magnitude
+ faster and startup time has been reduced too (especially under Windows).
+ Several fatal bugs which had unfortunately crept into Win32 release were
+ fixed as well.
 \layout Standard
+
 The new features this time include
 \layout Itemize
+
 Showing the total number and the number of unread messages directly in the
-folder tree
-
+ folder tree
 \layout Itemize
+
 New so-called unattended, or away, mode in which all new mail notifications
-and any interactive dialogs are temporarily suppressed
-
+ and any interactive dialogs are temporarily suppressed
 \layout Itemize
-A few new commands such as "Clear folder" to delete all messages in a folder
-without even opening it (handy for emptying the trash folder) and "Close" and
-"Close all" folder(s).
 
+A few new commands such as "Clear folder" to delete all messages in a folder
+ without even opening it (handy for emptying the trash folder) and "Close"
+ and "Close all" folder(s).
 \layout Standard
+
 There are several more minor improvements as well:
 \layout Itemize
+
 New URL popup menu in the message viewer and "Open URL in new browser window"
-option.
-
+ option.
 \layout Itemize
-A new option to automatically select the units for message size (kb/mb)
 
+A new option to automatically select the units for message size (KB/MB)
 \layout Itemize
+
 Python 2.x is now supported and not only 1.5 (Unix)
-
 \layout Standard
+
 Some of non fatal but annoying bugs fixed in this release are:
 \layout Itemize
+
 Fixed server side searching (IMAP only)
-
 \layout Itemize
+
 Fixed text highlighting when selecting text in the viewer
-
 \layout Itemize
-Renaming of the folders in the tree fixed once again
 
+Renaming of the folders in the tree fixed once again
 \layout Subsubsection
 
 0.62 against 0.61
