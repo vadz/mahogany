@@ -39,9 +39,9 @@ class ASTicketList;
 class HeaderInfoList_obj;
 class FolderViewAsyncStatus;
 
-enum wxFolderListCtrlFields
+enum wxFolderListColumn
 {
-   WXFLC_STATUS = 0,
+   WXFLC_STATUS,
    WXFLC_DATE,
    WXFLC_SIZE,
    WXFLC_FROM,
@@ -102,7 +102,7 @@ public:
    Ticket MarkRead(const UIdArray& messages, bool read);
 
    /** For use by the listctrl: get last previewed uid: */
-   UIdType GetPreviewUId(void) const { return m_uidPreviewed; }
+   UIdType GetPreviewUId(void) const;
 
    /** Are we previewing anything? */
    bool HasPreview() const { return GetPreviewUId() != UID_ILLEGAL; }
@@ -122,16 +122,13 @@ public:
    */
    UIdType GetFocus() const;
 
-   /// Show a message in the preview window.
-   void PreviewMessage(long uid);
-
    /// [de]select all items
    void SelectAll(bool on = true);
 
    /// select all messages by some status/flag
    void SelectAllByStatus(MailFolder::MessageStatus status, bool isSet = true);
 
-   /// return the MWindow pointer:
+   /// return the parent window
    MWindow *GetWindow(void) const { return m_SplitterWindow; }
 
    /// event processing
@@ -175,9 +172,6 @@ public:
    /// for use by the listctrl only:
    bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
 
-   /// called when the focused (== current) item in the listctrl changes
-   void OnFocusChange(long item, UIdType uid);
-
    /// get the parent frame of the folder view
    MFrame *GetParentFrame() const { return m_Frame; }
 
@@ -194,17 +188,17 @@ protected:
    /// set the folder to show, can't be NULL (unlike in SetFolder)
    void ShowFolder(MailFolder *mf);
 
-   /// set the currently previewed UID
-   void SetPreviewUID(UIdType uid);
-
-   /// invalidate the last previewed UID
-   void InvalidatePreviewUID() { SetPreviewUID(UID_ILLEGAL); }
+   /// Show a message in the preview window: only called by wxFolderListCtrl!
+   void PreviewMessage(long uid);
 
    /// select the first interesting message in the folder
    void SelectInitialMessage(const HeaderInfoList_obj& hil);
 
    /// select the next unread message, return false if no more
    bool SelectNextUnread();
+
+   /// called when the focused (== current) item in the listctrl changes
+   void OnFocusChange(long item, UIdType uid);
 
    /// get the number of the messages we show
    inline size_t GetHeadersCount() const;
@@ -216,16 +210,17 @@ private:
    /// number of deleted messages in the folder
    unsigned long m_nDeleted;
 
-   /// its parent
+   /// the parent window
    MWindow *m_Parent;
+
    /// and the parent frame
    MFrame *m_Frame;
 
-   /// either a listctrl or a treectrl
-   wxFolderListCtrl *m_FolderCtrl;
-
    /// a splitter window: it contains m_FolderCtrl and m_MessageWindow
    wxSplitterWindow *m_SplitterWindow;
+
+   /// the control showing the message headers
+   wxFolderListCtrl *m_FolderCtrl;
 
    /// container window for the message viewer (it changes, we don't)
    wxFolderMsgWindow *m_MessageWindow;
@@ -235,15 +230,6 @@ private:
 
    /// the command processor object
    MsgCmdProc *m_msgCmdProc;
-
-   /// UId of last previewed message (may be UID_ILLEGAL)
-   UIdType m_uidPreviewed;
-
-   /// index of the message being previewed in the list control
-   long m_itemPreviewed;
-
-   /// UId of the focused message, may be different from m_uidPreviewed!
-   UIdType m_uidFocused;
 
    /// a list of pending tickets from async operations
    ASTicketList *m_TicketList;
@@ -276,6 +262,8 @@ private:
       int font, size;
       /// do we want to preview messages when activated?
       bool previewOnSingleClick;
+      /// delay between selecting a message and previewing it
+      unsigned long previewDelay;
       /// strip e-mail address from sender and display only name?
       bool senderOnlyNames;
       /// replace "From" with "To" for messages sent from oneself?

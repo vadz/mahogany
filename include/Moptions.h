@@ -256,6 +256,7 @@ extern const MOption MP_FVIEW_AUTONEXT_UNREAD_MSG;
 extern const MOption MP_FVIEW_AUTONEXT_UNREAD_FOLDER;
 extern const MOption MP_FVIEW_STATUS_UPDATE;
 extern const MOption MP_FVIEW_STATUS_FMT;
+extern const MOption MP_FVIEW_PREVIEW_DELAY;
 
 // folder tree
 extern const MOption MP_FOLDER_BGCOLOUR;
@@ -849,6 +850,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FVIEW_STATUS_UPDATE_NAME "FViewStatUpdate"
 /// folder view status bar string
 #define   MP_FVIEW_STATUS_FMT_NAME  "FViewStatFmt"
+/// delay before previewing the selected item in the folder view (0 to disable)
+#define MP_FVIEW_PREVIEW_DELAY_NAME "FViewPreviewDelay"
 // how to show the size (MessageSizeShow enum value)
 #define MP_FVIEW_SIZE_FORMAT_NAME   "SizeFormat"
 /// replace "From" address with "To" in messages from oneself?
@@ -1693,6 +1696,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FVIEW_STATUS_UPDATE_DEFVAL 0L
 /// folder view status bar string
 #define   MP_FVIEW_STATUS_FMT_DEFVAL _("Date: $date, Subject: $subject, From: $from")
+/// delay before previewing the selected item in the folder view (0 to disable)
+#define MP_FVIEW_PREVIEW_DELAY_DEFVAL 500L
 //@}
 /**@name  Font settings for folder tree */
 //@{

@@ -103,6 +103,7 @@ extern const MOption MP_FVIEW_FONT_SIZE;
 extern const MOption MP_FVIEW_FROM_REPLACE;
 extern const MOption MP_FVIEW_NAMES_ONLY;
 extern const MOption MP_FVIEW_NEWCOLOUR;
+extern const MOption MP_FVIEW_PREVIEW_DELAY;
 extern const MOption MP_FVIEW_RECENTCOLOUR;
 extern const MOption MP_FVIEW_SIZE_FORMAT;
 extern const MOption MP_FVIEW_STATUS_FMT;
@@ -120,7 +121,7 @@ extern const MOption MP_USE_TRASH_FOLDER;
 static const int WXMENU_FVIEW_CONFIG_SORT = 3000;
 static const int WXMENU_FVIEW_RESET_SORT = 3001;
 
-static const char *wxFLC_ColumnNames[] =
+static const char *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
 {
    gettext_noop("Status"),
    gettext_noop("Date"),
@@ -311,7 +312,17 @@ public:
    */
    bool SelectNextByStatus(MailFolder::MessageStatus status, bool isSet);
 
-   /// select next unread or flagged message after the given one
+   /**
+     Select next unread or flagged message after the given one.
+
+     It will always focus the message it found, if any.
+
+     @param hil the headers to use
+     @param indexStart the index after which to look (exclusive)
+     @param status the status bit to look for
+     @param isSet if true, check that status bit is set, otherwise - cleared
+     @return uid of the item we found or UID_ILLEGAL if no more
+    */
    UIdType SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
                                  long indexStart = -1,
                                  MailFolder::MessageStatus status =
@@ -322,9 +333,15 @@ public:
    bool IsPreviewed(long item) const
       { return item == m_itemPreviewed; }
 
+   /// get the item being previewed
+   long GetPreviewedItem() const { return m_itemPreviewed; }
+
    /// return true if we preview the item with this UID
    bool IsUIdPreviewed(UIdType uid) const
-      { return m_FolderView->GetPreviewUId() == uid; }
+      { return uid == m_uidPreviewed; }
+
+   /// get the UID currently being viewed (may be UID_ILLEGAL)
+   UIdType GetPreviewUId() const { return m_uidPreviewed; }
 
    /// get the UID of the given item
    UIdType GetUIdFromIndex(long item) const
@@ -340,9 +357,6 @@ public:
 
    /// get the only selected item, return -1 if 0 or >= 2 items are selected
    long GetUniqueSelection() const;
-
-   /// get the item being previewed
-   long GetPreviewedItem() const { return m_itemPreviewed; }
 
    /// get the selected items (use the focused one if no selection)
    UIdArray GetSelectionsOrFocus() const;
@@ -367,10 +381,9 @@ public:
    void OnCommandEvent(wxCommandEvent& event)
       { m_FolderView->OnCommandEvent(event); }
 
-   void OnIdle(wxIdleEvent& event);
+   void OnPreviewTimer(wxTimerEvent& event);
 
-   /// called by wxFolderView before previewing the focused message
-   void OnPreview();
+   void OnIdle(wxIdleEvent& event);
    //@}
 
    /// change the profile we use
@@ -381,8 +394,17 @@ public:
                      int fontFamily, int fontSize,
                      int columns[WXFLC_NUMENTRIES]);
 
+   /// remember that we preview this message, return true if != old one
+   bool SetPreviewMsg(long idx, UIdType uid);
+
+   /// forget about the message we were previewing
+   void InvalidatePreview();
+
    /// set m_PreviewOnSingleClick flag
    void SetPreviewOnSingleClick(bool flag) { m_PreviewOnSingleClick = flag; }
+
+   /// set m_PreviewDelay value
+   void SetPreviewDelay(unsigned long delay) { m_PreviewDelay = delay; }
 
    /// save the widths of the columns in profile if needed
    void SaveColWidths();
@@ -402,6 +424,12 @@ protected:
    {
       m_FolderView->MoveToNextUnread();
    }
+
+   /// preview this item in folder view
+   void PreviewItem(long idx, UIdType uid);
+
+   /// schedule this item for previewing after m_PreviewDelay expires
+   void PreviewItemDelayed(long idx, UIdType uid);
 
    /// get the colour to use for this entry (depends on status)
    wxColour GetEntryColour(const HeaderInfo *hi) const;
@@ -473,10 +501,7 @@ protected:
    /// cached attribute
    wxListItemAttr *m_attr;
 
-   /// parent window
-   wxWindow *m_Parent;
-
-   /// the folder view
+   /// the associated folder view
    wxFolderView *m_FolderView;
 
    /// true until SelectInitialMessage() is called, don't update the control
@@ -492,6 +517,9 @@ protected:
 
    /// uid of the currently focused item or UID_ILLEGAL
    UIdType m_uidFocus;
+
+   /// uid of the item currently previewer or UID_ILLEGAL (!= m_uidFocus)
+   UIdType m_uidPreviewed;
 
    /// the currently focused item
    long m_itemFocus;
@@ -517,10 +545,22 @@ protected:
    wxString m_widthsOld;
 
    /// the column where the sort indicator is currently drawn or WXFLC_NONE
-   wxFolderListCtrlFields m_colSort;
+   wxFolderListColumn m_colSort;
 
    /// do we preview a message on a single mouse click?
    bool m_PreviewOnSingleClick;
+
+   /// delay between selecting a message and previewing it
+   unsigned long m_PreviewDelay;
+
+   /// the item which will be previewed once m_PreviewDelay expires
+   long m_itemDelayed;
+
+   /// uid of m_itemDelayed
+   UIdType m_uidDelayed;
+
+   /// timer used for delayed previewing
+   wxTimer m_timerPreview;
 
    /// do we handle OnSelected()?
    bool m_enableOnSelect;
@@ -608,7 +648,7 @@ public:
 // ----------------------------------------------------------------------------
 
 // return the n-th shown column (WXFLC_NONE if no more columns)
-static wxFolderListCtrlFields GetColumnByIndex(const int *columns, size_t n)
+static wxFolderListColumn GetColumnByIndex(const int *columns, size_t n)
 {
    size_t col;
    for ( col = 0; col < WXFLC_NUMENTRIES; col++ )
@@ -618,7 +658,7 @@ static wxFolderListCtrlFields GetColumnByIndex(const int *columns, size_t n)
    }
 
    // WXFLC_NONE == WXFLC_NUMENTRIES so the return value is always correct
-   return (wxFolderListCtrlFields)col;
+   return (wxFolderListColumn)col;
 }
 
 // read the columns info from profile into provided array
@@ -648,7 +688,7 @@ static inline wxString GetColumnName(size_t n)
 }
 
 // return the columns index from name
-static wxFolderListCtrlFields GetColumnByName(const wxString& name)
+static wxFolderListColumn GetColumnByName(const wxString& name)
 {
    size_t n;
    for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
@@ -657,10 +697,10 @@ static wxFolderListCtrlFields GetColumnByName(const wxString& name)
          break;
    }
 
-   return (wxFolderListCtrlFields)n;
+   return (wxFolderListColumn)n;
 }
 
-static wxFolderListCtrlFields ColFromSortOrder(MessageSortOrder sortOrder)
+static wxFolderListColumn ColFromSortOrder(MessageSortOrder sortOrder)
 {
    switch ( sortOrder )
    {
@@ -688,7 +728,7 @@ static wxFolderListCtrlFields ColFromSortOrder(MessageSortOrder sortOrder)
    }
 }
 
-static MessageSortOrder SortOrderFromCol(wxFolderListCtrlFields col)
+static MessageSortOrder SortOrderFromCol(wxFolderListColumn col)
 {
    switch ( col )
    {
@@ -838,6 +878,8 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
 
    EVT_LIST_KEY_DOWN(-1, wxFolderListCtrl::OnListKeyDown)
 
+   EVT_TIMER(-1, wxFolderListCtrl::OnPreviewTimer)
+
    EVT_IDLE(wxFolderListCtrl::OnIdle)
 END_EVENT_TABLE()
 
@@ -846,8 +888,8 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 
 wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
+                : m_timerPreview(this)
 {
-   m_Parent = parent;
    m_profile = fv->GetProfile();
    m_profile->IncRef(); // we wish to keep it until dtor
 
@@ -856,6 +898,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    InvalidateCache();
 
    m_PreviewOnSingleClick = false;
+   m_PreviewDelay = 0;
 
    m_FolderView = fv;
    m_enableOnSelect = true;
@@ -869,11 +912,11 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    // start in frozen state, wxFolderView should call Thaw() later
    m_isFrozen = true;
 
-   // no item focused yet
-   m_uidFocus = UID_ILLEGAL;
-   m_itemFocus = -1;
+   // no items focused/previewed yet
+   m_uidFocus =
+   m_uidPreviewed = UID_ILLEGAL;
 
-   // nor previewed
+   m_itemFocus =
    m_itemPreviewed = -1;
 
    // no selection at all
@@ -1141,7 +1184,7 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
    }
    else // preview on double click
    {
-      m_FolderView->PreviewMessage(uid);
+      PreviewItem(focused, uid);
    }
 }
 
@@ -1151,25 +1194,31 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 
    wxLogTrace(M_TRACE_SELECTION, "%ld was selected", item);
 
-   UpdateUniqueSelFlag();
-
    if ( m_enableOnSelect )
    {
       // update it as it is normally only updated in OnIdle() which wasn't
       // called yet
       m_itemFocus = GetFocusedItem();
 
-      // only preview the message when it is the first one we select,
-      // selecting subsequent messages just extends the selection but doesn't
-      // show them
-      if ( m_selIsUnique && (item == m_itemFocus) )
+      // preview the message when it is the first one we select or if there is
+      // exactly one currently selected message (which will be deselected by
+      // PreviewItem then); selecting subsequent messages just extends the
+      // selection but doesn't show them
+      long sel = GetFirstSelected();
+      if ( sel == -1 || GetNextSelected(sel) == -1 )
       {
-         // the current message is selected - view it if we don't yet
-         m_FolderView->PreviewMessage(GetFocusedUId());
+         // if m_PreviewDelay != 0, use delayed preview, i.e. just launch the
+         // timer now and only preview the messages when it expires: this
+         // allows to quickly move through the message list without having to
+         // wait for the message to be previewed but when you stop, the
+         // message will be previewed automatically
+         //
+         // if m_PreviewDelay == 0, this is just the same as PreviewItem()
+         PreviewItemDelayed(m_itemFocus, GetFocusedUId());
       }
       //else: don't react to selecting another message
    }
-   //else: processing this is temporarily blocked
+   //else: processing this notification is temporarily blocked
 }
 
 // called by RETURN press
@@ -1190,7 +1239,7 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
    }
    else // do preview
    {
-      m_FolderView->PreviewMessage(uid);
+      PreviewItem(event.m_itemIndex, uid);
    }
 }
 
@@ -1215,7 +1264,7 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
    mApplication->UpdateAwayMode();
 
    // get the column which was clicked
-   wxFolderListCtrlFields col = GetColumnByIndex(m_columns, event.GetColumn());
+   wxFolderListColumn col = GetColumnByIndex(m_columns, event.GetColumn());
    wxCHECK_RET( col != WXFLC_NONE, "should have a valid column" );
 
    MessageSortOrder orderCol = SortOrderFromCol(col);
@@ -1368,21 +1417,82 @@ void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
    event.Skip();
 }
 
-void wxFolderListCtrl::OnPreview()
+// ----------------------------------------------------------------------------
+// wxFolderListCtrl preview helpers
+// ----------------------------------------------------------------------------
+
+void wxFolderListCtrl::PreviewItem(long idx, UIdType uid)
 {
-   m_itemPreviewed = GetFocusedItem();
+   // remember this item as being previewed
+   if ( SetPreviewMsg(idx, uid) )
+   {
+      // and actually show it in the folder view if it's different from the
+      // old one
+      m_FolderView->PreviewMessage(uid);
+   }
+}
+
+void wxFolderListCtrl::OnPreviewTimer(wxTimerEvent& event)
+{
+   // preview timer expirer, do we still have the message we wanted to preview
+   // selected?
+   if ( GetUniqueSelection() == m_itemDelayed )
+   {
+      // do we still have this message? it might have been deleted
+      if ( GetUIdFromIndex(m_itemDelayed) == m_uidDelayed )
+         PreviewItem(m_itemDelayed, m_uidDelayed);
+   }
+
+   m_itemDelayed = -1;
+   m_uidDelayed = UID_ILLEGAL;
+}
+
+void wxFolderListCtrl::PreviewItemDelayed(long idx, UIdType uid)
+{
+   // first of all, do we need to delay item previewing at all?
+   if ( m_PreviewDelay )
+   {
+      // remember the item we wanted to preview
+      m_itemDelayed = idx;
+      m_uidDelayed = uid;
+
+      // start (or restart) the timer
+      m_timerPreview.Start(m_PreviewDelay, TRUE /* one shot */);
+   }
+   else // no, preview the item immediately
+   {
+      PreviewItem(idx, uid);
+   }
+}
+
+bool wxFolderListCtrl::SetPreviewMsg(long idx, UIdType uid)
+{
+   if ( uid == m_uidPreviewed )
+      return false;
+
+   m_itemPreviewed = idx;
+   m_uidPreviewed = uid;
 
    // as folder view calls us itself, no need to notify it
    wxFolderListCtrlBlockOnSelect noselect(this);
 
+   // if we had exactly one selected item before, deselect it
    long selOld = GetUniqueSelection();
-   if ( selOld != m_itemPreviewed )
+   if ( selOld != m_itemPreviewed && selOld != -1 )
    {
-      if ( selOld != -1 )
-         Select(selOld, false);
-
-      Select(m_itemPreviewed, true);
+      Select(selOld, false);
    }
+
+   // in any case, select the item being previewed
+   Select(m_itemPreviewed, true);
+
+   return true;
+}
+
+void wxFolderListCtrl::InvalidatePreview()
+{
+   m_itemPreviewed = -1;
+   m_uidPreviewed = UID_ILLEGAL;
 }
 
 // ----------------------------------------------------------------------------
@@ -1535,6 +1645,9 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
       RefreshItems(posMin, posMax);
    }
 
+   // check if we [still] have exactly one selection
+   UpdateUniqueSelFlag();
+
    // check if the focus changed
    UpdateFocus();
 }
@@ -1618,7 +1731,7 @@ void wxFolderListCtrl::CreateColumns()
    // add the new columns
    for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
    {
-      wxFolderListCtrlFields col = GetColumnByIndex(m_columns, n);
+      wxFolderListColumn col = GetColumnByIndex(m_columns, n);
       if ( col == WXFLC_NONE )
          break;
 
@@ -1636,7 +1749,7 @@ void wxFolderListCtrl::UpdateSortIndicator()
    long sortOrder = READ_CONFIG(m_FolderView->m_Profile, MP_MSGS_SORTBY);
    MessageSortOrder orderPrimary = GetSortCritDirect(sortOrder);
 
-   wxFolderListCtrlFields colSort = ColFromSortOrder(orderPrimary);
+   wxFolderListColumn colSort = ColFromSortOrder(orderPrimary);
 
    // if it's not the same as the old one, clear the indicator in the prev
    // column
@@ -1674,20 +1787,6 @@ void wxFolderListCtrl::UpdateFocus()
    if ( itemFocus == m_itemFocus )
       return;
 
-   // What we do here is to automatically preview the currently focused message
-   // if and only if there is exactly one item currently selected.
-   //
-   // Rationale: if there are no items selected, the user is just moving
-   // through the headers list and doesn't want to preview anything at all, so
-   // don't do anything. If there are 2 or more items selected, we shouldn't
-   // deselect them as it would cancel the users work which he did to select
-   // the messages in the first place. But if he just moved to the next
-   // message after previewing the previous one, he does want to preview it
-   // (unless "preview on select" option is off) but to do this he has to
-   // manually unselect the previously selected message and only then select
-   // this one (as selecting this one now won't preview it because it is not
-   // the first selected message, see OnSelected()!)
-
    m_itemFocus = itemFocus;
 
    // we can't call GetUIdFromIndex() from here as the item might not be
@@ -1701,12 +1800,6 @@ void wxFolderListCtrl::UpdateFocus()
    if ( m_itemFocus == -1 )
    {
       m_FolderView->OnFocusChange(-1, UID_ILLEGAL);
-   }
-
-   if ( m_selIsUnique && m_itemFocus != -1 )
-   {
-      // will set m_selIsUnique to true back again
-      Select(m_itemFocus, true);
    }
 }
 
@@ -1794,7 +1887,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
       return _("...");
    }
 
-   wxFolderListCtrlFields field = GetColumnByIndex(m_columns, column);
+   wxFolderListColumn field = GetColumnByIndex(m_columns, column);
 
    // deal with invalid headers first - these headers were not retrieved from
    // server because the user aborted the operation
@@ -2063,20 +2156,12 @@ wxFolderListCtrl::SelectNextByStatus(MailFolder::MessageStatus status,
    UIdType uid = SelectNextUnreadAfter(hil, idxFocused, status, isSet);
    if ( uid != UID_ILLEGAL )
    {
-      // unselect the previously selected message if there was exactly one
-      // selected - i.e. move selection to the new focus
-      if ( m_selIsUnique )
-      {
-         Select(m_itemFocus, false);
-      }
-
       // always preview the selected message, if we did "Show next unread"
       // we really want to see it regardless of m_PreviewOnSingleClick
       // setting
-      m_FolderView->PreviewMessage(uid);
-
-      // notify the folder view about the message change
-      m_FolderView->OnFocusChange(idxFocused, uid);
+      //
+      // NB: SelectNextUnreadAfter() has already changed the focus
+      PreviewItem(GetFocusedItem(), uid);
 
       return true;
    }
@@ -2151,7 +2236,6 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_TicketList = ASTicketList::Create();
 
    m_nDeleted = 0;
-   InvalidatePreviewUID();
 
    m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
    m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
@@ -2165,6 +2249,8 @@ wxFolderView::wxFolderView(wxWindow *parent)
 
    ReadProfileSettings(&m_settings);
    ApplyOptions();
+   m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
+   m_FolderCtrl->SetPreviewDelay(m_settings.previewDelay);
 
    m_SplitterWindow->SplitHorizontally(m_FolderCtrl,
                                        m_MessageWindow,
@@ -2235,7 +2321,9 @@ bool wxFolderView::SelectNextUnread()
 
    m_FolderCtrl->Focus(idx);
 
-   PreviewMessage(m_FolderCtrl->GetUIdFromIndex(idx));
+   UIdType uid = m_FolderCtrl->GetUIdFromIndex(idx);
+   m_FolderCtrl->SetPreviewMsg(idx, uid);
+   PreviewMessage(uid);
 
    return true;
 }
@@ -2259,10 +2347,12 @@ wxFolderView::SelectInitialMessage(const HeaderInfoList_obj& hil)
       return;
    }
 
+   MsgnoType idx;
    UIdType uid;
    if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
    {
       uid = m_FolderCtrl->SelectNextUnreadAfter(hil);
+      idx = m_FolderCtrl->GetFocusedItem();
    }
    else
    {
@@ -2273,10 +2363,8 @@ wxFolderView::SelectInitialMessage(const HeaderInfoList_obj& hil)
    {
       // select first unread is off or no unread message, so select the first
       // or the last one depending on the options
-      unsigned long idx
-         = READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTMESSAGE)
-            ? 0
-            : numMessages - 1;
+      idx = READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTMESSAGE) ? 0
+                                                             : numMessages - 1;
 
       // note that idx is always a valid index because numMessages >= 1
 
@@ -2301,6 +2389,7 @@ wxFolderView::SelectInitialMessage(const HeaderInfoList_obj& hil)
    // if we're configured to do this automatically
    if ( (uid != UID_ILLEGAL) && m_settings.previewOnSingleClick )
    {
+      m_FolderCtrl->SetPreviewMsg(idx, uid);
       PreviewMessage(uid);
    }
 }
@@ -2397,6 +2486,8 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    settings->previewOnSingleClick =
       READ_CONFIG_BOOL(GetProfile(), MP_PREVIEW_ON_SELECT);
 
+   settings->previewDelay = READ_CONFIG(GetProfile(), MP_FVIEW_PREVIEW_DELAY);
+
    ReadColumnsInfo(m_Profile, settings->columns);
 }
 
@@ -2410,8 +2501,6 @@ wxFolderView::ApplyOptions()
                               m_settings.font,
                               m_settings.size,
                               m_settings.columns);
-
-   m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
 }
 
 void
@@ -2431,6 +2520,9 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
    // list ctrl if it changes, so just pretend it didn't change
    m_settings.previewOnSingleClick = settings.previewOnSingleClick;
 
+   // same as previewOnSingleClick
+   m_settings.previewDelay = settings.previewDelay;
+
    // did any other, important, setting change?
    if ( settings != m_settings )
    {
@@ -2443,7 +2535,9 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
          Update();
    }
 
+   // do it unconditionally as it's fast
    m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
+   m_FolderCtrl->SetPreviewDelay(m_settings.previewDelay);
 }
 
 // ----------------------------------------------------------------------------
@@ -2472,7 +2566,7 @@ wxFolderView::Clear()
       m_MessagePreview->Clear();
 
    // reset them as they don't make sense for the new folder
-   InvalidatePreviewUID();
+   m_FolderCtrl->InvalidatePreview();
 
    if ( m_ASMailFolder )
    {
@@ -2816,18 +2910,8 @@ wxFolderView::OpenFolder(MFolder *folder)
 void
 wxFolderView::PreviewMessage(long uid)
 {
-   if ( (unsigned long)uid != m_uidPreviewed )
-   {
-      // remember which item we preview first as OnPreview() can call us back
-      // under wxGTK!
-      SetPreviewUID(uid);
-
-      // select the item we preview in the folder control
-      m_FolderCtrl->OnPreview();
-
-      // show it in the preview window
-      m_MessagePreview->ShowMessage(uid);
-   }
+   // show it in the preview window
+   m_MessagePreview->ShowMessage(uid);
 }
 
 void
@@ -3261,42 +3345,34 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 void
 wxFolderView::OnFocusChange(long idx, UIdType uid)
 {
-   if ( uid != m_uidFocused )
+   wxLogTrace(M_TRACE_SELECTION, "item %ld (uid = %lx) is now focused",
+              idx, uid);
+
+   if ( uid != UID_ILLEGAL && READ_CONFIG(m_Profile, MP_FVIEW_STATUS_UPDATE) )
    {
-      wxLogTrace(M_TRACE_SELECTION, "item %ld (uid = %lx) is now focused",
-                 idx, uid);
+      HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+      CHECK_RET( hil, "failed to get headers" );
 
-      m_uidFocused = uid;
+      wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
+      HeaderVarExpander expander(hil[idx],
+                                 m_settings.dateFormat,
+                                 m_settings.dateGMT);
 
-      if ( uid != UID_ILLEGAL && READ_CONFIG(m_Profile, MP_FVIEW_STATUS_UPDATE) )
-      {
-         HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-         CHECK_RET( hil, "failed to get headers" );
-
-         wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
-         HeaderVarExpander expander(hil[idx],
-                                    m_settings.dateFormat,
-                                    m_settings.dateGMT);
-
-         wxLogStatus(m_Frame, ParseMessageTemplate(fmt, expander));
-      }
-      //else: no status message
+      wxLogStatus(m_Frame, ParseMessageTemplate(fmt, expander));
    }
+      //else: no status message
+}
+
+UIdType
+wxFolderView::GetPreviewUId(void) const
+{
+   return m_FolderCtrl->GetPreviewUId();
 }
 
 bool
 wxFolderView::HasSelection() const
 {
    return m_FolderCtrl->HasSelection();
-}
-
-void
-wxFolderView::SetPreviewUID(UIdType uid)
-{
-   wxLogTrace(M_TRACE_SELECTION, "%lx is now previewed", uid);
-
-   m_uidPreviewed = uid;
-   m_itemPreviewed = uid == UID_ILLEGAL ? -1 : m_FolderCtrl->GetFocusedItem();
 }
 
 UIdArray
@@ -3350,7 +3426,7 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
 // this function is called when messages are deleted from folder but no new
 // ones appear
 void
-wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
+wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
 {
    MailFolder_obj mf = GetMailFolder();
 
@@ -3377,6 +3453,8 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
 
    HeaderInfoList_obj hil = GetFolder()->GetHeaders();
 
+   long itemPreviewed = m_FolderCtrl->GetPreviewedItem();
+
    wxArrayLong itemsDeleted;
    itemsDeleted.Alloc(count);
    for ( n = 0; n < count; n++ )
@@ -3386,8 +3464,8 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
 
       // we can't use m_FolderCtrl->GetUIdFromIndex(item) here because the item
       // is not in the headers any more, so we use indices instead of UIDs even
-      // if it is less simple (we have to add n to adjust for index offset)
-      if ( !previewDeleted && (item + (long)n == m_itemPreviewed) )
+      // if it is less simple (we have to modify it to adjust for index offset)
+      if ( !previewDeleted && item == itemPreviewed-- )
       {
          previewDeleted = true;
       }
@@ -3409,7 +3487,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    if ( previewDeleted )
    {
       m_MessagePreview->Clear();
-      InvalidatePreviewUID();
+      m_FolderCtrl->InvalidatePreview();
    }
 
    if ( hadUniqueSelection )
@@ -3765,7 +3843,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
    for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
    {
       // find the n-th column shown currently
-      wxFolderListCtrlFields col = GetColumnByIndex(columns, n);
+      wxFolderListColumn col = GetColumnByIndex(columns, n);
       if ( col == WXFLC_NONE )
       {
          break;
@@ -3805,7 +3883,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
    int index = 0;
    for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
    {
-      wxFolderListCtrlFields col = GetColumnByName(choices[n]);
+      wxFolderListColumn col = GetColumnByName(choices[n]);
       columns[col] = status[n] ? index++ : -1;
    }
 
@@ -3816,7 +3894,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
    for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
    {
       // find the n-th column shown currently
-      wxFolderListCtrlFields col = GetColumnByIndex(columns, n);
+      wxFolderListColumn col = GetColumnByIndex(columns, n);
       if ( col == WXFLC_NONE )
          break;
 
