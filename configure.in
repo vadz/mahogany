@@ -137,14 +137,17 @@ fi
 
 AC_OVERRIDES_PREPARE
 
-DEFAULT_USE_WXGTK=0
+DEFAULT_USE_WXGTK=1
 DEFAULT_USE_PYTHON=1
-DEFAULT_USE_WXXT=1
-DEFAULT_USE_WXWINDOWS=1
-DEFAULT_USE_WXWINDOWS2=0
-DEFAULT_USE_WXSTRING=0
-DEFAULT_USE_WXCONFIG=0
-DEFAULT_USE_APPCONF=1
+DEFAULT_USE_WXXT=0
+DEFAULT_USE_WXWINDOWS=0
+DEFAULT_USE_WXWINDOWS2=1
+DEFAULT_USE_WXSTRING=1
+DEFAULT_USE_WXCONFIG=1
+DEFAULT_USE_APPCONF=0
+
+MAKE_USE_WXTAB="USE_WXTAB=1"
+
 
 dnl ================ User editable settings ============================
 dnl where to find Python source
@@ -384,7 +387,7 @@ if test "$USE_WXGTK" = 1; then
       AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
       CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
       CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-      WX_LINK="$WX_LINK $ac_path_to_link -lgtk -lgdk -lXext"
+      WX_LINK="$WX_LINK $ac_path_to_link -lgtk -lgdk -lglib -lXext"
       WX_INCLUDE="$WX_INCLUDE $ac_path_to_include/gtk"
       AC_MSG_RESULT(yes)
     else
@@ -437,6 +440,11 @@ if test "$USE_WXCONFIG" = 1; then
 	USE_APPCONF=0
 fi
 
+if test "$USE_WXWINDOWS2" = 1; then
+	MAKE_USE_WXTAB=
+fi
+AC_SUBST(MAKE_USE_WXTAB)
+
 
 dnl Checks for libraries.
 dnl =====================
@@ -464,48 +472,55 @@ fi
 AC_SUBST(XPM_LINK)
 AC_SUBST(XPM_INCLUDE)
 
-PYTHON_LINK=
-SWIG=
-SWIG_LINK=
-AC_MSG_CHECKING(for Python)
-AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,Python.h)
-if test "$ac_find_includes" != "" ; then
-  AC_PATH_FIND_LIBRARIES($SEARCH_LIB,$PYTHON_LIB)
-  if test "$ac_find_libraries" != "" ; then
-    AC_INCLUDE_PATH_EXIST($ac_find_includes,$CHECK_INCLUDE)
-    AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-    CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-    CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-    PYTHON_LINK="$ac_path_to_link -l$PYTHON_LIB"
-    PYTHON_INCLUDE="$ac_path_to_include"
-    AC_DEFINE(USE_PYTHON)
-    AC_SUBST(USE_PYTHON)
-    AC_MSG_RESULT(yes)
+if test "$USE_PYTHON" = "1" ; then
+  PYTHON_LINK=
+  SWIG=
+  SWIG_LINK=
+  AC_MSG_CHECKING(for Python)
+  AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,Python.h)
+  if test "$ac_find_includes" != "" ; then
+    AC_PATH_FIND_LIBRARIES($SEARCH_LIB,$PYTHON_LIB)
+    if test "$ac_find_libraries" != "" ; then
+      AC_INCLUDE_PATH_EXIST($ac_find_includes,$CHECK_INCLUDE)
+      AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
+      CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
+      CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
+      PYTHON_LINK="$ac_path_to_link -l$PYTHON_LIB"
+      PYTHON_INCLUDE="$ac_path_to_include"
+      AC_DEFINE(USE_PYTHON)
+      MAKE_USE_PYTHON="USE_PYTHON=1"
+      AC_MSG_RESULT(yes)
+    else
+      AC_MSG_RESULT(no)
+      USE_PYTHON=0
+      MAKE_USE_PYTHON=
+    fi
   else
     AC_MSG_RESULT(no)
     USE_PYTHON=0
+    MAKE_USE_PYTHON=
   fi
-else
-  AC_MSG_RESULT(no)
-  USE_PYTHON=0
 fi
 
+AC_SUBST(MAKE_USE_PYTHON)
 AC_SUBST(PYTHON_LINK)
 AC_SUBST(PYTHON_INCLUDE)
 
 HAVE_SWIGLIB=0
-AC_PATH_PROG(SWIG,swig)
-if test -n "$SWIG"; then
-  AC_MSG_CHECKING(for libswigpy)
-  AC_PATH_FIND_LIBRARIES($SEARCH_LIB,swigpy)
-  if test "$ac_find_libraries" != "" ; then
-    AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-    SWIG_LINK="$ac_path_to_link -lswigpy"
-    AC_MSG_RESULT(yes)
-    HAVE_SWIGLIB=1
-    AC_DEFINE(HAVE_SWIGLIB)
-  else
-    AC_MSG_RESULT(no)
+if test "$USE_PYTHON" = "1" ; then
+  AC_PATH_PROG(SWIG,swig)
+  if test -n "$SWIG"; then
+    AC_MSG_CHECKING(for libswigpy)
+    AC_PATH_FIND_LIBRARIES($SEARCH_LIB,swigpy)
+    if test "$ac_find_libraries" != "" ; then
+      AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
+      SWIG_LINK="$ac_path_to_link -lswigpy"
+      AC_MSG_RESULT(yes)
+      HAVE_SWIGLIB=1
+      AC_DEFINE(HAVE_SWIGLIB)
+    else
+      AC_MSG_RESULT(no)
+    fi
   fi
 fi
 AC_SUBST(SWIG_LINK)

@@ -4,6 +4,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.9  1998/06/08 08:34:51  KB
+# Python adapted to use MAppBase/MDialog instead of MApplication.
+#
 # Revision 1.8  1998/05/30 17:54:52  KB
 # Python integration mostly complete, added hooks and sample callbacks.
 # Wrote documentation on how to use it.
@@ -52,7 +55,9 @@ GUI_DEFS=@WX_DEFS@
 PYTHON_LINK = @PYTHON_LINK@ @LIBDL_LINK@
 PYTHON_INCLUDE = @PYTHON_INCLUDE@ 
 
-USE_PYTHON=@USE_PYTHON@
+# this will be set or unset
+@MAKE_USE_PYTHON@
+@MAKE_USE_WXTAB@
 
 # output dir for binaries:
 ODIR = .

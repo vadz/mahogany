@@ -1,0 +1,69 @@
+# This file was created automatically by SWIG.
+import MAppBasec
+
+from String import *
+class MAppBasePtr :
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+    def Exit(self,arg0):
+        MAppBasec.MAppBase_Exit(self.this,arg0)
+    def TopLevelFrame(self):
+        val = MAppBasec.MAppBase_TopLevelFrame(self.this)
+        return val
+    def GetText(self,arg0):
+        val = MAppBasec.MAppBase_GetText(self.this,arg0)
+        return val
+    def GetGlobalDir(self):
+        val = StringPtr(MAppBasec.MAppBase_GetGlobalDir(self.this))
+        return val
+    def GetLocalDir(self):
+        val = StringPtr(MAppBasec.MAppBase_GetLocalDir(self.this))
+        return val
+    def GetMimeList(self):
+        val = MAppBasec.MAppBase_GetMimeList(self.this)
+        return val
+    def GetMimeTypes(self):
+        val = MAppBasec.MAppBase_GetMimeTypes(self.this)
+        return val
+    def GetProfile(self):
+        val = MAppBasec.MAppBase_GetProfile(self.this)
+        return val
+    def GetAdb(self):
+        val = MAppBasec.MAppBase_GetAdb(self.this)
+        return val
+    def __repr__(self):
+        return "<C MAppBase instance>"
+class MAppBase(MAppBasePtr):
+    def __init__(self,this):
+        self.this = this
+
+
+
+
+
+
+#-------------- FUNCTION WRAPPERS ------------------
+
+def wxGetApp():
+    val = MAppBasePtr(MAppBasec.wxGetApp())
+    return val
+
+MDialog_ErrorMessage = MAppBasec.MDialog_ErrorMessage
+
+MDialog_SystemErrorMessage = MAppBasec.MDialog_SystemErrorMessage
+
+MDialog_FatalErrorMessage = MAppBasec.MDialog_FatalErrorMessage
+
+MDialog_Message = MAppBasec.MDialog_Message
+
+MDialog_YesNoDialog = MAppBasec.MDialog_YesNoDialog
+
+MDialog_FileRequester = MAppBasec.MDialog_FileRequester
+
+MDialog_AdbLookupList = MAppBasec.MDialog_AdbLookupList
+
+
+
+#-------------- VARIABLE WRAPPERS ------------------
+
