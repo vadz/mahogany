@@ -205,12 +205,13 @@ TAG_HANDLER_BEGIN(META, "META" )
                               content.Mid(CHARSET_STRING_LEN));
 
                 if ( enc == wxFONTENCODING_SYSTEM
-#if wxUSE_UNICODE
-                   )
-#else
-                     || enc == m_WParser->GetInputEncoding() )
+#if !wxUSE_UNICODE
+                     || enc == m_WParser->GetInputEncoding()
 #endif
-                   return FALSE;
+                   )
+                {
+                   return false;
+                }
 
 #if !wxUSE_UNICODE
                 m_WParser->SetInputEncoding(enc);
@@ -220,7 +221,7 @@ TAG_HANDLER_BEGIN(META, "META" )
             }
         }
 
-        return FALSE;
+        return false;
     }
 
 TAG_HANDLER_END(META)
@@ -530,8 +531,9 @@ void HtmlViewerWindow::OnCellClicked(wxHtmlCell *cell, wxCoord x, wxCoord y,
       // click
       m_viewer->GetMessageView()->DoMouseCommand
                                   (
-                                    event.LeftDown() ? WXMENU_LAYOUT_DBLCLICK
-                                                     : WXMENU_LAYOUT_RCLICK,
+                                    event.GetEventType() == wxEVT_LEFT_UP
+                                       ? WXMENU_LAYOUT_DBLCLICK
+                                       : WXMENU_LAYOUT_RCLICK,
                                     ci,
                                     event.GetPosition()
                                   );
