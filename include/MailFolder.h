@@ -389,6 +389,11 @@ public:
 
    //@}
 
+   /**
+     @name Miscellaneous static methods
+    */
+   //@{
+
    /** Phyically deletes this folder.
        @return true on success
    */
@@ -431,6 +436,22 @@ public:
    */
    static bool CanExit(String *which);
 
+   /**
+     Create a new file containing the message data in MBOX format.
+
+     @param filename the name of the file to create (*will* overwrite)
+     @param contents the pointer to message contents, non NULL
+     @return true if everything went ok, false on error
+    */
+   static bool SaveMessageAsMBOX(const String& filename, const char *contents);
+
+   //@}
+
+   /**
+     @name Conversion to textual representation helpers
+   */
+   //@{
+
    /** Utility function to get a textual representation of a message
        status.
 
@@ -451,6 +472,13 @@ public:
                               unsigned long sizeLines = 0,
                               MessageSizeShow show = MessageSize_Automatic,
                               bool verbose = false);
+
+   //@}
+
+   /**
+     @name Replying/forwarding to the messages
+    */
+   //@{
 
    /** Forward one message.
        @param message message to forward
@@ -474,7 +502,11 @@ public:
                             Profile *profile = NULL,
                             wxWindow *parent = NULL);
 
-   /**@name Subscription management */
+   //@}
+
+   /**
+     @name Subscription management
+    */
    //@{
    /** Subscribe to a given mailbox (related to the
        mailfolder/mailstream underlying this folder.

@@ -3308,6 +3308,11 @@ void wxComposeView::ResetDirty()
    m_isModified = false;
 }
 
+void wxComposeView::SetDirty()
+{
+   m_isModified = true;
+}
+
 bool wxComposeView::IsModified() const
 {
    return m_isModified || m_editor->IsModified();
@@ -3585,8 +3590,16 @@ wxComposeView::AutoSave()
       m_filenameAutoSave = name + String::Format("%05d%08x", getpid(), this);
    }
 
-   // false means don't append, truncate
-   if ( !msg->WriteToFile(m_filenameAutoSave, false) )
+   String contents;
+   if ( !msg->WriteToString(contents) )
+   {
+      // this is completely unexpected
+      FAIL_MSG( "Failed to get the message text?" );
+
+      return false;
+   }
+
+   if ( !MailFolder::SaveMessageAsMBOX(m_filenameAutoSave, contents) )
    {
       // TODO: disable autosaving? we risk to give many such messages if
       //       something is wrong...
@@ -3642,7 +3655,14 @@ bool Composer::RestoreAll()
    {
       filename = name + filename;
 
-      MFolder_obj folder(MFolder::CreateTemp("", MF_FILE, 0, filename));
+      MFolder_obj folder(MFolder::CreateTemp
+                         (
+                           String::Format(_("Interrupted message %d"),
+                                          nResumed + 1),
+                           MF_FILE,
+                           MF_FLAGS_TEMPORARY,
+                           filename
+                         ));
 
       cont = dir.GetNext(&filename);
 
@@ -3653,18 +3673,28 @@ bool Composer::RestoreAll()
          {
             // FIXME: assume UID of the first message in a new MBX folder is
             //        always 1
-            Message_obj msg = mf->GetMessage(1);
+            Message *msg = mf->GetMessage(1);
             if ( msg )
             {
-               if ( EditMessage(mApplication->GetProfile(), msg.operator->()) )
+               // EditMessage takes ownership of the pointer
+               Composer *composer = EditMessage(mApplication->GetProfile(), msg);
+               if ( composer )
                {
                   // ok!
                   nResumed++;
+
+                  // mark the message as dirty to prevent the window from being
+                  // closed without confirmation (thus loosing the message we
+                  // had saved!)
+                  composer->SetDirty();
 
                   continue;
                }
             }
          }
+
+         // don't delete the file if we failed to restore the message!
+         folder->ResetFlags(MF_FLAGS_TEMPORARY);
       }
 
       wxLogError(_("Failed to resume composing the message from file '%s'"),

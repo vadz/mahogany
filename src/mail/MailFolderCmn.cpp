@@ -706,37 +706,14 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
          if ( pd )
             pd->Update( 2*i + 1 );
 
-         // iterate over all parts
-         int numParts = msg->CountParts();
-         for ( int part = 0; part < numParts; part++ )
+         if ( !msg->WriteToString(tmpstr, false /* no headers */) )
          {
-            size_t size = msg->GetPartSize(part);
-            if ( size == 0 )
-            {
-               // skip empty parts
-               continue;
-            }
-
-            int partType = msg->GetPartType(part);
-            if ( (partType == Message::MSG_TYPETEXT) ||
-                 (partType == Message::MSG_TYPEMESSAGE ))
-            {
-               // it is always "char *", not "void *" for these types
-               const char *cptr = (const char *)msg->GetPartContent(part);
-               if( !cptr )
-               {
-                  FAIL_MSG( "failed to get the content of a text psrt?" );
-
-                  continue;
-               }
-
-               tmpstr = strutil_enforceNativeCRLF(cptr);
-               size = tmpstr.length();
-               if ( file.Write(tmpstr, size) != size )
-               {
-                  rc = false;
-               }
-            }
+            wxLogError(_("Failed to get the text of the mesage to save."));
+            rc = false;
+         }
+         else
+         {
+            rc &= file.Write(tmpstr);
          }
 
          if ( pd )

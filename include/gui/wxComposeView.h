@@ -221,8 +221,9 @@ public:
    */
    void AddHeaderEntry(const String &entry, const String &value);
 
-   /// reset the "dirty" flag
-   void ResetDirty();
+   // set/reset the "dirty" flag
+   virtual void ResetDirty();
+   virtual void SetDirty();
 
    // implement base class virtual
    virtual wxComposeView *GetComposeView() { return this; }

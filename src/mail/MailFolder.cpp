@@ -33,6 +33,7 @@
 #endif
 
 #include <wx/dynarray.h>
+#include <wx/file.h>
 
 #include "MDialogs.h" // for MDialog_FolderChoose
 
@@ -1294,5 +1295,65 @@ extern String GetSequenceString(const UIdArray *messages)
    }
 
    return seq.GetString();
+}
+
+/* static */
+bool MailFolder::SaveMessageAsMBOX(const String& filename, const char *content)
+{
+   wxFile out(filename, wxFile::write);
+   bool ok = out.IsOpened();
+   if ( ok )
+   {
+      // when saving messages to a file we need to "From stuff" them to
+      // make them readable in a standard mail client (including this one)
+
+      // standard prefix
+      String fromLine = "From ";
+
+      // find the from address
+      static const char *FROM_HEADER = "From: ";
+      const char *p = strstr(content, FROM_HEADER);
+      if ( !p )
+      {
+         // this shouldn't normally happen, but if it does just make it up
+         wxLogDebug("Couldn't find from header in the message");
+
+         fromLine += "MAHOGANY-DUMMY-SENDER";
+      }
+      else // take everything until the end of line
+      {
+         // extract just the address in angle brackets
+         p += strlen(FROM_HEADER);
+         const char *q = strchr(p, '<');
+         if ( q )
+            p = q + 1;
+
+         while ( *p && *p != '\r' )
+         {
+            if ( q && *p == '>' )
+               break;
+
+            fromLine += *p++;
+         }
+      }
+
+      fromLine += ' ';
+
+      // time stamp
+      time_t t;
+      time(&t);
+      fromLine += ctime(&t);
+
+      ok = out.Write(fromLine);
+
+      if ( ok )
+      {
+         // write the body
+         size_t len = strlen(content);
+         ok = out.Write(content, len) == len;
+      }
+   }
+
+   return ok;
 }
 

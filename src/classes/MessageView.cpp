@@ -2370,65 +2370,35 @@ MessageView::MimeSave(const MimePart *mimepart,const char *ifilename)
    }
    else
    {
-      wxFile out(filename, wxFile::write);
-      if ( out.IsOpened() )
+      bool ok;
+      if ( mimepart->GetType().GetPrimary() == MimeType::MESSAGE )
       {
-         bool ok = true;
-
-         // when saving messages to a file we need to "From stuff" them to
-         // make them readable in a standard mail client (including this one)
-         if ( mimepart->GetType().GetPrimary() == MimeType::MESSAGE )
-         {
-            // standard prefix
-            String fromLine = "From ";
-
-            // find the from address
-            const char *p = strstr((const char *)content, "From: ");
-            if ( !p )
-            {
-               // this shouldn't normally happen, but if it does just make it
-               // up
-               wxLogDebug("Couldn't find from header in the message");
-
-               fromLine += "MAHOGANY-DUMMY-SENDER";
-            }
-            else // take everything until the end of line
-            {
-               // FIXME: we should extract just the address in angle brackets
-               //        instead of taking everything
-               while ( *p && *p != '\r' )
-               {
-                  fromLine += *p++;
-               }
-            }
-
-            fromLine += ' ';
-
-            // time stamp
-            time_t t;
-            time(&t);
-            fromLine += ctime(&t);
-
-            ok = out.Write(fromLine);
-         }
+         // saving the messages is special, we have a separate function for
+         // this as it's also done from elsewhere
+         ok = MailFolder::SaveMessageAsMBOX(filename, (const char *)content);
+      }
+      else // not a message
+      {
+         wxFile out(filename, wxFile::write);
+         ok = out.IsOpened();
 
          if ( ok )
          {
             // write the body
             ok = out.Write(content, len) == len;
          }
+      }
 
-         if ( ok )
+      if ( ok )
+      {
+         // only display in interactive mode
+         if ( strutil_isempty(ifilename) )
          {
-            // only display in interactive mode
-            if ( strutil_isempty(ifilename) )
-            {
-               wxLogStatus(GetParentFrame(), _("Wrote %lu bytes to file '%s'"),
-                           len, filename.c_str());
-            }
-
-            return true;
+            wxLogStatus(GetParentFrame(), _("Wrote %lu bytes to file '%s'"),
+                        len, filename.c_str());
          }
+
+         return true;
       }
    }
 

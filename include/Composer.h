@@ -224,6 +224,9 @@ public:
    /// reset the "dirty" flag
    virtual void ResetDirty() = 0;
 
+   /// make the composer dirty forcefully
+   virtual void SetDirty() = 0;
+
    //@}
 
    /** @name Implementation only */
