@@ -315,7 +315,7 @@ strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
       while (*c == '\t' || *c == ' ') num_white++, c++;
       while (*c >= 'A' && *c <= 'Z') num_alpha++, c++;
       if ((*c == '>' || *c == '|') &&
-          (num_alpha <= max_white && num_white <= max_alpha))
+          (num_alpha <= max_alpha && num_white <= max_white))
          levels++;
       else
          return levels;
