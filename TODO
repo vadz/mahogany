@@ -12,6 +12,11 @@ $Id$
 
 7	KB	group reply misses additional To entries
 
+	KB	add trash/outbox
+	KB	add blinking cursor
+
+	VZ	"hidden" flag for folder treecontrol
+
 9		cannot create new file from folder create dialog (M
 		bug, not wxGTK, save-as-file works!)
 		Also: dialog: wrong handling of "all files" pattern as "*.*"
