@@ -401,7 +401,7 @@ private:
 
 // ----------------------------------------------------------------------------
 // wxNewAddressTextCtrl: wxAddressTextCtrl which allows the user to add new
-// recipients
+// recipients (i.e. the unique top address entry in the compose frame)
 // ----------------------------------------------------------------------------
 
 class wxNewAddressTextCtrl : public wxAddressTextCtrl
@@ -430,7 +430,8 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// wxRcptTextCtrl: wxAddressTextCtrl which is part of wxRcptControls
+// wxRcptTextCtrl: wxAddressTextCtrl which is part of wxRcptControls (there are
+// as many of those as of the recipients)
 // ----------------------------------------------------------------------------
 
 class wxRcptTextCtrl : public wxAddressTextCtrl
@@ -969,7 +970,17 @@ void wxNewAddressTextCtrl::AddNewRecipients(bool quiet)
 
 void wxNewAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
 {
-   AddNewRecipients();
+   // if there is nothing in the address field, start editing instead, this is
+   // handy to be able to switch to the composer window rapidly - tabbing to it
+   // can take ages if there are a lot of recipient controls below us
+   if ( GetValue().empty() )
+   {
+      m_composeView->SetFocusToComposer();
+   }
+   else // add the contents of the control as a new recipient
+   {
+      AddNewRecipients();
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -1693,7 +1704,7 @@ wxComposeView::InitText(Message *msg, MessageView *msgview)
          break;
 
       case Message_Reply:
-         m_LayoutWindow->SetFocus();
+         SetFocusToComposer();
    }
 
    Show();

@@ -114,6 +114,9 @@ public:
    /// move the cursor to the given position
    void MoveCursorTo(int x, int y);
 
+   /// set the focus to the composer window
+   void SetFocusToComposer() { m_LayoutWindow->SetFocus(); }
+
    /** Set the newsgroups to post to.
        @param groups the list of newsgroups
    */
@@ -181,13 +184,13 @@ public:
    void OnRemoveRcpt(size_t index);
    //@}
 
-   // for wxAddressTextCtrl usage: remember last focused field
+   /// for wxAddressTextCtrl usage: remember last focused field
    void SetLastAddressEntry(int field) { m_indexLast = field; }
 
-   // get the profile to use for options
+   /// get the profile to use for options
    Profile *GetProfile(void) const { return m_Profile; }
 
-   // is the control with this index enabled?
+   /// is the control with this index enabled?
    bool IsRecipientEnabled(size_t index) const;
 
    /** Adds an extra header line.
