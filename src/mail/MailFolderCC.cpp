@@ -1113,10 +1113,16 @@ MailFolderCC::Ping(void)
 void
 MailFolderCC::Close(void)
 {
+   /*
+     DO NOT SEND EVENTS FROM HERE, ITS CALLED FROM THE DESTRUCTOR AND
+     THE OBJECT *WIL* DISAPPEAR!
+   */
+   
    // can cause references to this folder, cannot be allowd:
-   UpdateStatus(); // send last status event before closing
-   ProcessEventQueue();  //FIXMe: is this safe or not?
-   MEventManager::DispatchPending();
+//   UpdateStatus(); // send last status event before closing
+//   ProcessEventQueue();  //FIXMe: is this safe or not?
+//   MEventManager::DispatchPending();
+
    CCQuiet(true); // disable all callbacks!
    // We cannot run ProcessEventQueue() here as we must not allow any
    // Message to be created from this stream. If we miss an event -
