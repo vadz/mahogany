@@ -90,9 +90,19 @@ IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 
    struct MimeContent
    {
+      enum { MIMECONTENT_FILE, MIMECONTENT_DATA } m_Type;
+      const char *m_Data;
+      size_t m_Length;
       String m_FileName;
       int    m_NumericMimeType;
       String m_MimeType;
+      MimeContent()
+         { m_Type = MIMECONTENT_FILE; m_Data = NULL; } // safe settings
+      ~MimeContent()
+         {
+            if(m_Type == MIMECONTENT_DATA && m_Data != NULL)
+               delete [] m_Data;
+         }
    };
 
 // ============================================================================
@@ -414,6 +424,34 @@ wxComposeView::OnMenuCommand(int id)
       wxMFrame::OnMenuCommand(id);
    }
 }
+
+void
+wxComposeView::InsertData(const char *data,
+                         size_t length,
+                         const char *mimetype,
+                         int num_mimetype)
+{
+   MimeContent *mc = new MimeContent();
+
+   if(strutil_isempty(mimetype))
+   {
+      mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
+      mc->m_NumericMimeType = TYPEAPPLICATION;
+   }
+   else
+   {
+      mc->m_NumericMimeType = num_mimetype;
+      mc->m_MimeType = mimetype;
+   }
+   mc->m_Data = data;
+   mc->m_Length = length;
+   mc->m_Type = MimeContent::MIMECONTENT_DATA;
+   
+   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(mApplication.GetIconManager()->GetIcon(mc->m_MimeType));
+   obj->SetUserData(mc);
+   m_LayoutWindow->GetLayoutList().Insert(obj);
+}
+
 void
 wxComposeView::InsertFile(const char *filename, const char *mimetype,
                           int num_mimetype)
@@ -437,7 +475,7 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
    }
 
    mc->m_FileName = filename;
-
+   mc->m_Type = MimeContent::MIMECONTENT_FILE;
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(mApplication.GetIconManager()->GetIcon(mc->m_MimeType));
    obj->SetUserData(mc);
 
@@ -447,21 +485,14 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
 void
 wxComposeView::Send(void)
 {
-   String const
-      * tmp;
    String
       tmp2, mimeType, mimeSubType;
-   const char
-      *filename = NULL;
    char
-      *cptr, *ocptr,
       *buffer;
    ifstream
       istr;
    size_t
       size;
-   int
-      numMimeType;
 
    SendMessageCC sm
       (
@@ -491,36 +522,44 @@ wxComposeView::Send(void)
          if(lo->GetType() == WXLO_TYPE_ICON)
          {
             mc = (MimeContent *)lo->GetUserData();
-            istr.open(mc->m_FileName.c_str());
-            if(istr)
+            switch(mc->m_Type)
             {
-               istr.seekg(0,ios::end);
-               size = istr.tellg();
-               buffer = new char [size];
-               istr.seekg(0,ios::beg);
-               istr.read(buffer, size);
+            case MimeContent::MIMECONTENT_FILE:
+               istr.open(mc->m_FileName.c_str());
+               if(istr)
+               {
+                  istr.seekg(0,ios::end);
+                  size = istr.tellg();
+                  buffer = new char [size];
+                  istr.seekg(0,ios::beg);
+                  istr.read(buffer, size);
 
-               if(! istr.fail())
-                  sm.AddPart(mc->m_NumericMimeType, buffer, size,
-                             strutil_after(mc->m_MimeType,'/')  //subtype
-                     );
+                  if(! istr.fail())
+                     sm.AddPart(mc->m_NumericMimeType, buffer, size,
+                                strutil_after(mc->m_MimeType,'/')  //subtype
+                        );
+                  else
+                     SYSERRMESSAGE((_("Cannot read file."),this));
+                  delete [] buffer;
+                  istr.close();
+               }
                else
-                  SYSERRMESSAGE((_("Cannot read file."),this));
-               delete [] buffer;
-               istr.close();
+               {
+                  String dirtyHack = "Cannot open file: ";
+                  dirtyHack +=mc->m_FileName;
+                  SYSERRMESSAGE((_(Str(dirtyHack)),this));
+               }
+               break;
+            case MimeContent::MIMECONTENT_DATA:
+               sm.AddPart(mc->m_NumericMimeType, mc->m_Data, mc->m_Length,
+                          strutil_after(mc->m_MimeType,'/')  //subtype
+                        );
+               break;
             }
-            else
-            {
-               String dirtyHack = "Cannot open file: ";
-               dirtyHack +=mc->m_FileName;
-               SYSERRMESSAGE((_(Str(dirtyHack)),this));
-            }
-            delete mc;
          }
       }
       delete export;
    }
-
    sm.Send();
 }
 

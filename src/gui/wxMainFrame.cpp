@@ -18,29 +18,13 @@
 #   include   "guidef.h"
 #   include   "MFrame.h"
 #   include   "Mdefaults.h"
+#   include   "strutil.h"
 #endif
 
 #include   "gui/wxMainFrame.h"
 #include   "gui/wxMApp.h"
 #include   "gui/wxIconManager.h"
-
-#ifdef    OS_WIN
-#   define   MainFrame_xpm          "MainFrame"
-#   define   tb_exit                "tb_exit"
-#   define   tb_help                "tb_help"
-#   define   tb_open                "tb_open"
-#   define   tb_mail_compose        "tb_mail_compose"
-#   define   tb_book_open           "tb_book_open"
-#   define   tb_preferences         "tb_preferences"
-#else   //real XPMs
-#   include   "../src/icons/MainFrame.xpm"
-#   include   "../src/icons/tb_exit.xpm"
-#   include   "../src/icons/tb_help.xpm"
-#   include   "../src/icons/tb_open.xpm"
-#   include   "../src/icons/tb_mail_compose.xpm"
-#   include   "../src/icons/tb_book_open.xpm"
-#   include   "../src/icons/tb_preferences.xpm"
-#endif  //Win/Unix
+#include   "gui/wxFolderView.h"
 
 #ifdef   USE_WXWINDOWS2
 // ----------------------------------------------------------------------------
@@ -92,19 +76,24 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #endif
    CreateStatusBar();
 
-#if 0
-   int w,h;
-   GetClientSize(&w,&h);
-   splitter = new wxSplitterWindow(this, -1, wxPoint(0, 0), wxSize(w, h));
-   treeCtrl = new wxMainTreeCtrl(this,-1, wxPoint(0,0),
-                                 wxSize(200,200),wxTR_HAS_BUTTONS|wxSUNKEN_BORDER); 
-//     splitter->Initialize(treeCtrl);
-   wxTreeItem item;
-   item.m_mask = wxTREE_MASK_TEXT | wxTREE_MASK_CHILDREN | wxTREE_MASK_DATA;
-   item.m_text = "root.";
-   item.m_children = 1;
-   long root_id = treeCtrl->InsertItem( 0, item );
-#endif // 0
+   int x,y;
+   GetClientSize(&x, &y);
+
+   m_FolderView = NULL;
+   m_splitter = new wxSplitterWindow(this,-1,wxPosition(1,31),wxSize(x-1,y-31),wxSP_3D);
+   const char *foldername = READ_APPCONFIG(MC_MAINFOLDER);
+  //FIXME: insert treectrl here
+   if(! strutil_isempty(foldername))
+   {
+      m_FolderView = new wxFolderView(foldername,this);
+      m_splitter->SplitVertically(new wxPanel(this), //FIXME: insert treectrl
+                                  m_FolderView->GetWindow(),x/3);
+   }
+   else
+      m_splitter->Initialize(new wxPanel(this));  //FIXME: insert treectrl
+
+   m_splitter->SetMinimumPaneSize(0);
+   m_splitter->SetFocus();
 }
 
 void
@@ -112,3 +101,14 @@ wxMainFrame::OnMenuCommand(int id)
 {
    wxMFrame::OnMenuCommand(id);
 }
+
+void
+wxMainFrame::OnSize( wxSizeEvent &event )
+   
+{
+   int x = 0;
+   int y = 0;
+   GetClientSize( &x, &y );
+   if(m_ToolBar)  m_ToolBar->SetSize( 1, 0, x-2, 30 );
+   if(m_splitter) m_splitter->SetSize(0,31,x-2,y);
+};

@@ -5,75 +5,6 @@
  *                                                                  *
  * $Id$         *
  *                                                                  *
- * $Log$
- * Revision 1.26  1998/07/20 12:23:06  KB
- * Adopted MApplication for new wxConfig.
- *
- * Revision 1.25  1998/07/12 15:05:25  KB
- * some fixes and ugly fix to work with std::string again
- *
- * Revision 1.24  1998/07/08 11:56:55  KB
- * M compiles and runs on Solaris 2.5/gcc 2.8/c-client gso
- *
- * Revision 1.23  1998/06/23 08:46:45  KB
- * fixed #pragma
- *
- * Revision 1.22  1998/06/22 22:36:57  VZ
- *
- * config file name fixed for Windows
- *
- * Revision 1.21  1998/06/19 08:05:15  KB
- * restructured FolderView, menu handling and added toolbars
- *
- * Revision 1.20  1998/06/14 12:24:18  KB
- * started to move wxFolderView to be a panel, Python improvements
- *
- * Revision 1.19  1998/06/12 16:06:57  KB
- * updated
- *
- * Revision 1.18  1998/06/08 08:19:12  KB
- * Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
- *
- * Revision 1.17  1998/06/05 16:56:10  VZ
- *
- * many changes among which:
- *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
- *     i.e. there is wxMApp inheriting from AppBse and wxApp
- *  2) wxMLogFrame changed (but will probably change again because I wrote a
- *     generic wxLogFrame for wxWin2 - we can as well use it instead)
- *  3) Profile stuff simplified (but still seems to work :-), at least with
- *     wxConfig), no more AppProfile separate class.
- *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
- *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
- *     Classes
- *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
- *  6) constraints in wxComposeView changed to work under both wxGTK and
- *     wxMSW (but there is an annoying warning about unsatisfied constraints
- *     coming from I don't know where)
- *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
- *  8) many other minor changes I completely forgot about.
- *
- * Revision 1.16  1998/05/24 08:22:41  KB
- * changed the creation/destruction of MailFolders, now done through
- * MailFolder::Open/CloseFolder, made constructor/destructor private,
- * this allows multiple view on the same folder
- *
- * Revision 1.15  1998/05/18 17:48:29  KB
- * more list<>->kbList changes, fixes for wxXt, improved makefiles
- *
- * Revision 1.14  1998/05/15 22:04:44  VZ
- *
- * small USE_WXCONFIG-only change
- *
- * Revision 1.13  1998/05/14 11:00:15  KB
- * Code cleanups and conflicts resolved.
- *
- * Revision 1.12  1998/05/14 09:48:50  KB
- * added IsEmpty() to strutil, minor changes
- *
- * Revision 1.11  1998/05/13 19:02:08  KB
- * added kbList, adapted MimeTypes for it, more python, new icons
- *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -234,6 +165,8 @@ MAppBase::OnStartup()
    bool   found;
    String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
    PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
+   pf.AddPaths(M_DATADIR);
+
    globalDir = pf.FindDir(strRootDir, &found);
 
    VerifySettings();
@@ -293,9 +226,8 @@ MAppBase::OnStartup()
    {
       if((*i)->length() == 0) // empty token
          continue;
-      //VAR((*i)->c_str());
       wxLogDebug("Opening folder '%s'...", (*i)->c_str());
-      new wxFolderViewFrame((**i),topLevelFrame);
+      (void) new wxFolderViewFrame((**i),topLevelFrame);
    }
    
    return TRUE;

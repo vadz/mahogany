@@ -100,7 +100,7 @@ wxFolderListCtrl::AddEntry(String const &status, String const &sender, String
 }
 
 
-wxFolderView::wxFolderView(String const & folderName, wxMFrame *iparent)
+wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
 {
    wxCHECK_RET(iparent, "NULL parent frame in wxFolderView ctor");
    parent = iparent;
@@ -121,7 +121,7 @@ wxFolderView::wxFolderView(String const & folderName, wxMFrame *iparent)
    m_SplitterWindow = new wxSplitterWindow(parent,-1,wxDefaultPosition,wxSize(x,y),wxSP_3D);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
    m_MessagePreview = new wxMessageView(this,m_SplitterWindow,"MessagePreview");
-   m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview);
+   m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl,m_MessagePreview, y/3);
    
    mailFolder->RegisterView(this);
    timer = GLOBAL_NEW wxFVTimer(mailFolder);
@@ -344,7 +344,6 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
    int i;
    String str;
    String str2, prefix;
-   const char *cptr;
    wxComposeView *cv;
    Message *msg;
 
@@ -382,7 +381,7 @@ END_EVENT_TABLE()
 
    wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
                                         wxFrame *parent)
-      : wxMFrame(folderName, parent)
+      : MFrame(folderName, parent)
 {
    VAR(folderName);
    m_FolderView = NULL;
