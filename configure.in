@@ -341,16 +341,17 @@ case "$USE_WXCONFIGPRG" in
 *)	WXCONFIG_NAME="$USE_WXCONFIGPRG" ;;
 esac
 
-case "$USE_OPT" in
-1)	MYFLAGS="-O2" ;;
-*)	MYFLAGS="-O0" ;;
-esac
-
-
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
-1.yes.*)	MYFLAGS="$MYFLAGS -g3" ;;
+1.yes.*)	MYFLAGS="$MYFLAGS -g3" 
+                USE_OPT=0 ;;
 1.no.yes)	MYFLAGS="$MYFLAGS -g" ;;
 esac
+
+case "$USE_OPT" in
+1)	MYFLAGS="$MYFLAGS -O2" ;;
+*)	MYFLAGS="$MYFLAGS -O0" ;;
+esac
+
 
 case "$USE_PROFILER" in 1)
 	MYFLAGS="$MYFLAGS -pg"
