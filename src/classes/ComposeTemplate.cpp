@@ -335,9 +335,15 @@ protected:
 
    // put the text quoted according to our current quoting options with the
    // given reply prefix into value
+   enum
+   {
+      NoDetectSig = 0,
+      DetectSig = 1
+   };
    void ExpandOriginalText(const String& text,
                            const String& prefix,
-                           String *value) const;
+                           String *value,
+                           int flags = DetectSig) const;
 
 private:
    // helper used by GetCategory and GetVariable
@@ -1125,7 +1131,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                   else
                   {
                      // include the selection only in the template expansion
-                     ExpandOriginalText(selection, prefix, value);
+                     ExpandOriginalText(selection, prefix, value, NoDetectSig);
                   }
                }
 
@@ -1391,9 +1397,11 @@ static inline size_t IsEndOfLine(const char *p)
    return 0;
 }
 
-void VarExpander::ExpandOriginalText(const String& text,
-                                     const String& prefix,
-                                     String *value) const
+void
+VarExpander::ExpandOriginalText(const String& text,
+                                const String& prefix,
+                                String *value,
+                                int flags) const
 {
    // should we quote the empty lines?
    //
@@ -1425,7 +1433,8 @@ void VarExpander::ExpandOriginalText(const String& text,
    }
 
    // should we detect the signature and discard it?
-   bool detectSig = READ_CONFIG_BOOL(m_profile, MP_REPLY_DETECT_SIG);
+   bool detectSig = (flags & DetectSig) &&
+                        READ_CONFIG_BOOL(m_profile, MP_REPLY_DETECT_SIG);
 
 #if wxUSE_REGEX
    // will we use the RE?
