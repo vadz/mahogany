@@ -327,7 +327,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_COMPOSE_INSERTFILE, gettext_noop("&Insert file...\tCtrl-I"),
                                 gettext_noop("Insert a file")            , FALSE },
    { WXMENU_COMPOSE_LOADTEXT,gettext_noop("I&nsert text...\tCtrl-T"), gettext_noop("Insert text file")         , FALSE },
-   { WXMENU_COMPOSE_SEND,  gettext_noop("&Send\tShift-Ctrl-S"),             gettext_noop("Send the message now")     , FALSE },
+   { WXMENU_COMPOSE_SEND,  gettext_noop("&Send\tShift-Ctrl-X"),             gettext_noop("Send the message now")     , FALSE },
    { WXMENU_COMPOSE_SEND_LATER, gettext_noop("Send &Later\tShift-Ctrl-L"),
                                 gettext_noop("Schedule the message to be send at a later time.")     , FALSE },
    { WXMENU_COMPOSE_SEND_KEEP_OPEN, gettext_noop("Send and &keep\tShift-Ctrl-K"),

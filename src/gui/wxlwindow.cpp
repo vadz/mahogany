@@ -583,9 +583,10 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       else
          m_llist->MoveCursorToEndOfLine();
       break;
+
    default:
-      
       if(ctrlDown && ! shiftDown && ! IsEditable())
+      {
          switch(keyCode)
          {
          case 'c':
@@ -603,6 +604,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
             event.Skip();
             ;
          }
+      }
       else if( IsEditable() )
       {
          /* First, handle control keys */
@@ -612,76 +614,76 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                keyCode = tolower(keyCode);
             switch(keyCode)
             {
-            case WXK_INSERT:
-               Copy(WXLO_COPY_FORMAT, FALSE);
-               break;
-            case WXK_DELETE :
-               if(! deletedSelection)
-               {
-                  m_llist->DeleteWord();
+               case WXK_INSERT:
+                  Copy(WXLO_COPY_FORMAT, FALSE);
+                  break;
+               case WXK_DELETE :
+                  if(! deletedSelection)
+                  {
+                     m_llist->DeleteWord();
+                     SetDirty();
+                  }
+                  break;
+               case 'd':
+                  if(! deletedSelection) // already done
+                  {
+                     m_llist->Delete(1);
+                     SetDirty();
+                  }
+                  break;
+               case 'y':
+                  m_llist->DeleteLines(1);
                   SetDirty();
-               }
-               break;
-            case 'd':
-               if(! deletedSelection) // already done
-               {
-                  m_llist->Delete(1);
+                  break;
+               case 'h': // like backspace
+                  if(m_llist->MoveCursorHorizontally(-1))
+                  {
+                     m_llist->Delete(1);
+                     SetDirty();
+                  }
+                  break;
+               case 's': // search
+                  Find("");
+                  break;
+               case 't': // search again
+                  FindAgain();
+                  break;
+               case 'u':
+                  m_llist->DeleteToBeginOfLine();
                   SetDirty();
-               }
-               break;
-            case 'y':
-               m_llist->DeleteLines(1);
-               SetDirty();
-               break;
-            case 'h': // like backspace
-               if(m_llist->MoveCursorHorizontally(-1))
-               {
-                  m_llist->Delete(1);
+                  break;
+               case 'k':
+                  m_llist->DeleteToEndOfLine();
                   SetDirty();
-               }
-               break;
-            case 's': // search
-               Find("");
-               break;
-            case 't': // search again
-               FindAgain();
-               break;
-            case 'u':
-               m_llist->DeleteToBeginOfLine();
-               SetDirty();
-               break;
-            case 'k':
-               m_llist->DeleteToEndOfLine();
-               SetDirty();
-               break;
-            case 'c':
-               Copy(WXLO_COPY_FORMAT, FALSE);
-               break;
-            case 'v':
-               Paste( WXLO_COPY_FORMAT, FALSE );
-               break;
-            case 'x':
-               Cut( WXLO_COPY_FORMAT, FALSE );
-               break;
-            case 'w':
-               if(m_WrapMargin > 0)
-                  m_llist->WrapLine(m_WrapMargin);
-               break;
-            case 'q':
-               if(m_WrapMargin > 0)
-                  m_llist->WrapAll(m_WrapMargin);
-               break;
+                  break;
+               case 'c':
+                  Copy(WXLO_COPY_FORMAT, FALSE);
+                  break;
+               case 'v':
+                  Paste( WXLO_COPY_FORMAT, FALSE );
+                  break;
+               case 'x':
+                  Cut( WXLO_COPY_FORMAT, FALSE );
+                  break;
+               case 'w':
+                  if(m_WrapMargin > 0)
+                     m_llist->WrapLine(m_WrapMargin);
+                  break;
+               case 'q':
+                  if(m_WrapMargin > 0)
+                     m_llist->WrapAll(m_WrapMargin);
+                  break;
 #ifdef WXLAYOUT_DEBUG
-            case WXK_F1:
-               m_llist->SetFont(-1,-1,-1,-1,true);  // underlined
-               break;
-            case 'l':
-               Refresh(TRUE);
-               break;
+               case WXK_F1:
+                  m_llist->SetFont(-1,-1,-1,-1,true);  // underlined
+                  break;
+               case 'l':
+                  Refresh(TRUE);
+                  break;
 #endif
-            default:
-            // we don't handle it, maybe an accelerator?
-            event.Skip();
+               default:
+               // we don't handle it, maybe an accelerator?
+               event.Skip();
             }
          }
          // ALT only:
@@ -689,14 +691,14 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
          {
             switch(keyCode)
             {
-            case WXK_DELETE:
-            case 'd':
-               m_llist->DeleteWord();
-               SetDirty();
-               break;
-            default:
-               // we don't handle it, maybe an accelerator?
-               event.Skip();
+               case WXK_DELETE:
+               case 'd':
+                  m_llist->DeleteWord();
+                  SetDirty();
+                  break;
+               default:
+                  // we don't handle it, maybe an accelerator?
+                  event.Skip();
             }
          }
          // no control keys:
@@ -704,74 +706,80 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
          {
             switch(keyCode)
             {
-            case WXK_INSERT:
-               if(event.ShiftDown())
-                  Paste();
-               break;
-            case WXK_DELETE :
-               if(event.ShiftDown())
-                  Cut(WXLO_COPY_FORMAT, FALSE);
-               else
+               case WXK_INSERT:
+                  if(event.ShiftDown())
+                     Paste();
+                  break;
+               case WXK_DELETE :
+                  if(event.ShiftDown())
+                     Cut(WXLO_COPY_FORMAT, FALSE);
+                  else
+                     if(! deletedSelection)
+                     {
+                        m_llist->Delete(1);
+                        SetDirty();
+                     }
+                  break;
+               case WXK_BACK: // backspace
                   if(! deletedSelection)
-                  {
-                     m_llist->Delete(1);
-                     SetDirty();
-                  }
-               break;
-            case WXK_BACK: // backspace
-               if(! deletedSelection)
-                  if(m_llist->MoveCursorHorizontally(-1))
-                  {
-                     m_llist->Delete(1);
-                     SetDirty();
-                  }
-               break;
-            case WXK_RETURN:
-               if(m_DoWordWrap &&
-                  m_WrapMargin > 0
-                  && m_llist->GetCursorPos().x > m_WrapMargin)
-                  m_llist->WrapLine(m_WrapMargin);
-               m_llist->LineBreak();
-               SetDirty();
-               break;
-
-            case WXK_TAB:
-               if ( !event.ShiftDown() )
-               {
-                  // TODO should be configurable
-                  static const int tabSize = 8;
-
-                  CoordType x = m_llist->GetCursorPos().x;
-                  size_t numSpaces = tabSize - x % tabSize;
-                  m_llist->Insert(wxString(' ', numSpaces));
-                  SetDirty();
-               }
-               break;
-               
-            default:
-               if((!(event.ControlDown() || event.AltDown()
-                  ))
-                  && (keyCode < 256 && keyCode >= 32)
-                  )
-               {
-                  if(m_DoWordWrap
-                     && m_WrapMargin > 0
-                     && m_llist->GetCursorPos().x > m_WrapMargin
-                     && isspace(keyCode))
+                     if(m_llist->MoveCursorHorizontally(-1))
+                     {
+                        m_llist->Delete(1);
+                        SetDirty();
+                     }
+                  break;
+               case WXK_RETURN:
+                  if(m_DoWordWrap &&
+                     m_WrapMargin > 0
+                     && m_llist->GetCursorPos().x > m_WrapMargin)
                      m_llist->WrapLine(m_WrapMargin);
-                  m_llist->Insert((char)keyCode);
+                  m_llist->LineBreak();
                   SetDirty();
-               }
-               else
-                  // we don't handle it, maybe an accelerator?
-                  event.Skip();
-               break;
+                  break;
+
+               case WXK_TAB:
+                  if ( !event.ShiftDown() )
+                  {
+                     // TODO should be configurable
+                     static const int tabSize = 8;
+
+                     CoordType x = m_llist->GetCursorPos().x;
+                     size_t numSpaces = tabSize - x % tabSize;
+                     m_llist->Insert(wxString(' ', numSpaces));
+                     SetDirty();
+                  }
+                  break;
+                  
+               default:
+                  if((!(event.ControlDown() || event.AltDown()
+                     ))
+                     && (keyCode < 256 && keyCode >= 32)
+                     )
+                  {
+                     if(m_DoWordWrap
+                        && m_WrapMargin > 0
+                        && m_llist->GetCursorPos().x > m_WrapMargin
+                        && isspace(keyCode))
+                        m_llist->WrapLine(m_WrapMargin);
+                     m_llist->Insert((char)keyCode);
+                     SetDirty();
+                  }
+                  else
+                     // we don't handle it, maybe an accelerator?
+                     event.Skip();
+                  break;
             }
+         }
+         else
+         {
+            event.Skip();
          }
       }// if(IsEditable())
       else
+      {
          // we don't handle it, maybe an accelerator?
          event.Skip();
+      }
    }// first switch()
 
    if ( m_Selecting )

@@ -1876,8 +1876,8 @@ wxFolderView::Update(HeaderInfoList *listing)
 
       // this doesn't work well with wxWin <= 2.2.5 in debug mode as calling
       // EnsureVisible() results in an assert failure which is harmless but
-      // _very_ annoying as it happens all the time (FIXME: should be 6!!)
-#if !defined(__WXDEBUG__) || wxCHECK_VERSION(2,2,7)
+      // _very_ annoying as it happens all the time
+#if !defined(__WXDEBUG__) || wxCHECK_VERSION(2,2,6)
       if ( focusedIndex != -1 )
          m_FolderCtrl->EnsureVisible(focusedIndex);
 #endif
@@ -2318,6 +2318,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
             if ( cmd == WXMENU_FILE_COMPOSE_WITH_TEMPLATE )
             {
                templ = ChooseTemplateFor(MessageTemplate_NewMessage, frame);
+               if ( templ.empty() )
+               {
+                  // cancelled by user
+                  break;
+               }
             }
 
             wxComposeView *composeView = wxComposeView::CreateNewMessage

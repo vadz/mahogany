@@ -1073,6 +1073,7 @@ wxMessageView::Update(void)
    GetLayoutList()->ForceTotalLayout();
    // for safety, this is required to set scrollbars
    RequestUpdate();
+   ScrollToCursor();
 }
 
 String

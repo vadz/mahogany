@@ -95,7 +95,9 @@ InitPython(void)
       tmp << PATH_SEPARATOR << pathOld;
    }
 
-   putenv(tmp);
+   // on some systems putenv() takes "char *", cast silents the warnings but
+   // should be harmless otherwise
+   putenv((char *)tmp.c_str());
 
    // initialise the interpreter - this we do always, just to avoid problems
    Py_Initialize();

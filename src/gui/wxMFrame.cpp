@@ -275,6 +275,11 @@ wxMFrame::OnMenuCommand(int id)
             if ( id == WXMENU_FILE_COMPOSE_WITH_TEMPLATE )
             {
                templ = ChooseTemplateFor(MessageTemplate_NewMessage, this);
+               if ( templ.empty() )
+               {
+                  // cancelled by user
+                  break;
+               }
             }
 
             wxComposeView *composeView = wxComposeView::CreateNewMessage

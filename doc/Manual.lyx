@@ -1690,6 +1690,200 @@ The list of message headers at the top, showing message subjects, authors,
 \layout Itemize
 
 The contents of the currently selected message below.
+\layout Subsubsection
+
+Understanding the folder view
+\layout Standard
+
+The messages are displayed in the folder view according to the curent sort
+ order which may be changed either from the folder properties dialog (of
+ course, it can be set independently for each folder or be the same for
+ all folders at once) or by clicking on the column header.
+ In the latter case, clicking on, for example, 
+\noun on 
+
+\begin_inset Quotes eld
+\end_inset 
+
+Subject
+\begin_inset Quotes erd
+\end_inset 
+
+
+\noun default 
+ column, will sort the messages by subject if they were not sorted by subject
+ already, otherwise it will sort them by subject in the reverse order.
+ This allows you to sort the listing on some column by just clicking it
+ and to reverse the sort order by clicking it again.
+\layout Standard
+
+Most of the columns are self explanatory.
+ It should be mentioned that the date format is configurable from the folder
+ view page of the folder properties dialog and you may set it to anything
+ you like.
+ In particular, some people find it very useful to show the date in GMT
+ instead of the local time.
+\layout Standard
+
+The status column (which is usually the first one, although you may change
+ the column order from the same page already mentioned above) may be empty
+ or contain one or more flags:
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="7" columns="2">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+Symbol
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+Meaning
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+*
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+message is flagged or important
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+A
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+message was answered to
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+D
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+message is marked as deleted and will disappear after expunge
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+U
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+message is unread: you haven't seen its body yet
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+R
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+message is recent: this is the first time you see it
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+N
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+message is new: it is recent and unread
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+
+Accordingly, if nothing appears in the status column, the message was read
+ but wasn't deleted nor flagged and this is not the first time you see it.
+ Note that not all kinds of folders support all kinds of flags: while IMAP
+ servers always do, POP servers are not capable of storing the message flags
+ and so all messages will always appear as new in them.
+\layout Standard
+
+Note that each message flag has also the corresponding colour which is used
+ to highlight the message in the folder view and also to highlight the folder
+ containing this message in the folder tree.
+ These colours can be changed from the folder view page of the options dialog,
+ as usual.
+\layout Subsubsection
+
+Keyboard and mouse handling
 \layout Standard
 
 The reaction to a mouse click in the list of messages depends on the preferences

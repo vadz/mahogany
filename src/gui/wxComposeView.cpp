@@ -1018,18 +1018,18 @@ wxComposeView::DoInitText(Message *msg)
       if ( hasSign )
       {
          wxLayoutList *layoutList = m_LayoutWindow->GetLayoutList();
+
          // insert separator optionally
          if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
             layoutList->LineBreak();
             layoutList->Insert("--");
-            layoutList->LineBreak();
          }
 
          // read the whole file
          size_t nLineCount = fileSig.GetLineCount();
          for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
+            layoutList->LineBreak();
             layoutList->Insert(fileSig[nLine]);
-            layoutList->LineBreak();;
          }
 
          // let's respect the netiquette
@@ -2513,12 +2513,20 @@ wxComposeView::InsertFileAsText(const String& filename,
 {
    // read the text from the file
    char *text = NULL;
+   off_t lenFile;
    wxFile file(filename);
 
    bool ok = file.IsOpened();
    if ( ok )
    {
-      off_t lenFile = file.Length();
+      lenFile = file.Length();
+      if ( lenFile == 0 )
+      {
+         wxLogVerbose(_("File '%s' is empty, no text to insert."),
+                      filename.c_str());
+         return true;
+      }
+
       text = new char[lenFile + 1];
       text[lenFile] = '\0';
 
@@ -2539,6 +2547,23 @@ wxComposeView::InsertFileAsText(const String& filename,
    // text if asked for this
    if ( replaceFirstTextPart )
    {
+      // VZ: I don't know why exactly does this happen but exporting text and
+      //     importing it back adds a '\n' at the end, so this is useful as a
+      //     quick workaround for this bug - of course, it's not a real solution
+      //     (FIXME)
+      size_t index = (size_t)lenFile - 1;
+      if ( text[index] == '\n' )
+      {
+         // check for "\r\n" too
+         if ( index > 0 && text[index - 1] == '\r' )
+         {
+            // truncate one char before
+            index--;
+         }
+
+         text[index] = '\0';
+      }
+
       // this is not as simple as it sounds, because we normally exported all
       // the text which was in the beginning of the message and it's not one
       // text object, but possibly several text objects and line break
