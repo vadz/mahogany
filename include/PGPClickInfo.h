@@ -16,6 +16,8 @@
 
 #include "ClickInfo.h"
 
+#include "modules/MCrypt.h"
+
 // ----------------------------------------------------------------------------
 // ClickablePGPInfo: an icon in message viewer containing PGP information
 // ----------------------------------------------------------------------------
@@ -28,6 +30,13 @@ public:
                     const String& bmpName,
                     const wxColour& colour);
    virtual ~ClickablePGPInfo();
+
+   /// create the object corresponding to the given signature check status code
+   static ClickablePGPInfo *
+   CreateFromSigStatusCode(MCryptoEngine::Status code,
+                           MessageView *msgView,
+                           const MCryptoEngineOutputLog *log);
+
 
    // implement the base class pure virtuals
    virtual String GetLabel() const;
@@ -170,7 +179,6 @@ public:
                          _T("pgpmsg_bad"),
                          *wxRED) { }
 };
-
 
 #endif // _M_PGPCLICKINFO_H_
 

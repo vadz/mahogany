@@ -260,40 +260,20 @@ PGPFilter::DoProcess(String& text,
          CHECK_RET( m_engine, _T("PGP filter can't work without PGP engine") );
 
          ClickablePGPInfo *pgpInfo = NULL;
-         MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog;
+         MCryptoEngineOutputLog *
+            log = new MCryptoEngineOutputLog(m_msgView->GetWindow());
 
          String in(start, end),
                 out;
          if ( isSigned )
          {
             // pass everything between start and end to PGP for verification
-            switch ( m_engine->VerifySignature(in, out, log) )
-            {
-               case MCryptoEngine::OK:
-                  // create an icon for the sig just to show that it was there
-                  pgpInfo = new PGPInfoGoodSig(m_msgView, log->GetUserID());
-                  break;
-
-               case MCryptoEngine::SIGNATURE_EXPIRED_ERROR:
-                  pgpInfo = new PGPInfoExpiredSig(m_msgView, log->GetUserID());
-                  break;
-
-               case MCryptoEngine::SIGNATURE_UNTRUSTED_WARNING:
-                  pgpInfo = new PGPInfoUntrustedSig(m_msgView, log->GetUserID());
-                  break;
-
-               case MCryptoEngine::NONEXISTING_KEY_ERROR:
-                  pgpInfo = new PGPInfoKeyNotFoundSig(m_msgView, log->GetUserID());
-                  break;
-
-               default:
-                  // use unmodified text
-                  out = in;
-
-                  // but still create an icon showing that signature check
-                  // failed
-                  pgpInfo = new PGPInfoBadSig(m_msgView, log->GetUserID());
-            }
+            pgpInfo = ClickablePGPInfo::CreateFromSigStatusCode
+                      (
+                        m_engine->VerifySignature(in, out, log),
+                        m_msgView,
+                        log
+                      );
          }
          else // encrypted
          {
@@ -323,6 +303,7 @@ PGPFilter::DoProcess(String& text,
          {
             pgpInfo->SetLog(log);
             pgpInfo->SetRaw(in);
+
             // we want the PGP stuff to stand out
             viewer->InsertText(_T("\r\n"), style);
 
@@ -332,7 +313,7 @@ PGPFilter::DoProcess(String& text,
 
             viewer->InsertText(_T("\r\n"), style);
          }
-         else
+         else // if log is not given to pgpInfo we need to delete it ourselves
          {
             delete log;
          }

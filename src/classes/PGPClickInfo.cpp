@@ -118,6 +118,47 @@ ClickablePGPInfo::~ClickablePGPInfo()
    delete m_log;
 }
 
+/* static */
+ClickablePGPInfo *
+ClickablePGPInfo::CreateFromSigStatusCode(MCryptoEngine::Status code,
+                                          MessageView *msgView,
+                                          const MCryptoEngineOutputLog *log)
+{
+   ClickablePGPInfo *pgpInfo;
+   const String& user = log->GetUserID();
+
+   switch ( code )
+   {
+      case MCryptoEngine::OK:
+         // create an icon for the sig just to show that it was there
+         pgpInfo = new PGPInfoGoodSig(msgView, user);
+         break;
+
+      case MCryptoEngine::SIGNATURE_EXPIRED_ERROR:
+         pgpInfo = new PGPInfoExpiredSig(msgView, user);
+         break;
+
+      case MCryptoEngine::SIGNATURE_UNTRUSTED_WARNING:
+         pgpInfo = new PGPInfoUntrustedSig(msgView, user);
+         break;
+
+      case MCryptoEngine::NONEXISTING_KEY_ERROR:
+         pgpInfo = new PGPInfoKeyNotFoundSig(msgView, user);
+         break;
+
+      default:
+         // we use unmodified text but still create an icon showing that
+         // the signature check failed
+         pgpInfo = new PGPInfoBadSig(msgView, user);
+
+         // and also warn the user in case [s]he doesn't notice the icon
+         wxLogWarning(_("This message is cryptographically signed but "
+                        "its signature is invalid!"));
+   }
+
+   return pgpInfo;
+}
+
 // ----------------------------------------------------------------------------
 // ClickablePGPInfo accessors
 // ----------------------------------------------------------------------------

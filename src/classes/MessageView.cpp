@@ -1952,41 +1952,24 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
       {
          MCryptoEngine* pgpEngine = factory->Get();
 
-         MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog;
+         MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog(GetWindow());
 
          MCryptoEngine::Status status =
                pgpEngine->VerifyDetachedSignature(signedText, signature, log);
 
-         ClickablePGPInfo *pgpInfo = NULL;
-         const String& user = log->GetUserID();
-         switch ( status )
-         {
-            case MCryptoEngine::OK:
-               // create an icon for the sig just to show that it was there
-               pgpInfo = new PGPInfoGoodSig(this, user);
-               break;
-
-            case MCryptoEngine::SIGNATURE_EXPIRED_ERROR:
-               pgpInfo = new PGPInfoExpiredSig(this, user);
-               break;
-
-            case MCryptoEngine::SIGNATURE_UNTRUSTED_WARNING:
-               pgpInfo = new PGPInfoUntrustedSig(this, user);
-               break;
-
-            case MCryptoEngine::NONEXISTING_KEY_ERROR:
-               pgpInfo = new PGPInfoKeyNotFoundSig(this, user);
-               break;
-
-            default:
-               pgpInfo = new PGPInfoBadSig(this, user);
-         }
+         ClickablePGPInfo *pgpInfo = ClickablePGPInfo::CreateFromSigStatusCode
+                                     (
+                                       status,
+                                       this,
+                                       log
+                                     );
 
          ProcessPart(signedPart);
 
          if ( pgpInfo )
          {
             pgpInfo->SetLog(log);
+
             ShowText(_T("\r\n"));
 
             m_viewer->InsertClickable(pgpInfo->GetBitmap(),
