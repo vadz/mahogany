@@ -340,7 +340,7 @@ wxLayoutObjectCmd::wxLayoutObjectCmd(int size, int family, int style, int
 {
    m_StyleInfo = new
       wxLayoutStyleInfo(size,family,style,weight,underline,fg,bg);
-   m_font = m_StyleInfo->GetFont(NULL);
+   m_font = NULL;
 }
 
 wxLayoutObject *
@@ -374,7 +374,7 @@ wxLayoutObjectCmd::Copy(void)
 wxLayoutObjectCmd::~wxLayoutObjectCmd()
 {
    delete m_StyleInfo;
-   delete m_font;
+   if(m_font) delete m_font;
 }
 
 wxLayoutStyleInfo *
@@ -396,6 +396,10 @@ wxLayoutObjectCmd::Draw(wxDC &dc, wxPoint const & /* coords */,
 void
 wxLayoutObjectCmd::Layout(wxDC &dc, class wxLayoutList * llist)
 {
+   if(m_font) delete m_font;
+   m_font = m_StyleInfo->GetFont(llist->GetStyleInfo());
+
+
    // this get called, so that recalculation uses right font sizes
    Draw(dc, wxPoint(0,0), llist);
 }
@@ -1598,10 +1602,6 @@ wxLayoutList::Draw(wxDC &dc,
       if(bottom != -1 && line->GetPosition().y > bottom) break;
       line = line->GetNextLine();
    }
-   // can only be 0 if we are on the first line and have no next line
-   wxASSERT(m_CursorSize.x != 0 || (m_CursorLine &&
-                                    m_CursorLine->GetNextLine() == NULL &&
-                                    m_CursorLine == m_FirstLine));
    InvalidateUpdateRect();
 
    WXLO_DEBUG(("Selection is %s : l%d,%ld/%ld,%ld",
