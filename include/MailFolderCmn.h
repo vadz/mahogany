@@ -155,7 +155,17 @@ public:
        @param updateFlags the flags to set
    */
    virtual void SetUpdateFlags(int updateFlags)
-      { m_UpdateFlags = updateFlags; }
+      {
+         int oldFlags = m_UpdateFlags;
+         m_UpdateFlags = updateFlags;
+         if( !(oldFlags & UF_UpdateCount)
+             && (m_UpdateFlags & UF_UpdateCount)
+            )
+         {
+            UpdateStatus();
+            RequestUpdate();// this should be done already...
+         }
+      }
    /// Get the current update flags
    virtual int  GetUpdateFlags(void) const
       { return m_UpdateFlags; }
@@ -174,6 +184,8 @@ public:
 protected:
    /// common code for ApplyFilterRules:
    int ApplyFilterRulesCommonCode(UIdArray *msgs, bool NewOnly = FALSE);
+   /// Update the folder status, number of messages, etc
+   virtual void UpdateStatus(void) = 0;
    /// Constructor
    MailFolderCmn(class ProfileBase *profile);
 

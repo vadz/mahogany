@@ -368,9 +368,9 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
          rc = true;
 
       mf->SetUpdateFlags(updateFlags);
+      mf->UnLock();
+      mf->Ping(); //update it
    }
-   mf->UnLock();
-   mf->Ping(); //update it
 
    Lock(locked);
 

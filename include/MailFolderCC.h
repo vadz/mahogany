@@ -338,9 +338,6 @@ private:
    /// Common code for constructors
    void Create(int typeAndFlags);
 
-   /// Update the folder status, number of messages, etc
-   void UpdateStatus(void);
-      
    /** Try to open the mailstream for this folder.
        @return true on success
    */
@@ -446,6 +443,8 @@ private:
 protected:
    /// Request update
    virtual void RequestUpdate(void);
+   /// Update the folder status, number of messages, etc
+   virtual void UpdateStatus(void);
    /// Update the timeout values from a profile
    void UpdateTimeoutValues(void);
    /// apply all timeout values

@@ -771,7 +771,7 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
          wxFolderTreeNode *node = GetFolderTreeNode(child);
          CHECK( node, false, "tree folder node without folder?" );
 
-         if ( node->GetFolder()->GetFullName() == currentPath )
+         if ( node->GetFolder()->GetFullName().CmpNoCase(currentPath) == 0 )
             break;
 
          child = GetNextChild(current, cookie);
