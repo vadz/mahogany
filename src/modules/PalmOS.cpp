@@ -25,8 +25,8 @@
 
 #ifdef USE_PISOCK
 
-#include "MModule.h"
 
+#include "MModule.h"
 #include "Mversion.h"
 #include "MInterface.h"
 #include "Message.h"
@@ -40,6 +40,7 @@
 
 #include <wx/menu.h>
 
+#include "adb/AdbManager.h"
 #include "adb/ProvPalm.h"
 
 #define MODULE_NAME    "PalmOS"
@@ -102,8 +103,6 @@
 #include <pi-mail.h>        // for the mailbox
 #include <pi-dlp.h>
 
-#include "adb/AdbManager.h"
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -127,9 +126,11 @@ extern "C" {
 };
 #endif
 
+
 // ----------------------------------------------------------------------------
 // Implementation
 // ----------------------------------------------------------------------------
+
 
 class wxDeviceLock
 {
@@ -203,9 +204,11 @@ private:
 };
 
 
+
 ///----------------------------------------------------------------------------
 /// MModule interface:
 ///----------------------------------------------------------------------------
+
 
 class PalmOSModule : public MModule
 {
@@ -241,11 +244,13 @@ private:
    void StoreEMails(void);
 
    void Backup(void);
-   void Restore(void);
-   void Install(void);
 
-   void AutoInstall(void);
-   void InstallFiles(char ** fnames, int files_total, bool delFiles);
+   void Install(void);
+   void AutoInstall(void)
+      { InstallFromDir(m_AutoInstallDir, true); }
+   void Restore(void)
+      { InstallFromDir(m_BackupDir, false); }
+   void InstallFiles(wxArrayString &fnames, bool delFiles);
    void InstallFromDir(wxString directory, bool delFiles);
 
    inline void ErrorMessage(const String &msg)
@@ -258,9 +263,9 @@ private:
    int GetPalmDBList(wxArrayString &dblist, bool getFilenames);
 
    int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
-   int CreateFileList(char *** list, DIR * dir, wxString directory);
-   void DeleteFileList(char **list, int filecount);
-   void RemoveFromList(char *name, char **list, int max);
+   int CreateFileList(wxArrayString &list, DIR * dir, wxString directory);
+   void RemoveFromList(wxArrayString &list, wxString &name) 
+      { if (list.Index(name) >= 0) list.Remove(list.Index(name)); }
 
    int m_PiSocket;
    int m_MailDB;
@@ -565,6 +570,7 @@ PalmOSModule::Connect(void)
          if(! m_Lock->Lock())
             return false;
 
+      StatusMessage(_("Please press HotSync button and click on OK!"));
       Message(_("Please press HotSync button and click on OK."));
       if (!(m_PiSocket = pi_socket(PI_AF_SLP, PI_SOCK_STREAM, PI_PF_PADP)))
       {
@@ -582,6 +588,7 @@ PalmOSModule::Connect(void)
       pi_setmaxspeed(m_PiSocket, m_Speed, 0 /* overclock */);
 #endif
 
+      StatusMessage(_("Connecting to Palm ..."));
       rc = pi_bind(m_PiSocket, (struct sockaddr*)&addr, sizeof(addr));
       if(rc == -1)
       {
@@ -678,6 +685,8 @@ PalmOSModule::Disconnect(void)
          }
       }
    }
+   
+   StatusMessage(_(""));
 }
 
 // ----------------------------------------------------------------------------
@@ -738,107 +747,44 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
 
 
 /* Protect = and / in filenames */
-static void protect_name(char *d, char *s)
+static void protect_name(wxString &s)
 {
-   while(*s) {
-      switch(*s) {
-         case '/': 
-            *(d++) = '=';
-            *(d++) = '2';
-            *(d++) = 'F';
-            break;
-         case '=': 
-            *(d++) = '=';
-            *(d++) = '3';
-            *(d++) = 'D';
-            break;
-         case ',': 
-            *(d++) = '=';
-            *(d++) = '2';
-            *(d++) = 'C';
-            break;
-         case '\x0A':
-            *(d++) = '=';
-            *(d++) = '0';
-            *(d++) = 'A';
-            break;
-         case '\x0D':
-            *(d++) = '=';
-            *(d++) = '0';
-            *(d++) = 'D';
-            break;
-         default: *(d++) = *s;
-      }
-      s++;
-   }
-   *d = '\0';
+   s.Replace("=", "=3D");
+   s.Replace("/", "=2F");
+   s.Replace(",", "=2C");
+   s.Replace("\x0A", "=0A");
+   s.Replace("\x0D", "=0D");
 }
 
 int
-PalmOSModule::CreateFileList(char ***list, DIR * dir, wxString directory)
+PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir, wxString directory)
 {
-   char **filelist = 0;
    struct dirent * dirent;
+   int filecount = 0;
 
-   int file_len;
-   int filecount;
-   filecount = 0;
-   file_len = 0;
+   list.Empty();
 
    while( (dirent = readdir(dir)) ) {
-      char name[256];
+      StatusMessage(_("Reading local directory ..."));
+      wxString name;
+
+      // ignore .* files (especially . or ..)
       if (dirent->d_name[0] == '.')
          continue;
 
-      if (!filelist) {
-         file_len += 256;
-         filelist = (char **) malloc(sizeof(char*) * file_len);
-      } else if (filecount >= file_len) {
-         file_len += 256;
-         filelist = (char **) realloc(filelist, sizeof(char*) * file_len);
-      }
-
-      sprintf(name, "%s%s", directory.c_str(), dirent->d_name);
+      name.Printf("%s%s", directory.c_str(), dirent->d_name);
       
       // now we open the file and see whether it is really a file for
       // the Palm. If yes, then we remember the filename.
-      struct pi_file *f = pi_file_open(name);
+      struct pi_file *f = pi_file_open((char*)name.c_str());
       if (f > 0) {
          pi_file_close(f);
-         filelist[filecount++] = strutil_strdup(name);
+         list.Add(name);
+         ++filecount;
       }
    }
 
-   *list = filelist;
    return filecount;
-}
-
-
-void
-PalmOSModule::RemoveFromList(char *name, char **list, int max)
-{
-   for (int i = 0; i < max; i++)
-   {
-      if (list[i] != NULL && strcmp(name, list[i]) == 0)
-      {
-         free(list[i]);
-         list[i] = NULL;
-      }
-   }
-}
-
-
-void
-PalmOSModule::DeleteFileList(char **list, int filecount)
-{
-   if (list) {
-      for (int i = 0; i < filecount; i++)
-         if (list[i] != NULL)
-            free(list[i]);
-
-      if (list)
-         free(list);
-   }
 }
 
 
@@ -860,20 +806,19 @@ PalmOSModule::GetPalmDBList(wxArrayString &dblist, bool getFilenames)
       if (dlp_ReadDBList(m_PiSocket, 0, 0x80, i, &info) < 0)
          break;
 
-      char     name[256];
+      StatusMessage(_("Reading list of databases ..."));
+   
       wxString dbname;
+      dbname.Printf("%s", info.name);
 
       if (getFilenames) {
          // construct filename
-         protect_name(name, info.name);
+         protect_name(dbname);
          if (info.flags & dlpDBFlagResource)
-            strcat(name, ".prc");
+            dbname.append(".prc");
          else
-            strcat(name, ".pdb");
-            
-         dbname.Printf("%s", name);
-      } else
-         dbname.Printf("%s", info.name);
+            dbname.append(".pdb");
+      }
 
       dblist.Add(dbname);
 
@@ -912,10 +857,9 @@ PalmOSModule::Backup(void)
    }
 
    // Read original list of files in the backup dir
-   int     ofile_total;
-   char ** orig_files = 0;
+   wxArrayString orig_files;
 
-   ofile_total = CreateFileList(&orig_files, dir, m_BackupDir);
+   CreateFileList(orig_files, dir, m_BackupDir);
    closedir(dir);
 
    // count files on the palm
@@ -923,6 +867,7 @@ PalmOSModule::Backup(void)
    int i = 0;
 
    while (true) {
+      StatusMessage(_("Reading list of databases ..."));
       struct DBInfo info;
       if (dlp_ReadDBList(m_PiSocket, 0, 0x80, i, &info) < 0)
          break;
@@ -945,8 +890,8 @@ PalmOSModule::Backup(void)
       struct pi_file *f;
       struct utimbuf  times;
       struct stat     statb;
-      char            name[256];
-
+      wxString name, fname;
+      
       if (dlp_ReadDBList(m_PiSocket, 0, 0x80, i, &info) < 0)
          break;
 
@@ -962,39 +907,41 @@ PalmOSModule::Backup(void)
       info.flags &= 0xff;
 
       // construct filename
-      strncpy(name, m_BackupDir, 256);
-      protect_name(strlen(name) + name, info.name);
+      fname.Printf("%s", info.name);
+      protect_name(fname);
+      
       if (info.flags & dlpDBFlagResource)
-         strcat(name, ".prc");
+         fname.Append(".prc");
       else
-         strcat(name, ".pdb");
+         fname.Append(".pdb");
+
+      name.Printf("%s%s", m_BackupDir.c_str(), fname.c_str());
 
       // update progress dialog, exit on "cancel"
+      StatusMessage(_("Backup´ing ..."));
       if( ! pd->Update(max++, name) )
       {
-         DeleteFileList(orig_files, ofile_total);
          delete pd;
          return;
       }
 
       // check whether this might be a database we have to ignore
       if (m_IncrBackup)
-         if (stat(name, &statb) == 0)
+         if (stat(name.c_str(), &statb) == 0)
             if (info.modifyDate == statb.st_mtime) {
-               RemoveFromList(name, orig_files, ofile_total);
+               RemoveFromList(orig_files, name);
                continue;
             }
 
       if (!m_BackupAll && !(info.flags & dlpDBFlagBackup)) {
-         RemoveFromList(name, orig_files, ofile_total);
+         RemoveFromList(orig_files, name);
          continue;
       }
 
       // check exclude list
       int pos;
-      char *fname = name + strlen(m_BackupDir);
 
-      pos = m_BackupExcludeList.find(fname, 0);
+      pos = m_BackupExcludeList.find(fname.c_str(), 0);
       if (pos >= 0) {
          // the found string is only valid, if it is either surrounded by commata or
          // with string start or end
@@ -1013,23 +960,24 @@ PalmOSModule::Backup(void)
          // now we´ve made sure that the entry in the exclude list started correctly,
          // so let´s check whether it ends correctly, too
          if (valid) 
-            if (m_BackupExcludeList.Len() != (pos + strlen(fname )))
-               if ((m_BackupExcludeList.Mid(pos + strlen(fname),1)).Cmp(",") != 0)
+            if (m_BackupExcludeList.Len() != fname.Len())
+               if ((m_BackupExcludeList.Mid(pos + fname.Len(),1)).Cmp(",") != 0)
                   valid = false; // it was neither the last entry nor did it end with komma
          
          if (valid) {
-            RemoveFromList(name, orig_files, ofile_total);
+            if (orig_files.Index(name) >= 0)
+               orig_files.Remove(orig_files.Index(name));
             continue;
          }
       }
 
       // create file
-      f = pi_file_create(name, &info);
+      f = pi_file_create((char*)name.c_str(), &info);
 
       if (f == 0) {
          wxString msg;
          msg.Printf(_("Unable to create file %s!"),
-                       name);
+                       (char*)name.c_str());
          ErrorMessage(_(msg));
          continue;
       }
@@ -1037,7 +985,7 @@ PalmOSModule::Backup(void)
       if (pi_file_retrieve(f, m_PiSocket, 0) < 0) {
          wxString msg;
          msg.Printf(_("Unable to backup database %s!"),
-                       name);
+                       name.c_str());
          ErrorMessage(_(msg));
       }
       
@@ -1051,35 +999,35 @@ PalmOSModule::Backup(void)
       times.modtime = info.modifyDate;
       utime(name, &times);
 
-      RemoveFromList(name, orig_files, ofile_total);
+      RemoveFromList(orig_files, name);
    }
 
    delete pd;
 
    // Remaining files are outdated
-   if ( (m_BackupSync) && (orig_files) )
-      for (i = 0; i < ofile_total; i++)
-         if (orig_files[i] != NULL)
-            unlink(orig_files[i]);  // delete
+   if (m_BackupSync) {
+      for (unsigned int j = 0; j < orig_files.GetCount(); j++)
+         unlink(orig_files.Item(j).c_str());  // delete
+   }
 
    // All files are backed up now.
-   DeleteFileList(orig_files, ofile_total);
+   orig_files.Empty();
 }
 
 struct db {
-   char name[256];
-   int flags;
-   unsigned long creator;
-   unsigned long type;
-   int maxblock;
+   char           name[256];
+   int            flags;
+   unsigned long  creator;
+   unsigned long  type;
+   int            maxblock;
 };
 
 int
-pdbCompare(struct db * d1, struct db * d2)
+pdbCompare(struct db* d1, struct db* d2)
 {
-   /* types of 'appl' sort later then other types */
-   if(d1->creator == d2->creator)
-      if(d1->type != d2->type) {
+   /* types of 'appl' sort later than other types */
+   if (d1->creator == d2->creator)
+      if (d1->type != d2->type) {
          if(d1->type == pi_mktag('a','p','p','l'))
             return 1;
          if(d2->type == pi_mktag('a','p','p','l'))
@@ -1096,21 +1044,22 @@ pdbCompare(struct db * d1, struct db * d2)
 
 
 void
-PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
+PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
 {
    struct DBInfo info;
    struct db * db[256];
    int    dbcount = 0;
    int    size;
-   int i, j, max;
+   int    i, max;
    struct pi_file * f;
    MProgressDialog *pd;
 
-   for ( j = 0; j < files_total; j++) {
+   for (unsigned int j = 0; j < fnames.GetCount(); j++) {
+      StatusMessage(_("Checking files to install ..."));
       db[dbcount] = (struct db*)malloc(sizeof(struct db));
 
       // remember filename
-      sprintf(db[dbcount]->name, "%s", fnames[j]);
+      sprintf(db[dbcount]->name, "%s", fnames.Item(j).c_str());
 
       f = pi_file_open(db[dbcount]->name);
 
@@ -1124,9 +1073,9 @@ PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
 
       pi_file_get_info(f, &info);
 
-      db[dbcount]->creator = info.creator;
-      db[dbcount]->type = info.type;
-      db[dbcount]->flags = info.flags;
+      db[dbcount]->creator  = info.creator;
+      db[dbcount]->type     = info.type;
+      db[dbcount]->flags    = info.flags;
       db[dbcount]->maxblock = 0;
 
       pi_file_get_entries(f, &max);
@@ -1147,7 +1096,7 @@ PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
 
    // sort list in alphabetical order
    for (i=0; i < dbcount; i++)
-      for (j = i+1; j<dbcount; j++)
+      for (int j = i+1; j<dbcount; j++)
          if (pdbCompare(db[i], db[j]) > 0)
          {
             struct db * temp = db[i];
@@ -1159,24 +1108,22 @@ PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
                             dbcount, NULL, false, true);
 
    // Install files
-   for (i=0; i < dbcount; i++)
-   {
-      if (!pd->Update(i, db[i]->name))
-      {
+   for (i=0; i < dbcount; i++) {
+      StatusMessage(_("Installing Files ..."));
+
+      if (!pd->Update(i, db[i]->name)) {
          delete pd;
          return;
       }
 
-      if ( dlp_OpenConduit(m_PiSocket) < 0)
-      {
+      if ( dlp_OpenConduit(m_PiSocket) < 0) {
          ErrorMessage(_("Exiting on cancel, all data not restored/installed"));
          delete pd;
          return;
       }
 
       f = pi_file_open(db[i]->name);
-      if (f == 0)
-      {
+      if (f == 0) {
          wxString msg;
          msg.Printf(_("Could not open file %s or file invalid!"),
                        db[dbcount]->name);
@@ -1210,18 +1157,6 @@ PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
 
 
 void
-PalmOSModule::Restore()
-{
-   InstallFromDir(m_BackupDir, false);
-}
-
-void
-PalmOSModule::AutoInstall()
-{
-   InstallFromDir(m_AutoInstallDir, true);
-}
-
-void
 PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
 {
    PiConnection conn(this);
@@ -1230,7 +1165,7 @@ PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
 
    DIR*   dir;
    int    ofile_total;
-   char ** fnames = 0;
+   wxArrayString fnames;
 
    dir = opendir(directory);
    if (dir <= 0) {
@@ -1241,28 +1176,22 @@ PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
       return;
    }
 
-   ofile_total = CreateFileList(&fnames, dir, directory);
-
+   ofile_total = CreateFileList(fnames, dir, directory);
+   
    // we´ve finished reading the filelist
    closedir(dir);
 
    // install files
-   if (ofile_total > 0)   
-      InstallFiles(fnames, ofile_total, delFiles);
-   DeleteFileList(fnames, ofile_total);
+   if (ofile_total > 0)
+      InstallFiles(fnames, delFiles);
+      
+   fnames.Empty();
 }
 
 void
 PalmOSModule::Install()
 {
-   int    ofile_total;
-   char ** fnames = 0;
-
    MAppBase *mapp = m_MInterface->GetMApplication();
-
-
-   // TODO: extend to "real" install routine, e.g.
-   // let choose different files in different directories
 
    /*
    wxString wxPFileSelector("PalmOS/InstallFilesDlg",
@@ -1277,19 +1206,17 @@ PalmOSModule::Install()
    if ( fileDialog.ShowModal() != wxID_OK )
       return;
 
-   wxArrayString fileNames;
-   fileDialog.GetPaths(fileNames);
+   wxArrayString fnames;
+   fileDialog.GetPaths(fnames);
 
-   ofile_total = (int) fileNames.Count();
-   fnames = (char **) malloc( sizeof(char *) * ofile_total );
-   for(int i = 0; i < ofile_total; i++)
-      fnames[i] = strutil_strdup( fileNames[i] );
-
+   if (fnames.GetCount() == 0)
+      return;
+      
    // install files
    PiConnection conn(this);
    if( IsConnected())
-      InstallFiles(fnames, ofile_total, false);
-   DeleteFileList(fnames, ofile_total);
+      InstallFiles(fnames, false);
+   fnames.Empty();
 }
 
 
