@@ -757,9 +757,18 @@ InitRecipients(Composer *cv,
       explicitReplyKind = true;
    }
 
+   // our own addresses - used in the code below
+   String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
+   wxArrayString ownAddresses = strutil_restore_array(returnAddrs);
+
+   // is this a message from ourselves?
+   bool fromMyself = false;
+
+   // first try Reply-To
    wxSortedArrayString replyToAddresses;
-   size_t n,
-          countReplyTo = msg->GetAddresses(MAT_REPLYTO, replyToAddresses);
+   size_t countReplyTo = msg->GetAddresses(MAT_REPLYTO, replyToAddresses);
+
+   size_t n, count; // loop variables
 
    // REPLY_LIST overrides any Reply-To in the header
    if ( replyKind != MailFolder::REPLY_LIST )
@@ -769,17 +778,40 @@ InitRecipients(Composer *cv,
       // make it possible to reply to the sender of the message only even if
       // the Reply-To address had been mangled by the mailing list to point to
       // it instead
+      String rcptMain;
       if ( (explicitReplyKind && replyKind == MailFolder::REPLY_SENDER) ||
             !countReplyTo )
       {
          // try from address
          //
          // FIXME: original encoding is lost here
-         cv->AddTo(MailFolder::DecodeHeader(msg->From()));
+         rcptMain = MailFolder::DecodeHeader(msg->From());
       }
       else // have Reply-To
       {
-         for ( n = 0; n < countReplyTo; n++ )
+         rcptMain = MailFolder::DecodeHeader(replyToAddresses[0]);
+      }
+
+      // an additional complication: when replying to a message written by
+      // oneself you don't usually want to reply to you at all but, instead,
+      // use the "To:" address of the original message for your reply as well -
+      // the code below catches this particular case
+      fromMyself = Message::FindAddress(ownAddresses, rcptMain) != wxNOT_FOUND;
+      if ( fromMyself )
+      {
+         wxArrayString addresses;
+         size_t count = msg->GetAddresses(MAT_TO, addresses);
+         for ( n = 0; n < count; n++ )
+         {
+            cv->AddTo(addresses[n]);
+         }
+      }
+      else // not from myself
+      {
+         cv->AddTo(rcptMain);
+
+         // add the remaining Reply-To addresses (usually there will be none)
+         for ( n = 1; n < countReplyTo; n++ )
          {
             // FIXME: same as above
             cv->AddTo(MailFolder::DecodeHeader(replyToAddresses[n]));
@@ -820,12 +852,15 @@ InitRecipients(Composer *cv,
    else // we already have used some addresses
    {
       // use From only if not done already above
-      if ( countReplyTo > 0 )
+      if ( countReplyTo > 0 || fromMyself )
          otherAddresses.Add(msg->From());
    }
 
    msg->GetAddresses(MAT_CC, otherAddresses);
-   msg->GetAddresses(MAT_TO, otherAddresses);
+
+   // for messages from oneself we already used the "To" recipients above
+   if ( !fromMyself )
+      msg->GetAddresses(MAT_TO, otherAddresses);
 
    // this is probably an overkill - you never want to reply to the sender
    // address, do you?
@@ -833,24 +868,19 @@ InitRecipients(Composer *cv,
    msg->GetAddresses(MAT_SENDER, otherAddresses);
 #endif // 0
 
-   // decode headers before comparing them - the problem is that we lost their
-   // original encoding when doing this
-   for ( n = 0; n < otherAddresses.GetCount(); n++ )
+   // decode headers before comparing them
+   count = otherAddresses.GetCount();
+   for ( n = 0; n < count; n++ )
    {
+      // FIXME: as above, we lose the original encoding here
       otherAddresses[n] = MailFolder::DecodeHeader(otherAddresses[n]);
    }
 
    // remove duplicates
    wxArrayString uniqueAddresses = strutil_uniq_array(otherAddresses);
 
-   // and also filter out the addresses used in to as well as our own
-   // address(es) by putting their indices into addressesToIgnore array
-   String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
-   wxArrayString ownAddresses = strutil_restore_array(returnAddrs);
-
-   // finally, if we're in REPLY_LIST mode, also remember which reply
-   // addresses correspond to the mailing lists as we want to reply to them
-   // only
+   // if we're in REPLY_LIST mode, also remember which reply addresses
+   // correspond to the mailing lists as we want to reply to them only
    wxArrayString listAddresses;
    if ( replyKind == MailFolder::REPLY_LIST )
    {
@@ -927,7 +957,7 @@ InitRecipients(Composer *cv,
       }
    }
 
-   size_t count = uniqueAddresses.GetCount();
+   count = uniqueAddresses.GetCount();
    for ( n = 0; n < count; n++ )
    {
       if ( addressesToIgnore.Index(n) != wxNOT_FOUND )
