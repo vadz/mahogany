@@ -112,6 +112,18 @@ static inline void CCQuiet(bool disableCallbacks = false) { mm_ignore_errors = t
 // normal logging
 static inline void CCVerbose(void) { mm_ignore_errors = mm_disable_callbacks = false; }
 
+// loglevel for cclient error messages:
+static int cc_loglevel = wxLOG_Error;
+
+static int CC_GetLogLevel(void) { return cc_loglevel; }
+static int CC_SetLogLevel(int arg)
+{
+   int ccl = cc_loglevel;
+   cc_loglevel =  arg;
+   return ccl;
+}
+
+
 /** This class essentially maps to the c-client Overview structure,
     which holds information for showing lists of messages.
     The m_uid member is also used to map any access to the n-th message in
@@ -464,6 +476,9 @@ MailFolderCC::Ping(void)
 {
    DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.",
                GetName().c_str()));
+
+   int ccl = CC_SetLogLevel(M_LOG_WINONLY);
+   
    ProcessEventQueue();
    if(PingReopen())
    {
@@ -472,6 +487,7 @@ MailFolderCC::Ping(void)
 //      CCVerbose();
       ProcessEventQueue();
    }
+   CC_SetLogLevel(ccl);
 }
 
 MailFolderCC::~MailFolderCC()
@@ -1190,7 +1206,7 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
    msg << _(", error level: ") << strutil_ultoa(errflg);
 #endif
    if(errflg > 1)
-      ERRORMESSAGE((msg));
+      LOGMESSAGE((CC_GetLogLevel(), msg));
    else
       LOGMESSAGE((M_LOG_WINONLY, Str(msg)));
 }

@@ -460,6 +460,24 @@ MAppBase::OnStartup()
       (void)wxFolderViewFrame::Create((**i), m_topLevelFrame);
    }
 
+   // If we want the outgoing folder open all the time, open it here
+   // --------------------------------------------------------------
+   if(READ_APPCONFIG(MP_OUTGOINGFOLDER_KEEP_OPEN))
+   {
+      String name = READ_APPCONFIG(MP_OUTGOINGFOLDER);
+      LOGMESSAGE((M_LOG_WINONLY,
+                  _("Opening folder '%s' for saving outgoing messages."),
+                  name.c_str()));
+      m_OutgoingFolder = MailFolder::OpenFolder(
+         MF_PROFILE_OR_FILE, name);
+      if(! m_OutgoingFolder)
+         ERRORMESSAGE((
+            _("Cannot open folder '%s' for saving outgoing messages."),
+            name.c_str()));
+   }
+   else
+      m_OutgoingFolder = NULL;
+   
    // initialise collector object for incoming mails
    // ----------------------------------------------
    m_MailCollector = new MailCollector();
@@ -498,6 +516,8 @@ MAppBase::OnShutDown()
       m_eventReg = NULL;
    }
    if(m_MailCollector) delete m_MailCollector;
+   if(m_OutgoingFolder) m_OutgoingFolder->DecRef();
+   
    // clean up
    AdbManager::Delete();
    ProfileBase::FlushAll();
@@ -555,11 +575,18 @@ MAppBase::Exit()
 
    if ( m_framesOkToClose )
    {
+#if 0
+      //FIXME: Is this needed?
       for(size_t i = 0; i < m_framesOkToClose->Count(); i++)
-         delete (*m_framesOkToClose)[i];
+      {
+         ((wxMFrame *)(*m_framesOkToClose)[i])->Close();
+      }
+#endif
       delete m_framesOkToClose;
       m_framesOkToClose = NULL;
    }
+   // Force exit, as we might have more than one toplevel frame.
+   wxExit();
 }
 
 bool

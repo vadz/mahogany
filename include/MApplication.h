@@ -181,6 +181,8 @@ protected:
    /// a profile wrapper object for the global configuration
    ProfileBase *m_profile;
 
+   /// a pointer to the outgoing mail folder
+   class MailFolder * m_OutgoingFolder;
    /// the list of all constantly open folders to check for new mail
    class MailCollector *m_MailCollector;
    /// registration seed for EventManager

@@ -495,6 +495,12 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
          references << messageid;
          cv->AddHeaderEntry("In-Reply-To", messageid);
          cv->AddHeaderEntry("References", references);
+         if( READ_CONFIG(profile, MP_SET_REPLY_FROM_TO) )
+         {
+            String rt;
+            msg->GetHeaderLine("To", rt);
+            cv->AddHeaderEntry("Reply-To", rt);
+         }
          SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
          SafeDecRef(msg);
       }//if(msg)

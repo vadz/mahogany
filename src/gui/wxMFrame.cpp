@@ -245,7 +245,7 @@ wxMFrame::OnMenuCommand(int id)
          filename;
 
       path << mApplication->GetGlobalDir() << DIR_SEPARATOR << "scripts";
-      filename = MDialog_FileRequester("Please select a Python script to run.",
+      filename = MDialog_FileRequester(_("Please select a Python script to run."),
                                        this,
                                        path, filename,
                                        "py", "*.py?",

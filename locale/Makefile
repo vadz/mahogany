@@ -28,6 +28,9 @@ clean:
 dep depend: 
 
 
+update:
+	$(MAKE) msgcat
+	$(MAKE) mergecat
 
 install: 
 	$(MAKE) all
@@ -43,7 +46,7 @@ mergecat:
 	cat messages_po extra_po | sed "1,$$ s/^\\#\\~ //g" > tmp && mv tmp messages_po
 	for i in $(FILES_PO); do msgmerge $$i messages_po -o tmp.po && mv tmp.po $$i; done
 
-.PHONY: all dep clean doc semistatic static allclean install msgcat mergecat mo-files  wxstd-mo-files
+.PHONY: all dep clean doc semistatic static allclean install msgcat mergecat mo-files  wxstd-mo-files update
 
 %.mo: %.po
 	$(MSGFMT) -o $@ $<

@@ -90,6 +90,7 @@ enum ConfigFields
    ConfigField_ComposeFirst = ConfigField_IdentLast,
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
+   ConfigField_OutgoingFolderKeepOpen,
    ConfigField_WrapMargin,
    ConfigField_ReplyString,
    ConfigField_ReplyCollapse,
@@ -364,6 +365,8 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),
                                                    Field_File,    ConfigField_UseOutgoingFolder },
+   { gettext_noop("&Keep this folder always open"),
+                                                   Field_Bool,    ConfigField_UseOutgoingFolder },
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
    { gettext_noop("Co&llapse reply markers"
@@ -507,6 +510,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER),
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
+   CONFIG_ENTRY(MP_OUTGOINGFOLDER_KEEP_OPEN),
    CONFIG_ENTRY(MP_COMPOSE_WRAPMARGIN),
    CONFIG_ENTRY(MP_REPLY_PREFIX),
    CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),

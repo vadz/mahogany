@@ -87,34 +87,18 @@ wxMSW bugs:
 
 ******* Priorities for KB: ******************************
 
-- set Reply-To: from To: is in config but not implemented yet, needs
-  change to SendMessageCC.
-
 - document python callback behaviour for incoming folders, possibly do 
   testing for callback results in CollectOneFolder!!
 - add configure option for python path
-- before doing ping, change to logging for window only and restore(!)
-  old settings(!) afterwards to suppress error messages for closed POP
-  folders
 - when sending message failed, don't make composeview readonly but rebuild it
   after editing
-- change main frame icon when new mail in mainframe folder
-- searching in messageview
 - more configurability for news
 - do we really need to scan /var/lib/news/active?
 - add address auto collection to compose view
 - add a popup dialog to edit message headers in composeview
 - some html mail import/filtering of tags (easy, quick and dirty)
-- Change MessageCC code to first look for a mail cache entry via
-  mail_elt() instead of always fetching message. (REALLY REQUIRED?)
-  Is already like this, but fetch_overview() does an extra fetch, even
-  in mtest.
-  STRANGE....
 - Problem: mail uids and nums are long, WXARRAYINT.Count() is int,
   content is int.
-- MFolderDialog: TransferFromWindow return false ignored when asked
-  for password
-
 - do not redraw messageview if the message is the one currently being
   shown (DONE, better:)
   -- option to keep wxLayoutList around for reuse?
@@ -140,16 +124,8 @@ wxMSW bugs:
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
 
-- folder set message flag update hook takes too long for really large folders
-   ==> code commented out in MailFolderCC.cpp
-
 - easy to implement but useful feature: "check for new mail now"
-
-- delete temporary files (esp. from image conversion!)
-
- - easy to implement but useful feature: "check for new mail now"
  - possibly have a MIME types editor (similar to netscape's?)
- - delete temporary files (esp. from image conversion!)
   - easy: add support for email-to-fax gateway at www.tpc.int and
     their coverpage
 

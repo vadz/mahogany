@@ -239,12 +239,12 @@ wxMApp::OnInit()
    const char * locale = getenv("LANG");
    if( locale && (strcmp(locale, "C") != 0) )
    {
-      m_Locale = new wxLocale(locale, locale, "");
+      m_Locale = new wxLocale(locale, locale, NULL, false);
       String localePath ;
       localePath << M_BASEDIR << "/locale";
       m_Locale->AddCatalogLookupPathPrefix(localePath);
-      m_Locale->AddCatalog(M_APPLICATIONNAME);
       m_Locale->AddCatalog("wxstd");
+      m_Locale->AddCatalog(M_APPLICATIONNAME);
    }
    else
       m_Locale = NULL;

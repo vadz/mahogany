@@ -253,16 +253,20 @@ SendMessageCC::Build(void)
    strutil_tokenise(headers,";",m_headerList);
    delete [] headers;
 
+   bool replyToSet = false;
+   
    // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
    // last NULL entry
    size_t n = m_headerList.size() + m_ExtraHeaderLinesNames.size() + 4;
    m_headerNames = new const char*[n];
    m_headerValues = new const char*[n];
    /* Add the extra headers as defined in list of extra headers in
-      profile: */
+      profile (backward compatibility): */
    for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, h++)
    {
       m_headerNames[h] = strutil_strdup(**i);
+      if(strcmp(m_headerNames[h], "Reply-To") == 0)
+         replyToSet = true;
       // this is clever: read header value from profile:
       m_headerValues[h] = strutil_strdup(profile->readEntry(**i,""));
    }
@@ -273,6 +277,8 @@ SendMessageCC::Build(void)
    for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++, h++)
    {
       m_headerNames[h] = strutil_strdup(**i);
+      if(strcmp(m_headerNames[h], "Reply-To") == 0)
+         replyToSet = true;
       // this is clever: read header value from profile:
       m_headerValues[h] = strutil_strdup(**i2);
    }
@@ -282,21 +288,23 @@ SendMessageCC::Build(void)
    String version;
 
 #ifdef OS_UNIX
-   version << "Mahogany Mail, " << M_VERSION_STRING << _(" , compiled for ") << M_OSINFO;
+   version << "Mahogany, " << M_VERSION_STRING << _(" , compiled for ") << M_OSINFO;
 #else // Windows
    // TODO put Windows version info here
-   version << "Mahogany Mail, " << M_VERSION_STRING << _(" , compiled for ") << "Windows";
+   version << "Mahogany, " << M_VERSION_STRING << _(" , compiled for ") << "Windows";
 #endif // Unix/Windows
 
    m_headerValues[h++] = strutil_strdup(version);
    //always add reply-to header:
-   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-   if(!strutil_isempty(tmpstr))
+   if(! replyToSet)
    {
-      m_headerNames[h] = strutil_strdup("Reply-To");
-      m_headerValues[h++] = strutil_strdup(tmpstr);
+      tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+      if(!strutil_isempty(tmpstr))
+      {
+         m_headerNames[h] = strutil_strdup("Reply-To");
+         m_headerValues[h++] = strutil_strdup(tmpstr);
+      }
    }
-
 #ifdef HAVE_XFACES
    // add an XFace?
    char **xpmarray = NULL;
@@ -577,7 +585,13 @@ SendMessageCC::WriteToFolder(String const &name, MailFolder::Type type)
    MailFolder *mf =
       MailFolder::OpenFolder(type,name);
    CHECK_RET(mf,String(_("Cannot open folder to save to:")+name));
+
+   // we don't want this to create new mail events
+   bool events = mf->SendsNewMailEvents();
+   mf->EnableNewMailEvents(false, true);
    mf->AppendMessage(str);
+   mf->Ping();
+   mf->EnableNewMailEvents(events, true);
    mf->DecRef();
 }
 

@@ -1,4 +1,4 @@
-#This file was created by <karsten> Mon May 10 16:28:54 1999
+#This file was created by <karsten> Sun May 16 20:28:25 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -32,9 +32,9 @@
 
 \shape slanted 
 Mahogany
-\shape default 
-
 \newline 
+
+\shape default 
 User Manual for Version 0.22a
 \newline 
 
@@ -1496,7 +1496,7 @@ This is used as the default hostname for your username.
 
 
 \series bold 
-Return address
+Return/Reply address
 \series default 
  
 \newline 
@@ -1511,6 +1511,51 @@ uglier
 \end_inset 
 
 ) return address.
+\layout Itemize
+
+
+\series bold 
+Return return address from To: field
+\series default 
+
+\newline 
+If set, Mahogany will use the original 
+\family typewriter 
+To:
+\family default 
+ address field values for the 
+\family typewriter 
+Reply-To:
+\family default 
+ header entry of any message replies that you send.
+ This makes sure that the same person sending you mail will always see the
+ same mail address for you.
+ It is especially useful, if you collect mail from several different incoming
+ mail folders.
+ An example: Someone sends you mail to 
+\family typewriter 
+John.Doe@mycompany.com
+\family default 
+.
+ If you reply to this message, it will appear as coming from 
+\family typewriter 
+John.Doe@mycompany.org
+\family default 
+, even if you read this mail from home, on a machine called 
+\family typewriter 
+MyBox.fun.org
+\family default 
+.
+ On the other hand, if someone sends you mail to 
+\family typewriter 
+MyAlias@writeme.com
+\family default 
+, your reply will carry that as a return address, so that person will never
+ know about your 
+\family typewriter 
+mycompany.com
+\family default 
+ office address.
 \layout Itemize
 
 
@@ -1578,6 +1623,19 @@ Folder file for sent messages
 
 \newline 
 Where you want Mahogany to save the copies of sent messages.
+\layout Itemize
+
+
+\series bold 
+Keep this folder always open
+\series default 
+
+\newline 
+To avoid the delay in opening a potentially large folder and re-scanning
+ all its message headers, you can tell Mahogany to keep this folder open
+ all the time.
+ It will be opened at startup and closed again on program termination.
+ If you have a lot of messages in it, this significantly speeds up operation.
 \layout Itemize
 
 
@@ -7540,4 +7598,25 @@ root
 root
 \family default 
 .
+\layout Subsection
+
+Does Mahogany have group aliases?
+\layout Standard
+
+Mahogany supports alias expansion for individual entries and for groups.
+ There are two ways in which you can expand an alias to a group of addresses:
+\layout Itemize
+
+The quick and dirty approach: Create an addressbook entry and simply list
+ multiple, comma separated, addresses in its Email field.
+ Mahogany will use the whole contents of this field when expanding aliases.
+ 
+\layout Itemize
+
+The more elegan method: Create a new group in your addressbook and add the
+ individual addresses as sub-entries of this group.
+ If you use the group name as a mail alias, Mahogany will expand it to the
+ list of email addresses of all of its group members.
+ This is more powerful, as you can easily add and remove entries to sub
+ groups.
 \the_end

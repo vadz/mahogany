@@ -15,6 +15,8 @@
 #   include "strutil.h"
 #   include "guidef.h"
 #   include "gui/wxMFrame.h"
+#   include "MApplication.h"
+#   include "gui/wxIconManager.h"
 #endif
 
 #include <wx/colour.h>
@@ -281,6 +283,13 @@ void UpdateTitleAndStatusBars(const String& title,
 
    wxLogStatus(frame, statusMsg);
    frame->SetTitle(titleMsg);
+
+   if(newmsgs > 0)
+      frame->SetIcon( frame == mApplication->TopLevelFrame() ?
+                      ICON("MainFrameNewMail") : ICON("MFrameNewMail"));
+   else
+      frame->SetIcon( frame == mApplication->TopLevelFrame() ?
+                      ICON("MainFrame") : ICON("MFrame"));
 }
 
 // ---------------------------------------------------------------------------

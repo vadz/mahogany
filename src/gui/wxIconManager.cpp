@@ -523,7 +523,8 @@ wxIconManager::GetIcon(String const &_iconName)
    String name;
    for(c = 0; wxIconManagerFileExtensions[c]; c++)
    {
-      name = iconName + wxIconManagerFileExtensions[c];
+      // Use _iconName to preserve captialisation:
+      name = _iconName + wxIconManagerFileExtensions[c];
       name = pf.FindFile(name, &found);
 
       if ( !found && IsMimeType(iconName) )
