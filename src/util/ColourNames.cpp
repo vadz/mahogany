@@ -31,7 +31,7 @@ static const wxChar *rgbSpecificationString = gettext_noop("RGB(%d, %d, %d)");
 bool ParseColourString(const String& name, wxColour* colour)
 {
    if ( name.empty() )
-      return FALSE;
+      return false;
 
    wxString customColourString(wxGetTranslation(rgbSpecificationString));
 
@@ -48,21 +48,21 @@ bool ParseColourString(const String& name, wxColour* colour)
 #if wxCHECK_VERSION(2,5,0)
       wxColour col = wxTheColourDatabase->Find(name);
       if ( !col.Ok() )
-         return FALSE;
+         return false;
 
       if ( colour )
          *colour = col;
 #else
       wxColour *col = wxTheColourDatabase->FindColour(name);
       if ( !col )
-         return FALSE;
+         return false;
 
       if ( colour )
          *colour = *col;
 #endif
    }
 
-   return TRUE;
+   return true;
 }
 
 String GetColourName(const wxColour& colour)
@@ -86,16 +86,17 @@ String GetColourName(const wxColour& colour)
 }
 
 // get the colour by name and warn the user if it failed
-void GetColourByName(wxColour *colour,
+bool GetColourByName(wxColour *colour,
                      const String& name,
                      const String& def)
 {
    if ( !ParseColourString(name, colour) )
    {
-      wxLogError(_("Cannot find a colour named '%s', using default instead.\n"
-                   "(please check the settings)"), name.c_str());
       *colour = def;
+      return false;
    }
+
+   return true;
 }
 
 void ReadColour(wxColour *col, Profile *profile, const MOption& opt)
@@ -103,5 +104,12 @@ void ReadColour(wxColour *col, Profile *profile, const MOption& opt)
    CHECK_RET( profile, _T("NULL profile in ReadColour()") );
 
    const String value = GetOptionValue(profile, opt).GetTextValue();
-   GetColourByName(col, value, GetStringDefault(opt));
+
+   if ( !GetColourByName(col, value, GetStringDefault(opt)) )
+   {
+      wxLogError(_("Cannot find a colour named \"%s\", using default instead "
+                   "(please check the value of option \"%s\")"),
+                 value.c_str(),
+                 GetOptionName(opt));
+   }
 }

@@ -23,8 +23,8 @@ extern bool ParseColourString(const String& name, wxColour* colour = NULL);
 /// get the colour name - pass it to ParseColorString to get the same colour
 extern String GetColourName(const wxColour& color);
 
-/// get the colour by name and fallback to default (warning the user) if failed
-extern void GetColourByName(wxColour *colour,
+/// get the colour by name and fallback to default (then false is returned)
+extern bool GetColourByName(wxColour *colour,
                             const String& name,
                             const String& defaultName);
 /**
