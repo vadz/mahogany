@@ -370,10 +370,21 @@ SendMessageCC::EncodeHeader(const String& header)
       // FIXME should we check that the length is not greater than 76 here or
       //       does cclient take care of it?
 
+      String encword(textEnc, (size_t)len);
+
+      // hack: rfc822_8bit() doesn't encode spaces normally but we must
+      // do it inside the headers
+      //
+      // FIXME: what about TABs and other NLs?
+      if ( enc2047 == Encoding_QuotedPrintable )
+      {
+         encword.Replace(" ", "=20");
+      }
+
       // create a RFC 2047 encoded word
       headerEnc << "=?" << EncodingToCharset(m_encHeaders)
                 << '?' << (char)enc2047 << '?'
-                << String(textEnc, (size_t)len)
+                << encword
                 << "?=";
 
       fs_give((void **)&textEnc);
