@@ -40,9 +40,6 @@ $Id$
 
 7	KB	selecting/deselecting only message in folder
 
-9		exiting program does not call auto-expunge
-		functionality in main folder
-
 		Keep Statusbar static with three fields?
 
 9	VZ	can we have *all* log messages (incl status) appear in 
@@ -314,7 +311,6 @@ from 32bitsonline review:
 4		Trash folder, move to trash instead/alternative of of delete
 4		Message menu popup for folderlistctrl
 4		add option to hide messages marked as deleted
-4		in that case ask for auto-expunge on folder close
 
 2		Add code to collect split-up mime content from
 		multiple messages and decode it.
