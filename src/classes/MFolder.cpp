@@ -1374,16 +1374,16 @@ bool MFolderTraversal::DoTraverse(const wxString& start, RecurseMode mode)
 
    // enumerate all groups
    String name;
-   long dummy;
+   Profile::EnumData cookie;
 
    wxString rootName(start);
    if ( !rootName.empty() )
       rootName += '/';
    //else: there should be no leading slash
 
-   for ( bool cont = profile->GetFirstGroup(name, dummy);
+   for ( bool cont = profile->GetFirstGroup(name, cookie);
          cont;
-         cont = profile->GetNextGroup(name, dummy) )
+         cont = profile->GetNextGroup(name, cookie) )
    {
       wxString fullname(rootName);
       fullname += name;

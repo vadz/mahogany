@@ -739,8 +739,6 @@ wxFolderTree::Init(wxWindow *parent, wxWindowID id,
 
 wxFolderTree::~wxFolderTree()
 {
-   ProfilePathChanger p(mApplication->GetProfile(), M_SETTINGS_CONFIG_SECTION);
-
    delete m_tree;
 }
 

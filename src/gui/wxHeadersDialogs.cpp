@@ -1001,7 +1001,7 @@ bool wxCustomHeadersDialog::TransferDataFromWindow()
    // delete all old entries
    wxArrayString entriesToDelete;
    String name;
-   long cookie;
+   Profile::EnumData cookie;
    bool cont = m_profile->GetFirstEntry(name, cookie);
    while ( cont )
    {

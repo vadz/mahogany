@@ -2039,8 +2039,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    // M_FOLDER_CONFIG_SECTION or from M_PROFILE_CONFIG_SECTION if the section
    // is empty (i.e. we have no parent folder)
 
-   Profile_obj profile("");
-   profile->SetPath(m_folderPath);
+   Profile_obj profile(m_folderPath);
 
    RadioIndex selRadio = (RadioIndex)m_radio->GetSelection();
    MFolderType folderType = GetCurrentFolderType(selRadio);

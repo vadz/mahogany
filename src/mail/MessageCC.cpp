@@ -148,10 +148,10 @@ MessageCC::MessageCC(const char *text, UIdType uid, Profile *profile)
    m_uid = uid;
 
    m_Profile = profile;
-   if(m_Profile)
-      m_Profile->IncRef();
-   else
-      m_Profile = Profile::CreateEmptyProfile();
+   if(!m_Profile)
+      m_Profile = mApplication->GetProfile();
+
+   m_Profile->IncRef();
 
    // move \n --> \r\n convention
    m_msgText = strutil_strdup(strutil_enforceCRLF(text));
