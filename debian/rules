@@ -7,12 +7,12 @@ package=mahogany
 build:
 	$(checkdir)
 	autoconf
-	# debian 2.1 has no wxGTK shared lib:
+# debian 2.1 has no wxGTK shared lib:
 	if test "`cat /etc/debian_version`" = "2.1" ; \
 	then \
-		./configure --prefix=/usr --with-modules=static \
+		(./configure --prefix=/usr --with-modules=static) \
 	else \
-		./configure --prefix=/usr \
+		(./configure --prefix=/usr) \
 	fi
 	make depend || true
 	make doc
