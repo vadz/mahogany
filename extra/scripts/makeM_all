@@ -1,5 +1,5 @@
 #!/bin/sh
-# -*- text *-
+# -*- text -*-
 #
 # $Id$
 # makeM_all script: Checkout, compile and package wxGTK and Mahogany.
@@ -180,13 +180,14 @@ then
   MPREFIX=/opt
 fi
 
-if [ `hostname` = caisteal -o `hostname` = dearg ]
+if [ `hostname` = caisteal -o `hostname` = dearg -o `hostname` = bidean]
 then
   OSTYPE=SunOS
   OSTYPE_ADDON="-sparc"
   CC=gcc
   CXX=c++
   SCP=/usr/local/bin/ssh1/scp
+  BUILDDIR=/home/karsten/tmp
 fi
 
 if [ `hostname` = Matterhorn ]
