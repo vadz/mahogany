@@ -106,7 +106,7 @@ Next, we hope to tackle the following:
  - PGP/GPG support
  - LDAP support
 
-Please direct any queries to mahogany-developers@lists.sourceforge.net
+Please direct any queries to mahogany-users@lists.sourceforge.net
 and don't hesitate to contact us if you would like to participate in
 Mahogany development!
 

@@ -38,7 +38,7 @@ for Version 0.23a\\
 These compilation notes are probably a bit outdated. The best start is to use
 the \texttt{-{}-help} option of configure to see which options it supports.
 These notes are written with the Unix version in mind, for problems with compiling
-the MS Windows or MacOS versions, you might want to contact the mahogany-developers@lists.sourceforge.net
+the MS Windows or MacOS versions, you might want to contact the mahogany-users@lists.sourceforge.net
 mailing list instead.
 
 
@@ -246,7 +246,7 @@ distribution. If you don't have Python, leave it unloaded.
 \item Any other projects in the workspace shouldn't be used and should be left unloaded.
 \item After loading the ones which you need (C-Client is mandatory, all the other
 optional), you may start the build. It should succeed :-) If it doesn't, please
-report the build log with the explanation of what happened to mahogany-developers@lists.sourceforge.net
+report the build log with the explanation of what happened to mahogany-users@lists.sourceforge.net
 mailing list.
 \item Notice that the environment variable WX must be set before you launch MSDEV.EXE
 (otherwise it won't inherit it)! 
@@ -265,7 +265,7 @@ files in that directory. \\
 Add all of the sources to the makefile/project file and also add the resource
 file res/M.rc to the project, choose the same options as for wxWindows compilation
 and see what happens. If it doesn't work, send you questions to the usual place
-(mahogany-developers@lists.sourceforge.net). If it does work, please tell us
+(mahogany-users@lists.sourceforge.net). If it does work, please tell us
 about it as well so that this file could be updated.
 \end{enumerate}
 

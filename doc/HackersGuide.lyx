@@ -79,7 +79,7 @@ These compilation notes are probably a bit outdated.
  option of configure to see which options it supports.
  These notes are written with the Unix version in mind, for problems with
  compiling the MS Windows or MacOS versions, you might want to contact the
- mahogany-developers@lists.sourceforge.net mailing list instead.
+ mahogany-users@lists.sourceforge.net mailing list instead.
 \layout Section
 
 General Procedure
@@ -535,7 +535,7 @@ Any other projects in the workspace shouldn't be used and should be left
 After loading the ones which you need (C-Client is mandatory, all the other
  optional), you may start the build.
  It should succeed :-) If it doesn't, please report the build log with the
- explanation of what happened to mahogany-developers@lists.sourceforge.net
+ explanation of what happened to mahogany-users@lists.sourceforge.net
  mailing list.
 \layout Enumerate
 

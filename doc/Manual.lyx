@@ -608,8 +608,8 @@ Generally we welcome help for anything.
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{mahogany-developers@lists.sourceforge.net}{mailto:mahogany-d
-evelopers@lists.sourceforge.net}
+htmladdnormallinkfoot{mahogany-users@lists.sourceforge.net}{mailto:mahogany-u
+sers@lists.sourceforge.net}
 \latex default 
 .
  If you have questions about the Mahogany License, discuss them with us
@@ -858,7 +858,7 @@ When you start Mahogany for the first time, it will display the license
  If you have any questions about the license or want to otherwise comment
  on it, please email the development team at 
 \family typewriter 
-mahogany-developers@lists.sourceforge.net
+mahogany-users@lists.sourceforge.net
 \family default 
  .
 \layout Subsection

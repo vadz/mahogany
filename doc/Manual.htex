@@ -317,7 +317,7 @@ Naturally we tend to work on the features that we either need ourselves
 or find interesting to do. If your priorities are different, join
 our team and help us improve it. Mahogany is and will always be an
 OpenSource(TM) project and your involvement is wanted! If you have
-any questions about this, please contact the developers at \htmladdnormallinkfoot{mahogany-developers@lists.sourceforge.net}{mailto:mahogany-developers@lists.sourceforge.net}.
+any questions about this, please contact the developers at \htmladdnormallinkfoot{mahogany-users@lists.sourceforge.net}{mailto:mahogany-users@lists.sourceforge.net}.
 If you have questions about the Mahogany License, discuss them with
 us - we don't want the license to scare anyone.}
 \end{itemize}
@@ -474,7 +474,7 @@ When you start Mahogany for the first time, it will display the license
 and conditions of use and ask you to accept or reject the license.
 If you do not accept it, Mahogany will terminate. If you have any
 questions about the license or want to otherwise comment on it, please
-email the development team at \texttt{mahogany-developers@lists.sourceforge.net}
+email the development team at \texttt{mahogany-users@lists.sourceforge.net}
 .
 
 
