@@ -25,6 +25,15 @@ trap 'cleanup; exit 4' INT TERM
 # where to place the output file?
 OUTPUT_DIR=${1-`pwd`}
 
+# create tar.gz or tar.bz2?
+if test $USE_BZIP2 != ""; then
+  GZIP=bzip2
+  GZ=bz2
+else
+  GZIP=gzip
+  GZ=gz
+fi
+
 # create temp dir
 if ! mkdir $TMPDIR; then
    echo "Failed to create temporary directory $TMPDIR"
@@ -51,8 +60,8 @@ M_FULLNAME="mahogany-$M_VERSION_MAJOR.$M_VERSION_MINOR"
 rm M/*.ds[pw] M/M.DSP M/M.MAK M/TODO M/maketags.cmd M/cvsfix
 
 mv M $M_FULLNAME
-OUTPUT_FILE=$OUTPUT_DIR/$M_FULLNAME.tar.gz
-if ! tar cf - $M_FULLNAME --exclude="CVS" | gzip -c9 > $OUTPUT_FILE; then
+OUTPUT_FILE=$OUTPUT_DIR/$M_FULLNAME.tar.$GZ
+if ! tar cf - $M_FULLNAME --exclude="CVS" | $GZIP -c9 > $OUTPUT_FILE; then
    echo "Creating $OUTPUT_FILE failed."
    RC=3
 fi
