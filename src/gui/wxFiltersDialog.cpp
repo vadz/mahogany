@@ -605,13 +605,15 @@ public:
    {
       m_Type->Hide();
       m_Argument->Hide();
-      m_Button->Hide();
+      m_btnFolder->Hide();
+      m_btnColour->Hide();
    }
    void Disable()
    {
       m_Type->Disable();
       m_Argument->Disable();
-      m_Button->Disable();
+      m_btnFolder->Disable();
+      m_btnColour->Disable();
    }
 
    void LayoutControls(wxWindow **last,
@@ -622,11 +624,14 @@ public:
    static wxString TranslateToString(wxString & action);
 
 private:
-   wxChoice    *m_Type;             // Which action to perform
-   wxTextCtrl  *m_Argument;         // string, number of days or bytes
-   wxFolderBrowseButton *m_Button;
+   wxChoice             *m_Type;       // Which action to perform
+   wxTextCtrl           *m_Argument;   // string, number of days or bytes
 
-   wxWindow   *m_Parent; // the parent for all these controls
+   // browse buttons: only one of them is currently shown
+   wxFolderBrowseButton *m_btnFolder;
+   wxColorBrowseButton  *m_btnColour;
+
+   wxWindow             *m_Parent;     // the parent for all these controls
 };
 
 void
@@ -640,11 +645,29 @@ OneActionControl::UpdateUI()
                    || type == OAC_T_Uniq
       );
    m_Argument->Enable(enable);
-   enable &=
-      type != OAC_T_LogEntry && type != OAC_T_MessageBox
-      && type != OAC_T_Python
-      ;
-   m_Button->Enable(enable);
+
+   switch ( type )
+   {
+      case OAC_T_CopyTo:
+      case OAC_T_MoveTo:
+         // browse for folder
+         m_btnColour->Hide();
+         m_btnFolder->Show();
+         m_btnFolder->Enable(TRUE);
+         break;
+
+      case OAC_T_SetColour:
+         // browse for colour
+         m_btnFolder->Hide();
+         m_btnColour->Show();
+         m_btnColour->Enable(TRUE);
+         break;
+
+      default:
+         // nothing to browse for
+         m_btnColour->Disable();
+         m_btnFolder->Disable();
+   }
 }
 
 /* static */
@@ -695,13 +718,11 @@ OneActionControl::OneActionControl(wxWindow *parent)
 
    m_Parent = parent;
 
-   m_Type = new wxChoice(parent, -1, wxDefaultPosition,
-                         wxDefaultSize, OAC_TypesCount, OAC_Types);
-
-   m_Argument = new wxTextCtrl(parent,-1,"", wxDefaultPosition);
-
-   m_Button = new wxFolderBrowseButton(m_Argument,
-                                       parent);
+   m_Type = new wxChoice(parent, -1, wxDefaultPosition, wxDefaultSize,
+                         OAC_TypesCount, OAC_Types);
+   m_Argument = new wxTextCtrl(parent, -1, "");
+   m_btnFolder = new wxFolderBrowseButton(m_Argument, parent);
+   m_btnColour = new wxColorBrowseButton(m_Argument, parent);
 }
 
 void
@@ -722,11 +743,18 @@ OneActionControl::LayoutControls(wxWindow **last,
    c->width.AsIs();
    c->top.SameAs(m_Type, wxTop, 0);
    c->height.AsIs();
-   m_Button->SetConstraints(c);
+   m_btnFolder->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->left.SameAs(m_btnFolder, wxLeft);
+   c->width.SameAs(m_btnFolder, wxWidth);
+   c->top.SameAs(m_btnFolder, wxTop);
+   c->height.SameAs(m_btnFolder, wxHeight);
+   m_btnColour->SetConstraints(c);
 
    c = new wxLayoutConstraints;
    c->left.RightOf(m_Type, LAYOUT_X_MARGIN);
-   c->right.LeftOf(m_Button, LAYOUT_X_MARGIN);
+   c->right.LeftOf(m_btnFolder, LAYOUT_X_MARGIN);
    c->top.SameAs(m_Type, wxTop, 0);
    c->height.AsIs();
    m_Argument->SetConstraints(c);
@@ -1210,8 +1238,6 @@ wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
 
    SetDefaultSize(5*wBtn, 9*hBtn);
    m_lboxFilters->SetFocus();
-
-   DoUpdate();
 }
 
 void
@@ -1312,6 +1338,8 @@ wxFiltersDialog::TransferDataToWindow()
    {
       m_lboxFilters->Append(allFilters[n]);
    }
+
+   DoUpdate();
 
    return true;
 }
