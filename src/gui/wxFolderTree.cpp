@@ -186,7 +186,8 @@ public:
    // the ctor creates the element and inserts it in the tree
    wxFolderTreeNode(wxTreeCtrl *tree,
                     MFolder *folder,
-                    wxFolderTreeNode *parent = NULL);
+                    wxFolderTreeNode *parent = NULL,
+                    int index = -1);
 
    // dtor
    //
@@ -1182,7 +1183,8 @@ bool wxFolderTree::OnDoubleClick()
 
 wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
                                    MFolder *folder,
-                                   wxFolderTreeNode *parent)
+                                   wxFolderTreeNode *parent,
+                                   int index)
 {
    // init member vars
    m_parent = parent;
@@ -1219,7 +1221,11 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
       }
       //else: no status, don't show anything
 
-      id = tree->AppendItem(GetParent()->GetId(), label, image, image, this);
+      wxTreeItemId idParent = GetParent()->GetId();
+      if ( index == -1 )
+         id = tree->AppendItem(idParent, label, image, image, this);
+      else
+         id = tree->InsertItem(idParent, index, label, image, image, this);
    }
 
    SetId(id);
@@ -2752,8 +2758,35 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
 
                CHECK_RET( folder, "just created folder doesn't exist?" );
 
+               // insert the new folder at the right place
+               int pos = 0;
+               long cookie;
+               wxTreeItemId item = GetFirstChild(parent, cookie);
+               while ( item.IsOk() )
+               {
+                  MFolder *folder2 = GetFolderTreeNode(item)->GetFolder();
+                  int rc = CompareFoldersByTreePos(&folder, &folder2);
+                  if ( rc == 0 )
+                  {
+                     // CompareFoldersByTreePos() doesn't look at the folder
+                     // names as they are always sorted when it is called from
+                     // OnTreeExpanding() but we should do it specially here
+                     rc = strcmp(folder->GetName(), folder2->GetName());
+                  }
+
+                  if ( rc < 0 )
+                  {
+                     // we should insert it here
+                     break;
+                  }
+
+                  pos++;
+
+                  item = GetNextChild(parent, cookie);
+               }
+
                // create the entry as the tree won't do it for us any more
-               (void)new wxFolderTreeNode(this, folder, nodeParent);
+               (void)new wxFolderTreeNode(this, folder, nodeParent, pos);
             }
             else // parent has never been expanded
             {
