@@ -163,23 +163,6 @@ case `eval echo '$'{ac_cv_prog_cc_${ac_cc}_c_o}` in yes) ;; *)
 	have to use a compiler that supports this.]) ;;
 esac
 
-dnl disable support for exceptions if the compiler is gcc and
-dnl new enough to support it.
-case "$GCC" in yes)
-	AC_CACHE_CHECK(whether ${CC-gcc} accepts -fno-exceptions,
-		m_cv_gcc_exceptions,
-		[echo 'void f(){}' >conftest.c
-		case "`${CC-cc} -fno-exceptions -c conftest.c 2>&1`" in
-		'')	m_cv_gcc_exceptions=yes ;;
-		*)	m_cv_gcc_exceptions=no ;;
-		esac
-		rm -f conftest*])
-	case "$m_cv_gcc_exceptions" in yes)
-		CFLAGS="$CFLAGS -fno-exceptions"
-	esac
-dnl	CFLAGS="$CFLAGS -DCC_GCC -Wall "
-esac
-
 dnl how to generate dependencies...
 dnl for now, we just support -MD on gcc
 dnl NOTICE: this only looks at #include "xxx.h" -- NOT <xxx.h> !!
@@ -224,6 +207,19 @@ case "$GXX" in yes)
 		rm -f conftest*])
 	case "$m_cv_gxx_exceptions" in yes)
 		CXXFLAGS="$CXXFLAGS -fno-exceptions"
+	esac
+
+	dnl the same for RTTI - we don't use it neither
+	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-rtti,
+		m_cv_gxx_rtti,
+		[echo 'void f(){}' >conftest.cc
+		case "`${CXX-g++} -fno-rtti -c conftest.cc 2>&1`" in
+		'')	m_cv_gxx_rtti=yes ;;
+		*)	m_cv_gxx_rtti=no ;;
+		esac
+		rm -f conftest*])
+	case "$m_cv_gxx_rtti" in yes)
+		CXXFLAGS="$CXXFLAGS -fno-rtti"
 	esac
 esac
 
@@ -507,14 +503,30 @@ case "$USE_SSL" in
 	if test "$ssl_option" != "no"; then
 	    ssl_lib=`echo $ssl_inc | sed 's/include$/lib/'`
 	    M_CHECK_MYLIB(ssl, main,
-		    [ \
-			$ssl_lib \
-			/usr/lib \
-			/usr/local/lib \
-			/home/local/lib \
-		    ],
-		    LIBS_SSL="$libpath_ssl_main -lssl",
-		    ssl_option=no
+		[ \
+		    $ssl_lib \
+		    /usr/lib \
+		    /usr/local/lib \
+		    /home/local/lib \
+		],
+		LIBS_SSL="$libpath_ssl_main -lssl",
+		[
+		    # try linking with libcrypto - on some systems (notably
+		    # FreeBSD) it must always be linked with -lssl
+		    LIBS_SAVE=$LIBS
+		    LIBS="$LIBS -lcrypto"
+		    M_CHECK_MYLIB(ssl, main,
+			[ \
+			    $ssl_lib \
+			    /usr/lib \
+			    /usr/local/lib \
+			    /home/local/lib \
+			],
+			LIBS_SSL="$libpath_ssl_main -lcrypto -lssl",
+			ssl_option=no
+		    )
+		    LIBS="$LIBS_SAVE";;
+		]
 	    )
 	fi
 
@@ -531,34 +543,6 @@ case "$USE_SSL" in
 	case "$ssl_option" in
 	no*) 	AC_MSG_WARN([Cannot find libraries for SSL - SSL support disabled])
 		;;
-	*)  	dnl must check if ssl needs libcrypto
-		LIBS_SAVE=$LIBS
-		LIBS="$LIBS $LIBS_SSL"
-		AC_CACHE_CHECK(if libssl needs libcrypto, m_cv_ssl_needs_crypto,
-                    [
-			dnl FIXME why AC_TRY_LINK and not AC_CHECK_LIB? (VZ)
-			AC_TRY_LINK([#include <openssl/ssl.h>],
-			    [
-				SSLv2_client_method();
-				return 0;
-			    ],
-			    m_cv_ssl_needs_crypto="no",
-			    m_cv_ssl_needs_crypto="yes"
-			)
-
-			if test "$m_cv_ssl_needs_crypto" = "yes"; then
-			    LIBS="$LIBS -lcrypto"
-			    AC_TRY_LINK([#include <openssl/ssl.h>],
-				[
-				    SSLv2_client_method();
-				    return 0;
-				],
-				m_cv_ssl_needs_crypto="yes"
-			    )
-			fi
-		    ]
-                )
-		LIBS="$LIBS_SAVE";;
 	esac
 	;;
 *)	AC_MSG_WARN([--with-ssl=$USE_SSL ignored, you must specify absolute path])
