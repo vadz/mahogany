@@ -352,6 +352,16 @@ void MModule_AddStaticModule(const wxChar *Name,
 #   define MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version)
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 
+/// helper of MMODULE_BEGIN_IMPLEMENT
+#ifdef USE_MODULES_STATIC
+   #define MMODULE_DEFINE_GET_PROPERTIES(ClassName)
+#else
+   #define MMODULE_DEFINE_GET_PROPERTIES(ClassName)                           \
+      extern "C"                                                              \
+      MDLLEXPORT const ModuleProperty *GetMModuleProperties()                 \
+         { return ClassName::ms_properties; }
+#endif
+
 /// this macro must be used inside the class declaration for any module class
 #define MMODULE_DEFINE() \
 public: \
@@ -418,12 +428,8 @@ const ModuleProperty ClassName::ms_properties[] = \
    { NULL, NULL }, \
    }; \
 \
-extern "C" { \
-MDLLEXPORT const ModuleProperty *GetMModuleProperties() \
-{ \
-   return ClassName::ms_properties; \
-} \
-} \
+MMODULE_DEFINE_GET_PROPERTIES(ClassName) \
+\
 const wxChar * ClassName::GetName(void) const \
    { return GetMModuleProperty(ms_properties, MMODULE_NAME_PROP); } \
 const wxChar * ClassName::GetInterface(void) const \
