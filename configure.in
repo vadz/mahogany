@@ -390,7 +390,7 @@ if test "$USE_OPT" != 1; then
 	OPT="-O0"
 fi
 
-if test "$USE_PROFILER" != 1; then
+if test "$USE_PROFILER" = 1; then
 	OPT="-pg"
 fi
 
