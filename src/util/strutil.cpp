@@ -1416,6 +1416,9 @@ static wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
    // default value: use system default font
    wxFontEncoding enc = wxFONTENCODING_SYSTEM;
 
+   if ( !pwz )
+      return enc;
+
    // first find a non ASCII character as ASCII ones are present in all (well,
    // many) code pages
    while ( *pwz && *pwz < 0x80 )
