@@ -2386,9 +2386,9 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
                      {
                         // magic incantation understood by wxMSW
                         command << "WX_DDE#"
-                                << wxRegKey(key, "command") << '#'
-                                << wxRegKey(keyDDE, "application") << '#'
-                                << ddeTopic << '#'
+                                << wxString(wxRegKey(key, "command")) << '#'
+                                << wxString(wxRegKey(keyDDE, "application"))
+                                << '#' << ddeTopic << '#'
                                 << ddeCmd;
                      }
                   }
