@@ -2459,7 +2459,7 @@ wxComposeView::InsertFileAsText(const String& filename,
 {
    // read the text from the file
    char *text = NULL;
-   off_t lenFile;
+   off_t lenFile = 0;      // suppress warning
    wxFile file(filename);
 
    bool ok = file.IsOpened();
