@@ -32,7 +32,11 @@ typedef long int lcoord_t;
 
 // ----------------------------------------------------------------------------
 // debugging macros
+//
 // ----------------------------------------------------------------------------
+#ifdef ASSERT
+#   undef ASSERT
+#endif
 #ifdef DEBUG
 #  define   DEBUG_DEF     void Debug(void) const;
 #  undef ASSERT
