@@ -1,5 +1,4 @@
-#This file was created by <karsten> Wed Mar 29 10:45:11 2000
-#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
+#LyX 1.1 created this file. For more info see http://www.lyx.org/
 \lyxformat 2.15
 \textclass book
 \begin_preamble
@@ -64,7 +63,7 @@ http://www.wxwindows.org/Mahogany/
 \layout Standard
 
 
-\begin_inset LatexCommand \tableofcontents
+\begin_inset LatexCommand \tableofcontents{}
 
 \end_inset 
 
@@ -108,7 +107,7 @@ This release has long been delayed, mainly due to us waiting for changes
  and so on.
  It has been more than half a year since the last release, so changes are
  major.
- We hope to stick to a much faster cylce of minor update releases for the
+ We hope to stick to a much faster cycle of minor update releases for the
  future.
  The main new features are:
 \layout Itemize
@@ -451,8 +450,8 @@ extra/src
 Why not the GPL/BSD/QPL/my favourite license?
 \layout Standard
 
-Recently discussions about which license to chose for which project provoced
- major flamewars in the unix community.
+Recently discussions about which license to chose for which project provoked
+ major flamewars in the nix community.
  There is a trend to put everything under the GPL or LGPL.
  We do not want to get involved in this highly emotional and political discussio
 n.
@@ -571,12 +570,12 @@ edu, or by allowing the Copyright Holder to include your modifications in
  be provided, and provide a separate manual page for each non-standard executabl
 e that clearly documents how it differs from the Standard Version.
  You must not make the modified version depend on any other software or
- libary if that software or libary is not Freely Available or if it is covered
- under a license more restrictive than this.
+ library if that software or library is not Freely Available or if it is
+ covered under a license more restrictive than this.
  
 \layout Enumerate
 
-use the modified Package only within your corporation or organization.
+use the modified Package only within your corporation or organisation.
 \layout Enumerate
 
 make other distribution arrangements with the Copyright Holder.
@@ -599,8 +598,8 @@ accompany the distribution with the machine-readable source of the Package
  with your modifications, including the complete machine-readable source
  of the unmodified Standard Version.
  You must not make the modified version depend on any other software or
- libary if that software or libary is not Freely Available or if it is covered
- under a license more restrictive than this.
+ library if that software or library is not Freely Available or if it is
+ covered under a license more restrictive than this.
  
 \layout Enumerate
 
@@ -630,7 +629,7 @@ The name of the Copyright Holder may not be used to endorse or promote products
 \layout Enumerate
 
 THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES
-, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY
+, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY
  AND FITNESS FOR A PARTICULAR PURPOSE.
  
 \layout Subsection
@@ -1012,7 +1011,11 @@ to the
 System wide configuration file
 \layout Standard
 
-Mahogany can be pre-configured on a system wide basis by supplying a 
+
+\emph on 
+Mahogany
+\emph default 
+ can be pre-configured on a system wide basis by supplying a 
 \family typewriter 
 M.conf
 \family default 
@@ -1050,7 +1053,11 @@ The User Interface
 The Main Window_2001_
 \layout Standard
 
-Mahogany's main window is vertically divided into two parts.
+
+\emph on 
+Mahogany
+\emph default 
+'s main window is vertically divided into two parts.
  On the left it has a tree view (
 \begin_inset LatexCommand \ref{FolderTreeCtrl}
 
@@ -1074,8 +1081,11 @@ The Folder Tree_2004_
 
 \end_inset 
 
-The folder tree shows a hierarchical view of all folders managed by Mahogany,
- this includes both mail folders and newsgroups.
+The folder tree shows a hierarchical view of all folders managed by 
+\emph on 
+Mahogany
+\emph default 
+, this includes both mail folders and newsgroups.
  Folders can be grouped hierarchical and inherit settings from their parent
  folders (e.g.
  the server host).
@@ -1242,9 +1252,9 @@ This is a potential security risk!
  While this file will be created as only readable by you and the passwords
  be encrypted (using very weak encryption), it is nevertheless a certain
  risk.
- If you accidentially change the permissions of that file, someone else
- could obtain your passwords, though Mahogany would detect this the next
- time it starts and warn you about it.
+ If you accidentally change the permissions of that file, someone else could
+ obtain your passwords, though Mahogany would detect this the next time
+ it starts and warn you about it.
  Generally this should not pose a problem, but you should be aware of this.
  Previous versions of Mahogany had the passwords world-readable, so if you
  used it before this release, you might want to change them.
@@ -1346,7 +1356,7 @@ Force re-open on ping
 \newline 
 This forces Mahogany to close and re-open the mailbox when trying to update
  the information about it.
- This is required for some POP servers to correctly detect nw mail.
+ This is required for some POP servers to correctly detect new mail.
  Usually this should not be needed.
 \layout Itemize
 
@@ -1356,8 +1366,8 @@ Use Secure Sockets Layer (SSL)
 \series default 
 
 \newline 
-This option is not always available, as the use of strong cryptographie
- is outlawed in some dictatorical countries.
+This option is not always available, as the use of strong cryptography is
+ outlawed in some dictatorical countries.
  If your copy of Mahogany supports SSL, tick this box to access a secure
  IMAP/POP/NNTP server.
  Must be supported by the server side, too.
@@ -1452,7 +1462,7 @@ Preview message when selected
  If the option is not set, the message will only be selected but not previewed
  automatically, which is very useful for accessing mail folders through
  a slow connection.
- The same setting effects the behavious of the space bar, it acts excatly
+ The same setting effects the behaviour of the space bar, it acts exactly
  like a single mouse click in the window and will only cause a message to
  be previewed if a single mouse click is configured to do so.
  The key 
@@ -1472,57 +1482,57 @@ When the top window, the list of messages, is active, certain keyboard bindings
  are active, the following keys are recognized:
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol4
+multicol5
 15 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
-0 0 1 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
 1 0 0 0
 1 0 0 0
 1 0 0 0
 1 0 0 0
 1 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-8 1 0 
-2 1 1 
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 1 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
+8 1 0 "" ""
+8 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
 
-English
+0 8 1 0 0 0 0English
 \newline 
 Action performed
 \newline 
@@ -1787,7 +1797,7 @@ myMail
 \end_inset 
 
 .
- Note, that if you have your folders organised hieararchically, you must
+ Note, that if you have your folders organised hierarchically, you must
  specify the full path to the folder in the folder tree control.
  An example: If you have a group of folders in the tree, called 
 \begin_inset Quotes eld
@@ -1853,7 +1863,7 @@ BCC means Blind Carbon Copy - like CC:, copies will be sent to the addresses
 Key Bindings in the Message Editor
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol4
+multicol5
 13 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -1861,43 +1871,43 @@ multicol4
 1 0 0 0
 1 0 0 0
 1 0 0 0
-0 0 0 0
 1 0 0 0
-0 0 0 0
 1 0 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-8 1 0 
-2 1 1 
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+8 1 0 "" ""
+8 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
 
-Key-Combination
+0 8 1 0 0 0 0Key-Combination
 \newline 
 Function
 \newline 
@@ -1953,7 +1963,7 @@ search same text again
 Using the address book_3100_
 \layout Standard
 
-Although you may directly enter the addresses of recepients of your message
+Although you may directly enter the addresses of recipients of your message
  into the different address fields (
 \begin_inset Quotes eld
 \end_inset 
@@ -1978,9 +1988,9 @@ Bcc:
 \begin_inset Quotes eld
 \end_inset 
 
- althought the last two are optional and so might not appear), there is
- a more convenient way to do it using the address book.
- To insert an address fromyour adress book you should type the first few
+ although the last two are optional and so might not appear), there is a
+ more convenient way to do it using the address book.
+ To insert an address fromyour address book you should type the first few
  letters of either the 
 \begin_inset Quotes eld
 \end_inset 
@@ -2154,7 +2164,7 @@ BCC
 \begin_inset Quotes erd
 \end_inset 
 
- (blind carbon copy) addresses will be suppresed in the message keeping
+ (blind carbon copy) addresses will be suppressed in the message keeping
  them anonymous.
  If you enter an address like 
 \begin_inset Quotes eld
@@ -2196,7 +2206,7 @@ This window is essentially identical to the mail composition window (
 Understanding program options
 \layout Standard
 
-One of the goals of the Mahogany project is to be as configurably as possible.
+One of the goals of the Mahogany project is to be as configurable as possible.
  Of course, it means that Mahogany has a lot of options - however we hope
  that it doesn't make the program more difficult to use because you have
  the complete liberty to ignore all options until you need to use them.
@@ -2268,8 +2278,8 @@ end{figure}
 \layout Standard
 
 Here several important settings are configured, so it is advised (as the
- program itself will tell you whenit is run for the first time) to set them
- up before starting using Mahogany.
+ program itself will tell you when it is run for the first time) to set
+ them up before starting using Mahogany.
  These include your personal identity settings - see also your preferred
  mail and news servers which is configured from the network page (
 \begin_inset LatexCommand \ref{NetworkPage}
@@ -2287,7 +2297,7 @@ Username
 \newline 
 This is used as (default) login name for the accounts which require one
  (POP3 or IMAP4) and also as the base for the return address unless it is
- overriden by explicit setting of the return address.
+ overridden by explicit setting of the return address.
 \layout Itemize
 
 
@@ -3086,12 +3096,12 @@ and, as almost any other feature of Mahogany can be turned on and off as
  In this page you may choose whether you want to use this feature at all
  (it is on by default) and, if so, where should be the autocollected addresses
  be put and other settings.
- See the Adressbook section (
+ See the Addressbook section (
 \begin_inset LatexCommand \ref{AdressDatabase}
 
 \end_inset 
 
-) for more information on Mahogany's built-in adrdressbook.
+) for more information on Mahogany's built-in addressbook.
 \layout Itemize
 
 
@@ -3108,7 +3118,7 @@ No
 \begin_inset Quotes erd
 \end_inset 
 
- to disable autollecting addresses completely, or choose 
+ to disable autocollecting addresses completely, or choose 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -3362,7 +3372,7 @@ The line in this field will be executed whenever Mahogany receives new mail.
 Miscellaneous_4105_
 \layout Standard
 
-All options which don't fit in any other pages areb collected here.
+All options which don't fit in any other pages are collected here.
 \layout Itemize
 
 
@@ -3736,7 +3746,7 @@ use the toolbar: this may be more convenient because, depending on the current
 
 use keyboard: <INSERT> key creates a new entry or address book if the current
  selection is the root of the tree, <DELETE> deletes an item and <Alt-ENTER>
- brings upthe 
+ brings up the 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -3748,7 +3758,7 @@ Properties
 \layout Standard
 
 To edit the entry, simply select it in the tree.
- The data associated to it is spraed over several notebook pages - select
+ The data associated to it is spread over several notebook pages - select
  the one which contains the field you want to change and change it.
  If you want to undo your changes, simply press 
 \begin_inset Quotes eld
@@ -3966,7 +3976,7 @@ Support for Palm Address Books
 \emph on 
 Mahogany
 \emph default 
- does currently support reading of Palm Addressbooks (refering to a 
+ does currently support reading of Palm Addressbooks (referring to a 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -4035,9 +4045,11 @@ Mahogany
 \shape default 
 's functionality.
  Python scripts have full access to all internal Mahogany data structures
- and objects.Scripting and Python integration A number of user definable
- callback functions are available.
- Scripts have access most objects living in Mahogany.
+ and objects.
+\layout Standard
+
+A number of user definable callback functions are available.
+ Scripts have access to most objects living in Mahogany.
  Scripting can be disabled in the Preferences dialog (see 
 \begin_inset LatexCommand \ref{PythonOptions}
 
@@ -4173,81 +4185,81 @@ import
 List of Callbacks
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol4
+multicol5
 11 5 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
 1 0 0 0
 1 0 0 0
-0 0 0 0
 1 0 0 0
-0 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
 1 1 0 0
-0 1 0 0
-0 0 0 0
-0 1 0 0
-2 1 0 
-8 1 0 
-2 1 0 
-2 1 0 
-2 1 1 
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
 
-Callback Name
+0 8 1 0 0 0 0Callback Name
 \newline 
 Object Type
 \newline 
@@ -4255,7 +4267,7 @@ Additional Arguments/Types
 \newline 
 Return Value
 \newline 
-Documentaion
+Documentation
 \newline 
 FolderOpenHook
 \newline 
@@ -4285,7 +4297,7 @@ MailFolder
 \newline 
 1 if changing flags is ok,0 otherwise
 \newline 
-Called before changing flags for a mesage.
+Called before changing flags for a message.
 \newline 
 
 \newline 
@@ -4305,7 +4317,7 @@ MailFolder
 \newline 
 1 if changing flags is ok,0 otherwise
 \newline 
-Called before changing flags for a mesage.
+Called before changing flags for a message.
 \newline 
 
 \newline 
@@ -4598,11 +4610,12 @@ For all the people possessing one of those´s little helpers, the PalmOS
  in Mahogany.
  In future releases there will be full support for addressbook synching,
  schedules etc.
- As of today, it is only possible to view the Palm´s addressbook in 
+ Currently you can only view the Palm´s addressbook (see above) and use
+ 
 \emph on 
 Mahogany 
 \emph default 
-(see above).
+as your Palm desktop software.
 \layout Subsubsection
 
 Desktop functionality
@@ -4610,7 +4623,11 @@ Desktop functionality
 
 As there is not really a common Palm desktop in the Unix/Linux environment
  (not like under MS Windows), we thought it a nice idea to include the desktop
- into Mahogany.
+ into 
+\emph on 
+Mahogany
+\emph default 
+.
  Therefore 
 \emph on 
 Mahogany
@@ -4618,50 +4635,83 @@ Mahogany
  does allow to
 \layout Itemize
 
-create backups of the Palm´s databases
+create backups of the Palm´s databases using the 
+\begin_inset Quotes eld
+\end_inset 
+
+Backup
+\begin_inset Quotes erd
+\end_inset 
+
+ function
 \layout Itemize
 
-restore the previously backup-ed databases
+restore the previously backup-ed databases using the 
+\begin_inset Quotes eld
+\end_inset 
+
+Restore
+\begin_inset Quotes erd
+\end_inset 
+
+ function
 \layout Itemize
 
-install new files to the Palm
+install new files to the Palm using the 
+\begin_inset Quotes eld
+\end_inset 
+
+Install
+\begin_inset Quotes erd
+\end_inset 
+
+ function
 \layout Standard
 
 To use this functionality, you must of course have the PalmOS module enabled.
  You can access the functions via the Plugin menu.
+ In addition to the above mentioned tasks, you can specify quite a lot of
+ options to adapt for instance the backup process to your personal needs.
+ 
+\layout Standard
+
+There is an additional function not mentioned yet, labelled 
+\begin_inset Quotes eld
+\end_inset 
+
+Synchronize
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ Via the configuration dialog you can specify what should happen during
+ synchronization - starting with mail exchange, backups and automatic installati
+ons.
+ Read the following section about the configuration dialog to get see how
+ you can customize your PalmOS-Module.
 \layout Subsubsection
 
 The configuration dialog_10011_
 \layout Standard
 
-You can configure the PalmOS module via the Plugin menu.
- You will be presented a set of options of what should be done when doing
- a general hotsync (menu point 
-\begin_inset Quotes eld
-\end_inset 
+You can configure the PalmOS module via the Plugin menu in a lot of ways.
+ Let´s go through every single item in the configuration dialog which you
+ can access using the Plugin-Menu:
+\layout Description
 
 Synchronise
-\begin_inset Quotes erd
-\end_inset 
-
-):
-\layout Itemize
-
-
-\begin_inset Quotes eld
-\end_inset 
-
-Synchronise mails
-\begin_inset Quotes erd
-\end_inset 
-
- for storing/sending mails: When you have this enabled, you can specify
- a mailbox which will be used as place of exchange for mails.
+\protected_separator 
+Mail When you have this enabled, you can specify a mailbox which will be
+ used as place of exchange for mails.
  Mails in this folder will be transfered to the Palm at the next hotsync
  and the outbox of the Palm´s mail program will be send.
  This mailbox is also used as a configuration setting for messages sent.
- Mahogany will use the properties of this mailbox when sending the messages
- retrieved from the Palm's Outbox.
+ 
+\emph on 
+Mahogany
+\emph default 
+ will use the properties of this mailbox when sending the messages retrieved
+ from the Palm's Outbox.
  If you have enabled the 
 \begin_inset Quotes eld
 \end_inset 
@@ -4671,25 +4721,39 @@ advanced user
 \end_inset 
 
  option in the program preferences' identity tab, you can set up a separate
- return-address or completely different options for this mailbox and therefor
+ return-address or completely different options for this mailbox and therefore
  have the mail sent from the PalmPilot with different settings as those
  sent normally.
  The options for user name and return address as set on the Palm are ignored
- when mails are sent with Mahogany.
-\begin_deeper 
-\begin_deeper 
-\layout Itemize
+ when mails are sent with 
+\emph on 
+Mahogany
+\emph default 
+.
+\layout Description
 
-The 
+Mailbox
+\protected_separator 
+for
+\protected_separator 
+Exchange Enter here the name of the mailbox that should be used for mail
+ exchange when you have the 
 \begin_inset Quotes eld
 \end_inset 
 
-Mail disposal mode
+Synchronise Mail
 \begin_inset Quotes erd
 \end_inset 
 
- specifies what to do with outgoing e-mails retrieved from the PalmPilot
- and sent.
+ feature enabled (see above).
+\layout Description
+
+Mail
+\protected_separator 
+disposal
+\protected_separator 
+mode This specifies what to do with outgoing e-mails retrieved from the
+ PalmPilot and sent.
  You have three options: 
 \begin_deeper 
 \layout Itemize
@@ -4700,64 +4764,119 @@ file : move messages from Outbox to Filed mailbox on the Palm
 delete : delete messages after sending
 \layout Itemize
 
-keep : keep messages in Palm's Oubox
+keep : keep messages in Palm's Outbox
 \end_deeper 
-\end_deeper 
-\end_deeper 
-\layout Itemize
+\layout Description
 
-
+Always
+\protected_separator 
+do
+\protected_separator 
+Backup Setting this checkbox to true will make a backup take place every
+ time you 
 \begin_inset Quotes eld
 \end_inset 
 
-Synchronise Addressbook
+Synchronize
 \begin_inset Quotes erd
 \end_inset 
 
- for downloading the Palm´s addressbook and uploading changed entries (not
- yet supported)
-\layout Itemize
+.
+\layout Description
 
+Directory
+\protected_separator 
+for
+\protected_separator 
+backup
+\protected_separator 
+files This field does contain a valid directory path where the PalmOS-Module
+ will store the backup of your Palm´s databases.
+\layout Description
 
-\begin_inset Quotes eld
-\end_inset 
-
-Always do backup
-\begin_inset Quotes erd
-\end_inset 
-
- will mean that a backup will take place every time you hotsync.
- You can specify
-\begin_deeper 
-\layout Itemize
-
-a directory where the backup files will be stored
-\layout Itemize
-
-whether you want files to be deleted on the PC, that are residing in the
- backup directory but are not any longer on the Palm.
+Delete
+\protected_separator 
+no
+\protected_separator 
+longer
+\protected_separator 
+existing
+\protected_separator 
+backups This checkbox determines whether you want files to be deleted on
+ the PC that are residing in the backup directory but are not any longer
+ on the Palm.
  This makes it possible to really keep the backup identical to the Palm,
  but has the disadvantage that you might loose data if you (accidently?)
  delete important data on the Palm and do a backup, as the backup-ed databases
  will be deleted too.
  So think carefully whether you do really want to do this.
-\layout Itemize
+\layout Description
 
-whether you only want to make an incremental backup.
+Make
+\protected_separator 
+incremental
+\protected_separator 
+backup
+\protected_separator 
+only Enable this checkbox if you only want to make an incremental backup.
  Using this features will speed the backup process up, as only changed or
  new databases are downloaded from the Palm.
-\end_deeper 
+\layout Description
+
+Backup
+\protected_separator 
+all
+\protected_separator 
+databases Enabling this checkbox will make the PalmOS-Module ignore the
+ backup flags of the databases.
+ By default the PalmOS-Module does only backup files with a set backup flag.
+ Use this option if you want all files to be backup´ed.
+\layout Description
+
+Exclude
+\protected_separator 
+these
+\protected_separator 
+databases Here you can specify a comma separated list of databases (without
+ spaces!) that should not be backup´ed.
+ 
+\layout Description
+
+Do
+\protected_separator 
+auto-install Using this feature enables the auto-install feature and everytime
+ you 
+\begin_inset Quotes eld
+\end_inset 
+
+Synchronize
+\begin_inset Quotes erd
+\end_inset 
+
+ the module will check the auto-install directory for Palm databases.
+ If databases are found they will be installed and deleted without further
+ notice!
+\layout Description
+
+Auto-install
+\protected_separator 
+directory Specify here a directory where the files to be auto-installed
+ can be found.
 \layout Standard
 
 Besides that, some general options are available:
-\layout Itemize
+\layout Description
 
-You can specify the device where the Pilot is residing (this ought to be
- /dev/pilot under Unix/Linux and Com1: or Com2: under MS Windows (not yet
- supported)).
-\layout Itemize
+Pilot
+\protected_separator 
+device Here you can specify the device where the Pilot is residing (this
+ ought to be /dev/pilot under Unix/Linux and Com1: or Com2: under MS Windows
+ (not yet supported)).
+\layout Description
 
-You have the choice beetween different hotsync speeds (
+Connection
+\protected_separator 
+speed You have the choice beetween different hotsync speeds (
 \begin_inset Quotes eld
 \end_inset 
 
@@ -4767,9 +4886,15 @@ connection speed
 
 ), measured in baud.
  
-\layout Itemize
+\layout Description
 
-You can force a lock of the above set device by enabling 
+Try
+\protected_separator 
+to
+\protected_separator 
+lock
+\protected_separator 
+device You can force a lock of the above set device by enabling 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -5038,7 +5163,7 @@ I'm a linuxuser (redhat) who just found Mahogany and really likes it, but
  I have a problem, I cant get all the widgets to work, the pictures on the
  buttons and the ones before the mailboxes all appear as an questionmark.
  Do I need some library to make it look like your screenshot? If you would
- assist me in this matter I would be very greatful.
+ assist me in this matter I would be very grateful.
 \layout Standard
 
 It depends how you installed it.
@@ -5315,8 +5440,8 @@ The quick and dirty approach: Create an addressbook entry and simply list
  
 \layout Itemize
 
-The more elegan method: Create a new group in your addressbook and add the
- individual addresses as sub-entries of this group.
+The more elegant method: Create a new group in your addressbook and add
+ the individual addresses as sub-entries of this group.
  If you use the group name as a mail alias, Mahogany will expand it to the
  list of email addresses of all of its group members.
  This is more powerful, as you can easily add and remove entries to sub
@@ -5476,7 +5601,7 @@ Can I have multiple identities?
 \shape italic 
 Does Mahogany allow me to send email as different people? That is, if I
  monitor two IMAP or POP servers, one for my work email, and one for my
- home email, can I reply to emails and specifiy it to use my home or work
+ home email, can I reply to emails and specify it to use my home or work
  email address as the sender?
 \layout Standard
 
@@ -5519,7 +5644,7 @@ The technical reason, and this is why Mahogany does not allow it: The c-client
  0 (root) internally and does not work when called as root.
  When inquiring why this is so, c-client's author told us that it was bad
  to read mail as root - he thinks he knows what is good for you.
- Unless we find an easy way to circumvene that problem, you will not be
+ Unless we find an easy way to circumvent that problem, you will not be
  able to run Mahogany as root as we have no time and desire to re-write
  the c-client library just for this.
 \layout Standard
