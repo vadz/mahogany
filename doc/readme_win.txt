@@ -2,7 +2,7 @@ File: readme_win.txt, the README file for MS Windows version
 Date: 14.06.01
 Version: the information in this file applies to alpha 0.63
 
-0. Requirments
+0. Requirements
 --------------
 
  a) Win95/98/NT 4.0/W2K. Mahogany has been tested the most under NT 4.0, but
