@@ -15,6 +15,8 @@
 
 #include "MailFolder.h"    // for MailFolder::Params
 
+#include <wx/colour.h>     // wxColour
+
 class Profile;
 class Message;
 class MessageView;

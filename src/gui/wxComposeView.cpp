@@ -1776,6 +1776,8 @@ wxComposeView::CreateEditor(void)
 {
    wxASSERT_MSG( m_editor == NULL, _T("creating the editor twice?") );
 
+   MessageEditor *editor = NULL;
+
    MModuleListing *listing =
       MModule::ListAvailableModules(MESSAGE_EDITOR_INTERFACE);
 
@@ -1787,7 +1789,8 @@ wxComposeView::CreateEditor(void)
    else // have at least one editor, load it
    {
       // TODO: make it configurable
-      String name = (*listing)[0].GetName();
+      //String name = (*listing)[0].GetName();
+      String name = "BareBonesEditor";
 
       MModule *editorFactory = MModule::LoadModule(name);
       if ( !editorFactory ) // failed to load the configured editor
@@ -1816,7 +1819,7 @@ wxComposeView::CreateEditor(void)
 
       if ( editorFactory )
       {
-         m_editor = ((MessageEditorFactory *)editorFactory)->Create();
+         editor = ((MessageEditorFactory *)editorFactory)->Create();
          editorFactory->DecRef();
       }
 
@@ -1825,7 +1828,10 @@ wxComposeView::CreateEditor(void)
 
    // TODO: have a DummyEditor as we have a DummyViewer to avoid crashing
    //       if we failed to create any editor?
-   m_editor->Create(this, m_splitter);
+   editor->Create(this, m_splitter);
+
+   // Commit
+   m_editor = editor;
 }
 
 void
@@ -2876,6 +2882,7 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       case WXMENU_COMPOSE_PREVIEW:
+         if(m_editor->FinishWork())
          {
             SendMessage *msg = BuildMessage();
             if ( !msg )
@@ -2938,6 +2945,7 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       case WXMENU_COMPOSE_SAVETEXT:
+         if(m_editor->FinishWork())
          {
             String filename = wxPFileSelector
                               (
@@ -2969,7 +2977,8 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       case WXMENU_COMPOSE_EXTEDIT:
-         StartExternalEditor();
+         if(m_editor->FinishWork())
+            StartExternalEditor();
          break;
 
       case WXMENU_COMPOSE_CUSTOM_HEADERS:
@@ -3622,6 +3631,9 @@ wxComposeView::IsReadyToSend() const
       }
    }
 
+   if(!m_editor->FinishWork())
+      return false;
+   
    // everything is ok
    return true;
 }
@@ -4190,6 +4202,9 @@ VerifyStdFolder(const MOption& optName,
 
 bool wxComposeView::SaveAsDraft() const
 {
+   if(!m_editor->FinishWork())
+      return false;
+   
    SendMessage_obj msg = BuildDraftMessage();
    if ( !msg )
    {
@@ -4287,6 +4302,9 @@ static String GetComposerAutosaveDir()
 bool
 wxComposeView::AutoSave()
 {
+   if ( !m_editor )
+      return true;
+
    if ( !m_editor->IsModified() )
    {
       // nothing to do

@@ -70,6 +70,7 @@ public:
    // creation
    virtual void Create(Composer *composer, wxWindow *parent);
    virtual void UpdateOptions();
+   virtual bool FinishWork();
 
    // operations
    virtual void Clear();
@@ -297,6 +298,11 @@ void LayoutEditor::Create(Composer *composer, wxWindow *parent)
 void LayoutEditor::UpdateOptions()
 {
    // nothing to do here so far as it's not called anyway
+}
+
+bool LayoutEditor::FinishWork()
+{
+   return true;
 }
 
 // ----------------------------------------------------------------------------

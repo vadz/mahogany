@@ -67,6 +67,9 @@ public:
    /// update the profile options which are not updated by reshowing a msg
    virtual void UpdateOptions() = 0;
 
+   /// can we send or save the message?
+   virtual bool FinishWork() = 0;
+   
    /// virtual dtor for the base class
    virtual ~MessageEditor() { }
 

@@ -160,6 +160,7 @@ static const struct
    { "GetPGPPubKey",             gettext_noop("retrieve PGP/GPG public keys from key server") },
    { "SearchAgainIfNoMatch",     gettext_noop("propose to search again if no matches were found") },
    { "UseCreateFolderWizard",    gettext_noop("use wizard when creating a new folder") },
+   { "FormatParagraphBeforeExit",gettext_noop("format all paragraphs in composer before exit") },
 };
 
 // ============================================================================
