@@ -401,7 +401,7 @@ SendMessageCC::AddPart(Message::ContentType type,
    data = (unsigned char *) fs_get (len);
    memcpy(data,buf,len);
 
-   if(subtype.length() == 0) subtype = "PLAIN";
+   if(subtype.length() == 0) subtype = (const char *) "PLAIN";
    bdy = &(nextpart->body);
    
    switch(type)
