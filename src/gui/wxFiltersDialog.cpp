@@ -579,6 +579,12 @@ OneActionControl::UpdateUI()
 #endif
       );
    m_Argument->Enable(enable);
+   enable &=
+      type != OAC_T_LogEntry && type != OAC_T_MessageBox
+#ifdef USE_PYTHON
+      && type != OAC_T_Python
+#endif
+      ;
    m_Button->Enable(enable);
 }
 
