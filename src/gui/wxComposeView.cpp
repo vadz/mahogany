@@ -1432,9 +1432,10 @@ wxComposeView::wxComposeView(const String &name,
    m_mode = mode;
    m_kind = kind;
    m_pidEditor = 0;
-   m_alreadyExtEdited = false;
    m_procExtEdit = NULL;
-   m_sending = false;
+   m_alreadyExtEdited =
+   m_sending =
+   m_closing = false;
    m_OriginalMessage = NULL;
    m_DraftMessage = NULL;
    m_msgviewOrig = NULL;
