@@ -11,8 +11,10 @@
 ###############################################################################
 
 SRC	:= $(patsubst .src/%,%,$(wildcard .src/modules/spam/*.cpp))
+ifndef USE_DSPAM
+SRC	:= $(filter-out modules/spam/DspamFilter.cpp, $(SRC))
+endif
 MOD	:= $(SRC:.cpp=.so)
 
 MSOS	+= $(MOD)
 MSGSRC	+= $(SRC)
-
