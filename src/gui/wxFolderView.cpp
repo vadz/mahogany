@@ -1741,35 +1741,48 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
          break;
 
       case WXFLC_FROM:
-         // optionally replace the "From" with "To: someone" for messages sent
-         // by the user himself
-         switch ( HeaderInfo::GetFromOrTo(hi,
-                                          GetSettings().replaceFromWithTo,
-                                          GetSettings().returnAddresses,
-                                          &text) )
          {
-            default:
-            case HeaderInfo::Invalid:
-               FAIL_MSG( "unexpected GetFromOrTo() return value" );
-               // fall through
+            // optionally replace the "From" with "To: someone" for messages sent
+            // by the user himself
+            HeaderInfo::HeaderKind hdrKind = HeaderInfo::GetFromOrTo
+                                             (
+                                                hi,
+                                                GetSettings().replaceFromWithTo,
+                                                GetSettings().returnAddresses,
+                                                &text
+                                             );
 
-            case HeaderInfo::From:
-               // nothing special to do
-               break;
+            // optionally leave only the name part of the address (do it before
+            // mangling it below)
+            if ( GetSettings().senderOnlyNames )
+            {
+               String name = Message::GetNameFromAddress(text);
+               if ( !name.empty() )
+               {
+                  text = name;
+               }
+               //else: leave address without names as is
+            }
 
-            case HeaderInfo::To:
-               text.Prepend(_("To: "));
-               break;
+            switch ( hdrKind )
+            {
+               default:
+               case HeaderInfo::Invalid:
+                  FAIL_MSG( "unexpected GetFromOrTo() return value" );
+                  // fall through
 
-            case HeaderInfo::Newsgroup:
-               text.Prepend(_("Posted to: "));
-               break;
-         }
+               case HeaderInfo::From:
+                  // nothing special to do
+                  break;
 
-         // optionally leave only the name part of the address
-         if ( GetSettings().senderOnlyNames )
-         {
-            text = Message::GetNameFromAddress(text);
+               case HeaderInfo::To:
+                  text.Prepend(_("To: "));
+                  break;
+
+               case HeaderInfo::Newsgroup:
+                  text.Prepend(_("Posted to: "));
+                  break;
+            }
          }
          break;
 
