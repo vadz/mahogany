@@ -94,6 +94,8 @@ VZ:
 
 ******* Priorities for KB: ******************************
 
+- when sending message failed, don't make it readonly but rebuild it
+  after editing
 - change main frame icon when new mail in mainframe folder
 - searching in messageview
 - more configurability for news

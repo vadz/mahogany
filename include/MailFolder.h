@@ -111,8 +111,6 @@ public:
                                   const String &login = NULLstring,
                                   const String &password = NULLstring);
 
-   // currently we need to Close() and DecRef() it, that's not
-   // nice. We need to change that.
    //@}
 
    /** Register a FolderViewBase derived class to be notified when

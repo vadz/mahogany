@@ -345,11 +345,21 @@ MailFolderCC *
 MailFolderCC::FindFolder(String const &path, String const &login)
 {
    StreamConnectionList::iterator i;
+   DBGMESSAGE(("Looking for folder to re-use: '%s',login '%s'",
+               path.c_str(), login.c_str()));
+              
    for(i = streamList.begin(); i != streamList.end(); i++)
    {
+      DBGMESSAGE(("  Comparing to entry: '%s',login '%s'",
+                  (**i).name.c_str(), (**i).login.c_str()));
       if( (*i)->name == path && (*i)->login == login)
+      {
+         DBGMESSAGE(("  Re-using entry: '%s',login '%s'",
+                     (**i).name.c_str(), (**i).login.c_str()));
          return (*i)->folder;
+      }
    }
+   DBGMESSAGE(("  No matching entry found."));
    return NULL;
 }
 
@@ -371,6 +381,8 @@ MailFolderCC::PingReopen(void) const
 
    if(! m_MailStream || ! mail_ping(m_MailStream))
    {
+      if(m_MailStream)
+         ProcessEventQueue(); // flush queue
       RemoveFromMap(m_MailStream); // will be added again by Open()
       LOGMESSAGE((M_LOG_WINONLY, _("Mailstream for folder '%s' has been closed, trying to reopen it."),
                   GetName().c_str()));
@@ -422,8 +434,10 @@ MailFolderCC::Ping(void)
 
 MailFolderCC::~MailFolderCC()
 {
+    // can cause references to this folder, cannot be allowd:
+   //ProcessEventQueue();
    CCQuiet(true); // disable all callbacks!
-//   mail_check(m_MailStream); // update flags, etc, .newsrc
+   mail_check(m_MailStream); // update flags, etc, .newsrc
    // We cannot run ProcessEventQueue() here as we must not allow any
    // Message to be created from this stream. If we miss an event -
    // that's a pity.
@@ -468,7 +482,9 @@ MailFolderCC::AppendMessage(String const &msg)
 
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
    ProcessEventQueue();
-   if(! mail_append(NIL,(char *)m_MailboxPath.c_str(),&str))
+
+//??   PingReopen();
+   if(! mail_append(m_MailStream,(char *)m_MailboxPath.c_str(),&str))
       ERRORMESSAGE(("cannot append message"));
    ProcessEventQueue();
 }
@@ -808,7 +824,7 @@ MailFolderCC::BuildListing(void)
 
       delete [] messageIDs;
    }
-   if(m_UpdateMsgCount) // this will suppress more new mail events
+//   if(m_UpdateMsgCount) // this will suppress more new mail events
       m_OldNumOfMessages = m_NumOfMessages;
    m_UpdateNeeded = false;
    m_FirstListing = false;

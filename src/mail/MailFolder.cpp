@@ -64,7 +64,7 @@ MailFolder::OpenFolder(int typeAndFlags,
          type = GetFolderType(typeflags);
          flags = GetFolderFlags(typeflags);
          login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
-         if(strutil_isempty(login)) // fall back to user name
+         if(FolderTypeHasUserName(type) && strutil_isempty(login)) // fall back to user name
             login = READ_CONFIG(profile, MP_USERNAME);
          passwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
          name = READ_CONFIG(profile, MP_FOLDER_PATH);

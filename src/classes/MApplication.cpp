@@ -567,7 +567,7 @@ MAppBase::OnMEvent(MEventData& event)
    {
       if(m_MailCollector->IsCollecting())
          return false;
-      if(!m_MailCollector->Collect(folder))
+      if(! m_MailCollector->Collect(folder))
          wxLogError(_("Could not collect mail from incoming folder '%s'."),
                     folder->GetName().c_str());
       return false;
@@ -610,7 +610,7 @@ MAppBase::OnMEvent(MEventData& event)
                   folder->GetMessage(mailevent.GetNewMessageIndex(i));
                if ( msg )
                {
-                  message << _("Subject: ") << msg->Subject() 
+                  message << _("Subject: ") << msg->Subject() << ' '
                           << _("From: ") << msg->From()
                           << '\n'
                           << _("in folder '") << folder->GetName() << "'\n\n";

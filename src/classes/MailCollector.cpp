@@ -216,7 +216,7 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       }
       if(mf->SaveMessages(&selections,
                           READ_APPCONFIG(MP_NEWMAIL_FOLDER),
-                          true /* isProfile */, false /* update count */))
+                          true /* isProfile */, true /* update count */))
       {
          mf->DeleteMessages(&selections);
          mf->ExpungeMessages();
