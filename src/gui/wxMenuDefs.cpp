@@ -224,7 +224,7 @@ static const MenuItemInfo g_aMenuItems[] =
 #endif // USE_PYTHON
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tCtrl-S"), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
+   { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tShift-Ctrl-S"), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network\tCtrl-U"),
@@ -297,10 +297,10 @@ static const MenuItemInfo g_aMenuItems[] =
    // compose
    { WXMENU_COMPOSE_INSERTFILE,
                            gettext_noop("&Insert file...\tCtrl-I"),   gettext_noop("Insert a file")            , FALSE },
-   { WXMENU_COMPOSE_SEND,  gettext_noop("&Send\tCtrl-S"),             gettext_noop("Send the message now")     , FALSE },
-   { WXMENU_COMPOSE_SEND_LATER,  gettext_noop("Send &Later\tCtrl-L"),
+   { WXMENU_COMPOSE_SEND,  gettext_noop("&Send\tShift-Ctrl-S"),             gettext_noop("Send the message now")     , FALSE },
+   { WXMENU_COMPOSE_SEND_LATER,  gettext_noop("Send &Later\tShift-Ctrl-L"),
      gettext_noop("Schedule the message to be send at a later time.")     , FALSE },
-   { WXMENU_COMPOSE_SEND_KEEP_OPEN,  gettext_noop("Send and &keep"),
+   { WXMENU_COMPOSE_SEND_KEEP_OPEN,  gettext_noop("Send and &keep\tShift-Ctrl-K"),
      gettext_noop("Send the message now and keep the editor open")     , FALSE },
    { WXMENU_COMPOSE_PRINT, gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
