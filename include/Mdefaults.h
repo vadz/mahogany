@@ -698,6 +698,13 @@
 /// sync folder tree
 #define MP_SYNC_FOLDERGROUP   "SyncFolderGroup"
 
+/** @name sending */
+//@{
+/// confirm sending the message?
+#define MP_CONFIRM_SEND "ConfirmSend"
+/// preview the message being sent?
+#define MP_PREVIEW_SEND "PreviewSend"
+//@}
 
 /** @name names of obsolete configuration entries, for upgrade routines */
 //@{
@@ -1430,6 +1437,14 @@
 #define MP_SYNC_FOLDERS_D   0L
 /// sync folder tree
 #define MP_SYNC_FOLDERGROUP_D   ""
+//@}
+
+/** @name sending */
+//@{
+/// confirm sending the message?
+#define MP_CONFIRM_SEND_D 0L
+/// preview the message being sent?
+#define MP_PREVIEW_SEND_D 0L
 //@}
 
 /** @name other defines used in M */

@@ -332,7 +332,7 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
             wxString name = Message::GetNameFromAddress(addr),
                      email = Message::GetEMailFromAddress(addr);
 
-            if ( name.empty() )
+            if ( name.empty() || (name == email) )
             {
                name = email.BeforeFirst('@');
             }

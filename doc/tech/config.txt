@@ -25,6 +25,7 @@ MP_BEACONHOST	BeaconHost	""
 MP_BROWSER	Browser	"netscape" (Unix) or "" (elsewhere)
 MP_BROWSER_ISNS	BrowserIsNetscape	1 (Unix) or 0 (elsewhere)
 MP_CHARSET	CharSet	"ISO-8859-1"
+MP_CONFIRM_SEND	ConfigSend	0l
 MP_COMPOSETEMPLATEPATH_GLOBAL	CompooseTemplatePath"
 MP_COMPOSETEMPLATEPATH_USER	CompooseTemplatePathUser"
 MP_COMPOSE_BCC	ComposeBccDefault	M_EMPTYSTRING
@@ -178,6 +179,7 @@ MP_POLLINCOMINGDELAY	PollIncomingDelay	300
 MP_POPHOST	Pop3Host	"pop"
 MP_PREFIXPATH	PrefixPath	"/usr:/usr/local:/opt:/usr/share:/usr/local/share:/opt/share:/usr/local/opt:/usr/local/opt/share:/tmp"
 MP_PREVIEW_ON_SELECT	PreviewOnSelect	1l
+MP_PREVIEW_SEND	PreviewSend	0l
 MP_PRINT_BOTTOMMARGIN_X	PrintMarginRight	0l
 MP_PRINT_BOTTOMMARGIN_Y	PrintMarginBottom	0l
 MP_PRINT_COLOUR	PrintUseColour	1

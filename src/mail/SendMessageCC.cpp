@@ -885,6 +885,30 @@ SendMessageCC::Send(void)
       m_Protocol = Prot_SMTP;
 #endif
    
+   // preview message being sent if asked for it
+   String msgText;
+   bool confirmSend;
+   if ( READ_APPCONFIG(MP_PREVIEW_SEND) )
+   {
+      WriteToString(msgText);
+      MDialog_ShowText(NULL, "Outgoing message text", msgText);
+
+      // if we preview it, we want to confirm it too
+      confirmSend = true;
+   }
+   else
+   {
+      confirmSend = READ_APPCONFIG(MP_CONFIRM_SEND);
+   }
+
+   if ( confirmSend )
+   {
+      if ( !MDialog_YesNoDialog(_("Send this message?")) )
+      {
+         return false;
+      }
+   }
+
    switch(m_Protocol)
    {
    case Prot_SMTP:
@@ -917,8 +941,12 @@ SendMessageCC::Send(void)
 #ifdef OS_UNIX
    case Prot_Sendmail:
    {
-      String msgText;
-      WriteToString(msgText);
+      if ( msgText.empty() )
+      {
+         WriteToString(msgText);
+      }
+      //else: already done for preview above
+
       bool success = false;
       /// write to temp file:
       const char *filename = wxGetTempFileName("Mtemp");

@@ -247,7 +247,7 @@ public:
                 const wxString& text,
                 const wxPoint& position,
                 const wxSize& size)
-    : wxDialog(parent, -1, title, position, size,
+    : wxDialog(parent, -1, wxString("Mahogany: ") + title, position, size,
                wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
                | wxSYSTEM_MENU| wxMINIMIZE_BOX
                | wxMAXIMIZE_BOX | wxTHICK_FRAME) // make it resizealbe
@@ -1328,9 +1328,19 @@ void MDialog_ShowText(MWindow *parent,
                       const char *text,
                       const char *configPath)
 {
-   int x = -1, y = -1, w = -1, h = -1;
+   int x, y, w, h;
    if ( configPath )
+   {
       wxMFrame::RestorePosition(configPath, &x, &y, &w, &h);
+   }
+   else
+   {
+      x =
+      y = -1;
+      w = 500;
+      h = 300;
+   }
+      
 
    MTextDialog dlg(parent, title, text,
                    wxPoint(x, y), wxSize(w, h));
