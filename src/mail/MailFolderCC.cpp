@@ -688,7 +688,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    if(mf)
    {
       mf->IncRef();
-      mf->Ping(); // make sure it's updated
+      mf->PingReopen(); // make sure it's updated
       return mf;
    }
 
@@ -793,7 +793,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
          profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pword));
       }
    }
-
+   mf->PingReopen();
    return mf;
 }
 
@@ -1273,16 +1273,27 @@ MailFolderCC::CountNewMessagesQuick(void) const
 unsigned long
 MailFolderCC::CountMessages(int mask, int value) const
 {
+#if 0
+   // This is needed to update the m_nMessages.
+   if(m_nMessages == 0)
+   {
+      HeaderInfoList *hil = GetHeaders();
+      if ( !hil )
+         return 0;
+      hil->DecRef();
+   }
+#endif
+
    if(mask == MSG_STAT_NONE)
       return m_nMessages;
    else if(mask == MSG_STAT_RECENT && value == MSG_STAT_RECENT)
       return m_nRecent;
    else
    {
-      unsigned long numOfMessages = m_nMessages;
       HeaderInfoList *hil = GetHeaders();
       if ( !hil )
          return 0;
+      unsigned long numOfMessages = m_nMessages;
 
       // FIXME there should probably be a much more efficient way (using
       //       cclient functions?) to do it
