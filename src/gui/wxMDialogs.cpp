@@ -149,11 +149,20 @@ extern const MOption MP_WIDTH;
 // private classes
 // ----------------------------------------------------------------------------
 
-#ifdef USE_SEMIMODAL
+// define this to use semi-modal dialogs which allow to view help while they
+// are shown - note that this doesn't work at all well under Windows
+#ifndef OS_WIN
+   #define USE_SEMIMODAL
+#endif
 
 int
-wxSMDialog::ShowModal()
+wxMDialog::ShowModal()
 {
+   // hide the splash if it is still shown or we wouldn't see the dialog behind
+   // it
+   CloseSplash();
+
+#ifdef USE_SEMIMODAL
    m_modalShowing = TRUE;
 
 #if wxUSE_HELP && wxUSE_HTML
@@ -182,22 +191,27 @@ wxSMDialog::ShowModal()
 
    wxEnableTopLevelWindows(TRUE);
    return GetReturnCode();
+#else // !USE_SEMIMODAL
+   return wxDialog::ShowModal();
+#endif // USE_SEMIMODAL/!USE_SEMIMODAL
 }
 
-void wxSMDialog::EndModal( int retCode )
+void wxMDialog::EndModal( int retCode )
 {
+#ifdef USE_SEMIMODAL
     SetReturnCode( retCode );
 
     if (!IsModal())
     {
-        wxFAIL_MSG( _T("wxSMDialog:EndModal called twice") );
+        wxFAIL_MSG( _T("wxMDialog:EndModal called twice") );
         return;
     }
     m_modalShowing = FALSE;
     Show( FALSE );
+#else // !USE_SEMIMODAL
+    wxDialog::EndModal(retCode);
+#endif // USE_SEMIMODAL/!USE_SEMIMODAL
 }
-
-#endif // USE_SEMIMODAL
 
 // better looking and wxConfig-aware wxTextEntryDialog
 class MTextInputDialog : public wxDialog
@@ -267,7 +281,7 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(MFolderDialog, wxSMDialog)
+BEGIN_EVENT_TABLE(MFolderDialog, wxMDialog)
     EVT_BUTTON(-1, MFolderDialog::OnButton)
 END_EVENT_TABLE()
 
@@ -3555,7 +3569,7 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(MPasswordDialog, wxSMDialog)
+BEGIN_EVENT_TABLE(MPasswordDialog, wxMDialog)
    EVT_UPDATE_UI(wxID_OK, MPasswordDialog::OnUpdateOk)
 END_EVENT_TABLE()
 

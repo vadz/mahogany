@@ -53,7 +53,7 @@ class WXDLLEXPORT wxComboBox;
 // a stand-in for the wxPDialog class which is not written yet...
 // ----------------------------------------------------------------------------
 
-class wxPDialog : public wxSMDialog
+class wxPDialog : public wxMDialog
 {
 public:
    // ctor restores position/size

@@ -445,39 +445,32 @@ bool MDialog_GetPassword(Protocol protocol,
                          wxString *username,
                          wxWindow *parent = NULL);
 
-#if 1 //def OS_WIN
-#  undef USE_SEMIMODAL
+/**
+  The base class for all Mahogany dialogs.
 
-#  define wxSMDialog wxDialog
-#else // !Win
-#  define USE_SEMIMODAL
-
-/** Semi-modal dialog to allow pop-up help to work.
-    (Yes, I know it's a funny name, but so is the whole Help/Modal
-    problem... :-)
-
-    Behaves identical to wxDialog, but ShowModal() is only a
-    fake-modal mode to allow one to browse the help window.
+  It takes care of hiding the splash screen when it is shown and implements
+  Karsten's unique semi-modality concept ;-) under !Windows.
 */
-class wxSMDialog : public wxDialog
+class wxMDialog : public wxDialog
 {
 public:
-   wxSMDialog( wxWindow *parent, wxWindowID id,
-               const wxString &title,
-               const wxPoint &pos = wxDefaultPosition,
-               const wxSize &size = wxDefaultSize,
-               long style = wxDEFAULT_DIALOG_STYLE,
-               const wxString &name = wxDialogNameStr )
+   wxMDialog(wxWindow *parent, wxWindowID id,
+             const wxString &title,
+             const wxPoint &pos = wxDefaultPosition,
+             const wxSize &size = wxDefaultSize,
+             long style = wxDEFAULT_DIALOG_STYLE,
+             const wxString &name = wxDialogNameStr)
       : wxDialog ( parent, id, title, pos, size, style, name)
       {
       }
 
-   wxSMDialog() : wxDialog() {}
+   wxMDialog()
+   {
+   }
+
    virtual int ShowModal();
    virtual void EndModal(int rc);
 };
-#endif // Win/!Win
-
 
 class wxXFaceButton : public wxBitmapButton
 {
