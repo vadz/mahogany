@@ -228,11 +228,11 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
             last
           );
 
-   m_chkThrOnServer = m_panel->CreateCheckBox(fieldLabels[Field_ThreadOnServer],
+   m_chkThrOnServer = m_panel->CreateCheckBox(aLabels[Field_ThreadOnServer],
                                      widthMax, last);
    last = m_chkThrOnServer;
 
-   m_chkThrByRefOnly = m_panel->CreateCheckBox(fieldLabels[Field_ThreadByRefOnly],
+   m_chkThrByRefOnly = m_panel->CreateCheckBox(aLabels[Field_ThreadByRefOnly],
                                       widthMax, last);
    last = m_chkThrByRefOnly;
 
@@ -275,30 +275,30 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
             last
           );
 
-   m_txtRegex = m_panel->CreateTextWithLabel(fieldLabels[Field_SubjectRegex],
+   m_txtRegex = m_panel->CreateTextWithLabel(aLabels[Field_SubjectRegex],
                                              widthMax, last);
    last = m_txtRegex;
 
-   m_txtRegexRepl = m_panel->CreateTextWithLabel(fieldLabels[Field_SubjectRegexRepl],
+   m_txtRegexRepl = m_panel->CreateTextWithLabel(aLabels[Field_SubjectRegexRepl],
                                                  widthMax, last);
    last = m_txtRegexRepl;
 #else // !wxUSE_REGEX
-   m_chkSubject1 = m_panel->CreateCheckBox(fieldLabels[Field_RemoveSubjectListPrefix],
+   m_chkSubject1 = m_panel->CreateCheckBox(aLabels[Field_RemoveSubjectListPrefix],
                                            widthMax, last);
    last = m_chkSubject1;
 
-   m_chkSubject2 = m_panel->CreateCheckBox(fieldLabels[Field_RemoveSubjectPrefixToCmp],
+   m_chkSubject2 = m_panel->CreateCheckBox(aLabels[Field_RemoveSubjectPrefixToCmp],
                                            widthMax, last);
    last = m_chkSubject2;
 #endif // wxUSE_REGEX/!wxUSE_REGEX
 
 #endif // USE_EXTRA_THREADING_OPTIONS
 
-   m_chkGather = m_panel->CreateCheckBox(fieldLabels[Field_GatherSubjects],
+   m_chkGather = m_panel->CreateCheckBox(aLabels[Field_GatherSubjects],
                                          widthMax, last);
    last = m_chkGather;
 
-   m_chkBreak = m_panel->CreateCheckBox(fieldLabels[Field_BreakIfSubjectChanges],
+   m_chkBreak = m_panel->CreateCheckBox(aLabels[Field_BreakIfSubjectChanges],
                                         widthMax, last);
    last = m_chkBreak;
 
@@ -313,7 +313,7 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
             last
           );
 
-   m_chkIndent = m_panel->CreateCheckBox(fieldLabels[Field_IndentMissingRoot],
+   m_chkIndent = m_panel->CreateCheckBox(aLabels[Field_IndentMissingRoot],
                                          widthMax, last);
 #endif // USE_EXTRA_THREADING_OPTIONS
 
