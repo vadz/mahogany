@@ -2,8 +2,9 @@
  * PalmOS - a PalmOS connectivity module for Mahogany               *
  *                                                                  *
  * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
+ *                  Daniel Seifert (dseifert@gmx.net)               *
  *                                                                  *
- * $Id$
+ * $Id$              *
  *******************************************************************/
 
 // ----------------------------------------------------------------------------
@@ -47,38 +48,42 @@
 #define DISPOSE_DELETE 1l
 #define DISPOSE_FILE   2l
 
-#define MP_MOD_PALMOS_BOX        "PalmBox"
-#define MP_MOD_PALMOS_BOX_D      "PalmBox"
-#define MP_MOD_PALMOS_DISPOSE    "Dispose"
-#define MP_MOD_PALMOS_DISPOSE_D  2  // 0=keep 1=delete 2=file
-#define MP_MOD_PALMOS_SYNCMAIL   "SyncMail"
-#define MP_MOD_PALMOS_SYNCMAIL_D 1l
-#define MP_MOD_PALMOS_SYNCADDR   "SyncAddr"
-#define MP_MOD_PALMOS_SYNCADDR_D 1l
-#define MP_MOD_PALMOS_BACKUP     "Backup"
-#define MP_MOD_PALMOS_BACKUP_D   0l
+// Config file defines
+
+#define MP_MOD_PALMOS_BOX                    "PalmBox"
+#define MP_MOD_PALMOS_BOX_D                  "PalmBox"
+#define MP_MOD_PALMOS_DISPOSE                "Dispose"
+#define MP_MOD_PALMOS_DISPOSE_D              DISPOSE_FILE
+#define MP_MOD_PALMOS_SYNCMAIL               "SyncMail"
+#define MP_MOD_PALMOS_SYNCMAIL_D             1l
+#define MP_MOD_PALMOS_SYNCADDR               "SyncAddr"
+#define MP_MOD_PALMOS_SYNCADDR_D             1l
+#define MP_MOD_PALMOS_BACKUP                 "Backup"
+#define MP_MOD_PALMOS_BACKUP_D               0l
 #define MP_MOD_PALMOS_BACKUPDIR              "BackupDir"
 #define MP_MOD_PALMOS_BACKUPDIR_D            ""
 #define MP_MOD_PALMOS_BACKUP_SYNC            "BackupSync"
 #define MP_MOD_PALMOS_BACKUP_SYNC_D          0l
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL     "BackupIncremental"
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL_D   1l
-#define MP_MOD_PALMOS_BACKUP_ALL              "BackupAll"
-#define MP_MOD_PALMOS_BACKUP_ALL_D            1l
+#define MP_MOD_PALMOS_BACKUP_ALL             "BackupAll"
+#define MP_MOD_PALMOS_BACKUP_ALL_D           1l
 #define MP_MOD_PALMOS_BACKUP_EXCLUDELIST     "BackupExclude"
 #define MP_MOD_PALMOS_BACKUP_EXCLUDELIST_D   ""
-#define MP_MOD_PALMOS_AUTOINSTALLDIR     "AutoInstallDir"
-#define MP_MOD_PALMOS_AUTOINSTALLDIR_D   "/tmp"
-#define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
-#define MP_MOD_PALMOS_PILOTDEV_D "/dev/pilot"
-#define MP_MOD_PALMOS_SPEED      "Speed"
-#define MP_MOD_PALMOS_SPEED_D    3
-#define MP_MOD_PALMOS_LOCK       "Lock"
-#define MP_MOD_PALMOS_LOCK_D 0l
-#define MP_MOD_PALMOS_SCRIPT1    "Script1"
-#define MP_MOD_PALMOS_SCRIPT1_D  ""
-#define MP_MOD_PALMOS_SCRIPT2    "Script2"
-#define MP_MOD_PALMOS_SCRIPT2_D  ""
+#define MP_MOD_PALMOS_AUTOINSTALL            "AutoInstall"
+#define MP_MOD_PALMOS_AUTOINSTALL_D          0l
+#define MP_MOD_PALMOS_AUTOINSTALLDIR         "AutoInstallDir"
+#define MP_MOD_PALMOS_AUTOINSTALLDIR_D       "/tmp"
+#define MP_MOD_PALMOS_PILOTDEV               "PilotDev"
+#define MP_MOD_PALMOS_PILOTDEV_D             "/dev/pilot"
+#define MP_MOD_PALMOS_SPEED                  "Speed"
+#define MP_MOD_PALMOS_SPEED_D                3
+#define MP_MOD_PALMOS_LOCK                   "Lock"
+#define MP_MOD_PALMOS_LOCK_D                 0l
+#define MP_MOD_PALMOS_SCRIPT1                "Script1"
+#define MP_MOD_PALMOS_SCRIPT1_D              ""
+#define MP_MOD_PALMOS_SCRIPT2                "Script2"
+#define MP_MOD_PALMOS_SCRIPT2_D              ""
 
 #define pi_mktag(c1,c2,c3,c4) (((c1)<<24)|((c2)<<16)|((c3)<<8)|(c4))
 
@@ -122,9 +127,9 @@ extern "C" {
 };
 #endif
 
-// ---------------------------------------------------
+// ----------------------------------------------------------------------------
 // Implementation
-// ---------------------------------------------------
+// ----------------------------------------------------------------------------
 
 class wxDeviceLock
 {
@@ -198,14 +203,13 @@ private:
 };
 
 
-///------------------------------
+///----------------------------------------------------------------------------
 /// MModule interface:
-///------------------------------
+///----------------------------------------------------------------------------
 
 class PalmOSModule : public MModule
 {
-   /** Override the Entry() function to allow Main() and Config()
-       functions. */
+   /** Override the Entry() function to allow Main() and Config() functions. */
    virtual int Entry(int arg, ...);
    void Synchronise(PalmBook *pBook);
    void Configure(void);
@@ -252,7 +256,7 @@ private:
       { m_MInterface->StatusMessage(msg);wxYield();}
 
    int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
-   int CreateFileList(char *** list, DIR * dir);
+   int CreateFileList(char *** list, DIR * dir, wxString directory);
    void DeleteFileList(char **list, int filecount);
    void RemoveFromList(char *name, char **list, int max);
 
@@ -261,10 +265,12 @@ private:
    int m_AddrDB;
    ProfileBase *m_Profile;
 
-   int m_Dispose;
-   int m_Speed;
-   bool m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
-   bool m_IncrBackup, m_BackupSync, m_BackupAll;
+   // variables to store configuration values
+   int   m_Dispose;
+   int   m_Speed;
+   bool  m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
+   bool  m_IncrBackup, m_BackupSync, m_BackupAll;
+   bool  m_AutoInstall;
    String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
    String m_BackupExcludeList;
    String m_BackupDir;
@@ -272,6 +278,10 @@ private:
 
    class wxDeviceLock *m_Lock;
 };
+
+// ----------------------------------------------------------------------------
+// PiConnection - small helper class to automate connection
+// ----------------------------------------------------------------------------
 
 /// small helper class
 class PiConnection
@@ -296,6 +306,9 @@ private:
    bool cleanup;
 };
 
+// ----------------------------------------------------------------------------
+// 
+// ----------------------------------------------------------------------------
 
 bool
 PalmOSModule::ProcessMenuEvent(int id)
@@ -401,6 +414,7 @@ PalmOSModule::GetConfig(void)
    m_BackupSync = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_SYNC);
    m_BackupAll  = (READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_ALL) != 0);
    m_BackupExcludeList = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_EXCLUDELIST);
+   m_AutoInstall    = READ_CONFIG(p, MP_MOD_PALMOS_AUTOINSTALL);
    m_AutoInstallDir = READ_CONFIG(p, MP_MOD_PALMOS_AUTOINSTALLDIR);
 
    if(m_Speed < 0  || m_Speed > (signed) WXSIZEOF(speeds))
@@ -432,9 +446,9 @@ MMODULE_BEGIN_IMPLEMENT(PalmOSModule,
 MMODULE_END_IMPLEMENT(PalmOSModule)
 
 
-///------------------------------
+///----------------------------------------------------------------------------
 /// Own functionality:
-///------------------------------
+///----------------------------------------------------------------------------
 
 /* static */
 
@@ -514,6 +528,7 @@ private:
 };
 #endif
 
+
 bool
 PalmOSModule::Connect(void)
 {
@@ -544,7 +559,7 @@ PalmOSModule::Connect(void)
       Message(_("Please press HotSync button and click on OK."));
       if (!(m_PiSocket = pi_socket(PI_AF_SLP, PI_SOCK_STREAM, PI_PF_PADP)))
       {
-         ErrorMessage(_("Failed to connect to PalmOS device."));
+         ErrorMessage(_("Failed to connect to PalmOS device:\nCould not open socket."));
          if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
       }
@@ -561,7 +576,7 @@ PalmOSModule::Connect(void)
       rc = pi_bind(m_PiSocket, (struct sockaddr*)&addr, sizeof(addr));
       if(rc == -1)
       {
-         ErrorMessage(_("Failed to connect to PalmOS device."));
+         ErrorMessage(_("Failed to connect to PalmOS device:\nCould not bind to socket."));
          pi_close(m_PiSocket); m_PiSocket = -1;
          if (m_Lock->IsLocked())
             m_Lock->Unlock();
@@ -572,7 +587,7 @@ PalmOSModule::Connect(void)
       rc = pi_listen(m_PiSocket,1);
       if(rc == -1)
       {
-         ErrorMessage(_("Failed to connect to PalmOS device."));
+         ErrorMessage(_("Failed to connect to PalmOS device:\nListening on socket failed."));
          pi_close(m_PiSocket); m_PiSocket = -1;
          if (m_Lock->IsLocked())
             m_Lock->Unlock();
@@ -656,6 +671,10 @@ PalmOSModule::Disconnect(void)
    }
 }
 
+// ----------------------------------------------------------------------------
+// General Synchronisation calls
+// ----------------------------------------------------------------------------
+
 void PalmOSModule::SyncMail(void)
 {
    PiConnection conn(this);
@@ -700,7 +719,8 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
       if(m_Backup)
          Backup();
 
-      if(m_AutoInstallDir)
+      if(m_AutoInstall)
+         AutoInstall();
 
       m_Profile->DecRef();
       m_Profile=NULL;
@@ -739,7 +759,7 @@ static void protect_name(char *d, char *s)
 }
 
 int
-PalmOSModule::CreateFileList(char ***list, DIR * dir)
+PalmOSModule::CreateFileList(char ***list, DIR * dir, wxString directory)
 {
    char **filelist = 0;
    struct dirent * dirent;
@@ -762,8 +782,15 @@ PalmOSModule::CreateFileList(char ***list, DIR * dir)
          filelist = (char **) realloc(filelist, sizeof(char*) * file_len);
       }
 
-      sprintf(name, "%s%s", m_BackupDir.c_str(), dirent->d_name);
-      filelist[filecount++] = strutil_strdup(name);
+      sprintf(name, "%s%s", directory.c_str(), dirent->d_name);
+      
+      // now we open the file and see whether it is really a file for
+      // the Palm. If yes, then we remember the filename.
+      struct pi_file *f = pi_file_open(name);
+      if (f > 0) {
+         pi_file_close(f);
+         filelist[filecount++] = strutil_strdup(name);
+      }
    }
 
    *list = filelist;
@@ -799,6 +826,11 @@ PalmOSModule::DeleteFileList(char **list, int filecount)
 }
 
 
+// ----------------------------------------------------------------------------
+// Backup
+// ----------------------------------------------------------------------------
+
+
 void
 PalmOSModule::Backup(void)
 {
@@ -824,7 +856,7 @@ PalmOSModule::Backup(void)
    int     ofile_total;
    char ** orig_files = 0;
 
-   ofile_total = CreateFileList(&orig_files, dir);
+   ofile_total = CreateFileList(&orig_files, dir, m_BackupDir);
    closedir(dir);
 
    // count files on the palm
@@ -957,6 +989,12 @@ pdbCompare(struct db * d1, struct db * d2)
    return d1->maxblock < d2->maxblock;
 }
 
+
+// ----------------------------------------------------------------------------
+// Install routines
+// ----------------------------------------------------------------------------
+
+
 void
 PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
 {
@@ -978,7 +1016,8 @@ PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
 
       if (f==0) {
          // TODO: show filename
-         ErrorMessage(_("Unable to open file!"));
+         ErrorMessage(_("Could not open file or file invalid!"));
+         ErrorMessage(_(db[dbcount]->name));
          break;
       }
 
@@ -1003,11 +1042,6 @@ PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
 
       pi_file_close(f);
       dbcount++;
-
-      // shall we delete the file after deletion?
-      if (delFile) {
-         unlink(fnames[j]);
-      }
    }
 
    // sort list in alphabetical order
@@ -1034,7 +1068,7 @@ PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
 
       if ( dlp_OpenConduit(m_PiSocket) < 0)
       {
-         ErrorMessage(_("Exiting on cancel, all data not restored"));
+         ErrorMessage(_("Exiting on cancel, all data not restored/installed"));
          delete pd;
          return;
       }
@@ -1043,13 +1077,19 @@ PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
       if (f == 0)
       {
          // TODO: display filename
-         ErrorMessage(_("Unable to open file."));
+         ErrorMessage(_("Could not open file or file invalid!"));
+         ErrorMessage(_(db[dbcount]->name));
          break;
       }
 
       fflush(stdout);
       pi_file_install(f, m_PiSocket, 0);
       pi_file_close(f);
+
+      // shall we delete the file after deletion?
+      if (delFile) {
+         unlink(db[i]->name);
+      }
    }
 
    delete pd;
@@ -1096,13 +1136,14 @@ PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
       return;
    }
 
-   ofile_total = CreateFileList(&fnames, dir);
+   ofile_total = CreateFileList(&fnames, dir, directory);
 
    // we´ve finished reading the filelist
    closedir(dir);
 
    // install files
-   InstallFiles(fnames, ofile_total, delFiles);
+   if (ofile_total > 0)   
+      InstallFiles(fnames, ofile_total, delFiles);
    DeleteFileList(fnames, ofile_total);
 }
 
@@ -1147,6 +1188,11 @@ PalmOSModule::Install()
 }
 
 
+// ----------------------------------------------------------------------------
+// Synchronise Addresses
+// ----------------------------------------------------------------------------
+
+
 void
 PalmOSModule::GetAddresses(PalmBook *palmbook)
 {
@@ -1175,7 +1221,7 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
 
    /* Open the Address database, store access handle in db */
    if(dlp_OpenDB(m_PiSocket, 0, 0x80|0x40, "AddressDB", &m_AddrDB) < 0) {
-      ErrorMessage(_("Unable to open AddressDB"));
+      ErrorMessage(_(" AddressDB"));
       dlp_AddSyncLogEntry(m_PiSocket, "Unable to open AddressDB.\n");
       exit(1);
    }
@@ -1263,6 +1309,13 @@ PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup*
    // everything worked fine
    return 0;
 }
+
+
+
+// ----------------------------------------------------------------------------
+// Synchronise EMails
+// ----------------------------------------------------------------------------
+
 
 void
 PalmOSModule::SendEMails(void)
@@ -1422,6 +1475,7 @@ PalmOSModule::SendEMails(void)
  ** Copy messages from palmbox folder to handheld:
  **
  **/
+
 void
 PalmOSModule::StoreEMails(void)
 {
@@ -1576,13 +1630,14 @@ static ConfigValueDefault gs_ConfigValues [] =
    ConfigValueDefault(MP_MOD_PALMOS_SYNCMAIL, MP_MOD_PALMOS_SYNCMAIL_D),
    ConfigValueDefault(MP_MOD_PALMOS_BOX, MP_MOD_PALMOS_BOX_D),
    ConfigValueDefault(MP_MOD_PALMOS_DISPOSE, MP_MOD_PALMOS_DISPOSE_D),
-   ConfigValueDefault(MP_MOD_PALMOS_SYNCADDR, MP_MOD_PALMOS_SYNCADDR_D),
+//   ConfigValueDefault(MP_MOD_PALMOS_SYNCADDR, MP_MOD_PALMOS_SYNCADDR_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP, MP_MOD_PALMOS_BACKUP_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUPDIR, MP_MOD_PALMOS_BACKUPDIR_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_SYNC, MP_MOD_PALMOS_BACKUP_SYNC_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_INCREMENTAL, MP_MOD_PALMOS_BACKUP_INCREMENTAL_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_ALL, MP_MOD_PALMOS_BACKUP_ALL_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_EXCLUDELIST, MP_MOD_PALMOS_BACKUP_EXCLUDELIST_D),
+   ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALL, MP_MOD_PALMOS_AUTOINSTALL_D),
    ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALLDIR, MP_MOD_PALMOS_AUTOINSTALLDIR_D),
    ConfigValueDefault(MP_MOD_PALMOS_PILOTDEV, MP_MOD_PALMOS_PILOTDEV_D),
    ConfigValueDefault(MP_MOD_PALMOS_SPEED, MP_MOD_PALMOS_SPEED_D),
@@ -1596,7 +1651,7 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
    { gettext_noop("Synchronise Mail"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Mailbox for exchange"), wxOptionsPage::Field_Text, 0},
    { gettext_noop("Mail disposal mode:keep:delete:file"), wxOptionsPage::Field_Combo,   0},
-   { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
+//   { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Always do Backup"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Directory for backup files"), wxOptionsPage::Field_Text,    -1 },
    { gettext_noop("Delete no longer existing backup files"),
@@ -1604,6 +1659,7 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
    { gettext_noop("Make incremental backup only"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Backup all databases"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Exclude these databases"), wxOptionsPage::Field_Text,    -1 },
+   { gettext_noop("Do auto-install"), wxOptionsPage::Field_Bool,  -1 },
    { gettext_noop("Directory for databases to auto-install"), wxOptionsPage::Field_Text,    -1 },
    { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
    // the speed values must be in sync with the ones in the speeds[]
@@ -1618,12 +1674,12 @@ static
 struct wxOptionsPageDesc  gs_OptionsPageDesc =
 {
    gettext_noop("PalmOS module preferences"),
-   "palmpilot",// image
-   MH_MODULES_PALMOS_CONFIG,
-   // the fields description
-   gs_FieldInfos,
-   gs_ConfigValues,
-   WXSIZEOF(gs_FieldInfos)
+      "palmpilot",// image
+      MH_MODULES_PALMOS_CONFIG,
+      // the fields description
+      gs_FieldInfos,
+      gs_ConfigValues,
+      WXSIZEOF(gs_FieldInfos)
 };
 
 void
