@@ -11,7 +11,7 @@ build:
 	mkdir build-debian; \
 	cd build-debian; \
 	../configure --prefix=/usr $(CONFIG_FLAGS); \
-	$(MAKE) semistatic
+	$(MAKE)
 	touch build
 
 clean:
