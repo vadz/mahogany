@@ -40,6 +40,8 @@
 #  include <wx/dynarray.h>
 #  include <wx/colour.h>
 #  include <wx/menu.h>
+#else
+#  include <wx/imaglist.h>
 #endif // USE_PCH
 
 #include <ctype.h>
@@ -76,6 +78,11 @@
 #include "MDialogs.h"
 #include "MHelp.h"
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
+
+// use XPMs under MSW as well as it's the simplest way to have transparent
+// bitmaps like we need here
+#include "../icons/sortdown.xpm"
+#include "../icons/sortup.xpm"
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -279,8 +286,20 @@ private:
 class wxFolderListCtrl : public wxListView
 {
 public:
+   /**
+     Ctor and dtor
+    */
+   //@{
+
    wxFolderListCtrl(wxWindow *parent, wxFolderView *fv);
    virtual ~wxFolderListCtrl();
+
+   //@}
+
+   /**
+     Listing stuff
+    */
+   //@{
 
    /// set the listing to use
    void SetListing(HeaderInfoList *listing);
@@ -297,11 +316,42 @@ public:
    /// invalidate the cached header(s)
    void InvalidateCache();
 
+   //@}
+
+   /**
+     Column functions
+    */
+   //@{
+
    /// create the columns using order in m_columns and widths from profile
    void CreateColumns();
 
    /// return the string containing ':' separated columns widths
    String GetWidths() const;
+
+   //@}
+
+   /**
+     Selection, focus &c.
+
+     Note that when selecting a new item programmatically, GoToItem() should be
+     used instead of directly Select()ing the item: GoToItem() maintains the
+     single selection invariant, i.e. if the control had a unique item selected
+     before it, it will unselect the previously selected item and select the
+     new one, otherwise it will just add the new one to the selection. If this
+     sounds complicated, just try it out and you'll see that this is exactly
+     what we want to happen from the UI point of view.
+    */
+   //@{
+
+   /**
+     Focuses and selects the given item and unselects the previously selected
+     one if it was the only item selected.
+
+     @param item the item to focus and select
+     @return true if we have one one selected item, false if there are others
+    */
+   bool GoToItem(long item);
 
    /** select the next (after the current one) message in the control which
        has the given status bit on or off, depending on the second parameter
@@ -364,6 +414,8 @@ public:
    /// return true if we have either selection or valid focus
    bool HasSelection() const;
 
+   //@}
+
    /// @name the event handlers
    //@{
    void OnSelected(wxListEvent& event);
@@ -406,6 +458,9 @@ public:
    /// set m_PreviewDelay value
    void SetPreviewDelay(unsigned long delay) { m_PreviewDelay = delay; }
 
+   /// draw the sort direction arrow on the column used for sorting
+   void UpdateSortIndicator();
+
    /// save the widths of the columns in profile if needed
    void SaveColWidths();
 
@@ -442,9 +497,6 @@ protected:
    /// read the column width string from profile or default one
    wxString GetColWidths() const;
 
-   /// draw the sort direction arrow on the column used for sorting
-   void UpdateSortIndicator();
-
    /// enable/disable handling of select events (returns old value)
    bool EnableOnSelect(bool enable)
    {
@@ -454,10 +506,7 @@ protected:
    }
 
    /// update our "unique selection" flag
-   void UpdateUniqueSelFlag()
-   {
-      m_selIsUnique = GetUniqueSelection() != -1;
-   }
+   void UpdateUniqueSelFlag();
 
    /// update the number of items in the list control
    void UpdateItemCount() { SetItemCount(GetHeadersCount()); }
@@ -527,11 +576,8 @@ protected:
    /// the item currently previewed in the folder view
    long m_itemPreviewed;
 
-   /// this is true as long as we have exactly one selection
-   bool m_selIsUnique;
-
-   /// HACK: this is set to true to force m_selIsUnique update if needed
-   bool m_selMaybeChanged;
+   /// 1 => we have exactly 1 sel item, 0 - more, -1 - none at all
+   int m_selIsUnique;
 
    //@}
 
@@ -894,8 +940,9 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_profile->IncRef(); // we wish to keep it until dtor
 
    m_headers = NULL;
+   m_indexHI = (size_t)-1;
+   m_hiCached = NULL;
    m_attr = NULL;
-   InvalidateCache();
 
    m_PreviewOnSingleClick = false;
    m_PreviewDelay = 0;
@@ -920,10 +967,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_itemPreviewed = -1;
 
    // no selection at all
-   m_selIsUnique = false;
-
-   // and it didn't change yet
-   m_selMaybeChanged = false;
+   m_selIsUnique = -1;
 
    // do create the control
    Create(parent, M_WXID_FOLDERVIEW_LISTCTRL,
@@ -931,15 +975,16 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
           wxLC_REPORT | wxLC_VIRTUAL | wxNO_BORDER);
 
    // add the images to use for the columns
-   wxIcon iconDown = ICON("sortdown"),
-          iconUp = ICON("sortup");
-   wxImageList *imagelist = new wxImageList(iconDown.GetWidth(),
-                                            iconDown.GetHeight());
+   wxIconManager *iconManager = mApplication->GetIconManager();
+   wxBitmap bmpDown = sort_down_xpm,
+            bmpUp = sort_up_xpm;
+   wxImageList *imagelist = new wxImageList(bmpDown.GetWidth(),
+                                            bmpDown.GetHeight());
 
    // this must be consistent with logic in UpdateSortIndicator(): first icon
    // is used for the reversed sort, second for the normal one
-   imagelist->Add(iconDown);
-   imagelist->Add(iconUp);
+   imagelist->Add(bmpDown);
+   imagelist->Add(bmpUp);
    AssignImageList(imagelist, wxIMAGE_LIST_SMALL);
 
    // create a drop target for dropping messages on us
@@ -1204,8 +1249,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
       // exactly one currently selected message (which will be deselected by
       // PreviewItem then); selecting subsequent messages just extends the
       // selection but doesn't show them
-      long sel = GetFirstSelected();
-      if ( sel == -1 || GetNextSelected(sel) == -1 )
+      if ( m_selIsUnique != 0 )
       {
          // if m_PreviewDelay != 0, use delayed preview, i.e. just launch the
          // timer now and only preview the messages when it expires: this
@@ -1402,15 +1446,10 @@ void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
       case WXK_NEXT:
       case WXK_HOME:
       case WXK_END:
+      case WXK_SPACE:
          // update the unique selection flag as we can lose it now (the keys
          // above can change the focus/selection)
          UpdateUniqueSelFlag();
-         break;
-
-      case WXK_SPACE:
-         // selection may change if this is Ctrl-Space, for example, so check
-         // it a bit later
-         m_selMaybeChanged = true;
          break;
    }
 
@@ -1476,15 +1515,8 @@ bool wxFolderListCtrl::SetPreviewMsg(long idx, UIdType uid)
    // as folder view calls us itself, no need to notify it
    wxFolderListCtrlBlockOnSelect noselect(this);
 
-   // if we had exactly one selected item before, deselect it
-   long selOld = GetUniqueSelection();
-   if ( selOld != m_itemPreviewed && selOld != -1 )
-   {
-      Select(selOld, false);
-   }
-
-   // in any case, select the item being previewed
-   Select(m_itemPreviewed, true);
+   // select the item being previewed
+   GoToItem(m_itemPreviewed);
 
    return true;
 }
@@ -1535,6 +1567,11 @@ void wxFolderListCtrl::InvalidateCache()
    m_hiCached = NULL;
 
    m_headersToGet.Empty();
+
+   // reset them so that OnIdle() doesn't try to access invalid (because
+   // referring to the old listing) m_itemFocus
+   m_uidFocus = UID_ILLEGAL;
+   m_itemFocus = -1;
 }
 
 void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
@@ -1739,7 +1776,18 @@ void wxFolderListCtrl::CreateColumns()
       if ( !widths[n].ToLong(&width) )
          width = -1;
 
-      InsertColumn(n, GetColumnName(col), wxLIST_FORMAT_LEFT, width);
+      // we have to specify an image initially - otherwise setting it later for
+      // the column will have no effect under MSW (bug in the native control)
+      wxListItem item;
+      item.m_mask = wxLIST_MASK_TEXT |
+                    wxLIST_MASK_IMAGE |
+                    wxLIST_MASK_FORMAT |
+                    wxLIST_MASK_WIDTH;
+      item.m_format = wxLIST_FORMAT_LEFT;
+      item.m_width = width;
+      item.m_text = GetColumnName(col);
+      item.m_image = -2;
+      InsertColumn(n, item);
    }
 }
 
@@ -1800,6 +1848,29 @@ void wxFolderListCtrl::UpdateFocus()
    if ( m_itemFocus == -1 )
    {
       m_FolderView->OnFocusChange(-1, UID_ILLEGAL);
+   }
+}
+
+void wxFolderListCtrl::UpdateUniqueSelFlag()
+{
+   long item = GetFirstSelected();
+   if ( item != -1 )
+   {
+      if ( GetNextSelected(item) != -1 )
+      {
+         // >= 2 items selected
+         m_selIsUnique = 0;
+      }
+      else
+      {
+         // exactly 1 item selected
+         m_selIsUnique = 1;
+      }
+   }
+   else
+   {
+      // no items selected
+      m_selIsUnique = -1;
    }
 }
 
@@ -2035,7 +2106,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
 
 int wxFolderListCtrl::OnGetItemImage(long item) const
 {
-   return -1;
+   return -2;
 }
 
 wxColour
@@ -2138,8 +2209,22 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
 }
 
 // ----------------------------------------------------------------------------
-// wxFolderListCtrl "select next" logic
+// wxFolderListCtrl selection
 // ----------------------------------------------------------------------------
+
+bool wxFolderListCtrl::GoToItem(long item)
+{
+   long itemOldSel = GetUniqueSelection();
+   if ( itemOldSel != -1 )
+   {
+      Select(itemOldSel, false);
+   }
+
+   Focus(item);
+   Select(item, true);
+
+   return itemOldSel != -1;
+}
 
 bool
 wxFolderListCtrl::SelectNextByStatus(MailFolder::MessageStatus status,
@@ -2538,6 +2623,8 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
    // do it unconditionally as it's fast
    m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
    m_FolderCtrl->SetPreviewDelay(m_settings.previewDelay);
+
+   m_FolderCtrl->UpdateSortIndicator();
 }
 
 // ----------------------------------------------------------------------------
@@ -3202,15 +3289,7 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
    if ( newFocus != -1 )
    {
       // move focus
-      m_FolderCtrl->Focus(newFocus);
-
-      long sel = m_FolderCtrl->GetUniqueSelection();
-      if ( sel != -1 )
-      {
-         m_FolderCtrl->Select(sel, false);
-      }
-
-      m_FolderCtrl->UpdateFocus();
+      m_FolderCtrl->GoToItem(newFocus);
    }
 
    return true;
