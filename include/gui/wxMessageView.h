@@ -201,10 +201,15 @@ protected:
 
    /// displays information about the currently selected MIME content
    void MimeInfo(int num);
+
    /// handles the currently selected MIME content
    void MimeHandle(int num);
+
    /// saves the currently selected MIME content
    bool MimeSave(int num, const char *filename = NULL);
+
+   /// view attachment as text
+   void MimeViewText(int num);
 
    /// launch a process, returns FALSE if it failed
    bool LaunchProcess(const String& command,    // cmd to execute

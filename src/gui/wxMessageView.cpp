@@ -195,18 +195,24 @@ private:
 class MimePopup : public wxMenu
 {
 public:
-   MimePopup(wxMessageView *parent, int partno) : wxMenu(_("MIME Menu"))
-      {
-         // init member vars
-         m_PartNo = partno;
-         m_MessageView = parent;
+   MimePopup(wxMessageView *parent, int partno)
+   {
+      // init member vars
+      m_PartNo = partno;
+      m_MessageView = parent;
 
-         // create the menu items
-         Append(WXMENU_MIME_INFO,_("&Info..."));
-         AppendSeparator();
-         Append(WXMENU_MIME_HANDLE,_("&Open"));
-         Append(WXMENU_MIME_SAVE,_("&Save..."));
-      }
+      // create the menu items
+      Append(WXMENU_MIME_INFO, _("&Info..."));
+      AppendSeparator();
+      Append(WXMENU_MIME_OPEN, _("&Open"));
+
+#if 0 // TODO
+      Append(WXMENU_MIME_OPEN_WITH, _("Open &with..."));
+#endif // 0
+
+      Append(WXMENU_MIME_SAVE, _("&Save..."));
+      Append(WXMENU_MIME_VIEW_AS_TEXT, _("&View as text..."));
+   }
 
    // callbacks
    void OnCommandEvent(wxCommandEvent &event);
@@ -315,17 +321,23 @@ String GetFileNameForMIME(Message *message, int partNo)
 void
 MimePopup::OnCommandEvent(wxCommandEvent &event)
 {
-   switch(event.GetId())
+   switch ( event.GetId() )
    {
-   case WXMENU_MIME_INFO:
-      m_MessageView->MimeInfo(m_PartNo);
-      break;
-   case WXMENU_MIME_HANDLE:
-      m_MessageView->MimeHandle(m_PartNo);
-      break;
-   case WXMENU_MIME_SAVE:
-      m_MessageView->MimeSave(m_PartNo);
-      break;
+      case WXMENU_MIME_INFO:
+         m_MessageView->MimeInfo(m_PartNo);
+         break;
+
+      case WXMENU_MIME_OPEN:
+         m_MessageView->MimeHandle(m_PartNo);
+         break;
+
+      case WXMENU_MIME_VIEW_AS_TEXT:
+         m_MessageView->MimeViewText(m_PartNo);
+         break;
+
+      case WXMENU_MIME_SAVE:
+         m_MessageView->MimeSave(m_PartNo);
+         break;
    }
 }
 
@@ -1223,6 +1235,22 @@ wxMessageView::HighLightURLs(const char *input)
    return out;
 }
 
+// ----------------------------------------------------------------------------
+// MIME attachments menu commands
+// ----------------------------------------------------------------------------
+
+// make the first letter of the string capitalized and all the others of lower
+// case, it looks nicer like this when presented to the user
+static String NormalizeString(const String& s)
+{
+   String norm;
+   if ( !s.empty() )
+   {
+      norm << String(s[0]).Upper() << String(s.c_str() + 1).Lower();
+   }
+
+   return norm;
+}
 
 // show information about an attachment
 void
@@ -1233,9 +1261,9 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
            << m_mailMessage->GetPartMimeType(mimeDisplayPart)
            << '\n';
 
-   String tmp = m_mailMessage->GetPartDesc(mimeDisplayPart);
-   if(tmp.length() > 0)
-      message << '\n' << _("Description: ") << tmp << '\n';
+   String desc = m_mailMessage->GetPartDesc(mimeDisplayPart);
+   if ( !desc.empty() )
+      message << '\n' << _("Description: ") << desc << '\n';
 
    message << _("Size: ")
            << strutil_ltoa(m_mailMessage->GetPartSize(mimeDisplayPart, true));
@@ -1249,35 +1277,60 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
       message << _(" bytes");
    message << '\n';
 
+   // param name and value (used in 2 loops below)
+   wxString name, value;
+
    // debug output with all parameters
    const MessageParameterList &plist = m_mailMessage->GetParameters(mimeDisplayPart);
    MessageParameterList::iterator plist_it;
-   if(!plist.empty())
+   if ( !plist.empty() )
    {
       message += _("\nParameters:\n");
-      for(plist_it = plist.begin(); plist_it != plist.end();
-          plist_it++)
+      for ( plist_it = plist.begin(); plist_it != plist.end(); plist_it++ )
       {
-         message += (*plist_it)->name;
-         message += ": ";
-         message += (*plist_it)->value;
-         message += '\n';
+         name = (*plist_it)->name;
+         message << NormalizeString(name) << ": ";
+
+         // filenames are case-sensitive, don't modify them
+         value = (*plist_it)->value;
+         if ( name.CmpNoCase("name") != 0 )
+         {
+            value.MakeLower();
+         }
+
+         message << value << '\n';
       }
    }
+
+   // now output disposition parameters too
    String disposition;
-   const MessageParameterList &dlist = m_mailMessage->GetDisposition(mimeDisplayPart,&disposition);
-   if(! strutil_isempty(disposition))
-      message << _("\nDisposition: ") << disposition << '\n';
-   if(!dlist.empty())
+   const MessageParameterList& dlist =
+      m_mailMessage->GetDisposition(mimeDisplayPart,&disposition);
+
+   if ( !strutil_isempty(disposition) )
+      message << _("\nDisposition: ") << disposition.Lower() << '\n';
+
+   if ( !dlist.empty() )
    {
-      message += _("\nDisposition Parameters:\n");
-      for(plist_it = dlist.begin(); plist_it != dlist.end();
-          plist_it++)
-         message << (*plist_it)->name << ": "
-                 << (*plist_it)->value << '\n';
+      message += _("\nDisposition parameters:\n");
+      for ( plist_it = dlist.begin(); plist_it != dlist.end(); plist_it++ )
+      {
+         name = (*plist_it)->name;
+         message << NormalizeString(name) << ": ";
+
+         value = (*plist_it)->value;
+         if ( name.CmpNoCase("filename") != 0 )
+         {
+            value.MakeLower();
+         }
+
+         message << value << '\n';
+      }
    }
 
-   MDialog_Message(message, this, _("MIME information"));
+   String title;
+   title << _("MIME information for attachment #") << mimeDisplayPart;
+   MDialog_Message(message, this, title);
 }
 
 // open (execute) a message attachment
@@ -1642,6 +1695,35 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 
    return false;
 }
+
+void
+wxMessageView::MimeViewText(int mimeDisplayPart)
+{
+   unsigned long len;
+   const char *content = m_mailMessage->GetPartContent(mimeDisplayPart, &len);
+   if ( content )
+   {
+      String title;
+      title.Printf(_("Attachment #%d"), mimeDisplayPart);
+
+      // add the filename if any
+      String filename = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
+      if ( !filename.empty() )
+      {
+         title << " ('" << filename << "')";
+      }
+
+      MDialog_ShowText(this, title, content, "MimeView");
+   }
+   else
+   {
+      wxLogError(_("Failed to view the attachment."));
+   }
+}
+
+// ----------------------------------------------------------------------------
+// event handling
+// ----------------------------------------------------------------------------
 
 bool
 wxMessageView::OnMEvent(MEventData& ev)
