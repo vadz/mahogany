@@ -467,15 +467,31 @@ match:
             p++;
 
          // URLs are frequently so long that they're spread across multiple
-         // lines, try to see if this might be the case here
+         // lines, so try to see if this might be the case here
          if ( p[0] != '\r' || p[1] != '\n' || !IsURLChar(p[2]) )
          {
             // it isn't
             break;
          }
 
-         // continue on the next line and no need to test the first
-         // character
+         // it might be a wrapped URL but it might be not: it seems like we
+         // get way too many false positives if we suppose that it's already
+         // the case... so restrict the wrapped URLs detection to the case
+         // when they occur at the beginning of the line, possibly after some
+         // white space as this is how people usually format them
+         const char *q = start;
+         while ( q >= text && *q != '\n' )
+         {
+            if ( !isspace(*q--) )
+               break;
+         }
+
+         if ( q >= text && *q != '\n' )
+            break;
+
+         // it did occur at the start, suppose the URL is wrapped ans so
+         // continue on the next line (no need to test the first character,
+         // it had been already done above)
          p += 3;
       }
    }
