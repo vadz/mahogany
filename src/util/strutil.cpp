@@ -199,11 +199,21 @@ strutil_ultoa(unsigned long i)
    return String(buffer);
 }
 
+#if wxUSE_UNICODE
 wxChar *
 strutil_strdup(const wxChar *in)
 {
    wxChar *cptr = new wxChar[strlen(in)+1];
    wxStrcpy(cptr,in);
+   return cptr;
+}
+#endif
+
+char *
+strutil_strdup(const char *in)
+{
+   char *cptr = new char[strlen(in)+1];
+   strcpy(cptr,in);
    return cptr;
 }
 
