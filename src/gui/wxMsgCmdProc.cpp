@@ -1679,11 +1679,18 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                   if ( toDelete )
                   {
                      // delete right now
-                     m_TicketList->Add
-                     (
-                        // true => expunge as well
-                        m_asmf->DeleteOrTrashMessages(seq, this)
-                     );
+
+                     // true => expunge as well
+                     Ticket t = m_asmf->DeleteMessages(seq, true, this);
+                     if ( t != ILLEGAL_TICKET )
+                     {
+                        m_TicketList->Add(t);
+                     }
+                     else // failed to delete?
+                     {
+                        wxLogError(_("Failed to delete messages after "
+                                     "moving them."));
+                     }
 
                      if ( !wasDropped )
                      {
