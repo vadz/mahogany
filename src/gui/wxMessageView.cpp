@@ -1289,7 +1289,7 @@ wxMessageView::ShowMessage(MailFolder *folder, long uid)
    (void)mailMessage->GetStatus(&size);
    size /= 1024;  // size is measured in KBytes
 
-   if ( size > maxSize )
+   if ( size > maxSize && (folder && GetFolderType(folder->GetType()) != MF_FILE)
    {
       wxString msg;
       msg.Printf(_("The selected message is %u Kbytes long which is "
