@@ -125,8 +125,8 @@ public:
    */
    bool HasSelection() const;
 
-   /** Gets an array containing the positions of the selected
-       strings. The number of selections is returned.
+   /** Gets an array containing the uids of the selected messages.
+       The number of selections is returned.
        @param  selections Pass a pointer to an integer array, and do not deallocate the returned array.
        @return number of selections.
    */

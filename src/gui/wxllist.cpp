@@ -202,7 +202,7 @@ wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap *icon)
 void
 wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint const &coords)
 {
-   dc.DrawBitmap(*m_Icon, coords.x, coords.y-m_Icon->GetHeight());
+   dc.DrawBitmap(*m_Icon, coords.x, coords.y-m_Icon->GetHeight(), TRUE);
 }
 
 void

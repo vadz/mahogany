@@ -366,14 +366,15 @@ SendMessageCC::AddPart(Message::ContentType type,
    {
    case TYPEMESSAGE:
       //FIXME: leads to empty body?
-      bdy->nested.msg = mail_newmsg(); 
+      bdy->nested.msg = mail_newmsg();
    case TYPETEXT:
       bdy->type = type;
       bdy->subtype = (char *) fs_get(subtype.length()+1);
       strcpy(bdy->subtype,(char *)subtype.c_str());
       bdy->contents.text.data = data;
       bdy->contents.text.size = len;
-      bdy->encoding = ENC8BIT;
+      bdy->encoding = (type == TYPETEXT) ? ENC8BIT : ENC7BIT;
+      /* ENC8BIT for text is auto-converted to quoted pritable */
       break;
 
    default:

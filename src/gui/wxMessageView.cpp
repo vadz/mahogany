@@ -310,7 +310,7 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
    m_Parent = parent;
    m_FolderView = fv;
    m_MimePopup = NULL;
-   m_seqno = -1;
+   m_uid = -1;
    SetFocus();
    SetMouseTracking();
 
@@ -743,7 +743,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,
                                                  filename);
          wxMessageViewFrame * f = GLOBAL_NEW
-            wxMessageViewFrame(mf, 0, NULL, m_Parent);  //FIXME: UID
+            wxMessageViewFrame(mf, 0, NULL, m_Parent);
          f->SetTitle("M : " + mimetype);
          mf->DecRef();
       }
@@ -1128,7 +1128,8 @@ bool
 wxMessageView::DoMenuCommand(int id)
 {
    wxArrayInt msgs;
-   msgs.Add(m_seqno-1);  // index in listctrl is seqno in folder -1
+   if(m_uid != -1)
+      msgs.Add(m_uid);  
    bool handled = true;
    switch(id)
    {
@@ -1139,28 +1140,28 @@ wxMessageView::DoMenuCommand(int id)
       PrintPreview();
       break;
    case WXMENU_MSG_REPLY:
-      if(m_seqno != -1)
+      if(m_uid != -1)
          GetFolder()->ReplyMessages(&msgs, GetFrame(this), m_Profile);
       break;
    case WXMENU_MSG_FORWARD:
-      if(m_seqno != -1)
+      if(m_uid != -1)
          GetFolder()->ForwardMessages(&msgs, GetFrame(this), m_Profile);
       break;
 
    case WXMENU_MSG_SAVE_TO_FOLDER:
-      if(m_seqno != -1)
+      if(m_uid != -1)
          GetFolder()->SaveMessagesToFolder(&msgs, GetFrame(this));
       break;
    case WXMENU_MSG_SAVE_TO_FILE:
-      if(m_seqno != -1)
+      if(m_uid != -1)
          GetFolder()->SaveMessagesToFile(&msgs, GetFrame(this));
       break;
    case WXMENU_MSG_DELETE:
-      if(m_seqno != -1)
+      if(m_uid != -1)
          GetFolder()->DeleteMessages(&msgs);
       break;
    case WXMENU_MSG_UNDELETE:
-      if(m_seqno != -1)
+      if(m_uid != -1)
          GetFolder()->UnDeleteMessages(&msgs);
       break;
 #ifdef USE_PS_PRINTING
@@ -1197,10 +1198,10 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
    //   return;
 
    if(mailMessage) mailMessage->DecRef();
-   mailMessage = folder->GetMessage(num);
-   m_seqno = num;
+   m_uid = folder->GetHeaderInfo(num)->GetUId();
+   mailMessage = folder->GetMessage(m_uid);
 
-   folder->SetMessageFlag(num, MailFolder::MSG_STAT_SEEN, true);
+   folder->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
 
    /* FIXME for now it's here, should go somewhere else: */
    if ( m_ProfileValues.autocollect )

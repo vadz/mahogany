@@ -57,7 +57,7 @@ public:
 
    /** Constructor
        @param folder the mailfolder
-       @param num    number of message (0 based)
+       @param num    sequence number of message (0 based)
        @param parent parent window
    */
    wxMessageView(MailFolder *folder,
@@ -122,8 +122,8 @@ public:
 private:
    /// the parent window
    wxWindow   *m_Parent;
-   /// number of the message
-   long m_seqno;
+   /// uid of the message
+   long m_uid;
    /// the current message
    Message   *mailMessage;
    /// the mail folder (only used if m_FolderView is NULL)

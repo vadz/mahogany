@@ -114,7 +114,9 @@ MessageCC::Refresh(void)
 {
    GetBody();
    hdr_date = envelope->date ? String(envelope->date) :  :: String("");
-   hdr_subject = envelope->subject ? String(envelope->subject) : String("");
+   hdr_subject = envelope->subject ? String(envelope->subject) :
+      String("");
+   hdr_subject = MailFolderCC::qprint(hdr_subject);
 }
 
 String const &
@@ -208,7 +210,8 @@ MessageCC::Address(String &name, MessageAddressType type) const
    if(addr->personal && strlen(addr->personal))
       name = String(addr->personal);
 
-   return   email;
+   name = MailFolderCC::qprint(name);
+   return   MailFolderCC::qprint(email);
 }
 
 String const &

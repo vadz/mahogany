@@ -134,33 +134,40 @@ public:
    /** Check whether mailbox has changed. */
    virtual void Ping(void) = 0;
    
-   /** get the message with number msgno
-       @param msgno sequence number
+   /** Returns a HeaderInfo structure for a message with a given
+       sequence number. This can be used to obtain the uid.
+       @param msgno message sequence number, starting from 0
+       @return a pointer to the messages current header info entry
+   */
+   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno) = 0;
+
+   /** get the message with unique id uid
+       @param uid message uid
        @return message handler
    */
-   virtual class Message *GetMessage(unsigned long msgno) = 0;
+   virtual class Message *GetMessage(unsigned long uid) = 0;
 
    /** Delete a message.
-       @param index the sequence number
+       @param uid the message uid
    */
-   virtual void DeleteMessage(unsigned long index) = 0;
+   virtual void DeleteMessage(unsigned long uid) = 0;
 
    /** UnDelete a message.
-       @param index the sequence number
+       @param uid the message uid
    */
-   virtual void UnDeleteMessage(unsigned long index) = 0;
+   virtual void UnDeleteMessage(unsigned long uid) = 0;
 
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
-       @param sequence number of the message
+       @param uid the message uid
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual void SetMessageFlag(unsigned long msgno,
+   virtual void SetMessageFlag(unsigned long uid,
                                int flag,
                                bool set = true) = 0;
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
-       @param sequence the IMAP sequence
+       @param sequence the IMAP sequence of uids
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */

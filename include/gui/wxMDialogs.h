@@ -255,7 +255,4 @@ void MDialog_ShowText(MWindow *parent,
                       const char *text,
                       const char *configPath = NULL);
 
-/// A safe version of wxYield() which disables all top level windows.
-void wxSafeYield(void);
-
 #endif  //WXMDIALOGS_H

@@ -87,7 +87,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 
       // in this case we operate on the highlighted  message
       if(nselected == 0)
-         selections.Add(focused);
+         selections.Add(m_FolderView->GetFolder()->GetHeaderInfo(focused)->GetUId());
 
       /** To    allow translations:
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
@@ -224,10 +224,11 @@ int
 wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
 {
    long item = -1;
+   MailFolder *mf = m_FolderView->GetFolder();
    while((item = GetNextItem(item,
                              wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
          != -1) 
-      selections.Add(item++);
+      selections.Add(mf->GetHeaderInfo(item++)->GetUId());
    return selections.Count();
 }
 
@@ -278,7 +279,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    if ( recreateFolderCtrl )
       m_FolderCtrl->Clear();
 
-   wxYield();
+   wxSafeYield();
    
    if(m_MailFolder)  // clean up old folder
    {
@@ -339,7 +340,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          delete oldfolderctrl;
       }
 
-      wxYield(); // display the new folderctrl immediately
+      wxSafeYield(); // display the new folderctrl immediately
       Update();
 
       if(m_NumOfMessages > 0 && READ_CONFIG(m_Profile,MP_AUTOSHOW_FIRSTMESSAGE))
@@ -397,7 +398,7 @@ wxFolderView::Update(void)
       return; // don't call this code recursively
    m_UpdateSemaphore = true;
 
-   wxBeginBusyCursor(); wxYield();
+   wxBeginBusyCursor(); wxSafeYield();
    n = m_MailFolder->CountMessages();
 
    // mildly annoying, but have to do it in order to prevent the generation of
@@ -439,9 +440,9 @@ wxFolderView::Update(void)
    for(hi = m_MailFolder->GetFirstHeaderInfo(); hi != NULL;
        hi = m_MailFolder->GetNextHeaderInfo(hi))
    {
-      // FIXME vars are not inited here!
+      // FIXME vars are not initialised here!
       nsize = day = month = year = 0;
-
+      
       date.Printf(dateFormat, day, month, year);
       size = strutil_ultoa(nsize);
 
@@ -458,7 +459,7 @@ wxFolderView::Update(void)
       i++;
    }
    m_NumOfMessages = n;
-   wxEndBusyCursor(); wxYield();
+   wxEndBusyCursor(); wxSafeYield();
    m_UpdateSemaphore = false;
 }
 
@@ -467,7 +468,7 @@ void
 wxFolderView::OpenFolder(String const &profilename)
 {
    wxBeginBusyCursor();
-   wxYield(); // make changes visible
+   wxSafeYield(); // make changes visible
 
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE, profilename);
    SetFolder(mf);
@@ -596,7 +597,8 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
    int i;
    for(i = 0; i < n; i++)
    {
-      mptr = m_MailFolder->GetMessage(selections[i]);
+      unsigned long uid = m_MailFolder->GetHeaderInfo(selections[i])->GetUId();
+      mptr = m_MailFolder->GetMessage(uid);
       title = mptr->Subject() + " - " + mptr->From();
       mv = GLOBAL_NEW wxMessageViewFrame(m_MailFolder,selections[i],
                                          this);

@@ -131,10 +131,17 @@ public:
    long      CountMessages(void) const;
 
    /** get message header
-       @param msgno sequence nubmer of message
+       @param uid mesage uid
        @return message header information class
    */
-   class Message *GetMessage(unsigned long msgno);
+   class Message *GetMessage(unsigned long uid);
+
+   /** Returns a HeaderInfo structure for a message with a given
+       sequence number. This can be used to obtain the uid.
+       @param msgno message sequence number, starting from 0
+       @return a pointer to the messages current header info entry
+   */
+   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno);
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence
@@ -146,11 +153,11 @@ public:
                                 bool set = true);
 
   /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
-       @param sequence number of the message
+       @param uid mesage uid
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-  virtual void SetMessageFlag(unsigned long msgno,
+  virtual void SetMessageFlag(unsigned long uid,
                               int flag,
                               bool set = true);
    
@@ -165,14 +172,14 @@ public:
    virtual void AppendMessage(String const &msg);
 
    /** Delete a message.
-       @param index the sequence number
+       @param uid mesage uid
    */
-   void DeleteMessage(unsigned long index) { SetMessageFlag(index, MSG_STAT_DELETED); }
+   void DeleteMessage(unsigned long uid) { SetMessageFlag(uid, MSG_STAT_DELETED); }
 
    /** UnDelete a message.
-       @param index the sequence number
+       @param uid mesage uid
    */
-   void UnDeleteMessage(unsigned long index) { SetMessageFlag(index,MSG_STAT_DELETED, false); }
+   void UnDeleteMessage(unsigned long uid) { SetMessageFlag(uid,MSG_STAT_DELETED, false); }
 
    /** Expunge messages.
      */
@@ -213,6 +220,14 @@ public:
    */
    virtual void SetRetrievalLimit(unsigned long nmax)
    { m_RetrievalLimit = nmax; }
+
+   /** Little helper function to convert iso8859 encoded header lines into 
+       8 bit. This is a quick fix until wxWindows supports unicode.
+       Also used by MessageCC.
+       @param in the string with some embedded iso8859 encoding
+       @return the full 8bit decoded string
+   */
+   static String qprint(const String &in);
 
 private:
    /// private constructor, does basic initialisation

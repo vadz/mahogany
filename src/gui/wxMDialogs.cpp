@@ -82,28 +82,6 @@ extern void CloseSplash()
   }
 }
 
-void wxSafeYield(void)
-{
-   wxNode *node;
-   for ( node = wxTopLevelWindows.GetFirst();
-         node;
-         node = node->GetNext() )
-   {
-      wxWindow *win = ((wxWindow*)node->GetData());
-      win->Enable(false);
-   }
-
-   wxYield();
-
-   for ( node = wxTopLevelWindows.GetFirst();
-         node;
-         node = node->GetNext() )
-   {
-      wxWindow *win = ((wxWindow*)node->GetData());
-      win->Enable(true);
-   }
-}
-
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------

@@ -34,6 +34,32 @@
 #include <ctype.h>   // isspace()
 
 
+#define ISO8859MARKER "=?iso-8859-1?Q?"
+
+/* Little helper function to convert iso8859 encoded header lines into 
+   8 bit. This is a quick fix until wxWindows supports unicode. */
+/* static */
+String MailFolderCC::qprint(const String &in)
+{
+   int pos = in.Find(ISO8859MARKER);
+   if(pos == -1)
+      return in;
+   String out = in.substr(0,pos);
+   String quoted;
+   const char *cptr = in.c_str() + pos + strlen(ISO8859MARKER);
+   while(*cptr && !(*cptr == '?' && *(cptr+1) == '='))
+      quoted << (char) *cptr++;
+   cptr += 2; // "?="
+   unsigned long unused_len;
+   char *cptr2 = (char *)rfc822_qprint((unsigned char *)quoted.c_str(), in.Length(), &unused_len);
+   out +=  cptr2;
+   out +=  cptr;
+   fs_give((void **) &cptr2); // free memory allocated
+   return out;
+}
+
+
+
 /*----------------------------------------------------------------------------------------
  * MailFolderCC code
  *---------------------------------------------------------------------------------------*/
@@ -401,12 +427,20 @@ MailFolderCC::CountMessages(void) const
 }
 
 Message *
-MailFolderCC::GetMessage(unsigned long index)
+MailFolderCC::GetMessage(unsigned long uid)
 {
-   ASSERT(index < m_NumOfMessages && index >= 0);
-   MessageCC *m = MessageCC::CreateMessageCC(this,m_Listing[index].m_Uid);
+//FIXME: add some test whether uid is valid   ASSERT(index < m_NumOfMessages && index >= 0);
+   MessageCC *m = MessageCC::CreateMessageCC(this,uid);
    ProcessEventQueue();
    return m;
+}
+
+const class HeaderInfo *
+MailFolderCC::GetHeaderInfo(unsigned long msgno)
+{
+   ASSERT(m_Listing);
+   ASSERT(msgno >= 0 && msgno < m_NumOfMessages);
+   return m_Listing + msgno;
 }
 
 void
@@ -446,13 +480,13 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
 }
 
 void
-MailFolderCC::SetMessageFlag(unsigned long msgno,
+MailFolderCC::SetMessageFlag(unsigned long uid,
                              int flag,
                              bool set)
 {
    ASSERT(m_Listing);
-   ASSERT(msgno >= 0 && msgno < m_NumOfMessages);
-   String sequence = strutil_ultoa(m_Listing[msgno].m_Uid);
+//FIXME uid check   ASSERT(msgno >= 0 && msgno < m_NumOfMessages);
+   String sequence = strutil_ultoa(uid);
    SetSequenceFlag(sequence,flag,set);
 }
 
@@ -528,10 +562,9 @@ MailFolderCC::UpdateCount(void)
    {
       unsigned long n = m_NumOfMessages - oldnum;
       unsigned long *messageIDs = new unsigned long[n];
-
-      // actually these are no IDs, but sequence numbers, which is fine.
+      // FIXME: this will need to be changed when we sort message
       for ( unsigned long i = 0; i < n; i++ )
-         messageIDs[i] = oldnum + i + 1;
+         messageIDs[i] = m_Listing[oldnum + i + 1].GetUId();
 
       MEventNewMailData data(this, n, messageIDs);
       MEventManager::Send(data);
@@ -669,7 +702,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
          entry.m_From.Printf("%s@%s",adr->mailbox,adr->host);
    else
       entry.m_From = _("<address missing>");
-
+   entry.m_From = qprint(entry.m_From);
 #if 0
    //FIXME: what on earth are user flags?
    if (i = elt->user_flags)
@@ -684,7 +717,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    }
 #endif
 
-   entry.m_Subject = ov->subject;
+   entry.m_Subject = qprint(ov->subject);
    entry.m_Size = ov->optional.octets;
    entry.m_Id = ov->message_id;
    entry.m_References = ov->references;

@@ -54,33 +54,47 @@ VZ:
 
 ******* Priorities for KB: ******************************
 
-
-TODO:
-
+DONE:
 - Modify MailFolder interface to take UIDs instead of listing indices
   everywhere. This is important for "Views" to be implemented.
-- add a popup dialog to edit message headers in composeview
+  --> add test for validy of uid
 - ISO8859 encoded message headers!
+
+- the selection in wxFoldreview should store uids directly, currently
+  the wxMessageview of a standalone viewer passes its msgno to some
+  functions but msgnos might have changed in the meantime.
+
+CHECK:- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
+  SendMessageCC::AddPart()
+  done-->  // check whether enc8bit is needed or not
+
+
+TODO:
+- add a popup dialog to edit message headers in composeview
 - some html mail import/filtering of tags (easy, quick and dirty)
-- occasionally parts of xface header show up in following mail header
-  lines (content type/parameters)
 - copying message to non-existing folder gives error message but works
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message. (REALLY REQUIRED?)
 - speed up copy mail to folder by cusing c-client functionality
   wxComposeView: if replying, only mark message as answered if reply
   got sent
-- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
-  SendMessageCC::AddPart()
+
+- make mailfolders collectable:
+  - have a "collect" flag
+  - have a global "NewMail" folder setting and ensure its existence
+
+- support for local news spool
+  (Waiting for VZ to support MF_NEWS) then implement /service=news
 
 = wxLayout:
   - delete in empty line doesn't work
   - fix initial scrollbar sizes
+  - fix horiz scrollbar size
   - update rectangle (needs support in wxllist and wxWindows)
   - fix(simplify) cursor size calculation
-  - font optimisations(?)
+  - font optimisations(!)
   - copy/cut/selections
-  - occasionally wraps lines wongly (twice)
+  - occasionally wraps lines wongly (twice) ??
   - UNDO
   later:
     - DragNDrop (waiting for wxGTK/gtk1.2 & GNOME 1.0 / Debian Slink)
@@ -90,32 +104,33 @@ TODO:
     x- add setting of background colour and/or image
     x- composeview: after inserting text (reply), update scrollbars
 
-- add a message/delivery-status icon (like message, but with a red 'S' ?)
-- IMAP progress updates don't appear because there is too much to be
-  done in wxYield()?
-- add progress indicator to image loading
 
-- make mailfolders collectable:
-  - have a "collect" flag
-  - have a global "NewMail" folder setting and ensure its existence
+- add progress indicator to image loading
     (and the one of SentFolder) in VerifySettings()
 
-- when inserting filetype of unknown MIME type, prompt for it,
-  possibly have a MIME types editor (similar to netscape's?)
 - do not redraw messageview if the message is the one currently being
   shown
   -- option to keep wxLayoutList around for reuse?
 - show status dialog while importing graphics into messageview
-- if time permits: vcard-import
-
-- support for local news spool (ask on c-client list how to do this)
+- when inserting filetype of unknown MIME type, prompt for it
 
 - implement Compose/Reply templates
-- Let Iconmanager chose handler by format! JPEG crashes program if fed 
-  the wrong filetype! Handler can return extension, caller should do
-  the same.
 
-  
+
+
+
+- add a message/delivery-status icon (like message, but with a red 'S' ?)
+
+- IMAP progress updates don't appear because there is too much to be
+  done in wxYield()?
+
+- occasionally parts of xface header show up in following mail header
+  lines (content type/parameters)
+
+
+
+- possibly have a MIME types editor (similar to netscape's?)
+- if time permits: vcard-import
 
 **************** end of KB priorities :-) *********************
 
