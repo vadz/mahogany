@@ -628,6 +628,9 @@ protected:
    /// update our "unique selection" flag
    void UpdateUniqueSelFlag();
 
+   /// update the informational message shown in the status bar
+   void UpdateStatusBar();
+
    /// update the number of items in the list control
    void UpdateItemCount() { SetItemCount(GetHeadersCount()); }
 
@@ -724,6 +727,9 @@ protected:
 
    /// do we handle OnSelected()?
    bool m_enableOnSelect;
+
+   /// the number of currently selected items
+   int m_countSelected;
 
    /// the popup menu
    wxMenu *m_menu;
@@ -1373,6 +1379,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    m_FolderView = fv;
    m_enableOnSelect = true;
+   m_countSelected = 0;
    m_menu = NULL;
    m_menuFolders = NULL;
 
@@ -1746,7 +1753,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
          //
          // if m_PreviewDelay == 0, this is just the same as PreviewItem()
          if ( m_PreviewOnSingleClick )
-         PreviewItemDelayed(m_itemFocus, uid);
+            PreviewItemDelayed(m_itemFocus, uid);
       }
       //else: don't react to selecting another message
    }
@@ -2419,6 +2426,9 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
       }
    }
 
+   // update the message in the status bar
+   UpdateStatusBar();
+
    // check if we [still] have exactly one selection
    UpdateUniqueSelFlag();
 
@@ -2656,6 +2666,25 @@ void wxFolderListCtrl::UpdateUniqueSelFlag()
    {
       // no items selected
       m_selIsUnique = -1;
+   }
+}
+
+void wxFolderListCtrl::UpdateStatusBar()
+{
+   int countNew = GetSelectedItemCount();
+   if ( countNew != m_countSelected )
+   {
+      m_countSelected = countNew;
+
+      String msg;
+      if ( m_countSelected )
+         msg.Printf(_("%lu messages selected"), (unsigned long)m_countSelected);
+      else
+         msg = "";
+
+      wxFrame *frame = mApplication->TopLevelFrame();
+      frame->SetStatusText(msg,
+                           mApplication->GetStatusField(MAppBase::SF_FOLDER));
    }
 }
 
@@ -3635,6 +3664,9 @@ wxFolderView::DoClear(bool keepTheViewer)
 
    // disable the message menu as we have no folder
    EnableMMenu(MMenu_Message, m_FolderCtrl, false);
+
+   // remove the status bar pane used for showing the folder status
+   mApplication->RemoveStatusField(MAppBase::SF_FOLDER);
 }
 
 void

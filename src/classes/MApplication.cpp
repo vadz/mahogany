@@ -1189,17 +1189,8 @@ MAppBase::GetStatusField(StatusFields field)
    // initialize it with the default values
    if ( m_statusPanes[0] == SF_ILLEGAL )
    {
-      StatusFields *p = m_statusPanes;
-      *p++ = SF_STANDARD;
-      *p++ = SF_FOLDER;
-
-#ifdef USE_DIALUP
-      if ( m_DialupSupport )
-         *p++ = SF_ONLINE;
-#endif // USE_DIALUP
-
-      if ( m_UseOutbox )
-         *p++ = SF_OUTBOX;
+      m_statusPanes[0] = SF_STANDARD;
+      m_statusPanes[1] = SF_ILLEGAL;
    }
 
    // look for the field in the sorted array using linear search (for an array
@@ -1212,7 +1203,7 @@ MAppBase::GetStatusField(StatusFields field)
          return n;
       }
 
-      if ( m_statusPanes[n] > field )
+      if ( m_statusPanes[n] > field || m_statusPanes[n] == SF_ILLEGAL )
       {
          // we insert the status field here to keep the array sorted
          for ( size_t m = n + 1; m < WXSIZEOF(m_statusPanes); m++ )
@@ -1247,11 +1238,9 @@ void MAppBase::RemoveStatusField(StatusFields field)
 
          RecreateStatusBar();
 
-         return;
+         break;
       }
    }
-
-   FAIL_MSG( "RemoveStatusField(): no such field shown" );
 }
 
 static bool FatalErrorSemaphore = false;
