@@ -682,7 +682,7 @@ protected:
 };
 
 BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxPanel)
-   EVT_BUTTON(-1, wxFolderPropertiesPage::OnCommand)
+   EVT_BUTTON(-1, wxFolderPropertiesPage::OnEvent)
 END_EVENT_TABLE()
 
 wxTextCtrl *
