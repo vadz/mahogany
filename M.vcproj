@@ -36,13 +36,14 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wxbase25d.lib wxbase25d_net.lib wxmsw25d_core.lib wxmsw25d_adv.lib wxmsw25d_html.lib wxpngd.lib wxjpegd.lib wxregexd.lib wxtiffd.lib wxzlibd.lib lib/imap/debug/imap.lib lib/compface/debug/compface.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib"
+				AdditionalDependencies="wxbase25d.lib wxbase25d_net.lib wxmsw25d_core.lib wxmsw25d_adv.lib wxmsw25d_html.lib wxpngd.lib wxjpegd.lib wxregexd.lib wxtiffd.lib wxzlibd.lib lib/imap/debug/imap.lib lib/compface/debug/compface.lib lib/dspam/debug/dspam.lib sqlited.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib"
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/M.pdb"
 				SubSystem="2"
+				StackReserveSize="10000000"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -88,7 +89,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wxbase25.lib wxbase25_net.lib wxmsw25_core.lib wxmsw25_adv.lib wxmsw25_html.lib wxpng.lib wxjpeg.lib wxregex.lib wxtiff.lib wxzlib.lib lib/imap/release/imap.lib lib/compface/release/compface.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib"
+				AdditionalDependencies="wxbase25.lib wxbase25_net.lib wxmsw25_core.lib wxmsw25_adv.lib wxmsw25_html.lib wxpng.lib wxjpeg.lib wxregex.lib wxtiff.lib wxzlib.lib lib/imap/release/imap.lib lib/compface/release/compface.lib lib/dspam/release/dspam.lib sqlite.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib"
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
@@ -422,6 +423,9 @@
 				</File>
 				<File
 					RelativePath=".\src\mail\Sorting.cpp">
+				</File>
+				<File
+					RelativePath=".\src\mail\SpamFilter.cpp">
 				</File>
 				<File
 					RelativePath=".\src\mail\Threading.cpp">
@@ -1166,6 +1170,25 @@
 						RelativePath=".\src\modules\crypt\PGPEngine.cpp">
 					</File>
 				</Filter>
+				<Filter
+					Name="spam"
+					Filter="">
+					<File
+						RelativePath=".\src\modules\spam\dspam.cpp">
+						<FileConfiguration
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								AdditionalIncludeDirectories="lib/dspam"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								AdditionalIncludeDirectories="lib/dspam"/>
+						</FileConfiguration>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="vcard"
@@ -1289,6 +1312,9 @@
 			</File>
 			<File
 				RelativePath=".\include\MApplication.h">
+			</File>
+			<File
+				RelativePath=".\include\MAtExit.h">
 			</File>
 			<File
 				RelativePath=".\include\Mcallbacks.h">
@@ -1469,6 +1495,9 @@
 			</File>
 			<File
 				RelativePath=".\include\Sorting.h">
+			</File>
+			<File
+				RelativePath=".\include\SpamFilter.h">
 			</File>
 			<File
 				RelativePath=".\include\strutil.h">
