@@ -635,39 +635,37 @@ case "$USE_SSL" in
 *)	AC_MSG_WARN([--with-ssl=$USE_SSL ignored, you must specify absolute path])
 	ssl_option=no ;;
 esac
-MAKE_USESSL=
-IMAP_SPECIALAUTHENTICATORS=
 IMAP_CPPFLAGS=
 
 if test "$ssl_option" = "yes"; then
-	MAKE_USESSL="USESSL=yes"
-	IMAP_SPECIALAUTHENTICATORS="$IMAP_SPECIALAUTHENTICATORS ssl"
-	AC_DEFINE(USE_SSL)
+    AC_DEFINE(USE_SSL)
 
-	dnl We assume no IDEA/no DSA as this is easiest to compile. It doesn't
-	dnl matter anyway as we load openssl later, but we must be able to
-	dnl compile the header file (note that we can't give -DNO_RSA any longer
-	dnl (starting with imap2000) or auth_ssl.cpp wouldn't compile!)
-	IMAP_CPPFLAGS="-DNO_IDEA -DNO_DSA"
+    dnl We assume no IDEA/no DSA as this is easiest to compile. It doesn't
+    dnl matter anyway as we load openssl later, but we must be able to
+    dnl compile the header file (note that we can't give -DNO_RSA any longer
+    dnl (starting with imap2000) or auth_ssl.cpp wouldn't compile!)
+    IMAP_CPPFLAGS="-DNO_IDEA -DNO_DSA"
 
-	dnl have to give the location of SSL headers to cclient if it is in a
-	dnl non standard place: note that imap2000 includes <ssl.h> and not
-	dnl <openssl/ssl.h> but SSL headers themselves use the second form, so
-	dnl we need both
-	case "$ssl_inc" in
-	    /usr/include)
-		IMAP_CPPFLAGS="-I/usr/include/openssl $IMAP_CPPFLAGS"
-	        ;;
-	    *)
-		IMAP_CPPFLAGS="-I$ssl_inc -I$ssl_inc/openssl $IMAP_CPPFLAGS"
-	esac
+    dnl have to give the location of SSL headers to cclient if it is in a
+    dnl non standard place: note that imap2000 includes <ssl.h> and not
+    dnl <openssl/ssl.h> but SSL headers themselves use the second form, so
+    dnl we need both
+    case "$ssl_inc" in
+	/usr/include)
+	    IMAP_CPPFLAGS="-I/usr/include/openssl $IMAP_CPPFLAGS"
+	    ;;
+	*)
+	    IMAP_CPPFLAGS="-I$ssl_inc -I$ssl_inc/openssl $IMAP_CPPFLAGS"
+    esac
 
-	dnl note that we don't have to link with SSL libraries because we load
-	dnl them dynamically
+    dnl note that we don't have to link with SSL libraries because we load
+    dnl them dynamically
+else
+    dnl tell c-client that we don't want to use SSL
+    IMAP_SSLTYPE="SSLTYPE=none"
 fi
 
-AC_SUBST(MAKE_USESSL)
-AC_SUBST(IMAP_SPECIALAUTHENTICATORS)
+AC_SUBST(IMAP_SSLTYPE)
 
 dnl --------------------------------------------------------------------------
 dnl check for other libraries
