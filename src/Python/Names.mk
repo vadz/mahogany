@@ -11,17 +11,20 @@ MSRC	:= Python/InitPython.cpp Python/PythonHelp.cpp Python/PythonDll.cpp
 MOBJS	+= $(POBJS:.py=.o) $(MSRC:.cpp=.o)
 MSGSRC	+= $(MSRC)
 
-# common compilation steps
+# the rule below is used to build .o file from the SWIG .i source
+#
+# the goal of the sed line is to make *.o file to depend on the *.i source,
+# not on the intermediate *.cpp generated from it
 define M_COMPILE_SWIG
 $(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $*.cpp
 @rm -f $*.cpp
-@f=$(notdir $*); test ! -f $$f.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.cpp,$<," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
+@f=$(notdir $*); test ! -f $*.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.cpp,$<," $*.d >$*.t && rm -f $*.d && mv $*.t $*.d; }
 endef
 
 define M_COMPILE_SWIGLIB
 $(CXX) -o $@ $(strip $(M_COMPILE_CXX)) -DSWIG_GLOBAL $*.cpp
 @rm -f $*.cpp
-@f=$(notdir $*); test ! -f $$f.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.cpp,$<," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
+@f=$(notdir $*); test ! -f $*.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.cpp,$<," $*.d >$*.t && rm -f $*.d && mv $*.t $*.d; }
 endef
 
 ifdef SWIG
@@ -29,7 +32,7 @@ SWIGFLAGS := -c++ -python -shadow
 vpath %.i .src
 %.o %.py: %.i
 	@rm -f $*.py
-	$(SWIG) -I$(dir $<) $(SWIGFLAGS) -c -o $*.cpp $<
+	$(SWIG) -I$(dir $<) $(CPPFLAGS) $(SWIGFLAGS) -c -o $*.cpp $<
 	$(M_COMPILE_SWIG)
 Python/swiglib.o: Python/swiglib.i
 	$(SWIG) -I$(dir $<) $(SWIGFLAGS) -o $*.cpp $<
