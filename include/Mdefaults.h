@@ -818,9 +818,9 @@
 /// the news server
 #define   MP_NNTPHOST_D      "news"
 /// the news server
-#define   MP_NNTPHOST_LOGIN_D      "news"
+#define   MP_NNTPHOST_LOGIN_D      ""
 /// the news server
-#define   MP_NNTPHOST_PASSWORD_D      "news"
+#define   MP_NNTPHOST_PASSWORD_D      ""
 /// the news server
 #define   MP_NNTPHOST_USE_SSL_D   0l
 /// the beacon host to test for net connection
