@@ -1,7 +1,7 @@
 /* XPM */
 static char *spam_xpm[] = {
 /* columns rows colors chars-per-pixel */
-"32 32 26 1",
+"32 32 27 1",
 "  c #fcfce8e8f5f5",
 ". c #fffff8f8ffff",
 "X c #f7f7ffffffff",
@@ -28,6 +28,7 @@ static char *spam_xpm[] = {
 "5 c #efefefefefef",
 "6 c #e4e4e4e4e4e4",
 "7 c #d5d5d5d5d5d5",
+"8 c #f2f2d9d9d2d2",
 /* pixels */
 "33333333333333333333333333333333",
 "33333333333333333333333333333333",
