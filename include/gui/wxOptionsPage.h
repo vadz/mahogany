@@ -286,7 +286,7 @@ public:
    wxOptionsPageStandard(wxNotebook *parent,
                          const char *title,
                          Profile *profile,
-                         size_t nFirst,
+                         int nFirst,
                          size_t nLast,
                          int helpID = -1);
 

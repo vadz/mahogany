@@ -2507,19 +2507,24 @@ wxOptionsPageDynamic::wxOptionsPageDynamic(wxNotebook *parent,
 wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
                                              const char *title,
                                              Profile *profile,
-                                             size_t nFirst,
+                                             int nFirst,
                                              size_t nLast,
                                              int helpId)
                      : wxOptionsPage(ms_aFields, ms_aConfigDefaults,
                                      // see enum ConfigFields for the
                                      // explanation of "+1"
-                                     nFirst + 1, nLast + 1,
+                                     (size_t)(nFirst + 1), nLast + 1,
                                      notebook, title, profile, helpId,
                                      notebook->GetPageCount())
 {
+   // nFirst + 1 really must be unsigned
+   ASSERT_MSG( nFirst >= -1, "bad parameret in wxOptionsPageStandard ctor" );
+
    // check that we didn't forget to update one of the arrays...
-   wxASSERT( WXSIZEOF(ms_aConfigDefaults) == ConfigField_Max );
-   wxASSERT( WXSIZEOF(ms_aFields) == ConfigField_Max );
+   ASSERT_MSG( WXSIZEOF(ms_aConfigDefaults) == ConfigField_Max,
+               "defaults array size mismatch" );
+   ASSERT_MSG( WXSIZEOF(ms_aFields) == ConfigField_Max,
+               "fields array size mismatch" );
 }
 
 // ----------------------------------------------------------------------------
