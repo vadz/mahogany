@@ -109,7 +109,16 @@ CHECK:
 TODO:
 
 - MFolder.i
-- MailFolderCC: if mailfolder has been closed due to timeout, reopen it.
+- MailFolderCC:
+   -if mailfolder has been closed due to timeout, reopen it.
+   - check path/name handling
+     IS BROKEN: if no "SendMail" is defined, it cannot be opened
+                because it doesn't find it, triggering ASSERT in SendMessageCC
+   - add config dialog for mailfolder directory
+
+- SendMessageCC: allow re-sending of aborted send, i.e. Send() called
+                 more than once
+
 for release:
 - make mailfolders collectable:
   - have a "collect" flag
