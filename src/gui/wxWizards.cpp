@@ -794,7 +794,7 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
         "You also need to give your new entry\n"
         "a name to appear in the tree."
         ), m_Path);
-   m_Name = panel->CreateTextWithLabel(labels[4],maxwidth, msg2);
+   m_Name = panel->CreateTextWithLabel(labels[4],maxwidth, last);
 
    if ( type == ET_MH )
    {
