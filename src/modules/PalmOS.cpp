@@ -215,11 +215,11 @@ private:
    MInterface * m_MInterface;
 
 private:
-#if EXPERIMENTAL
-   int match_category(char * buf, struct AddressAppInfo *aai);
-   int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
 
+#if EXPERIMENTAL
+   int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
 #endif
+
    int m_PiSocket;
    int m_MailDB;
    int m_AddrDB;
@@ -498,9 +498,6 @@ void PalmOSModule::Synchronise(PalmBook *p_Book)
   }
 }
 
-int defaultcategory = 0;
-int augment;
-
 void
 PalmOSModule::GetAddresses(PalmBook *palmbook)
 {
@@ -508,12 +505,12 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
    int    l;
    char   buf[0xffff];
    struct AddressAppInfo aai;
-   char * defaultcategoryname = 0;
    PalmEntryGroup *rootGroup;
    
-   // if no book specified where to save, we can skip it
    if (!palmbook) {
       ErrorMessage(_("No PalmBook specified."));
+      // TODO: Check for already existing PalmADB and update it, or
+      // create one ourselves!
       return;
    }
 
@@ -527,11 +524,6 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
    l = dlp_ReadAppBlock(m_PiSocket, m_AddrDB, 0, (unsigned char *)buf, 0xffff);
    unpack_AddressAppInfo(&aai, (unsigned char *)buf, l);
 
-   if (defaultcategoryname)
-      defaultcategory = match_category(defaultcategoryname,&aai);
-   else
-      defaultcategory = 0; /* Unfiled */
-      
    rootGroup = (PalmEntryGroup*)(palmbook->GetGroup());
    if (!rootGroup) {
       ErrorMessage(_("ADB not correctly initialized!"));
@@ -543,24 +535,14 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
 }
 
 #if EXPERIMENTAL
-int
-PalmOSModule::match_category(char * buf, struct AddressAppInfo * aai)
-{
-  int i;
-  for (i=0;i<16;i++)
-    if (strcasecmp(buf, aai->category.name[i])==0)
-      return i;
-  return atoi(buf); /* 0 is default */
-}
-
 int 
 PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group)
 {
   struct Address a;
   int i,j,l;
   char buf[0xffff];
-  int category,attribute;
-  
+  int category, attribute;
+
   for(i=0;
       (j=dlp_ReadRecordByIndex(m_PiSocket, db, i, (unsigned char *)buf, 0, &l, &attribute, &category)) >= 0;
       i++)
