@@ -1,10 +1,13 @@
 config.cache
 config.log
 config.status
-linux.system.cache
-linux.system.cache.tmp
 linux-gnu.system.cache
 linux-gnu.system.cache.tmp
+linux.system.cache
+linux.system.cache.tmp
 makeopts
+makeopts.in.Solaris
 nohup.out
 out
+solaris2.5.system.cache
+solaris2.5.system.cache.tmp

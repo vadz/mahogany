@@ -16,8 +16,9 @@ if test "x$OS" = "x"; then
                "please set this and restart again."
               )
 fi
+CWD=`pwd`
 AC_CONFIG_HEADER(include/config.h)
-AC_CONFIG_AUX_DIR(extra/scripts)
+AC_CONFIG_AUX_DIR($CWD/extra/scripts)
 
 
 dnl --------------------------------------------------------------------------
