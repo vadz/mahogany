@@ -11,6 +11,9 @@ $Id$
   + backspace sometimes goes wrong, occasional editing problems ??
   + flicker
   + key bindings for wxLayoutWindow
+  + selection with a mouse (and the keys?)
+  + cursor not seen if at (0, 0), hide it if we don't have focus.
+    it could also be made to blink (use a timer...)
 
 - Profile/wxMDialogs
   + fix usage of readEntry to use String objects
