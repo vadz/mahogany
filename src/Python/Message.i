@@ -10,6 +10,7 @@
 
 %{
 #include   "Mcommon.h"
+#include   <wx/config.h>
 #include   "Message.h"
 
 // we don't want to export our functions as we don't build a shared library

@@ -8,6 +8,7 @@
 %module   MAppBase
 %{
 #include   "Mcommon.h"
+#include   <wx/config.h>
 #include   "kbList.h"
 #include   "guidef.h"
 #include   "strutil.h"

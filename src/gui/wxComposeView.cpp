@@ -32,8 +32,6 @@
 
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
-#else
-# error USE_PCH for unix?
 #endif
 
 #include "Mdefaults.h"
@@ -271,15 +269,18 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    // -----------------------
 
    // set def values for the headers
-   if(m_txtFields[Field_To])
+   if(m_txtFields[Field_To]) {
       m_txtFields[Field_To]->SetValue(
          strutil_isempty(to) ? READ_CONFIG(m_Profile, MP_COMPOSE_TO) : to);
-   if(m_txtFields[Field_Cc])
+   }
+   if(m_txtFields[Field_Cc]) {
       m_txtFields[Field_Cc]->SetValue(
          strutil_isempty(cc) ? READ_CONFIG(m_Profile, MP_COMPOSE_CC) : cc);
-   if(m_txtFields[Field_Bcc])
+   }
+   if(m_txtFields[Field_Bcc]) {
       m_txtFields[Field_Bcc]->SetValue(
          strutil_isempty(bcc) ? READ_CONFIG(m_Profile, MP_COMPOSE_BCC) : bcc);
+   }
 
    // append signature
    if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
@@ -349,11 +350,11 @@ wxComposeView::CreateFTCanvas(void)
       bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
    
    m_LayoutWindow->Clear(READ_CONFIG(m_Profile,MP_FTEXT_FONT),
-         READ_CONFIG(m_Profile,MP_FTEXT_SIZE),
-         READ_CONFIG(m_Profile,MP_FTEXT_STYLE),
-         READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT),
-         0,
-         fg.c_str(),bg.c_str());
+                         READ_CONFIG(m_Profile,MP_FTEXT_SIZE),
+                         READ_CONFIG(m_Profile,MP_FTEXT_STYLE),
+                         READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT),
+                         0,
+                         fg.c_str(),bg.c_str());
 
    m_LayoutWindow->GetLayoutList().SetEditable(true);
    //FIXMEm_LayoutWindow->SetWrapMargin(READ_CONFIG(profile, MP_COMPOSE_WRAPMARGIN));

@@ -87,7 +87,7 @@ MAppBase::VerifySettings(void)
       str;
 
    str = MP_USERNAME;
-   str = m_profile->readEntry(str, (const char *)MP_USERNAME_D);
+   str = m_profile->readEntry(str, MP_USERNAME_D);
 
    if( strutil_isempty(READ_APPCONFIG(MP_USERNAME)) )
    {
@@ -105,7 +105,7 @@ MAppBase::VerifySettings(void)
       if( strutil_isempty(READ_APPCONFIG(MC_USERDIR)) )
       {
          wxString strHome;
-//FIXME         wxGetHomeDir(&strHome);
+         //FIXME wxGetHomeDir(&strHome);
          strHome = getenv("HOME");
          strHome << DIR_SEPARATOR << READ_APPCONFIG(MC_USER_MDIR);
          m_profile->writeEntry(MC_USERDIR, strHome);
@@ -144,8 +144,8 @@ MAppBase::OnStartup()
    // -------------------------
    m_cfManager = new ConfigFileManager;
 
-      String strConfFile;
-#     ifdef OS_UNIX
+   String strConfFile;
+#  ifdef OS_UNIX
       strConfFile = getenv("HOME");
       strConfFile << "/." << M_APPLICATIONNAME;
       // FIXME must create the directory ourselves!
@@ -163,11 +163,16 @@ MAppBase::OnStartup()
       }
       
       strConfFile += "/config";
-#     else  // Windows
+#  else  // Windows
       strConfFile << "wxWindows\\" << M_APPLICATIONNAME;
-#     endif // Unix
+#  endif // Unix
 
-      m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
+   m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
+
+#  ifndef OS_WIN
+      // set the default path for configuration entries
+      m_profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
+#  endif
 
    // do we have gettext()?
    // ---------------------
@@ -245,7 +250,7 @@ MAppBase::OnStartup()
 
          const char *msg = "It's possible that you have problems with Python\n"
                            "installation. Would you like to disable Python\n"
-                           "support for now (set " MC_USEPYTHON " to 1 to"
+                           "support for now (set " MC_USEPYTHON " to 1 to "
                            "reenable it later)?";
          if ( MDialog_YesNoDialog(_(msg)) )
          {
@@ -295,7 +300,7 @@ MAppBase::OnStartup()
       if( strutil_isempty(tmp) )
       {
          tmp = m_localDir;
-         m_profile->writeEntry(MP_MBOXDIR, tmp.c_str());
+         m_profile->writeEntry(MP_MBOXDIR, tmp);
       }
    }
    
@@ -310,10 +315,10 @@ MAppBase::OnAbnormalTermination()
 void
 MAppBase::OnShutDown()
 {
+   m_profile->DecRef();
    GLOBAL_DELETE m_mimeList;
    GLOBAL_DELETE m_mimeTypes;
    GLOBAL_DELETE m_cfManager;
-   m_profile->DecRef();
 }
 
 const char *

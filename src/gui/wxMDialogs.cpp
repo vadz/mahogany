@@ -508,7 +508,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll.Insert("         to");
    ll.LineBreak();
    ll.Insert("         ");
-   ll.Insert(new wxLayoutObjectIcon(ICON("M_32x32")));
+   ll.Insert(new wxLayoutObjectIcon(ICON("Micon")));
    ll.Insert("!");
    ll.SetFontWeight(wxNORMAL);
    ll.SetFontSize(10);

@@ -529,7 +529,6 @@ public:
 
   void OnMenuCommand(wxCommandEvent&);
 
-  void OnAbout(wxCommandEvent&);
   void OnHelp(wxCommandEvent&);
 
   void OnTreeExpand(wxTreeEvent&);
@@ -1635,10 +1634,6 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
       DoUndoChanges();
       break;
 
-    case WXMENU_HELP_ABOUT:
-      OnAbout(event);
-      break;
-
     case WXMENU_HELP_HELP:
       OnHelp(event);
       break;
@@ -1878,12 +1873,6 @@ void wxAdbEditFrame::DoPaste()
   AddNewTreeElement(copy);
 }
 
-void wxAdbEditFrame::OnAbout(wxCommandEvent&)
-{
-  wxMessageDialog dialog(this, _("Address Book Editor"));
-  dialog.ShowModal();
-}
-
 void wxAdbEditFrame::OnHelp(wxCommandEvent&)
 {
   NOT_IMPLEMENTED;
@@ -2030,8 +2019,11 @@ void wxAdbEditFrame::OnActivate(wxActivateEvent& event)
 // (full and relative paths accepted), returns NULL if path is invalid
 AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
 {
-  AdbTreeElement *current = wxIsPathSeparator(strEntry[0]) ? m_root
-                                                            : GetCurNode();
+  AdbTreeElement *current;
+  if ( strEntry.IsEmpty() || wxIsPathSeparator(strEntry[0]) )
+    current = m_root;
+  else
+    current = GetCurNode();
 
   wxArrayString aComponents;
   wxSplitPath(aComponents, strEntry);

@@ -68,8 +68,6 @@ public:
    /// Read an integer value.
    virtual int readEntry(STRINGARG key, int defaultvalue) const
       { return (int) readEntry(key, (long)defaultvalue); }
-   /// Read a bool value.
-   virtual bool readEntry(STRINGARG key, bool defaultvalue) const = 0;
    /// Write back the character value.
    virtual bool writeEntry(STRINGARG key, STRINGARG Value) = 0;
    /// Write back the int value.
@@ -77,8 +75,6 @@ public:
    /// Write back the int value.
    virtual bool writeEntry(STRINGARG key, int Value)
       { return writeEntry(key, (long)Value); }
-   /// Write back the bool value.
-   virtual bool writeEntry(STRINGARG key, bool Value) = 0;
    //@}
    /// set the path within the profile,just like cd
    virtual void   SetPath(STRINGARG path) = 0;
@@ -90,15 +86,26 @@ public:
    virtual void DeleteGroup(STRINGARG path) = 0;
    /// return the name of the profile
    virtual String GetProfileName(void) = 0;
+
+   /** @name Managing environment variables
+
+       just expose wxConfig methods (we do need them to be able to read the
+       real config values, i.e. to disable expansion, sometimes)
+   */
+   /// are we automatically expanding env vars?
+   virtual bool IsExpandingEnvVars() const = 0;
+   /// set the flag which tells if we should auto expand env vars
+   virtual void SetExpandEnvVars(bool bDoIt = TRUE) = 0;
+
 protected:
    /// why does egcs want this?
-   ProfileBase() {}  
+   ProfileBase() {}
+
 private:
    /// forbid copy construction
    ProfileBase(ProfileBase const &);
    /// forbid assignments
    ProfileBase & operator=(const ProfileBase & );
-
 };
 
 
@@ -133,12 +140,29 @@ public:
    CB_DECLARE_CLASS(ConfigFileManager, CommonBase);
 };
 
+// ----------------------------------------------------------------------------
+// Helper classes
+// ----------------------------------------------------------------------------
 
+// suspend the env var expansion (the old state restored in dtor)
+class ProfileEnvVarSuspend
+{
+public:
+  ProfileEnvVarSuspend(ProfileBase *profile);
+  ~ProfileEnvVarSuspend();
+
+private:
+  ProfileBase *m_profile;
+  bool         m_wasExpanding;
+};
+
+// change the profile path temporarily (will be restored in dtor)
 class ProfilePathChanger
 {
 public:
    ProfilePathChanger(ProfileBase *config, STRINGARG path);
    ~ProfilePathChanger();
+   
 private:
    ProfileBase *m_config;
    String      m_strOldPath;

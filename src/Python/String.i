@@ -6,7 +6,14 @@
  * $Id$                 *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/09/06 00:30:04  VZ
+ * 0) fixed compilation problems under Windows
+ * 1) fixed crash on shutdown because of double deletion of wxConfig objects
+ * 2) fixed assert failure in adbframe if no current selection
+ * 3) added env var expansion management methods (as in wxConfig) to ProfileBase
+ *
  * Revision 1.3  1998/08/22 23:19:29  VZ
+ *
  * many, many changes (I finally had to correct all the small things I was delaying
  * before). Among more or less major changes:
  *  1) as splash screen now looks more or less decently, show it on startup
@@ -32,6 +39,8 @@
 %module 	MString
 %{
 #include  "Mcommon.h"
+
+#include  <wx/config.h>
 
 // we don't want to export our functions as we don't build a shared library
 #undef SWIGEXPORT

@@ -12,7 +12,7 @@
 #                                                                  #
 ####################################################################
 
-import MString, MAppBase, MailFolder, Profile, Message
+import MString, MAppBase, MailFolder, MProfile, Message
 
 # helper function: return the username
 def GetUserName():
@@ -26,7 +26,7 @@ def GetUserName():
             # function, but for this we must have this module installed
             import win32api
 
-            username = win32api.GetUserName
+            username = win32api.GetUserName()
         except ImportError:
             # ok, try the environment again
             if os.environ.has_key('USERNAME'): # this works for NT
@@ -43,7 +43,7 @@ def GetUserName():
 ####################################################################
 
 def Minit():
-    msg = "Welcome, " + GetUserName() + ", to the wonderful world\nof M/Python integration!"
+    msg = "Welcome, " + GetUserName() + ", to the wonderful world of M/Python integration!"
     MAppBase.MDialog_StatusMessage(msg)
 
 ####################################################################

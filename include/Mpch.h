@@ -20,6 +20,10 @@
 #include  <stdio.h>
 #include  <time.h>
 
+#ifdef   OS_WIN
+#  undef USE_IPC  // it's in conflict with a standard Windows constant
+#endif   //Windows
+
 extern "C"
 {
 #  include <mail.h>
@@ -38,8 +42,8 @@ extern "C"
 }
 
 #include  "kbList.h"
-
 #include  "guidef.h"
+
 #include  "strutil.h"
 
 #ifdef   USE_WXCONFIG

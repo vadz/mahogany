@@ -42,7 +42,7 @@
 // ----------------------------------------------------------------------------
 
 #ifdef OS_WIN
-# define BMP(name) (mApplication.GetIconManager()->GetBitmap(name))
+# define BMP(name) (mApplication->GetIconManager()->GetBitmap(name))
 #else
 # define BMP(name)  ICON(name)
 #endif

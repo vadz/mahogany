@@ -9,6 +9,7 @@
 
 %{
 #include  "Mcommon.h"
+#include  <wx/config.h>
 #include  "kbList.h"
 #include  "Profile.h"
 #include  "strutil.h"

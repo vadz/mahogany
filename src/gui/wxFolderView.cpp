@@ -214,19 +214,13 @@ wxFolderView::Update(void)
    
    n = mailFolder->CountMessages();
 
-   // it contains '%'s which are interpreted as env var expansion chars
-   // under Windows and we need to disable it to avoid error messages
-#  ifdef OS_WIN
-      bool bDoesExpand = Profile::GetAppConfig()->IsExpandingEnvVars();
-      Profile::GetAppConfig()->SetExpandEnvVars(FALSE);
-#  endif //Windows
-
-   format = READ_APPCONFIG(MC_DATE_FMT);
-
-#  ifdef OS_WIN
-      // restore the old setting
-      Profile::GetAppConfig()->SetExpandEnvVars(bDoesExpand);
-#  endif // Windows
+   // mildly annoying, but have to do it in order to prevent the generation of
+   // error messages about failed env var expansion (this string contains '%'
+   // which introduce env vars under Windows)
+   {
+      ProfileEnvVarSuspend suspend(mApplication->GetProfile());
+      format = READ_APPCONFIG(MC_DATE_FMT);
+   }
 
    if(n < m_NumOfMessages)  // messages have been deleted, start over
       m_FolderCtrl->Clear();

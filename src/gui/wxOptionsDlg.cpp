@@ -24,7 +24,6 @@
 #   include   "MApplication.h"
 #   include   "Profile.h"
 #   include   "guidef.h"
-#   include   "gui/wxIconManager.h"
 #endif
 
 //FIXME which headers are required?
@@ -37,6 +36,8 @@
 
 #include   "MDialogs.h"
 #include   "Mdefaults.h"
+
+#include   "gui/wxIconManager.h"
 
 #define MCB_FOLDEROPEN_D            ""
 #define MCB_FOLDERUPDATE_D          ""
@@ -820,10 +821,9 @@ void wxOptionsPage::Refresh()
 // read the data from config
 bool wxOptionsPage::TransferDataToWindow()
 {
-  // disable environment variable expansion here
-//FIXME
-   bool bDoesExpand = false; //Profile::GetAppConfig()->IsExpandingEnvVars();
-//  Profile::GetAppConfig()->SetExpandEnvVars(FALSE);
+  // disable environment variable expansion here because we want the user to
+  // edit the real value stored in the config
+  ProfileEnvVarSuspend suspend(mApplication->GetProfile());
 
   // check that we didn't forget to update one of the arrays...
   wxASSERT( WXSIZEOF(gs_aConfigDefaults) == ConfigField_Max );
@@ -844,7 +844,7 @@ bool wxOptionsPage::TransferDataToWindow()
     else {
       // it's a string
       strValue = conf->readEntry(gs_aConfigDefaults[n].name,
-                            gs_aConfigDefaults[n].szValue);
+                                 gs_aConfigDefaults[n].szValue);
     }
 
     wxControl *control = GetControl(n);
@@ -902,9 +902,6 @@ bool wxOptionsPage::TransferDataToWindow()
         wxFAIL_MSG("unexpected field type");
     }
   }
-
-  // restore the old setting
-  //FIXME Profile::GetAppConfig()->SetExpandEnvVars(bDoesExpand);
 
   return TRUE;
 }

@@ -76,7 +76,7 @@ public:
    Profile(STRINGARG iClassName, ProfileBase const *Parent);
 
    /// get the associated config object
-   wxConfigBase *GetConfig() const { return fileConfig; }
+   wxConfigBase *GetConfig() const { return m_config; }
 
    /// get our name
    const String& GetProfileName() const { return profileName; }
@@ -109,10 +109,16 @@ public:
    virtual void DeleteGroup(STRINGARG path);
    /// return the name of the profile
    virtual String GetProfileName(void) { return profileName; }
-   
+
+   // env vars stuff
+   virtual bool IsExpandingEnvVars() const
+      { return m_config->IsExpandingEnvVars(); }
+   virtual void SetExpandEnvVars(bool bDoIt)
+      { m_config->SetExpandEnvVars(bDoIt); }
+
 private:
    /// The wxConfig object.
-   wxConfigBase  *fileConfig;
+   wxConfigBase  *m_config;
    /// The parent profile.
    ProfileBase const *parentProfile;
    /// Name of this profile
@@ -161,6 +167,12 @@ public:
    /// return the name of the profile
    virtual String GetProfileName(void) { return String("/"); }
 
+   // env vars stuff
+   virtual bool IsExpandingEnvVars() const
+      { return m_Config->IsExpandingEnvVars(); }
+   virtual void SetExpandEnvVars(bool bDoIt)
+      { m_Config->SetExpandEnvVars(bDoIt); }
+
 private:
    wxConfigBase *m_Config;
    /// forbid deletion
@@ -174,7 +186,7 @@ private:
 struct FCData
 {
   String      fileName;
-  wxConfigBase *fileConfig;
+  wxConfigBase *m_config;
 
   IMPLEMENT_DUMMY_COMPARE_OPERATORS(FCData)
 };
@@ -206,7 +218,7 @@ ProfileBase::CreateGlobalConfig(STRINGARG filename)
 
 String
 ProfileBase::readEntry(STRINGARG key,
-                       const char *defaultvalue = NULL) const
+                       const char *defaultvalue) const
 {
    String str;
    str = readEntry(key, String(defaultvalue));
@@ -219,12 +231,13 @@ ProfileBase::readEntry(STRINGARG key,
 
 wxConfigProfile::wxConfigProfile(STRINGARG fileName)
 {
-   // we shouldn't be called twice normally
-   ASSERT( m_Config == NULL );
-
    m_Config = mApplication->GetConfigManager().GetConfig(fileName, TRUE);
-   // set the default path for configuration entries
-   m_Config->SetPath(M_APPLICATIONNAME);
+
+   // VZ: I don't want to have additional level in the registry
+#  ifndef OS_WIN
+      // set the default path for configuration entries
+      m_Config->SetPath(M_APPLICATIONNAME);
+#  endif // Windows
 }
 
 void wxConfigProfile::SetPath(STRINGARG path)
@@ -254,10 +267,9 @@ wxConfigProfile::DeleteGroup(STRINGARG path)
    m_Config->DeleteGroup(path);
 }
 
-wxConfigProfile::~wxConfigProfile(STRINGARG appName)
+wxConfigProfile::~wxConfigProfile()
 {
    MOcheck();
-   delete m_Config;
 }
 
 String 
@@ -280,7 +292,7 @@ bool
 wxConfigProfile::readEntry(STRINGARG key, bool def) const
 {
    MOcheck();
-   return m_Config->Read(key.c_str(),def);
+   return m_Config->Read(key.c_str(), def) != 0;
 }
 
 bool
@@ -320,7 +332,7 @@ wxConfigProfile::writeEntry(STRINGARG key, bool value)
 Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
    : profileName(iClassName)
 {
-   fileConfig = NULL;   // set it before using CHECK()
+   m_config = NULL;   // set it before using CHECK()
 
    // the top entry should already exist and we must have a parent
    CHECK_RET( mApplication->GetProfile(),
@@ -350,9 +362,9 @@ Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
       fullFileName << profileName << READ_APPCONFIG(MC_PROFILE_EXTENSION);
    }
 
-   fileConfig = mApplication->GetConfigManager().GetConfig(fullFileName);
+   m_config = mApplication->GetConfigManager().GetConfig(fullFileName);
    
-   isOk = fileConfig != NULL;
+   isOk = m_config != NULL;
 }
 
 
@@ -366,9 +378,9 @@ Profile::readEntry(STRINGARG key, STRINGARG defaultvalue) const
 {
    MOcheck(); 
    // config object must be created
-   CHECK( fileConfig != NULL, "", "no fileConfig in Profile" );
+   CHECK( m_config != NULL, "", "no m_config in Profile" );
 
-   wxString rc = fileConfig->Read(key.c_str());
+   wxString rc = m_config->Read(key.c_str());
 
    if( strutil_isempty(rc) && parentProfile != NULL)
    {
@@ -391,7 +403,7 @@ Profile::readEntry(STRINGARG key, STRINGARG defaultvalue) const
    if( strutil_isempty(rc) )
    {
       if(READ_APPCONFIG(MC_RECORDDEFAULTS) )
-         fileConfig->Write(key,defaultvalue); // so default value can be recorded
+         m_config->Write(key,defaultvalue); // so default value can be recorded
       rc = defaultvalue;
    }
 
@@ -410,7 +422,7 @@ Profile::readEntry(STRINGARG key, long defaultvalue) const
    long rc;
    MOcheck();
    
-   if ( !fileConfig->Read(key, &rc, defaultvalue) )
+   if ( !m_config->Read(key, &rc, defaultvalue) )
    {
       if ( !parentProfile ||
            (rc = parentProfile->readEntry(key, defaultvalue)) == defaultvalue
@@ -421,7 +433,7 @@ Profile::readEntry(STRINGARG key, long defaultvalue) const
             rc = mApplication->GetProfile()->readEntry(key,defaultvalue);
             {
                if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
-                  fileConfig->Write(key, defaultvalue);
+                  m_config->Write(key, defaultvalue);
             }
          }
       }
@@ -434,52 +446,46 @@ Profile::readEntry(STRINGARG key, long defaultvalue) const
 void Profile::SetPath(STRINGARG path)
 {
    MOcheck(); 
-   fileConfig->SetPath(path);
+   m_config->SetPath(path);
 }
 
 String 
 Profile::GetPath(void) const
 {
    MOcheck(); 
-   return fileConfig->GetPath();
+   return m_config->GetPath();
 }
 
 bool
 Profile::HasEntry(STRINGARG key) const
 {
    MOcheck(); 
-   return fileConfig->HasEntry(key);
+   return m_config->HasEntry(key);
 }
 
 void
 Profile::DeleteGroup(STRINGARG path)
 {
    MOcheck(); 
-   fileConfig->DeleteGroup(path);
-}
-
-bool
-Profile::readEntry(STRINGARG key, bool defaultvalue) const
-{
-   return readEntry(key, (long) defaultvalue) != 0;
+   m_config->DeleteGroup(path);
 }
 
 bool
 Profile::writeEntry(STRINGARG key, long Value)
 {
    MOcheck();
-   CHECK( fileConfig != NULL, false, "no fileConfig in Profile" );
+   CHECK( m_config != NULL, false, "no m_config in Profile" );
 
-   return fileConfig->Write(key, (long int) Value) != 0;
+   return m_config->Write(key, (long int) Value) != 0;
 }
 
 bool
 Profile::writeEntry(STRINGARG key, STRINGARG Value)
 {
    MOcheck();
-   CHECK( fileConfig != NULL, false, "no fileConfig in Profile" );
+   CHECK( m_config != NULL, false, "no m_config in Profile" );
 
-   return fileConfig->Write(key, Value) != 0;
+   return m_config->Write(key, Value) != 0;
 }
 
 bool
@@ -508,7 +514,7 @@ ConfigFileManager::~ConfigFileManager()
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
       FCData *data = *i;
-      wxConfigBase *fcp = data->fileConfig;
+      wxConfigBase *fcp = data->m_config;
       fcp->Flush();
       //FIXME: this must be a DecRef()
       delete fcp;
@@ -528,7 +534,7 @@ ConfigFileManager::GetConfig(STRINGARG fileName, bool isApp)
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
       if((*i)->fileName == fileName)
-         return (*i)->fileConfig;
+         return (*i)->m_config;
    }
    FCData   *newEntry = new FCData;
    newEntry->fileName = fileName;
@@ -537,17 +543,17 @@ ConfigFileManager::GetConfig(STRINGARG fileName, bool isApp)
    {
       PathFinder pf(M_ETC_PATH);
       String globalconfig = pf.FindFile(M_GLOBAL_CONFIG_NAME);
-      newEntry->fileConfig = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+      newEntry->m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
                                           newEntry->fileName, globalconfig,
                                           wxCONFIG_USE_LOCAL_FILE|wxCONFIG_USE_GLOBAL_FILE);
    }
    else
-      newEntry->fileConfig = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+      newEntry->m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
                                           newEntry->fileName,wxString(""),
                                           wxCONFIG_USE_LOCAL_FILE);
    fcList->push_front(newEntry);
    
-   return newEntry->fileConfig;
+   return newEntry->m_config;
 }
 
 #ifdef DEBUG
@@ -558,9 +564,9 @@ ConfigFileManager::Debug() const
 
    DBGLOG("------ConfigFileManager------\n");
    for(i = fcList->begin(); i != fcList->end(); i++) {
-      // @@ where is operator<<(fileConfig)?
+      // @@ where is operator<<(m_config)?
 #     if 0
-      DBGLOG('"' << (*i).fileName << '"' << '\t' << (*i).fileConfig << '\n');
+      DBGLOG('"' << (*i).fileName << '"' << '\t' << (*i).m_config << '\n');
 #     endif
    }
    DBGLOG("-----------------------------\n");
@@ -605,6 +611,22 @@ void RestoreArray(ProfileBase& conf, wxArrayString& astr, STRINGARG key)
    }
 
    conf.SetPath("..");
+}
+
+// ----------------------------------------------------------------------------
+// a small class to temporarily suspend env var expansion
+// ----------------------------------------------------------------------------
+
+ProfileEnvVarSuspend::ProfileEnvVarSuspend(ProfileBase *profile)
+{
+  m_profile = profile;
+  m_wasExpanding = profile->IsExpandingEnvVars();
+  profile->SetExpandEnvVars(FALSE);
+}
+
+ProfileEnvVarSuspend::~ProfileEnvVarSuspend()
+{
+  m_profile->SetExpandEnvVars(m_wasExpanding);
 }
 
 // ----------------------------------------------------------------------------

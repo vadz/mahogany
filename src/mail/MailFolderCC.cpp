@@ -15,8 +15,6 @@
 #ifndef  USE_PCH
 #   include "strutil.h"
 #   include "MApplication.h"
-#   include "MailFolderCC.h"
-#   include "MessageCC.h"
 #   include "MDialogs.h"
 
 // includes for c-client library
@@ -28,11 +26,14 @@ extern "C"
 #   include <nntp.h>
 }
 #   include "Profile.h"
-#   include  "Mdefaults.h"
 #endif // USE_PCH
 
-#include  "MPython.h"
-#include  "FolderView.h"
+#include "Mdefaults.h"
+#include "MPython.h"
+#include "FolderView.h"
+
+#include "MailFolderCC.h"
+#include "MessageCC.h"
 
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
