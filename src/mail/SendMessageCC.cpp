@@ -329,14 +329,15 @@ static MimeEncoding GetMimeEncodingForFontEncoding(wxFontEncoding enc)
       case wxFONTENCODING_ISO8859_2:
       case wxFONTENCODING_ISO8859_3:
       case wxFONTENCODING_ISO8859_4:
+      case wxFONTENCODING_ISO8859_9:
       case wxFONTENCODING_ISO8859_10:
-      case wxFONTENCODING_ISO8859_12:
       case wxFONTENCODING_ISO8859_13:
       case wxFONTENCODING_ISO8859_14:
       case wxFONTENCODING_ISO8859_15:
 
       case wxFONTENCODING_CP1250:
       case wxFONTENCODING_CP1252:
+      case wxFONTENCODING_CP1254:
       case wxFONTENCODING_CP1257:
 
 #if wxCHECK_VERSION(2, 3, 0)
@@ -349,12 +350,11 @@ static MimeEncoding GetMimeEncodingForFontEncoding(wxFontEncoding enc)
       case wxFONTENCODING_ISO8859_6:
       case wxFONTENCODING_ISO8859_7:
       case wxFONTENCODING_ISO8859_8:
-      case wxFONTENCODING_ISO8859_9:
       case wxFONTENCODING_ISO8859_11:
+      case wxFONTENCODING_ISO8859_12:
 
       case wxFONTENCODING_CP1251:
       case wxFONTENCODING_CP1253:
-      case wxFONTENCODING_CP1254:
       case wxFONTENCODING_CP1255:
       case wxFONTENCODING_CP1256:
 
