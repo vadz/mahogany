@@ -81,9 +81,6 @@ extern const MOption MP_USE_TRASH_FOLDER;
 // trace masks
 // ----------------------------------------------------------------------------
 
-// trace new mail processing
-#define TRACE_NEWMAIL "newmail"
-
 // trace mail folder ref counting
 #define TRACE_MF_REF "mfref"
 
@@ -775,10 +772,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    }
 
    // force the folder status update as the number of messages in it changed
-   // (CountAllMessages() will call UpdateStatus() internally which sends out an
-   // event notifying the GUI about the update)
-   MailFolderStatus status;
-   (void)mf->CountAllMessages(&status);
+   mf->Ping();
 
    mf->DecRef();
 
@@ -1283,106 +1277,46 @@ MailFolderCmn::DeleteMessages(const UIdArray *selections, bool expunge)
 
 /// apply the filters to the selected messages
 int
-MailFolderCmn::ApplyFilterRules(const UIdArray& msgs)
+MailFolderCmn::ApplyFilterRules(const UIdArray& msgsOrig)
 {
-   // Has the folder got any filter rules set? Concat all its filters together
-   String filterString;
-
    MFolder_obj folder(GetName());
-   wxArrayString filters = folder->GetFilters();
-   size_t count = filters.GetCount();
-
-   for ( size_t n = 0; n < count; n++ )
-   {
-      MFilter_obj filter(filters[n]);
-      MFilterDesc fd = filter->GetDesc();
-      filterString += fd.GetRule();
-   }
+   CHECK( folder, FilterRule::Error, "ApplyFilterRules: no MFolder?" );
 
    int rc = 0;
-   if ( !filterString.empty() )
+
+   MModule_Filters *filterModule = NULL;
+   FilterRule *filterRule = GetFilterForFolder(folder, &filterModule);
+   if ( filterRule )
    {
-      // Obtain pointer to the filtering module:
-      MModule_Filters *filterModule = MModule_Filters::GetModule();
+      wxBusyCursor busyCursor;
 
-      if ( filterModule )
-      {
-         FilterRule *filterRule = filterModule->GetFilter(filterString);
-         if ( filterRule )
-         {
-            wxBusyCursor busyCursor;
+      // make copy as Apply() may modify it
+      UIdArray msgs = msgsOrig;
+      rc = filterRule->Apply(this, msgs, false /* don't ignore deleted */);
 
-            // don't ignore deleted messages here (hence "false")
-            rc = filterRule->Apply(this, msgs, false);
-
-            filterRule->DecRef();
-         }
-         else
-         {
-            wxLogWarning(_("Error in filter code for folder '%s', "
-                           "filters not applied"),
-                         filterString.c_str());
-
-            rc = FilterRule::Error;
-         }
-
-         filterModule->DecRef();
-      }
-      else // no filter module
-      {
-         wxLogWarning(_("Filter module couldn't be loaded, "
-                        "filters not applied"));
-
-         rc = FilterRule::Error;
-      }
+      filterRule->DecRef();
    }
    else // no filters to apply
    {
-      wxLogVerbose(_("No filters configured for this folder."));
+      // do give the message because this function is never called
+      // automatically but only when the user selects the menu command manually
+      // and so it would be surprizing if nothing happened and no message were
+      // given
+      wxLogMessage(_("No filters configured for this folder."));
    }
 
    return rc;
 }
 
-DECLARE_AUTOPTR(MModule_Filters);
-DECLARE_AUTOPTR(FilterRule);
-
-// apply filters to the new mail, return true only if all new messages were
-// deleted as the result of the filters action
+// apply filters to the new mail, remove the UIDs deleted by the filters from
+// uidsNew array
 bool
-MailFolderCmn::FilterNewMail(const UIdArray& uidsNew)
+MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
 {
-   // Obtain pointer to the filtering module:
-   MModule_Filters_obj filterModule = MModule_Filters::GetModule();
-   if ( !filterModule )
-   {
-      wxLogVerbose("Filter module couldn't be loaded.");
+   CHECK( filterRule, false, "FilterNewMail: NULL filter" );
 
-      return false;
-   }
-
-   // build a single program from all filter rules:
-   String filterString;
-   MFolder_obj folder(GetName());
-   wxArrayString filters;
-   if ( folder )
-      filters = folder->GetFilters();
-   size_t countFilters = filters.GetCount();
-   for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
-   {
-      MFilter_obj filter(filters[nFilter]);
-      MFilterDesc fd = filter->GetDesc();
-      filterString += fd.GetRule();
-   }
-
-   // don't do anything if no filters
-   if ( filterString.empty() )
-      return true;
-
-   // or if there is a syntax error in them
-   FilterRule_obj filterRule = filterModule->GetFilter(filterString);
-   if ( !filterRule )
-      return false;
+   wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::FilterNewMail(%u msgs)",
+              GetName().c_str(), uidsNew.GetCount());
 
    // apply the filters finally
    int rc = filterRule->Apply(this, uidsNew, true /* ignore deleted */);
@@ -1413,87 +1347,185 @@ MailFolderCmn::FilterNewMail(const UIdArray& uidsNew)
 
       if ( expunge )
       {
-         // we want to know if the filters expunged all new messages and for
-         // this we simply compare the number of messages expunged with the
-         // number of the new ones - of course, this is wrong in general as the
-         // filters may expunge other messages as well but should work well in
-         // practice and doesn't lead to catastrophic consequences when this
-         // assumption is wrong
-         MsgnoType numOld = GetMessageCount();
-
          ExpungeMessages();
-
-         if ( GetMessageCount() <= numOld - uidsNew.Count() )
-         {
-            // suppose that all new messages were expunged
-            return true;
-         }
       }
    }
 
-   // we didn't expunge everything
-   return false;
+   // some messages could have been deleted by filters
+   wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::FilterNewMail(): %u msgs left",
+              GetName().c_str(), uidsNew.GetCount());
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------
 // MailFolderCmn new mail processing
 // ----------------------------------------------------------------------------
 
-// remember that this function return TRUE only if all new mail was deleted in
-// the result of processing it
-bool MailFolderCmn::ProcessNewMail(const UIdArray& uidsNew)
+/*
+   ProcessNewMail() is very confusing as it is really a merge of two different
+   functions: one which processes the new mail in the folder itself and the
+   other which processes new mail in _another_ folder. I realize that it is
+   very unclear but it was the only way I found to share the code for these
+   two tasks.
+
+   So there are two cases:
+
+   1. we have new mail in this folder, in this case there is no folderDst (it
+      is the same as this folder) and we do the usual sequence of events
+      (filter/collect/report) without any problems as this folder is already
+      opened and so we can do everything we want.
+
+   2. we have copied some new mail from this folder to folderDst for which we
+      don't have an opened MailFolder (this condition is important as it
+      explains why do we go through all these troubles). Then we do the sam
+      steps as above (filter/collect/report) except that if we notice that we
+      do need to filter or collect messages we just open folderDst and return -
+      opening it is enough to ensure that its own ProcessNewMail() is called in
+      its 1st version. But if we don't need to filter not collect we
+      ReportNewMail() without ever opening the folderDst - which is a big gain
+      (imagine that we filter 10 messages we just got and they go to 5
+      different folders: we really don't need to open all 5 of them just to
+      report new mail in them, we can do it immediately)
+ */
+
+bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
+                                   const MFolder *folderDst)
 {
-   // first filter the messages
-   if ( FilterNewMail(uidsNew) )
+   wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ProcessNewMail(%u msgs) for %s",
+              GetName().c_str(),
+              uidsNew.GetCount(),
+              folderDst ? folderDst->GetFullName().c_str() : "ourselves");
+
+   // use the settings for the folder where the new mail is!
+   MFolder *folderWithNewMail;
+   if ( folderDst )
    {
-      // all new mail was deleted by the filters
-      return true;
+      // use the folder where new mail is (need to const_cast it to IncRef())
+      folderWithNewMail = (MFolder *)folderDst;
+
+      // to compensate for DecRef() done by MFolder_obj
+      folderWithNewMail->IncRef();
+   }
+   else // use this folder
+   {
+      folderWithNewMail = MFolder::Get(GetName());
+
+      CHECK( folderWithNewMail, false, "ProcessNewMail: no MFolder?" );
+   }
+
+   MFolder_obj folder = folderWithNewMail;
+
+   Profile_obj profile(folder->GetProfile());
+
+   // first filter the messages
+   // -------------------------
+
+   MModule_Filters *filterModule = NULL;
+   FilterRule *filterRule = GetFilterForFolder(folder, &filterModule);
+   if ( filterRule )
+   {
+      bool ok;
+
+      if ( folderDst )
+      {
+         // we need to open the folder where the new mail is
+         MailFolder *mf = OpenFolder(folderDst);
+         if ( !mf )
+         {
+            ok = false;
+         }
+
+         mf->DecRef();
+
+         ok = true;
+      }
+      else // new mail in this folder, filter it
+      {
+         ok = FilterNewMail(filterRule, uidsNew);
+      }
+
+      filterRule->DecRef();
+      filterModule->DecRef();
+
+      // return if an error occured or if we had opened the folderDst - in this
+      // case we have nothing to do here any more as this folder processed (or
+      // is going to process) the new mail in it itself
+      if ( !ok || folderDst )
+         return ok;
+
+      if ( uidsNew.IsEmpty() )
+      {
+         // all new mail was deleted by the filters, nothing more to do
+         return true;
+      }
    }
 
    // next copy/move all new mail to the central new mail folder if needed
-   if ( CollectNewMail(uidsNew) )
+   // --------------------------------------------------------------------
+
+   // do we collect messages from this folder at all?
+   if ( folder->GetFlags() & MF_FLAGS_INCOMING )
    {
-      // we moved everything elsewhere, nothing left
-      return true;
+      // where do we collect the mail?
+      String newMailFolder = READ_CONFIG(profile, MP_NEWMAIL_FOLDER);
+      if ( newMailFolder == folder->GetFullName() )
+      {
+         ERRORMESSAGE((_("Cannot collect mail from folder '%s' into itself, "
+                         "please modify the properties for this folder.\n"
+                         "\n"
+                         "Disabling automatic mail collection for now."),
+                      newMailFolder.c_str()));
+
+         folder->ResetFlags(MF_FLAGS_INCOMING);
+
+         return false;
+      }
+
+      if ( folderDst )
+      {
+         // we need to open the folder where the new mail is
+         MailFolder *mf = OpenFolder(folderDst);
+         if ( !mf )
+         {
+            return false;
+         }
+
+         mf->DecRef();
+
+         return true;
+      }
+      //else: new mail in this folder, collect it
+
+      if ( !CollectNewMail(uidsNew, newMailFolder) )
+      {
+         return false;
+      }
+
+      if ( uidsNew.IsEmpty() )
+      {
+         // we moved everything elsewhere, nothing left
+         return true;
+      }
    }
 
    // finally, notify the user about it
+   // ---------------------------------
+
    ReportNewMail(uidsNew);
 
-   // some new mail is left in the folder
-   return false;
+   return true;
 }
 
-bool MailFolderCmn::CollectNewMail(const UIdArray& uidsNew)
+bool MailFolderCmn::CollectNewMail(UIdArray& uidsNew,
+                                   const String& newMailFolder)
 {
-   // do we collect messages from this folder at all?
-   if ( !(GetFlags() & MF_FLAGS_INCOMING) )
-   {
-      // no, messages not moved - hence "false"
-      return false;
-   }
-
-   // where to we collect the mail?
-   String newMailFolder = READ_CONFIG(GetProfile(), MP_NEWMAIL_FOLDER);
-   if ( newMailFolder == GetName() )
-   {
-      ERRORMESSAGE((_("Cannot collect mail from folder '%s' into itself, "
-                      "please modify the properties for this folder.\n"
-                      "\n"
-                      "Disabling automatic mail collection for now."),
-                   GetName().c_str()));
-
-      // reset MF_FLAGS_INCOMING flag to avoid the error the next time
-      MFolder_obj folder(GetProfile());
-      if ( folder )
-      {
-         folder->ResetFlags(MF_FLAGS_INCOMING);
-      }
-
-      return false;
-   }
-
    bool move = READ_CONFIG_BOOL(GetProfile(), MP_MOVE_NEWMAIL);
+
+   wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::CollectNewMail(%u msgs) (%s)",
+              GetName().c_str(),
+              uidsNew.GetCount(),
+              move ? "moving" : "copying");
 
    if ( !SaveMessages(&uidsNew, newMailFolder) )
    {
@@ -1512,11 +1544,10 @@ bool MailFolderCmn::CollectNewMail(const UIdArray& uidsNew)
       DeleteMessages(&uidsNew, true);
 
       // no new mail left here
-      return true;
+      uidsNew.Clear();
    }
 
-   // we did copy it to the new mail folder but it was left here as well
-   return false;
+   return true;
 }
 
 void MailFolderCmn::ReportNewMail(const UIdArray& uidsNew)
@@ -1528,6 +1559,9 @@ void MailFolderCmn::ReportNewMail(const UIdArray& uidsNew)
       return;
    }
 
+   wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ReportNewMail(%u msgs)",
+              GetName().c_str(), uidsNew.GetCount());
+
    // step 1: execute external command if it's configured
    Profile *profile = GetProfile();
    if ( READ_CONFIG(profile, MP_USE_NEWMAILCOMMAND) )
@@ -1535,6 +1569,9 @@ void MailFolderCmn::ReportNewMail(const UIdArray& uidsNew)
       String command = READ_CONFIG(profile, MP_NEWMAILCOMMAND);
       if ( !command.empty() )
       {
+         wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ReportNewMail(): running '%s'",
+                    GetName().c_str(), command.c_str());
+
          if ( !wxExecute(command, false /* async */) )
          {
             // TODO ask whether the user wants to disable it

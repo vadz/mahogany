@@ -180,7 +180,7 @@ public:
    virtual int Apply(MailFolder *mf, UIdType uid);
    virtual int Apply(MailFolder *folder, bool newOnly);
    virtual int Apply(MailFolder *folder,
-                     UIdArray msgs,
+                     UIdArray& msgs,
                      bool ignoreDeleted);
 
    static FilterRule * Create(const String &filterrule,
@@ -324,8 +324,8 @@ private:
    // this flag is set during evalutation if any filter calls Expunge()
    bool m_expungeMsgs;
 
-   // this array contains the msgnos of the messages which were deleted from the
-   // filter rule action part
+   // this array contains the msgnos of the messages which were deleted from
+   // the filter rule action part
    wxArrayLong m_deletedMsgs;
 
    // the folder the message was copied to or empty
@@ -2533,12 +2533,13 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid)
 
    const Value rc = m_Program->Evaluate();
 
+   bool wasDeleted = IsMsgDeleted();
+
    // and now show the result in the status bar too
    if ( msg )
    {
       text += " - ";
 
-      bool wasDeleted = IsMsgDeleted();
       if ( !m_copiedTo.empty() )
       {
          text << (wasDeleted ? _("moved to ") : _("copied to "))
@@ -2570,7 +2571,7 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid)
       return FilterRule::Error;
 
    int retval = 0;
-   if ( !m_deletedMsgs.IsEmpty() )
+   if ( wasDeleted )
       retval |= Deleted;
    if ( m_expungeMsgs )
       retval |= Expunged;
@@ -2588,7 +2589,7 @@ FilterRuleImpl::Apply(MailFolder *mf, bool newOnly)
 
 int
 FilterRuleImpl::Apply(MailFolder *folder,
-                      UIdArray msgs,
+                      UIdArray& msgs,
                       bool ignoreDeleted)
 {
 #ifndef TEST                // UIdArray not instantiated
@@ -2639,6 +2640,9 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
    HeaderInfoList_obj hil = mf->GetHeaders();
    CHECK( hil, 0, "can't filter messages - failed to get header info list" );
 
+   // the array holding the indices of the messages deleted by filters
+   wxArrayLong indicesDeleted;
+
    // apply filter either to all messages in the list or only to the given ones
    m_msgnoMax = msgs ? msgs->Count() : hil->Count();
    for ( size_t idx = 0; idx < m_msgnoMax; idx++ )
@@ -2654,11 +2658,29 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
       if ( hi && CheckStatusMatch(hi->GetStatus(),
                                   newOnly, ignoreDeleted))
       {
-         rc |= Apply(mf, hi->GetUId());
+         int rcThis = Apply(mf, hi->GetUId());
+         if ( msgs && (rcThis & Deleted) )
+         {
+            indicesDeleted.Add(idx);
+         }
+
+         rc |= rcThis;
       }
    }
 
    mf->DecRef();
+
+   // remove the deleted messages from msgs
+   if ( msgs )
+   {
+      // iterate from end because otherwise the indices would shift while we
+      // traverse them
+      size_t count = indicesDeleted.GetCount();
+      for ( size_t n = count; n > 0; n-- )
+      {
+         msgs->RemoveAt(n - 1);
+      }
+   }
 
    return rc;
 #else

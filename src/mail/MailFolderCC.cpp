@@ -2915,6 +2915,8 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       status.total = 0;
    }
 
+   UIdArray uidsNew;
+
    // examine flags of all messages we copied
    HeaderInfoList_obj headers = GetHeaders();
    for ( size_t n = 0; n < count; n++ )
@@ -2946,7 +2948,11 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
          if ( !(flags & MailFolder::MSG_STAT_SEEN) )
          {
             if ( isRecent )
+            {
+               uidsNew.Add(selections->Item(n));
+
                status.newmsgs++;
+            }
 
             status.unread++;
          }
@@ -2974,7 +2980,16 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       mfDst->Ping();
       mfDst->DecRef();
    }
-   //else: not opened
+   else // dst folder not opened
+   {
+      // if we have copied any new messages to the dst folder, we must process
+      // them (i.e. filter, report, ...)
+      if ( !uidsNew.IsEmpty() )
+      {
+         ProcessNewMail(uidsNew, folder);
+      }
+      //else: no need to open it
+   }
 
    return true;
 }
@@ -4451,15 +4466,15 @@ void MailFolderCC::OnNewMail()
 
                // process the new mail, whatever it means (collecting,
                // filtering, just reporting, ...)
-               if ( !ProcessNewMail(*uidsNew) )
+               if ( ProcessNewMail(*uidsNew) && !uidsNew->IsEmpty() )
                {
-                  // ProcessNewMail() returns TRUE only if all new mail was
-                  // deleted (presumably after moving it to another folder),
-                  // but it returns FALSE, some of the new messages are left
-                  // here: notify the GUI about them
+                  // ProcessNewMail() removes the messages removed by filters
+                  // or whatever else it does from uidsNew - if something is
+                  // left there after it finished, we have some new mail to
+                  // notoify the GUI about
                   shouldNotify = true;
                }
-               //else: no, all new messages were deleted
+               //else: nothing changed for this folder
             }
             else
             {

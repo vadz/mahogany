@@ -31,6 +31,11 @@
 // define this for some additional checks of folder closing logic
 #undef DEBUG_FOLDER_CLOSE
 
+// trace mask for the new mail messages
+#define TRACE_MF_NEWMAIL "mfnew"
+
+class FilterRule;
+
 /**
    MailFolderCmn  class, common code shared by all implementations of
    the MailFolder ABC.
@@ -146,7 +151,8 @@ public:
 
    virtual HeaderInfoList *GetHeaders(void) const;
 
-   virtual bool ProcessNewMail(const UIdArray& uidsNew);
+   virtual bool ProcessNewMail(UIdArray& uidsNew,
+                               const MFolder *folderDst = NULL);
 
    virtual int ApplyFilterRules(const UIdArray& msgs);
 
@@ -245,11 +251,11 @@ protected:
    class MailFolderTimer *m_Timer;
 
 private:
-   /// apply filters to all new mail messages
-   bool FilterNewMail(const UIdArray& uidsNew);
+   /// apply the filter to the messages, return false on error
+   bool FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew);
 
-   /// copy/move new mail to the incoming folder, return true if moved (only!)
-   bool CollectNewMail(const UIdArray& uidsNew);
+   /// copy/move new mail to the NewMail folder, return false on error
+   bool CollectNewMail(UIdArray& uidsNew, const String& newMailFolder);
 
    /// report new mail to the user
    void ReportNewMail(const UIdArray& uidsNew);

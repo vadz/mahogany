@@ -33,6 +33,7 @@
 #endif
 
 #include "MFilter.h"
+#include "modules/Filters.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -816,4 +817,69 @@ MFilterFromProfile::DebugDump() const
 }
 
 #endif // DEBUG
+
+// ----------------------------------------------------------------------------
+// global functions
+// ----------------------------------------------------------------------------
+
+extern FilterRule *
+GetFilterForFolder(const MFolder *folder, MModule_Filters **modFilters)
+{
+   CHECK( folder && modFilters, NULL, "GetFilterForFolder: NULL parameter" );
+
+   // build a single program from all filter rules:
+   String filterString;
+   wxArrayString filters = folder->GetFilters();
+   size_t countFilters = filters.GetCount();
+   for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
+   {
+      MFilter_obj filter(filters[nFilter]);
+      MFilterDesc fd = filter->GetDesc();
+      filterString += fd.GetRule();
+   }
+
+   // do we have any filters?
+   if ( filterString.empty() )
+   {
+      // no, nothing to do
+      return NULL;
+   }
+
+   MModule_Filters *filterModule = *modFilters;
+   if ( !filterModule )
+   {
+      filterModule = MModule_Filters::GetModule();
+      if ( !filterModule )
+      {
+         wxLogWarning(_("Filter module couldn't be loaded."));
+
+         return NULL;
+      }
+   }
+
+   // compile the filter rule into the real filter
+   FilterRule *filterRule = filterModule->GetFilter(filterString);
+   if ( !filterRule )
+   {
+      wxLogError(_("Error parsing filter '%s' for folder '%s'"),
+                 filterString.c_str(), folder->GetFullName().c_str());
+
+      // free the filter module if created it ourselves
+      if ( !*modFilters )
+      {
+         filterModule->DecRef();
+      }
+         
+      return NULL;
+   }
+
+   // return the filter module to the caller if it hadn't provided it
+   if ( !*modFilters )
+   {
+      // now the caller is responsible for freeing it
+      *modFilters = filterModule;
+   }
+
+   return filterRule;
+}
 

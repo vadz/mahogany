@@ -787,14 +787,17 @@ public:
    //@{
 
    /**
-     Process the new mail in this folder: this may involve collecting it (==
-     copying or moving to another folder), filtering it or just reporting it
-     depending on the folder options.
+     Process the new mail in this or another folder (if folderDst is not NULL):
+     this may involve collecting it (== copying or moving to another folder),
+     filtering it or just reporting it depending on the folder options. It
+     removes all messages deleted as results of its actions from uidsNew array.
 
      @param uidsNew the array containing UIDs of the new messages
-     @return TRUE if all new mail was moved away or deleted, FALSE if any left
+     @param folderDst if not NULL, folder where the new messages really are
+     @return true if ok, false on error
    */
-   virtual bool ProcessNewMail(const UIdArray& uidsNew) = 0;
+   virtual bool ProcessNewMail(UIdArray& uidsNew,
+                               const MFolder *folderDst = NULL) = 0;
 
    /** Apply any filter rules to the folder.
        Applies the rule to all messages listed in msgs.

@@ -70,13 +70,15 @@ public:
    virtual int Apply(MailFolder *folder, bool newOnly = true) = 0;
 
    /** Apply the filter to the selected messages in a folder.
+       The messages deleted by the filters are removed from msgs array.
+
        @param folder - the MailFolder object
        @param msgs - the list of messages to apply to
        @param ignoreDeleted - do not filter messages marked as deleted
        @return combination of the flags defined above
    */
    virtual int Apply(MailFolder *folder,
-                     UIdArray msgs,
+                     UIdArray& msgs,
                      bool ignoreDeleted = TRUE) = 0;
 
    MOBJECT_NAME(FilterRule)

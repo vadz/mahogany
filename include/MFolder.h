@@ -127,14 +127,15 @@ public:
    virtual void SetTreeIndex(int pos) { }
 
       /**
-        Get the profile associated with this folder: it will never be NULL and
-        can be used to read the other (than the ones we have explicit
-        functions for accessing them) settings associated with this folder.
+        Get the profile associated with this folder: it will never be NULL (as
+        we fall back to the application profile if we don't have our own) and
+        can be used to read the other (than the ones we have explicit functions
+        for accessing them) settings associated with this folder.
 
         Avoid using this function in the new code, it is mainly for backwards
         compatibility!
 
-        @return profile object to be DecRef()d by caller
+        @return profile object to be DecRef()d by caller (never NULL)
        */
    virtual Profile *GetProfile() const = 0;
    //@}

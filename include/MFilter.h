@@ -15,6 +15,10 @@
 
 class WXDLLEXPORT wxWindow;
 
+class FilterRule;
+class MFolder;
+class MModule_Filters;
+
 /**@name Some commonly used enums for the different parts of a simple
    dialog-constructed filter rule. */
 //@{
@@ -264,6 +268,21 @@ BEGIN_DECLARE_AUTOPTR(MFilter)
    public:
       MFilter_obj(const String& name) { m_ptr = MFilter::CreateFromProfile(name); }
 END_DECLARE_AUTOPTR();
+
+/**
+  Returns the filter program for the given folder. If no filters are specified
+  or if an error occured, returns NULL. The parameter modFilters must point
+  either to an already loaded MModule_Filters instance or NULL. In the latter
+  case the function loads the module itself but it must be DecRef()'d by the
+  caller (NB: it will point to NULL if it was NULL initially and the function
+  returned NULL, i.e. in case of NULL return modFilters value doesn't change)
+
+  @param mfolder the folder to get filters for (can't be NULL)
+  @param modFilters pointer to a pointer to a valid MModule_Filters or to NULL
+  @return filter rule configured for this folder or NULL
+ */
+extern FilterRule *
+GetFilterForFolder(const MFolder *mfolder, MModule_Filters **modFilters);
 
 #endif // _MFILTER_H
 
