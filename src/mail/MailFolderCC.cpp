@@ -3782,12 +3782,15 @@ MailFolderCC::DoSetSequenceFlag(SequenceKind kind,
                                 bool set)
 {
    CHECK_DEAD_RC("Cannot access closed folder '%s'.", false);
+
    String flags = GetImapFlags(flag);
 
    if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
                      1, this, this->GetClassName(),
                      GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
    {
+      wxBusyCursor busyCursor;
+
       int opFlags = 0;
       if ( set )
          opFlags |= ST_SET;
