@@ -4217,6 +4217,24 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       // our cached idea of the number of messages we have doesn't correspond
       // to reality any more
       MfStatusCache *mfStatusCache = MfStatusCache::Get();
+
+      // the code inside "#if 0" doesn't work because some dumb IMAP servers
+      // (IMApd 12.264 to not name it) generate two untagged EXISTS in a row
+      // when you open a folder which used to be empty but later got a message
+      // into it, i.e. it says:
+      //
+      //    2 select wxWindows/CVS
+      //    * 0 EXISTS
+      //    * 1 EXISTS
+      //    * 1 RECENT
+      //
+      // and then the first event triggers an assert failure elsewhere (in
+      // wxFolderTree) because when it is processed there is no cached status
+      // for it because we invalidate it immediately after sending the event!
+      //
+      // so we can't be smart, unfortunately, and have to always invalidate the
+      // cache
+#if 0
       if ( msgnoMax )
       {
          // flushing it like we do here is a bit dumb, so maybe we could
@@ -4224,6 +4242,7 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
          // parameters to DoCountMessages() and call it from here?
          mfStatusCache->InvalidateStatus(GetName());
       }
+
       else // no messages
       {
          // for an empty folder, we know the status
@@ -4233,6 +4252,9 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
          status.total = 0;
          mfStatusCache->UpdateStatus(GetName(), status);
       }
+#else
+      mfStatusCache->InvalidateStatus(GetName());
+#endif // 0
 
       // update to use in the enclosing "if" test the next time
       m_nMessages = msgnoMax;
