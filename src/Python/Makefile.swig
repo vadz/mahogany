@@ -13,11 +13,11 @@ OBJS := $(IFACES:.i=.o)
 %.cpp %.py: %.i
 	$(SWIG) -I$(dir $<) $(SWIGFLAGS) -o $@ $<
 
-%.cpp-swig: %.cpp
-	cp $< $@
+%.cpp-swig: %.cpp %.i
+	cp $(basename $@).cpp $@
 
-%.py-swig: %.py
-	cp $< $@
+%.py-swig: %.py %.i
+	cp $(basename $@).py $@
 
 all: $(OBJS)
 
