@@ -40,10 +40,10 @@ public:
    virtual void DoBrowse() = 0;
 
    // enable/disable associated text control with us
-   virtual void Enable(bool enable)
+   virtual bool Enable(bool enable)
    {
       m_text->Enable(enable);
-      wxButton::Enable(enable);
+      return wxButton::Enable(enable);
    }
 
 protected:

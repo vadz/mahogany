@@ -58,14 +58,6 @@ wxMSW bugs:
    + ...
  - CR/LF problems when replying to the messages
 
-VZ:
-- wxConfig does not like entries like:
-  Key=Value
-  but insists on
-  Key = Value
-
-- Initially selected folder is not highlighted in treectrl.
-
 - help button for first folder create page nees a help id
   KB: couldn't even find out where you create the button :-(
 - when user level is >=1 (advanced) show full preferences pages in
@@ -87,6 +79,11 @@ VZ:
   basis? I'd like to read the iconname from the folder profile, that
   would allow nice things such as a "trash/junk" folder, etc.
 
+- Could you have a look at the setting of the default columns sizes in 
+  wxFolderView.cpp, please?  Currently it gets called in the
+  constructor which doesn't work properly, but moving that code to
+  Clear(), using a SetConfigPath(), just before RestoreWidths() is
+  called, didn't work either. 
 
 ******* Priorities for KB: ******************************
 

@@ -1052,6 +1052,14 @@ wxComposeView::OnMenuCommand(int id)
       m_LayoutWindow->Paste();
       m_LayoutWindow->Refresh();
       break;
+   case WXMENU_MSG_EDIT_COPY:
+      m_LayoutWindow->Copy();
+      m_LayoutWindow->Refresh();
+      break;
+   case WXMENU_MSG_EDIT_CUT:
+//      m_LayoutWindow->Cut();
+      m_LayoutWindow->Refresh();
+      break;
    default:
       wxMFrame::OnMenuCommand(id);
    }

@@ -273,6 +273,8 @@ protected:
    int m_firstColumn;
    /// do we want OnSelect() callbacks?
    bool m_SelectionCallbacks;
+   /// have we been used previously?
+   bool m_Initialised;
 };
 
 #endif // WXFOLDERVIEW_H

@@ -248,7 +248,7 @@ protected:
                                    long widthMax,
                                    wxControl *last,
                                    size_t nRightMargin = 0,
-                                   int style = 0);
+                                   int style = wxALIGN_RIGHT);
    wxStaticText *CreateMessage(const char *label, wxControl *last);
 
       // a combobox, the entries are taken from the label string which is
