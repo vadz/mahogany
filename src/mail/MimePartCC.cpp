@@ -137,7 +137,7 @@ MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
       Nasty hack: c-client (and so probably IMAP as well) doesn't seem to
       number the multipart parts whose parent and grand parent are multipart
       as well and this part is the only part at this level
-     
+
       For example, the part numbers are assigned like this in this example
       message:
 
@@ -161,8 +161,7 @@ MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
       String specParent;
 
       MimeType::Primary mt = m_parent->GetType().GetPrimary();
-#if 1
-      if ( mt == MimeType::MULTIPART ) 
+      if ( mt == MimeType::MULTIPART )
       {
          MimePartCC *grandparent = m_parent->m_parent;
 
@@ -184,26 +183,6 @@ MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
             }
          }
       }
-#else   
-      if ( mt == MimeType::MULTIPART || mt == MimeType::MESSAGE )
-      {
-         MimePartCC *grandparent = m_parent->m_parent;
-
-         // it shouldn't be the top level part (note that it is non NULL
-         // because of the test in the enclosing if)
-         if ( grandparent->m_parent )
-         {
-            mt = grandparent->GetType().GetPrimary();
-
-            if ( mt == MimeType::MULTIPART || mt == MimeType::MESSAGE )
-            {
-               // our parent part doesn't have its own part number, use the
-               // grand parent spec as the base
-               specParent = grandparent->m_spec;
-            }
-         }
-      }
-#endif
 
       if ( specParent.empty() )
       {
@@ -369,8 +348,9 @@ MessageCC *MimePartCC::GetMessage() const
    return m_parent ? m_parent->GetMessage() : m_message;
 }
 
-// MimePartCC::GetContent() is implemented in MessageCC.cpp to reduce
-// compilation dependencies
+// MimePartCC::GetContent(), GetRawContent() and GetHeaders() are implemented
+// in MessageCC.cpp to reduce compilation dependencies (Message doesn't have
+// the necessary methods so we'd need to include MessageCC.h here...)
 
 MimeXferEncoding MimePartCC::GetTransferEncoding() const
 {

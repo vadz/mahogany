@@ -305,8 +305,8 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
       // end of this line
       name = headerLine.BeforeFirst(':').Lower();
       value = headerLine.AfterFirst(':');
-      if ( name != "date" && 
-           name != "from" && 
+      if ( name != "date" &&
+           name != "from" &&
            name != "message-id" &&
            name != "mime-version" &&
            name != "content-type" &&
@@ -453,7 +453,7 @@ String MessageCC::GetHeader(void) const
    String str;
 
    if ( m_folder )
-   {  
+   {
       CHECK_DEAD_RC(str);
 
       if ( m_folder->Lock() )
@@ -462,7 +462,7 @@ String MessageCC::GetHeader(void) const
          const char *cptr = mail_fetchheader_full(m_folder->Stream(), m_uid,
                                                   NULL, &len, FT_UID);
          m_folder->UnLock();
-         str = String(cptr, (size_t)len);
+         str = String(wxConvertMB2WX(cptr), (size_t)len);
       }
       else
       {
@@ -849,8 +849,14 @@ const MimePart *MessageCC::GetMimePart(int n) const
    return mimepart;
 }
 
-char *
-MessageCC::GetRawPartData(const MimePart& mimepart, unsigned long *lenptr)
+const char *
+MessageCC::DoGetPartAny(const MimePart& mimepart,
+                        unsigned long *lenptr,
+                        char *(*fetchFunc)(MAILSTREAM *,
+                                           unsigned long,
+                                           char *,
+                                           unsigned long *,
+                                           long))
 {
    CHECK( m_folder, NULL, _T("MessageCC::GetPartData() without folder?") );
 
@@ -880,91 +886,65 @@ MessageCC::GetRawPartData(const MimePart& mimepart, unsigned long *lenptr)
    unsigned long len = 0;
 
    // NB: this pointer shouldn't be freed
-   char *cptr = mail_fetch_mime(stream,
-                                    m_uid,
-                                    (char *)sp.c_str(),
-                                    &len, FT_UID);
+   char *cptr = (*fetchFunc)(stream, m_uid, (char *)sp.c_str(), &len, FT_UID);
+
    m_folder->EndReading();
 
    m_folder->UnLock();
 
-   // ensure that lenptr is always valid
-   if ( lenptr == NULL )
-   {
-      lenptr = &len;
-   }
+   if ( lenptr )
+      *lenptr = len;
 
    // have we succeeded in retrieveing anything?
-   if ( len == 0 )
-   {
-      *lenptr = 0;
+   return len ? cptr : NULL;
+}
 
-      return NULL;
-   } else {
-      *lenptr = len+size;
+const char *
+MessageCC::GetRawPartData(const MimePart& mimepart, unsigned long *lenptr)
+{
+   return DoGetPartAny(mimepart, lenptr, mail_fetch_body);
+}
+
+String
+MessageCC::GetPartHeaders(const MimePart& mimepart)
+{
+   String s;
+
+   unsigned long len = 0;
+   const char *cptr = DoGetPartAny(mimepart, &len, mail_fetch_mime);
+   if ( cptr )
+   {
+      s.assign(wxConvertMB2WX(cptr), len);
    }
 
-   // free old text
-   fs_give(&m_partContentPtr);
-   
-   return cptr;
+   return s;
 }
-   
+
 const void *
 MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
 {
-   CHECK( m_folder, NULL, _T("MessageCC::GetPartData() without folder?") );
+   // first get the raw text
+   // ----------------------
 
-   CheckMIME();
-
-   MAILSTREAM *stream = m_folder->Stream();
-   if ( !stream )
-   {
-      ERRORMESSAGE((_("Impossible to retrieve message text: "
-                      "folder '%s' is closed."),
-                    m_folder->GetName().c_str()));
-      return NULL;
-   }
-
-   if ( !m_folder->Lock() )
-   {
-      ERRORMESSAGE((_("Impossible to retrieve message text: "
-                      "failed to lock folder '%s'."),
-                    m_folder->GetName().c_str()));
-      return NULL;
-   }
-
-   unsigned long size = mimepart.GetSize();
-   m_folder->StartReading(size);
-
-   const String& sp = mimepart.GetPartSpec();
    unsigned long len = 0;
+   const char *cptr = GetRawPartData(mimepart, &len);
 
-   // NB: this pointer shouldn't be freed
-   char *cptr = mail_fetchbody_full(stream,
-                                    m_uid,
-                                    (char *)sp.c_str(),
-                                    &len, FT_UID);
-   m_folder->EndReading();
-
-   m_folder->UnLock();
-
-   // ensure that lenptr is always valid
-   if ( lenptr == NULL )
-   {
-      lenptr = &len;
-   }
-
-   // have we succeeded in retrieveing anything?
-   if ( len == 0 )
-   {
-      *lenptr = 0;
-
+   if ( !len )
       return NULL;
-   }
+
+   // now decode it
+   // -------------
+
+   // ensure that lenptr is always valid -- this is simpler than testing it all
+   // the time
+   if ( !lenptr )
+      lenptr = &len;
 
    // free old text
    fs_give(&m_partContentPtr);
+
+   // total size of this message part
+   unsigned long size = mimepart.GetSize();
 
    // the size of possible extra non Base64 encoded text following a Base64
    // encoded part
@@ -1101,6 +1081,11 @@ const void *MimePartCC::GetRawContent(unsigned long *len) const
 const void *MimePartCC::GetContent(unsigned long *len) const
 {
    return GetMessage()->GetPartData(*this, len);
+}
+
+String MimePartCC::GetHeaders() const
+{
+   return GetMessage()->GetPartHeaders(*this);
 }
 
 // ----------------------------------------------------------------------------

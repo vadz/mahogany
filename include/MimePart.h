@@ -175,11 +175,14 @@ public:
     */
    //@{
 
+   /// get the raw (un-decoded) contents of this part
+   virtual const void *GetRawContent(unsigned long *len = NULL) const = 0;
+
    /// get the decoded contents of this part
    virtual const void *GetContent(unsigned long *len = NULL) const = 0;
 
-   /// get the raw (un-decoded) contents of this part, with all headers
-   virtual const void *GetRawContent(unsigned long *len = NULL) const = 0;
+   /// get all headers as one string
+   virtual String GetHeaders() const = 0;
 
    /// get the encoding of the part
    virtual MimeXferEncoding GetTransferEncoding() const = 0;

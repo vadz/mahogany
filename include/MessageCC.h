@@ -75,13 +75,20 @@ public:
    */
    virtual String FetchText(void) const;
 
-   /** get the raw part text, with MIME headers
+   /** get the raw part text
     */
-   char *GetRawPartData(const MimePart& mimepart, unsigned long *len = NULL);
+   const char *GetRawPartData(const MimePart& mimepart, unsigned long *len = NULL);
 
    /** get the decoded part text
     */
    const void *GetPartData(const MimePart& mimepart, unsigned long *len = NULL);
+
+   /**
+      Get all headers of this message part.
+
+      @return string containing all headers or an empty string on error
+     */
+   String GetPartHeaders(const MimePart& mimepart);
 
    virtual const MimePart *GetTopMimePart() const;
 
@@ -159,6 +166,15 @@ protected:
 
    /// get the ADDRESS struct for the given address header
    ADDRESS *GetAddressStruct(MessageAddressType type) const;
+
+   /// common part of GetRawPartData() and GetPartHeaders()
+   const char *DoGetPartAny(const MimePart& mimepart,
+                            unsigned long *lenptr,
+                            char *(*fetchFunc)(MAILSTREAM *,
+                                               unsigned long,
+                                               char *,
+                                               unsigned long *,
+                                               long));
 
 private:
    /// common part of all ctors
