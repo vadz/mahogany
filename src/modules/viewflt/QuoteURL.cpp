@@ -95,22 +95,12 @@ public:
    QuoteURLFilter(MessageView *msgView, ViewFilter *next, bool enable)
       : ViewFilter(msgView, next, enable)
    {
-      ReadOptions(msgView->GetProfile());
+      ReadOptions(m_options, msgView->GetProfile());
    }
 
+   virtual bool UpdateOptions(Profile *profile);
+
 protected:
-   // the main work function
-   virtual void DoProcess(String& text,
-                          MessageViewer *viewer,
-                          MTextStyle& style);
-
-   // fill m_options using the values from the given profile
-   void ReadOptions(Profile *profile);
-
-   // helpers
-   size_t GetQuotedLevel(const wxChar *text) const;
-   wxColour GetQuoteColour(size_t qlevel) const;
-
    struct Options
    {
       // the colours for quoted text (only used if quotedColourize)
@@ -133,7 +123,42 @@ protected:
 
       /// highlight URLs?
       bool highlightURLs:1;
-   } m_options;
+
+      bool operator==(const Options& o) const
+      {
+         bool eq = quotedMaxWhitespace == o.quotedMaxWhitespace &&
+                   quotedColourize == o.quotedColourize &&
+                   quotedCycleColours == o.quotedCycleColours &&
+                   highlightURLs == o.highlightURLs;
+         if ( eq && quotedColourize )
+         {
+            for ( size_t n = 0; n <= QUOTE_LEVEL_MAX; n++ )
+            {
+               if ( QuotedCol[n] != o.QuotedCol[n] )
+               {
+                 eq = false;
+                 break;
+               }
+            }
+         }
+
+         return eq;
+      }
+   };
+
+   // the main work function
+   virtual void DoProcess(String& text,
+                          MessageViewer *viewer,
+                          MTextStyle& style);
+
+   // fill m_options using the values from the given profile
+   void ReadOptions(Options& options, Profile *profile);
+
+   // helpers
+   size_t GetQuotedLevel(const wxChar *text) const;
+   wxColour GetQuoteColour(size_t qlevel) const;
+
+   Options m_options;
 };
 
 // ============================================================================
@@ -215,7 +240,8 @@ IMPLEMENT_VIEWER_FILTER(QuoteURLFilter,
 // ----------------------------------------------------------------------------
 
 void
-QuoteURLFilter::ReadOptions(Profile *profile)
+QuoteURLFilter::ReadOptions(QuoteURLFilter::Options& options,
+                            Profile *profile)
 {
    // a macro to make setting many colour options less painful
    #define GET_COLOUR_FROM_PROFILE(col, name) \
@@ -223,21 +249,34 @@ QuoteURLFilter::ReadOptions(Profile *profile)
                       READ_CONFIG(profile, MP_MVIEW_##name), \
                       GetStringDefault(MP_MVIEW_##name))
 
-   GET_COLOUR_FROM_PROFILE(m_options.QuotedCol[1], QUOTED_COLOUR1);
-   GET_COLOUR_FROM_PROFILE(m_options.QuotedCol[2], QUOTED_COLOUR2);
-   GET_COLOUR_FROM_PROFILE(m_options.QuotedCol[3], QUOTED_COLOUR3);
+   GET_COLOUR_FROM_PROFILE(options.QuotedCol[1], QUOTED_COLOUR1);
+   GET_COLOUR_FROM_PROFILE(options.QuotedCol[2], QUOTED_COLOUR2);
+   GET_COLOUR_FROM_PROFILE(options.QuotedCol[3], QUOTED_COLOUR3);
 
    #undef GET_COLOUR_FROM_PROFILE
 
-   m_options.quotedColourize =
+   options.quotedColourize =
        READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_COLOURIZE);
-   m_options.quotedCycleColours =
+   options.quotedCycleColours =
        READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_CYCLE_COLOURS);
-   m_options.quotedMaxWhitespace =
+   options.quotedMaxWhitespace =
        READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_MAXWHITESPACE);
-   m_options.quotedMaxAlpha = READ_CONFIG(profile, MP_MVIEW_QUOTED_MAXALPHA);
+   options.quotedMaxAlpha = READ_CONFIG(profile, MP_MVIEW_QUOTED_MAXALPHA);
 
-   m_options.highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
+   options.highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
+}
+
+bool QuoteURLFilter::UpdateOptions(Profile *profile)
+{
+   Options optionsNew;
+   ReadOptions(optionsNew, profile);
+
+   if ( optionsNew == m_options )
+      return false;
+
+   m_options = optionsNew;
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------

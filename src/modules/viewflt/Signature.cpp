@@ -48,22 +48,29 @@ public:
    SignatureFilter(MessageView *msgView, ViewFilter *next, bool enable)
       : ViewFilter(msgView, next, enable)
    {
-      ReadOptions(msgView->GetProfile());
+      ReadOptions(m_options, msgView->GetProfile());
    }
 
+   virtual bool UpdateOptions(Profile *profile);
+
 protected:
+   struct Options
+   {
+      // the colour to use for signatures
+      wxColour SigCol;
+
+      bool operator==(const Options& o) const { return SigCol == o.SigCol; }
+   };
+
    virtual void DoProcess(String& text,
                           MessageViewer *viewer,
                           MTextStyle& style);
 
    // fill m_options using the values from the given profile
-   void ReadOptions(Profile *profile);
+   void ReadOptions(Options& options, Profile *profile);
 
-   struct Options
-   {
-      // the colour to use for signatures
-      wxColour SigCol;
-   } m_options;
+
+   Options m_options;
 };
 
 // ============================================================================
@@ -75,7 +82,8 @@ protected:
 // ----------------------------------------------------------------------------
 
 void
-SignatureFilter::ReadOptions(Profile *profile)
+SignatureFilter::ReadOptions(SignatureFilter::Options& options,
+                             Profile *profile)
 {
    // a macro to make setting many colour options less painful
    #define GET_COLOUR_FROM_PROFILE(col, name) \
@@ -83,7 +91,7 @@ SignatureFilter::ReadOptions(Profile *profile)
                       READ_CONFIG(profile, MP_MVIEW_##name), \
                       GetStringDefault(MP_MVIEW_##name))
 
-   GET_COLOUR_FROM_PROFILE(m_options.SigCol, SIGCOLOUR);
+   GET_COLOUR_FROM_PROFILE(options.SigCol, SIGCOLOUR);
 
    #undef GET_COLOUR_FROM_PROFILE
 
@@ -91,6 +99,34 @@ SignatureFilter::ReadOptions(Profile *profile)
    {
       Enable(false);
    }
+}
+
+bool SignatureFilter::UpdateOptions(Profile *profile)
+{
+   Options optionsNew;
+   ReadOptions(optionsNew, profile);
+
+   bool changed;
+   if ( optionsNew == m_options )
+   {
+      changed = false;
+   }
+   else
+   {
+      changed = true;
+
+      m_options = optionsNew;
+   }
+
+   bool enabled = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_SIGNATURE);
+   if ( enabled != IsEnabled() )
+   {
+      changed = true;
+
+      Enable(enabled);
+   }
+
+   return changed;
 }
 
 // ----------------------------------------------------------------------------

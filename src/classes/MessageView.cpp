@@ -993,7 +993,22 @@ MessageView::UpdateProfileValues()
 {
    AllProfileValues settings;
    ReadAllSettings(&settings);
-   if ( settings != m_ProfileValues )
+
+   // we do not call DecRef() on this one
+   Profile *profile = GetProfile();
+
+   bool updateViewer = false;
+   for ( ViewFilterNode *filterNode = m_filters;
+         filterNode;
+         filterNode = filterNode->GetNext() )
+   {
+      if ( filterNode->GetFilter()->UpdateOptions(profile) )
+      {
+         updateViewer = true;
+      }
+   }
+
+   if ( updateViewer || settings != m_ProfileValues )
    {
       bool recreateViewer = settings.msgViewer != m_ProfileValues.msgViewer;
 
