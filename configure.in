@@ -115,6 +115,9 @@ M_OVERRIDES(nls,i18n support,USE_I18N,1,
 M_OVERRIDES(python,Python scripting,USE_PYTHON,1,
 --with-python=xxx       one of none/static/dynamic)
 
+M_OVERRIDES(dspam,DSPAM spam filter,USE_DSPAM,1,
+--with-dspam            use DSPAM for spam filtering)
+
 dnl choose how to use Python: normally, dynamic loading is preferred, but it
 dnl doesn't work under Mac (we need Python.bundle, but all we have is Python
 dnl framework which is a dylib and not a bundle)
@@ -1145,6 +1148,28 @@ case "$MAKE_PISOCKLIB" in
 	fi
 esac
 AC_SUBST(MAKE_HAVE_LIBMAL)
+
+dnl --------------------------------------------------------------------------
+dnl check whether we use dspam
+dnl --------------------------------------------------------------------------
+
+MAKE_USE_DSPAM=
+case "$USE_DSPAM" in
+    1)
+	dnl check for sqlite as we use sqlite driver for dspam
+	dnl
+	dnl TODO: support for other drivers
+	AC_CHECK_HEADER(sqlite.h,
+	    AC_CHECK_LIB(sqlite, main,
+		MAKE_USE_DSPAM="USE_DSPAM=1",
+		AC_MSG_WARN(Cannot find sqlite library - support for DSPAM disabled.)
+	    ),
+	    AC_MSG_WARN(Cannot find sqlite header - support for DSPAM disabled.)
+	)
+	;;
+esac
+
+AC_SUBST(MAKE_USE_DSPAM)
 
 dnl --------------------------------------------------------------------------
 dnl How do we want to use modules?

@@ -28,6 +28,13 @@ else
 MOD	:= $(filter-out modules/PalmOS.so, $(MOD))
 endif
 
+ifdef USE_DSPAM
+CPPFLAGS_modules_spam_dspam_so := -I../lib/dspam/.src
+LDFLAGS_modules_spam_dspam_so := ../lib/dspam/libdspam.a -lsqlite
+else
+MOD	:= $(filter-out modules/spam/dspam.so, $(MOD))
+endif
+
 MSOS	+= $(MOD)
 
 MSGSRC	+= $(SRC)
