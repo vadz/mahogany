@@ -3128,8 +3128,7 @@ MailFolderCC::mm_dlog(String str)
    GetLogCircle().Add(str);
    if(mm_show_debug)
    {
-      msg = _("Mail-debug: ") + msg;
-      STATUSMESSAGE((Str(msg)));
+      LOGMESSAGE((M_LOG_WINONLY, String(_("Mail-debug: ") + msg)));
    }
 }
 

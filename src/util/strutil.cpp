@@ -283,13 +283,13 @@ strutil_findurl(String &str, String &url)
 }
 
 
-int 
+int
 strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
 {
    int levels = 0;
    int num_alpha, num_white;
    const char *c;
-   
+
    for (c = string; *c != 0 && *c != '\n'; c++)
    {
       num_alpha = num_white = 0;
@@ -298,7 +298,7 @@ strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
       if ((*c == '>' || *c == '|') &&
           (num_alpha <= max_white && num_white <= max_alpha))
          levels++;
-      else 
+      else
          return levels;
    }
    return levels;
@@ -664,8 +664,8 @@ int TwoFishCrypt(
    struct CryptData *data_out
    )
 {
-   keyInstance    ki;			/* key information, including tables */
-   cipherInstance ci;			/* keeps mode (ECB, CBC) and IV */
+   keyInstance    ki;         /* key information, including tables */
+   cipherInstance ci;         /* keeps mode (ECB, CBC) and IV */
    int  i;
    int pwLen, result;
    int blkCount = (data_in->len+1)/(BLOCK_SIZE/8) + 1;
@@ -674,7 +674,7 @@ int TwoFishCrypt(
    BYTE * input = (BYTE *) calloc(byteCnt,1);
    BYTE * output = (BYTE *) calloc(byteCnt,1);
    memcpy(input, data_in->data, byteCnt);
-   
+
    if (makeKey(&ki,DIR_ENCRYPT,keySize,NULL) != TRUE)
    {
       free(input);
@@ -687,10 +687,10 @@ int TwoFishCrypt(
       free(output);
       return 0;
    }
-   
+
    /* Set key bits from password. */
    pwLen = strlen(passwd);
-   for (i=0;i<keySize/32;i++)	/* select key bits */
+   for (i=0;i<keySize/32;i++)   /* select key bits */
    {
       ki.key32[i] = (i < pwLen) ? passwd[i] : 0;
       ki.key32[i] ^= passwd[0];
@@ -698,23 +698,21 @@ int TwoFishCrypt(
    reKey(&ki);
 
    /* encrypt the bytes */
-   result =
-      direction ?
-      blockEncrypt(&ci,&ki, input ,byteCnt*8, output)
-      : blockDecrypt(&ci,&ki, input, byteCnt*8, output);
+   result = direction ? blockEncrypt(&ci, &ki, input, byteCnt*8, output)
+                      : blockDecrypt(&ci, &ki, input, byteCnt*8, output);
 
    if(result == byteCnt*8)
    {
-      data_out->data = (BYTE *) malloc(byteCnt*8);
-      memcpy(data_out->data, output, byteCnt*8);
-      data_out->len = byteCnt*8;
+      data_out->data = (BYTE *) malloc(byteCnt);
+      memcpy(data_out->data, output, byteCnt);
+      data_out->len = byteCnt;
       free(input);
       free(output);
       return 1;
    }
    free(input);
    free(output);
-   return 0;			
+   return 0;
 }
 
 
@@ -888,8 +886,8 @@ strutil_encrypt(const String &original)
 
    if(READ_APPCONFIG(MP_CRYPTALGO) == 1)
       return strutil_encrypt_tf(original);
-      
-   
+
+
    String
       tmpstr,
       newstr;
@@ -1015,9 +1013,19 @@ strutil_ftime(time_t time, const String & format, bool gmtflag)
 {
    struct tm *tmvalue = gmtflag ? gmtime(&time) : localtime(&time);
 
-   char buffer[256];
-   strftime(buffer, 256, format.c_str(), tmvalue);
-   return String(buffer);
+   String strTime;
+   if ( tmvalue )
+   {
+      char buffer[256];
+      strftime(buffer, 256, format.c_str(), tmvalue);
+      strTime = buffer;
+   }
+   else // this can happen if the message has no valid date header, don't crash!
+   {
+      strTime = _("invalid");
+   }
+
+   return strTime;
 }
 
 
@@ -1110,7 +1118,7 @@ strutil_readString(String &string, bool *success)
    }
    else
       cptr++;
-   
+
    String newstr;
    bool escaped = false;
    for(; *cptr && (*cptr != '"' || escaped); cptr++)
@@ -1169,7 +1177,7 @@ strutil_makeMailAddress(const String &personal,
       output << *cptr++;
    }
    if(quotesRequired)
-      output = String('"') + output + String('"'); 
+      output = String('"') + output + String('"');
    output << ' ';
    output << '<' << mailaddress << '>';
    return output;
@@ -1191,7 +1199,7 @@ strutil_getMailAddress(const String &inputline,
 
    String personal, mailbox, hostname;
    // We parse from the end which is easier:
-   
+
    const char *last = inputline.c_str() + inputline.Length() - 1;
    const char *first = inputline.c_str();
 
@@ -1344,7 +1352,7 @@ String strutil_flatten_array(const wxArrayString& array, char ch)
    {
       s += array[n];
       if ( n < count - 1 )
-         s+= ch;
+         s += ch;
    }
 
    return s;
@@ -1386,7 +1394,7 @@ wxArrayString strutil_uniq_array(const wxSortedArrayString& addrSorted)
 bool strutil_is7bit(const char *text)
 {
    unsigned char *utext = (unsigned char *)text;
-   
+
    for(;*utext;utext++)
       if(! isascii(*utext))
          return FALSE;

@@ -1151,7 +1151,7 @@ MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder)
    m_tree->GetWindow()->SetConstraints(c);
 
    // position the dialog
-   SetDefaultSize(6*wBtn, 5*hBtn);
+   SetDefaultSize(6*wBtn, 20*hBtn);
 }
 
 MFolderDialog::~MFolderDialog()
@@ -3426,7 +3426,7 @@ MText2Dialog::MText2Dialog(wxWindow *parent,
    m_text2->SetConstraints(c);
 
    Layout();
-   SetDefaultSize(5*wBtn, 7*hBtn);
+   SetDefaultSize(5*wBtn, 10*hBtn);
 }
 
 bool MText2Dialog::TransferDataToWindow()

@@ -348,12 +348,20 @@ SendMessageCC::SetupAddresses(void)
    if(m_Sender.Length() > 0)
    {
       m_Envelope->sender = mail_newaddr();
-      String email = Message::GetEMailFromAddress(m_Sender);
+      email = Message::GetEMailFromAddress(m_Sender);
       mailbox = strutil_before(email, '@');
       mailhost = strutil_after(email,'@');
+
+      if ( mailhost.empty() )
+      {
+         // SMTP servers often won't accept unqualified username as sender, so
+         // always use some domain name
+         mailhost = m_ServerHost;
+      }
+
       String tmp = Message::GetNameFromAddress(m_Sender);
       if(tmp != email) // it might just be the same name@host
-         m_Envelope->sender->personal = CPYSTR(tmp); 
+         m_Envelope->sender->personal = CPYSTR(tmp);
       m_Envelope->sender->mailbox = CPYSTR(mailbox);
       m_Envelope->sender->host = CPYSTR(mailhost);
    }
@@ -471,7 +479,7 @@ SendMessageCC::HasHeaderEntry(const String &entry)
          return true;
    return false;
 }
-String 
+String
 SendMessageCC::GetHeaderEntry(const String &key)
 {
    kbStringList::iterator i;
@@ -605,11 +613,11 @@ SendMessageCC::Build(bool forStorage)
    {
       m_headerNames[h] = strutil_strdup("X-Mailer");
       String version;
+      version << "Mahogany, " << M_VERSION_STRING;
 #ifdef OS_UNIX
-      version << "Mahogany, " << M_VERSION_STRING << _(", compiled for ") << M_OSINFO;
+      version  << _(", compiled for ") << M_OSINFO;
 #else // Windows
-      // TODO put Windows version info here
-      version << "Mahogany, " << M_VERSION_STRING << _(", compiled for ") << "Windows";
+      version << _(", running under ") << wxGetOsDescription();
 #endif // Unix/Windows
       m_headerValues[h++] = strutil_strdup(version);
    }
@@ -880,7 +888,7 @@ SendMessageCC::SendOrQueue(void)
   This cannot work at present as we have no Outbox setting that we
   could use. We need to make a difference between Outbox and the
   "send_directly" configuration settings.
-  
+
       MDialog_Message(
          _("No network connection available at present.\n"
            "Message will be queued in outbox."),
@@ -892,7 +900,7 @@ SendMessageCC::SendOrQueue(void)
          NULL, MDIALOG_MSGTITLE);
       return FALSE;
    }
- 
+
    kbStringList::iterator i;
    for(i = m_FccList.begin(); i != m_FccList.end(); i++)
       WriteToFolder(**i);
@@ -939,32 +947,28 @@ SendMessageCC::SendOrQueue(void)
 bool
 SendMessageCC::Send(void)
 {
-   // Built() must have been called!
-   ASSERT(m_headerNames != NULL);
+   ASSERT_MSG(m_headerNames != NULL, "Build() must have been called!");
 
    MCclientLocker locker();
 
-   SENDSTREAM
-      *stream = NIL;
-   const char
-      *hostlist[2];
-   String tmpbuf;
-   bool
-      success = true;
-   String
-      reply;
+   SENDSTREAM *stream = NIL;
+   bool success = true;
 
-   hostlist[1] = NIL;
-   String service;
+   // SMTP/NNTP server reply
+   String reply;
 
-   String server = m_ServerHost;
-   hostlist[0] = server;
+   String service,
+          server = m_ServerHost;
 
    if(m_UserName.Length() > 0) // activate authentication
    {
       server << "/user=\"" << m_UserName << '"';
       MailFolderCC::SetLoginData(m_UserName, m_Password);
    }
+
+   const char *hostlist[2];
+   hostlist[0] = server;
+   hostlist[1] = NIL;
 
 #ifndef OS_UNIX
    // For non-unix systems we make sure that no-one tries to run
@@ -975,7 +979,7 @@ SendMessageCC::Send(void)
    if(m_Protocol == Prot_Sendmail)
       m_Protocol = Prot_SMTP;
 #endif
-   
+
    // preview message being sent if asked for it
    String msgText;
    bool confirmSend;
@@ -1114,7 +1118,7 @@ SendMessageCC::Send(void)
       }
       else
       {
-         tmpbuf = MailFolder::GetLogCircle().GuessError();
+         String tmpbuf = MailFolder::GetLogCircle().GuessError();
          if(tmpbuf[0])
             ERRORMESSAGE((tmpbuf));
          tmpbuf.Printf(_("Failed to send - %s\n"),
@@ -1126,7 +1130,7 @@ SendMessageCC::Send(void)
    }
    else // error in opening stream
    {
-      tmpbuf = MailFolder::GetLogCircle().GuessError();
+      String tmpbuf = MailFolder::GetLogCircle().GuessError();
       if(tmpbuf[0])
          ERRORMESSAGE((tmpbuf));
       ERRORMESSAGE((_("Cannot open connection to any server.\n")));

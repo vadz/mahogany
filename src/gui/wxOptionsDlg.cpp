@@ -346,7 +346,7 @@ enum ConfigFields
    ConfigField_RSFolders,
    ConfigField_RSFolderGroup,
    ConfigField_OthersLast = ConfigField_RSFolderGroup,
-   
+
 
    // the end
    ConfigField_Max
@@ -1308,7 +1308,7 @@ void wxOptionsPage::CreateControls()
          case Field_Dir:
             last = CreateDirEntry(_(m_aFields[n].label), widthMax, last);
             break;
-            
+
          case Field_File:
             last = CreateFileEntry(_(m_aFields[n].label), widthMax, last);
             break;
@@ -1339,8 +1339,12 @@ void wxOptionsPage::CreateControls()
                dial->GetISPNames(aConnections);
                delete dial;
 
-               last = CreateComboBox(title + strutil_flatten_array(aConnections),
-                                     widthMax, last);
+               if ( !aConnections.IsEmpty() )
+               {
+                  title << ':' << strutil_flatten_array(aConnections);
+               }
+
+               last = CreateComboBox(title, widthMax, last);
             }
             else
 #endif // OS_WIN
@@ -1543,7 +1547,7 @@ void wxOptionsPage::UpdateUI()
                break;
 
             default:
-               ;
+               EnableControlWithLabel(control, bEnable);
          }
       }
       // this field is always enabled
@@ -2074,7 +2078,7 @@ bool wxOptionsPageFolderView::TransferDataToWindow()
       wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
       if ( !listbox->GetCount() )
       {
-         listbox->Append(READ_CONFIG(m_Profile, MP_FROM_ADDRESS)); 
+         listbox->Append(READ_CONFIG(m_Profile, MP_FROM_ADDRESS));
       }
    }
 
@@ -2091,7 +2095,7 @@ bool wxOptionsPageFolderView::TransferDataFromWindow()
       // default anyhow
       wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
       if ( listbox->GetCount() == 1 &&
-           listbox->GetString(0) == READ_CONFIG(m_Profile, MP_FROM_ADDRESS) ) 
+           listbox->GetString(0) == READ_CONFIG(m_Profile, MP_FROM_ADDRESS) )
       {
          listbox->Clear();
       }

@@ -11,6 +11,10 @@
 #   pragma implementation "Filters.h"
 #endif
 
+#include   "Mpch.h"
+
+// VZ: Greg, testing is nice, but this breaks Windows compilation!
+#if 0
 #ifndef TEST
 #   include   "Mpch.h"
 #else
@@ -26,6 +30,7 @@
 #   undef DEBUG_filters        // in case it's already set
 #   define DEBUG_filters 1
 #endif
+#endif // 0
 
 #ifndef USE_PCH
 #   include   "Mcommon.h"
