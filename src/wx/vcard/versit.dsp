@@ -92,11 +92,6 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;for;f90"
 # Begin Source File
 
-SOURCE=.\vcaltmp.c
-# PROP Exclude_From_Build 1
-# End Source File
-# Begin Source File
-
 SOURCE=.\vcc.c
 # End Source File
 # Begin Source File
@@ -136,5 +131,34 @@ SOURCE=.\vobject.h
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 # End Group
+# Begin Source File
+
+SOURCE=".\vcc.c-yacc"
+
+!IF  "$(CFG)" == "versit - Win32 Release"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Creating YACC output file
+InputPath=.\vcc.c-yacc
+
+"vcc.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) vcc.c
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "versit - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Creating YACC output file
+InputPath=.\vcc.c-yacc
+
+"vcc.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) vcc.c
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
 # End Target
 # End Project

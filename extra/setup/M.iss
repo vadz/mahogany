@@ -20,7 +20,7 @@ DefaultGroupName=Mahogany
 AllowNoIcons=1
 
 ; hmm... what's RGB value of mahogany?
-BackColor="$037ebd"
+BackColor=$037ebd
 
 SourceDir=f:\Progs\M
 LicenseFile=doc\license.txt
