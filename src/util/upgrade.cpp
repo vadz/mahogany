@@ -1253,8 +1253,10 @@ public:
             {
                ERRORMESSAGE((_(
                   "Found additional folder '%s'\n"
-                  "marked as central new mail folder. Ignoring it."),
-                             f->GetName().c_str()));
+                  "marked as central new mail folder. Ignoring it.\n"
+                  "New Mail folder used is '%s'."),
+                             f->GetName().c_str(),
+                             m_NewMailFolder.c_str()));
                f->SetFlags(f->GetFlags() & !MF_FLAGS_NEWMAILFOLDER);
             }
             else
