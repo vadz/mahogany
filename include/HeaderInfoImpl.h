@@ -116,7 +116,10 @@ private:
    void BuildTables();
 
    /// build m_tablePos from m_tableMsgno (call only if needed)
-   void BuildInverseTable();
+   void BuildPosTable();
+
+   /// return a new table which is inverse to the given one
+   MsgnoType *BuildInverseTable(MsgnoType *table) const;
 
    /// combine sorting and threading data into m_tableMsgno
    void CombineSortAndThread();

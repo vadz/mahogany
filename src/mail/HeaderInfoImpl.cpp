@@ -727,7 +727,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
             m_tablePos = NULL;
          }
 
-         BuildInverseTable();
+         BuildPosTable();
       }
       else // the trans tables are independent of the other ones, do update
       {
@@ -955,10 +955,21 @@ void HeaderInfoListImpl::CombineSortAndThread()
    // normally we're called from BuildTables() so we shouldn't have it yet
    ASSERT_MSG( !m_tableMsgno, "unexpected call to CombineSortAndThread" );
 
+   // allocate the tables: we're bulding both of them on the fly here
    m_tableMsgno = AllocTable();
+   m_tablePos = AllocTable();
    memset(m_tableMsgno, 0, m_count * sizeof(MsgnoType));
 
+   // we also need the inverse thread table to quickly find the parents of the
+   // messages in thread in the code below
+   MsgnoType *tableThrInv = BuildInverseTable(m_thrData->m_tableThread);
+
    /*
+      TODO: describe the current code correctly once it works (the comment
+            below is wrong because it omits to mention that we must put the
+            children in the free slots under their parent, otherwise the thread
+            structure would be broken!)
+
       Here is the idea: we scan the sorting table from top to bottom and
       extract from it first the root messages (i.e. with 0 indent in the
       threading table) which we can immediately put in order into
@@ -984,64 +995,6 @@ void HeaderInfoListImpl::CombineSortAndThread()
          3. traverse each of these arrays putting messages in place
     */
 
-   // old multi-pass code, keep it here for now for reference (it should
-   // produce the same results as the new one!)
-#if 0
-   size_t level = 0;
-   MsgnoType countDone = 0;
-   while ( countDone < m_count )
-   {
-      MsgnoType idxCur = 0;
-
-      for ( MsgnoType n = 0; n < m_count; n++ )
-      {
-         MsgnoType msgno;
-         if ( m_reverseOrder )
-         {
-            // reverse either the table order or the natural order
-            msgno = m_tableSort ? m_tableSort[m_count - 1 - n]
-                                : m_count - n;
-         }
-         else // !reversed order
-         {
-            // must have a table, otherwise how do we sort messages?
-            msgno = m_tableSort[n];
-         }
-
-         if ( m_thrData->m_indents[msgno - 1] != level )
-         {
-            // ignore it now, we either have already seen it or will see
-            // it later
-            continue;
-         }
-
-         // skip the slots already taken (by messages of the lesser
-         // level)
-         while ( idxCur < m_count && m_tableMsgno[idxCur] )
-         {
-            idxCur++;
-         }
-
-         // there must be a free slot somewhere left!
-         ASSERT_MSG( idxCur < m_count, "logic error" );
-
-         // this is the next message we have here, so put it in the first
-         // available slot in the msgno table
-         m_tableMsgno[idxCur++] = msgno;
-
-         // one more message put in place
-         countDone++;
-
-         // reserve some places for the children of this item
-         idxCur += m_thrData->m_children[msgno - 1];
-      }
-
-      // now process the messages at the next level (if there are any, of
-      // course)
-      level++;
-   }
-#endif // 0
-
    // first pass: position the root messages and remember the number of other
    // ones in the array
    wxArrayInt numAtLevel;
@@ -1059,10 +1012,14 @@ void HeaderInfoListImpl::CombineSortAndThread()
       {
          // this is the next message we have here, so put it in the first
          // available slot in the msgno table
-         m_tableMsgno[idxCur++] = msgno;
+         m_tableMsgno[idxCur] = msgno;
 
-         // reserve some places for the children of this item
-         idxCur += m_thrData->m_children[msgno - 1];
+         // build the position table on the fly, too
+         m_tablePos[msgno - 1] = idxCur;
+
+         // reserve some places for the children of this item (always add 1 as
+         // we just used the slot at the position idxCur)
+         idxCur += m_thrData->m_children[msgno - 1] + 1;
       }
       else // child
       {
@@ -1081,17 +1038,21 @@ void HeaderInfoListImpl::CombineSortAndThread()
       }
    }
 
-   // alloc memory for the indices
+   // alloc memory for the arrays of indices themselves and their parents
    size_t level,
           depthMax = numAtLevel.GetCount();
    MsgnoType **indicesAtLevel = new MsgnoType *[depthMax];
+   MsgnoType **parentsAtLevel = new MsgnoType *[depthMax];
    for ( level = 0; level < depthMax; level++ )
    {
       indicesAtLevel[level] = new MsgnoType[numAtLevel[level]];
+      parentsAtLevel[level] = new MsgnoType[numAtLevel[level]];
       numAtLevel[level] = 0;
    }
 
-   // second pass: fill the indicesAtLevel arrays
+   // second pass: fill the arrays: indicesAtLevel[level] contains all messages
+   // at this depth in the sorted order while parentsAtLevel[level][n] contains
+   // the parent of the message indicesAtLevel[level][n]
    for ( n = 0; n < m_count; n++ )
    {
       MsgnoType msgno = GetNthSortedMsgno(n);
@@ -1099,8 +1060,31 @@ void HeaderInfoListImpl::CombineSortAndThread()
       size_t level = m_thrData->m_indents[msgno - 1];
       if ( level > 0 )
       {
-         level--;
-         indicesAtLevel[level][numAtLevel[level]++] = msgno;
+         size_t depth = level - 1; // convert to array index
+         indicesAtLevel[depth][numAtLevel[depth]] = msgno;
+
+         // find the parent of this message by finding the previous message in
+         // the thread table with indent strictly less than this one
+
+         // use index offset by 1 to avoid comparing unsigned quantities with 0,
+         // so idxInThread really corresponds to the previous message
+         MsgnoType idxInThread = tableThrInv[msgno - 1];
+         while ( idxInThread )
+         {
+            // see comment above for this "-1": we need the real index here
+            msgno = m_thrData->m_tableThread[idxInThread - 1];
+
+            // and this "-1" just transforms msgno to index
+            if ( m_thrData->m_indents[msgno - 1] < level )
+               break;
+
+            // NB: do it after "break" to avoid triggering the assert below
+            idxInThread--;
+         }
+
+         ASSERT_MSG( idxInThread, "didn't find the parent for a child?" );
+
+         parentsAtLevel[depth][numAtLevel[depth]++] = msgno;
       }
    }
 
@@ -1108,8 +1092,6 @@ void HeaderInfoListImpl::CombineSortAndThread()
    // place
    for ( level = 0; level < depthMax; level++ )
    {
-      idxCur = 0;
-
       MsgnoType countLevel = numAtLevel[level];
       for ( n = 0; n < countLevel; n++ )
       {
@@ -1117,6 +1099,17 @@ void HeaderInfoListImpl::CombineSortAndThread()
 
          // skip the slots already taken (by messages of the lesser
          // level)
+         //
+         // TODO: how can we speed it up? this can be quite slow with atypical
+         //       threads having a lot of messages at the same level (hopefully
+         //       this doesn't happen that often though)
+         MsgnoType msgnoParent = parentsAtLevel[level][n];
+         ASSERT_MSG( msgnoParent != MSGNO_ILLEGAL, "must have parent!" );
+
+         idxCur = m_tablePos[msgnoParent - 1];
+         ASSERT_MSG( m_tableMsgno[idxCur] == msgnoParent,
+                     "msgno/pos tables discrepancy detected" );
+
          while ( idxCur < m_count && m_tableMsgno[idxCur] )
          {
             idxCur++;
@@ -1127,10 +1120,11 @@ void HeaderInfoListImpl::CombineSortAndThread()
 
          // this is the next message we have here, so put it in the first
          // available slot in the msgno table
-         m_tableMsgno[idxCur++] = msgno;
+         m_tableMsgno[idxCur] = msgno;
 
-         // reserve some places for the children of this item
-         idxCur += m_thrData->m_children[msgno - 1];
+         // remember to update the position table as well, we must build it
+         // completely
+         m_tablePos[msgno - 1] = idxCur;
       }
    }
 
@@ -1141,6 +1135,8 @@ void HeaderInfoListImpl::CombineSortAndThread()
    }
 
    delete [] indicesAtLevel;
+   delete [] parentsAtLevel;
+   delete [] tableThrInv;
 }
 
 void HeaderInfoListImpl::BuildTables()
@@ -1152,6 +1148,9 @@ void HeaderInfoListImpl::BuildTables()
 
       return;
    }
+
+   // what is it inverse for?
+   ASSERT_MSG( !m_tablePos, "shouldn't have inverse table neither!" );
 
    // no, check if we need them
 
@@ -1203,25 +1202,32 @@ void HeaderInfoListImpl::BuildTables()
    //     just m_reverseOrder
    if ( m_tableMsgno && !m_tablePos )
    {
-      BuildInverseTable();
+      BuildPosTable();
    }
 
    CHECK_TABLES();
 }
 
-void HeaderInfoListImpl::BuildInverseTable()
+MsgnoType *HeaderInfoListImpl::BuildInverseTable(MsgnoType *table) const
+{
+   MsgnoType *tableInverse = AllocTable();
+
+   // build the inverse table from the direct one
+   for ( MsgnoType n = 0; n < m_count; n++ )
+   {
+      tableInverse[table[n] - 1] = n;
+   }
+
+   return tableInverse;
+}
+
+void HeaderInfoListImpl::BuildPosTable()
 {
    CHECK_RET( m_tableMsgno, "can't build inverse table without direct one" );
 
    ASSERT_MSG( !m_tablePos, "rebuilding inverse table (and leaking memory)?" );
 
-   m_tablePos = AllocTable();
-
-   // build the inverse table from the direct one
-   for ( MsgnoType n = 0; n < m_count; n++ )
-   {
-      m_tablePos[m_tableMsgno[n] - 1] = n;
-   }
+   m_tablePos = BuildInverseTable(m_tableMsgno);
 }
 
 void HeaderInfoListImpl::FreeTables()
@@ -1278,6 +1284,14 @@ void HeaderInfoListImpl::Sort()
          // we do need to sort messages
          m_tableSort = AllocTable();
 
+         long sortOrderOld;
+         if ( m_reverseOrder )
+         {
+            // we do the reversal ourselves
+            sortOrderOld = m_sortParams.sortOrder;
+            m_sortParams.sortOrder &= ~1;
+         }
+
          if ( m_mf->SortMessages(m_tableSort, m_sortParams) )
          {
             DUMP_TABLE(m_tableSort,
@@ -1287,6 +1301,13 @@ void HeaderInfoListImpl::Sort()
          else // sort failed
          {
             FreeSortData();
+         }
+
+         if ( m_reverseOrder )
+         {
+            // restore the real sort order so that comparing against it in
+            // SetSortOrder() has expected result when it is called later
+            m_sortParams.sortOrder = sortOrderOld;
          }
    }
 }
@@ -1349,7 +1370,9 @@ bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
 
    if ( canReverseOnly )
    {
-      m_reverseOrder = !m_reverseOrder;
+      // don't use !m_reverseOrder in the RHS because it is always set to false
+      // if we're threading messages
+      m_reverseOrder = IsSortCritReversed(m_sortParams.sortOrder);
    }
    else
    {
