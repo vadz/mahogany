@@ -30,7 +30,6 @@
 #endif
 
 #ifdef USE_PYTHON
-#  include <Python.h>
 #  include "PythonHelp.h"
 #endif // Python
 
