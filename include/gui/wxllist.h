@@ -38,12 +38,10 @@
 #   define WXLAYOUT_USE_CARET 1
 #endif // __WXMSW__
 
-// do not enable debug mode within Mahogany
-#if defined(__WXDEBUG__)  && ! defined(M_BASEDIR)
+// do not enable debug mode within Mahogany unless in debug mode
+#if defined(__WXDEBUG__) && (( ! defined(M_BASEDIR) )|| defined(DEBUG))
 #   define   WXLAYOUT_DEBUG
 #endif
-
-#define WXLAYOUT_DEBUG
 
 #ifdef WXLAYOUT_DEBUG
 #   define WXLO_TRACE(x)   wxLogDebug(x)
