@@ -617,6 +617,13 @@ MailFolderCmn::DeleteDuplicates()
    return UID_ILLEGAL; // an error happened
 }
 
+/* static */
+void MailFolder::PingAllOpened(void)
+{
+   // FIXME this should be fixed by moving the list of all opened folders into
+   //       MailFolder itself from MailFolderCC
+   MailFolderCC::PingAllOpened();
+}
 
 /* Before actually closing a mailfolder, we keep it around for a
    little while. If someone reaccesses it, this speeds things up. So

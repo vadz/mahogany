@@ -244,6 +244,8 @@ public:
    */
    static bool PingReopenAll(void);
 
+   /** Call Ping() on all opened mailboxes. */
+   static void PingAllOpened(void);
    //@}
 
    /**@name Subscription management */

@@ -1418,6 +1418,20 @@ MailFolderCC::Ping(void)
    }
 }
 
+/* static */
+void MailFolderCC::PingAllOpened(void)
+{
+   DBGMESSAGE(("Pinging all opened folders."));
+
+   StreamConnectionList::iterator i;
+   for ( const MailFolderCC *mf = MailFolderCC::GetFirstMapEntry(i);
+         mf;
+         mf = MailFolderCC::GetNextMapEntry(i) )
+   {
+      mf->Ping();
+   }
+}
+
 void
 MailFolderCC::Close(void)
 {
@@ -2883,7 +2897,9 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
          // fall through
 
       case ERROR:
-         loglevel = wxLOG_Error;
+         // usually just wxLOG_Error but may be set to something else to
+         // temporarily suppress the errors
+         loglevel = CC_GetLogLevel();
          break;
 
       case PARSE:

@@ -301,6 +301,9 @@ public:
    /** Check whether mailbox has changed. */
    virtual void Ping(void) = 0;
 
+   /** Call Ping() on all opened mailboxes. */
+   static void PingAllOpened(void);
+
    /** Perform a checkpoint on the folder. */
    virtual void Checkpoint(void) = 0;
 

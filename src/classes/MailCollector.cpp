@@ -301,6 +301,11 @@ MailCollectorImpl::Collect(MailFolder *mf)
    m_Count = 0;
    bool rc = true;
 
+   // first thing to do is to ping all currently opened folders as we want to
+   // do it anyhow - even if we don't use "new mail" folder - as checking for
+   // new mail should update them
+   MailFolder::PingAllOpened();
+
    if ( !m_NewMailFolder )
    {
       if ( mf || m_list->size() )
