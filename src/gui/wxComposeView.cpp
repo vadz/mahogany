@@ -323,7 +323,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
          }
 
          // take what was there before...
-         wxString newText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
+         wxString newText(text, nPrevAddrEnd + 1);  // first nPrevAddrEnd chars
          if ( !newText.IsEmpty() )
          {
             // there was something before, add separator
