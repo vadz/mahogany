@@ -288,6 +288,10 @@ public:
    /// Is it currently active/checked?
    bool m_active;
 
+protected:
+   /// virtual dtor
+   virtual ~SpamOption() { }
+
 private:
    SpamTest m_test;
 };

@@ -99,6 +99,9 @@ protected:
 
    //@}
 
+   /// virtual dtor
+   virtual ~CacheFile() { }
+
 private:
    /// copying the objects of this class is forbidden
    CacheFile(const CacheFile&);

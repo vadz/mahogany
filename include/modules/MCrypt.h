@@ -165,6 +165,10 @@ public:
    //virtual void Configure(wxWindow *parent) = 0;
 
    //@}
+
+protected:
+   /// virtual dtor
+   virtual ~MCryptoEngine() { }
 };
 
 // ----------------------------------------------------------------------------

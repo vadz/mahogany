@@ -300,6 +300,9 @@ public:
 protected:
    typedef ComposerOptions Options;
 
+   /// virtual dtor
+   virtual ~Composer() { }
+
 private:
    /**
      @name MessageEditor callbacks
