@@ -334,6 +334,8 @@ static const MenuItemInfo g_aMenuItems[] =
 #endif // USE_PS_PRINTING
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_SUBMENU,       gettext_noop("Rep&ly"), "", wxITEM_NORMAL },
+      // the available accelerators for this menu:
+      // BCDGIJKOQUVWXYZ
       {
          WXMENU_MSG_REPLY,
          gettext_noop("&Reply\tCtrl-R"),
@@ -348,25 +350,25 @@ static const MenuItemInfo g_aMenuItems[] =
       },
       {
          WXMENU_MSG_REPLY_SENDER,
-         gettext_noop("&Reply to sender"),
+         gettext_noop("Reply to &sender"),
          gettext_noop("Reply to the sender of this message only"),
          wxITEM_NORMAL
       },
       {
          WXMENU_MSG_REPLY_SENDER_WITH_TEMPLATE,
-         gettext_noop("Reply to sender with &template..."),
+         gettext_noop("Reply to sender with t&emplate..."),
          gettext_noop("Reply to the sender of this message after choosing a template to use"),
          wxITEM_NORMAL
       },
       {
          WXMENU_MSG_REPLY_ALL,
-         gettext_noop("Reply to a&ll\tCtrl-G"),
+         gettext_noop("Reply to &all\tCtrl-G"),
          gettext_noop("Reply to all recipients of this message (group reply)"),
          wxITEM_NORMAL
       },
       {
          WXMENU_MSG_REPLY_ALL_WITH_TEMPLATE,
-         gettext_noop("Repl&y to all with template...\tShift-Ctrl-G"),
+         gettext_noop("Reply to all with te&mplate...\tShift-Ctrl-G"),
          gettext_noop("Reply to all recipients of this message after choosing a template to use"),
          wxITEM_NORMAL
       },
@@ -378,7 +380,7 @@ static const MenuItemInfo g_aMenuItems[] =
       },
       {
          WXMENU_MSG_REPLY_LIST_WITH_TEMPLATE,
-         gettext_noop("Reply to list &with template...\tShift-Ctrl-L"),
+         gettext_noop("Reply to list with tem&plate...\tShift-Ctrl-L"),
          gettext_noop("Reply to the mailing list after choosing a template to use"),
          wxITEM_NORMAL
       },
@@ -390,7 +392,7 @@ static const MenuItemInfo g_aMenuItems[] =
       },
       {
          WXMENU_MSG_FORWARD_WITH_TEMPLATE,
-         gettext_noop("Forward with t&emplate...\tShift-Ctrl-F"),
+         gettext_noop("Forward wit&h template...\tShift-Ctrl-F"),
          gettext_noop("Forward this message after choosing a template to use"),
          wxITEM_NORMAL
       },
@@ -404,7 +406,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_BOUNCE,    gettext_noop("&Bounce..."), gettext_noop("Redirect the selected messages to another recipient"), wxITEM_NORMAL },
    { WXMENU_MSG_RESEND,    gettext_noop("R&esend..."), gettext_noop("Send the selected messages again."), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
-   { WXMENU_MSG_FILTER,    gettext_noop("&Apply filter rules..."), gettext_noop("Apply filter rules to selected messages")     , wxITEM_NORMAL },
+   { WXMENU_MSG_FILTER,    gettext_noop("Appl&y filter rules..."), gettext_noop("Apply filter rules to selected messages")     , wxITEM_NORMAL },
    { WXMENU_MSG_QUICK_FILTER, gettext_noop("&Quick filter..."), gettext_noop("Create a new filter for the selected message")     , wxITEM_NORMAL },
    { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Sa&ve as file..."), gettext_noop("Export message to a file")   , wxITEM_NORMAL },
    { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to folder..."),gettext_noop("Save message to another folder")   , wxITEM_NORMAL },
@@ -429,14 +431,20 @@ static const MenuItemInfo g_aMenuItems[] =
       { WXMENU_MSG_DESELECTALL,gettext_noop("&Deselect all\tCtrl-B"),    gettext_noop("Deselect all messages")    , wxITEM_NORMAL },
    { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
-   { WXMENU_SUBMENU,       gettext_noop("&Yet more commands"), "", wxITEM_NORMAL },
-      { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extra&ct addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), wxITEM_NORMAL },
-      { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , wxITEM_CHECK },
-      { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-Z"), gettext_noop("Show the raw message text") , wxITEM_NORMAL },
+   { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extract &addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), wxITEM_NORMAL },
+
+   // view
+
+   // the available accelerators for this menu:
+   // ABCDEFGIJKNOPQRSTUVXYZ
+   { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , wxITEM_CHECK },
+   { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-Z"), gettext_noop("Show the raw message text") , wxITEM_NORMAL },
 #ifdef EXPERIMENTAL_show_uid
-      { WXMENU_MSG_SHOWUID, "Show message UID&L", "", wxITEM_NORMAL },
+   { WXMENU_MSG_SHOWUID, "Show message UID&L", "", wxITEM_NORMAL },
 #endif // EXPERIMENTAL_show_uid
-      { WXMENU_MSG_SHOWMIME,  gettext_noop("Show &MIME structure...\tShift-Ctrl-Z"), gettext_noop("Show the MIME structure of the message") , wxITEM_NORMAL },
+   { WXMENU_MSG_SHOWMIME,  gettext_noop("Show &MIME structure...\tShift-Ctrl-Z"), gettext_noop("Show the MIME structure of the message") , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       gettext_noop("&Filters"), "", wxITEM_NORMAL },
    { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
 
    // compose
@@ -583,8 +591,8 @@ void AppendToMenu(wxMenu *menu, int& n)
    else {
       int id = GetMenuItem(n).idMenu;
       if ( id == WXMENU_SUBMENU ) {
-         // append all entries until the next one with id == WXMENU_SUBMENU to a
-         // submenu
+         // append all entries until the next one with id == WXMENU_SUBMENU to
+         // a submenu
          wxMenu *submenu = new wxMenu();
 
          int nSubMenu = n;
@@ -595,7 +603,11 @@ void AppendToMenu(wxMenu *menu, int& n)
 
          const MenuItemInfo& mii = GetMenuItem(nSubMenu);
 
-         menu->Append(10000, // FIXME
+         // we don't have the menu id field for the submenus so use their
+         // offset in the menu item array
+         //
+         // note that if this changes, FindSubmenu() will have to change too!
+         menu->Append(WXMENU_BEGIN + n,
                       wxGetTranslation(mii.label),
                       submenu,
                       wxGetTranslation(mii.helpstring));
@@ -745,7 +757,7 @@ void CreateMToolbar(wxFrame *parent, wxFrameId frameId)
 extern void
 CreateMMenu(wxMenuBar *menubar, int menu_begin, int menu_end, const wxString &caption)
 {
-   wxMenu *pMenu = new wxMenu("", wxMENU_TEAROFF);
+   wxMenu *pMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
    AppendToMenu(pMenu, menu_begin+1, menu_end);
    menubar->Append(pMenu, caption);
 }
@@ -757,6 +769,7 @@ EnableMMenu(MMenuId id, wxWindow *win, bool enable)
 {
    wxFrame *frame = GetFrame(win);
    CHECK_RET(frame, _T("no parent frame in EnableMMenu"));
+
    wxMenuBar *mb = frame->GetMenuBar();
    CHECK_RET(mb, _T("no menu bar in EnableMMenu"));
 
@@ -783,7 +796,28 @@ EnableMMenu(MMenuId id, wxWindow *win, bool enable)
    }
 }
 
-extern void EnableToolbarButton(wxToolBar *toolbar, int nButton, bool enable)
+extern wxMenu *
+FindSubmenu(wxWindow *win, int id)
+{
+   wxFrame *frame = GetFrame(win);
+   CHECK( frame, NULL, _T("no parent frame in FindSubmenu") );
+
+   wxMenuBar *mb = frame->GetMenuBar();
+   CHECK( mb, NULL, _T("no menu bar in FindSubmenu") );
+
+   // we use the index in the array/enum as id for the submenus, see
+   // AppendToMenu()
+   wxMenuItem *menuitem = mb->FindItem(WXMENU_BEGIN + id);
+   CHECK( menuitem, NULL, _T("no such menuitem in FindSubmenu") );
+
+   ASSERT_MSG( menuitem->IsSubMenu(),
+               _T("this menuitem is not a submenu in FindSubmenu") );
+
+   return menuitem->GetSubMenu();
+}
+
+extern void
+EnableToolbarButton(wxToolBar *toolbar, int nButton, bool enable)
 {
    CHECK_RET( toolbar, _T("no toolbar in EnableToolbarButton") );
 

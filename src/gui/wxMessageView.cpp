@@ -268,6 +268,72 @@ wxMessageView::CreateDefaultViewer() const
 }
 
 // ----------------------------------------------------------------------------
+// message view filters functions
+// ----------------------------------------------------------------------------
+
+void
+wxMessageView::CreateViewMenu()
+{
+   wxFrame *frame = GetParentFrame();
+   CHECK_RET( frame, _T("no parent frame in wxMessageView") );
+
+   // create the top level menu
+   WXADD_MENU(frame->GetMenuBar(), VIEW, _("&View"));
+
+   // find the filters submenu in it
+   wxMenu *menu = FindSubmenu(frame, WXMENU_VIEW_FILTERS_SUBMENU_BEGIN + 1);
+   CHECK_RET( menu, _T("View|Filters submenu not found?") );
+
+
+   // add all the filters to it
+
+   // initialize the filters chain first
+   MessageView::CreateViewMenu();
+
+   // and then iterate over all the filters adding them
+   int id = WXMENU_VIEW_FILTERS_BEGIN + 1;
+   void *cookie;
+   String name;
+   bool enabled;
+   bool cont = GetFirstViewFilter(&name, &enabled, &cookie);
+   while ( cont )
+   {
+      m_namesFilters.Add(name);
+
+      menu->AppendCheckItem(id, name);
+      if ( enabled )
+         menu->Check(id, true);
+
+      id++;
+
+      cont = GetNextViewFilter(&name, &enabled, &cookie);
+   }
+
+   // TODO: disable/remove filters menu if there are no filters?
+}
+
+void
+wxMessageView::OnToggleViewFilter(int id, bool checked)
+{
+   const int n = id - WXMENU_VIEW_FILTERS_BEGIN - 1;
+
+   CHECK_RET( n >= 0 && (size_t)n < m_namesFilters.GetCount(),
+              _T("invalid view filter toggled?") );
+
+   // this one must not be DecRef()'d
+   Profile * const profile = GetProfile();
+   CHECK_RET( profile, _T("no Profile in wxMessageView?") );
+
+   profile->writeEntry(m_namesFilters[n], checked);
+
+   MEventManager::Send(new MEventOptionsChangeData
+                           (
+                            profile,
+                            MEventOptionsChangeData::Ok
+                           ));
+}
+
+// ----------------------------------------------------------------------------
 // wxMessageViewFrame
 // ----------------------------------------------------------------------------
 
@@ -319,15 +385,13 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
       WXMENU_MSG_DELETE,
       WXMENU_MSG_UNDELETE,
       WXMENU_MSG_SEP3,
-      WXMENU_MSG_ADVANCED_SUBMENU_BEGIN,
-         WXMENU_MSG_SAVEADDRESSES,
-         WXMENU_MSG_TOGGLEHEADERS,
-         WXMENU_MSG_SHOWRAWTEXT,
+      WXMENU_MSG_SAVEADDRESSES,
+      WXMENU_MSG_TOGGLEHEADERS,
+      WXMENU_MSG_SHOWRAWTEXT,
 #ifdef EXPERIMENTAL_show_uid
-         WXMENU_MSG_SHOWUID,
+      WXMENU_MSG_SHOWUID,
 #endif // EXPERIMENTAL_show_uid
-         WXMENU_MSG_SHOWMIME,
-      WXMENU_MSG_ADVANCED_SUBMENU_END
+      WXMENU_MSG_SHOWMIME,
    };
 
    wxMenu *menu = new wxMenu("", wxMENU_TEAROFF);
@@ -346,6 +410,7 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
 
    GetMenuBar()->Append(menu, _("Me&ssage"));
 
+   m_MessageView->CreateViewMenu();
    AddLanguageMenu();
 
    // add a toolbar to the frame

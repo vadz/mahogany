@@ -54,11 +54,20 @@ public:
    virtual void OnViewerChange(const MessageViewer *viewerOld,
                                const MessageViewer *viewerNew);
 
+   /// create the "View" menu for our parent frame
+   virtual void CreateViewMenu();
+;
+   virtual void OnToggleViewFilter(int id, bool checked);
+
 protected:
    virtual MessageViewer *CreateDefaultViewer() const;
 
 private:
+   /// the associated folder view, if any
    FolderView *m_FolderView;
+
+   /// the array containing the names of all the existing filters
+   wxArrayString m_namesFilters;
 };
 
 // ----------------------------------------------------------------------------

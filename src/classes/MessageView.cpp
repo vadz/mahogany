@@ -782,6 +782,51 @@ MessageView::UpdateViewFiltersState()
    }
 }
 
+void
+MessageView::CreateViewMenu()
+{
+   if ( !m_filters )
+   {
+      InitializeViewFilters();
+   }
+}
+
+bool
+MessageView::GetFirstViewFilter(String *name, bool *enabled, void **cookie)
+{
+   CHECK( cookie, false, _T("NULL cookie in GetFirstFilter") );
+
+   *cookie = m_filters;
+
+   return GetNextViewFilter(name, enabled, cookie);
+}
+
+bool
+MessageView::GetNextViewFilter(String *name, bool *enabled, void **cookie)
+{
+   CHECK( name && enabled && cookie, false,
+          _T("NULL parameter in GetNextFilter") );
+
+   if ( !*cookie )
+      return false;
+
+   const ViewFilterNode * const filter = (ViewFilterNode *)(*cookie);
+
+   // we shouldn't return the TransparentFilter because it is an implementation
+   // detail and can't be turned off (nor does it make sense) anyhow
+   //
+   // as the TransparentFilter has empty name and is always the last one in the
+   // priority queue we know that if we encounter it we may stop
+   if ( filter->GetName().empty() )
+      return false;
+
+   *name = filter->GetName();
+   *enabled = filter->GetFilter()->IsEnabled();
+   *cookie = filter->GetNext();
+
+   return true;
+}
+
 // ----------------------------------------------------------------------------
 // misc
 // ----------------------------------------------------------------------------

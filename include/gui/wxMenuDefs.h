@@ -16,8 +16,9 @@
 
 #include <wx/fontenc.h>
 
-class wxMenu;
-class wxToolBar;
+class WXDLLEXPORT wxMenu;
+class WXDLLEXPORT wxToolBar;
+class WXDLLEXPORT wxWindow;
 
 // ----------------------------------------------------------------------------
 // menu functions
@@ -48,12 +49,17 @@ enum MMenuId
    MMenu_Folder,
    MMenu_Edit,
    MMenu_Message,
+   MMenu_View,
+   MMenu_Language,
    MMenu_Help,
    MMenu_Plugins
 };
 
-/// Function to enable/disable a given menu:
-extern void EnableMMenu(MMenuId id, class wxWindow *win, bool enable);
+/// Enable/disable a given menu:for the frame containing the given window
+extern void EnableMMenu(MMenuId id, wxWindow *win, bool enable);
+
+/// Find a submenu with the given id (from the WXMENU_XXX enum below)
+extern wxMenu *FindSubmenu(wxWindow *win, int id);
 
 /// Get the encoding selected by the user from the language menu
 extern wxFontEncoding GetEncodingFromMenuCommand(int id);
@@ -227,18 +233,24 @@ enum
    WXMENU_MSG_SELECT_SUBMENU_END,
    WXMENU_MSG_SEP6,
 
-   WXMENU_MSG_ADVANCED_SUBMENU_BEGIN,
-      WXMENU_MSG_SAVEADDRESSES,
-      WXMENU_MSG_TOGGLEHEADERS,
-      WXMENU_MSG_SHOWRAWTEXT,
-#ifdef EXPERIMENTAL_show_uid
-      WXMENU_MSG_SHOWUID,
-#endif // EXPERIMENTAL_show_uid
-      WXMENU_MSG_SHOWMIME,
-   WXMENU_MSG_ADVANCED_SUBMENU_END,
-   WXMENU_MSG_END = WXMENU_MSG_ADVANCED_SUBMENU_END,
+   WXMENU_MSG_SAVEADDRESSES,
+   WXMENU_MSG_END = WXMENU_MSG_SAVEADDRESSES,
 
-   WXMENU_COMPOSE_BEGIN = WXMENU_MSG_END,
+   WXMENU_VIEW_BEGIN = WXMENU_MSG_END,
+   WXMENU_MSG_TOGGLEHEADERS,
+   WXMENU_MSG_SHOWRAWTEXT,
+#ifdef EXPERIMENTAL_show_uid
+   WXMENU_MSG_SHOWUID,
+#endif // EXPERIMENTAL_show_uid
+   WXMENU_MSG_SHOWMIME,
+   WXMENU_VIEW_SEP,
+   WXMENU_VIEW_FILTERS_SUBMENU_BEGIN,
+      // this submenu is filled dynamically and the ids of its items start at
+      // WXMENU_VIEW_FILTERS_BEGIN defined below
+   WXMENU_VIEW_FILTERS_SUBMENU_END,
+   WXMENU_VIEW_END = WXMENU_VIEW_FILTERS_SUBMENU_END,
+
+   WXMENU_COMPOSE_BEGIN = WXMENU_VIEW_END,
    WXMENU_COMPOSE_INSERTFILE,
    WXMENU_COMPOSE_LOADTEXT,
    WXMENU_COMPOSE_SEND,
@@ -397,6 +409,9 @@ enum
    WXMENU_MODULES_MIGRATE_BEGIN = WXMENU_MODULES_CALENDAR_END,
    WXMENU_MODULES_MIGRATE_DO,
    WXMENU_MODULES_MIGRATE_END,
+
+   WXMENU_VIEW_FILTERS_BEGIN = WXMENU_MODULES_MIGRATE_END,
+   WXMENU_VIEW_FILTERS_END = WXMENU_VIEW_FILTERS_BEGIN + 30,
 
    WXMENU_MODULES_END,
 

@@ -567,12 +567,31 @@ END_EVENT_TABLE()
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
            : wxMFrame(iname,parent)
 {
+   // init members
    m_searchData = NULL;
 
+   // set frame icon/title, create status bar
    SetIcon(ICON("MainFrame"));
    SetTitle(_("Copyright (C) 1997-2003 The Mahogany Developers Team"));
 
    CreateStatusBar();
+
+   // create the child controls
+   m_splitter = new wxPSplitterWindow("MainSplitter", this, -1,
+                                      wxDefaultPosition, wxDefaultSize,
+                                      0);
+
+   wxSize sizeFrame = GetClientSize();
+   m_splitter->SetSize(sizeFrame);
+
+   // insert treectrl in one of the splitter panes
+   m_FolderTree = new wxMainFolderTree(m_splitter, this);
+   m_FolderView = new wxMainFolderView(m_splitter, this);
+   m_splitter->SplitVertically(m_FolderTree->GetWindow(),
+                               m_FolderView->GetWindow(),
+                               sizeFrame.x/3);
+
+   m_splitter->SetMinimumPaneSize(10);
 
    // construct the menu and toolbar
    AddFileMenu();
@@ -581,6 +600,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
 #ifndef HAS_DYNAMIC_MENU_SUPPORT
    AddMessageMenu();
+   m_FolderView->CreateViewMenu();
    AddLanguageMenu();
 #endif
 
@@ -601,30 +621,14 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    m_ModulesMenu = NULL;
 
-   // create the children
-   m_splitter = new wxPSplitterWindow("MainSplitter", this, -1,
-                                      wxDefaultPosition, wxDefaultSize,
-                                      0);
-
-   wxSize sizeFrame = GetClientSize();
-   m_splitter->SetSize(sizeFrame);
-
-   // insert treectrl in one of the splitter panes
-   m_FolderTree = new wxMainFolderTree(m_splitter, this);
-   m_FolderView = new wxMainFolderView(m_splitter, this);
-   m_splitter->SplitVertically(m_FolderTree->GetWindow(),
-                               m_FolderView->GetWindow(),
-                               sizeFrame.x/3);
-
-   m_splitter->SetMinimumPaneSize(10);
-   m_FolderTree->GetWindow()->SetFocus();
-
    // update the menu to match the initial selection
    MFolder_obj folder = m_FolderTree->GetSelection();
    if ( folder )
    {
       UpdateFolderMenuUI(folder);
    }
+
+   m_FolderTree->GetWindow()->SetFocus();
 }
 
 void wxMainFrame::AddFolderMenu(void)
@@ -764,11 +768,8 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
    bool hasFolder = m_FolderView && m_FolderView->GetFolder();
    if ( hasFolder != s_hasFolder )
    {
-      int idMessageMenu = mbar->FindMenu(_("Me&ssage"));
-      if ( idMessageMenu == wxNOT_FOUND )
-         return;
-
-      mbar->EnableTop(idMessageMenu, hasFolder);
+      EnableMMenu(MMenu_Message, this, hasFolder);
+      EnableMMenu(MMenu_View, this, hasFolder);
 
       // also update the toolbar buttons
       static const int buttonsToDisable[] =
@@ -793,11 +794,7 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
    bool hasPreview = hasFolder && m_FolderView->HasPreview();
    if ( hasPreview != s_hasPreview )
    {
-      int idLangMenu = mbar->FindMenu(_("&Language"));
-      if ( idLangMenu == wxNOT_FOUND )
-         return;
-
-      mbar->EnableTop(idLangMenu, hasPreview);
+      EnableMMenu(MMenu_Language, this, hasPreview);
 
       // only change the internal status now, if we succeeded in
       // enabling/disabling the menu, otherwise it would get out of sync
@@ -830,7 +827,7 @@ wxMainFrame::OnIdentChange(wxCommandEvent &event)
 void
 wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 {
-   int id = event.GetId();
+   const int id = event.GetId();
 
    if ( WXMENU_CONTAINS(FOLDER, id) )
    {
@@ -993,7 +990,9 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
               ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) ) ||
              id == WXMENU_EDIT_COPY ||
              id == WXMENU_EDIT_FIND ||
-             id == WXMENU_EDIT_FINDAGAIN) )
+             id == WXMENU_EDIT_FINDAGAIN ||
+             WXMENU_CONTAINS(VIEW, id) ||
+             WXMENU_CONTAINS(VIEW_FILTERS, id)) )
    {
       m_FolderView->OnCommandEvent(event);
    }

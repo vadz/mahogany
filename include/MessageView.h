@@ -221,6 +221,12 @@ public:
                       const String& errormsg,   // err msg to give on failure
                       const String& tempfile = _T("")); // temp file name if any
 
+   /// create the "View" menu for our parent frame
+   virtual void CreateViewMenu();
+
+   /// called when view filter state is toggled
+   virtual void OnToggleViewFilter(int id, bool checked) = 0;
+
 protected:
    /** @name Initialization
     */
@@ -321,9 +327,35 @@ protected:
 
    //@}
 
+   /// @name Access to the view filters for wxMessageView
+   //@{
+
+   /**
+      Start iterating over all filters in the filter chain.
+
+      @param name the string where the name of the filter is returned
+      @param enabled on return is true if the filter is enabled
+      @param cookie opaque cookie to be passed to GetNextViewFilter() later
+      @return true if there any filtersm, false otherwise
+    */
+   bool GetFirstViewFilter(String *name, bool *enabled, void **cookie);
+
+   /**
+      Continue iterating over all filters in the filter chain.
+
+      @param name the string where the name of the filter is returned
+      @param enabled on return is true if the filter is enabled
+      @param cookie opaque cookie (same as passed to GetFirstViewFilter())
+      @return true if there any more filtersm, false otherwise
+    */
+   bool GetNextViewFilter(String *name, bool *enabled, void **cookie);
+
+   //@}
+
 private:
    /** @name Preview data */
    //@{
+
    /// uid of the message being previewed or UID_ILLEGAL
    UIdType m_uid;
 
@@ -332,6 +364,7 @@ private:
 
    /// the mail folder
    ASMailFolder *m_asyncFolder;
+
    //@}
 
    /** @name Event manager stuff

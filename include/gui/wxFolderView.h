@@ -133,6 +133,9 @@ public:
    /// return the parent window
    wxWindow *GetWindow(void) const { return m_SplitterWindow; }
 
+   /// create the "View" menu for the frame
+   void CreateViewMenu();
+
    /// event processing
    virtual bool OnMEvent(MEventData& event)
    {

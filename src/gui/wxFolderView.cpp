@@ -57,7 +57,6 @@
 #include <wx/listctrl.h>
 #include <wx/menuitem.h>
 #include <wx/fontutil.h>
-#include <wx/tglbtn.h>
 
 #include "wx/persctrl.h"
 
@@ -334,7 +333,6 @@ protected:
    void OnSize(wxSizeEvent& event);
    void OnButton(wxCommandEvent& event);
    void OnChoice(wxCommandEvent& event);
-   void OnToggleButton(wxCommandEvent& event);
 
    // resize our own child to fill the entire window
    void Resize();
@@ -362,12 +360,6 @@ private:
    // the array containing the names of all the existing viewers
    wxArrayString m_namesViewers;
 
-   // the array containing the names of all the existing filters
-   wxArrayString m_namesFilters;
-
-   // the array containing the default states of the filters
-   wxArrayInt m_defFilterStates;
-
    // the event handler to hook the kbd input (NULL initially, !NULL later)
    class wxFolderMsgViewerEvtHandler *m_evtHandlerMsgView;
 
@@ -375,8 +367,7 @@ private:
    enum
    {
       Button_Close = 100,
-      TglButton_First = 200,
-      Choice_Viewer = 300
+      Choice_Viewer = 200
    };
 
    DECLARE_EVENT_TABLE()
@@ -1051,7 +1042,6 @@ BEGIN_EVENT_TABLE(wxFolderMsgWindow, wxWindow)
 
    EVT_BUTTON(wxFolderMsgWindow::Button_Close, wxFolderMsgWindow::OnButton)
    EVT_CHOICE(wxFolderMsgWindow::Choice_Viewer, wxFolderMsgWindow::OnChoice)
-   EVT_TOGGLEBUTTON(-1, wxFolderMsgWindow::OnToggleButton)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -1165,35 +1155,6 @@ void wxFolderMsgWindow::CreateViewerBar()
 
    sizer->Add(choice, 0, wxALL | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
 
-   // add the controls for the view filters
-   wxArrayString labelsFilters;
-   size_t countFilters = MessageView::GetAllAvailableFilters(&m_namesFilters,
-                                                             &labelsFilters,
-                                                             &m_defFilterStates);
-   for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
-   {
-      if ( !nFilter )
-      {
-         // add a spacer in the beginning
-         sizer->Add(10, 10);
-      }
-
-      wxToggleButton *btn = new wxToggleButton
-                                (
-                                    m_winBar,
-                                    TglButton_First + nFilter,
-                                    labelsFilters[nFilter],
-                                    wxDefaultPosition,
-                                    wxDefaultSize,
-                                    wxNO_BORDER
-                                );
-
-      btn->SetValue(m_defFilterStates[nFilter] != 0);
-
-      sizer->Add(btn, 0,
-                 wxTOP | wxBOTTOM | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
-   }
-
    // add the spacer and the button at the far right to close this bar
    sizer->Add(5, 0, 1); // expandable
 
@@ -1259,28 +1220,6 @@ void wxFolderMsgWindow::UpdateViewerBar()
    else
    {
       FAIL_MSG( _T("current viewer not in the list of all viewers?") );
-   }
-
-   // then update the filters states
-   const size_t countFilters = m_namesFilters.GetCount();
-   for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
-   {
-      // determine if this filter is enabled
-      bool found;
-      bool enable = profile->readEntry(m_namesFilters[nFilter], false, &found);
-      if ( !found )
-         enable = m_defFilterStates[nFilter] != 0;
-
-      // and change its state accordingly
-      wxToggleButton *btn = wxStaticCast
-                            (
-                              m_winBar->FindWindow(TglButton_First + nFilter),
-                              wxToggleButton
-                            );
-
-      CHECK_RET( btn, _T("no filter button in the viewer bar") );
-
-      btn->SetValue(enable);
    }
 }
 
@@ -1381,24 +1320,6 @@ void wxFolderMsgWindow::OnChoice(wxCommandEvent& event)
    // choosing the viewer he wants
    if ( m_listCtrl )
       m_listCtrl->SetFocus();
-}
-
-void wxFolderMsgWindow::OnToggleButton(wxCommandEvent& event)
-{
-   const int n = event.GetId() - TglButton_First;
-
-   CHECK_RET( n >= 0 && (size_t)n < m_namesFilters.GetCount(),
-              _T("invalid filter toggled?") );
-
-   Profile_obj profile(m_folderView->GetFolderProfile());
-
-   profile->writeEntry(m_namesFilters[n], event.IsChecked());
-
-   MEventManager::Send(new MEventOptionsChangeData
-                           (
-                            profile,
-                            MEventOptionsChangeData::Ok
-                           ));
 }
 
 // resize our own child to fill the entire available for it area
@@ -3745,6 +3666,7 @@ wxFolderView::DoClear(bool keepTheViewer)
 
    // disable the message menu as we have no folder
    EnableMMenu(MMenu_Message, m_FolderCtrl, false);
+   EnableMMenu(MMenu_View, m_FolderCtrl, false);
 
    // remove the status bar pane used for showing the folder status
    mApplication->RemoveStatusField(MAppBase::SF_FOLDER);
@@ -3810,6 +3732,7 @@ wxFolderView::ShowFolder(MailFolder *mf)
    m_FolderCtrl->SetFocus();
 
    EnableMMenu(MMenu_Message, m_FolderCtrl, true);
+   EnableMMenu(MMenu_View, m_FolderCtrl, true);
 }
 
 void
@@ -4369,7 +4292,7 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
 void
 wxFolderView::OnCommandEvent(wxCommandEvent& event)
 {
-   int cmd = event.GetId();
+   const int cmd = event.GetId();
 
    // we can process these commands even without having an opened folder
    if ( cmd >= WXMENU_FVIEW_POPUP_BEGIN && cmd < WXMENU_FVIEW_POPUP_END )
@@ -4476,7 +4399,12 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          break;
 
       default:
-         if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
+         if ( WXMENU_CONTAINS(VIEW_FILTERS, cmd) )
+         {
+            if ( m_MessagePreview )
+               m_MessagePreview->OnToggleViewFilter(cmd, event.IsChecked());
+         }
+         else if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
          {
             // it might be a folder from popup menu
             wxFolderMenu *menu = m_FolderCtrl->GetFolderMenu();
@@ -4962,6 +4890,21 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    //else: not out result at all
 
    result->DecRef();
+}
+
+// ----------------------------------------------------------------------------
+// wxFolderView misc
+// ----------------------------------------------------------------------------
+
+// this is just for wxMainFrame -- it can't access our m_MessagePreview
+// directly so we forward this call to it
+void
+wxFolderView::CreateViewMenu()
+{
+   // should be called later maybe?
+   CHECK_RET( m_MessagePreview, _T("no message view in wxFolderView yet") );
+
+   m_MessagePreview->CreateViewMenu();
 }
 
 // ============================================================================

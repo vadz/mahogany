@@ -796,6 +796,8 @@ void wxFolderTree::ProcessMenuCommand(int id)
 // for the current selection!
 void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
 {
+   CHECK_RET( menu, _T("NULL menu in wxFolderTree::UpdateMenu") );
+
    int folderFlags = folder->GetFlags();
    MFolderType folderType = folder->GetType();
 
