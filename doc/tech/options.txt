@@ -65,7 +65,7 @@ then, i.e. MFolder or MailFolder or ASMailFolder::GetProfile(). Don't forget
 to call DecRef() on the profile object returned by these functions to avoid
 memory leaks or, better yet, use Profile_obj class which is a smart pointer to
 Profile and avoids memory leaks automatically (downside: you can't use it for
-mApplication->GetProfile() bnecause this one should _not_ be DecRef()'d).
+mApplication->GetProfile() because this one should _not_ be DecRef()'d).
 
    Now that you have a Profile (or Profile_obj) "profile" you may just do the
 following:
@@ -163,9 +163,7 @@ how this should be done.
    Mahogany uses different profile paths under Unix and Windows or, to be more
 precise, when using registry under Windows (which is the default) and using
 config files (which is the only possibility under Unix and may be also done
-under Windows). In the latter case, all Mahogany profile paths start with "/M",
-e.g. "/M/Profiles". In the former case, the "/M" prefix is removed as it is
-superfluous under Windows: the registry key is already called "M". This means
+under Windows). This means
 that the path used in the program and the actual path in wxConfig may be
 different. Normally, it shouldn't matter as Profile class takes care of it but
 it will break down if you access the config directly using wxConfig. For this
