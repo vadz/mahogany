@@ -6,6 +6,10 @@ $Id$
 - MessageView:
   + use parameters from list as default filenames
 
+- wxMainFrame:
+  + add message menu
+  + unsplit for now
+
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
   + backspace sometimes goes wrong, occasional editing problems ??
