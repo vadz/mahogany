@@ -214,11 +214,8 @@ MailCollectorImpl::Collect(MailFolder *mf)
 
    /* We might have filter rules set on the NewMail folder, so we
       apply these as well: */
-   // FIXME: This should only happen to new messages, but we do it to all, or 
-   // for some strange reason messages won't be recognised as new.
    m_NewMailFolder->ApplyFilterRules(true);
 
-   
    m_NewMailFolder->EnableNewMailEvents(true,true);
    m_NewMailFolder->Ping();
 
