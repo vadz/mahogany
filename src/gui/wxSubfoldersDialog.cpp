@@ -77,6 +77,8 @@ private:
 
    bool IsStackEmpty() const { return m_folderNames.GetCount() == 0; }
 
+   void EmptyStack() { m_folderNames.Clear(); m_folderIds.Clear(); }
+
    // just discards the top stack element
    void PopFolder()
    {
@@ -219,24 +221,30 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
    CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
           "unexpected event type" );
 
-   ASMailFolder::Result *result = ((MEventASFolderResultData &)event).GetResult();
+   // needed to be able to use DECLARE_AUTOREF() macro
+   typedef ASMailFolder::ResultFolderExists ASFolderExistsResult;
+   MEventASFolderResultData &data = (MEventASFolderResultData &)event;
+   DECLARE_AUTOPTR(ASFolderExistsResult)
+      result((ASFolderExistsResult *)data.GetResult());
 
    // is this message really for us?
    if ( result->GetUserData() != this )
    {
       // no: continue with other event handlers
-      result->DecRef();
-
       return TRUE;
    }
 
-   CHECK( result->GetOperation() == ASMailFolder::Op_ListFolders, FALSE,
-          "unexpected operation notification" );
+   if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
+   {
+      FAIL_MSG( "unexpected operation notification" );
+
+      return FALSE;
+   }
 
    // we're passed a folder specification - extract the folder name from it
    // (it's better to show this to the user rather than cryptic cclient string)
    wxString name,
-            spec = ((ASMailFolder::ResultFolderExists *)result)->GetName();
+            spec = result->GetName();
    if ( MailFolderCC::SpecToFolderName(spec, m_folderType, &name) )
    {
       String nameFull(name);
@@ -249,8 +257,6 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
    {
       wxLogDebug("Folder specification '%s' unexpected.", spec.c_str());
    }
-
-   result->DecRef();
 
    // we don't want anyone else to receive this message - it was for us only
    return FALSE;

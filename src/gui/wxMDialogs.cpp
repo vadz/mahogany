@@ -96,14 +96,18 @@
 // private classes
 // ----------------------------------------------------------------------------
 
-
+#if 1 // def OS_WIN
+#  undef USE_SEMIMODAL
+#else
+#  define USE_SEMIMODAL
+#endif
 
 int
 wxSMDialog::ShowModal()
 {
-#ifdef OS_WIN
+#ifndef USE_SEMIMODAL
    return wxDialog::ShowModal();
-#else // !Windows
+#else // USE_SEMIMODAL
    m_modalShowing = TRUE;
 
 #if wxUSE_HELP && wxUSE_HTML
@@ -132,14 +136,14 @@ wxSMDialog::ShowModal()
 
    wxEnableTopLevelWindows(TRUE);
    return GetReturnCode();
-#endif // Win/!Win
+#endif // !USE_SEMIMODAL/USE_SEMIMODAL
 }
 
 void wxSMDialog::EndModal( int retCode )
 {
-#ifdef OS_WIN
+#ifndef USE_SEMIMODAL
     wxDialog::EndModal(retCode);
-#else // !Win
+#else // USE_SEMIMODAL
     SetReturnCode( retCode );
 
     if (!IsModal())
@@ -149,7 +153,7 @@ void wxSMDialog::EndModal( int retCode )
     }
     m_modalShowing = FALSE;
     Show( FALSE );
-#endif // Win/!Win
+#endif // !USE_SEMIMODAL/USE_SEMIMODAL
 }
 
 

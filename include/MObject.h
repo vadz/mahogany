@@ -161,6 +161,41 @@ private:
 #endif
 
 // ----------------------------------------------------------------------------
+// utility classes
+// ----------------------------------------------------------------------------
+
+// declare an class which is an auto ptr to the given MObjectRC-derived type
+#define DECLARE_AUTOPTR(classname)  \
+   class classname##_obj \
+   { \
+   public: \
+      classname##_obj(classname *ptr = NULL) { m_ptr = ptr; } \
+      ~classname##_obj() { SafeDecRef(m_ptr); } \
+ \
+      void Attach(classname *ptr) \
+      { \
+         ASSERT_MSG( !m_ptr, "should have used Detach() first" ); \
+ \
+         m_ptr = ptr; \
+      } \
+ \
+      classname *Detach() \
+      { \
+         classname *ptr = m_ptr; \
+         m_ptr = NULL; \
+         return ptr; \
+      } \
+ \
+      classname *operator->() const { return m_ptr; } \
+ \
+   private: \
+      classname##_obj(const classname##_obj &); \
+      classname##_obj& operator=(const classname##_obj &); \
+ \
+      classname *m_ptr; \
+   }
+
+// ----------------------------------------------------------------------------
 // utility functions
 // ----------------------------------------------------------------------------
 
