@@ -42,10 +42,10 @@
 #   include "strutil.h"
 #   include "strings.h"
 #   include "guidef.h"
-#   include "miscutil.h"
 #   include <strings.h>
 #endif // USE_PCH
 
+#include "miscutil.h"
 #include "Mdefaults.h"
 #include "MApplication.h"
 #include "Message.h"

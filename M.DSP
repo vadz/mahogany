@@ -177,6 +177,10 @@ SOURCE=.\src\classes\MEvent.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\classes\MFilter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\classes\MFolder.cpp
 # End Source File
 # Begin Source File
@@ -224,6 +228,10 @@ SOURCE=.\src\classes\XFace.cpp
 # Begin Source File
 
 SOURCE=.\src\mail\ASMailFolder.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\mail\HeaderInfoImpl.cpp
 # End Source File
 # Begin Source File
 

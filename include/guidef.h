@@ -40,17 +40,10 @@
 #define LAYOUT_X_MARGIN       5
 #define LAYOUT_Y_MARGIN       5
 
-// these coefficients are used to calculate the size of the controls in
-// character height units (which we retrieve with wxGetCharHeight).
-// @@@ the coeffecients are purely empirical...
-
+// this function is obsolete
 inline long AdjustCharHeight(long h)
 {
-#  ifdef OS_WIN
-      return h - 3;
-#  else  // !Win
-      return h;
-#  endif // OS_WIN
+   return h;
 }
 
 // calculate the "optimal" text height for given label height

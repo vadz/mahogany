@@ -40,6 +40,7 @@
 #include "gui/wxMIds.h"
 #include "Mpers.h"
 #include "MFilter.h"
+#include "MFolder.h"
 
 #include <wx/window.h>
 #include <wx/confbase.h>
@@ -48,6 +49,7 @@
 #include <wx/layout.h>
 #include <wx/checklst.h>
 #include <wx/statbox.h>
+
 #include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxFiltersDialog.h"
@@ -997,7 +999,12 @@ wxOneFilterDialog::TransferDataToWindow()
 
       LayoutControls();
    }
-   else if ( !m_FilterData->IsEmpty() )
+   else if ( m_FilterData->IsEmpty() )
+   {
+      AddOneControl();
+      LayoutControls();
+   }
+   else
    {
       m_ActionControl->Hide();
       m_ButtonMore->Hide();
@@ -1111,13 +1118,15 @@ public:
    void OnEditFiter(wxCommandEvent& event);
    void OnDeleteFiter(wxCommandEvent& event);
 
+   void OnListboxChange(wxCommandEvent& event) { DoUpdate(); }
+
 protected:
    // update the buttons state depending on the lbox selection
    void DoUpdate();
 
    // listbox contains the names of all filters
    wxListBox *m_lboxFilters;
-   
+
    // the Add/Edit/Delete buttons
    wxButton *m_btnAdd,
             *m_btnEdit,
@@ -1125,7 +1134,7 @@ protected:
 
    // did anything change?
    bool m_hasChanges;
-   
+
 private:
    DECLARE_EVENT_TABLE()
 };
@@ -1134,6 +1143,7 @@ BEGIN_EVENT_TABLE(wxFiltersDialog, wxManuallyLaidOutDialog)
    EVT_BUTTON(Button_Add, wxFiltersDialog::OnAddFiter)
    EVT_BUTTON(Button_Edit, wxFiltersDialog::OnEditFiter)
    EVT_BUTTON(Button_Delete, wxFiltersDialog::OnDeleteFiter)
+   EVT_LISTBOX(-1, wxFiltersDialog::OnListboxChange)
 END_EVENT_TABLE()
 
 wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
@@ -1200,6 +1210,8 @@ wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
 
    SetDefaultSize(5*wBtn, 9*hBtn);
    m_lboxFilters->SetFocus();
+
+   DoUpdate();
 }
 
 void
