@@ -230,9 +230,6 @@ public:
    */
    //@{
 
-   /// set the MIME type for this attachment, must be called if !Type_Text
-   void SetMimeType(const String& mimeType);
-
    /// give us the data to attach, we will free() it (must be !NULL)
    void SetData(void *data, size_t length, const char *filename = NULL);
 
@@ -245,6 +242,22 @@ public:
    //@}
 
    /**
+      @name Other setters
+    */
+   //@{
+
+   /// set the MIME type for this attachment, must be called if !Type_Text
+   void SetMimeType(const String& mimeType);
+
+   /// set the name for Content-Disposition (same as filename by default)
+   void SetName(const String& name);
+
+   /// set disposition parameter of Content-Disposition header
+   void SetDisposition(const String& disposition);
+
+   //@}
+
+   /**
       @name Accessors
     */
    //@{
@@ -252,14 +265,17 @@ public:
    /// get the attachment type
    EditorContentType GetType() const { return m_Type; }
 
-   /// get the full attachment MIME type
-   String GetMimeType() const { return m_MimeType.GetFull(); }
-
-   /// get the first part of the attachment MIME type
-   MimeType::Primary GetMimeCategory() const { return m_MimeType.GetPrimary(); }
+   /// get the MIME type object
+   const MimeType& GetMimeType() const { return m_MimeType; }
 
    /// get the filename, may be empty
    const String& GetFileName() const { return m_FileName; }
+
+   /// get the name, may be empty
+   const String& GetName() const { return m_Name; }
+
+   /// get our disposition string
+   const String& GetDisposition() const { return m_Disposition; }
 
    /// get our text, only valid for text parts
    const String& GetText() const
@@ -307,6 +323,8 @@ private:
    void     *m_Data;
    size_t    m_Length;
    String    m_FileName,
+             m_Name,
+             m_Disposition,
              m_Text;
 
    MimeType m_MimeType;

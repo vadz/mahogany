@@ -149,7 +149,7 @@ public:
          name += ' ';
       }
 
-      name << '[' << mc->GetMimeType() << ']';
+      name << '[' << mc->GetMimeType().GetFull() << ']';
 
       SetLabel(name);
    }
