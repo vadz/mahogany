@@ -297,6 +297,17 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
       if(hi)
          selections.Add(hi->GetUId());
    }
+   if(selections.Count())
+   {
+      item = -1;
+      item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
+      if(item != -1)
+      {
+         hi = mf->GetHeaderInfo(item++);
+         if(hi)
+            selections.Add(hi->GetUId());
+      }
+   }
    return selections.Count();
 }
 
@@ -740,13 +751,7 @@ wxFolderView::GetSelections(wxArrayInt& selections)
       Update();
       return 0; // ignore current selection, so user has to re-issue command
    }
-   m_FolderCtrl->GetSelections(selections);
-   if(selections.Count() == 0
-      && m_MessagePreview->GetUId() != -1)
-   {
-      selections.Add(m_MessagePreview->GetUId());
-   }
-   return selections.Count();
+   return m_FolderCtrl->GetSelections(selections);
 }
 
 void
