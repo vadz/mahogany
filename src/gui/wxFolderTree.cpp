@@ -2293,17 +2293,22 @@ void wxFolderTreeImpl::OnEndLabelEdit(wxTreeEvent& event)
 
    if ( !label.empty() )
    {
-      if ( !m_sink->OnRename(folder, label) )
+      if ( label != folder->GetName() )
       {
-         wxTreeItemId id = event.GetItem();
-         label = GetItemText(id);
+         if ( !m_sink->OnRename(folder, label) )
+         {
+            wxTreeItemId id = event.GetItem();
+            label = GetItemText(id);
 
-         event.Veto();
+            event.Veto();
+         }
+         //else: renamed ok, leave m_idEditedInPlace non null because
+         //      we can't restore the suffix part of the label right now as it
+         //      is going to be overwritten after we return (at least under
+         //      MSW), and this will be done in OnIdle() later if
+         //      m_idEditedInPlace != 0
       }
-      //else: renamed ok, leave m_idEditedInPlace non null because
-      //      we can't restore the suffix part of the label right now as it is
-      //      going to be overwritten after we return (at least under MSW), and
-      //      this will be done in OnIdle() later if m_idEditedInPlace != 0
+      //else: don't rename, the name didn't change
    }
    else // empty new label or renaming cancelled, don't do anything
    {
