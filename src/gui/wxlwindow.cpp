@@ -1330,7 +1330,7 @@ wxLayoutWindow::Find(const wxString &needle,
    wxPoint found;
 
    if(fromWhere == NULL)
-      found = m_llist->FindText(m_FindString, m_llist->GetCursorPos());
+      found = m_llist->FindText(m_FindString, wxPoint(0, 0));
    else
       found = m_llist->FindText(m_FindString, *fromWhere);
    if(found.x != -1)
@@ -1355,8 +1355,8 @@ wxLayoutWindow::Find(const wxString &needle,
 bool
 wxLayoutWindow::FindAgain(void)
 {
-   bool rc = Find(m_FindString);
-   return rc;
+   wxPoint pt = m_llist->GetCursorPos();
+   return Find(m_FindString, &pt);
 }
 
 // ----------------------------------------------------------------------------

@@ -57,8 +57,8 @@ public:
    virtual wxWindow *GetWindow() const;
 
    // operations
-   virtual void Find(const String& text);
-   virtual void FindAgain();
+   virtual bool Find(const String& text);
+   virtual bool FindAgain();
    virtual String GetSelection() const;
    virtual void Copy();
    virtual bool Print();
@@ -104,6 +104,12 @@ public:
 private:
    // the viewer window
    TextViewerWindow *m_window;
+
+   // the position of the last match used by Find() and FindAgain()
+   long m_posFind;
+
+   // the text we're searched for the last time
+   wxString m_textFind;
 
    DECLARE_MESSAGE_VIEWER()
 };
@@ -302,6 +308,7 @@ IMPLEMENT_MESSAGE_VIEWER(TextViewer,
 TextViewer::TextViewer()
 {
    m_window = NULL;
+   m_posFind = -1;
 }
 
 // ----------------------------------------------------------------------------
@@ -344,14 +351,39 @@ void TextViewer::UpdateOptions()
 // TextViewer operations
 // ----------------------------------------------------------------------------
 
-void TextViewer::Find(const String& text)
+bool TextViewer::Find(const String& text)
 {
-   // TODO
+   m_posFind = -1;
+   m_textFind = text;
+
+   return FindAgain();
 }
 
-void TextViewer::FindAgain()
+bool TextViewer::FindAgain()
 {
-   // TODO
+   const char *pStart = m_window->GetValue();
+
+   const char *p = pStart;
+   if ( m_posFind != -1 )
+   {
+      // start looking at the next position after the last match
+      p += m_posFind + 1;
+   }
+
+   p = *p != '\0' ? strstr(p, m_textFind) : NULL;
+
+   if ( p )
+   {
+      m_posFind = p - pStart;
+
+      m_window->SetSelection(m_posFind, m_posFind + m_textFind.length());
+   }
+   else // not found
+   {
+      m_window->SetSelection(0, 0);
+   }
+
+   return p != NULL;
 }
 
 void TextViewer::Copy()

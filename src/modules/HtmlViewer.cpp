@@ -74,8 +74,8 @@ public:
    virtual wxWindow *GetWindow() const;
 
    // operations
-   virtual void Find(const String& text);
-   virtual void FindAgain();
+   virtual bool Find(const String& text);
+   virtual bool FindAgain();
    virtual String GetSelection() const;
    virtual void Copy();
    virtual bool Print();
@@ -473,14 +473,16 @@ void HtmlViewer::UpdateOptions()
 // HtmlViewer operations
 // ----------------------------------------------------------------------------
 
-void HtmlViewer::Find(const String& text)
+bool HtmlViewer::Find(const String& text)
 {
-   // TODO
+   return FindAgain();
 }
 
-void HtmlViewer::FindAgain()
+bool HtmlViewer::FindAgain()
 {
-   // TODO
+   wxLogError(_("Sorry, searching is not implemented in the HTML viewer yet"));
+
+   return false;
 }
 
 void HtmlViewer::Copy()

@@ -264,8 +264,8 @@ public:
    virtual void UpdateOptions() { }
    virtual wxWindow *GetWindow() const { return m_window; }
 
-   virtual void Find(const String& text) { }
-   virtual void FindAgain() { }
+   virtual bool Find(const String& text) { return false; }
+   virtual bool FindAgain() { return false; }
    virtual String GetSelection() const { return ""; }
    virtual void Copy() { }
    virtual bool Print() { return false; }
@@ -2467,13 +2467,21 @@ MessageView::DoMenuCommand(int id)
                            GetParentFrame(),
                            "MsgViewFindString") )
             {
-               m_viewer->Find(text);
+               if ( !m_viewer->Find(text) )
+               {
+                  wxLogStatus(GetParentFrame(),
+                              _("'%s' not found"),
+                              text.c_str());
+               }
             }
          }
          break;
 
       case WXMENU_EDIT_FINDAGAIN:
-         m_viewer->FindAgain();
+         if ( !m_viewer->FindAgain() )
+         {
+            wxLogStatus(GetParentFrame(), _("No more matches"));
+         }
          break;
 
       case WXMENU_HELP_CONTEXT:

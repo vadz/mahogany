@@ -69,8 +69,8 @@ public:
    virtual wxWindow *GetWindow() const;
 
    // operations
-   virtual void Find(const String& text);
-   virtual void FindAgain();
+   virtual bool Find(const String& text);
+   virtual bool FindAgain();
    virtual String GetSelection() const;
    virtual void Copy();
    virtual bool Print();
@@ -365,14 +365,14 @@ void LayoutViewer::UpdateOptions()
 // LayoutViewer operations
 // ----------------------------------------------------------------------------
 
-void LayoutViewer::Find(const String& text)
+bool LayoutViewer::Find(const String& text)
 {
-   m_window->Find(text);
+   return m_window->Find(text);
 }
 
-void LayoutViewer::FindAgain()
+bool LayoutViewer::FindAgain()
 {
-   m_window->FindAgain();
+   return m_window->FindAgain();
 }
 
 void LayoutViewer::Copy()

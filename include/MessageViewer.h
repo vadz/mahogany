@@ -70,10 +70,10 @@ public:
    //@{
 
    /// find the given string in the window
-   virtual void Find(const String& text) = 0;
+   virtual bool Find(const String& text) = 0;
 
    /// find the same string again (i.e. resume search)
-   virtual void FindAgain() = 0;
+   virtual bool FindAgain() = 0;
 
    /// return the selection
    virtual String GetSelection() const = 0;

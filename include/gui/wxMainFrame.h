@@ -54,7 +54,7 @@ public:
    void OnCommandEvent(wxCommandEvent &event);
    void OnIdentChange(wxCommandEvent &event);
    void OnIdle(wxIdleEvent &event);
-   void OnUpdateUIEnableIfHasFolder(wxUpdateUIEvent& event);
+   void OnUpdateUIEnableIfHasPreview(wxUpdateUIEvent& event);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 
    /// Appends the menu for a module to the menubar

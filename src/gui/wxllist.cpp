@@ -822,10 +822,8 @@ wxLayoutLine::FindObjectScreen(wxDC &dc, wxLayoutList *llist,
 CoordType
 wxLayoutLine::FindText(const wxString &needle, CoordType xpos) const
 {
-   int
-      cpos = 0,
-      relpos = -1;
-   wxString const *text;
+   int cpos = 0;
+   const wxString *text;
 
    for(wxLOiterator i = m_ObjectList.begin(); i != m_ObjectList.end(); ++i)
    {
@@ -834,8 +832,8 @@ wxLayoutLine::FindText(const wxString &needle, CoordType xpos) const
          if((**i).GetType() == WXLO_TYPE_TEXT)
          {
             text = & ((wxLayoutObjectText*)(*i))->GetText();
-            relpos = text->Find(needle);
-            if(relpos >= cpos-xpos) // -1 if not found
+            int relpos = text->Find(needle);
+            if ( relpos != wxNOT_FOUND )
             {
                return cpos+relpos;
             }
@@ -2918,7 +2916,6 @@ void
 wxLayoutList::EndHighlighting(wxDC &dc)
 {
    dc.SetTextForeground(m_CurrentStyleInfo.m_fg);
-   dc.SetTextBackground(m_CurrentStyleInfo.m_bg); // needed?
    dc.SetBackgroundMode(wxTRANSPARENT);
 }
 

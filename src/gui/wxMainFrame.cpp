@@ -225,9 +225,8 @@ BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
 
    EVT_IDLE(wxMainFrame::OnIdle)
 
-   EVT_UPDATE_UI_RANGE(WXMENU_MSG_BEGIN + 1,
-                       WXMENU_MSG_END,
-                       wxMainFrame::OnUpdateUIEnableIfHasFolder)
+   EVT_UPDATE_UI(WXMENU_EDIT_FIND, wxMainFrame::OnUpdateUIEnableIfHasPreview)
+   EVT_UPDATE_UI(WXMENU_EDIT_FINDAGAIN, wxMainFrame::OnUpdateUIEnableIfHasPreview)
 
    EVT_CHOICE(IDC_IDENT_COMBO, wxMainFrame::OnIdentChange)
 END_EVENT_TABLE()
@@ -448,9 +447,9 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
    }
 }
 
-void wxMainFrame::OnUpdateUIEnableIfHasFolder(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateUIEnableIfHasPreview(wxUpdateUIEvent& event)
 {
-   event.Enable( m_FolderView && m_FolderView->GetFolder() );
+   event.Enable( m_FolderView && m_FolderView->HasPreview() );
 }
 
 void
