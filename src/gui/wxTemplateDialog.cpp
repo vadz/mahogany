@@ -61,7 +61,6 @@ static const char *gs_templateNames[MessageTemplate_Max] =
    gettext_noop("Forward")
 };
 
-
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -743,6 +742,8 @@ void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& event)
       m_listbox->Delete(m_listbox->GetSelection());
 
       DeleteMessageTemplate(m_kind, m_name);
+
+      UpdateText();
    }
 }
 
