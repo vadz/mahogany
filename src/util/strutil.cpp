@@ -899,7 +899,7 @@ strutil_makeMailAddress(const String &personal,
    if(quotesRequired)
       output = String('"') + output + String('"'); 
    output << ' ';
-   output << mailaddress;
+   output << '<' << mailaddress << '>';
    return output;
 }
 

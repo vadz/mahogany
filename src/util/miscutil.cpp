@@ -471,6 +471,11 @@ extern String miscutil_GetReplyAddress(Profile *p,
    //else:
    String personal, mbox;
    personal = Message::GetNameFromAddress(replyTo);
+   if(personal == replyTo)
+   {  // there was no personal name
+      personal = "";
+      miscutil_GetFromAddress(p, &personal);
+   }
    mbox = Message::GetEMailFromAddress(replyTo);
    if(mbox.Length() == 0)
       return miscutil_GetFromAddress(p, &personal, &mbox);
