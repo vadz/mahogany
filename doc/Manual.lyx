@@ -1,4 +1,4 @@
-#This file was created by <karsten> Fri Feb 19 09:41:44 1999
+#This file was created by <karsten> Fri Feb 19 18:33:31 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -6095,7 +6095,60 @@ TODO (this is probably the section Karsten is waiting the most for...) (Yes
 FAQ - Frequently Asked Questions_1002_
 \layout Standard
 
-Being a brand new program, this section is currently empty.
+Being a brand new program, this section is currently pretty empty.
  However, we will constantly update this chapter with questions received
  on the mailing lists.
+\layout Section
+
+Installation Problems
+\layout Subsection
+
+All M icons show a questionmark
+\layout Standard
+
+
+\shape italic 
+I'm a linuxuser (redhat) who just found M and really likes it, but I have
+ a problem, I cant get all the widgets to work, the pictures on the buttons
+ and the ones before the mailboxes all appear as an questionmark.
+ Do I need some library to make it look like your screenshot? If you would
+ assist me in this matter I would be very greatful.
+\layout Standard
+
+It depends how you installed it.
+ If the icon with the questionmark appears, it means that M didn't find
+ its installation directory with the icons.
+ If you installed the linux version from the .tar.gz with the binary, it should
+ go into /usr/local or a similar place and you should have the icons in
+ /usr/local/share/M/icons.
+ If they are not there, M cannot find them.
+ If you have installed it in a different location, M should ask you for
+ the installation ("global M directory") when you start it for the first
+ time.
+\layout Standard
+
+If you have compiled it yourself, make sure you do a "make install" or "make
+ install_all" (of which parts might fail, depending on your setup), to install
+ everything in the right place.
+ If you just grabbed the binary of the daily snapshot, you need to have
+ a working M installation as well or it won't get the icons.
+ You do not need any additional library, M handles xpm files internally.
+\layout Subsection
+
+The Preferences Dialog does not show up properly
+\layout Standard
+
+
+\shape italic 
+When I set up M or select the preferences dialog, its contents do not appear.
+ Sometimes I cannot enter anything in the fields.
+\layout Standard
+
+wxGTK has a problem with constraint handling which can cause this dialog
+ to sometimes get into an endless loop trying to do the layout.
+ On most windowmanagers it helps if you resize the dialog a little and it
+ will appear correctly.
+ This seems to depend on the platform and windowmanager.
+ Also, wxGTK does not seem to work correctly with OpenLook which does not
+ allow you to enter anything.
 \the_end

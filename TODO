@@ -66,7 +66,6 @@ $Id$
  - document scripts in extra/scripts
 
  - move some functionality from wxFolderView to MailFolder?
-
  - Profile fixes/rewrite:
    - Current wxFolderView::SaveMessages() relies on
      MailFolder::OpenFolder() profile/file behaviour 
@@ -89,6 +88,7 @@ $Id$
     highlight and count the number of new messages
   - trying to exit M when wxMessageViews are open doesn't work, message 
     view remains there
+  - add "Inline" option for MIME popup on graphics
 
 - ADB:
   + make AdbEdit auto-generate a formatted name from first/family-name
@@ -114,7 +114,9 @@ $Id$
   - BBDB: sort entries by surname
   - easy: add support for email-to-fax gateway at www.tpc.int and
     their coverpage
-  - add "Inline" option for MIME popup on graphics
+  - add ADB support for $HOME/.mailrc
+    ( lines: "alias john_doe  john@doe.com, second@xxx.uuu, ...") 
+
 
 (Windows)
  - list ctrl resizing columns doesn't propagate the event to the app
