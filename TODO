@@ -14,6 +14,7 @@ $Id$
 *** not fixed yet:
 *********************************************************************
 
+ - allow '=' in urls and don't allow ' '
  - forwarding message triggers assert in wxComposeView:119
  - lock file checking for INBOX:
    + need to check for xxx.lock.* not just xxx.lock !
