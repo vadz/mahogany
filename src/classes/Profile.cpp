@@ -170,15 +170,20 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
 int
 Profile::readEntry(const char *szKey, int Default) const
 {
-   int
-      rc = Default;
-   char
-      *buf = strutil_strdup(strutil_ltoa(Default));
-   
-   rc = atoi(readEntry(szKey,buf));
-   
-   delete [] buf;
+   int rc;
 
+   if ( !fileConfig->Read((long *)&rc, szKey, Default) ) {
+      if ( !parentProfile ||
+           parentProfile->readEntry(szKey, Default) == Default ) {
+         if ( appConfig ) {
+            if ( !appConfig->Read((long *)&rc, szKey, Default) ) {
+               if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
+                   fileConfig->WRITE_ENTRY(szKey, Default);
+            }
+         }
+      }
+   }
+  
    return rc;
 }
 

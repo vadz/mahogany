@@ -21,15 +21,23 @@
 
 #ifndef USE_PCH
 # include "Mcommon.h"
+
+# include "Profile.h"
 #endif
 
 #include <wx/log.h>
 #include <wx/imaglist.h>
 #include <wx/notebook.h>
 
+#include "MDialogs.h"
+
 #include "Mdefaults.h"
 
-#include "MDialogs.h"
+#define MCB_FOLDEROPEN_D            ""
+#define MCB_FOLDERUPDATE_D          ""
+#define MCB_FOLDEREXPUNGE_D         ""
+#define MCB_FOLDERSETMSGFLAG_D      ""
+#define MCB_FOLDERCLEARMSGFLAG_D    ""
 
 // first and last are shifted by -1, i.e. the range of fields for the page Foo
 // is from ConfigField_FooFirst + 1 to ConfigField_FooLast inclusive.
@@ -71,7 +79,12 @@ enum ConfigFields
   ConfigField_PythonFirst = ConfigField_FoldersLast,
   ConfigField_EnablePython,
   ConfigField_StartupScript,
-  ConfigField_PythonLast = ConfigField_StartupScript,
+  ConfigField_CallbackFolderOpen,
+  ConfigField_CallbackFolderUpdate,
+  ConfigField_CallbackFolderExpunge,
+  ConfigField_CallbackSetFlag,
+  ConfigField_CallbackClearFlag,
+  ConfigField_PythonLast = ConfigField_CallbackClearFlag,
 
   // other options
   ConfigField_OthersFirst = ConfigField_PythonLast,
@@ -96,6 +109,8 @@ struct ConfigValueDefault
 
   long GetLong() const { wxASSERT( bNumeric ); return lValue; }
   const char *GetString() const { wxASSERT( !bNumeric ); return szValue; }
+
+  bool IsNumeric() const { return bNumeric; }
 
   const char *name;
   union
@@ -197,12 +212,8 @@ public:
                 size_t nFirst,
                 size_t nLast);
 
-  // these functions should never be called, but we can't make them pure
-  // virtuals because they're defined in wxWindow already
-  virtual bool TransferDataToWindow()
-    { wxFAIL_MSG("pure virtual called."); return FALSE; }
-  virtual bool TransferDataFromWindow()
-    { wxFAIL_MSG("pure virtual called."); return FALSE; }
+  virtual bool TransferDataToWindow();
+  virtual bool TransferDataFromWindow();
 
   // callbacks
   void OnBrowse(wxCommandEvent&);
@@ -213,6 +224,9 @@ public:
   void Refresh();
 
 protected:
+  // get the parent frame
+  wxOptionsDialog *GetFrame() const;
+
   void SetTopConstraint(wxLayoutConstraints *c, wxControl *last);
   
   wxListBox  *CreateListbox(const char *label, wxControl *last);
@@ -241,9 +255,6 @@ public:
     : wxOptionsPage(parent, _("Network"), wxOptionsDialog::Icon_Network,
                     ConfigField_NetworkFirst, ConfigField_NetworkLast) { }
 
-  virtual bool TransferDataToWindow();
-  virtual bool TransferDataFromWindow();
-
 private:
 };
 
@@ -253,9 +264,6 @@ public:
   wxOptionsPageIdent(wxNotebook *parent)
     : wxOptionsPage(parent, _("Identity"), wxOptionsDialog::Icon_Ident,
                     ConfigField_IdentFirst, ConfigField_IdentLast) { }
-
-  virtual bool TransferDataToWindow();
-  virtual bool TransferDataFromWindow();
 
 private:
 };
@@ -267,8 +275,7 @@ public:
     : wxOptionsPage(parent, _("Mail boxes"), wxOptionsDialog::Icon_Folders,
                     ConfigField_FoldersFirst, ConfigField_FoldersLast) { }
 
-  virtual bool TransferDataToWindow();
-  virtual bool TransferDataFromWindow();
+  void OnIdle(wxIdleEvent&);
 
   void OnNewFolder(wxCommandEvent&);
   void OnModifyFolder(wxCommandEvent&);
@@ -285,9 +292,6 @@ public:
     : wxOptionsPage(parent, _("Python"), wxOptionsDialog::Icon_Python,
                     ConfigField_PythonFirst, ConfigField_PythonLast) { }
 
-  virtual bool TransferDataToWindow();
-  virtual bool TransferDataFromWindow();
-
 private:
 };
 
@@ -297,9 +301,6 @@ public:
   wxOptionsPageOthers(wxNotebook *parent)
     : wxOptionsPage(parent, _("Others"), wxOptionsDialog::Icon_Others,
                     ConfigField_OthersFirst, ConfigField_OthersLast) { }
-
-  virtual bool TransferDataToWindow();
-  virtual bool TransferDataFromWindow();
 
 private:
 };
@@ -326,6 +327,8 @@ BEGIN_EVENT_TABLE(wxOptionsPageFolders, wxOptionsPage)
   EVT_BUTTON(wxOptionsPage_BtnNew,    wxOptionsPageFolders::OnNewFolder)
   EVT_BUTTON(wxOptionsPage_BtnModify, wxOptionsPageFolders::OnModifyFolder)
   EVT_BUTTON(wxOptionsPage_BtnDelete, wxOptionsPageFolders::OnDeleteFolder)
+
+  EVT_IDLE(wxOptionsPageFolders::OnIdle)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -358,12 +361,17 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 
   // folders
   { "Folders to open on &startup",  Field_List,    -1,                        },
-  { "Folder opened in &main frame", Field_Text,    -1,                        },
+  { "&Folder opened in main frame", Field_Text,    -1,                        },
 
 
   // python
   { "&Enable Python",               Field_Bool,    -1,                        },
   { "&Startup script",              Field_File,    ConfigField_EnablePython   },
+  { "&Folder open callback",        Field_Text,    ConfigField_EnablePython   },
+  { "Folder &update callback",      Field_Text,    ConfigField_EnablePython   },
+  { "Folder e&xpunge callback",     Field_Text,    ConfigField_EnablePython   },
+  { "Flag &set callback",           Field_Text,    ConfigField_EnablePython   },
+  { "Flag &clear callback",         Field_Text,    ConfigField_EnablePython   },
 
   // other options
   { "Show &log window",             Field_Bool,    -1,                        },
@@ -394,8 +402,8 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
   CONFIG_ENTRY(MC_BCC_LABEL),
 
   CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE),
-  CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
   CONFIG_ENTRY(MP_COMPOSE_SIGNATURE),
+  CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
 
   // folders
   CONFIG_ENTRY(MC_OPENFOLDERS),
@@ -404,6 +412,11 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
   // python
   CONFIG_ENTRY(MC_USEPYTHON),
   CONFIG_ENTRY(MC_STARTUPSCRIPT),
+  CONFIG_ENTRY(MCB_FOLDEROPEN),
+  CONFIG_ENTRY(MCB_FOLDERUPDATE),
+  CONFIG_ENTRY(MCB_FOLDEREXPUNGE),
+  CONFIG_ENTRY(MCB_FOLDERSETMSGFLAG),
+  CONFIG_ENTRY(MCB_FOLDERCLEARMSGFLAG),
 
   // other
   CONFIG_ENTRY(MC_SHOWLOG),
@@ -659,6 +672,19 @@ void wxOptionsPage::CreateControls()
   }
 }
 
+wxOptionsDialog *wxOptionsPage::GetFrame() const
+{
+  // find the frame we're in
+  wxWindow *win = GetParent();
+  while ( win && !win->IsKindOf(CLASSINFO(wxFrame)) ) {
+    win = win->GetParent();
+  }
+
+  wxASSERT( win != NULL );  // we must have a parent frame!
+
+  return (wxOptionsDialog *)win;
+}
+
 void wxOptionsPage::OnBrowse(wxCommandEvent& event)
 {
   wxBrowseButton *btn = (wxBrowseButton *)event.GetEventObject();
@@ -667,14 +693,7 @@ void wxOptionsPage::OnBrowse(wxCommandEvent& event)
 
 void wxOptionsPage::OnChange(wxEvent&)
 {
-  // find the frame we're in
-  wxWindow *win = GetParent();
-  while ( win && !win->IsKindOf(CLASSINFO(wxFrame)) ) {
-    win = win->GetParent();
-  }
-
-  if ( win )
-    ((wxOptionsDialog *)win)->SetDirty();
+  GetFrame()->SetDirty();
 }
 
 void wxOptionsPage::OnCheckboxChange(wxEvent& event)
@@ -750,6 +769,158 @@ void wxOptionsPage::Refresh()
   }
 }
 
+// read the data from config
+bool wxOptionsPage::TransferDataToWindow()
+{
+  // check that we didn't forget to update one of the arrays...
+  wxASSERT( WXSIZEOF(gs_aConfigDefaults) == ConfigField_Max );
+  wxASSERT( WXSIZEOF(wxOptionsPage::ms_aFields) == ConfigField_Max );
+
+  wxConfigBase *conf = Profile::GetAppConfig();
+
+  String strValue;
+  long lValue;
+  for ( size_t n = m_nFirst; n < m_nLast; n++ ) {
+    if ( gs_aConfigDefaults[n].IsNumeric() ) {
+      lValue = conf->Read(gs_aConfigDefaults[n].name,
+                          gs_aConfigDefaults[n].lValue);
+      strValue.Printf("%ld", lValue);
+    }
+    else {
+      // it's a string
+      strValue = conf->Read(gs_aConfigDefaults[n].name,
+                            gs_aConfigDefaults[n].szValue);
+    }
+
+    wxControl *control = m_aControls[n - m_nFirst];
+    switch ( ms_aFields[n].type ) {
+      case Field_Text:
+      case Field_File:
+      case Field_Number:
+        if ( ms_aFields[n].type == Field_Number ) {
+          wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+
+          strValue.Printf("%ld", lValue);
+        }
+        else {
+          wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+        }
+        wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+
+        ((wxTextCtrl *)control)->SetValue(strValue);
+        break;
+
+      case Field_Bool:
+        wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+        wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
+
+        ((wxCheckBox *)control)->SetValue(lValue != 0);
+        break;
+
+      case Field_List:
+        wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+        wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
+
+        // split it (FIXME @@@ what if it contains ';'?)
+        {
+          String str;
+          for ( size_t n = 0; n < strValue.Len(); n++ ) {
+            if ( strValue[n] == ';' ) {
+              if ( !str.IsEmpty() ) {
+                ((wxListBox *)control)->Append(str);
+                str.Empty();
+              }
+              //else: nothing to do, two ';' one after another
+            }
+            else {
+              str << strValue[n];
+            }
+          }
+
+          if ( !str.IsEmpty() ) {
+            ((wxListBox *)control)->Append(str);
+          }
+        }
+        break;
+
+      default:
+        wxFAIL_MSG("unexpected field type");
+    }
+  }
+
+  return TRUE;
+}
+
+// write the data to config
+bool wxOptionsPage::TransferDataFromWindow()
+{
+  // @@@ should only write the entries which really changed
+  wxConfigBase *conf = Profile::GetAppConfig();
+
+  String strValue;
+  long lValue;
+  for ( size_t n = m_nFirst; n < m_nLast; n++ ) {
+    wxControl *control = m_aControls[n - m_nFirst];
+    switch ( ms_aFields[n].type ) {
+      case Field_Text:
+      case Field_File:
+      case Field_Number:
+        wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+
+        strValue = ((wxTextCtrl *)control)->GetValue();
+
+        if ( ms_aFields[n].type == Field_Number ) {
+          wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+
+          lValue = atol(strValue);
+        }
+        else {
+          wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+        }
+        break;
+
+      case Field_Bool:
+        wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+        wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
+
+        lValue = ((wxCheckBox *)control)->GetValue();
+        break;
+
+      case Field_List:
+        wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+        wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
+
+        // join it (FIXME @@@ what if it contains ';'?)
+        {
+          wxListBox *listbox = (wxListBox *)control;
+          for ( size_t n = 0; n < (size_t)listbox->Number(); n++ ) {
+            if ( !strValue.IsEmpty() ) {
+              strValue << ';';
+            }
+
+            strValue << listbox->GetString(n);
+          }
+        }
+        break;
+
+      default:
+        wxFAIL_MSG("unexpected field type");
+    }
+
+    if ( gs_aConfigDefaults[n].IsNumeric() ) {
+      conf->Write(gs_aConfigDefaults[n].name, lValue);
+    }
+    else {
+      // it's a string
+      conf->Write(gs_aConfigDefaults[n].name, strValue);
+    }
+  }
+
+  // @@@@ yeah, no errors, that;s it...
+  return TRUE;
+}
+
+#if 0 // unused now
 // ----------------------------------------------------------------------------
 // wxOptionsPageNetwork
 // ----------------------------------------------------------------------------
@@ -789,18 +960,6 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
   return TRUE;
 }
 
-void wxOptionsPageFolders::OnNewFolder(wxCommandEvent&)
-{
-}
-
-void wxOptionsPageFolders::OnModifyFolder(wxCommandEvent&)
-{
-}
-
-void wxOptionsPageFolders::OnDeleteFolder(wxCommandEvent&)
-{
-}
-
 // ----------------------------------------------------------------------------
 // wxOptionsPagePython
 // ----------------------------------------------------------------------------
@@ -826,13 +985,64 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
 {
   return TRUE;
 }
+#endif
+
+void wxOptionsPageFolders::OnNewFolder(wxCommandEvent&)
+{
+  wxString str;
+  if ( !MInputBox(&str, _("Folders to open on startup"), _("Folder name"),
+                  GetFrame(), "LastStartupFolder") ) {
+    return;
+  }
+
+  ((wxListBox *)m_aControls[ConfigField_OpenFolders - m_nFirst])->Append(str);
+}
+
+void wxOptionsPageFolders::OnModifyFolder(wxCommandEvent&)
+{
+  wxListBox *l = (wxListBox *)m_aControls[ConfigField_OpenFolders - m_nFirst];
+  int nSel = l->GetSelection();
+
+  wxCHECK_RET( nSel != -1, "should be disabled" );
+
+  Profile *profile = new Profile(l->GetString(nSel), NULL);
+
+  MDialog_FolderProfile(GetFrame(), profile);
+}
+
+void wxOptionsPageFolders::OnDeleteFolder(wxCommandEvent&)
+{
+  wxListBox *l = (wxListBox *)m_aControls[ConfigField_OpenFolders - m_nFirst];
+  int nSel = l->GetSelection();
+
+  wxCHECK_RET( nSel != -1, "should be disabled" );
+
+  l->Delete(nSel);
+}
+
+void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
+{
+  bool bEnable = ((wxListBox *)m_aControls[ConfigField_OpenFolders - m_nFirst])
+                    ->GetSelection() != -1;
+
+  long id;
+  for ( id = wxOptionsPage_BtnNew; id <= wxOptionsPage_BtnNew; id++ ) {
+    wxWindow *win = FindWindow(id);
+    if ( win ) {
+      win->Enable(bEnable);
+    }
+    else {
+      wxFAIL_MSG("can't find listbox buttons by id");
+    }
+  }
+}
 
 // ----------------------------------------------------------------------------
 // wxOptionsDialog
 // ----------------------------------------------------------------------------
 wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
                : wxFrame(parent, -1, wxString(_("M Options")),
-                         wxDefaultPosition, wxSize(450, 350),
+                         wxDefaultPosition, wxSize(470, 350),
                          wxDEFAULT_FRAME_STYLE | wxDIALOG_MODAL)
 {
   wxLayoutConstraints *c;  
@@ -887,8 +1097,6 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
   m_notebook->SetImageList(imageList);
 
   // create and add the pages
-  wxASSERT( WXSIZEOF(wxOptionsPage::ms_aFields) == ConfigField_Max );
-
   (void)new wxOptionsPageNetwork(m_notebook);
   (void)new wxOptionsPageIdent(m_notebook);
   (void)new wxOptionsPageFolders(m_notebook);
@@ -928,7 +1136,7 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
 
   // set position
   // ------------
-  SetSizeHints(6*wBtn, 15*hBtn);
+  SetSizeHints(6*wBtn, 16*hBtn);
   Centre(wxCENTER_FRAME | wxBOTH);
 
   TransferDataToWindow();

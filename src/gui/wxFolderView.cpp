@@ -211,7 +211,20 @@ wxFolderView::Update(void)
    m_UpdateSemaphore = true;
    
    n = mailFolder->CountMessages();
+
+   // it contains '%'s which are interpreted as env var expansion chars
+   // under Windows and we need to disable it to avoid error messages
+#  ifdef OS_WIN
+      bool bDoesExpand = Profile::GetAppConfig()->IsExpandingEnvVars();
+      Profile::GetAppConfig()->SetExpandEnvVars(FALSE);
+#  endif //Windows
+
    format = READ_APPCONFIG(MC_DATE_FMT);
+
+#  ifdef OS_WIN
+      // restore the old setting
+      Profile::GetAppConfig()->SetExpandEnvVars(bDoesExpand);
+#  endif // Windows
 
    if(n < m_NumOfMessages)  // messages have been deleted, start over
       m_FolderCtrl->Clear();
