@@ -308,7 +308,12 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
       // end of this line
       name = headerLine.BeforeFirst(':');
       value = headerLine.AfterFirst(':');
-      if(name != "Date" && name != "From")
+      if ( name != "Date" && 
+           name != "From" && 
+           name != "MIME-Version" &&
+           name != "Content-Type" &&
+           name != "Content-Disposition" &&
+           name != "Content-Transfer-Encoding" )
          sendMsg->AddHeaderEntry(name, value);
       headerLine = "";
    }while(*cptr && *cptr != '\012');
