@@ -467,8 +467,8 @@ public:
    void OnIdle(wxIdleEvent& event);
    //@}
 
-   /// change the profile we use
-   void SetProfile(Profile *profile);
+   /// tell us that the folder we're viewing has changed
+   void OnFolderChange();
 
    /// change the options governing our appearance
    void ApplyOptions(const wxColour& fg, const wxColour& bg,
@@ -488,7 +488,10 @@ public:
    void SetPreviewDelay(unsigned long delay) { m_PreviewDelay = delay; }
 
    /// set the sort order to use (and notify everybody about it)
-   void SetSortOrder(Profile *profile, long sortOrder);
+   void SetSortOrder(Profile *profile,
+                     long sortOrder,
+                     wxFolderListColumn col,
+                     bool reverse);
 
    /// draw the sort direction arrow on the column used for sorting
    void UpdateSortIndicator();
@@ -612,9 +615,6 @@ protected:
    int m_selIsUnique;
 
    //@}
-
-   /// the profile used for storing columns widths
-   Profile *m_profile;
 
    /// column order
    int m_columns[WXFLC_NUMENTRIES];
@@ -968,9 +968,6 @@ END_EVENT_TABLE()
 wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
                 : m_timerPreview(this)
 {
-   m_profile = fv->GetProfile();
-   m_profile->IncRef(); // we wish to keep it until dtor
-
    m_headers = NULL;
    m_indexHI = (size_t)-1;
    m_hiCached = NULL;
@@ -1024,29 +1021,17 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
 wxFolderListCtrl::~wxFolderListCtrl()
 {
-   SaveColWidths();
-
    SafeDecRef(m_headers);
 
    delete m_attr;
-
-   m_profile->DecRef();
 
    delete m_menuFolders;
    delete m_menu;
 }
 
-void wxFolderListCtrl::SetProfile(Profile *profile)
+void wxFolderListCtrl::OnFolderChange()
 {
-   CHECK_RET( profile, "NULL profile in wxFolderListCtrl?" );
-
-   SafeDecRef(m_profile);
-
-   m_profile = profile;
-   m_profile->IncRef();
-
-   // the profile changes, hence the folder we show changes too, don't keep the
-   // old headers
+   // if the folder we show changes, don't keep the old headers
    if ( m_headers )
    {
       m_headers->DecRef();
@@ -1337,14 +1322,34 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
 
 void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 {
-   wxMenu menu(_("Sorting and threading"));
+   // get some non NULL profile
+   Profile_obj profile(m_FolderView->GetFolderProfile());
+
+   String name;
+   if ( !profile->GetName().
+            StartsWith(String(M_PROFILE_CONFIG_SECTION) + '/', &name) )
+   {
+      FAIL_MSG( "unexpected profile - what folder does it correspond to?" );
+   }
+
+   wxString menuTitle;
+   if ( name.empty() )
+   {
+      menuTitle = _("Default");
+   }
+   else // we're changing options for some folder
+   {
+      menuTitle = name.AfterLast('/');
+   }
+
+   wxMenu menu(menuTitle);
 
    // add items to sort by this column in direct/reverse order if we have a
    // valid column and if we can sort by it
    wxFolderListColumn col = GetColumnByIndex(m_columns, event.GetColumn());
    if ( col != WXFLC_NONE && SortOrderFromCol(col) != MSO_NONE )
    {
-      String colName = GetColumnName(col);
+      String colName = GetColumnName(col).Lower();
 
       menu.Append(WXMENU_FVIEW_SORT_BY_COL + col,
                   wxString::Format(_("Sort by %s"), colName.c_str()));
@@ -1362,13 +1367,6 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
    menu.AppendSeparator();
    menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), "", TRUE);
    menu.Append(WXMENU_FVIEW_CONFIG_THREAD, _("&Configure threading..."));
-
-   Profile *profile = m_FolderView->GetProfile();
-   if ( !profile )
-   {
-      // edit global settings if we don't have any open folder
-      profile = mApplication->GetProfile();
-   }
 
    if ( !READ_CONFIG(profile, MP_MSGS_SORTBY) )
    {
@@ -1398,7 +1396,7 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
       // we can't sort by this column
       wxLogStatus(GetFrame(this),
                   _("Impossible to sort messages using %s column"),
-                  GetColumnName(col).c_str());
+                  GetColumnName(col).Lower().c_str());
       return;
    }
 
@@ -1422,16 +1420,30 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
    // it would be surprizing for the novice user as he'd see one thing in the
    // options dialog and another thing on the screen (the sorting page is not
    // shown in the folder dialog in this mode)
-   Profile *profile = READ_APPCONFIG(MP_USERLEVEL) == (long)M_USERLEVEL_NOVICE
-                        ? mApplication->GetProfile()
-                        : m_FolderView->GetProfile();
+   Profile *profile;
+   bool usingGlobalProfile;
+   if ( READ_APPCONFIG(MP_USERLEVEL) == (long)M_USERLEVEL_NOVICE )
+   {
+      profile = mApplication->GetProfile();
+      profile->IncRef();
+
+      usingGlobalProfile = true;
+   }
+   else
+   {
+      profile = m_FolderView->GetFolderProfile();
+
+      usingGlobalProfile = false;
+   }
 
    // sort by this column: if we already do this, then toggle the sort
    // direction
    long sortOrder = READ_CONFIG(profile, MP_MSGS_SORTBY);
-   if ( profile != m_FolderView->GetProfile() )
+   if ( usingGlobalProfile )
    {
-      if ( READ_CONFIG(m_FolderView->GetProfile(), MP_MSGS_SORTBY) != sortOrder )
+      Profile *profileFolder = m_FolderView->GetProfile();
+      if ( profileFolder &&
+            READ_CONFIG(profileFolder, MP_MSGS_SORTBY) != sortOrder )
       {
          // as we're going to change the global one but this profiles settings
          // will override it!
@@ -1499,12 +1511,9 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
    }
 #endif // USE_COMPLEX_SORT/!USE_COMPLEX_SORT
 
-   // save the new sort order and update everything
-   wxLogStatus(GetFrame(this), _("Now sorting by %s%s"),
-               GetColumnName(col).c_str(),
-               GetSortCrit(sortOrder) == orderCol ? "" :  _(" (reverse)"));
+   SetSortOrder(profile, sortOrder, col, GetSortCrit(sortOrder) != orderCol);
 
-   SetSortOrder(profile, sortOrder);
+   profile->DecRef();
 }
 
 void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
@@ -1630,6 +1639,10 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
             Focus(m_headers->GetPosFromIdx(idx));
          }
       }
+      else
+      {
+         ASSERT_MSG( m_itemFocus == -1, "why no focused UID?" );
+      }
 
       // just show the new items
       UpdateItemCount();
@@ -1647,11 +1660,6 @@ void wxFolderListCtrl::InvalidateCache()
    m_hiCached = NULL;
 
    m_headersToGet.Empty();
-
-   // reset them so that OnIdle() doesn't try to access invalid (because
-   // referring to the old listing) m_itemFocus
-   m_uidFocus = UID_ILLEGAL;
-   m_itemFocus = -1;
 }
 
 void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
@@ -1707,6 +1715,18 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
          return NULL;
       }
 
+      // if the header is already cached, check if it's not the focused one
+      if ( (long)index == m_itemFocus )
+      {
+         // it is, update m_uidFocus here (for non cached indices it would be
+         // updated in OnIdle() as we can't do it before retrieving the
+         // header)
+         if ( m_uidFocus == UID_ILLEGAL )
+         {
+            self->m_uidFocus = GetUIdFromIndex(index);
+         }
+      }
+
       self->m_hiCached = m_headers->GetItem(index);
       self->m_indexHI = index;
    }
@@ -1754,7 +1774,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 
             m_FolderView->OnFocusChange(m_itemFocus, m_uidFocus);
          }
-         //else: hmm, what to do? we need call OnFocusChange... (FIXME)
+         //else: hmm, can it happen at all?
       }
 
       // now the header info should be in cache, so GetHeaderInfo() will
@@ -1780,7 +1800,9 @@ void wxFolderListCtrl::SaveColWidths()
    if ( str != FOLDER_LISTCTRL_WIDTHS_D && str != GetColWidths() )
    {
       // the widths did change, so save them for this folder
-      m_profile->writeEntry(FOLDER_LISTCTRL_WIDTHS, str);
+      Profile *profile = m_FolderView->GetProfile();
+      if ( profile )
+         profile->writeEntry(FOLDER_LISTCTRL_WIDTHS, str);
 
       // and also in global location so the next folder the user will open
       // will use these widths unless the user had fixed its width before:
@@ -1793,8 +1815,15 @@ void wxFolderListCtrl::SaveColWidths()
 wxString wxFolderListCtrl::GetColWidths() const
 {
    // first look in our profile
-   String widthsString = READ_CONFIG_PRIVATE(m_profile, FOLDER_LISTCTRL_WIDTHS);
-   if ( widthsString == FOLDER_LISTCTRL_WIDTHS_D )
+   String widthsString;
+
+   Profile *profile = m_FolderView->GetProfile();
+   if ( profile )
+   {
+      widthsString = READ_CONFIG_PRIVATE(profile, FOLDER_LISTCTRL_WIDTHS);
+   }
+
+   if ( widthsString.empty() || widthsString == FOLDER_LISTCTRL_WIDTHS_D )
    {
       // try the global setting
       widthsString =
@@ -1875,8 +1904,15 @@ void wxFolderListCtrl::CreateColumns()
 // wxFolderListCtrl sorting
 // ----------------------------------------------------------------------------
 
-void wxFolderListCtrl::SetSortOrder(Profile *profile, long sortOrder)
+void wxFolderListCtrl::SetSortOrder(Profile *profile,
+                                    long sortOrder,
+                                    wxFolderListColumn col,
+                                    bool reverse)
 {
+   wxLogStatus(GetFrame(this), _("Now sorting by %s%s"),
+               GetColumnName(col).Lower().c_str(),
+               reverse ? _(" (reverse)") : "");
+
    profile->writeEntry(MP_MSGS_SORTBY, sortOrder);
 
    UpdateSortIndicator();
@@ -1891,7 +1927,9 @@ void wxFolderListCtrl::SetSortOrder(Profile *profile, long sortOrder)
 void wxFolderListCtrl::UpdateSortIndicator()
 {
    // which column do we use now?
-   long sortOrder = READ_CONFIG(m_FolderView->m_Profile, MP_MSGS_SORTBY);
+   Profile_obj profile(m_FolderView->GetFolderProfile());
+
+   long sortOrder = READ_CONFIG(profile, MP_MSGS_SORTBY);
    MessageSortOrder orderPrimary = GetSortCritDirect(sortOrder);
 
    wxFolderListColumn colSort = ColFromSortOrder(orderPrimary);
@@ -2411,6 +2449,7 @@ wxFolderView::Create(MWindow *parent)
 
 wxFolderView::wxFolderView(wxWindow *parent)
 {
+   m_Profile = NULL;
    m_Parent = parent;
 
    // cast is harmless as we can only have MFrames in this application
@@ -2423,7 +2462,6 @@ wxFolderView::wxFolderView(wxWindow *parent)
 
    m_nDeleted = 0;
 
-   m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
    m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
    m_MessageWindow = new wxFolderMsgWindow(m_SplitterWindow, this);
@@ -2460,6 +2498,9 @@ wxFolderView::~wxFolderView()
    m_MessagePreview = NULL;
 
    Clear();
+
+   // must have been deleted in Clear()
+   ASSERT_MSG( !m_Profile, "profile leak in wxFolderView" );
 
    delete m_msgCmdProc;
 }
@@ -2596,8 +2637,40 @@ String wxFolderView::GetFullPersistentKey(MPersMsgBox key)
 void
 wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 {
-#   define NUM_FONTS 7
-   static int wxFonts[NUM_FONTS] =
+   Profile *profile = m_Profile ? m_Profile : mApplication->GetProfile();
+
+#ifdef OS_WIN
+   // MP_DATE_FMT contains '%' which are being (mis)interpreted as env var
+   // expansion characters under Windows - prevent this from happening
+   ProfileEnvVarSave noEnvVars(profile);
+#endif // OS_WIN
+
+   settings->dateFormat = READ_CONFIG_TEXT(profile, MP_DATE_FMT);
+   settings->dateGMT = READ_CONFIG_BOOL(profile, MP_DATE_GMT);
+
+   GetColourByName(&settings->FgCol,
+                   READ_CONFIG(profile, MP_FVIEW_FGCOLOUR),
+                   GetStringDefault(MP_FVIEW_FGCOLOUR));
+   GetColourByName(&settings->BgCol,
+                   READ_CONFIG(profile, MP_FVIEW_BGCOLOUR),
+                   GetStringDefault(MP_FVIEW_BGCOLOUR));
+   GetColourByName(&settings->FlaggedCol,
+                   READ_CONFIG(profile, MP_FVIEW_FLAGGEDCOLOUR),
+                   GetStringDefault(MP_FVIEW_FLAGGEDCOLOUR));
+   GetColourByName(&settings->NewCol,
+                   READ_CONFIG(profile, MP_FVIEW_NEWCOLOUR),
+                   GetStringDefault(MP_FVIEW_NEWCOLOUR));
+   GetColourByName(&settings->RecentCol,
+                   READ_CONFIG(profile, MP_FVIEW_RECENTCOLOUR),
+                   GetStringDefault(MP_FVIEW_RECENTCOLOUR));
+   GetColourByName(&settings->DeletedCol,
+                   READ_CONFIG(profile, MP_FVIEW_DELETEDCOLOUR),
+                   GetStringDefault(MP_FVIEW_DELETEDCOLOUR));
+   GetColourByName(&settings->UnreadCol,
+                   READ_CONFIG(profile, MP_FVIEW_UNREADCOLOUR),
+                   GetStringDefault(MP_FVIEW_UNREADCOLOUR));
+
+   static const int fontFamilies[] =
    {
       wxDEFAULT,
       wxDECORATIVE,
@@ -2608,73 +2681,42 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
       wxTELETYPE
    };
 
-#ifdef OS_WIN
-   // MP_DATE_FMT contains '%' which are being (mis)interpreted as env var
-   // expansion characters under Windows - prevent this from happening
-   ProfileEnvVarSave noEnvVars(m_Profile);
-#endif // OS_WIN
-
-   settings->dateFormat = READ_CONFIG_TEXT(m_Profile, MP_DATE_FMT);
-   settings->dateGMT = READ_CONFIG_BOOL(m_Profile, MP_DATE_GMT);
-
-   GetColourByName(&settings->FgCol,
-                   READ_CONFIG(m_Profile, MP_FVIEW_FGCOLOUR),
-                   GetStringDefault(MP_FVIEW_FGCOLOUR));
-   GetColourByName(&settings->BgCol,
-                   READ_CONFIG(m_Profile, MP_FVIEW_BGCOLOUR),
-                   GetStringDefault(MP_FVIEW_BGCOLOUR));
-   GetColourByName(&settings->FlaggedCol,
-                   READ_CONFIG(m_Profile, MP_FVIEW_FLAGGEDCOLOUR),
-                   GetStringDefault(MP_FVIEW_FLAGGEDCOLOUR));
-   GetColourByName(&settings->NewCol,
-                   READ_CONFIG(m_Profile, MP_FVIEW_NEWCOLOUR),
-                   GetStringDefault(MP_FVIEW_NEWCOLOUR));
-   GetColourByName(&settings->RecentCol,
-                   READ_CONFIG(m_Profile, MP_FVIEW_RECENTCOLOUR),
-                   GetStringDefault(MP_FVIEW_RECENTCOLOUR));
-   GetColourByName(&settings->DeletedCol,
-                   READ_CONFIG(m_Profile, MP_FVIEW_DELETEDCOLOUR),
-                   GetStringDefault(MP_FVIEW_DELETEDCOLOUR));
-   GetColourByName(&settings->UnreadCol,
-                   READ_CONFIG(m_Profile, MP_FVIEW_UNREADCOLOUR),
-                   GetStringDefault(MP_FVIEW_UNREADCOLOUR));
-
-   settings->font = READ_CONFIG(m_Profile,MP_FVIEW_FONT);
-   if ( settings->font < 0 || settings->font > NUM_FONTS )
+   settings->font = READ_CONFIG(profile,MP_FVIEW_FONT);
+   if ( settings->font < 0 || (size_t)settings->font > WXSIZEOF(fontFamilies) )
    {
       wxFAIL_MSG( "bad font setting in config" );
 
       settings->font = 0;
    }
 
-   settings->font = wxFonts[settings->font];
-   settings->size = READ_CONFIG(m_Profile, MP_FVIEW_FONT_SIZE);
+   settings->font = fontFamilies[settings->font];
+   settings->size = READ_CONFIG(profile, MP_FVIEW_FONT_SIZE);
    settings->senderOnlyNames =
-       READ_CONFIG_BOOL(m_Profile, MP_FVIEW_NAMES_ONLY);
+       READ_CONFIG_BOOL(profile, MP_FVIEW_NAMES_ONLY);
 
    settings->showSize =
-      (MessageSizeShow)(long)READ_CONFIG(m_Profile, MP_FVIEW_SIZE_FORMAT);
+      (MessageSizeShow)(long)READ_CONFIG(profile, MP_FVIEW_SIZE_FORMAT);
 
    settings->replaceFromWithTo =
-       READ_CONFIG_BOOL(m_Profile, MP_FVIEW_FROM_REPLACE);
+       READ_CONFIG_BOOL(profile, MP_FVIEW_FROM_REPLACE);
    if ( settings->replaceFromWithTo )
    {
-      String returnAddrs = READ_CONFIG(m_Profile, MP_FROM_REPLACE_ADDRESSES);
+      String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
       if ( returnAddrs == GetStringDefault(MP_FROM_REPLACE_ADDRESSES) )
       {
          // the default for this option is just the return address
-         returnAddrs = READ_CONFIG_TEXT(m_Profile, MP_FROM_ADDRESS);
+         returnAddrs = READ_CONFIG_TEXT(profile, MP_FROM_ADDRESS);
       }
 
       settings->returnAddresses = strutil_restore_array(':', returnAddrs);
    }
 
    settings->previewOnSingleClick =
-      READ_CONFIG_BOOL(GetProfile(), MP_PREVIEW_ON_SELECT);
+      READ_CONFIG_BOOL(profile, MP_PREVIEW_ON_SELECT);
 
-   settings->previewDelay = READ_CONFIG(GetProfile(), MP_FVIEW_PREVIEW_DELAY);
+   settings->previewDelay = READ_CONFIG(profile, MP_FVIEW_PREVIEW_DELAY);
 
-   ReadColumnsInfo(m_Profile, settings->columns);
+   ReadColumnsInfo(profile, settings->columns);
 }
 
 void
@@ -2828,8 +2870,6 @@ wxFolderView::ShowFolder(MailFolder *mf)
    m_Profile = m_ASMailFolder->GetProfile();
    if ( m_Profile )
       m_Profile->IncRef();
-   else
-      m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
 
    m_MessagePreview->SetFolder(m_ASMailFolder);
 
@@ -2838,7 +2878,7 @@ wxFolderView::ShowFolder(MailFolder *mf)
    // read in our new profile settigns
    ReadProfileSettings(&m_settings);
 
-   m_FolderCtrl->SetProfile(m_Profile);
+   m_FolderCtrl->OnFolderChange();
    ApplyOptions();
 
    m_msgCmdProc->SetWindowForDnD(m_FolderCtrl);
@@ -3499,7 +3539,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 void wxFolderView::OnHeaderPopupMenu(int cmd)
 {
    // edit the global settings if we don't have any open folder
-   Profile *profile = m_Profile ? m_Profile : mApplication->GetProfile();
+   Profile_obj profile(GetFolderProfile());
 
    switch ( cmd )
    {
@@ -3560,8 +3600,9 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
 
             ASSERT_MSG( sortOrder != MSO_NONE, "invalid sort order" );
 
-            m_FolderCtrl->SetSortOrder(profile, reverse ? sortOrder + 1
-                                                          : sortOrder);
+            m_FolderCtrl->SetSortOrder(profile,
+                                       reverse ? sortOrder + 1 : sortOrder,
+                                       col, reverse);
 
             // SetSortOrder() notifies about the options change event itself,
             // don't do it here

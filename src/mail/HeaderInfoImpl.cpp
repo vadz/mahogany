@@ -48,14 +48,22 @@
 #define DEBUG_SORTING
 
 #ifdef DEBUG_SORTING
-   #define CHECK_TABLES() VerifyTables(m_count, m_tableSort, m_tablePos)
-   #define DUMP_TABLES(msg) \
-      printf("Translation tables (count = %ld) state ", m_count); \
+   #define CHECK_TABLES() VerifyTables(m_count, m_tableMsgno, m_tablePos)
+   #define DUMP_TABLE(table, msg) \
+      printf(#table " (count = %ld) ", m_count); \
       printf msg ; \
-      DumpTables(m_count, m_tableSort, m_tablePos)
+      puts("") ; \
+      DumpTable(m_count, table); \
+      puts("")
+   #define DUMP_TRANS_TABLES(msg) \
+      printf("Translation tables state (count = %ld)", m_count); \
+      printf msg ; \
+      DumpTransTables(m_count, m_tableMsgno, m_tablePos); \
+      puts("")
 #else
    #define CHECK_TABLES()
-   #define DUMP_TABLES(msg)
+   #define DUMP_TABLE(table, msg)
+   #define DUMP_TRANS_TABLES(msg)
 #endif
 
 // ----------------------------------------------------------------------------
@@ -140,15 +148,15 @@ static void DumpTable(MsgnoType count, const MsgnoType *table)
 }
 
 // dump the translation tables
-static void DumpTables(MsgnoType count,
-                       const MsgnoType *msgnos,
-                       const MsgnoType *pos)
+static void DumpTransTables(MsgnoType count,
+                            const MsgnoType *msgnos,
+                            const MsgnoType *pos)
 {
    printf("\n\tmsgnos:");
    DumpTable(count, msgnos);
+
    printf("\n\tpos   :");
    DumpTable(count, pos);
-   puts("");
 }
 
 #endif // DEBUG_SORTING
@@ -220,7 +228,12 @@ HeaderInfo::GetFromOrTo(const HeaderInfo *hi,
 
 inline bool HeaderInfoListImpl::IsSorting() const
 {
-   return m_tableSort != NULL || m_reverseOrder;
+   return m_sortParams.sortOrder != MSO_NONE || m_reverseOrder;
+}
+
+inline bool HeaderInfoListImpl::IsThreading() const
+{
+   return m_thrParams.useThreading;
 }
 
 inline bool HeaderInfoListImpl::IsHeaderValid(MsgnoType n) const
@@ -230,12 +243,23 @@ inline bool HeaderInfoListImpl::IsHeaderValid(MsgnoType n) const
 
 inline bool HeaderInfoListImpl::HasTransTable() const
 {
-   return m_tableSort != NULL;
+   return m_tableMsgno != NULL;
 }
 
-inline bool HeaderInfoListImpl::NeedsSort() const
+inline bool HeaderInfoListImpl::IsTranslatingIndices() const
 {
-   return m_needsResort;
+   return HasTransTable() || m_reverseOrder;
+}
+
+inline bool HeaderInfoListImpl::MustRebuildTables() const
+{
+   // if we already have the tables, we don't have to rebuild them
+   //
+   // we also don't need them if we are not really sorting but just reveresing
+   // the indices
+   return !HasTransTable() &&
+          (IsThreading() ||
+           GetSortCritDirect(m_sortParams.sortOrder) != MSO_NONE);
 }
 
 // ----------------------------------------------------------------------------
@@ -267,12 +291,15 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
 
    // no sorting/threading yet
    m_tableSort =
+   m_tableThread =
+   m_tableMsgno =
    m_tablePos = NULL;
 
    m_indents = NULL;
 
+   m_dontFreeMsgnos = false;
+
    m_reverseOrder = false;
-   m_needsResort = false;
 }
 
 void HeaderInfoListImpl::CleanUp()
@@ -284,8 +311,9 @@ void HeaderInfoListImpl::CleanUp()
 
    m_lastMod++;
 
-   FreeSortTables();
-   FreeIndentTable();
+   FreeSortData();
+   FreeThreadData();
+   FreeTables();
 }
 
 HeaderInfoListImpl::~HeaderInfoListImpl()
@@ -345,12 +373,19 @@ MsgnoType HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 
 MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
 {
+   if ( MustRebuildTables() )
+   {
+      ((HeaderInfoListImpl *)this)->BuildTables(); // const_cast
+   }
+
    if ( m_reverseOrder )
    {
-      if ( m_tableSort )
+      ASSERT_MSG( !IsThreading(), "can't reverse threaded listing!" );
+
+      if ( m_tableMsgno )
       {
          // flip the table (which always corresponds to the direct ordering)
-         return m_tableSort[m_count - 1 - pos];
+         return m_tableMsgno[m_count - 1 - pos];
       }
       else // no table, reverse the natural message order
       {
@@ -359,39 +394,38 @@ MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
    }
    else // just use the table
    {
-      CHECK( m_tableSort, 0, "should only be called if IsSorting()" );
+      // it is wasteful to call us if we don't perform any index translation at
+      // all and this is not supposed to happen
+      CHECK( m_tableMsgno, 0, "shouldn't be called at all in this case" );
 
-      return m_tableSort[pos];
+      return m_tableMsgno[pos];
    }
 }
 
 MsgnoType HeaderInfoListImpl::GetIdxFromPos(MsgnoType pos) const
 {
-   // we have to resort before using m_tableSort!
-   ASSERT_MSG( !NeedsSort(), "can't be called now" );
-
    CHECK( pos < m_count, INDEX_ILLEGAL, "invalid position in GetIdxFromPos" );
 
-   return IsSorting() ? GetMsgnoFromPos(pos) - 1 : pos;
+   return IsTranslatingIndices() ? GetMsgnoFromPos(pos) - 1 : pos;
 }
 
 MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
 {
-   // we have to resort before using m_tablePos!
-   ASSERT_MSG( !NeedsSort(), "can't be called now" );
-
    CHECK( n < m_count, INDEX_ILLEGAL, "invalid index in GetPosFromIdx" );
 
-   // calculate it on the fly if needed
-   if ( !m_tablePos )
+   // calculate the table on the fly if needed
+   if ( MustRebuildTables() )
    {
-      ((HeaderInfoListImpl *)this)->UpdateInverseTable(); // const_cast
+      ((HeaderInfoListImpl *)this)->BuildTables(); // const_cast
    }
 
    if ( m_reverseOrder )
    {
+      ASSERT_MSG( !IsThreading(), "can't reverse threaded listing!" );
+
       if ( m_tablePos )
       {
+         // reverse the order specified by the table
          return m_count - 1 - m_tablePos[n];
       }
       else // no table, reverse the natural message order
@@ -416,7 +450,7 @@ MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
 //    being expunged
 //
 // 2. don't modify the array but just mark the index being removed as
-//    being invalid (somehow...) and ignore it later
+//    being invalid (somehow...) and ignore it later (?)
 
 void HeaderInfoListImpl::OnRemove(MsgnoType n)
 {
@@ -435,10 +469,10 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
 
    if ( HasTransTable() )
    {
-      DUMP_TABLES(("before removing element %ld", n));
+      DUMP_TRANS_TABLES(("before removing element %ld:", n));
 
       // we will determine the index of the message being expunged (in
-      // m_tableSort) below
+      // m_tableMsgno) below
       MsgnoType idxRemovedInMsgnos = INDEX_ILLEGAL;
 
       MsgnoType posRemoved;
@@ -451,7 +485,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       for ( MsgnoType i = 0; i < m_count; i++ )
       {
          // first work with msgnos table
-         MsgnoType msgno = m_tableSort[i];
+         MsgnoType msgno = m_tableMsgno[i];
          if ( msgno == n + 1 ) // +1 because n is an index, not msgno
          {
             // found the position of msgno which was expunged, store it
@@ -460,7 +494,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
          else if ( msgno > n )
          {
             // indices are shifted
-            m_tableSort[i]--;
+            m_tableMsgno[i]--;
          }
          //else: leave it as is
 
@@ -479,12 +513,12 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       // delete the removed element from the translation tables
 
       ASSERT_MSG( idxRemovedInMsgnos != INDEX_ILLEGAL,
-                  "expunged item not found in m_tableSort?" );
+                  "expunged item not found in m_tableMsgno?" );
 
       if ( idxRemovedInMsgnos < m_count - 1 )
       {
          // shift everything
-         MsgnoType *p = m_tableSort + idxRemovedInMsgnos;
+         MsgnoType *p = m_tableMsgno + idxRemovedInMsgnos;
          memmove(p, p + 1,
                  sizeof(MsgnoType)*(m_count - idxRemovedInMsgnos - 1));
       }
@@ -504,7 +538,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       // last index is invalid now, don't let CHECK_TABLES() check it
       m_count--;
 
-      DUMP_TABLES(("after removing"));
+      DUMP_TRANS_TABLES(("after removing"));
       CHECK_TABLES();
 
       // restore for -- below
@@ -518,7 +552,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
 
 void HeaderInfoListImpl::OnAdd(MsgnoType countNew)
 {
-   if ( HasTransTable() )
+   if ( IsSorting() || IsThreading() )
    {
       // FIXME: resort everything :-(
       //
@@ -531,9 +565,9 @@ void HeaderInfoListImpl::OnAdd(MsgnoType countNew)
       //  1. we can't do it from here because c-client is not reentrant
       //  2. retrieving a lot of headers from GetHeaderInfo() may be too slow
       //  3. what to do if this hadn't been done yet when OnRemove() is called?
-      FreeSortTables();
-
-      m_needsResort = true;
+      FreeSortData();
+      FreeThreadData();
+      FreeTables();
    }
 
    m_count = countNew;
@@ -646,21 +680,160 @@ MsgnoType *HeaderInfoListImpl::AllocTable() const
    return (MsgnoType *)malloc(m_count * sizeof(MsgnoType));
 }
 
-void HeaderInfoListImpl::FreeIndentTable()
+void HeaderInfoListImpl::BuildTables()
 {
-   if ( m_indents )
+   // maybe we have them already?
+   if ( m_tableMsgno )
    {
-      free(m_indents);
-      m_indents = NULL;
+      ASSERT_MSG( m_tablePos, "should have inverse table as well!" );
+
+      return;
    }
+
+   // no, check if we need them
+
+   if ( IsThreading() )
+   {
+      // first thread the messages if not done yet
+      if ( !m_tableThread )
+      {
+         Thread();
+      }
+
+      // FIXME: how to sort threaded messages here, i.e. how to construct
+      //        m_tableMsgno (or m_tablePos) from m_tableThread and
+      //        m_tableSort?
+#if 0
+      if ( IsSorting() )
+      {
+         m_tableMsgno = AllocTable();
+         m_tablePos = AllocTable();
+
+         int *displacements = (int *)calloc(m_count * sizeof(int));
+
+         MsgnoType *tableSortPos;
+         if ( m_tableSort )
+         {
+            tableSortPos = AllocTable();
+
+            // build the inverse table from the direct one
+            for ( MsgnoType n = 0; n < m_count; n++ )
+            {
+               tableSortPos[m_tableSort[n] - 1] = n;
+            }
+         }
+         else
+         {
+            // if we're sorting, we can either use an explicit sort table or
+            // reverse the normal order (or both), so if we don't have the table
+            // we must be reversing
+            ASSERT_MSG( m_reverseOrder, "how do we sort then?" );
+
+            tableSortPos = NULL;
+         }
+
+         MsgnoType parent = MSGNO_ILLEGAL;
+         for ( MsgnoType n = 0; n < m_count; n++ )
+         {
+            MsgnoType item = m_tableThread[n] - 1; // index, not msgno
+
+            // at which position should it normally appear after sorting?
+            MsgnoType posSorted;
+            if ( m_reverseOrder )
+            {
+               if ( tableSortPos )
+               {
+                  // reverse the order specified by the table
+                  posSorted = m_count - 1 - tableSortPos[item];
+               }
+               else // no table, reverse the natural message order
+               {
+                  posSorted = m_count - 1 - item;
+               }
+            }
+            else // use the table if any
+            {
+               posSorted = tableSortPos[item];
+            }
+
+            // count the number of children of this item
+            MsgnoType m;
+            for ( m = n + 1; m < m_count; m++ )
+            {
+               if ( m_indents[m] <= m_indents[n] )
+                  break;
+            }
+
+            MsgnoType children = m - n - 1;
+
+            // put this item at the position above the one it should have
+            // normally been in so that all its children can be (later) put
+            // under it
+            displacements[n] = ;
+
+            m_tablePos[item] = posSorted - displacements[n];
+         }
+
+         free(tableSortPos);
+      }
+      else // no sorting
+#endif // 0
+      {
+         // just reuse the same table
+         m_tableMsgno = m_tableThread;
+         m_dontFreeMsgnos = true;
+      }
+
+      // reset it as it doesn't make sense to use it with threading (thread
+      // would be inverted as well and grow upwards - hardly what we want)
+      if ( m_reverseOrder )
+      {
+         m_reverseOrder = false;
+      }
+   }
+   else if ( IsSorting() )
+   {
+      // sort the messages if not done yet
+      if ( !m_tableSort )
+      {
+         Sort();
+      }
+
+      // don't create another table, just reuse the same one
+      m_tableMsgno = m_tableSort;
+      m_dontFreeMsgnos = true;
+   }
+   //else: no sorting/no threading at all
+
+   // if we have the direct table compute the inverse one as well
+   //
+   // NB: we might not have m_tableMsgno if we don't sort/thread at all _or_ if
+   //     we do sorting according to MSO_NONE_REV, i.e. don't use the table but
+   //     just m_reverseOrder
+   if ( m_tableMsgno && !m_tablePos )
+   {
+      m_tablePos = AllocTable();
+
+      // build the inverse table from the direct one
+      for ( MsgnoType n = 0; n < m_count; n++ )
+      {
+         m_tablePos[m_tableMsgno[n] - 1] = n;
+      }
+   }
+
+   CHECK_TABLES();
 }
 
-void HeaderInfoListImpl::FreeSortTables()
+void HeaderInfoListImpl::FreeTables()
 {
-   if ( m_tableSort )
+   if ( m_tableMsgno )
    {
-      free(m_tableSort);
-      m_tableSort = NULL;
+      // don't free it if it is the same as either m_tableThread or m_tableSort
+      if ( m_dontFreeMsgnos )
+         m_dontFreeMsgnos = false;
+      else
+         free(m_tableMsgno);
+      m_tableMsgno = NULL;
    }
 
    if ( m_tablePos )
@@ -670,89 +843,52 @@ void HeaderInfoListImpl::FreeSortTables()
    }
 }
 
-void HeaderInfoListImpl::UpdateInverseTable()
-{
-   // if there is no direct table, then there is no inverse table neither
-   if ( !m_tableSort )
-   {
-      ASSERT_MSG( !m_tablePos, "have inverse table but not direct one?" );
-
-      return;
-   }
-
-   // it can be NULL as we delay calculating the inverse mapping until we
-   // really need it: this way we may save extra calculation if the listing is
-   // first sorted and then threaded as we'll only do it once, after both
-   // operations even if m_tableSort changes twice
-   if ( !m_tablePos )
-   {
-      m_tablePos = AllocTable();
-   }
-
-   // build the inverse table from the direct one
-   for ( MsgnoType n = 0; n < m_count; n++ )
-   {
-      m_tablePos[m_tableSort[n] - 1] = n;
-   }
-}
-
 // ----------------------------------------------------------------------------
 // HeaderInfoListImpl sorting
 // ----------------------------------------------------------------------------
 
+void HeaderInfoListImpl::FreeSortData()
+{
+   if ( m_tableSort )
+   {
+      free(m_tableSort);
+      m_tableSort = NULL;
+   }
+}
+
 // sort the messages according to the current sort parameters
 void HeaderInfoListImpl::Sort()
 {
-   // easy case: don't sort at all
-   if ( GetSortCritDirect(m_sortParams.sortOrder) == MSO_NONE )
+   // caller must check if we need to be sorted
+   ASSERT_MSG( !m_tableMsgno && !m_tableSort && !m_reverseOrder,
+               "shouldn't be called again" );
+
+   switch ( GetSortCrit(m_sortParams.sortOrder) )
    {
-      // we may still need to reverse the messages order
-      m_reverseOrder = GetSortCrit(m_sortParams.sortOrder) == MSO_NONE_REV;
+      case MSO_NONE:
+         // the easiest case: don't sort at all
+         break;
 
-      FreeSortTables();
+      case MSO_NONE_REV:
+         // we just need to reverse the messages order
+         m_reverseOrder = true;
+         break;
+
+      default:
+         // we do need to sort messages
+         m_tableSort = AllocTable();
+
+         if ( m_mf->SortMessages(m_tableSort, m_sortParams) )
+         {
+            DUMP_TABLE(m_tableSort,
+                       ("after sorting with sort order %08lx",
+                        m_sortParams.sortOrder));
+         }
+         else // sort failed
+         {
+            FreeSortData();
+         }
    }
-   else // we do need to sort messages
-   {
-      FreeSortTables();
-
-      m_tableSort = AllocTable();
-
-      if ( m_mf->SortMessages((MsgnoType *)m_tableSort, m_sortParams) )
-      {
-#ifdef DEBUG_SORTING
-         UpdateInverseTable();
-
-         DUMP_TABLES(("after sorting with sort order %08lx",
-                     m_sortParams.sortOrder));
-
-         CHECK_TABLES();
-
-         // free it to make the program behave in the same way with
-         // DEBUG_SORTING as without it
-         free(m_tablePos);
-         m_tablePos = NULL;
-#endif // DEBUG_SORTING
-      }
-      else // sort failed
-      {
-         FreeSortTables();
-      }
-   }
-}
-
-void HeaderInfoListImpl::Resort()
-{
-   // don't call us again
-   m_needsResort = false;
-
-   // FIXME: this should just insert new elements into the already sorted
-   //        array, see comments in OnAdd()
-   Sort();
-}
-
-void HeaderInfoListImpl::Reverse()
-{
-   m_reverseOrder = !m_reverseOrder;
 }
 
 // check if a sort order includes MSO_SENDER
@@ -774,8 +910,14 @@ static bool UsesSenderForSorting(long sortOrder)
 // change the sorting order
 bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
 {
-   // we are only called if some of the sorting parameters changed, but make
-   // sure this change will really affect us before resorting
+   if ( sortParams == m_sortParams )
+   {
+      // nothing changed at all
+      return false;
+   }
+
+   // ok, so some of the sorting parameters changed, but make sure this change
+   // will really affect us before resorting
 
    // if true, we can only reverse the existing sorting instead of doing full
    // fledged sort
@@ -805,6 +947,15 @@ bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
    // remember new sort order
    m_sortParams = sortParams;
 
+   if ( canReverseOnly )
+   {
+      m_reverseOrder = !m_reverseOrder;
+   }
+   else
+   {
+      m_reverseOrder = false;
+   }
+
    // sorting order can hardly change the listing if we have less than 2
    // elements
    if ( m_count < 2 )
@@ -814,12 +965,23 @@ bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
 
    if ( canReverseOnly )
    {
-      Reverse();
+      // if we are threading messages, we must rebuild the translation table as
+      // there is no easy way to invert the threading table, but otherwise we
+      // may reuse the current sorting table as inverting it is as easy as
+      // shifting the indices
+      if ( IsThreading() )
+      {
+         FreeTables();
+      }
+
+      // in any case, don't throw away the existing sort data, we can perfectly
+      // well continue using them
    }
-   else
+   else // sort order really changed
    {
-      // recalculate the tables
-      Sort();
+      // we will resort messages when needed
+      FreeSortData();
+      FreeTables();
    }
 
    // assume it changed
@@ -832,85 +994,47 @@ bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
 // HeaderInfoListImpl threading
 // ----------------------------------------------------------------------------
 
-void HeaderInfoListImpl::Thread()
+void HeaderInfoListImpl::FreeThreadData()
 {
-   if ( !m_thrParams.useThreading )
+   if ( m_tableThread )
    {
-      // this one is surely not needed any longer
-      FreeIndentTable();
-
-      // but the trouble is that we also have to resort the messages as we
-      // can't "unthread" them
-      Sort();
+      free(m_tableThread);
+      m_tableThread = NULL;
    }
-   else // do thread
+
+   if ( m_indents )
    {
-      MsgnoType *tableThr = AllocTable();
-      m_indents = (size_t *)malloc(m_count * sizeof(size_t));
-
-      if ( m_mf->ThreadMessages(tableThr, m_indents, m_thrParams) )
-      {
-         // unfortunately it simply doesn't work this way... you can't combine
-         // them in such way!
-#if 0
-         if ( HasTransTable() )
-         {
-            // combine the threading index translation with the sorting one:
-            // this is just the multiplication of permutations
-
-            // unfortunately we can't do it in place
-            MsgnoType *tableMsgnoNew = AllocTable();
-            for ( size_t n = 0; n < m_count; n++ )
-            {
-               // don't forget to subtract 1 as tableThr contains msgnos
-               tableMsgnoNew[n] = m_tableSort[tableThr[n] - 1];
-            }
-
-            FreeSortTables();
-            m_tableSort = tableMsgnoNew;
-
-            free(tableThr);
-         }
-         else
-         {
-            // it will be just the one we have built
-            m_tableSort = tableThr;
-         }
-#else // 1
-         FreeSortTables();
-         m_tableSort = tableThr;
-#endif // 0/1
-
-#ifdef DEBUG_SORTING
-         UpdateInverseTable();
-
-         DUMP_TABLES(("after threading"));
-         CHECK_TABLES();
-
-         // free it to make the program behave in the same way with
-         // DEBUG_SORTING as without it
-         free(m_tablePos);
-         m_tablePos = NULL;
-#endif // DEBUG_SORTING
-      }
-      else // threading failed
-      {
-         // FIXME: what to do?
-      }
+      free(m_indents);
+      m_indents = NULL;
    }
 }
 
-void HeaderInfoListImpl::Rethread()
+void HeaderInfoListImpl::Thread()
 {
-   if ( m_thrParams.useThreading )
+   // the caller must check that we need to be threaded
+   ASSERT_MSG( !m_tableThread && IsThreading(), "shouldn't be called" );
+
+   m_tableThread = AllocTable();
+   m_indents = (size_t *)malloc(m_count * sizeof(size_t));
+
+   if ( m_mf->ThreadMessages(m_tableThread, m_indents, m_thrParams) )
    {
-      // TODO: there is surely a more efficient way of doing this
-      Thread();
+      DUMP_TABLE(m_tableThread, ("after threading"));
+   }
+   else // threading failed
+   {
+      FreeThreadData();
    }
 }
 
 bool HeaderInfoListImpl::SetThreadParameters(const ThreadParams& thrParams)
 {
+   if ( thrParams == m_thrParams )
+   {
+      // nothing changed at all
+      return false;
+   }
+
    m_thrParams = thrParams;
 
    if ( m_count < 2 )
@@ -919,7 +1043,10 @@ bool HeaderInfoListImpl::SetThreadParameters(const ThreadParams& thrParams)
       return false;
    }
 
-   Thread();
+   // we will rethread messages and rebuild the translation tables the next time
+   // they are needed
+   FreeThreadData();
+   FreeTables();
 
    m_lastMod++;
 
@@ -1000,17 +1127,15 @@ void HeaderInfoListImpl::Cache(const Sequence& seq)
 
 void HeaderInfoListImpl::CachePositions(const Sequence& seq)
 {
-   // first thing to do is to (re)establish the correct mapping between msgnos
-   // and positions, if necessary
-   if ( NeedsSort() )
+   // update the translation tables if necessary
+   if ( MustRebuildTables() )
    {
-      Resort();
-      Rethread();
+      BuildTables();
    }
 
    // transform sequence of positions into sequence of msgnos
    Sequence seqMsgnos;
-   if ( IsSorting() )
+   if ( IsTranslatingIndices() )
    {
       // a contiguous range of positions doesn't correspond in general to a
       // contiguous set of msgnos so constructing a new sequence is,
@@ -1055,7 +1180,7 @@ bool HeaderInfoListImpl::IsInCache(MsgnoType pos) const
    // NB: don't call Resort() from here as this function is supposed to always
    //     return immediately and Resort() is a long function (it access the
    //     folder)
-   if ( NeedsSort() )
+   if ( MustRebuildTables() )
       return false;
 
    MsgnoType idx = GetIdxFromPos(pos);
@@ -1068,7 +1193,9 @@ bool HeaderInfoListImpl::IsInCache(MsgnoType pos) const
 
 bool HeaderInfoListImpl::ReallyGet(MsgnoType pos)
 {
-   CHECK( !NeedsSort(), false, "can't be called now" );
+   // we must be already sorted/threaded by now
+   CHECK( !IsTranslatingIndices() || HasTransTable(), false,
+          "can't be called now" );
 
    MsgnoType idx = GetIdxFromPos(pos);
 

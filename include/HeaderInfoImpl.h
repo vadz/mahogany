@@ -39,12 +39,18 @@ WX_DEFINE_ARRAY(HeaderInfo *, ArrayHeaderInfo);
   sorting/threading them though?).
 
   TODO:
-   1. although there is nothing wrong with preallocating all the memory we need
+   1. combine sorting and threading: we need to thread messages first and then
+      to sort the siblings _separately_ (i.e. first sort the roots, then the
+      children of the first root, &c) - but for this we need to store the
+      parent-children relationships and not only the order of the threaded
+      messages...
+
+   2. although there is nothing wrong with preallocating all the memory we need
       (even for 100000 message we take just 400Kb), it would still be nice to
       have some smart way of storing HeaderInfo objects as using array is less
       than ideal because adding/removing messages is a common operation.
 
-   2. batch processing of OnRemove() calls: instead of removing the item
+   3. batch processing of OnRemove() calls: instead of removing the item
       immediately, remember the range of items to be removed. If the new
       item to remove is not contiguous to the existing range, DoRemove()
       immediately and start new range. Also call DoRemove() in the beginning
@@ -106,11 +112,17 @@ private:
    /// allocate a table of m_count MsgnoTypes
    MsgnoType *AllocTable() const;
 
-   /// free the sort/thread tables
-   void FreeSortTables();
+   /// build m_tableMsgno/m_tablePos from sort/thread data if not done yet
+   void BuildTables();
 
-   /// free the indent data (used for threading only)
-   void FreeIndentTable();
+   /// free m_tableMsgno/m_tablePos tables
+   void FreeTables();
+
+   /// free the sort table
+   void FreeSortData();
+
+   /// free the thread data (thread table and indent data)
+   void FreeThreadData();
 
    /// is the given entry valid (i.e. already cached)?
    inline bool IsHeaderValid(MsgnoType n) const;
@@ -118,14 +130,17 @@ private:
    /// do we sort messages at all?
    inline bool IsSorting() const;
 
+   /// do we [need to] thread messages?
+   inline bool IsThreading() const;
+
    /// do we have the translation table mapping indices to positions?
    inline bool HasTransTable() const;
 
-   /// do we have to be resorted?
-   inline bool NeedsSort() const;
+   /// do we do any kind of index mapping (trans tables or reverse order)?
+   inline bool IsTranslatingIndices() const;
 
-   /// build the inverse table from the direct one
-   void UpdateInverseTable();
+   /// do we need to rebuild the translation table?
+   inline bool MustRebuildTables() const;
 
    /// get the msgno which should appear at the given display position
    MsgnoType GetMsgnoFromPos(MsgnoType pos) const;
@@ -136,20 +151,11 @@ private:
    /// cache the sequence of msgnos
    void Cache(const Sequence& seqmMsgnos);
 
-   /// init the translation tables using the current searching criterium
+   /// sort messages, i.e. set m_tableSort
    void Sort();
 
    /// thread the messages according to m_thrParams
    void Thread();
-
-   /// reverse the existing translation tables
-   void Reverse();
-
-   /// resort us after the new messages appeared in the folder
-   void Resort();
-
-   /// thread again after some messages were added/removed
-   void Rethread();
 
    /**
       Find first position in the given range containing a msgno from array
@@ -170,12 +176,13 @@ private:
    /**
      @name Sorting/threading data
 
-     We maintain 2 tables which define the correspondence between the indices
-     (which are just msgnos, i.e. the internal message indices in the folder)
-     and the position on the screen where they should appear.
+     The translation tables allow to get the msgno shown at given position
+     and the position at which given msgno (index) is shown. They are
+     calculated when needed from m_tableSort and m_tableThread and may be NULL
+     even if we do sort/thread messages if we hadn't needed them before, so they
+     should never be accessed directly.
 
-     The tables below are synhronized if not NULL (they are both NULL if no
-     sorting/threading is done)
+     The translation tables are synhronized if not NULL.
 
      Finally, we also keep m_reverseOrder flag which allows us to flip the
      order of messages in the folder quickly. Note that it may be set even if
@@ -186,21 +193,20 @@ private:
    /// the translation table containing the msgnos in sorted order
    MsgnoType *m_tableSort;
 
+   /// should we reverse the order of messages in the folder?
+   bool m_reverseOrder;
+
    /// the translation table containing the msgnos in threaded order
    MsgnoType *m_tableThread;
-
-   /**
-      The translation table allowing to get position from msgno (index). It is
-      calculated when needed from m_tableSort and m_tableThread and may be NULL
-      even if we do sort/thread messages.
-    */
-   MsgnoType *m_tablePos;
 
    /// table containing the message indent in the thread, NULL if !threading
    size_t *m_indents;
 
-   /// should we reverse the order of messages in the folder?
-   bool m_reverseOrder;
+   /// position -> msgno mapping
+   MsgnoType *m_tableMsgno;
+
+   /// index -> position mapping
+   MsgnoType *m_tablePos;
 
    /// sorting parameters
    SortParams m_sortParams;
@@ -208,8 +214,8 @@ private:
    /// threading parameters
    ThreadParams m_thrParams;
 
-   /// set to true if we must be resorted (after OnAdd(), for example)
-   bool m_needsResort;
+   /// if true, don't free the msgno table as it's the same as thread/sort
+   bool m_dontFreeMsgnos;
 
    //@}
 

@@ -1231,18 +1231,15 @@ MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
       if ( m_headers )
       {
          // do we need to resort messages?
-         if ( config.m_SortParams != m_Config.m_SortParams )
+         if ( m_headers->SetSortOrder(config.m_SortParams) )
          {
-            listingChanged = m_headers->SetSortOrder(config.m_SortParams);
+            listingChanged = true;
          }
 
          // rethread?
-         if ( config.m_ThrParams != m_Config.m_ThrParams )
+         if ( m_headers->SetThreadParameters(config.m_ThrParams) )
          {
-            if ( m_headers->SetThreadParameters(config.m_ThrParams) )
-            {
-               listingChanged = true;
-            }
+            listingChanged = true;
          }
       }
 

@@ -177,6 +177,32 @@ public:
       // in MP_OPENFOLDERS config entry but the main frame does it for us
    }
 
+   virtual Profile *GetFolderProfile() const
+   {
+      Profile *profile = GetProfile();
+      if ( profile )
+      {
+         profile->IncRef();
+      }
+      else // no opened folder in this folder view
+      {
+         // try the profile for the folder in the tree
+         MFolder_obj folder = m_mainFrame->GetFolderTree()->GetSelection();
+         if ( folder )
+         {
+            profile = Profile::CreateProfile(folder->GetFullName());
+         }
+      }
+
+      if ( !profile )
+      {
+         profile = mApplication->GetProfile();
+         profile->IncRef();
+      }
+
+      return profile;
+   }
+
 private:
    wxMainFrame *m_mainFrame;
 };

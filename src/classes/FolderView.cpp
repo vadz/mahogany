@@ -122,3 +122,22 @@ void FolderView::OnAppExit()
    }
 }
 
+// ----------------------------------------------------------------------------
+// FolderView misc
+// ----------------------------------------------------------------------------
+
+Profile *FolderView::GetFolderProfile() const
+{
+   Profile *profile = GetProfile();
+   if ( !profile )
+   {
+      profile = mApplication->GetProfile();
+
+      CHECK( profile, NULL, "no global profile?" );
+   }
+
+   profile->IncRef();
+
+   return profile;
+}
+

@@ -55,7 +55,20 @@ public:
    /// return full folder name
    const String& GetFullName() { return m_folderName; }
 
-   /// return a profile pointer:
+   /**
+      GetFolderProfile() differs from GetProfile() in two ways: first, it
+      always returns a non-NULL profile as it falls back to the application
+      object profile (i.e. global one) if there is no opened folder in this
+      folder view and, second, it returns the pointer properly IncRef()'d so
+      that the caller must DecRef() it.
+
+      This function should be used instead of GetProfile() in all new code!
+
+      @return profile pointer, the caller must DecRef() it
+    */
+   virtual Profile *GetFolderProfile() const;
+
+   /// return a profile pointer (NOT IncRef()'d!)
    Profile *GetProfile(void) const { return m_Profile; }
 
    /// return pointer to async mail folder (NOT IncRef()'d!)

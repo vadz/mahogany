@@ -223,7 +223,9 @@ private:
 class Profile_obj
 {
 public:
-   // ctor & dtor
+   // ctors & dtor
+   Profile_obj(Profile *profile)
+      { m_profile = profile; }
    Profile_obj(const String& name)
       { m_profile = Profile::CreateProfile(name); }
    ~Profile_obj()

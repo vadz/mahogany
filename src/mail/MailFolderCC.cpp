@@ -3664,6 +3664,7 @@ bool MailFolderCC::ThreadMessages(MsgnoType *msgnos,
 {
    CHECK( m_MailStream, false, "can't thread closed folder" );
 
+#if 0
    // does the server support threading at all?
    if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) &&
         READ_CONFIG(m_Profile, MP_MSGS_SERVER_THREAD) )
@@ -3701,6 +3702,10 @@ bool MailFolderCC::ThreadMessages(MsgnoType *msgnos,
          // this is the best method available, just use it
          threadingAlgo = "REFERENCES";
       }
+#else
+   {
+      const char *threadingAlgo = "REFERENCES";
+#endif
 
       if ( threadingAlgo )
       {
@@ -3737,7 +3742,7 @@ bool MailFolderCC::ThreadMessages(MsgnoType *msgnos,
          else
          {
             wxLogWarning(_("Server side threading failed, trying to thread "
-                            "messages locally."));
+                           "messages locally."));
          }
       }
       //else: no appropriate thread method
