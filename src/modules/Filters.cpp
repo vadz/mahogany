@@ -2378,5 +2378,8 @@ MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
    return new MModule_FiltersImpl(interface);
 }
 
-
+MModule_FiltersImpl::~MModule_FiltersImpl()
+{
+   m_Interface->GetMApplication()->RemoveModule(this);
+}
 

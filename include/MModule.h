@@ -115,9 +115,8 @@ public:
 class MModuleCommon : public MObjectRC
 {
 protected:
-   /* When a module gets deleted it must make sure that it is no longer
-      in the module list. */
-   virtual ~MModuleCommon();
+   /// Removes the module from the global list
+   virtual ~MModuleCommon() { }
 };
 
 /**
@@ -193,8 +192,7 @@ extern "C"
    typedef MModule *(* MModule_InitModuleFuncType) (int version_major,
                                                     int version_minor,
                                                     int version_release,
-                                                    class MInterface
-                                                    *Minterface,
+                                                    class MInterface *minterface,
                                                     int *errorCode);
 }
 //@}
@@ -227,6 +225,7 @@ virtual const char * GetVersion(void) const; \
 virtual void GetMVersion(int *version_major, \
                          int *version_minor, \
                          int *version_release) const; \
+virtual ~ClassName(); \
 static  MModule *Init(int, int, int, MInterface *, int *); 
 
 #define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */, ...) { return 0; }

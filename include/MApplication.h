@@ -33,6 +33,7 @@
 
 class wxMimeTypesManager;
 class MailFolder;
+class MModuleCommon;
 class ArrayFrames;
 
 /**
@@ -252,6 +253,11 @@ public:
 
    /// Report a fatal error:
    virtual void FatalError(const char *message) = 0;
+
+   /// remove the module from the list of all modules
+   /// (this is implemented in MModule.cpp actually)
+   void RemoveModule(MModuleCommon *module);
+
 protected:
    /// Load modules at startup
    virtual void LoadModules(void) = 0;

@@ -475,6 +475,8 @@ PalmOSModule::~PalmOSModule()
 
    if(m_Lock) delete m_Lock;
    SafeDecRef(m_Profile);
+
+   m_MInterface->GetMApplication()->RemoveModule(this);
 }
 
 #if defined( wxUSE_THREADS ) && defined( OS_UNIX )

@@ -75,8 +75,6 @@ struct MModuleListEntry
 /// A list of all loaded modules.
 KBLIST_DEFINE(MModuleList, MModuleListEntry);
 
-// VZ: this should be somehow made accessible to the modules! (FIXME)
-
 /// The actual list of all loaded modules.
 static MModuleList *gs_MModuleList = NULL;
 
@@ -89,7 +87,7 @@ MModuleList *GetMModuleList(void)
 
 /* When a module gets deleted it must make sure that it is no longer
    in the module list. */
-MModuleCommon::~MModuleCommon()
+void MAppBase::RemoveModule(MModuleCommon *module)
 {
    if(gs_MModuleList)
    {
@@ -97,7 +95,7 @@ MModuleCommon::~MModuleCommon()
       for(i = gs_MModuleList->begin();
           i != gs_MModuleList->end();
           i++)
-         if( (**i).m_Module == this )
+         if( (**i).m_Module == module )
             gs_MModuleList->erase(i); // remove our entry
    }
 }
