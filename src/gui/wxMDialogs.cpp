@@ -2724,7 +2724,7 @@ void wxSelectionsOrderDialog::OnButtonMove(bool up)
         wxString label = m_checklstBox->GetString(selection);
 
         int positionNew = up ? selection - 1 : selection + 2;
-        if ( positionNew >= 0 && positionNew < m_checklstBox->Number() )
+        if ( positionNew >= 0 && positionNew <= m_checklstBox->Number() )
         {
             bool wasChecked = m_checklstBox->IsChecked(selection);
 

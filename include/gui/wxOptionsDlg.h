@@ -36,6 +36,7 @@ enum OptionsPage
    OptionsPage_Python,
 #endif
    OptionsPage_MessageView,
+   OptionsPage_FolderView,
    OptionsPage_Adb,
    OptionsPage_Helpers,
    OptionsPage_Misc,

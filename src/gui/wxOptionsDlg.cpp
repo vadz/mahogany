@@ -221,10 +221,19 @@ enum ConfigFields
    ConfigField_MessageViewFaxSupport,
    ConfigField_MessageViewFaxDomains,
 #endif // Unix
+   ConfigField_MessageViewMaxHelpText,
+   ConfigField_MessageViewMaxMsgSize,
+   ConfigField_MessageViewMaxHeadersNum,
+   ConfigField_MessageViewHeaders,
+   ConfigField_MessageViewDateFormat,
+   ConfigField_MessageViewLast = ConfigField_MessageViewDateFormat,
+
+   // folder view options
+   ConfigField_FolderViewFirst = ConfigField_MessageViewLast,
    ConfigField_FolderViewHelpText,
-   ConfigField_FolderViewFontFamily,
    ConfigField_FolderViewOnlyNames,
    ConfigField_FolderViewReplaceFrom,
+   ConfigField_FolderViewFontFamily,
    ConfigField_FolderViewFontSize,
    ConfigField_FolderViewFGColour,
    ConfigField_FolderViewBGColour,
@@ -232,17 +241,12 @@ enum ConfigFields
    ConfigField_FolderViewRecentColour,
    ConfigField_FolderViewUnreadColour,
    ConfigField_FolderViewDeletedColour,
-   ConfigField_MessageViewMaxHelpText,
-   ConfigField_MessageViewMaxMsgSize,
-   ConfigField_MessageViewMaxHeadersNum,
-   ConfigField_MessageViewHeaders,
+   ConfigField_FolderViewSortMessagesBy,
    ConfigField_FolderViewHeaders,
-   ConfigField_MessageViewSortMessagesBy,
-   ConfigField_MessageViewDateFormat,
-   ConfigField_MessageViewLast = ConfigField_MessageViewDateFormat,
+   ConfigField_FolderViewLast = ConfigField_FolderViewHeaders,
 
-   // autocollecting addresses options
-   ConfigField_AdbFirst = ConfigField_MessageViewLast,
+   // autocollecting and address books options
+   ConfigField_AdbFirst = ConfigField_FolderViewLast,
    ConfigField_AutoCollect_HelpText,
    ConfigField_AutoCollect,
    ConfigField_AutoCollectAdb,
@@ -537,6 +541,11 @@ BEGIN_EVENT_TABLE(wxOptionsPageMessageView, wxOptionsPage)
    EVT_BUTTON(-1, wxOptionsPageMessageView::OnButton)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxOptionsPageFolderView, wxOptionsPage)
+   // buttons invoke subdialogs
+   EVT_BUTTON(-1, wxOptionsPageFolderView::OnButton)
+END_EVENT_TABLE()
+
 BEGIN_EVENT_TABLE(wxOptionsPageFolders, wxOptionsPage)
    EVT_BUTTON(-1, wxOptionsPageFolders::OnButton)
 
@@ -702,7 +711,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Flag &clear callback"),         Field_Text,    ConfigField_EnablePython   },
 #endif // USE_PYTHON
 
-   // message views:
+   // message view
    { gettext_noop("Preview message when &selected"), Field_Bool,    -1 },
    { gettext_noop("&Font family"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
@@ -719,20 +728,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Support special &fax mailers"), Field_Bool,    -1 },
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
 #endif // unix
-   { gettext_noop("The following settings are for the list of messages."),
-                                                   Field_Message,  -1 },
-   { gettext_noop("Font famil&y"
-                  ":default:decorative:roman:script:swiss:modern:teletype"),
-                                                   Field_Combo,   -1},
-   { gettext_noop("Font si&ze"),                   Field_Number,  -1},
-   { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
-   { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
-   { gettext_noop("Foreground c&olour"),           Field_Color,   -1},
-   { gettext_noop("&Backgroud colour"),            Field_Color,   -1},
-   { gettext_noop("Colour for &new message"),      Field_Color,   -1},
-   { gettext_noop("Colour for &recent messages"),  Field_Color,   -1},
-   { gettext_noop("Colour for u&nread messages"),  Field_Color,   -1},
-   { gettext_noop("Colour for &deleted messages" ),Field_Color,   -1},
    { gettext_noop("The following settings allow to limit the amount of data\n"
                   "retrieved from remote server: if the message size or\n"
                   "number is greater than the value specified here, you\n"
@@ -742,9 +737,25 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Number,   -1 },
    { gettext_noop("Maximum &number of messages"),  Field_Number,   -1 },
    { gettext_noop("Configure &headers to show..."),Field_SubDlg,   -1 },
-   { gettext_noop("Configure &columns to show..."),Field_SubDlg,   -1 },
-   { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
    { gettext_noop("Configure &format for displaying dates"),         Field_SubDlg,    -1                     },
+
+   // folder view
+   { gettext_noop("The following settings are for the list of messages."),
+                                                   Field_Message,  -1 },
+   { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
+   { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
+   { gettext_noop("Font famil&y"
+                  ":default:decorative:roman:script:swiss:modern:teletype"),
+                                                   Field_Combo,   -1},
+   { gettext_noop("Font si&ze"),                   Field_Number,  -1},
+   { gettext_noop("Foreground c&olour"),           Field_Color,   -1},
+   { gettext_noop("&Backgroud colour"),            Field_Color,   -1},
+   { gettext_noop("Colour for &new message"),      Field_Color,   -1},
+   { gettext_noop("Colour for &recent messages"),  Field_Color,   -1},
+   { gettext_noop("Colour for u&nread messages"),  Field_Color,   -1},
+   { gettext_noop("Colour for &deleted messages" ),Field_Color,   -1},
+   { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
+   { gettext_noop("Configure &columns to show..."),Field_SubDlg,   -1 },
 
    // adb: autocollect and bbdb options
    { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
@@ -949,23 +960,25 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),
 #endif
    CONFIG_NONE(),
-   CONFIG_ENTRY(MP_FVIEW_FONT),
-   CONFIG_ENTRY(MP_FVIEW_FONT_SIZE),
+   CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
+   CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
+   CONFIG_ENTRY(MP_MSGVIEW_HEADERS),
+   CONFIG_ENTRY(MP_DATE_FMT),
+
+   // folder view
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_NAMES_ONLY),
    CONFIG_ENTRY(MP_FVIEW_FROM_REPLACE),
+   CONFIG_ENTRY(MP_FVIEW_FONT),
+   CONFIG_ENTRY(MP_FVIEW_FONT_SIZE),
    CONFIG_ENTRY(MP_FVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_BGCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_NEWCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_RECENTCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_UNREADCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_DELETEDCOLOUR),
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
-   CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
-   CONFIG_ENTRY(MP_MSGVIEW_HEADERS),
-   CONFIG_NONE(), // no such thing as MP_FOLDERVIEW_COLUMNS
    CONFIG_ENTRY(MP_MSGS_SORTBY),
-   CONFIG_ENTRY(MP_DATE_FMT),
+   CONFIG_NONE(), // no such thing as MP_FOLDERVIEW_COLUMNS
 
    // autocollect
    CONFIG_NONE(),
@@ -1708,12 +1721,48 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
    bool dirty;
 
    wxObject *obj = event.GetEventObject();
-   if ( obj == GetControl(ConfigField_MessageViewSortMessagesBy) )
-      dirty = ConfigureSorting(m_Profile, this);
-   else if ( obj == GetControl(ConfigField_MessageViewDateFormat) )
+   if ( obj == GetControl(ConfigField_MessageViewDateFormat) )
       dirty = ConfigureDateFormat(m_Profile, this);
    else if ( obj == GetControl(ConfigField_MessageViewHeaders) )
       dirty = ConfigureMsgViewHeaders(m_Profile, this);
+   else
+   {
+      wxFAIL_MSG( "alien button" );
+
+      dirty = false;
+   }
+
+   if ( dirty )
+   {
+      // something changed - make us dirty
+      wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+      wxCHECK_RET( dialog, "options page without a parent dialog?" );
+      dialog->SetDirty();
+   }
+}
+
+// ----------------------------------------------------------------------------
+// wxOptionsPageFolderView
+// ----------------------------------------------------------------------------
+
+wxOptionsPageFolderView::wxOptionsPageFolderView(wxNotebook *parent,
+                                                 Profile *profile)
+   : wxOptionsPageStandard(parent,
+                           _("Folder Viewer"),
+                           profile,
+                           ConfigField_FolderViewFirst,
+                           ConfigField_FolderViewLast,
+                           MH_OPAGE_MESSAGEVIEW)
+{
+}
+
+void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
+{
+   bool dirty;
+
+   wxObject *obj = event.GetEventObject();
+   if ( obj == GetControl(ConfigField_FolderViewSortMessagesBy) )
+      dirty = ConfigureSorting(m_Profile, this);
    else if ( obj == GetControl(ConfigField_FolderViewHeaders) )
       dirty = ConfigureFolderViewHeaders(m_Profile, this);
    else
@@ -2223,6 +2272,7 @@ const char *wxOptionsNotebook::ms_aszImages[] =
    "python",
 #endif
    "msgview",
+   "folderview",
    "adrbook",
    "helpers",
    "miscopt",
@@ -2247,6 +2297,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    new wxOptionsPagePython(this, profile);
 #endif
    new wxOptionsPageMessageView(this, profile);
+   new wxOptionsPageFolderView(this, profile);
    new wxOptionsPageAdb(this, profile);
    new wxOptionsPageHelpers(this, profile);
    new wxOptionsPageOthers(this, profile);

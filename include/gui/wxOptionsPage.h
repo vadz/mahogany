@@ -335,6 +335,18 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// settings concerning the folder view window
+class wxOptionsPageFolderView : public wxOptionsPageStandard
+{
+public:
+   wxOptionsPageFolderView(wxNotebook *parent, Profile *profile);
+
+   void OnButton(wxCommandEvent&);
+
+private:
+   DECLARE_EVENT_TABLE()
+};
+
 // user identity
 class wxOptionsPageIdent : public wxOptionsPageStandard
 {
