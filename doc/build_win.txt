@@ -67,7 +67,8 @@ library paths.
    If you don't want to install SQlite, you will have to skip building dspam
 project and DspamFilter.cpp file located in modules/spam subfolder of the
 source files of M project in the IDE (simply set "Excluded from build" to true
-in its properties).
+in its properties). You will also need to remove dspam.lib from the linker
+inputs in the linker options of M project.
 
 
 c) Python
