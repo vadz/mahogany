@@ -407,6 +407,8 @@ MessageCC::FetchText(void)
       mailText = mail_fetchtext_full(folder->Stream(), m_uid,
                                      &m_MailTextLen, FT_UID);
       folder->UnLock();
+      ASSERT_MSG(strlen(mailText) == m_MailTextLen,
+                 "DEBUG: Mailfolder corruption detected");
       MailFolderCC::ProcessEventQueue();
       return String(mailText, (size_t) m_MailTextLen);
    }
@@ -550,6 +552,13 @@ MessageCC::GetBody(void)
    if(folder == NULL) // this message has no folder associated
       return m_Body;
 
+#ifdef DEBUG
+   /// Helps me find corrupted folders:
+   /// Triggers an assert is header is corrupted
+   String tmpstr;
+   WriteToString(tmpstr, true);
+#endif
+   
    int retry = 1;
 
    // Forget what we  know and re-fetch the body, it is cached anyway.
@@ -849,8 +858,11 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
       {
          str = "";
          CHECK_DEAD();
-         char *headerPart = mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID);
+         char *headerPart =
+            mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID); 
          folder->UnLock();
+         ASSERT_MSG(strlen(headerPart == len),
+                    "DEBUG: Mailfolder corruption detected");
          str += String(headerPart, (size_t)len);
          str += ((MessageCC*)this)->FetchText();
          MailFolderCC::ProcessEventQueue();
