@@ -1922,46 +1922,52 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
    unsigned long lastcount = 0;
    MProgressDialog *progDlg = NULL;
    m_SearchMessagesFound = new UIdArray;
+
    // Error is set to true if we cannot handle it on the server side
    // or later, if a real error occurs.
    bool error = false;
 
-   /* Do server-side searches if we are using IMAP */
-   if( GetType() == MF_IMAP )
+   // attempt server side search first: this currently only works for IMAP and
+   // NNTP but maybe it will work for other folders too later
    {
       SEARCHPGM *pgm = mail_newsearchpgm();
       STRINGLIST *slist = mail_newstringlist();
 
-      slist->text.data = (unsigned char *)strutil_strdup(crit->m_Key);
+      slist->text.data = (unsigned char *)strdup(crit->m_Key);
       slist->text.size = crit->m_Key.length();
-      switch(crit->m_What)
+
+      switch ( crit->m_What )
       {
-      case SearchCriterium::SC_FULL:
-         pgm->subject = slist; break;
-      case SearchCriterium::SC_BODY:
-         pgm->subject = slist; break;
-      case SearchCriterium::SC_SUBJECT:
-         pgm->subject = slist; break;
-      case SearchCriterium::SC_TO:
-         pgm->subject = slist; break;
-      case SearchCriterium::SC_FROM:
-         pgm->subject = slist; break;
-      case SearchCriterium::SC_CC:
-         pgm->subject = slist; break;
-      default:
-         error = true;
+         case SearchCriterium::SC_FULL:
+            pgm->text = slist; break;
+         case SearchCriterium::SC_BODY:
+            pgm->body = slist; break;
+         case SearchCriterium::SC_SUBJECT:
+            pgm->subject = slist; break;
+         case SearchCriterium::SC_TO:
+            pgm->to = slist; break;
+         case SearchCriterium::SC_FROM:
+            pgm->from = slist; break;
+         case SearchCriterium::SC_CC:
+            pgm->cc = slist; break;
+
+         default:
+            error = true;
+            mail_free_searchpgm(&pgm);
       }
-      if(! error)
+
+      if ( !error )
+      {
          mail_search_full (m_MailStream,
-                           /* charset */ NIL,
+                           NIL /* charset: use default (US-ASCII) */,
                            pgm,
-                           SE_UID|SE_FREE|SE_NOPREFETCH);
-      else
-         mail_free_searchpgm(&pgm);
+                           SE_UID | SE_FREE | SE_NOPREFETCH);
+      }
    }
-   /* our own search for all other folder types or unsuppported server
-      searches */
-   if( GetType() != MF_IMAP || error == TRUE)
+
+   // our own search for all other folder types or unsuppported server
+   // searches
+   if ( error )
    {
       String what;
       error = false;

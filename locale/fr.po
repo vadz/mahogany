@@ -15,7 +15,7 @@ msgstr ""
 
 #: .src/Calendar.cpp:359
 msgid "Pick a Date"
-msgstr ""
+msgstr "Choisissez une date"
 
 #: .src/Calendar.cpp:361 .src/Calendar.cpp:642 wxFolderView.cpp:80
 #: wxMDialogs.cpp:1355
@@ -28,50 +28,49 @@ msgid ""
 "send the message\n"
 "\n"
 msgstr ""
+"Veuillez choisir une date pour\n"
+"l'envoi de ce message\n"
+"\n"
 
 #: .src/Calendar.cpp:387
 msgid "Repeat Event"
-msgstr ""
+msgstr "Répéter l'evenement"
 
 #: .src/Calendar.cpp:395
 msgid "every"
-msgstr ""
+msgstr "chaque"
 
 #: .src/Calendar.cpp:422
-#, fuzzy
 msgid "days"
-msgstr "beaucoup "
+msgstr "jours"
 
 #: .src/Calendar.cpp:422
 msgid "weeks"
-msgstr ""
+msgstr "semaines"
 
 #: .src/Calendar.cpp:423
 msgid "months"
-msgstr ""
+msgstr "mois"
 
 #: .src/Calendar.cpp:423
-#, fuzzy
 msgid "years"
-msgstr " octets"
+msgstr "années"
 
 #: .src/Calendar.cpp:437
 msgid "Repeat ends on"
-msgstr ""
+msgstr "Répétition s'arrête le"
 
 #: .src/Calendar.cpp:610
-#, fuzzy
 msgid "Mahogany : Calendar"
-msgstr "Barre d'outils de Mahogany"
+msgstr "Mahogany : Calendrier"
 
 #: .src/Calendar.cpp:621
 msgid "&Add Reminder"
-msgstr ""
+msgstr "&Ajouter un rappel"
 
 #: .src/Calendar.cpp:622
-#, fuzzy
 msgid "&Calendar"
-msgstr "&Effacer"
+msgstr "&Calendrier"
 
 #: .src/Calendar.cpp:643 wxFolderView.cpp:83 wxMDialogs.cpp:1356
 msgid "Subject"
@@ -79,104 +78,90 @@ msgstr "Au sujet de"
 
 #: .src/Calendar.cpp:644
 msgid "Action"
-msgstr ""
+msgstr "Action"
 
 #: .src/Calendar.cpp:724
 msgid "This folder is used to store data for the calendar plugin module."
-msgstr ""
+msgstr "Ce dossier est utilisé pour les données du calendrier"
 
 #: .src/Calendar.cpp:727
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot create calendar module folder '%s'."
-msgstr "Impossible de sauvegarder le message dans le fichier '%s'."
+msgstr "Impossible de créer le dossier pour les données du calendrier '%s'."
 
 #: .src/Calendar.cpp:767
-#, fuzzy
 msgid "Cannot parse date information."
-msgstr "Impossible d'ouvrir le répertoire '%s'."
+msgstr "La date n'a pas pu être analysée."
 
 #: .src/Calendar.cpp:814
-#, fuzzy
 msgid "Please enter the text for the reminder:"
-msgstr ""
-"Veuillez entrer la commande à utiliser pour le traitement\n"
-"des données du type '%s':"
+msgstr "Veuillez entrez le texte pour le rappel:"
 
 #: .src/Calendar.cpp:815
-#, fuzzy
 msgid "Mahogany : Create Reminder"
-msgstr "Message de test de Mahogany"
+msgstr "Mahogany : Créer un rappel"
 
 #: .src/Calendar.cpp:881
 msgid "reminder"
-msgstr ""
+msgstr "rappel"
 
 #: .src/Calendar.cpp:950
 #, c-format
 msgid "Stored reminder `%s' in mailbox `%s'."
-msgstr ""
+msgstr "La rappel '%s' a été enregistré dans le dossier '%s'."
 
 #: .src/Calendar.cpp:966
-#, fuzzy, c-format
+#, c-format
 msgid "Send or queued message `%s'."
-msgstr "Sauvegarde de %d message(s) en cours..."
+msgstr "Message envoyé '%s'."
 
 #: .src/Calendar.cpp:977
 msgid "Message for reminder disappeared!"
-msgstr ""
+msgstr "Le message de rappel a disparu!"
 
 #: .src/Calendar.cpp:1012
-#, fuzzy
 msgid "Mahogany Calendar Module "
-msgstr "Barre d'outils de Mahogany"
+msgstr "Calendrier de Mahogany"
 
 #: .src/Calendar.cpp:1015
 msgid "Reminder"
-msgstr ""
+msgstr "Rappel"
 
 #: .src/Calendar.cpp:1074
-#, fuzzy
 msgid "&Show"
-msgstr "Plus &bas"
+msgstr "&Afficher"
 
 #: .src/Calendar.cpp:1076 .src/PalmOS.cpp:625
-#, fuzzy
 msgid "&Configure"
-msgstr "Configurer les paramètres d'impression"
+msgstr "Configurer"
 
 #: .src/Calendar.cpp:1079
-#, fuzzy
 msgid "&Calendar Module"
-msgstr "Changer les options du programme"
+msgstr "Module de &calendrier"
 
 #: .src/Calendar.cpp:1080
 msgid "Functionality to schedule messages and reminders."
-msgstr ""
+msgstr "Permet de programmer les rappels et l'envoi de messages."
 
 #: .src/Calendar.cpp:1223
-#, fuzzy
 msgid "Mailbox for calendar"
-msgstr "Le message a été envoyé."
+msgstr "Le dossier pour le calendrier"
 
 #: .src/Calendar.cpp:1224
-#, fuzzy
 msgid "Show on Startup"
-msgstr "Ecran de &bienvenu au démarrage"
+msgstr "Afficher au démarrage"
 
 #: .src/Calendar.cpp:1230
-#, fuzzy
 msgid "Calendar module preferences"
-msgstr "Changer les options du programme"
+msgstr "Les options du calendrier"
 
 #: .src/Filters.cpp:397
-#, fuzzy
 msgid "Filters output"
-msgstr "&Fichier"
+msgstr "La sortie du filtre"
 
 #: .src/Filters.cpp:401
-#, fuzzy
 msgid "Filters: "
-msgstr "&Fichier"
+msgstr "&Filtres: "
 
 #: .src/Filters.cpp:1095
 #, c-format
@@ -185,47 +170,47 @@ msgid ""
 "  %s\n"
 "%s<error> %s"
 msgstr ""
+"Erreur de syntaxe à la position %lu:\n"
+"  %s\n"
+"%s<erreur> %s"
 
 #: .src/Filters.cpp:1098
-#, fuzzy
 msgid "Parse error!"
-msgstr "Coller ici"
+msgstr "Erreur de syntaxe"
 
 #: .src/Filters.cpp:1152
 msgid "Unterminated string."
-msgstr ""
+msgstr "Une chaîne non terminée."
 
 #: .src/Filters.cpp:1199
-#, fuzzy
 msgid "'(' expected after 'if'."
-msgstr "Répertoire '%s' sélectionné."
+msgstr "'(' attendu après 'if'."
 
 #: .src/Filters.cpp:1211
-#, fuzzy
 msgid "')' expected after condition in if statement."
-msgstr "Répertoire '%s' sélectionné."
+msgstr "')' attendu après la condition dans le 'if'."
 
 #: .src/Filters.cpp:1257
 msgid "Expected an expression in argument list."
-msgstr ""
+msgstr "Une expression attendue dans la liste de paramètres."
 
 #: .src/Filters.cpp:1261
 msgid "Expected ',' or ')' behind argument."
-msgstr ""
+msgstr "',' ou ')' attendu après le paramètre."
 
 #: .src/Filters.cpp:1288
-#, fuzzy, c-format
+#, c-format
 msgid "Functioncall expected '(' after '%s'."
-msgstr "Répertoire '%s' sélectionné."
+msgstr "Un appel de fonction attendu après '%s'."
 
 #: .src/Filters.cpp:1299
 msgid "Expected ')' at end of argument list."
-msgstr ""
+msgstr "')' attendu à la fin de la liste de paramètres."
 
 #: .src/Filters.cpp:1313
 #, c-format
 msgid "Attempt to call undefined function '%s'."
-msgstr ""
+msgstr "Appel d'une fonction inconnue '%s'."
 
 #: .src/Filters.cpp:1351
 msgid "Expected ')' after expression."

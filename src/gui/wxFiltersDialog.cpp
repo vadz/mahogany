@@ -1070,6 +1070,34 @@ wxFiltersDialog::OnAddFiter(wxCommandEvent &event)
    if ( idx == -1 )
    {
       m_lboxFilters->Append(name);
+
+      // a newly added filter is not used by any folders yet, but this could
+      // be surprizing (well, in fact, it's really bad design and we should
+      // just allow to configure the folders which use this filter in the
+      // wxOneFilterDialog - TODO)
+      String msg;
+      msg.Printf(_("The filter '%s' which you have just created is not\n"
+                   "yet used by any folder. Would you like to select\n"
+                   "a folder to which you'd like to assign this filter\n"
+                   "right now (otherwise you can do it later by using\n"
+                   "the \"Filters\" entry in the \"Folder\" menu)?"),
+                 name.c_str());
+
+      if ( MDialog_YesNoDialog(msg,
+                               this,
+                               _("Filter is not used"),
+                               false /* yes default */,
+                               GetPersMsgBoxName(M_MSGBOX_FILTER_NOT_USED_YET)
+                              ) )
+      {
+         MFolder_obj folder(MDialog_FolderChoose(this));
+         if ( folder )
+         {
+            // activate the filter for this folder
+            folder->AddFilter(name);
+         }
+      }
+      //else: leave the filter unused
    }
    //else: it already exists in the message box
 
@@ -1237,7 +1265,7 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
    c->left.SameAs(boxBottom, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
    c->top.SameAs(boxBottom, wxTop, 4*LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(boxBottom, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(boxBottom, wxBottom, -2*LAYOUT_Y_MARGIN);
    statText->SetConstraints(c);
 
    m_btnAdd = new wxButton(this, -1, _("&Add..."));

@@ -177,6 +177,21 @@ const char *MDialog_FileRequester(String const &message,
                                   Profile *profile = NULL
    );
 
+/** show a (modal) dialog with the given text
+
+    @param title is the title of the dialog
+    @param text is the text to show in it
+    @param configPath is the path in the config used to save dialog position
+           and size and may be NULL
+*/
+void MDialog_ShowText(MWindow *parent,
+                      const char *title,
+                      const char *text,
+                      const char *configPath = NULL);
+
+} // extern "C"
+
+
 /**
   Ask the user to enter some text and remember the last value in the "Prompt"
   section of the global config object in the key named "key" if it's !NULL:
@@ -262,21 +277,7 @@ MFolder *
 MDialog_FolderChoose(const MWindow *parent, MFolder *folder = NULL);
 
 /// choose a folder and open a view on it
-void MDialog_FolderOpen(class wxMFrame *parent);
-
-/** show a (modal) dialog with the given text
-
-    @param title is the title of the dialog
-    @param text is the text to show in it
-    @param configPath is the path in the config used to save dialog position
-           and size and may be NULL
-*/
-void MDialog_ShowText(MWindow *parent,
-                      const char *title,
-                      const char *text,
-                      const char *configPath = NULL);
-
-} // extern "C"
+void MDialog_FolderOpen(const MWindow *parent);
 
 /// Configure modules, in wxModulesDialog.cpp:
 extern

@@ -1095,7 +1095,7 @@ MDialog_FolderOpen(const MWindow *parent)
    if ( folder != NULL )
    {
       // open a view on this folder
-      (void)wxFolderViewFrame::Create(folder->GetName(),
+      (void)wxFolderViewFrame::Create(folder->GetFullName(),
                                       mApplication->TopLevelFrame());
       folder->DecRef();
    }
@@ -2503,14 +2503,14 @@ static const struct
    { "MailQueuedMessage",        gettext_noop("show notification for queued messages") },
    { "MailSentMessage",          gettext_noop("show notification for sent messages") },
    { "TestMailSent",             gettext_noop("show successful test message") },
-      { "AdbDeleteEntry",           gettext_noop("ask for confirmation before deleting the address book entries") },
-  { "ModulesWarning",           gettext_noop("Warning that module changes take effect only after restart") },
+   { "AdbDeleteEntry",           gettext_noop("ask for confirmation before deleting the address book entries") },
+   { "ModulesWarning",           gettext_noop("Warning that module changes take effect only after restart") },
 
    { "ConfirmAdbImporter",       gettext_noop("ask for confirmation before importing unrecognized address book files") },
    { "BbdbSaveDialog",           gettext_noop("ask for confirmation before saving address books in BBDB format") },
    { "FolderGroupHint",          gettext_noop("show explanation after creating a folder group") },
 
-      { "SignatureTooLong",         gettext_noop("warn if signature is longer than netiquette recommends") },
+   { "SignatureTooLong",         gettext_noop("warn if signature is longer than netiquette recommends") },
    { "RememberPwd",              gettext_noop("propose to remember passwords entered interactively") },
    { "ShowLogWinHint",           gettext_noop("show the hint about reopening the log window when it is being closed") },
    { "AutoExpunge",              gettext_noop("ask to expunge deleted messages before closing the folder") },
@@ -2526,6 +2526,8 @@ static const struct
    { "RetrieveRemote", gettext_noop("Question whether to retrieve remote settings at startup.") },
    { "StoreRemote", gettext_noop("Question whether to store remote settings at shutdown.") },   { "OverwriteRemote",gettext_noop("Question whether to overwrite newer remote config settings") },
    { "StoredRemote", gettext_noop("Confirmation that remote config was saved") },
+   { "FilterNotUsedYet", gettext_noop("Warn that newly created filter is unused") },
+   //{ "", gettext_noop() },
 };
 
 /// return the name to use for the given persistent msg box

@@ -442,14 +442,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       switch ( id )
       {
          case WXMENU_FOLDER_OPEN:
-            {
-               wxString name;
-               if ( MInputBox(&name, _("Folder Open"), _("Name of the folder?"),
-                              this, "OpenFolderName", "INBOX") )
-               {
-                  (void) wxFolderViewFrame::Create(name, this);
-               }
-            }
+            MDialog_FolderOpen(this);
             break;
 
          case WXMENU_FOLDER_CREATE:
@@ -459,17 +452,19 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                MFolder *newfolder = RunCreateFolderWizard(&wantsDialog, NULL, winTop);
                if ( wantsDialog )
                {
-                  // users wants to use the dialog directly instead of the wizard
-                  newfolder = ShowFolderCreateDialog(winTop, FolderCreatePage_Default, NULL);
+                  // users wants to use the dialog directly instead of the
+                  // wizard
+                  newfolder = ShowFolderCreateDialog(winTop,
+                                                     FolderCreatePage_Default,
+                                                     NULL);
                }
-               if(newfolder)
-                  newfolder->DecRef();
+               SafeDecRef(newfolder);
             }
             break;
 
          case WXMENU_FOLDER_FILTERS:
             {
-               MFolder_obj folder(m_folderName);
+               MFolder_obj folder(m_FolderTree->GetSelection());
                if ( folder )
                   ConfigureFiltersForFolder(folder, this);
             }
