@@ -106,6 +106,7 @@ extern const MOption MP_INLINE_GFX_EXTERNAL;
 extern const MOption MP_INLINE_GFX_SIZE;
 extern const MOption MP_MAX_MESSAGE_SIZE;
 extern const MOption MP_MSGVIEW_AUTO_ENCODING;
+extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
 extern const MOption MP_MSGVIEW_HEADERS;
 extern const MOption MP_MSGVIEW_VIEWER;
 extern const MOption MP_MVIEW_TITLE_FMT;
@@ -531,7 +532,7 @@ MessageView::Init()
    m_filters = NULL;
 
    m_uid = UID_ILLEGAL;
-   m_encodingUser =
+   m_encodingUser = wxFONTENCODING_DEFAULT;
    m_encodingAuto = wxFONTENCODING_SYSTEM;
 
    m_evtHandlerProc = NULL;
@@ -1376,7 +1377,7 @@ MessageView::ShowHeaders()
       }
       else // no encoding in the header
       {
-         if ( m_encodingUser != wxFONTENCODING_SYSTEM )
+         if ( m_encodingUser != wxFONTENCODING_DEFAULT )
          {
             // use the user specified encoding if none specified in the header
             // itself
@@ -1525,7 +1526,7 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
 {
    // get the encoding of the text
    wxFontEncoding encPart;
-   if ( m_encodingUser != wxFONTENCODING_SYSTEM )
+   if ( m_encodingUser != wxFONTENCODING_DEFAULT )
    {
       // user-specified encoding overrides everything
       encPart = m_encodingUser;
@@ -2070,7 +2071,7 @@ MessageView::Update(void)
 
    // if user selects the language from the menu, m_encodingUser is set
    wxFontEncoding encoding;
-   if ( m_encodingUser != wxFONTENCODING_SYSTEM )
+   if ( m_encodingUser != wxFONTENCODING_DEFAULT )
    {
       encoding = m_encodingUser;
    }
@@ -2746,6 +2747,10 @@ MessageView::SetLanguage(int id)
 void
 MessageView::SetEncoding(wxFontEncoding encoding)
 {
+   // use wxFONTENCODING_DEFAULT instead!
+   ASSERT_MSG( encoding != wxFONTENCODING_SYSTEM,
+               _T("invalid encoding in MessageView::SetEncoding()") );
+
    m_encodingUser = encoding;
 
    Update();
@@ -2754,12 +2759,12 @@ MessageView::SetEncoding(wxFontEncoding encoding)
 void MessageView::ResetUserEncoding()
 {
    // if the user had manually set the encoding for the old message, we
-   // revert back to automatic encoding detection for the new one
-   if ( READ_CONFIG(GetProfile(), MP_MSGVIEW_AUTO_ENCODING) )
-   {
-      // don't keep it for the other messages, just for this one
-      m_encodingUser = wxFONTENCODING_SYSTEM;
-   }
+   // revert back to the default encoding for the new message
+   //
+   // note that if m_encodingUser will be wxFONTENCODING_DEFAULT (default),
+   // we'll detect the encoding automatically
+   m_encodingUser = (wxFontEncoding)(long)
+                     READ_CONFIG(GetProfile(), MP_MSGVIEW_DEFAULT_ENCODING);
 }
 
 void
