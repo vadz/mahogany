@@ -6,7 +6,12 @@
  * $Id$              *
  ********************************************************************
  * $Log$
+ * Revision 1.10  1998/06/09 13:42:28  VZ
+ * corrected the line which checks that wxGetTextFromUser() returns something
+ * (i.e. wasn't cancelled)
+ *
  * Revision 1.9  1998/06/05 16:56:26  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -62,7 +67,8 @@
 #include "Mcommon.h"
 
 #ifndef  USE_PCH
-#  include <guidef.h>
+#  include "guidef.h"
+#  include "strutil.h"
 
 #  include "MFrame.h"
 #  include "MLogFrame.h"
@@ -263,7 +269,7 @@ wxMFrame::OnMenuCommand(int id)
                                   _("Folder Open"),
                                   "INBOX",
                                   this);
-      if(name)
+      if ( !strutil_isempty(name) )
       {
          MailFolder *mf = MailFolderCC::OpenFolder((const char *)name);
          if(mf->IsInitialised())
@@ -271,6 +277,7 @@ wxMFrame::OnMenuCommand(int id)
          else
             delete mf;
       }
+      //else: cancelled
       break;
    }
    case WXMENU_FILE_ADBEDIT:
