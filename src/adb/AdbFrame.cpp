@@ -2343,7 +2343,7 @@ wxAdbEditFrame::~wxAdbEditFrame()
   SaveSettings();
 
   // clear the clipboard (may be NULL, it's ok)
-  delete m_clipboard;
+  if(m_clipboard) delete m_clipboard;
 
   // and now delete all ADB entries
 #if DELETE_TREE_CHILDREN
@@ -2351,7 +2351,7 @@ wxAdbEditFrame::~wxAdbEditFrame()
 #endif
 
   // and the imagelist we were using
-  delete m_pImageList;
+  if(m_pImageList) delete m_pImageList; // FIXME OBSOLETE?
 }
 
 // ----------------------------------------------------------------------------
