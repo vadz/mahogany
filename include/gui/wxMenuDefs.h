@@ -34,6 +34,9 @@ extern void AppendToMenu(wxMenu *menu, int nFirst, int nLast);
 #define  WXMENU_CONTAINS(menu,id)   \
    (WXMENU_##menu##_BEGIN < (id) && WXMENU_##menu##_END >= (id))
 
+/// check wether an ID belongs to a given submenu
+#define  WXSUBMENU_CONTAINS(menu,id) (WXMENU_CONTAINS(menu ## _SUBMENU, id))
+
 /// creates a menu, appends all it's items to it and appends it to menu bar
 extern void CreateMMenu(class wxMenuBar *menubar,
                         int menu_begin, int menu_end,
@@ -147,6 +150,13 @@ enum
    WXMENU_FOLDER_BROWSESUB,
    WXMENU_FOLDER_IMPORTTREE,
    WXMENU_FOLDER_SEP3,
+   // this got moved here from "Message" menu hence the "MSG" part...
+   WXMENU_MSG_SELECT_SUBMENU_BEGIN,
+      WXMENU_MSG_SELECTALL,
+      WXMENU_MSG_SELECTUNREAD,
+      WXMENU_MSG_SELECTFLAGGED,
+      WXMENU_MSG_DESELECTALL,
+   WXMENU_MSG_SELECT_SUBMENU_END,
    WXMENU_FOLDER_SEARCH,
    WXMENU_FOLDER_SEP4,
    WXMENU_FOLDER_FILTERS,
@@ -229,12 +239,11 @@ enum
    WXMENU_MSG_MARK_UNREAD,
    WXMENU_MSG_SEP5,
 
-   WXMENU_MSG_SELECT_SUBMENU_BEGIN,
-      WXMENU_MSG_SELECTALL,
-      WXMENU_MSG_SELECTUNREAD,
-      WXMENU_MSG_SELECTFLAGGED,
-      WXMENU_MSG_DESELECTALL,
-   WXMENU_MSG_SELECT_SUBMENU_END,
+   WXMENU_MSG_SPAM_SUBMENU_BEGIN,
+      WXMENU_MSG_SPAM_MARK,
+      WXMENU_MSG_SPAM_UNMARK,
+      WXMENU_MSG_SPAM_CHECK,
+   WXMENU_MSG_SPAM_SUBMENU_END,
    WXMENU_MSG_SEP6,
 
    WXMENU_MSG_SAVEADDRESSES,

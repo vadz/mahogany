@@ -841,7 +841,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 {
    const int id = event.GetId();
 
-   if ( WXMENU_CONTAINS(FOLDER, id) )
+   if ( WXMENU_CONTAINS(FOLDER, id) && !WXSUBMENU_CONTAINS(MSG_SELECT, id) )
    {
       switch ( id )
       {
@@ -997,7 +997,8 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       }
    }
    else if ( m_FolderView &&
-            ( WXMENU_CONTAINS(MSG, id) ||
+            ( WXSUBMENU_CONTAINS(MSG_SELECT, id) ||
+              WXMENU_CONTAINS(MSG, id) ||
               WXMENU_CONTAINS(LAYOUT, id) ||
               ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) ) ||
               // in edit menu there are some commands which should be forwarded
