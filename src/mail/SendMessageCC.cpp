@@ -214,10 +214,10 @@ SendMessageCC::Build(void)
    String version;
 
 #ifdef OS_UNIX
-   version << "M, " << M_VERSION_STRING << _(" , running on ") << M_OSINFO;
+   version << "M, " << M_VERSION_STRING << _(" , compiled for ") << M_OSINFO;
 #else // Windows
    // TODO put Windows version info here
-   version << "M, " << M_VERSION_STRING << _(" , running on ") << "Windows";
+   version << "M, " << M_VERSION_STRING << _(" , compiled for ") << "Windows";
 #endif // Unix/Windows
 
    m_headerValues[h++] = strutil_strdup(version);

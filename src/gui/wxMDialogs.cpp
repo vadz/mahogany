@@ -599,7 +599,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    version += M_VERSION_STRING;
    ll.Insert(version);
    ll.LineBreak();
-   version = _("        running on: ");
+   version = _("        compiled for: ");
 #ifdef OS_UNIX
    version += M_OSINFO;
 #else // Windows

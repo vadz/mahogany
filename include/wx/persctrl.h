@@ -239,6 +239,7 @@ private:
 // a list control which remembers the widths of its columns
 // ----------------------------------------------------------------------------
 
+#if 0
 class WXDLLEXPORT wxPListCtrl : public wxListCtrl
 {
 public:
@@ -284,6 +285,7 @@ protected:
 private:
     static const char *ms_listctrlKey;
 };
+#endif
 
 // ----------------------------------------------------------------------------
 // Persistent file selector functions: remember the last directory and file

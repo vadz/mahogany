@@ -104,7 +104,7 @@ XFace::CreateFromXpm(const char *xpmdata)
          tstr = buffer;
          strutil_tolower(tstr);
          
-	 if(tstr == "#000000")
+	 if(tstr == "#000000" || tstr == "gray0")
             zero = token[0];
 	 else if(tstr == "#ffffff"
                  || tstr >= "gray100"

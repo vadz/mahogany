@@ -87,7 +87,8 @@ InitPython(void)
       tmp += PATH_SEPARATOR;
       tmp += getenv("PYTHONPATH");
    }
-   putenv(tmp.c_str());
+   char *pathstring = strutil_strdup(tmp);  // this string must not be used again or freed
+   putenv(pathstring);
 #  endif
 
    // initialise the interpreter - this we do always, just to avoid problems

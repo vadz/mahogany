@@ -343,7 +343,8 @@ MAppBase::OnStartup()
       if(getenv("PATH"))
          tmp += getenv("PATH");
       tmp="PATH="+tmp;
-      putenv(tmp.c_str());
+      char *pathstring = strutil_strdup(tmp);  // this string must not be used again or freed
+      putenv(pathstring);
 #  endif //OS_WIN
 
    // initialise python interpreter

@@ -46,7 +46,7 @@ inline void MDialog_StatusMessage(const char *message, MFrame *frame = NULL)
 class MAppBase 
 {
 public:
-   void Exit(bool force);
+   void Exit();
    MFrame *TopLevelFrame(void) const;
    const char *GetText(const char *in) const;
    String  GetGlobalDir(void) const;
