@@ -52,7 +52,7 @@ CPP = @CPP@
 CXX = @CXX@
 LIBTOOL = @LIBTOOL@
 CXXCPP = @CXXCPP@
-CPPFLAGS =@CPPFLAGS@
+CPPFLAGS =@CPPFLAGS@ -DM_CANONICAL_HOST=$(CANONICAL_HOST)
 
 # SWIG
 ifdef USE_SWIG
@@ -82,6 +82,8 @@ DOCDIR = $(DATADIR)/doc
 PREFIX=@prefix@
 # for the dynamic linker, better than using -rpath
 LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib
+# the following must be identical to the setting in Mdefaults.h
+MODULEDIR=$(DATADIR)/$(CANONICAL_HOST)/lib
 
 LINK = $(LIBTOOL) --mode=link $(CXX) -Wl-r$(LD_RUN_PATH)
 

@@ -615,6 +615,9 @@ void FilterTest(void)
    SyntaxNode *sn = p->Parse();
    String str = sn->Debug();
    INFOMESSAGE((str.c_str()));
+   str.Printf("Evaluated '%s' = %ld",
+              testprogram, sn->Evaluate());
+   INFOMESSAGE((str.c_str()));
    p->DecRef();
    delete sn;
 }

@@ -805,7 +805,11 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
        buttons[Btn_Yes] = new wxButton(this, wxID_YES, _("Yes"));
        buttons[Btn_No] = new wxButton(this, wxID_NO, _("No"));
 
-       nDefaultBtn = Btn_Yes;
+
+       if(style & wxNO_DEFAULT)
+          nDefaultBtn = Btn_No;
+       else
+          nDefaultBtn = Btn_Yes;
     }
 
     if (style & wxOK) {

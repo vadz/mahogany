@@ -17,6 +17,9 @@ else
 	$(CC) $(CFLAGS) -c $<
 endif
 
+%.so: %.o
+	$(CXX) --shared $(CXXFLAGS) -o $@ $<
+
 %.cpp: %.i
 	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
 
