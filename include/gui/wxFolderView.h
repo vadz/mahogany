@@ -45,7 +45,6 @@ enum wxFolderListCtrlFields
 /** a wxWindows FolderView class */
 class wxFolderView : public FolderView
 {
-
 public:
    /** Constructor
        @param parent   the parent window
@@ -68,6 +67,9 @@ public:
        @return pointer to the folder or NULL
    */
    MailFolder * OpenFolder(String const &profilename);
+
+   /// set the language to use for message display
+   void SetLanguage(int id);
 
    /// called on Menu selection
    void OnCommandEvent(wxCommandEvent &event);

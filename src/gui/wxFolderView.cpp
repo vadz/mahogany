@@ -816,7 +816,7 @@ wxFolderListCtrl::SelectNextUnread()
       {
          if(failedOnce)
             break; // we really haven't found one
-	 failedOnce = true;
+         failedOnce = true;
          // else: we didn't find an unread *below*, so try above:
          foundFocused = false;
          idx = -1;
@@ -1922,10 +1922,55 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    result->DecRef();
 }
 
+void
+wxFolderView::SetLanguage(int id)
+{
+   if ( !m_MessagePreview )
+      return;
 
-/*------------------------------------------------------------------------
- * wxFolderViewFrame
- *-----------------------------------------------------------------------*/
+   int encoding;
+   switch ( id )
+   {
+      default:
+      case WXMENU_LANG_US_ASCII:
+         encoding = wxFONTENCODING_SYSTEM;
+         break;
+
+      case WXMENU_LANG_ISO8859_1:
+      case WXMENU_LANG_ISO8859_2:
+      case WXMENU_LANG_ISO8859_3:
+      case WXMENU_LANG_ISO8859_4:
+      case WXMENU_LANG_ISO8859_5:
+      case WXMENU_LANG_ISO8859_6:
+      case WXMENU_LANG_ISO8859_7:
+      case WXMENU_LANG_ISO8859_8:
+      case WXMENU_LANG_ISO8859_9:
+      case WXMENU_LANG_ISO8859_10:
+         encoding = wxFONTENCODING_ISO8859_1 + id - WXMENU_LANG_ISO8859_1;
+         break;
+
+      case WXMENU_LANG_CP1250:
+      case WXMENU_LANG_CP1251:
+      case WXMENU_LANG_CP1252:
+      case WXMENU_LANG_CP1253:
+      case WXMENU_LANG_CP1254:
+      case WXMENU_LANG_CP1255:
+      case WXMENU_LANG_CP1256:
+      case WXMENU_LANG_CP1257:
+         encoding = wxFONTENCODING_CP1250 + id - WXMENU_LANG_CP1250;
+         break;
+
+      case WXMENU_LANG_KOI8:
+         encoding = wxFONTENCODING_KOI8;
+   }
+
+   m_MessagePreview->SetEncoding((wxFontEncoding)encoding);
+}
+
+// ----------------------------------------------------------------------------
+// wxFolderViewFrame
+// ----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
    EVT_SIZE(    wxFolderViewFrame::OnSize)
    EVT_MENU(-1,    wxFolderViewFrame::OnCommandEvent)
@@ -2019,20 +2064,23 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
       case WXMENU_EDIT_PREF: // edit folder profile
          MDialog_FolderProfile(this, m_FolderView->GetFullName());
          break;
-   case WXMENU_EDIT_FILTERS:
-   {
-      ASMailFolder *amf = m_FolderView->GetFolder();
-      (void) ConfigureFilterRules(amf->GetProfile(), this);
-   }
-   break;
+
+      case WXMENU_EDIT_FILTERS:
+         {
+            ASMailFolder *amf = m_FolderView->GetFolder();
+            (void) ConfigureFilterRules(amf->GetProfile(), this);
+         }
+         break;
 
       default:
-         if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
-             || id == WXMENU_HELP_CONTEXT
-             || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST
-             || id == WXMENU_EDIT_CUT
-             || id == WXMENU_EDIT_COPY
-             || id == WXMENU_EDIT_PASTE)
+         if ( WXMENU_CONTAINS(MSG_LANG_SUBMENU, id) )
+            m_FolderView->SetLanguage(id);
+         else if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
+               || id == WXMENU_HELP_CONTEXT
+               || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST
+               || id == WXMENU_EDIT_CUT
+               || id == WXMENU_EDIT_COPY
+               || id == WXMENU_EDIT_PASTE)
             m_FolderView->OnCommandEvent(event);
          else
             wxMFrame::OnMenuCommand(id);

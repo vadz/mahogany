@@ -303,6 +303,32 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_SEARCH,  gettext_noop("&Search..."),
      gettext_noop("Search and select messages") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_SUBMENU,       gettext_noop("&Language"), "", FALSE },
+      { WXMENU_LANG_US_ASCII, gettext_noop("&US ASCII (7 bit)"), gettext_noop(""), TRUE },
+      { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
+      { WXMENU_LANG_ISO8859_1, gettext_noop("&West European (Latin1)"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_2, gettext_noop("&Central European (Latin2)"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_3, gettext_noop("&Esperanto (Latin3)"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_4, gettext_noop("&Baltic (Latin4)"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_5, gettext_noop("C&yrillic"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_6, gettext_noop("&Arabic"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_7, gettext_noop("&Greek"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_8, gettext_noop("&Hebrew"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_9, gettext_noop("&Turkish (Latin5)"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_10, gettext_noop("&Nordic (Latin6)"), gettext_noop(""), TRUE },
+      { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
+      { WXMENU_LANG_CP1250, gettext_noop("MS C&entral European (WinLatin2)"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_CP1251, gettext_noop("MS Cyri&llic"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_CP1252, gettext_noop("MS We&st European (WinLatin1)"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_CP1253, gettext_noop("MS Gree&k"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_CP1254, gettext_noop("MS T&urkish"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_CP1255, gettext_noop("MS Hebre&w"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_CP1256, gettext_noop("MS A&rabic"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_CP1257, gettext_noop("MS Bal&tic"), gettext_noop(""), TRUE },
+      { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
+      { WXMENU_LANG_KOI8, gettext_noop("Russian (KOI8-R)"), gettext_noop(""), TRUE },
+   { WXMENU_SUBMENU,       "", "", FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_TOGGLEHEADERS,gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
    { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message"), gettext_noop("Show the raw message text") , FALSE },
    { WXMENU_MSG_FIND,  gettext_noop("Fi&nd..."), gettext_noop("F&ind text in message\tCtrl-I") , FALSE },
@@ -557,5 +583,70 @@ EnableMMenu(MMenuId id, wxWindow *win, bool enable)
    }
 }
 
+/// Check the entry corresponding to this encoding in LANG submenu
+extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
+{
+   // the id of the current charset item in the menu
+   static int s_idCurrent = -1;
+
+   wxFrame *frame = GetFrame(win);
+   CHECK_RET(frame, "no parent frame in EnableMMenu");
+   wxMenuBar *mb = frame->GetMenuBar();
+   CHECK_RET(mb, "no menu bar in EnableMMenu");
+
+   if ( encoding == wxFONTENCODING_SYSTEM )
+   {
+      wxASSERT_MSG( s_idCurrent == -1,
+                    "CheckLanguageInMenu(wxFONTENCODING_SYSTEM) can "
+                    "only be called once!" );
+
+      s_idCurrent = WXMENU_LANG_US_ASCII;
+   }
+   else
+   {
+      mb->Check(s_idCurrent, FALSE);
+
+      switch ( encoding )
+      {
+         case wxFONTENCODING_ISO8859_1:
+         case wxFONTENCODING_ISO8859_2:
+         case wxFONTENCODING_ISO8859_3:
+         case wxFONTENCODING_ISO8859_4:
+         case wxFONTENCODING_ISO8859_5:
+         case wxFONTENCODING_ISO8859_6:
+         case wxFONTENCODING_ISO8859_7:
+         case wxFONTENCODING_ISO8859_8:
+         case wxFONTENCODING_ISO8859_9:
+         case wxFONTENCODING_ISO8859_10:
+            s_idCurrent = WXMENU_LANG_ISO8859_1 +
+                          encoding - wxFONTENCODING_ISO8859_1;
+            break;
+
+         case wxFONTENCODING_CP1250:
+         case wxFONTENCODING_CP1251:
+         case wxFONTENCODING_CP1252:
+         case wxFONTENCODING_CP1253:
+         case wxFONTENCODING_CP1254:
+         case wxFONTENCODING_CP1255:
+         case wxFONTENCODING_CP1256:
+         case wxFONTENCODING_CP1257:
+            s_idCurrent = WXMENU_LANG_CP1250 +
+                          encoding - wxFONTENCODING_CP1250;
+            break;
+
+         case wxFONTENCODING_KOI8:
+            s_idCurrent = WXMENU_LANG_KOI8;
+            break;
+
+         default:
+            wxFAIL_MSG( "Unexpected encoding in CheckLanguageInMenu" );
+
+         case wxFONTENCODING_DEFAULT:
+            s_idCurrent = WXMENU_LANG_US_ASCII;
+      }
+   }
+
+   mb->Check(s_idCurrent, TRUE);
+}
 
 /* vi: set tw=0 */

@@ -539,7 +539,7 @@ struct MfCloseEntry
    wxDateTime m_dt;
    ~MfCloseEntry()
       {
-         wxLogDebug("Mailfolder '%s': close timed out.", m_mf->GetName().c_str());
+         wxLogTrace("mailfolder", "Mailfolder '%s': close timed out.", m_mf->GetName().c_str());
          if(m_mf) m_mf->RealDecRef();
       }
    MfCloseEntry(MailFolderCmn *mf, int secs)
@@ -606,6 +606,7 @@ MailFolderCmn::DecRef()
    ASSERT_MSG(gs_MailFolderCloser, "DEBUG: this must not happen (harmless but should not be the case)");
    if(gs_MailFolderCloser && GetNRef() == 1) // only real closes get delayed
    {
+     wxLogTrace("mailfolder", "Mailfolder '%s': close delayed.", GetName().c_str());
      wxLogDebug("Mailfolder '%s': close delayed.", GetName().c_str());
      Checkpoint(); // flush data immediately
      gs_MailFolderCloser->Add(this);

@@ -578,6 +578,16 @@ wxMessageView::Clear(void)
 }
 
 void
+wxMessageView::SetEncoding(wxFontEncoding enc)
+{
+   m_encoding = enc;
+
+   CheckLanguageInMenu(this, enc);
+
+   Update();
+}
+
+void
 wxMessageView::SetFontForEncoding(wxFontEncoding enc)
 {
    wxCHECK_RET( m_mailMessage, "shouldn't be called without message" );
@@ -620,11 +630,16 @@ wxMessageView::SetFontForEncoding(wxFontEncoding enc)
          {
             wxLogStatus(GetFrame(this),
                         _("Unsupport charset '%s', message may be shown incorrectly."));
+
+            CheckLanguageInMenu(this, wxFONTENCODING_DEFAULT);
          }
          else
          {
             // remember it
             m_encoding = enc;
+
+            // and update the menu to reflect the current charset
+            CheckLanguageInMenu(this, enc);
          }
       }
    }

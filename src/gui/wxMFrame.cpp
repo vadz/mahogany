@@ -174,6 +174,9 @@ void
 wxMFrame::AddMessageMenu(void)
 {
    WXADD_MENU(GetMenuBar(), MSG, _("Me&ssage"));
+
+   // initially use the default charset
+   CheckLanguageInMenu(this);
 }
 
 wxMFrame::~wxMFrame()
@@ -185,8 +188,8 @@ void
 wxMFrame::SetTitle(String const &title)
 {
    wxString t = "Mahogany : " + title;
-   // the following (char *) is required to avoid a warning
-   wxFrame::SetTitle((char *)t.c_str());
+
+   wxFrame::SetTitle(t.c_str());
 }
 
 void

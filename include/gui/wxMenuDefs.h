@@ -14,6 +14,8 @@
 #ifndef  WXMENUDEFS_H
 #define  WXMENUDEFS_H
 
+#include <wx/fontenc.h>
+
 class wxMenu;
 class wxToolBar;
 
@@ -48,6 +50,10 @@ enum MMenuId
 
 /// Function to enable/disable a given menu:
 extern void EnableMMenu(MMenuId id, class wxWindow *win, bool enable);
+
+/// Check the entry corresponding to this encoding in LANG submenu
+extern void CheckLanguageInMenu(wxWindow *win,
+                                wxFontEncoding encoding = wxFONTENCODING_SYSTEM);
 
 /** Definition of all numeric menu IDs.
     Include each menu in WXMENU_menuname_BEGIN and WXMENU_menuname_END, so it
@@ -85,7 +91,7 @@ enum
    WXMENU_FILE_NET_ON,
    WXMENU_FILE_NET_OFF,
    WXMENU_FILE_SEP5,
-   WXMENU_FILE_IDENT_SUBMENU_START,
+   WXMENU_FILE_IDENT_SUBMENU_BEGIN,
       WXMENU_FILE_IDENT_ADD,
       WXMENU_FILE_IDENT_CHANGE,
       WXMENU_FILE_IDENT_EDIT,
@@ -156,6 +162,32 @@ enum
    WXMENU_MSG_DESELECTALL,
    WXMENU_MSG_SEARCH,
    WXMENU_MSG_SEP4,
+   WXMENU_MSG_LANG_SUBMENU_BEGIN,
+      WXMENU_LANG_US_ASCII,
+      WXMENU_LANG_SEP1,
+      WXMENU_LANG_ISO8859_1,
+      WXMENU_LANG_ISO8859_2,
+      WXMENU_LANG_ISO8859_3,
+      WXMENU_LANG_ISO8859_4,
+      WXMENU_LANG_ISO8859_5,
+      WXMENU_LANG_ISO8859_6,
+      WXMENU_LANG_ISO8859_7,
+      WXMENU_LANG_ISO8859_8,
+      WXMENU_LANG_ISO8859_9,
+      WXMENU_LANG_ISO8859_10,
+      WXMENU_LANG_SEP2,
+      WXMENU_LANG_CP1250,
+      WXMENU_LANG_CP1251,
+      WXMENU_LANG_CP1252,
+      WXMENU_LANG_CP1253,
+      WXMENU_LANG_CP1254,
+      WXMENU_LANG_CP1255,
+      WXMENU_LANG_CP1256,
+      WXMENU_LANG_CP1257,
+      WXMENU_LANG_SEP3,
+      WXMENU_LANG_KOI8,
+   WXMENU_MSG_LANG_SUBMENU_END,
+   WXMENU_MSG_SEP5,
    WXMENU_MSG_TOGGLEHEADERS,
    WXMENU_MSG_SHOWRAWTEXT,
    WXMENU_MSG_FIND,

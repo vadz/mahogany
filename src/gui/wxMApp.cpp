@@ -594,8 +594,6 @@ wxMApp::OnInit()
    gs_timerAutoSave = new AutoSaveTimer;
    gs_timerMailCollection = new MailCollectionTimer;
 
-   wxLog::AddTraceMask("mime");
-
    if ( OnStartup() )
    {
       // only now we can use profiles

@@ -88,6 +88,9 @@ public:
    /// update it
    void Update(void);
 
+   /// set the user-specified encoding and update
+   void SetEncoding(wxFontEncoding enc);
+
    /// prints the currently displayed message
    void Print(void);
 
