@@ -15,6 +15,7 @@
 
 #ifndef     USE_PCH
 #   include "FolderType.h"
+#   include "MApplication.h"
 
 #   include <wx/bmpbuttn.h>
 #endif // USE_PCH
