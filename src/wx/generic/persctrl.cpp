@@ -56,6 +56,11 @@
 #include "wx/config.h"
 #include "wx/persctrl.h"
 
+#ifdef __WINDOWS__
+    #include <windows.h>
+    #include "wx/msw/winundef.h"
+#endif // __WINDOWS__
+
 #ifndef MAX
 #   define   MAX(a,b) (((a) > (b))?(a):(b))
 #endif
@@ -1813,6 +1818,13 @@ int wxPMessageBox(const wxString& configPath,
             int rc = ConvertId(config->Read(configValue, 0l));
 
             if ( !rc ) {
+#ifdef __WINDOWS__
+                // hack: we're called with mouse being captured by the list
+                // ctrl under Windows and we must release it to allow it to
+                // work normally in the dialog which we show below
+               ::ReleaseCapture();
+#endif // __WINDOWS__
+
                 // do show the msg box
                 wxPMessageDialog dlg(parent, message, caption, style);
                 rc = dlg.ShowModal();
