@@ -93,12 +93,33 @@ public:
     bool m_started;
 };
 
+// a timer used to periodically check for new mail
+class MailCollectionTimer : public wxTimer
+{
+public:
+   MailCollectionTimer() { m_started = FALSE; }
+
+   virtual bool Start( int millisecs = -1, bool oneShot = FALSE )
+      { m_started = TRUE; return wxTimer::Start(millisecs, oneShot); }
+
+   virtual void Notify()
+      { wxLogTrace("Collection timer expired."); mApplication->GetMailCollector()->Collect(); }
+
+    virtual void Stop()
+      { if ( m_started ) wxTimer::Stop(); }
+
+public:
+    bool m_started;
+};
+
 // ----------------------------------------------------------------------------
 // global vars
 // ----------------------------------------------------------------------------
 
 // a (unique) autosave timer instance
 static AutoSaveTimer gs_timerAutoSave;
+// a (unique) timer for polling for new mail
+static MailCollectionTimer gs_MailCollectionTimer;
 
 // this creates the one and only application object
 IMPLEMENT_APP(wxMApp);
@@ -242,6 +263,10 @@ wxMApp::OnInit()
          gs_timerAutoSave.Start(delay);
 
       // start another timer to poll for new mail:
+      // start a timer to autosave the profile entries
+      delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY);
+      if ( delay > 0 )
+         gs_MailCollectionTimer.Start(delay);
       
       
       return true;

@@ -135,7 +135,7 @@ public:
    /** Get the MailCollector object, not reference counted.
        @return reference to the mailcollector object.
    */
-   class MailCollector *GetCollectoor(void) const { return m_MailCollector; }
+   class MailCollector *GetMailCollector(void) const { return m_MailCollector; }
    /** Toggle display of log output window
        @param display true to show it
    */

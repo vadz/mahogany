@@ -145,6 +145,8 @@ for release:
 - CHECK mailcollector for nntp: do mails get marked as read?
   ++ if necessary, reopen folder??
   ++ implement Add/Remove calls
+  ++ make delay configurable on a per-folder basis, compare elapsed
+     time to their PING interval.
 
 - remove dialog box in MailFolderCC::Ping about reopening folder!!!
 

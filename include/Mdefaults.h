@@ -175,6 +175,8 @@
 #define   MP_SPLASHDELAY       "SplashDelay"
 /// how often should we autosave the profile settings (0 to disable)?
 #define   MP_AUTOSAVEDELAY       "AutoSaveDelay"
+/// how often should we check for incoming mail (millisecs, 0 to disable)?
+#define   MP_POLLINCOMINGDELAY       "PollIncomingDelay"
 /// ask user if he really wants to exit?
 #define   MP_CONFIRMEXIT       "ConfirmExit"
 /// open folders when they're clicked (otherwise - double clicked)
@@ -492,6 +494,8 @@
 #define MP_SPLASHDELAY_D        5000
 /// how often should we autosave the profile settings (0 to disable)?
 #define   MP_AUTOSAVEDELAY_D       60000
+/// how often should we check for incoming mail (millisecs, 0 to disable)?
+#define   MP_POLLINCOMINGDELAY_D       60000
 /// ask user if he really wants to exit?
 #define   MP_CONFIRMEXIT_D      1
 /// open folders when they're clicked (otherwise - double clicked)

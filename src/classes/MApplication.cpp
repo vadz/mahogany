@@ -164,7 +164,10 @@ MailCollector::Collect(MailFolder *mf)
    else
       rc = CollectOneFolder(mf);
    if(m_NewMailFolder)
+   {
       m_NewMailFolder->EnableNewMailEvents(true);
+      m_NewMailFolder->Ping();
+   }
    return rc;
 }
 
@@ -696,6 +699,8 @@ MAppBase::OnMEvent(MEventData& event)
       ignore the event. */
    if(m_MailCollector->IsIncoming(folder))
    {
+      if(m_MailCollector->IsCollecting())
+         return false;
       if(!m_MailCollector->Collect(folder))
          wxLogError(_("Could not collect mail from incoming folder '%s'."),
                     folder->GetName().c_str());
