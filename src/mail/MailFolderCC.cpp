@@ -2641,19 +2641,14 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    // always send this one to update the number of messages in the tree
    mfStatusCache->UpdateStatus(nameDst, status);
 
-   // if the folder is opened, we must also update the display - if not done
-   // yet
-   if ( needsUpdate )
+   // if the folder is opened, we must also update the display
+   MailFolder *mfDst = FindFolder(folder);
+   if ( mfDst )
    {
-      MailFolder *mfDst = FindFolder(folder);
-      if ( mfDst )
-      {
-         mfDst->Ping();
-         mfDst->DecRef();
-      }
-      //else: not opened
+      mfDst->Ping();
+      mfDst->DecRef();
    }
-   //else already updated
+   //else: not opened
 
    return true;
 }
