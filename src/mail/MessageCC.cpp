@@ -1113,8 +1113,11 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
       case  ENCBINARY:     // 8 bit binary data
          // don't use string functions, string may contain NULs
          *lenptr = size;
-         m_partContentPtr = fs_get(size);
+         m_partContentPtr = fs_get(size + 1);
          memcpy(m_partContentPtr, cptr, size);
+
+         // still NUL terminate it, though
+         ((char *)m_partContentPtr)[size] = '\0';
          break;
 
       case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
