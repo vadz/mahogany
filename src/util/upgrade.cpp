@@ -3360,6 +3360,10 @@ bool SaveRemoteConfigSettings(bool confirm)
       mf->DecRef();
       return FALSE;
    }
+
+   // flush the config into file before reading it
+   fc.Flush();
+
    wxFile tmpfile(filename, wxFile::read);
    char * buffer = new char [ tmpfile.Length() + 1];
    if(tmpfile.Read(buffer, tmpfile.Length()) != tmpfile.Length())
