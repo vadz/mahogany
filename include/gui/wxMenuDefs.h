@@ -455,11 +455,8 @@ enum wxFrameId
    WXFRAME_MAX
 };
 
-/// adds all buttons configured for the given frame
-extern void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId);
-
-/// adds the given button
-extern void AddToolbarButton(wxToolBar *toolbar, int nButton);
+/// creates the toolbar for the given frame
+extern void CreateMToolbar(wxFrame *parent, wxFrameId frameId);
 
 /// enables or disables the given button
 extern void EnableToolbarButton(wxToolBar *toolbar, int nButton, bool enable);

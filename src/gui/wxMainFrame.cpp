@@ -571,7 +571,8 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #endif // debug
 
    AddHelpMenu();
-   AddToolbarButtons(CreateToolBar(), WXFRAME_MAIN);
+
+   CreateMToolbar(this, WXFRAME_MAIN);
 
    // disable the operations which don't make sense for viewer
    wxMenuBar *menuBar = GetMenuBar();

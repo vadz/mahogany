@@ -1467,7 +1467,7 @@ wxComposeView::CreateMenu()
 void
 wxComposeView::CreateToolAndStatusBars()
 {
-   AddToolbarButtons(CreateToolBar(), WXFRAME_COMPOSE);
+   CreateMToolbar(this, WXFRAME_COMPOSE);
 
    CreateStatusBar(2);
    static const int s_widths[] = { -1, 90 };

@@ -124,6 +124,9 @@ static const TbarItemInfo g_aToolBarData[] =
    { "tb_lookup",   WXMENU_ADBFIND_NEXT,    gettext_noop("Find"), gettext_noop("Find next")               },
 };
 
+wxCOMPILE_TIME_ASSERT( WXSIZEOF(g_aToolBarData) == WXTBAR_MAX,
+                       WrongTbarDataCount);
+
 // arrays containing tbar buttons for each frame (must be -1 terminated!)
 // the "Close", "Help" and "Exit" icons are added to all frames (except that
 // "Close" is not added to the main frame because there it's the same as "Exit")
@@ -550,6 +553,11 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"), gettext_noop("Show Copyright."), wxITEM_NORMAL },
 };
 
+// consistency check which ensures (well, helps to ensure) that the array
+// and enum are in sync
+wxCOMPILE_TIME_ASSERT( WXSIZEOF(g_aMenuItems) == WXMENU_END - WXMENU_BEGIN,
+                       WrongMenuDataCount );
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -606,10 +614,6 @@ void AppendToMenu(wxMenu *menu, int& n)
 
 void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
 {
-   // consistency check which ensures (well, helps to ensure) that the array
-   // and enum are in sync
-   wxASSERT( WXSIZEOF(g_aMenuItems) == WXMENU_END - WXMENU_BEGIN );
-
    // in debug mode we also verify if the keyboard accelerators are ok
 #ifdef DEBUG
    wxString strAccels;
@@ -645,19 +649,32 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
 // toolbar stuff
 // ----------------------------------------------------------------------------
 
-// add the given button to the toolbar
-void AddToolbarButton(wxToolBar *toolbar, int nButton)
+enum
 {
-   if ( nButton == WXTBAR_SEP ) {
+   Show_Icons = 1,
+   Show_Text = 2
+};
+
+// add the given button to the toolbar
+void AddToolbarButton(wxToolBar *toolbar, int flags, int nButton)
+{
+   if ( nButton == WXTBAR_SEP )
+   {
       toolbar->AddSeparator();
    }
-   else {
+   else
+   {
       const TbarItemInfo& tbii = g_aToolBarData[nButton];
 
       // we use either bitmap or label, but not both
       wxString label;
+      if ( flags & Show_Text )
+      {
+         label = tbii.text;
+      }
+
       wxBitmap bmp;
-      if ( READ_APPCONFIG(MP_TBARIMAGES) )
+      if ( flags & Show_Icons )
       {
          wxString iconName = tbii.bmp;
 #ifdef __WXMSW__
@@ -666,35 +683,43 @@ void AddToolbarButton(wxToolBar *toolbar, int nButton)
          bmp = mApplication->GetIconManager()->GetIcon(iconName);
 #endif
       }
-      else // no bitmaps, use label
-      {
-         label = tbii.text;
-      }
 
       toolbar->AddTool(tbii.id, label, bmp, wxString(_(tbii.tooltip)));
    }
 }
 
 // add all buttons for the given frame to the toolbar
-void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
+void CreateMToolbar(wxFrame *parent, wxFrameId frameId)
 {
-   wxASSERT( WXSIZEOF(g_aToolBarData) == WXTBAR_MAX);
+   wxASSERT_MSG( frameId < WXFRAME_MAX, _T("unknown frame id in CreateMToolbar") );
+
+   int flags = Show_Text;
+   if ( READ_APPCONFIG(MP_TBARIMAGES) )
+      flags |= Show_Icons;
+
+   long style = wxTB_HORIZONTAL | wxTB_FLAT | wxTB_DOCKABLE | wxTB_TEXT;
+   if ( !(flags & Show_Icons) )
+      style |= wxTB_NOICONS;
+
+   wxToolBar *toolbar = parent->CreateToolBar(style);
 
 #ifdef __WXMSW__
-   // we use the icons of non standard size
-   toolbar->SetToolBitmapSize(wxSize(24, 24));
+   if ( flags & Show_Icons )
+   {
+      // we use the icons of non standard size
+      toolbar->SetToolBitmapSize(wxSize(24, 24));
+   }
 #endif
 
-   wxASSERT( frameId < WXFRAME_MAX );
    const int *aTbarIcons = g_aFrameToolbars[frameId];
 
 #ifdef __WXGTK__
    // it looks better like this under GTK
-   AddToolbarButton(toolbar, WXTBAR_SEP);
+   AddToolbarButton(toolbar, flags, WXTBAR_SEP);
 #endif
 
    for ( size_t nButton = 0; aTbarIcons[nButton] != -1 ; nButton++ ) {
-      AddToolbarButton(toolbar, aTbarIcons[nButton]);
+      AddToolbarButton(toolbar, flags, aTbarIcons[nButton]);
    }
 
    // show the identity combo in the main frame
@@ -706,18 +731,19 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
    }
 
    // next add the "Help" button
-   AddToolbarButton(toolbar, WXTBAR_SEP);
-   AddToolbarButton(toolbar, WXTBAR_MAIN_HELP);
-   AddToolbarButton(toolbar, WXTBAR_SEP);
+   AddToolbarButton(toolbar, flags, WXTBAR_SEP);
+   AddToolbarButton(toolbar, flags, WXTBAR_MAIN_HELP);
+   AddToolbarButton(toolbar, flags, WXTBAR_SEP);
 
    // finally, add the "Close" icon - but only if we're not the main frame
-   if ( frameId != WXFRAME_MAIN ) {
-      AddToolbarButton(toolbar, WXTBAR_CLOSE);
-      AddToolbarButton(toolbar, WXTBAR_SEP);
+   if ( frameId != WXFRAME_MAIN )
+   {
+      AddToolbarButton(toolbar, flags, WXTBAR_CLOSE);
+      AddToolbarButton(toolbar, flags, WXTBAR_SEP);
    }
 
    // and the "Exit" button for all frames
-   AddToolbarButton(toolbar, WXTBAR_MAIN_EXIT);
+   AddToolbarButton(toolbar, flags, WXTBAR_MAIN_EXIT);
 
    // must do it for the toolbar to be shown properly
    toolbar->Realize();

@@ -547,7 +547,7 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
    AddLanguageMenu();
 
    // add a toolbar to the frame
-   AddToolbarButtons(CreateToolBar(), WXFRAME_MESSAGE);
+   CreateMToolbar(this, WXFRAME_MESSAGE);
 
    // a status bar
    CreateStatusBar(2);

@@ -1220,7 +1220,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // ----------------------
 
   // standard M toolbar
-  AddToolbarButtons(CreateToolBar(), WXFRAME_ADB);
+  CreateMToolbar(this, WXFRAME_ADB);
 
   // create a status bar with 2 panes
   CreateStatusBar(2);

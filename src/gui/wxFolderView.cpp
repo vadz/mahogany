@@ -4918,8 +4918,9 @@ wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
    SetTitle(m_FolderView->GetFolder()->GetName());
 
    // add a toolbar to the frame
+   //
    // NB: the buttons must have the same ids as the menu commands
-   AddToolbarButtons(CreateToolBar(), WXFRAME_FOLDER);
+   CreateMToolbar(this, WXFRAME_FOLDER);
 
    Show(true);
 }
