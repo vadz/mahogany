@@ -91,6 +91,7 @@ extern const MOption MP_OPENFOLDERS;
 extern const MOption MP_REOPENLASTFOLDER;
 extern const MOption MP_MAINFOLDER;
 extern const MOption MP_PYTHONPATH;
+extern const MOption MP_PYTHONDLL;
 extern const MOption MP_USEPYTHON;
 extern const MOption MP_STARTUPSCRIPT;
 extern const MOption MP_SHOWSPLASH;
@@ -583,6 +584,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_MAINFOLDER_NAME          _T("MainFolder")
 /// path for Python
 #define   MP_PYTHONPATH_NAME        _T("PythonPath")
+/// Python DLL
+#define   MP_PYTHONDLL_NAME        _T("PythonDLL")
 /// is Python enabled (this is a run-time option)?
 #define   MP_USEPYTHON_NAME         _T("UsePython")
 /// start-up script to run
@@ -1418,6 +1421,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_MAINFOLDER_DEFVAL        wxEmptyString
 /// path for Python
 #define   MP_PYTHONPATH_DEFVAL         M_EMPTYSTRING
+/// Python DLL
+#define   MP_PYTHONDLL_DEFVAL         M_EMPTYSTRING
 #ifdef OS_WIN
 // under Windows, the setup program will create the appropriate registry key
 #define   MP_USEPYTHON_DEFVAL         0l

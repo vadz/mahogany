@@ -2322,6 +2322,13 @@ Enables the built-in python interpreter which can be used to extend
 Mahogany. It is not essential for normal operation, but if you want
 to do unusual things, python gives you the power to do practically
 anything you want with the program.
+\item \textbf{Python DLL}\\
+This option is only present if Mahogany is configured to load Python
+interpreter from a shared library (also known as DLL under Windows).
+You should only use it if you have Python DLL installed in a non standard
+location where Mahogany can't find it or if you have several Python versions
+installed and you want to use a different one from the one Mahogany
+automatically detects.
 \item \textbf{Python Path}\\
 Where to search for python files.
 \item \textbf{Startup script}\\
