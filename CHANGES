@@ -6,9 +6,10 @@
       See at the end of file for the list of contributors (initials appearing
       in the second column of the changelog below).
 
-Release 0.67 '???' ??? ??, 2004
+Release 0.67 'Constance' ??? ??, 2004
 ------------------------------------
 
+22.04.04 VZ: improved signature/trailer detection when replying to messages
 21.04.04 VZ: show subfolders not in the tree in bold in browse subfolders dialog
 20.04.04 VZ: added "--import" command line option
 19.04.04 VZ: made "Quick filter" dialog slightly easier to use

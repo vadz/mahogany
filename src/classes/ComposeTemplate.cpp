@@ -635,8 +635,11 @@ ExpandOriginalText(const String& text,
    // the current line
    String lineCur;
 
-   // the last detected signature start
+   // the last detected signature start and the number of new lines after it
+   // which we use at the end to detect if we don't discard a too big part of
+   // the message
    int posSig = -1;
+   size_t numLinesAfterSig = 0;
 
    for ( const wxChar *cptr = text.c_str(); ; cptr++ )
    {
@@ -649,6 +652,11 @@ ExpandOriginalText(const String& text,
             {
                // remember that the sig apparently starts here
                posSig = value.length();
+               numLinesAfterSig = 0;
+            }
+            else if ( posSig != -1 )
+            {
+               numLinesAfterSig++;
             }
          }
 
@@ -735,7 +743,14 @@ ExpandOriginalText(const String& text,
    // everything after the last sig detected
    if ( posSig != -1 )
    {
-      value.erase(posSig);
+      // also check that it wasn't just a line of dashes in the middle of the
+      // messages -- the check is empirical, of course, but better than nothing
+      // as it avoids losing bottom half of messages containing ASCII art
+      //
+      // the value of 10 is arbitrary but hopefully no trailer nor signature is
+      // going to be more than 10 lines in length
+      if ( numLinesAfterSig < 10 )
+         value.erase(posSig);
    }
 
    return value;
