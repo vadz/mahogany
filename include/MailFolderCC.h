@@ -133,7 +133,7 @@ public:
    virtual String GetName(void) const { return m_mfolder->GetFullName(); }
 
    /// return the folder type
-   virtual FolderType GetType(void) const { return m_mfolder->GetType(); }
+   virtual MFolderType GetType(void) const { return m_mfolder->GetType(); }
 
    /// return the folder flags
    virtual int GetFlags(void) const { return m_mfolder->GetFlags(); }
@@ -250,7 +250,7 @@ public:
        @return true on success
    */
    static  bool Subscribe(const String &host,
-                          FolderType protocol,
+                          MFolderType protocol,
                           const String &mailboxname,
                           bool subscribe = true);
 
@@ -348,7 +348,7 @@ private:
    MailFolderCC(const MFolder *mfolder, wxFrame *frame);
 
    /// Common code for constructors
-   void Create(FolderType type, int flags);
+   void Create(MFolderType type, int flags);
 
    /// code common to Create() and Close()
    void Init();

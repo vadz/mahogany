@@ -596,7 +596,7 @@ class MT_Subscribe : public MailThread
 public:
    MT_Subscribe(ASMailFolder *mf, UserData ud,
                 const String &host,
-                FolderType protocol,
+                MFolderType protocol,
                 const String &mailboxname,
                 bool subscribe)
       : MailThread(mf, ud)
@@ -616,7 +616,7 @@ public:
       }
 private:
    String  m_Host;
-   FolderType m_Prot;
+   MFolderType m_Prot;
    String  m_Name;
    bool    m_Sub;
 };
@@ -952,7 +952,7 @@ public:
        @param bool if true, subscribe, else unsubscribe
    */
    static Ticket Subscribe(const String &host,
-                           FolderType protocol,
+                           MFolderType protocol,
                            const String &mailboxname,
                            bool subscribe,
                            UserData ud)
@@ -999,7 +999,7 @@ public:
       { AScheck(); return m_MailFolder->GetHeaders(); }
    //@}
    /// Return the folder's type.
-   virtual FolderType GetType(void) const
+   virtual MFolderType GetType(void) const
       { AScheck(); return m_MailFolder->GetType(); }
    /// Returns the underlying MailFolder object.
    virtual MailFolder *GetMailFolder(void) const
@@ -1128,7 +1128,7 @@ ASTicketList * ASTicketList::Create(void)
 /* static */
 Ticket
 ASMailFolder::Subscribe(const String &host,
-                        FolderType protocol,
+                        MFolderType protocol,
                         const String &mailboxname,
                         bool subscribe,
                         UserData ud)

@@ -758,7 +758,7 @@ void wxFolderTree::ProcessMenuCommand(int id)
 void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
 {
    int folderFlags = folder->GetFlags();
-   FolderType folderType = folder->GetType();
+   MFolderType folderType = folder->GetType();
 
    bool isRoot = folderType == MF_ROOT;
 
@@ -1658,7 +1658,7 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
          title = _("All folders");
       }
 
-      FolderType folderType = folder->GetType();
+      MFolderType folderType = folder->GetType();
       bool isRoot = folderType == MF_ROOT;
 
       FolderMenu **menu = isRoot ? &m_menuRoot : &m_menu;
@@ -2981,7 +2981,7 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
 }
 
 // ----------------------------------------------------------------------------
-// global functions from include/FolderType.h implemented here
+// global functions from include/MFolderType.h implemented here
 // ----------------------------------------------------------------------------
 
 size_t GetNumberOfFolderIcons()
@@ -3036,13 +3036,13 @@ int GetFolderIconForDisplay(const MFolder* folder)
    return image;
 }
 
-int GetDefaultFolderTypeIcon(FolderType folderType)
+int GetDefaultFolderTypeIcon(MFolderType folderType)
 {
    // each folder type has its own icon
    static const struct
    {
       wxFolderTree::FolderIcon icon;
-      FolderType type;
+      MFolderType type;
    } FolderIcons[] =
      {
       { wxFolderTree::iconInbox,         MF_INBOX       },

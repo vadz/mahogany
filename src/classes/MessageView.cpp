@@ -2683,7 +2683,7 @@ MessageView::CheckMessageSize(const Message *message) const
    // for example, if the message has text/plain part of 100 bytes and
    // video/mpeg one of 2Mb, we don't want to ask the user before downloading
    // 100 bytes (and then, second time, before downloading 2b!)
-   FolderType folderType = m_asyncFolder->GetType();
+   MFolderType folderType = m_asyncFolder->GetType();
    return (folderType != MF_POP && folderType != MF_NNTP) ||
                CheckMessageOrPartSize(message->GetSize(), false);
 }

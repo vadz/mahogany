@@ -1104,7 +1104,7 @@ strutil_decrypt(const String &original)
 
 /// A small helper function to expand mailfolder names:
 String
-strutil_expandfoldername(const String &name, FolderType folderType)
+strutil_expandfoldername(const String &name, MFolderType folderType)
 {
    if( folderType != MF_FILE && folderType != MF_MH)
        return name;

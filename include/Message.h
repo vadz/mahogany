@@ -17,7 +17,7 @@
 
 #include "MimePart.h"
 
-#include "FolderType.h"    // for Protocol enum
+#include "MFolderType.h"    // for Protocol enum
 
 class WXDLLEXPORT wxArrayString;
 class AddressList;

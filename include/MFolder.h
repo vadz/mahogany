@@ -23,7 +23,7 @@
 #   include "Profile.h"
 #   include "MailFolder.h"
 #   include "MObject.h"
-#   include "FolderType.h"
+#   include "MFolderType.h"
 #endif
 
 /** A class representing a folder used by M. The folders are organized in a tree
@@ -67,12 +67,12 @@ public:
        the folder name which already exists (NULL will be returned)
    */
    static MFolder *Create(const String& fullname,
-                          FolderType type,
+                          MFolderType type,
                           bool tryCreateOnOpen = true);
    /** create a temp object containing folder data
    */
    static MFolder *CreateTemp(const String& fullname,
-                              FolderType type,
+                              MFolderType type,
                               int flags,
                               const String& path,
                               const String& server = "",
@@ -107,7 +107,7 @@ public:
    virtual wxString GetFullName() const = 0;
 
       /// folder type can't be changed once it's created
-   virtual FolderType GetType() const = 0;
+   virtual MFolderType GetType() const = 0;
 
       /**
         the icon index for this folder or -1 if there is no specific icon
@@ -203,7 +203,7 @@ public:
    //@{
       /// create a new subfolder
    virtual MFolder *CreateSubfolder(const String& name,
-                                    FolderType type,
+                                    MFolderType type,
                                     bool tryCreateOnOpen = true) = 0;
       /// delete this folder (does not delete the C++ object!)
    virtual void Delete() = 0;
@@ -328,7 +328,7 @@ private:
  */
 extern MFolder *CreateFolderTreeEntry(MFolder *parent,
                                       const String& name,
-                                      FolderType folderType,
+                                      MFolderType folderType,
                                       long folderFlags,
                                       const String& path,
                                       bool notify = TRUE);

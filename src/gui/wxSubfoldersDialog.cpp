@@ -140,7 +140,7 @@ private:
    MProgressInfo *m_progressInfo;
 
    // the type of the folders we're enumerating
-   FolderType m_folderType;
+   MFolderType m_folderType;
 
    // the name of the root folder
    String m_folderPath;
@@ -213,7 +213,7 @@ private:
    wxString m_completion;        // TAB completion for the current item
 
    // the type of the folders we're enumerating
-   FolderType m_folderType;
+   MFolderType m_folderType;
 
    // the name of the root folder
    String m_folderPath;

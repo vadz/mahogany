@@ -251,7 +251,7 @@ public:
    virtual bool TransferDataFromWindow();
 
    // called by the page to create the new folder
-   MFolder *DoCreateFolder(FolderType folderType);
+   MFolder *DoCreateFolder(MFolderType folderType);
 
    // set the folder name
    void SetFolderName(const String& name);
@@ -385,12 +385,12 @@ protected:
 
    // get the type of the folder chosen from the combination of the current
    // radiobox and combobox values or from the given one (if it's != Radio_Max)
-   FolderType GetCurrentFolderType(RadioIndex selRadiobox = Radio_Max,
+   MFolderType GetCurrentFolderType(RadioIndex selRadiobox = Radio_Max,
                                    int selChoice = -1) const;
 
    // inverse function of the above one: get the radiobox and choice indices
    // (if any) from the folder type
-   RadioIndex GetRadioIndexFromFolderType(FolderType type,
+   RadioIndex GetRadioIndexFromFolderType(MFolderType type,
                                           int *choiceIndex = NULL) const;
 
    // enable the controls which make sense for a NNTP/News folder
@@ -400,7 +400,7 @@ protected:
    void EnableControlsForImapOrPop(bool isIMAP = TRUE);
 
    // enable the controls which make sense for MBOX or MH folder
-   void EnableControlsForFileFolder(FolderType folderType);
+   void EnableControlsForFileFolder(MFolderType folderType);
 
    // hack: this flag tells whether we're in process of creating the folder or
    // just showing the properties for it. Ultimately, it shouldn't be
@@ -499,7 +499,7 @@ protected:
    int m_originalFolderIcon;
 
    /// the current folder type or MF_ILLEGAL if none
-   FolderType m_folderType;
+   MFolderType m_folderType;
 
    // true if the user modified manually the filename, false otherwise and may
    // have temporary value of -1 if we modified it programmatically
@@ -750,7 +750,7 @@ wxFolderCreateDialog::wxFolderCreateDialog(wxWindow *parent,
    m_nameModifiedByUser = false;
 }
 
-MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType folderType)
+MFolder *wxFolderCreateDialog::DoCreateFolder(MFolderType folderType)
 {
    if ( !m_parentFolder )
    {
@@ -1274,7 +1274,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
       // the control whose value we will automatically set
       wxTextCtrl *text = NULL;
 
-      FolderType folderType = GetCurrentFolderType();
+      MFolderType folderType = GetCurrentFolderType();
       switch ( folderType )
       {
          case MF_MH:
@@ -1437,7 +1437,7 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
 }
 
 void
-wxFolderPropertiesPage::EnableControlsForFileFolder(FolderType folderType)
+wxFolderPropertiesPage::EnableControlsForFileFolder(MFolderType folderType)
 {
    EnableTextWithLabel(m_mailboxname, FALSE);
    EnableTextWithLabel(m_server, FALSE);
@@ -1483,7 +1483,7 @@ wxFolderPropertiesPage::DoUpdateUI()
 {
    // get the current folder type from dialog controls
    RadioIndex selRadio = (RadioIndex)m_radio->GetSelection();
-   FolderType folderType = GetCurrentFolderType(selRadio);
+   MFolderType folderType = GetCurrentFolderType(selRadio);
 
    if ( folderType != m_folderType )
    {
@@ -1705,7 +1705,7 @@ wxFolderPropertiesPage::FillSubtypeCombo(RadioIndex sel)
    m_folderSubtype->SetSelection(subtype);
 }
 
-FolderType
+MFolderType
 wxFolderPropertiesPage::GetCurrentFolderType(RadioIndex selRadio,
                                              int selChoice) const
 {
@@ -1786,7 +1786,7 @@ wxFolderPropertiesPage::GetCurrentFolderType(RadioIndex selRadio,
 }
 
 wxFolderPropertiesPage::RadioIndex
-wxFolderPropertiesPage::GetRadioIndexFromFolderType(FolderType type,
+wxFolderPropertiesPage::GetRadioIndexFromFolderType(MFolderType type,
                                                     int *choiceIndex) const
 {
    if ( choiceIndex )
@@ -1967,7 +1967,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    profile->SetPath(m_folderPath);
 
    RadioIndex selRadio = (RadioIndex)m_radio->GetSelection();
-   FolderType folderType = GetCurrentFolderType(selRadio);
+   MFolderType folderType = GetCurrentFolderType(selRadio);
 
    String value;
    if ( FolderTypeHasUserName(folderType) )
@@ -2196,7 +2196,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
    {
       // use the type of the folder last created
       m_folderType =
-         (FolderType)(long)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
+         (MFolderType)(long)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
    }
    else
    {
@@ -2210,7 +2210,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       // obviously by using a corrupted config file... no need to crash though
 
       m_folderType =
-         (FolderType)GetNumericDefault(MP_LAST_CREATED_FOLDER_TYPE);
+         (MFolderType)GetNumericDefault(MP_LAST_CREATED_FOLDER_TYPE);
    }
 
    if ( m_folderType == MF_INBOX )
@@ -2247,7 +2247,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 bool
 wxFolderPropertiesPage::TransferDataFromWindow(void)
 {
-   FolderType folderType = GetCurrentFolderType();
+   MFolderType folderType = GetCurrentFolderType();
 
    // it's impossible to create INBOX folder
    CHECK( !m_dlgCreate || folderType != MF_INBOX, false,

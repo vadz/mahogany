@@ -2485,7 +2485,7 @@ public:
                if(p)
                {
                  int typeAndFlags = READ_CONFIG(p,MP_FOLDER_TYPE);
-                 FolderType type = GetFolderType(typeAndFlags);
+                 MFolderType type = GetFolderType(typeAndFlags);
                  int flags = GetFolderFlags(typeAndFlags);
                  flags ^= MF_FLAGS_NEWMAILFOLDER;
                  p->writeEntry(MP_FOLDER_TYPE,
@@ -2879,7 +2879,7 @@ void VerifyUserDir(void)
   CreateFolderTreeEntry()
  */
 static inline MFolder *CreateServerEntry(const String& name,
-                                         FolderType type,
+                                         MFolderType type,
                                          int flags)
 {
    return CreateFolderTreeEntry(NULL, name, type, flags, "", false);

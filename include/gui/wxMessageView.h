@@ -21,7 +21,7 @@
 class FolderView;
 class MsgCmdProc;
 
-#include "FolderType.h"
+#include "MFolderType.h"
 #include "MessageView.h"
 
 #ifndef USE_PCH

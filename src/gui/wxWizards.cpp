@@ -1077,8 +1077,8 @@ MWizard_CreateFolder_FinalPage::MWizard_CreateFolder_FinalPage(MWizard *wizard)
 {
    CreateFolderWizard::FolderParams *params =
       ((CreateFolderWizard*)GetWizard())->GetParams();
-   FolderType ftype;
-   if ( CanHaveSubfolders((FolderType)params->m_FolderType,
+   MFolderType ftype;
+   if ( CanHaveSubfolders((MFolderType)params->m_FolderType,
                           params->m_FolderFlags, &ftype)
         && ftype != MF_ILLEGAL )
    {
@@ -1173,7 +1173,7 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
       else // wizard completed successfully, create folder
       {
          CreateFolderWizard::FolderParams *params = wizard->GetParams();
-         FolderType type = (FolderType) params->m_FolderType;
+         MFolderType type = (MFolderType) params->m_FolderType;
 
          newfolder = CreateFolderTreeEntry(
             parent,

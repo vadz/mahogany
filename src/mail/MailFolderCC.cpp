@@ -1037,7 +1037,7 @@ String MailFolder::GetImapSpec(int typeOrig,
    String server = iserver;
    strutil_tolower(server);
 
-   FolderType type = (FolderType)typeOrig;
+   MFolderType type = (MFolderType)typeOrig;
 
 #ifdef USE_SSL
    extern bool InitSSL(void);
@@ -1177,7 +1177,7 @@ wxString GetImapSpec(const MFolder *folder)
 }
 
 bool MailFolder::SpecToFolderName(const String& specification,
-                                  FolderType folderType,
+                                  MFolderType folderType,
                                   String *pName)
 {
    CHECK( pName, FALSE, "NULL name in MailFolderCC::SpecToFolderName" );
@@ -1548,7 +1548,7 @@ MailFolderCC::MailFolderCC(const MFolder *mfolder, wxFrame *frame)
 }
 
 void
-MailFolderCC::Create(FolderType type, int flags)
+MailFolderCC::Create(MFolderType type, int flags)
 {
    m_MailStream = NIL;
    m_nMessages = 0;
@@ -1970,7 +1970,7 @@ MailFolderCC::OpenFolder(const MFolder *mfolder,
 
 void MailFolderCC::CreateFileFolder()
 {
-   FolderType folderType = GetType();
+   MFolderType folderType = GetType();
 
    CHECK_RET( folderType == MF_FILE || folderType == MF_MH,
               "shouldn't be called for non file folders" );
@@ -2072,7 +2072,7 @@ MailFolderCC::CheckForFileLock()
 {
    String lockfile;
 
-   FolderType folderType = GetType();
+   MFolderType folderType = GetType();
    if( folderType == MF_FILE )
       lockfile = m_ImapSpec;
 #ifdef OS_UNIX
@@ -2144,7 +2144,7 @@ MailFolderCC::Open(OpenMode openmode)
    // changed.
    UpdateTimeoutValues();
 
-   FolderType folderType = GetType();
+   MFolderType folderType = GetType();
 
    // for files, check whether mailbox is locked, c-client library is
    // to dumb to handle this properly
@@ -4472,7 +4472,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
    // from and to
    entry.m_From = ParseAddress(env->from);
 
-   FolderType folderType = GetType();
+   MFolderType folderType = GetType();
    if ( folderType == MF_NNTP || folderType == MF_NEWS )
    {
       entry.m_NewsGroups = env->newsgroups;
@@ -5430,7 +5430,7 @@ MailFolderCC::mm_fatal(char *str)
 /* static */
 bool
 MailFolderCC::Subscribe(const String &host,
-                        FolderType protocol,
+                        MFolderType protocol,
                         const String &mailboxname,
                         bool subscribe)
 {
@@ -5607,7 +5607,7 @@ MailFolderCC::Rename(const MFolder *mfolder, const String& name)
 long
 MailFolderCC::ClearFolder(const MFolder *mfolder)
 {
-   FolderType type = mfolder->GetType();
+   MFolderType type = mfolder->GetType();
    int flags = mfolder->GetFlags();
    String login = mfolder->GetLogin(),
           password = mfolder->GetPassword(),

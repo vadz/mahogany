@@ -18,7 +18,7 @@
 #   pragma interface "ASMailFolder.h"
 #endif
 
-#include "FolderType.h"
+#include "MFolderType.h"
 
 
 // forward declarations
@@ -465,7 +465,7 @@ public:
        @param bool if true, subscribe, else unsubscribe
    */
    static Ticket Subscribe(const String &host,
-                           FolderType protocol,
+                           MFolderType protocol,
                            const String &mailboxname,
                            bool subscribe = true,
                            UserData ud = 0);
@@ -514,7 +514,7 @@ public:
    virtual class HeaderInfoList *GetHeaders(void) const = 0;
 
    /// Return the folder's type.
-   virtual FolderType GetType(void) const = 0;
+   virtual MFolderType GetType(void) const = 0;
    /// Returns the underlying MailFolder object and increfs it.
    virtual MailFolder *GetMailFolder(void) const = 0;
    //@}

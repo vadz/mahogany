@@ -91,7 +91,7 @@ public:
          @return false on error or true on success
    */
    static bool CreateFolder(const String &name,
-                            FolderType type = MF_MFILE,
+                            MFolderType type = MF_MFILE,
                             int flags = MF_FLAGS_DEFAULT,
                             const String &path = "",
                             const String &comment = "");
@@ -140,7 +140,7 @@ public:
        @return true on success
    */
    static bool Subscribe(const String &host,
-                         FolderType protocol,
+                         MFolderType protocol,
                          const String &mailboxname,
                          bool subscribe = true);
    /** Get a listing of all mailboxes.
@@ -251,7 +251,7 @@ public:
    virtual class HeaderInfoList *GetHeaders(void) const;
    //@}
    /// Return the folder's type.
-   virtual FolderType GetType(void) const;
+   virtual MFolderType GetType(void) const;
    /// return the folder flags
    virtual int GetFlags(void) const;
 

@@ -17,7 +17,7 @@
 
 #include <time.h>
 
-#include "FolderType.h"    // for strutil_expandfoldername
+#include "MFolderType.h"    // for strutil_expandfoldername
 
 class kbStringList;
 
@@ -236,7 +236,7 @@ String strutil_expandpath(const String &ipath);
     @return the path to the folder file
 */
 String
-strutil_expandfoldername(const String &name, FolderType ftype = MF_FILE);
+strutil_expandfoldername(const String &name, MFolderType ftype = MF_FILE);
 
 #ifdef OS_UNIX
 #   define STRUTIL_PATH_SEPARATOR '/'

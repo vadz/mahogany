@@ -26,7 +26,7 @@
 #   include   "MFrame.h"
 #   include   "gui/wxMFrame.h"
 #   include   "MLogFrame.h"
-#   include   "FolderType.h"
+#   include   "MFolderType.h"
 #endif
 
 #include "MEvent.h"

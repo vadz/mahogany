@@ -17,7 +17,7 @@
 #   pragma interface "SendMessageCC.h"
 #endif
 
-#include "FolderType.h"
+#include "MFolderType.h"
 
 class Profile;
 

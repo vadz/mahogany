@@ -13,7 +13,7 @@
 
 #ifndef  USE_PCH
 #   include "Mconfig.h"
-#   include "FolderType.h"
+#   include "MFolderType.h"
 #   include "Profile.h"
 #endif
 

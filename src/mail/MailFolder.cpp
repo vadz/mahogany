@@ -376,7 +376,7 @@ MailFolder::ClearFolder(const MFolder *folder)
 /* static */
 bool
 MailFolder::CreateFolder(const String& name,
-                         FolderType type,
+                         MFolderType type,
                          int flags,
                          const String &path,
                          const String &comment)
@@ -622,7 +622,7 @@ bool MailFolder::CanExit(String *which)
 
 /* static */
 bool
-MailFolder::Subscribe(const String &host, FolderType protocol,
+MailFolder::Subscribe(const String &host, MFolderType protocol,
                       const String &mailboxname, bool subscribe)
 {
    return MailFolderCC::Subscribe(host, protocol, mailboxname, subscribe);

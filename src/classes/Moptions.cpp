@@ -28,7 +28,7 @@
 #include "Mdefaults.h"
 #include "Moptions.h"
 
-#include "FolderType.h" // for MF_FILE used by MP_LAST_CREATED_FOLDER_TYPE
+#include "MFolderType.h" // for MF_FILE used by MP_LAST_CREATED_FOLDER_TYPE
 
 // ----------------------------------------------------------------------------
 // MOptionData

@@ -1,6 +1,6 @@
 //-*- c++ -*-//////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
-// File name:   FolderType.h - constants for folder types
+// File name:   MFolderType.h - constants for folder types
 // Purpose:     collect all folder types and flags in one place
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -27,7 +27,7 @@
 // the folder flags (see FolderFlags enum)
 #define MF_TYPEMASK 0x00ff
 
-enum FolderType
+enum MFolderType
 {
    // the MF_XXX constants have the same values as c-client folder types
    MF_ILLEGAL = 0xff,            // illegal type - cannot use -1 because of bitmask
@@ -147,9 +147,9 @@ enum Protocol
 // ----------------------------------------------------------------------------
 
 /// get the type from an int
-inline FolderType GetFolderType(int typeAndFlags)
+inline MFolderType GetFolderType(int typeAndFlags)
 {
-   return (FolderType)(typeAndFlags & MF_TYPEMASK);
+   return (MFolderType)(typeAndFlags & MF_TYPEMASK);
 }
 
 /// get the flags from an int
@@ -160,7 +160,7 @@ inline static int GetFolderFlags(int typeAndFlags)
 
 #ifdef USE_SSL
 /// is this a folder type for which username/password make sense?
-inline bool FolderTypeSupportsSSL(FolderType type)
+inline bool FolderTypeSupportsSSL(MFolderType type)
 {
    ASSERT(GetFolderType(type) == type);
    switch(type)
@@ -176,7 +176,7 @@ inline bool FolderTypeSupportsSSL(FolderType type)
 #endif // USE_SSL
 
 /// is this a folder type for which username/password make sense?
-inline bool FolderTypeHasUserName(FolderType type)
+inline bool FolderTypeHasUserName(MFolderType type)
 {
    ASSERT(GetFolderType(type) == type);
 
@@ -189,7 +189,7 @@ inline bool FolderTypeHasUserName(FolderType type)
       return true;
 
       // don't use "default:" - like this, the compiler will warn us if we add
-      // a new type to the FolderType enum and forget to add it here
+      // a new type to the MFolderType enum and forget to add it here
    case MF_ROOT:
    case MF_ILLEGAL:
    case MF_PROFILE:
@@ -209,7 +209,7 @@ inline bool FolderTypeHasUserName(FolderType type)
 }
 
 /// is this a folder type for which server field makes sense?
-inline bool FolderTypeHasServer(FolderType type)
+inline bool FolderTypeHasServer(MFolderType type)
 {
    // currently it's the same as FolderTypeHasUserName(), but it's not
    // impossible that there are some protocols which don't have
@@ -219,7 +219,7 @@ inline bool FolderTypeHasServer(FolderType type)
 }
 
 /// combine type and flags into one int
-inline int CombineFolderTypeAndFlags(FolderType type, int flags)
+inline int CombineFolderTypeAndFlags(MFolderType type, int flags)
 {
    ASSERT_MSG( !(flags & MF_TYPEMASK), "flags shouldn't contain type" );
 
@@ -227,15 +227,15 @@ inline int CombineFolderTypeAndFlags(FolderType type, int flags)
 }
 
 /// is this folder a local, file based one?
-inline bool IsLocalQuickFolder(FolderType type)
+inline bool IsLocalQuickFolder(MFolderType type)
 {
    return type == MF_FILE || type == MF_MH || type == MF_NEWS;
 }
 
 /// can this folder contain other subfolders? if so, of which type?
-inline bool CanHaveSubfolders(FolderType folderType,
+inline bool CanHaveSubfolders(MFolderType folderType,
                               int flags,
-                              FolderType *subtype = NULL)
+                              MFolderType *subtype = NULL)
 {
    switch ( folderType )
    {
@@ -279,7 +279,7 @@ inline bool CanHaveSubfolders(FolderType folderType,
 }
 
 /// can a folder of this type be (physically) deleted by the user?
-inline bool CanDeleteFolderOfType(FolderType folderType)
+inline bool CanDeleteFolderOfType(MFolderType folderType)
 {
    return folderType == MF_FILE ||
           folderType == MF_MH ||
@@ -288,20 +288,20 @@ inline bool CanDeleteFolderOfType(FolderType folderType)
 }
 
 /// is it a file or directory local folder
-inline bool IsFileOrDirFolder(FolderType folderType)
+inline bool IsFileOrDirFolder(MFolderType folderType)
 {
-   FolderType ft = GetFolderType(folderType);
+   MFolderType ft = GetFolderType(folderType);
    return ft == MF_FILE || ft == MF_MH || ft == MF_MFILE || ft == MF_MDIR;
 }
 
 /// can the messages in this folder be deleted by user?
-inline bool CanDeleteMessagesInFolder(FolderType folderType)
+inline bool CanDeleteMessagesInFolder(MFolderType folderType)
 {
    return folderType != MF_NNTP && folderType != MF_NEWS;
 }
 
 /// can we copy messages to this folder?
-inline bool CanCreateMessagesInFolder(FolderType folderType)
+inline bool CanCreateMessagesInFolder(MFolderType folderType)
 {
    switch ( folderType )
    {
@@ -317,7 +317,7 @@ inline bool CanCreateMessagesInFolder(FolderType folderType)
          // fall through nevertheless
 
          // don't use "default:" - like this, the compiler will warn us if we
-         // add a new type to the FolderType enum and forget to add it here
+         // add a new type to the MFolderType enum and forget to add it here
       case MF_INBOX:
       case MF_FILE:
       case MF_MH:
@@ -331,7 +331,7 @@ inline bool CanCreateMessagesInFolder(FolderType folderType)
    return true;
 }
 
-inline bool CanOpenFolder(FolderType folderType, int folderFlags)
+inline bool CanOpenFolder(MFolderType folderType, int folderFlags)
 {
    switch ( folderType )
    {
@@ -355,7 +355,7 @@ inline bool CanOpenFolder(FolderType folderType, int folderFlags)
          // fall through nevertheless
 
          // don't use "default:" - like this, the compiler will warn us if we
-         // add a new type to the FolderType enum and forget to add it here
+         // add a new type to the MFolderType enum and forget to add it here
       case MF_INBOX:
       case MF_FILE:
       case MF_MH:
@@ -369,7 +369,7 @@ inline bool CanOpenFolder(FolderType folderType, int folderFlags)
 }
 
 /// does this folder require network to be up?
-inline bool FolderNeedsNetwork(FolderType type, int flags)
+inline bool FolderNeedsNetwork(MFolderType type, int flags)
 {
    return (type == MF_NNTP || type == MF_IMAP || type == MF_POP) &&
           !(flags & MF_FLAGS_ISLOCAL);
@@ -392,6 +392,6 @@ extern String GetFolderIconName(size_t n);
 int GetFolderIconForDisplay(const class MFolder* folder);
 
 /// get the default icon for folders of this type
-int GetDefaultFolderTypeIcon(FolderType folderType);
+int GetDefaultFolderTypeIcon(MFolderType folderType);
 
 #endif //  _FOLDERTYPE_H

@@ -748,7 +748,7 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FOLDER_TYPE_NAME         "Type"
 /// should we try to create the folder before opening it?
 #define   MP_FOLDER_TRY_CREATE_NAME "TryCreate"
-/// the folder icon for a mailbox (see icon functions in FolderType.h)
+/// the folder icon for a mailbox (see icon functions in MFolderType.h)
 #define   MP_FOLDER_ICON_NAME         "Icon"
 /// the position of the folder in the tree
 #define MP_FOLDER_TREEINDEX_NAME "Index"
@@ -1500,7 +1500,7 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FOLDER_TYPE_DEFVAL         (long)(0x00ff)  // MF_ILLEGAL
 /// should we try to create the folder before opening it?
 #define   MP_FOLDER_TRY_CREATE_DEFVAL 0L
-/// the folder icon for a mailbox (see icon functions in FolderType.h)
+/// the folder icon for a mailbox (see icon functions in MFolderType.h)
 #define   MP_FOLDER_ICON_DEFVAL         (long)-1        // no special icon
 /// the position of the folder in the tree
 #define MP_FOLDER_TREEINDEX_DEFVAL      (long)-1        // see enum MFolderIndex

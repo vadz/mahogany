@@ -389,7 +389,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
       }
 
       // do create the folder
-      FolderType type = nType == 1 ? MF_MH : MF_FILE;
+      MFolderType type = nType == 1 ? MF_MH : MF_FILE;
 
       MFolder *folder = CreateFolderTreeEntry
                         (

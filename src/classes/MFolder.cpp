@@ -84,7 +84,7 @@ class MTempFolder : public MFolder
 {
 public:
    MTempFolder(const String& fullname,
-               FolderType type,
+               MFolderType type,
                int flags,
                const String& path,
                const String& server,
@@ -106,7 +106,7 @@ public:
    virtual String GetPassword() const {return m_password; }
    virtual String GetName() const { return m_fullname.AfterLast('/'); }
    virtual wxString GetFullName() const { return m_fullname; }
-   virtual FolderType GetType() const { return m_type; }
+   virtual MFolderType GetType() const { return m_type; }
    virtual bool NeedsNetwork(void) const { return false; }
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
@@ -133,13 +133,13 @@ public:
    virtual MFolder *GetSubfolder(const String&) const { return NULL; }
    virtual MFolder *GetParent() const { return NULL; }
    virtual MFolder *CreateSubfolder(const String&,
-                                    FolderType, bool) { return NULL; }
+                                    MFolderType, bool) { return NULL; }
    virtual void Delete() { FAIL_MSG("doesn't make sense for MTempFolder"); }
    virtual bool Rename(const String&)
     { FAIL_MSG("doesn't make sense for MTempFolder"); return false; }
 
 private:
-   FolderType m_type;
+   MFolderType m_type;
    int m_flags;
    String m_fullname,
           m_path,
@@ -197,7 +197,7 @@ public:
    virtual String GetName() const;
    virtual wxString GetFullName() const { return m_folderName; }
 
-   virtual FolderType GetType() const;
+   virtual MFolderType GetType() const;
    virtual bool NeedsNetwork() const;
 
    virtual int GetIcon() const;
@@ -229,7 +229,7 @@ public:
    virtual MFolder *GetParent() const;
 
    virtual MFolder *CreateSubfolder(const String& name,
-                                    FolderType type,
+                                    MFolderType type,
                                     bool tryCreateLater);
    virtual void Delete();
    virtual bool Rename(const String& newName);
@@ -288,7 +288,7 @@ public:
    virtual ~MRootFolderFromProfile() { }
 
    // implement base class pure virtuals (some of them don't make sense to us)
-   virtual FolderType GetType() const { return MF_ROOT; }
+   virtual MFolderType GetType() const { return MF_ROOT; }
    virtual bool NeedsNetwork(void) const { return false; }
 
    virtual String GetComment() const { return ""; }
@@ -446,7 +446,7 @@ MFolder *MFolder::Get(const String& fullname)
 }
 
 MFolder *
-MFolder::Create(const String& fullname, FolderType type, bool tryCreateLater)
+MFolder::Create(const String& fullname, MFolderType type, bool tryCreateLater)
 {
    MFolder *folder = Get(fullname);
    if ( folder )
@@ -490,7 +490,7 @@ MFolder::Create(const String& fullname, FolderType type, bool tryCreateLater)
 
 /* static */
 MFolder *MFolder::CreateTemp(const String& fullname,
-                             FolderType type,
+                             MFolderType type,
                              int flags,
                              const String& path,
                              const String& server,
@@ -661,7 +661,7 @@ String MFolderFromProfile::GetPassword() const
    return strutil_decrypt(READ_CONFIG(m_profile, MP_FOLDER_PASSWORD));
 }
 
-FolderType MFolderFromProfile::GetType() const
+MFolderType MFolderFromProfile::GetType() const
 {
    return GetFolderType(READ_CONFIG(m_profile, MP_FOLDER_TYPE));
 }
@@ -824,7 +824,7 @@ MFolder *MFolderFromProfile::GetParent() const
 }
 
 MFolder *MFolderFromProfile::CreateSubfolder(const String& name,
-                                             FolderType type,
+                                             MFolderType type,
                                              bool tryCreateLater)
 {
    // first of all, check if the name is valid
@@ -1068,7 +1068,7 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
 
 extern MFolder *CreateFolderTreeEntry(MFolder *parent,
                                       const String& name,
-                                      FolderType folderType,
+                                      MFolderType folderType,
                                       long folderFlags,
                                       const String& path,
                                       bool notify)

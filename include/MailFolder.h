@@ -18,7 +18,7 @@
 #endif
 
 #include "MObject.h"
-#include "FolderType.h"
+#include "MFolderType.h"
 #include "kbList.h"
 
 // ----------------------------------------------------------------------------
@@ -409,7 +409,7 @@ public:
          @return false on error or true on success
    */
    static bool CreateFolder(const String &name,
-                            FolderType type = MF_FILE,
+                            MFolderType type = MF_FILE,
                             int flags = MF_FLAGS_DEFAULT,
                             const String &path = "",
                             const String &comment = "");
@@ -474,7 +474,7 @@ public:
        @return true on success
    */
    static bool Subscribe(const String &host,
-                         FolderType protocol,
+                         MFolderType protocol,
                          const String &mailboxname,
                          bool subscribe = true);
 
@@ -510,7 +510,7 @@ public:
    virtual String GetImapSpec(void) const = 0;
 
    /// Return the folder's type.
-   virtual FolderType GetType(void) const = 0;
+   virtual MFolderType GetType(void) const = 0;
 
    /// return the folder flags
    virtual int GetFlags(void) const = 0;
@@ -893,7 +893,7 @@ public:
        @return TRUE if folder name could be successfully extracted
     */
    static bool SpecToFolderName(const String& specification,
-                                FolderType folderType,
+                                MFolderType folderType,
                                 String *name);
 
    /** A helper function: remove the MHPATH prefix from the path and return

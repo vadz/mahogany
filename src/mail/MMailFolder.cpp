@@ -244,7 +244,7 @@ MMailFolder::OpenFolder(const MFolder *mfolder)
 /* static */
 bool
 MMailFolder::CreateFolder(const String &name,
-                              FolderType type,
+                              MFolderType type,
                               int flags,
                               const String &path = "",
                           const String &comment = "")
@@ -316,7 +316,7 @@ MMailFolder::ReplyMessage(class Message *msg,
 /* static */
 bool
 MMailFolder::Subscribe(const String &host,
-                       FolderType protocol,
+                       MFolderType protocol,
                        const String &mailboxname,
                        bool subscribe = true)
 {
@@ -460,7 +460,7 @@ class HeaderInfoList *
 MMailFolder::GetHeaders(void) const{ MMAILFOLDER_MISSING(); }
 //@}
 /// Return the folder's type.
-FolderType
+MFolderType
 MMailFolder::GetType(void) const{ MMAILFOLDER_MISSING(); }
 /// return the folder flags
 int

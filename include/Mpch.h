@@ -46,7 +46,7 @@
 
 #include "Profile.h"
 
-#include "FolderType.h"
+#include "MFolderType.h"
 #include "Sorting.h"
 #include "Threading.h"
 
