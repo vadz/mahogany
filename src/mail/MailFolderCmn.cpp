@@ -340,10 +340,10 @@ MfCloseEntry::~MfCloseEntry()
 MfCloser::MfCloser()
         : m_timer(this)
 {
+   // default timer interval, will be updated in Add() if needed
    m_interval = READ_APPCONFIG(MP_FOLDER_CLOSE_DELAY);
 
-   // start it, in fact
-   RestartTimer();
+   // don't start the timer for now, we don't have any folders to close yet
 }
 
 MfCloser::~MfCloser()
@@ -376,7 +376,7 @@ void MfCloser::Add(MailFolderCmn *mf, int delay)
    if ( delay < m_interval )
    {
       // restart the timer using smaller interval - of course, normally we
-      // should compute the pgcd of all intervals but let's keep it simple
+      // should compute the gcd of all intervals but let's keep it simple
       m_interval = delay;
 
       RestartTimer();
@@ -401,10 +401,6 @@ void MfCloser::OnTimer(void)
          ++i;
       }
    }
-
-   // FIXME: this is just a temp hack
-   extern void CheckConnectionsTimeout();
-   CheckConnectionsTimeout();
 }
 
 void MfCloser::CleanUp(void)
@@ -438,7 +434,7 @@ MfCloseEntry *MfCloser::GetCloseEntry(MailFolderCmn *mf) const
    {
       if ( i->Matches(mf) )
       {
-         return i.operator->();
+         return *i;
       }
    }
 
@@ -483,9 +479,6 @@ void MailFolderCmn::Close(void)
 bool
 MailFolderCmn::DecRef()
 {
-   // FIXME: revise this code taking into account connection caching we now do
-   //        in MailFolderCC, it can't work without changes probably
-#if 0
    // don't keep folders alive artificially if we're going to terminate soon
    // anyhow - or if we didn't start up fully yet and gs_MailFolderCloser
    // hadn't been created
@@ -527,7 +520,6 @@ MailFolderCmn::DecRef()
          }
       }
    }
-#endif // 0
 
    return RealDecRef();
 }
