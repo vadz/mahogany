@@ -34,6 +34,7 @@
 #endif
 
 #include <wx/treectrl.h>
+#include <wx/tokenzr.h>
 
 #include "MFolder.h"
 
@@ -80,48 +81,15 @@ private:
                                                                     : '/';
    }
 
-   // to find out under which item to add a new folder we maintain a stack
-   // which contains the current branch. This stack is implemented using 2
-   // arrays (not terribly clever or fast, but simple)
-   // --------------------------------------------------------------------
-
-   void PushFolder(const String& name, wxTreeItemId id)
-   {
-      m_folderNames.Add(name);
-      m_folderIds.Add(id);
-   }
-
-   bool IsStackEmpty() const { return m_folderNames.GetCount() == 0; }
-
-   void EmptyStack() { m_folderNames.Clear(); m_folderIds.Clear(); }
-
-   // just discards the top stack element
-   void PopFolder()
-   {
-      ASSERT_MSG( !IsStackEmpty(), "stack is empty!" );
-
-      m_folderNames.Remove(m_folderNames.GetCount() - 1);
-      m_folderIds.Remove(m_folderIds.GetCount() - 1);
-   }
-
-   // get the top stack element
-   void GetStackTop(String *name, wxTreeItemId *id) const
-   {
-      ASSERT_MSG( !IsStackEmpty(), "stack is empty!" );
-
-      *name = m_folderNames.Last();
-      *id = m_folderIds.Last();
-   }
-
-   wxArrayString m_folderNames;
-   wxArrayTreeItemIds m_folderIds;
-
    // helper function used to populate the tree with folders
    // ------------------------------------------------------
 
-   // get the tree item under which we should insert this folder (modifies the
-   // folder name to contain only the last path component)
-   wxTreeItemId GetParentForFolder(String *name);
+   // insert all components of the path into the tree
+   void InsertRecursively(const wxString& path);
+
+   // insert a new item named "name" under parent if it doesn't exist yet in
+   // alphabetical order; returns the id of the (new) item
+   wxTreeItemId InsertInOrder(wxTreeItemId parent, const wxString& name);
 
    // called when a new folder must be added
    void OnNewFolder(String& name);
@@ -179,6 +147,10 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_treectrl->SetConstraints(c);
 
+   // don't allow to do anything with it until all foders are retrieved
+   // (reenabled in OnNoMoreFolders)
+   m_treectrl->Disable();
+
    SetDefaultSize(6*hBtn, 4*wBtn);
 }
 
@@ -189,83 +161,111 @@ wxSubscriptionDialog::~wxSubscriptionDialog()
    MEventManager::Deregister(m_regCookie);
 }
 
-wxTreeItemId wxSubscriptionDialog::GetParentForFolder(String *name)
+void wxSubscriptionDialog::InsertRecursively(const String& path)
 {
-   // currently we suppose that the enumeration is depth-first, but a better
-   // solution would be to be prepared for folders coming in any order - but
-   // then we'd need to maintain some complicated data structure instead of a
-   // simple stack we have currently...
-
-   wxASSERT_MSG( *name != m_folderPath, "shouldn't be called for the root" );
-
-   // if there is no root, add it now
-   wxTreeItemId root = m_treectrl->GetRootItem();
-   if ( !root )
+   // don't do anything for this case as we're not sure to get here (see
+   // comment below)
+   if ( path == m_folderPath )
    {
-      // add the root item to the tree - this allows us to forget about the
-      // difference between listing all folders and all folders under some
-      // folder (in the first case, there is no "root" returned by cclient, in
-      // the second case there would be)
-      String label = m_folderPath.AfterLast(GetFolderNameSeparator());
-      if ( !label )
-      {
-         // anything better to say?
-         label = _T("All subfolders");
-      }
-
-      root = m_treectrl->AddRoot(label);
-
-      PushFolder(m_folderPath, root);
+      return;
    }
 
-   while ( !IsStackEmpty() )
+   // remove the common prefix and the following it separator from name
+   //
+   // we suppose that all subofolder names start with the parent folder name
+   // followed by the name separator, but don't blindly believe cclient -
+   // check it!
+   size_t len = m_folderPath.length();
+   char sep = GetFolderNameSeparator();
+   CHECK_RET( !wxStrncmp(path, m_folderPath, len),
+              "all folder names should start with the same common prefix" );
+
+   wxString name;
+   if ( !m_folderPath )
    {
-      String folderName;
-      wxTreeItemId folderId;
-      GetStackTop(&folderName, &folderId);
+      // this happens when enumerating all MH subfolders
+      name = path;
+   }
+   else // normal case of non empty m_folderPath
+   {
+      CHECK_RET( (path.length() > len) && (path[len] == sep),
+                 "folder name separator expected in the folder name" );
 
-      if ( !folderName )
+      // +1 for trailing separator
+      name = path.c_str() + m_folderPath.length() + 1;
+   }
+
+   // note: in some cases (NNTP) cclient will not return the root folder, in
+   // others (MH) it will, so don't count on it here and instead add the root
+   // item independently of this
+   wxTreeItemId parent = m_treectrl->GetRootItem();
+   if ( !parent.IsOk() )
+   {
+      wxString rootName = m_folderPath;
+      if ( !rootName )
       {
-         // special case: comparison below would match too, but we don't have
-         // to change name (this happens only when enumerating the subfolders
-         // of the root MH pseufo-folder)
-         return folderId;
+         rootName = _("All subfolders");
       }
 
-      // this should never happen, but check for it nevertheless
-      if ( *name == folderName )
-      {
-         wxFAIL_MSG( "same folder listed twice in subfolders list" );
+      parent = m_treectrl->AddRoot(rootName);
+   }
 
-         return folderId;
+   wxStringTokenizer tk(name, sep);
+   while ( tk.HasMoreTokens() )
+   {
+      // find the child with the given name
+      wxString component = tk.GetNextToken();
+
+      ASSERT_MSG( !!component, "token can't be empty here" );
+
+      parent = InsertInOrder(parent, component);
+   }
+}
+
+wxTreeItemId wxSubscriptionDialog::InsertInOrder(wxTreeItemId parent,
+                                                 const wxString& name)
+{
+   // insert in alphabetic order under the parent
+   long cookie;
+   wxTreeItemId childPrev,
+                child = m_treectrl->GetFirstChild(parent, cookie);
+   while ( child.IsOk() )
+   {
+      int rc = name.Cmp(m_treectrl->GetItemText(child));
+
+      if ( rc == 0 )
+      {
+         // the item is already there
+         return child;
       }
-
-      // to be the child of the folderName, name must be longer than it and
-      // start by folderName followed by '/' (or '.')
-      size_t len = folderName.length() + 1;
-      folderName += GetFolderNameSeparator();
-      if ( strncmp(*name, folderName, len) == 0 )
+      else if ( rc < 0 )
       {
-         // we found the parent, so now leave only the child part of the
-         // folder name
-         (*name).erase(0, len);
-
-         return folderId;
+         // should insert before this item (it's the first one which is
+         // greater than us)
+         break;
       }
-      else
+      else // if ( rc > 0 )
       {
-         // no, it doesn't live under this folder - go one step up
-         PopFolder();
+         childPrev = child;
+
+         child = m_treectrl->GetNextChild(parent, cookie);
       }
    }
 
-   return root;
+   if ( childPrev.IsOk() )
+   {
+      // insert after child
+      return m_treectrl->InsertItem(parent, childPrev, name);
+   }
+   else
+   {
+      // prepend if there is no previous child
+      return m_treectrl->PrependItem(parent, name);
+   }
 }
 
 void wxSubscriptionDialog::OnNewFolder(String& name)
 {
-   String nameFull(name);
-
    // remove trailing backslashes if any
    size_t len = name.length();
    while ( len > 0 && name[len - 1] == '/' )
@@ -276,13 +276,8 @@ void wxSubscriptionDialog::OnNewFolder(String& name)
 
    name.Truncate(len);
 
-   if ( name != m_folderPath )
-   {
-      wxTreeItemId parent = GetParentForFolder(&name);
-      wxTreeItemId itemId = m_treectrl->PrependItem(parent, name);
-
-      PushFolder(nameFull, itemId);
-   }
+   // put it into the tree
+   InsertRecursively(name);
 }
 
 void wxSubscriptionDialog::OnNoMoreFolders()
@@ -292,14 +287,12 @@ void wxSubscriptionDialog::OnNoMoreFolders()
    if ( root.IsOk() )
    {
       m_treectrl->Expand(root);
+      m_treectrl->Enable();
    }
    else
    {
       m_treectrl->AddRoot(_("No subfolders"));
-      m_treectrl->Disable();
    }
-
-   EmptyStack();
 }
 
 // needed to be able to use DECLARE_AUTOREF() macro
