@@ -35,6 +35,7 @@
 
 #include "wx/log.h"
 #include "wx/intl.h"
+#include "wx/dynarray.h"
 
 #ifdef __WXMSW__
     #include "wx/msw/registry.h"
@@ -124,24 +125,62 @@ public:
 // this class uses both mailcap and mime.types to gather information about file
 // types.
 //
-// FIXME any docs with real descriptions of these files??
+// The information about mailcap file was extracted from metamail(1) sources and
+// documentation.
 //
 // Format of mailcap file: spaces are ignored, each line is either a comment
-// (starts with '#') or a line of the form <mime type>;<command>;<flags>. A
-// backslash can be used to quote semicolons and newlines (and probably anything
-// else as well). Any of 2 parts of the MIME type may be '*' used as a wildcard.
+// (starts with '#') or a line of the form <field1>;<field2>;...;<fieldN>.
+// A backslash can be used to quote semicolons and newlines (and, in fact,
+// anything else including itself).
+//
+// The first field is always the MIME type in the form of type/subtype (see RFC
+// 822) where subtype may be '*' meaning "any". Following metamail, we accept
+// "type" which means the same as "type/*", although I'm not sure whether this
+// is standard.
+//
+// The second field is always the command to run. It is subject to
+// parameter/filename expansion described below.
+//
+// All the following fields are optional and may not be present at all. If
+// they're present they may appear in any order, although each of them should
+// appear only once. The optional fields are the following:
+//  * notes=xxx is an uninterpreted string which is silently ignored
+//  * test=xxx is the command to be used to determine whether this mailcap line
+//    applies to our data or not. The RHS of this field goes through the
+//    parameter/filename expansion (as the 2nd field) and the resulting string
+//    is executed. The line applies only if the command succeeds, i.e. returns 0
+//    exit code.
+//  * print=xxx is the command to be used to print (and not view) the data of
+//    this type (parameter/filename expansion is done here too)
+//  * edit=xxx is the command to open/edit the data of this type
+//  * needsterminal means that a new console must be created for the viewer
+//  * copiousoutput means that the viewer doesn't interact with the user but
+//    produces (possibly) a lof of lines of output on stdout (i.e. "cat" is a
+//    good example), thus it might be a good idea to use some kind of paging
+//    mechanism.
+//  * textualnewlines means not to perform CR/LF translation (not honored)
+//  * compose and composetyped fields are used to determine the program to be
+//    called to create a new message pert in the specified format (unused).
+//
+// Parameter/filename xpansion: 
+//  * %s is replaced with the (full) file name
+//  * %t is replaced with MIME type/subtype of the entry
+//  * for multipart type only %n is replaced with the nnumber of parts and %F is
+//    replaced by an array of (content-type, temporary file name) pairs for all
+//    message parts (TODO)
+//  * %{parameter} is replaced with the value of parameter taken from
+//    Content-type header line of the message.
+//
+// FIXME any docs with real descriptions of these files??
 //
 // There are 2 possible formats for mime.types file, one entry per line (used
 // for global mime.types) and "expanded" format where an entry takes multiple
 // lines (used for users mime.types).
 //
 // For both formats spaces are ignored and lines starting with a '#' are
-// comments. Each record has one of two following forms:
-//  a) for "brief" format:  <mime type>  <space separated list of extensions>
-//  b) for "expanded" format:
-//      type=<mime type> \ 
-//      desc="<description>" \ 
-//      exts="ext"
+// comments. Each record has one of two following forms: a) for "brief" format:
+// <mime type>  <space separated list of extensions> b) for "expanded" format:
+// type=<mime type> \ desc="<description>" \ exts="ext"
 //
 // We try to autodetect the format of mime.types: if a non-comment line starts
 // with "type=" we assume the second format, otherwise the first one.
@@ -167,10 +206,44 @@ public:
     wxString GetExtension(size_t index) { return m_aExtensions[index]; }
 
 private:
+    // there may be more than one entry for one and the same mime type, to
+    // choose the right one we have to run the command specified in the test
+    // field on our data.
+    class MailCapEntry
+    {
+    private:
+        wxString m_openCmd,         // command to use to open/view the file
+                 m_printCmd,        //                     print
+                 m_testCmd;         // only apply this entry if test yields
+                                    // true (i.e. the command returns 0)
+
+        MailCapEntry *m_next;       // in the linked list
+
+    public:
+        // ctor
+        MailCapEntry(const wxString& openCmd,
+                     const wxString& printCmd,
+                     const wxString& testCmd)
+            : m_openCmd(openCmd), m_printCmd(printCmd), m_testCmd(testCmd)
+        {
+            m_next = NULL;
+        }
+
+        // accessors
+        const wxString& GetOpenCmd()  const { return m_openCmd;  }
+        const wxString& GetPrintCmd() const { return m_printCmd; }
+        const wxString& GetTestCmd()  const { return m_testCmd;  }
+
+        // operations
+        void SetNext(MailCapEntry *next) { m_next = next; }
+    };
+
+    WX_DEFINE_ARRAY(MailCapEntry *, ArrayTypeEntries);
+
     wxArrayString m_aTypes,         // MIME types
-                  m_aCommands,      // commands to handle them
                   m_aDescriptions,  // descriptions (just some text)
                   m_aExtensions;    // space separated list of extensions
+    ArrayTypeEntries m_aEntries;    // commands and tests for this file type
 };
 
 class wxFileTypeImpl
@@ -188,10 +261,18 @@ public:
         { return FALSE; }   // @@ maybe with Gnome/KDE integration...
     bool GetDescription(wxString *desc) const
         { *desc = m_manager->m_aDescriptions[m_index]; return TRUE; }
+
     bool GetOpenCommand(wxString *openCmd) const
-        { *openCmd = m_manager->m_aCommands[m_index]; return TRUE; }
+    {
+        *openCmd = m_manager->m_aEntries[m_index]->GetOpenCmd();
+        return TRUE;
+    }
+
     bool GetPrintCommand(wxString *printCmd) const
-        { return FALSE; }   // @@ how to print files under Unix?
+    {
+        *printCmd = m_manager->m_aEntries[m_index]->GetPrintCmd();
+        return TRUE;
+    }
 
 private:
     wxMimeTypesManagerImpl *m_manager;
@@ -518,18 +599,19 @@ bool wxFileTypeImpl::GetExtensions(wxArrayString& extensions)
     extensions.Empty();
 
     wxString strExt;    // one extension in the space delimitid list
-    size_t len = strExtensions.Len();
-    for ( size_t n = 0; n < len; n++ ) {
-        char ch = strExtensions[n];
-        if ( ch == ' ' ) {
+    for ( const char *p = strExtensions; ; p++ ) {
+        if ( *p == ' ' || *p == '\0' ) {
             if ( !strExt.IsEmpty() ) {
                 extensions.Add(strExt);
                 strExt.Empty();
             }
             //else: repeated spaces (shouldn't happen, but it's not that
             //      important if it does happen)
+
+            if ( *p == '\0' )
+                break;
         }
-        else if ( ch == '.' ) {
+        else if ( *p == '.' ) {
             // remove the dot from extension (but only if it's the first char)
             if ( !strExt.IsEmpty() ) {
                 strExt += '.';
@@ -537,7 +619,7 @@ bool wxFileTypeImpl::GetExtensions(wxArrayString& extensions)
             //else: no, don't append it
         }
         else {
-            strExt += ch;
+            strExt += *p;
         }
     }
 
@@ -548,11 +630,14 @@ bool wxFileTypeImpl::GetExtensions(wxArrayString& extensions)
 wxMimeTypesManagerImpl::wxMimeTypesManagerImpl()
 {
     // directories where we look for mailcap and mime.types by default
+    // (taken from metamail(1) sources)
     static const char *aStandardLocations[] =
     {
         "/etc",
         "/usr/etc",
         "/usr/local/etc",
+        "/etc/mail",
+        "/usr/public/lib"
     };
 
     // first read the system wide file(s)
@@ -600,9 +685,9 @@ wxMimeTypesManagerImpl::GetFileTypeFromMimeType(const wxString& mimeType)
     int index = m_aTypes.Index(mimeType);
     if ( index == NOT_FOUND ) {
         // then try to find "text/*" as match for "text/plain" (for example)
-        wxString strCategory = mimeType.Before('/');
-        wxCHECK_MSG( !strCategory.IsEmpty(), NULL,
-                     "MIME type in wrong format" );
+        // NB: if mimeType doesn't contain '/' at all, Left() will return the
+        //     whole string - ok.
+        wxString strCategory = mimeType.Left('/');
 
         size_t nCount = m_aTypes.Count();
         for ( size_t n = 0; n < nCount; n++ ) {
@@ -628,9 +713,14 @@ wxMimeTypesManagerImpl::GetFileTypeFromMimeType(const wxString& mimeType)
 
 void wxMimeTypesManagerImpl::ReadMimeTypes(const wxString& strFileName)
 {
+    wxLogTrace("--- Parsing mime.types file '%s' ---", strFileName.c_str());
+
     wxTextFile file(strFileName);
     if ( !file.Open() )
         return;
+
+    // the information we extract
+    wxString strMimeType, strDesc, strExtensions;
 
     size_t nLineCount = file.GetLineCount();
     for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
@@ -644,9 +734,6 @@ void wxMimeTypesManagerImpl::ReadMimeTypes(const wxString& strFileName)
         // comment?
         if ( *pc == '#' )
             continue;
-
-        // the information we extract
-        wxString strMimeType, strDesc, strExtensions;
 
         // detect file format
         const char *pEqualSign = strchr(pc, '=');
@@ -673,71 +760,78 @@ void wxMimeTypesManagerImpl::ReadMimeTypes(const wxString& strFileName)
             // expanded format
             // ---------------
 
-            // the string on the left of '='
+            // the string on the left of '=' is the field name
             wxString strLHS(pc, pEqualSign - pc);
 
-            // get the RHS
-            wxString strRHS;
-            bool bInQuotes = FALSE;
-            for ( pc = pEqualSign + 1; *pc != '\0' && !isspace(*pc); pc++ ) {
-                if ( *pc == '"' ) {
-                    if ( bInQuotes ) {
-                        // ok, it's the end of the quoted string
-                        pc++;
-                        bInQuotes = FALSE;
-                        break;
-                    }
-                    else {
-                        // the string is quoted
-                        bInQuotes = TRUE;
-                    }
-                }
-                else {
-                    strRHS += *pc;
-                }
-            }
+            // eat whitespace
+            for ( pc = pEqualSign + 1; isspace(*pc); pc++ )
+                ;
 
-            // check that it's more or less what we're waiting for
-            if ( bInQuotes ) {
-                wxLogWarning(_("Unterminated quote in file %s, line %d."),
-                             strFileName.c_str(), nLine);
+            const char *pEnd;
+            if ( *pc == '"' ) {
+                // the string is quoted and ends at the matching quote
+                pEnd = strchr(++pc, '"');
+                if ( pEnd == NULL ) {
+                    wxLogWarning(_("Mime.types file %s, line %d: unterminated "
+                                   "quoted string."),
+                                 strFileName.c_str(), nLine + 1);
+                }
             }
             else {
-                // only '\' should be left on the line
-                while ( isspace(*pc) )
-                    pc++;
-
-                // only '\\' may be left on the line normally
-                if ( (*pc != '\n') && ((*pc != '\\') || (*++pc != '\n')) ) {
-                    wxLogWarning(_("Extra characters in file %s, line %d."),
-                                 strFileName.c_str(), nLine);
-                }
+                // unquoted stringends at the first space
+                for ( pEnd = pc; !isspace(*pEnd); pEnd++ )
+                    ;
             }
+
+            // now we have the RHS (field value)
+            wxString strRHS(pc, pEnd - pc);
+
+            // check that it's more or less what we're waiting for, i.e. that
+            // only '\' is left on the line
+            if ( *pEnd == '"' ) {
+                // skip this quote
+                pEnd++;
+            }
+
+            for ( pc = pEnd; isspace(*pc); pc++ )
+                ;
+
+            // only '\\' may be left on the line normally
+            bool entryEnded = *pc == '\0';
+            if ( !entryEnded && ((*pc != '\\') || (*++pc != '\0')) ) {
+                wxLogWarning(_("Mime.types file %s, line %d: extra characters "
+                               "after the field value ignored."),
+                             strFileName.c_str(), nLine + 1);
+            }
+            // if there is a trailing backslash entryEnded = FALSE
 
             // now see what we got
             if ( strLHS == "type" ) {
-                strMimeType = strLHS;
+                strMimeType = strRHS;
             }
             else if ( strLHS == "desc" ) {
-                strDesc = strLHS;
+                strDesc = strRHS;
             }
             else if ( strLHS == "exts" ) {
-                strExtensions = strLHS;
+                strExtensions = strRHS;
             }
             else {
                 wxLogWarning(_("Unknown field in file %s, line %d: '%s'."),
-                             strFileName.c_str(), nLine, strLHS.c_str());
+                             strFileName.c_str(), nLine + 1, strLHS.c_str());
             }
 
-            // as we don't reset strMimeType, the next line in this entry will
-            // be interpreted correctly.
+            if ( !entryEnded ) {
+                // as we don't reset strMimeType, the next line in this entry
+                // will be interpreted correctly.
+                continue;
+            }
         }
 
         int index = m_aTypes.Index(strMimeType);
         if ( index == NOT_FOUND ) {
             // add a new entry
             m_aTypes.Add(strMimeType);
-            m_aCommands.Add("");
+            m_aEntries.Add(NULL);
             m_aExtensions.Add(strExtensions);
             m_aDescriptions.Add(strDesc);
         }
@@ -751,13 +845,15 @@ void wxMimeTypesManagerImpl::ReadMimeTypes(const wxString& strFileName)
     }
 
     // check our data integriry
-    wxASSERT( m_aTypes.Count() == m_aCommands.Count() &&
+    wxASSERT( m_aTypes.Count() == m_aEntries.Count() &&
               m_aTypes.Count() == m_aExtensions.Count() &&
               m_aTypes.Count() == m_aDescriptions.Count() );
 }
 
 void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
 {
+    wxLogTrace("--- Parsing mailcap file '%s' ---", strFileName.c_str());
+
     wxTextFile file(strFileName);
     if ( !file.Open() )
         return;
@@ -780,109 +876,183 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
         // what field are we currently in? The first 2 are fixed and there may
         // be an arbitrary number of other fields -- currently, we are not
         // interested in any of them, but we should parse them as well...
-        //
-        // TODO must support test field (pretty tricky unfortunately)
         enum
         {
-            Token_Type,
-            Token_Command,
-            Token_Ignore,
-            Token_Invalid
-        } currentToken = Token_Type;
+            Field_Type,
+            Field_OpenCmd,
+            Field_Other,
+        } currentToken = Field_Type;
 
-        // if it's NOT_FOUND, it means that this entry is new, otherwise we'd
-        // already seen it before
-        int nIndex = NOT_FOUND;
-
-        wxString strCurrentToken; // accumulator
+        // the flags and field values on the current line
+        bool needsterminal = false,
+             copiousoutput = false;
+        wxString strType,
+                 strOpenCmd,
+                 strPrintCmd,
+                 strTest,
+                 strDesc,
+                 curField; // accumulator
         for ( bool cont = TRUE; cont; pc++ ) {
             switch ( *pc ) {
                 case '\\':
-                    // interpret the next character literally
-                    strCurrentToken += *++pc;
-                    break;
+                    // interpret the next character literally (notice that
+                    // backslash can be used for line continuation)
+                    if ( *++pc == '\0' ) {
+                        // fetch the next line.
 
-                case '\0':
-                    // backslash can be used for line continuation
-                    if ( *(pc - 1) == '\\' ) {
                         // pc currently points to nowhere, but after the next
                         // pc++ in the for line it will point to the beginning
                         // of the next line in the file
                         pc = file[++nLine].c_str() - 1;
                     }
                     else {
-                        cont = FALSE;   // end of line reached
+                        // just a normal character
+                        curField += *pc;
                     }
+                    break;
+
+                case '\0':
+                    cont = FALSE;   // end of line reached, exit the loop
 
                     // fall through
 
                 case ';':
-                    // store this token and start looking for the next one
-                    {
-                        // trim whitespaces from both sides
-                        strCurrentToken.Trim(TRUE).Trim(FALSE);
+                    // store this field and start looking for the next one
 
-                        switch ( currentToken ) {
-                            case Token_Type:
-                                // try to find it first
-                                nIndex = m_aTypes.Index(strCurrentToken);
-                                if ( nIndex == NOT_FOUND ) {
-                                    m_aTypes.Add(strCurrentToken);
-                                    m_aExtensions.Add("");
-                                    m_aDescriptions.Add("");
-                                }
-                                //else: nothing, modify other fields later
+                    // trim whitespaces from both sides
+                    curField.Trim(TRUE).Trim(FALSE);
 
-                                currentToken = Token_Command;
-                                break;
+                    switch ( currentToken ) {
+                        case Field_Type:
+                            strType = curField;
+                            if ( strType.Find('/') == NOT_FOUND ) {
+                                // we interpret "type" as "type/*"
+                                strType += "/*";
+                            }
 
-                            // modify the existing entry or add the new one
-                            // depending on nIndex variable (set just above)
-                            case Token_Command:
-                                if ( nIndex == NOT_FOUND ) {
-                                    m_aCommands.Add(strCurrentToken);
+                            currentToken = Field_OpenCmd;
+                            break;
+
+                        case Field_OpenCmd:
+                            strOpenCmd = curField;
+
+                            currentToken = Field_Other;
+                            break;
+
+                        case Field_Other:
+                            {
+                                // "good" mailcap entry?
+                                bool ok = TRUE;
+
+                                // is this something of the form foo=bar?
+                                const char *pEq = strchr(curField, '=');
+                                if ( pEq != NULL ) {
+                                    wxString lhs = curField.Left('='),
+                                             rhs = curField.After('=');
+
+                                    lhs.Trim(TRUE);     // from right
+                                    rhs.Trim(FALSE);    // from left
+
+                                    if ( lhs == "print" )
+                                        strPrintCmd = rhs;
+                                    else if ( lhs == "test" )
+                                        strTest = rhs;
+                                    else if ( lhs == "description" ) {
+                                        // it might be quoted
+                                        if ( rhs[0u] == '"' &&
+                                             rhs.Last() == '"' ) {
+                                            strDesc = wxString(rhs + 1,
+                                                               rhs.Len() - 2);
+                                        }
+                                        else {
+                                            strDesc = rhs;
+                                        }
+                                    }
+                                    else if ( lhs == "compose" ||
+                                              lhs == "composetyped" ||
+                                              lhs == "notes" ||
+                                              lhs == "edit" )
+                                        ;   // ignore
+                                    else
+                                        ok = FALSE;
+
                                 }
                                 else {
-                                    m_aCommands[nIndex] = strCurrentToken;
+                                    // no, it's a simple flag
+                                    if ( curField == "needsterminal" )
+                                        needsterminal = TRUE;
+                                    else if ( curField == "copiousoutput" )
+                                        copiousoutput = TRUE;
+                                    else if ( curField == "textualnewlines" )
+                                        ;   // ignore
+                                    else
+                                        ok = FALSE;
                                 }
 
-                                currentToken = Token_Ignore;
-                                break;
+                                if ( !ok )
+                                {
+                                    // don't flood the user with error messages
+                                    // if we don't understand something in his
+                                    // mailcap
+                                    wxLogDebug
+                                    (
+                                      _("Mailcap file %s, line %d: unknown "
+                                        "field '%s' for the MIME type "
+                                        "'%s' ignored."),
+                                      strFileName.c_str(),
+                                      nLine + 1,
+                                      curField.c_str(),
+                                      strType.c_str()
+                                    );
+                                }
+                            }
 
-                            case Token_Ignore:
-                                // we ignore this field
-                                currentToken = Token_Ignore;
-                                break;
+                            // it already has this value
+                            //currentToken = Field_Other;
+                            break;
 
-                            case Token_Invalid:
-                                wxLogWarning
-                                (
-                                  _("Mailcap file %s, line %d: unknown field "
-                                    "for the MIME type '%s' ignored."),
-                                  strFileName.c_str(),
-                                  nLine,
-                                  (nIndex == NOT_FOUND ? m_aCommands.Last()
-                                                       :
-                                                       m_aCommands[nIndex]).c_str()
-                                );
-                                break;
-
-                            default:
-                                wxFAIL_MSG("unknown field type in mailcap");
-                        }
-
-                        // next token starts immediately after ';'
-                        strCurrentToken.Empty();
+                        default:
+                            wxFAIL_MSG("unknown field type in mailcap");
                     }
+
+                    // next token starts immediately after ';'
+                    curField.Empty();
                     break;
 
                 default:
-                    strCurrentToken += *pc;
+                    curField += *pc;
+            }
+        }
+
+        // check that we really read something reasonable
+        if ( currentToken == Field_Type || currentToken == Field_OpenCmd ) {
+            wxLogWarning(_("Mailcap file %s, line %d: incomplete entry "
+                           "ignored."),
+                         strFileName.c_str(), nLine + 1);
+        }
+        else {
+            MailCapEntry *entry = new MailCapEntry(strOpenCmd,
+                                                   strPrintCmd,
+                                                   strTest);
+
+            int nIndex = m_aTypes.Index(strType);
+            if ( nIndex == NOT_FOUND ) {
+                // new file type
+                m_aTypes.Add(strType);
+
+                m_aEntries.Add(entry);
+                m_aExtensions.Add("");
+                m_aDescriptions.Add(strDesc);
+            }
+            else {
+                // modify the existing entry
+                entry->SetNext(m_aEntries[nIndex]);
+                m_aEntries[nIndex] = entry;
             }
         }
 
         // check our data integriry
-        wxASSERT( m_aTypes.Count() == m_aCommands.Count() &&
+        wxASSERT( m_aTypes.Count() == m_aEntries.Count() &&
                   m_aTypes.Count() == m_aExtensions.Count() &&
                   m_aTypes.Count() == m_aDescriptions.Count() );
     }
