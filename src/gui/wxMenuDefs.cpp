@@ -299,7 +299,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // normal edit
 
    // the available accelerators for this menu:
-   // BHIJKLNOQVWXYZ
+   // BHJKLNOQVWYZ
    { WXMENU_EDIT_CUT,  gettext_noop("C&ut\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_COPY, gettext_noop("&Copy\tCtrl-C"), gettext_noop("Copy selection to clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , wxITEM_NORMAL },
@@ -313,7 +313,9 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_FILTERS,  gettext_noop("Filter &rules..."), gettext_noop("Edit rules for message filtering")   , wxITEM_NORMAL },
    { WXMENU_EDIT_TEMPLATES,gettext_noop("&Templates..."), gettext_noop("Edit templates used for message composition")   , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
-   { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             , wxITEM_NORMAL },
+   { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save preferences"), gettext_noop("Save options")             , wxITEM_NORMAL },
+   { WXMENU_EDIT_EXPORT_PREF,gettext_noop("E&xport preferences..."), gettext_noop("Save options")             , wxITEM_NORMAL },
+   { WXMENU_EDIT_IMPORT_PREF,gettext_noop("&Import preferences..."), gettext_noop("Save options")             , wxITEM_NORMAL },
    { WXMENU_EDIT_RESTORE_PREF,
                            gettext_noop("Restore &defaults..."), gettext_noop("Restore default options values") , wxITEM_NORMAL },
 

@@ -43,6 +43,7 @@
 #  include <wx/ffile.h>
 #endif // Python
 
+#include "ConfigSource.h"
 #include "FolderMonitor.h"
 
 #include "TemplateDialog.h"
@@ -651,24 +652,75 @@ wxMFrame::OnMenuCommand(int id)
       case WXMENU_EDIT_RESTORE_PREF:
          (void)ShowRestoreDefaultsDialog(mApplication->GetProfile(), this);
          break;
-      case WXMENU_EDIT_SAVE_PREF:
-         {
-            // FIXME any proper way to flush all profiles at once?
-            wxConfigBase *config = mApplication->GetProfile()->GetConfig();
-            bool ok = config != NULL;
-            if ( ok )
-               ok = config->Flush();
 
-            if ( ok )
+      case WXMENU_EDIT_SAVE_PREF:
+         if ( Profile::FlushAll() )
+         {
+            wxLogStatus(this, _("Program preferences successfully saved."));
+         }
+         else
+         {
+            ERRORMESSAGE((_("Couldn't save preferences.")));
+         }
+         break;
+
+      case WXMENU_EDIT_EXPORT_PREF:
+      case WXMENU_EDIT_IMPORT_PREF:
+         {
+            const bool doExport = id == WXMENU_EDIT_EXPORT_PREF;
+
+            String path = MDialog_FileRequester
+                          (
+                              doExport ? _("Choose file to export settings to")
+                                       : _("Choose file to import settings from"),
+                              this,
+                              "", "", "", "",
+                              doExport    // true => save, false => load
+                          );
+            if ( path.empty() )
+               break;
+
+            ConfigSource_obj
+               configSrc(ConfigSourceLocal::CreateDefault()),
+               configDst(ConfigSourceLocal::CreateFile(path));
+            if ( !doExport )
             {
-               wxLogStatus(this, _("Program preferences successfully saved."));
+               configSrc.Swap(configDst);
             }
-            else
+
+            bool ok = ConfigSource::Copy(*configDst.Get(), *configSrc.Get());
+
+            if ( doExport )
             {
-               ERRORMESSAGE((_("Couldn't save preferences.")));
+               if ( ok )
+               {
+                  wxLogStatus(this,
+                              _("Settings successfully exported to file \"%s\""),
+                              path.c_str());
+               }
+               else
+               {
+                  wxLogError(_("Failed to export settings to the file \"%s\"."),
+                             path.c_str());
+               }
+            }
+            else // import
+            {
+               if ( ok )
+               {
+                  wxLogStatus(this,
+                              _("Settings successfully imported from \"%s\""),
+                              path.c_str());
+               }
+               else
+               {
+                  wxLogError(_("Failed to import settings from the file \"%s\"."),
+                             path.c_str());
+               }
             }
          }
          break;
+
 
       case WXMENU_HELP_ABOUT:
          MDialog_AboutDialog(this, false /* don't timeout */);
