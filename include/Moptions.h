@@ -1463,7 +1463,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// program used to convert image files?
 #define   MP_CONVERTPROGRAM_DEFVAL      _T("convert %s -compress None %s")
 /// list of modules to load at startup
-#define MP_MODULES_DEFVAL   _T("Filters")
+#define MP_MODULES_DEFVAL   _T("Filters:Migrate")
 /// the user path for template files used for message composition
 #define MP_COMPOSETEMPLATEPATH_USER_DEFVAL   wxEmptyString
 /// the global path for template files used for message composition
