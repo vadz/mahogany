@@ -1236,7 +1236,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
    {
       encPart = mimepart->GetTextEncoding();
 
-      if ( encPart == wxFONTENCODING_UTF8 || encPart == wxFONTENCODING_UTF7)
+      if ( encPart == wxFONTENCODING_UTF8 || encPart == wxFONTENCODING_UTF7 )
       {
          // show UTF-8|7, not env. encoding in Language menu
          m_encodingAuto = encPart;
