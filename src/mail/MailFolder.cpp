@@ -305,10 +305,12 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
       cv->AddHeaderEntry("In-Reply-To",messageid);
       cv->AddHeaderEntry("References",references);
       
+      SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
       SafeDecRef(msg);
-      wxString seq;
-      seq << (*selections)[i];
-      SetSequenceFlag(seq, MailFolder::MSG_STAT_ANSWERED, true);
+
+      //wxString seq;
+      //seq << (*selections)[i];
+      //SetSequenceFlag(seq, MailFolder::MSG_STAT_ANSWERED, true);
    }
 }
 
