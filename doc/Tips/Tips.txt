@@ -24,3 +24,4 @@ If you are concerned about security, you shouldn't let Mahogany store the passwo
 You can right click the attachments shown in the message view to save or open them.
 You may always see the full message details using the "Show raw message" command from the "Message" menu (Ctrl-Z). Try also Shift-Ctrl-Z.
 You may preview your messages before sending them to check them for the one last time by enabling the corresponding option in the compose preferences page.
+You can see full message headers by pressing "H".
