@@ -32,7 +32,6 @@
 #include "MailFolder.h"
 #include "Message.h"
 #include "HeaderInfo.h"
-#include "MAtExit.h"
 
 #include "SpamFilter.h"
 #include "gui/SpamOptionsPage.h"
@@ -115,7 +114,7 @@ private:
 
 sqlite *DspamCtx::ms_dbh = NULL;
 
-MRunFunctionAtExit closeSQlite(DspamCtx::CloseDatabase);
+MMODULE_CLEANUP(DspamCtx::CloseDatabase)
 
 
 // normal DSPAM context
