@@ -902,8 +902,6 @@ MailFolderCC::Create(int typeAndFlags)
 
    m_FolderListing = NULL;
 
-   m_flagsData = NULL;
-
    m_InCritical = false;
    m_ASMailFolder = NULL;
 
