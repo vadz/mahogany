@@ -33,10 +33,9 @@
    #include "Profile.h"                // for M_PROFILE_CONFIG_SECTION
 #endif // USE_PCH
 
-#ifdef  OS_WIN
+#include <wx/confbase.h>               // for wxConfigBase
+#ifdef OS_WIN
    #include <wx/msw/regconf.h>
-#else
-   #include <wx/confbase.h>            // for wxConfigBase
 #endif
 
 #include <wx/dir.h>
