@@ -53,18 +53,19 @@ $Id$
 - folder set message flag update hook takes too long for really large folders
  ==> code commented out in MailFolderCC.cpp
 
+ - merge many Re: into one, optionally Re[n]:
  - easy to implement but useful features:
   - "check for new mail now"
 - use mm_critical() and delay application exit if necessary
 - don't use XPM as intermediary format, but e.g. PNG and builtin wxWin 
   PNG loader, specify image formats to convert "png:Mtempxxx"
+  Try: conversion to png if available and loading, otherwise
+  conversion to xpm and use of builtin code
+- delete temporary files (esp. from image conversion!)
 
- - wxLayout:
-  + Refresh!!
-  + undo?
-  + fix the minor (moving up in 1st column over empty line) bug
-  + still some cursor corruption which can lead to crashes
- - save and restore printer settings in profile
+ - wxLayout: UNDERGOING REWRITE
+
+- save and restore printer settings in profile
  - M takes ages to send a message
  - add a wxASSERT() for the correct path in READ_APPCONFIG()
  - add some progress messages when opening folders (looks like it's
