@@ -350,17 +350,19 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
    m_ProfileValues.style = READ_CONFIG(m_Profile,MP_FTEXT_STYLE);
    m_ProfileValues.weight = READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT);
 
-   m_ProfileValues.showHeaders = (bool)READ_CONFIG(m_Profile,MP_SHOWHEADERS);
-   m_ProfileValues.rfc822isText = (bool)READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT);
-   m_ProfileValues.highlightURLs = (bool)READ_CONFIG(m_Profile,MP_HIGHLIGHT_URLS);
-   m_ProfileValues.inlineGFX = READ_CONFIG(m_Profile, MP_INLINE_GFX);
+   m_ProfileValues.showHeaders = READ_CONFIG(m_Profile,MP_SHOWHEADERS) != 0;
+   m_ProfileValues.rfc822isText = READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT) != 0;
+   m_ProfileValues.highlightURLs = READ_CONFIG(m_Profile,MP_HIGHLIGHT_URLS) != 0;
+   m_ProfileValues.inlineGFX = READ_CONFIG(m_Profile, MP_INLINE_GFX) != 0;
    m_ProfileValues.browser = READ_CONFIG(m_Profile, MP_BROWSER);
-   m_ProfileValues.browserIsNS = (bool) READ_CONFIG(m_Profile, MP_BROWSER_ISNS);
+   m_ProfileValues.browserIsNS = READ_CONFIG(m_Profile, MP_BROWSER_ISNS) != 0;
    m_ProfileValues.autocollect =  READ_CONFIG(profile, MP_AUTOCOLLECT);
    m_ProfileValues.autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
    m_ProfileValues.autoCollectBookName = READ_CONFIG(profile, MP_AUTOCOLLECT_ADB);
+#ifdef OS_UNIX
    m_ProfileValues.afmpath = READ_APPCONFIG(MP_AFMPATH);
-   m_ProfileValues.showFaces = (bool) READ_CONFIG(profile, MP_SHOW_XFACES);
+#endif // Unix
+   m_ProfileValues.showFaces = READ_CONFIG(profile, MP_SHOW_XFACES) != 0;
 }
    
 void
@@ -1286,7 +1288,7 @@ wxMessageView::Print(void)
 {
 #ifdef OS_WIN
    wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#else
+#else // Unix
    bool found;
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
 
@@ -1297,7 +1299,7 @@ wxMessageView::Print(void)
    String afmpath = pf.FindDirFile("Cour.afm", &found);
    if(found)
       wxSetAFMPath(afmpath);
-#endif
+#endif // Win/Unix
    wxPrinter printer;
    wxLayoutPrintout printout(GetLayoutList(),_("M: Printout"));
    if (! printer.Print(this, &printout, TRUE))
@@ -1312,7 +1314,7 @@ wxMessageView::PrintPreview(void)
 {
 #ifdef OS_WIN
    wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#else
+#else // Unix
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
    //    set AFM path (recursive!)
    PathFinder pf(m_ProfileValues.afmpath, true);
@@ -1320,7 +1322,7 @@ wxMessageView::PrintPreview(void)
    pf.AddPaths(mApplication->GetLocalDir(), true);
    String afmpath = pf.FindDirFile("Cour.afm");
    wxSetAFMPath((char *) afmpath.c_str());
-#endif
+#endif // in/Unix
 
    // Pass two printout objects: for preview, and possible printing.
    wxPrintPreview *preview = new wxPrintPreview(new wxLayoutPrintout(GetLayoutList()),

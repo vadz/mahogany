@@ -160,7 +160,7 @@ protected:
    bool RunProcess(const String& command);
 
    /// All values read from the profile
-   struct
+   struct AllProfileValues
    {
       /// Background and foreground colours.
       String bg, fg;
@@ -184,8 +184,10 @@ protected:
       int autocollectNamed;
       /// Name of the ADB book to use for autocollect.
       String autoCollectBookName;
+#ifdef OS_UNIX
       /// Where to find AFM files.
       String afmpath;
+#endif // Unix
       /// Show XFaces?
       bool showFaces;
    } m_ProfileValues;

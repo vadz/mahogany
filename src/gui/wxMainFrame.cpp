@@ -73,7 +73,14 @@ public:
       wxFolderTree::OnSelectionChange(oldsel, newsel);
    }
 
-   virtual void OnOpenHere(MFolder *folder) { m_frame->OpenFolder(folder); }
+   virtual void OnOpenHere(MFolder *folder)
+   {
+      // attention, base version of OnOpenHere() will DecRef() the folder, so
+      // compensate for it
+      SafeIncRef(folder);
+      wxFolderTree::OnOpenHere(folder);
+      m_frame->OpenFolder(folder);
+   }
 
 private:
    wxMainFrame *m_frame;
