@@ -1856,7 +1856,9 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
    fd.Set(settings);
    filter->Set(fd);
 
-   m_folder->AddFilter(name);
+   // add it to the beginning of the filter list as it should override any
+   // other (presumably more generic) filters
+   m_folder->PrependFilter(name);
 
    return true;
 }

@@ -142,6 +142,7 @@ public:
 
    virtual wxArrayString GetFilters() const { return wxArrayString(); }
    virtual void SetFilters(const wxArrayString& /* filters */) { }
+   virtual void PrependFilter(const String& /* filter */) { }
    virtual void AddFilter(const String& /* filter */) { }
    virtual void RemoveFilter(const String& /* filter */) { }
 
@@ -238,6 +239,7 @@ public:
 
    virtual wxArrayString GetFilters() const;
    virtual void SetFilters(const wxArrayString& filters);
+   virtual void PrependFilter(const String& filter);
    virtual void AddFilter(const String& filter);
    virtual void RemoveFilter(const String& filter);
 
@@ -758,6 +760,17 @@ wxArrayString MFolderFromProfile::GetFilters() const
 void MFolderFromProfile::SetFilters(const wxArrayString& filters)
 {
    m_profile->writeEntry(MP_FOLDER_FILTERS, strutil_flatten_array(filters, ':'));
+}
+
+void MFolderFromProfile::PrependFilter(const String& filter)
+{
+   String filters = filter;
+
+   String filtersOld = READ_CONFIG(m_profile, MP_FOLDER_FILTERS);
+   if ( !filtersOld.empty() )
+      filters += ':';
+
+   m_profile->writeEntry(MP_FOLDER_FILTERS, filters + filtersOld);
 }
 
 void MFolderFromProfile::AddFilter(const String& filter)

@@ -181,6 +181,8 @@ public:
       /// set the filters (this replaces the old value)
    virtual void SetFilters(const wxArrayString& filters) = 0;
 
+      /// adds a filter to the start of the filter list
+   virtual void PrependFilter(const String& filter) = 0;
       /// adds a filter without changing the other ones
    virtual void AddFilter(const String& filter) = 0;
       /// remove a filter without changing the other ones
