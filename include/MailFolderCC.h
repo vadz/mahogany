@@ -325,14 +325,6 @@ private:
 
    //@}
 
-   /** @name Mailbox update helpers */
-   //@{
-
-   /// call to notify everybody that some messages were expunged
-   void RequestUpdateAfterExpunge();
-
-   //@}
-
    /** @name Message counting */
    //@{
    /// perform the search, return number of messages found
@@ -409,9 +401,6 @@ private:
    void UpdateAfterAppend();
 
    virtual void ReadConfig(MailFolderCmn::MFCmnOptions& config);
-
-   /// clear m_expungedMsgnos and m_expungedPositions arrays
-   void DiscardExpungeData();
 
    /// fill mailstatus with the results of c-client mail_status() call
    static bool DoCheckStatus(const MFolder *folder,
@@ -521,42 +510,6 @@ private:
      should be used with extreme care to avoid possible c-client reentrancies!
     */
    bool m_gotUnprocessedNewMail;
-
-   /**
-     These two arrays are used between the moment when we get the expunge
-     notification and until the moment we can send the notification about it
-     to the GUI.
-
-     We need both msgnos and positions because by the time GUI code gets our
-     notification, the header listing doesn't have the items corresponding to
-     the expunged msgnos (they were expunged!) and so can't be asked for the
-     positions of these msgnos but the GUI needs them.
-    */
-   //@{
-
-   /// the array containing indices of expunged messages or NULL
-   wxArrayInt *m_expungedMsgnos;
-
-   /// the array containing the positions of expunged messages or NULL
-   wxArrayInt *m_expungedPositions;
-
-   //@}
-
-   /**
-     The elements are added to these arrays from mm_flags() handler
-     (i.e. UpdateMessageStatus()) and they are cleared later in
-     OnMsgStatusChanged()
-    */
-   //@{
-
-   /// the array containing the msgnos of the messages whose status changed
-   wxArrayInt *m_statusChangedMsgnos;
-
-   /// the arrays containing the old and new status of these messages
-   wxArrayInt *m_statusChangedOld,
-              *m_statusChangedNew;
-
-   //@}
 
    /** If we are searching, this points to an UIdArray where to store
        the entries found.

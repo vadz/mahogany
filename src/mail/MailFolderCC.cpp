@@ -1702,9 +1702,6 @@ void MailFolderCC::Init()
       }
    }
 
-   m_expungedMsgnos =
-   m_expungedPositions = NULL;
-
    m_gotUnprocessedNewMail =
    m_InCritical = false;
 
@@ -1726,18 +1723,6 @@ MailFolderCC::~MailFolderCC()
       FAIL_MSG( "m_SearchMessagesFound unexpectedly != NULL" );
 
       delete m_SearchMessagesFound;
-   }
-
-   // normally this one should be deleted as well but POP3 server never sends
-   // us mm_expunged() (well, because it never expunges the messages until we
-   // close the folder but by this time the notifications are blocked) so in
-   // this case it may be left lying around
-   if ( m_expungedMsgnos )
-   {
-      FAIL_MSG( "m_expungedMsgnos unexpectedly != NULL" );
-
-      delete m_expungedMsgnos;
-      delete m_expungedPositions;
    }
 
    m_Profile->DecRef();
@@ -2335,21 +2320,6 @@ MailFolderCC::Open(OpenMode openmode)
 // ----------------------------------------------------------------------------
 // MailFolderCC closing
 // ----------------------------------------------------------------------------
-
-void MailFolderCC::DiscardExpungeData()
-{
-   if ( m_expungedMsgnos )
-   {
-      // harmless but not supposed to happen
-      ASSERT_MSG( m_expungedPositions, "can't be NULL if m_expungedMsgnos!" );
-
-      delete m_expungedMsgnos;
-      delete m_expungedPositions;
-
-      m_expungedMsgnos = NULL;
-      m_expungedPositions = NULL;
-   }
-}
 
 void
 MailFolderCC::Close()
@@ -3202,9 +3172,9 @@ MailFolderCC::ExpungeMessages(void)
 
       // for some types of folders (IMAP) mm_exists() is called from
       // mail_expunge() but for the others (POP) it isn't and we have to call
-      // it ourselves: check is based on the fact that m_expungedMsgnos is
+      // it ourselves: check is based on the fact that m_expungeData is
       // reset in mm_exists handler
-      if ( m_expungedMsgnos )
+      if ( m_expungeData )
       {
          RequestUpdateAfterExpunge();
       }
@@ -4320,47 +4290,6 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
 // MailFolderCC notification sending
 // ----------------------------------------------------------------------------
 
-void MailFolderCC::RequestUpdateAfterExpunge()
-{
-   CHECK_RET( m_expungedMsgnos, "shouldn't be called if we didn't expunge" );
-
-   // FIXME: we ignore IsUpdateSuspended() here, should we? and if not,
-   //        what to do?
-
-   // we can update the status faster here as we have decremented the
-   // number of recent/unseen/... when the messages were deleted (before
-   // being expunged), so we just have to update the total now
-   //
-   // NB: although this has all chances to break down with manual expunge
-   //     or even with automatic one due to race condition (if the
-   //     message status changed from outside...) - but this is so much
-   //     faster and the problem is not really fatal that I still prefer
-   //     to do it like this
-   MailFolderStatus status;
-   MfStatusCache *mfStatusCache = MfStatusCache::Get();
-   if ( mfStatusCache->GetStatus(GetName(), &status) )
-   {
-      // caller is supposed to check for this!
-      CHECK_RET( m_MailStream, "UpdateStatusAfterExpunge(): dead stream" );
-
-      status.total = m_MailStream->nmsgs;
-
-      mfStatusCache->UpdateStatus(GetName(), status);
-   }
-
-   // tell GUI to update
-   wxLogTrace(TRACE_MF_EVENTS, "Sending FolderExpunged event for folder '%s'",
-              GetName().c_str());
-
-   MEventManager::Send(new MEventFolderExpungeData(this,
-                                                   m_expungedMsgnos,
-                                                   m_expungedPositions));
-
-   // MEventFolderExpungeData() will delete them
-   m_expungedMsgnos =
-   m_expungedPositions = NULL;
-}
-
 void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
 {
    // NB: use stream and not m_MailStream because the latter might not be set
@@ -4412,8 +4341,8 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
             // call to c-client if we use server side sorting and/or threading
             m_gotUnprocessedNewMail = true;
 
-            // NB: if we have m_expungedMsgnos, leave them for now and don't
-            //     discard them as we used to do because if all new mail is
+            // NB: if we have m_expungeData, leave it for now and don't
+            //     discard it as we used to do because if all new mail is
             //     filtered away, we'd still have to notify the GUI about these
             //     expunged messages
 
@@ -4446,7 +4375,7 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
    else // same number of messages
    {
       // anything expunged?
-      if ( m_expungedMsgnos )
+      if ( m_expungeData )
       {
          RequestUpdateAfterExpunge();
       }
@@ -4478,18 +4407,17 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
             // don't do it right now but wait until mm_exists() which is sent
             // after all mm_expunged() as it is much faster to delete all
             // messages at once instead of one at a time
-            if ( !m_expungedMsgnos )
+            if ( !m_expungeData )
             {
                // create new arrays
-               m_expungedMsgnos = new wxArrayInt;
-               m_expungedPositions = new wxArrayInt;
+               m_expungeData = new ExpungeData;
             }
 
             // add the msgno to the list of expunged messages
-            m_expungedMsgnos->Add(msgno);
+            m_expungeData->msgnos.Add(msgno);
 
             // and remember its position as well
-            m_expungedPositions->Add(m_headers->GetPosFromIdx(idx));
+            m_expungeData->positions.Add(m_headers->GetPosFromIdx(idx));
          }
 
          wxLogTrace(TRACE_MF_EVENTS, "Removing msgno %u from headers", (unsigned int)msgno);
@@ -4627,7 +4555,7 @@ void MailFolderCC::OnNewMail()
    else // no new mail
    {
       // we might want to notify about the delayed message expunging
-      if ( m_expungedMsgnos )
+      if ( m_expungeData )
       {
          RequestUpdateAfterExpunge();
       }

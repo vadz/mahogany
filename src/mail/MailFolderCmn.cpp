@@ -612,6 +612,7 @@ MailFolderCmn::MailFolderCmn()
    m_frame = NULL;
 
    m_statusChangeData = NULL;
+   m_expungeData = NULL;
 
    m_MEventReceiver = new MfCmnEventReceiver(this);
 }
@@ -628,6 +629,15 @@ MailFolderCmn::~MailFolderCmn()
 
       delete m_statusChangeData;
    }
+
+   // normally this one should be deleted as well
+   if ( m_expungeData )
+   {
+      FAIL_MSG( "m_expungeData unexpectedly != NULL" );
+
+      delete m_expungeData;
+   }
+
 
    delete m_Timer;
    delete m_MEventReceiver;
@@ -2191,6 +2201,58 @@ MailFolderCmn::SendMsgStatusChangeEvent()
 
    // MEventMsgStatusData will delete them
    m_statusChangeData = NULL;
+}
+
+// ----------------------------------------------------------------------------
+// MailFolderCmn expunge data
+// ----------------------------------------------------------------------------
+
+void MailFolderCmn::DiscardExpungeData()
+{
+   if ( m_expungeData )
+   {
+      delete m_expungeData;
+
+      m_expungeData = NULL;
+   }
+}
+
+void MailFolderCmn::RequestUpdateAfterExpunge()
+{
+   CHECK_RET( m_expungeData, "shouldn't be called if we didn't expunge" );
+
+   // FIXME: we ignore IsUpdateSuspended() here, should we? and if not,
+   //        what to do?
+
+   // we can update the status faster here as we have decremented the
+   // number of recent/unseen/... when the messages were deleted (before
+   // being expunged), so we just have to update the total now
+   //
+   // NB: although this has all chances to break down with manual expunge
+   //     or even with automatic one due to race condition (if the
+   //     message status changed from outside...) - but this is so much
+   //     faster and the problem is not really fatal that I still prefer
+   //     to do it like this
+   MailFolderStatus status;
+   MfStatusCache *mfStatusCache = MfStatusCache::Get();
+   if ( mfStatusCache->GetStatus(GetName(), &status) )
+   {
+      // caller is supposed to check for this!
+      CHECK_RET( IsOpened(), "RequestUpdateAfterExpunge(): closed folder?" );
+
+      status.total = GetMessageCount();
+
+      mfStatusCache->UpdateStatus(GetName(), status);
+   }
+
+   // tell GUI to update
+   wxLogTrace(TRACE_MF_EVENTS, "Sending FolderExpunged event for folder '%s'",
+              GetName().c_str());
+
+   MEventManager::Send(new MEventFolderExpungeData(this, m_expungeData));
+
+   // MEventFolderExpungeData() will delete the data
+   m_expungeData = NULL;
 }
 
 // ----------------------------------------------------------------------------

@@ -158,40 +158,48 @@ public:
 };
 
 /**
+  This struct contains the information used by MEventFolderExpungeData
+ */
+struct ExpungeData
+{
+   /// the msgnos which have been expunged from the folder
+   wxArrayInt msgnos;
+
+   /// the positions (on screen) of the expunged messages
+   wxArrayInt positions;
+};
+
+/**
    MEventFolderExpungeData: notifies about message expunge
  */
 class MEventFolderExpungeData : public MEventWithFolderData
 {
 public:
-   /// ctor takes the array of deleted msgnos which will be deleted by us
+   /// ctor takes ownership of the pointer passed to it and will delete it
    MEventFolderExpungeData(MailFolder *folder,
-                           wxArrayInt *delMsgnos,
-                           wxArrayInt *delPositions)
+                           ExpungeData *expungeData)
       : MEventWithFolderData(MEventId_FolderExpunge, folder)
       {
-         m_delMsgnos = delMsgnos;
-         m_delPositions = delPositions;
+         m_expungeData = expungeData;
       }
 
-   /// free msgno array
+   /// dtors frees the data
    virtual ~MEventFolderExpungeData()
    {
-      delete m_delMsgnos;
-      delete m_delPositions;
+      delete m_expungeData;
    }
 
    /// return the number of messages deleted
-   size_t GetCount() const { return m_delMsgnos ? m_delMsgnos->GetCount() : 0; }
+   size_t GetCount() const { return m_expungeData->msgnos.GetCount(); }
 
    /// return the msgno of n-th deleted item
-   size_t GetItem(size_t n) const { return m_delMsgnos->Item(n); }
+   size_t GetItem(size_t n) const { return m_expungeData->msgnos[n]; }
 
    /// return the position in the listing of the n-th deleted item
-   size_t GetItemPos(size_t n) const { return m_delPositions->Item(n); }
+   size_t GetItemPos(size_t n) const { return m_expungeData->positions[n]; }
 
 private:
-   wxArrayInt *m_delMsgnos,
-              *m_delPositions;
+   ExpungeData *m_expungeData;
 };
 
 /**

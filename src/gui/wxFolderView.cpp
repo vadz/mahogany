@@ -812,6 +812,9 @@ public:
 // private functions
 // ----------------------------------------------------------------------------
 
+static
+bool ShowSearchResults(MailFolder *mf, const UIdArray& uids, wxFrame *frame);
+
 // return the n-th shown column (WXFLC_NONE if no more columns)
 static wxFolderListColumn GetColumnByIndex(const int *columns, size_t n)
 {
@@ -4800,7 +4803,6 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
       switch ( result->GetOperation() )
       {
          case ASMailFolder::Op_SearchMessages:
-            ASSERT(result->GetSequence());
             if( ok )
             {
                UIdArray *uidsMatching = result->GetSequence();
@@ -4810,40 +4812,16 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                   break;
                }
 
-               unsigned long count = uidsMatching->Count();
+               MailFolder_obj mf = GetMailFolder();
+               ShowSearchResults(mf, *uidsMatching, m_Frame);
 
-               wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
-
-               /*
-                  The returned message numbers are UIds which we must map
-                  to our listctrl indices via the current HeaderInfo
-                  structure.
-
-                  VZ: I wonder why do we jump through all these hops - we might
-                      return msgnos from search directly... (FIXME)
-                */
-               HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-               for ( unsigned long n = 0; n < uidsMatching->Count(); n++ )
-               {
-                  UIdType idx = hil->GetIdxFromUId((*uidsMatching)[n]);
-                  if ( idx != UID_ILLEGAL )
-                  {
-                     m_FolderCtrl->Select(hil->GetPosFromIdx(idx));
-                  }
-                  else
-                  {
-                     FAIL_MSG( "found inexistent message??" );
-                  }
-               }
-
-               msg.Printf(_("Found %lu messages."), count);
+               wxLogStatus(m_Frame, _("Found %lu messages."),
+                           uidsMatching->GetCount());
             }
             else
             {
-               msg.Printf(_("No matching messages found."));
+               wxLogWarning(_("No matching messages found."));
             }
-
-            wxLogStatus(m_Frame, msg);
             break;
 
          case ASMailFolder::Op_GetMessage:
@@ -5053,6 +5031,40 @@ Profile *wxFolderViewFrame::GetFolderProfile(void) const
 // ----------------------------------------------------------------------------
 // other public functions (from include/FolderView.h)
 // ----------------------------------------------------------------------------
+
+static
+bool ShowSearchResults(MailFolder *mf, const UIdArray& uids, wxFrame *frame)
+{
+   MFolder_obj folder = MFolder::CreateTemp
+                        (
+                           "virtual",
+                           "Search results",
+                           MF_FILE,
+                           mf->GetProfile()
+                        );
+   if ( !folder )
+      return false;
+
+   MailFolder_obj mfVirt = MailFolder::OpenFolder(folder);
+   if ( !mfVirt )
+      return false;
+
+   HeaderInfoList_obj hil = mf->GetHeaders();
+   if ( !hil )
+      return false;
+
+   size_t count = uids.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      Message_obj message = mf->GetMessage(uids[n]);
+      if ( message )
+      {
+         mfVirt->AppendMessage(*message.Get());
+      }
+   }
+
+   return OpenFolderViewFrame(folder, frame);
+}
 
 bool OpenFolderViewFrame(MFolder *folder,
                          wxWindow *parent,

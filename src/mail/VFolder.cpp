@@ -288,10 +288,28 @@ void MailFolderVirt::DeleteMsg(MsgCookie& cookie)
 {
    CHECK_RET( cookie < GetMsgCount(), "invalid UID in MailFolderVirt" );
 
+   CHECK_RET( m_headers, "no HeaderInfoList in MailFolderVirt::DeleteMsg()?" );
+
+   // collect the information about the expunged messages to notify the GUI
+   // about them later
+   if ( !m_expungeData )
+   {
+      m_expungeData = new ExpungeData;
+   }
+
+   // the cookie already contains the index of the next item so normally we
+   // should decrement it but it's already ok as msgno, so use it first and
+   // decrement later to make it the correct index
+   m_expungeData->msgnos.Add(cookie--);
+   m_expungeData->positions.Add(m_headers->GetPosFromIdx(cookie));
+
+   // also let the headers object know that this header doesn't exist any more
+   m_headers->OnRemove(cookie);
+
+   // finally, really delete the message
    delete m_messages[cookie];
 
-   // the indices are now shifted, so modify the cookie
-   m_messages.RemoveAt(cookie--);
+   m_messages.RemoveAt(cookie);
 }
 
 void MailFolderVirt::ClearMsgs()
@@ -335,30 +353,27 @@ MailFolderVirt::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
       if ( !msg )
          break;
 
-      Sequence subseq;
-      subseq.Add(msg->mf->GetMsgnoFromUID(msg->uid));
+      HeaderInfoList_obj hil = msg->mf->GetHeaders();
 
-      // we rely on the fact that headers array contains pointers to HeaderInfo
-      // objects so we can fill them by passing the same pointer to
-      // GetHeaderInfo()
-      HeaderInfo * const hi = headers[count++];
-
-      ArrayHeaderInfo subhdrs;
-      subhdrs.Add(hi);
-
-      if ( msg->mf->GetHeaderInfo(subhdrs, subseq) )
+      HeaderInfo * const hiDst = headers[count++];
+      const HeaderInfo * const hiSrc = hil->GetEntryUId(msg->uid);
+      if ( !hiSrc )
       {
-         // override some fields
-
-         // UID must refer to this folder, not the other one (notice that count
-         // is already incremented, as it should be -- UIDs == msgnos start
-         // from 1, not 0)
-         hi->m_UId = count;
-
-         // and we maintain our own, independent flags
-         hi->m_Status = msg->flags;
+         FAIL_MSG( "failed to get header info in virtual folder" );
+         break;
       }
-      //else: what to do on failure? (FIXME)
+
+      *hiDst = *hiSrc;
+
+      // override some fields:
+
+      // UID must refer to this folder, not the other one (notice that count
+      // is already incremented, as it should be -- UIDs == msgnos start
+      // from 1, not 0)
+      hiDst->m_UId = count;
+
+      // and we maintain our own, independent flags
+      hiDst->m_Status = msg->flags;
    }
 
    return count;
@@ -602,6 +617,11 @@ void MailFolderVirt::ExpungeMessages()
       {
          DeleteMsg(cookie);
       }
+   }
+
+   if ( m_expungeData )
+   {
+      RequestUpdateAfterExpunge();
    }
 }
 

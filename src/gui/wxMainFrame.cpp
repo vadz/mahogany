@@ -57,10 +57,6 @@
 
 #include "MModule.h"
 
-#ifdef DEBUG
-   #include "HeaderInfo.h"
-#endif
-
 // define this for future, less broken versions of wxWindows to dynamically
 // insert/remove the message menu depending on whether we have or not a folder
 // view in the frame - with current wxGTK it doesn't work at all, so disabling
@@ -74,8 +70,7 @@
 
 enum
 {
-   WXMENU_DEBUG_WIZARD = WXMENU_DEBUG_BEGIN + 1,
-   WXMENU_DEBUG_SHOWVFOLDER,
+   WXMENU_DEBUG_WIZARD = WXMENU_DEBUG_BEGIN + 1
 };
 
 #endif // DEBUG
@@ -280,7 +275,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #ifdef DEBUG
    wxMenu *menuDebug = new wxMenu;
    menuDebug->Append(WXMENU_DEBUG_WIZARD, "Run install &wizard...");
-   menuDebug->Append(WXMENU_DEBUG_SHOWVFOLDER, "Show test &virtual folder");
    GetMenuBar()->Append(menuDebug, "&Debug");
 #endif // debug
 
@@ -699,46 +693,6 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
             wxLogMessage("Wizard returned %s",
                           RunInstallWizard() ? "true" : "false");
-            break;
-
-         case WXMENU_DEBUG_SHOWVFOLDER:
-            if ( m_FolderView )
-            {
-               MailFolder_obj mf(m_FolderView->GetMailFolder());
-               if ( mf )
-               {
-                  MFolder_obj folder = MFolder::CreateTemp
-                                       (
-                                          "virtual",
-                                          "Search results",
-                                          MF_FILE,
-                                          mf->GetProfile()
-                                       );
-                  if ( folder )
-                  {
-                     MailFolder_obj vf = MailFolder::OpenFolder(folder);
-                     if ( vf )
-                     {
-                        HeaderInfoList_obj hil = mf->GetHeaders();
-                        if ( hil )
-                        {
-                           const HeaderInfo *hi = hil[0];
-                           if ( hi )
-                           {
-                              Message_obj message = mf->GetMessage(hi->GetUId());
-
-                              if ( message )
-                              {
-                                 vf->AppendMessage(*message.Get());
-
-                                 OpenFolderViewFrame(folder, this);
-                              }
-                           }
-                        }
-                     }
-                  }
-               }
-            }
             break;
 
          default:

@@ -206,6 +206,17 @@ protected:
    */
    void SendMsgStatusChangeEvent();
 
+   /**
+     Send the message notifying the GUI about the messages which have been
+     expunged (uses m_expungeData)
+   */
+   void RequestUpdateAfterExpunge();
+
+   /**
+     Delete m_expungeData and reset the pointer to NULL.
+    */
+   void DiscardExpungeData();
+
    /** @name Config management */
    //@{
    struct MFCmnOptions
@@ -260,8 +271,32 @@ protected:
    /// a timer to update information
    class MailFolderTimer *m_Timer;
 
-   /// struct used by SendMsgStatusChangeEvent()
+   /** @name Mail folder events data */
+   //@{
+
+   /**
+     The two arrays inside m_expungeData are used between the moment when we
+     get the expunge notification and until the moment we can send the
+     notification about it to the GUI.
+
+     We need both msgnos and positions because by the time GUI code gets our
+     notification, the header listing doesn't have the items corresponding to
+     the expunged msgnos (they were expunged!) and so can't be asked for the
+     positions of these msgnos but the GUI needs them.
+    */
+   ExpungeData *m_expungeData;
+
+   /**
+     The elements are added to these arrays when the messages status changes
+     (e.g. from mm_flags() in MailFolderCC) and then, during the next event
+     loop iteration, SendMsgStatusChangeEvent() is called to notify the GUI
+     code about all the changes at once.
+
+     Outside of this time window this pointer is always NULL.
+    */
    StatusChangeData *m_statusChangeData;
+
+   //@}
 
 private:
    /**
