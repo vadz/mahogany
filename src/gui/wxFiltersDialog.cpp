@@ -2316,7 +2316,7 @@ void wxQuickFilterDialog::AddTest(MFDialogSettings **settings,
       if ( !*settings )
          *settings = MFDialogSettings::Create();
       else
-         *name << ' ';
+         *name << _(" and ");
 
       (*settings)->AddTest(ORC_L_And, false /* not inverted */,
                            ORC_T_Contains, where[which], text);
