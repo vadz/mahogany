@@ -282,6 +282,42 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// FIXME: this duplicates the code in Singature.cpp and Trailer.cpp
+//        and should somehow be shared (but it is also used incorrectly
+//        here, i.e. we don't detect signature starting from the end...)
+bool DoesSignatureStartHere(const wxChar *cptr)
+{
+   bool isSig = false;
+
+   // hard coded detection for standard signature separator "--"
+   // and the mailing list trailer "____...___"
+   if ( cptr[0] == '-' && cptr[1] == '-' )
+   {
+      // there may be an optional space after "--" (in fact the
+      // space should be there but some people don't put it)
+      const wxChar *p = cptr + 2;
+      if ( IsEndOfLine(p) || (*p == ' ' && IsEndOfLine(p + 1)) )
+      {
+         // looks like the start of the sig
+         isSig = true;
+      }
+   }
+   else if ( cptr[0] == '_' )
+   {
+      const wxChar *p = cptr + 1;
+      while ( *p == '_' )
+         p++;
+
+      // arbitrarily consider that there should be at least 40 underscores...
+      if ( IsEndOfLine(p) && p - cptr >= 40 )
+      {
+         // looks like the mailing list trailer
+         isSig = true;
+      }
+   }
+
+   return isSig;
+}
 
 // ============================================================================
 // implementation
@@ -623,14 +659,11 @@ void FormattedParagraph::FindSignature()
 {
    int count = m_control->GetNumberOfLines();
 
-   DetectSignature detector;
-   detector.Initialize(m_profile);
-
-   for(m_signature = 0; m_signature < count; ++m_signature)
+   for ( m_signature = 0; m_signature < count; ++m_signature )
    {
       String line = m_control->GetLineText(m_signature);
       line += '\n';
-      if( detector.StartsHere(line.c_str()) )
+      if ( DoesSignatureStartHere(line) )
          break;
    }
 }
