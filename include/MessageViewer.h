@@ -72,6 +72,9 @@ public:
    /// find the same string again (i.e. resume search)
    virtual void FindAgain() = 0;
 
+   /// return the selection
+   virtual String GetSelection() const = 0;
+
    /// copy selection to clipboard
    virtual void Copy() = 0;
 

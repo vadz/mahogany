@@ -498,6 +498,8 @@ enum MFolderIndex
 #endif
 /// include the original message in the reply [no,ask,yes]
 #define MP_REPLY_QUOTE_ORIG "ReplyQuoteInsert" 
+/// include only the selected text (if any) in the reply?
+#define MP_REPLY_QUOTE_SELECTION "ReplyQuoteSelection"
 
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE   "UseXFaces"
@@ -1212,6 +1214,8 @@ enum MFolderIndex
 #endif
 /// include the original message in the reply [no,ask,yes]
 #define MP_REPLY_QUOTE_ORIG_D M_ACTION_ALWAYS
+/// include only the selected text (if any) in the reply?
+#define MP_REPLY_QUOTE_SELECTION_D true
 
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE_D   1

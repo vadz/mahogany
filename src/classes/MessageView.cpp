@@ -217,6 +217,7 @@ public:
 
    virtual void Find(const String& text) { }
    virtual void FindAgain() { }
+   virtual String GetSelection() const { return ""; }
    virtual void Copy() { }
    virtual bool Print() { return false; }
    virtual void PrintPreview() { }
@@ -2658,6 +2659,15 @@ MessageView::DoShowMessage(Message *mailMessage)
    }
 
    Update();
+}
+
+// ----------------------------------------------------------------------------
+// selection
+// ----------------------------------------------------------------------------
+
+String MessageView::GetSelection() const
+{
+   return m_viewer->GetSelection();
 }
 
 // ----------------------------------------------------------------------------

@@ -62,6 +62,7 @@ public:
    // operations
    virtual void Find(const String& text);
    virtual void FindAgain();
+   virtual String GetSelection() const;
    virtual void Copy();
    virtual bool Print();
    virtual void PrintPreview();
@@ -368,6 +369,40 @@ void LayoutViewer::FindAgain()
 void LayoutViewer::Copy()
 {
    m_window->Copy();
+}
+
+String LayoutViewer::GetSelection() const
+{
+   String sel;
+
+   wxLayoutList *llist = m_window->GetLayoutList();
+   if ( llist->HasSelection() )
+   {
+      wxLayoutList *llistSel = llist->GetSelection(NULL, false);
+
+      wxLayoutExportStatus status(llistSel);
+      wxLayoutExportObject *exp;
+      while( (exp = wxLayoutExport(&status)) != NULL )
+      {
+         switch ( exp->type )
+         {
+            case WXLO_EXPORT_TEXT:
+               sel += *exp->content.text;
+               break;
+
+            case WXLO_EXPORT_EMPTYLINE:
+               sel += "\n";
+               break;
+
+            default:
+               FAIL_MSG( "unexpected wxLayoutExport result" );
+         }
+      }
+
+      delete llistSel;
+   }
+
+   return sel;
 }
 
 // ----------------------------------------------------------------------------

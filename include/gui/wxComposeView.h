@@ -87,7 +87,7 @@ public:
 
        @param msg the message we're replying to or forwarding
     */
-   void InitText(Message *msg = NULL);
+   void InitText(Message *msg = NULL, MessageView *msgview = NULL);
 
    /** insert a file into buffer
        @param filename file to insert
@@ -229,7 +229,7 @@ protected:
    void DoClear();
 
    /// InitText() helper
-   void DoInitText(Message *msg);
+   void DoInitText(Message *msg, MessageView *msgview = NULL);
 
    /// set the message encoding to be equal to the encoding of this msg
    void SetEncodingToSameAs(Message *msg);
@@ -419,7 +419,8 @@ private:
 extern bool ExpandTemplate(Composer& cv,
                            Profile *profile,
                            const String& templateValue,
-                           Message *msgOriginal);
+                           Message *msgOriginal,
+                           MessageView *msgview = NULL);
 
 #endif // WXCOMPOSEVIEW_H
 

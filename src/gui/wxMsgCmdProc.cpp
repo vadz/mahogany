@@ -461,8 +461,9 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
 
       case WXMENU_MSG_REPLY:
       case WXMENU_MSG_FOLLOWUP:
-         if ( templ != MessageTemplate_None )
          {
+            bool followUp = cmd == WXMENU_MSG_FOLLOWUP; // otherwise reply
+
             int quoteRule = READ_CONFIG(m_asmf->GetProfile(),
                                         MP_REPLY_QUOTE_ORIG);
 
@@ -471,8 +472,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
                String msg;
                msg.Printf(_("Do you want to include the original message "
                             "text in your %s?"),
-                          cmd == WXMENU_MSG_FOLLOWUP ? _("follow up")
-                                                     : _("reply"));
+                          followUp ? _("follow up") : _("reply"));
 
                if ( !MDialog_YesNoDialog(msg, GetFrame()) )
                {
@@ -488,27 +488,32 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
                // use the default for it then
                templ = "$cursor";
             }
-         }
 
-         m_TicketList->Add(m_asmf->ReplyMessages
-                                   (
-                                    &messages,
-                                    MailFolder::Params(templ,
-                                       cmd == WXMENU_MSG_FOLLOWUP
-                                          ? MailFolder::REPLY_FOLLOWUP
-                                          : 0),
-                                    GetFrame(),
-                                    this
-                                   )
-                          );
+            MailFolder::Params params(templ,
+                                      followUp ? MailFolder::REPLY_FOLLOWUP
+                                               : 0);
+            params.msgview = m_msgView;
+
+            m_TicketList->Add(m_asmf->ReplyMessages
+                                      (
+                                       &messages,
+                                       params,
+                                       GetFrame(),
+                                       this
+                                      )
+                             );
+         }
          break;
 
       case WXMENU_MSG_FORWARD:
          {
+            MailFolder::Params params(templ);
+            params.msgview = m_msgView;
+
             m_TicketList->Add(m_asmf->ForwardMessages
                                       (
                                        &messages,
-                                       MailFolder::Params(templ),
+                                       params,
                                        GetFrame(),
                                        this
                                       )

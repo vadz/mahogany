@@ -75,6 +75,7 @@ public:
    // operations
    virtual void Find(const String& text);
    virtual void FindAgain();
+   virtual String GetSelection() const;
    virtual void Copy();
    virtual bool Print();
    virtual void PrintPreview();
@@ -414,6 +415,12 @@ void HtmlViewer::FindAgain()
 void HtmlViewer::Copy()
 {
    // TODO
+}
+
+String HtmlViewer::GetSelection() const
+{
+   // TODO
+   return "";
 }
 
 // ----------------------------------------------------------------------------

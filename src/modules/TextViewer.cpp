@@ -59,6 +59,7 @@ public:
    // operations
    virtual void Find(const String& text);
    virtual void FindAgain();
+   virtual String GetSelection() const;
    virtual void Copy();
    virtual bool Print();
    virtual void PrintPreview();
@@ -359,6 +360,20 @@ void TextViewer::FindAgain()
 void TextViewer::Copy()
 {
    m_window->Copy();
+}
+
+String TextViewer::GetSelection() const
+{
+   long from, to;
+   m_window->GetSelection(&from, &to);
+
+   String sel;
+   if ( from < to )
+   {
+      sel = m_window->GetValue().Mid(from, to - from);
+   }
+
+   return sel;
 }
 
 // ----------------------------------------------------------------------------

@@ -17,6 +17,7 @@
 
 class Profile;
 class Message;
+class MessageView;
 class wxComposeView;
 
 // ----------------------------------------------------------------------------
@@ -148,9 +149,13 @@ public:
        The msg parameter may be NULL only for the new messages, messages
        created with CreateReply/FwdMessage require it to be !NULL.
 
+       The msgview parameter allows to include only the selected text in the
+       reply if the user configured the program to behave like this.
+
        @param msg the message we're replying to or forwarding
+       @param msgview the message viewer to query for selection
     */
-   virtual void InitText(Message *msg = NULL) = 0;
+   virtual void InitText(Message *msg = NULL, MessageView *msgview = NULL) = 0;
 
    /** insert a file into buffer
        @param filename file to insert (ask the user if NULL)

@@ -138,6 +138,9 @@ public:
    /// show the print preview of the currently shown message
    void PrintPreview();
 
+   /// return the text selected in the viewer, may be empty
+   String GetSelection() const;
+
    //@}
 
    /** @name Scrolling

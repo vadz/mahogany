@@ -138,6 +138,7 @@ class MFolder;
 class MFrame;
 class MWindow;
 class Message;
+class MessageView;
 class Sequence;
 
 // ----------------------------------------------------------------------------
@@ -272,14 +273,25 @@ public:
       REPLY_FOLLOWUP
    };
 
-   /** the structure containing the parameters for some mail operations */
+   /**
+     The structure containing the parameters for Forward/ReplyMessage(s)
+     methods.
+    */
    struct Params
    {
-      Params(int f = 0) { flags = f; }
-      Params(const String& t, int f = 0) : templ(t) { flags = f; }
+      Params(int f = 0) { Init(f); }
+      Params(const String& t, int f = 0) : templ(t) { Init(f); }
 
-      int flags;        // see Flags enum above
-      String templ;     // the template to use for the new message
+      void Init(int f) { flags = f; msgview = NULL; }
+
+      /// combination of Flags enum above (i.e. 0 or REPLY_FOLLOWUP)
+      int flags;
+
+      /// the template to use for the new message, use default if empty
+      String templ;
+
+      /// msg viewer from which the reply/forward command originated
+      MessageView *msgview;
    };
    //@}
 
@@ -414,20 +426,22 @@ public:
        @param profile environment
        @param parent window for dialog
    */
-   static void ForwardMessage(class Message *msg,
+   static void ForwardMessage(Message *msg,
                               const Params& params,
                               Profile *profile = NULL,
                               MWindow *parent = NULL);
+
    /** Reply to one message.
        @param message message to reply to
        @param params is the Params struct to use
        @param profile environment
        @param parent window for dialog
    */
-   static void ReplyMessage(class Message *msg,
+   static void ReplyMessage(Message *msg,
                             const Params& params,
                             Profile *profile = NULL,
                             MWindow *parent = NULL);
+
    /**@name Subscription management */
    //@{
    /** Subscribe to a given mailbox (related to the

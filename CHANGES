@@ -6,6 +6,7 @@
 Release 0.64 '???' ???, 2001
 -------------------------------------------------------------------------------
 
+12.08.01 VZ: added the option to include the selected text only in reply
 11.08.01 MR: added "quote original text in reply" option (yes/no/ask)
 08.08.01 VZ: added "Zap" (== delete and expunge) command
 03.08.01 VZ: better feedback for dnd, show the target folder name in status bar

@@ -35,6 +35,8 @@
 #include "MDialogs.h"
 #include "Mdefaults.h"
 
+#include "MessageView.h"
+
 #include <wx/confbase.h>      // for wxExpandEnvVars()
 #include <wx/file.h>
 #include <wx/ffile.h>
@@ -233,13 +235,17 @@ public:
    VarExpander(ExpansionSink& sink,
                Composer& cv,
                Profile *profile = NULL,
-               Message *msg = NULL)
+               Message *msg = NULL,
+               MessageView *msgview = NULL)
       : m_sink(sink), m_cv(cv)
    {
       m_profile = profile ? profile : mApplication->GetProfile();
       m_profile->IncRef();
+
       m_msg = msg;
       SafeIncRef(m_msg);
+
+      m_msgview = msgview;
    }
 
    virtual ~VarExpander()
@@ -300,6 +306,9 @@ private:
    // the message used for expansion of variables pertaining to the original
    // message (may be NULL for new messages)
    Message *m_msg;
+
+   // the message viewer we use for querying the selection if necessary
+   MessageView *m_msgview;
 
    // the profile to use for everything (global one by default)
    Profile *m_profile;
@@ -945,35 +954,67 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                }
                //else: name == text, so no reply prefix at all
 
-               // was the last message part a text one?
-               bool lastWasPlainText = false;
+               // do we include everything or just the selection?
 
-               int nParts = m_msg->CountParts();
-               for ( int nPart = 0; nPart < nParts; nPart++ )
+               // first: can we get the selection?
+               bool justSelection = m_msgview != NULL;
+
+               // second: should we use the selection?
+               if ( justSelection &&
+                     !READ_CONFIG(m_profile, MP_REPLY_QUOTE_SELECTION) )
                {
-                  if ( m_msg->GetPartType(nPart) == MimeType::TEXT )
+                  justSelection = false;
+               }
+
+               // third: do we have any selection?
+               if ( justSelection )
+               {
+                  String selection = m_msgview->GetSelection();
+                  if ( selection.empty() )
                   {
-                     // FIXME: we lack propert multipart/alternative support -
-                     //        until we have it we can at least avoid
-                     //        inserting all parts of such messages when
-                     //        replying in the most common case (2 parts:
-                     //        text/plain and text/html)
-                     String mimeType = m_msg->GetPartMimeType(nPart).Lower();
-                     if ( mimeType == "text/html" && lastWasPlainText )
-                     {
-                        // skip it
-                        continue;
-                     }
-
-                     lastWasPlainText = mimeType == "text/plain";
-
-                     ExpandOriginalText(m_msg->GetPartContent(nPart),
-                                        prefix,
-                                        value);
+                     // take everything if no selection
+                     justSelection = false;
                   }
                   else
                   {
-                     lastWasPlainText = false;
+                     // include the selection only in the template expansion
+                     ExpandOriginalText(selection, prefix, value);
+                  }
+               }
+
+               // quote everything
+               if ( !justSelection )
+               {
+                  // was the last message part a text one?
+                  bool lastWasPlainText = false;
+
+                  int nParts = m_msg->CountParts();
+                  for ( int nPart = 0; nPart < nParts; nPart++ )
+                  {
+                     if ( m_msg->GetPartType(nPart) == MimeType::TEXT )
+                     {
+                        // FIXME: we lack propert multipart/alternative support -
+                        //        until we have it we can at least avoid
+                        //        inserting all parts of such messages when
+                        //        replying in the most common case (2 parts:
+                        //        text/plain and text/html)
+                        String mimeType = m_msg->GetPartMimeType(nPart).Lower();
+                        if ( mimeType == "text/html" && lastWasPlainText )
+                        {
+                           // skip it
+                           continue;
+                        }
+
+                        lastWasPlainText = mimeType == "text/plain";
+
+                        ExpandOriginalText(m_msg->GetPartContent(nPart),
+                                           prefix,
+                                           value);
+                     }
+                     else
+                     {
+                        lastWasPlainText = false;
+                     }
                   }
                }
             }
@@ -1251,10 +1292,11 @@ void VarExpander::ExpandOriginalText(const String& text,
 extern bool ExpandTemplate(Composer& cv,
                            Profile *profile,
                            const String& templateValue,
-                           Message *msg)
+                           Message *msg,
+                           MessageView *msgview)
 {
    ExpansionSink sink;
-   VarExpander expander(sink, cv, profile, msg);
+   VarExpander expander(sink, cv, profile, msg, msgview);
    MessageTemplateParser parser(templateValue, _("template"), &expander);
    if ( !parser.Parse(sink) )
    {

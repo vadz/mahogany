@@ -777,7 +777,7 @@ MailFolder::Subscribe(const String &host, FolderType protocol,
 // ----------------------------------------------------------------------------
 
 void
-MailFolder::ReplyMessage(class Message *msg,
+MailFolder::ReplyMessage(Message *msg,
                          const MailFolder::Params& params,
                          Profile *profile,
                          MWindow *parent)
@@ -1034,12 +1034,12 @@ MailFolder::ReplyMessage(class Message *msg,
       cv->AddHeaderEntry("Reply-To", rt);
    }
 
-   cv->InitText(msg);
+   cv->InitText(msg, params.msgview);
 }
 
 /* static */
 void
-MailFolder::ForwardMessage(class Message *msg,
+MailFolder::ForwardMessage(Message *msg,
                            const MailFolder::Params& params,
                            Profile *profile,
                            MWindow *parent)
@@ -1056,7 +1056,7 @@ MailFolder::ForwardMessage(class Message *msg,
    //        encoding as well
    cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX) +
                      DecodeHeader(msg->Subject()));
-   cv->InitText(msg);
+   cv->InitText(msg, params.msgview);
 }
 
 char MailFolder::GetFolderDelimiter() const

@@ -1537,7 +1537,7 @@ String wxComposeView::GetSubject() const
 // ----------------------------------------------------------------------------
 
 void
-wxComposeView::InitText(Message *msg)
+wxComposeView::InitText(Message *msg, MessageView *msgview)
 {
    if ( m_kind == Message_New )
    {
@@ -1571,7 +1571,7 @@ wxComposeView::InitText(Message *msg)
       // replying or forwarding - evaluate the template right now
       CHECK_RET( msg, "no message in InitText" );
 
-      DoInitText(msg);
+      DoInitText(msg, msgview);
    }
 
    // we also use this method to initialize the focus as we can't do it before
@@ -1599,7 +1599,7 @@ wxComposeView::InitText(Message *msg)
 }
 
 void
-wxComposeView::DoInitText(Message *mailmsg)
+wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
 {
    // first append signature - everything else will be inserted before it
    if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
@@ -1747,7 +1747,7 @@ wxComposeView::DoInitText(Message *mailmsg)
       templateChanged = FALSE;
 
       // do parse the template
-      if ( !ExpandTemplate(*this, m_Profile, templateValue, mailmsg) )
+      if ( !ExpandTemplate(*this, m_Profile, templateValue, mailmsg, msgview) )
       {
          // first show any errors which the call to Parse() above could
          // generate
