@@ -1563,6 +1563,10 @@ RelOp(Token t)
       OPERATOR_VALUE(Geq);
       OPERATOR_VALUE(Equal);
       OPERATOR_VALUE(Neq);
+
+      // needed to shut up gcc warnings
+      default:
+         ;
    }
    return NULL;
 }
@@ -1596,6 +1600,10 @@ AddOp(Token t)
    {
       OPERATOR_VALUE(Plus);
       OPERATOR_VALUE(Minus);
+
+      // needed to shut up gcc warnings
+      default:
+         ;
    }
 
    return NULL;
@@ -1612,6 +1620,10 @@ MulOp(Token t)
       OPERATOR_VALUE(Times);
       OPERATOR_VALUE(Divide);
       OPERATOR_VALUE(Mod);
+
+      // needed to shut up gcc warnings
+      default:
+         ;
    }
    return NULL;
 }
