@@ -80,14 +80,18 @@ extern const MOption MP_COMPOSE_CC;
 extern const MOption MP_COMPOSE_TO;
 extern const MOption MP_MSGVIEW_ALL_HEADERS;
 extern const MOption MP_MSGVIEW_HEADERS;
+extern const MOption MP_ORGANIZATION;
 extern const MOption MP_USERLEVEL;
 
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
-/// the prefix for custom headers values
+// the prefix for custom headers values
 #define CUSTOM_HEADERS_PREFIX "CustomHeaders"
+
+// the organization header
+#define ORGANIZATION "Organization"
 
 // prefixes identifying headers of different types
 static const char *gs_customHeaderSubgroups[CustomHeader_Max] =
@@ -1020,6 +1024,9 @@ bool wxCustomHeadersDialog::TransferDataFromWindow()
    String pathBase = CUSTOM_HEADERS_PREFIX;
    pathBase += ':';
 
+   // remember if we have the Organization header among them
+   bool hasOrg = false;
+
    wxArrayString headersFor[CustomHeader_Max];
    String headerName, headerValue;
    int nItems = m_listctrl->GetItemCount();
@@ -1029,11 +1036,28 @@ bool wxCustomHeadersDialog::TransferDataFromWindow()
       GetHeader(nItem, &headerName, &headerValue);
       int type = m_headerTypes[(size_t)nItem];
 
+      // don't write back the default organization header, it is stored in its
+      // own config setting
+      if ( headerName == ORGANIZATION )
+      {
+         hasOrg = true;
+
+         if ( type == CustomHeader_Both )
+         {
+            continue;
+         }
+         //else: keep this one as it has a more restricted type than
+         //      MP_ORGANIZATION and will override it in the future
+      }
+
       // write the corresponding entry
       wxString path;
       path << pathBase << headerName << ':' << gs_customHeaderSubgroups[type];
 
       m_profile->writeEntry(path, headerValue);
+
+      // and remember that we have got some custom headers of this type
+      headersFor[type].Add(headerName);
    }
 
    // finally write the names of the headers to use
@@ -1045,6 +1069,15 @@ bool wxCustomHeadersDialog::TransferDataFromWindow()
          m_profile->writeEntry(pathBase + gs_customHeaderSubgroups[type],
                                strutil_flatten_array(headersFor[type]));
       }
+   }
+
+   // remove the organization header if it hadn't been specified: we must do it
+   // or otherwise deleting this header in the dialog wouldn't work as it is
+   // added to the list of the initial dialog items by GetCustomHeaders()
+   // implicitly
+   if ( !hasOrg )
+   {
+      m_profile->DeleteEntry(MP_ORGANIZATION);
    }
 
    return TRUE;
@@ -1240,6 +1273,20 @@ size_t GetCustomHeaders(Profile *profile,
             if ( types )
                types->Add(type);
          }
+      }
+   }
+
+   // treat the organization field specially - it's the most common custom
+   // header so we have a separate config setting for it
+   if ( names->Index(ORGANIZATION) == wxNOT_FOUND )
+   {
+      String organization = READ_CONFIG(profile, MP_ORGANIZATION);
+      if ( !organization.empty() )
+      {
+         names->Add(ORGANIZATION);
+         values->Add(organization);
+         if ( types )
+            types->Add(CustomHeader_Both);
       }
    }
 

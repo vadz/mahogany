@@ -120,7 +120,10 @@ enum ConfigFields
 {
    // identity
    ConfigField_IdentFirst = -1,
+   ConfigField_IdentHelp,
    ConfigField_PersonalName,
+   ConfigField_Organization,
+   ConfigField_AddressHelp,
    ConfigField_ReturnAddress,
    ConfigField_ReplyAddress,
    ConfigField_HostnameHelp,
@@ -771,14 +774,25 @@ END_EVENT_TABLE()
 const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 {
    // general config and identity
+   { gettext_noop("Your personal name and organization are used only for\n"
+                  "informational purposes and so you may give then any\n"
+                  "values at all or even leave them empty, while the\n"
+                  "user name is used as the default login for the servers\n"
+                  "which require authentification and should be set to\n"
+                  "the value they expect."),       Field_Message, -1 },
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
+   { gettext_noop("&Organization"),                Field_Text,    -1,                        },
+   { gettext_noop("The e-mail address is the value of the \"From:\" header\n"
+                  "while the reply address is used for the \"Reply-To\" one.\n"
+                  "If you don't know whether you should set it, leave the\n"
+                  "reply address empty."),         Field_Message | Field_Advanced, -1 },
    { gettext_noop("&E-mail address"),              Field_Text | Field_Vital,   -1, },
    { gettext_noop("&Reply address"),               Field_Text | Field_Advanced,   -1, },
-   { gettext_noop("The following host name can be used as a default host "
-                  "name for local mail addresses."),
+   { gettext_noop("The following domain name can be used as a default "
+                  "suffix for local mail addresses."),
                                                    Field_Message, -1 },
-   { gettext_noop("&Add this hostname if none specified"), Field_Bool, -1 },
-   { gettext_noop("&Hostname"),                    Field_Text | Field_Vital,   ConfigField_AddDefaultHostname, },
+   { gettext_noop("&Add this suffix if none specified"), Field_Bool, -1 },
+   { gettext_noop("&Domain"),                    Field_Text | Field_Vital,   ConfigField_AddDefaultHostname, },
    { gettext_noop("Reply return address from &To: field"), Field_Bool | Field_Advanced, -1, },
    { gettext_noop(
       "You may want to attach your personal information card (vCard)\n"
@@ -1430,7 +1444,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 {
    // identity
+   CONFIG_NONE(), // ident help
    CONFIG_ENTRY(MP_PERSONALNAME),
+   CONFIG_ENTRY(MP_ORGANIZATION),
+   CONFIG_NONE(), // return address help
    CONFIG_ENTRY(MP_FROM_ADDRESS),
    CONFIG_ENTRY(MP_REPLY_ADDRESS),
    CONFIG_NONE(),

@@ -125,6 +125,7 @@ extern const MOption MP_BBDB_IGNOREANONYMOUS;
 extern const MOption MP_BBDB_ANONYMOUS;
 extern const MOption MP_BBDB_SAVEONEXIT;
 extern const MOption MP_PERSONALNAME;
+extern const MOption MP_ORGANIZATION;
 extern const MOption MP_CURRENT_IDENTITY;
 extern const MOption MP_USERLEVEL;
 extern const MOption MP_USERNAME;
@@ -611,6 +612,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_CURRENT_IDENTITY_NAME  "Identity"
 /// the user's full name
 #define   MP_PERSONALNAME_NAME     "PersonalName"
+/// organization (the "Organization:" header name value)
+#define   MP_ORGANIZATION_NAME     "Organization"
 /// the user's qualification
 #define   MP_USERLEVEL_NAME        "Userlevel"
 /// the username/login
@@ -1355,6 +1358,8 @@ extern const MOption MP_AWAY_STATUS;
 //@}
 /// the user's full name
 #define   MP_PERSONALNAME_DEFVAL      M_EMPTYSTRING
+/// organization (the "Organization:" header name value)
+#define   MP_ORGANIZATION_DEFVAL     M_EMPTYSTRING
 /// the current user identity
 #define   MP_CURRENT_IDENTITY_DEFVAL M_EMPTYSTRING
 /// the user's qualification (see M_USERLEVEL_XXX)

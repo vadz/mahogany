@@ -3,9 +3,10 @@
       Please refer to the cvs update list archives for the even more detailed
       list of all changes.
 
-Release 0.64 'Sparc' ???, 2001
+Release 0.64 'Sparc' January 14, 2002
 -------------------------------------------------------------------------------
 
+13.01.02 VZ: added "Organization" header
 09.01.02 VZ: added "New Mail" page to the create folder wizard
 08.01.02 VZ: added "Leave mail on server" to the insall/folder create wizards
 04.12.01 VZ: added more commands to the folder view header popup menu
