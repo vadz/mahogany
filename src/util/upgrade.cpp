@@ -30,12 +30,20 @@
 #  include "gui/wxMApp.h"  // for wxMApp::GetDialUpManager()
 #endif  //USE_PCH
 
-#  include "Message.h"
-#  include "MailFolder.h"
-#  include "HeaderInfo.h"
-#  include "MailFolderCC.h"
-#  include "SendMessage.h"
-#  include "MessageCC.h"
+// use wizard and not the old (and probably broken) dialog-based code
+#define USE_WIZARD
+
+// define to enable DNS lookup of the server names - disabled for now as it
+// causes too many problems (it may hang for a long time if DNS is not
+// available)
+#undef USE_DNS
+
+#include "Message.h"
+#include "MailFolder.h"
+#include "HeaderInfo.h"
+#include "MailFolderCC.h"
+#include "SendMessage.h"
+#include "MessageCC.h"
 
 #ifdef USE_PYTHON
 #  include <Python.h>
@@ -48,11 +56,12 @@
 #include <wx/log.h>
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
-#include <wx/utils.h>         // wxGetFullHostName()
 #include <wx/dialup.h>        // for IsAlwaysOnline()
-#include <wx/socket.h>        // wxIPv4Address
+#include <wx/utils.h>         // wxGetFullHostName()
 
-#define USE_WIZARD
+#ifdef USE_DNS
+   #include <wx/socket.h>     // wxIPV4address
+#endif // USE_DNS
 
 #ifdef OS_UNIX
    // mail collection from INBOX makes sense only under Unix
@@ -194,6 +203,8 @@ struct InstallWizardData
 // private functions
 // ----------------------------------------------------------------------------
 
+#ifdef USE_DNS
+
 // check the given address for validity
 static bool CheckHostName(const wxString& hostname)
 {
@@ -201,6 +212,8 @@ static bool CheckHostName(const wxString& hostname)
    // discard everything after ':' which is the port number) with DNS
    return hostname.empty() || wxIPV4address().Hostname(hostname.AfterLast(':'));
 }
+
+#endif // USE_DNS
 
 // return the name of the main mail folder
 static wxString GetMainMailFolderName()
@@ -340,14 +353,22 @@ public:
          gs_installWizardData.imap = m_imap->GetValue();
          gs_installWizardData.smtp = m_smtp->GetValue();
          gs_installWizardData.nntp = m_nntp->GetValue();
-         if(gs_installWizardData.smtp.Length() == 0)
+
+         if ( gs_installWizardData.smtp.empty() )
          {
-            // FIXME: they could use an MTA under Unix instead...
+#ifdef OS_UNIX
+            // we could use an MTA under Unix instead...
+            wxLogWarning(_("You will need to specify the MTA to use for "
+                           "mail delivery later to be able to send email "
+                           "as you didn't choose the SMTP server."));
+#else // !Unix
             wxLogError(_("You need to specify the SMTP server to be able "
                          "to send email, please do it!"));
             return FALSE;
+#endif // Unix/!Unix
          }
 
+#ifdef USE_DNS
          // check all the hostnames unless we use dial up - we can't call
          // MApp::IsOnline() here yet because this stuff is not yet
          // configured, so use wxDialUpManager directly
@@ -402,6 +423,7 @@ public:
                   return FALSE;
             }
          }
+#endif // USE_DNS
 
          return TRUE;
       }
@@ -602,7 +624,6 @@ private:
 
 // the function which runs the install wizard
 extern bool RunInstallWizard();
-extern bool VerifyMailConfig(void);
 
 #endif // USE_WIZARD
 
@@ -1120,31 +1141,53 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
                                      ));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
-   wxArrayString labels;
-   labels.Add(_("&Send test message:"));
 
-   long widthMax = GetMaxLabelWidth(labels, panel);
+   // we can only send test message if we have the SMTP server configured
+   if ( !gs_installWizardData.smtp.empty() )
+   {
+      wxArrayString labels;
+      labels.Add(_("&Send test message:"));
 
-   text = panel->CreateMessage(_(
-      "\n"
-      "Finally, you may want to test your configuration\n"
-      "by sending a test message to yourself."
-                                 ), NULL);
-   m_checkboxSendTestMsg = panel->CreateCheckBox(labels[0], widthMax, text);
+      long widthMax = GetMaxLabelWidth(labels, panel);
+
+      text = panel->CreateMessage(_(
+         "\n"
+         "Finally, you may want to test your configuration\n"
+         "by sending a test message to yourself."
+                                    ), NULL);
+      m_checkboxSendTestMsg = panel->CreateCheckBox(labels[0], widthMax, text);
+   }
+   else
+   {
+      String msg = _("\nPlease don't forget to configure SMTP server\n");
+#ifdef OS_UNIX
+      msg += _("(or a MTA for local mail delivery)\n");
+#endif // OS_UNIX
+      msg += _("to be able to send the outgoing messages!");
+
+      text = panel->CreateMessage(msg, NULL);
+
+      m_checkboxSendTestMsg = NULL;
+   }
 
    panel->ForceLayout();
 }
 
 bool InstallWizardFinalPage::TransferDataToWindow()
 {
-   m_checkboxSendTestMsg->SetValue(gs_installWizardData.sendTestMsg);
+   if ( m_checkboxSendTestMsg )
+   {
+      m_checkboxSendTestMsg->SetValue(gs_installWizardData.sendTestMsg);
+   }
 
    return TRUE;
 }
 
 bool InstallWizardFinalPage::TransferDataFromWindow()
 {
-   gs_installWizardData.sendTestMsg = m_checkboxSendTestMsg->GetValue();
+   gs_installWizardData.sendTestMsg = m_checkboxSendTestMsg
+                                       ? m_checkboxSendTestMsg->GetValue()
+                                       : false;
 
    return TRUE;
 }
@@ -1610,7 +1653,9 @@ UpgradeFromNone()
 {
 #ifdef USE_WIZARD // new code which uses the configuration wizard
    (void)RunInstallWizard();
-   if ( gs_installWizardData.sendTestMsg )
+
+   // we can't send email if we don't have SMTP server configured
+   if ( gs_installWizardData.sendTestMsg && !gs_installWizardData.smtp.empty() )
 #else // old code which didn't use the setup wizard
    wxLog *log = wxLog::GetActiveTarget();
    if ( log ) {
@@ -1622,7 +1667,7 @@ UpgradeFromNone()
    ShowOptionsDialog();
 #endif // USE_WIZARD/!USE_WIZARD
    {
-      VerifyMailConfig();
+      VerifyEMailSendingWorks();
    }
 
    return true;
@@ -2404,7 +2449,7 @@ VerifyInbox(void)
 
 
 extern bool
-VerifyMailConfig(void)
+VerifyEMailSendingWorks(void)
 {
    // we send a mail to ourself
    Profile *p = mApplication->GetProfile();

@@ -24,7 +24,7 @@ extern bool Upgrade(const String& fromVersion);
 extern bool SetupInitialConfig(void);
 
 /// Verify whether the mail configuration works, return true on success.
-extern bool VerifyMailConfig(void);
+extern bool VerifyEMailSendingWorks(void);
 
 /// Verify whether the INBOX profile exists, return false if it was created.
 extern bool VerifyInbox(void);

@@ -58,7 +58,7 @@
 #include "gui/wxBrowseButton.h"
 
 #include "MEvent.h"
-#include "Mupgrade.h"      // for VerifyMailConfig()
+#include "Mupgrade.h"      // for VerifyEMailSendingWorks()
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -1300,7 +1300,7 @@ bool wxOptionsEditDialog::OnSettingsChange()
                                true,
                                "OptTestAsk") )
       {
-         if ( !VerifyMailConfig() )
+         if ( !VerifyEMailSendingWorks() )
          {
             return FALSE;
          }

@@ -6,6 +6,7 @@
 Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+19.03.01 VZ: allow to have empty SMTP server for Unix setup
 16.03.01 VZ: more flexible initial msg selection in the folder viewer
              reading newsgroups doesn't crash the program and works somehow
 15.03.01 VZ: added "Synchronize" page to the options dialog
