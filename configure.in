@@ -238,6 +238,7 @@ SEARCH_LIB="`echo "$SEARCH_INCLUDE" | sed s/include/lib/g` \
 SEARCH_LIB="\
     $SEARCH_LIB \
     $PYTHON_PATH \
+    /lib \
 "
 
 AC_CONFIG_HEADER(include/config.h)
