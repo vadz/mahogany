@@ -704,7 +704,7 @@ void HtmlViewer::InsertText(const String& text, const TextStyle& style)
 
 void HtmlViewer::InsertURL(const String& url)
 {
-   m_htmlText << "<a href=\"" << url << "\">" << url << "</a>";
+   m_htmlText << "<a href=\"" << url << "\">" << MakeHtmlSafe(url) << "</a>";
 }
 
 void HtmlViewer::InsertSignature(const String& signature)
