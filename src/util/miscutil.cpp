@@ -27,65 +27,11 @@
 
 #include "Mdefaults.h"
 #include "MailFolder.h"    // UpdateTitleAndStatusBars uses it
+#include "HeaderInfo.h"    // GetAllMessagesSequence
 #include "ASMailFolder.h"
 #include "miscutil.h"
 
 #include <ctype.h>
-
-// helper function to parse a string for foldr status messages
-static String ParseStatusFormat(const String& format,
-                                unsigned long total,
-                                unsigned long recent,
-                                unsigned long newmsgs,
-                                const String& name)
-{
-   String result;
-   const char *start = format.c_str();
-   for ( const char *p = start; *p; p++ )
-   {
-      if ( *p == '%' )
-      {
-         switch ( *++p )
-         {
-            case '\0':
-               wxLogWarning(_("Unexpected end of string in the status format "
-                              "string '%s'."), start);
-               p--; // avoid going beyond the end of string
-               break;
-
-            case 'f':
-               result += name;
-               break;
-
-            case 't':
-               result += wxString::Format("%lu", total);
-               break;
-
-            case 'r':
-               result += wxString::Format("%lu", recent);
-               break;
-
-            case 'n':
-               result += wxString::Format("%lu", newmsgs);
-               break;
-
-            case '%':
-               result += '%';
-               break;
-
-            default:
-               wxLogWarning(_("Unknown macro '%c%c' in the status format "
-                              "string '%s'."), *(p-1), *p, start);
-         }
-      }
-      else // not a format spec
-      {
-         result += *p;
-      }
-   }
-
-   return result;
-}
 
 // show the number of new/unread/total messages in the title and status bars
 void UpdateTitleAndStatusBars(const String& title,
@@ -99,31 +45,34 @@ void UpdateTitleAndStatusBars(const String& title,
    ProfileEnvVarSave disableExpansion(mApplication->GetProfile());
 #endif // Win
 
-   // we could probably optimize this somewhat by only counting the messages if
-   // we need them, but is it worth it?
+   MailFolderStatus mfStatus;
    String folderName = mailFolder->GetName();
-   unsigned long total = mailFolder->CountMessages(),
-      recent =  mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
-                                          MailFolder::MSG_STAT_SEEN,
-                                          MailFolder::MSG_STAT_RECENT |
-                                          MailFolder::MSG_STAT_SEEN),
-      // recent & !seen --> new
-      newmsgs = mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
-                                          MailFolder::MSG_STAT_SEEN,
-                                          MailFolder::MSG_STAT_RECENT);
 
    // contruct the messages
-   wxString titleMsg(title), statusMsg(status);
-   statusMsg += ParseStatusFormat(READ_APPCONFIG(MP_FOLDERSTATUS_STATBAR),
-                                  total, recent, newmsgs, folderName);
-   titleMsg += ParseStatusFormat(READ_APPCONFIG(MP_FOLDERSTATUS_TITLEBAR),
-                                 total, recent, newmsgs, folderName);
+   wxString statusMsg(status);
+   statusMsg += FormatFolderStatusString
+                (
+                 READ_APPCONFIG(MP_FOLDERSTATUS_STATBAR),
+                 folderName,
+                 &mfStatus,
+                 mailFolder
+                );
+
+   wxString titleMsg(title);
+   titleMsg += FormatFolderStatusString
+               (
+                READ_APPCONFIG(MP_FOLDERSTATUS_TITLEBAR),
+                folderName,
+                &mfStatus,
+                mailFolder
+               );
 
    // show them
    frame->SetStatusText(statusMsg);
    frame->SetTitle(titleMsg);
 
-   if ( newmsgs > 0 )
+   // TODO: customize this to show "unread mail" icon!
+   if ( mfStatus.newmsgs > 0 )
       frame->SetIcon( frame == mApplication->TopLevelFrame() ?
                       ICON("MainFrameNewMail") : ICON("MFrameNewMail"));
    else

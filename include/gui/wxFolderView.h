@@ -73,28 +73,25 @@ public:
 
 
    /** Open some messages.
-       @param n number of messages to open
-       @messages pointer to an array holding the message numbers
+       @param messages array holding the message numbers
    */
    void OpenMessages(UIdArray const &messages);
 
    /** Print messages.
-       @param n number of messages to print
-       @messages pointer to an array holding the message numbers
+       @param messages array holding the message numbers
    */
    void PrintMessages(UIdArray const &messages);
 
    /** Print-preview messages.
-       @param n number of messages to print preview
-       @messages pointer to an array holding the message numbers
+       @param message array holding the message numbers
    */
    void PrintPreviewMessages(UIdArray const &messages);
 
    /** For use by the listctrl: get last previewed uid: */
    UIdType GetPreviewUId(void) const { return m_previewUId; }
+
    /** Save messages to a file.
-       @param n number of messages
-       @messages pointer to an array holding the message numbers
+       @param pointer array holding the message numbers
    */
    void SaveMessagesToFile(UIdArray const &messages);
 
@@ -125,6 +122,11 @@ public:
    /** Delete messages
     */
    void DeleteOrTrashMessages(const UIdArray& messages);
+
+   /** Toggle the "flagged" status of the messages.
+       @param pointer to an array holding the message numbers
+   */
+   void ToggleMessages(UIdArray const &messages);
 
    /** Returns false if no items are selected
    */
@@ -185,9 +187,8 @@ public:
 
 protected:
    /** Save messages to a folder.
-       @param n number of messages
+       @param messages array holding the message numbers
        @param file filename
-       @messages pointer to an array holding the message numbers
    */
    void SaveMessages(UIdArray const &messages, String const &file);
 
@@ -268,8 +269,14 @@ private:
       String dateFormat;
       /// TRUE => display time/date in GMT
       bool dateGMT;
-      /// Background and foreground colours
-      wxColour BgCol, FgCol, NewCol, RecentCol, DeletedCol, UnreadCol;
+      /// the folder view control colours
+      wxColour BgCol,         // background (same for all messages)
+               FgCol,         // normal text colour
+               NewCol,        // text colour for new messages
+               FlaggedCol,    //                 flagged
+               RecentCol,     //                 recent
+               DeletedCol,    //                 deleted
+               UnreadCol;     //                 unseen
       /// font attributes
       int font, size;
       /// do we want to preview messages when activated?

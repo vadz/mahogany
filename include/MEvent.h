@@ -187,6 +187,7 @@ private:
 // its index in the folder list
 // ----------------------------------------------------------------------------
 
+class HeaderInfo;
 class MEventMsgStatusData : public MEventWithFolderData
 {
 public:
@@ -199,10 +200,7 @@ public:
          m_index = index;
          m_hi = hi;
       }
-   ~MEventMsgStatusData()
-      {
-         delete m_hi;
-      }
+   ~MEventMsgStatusData();
 
    /// Get the changed header info
    const HeaderInfo *GetHeaderInfo() const { return m_hi; }
@@ -211,8 +209,8 @@ public:
    size_t GetIndex() const { return m_index; }
 
 private:
-   size_t            m_index;
-   class HeaderInfo *m_hi;
+   size_t      m_index;
+   HeaderInfo *m_hi;
 };
 
 // ----------------------------------------------------------------------------

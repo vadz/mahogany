@@ -32,7 +32,7 @@
 #  include "MApplication.h"
 #  include "MPython.h"
 #  include "Mpers.h"
-#  include   <wx/dynarray.h>
+#  include  <wx/dynarray.h>
 #endif   // USE_PCH
 
 #include <errno.h>
@@ -40,6 +40,7 @@
 #include "MFolder.h"
 #include "FolderView.h"
 #include "MailFolder.h"
+#include "HeaderInfo.h"
 #include "MailCollector.h"
 
 #include "gui/wxFolderView.h"

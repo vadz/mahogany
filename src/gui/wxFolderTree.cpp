@@ -109,11 +109,13 @@ WX_DEFINE_OBJARRAY(ArrayOfItemsWithChangedIcon);
 class wxFolderTreeNode : public wxTreeItemData
 {
 public:
+   // the [visible] folder status in the tree: note that the elements must be
+   // ordered from least to the most important
    enum Status
    {
       Folder_Normal,       // normal state
+      Folder_Unseen,       // folder has unread/unseen messages
       Folder_New,          // folder has new messages
-      Folder_Recent,       // folder has recent messages
       Folder_StatusMax
    };
 
@@ -149,10 +151,23 @@ public:
    MFolder          *GetFolder() const { return m_folder; }
    wxFolderTreeNode *GetParent() const { return m_parent; }
 
-      // the folder status
+   // the folder status functions
+
+      // get the current status
    Status GetStatus() const { return m_status; }
+
+      // set the status for this folder - this might not have the expected
+      // effect if the folder has children with status greater than the given
+      // (i.e. a folder with children which have NEW status will have NEW
+      // status even if SetStatus(NORMAL) is called for it)
    void SetStatus(wxTreeCtrl *tree, Status status);
 
+      // get the status induced by children: new if any child has new
+      // status, unseen if any child has unseen status and normal otherwise
+   Status GetChildrenStatus() const;
+
+      // called whenever the status of one of the children changes from
+      // statusOld to statusNew and allows the parent to update its own status
    void OnChildStatusChange(wxTreeCtrl *tree,
                             Status statusOld, Status statusNew);
 
@@ -165,11 +180,13 @@ private:
 
    wxFolderTreeNode *m_parent;   // the parent node (may be NULL)
 
-   // status info: our own status and the number of children with new/recent
-   // messages we have
-   Status m_status;
-   size_t m_countNew,
-          m_countRecent;
+   // status info: our current status, our real own status (i.e. corresponding
+   // to the messages in this folder) and the number of children with
+   // new/unseen messages we have
+   Status m_status,
+          m_statusOwn;
+   size_t m_nNewChildren,
+          m_nUnseenChildren;
 
    bool m_wasExpanded;
 };
@@ -813,9 +830,12 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    m_parent = parent;
    m_folder = folder;
    m_wasExpanded = false;
-   m_status = Folder_Normal;
-   m_countNew =
-   m_countRecent = 0;
+
+   m_status =
+   m_statusOwn = Folder_Normal;
+
+   m_nNewChildren =
+   m_nUnseenChildren = 0;
 
    int image = GetFolderIconForDisplay(folder);
 
@@ -840,6 +860,13 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    }
 }
 
+wxFolderTreeNode::Status wxFolderTreeNode::GetChildrenStatus() const
+{
+   return m_nNewChildren ? Folder_New
+                         : m_nUnseenChildren ? Folder_Unseen
+                                             : Folder_Normal;
+}
+
 void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
                                            Status statusOld, Status statusNew)
 {
@@ -851,35 +878,43 @@ void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
 
    if ( statusOld == Folder_Normal )
    {
+      // one of our children got new mail
       if ( statusNew == Folder_New )
-         m_countNew++;
+         m_nNewChildren++;
       else
-         m_countRecent++;
+         m_nUnseenChildren++;
    }
-   else
+   else // a child lost its new/unseen status
    {
       if ( statusOld == Folder_New )
       {
-         wxASSERT_MSG( m_countNew > 0, "error in status change logic" );
+         wxASSERT_MSG( m_nNewChildren > 0, "error in status change logic" );
 
-         m_countNew--;
+         m_nNewChildren--;
       }
       else
       {
-         wxASSERT_MSG( m_countRecent > 0, "error in status change logic" );
+         wxASSERT_MSG( m_nUnseenChildren > 0, "error in status change logic" );
 
-         m_countRecent--;
+         m_nUnseenChildren--;
       }
    }
 
-   // update our own status if needed
-   SetStatus(tree, m_countNew ? Folder_New
-                              : m_countRecent ? Folder_Recent
-                                              : Folder_Normal);
+   // update our own status
+   SetStatus(tree, GetChildrenStatus());
 }
 
 void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree, Status status)
 {
+   // the status can never become less than our own status nor less than status
+   // of our children: i.e. if we have UNSEEN status and a child with NEW
+   // status, any request to change status will be ignored until the childs
+   // status changes to, say, NORMAL and then SetStatus(NORMAL) will be done
+   // but the status will only change to RECENT then.
+   Status statusMin = wxMin(GetStatus(), GetChildrenStatus());
+   if ( status < statusMin )
+      status = statusMin;
+
    // only do something if the status really changed
    if ( GetStatus() != status )
    {
@@ -887,15 +922,15 @@ void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree, Status status)
       static const char *colorNames[Folder_StatusMax] =
       {
          MP_FVIEW_FGCOLOUR,
-         MP_FVIEW_NEWCOLOUR,
          MP_FVIEW_UNREADCOLOUR,
+         MP_FVIEW_NEWCOLOUR,
       };
 
       static const char *colorDefaults[Folder_StatusMax] =
       {
          MP_FVIEW_FGCOLOUR_D,
-         MP_FVIEW_NEWCOLOUR_D,
          MP_FVIEW_UNREADCOLOUR_D,
+         MP_FVIEW_NEWCOLOUR_D,
       };
 
       wxString colorName = mApplication->GetProfile()
@@ -1691,19 +1726,25 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
       return;
    }
 
-   // change the folder colour depending on whether it has any recent
-   // messages, any new messages or neither at all
+   // change the folder colour depending on whether it has any unread
+   // messages, any new messages (unread and recent) or neither at all
    wxFolderTreeNode::Status status;
-   UIdType newMsgs = folder->CountNewMessages();
-   if ( newMsgs != UID_ILLEGAL && newMsgs > 0 )
+
+   MailFolderStatus mfStatus;
+   if ( !folder->CountInterestingMessages(&mfStatus) )
+   {
+      // only "normal" messages, nothing interesting
+      status = wxFolderTreeNode::Folder_Normal;
+   }
+   else if ( mfStatus.newmsgs > 0 )
    {
       status = wxFolderTreeNode::Folder_New;
    }
-   else if ( folder->CountRecentMessages() )
+   else if ( mfStatus.unseen > 0 )
    {
-      status = wxFolderTreeNode::Folder_Recent;
+      status = wxFolderTreeNode::Folder_Unseen;
    }
-   else // no recent, no new
+   else // no unseen, no new
    {
       status = wxFolderTreeNode::Folder_Normal;
    }

@@ -32,6 +32,7 @@
 #include "Mdnd.h"
 
 #include "ASMailFolder.h"
+#include "HeaderInfo.h"
 #include "Message.h"
 
 #include "SendMessage.h"

@@ -37,6 +37,7 @@
 
 #include "Message.h"
 #include "MailFolder.h"
+#include "HeaderInfo.h"
 #include "MailFolderCC.h" // CC_Cleanup (FIXME: shouldn't be there!)
 
 #ifdef EXPERIMENTAL
@@ -257,7 +258,6 @@ MailFolder::OpenFolder(const MFolder *mfolder)
                                 mfolder->GetLogin(),
                                 mfolder->GetPassword(),
                                 mfolder->GetFullName());
-                                /*VS:was mfolder->GetName()*/
    return mf;
 }
 
@@ -497,53 +497,155 @@ MailFolder::CreateFolder(const String &name,
    return true;
 }
 
+// ----------------------------------------------------------------------------
+// message flags
+// ----------------------------------------------------------------------------
 
 /* static */ String
-MailFolder::ConvertMessageStatusToString(int status, MailFolder *mf)
+MailFolder::ConvertMessageStatusToString(int status)
 {
    InitStatic();
-   String strstatus = "";
 
-   // We treat news differently:
-   bool isNews = FALSE;
-   if(mf && mf->GetType() == MF_NEWS  || mf->GetType() == MF_NNTP)
-      isNews = TRUE;
+   String strstatus;
 
-   if(isNews)
+   // in IMAP/cclient the NEW == RECENT && !SEEN while for most people it is
+   // just NEW == !SEEN
+   if ( status & MSG_STAT_RECENT )
    {
-      if((status & MSG_STAT_SEEN) == 0)
-      {
-         if(status & MSG_STAT_RECENT)
-            strstatus << 'U'; // unread or new!
-         else
-            strstatus << 'O'; // old messages, whatever that is
-      }
-      else
-         strstatus << ' ';
+      // 'R' == RECENT && SEEN (doesn't make much sense if you ask me)
+      strstatus << ((status & MSG_STAT_SEEN) ? 'R' : 'N');
    }
-   else
+   else // !recent
    {
-      if(status & MSG_STAT_RECENT)
-      {
-         if(status & MSG_STAT_SEEN)
-            strstatus << 'R'; // seen but not read -->RECENT
-         else
-            strstatus << 'N'; // not seen yet  --> really new
-      }
-      else
-         if(! (status & MSG_STAT_SEEN))
-            strstatus << 'U';
-         else
-            strstatus << ' ';
+      // we're interested in showing the UNSEEN messages
+      strstatus << ((status & MSG_STAT_SEEN) ? ' ' : 'U');
    }
 
-   strstatus << ((status & MSG_STAT_FLAGGED) ? 'F' : ' ');
-   strstatus << ((status & MSG_STAT_ANSWERED) ? 'A' : ' ');
-   strstatus << ((status & MSG_STAT_DELETED) ? 'D' : ' ');
+   strstatus << ((status & MSG_STAT_FLAGGED) ? '*' : ' ')
+             << ((status & MSG_STAT_ANSWERED) ? 'A' : ' ')
+             << ((status & MSG_STAT_DELETED) ? 'D' : ' ');
 
    return strstatus;
 }
 
+String FormatFolderStatusString(const String& format,
+                                const String& name,
+                                MailFolderStatus *status,
+                                const MailFolder *mf)
+{
+   // this is a wrapper class which catches accesses to MailFolderStatus and
+   // fills it with the info from the real folder if it is not yet initialized
+   class StatusInit
+   {
+   public:
+      StatusInit(MailFolderStatus *status,
+                 const String& name,
+                 const MailFolder *mf)
+         : m_name(name)
+      {
+         m_status = status;
+         m_mf = (MailFolder *)mf; // cast away const for IncRef()
+         SafeIncRef(m_mf);
+
+         m_init = false;
+      }
+
+      MailFolderStatus *operator->() const
+      {
+         if ( !m_init )
+         {
+            ((StatusInit *)this)->m_init = true;
+
+            // query the mail folder for info
+            MailFolder *mf;
+            if ( !m_mf )
+            {
+               MFolder_obj mfolder(m_name);
+               mf = MailFolder::OpenFolder(mfolder);
+            }
+            else // already have the folder
+            {
+               mf = m_mf;
+               mf->IncRef();
+            }
+
+            if ( mf )
+            {
+               mf->CountInterestingMessages(m_status);
+               mf->DecRef();
+            }
+         }
+
+         return m_status;
+      }
+
+      ~StatusInit()
+      {
+         SafeDecRef(m_mf);
+      }
+
+   private:
+      MailFolderStatus *m_status;
+      MailFolder *m_mf;
+      String m_name;
+      bool m_init;
+   } stat(status, name, mf);
+
+   String result;
+   const char *start = format.c_str();
+   for ( const char *p = start; *p; p++ )
+   {
+      if ( *p == '%' )
+      {
+         switch ( *++p )
+         {
+            case '\0':
+               wxLogWarning(_("Unexpected end of string in the status format "
+                              "string '%s'."), start);
+               p--; // avoid going beyond the end of string
+               break;
+
+            case 'f':
+               result += name;
+               break;
+
+            case 't':
+               result += strutil_ultoa(stat->total);
+               break;
+
+            case 'r':
+               result += strutil_ultoa(stat->recent);
+               break;
+
+            case 'n':
+               result += strutil_ultoa(stat->newmsgs);
+               break;
+
+            case 'u':
+               result += strutil_ultoa(stat->unseen);
+               break;
+
+            case '%':
+               result += '%';
+               break;
+
+            default:
+               wxLogWarning(_("Unknown macro '%c%c' in the status format "
+                              "string '%s'."), *(p-1), *p, start);
+         }
+      }
+      else // not a format spec
+      {
+         result += *p;
+      }
+   }
+
+   return result;
+}
+
+// ----------------------------------------------------------------------------
+// eliminating duplicate messages code (TODO: shouldn't be needed!)
+// ----------------------------------------------------------------------------
 
 struct Dup_MsgInfo
 {
@@ -609,6 +711,10 @@ MailFolderCmn::DeleteDuplicates()
    return UID_ILLEGAL; // an error happened
 }
 
+// ----------------------------------------------------------------------------
+// ping
+// ----------------------------------------------------------------------------
+
 /* static */
 bool MailFolder::PingAllOpened(void)
 {
@@ -616,6 +722,10 @@ bool MailFolder::PingAllOpened(void)
    //       MailFolder itself from MailFolderCC
    return MailFolderCC::PingAllOpened();
 }
+
+// ----------------------------------------------------------------------------
+// folder closing
+// ----------------------------------------------------------------------------
 
 /* Before actually closing a mailfolder, we keep it around for a
    little while. If someone reaccesses it, this speeds things up. So
@@ -733,6 +843,10 @@ MailFolder::Subscribe(const String &host, FolderType protocol,
 {
    return MailFolderCC::Subscribe(host, protocol, mailboxname, subscribe);
 }
+
+// ----------------------------------------------------------------------------
+// message operations
+// ----------------------------------------------------------------------------
 
 void
 MailFolder::ReplyMessage(class Message *msg,
@@ -927,9 +1041,9 @@ MailFolder::ForwardMessage(class Message *msg,
    SafeDecRef(msg);
 }
 
-/*-------------------------------------------------------------------*
- * Higher level functionality, collected in MailFolderCmn class.
- *-------------------------------------------------------------------*/
+// ----------------------------------------------------------------------------
+// MFCmnEventReceiver
+// ----------------------------------------------------------------------------
 
 class MFCmnEventReceiver : public MEventReceiver
 {
@@ -972,6 +1086,14 @@ private:
    void *m_MEventCookie, *m_MEventPingCookie;
 };
 
+// ============================================================================
+// MailFolderCmn: higher level functionality
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// MailFolderCmn creation/destruction
+// ----------------------------------------------------------------------------
+
 MailFolderCmn::MailFolderCmn()
 {
 #ifdef DEBUG
@@ -1007,6 +1129,10 @@ MailFolderCmn::PreClose(void)
    m_PreCloseCalled = true;
 #endif
 }
+
+// ----------------------------------------------------------------------------
+// MailFolderCmn message saving
+// ----------------------------------------------------------------------------
 
 bool
 MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
@@ -1216,17 +1342,6 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
 }
 
 bool
-MailFolderCmn::UnDeleteMessages(const UIdArray *selections)
-{
-   int n = selections->Count();
-   int i;
-   bool rc = true;
-   for(i = 0; i < n; i++)
-      rc &= UnDeleteMessage((*selections)[i]);
-   return rc;
-}
-
-bool
 MailFolderCmn::SaveMessagesToFolder(const UIdArray *selections,
                                     MWindow *parent,
                                     MFolder *folder)
@@ -1285,6 +1400,10 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections, MWindow *parent)
       return false;
 }
 
+// ----------------------------------------------------------------------------
+// MailFolderCmn message replying/forwarding
+// ----------------------------------------------------------------------------
+
 void
 MailFolderCmn::ReplyMessages(const UIdArray *selections,
                              const MailFolder::Params& params,
@@ -1319,6 +1438,10 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
       msg->DecRef();
    }
 }
+
+// ----------------------------------------------------------------------------
+// MailFolderCmn sorting
+// ----------------------------------------------------------------------------
 
 static MMutex gs_SortListingMutex;
 
@@ -1568,6 +1691,10 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
    gs_SortListingMutex.Unlock();
 }
 
+// ----------------------------------------------------------------------------
+// MailFolderCmn new mail check
+// ----------------------------------------------------------------------------
+
 /*
   This function is called by GetHeaders() immediately after building a
   new folder listing. It checks for new mails and, if required, sends
@@ -1714,6 +1841,21 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
    MailFolderCC::UpdateCClientConfig();
 }
 
+// ----------------------------------------------------------------------------
+// MailFolderCmn message deletion
+// ----------------------------------------------------------------------------
+
+bool
+MailFolderCmn::UnDeleteMessages(const UIdArray *selections)
+{
+   int n = selections->Count();
+   int i;
+   bool rc = true;
+   for(i = 0; i < n; i++)
+      rc &= UnDeleteMessage((*selections)[i]);
+   return rc;
+}
+
 
 /** Delete a message.
     @param uid mesage uid
@@ -1777,6 +1919,10 @@ MailFolderCmn::DeleteMessages(const UIdArray *selections, bool expunge)
 
    return rc;
 }
+
+// ----------------------------------------------------------------------------
+// MailFolderCmn filtering
+// ----------------------------------------------------------------------------
 
 int
 MailFolderCmn::ApplyFilterRules(bool newOnly)
@@ -1946,7 +2092,6 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
    return changed;
 }
 
-
 // ----------------------------------------------------------------------------
 // sort order conversions
 // ----------------------------------------------------------------------------
@@ -1981,8 +2126,9 @@ long BuildSortOrder(const wxArrayInt& sortOrders)
    return sortOrder;
 }
 
-
-
+// ----------------------------------------------------------------------------
+// static functions used by MailFolder
+// ----------------------------------------------------------------------------
 
 static void InitStatic()
 {

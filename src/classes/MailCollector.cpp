@@ -33,6 +33,7 @@
 
 #include "FolderView.h"
 #include "MailFolder.h"
+#include "HeaderInfo.h"
 
 #include "MailCollector.h"
 

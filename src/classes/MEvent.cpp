@@ -31,6 +31,7 @@
 #include "MEvent.h"
 #include "Profile.h"
 #include "MailFolder.h"
+#include "HeaderInfo.h"
 #include "MApplication.h"
 
 // ----------------------------------------------------------------------------
@@ -321,3 +322,7 @@ MEventNewMailData::~MEventNewMailData()
    delete [] m_messageIDs;
 }
 
+MEventMsgStatusData::~MEventMsgStatusData()
+{
+   delete m_hi;
+}

@@ -14,14 +14,7 @@
 #   pragma interface "HeaderInfoImpl.h"
 #endif
 
-#ifndef   USE_PCH
-#   include  "kbList.h"
-#   include  "MObject.h"
-#endif
-
-#include  "MailFolder.h"
-#include  "FolderView.h"
-#include  "MFolder.h"
+#include "HeaderInfo.h"
 
 /** This class essentially maps to the c-client Overview structure,
     which holds information for showing lists of messages.

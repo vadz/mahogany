@@ -130,7 +130,7 @@ enum MFolderIndex
    // anything else goes here
    MFolderIndex_Max
 };
-  
+
 /**
  NOTICE: the distinction between MP_xxx and MP_xxx config entries no
  longer exists. They are now treated identically.
@@ -308,6 +308,8 @@ enum MFolderIndex
 /// the global path for template files used for message composition
 #define MP_COMPOSETEMPLATEPATH_GLOBAL   "CompooseTemplatePath"
 
+/// the format string for the folder tree display
+#define MP_FOLDERSTATUS_TREE "TreeViewFmt"
 /// the format string for status bar folder status display
 #define MP_FOLDERSTATUS_STATBAR "StatusBarFmt"
 /// the format string for title bar folder status display
@@ -574,14 +576,16 @@ enum MFolderIndex
 #define   MP_FVIEW_FGCOLOUR      "FViewFgColour"
 // which background colour for the font
 #define   MP_FVIEW_BGCOLOUR      "FViewBgColour"
-// which for deleted messages
+// colour for deleted messages
 #define   MP_FVIEW_DELETEDCOLOUR      "FViewDeletedColour"
-// which for new messages
+// colour for new messages
 #define   MP_FVIEW_NEWCOLOUR      "FViewNewColour"
-// which for recent messages
+// colour for recent messages
 #define   MP_FVIEW_RECENTCOLOUR      "FViewRecentColour"
-// which for unread messages
+// colour for unread messages
 #define   MP_FVIEW_UNREADCOLOUR      "FViewUnreadColour"
+// colour for flagged messages
+#define   MP_FVIEW_FLAGGEDCOLOUR      "FViewFlaggedColour"
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -898,10 +902,13 @@ enum MFolderIndex
 #define   MP_CONVERTPROGRAM_D      "convert %s -compress None %s"
 /// list of modules to load at startup
 #define MP_MODULES_D   "Filters"
+
+/// the format string for the folder tree display
+#define MP_FOLDERSTATUS_TREE_D "%f (%t, %u)"
 /// the format string for status bar folder status display
-#define MP_FOLDERSTATUS_STATBAR_D "%f (%t messages, %r recent, %n new)"
+#define MP_FOLDERSTATUS_STATBAR_D "%f (%t messages, %u unread, %n new)"
 /// the format string for title bar folder status display
-#define MP_FOLDERSTATUS_TITLEBAR_D "%f (%t messages, %n new)"
+#define MP_FOLDERSTATUS_TITLEBAR_D "%f (%u unread, %n new)"
 
 /**@name Printer settings */
 //@{
@@ -1284,14 +1291,16 @@ enum MFolderIndex
 #define   MP_FVIEW_FGCOLOUR_D      "black"
 // which background colour for the font
 #define   MP_FVIEW_BGCOLOUR_D      "white"
-// which for deleted messages
+// colour for deleted messages
 #define   MP_FVIEW_DELETEDCOLOUR_D      "grey"
-// which for new messages
+// colour for new messages
 #define   MP_FVIEW_NEWCOLOUR_D      "orange"
-// which for recent messages
-#define   MP_FVIEW_RECENTCOLOUR_D      "red"
-// which for unread messages
+// colour for recent messages
+#define   MP_FVIEW_RECENTCOLOUR_D      "gold"
+// colour for unread messages
 #define   MP_FVIEW_UNREADCOLOUR_D      "blue"
+// colour for flagged messages
+#define   MP_FVIEW_FLAGGEDCOLOUR_D      "purple"
 //@}
 /**@name Font settings for compose view */
 //@{

@@ -53,6 +53,7 @@
 
 #include "FolderView.h"
 #include "MailFolder.h"
+#include "HeaderInfo.h"
 #include "ASMailFolder.h"
 #include "MessageView.h"
 #include "TemplateDialog.h"
@@ -68,8 +69,6 @@
 #include "MDialogs.h"
 #include "MHelp.h"
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
-
-#define   LCFIX ((wxFolderListCtrl *)this)->
 
 // ----------------------------------------------------------------------------
 // constants
@@ -388,7 +387,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    else
       newFocus = (focused < nMsgs-1) ? focused + 1 : focused;
 
-   /** To    allow translations:
+   /** To allow translations:
        Delete, Undelete, eXpunge, Copytofolder, Savetofile,
        Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
        View, Group reply (==followup)
@@ -402,8 +401,18 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       ;
 
    // extra keys:
-   if(key == '#') idx = 2; // # == expunge for VM compatibility
-   if(key == WXK_DELETE) idx = 0; // delete
+   if(key == '#')
+   {
+      // # == expunge for VM compatibility
+      idx = 2;
+   }
+
+   if(key == WXK_DELETE)
+   {
+      // delete
+      idx = 0;
+   }
+
    // scroll up within the message viewer:
    if(key == WXK_BACK)
    {
@@ -412,6 +421,14 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       event.Skip();
       return;
    }
+
+   if ( key == '*' )
+   {
+      // toggle the flagged status
+      m_FolderView->ToggleMessages(selections);
+      return;
+   }
+
    switch(keycodes_en[idx])
    {
       case 'M': // move = copy + delete
@@ -428,47 +445,59 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          else
             m_FolderView->UpdateSelectionInfo();
          break;
+
       case 'U': // undelete
          m_FolderView->GetTicketList()->Add(
             m_FolderView->GetFolder()->UnDeleteMessages(&selections, m_FolderView));
          MoveFocus(newFocus);
          break;
+
       case 'X': // expunge
          m_FolderView->GetFolder()->ExpungeMessages();
          break;
+
       case 'C': // copy
          m_FolderView->SaveMessagesToFolder(selections);
          MoveFocus(newFocus);
          break;
+
       case 'S': // save
          m_FolderView->SaveMessagesToFile(selections);
          MoveFocus(newFocus);
          break;
+
       case 'G': // group reply
       case 'R': // reply
-         m_FolderView->GetFolder()->ReplyMessages(
-            &selections,
-            (keycodes_en[idx] == 'G')?MailFolder::REPLY_FOLLOWUP:0,
-            GetFrame(this),
-            m_FolderView);
+         m_FolderView->GetFolder()->ReplyMessages
+            (
+               &selections,
+               keycodes_en[idx] == 'G' ? MailFolder::REPLY_FOLLOWUP : 0,
+               GetFrame(this),
+               m_FolderView
+            );
          MoveFocus(newFocus);
          break;
+
       case 'F': // forward
          m_FolderView->GetFolder()->ForwardMessages(
             &selections, MailFolder::Params(), GetFrame(this), m_FolderView);
          MoveFocus(newFocus);
          break;
+
       case 'O': // open
          m_FolderView->OpenMessages(selections);
          MoveFocus(newFocus);
          break;
+
       case 'P': // print
          m_FolderView->PrintMessages(selections);
          MoveFocus(newFocus);
          break;
+
       case 'H': // headers
          m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
          break;
+
       case ' ': // mark:
          // should just be the default behaviour
          /* I would like it to mark the current entry and then
@@ -1212,12 +1241,16 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 
    settings->dateFormat = READ_CONFIG(m_Profile, MP_DATE_FMT);
    settings->dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT) != 0;
-   GetColourByName(&settings->FgCol, READ_CONFIG(m_Profile,
-                                                 MP_FVIEW_FGCOLOUR),
+
+   GetColourByName(&settings->FgCol,
+                   READ_CONFIG(m_Profile, MP_FVIEW_FGCOLOUR),
                    MP_FVIEW_FGCOLOUR_D);
    GetColourByName(&settings->BgCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_BGCOLOUR),
                    MP_FVIEW_BGCOLOUR_D);
+   GetColourByName(&settings->FlaggedCol,
+                   READ_CONFIG(m_Profile, MP_FVIEW_FLAGGEDCOLOUR),
+                   MP_FVIEW_FLAGGEDCOLOUR_D);
    GetColourByName(&settings->NewCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_NEWCOLOUR),
                    MP_FVIEW_NEWCOLOUR_D);
@@ -1230,8 +1263,15 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    GetColourByName(&settings->UnreadCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_UNREADCOLOUR),
                    MP_FVIEW_UNREADCOLOUR_D);
+
    settings->font = READ_CONFIG(m_Profile,MP_FVIEW_FONT);
-   ASSERT(settings->font >= 0 && settings->font <= NUM_FONTS);
+   if ( settings->font < 0 || settings->font > NUM_FONTS )
+   {
+      wxFAIL_MSG( "bad font setting in config" );
+
+      settings->font = 0;
+   }
+
    settings->font = wxFonts[settings->font];
    settings->size = READ_CONFIG(m_Profile, MP_FVIEW_FONT_SIZE);
    settings->senderOnlyNames = READ_CONFIG(m_Profile, MP_FVIEW_NAMES_ONLY) != 0;
@@ -1355,17 +1395,17 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
       }
    }
 
-   MailFolder *mf = m_ASMailFolder->GetMailFolder();
+   int status = hi->GetStatus();
+   String strStatus = MailFolder::ConvertMessageStatusToString(hi->GetStatus());
    m_FolderCtrl->SetEntry(index,
-                          MailFolder::ConvertMessageStatusToString(hi->GetStatus(),
-                                                                   mf),
+                          strStatus,
                           sender,
                           subject,
                           strutil_ftime(hi->GetDate(),
                                         m_settings.dateFormat,
                                         m_settings.dateGMT),
                           strutil_ultoa(hi->GetSize()));
-   mf->DecRef();
+
    m_FolderCtrl->Select(index,selected);
    m_FolderCtrl->SetItemState(index, wxLIST_STATE_FOCUSED,
                               (hi->GetUId() == m_FocusedUId)?
@@ -1373,25 +1413,29 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
    wxListItem info;
    info.m_itemId = index;
    m_FolderCtrl->GetItem(info);
-   int status = hi->GetStatus();
 
-   if(hi->GetColour()[0]) // entry has a colour setting
+   wxColour col;
+   if ( !hi->GetColour().empty() ) // entry has its own colour setting
    {
-      wxColour col;
       GetColourByName(&col, hi->GetColour(), MP_FVIEW_FGCOLOUR_D);
-      info.SetTextColour(col);
    }
-   else
-      info.SetTextColour(
-         ((status & MailFolder::MSG_STAT_DELETED) != 0 ) ? m_settings.DeletedCol
-         : ( ( (status & MailFolder::MSG_STAT_RECENT) != 0 ) ?
-             ( ( (status & MailFolder::MSG_STAT_SEEN) != 0 ) ? m_settings.RecentCol
-               : m_settings.NewCol )
-             : ( ((status & MailFolder::MSG_STAT_SEEN) != 0 ) ?
-                 m_settings.FgCol :
-                 m_settings.UnreadCol)
-            )
-         );
+   else // set the colour depending on the status of the message
+   {
+      if ( status & MailFolder::MSG_STAT_FLAGGED )
+         col = m_settings.FlaggedCol;
+      else if ( status & MailFolder::MSG_STAT_DELETED )
+         col = m_settings.DeletedCol;
+      else if ( status & MailFolder::MSG_STAT_RECENT )
+         col = status & MailFolder::MSG_STAT_SEEN ? m_settings.RecentCol
+                                                  : m_settings.NewCol;
+      else if ( !(status & MailFolder::MSG_STAT_SEEN) )
+         col = m_settings.UnreadCol;
+      else // normal message
+         col = m_settings.FgCol;
+   }
+
+   if ( col.Ok() )
+      info.SetTextColour(col);
 
    if ( encoding != wxFONTENCODING_SYSTEM )
    {
@@ -2003,6 +2047,37 @@ wxFolderView::DeleteOrTrashMessages(const UIdArray& messages)
    m_TicketList->Add(t);
 }
 
+void
+wxFolderView::ToggleMessages(const UIdArray& messages)
+{
+   HeaderInfoList *hil = GetFolder()->GetHeaders();
+   CHECK_RET( hil, "can't toggle messages without folder listing" );
+
+   size_t count = messages.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      UIdType uid = messages[n];
+      UIdType idx = hil->GetIdxFromUId(uid);
+      if ( idx == UID_ILLEGAL )
+      {
+         wxLogDebug("Inexistent message (uid = %lu) selected?", uid);
+
+         continue;
+      }
+
+      // find the corresponding entry in the listing
+      // is the message currently flagged?
+      bool flagged = (hil->GetItem(idx)->GetStatus() &
+                       MailFolder::MSG_STAT_FLAGGED) != 0;
+
+      // invert the flag
+      m_ASMailFolder->SetMessageFlag(uid, MailFolder::MSG_STAT_FLAGGED,
+                                     !flagged);
+   }
+
+   hil->DecRef();
+}
+
 Ticket
 wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
                                    MFolder *folder,
@@ -2090,12 +2165,15 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 void
 wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
 {
-   if(event.GetFolder() == m_MailFolder)
+   if ( event.GetFolder() == m_MailFolder )
    {
 #ifdef __WXMSW__
       m_FolderCtrl->Hide(); // optimise for speed under MSW
 #endif
+
       SetEntry(event.GetHeaderInfo(), event.GetIndex());
+      UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
+
 #ifdef __WXMSW__
       m_FolderCtrl->Show();
 #endif

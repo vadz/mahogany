@@ -1,9 +1,10 @@
       This file contains the detailed list of the user visible changes in
       Mahogany, you can use it to find all the changes between releases.
 
-Release 0.62 'Hawkins'
+Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+29.01.01 VZ: support for flagging messages (display and status changing)
 26.01.01 VZ: big internal changes => much better stability
 
 Release 0.61 'Hawkins' [UNRELEASED]

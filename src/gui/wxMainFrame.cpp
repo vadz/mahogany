@@ -244,21 +244,15 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
       ASSERT( folder->GetFullName() == m_folderName );
 
       MailFolder *mailFolder = m_FolderView->OpenFolder(folder->GetFullName());
-      if ( mailFolder )
+      if ( !mailFolder )
       {
-         mailFolder->IncRef();
+         if ( mApplication->GetLastError() == M_ERROR_CANCEL )
+         {
+            // don't set the unaccessible flag - may be it's ok
+            wxLogStatus(this, _("Opening folder '%s' cancelled."),
+                        m_folderName.c_str());
+         }
 
-         UpdateTitleAndStatusBars("", _("Opened folder: "), this, mailFolder);
-         mailFolder->DecRef();
-      }
-      else if ( mApplication->GetLastError() == M_ERROR_CANCEL )
-      {
-         // don't set the unaccessible flag - may be it's ok
-         wxLogStatus(this, _("Opening folder '%s' cancelled."),
-                     m_folderName.c_str());
-      }
-      else
-      {
          m_folderName.clear();
       }
   }

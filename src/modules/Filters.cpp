@@ -41,6 +41,7 @@
 #include "MModule.h"
 #include "MInterface.h"
 #include "MPython.h"
+#include "HeaderInfo.h"
 
 #include <stdlib.h>
 #include <ctype.h>

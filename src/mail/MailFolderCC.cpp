@@ -303,6 +303,17 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// MessageFlagsData: struct used for data storage by GetMessageFlags()
+// ----------------------------------------------------------------------------
+
+struct MessageFlagsData
+{
+   MessageFlagsData() { flags = 0; }
+
+   int flags;
+};
+
+// ----------------------------------------------------------------------------
 // Various locker classes
 // ----------------------------------------------------------------------------
 
@@ -408,17 +419,19 @@ static String GetImapFlags(int flag)
    String flags;
    if(flag & MailFolder::MSG_STAT_SEEN)
       flags <<"\\SEEN ";
-// RECENT flag cannot be set?
-//   if(flag & MailFolder::MSG_STAT_RECENT)
-//      flags <<"\\RECENT ";
+
+   // RECENT flag can't be set, it is handled entirely by server in IMAP
+
    if(flag & MailFolder::MSG_STAT_ANSWERED)
       flags <<"\\ANSWERED ";
    if(flag & MailFolder::MSG_STAT_DELETED)
       flags <<"\\DELETED ";
    if(flag & MailFolder::MSG_STAT_FLAGGED)
       flags <<"\\FLAGGED ";
+
    if(flags.Length() > 0) // chop off trailing space
-     flags.Trim();
+     flags.RemoveLast();
+
    return flags;
 }
 
@@ -653,15 +666,23 @@ String GetPathFromImapSpec(const String &imap)
 /*
  * Small function to translate c-client status flags into ours.
  */
-static MailFolder::MessageStatus GetMsgStatus(MESSAGECACHE *elt)
+static int GetMsgStatus(MESSAGECACHE *elt)
 {
-   int status = MailFolder::MSG_STAT_NONE;
-   if(elt->recent)   status |= MailFolder::MSG_STAT_RECENT;
-   if(elt->seen)     status |= MailFolder::MSG_STAT_SEEN;
-   if(elt->flagged)  status |= MailFolder::MSG_STAT_FLAGGED;
-   if(elt->answered) status |= MailFolder::MSG_STAT_ANSWERED;
-   if(elt->deleted)  status |= MailFolder::MSG_STAT_DELETED;
-   return (MailFolder::MessageStatus) status;
+   int status = 0;
+   if (elt->recent)
+      status |= MailFolder::MSG_STAT_RECENT;
+   if (elt->seen)
+      status |= MailFolder::MSG_STAT_SEEN;
+   if (elt->flagged)
+      status |= MailFolder::MSG_STAT_FLAGGED;
+   if (elt->answered)
+      status |= MailFolder::MSG_STAT_ANSWERED;
+   if (elt->deleted)
+      status |= MailFolder::MSG_STAT_DELETED;
+
+   // TODO: what about custom/user flags?
+
+   return status;
 }
 
 // ----------------------------------------------------------------------------
@@ -891,8 +912,12 @@ MailFolderCC::Create(int typeAndFlags)
    m_FirstListing = true;
 
    m_FolderListing = NULL;
+
+   m_flagsData = NULL;
+
    m_InCritical = false;
    m_ASMailFolder = NULL;
+
    FolderType type = GetFolderType(typeAndFlags);
    m_FolderFlags = GetFolderFlags(typeAndFlags);
    m_SearchMessagesFound = NULL;
@@ -1891,50 +1916,8 @@ MailFolderCC::ExpungeMessages(void)
 // Counting messages
 // ----------------------------------------------------------------------------
 
-/// return number of recent messages
-unsigned long
-MailFolderCC::CountRecentMessages(void) const
-{
-   return CountMessages(MSG_STAT_RECENT, MSG_STAT_RECENT);
-}
-
-unsigned long
-MailFolderCC::CountNewMessagesQuick(void) const
-{
-   return CountNewMessages();
-}
-
-/// Counts the number of new mails
-UIdType
-MailFolderCC::CountNewMessages(void) const
-{
-   UIdType num;
-   if ( HaveListing() )
-   {
-      CHECK_NOT_BUSY_RC(UID_ILLEGAL);
-
-      const int mask = MSG_STAT_RECENT | MSG_STAT_SEEN;
-      const int value = MSG_STAT_RECENT;
-
-      num = 0;
-
-      HeaderInfoList_obj listing(GetHeaders());
-      UIdType count = listing->Count();
-      for ( UIdType msgno = 0; msgno < count; msgno++ )
-      {
-         int status = listing[msgno]->GetStatus();
-         if( (status & mask) == value )
-            num++;
-      }
-   }
-   {
-      num = UID_ILLEGAL;
-   }
-
-   return num;
-}
-
-static inline bool WantRecent(int mask, int value)
+// are we asked to count recent messages in WantRecent()?
+static bool WantRecent(int mask, int value)
 {
    return mask == MailFolder::MSG_STAT_RECENT && value == mask;
 }
@@ -1954,15 +1937,15 @@ MailFolderCC::CountMessages(int mask, int value) const
       return m_nMessages;
    else if ( WantRecent(mask, value) && m_nRecent != UID_ILLEGAL )
       return m_nRecent;
-   else // general case or we were asked for recent messages and we don't have
+   else // general case or we asked for recent messages and we don't have them
    {
       // FIXME there should probably be a much more efficient way (using
       //       cclient functions?) to do it
-      unsigned long numOfMessages = m_nMessages;
+      unsigned long numOfMessages = 0;
       for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
       {
-         if ( (hil[msgno]->GetStatus() & mask) != value )
-            numOfMessages--;
+         if ( (hil[msgno]->GetStatus() & mask) == value )
+            numOfMessages++;
       }
 
       // if we were asked for recent messages, cache them
@@ -1973,6 +1956,44 @@ MailFolderCC::CountMessages(int mask, int value) const
 
       return numOfMessages;
    }
+}
+
+bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
+{
+   CHECK( status, false, "NULL pointer in CountInterestingMessages" );
+
+   status->Init();
+
+   CHECK_NOT_BUSY_RC(false);
+
+   HeaderInfoList_obj hil(GetHeaders());
+   CHECK( hil, false, "no listing in CountInterestingMessages" );
+
+   status->total = m_nMessages;
+   for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
+   {
+      int stat = hil[msgno]->GetStatus();
+
+      // ignore deleted messages (FIXME should we?)
+      if ( stat & MSG_STAT_DELETED )
+         continue;
+
+      int isRecent = stat & MSG_STAT_RECENT ? 1 : 0;
+      if ( !(stat & MSG_STAT_SEEN) )
+      {
+         status->unseen++;
+
+         if ( isRecent )
+            status->newmsgs++;
+      }
+
+      status->recent += isRecent;
+   }
+
+   // cache the number of recent messages
+   ((MailFolderCC *)this)->m_nRecent = status->recent;
+
+   return status->newmsgs || status->recent || status->unseen;
 }
 
 // ----------------------------------------------------------------------------
@@ -2202,6 +2223,45 @@ MailFolderCC::GetMessageUID(unsigned long msgno) const
 // Message flags
 // ----------------------------------------------------------------------------
 
+/* static */
+String MailFolderCC::BuildSequence(const UIdArray& messages)
+{
+   String sequence;
+   size_t n = messages.GetCount();
+   for ( size_t i = 0; i < n; i++ )
+   {
+      if ( i > 0 )
+         sequence += ',';
+
+      sequence += strutil_ultoa(messages[i]);
+   }
+
+   return sequence;
+}
+
+int MailFolderCC::GetMessageFlags(UIdType uid) const
+{
+   MailFolderCC *that = (MailFolderCC *)this;
+   if ( m_MailStream == NIL && !that->PingReopen() )
+   {
+      wxLogError(_("Can't get flags for message from closed folder '%s'."),
+                 GetName().c_str());
+
+      return 0;
+   }
+
+   that->m_flagsData = new MessageFlagsData();
+
+   // this will result in calls to mm_flags() which will fill m_flagsData
+   mail_fetch_flags(m_MailStream, (char *)strutil_ultoa(uid).c_str(), ST_UID);
+   int flags = m_flagsData->flags;
+
+   delete m_flagsData;
+   that->m_flagsData = NULL;
+
+   return flags;
+}
+
 bool
 MailFolderCC::SetSequenceFlag(String const &sequence,
                               int flag,
@@ -2225,21 +2285,15 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
                         (char *)flags.c_str(),
                         ST_UID);
    }
-   return true; /* not supported by c-client */
-}
+   //else: blocked by python callback
 
+   return true;
+}
 
 bool
 MailFolderCC::SetFlag(const UIdArray *selections, int flag, bool set)
 {
-   int n = selections->Count();
-   int i;
-   String sequence;
-   for(i = 0; i < n-1; i++)
-      sequence << strutil_ultoa((*selections)[i]) << ',';
-   if(n)
-      sequence << strutil_ultoa((*selections)[n-1]);
-   return SetSequenceFlag(sequence, flag, set);
+   return SetSequenceFlag(BuildSequence(*selections), flag, set);
 }
 
 bool
@@ -2981,7 +3035,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
     @param errflg error level
 */
 void
-MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf)
+MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
 {
    GetLogCircle().Add(str);
 
@@ -3039,13 +3093,15 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf)
     @param str    message str
 */
 void
-MailFolderCC::mm_dlog(String str)
+MailFolderCC::mm_dlog(const String& str)
 {
    String msg;
-   // check for PASS
+
+   // replace the passwords in the log output with stars if plain text
+   // authentification is used (TODO: check for IMAP "LOGIN" too)
    if ( str[0u] == 'P' && str[1u] == 'A' && str[2u] == 'S' && str[3u] == 'S' )
    {
-      msg += "PASS";
+      msg = "PASS";
 
       size_t n = 4;
       while ( isspace(str[n]) )
@@ -3062,12 +3118,14 @@ MailFolderCC::mm_dlog(String str)
    }
    else
    {
-      msg += str;
+      msg = str;
    }
-   GetLogCircle().Add(str);
-   if(mm_show_debug)
+
+   GetLogCircle().Add(msg);
+
+   if ( mm_show_debug )
    {
-      LOGMESSAGE((M_LOG_WINONLY, String(_("Mail-debug: ") + msg)));
+      wxLogGeneric(wxLOG_User, _("Mail debug: %s"), msg.c_str());
    }
 }
 
@@ -3115,7 +3173,24 @@ MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long msgno)
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf, "mm_flags for non existent folder");
 
-   mf->UpdateMessageStatus(msgno);
+   if ( mf->m_flagsData )
+   {
+      // we're inside GetMessageFlags(), just update m_flagsData
+      //
+      // NB: for now we always ask for flags of one message, we should extend
+      //     the MessageFlagsData struct to include msgno/uid if we want to
+      //     get the flags of a whole sequence at ones
+      MESSAGECACHE *elt = mail_elt(mf->m_MailStream, msgno);
+
+      // I think this shouldn't happen (only MRC really knows, of course)
+      CHECK_RET( elt, "mail_elt() returned NULL in mm_flags" );
+
+      mf->m_flagsData->flags = GetMsgStatus(elt);
+   }
+   else // message flags really changed
+   {
+      mf->UpdateMessageStatus(msgno);
+   }
 }
 
 /** alert that c-client will run critical code
@@ -3212,12 +3287,17 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
    MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
 
    HeaderInfo *hi = hil[i];
-   ((HeaderInfoImpl *)hi)->m_Status = GetMsgStatus(elt);
+   int status = GetMsgStatus(elt);
+   if ( status != hi->GetStatus() )
+   {
+      ((HeaderInfoImpl *)hi)->m_Status = status;
 
-   // tell all interested that status changed
-   DBGMESSAGE(("Sending MsgStatus event for folder '%s'", GetName().c_str()));
+      // tell all interested that status changed
+      DBGMESSAGE(("Sending MsgStatus event for folder '%s'", GetName().c_str()));
 
-   MEventManager::Send(new MEventMsgStatusData(this, i, hi->Clone()));
+      MEventManager::Send(new MEventMsgStatusData(this, i, hi->Clone()));
+   }
+   //else: flags didn't really change
 }
 
 void
@@ -3707,7 +3787,7 @@ mm_dlog(char *str)
 {
    if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK_NOSTREAM_1(mm_dlog, "%s (%s)", str);
+      TRACE_CALLBACK_NOSTREAM_1(mm_dlog, "%s", str);
 
       MailFolderCC::mm_dlog(str);
    }

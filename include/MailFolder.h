@@ -64,6 +64,33 @@ private:
 };
 
 /**
+  MailFolderStatus contains the "interesting" and often changign information
+  about the folder such as the number of new/unread messages in it
+*/
+
+struct MailFolderStatus
+{
+   MailFolderStatus() { Init(); }
+
+   void Init()
+   {
+      total = UID_ILLEGAL;
+      newmsgs =
+      recent =
+      unseen = 0;
+   }
+
+   bool IsValid() const { return total != UID_ILLEGAL; }
+
+   // the total number of messages and the number of new, recent and unseen
+   // messages in this folder
+   unsigned long total,
+                 newmsgs,
+                 recent,
+                 unseen;
+};
+
+/**
    MailFolder base class, represents anything containig mails.
 
    This class defines the interface for all MailFolder classes. It can
@@ -206,12 +233,12 @@ public:
 
    /** Utiltiy function to get a textual representation of a message
        status.
-       @param message status
-       @param mf optional pointer to folder to treat e.g. NNTP separately
+
+       @param message flags
        @return string representation
    */
-   static String ConvertMessageStatusToString(int status,
-                                              MailFolder *mf = NULL);
+   static String ConvertMessageStatusToString(int status);
+
    /** Forward one message.
        @param message message to forward
        @param params is the Params struct to use
@@ -287,16 +314,30 @@ public:
    */
    virtual unsigned long CountMessages(int mask = 0, int value = 0) const = 0;
 
-   /// Count number of new messages.
-   virtual unsigned long CountNewMessages(void) const = 0;
+   /** Count the number of new, recent and unseen messages: this is equivelent
+       to calling CountNewMessages(), CountRecentMessages() and
+       CountUnseenMessages() in succession but may be 3 times faster.
+
+       NB: this is pure virtual although could be implemented in the base class
+
+       @param status is the struct to fill with the folder info
+       @return true if any new/recent/unseen messages found, false otherwise
+   */
+   virtual bool CountInterestingMessages(MailFolderStatus *status) const = 0;
+
+   /// Count number of new messages (== RECENT && !SEEN)
+   unsigned long CountNewMessages(void) const
+   {
+      return CountMessages(MSG_STAT_RECENT | MSG_STAT_SEEN, MSG_STAT_RECENT);
+   }
 
    /// Count number of recent messages.
-   virtual unsigned long CountRecentMessages(void) const = 0;
+   unsigned long CountRecentMessages(void) const
+      { return CountMessages(MSG_STAT_RECENT, MSG_STAT_RECENT); }
 
-   /** Count number of new messages but only if a listing is
-       available, returns UID_ILLEGAL otherwise.
-   */
-   virtual unsigned long CountNewMessagesQuick(void) const = 0;
+   /// Count number of unread messages
+   unsigned long CountUnseenMessages(void) const
+      { return CountMessages(MSG_STAT_SEEN, 0); }
 
    /** Check whether mailbox has changed.
        @return FALSE on error, TRUE otherwise
@@ -330,6 +371,13 @@ public:
        @return true on success
    */
    virtual bool UnDeleteMessage(unsigned long uid) = 0;
+
+   /** Get the message flags
+
+       @param uid the message UID
+       @return the message flags
+   */
+   virtual int GetMessageFlags(UIdType uid) const = 0;
 
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
        @param uid the message uid
@@ -734,7 +782,31 @@ public:
    String m_Key;
 };
 
-#include "HeaderInfo.h"
+/**
+   Formats a message replacing the occurences of the format specifiers with the
+   data. The format specifiers (listed with their meanings) are:
+
+      %f          folder name
+      %t          total number of messages in the folder
+      %n          number of new messages in the folder
+      %r          number of recent messages in the folder
+      %u          number of unseen/unread messages in the folder
+      %%          percent sign
+
+   The function uses MailFolderStatus oassed to it and will fill it if it is in
+   unfilled state and if it needs any of the data in it - so you should reuse
+   the same struct when calling this function several times.if possible.
+
+   @param format the format string
+   @param folderName the full folder name
+   @param status the status struct to use and fill
+   @param mf the mail folder to use, may be NULL (then folderName is used)
+   @return the formatted string
+ */
+String FormatFolderStatusString(const String& format,
+                                const String& folderName,
+                                MailFolderStatus *status,
+                                const MailFolder *mf = NULL);
 
 #endif /// MAILFOLDER_H
 

@@ -166,19 +166,15 @@ public:
    */
    virtual unsigned long CountMessages(int mask = 0, int value = 0) const;
 
-   /// return number of recent messages
-   virtual unsigned long CountRecentMessages(void) const;
-
-   /** Count number of new messages but only if a listing is
-       available, returns UID_ILLEGAL otherwise.
-   */
-   virtual unsigned long CountNewMessagesQuick(void) const;
+   virtual bool CountInterestingMessages(MailFolderStatus *status) const;
 
    /** get message header
        @param uid mesage uid
        @return message header information class
    */
    class Message *GetMessage(unsigned long uid);
+
+   virtual int GetMessageFlags(UIdType uid) const;
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence
@@ -453,11 +449,17 @@ protected:
    /// Check if this message is a "New Message":
    virtual bool IsNewMessage(const HeaderInfo * hi);
 
-   /* Handles the mm_overview_header callback on a per folder basis.
-      It returns 0 to abort overview generation, 1 to continue.*/
+   /**
+     Handles the mm_overview_header callback on a per folder basis.
+     It returns 0 to abort overview generation, 1 to continue.
+   */
    int OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov);
 
+   /// Close the folder
    void Close(void);
+
+   /// Build the sequence string from the array of message uids
+   static String BuildSequence(const UIdArray& messages);
 
    /// A Mutex to control access to this folder.
    MMutex *m_Mutex;
@@ -474,7 +476,7 @@ protected:
    void BuildListing(void);
    /** The index of the next entry in list to fill. Only used for
        BuildListing()/OverviewHeader() interaction. */
-   unsigned long      m_BuildNextEntry;
+   unsigned long m_BuildNextEntry;
    /// The maximum number of messages to retrive or 0
    unsigned long m_RetrievalLimit;
    //@}
@@ -535,12 +537,12 @@ public:
        @param errflg   error level
        @param mf if non-NULL the folder
        */
-   static void mm_log(String str, long errflg, MailFolderCC *mf = NULL);
+   static void mm_log(const String& str, long errflg, MailFolderCC *mf = NULL);
 
    /** log a debugging message
        @param str    message string
        */
-   static void mm_dlog(String str);
+   static void mm_dlog(const String& str);
 
    /** get user name and password
        @param   mb   parsed mailbox specification
@@ -637,8 +639,8 @@ private:
    /// Used by the subscription management.
    class FolderListingCC *m_FolderListing;
 
-   /// Counts the number of new mails
-   UIdType CountNewMessages(void) const;
+   /// a private struct used during GetMessageFlags() call only
+   struct MessageFlagsData *m_flagsData;
 
    /**@name only used for ListFolders: */
    //@{

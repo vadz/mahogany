@@ -1634,6 +1634,10 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
     // filename
     wxASSERT_MSG( IsAbsPath(strName), "book name should be absolute" );
 
+#ifdef __WXMSW__
+    strName.Replace("\\", "/");
+#endif
+
     int nIndex = wxNOT_FOUND;
     size_t count = m_astrAdb.Count();
     for ( size_t n = 0; n < count; n++ ) {

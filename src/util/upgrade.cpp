@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "Mpch.h"
 
 #ifndef   USE_PCH
@@ -30,6 +31,7 @@
 
 #  include "Message.h"
 #  include "MailFolder.h"
+#  include "HeaderInfo.h"
 #  include "MailFolderCC.h"
 #  include "SendMessage.h"
 #  include "MessageCC.h"
