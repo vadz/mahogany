@@ -1,0 +1,38 @@
+#############################################################################
+## Name:        doc/Makefile.html
+## Purpose:     makefile to build Mahogany manual in HTML without configure,
+##              this is mainly useful for automatic unattended doc rebuilds
+## Author:      Vadim Zeitlin
+## Modified by:
+## Created:     22.03.01
+## RCS-ID:      $Id$
+## Copyright:   (c) 2001 Vadim Zeitlin <vadim@wxwindows.org>
+## License:     Mahogany license
+#############################################################################
+
+# configurable parameters
+
+# directories
+top_srcdir=..
+
+# tools
+LATEX=latex
+LATEX2HTML=latex2html
+
+# you shouldn't have to edit the rules below
+all: html
+
+Manual.tex: Manual.htex
+	$(top_srcdir)/extra/scripts/striphelpids $< > $@
+
+# latex2html needs the AUX file for cross-refs
+Manual.aux: Manual.tex
+	$(LATEX) Manual.tex < /dev/null
+
+html: Manual.aux
+	${LATEX2HTML} -local_icons -info 0 Manual.tex
+
+clean:
+	rm -rf Manual Manual.tex Manual.aux Manual.dvi
+
+.PHONY: html clean
