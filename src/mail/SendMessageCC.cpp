@@ -44,6 +44,13 @@
 
 #include "AddressCC.h"
 
+// has to be included before SendMessage.h, as it includes windows.h which
+// defines SendMessage under Windows
+#include <wx/fontmap.h>          // for GetEncodingName()
+#ifdef __CYGWIN__
+#  undef SendMessage
+#endif
+
 #include "SendMessage.h"
 #include "SendMessageCC.h"
 
@@ -55,7 +62,6 @@
 
 #include <wx/utils.h>            // wxGetFullHostName(), wxGetProcessId()
 #include <wx/file.h>
-#include <wx/fontmap.h>          // for GetEncodingName()
 #include <wx/datetime.h>
 
 extern bool InitSSL(); // from src/util/ssl.cpp

@@ -28,6 +28,11 @@
    #include "Mcommon.h"
 
    #include <wx/app.h>        // for wxPostEvent()
+   // it includes windows.h which defines SendMessage under Windows
+#ifdef __CYGWIN__
+   #undef SendMessage
+#endif
+
    #include <wx/sizer.h>
 
    #include <wx/gauge.h>

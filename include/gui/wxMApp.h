@@ -17,6 +17,11 @@
 #  include "MApplication.h"
 
 #  include <wx/app.h>
+// it includes windows.h which defines SendMessage under Windows
+#ifdef __CYGWIN__
+#  undef SendMessage
+#endif
+
 #  include <wx/help.h>
 #  include <wx/icon.h>
 #endif  //USE_PCH

@@ -63,6 +63,10 @@
 #include <wx/tokenzr.h>
 #include <wx/textbuf.h>
 #include <wx/fontutil.h>      // for wxNativeFontInfo
+// windows.h included from wx/fontutil.h under Windows #defines this
+#ifdef __CYGWIN__
+#  undef SendMessage
+#endif
 
 #include "wx/persctrl.h"
 

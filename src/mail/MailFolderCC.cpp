@@ -28,6 +28,9 @@
 #   include "strutil.h"
 #   include "MApplication.h"
 #   include "Profile.h"
+#ifdef __CYGWIN__
+#   include <wx/timer.h>
+#endif
 #endif // USE_PCH
 
 #include "MPython.h"
@@ -69,13 +72,20 @@
 #include <wx/filefn.h>
 #include <wx/file.h>
 
-// DecodeHeader() uses CharsetToEncoding()
-#include <wx/fontmap.h>
+// windows.h included from fontutil.h defines ERROR
+#ifdef __CYGWIN__
+#  undef   ERROR
+#endif
+#include <wx/fontmap.h>      // DecodeHeader() uses CharsetToEncoding()
+#ifdef __CYGWIN__
+#  undef   ERROR
+#  define  ERROR (long) 2 // HACK - redefine again as in extra/src/c-client/mail.h
+#endif
 
 #include <ctype.h>      // isspace()
 #include <sys/stat.h>   // struct stat
 
-#ifdef OS_UNIX
+#if defined(OS_UNIX) && !defined(__CYGWIN__)
    #include <signal.h>
 
    // wxTYPE_SA_HANDLER is defined by wxWindows configure script in its setup.h
@@ -4634,7 +4644,7 @@ MailFolderCC::CClientInit(void)
    mail_parameters(NULL, SET_READPROGRESS, (void *)mahogany_read_progress);
 #endif // USE_READ_PROGRESS
 
-#ifdef OS_UNIX
+#if defined(OS_UNIX) && !defined(__CYGWIN__)
    // install our own sigpipe handler to ignore (and not die) if a SIGPIPE
    // happens
    struct sigaction sa;

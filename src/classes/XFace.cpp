@@ -166,8 +166,6 @@ XFace::CreateFromXpm(const char *xpmdata)
 
 #if XFACE_WITH_WXIMAGE
 
-#include   <wx/image.h>
-
 /* static */
 wxImage
 XFace::GetXFaceImg(const String &filename, bool *hasimg, class wxWindow *parent)

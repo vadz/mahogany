@@ -25,8 +25,10 @@
 #   include <wx/menu.h>
 #   include <wx/statusbr.h>
 #   include <wx/statbox.h>
+#ifdef __CYGWIN__
+#   include <wx/timer.h>
 #endif
-
+#endif
 
 #include "MModule.h"
 #include "modules/Calendar.h"

@@ -22,6 +22,12 @@
 
 #include "MDialogs.h"
 
+#ifndef USE_PCH
+#ifdef __CYGWIN__
+#  include <wx/scrolwin.h>
+#endif
+#endif // USE_PCH
+
 // -----------------------------------------------------------------------------
 // forward declarations
 // -----------------------------------------------------------------------------

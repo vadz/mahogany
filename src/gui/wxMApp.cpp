@@ -60,7 +60,7 @@
 
 #include <wx/snglinst.h>
 
-#ifdef OS_WIN
+#if defined(OS_WIN) || defined(__CYGWIN__)
    #define wxConnection    wxDDEConnection
    #define wxServer        wxDDEServer
    #define wxClient        wxDDEClient

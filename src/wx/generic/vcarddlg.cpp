@@ -803,7 +803,7 @@ bool wxVCardAddressDialog::TransferDataFromWindow()
 // our public API
 // ----------------------------------------------------------------------------
 
-extern bool WXDLLEXPORT wxEditVCard(wxVCard *vcard)
+extern bool WXDLLMAYEXP wxEditVCard(wxVCard *vcard)
 {
     wxCHECK_MSG( vcard, FALSE, _T("NULL vCard not allowed in wxEditVCard") );
 

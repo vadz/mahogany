@@ -76,7 +76,7 @@
 
 #include <wx/printdlg.h>
 
-#if defined(OS_UNIX) && !defined(OS_MAC)
+#if defined(OS_UNIX) && !defined(OS_MAC) && !defined(__CYGWIN__)
     typedef wxGenericPrintDialog wxPrintDialog;
 #endif
 
