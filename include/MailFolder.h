@@ -212,7 +212,7 @@ public:
        @param send if true, send them
    */
    virtual void EnableNewMailEvents(bool send = true) = 0;
-   /** Query whether foldre is sending new mail events.
+   /** Query whether folder is sending new mail events.
        @return if true, folder sends them
    */
    virtual bool SendsNewMailEvents(void) const = 0;

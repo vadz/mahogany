@@ -125,6 +125,11 @@ CHECK:
      TEST!!!!
 - When mm_log reports a "Unexpected change", do a Ping(), trying to
   reopen the stream.
+- update the list of folders to poll for new mail when the folder
+  properties are changed, tricky.
+  --> Just add MAppBase::AddIncomingFolder()/RemoveIncomingFolder()
+      and keep a list of the folder names and MailFolder pointers.
+      Regularly check the incoming folders for validity, i.e. Ping() them.
 
 
 TODO:
@@ -133,12 +138,15 @@ TODO:
 
 for release:
 
+-- disable main frame updates if main frame folder is incoming folder, 
+   while collecting mail
+-- filter messages in mm_log/mm_notify
+
+- CHECK mailcollector for nntp: do mails get marked as read?
+  ++ if necessary, reopen folder??
+  ++ implement Add/Remove calls
+
 - remove dialog box in MailFolderCC::Ping about reopening folder!!!
-- update the list of folders to poll for new mail when the folder
-  properties are changed, tricky.
-  --> Just add MAppBase::AddIncomingFolder()/RemoveIncomingFolder()
-      and keep a list of the folder names and MailFolder pointers.
-      Regularly check the incoming folders for validity, i.e. Ping() them.
 
 - config panels are too small/too full, move font settings somewhere
   else, i.e. have a "layout" page?

@@ -127,11 +127,15 @@ public:
    */
    wxMimeTypesManager& GetMimeManager(void) const { return *m_mimeManager; }
 
-   /** Get this object's profile.
+   /** Get this object's profile, not reference counted.
        @return a pointer to the profile.
    */
    ProfileBase *GetProfile(void) const { return m_profile; }
 
+   /** Get the MailCollector object, not reference counted.
+       @return reference to the mailcollector object.
+   */
+   class MailCollector *GetCollectoor(void) const { return m_MailCollector; }
    /** Toggle display of log output window
        @param display true to show it
    */
@@ -187,5 +191,49 @@ protected:
 };
 
 extern MAppBase *mApplication;
+
+
+/** One object of this class is created by MApplication to collect new 
+    mail from all incoming folders.
+*/
+class MailCollector
+{
+public:
+   MailCollector();
+   ~MailCollector();
+   /// Returns true if the mailfolder mf is an incoming folder.
+   bool IsIncoming(MailFolder *mf);
+   /** Collect all mail from folder mf.
+       @param mf the folder to collect from
+       @return true on success
+   */
+   bool Collect(MailFolder *mf = NULL);
+   /** Tells the object about a new new mail folder.
+       @param name use this folder as the new mail folder
+   */
+   void SetNewMailFolder(const String &name) {}
+   /** Adds a new incoming folder to the list.
+       @param name folder to collect from
+   */
+   void AddIncomingFolder(const String &name) {}
+   /** Removes an incoming folder from the list.
+       @param name no longer collect from this folder
+   */
+   void RemoveIncomingFolder(const String &name) {}
+   /** Returns true if the collector is currently collecting mail.
+       @return true if collecting
+   */
+   bool IsCollecting(void) const { return m_IsCollecting; }
+protected:
+   /// Collect mail from this one folder.
+   bool CollectOneFolder(MailFolder *mf);
+private:
+   /// a list of folder names and mailfolder pointers
+   class MailFolderList *m_list;
+   /// the folder to save new mail to
+   MailFolder     *m_NewMailFolder;
+   /// are we currently collecting?
+   bool           m_IsCollecting;
+};
 
 #endif   // MAPPLICATION_H

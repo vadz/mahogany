@@ -80,6 +80,7 @@ struct MailFolderEntry
 
 KBLIST_DEFINE(MailFolderList, MailFolderEntry);
 
+/// only used by MailCollector to find incoming folders
 class MAppFolderTraversal : public MFolderTraversal
 {
 public:
@@ -95,15 +96,11 @@ public:
          {
             wxLogDebug("Found incoming folder '%s'.",
                        folderName.c_str());
-            ProfileBase *p = ProfileBase::CreateProfile(folderName);
-            MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,
-                                                    folderName,
-                                                    p);
+            MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
             MailFolderEntry *e = new MailFolderEntry;
             e->m_name = folderName;
             e->m_folder = mf;
             m_list->push_back(e);
-            p->DecRef();
          }
          f->DecRef();
          return true;
@@ -116,27 +113,11 @@ private:
 
 
 
-class MailCollector : public MObject
-{
-public:
-   MailCollector();
-   ~MailCollector();
-   bool IsIncoming(MailFolder *mf);
-   bool Collect(MailFolder *mf = NULL);
-   void SetNewMailFolder(const String &name) {}
-   void AddIncomingFolder(const String &name) {}
-   void RemoveIncomingFolder(const String &name) {}
-protected:
-   bool CollectOneFolder(MailFolder *mf);
-private:
-   MailFolderList m_list;
-   MailFolder     *m_NewMailFolder;
-};
-
-
 MailCollector::MailCollector(void)
 {
-   MAppFolderTraversal t (&m_list);
+   m_IsCollecting = false;
+   m_list = new MailFolderList;
+   MAppFolderTraversal t (m_list);
    if(! t.Traverse(true))
       wxLogError(_("Cannot build list of incoming mail folders."));
    // keep it open all the time to speed things up
@@ -147,17 +128,18 @@ MailCollector::MailCollector(void)
 MailCollector::~MailCollector(void)
 {
    MailFolderList::iterator i;
-   for(i = m_list.begin();i != m_list.end(); i++)
+   for(i = m_list->begin();i != m_list->end(); i++)
       (**i).m_folder->DecRef();
    if(m_NewMailFolder)
       m_NewMailFolder->DecRef();
+   delete m_list;
 }
 
 bool
 MailCollector::IsIncoming(MailFolder *mf)
 {
    MailFolderList::iterator i;
-   for(i = m_list.begin();i != m_list.end();i++)
+   for(i = m_list->begin();i != m_list->end();i++)
       if((**i).m_folder == mf)
          return true;
    return false;
@@ -166,28 +148,36 @@ MailCollector::IsIncoming(MailFolder *mf)
 bool
 MailCollector::Collect(MailFolder *mf)
 {
+   bool rc = true;
    if(m_NewMailFolder)
+   {
+      m_NewMailFolder->EnableNewMailEvents(false);
       m_NewMailFolder->Ping();
+   }
 
    MailFolderList::iterator i;
    if(mf == NULL)
    {
-      bool rc = true;
-      for(i = m_list.begin();i != m_list.end();i++)
+      for(i = m_list->begin();i != m_list->end();i++)
          rc &= CollectOneFolder((*i)->m_folder);
-      return rc;
    }
    else
-      return CollectOneFolder(mf);
+      rc = CollectOneFolder(mf);
+   if(m_NewMailFolder)
+      m_NewMailFolder->EnableNewMailEvents(true);
+   return rc;
 }
 
 bool
 MailCollector::CollectOneFolder(MailFolder *mf)
 {
    ASSERT(mf);
-
+   bool rc;
+   
+   m_IsCollecting = true;
    wxLogDebug(_("Auto-collecting mail from incoming folder '%s'."),
                 mf->GetName().c_str());
+   bool sendsEvents = mf->SendsNewMailEvents();
    mf->Ping(); //update it
    INTARRAY selections;
 
@@ -203,10 +193,14 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    {
       mf->DeleteMessages(&selections);
       mf->ExpungeMessages();
-      return true;
+      m_IsCollecting = false;
+      rc = true;
    }
    else
-      return false;
+      rc = false;
+   mf->EnableNewMailEvents(sendsEvents);
+   m_IsCollecting = false;
+   return rc;
 }
 
 // ----------------------------------------------------------------------------

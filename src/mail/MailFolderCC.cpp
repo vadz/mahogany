@@ -987,10 +987,13 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
     @param errflg error level
 */
 void
-MailFolderCC::mm_log(String str, long /* errflg */)
+MailFolderCC::mm_log(String str, long errflg )
 {
    String  msg = _("c-client log: ");
    msg += str;
+#ifdef DEBUG
+   msg << _(" error level: ") << strutil_ultoa(errflg);
+#endif
    LOGMESSAGE((M_LOG_INFO, Str(msg)));
    const char *unexpected = "Unexpected change";
    if(strstr(str,unexpected) != NULL)

@@ -221,8 +221,12 @@ MailFolder::DeleteMessages(const INTARRAY *selections)
 {
    int n = selections->Count();
    int i;
-   for(i = 0; i < n; i++)
-      DeleteMessage((*selections)[i]);
+   String sequence;
+   for(i = 0; i < n-1; i++)
+      sequence << strutil_ultoa((*selections)[i]) << ',';
+   if(n)
+      sequence << strutil_ultoa((*selections)[n-1]);
+   SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
 }
 
 void
