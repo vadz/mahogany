@@ -28,6 +28,9 @@ $Id$
 - configure: USE_WXCONFIG does not get defined ?
 
 - WINDOWS: how to do MIME handling?
+  + as follows: MIME type => file extension => file type => can execute it
+    (also, a file type has an associated description and icon: the only
+     problem is that for now I don't have any attachments at all)                 
 
 - DND with gmc (dead easy, see dnd example :-) )
 
@@ -38,10 +41,11 @@ $Id$
 
 *** to implement in near future ***
 
+- !!! non-blocking message retrieval !!!
+
 - add support for popping window open and reading a folder of one's choice
   (for being controlled from xbiff like programs)
   idea: listen() on a socket and write socket number to a file ~/.M/socket 
-
 
 - threading of messages via MessageId/References header lines
   Follow examples in SunExpert journal.
@@ -58,6 +62,7 @@ $Id$
 - lots of dialogs for profile settings required
 
 - support for external editor (WHAT!? KB)
+  + I want vim
 
 - fix non-ASCII characters in header lines
 
