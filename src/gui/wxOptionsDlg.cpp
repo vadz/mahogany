@@ -1602,6 +1602,7 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
       wxPMessageBoxEnable(MP_CONFIRMEXIT,
                           READ_CONFIG(m_Profile, MP_CONFIRMEXIT) != 0);
 
+      // restart the timer if the timeout changed
       long nAutosaveDelay = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);
       if ( nAutosaveDelay != m_nAutosaveDelay )
       {
@@ -1611,6 +1612,13 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
 
             rc = false;
          }
+      }
+
+      // show/hide the log window depending on the new setting value
+      bool showLog = READ_CONFIG(m_Profile, MP_SHOWLOG);
+      if ( showLog != mApplication->IsLogShown() )
+      {
+         mApplication->ShowLog(showLog);
       }
    }
 

@@ -27,7 +27,7 @@ class wxIconManager;
 
 /// Define this to have an online status icon in the statusbar
 #ifdef DEBUG
-#   define USE_STATUSBARICON 
+#   define USE_STATUSBARICON
 #endif
 
 
@@ -53,6 +53,9 @@ public:
    virtual bool StartTimer(Timer timer);
    virtual bool StopTimer(Timer timer);
 
+   virtual bool IsLogShown() const;
+   virtual void ShowLog(bool doShow = TRUE);
+
    // override this to return true only if all frames can close
    virtual bool CanClose() const;
 
@@ -64,10 +67,10 @@ public:
    /// override wxWindows default icons
    virtual wxIcon GetStdIcon(int which) const;
 
-   /// OnIdle() handler to process Mahogany-specific MEvents which are 
+   // OnIdle() handler to process Mahogany-specific MEvents which are
    // asynchronous.
    void OnIdle(wxIdleEvent &event);
-   
+
    /** Gets help for a specific topic.
        @param id help id from MHelp.h
    */
@@ -142,6 +145,10 @@ private:
    class wxDialUpManager *m_OnlineManager;
    /// are we currently online?
    bool m_IsOnline;
+
+   /// the log window (may be NULL)
+   class wxMLogWindow *m_logWindow;
+
    DECLARE_EVENT_TABLE()
 };
 

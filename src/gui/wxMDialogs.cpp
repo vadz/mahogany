@@ -780,15 +780,17 @@ class wxAboutFrame : public wxFrame
 {
 public:
    wxAboutFrame(bool bCloseOnTimeout);
-   virtual ~wxAboutFrame()
+   virtual ~wxAboutFrame() { g_pSplashScreen = NULL; }
+
+   void Close(void)
    {
+      m_Window->StopTimer();
+      wxWindow::Close();
+
       // remove our temp log redirector
       delete wxLog::GetActiveTarget();
 
-      g_pSplashScreen = NULL;
    }
-
-   void Close(void) { m_Window->StopTimer(); wxWindow::Close(); }
 
 private:
    wxAboutWindow *m_Window;
@@ -2077,7 +2079,7 @@ void CheckExpungeDialog(ASMailFolder *mf, wxWindow *parent)
                              parent,
                              MDIALOG_YESNOTITLE,
                              true,
-                             ProfileBase::FilterProfileName(mf->GetProfile()->GetName())+"_AutoExpunge"))
+                             mf->GetProfile()->GetName()+"/AutoExpunge"))
    {
       (void) mf->ExpungeMessages();
    }
@@ -2135,6 +2137,8 @@ static const struct
    { "FolderGroupHint",          gettext_noop("show explanation after creating a folder group") },
    { "SignatureTooLong",         gettext_noop("warn if signature is longer than netiquette recommends") },
    { "RememberPwd",              gettext_noop("propose to remember passwords entered interactively") },
+   { "ShowLogWinHint",           gettext_noop("show the hint about reopening the log window when it is being closed") },
+   { "AutoExpunge",              gettext_noop("ask to expunge deleted messages before closing the folder") },
    //{ "", gettext_noop("") },
 };
 

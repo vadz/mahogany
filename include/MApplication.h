@@ -215,6 +215,17 @@ public:
    bool RestartTimer(Timer timer)
       { return StopTimer(timer) && StartTimer(timer); }
 
+   /** @name Log window */
+   //@{
+
+   /// return TRUE if the log window is currently shown
+   virtual bool IsLogShown() const = 0;
+
+   /// show or hide the log window
+   virtual void ShowLog(bool doShow = TRUE) = 0;
+
+   //@}
+
    /** @name Thread control */
    //@{
    /** An enum holding the possible sections that we can lock in

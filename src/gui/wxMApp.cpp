@@ -82,8 +82,13 @@ public:
    // ctor (creates the frame hidden)
    wxMLogWindow(wxFrame *pParent, const char *szTitle);
 
-   // override base class virtual to implement saving the frame position
+   // override base class virtual to implement saving the frame position and
+   // to update the MP_SHOWLOG option
+   virtual bool OnFrameClose(wxFrame *frame);
    virtual void OnFrameDelete(wxFrame *frame);
+
+   // are we currently shown?
+   bool IsShown() const;
 
 private:
    bool m_hasWindow;
@@ -173,6 +178,7 @@ IMPLEMENT_APP(wxMApp);
 // ----------------------------------------------------------------------------
 // wxMLogWindow
 // ----------------------------------------------------------------------------
+
 wxMLogWindow::wxMLogWindow(wxFrame *pParent, const char *szTitle)
             : wxLogWindow(pParent, szTitle, FALSE)
 {
@@ -185,6 +191,31 @@ wxMLogWindow::wxMLogWindow(wxFrame *pParent, const char *szTitle)
 
    m_hasWindow = true;
    Show();
+}
+
+bool wxMLogWindow::IsShown() const
+{
+   if ( !m_hasWindow )
+      return false;
+
+   return GetFrame()->IsShown();
+}
+
+bool wxMLogWindow::OnFrameClose(wxFrame *frame)
+{
+   // disable the log window
+   mApplication->GetProfile()->writeEntry(MP_SHOWLOG, 0l);
+
+   MDialog_Message(_("You have closed the log window and it will not be "
+                     "opened automatically again any more.\n"
+                     "To make it appear again, you should change the "
+                     "corresponding setting in the\n"
+                     "'Miscellaneous' page of the Preferences dialog."),
+                   NULL,
+                   MDIALOG_MSGTITLE,
+                   "ShowLogWinHint");
+
+   return wxLogWindow::OnFrameClose(frame); // TRUE, normally
 }
 
 void wxMLogWindow::OnFrameDelete(wxFrame *frame)
@@ -294,6 +325,7 @@ wxMApp::wxMApp(void)
    m_IdleTimer = NULL;
    m_OnlineManager = NULL;
    m_DialupSupport = FALSE;
+   m_logWindow = NULL;
 }
 
 wxMApp::~wxMApp()
@@ -577,8 +609,9 @@ wxMApp::OnInit()
       }
 
       // now we can create the log window
-      if ( READ_APPCONFIG(MP_SHOWLOG) ) {
-         (void)new wxMLogWindow(m_topLevelFrame, _("Mahogany : Activity Log"));
+      if ( READ_APPCONFIG(MP_SHOWLOG) )
+      {
+         ShowLog();
 
          // we want it to be above the log frame
          m_topLevelFrame->Raise();
@@ -834,7 +867,8 @@ wxMApp::LoadModules(void)
          // remember it so we can decref it before exiting
          gs_GlobalModulesList.push_back(new MModuleEntry(module));
 #ifdef DEBUG
-         INFOMESSAGE(("Successfully loaded module:\nName: %s\nDescr: %s\nVersion: %s\n",
+         LOGMESSAGE((M_LOG_WINONLY,
+                   "Successfully loaded module:\nName: %s\nDescr: %s\nVersion: %s\n",
                    module->GetName(),
                    module->GetDescription(),
                    module->GetVersion()));
@@ -1217,4 +1251,39 @@ wxMApp::FatalError(const char *message)
 #else
    OnFatalException();
 #endif
+}
+
+// ----------------------------------------------------------------------------
+// log window support (see also wxMLogWindow)
+// ----------------------------------------------------------------------------
+
+bool wxMApp::IsLogShown() const
+{
+   return m_logWindow && m_logWindow->IsShown();
+}
+
+void wxMApp::ShowLog(bool doShow)
+{
+   if ( !m_logWindow )
+   {
+      if ( doShow )
+      {
+         // close the splash first as otherwise we get a subtle bug: the
+         // splash screen installs its own (temp) log handler and deletes itin
+         // its dtor, however if we install ourselves as the log handler in
+         // the meanwhile, _we_ will be deleted - which we don't want to
+         // happen
+         CloseSplash();
+
+         // create the log window
+         m_logWindow = new wxMLogWindow(m_topLevelFrame,
+                                        _("Mahogany : Activity Log"));
+      }
+      //else: nothing to do
+   }
+   else
+   {
+      // reuse the existing one
+      m_logWindow->Show(doShow);
+   }
 }
