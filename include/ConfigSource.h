@@ -44,6 +44,9 @@
 
 class WXDLLEXPORT wxConfigBase;
 
+/// The name of the config section containing the config sources info
+#define M_CONFIGSRC_CONFIG_SECTION _T("/M/Configs")
+
 /**
    ConfigSource is a source of configuration information.
 
@@ -54,6 +57,28 @@ class WXDLLEXPORT wxConfigBase;
 class ConfigSource : public MObjectRC
 {
 public:
+   /**
+      This class is used with GetFirst/NextEntry/Group().
+   */
+   class EnumData
+   {
+   public:
+      EnumData() { }
+
+      // for internal use only
+      String& Key() { return m_key; }
+      long& Cookie() { return m_cookie; }
+
+   private:
+      String m_key;
+      long m_cookie;
+
+      // we can't be copied
+      EnumData(const EnumData&);
+      EnumData& operator=(const EnumData&);
+   };
+
+
    /**
       @name Creating config sources.
 
@@ -154,8 +179,8 @@ public:
 
       As above, onlky strings and longs are directly supported.
 
-      All methods below return true if ok and false on error -- this should be
-      checked for and handled!
+      All Write() methods below return true if ok and false on error -- this
+      should be checked for and handled!
     */
    //@{
 
@@ -164,6 +189,16 @@ public:
 
    /// Write an integer
    virtual bool Write(const String& name, long value) = 0;
+
+   /**
+      Flush, i.e. permanently save, the data written to this config source.
+
+      This may do nothing at all or take a long time to complete depending on
+      the implementation.
+
+      @return true if the data was successfully flushed, false on error
+    */
+   virtual bool Flush() = 0;
 
    //@}
 
@@ -179,30 +214,68 @@ public:
    //@{
 
    /// Get the first subgroup of the given key
-   virtual bool GetFirstGroup(String& group, long& cookie) const = 0;
+   virtual bool GetFirstGroup(const String& key,
+                                 String& group, EnumData& cookie) const = 0;
 
    /// Get the next subgroup of the given key
-   virtual bool GetNextGroup(String& group, long& cookie) const = 0;
+   virtual bool GetNextGroup(String& group, EnumData& cookie) const = 0;
 
    /// Get the first entry of the given key
-   virtual bool GetFirstEntry(String& entry, long& cookie) const = 0;
+   virtual bool GetFirstEntry(const String& key,
+                                 String& entry, EnumData& cookie) const = 0;
 
    /// Get the next entry of the given key
-   virtual bool GetNextEntry(String& entry, long& cookie) const = 0;
+   virtual bool GetNextEntry(String& entry, EnumData& cookie) const = 0;
+
+   /**
+      Checks whether the given group exists.
+
+      Note to implementors: the path may contain slashes, so this function
+      should recurse for each path component, not just enumerate all immediate
+      subgroups!
+
+      @param path the group to check existence of
+      @return true if the group exists (even if it is empty), false otherwise
+    */
+   virtual bool HasGroup(const String& path) const = 0;
+
+   /**
+      Checks whether the given entry exists.
+
+      @sa HasGroup
+
+      @param path the entry to check existence of (may contain slashes)
+      @return true if the entry exists
+    */
+   virtual bool HasEntry(const String& path) const = 0;
 
    //@}
 
 
    /**
-      @name Deleting entries and groups.
+      @name Other operations on entries and groups.
     */
    //@{
 
-   /// Delete the given entry
+   /// Delete the given entry (it must exist).
    virtual bool DeleteEntry(const String& name) = 0;
 
    /// Delete the group with all its subgroups (TAKE CARE!)
    virtual bool DeleteGroup(const String& name) = 0;
+
+   /**
+      Copy the given entry (maybe to another group).
+    */
+   virtual bool CopyEntry(const String& nameSrc, const String& nameDst) = 0;
+
+   /**
+      Rename a group.
+
+      We don't provide a method for entry renaming first because we don't need
+      it right now and second because doing it is already possible using
+      CopyEntry() and DeleteEntry().
+    */
+   virtual bool RenameGroup(const String& nameOld, const String& nameNew) = 0;
 
    //@}
 
@@ -242,6 +315,7 @@ public:
       @param name the name for the ConfigSource object
     */
    ConfigSourceLocal(const String& filename, const String& name = _T(""));
+   virtual ~ConfigSourceLocal();
 
    // implement base class pure virtuals
    virtual bool IsOk() const;
@@ -250,14 +324,25 @@ public:
    virtual bool Read(const String& name, long *value) const;
    virtual bool Write(const String& name, const String& value);
    virtual bool Write(const String& name, long value);
-   virtual bool GetFirstGroup(String& group, long& cookie) const;
-   virtual bool GetNextGroup(String& group, long& cookie) const;
-   virtual bool GetFirstEntry(String& entry, long& cookie) const;
-   virtual bool GetNextEntry(String& entry, long& cookie) const;
+   virtual bool Flush();
+   virtual bool GetFirstGroup(const String& key,
+                                 String& group, EnumData& cookie) const;
+   virtual bool GetNextGroup(String& group, EnumData& cookie) const;
+   virtual bool GetFirstEntry(const String& key,
+                                 String& entry, EnumData& cookie) const;
+   virtual bool GetNextEntry(String& entry, EnumData& cookie) const;
+   virtual bool HasGroup(const String& path) const;
+   virtual bool HasEntry(const String& path) const;
    virtual bool DeleteEntry(const String& name);
    virtual bool DeleteGroup(const String& name);
+   virtual bool CopyEntry(const String& nameSrc, const String& nameDst);
+   virtual bool RenameGroup(const String& nameOld, const String& nameNew);
+
+   // for internal use by ProfileImpl only, don't use elsewhere
+   wxConfigBase *GetConfig() const { return m_config; }
 
 private:
+   // the config object we use
    wxConfigBase *m_config;
 };
 
@@ -441,14 +526,7 @@ public:
       virtual ConfigSource *Create(const ConfigSource& config,             \
                                    const String& name)                     \
       {                                                                    \
-         cname *configNew = new cname(config, name);                       \
-         if ( !configNew->IsOk() )                                         \
-         {                                                                 \
-            configNew->DecRef();                                           \
-            configNew = NULL;                                              \
-         }                                                                 \
-                                                                           \
-         return configNew;                                                 \
+         return new cname(config, name);                                   \
       }                                                                    \
                                                                            \
    private:                                                                \

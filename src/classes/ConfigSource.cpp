@@ -46,6 +46,8 @@
    #include <fcntl.h>
 #endif //Unix
 
+#include <errno.h>
+
 #include "ConfigSource.h"
 
 #include "Mdefaults.h"
@@ -110,7 +112,15 @@ ConfigSource::Create(const ConfigSource& config, const String& name)
       return NULL;
    }
 
-   return factory->Create(config, name);
+   ConfigSource *configNew = factory->Create(config, name);
+   if ( configNew && !configNew->IsOk() )
+   {
+      // creation failed, don't return an invalid object
+      configNew->DecRef();
+      configNew = NULL;
+   }
+
+   return configNew;
 }
 
 ConfigSource::~ConfigSource()
@@ -237,6 +247,9 @@ ConfigSourceFactory::Find(const String& type)
 
 ConfigSourceLocal::ConfigSourceLocal(const String& filename, const String& name)
                  : ConfigSource(name), m_config(NULL)
+#ifdef OS_WIN
+                   , m_usingRegConfig(false)
+#endif // OS_WIN
 {
    String localFilePath, globalFilePath;
 
@@ -413,6 +426,8 @@ ConfigSourceLocal::ConfigSourceLocal(const String& filename, const String& name)
                         wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE
                      );
 
+      m_usingRegConfig = true;
+
       // skip wxFileConfig creation below
       return;
    }
@@ -436,6 +451,12 @@ ConfigSourceLocal::ConfigSourceLocal(const String& filename, const String& name)
    fileconf->SetUmask(0077);
 
    m_config = fileconf;
+}
+
+ConfigSourceLocal::~ConfigSourceLocal()
+{
+   // don't try to recreate us
+   wxConfig::Set(NULL);
 }
 
 // ----------------------------------------------------------------------------
@@ -476,24 +497,57 @@ bool ConfigSourceLocal::Write(const String& name, long value)
    return m_config->Write(name, value);
 }
 
-bool ConfigSourceLocal::GetFirstGroup(String& group, long& cookie) const
+bool ConfigSourceLocal::Flush()
 {
-   return m_config->GetFirstGroup(group, cookie);
+   return m_config->Flush();
 }
 
-bool ConfigSourceLocal::GetNextGroup(String& group, long& cookie) const
+bool
+ConfigSourceLocal::GetFirstGroup(const String& key,
+                                 String& group,
+                                 EnumData& cookie) const
 {
-   return m_config->GetNextGroup(group, cookie);
+   cookie.Key() = key;
+
+   m_config->SetPath(key);
+
+   return m_config->GetFirstGroup(group, cookie.Cookie());
 }
 
-bool ConfigSourceLocal::GetFirstEntry(String& entry, long& cookie) const
+bool ConfigSourceLocal::GetNextGroup(String& group, EnumData& cookie) const
 {
-   return m_config->GetFirstEntry(entry, cookie);
+   m_config->SetPath(cookie.Key());
+
+   return m_config->GetNextGroup(group, cookie.Cookie());
 }
 
-bool ConfigSourceLocal::GetNextEntry(String& entry, long& cookie) const
+bool
+ConfigSourceLocal::GetFirstEntry(const String& key,
+                                 String& entry,
+                                 EnumData& cookie) const
 {
-   return m_config->GetNextEntry(entry, cookie);
+   cookie.Key() = key;
+
+   m_config->SetPath(key);
+
+   return m_config->GetFirstEntry(entry, cookie.Cookie());
+}
+
+bool ConfigSourceLocal::GetNextEntry(String& entry, EnumData& cookie) const
+{
+   m_config->SetPath(cookie.Key());
+
+   return m_config->GetNextEntry(entry, cookie.Cookie());
+}
+
+bool ConfigSourceLocal::HasGroup(const String& path) const
+{
+   return m_config->HasGroup(path);
+}
+
+bool ConfigSourceLocal::HasEntry(const String& path) const
+{
+   return m_config->HasEntry(path);
 }
 
 bool ConfigSourceLocal::DeleteEntry(const String& name)
@@ -504,6 +558,54 @@ bool ConfigSourceLocal::DeleteEntry(const String& name)
 bool ConfigSourceLocal::DeleteGroup(const String& name)
 {
    return DeleteGroup(name);
+}
+
+bool ConfigSourceLocal::CopyEntry(const String& nameSrc, const String& nameDst)
+{
+   bool rc = true;
+
+   if ( m_config->HasEntry(nameSrc) )
+   {
+      switch ( m_config->GetEntryType(nameSrc) )
+      {
+         case wxConfigBase::Type_Unknown:
+         case wxConfigBase::Type_Float:
+         case wxConfigBase::Type_Boolean:
+            wxFAIL_MSG(_T("unexpected entry type"));
+            // fall through
+
+         case wxConfigBase::Type_String:
+            // GetEntryType() returns string for all wxFileConfig entries, so
+            // try to correct it here
+            {
+               wxString val;
+               if ( m_config->Read(nameSrc, &val) )
+               {
+                  long l;
+                  if ( val.ToLong(&l) )
+                     rc = m_config->Write(nameDst, l);
+                  else
+                     rc = m_config->Write(nameDst, val);
+               }
+            }
+            break;
+
+         case wxConfigBase::Type_Integer:
+            {
+               long l;
+               rc = m_config->Read(nameSrc, &l) && m_config->Write(nameDst, l);
+            }
+            break;
+      }
+   }
+
+   return rc;
+}
+
+bool
+ConfigSourceLocal::RenameGroup(const String& nameOld, const String& nameNew)
+{
+   return m_config->RenameGroup(nameOld, nameNew);
 }
 
 // ============================================================================
