@@ -136,7 +136,7 @@ public:
       @param name the name of the key to read it from
       @param value pointer to the result, must not be NULL!
     */
-   virtual bool Read(const String& name, String *value) = 0;
+   virtual bool Read(const String& name, String *value) const = 0;
 
    /**
       Read an integer
@@ -144,7 +144,7 @@ public:
       @param name the name of the key to read it from
       @param value pointer to the result, must not be NULL!
     */
-   virtual bool Read(const String& name, long *value) = 0;
+   virtual bool Read(const String& name, long *value) const = 0;
 
    //@}
 
@@ -246,8 +246,8 @@ public:
    // implement base class pure virtuals
    virtual bool IsOk() const;
    virtual bool IsLocal() const;
-   virtual bool Read(const String& name, String *value);
-   virtual bool Read(const String& name, long *value);
+   virtual bool Read(const String& name, String *value) const;
+   virtual bool Read(const String& name, long *value) const;
    virtual bool Write(const String& name, const String& value);
    virtual bool Write(const String& name, long value);
    virtual bool GetFirstGroup(String& group, long& cookie) const;
@@ -266,13 +266,58 @@ private:
    ConfigSourceFactory creates ConfigSource objects.
 
    This class is used to create config sources from their types.
-
-   It derives from MModule which means that config source factories can be
-   loaded during run-time as/if needed.
  */
-class ConfigSourceFactory : public MModule
+class ConfigSourceFactory : public MObjectRC
 {
 public:
+   /**
+      This class is used by GetFirst() and GetNext() internally.
+
+      To enumerate all config source factories you should simply do something
+      like this:
+      @code
+         ConfigSourceFactory::EnumData data;
+         for ( ConfigSourceFactory *fact = ConfigSourceFactory::GetFirst(data);
+               fact;
+               fact = ConfigSourceFactory::GetNext(data) )
+         {
+            ... do whatever with fact ...
+
+            fact->DecRef();
+         }
+      @endcode
+    */
+   class EnumData
+   {
+   public:
+      EnumData();
+      ~EnumData();
+
+   private:
+      // for ConfigSourceFactory::GetFirst() only: resets the object ot the
+      // initial state
+      void Reset();
+
+      // for ConfigSourceFactory::GetNext() only: returns the next listing
+      // entry or NULL if no more
+      const MModuleListingEntry *GetNext();     
+
+      
+      // the listing containing all config source factory modules
+      MModuleListing *m_listing;
+
+      // the index of the next element to be returned
+      size_t m_current;
+
+
+      // we can't be copied
+      EnumData(const EnumData&);
+      EnumData& operator=(const EnumData&);
+
+      friend class ConfigSourceFactory;
+   };
+
+
    /**
       Finds the factory for creating the config sources of given type.
 
@@ -280,6 +325,44 @@ public:
       @return the factory for the objects of this type or NULL if none
     */
    static ConfigSourceFactory *Find(const String& type);
+
+   /**
+      Get the first factory.
+
+      This function and the next one allow to enumerate all available config
+      sources factories.
+
+      The caller is responsible for calling DecRef() on the returned pointer if
+      it is not NULL.
+
+      @param cookie the enumeration data, should be passed to GetNext() later
+      @return the first factory in the list or NULL
+    */
+   static ConfigSourceFactory *GetFirst(EnumData& cookie);
+
+   /**
+      Get the next factory.
+
+      This function is used together with GetFirst() to enumerate all avilable
+      factories.
+
+      The caller is responsible for calling DecRef() on the returned pointer if
+      it is not NULL.
+
+      @param cookie the same cookie as used with GetFirst() previously
+      @return the next factory in the list or NULL
+    */
+   static ConfigSourceFactory *GetNext(EnumData& cookie);
+
+
+   /**
+      Get the string identifying this config source factory.
+
+      The factory types are case-insensitive.
+
+      @return string uniquely identifying this factory.
+    */
+   virtual const char *GetType() const = 0;
 
    /**
       Creates the config source object.
@@ -299,17 +382,32 @@ public:
 DECLARE_AUTOPTR(ConfigSourceFactory);
 
 /**
+   ConfigSourceFactoryModule is used to load ConfigSourceFactory from shared
+   libraries during run-time.
+ */
+class ConfigSourceFactoryModule : public MModule
+{
+public:
+   /**
+      Creates the config factory implemented by this module.
+
+      @return pointer to the factory to be DecRef()'d by the caller or NULL
+    */
+   virtual ConfigSourceFactory *CreateFactory() = 0;
+};
+
+/**
    The config source module interface name.
 
    ConfigSourceFactory::Find() uses this to find all modules containing
    ConfigSourceFactory implementations.
  */
-#define CONIFG_SOURCE_INTERFACE _T("ConfigSource")
+#define CONFIG_SOURCE_INTERFACE _T("ConfigSource")
 
 /**
-   This macro is used to create ConfigSourceFactory-derived classes.
+   This macro is used to create ConfigSourceFactoryModule-derived classes.
 
-   The implementation of classes deriving from ConfigSourceFactory is
+   The implementation of classes deriving from ConfigSourceFactoryModule is
    straightforward: we just have to create an object of the specified class in
    Create() and return it so we provide a macro to automate this.
 
@@ -323,18 +421,18 @@ DECLARE_AUTOPTR(ConfigSourceFactory);
    @param cpyright the module author/copyright string
  */
 #define IMPLEMENT_CONFIG_SOURCE(cname, type, desc, cpyright)               \
-   class cname##Factory : public ConfigSourceFactory                       \
+   class cname##Factory : public ConfigSourceFactoryModule                 \
    {                                                                       \
    public:                                                                 \
       virtual const char *GetType() const { return type; }                 \
                                                                            \
       virtual ConfigSource *Create(const ConfigSource& config,             \
-                                   const St& name)                         \
+                                   const String& name)                     \
       {                                                                    \
          cname *configNew = new cname(config, name);                       \
          if ( !configNew->IsOk() )                                         \
          {                                                                 \
-            delete configNew;                                              \
+            configNew->DecRef();                                           \
             configNew = NULL;                                              \
          }                                                                 \
                                                                            \
@@ -345,7 +443,7 @@ DECLARE_AUTOPTR(ConfigSourceFactory);
       DEFAULT_ENTRY_FUNC;                                                  \
    };                                                                      \
    MMODULE_BEGIN_IMPLEMENT(cname##Factory, #cname,                         \
-                           CONIFG_SOURCE_INTERFACE, desc, "1.00")          \
+                           CONFIG_SOURCE_INTERFACE, desc, "1.00")          \
       MMODULE_PROP("author", cpyright)                                     \
    MMODULE_END_IMPLEMENT(cname##Factory)                                   \
    MModule *cname##Factory::Init(int /* version_major */,                  \

@@ -51,6 +51,24 @@
 #include "Mdefaults.h"
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// the type of the local config source
+#define CONFIG_SOURCE_TYPE_LOCAL "local"
+
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+class ConfigSourceLocalFactory : public ConfigSourceFactory
+{
+public:
+   virtual const char *GetType() const { return CONFIG_SOURCE_TYPE_LOCAL; }
+   virtual ConfigSource *Create(const ConfigSource& config, const String& name);
+};
+
+// ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
 
@@ -60,10 +78,14 @@ extern const MOption MP_CONFIG_SOURCE_TYPE;
 // ConfigSource implementation
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// CreateXXX() methods
+// ----------------------------------------------------------------------------
+
 /* static */ ConfigSource *
 ConfigSource::CreateDefault(const String& filename)
 {
-   return ConfigSourceLocal(filename);
+   return new ConfigSourceLocal(filename);
 }
 
 /* static */ ConfigSource *
@@ -71,7 +93,7 @@ ConfigSource::Create(const ConfigSource& config, const String& name)
 {
    // get the type of config source to create
    String type;
-   if ( !config.Read(GetOptionName(MP_CONFIG_SOURCE_TYPE), value) )
+   if ( !config.Read(GetOptionName(MP_CONFIG_SOURCE_TYPE), &type) )
    {
       wxLogError(_("Invalid config source \"%s\" without type."), name.c_str());
 
@@ -97,8 +119,121 @@ ConfigSource::~ConfigSource()
 }
 
 // ============================================================================
+// ConfigSourceFactory implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// ConfigSourceFactory::EnumData implementation
+// ----------------------------------------------------------------------------
+
+ConfigSourceFactory::EnumData::EnumData()
+{
+   m_listing = NULL;
+}
+
+void ConfigSourceFactory::EnumData::Reset()
+{
+   if ( m_listing )
+   {
+      m_listing->DecRef();
+      m_listing = NULL;
+   }
+}
+
+const MModuleListingEntry *ConfigSourceFactory::EnumData::GetNext()
+{
+   // retrieve the listing if not done yet
+   if ( !m_listing )
+   {
+      m_listing = MModule::ListAvailableModules(CONFIG_SOURCE_INTERFACE);
+      if ( !m_listing )
+      {
+         // no config source modules at all
+         return NULL;
+      }
+
+      m_current = 0;
+   }
+
+   if ( m_current == m_listing->Count() )
+   {
+      // no more
+      return NULL;
+   }
+
+   return &(*m_listing)[m_current++];
+}
+
+ConfigSourceFactory::EnumData::~EnumData()
+{
+   if ( m_listing )
+      m_listing->DecRef();
+}
+
+// ----------------------------------------------------------------------------
+// enumerating the config source factories
+// ----------------------------------------------------------------------------
+
+/* static */ ConfigSourceFactory *
+ConfigSourceFactory::GetFirst(EnumData& data)
+{
+   // this may be needed if we reuse the same data for 2 enumerations, one
+   // after another
+   data.Reset();
+
+   // the first factory in the list is always the local one
+   return new ConfigSourceLocalFactory;
+}
+
+/* static */ ConfigSourceFactory *
+ConfigSourceFactory::GetNext(EnumData& data)
+{
+   const MModuleListingEntry * const entry = data.GetNext();
+   if ( !entry )
+      return NULL;
+
+   MModule *module = MModule::LoadModule(entry->GetName());
+   if ( !module )
+      return NULL;
+
+   ConfigSourceFactory *
+      fact = static_cast<ConfigSourceFactoryModule *>(module)->CreateFactory();
+
+   // if the factory has been loaded, it keeps a lock on the module which
+   // prevents it from being unloaded here, otherwise we don't need it any more
+   module->DecRef();
+
+   return fact;
+}
+
+// ----------------------------------------------------------------------------
+// retrieving factory by name
+// ----------------------------------------------------------------------------
+
+/* static */ ConfigSourceFactory *
+ConfigSourceFactory::Find(const String& type)
+{
+   ConfigSourceFactory::EnumData data;
+   for ( ConfigSourceFactory *fact = ConfigSourceFactory::GetFirst(data);
+         fact;
+         fact = ConfigSourceFactory::GetNext(data) )
+   {
+      if ( fact->GetType() == type )
+         return fact;
+
+      fact->DecRef();
+   }
+
+   return NULL;
+}
+
+// ============================================================================
 // ConfigSourceLocal implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// ConfigSourceLocal creation
+// ----------------------------------------------------------------------------
 
 ConfigSourceLocal::ConfigSourceLocal(const String& filename, const String& name)
                  : ConfigSource(name), m_config(NULL)
@@ -303,6 +438,10 @@ ConfigSourceLocal::ConfigSourceLocal(const String& filename, const String& name)
    m_config = fileconf;
 }
 
+// ----------------------------------------------------------------------------
+// ConfigSourceLocal simple accessors
+// ----------------------------------------------------------------------------
+
 bool ConfigSourceLocal::IsOk() const
 {
    return m_config != NULL;
@@ -313,12 +452,16 @@ bool ConfigSourceLocal::IsLocal() const
    return true;
 }
 
-bool ConfigSourceLocal::Read(const String& name, String *value)
+// ----------------------------------------------------------------------------
+// ConfigSourceLocal other methods: all simply forwarded to m_config
+// ----------------------------------------------------------------------------
+
+bool ConfigSourceLocal::Read(const String& name, String *value) const
 {
    return m_config->Read(name, value);
 }
 
-bool ConfigSourceLocal::Read(const String& name, long *value)
+bool ConfigSourceLocal::Read(const String& name, long *value) const
 {
    return m_config->Read(name, value);
 }
@@ -361,5 +504,30 @@ bool ConfigSourceLocal::DeleteEntry(const String& name)
 bool ConfigSourceLocal::DeleteGroup(const String& name)
 {
    return DeleteGroup(name);
+}
+
+// ============================================================================
+// ConfigSourceLocalFactory implementation
+// ============================================================================
+
+ConfigSource *
+ConfigSourceLocalFactory::Create(const ConfigSource& config, const String& name)
+{
+   String filename;
+   if ( !config.Read(_T(""), &filename) )
+   {
+      wxLogError(_("No filename for local config source \"%s\"."),
+                 name.c_str());
+      return NULL;
+   }
+
+   ConfigSource *configNew = new ConfigSourceLocal(filename, name);
+   if ( !configNew->IsOk() )
+   {
+      configNew->DecRef();
+      configNew = NULL;
+   }
+
+   return configNew;
 }
 
