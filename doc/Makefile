@@ -28,7 +28,7 @@ install2:
 	$(INSTALL_DATA) $(FILES_PS) $(DOCDIR)/Postscript
 	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i install ; done
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
-	$(INSTALL_DATA) classes/*.html $(DOCDIR)/classes
+	$(INSTALL_DATA) classes/*.htm $(DOCDIR)/classes
 	if [ "$(SCANDOCHTML)" = "$(DOCHTML)" ] ; then $(INSTALL_DATA) $(BUILDDIR)/extra/scandoc/images/* $(DOCDIR)/classes/images ; fi
 	$(INSTALL_DATA) classes/images/*.gif $(DOCDIR)/classes/images || echo no gifs to install
 	$(INSTALL_DATA) classes/images/*.jpg $(DOCDIR)/classes/images || echo no jpegs to install

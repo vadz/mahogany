@@ -1,6 +1,8 @@
-The Debian Package m-mail
-----------------------------
+mahogany for Debian
+----------------------
 
-Comments regarding the Package
+Mahogany is a native Debian package, so there are no Debian specific
+comments here. Please view the full docs or the online help for more
+information.
 
-Karsten Ballüder <m-developers@egroups.com>, Sat,  6 Feb 1999 22:05:03 +0000
+Karsten Ballüder <karsten@phy.hw.ac.uk>, Sun, 25 Apr 1999 20:54:01 +0100

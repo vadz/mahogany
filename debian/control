@@ -1,14 +1,17 @@
 Source: mahogany
-Section: mail
+Section: unknown
 Priority: optional
-Maintainer: Karsten Ballüder <m-developers@egroups.com>
-Standards-Version: 2.4.1
+Maintainer: Karsten Ballüder <karsten@phy.hw.ac.uk>
+Standards-Version: 2.5.0
 
 Package: mahogany
 Architecture: any
 Depends: ${shlibs:Depends}
-Description: Mahogany Mail
-Mahogany Mail is a powerful, scriptable mail user agent and news reader. It features
-an intuitive gtk based X11 user interface and a built-in python interpreter. In addition
-to the major unix flavours, it is also available for MS Windows, allowing you to use the
-same interface on different systems.
+Description: Mahogany, powerful and user-friendly mail/news client for X11.
+ Mahogany is a mail and news client for X11, using the gtk toolkit. It
+ supports a wide range of standards and protocols, including IMAP and POP3.
+ The aim of Mahogany is to be both as user friendly as possible and at the
+ same time to provide the functionality and efficiency required from a daily
+ used tool. Mahogany is a cross-platform project, allowing you to use the
+ same program on MS Windows, too.
+ Thanks to its built-in Python interpreter it can be extended by the user.

@@ -1,2 +1,2 @@
-?package(m_mail):needs=X11 section=Apps/Mail\
-  title="M" command="/usr/bin/M"
+?package(mahogany):needs=X11 section=Apps/Net\
+  title="Mahogany" command="/usr/bin/mahogany"

@@ -1,9 +1,10 @@
-m-mail (0.10a) unstable; urgency=low
+mahogany (0.21a) unstable; urgency=low
 
   * Initial Release.
 
- -- Karsten Ballüder <m-developers@egroups.com>  Sat,  6 Feb 1999 22:05:03 +0000
+ -- Karsten Ballüder <karsten@phy.hw.ac.uk>  Sun, 25 Apr 1999 20:54:01 +0100
 
 Local variables:
 mode: debian-changelog
+add-log-mailing-address: "karsten@phy.hw.ac.uk"
 End:

@@ -1,1 +1,1 @@
-shlibs:Depends=libc6, libc6 (>= 2.0.7u), libgtk1 (>= 1:1.0.6-2), libstdc++2.8 (>=2.90.26-1), xlib6g (>= 3.3-5)
+shlibs:Depends=libc6, libjpeg62, libstdc++2.9, xlib6g (>= 3.3.2.3a-2)

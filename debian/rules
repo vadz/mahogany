@@ -2,21 +2,21 @@
 # Made with the aid of debmake, by Christoph Lameter,
 # based on the sample debian/rules file for GNU hello by Ian Jackson.
 
-package=m-mail
+package=mahogany
 
 build:
 	$(checkdir)
 	autoconf
-	make config
+	./configure --prefix=/usr
 	make depend
 	make doc
-	make all CFLAGS="-O2 -g -Wall"
+	$(MAKE) all CFLAGS="-O2 -g -Wall"
 	touch build
 
 clean:
 	$(checkdir)
 	-rm -f build
-	-make clean
+	-$(MAKE) allclean
 	-rm -f `find . -name "*~"`
 	-rm -rf debian/tmp debian/files* core debian/substvars
 
@@ -31,7 +31,7 @@ binary-arch: checkroot build
 	-rm -rf debian/tmp
 	install -d debian/tmp
 	cd debian/tmp && install -d `cat ../dirs`
-	make install_all DESTDIR=`pwd`/debian/tmp
+	$(MAKE) install_all DESTDIR=`pwd`/debian/tmp/usr
 # Must have debmake installed for this to work. Otherwise please copy
 # /usr/bin/debstd into the debian directory and change debstd to debian/debstd
 	debstd README TODO 
