@@ -647,7 +647,9 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
 
    SetDefaultSize(4*wBtn, 10*hBtn);
 
-   m_folderPath = m_treectrl->GetItemText(m_treectrl->GetRootItem());
+   wxTreeItemId idRoot = m_treectrl->GetRootItem();
+   m_folderPath = m_treectrl->GetItemText(idRoot);
+   m_treectrl->Expand(idRoot);
 }
 
 wxSubscriptionDialog::~wxSubscriptionDialog()
