@@ -64,10 +64,8 @@ extern "C"
 
 #include <ctype.h>   // isspace()
 
-
-#ifdef EXPERIMENTAL
-#   define NEW_UPDATE
-#endif
+// activate new folder update code
+#define NEW_UPDATE
 
 // ----------------------------------------------------------------------------
 // macros

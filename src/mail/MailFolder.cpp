@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolder class: handling of Unix mail folders                  *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -1115,9 +1115,7 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
 void
 MailFolderCmn::UpdateListing(void)
 {
-#ifdef EXPERIMENTAL
    ASSERT_MSG(0,"obsolete UpdateListing() called");
-#endif
 
    // We must make sure that we have called BuildListing() at least
    // once, or ApplyFilterRules() will get into an endless recursion
