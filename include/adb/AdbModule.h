@@ -119,7 +119,7 @@ private:
 //    format - the ADB format shown in the ADB dialogs
 //    author - the module author/copyright string
 #define IMPLEMENT_ADB_MODULE(modint, cname, desc, format, Author)          \
-   MMODULE_BEGIN_IMPLEMENT(cname, #cname, modint, _(desc), "1.00")         \
+   MMODULE_BEGIN_IMPLEMENT(cname, #cname, modint, "", "1.00")              \
       MMODULE_PROP("author", Author)                                       \
       MMODULE_PROP("adbformat", format)                                    \
    MMODULE_END_IMPLEMENT(cname)                                            \

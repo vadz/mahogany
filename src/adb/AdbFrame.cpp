@@ -2106,11 +2106,11 @@ void wxAdbEditFrame::ExportAdb()
 
   if ( AdbShowExportDialog(*(GetCurNode()->AdbGroup())) )
   {
-    wxLogStatus(_("Successfully exported address book data."));
+    wxLogStatus(this, _("Successfully exported address book data."));
   }
   else
   {
-    wxLogStatus(_("Address book export failed."));
+    wxLogStatus(this, _("Address book export abandoned."));
   }
 }
 
@@ -2161,12 +2161,12 @@ void wxAdbEditFrame::ExportVCardEntry()
     AdbEntry *entry = ((AdbTreeEntry *)m_current)->GetAdbEntry();
     if ( exporter->Export(*entry, filename) )
     {
-      wxLogStatus(_("Successfully exported address book data to the file '%s'."),
+      wxLogStatus(this, _("Successfully exported address book data to the file '%s'."),
                   filename.c_str());
     }
     else
     {
-      wxLogStatus(_("Address book export failed."));
+      wxLogStatus(this, _("Address book export failed."));
     }
 
     entry->DecRef();

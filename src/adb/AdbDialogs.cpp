@@ -76,6 +76,9 @@ public:
       // if empty, get the filename from importer
    const wxString& GetFileName() const { return m_filename; }
 
+   // fill the listbox with importer names
+   virtual bool TransferDataToWindow();
+
    // save the controls values
    virtual bool TransferDataFromWindow();
 
@@ -252,13 +255,6 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
    c->bottom.SameAs(canvas, wxBottom);
    m_listbox->SetConstraints(c);
 
-   // populate the listbox
-   size_t nCount = AdbImporter::EnumImporters(m_importerNames, m_importerDescs);
-   for ( size_t n = 0; n < nCount; n++ )
-   {
-      m_listbox->Append(m_importerDescs[n]);
-   }
-
    // final steps
    String file = mApplication->GetProfile()->readEntry(GetFileProfilePath(),
                                                        "");
@@ -292,6 +288,27 @@ void wxAdbImportDialog::DoUpdateUI()
    // checkbox is enabled
    m_btnOk->Enable((autoLocation || !!m_text->GetValue()) &&
                    (autoFormat || m_listbox->GetSelection() != -1));
+}
+
+bool wxAdbImportDialog::TransferDataToWindow()
+{
+   // populate the listbox
+   size_t nCount = AdbImporter::EnumImporters(m_importerNames, m_importerDescs);
+
+   if ( !nCount )
+   {
+      wxLogError(_("Sorry, no import filters found - importing address "
+                   "books is not available in this version of the program."));
+
+      return FALSE;
+   }
+
+   for ( size_t n = 0; n < nCount; n++ )
+   {
+      m_listbox->Append(m_importerDescs[n]);
+   }
+
+   return TRUE;
 }
 
 bool wxAdbImportDialog::TransferDataFromWindow()

@@ -773,6 +773,12 @@ static wxArrayString BuildListOfModulesDirs()
          << DIR_SEPARATOR << "src"
          << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
    dirs.Add(path0);
+
+   path0.clear();
+   path0 << M_TOP_BUILDDIR
+         << DIR_SEPARATOR << "src"
+         << DIR_SEPARATOR << "adb" << DIR_SEPARATOR;
+   dirs.Add(path0);
 #endif // Unix
 
    // look under extra M_CANONICAL_HOST directory under Unix, but not for other
