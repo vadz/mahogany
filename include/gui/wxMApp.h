@@ -16,6 +16,7 @@
 
 // fwd decl
 class wxLog;
+class wxIconManager;
 
 // ----------------------------------------------------------------------------
 // wxMApp
@@ -41,8 +42,14 @@ public:
    virtual wxFrame *OnInit(void);
 #endif  // wxWin ver
 
+   /// return a pointer to the IconManager:
+   wxIconManager *GetIconManager(void) { return m_IconManager; }
+   
    /// Destructor
    ~wxMApp();
+private:
+   /// an iconmanager instance
+   wxIconManager *m_IconManager;
 };
 
 // ----------------------------------------------------------------------------

@@ -6,6 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/07/05 12:20:09  KB
+ * wxMessageView works and handles mime (segfault on deletion)
+ * wsIconManager loads files
+ * install target
+ *
  * Revision 1.4  1998/06/19 08:05:08  KB
  * restructured FolderView, menu handling and added toolbars
  *
@@ -33,7 +38,8 @@
 */
 enum
 {
-   WXMENU_FILE_BEGIN = 1,
+   WXMENU_LAYOUT_CLICK = 1,
+   WXMENU_FILE_BEGIN,
    WXMENU_FILE_OPEN,
    WXMENU_FILE_COMPOSE,
    WXMENU_FILE_TEST,
@@ -66,6 +72,7 @@ enum
    WXMENU_MIME_HANDLE,
    WXMENU_MIME_INFO,
    WXMENU_MIME_SAVE,
+   WXMENU_MIME_DISMISS,
    WXMENU_MIME_END,
    WXMENU_HELP_BEGIN,
    WXMENU_HELP_ABOUT,

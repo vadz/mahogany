@@ -2,6 +2,11 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  1998/07/05 12:20:03  KB
+# wxMessageView works and handles mime (segfault on deletion)
+# wsIconManager loads files
+# install target
+#
 # Revision 1.1  1998/05/18 18:00:52  KB
 # new makefile for extra sources
 #
@@ -25,8 +30,10 @@ clean:
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
+install: all
+	$(MAKE) -C install install
 
-.PHONY: all dep clean doc static allclean
+.PHONY: all dep clean doc static allclean install
 
 
 

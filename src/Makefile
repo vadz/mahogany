@@ -2,6 +2,11 @@
 # $Id$
 #
 # $Log$
+# Revision 1.10  1998/07/05 12:20:14  KB
+# wxMessageView works and handles mime (segfault on deletion)
+# wsIconManager loads files
+# install target
+#
 # Revision 1.9  1998/06/22 15:17:00  KB
 # support for "make static", fixed duplicate main()
 #
@@ -50,8 +55,13 @@ clean:
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
+install: all
+	strip M
+	$(INSTALL_PROGRAM) M $(BINDIR)
+	$(INSTALL_DATA) -d $(DATADIR)/icons
+	$(INSTALL_DATA) icons/* $(DATADIR)/icons
 
-.PHONY: all dep clean doc static allclean
+.PHONY: all dep clean doc static allclean install
 
 
 

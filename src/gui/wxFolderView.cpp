@@ -369,6 +369,9 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
    m_ToolBar->AddSeparator();
    TB_AddTool(m_ToolBar, tb_exit, WXMENU_FILE_EXIT, "Exit M");
 #endif
+
+   m_FolderView = new wxFolderView(folderName,this);
+   Show(true);
 }
    
 void

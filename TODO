@@ -2,10 +2,16 @@ TODO list for M
 $Id$
 
 *** bugs to fix ***
+- MessageView:
+  + better detection of mime type for inlining graphics
+  + extraction of parameter list and filenames for mime handling/saving
+  + move wxMessageView to be a panel only and rewrite folderview
+  + some code in wxMessageView relies on unix unlink() behavious (file is still open and
+    in use when deleted)
+  + wxMessageView : Profile reading causes segfault, marked with FIXME
+  + fix profile mess in here, use folder profile and MessageView profile
 
-- fix wxIconManager for GTK
-
-- listCtrl in wxMainFrame doesn't even show up - wxGTK broken?
+- fix my printing code in wxl*.new in src/Projects/wxLayout
 
 - clean up header inclusion: use <> for system/wxWin files and "xxx" for M
   headers in order to get "make depend" right

@@ -261,7 +261,7 @@ AC_OVERRIDES(efence,efence,
 --with-efence             use ElectricFence,
 USE_EFENCE)
 
-AC_OVERRIDES(thread,threads,
+AC_OVERRIDES(threads,threads,
 --with-threads            link with libpthread,
 USE_THREADS)
 

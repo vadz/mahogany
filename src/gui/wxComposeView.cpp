@@ -542,7 +542,7 @@ wxComposeView::InsertFile(void)
    if(! mApplication.GetMimeTypes()->Lookup(mc->m_FileName, mc->m_MimeType, &(mc->m_NumericMimeType)))
       mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
 
-   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(m_IconManager.GetIcon(mimeType));
+   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(mApplication.GetIconManager()->GetIcon(mimeType));
    obj->SetUserData(mc);
    
    m_LayoutWindow->GetLayoutList().Insert(tmp);

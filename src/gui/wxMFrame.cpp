@@ -263,7 +263,7 @@ wxMFrame::OnMenuCommand(int id)
                                   this);
       VAR(name);
       if ( !strutil_isempty(name) )
-         new wxFolderView(name,this);
+         (void) new wxFolderViewFrame(name,this);
       break;
    }
    case WXMENU_FILE_CLOSE:

@@ -6,7 +6,13 @@
  * $Id$                *
  *                                                                  *
  * $Log$
+ * Revision 1.12  1998/07/05 12:20:06  KB
+ * wxMessageView works and handles mime (segfault on deletion)
+ * wsIconManager loads files
+ * install target
+ *
  * Revision 1.11  1998/06/05 16:56:51  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -104,6 +110,12 @@ void strutil_delwhitespace(String &str);
     @param str string to change
 */
 void strutil_toupper(String &str);
+
+/** Convert string to lower case.
+
+    @param str string to change
+*/
+void strutil_tolower(String &str);
 
 /** Compare two strings, starting at an offset each.
 

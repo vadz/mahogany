@@ -6,6 +6,11 @@
  * $Id$              *
  *
  * $Log$
+ * Revision 1.9  1998/07/05 12:20:05  KB
+ * wxMessageView works and handles mime (segfault on deletion)
+ * wsIconManager loads files
+ * install target
+ *
  * Revision 1.8  1998/05/30 17:55:31  KB
  * Python integration mostly complete, added hooks and sample callbacks.
  * Wrote documentation on how to use it.
@@ -87,7 +92,7 @@
 /// the icon for the main frame
 #define   MC_ICON_MAINFRAME      "MainFrameIcon"
 /// the icon directory
-#define   MC_ICONDIR         "IconDirectory"
+#define   MC_ICONPATH         "IconDirectory"
 /// the path for finding profiles
 #define   MC_PROFILE_PATH         "ProfilePath"
 /// the extension to use for profile files
@@ -192,6 +197,8 @@
 #define   MP_REPLY_MSGPREFIX      "ReplyQuote"
 /// show XFaces?
 #define   MP_SHOW_XFACES         "ShowXFaces"
+// show graphics inline
+#define   MP_INLINE_GFX         "InlineGraphics"
 /// which font to use
 #define   MP_FTEXT_FONT         "FontFamily"
 /// which font size
@@ -200,6 +207,10 @@
 #define   MP_FTEXT_STYLE         "FontStyle"
 /// which font weight
 #define   MP_FTEXT_WEIGHT         "FontWeight"
+// which foreground colour for the font
+#define   MP_FTEXT_FGCOLOUR      "FontForeGround"
+// which background colour for the font
+#define   MP_FTEXT_BGCOLOUR      "FontBackGround"
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS      "HighlightURL"
 /// open URLs with
@@ -233,7 +244,7 @@
 /// the icon for the main frame
 #define   MC_ICON_MAINFRAME_D      "mainframe.xpm"
 /// the icon directoy
-#define   MC_ICONDIR_D         "icons"
+#define   MC_ICONPATH_D         "icons"
 /// the profile path
 #define   MC_PROFILE_PATH_D      "/home/karsten/src/Projects/M/test/profiles:profiles:."
 /// the extension to use for profile files
@@ -335,6 +346,8 @@
 #define   MP_REPLY_MSGPREFIX_D      " > "
 /// show XFaces?
 #define   MP_SHOW_XFACES_D      1
+// show graphics inline
+#define   MP_INLINE_GFX_D       1
 /// which font to use
 #define   MP_FTEXT_FONT_D         0
 /// which font size
@@ -343,6 +356,10 @@
 #define   MP_FTEXT_STYLE_D      1
 /// which font weight
 #define   MP_FTEXT_WEIGHT_D      0
+// which foreground colour for the font
+#define   MP_FTEXT_FGCOLOUR_D      "black"
+// which background colour for the font
+#define   MP_FTEXT_BGCOLOUR_D      "white"
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_D      1
 /// open URLs with

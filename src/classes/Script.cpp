@@ -6,6 +6,11 @@
  * $Id$                
  *
  * $Log$
+ * Revision 1.3  1998/07/05 12:20:17  KB
+ * wxMessageView works and handles mime (segfault on deletion)
+ * wsIconManager loads files
+ * install target
+ *
  * Revision 1.2  1998/05/02 18:30:06  KB
  * After many problems, Python integration is eventually taking off -
  * works.
@@ -73,7 +78,10 @@ Script::Run(String const &parameters)
       fd = open(stdinFile.c_str(),O_RDONLY,S_IRUSR|S_IWUSR);
       close(STDOUT_FILENO);
       fd = open(stdoutFile.c_str(),O_CREAT|O_TRUNC|O_WRONLY,S_IWUSR);
-      exit(wxExecute(WXSTR(cmd), FALSE));
+//FIXME
+      //exit(wxExecute(WXSTR(cmd), FALSE));
+      system(cmd.c_str());
+      exit(0);
    }
    else
       waitpid(pid,&status, 0);

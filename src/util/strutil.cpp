@@ -6,6 +6,11 @@
  * $Id$               *
  *                                                                  *
  * $Log$
+ * Revision 1.7  1998/07/05 12:20:28  KB
+ * wxMessageView works and handles mime (segfault on deletion)
+ * wsIconManager loads files
+ * install target
+ *
  * Revision 1.6  1998/05/24 14:48:44  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -110,6 +115,16 @@ strutil_toupper(String &str)
    const char *cptr = str.c_str();
    while(*cptr)
       s += toupper(*cptr++);
+   str = s;
+}
+
+void
+strutil_tolower(String &str)
+{
+   String s = "";
+   const char *cptr = str.c_str();
+   while(*cptr)
+      s += tolower(*cptr++);
    str = s;
 }
 

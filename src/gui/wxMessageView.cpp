@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$         *
+ * $Id$        *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -49,6 +49,10 @@
 #include "gui/wxFText.h"
 #include "gui/wxMessageView.h"
 
+#include   <gui/wxllist.h>
+#include   <gui/wxlwindow.h>
+#include   <gui/wxlparser.h>
+
 #include <ctype.h>  // for isspace
  
 // @@@@ for testing only
@@ -74,17 +78,17 @@ protected:
    int      menu_offset;  // all selections get added to this and passed
                           // to popup_parent->OnMenuCommand(offset+entry)
 
-  #if !USE_WXWINDOWS2
+#if !USE_WXWINDOWS2
     friend void popup_callback(wxMenu& menu, wxCommandEvent& ev);
-  #endif
+#endif
 
 public:
   myPopup(const char *name, wxWindow *frame, int offset)
-  #if USE_WXWINDOWS2
+#if USE_WXWINDOWS2
       : wxMenu(name)
-  #else  // wxWin 1
+#else  // wxWin 1
       : wxMenu((char *)name, (wxFunction) &popup_callback)
-  #endif // wxWin1/2
+#endif // wxWin1/2
   {
     popup_parent = frame;
     menu_offset  = offset;
@@ -102,36 +106,92 @@ static void popup_callback(wxMenu& menu, wxCommandEvent& ev)
 #endif
 
 
-class wxMVCanvas : public wxCanvas
+class MimePopup : public wxMenu
 {
-   wxFTOList *ftol;
-   wxMessageView *mv;
 public:
-   wxMVCanvas(wxFTOList *iftol, wxMessageView *imv)
-#if USE_WXWINDOWS2
-      : wxCanvas(*imv)    // @@@@ wxCanvas
-#else
-      : wxCanvas(imv)
-#endif
-      { ftol = iftol; mv = imv; }
-   void OnPaint(void) { ftol->Draw(); }
-   void OnEvent(wxMouseEvent &event)
-      { mv->ProcessMouse(event); }
+  MimePopup()
+      : wxMenu(_("MIME Menu"))
+  {
+     Append(WXMENU_MIME_INFO,_("&Info"));
+     Append(WXMENU_MIME_HANDLE,_("&Handle"));
+     Append(WXMENU_MIME_SAVE,_("&Save"));
+  }
 };
 
+
+#define   BUTTON_HEIGHT 24
+#define   BUTTON_WIDTH  60
+
+class MimeDialog : public wxDialog
+{
+public:
+   MimeDialog(wxMessageView *parent, wxPoint const & pos, int partno)
+      : wxDialog(parent, -1, _("MIME Dialog"), pos,
+                 wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+      {
+         m_PartNo = partno;
+         m_MessageView = parent;
+         new wxButton(this, WXMENU_MIME_INFO, _("Info"),wxPoint(0,0),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
+         new wxButton(this, WXMENU_MIME_HANDLE, _("Handle"),wxPoint(0,BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
+         new wxButton(this, WXMENU_MIME_SAVE, _("Save"), wxPoint(0,2*BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
+         new wxButton(this, WXMENU_MIME_DISMISS, _("Dismiss"), wxPoint(0,3*BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
+         Fit();
+      }
+   void OnCommandEvent(wxCommandEvent &event);
+   DECLARE_EVENT_TABLE()
+private:
+   wxMessageView *m_MessageView;
+   int m_PartNo;
+};
+
+
+
+BEGIN_EVENT_TABLE(MimeDialog, wxDialog)
+   EVT_BUTTON(-1,    MimeDialog::OnCommandEvent)
+END_EVENT_TABLE()
+
+void
+MimeDialog::OnCommandEvent(wxCommandEvent &event)
+{
+   switch(event.GetId())
+   {
+   case WXMENU_MIME_INFO:
+      m_MessageView->MimeInfo(m_PartNo);
+      break;
+   case WXMENU_MIME_HANDLE:
+      m_MessageView->MimeHandle(m_PartNo);
+      break;
+   case WXMENU_MIME_SAVE:
+      m_MessageView->MimeSave(m_PartNo);
+      break;
+   case WXMENU_MIME_DISMISS:
+      Show(false);
+      break;
+   }
+}
+
+   
+BEGIN_EVENT_TABLE(wxMessageView, wxMFrame)
+   EVT_MENU(-1,    wxMessageView::OnCommandEvent)
+   EVT_TOOL(-1,    wxMessageView::OnCommandEvent)
+END_EVENT_TABLE()
 
 void
 wxMessageView::Create(const String &iname, wxWindow *parent)
 {
   if(initialised)
-    return; // ERROR!
+     return; // ERROR!
+  
   mailMessage = NULL;
   mimeDisplayPart = 0;
   xface = NULL;
   xfaceXpm = NULL;
 
-  wxMFrame::Create(iname, parent);
+  m_Profile = new Profile("MessageView",
+                          folder ? folder->GetProfile() : NULL);
 
+  wxMFrame::Create(iname, parent);
+  
   AddFileMenu();
 
   messageMenu = GLOBAL_NEW wxMenu;
@@ -143,21 +203,10 @@ wxMessageView::Create(const String &iname, wxWindow *parent)
   AddHelpMenu();
   SetMenuBar(menuBar);
 
-  popupMenu = GLOBAL_NEW myPopup(_("MIME Menu"),this, WXMENU_POPUP_MIME_OFFS);
-  popupMenu->Append(WXMENU_MIME_INFO,(char *)_("&Info"));
-  popupMenu->Append(WXMENU_MIME_HANDLE,(char *)_("&Handle"));
-  popupMenu->Append(WXMENU_MIME_SAVE,(char *)_("&Save"));
-
-  ftoList = GLOBAL_NEW wxFTOList((wxDC *)NULL, folder ?
-      folder->GetProfile() : NULL);
-  ftCanvas = GLOBAL_NEW wxMVCanvas(ftoList,this);
-
-  #if USE_WXWINDOWS2
-    // @@@@ GetDC
-  #else
-    ftoList->SetDC(ftCanvas->GetDC());
-  #endif
-
+  m_MimePopup = NULL;
+  m_LWindow = new wxLayoutWindow(this);
+  m_LWindow->SetEventId(WXMENU_LAYOUT_CLICK);
+  m_LWindow->SetFocus();
   initialised = true;
 }
 
@@ -192,12 +241,27 @@ wxMessageView::wxMessageView(MailFolder *ifolder,
 void
 wxMessageView::Update(void)
 {
-   coord_t  width, height;
    int i,n,t;
    char const * cptr;
    String tmp,from;
    bool   lastObjectWasIcon = false; // a flag
 
+   wxLayoutList &llist = m_LWindow->GetLayoutList();
+   wxLayoutObjectBase *obj = NULL;
+
+   m_LWindow->GetLayoutList().SetEditable(true);
+   m_LWindow->GetLayoutList().Clear(wxROMAN,16);
+
+   /* FIXME
+     m_LWindow->GetLayoutList().Clear(
+      m_Profile->readEntry(MP_FTEXT_FONT,MP_FTEXT_FONT_D),
+      m_Profile->readEntry(MP_FTEXT_SIZE,MP_FTEXT_SIZE_D),
+      m_Profile->readEntry(MP_FTEXT_STYLE,MP_FTEXT_STYLE_D),
+      m_Profile->readEntry(MP_FTEXT_WEIGHT,MP_FTEXT_WEIGHT_D),
+      0,
+      m_Profile->readEntry(MP_FTEXT_FGCOLOUR,MP_FTEXT_FGCOLOUR_D),
+      m_Profile->readEntry(MP_FTEXT_BGCOLOUR,MP_FTEXT_BGCOLOUR_D));
+   */
 #ifdef HAVE_XFACES
    // need real XPM support in windows
 #ifndef OS_WIN
@@ -212,23 +276,31 @@ wxMessageView::Update(void)
        xface->CreateFromXFace(tmp.c_str());
        if(xface->CreateXpm(&xfaceXpm))
        {
-         ftoList->AddIcon("XFACE", xfaceXpm);
-         ftoList->AddFormattedText(" \n<IMG SRC=\"XFACE\">\n");
+          llist.Insert(new wxLayoutObjectIcon(new wxIcon(xfaceXpm)));
+          llist.LineBreak();
        }
      }
    }
 #endif
 #endif
-   ftoList->AddFormattedText(_("<b>From:</b> "));
+   llist.SetFontWeight(wxBOLD);
+   llist.Insert(_("From: "));
+   llist.SetFontWeight(wxNORMAL);
    from = mailMessage->Address(tmp,MAT_FROM);
    if(tmp.length() > 0)
      from = tmp + String(" <") + from + '>';
-   ftoList->AddText(from);
-   ftoList->AddFormattedText(_("\n<b>Subject:</b> "));
-   ftoList->AddText(mailMessage->Subject());
-   ftoList->AddFormattedText(_("\n<b>Date:</b> "));
-   ftoList->AddText(mailMessage->Date());
-   ftoList->AddText("\n\n");
+   llist.Insert(from);
+   llist.LineBreak();
+   llist.SetFontWeight(wxBOLD);
+   llist.Insert(_("Subject: "));
+   llist.SetFontWeight(wxNORMAL);
+   llist.Insert(mailMessage->Subject());
+   llist.LineBreak();
+   llist.SetFontWeight(wxBOLD);
+   llist.Insert(_("Date: "));
+   llist.SetFontWeight(wxNORMAL);
+   llist.Insert(mailMessage->Date());
+   llist.LineBreak();llist.LineBreak();
 
    n = mailMessage->CountParts();
    for(i = 0; i < n; i++)
@@ -243,39 +315,55 @@ wxMessageView::Update(void)
           cptr = mailMessage->GetPartContent(i);
           if(cptr)
           {
-            ftoList->AddText("\n");
+            llist.LineBreak();
             if(folder->GetProfile() &&
                 folder->GetProfile()->readEntry(MP_HIGHLIGHT_URLS,
                     MP_HIGHLIGHT_URLS_D))
             {
               tmp = "";
-              HighLightURLs(cptr, tmp);
-              ftoList->AddFormattedText(tmp);
+              HighLightURLs(cptr, tmp);  //FIXME - cannot work!
+              wxLayoutImportText(llist,tmp);
             }
             else
-              ftoList->AddText(tmp.c_str());
+              llist.Insert(tmp.c_str());
             lastObjectWasIcon = false;
           }
         }
         else
         {
-          tmp = String("<IMG SRC=\"") + mailMessage->GetPartMimeType(i) + String("\" ")
-            + String(";") + mailMessage->GetPartMimeType(i) + String(";") +
-            strutil_ltoa(i) + String(">");
-          ftoList->AddFormattedText(tmp);
-          lastObjectWasIcon = true;
+           wxIcon *icn;
+           if(t == TYPEIMAGE
+              && folder->GetProfile()
+              && folder->GetProfile()->readEntry(MP_INLINE_GFX,MP_INLINE_GFX_D))
+           {
+              char *filename = wxGetTempFileName("Mtemp");
+              MimeSave(i,filename);
+              icn = new wxIcon();
+              if(icn->LoadFile(filename,0))
+                 obj = new wxLayoutObjectIcon(icn);
+              else
+              {
+                 delete icn;
+                 icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
+              }
+              wxRemoveFile(filename);
+           }
+           else
+              icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
+           obj = new wxLayoutObjectIcon(icn);
+           int *num = new int;
+           *num = i;
+           obj->SetUserData(num); // gets freed by list
+           llist.Insert(obj);
+           lastObjectWasIcon = true;
         }
       }
    }
 
-   ftoList->AddText("\n");
-   ftoList->ReCalculateLines(&width, &height);
-
-   #if USE_WXWINDOWS2
-      // @@@@ SetScrollbar?
-   #else
-      ftCanvas->SetScrollbars(20,20,(int)width/20,(int)(height*1.2)/20,10,10);
-   #endif
+   llist.LineBreak();
+   m_LWindow->GetLayoutList().SetEditable(false);
+   m_LWindow->Refresh();
+   m_LWindow->UpdateScrollbars();
 }
 
 void
@@ -318,18 +406,16 @@ wxMessageView::~wxMessageView()
       GLOBAL_DELETE xface;
    if(xfaceXpm)
       GLOBAL_DELETE [] xfaceXpm;
-   if(popupMenu)
-      GLOBAL_DELETE popupMenu;
-   GLOBAL_DELETE ftCanvas;
-   //fixme:
-   GLOBAL_DELETE ftoList;
+   if(m_MimePopup)
+      delete m_MimePopup;
 }
 
 
 void
 wxMessageView::ProcessMouse(wxMouseEvent &event)
 {
-  int x,y;
+#if 0
+   int x,y;
   FTObject const * obj;
 
   if(event.RightDown())
@@ -357,13 +443,12 @@ wxMessageView::ProcessMouse(wxMouseEvent &event)
         token = strtok(NULL,";");
         if(!token) abort(); 
         mimeDisplayPart = atoi(token); // remember section to use it in
-        // Popup menu
         GLOBAL_DELETE [] buf;
-        #if	USE_WXWINDOWS2
+#if	USE_WXWINDOWS2
           // @@@@ PopupMenu?
-        #else
+#else
           PopupMenu(popupMenu, event.x - x, event.y - y);
-        #endif
+#endif
       }
       else if (obj->GetType() == LI_URL)
       {
@@ -372,20 +457,31 @@ wxMessageView::ProcessMouse(wxMouseEvent &event)
           cmd = READ_CONFIG(folder->GetProfile(), MP_BROWSER);
         else
           cmd = READ_APPCONFIG(MP_BROWSER);
-        cmd += ' ';
+        cmd += ' '; 
         cmd += obj->GetText();
-        wxExecute(WXCPTR cmd.c_str());
+#if 0
+        wxExecute(WXCPTR cmd.c_str());   //FIXME: wxExecute() doesn't exist!
+#else
+        system(cmd.c_str());
+#endif
       }
     }
   }
   // else do nothing
+#endif
 }
 
 
 void
 wxMessageView::Print(void)
 {
-  #ifdef  OS_UNIX
+
+   m_LWindow->Print();
+   
+   // old stuff
+#if 0
+   
+#ifdef  OS_UNIX
     // set AFM path (recursive!)
     PathFinder pf(READ_APPCONFIG(MC_AFMPATH), true);
     pf.AddPaths(mApplication.GetGlobalDir(), true);
@@ -394,22 +490,17 @@ wxMessageView::Print(void)
     String afmpath = pf.FindDirFile("Cour.afm");
     wxSetAFMPath((char *) afmpath.c_str());
 
-    // @@@ Would passing the empty string also work with wxWin1?
-    #if	USE_WXWINDOWS2
-      wxDC *dc = GLOBAL_NEW wxPostScriptDC("", TRUE, this);
-    #else  // wxWin 1
-      wxDC *dc = GLOBAL_NEW wxPostScriptDC(NULL, TRUE, this);
-    #endif // wxWin 1/2
+    wxDC *dc = GLOBAL_NEW wxPostScriptDC("", TRUE, this);
 
     if (dc && dc->Ok() && dc->StartDoc((char *)_("Printing message...")))
     {
       dc->SetUserScale(1.0, 1.0);
-      #if	USE_WXWINDOWS2
+#if	USE_WXWINDOWS2
         // @@@@ ScaleGDIClasses
-      #else  // wxWin 1
-        dc->ScaleGDIClasses(TRUE);
-      #endif // wxWin 1/2
-        
+#else  // wxWin 1
+      dc->ScaleGDIClasses(TRUE);
+#endif // wxWin 1/2
+
       ftoList->SetDC(dc,true); // enable pageing!
       ftoList->ReCalculateLines();
       ftoList->Draw();
@@ -422,12 +513,13 @@ wxMessageView::Print(void)
       ftoList->SetDC(ftCanvas->GetDC());
     #endif // wxWin 1/2ftoList->ReCalculateLines();
   #else
-    // TODO: printing for Windows
-  #endif
+    // FIXME TODO: printing for Windows
+#endif
+#endif
 }
 
 void
-wxMessageView::MimeInfo(void)
+wxMessageView::MimeInfo(int mimeDisplayPart)
 {
   String message, tmp;
   int type;
@@ -452,7 +544,7 @@ wxMessageView::MimeInfo(void)
 }
 
 void
-wxMessageView::MimeHandle(void)
+wxMessageView::MimeHandle(int mimeDisplayPart)
 {
    String message, tmp, mimetype;
    int type;
@@ -515,7 +607,7 @@ wxMessageView::MimeHandle(void)
      if(mimetype == "MESSAGE/RFC822")
      {
        char *filename = wxGetTempFileName("Mtemp");
-       MimeSave(filename);
+       MimeSave(mimeDisplayPart,filename);
        MailFolderCC *mf = MailFolderCC::OpenFolder(filename);
        (void) GLOBAL_NEW wxMessageView(mf, 1, "message/rfc822",this);
        wxRemoveFile(filename);//FIXME: does this work for non-UNIX systems?
@@ -525,7 +617,7 @@ wxMessageView::MimeHandle(void)
 }
 
 void
-wxMessageView::MimeSave(const char *ifilename)
+wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 {
   const char *filename;
   String message;
@@ -568,6 +660,32 @@ wxMessageView::MimeSave(const char *ifilename)
 }
 
 void
+wxMessageView::OnCommandEvent(wxCommandEvent &event)
+{
+   if(event.GetId() == WXMENU_LAYOUT_CLICK)
+   {
+      wxLayoutObjectBase *obj;
+      cerr << "Received click event!" << endl;
+      obj = (wxLayoutObjectBase *)event.GetClientData();
+      if(obj->GetUserData())
+      {
+         int x,y;
+         GetPosition(&x,&y);
+         int partno = *(int *)(obj->GetUserData());
+         wxPoint pos = m_LWindow->GetClickPosition();
+         pos.x += x; pos.y += y;
+         if(m_MimePopup)
+            delete m_MimePopup;
+         m_MimePopup = new MimeDialog(this,pos,partno);
+         m_MimePopup->Show(true);
+      }
+   }
+   else
+      OnMenuCommand(event.GetId());
+}
+
+
+void
 wxMessageView::OnMenuCommand(int id)
 {
    switch(id)
@@ -581,28 +699,9 @@ wxMessageView::OnMenuCommand(int id)
    case WXMENU_MSG_FORWARD:
       //Forward();
       break;
-   case WXMENU_POPUP_MIME_OFFS+WXMENU_MIME_INFO:
-      MimeInfo();
-      break;
-   case WXMENU_POPUP_MIME_OFFS+WXMENU_MIME_HANDLE:
-      MimeHandle();
-      break;
-   case WXMENU_POPUP_MIME_OFFS+WXMENU_MIME_SAVE:
-      MimeSave();
-      break;
    default:
       wxMFrame::OnMenuCommand(id);
    }
-}
-
-wxMessageViewPanel::wxMessageViewPanel(wxMessageView *iMessageView)
-{
-  messageView = iMessageView;
-  #if USE_WXWINDOWS2
-    Create(messageView, -1);
-  #else
-    Create(messageView);
-  #endif
 }
 
 void
@@ -611,7 +710,6 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
    if(initialised) GLOBAL_DELETE mailMessage;
 
    mailMessage = folder->GetMessage(num);
-
    if(mailMessage->IsInitialised())
       initialised = true;
    else

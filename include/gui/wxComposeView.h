@@ -162,8 +162,6 @@ private:
    /// the canvas for displaying the mail
    //wxFTCanvas	*ftCanvas;
    wxLayoutWindow *m_LayoutWindow;
-   /// an icon manager
-   wxIconManager m_IconManager;
    /// the alias expand button
    wxButton	*aliasButton;
    //@}

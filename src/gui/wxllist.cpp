@@ -25,6 +25,8 @@
 #include   "wxllist.h"
 #include   "iostream"
 
+#define   BASELINESTRETCH   12
+
 #define   VAR(x)   cerr << #x"=" << x << endl;
 #define   DBG_POINT(p)   cerr << #p << ": " << p.x << ',' << p.y << endl
 #define   TRACE(f)   cerr << #f":" << endl;
@@ -168,11 +170,14 @@ wxLayoutObjectCmd::Draw(wxDC &dc, wxPoint position, CoordType lineHeight,
 
 wxLayoutList::wxLayoutList()
 {
+   m_DefaultSetting = NULL;
    Clear();
 }
 
 wxLayoutList::~wxLayoutList()
 {
+   if(m_DefaultSetting)
+      delete m_DefaultSetting;
 }
 
 
@@ -250,7 +255,7 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const &findCoords)
    wxPoint position = wxPoint(0,0);
    wxPoint position_HeadOfLine;
    CoordType baseLine = m_FontPtSize;
-   CoordType baseLineSkip = (12 * baseLine)/10;
+   CoordType baseLineSkip = (BASELINESTRETCH * baseLine)/10;
 
    // we trace the objects' cursor positions so we can draw the cursor
    wxPoint cursor = wxPoint(0,0);
@@ -278,6 +283,9 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const &findCoords)
    dc.SetTextForeground( *wxBLACK );
    dc.SetFont( *wxNORMAL_FONT );
 
+   if(m_DefaultSetting)
+      m_DefaultSetting->Draw(dc,wxPoint(0,0),0,true);
+   
    // we calculate everything for drawing a line, then rewind to the
    // begin of line and actually draw it
    i = begin();
@@ -377,21 +385,23 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const &findCoords)
          else // we have drawn a line, so continue calculating next one
             draw = false;
       }
-      
+
+      if(position.x+size.x > m_MaxX)
+         m_MaxX = position.x+size.x;
       // is it a linebreak?
       if(type == WXLO_TYPE_LINEBREAK || i == tail())
       {
          position.x = 0;
          position.y += baseLineSkip;
          baseLine = m_FontPtSize;
-         baseLineSkip = (12 * baseLine)/10;
+         objBaseLine = baseLine; // not all objects set it
+         baseLineSkip = (BASELINESTRETCH * baseLine)/10;
          headOfLine = i;
          headOfLine++;
          position_HeadOfLine = position;
       }
       i++;
    }
-   m_MaxX = position.x;
    m_MaxY = position.y;
    return foundObject;
 }
@@ -764,7 +774,8 @@ wxLayoutList::GetLineLength(wxLayoutObjectList::iterator i)
 }
 
 void
-wxLayoutList::Clear(void)
+wxLayoutList::Clear(int family, int size, int style, int weight,
+                    int underline, char const *fg, char const *bg)
 {
    wxLayoutObjectList::iterator i = begin();
 
@@ -772,17 +783,24 @@ wxLayoutList::Clear(void)
       erase(i);
 
    // set defaults
-   m_FontPtSize = 12;
+   m_FontPtSize = size;
    m_FontUnderline = false;
-   m_FontFamily = wxDEFAULT;
-   m_FontStyle = wxNORMAL;
-   m_FontWeight = wxNORMAL;
-   m_ColourFG = wxTheColourDatabase->FindColour("BLACK");
-   m_ColourBG = wxTheColourDatabase->FindColour("WHITE");
+   m_FontFamily = family;
+   m_FontStyle = style;
+   m_FontWeight = weight;
+   m_ColourFG = wxTheColourDatabase->FindColour(fg);
+   m_ColourBG = wxTheColourDatabase->FindColour(bg);
 
    m_Position = wxPoint(0,0);
    m_CursorPosition = wxPoint(0,0);
    m_MaxLine = 0;
-   m_LineHeight = (12*m_FontPtSize)/10;
+   m_LineHeight = (BASELINESTRETCH*m_FontPtSize)/10;
    m_MaxX = 0; m_MaxY = 0;
+
+   if(m_DefaultSetting)
+      delete m_DefaultSetting;
+   m_DefaultSetting = new
+      wxLayoutObjectCmd(m_FontPtSize,m_FontFamily,m_FontStyle,
+                        m_FontWeight,m_FontUnderline,
+                        m_ColourFG, m_ColourBG);
 }

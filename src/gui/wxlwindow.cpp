@@ -47,6 +47,8 @@ wxLayoutWindow::OnMouse(wxMouseEvent& event)
       {
          wxCommandEvent commandEvent(wxEVENT_TYPE_MENU_COMMAND, m_EventId);
          commandEvent.SetEventObject( this );
+         commandEvent.SetClientData((char *)m_FoundObject);
+         m_ClickPosition = wxPoint(event.GetX(), event.GetY());
          GetEventHandler()->ProcessEvent(commandEvent);
       }
    }

@@ -6,6 +6,11 @@
  * $Id$                *
  *
  * $Log$
+ * Revision 1.8  1998/07/05 12:20:21  KB
+ * wxMessageView works and handles mime (segfault on deletion)
+ * wsIconManager loads files
+ * install target
+ *
  * Revision 1.7  1998/06/29 15:00:25  KB
  * works with new wxGTK
  *
@@ -63,6 +68,7 @@
 #include "gui/wxMApp.h"
 #include "gui/wxMainFrame.h"
 #include "gui/wxMLogFrame.h"
+#include "gui/wxIconManager.h"
 
 // ============================================================================
 // implementation
@@ -73,10 +79,12 @@
 // ----------------------------------------------------------------------------
 wxMApp::wxMApp(void)
 {
+   m_IconManager = NULL;
 }
 
 wxMApp::~wxMApp()
 {
+   if(m_IconManager) delete m_IconManager;
 }
 
 // app initilization
@@ -107,10 +115,12 @@ MFrame *wxMApp::CreateTopLevelFrame()
    topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
    topLevelFrame->Show(true);
 
-#  ifdef  USE_WXWINDOWS2
-      SetTopWindow(topLevelFrame);
-#  endif
-
+#ifdef  USE_WXWINDOWS2
+   SetTopWindow(topLevelFrame);
+#endif
+      
+   m_IconManager = new wxIconManager();
+   
    return topLevelFrame;
 }
 

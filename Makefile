@@ -2,6 +2,11 @@
 # $Id$
 #
 # $Log$
+# Revision 1.6  1998/07/05 12:19:57  KB
+# wxMessageView works and handles mime (segfault on deletion)
+# wsIconManager loads files
+# install target
+#
 # Revision 1.5  1998/05/18 17:48:10  KB
 # more list<>->kbList changes, fixes for wxXt, improved makefiles
 #
@@ -45,6 +50,14 @@ include/config.h: include/config.h.in configure
 bak backup:
 	tar cvf M-`date +"%y-%m-%d"`.tar $(SUB_DIRS) $(FILES) $(EXTRA)
 	gzip -9 M-`date +"%y-%m-%d"`.tar
+#
+# probably the most complicated target:
+#
+install:
+	@echo "Installing M in " $(bindir)
+	@echo "        data in " $(datadir)
+	@echo "        docs in " $(prefix)/doc/M
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
 
 .PHONY: all dep clean bak backup config program 
 

@@ -6,7 +6,13 @@
  * $Id$               *
  ********************************************************************
  * $Log$
+ * Revision 1.10  1998/07/05 12:20:16  KB
+ * wxMessageView works and handles mime (segfault on deletion)
+ * wsIconManager loads files
+ * install target
+ *
  * Revision 1.9  1998/06/22 22:42:30  VZ
+ *
  * kbList/CHECK/PY_CALLBACK small changes
  *
  * Revision 1.8  1998/06/05 16:56:13  VZ
@@ -156,7 +162,8 @@ Profile::~Profile()
    if ( appConfig == fileConfig )
       appConfig = NULL;
 
-   GLOBAL_DELETE fileConfig;
+   if(fileConfig)
+      delete fileConfig;
 }
 
 

@@ -51,7 +51,7 @@ public:
    virtual CoordType CountPositions(void) const { return 1; }
 
    wxLayoutObjectBase() { m_UserData = NULL; }
-   virtual ~wxLayoutObjectBase() {}
+   virtual ~wxLayoutObjectBase() { if(m_UserData) delete m_UserData; }
 #ifdef DEBUG
    virtual void Debug(void);
 #endif
@@ -173,6 +173,14 @@ public:
                 int weight=-1, int underline = -1,
                 char const *fg = NULL,
                 char const *bg = NULL);
+   inline void SetFontFamily(int family) { SetFont(family); }
+   inline void SetFontSize(int size) { SetFont(-1,size); }
+   inline void SetFontStyle(int style) { SetFont(-1,-1,style); }
+   inline void SetFontWeight(int weight) { SetFont(-1,-1,-1,weight); }
+   inline void SetFontUnderline(bool ul) { SetFont(-1,-1,-1,-1,(int)ul); }
+   inline void SetFontColour(char const *fg, char const *bg = NULL) { SetFont(-1,-1,-1,-1,-1,fg,bg); }
+      
+   
    /** Draw the list on a given DC.
        @param findObject if true, return the object occupying the
        position specified by coords
@@ -202,7 +210,8 @@ public:
    void Delete(CoordType count = 1);
    void Insert(wxString const &text);
    void Insert(wxLayoutObjectBase *obj);
-   void Clear(void);
+   void Clear(int family = wxROMAN, int size=12, int style=wxNORMAL, int weight=wxNORMAL,
+                    int underline=0, char const *fg="black", char const *bg="white");
 
    //@}
 protected:
@@ -213,6 +222,8 @@ protected:
    /// colours:
    wxColour const * m_ColourFG;
    wxColour const * m_ColourBG;
+   /// the default setting:
+   wxLayoutObjectCmd *m_DefaultSetting;
    
    /// needs recalculation?
    bool m_dirty;

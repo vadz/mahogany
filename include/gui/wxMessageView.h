@@ -13,19 +13,17 @@
 #endif
 
 #ifndef USE_PCH
-#	include	<Message.h>
-#	include	<MessageView.h>
-#	include	<gui/wxMenuDefs.h>
-#	include	<gui/wxMFrame.h>
-#	include	<XFace.h>
+#   include   <Message.h>
+#   include   <MessageView.h>
+#   include   <gui/wxMenuDefs.h>
+#   include   <gui/wxMFrame.h>
+#   include   <XFace.h>
 #endif
 
-//#include	<gui/wxFTCanvas.h>
-class wxFTOList;
 
 class wxMessageViewPanel;
 class wxMessageView;
-class wxFTCanvas;
+class wxLayoutWindow;
 
 /** a wxWindows panel for the MessageView class */
 class wxMessageViewPanel : public wxPanel
@@ -58,14 +56,14 @@ public:
        @param parent parent window
    */
    void Create(const String &iname = String("wxMessageView"),
-	  wxWindow *parent = NULL);
+     wxWindow *parent = NULL);
 
    /** Constructor
        @param iname  name of windowclass
        @param parent parent window
    */
    wxMessageView(const String &iname = String("wxMessageView"),
-	  wxWindow *parent = NULL);
+     wxWindow *parent = NULL);
    
    /** Constructor
        @param folder the mailfolder
@@ -74,9 +72,9 @@ public:
        @param parent parent window
    */
    wxMessageView(MailFolder *folder,
-		 long num,
-		 const String &iname = String("wxMessageView"),
-		 wxWindow  *parent = NULL);
+       long num,
+       const String &iname = String("wxMessageView"),
+       wxWindow  *parent = NULL);
    /// Destructor
    ~wxMessageView();
 
@@ -87,10 +85,10 @@ public:
    void ShowMessage(MailFolder *folder, long num);
    
    /// update it
-   void	Update(void);
+   void   Update(void);
 
    /// return true if initialised
-   bool	IsInitialised(void) const { return initialised; }
+   bool   IsInitialised(void) const { return initialised; }
 
    /// called on Menu selection
    void OnMenuCommand(int id);
@@ -101,47 +99,53 @@ public:
    /// convert string in cptr to one in which URLs are highlighted
    void HighLightURLs(const char *cptr, String &out);
 
+   /// wxWin2 event system
+   void OnCommandEvent(wxCommandEvent & event);
+   DECLARE_EVENT_TABLE()
+
 private:
    /// is initialised?
    bool initialised;
    /// a panel to fill the frame
-   wxPanel	*panel;
+   wxPanel   *panel;
 
    /// the current message
-   Message	*mailMessage;
+   Message   *mailMessage;
    /// the mail folder
-   MailFolder	*folder;
+   MailFolder   *folder;
    /// the menu with message related commands
-   wxMenu	*messageMenu;
+   wxMenu   *messageMenu;
    /// the canvas for displaying the mail
-   wxCanvas	*ftCanvas;
-   /// the list of items for display
-   wxFTOList	*ftoList;
+   //wxCanvas   *ftCanvas;
+   wxLayoutWindow *m_LWindow;
    /// the popup menu
-   wxMenu	*popupMenu;
+   wxMenu   *popupMenu;
    /// the message part selected for MIME display
-   int		mimeDisplayPart;
+   int      mimeDisplayPart;
 
    /// this can hold an xface
-   XFace	*xface;
+   XFace   *xface;
    /// and the xpm for it
    char **xfaceXpm;
+
+   /// Profile
+   Profile *m_Profile;
+   /// the MIME popup
+   wxDialog *m_MimePopup;
    
    /**@name The interface to its canvas. */
    //@{
-   /// the MessageView canvas class
-   friend class wxMVCanvas;
    /// Process a Mouse Event.
-   void	ProcessMouse(wxMouseEvent &event);
+   void   ProcessMouse(wxMouseEvent &event);
    //@}
-
+protected:
+   friend class MimeDialog;
    /// displays information about the currently selected MIME content
-   void MimeInfo(void);
+   void MimeInfo(int num);
    /// handles the currently selected MIME content
-   void MimeHandle(void);
+   void MimeHandle(int num);
    /// saves the currently selected MIME content
-   void MimeSave(const char *filename = NULL);
-
+   void MimeSave(int num, const char *filename = NULL);
 };
 
 #endif
