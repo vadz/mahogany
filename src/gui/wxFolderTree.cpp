@@ -186,6 +186,10 @@ public:
       // it to notify the main frame if this folder is deleted
    void SetOpenFolderName(const String& name) { m_openFolderName = name; }
 
+      // used to process menu commands from the global menubar and from our
+      // own popup menu
+   bool ProcessMenuCommand(int id);
+
    // callbacks
    void OnChar(wxKeyEvent&);
 
@@ -268,11 +272,11 @@ private:
       {
          Open,
          New,
-         Remove,
-         Delete,
-         Rename,
-         BrowseSub,
-         Properties,
+         Remove = WXMENU_FOLDER_REMOVE,
+         Delete = WXMENU_FOLDER_DELETE,
+         Rename = WXMENU_FOLDER_RENAME,
+         BrowseSub = WXMENU_FOLDER_BROWSESUB,
+         Properties = WXMENU_FOLDER_PROP,
          ShowHidden
       };
 
@@ -460,6 +464,42 @@ bool wxFolderTree::SelectFolder(MFolder *folder)
    }
 }
 
+void wxFolderTree::ProcessMenuCommand(int id)
+{
+   CHECK_RET( m_tree, "you didn't call Init()" );
+
+   m_tree->ProcessMenuCommand(id);
+}
+
+void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
+{
+   int folderFlags = folder->GetFlags();
+   FolderType folderType = folder->GetType();
+   bool isRoot = folderType == MF_ROOT,
+        isGroup = folderType == MF_GROUP;
+
+   // TODO we should allow "renaming" the root folder, i.e. changing the
+   //      default 'All folders' label for it, but for now we don't
+   menu->Enable(WXMENU_FOLDER_RENAME, !isRoot && folderType != MF_INBOX);
+
+   // the root folder can't be removed, all others can be
+   menu->Enable(WXMENU_FOLDER_REMOVE, !isRoot);
+
+   // but only some folder types can be deleted
+   menu->Enable(WXMENU_FOLDER_DELETE, !isRoot &&
+                                      CanDeleteFolderOfType(folderType));
+
+   // browsing subfolders only makes sense if we have any and not for the
+   // simple groups which can contain anything - so browsing is impossible
+   bool mayHaveSubfolders = isRoot || isGroup
+                              ? FALSE
+                              : CanHaveSubfolders(folderType, folderFlags);
+   menu->Enable(WXMENU_FOLDER_BROWSESUB, mayHaveSubfolders);
+
+   // only root folder doesn't have properties
+   menu->Enable(WXMENU_FOLDER_PROP, !isRoot);
+}
+
 MFolder *wxFolderTree::GetSelection() const
 {
    CHECK( m_tree, NULL, "you didn't call Init()" );
@@ -491,8 +531,7 @@ void wxFolderTree::OnSelectionChange(MFolder * /* oldsel */, MFolder *newsel)
    // opening the folder takes too much time.
    if ( READ_APPCONFIG(MP_OPEN_ON_CLICK) )
    {
-      // don't even try to open the root folder
-      // don't try to open groups either
+      // don't even try to open the folders which can't be opened
       if ( CanOpen(newsel) )
       {
          newsel->IncRef(); // before returning it to the outside world
@@ -913,14 +952,13 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
 
       (*menu)->SetTitle(wxString::Format(_("Folder '%s'"), title.c_str()));
 
+      // some items (all WXMENU_FOLDEX_XXX ones) are taken care of there already
+      m_sink->UpdateMenu(*menu, folder);
+
       if ( isRoot )
       {
          // init the menu
          (*menu)->Check(FolderMenu::ShowHidden, ShowHiddenFolders());
-
-         // TODO we should allow "renaming" the root folder, i.e. changing the
-         //      default 'All folders' label for it
-         (*menu)->Enable(FolderMenu::Rename, FALSE);
       }
       else
       {
@@ -932,15 +970,7 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
          // inferiors (and browsing doesn't make sense for "simple" groups - what
          // would we browse for?)
          bool mayHaveSubfolders = CanHaveSubfolders(folderType, folder->GetFlags());
-         (*menu)->Enable(FolderMenu::BrowseSub, mayHaveSubfolders && !isGroup);
          (*menu)->Enable(FolderMenu::New, mayHaveSubfolders);
-
-         // all folders may be removed from the tree, but only some of them
-         // can be physically deleted as well
-         (*menu)->Enable(FolderMenu::Delete, CanDeleteFolderOfType(folderType));
-
-         // the INBOX can't be renamed
-         (*menu)->Enable(FolderMenu::Rename, folderType != MF_INBOX);
       }
 
       PopupMenu(*menu, pos.x, pos.y);
@@ -1263,7 +1293,13 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
 
 void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
 {
-   switch ( event.GetId() )
+   if ( !ProcessMenuCommand(event.GetId()) )
+      event.Skip();
+}
+
+bool wxFolderTreeImpl::ProcessMenuCommand(int id)
+{
+   switch ( id )
    {
       case FolderMenu::Open:
          DoFolderOpen();
@@ -1335,8 +1371,10 @@ void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
 
       default:
          //FAIL_MSG("unexpected menu command in wxFolderTree");
-         event.Skip();
+         return FALSE;
    }
+
+   return TRUE;
 }
 
 void wxFolderTreeImpl::OnChar(wxKeyEvent& event)

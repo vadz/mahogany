@@ -40,6 +40,9 @@ public:
    // close the given folder if it is opened
    void CloseFolder(MFolder *folder);
 
+   // add the folder menu to the menu bar
+   void AddFolderMenu(void);
+
    // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}

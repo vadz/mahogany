@@ -75,7 +75,7 @@ static const TbarItemInfo g_aToolBarData[] =
    { "tb_preferences", WXMENU_EDIT_PREF,   gettext_noop("Edit preferences")  },
 
    // main frame
-   { "tb_open",          WXMENU_FILE_OPEN,     gettext_noop("Open folder")           },
+   { "tb_open",          WXMENU_FOLDER_OPEN,     gettext_noop("Open folder")           },
    { "tb_mail_compose",  WXMENU_FILE_COMPOSE,  gettext_noop("Compose a new message") },
    { "tb_help",          WXMENU_HELP_CONTEXT,  gettext_noop("Help")                  },
    { "tb_exit",          WXMENU_FILE_EXIT,     gettext_noop("Exit the program")      },
@@ -201,7 +201,6 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
 
    // file
-   { WXMENU_FILE_OPEN,     gettext_noop("&Open Folder...\tCtrl-O"),   gettext_noop("Open an existing message folder")                  , FALSE },
    { WXMENU_FILE_COMPOSE,  gettext_noop("Compose &New Message\tCtrl-N"),  gettext_noop("Start a new message")      , FALSE },
    { WXMENU_FILE_COMPOSE_WITH_TEMPLATE,
                            gettext_noop("Compose with &template...\tShift-Ctrl-N"),  gettext_noop("Compose a new message using after choosing a temple for it")      , FALSE },
@@ -215,8 +214,6 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_PRINT_SETUP_PS,    gettext_noop("&Print PS Setup"),     gettext_noop("Configure PostScript printing")  , FALSE },
 // { WXMENU_FILE_PAGE_SETUP_PS,    gettext_noop("P&age PS Setup"),     gettext_noop("Configure PostScript page setup")  , FALSE },
 #endif // USE_PS_PRINTING
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_CREATE,   gettext_noop("Create &Folder..."), gettext_noop("Creates a new folder definition")               , FALSE },
 
 #ifdef USE_PYTHON
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
@@ -239,6 +236,17 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window\tCtrl-W"),     gettext_noop("Close this window")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tCtrl-Q"),             gettext_noop("Quit the application")     , FALSE },
+
+   // folder
+   { WXMENU_FOLDER_OPEN,      gettext_noop("&Open...\tCtrl-O"),   gettext_noop("Open an existing message folder")                  , FALSE },
+   { WXMENU_FOLDER_CREATE,    gettext_noop("&Create..."), gettext_noop("Create a new folder definition")               , FALSE },
+   { WXMENU_FOLDER_RENAME,    gettext_noop("Re&name"), gettext_noop("Rename the selected folder")               , FALSE },
+   { WXMENU_FOLDER_REMOVE,    gettext_noop("&Remove"), gettext_noop("Remove the selected folder from the folder tree")               , FALSE },
+   { WXMENU_FOLDER_DELETE,    gettext_noop("&Delete"), gettext_noop("Delete all messages in the folder and remove it")               , FALSE },
+   { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
+   { WXMENU_FOLDER_BROWSESUB, gettext_noop("&Browse..."), gettext_noop("Show subfolders of the current folder")               , FALSE },
+   { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
+   { WXMENU_FOLDER_PROP,      gettext_noop("&Properties..."), gettext_noop("Show the properties of the current folder")               , FALSE },
 
    // normal edit
    { WXMENU_EDIT_CUT,  gettext_noop("C&ut\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , FALSE },

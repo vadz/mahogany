@@ -155,7 +155,7 @@ wxMFrame::AddFileMenu(void)
    n += 2;
    AppendToMenu(fileMenu, n, WXMENU_FILE_END);
 
-   GetMenuBar()->Append(fileMenu, _("&File"));
+   GetMenuBar()->Append(fileMenu, _("&Mail"));
 }
 
 void
@@ -220,34 +220,8 @@ wxMFrame::OnMenuCommand(int id)
 
    switch(id)
    {
-   case WXMENU_FILE_OPEN:
-      {
-         wxString name;
-         if ( MInputBox(&name, _("Folder Open"), _("Name of the folder?"),
-                        this, "OpenFolderName", "INBOX") )
-         {
-            (void) wxFolderViewFrame::Create(name, this);
-         }
-      }
-      break;
-
    case WXMENU_FILE_CLOSE:
       Close();
-      break;
-
-   case WXMENU_FILE_CREATE:
-      {
-         wxWindow *winTop = ((wxMApp *)mApplication)->GetTopWindow();
-         bool wantsDialog;
-         MFolder *newfolder = RunCreateFolderWizard(&wantsDialog, NULL, winTop);
-         if ( wantsDialog )
-         {
-            // users wants to use the dialog directly instead of the wizard
-            newfolder = ShowFolderCreateDialog(winTop, FolderCreatePage_Default, NULL);
-         }
-         if(newfolder)
-            newfolder->DecRef();
-      }
       break;
 
    case WXMENU_FILE_COMPOSE_WITH_TEMPLATE:

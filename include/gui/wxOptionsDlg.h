@@ -50,6 +50,9 @@ enum OptionsPage
 extern void ShowOptionsDialog(wxFrame *parent = NULL,
                               OptionsPage page = OptionsPage_Default);
 
+/// creates and shows the edit identity dialog
+extern void ShowIdentityDialog(wxFrame *parent = NULL);
+
 /// creates and shows the dialog allowing to restore default settings
 extern bool ShowRestoreDefaultsDialog(Profile *profile, wxFrame *parent);
 

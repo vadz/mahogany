@@ -2175,3 +2175,7 @@ void ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
 
    (void)dlg.ShowModal();
 }
+
+void ShowIdentityDialog(wxFrame *parent)
+{
+}

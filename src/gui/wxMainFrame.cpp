@@ -182,7 +182,7 @@ BEGIN_EVENT_TABLE(wxModulePopup, wxMenu)
   EVT_MENU(-1,    wxModulePopup::OnCommandEvent)
 END_EVENT_TABLE()
 
-#endif
+#endif // 0
 
 // override wxFolderTree OnOpenHere() function to open the folder in this
 // frame and OnClose() to close it
@@ -202,6 +202,8 @@ public:
          wxLogStatus(m_frame, _("Selected folder '%s'."),
                      newsel->GetFullName().c_str());
       }
+
+      UpdateMenu(m_frame->GetMenuBar()->GetMenu(MMenu_Folder), newsel);
 
       wxFolderTree::OnSelectionChange(oldsel, newsel);
    }
@@ -240,7 +242,7 @@ END_EVENT_TABLE()
 // ============================================================================
 
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
-   : wxMFrame(iname,parent)
+           : wxMFrame(iname,parent)
 {
    SetIcon(ICON("MainFrame"));
    SetTitle(M_TOPLEVELFRAME_TITLE);
@@ -250,6 +252,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    GetStatusBar()->SetFieldsCount(3, widths);
 
    AddFileMenu();
+   AddFolderMenu();
    AddEditMenu();
 
    // disable the operations which don't make sense for viewer
@@ -313,6 +316,11 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
      SetSize(x,y);
    }
 #endif // GTK
+}
+
+void wxMainFrame::AddFolderMenu(void)
+{
+   WXADD_MENU(GetMenuBar(), FOLDER, _("&Folder"));
 }
 
 void
@@ -448,7 +456,42 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 {
    int id = event.GetId();
 
-   if(m_FolderView &&
+   if ( WXMENU_CONTAINS(FOLDER, id) )
+   {
+      switch ( id )
+      {
+         case WXMENU_FOLDER_OPEN:
+            {
+               wxString name;
+               if ( MInputBox(&name, _("Folder Open"), _("Name of the folder?"),
+                              this, "OpenFolderName", "INBOX") )
+               {
+                  (void) wxFolderViewFrame::Create(name, this);
+               }
+            }
+            break;
+
+         case WXMENU_FOLDER_CREATE:
+            {
+               wxWindow *winTop = ((wxMApp *)mApplication)->GetTopWindow();
+               bool wantsDialog;
+               MFolder *newfolder = RunCreateFolderWizard(&wantsDialog, NULL, winTop);
+               if ( wantsDialog )
+               {
+                  // users wants to use the dialog directly instead of the wizard
+                  newfolder = ShowFolderCreateDialog(winTop, FolderCreatePage_Default, NULL);
+               }
+               if(newfolder)
+                  newfolder->DecRef();
+            }
+            break;
+
+         default:
+            // all others are processed by the folder tree
+            m_FolderTree->ProcessMenuCommand(id);
+      }
+   }
+   else if ( m_FolderView &&
       (WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
        || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST
        || id == WXMENU_EDIT_COPY ))

@@ -14,15 +14,17 @@
 #define   _WXFOLDERTREE_H
 
 // fwd declarations
-class wxWindow;
 class wxFolderTreeImpl;
 class MFolder;
 class wxMainFrame;
 
+class WXDLLEXPORT wxMenu;
+class WXDLLEXPORT wxWindow;
+
 // abstraction of the folder tree control for M usage
 class wxFolderTree
 {
- public:
+public:
    enum FolderIcon
    {
       iconInbox,
@@ -62,6 +64,10 @@ class wxFolderTree
       // select the tree node specified by the given folder, returns FALSE if
       // the folder is not in the tree
    bool SelectFolder(MFolder *folder);
+      // process one of WXMENU_FOLDER_XXX commands
+   void ProcessMenuCommand(int id);
+      // update the menu items state (NB: doesn't inc/dec ref the pointer)
+   void UpdateMenu(wxMenu *menu, const MFolder *folder);
 
    // events
       // parameters are the previously selected folder and the new selection
