@@ -2393,11 +2393,9 @@ wxFolderView::ShowFolder(MailFolder *mf)
    m_FolderCtrl->Thaw();
 
    m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
-   if ( wxWindow::FindFocus() != m_FolderCtrl )
-   {
-      // so we can react to keyboard events
-      m_FolderCtrl->SetFocus();
-   }
+
+   // so we can react to keyboard events
+   m_FolderCtrl->SetFocus();
 
    EnableMMenu(MMenu_Message, m_FolderCtrl, true);
 }
@@ -2659,7 +2657,7 @@ void wxFolderView::SelectAllByStatus(MailFolder::MessageStatus status,
    size_t count = indices->GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      m_FolderCtrl->Select(indices->Item(n), true);
+      m_FolderCtrl->Select(hil->GetIdxFromMsgno(indices->Item(n)), true);
    }
 
    delete indices;
