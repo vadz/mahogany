@@ -58,12 +58,12 @@ extern void ssl_onceonlyinit();
    name##_TYPE stub_##name = NULL
 
 #define SSL_LOOKUP(name) \
-      stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(ssldll, #name); \
+      stub_##name = (name##_TYPE) gs_dllSll.GetSymbol(#name); \
       if ( !stub_##name ) \
          goto error
 
 #define CRYPTO_LOOKUP(name) \
-      stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(cryptodll, #name); \
+      stub_##name = (name##_TYPE) gs_dllCrypto.GetSymbol(#name); \
       if ( !stub_##name ) \
          goto error
 
@@ -150,6 +150,9 @@ SSL_METHOD * SSLv23_client_method(void)
 static bool gs_SSL_loaded = false;
 static bool gs_SSL_available = false;
 
+static wxDynamicLibrary gs_dllSll,
+                        gs_dllCrypto;
+
 bool InitSSL(void) /* FIXME: MT */
 {
    static bool s_errMsgGiven = false;
@@ -167,17 +170,10 @@ bool InitSSL(void) /* FIXME: MT */
                   ssl_dll.c_str()));
 #endif // 0
 
-   // FIXME: when are we going to unload these DLLs?
-
-   wxDllType cryptodll = NULL,
-             ssldll = NULL;
-
-   cryptodll = wxDllLoader::LoadLibrary(crypto_dll);
-   if ( !cryptodll )
+   if ( !gs_dllCrypto.Load(crypto_dll) )
       goto error;
 
-   ssldll = wxDllLoader::LoadLibrary(ssl_dll);
-   if ( !ssldll )
+   if ( !gs_dllSll.Load(ssl_dll) )
       goto error;
 
    SSL_LOOKUP(SSL_new );
@@ -218,12 +214,6 @@ bool InitSSL(void) /* FIXME: MT */
    return true;
 
 error:
-   if ( cryptodll )
-      wxDllLoader::UnloadLibrary(cryptodll);
-
-   if ( ssldll )
-      wxDllLoader::UnloadLibrary(ssldll);
-
    if ( !s_errMsgGiven )
    {
       ERRORMESSAGE((_("SSL authentication is not available.")));
