@@ -3720,7 +3720,7 @@ static void ThreadMessagesHelper(THREADNODE *thr,
       if ( msgno )
       {
          // remember the number of children under this message, used later
-         thrData->m_children[msgno - 1] = number;
+         thrData->m_children[msgno - 1] = numChildren;
       }
 
       // pass to the next sibling
