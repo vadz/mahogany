@@ -781,7 +781,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
 
       case 'X': // expunge
-         msgCmdProc->ProcessCommand(WXMENU_MSG_EXPUNGE, selections);
+         m_FolderView->ExpungeMessages();
          newFocus = -1;
          break;
 
@@ -2589,6 +2589,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
    {
       case WXMENU_MSG_SEARCH:
          SearchMessages();
+         break;
+
+      case WXMENU_MSG_EXPUNGE:
+         ExpungeMessages();
          break;
 
       case WXMENU_MSG_QUICK_FILTER:
