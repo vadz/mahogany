@@ -59,10 +59,10 @@
 #define   PROFILE_EMPTY_NAME "EMPTYPROFILE?(*[]{}"
 
 #ifdef DEBUG
-   // there are 2 many of profile trace messages - filter them. They won't
+   // there are t many of profile trace messages - filter them. They won't
    // appear by default, if you do want them change the wxLog::ms_ulTraceMask
-   // to include wxTraceProfileCalss bit
-   static const int wxTraceProfileCalss = 0x200;
+   // to include wxTraceProfileClass bit
+   static const int wxTraceProfileClass = 0x200;
 #endif
 
 // ----------------------------------------------------------------------------
@@ -890,7 +890,7 @@ readEntryHelper(wxConfigBase *config,
    else
       dbgtmp += strutil_ltoa(value.GetNumber());
 
-   wxLogTrace(wxTraceProfileCalss, Str(dbgtmp));
+   wxLogTrace(wxTraceProfileClass, Str(dbgtmp));
 #  endif
 
    if(read)
@@ -1089,7 +1089,7 @@ ConfigFileManager::DeRegister(ProfileBase *prof)
    {
       if((*i)->profile == prof)
       {
-         TRACEMESSAGE((wxTraceProfileCalss,
+         TRACEMESSAGE((wxTraceProfileClass,
                        "ConfigFileManager::DeRegister(%s)",
                        (*i)->className.c_str()));
          delete fcList->remove(i);
@@ -1103,7 +1103,7 @@ ConfigFileManager::DeRegister(ProfileBase *prof)
 void
 ConfigFileManager::Register(const String & className, ProfileBase *profile)
 {
-   TRACEMESSAGE((wxTraceProfileCalss,
+   TRACEMESSAGE((wxTraceProfileClass,
                  "ConfigFileManager.Register(%s)",
                  className.c_str()));
 
