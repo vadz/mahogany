@@ -572,7 +572,13 @@ case "$USE_SSL" in
 	case "$USE_SSL" in
 	/*/include) ssl_inc="$USE_SSL" ;;
 	/*)	ssl_inc="$USE_SSL/include" ;;
-	*)	ssl_inc="$prefix/include" ;;
+	*)	# explicitly using -/usr/local/include is a bad idea with gcc,
+		# it complains about it ("changing the order of system
+		# directories search")
+		if "$prefix" != "/usr/local"; then
+		    ssl_inc="$prefix/include"
+		fi
+		;;
 	esac
 
 	dnl there is a subtlety here: we have to look for ssl.h and not for
