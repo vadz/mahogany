@@ -82,7 +82,7 @@ ifdef USE_SWIG
 SWIG = @SWIG@
 SWIGFLAGS = -c++ -python -shadow -dhtml -c
 SWIGFLAGS_LIBSWIG = -c++ -python -shadow 
-SWIG_LIBS = -lswig -lswigpy
+SWIG_LIBS = #no longer needed -lswig -lswigpy
 else
 SWIG= echo
 SWIGFLAGS=
