@@ -890,6 +890,11 @@ void BareBonesEditor::ResetDirty()
 
 void BareBonesEditor::SetFontEncoding()
 {
+   if ( m_encoding == wxFONTENCODING_SYSTEM )
+   {
+      return;
+   }
+
    wxFont fontOld = m_textControl->GetFont();
 #if 0 // FIXME: wxGtk2.4/wxFont::SetEncoding doesn't work for some reason
    wxFont fontNew(fontOld);
