@@ -352,7 +352,7 @@ private:
                            "RawText", 
                            _("Mahogany: Please choose where to save the text"),
                            NULL, NULL, NULL, NULL,
-                           wxSAVE,
+                           wxSAVE | wxOVERWRITE_PROMPT,
                            this
                          );
        if ( !filename.empty() )
