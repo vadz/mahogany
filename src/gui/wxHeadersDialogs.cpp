@@ -784,7 +784,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(ProfileBase *profile,
          gettext_noop("all messages")
       };
 
-      wxString *radioStrings = new wxString[CustomHeader_Max];
+      wxString *radioStrings = new wxString[ (size_t) CustomHeader_Max];
       for ( size_t n = 0; n < CustomHeader_Max; n++ )
       {
          radioStrings[n] = _(radioItems[n]);
