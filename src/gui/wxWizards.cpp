@@ -34,6 +34,8 @@
 #include "MFolder.h"
 #include "Mpers.h"
 
+#include "MailFolderCC.h"
+
 #include "MHelp.h"
 #include "gui/wxMApp.h"
 #include "gui/wxMIds.h"

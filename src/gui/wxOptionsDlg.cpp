@@ -1615,7 +1615,7 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
       }
 
       // show/hide the log window depending on the new setting value
-      bool showLog = READ_CONFIG(m_Profile, MP_SHOWLOG);
+      bool showLog = READ_CONFIG(m_Profile, MP_SHOWLOG) != 0;
       if ( showLog != mApplication->IsLogShown() )
       {
          mApplication->ShowLog(showLog);

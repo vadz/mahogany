@@ -1010,7 +1010,6 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       filename = wxGetTempFileName("Mtemp"),
       filename2 = "";
 
-#  ifdef OS_WIN
    // get the standard extension for such files
    wxString ext;
    if ( fileType != NULL ) {
@@ -1036,7 +1035,6 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
 
       filename = path + wxFILE_SEP_PATH + name + ext;
    }
-#  endif // Win
 
    MailMessageParameters
       params(filename, mimetype, m_mailMessage, mimeDisplayPart);

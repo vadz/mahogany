@@ -1143,7 +1143,7 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
    // only enable menu item if outbox is used and contains messages:
    ASSERT(m_topLevelFrame->GetMenuBar());
 
-   bool useOutbox = READ_APPCONFIG(MP_USE_OUTBOX);
+   bool useOutbox = READ_APPCONFIG(MP_USE_OUTBOX) != 0;
    m_topLevelFrame->GetMenuBar()->Enable(
       (int)WXMENU_FILE_SEND_OUTBOX,enable && useOutbox);
 

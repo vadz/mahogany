@@ -26,9 +26,10 @@
 
 #  include "strutil.h"
 
-#  include "MailFolderCC.h"
 #  include "ASMailFolder.h"
 #endif // USE_PCH
+
+#include "MailFolderCC.h"
 
 #include <wx/dir.h>
 #include <wx/filefn.h>

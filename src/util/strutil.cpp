@@ -913,9 +913,9 @@ strutil_makeMailAddress(const String &personal,
 */
 bool
 strutil_getMailAddress(const String &inputline,
-                       String * opersonal = NULL,
-                       String * omailbox = NULL,
-                       String * ohostname = NULL)
+                       String * opersonal,
+                       String * omailbox,
+                       String * ohostname)
 {
    if(inputline.Length() == 0)
       return FALSE;
