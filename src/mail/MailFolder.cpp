@@ -1355,7 +1355,7 @@ extern "C"
             break;
          case MSO_DATE:
          case MSO_DATE_REV:
-            flag = criterium == MSO_DATE ? -1 : 1;
+            flag = criterium == MSO_DATE ? 1 : -1;
             if(i1->GetDate() > i2->GetDate())
                result = flag;
             else
