@@ -331,9 +331,10 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual Ticket SetSequenceFlag(const UIdArray *sequence,
-                                int flag,
-                                bool set = true) = 0;
+   virtual Ticket SetSequenceFlag(MailFolder::SequenceKind kind,
+                                  const Sequence& sequence,
+                                  int flag,
+                                  bool set = true) = 0;
 
    /** Appends the message to this folder.
        @param msg the message to append

@@ -1074,6 +1074,37 @@ char MailFolder::GetFolderDelimiter() const
 }
 
 // ----------------------------------------------------------------------------
+// MailFolder flags
+// ----------------------------------------------------------------------------
+
+bool
+MailFolder::SetFlagForAll(int flag, bool set)
+{
+   unsigned long nMessages = GetMessageCount();
+
+   if ( !nMessages )
+   {
+      // no messages to set the flag for
+      return true;
+   }
+
+   Sequence sequence;
+   sequence.AddRange(1, nMessages);
+
+   return SetSequenceFlag(SEQ_MSGNO, sequence, flag, set);
+}
+
+bool MailFolder::SetFlag(const UIdArray *sequence, int flag, bool set)
+{
+   CHECK( sequence, false, "NULL sequence in MailFolder::SetFlag" );
+
+   Sequence seq;
+   seq.AddArray(*sequence);
+
+   return SetSequenceFlag(SEQ_UID, seq, flag, set);
+}
+
+// ----------------------------------------------------------------------------
 // misc static MailFolder methods
 // ----------------------------------------------------------------------------
 

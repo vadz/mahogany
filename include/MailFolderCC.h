@@ -52,13 +52,6 @@ class MailFolderCC;
 class MailFolderCC : public MailFolderCmn
 {
 public:
-   /// flags for DoSetSequenceFlag()
-   enum SequenceKind
-   {
-      SEQ_UID,
-      SEQ_MSGNO
-   };
-
    /** @name Constructors and destructor */
    //@{
    static MailFolder *OpenFolder(const MFolder *mfolder,
@@ -145,27 +138,20 @@ public:
    */
    virtual Message *GetMessage(unsigned long uid);
 
+   virtual bool SetMessageFlag(unsigned long uid,
+                               int flag,
+                               bool set = true);
+
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
        @return always true UNSUPPORTED!
    */
-   virtual bool SetSequenceFlag(const String& sequence,
+   virtual bool SetSequenceFlag(SequenceKind kind,
+                                const Sequence& sequence,
                                 int flag,
                                 bool set = true);
-
-   virtual bool SetFlagForAll(int flag, bool set = true);
-
-   /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
-       @param sequence the IMAP sequence of uids
-       @param flag flag to be set, e.g. "\\Deleted"
-       @param set if true, set the flag, if false, clear it
-       @return true on success
-   */
-   virtual bool SetFlag(const UIdArray *sequence,
-                        int flag,
-                        bool set = true);
 
    /// override base class SaveMessages() to do server side copy if possible
    virtual bool SaveMessages(const UIdArray *selections, MFolder *folder);
@@ -189,14 +175,6 @@ public:
 
    virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);
 
-
-   /** Set a flag for all messages in this sequence which may contain either
-       UIDs or msgnos
-    */
-   virtual bool DoSetSequenceFlag(SequenceKind kind,
-                                  const String& sequence,
-                                  int flag,
-                                  bool set = true);
 
    /** Check whether mailbox has changed.
        @return FALSE on error
@@ -349,9 +327,6 @@ private:
 
    /** @name Mailbox update helpers */
    //@{
-
-   /// call to notify everybody that its listing changed
-   virtual void RequestUpdate(void);
 
    /// call to notify everybody that some messages were expunged
    void RequestUpdateAfterExpunge();

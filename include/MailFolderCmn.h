@@ -34,6 +34,9 @@
 // trace mask for the new mail messages
 #define TRACE_MF_NEWMAIL "mfnew"
 
+// trace mask for the mail folder related events
+#define TRACE_MF_EVENTS "mfevent"
+
 class FilterRule;
 
 /**
@@ -86,7 +89,7 @@ public:
        @param expunge expunge messages after deletion
        @return true on success
    */
-   virtual bool DeleteMessages(const UIdArray *messages, bool expunge=false);
+   virtual bool DeleteMessages(const UIdArray *messages, bool expunge = false);
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
@@ -94,36 +97,18 @@ public:
    */
    virtual bool UnDeleteMessages(const UIdArray *messages);
 
-   /**@name Old-style functions, try to avoid. */
-   //@{
-
-   /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
+   /** Mark message as deleted.
        @param uid mesage uid
-       @param flag flag to be set, e.g. "\\Deleted"
-       @param set if true, set the flag, if false, clear it
-       @return always true UNSUPPORTED!
-   */
-  virtual bool SetMessageFlag(unsigned long uid,
-                              int flag,
-                              bool set = true)
-      {
-         return SetSequenceFlag(strutil_ultoa(uid),flag,set);
-      }
-
-   /** Delete a message.
-       @param uid mesage uid
-       @return always true UNSUPPORTED!
+       @return true if ok
    */
    virtual bool DeleteMessage(unsigned long uid);
 
-   /** UnDelete a message.
+   /** Mark message as not deleted.
        @param uid mesage uid
-       @return always true UNSUPPORTED!
+       @return true if ok
    */
-   virtual inline bool UnDeleteMessage(unsigned long uid)
-      { SetMessageFlag(uid,MSG_STAT_DELETED, false); return true; }
+   virtual bool UnDeleteMessage(unsigned long uid);
 
-   //@}
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
        @param params reply parameters
@@ -185,6 +170,7 @@ public:
 
    virtual void SuspendUpdates() { m_suspendUpdates++; }
    virtual void ResumeUpdates() { if ( !--m_suspendUpdates ) RequestUpdate(); }
+   virtual void RequestUpdate();
 
    /** @name Delayed folder closing
 

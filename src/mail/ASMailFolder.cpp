@@ -226,26 +226,46 @@ public:
 class MT_SetSequenceFlag : public MailThread
 {
 public:
-   // passing empty sequence string means that we set flag for all messages
-   MT_SetSequenceFlag(ASMailFolder *mf, UserData ud,
-                      const String &sequence,
+   MT_SetSequenceFlag(ASMailFolder *mf,
+                      UserData ud,
+                      MailFolder::SequenceKind kind,
+                      const Sequence& sequence,
                       int flag, bool set)
-      : MailThread(mf, ud)
+      : MailThread(mf, ud), m_Sequence(sequence)
       {
-         m_Sequence = sequence;
+         m_Kind = kind;
          m_Flag = flag;
          m_Set = set;
       }
    virtual void WorkFunction(void)
       {
-         if ( m_Sequence.empty() )
-            m_MailFolder->SetFlagForAll(m_Flag, m_Set);
-         else
-            m_MailFolder->SetSequenceFlag(m_Sequence, m_Flag, m_Set);
+         m_MailFolder->SetSequenceFlag(m_Kind, m_Sequence, m_Flag, m_Set);
       }
 
 protected:
-   String m_Sequence;
+   const Sequence m_Sequence;
+   MailFolder::SequenceKind m_Kind;
+   int m_Flag;
+   bool m_Set;
+};
+
+class MT_SetFlagForAll : public MailThread
+{
+public:
+   MT_SetFlagForAll(ASMailFolder *mf,
+                    UserData ud,
+                    int flag, bool set)
+      : MailThread(mf, ud)
+      {
+         m_Flag = flag;
+         m_Set = set;
+      }
+   virtual void WorkFunction(void)
+      {
+         m_MailFolder->SetFlagForAll(m_Flag, m_Set);
+      }
+
+protected:
    int m_Flag;
    bool m_Set;
 };
@@ -720,8 +740,7 @@ public:
 
    virtual Ticket SetFlagForAll(int flag, bool set = true)
       {
-         // passing empty string means that we set it for all messages
-         return (new MT_SetSequenceFlag(this, NULL, "", flag, set))->Start();
+         return (new MT_SetFlagForAll(this, NULL, flag, set))->Start();
       }
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
@@ -729,12 +748,13 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual Ticket SetSequenceFlag(const UIdArray *sequence,
+   virtual Ticket SetSequenceFlag(MailFolder::SequenceKind kind,
+                                  const Sequence& sequence,
                                   int flag,
                                   bool set)
       {
          return (new MT_SetSequenceFlag(this, NULL,
-                                        GetSequenceString(sequence),flag,set))->Start();
+                                        kind,sequence,flag,set))->Start();
       }
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
@@ -781,7 +801,6 @@ public:
                            UserData ud,
                            bool read)
       {
-         //return SetFlag(selections, MailFolder::MSG_STAT_SEEN, read);
          return (new MT_MarkRead(this, ud, selections, read))->Start();
       }
 
@@ -824,10 +843,10 @@ public:
    virtual void SetMessageFlag(unsigned long uid,
                                int flag, bool set)
       {
-         UIdArray *ia = new UIdArray;
-         ia->Add(uid);
-         SetSequenceFlag(ia, flag, set);
-         delete ia;
+         UIdArray ua;
+         ua.Add(uid);
+
+         SetFlag(&ua, flag, set);
       }
    //@}
 

@@ -125,6 +125,16 @@ public:
       HalfOpen
    };
 
+   /// flags for SetSequenceFlag()
+   enum SequenceKind
+   {
+      /// the sequence contains the UIDs
+      SEQ_UID,
+
+      /// the sequence contains the msgnos
+      SEQ_MSGNO
+   };
+
    /// flags for SearchByFlag()
    enum
    {
@@ -536,44 +546,55 @@ public:
    virtual bool DeleteMessage(unsigned long uid) = 0;
 
    /** UnDelete a message.
-       @param uid the message uid
-       @return true on success
+       @param uid the message uid @return true on success
    */
    virtual bool UnDeleteMessage(unsigned long uid) = 0;
 
-   /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
-       @param uid the message uid
-       @param flag flag to be set, e.g. "\\Deleted"
-       @param set if true, set the flag, if false, clear it
-       @return true on success
+   /**
+     Set or clear the given flag for one message. Possible flag values are
+     MSG_STAT_xxx.
+
+     @param uid the message uid
+     @param flag flag to be set, e.g. "\\Deleted"
+     @param set if true, set the flag, if false, clear it
+     @return true on success
    */
    virtual bool SetMessageFlag(unsigned long uid,
                                int flag,
                                bool set = true) = 0;
 
-   /** Set flag for all messages
-    */
-   virtual bool SetFlagForAll(int flag, bool set = true) = 0;
+   /** Set flags on a sequence of messages. Possible flag values are
+       MSG_STAT_xxx. Note that it is more efficient to call this function
+       rather SetMessageFlag() for each sequence element so it should be used
+       whenever possible.
 
-   /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
-       @param sequence the IMAP sequence of uids
+       @param kind if SEQ_UID, sequence contains UIDs, otherwise -- msgnos
+       @param sequence the sequence of uids or msgnos
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
        @return true on success
    */
-   virtual bool SetFlag(const UIdArray *sequence,
-                        int flag,
-                        bool set = true) = 0;
-
-   /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
-       @param sequence the IMAP sequence of uids
-       @param flag flag to be set, e.g. "\\Deleted"
-       @param set if true, set the flag, if false, clear it
-       @return true on success
-   */
-   virtual bool SetSequenceFlag(const String &sequence,
+   virtual bool SetSequenceFlag(SequenceKind kind,
+                                const Sequence& sequence,
                                 int flag,
                                 bool set = true) = 0;
+
+   /// for compatibility: SetSequenceFlag() working only with UIDs
+   bool SetSequenceFlag(const Sequence& sequence, int flag, bool set = true)
+      { return SetSequenceFlag(SEQ_UID, sequence, flag, set); }
+
+   /**
+     Set or clear the given flag for all messages in the folder.
+    */
+   bool SetFlagForAll(int flag, bool set = true);
+
+   /**
+     Simple wrapper around SetSequenceFlag().
+
+     Avoid using this one, it is mainly here for backwards compatibility.
+   */
+   bool SetFlag(const UIdArray *sequence, int flag, bool set = true);
+
    /** Appends the message to this folder.
        @param msg the message to append
        @return true on success

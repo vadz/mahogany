@@ -1322,6 +1322,23 @@ bool MailFolderCmn::ThreadMessages(const ThreadParams& thrParams,
 }
 
 // ----------------------------------------------------------------------------
+// MailFolderCmn misc
+// ----------------------------------------------------------------------------
+
+void
+MailFolderCmn::RequestUpdate()
+{
+   if ( IsUpdateSuspended() )
+      return;
+
+   wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
+              GetName().c_str());
+
+   // tell all interested that the folder changed
+   MEventManager::Send(new MEventFolderUpdateData(this));
+}
+
+// ----------------------------------------------------------------------------
 // MFCmnOptions
 // ----------------------------------------------------------------------------
 
@@ -1433,20 +1450,17 @@ MailFolderCmn::UnDeleteMessages(const UIdArray *selections)
 }
 
 
-/** Delete a message.
-    @param uid mesage uid
-    @return true if ok
-    */
 bool
 MailFolderCmn::DeleteMessage(unsigned long uid)
 {
-   UIdArray a;
-   a.Add(uid);
-
-   // delete without expunging
-   return DeleteMessages(&a);
+   return SetMessageFlag(uid, MSG_STAT_DELETED, true);
 }
 
+bool
+MailFolderCmn::UnDeleteMessage(unsigned long uid)
+{
+   return SetMessageFlag(uid, MSG_STAT_DELETED, false);
+}
 
 bool
 MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
@@ -1491,14 +1505,13 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
 bool
 MailFolderCmn::DeleteMessages(const UIdArray *selections, bool expunge)
 {
-   String seq = GetSequenceString(selections);
-   if ( seq.empty() )
-   {
-      // nothing to do
-      return true;
-   }
+   CHECK( selections, false,
+          "NULL selections in MailFolderCmn::DeleteMessages" );
 
-   bool rc = SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
+   Sequence seq;
+   seq.AddArray(*selections);
+
+   bool rc = SetSequenceFlag(SEQ_UID, seq, MailFolder::MSG_STAT_DELETED);
    if ( rc && expunge )
       ExpungeMessages();
 

@@ -184,9 +184,6 @@ extern const MPersMsgBox *M_MSGBOX_NO_NET_PING_ANYWAY;
 // turn on logging of MailFolderCC operations
 #define TRACE_MF_CALLS "mfcall"
 
-// turn on logging of events sent by MailFolderCC
-#define TRACE_MF_EVENTS "mfevent"
-
 // ----------------------------------------------------------------------------
 // global functions prototypes
 // ----------------------------------------------------------------------------
@@ -3531,12 +3528,17 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
 
       CHECK( m_MailStream, 0, "SearchByFlag: folder is closed" );
 
-      set->last = mail_uid(m_MailStream, m_nMessages);
 
       if ( flags & SEARCH_UID )
+      {
+         set->last = mail_uid(m_MailStream, m_nMessages);
          pgm->uid = set;
-      else
+      }
+      else // msgno search
+      {
+         set->last = m_nMessages;
          pgm->msgno = set;
+      }
    }
 
    return DoSearch(pgm, flags & (SEARCH_UID | SEARCH_MSGNO));
@@ -3630,18 +3632,21 @@ String MailFolderCC::BuildSequence(const UIdArray& messages)
 }
 
 bool
-MailFolderCC::SetSequenceFlag(const String& sequence,
-                              int flag,
-                              bool set)
+MailFolderCC::SetMessageFlag(unsigned long uid,
+                             int flag,
+                             bool set)
 {
-   return DoSetSequenceFlag(SEQ_UID, sequence, flag, set);
+   Sequence seq;
+   seq.Add(uid);
+
+   return SetSequenceFlag(SEQ_UID, seq, flag, set);
 }
 
 bool
-MailFolderCC::DoSetSequenceFlag(SequenceKind kind,
-                                const String& sequence,
-                                int flag,
-                                bool set)
+MailFolderCC::SetSequenceFlag(SequenceKind kind,
+                              const Sequence& seq,
+                              int flag,
+                              bool set)
 {
    CHECK_DEAD_RC("Cannot access closed folder '%s'.", false);
 
@@ -3655,6 +3660,8 @@ MailFolderCC::DoSetSequenceFlag(SequenceKind kind,
 
    String flags = GetImapFlags(flag);
 
+   const String sequence = seq.GetString();
+
    if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
                      1, this, this->GetClassName(),
                      GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
@@ -3667,7 +3674,7 @@ MailFolderCC::DoSetSequenceFlag(SequenceKind kind,
       if ( kind == SEQ_UID )
          opFlags |= ST_UID;
 
-      CHECK( m_MailStream, 0, "DoSetSequenceFlag: folder is closed" );
+      CHECK( m_MailStream, 0, "SetSequenceFlag: folder is closed" );
 
       wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SetFlags(%s) = %s",
                  GetName().c_str(), sequence.c_str(), flags.c_str());
@@ -3680,27 +3687,6 @@ MailFolderCC::DoSetSequenceFlag(SequenceKind kind,
    //else: blocked by python callback
 
    return true;
-}
-
-bool
-MailFolderCC::SetFlag(const UIdArray *selections, int flag, bool set)
-{
-   return SetSequenceFlag(BuildSequence(*selections), flag, set);
-}
-
-bool
-MailFolderCC::SetFlagForAll(int flag, bool set)
-{
-   if ( !m_nMessages )
-   {
-      // no messages to set the flag for
-      return true;
-   }
-
-   Sequence sequence;
-   sequence.AddRange(1, m_nMessages);
-
-   return DoSetSequenceFlag(SEQ_MSGNO, sequence.GetString(), flag, set);
 }
 
 void
@@ -4487,19 +4473,6 @@ void MailFolderCC::RequestUpdateAfterExpunge()
    // MEventFolderExpungeData() will delete them
    m_expungedMsgnos =
    m_expungedPositions = NULL;
-}
-
-void
-MailFolderCC::RequestUpdate()
-{
-   if ( IsUpdateSuspended() )
-      return;
-
-   wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
-              GetName().c_str());
-
-   // tell all interested that the folder changed
-   MEventManager::Send(new MEventFolderUpdateData(this));
 }
 
 void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
