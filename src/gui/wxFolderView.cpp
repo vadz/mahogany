@@ -430,7 +430,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       if ( !m_InDeletion )
       {
          wxString msg;
-         msg.Printf(_("Mark all articles in\n%s\nas read?"),
+         msg.Printf(_("Mark all articles in\n'%s'\nas read?"),
                     m_ASMailFolder->GetName().c_str());
 
          if(m_NumOfMessages > 0 && m_ASMailFolder->GetType() == MF_NNTP
@@ -438,7 +438,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
                                    m_Parent,
                                    MDIALOG_YESNOTITLE,
                                    true,
-                                   ProfileBase::FilterProfileName(m_Profile->GetName())))
+                                   ProfileBase::FilterProfileName(m_Profile->GetName())+"MarkRead"))
          {
             // build sequence
             wxString sequence;
@@ -457,13 +457,16 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          }
          /// For all non-NNTP folders, check if the user wants to
          /// auto-expunge the messages?
+         msg.Printf(_("Do you want to expunge all deleted messages\n"
+                      "in folder '%s'?"),
+                    m_ASMailFolder->GetName().c_str());
          if(m_ASMailFolder->GetType() != MF_NNTP
             && m_ASMailFolder->CountMessages(MailFolder::MSG_STAT_DELETED,MailFolder::MSG_STAT_DELETED)
-            && MDialog_YesNoDialog(_("Do you want to expunge all deleted messages?"),
+            && MDialog_YesNoDialog(msg,
                                    m_Parent,
                                    MDIALOG_YESNOTITLE,
                                    true,
-                                   ProfileBase::FilterProfileName(m_Profile->GetName())))
+                                   ProfileBase::FilterProfileName(m_Profile->GetName())+"_AutoExpunge"))
          {
             (void) m_ASMailFolder->ExpungeMessages();
          }
