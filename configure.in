@@ -319,14 +319,14 @@ if test "$USE_PYTHON" = 1 ; then
              /home/local/lib/python1.5/config \
              /home/local/python1.5/config\
            ],
-           [ AC_CHECK_LIB(swigpy,main,
-             [  AC_DEFINE(USE_PYTHON)
-                AC_DEFINE(HAVE_SWIGLIB)
-                MAKE_USE_PYTHON="USE_PYTHON=yes"
+             [ AC_DEFINE(USE_PYTHON)
+               MAKE_USE_PYTHON="USE_PYTHON=yes"
+               AC_CHECK_LIB(swigpy,main,
+             [  AC_DEFINE(HAVE_SWIGLIB)
                 PYTHON_LIBS="$libpath_python1_5_main -lpython1.5 -lswigpy"
               ],
-              [ AC_MSG_WARN("Cannot find SWIG library for python - disabling python.")
-                MAKE_USE_PYTHON=
+              [ AC_MSG_WARN("Cannot find SWIG library for python - trying anyway.")
+                PYTHON_LIBS="$libpath_python1_5_main -lpython1.5"
               ],
               [$libpath_python1_5_main -lpython1.5]
              )
@@ -334,7 +334,7 @@ if test "$USE_PYTHON" = 1 ; then
          )
        ]
    )
-   AC_PATH_PROG(SWIG,swig)
+   AC_PATH_PROG(SWIG,swig,echo)
 fi
 AC_SUBST(MAKE_USE_PYTHON)
 
