@@ -11,18 +11,18 @@
 #   pragma implementation "Filters.h"
 #endif
 
-#ifndef TEST
-#   include   "Mpch.h"
-#else
+#include   "Mpch.h"
+
+#ifdef TEST
 //  For regression testing, we pull the configuration options
 //  and tweak them to suit our nefarious purposes...
 #   include "Mconfig.h"
-#   undef USE_PCH		// never use precompiled headers
-#   undef USE_MODULES_STATIC	// don't pull in static linking crud
+#   undef USE_PCH                // never use precompiled headers
+#   undef USE_MODULES_STATIC     // don't pull in static linking crud
 //  turn on some debugging options in case they weren't already
-#   undef DEBUG		// in case it's already set
+#   undef DEBUG                // in case it's already set
 #   define DEBUG 1
-#   undef DEBUG_filters	// in case it's already set
+#   undef DEBUG_filters        // in case it's already set
 #   define DEBUG_filters 1
 #endif
 
@@ -505,9 +505,9 @@ protected:
    friend Parser;
 private:
    String m_Input;
-   Token token, peek;	// current and next tokens
-   size_t m_Position;	// seek offset of current token
-   size_t m_Peek;	// seek offset of next token
+   Token token, peek;        // current and next tokens
+   size_t m_Position;        // seek offset of current token
+   size_t m_Peek;        // seek offset of next token
    MInterface *m_MInterface;
    FunctionDefinition *m_FunctionList;
 
@@ -608,7 +608,7 @@ class Filter : public SyntaxNode
 public:
    Filter(SyntaxNode *r, SyntaxNode *n)
       {
-	 ASSERT(r != NULL); ASSERT(n != NULL);
+         ASSERT(r != NULL); ASSERT(n != NULL);
          m_Rule = r; m_Next = n;
       }
    ~Filter(void) { delete m_Rule; delete m_Next; }
@@ -616,15 +616,15 @@ public:
       {
          MOcheck();
          (void) m_Rule->Evaluate();;
-	 // tail recursion, so no add'l stack frame
-	 return m_Next->Evaluate();
+         // tail recursion, so no add'l stack frame
+         return m_Next->Evaluate();
       }
 #ifdef DEBUG
    virtual String Debug(void) const
       {
          MOcheck();
          String s = m_Rule->Debug();
-	 s << m_Next->Debug();
+         s << m_Next->Debug();
          return s;
       }
 #endif
@@ -638,7 +638,7 @@ class Statement : public SyntaxNode
 public:
    Statement(SyntaxNode *r, SyntaxNode *n)
       {
-	 ASSERT(r != NULL); ASSERT(n != NULL);
+         ASSERT(r != NULL); ASSERT(n != NULL);
          m_Rule = r; m_Next = n;
       }
    ~Statement(void) { delete m_Rule; delete m_Next; }
@@ -646,8 +646,8 @@ public:
       {
          MOcheck();
          (void) m_Rule->Evaluate();;
-	 // tail recursion, so no add'l stack frame
-	 return m_Next->Evaluate();
+         // tail recursion, so no add'l stack frame
+         return m_Next->Evaluate();
       }
    void AddNext(SyntaxNode *node) { m_Next = node; }
 #ifdef DEBUG
@@ -655,7 +655,7 @@ public:
       {
          MOcheck();
          String s = m_Rule->Debug();
-	 s << ';' << m_Next->Debug();
+         s << ';' << m_Next->Debug();
          return s;
       }
 #endif
@@ -770,19 +770,19 @@ public:
       {
          MOcheck();
          ASSERT(m_UseCount == 0);
-	 if (m_Next != NULL)
-	    m_Next->DecRef();
+         if (m_Next != NULL)
+            m_Next->DecRef();
       }
 
    FunctionDefinition * FindFunction(const String &name)
       {
          if(name == m_Name) {
-	    IncRef();
-	    return this;
-	 }
+            IncRef();
+            return this;
+         }
          if(m_Next == NULL)
-	    return NULL;
-	 // tail recursion
+            return NULL;
+         // tail recursion
          return m_Next->FindFunction(name);
       }
 
@@ -869,7 +869,7 @@ class QueryOp : public SyntaxNode
 public:
    QueryOp(SyntaxNode *cond, SyntaxNode *left, SyntaxNode *right)
       {
-	 ASSERT(cond != NULL); ASSERT(left != NULL); ASSERT(right != NULL);
+         ASSERT(cond != NULL); ASSERT(left != NULL); ASSERT(right != NULL);
          m_Cond = cond; m_Left = left; m_Right = right;
       }
    ~QueryOp(void)
@@ -882,9 +882,9 @@ public:
    virtual Value Evaluate(void) const
       {
          MOcheck();
-	 return m_Cond->Evaluate().ToNumber()
-	      ? m_Left->Evaluate()
-	      : m_Right->Evaluate();
+         return m_Cond->Evaluate().ToNumber()
+              ? m_Left->Evaluate()
+              : m_Right->Evaluate();
       }
 #ifdef DEBUG
    virtual String Debug(void) const
@@ -892,10 +892,10 @@ public:
          MOcheck();
          String s = "(";
          s << m_Left->Debug()
-	   << '?'
-	   << m_Left->Debug()
-	   << ':'
-	   << m_Right->Debug()
+           << '?'
+           << m_Left->Debug()
+           << ':'
+           << m_Right->Debug()
            << ')';
          return s;
       }
@@ -913,7 +913,7 @@ public:
    Expression(SyntaxNode *left, Operator *op, SyntaxNode *right)
       {
          ASSERT(left != NULL); ASSERT(op != NULL); ASSERT(right != NULL);
-	 m_Left = left; m_Op = op; m_Right = right;
+         m_Left = left; m_Op = op; m_Right = right;
       }
    ~Expression()
       {
@@ -976,7 +976,7 @@ public: \
       { MOcheck(); return #oper; } \
 } Oper_##name
 
-#else	// not DEBUGing
+#else        // not DEBUGing
 
 #define IMPLEMENT_OP(name, oper, string) \
 IMPLEMENT_VALUE_OP(oper, string); \
@@ -1220,9 +1220,9 @@ ParserImpl::GetToken(bool remove)
 {
    MOcheck();
    if (remove) {
-   	Token mytok = token;
-   	NextToken();
-	return mytok;
+           Token mytok = token;
+           NextToken();
+        return mytok;
    }
    return token;
 }
@@ -1287,68 +1287,68 @@ ParserImpl::Rewind(size_t pos)
       {
       case '+':
          token.SetOperator(Token::Operator_Plus);
-	 break;
+         break;
       case '-':
          token.SetOperator(Token::Operator_Minus);
-	 break;
+         break;
       case '*':
          token.SetOperator(Token::Operator_Times);
-	 break;
+         break;
       case '/':
          token.SetOperator(Token::Operator_Divide);
-	 break;
+         break;
       case '%':
          token.SetOperator(Token::Operator_Mod);
-	 break;
+         break;
       case '&':
-	 if ( Char() == c )
-	    (void)CharInc();
+         if ( Char() == c )
+            (void)CharInc();
          token.SetOperator(Token::Operator_And);
-	 break;
+         break;
       case '|':
-	 if ( Char() == c )
-	    (void)CharInc();
+         if ( Char() == c )
+            (void)CharInc();
          token.SetOperator(Token::Operator_Or);
-	 break;
+         break;
       case '<':
-	 if ( Char() == '=' )
-	 {
-	    (void)CharInc();
+         if ( Char() == '=' )
+         {
+            (void)CharInc();
             token.SetOperator(Token::Operator_Leq);
-	 }
-	 else if ( Char() == '>' )
-	 {
-	    (void)CharInc();
+         }
+         else if ( Char() == '>' )
+         {
+            (void)CharInc();
             token.SetOperator(Token::Operator_Neq);
-	 }
-	 else
+         }
+         else
             token.SetOperator(Token::Operator_Less);
-	 break;
+         break;
       case '>':
-	 if ( Char() == '=' )
-	 {
-	    (void)CharInc();
+         if ( Char() == '=' )
+         {
+            (void)CharInc();
             token.SetOperator(Token::Operator_Geq);
-	 }
-	 else
+         }
+         else
             token.SetOperator(Token::Operator_Greater);
-	 break;
+         break;
       case '=':
-	 if ( Char() == c )
-	    (void)CharInc();
+         if ( Char() == c )
+            (void)CharInc();
          token.SetOperator(Token::Operator_Equal);
-	 break;
+         break;
       case '!':
-	 if ( Char() == '=' )
-	 {
-	    (void)CharInc();
+         if ( Char() == '=' )
+         {
+            (void)CharInc();
             token.SetOperator(Token::Operator_Neq);
-	    break;
-	 }
-	 // fall through to...
+            break;
+         }
+         // fall through to...
       default:
          // All other cases: return the character:
-	 token.SetChar(c);
+         token.SetChar(c);
       }
    }
 
@@ -1552,7 +1552,7 @@ ParserImpl::ParseQueryOp(void)
    if(sn == NULL)
       return NULL;
    if(!token.IsChar('?'))
-   	return sn;
+           return sn;
    NextToken();
    SyntaxNode *left = ParseExpression();
    if(left == NULL) {
@@ -1582,8 +1582,8 @@ ParserImpl::ParseQueryOp(void)
    case Token::Operator_##oper: return &Oper_##oper
 
 // This ditty implements the dreaded left-recursive grammar
-//	name	:= part
-//		| name op part
+//        name        := part
+//                | name op part
 // That is, a string of left-associative operators at the same
 // precedence level.  The operands are all of type `part'
 #define LeftAssoc(name,opers,part,msg) \
@@ -1603,8 +1603,8 @@ ParserImpl::Parse##name(void) \
       SyntaxNode *exp = Parse##part(); \
       if (exp == NULL) { \
          delete expr; \
-	 Error(msg); \
-	 return NULL; \
+         Error(msg); \
+         return NULL; \
       } \
       expr = new Expression(expr, op, exp); \
    } \
@@ -1799,7 +1799,7 @@ ParserImpl::ParseUnary(void)
    {
       if(token.GetOperator() == Token::Operator_Plus)
       {
-	 NextToken();
+         NextToken();
          return ParseUnary();
       }
       else if(token.GetOperator() == Token::Operator_Minus)
@@ -1811,12 +1811,12 @@ ParserImpl::ParseUnary(void)
             NextToken();
          }
          else
-	 {
-	    sn = ParseUnary();
-	    if (sn == NULL)
-	       return NULL;
-	    sn = new Negative(sn);
-	 }
+         {
+            sn = ParseUnary();
+            if (sn == NULL)
+               return NULL;
+            sn = new Negative(sn);
+         }
       }
    }
    else if( token.IsString() )
@@ -1828,7 +1828,7 @@ ParserImpl::ParseUnary(void)
    {
       Token id = GetToken();
       if(token.GetType() == Token::TT_Char) {
-	 // IDENTIFIER ( ARGLIST )  ==> function call
+         // IDENTIFIER ( ARGLIST )  ==> function call
          if(token.GetChar() == '(')
             sn = ParseFunctionCall(id);
          // IDENTIFIER [ EXPRESSION ] ==> subscripted reference
@@ -1873,11 +1873,11 @@ ParserImpl::ParseFunctionCall(Token id)
          if(expr)
             args->Add(expr);
          else
-	 {
+         {
             Error(_("Expected an expression in argument list."));
-	    delete args;
-	    return NULL;
-	 }
+            delete args;
+            return NULL;
+         }
          if(token.GetType() != Token::TT_Char)
          {
             Error(_("Expected ',' or ')' after argument."));
@@ -2181,7 +2181,7 @@ extern "C"
 #ifdef USE_PYTHON
    static Value func_python(ArgList *args, Parser *p)
    {
-#ifndef TEST	// uses functions not in libraries
+#ifndef TEST        // uses functions not in libraries
       ASSERT(args);
       if(args->Count() != 1)
          return 0;
@@ -2213,7 +2213,7 @@ extern "C"
 
    static Value func_print(ArgList *args, Parser *p)
    {
-#ifndef TEST	// uses functions not in libraries
+#ifndef TEST        // uses functions not in libraries
       if(args->Count() != 0)
          return Value(0);
 
@@ -2384,7 +2384,7 @@ extern "C"
 
    static Value func_copytofolder(ArgList *args, Parser *p)
    {
-#ifndef TEST		// UIdArray not instantiated
+#ifndef TEST                // UIdArray not instantiated
       if(args->Count() != 1)
          return 0;
       Value fn = args->GetArg(0)->Evaluate();
@@ -2631,7 +2631,7 @@ FilterRuleImpl::Apply(MailFolder *folder,
                       bool ignoreDeleted,
                       bool *changeflag) const
 {
-#ifndef TEST		// UIdArray not instantiated
+#ifndef TEST                // UIdArray not instantiated
    return ApplyCommonCode(folder, &msgs, FALSE, ignoreDeleted, changeflag);
 #else
    return 0;
@@ -2662,7 +2662,7 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
                                 bool ignoreDeleted,
                                 bool *changeflag) const
 {
-#ifndef TEST		// UIdArray not instantiated
+#ifndef TEST                // UIdArray not instantiated
    if(! m_Program || ! m_Parser)
       return 0;
    int rc = 1; // no error yet
@@ -2795,15 +2795,15 @@ MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
    return new MModule_FiltersImpl();
 }
 
-#ifdef TEST	// test suite
-#include "../classes/MObject.cpp"	// Gross hack...
+#ifdef TEST        // test suite
+#include "../classes/MObject.cpp"        // Gross hack...
 class MyParser : public ParserImpl
 {
 public:
-	MyParser(String s) : ParserImpl(s, 0) {}
-	virtual void Error(const String &error);
-	String CharLeft() { return ParserImpl::CharLeft(); }
-	String CharMid() { return ParserImpl::CharMid(); }
+        MyParser(String s) : ParserImpl(s, 0) {}
+        virtual void Error(const String &error);
+        String CharLeft() { return ParserImpl::CharLeft(); }
+        String CharMid() { return ParserImpl::CharMid(); }
 };
 void
 MyParser::Error(const String &error)
@@ -2814,140 +2814,140 @@ MyParser::Error(const String &error)
 void
 Rejected(MyParser &p)
 {
-	printf("Rejected `%s<error>%s'\n",
-		p.CharLeft().c_str(),
-		p.CharMid().c_str());
+        printf("Rejected `%s<error>%s'\n",
+                p.CharLeft().c_str(),
+                p.CharMid().c_str());
 }
 
-int	// test whether the string is rejected by the parser
+int        // test whether the string is rejected by the parser
 TestExprFail(const char *s)
 {
-	MyParser p(s);
-	SyntaxNode *exp = p.ParseExpression();
-	if (exp == NULL) {
-		Rejected(p);
-		return 0;
-	}
-	Value v = exp->Evaluate();
-	delete exp;
-	printf("`%s' was accepted and evaluated as %ld\n", s, v.ToNumber());
-	return 1;
+        MyParser p(s);
+        SyntaxNode *exp = p.ParseExpression();
+        if (exp == NULL) {
+                Rejected(p);
+                return 0;
+        }
+        Value v = exp->Evaluate();
+        delete exp;
+        printf("`%s' was accepted and evaluated as %ld\n", s, v.ToNumber());
+        return 1;
 }
 
-int	// test whether the string is accepted by the parser
+int        // test whether the string is accepted by the parser
 TestExpr(int arg, const char *s)
 {
-	MyParser p(s);
-	SyntaxNode *exp = p.ParseExpression();
-	if (exp == NULL) {
-		Rejected(p);
-		return 1;
-	}
-	Value v = exp->Evaluate();
-	delete exp;
-	if (v.ToNumber() != arg) {
-		printf("`%s' was %ld instead of %d\n", s, v.ToNumber(), arg);
-		return 1;
-	}
-	return 0;
+        MyParser p(s);
+        SyntaxNode *exp = p.ParseExpression();
+        if (exp == NULL) {
+                Rejected(p);
+                return 1;
+        }
+        Value v = exp->Evaluate();
+        delete exp;
+        if (v.ToNumber() != arg) {
+                printf("`%s' was %ld instead of %d\n", s, v.ToNumber(), arg);
+                return 1;
+        }
+        return 0;
 }
 
-int	// test whether the pgm is rejected by the parser
+int        // test whether the pgm is rejected by the parser
 TestReject(const char *s)
 {
-	MyParser p(s);
-	SyntaxNode *pgm = p.ParseProgram();
-	if (pgm == NULL) {
-		Rejected(p);
-		return 0;
-	}
-	Value v = pgm->Evaluate();
-	delete pgm;
-	printf("`%s' was accepted and evaluated as %ld\n", s, v.ToNumber());
-	return 1;
+        MyParser p(s);
+        SyntaxNode *pgm = p.ParseProgram();
+        if (pgm == NULL) {
+                Rejected(p);
+                return 0;
+        }
+        Value v = pgm->Evaluate();
+        delete pgm;
+        printf("`%s' was accepted and evaluated as %ld\n", s, v.ToNumber());
+        return 1;
 }
 
-int	// test whether the pgm is accepted by the parser
+int        // test whether the pgm is accepted by the parser
 TestAccept(const char *s)
 {
-	MyParser p(s);
-	SyntaxNode *pgm = p.ParseProgram();
-	if (pgm == NULL) {
-		Rejected(p);
-		return 1;
-	}
-	delete pgm;
-	return 0;
+        MyParser p(s);
+        SyntaxNode *pgm = p.ParseProgram();
+        if (pgm == NULL) {
+                Rejected(p);
+                return 1;
+        }
+        delete pgm;
+        return 0;
 }
 
-int	// test whether the pgm is accepted by the parser
+int        // test whether the pgm is accepted by the parser
 TestPgm(int arg, const char *s)
 {
-	MyParser p(s);
-	SyntaxNode *pgm = p.ParseProgram();
-	if (pgm == NULL) {
-		Rejected(p);
-		return 1;
-	}
-	Value v = pgm->Evaluate();
-	delete pgm;
-	if (v.ToNumber() != arg) {
-		printf("`%s' was %ld instead of %d\n", s, v.ToNumber(), arg);
-		return 1;
-	}
-	return 0;
+        MyParser p(s);
+        SyntaxNode *pgm = p.ParseProgram();
+        if (pgm == NULL) {
+                Rejected(p);
+                return 1;
+        }
+        Value v = pgm->Evaluate();
+        delete pgm;
+        if (v.ToNumber() != arg) {
+                printf("`%s' was %ld instead of %d\n", s, v.ToNumber(), arg);
+                return 1;
+        }
+        return 0;
 }
 
 int
 main(void)
 {
-	int errs = 0;
-	for (;;) {
-		int c = getchar();
-		if (c == EOF)
-			break;
-		if (c == '\n')
-			continue;
-		if (c == '#') {
-			// swallow comment
-			while (getchar() != '\n') {}
-			continue;
-		}
-		String cmd = (char)c, opt, exp;
-		while ((c = getchar()) != '\t')
-			cmd += (char)c;
-		while ((c = getchar()) != '\t')
-			opt += (char)c;
-		while ((c = getchar()) != '\n')
-			exp += (char)c;
-		if (cmd == "expr") {
-			long val;
-			if (opt == "reject")
-				errs += TestExprFail(exp);
-			else if (opt.ToLong(&val))
-				errs += TestExpr(val, exp);
-			else
-				printf("Unknown option `%s' to expr command\n",
-					opt.c_str());
-		} else
-		if (cmd == "pgm") {
-			long val;
-			if (opt == "accept")
-				errs += TestAccept(exp);
-			else if (opt == "reject")
-				errs += TestReject(exp);
-			else if (opt.ToLong(&val))
-				errs += TestPgm(val, exp);
-			else
-				printf("Unknown option `%s' to pgm command\n",
-					opt.c_str());
-		} else
-			printf("Unknown command `%s'\n", cmd.c_str());
-	}
+        int errs = 0;
+        for (;;) {
+                int c = getchar();
+                if (c == EOF)
+                        break;
+                if (c == '\n')
+                        continue;
+                if (c == '#') {
+                        // swallow comment
+                        while (getchar() != '\n') {}
+                        continue;
+                }
+                String cmd = (char)c, opt, exp;
+                while ((c = getchar()) != '\t')
+                        cmd += (char)c;
+                while ((c = getchar()) != '\t')
+                        opt += (char)c;
+                while ((c = getchar()) != '\n')
+                        exp += (char)c;
+                if (cmd == "expr") {
+                        long val;
+                        if (opt == "reject")
+                                errs += TestExprFail(exp);
+                        else if (opt.ToLong(&val))
+                                errs += TestExpr(val, exp);
+                        else
+                                printf("Unknown option `%s' to expr command\n",
+                                        opt.c_str());
+                } else
+                if (cmd == "pgm") {
+                        long val;
+                        if (opt == "accept")
+                                errs += TestAccept(exp);
+                        else if (opt == "reject")
+                                errs += TestReject(exp);
+                        else if (opt.ToLong(&val))
+                                errs += TestPgm(val, exp);
+                        else
+                                printf("Unknown option `%s' to pgm command\n",
+                                        opt.c_str());
+                } else
+                        printf("Unknown command `%s'\n", cmd.c_str());
+        }
 
-	if (errs > 0)
-		printf("%d errors found\n", errs);
+        if (errs > 0)
+                printf("%d errors found\n", errs);
 
-	return errs != 0;
+        return errs != 0;
 }
 #endif
