@@ -26,7 +26,7 @@
 
 #include <openssl/ssl.h>
 
-// starting from 0.9.6a (I think), OpenSSL uses void, as it should, instead of
+// starting from 0.9.6 (I think), OpenSSL uses void, as it should, instead of
 // char
 #include <openssl/opensslv.h>
 #if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER > 0x0090600fL)
