@@ -35,9 +35,34 @@ We *must* cache the result - the problem is how to update this cache?
    called and with which args, so have to test it first, but it might be a
    good place to show the busy cursor and such...)
 
-************ architecture changes
+************ other changes
 
 Very high priority:
+
+1. ADB expansion: have a priority field for each address entry and:
+
+----------------------------------------------------------------------------
+ I think of having 2 buttons in the address expansion dialog:
+
+1. either
+
+   a) "Don't use this" -- sets the priority of the selected item to 0 (and
+      removes it from the listbox) so that it won't be shown ever again
+
+   or
+
+   b) "Delete this" -- simply deletes the selected item from the address
+      book
+
+   This is helpful to deal with obsolete addresses which are still in the
+   address book and get in the way when you expand them. It's a real
+   problem as it's a safe bet that when a person's address changes, the
+   new one will still match his/her name - just as the old one did - so
+   you'd get both of them each time you want to write to this "name".
+
+2. have a "Show all" button which would also show the entries with 0
+   priority (it wouldn't be shown if no such entries were found)
+----------------------------------------------------------------------------
 
 High priority:
 
