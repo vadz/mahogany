@@ -87,7 +87,7 @@ public:
    /** get message text
        @return the uninterpreted message body
    */
-   virtual char *FetchText(void);
+   virtual const String & FetchText(void);
 
    /** return the number of body parts in message
        @return the number of body parts
