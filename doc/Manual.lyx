@@ -35,13 +35,13 @@ Mahogany User Manual
 \newline 
 
 \shape default 
-for Version 0.24a+
+for Version 0.7+
 \newline 
 
 \begin_inset Quotes eld
 \end_inset 
 
-Polwarth III
+Meadows
 \begin_inset Quotes erd
 \end_inset 
 
@@ -1365,7 +1365,7 @@ When the top window, the list of messages, is active, certain keyboard bindings
  are active, the following keys are recognized:
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
+multicol4
 15 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -1382,38 +1382,38 @@ multicol5
 0 1 0 0
 0 1 0 0
 0 1 0 0
-8 1 0 "" ""
-2 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 1 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+8 1 0 
+2 1 1 
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 1 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
 
 English
 \newline 
@@ -1746,7 +1746,7 @@ BCC means Blind Carbon Copy - like CC:, copies will be sent to the addresses
 Key Bindings in the Message Editor
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
+multicol4
 13 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -1761,34 +1761,34 @@ multicol5
 0 1 0 0
 0 1 0 0
 0 1 0 0
-8 1 0 "" ""
-2 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+8 1 0 
+2 1 1 
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
 
 Key-Combination
 \newline 
@@ -4008,7 +4008,7 @@ import
 List of Callbacks
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
+multicol4
 11 5 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -4021,66 +4021,66 @@ multicol5
 0 1 0 0
 0 0 0 0
 0 1 0 0
-2 1 0 "" ""
-8 1 0 "" ""
-2 1 0 "" ""
-2 1 0 "" ""
-2 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+2 1 0 
+8 1 0 
+2 1 0 
+2 1 0 
+2 1 1 
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 2 1 0 0 0 0
+0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 2 1 0 0 0 0
+0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
 
 Callback Name
 \newline 
@@ -4760,4 +4760,52 @@ Preferences
 Mahogany
 \shape default 
  automatically check these accounts for new mail and collect it from there.
+\layout Subsection
+
+How can I set which language to use?
+\layout Standard
+
+Under Unix: simply set and export your LANG environment variable like for
+ any other program, too.
+ Under Windows: the environment variable LANG will be recognised if it is
+ set, but in addition Mahogany will automatically detect which language
+ your system is set to use.
+\layout Subsection
+
+How can I get it to compile on Caldera Linux?
+\layout Standard
+
+You will need to install a libcrypt library with a working crypt() function.
+ The source for one such library can be found on the Mahogany ftp server.
+\layout Subsection
+
+Mahogany fails to find wxWindows, Configure fails
+\layout Standard
+
+The following steps should identify and solve the problem:
+\layout Enumerate
+
+Do a "make install" for wxWindows and watch the output, it should copy lots
+ of things to /usr/local/....
+\layout Enumerate
+
+Do a "which wx-config", it should report wx-config to be in /usr/local/bin
+\layout Enumerate
+
+Just type "wx-config --cflags", it should run the wx-config script and report
+ the compiler flags, which should include something like "-I/usr/local/include".
+\layout Enumerate
+
+Then go to the Mahogany directory and "rm *cache*" to remove old configuration
+ info and run ./configure
+\layout Enumerate
+
+This *should* find wx/wx.h if all of the above worked, if not, look at the
+ end of config.log to see what went wrong.
+\layout Enumerate
+
+If it does not find the wxWindows library, you need to add /usr/local/lib
+ to either your LD_LIBRARY_PATH or to /etc/ld.conf (and run ldconfig as root),
+ then remove *cache* and try again.
+ Again, if something fails, look at config.log.
 \the_end

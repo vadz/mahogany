@@ -9,9 +9,6 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 9	KB	finish filters dialog
-
-9	KB	reference counting problem in filterrule?
-
 9	KB	wxLayout:
 		- delete in empty line
 		- undo

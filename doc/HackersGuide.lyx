@@ -1,5 +1,5 @@
-#This file was created by <karsten> Sun Jul 18 18:11:39 1999
-#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
+#This file was created by <karsten> Mon Jan 10 17:30:03 2000
+#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
 \begin_preamble
@@ -438,6 +438,145 @@ Mahogany can be compiled under Windows, using wxWindows Version 2.0 and Microsof
  Visual C++ version 4.x or later.
  The makefiles are included in the Mahogany source distribution (they will
  build the version of Mahogany without Python support).
+\layout Enumerate
+
+Prerequisites: 
+\begin_deeper 
+\layout Enumerate
+
+You need the Mahogany sources.
+ You may either download them from one of the locations mentioned in README
+ file or use the cvs (preferred because it will allow us to fix reported
+ bugs and for you to test our fixes faster)
+\layout Enumerate
+
+You need the sources of wxWindows cross-platform GUI library used by Mahogany:
+ get it from either Mahogany home page or directly from http://www.wxwindows.org.
+\layout Enumerate
+
+You need a compiler capable of creating Win32 executables.
+ Although, in principle, any one will do, we only provide makefiles for
+ Microsoft Visual C++ - for other compilers you would need to create them
+ yourself.
+\layout Enumerate
+
+The *source* distribution of Python 1.5 if you want to build Mahogany with
+ Python support (if you don't know what Python is, you don't need it).
+\layout Enumerate
+
+You need quite a lot of time: on a slow machine (average CPU, IDE disk subsystem
+) the compilation might take a long time (on the order of 30 minutes - one
+ hour counting with wxWindows)
+\end_deeper 
+\layout Enumerate
+
+Building wxWindows: 
+\newline 
+This is documented in wxWindows documentation.
+ The makefiles and/or project files are provided for all major compilers
+ (including Microsoft, Borland, Symantec, Watcom and g++ for Win32 (mingw32)).
+ You will need almost all features of the library, so don't edit setup.h
+ and leave the default settings in it.
+ The important moment is to realize that the program should be built later
+ with the same compile-time options and compiler settings as the library
+ - if they are not identical, weird and difficult to diagnose problems will
+ result! It is recommended (although not mandatory) that you use project
+ files and not the command-line makefiles to build wxWindows if you are
+ using Visual C++ compiler.
+\newline 
+Although wxWindows itself doesn't need it, you should define an environment
+ variable WX with the path to the root directory of wxWindows installation
+ (for example: set wx=d:
+\backslash 
+progs
+\backslash 
+libs
+\backslash 
+wxWindows).
+ 
+\layout Enumerate
+
+Building Mahogany with Visual C++ 6.0
+\newline 
+Open the file M.dsw in MSDEV.EXE (IDE).
+ This is the main workspace file for Mahogany and it contains several projects
+ (you may get warnings about some projects being missing - don't worry):
+ 
+\begin_deeper 
+\layout Enumerate
+
+wxWindows project: you probably don't have it in the same place, so just
+ ignore the warnings and either leave it unloaded or delete it from the
+ workspace if you wish.
+ You may also modify the path to the project file (wxWindows.dsp) to point
+ to the project file you used to build wxWindows if this is how you built
+ it - then you will profit from automatic dependencies between projects.
+\layout Enumerate
+
+C-Client project: this is the library which is included in Mahogany distribution
+ and which must be built as well.
+ Load the project (right click it with the mouse, choose "Load") and it
+ will be done automatically the first time you build Mahogany.
+\layout Enumerate
+
+compface is the library for the X-Face support: follow the same instructions
+ as above.
+\layout Enumerate
+
+MModule project: this project contains the loadable modules for Mahogany
+ ("plug-ins").
+ They are in experimental state right now and you may compile Mahogany without
+ them for now.
+\layout Enumerate
+
+python15 project: if you have installed source distribution of Python, you
+ should have this file in it.
+ When you will try loading the project, you will have a possibility to browse
+ for puthon15.dsp file - select the one from the Python distribution.
+ If you don't have Python, leave it unloaded.
+\layout Enumerate
+
+Any other projects in the workspace shouldn't be used and should be left
+ unloaded.
+\layout Enumerate
+
+After loading the ones which you need (C-Client is mandatory, all the other
+ optional), you may start the build.
+ It should succeed :-) If it doesn't, please report the build log with the
+ explanation of what happened to m-developers@egroups.com mailing list.
+\layout Enumerate
+
+Notice that the environment variable WX must be set before you launch MSDEV.EXE
+ (otherwise it won't inherit it)! 
+\end_deeper 
+\layout Enumerate
+
+Building Mahogany with Visual C++ 5.0 
+\newline 
+Edit the workspace file wxWindows.dsw with a text editor and replace the
+ string "Format Version 6.00" with "Format Version 5.00".
+ Then proceed as above.
+\layout Enumerate
+
+Building Mahogany with other compilers
+\newline 
+It should be possible to do it, but I don't have all Windows compilers installed
+ on my system, so I cannot guarante it.
+ Most probably, you might need some minor tweaks, but almost surely no major
+ changes will be needed.
+\newline 
+The list of all Mahogany source files can be found by looking at the Makefile
+ files in each subdirectory of src: SRC variable there contains all the
+ source files in that directory.
+ 
+\newline 
+Add all of the sources to the makefile/project file and also add the resource
+ file res/M.rc to the project, choose the same options as for wxWindows compilati
+on and see what happens.
+ If it doesn't work, send you questions to the usual place (m-developers@egroups.
+com).
+ If it does work, please tell us about it as well so that this file could
+ be updated.
 \layout Subsection
 
 DEC Alpha with Digital UNIX 3.2c
