@@ -55,7 +55,9 @@ wxLayoutWindow::OnMouse(wxMouseEvent& event)
    //doesn't work, undefined functions
    //wxLogTrace("OnMouse: (%d, %d)", m_FindPos.x, m_FindPos.y);
 #endif
-   Refresh();
+   // try new method:
+   m_FoundObject = m_llist.Find(m_FindPos);
+   //Refresh();
    if(m_FoundObject)
    {
       if(m_EventId != -1)

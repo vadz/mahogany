@@ -73,15 +73,20 @@ public:
    virtual void Draw(wxDC & /* dc */, wxPoint /* position */,
                      CoordType /* baseLine */, bool /* draw */ = true) {}
 
-   /** Calculates and returns the size of the object. May need to be
-       called twice to work.
+   /** Calculates and returns the size of the object. 
        @param baseLine pointer where to store the baseline position of 
        this object (i.e. the height from the top of the box to the
        baseline)
        @return the size of the object's box in pixels
    */
-   virtual wxPoint GetSize(CoordType * /* baseLine */) const
+   virtual wxPoint GetSize(CoordType * /* baseLine */ = NULL) const
       { return wxPoint(0,0); }
+
+   /** Calculates and returns the position of the object.
+       @return the size of the object's box in pixels
+   */
+   virtual wxPoint GetPosition(void) const
+      { return wxPoint(-1,-1); }
 
    /// returns the number of cursor positions occupied by this object
    virtual CoordType CountPositions(void) const { return 1; }
@@ -120,7 +125,11 @@ public:
        text's baseline within it's box. This is needed to properly
        align text objects.
    */
-   virtual wxPoint GetSize(CoordType *baseLine) const;
+   virtual wxPoint GetSize(CoordType *baseLine = NULL) const;
+
+   virtual wxPoint GetPosition(void) const
+      { return m_Position; }
+
 #ifdef WXLAYOUT_DEBUG
    virtual void Debug(void);
 #endif
@@ -135,6 +144,8 @@ private:
    String m_Text;
    /// size of the box containing text
    long   m_Width, m_Height;
+   /// the last draw position
+   wxPoint m_Position;
    /// the position of the baseline counted from the top of the box
    long   m_BaseLine;
 };
@@ -146,12 +157,15 @@ public:
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_ICON; }
    virtual void Draw(wxDC &dc, wxPoint position, CoordType baseLine,
                      bool draw = true);
-   virtual wxPoint GetSize(CoordType *baseLine) const;
+   virtual wxPoint GetSize(CoordType *baseLine = NULL) const;
+   virtual wxPoint GetPosition(void) const
+      { return m_Position; }
    wxLayoutObjectIcon(wxIcon *icon);
    wxLayoutObjectIcon(wxIcon const &icon);
 
 private:
    wxIcon *m_Icon;
+   wxPoint m_Position;
 };
 
 /// for export to html:
@@ -249,6 +263,11 @@ public:
                             int pageNo = -1, bool reallyDraw = true,
                             bool *hasDrawn = 0);
 
+   /** Finds the object occupying a certain screen position.
+       @return pointer to wxLayoutObjectBase or NULL if not found
+   */
+   wxLayoutObjectBase *Find(wxPoint coords) const;
+   
 #ifdef WXLAYOUT_DEBUG
    void Debug(void);
    void ShowCurrentObject();

@@ -75,6 +75,7 @@ wxLayoutObjectText::wxLayoutObjectText(const String &txt)
    m_Text = txt;
    m_Width = 0;
    m_Height = 0;
+   m_Position = wxPoint(-1,-1);
 }
 
 
@@ -90,6 +91,7 @@ wxLayoutObjectText::Draw(wxDC &dc, wxPoint position, CoordType baseLine,
                          bool draw)
 {
    long descent = 0l;
+   m_Position = position;
    dc.GetTextExtent(Str(m_Text),&m_Width, &m_Height, &descent);
    //FIXME: wxGTK does not set descent to a descent value yet.
    if(descent == 0)
@@ -116,19 +118,21 @@ wxLayoutObjectText::Debug(void)
 //-------------------------- wxLayoutObjectIcon
 
 wxLayoutObjectIcon::wxLayoutObjectIcon(wxIcon const &icon)
-   : m_Icon(new wxIcon(icon))
 {
+   m_Position = wxPoint(-1,-1);
+   m_Icon = new wxIcon(icon);
 }
 
 wxLayoutObjectIcon::wxLayoutObjectIcon(wxIcon *icon)
-   : m_Icon(icon)
 {
+   m_Icon = icon;
 }
 
 void
 wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint position, CoordType baseLine,
                          bool draw)
 {
+   m_Position = position;
    position.y += baseLine - m_Icon->GetHeight();
    if(draw)
       dc.DrawIcon(m_Icon,position.x,position.y);
@@ -137,8 +141,7 @@ wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint position, CoordType baseLine,
 wxPoint
 wxLayoutObjectIcon::GetSize(CoordType *baseLine) const
 {
-   wxASSERT(baseLine);
-   *baseLine = m_Icon->GetHeight();
+   if(baseLine)   *baseLine = m_Icon->GetHeight();
    return wxPoint(m_Icon->GetWidth(), m_Icon->GetHeight());
 }
 
@@ -384,6 +387,8 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const
             *hasDrawn = true;
       }
       // update coordinates for next object:
+
+
       size = (*i)->GetSize(&objBaseLine);
       if(findObject && draw)  // we need to look for an object
       {
@@ -1018,6 +1023,28 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
                         m_ColourFG, m_ColourBG);
 }
 
+
+wxLayoutObjectBase *
+wxLayoutList::Find(wxPoint coords) const
+{
+   wxLayoutObjectList::iterator i = begin();
+
+   wxPoint topleft, bottomright;
+   
+   while(i != end()) // == while valid
+   {
+      topleft = (**i).GetPosition();
+      if(coords.y >= topleft.y && coords.x >= topleft.x)
+      {
+         bottomright = topleft;
+         bottomright.x += (**i).GetSize().x;
+         bottomright.y += (**i).GetSize().y;
+         if(coords.x <= bottomright.x && coords.y <= bottomright.y)
+            return *i;
+      }
+   }
+   return NULL;
+}
 
 
 /******************** printing stuff ********************/
