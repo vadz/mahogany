@@ -39,6 +39,7 @@
 #include "MFolderDialogs.h"
 
 #include <wx/treectrl.h>
+#include <wx/tokenzr.h>
 
 #include "gui/wxFolderTree.h"
 #include "gui/wxIconManager.h"
@@ -387,16 +388,24 @@ wxFolderTree::Init(wxWindow *parent, wxWindowID id,
 {
    m_tree = new wxFolderTreeImpl(this, parent, id, pos, size);
 
+   // this setting is obsolete as now the tree control remembers its expanded
+   // branches itself and restores them itself as well - I think we should
+   // remove all mentions of MP_EXPAND_TREECTRL completely (VZ)
+#if 0
    if( READ_APPCONFIG(MP_EXPAND_TREECTRL) )
       m_tree->Expand(m_tree->GetRootItem());
+#endif // 0
 }
 
 wxFolderTree::~wxFolderTree()
 {
    ProfilePathChanger p(mApplication->GetProfile(), M_SETTINGS_CONFIG_SECTION);
 
+#if 0
    mApplication->GetProfile()->writeEntry(MP_EXPAND_TREECTRL,
       m_tree->IsExpanded(m_tree->GetRootItem()));
+#endif // 0
+
    delete m_tree;
 }
 
@@ -521,12 +530,12 @@ void wxFolderTree::OnProperties(MFolder *folder)
 
 MFolder *wxFolderTree::OnCreate(MFolder *parent)
 {
-#ifdef EXPERIMENTAL
+#if 0 //def EXPERIMENTAL
    RunCreateFolderWizard(NULL);
-#endif
+#else
    return ShowFolderCreateDialog(NULL, FolderCreatePage_Default,
                                  parent);
-   
+#endif
 }
 
 bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
@@ -765,37 +774,30 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
    //else: no selection
 }
 
+// this functions accepts a slash delimited (but without leading slash) full
+// path to the folder in the folder tree and returns its tree item id
 wxTreeItemId
 wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
 {
-   wxArrayString components;
-   wxSplitPath(components, fullname);
+   ASSERT_MSG( !!fullname, "folder name can't be empty" );
+   ASSERT_MSG( fullname[0] != '/', "folder name shouldn't start with slash" );
 
+   // tokenize the fullname in components treating subsequent slashes as one
+   // delimiter
+   wxStringTokenizer tk(fullname, _T("/"), wxTOKEN_STRTOK);
    wxTreeItemId current = GetRootItem();
-   wxString currentPath;
 
-   size_t count = components.GetCount();
-   for ( size_t n = 0; n < count; n++ )
+   // we do breadth-first search in the tree
+   while ( tk.HasMoreTokens() )
    {
-      // find the child of the current item which corresponds to (the [grand]
-      // parent of) our folder
-      if ( !!currentPath )
-      {
-         currentPath << '/';
-      }
-      currentPath << components[n];
+      // find the child with the given name
+      wxString name = tk.GetNextToken();
 
       long cookie;
       wxTreeItemId child = GetFirstChild(current, cookie);
       while ( child.IsOk() )
       {
-         // expand it first
-         Expand(child);
-
-         wxFolderTreeNode *node = GetFolderTreeNode(child);
-         CHECK( node, false, "tree folder node without folder?" );
-
-         if ( node->GetFolder()->GetFullName().CmpNoCase(currentPath) == 0 )
+         if ( GetItemText(child) == name )
             break;
 
          child = GetNextChild(current, cookie);
@@ -1122,11 +1124,14 @@ void wxFolderTreeImpl::ReopenBranch(wxTreeItemId parent)
       currentName = m_current->GetFolder()->GetFullName();
    }
 
+   wxString expState = SaveExpandedBranches(parent);
+
    Collapse(parent);
    DeleteChildren(parent);
    GetFolderTreeNode(parent)->ResetExpandedFlag();
    SetItemHasChildren(parent, TRUE);
-   Expand(parent);
+
+   RestoreExpandedBranches(parent, expState);
 
    if ( !!currentName )
    {

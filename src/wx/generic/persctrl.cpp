@@ -1204,29 +1204,79 @@ bool wxPTreeCtrl::GetExpandedBranches(const wxTreeItemId& id,
     return TRUE;
 }
 
+wxString wxPTreeCtrl::SaveExpandedBranches(const wxTreeItemId& itemRoot)
+{
+    wxArrayString branches;
+    GetExpandedBranches(itemRoot, branches);
+
+    // we store info about all extended branches of max length separating
+    // the indices in one branch by ',' and branches by ':'
+    wxString data;
+    size_t count = branches.GetCount();
+    for ( size_t n = 0; n < count; n++ )
+    {
+        if ( n != 0 )
+            data += _T(':');
+
+        data += branches[n];
+    }
+
+    return data;
+}
+
 void wxPTreeCtrl::SaveExpandedBranches()
 {
     if ( m_persist->ChangePath() ) {
         wxConfigBase *config = m_persist->GetConfig();
 
-        wxArrayString branches;
-        GetExpandedBranches(GetRootItem(), branches);
-
-        // we store info about all extended branches of max length separating
-        // the indices in one branch by ',' and branches by ':'
-        wxString data;
-        size_t count = branches.GetCount();
-        for ( size_t n = 0; n < count; n++ )
-        {
-            if ( n != 0 )
-                data += _T(':');
-
-            data += branches[n];
-        }
-
-        config->Write(m_persist->GetKey(), data);
+        config->Write(m_persist->GetKey(), SaveExpandedBranches(GetRootItem()));
 
         m_persist->RestorePath();
+    }
+}
+
+void wxPTreeCtrl::RestoreExpandedBranches(const wxTreeItemId& itemRoot,
+                                          const wxString& expState)
+{
+    wxStringTokenizer tkBranches(expState, _T(":"));
+    while ( tkBranches.HasMoreTokens() )
+    {
+        wxStringTokenizer tkNodes(tkBranches.GetNextToken(), _T(","));
+
+        wxTreeItemId id = itemRoot;
+        while ( tkNodes.HasMoreTokens() && id.IsOk() )
+        {
+            Expand(id);
+
+            unsigned long index;
+            wxString node = tkNodes.GetNextToken();
+            if ( !node.ToULong(&index) )
+            {
+                wxLogDebug(_T("Corrupted config data: '%s'."),
+                           node.c_str());
+                break;
+            }
+
+            // get the child with the given index
+            long cookie;
+            wxTreeItemId idChild = GetFirstChild(id, cookie);
+            while ( idChild.IsOk() )
+            {
+                if ( index-- == 0 )
+                    break;
+
+                idChild = GetNextChild(id, cookie);
+            }
+
+            id = idChild;
+
+            if ( !idChild.IsOk() )
+            {
+                wxLogDebug(_T("Number of items in wxPTreeCtrl changed "
+                              "unexpectedly."));
+                break;
+            }
+        }
     }
 }
 
@@ -1235,46 +1285,7 @@ void wxPTreeCtrl::RestoreExpandedBranches()
     if ( m_persist->ChangePath() ) {
         wxString data = m_persist->GetConfig()->Read(m_persist->GetKey());
 
-        wxStringTokenizer tkBranches(data, _T(":"));
-        while ( tkBranches.HasMoreTokens() )
-        {
-            wxStringTokenizer tkNodes(tkBranches.GetNextToken(), _T(","));
-
-            wxTreeItemId id = GetRootItem();
-            while ( tkNodes.HasMoreTokens() && id.IsOk() )
-            {
-                Expand(id);
-
-                unsigned long index;
-                wxString node = tkNodes.GetNextToken();
-                if ( !node.ToULong(&index) )
-                {
-                    wxLogDebug(_T("Corrupted config data: '%s'."),
-                               node.c_str());
-                    break;
-                }
-
-                // get the child with the given index
-                long cookie;
-                wxTreeItemId idChild = GetFirstChild(id, cookie);
-                while ( idChild.IsOk() )
-                {
-                    if ( index-- == 0 )
-                        break;
-
-                    idChild = GetNextChild(id, cookie);
-                }
-
-                id = idChild;
-
-                if ( !idChild.IsOk() )
-                {
-                    wxLogDebug(_T("Number of items in wxPTreeCtrl changed "
-                                  "unexpectedly."));
-                    break;
-                }
-            }
-        }
+        RestoreExpandedBranches(GetRootItem(), data);
 
         m_persist->RestorePath();
     }

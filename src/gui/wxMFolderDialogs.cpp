@@ -1276,7 +1276,6 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 #ifdef USE_SSL
    bool enableSSL;
 #endif
-   
 
    if ( m_folderType == MF_GROUP )
    {
@@ -1310,9 +1309,6 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
    m_isAnonymous->Enable(enableAnonymous);
    EnableTextWithLabel(m_password, enableLogin);
    EnableTextWithLabel(m_login, enableLogin);
-
-   // doesn't make sense for most folders
-   m_isDir->Enable(FALSE);
 
    switch ( m_folderType )
    {
@@ -1348,6 +1344,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
             case MF_FILE:
                m_browsePath->BrowseForFiles();
                m_folderSubtype->SetSelection(FileFolderSubtype_Mbox);
+               m_isDir->Enable(FALSE);
                break;
 
             case MF_MH:
@@ -1366,6 +1363,8 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
                   path << dlg->GetFolderName();
 
                   m_path->SetValue(path);
+
+                  m_isDir->Enable(TRUE);
                }
                break;
 
@@ -1387,6 +1386,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
          EnableTextWithLabel(m_newsgroup, TRUE);
          EnableTextWithButton(m_path, TRUE);
          m_forceReOpen->Enable(TRUE);
+         m_isDir->Enable(TRUE);
          break;
 
       default:
@@ -1735,7 +1735,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_originalUseSSL = ((flags & MF_FLAGS_SSLAUTH) != 0);
    m_useSSL->SetValue(m_originalUseSSL);
 #endif
-   
+
    // update the folder icon
    if ( m_isCreating )
    {
@@ -1844,7 +1844,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
        if (folderType == MF_FILE && dlg->GetFolderName() == "INBOX")
            folderType = MF_INBOX;
    }
-   
+
    // is the folder name valid?
    wxString path;
    if ( folderType == MF_MH )
@@ -1874,7 +1874,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       flags |= MF_FLAGS_GROUP;
    if ( m_isHidden->GetValue() )
       flags |= MF_FLAGS_HIDDEN;
-   
+
 #ifdef USE_LOCAL_CHECKBOX
    if ( m_isLocal->GetValue() )
       flags |= MF_FLAGS_ISLOCAL;

@@ -521,6 +521,15 @@ public:
         // set the path to use (either absolute or relative)
     void SetConfigPath(const wxString& path);
 
+    // operations
+        // this function may be used to save the state of all expanded
+        // branches under the given one
+    wxString SaveExpandedBranches(const wxTreeItemId& itemRoot);
+        // and this one restores the previously expanded branches: the string
+        // passed to it must have been returned by SaveExpandedBranches()
+    void RestoreExpandedBranches(const wxTreeItemId& itemRoot,
+                                 const wxString& expState);
+
     // callbacks
         // when we're resized the first time we reexpand
     void OnSize(wxSizeEvent& event);
