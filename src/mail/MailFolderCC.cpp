@@ -1250,8 +1250,7 @@ void
 MailFolderCC::Create(int typeAndFlags)
 {
    m_MailStream = NIL;
-   m_nMessages =
-   m_nRecent = 0;
+   m_nMessages = 0;
 
    m_hasNewMail = false;
 
@@ -3610,11 +3609,14 @@ MailFolderCC::RequestUpdate()
    MEventManager::Send(new MEventFolderUpdateData(this));
 }
 
-void MailFolderCC::OnMailExists(MsgnoType msgnoMax)
+void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
 {
+   // NB: use stream and not m_MailStream because the latter might not be set
+   //     yet if we're called from mail_open()
+
    // ignore any callbacks for closed or half opened folders: normally we
    // shouldn't get them at all but somehow we do (ask c-client why...)
-   if ( !m_MailStream || m_MailStream->halfopen )
+   if ( !stream || stream->halfopen )
    {
       wxLogDebug("mm_exists() for not opened folder '%s' ignored.",
                  GetName().c_str());
@@ -3632,25 +3634,6 @@ void MailFolderCC::OnMailExists(MsgnoType msgnoMax)
          m_headers->OnAdd(msgnoMax);
       }
 
-      // update the folder status
-      MailFolderStatus status;
-      MfStatusCache *mfStatusCache = MfStatusCache::Get();
-      if ( mfStatusCache->GetStatus(GetName(), &status) )
-      {
-         ASSERT_MSG( status.total == m_nMessages,
-                     _T("folder status not in sync?") );
-
-         status.total = msgnoMax;
-
-         // all new messages are, well, new
-         MsgnoType newmsgs = msgnoMax - m_nMessages;
-         status.newmsgs += newmsgs;
-         status.recent += newmsgs;
-         status.unread += newmsgs;
-
-         mfStatusCache->UpdateStatus(GetName(), status);
-      }
-
       // it is useless to send MEventFolderExpungeData if we're going to send
       // MEventFolderUpdateData anyhow - the latter should refresh GUI by
       // itself
@@ -3662,13 +3645,8 @@ void MailFolderCC::OnMailExists(MsgnoType msgnoMax)
 
       m_nMessages = msgnoMax;
 
-      MsgnoType nRecent = m_MailStream->recent;
-      if ( nRecent != m_nRecent )
+      if ( stream->recent )
       {
-         ASSERT_MSG( nRecent > m_nRecent, "got anti new mail" );
-
-         m_nRecent = nRecent;
-
          // we need to apply the filtering code but we can't do it from here
          // because we're inside c-client now and it is not reentrant, so we
          // the GUI to filter us later
@@ -3676,12 +3654,16 @@ void MailFolderCC::OnMailExists(MsgnoType msgnoMax)
 
          MEventManager::Send(new MEventFolderOnNewMailData(this));
       }
+      else // recent messages number didn't change
+      {
+         // just update directly
+         RequestUpdate();
+      }
    }
    else // same number of messages
    {
       // this means that the messages were only expunged, we shouldn't have
       // any new ones
-      ASSERT_MSG( m_MailStream->recent == m_nRecent, "unexpected new message" );
 
       // FIXME: we ignore IsUpdateSuspended() here, should we? and if not,
       //        what to do?
@@ -3723,9 +3705,6 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
 
    m_nMessages--;
 
-   // FIXME: it almost surely gets out of sync here, what to do??
-   m_nRecent = m_MailStream->recent;
-
    // we don't change the cached status here as it will be done in
    // OnMailExists() later
 }
@@ -3741,6 +3720,9 @@ void MailFolderCC::OnNewMail()
    // c-client is not reentrant, this is why we have to call this function
    // when we are not inside any c-client call!
    CHECK_RET( !m_MailStream->lock, "OnNewMail: folder is locked" );
+
+   wxLogTrace(TRACE_MF_EVENTS, "Got new mail notification for '%s'",
+              GetName().c_str());
 
    FilterNewMail();
 
@@ -3959,7 +3941,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgnoMax)
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET( mf, "number of messages changed in unknown mail folder" );
 
-   mf->OnMailExists(msgnoMax);
+   mf->OnMailExists(stream, msgnoMax);
 }
 
 /* static */

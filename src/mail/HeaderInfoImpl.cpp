@@ -128,7 +128,7 @@ inline bool HeaderInfoListImpl::IsHeaderValid(size_t n) const
 
 size_t HeaderInfoListImpl::Count(void) const
 {
-   return m_headers.GetCount();
+   return m_count;
 }
 
 HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
@@ -149,11 +149,8 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
       // alloc space for new header
       m_headers[n] = new HeaderInfo;
 
-      // turn index into msgno
-      n++;
-
       // get header info for the new header
-      m_mf->GetHeaderInfo(m_headers[n], n, n);
+      m_mf->GetHeaderInfo(m_headers[n], n + 1, n + 1);
    }
 
    return m_headers[n];

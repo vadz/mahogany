@@ -46,7 +46,6 @@
 #include "MDialogs.h"
 #include "MFolderDialogs.h"
 #include "MailFolder.h"
-#include "MailFolderCC.h" // only for FileMbox_Max :-(
 #include "MFolder.h"
 
 #include "Mdefaults.h"

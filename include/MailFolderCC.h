@@ -32,16 +32,6 @@
 class MailFolderCC;
 class MMutex;
 
-// supported formats for the local file mailboxes (hence MH not counted)
-enum FileMailboxFormat
-{
-   FileMbox_MBX,   // the default format, must be 0!
-   FileMbox_MBOX,  // traditional Unix one
-   FileMbox_MMDF,  // SCO default format
-   FileMbox_TNX,   // MM-compatible fast format
-   FileMbox_Max
-};
-
 // ----------------------------------------------------------------------------
 // helper classes
 // ----------------------------------------------------------------------------
@@ -491,7 +481,7 @@ private:
    /** @name Notification handlers */
    //@{
    /// called when the number of the messages in the folder changes
-   void OnMailExists(MsgnoType msgnoMax);
+   void OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax);
 
    /// called when the given msgno is expunged from the folder
    void OnMailExpunge(MsgnoType msgno);
@@ -550,9 +540,6 @@ private:
 
    /// the number of messages as we know it
    MsgnoType m_nMessages;
-
-   /// the number of recent messages as we know it
-   MsgnoType m_nRecent;
 
    /// last seen UID, all messages above this one are new
    UIdType m_LastUId;
