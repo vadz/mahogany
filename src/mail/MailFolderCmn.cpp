@@ -809,7 +809,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       return false;
    }
 
-   AutoPtr<MProgressDialog> pd;
+   scoped_ptr<MProgressDialog> pd;
    long threshold = GetProgressThreshold(mf->GetProfile());
 
    if ( threshold > 0 && n > threshold )
@@ -819,7 +819,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       msg.Printf(_("Saving %d messages to the folder '%s'..."),
                  n, folder->GetName().c_str());
 
-      pd.Initialize(new MProgressDialog(
+      pd.set(new MProgressDialog(
                                mf->GetName(),   // title
                                msg,             // label message
                                2*n,             // range

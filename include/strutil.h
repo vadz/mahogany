@@ -377,7 +377,7 @@ private:
 #if wxUSE_REGEX
    bool m_useRE;
    // a RE to detect the start of the signature
-   AutoPtr<wxRegEx> m_reSig;
+   scoped_ptr<wxRegEx> m_reSig;
 #endif
 };
 

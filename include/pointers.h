@@ -221,6 +221,9 @@ template <class T>
 class WeakRef
 {
 public:
+   /// same as auto_ptr<>::element_type
+   typedef T element_type;
+
    /// Default constructor creates NULL pointer.
    WeakRef() : m_pointer(NULL) {}
    
@@ -271,35 +274,58 @@ private:
 };
 
 
-// Equivalent of auto_ptr, but with private copy constructor and assignment
+/// Mostly boost::scoped_ptr clone.
 template <class T>
-class AutoPtr
+class scoped_ptr
 {
 public:
-   AutoPtr() { NewDefault(); }
-   AutoPtr(T *copy) { NewCopy(); }
-   ~AutoPtr() { Destroy(); }
+   /// same as auto_ptr<>::element_type
+   typedef T element_type;
 
-   void Initialize(T *copy)
+   /// a scalar type which doesn't risk to be converted to anything
+   typedef T *(scoped_ptr<T>::*unspecified_bool_type)() const;
+
+   /// Default constructor initializes to @c NULL.
+   scoped_ptr() : m_pointer(NULL) {}
+
+   /// Takes ownership of raw pointer
+   scoped_ptr(T *copy) : m_pointer(copy) {}
+
+   /// Destructor deletes held pointer if it is not @c NULL.
+   ~scoped_ptr() { if( m_pointer ) delete m_pointer; }
+
+   /// Late construction. Delete previously help pointer.
+   void set(T *copy)
    {
-      Destroy();
+      if( m_pointer )
+         delete m_pointer;
       m_pointer = copy;
    }
 
-   operator T *() { return Get(); }
-   T *operator->() { return Get(); }
+   /// Return stored pointer.
+   T *get() const { return m_pointer; }
+
+   /// Allow use of this class as pointer.
+   T *operator->() const { return get(); }
+
+   /**
+      Implicit, but safe, conversion to bool.
+
+      It's copy of similar method in RefCounter.
+    */
+   operator unspecified_bool_type() const // never throws
+   {
+      return m_pointer ? &scoped_ptr<T>::get : NULL;
+   }
 
 private:
-   void NewDefault() { m_pointer = 0; }
-   void NewCopy(T *copy) { m_pointer = copy; }
-   void Destroy() { if( m_pointer ) delete m_pointer; }
-
-   T *Get() { return m_pointer; }
+   /// Copy constructor is private.
+   scoped_ptr(const scoped_ptr<T>& copy) {}
+   
+   /// Assignment operator is private.
+   void operator=(const scoped_ptr<T>& copy) {}
 
    T *m_pointer;
-
-   AutoPtr(const AutoPtr<T>& copy) {}
-   void operator=(const AutoPtr<T>& copy) {}
 };
 
 
