@@ -46,6 +46,17 @@ class HtmlViewerWindow;
 WX_DEFINE_ARRAY(ClickableInfo *, ArrayClickInfo);
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// the possible values of MakeHtmlSafe() second parameter
+enum HtmlSpaceMode
+{
+   HtmlSpace_DontBreak,
+   HtmlSpace_Keep
+};
+
+// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -53,7 +64,8 @@ WX_DEFINE_ARRAY(ClickableInfo *, ArrayClickInfo);
 static wxString Col2Html(const wxColour& col);
 
 // filter out special HTML characters from the text
-static wxString MakeHtmlSafe(const wxString& text);
+static wxString MakeHtmlSafe(const wxString& text,
+                             HtmlSpaceMode htmlSpaceMode = HtmlSpace_DontBreak);
 
 // ----------------------------------------------------------------------------
 // HtmlViewer: a wxHTML-based MessageViewer implementation
@@ -580,7 +592,7 @@ static wxString Col2Html(const wxColour& col)
                            (int)col.Red(), (int)col.Green(), (int)col.Blue());
 }
 
-static wxString MakeHtmlSafe(const wxString& text)
+static wxString MakeHtmlSafe(const wxString& text, HtmlSpaceMode htmlSpaceMode)
 {
    wxString textSafe;
    textSafe.reserve(text.length());
@@ -605,12 +617,8 @@ static wxString MakeHtmlSafe(const wxString& text)
             textSafe += "&quot;";
             break;
 
-         case ' ':
-            textSafe += "&nbsp;";
-            break;
-
          case '\t':
-            // we hardcode the tab width to 8
+            // we hardcode the tab width to 8 spaces
             textSafe += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             break;
 
@@ -621,6 +629,15 @@ static wxString MakeHtmlSafe(const wxString& text)
          case '\n':
             textSafe += "<br>";
             break;
+
+         case ' ':
+            // replace the spaces with non breaking ones if necessary
+            if ( htmlSpaceMode == HtmlSpace_DontBreak )
+            {
+               textSafe += "&nbsp;";
+               break;
+            }
+            //else: fall through
 
          default:
             textSafe += *p;
@@ -862,13 +879,13 @@ void HtmlViewer::InsertText(const String& text, const MTextStyle& style)
 
    FontColourChanger colChanger(style.GetTextColour(), m_htmlText);
 
-   m_htmlText += MakeHtmlSafe(text);
+   m_htmlText += MakeHtmlSafe(text, HtmlSpace_Keep);
 }
 
 void HtmlViewer::InsertURL(const String& text, const String& url)
 {
    // URLs may contain special characters which must be replaced by HTML
-   // entities (i.e. '&' -> "&amp;") so use MakeHtmlSafe()
+   // entities (i.e. '&' -> "&amp;") so use MakeHtmlSafe() to filter them
    m_htmlText << "<a href=\"" << MakeHtmlSafe(url) << "\">"
               << MakeHtmlSafe(text)
               << "</a>";
