@@ -560,7 +560,8 @@ MAppBase::OnStartup()
 #ifdef EXPERIMENTAL
    /* Test the MModule subsystem. Completely disabled in release
       build. */
-   MModule *dummyMod = MModule::LoadModule("/home/karsten/src/Projects/M/src/modules/Mdummy.so");
+//   MModule *dummyMod = MModule::LoadModule("/home/karsten/src/Projects/M/src/modules/Mdummy.so");
+   MModule *dummyMod = MModule::LoadModule("/home/karsten/tmp/M/src/modules/Mdummy.so");
    if(dummyMod)
    {
       INFOMESSAGE(("Successfully loaded Mdummy module:\nName: %s\nDescr: %s\nVersion: %s\n",

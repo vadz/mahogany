@@ -86,15 +86,11 @@ $Id$
 * PRI	WHO	DESCRIPTION
 *********************************************************************
 
-5	KB	group reply/followup functionality
 5	KB	properties dialog forgets IMAP mailbox name
-5	KB	clicking in startup dialog no longer causes crash
 5	KB	check handling of missing hostnames,
 5	KB	network page
 5	KB	folder properties for advanced user
 5	KB	POP/IMAP server/localhost default values
-5	KB	check mail now in File... menu
-5	KB	check "Unread" status flag
 
 *********************************************************************
 *** GENERAL TODO
@@ -278,5 +274,13 @@ $Id$
 
 - importing mail folders and address books from other clients:
   Eudora, Outlook, XFMail, Netscape, The Bat! (in this order)
+
+*********************************************************************
+*** CHANGELOG SINCE LAST REVISION / TESTED AND FINE
+*********************************************************************
+5	KB	group reply/followup functionality
+5	KB	clicking in startup dialog no longer causes crash
+5	KB	check mail now in File... menu
+5	KB	check "Unread" status flag
 
 vi: set si tw=80:

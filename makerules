@@ -21,7 +21,7 @@ else
 	$(CC)  -fPIC $(CFLAGS) -c $<
 
 %.so: %.cpp
-	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src -lM 
+	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< 
 endif
 
 %.cpp: %.i
