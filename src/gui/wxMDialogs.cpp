@@ -796,7 +796,13 @@ class wxAboutFrame : public wxFrame
 {
 public:
    wxAboutFrame(bool bCloseOnTimeout);
-   virtual ~wxAboutFrame() { g_pSplashScreen = NULL; }
+   virtual ~wxAboutFrame() 
+   {
+      g_pSplashScreen = NULL; 
+      wxLog *log = wxLog::SetActiveTarget(NULL);
+      delete log; 
+      // this will remove SplashKillerLog and restore the original one
+   }
 
    void Close(void)
    {
