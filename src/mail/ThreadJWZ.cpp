@@ -1552,7 +1552,11 @@ static size_t FlushThreadable(Threadable *t,
          FlushThreadable(t->getChild(), indices, indents, children);
 #endif
    }
-   children[t->getIndex()] = number;
+   if (!t->isDummy())
+   {
+      children[t->getIndex()] = number;
+      number++;  // Count oneself
+   }
    if (t->getNext()) {
      number +=
 #if defined(DEBUG)
@@ -1561,7 +1565,7 @@ static size_t FlushThreadable(Threadable *t,
          FlushThreadable(t->getNext(), indices, indents, children);
 #endif
    }
-   return number + 1;   // +1 for counting current message
+   return number;
 }
 
 // ----------------------------------------------------------------------------
