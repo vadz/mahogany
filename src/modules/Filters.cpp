@@ -2159,24 +2159,33 @@ static bool CheckForHTMLOnly(const Message *msg)
          break;
 
       case MimeType::MULTIPART:
-         if ( type.GetSubType() == _T("ALTERNATIVE") )
+         // if we have only one subpart and it's HTML, flag it as spam
          {
-            // although multipart/alternative messages with a text/plain and a
-            // text/html type are legal, spammers sometimes send them with an
-            // empty text part -- which is not
             const MimePart *subpart1 = part->GetNested();
             if ( subpart1 &&
-                     subpart1->GetType() == _T("TEXT/PLAIN") &&
-                        !subpart1->GetSize() )
+                  !subpart1->GetNext() &&
+                     subpart1->GetType() == _T("TEXT/HTML") )
             {
-               const MimePart *subpart2 = subpart1->GetNext();
-               if ( subpart2 &&
-                     !subpart2->GetNext() &&
-                        subpart2->GetType() == _T("TEXT/HTML") )
+               return true;
+            }
+
+            if ( type.GetSubType() == _T("ALTERNATIVE") )
+            {
+               // although multipart/alternative messages with a text/plain and a
+               // text/html type are legal, spammers sometimes send them with an
+               // empty text part -- which is not
+               if ( subpart1->GetType() == _T("TEXT/PLAIN") &&
+                           !subpart1->GetSize() )
                {
-                  // multipart/alternative message with text/plain and html
-                  // subparts [only] and the text part is empty -- junk
-                  return true;
+                  const MimePart *subpart2 = subpart1->GetNext();
+                  if ( subpart2 &&
+                        !subpart2->GetNext() &&
+                           subpart2->GetType() == _T("TEXT/HTML") )
+                  {
+                     // multipart/alternative message with text/plain and html
+                     // subparts [only] and the text part is empty -- junk
+                     return true;
+                  }
                }
             }
          }
