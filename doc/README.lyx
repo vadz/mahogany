@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sun Aug 16 17:03:39 1998
+#This file was created by <karsten> Mon Aug 17 19:58:30 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -72,7 +72,9 @@ When you do a large free software project, you have two choices: either
 it is incomplete and awkward to use
 \layout Itemize
 
-it may crash occasionally or often or be completely unusable
+it may crash occasionally or often or be completely unusable - 
+\shape italic 
+Use it at your own risk!
 \layout Standard
 
 M is not ready for the end user yet, but we present it in its current state
@@ -141,14 +143,18 @@ ons yet.
 Known bugs
 \layout Itemize
 
-selection in the folder view sometimes behaves strange, selecting all messages
- doesn't work
+Folder creation dialog doesn't work properly.
+ See Information file for how to setup new mail folders.
 \layout Itemize
 
-message and composition view don't automatically scroll to the cursor
+Selection in the folder view sometimes behaves strange, selecting all messages
+ doesn't work.
 \layout Itemize
 
-tab traversal in dialogs doesn't work (wxGTK problem)
+Message and composition view don't automatically scroll to the cursor.
+\layout Itemize
+
+Tab traversal in dialogs doesn't work (wxGTK problem).
 \layout Section
 
 TODO, features to implement
@@ -167,7 +173,7 @@ First comes a rewrite of the class hierarchy.
  This includes a common base object with reference couting.
 \layout Itemize
 
-Plug the (very few remaining) memory holes.
+Plug the (apparently very few remaining) memory holes.
 \layout Standard
 
 Then we fix some GUI issues.
@@ -250,6 +256,9 @@ Support for Drag and Drop interaction with KDE, once that wxQt is available.
 \layout Itemize
 
 CORBA support, possible cooperation with PINN project.
+\layout Itemize
+
+Address datbase synchronisation with PDA's (Just got one...)
 \layout Itemize
 
 ANY OTHER SUGGESTION

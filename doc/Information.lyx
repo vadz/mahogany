@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sun Aug 16 17:04:42 1998
+#This file was created by <karsten> Mon Aug 17 20:11:22 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -663,6 +663,143 @@ or
 [M/Profiles]
 \family default 
 .
+\layout Subsection
+
+How to set up a new folder
+\layout Standard
+
+This should be handled by the Create Folder dialog, but unfortunately it
+ is broken - we'll fix it soon.
+ 
+\layout Subsubsection
+
+mail box files 
+\layout Standard
+
+To open a folder which is a mail box file, simply select Open Folder from
+ the menu and type in the pathname to the folder.
+ That will work.
+\layout Subsubsection
+
+other folders
+\layout Standard
+
+
+\begin_inset LatexCommand \label{openFolders}
+
+\end_inset 
+
+To open a different type of folder, you need to create a Profile for it,
+ either as a subsection in 
+\family typewriter 
+$HOME/.M/config
+\family default 
+ , like 
+\family typewriter 
+[M/NewFolder]
+\family default 
+, or as a separate Profile file 
+\family typewriter 
+$HOME/.M/NewFolder.profile
+\family default 
+ .
+ Some example profiles are supplied.
+\layout Standard
+
+An example for a POP mailbox POPBOX.profile file:
+\layout Standard
+
+
+\family typewriter 
+Type = 2
+\layout Standard
+
+
+\family typewriter 
+Path = {localhost/pop3}
+\layout Standard
+
+
+\family typewriter 
+Login = karsten
+\layout Standard
+
+
+\family typewriter 
+Password = MyPassword
+\layout Standard
+
+
+\family typewriter 
+UpdateInterval = 60
+\layout Standard
+
+An example for accessing a newsgroup, COLA.profile:
+\layout Standard
+
+
+\family typewriter 
+Type=4
+\layout Standard
+
+
+\family typewriter 
+Path={newshost/nntp}comp.os.linux.announce
+\layout Standard
+
+The available 
+\family typewriter 
+Type
+\family default 
+ values are:
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
+multicol4
+6 2 0 0 -1 -1 -1 -1
+1 1 0 0
+1 1 0 0
+0 1 0 0
+0 1 0 0
+0 1 0 0
+0 1 0 0
+8 1 0 
+8 1 1 
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+0 8 0 1 0 0 0
+
+Type Value
+\newline 
+Description
+\newline 
+0
+\newline 
+System's default INBOX
+\newline 
+1
+\newline 
+Mailbox file
+\newline 
+2
+\newline 
+POP3
+\newline 
+3
+\newline 
+IMAP
+\newline 
+4
+\newline 
+NNTP, news
 \layout Section
 
 Scripting and Python integration
@@ -938,4 +1075,15 @@ wxxt/
 \layout Section
 
 FAQ
+\layout Subsection
+
+How can I create/open other folders?
+\layout Standard
+
+Refer to section 
+\begin_inset LatexCommand \ref{openFolders}
+
+\end_inset 
+
+
 \the_end

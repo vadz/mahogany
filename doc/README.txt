@@ -25,7 +25,8 @@ BUT THIS SOFTWARE IS STILL UNDER DEVELOPMENT! This means
 
 * it is incomplete and awkward to use
 
-* it may crash occasionally or often or be completely unusable
+* it may crash occasionally or often or be completely unusable - Use
+  it at your own risk!
 
 M is not ready for the end user yet, but we present it in its current
 state to give you an impression of what it is going to be. We also
@@ -71,12 +72,15 @@ Quite some already, but more are still missing. What we have so far:
 
 3 Known bugs
 
-* selection in the folder view sometimes behaves strange, selecting
-  all messages doesn't work
+* Folder creation dialog doesn't work properly. See Information file
+  for how to setup new mail folders.
 
-* message and composition view don't automatically scroll to the cursor
+* Selection in the folder view sometimes behaves strange, selecting
+  all messages doesn't work.
 
-* tab traversal in dialogs doesn't work (wxGTK problem)
+* Message and composition view don't automatically scroll to the cursor.
+
+* Tab traversal in dialogs doesn't work (wxGTK problem).
 
 4 TODO, features to implement
 
@@ -90,7 +94,7 @@ on. Before adding new features, we'll clean up a few things:
   interface definitions will be sorted out more clearly. This includes
   a common base object with reference couting.
 
-* Plug the (very few remaining) memory holes.
+* Plug the (apparently very few remaining) memory holes.
 
 Then we fix some GUI issues. Many of these depend on wxGTK which is
 still evolving speedily. 
@@ -146,6 +150,8 @@ After that we reach the list of serious improvements:
   available.
 
 * CORBA support, possible cooperation with PINN project.
+
+* Address datbase synchronisation with PDA's (Just got one...)
 
 * ANY OTHER SUGGESTION
 

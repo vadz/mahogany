@@ -286,6 +286,59 @@ inherits the profile from the mail folder, which might be [M/Profiles/INBOX]or
 are using at the moment. The mail folder setup itself might inherit
 from some other profile and eventually all profiles inherit from [M/Profiles].
 
+5.2 How to set up a new folder
+
+This should be handled by the Create Folder dialog, but unfortunately
+it is broken - we'll fix it soon. 
+
+5.2.1 mail box files 
+
+To open a folder which is a mail box file, simply select Open Folder
+from the menu and type in the pathname to the folder. That will work.
+
+5.2.2 other folders
+
+\label{openFolders}To open a different type of folder, you need to
+create a Profile for it, either as a subsection in $HOME/.M/config
+, like [M/NewFolder], or as a separate Profile file $HOME/.M/NewFolder.profile
+. Some example profiles are supplied.
+
+An example for a POP mailbox POPBOX.profile file:
+
+Type = 2
+
+Path = {localhost/pop3}
+
+Login = karsten
+
+Password = MyPassword
+
+UpdateInterval = 60
+
+An example for accessing a newsgroup, COLA.profile:
+
+Type=4
+
+Path={newshost/nntp}comp.os.linux.announce
+
+The available Type values are:
+
++-----------+------------------------+
+|Type Value |      Description       |
++-----------+------------------------+
++-----------+------------------------+
+|    0      | System's default INBOX |
++-----------+------------------------+
+|    1      |      Mailbox file      |
++-----------+------------------------+
+|    2      |          POP3          |
++-----------+------------------------+
+|    3      |          IMAP          |
++-----------+------------------------+
+|    4      |       NNTP, news       |
++-----------+------------------------+
+
+
 6 Scripting and Python integration
 
 6.1 Introduction
@@ -356,3 +409,7 @@ must be explicitly named.
 * The GTK port of wxWindows, wxGTK, is available from: http://www.freiburg.linux.de/~wxxt/
 
 8 FAQ
+
+8.1 How can I create/open other folders?
+
+Refer to section \ref{openFolders}

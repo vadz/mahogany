@@ -10,7 +10,7 @@
 %DVIPSCommandLine: dvips -o
 %+ /home/karsten/src/Projects/M/doc/StyleGuide.ps StyleGuide.dvi
 %DVIPSParameters: dpi=300, compressed, comments removed
-%DVIPSSource:  TeX output 1998.08.16:1640
+%DVIPSSource:  TeX output 1998.08.17:2113
 %%BeginProcSet: texc.pro
 /TeXDict 250 dict def TeXDict begin /N{def}def /B{bind def}N /S{exch}N
 /X{S N}B /TR{translate}N /isls false N /vsize 11 72 mul N /hsize 8.5 72
@@ -240,7 +240,7 @@ rf /Fg 137[40 44 24 32 28 1[44 40 44 64 3[24 44 40 28
 3[36 36 1[36 36 2[36 30[36 1[36 5[36 10[36 36 1[36 44[{
  TeXBase1Encoding ReEncodeFont }20 59.999974 /Courier
 rf /Fk 3[36 134[36 19 25 24 3[35 1[17 3[35 33 1[29 37
-2[30 21[43 8[37 47 7[30 30 1[30 4[30 7[20 20 40[{
+2[30 21[43 8[37 47 7[30 30 30 5[30 7[20 20 40[{
  TeXBase1Encoding ReEncodeFont }21 59.999974 /Palatino-Roman
 rf /Fl 134[48 3[52 28 4[47 50 1[25 2[25 1[48 1[41 53
 16[45 11[66 3[61 23[52 43[{ TeXBase1Encoding ReEncodeFont }14
@@ -258,7 +258,7 @@ a4
 %%Page: 1 1
 1 0 bop 446 407 a Fl(C++)22 b(Coding)f(Style)h(Guide)725
 588 y Fk(Karsten)15 b(Ball\374der)85 663 y(\()p Fj(Ballueder@usa.net,)
-33 b(http://Ballueder.home.ml.org)o Fk(\))685 782 y(16th)15
+33 b(http://Ballueder.home.ml.org)o Fk(\))685 782 y(17th)15
 b(August)h(1998)828 967 y Fi(Abstract)250 1055 y Fh(This)e(document)g
 (is)g(a)f(set)g(of)h(notes)f(explaining)j(my)e(pr)o(eferr)o(ed)f(style)
 h(of)f(cod-)182 1112 y(ing)e(for)f(C++,)f(as)h(it)g(should)h(be)f(used)
@@ -434,32 +434,34 @@ Fd(.)60 1719 y Ff(4.3)59 b(V)-7 b(ersion)15 b(Control)60
 Fc(CVS)f Fd(version)h(contr)o(ol)h(system.)k(For)9 b(easy)h
 (identi\002c-)60 1874 y(ation,)h(each)f(\002le)g(should)g(start)g(with)
 g(a)f(comment,)i(including)g(at)f(least)g(the)f Fc($Id:)30
-b(StyleGuide.lyx,v)60 1935 y(1.7)g(1998/05/20)e(13:32:10)h(KB)h(Exp)g
+b(StyleGuide.lyx,v)60 1935 y(1.8)g(1998/08/16)e(16:32:16)h(KB)h(Exp)g
 ($)9 b Fd(and)h(the)f Fc($Log:)30 b(StyleGuide.lyx,v)60
-1995 y($Revision)f(1.7)59 b(1998/05/20)29 b(13:32:10)59
-b(KBEventually)29 b(fixed)g(that)60 2055 y(Doc++)g(core)h(dump)f
-(problem)g(and)h(added)f(a)h(note)f(aboutthis)g(in)h(the)f
-(StyleGuide.Revision)60 2115 y(1.6)59 b(1998/05/14)29
-b(18:49:07)59 b(KBExtended)29 b(naming)g(conventions,)g(added)60
-2175 y(postscript)g(versions.Revision)f(1.5)59 b(1998/05/02)29
-b(18:29:51)59 b(KBAfter)60 2236 y(many)29 b(problems,)g(Python)h
-(integration)e(is)i(eventually)f(taking)g(off)60 2296
-y(-works.)14 b Fd(tags.)h(Including)10 b(the)g Fc($Log:)29
-b(StyleGuide.lyx,v)f($Revision)h(1.7)60 2356 y(1998/05/20)g(13:32:10)59
-b(KBEventually)28 b(fixed)i(that)f(Doc++)g(core)h(dump)60
-2416 y(problem)f(and)h(added)f(a)h(note)f(aboutthis)g(in)h(the)f
-(StyleGuide.Revision)60 2476 y(1.6)59 b(1998/05/14)29
-b(18:49:07)59 b(KBExtended)29 b(naming)g(conventions,)g(added)60
-2537 y(postscript)g(versions.Revision)f(1.5)59 b(1998/05/02)29
-b(18:29:51)59 b(KBAfter)60 2597 y(many)29 b(problems,)g(Python)h
-(integration)e(is)i(eventually)f(taking)g(off)60 2657
-y(-works.)21 b Fd(information)15 b(in)g(each)f(\002le)h(somehow)f
-(in\003ates)i(the)e(code,)i(but)f(as)f(the)h(CVS)903
-2856 y(5)p eop
+1995 y($Revision)f(1.8)59 b(1998/08/16)29 b(16:32:16)59
+b(KBupdatesRevision)28 b(1.7)59 b(1998/05/20)60 2055
+y(13:32:10)g(KBEventually)28 b(fixed)i(that)f(Doc++)h(core)f(dump)g
+(problem)g(and)60 2115 y(added)g(a)h(note)g(aboutthis)e(in)i(the)g
+(StyleGuide.Revision)d(1.6)60 b(1998/05/14)60 2175 y(18:49:07)f
+(KBExtended)29 b(naming)g(conventions,)f(added)i(postscript)e
+(versions.Revision)60 2236 y(1.5)59 b(1998/05/02)29 b(18:29:51)59
+b(KBAfter)29 b(many)h(problems,)f(Python)g(integration)60
+2296 y(is)h(eventually)e(taking)i(off)f(-works.)14 b
+Fd(tags.)h(Including)10 b(the)g Fc($Log:)29 b(StyleGuide.lyx,v)60
+2356 y($Revision)g(1.8)59 b(1998/08/16)29 b(16:32:16)59
+b(KBupdatesRevision)28 b(1.7)59 b(1998/05/20)60 2416
+y(13:32:10)g(KBEventually)28 b(fixed)i(that)f(Doc++)h(core)f(dump)g
+(problem)g(and)60 2476 y(added)g(a)h(note)g(aboutthis)e(in)i(the)g
+(StyleGuide.Revision)d(1.6)60 b(1998/05/14)60 2537 y(18:49:07)f
+(KBExtended)29 b(naming)g(conventions,)f(added)i(postscript)e
+(versions.Revision)60 2597 y(1.5)59 b(1998/05/02)29 b(18:29:51)59
+b(KBAfter)29 b(many)h(problems,)f(Python)g(integration)60
+2657 y(is)h(eventually)e(taking)i(off)f(-works.)15 b
+Fd(information)e(in)g(each)f(\002le)h(somehow)903 2856
+y(5)p eop
 %%Page: 6 6
-6 5 bop 60 203 a Fd(ar)o(chive)10 b(might)g(only)f(be)g(accessible)h
-(thr)o(ough)g(a)f(dial-up)i(internet)e(connection,)j(it)e(pr)o(ovides)
-60 264 y(valuable)j(information.)903 2856 y(6)p eop
+6 5 bop 60 203 a Fd(in\003ates)18 b(the)e(code,)j(but)e(as)f(the)h(CVS)
+g(ar)o(chive)g(might)g(only)g(be)f(accessible)i(thr)o(ough)e(a)60
+264 y(dial-up)d(internet)g(connection,)h(it)f(pr)o(ovides)h(valuable)f
+(information.)903 2856 y(6)p eop
 %%Trailer
 end
 userdict /end-hook known{end-hook}if

@@ -409,7 +409,7 @@ wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
 void
 wxFolderView::ReplyMessages(const wxArrayInt& selections)
 {
-   int i;
+   int i,np,p;
    String str;
    String str2, prefix;
    const char *cptr;
@@ -420,22 +420,34 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
    prefix = mailFolder->GetProfile()->readEntry(MP_REPLY_MSGPREFIX,MP_REPLY_MSGPREFIX_D);
    for(i = 0; i < n; i++)
    {
-      str = "";
-      msg = mailFolder->GetMessage(selections[i]+1);
-      msg->WriteToString(str, false);
       cv = GLOBAL_NEW wxComposeView(_("Reply"),parent,
                                     mailFolder->GetProfile());
-      cptr = str.c_str();
-      str2 = "";
-      str2 += prefix;
-      while(*cptr)
+      str = "";
+      msg = mailFolder->GetMessage(selections[i]+1);
+      np = msg->CountParts();
+      for(p = 0; p < np; p++)
       {
-         str2 += *cptr;
-         if(*cptr == '\n' && *(cptr+1))
+         if(msg->GetPartType(p) == TYPETEXT)
+         {
+            str = msg->GetPartContent(p);
+            cptr = str.c_str();
+            str2 = "";
             str2 += prefix;
-         cptr++;
+            while(*cptr)
+            {
+               if(*cptr == '\r')
+               {
+                  cptr++;
+                  continue;
+               }
+               str2 += *cptr;
+               if(*cptr == '\n' && *(cptr+1))
+                  str2 += prefix;
+               cptr++;
+            }
+            cv->InsertText(str2);
+         }
       }
-      cv->InsertText(str2);
       cv->Show(TRUE);
       String
          name, email;
@@ -470,10 +482,8 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
                      ->readEntry(MP_FORWARD_PREFIX,MP_FORWARD_PREFIX_D) + msg->Subject());
 
       mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-#pragma message("FIXME: needs completion or even easier interface")
-//      cv->InsertFile(tmpfilename,"MESSAGE/RFC822",TYPEMESSAGE);
+      cv->InsertData(strutil_strdup(str),str.Length(),"MESSAGE/RFC822",TYPEMESSAGE);
    }
-
 }
 
 void

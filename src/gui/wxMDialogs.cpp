@@ -475,10 +475,10 @@ END_EVENT_TABLE()
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
-   SetBackgroundColour(wxWHITE);
+   SetBackgroundColour(wxColour("navy"));
 
    wxLayoutList &ll = GetLayoutList();
-   
+   ll.SetFontColour("white","navy");
    ll.SetEditable(true);
 
    // NB: can't use wxIconManager here because it's not yet constructed
@@ -501,7 +501,15 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll.LineBreak();
    ll.LineBreak();
    ll.Insert("Version: " M_RELEASE_STRING);
-   
+   ll.LineBreak();
+   ll.LineBreak();
+   ll.Insert("Copyright (C) 1998 by Karsten Ballüder");
+   ll.LineBreak();
+   ll.LineBreak();
+   ll.Insert("Written by Karsten Ballüder");
+   ll.LineBreak();
+   ll.Insert("and Vadim Zeitlin");
+   ll.LineBreak();
    ll.SetEditable(false);
 
    // start a timer which will close us (if not disabled)
@@ -517,7 +525,8 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 void
 MDialog_AboutDialog( MWindow * /* parent */, bool bCloseOnTimeout)
 {
-   wxFrame *frame = new wxFrame(NULL, -1, _("Welcome"));
+   wxFrame *frame = new wxFrame(NULL, -1, _("Welcome"),
+                                wxDefaultPosition, wxSize(200,280));
 
    (void)new wxAboutWindow(frame, bCloseOnTimeout);
 
@@ -569,6 +578,7 @@ private:
    wxTextCtrl *m_UpdateIntervalTextCtrl;
    wxTextCtrl *m_UserIdTextCtrl;
    wxTextCtrl *m_PasswordTextCtrl;
+   wxStaticText *m_PathStaticText;
    wxButton   *m_CancelButton, *m_OkButton, *m_UndoButton;
    wxString choices[5];
 
@@ -582,6 +592,11 @@ END_EVENT_TABLE()
 
 #define   MkTextCtrl(control,label,id) \
   (void) new wxStaticText(this, id, _(label), pos, wxSize(labelWidth,labelHeight)); \
+  control = new wxTextCtrl(this, id, "",wxPoint(pos.x+labelWidth,pos.y),wxSize(inputWidth,-1)); \
+  pos.y += labelHeight;\
+
+#define   MkTextCtrlAndLabel(control,labelctrl,label,id) \
+  labelctrl = new wxStaticText(this, id, _(label), pos, wxSize(labelWidth,labelHeight)); \
   control = new wxTextCtrl(this, id, "",wxPoint(pos.x+labelWidth,pos.y),wxSize(inputWidth,-1)); \
   pos.y += labelHeight;\
 
@@ -633,7 +648,7 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    inputWidth += 10;
    
    pos.y += LAYOUT_Y_MARGIN;
-   MkTextCtrl(m_FolderPathTextCtrl, "Path or name of folder",-1);
+   MkTextCtrlAndLabel(m_FolderPathTextCtrl,m_PathStaticText, "",-1);
    MkTextCtrl(m_UpdateIntervalTextCtrl, label,-1);
    MkTextCtrl(m_UserIdTextCtrl, "User ID",-1);
    MkTextCtrl(m_PasswordTextCtrl, "Password",-1);
@@ -666,22 +681,31 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    MkButton(m_CancelButton, "Cancel", wxID_CANCEL);
 
    Fit();
+   UpdateUI();
 }
 
 void
 wxPEP_Folder::UpdateUI(void)
 {
    int type = m_FolderTypeRadioBox->GetSelection();
-   
+
+   m_FolderPathTextCtrl->Enable(TRUE);
    if(type == 2 || type == 3) // we need defines for that: pop/imap
    {
       m_UserIdTextCtrl->Enable(TRUE);
       m_PasswordTextCtrl->Enable(TRUE);
+      m_PathStaticText->SetLabel(_("Hostname"));
    }
    else
    {
       m_UserIdTextCtrl->Enable(FALSE);
       m_PasswordTextCtrl->Enable(FALSE);
+      m_PathStaticText->SetLabel(_("Pathname or name of folder"));
+      if(type == 0)
+      {
+         m_FolderPathTextCtrl->SetValue("INBOX");
+         m_FolderPathTextCtrl->Enable(FALSE);
+      }
    }
 }
 
@@ -698,7 +722,7 @@ wxPEP_Folder::TransferDataFromWindow(void)
       m_Profile->writeEntry(MP_POP_LOGIN,m_UserIdTextCtrl->GetValue());
       m_Profile->writeEntry(MP_POP_PASSWORD,m_PasswordTextCtrl->GetValue());
    }
-
+   
    // if we return FALSE, it means that entered data is invalid and the dialog
    // wouldn't be closed
    return true;

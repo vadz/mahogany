@@ -128,7 +128,8 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
 
    m_LayoutWindow = NULL;
    nextFileID = 0;
-
+   m_pManager = NULL;
+   
    if(!parentProfile)
       parentProfile = mApplication.GetProfile();
    m_Profile = new Profile(iname,parentProfile);
@@ -317,14 +318,18 @@ void
 wxComposeView::CreateFTCanvas(void)
 {
    m_LayoutWindow = new wxLayoutWindow(m_panel);
-   m_LayoutWindow->Clear(
-      m_Profile->readEntry(MP_FTEXT_FONT,MP_FTEXT_FONT_D),
-      m_Profile->readEntry(MP_FTEXT_SIZE,MP_FTEXT_SIZE_D),
-      m_Profile->readEntry(MP_FTEXT_STYLE,MP_FTEXT_STYLE_D),
-      m_Profile->readEntry(MP_FTEXT_WEIGHT,MP_FTEXT_WEIGHT_D),
-      0,
-      m_Profile->readEntry(MP_FTEXT_FGCOLOUR,MP_FTEXT_FGCOLOUR_D),
-      m_Profile->readEntry(MP_FTEXT_BGCOLOUR,MP_FTEXT_BGCOLOUR_D));
+
+   String
+      fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR),
+      bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
+   
+   m_LayoutWindow->Clear(READ_CONFIG(m_Profile,MP_FTEXT_FONT),
+         READ_CONFIG(m_Profile,MP_FTEXT_SIZE),
+         READ_CONFIG(m_Profile,MP_FTEXT_STYLE),
+         READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT),
+         0,
+         fg.c_str(),bg.c_str());
+
    m_LayoutWindow->GetLayoutList().SetEditable(true);
    //FIXMEm_LayoutWindow->SetWrapMargin(READ_CONFIG(profile, MP_COMPOSE_WRAPMARGIN));
 }
@@ -368,7 +373,8 @@ wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
      return;
    }
 
-   if ( !m_pManager ) {
+   if ( ! m_pManager )
+   {
      m_pManager = AdbManager::Get();
      m_pManager->LoadAll();
    }
