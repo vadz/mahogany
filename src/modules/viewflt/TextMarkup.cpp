@@ -97,8 +97,6 @@ TextMarkupFilter::DoProcess(String& text,
           textSpecial;
    for ( const wxChar *pc = text.c_str(); ; pc++ )
    {
-      bool isSpace = false;
-
       switch ( *pc )
       {
          case _T('*'):
@@ -177,26 +175,36 @@ TextMarkupFilter::DoProcess(String& text,
             }
             break;
 
-         case _T(' '):
-         case _T('\t'):
-         case _T('\r'):
-         case _T('\n'):
-            isSpace = true;
-            // fall through
-
-         case _T('\0'):
-            // as a space can't appear inside a marked up word, we decide
-            // that the last special character wasn't meant to begin the markup
-            // after all
+         default:
             if ( state != Normal )
             {
-               textNormal = textSpecial;
-               textSpecial.clear();
-               state = Normal;
-            }
-            // fall through
+               // only letters and some special symbols may appear inside a
+               // marked up word
+               //
+               // apostrophe catches cases like "... *don't* do this ..."
+               if ( !wxIsalpha(*pc) && *pc != _T('\'') )
+               {
+                  // we decide that the last special character wasn't meant
+                  // to begin the markup after all
+                  if ( !isContinuation )
+                  {
+                     // don't forget to treat the markup symbol which isn't one
+                     // literally
+                     textNormal = chLastSpecial;
+                  }
+                  else // continuation
+                  {
+                     // the markup symbol did have special meaning -- it ended
+                     // the previous one, so don't take it
+                     textNormal.clear();
+                  }
 
-         default:
+                  textNormal += textSpecial;
+                  textSpecial.clear();
+                  state = Normal;
+               }
+            }
+
             (state == Normal ? textNormal : textSpecial) += *pc;
       }
 
@@ -210,7 +218,7 @@ TextMarkupFilter::DoProcess(String& text,
          break;
       }
 
-      atWordStart = isSpace;
+      atWordStart = wxIsspace(*pc);
    }
 }
 
