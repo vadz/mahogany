@@ -783,6 +783,23 @@ static String GetImapFlags(int flag)
    return flags;
 }
 
+// small GetImapSpec() helper
+static String GetSSLOptions(int flags)
+{
+   String specSsl;
+
+#ifdef USE_SSL
+   if ( flags & MF_FLAGS_SSLAUTH )
+   {
+      specSsl << "/ssl";
+      if ( flags & MF_FLAGS_SSLUNSIGNED )
+         specSsl << "/novalidate-cert";
+   }
+#endif // USE_SSL
+
+   return specSsl;
+}
+
 /* static */
 String MailFolder::GetImapSpec(int typeOrig,
                                int flags,
@@ -819,95 +836,84 @@ String MailFolder::GetImapSpec(int typeOrig,
 
    switch( type )
    {
-   case MF_INBOX:
-      mboxpath = "INBOX";
-      break;
+      case MF_INBOX:
+         mboxpath = "INBOX";
+         break;
 
-   case MF_FILE:
-      mboxpath = strutil_expandfoldername(name, type);
-      break;
+      case MF_FILE:
+         mboxpath = strutil_expandfoldername(name, type);
+         break;
 
-   case MF_MH:
-      {
-         // accept either absolute or relative filenames here, but the absolute
-         // ones should start with MHROOT
-         wxString mhRoot = MailFolderCC::InitializeMH();
-
-         const char *p;
-         wxString nameReal;
-         if ( name.StartsWith(mhRoot, &nameReal) )
+      case MF_MH:
          {
-            p = nameReal.c_str();
+            // accept either absolute or relative filenames here, but the absolute
+            // ones should start with MHROOT
+            wxString mhRoot = MailFolderCC::InitializeMH();
+
+            const char *p;
+            wxString nameReal;
+            if ( name.StartsWith(mhRoot, &nameReal) )
+            {
+               p = nameReal.c_str();
+            }
+            else
+            {
+               p = name.c_str();
+
+               if ( *p == '/' )
+               {
+                  wxLogError(_("Invalid MH folder name '%s' not under the "
+                               "root MH directory '%s'."),
+                            p, mhRoot.c_str());
+
+                  return "";
+               }
+            }
+
+            // newly created MH folders won't have leading slash, but we may still
+            // have to deal with the old entries in config, so eat both here, but
+            // be sure to remove the leading backslash: we want #mh/inbox, not
+            // #mh//inbox
+            while ( *p == '/' )
+               p++;
+
+            mboxpath << "#mh/" << p;
+         }
+         break;
+
+      case MF_POP:
+         mboxpath << '{' << server << "/pop3" << GetSSLOptions(flags) << '}';
+         break;
+
+      case MF_IMAP:
+         mboxpath << '{' << server;
+         if ( flags & MF_FLAGS_ANON )
+         {
+            mboxpath << "/anonymous";
          }
          else
          {
-            p = name.c_str();
-
-            if ( *p == '/' )
-            {
-               wxLogError(_("Invalid MH folder name '%s' not under the "
-                            "root MH directory '%s'."),
-                         p, mhRoot.c_str());
-
-               return "";
-            }
+            if( !login.empty() )
+               mboxpath << "/user=" << login ;
+            //else: we get asked  later
          }
 
-         // newly created MH folders won't have leading slash, but we may still
-         // have to deal with the old entries in config, so eat both here, but
-         // be sure to remove the leading backslash: we want #mh/inbox, not
-         // #mh//inbox
-         while ( *p == '/' )
-            p++;
+         mboxpath << GetSSLOptions(flags) << '}' << name;
+         break;
 
-         mboxpath << "#mh/" << p;
-      }
-      break;
+      case MF_NEWS:
+         mboxpath << "#news." << name;
+         break;
 
-   case MF_POP:
-      mboxpath << '{' << server << "/pop3";
-      if(flags & MF_FLAGS_SSLAUTH)
-      {
-         mboxpath << "/ssl";
-         if(flags & MF_FLAGS_SSLUNSIGNED)
-            mboxpath << "/novalidate-cert";
-      }
-      mboxpath << '}';
-      break;
-   case MF_IMAP:  // do we need /imap flag?
-      if(flags & MF_FLAGS_ANON)
-         mboxpath << '{' << server << "/anonymous";
-      else
-      {
-         if(login.Length())
-            mboxpath << '{' << server << "/user=" << login ;
-         else // we get asked  later FIXME!!
-            mboxpath << '{' << server << '}'<< name;
-      }
-      if(flags & MF_FLAGS_SSLAUTH)
-      {
-         mboxpath << "/ssl";
-         if(flags & MF_FLAGS_SSLUNSIGNED)
-            mboxpath << "/novalidate-cert";
-      }
-      mboxpath << '}' << name;
-      break;
-   case MF_NEWS:
-      mboxpath << "#news." << name;
-      break;
-   case MF_NNTP:
-      mboxpath << '{' << server << "/nntp";
-      if(flags & MF_FLAGS_SSLAUTH)
-      {
-         mboxpath << "/ssl";
-         if(flags & MF_FLAGS_SSLUNSIGNED)
-            mboxpath << "/novalidate-cert";
-      }
-      mboxpath << '}' << name;
-      break;
-   default:
-      FAIL_MSG("Unsupported folder type.");
+      case MF_NNTP:
+         mboxpath << '{' << server << "/nntp"
+                  << GetSSLOptions(flags) << '}' << name;
+         break;
+
+      default:
+         FAIL_MSG("Unsupported folder type.");
    }
+
    return mboxpath;
 }
 
