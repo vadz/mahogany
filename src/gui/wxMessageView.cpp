@@ -1823,7 +1823,7 @@ wxMessageView::Print(bool interactive)
    wxLayoutPrintout printout(GetLayoutList(), _("Mahogany: Printout"));
 
    if ( !printer.Print(this, &printout, interactive)
-        && ! printer.GetAbort() )
+        && printer.GetLastError() != wxPRINTER_CANCELLED )
    {
       wxMessageBox(_("There was a problem with printing the message:\n"
                      "perhaps your current printer is not set up correctly?"),
