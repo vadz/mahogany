@@ -819,7 +819,9 @@ MFolder *MFolderFromProfile::CreateSubfolder(const String& name, FolderType type
 
    // ok, it is: do create it
    MFolder *subfolder = MFolder::Create(GetSubFolderFullName(name), type);
-   if ( subfolder )
+
+   // is it our immediate child?
+   if ( subfolder && name.find('/') == String::npos )
    {
       // we must update the children count if we had already calculated it
       if ( m_nChildren != INVALID_CHILDREN_COUNT )
