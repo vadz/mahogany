@@ -32,16 +32,25 @@ public:
 #ifdef   DEBUG
    /// initialise the magic number
    MObject()
-      { m_magic = MOBJECT_MAGIC; }
+      {
+         m_magic = MOBJECT_MAGIC;
+         Register();
+      }
+   MObject(const MObject &oldobj)
+      {
+         oldobj.MOcheck();
+         m_magic = MOBJECT_MAGIC;
+         Register();
+      }
    /** Check validity of this object.
        This function should be called wherever such an object is used,
        especially at the beginning of all methods.
    */
    virtual void MOcheck(void) const
       {
-         // check that this != NULL
+         /// check that this != NULL
          wxASSERT(this);
-         // check that the object is really a MObject
+         /// check that the object is really a MObject
          wxASSERT(m_magic == MOBJECT_MAGIC);
       }
    /// virtual destructor
@@ -49,9 +58,31 @@ public:
       {
          // check we are valid
          MOcheck();
+         DeRegister();
          // make sure we are no longer
          m_magic = 0;
       }
+   
+
+    /// call this function on program termination to check for memory leaks
+    /// (of course, you shouldn't allocate memory in static object's: otherwise
+    /// it will be reported as leaked)
+    static void CheckLeaks();
+
+    /// override this function (see also MOBJECT_DEBUG macro) to provide some
+    /// rich information about your object (MObjectRC::Dump() prints the base
+    /// information such as name, pointer and ref count only)
+    virtual String DebugDump() const;
+
+    /// this function just returns the class name (also overriden by
+    /// MOBJECT_DEBUG macro)
+    virtual const char *DebugGetClassName() const { return "<<Invalid>>"; }
+
+private:
+   /// Adds the object to list of MObjects
+   void Register(void);
+   /// Removes the object from the list.
+   void DeRegister(void);
 protected:
    /// a simple magic number as a validity check
    int m_magic;
@@ -60,6 +91,8 @@ protected:
    virtual ~MObject() {}
    /// empty MOcheck() method
    void MOcheck(void) const {}
+   /// nothing
+   static void CheckLeaks() { }
 #endif
 };
 
@@ -98,49 +131,49 @@ protected:
 class MObjectRC : public MObject
 {
 public:
-  // ctor creates the object with the ref. count of 1
+  /// ctor creates the object with the ref. count of 1
 #ifdef   DEBUG
   MObjectRC();
 #else
   MObjectRC() { m_nRef = 1; }
 #endif
 
-  // debugging support
+  /// debugging support
 #ifdef   DEBUG
-    // call this function on program termination to check for memory leaks
-    // (of course, you shouldn't allocate memory in static object's: otherwise
-    // it will be reported as leaked)
+    /// call this function on program termination to check for memory leaks
+    /// (of course, you shouldn't allocate memory in static object's: otherwise
+    /// it will be reported as leaked)
     static void CheckLeaks();
 
-    // override this function (see also MOBJECT_DEBUG macro) to provide some
-    // rich information about your object (MObjectRC::Dump() prints the base
-    // information such as name, pointer and ref count only)
+    /// override this function (see also MOBJECT_DEBUG macro) to provide some
+    /// rich information about your object (MObjectRC::Dump() prints the base
+    /// information such as name, pointer and ref count only)
     virtual String DebugDump() const;
 
-    // this function just returns the class name (also overriden by
-    // MOBJECT_DEBUG macro)
-    virtual const char *DebugGetClassName() const { return "<<Invalid>>"; }
+    /// this function just returns the class name (also overriden by
+    /// MOBJECT_DEBUG macro)
+    virtual const char *DebugGetClassName() const { return "<<Unknown>>"; }
 #else
     static void CheckLeaks() { }
 #endif
 
-  // ref counting
+  /// ref counting
 #ifdef   DEBUG
-    // increment
+    /// increment
   void IncRef();
-    // decrement and delete if reached 0, return TRUE if item wasn't deleted
+    /// decrement and delete if reached 0, return TRUE if item wasn't deleted
   bool DecRef();
-#else  //release
+#else  ///release
   void IncRef()
     { MOcheck(); wxASSERT(m_nRef > 0); m_nRef++; }
   bool DecRef()
     { MOcheck(); if ( --m_nRef ) return TRUE; delete this; return FALSE; }
-#endif //debug/release
+#endif ///debug/release
 
 protected:
-  /// dtor is protected because only DecRef() can delete us
+  //// dtor is protected because only DecRef() can delete us
   virtual ~MObjectRC() {}
-   /// return the reference count:
+   //// return the reference count:
    size_t GetNRef(void) const { return m_nRef; }
 #ifndef DEBUG // we may use m_nRef only for diagnostic functions
 private:
@@ -156,8 +189,12 @@ private:
          virtual const char *DebugGetClassName() const { return #classname; } \
          virtual String DebugDump() const;
 
+#   define MOBJECT_NAME(classname) \
+      public:                                                                 \
+         virtual const char *DebugGetClassName() const { return #classname; } 
 #else
 #   define MOBJECT_DEBUG(classname)
+#   define MOBJECT_NAME(classname)
 #endif
 
 // ----------------------------------------------------------------------------

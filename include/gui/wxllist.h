@@ -28,6 +28,8 @@
 #   define WXMENU_LAYOUT_LCLICK     1111
 #   define WXMENU_LAYOUT_RCLICK     1112
 #   define WXMENU_LAYOUT_DBLCLICK   1113
+#else // for Mahogany only:
+#   include "MObject.h"
 #endif
 
 // use the wxWindows caret class instead of home grown cursor whenever possible
@@ -96,6 +98,9 @@ class WXDLLEXPORT wxFont;
     its size.
 */
 class wxLayoutObject
+#ifdef M_BASEDIR
+   : public MObject
+#endif
 {
 public:
    /** This structure can be used to contain data associated with the
@@ -210,6 +215,9 @@ public:
 protected:
    /// optional data for application's use
    UserData *m_UserData;
+#if defined (M_BASEDIR) && defined (DEBUG)
+   MOBJECT_NAME(wxLayoutObject)
+#endif
 };
 
 /// Define a list type of wxLayoutObject pointers.

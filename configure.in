@@ -40,6 +40,7 @@ DEFAULT_USE_WXCONFIG=1
 DEFAULT_USE_LIBTOOL=0
 DEFAULT_USE_DOCXX=0
 DEFAULT_USE_MODULES=dynamic
+DEFAULT_USE_LEAKTRACER=0
 
 M_OVERRIDES(python,python,
 --with-python   use python scripting,
@@ -52,6 +53,10 @@ USE_THREADS)
 M_OVERRIDES(dmalloc,dmalloc,
 --with-dmalloc  use dmalloc library for debugging,
 USE_DMALLOC)
+
+M_OVERRIDES(leaktracer,leaktracer,
+--with-leaktracer  use LeakTracer for debugging,
+USE_LEAKTRACER)
 
 M_OVERRIDES(efence,efence,
 --with-efence   use ElectricFence,
@@ -284,6 +289,13 @@ dnl dmalloc debugging lib
 if test "$USE_DMALLOC" = 1; then
 	AC_CHECK_LIB(dmalloc,main,LIB_DMALLOC="-ldmalloc",AC_MSG_WARN("dmalloc library configured but not available."))
 fi
+
+dnl LeakTracer debugging lib
+MAKE_USE_LEAKTRACER=
+if test "$USE_LEAKTRACER" = 1; then
+	MAKE_USE_LEAKTRACER="USE_LEAKTRACER=yes"
+fi
+	AC_SUBST(MAKE_USE_LEAKTRACER)
 
 if test "$USE_THREADS" = 1
 then

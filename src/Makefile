@@ -3,8 +3,9 @@
 #
 
 CWD = src
+UTILOBJ:=util/strutil.o util/sysutil.o util/miscutil.o util/upgrade.o
 SUB_DIRS = util classes gui mail adb wx modules
-MOBJS=util/*.o classes/*.o gui/*.o  mail/*.o adb/*.o \
+MOBJS:=$(UTILOBJ) classes/*.o gui/*.o  mail/*.o adb/*.o \
       wx/generic/*.o wx/common/*.o
 
 include ../makeopts
@@ -14,6 +15,11 @@ SUB_DIRS += Python
 MOBJS += Python/*.o
 endif
 
+ifdef USE_LEAKTRACER
+MOBJS := $(MOBJS) util/LeakTracer.o
+endif
+
+# LeakTracer must be the last object on the linker line!
 ifeq ($(USE_MODULES), static)
 MOBJS += modules/*.o
 endif

@@ -641,7 +641,8 @@ wxMessageView::Update(void)
            (t == Message::MSG_TYPEMESSAGE &&
             m_ProfileValues.rfc822isText) )
       {
-         cptr = m_mailMessage->GetPartContent(i);
+         unsigned long len;
+         cptr = m_mailMessage->GetPartContent(i, &len);
          if(cptr == NULL)
             continue; // error ?
          llist->LineBreak();

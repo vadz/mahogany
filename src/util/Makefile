@@ -8,12 +8,17 @@ HDR = $(SRC:.cpp=.h) $(CSRC:.c=.h)
 
 TARGETS = $(SRC:.cpp=.o) $(CSRC:.c=.o)
 
+include ../../makeopts
+
+ifdef USE_LEAKTRACER
+TARGETS := $(TARGETS) LeakTracer.o
+endif
+
 all:	$(TARGETS)
 
 clean: stdclean
 
 .PHONY: all clean
 
-include ../../makeopts
 include ../../makerules
 include .depend

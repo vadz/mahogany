@@ -36,6 +36,10 @@ WX_DEFINE_ARRAY(MObjectRC *, ArrayObjects);
 
 static ArrayObjects gs_aObjects;
 
+WX_DEFINE_ARRAY(MObject *, ArrayMObjects);
+
+static ArrayMObjects gs_aMObjects;
+
 // we don't want to trace all Inc/DecRef()s - there are too many of them. But
 // sometimes we want to trace the lifetime of a selected object. For this, you
 // should change these variable under debugger - all operations on this object
@@ -68,10 +72,35 @@ String MObjectRC::DebugDump() const
 {
    MOcheck();
    String str;
+   str.Printf("%s at 0x%p m_nRef = %d: ", DebugGetClassName(), this, m_nRef);
+
+   return str;
+}
+
+void MObject::CheckLeaks()
+{
+   size_t nCount = gs_aMObjects.Count();
+
+   if ( nCount > 0 ) {
+      wxFAIL_MSG("MObjectRmemory leaks detected, see debug log for details.");
+
+      wxLogDebug("%d MObjects leaked:", nCount);
+   }
+
+   for ( size_t n = 0; n < nCount; n++ ) {
+      wxLogDebug("Object %d: %s", n, gs_aMObjects[n]->DebugDump().c_str());
+   }
+}
+
+String MObject::DebugDump() const
+{
+   MOcheck();
+   String str;
    str.Printf("%s at 0x%08x m_nRef = %d: ", DebugGetClassName(), this, m_nRef);
 
    return str;
 }
+
 
 // ----------------------------------------------------------------------------
 // debug implementations of other functions
@@ -117,5 +146,19 @@ bool MObjectRC::DecRef()
 
    return TRUE;
 }
+
+
+void MObject::Register(void)
+{
+   MOcheck();
+   gs_aMObjects.Add(this);
+}
+
+void MObject::DeRegister(void)
+{
+   MOcheck();
+   gs_aMObjects.Remove(this);
+}
+
 
 #endif //DEBUG

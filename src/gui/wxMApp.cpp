@@ -645,6 +645,7 @@ int wxMApp::OnExit()
    ProfileBase::DeleteGlobalConfig();
 
    MObjectRC::CheckLeaks();
+   MObject::CheckLeaks();
 
    // delete the previously active log target (it's the one we had set before
    // here, but in fact it doesn't even matter: if somebody installed another

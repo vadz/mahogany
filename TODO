@@ -56,13 +56,6 @@ $Id$
 		mechanism for setting custom headers. Move Vadim's
 		code to SendMessaggeCC. Introduce SendMessage??
 
-9		Crash from MailFolder::OpenFolder() when clicking on a 
-		folder group in tree
-			1. why is profile value invalid
-			   (CreateEmptyProfile() broken?)
-			2. why does the tree attempt to open the group 
-			   as a folder?
-
 9	VZ	Folder Properties dialog: OK disabled, Apply sometimes 
 		enabled... impossible to change settings for existing
 		folders. 

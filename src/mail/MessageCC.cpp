@@ -67,7 +67,7 @@ MessageCC::~MessageCC()
    if(partInfos != NULL)
       delete [] partInfos;
    if(partContentPtr)
-      delete  partContentPtr;
+      delete [] partContentPtr;
    if(text)
       delete [] text;
    if(folder)
@@ -510,7 +510,7 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
    }
 
    if(partContentPtr)
-      delete partContentPtr;
+      delete [] partContentPtr;
    partContentPtr = new char[len+1];
    strncpy(partContentPtr, cptr, len);
    partContentPtr[len] = '\0';
@@ -520,7 +520,7 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
       rfc822_qprint() when HTML code is fed into it and while Mahogany 
       has long done all this, it seems to be not significantly worse
       if I comment it all out. So what I do now, is to just return the 
-      plain text iff the decoding failed.
+      plain text if the decoding failed.
       FIXME I should really find out whether this is correct :-)
    */
    const char * returnVal = NULL;
@@ -548,9 +548,10 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
       return partContentPtr;
    else if(returnVal != partContentPtr)
    { // we need to copy it over
-      if(partContentPtr) delete partContentPtr;
-      partContentPtr = new char [*lenptr];
+      if(partContentPtr) delete [] partContentPtr;
+      partContentPtr = new char [(*lenptr)+1];
       memcpy(partContentPtr, returnVal, *lenptr);
+      partContentPtr[(*lenptr)+1] = '\0';
       fs_give((void **)&returnVal);
    }
    return partContentPtr;
