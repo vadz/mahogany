@@ -189,6 +189,13 @@ void wxLayoutImportText(wxLayoutList *list,
    {
       // Convert from UTF-8 to environment's default encoding
       str = wxString(strOrig.wc_str(wxConvUTF8), wxConvLocal);
+      if ( str.Length() == 0 )
+      {
+         // conversion failed - use original text (and display
+         // incorrectly, unfortunately)
+         str = strOrig;
+         wxLogDebug("conversion from UTF-8 to environment's default encoding failed");
+      }
       encoding = wxLocale::GetSystemEncoding();
    }
    else

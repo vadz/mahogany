@@ -2643,7 +2643,15 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
       // FIXME it won't be needed when full Unicode support is available
       if ( encoding == wxFONTENCODING_UTF8 )
       {
-         text = wxString(text.wc_str(wxConvUTF8), wxConvLocal);
+         wxString textOrig = text;
+         text = wxString(textOrig.wc_str(wxConvUTF8), wxConvLocal);
+         if ( text.Length() == 0 )
+         {
+            // conversion failed - use original text (and display
+            // incorrectly, unfortunately)
+            text = textOrig;
+            wxLogDebug("conversion from UTF-8 to environment's default encoding failed");
+         }
          encoding = wxLocale::GetSystemEncoding();
       }
 
