@@ -344,14 +344,21 @@ private:
 class wxRcptExtraControl : public wxRcptControl
 {
 public:
-   wxRcptExtraControl(wxComposeView *cv, size_t index) : wxRcptControl(cv)
+   wxRcptExtraControl(wxComposeView *cv) : wxRcptControl(cv)
    {
-      m_index = index;
+      // we're always inserted in the beginning, see AddRecipientControls()
+      m_index = 0;
       m_btnRemove = NULL;
    }
 
    // remove this one - called by button
    void OnRemove() { m_composeView->OnRemoveRcpt(m_index); }
+
+   // increment our index (called when another control is inserted before us)
+   void IncIndex()
+   {
+      m_index++;
+   }
 
    // decrement our index (presumably because another control was deleted
    // before us)
@@ -1918,8 +1925,7 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
    }
 
    // create the controls and add them to the sizer
-   wxRcptExtraControl *
-       rcpt = new wxRcptExtraControl(this, m_rcptExtra.GetCount());
+   wxRcptExtraControl *rcpt = new wxRcptExtraControl(this);
 
    wxSizer *sizerRcpt = rcpt->CreateControls(m_panelRecipients->GetCanvas());
 
@@ -1933,6 +1939,13 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
    m_sizerRcpts->Prepend(sizerRcpt, 0, wxALL | wxEXPAND, LAYOUT_MARGIN / 2);
    m_sizerRcpts->Layout();
    m_panelRecipients->RefreshScrollbar(m_panelRecipients->GetClientSize());
+
+   // adjust the indexes of all the existing controls
+   const size_t count = m_rcptExtra.GetCount();
+   for ( size_t n = 1; n < count; n++ )
+   {
+      m_rcptExtra[n]->IncIndex();
+   }
 }
 
 void
