@@ -23,6 +23,8 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
+   #include "MFolder.h"
+
    #include "MHelp.h"
 
    #include "guidef.h"
@@ -81,40 +83,59 @@ class wxMessageSearchDialog : public wxOptionsPageSubdialog
 {
 public:
    wxMessageSearchDialog(SearchCriterium *crit,
-                         Profile *profile, wxWindow *parent);
+                         Profile *profile,
+                         const MFolder *folder,
+                         wxWindow *parent);
 
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
 
 protected:
-   void UpdateCritStruct(void)
-   {
-      m_CritStruct->m_What = (SearchCriterium::Type)
-         m_Choices->GetSelection();
-      m_CritStruct->m_Invert = m_Invert->GetValue();
-      m_CritStruct->m_Key = m_Keyword->GetValue();
-   }
+   // event handlers
+   void OnUpdateUIOk(wxUpdateUIEvent& event);
+   void OnUpdateUIRemove(wxUpdateUIEvent& event);
+   void OnButtonAdd(wxCommandEvent& event);
+   void OnButtonRemove(wxCommandEvent& event);
 
    SearchCriterium *m_CritStruct;
    int           m_Criterium;
    String        m_Arg;
 
    // GUI controls
-   wxChoice     *m_Choices;
-   wxCheckBox   *m_Invert;
-   wxPTextEntry *m_Keyword;
-   wxListBox *m_lboxFolders;
+   wxChoice     *m_choiceWhere;
+   wxCheckBox   *m_chkInvert;
+   wxPTextEntry *m_textWhat;
+   wxListBox    *m_lboxFolders;
+
+   DECLARE_EVENT_TABLE()
 };
+
+// ----------------------------------------------------------------------------
+// event tables
+// ----------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(wxMessageSearchDialog, wxOptionsPageSubdialog)
+   EVT_BUTTON(Btn_Add, wxMessageSearchDialog::OnButtonAdd)
+   EVT_BUTTON(Btn_Remove, wxMessageSearchDialog::OnButtonRemove)
+
+   EVT_UPDATE_UI(wxID_OK, wxMessageSearchDialog::OnUpdateUIOk)
+   EVT_UPDATE_UI(Btn_Remove, wxMessageSearchDialog::OnUpdateUIRemove)
+END_EVENT_TABLE()
 
 // ============================================================================
 // wxMessageSearchDialog implementation
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// ctor
+// ----------------------------------------------------------------------------
+
 wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
                                              Profile *profile,
+                                             const MFolder *folder,
                                              wxWindow *parent)
-                     : wxOptionsPageSubdialog(profile,parent,
+                     : wxOptionsPageSubdialog(profile, parent,
                                               _("Search for messages"),
                                               "MessageSearchDialog")
 {
@@ -135,54 +156,54 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    wxStaticBox *box = new wxStaticBox(this, -1, _("&Search for messages"));
 
    // first line: [x] Not containing [Text___]
-   m_Invert = new wxCheckBox(this, -1, _("&Not"));
+   m_chkInvert = new wxCheckBox(this, -1, _("&not"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
    c->top.SameAs(box, wxTop, 5*LAYOUT_Y_MARGIN);
    c->height.AsIs();
-   m_Invert->SetConstraints(c);
+   m_chkInvert->SetConstraints(c);
 
    label = new wxStaticText(this, -1, _("&containing"));
    c = new wxLayoutConstraints;
-   c->left.RightOf(m_Invert, 2*LAYOUT_X_MARGIN);
+   c->left.RightOf(m_chkInvert, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
-   c->centreY.SameAs(m_Invert, wxCentreY);
+   c->centreY.SameAs(m_chkInvert, wxCentreY);
    c->height.AsIs();
    label->SetConstraints(c);
 
-   m_Keyword = new wxPTextEntry("SearchFor", this, -1);
+   m_textWhat = new wxPTextEntry("SearchFor", this, -1);
    c = new wxLayoutConstraints;
    c->left.RightOf(label, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->centreY.SameAs(label, wxCentreY);
    c->height.AsIs();
-   m_Keyword->SetConstraints(c);
+   m_textWhat->SetConstraints(c);
 
    // second line: In [Where___]
-   label = new wxStaticText(this, -1, _("&In"));
+   m_choiceWhere = new wxPChoice("SearchWhere", this, -1,
+                                 wxDefaultPosition, wxDefaultSize,
+                                 WXSIZEOF(searchCriteria), searchCriteria);
    c = new wxLayoutConstraints;
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->left.SameAs(m_textWhat, wxLeft);
+   c->right.SameAs(m_textWhat, wxRight);
+   c->top.Below(m_textWhat, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   m_choiceWhere->SetConstraints(c);
+
+   label = new wxStaticText(this, -1, _("&in"));
+   c = new wxLayoutConstraints;
+   c->right.LeftOf(m_choiceWhere, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
-   c->top.Below(m_Keyword, 2*LAYOUT_Y_MARGIN);
+   c->centreY.SameAs(m_choiceWhere, wxCentreY);
    c->height.AsIs();
    label->SetConstraints(c);
-
-   m_Choices = new wxPChoice("SearchWhere", this, -1,
-                             wxDefaultPosition, wxDefaultSize,
-                             WXSIZEOF(searchCriteria), searchCriteria);
-   c = new wxLayoutConstraints;
-   c->left.RightOf(label, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->centreY.SameAs(label, wxCentreY);
-   c->height.AsIs();
-   m_Choices->SetConstraints(c);
 
    c = new wxLayoutConstraints;
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
    c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(m_Choices, wxBottom, -3*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(m_choiceWhere, wxBottom, -3*LAYOUT_Y_MARGIN);
    box->SetConstraints(c);
 
 
@@ -197,7 +218,18 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    c->height.AsIs();
    btnAdd->SetConstraints(c);
 
+   wxButton *btnRemove = new wxButton(this, Btn_Remove, _("&Remove"));
+   c = new wxLayoutConstraints;
+   c->width.AsIs();
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   btnRemove->SetConstraints(c);
+
    m_lboxFolders = new wxListBox(this, -1);
+   if ( folder )
+      m_lboxFolders->Append('/' + folder->GetFullName());
+
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.LeftOf(btnAdd, 2*LAYOUT_X_MARGIN);
@@ -208,54 +240,113 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    c = new wxLayoutConstraints;
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->top.SameAs(m_Choices, wxBottom, 5*LAYOUT_Y_MARGIN);
+   c->top.SameAs(m_choiceWhere, wxBottom, 5*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(FindWindow(wxID_OK), wxTop, 3*LAYOUT_Y_MARGIN);
    box->SetConstraints(c);
 
    SetDefaultSize(5*wBtn, 14*hBtn);
 }
 
-
-bool wxMessageSearchDialog::TransferDataFromWindow()
-{
-   m_Criterium = m_Choices->GetSelection();
-   if(m_Invert->GetValue() != 0)
-      m_Criterium |= SEARCH_CRIT_INVERT_FLAG;
-
-   m_Arg = m_Keyword->GetValue();
-   GetProfile()->writeEntry(MP_MSGS_SEARCH_CRIT, m_Criterium);
-   GetProfile()->writeEntry(MP_MSGS_SEARCH_ARG, m_Arg);
-
-   UpdateCritStruct();
-   return TRUE;
-}
+// ----------------------------------------------------------------------------
+// wxMessageSearchDialog data transfer
+// ----------------------------------------------------------------------------
 
 bool wxMessageSearchDialog::TransferDataToWindow()
 {
+   // see TransferDataFromWindow() for the explanation of SEARCH_CRIT_MASK: now
+   // we simply unpack that word back
    m_Criterium = READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_CRIT);
+   m_choiceWhere->SetSelection(m_Criterium & SEARCH_CRIT_MASK);
+
+   m_chkInvert->SetValue((m_Criterium & SEARCH_CRIT_INVERT_FLAG) != 0);
+
    m_Arg = READ_CONFIG_TEXT(GetProfile(), MP_MSGS_SEARCH_ARG);
+   m_textWhat->SetValue(m_Arg);
 
-   if ( m_Criterium & SEARCH_CRIT_MASK )
-      m_Choices->SetSelection(m_Criterium & SEARCH_CRIT_MASK);
-
-   m_Invert->SetValue((m_Criterium & SEARCH_CRIT_INVERT_FLAG) != 0);
-
-   if ( !m_Arg.empty() )
-      m_Keyword->SetValue(m_Arg);
-
-   UpdateCritStruct();
-
-   m_Choices->SetFocus();
+   m_choiceWhere->SetFocus();
 
    return TRUE;
 }
 
-/* Configuration dialog for searching messages. */
+bool wxMessageSearchDialog::TransferDataFromWindow()
+{
+   m_Criterium = m_choiceWhere->GetSelection();
+   m_CritStruct->m_What = (SearchCriterium::Type) m_Criterium;
+
+   m_CritStruct->m_Invert = m_chkInvert->GetValue();
+   if ( m_CritStruct->m_Invert )
+   {
+      // we combine the values of m_chkInvert and m_choiceWhere into one config
+      // entry
+      m_Criterium |= SEARCH_CRIT_INVERT_FLAG;
+   }
+
+   m_Arg = m_textWhat->GetValue();
+
+   GetProfile()->writeEntry(MP_MSGS_SEARCH_CRIT, m_Criterium);
+   GetProfile()->writeEntry(MP_MSGS_SEARCH_ARG, m_Arg);
+
+   m_CritStruct->m_Key = m_Arg;
+
+   wxString s;
+   m_CritStruct->m_Folders.Empty();
+   size_t count = m_lboxFolders->GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      s = m_lboxFolders->GetString(n);
+      m_CritStruct->m_Folders.Add(s.c_str() + 1); // skip leading slash
+   }
+
+   return TRUE;
+}
+
+// ----------------------------------------------------------------------------
+// wxMessageSearchDialog event handlers
+// ----------------------------------------------------------------------------
+
+void wxMessageSearchDialog::OnUpdateUIOk(wxUpdateUIEvent& event)
+{
+   // we must have something and somewhere to search for
+   event.Enable( !m_textWhat->GetValue().empty() &&
+                     m_lboxFolders->GetCount() != 0 );
+}
+
+void wxMessageSearchDialog::OnUpdateUIRemove(wxUpdateUIEvent& event)
+{
+   event.Enable( m_lboxFolders->GetSelection() != -1 );
+}
+
+void wxMessageSearchDialog::OnButtonAdd(wxCommandEvent& event)
+{
+   MFolder_obj folder = MDialog_FolderChoose(this, NULL, MDlg_Folder_NoFiles);
+   if ( folder )
+   {
+      m_lboxFolders->Append('/' + folder->GetFullName());
+   }
+}
+
+void wxMessageSearchDialog::OnButtonRemove(wxCommandEvent& event)
+{
+   int sel = m_lboxFolders->GetSelection();
+   if ( sel == -1 )
+      return;
+
+   m_lboxFolders->Delete(sel);
+}
+
+// ----------------------------------------------------------------------------
+// wxMessageSearchDialog public API
+// ----------------------------------------------------------------------------
+
+// Configuration dialog for searching message
 extern
 bool ConfigureSearchMessages(SearchCriterium *crit,
-                             Profile *profile, wxWindow *parent)
+                             Profile *profile,
+                             const MFolder *folder,
+                             wxWindow *parent)
 {
-   wxMessageSearchDialog dlg(crit, profile, parent);
+   wxMessageSearchDialog dlg(crit, profile, folder, parent);
+
    return dlg.ShowModal() == wxID_OK;
 }
 

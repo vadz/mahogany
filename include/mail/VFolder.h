@@ -77,7 +77,7 @@ public:
 
    virtual void Checkpoint();
 
-   virtual Message *GetMessage(unsigned long uid);
+   virtual Message *GetMessage(unsigned long uid) const;
 
    virtual bool SetMessageFlag(unsigned long uid,
                                int flag,

@@ -811,9 +811,6 @@ public:
 // private functions
 // ----------------------------------------------------------------------------
 
-static
-bool ShowSearchResults(MailFolder *mf, const UIdArray& uids, wxFrame *frame);
-
 // return the n-th shown column (WXFLC_NONE if no more columns)
 static wxFolderListColumn GetColumnByIndex(const int *columns, size_t n)
 {
@@ -4780,33 +4777,9 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 
       m_TicketList->Remove(t);
 
-      int ok = ((ASMailFolder::ResultInt *)result)->GetValue() != 0;
-
       String msg;
       switch ( result->GetOperation() )
       {
-         case ASMailFolder::Op_SearchMessages:
-            if( ok )
-            {
-               UIdArray *uidsMatching = result->GetSequence();
-               if ( !uidsMatching )
-               {
-                  FAIL_MSG( "searched ok but no search results??" );
-                  break;
-               }
-
-               MailFolder_obj mf = GetMailFolder();
-               ShowSearchResults(mf, *uidsMatching, m_Frame);
-
-               wxLogStatus(m_Frame, _("Found %lu messages."),
-                           uidsMatching->GetCount());
-            }
-            else
-            {
-               wxLogWarning(_("No matching messages found."));
-            }
-            break;
-
          case ASMailFolder::Op_GetMessage:
             // so far we only use GetMessage() when processing
             // WXMENU_MSG_QUICK_FILTER
@@ -5014,44 +4987,6 @@ Profile *wxFolderViewFrame::GetFolderProfile(void) const
 // ----------------------------------------------------------------------------
 // other public functions (from include/FolderView.h)
 // ----------------------------------------------------------------------------
-
-static
-bool ShowSearchResults(MailFolder *mf, const UIdArray& uids, wxFrame *frame)
-{
-   MFolder_obj folder = MFolder::CreateTemp
-                        (
-                           _("Search results"),
-                           MF_VIRTUAL,
-                           mf->GetProfile()
-                        );
-   if ( !folder )
-      return false;
-
-   // FIXME: a hack to prevent the same search results folder from being reused
-   //        all the time
-   static unsigned int s_countSearch = 0;
-   folder->SetPath(String::Format("(%u)", ++s_countSearch));
-
-   MailFolder_obj mfVirt = MailFolder::OpenFolder(folder);
-   if ( !mfVirt )
-      return false;
-
-   HeaderInfoList_obj hil = mf->GetHeaders();
-   if ( !hil )
-      return false;
-
-   size_t count = uids.GetCount();
-   for ( size_t n = 0; n < count; n++ )
-   {
-      Message_obj message = mf->GetMessage(uids[n]);
-      if ( message )
-      {
-         mfVirt->AppendMessage(*message.Get());
-      }
-   }
-
-   return OpenFolderViewFrame(folder, frame);
-}
 
 bool OpenFolderViewFrame(MFolder *folder,
                          wxWindow *parent,

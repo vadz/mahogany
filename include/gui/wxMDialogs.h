@@ -346,15 +346,31 @@ extern class wxFrame *g_pSplashScreen;
 void
 MDialog_FolderProfile(const wxWindow *parent, const String& folderName);
 
-/** choose a folder from the list of all folders, returns NULL if cancelled
+/// the flags for MDialog_FolderChoose
+enum
+{
+   /// propose to choose file to save to
+   MDlg_Folder_Save = 0,
+
+   /// propose to choose file to open
+   MDlg_Folder_Open = 1,
+
+   /// don't propose choosing a file at all
+   MDlg_Folder_NoFiles = 2
+};
+
+/**
+  Choose a folder from the list of all folders (also allows to choose a file to
+  use as a folder), returns NULL if cancelled
 
   @param parent the parent window for the dialog
   @param folder the default folder to use
-  @param open true if the folder is going to be opened (used for file dialog)
+  @param flags the dialog option flags, combination of MDlg_Folder_XXX values
+  @return the folder selected by user (must be DecRef()'d) or NULL if cancelled
  */
 MFolder *MDialog_FolderChoose(const wxWindow *parent,
                               MFolder *folder = NULL,
-                              bool open = false);
+                              int flags = MDlg_Folder_Save);
 
 /// choose a folder and open a view on it
 void MDialog_FolderOpen(const wxWindow *parent);

@@ -529,7 +529,7 @@ void MailFolderVirt::Checkpoint()
    // NOOP
 }
 
-Message *MailFolderVirt::GetMessage(unsigned long uid)
+Message *MailFolderVirt::GetMessage(unsigned long uid) const
 {
    Msg *msg = GetMsgFromUID(uid);
    if ( !msg )
@@ -539,7 +539,7 @@ Message *MailFolderVirt::GetMessage(unsigned long uid)
    if ( !message )
       return NULL;
 
-   return MessageVirt::Create(this, uid, &msg->flags, message);
+   return MessageVirt::Create((MailFolderVirt *)this, uid, &msg->flags, message);
 }
 
 bool

@@ -20,12 +20,18 @@
 #include "gui/wxMenuDefs.h"
 #include "gui/wxMFrame.h"
 
+#include "MEvent.h"
+
 class MFolder;
 class wxFolderView;
 class wxFolderTree;
+
+class GlobalSearchData;
+
+class WXDLLEXPORT wxMenu;
 class WXDLLEXPORT wxSplitterWindow;
 
-class wxMainFrame : public wxMFrame
+class wxMainFrame : public wxMFrame, public MEventReceiver
 {
 public:
    /// constructor & dtor
@@ -57,6 +63,9 @@ public:
    void OnUpdateUIEnableIfHasPreview(wxUpdateUIEvent& event);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 
+   /// Mahogany event processing
+   virtual bool OnMEvent(MEventData& event);
+
    /// Appends the menu for a module to the menubar
    virtual void AddModulesMenu(const char *name,
                                const char *help,
@@ -81,6 +90,9 @@ public:
    wxFolderTree *GetFolderTree() const { return m_FolderTree; }
 
 protected:
+   /// handler for the "Folder|Search" menu command
+   void DoFolderSearch();
+
    /// the splitter window holding the treectrl and folder view
    wxSplitterWindow *m_splitter;
 
@@ -94,10 +106,20 @@ protected:
    String m_folderName;
 
    /// the module extension menu if it is set
-   class wxMenu *m_ModulesMenu;
+   wxMenu *m_ModulesMenu;
+
+   /// the async search data
+   GlobalSearchData *m_searchData;
+
+   /// the MEventManager cookie for ASFolder events
+   void *m_cookieASMf;
 
 private:
+   /// create and initialize the modules menu
    void MakeModulesMenu(void);
+
+   /// initialize m_searchData and m_cookieASMf if necessary
+   void InitSearchData();
 
    DECLARE_EVENT_TABLE()
 };

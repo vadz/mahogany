@@ -42,25 +42,21 @@ public:
    /// invert the criterium?
    bool m_Invert;
 
-   /// the number of folders in m_Folders array (if 0, only the current one)
-   size_t m_nFolders;
+   /// the array of the names of folders to search
+   wxArrayString m_Folders;
 
-   /// the array of size m_nFolders of folders to search
-   MFolder *m_Folders;
-
-   SearchCriterium() { m_What = SC_ILLEGAL; m_Invert = false; m_nFolders = 0; }
+   SearchCriterium() { m_What = SC_ILLEGAL; m_Invert = false; }
 };
 
 /**
   Show the dialog allowing the user to specify the search criteria. If this
   function returns true, the caller should continue with searching, otherwise
   the search is cancelled. In the former case, crit out parameter contains not
-  only what to search, but also where to search for it: either just in the
-  current folder in which case crit->m_nFolders == 0 or in all of the folders
-  in crit->m_Folders array which, then, should all be DecRef()'d by caller.
+  only what to search, but also where to search for it (m_Folders names array)
 
   @param crit the search criterium filled by this function
   @param profile the profile to use for the last search values
+  @param folder the default folder to search in
   @param parent the parent window for the dialog
   @return true if ok, false if the dialog was cancelled
  */
@@ -68,6 +64,7 @@ extern
 bool
 ConfigureSearchMessages(SearchCriterium *crit,
                         Profile *profile,
+                        const MFolder *folder,
                         wxWindow *parent);
 
 #endif // _MSEARCH_H_

@@ -136,7 +136,7 @@ public:
        @param uid mesage uid
        @return message header information class
    */
-   virtual Message *GetMessage(unsigned long uid);
+   virtual Message *GetMessage(unsigned long uid) const;
 
    virtual bool SetMessageFlag(unsigned long uid,
                                int flag,

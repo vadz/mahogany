@@ -22,7 +22,7 @@
 #   pragma   implementation "wxMainFrame.h"
 #endif
 
-#include   "Mpch.h"
+#include "Mpch.h"
 
 #ifndef   USE_PCH
 #  include "Mcommon.h"
@@ -42,7 +42,10 @@
 
 #include "MFolder.h"
 
+// these 3 are needed only for SEARCH command processing
 #include "MSearch.h"
+#include "UIdArray.h"
+#include "HeaderInfo.h"
 
 #include "gui/wxMainFrame.h"
 #include "gui/wxMApp.h"
@@ -230,6 +233,282 @@ private:
    wxMainFrame *m_mainFrame;
 };
 
+// ============================================================================
+// async search helper classes
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// AsyncSearchData: data for one search operation
+// ----------------------------------------------------------------------------
+
+class AsyncSearchData
+{
+public:
+   // default ctor
+   AsyncSearchData()
+   {
+      m_mfVirt = NULL;
+
+      m_folderVirt = NULL;
+
+      m_nMatchingMessages =
+      m_nMatchingFolders = 0;
+   }
+
+   ~AsyncSearchData()
+   {
+      if ( m_mfVirt )
+      {
+         m_mfVirt->DecRef();
+         m_folderVirt->DecRef();
+      }
+   }
+
+   // add a record for another folder being searched
+   //
+   // NB: we take ownership of the mf pointer and will DecRef() it
+   bool AddSearchFolder(MailFolder *mf, Ticket t)
+   {
+      CHECK( mf && t != ILLEGAL_TICKET, false,
+             "invalid params in AsyncSearchData::AddSearchFolder" );
+
+      m_listSingleSearch.push_back(new SingleSearchData(t, mf));
+
+      return true;
+   }
+
+   // process the search result if it concerns this search, in which case true
+   // is returned (even if there were errors), otherwise return false to
+   // indicate that we don't have anything to do with this result
+   bool HandleSearchResult(const ASMailFolder::Result& result)
+   {
+      const Ticket t = result.GetTicket();
+      for ( SingleSearchDataList::iterator i = m_listSingleSearch.begin();
+            i != m_listSingleSearch.end();
+            ++i )
+      {
+         if ( i->GetTicket() == t )
+         {
+            if ( ((const ASMailFolder::ResultInt&)result).GetValue() )
+            {
+               const UIdArray *uidsMatching = result.GetSequence();
+               if ( !uidsMatching )
+               {
+                  FAIL_MSG( "searched ok but no search results??" );
+               }
+               else // have some messages to show
+               {
+                  // create the virtual folder to show the results if not done
+                  // yet
+                  if ( GetResultsVFolder() )
+                  {
+                     const MailFolder *mf = i->GetMailFolder();
+
+                     // and append all matching messages to the results folder
+                     HeaderInfoList_obj hil = mf->GetHeaders();
+                     if ( hil )
+                     {
+                        size_t nMatches = 0;
+
+                        size_t count = uidsMatching->GetCount();
+                        for ( size_t n = 0; n < count; n++ )
+                        {
+                           Message_obj msg = mf->GetMessage((*uidsMatching)[n]);
+                           if ( msg )
+                           {
+                              m_mfVirt->AppendMessage(*msg.Get());
+
+                              nMatches++;
+                           }
+                        }
+
+                        if ( nMatches )
+                        {
+                           m_nMatchingMessages += nMatches;
+                           m_nMatchingFolders++;
+                        }
+                     }
+                  }
+               }
+            }
+            //else: nothing found at all in this folder, nothing to do
+
+            // we don't care about this one any more
+            m_listSingleSearch.erase(i);
+
+            // it was our result
+            return true;
+         }
+      }
+
+      // not the result of this search at all
+      return false;
+   }
+
+   // if we're still waiting for the completion of [another] search, return
+   // false, otherwise return true
+   bool IsSearchCompleted() const { return m_listSingleSearch.empty(); }
+
+   // show the search results to the user
+   void ShowSearchResults(wxFrame *frame)
+   {
+      ASSERT_MSG( IsSearchCompleted(), "shouldn't be called yet!" );
+
+      if ( m_folderVirt && m_nMatchingMessages )
+      {
+         OpenFolderViewFrame(m_folderVirt, frame);
+
+         wxLogStatus(frame, _("Found %lu messages in %lu folders."),
+                     (unsigned long)m_nMatchingMessages,
+                     (unsigned long)m_nMatchingFolders);
+
+      }
+      else
+      {
+         wxLogWarning(_("No matching messages found."));
+      }
+   }
+
+private:
+   // returns, creating if necessary, the virtual folder in which we show the
+   // search results
+   //
+   // NB: the returned pointer should not be DecRef()'d by caller
+   MailFolder *GetResultsVFolder()
+   {
+      if ( !m_mfVirt )
+      {
+         // FIXME: we should use the profile of the common parent of the
+         //        folders being searched instead of the global settings here
+         //        or, at the very least, the profile of the only folder being
+         //        searched if we search in only one folder
+         m_folderVirt = MFolder::CreateTemp
+                        (
+                         _("Search results"),
+                         MF_VIRTUAL,
+                         mApplication->GetProfile()
+                        );
+
+         if ( m_folderVirt )
+         {
+            // FIXME: a hack to prevent the same search results folder from
+            //        being reused all the time
+            static unsigned int s_countSearch = 0;
+            m_folderVirt->SetPath(String::Format("(%u)", ++s_countSearch));
+
+            m_mfVirt = MailFolder::OpenFolder(m_folderVirt);
+            if ( !m_mfVirt )
+            {
+               m_folderVirt->DecRef();
+               m_folderVirt = NULL;
+            }
+         }
+      }
+
+      if ( !m_mfVirt )
+      {
+         ERRORMESSAGE((_("Failed to create the search results folder")));
+      }
+
+      return m_mfVirt;
+   }
+
+   // SingleSearchData: struct containing info about search in one folder
+   class SingleSearchData
+   {
+   public:
+      SingleSearchData(Ticket ticket, MailFolder *mf)
+      {
+         m_ticket = ticket;
+         m_mf = mf;
+      }
+
+      ~SingleSearchData() { m_mf->DecRef(); }
+
+      /// get the associated async operation ticket
+      Ticket GetTicket() const { return m_ticket; }
+
+      /// get the the mail folder we're searching in (NOT IncRef()'d)
+      MailFolder *GetMailFolder() const { return m_mf; }
+
+   private:
+      /// the associated async ticket
+      Ticket m_ticket;
+
+      /// the folder we're searching in
+      MailFolder *m_mf;
+
+      /// the UIDs found so far
+      UIdArray m_uidsFound;
+   };
+
+   // the list containing the individual search records for all folders we're
+   // searching in
+   M_LIST_OWN(SingleSearchDataList, SingleSearchData) m_listSingleSearch;
+
+   // the virtual folder we show the search results in and the associated
+   // MFolder object for it
+   MailFolder *m_mfVirt;
+   MFolder *m_folderVirt;
+
+   // the number of messages found so far
+   size_t m_nMatchingMessages;
+
+   // the number of folders containing the matching messages
+   size_t m_nMatchingFolders;
+};
+
+// ----------------------------------------------------------------------------
+// GlobalSearchData: contains data for all search operations in progress
+// ----------------------------------------------------------------------------
+
+class GlobalSearchData
+{
+public:
+   // ctor
+   GlobalSearchData(wxFrame *frame) { m_frame = frame; }
+
+   // create a record for a new search operation
+   AsyncSearchData *StartNewSearch()
+   {
+      AsyncSearchData *ssd = new AsyncSearchData;
+      m_listAsyncSearch.push_back(ssd);
+      return ssd;
+   }
+
+   // process the result of the async search operation
+   void HandleSearchResult(const ASMailFolder::Result& result)
+   {
+      // leave the real handling to the search this result concerns
+      for ( AsyncSearchDataList::iterator i = m_listAsyncSearch.begin();
+            i != m_listAsyncSearch.end();
+            ++i )
+      {
+         if ( i->HandleSearchResult(result) )
+         {
+            // was it the last search result for this search
+            if ( i->IsSearchCompleted() )
+            {
+               // yes, show the results ...
+               i->ShowSearchResults(m_frame);
+
+               // ... and delete the stale stale search record
+               m_listAsyncSearch.erase(i);
+            }
+
+            return;
+         }
+      }
+
+      FAIL_MSG( "got search result for a search we hadn't ever started?" );
+   }
+
+private:
+   M_LIST_OWN(AsyncSearchDataList, AsyncSearchData) m_listAsyncSearch;
+
+   wxFrame *m_frame;
+};
+
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
@@ -257,6 +536,8 @@ END_EVENT_TABLE()
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
            : wxMFrame(iname,parent)
 {
+   m_searchData = NULL;
+
    SetIcon(ICON("MainFrame"));
    SetTitle(_("Copyright (C) 1997-2002 The Mahogany Developers Team"));
 
@@ -308,7 +589,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    // update the menu to match the initial selection
    MFolder_obj folder = m_FolderTree->GetSelection();
-   if ( folder.IsOk() )
+   if ( folder )
    {
       UpdateFolderMenuUI(folder);
    }
@@ -567,16 +848,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             break;
 
          case WXMENU_FOLDER_SEARCH:
-            {
-               SearchCriterium crit;
-
-               Profile_obj profile(GetFolderProfile());
-               if ( ConfigureSearchMessages(&crit, profile, this) )
-               {
-                  //Ticket t = m_ASMailFolder->SearchMessages(&crit, this);
-                  //m_TicketList->Add(t);
-               }
-            }
+            DoFolderSearch();
             break;
 
          case WXMENU_FOLDER_FILTERS:
@@ -721,6 +993,114 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
    }
 }
 
+void wxMainFrame::DoFolderSearch()
+{
+   SearchCriterium crit;
+
+   Profile_obj profile(GetFolderProfile());
+   MFolder_obj folder = m_FolderTree->GetSelection();
+   if ( ConfigureSearchMessages(&crit, profile, folder, this) )
+   {
+      AsyncSearchData *searchData = NULL;
+
+      const wxArrayString& folderNames = crit.m_Folders;
+      size_t count = folderNames.GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         const String& name = folderNames[n];
+
+         MFolder_obj folder = name;
+         if ( !folder )
+         {
+            wxLogError(_("Can't search for messages in a "
+                         "non existent folder '%s'."),
+                       name.c_str());
+            continue;
+         }
+
+         if ( folder->CanOpen() )
+         {
+            ASMailFolder *asmf = ASMailFolder::OpenFolder(folder);
+            if ( !asmf )
+            {
+               wxLogError(_("Can't search for messages in the "
+                            "folder '%s'."),
+                          name.c_str());
+
+               continue;
+            }
+
+            // opened ok, search in it
+            Ticket t = asmf->SearchMessages(&crit, this);
+            if ( t != ILLEGAL_TICKET )
+            {
+               // create a new single search data on the fly
+               if ( !searchData )
+               {
+                  // create the search data on demand as well if necessary
+                  InitSearchData();
+
+                  searchData = m_searchData->StartNewSearch();
+               }
+
+               searchData->AddSearchFolder(asmf->GetMailFolder(), t);
+            }
+
+            asmf->DecRef();
+         }
+         //else: silently skip this one
+      }
+   }
+   //else: cancelled by user
+}
+
+void wxMainFrame::InitSearchData()
+{
+   if ( m_searchData )
+      return;
+
+   m_searchData = new GlobalSearchData(this);
+
+   m_cookieASMf = MEventManager::Register(*this, MEventId_ASFolderResult);
+}
+
+bool wxMainFrame::OnMEvent(MEventData& ev)
+{
+   if ( ev.GetId() == MEventId_ASFolderResult )
+   {
+      const MEventASFolderResultData& event = (MEventASFolderResultData &)ev;
+
+      ASMailFolder::Result *result = event.GetResult();
+      if ( result )
+      {
+         if ( result->GetUserData() == this )
+         {
+            switch ( result->GetOperation() )
+            {
+               case ASMailFolder::Op_SearchMessages:
+                  if ( m_searchData )
+                  {
+                     m_searchData->HandleSearchResult(*result);
+                  }
+                  else
+                  {
+                     FAIL_MSG( "search in progress but no search data?" );
+                  }
+                  break;
+
+               default:
+                  FAIL_MSG( "unexpected ASMailFolder::Result in wxMainFrame" );
+            }
+         }
+
+         result->DecRef();
+      }
+   }
+
+   // continue evaluating this event
+   return true;
+}
+
 wxMainFrame::~wxMainFrame()
 {
    // tell the app there is no main frame any more and do it as the very first
@@ -731,6 +1111,13 @@ wxMainFrame::~wxMainFrame()
 
    delete m_FolderView;
    delete m_FolderTree;
+
+   if ( m_searchData )
+   {
+      delete m_searchData;
+
+      MEventManager::Deregister(m_cookieASMf);
+   }
 }
 
 void

@@ -3288,7 +3288,7 @@ MailFolderCC::GetMsgnoFromUID(UIdType uid) const
 }
 
 Message *
-MailFolderCC::GetMessage(unsigned long uid)
+MailFolderCC::GetMessage(unsigned long uid) const
 {
    CHECK_DEAD_RC("Cannot access closed folder '%s'.", NULL);
 
@@ -3301,7 +3301,7 @@ MailFolderCC::GetMessage(unsigned long uid)
    HeaderInfo *hi = headers->GetItemByIndex((size_t)idx);
    CHECK( hi, NULL, "invalid UID in GetMessage" );
 
-   return MessageCC::Create(this, *hi);
+   return MessageCC::Create((MailFolderCC *)this, *hi); // const_cast
 }
 
 // ----------------------------------------------------------------------------

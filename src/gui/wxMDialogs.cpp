@@ -262,7 +262,7 @@ END_EVENT_TABLE()
 class MFolderDialog : public wxManuallyLaidOutDialog
 {
 public:
-   MFolderDialog(wxWindow *parent, MFolder *folder, bool open = false);
+   MFolderDialog(wxWindow *parent, MFolder *folder, int flags);
    virtual ~MFolderDialog();
 
    // accessors
@@ -287,8 +287,8 @@ private:
    // has the user chosen a folder?
    bool m_userChoseFolder;
 
-   // are we going to open this folder or save to it?
-   bool m_selectForOpening;
+   // the combination of MDlg_Folder_XXX flags
+   int m_flags;
 
    DECLARE_EVENT_TABLE()
 };
@@ -1397,12 +1397,12 @@ MDialog_FolderOpen(const wxWindow *parent)
 // folder dialog stuff
 // ----------------------------------------------------------------------------
 
-MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder, bool open)
+MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder, int flags)
              : wxManuallyLaidOutDialog(parent,
                                        _("Choose folder"),
                                        "FolderSelDlg")
 {
-   m_selectForOpening = open;
+   m_flags = flags;
    m_userChoseFolder = false;
 
    m_folder = folder;
@@ -1418,13 +1418,16 @@ MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder, bool open)
    wxWindow *btnOk = FindWindow(wxID_OK);
 
    // File button
-   wxButton *btnFile = new wxButton(this, wxID_OPEN, _("&File..."));
-   c = new wxLayoutConstraints;
-   c->height.SameAs(btnOk, wxHeight);
-   c->width.SameAs(btnOk, wxWidth);
-   c->right.SameAs(btnOk, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(btnOk, wxBottom);
-   btnFile->SetConstraints(c);
+   if ( !(m_flags & MDlg_Folder_NoFiles) )
+   {
+      wxButton *btnFile = new wxButton(this, wxID_OPEN, _("&File..."));
+      c = new wxLayoutConstraints;
+      c->height.SameAs(btnOk, wxHeight);
+      c->width.SameAs(btnOk, wxWidth);
+      c->right.SameAs(btnOk, wxLeft, 2*LAYOUT_X_MARGIN);
+      c->bottom.SameAs(btnOk, wxBottom);
+      btnFile->SetConstraints(c);
+   }
 
    // Help button
    wxButton *btnHelp = new wxButton(this, wxID_HELP, _("Help"));
@@ -1469,7 +1472,7 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
          m_FileName = wxPFileSelector("FolderDialogFile",
                                       _("Mahogany: Please choose a folder file"),
                                       NULL, NULL, NULL, NULL,
-                                      m_selectForOpening
+                                      m_flags & MDlg_Folder_Open
                                        ? wxOPEN | wxFILE_MUST_EXIST
                                        : wxSAVE,
                                       this);
@@ -1557,10 +1560,10 @@ bool MFolderDialog::TransferDataFromWindow()
 }
 
 MFolder *
-MDialog_FolderChoose(const wxWindow *parent, MFolder *folder, bool open)
+MDialog_FolderChoose(const wxWindow *parent, MFolder *folder, int flags)
 {
    // TODO store the last folder in config
-   MFolderDialog dlg((wxWindow *)parent, folder, open);
+   MFolderDialog dlg((wxWindow *)parent, folder, flags);
 
    return dlg.ShowModal() == wxID_OK ? dlg.GetFolder() : NULL;
 }
