@@ -82,16 +82,18 @@ public:
    /// Read an integer value.
    virtual long readEntry(String const & key, long defaultvalue) const = 0;
    /// Read an integer value.
-   virtual int readEntry(String const & key, int defaultvalue) const
-      { return (int) readEntry(key, (long)defaultvalue); }
+   int readEntry(String const & key, int defaultvalue) const
+      { return (int)readEntry(key, (long)defaultvalue); }
+   /// Read a bool value.
+   bool readEntry(const String & key, bool defaultvalue) const
+      { return readEntry(key, (long)defaultvalue) != 0; }
+
    /// Write back the character value.
    virtual bool writeEntry(String const & key, String const & Value) = 0;
    /// Write back the int value.
    virtual bool writeEntry(String const & key, long Value) = 0;
-   /// Write back the int value.
-   virtual bool writeEntry(String const & key, int Value)
-      { return writeEntry(key, (long)Value); }
    //@}
+
    /// set the path within the profile,just like cd
    virtual void   SetPath(String const & path) = 0;
    /// query the current path

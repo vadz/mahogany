@@ -131,17 +131,10 @@ public:
                     const String & defaultvalue = (const char *)NULL) const;
    /// Read an integer value.
    long readEntry(const String & key, long defaultvalue) const;
-   /// Read an integer value.
-   virtual int readEntry(const String & key, int defaultvalue) const
-      { return (int) readEntry(key, (long)defaultvalue); }
-   /// Read a bool value.
-   bool readEntry(const String & key, bool defaultvalue) const;
    /// Write back the character value.
    bool writeEntry(const String & key, const String & Value);
    /// Write back the int value.
    bool writeEntry(const String & key, long Value);
-   /// Write back the bool value.
-   bool writeEntry(const String & key, bool Value);
    //@}
 
    void SetPath(const String & path);
@@ -214,17 +207,10 @@ public:
                     const String & defaultvalue = (const char *) NULL) const;
    /// Read an integer value.
    long readEntry(const String & key, long defaultvalue) const;
-   /// Read an integer value.
-   virtual int readEntry(const String & key, int defaultvalue) const
-      { return (int) readEntry(key, (long)defaultvalue); }
-   /// Read a bool value.
-   bool readEntry(const String & key, bool defaultvalue) const;
    /// Write back the character value.
    bool writeEntry(const String & key, const String & Value);
    /// Write back the int value.
    bool writeEntry(const String & key, long Value);
-   /// Write back the bool value.
-   bool writeEntry(const String & key, bool Value);
    //@}
 
    void SetPath(const String & path);
@@ -425,15 +411,19 @@ wxConfigProfile::readEntry(const String & key, long def) const
 bool
 wxConfigProfile::writeEntry(const String & key, const String & value)
 {
-   MOcheck(); ASSERT(m_config);
-   return m_config->Write(key,value);
+   MOcheck();
+   CHECK( m_config, false, "No config object in wxConfigProfile" );
+
+   return m_config->Write(key, value);
 }
 
 bool
 wxConfigProfile::writeEntry(const String & key, long value)
 {
-   MOcheck(); ASSERT(m_config);
-   return m_config->Write(key,value);
+   MOcheck();
+   CHECK( m_config, false, "No config object in wxConfigProfile" );
+
+   return m_config->Write(key, value);
 }
 
 // ----------------------------------------------------------------------------
@@ -554,7 +544,7 @@ public:
 
    // assignment
    void SetValue(const String& str) { m_isString = true; m_strValue = str; }
-   void SetValue(long l) { m_isString = false; m_lValue = l; }
+   void SetValue(int l) { m_isString = false; m_lValue = l; }
 
    // accessors
    bool IsString() const { return m_isString; }
@@ -653,7 +643,7 @@ readEntryHelper(wxConfigBase *config,
             if( defaultValue.IsString() )
                config->Write(key, defaultValue.GetString());
             else
-               config->Write(key, defaultValue.GetNumber());
+               config->Write(key, (long)defaultValue.GetNumber());
          }else
          {
             //ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
@@ -732,13 +722,6 @@ Profile::DeleteGroup(const String & path)
 }
 
 bool
-Profile::readEntry(const String & key, bool defaultvalue) const
-{
-   MOcheck();
-   return readEntry(key, (long) defaultvalue) != 0;
-}
-
-bool
 Profile::writeEntry(const String & key, long Value)
 {
    MOcheck();
@@ -770,12 +753,6 @@ Profile::writeEntry(const String & key, const String & value)
       return mApplication->GetProfile()->writeEntry(key, value);
    }
    return false; // keep compiler happy
-}
-
-bool
-Profile::writeEntry(const String & key, bool Value)
-{
-   return writeEntry(key, (long) Value);
 }
 
 #ifdef DEBUG

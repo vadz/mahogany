@@ -461,7 +461,7 @@
 /// Name from where to read XFace
 #define   MP_COMPOSE_XFACE_FILE_D   "$HOME/.xface"
 /// the folder type for a mailbox
-#define   MP_FOLDER_TYPE_D         MFolder::File
+#define   MP_FOLDER_TYPE_D         (int)(MFolder::File)
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// comment
@@ -483,13 +483,13 @@
 // show graphics inline
 #define   MP_INLINE_GFX_D       1
 /// which font to use
-#define   MP_FTEXT_FONT_D         wxTELETYPE
+#define   MP_FTEXT_FONT_D         (int)wxTELETYPE
 /// which font size
 #define   MP_FTEXT_SIZE_D         14
 /// which font style
-#define   MP_FTEXT_STYLE_D      wxNORMAL
+#define   MP_FTEXT_STYLE_D      (int)wxNORMAL
 /// which font weight
-#define   MP_FTEXT_WEIGHT_D     wxNORMAL
+#define   MP_FTEXT_WEIGHT_D     (int)wxNORMAL
 // which foreground colour for the font
 #define   MP_FTEXT_FGCOLOUR_D      "black"
 // which background colour for the font
