@@ -1552,7 +1552,8 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
    if(rc == 0) // no success yet, almost "else" :-)
    {
       String flags = GetImapFlags(msg.GetStatus());
-      String date = msg.Date();
+      String date;
+      msg.HeaderLine("Date", date);
       // different folders, so we actually copy the message around:
       String tmp;
       msg.WriteToString(tmp);
