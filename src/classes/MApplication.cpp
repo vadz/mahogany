@@ -199,6 +199,7 @@ MAppBase::OnStartup()
    mApplication = this;
 
 #ifdef OS_UNIX
+#if 0
    // First, check our user ID: mahogany does not like being run as root.
    if(geteuid() == 0)
    {
@@ -207,6 +208,7 @@ MAppBase::OnStartup()
                    "as an ordinary user and try again."));
       return false;
    }
+#endif
 #endif // Unix
 
    // initialise the profile(s)

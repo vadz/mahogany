@@ -951,7 +951,12 @@ MailFolderCC::Open(void)
       if ( !exists
            && (GetType() == MF_FILE || GetType() == MF_MH))
       {
-         mail_create(NIL, (char *)m_MailboxPath.c_str());
+         // This little hack makes it root (uid 0) safe:
+         String tmp;
+         tmp = (GetType() == MF_FILE) ? "#driver.mbx/" : "#driver.mh/";
+         tmp += m_MailboxPath;
+         mail_create(NIL, (char *)tmp.c_str());
+         //mail_create(NIL, (char *)m_MailboxPath.c_str());
          alreadyCreated = TRUE;
       }
 
@@ -2004,7 +2009,10 @@ MailFolderCC::CClientInit(void)
 #include <linkage.c>
 
    // this triggers c-client initialisation via env_init()
-   (void *) myusername();
+#ifdef OS_UNIX
+   if(geteuid() != 0) // running as root, skip init:
+#endif
+      (void *) myusername();
 
    // 1 try is enough, the default (3) is too slow
    mail_parameters(NULL, SET_MAXLOGINTRIALS, (void *)1);
