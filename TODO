@@ -114,40 +114,16 @@ for release:
 ---> done, after merging of profile code, add support for building
      list of these folders and periodically checking them.
 
-<<<<<<< TODO
-<<<<<<< TODO
-TODO:
-- support for local news spool
-  (Waiting for VZ to support MF_NEWS) then implement /service=news
-  DONE?
-
-TESTING!!
-=======
->>>>>>> 1.178
-
-<<<<<<< TODO
 - do we really need to scan /var/lib/news/active?
 - more configurability for news
-=======
 - do wxImage changes affect list of available handlers, etc?
 - printer settings seem to have no effect
-=======
->>>>>>> 1.181
-- do we really need to scan /var/lib/news/active?
->>>>>>> 1.178
 
-<<<<<<< TODO
-<<<<<<< TODO
-- gtk 1.2 support
-=======
-=======
 doc: add note about news active file
->>>>>>> 1.181
 
 after release:
 
 - more configurability for news
->>>>>>> 1.178
 - add auto collection to compose view
 - add a popup dialog to edit message headers in composeview
 - some html mail import/filtering of tags (easy, quick and dirty)
