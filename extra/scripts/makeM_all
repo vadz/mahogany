@@ -123,9 +123,6 @@ export PATH
 CVS=cvs
 export CVS
 
-CVS_RSH="ssh"
-export CVS_RSH
-
 SCP=scp
 export scp
 
@@ -143,22 +140,19 @@ export DESTDIR
 
 USESTABLE=no
 
-if [ `domainname` = "compile.sourceforge.net" ]
-then
-	CVSSERVER="cvs1"
-	FTPSERVER="shell1"
-else
-	CVSSERVER="cvs.mahogany.sourceforge.net"
-	FTPSERVER="mahogany.sourceforge.net"
-fi
+FTPLOCATION="ballueder@mahogany.sourceforge.net:FTP/daily/"
+LIBMALLOCATION="ballueder@mahogany.sourceforge.net:FTP/Libraries/libmal.tar.gz"
+WWWDOCLOCATION="ballueder@mahogany.sourceforge.net:WWW/doc/"
+WXCVSROOT=":pserver:KB@cvs.wxwindows.org:/var/cvs/wxWindows"
+MCVSROOT=":pserver:anoncvs@cvs.mahogany.sourceforge.net:/cvsroot/mahogany"
 
-FTPLOCATION="ballueder@${FTPSERVER}:FTP/daily/"
-LIBMALLOCATION="ballueder@${FTPSERVER}:FTP/Libraries/libmal.tar.gz"
-WWWDOCLOCATION="ballueder@${FTPSERVER}:WWW/doc/"
+#WWWDOCLOCATION="ballueder@shell1.sourceforge.net:/home/groups/mahogany/htdocs/doc"
+#FTPLOCATION="karsten@wxwindows.org:Mftp/daily/"
+#LIBMALLOCATION="karsten@wxwindows.org:Mftp/Libraries/libmal.tar.gz"
+#WWWDOCLOCATION="karsten@wxwindows.org:Mwww/doc/"
 #WXCVSROOT=":pserver:KB@cvs.wxwindows.org:/var/cvs/wxWindows"
-#MCVSROOT="ballueder@cvs.mahogany.sourceforge.net:/cvsroot/mahogany"
-WXCVSROOT=":pserver:anoncvs@cvs.wxwindows.org:/var/cvs/wxWindows"
-MCVSROOT=":pserver:anoncvs@${CVSSERVER}:/cvsroot/mahogany"
+#MCVSROOT=":pserver:KB@mcvs.dhs.org:/var/cvs/Mahogany"
+#WXCVSROOT=":pserver:KB@wxcvs.dhs.org:/home/karsten/CVSSERVER/wxcvs"
 
 # Need to hardwire this as we run it as root for rpm/deb generation:
 #if [ "$UID" = 0 ]
@@ -180,7 +174,7 @@ MTAG="-A"
 WXNAME=wxGTK
 WXVERSION=2.2
 
-DOCHOST=Matterhorn
+DOCHOST=matterhorn
 
 # This should be set to "yes" by the Mahogany compilation if it
 # succeeds. Used in the debian compilation only for now.
@@ -229,42 +223,6 @@ MCONFOPT="--with-modules=static"
 ## Host/OS specific setups
 ##
 #################################################################################
-if [ `hostname` = caisteal -o `hostname` = dearg -o `hostname` = nevis ]
-then
-  OSTYPE=SunOS
-  OSTYPE_ADDON="-sparc"
-fi
-
-if [ "$OSTYPE" = "SunOS" ]
-then
-  LD_LIBRARY_PATH=$HOME/arch/SunOS/lib:/opt/lib:/usr/openwin/lib:/usr/local/X11R5/lib:/usr/lib:/usr/ucblib:/opt/Fsfgcc/lib:/usr/dt/lib:/opt/GBxpm/lib:$HOME/bin
-  LD_LIBRARY_PATH=/opt/lib:/usr/openwin/lib:/usr/local/X11R5/lib:/usr/lib:/usr/ucblib:/opt/Fsfgcc/lib:/usr/dt/lib:/opt/GBxpm/lib:$HOME/bin:$LD_LIBRARY_PATH:/usr/local/lib
-  CC=/opt/FSFgcc-2.8.0/bin/gcc
-  CXX=/opt/FSFgcc-2.8.0/bin/c++
-  LDFLAGS="$LDFLAGS -L/opt/FSFstdc++/lib -L/opt/lib -L/home/karsten/arch/SunOS/lib"
-  CPPFLAGS="$CPPFLAGS -I/home/karsten/arch/SunOS/include"
-  CPPFLAGS="-I/opt/include -I/opt/FSFstdc++/include/g++ -I/home/karsten/arch/SunOS/include -I$HOME/opt/include" # -I/scratch/karsten/Python/include/python1.5"
-  MAKE="gmake -s"
-  PATH=/usr/ucb:/sbin:/usr/openwin/bin:/usr/bin:/usr/sbin:/opt/bin:/opt/SUNWspro/bin:/opt/hostsA:/usr/ccs/bin:$PATH:/usr/local/bin
-  PATH=$HOME/arch/`uname`/bin:/opt/bin:$PATH
-  BISON_SIMPLE=$HOME/arch/SunOS/lib/bison.simple 
-  BISON_HAIRY=$HOME/arch/SunOS/lib/bison.hairy 
-  export MAKE CPPFLAGS LDFLAGS CXX CC LD_LIBRARY_PATH PATH BISON_HAIRY BISON_SIMPLE
-  BUILDDIR=/home/karsten/tmp
-
-  WXPREFIX=/home/karsten/opt
-  MPREFIX=/opt
-fi
-
-if [ `hostname` = dearg ]
-then
-  OSTYPE=SunOS
-  OSTYPE_ADDON="-sparc"
-  CC=gcc
-  CXX=c++
-  SCP=/usr/local/bin/ssh1/scp
-  BUILDDIR=/home/karsten/tmp
-fi
 
 if [ `hostname` = phyw164 ]
 then
@@ -307,30 +265,36 @@ fi
 if [ "x$MAKE" = x ] ; then MAKE=make; fi
 
 RCNAME=.makeMrc    
-# obtain central options file from ftp server
-echo "Retrieving central options file"
-$SCP $FTPLOCATION/buildoptions /tmp/makeM_deb.$$
-. /tmp/makeM_deb.$$
-rm -f /tmp/makeM_deb.$$ 
 
 # obtain local config file:
 if [ -r $HOME/$RCNAME ]
 then 
   echo "Reading $HOME/$RCNAME"
  . $HOME/$RCNAME 
-else
-  echo "$HOME/$RCNAME not found"
 fi
 
+
 # obtain 2nd local config file:
+HOSTNAME=`hostname`
+if [ -r $HOME/$RCNAME.$OSTYPE ]
+then
+  echo "Reading $HOME/$RCNAME.$OSTYPE"
+  . $HOME/$RCNAME.$OSTYPE
+fi    
+
+# obtain 3rd local config file:
 HOSTNAME=`hostname`
 if [ -r $HOME/$RCNAME.$HOSTNAME ]
 then
   echo "Reading $HOME/$RCNAME.$HOSTNAME"
   . $HOME/$RCNAME.$HOSTNAME
-else
-  echo "$HOME/$RCNAME.$HOSTNAME not found"
 fi    
+
+# obtain central options file from ftp server
+echo "Retrieving central options file"
+$SCP $FTPLOCATION/buildoptions /tmp/makeM_deb.$$
+. /tmp/makeM_deb.$$
+rm -f /tmp/makeM_deb.$$ 
 
 if [ ! -d $BUILDDIR ] ; then  mkdir $BUILDDIR ; fi
 if [ ! -d $WXPREFIX ] ; then mkdir $WXPREFIX ; fi
@@ -411,6 +375,8 @@ echo >cvs.log
 OS=`uname -s`-`uname -m`
 export OS
 HOST=`hostname`.`domainname`
+
+OSTYPE=`uname`
 
 if [ $DOWXWIN = yes ]
 then
