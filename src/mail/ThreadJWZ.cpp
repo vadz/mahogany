@@ -51,6 +51,9 @@
 #endif // TEST_SUBJECT_NORMALIZE/!TEST_SUBJECT_NORMALIZE
 */
 
+// consider that no thread can be more than this level deep
+#define MAX_THREAD_DEPTH (100000)
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -413,7 +416,7 @@ Threadable::~Threadable()
 
 void Threadable::destroy() {
    static size_t depth = 0;
-   CHECK_RET(depth < 1000, "Deep recursion in Threadable::destroy()");
+   CHECK_RET(depth < MAX_THREAD_DEPTH, "Deep recursion in Threadable::destroy()");
    if (m_child != 0)
    {
       depth++;
@@ -771,7 +774,7 @@ size_t ThreadContainer::getIndex() const
 #else
    const size_t foolish = 1000000000;
    static size_t depth = 0;
-   CHECK(depth < 1000, foolish,
+   CHECK(depth < MAX_THREAD_DEPTH, foolish,
       "Deep recursion in ThreadContainer::getIndex()");
    Threadable *th = getThreadable();
    if (th != 0)
@@ -837,7 +840,7 @@ void ThreadContainer::addAsChild(ThreadContainer *c)
 bool ThreadContainer::findChild(ThreadContainer *target, bool withNexts) const
 {
    static size_t depth = 0;
-   CHECK(depth < 1000, true, "Deep recursion in ThreadContainer::findChild()");
+   CHECK(depth < MAX_THREAD_DEPTH, true, "Deep recursion in ThreadContainer::findChild()");
    if (m_child == target)
       return true;
    if (withNexts && m_next == target)
@@ -864,7 +867,7 @@ bool ThreadContainer::findChild(ThreadContainer *target, bool withNexts) const
 void ThreadContainer::flush(size_t &threadedIndex, size_t indent, bool indentIfDummyNode)
 {
    static size_t depth = 0;
-   CHECK_RET(depth < 1000, "Deep recursion in ThreadContainer::flush()");
+   CHECK_RET(depth < MAX_THREAD_DEPTH, "Deep recursion in ThreadContainer::flush()");
    CHECK_RET(m_threadable != 0, "No threadable in ThreadContainer::flush()");
    m_threadable->setChild(m_child == 0 ? 0 : m_child->getThreadable());
    if (!m_threadable->isDummy())
@@ -894,7 +897,7 @@ void ThreadContainer::flush(size_t &threadedIndex, size_t indent, bool indentIfD
 void ThreadContainer::destroy()
 {
    static size_t depth = 0;
-   CHECK_RET(depth < 1000, "Deep recursion in ThreadContainer::destroy()");
+   CHECK_RET(depth < MAX_THREAD_DEPTH, "Deep recursion in ThreadContainer::destroy()");
    if (m_child != 0)
    {
       depth++;
@@ -1682,7 +1685,7 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
                                  bool recursive)
 {
    static size_t depth = 0;
-   VERIFY(depth < 1000, "Deep recursion in Threader::collectSubjects()");
+   ASSERT_MSG(depth < MAX_THREAD_DEPTH, "Deep recursion in Threader::collectSubjects()");
    size_t count = 0;
    ThreadContainer *c;
    for (c = parent->getChild(); c != 0; c = c->getNext())
@@ -1761,7 +1764,7 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
 void Threader::breakThreads(ThreadContainer* c)
 {
    static size_t depth = 0;
-   CHECK_RET(depth < 1000, "Deep recursion in Threader::breakThreads()");
+   CHECK_RET(depth < MAX_THREAD_DEPTH, "Deep recursion in Threader::breakThreads()");
 
    // Dummies should have been built
    CHECK_RET((c == m_root) || (c->getThreadable() != NULL),
