@@ -37,6 +37,31 @@
 #include "Sequence.h"
 
 // ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+// FindHeaderHelper just calls SearchByFlag() and deletes the results returned
+// by it automatically
+class FindHeaderHelper
+{
+public:
+   FindHeaderHelper(MailFolder *mf, MailFolder::MessageStatus flag, bool set)
+   {
+      m_msgnosFound = mf->SearchByFlag(flag, set);
+   }
+
+   const MsgnoArray *GetResults() const { return m_msgnosFound; }
+
+   ~FindHeaderHelper()
+   {
+      delete m_msgnosFound;
+   }
+
+private:
+   MsgnoArray *m_msgnosFound;
+};
+
+// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -294,42 +319,37 @@ size_t HeaderInfoListImpl::GetIndentation(size_t n) const
 // HeaderInfoListImpl searching
 // ----------------------------------------------------------------------------
 
-// FIXME: all this is totally bogus when we do sorting/threading
-
-class FindHeaderHelper
+// return the first position between from and to at which an element from the
+// array appears
+size_t
+HeaderInfoListImpl::FindFirstInRange(const MsgnoArray& array,
+                                     size_t posFrom, size_t posTo) const
 {
-public:
-   FindHeaderHelper(MailFolder *mf, MailFolder::MessageStatus flag, bool set)
-   {
-      m_msgnosFound = mf->SearchByFlag(flag, set);
-   }
+   size_t posFirst = UID_ILLEGAL;
 
-   const MsgnoArray *GetResults() const { return m_msgnosFound; }
-
-   ~FindHeaderHelper()
-   {
-      delete m_msgnosFound;
-   }
-
-private:
-   MsgnoArray *m_msgnosFound;
-};
-
-// return the first array element in range [from, to] inclusive or UID_ILLEGAL
-static MsgnoType
-FindElementInRange(const MsgnoArray& array, MsgnoType from, MsgnoType to)
-{
    size_t count = array.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      MsgnoType msgno = array[n];
-      if ( msgno >= from && msgno <= to )
+      size_t pos = GetPosFromIdx(array[n] - 1);
+      if ( pos >= posFrom && pos <= posTo && pos < posFirst )
       {
-         return msgno;
+         posFirst = pos;
+
+         // optimization: if we don't sort messages at all, the first msgno we
+         // find will be the first one by position as well (as position is
+         // equal to msgno and array is supposed to be sorted)
+         if ( !IsSorting() )
+            break;
+      }
+
+      if ( posFirst == posFrom )
+      {
+         // no need to search further, we can't find anything better
+         break;
       }
    }
 
-   return MSGNO_ILLEGAL;
+   return posFirst;
 }
 
 size_t
@@ -343,20 +363,13 @@ HeaderInfoListImpl::FindHeaderByFlag(MailFolder::MessageStatus flag,
    if ( !results )
       return UID_ILLEGAL;
 
-   MsgnoType msgno = FindElementInRange
-                     (
-                        *results,
-                        GetIdxFromPos(posFrom) + 1, // +1 to make it msgno
-                        m_count
-                     );
-
-   return msgno ? GetPosFromIdx(GetIdxFromMsgno(msgno)) : (size_t)-1;
+   return FindFirstInRange(*results, posFrom + 1, m_count);
 }
 
 size_t
 HeaderInfoListImpl::FindHeaderByFlagWrap(MailFolder::MessageStatus flag,
                                          bool set,
-                                         long indexFrom)
+                                         long posFrom)
 {
    FindHeaderHelper helper(m_mf, flag, set);
 
@@ -364,12 +377,11 @@ HeaderInfoListImpl::FindHeaderByFlagWrap(MailFolder::MessageStatus flag,
    if ( !results )
       return INDEX_ILLEGAL;
 
-   // +1 to transform indexFrom in msgno
-   MsgnoType msgno = FindElementInRange(*results, indexFrom + 1, m_count);
-   if ( msgno == MSGNO_ILLEGAL )
-      msgno = FindElementInRange(*results, 0, indexFrom);
+   size_t pos = FindFirstInRange(*results, posFrom + 1, m_count);
+   if ( pos == UID_ILLEGAL )
+      pos = FindFirstInRange(*results, 0, posFrom);
 
-   return GetIdxFromMsgno(msgno);
+   return pos;
 }
 
 MsgnoArray *
@@ -455,7 +467,7 @@ void HeaderInfoListImpl::CachePositions(const Sequence& seq)
 {
    // transform sequence of positions into sequence of msgnos
    Sequence seqMsgnos;
-   if ( m_tableMsgno )
+   if ( IsSorting() )
    {
       // a contiguous range of positions doesn't correspond in general to a
       // contiguous set of msgnos so the best we can do (or at least the best

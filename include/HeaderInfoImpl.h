@@ -104,11 +104,21 @@ private:
    /// is the given entry valid (i.e. already cached)?
    inline bool IsHeaderValid(size_t n) const;
 
+   /// do we sort messages at all?
+   bool IsSorting() const { return m_tableMsgno != NULL; }
+
    /// expand m_headers array so that the given index is valid
    void ExpandToMakeIndexValid(size_t n);
 
    /// cache the sequence of msgnos
    void Cache(const Sequence& seqmMsgnos);
+
+   /**
+      Find first position in the given range containing a msgno from array
+      @return position or UID_ILLEGAL
+   */
+   size_t FindFirstInRange(const MsgnoArray& array,
+                           size_t posFrom, size_t posTo) const;
 
    /// the folder we contain the listinf for
    MailFolder *m_mf;
