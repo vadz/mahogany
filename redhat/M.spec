@@ -87,7 +87,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 
-echo -e "# added by rpm installation\nGlobalDir=%prefix" >> %prefix/share/Mahogany/M.conf
+echo -e "# added by rpm installation\nGlobalDir=%prefix" >> %prefix/share/mahogany/M.conf
 
 %postun
 

@@ -614,10 +614,10 @@ then
   then
     echo "Building and packaging documentation..."
     ( cd $BUILDDIR/$NAME-$VERSION && $MAKE doc && $MAKE install DESTDIR=$DESTDIR ) >/dev/null
-    echo "Copying docs in $DESTDIR/share/Mahogany/doc to WWW..."
-    ( cd $DESTDIR/share/Mahogany/doc &&  $SCP -r * $WWWDOCLOCATION )
-    echo "Packing docs in $DESTDIR/share/Mahogany/doc..."
-    (cd $DESTDIR/share/Mahogany/doc && \
+    echo "Copying docs in $DESTDIR/share/mahogany/doc to WWW..."
+    ( cd $DESTDIR/share/mahogany/doc &&  $SCP -r * $WWWDOCLOCATION )
+    echo "Packing docs in $DESTDIR/share/mahogany/doc..."
+    (cd $DESTDIR/share/mahogany/doc && \
 	tar czvf /tmp/Mdocs.tar.gz * && $SCP /tmp/Mdocs.tar.gz $FTPLOCATION)
     rm -f /tmp/Mdocs.tar.gz
   else

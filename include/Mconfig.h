@@ -149,7 +149,7 @@
 
 /// basic M installation directory
 #ifdef OS_UNIX
-#   define   M_BASEDIR M_PREFIX _T("/share/Mahogany")
+#   define   M_BASEDIR M_PREFIX _T("/share/mahogany")
 #else
 #   define   M_BASEDIR M_PREFIX _T("\\Mahogany")
 #endif

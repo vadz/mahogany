@@ -1027,7 +1027,7 @@ file to some other location or even delete it and restart Mahogany
 \subsubsection{System wide configuration file}
 
 \emph{Mahogany} can be pre-configured on a system wide basis by supplying
-a \texttt{M.conf} file in the installation directory (e.g. \texttt{/usr/share/Mahogany/M.conf}).
+a \texttt{M.conf} file in the installation directory (e.g. \texttt{/usr/share/mahogany/M.conf}).
 The syntax for this configuration file is identical to the user's
 configuration file, so you can just copy a user's file to this location
 and edit it by hand. Useful settings for a system wide default are
