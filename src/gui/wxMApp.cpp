@@ -933,13 +933,13 @@ wxMApp::OnInit()
             {
                msg.Printf("Locale '%s' couldn't be set, do you want to "
                           "retry setting it the next time?",
-                          locale);
+                          locale.c_str());
             }
             else // failedToLoadMsgs
             {
                msg.Printf("Impossible to load message catalog(s) for the "
                           "locale '%s', do you want to retry next time?",
-                          locale);
+                          locale.c_str());
             }
 
             if ( wxMessageBox(msg, "Error",
