@@ -14,10 +14,12 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if EXPERIMENTAL
-
 // M
 #include "Mpch.h"
+
+#if EXPERIMENTAL
+
+#ifdef USE_PISOCK
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
@@ -414,5 +416,7 @@ String PalmDataProvider::DebugDump() const
 }
 
 #endif // DEBUG
+
+#endif // USE_PISOCK
 
 #endif // EXPERIMENTAL

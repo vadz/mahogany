@@ -16,6 +16,8 @@
 // M
 #include "Mpch.h"
 
+#ifdef USE_PISOCK
+
 #ifndef  USE_PCH
 #  include "Mcommon.h"
 #  include "guidef.h"
@@ -203,7 +205,6 @@ public:
   DECLARE_ADB_PROVIDER(PalmDataProvider);
 };
 
-
-
+#endif // USE_PISOCK
 
 #endif  //_PROVPALM_H
