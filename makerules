@@ -17,7 +17,7 @@ M_FLAGS_s := -S
 
 # common initial flags
 define M_COMPILE_CPP
-$(M_FLAGS$(subst .,_,$(suffix $@))) -fPIC $(CPPFLAGS) \
+$(M_FLAGS$(subst .,_,$(suffix $@))) $(CPPFLAGS) \
 $(CPPFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) \
 $(CPPFLAGS_$(subst .,_,$(subst /,_,$@)))
 endef
