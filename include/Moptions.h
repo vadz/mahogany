@@ -112,6 +112,7 @@ extern const MOption MP_PREVIEW_ON_SELECT;
 extern const MOption MP_AUTOSHOW_SELECT;
 extern const MOption MP_CONVERTPROGRAM;
 extern const MOption MP_MODULES;
+extern const MOption MP_MODULES_DONT_LOAD;
 extern const MOption MP_COMPOSETEMPLATEPATH_USER;
 extern const MOption MP_COMPOSETEMPLATEPATH_GLOBAL;
 
@@ -626,6 +627,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_CONVERTPROGRAM_NAME      _T("ImageConverter")
 /// list of modules to load at startup
 #define MP_MODULES_NAME               _T("Modules")
+/// list of modules to not load
+#define MP_MODULES_DONT_LOAD_NAME               _T("ModulesIgnore")
 /// the user path for template files used for message composition
 #define MP_COMPOSETEMPLATEPATH_USER_NAME   _T("CompooseTemplatePathUser")
 /// the global path for template files used for message composition
@@ -1470,6 +1473,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_CONVERTPROGRAM_DEFVAL      _T("convert %s -compress None %s")
 /// list of modules to load at startup
 #define MP_MODULES_DEFVAL   _T("Filters:Migrate")
+/// list of modules to not load
+#define MP_MODULES_DONT_LOAD_DEFVAL _T("")
 /// the user path for template files used for message composition
 #define MP_COMPOSETEMPLATEPATH_USER_DEFVAL   wxEmptyString
 /// the global path for template files used for message composition
