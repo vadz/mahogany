@@ -160,7 +160,7 @@ public:
    virtual void Suspend(void)
       {
          PCHECK();
-
+         ASSERT(! m_Suspended); // for debugging, causes no problems though
          // as we don't have IsSuspended(), it's not an error to call Suspend()
          // twice
          m_Suspended = true;
