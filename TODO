@@ -98,6 +98,12 @@ BUG:- saving message from messageview (called from embedded rfc822) saves
 - add progress indicator to image loading
 - add ext editor icon to toolbar in composeview
 
+- add NNTP posting:
+  From mtest.c:
+    if (stream = nntp_open (newslist,debug)) {
+      if (nntp_mail (stream,msg,body)) puts ("[Ok]");
+      else printf ("[Failed - %s]\n",stream->reply);
+
 - make mailfolders collectable:
   - have a "collect" flag
   - have a global "NewMail" folder setting and ensure its existence
