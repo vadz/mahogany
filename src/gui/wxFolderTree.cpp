@@ -1546,19 +1546,21 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
 
 wxString wxFolderTreeNode::GetName() const
 {
-   wxString name, nameutf7, nameutf8;
-   wxString nameOrig = m_folder->GetName();
+   const wxString nameOrig = m_folder->GetName();
+   wxString name;
 
    bool isValid = true;
 
-   size_t len = nameOrig.Length();
+   const size_t len = nameOrig.Length();
+
+   name.reserve(len);
    for ( size_t i = 0; i < len; i++ )
    {
       // make sure valid name
       wxChar s = nameOrig[i];
       if (s & 0x80)
       {
-         /* reserved for future use with UTF-8 */
+         // reserved for future use with UTF-8
          wxLogDebug(_T("mailbox name with 8-bit character"));
          isValid = false;
          break;
@@ -1567,9 +1569,9 @@ wxString wxFolderTreeNode::GetName() const
       // validate IMAP modified UTF-7
       if (s == '&')
       {
-         nameutf7 = '+';
+         String nameutf7 = '+';
          size_t j = i;
-         while ( (s = nameOrig[++j]) != '-')
+         while ( ((s = nameOrig[++j]) != '-') && isValid )
          {
             switch (s)
             {
@@ -1577,6 +1579,18 @@ wxString wxFolderTreeNode::GetName() const
                   wxLogDebug(_T("unterminated modified UTF-7 name"));
                   isValid = false;
                   break;
+
+#if 0
+               case '+':   /* valid modified BASE64 */
+                  // but we don't support it yet  FIXME
+                  isValid = false;
+                  break;
+               case ',':  /* all OK so far */
+                  // but we don't support it yet; should be changed to "/"  FIXME
+                  isValid = false;
+                  break;
+#endif // 0
+
                default:    /* must be alphanumeric */
                   if (!isalnum (s))
                   {
@@ -1588,65 +1602,52 @@ wxString wxFolderTreeNode::GetName() const
                   {
                      nameutf7 << s;
                   }
-#if 0
-               case '+':   /* valid modified BASE64 */
-                  // but we don't support it yet  FIXME
-                  isValid = false;
-                  break;
-               case ',':  /* all OK so far */
-                  // but we don't support it yet; should be changed to "/"  FIXME
-                  isValid = false;
-                  break;
-#endif
             }
-         } //end while
-
-         if (isValid)
-         {
-            // valid IMAP modified UTF-7 mailbox name, converting to
-            // environment's default encoding for now (FIXME)
-
-            //Convert UTF-7 to UTF-8. Instead of this we could just use
-            //wxString(nameutf7.wc_str(wxConvUTF7), wxConvLocal);
-            //but wxWindows does not support UTF-7 yet, so we first convert
-            //UTF-7 to UTF-8 using c-client function and then convert
-            //UTF-8 to current environment's encoding.
-
-            nameutf7 << "-";
-
-            SIZEDTEXT *text7 = new SIZEDTEXT;
-            SIZEDTEXT *text8 = new SIZEDTEXT;
-            text7->data = (unsigned char *) nameutf7.c_str();
-            text7->size = nameutf7.Length();
-
-            utf8_text_utf7 (text7, text8);
-
-            //we cannot use "nameutf8 << text8->data" here as utf8_text_utf7()
-            //returns text8->data which is longer than text8->size:
-            for ( unsigned long k = 0; k < text8->size; k++ )
-            {
-               nameutf8 << wxChar(text8->data[k]);
-            }
-            // convert nameutf8 from UTF-8 to current environment's encoding:
-            nameutf8 = wxString(nameutf8.wc_str(wxConvUTF8), wxConvLocal);
-            name << nameutf8;
-            i = j;
-            free(text7);
-            free(text8);
          }
+
+         if ( !isValid )
+            break;
+
+         // valid IMAP modified UTF-7 mailbox name, converting to
+         // environment's default encoding for now (FIXME)
+
+         //Convert UTF-7 to UTF-8. Instead of this we could just use
+         //wxString(nameutf7.wc_str(wxConvUTF7), wxConvLocal);
+         //but wxWindows does not support UTF-7 yet, so we first convert
+         //UTF-7 to UTF-8 using c-client function and then convert
+         //UTF-8 to current environment's encoding.
+
+         nameutf7 << "-";
+
+         SIZEDTEXT *text7 = new SIZEDTEXT;
+         SIZEDTEXT *text8 = new SIZEDTEXT;
+         text7->data = (unsigned char *) nameutf7.c_str();
+         text7->size = nameutf7.Length();
+
+         utf8_text_utf7 (text7, text8);
+
+         //we cannot use "nameutf8 << text8->data" here as utf8_text_utf7()
+         //returns text8->data which is longer than text8->size:
+         String nameutf8;
+         nameutf8.reserve(text8->size);
+         for ( unsigned long k = 0; k < text8->size; k++ )
+         {
+            nameutf8 << wxChar(text8->data[k]);
+         }
+         // convert nameutf8 from UTF-8 to current environment's encoding:
+         nameutf8 = wxString(nameutf8.wc_str(wxConvUTF8), wxConvLocal);
+         name << nameutf8;
+         i = j;
+         free(text7);
+         free(text8);
       }
       else // s != '&'
       {
          name << s;
       }
-   } //end for
-
-   if ( isValid )
-   {
-      return name;
    }
 
-   return nameOrig;
+   return isValid ? name : nameOrig;
 }
 
 #endif // USE_UTF8
