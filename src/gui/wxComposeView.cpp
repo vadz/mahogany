@@ -1915,7 +1915,7 @@ bool wxComposeView::StartExternalEditor()
          {
             if ( MInputBox(&extEdit,
                            _("Set up external editor"),
-                           _("Enter the command name (%%s will be "
+                           _("Enter the command name (%s will be "
                              "replaced with the name of the file):"),
                            this,
                            NULL,
