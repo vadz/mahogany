@@ -15,6 +15,7 @@
 #include   "Mdefaults.h"
 #include   "wxMFrame.h"
 #include   "MailFolder.h"
+#include   "FolderView.h"
 #include   "wxMessageView.h"
 #include   <wx/listctrl.h>
 #include   <wx/dynarray.h>
@@ -219,7 +220,7 @@ public:
       
    int GetSelections(wxArrayInt &selections) const;
    bool IsSelected(long index)
-      { return GetItemState(index,wxLIST_STATE_SELECTED); }
+      { return GetItemState(index,wxLIST_STATE_SELECTED) == wxLIST_STATE_SELECTED; }
    void OnSelected(wxListEvent& event);
    void OnSize( wxSizeEvent &event );
 
