@@ -1011,7 +1011,6 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_Newsgroup,
       Label_Comment,
       Label_KeepOpen,
-      Label_ForceReOpen,
       Label_IsAnonymous,
 #ifdef USE_SSL
       Label_UseSSL,
@@ -1023,6 +1022,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_IsHidden,
       Label_CanBeOpened,
       Label_IsGroup,
+      Label_ForceReOpen,
       Label_FolderSubtype,
       Label_FolderIcon,
       Label_Max
@@ -1040,7 +1040,6 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Newsgroup"),
       gettext_noop("&Comment"),
       gettext_noop("&Keep server connection when idle"),
-      gettext_noop("Force &re-open on ping"),
       gettext_noop("Anon&ymous access"),
 #ifdef USE_SSL
       gettext_noop("Use Secure Sockets Layer (SS&L)"),
@@ -1052,6 +1051,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Hide folder in tree"),
       gettext_noop("Can &be opened"),
       gettext_noop("Contains subfold&ers"),
+      gettext_noop("&Reopen on ping (broken POP3 servers only)"),
       gettext_noop("Folder sub&type"),
       gettext_noop("&Icon for this folder"),
    };
@@ -1078,9 +1078,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                  FALSE);  // allow non existing files
 
    m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_path);
-   m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_keepOpen);
-   m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax,
-                                  m_forceReOpen);
+   m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_keepOpen);
    wxControl *lastCtrl = m_isAnonymous;
 #ifdef USE_SSL
    m_useSSL = CreateCheckBox(labels[Label_UseSSL], widthMax, lastCtrl);
@@ -1096,7 +1094,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_isHidden = CreateCheckBox(labels[Label_IsHidden], widthMax, lastCtrl);
    m_canBeOpened = CreateCheckBox(labels[Label_CanBeOpened], widthMax, m_isHidden);
    m_isGroup = CreateCheckBox(labels[Label_IsGroup], widthMax, m_canBeOpened);
-   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isGroup);
+   m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_isGroup);
+   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_forceReOpen);
 
    // the checkboxes might not be very clear, so add some explanations in the
    // form of tooltips
@@ -1296,7 +1295,6 @@ wxFolderPropertiesPage::EnableControlsForNewsGroup(bool isNNTP)
    EnableTextWithLabel(m_server, TRUE);
    EnableTextWithLabel(m_newsgroup, TRUE);
    EnableTextWithButton(m_path, FALSE);
-   m_forceReOpen->Enable(isNNTP);
 
 #ifdef USE_LOCAL_CHECKBOX
    m_isLocal->Enable(isNNTP);
@@ -1320,7 +1318,6 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
    EnableTextWithLabel(m_server, TRUE);
    EnableTextWithLabel(m_newsgroup, FALSE);
    EnableTextWithButton(m_path, FALSE);
-   m_forceReOpen->Enable(TRUE);
 
 #ifdef USE_LOCAL_CHECKBOX
    m_isLocal->Enable(TRUE);
@@ -1350,6 +1347,12 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
       m_isGroup->SetValue(FALSE);
       m_isGroup->Enable(FALSE);
    }
+
+   // this option only makes sense for POP, enable it for it
+   if ( !isIMAP )
+   {
+      m_forceReOpen->Enable(TRUE);
+   }
 }
 
 void
@@ -1363,9 +1366,6 @@ wxFolderPropertiesPage::EnableControlsForFileFolder(FolderType folderType)
    EnableTextWithButton(m_path, m_isCreating);
 
    // file folders are always local
-   m_forceReOpen->SetValue(FALSE);
-   m_forceReOpen->Disable();
-
 #ifdef USE_LOCAL_CHECKBOX
    m_isLocal->SetValue(FALSE);
    m_isLocal->Disable();
@@ -1477,6 +1477,9 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 #ifdef USE_SSL
       enableSSL = FolderTypeSupportsSSL(m_folderType);
 #endif // USE_SSL
+
+      // this only makes sense for POP3 so disable it by default
+      m_forceReOpen->Disable();
    }
 
 #ifdef USE_SSL
@@ -2204,7 +2207,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    bool canBeOpened = m_canBeOpened->GetValue();
 
    int flags = 0;
-   if ( m_keepOpen->GetValue() )
+   if ( m_keepOpen->IsEnabled() && m_keepOpen->GetValue() )
       flags |= MF_FLAGS_KEEPOPEN;
    if ( m_forceReOpen->GetValue() )
       flags |= MF_FLAGS_REOPENONPING;
