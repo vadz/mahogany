@@ -1711,14 +1711,12 @@ SOURCE=.\include\MInterface.mid
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build - Creating MInterface.h and .cpp
 InputDir=.\include
 InputPath=.\include\MInterface.mid
 
 BuildCmds= \
-	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2cpp.m4 $(InputPath) > $(InputDir)/MInterface.cpp \
-	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2h.m4 $(InputPath) > $(InputDir)/MInterface.h \
-	
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
 
 "$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -1734,9 +1732,7 @@ InputDir=.\include
 InputPath=.\include\MInterface.mid
 
 BuildCmds= \
-	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2cpp.m4 $(InputPath) > $(InputDir)/MInterface.cpp \
-	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2h.m4 $(InputPath) > $(InputDir)/MInterface.h \
-	
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
 
 "$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -1752,9 +1748,7 @@ InputDir=.\include
 InputPath=.\include\MInterface.mid
 
 BuildCmds= \
-	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2cpp.m4 $(InputPath) > $(InputDir)/MInterface.cpp \
-	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2h.m4 $(InputPath) > $(InputDir)/MInterface.h \
-	
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
 
 "$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -1765,14 +1759,12 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
-# Begin Custom Build
+# Begin Custom Build - Creating MInterface.h and .cpp
 InputDir=.\include
 InputPath=.\include\MInterface.mid
 
 BuildCmds= \
-	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2cpp.m4 $(InputPath) > $(InputDir)/MInterface.cpp \
-	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2h.m4 $(InputPath) > $(InputDir)/MInterface.h \
-	
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
 
 "$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -1783,14 +1775,12 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
-# Begin Custom Build
+# Begin Custom Build - Creating MInterface.h and .cpp
 InputDir=.\include
 InputPath=.\include\MInterface.mid
 
 BuildCmds= \
-	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2cpp.m4 $(InputPath) > $(InputDir)/MInterface.cpp \
-	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2h.m4 $(InputPath) > $(InputDir)/MInterface.h \
-	
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
 
 "$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
