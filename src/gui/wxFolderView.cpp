@@ -1707,6 +1707,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
       default:
          FAIL_MSG( "forgot to update the switch after adding a new column?" );
 
+      case WXFLC_NONE:
       case WXFLC_STATUS:
       case WXFLC_SUBJECT:
          // nothing special to do
