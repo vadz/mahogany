@@ -657,6 +657,7 @@ void ThreadContainer::addAsChild(ThreadContainer *c)
    // Takes into account the indices so that the new kid
    // is inserted in the correct position
    CHECK_RET(c->getThreadable(), "No threadable in ThreadContainer::addAsChild()");
+   CHECK_RET(!c->findChild(this), "Adding our own parent as a child !");
    ThreadContainer *prev = 0;
    ThreadContainer *current = getChild();
 
@@ -1386,6 +1387,15 @@ void Threader::gatherSubjects()
       ThreadContainer *old = lookUp(subjectTable, subject);
       if (old == c)    // oops, that's us
          continue;
+
+      if (c->findChild(old)) {
+         // It is possible that the message we just found is a child of
+         // the one we are trying to merge. This happens e.g. if the References
+         // give us a tree like this one
+         //   Re: Subject1
+         //     Subject1
+         continue;
+      }
 
       // Ok, so now we have found another container in the root set with
       // the same subject. There are a few possibilities:
