@@ -72,6 +72,9 @@
 #include <wx/fs_mem.h> // memory filesystem for startup screen
 #include <wx/confbase.h>
 #include <wx/treectrl.h>
+#if wxCHECK_VERSION(2, 5, 1)
+   #include <wx/numdlg.h>
+#endif // wxWindows 2.5.1+
 
 #include "MFolderDialogs.h"
 #include "FolderView.h"
