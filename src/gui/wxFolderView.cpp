@@ -103,6 +103,16 @@
 // bitmaps like we need here
 #include "../icons/sortdown.xpm"
 #include "../icons/sortup.xpm"
+#include "../icons/thread.xpm"
+
+enum ListCtrlImages
+{
+   ListCtrlImage_None = -1,
+   ListCtrlImage_SortDown,
+   ListCtrlImage_SortUp,
+   ListCtrlImage_Thread,
+   ListCtrlImage_Max
+};
 
 #ifndef wxHAS_RADIO_MENU_ITEMS
    #define wxITEM_NORMAL FALSE
@@ -611,6 +621,10 @@ public:
    /// draw the sort direction arrow on the column used for sorting
    void UpdateSortIndicator();
 
+   /// and the same for threading
+   void UpdateThreadIndicator();
+
+   /// save the widths of the columns in profile if needed
    /// save the widths of the columns in profile if needed
    void SaveColWidths();
 
@@ -1491,8 +1505,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_menuFolders = NULL;
 
    m_colSort = WXFLC_NONE;
-   // FIXME: replace by a more efficient call
-   for (size_t i = 0; i < WXFLC_NUMENTRIES; ++i) {
+   for (size_t i = 0; i < WXFLC_NUMENTRIES; ++i)
+   {
       m_columns[i] = 0;
    }
 
@@ -1515,7 +1529,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    // add the images to use for the columns
    wxBitmap bmpDown = sort_down_xpm,
-            bmpUp = sort_up_xpm;
+            bmpUp = sort_up_xpm,
+            bmpThread = thread_xpm;
    wxImageList *imagelist = new wxImageList(bmpDown.GetWidth(),
                                             bmpDown.GetHeight());
 
@@ -1523,6 +1538,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    // is used for the reversed sort, second for the normal one
    imagelist->Add(bmpUp);
    imagelist->Add(bmpDown);
+   imagelist->Add(bmpThread);
    AssignImageList(imagelist, wxIMAGE_LIST_SMALL);
 
 #if wxUSE_DRAG_AND_DROP
@@ -1622,6 +1638,7 @@ void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
    }
 
    UpdateSortIndicator();
+   UpdateThreadIndicator();
 }
 
 // ----------------------------------------------------------------------------
@@ -2017,6 +2034,28 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
    // get the column which was clicked
    wxFolderListColumn col = GetColumnByIndex(m_columns, event.GetColumn());
    wxCHECK_RET( col != WXFLC_NONE, _T("should have a valid column") );
+
+   // we now toggle threading when status column is clicked: this is more
+   // useful than toggling "sort by status" which is hardly ever used
+   if ( col == WXFLC_STATUS )
+   {
+      Profile_obj profile(m_FolderView->GetFolderProfile());
+
+      profile->writeEntry(MP_MSGS_USE_THREADING,
+                           !READ_CONFIG_BOOL(profile,  MP_MSGS_USE_THREADING));
+
+      // although this would be done by ApplyOptions() anyhow, doing it
+      // immediately results in a faster (and hence better) visual feedback
+      UpdateThreadIndicator();
+
+      MEventManager::Send(new MEventOptionsChangeData
+                              (
+                               profile,
+                               MEventOptionsChangeData::Ok
+                              ));
+      return;
+   }
+
 
    MessageSortOrder orderCol = SortOrderFromCol(col);
    if ( orderCol == MSO_NONE )
@@ -2718,6 +2757,16 @@ void wxFolderListCtrl::UpdateSortIndicator()
          SetColumnImage(colIdx, IsSortCritReversed(sortOrder));
       }
    }
+}
+
+void wxFolderListCtrl::UpdateThreadIndicator()
+{
+   Profile_obj profile(m_FolderView->GetFolderProfile());
+
+   SetColumnImage(m_columns[WXFLC_STATUS],
+                  READ_CONFIG(profile, MP_MSGS_USE_THREADING)
+                     ? ListCtrlImage_Thread
+                     : ListCtrlImage_None);
 }
 
 // ----------------------------------------------------------------------------
@@ -3755,6 +3804,7 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& /* event */)
    m_FolderCtrl->SetPreviewDelay(m_settings.previewDelay);
 
    m_FolderCtrl->UpdateSortIndicator();
+   m_FolderCtrl->UpdateThreadIndicator();
 
    m_MessageWindow->UpdateOptions();
 }
