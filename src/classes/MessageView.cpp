@@ -304,6 +304,12 @@ public:
    const String& GetName() const { return m_name; }
    ViewFilterNode *GetNext() const { return m_next; }
 
+   void SetNext(ViewFilterNode *next)
+   {
+      m_filter->m_next = next->m_filter;
+      m_next = next;
+   }
+
 private:
    ViewFilter *m_filter;
    int m_prio;
@@ -726,10 +732,9 @@ MessageView::InitializeViewFilters()
             }
 
             // find the right place to insert the new filter into
-            ViewFilterNode **prevNode = &m_filters;
-            for ( ViewFilterNode *node = m_filters;
+            for ( ViewFilterNode *node = m_filters, *nodePrev = NULL;
                   node;
-                  prevNode = &node, node = node->GetNext() )
+                  nodePrev = node, node = node->GetNext() )
             {
                if ( prio >= node->GetPriority() )
                {
@@ -745,7 +750,10 @@ MessageView::InitializeViewFilters()
                                                    node
                                                 );
 
-                  *prevNode = nodeNew;
+                  if ( !nodePrev )
+                     m_filters = nodeNew;
+                  else
+                     nodePrev->SetNext(nodeNew);
 
                   // finally, enable/disable it initially as configured
                   Profile *profile = GetProfile();

@@ -131,6 +131,8 @@ protected:
 
    /// true if we're enabled
    bool m_active;
+
+   friend class ViewFilterNode;
 };
 
 // ----------------------------------------------------------------------------
