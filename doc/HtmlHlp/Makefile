@@ -4,7 +4,7 @@
 include ../../makeopts
 
 GENERATED = Manual.tex Manual.html Manual.hhc
-BACK_TO_SOURCES = $(patsubst %,.src/%,$(GENERATED)) .src/Manual.html
+BACK_TO_SOURCES = .src/Manual.hhc .src/Manual.html
 
 htmlhlp: Manual.hhc
 
@@ -27,10 +27,13 @@ install: htmlhlp
 	@# this file must exist or HTML help controller complains
 	touch $(DOCDIR)/Manual.hhk
 
-$(BACK_TO_SOURCES): .src/%: %
+.src/Manual.html: Manual.html
 	cp $< $@
 
-update: $(BACK_TO_SOURCES)
+.src/Manual.hhc: Manual.hhc
+	cp $< $@
+
+update: .src/Manual.hhc .src/Manual.html
 
 clean:
 	rm -rf Manual Manual.tex Manual.html

@@ -140,6 +140,10 @@
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="#SECTION00255000000000000000">
+<param name="Name" value="Searching for Messages">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="#SECTION00256000000000000000">
 <param name="Name" value="Filters">
 </OBJECT>
 </UL>
@@ -242,18 +246,22 @@
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="#SECTION00313000000000000000">
-<param name="Name" value="Callback Functions (Hooks)">
+<param name="Name" value="Using Python with Filters">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="#SECTION00314000000000000000">
-<param name="Name" value="Namespaces">
+<param name="Name" value="Callback Functions (Hooks)">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="#SECTION00315000000000000000">
-<param name="Name" value="List of Callbacks">
+<param name="Name" value="Namespaces">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="#SECTION00316000000000000000">
+<param name="Name" value="List of Callbacks">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="#SECTION00317000000000000000">
 <param name="Name" value="Supported Classes">
 </OBJECT>
 </UL>
