@@ -262,6 +262,7 @@ void UpdateTitleAndStatusBars(const String& title,
       statusMsg += tmp;
    }
 
+#if 0
    // and the same for new messages. Also, in the title bar we show
    // either "new/total" or just "total" (or nothing at all if there are
    // no messages)
@@ -279,7 +280,9 @@ void UpdateTitleAndStatusBars(const String& title,
 
       titleMsg += tmp;
    }
-
+#endif
+   tmp.Printf(" (%lu/%lu)", total, newmsgs);
+   titleMsg += tmp;
    statusMsg << ')';
 
    wxLogStatus(frame, statusMsg);
