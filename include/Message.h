@@ -17,6 +17,8 @@
 #include "kbList.h"
 #include "MailFolder.h"
 
+class WXDLLEXPORT wxArrayString;
+
 // ----------------------------------------------------------------------------
 // C-client compatibility defines
 // ----------------------------------------------------------------------------
@@ -30,14 +32,16 @@
 // Message class
 // ----------------------------------------------------------------------------
 
-/// a type used by Address():
+/// all (standard) address headers
 enum MessageAddressType
 {
    MAT_FROM,
    MAT_SENDER,
+   MAT_RETURNPATH,
    MAT_REPLYTO,
    MAT_TO,
-   MAT_CC
+   MAT_CC,
+   MAT_BCC
 };
 
 /// a define to make scandoc work
@@ -133,6 +137,19 @@ public:
        @return Subject entry
    */
    virtual const String & Subject(void) const = 0;
+
+   /**
+       Get all addresses of the given type (more efficient than GetHeader as it
+       only uses the envelope and doesn't need to fetch all headers)
+
+       May return empty string if the corresponding header was not found.
+
+       @param type which address
+       @param addresses the array to append addresses to
+       @return number of addresses added to the array
+   */
+   virtual size_t GetAddresses(MessageAddressType type,
+                               wxArrayString& addresses) const = 0;
 
    /** Get an address line.
        Using MAT_REPLY should always return a valid return address.
@@ -231,6 +248,15 @@ public:
        @return list of parameters, must be freed by caller.
    */
    virtual MessageParameterList const & GetDisposition(int n = -1, String *disptype = NULL) = 0;
+
+   /**
+       Get the list of all unique addresses appearing in this message headers
+       (including from, to, reply-to, cc, bcc, ...)
+
+       @param [out] array filled with unique addresses
+       @return the number of addresses retrieved
+   */
+   virtual size_t ExtractAddressesFromHeader(wxArrayString& addresses);
 
    /** Get a parameter value from the list.
        @param list a MessageParameterList

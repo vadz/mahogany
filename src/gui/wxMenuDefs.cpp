@@ -316,7 +316,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_SEARCH,  gettext_noop("&Search..."),
      gettext_noop("Search and select messages") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_TOGGLEHEADERS,gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
+   { WXMENU_MSG_SAVEADDRESSES, gettext_noop("E&xtract addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), FALSE },
+   { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
    { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message"), gettext_noop("Show the raw message text") , FALSE },
    { WXMENU_MSG_FIND,  gettext_noop("Fi&nd..."), gettext_noop("F&ind text in message\tCtrl-I") , FALSE },
 

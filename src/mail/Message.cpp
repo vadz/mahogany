@@ -292,6 +292,54 @@ bool Message::CompareAddresses(const String& adr1, const String& adr2)
 }
 
 // ----------------------------------------------------------------------------
+// address extraction
+// ----------------------------------------------------------------------------
+
+size_t Message::ExtractAddressesFromHeader(wxArrayString& addresses)
+{
+   // first get all possible addresses
+   wxSortedArrayString addrSorted;
+   GetAddresses(MAT_FROM, addrSorted);
+   GetAddresses(MAT_SENDER, addrSorted);
+   GetAddresses(MAT_REPLYTO, addrSorted);
+   GetAddresses(MAT_RETURNPATH, addrSorted);
+   GetAddresses(MAT_TO, addrSorted);
+   GetAddresses(MAT_CC, addrSorted);
+   GetAddresses(MAT_BCC, addrSorted);
+
+   // now copy them to the output array filtering the copies
+   addresses.Empty();
+
+   wxString addr;
+   size_t count = addrSorted.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( addrSorted[n] != addr )
+      {
+         // add the address we had before (if we did) to the list
+         if ( !addr.empty() )
+         {
+            addresses.Add(addr);
+         }
+
+         // and remeber it to avoid adding it more than once
+         addr = addrSorted[n];
+      }
+      //else: another copy, just skip
+   }
+
+   if ( !addr.empty() )
+   {
+      // don't forget to add the last one which we don't have yet
+      addresses.Add(addr);
+   }
+
+   return addresses.GetCount();
+}
+
+// TODO: write a function to extract addresses from the body as well
+
+// ----------------------------------------------------------------------------
 // Message creation
 // ----------------------------------------------------------------------------
 

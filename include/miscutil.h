@@ -17,6 +17,8 @@
 #   include "Profile.h"
 #endif
 
+class WXDLLEXPORT wxArrayString;
+
 /**@name Miscellaneous utility functions */
 //@{
 /** Automatic collection of an email address/name pair into the given subgroup
@@ -37,6 +39,22 @@ extern void AutoCollectAddresses(const String &email,
                                  const String& groupName,
                                  class MFrame *frame = NULL);
 
+/**
+   Interactive collection of email addresses: present the user with a dialog
+   allowing to choose any of the provided addresses and save them into an
+   address book/group of choice.
+
+   @param addresses contains all addresses to collect
+   @param bookName the default address book name for auto collection
+   @param groupName the default subgroup name in bookName where to put new entries
+   @param frame optional pointer to a frame for displaying status messages
+   @return the number of the addresses saved, -1 if cancelled
+ */
+extern int InteractivelyCollectAddresses(const wxArrayString& addresses,
+                                         const String& bookName,
+                                         const String& groupName,
+                                         MFrame *parent = NULL);
+
 /// construct the full email address of the form "name <email>"
 inline String GetFullEmailAddress(const String& name, const String& email)
 {
@@ -44,7 +62,16 @@ inline String GetFullEmailAddress(const String& name, const String& email)
       return email;
 
    String address(name);
-   address << " <" << email << '>';
+   if ( !email.empty() )
+   {
+      if ( !name.empty() )
+         address += " <";
+
+      address += email;
+
+      if ( !name.empty() )
+         address += '>';
+   }
 
    return address;
 }

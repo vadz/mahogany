@@ -1,11 +1,12 @@
 A new release of the `Mahogany' e-Mail and News client has been made.
 =====================================================================
 
-Binaries and source for a variety of Linux and Unix systems are
+Source and binaries for a variety of Linux and Unix systems are
 available at http://mahogany.sourceforge.net/ and
 http://sourceforge.net/projects/mahogany/
 
-Binaries for Win32 systems are available at request.
+Binaries for Win32 systems and debian packages will be made available
+in a couple of days.
 
 In this message:
 
@@ -29,8 +30,8 @@ interface across all supported platforms.
 It aims at supporting GNOME (and KDE for that matter) and includes an
 extendable address book system supporting hierarchical organisation of
 entries, group aliases, searching the database and easy editing, with
-support for other program`s address database formats. Currently
-Mahogany`s native format, (X)Emacs' BBDB address books and PalmOS
+support for other program's address database formats. Currently
+Mahogany's native format, (X)Emacs' BBDB address books and PalmOS
 address books are supported.
 
 Mahogany is being developed using the OpenSource wxWindows application
@@ -40,7 +41,7 @@ Mahogany is constantly being tested on a variety of Linux system,
 Solaris-sparc and MS Windows. It should compile and work on any modern
 Unix platform.
 
-CHANGES AGAINST RELEASE 0.50 / UPDATE :
+Changes Since Release 0.50
 =====================================================================
 
 Key changes are:
@@ -97,7 +98,7 @@ New experimental features include:
 Please see the CHANGES file in the distribution for an even more
 detailed list of changes.
 
-FUTURE PLANS
+Future Plans
 =====================================================================
 
 Next, we hope to tackle the following:
@@ -120,9 +121,7 @@ Known bugs:
 There are always some, listed on our bugtracker at
 http://www.wxwindows.org/m-bugs/ and we are working on them.
 
-Version 0.60 suffers from a minor printing bug leading to some overlap
-between strings sometimes, which is due to a bug in wxWindows which
-will hopefully be fixed fairly soon. Also, the global password option for
-encrypting passwords currently does not work on all systems. It has been tested
-on PCs under Linux but does not currently work on Solaris 7/Sparc (but, if you
-attempt to use it, you will be warned by it).
+ Hoping you will find Mahogany usefull,
+
+M dev-team
+

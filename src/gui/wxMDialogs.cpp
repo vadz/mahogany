@@ -2903,7 +2903,9 @@ wxMultipleChoiceDialog::wxMultipleChoiceDialog(wxWindow *parent,
                                                const wxString& caption,
                                                const wxArrayString& choices,
                                                wxArrayInt *selections)
-                      : wxDialog(parent, -1, caption)
+                      : wxDialog(parent, -1, caption,
+                                 wxDefaultPosition, wxDefaultSize,
+                                 wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
     m_selections = selections;
 

@@ -2029,6 +2029,8 @@ MailFolderCC::Debug(void) const
 void
 MailFolderCC::DebugStreams(void) 
 {
+   // this produces a *lot* of output, so enable it separately as needed
+#ifdef DEBUG_STREAMS
    wxLogDebug("--list of streams and objects--");
 
    StreamConnection *conn;
@@ -2048,6 +2050,7 @@ MailFolderCC::DebugStreams(void)
                  conn->stream, conn->folder, conn->folder->GetName().c_str());
    }
    wxLogDebug("--end of list--");
+#endif // DEBUG_STREAMS
 }
 
 String

@@ -418,7 +418,7 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 }
 
 
-wxMessageView::wxMessageView(wxFolderView *fv, 
+wxMessageView::wxMessageView(wxFolderView *fv,
                              wxWindow *parent,
                              bool show)
              : wxLayoutWindow(parent)
@@ -869,7 +869,7 @@ wxMessageView::Update(void)
                   qlevel = 3;                           \
             }                                           \
             }
-            
+
             SET_QUOTING_LEVEL(level, tmp)
             SET_QUOTING_COLOUR(level)
             do
@@ -1669,13 +1669,40 @@ wxMessageView::DoMenuCommand(int id)
       break;
 
    case WXMENU_MSG_TOGGLEHEADERS:
-   {
-      m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;
-      m_Profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
-      UpdateShowHeadersInMenu();
-      Update();
-   }
-   break;
+      {
+         m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;
+         m_Profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
+         UpdateShowHeadersInMenu();
+         Update();
+      }
+      break;
+
+   case WXMENU_MSG_SAVEADDRESSES:
+      if ( m_mailMessage )
+      {
+         // autocollect the addresses
+         wxArrayString addresses;
+         if ( m_mailMessage->ExtractAddressesFromHeader(addresses) )
+         {
+            MailFolder *folder = m_mailMessage->GetFolder();
+            String folderName =  folder ? folder->GetName()
+                                        : String(_("unknown"));
+            InteractivelyCollectAddresses(addresses,
+                                          m_ProfileValues.autocollectBookName,
+                                          folderName,
+                                          (MFrame *)GetFrame(this));
+         }
+         else
+         {
+            // very strange
+            wxLogWarning(_("This message doesn't contain any valid addresses."));
+         }
+      }
+      else
+      {
+         wxLogStatus(GetFrame(this), _("No message selected."));
+      }
+      break;
 
    case WXMENU_MSG_SHOWRAWTEXT:
       ShowRawText();
@@ -1764,38 +1791,39 @@ wxMessageView::ShowMessage(Message *mailMessage)
    m_uid = mailMessage->GetUId();
 
    //have we not seen the message before?
-   if( GetFolder() && 
+   if( GetFolder() &&
      ! (m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
    {
       // mark it as seen
       m_mailMessage->GetFolder()->
         SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
 
-     // autocollect the address:
-     /* FIXME for now it's here, should go somewhere else: */
-     if ( m_ProfileValues.autocollect )
-     { 
-      String addr, name;
-      addr = m_mailMessage->Address(name, MAT_REPLYTO);
+      // autocollect the address:
+      /* FIXME for now it's here, should go somewhere else: */
+      if ( m_ProfileValues.autocollect )
+      {
+         String addr, name;
+         addr = m_mailMessage->Address(name, MAT_REPLYTO);
 
-      String folderName = m_mailMessage->GetFolder() ?
-         m_mailMessage->GetFolder()->GetName() : String(_("unknown"));
+         String folderName = m_mailMessage->GetFolder() ?
+            m_mailMessage->GetFolder()->GetName() : String(_("unknown"));
 
-      AutoCollectAddresses(addr, name,
-                           m_ProfileValues.autocollect,
-                           m_ProfileValues.autocollectNamed != 0,
-                           m_ProfileValues.autocollectBookName,
-                           folderName,
-                           (MFrame *)GetFrame(this));
-      addr = m_mailMessage->Address(name, MAT_FROM);
-      AutoCollectAddresses(addr, name,
-                           m_ProfileValues.autocollect,
-                           m_ProfileValues.autocollectNamed != 0,
-                           m_ProfileValues.autocollectBookName,
-                           folderName,
-                           (MFrame *)GetFrame(this));
-    }
+         AutoCollectAddresses(addr, name,
+                              m_ProfileValues.autocollect,
+                              m_ProfileValues.autocollectNamed != 0,
+                              m_ProfileValues.autocollectBookName,
+                              folderName,
+                              (MFrame *)GetFrame(this));
+         addr = m_mailMessage->Address(name, MAT_FROM);
+         AutoCollectAddresses(addr, name,
+                              m_ProfileValues.autocollect,
+                              m_ProfileValues.autocollectNamed != 0,
+                              m_ProfileValues.autocollectBookName,
+                              folderName,
+                              (MFrame *)GetFrame(this));
+      }
    }
+
    Update();
 }
 
@@ -2124,5 +2152,5 @@ wxMessageViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 
 IMPLEMENT_DYNAMIC_CLASS(wxMessageViewFrame, wxMFrame)
 
-#endif
-   
+#endif // EXPERIMENTAL_karsten
+

@@ -325,90 +325,115 @@ MessageCC::GetHeaderLine(const String &line,
    return value.length() != 0;
 }
 
-String const
-MessageCC::Address(String &name, MessageAddressType type) const
+// ----------------------------------------------------------------------------
+// address stuff
+// ----------------------------------------------------------------------------
+
+ADDRESS *
+MessageCC::GetAddressStruct(MessageAddressType type) const
 {
    ((MessageCC *)this)->GetBody();
-   CHECK(m_Envelope, "", _("Non-existent message data."))
+   CHECK(m_Envelope, NULL, _("Non-existent message data."))
 
-   ADDRESS
-      * addr = NULL;
-   String email0, name0;
-   String email;
+   ADDRESS *addr;
 
-   name = "";
-   switch(type)
+   switch ( type )
    {
-   case MAT_FROM:
-      addr = m_Envelope->from;
-      break;
-   case MAT_TO:
-      addr = m_Envelope->to;
-      break;
-   case MAT_CC:
-      addr = m_Envelope->cc;
-      break;
-   case MAT_SENDER:
-      addr = m_Envelope->sender;
-      break;
-   case MAT_REPLYTO:
-      addr = m_Envelope->reply_to;
-      if(! addr)
-         addr = m_Envelope->from;
-      if(! addr)
-         addr = m_Envelope->sender;
-/*
-      if(addr && addr->personal && strlen(addr->personal))
-         name = String(addr->personal);
-  This is a rather nice hack which takes the "From:" personal name and
-  combines it with the reply-to to return a complete mail address
-  including name and email, but it seems to cause too much confusion
-  to others if used on mailing lists.
-
-  else
-      {
-         if(m_Envelope->from &&
-            m_Envelope->from->personal &&
-            strlen(m_Envelope->from->personal))
-            name = String(m_Envelope->from->personal);
-      }
-*/
-      break;
+      case MAT_FROM:       addr = m_Envelope->from; break;
+      case MAT_TO:         addr = m_Envelope->to; break;
+      case MAT_CC:         addr = m_Envelope->cc; break;
+      case MAT_BCC:        addr = m_Envelope->bcc; break;
+      case MAT_SENDER:     addr = m_Envelope->sender; break;
+      case MAT_REPLYTO:    addr = m_Envelope->reply_to; break;
+      case MAT_RETURNPATH: addr = m_Envelope->return_path; break;
+      default:
+         FAIL_MSG( "unknown address type" );
+         addr = NULL;
    }
 
-   if(! addr)
-      return "";
+   return addr;
+}
 
-   while(addr)
+/* static */ void
+MessageCC::AddressToNameAndEmail(ADDRESS *addr, wxString& name, wxString& email)
+{
+   CHECK_RET( addr, "ADDRESS can't be NULL here" );
+
+   name.clear();
+   email.clear();
+
+   email = String(addr->mailbox);
+   if(addr->host && strlen(addr->host)
+      && (strcmp(addr->host,BADHOST) != 0))
+      email += String("@") + String(addr->host);
+   email = MailFolderCC::DecodeHeader(email);
+   if(addr->personal && strlen(addr->personal))
    {
-      email0 = String(addr->mailbox);
-      if(addr->host && strlen(addr->host)
-         && (strcmp(addr->host,BADHOST) != 0))
-         email0 += String("@") + String(addr->host);
-      email0 = MailFolderCC::DecodeHeader(email0);
-      if(addr->personal && strlen(addr->personal))
-      {
-         name0 = String(addr->personal);
-         name0 = MailFolderCC::DecodeHeader(name0);
-      }
-      else
-         name0 = "";
-      if(strchr(name0, ',') || strchr(name0,'<') || strchr(name0,'>'))
-         name0 = String("\"") + name0 + String("\"");
+      name = String(addr->personal);
+      name = MailFolderCC::DecodeHeader(name);
+   }
+   else
+      name = "";
+   if(strchr(name, ',') || strchr(name,'<') || strchr(name,'>'))
+      name = String("\"") + name + String("\"");
+}
 
-      if(email[0]) email += ", ";
-      email += email0;
+size_t
+MessageCC::GetAddresses(MessageAddressType type,
+                        wxArrayString& addresses) const
+{
+   ADDRESS *addr = GetAddressStruct(type);
 
-      // for now: use first name found:
-      if(name[0] == '\0') 
-        name = name0;
-      else if (name0[0]) // found another name
-        name << " ...";
+   while ( addr )
+   {
+      String name, email;
+      AddressToNameAndEmail(addr, name, email);
 
-      
+      addresses.Add(GetFullEmailAddress(name, email));
+
       addr = addr->next;
    }
-   return email;
+
+   return addresses.GetCount();
+}
+
+const String
+MessageCC::Address(String &nameAll, MessageAddressType type) const
+{
+   ADDRESS *addr = GetAddressStruct(type);
+
+   // special case for Reply-To: we want to find a valid reply address
+   if ( type == MAT_REPLYTO )
+   {
+      if(! addr)
+         addr = GetAddressStruct(MAT_FROM);
+      if(! addr)
+         addr = GetAddressStruct(MAT_SENDER);
+   }
+
+   // concatenate all found addresses together
+   String emailAll;
+   while ( addr )
+   {
+      String name, email;
+      AddressToNameAndEmail(addr, name, email);
+
+      // concatenate emails together
+      if ( !emailAll.empty() )
+         emailAll += ", ";
+
+      emailAll += email;
+
+      // for now: use first name found (VZ: FIXME, this is just wrong)
+      if ( nameAll.empty() )
+        nameAll = name;
+      else if ( !name.empty() ) // found another name
+        nameAll << " ...";
+
+      addr = addr->next;
+   }
+
+   return emailAll;
 }
 
 String const &

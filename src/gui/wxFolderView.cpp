@@ -1569,6 +1569,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       SearchMessages();
       break;
    case WXMENU_MSG_FIND:
+   case WXMENU_MSG_SAVEADDRESSES:
    case WXMENU_MSG_TOGGLEHEADERS:
    case WXMENU_MSG_SHOWRAWTEXT:
    case WXMENU_EDIT_COPY:

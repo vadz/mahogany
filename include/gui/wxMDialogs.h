@@ -384,6 +384,18 @@ bool MDialog_GetSelectionsInOrder(const wxString& message,
                                   wxWindow *parent = NULL);
 
 /**
+  Show a dialog asking for two text values
+*/
+
+bool MDialog_GetText2FromUser(const wxString& message,
+                              const wxString& caption,
+                              const wxString& prompt1,
+                              String *value1,
+                              const wxString& prompt2,
+                              String *value2,
+                              wxWindow *parent = NULL);
+
+/**
   Show a dialog asking the user for password and also, optionally, the
   username for the folder
 

@@ -1,7 +1,12 @@
       This file contains the detailed list of the user visible changes in
       Mahogany, you can use it to find all the changes between releases.
 
-Release 0.60 'Redmond' October 24, 2000
+Release 0.61 'Hawkins'
+-------------------------------------------------------------------------------
+
+09.11.00 VZ: added "Save addresses from message" command
+
+Release 0.60 'Redmond' November 9, 2000
 -------------------------------------------------------------------------------
 24.10.00 VZ: added a per-folder flag for new mail notification
 23.10.00 KB: fixed IMAP flag string generation (didn't work for some servers)

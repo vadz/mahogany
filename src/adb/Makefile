@@ -4,7 +4,7 @@ include ../../makeopts
 
 SRC :=	AdbFrame.cpp AdbManager.cpp AdbProvider.cpp AdbEntry.cpp \
 	AdbDialogs.cpp ProvFC.cpp ProvBbdb.cpp ProvPalm.cpp \
-	AdbModule.cpp AdbImport.cpp AdbExport.cpp
+	AdbModule.cpp AdbImport.cpp AdbExport.cpp Collect.cpp
 
 MOD :=	ImportText.cpp ImportXFMail.cpp ImportPine.cpp \
 	ImportMailrc.cpp ImportVCard.cpp \
