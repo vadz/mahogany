@@ -59,6 +59,7 @@
 #include <wx/dynarray.h>
 #include <wx/file.h>
 #include <wx/mimetype.h>
+#include <wx/fontmap.h>
 
 #include <ctype.h>  // for isspace
 #include <time.h>   // for time stamping autocollected addresses
