@@ -161,7 +161,7 @@ then
   OSTYPE=FreeBSD
   CC=/usr/local/bin/gcc295
   CXX=$CC
-  LDFLAGS="$LDFLAGS -lreadline -lstdc++"
+  LDFLAGS="$LDFLAGS -lreadline -lstdc++ -L/usr/local/pilot/lib"
   export CC CXX OSTYPE LDFLAGS
   USESTABLE=no
   SCP=scp1
