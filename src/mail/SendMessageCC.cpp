@@ -1816,19 +1816,46 @@ SendMessageCC::Send(int flags)
       }
       else // failed to send/post
       {
-         wxLogWarning(_("%s error: %s"),
-                      m_Protocol == Prot_SMTP ? "SMTP" : "NNTP",
-                      reply.empty() ? _("unknown error") : reply.c_str());
+         MLogCircle& log = MailFolder::GetLogCircle();
+         if ( !reply.empty() )
+         {
+            log.Add(reply);
+         }
 
-         MailFolder::GetLogCircle().GuessError();
+         const String explanation = log.GuessError();
+
+         // give the general error message anyhow
+         String err = m_Protocol == Prot_SMTP ? _("Failed to send the message.")
+                                              : _("Failed to post the article.");
+
+         // and then try to give more details about what happened
+         if ( !explanation.empty() )
+         {
+            err << _T("\n\n") << explanation;
+         }
+         else if ( !reply.empty() )
+         {
+            // no explanation, at least show the server error message
+            err << _T("\n\n") << _("Server error: ") << reply;
+         }
+
+         ERRORMESSAGE((_T("%s"), err.c_str()));
       }
    }
    else // error in opening stream
    {
-      MailFolder::GetLogCircle().GuessError();
+      String err;
+      err.Printf(_("Cannot open connection to the %s server '%s'."),
+               m_Protocol == Prot_SMTP ? "SMTP" : "NNTP",
+                 m_ServerHost.c_str());
 
-      ERRORMESSAGE((_("Cannot open connection to the server '%s'."),
-                    m_ServerHost.c_str()));
+      String explanation = MailFolder::GetLogCircle().GuessError();
+      if ( !explanation.empty() )
+      {
+         err << _T("\n\n") << explanation;
+      }
+
+      ERRORMESSAGE((_T("%s"), err.c_str()));
 
       success = false;
    }

@@ -4131,12 +4131,6 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
                   MDialog_FolderProfile(m_Frame, m_fullname);
                }
             }
-            else // msg box disabled, at least show the error msg
-            {
-               wxLogError(_("The folder '%s' could not be opened, "
-                            "please check its settings."),
-                          m_fullname.c_str());
-            }
       }
    }
    else

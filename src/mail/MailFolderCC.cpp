@@ -2313,10 +2313,19 @@ MailFolderCC::Open(OpenMode openmode)
    if ( m_MailStream == NIL )
    {
       // can we give the user a hint as to why did it fail?
-      GetLogCircle().GuessError();
+      String explanation = GetLogCircle().GuessError();
 
       // give the general error message anyhow
-      wxLogError(_("Could not open mailbox '%s'."), GetName().c_str());
+      String err;
+      err.Printf(_("Could not open mailbox '%s'."), GetName().c_str());
+
+      // and then try to give more details about what happened
+      if ( !explanation.empty() )
+      {
+         err << _T("\n\n") << explanation;
+      }
+
+      wxLogError(_T("%s"), err.c_str());
 
       return false;
    }

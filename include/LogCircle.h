@@ -29,21 +29,51 @@
 class MLogCircle
 {
 public:
+   /**
+      Creates an empty log circle.
+
+      @param n the size of the internal buffer, i.e. the number of last error
+               messages stored
+    */
    MLogCircle(int n);
+
+   /// Trivial destructor
    ~MLogCircle();
 
-   void Add(const String &txt);
-   bool Find(const String needle, String *store = NULL) const;
-   String GetLog(void) const;
-   void Clear(void);
+   /**
+      Adds a log message to the buffer.
+
+      This method must be called for all error messages if you want
+      GuessError() to be able to do its job.
+
+      @param txt the error message
+    */
+   void Add(const String& txt);
 
    /**
-     Looks at log data and guesses what went wrong and calls LOGMESSAGE()
-     if we have any ideas.
+      Forgets the remembered error messages.
     */
-   void GuessError(void) const;
+   void Clear();
+
+   /**
+      Looks at log data and tries to guess what went wrong.
+
+      If we could determine the reason for the error, we return the string and
+      also possibly call LOGMESSAGE() with some more explanations. The reason
+      for doing it like this is that the calling code usually does its own
+      LOGERROR() and if we did LOGMESSAGE() directly from this function, our
+      explanation wouldn't be directly visible to the user and as 90% of the
+      users never click on "Details" button, they would never see it at all
+      (and these 90% are also probably those who need to see it most...).
+
+      So instead the caller should append our string, usually after a new line,
+      to the string it passes to LOGERROR().
+    */
+   String GuessError() const;
 
 private:
+   bool Find(const String needle, String *store = NULL) const;
+
    int m_N,
        m_Next;
 
