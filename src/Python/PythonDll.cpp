@@ -33,6 +33,12 @@
 #include <wx/dynlib.h>
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_PYTHONDLL;
+
+// ----------------------------------------------------------------------------
 // local functions
 // ----------------------------------------------------------------------------
 
@@ -264,9 +270,17 @@ extern bool InitPythonDll()
 
    wxDynamicLibrary dllPython;
 
-   // don't give errors about missing DLL here
+   String pathDLL = READ_APPCONFIG(MP_PYTHONDLL);
+   if ( !pathDLL.empty() )
    {
+      dllPython.Load(pathDLL);
+   }
+   else // try to find the DLL ourselves
+   {
+      // don't give errors about missing DLL here
       wxLogNull noLog;
+
+      // try all supported versions
       for ( size_t nVer = 0; nVer < WXSIZEOF(versions); nVer++ )
       {
          String name = GetPythonDllBaseName(versions[nVer]);
