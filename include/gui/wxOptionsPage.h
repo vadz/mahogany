@@ -17,6 +17,7 @@
 #include <wx/dynarray.h>
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
+WX_DEFINE_ARRAY(bool, ArrayBool);
 
 // -----------------------------------------------------------------------------
 // constants
@@ -85,20 +86,19 @@ public:
                  size_t nFirst,
                  size_t nLast,
                  int helpID = -1);
-   ~wxOptionsPage()
-      {
-         if(m_Profile) m_Profile->DecRef();
-      }
+   ~wxOptionsPage() { SafeDecRef(m_Profile); }
+
+   // transfer data to/from the controls
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
    // to change the profile associated with the page:
    void SetProfile(ProfileBase *profile)
-      {
-         if(m_Profile) m_Profile->DecRef();
-         m_Profile = profile;
-         m_Profile->IncRef();
-      }
+   {
+      SafeDecRef(m_Profile);
+      m_Profile = profile;
+      SafeIncRef(m_Profile);
+   }
 
    // callbacks
    void OnChange(wxEvent&);
@@ -110,6 +110,7 @@ public:
 
    /// Returns the numeric help id.
    int HelpId(void) const { return m_HelpId; }
+
 protected:
    void CreateControls();
 
@@ -123,15 +124,25 @@ protected:
    wxControl *GetControl(size_t /* ConfigFields */ n) const
       { return m_aControls[n - m_nFirst]; }
 
+   // get the dirty flag for the control with index n
+   bool IsDirty(size_t n) const
+      { return m_aDirtyFlags[n- m_nFirst]; }
+
+   // reset the dirty flag for the control with index n
+   bool ClearDirty(size_t n) const
+      { m_aDirtyFlags[n- m_nFirst] = false; }
+
    // type safe access to the control text
    wxString GetControlText(size_t /* ConfigFields */ n) const
-      {
-         wxASSERT( GetControl(n)->IsKindOf(CLASSINFO(wxTextCtrl)) );
+   {
+      wxASSERT( GetControl(n)->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
-         return ((wxTextCtrl *)GetControl(n))->GetValue();
-      }
+      return ((wxTextCtrl *)GetControl(n))->GetValue();
+   }
+
    /// numeric help id
    int m_HelpId;
+
 private:
    // the controls themselves (indexes in this array are shifted by m_nFirst
    // with respect to ConfigFields enum!) - use GetControl()
@@ -143,6 +154,9 @@ private:
    // the controls which are so important for the proper program working that
    // we propose to the user to test the new settings before accepting them
    ArrayControls m_aVitalControls;
+
+   // n-th element tells if the n-th control in m_aControls is dirty or not
+   ArrayBool m_aDirtyFlags;
 
    DECLARE_EVENT_TABLE()
 };

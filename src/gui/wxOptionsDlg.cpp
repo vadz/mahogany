@@ -548,7 +548,7 @@ wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
                              size_t nFirst,
                              size_t nLast,
                              int helpId)
-   : wxNotebookPageBase(notebook)
+             : wxNotebookPageBase(notebook)
 {
    int image = notebook->GetPageCount();
 
@@ -645,6 +645,7 @@ void wxOptionsPage::CreateControls()
          m_aRestartControls.Add(last);
 
       m_aControls.Add(last);
+      m_aDirtyFlags.Add(false);
    }
 }
 
@@ -653,6 +654,18 @@ void wxOptionsPage::OnChange(wxEvent& event)
    wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
 
    UpdateUI();
+
+   wxControl *control = (wxControl *)event.GetEventObject();
+   int index = m_aControls.Index(control);
+
+   if ( index != wxNOT_FOUND )
+   {
+      m_aDirtyFlags[(size_t)index] = true;
+   }
+   else
+   {
+      wxFAIL_MSG("unknown control in wxOptionsPage::OnChange");
+   }
 
    if ( !dialog )
    {
@@ -664,7 +677,6 @@ void wxOptionsPage::OnChange(wxEvent& event)
       return;
    }
 
-   wxControl *control = (wxControl *)event.GetEventObject();
    if ( m_aVitalControls.Index(control) != -1 )
       dialog->SetDoTest();
    else
@@ -863,7 +875,10 @@ bool wxOptionsPage::TransferDataToWindow()
 
          default:
             wxFAIL_MSG("unexpected field type");
-         }
+      }
+
+      // the dirty flag was set from the OnChange() callback, reset it!
+      ClearDirty(n);
    }
 
    return TRUE;
@@ -878,66 +893,74 @@ bool wxOptionsPage::TransferDataFromWindow()
    long lValue = 0;
    for ( size_t n = m_nFirst; n < m_nLast; n++ )
    {
+      // only write the controls which were really changed
+      if ( !IsDirty(n) )
+         continue;
+
       wxControl *control = GetControl(n);
       switch ( GetFieldType(n) )
       {
-      case Field_Text:
-      case Field_File:
-      case Field_Color:
-      case Field_Number:
-         wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+         case Field_Text:
+         case Field_File:
+         case Field_Color:
+         case Field_Number:
+            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
-         strValue = ((wxTextCtrl *)control)->GetValue();
+            strValue = ((wxTextCtrl *)control)->GetValue();
 
-         if ( GetFieldType(n) == Field_Number ) {
-            wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+            if ( GetFieldType(n) == Field_Number ) {
+               wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
 
-            lValue = atol(strValue);
-         }
-         else {
-            wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
-         }
-         break;
-
-      case Field_Bool:
-         wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
-         wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
-
-         lValue = ((wxCheckBox *)control)->GetValue();
-         break;
-
-      case Field_Action:
-         wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
-         wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
-
-         lValue = ((wxRadioBox *)control)->GetSelection();
-         break;
-      case Field_Combo:
-         wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
-         wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
-
-         lValue = ((wxComboBox *)control)->GetSelection();
-         break;
-      case Field_List:
-         wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
-         wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
-
-         // join it (FIXME what if it contains ';'?)
-         {
-            wxListBox *listbox = (wxListBox *)control;
-            for ( size_t m = 0; m < (size_t)listbox->Number(); m++ ) {
-               if ( !strValue.IsEmpty() ) {
-                  strValue << ';';
-               }
-
-               strValue << listbox->GetString(m);
+               lValue = atol(strValue);
             }
-         }
-         break;
-      case Field_Message:
-         break;
-      default:
-         wxFAIL_MSG("unexpected field type");
+            else {
+               wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+            }
+            break;
+
+         case Field_Bool:
+            wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
+
+            lValue = ((wxCheckBox *)control)->GetValue();
+            break;
+
+         case Field_Action:
+            wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
+
+            lValue = ((wxRadioBox *)control)->GetSelection();
+            break;
+
+         case Field_Combo:
+            wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
+
+            lValue = ((wxComboBox *)control)->GetSelection();
+            break;
+
+         case Field_List:
+            wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
+
+            // join it (FIXME what if it contains ';'?)
+            {
+               wxListBox *listbox = (wxListBox *)control;
+               for ( size_t m = 0; m < (size_t)listbox->Number(); m++ ) {
+                  if ( !strValue.IsEmpty() ) {
+                     strValue << ';';
+                  }
+
+                  strValue << listbox->GetString(m);
+               }
+            }
+            break;
+
+         case Field_Message:
+            break;
+
+         default:
+            wxFAIL_MSG("unexpected field type");
       }
 
       if ( gs_aConfigDefaults[n].IsNumeric() )
@@ -961,12 +984,12 @@ bool wxOptionsPage::TransferDataFromWindow()
 
 wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
                                            ProfileBase *profile)
-   : wxOptionsPage(parent,
-                   _("Compose"),
-                   profile,
-                   ConfigField_ComposeFirst,
-                   ConfigField_ComposeLast,
-                   MH_OPAGE_COMPOSE)
+                    : wxOptionsPage(parent,
+                                    _("Compose"),
+                                    profile,
+                                    ConfigField_ComposeFirst,
+                                    ConfigField_ComposeLast,
+                                    MH_OPAGE_COMPOSE)
 {
 }
 
@@ -991,12 +1014,12 @@ wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
 
 wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
                                        ProfileBase *profile)
-   : wxOptionsPage(parent,
-                   _("Identity"),
-                   profile,
-                   ConfigField_IdentFirst,
-                   ConfigField_IdentLast,
-                   MH_OPAGE_IDENT)
+                  : wxOptionsPage(parent,
+                                  _("Identity"),
+                                  profile,
+                                  ConfigField_IdentFirst,
+                                  ConfigField_IdentLast,
+                                  MH_OPAGE_IDENT)
 {
 }
 
@@ -1008,12 +1031,12 @@ wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
 
 wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
                                          ProfileBase *profile)
-   : wxOptionsPage(parent,
-                   _("Python"),
-                   profile,
-                   ConfigField_PythonFirst,
-                   ConfigField_PythonLast,
-                   MH_OPAGE_PYTHON)
+                   : wxOptionsPage(parent,
+                                   _("Python"),
+                                   profile,
+                                   ConfigField_PythonFirst,
+                                   ConfigField_PythonLast,
+                                   MH_OPAGE_PYTHON)
 {
 }
 
@@ -1026,12 +1049,12 @@ wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
 
 wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
                                     ProfileBase *profile)
-   : wxOptionsPage(parent,
-                   _("Adressbook"),
-                   profile,
-                   ConfigField_AdbFirst,
-                   ConfigField_AdbLast,
-                   MH_OPAGE_ADB)
+                : wxOptionsPage(parent,
+                                _("Adressbook"),
+                                profile,
+                                ConfigField_AdbFirst,
+                                ConfigField_AdbLast,
+                                MH_OPAGE_ADB)
 {
 }
 
@@ -1042,12 +1065,12 @@ wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
 
 wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
                                          ProfileBase *profile)
-   : wxOptionsPage(parent,
-                   _("Miscellaneous"),
-                   profile,
-                   ConfigField_OthersFirst,
-                   ConfigField_OthersLast,
-                   MH_OPAGE_OTHERS)
+                   : wxOptionsPage(parent,
+                                   _("Miscellaneous"),
+                                   profile,
+                                   ConfigField_OthersFirst,
+                                   ConfigField_OthersLast,
+                                   MH_OPAGE_OTHERS)
 {
 }
 
