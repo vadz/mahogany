@@ -1092,7 +1092,14 @@ void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree,
    String suffix = GetLabelSuffix(mfStatus);
    if ( !suffix.empty() )
    {
-      tree->SetItemText(GetId(), GetName() + suffix);
+      wxString textOld = tree->GetItemText(GetId()),
+               textNew = GetName() + suffix;
+
+      // avoid flicker: don't update the item text unless it really changed
+      if ( textNew != textOld )
+      {
+         tree->SetItemText(GetId(), textNew);
+      }
    }
 }
 
