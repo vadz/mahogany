@@ -61,13 +61,19 @@ static wxArrayString BuildListOfModulesDirs();
 #endif // USE_MODULES_STATIC
 
 // ----------------------------------------------------------------------------
-// Actual MModule code
+// constants
 // ----------------------------------------------------------------------------
 
 #define DLL_EXTENSION wxDllLoader::GetDllExt()
 
 #define MMD_SIGNATURE "Mahogany-Module-Definition"
 
+// the trace mask used by module loading code
+#define M_TRACE_MODULES "mmodule"
+
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
 
 /** Structure for holding information about a loaded module. */
 struct MModuleListEntry
@@ -93,6 +99,10 @@ KBLIST_DEFINE(MModuleList, MModuleListEntry);
 
 /// The actual list of all loaded modules.
 static MModuleList *gs_MModuleList = NULL;
+
+// ============================================================================
+// implementation
+// ============================================================================
 
 static
 MModuleList *GetMModuleList(void)
@@ -195,13 +205,22 @@ void MModule_AddStaticModule(const char *Name,
    me->m_InitFunc = initFunc;
    GetMModuleList()->push_back(me);
 }
-#else
+#else // !USE_MODULES_STATIC
 static
 MModule *LoadModuleInternal(const String & name, const String &pathname)
 {
    bool success = false;
    wxDllType dll = wxDllLoader::LoadLibrary(pathname, &success);
-   if(! success) return NULL;
+   if(! success)
+   {
+      wxLogTrace(M_TRACE_MODULES, "Failed to load module '%s' from '%s'.",
+                 name.c_str(), pathname.c_str());
+
+      return NULL;
+   }
+
+   wxLogTrace(M_TRACE_MODULES, "Successfully loaded module '%s' from '%s'.",
+              name.c_str(), pathname.c_str());
 
    MModule_InitModuleFuncType initFunc =
       (MModule_InitModuleFuncType)
@@ -241,8 +260,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
    }
    return module;
 }
-#endif
-
+#endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 
 /* static */
 MModule *
@@ -258,8 +276,22 @@ MModule::LoadModule(const String & name)
 #ifdef USE_MODULES_STATIC
    return NULL;
 #else // !USE_MODULES_STATIC
+
    wxArrayString dirs = BuildListOfModulesDirs();
    size_t nDirs = dirs.GetCount();
+
+#ifdef DEBUG
+   String path;
+   for ( size_t n = 0; n < nDirs; n++ )
+   {
+      if ( !path.empty() )
+         path += ":";
+      path += dirs[nDirs];
+   }
+
+   wxLogTrace(M_TRACE_MODULES, "Looking for module '%s' in the path '%s'.",
+              name.c_str(), path.c_str());
+#endif // DEBUG
 
    const wxString moduleExt = DLL_EXTENSION;
 
