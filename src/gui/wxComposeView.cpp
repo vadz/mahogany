@@ -754,17 +754,6 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
    text.Trim(FALSE); // trim spaces from both sides
    text.Trim(TRUE);
 
-   // remove "mailto:" prefix if it's there - this is convenient when you paste
-   // in an URL from the web browser
-   if ( text.StartsWith("mailto:", &text) )
-   {
-      SetValue(text);
-      SetInsertionPointEnd();
-
-      // don't try to expand it, the address is already complete
-      return TRUE;
-   }
-
    // check for the lone '"' simplifies the code for finding the starting
    // position below: it should be done here, otherwise the following loop
    // will crash!
@@ -803,7 +792,7 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
 
       nLastAddr = p - pStart;
    }
-   else
+   else // unquoted
    {
       // search back until the last address separator
       for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
@@ -827,41 +816,32 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
       }
    }
 
+   // so now we've got the text we'll be trying to expand
    String textOrig = text.c_str() + nLastAddr;
 
-   wxArrayString expansions;
-   if ( AdbExpand(expansions, textOrig, m_lookupMode,
-                  quiet ? NULL : GetComposer()) )
+   // remove "mailto:" prefix if it's there - this is convenient when you paste
+   // in an URL from the web browser
+   String newText;
+   if ( !textOrig.StartsWith("mailto:", &newText) )
    {
-      // find the end of the previous address
-      size_t nPrevAddrEnd;
-      if ( nLastAddr > 0 )
+      // if the text already has a '@' inside it, assume it's a full email
+      // address and doesn't need to be expanded (this saves a lot of time as
+      // expanding a non existing address looks through all address books...)
+      if ( textOrig.find('@') != String::npos )
       {
-         // undo "++" above
-         nLastAddr--;
+         // nothing to do
+         return TRUE;
       }
 
-      for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
+      wxArrayString expansions;
+      if ( !AdbExpand(expansions, textOrig, m_lookupMode,
+                     quiet ? NULL : GetComposer()) )
       {
-         char c = text[nPrevAddrEnd];
-         if ( !isspace(c) && (c != ',') && (c != ';') )
-         {
-            // this character is a part of previous string, leave it there
-            nPrevAddrEnd++;
-
-            break;
-         }
+         // cancelled, don't do anything
+         return TRUE;
       }
 
-      // take what was there before...
-      wxString newText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
-      if ( !newText.empty() )
-      {
-         // there was something before, add separator
-         newText += CANONIC_ADDRESS_SEPARATOR;
-      }
-
-      // ... and and the replacement string(s)
+      // construct the replacement string(s)
       size_t nExpCount = expansions.GetCount();
       for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
       {
@@ -887,10 +867,38 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
             newText += '"';
          }
       }
-
-      SetValue(newText);
-      SetInsertionPointEnd();
    }
+
+   // find the end of the previous address
+   size_t nPrevAddrEnd;
+   if ( nLastAddr > 0 )
+   {
+      // undo "++" above
+      nLastAddr--;
+   }
+
+   for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
+   {
+      char c = text[nPrevAddrEnd];
+      if ( !isspace(c) && (c != ',') && (c != ';') )
+      {
+         // this character is a part of previous string, leave it there
+         nPrevAddrEnd++;
+
+         break;
+      }
+   }
+
+   // keep the text up to the address we expanded/processed
+   wxString oldText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
+   if ( !oldText.empty() )
+   {
+      // there was something before, add separator
+      oldText += CANONIC_ADDRESS_SEPARATOR;
+   }
+
+   SetValue(oldText + newText);
+   SetInsertionPointEnd();
 
    return TRUE;
 }
