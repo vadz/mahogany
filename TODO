@@ -120,6 +120,9 @@ TODO:
 
 - MFolder.i
 
+- are mail contens exported/imported in wrong order in reply?
+  attachments appear before text.
+
 for release:
 
 - remove dialog box in MailFolderCC::Ping about reopening folder!!!

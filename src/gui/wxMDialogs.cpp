@@ -95,26 +95,35 @@ extern void CloseSplash()
 class MTextInputDialog : public wxDialog
 {
 public:
-  MTextInputDialog(wxWindow *parent,
-                   const wxString& strText,
-                   const wxString& strCaption,
-                   const wxString& strPrompt,
-                   const wxString& strConfigPath,
-                   const wxString& strDefault,
-                   bool passwordflag);
+   MTextInputDialog(wxWindow *parent,
+                    const wxString& strText,
+                    const wxString& strCaption,
+                    const wxString& strPrompt,
+                    const wxString& strConfigPath,
+                    const wxString& strDefault,
+                    bool passwordflag);
 
-  // accessors
-  const wxString& GetText() const { return m_strText; }
+   // accessors
+   const wxString& GetText() const { return m_strText; }
 
-  // base class virtuals implemented
-  virtual bool TransferDataToWindow();
-  virtual bool TransferDataFromWindow();
+   // base class virtuals implemented
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
 
+   // if using a textctrl and not a combobox, this will process the
+   // ENTER key
+   void OnEnter(WXUNUSED(wxEvent &))
+      { TransferDataFromWindow(); EndModal(wxID_OK); }
 private:
    wxString      m_strText;
    wxPTextEntry *m_text;
    wxTextCtrl   *m_passwd; // used if we ask for a password, NULL otherwise
+   DECLARE_EVENT_TABLE()
 };
+
+BEGIN_EVENT_TABLE(MTextInputDialog, wxDialog)
+    EVT_TEXT_ENTER(-1, MTextInputDialog::OnEnter)
+END_EVENT_TABLE()
 
 // a dialog showing all folders
 class MFolderDialog : public wxDialog
@@ -358,14 +367,19 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
   (void)new wxStaticText(this, -1, strPrompt, wxPoint(x, y + dy),
                          wxSize(widthLabel, heightLabel));
   if(passwordflag)
+  {
      m_passwd = new wxTextCtrl(this, -1, "",
                                wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
-                               wxSize(widthText, heightText), wxTE_PASSWORD);
+                               wxSize(widthText, heightText),
+                               wxTE_PASSWORD|wxTE_PROCESS_ENTER);
+     m_passwd->SetFocus();
+  }
   else
   {
      m_text = new wxPTextEntry(strConfigPath, this, -1, "",
                                wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                                wxSize(widthText, heightText));
+     m_text->SetFocus();
      m_passwd = NULL; // signal that it's not used
   }
   // buttons
