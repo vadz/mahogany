@@ -32,12 +32,12 @@
 #  include <wx/checkbox.h>
 #  include <wx/listbox.h>
 #  include <wx/sizer.h>
-#  include <wx/statline.h>
 #  include <wx/statbmp.h>
 #  include <wx/statbox.h>
 #endif // USE_PCH
 
 #include <wx/datetime.h>
+#include <wx/statline.h>
 
 #include "MImport.h"
 

@@ -1184,10 +1184,15 @@ static String GetFolderNameFromProfile(ProfileBase *profile)
    size_t lenPrefix = strlen(M_PROFILE_CONFIG_SECTION);
    if ( strncmp(profileName, M_PROFILE_CONFIG_SECTION, lenPrefix) == 0 )
    {
-      // +1 to skip following '/'
-      folderName = profileName.c_str() + lenPrefix + 1;
+      const char *p = profileName.c_str() + lenPrefix;
 
-      folderName = folderName.BeforeFirst('/');
+      if ( *p )
+      {
+         // +1 to skip following '/'
+         folderName = p + 1;
+         folderName = folderName.BeforeFirst('/');
+      }
+      //else: leave empty
    }
 
    return folderName;

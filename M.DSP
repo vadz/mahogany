@@ -348,6 +348,10 @@ SOURCE=.\src\gui\Mdnd.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\MImport.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\wxBrowseButton.cpp
 # End Source File
 # Begin Source File
@@ -542,6 +546,8 @@ SOURCE=.\src\adb\ImportPine.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
+# PROP Exclude_From_Build 1
+
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
@@ -592,6 +598,8 @@ SOURCE=.\src\adb\ImportXFMail.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
+# PROP Exclude_From_Build 1
+
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
@@ -633,6 +641,7 @@ SOURCE=.\src\adb\ProvFC.cpp
 # Begin Source File
 
 SOURCE=.\src\adb\ProvPalm.cpp
+# PROP Exclude_From_Build 1
 # End Source File
 # End Group
 # Begin Group "python"
@@ -1088,6 +1097,20 @@ BuildCmds= \
 
 !ENDIF 
 
+# End Source File
+# End Group
+# Begin Group "import"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\src\modules\PineImport.cpp
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\modules\XFMailImport.cpp
+# PROP Exclude_From_Build 1
 # End Source File
 # End Group
 # Begin Source File

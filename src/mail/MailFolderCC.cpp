@@ -336,7 +336,7 @@ static inline void CCVerbose(void)
 void
 MailFolderCC::UpdateCClientConfig()
 {
-   mm_show_debug = READ_APPCONFIG(MP_DEBUG_CCLIENT);
+   mm_show_debug = READ_APPCONFIG(MP_DEBUG_CCLIENT) != 0;
 }
 
 // loglevel for cclient error messages:

@@ -847,12 +847,21 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    // create an image list and associate it with this control
    size_t nIcons = GetNumberOfFolderIcons();
 
-   wxImageList *imageList = new wxImageList(16, 16, FALSE, nIcons);
+   wxImageList *imageList = NULL;
 
    wxIconManager *iconManager = mApplication->GetIconManager();
    for ( size_t n = 0; n < nIcons; n++ )
    {
-      imageList->Add(iconManager->GetBitmap(GetFolderIconName(n)));
+      wxBitmap bmp = iconManager->GetBitmap(GetFolderIconName(n));
+
+      // create thei mage list once we know the size of the images in it
+      if ( !imageList )
+      {
+         imageList = new wxImageList(bmp.GetWidth(), bmp.GetHeight(),
+                                     FALSE, nIcons);
+      }
+
+      imageList->Add(bmp);
    }
 
    SetImageList(imageList);

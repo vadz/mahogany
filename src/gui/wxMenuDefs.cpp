@@ -43,16 +43,6 @@
 #include "gui/wxMenuDefs.h"
 
 // ----------------------------------------------------------------------------
-// macros
-// ----------------------------------------------------------------------------
-
-#ifdef OS_WIN
-# define BMP(name) (mApplication->GetIconManager()->GetBitmap(name))
-#else
-# define BMP(name)  ICON(name)
-#endif
-
-// ----------------------------------------------------------------------------
 // local data
 // ----------------------------------------------------------------------------
 
@@ -461,8 +451,13 @@ void AddToolbarButton(wxToolBar *toolbar, int nButton)
       toolbar->AddSeparator();
    }
    else {
+      wxString iconName = g_aToolBarData[nButton].bmp;
       toolbar->AddTool(g_aToolBarData[nButton].id,
-                       BMP(g_aToolBarData[nButton].bmp),
+#ifdef __WXMSW__
+                       mApplication->GetIconManager()->GetBitmap(iconName),
+#else
+                       mApplication->GetIconManager()->GetIcon(iconName),
+#endif
                        wxNullBitmap,
                        FALSE, -1, -1, NULL,
                        _(g_aToolBarData[nButton].tooltip));
@@ -476,7 +471,7 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
 
 #ifdef __WXMSW__
    // we use the icons of non standard size
-   toolbar->SetToolBitmapSize(wxSize(32, 30));
+   toolbar->SetToolBitmapSize(wxSize(24, 24));
 #endif
 
    wxASSERT( frameId < WXFRAME_MAX );

@@ -118,7 +118,8 @@ folder_root		BITMAP "folder_root.bmp"
 folder_group		BITMAP "folder_group.bmp"
 folder_newmail		BITMAP "folder_newmail.bmp"
 folder_sentmail		BITMAP "folder_sentmail.bmp"
-folder_palmpilot	BITMAP "folder_palmpilot.bmp"
+//folder_palmpilot	BITMAP "folder_palmpilot.bmp"
+folder_palmpilot	BITMAP "folder_trash.bmp"
 folder_trash		BITMAP "folder_trash.bmp"
 
 // Custom headers dialog image list (16x16)

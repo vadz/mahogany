@@ -6,11 +6,6 @@
  * $Id$
  *******************************************************************/
 
-#ifdef USE_NEW_MSGVIEW
-#   include "wxMessageViewNew.cpp"
-#else
-
-
 #ifdef __GNUG__
 #   pragma implementation "wxMessageView.h"
 #endif
@@ -24,6 +19,10 @@
 // ----------------------------------------------------------------------------
 
 #include "Mpch.h"
+
+#ifdef USE_NEW_MSGVIEW
+#   include "wxMessageViewNew.cpp"
+#else
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
