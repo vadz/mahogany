@@ -67,7 +67,6 @@
 
 #include "gui/wxIconManager.h"
 
-#include <wx/ffile.h>
 #include "wx/persctrl.h"
 #include <wx/help.h>
 #include <wx/tipdlg.h>
@@ -317,92 +316,6 @@ public:
 private:
    MFolderDialog *m_dlg;
 };
-
-// ----------------------------------------------------------------------------
-// MTextDialog - a dialog containing a multi-line text control (used to show
-//               user some text)
-// ----------------------------------------------------------------------------
-
-class MTextDialog : public wxDialog
-{
-public:
-    MTextDialog(wxWindow *parent,
-                const wxString& title,
-                const wxString& text,
-                const wxPoint& position,
-                const wxSize& size)
-    : wxDialog(parent, -1, wxString("Mahogany: ") + title, position, size,
-               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
-               | wxSYSTEM_MENU | wxMINIMIZE_BOX
-               | wxMAXIMIZE_BOX | wxTHICK_FRAME ) // make it resizealbe
-    {
-       // create controls
-       m_text = new wxTextCtrl(this, -1, "",
-                               wxPoint(0, 0), size,
-                               wxTE_MULTILINE | wxTE_READONLY);
-       m_text->SetValue(text);
-       m_text->SetFont(wxFont(12, wxFONTFAMILY_TELETYPE,
-                              wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-
-       // in TAB order we want "Save" to get focus before "Close", so create
-       // them in order
-       wxButton *btnSave = new wxButton(this, wxID_SAVE, _("&Save...")),
-                *btnClose = new wxButton(this, wxID_CANCEL, _("Close"));
-
-
-       // layout them
-       wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL),
-               *sizerBtns = new wxBoxSizer(wxHORIZONTAL);
-
-       sizerBtns->Add(btnSave, 0, wxRIGHT, LAYOUT_X_MARGIN);
-       sizerBtns->Add(btnClose, 0, wxLEFT, LAYOUT_X_MARGIN);
-
-       sizerTop->Add(m_text, 1, wxEXPAND);
-       sizerTop->Add(sizerBtns, 0, wxCENTRE | wxTOP | wxBOTTOM, LAYOUT_Y_MARGIN);
-
-       // set the sizer &c
-       SetSizer(sizerTop);
-       SetAutoLayout(TRUE);
-
-       // FIXME: bug in wxMSW? without Layout() the buttons are not positioned
-       //        correctly initially
-#ifdef __WXMSW__
-       Layout();
-#endif
-
-       m_text->SetFocus();
-    }
-
-private:
-    // save the text controls contents to file
-    void OnSave(wxCommandEvent&)
-    {
-       String filename = wxPFileSelector
-                         (
-                           "RawText",
-                           _("Mahogany: Please choose where to save the text"),
-                           NULL, NULL, NULL, NULL,
-                           wxSAVE | wxOVERWRITE_PROMPT,
-                           this
-                         );
-       if ( !filename.empty() )
-       {
-          wxFFile fileOut(filename, "w");
-          if ( !fileOut.IsOpened() || !fileOut.Write(m_text->GetValue()) )
-          {
-             wxLogError(_("Failed to save the dialog contents."));
-          }
-       }
-    }
-
-    wxTextCtrl *m_text;
-
-    DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(MTextDialog, wxDialog)
-   EVT_BUTTON(wxID_SAVE, MTextDialog::OnSave)
-END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
 // NoBusyCursor ensures that the cursor is not "busy" (hourglass) while this
@@ -1608,32 +1521,6 @@ MDialog_FolderChoose(const wxWindow *parent, MFolder *folder, int flags)
    return dlg.ShowModal() == wxID_OK ? dlg.GetFolder() : NULL;
 }
 
-
-void MDialog_ShowText(wxWindow *parent,
-                      const char *title,
-                      const char *text,
-                      const char *configPath)
-{
-   int x, y, w, h;
-   if ( configPath )
-   {
-      wxMFrame::RestorePosition(configPath, &x, &y, &w, &h);
-   }
-   else
-   {
-      x =
-      y = -1;
-      w = 500;
-      h = 300;
-   }
-
-   MTextDialog dlg(GetDialogParent(parent), title, text,
-                   wxPoint(x, y), wxSize(w, h));
-   (void)dlg.ShowModal();
-
-   if ( configPath )
-      wxMFrame::SavePosition(configPath, &dlg);
-}
 
 //-----------------------------------------------------------------------------
 
