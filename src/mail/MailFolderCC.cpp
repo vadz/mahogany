@@ -77,6 +77,11 @@ extern "C"
 {
    #undef LOCAL         // previously defined in other cclient headers
    #include <pop3.h>    // for pop3_xxx() in GetMessageUID()
+   #undef LOCAL         // now defined by pop3.h
+
+   #define namespace cc__namespace
+   #include <imap4r1.h> // for LEVELSORT/THREAD in CanSort()/Thread()
+   #undef namespace
 }
 
 // this is #define'd in windows.h included by one of cclient headers
@@ -3436,14 +3441,16 @@ MailFolderCC::DebugDump() const
 
 bool MailFolderCC::CanSort() const
 {
-   // TODO
-   return false;
+   CHECK( m_MailStream, false, "MailFolderCC::CanSort(): folder closed" );
+
+   return GetType() == MF_IMAP && LEVELSORT(m_MailStream);
 }
 
 bool MailFolderCC::CanThread() const
 {
-   // TODO
-   return false;
+   CHECK( m_MailStream, false, "MailFolderCC::CanThread(): folder closed" );
+
+   return GetType() == MF_IMAP && LEVELTHREAD(m_MailStream);
 }
 
 // ----------------------------------------------------------------------------
