@@ -13,6 +13,8 @@ $Id$
 		    profile which work with a temporary subgroup
 
 9	KB	wxLayout:
+		- speed up by only running Layout() for recalculations 
+		  rather than the full RequestUpdate()
 		- reduce the scrollbar flickering somehow
 		- editing seems a bit slow (related to scrollbar flicker?)
 		- selections: do not exchange end/start while
