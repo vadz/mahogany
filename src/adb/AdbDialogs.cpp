@@ -268,7 +268,6 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
    }
 
    SetDefaultSize(4*LAYOUT_X_MARGIN + msg->GetSize().x + 32, 12*hBtn);
-   Centre();
    DoUpdateUI();
 }
 

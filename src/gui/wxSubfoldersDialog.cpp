@@ -751,13 +751,11 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
    c->bottom.SameAs(m_textFind, wxTop, 2*LAYOUT_Y_MARGIN);
    m_treectrl->SetConstraints(c);
 
-   SetDefaultSize(4*wBtn, 10*hBtn);
-
    wxTreeItemId idRoot = m_treectrl->GetRootItem();
    m_folderPath = m_treectrl->GetItemText(idRoot);
    m_treectrl->Expand(idRoot);
 
-   Layout();
+   SetDefaultSize(4*wBtn, 10*hBtn);
 }
 
 wxSubscriptionDialog::~wxSubscriptionDialog()

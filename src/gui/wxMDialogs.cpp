@@ -1259,7 +1259,6 @@ MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder)
 
    // position the dialog
    SetDefaultSize(6*wBtn, 20*hBtn);
-   Layout();
 }
 
 MFolderDialog::~MFolderDialog()
@@ -1586,7 +1585,6 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    c->height.AsIs();
    m_checkReSortOnChange->SetConstraints(c);
 
-   Layout();
    SetDefaultSize(380,310);
 
    m_wasChanged = false;
@@ -1807,7 +1805,6 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    c->height.AsIs();
    m_Invert->SetConstraints(c);
 
-   Layout();
    SetDefaultSize(380,310);
 
    TransferDataToWindow();
@@ -2958,8 +2955,8 @@ wxLicenseDialog::wxLicenseDialog(Profile *profile, wxWindow *parent)
    button = (wxButton *) FindWindow(wxID_CANCEL);
    button->SetLabel(_("Reject"));
 
-   SetDefaultSize(400, 400, FALSE /* not minimal */);
    SetAutoLayout(TRUE);
+   SetDefaultSize(400, 400, FALSE /* not minimal */);
 }
 
 
@@ -3581,7 +3578,6 @@ MText2Dialog::MText2Dialog(wxWindow *parent,
    c->height.AsIs();
    m_text2->SetConstraints(c);
 
-   Layout();
    SetDefaultSize(5*wBtn, 6*hBtn);
 }
 

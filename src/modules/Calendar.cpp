@@ -713,7 +713,7 @@ CalendarFrame::GetConfig(void)
 #ifdef OS_WIN
       // MP_DATE_FMT contains '%' which are being (mis)interpreted as
       // env var expansion characters under Windows
-      ProfileEnvVarSave noEnvVars(m_profile);
+      ProfileEnvVarSave noEnvVars(fp);
 #endif // OS_WIN
 
       m_DateFormat = READ_CONFIG(fp, MP_DATE_FMT);

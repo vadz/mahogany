@@ -79,8 +79,6 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
                               _("Extension Modules Configuration"),
                               "ModulesDialog")
 {
-   SetDefaultSize(380,400);
-
    m_Listing = MModule::ListAvailableModules();
 
    // create controls
@@ -119,7 +117,7 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_textCtrl->SetConstraints(c);
 
-   Layout();
+   SetDefaultSize(380,400);
 }
 
 wxModulesDialog::~wxModulesDialog()

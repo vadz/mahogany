@@ -952,6 +952,8 @@ void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
 
       m_sizeMin = wxSize(width, height);
    }
+
+   Layout();
 }
 
 wxStaticBox *
@@ -1106,8 +1108,6 @@ void wxOptionsEditDialog::CreateAllControls()
 
    // set dialog size (FIXME these are more or less arbitrary numbers)
    SetDefaultSize(6*wBtn, 27*hBtn, TRUE /* set as min size too */);
-
-   Layout();
 }
 
 // transfer the data to/from notebook pages

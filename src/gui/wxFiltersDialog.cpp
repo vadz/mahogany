@@ -1062,7 +1062,6 @@ wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
    m_lboxFilters->SetConstraints(c);
 
    SetDefaultSize(5*wBtn, 9*hBtn);
-   Layout();
 
    m_lboxFilters->SetFocus();
 }
@@ -1300,7 +1299,6 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
 
    // increase min horz size
    SetDefaultSize(5*wBtn, 19*hBtn);
-   Layout();
 }
 
 wxFolderFiltersDialog::~wxFolderFiltersDialog()

@@ -755,7 +755,6 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
    }
 
    // final touch
-   Layout();
    m_textctrlName->SetFocus();
    SetDefaultSize(4*wBtn, (8 + extraHeight)*hBtn);
 }
