@@ -1608,6 +1608,7 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
          WXMENU_MSG_REPLY_ALL_WITH_TEMPLATE,
          WXMENU_MSG_FORWARD,
          WXMENU_MSG_FORWARD_WITH_TEMPLATE,
+         WXMENU_MSG_FOLLOWUP_TO_NEWSGROUP,
          WXMENU_SEPARATOR,
          WXMENU_MSG_FILTER,
          WXMENU_MSG_PRINT,

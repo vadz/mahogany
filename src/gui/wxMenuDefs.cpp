@@ -391,6 +391,12 @@ static const MenuItemInfo g_aMenuItems[] =
          gettext_noop("Forward this message after choosing a template to use"),
          wxITEM_NORMAL
       },
+      {
+         WXMENU_MSG_FOLLOWUP_TO_NEWSGROUP,
+         gettext_noop("Follow-up to &newsgroup"),
+         gettext_noop("Follow-up (reply to) this message to the newsgroup"),
+         wxITEM_NORMAL
+      },
    { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
    { WXMENU_MSG_BOUNCE,    gettext_noop("&Bounce..."), gettext_noop("Redirect this message to another recipient"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },

@@ -715,6 +715,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
       case WXMENU_MSG_REPLY_SENDER:
       case WXMENU_MSG_REPLY_ALL:
       case WXMENU_MSG_REPLY_LIST:
+      case WXMENU_MSG_FOLLOWUP_TO_NEWSGROUP:
          {
             int quote = READ_CONFIG(m_asmf->GetProfile(), MP_REPLY_QUOTE_ORIG);
 
@@ -747,6 +748,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
                CASE_REPLY(REPLY_SENDER);
                CASE_REPLY(REPLY_ALL);
                CASE_REPLY(REPLY_LIST);
+               CASE_REPLY(FOLLOWUP_TO_NEWSGROUP);
             }
 
 #undef CASE_REPLY

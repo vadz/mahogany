@@ -1012,6 +1012,20 @@ Composer::CreateNewArticle(const MailFolder::Params& params,
 }
 
 Composer *
+Composer::CreateFollowUpArticle(const MailFolder::Params& params,
+                                Profile *profile,
+                                Message *original)
+{
+   wxComposeView *cv = CreateComposeView(profile, params,
+                                         wxComposeView::Mode_News,
+                                         wxComposeView::Message_Reply);
+
+   cv->SetOriginal(original);
+
+   return cv;
+}
+
+Composer *
 Composer::CreateNewMessage(const MailFolder::Params& params, Profile *profile)
 {
    wxComposeView *cv = CreateComposeView(profile, params,

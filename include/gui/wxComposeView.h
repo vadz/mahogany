@@ -93,7 +93,7 @@ public:
 
    /**
      Set the original message to use when replying or forwarding. Should be
-     called only by CreateReplyMessage() and CreateFwdMessage()
+     called only by CreateReplyMessage(), CreateFwdMessage() and CreateFollowUpArticle()
    */
    void SetOriginal(Message *original);
 

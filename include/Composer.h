@@ -53,6 +53,16 @@ public:
    static Composer *CreateNewArticle(Profile *profile = NULL)
       { return CreateNewArticle(MailFolder::Params(), profile); }
 
+   /** Constructor for sending a follow-up to newsgroup.
+
+       @param profile parent profile
+       @param original message that we replied to
+       @return pointer to the new compose view
+    */
+   static Composer *CreateFollowUpArticle(const MailFolder::Params& params,
+                                          Profile *profile,
+                                          Message * original = NULL);
+
    /** Constructor for sending mail.
        @param profile parent profile
        @return pointer to the new compose view
@@ -135,7 +145,7 @@ public:
    /// sets Subject field
    virtual void SetSubject(const String& subj) = 0;
 
-   /// adds recepients from addr (Recepient_Max means to reuse the last)
+   /// adds recipients from addr (Recipient_Max means to reuse the last)
    virtual void AddRecipients(const String& addr,
                               RecipientType rcptType = Recipient_Max) = 0;
 
@@ -147,6 +157,9 @@ public:
 
    /// adds a "Bcc" recipient
    void AddBcc(const String& addr) { AddRecipients(addr, Recipient_Bcc); }
+
+   /// adds a Newsgroup
+   void AddNewsgroup(const String& addr) { AddRecipients(addr, Recipient_Newsgroup); }
 
    /** Sets the address fields, To:, CC: and BCC:.
        @param To primary address to send mail to

@@ -535,18 +535,15 @@ ExtractListPostAddress(const String& listPostHeader)
    }
 }
 
-// add the recipients addresses extracted from the message being replied to to
-// the composer according to the MailFolder::Params::replyKind value
-static void
-InitRecipients(Composer *cv,
-               Message *msg,
-               const MailFolder::Params& params,
-               Profile *profile)
+// find reply kind value replyKind, return true if it was set explicitly
+bool
+GetReplyKind(const MailFolder::Params& params,
+	     Profile *profile,
+	     MailFolder::ReplyKind& replyKind)
 {
    // first get the real reply kind
-   MailFolder::ReplyKind replyKind = params.replyKind;
+   replyKind = params.replyKind;
 
-   bool explicitReplyKind;
    if ( replyKind == MailFolder::REPLY )
    {
       // this means we should use the default reply kind for this folder
@@ -563,12 +560,26 @@ InitRecipients(Composer *cv,
       replyKind = (MailFolder::ReplyKind)rk;
 
       // implicit because we used the default value
-      explicitReplyKind = false;
+      return false;
    }
    else
    {
-      explicitReplyKind = true;
+      return true;
    }
+}
+
+// add the recipients addresses extracted from the message being replied to to
+// the composer according to the MailFolder::Params::replyKind value
+static void
+InitRecipients(Composer *cv,
+               Message *msg,
+               const MailFolder::Params& params,
+               Profile *profile)
+{
+   MailFolder::ReplyKind replyKind;
+   bool explicitReplyKind;
+
+   explicitReplyKind = GetReplyKind(params, profile, replyKind);
 
    // our own addresses - used in the code below
    String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
@@ -576,6 +587,13 @@ InitRecipients(Composer *cv,
 
    // is this a message from ourselves?
    bool fromMyself = false;
+
+   // is this a follow-up to newsgroup?
+   if ( replyKind == MailFolder::FOLLOWUP_TO_NEWSGROUP )
+   {
+      cv->AddNewsgroup( MailFolder::DecodeHeader(msg->GetNewsgroups()) );
+      return;
+   }
 
    // first try Reply-To
    wxSortedArrayString replyToAddresses;
@@ -837,7 +855,17 @@ MailFolder::ReplyMessage(Message *msg,
 
    if ( !cv )
    {
-      cv = Composer::CreateReplyMessage(params, profile, msg);
+      MailFolder::ReplyKind replyKind;
+      GetReplyKind(params, profile, replyKind);
+
+      if ( replyKind == MailFolder::FOLLOWUP_TO_NEWSGROUP )
+      {
+         cv = Composer::CreateFollowUpArticle(params, profile, msg);
+      }
+      else
+      {
+         cv = Composer::CreateReplyMessage(params, profile, msg);
+      }
 
       CHECK( cv, NULL, "failed to create composer" );
    }

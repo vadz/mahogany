@@ -94,6 +94,9 @@ public:
       /// reply to the mailing list this message was sent to
       REPLY_LIST,
 
+      /// follow-up to newsgroup
+      FOLLOWUP_TO_NEWSGROUP,
+
       /// default reply: may go to the sender, all or list
       REPLY
    };

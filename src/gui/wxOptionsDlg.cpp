@@ -1090,7 +1090,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "What do you want the default reply command to do?"),
                                                    Field_Message |
                                                    Field_Advanced, -1},
-   { gettext_noop("Default &reply kind:sender:all:list"),
+   { gettext_noop("Default &reply kind:sender:all:list:newsgroup"),
                                                    Field_Combo |
                                                    Field_Advanced, -1},
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
