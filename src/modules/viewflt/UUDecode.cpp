@@ -282,7 +282,9 @@ UUDecodeFilter::DoProcess(String& text,
               && start[2] >= '0' && start[2] <= '9'
               && start[3] == ' ' ) ) 
       {
+#if defined(__WXDEBUG__)
          wxLogWarning(_("The BEGIN line is not correctly formed."));
+#endif
          continue;
       }
 
@@ -301,17 +303,16 @@ UUDecodeFilter::DoProcess(String& text,
       String decodedFile;
       const wxChar* endOfEncodedStream = 0;
       bool ok = UUdecodeFile(start_data, decodedFile, &endOfEncodedStream);
-      if ( endOfEncodedStream[0] == '\r' &&
-           endOfEncodedStream[1] == '\n' &&
-           endOfEncodedStream[2] == 'e' &&
-           endOfEncodedStream[3] == 'n' &&
-           endOfEncodedStream[4] == 'd' )
-      {
-         endOfEncodedStream += 5;
-      }
       if ( ok )
       {
-
+         if ( endOfEncodedStream[0] == '\r' &&
+            endOfEncodedStream[1] == '\n' &&
+            endOfEncodedStream[2] == 'e' &&
+            endOfEncodedStream[3] == 'n' &&
+            endOfEncodedStream[4] == 'd' )
+         {
+            endOfEncodedStream += 5;
+         }
          // output the part before the BEGIN line, if any
          String prolog(nextToOutput, startBeginLine-2);
          if ( !prolog.empty() )
@@ -319,8 +320,7 @@ UUDecodeFilter::DoProcess(String& text,
             m_next->Process(prolog, viewer, style);
          }
 
-#if 1
-         // Let's get a fileType
+         // Let's get a mimeType from the extention
          wxFileType *fileType = mApplication->GetMimeManager().GetFileTypeFromExtension(fileName.AfterLast('.'));
          String mimeType;
          if (!fileType->GetMimeType(&mimeType)) {
@@ -330,15 +330,15 @@ UUDecodeFilter::DoProcess(String& text,
 
          MimePartRaw* decodedMime = 
             new MimePartRaw(fileName, mimeType, decodedFile, _T("uuencoded"));
-
          m_msgView->ShowPart(decodedMime);
-#else
-         viewer->InsertText(_T("UUencoded file named \""), style);
-         viewer->InsertText(fileName, style);
-         viewer->InsertText(_T("\"\n"), style);
-#endif
 
          nextToOutput = start = endOfEncodedStream;
+      }
+      else
+      {
+#if defined(__WXDEBUG__)
+         wxLogWarning(_("This message seems to contain uuencoded data, but in fact it does not."));
+#endif
       }
    }
    String prolog(nextToOutput);
