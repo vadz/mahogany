@@ -23,7 +23,7 @@ enum
    /// help about certain controls and dialogs
    MH_CONTROLS = 2000,
    MH_MAIN_FRAME = 2001,
-   MH_FOLDER_VIEW = 2001,
+   MH_FOLDER_VIEW = 2002,
    MH_MESSAGE_VIEW = 2003,
    MH_FOLDER_OPEN_DIALOG = 2004,
    MH_FOLDER_CREATE_DIALOG = 2005,
