@@ -1344,7 +1344,9 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
          m_FileName = wxPFileSelector("FolderDialogFile",
                                       _("Mahogany: Please choose a folder file"),
                                       NULL, NULL, NULL, NULL,
-                                      m_selectForOpening ? wxOPEN : wxSAVE,
+                                      m_selectForOpening
+                                       ? wxOPEN | wxFILE_MUST_EXIST
+                                       : wxSAVE,
                                       this);
          if ( !!m_FileName )
          {
@@ -1455,8 +1457,8 @@ bool MFolderDialog::TransferDataFromWindow()
                 _("Mahogany: folder selection"),
                 wxString::Format(
                 _("Sorry, the folder '%s' already exists "
-                  "and corresponds to another file, please "
-                  "choose a different name for the folder "
+                  "and corresponds to another file,\n"
+                  "please choose a different name for the folder "
                   "which will correspond to the file '%s'."),
                 name.c_str(), m_FileName.c_str()
                 ),
