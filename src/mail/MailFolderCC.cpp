@@ -3671,9 +3671,6 @@ bool MailFolderCC::ThreadMessages(ThreadData *thrData,
 {
    CHECK( m_MailStream, false, "can't thread closed folder" );
 
-   // FIXME: our threading code doesn't seem to work and I need working
-   //        threading for testing :-(
-#if 0
    // does the server support threading at all?
    if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) &&
         READ_CONFIG(m_Profile, MP_MSGS_SERVER_THREAD) )
@@ -3711,10 +3708,6 @@ bool MailFolderCC::ThreadMessages(ThreadData *thrData,
          // this is the best method available, just use it
          threadingAlgo = "REFERENCES";
       }
-#else
-   {
-      const char *threadingAlgo = "REFERENCES";
-#endif
 
       if ( threadingAlgo )
       {
