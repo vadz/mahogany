@@ -633,11 +633,14 @@ IMAP_CPPFLAGS=
 if test "$ssl_option" = "yes"; then
     AC_DEFINE(USE_SSL)
 
-    dnl We assume no IDEA/no DSA as this is easiest to compile. It doesn't
-    dnl matter anyway as we load openssl later, but we must be able to
-    dnl compile the header file (note that we can't give -DNO_RSA any longer
-    dnl (starting with imap2000) or auth_ssl.cpp wouldn't compile!)
-    IMAP_CPPFLAGS="-DNO_IDEA -DNO_DSA"
+    dnl RH9 install of OpenSSL is broken and krb5.h file included by ssl.h is
+    dnl in a non standard directory and this breaks compilation -- luckily we
+    dnl don't need it anyhow so we can just disable using Kerberos completely
+    dnl
+    dnl the others don't seem to exist any more in the new OpenSSL versions
+    dnl anyhow but we keep them here as apparently they were needed for the
+    dnl older versions, for whatever reasons...
+    SSL_CPPFLAGS="-DNO_IDEA -DNO_DSA -DOPENSSL_NO_KRB5"
 
     dnl have to give the location of SSL headers to cclient if it is in a
     dnl non standard place: note that imap2000 includes <ssl.h> and not
@@ -645,15 +648,14 @@ if test "$ssl_option" = "yes"; then
     dnl we need both
     case "$ssl_inc" in
 	/usr/include)
-	    IMAP_CPPFLAGS="-I/usr/include/openssl $IMAP_CPPFLAGS"
+	    dnl no need to -I/usr/include to the compiler options
 	    ;;
 	*)
-	    IMAP_CPPFLAGS="-I$ssl_inc -I$ssl_inc/openssl $IMAP_CPPFLAGS"
+	    SSL_CPPFLAGS="-I$ssl_inc $SSL_CPPFLAGS"
     esac
 
-    dnl note that we don't have to link with SSL libraries because we load
-    dnl them dynamically, we just need the headers
-    CPPFLAGS="-I$ssl_inc $CPPFLAGS"
+    IMAP_CPPFLAGS="-I$ssl_inc/openssl $SSL_CPPFLAGS $IMAP_CPPFLAGS"
+    CPPFLAGS="$SSL_CPPFLAGS $CPPFLAGS"
 else
     dnl tell c-client that we don't want to use SSL
     IMAP_SSLTYPE="SSLTYPE=none"
