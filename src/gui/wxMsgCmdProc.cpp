@@ -24,8 +24,6 @@
 #include  "Mpch.h"
 
 #ifndef USE_PCH
-   #include <wx/utils.h>      // for wxBeginBusyCursor()
-
    #include <wx/layout.h>
    #include <wx/statbox.h>
    #include <wx/stattext.h>
@@ -498,7 +496,7 @@ AsyncStatusHandler::AsyncStatusHandler(MsgCmdProcImpl *msgCmdProc,
    m_msgCmdProc->AddAsyncStatus(this);
 
    wxLogStatus(GetFrame(), m_msgInitial);
-   wxBeginBusyCursor();
+   MBeginBusyCursor();
 }
 
 bool AsyncStatusHandler::Monitor(Ticket ticket, const char *fmt, ...)
@@ -556,7 +554,7 @@ AsyncStatusHandler::~AsyncStatusHandler()
       wxLogStatus(GetFrame(), m_msgOk);
    }
 
-   wxEndBusyCursor();
+   MEndBusyCursor();
 }
 
 // ----------------------------------------------------------------------------
@@ -1696,37 +1694,25 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                   {
                      // delete right now
 
+                     // don't copy the messages to the trash, they
+                     // had been already copied somewhere
+                     Ticket t = m_asmf
+                                 ? m_asmf->DeleteOrTrashMessages
+                                   (
+                                    seq,
+                                    MailFolder::DELETE_NO_TRASH,
+                                    this
+                                   )
+                                 : ILLEGAL_TICKET;
+
+                     if ( t != ILLEGAL_TICKET )
                      {
-                        // Reentrancy hotfix. This function can be called
-                        // recursively from idle loop. IMO, locking should
-                        // go to MEventManager::DispatchPending to prevent
-                        // nesting of any event. However there are about ten
-                        // calls to DispatchPending, that won't like it right
-                        // now. These calls can and should be replaced with
-                        // cleaner alternatives. Then we can lock
-                        // DispatchPending itself and remove this line.
-                        MEventManagerSuspender eventSuspender;
-                        
-                        // don't copy the messages to the trash, they
-                        // had been already copied somewhere
-                        Ticket t = m_asmf
-                                    ? m_asmf->DeleteOrTrashMessages
-                                      (
-                                       seq,
-                                       MailFolder::DELETE_NO_TRASH,
-                                       this
-                                      )
-                                    : ILLEGAL_TICKET;
-   
-                        if ( t != ILLEGAL_TICKET )
-                        {
-                           m_TicketList->Add(t);
-                        }
-                        else // failed to delete?
-                        {
-                           wxLogError(_("Failed to delete messages after "
-                                        "moving them."));
-                        }
+                        m_TicketList->Add(t);
+                     }
+                     else // failed to delete?
+                     {
+                        wxLogError(_("Failed to delete messages after "
+                                     "moving them."));
                      }
 
                      if ( !wasDropped )

@@ -806,7 +806,7 @@ MessageView::GetFirstViewFilter(String *name,
                                 bool *enabled,
                                 void **cookie)
 {
-   CHECK( cookie, NULL, _T("NULL cookie in GetFirstFilter") );
+   CHECK( cookie, false, _T("NULL cookie in GetFirstFilter") );
 
    *cookie = m_filters;
 
@@ -819,7 +819,7 @@ MessageView::GetNextViewFilter(String *name,
                                bool *enabled,
                                void **cookie)
 {
-   CHECK( name && desc && enabled && cookie, NULL,
+   CHECK( name && desc && enabled && cookie, false,
           _T("NULL parameter in GetNextFilter") );
 
    if ( !*cookie )

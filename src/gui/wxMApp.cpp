@@ -2540,3 +2540,18 @@ bool CmdLineOptions::FromString(const String& s)
    return true;
 }
 
+int g_busyCursorYield;
+
+extern void MBeginBusyCursor()
+{
+   ++g_busyCursorYield;
+   wxBeginBusyCursor();
+   --g_busyCursorYield;
+}
+
+extern void MEndBusyCursor()
+{
+   ++g_busyCursorYield;
+   wxEndBusyCursor();
+   --g_busyCursorYield;
+}

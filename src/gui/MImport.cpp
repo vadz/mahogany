@@ -263,7 +263,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
       #define DO_IMPORT(what, desc) \
          if ( m_check##what->GetValue() ) \
          { \
-            wxBusyCursor bc; \
+            MBusyCursor bc; \
             m_check##what->Disable(); \
             wxLogMessage(_("Importing %s %s"), progname, desc); \
             if ( !m_importer.Import##what() ) \
@@ -324,7 +324,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
 
          flags |= MImporter::ImportFolder_SystemUseParent;
 
-         wxBusyCursor bc;
+         MBusyCursor bc;
 
          wxLogMessage(_("Importing %s %s"), progname, _("folders"));
          if ( !m_importer.ImportFolders(folderParent, flags) )

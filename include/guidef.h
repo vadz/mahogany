@@ -75,4 +75,17 @@ extern bool EnsureAvailableTextEncoding(wxFontEncoding *encoding,
                                         wxString *text = NULL,
                                         bool mayAskUser = false);
 
+// Prevent MEvent dispatch inside wxYield
+extern int g_busyCursorYield;
+
+extern void MBeginBusyCursor();
+extern void MEndBusyCursor();
+
+class MBusyCursor
+{
+public:
+   MBusyCursor() { MBeginBusyCursor(); }
+   ~MBusyCursor() { MEndBusyCursor(); }
+};
+
 #endif // GUIDEF_H

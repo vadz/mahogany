@@ -451,7 +451,7 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
 
       m_reference += reference;
 
-      wxBusyCursor bc;
+      MBusyCursor bc;
 
       // now OnNewFolder() and OnNoMoreFolders() will be called
       //
@@ -469,7 +469,7 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       // process the events from ListFolders
       do
       {
-         MEventManager::DispatchPending();
+         MEventManager::ForceDispatchPending();
       }
       while ( m_idParent.IsOk() );
 
@@ -1096,7 +1096,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
          new MEventFolderTreeChangeData(m_folder->GetFullName(),
                                         MEventFolderTreeChangeData::CreateUnder)
          );
-      MEventManager::DispatchPending();
+      MEventManager::ForceDispatchPending();
    }
 
    // show all errors which could have been accumulated
@@ -1135,7 +1135,7 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
    // wait until the expansion ends
    do
    {
-      MEventManager::DispatchPending();
+      MEventManager::ForceDispatchPending();
    }
    while ( !m_finished );
 
@@ -1161,7 +1161,7 @@ ListFolderEventReceiver::OnNoMoreFolders()
          new MEventFolderTreeChangeData(m_folder->GetFullName(),
                                         MEventFolderTreeChangeData::CreateUnder)
          );
-      MEventManager::DispatchPending();
+      MEventManager::ForceDispatchPending();
    }
 }
 

@@ -1904,7 +1904,7 @@ wxWizardPage *MigrateWizard::GetNextPage(Page page)
                // process the events from ListFolders
                do
                {
-                  MEventManager::DispatchPending();
+                  MEventManager::ForceDispatchPending();
                }
                while ( !m_doneWithList );
             }

@@ -161,7 +161,7 @@ protected:
 void *
 MailThread::Entry()
 {
-   wxBusyCursor bc;
+   MBusyCursor bc;
 
    //FIXME-MT: IS THIS TRUE? MailFolderCC does sufficient locking
    //LockFolder();

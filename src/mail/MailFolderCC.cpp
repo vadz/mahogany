@@ -2178,7 +2178,7 @@ MailFolderCC::Open(OpenMode openmode)
    // ideally we should just dispatch MEventWithFolderData events, not all of
    // the pending ones as this might cause problems but for now let's keep it
    // simple and fix it when/if we find the problems with the current approach
-   MEventManager::DispatchPending();
+   MEventManager::ForceDispatchPending();
 
    // lock cclient inside this block
    {
@@ -2726,7 +2726,7 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
 {
    static const int STATUS_FLAGS = SA_MESSAGES | SA_RECENT | SA_UNSEEN;
 
-   wxBusyCursor busyCursor;
+   MBusyCursor busyCursor;
 
    // instead of calling mail_status() with NIL stream we always open the
    // connection to the folder manually before as this gives us a
@@ -3618,7 +3618,7 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
                      1, this, this->GetClassName(),
                      GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
    {
-      wxBusyCursor busyCursor;
+      MBusyCursor busyCursor;
 
       int opFlags = 0;
       if ( set )
@@ -5429,7 +5429,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
    if ( nmsgs > 0 )
    {
-      wxBusyCursor busyCursor;
+      MBusyCursor busyCursor;
 
       String seq;
       seq << "1:" << nmsgs;

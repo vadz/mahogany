@@ -669,7 +669,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
 {
    MOcheck();
 
-   wxBeginBusyCursor();
+   MBeginBusyCursor();
 
    m_entries = new BbdbEntryList(false);
 
@@ -692,7 +692,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    {
       wxLogError(_("BBDB: file has wrong header line: '%s'"),
                  line.c_str());
-      wxEndBusyCursor();
+      MEndBusyCursor();
       return;
    }
    else
@@ -722,7 +722,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    if(ignored > 0)
       wxLogWarning(_("BBDB: ignored %d entries with neither first nor last names."),
                    ignored);
-   wxEndBusyCursor();
+   MEndBusyCursor();
 }
 
 #define   SAVE_FIELD(x)  e->GetField(x, &str);BbdbEntry::WriteString(out, str);

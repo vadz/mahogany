@@ -243,7 +243,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
                 what.c_str());
   }
 
-  wxBusyCursor bc;
+  MBusyCursor bc;
 
   if ( AdbLookupForEntriesOrGroups(aEntries, &aMoreEntries, what, lookupMode,
                                    how, NULL, &aGroups ) ) {

@@ -280,7 +280,7 @@ void ClickableURL::OpenInBrowser(int options) const
    wxFrame *frame = m_msgView->GetParentFrame();
    wxLogStatus(frame, _("Opening URL '%s'..."), m_url.c_str());
 
-   wxBusyCursor bc;
+   MBusyCursor bc;
 
    // the command to execute
    wxString command;

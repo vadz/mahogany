@@ -1708,10 +1708,10 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
    }
 
    // constructing the menu may take a long time
-   wxBeginBusyCursor();
+   MBeginBusyCursor();
    m_menu->Insert(0, WXMENU_POPUP_FOLDER_MENU, _("&Quick move"),
                   m_menuFolders->GetMenu());
-   wxEndBusyCursor();
+   MEndBusyCursor();
 
    m_isInPopupMenu = true;
 
@@ -3779,7 +3779,7 @@ wxFolderView::ShowFolder(MailFolder *mf)
    //
    // For now, let it process the event if there is any and if not, update
    // manually
-   MEventManager::DispatchPending();
+   MEventManager::ForceDispatchPending();
 
    // the connection to the folder might have been lost in the meanwhile
    mf = GetMailFolder();
@@ -3938,7 +3938,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
       }
    }
 
-   wxBeginBusyCursor();
+   MBeginBusyCursor();
 
    DoClear(false /* don't keep the viewer */);
 
@@ -3953,7 +3953,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
       mf->DecRef();
    }
 
-   wxEndBusyCursor();
+   MEndBusyCursor();
 
    if ( !mf )
    {

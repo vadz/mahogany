@@ -1569,7 +1569,7 @@ MailFolderCmn::ApplyFilterRules(const UIdArray& msgsOrig)
    FilterRule *filterRule = GetFilterForFolder(folder);
    if ( filterRule )
    {
-      wxBusyCursor busyCursor;
+      MBusyCursor busyCursor;
 
       // make copy as Apply() may modify it
       UIdArray msgs = msgsOrig;

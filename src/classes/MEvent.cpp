@@ -26,6 +26,7 @@
 #   include <stdarg.h>
 
 #   include <wx/dynarray.h>
+#   include <wx/utils.h>
 #endif // USE_PCH
 
 #include "MEvent.h"
@@ -113,6 +114,19 @@ MEventManager::MEventManager()
 /* static */
 void
 MEventManager::DispatchPending(void)
+{
+   static bool gs_running = false;
+   if ( !gs_running && !g_busyCursorYield )
+   {
+      gs_running = true;
+      ForceDispatchPending();
+      gs_running = false;
+   }
+}
+
+/* static */
+void
+MEventManager::ForceDispatchPending(void)
 {
    // don't dispatch events while we're suspended: as Dispatch() just ignores
    // them, it means that events are simply lost if we do it

@@ -603,7 +603,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
    // process the new mail events for the folder we just checked: if we don't
    // do it know, it might time out and close while we're checking the other
    // folders
-   MEventManager::DispatchPending();
+   MEventManager::ForceDispatchPending();
 
    return true;
 }

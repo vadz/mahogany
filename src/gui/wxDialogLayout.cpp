@@ -1466,7 +1466,7 @@ void wxOptionsEditDialog::OnCancel(wxCommandEvent& /* event */)
       SendOptionsChangeEvent();
 
       // allow the event to be processed before we are gone
-      MEventManager::DispatchPending();
+      MEventManager::ForceDispatchPending();
    }
 
    // release the profile anyhow (notice that this should be done after

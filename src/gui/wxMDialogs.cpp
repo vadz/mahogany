@@ -336,7 +336,7 @@ public:
       {
          m_countBusy++;
 
-         wxEndBusyCursor();
+         MEndBusyCursor();
       }
    }
 
@@ -344,7 +344,7 @@ public:
    {
       while ( m_countBusy-- > 0 )
       {
-         wxBeginBusyCursor();
+         MBeginBusyCursor();
       }
    }
 

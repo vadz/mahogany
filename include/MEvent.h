@@ -477,6 +477,9 @@ public:
    /// dispatches all events in the queue.
    static void DispatchPending(void);
 
+   /// dispatches all events in the queue, even if it is called recursively.
+   static void ForceDispatchPending(void);
+
    // register the event receiever for the events "eventId", the returned
    // pointer is NULL if the function failed, otherwise it should be saved for
    // subsequent call to Deregister()

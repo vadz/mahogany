@@ -3859,7 +3859,7 @@ wxComposeView::Send(bool schedule)
 
    m_sending = true;
 
-   wxBusyCursor bc;
+   MBusyCursor bc;
    wxLogStatus(this, m_mode == Mode_News ? _("Posting message")
                                          : _("Sending message..."));
    Disable();

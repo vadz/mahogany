@@ -1602,7 +1602,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
   }
 
   // loading of a big file might take quite some time
-  wxBeginBusyCursor();
+  MBeginBusyCursor();
 
   wxString strProv = szProvName;
   AdbTreeBook *adb = new AdbTreeBook(m_root, strPath, pProvider, &strProv);
@@ -1628,7 +1628,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
   // currently, we always succeed because even if the file doesn't exist
   // we create it -- should it be changed?
 
-  wxEndBusyCursor();
+  MEndBusyCursor();
 
   return TRUE;
 }
