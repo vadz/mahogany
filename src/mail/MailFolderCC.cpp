@@ -294,9 +294,15 @@ MailFolderCC::Open(void)
 
    if(GetType() == MF_FILE && ! wxFileExists(m_MailboxPath))
       mail_create(NIL, (char *)m_MailboxPath.c_str());
-   
-   m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
-                            debugFlag ? OP_DEBUG : NIL);
+   if(m_MailStream != NIL) 
+      m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
+                               debugFlag ? OP_DEBUG : NIL);
+   // if we didn't have a mailstream or the re-use of the old one
+   // failed, we try again:
+   if(m_MailStream == NIL)
+      m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
+                               debugFlag ? OP_DEBUG : NIL);
+      
    ProcessEventQueue();
    SetDefaultObj(false);
    CCVerbose();

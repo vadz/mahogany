@@ -152,10 +152,10 @@ public:
       unsigned int *year = NULL) const;
 
    /** Return message id. */
-   virtual String const &GetId(void) const ;
+   virtual String GetId(void) const ;
        
    /** Return message references. */
-   virtual String const &GetReferences(void) const;
+   virtual String GetReferences(void) const;
 
    /** Query the section specification string of body part.
        @param  n part number

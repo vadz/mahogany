@@ -120,10 +120,10 @@ public:
    virtual const String & Date(void) const = 0;
 
    /** Return message id. */
-   virtual String const &GetId(void) const = 0;
+   virtual String GetId(void) const = 0;
        
    /** Return message references. */
-   virtual String const &GetReferences(void) const = 0;
+   virtual String GetReferences(void) const = 0;
 
    /** get message text
        @return the uninterpreted message body

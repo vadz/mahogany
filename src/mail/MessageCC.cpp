@@ -34,6 +34,10 @@
 /// temporary buffer for storing message headers, be generous:
 #define   HEADERBUFFERSIZE 100*1024
 
+/// check for dead mailstream
+#define CHECK_DEAD()   if( folder->Stream() == NIL) { ERRORMESSAGE((_("Cannot access inactive folder '%s'."), folder->GetName().c_str())); return; }
+#define CHECK_DEAD_RC(rc)   if( folder->Stream() == NIL) {   ERRORMESSAGE((_("Cannot access inactive folder '%s'."), folder->GetName().c_str())); return rc; }
+
 MessageCC *
 MessageCC::CreateMessageCC(MailFolderCC *ifolder,
                            unsigned long iuid)
@@ -137,6 +141,7 @@ MessageCC::From(void) const
 const char *
 MessageCC::GetHeader(void) const
 {
+   CHECK_DEAD_RC(NULL);
    const char *cptr = mail_fetchheader_full(folder->Stream(), m_uid,
                                             NULL, NIL, FT_UID);
    MailFolderCC::ProcessEventQueue();
@@ -146,6 +151,7 @@ MessageCC::GetHeader(void) const
 void
 MessageCC::GetHeaderLine(const String &line, String &value)
 {
+   CHECK_DEAD();
    STRINGLIST  slist;
    slist.next = NULL;
    slist.text.size = line.length();
@@ -229,6 +235,7 @@ MessageCC::FetchText(void)
 {
    if(folder)
    {
+      CHECK_DEAD_RC("");
       mailText = mail_fetchtext_full(folder->Stream(), m_uid,
                                             NIL, FT_UID);
       MailFolderCC::ProcessEventQueue();
@@ -372,8 +379,11 @@ BODY *
 MessageCC::GetBody(void)
 {
    if(body == NULL && folder)
+   {
+      CHECK_DEAD_RC(NULL);
       envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &body,
                                           FT_UID);
+   }
    MailFolderCC::ProcessEventQueue();
    
    CHECK(body && envelope, NULL, _("Non-existent message data."));
@@ -568,22 +578,28 @@ MessageCC::GetPartDesc(int n)
 }
 
 
-String const &
+String
 MessageCC::GetId(void) const
 {
    if(body == NULL)
       ((MessageCC *)this)-> GetBody();
    ASSERT(body);
-   return * new String(body->id);
+   if(body)
+      return String(body->id);
+   else
+      return "";
 }
 
-String const &
+String 
 MessageCC::GetReferences(void) const
 {
    if(body == NULL)
       ((MessageCC *)this)-> GetBody();
    ASSERT(body);
-   return * new String(envelope->references);
+   if(body)
+      return String(envelope->references);
+   else
+      return "";
 }
 
 void
@@ -596,6 +612,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
 
    if(folder)
    {
+      CHECK_DEAD();
       if(headerFlag)
       {
          char *headerPart = mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID);
