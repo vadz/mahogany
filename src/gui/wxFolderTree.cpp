@@ -409,7 +409,7 @@ private:
          Append(New, _("Create &new folder..."));
          if ( !isRoot )
          {
-            Append(Remove, _("&Remove folder"));
+            Append(Remove, _("&Remove from tree"));
             Append(Delete, _("&Delete folder"));
          }
          Append(Rename, _("Re&name folder..."));
