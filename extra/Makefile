@@ -9,8 +9,13 @@ SUB_DIRS += src/libmal
 endif
 
 all: 
+ifeq ($(USE_MINGW),yes)
+	$(MAKE) -j1 -C src/c-client -f .src/makefile.nt.gcc
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i; done
+else
 	$(MAKE) -j1 -C src/c-client -f .src/Makefile.M
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i; done
+endif
 
 doc: ; @true
 

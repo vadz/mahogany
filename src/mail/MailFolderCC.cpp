@@ -28,7 +28,7 @@
 #   include "strutil.h"
 #   include "MApplication.h"
 #   include "Profile.h"
-#ifdef __CYGWIN__
+#ifdef OS_WIN // cygwin and mingw
 #   include <wx/timer.h>
 #endif
 #endif // USE_PCH
@@ -73,11 +73,11 @@
 #include <wx/file.h>
 
 // windows.h included from fontutil.h defines ERROR
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(__MINGW32__)
 #  undef   ERROR
 #endif
 #include <wx/fontmap.h>      // DecodeHeader() uses CharsetToEncoding()
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(__MINGW32__)
 #  undef   ERROR
 #  define  ERROR (long) 2 // HACK - redefine again as in extra/src/c-client/mail.h
 #endif

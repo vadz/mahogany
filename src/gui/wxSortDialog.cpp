@@ -32,7 +32,7 @@
    #include <wx/choice.h>
    #include <wx/stattext.h>
    #include <wx/statbox.h>
-#ifdef __CYGWIN__
+#ifdef OS_WIN // cygwin and mingw
    #include <wx/settings.h>
 #endif
 #endif // USE_PCH

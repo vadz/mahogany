@@ -16,9 +16,12 @@
 #ifndef USE_PCH
 #  include "MApplication.h"
 
+#ifdef OS_WIN // cygwin and mingw
+#  undef Yield // otherwise we get include/wx/app.h:182: arguments given to macro `Yield'
+#endif
 #  include <wx/app.h>
 // it includes windows.h which defines SendMessage under Windows
-#ifdef __CYGWIN__
+#ifdef OS_WIN // cygwin and mingw
 #  undef SendMessage
 #endif
 

@@ -55,6 +55,9 @@
 #ifdef __CYGWIN__
 #  include <sys/unistd.h>     // for getpid()
 #endif
+#ifdef __MINGW32__
+#  include <process.h>        // for getpid()
+#endif
 #endif // USE_PCH
 
 #include <wx/filename.h>

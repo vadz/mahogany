@@ -23,9 +23,7 @@
 // M
 #include "Mpch.h"
 
-#if !defined(OS_UNIX) && !defined(__CYGWIN__)
-   #error "This module can only be compiled under Unix."
-#endif
+#if defined(OS_UNIX) || defined(__CYGWIN__)
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
@@ -482,3 +480,5 @@ bool PasswdDataProvider::DeleteBook(AdbBook *book)
 {
    return false;
 }
+
+#endif // OS_UNIX

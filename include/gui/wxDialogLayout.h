@@ -23,7 +23,7 @@
 #include "MDialogs.h"
 
 #ifndef USE_PCH
-#ifdef __CYGWIN__
+#ifdef OS_WIN // cygwin and mingw
 #  include <wx/scrolwin.h>
 #endif
 #endif // USE_PCH

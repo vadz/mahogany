@@ -48,10 +48,18 @@ M_BUNDLE :=
 endif
 
 # for cygwin/mingw we need to add resources to the main binary
+# and use -mwindows in order to make GUI binary
 ifdef USE_RESOURCES
-M_RES := ../res/M.res
+M_RES := ../res/M.res -mwindows
 else
 M_RES :=
+endif
+
+# for cygwin with -mno-cygwin (mingw) we need to add additional libs
+ifdef USE_MINGW
+M_MINGW_LIBS := -lwsock32 -lwinmm
+else
+M_MINGW_LIBS :=
 endif
 
 # OK, we've got all the names and the rules to generate them; we can
@@ -60,7 +68,7 @@ binary:	M $(MSOS) $(M_BUNDLE)
 	@true
 
 M:	$(MOBJS)
-	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS) $(M_RES)
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS) $(M_MINGW_LIBS) $(M_RES)
 ifdef USE_MAC
 	$(REZ) -t APPL Carbon.r -o $@
 	$(SETFILE) -a C $@

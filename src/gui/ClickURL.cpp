@@ -28,7 +28,7 @@
    #include "gui/wxOptionsDlg.h"
 
    #include <wx/menu.h>
-#ifdef __CYGWIN__
+#ifdef OS_WIN // cygwin and mingw
    #include <wx/msw/registry.h>
 #endif
 #endif //USE_PCH
@@ -337,7 +337,7 @@ void ClickableURL::OpenInBrowser(int options) const
       }
       else // easy case: open in the same window
       {
-#ifndef __CYGWIN__ // FIXME ShellExecute() is defined in <w32api/shellapi.h>, how to include it?
+#if !defined(__CYGWIN__) && !defined(__MINGW32__) // FIXME ShellExecute() is defined in <w32api/shellapi.h>, how to include it?
          bOk = (int)ShellExecute(NULL, "open", m_url,
                                  NULL, NULL, SW_SHOWNORMAL ) > 32;
 #endif

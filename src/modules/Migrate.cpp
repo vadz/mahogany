@@ -29,7 +29,7 @@
 
    #include <wx/app.h>        // for wxPostEvent()
    // it includes windows.h which defines SendMessage under Windows
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(__MINGW32__)
    #undef SendMessage
 #endif
 

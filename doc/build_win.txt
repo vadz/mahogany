@@ -108,6 +108,8 @@ make install
 
 in cygwin bash shell.
 
+You can also compile with -mno-cygwin switch, i.e. mingw version. Use
+CC='gcc-2 -mno-cygwin' CXX='g++-2 -mno-cygwin' OSTYPE=mingw ../configure --with-modules=static
 
 b) Common problems
 ------------------

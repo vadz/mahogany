@@ -22,18 +22,27 @@ case "$OSTYPE" in
 	USE_MAC=1
 	MAKE_USE_MAC="USE_MAC=yes"
 	;;
-    CYGWIN*)
+    cygwin* | CYGWIN*)
+	USE_RESOURCES=1
+	MAKE_USE_RESOURCES="USE_RESOURCES=yes"
+	;;
+    mingw* | MINGW*)
+	USE_MINGW=1
+	MAKE_USE_MINGW="USE_MINGW=yes"
 	USE_RESOURCES=1
 	MAKE_USE_RESOURCES="USE_RESOURCES=yes"
 	;;
     *)
 	USE_MAC=0
 	MAKE_USE_MAC=""
+	USE_MINGW=0
+	MAKE_USE_MINGW=""
 	USE_RESOURCES=0
 	MAKE_USE_RESOURCES=""
 	;;
 esac
 AC_SUBST(MAKE_USE_MAC)
+AC_SUBST(MAKE_USE_MINGW)
 AC_SUBST(MAKE_USE_RESOURCES)
 
 echo ""
@@ -957,7 +966,10 @@ case "$OSTYPE" in
       ;;
 esac
 
-dnl we need to set the target for c-client library
+dnl we need to set the target for c-client library except for mingw, for which
+dnl we use separate makefile
+case "$USE_MINGW" in 
+0)
 case "$USE_CCOSTYPE" in
 ''|0|1)	AC_MSG_CHECKING(for c-client library OS type)
 	case "$OSTYPE" in
@@ -992,7 +1004,7 @@ case "$USE_CCOSTYPE" in
 		CCOSTYPE=osx ;;
 	OpenBSD*)
 		CCOSTYPE=bso ;;
-	CYGWIN*)
+	cygwin*|CYGWIN*)
 		CCOSTYPE=cyg ;;
 	*)
 		AC_MSG_RESULT(unknown)
@@ -1005,6 +1017,10 @@ with xxx being the most appropriate system type from this file.])
 	m_cv_USE_CCOSTYPE="$CCOSTYPE"
 	AC_MSG_RESULT($CCOSTYPE) ;;
 *)	CCOSTYPE="$USE_CCOSTYPE" ;;
+esac
+;;
+1)
+;;
 esac
 AC_SUBST(CCOSTYPE)
 case "$CCOSTYPE" in

@@ -23,7 +23,10 @@
 #  include   <guidef.h>
 #  include   <string.h>
 #  include   "kbList.h"
+#ifdef OS_WIN // cygwin and mingw
+#  include  <io.h> // for access()
 #endif
+#endif // USE_PCH
 
 #include <sys/stat.h>
 
@@ -31,10 +34,6 @@
 
 #include <wx/filefn.h>
 #include <wx/file.h>
-
-#if defined(__CYGWIN__)
-#include  <io.h> // for int access()
-#endif
 
 #if defined(OS_UNIX)
 #   define   ANYFILE   "/*"
