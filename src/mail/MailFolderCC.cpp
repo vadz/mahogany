@@ -116,11 +116,11 @@ CCStreamCleaner::~CCStreamCleaner()
          stream = *i;
          // copied from c-client mail.c:
          if (stream->mailbox) fs_give ((void **) &stream->mailbox);
-         stream->sequence++;		/* invalidate sequence */
-				        /* flush user flags */
+         stream->sequence++;  /* invalidate sequence */
+         /* flush user flags */
          for (int n = 0; n < NUSERFLAGS; n++)
             if (stream->user_flags[n]) fs_give ((void **) &stream->user_flags[n]);
-         mail_free_cache (stream);	/* finally free the stream's storage */
+         mail_free_cache (stream);  /* finally free the stream's storage */
          /*if (!stream->use)*/ fs_give ((void **) &stream);
       }
    }
@@ -552,7 +552,7 @@ MailFolderCC::Create(int typeAndFlags)
    m_InCritical = false;
 
    UpdateTimeoutValues();
-   
+
    SetRetrievalLimit(0); // no limit
    m_nMessages = 0;
    m_nRecent = 0;
@@ -640,18 +640,21 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       flags ^= MF_FLAGS_SSLAUTH;
    }
 #endif
-   
+
    switch( type )
    {
    case MF_INBOX:
       mboxpath = "INBOX";
       break;
+
    case MF_FILE:
-      mboxpath = name;
+      mboxpath = strutil_expandfoldername(name, (FolderType) type);
       break;
+
    case MF_MH:
       mboxpath << "#mh/" << name;
       break;
+
    case MF_POP:
       mboxpath << '{' << server << "/pop3";
       if(flags & MF_FLAGS_SSLAUTH)
@@ -660,7 +663,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       break;
    case MF_IMAP:  // do we need /imap flag?
       if(flags & MF_FLAGS_ANON)
-         mboxpath << '{' << server << "/anonymous" << name;
+         mboxpath << '{' << server << "/anonymous";
       else
       {
          if(login.Length())
@@ -685,15 +688,12 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       FAIL_MSG("Unsupported folder type.");
    }
 
-   mboxpath = strutil_expandfoldername(mboxpath, (FolderType) type);
-
    //FIXME: This should somehow be done in MailFolder.cc
    mf = FindFolder(mboxpath,login);
    if(mf)
    {
       mf->IncRef();
       mf->Ping(); // make sure it's updated
-//      mf->SetName(symname);
       return mf;
    }
 
@@ -916,9 +916,10 @@ MailFolderCC::Open(void)
       }
       else if ( GetType() == MF_MH )
       {
-         // the real path for MH mailboxes is not just the mailbox name
+         // construct the filename from MH folder name
          String path;
-         path << InitializeMH() << m_MailboxPath.c_str() + 4; // strlen("#mh/")
+         path << InitializeMH()
+              << m_MailboxPath.c_str() + 4; // 4 == strlen("#mh/")
          exists = wxFileExists(path);
       }
 
@@ -938,38 +939,39 @@ MailFolderCC::Open(void)
          if(! m_MailStream)
             return false;
          else
-	{
+         {
             AddToMap(m_MailStream); // now we are known
             return true;
-        }
+         }
       }
+
+      // if the file folder doesn't exist, we should create it first
+      bool alreadyCreated = FALSE;
       if ( !exists
            && (GetType() == MF_FILE || GetType() == MF_MH))
       {
          mail_create(NIL, (char *)m_MailboxPath.c_str());
+         alreadyCreated = TRUE;
       }
 
       // first try, don't log errors (except in debug mode)
-      // If we don't have a mailstream yet, we half-open one:
-      // this would give us a valid stream to use for looking up the
-#if 0
-      if(m_MailStream == NIL)
-         m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
-                                  (debugFlag ? OP_DEBUG : NIL)|OP_HALFOPEN);
-#endif
-      if(m_MailStream == NIL)
-         m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
-                                  debugFlag ? OP_DEBUG : NIL);
-      if(m_MailStream == NIL) // try to create it
+      m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
+                               debugFlag ? OP_DEBUG : NIL);
+
+      // try to create it if hadn't tried yet
+      if ( !m_MailStream && !alreadyCreated )
       {
          CCVerbose();
          mail_create(NIL, (char *)m_MailboxPath.c_str());
          m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                                   debugFlag ? OP_DEBUG : NIL);
       }
+
       ProcessEventQueue();
       SetDefaultObj(false);
    }
+
+#if 0 // VZ: this seems to duplicate the code just above - is it needed?
    CCVerbose();
    if(m_MailStream == NIL)
    {
@@ -985,6 +987,8 @@ MailFolderCC::Open(void)
       ProcessEventQueue();
       SetDefaultObj(false);
    }
+#endif // 0
+
    if(m_MailStream == NIL)
    {
          STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
@@ -1847,10 +1851,16 @@ MailFolderCC::CClientInit(void)
 {
    if(cclientInitialisedFlag == true)
       return;
+
    // do further initialisation
 #include <linkage.c>
+
    // this triggers c-client initialisation via env_init()
    (void *) myusername();
+
+   // 1 try is enough, the default (3) is too slow
+   mail_parameters(NULL, SET_MAXLOGINTRIALS, (void *)1);
+
    cclientInitialisedFlag = true;
    ASSERT(gs_CCStreamCleaner == NULL);
    gs_CCStreamCleaner = new CCStreamCleaner();
@@ -2614,10 +2624,10 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
       if(spec.Length() > 0
       && spec[spec.Length()-1] != '.'
       && spec[spec.Length()-1] != '}')
-	{
-	if(spec[spec.Length()-1] == '/')
-		spec[spec.Length()-1] = '.';
-     }
+      {
+         if(spec[spec.Length()-1] == '/')
+            spec[spec.Length()-1] = '.';
+      }
    }
 
    spec += pattern;
