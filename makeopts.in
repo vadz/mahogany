@@ -24,6 +24,9 @@ LIBMAL_CXXFLAGS := @LIBMAL_CXXFLAGS@
 # where we have the Icon xpms:
 ICONDIR=$(SOURCEDIR)/src/icons
 
+# wx installation directory is needed for cygwin resources:
+WX_DIR := @WX_DIR@
+
 # this will be set or unset
 @MAKE_USE_PYTHON@
 @MAKE_DEBUG@
@@ -34,6 +37,7 @@ ICONDIR=$(SOURCEDIR)/src/icons
 @MAKE_HAVE_LIBMAL@
 @MAKE_PISOCKLIB@
 @MAKE_USE_MAC@
+@MAKE_USE_RESOURCES@
 
 ifdef HAVE_LIBMAL
 LIBMAL_SRC := $(SOURCEDIR)/extra/src/libmal

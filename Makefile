@@ -2,7 +2,7 @@
 # $Id$
 
 FILES := configure.in configure Makefile makeopts.in makerules
-SUB_DIRS := include extra src
+SUB_DIRS := include extra res src
 ALL_DIRS := $(SUB_DIRS) doc
 
 include makeopts

@@ -22,12 +22,19 @@ case "$OSTYPE" in
 	USE_MAC=1
 	MAKE_USE_MAC="USE_MAC=yes"
 	;;
+    CYGWIN*)
+	USE_RESOURCES=1
+	MAKE_USE_RESOURCES="USE_RESOURCES=yes"
+	;;
     *)
 	USE_MAC=0
 	MAKE_USE_MAC=""
+	USE_RESOURCES=0
+	MAKE_USE_RESOURCES=""
 	;;
 esac
 AC_SUBST(MAKE_USE_MAC)
+AC_SUBST(MAKE_USE_RESOURCES)
 
 echo ""
 echo "*** Configuring Mahogany for $OSTYPE ***"
@@ -931,6 +938,11 @@ case "$USE_THREADS" in 1)
 	esac
 esac
 
+dnl wx installation directory is needed for cygwin resources
+WX_INSTALL_DIR=`$WX_CONFIG_WITH_ARGS --prefix`
+WX_DIR="$WX_INSTALL_DIR"
+AC_SUBST(WX_DIR)
+
 dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
 dnl --------------------------------------------------------------------------
@@ -1254,7 +1266,7 @@ AC_SUBST(CXXFLAGS_RELAXED)
 OUTPUT="makeopts"
 COPY=Makefile
 DIR=
-for dir in `cd $srcdir; find include extra src locale doc -type d -print`
+for dir in `cd $srcdir; find include extra src locale doc res -type d -print`
 do	case "$dir" in
 	CVS | */CVS)		continue ;;
 	extra/src)		DIR="$DIR $dir" ;;   # no Makefile in this dir

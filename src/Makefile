@@ -47,13 +47,20 @@ else
 M_BUNDLE :=
 endif
 
+# for cygwin/mingw we need to add resources to the main binary
+ifdef USE_RESOURCES
+M_RES := ../res/M.res
+else
+M_RES :=
+endif
+
 # OK, we've got all the names and the rules to generate them; we can
 # now actually specify the dependencies.
 binary:	M $(MSOS) $(M_BUNDLE)
 	@true
 
 M:	$(MOBJS)
-	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS) $(M_RES)
 ifdef USE_MAC
 	$(REZ) -t APPL Carbon.r -o $@
 	$(SETFILE) -a C $@
