@@ -130,10 +130,9 @@ bool PalmEntry::Save()
 
 PalmEntryGroup::PalmEntryGroup(void)
 {
-  m_pParent = NULL;
-  m_strName = "Palm ADB";
-  m_entries = new PalmEntryList(false);
-  m_groups  = new PalmGroupList(false);
+   m_strName = "Palm ADB";
+   m_entries = new PalmEntryList(false);
+   m_groups  = new PalmGroupList(false);
 }
 
 PalmEntryGroup::PalmEntryGroup(PalmEntryGroup *pParent,

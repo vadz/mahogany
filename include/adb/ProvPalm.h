@@ -1,4 +1,4 @@
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
+// -*- c++ -*-/// //// //// //// //// //// //// //// //// //// //// //// //////
 // Project:     M - cross platform e-mail GUI client
 // File name:   adb/ProvPalm.h 
 // Purpose:     Palm-ADBProvider defines an interface for the Palm ADB
@@ -63,6 +63,8 @@ public:
 
   // if it's not, we will be deleted, so it really must be something fatal
   bool IsOk() const { return m_pGroup != NULL; }
+    /// is the entry read-only?
+  virtual bool IsReadOnly() const;
 
   MOBJECT_DEBUG(PalmEntry)
 
@@ -107,6 +109,15 @@ public:
   virtual void DeleteGroup(const String& strName);
 
   virtual AdbEntry *FindEntry(const char *szName);
+  virtual bool IsReadOnly() const
+     {
+        /*ASSERT(m_pParent); return m_pParent->IsReadOnly();*/
+#ifdef EXPERIMENTAL
+        return FALSE;
+#else
+        return TRUE;
+#endif
+     }
 
   MOBJECT_DEBUG(PalmEntry)
 
@@ -118,6 +129,14 @@ private:
   
   GCC_DTOR_WARN_OFF
 };
+
+inline  bool
+PalmEntry::IsReadOnly() const
+{
+   ASSERT(m_pGroup);
+   return m_pGroup->IsReadOnly();
+}
+
 
 KBLIST_DEFINE(PalmGroupList, PalmEntryGroup);
 

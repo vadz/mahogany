@@ -159,6 +159,8 @@ public:
   virtual bool IsDirty() const = 0;
     /// prevent the entry from saving itself by resetting the dirty flag
   virtual void ClearDirty() = 0;
+    /// is the entry read-only?
+  virtual bool IsReadOnly() const = 0;
 
   // other operations
     /// check whether we match the given string (see AdbLookup_xxx constants)
@@ -187,6 +189,9 @@ class AdbEntryCommon : public AdbEntry
        values). Tries to generate meaningful return values for empty
        FirstName/FamilyName fields. */
   virtual void GetField(size_t n, wxString *pstr) const;
+    /// is the entry read-only?
+  virtual bool IsReadOnly() const
+     { return FALSE; } // writeable by default
 };
 /**
   A group of ADB entries which contains the entries and other groups.

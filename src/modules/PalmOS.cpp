@@ -867,10 +867,11 @@ PalmOSModule::InstallFiles(char **fnames, unsigned int files_total)
   struct DBInfo info;
   struct db * db[256];
   int    dbcount = 0;
-  int    i, j, max, size;
+  int    max, size;
+  unsigned i, j;
   struct pi_file * f;
 
-  for (j = 0; j < files_total; j++) {
+  for ( j = 0; j < files_total; j++) {
 	db[dbcount] = (struct db*)malloc(sizeof(struct db));
 
     // remember filename

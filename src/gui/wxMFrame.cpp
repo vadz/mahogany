@@ -276,6 +276,7 @@ wxMFrame::OnMenuCommand(int id)
 #endif   // USE_PYTHON
 
    case WXMENU_FILE_EXIT:
+      wxYield(); // just to flush MEvent queues for safety
       if ( CanClose() )
       {
          // this frame has been already asked whether it wants to exit, so

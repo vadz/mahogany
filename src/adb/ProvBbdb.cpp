@@ -115,6 +115,7 @@ public:
    const char *GetName() const
       { return m_astrFields[0]; }
 
+   virtual bool IsReadOnly(void) const;
    /**@name the parser */
    //@{
    enum FieldTypes { Field_String, Field_Integer};
@@ -173,6 +174,11 @@ public:
    virtual void DeleteGroup(const String& strName);
 
    virtual AdbEntry *FindEntry(const char *szName);
+   virtual bool IsReadOnly(void) const
+      {
+         /*ASSERT(m_pParent); return m_pParent->IsReadOnly(); */
+         return FALSE;
+      }
 
 private:
    virtual ~BbdbEntryGroup();
@@ -182,6 +188,12 @@ private:
    BbdbEntryGroup   *m_pParent;      // the parent group (never NULL)
    GCC_DTOR_WARN_OFF
 };
+
+bool BbdbEntry::IsReadOnly() const
+{
+   ASSERT(m_pGroup);
+   return m_pGroup->IsReadOnly();
+}
 
 // our AdbBook implementation: it maps to a disk file here
 class BbdbBook : public AdbBook
@@ -651,7 +663,8 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    m_entries = new BbdbEntryList(false);
 
    m_strName = strName; // there is only one group so far
-
+   m_pParent = NULL;
+   
    BbdbEntry *e;
    wxString line, version;
    int ignored = 0, entries_read = 0;
@@ -1013,7 +1026,7 @@ bool
 BbdbBook::IsReadOnly() const
 {
    MOcheck();
-   return TRUE;
+   return FALSE;
 }
 
 // ----------------------------------------------------------------------------

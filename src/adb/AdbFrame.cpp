@@ -2909,7 +2909,7 @@ void wxAdbNotebook::ChangeData(AdbTreeEntry *pEntry)
 // save changes i.e. transfer all data from our controls to AdbEntry
 void wxAdbNotebook::SaveChanges()
 {
-  if ( m_pAdbEntry ) {
+  if ( m_pAdbEntry && !m_pAdbEntry->IsReadOnly()) {
     for ( size_t n = 0; n < Page_Max; n++ ) {
       ((wxAdbPage *)GetPage(n))->SaveChanges(*m_pAdbEntry);
     }
@@ -2942,6 +2942,7 @@ void wxAdbNotebook::SetData(AdbTreeEntry *pEntry)
   if ( m_pAdbEntry ) {
     for ( size_t n = 0; n < Page_Max; n++ ) {
       ((wxAdbPage *)GetPage(n))->SetData(*m_pAdbEntry);
+      ((wxAdbPage *)GetPage(n))->Enable( ! m_pAdbEntry->IsReadOnly() );
     }
   }
 
