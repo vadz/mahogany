@@ -1145,7 +1145,7 @@ MailFolderCC::Ping(void)
 
       if(PingReopen())
       {
-         mail_check(m_MailStream); // update flags, etc, .newsrc
+         //mail_check(m_MailStream); // update flags, etc, .newsrc
          UnLock();
          ProcessEventQueue();
          Lock();

@@ -84,6 +84,7 @@ AutoCollectAddresses(const String &email,
                       bookName.c_str());
 
          // TODO ask the user if he wants to disable autocollec?
+         return; //FIXME: why does this suddenly fail?
       }
 
       ArrayAdbEntries matches;

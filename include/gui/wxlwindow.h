@@ -207,7 +207,9 @@ public:
    void ResetDirty(void) { m_Dirty = false; }
    //@}
 
-   
+   wxPoint GetClickPosition(void) const
+     { return m_ClickPosition; }
+
 protected:
    /// generic function for mouse events processing
    void OnMouse(int eventId, wxMouseEvent& event);

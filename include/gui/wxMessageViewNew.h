@@ -1,17 +1,10 @@
 /*-*- c++ -*-********************************************************
  * wxMessageView.h: a window displaying a mail message              *
  *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
+ * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
-
-//FIXME: this code is thoroughly broken:
-//#define USE_NEW_MSGVIEW
-
-#ifdef USE_NEW_MSGVIEW
-#   include "wxMessageViewNew.h"
-#else
 
 #ifndef WXMESSAGEVIEW_H
 #define WXMESSAGEVIEW_H
@@ -22,6 +15,7 @@
 
 #include "FolderType.h"
 #include "MessageView.h"
+#include "MEditCtrl.h"
 
 #include "gui/wxlwindow.h"
 
@@ -43,10 +37,11 @@ class XFace;
 class Message;
 class ASMailFolder;
 
+
 /** A wxWindows MessageView class
   */
 
-class wxMessageView : public wxLayoutWindow,
+class wxMessageView : public wxWindow,
                       public MessageViewBase,
                       public MEventReceiver
 {
@@ -92,10 +87,10 @@ public:
    void   Update(void);
 
    /// prints the currently displayed message
-   void Print(void);
+   void Print(void) { ((MEditCtrl *)m_EditCtrl)->Print(); }
 
    /// print-previews the currently displayed message
-   void PrintPreview(void);
+   void PrintPreview(void) { ((MEditCtrl *)m_EditCtrl)->PrintPreview(); }
 
    /// convert string in cptr to one in which URLs are highlighted
    String HighLightURLs(const char *cptr);
@@ -108,9 +103,17 @@ public:
    /// returns true if it handled the command
    bool DoMenuCommand(int command);
 
-   /// called on mouse click
-   void OnMouseEvent(wxCommandEvent & event);
+   /**@name Callbacks for editor control */
+   //@{
+   /// when clicked on mimepart
+   void OnMouseLeft(UIdType partno);
+   /// when right-clicked on mimepart
+   void OnMouseRight(UIdType partno);
+   /// when clicked on url
+   void OnUrl(const wxString &url);
+   //@}
 
+   
    /// called when a process we launched terminates
    void OnProcessTermination(wxProcessEvent& event);
 
@@ -198,7 +201,7 @@ protected:
    struct AllProfileValues
    {
       /// Background and foreground colours, colours for URLs and headers
-      wxColour BgCol, FgCol, UrlCol, HeaderNameCol, HeaderValueCol;
+      wxString BgCol, FgCol, UrlCol, HeaderNameCol, HeaderValueCol;
       /// font attributes
       int font, size;
       /// show headers?
@@ -232,6 +235,8 @@ protected:
    void ReadAllSettings(AllProfileValues *settings);
 
 private:
+   class wxMEditCtrl *m_EditCtrl;
+
    /// array of process info for all external viewers we have launched
    ArrayProcessInfo m_processes;
 
@@ -261,7 +266,5 @@ private:
 
    DECLARE_EVENT_TABLE()
 };
-
-#endif
 
 #endif

@@ -84,7 +84,9 @@ protected:
 MailFolder *
 MailFolder::OpenFolder(const String &name, ProfileBase *parentProfile)
 {
-   MFolder *mf = MFolder::Get(name);
+   String pname = (name[0] == '/') ? String(name.c_str()+1) : name;
+
+   MFolder *mf = MFolder::Get(pname);
    if(mf )
    {
       MailFolder *m = OpenFolder(mf);
@@ -94,8 +96,7 @@ MailFolder::OpenFolder(const String &name, ProfileBase *parentProfile)
    else
    {
       // profile entry does not exist
-      ProfileBase *profile =
-         ProfileBase::CreateProfile(name, parentProfile);
+      ProfileBase *profile = ProfileBase::CreateProfile(pname, parentProfile);
       MailFolder *m = OpenFolder( MF_FILE, name, profile);
       profile->DecRef();
       return m;
@@ -204,6 +205,7 @@ MailFolder::OpenFolder(int folderType,
    }
    else // type != PROFILE
    {
+      String pname = (symbolicName[0] == '/') ? String(symbolicName.c_str()+1) : symbolicName;
       profile = ProfileBase::CreateProfile(symbolicName, parentProfile);
       CHECK(profile, NULL, "can't create profile");   // return if it fails
 

@@ -323,6 +323,8 @@
 #define   MP_IMAPHOST          "Imap4Host"
 /// the mail host
 #define   MP_SMTPHOST         "MailHost"
+/// the smtp host user-id
+#define   MP_SMTPHOST_LOGIN   "MailHostLogin"
 /// the news server
 #define   MP_NNTPHOST         "NewsHost"
 /// the mail host
@@ -795,6 +797,8 @@
 #define   MP_IMAPHOST_D          "imap"
 /// the mail host
 #define   MP_SMTPHOST_D         "mail"
+/// the mail host user-id
+#define   MP_SMTPHOST_LOGIN_D   ""
 /// the mail host
 #define   MP_SMTPHOST_USE_SSL_D   0l
 /// tyhe mail server fallback

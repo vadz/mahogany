@@ -485,10 +485,12 @@ wxMApp::OnInit()
 
 #ifdef OS_UNIX
    const char *locale = getenv("LANG");
-   hasLocale = locale &&
-               (strcmp(locale, "C") != 0) &&
-               (strcmp(locale, "en") != 0) &&
-               (strcmp(locale, "us") != 0);
+   hasLocale =
+      locale &&
+      (strcmp(locale, "C") != 0) &&
+      (strcmp(locale, "en") != 0) &&
+      (strncmp(locale,"en_", 3) != 0) &&
+      (strcmp(locale, "us") != 0);
 #elif defined(OS_WIN)
    // this variable is not usually set under Windows, but give the user a
    // chance to override our locale detection logic in case it doesn't work

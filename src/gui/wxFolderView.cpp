@@ -1204,7 +1204,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_LAYOUT_LCLICK:
    case WXMENU_LAYOUT_RCLICK:
    case WXMENU_LAYOUT_DBLCLICK:
-      m_MessagePreview->OnMouseEvent(event);
+//FIXME      m_MessagePreview->OnMouseEvent(event);
       break;
 
    case  WXMENU_MSG_EXPUNGE:

@@ -117,9 +117,25 @@ SendMessageCC::Create(Protocol protocol,
       m_DefaultHost = prof->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
 
    if(protocol == Prot_SMTP)
+   {
       m_ServerHost = READ_CONFIG(prof, MP_SMTPHOST);
+      if(READ_CONFIG(prof,MP_SMTPHOST_LOGIN) != "")
+         m_ServerHost = String('{')
+            << m_ServerHost
+            << String("/user=")
+            << String(READ_CONFIG(prof,MP_SMTPHOST_LOGIN))
+            << String('}');
+   }
    else
+   {
       m_ServerHost = READ_CONFIG(prof, MP_NNTPHOST);
+      if(READ_CONFIG(prof,MP_USERNAME) != "")
+         m_ServerHost = String('{')
+            << m_ServerHost
+            << String("/user=")
+            << String(READ_CONFIG(prof,MP_USERNAME))
+            << String('}');
+   }
 #ifdef USE_SSL
    m_UseSSL = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
 #endif
@@ -625,24 +641,31 @@ SendMessageCC::Send(void)
 
 
    hostlist[1] = NIL;
+   String service;
+
    switch(m_Protocol)
    {
    case Prot_SMTP:
+      service = "smtp";
+      if( m_ServerHost.Contains("/user=") )
+         service = "esmpt";
       // notice that we _must_ assign the result to this string!
+
       hostlist[0] = m_ServerHost;
       DBGMESSAGE(("Trying to open connection to SMTP server '%s'", m_ServerHost.c_str()));
 #ifdef USE_SSL
       if(m_UseSSL)
       {
          STATUSMESSAGE(("Sending message via SSL..."));
-         stream = smtp_open_full
-            (NIL,(char **)hostlist,"smtp/ssl",SMTPTCPPORT,NIL);
+         service << "/ssl";
       }
-      else
 #endif
-         stream = smtp_open ((char **)hostlist,NIL);
+      stream = smtp_open_full
+         (NIL,(char **)hostlist, (char *)service.c_str(),
+          SMTPTCPPORT, OP_DEBUG); 
       break;
    case Prot_NNTP:
+      service = "nntp";
       // notice that we _must_ assign the result to this string!
       hostlist[0] = m_ServerHost;
       DBGMESSAGE(("Trying to open connection to NNTP server '%s'", m_ServerHost.c_str()));
@@ -650,12 +673,11 @@ SendMessageCC::Send(void)
       if( m_UseSSL )
       {
          STATUSMESSAGE(("Posting message via SSL..."));
-         stream = nntp_open_full
-            (NIL,(char **)hostlist,"nntp/ssl",SMTPTCPPORT,NIL);
+         service << "/ssl";
       }
-      else
 #endif
-         stream = nntp_open ((char **)hostlist,NIL);
+      stream = nntp_open_full
+         (NIL,(char **)hostlist,"nntp/ssl",SMTPTCPPORT,NIL);
       break;
 
       // make gcc happy
