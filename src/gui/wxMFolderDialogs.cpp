@@ -852,7 +852,12 @@ bool wxFolderCreateDialog::TransferDataToWindow()
    }
    //else: the parent folder is fixed, don't let user change it
 
-   return wxOptionsEditDialog::TransferDataToWindow();
+   if ( !wxOptionsEditDialog::TransferDataToWindow() )
+      return FALSE;
+
+   m_folderName->SetFocus();
+
+   return TRUE;
 }
 
 bool wxFolderCreateDialog::TransferDataFromWindow()
