@@ -250,6 +250,7 @@ strutil_findurl(String &str, String &url)
    int i;
    String before = "";
    const char *cptr = str.c_str();
+   String tmp;
 
    url = "";
    while(*cptr)
@@ -263,8 +264,8 @@ strutil_findurl(String &str, String &url)
          {
             while(strutil_isurlchar(*cptr))
                url += *cptr++;
-#pragma warning this code uses memcpy() on overlapping memory areas, fix it!
-            str = cptr;
+            tmp = cptr; // cannot assign directly as cptr points into
+            str = tmp;  // str, so using a temporary string in between
             return before;
          }
       }
