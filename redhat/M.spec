@@ -72,6 +72,15 @@ if [ "x%{MAKETARGET}" = "xquartstatic" ]; then
     fi
 fi
 
+# also check if we have everything we need to build the docs (bug 874)
+if [ $(echo @MAKE_HAVE_DOCTOOLS@ | \
+        sed `grep MAKE_HAVE_DOCTOOLS config.status`) = "no" ]; then
+    if [ ! -f doc/Mdocs-%{VERSION}.tar.gz ]; then
+        echo "Please download Mdocs-%{VERSION}.tar.gz file or install "\
+             "the missing tools required for the docs generation!"
+        exit 1
+fi
+
 # we have to fix M_PREFIX in config.h because the package will be later
 # installed in just %prefix, so fallback paths hardcoded into the binary
 # shouldn't contain RPM_BUILD_ROOT
