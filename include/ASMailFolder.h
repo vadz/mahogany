@@ -339,7 +339,7 @@ public:
      */
    virtual Ticket ExpungeMessages(void) = 0;
 
-   
+
    /** Search Messages for certain criteria.
        @return UIdArray with UIds of matching messages
    */
@@ -439,7 +439,7 @@ public:
    */
    virtual Ticket ApplyFilterRules(const UIdArray *msgs,
                                    UserData ud = 0) = 0;
-   
+
    /**@name Subscription management.
       These functions are statically defined and are implemented in
       ASMailFolder.cpp.
@@ -466,7 +466,7 @@ public:
                       bool subscribed_only = false,
                       const String &reference = "",
                       UserData ud = 0);
-   //@}   
+   //@}
    //@}
    //@}
    /**@name Synchronous Access Functions */
@@ -519,7 +519,7 @@ public:
 
 };
 
-/** A useful helper function to keep tickets for us. */
+/** A useful helper class to keep tickets for us. */
 class ASTicketList : public MObjectRC
 {
 public:
@@ -527,7 +527,13 @@ public:
    virtual void Add(Ticket t) = 0;
    virtual void Remove(Ticket t) = 0;
    virtual void Clear(void) = 0;
+   virtual bool IsEmpty(void) const = 0;
+
+   /// return the last ticket in the list and remove it from list
+   virtual Ticket Pop(void) = 0;
+
    static ASTicketList * Create(void);
 };
 
-#endif
+#endif // ASMAILFOLDER_H
+

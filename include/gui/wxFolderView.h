@@ -103,10 +103,24 @@ public:
        @param messages pointer to an array holding the message numbers
        @param folder is the folder to save to, ask the user if NULL
        @param del if TRUE, delete them when they are saved
+       @return the ticket for the save operation
    */
-   void SaveMessagesToFolder(UIdArray const &messages,
-                             MFolder *folder = NULL,
-                             bool del = FALSE);
+   Ticket SaveMessagesToFolder(UIdArray const &messages,
+                               MFolder *folder = NULL,
+                               bool del = FALSE);
+
+   /** Save messages to a folder and possibly delete them later.
+       This function should be used by drop targets accepting the message
+       objects as the folder view must know whether it has to delete the
+       messages or not after saving (depending on whether copy or move was
+       done)
+
+       @param n number of messages
+       @param messages pointer to an array holding the message numbers
+       @param folder is the folder to save to, ask the user if NULL
+       @param del if TRUE, delete them when they are saved
+   */
+   void DropMessagesToFolder(UIdArray const &messages, MFolder *folder);
 
    /** Delete messages
     */
@@ -161,13 +175,15 @@ public:
    /// return profile name for persistent controls
    wxString const &GetFullName(void) const { return m_ProfileName; }
    /// for use by the listctrl:
-   class ASTicketList *GetTicketList(void) const { return
-                                                      m_TicketList; }
+   class ASTicketList *GetTicketList(void) const { return m_TicketList; }
    /// for use by the listctrl only:
    bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
 
    /// Update the idea of which messages are selected.
    void UpdateSelectionInfo(void);
+
+   /// called by wxFolderListCtrl to drag abd drop messages
+   bool DragAndDropMessages();
 
 protected:
    /** Save messages to a folder.
@@ -216,10 +232,28 @@ private:
    friend class wxFolderListCtrl;
    /// in deletion semaphore, ugly hack to avoid recursion in destructor
    bool m_InDeletion;
+
    /// a list of pending tickets from async operations
    class ASTicketList *m_TicketList;
-   /// Used by SaveMessagesToFolder: ticket from moving messages
-   Ticket m_DeleteSavedMessagesTicket;
+   /// a list of tickets we should delete if copy operation succeeded
+   ASTicketList *m_TicketsToDeleteList;
+
+   // drag and dropping messages is complicated because all operations
+   // (message saving, deletion *and* DoDragDrop() call) are async, so
+   // everything may happen in any order, yet we should never delete the
+   // messages which couldn't be copied successfully. To deal with this we
+   // maintain the following lists:
+   //  * m_TicketsDroppedList which contains all tickets created by
+   //    DropMessagesToFolder()
+   //  * m_UIdsCopiedOk which contains messages from tickets of
+   //    m_TicketsDroppedList which have been already saved successfully.
+
+   /// a list of tickets which we _might_ have to delete
+   ASTicketList *m_TicketsDroppedList;
+
+   /// a list of UIDs we might have to delete
+   UIdArray m_UIdsCopiedOk;
+
    /// do we have focus-follow enabled?
    bool m_FocusFollowMode;
 

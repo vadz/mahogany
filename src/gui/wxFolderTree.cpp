@@ -1478,7 +1478,7 @@ void wxFolderTreeImpl::OnDrop(wxCoord x, wxCoord y, MMessagesDataObject *data)
 
    // TODO: check here if the folder can be written to?
 
-   data->GetFolderView()->SaveMessagesToFolder(data->GetMessages(), folder);
+   data->GetFolderView()->DropMessagesToFolder(data->GetMessages(), folder);
 }
 
 // ----------------------------------------------------------------------------

@@ -1047,6 +1047,19 @@ public:
       {
          m_Tickets.Clear();
       }
+
+   virtual bool IsEmpty(void) const { return m_Tickets.IsEmpty(); }
+   virtual Ticket Pop(void)
+   {
+      size_t n = m_Tickets.GetCount();
+      CHECK( n > 0, ILLEGAL_TICKET, "ticket list is empty in Pop()" );
+
+      Ticket t = m_Tickets.Last();
+      m_Tickets.RemoveAt(n - 1);
+
+      return t;
+   }
+
 private:
    wxArrayInt m_Tickets;
 };
