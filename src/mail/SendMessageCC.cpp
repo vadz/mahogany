@@ -1337,6 +1337,9 @@ SendMessageCC::Send(int flags)
 {
    ASSERT_MSG(m_headerNames != NULL, "Build() must have been called!");
 
+   if ( !MailFolder::Init() )
+      return false;
+
    MCclientLocker locker();
 
 #ifndef OS_UNIX
