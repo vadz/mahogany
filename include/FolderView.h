@@ -12,16 +12,13 @@
 
 /**
    FolderView class, a window displaying a MailFolder.
-
 */
-
-class FolderViewBase
+class FolderView
 {   
- public:
+public:
    /// update the user interface
    virtual void Update(void) = 0;
    /// virtual destructor
-   virtual ~FolderViewBase() {}
+   virtual ~FolderView() {}
 };
-
 #endif

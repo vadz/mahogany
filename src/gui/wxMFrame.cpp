@@ -191,10 +191,9 @@ wxMFrame::OnMenuCommand(int id)
    {
       wxString name;
       if ( MInputBox(&name, _("Folder Open"), _("Name of the folder?"),
-                     this, "OpenFolderName", "INBOX") ) {
-         (void)new wxFolderViewFrame(Str(name), this);
-      }
-      break;
+                     this, "OpenFolderName", "INBOX") )
+               (void) wxFolderViewFrame::Create(name, this);
+            break;
    }
    case WXMENU_FILE_OPENANY:
       MDialog_FolderOpen(this);

@@ -59,6 +59,7 @@ enum ConfigFields
   ConfigField_Username,
   ConfigField_Hostname,
   ConfigField_MailServer,
+  ConfigField_NewsServer,
   ConfigField_PersonalName,
   ConfigField_IdentLast = ConfigField_PersonalName,
 
@@ -385,6 +386,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
   { "&Username",                    Field_Text,    -1,                        },
   { "&Hostname",                    Field_Text,    -1,                        },
   { "SMTP (&mail) server",          Field_Text,    -1,                        },
+  { "NNTP (&news) server",          Field_Text,    -1,                        },
   { "&Personal name",               Field_Text,    -1,                        },
 
   // compose
@@ -438,6 +440,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
   CONFIG_ENTRY(MP_USERNAME),
   CONFIG_ENTRY(MP_HOSTNAME),
   CONFIG_ENTRY(MP_SMTPHOST),
+  CONFIG_ENTRY(MP_NNTPHOST),
   CONFIG_ENTRY(MP_PERSONALNAME),
 
   CONFIG_ENTRY(MC_FROM_LABEL),

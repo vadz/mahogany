@@ -7,11 +7,4 @@ Pri:        5 high --- 0 low
 --------------------------------------------------------------------------
 Pri Difficulty Target				Treatment
 --------------------------------------------------------------------------
-5 0  - wxOptionsDialog: there are some FIXME to be looked at  Vadim?
-5 0  - fix MessageBox in wxMApp.cpp
-5 0  - completely remove CommonBase and replace it with either MObject or MagicObject
-3 5  - fix wxGTK memory holes, serious debugging with dmalloc
-
-- class rewrite:
-3 1  - Message/MailFolder classes              KB: will do this next
 

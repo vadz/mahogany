@@ -150,40 +150,6 @@ MAppBase::OnStartup()
 {
    mApplication = this;
 
-   // initialise the profile(s)
-   // -------------------------
-
-   String strConfFile;
-#  ifdef OS_UNIX
-      strConfFile = getenv("HOME");
-      strConfFile << "/." << M_APPLICATIONNAME;
-      // FIXME must create the directory ourselves!
-      struct stat st;
-      if ( stat(strConfFile, &st) != 0 || !S_ISDIR(st.st_mode) ) {
-         if ( mkdir(strConfFile, 0777) != 0 ) {
-            wxLogError(_("Can't create the directory for configuration"
-                         "files '%s'."), strConfFile.c_str());
-            return FALSE;
-         }
-
-         wxLogInfo(_("Created directory '%s' for configuration files."),
-                   strConfFile.c_str());
-      }
-
-      strConfFile += "/config";
-#  else  // Windows
-      strConfFile = M_APPLICATIONNAME;
-#  endif // Win/Unix
-
-   m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
-
-   // show the splash screen (do it as soon as we have profile to read
-   // MC_SHOWSPLASH from)
-   if ( READ_APPCONFIG(MC_SHOWSPLASH) ) {
-      // no parent because no frames created yet
-      MDialog_AboutDialog(NULL);
-   }
-
    // do we have gettext()?
    // ---------------------
 #  ifdef  USE_GETTEXT
@@ -191,6 +157,76 @@ MAppBase::OnStartup()
       //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
       textdomain (M_APPLICATIONNAME);
 #  endif // USE_GETTEXT
+
+
+   // find our directories (has to be done first!)
+   String tmp;
+#ifdef OS_UNIX
+   bool   found;
+   if(PathFinder::IsDir(M_BASEDIR))
+      m_globalDir = M_BASEDIR;
+   else
+   {
+      PathFinder pf(MC_ETCPATH_D);
+      pf.AddPaths(M_PREFIX,true,true); 
+      m_globalDir = pf.FindDir(MC_ROOTDIRNAME_D, &found);
+      if(!found)
+      {
+         // TODO instead of insulting the user it would be better to propose
+         //      to find it right now or even create one
+         String msg = _("Cannot find global directory \"");
+         msg << MC_ROOTDIRNAME_D << _("\" in\n \"") << MC_ETCPATH_D << ':' << M_BASEDIR; 
+         ERRORMESSAGE((Str(msg)));
+      }
+   }
+#else  //Windows
+      // under Windows our directory is always the one where the executable is
+      // located. At least we're sure that it exists this way...
+      wxString strPath;
+      ::GetModuleFileName(::GetModuleHandle(NULL),
+                          strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
+      strPath.UngetWriteBuf();
+
+      // extract the dir name
+      wxSplitPath(strPath, &m_globalDir, NULL, NULL);
+#endif //Unix
+
+      // initialise the profile(s)
+   // -------------------------
+
+   String strConfFile;
+#ifdef OS_UNIX
+   strConfFile = getenv("HOME");
+   strConfFile << "/." << M_APPLICATIONNAME;
+   // FIXME must create the directory ourselves!
+   struct stat st;
+   if ( stat(strConfFile, &st) != 0 || !S_ISDIR(st.st_mode) ) {
+      if ( mkdir(strConfFile, 0777) != 0 )
+      {
+         wxLogError(_("Can't create the directory for configuration"
+                      "files '%s'."), strConfFile.c_str());
+         return FALSE;
+      }
+      
+      wxLogInfo(_("Created directory '%s' for configuration files."),
+                strConfFile.c_str());
+   }
+   
+   strConfFile += "/config";
+#else  // Windows
+   strConfFile = M_APPLICATIONNAME;
+#endif // Win/Unix
+
+   m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
+   m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
+
+   // show the splash screen (do it as soon as we have profile to read
+   // MC_SHOWSPLASH from)
+   if ( READ_APPCONFIG(MC_SHOWSPLASH) )
+   {
+      // no parent because no frames created yet
+      MDialog_AboutDialog(NULL);
+   }
 
    // verify (and upgrade if needed) our settings
    // -------------------------------------------
@@ -204,49 +240,6 @@ MAppBase::OnStartup()
 
    m_mimeManager = new wxMimeTypesManager();
 
-   // find our directories
-   // --------------------
-   String tmp;
-#  ifdef OS_UNIX
-      tmp = READ_APPCONFIG(MC_ROOTPATH);
-      if(PathFinder::IsDir(tmp))
-         m_globalDir = tmp;
-      else // look for it
-      {
-         bool   found;
-         String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
-         PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
-         m_globalDir = pf.FindDir(strRootDir, &found);
-      
-         if(found)
-         {
-            m_profile->writeEntry(MC_ROOTPATH,strRootDir);
-         }
-         else
-         {
-            // TODO instead of insulting the user it would be better to propose
-            //      to find it right now or even create one
-            String msg = _("Cannot find global directory \"");
-            msg += strRootDir;
-            msg += _("\" in\n \"");
-            msg += String(READ_APPCONFIG(MC_PATHLIST));
-            ERRORMESSAGE((Str(msg)));
-         }
-      }
-   
-      m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
-#  else  //Windows
-      // under Windows our directory is always the one where the executable is
-      // located. At least we're sure that it exists this way...
-      wxString strPath;
-      ::GetModuleFileName(::GetModuleHandle(NULL),
-                          strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
-      strPath.UngetWriteBuf();
-
-      // extract the dir name
-      wxSplitPath(strPath, &m_globalDir, NULL, NULL);
-      m_localDir = m_globalDir;
-#  endif //Unix
 
    // create and show the main program window
    CreateTopLevelFrame();
@@ -300,7 +293,7 @@ MAppBase::OnStartup()
       if((*i)->length() == 0) // empty token
          continue;
       DBGMESSAGE(("Opening folder '%s'...", (*i)->c_str()));
-      (void)new wxFolderViewFrame((**i), m_topLevelFrame);
+      (void)wxFolderViewFrame::Create((**i), m_topLevelFrame);
    }
 
    // now that we have the local dir, we can set up a default mail

@@ -39,10 +39,10 @@ config.status: configure
 	exit 1;
 
 config: configure makeopts.in
-	./configure
+	./configure || $(RM) config.status
 
 configure: configure.in aclocal.m4
-	autoconf
+	autoconf && $(RM) config.status
 
 makeopts: makeopts.in config.status
 	CONFIG_FILES=$@ CONFIG_HEADERS=./config.status

@@ -10,7 +10,7 @@ all:
 	@$(MAKE) -f Makefile2 $@
 
 clean:
-	$(RM) *.o *.so *.pyc *.py *.doc $(CPPTARGETS)
+	$(RM) *.o *.so *.pyc *.py $(CPPTARGETS)
 	ln -s INIT/Minit.py .
 
 %: force

@@ -9,7 +9,7 @@ static char *magick[] = {
 "O c #000080",
 "+ c #800080",
 "@ c #008080",
-"# c #c0c0c0",
+"# c none",
 "$ c #808080",
 "% c Red",
 "& c Green",

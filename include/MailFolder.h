@@ -14,7 +14,7 @@
 #endif
 
 // forward declarations
-class FolderViewBase;
+class FolderView;
 class ProfileBase;
 
 /**
@@ -119,7 +119,7 @@ public:
        @param  view the FolderView to register
        @param reg if false, unregister it
    */
-   virtual void RegisterView(FolderViewBase *view, bool reg = true) = 0;
+   virtual void RegisterView(FolderView *view, bool reg = true) = 0;
    
    /** is mailbox "ok", i.e. was there an error or not?
        @return  true if everything succeeded

@@ -19,6 +19,7 @@
 #   include "Profile.h"
 #endif // USE_PCH
 
+#include "gui/wxMFrame.h"
 #include "FolderView.h"
 
 #include "Mdefaults.h"

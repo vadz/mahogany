@@ -157,6 +157,8 @@
 #define   MP_RETURN_HOSTNAME      "ReturnHostName"
 /// the mail host
 #define   MP_SMTPHOST         "MailHost"
+/// the news server
+#define   MP_NNTPHOST         "NewsHost"
 /// the directory for mbox folders
 #define   MP_MBOXDIR         "FolderDir"
 /// show CC field in message composition?
@@ -310,7 +312,7 @@
 /// the path where to find .afm files
 #define   MC_AFMPATH_D "/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
 /// the path to the /etc directories (configuration files)
-#define   MC_ETCPATH_D "/etc:/usr/etc:/usr/local/etc"
+#define   MC_ETCPATH_D "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc"
 #endif // Unix
 
 /// the default icon for frames
@@ -368,6 +370,8 @@
 #define   MP_HOSTNAME_D         ""
 /// the mail host
 #define   MP_SMTPHOST_D         "localhost"
+/// the news server
+#define   MP_NNTPHOST_D         "news"
 /// the directory for mbox folders
 #define   MP_MBOXDIR_D         ""
 // the username for returned mail

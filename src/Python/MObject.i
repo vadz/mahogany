@@ -26,6 +26,8 @@
 
 %}
 
+%import MString.i
+
 /** This class is base of all other M objects. It has a simple
     mechanism of magic numbers to check an object's validity.
     This class is empty if compiled with debugging disabled.

@@ -48,10 +48,12 @@ struct StreamConnection
    MAILSTREAM   const *stream;
    /// name of the MailFolderCC object
    String name;
+   /// for POP3/IMAP/NNTP: login or newsgroup
+   String login;
 };
 
 KBLIST_DEFINE(StreamConnectionList, StreamConnection);
-KBLIST_DEFINE(FolderViewList, FolderViewBase);
+KBLIST_DEFINE(FolderViewList, FolderView);
 
 /**
    MailFolder class, implemented with the C-client library.
@@ -108,7 +110,8 @@ public:
    void   DoDebug(bool flag = true) { debugFlag = flag; }
 
    // checks whether a folder with that path exists
-   static MailFolderCC *FindFolder(String const &path);
+   static MailFolderCC *FindFolder(String const &path,
+                                   String const &login);
 
 public:
 
@@ -117,12 +120,12 @@ public:
    */
    bool   IsOk(void) const { return okFlag; }
 
-   /** Register a FolderViewBase derived class to be notified when
+   /** Register a FolderView derived class to be notified when
        folder contents change.
        @param    view the FolderView to register
        @param   reg if false, unregister it
    */
-   void RegisterView(FolderViewBase *view, bool reg = true);
+   void RegisterView(FolderView *view, bool reg = true);
 
    /** return a symbolic name for mail folder
        @return the folder's name

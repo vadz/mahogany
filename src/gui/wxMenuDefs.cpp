@@ -106,7 +106,7 @@ static const TbarItemInfo g_aToolBarData[] =
    { "open",     WXMENU_ADBBOOK_OPEN,    "Open address book file"  },
    { "new",      WXMENU_ADBEDIT_NEW,     "Create new entry"        },
    { "delete",   WXMENU_ADBEDIT_DELETE,  "Delete"                  },
-   { "undo",     WXMENU_ADBEDIT_UNDO,    "Undo"                    },
+   { "tb_undo",     WXMENU_ADBEDIT_UNDO,    "Undo"                    },
    { "lookup",   WXMENU_ADBFIND_NEXT,    "Find next"               },
 };
 

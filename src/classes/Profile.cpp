@@ -432,6 +432,7 @@ Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
       // data from/write to somewhere!
       fullName = M_PROFILE_CONFIG_SECTION;
       fullName << '/' << iClassName;
+      //FIXME: what's going on here?
       m_config = CreateGlobalConfigBase(NOT_WIN(""));
       m_config->SetPath(fullName);
    }
@@ -819,7 +820,6 @@ void RestoreArray(ProfileBase& conf, wxArrayString& astr, STRINGARG key)
 static wxConfigBase *
 CreateGlobalConfigBase(NOT_WIN(const String& filename))
 {
-   wxConfigBase *config;
 #  ifdef OS_WIN
       // don't give explicit name, but rather use the default logic (it's
       // perfectly ok, for the registry case our keys are under vendor\appname)
@@ -838,14 +838,12 @@ CreateGlobalConfigBase(NOT_WIN(const String& filename))
       //else: if no filename is given, reuse the last one
 
       // we don't need the config file manager for this profile
-      PathFinder pf(M_ETC_PATH);
-      String globalconfig = pf.FindFile(M_GLOBAL_CONFIG_NAME);
-      config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                            s_filename, globalconfig,
-                            wxCONFIG_USE_LOCAL_FILE|
-                            wxCONFIG_USE_GLOBAL_FILE);
-
-      // set the default path for configuration entries
+      //FIXME: this is broken!? multiple wxConfig on the same file?
+      m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+                              s_filename, mApplication->GetGlobalDir(),
+                              wxCONFIG_USE_LOCAL_FILE|
+                              wxCONFIG_USE_GLOBAL_FILE);
+         // set the default path for configuration entries
       config->SetPath(M_APPLICATIONNAME);
 #  endif // Unix/Windows
 

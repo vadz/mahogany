@@ -4,19 +4,19 @@ $Id$
 
 *** things to fix/implement next ***
 
+- sequence invalid bug on close of folder
 - test sl5/slx abiguity in c-client: use -lshadow on libc5 and -lcrypt on glibc2?
-
 - SentMail folder path should be relative - broken
 - reply mail does not quote original mail but inserts junk
 - reply/forward buttons for messageview/folderview
-- Preferences editor should mail oneself for test
 - make icons in AdbEdit transparent
 - make AdbEdit textctrl accept pasted text
 - make AdbEdit auto-generate a formatted name from first/family-name and prefix/title.
 
-- wxOptionsDlg: two conversions from (long) to (int) .... is that ok?
-  + should have "restore defaults", would be nice to be able to do it for
-    one setting only (and not for all of them which is trivial)
+
+- wxOptionsDlg:
+	+ can easily get crashed/stuck in endless loop trying to satisfy constraints
+- Preferences editor should mail oneself for test (MAppBase::VerifySettings)
 
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
@@ -27,11 +27,6 @@ $Id$
     reading all the docs, but Profile::readEntry() definitely shouldn't be
     highlighted (well, "Pro" is not) :-)
 
-- Profile/wxMDialogs
-  + fix usage of readEntry to use String objects
-  + who cleans up CPYSTR() generated strings?
-  + find path to global configuration file and use it?
-
 - Python
   + in src/Python: improve rules to always redo .cpp/.py
   + add remaining (important) interface definitions
@@ -41,21 +36,9 @@ $Id$
     + add sample callback showing new messages
   + update interface files
 
-- write some first configuration dialogs and for opening a folder
-
-- configure: USE_WXCONFIG does not get defined ?
-
-- WINDOWS: how to do MIME handling?
-  + as follows: MIME type => file extension => file type => can execute it
-    (also, a file type has an associated description and icon: the only
-     problem is that for now I don't have any attachments at all)                 
-
 - DND with gmc (dead easy, see dnd example :-) )
 
 - new mail callback
-
-- drop Script classes and old Adb from source
-
 
 *** to implement in near future ***
 

@@ -55,8 +55,10 @@ public:
       Adds the pathlist to the list of paths.
       @param pathlist like for constructor
       @param recursive if true, add all subdirectories
+      @param prepend if true, add paths to head of list
    */
-   void AddPaths(STRINGARG pathlist, bool recursive = false);
+   void AddPaths(STRINGARG pathlist, bool recursive = false,
+                 bool prepend = true);
    
    /** 
        Returns the path to the file or directory or an empty string.

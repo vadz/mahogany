@@ -15,7 +15,6 @@
 /// define the class to use for implementing MFrame objects
 #   define   MFrame        wxMFrame
 #   define   MWindow       wxWindow
-#   define   FolderView    wxFolderView
 #   define   MainFrame     wxMainFrame
 #   define   MDialogs      wxMDialogs
 

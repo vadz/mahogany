@@ -20,7 +20,7 @@
 
 %}
 
-%import String.i
+%import MString.i
 %import Profile.i
 
 /**

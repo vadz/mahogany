@@ -56,15 +56,22 @@ public:
 };
 
 /** a wxWindows FolderView class */
-class wxFolderView : public FolderViewBase 
+class wxFolderView : public FolderView 
 {
 public:
    /** Constructor
        @param folderName the name of the folder
        @param parent   the parent window
    */
-   wxFolderView(String const & folderName,
-                MWindow *parent = NULL);
+   static wxFolderView *Create(String const & folderName,
+                        MWindow *parent = NULL);
+
+   /* Constructor, for displaying an already open mail folder
+      @param mf pointer to mailfolder
+      @param parent parent window
+   */
+   static wxFolderView* Create(MailFolder *mf, MWindow *parent = NULL);
+   
    /// Destructor
    ~wxFolderView();
 
@@ -72,7 +79,7 @@ public:
    void  Update(void);
 
    /// return true if initialised
-   bool  IsInitialised(void) const { return initialised; }
+   bool  IsOk(void) const { return initialised; }
 
    /// called on Menu selection
    void OnCommandEvent(wxCommandEvent &event);
@@ -135,12 +142,14 @@ public:
    /** Show a message in the preview window.
     */
    void PreviewMessage(long messageno)
-      { m_MessagePreview->ShowMessage(mailFolder,messageno+1); }
+      { m_MessagePreview->ShowMessage(m_MailFolder,messageno+1); }
    void SetSize(const int x, const int y, const int width, int height);
    /// return the MWindow pointer:
-   MWindow *GetWindow(void) { return m_SplitterWindow; }
+   MWindow *GetWindow(void) const { return m_SplitterWindow; }
    /// return a profile pointer:
-   inline ProfileBase *GetProfile(void) { return m_Profile; }
+   inline ProfileBase *GetProfile(void) const { return m_Profile; }
+   /// return pointer to folder
+   inline MailFolder * GetFolder(void) const { return m_MailFolder; }
 protected:
    /** Save messages to a folder.
        @param n number of messages
@@ -149,12 +158,18 @@ protected:
    */
    void SaveMessages(wxArrayInt const &messages, String const &file);
 private:
+   /* Constructor, for displaying an already open mail folder
+      @param mf pointer to mailfolder
+      @param parent parent window
+   */
+   void InternalCreate(MailFolder *mf, MWindow *parent = NULL);
+
    /// is initialised?
    bool initialised;
    /// are we to deallocate the folder?
    bool ownsFolder;
    /// the mail folder being displayed
-   class MailFolder  *mailFolder;
+   class MailFolder  *m_MailFolder;
    /// the number of messages in the folder when last updated
    int m_NumOfMessages;
    /// the number of messages in box
@@ -168,7 +183,7 @@ private:
    /// a timer to update information
    wxFVTimer   *timer;
    /// its parent
-   MWindow *parent;
+   MWindow *m_Parent;
    /// either a listctrl or a treectrl
    wxFolderListCtrl *m_FolderCtrl;
    /// a splitter window
@@ -184,7 +199,19 @@ private:
 class wxFolderViewFrame : public wxMFrame
 {
 public:
-   wxFolderViewFrame(const String &iname, wxFrame *parent = NULL);
+   /* Opens a FolderView for a mail folder defined by a profile entry.
+      @param profileName name of the profile
+      @parent parent window
+      @return pointer to FolderViewFrame or NULL
+   */
+   static wxFolderViewFrame * Create(const String &profileName, wxMFrame *parent = NULL);
+
+   /* Opens a FolderView for an already opened mail folder.
+      @param mf the mail folder to display
+      @parent parent window
+      @return pointer to FolderViewFrame or NULL
+   */
+   static wxFolderViewFrame * Create(MailFolder *mf, wxMFrame *parent = NULL);
    ~wxFolderViewFrame();
 
    // callbacks
@@ -192,7 +219,10 @@ public:
    void OnSize(wxSizeEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
 
+   bool IsOk(void) const { return m_FolderView && m_FolderView->IsOk(); }
 private:
+   void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);
+   wxFolderViewFrame(String const &name, wxMFrame *parent);
    wxFolderView *m_FolderView;
 
    DECLARE_EVENT_TABLE() 

@@ -15,12 +15,12 @@
 #include   "Profile.h"   
 %}
 
-%import String.i
+%import MString.i
 %import Profile.i
 %import Message.i
 
 // forward declarations
-class FolderViewBase;
+class FolderView;
 
 /**
    MailFolder base class, represents anything containig mails.
@@ -119,12 +119,12 @@ public:
    /// check wether object is initialised
    virtual bool  IsInitialised(void);
 
-   /** Register a FolderViewBase derived class to be notified when
+   /** Register a FolderView derived class to be notified when
        folder contents change.
        @param  view the FolderView to register
        @param reg if false, unregister it
    */
-   virtual void RegisterView(FolderViewBase *view, bool reg = true);
+   virtual void RegisterView(FolderView *view, bool reg = true);
    
    /** is mailbox "ok", i.e. was there an error or not?
        @return  true if everything succeeded

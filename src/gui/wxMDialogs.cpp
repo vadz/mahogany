@@ -23,20 +23,17 @@
 #include <errno.h>
 
 #ifndef USE_PCH
-#  include "Mcommon.h"
-
-#  include "guidef.h"
-#  include "strutil.h"
-#  include "MFrame.h"
-#  include "MLogFrame.h"
-#  include "PathFinder.h"
-#  include "MimeList.h"
-#  include "MimeTypes.h"
-#  include "Profile.h"
-#  include "MApplication.h"
+#   include "Mcommon.h"
+#   include "Mdefaults.h"
+#   include "guidef.h"
+#   include "strutil.h"
+#   include "MFrame.h"
+#   include "Profile.h"
+#   include "MApplication.h"
+#   include "MailFolder.h"
+#   include "Profile.h"
 #endif
 
-#include "Mdefaults.h"
 
 #include "gui/wxMApp.h"
 #include "gui/wxMIds.h"
@@ -53,6 +50,8 @@
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
+
+#include   "gui/wxFolderView.h"
 
 #ifdef    OS_WIN
 #  define M_32x32         "Micon"
@@ -804,8 +803,8 @@ public:
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
-   
-private:
+
+protected:
    //    callbacks
    void OnButton(wxCommandEvent& event);
 
@@ -814,7 +813,7 @@ private:
 
 // a general wxr dialog
 BEGIN_EVENT_TABLE(wxMRDialog, wxDialog)
-  EVT_BUTTON(-1,     wxMRDialog::OnButton)
+   EVT_BUTTON(-1,     wxMRDialog::OnButton)
 END_EVENT_TABLE()
 
 void wxMRDialog::OnButton(wxCommandEvent&  event)
@@ -844,16 +843,83 @@ class wxMROpenFolderDialog : public wxMRDialog
 {
 public:
    virtual bool TransferDataFromWindow(void);
-
+   void OnRadio(wxCommandEvent &event);
+   void UpdateRadioBox(void);
+   
    int m_Type;
    wxString m_UserID, m_Password, m_Hostname;
+
+   DECLARE_EVENT_TABLE()
 };
 
+// a general wxr dialog
+BEGIN_EVENT_TABLE(wxMROpenFolderDialog, wxMRDialog)
+   EVT_BUTTON(-1,     wxMRDialog::OnButton)
+   EVT_RADIOBOX(-1,   wxMROpenFolderDialog::OnRadio)
+END_EVENT_TABLE()
+
+void
+wxMROpenFolderDialog::OnRadio(wxCommandEvent &event)
+{
+   UpdateRadioBox();
+}
+
+void wxMROpenFolderDialog::UpdateRadioBox(void)
+{
+   ProfileBase *profile;
+   
+   wxRadioBox * win = (wxRadioBox *)wxFindWindowByName("FolderType",
+                                                       this);
+   wxASSERT(win);
+   
+   wxStaticText *UidLabel = (wxStaticText *)wxFindWindowByName("UIDLABEL",this);
+   wxStaticText *HostLabel = (wxStaticText *)wxFindWindowByName("HOSTLABEL",this);
+   wxTextCtrl   *UserID = (wxTextCtrl *)wxFindWindowByName("UserID",this);
+   wxTextCtrl   *Password = (wxTextCtrl *)wxFindWindowByName("Password",this);
+   wxTextCtrl   *Hostname = (wxTextCtrl *)wxFindWindowByName("MailHost",this);
+   switch(win->GetSelection())
+   {
+   case 0: // INBOX
+      HostLabel->SetLabel("Foldername");
+      Hostname->SetValue("INBOX");
+      Hostname->Enable(false);
+      UserID->Enable(false);
+      Password->Enable(false);
+      break;
+   case 1: // mbox
+      HostLabel->SetLabel("Foldername");
+      UserID->Enable(false);
+      Password->Enable(false);
+      Hostname->Enable(true);
+      break;
+   case 2: case 3: // POP3, IMAP
+      HostLabel->SetLabel("Mailhost");
+      UserID->Enable(true);
+      Password->Enable(true);
+      Hostname->Enable(true);
+      profile = ProfileBase::CreateEmptyProfile();
+      Hostname->SetValue(READ_CONFIG(profile,MP_SMTPHOST));
+      profile->DecRef();
+      break;
+   case 4: // NNTP
+      HostLabel->SetLabel("Newsserver");
+      UidLabel->SetLabel("Newsgroup");
+      UserID->Enable(true);
+      Password->Enable(false);
+      Hostname->Enable(true);
+      break;
+      
+   default:
+      /* nothing, keep compiler happy */
+      ;
+   }
+          
+}
+   
 bool
 wxMROpenFolderDialog::TransferDataFromWindow(void)
 {
-   wxRadioBox *ctrl = (wxRadioBox
-                       *)wxFindWindowByName("FolderType",this);
+   wxRadioBox *ctrl = (wxRadioBox*)wxFindWindowByName("FolderType",this);
    ASSERT(ctrl); m_Type = ctrl->GetSelection();
    wxTextCtrl *tctrl = (wxTextCtrl *)wxFindWindowByName("UserID",this);
    ASSERT(tctrl); m_UserID = tctrl->GetValue();
@@ -866,13 +932,25 @@ wxMROpenFolderDialog::TransferDataFromWindow(void)
 
 
 void
-MDialog_FolderOpen(MWindow *parent)
+MDialog_FolderOpen(wxMFrame *parent)
 {
-   int rc = -1; 
+   int rc = 0; 
    wxResourceParseData(OpenFolderDialog); 
-   wxDialog *dialog = new wxMROpenFolderDialog;
+   wxMROpenFolderDialog *dialog = new wxMROpenFolderDialog;
    if (dialog->LoadFromResource(parent, "OpenFolderDialog")) 
-      rc = dialog->ShowModal(); 
-   dialog->Close(TRUE);
-   //   return rc;
+   {
+      dialog->UpdateRadioBox();
+      rc = dialog->ShowModal();
+      if(rc == wxOK)
+      {
+         MailFolder *mf =
+            MailFolder::OpenFolder((MailFolder::Type)dialog->m_Type,
+                                   dialog->m_Hostname, NULL,
+                                   dialog->m_UserID, dialog->m_Password); 
+         if(mf)
+            if(wxFolderViewFrame::Create(mf, parent))
+               mf->DecRef(); // now the folder view has increfed the folder
+      }
+      dialog->Close(TRUE);
+   }
 }

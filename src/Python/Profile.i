@@ -17,7 +17,7 @@
 %}
 
 %import MObject.i
-%import String.i
+%import MString.i
 
 class ProfileBase : public MObjectRC
 {

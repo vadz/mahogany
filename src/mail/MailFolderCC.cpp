@@ -51,7 +51,11 @@ MailFolderCC::MailFolderCC(MailFolder::Type type,
    m_MailboxPath = path;
    m_Login = login;
    m_Password = password;
+   type = (MailFolder::Type) (type & MF_TYPEMASK);
    SetType(type);
+   if(type == MF_INBOX || type == MF_FILE)
+      m_Login = ""; // empty login for these types
+      
 }
 
 MailFolderCC *
@@ -90,7 +94,7 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
       FAIL_MSG("Unsupported folder type.");
    }
 
-   mf = FindFolder(mboxpath);
+   mf = FindFolder(mboxpath,login);
    if(mf)
    {
       mf->IncRef();
@@ -152,12 +156,12 @@ MailFolderCC::Open(void)
 }
 
 MailFolderCC *
-MailFolderCC::FindFolder(String const &path)
+MailFolderCC::FindFolder(String const &path, String const &login)
 {
    StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
    {
-      if( (*i)->name == path )
+      if( (*i)->name == path && (*i)->login == login)
          return (*i)->folder;
    }
    return NULL;
@@ -184,7 +188,7 @@ MailFolderCC::~MailFolderCC()
 }
 
 void
-MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
+MailFolderCC::RegisterView(FolderView *view, bool reg)
 {
    FolderViewList::iterator
       i;
@@ -244,11 +248,11 @@ MailFolderCC::GetName(void) const
    case MailFolder::MF_FILE:
       symbolicName = m_MailboxPath; break;
    case MailFolder::MF_POP:
-      symbolicName << "pop:" << m_Login; break;
+      symbolicName << "pop_" << m_Login; break;
    case MailFolder::MF_IMAP:
-      symbolicName << "imap:" << m_Login; break;
+      symbolicName << "imap_" << m_Login; break;
    case MailFolder::MF_NNTP:
-      symbolicName << "news:" << m_Login;
+      symbolicName << "news_" << m_Login;
    default:
       // just to keep the compiler happy
       ;
@@ -365,7 +369,7 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
    StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
    {
-      if( (*i)->stream == stream )
+      if( (*i)->folder == this )
       {
          StreamConnection *conn = *i;
          delete conn;
@@ -405,6 +409,7 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream)
    conn->folder = this;
    conn->stream = stream;
    conn->name = m_MailboxPath;
+   conn->login = m_Login;
    streamList.push_front(conn);
 }
 

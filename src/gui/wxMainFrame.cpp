@@ -69,10 +69,10 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    if(! strutil_isempty(foldername))
    {
-      m_FolderView = new wxFolderView(foldername, m_splitter);
+      m_FolderView = wxFolderView::Create(foldername, m_splitter);
    }
 
-   if ( m_FolderView && m_FolderView->IsInitialised() )
+   if ( m_FolderView && m_FolderView->IsOk() )
    {
       m_splitter->SplitVertically(m_FolderTree->GetWindow(),
                                   m_FolderView->GetWindow(),

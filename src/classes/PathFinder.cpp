@@ -39,7 +39,7 @@ PathFinder::PathFinder(STRINGARG ipathlist, bool recursive)
 }
 
 void
-PathFinder::AddPaths(STRINGARG ipathlist, bool recursive)
+PathFinder::AddPaths(STRINGARG ipathlist, bool recursive, bool prepend)
 {
    char *work = new char[ipathlist.length()+1];
    char   *found;
@@ -53,7 +53,10 @@ PathFinder::AddPaths(STRINGARG ipathlist, bool recursive)
    
    while(found)
    {
-      pathList->push_back(new String(found));
+      if(prepend)
+         pathList->push_front(new String(found));
+      else
+         pathList->push_back(new String(found));
       if(recursive && IsDir(found))   // look for subdirectories
       {
          tmp = String(found) + ANYFILE;
