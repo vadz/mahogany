@@ -751,6 +751,25 @@ bool wxFolderTree::OnClose(MFolder *folder)
    return FALSE;
 }
 
+bool wxFolderTree::OnDoubleClick()
+{
+   MFolder *sel = GetSelection();
+   CHECK( sel, FALSE, "no folder to open" );
+
+   if ( READ_APPCONFIG(MP_OPEN_ON_CLICK) )
+   {
+      // then double click opens in a separate view
+      OnOpen(sel);
+   }
+   else
+   {
+      // double click is needed to open it in this view (== "here")
+      OnOpenHere(sel);
+   }
+
+   return TRUE;
+}
+
 // ----------------------------------------------------------------------------
 // wxFolderTreeNode
 // ----------------------------------------------------------------------------
@@ -1268,16 +1287,7 @@ void wxFolderTreeImpl::OnDoubleClick()
       return;
    }
 
-   if ( READ_APPCONFIG(MP_OPEN_ON_CLICK) )
-   {
-      // then double click opens in a separate view
-      DoFolderOpen();
-   }
-   else
-   {
-      // double click is needed to open it here
-      m_sink->OnOpenHere(m_sink->GetSelection());
-   }
+   m_sink->OnDoubleClick();
 }
 
 void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)

@@ -204,10 +204,10 @@ BEGIN_EVENT_TABLE(MTextInputDialog, wxDialog)
 END_EVENT_TABLE()
 
 // a dialog showing all folders
-class MFolderDialog : public wxSMDialog
+class MFolderDialog : public wxManuallyLaidOutDialog
 {
 public:
-   MFolderDialog(wxWindow *parent, const wxPoint& pos, const wxSize& size);
+   MFolderDialog(wxWindow *parent);
    virtual ~MFolderDialog();
 
    // accessors
@@ -233,6 +233,27 @@ private:
 BEGIN_EVENT_TABLE(MFolderDialog, wxSMDialog)
     EVT_BUTTON(-1, MFolderDialog::OnButton)
 END_EVENT_TABLE()
+
+// helper class for MFolderDialog: this folder tree selects the folders on
+// double click instead of opening them
+class MFolderDialogTree : public wxFolderTree
+{
+public:
+   MFolderDialogTree(MFolderDialog *dlg) : wxFolderTree(dlg) { m_dlg = dlg; }
+
+   virtual bool OnDoubleClick()
+   {
+      // pretend the dialog was closed via ok button
+      wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, wxID_OK);
+      event.SetEventObject(m_dlg);
+      m_dlg->GetEventHandler()->ProcessEvent(event);
+
+      return TRUE;
+   }
+
+private:
+   MFolderDialog *m_dlg;
+};
 
 // ----------------------------------------------------------------------------
 // MTextDialog - a dialog containing a multi-line text control (used to show
@@ -1074,86 +1095,52 @@ MDialog_FolderOpen(const MWindow *parent)
 // folder dialog stuff
 // ----------------------------------------------------------------------------
 
-MFolderDialog::MFolderDialog(wxWindow *parent,
-                             const wxPoint& pos,
-                             const wxSize& size)
-             : wxSMDialog(parent, -1, _("Choose folder"),
-                        pos, size,
-                        wxDEFAULT_DIALOG_STYLE |
-                        wxDIALOG_MODAL |
-                        wxRESIZE_BORDER)
+MFolderDialog::MFolderDialog(wxWindow *parent)
+             : wxManuallyLaidOutDialog(parent,
+                                       _("Choose folder"),
+                                       "FolderSelDlg")
 {
-   SetAutoLayout(TRUE);
    wxLayoutConstraints *c;
 
-   // create 2 buttons
-   // ----------------
+   // create box and buttons
+   // ----------------------
 
-   // we want to have the buttons of standard size
-   long heightChar = AdjustCharHeight(GetCharHeight());
-   long heightBtn = TEXT_HEIGHT_FROM_LABEL(heightChar),
-        widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Please select a folder"));
 
-   // Cancel button
-   wxButton *btnCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
-
-   c = new wxLayoutConstraints;
-   c->height.Absolute(heightBtn);
-   c->width.Absolute(widthBtn);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->bottom.SameAs(this, wxBottom, 2*LAYOUT_Y_MARGIN);
-   btnCancel->SetConstraints(c);
-
-   // Ok button
-   wxButton *btnOk = new wxButton(this, wxID_OK, _("OK"));
-
-   btnOk->SetDefault();
-
-   c = new wxLayoutConstraints;
-   c->height.Absolute(heightBtn);
-   c->width.Absolute(widthBtn);
-   c->right.SameAs(btnCancel, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(this, wxBottom, 2*LAYOUT_Y_MARGIN);
-
-   btnOk->SetConstraints(c);
+   wxWindow *btnOk = FindWindow(wxID_OK);
 
    // File button
    wxButton *btnFile = new wxButton(this, wxID_OPEN, _("File..."));
    c = new wxLayoutConstraints;
-   c->height.Absolute(heightBtn);
-   c->width.Absolute(widthBtn);
+   c->height.SameAs(btnOk, wxHeight);
+   c->width.SameAs(btnOk, wxWidth);
    c->right.SameAs(btnOk, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(this, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(btnOk, wxBottom);
    btnFile->SetConstraints(c);
 
    // Help button
    wxButton *btnHelp = new wxButton(this, wxID_HELP, _("Help"));
    c = new wxLayoutConstraints;
-   c->height.Absolute(heightBtn);
-   c->width.Absolute(widthBtn);
-   c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(this, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->height.SameAs(btnOk, wxHeight);
+   c->width.SameAs(btnOk, wxWidth);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(btnOk, wxBottom);
    btnHelp->SetConstraints(c);
 
    // create the folder tree control
    // ------------------------------
 
-   m_tree = new wxFolderTree(this);
+   m_tree = new MFolderDialogTree(this);
 
    c = new wxLayoutConstraints;
-   c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->bottom.SameAs(btnOk, wxTop, 2*LAYOUT_Y_MARGIN);
+   c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
+   c->left.SameAs(box, wxLeft, LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, LAYOUT_X_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_tree->GetWindow()->SetConstraints(c);
 
    // position the dialog
-   if ( size.GetX() < 3*widthBtn )
-   {
-      SetClientSize(3*widthBtn, size.GetY());
-   }
-
-   Centre(wxCENTER_FRAME | wxBOTH);
+   SetDefaultSize(6*wBtn, 5*hBtn);
 }
 
 MFolderDialog::~MFolderDialog()
@@ -1307,19 +1294,9 @@ bool MFolderDialog::TransferDataFromWindow()
 MFolder *
 MDialog_FolderChoose(const MWindow *parent)
 {
-   // the config path where we store the position of the dialog
-   static const char *folderDialogPos = "FolderSelDlg";
+   MFolderDialog dlg((wxWindow *)parent);
 
-   int x, y, w, h;
-   wxMFrame::RestorePosition(folderDialogPos, &x, &y, &w, &h);
-
-   MFolderDialog dlg((wxWindow *)parent, wxPoint(x, y), wxSize(w, h));
-
-   bool selected = dlg.ShowModal() == wxID_OK;
-
-   wxMFrame::SavePosition(folderDialogPos, &dlg);
-
-   return selected ? dlg.GetFolder() : NULL;
+   return dlg.ShowModal() == wxID_OK ? dlg.GetFolder() : NULL;
 }
 
 

@@ -69,12 +69,12 @@ public:
       // update the menu items state (NB: doesn't inc/dec ref the pointer)
    void UpdateMenu(wxMenu *menu, const MFolder *folder);
 
-   // events
+   // high level events (should be implemented in derived classes)
       // parameters are the previously selected folder and the new selection
    virtual void OnSelectionChange(MFolder *oldsel, MFolder *newsel);
-      // folder single clicked (does nothing in the base class)
+      // folder single clicked (or double click and !MP_OPEN_ON_CLICK)
    virtual void OnOpenHere(MFolder *folder);
-      // folder double clicked/enter pressed
+      // folder double clicked/enter pressed or open chosen from menu
    virtual void OnOpen(MFolder *folder);
       // "browse subfolders" selected from the popup menu
    virtual void OnBrowseSubfolders(MFolder *folder);
@@ -89,6 +89,10 @@ public:
    virtual bool OnRename(MFolder *folder, const String& folderNewName);
       // the folder must be closed, return FALSE to prevent it from closing
    virtual bool OnClose(MFolder *folder);
+
+   // low level events (have reasonable default implementation in base class)
+      // folder double clicked/enter pressed
+   virtual bool OnDoubleClick();
 
    // accessors
       // associated window object (for showing/hiding/resizing...)
