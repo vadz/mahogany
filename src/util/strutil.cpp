@@ -258,28 +258,39 @@ int
 strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
 {
    int levels = 0;
-   int num_alpha, num_white;
-   const char *c;
 
-   for (c = string; *c != 0 && *c != '\n'; c++)
+   for ( const char *c = string; *c != 0 && *c != '\n'; c++)
    {
-      num_alpha =
-      num_white = 0;
-      while (*c == '\t' || *c == ' ')
+      // skip white space
+      int num_white = 0;
+      while ( *c == '\t' || *c == ' ' )
       {
-         num_white++;
+         if ( ++num_white > max_white )
+         {
+            // too much whitespace for this to be a quoted string
+            return levels;
+         }
+
          c++;
       }
 
+      // skip optional alphanumeric prefix
+      int num_alpha = 0;
       while ( isalpha((unsigned char)*c) )
       {
-         num_alpha++;
+         if ( ++num_alpha > max_alpha )
+         {
+            // prefix too long, not start of the quote
+            return levels;
+         }
+
          c++;
       }
 
       // start of text?
-      if ( (*c != '>' && *c != '|') ||
-           (num_alpha > max_alpha || num_white > max_white) )
+      //
+      // TODO: make the string of "quote" characters configurable
+      if ( *c != '>' && *c != '|' && *c != ')' && *c != '}' && *c != '*' )
       {
          // yes (according to our heuristics anyhow)
          break;
