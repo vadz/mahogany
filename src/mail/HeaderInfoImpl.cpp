@@ -330,13 +330,16 @@ StatusIndicator::~StatusIndicator()
 
 BusyIndicator::BusyIndicator(MailFolder *mf, const char *fmt, ...)
 {
-   if ( READ_CONFIG(mf->GetProfile(), MP_SHOWBUSY_DURING_SORT) )
-   {
-      va_list argptr;
-      va_start(argptr, fmt);
-      Init(mf->GetInteractiveFrame(), fmt, argptr);
-      va_end(argptr);
+   va_list argptr;
+   va_start(argptr, fmt);
+   Init(mf->GetInteractiveFrame(), fmt, argptr);
+   va_end(argptr);
 
+   // only show the busy dialog when we're opening the folder manually,
+   // otherwise it would be very annoying as it would popup without any user
+   // intervention
+   if ( m_frame && READ_CONFIG(mf->GetProfile(), MP_SHOWBUSY_DURING_SORT) )
+   {
       m_progInfo = new MProgressInfo(m_frame, m_msgInitial);
       wxYield();
    }
