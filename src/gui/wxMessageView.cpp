@@ -485,6 +485,7 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
    // sense for standalone message preview
    static const int menuCommands[] =
    {
+      WXMENU_MSG_EDIT,
       WXMENU_MSG_PRINT,
       WXMENU_MSG_PRINT_PREVIEW,
 #ifdef USE_PS_PRINTING
@@ -505,6 +506,7 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
          WXMENU_MSG_FORWARD,
          WXMENU_MSG_FORWARD_WITH_TEMPLATE,
       WXMENU_MSG_SEND_SUBMENU_END,
+      WXMENU_MSG_BOUNCE,
       WXMENU_MSG_SEP2,
       WXMENU_MSG_SAVE_TO_FILE,
       WXMENU_MSG_SAVE_TO_FOLDER,
