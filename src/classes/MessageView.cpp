@@ -1181,6 +1181,8 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
       return;
    }
 
+   String textPart = mimepart->GetContent();
+
    // get the encoding of the text
    wxFontEncoding encPart;
    if ( m_encodingUser != wxFONTENCODING_SYSTEM )
@@ -1191,6 +1193,15 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
    else if ( READ_CONFIG(GetProfile(), MP_MSGVIEW_AUTO_ENCODING) )
    {
       encPart = mimepart->GetTextEncoding();
+
+      if ( encPart == wxFONTENCODING_UTF8 )
+      {
+         // convert from UTF-8 to environment's default encoding
+         // FIXME it won't be needed when full Unicode support is available
+         textPart = wxString(textPart.wc_str(wxConvUTF8), wxConvLocal);
+         encPart = wxLocale::GetSystemEncoding();
+      }
+
       if ( encPart == wxFONTENCODING_SYSTEM ||
             encPart == wxFONTENCODING_DEFAULT )
       {
@@ -1209,7 +1220,6 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
       encPart = wxFONTENCODING_SYSTEM;
    }
 
-   String textPart = mimepart->GetContent();
 
    TextStyle style;
    if ( encPart != wxFONTENCODING_SYSTEM )

@@ -665,7 +665,7 @@ void HtmlViewer::ShowHeader(const String& headerName,
 
    const ProfileValues& profileValues = GetOptions();
 
-   // first row: header names (width=1 means minimal width)
+   // first column: header names (width=1 means minimal width)
    m_htmlText += "<tr>"
                  "<td align=\"right\" width=\"1\">";
 
@@ -675,8 +675,16 @@ void HtmlViewer::ShowHeader(const String& headerName,
       m_htmlText << "<tt>" << headerName << ":&nbsp;</tt>";
    }
 
-   // second row: header values
+   // second column: header values
    m_htmlText += "</td><td>";
+
+   if ( encHeader == wxFONTENCODING_UTF8 )
+   {
+      // convert from UTF-8 to environment's default encoding
+      // FIXME it won't be needed when full Unicode support is available
+      m_htmlText = wxString(m_htmlText.wc_str(wxConvUTF8), wxConvLocal);
+      encHeader = wxLocale::GetSystemEncoding();
+   }
 
    {
       FontColourChanger colChanger(profileValues.HeaderValueCol, m_htmlText);
