@@ -3183,7 +3183,7 @@ bool wxFolderView::GoToMessage(MsgnoType msgno)
 
 bool wxFolderView::MoveToNextUnread(bool takeNextIfNoUnread)
 {
-   if ( !READ_CONFIG(m_Profile, MP_FVIEW_AUTONEXT_UNREAD_MSG) )
+   if ( !m_settings.autoNextUnread )
    {
       // this feature is disabled
       return false;
@@ -3423,6 +3423,14 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 
    settings->previewDelay = READ_CONFIG(profile, MP_FVIEW_PREVIEW_DELAY);
    settings->focusOnMouse = READ_CONFIG_BOOL(profile, MP_FOCUS_FOLLOWSMOUSE);
+   settings->autoNextUnread = READ_CONFIG_BOOL(profile, MP_FVIEW_AUTONEXT_UNREAD_MSG);
+   settings->usingTrash = READ_CONFIG_BOOL(profile, MP_USE_TRASH_FOLDER);
+
+   settings->updateStatus = READ_CONFIG_BOOL(profile, MP_FVIEW_STATUS_UPDATE);
+   if ( settings->updateStatus )
+   {
+      settings->statusFormat = READ_CONFIG(profile, MP_FVIEW_STATUS_FMT);
+   }
 
    ReadColumnsInfo(profile, settings->columns);
 }
@@ -4099,7 +4107,7 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
 
             // only move on if we mark as deleted, for trash usage, selection
             // remains the same:
-            if ( READ_CONFIG(m_Profile, MP_USE_TRASH_FOLDER) )
+            if ( m_settings.usingTrash )
             {
                // don't move focus
                newFocus = -1;
@@ -4513,17 +4521,16 @@ wxFolderView::OnFocusChange(long idx, UIdType uid)
    wxLogTrace(M_TRACE_FV_SELECTION, "item %ld (uid = %lx) is now focused",
               idx, uid);
 
-   if ( uid != UID_ILLEGAL && READ_CONFIG(m_Profile, MP_FVIEW_STATUS_UPDATE) )
+   if ( uid != UID_ILLEGAL && m_settings.updateStatus )
    {
       HeaderInfoList_obj hil = GetFolder()->GetHeaders();
       CHECK_RET( hil, "failed to get headers" );
 
-      wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
       HeaderVarExpander expander(hil[idx],
                                  m_settings.dateFormat,
                                  m_settings.dateGMT);
 
-      wxLogStatus(m_Frame, ParseMessageTemplate(fmt, expander));
+      wxLogStatus(m_Frame, ParseMessageTemplate(m_settings.statusFormat, expander));
    }
       //else: no status message
 }

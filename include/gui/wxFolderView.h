@@ -262,6 +262,7 @@ private:
       String dateFormat;
       /// TRUE => display time/date in GMT
       bool dateGMT;
+
       /// the folder view control colours
       wxColour BgCol,         // background (same for all messages)
                FgCol,         // normal text colour
@@ -270,27 +271,48 @@ private:
                RecentCol,     //                 recent
                DeletedCol,    //                 deleted
                UnreadCol;     //                 unseen
+
       /// font description
       String font;
       /// font family and size if font is empty
       int fontFamily,
           fontSize;
+
       /// do we want to preview messages when activated?
       bool previewOnSingleClick;
+
       /// delay between selecting a message and previewing it
       unsigned long previewDelay;
+
       /// strip e-mail address from sender and display only name?
       bool senderOnlyNames;
+
       /// replace "From" with "To" for messages sent from oneself?
       bool replaceFromWithTo;
+
       /// all the addresses corresponding to "oneself"
       wxArrayString returnAddresses;
+
       /// the order of columns
       int columns[WXFLC_NUMENTRIES];
+
       /// how to show the size
       MessageSizeShow showSize;
+
       /// do we have focus-follow enabled?
       bool focusOnMouse;
+
+      /// do we automatically go to the next unread message?
+      bool autoNextUnread;
+
+      /// do we use trash or delete in place?
+      bool usingTrash;
+
+      /// do we show the details of the current message in the status bar?
+      bool updateStatus;
+
+      /// the format of the status messages (only if updateStatus)
+      String statusFormat;
    } m_settings;
 
    /// read the values from the profile into AllProfileSettings structure
