@@ -681,6 +681,21 @@ MDialog_FileRequester(String const & message,
                           wildcard, 0, (wxWindow *)parent);
 }
 
+String MDialog_DirRequester(const String& message,
+                            const String& path,
+                            MWindow *parent)
+{
+   wxDirDialog dlg(parent, message, path);
+
+   String dir;
+   if ( dlg.ShowModal() == wxID_OK )
+   {
+      dir = dlg.GetPath();
+   }
+
+   return dir;
+}
+
 int
 MDialog_AdbLookupList(ArrayAdbElements& aEntries,
                       const MWindow *parent)

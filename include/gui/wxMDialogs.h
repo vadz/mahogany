@@ -1,4 +1,4 @@
-/*-*- c++ -*-********************************************************
+/*******************************************************************
  * wxMDialogs.h : wxWindows version of dialog boxes                 *
  *                                                                  *
  * (C) 1998-1999 by Karsten Ballüder (ballueder@bmx.net)            *
@@ -156,7 +156,7 @@ bool   MDialog_YesNoDialog(char const *message,
                            bool YesDefault = true,
                            const char *configPath = NULL);
 
-/** Filerequester
+/** File requester dialog: asks user for a file name
        @param message the text to display
        @param parent   the parent frame
        @param path   default path
@@ -167,15 +167,25 @@ bool   MDialog_YesNoDialog(char const *message,
        @param profile   the profile to use
        @return pointer to a temporarily allocated buffer with he filename, or NULL
    */
-const char *MDialog_FileRequester(String const &message,
+const char *MDialog_FileRequester(const String &message,
                                   const MWindow *parent = NULL,
                                   String path = NULLstring,
                                   String filename = NULLstring,
                                   String extension = NULLstring,
                                   String wildcard = NULLstring,
                                   bool save = false,
-                                  Profile *profile = NULL
-   );
+                                  Profile *profile = NULL);
+
+/** Ask user for a directory
+
+  @param message the explanatory message
+  @param path the initially selected directory (if not empty)
+  @param parent the parent frame
+  @return the path of the selected directory or an empty string
+ */
+String MDialog_DirRequester(const String& message,
+                            const String& path = NULLstring,
+                            MWindow *parent = NULL);
 
 /** show a (modal) dialog with the given text
 

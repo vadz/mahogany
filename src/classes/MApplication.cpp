@@ -368,7 +368,9 @@ MAppBase::OnStartup()
    if ( path )
       tmp << PATH_SEPARATOR << path;
 
-   putenv(tmp);
+   // on some systems putenv() takes "char *", cast silents the warnings but
+   // should be harmless otherwise
+   putenv((char *)tmp.c_str());
 
    // initialise python interpreter
 #  ifdef  USE_PYTHON
