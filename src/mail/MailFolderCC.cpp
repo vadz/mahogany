@@ -1029,7 +1029,7 @@ String MailFolder::GetImapSpec(int typeOrig,
       if ( !InitSSL() )
       {
 #else // !USE_SSL
-         ERRORMESSAGE((_("This version of the program doesn't supprot SSL "
+         ERRORMESSAGE((_("This version of the program doesn't support SSL "
                          "authentification.")));
 #endif // USE_SSL/!USE_SSL
 
@@ -1046,7 +1046,7 @@ String MailFolder::GetImapSpec(int typeOrig,
             _("You can change the locations of the SSL and crypto "
               "libraries in the last page of the preferences dialog\n"
               "if you have these libraries in non default location"
-              " or if they have soem other names on your system."),
+              " or if they have some other names on your system."),
             NULL,
             "SSL tip",
             "SSLLibTip"
