@@ -102,6 +102,9 @@ void UpdateTitleAndStatusBars(const String& title,
    // we could probably optimize this somewhat by only counting the messages if
    // we need them, but is it worth it?
    String folderName = mailFolder->GetName();
+#ifdef DEBUG_greg
+printf("UpdateTitleAndStatusBars ==> CountMessages (thrice)\n");
+#endif
    unsigned long total = mailFolder->CountMessages(),
       recent =  mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
                                           MailFolder::MSG_STAT_SEEN,

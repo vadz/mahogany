@@ -1444,6 +1444,9 @@ wxFolderView::Update(HeaderInfoList *listing)
          m_FolderCtrl->SetItemState(focusedIndex,
                                     wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
 
+#ifdef DEBUG_greg
+printf("Update ==> UpdateTitleAndStatusBars\n");
+#endif
    UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
 
    if(focusedIndex != -1 && focusedIndex < (long) n)
@@ -1994,7 +1997,13 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 {
    if(event.GetFolder() == m_MailFolder)
    {
+#ifdef DEBUG_greg
+printf("OnFolderUpdateEvent ==> Update()\n");
+#endif
       Update();
+#ifdef DEBUG_greg
+printf("OnFolderUpdateEvent ==> UpdateTitleAndStatusBars()\n");
+#endif
       UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
    }
 }

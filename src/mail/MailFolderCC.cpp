@@ -1494,7 +1494,7 @@ MailFolderCC::Lock(void) const
    else
    {
 #ifdef EXPERIMENTAL_log_callbacks
-      printf("**********Attempt to lock locked folder\n");	// FIXME
+      printf("**********Attempt to lock locked folder\n");        // FIXME
       //mm_log("Attempt to lock locked folder.", 0, (MailFolderCC *)this);
 #endif
       return false;
@@ -1658,6 +1658,9 @@ MailFolderCC::CountMessages(int mask, int value) const
       return m_nRecent;
    else
    {
+#ifdef DEBUG_greg
+printf("CountMessages ==> GetHeaders\n");
+#endif
       HeaderInfoList *hil = GetHeaders();
       if ( !hil )
          return 0;
@@ -1737,13 +1740,18 @@ MailFolderCC::CountNewMessages(void) const
 class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
+#ifdef DEBUG_greg
+//printf("GetHeaders:%s%s%s\n", m_ListingFrozen ? " ListingFrozen" : "",
+//        m_ExpungeRequested ? " ExpungeRequested" : "",
+//        m_NeedFreshListing ? " NeedFreshListing" : "");
+#endif
    /* A listing can be frozen if we want to suppress updates at
       present to avoid recursion. */
    if(m_ListingFrozen)
    {
-      ASSERT_MSG(m_Listing,
-                 "GetHeaders() returning frozen listing - "
-                 "should be harmless");
+      //ASSERT_MSG(!m_ListingFrozen,
+      //           "GetHeaders() returning frozen listing - "
+      //           "should be harmless");
       if(m_Listing) m_Listing->IncRef();
       ASSERT_MSG(m_Listing, "GetHeaders() returning NULL listing - dubious");
       return m_Listing;
@@ -1757,7 +1765,7 @@ MailFolderCC::GetHeaders(void) const
    if( m_ExpungeRequested == TRUE )
    {
       that->ExpungeMessages();
-      that->m_ExpungeRequested = FALSE;
+      //that->m_ExpungeRequested = FALSE;
    }
 
    // check if we are still alive:
@@ -1769,16 +1777,17 @@ MailFolderCC::GetHeaders(void) const
                        GetName().c_str()));
          return NULL;
       }
-      that->m_NeedFreshListing = true; // re-build it!
+      //that->m_NeedFreshListing = true; // re-build it!
    }
-
+   else if( m_NeedFreshListing == FALSE )
    // if nothing needs to be done, just return current listing
-   if( m_NeedFreshListing == FALSE )
    {
+#ifdef DEBUG_greg
+//printf("No fresh listing required; returning current listing\n");
+#endif
       m_Listing->IncRef();
       return m_Listing;
    }
-
 
    /*
      OK, we need to rebuild the current folder listing.
@@ -1790,6 +1799,9 @@ MailFolderCC::GetHeaders(void) const
    that-> m_ListingFrozen = TRUE;
 
    // we need to re-generate the listing:
+#ifdef DEBUG_greg
+printf("GetHeaders ==> BuildListing\n");
+#endif
    that->BuildListing();
 
    /* The filter code returns a TRUE if there is a chance that the
@@ -1821,6 +1833,9 @@ MailFolderCC::GetHeaders(void) const
       listing was frozen. So now that it's thawed, we can flush the
       queue again to make sure everything is updated.
    */
+#ifdef DEBUG_greg
+printf("GetHeaders ==> ProcessEventQueue\n");
+#endif
    ProcessEventQueue();
    m_Listing->IncRef(); // for the caller who uses it
    return m_Listing;
@@ -2363,7 +2378,12 @@ MailFolderCC::BuildListing(void)
       // resulting in an infinite recursion
       bool oldCB = mm_disable_callbacks;
       mm_disable_callbacks = true;
-      mail_fetch_overview_x(m_MailStream, (char *)sequence.c_str(), mm_overview_header);
+#ifdef DEBUG_greg
+printf("BuildListing ==> mail_fetch_overview_x ==> mm_overview_header\n");
+#endif
+      mail_fetch_overview_x(m_MailStream,
+                            (char *)sequence.c_str(),
+                            mm_overview_header);
       mm_disable_callbacks = oldCB;
 
       if ( m_ProgressDialog != (MProgressDialog *)1 )
@@ -2385,6 +2405,9 @@ MailFolderCC::BuildListing(void)
 
    m_FirstListing = false;
    m_BuildListingSemaphore = false;
+#ifdef DEBUG_greg
+printf("Current listing is fresh\n");
+#endif
    m_NeedFreshListing = false;
    m_UpdateNeeded = true;
    // now we must release the MEvent queue again:
@@ -2759,6 +2782,10 @@ MailFolderCC::UpdateStatus(void)
    if(m_nMessages != m_MailStream->nmsgs ||
       m_nRecent != m_MailStream->recent)
    {
+#ifdef DEBUG_greg
+printf("UpdateStatus: m_nMessages %ld, nmsgs %ld, m_nRecent %ld, recent %ld\n",
+       m_nMessages, m_MailStream->nmsgs, m_nRecent, m_MailStream->recent);
+#endif
       m_nMessages = m_MailStream->nmsgs;
       m_nRecent = m_MailStream->recent;
       // Little sanity check, needed as c-client is insane:
@@ -3243,6 +3270,13 @@ MailFolderCC::ProcessEventQueue(void)
    while(! ms_EventQueue.empty())
    {
       evptr = ms_EventQueue.pop_front();
+#ifdef DEBUG_greg
+{ static char *evt[] = { "Searched", "Exists", "Expunged", "Flags",
+                        "Notify", "List", "LSub", "Status",
+                        "Log", "DLog", "Update", "MsgStatus" };
+printf("ProcessEventQueue: Removed %s event from queue\n", evt[evptr->m_type]);
+}
+#endif
       switch(evptr->m_type)
       {
       case Notify:
@@ -3338,6 +3372,9 @@ MailFolderCC::ProcessEventQueue(void)
                 "Sending update event for folder '%s'",
                 mf->GetName().c_str() ));
              // tell all interested that an update might be required
+#ifdef DEBUG_greg
+printf("ProcessEventQueue ==> Send!!!\n");
+#endif
              MEventManager::Send( new MEventFolderUpdateData (mf) );
              mf->m_UpdateNeeded = false;
           }
@@ -3354,6 +3391,9 @@ MailFolderCC::ProcessEventQueue(void)
 void
 MailFolderCC::RequestUpdate(bool sendEvent)
 {
+#ifdef DEBUG_greg
+printf("RequestUpdate%s\n", m_ListingFrozen ? " (frozen)" : "");
+#endif
    // no need to do anything if the listing is frozen, as it will have
    // to be regenerated after unfreezing it anyway
    if(m_ListingFrozen)
@@ -3808,8 +3848,11 @@ static int
 mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW_X *ov)
 {
 #ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_overview_header(`%s', %lu, %p) %d\n", stream->mailbox, uid, ov,
-           mm_disable_callbacks);
+#ifndef DEBUG_greg        // TEMPORARY!!!
+   printf("mm_overview_header(`%s', %lu, %p)\n", stream->mailbox, uid, ov);
+#else
+   putchar('.'); if (uid == 1) putchar('\n'); fflush(stdout);
+#endif
 #endif
    return MailFolderCC::OverviewHeader(stream, uid, ov);
 }
