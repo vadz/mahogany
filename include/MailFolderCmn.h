@@ -153,6 +153,10 @@ public:
                           MailFolder::MSG_STAT_RECENT);
       }
 
+   /** Delete duplicate messages by Message-Id
+       @return number of messages removed*/
+   virtual UIdType DeleteDuplicates();
+
    virtual inline void GetAuthInfo(String *login, String *password) const
       { *login = m_Login; *password = m_Password; }
 
@@ -201,6 +205,8 @@ public:
    virtual void Checkpoint(void) = 0;
 
 protected:
+   /// Is the mailfolder still connected to a server or file?
+   virtual bool IsAlive(void) const = 0;
    /**@name Config information used */
    //@{
    struct MFCmnOptions

@@ -347,17 +347,24 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          event.Skip();
          return;
       }
+      long newFocus = -1;
       // in this case we operate on the highlighted  message
       UIdType focused_uid = UID_ILLEGAL;
-      HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-      if(hil)
+      if(nselected == 0)
       {
-         const HeaderInfo *hi =(*hil)[focused];
-         focused_uid = hi->GetUId();
-         if(nselected == 0 && hi)
+         HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
+         if(hil)
+         {
+            if(focused > 0 && focused < (long) hil->Count())
+            focused_uid = (*hil)[focused]->GetUId();
             selections.Add(focused_uid);
-         hil->DecRef();
+            hil->DecRef();
+         }
+         newFocus = -1;
       }
+      else
+         newFocus = (focused < nMsgs-1) ? focused + 1 : focused;
+      
       /** To    allow translations:
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
           Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
@@ -386,10 +393,14 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       {
       case 'D':
          m_FolderView->DeleteOrTrashMessages(selections);
+         if(newFocus != -1) SetItemState(newFocus, wxLIST_STATE_FOCUSED,
+                                         wxLIST_STATE_FOCUSED);
          break;
       case 'U':
          m_FolderView->GetTicketList()->Add(
             m_FolderView->GetFolder()->UnDeleteMessages(&selections, m_FolderView));
+         if(newFocus != -1) SetItemState(newFocus, wxLIST_STATE_FOCUSED,
+                                         wxLIST_STATE_FOCUSED);
          break;
       case 'X':
             m_FolderView->GetFolder()->ExpungeMessages();
@@ -402,6 +413,8 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
       case 'M': // move = copy + delete
          m_FolderView->SaveMessagesToFolder(selections, NULL, true);
+         if(newFocus != -1) SetItemState(newFocus, wxLIST_STATE_FOCUSED,
+                                         wxLIST_STATE_FOCUSED);
          break;
       case 'G':
       case 'R':
@@ -417,6 +430,8 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
       case 'O':
          m_FolderView->OpenMessages(selections);
+         if(newFocus != -1) SetItemState(newFocus, wxLIST_STATE_FOCUSED,
+                                         wxLIST_STATE_FOCUSED);
          break;
       case 'P':
          m_FolderView->PrintMessages(selections);
@@ -875,13 +890,13 @@ wxFolderListCtrl::SelectNextUnread()
       if(
          ((! failedOnce) && foundFocused)// we are looking for the next unread now:
          || (failedOnce && ! foundFocused) // now we look for the once
-                                           // before the focused one
+         // before the focused one
          )
       {
          if((hi->GetStatus() & MailFolder::MSG_STAT_SEEN) == 0)
          {
             SetItemState(idx, wxLIST_STATE_FOCUSED,wxLIST_STATE_FOCUSED);
-            SetItemState(idx, wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
+//            SetItemState(idx, wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
             m_FolderView->PreviewMessage(hi->GetUId());
             m_FolderView->UpdateSelectionInfo();
             SafeDecRef(hil);
@@ -891,6 +906,7 @@ wxFolderListCtrl::SelectNextUnread()
    }
    SafeDecRef(hil);
 }
+
 
 // ----------------------------------------------------------------------------
 // wxFolderView
@@ -942,8 +958,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
             m_ASMailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
             delete seq;
          }
-
-
          CheckExpungeDialog(m_ASMailFolder, m_Parent);
       }
 
@@ -1006,7 +1020,12 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
       if(m_NumOfMessages > 0 && READ_CONFIG(m_Profile,MP_AUTOSHOW_FIRSTMESSAGE))
       {
-         m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
+         m_FolderCtrl->SetItemState(0,wxLIST_STATE_FOCUSED,wxLIST_STATE_FOCUSED);
+         HeaderInfoList *hil = m_ASMailFolder->GetHeaders();
+         if(hil && hil->Count() > 0)
+            PreviewMessage ((*hil)[0]->GetUId());
+         SafeDecRef(hil);
+         //  m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
          // the callback will preview the (just) selected message
       }
 #ifndef OS_WIN
@@ -1476,7 +1495,8 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
             m_ASMailFolder->ReplyMessages(
                                           &selections,
                                           MailFolder::Params(templ, flags),
-                                          GetFrame(m_Parent)
+                                          GetFrame(m_Parent),
+                                          this
                                          )
          );
       }
@@ -1487,7 +1507,8 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
             m_ASMailFolder->ForwardMessages(
                                             &selections,
                                             MailFolder::Params(templ),
-                                            GetFrame(m_Parent)
+                                            GetFrame(m_Parent),
+                                            this
                                            )
          );
       break;
@@ -1498,11 +1519,14 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_MSG_UNDELETE:
       GetSelections(selections);
-      m_TicketList->Add(m_ASMailFolder->UnDeleteMessages(&selections));
+      m_TicketList->Add(m_ASMailFolder->UnDeleteMessages(&selections, this));
       break;
    case WXMENU_MSG_DELETE:
       GetSelections(selections);
       DeleteOrTrashMessages(selections);
+      break;
+   case WXMENU_MSG_DELDUPLICATES:
+      m_TicketList->Add(m_ASMailFolder->DeleteDuplicates(this));
       break;
    case WXMENU_MSG_NEXT_UNREAD:
       m_FolderCtrl->SelectNextUnread();
@@ -1870,126 +1894,138 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 
       switch(result->GetOperation())
       {
-         case ASMailFolder::Op_SaveMessagesToFile:
-            ASSERT(result->GetSequence());
-            if( value )
-               msg.Printf(_("Saved %lu messages."), (unsigned long)
-                          result->GetSequence()->Count());
-            else
-               msg.Printf(_("Saving messages failed."));
-            wxLogStatus(GetFrame(m_Parent), msg);
-            break;
+      case ASMailFolder::Op_SaveMessagesToFile:
+         ASSERT(result->GetSequence());
+         if( value )
+            msg.Printf(_("Saved %lu messages."), (unsigned long)
+                       result->GetSequence()->Count());
+         else
+            msg.Printf(_("Saving messages failed."));
+         wxLogStatus(GetFrame(m_Parent), msg);
+         break;
 
-         case ASMailFolder::Op_SaveMessagesToFolder:
-            ASSERT(result->GetSequence());
+      case ASMailFolder::Op_SaveMessagesToFolder:
+         ASSERT(result->GetSequence());
 
-            // we may have to do a few extra things here:
-            //  - if the message was marked for deletion (its ticket is in
-            //    m_TicketsToDeleteList_, we have to delete it and give a
-            //    message about a successful move and not copy operation
-            //
-            //  - if we're inside DoDragDrop(), m_TicketsDroppedList is !NULL
-            //    but we don't know yet if we will have to delete dropped
-            //    messages or not, so just remember those of them which were
-            //    copied successfully
+         // we may have to do a few extra things here:
+         //  - if the message was marked for deletion (its ticket is in
+         //    m_TicketsToDeleteList_, we have to delete it and give a
+         //    message about a successful move and not copy operation
+         //
+         //  - if we're inside DoDragDrop(), m_TicketsDroppedList is !NULL
+         //    but we don't know yet if we will have to delete dropped
+         //    messages or not, so just remember those of them which were
+         //    copied successfully
+         {
+            bool toDelete = m_TicketsToDeleteList->Contains(t);
+            bool wasDropped = m_TicketsDroppedList &&
+               m_TicketsDroppedList->Contains(t);
+
+            if ( toDelete )
             {
-               bool toDelete = m_TicketsToDeleteList->Contains(t);
-               bool wasDropped = m_TicketsDroppedList &&
-                                    m_TicketsDroppedList->Contains(t);
+               m_TicketsToDeleteList->Remove(t);
+            }
 
+            if ( !value )
+            {
+               // something failed - what?
+               if ( toDelete )
+                  msg = _("Moving messages failed.");
+               else if ( wasDropped )
+                  msg = _("Dragging messages failed.");
+               else
+                  msg = _("Copying messages failed.");
+            }
+            else
+            {
+               // message was copied ok, what else to do with it?
                if ( toDelete )
                {
-                  m_TicketsToDeleteList->Remove(t);
+                  // delete right now
+                  Profile *p = m_ASMailFolder->GetProfile();
+                  m_TicketList->Add(m_ASMailFolder->DeleteMessages(
+                     result->GetSequence(),
+                     (p && READ_CONFIG(p,  MP_USE_TRASH_FOLDER)),
+                     this));
+                  msg.Printf(_("Moved %lu messages."), (unsigned long)
+                             result->GetSequence()->Count());
                }
-
-               if ( !value )
+               else if ( wasDropped )
                {
-                  // something failed - what?
-                  if ( toDelete )
-                     msg = _("Moving messages failed.");
-                  else if ( wasDropped )
-                     msg = _("Dragging messages failed.");
-                  else
-                     msg = _("Copying messages failed.");
+                  // remember all UIDs as we may have to delete them later
+                  m_TicketsDroppedList->Remove(t);
+
+                  UIdArray& seq = *result->GetSequence();
+                  WX_APPEND_ARRAY(m_UIdsCopiedOk, seq);
+
+                  msg.Printf(_("Dropped %lu messages."), (unsigned long)
+                             result->GetSequence()->Count());
                }
                else
                {
-                  // message was copied ok, what else to do with it?
-                  if ( toDelete )
-                  {
-                     // delete right now
-                     Profile *p = m_ASMailFolder->GetProfile();
-                     m_TicketList->Add(m_ASMailFolder->DeleteMessages(
-                        result->GetSequence(),
-                        (p && READ_CONFIG(p,  MP_USE_TRASH_FOLDER)),
-                        this));
-                     msg.Printf(_("Moved %lu messages."), (unsigned long)
-                                result->GetSequence()->Count());
-                  }
-                  else if ( wasDropped )
-                  {
-                     // remember all UIDs as we may have to delete them later
-                     m_TicketsDroppedList->Remove(t);
-
-                     UIdArray& seq = *result->GetSequence();
-                     WX_APPEND_ARRAY(m_UIdsCopiedOk, seq);
-
-                     msg.Printf(_("Dropped %lu messages."), (unsigned long)
-                                result->GetSequence()->Count());
-                  }
-                  else
-                  {
-                     msg.Printf(_("Copied %lu messages."), (unsigned long)
-                                result->GetSequence()->Count());
-                  }
+                  msg.Printf(_("Copied %lu messages."), (unsigned long)
+                             result->GetSequence()->Count());
                }
-
-               wxLogStatus(GetFrame(m_Parent), msg);
             }
-            break;
 
-         case ASMailFolder::Op_SearchMessages:
-            ASSERT(result->GetSequence());
-            if( value )
-            {
-               UIdArray *ia = result->GetSequence();
-               msg.Printf(_("Found %lu messages."), (unsigned long)
-                          ia->Count());
-               bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
-               for(unsigned long n = 0; n < ia->Count(); n++)
-                  m_FolderCtrl->Select((*ia)[n]);
-               m_FolderCtrl->EnableSelectionCallbacks(tmp);
-
-            }
-            else
-               msg.Printf(_("No matching messages found."));
             wxLogStatus(GetFrame(m_Parent), msg);
-            break;
+         }
+         break;
 
-         case ASMailFolder::Op_ApplyFilterRules:
+      case ASMailFolder::Op_SearchMessages:
+         ASSERT(result->GetSequence());
+         if( value )
          {
-            ASSERT(result->GetSequence());
-            if(value == -1)
-               msg.Printf(_("Filtering messages failed."));
-            else
-               msg.Printf(_("Applied filters to %lu messages, return code %d."),
-                          (unsigned long)
-                          result->GetSequence()->Count(),
-                          value);
-            wxLogStatus(GetFrame(m_Parent), msg);
-            break;
-         }
+            UIdArray *ia = result->GetSequence();
+            msg.Printf(_("Found %lu messages."), (unsigned long)
+                       ia->Count());
+            bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
+            for(unsigned long n = 0; n < ia->Count(); n++)
+               m_FolderCtrl->Select((*ia)[n]);
+            m_FolderCtrl->EnableSelectionCallbacks(tmp);
 
-         // these cases don't have return values
-         case ASMailFolder::Op_ReplyMessages:
-         case ASMailFolder::Op_ForwardMessages:
-         case ASMailFolder::Op_DeleteMessages:
-         case ASMailFolder::Op_UnDeleteMessages:
-            break;
-
-         default:
-            wxASSERT_MSG(0,"MEvent handling not implemented yet");
          }
+         else
+            msg.Printf(_("No matching messages found."));
+         wxLogStatus(GetFrame(m_Parent), msg);
+         break;
+
+      case ASMailFolder::Op_ApplyFilterRules:
+      {
+         ASSERT(result->GetSequence());
+         if(value == -1)
+            msg.Printf(_("Filtering messages failed."));
+         else
+            msg.Printf(_("Applied filters to %lu messages, return code %d."),
+                       (unsigned long)
+                       result->GetSequence()->Count(),
+                       value);
+         wxLogStatus(GetFrame(m_Parent), msg);
+         break;
+      }
+
+      case ASMailFolder::Op_DeleteDuplicates:
+      {
+         UIdType count = ((ASMailFolder::ResultUIdType
+                           *)result)->GetValue();
+         if(count == UID_ILLEGAL)
+            msg = _("An error occured while deleting duplicate messages.");
+         else if (count != 0)
+            msg.Printf(_("%lu duplicate messages removed."),
+                       (unsigned long) count);
+         wxLogStatus(GetFrame(m_Parent), msg);
+         break;
+      }
+      // these cases don't have return values
+      case ASMailFolder::Op_ReplyMessages:
+      case ASMailFolder::Op_ForwardMessages:
+      case ASMailFolder::Op_DeleteMessages:
+      case ASMailFolder::Op_UnDeleteMessages:
+         break;
+
+      default:
+         wxASSERT_MSG(0,"MEvent handling not implemented yet");
+      }
    }
    result->DecRef();
 }

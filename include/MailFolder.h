@@ -312,6 +312,10 @@ public:
    */
    virtual bool DeleteMessage(unsigned long uid) = 0;
 
+   /** Delete duplicate messages by Message-Id
+    @return number of messages removed or UID_ILLEGAL on error*/
+   virtual UIdType DeleteDuplicates() = 0;
+   
    /** UnDelete a message.  UNSUPPORTED!
        @param uid the message uid
        @return true on success

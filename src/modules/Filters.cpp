@@ -2109,6 +2109,17 @@ extern "C"
       return Value(rc);
    }
 
+   static Value func_uniq(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return 0;
+      MailFolder *mf = p->GetFolder();
+      if(! mf) return Value(0);
+      int rc = mf->DeleteDuplicates();
+      mf->DecRef();
+      return Value(rc);
+   }
+
    static Value func_copytofolder(ArgList *args, Parser *p)
    {
       if(args->Count() != 1)
@@ -2266,6 +2277,7 @@ ParserImpl::AddBuiltinFunctions(void)
    DefineFunction("body", func_body);
    DefineFunction("text", func_text);
    DefineFunction("delete", func_delete);
+   DefineFunction("uniq", func_uniq);
    DefineFunction("copy", func_copytofolder);
    DefineFunction("move", func_movetofolder);
    DefineFunction("date", func_date);

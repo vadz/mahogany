@@ -67,6 +67,7 @@ enum OAC_Types_Enum
    OAC_T_Python,
    OAC_T_ChangeScore,
    OAC_T_SetColour,
+   OAC_T_Uniq,
    OAC_T_Max
 };
 

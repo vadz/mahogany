@@ -100,7 +100,8 @@ public:
       Op_Subscribe,
       Op_ListFolders,
       Op_SearchMessages,
-      Op_ApplyFilterRules
+      Op_ApplyFilterRules,
+      Op_DeleteDuplicates
    };
     /** A structure containing the return values from an operation.
         This will get passed in an MEvent to notify other parts of the
@@ -183,6 +184,32 @@ public:
          { m_Value = value; }
    private:
       int         m_Value;
+   };
+   /** Holds the result from an operation which can be expressed as an
+       UIdType value. Used for all boolean success values.
+   */
+   class ResultUIdType : public ResultImpl
+   {
+   public:
+      UIdType GetValue(void) const { return m_Value; }
+      static ResultUIdType *Create(ASMailFolder *mf,
+                                   Ticket t,
+                                   OperationId id,
+                                   UIdArray * mc,
+                                   UIdType value,
+                                   UserData ud)
+         { return new ResultUIdType(mf, t, id, mc, value, ud); }
+   protected:
+      ResultUIdType(ASMailFolder *mf,
+                    Ticket t,
+                    OperationId id,
+                    UIdArray * mc,
+                    int value,
+                    UserData ud)
+         : ResultImpl(mf, t, id, mc, ud)
+         { m_Value = value; }
+   private:
+      UIdType         m_Value;
    };
    /** Holds the result from a GetMessage() and returns the message pointer.
    */
@@ -352,8 +379,8 @@ public:
        @return ResultInt boolean
    */
    virtual Ticket SaveMessages(const UIdArray *selections,
-                             String const & folderName,
-                             bool isProfile,
+                               String const & folderName,
+                               bool isProfile,
                                bool updateCount = true,
                                UserData ud = 0) = 0;
    /** Save the messages to a file.
@@ -379,6 +406,11 @@ public:
    virtual Ticket DeleteMessages(const UIdArray *messages,
                                  bool expunge = false,
                                  UserData ud = 0) = 0;
+   
+   /** Delete duplicate messages by Message-Id
+       @return (ResultUIdType) number of messages removed or
+       UID_ILLEGAL on error*/
+   virtual Ticket DeleteDuplicates(UserData ud = 0) = 0;
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers

@@ -120,7 +120,8 @@ wxString OAC_Types[] =
    gettext_noop("Log Entry"),
    gettext_noop("Python"),
    gettext_noop("Change Score"),
-   gettext_noop("Set Colour")
+   gettext_noop("Set Colour"),
+   gettext_noop("Delete Duplicates")
 };
 
 static const
@@ -628,8 +629,10 @@ OneActionControl::UpdateUI()
 {
    int type = m_Type->GetSelection();
 
-   bool enable = !(type == OAC_T_Delete || type == OAC_T_Expunge
-        || type == OAC_T_Python
+   bool enable = !(type == OAC_T_Delete
+                   || type == OAC_T_Expunge
+                   //|| type == OAC_T_Python
+                   || type == OAC_T_Uniq
       );
    m_Argument->Enable(enable);
    enable &=
@@ -687,6 +690,8 @@ OneActionControl::TranslateToString(wxString & action)
       break;
    case OAC_T_SetColour:
       program << "setcolour("; break;
+   case OAC_T_Uniq:
+      program << "uniq("; needsArgument = false; break;
    }
    if(needsArgument)
       program << '"' << argument << '"';

@@ -465,6 +465,9 @@ private:
    /// return the folder flags
    int GetFlags(void) const { return m_FolderFlags; }
 protected:
+   /// Is the mailfolder still connected to a server or file?
+   bool IsAlive(void) const
+      { return m_MailStream != NULL; }
    /// Request update
    virtual void RequestUpdate(bool sendEvents = false);
    /// Update the folder status, number of messages, etc

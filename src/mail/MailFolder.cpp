@@ -533,6 +533,72 @@ MailFolder::ConvertMessageStatusToString(int status, MailFolder *mf)
    return strstatus;
 }
 
+
+struct Dup_MsgInfo
+{
+   Dup_MsgInfo(const String &s, UIdType id, unsigned long size)
+      { m_Id = s; m_UId = id; m_Size = size; }
+   String m_Id;
+   UIdType m_UId;
+   unsigned long m_Size;
+};
+
+KBLIST_DEFINE(Dup_MsgInfoList, Dup_MsgInfo);
+
+UIdType
+MailFolderCmn::DeleteDuplicates()
+{
+   HeaderInfoList *hil = GetHeaders();
+   if(! hil)
+      return 0;
+   
+   Dup_MsgInfoList mlist;
+
+   UIdArray toDelete;
+   
+   for(size_t idx = 0; idx < hil->Count(); idx++)
+   {
+      String   id = (*hil)[idx]->GetId();
+      UIdType uid = (*hil)[idx]->GetUId();
+      size_t size = (*hil)[idx]->GetSize();
+      bool found = FALSE;
+      for(Dup_MsgInfoList::iterator i = mlist.begin();
+          i != mlist.end();
+          i++)
+         if( (**i).m_Id == id )
+         {
+            /// if new message is larger, keep it instead
+            if( (**i).m_Size < size )
+            {
+               toDelete.Add((**i).m_UId);
+               (**i).m_UId = uid;
+               (**i).m_Size = size;
+               found = FALSE;
+            }
+            else
+               found = TRUE;
+            break;
+         }
+      if(found)
+         toDelete.Add(uid);
+      else
+      {
+         Dup_MsgInfo *mi = new Dup_MsgInfo(id, uid, size);
+         mlist.push_back(mi);
+      }
+   }
+   hil->DecRef();
+   
+   if(toDelete.Count() == 0)
+      return 0; // nothing to do
+   
+   if(DeleteMessages(&toDelete,FALSE))
+      return toDelete.Count();
+   else
+      return UID_ILLEGAL; // an error happened
+}
+
+
 /* Before actually closing a mailfolder, we keep it around for a
    little while. If someone reaccesses it, this speeds things up. So
    all we need, is a little helper class to keep a list of mailfolders
@@ -611,10 +677,12 @@ bool
 MailFolderCmn::DecRef()
 {
    ASSERT_MSG(gs_MailFolderCloser, "DEBUG: this must not happen (harmless but should not be the case)");
-   if(gs_MailFolderCloser && GetNRef() == 1) // only real closes get delayed
+   if(gs_MailFolderCloser
+      && GetNRef() == 1  // only real closes get delayed
+      && IsAlive() )     // and only if the folder was opened
+                         // successfully and is still functional
    {
      wxLogTrace("mailfolder", "Mailfolder '%s': close delayed.", GetName().c_str());
-     wxLogDebug("Mailfolder '%s': close delayed.", GetName().c_str());
      Checkpoint(); // flush data immediately
      gs_MailFolderCloser->Add(this);
      return FALSE;
