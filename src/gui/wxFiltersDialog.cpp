@@ -229,9 +229,8 @@ OneCritControl::Save(wxString *str)
 void
 OneCritControl::Load(wxString *str)
 {
-   long number = 0;
-   number = strutil_readNumber(*str);
-   m_Not->SetValue(number);
+   long number = strutil_readNumber(*str);
+   m_Not->SetValue(number != 0);
    number = strutil_readNumber(*str);
    m_Type->SetSelection(number);
    m_Argument->SetValue(strutil_readString(*str));

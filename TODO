@@ -13,6 +13,12 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
+7		after deleting a folder from the tree, the opened message from
+		it stays shown in the main frame - this is confusing and
+		dangerous
+
+3	VZ	change MAXLOGINTRIALS - 3 is too many...
+
 6	VZ	"Browse subfolders" under root folder should give a choice:
 		subscribe to newsgroups, import MH folders, mirror server IMAP
 		folders...

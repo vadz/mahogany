@@ -46,9 +46,9 @@ enum FolderType
    MF_IMAP = 3,                  // imap
    MF_NNTP = 4,                  // newsgroup
    MF_NEWS = 5,                  // newsgroup in local newsspool
-   MF_PROFILE = 10,              // read type etc from profile
    MF_MH = 6,                    // MH folder (directory/files)
    MF_PROFILE_OR_FILE,           // profile, if it doesn't work, file
+   MF_PROFILE = 10,              // read type etc from profile
 
    // real folder types
    Inbox = MF_INBOX,     // system inbox
@@ -59,13 +59,8 @@ enum FolderType
    News  = MF_NEWS,
 
    // pseudo types
-   MF_GROUP = 0x20,
-   FolderGroup = MF_GROUP,     // doesn't contain mail, but (any) other folders
-   MF_GROUP_NEWS,              // a news hierarchy
-   MF_GROUP_IMAP,              // a directory on an IMAP server
-
-   FolderRoot,                 // this is the the special root pseudo-folder
-   MF_ROOT = FolderRoot,
+   MF_GROUP = 0x20,            // only used for grouping other folders
+   MF_ROOT = 0xfe,             // this is the the special root pseudo-folder
 
    FolderInvalid = MF_ILLEGAL  // folder not initialized properly
 };
@@ -91,13 +86,13 @@ enum FolderFlags
    MF_FLAGS_KEEPOPEN      = 0x00004000, // keep this folder open at all times
    MF_FLAGS_REOPENONPING  = 0x00008000, // force a close and re-open on a ping
    MF_FLAGS_ISLOCAL       = 0x00010000, // can be accessed even without network
-   MF_FLAGS_HIDDEN        = 0x00020000  // don't show in the folder tree
+   MF_FLAGS_HIDDEN        = 0x00020000, // don't show in the folder tree
+   MF_FLAGS_GROUP         = 0x00040000  // can be only half opened, not opened
 };
 
 /** SendMessageCC supports two different protocols:
  */
 enum Protocol { Prot_SMTP, Prot_NNTP, Prot_Default = Prot_SMTP };
-   
 
 // ----------------------------------------------------------------------------
 // For asynchronous operations:
@@ -139,8 +134,6 @@ inline bool FolderTypeHasUserName(FolderType type)
       case MF_IMAP:
       case MF_NNTP:
       case MF_GROUP:
-      case MF_GROUP_IMAP:
-      case MF_GROUP_NEWS:
          return true;
 
       // don't use "default:" - like this, the compiler will warn us if we add
@@ -156,21 +149,12 @@ inline bool FolderTypeHasUserName(FolderType type)
       case MF_FILE:
       case MF_MH:
       case MF_NEWS:
-         ;
+         ; // don't put return false here to avoid VC++ warnings
    }
 
    return false;
 }
 
-/// is this folder a group?
-inline bool FolderTypeIsGroup(FolderType type)
-{
-   return
-      type == MF_GROUP 
-      || type == MF_GROUP_NEWS 
-      || type == MF_GROUP_IMAP ;
-
-}
 /// is this a folder type for which server field makes sense?
 inline bool FolderTypeHasServer(FolderType type)
 {
@@ -196,9 +180,11 @@ inline bool IsLocalQuickFolder(FolderType type)
 }
 
 /// can this folder contain other subfolders? if so, of which type?
-inline bool CanHaveSubfolders(FolderType type, FolderType *subtype = NULL)
+inline bool CanHaveSubfolders(FolderType folderType,
+                              int flags,
+                              FolderType *subtype = NULL)
 {
-   switch ( type )
+   switch ( folderType )
    {
       case MF_MH:
          if ( subtype )
@@ -208,20 +194,36 @@ inline bool CanHaveSubfolders(FolderType type, FolderType *subtype = NULL)
          }
          return TRUE;
 
-      case MF_GROUP_NEWS:
-         if ( subtype )
+      case MF_NEWS:
+      case MF_NNTP:
+         if ( flags & MF_FLAGS_GROUP )
          {
-            // FIXME they may also contain MF_NEWS
-            *subtype = MF_NNTP;
-         }
-         return TRUE;
+            if ( subtype )
+            {
+               *subtype = folderType;
+            }
 
-      case MF_GROUP_IMAP:
-         if ( subtype )
-         {
-            *subtype = MF_IMAP;
+            return TRUE;
          }
-         return TRUE;
+         else
+         {
+            return FALSE;
+         }
+
+      case MF_IMAP:
+         if ( flags & MF_FLAGS_GROUP )
+         {
+            if ( subtype )
+            {
+               *subtype = MF_IMAP;
+            }
+
+            return TRUE;
+         }
+         else
+         {
+            return FALSE;
+         }
 
       case MF_GROUP:
       case MF_ROOT:

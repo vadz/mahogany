@@ -207,7 +207,7 @@ void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 {
    // close the splash screen as the very first thing because otherwise it
    // would float on top of our message boxes
-   CloseSplash();
+   //CloseSplash(); -- not any more, we have our SplashKillerLog installed
 
    if ( m_hasWindow && level == wxLOG_User )
    {

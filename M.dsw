@@ -69,7 +69,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mtest"="L:\wxWindows\samples\help\src\imap-4.2\mtest\mtest.dsp" - Package Owner=<4>
+Project: "mtest"="..\imap-4.2\mtest\mtest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -77,6 +77,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name cclient
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -117,7 +120,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "wxXPM"=L:\wxWindows\samples\help\Libs\wxWindows\contrib\WXXPM\wxXPM.dsp - Package Owner=<4>
+Project: "wxXPM"=L:\wxWindows\src\xpm\wxXPM.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

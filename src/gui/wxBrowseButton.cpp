@@ -52,7 +52,7 @@
 
 WX_DEFINE_ARRAY(wxBitmap *, wxIconArray);
 
-class wxIconView : public wxScrolledWindow
+class wxIconView : public wxListCtrl
 {
 public:
    // the size of icons as we show them
@@ -61,29 +61,6 @@ public:
    wxIconView(wxDialog *parent,
               const wxIconArray& icons,
               int selection);
-
-   // accessors
-   size_t GetSelection() const
-   {
-      ASSERT_MSG( m_selection != -1, "no selection" );
-
-      return (size_t)m_selection;
-   }
-
-protected:
-   void OnPaint(wxPaintEvent& event);
-   void OnClick(wxMouseEvent& event);
-   void OnUpdateUI(wxUpdateUIEvent& event);
-   void OnSize(wxSizeEvent& event);
-
-   void DoDrawIcon(wxDC& dc, size_t n);
-
-private:
-   wxIconArray m_icons;
-   int         m_selection;
-   int         m_y;
-
-   DECLARE_EVENT_TABLE()
 };
 
 class wxIconSelectionDialog : public wxManuallyLaidOutDialog
@@ -94,29 +71,34 @@ public:
                          const wxIconArray& icons,
                          int selection);
 
-   size_t GetSelection() const { return m_iconView->GetSelection(); }
+   // accessors
+   size_t GetSelection() const { return m_selection; }
+
+   // event handlers
+   void OnIconSelected(wxListEvent& event);
+   void OnUpdateUI(wxUpdateUIEvent& event);
 
 private:
-   wxIconView *m_iconView;
+   int m_selection;
+
+   DECLARE_EVENT_TABLE()
 };
 
 // ============================================================================
 // implementation
 // ============================================================================
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // event tables
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxBrowseButton, wxButton)
    EVT_BUTTON(-1, wxBrowseButton::OnButtonClick)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxIconView, wxScrolledWindow)
-   EVT_PAINT(wxIconView::OnPaint)
-   EVT_SIZE(wxIconView::OnSize)
-   EVT_UPDATE_UI(wxID_OK, wxIconView::OnUpdateUI)
-   EVT_LEFT_DOWN(wxIconView::OnClick)
+BEGIN_EVENT_TABLE(wxIconSelectionDialog, wxManuallyLaidOutDialog)
+   EVT_UPDATE_UI(wxID_OK, wxIconSelectionDialog::OnUpdateUI)
+   EVT_LIST_ITEM_SELECTED(-1, wxIconSelectionDialog::OnIconSelected)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -287,11 +269,10 @@ void wxIconBrowseButton::SetIcon(size_t nIcon)
 
       if ( (w1 != w2) || (h1 != h2) )
       {
-         wxImage image(bmp);
-         bmp = image.ConvertToBitmap();
+         bmp = wxImage(bmp).Rescale(w1, h1).ConvertToBitmap();
       }
       //else: the size is already correct
-      
+
       m_staticBitmap->SetBitmap(bmp);
    }
 }
@@ -364,100 +345,37 @@ wxFolderIconBrowseButton::wxFolderIconBrowseButton(wxWindow *parent,
 #ifdef __WXGTK__
 const int wxIconView::ms_iconSize = 16;
 #else
-const int wxIconView::ms_iconSize = 64;
+const int wxIconView::ms_iconSize = 32;
 #endif
 
 wxIconView::wxIconView(wxDialog *parent,
                        const wxIconArray& icons,
                        int selection)
-          : wxScrolledWindow(parent, -1,
-                             wxDefaultPosition, wxDefaultSize,
-                             wxHSCROLL | wxBORDER)
+          : wxListCtrl(parent, -1, wxDefaultPosition, wxDefaultSize,
+                       wxLC_ICON |
+                       wxLC_SINGLE_SEL |
+                       wxLC_AUTOARRANGE |
+                       wxLC_ALIGN_LEFT)
 {
-   m_icons = icons;
-   m_selection = selection;
-
-   SetBackgroundColour(*wxWHITE);
-
-   SetScrollbars(ms_iconSize, 0, m_icons.GetCount(), 1,
-                 m_selection, 0);
-
-   EnableScrolling(TRUE, FALSE);
-}
-
-void wxIconView::OnPaint(wxPaintEvent& WXUNUSED(event))
-{
-   wxPaintDC dc(this);
-   PrepareDC(dc);
-
-#ifdef __WXGTK__
-   Clear();
-#endif // GTK
-
-   int x0, y0;
-   ViewStart(&x0, &y0);
-
-   x0 *= ms_iconSize;
-
-   int nIconFirst = x0 / ms_iconSize;
-   int nIconLast = (x0 + GetClientSize().x) / ms_iconSize;
-   if ( nIconLast >= (int)m_icons.GetCount() )
+   size_t n, count = icons.GetCount();
+   wxImageList *imageList = new wxImageList(ms_iconSize, ms_iconSize,
+                                            TRUE, count);
+   for ( n = 0; n < count; n++ )
    {
-      nIconLast = m_icons.GetCount() - 1;
+      imageList->Add(*icons[n]);
    }
 
-   for ( int n = nIconFirst; n <= nIconLast; n++ )
-      DoDrawIcon(dc, (size_t)n);
-}
+   SetImageList(imageList, wxIMAGE_LIST_NORMAL);
 
-void wxIconView::OnClick(wxMouseEvent& event)
-{
-   int x;
-   CalcUnscrolledPosition(event.GetX(), 0, &x, NULL);
-
-   int selection = (int) (x / ms_iconSize);
-   if ( selection != m_selection )
+   for ( n = 0; n < count; n++ )
    {
-      m_selection = selection;
-
-      Refresh();
-   }
-}
-
-void wxIconView::OnUpdateUI(wxUpdateUIEvent& event)
-{
-   event.Enable(m_selection != -1);
-}
-
-void wxIconView::OnSize(wxSizeEvent& event)
-{
-   // always centre the icons vertically
-   m_y = (event.GetSize().y - ms_iconSize) / 2;
-
-   event.Skip();
-}
-
-void wxIconView::DoDrawIcon(wxDC& dc, size_t n)
-{
-   wxMemoryDC dcMem(&dc);
-   wxBitmap bmp(ms_iconSize, ms_iconSize);
-   dcMem.SelectObject(bmp);
-   dcMem.DrawBitmap(*m_icons[n], 0, 0);
-
-   // draw the selected icon inverted
-   int rop;
-   if ( (int)n == m_selection )
-   {
-      rop = wxSRC_INVERT;
-   }
-   else
-   {
-      rop = wxCOPY;
+      InsertItem(n, n);
    }
 
-   dc.Blit(n*ms_iconSize, m_y, ms_iconSize, ms_iconSize, &dcMem, 0, 0, rop);
-
-   dcMem.SelectObject(wxNullBitmap);
+   if ( selection != -1 )
+   {
+      SetItemState(selection, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -477,14 +395,25 @@ wxIconSelectionDialog::wxIconSelectionDialog(wxWindow *parent,
    // Ok and Cancel buttons and a static box around everything else
    wxStaticBox *box = CreateStdButtonsAndBox(_("&Current icon"));
 
-   m_iconView = new wxIconView(this, icons, selection);
+   wxIconView *iconView = new wxIconView(this, icons, selection);
 
    c = new wxLayoutConstraints;
    c->centreY.SameAs(box, wxCentreY);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->height.Absolute(wxIconView::ms_iconSize + 4*LAYOUT_X_MARGIN);
-   m_iconView->SetConstraints(c);
+   c->height.Absolute(wxIconView::ms_iconSize + 9*LAYOUT_X_MARGIN);
+   iconView->SetConstraints(c);
 
    SetDefaultSize(4*wBtn, wxIconView::ms_iconSize + 4*hBtn);
 }
+
+void wxIconSelectionDialog::OnIconSelected(wxListEvent& event)
+{
+   m_selection = event.GetIndex();
+}
+
+void wxIconSelectionDialog::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   event.Enable(m_selection != -1);
+}
+

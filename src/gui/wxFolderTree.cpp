@@ -60,8 +60,8 @@ enum FolderIcon
    iconNews,
    iconRoot,
    iconGroup,
-   iconGroupNews,
-   iconGroupIMAP,
+   iconNewsHierarchy,   // also these types are not used any more, do keep them
+   iconImapDirectory,   // to avoid changing values of others (compatibility!)
    iconNewMail,
    iconSentMail,
    iconPalmPilot,
@@ -77,6 +77,15 @@ enum FolderIcon
 static bool ShowHiddenFolders()
 {
    return READ_APPCONFIG(MP_SHOW_HIDDEN_FOLDERS) != 0;
+}
+
+// can this folder be opened?
+static bool CanOpen(const MFolder *folder)
+{
+  return folder &&
+         folder->GetType() != MF_ROOT &&
+         folder->GetType() != MF_GROUP &&
+         !(folder->GetFlags() & MF_FLAGS_GROUP);
 }
 
 // ----------------------------------------------------------------------------
@@ -209,7 +218,8 @@ protected:
 
       MFolder *folder = node->GetFolder();
 
-      return folder->GetType() != FolderGroup;
+      return (folder->GetType() != MF_GROUP) &&
+            !(folder->GetFlags() & MF_GROUP);
    }
 
    // this is the real handler for double-click and enter events
@@ -430,9 +440,7 @@ void wxFolderTree::OnSelectionChange(MFolder * /* oldsel */, MFolder *newsel)
    {
       // don't even try to open the root folder
       // don't try to open groups either
-      if ( newsel
-           && newsel->GetType() != FolderRoot
-           && newsel->GetType() != FolderGroup )
+      if ( CanOpen(newsel) )
       {
          newsel->IncRef(); // before returning it to the outside world
          OnOpenHere(newsel);
@@ -463,8 +471,7 @@ void wxFolderTree::OnOpenHere(MFolder *folder)
 // open a new folder view on this folder
 void wxFolderTree::OnOpen(MFolder *folder)
 {
-   if ( folder->GetType() != FolderRoot
-        && folder->GetType() != FolderGroup )
+   if ( CanOpen(folder) )
    {
       (void)wxFolderViewFrame::Create(
          // we need to pass relative names (profile names) into
@@ -475,7 +482,7 @@ void wxFolderTree::OnOpen(MFolder *folder)
    }
    else
    {
-      FAIL_MSG("can't open root pseudo-folder");
+      FAIL_MSG("OnOpen() called for folder which can't be opened");
    }
 
    folder->DecRef();
@@ -506,13 +513,14 @@ bool wxFolderTree::OnDelete(MFolder *folder)
 {
    CHECK( folder, FALSE, "can't delete NULL folder" );
 
-   if(folder->GetFlags() & MF_FLAGS_DONTDELETE)
+   if ( folder->GetFlags() & MF_FLAGS_DONTDELETE )
    {
-      wxLogError(_("You cannot delete the '%s' folder.\n"),
+      wxLogError(_("The folder '%s' is used by Mahogany and cannot be deleted"),
                  folder->GetName().c_str());
       return FALSE;
    }
-   if(folder->GetType() == FolderRoot)
+
+   if ( folder->GetType() == MF_ROOT )
    {
       wxLogError(_("The root folder can not be deleted."));
       return FALSE;
@@ -564,7 +572,7 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    int image = GetFolderIconForDisplay(folder);
 
    // add this item to the tree
-   if ( folder->GetType() == FolderRoot )
+   if ( folder->GetType() == MF_ROOT )
    {
       SetId(tree->AddRoot(wxString(_("All folders")), image, image, this));
    }
@@ -640,8 +648,8 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
       }
 
       FolderType folderType = folder->GetType();
-      bool isRoot = folderType == FolderRoot,
-           isGroup = folderType == FolderGroup;
+      bool isRoot = folderType == MF_ROOT,
+           isGroup = folderType == MF_GROUP;
 
       FolderMenu **menu = isRoot ? &m_menuRoot : &m_menu;
 
@@ -667,7 +675,7 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
          // these items only make sense when a folder can, in principle, have
          // inferiors (and browsing doesn't make sense for "simple" groups - what
          // would we browse for?)
-         bool mayHaveSubfolders = CanHaveSubfolders(folderType);
+         bool mayHaveSubfolders = CanHaveSubfolders(folderType, folder->GetFlags());
          (*menu)->Enable(FolderMenu::BrowseSub, mayHaveSubfolders && !isGroup);
          (*menu)->Enable(FolderMenu::New, mayHaveSubfolders);
       }
@@ -1203,8 +1211,8 @@ String GetFolderIconName(size_t n)
       "folder_news",
       "folder_root",
       "folder_group",
-      "folder_newshierarchy",
-      "folder_imapdir",
+      "folder_nntp",
+      "folder_imap",
       "folder_newmail",
       "folder_sentmail",
       "folder_palmpilot",
@@ -1244,17 +1252,15 @@ int GetDefaultFolderTypeIcon(FolderType folderType)
       FolderType type;
    } FolderIcons[] =
    {
-      { iconInbox,      Inbox          },
-      { iconFile,       File           },
-      { iconMH,         MF_MH          },
-      { iconPOP,        POP            },
-      { iconIMAP,       IMAP           },
-      { iconNNTP,       Nntp           },
-      { iconNews,       News           },
-      { iconRoot,       FolderRoot     },
-      { iconGroup,      FolderGroup    },
-      { iconGroupNews,  MF_GROUP_NEWS  },
-      { iconGroupIMAP,  MF_GROUP_IMAP  },
+      { iconInbox,         MF_INBOX       },
+      { iconFile,          MF_FILE        },
+      { iconMH,            MF_MH          },
+      { iconPOP,           MF_POP         },
+      { iconIMAP,          MF_IMAP        },
+      { iconNNTP,          MF_NNTP        },
+      { iconNews,          MF_NEWS        },
+      { iconRoot,          MF_ROOT        },
+      { iconGroup,         MF_GROUP       },
    };
 
    int image = -1;

@@ -130,7 +130,7 @@ public:
    MRootFolderFromProfile() : MFolderFromProfile("") { }
 
    // implement base class pure virtuals (some of them don't make sense to us)
-   virtual FolderType GetType() const { return FolderRoot; }
+   virtual FolderType GetType() const { return MF_ROOT; }
 
    virtual String GetComment() const { return ""; }
    virtual void SetComment(const String& /* comment */)

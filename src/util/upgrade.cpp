@@ -274,7 +274,7 @@ public:
 
    virtual bool TransferDataToWindow()
    {
-      m_UseDialUpCheckbox->SetValue(gs_installWizardData.useDialUp);
+      m_UseDialUpCheckbox->SetValue(gs_installWizardData.useDialUp != 0);
       m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox);
       m_TrashCheckbox->SetValue(gs_installWizardData.useTrash);
       m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail);

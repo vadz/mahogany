@@ -336,21 +336,6 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
    }
    else
    {
-      if ( type == MF_GROUP_IMAP )
-      {
-         type = MF_IMAP;
-      }
-      else if ( type == MF_GROUP_NEWS )
-      {
-         type = MF_NNTP;
-      }
-      else
-      {
-         FAIL_MSG( "Unexpected folder type in ShowFolderSubfoldersDialog" );
-
-         return FALSE;
-      }
-
       // OpenFolder() will half open folder names ending with '/' - otheriwse
       // it would try to open something like "{nntp}news" which won't work
       if ( doesntEndWithSlash )
