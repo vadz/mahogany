@@ -1838,7 +1838,7 @@ the text of the new message. Special constructions are introduced by the
 $([category:]name[?arguments][{+|-|=}<number>[!]])
 \end{verbatim}
 \end{center}
-(the parentheses around all this may be replaced with accolades). For the
+(the parentheses around all this may be replaced with braces). For the
 simplest cases (no category, no arguments, no justficiation tail) the
 parentheses may be omitted entirely, as in \texttt{\$DATE}.
 
