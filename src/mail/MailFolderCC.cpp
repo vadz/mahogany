@@ -158,6 +158,8 @@ extern const MOption MP_TCP_READTIMEOUT;
 extern const MOption MP_TCP_WRITETIMEOUT;
 extern const MOption MP_TCP_RSHTIMEOUT;
 extern const MOption MP_TCP_SSHTIMEOUT;
+extern const MOption MP_USE_SSL;
+extern const MOption MP_USE_SSL_UNSIGNED;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -268,9 +270,6 @@ extern "C"
    void *mahogany_block_notify(int reason, void *data);
 #endif
 };
-
-/// return the c-client "{...}" string for the given folder
-static wxString GetImapSpec(const MFolder *folder);
 
 /// trivial wrappers around mail_open() which wants a non const "char *" (ugh)
 static inline
@@ -1145,78 +1144,102 @@ static String GetImapFlags(int flag)
    return flags;
 }
 
-// small GetImapSpec() helper
-static String GetSSLOptions(int flags)
-{
-   String specSsl;
-
-#ifdef USE_SSL
-   if ( flags & MF_FLAGS_SSLAUTH )
-   {
-      specSsl << "/ssl";
-      if ( flags & MF_FLAGS_SSLUNSIGNED )
-         specSsl << "/novalidate-cert";
-   }
-#endif // USE_SSL
-
-   return specSsl;
-}
-
 /* static */
-String MailFolder::GetImapSpec(int typeOrig,
-                               int flags,
-                               const String &name,
-                               const String &iserver,
-                               const String &login)
+String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
 {
-   String mboxpath;
+   String spec;
+   CHECK( folder, spec, _T("NULL folder in GetImapSpec") );
 
-   String server = iserver;
-   strutil_tolower(server);
+   const MFolderType type = folder->GetType();
+   const int flags = folder->GetFlags();
+   const String& server = folder->GetServer();
+   const String& name = folder->GetPath();
 
-   MFolderType type = (MFolderType)typeOrig;
+   String login = login_;
+   if ( login.empty() )
+      login = folder->GetLogin();
+
+   SSLSupport ssl;
 
 #ifdef USE_SSL
-   // SSL only for NNTP/IMAP/POP:
-   if( (flags & MF_FLAGS_SSLAUTH) && !FolderTypeSupportsSSL(type) )
+   Profile_obj profile(folder->GetProfile());
+   ssl = (SSLSupport)(long)READ_CONFIG(profile, MP_USE_SSL);
+
+   // SSL is valid only for some protocols (NNTP/IMAP/POP)
+   if ( (ssl != SSLSupport_None) && !FolderTypeSupportsSSL(type) )
    {
-      flags ^= MF_FLAGS_SSLAUTH;
-      wxLogWarning(_("Ignoring SSL authentication for folder '%s'"),
-                   name.c_str());
+      // complain if anything except default value was used for a folder for
+      // which it doesn't make sense
+      if ( ssl != SSLSupport_TLSIfAvailable )
+      {
+         wxLogWarning(_("Ignoring SSL authentication for folder '%s'"),
+                      name.c_str());
+      }
+
+      // and reset it to nothing in any case
+      ssl = SSLSupport_None;
    }
+#else
+   ssl = SSLSupport_None;
 #endif // USE_SSL
 
-   if ( flags & MF_FLAGS_SSLAUTH )
+   if ( ssl != SSLSupport_None )
    {
       extern bool InitSSL(void);
 
       if ( !InitSSL() )
       {
-         flags ^= MF_FLAGS_SSLAUTH;
+         ssl = SSLSupport_None;
       }
    }
 
    if ( FolderTypeHasServer(type) )
    {
       // remote spec starts with '{'
-      mboxpath << '{' << server << GetSSLOptions(flags);
+      spec << '{' << server;
+
+#ifdef USE_SSL
+      switch ( ssl )
+      {
+         case SSLSupport_SSL:
+         case SSLSupport_TLS:
+            spec << (ssl == SSLSupport_TLS ? _T("/tls") : _T("/ssl"));
+            // fall through
+
+         case SSLSupport_TLSIfAvailable:
+            // nothing to do -- this is the default
+
+            if ( READ_CONFIG(profile, MP_USE_SSL_UNSIGNED) )
+            {
+               spec << _T("/novalidate-cert");
+            }
+            break;
+
+         default:
+            FAIL_MSG( _T("unknown value of SSLSupport") );
+            // fall through
+
+         case SSLSupport_None:
+            spec << _T("/notls");
+      }
+#endif // USE_SSL
 
       // if it has server, it must have a login as well
       if ( !login.empty() )
-         mboxpath << "/user=" << login;
+         spec << "/user=" << login;
       else if ( flags & MF_FLAGS_ANON )
-         mboxpath << "/anonymous";
+         spec << "/anonymous";
       //else: we'll ask the user about his login later
    }
 
    switch ( type )
    {
       case MF_INBOX:
-         mboxpath = "INBOX";
+         spec = "INBOX";
          break;
 
       case MF_FILE:
-         mboxpath = strutil_expandfoldername(name, type);
+         spec = strutil_expandfoldername(name, type);
          break;
 
       case MF_MH:
@@ -1252,51 +1275,37 @@ String MailFolder::GetImapSpec(int typeOrig,
             while ( *p == '/' )
                p++;
 
-            mboxpath << "#mh/" << p;
+            spec << "#mh/" << p;
          }
          break;
 
       case MF_POP:
-         mboxpath << "/pop3}";
+         spec << "/pop3}";
          break;
 
       case MF_IMAP:
-         mboxpath << '}' << name;
+         spec << '}' << name;
          break;
 
       case MF_NEWS:
-         mboxpath << "#news." << name;
+         spec << "#news." << name;
          break;
 
       case MF_NNTP:
-         mboxpath << "/nntp}" << name;
+         spec << "/nntp}" << name;
          break;
 
       default:
          FAIL_MSG(_T("Unsupported folder type."));
    }
 
-   return mboxpath;
-}
-
-static
-wxString GetImapSpec(const MFolder *folder)
-{
-   return MailFolder::GetImapSpec(folder->GetType(),
-                                  folder->GetFlags(),
-                                  folder->GetPath(),
-                                  folder->GetServer(),
-                                  folder->GetLogin());
+   return spec;
 }
 
 /* static */
 String MailFolderCC::GetFullImapSpec(const MFolder *folder, const String& login)
 {
-   return MailFolder::GetImapSpec(folder->GetType(),
-                                  folder->GetFlags(),
-                                  folder->GetPath(),
-                                  folder->GetServer(),
-                                  login);
+   return MailFolder::GetImapSpec(folder, login);
 }
 
 bool MailFolder::SpecToFolderName(const String& specification,
@@ -1659,7 +1668,7 @@ MailFolderCC::MailFolderCC(const MFolder *mfolder, wxFrame *frame)
 
    Create(mfolder->GetType(), mfolder->GetFlags());
 
-   m_ImapSpec = ::GetImapSpec(mfolder);
+   m_ImapSpec = MailFolder::GetImapSpec(mfolder);
 
    // do this at the very end as it calls RequestUpdate() and so anything may
    // happen from now on
@@ -1746,7 +1755,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
       return true;
    }
 
-   String imapspec = ::GetImapSpec(folder);
+   String imapspec = MailFolder::GetImapSpec(folder);
 
    String login, password;
    if ( !GetAuthInfoForFolder(folder, login, password) )
@@ -2742,11 +2751,7 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
    SetLoginData(login, password);
 
    // preopen the stream if it may be reused, as explained above
-   String spec = MailFolder::GetImapSpec(folder->GetType(),
-                                         folder->GetFlags(),
-                                         folder->GetPath(),
-                                         folder->GetServer(),
-                                         login);
+   String spec = MailFolder::GetImapSpec(folder, login);
 
    if ( server && !stream )
    {
@@ -3008,7 +3013,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    {
       // they're both IMAP but do they live on the same server?
       // check if host, protocol, user all identical:
-      String specDst = ::GetImapSpec(folder);
+      String specDst = MailFolder::GetImapSpec(folder);
       String serverSrc = GetFirstPartFromImapSpec(specDst);
       String serverDst = GetFirstPartFromImapSpec(GetImapSpec());
 
@@ -5149,7 +5154,11 @@ MailFolderCC::Subscribe(const String &host,
                         const String &mailboxname,
                         bool subscribe)
 {
-   String spec = MailFolder::GetImapSpec(protocol, 0, mailboxname, host, "");
+   MFolder_obj folder(MFolder::CreateTemp(mailboxname, protocol));
+   folder->SetServer(host);
+
+   String spec = MailFolder::GetImapSpec(folder);
+
    return (subscribe ? mail_subscribe (NIL, (char *)spec.c_str())
                      : mail_unsubscribe (NIL, (char *)spec.c_str())) != NIL;
 }
@@ -5305,8 +5314,9 @@ MailFolderCC::Rename(const MFolder *mfolder, const String& name)
    // if we rename the folder being used - or maybe not?
    (void)MailFolderCC::CloseFolder(mfolder);
 
+   String spec = MailFolder::GetImapSpec(mfolder);
    if ( !mail_rename(NULL,
-                     (char *)::GetImapSpec(mfolder).c_str(),
+                     (char *)spec.c_str(),
                      (char *)name.c_str()) )
    {
       wxLogError(_("Failed to rename the mailbox for folder '%s' "
@@ -5329,16 +5339,10 @@ MailFolderCC::Rename(const MFolder *mfolder, const String& name)
 long
 MailFolderCC::ClearFolder(const MFolder *mfolder)
 {
-   MFolderType type = mfolder->GetType();
-   int flags = mfolder->GetFlags();
    String login = mfolder->GetLogin(),
           password = mfolder->GetPassword(),
           fullname = mfolder->GetFullName();
-   String mboxpath = MailFolder::GetImapSpec(type,
-                                             flags,
-                                             mfolder->GetPath(),
-                                             mfolder->GetServer(),
-                                             login);
+   String mboxpath = MailFolder::GetImapSpec(mfolder);
 
    wxLogTrace(TRACE_MF_CALLS, _T("Clearing folder '%s'"), fullname.c_str());
 
@@ -5455,11 +5459,7 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
       return false;
    }
 
-   String mboxpath = MailFolder::GetImapSpec(mfolder->GetType(),
-                                             mfolder->GetFlags(),
-                                             mfolder->GetPath(),
-                                             mfolder->GetServer(),
-                                             login);
+   String mboxpath = MailFolder::GetImapSpec(mfolder, login);
 
    MCclientLocker lock;
    SetLoginData(login, password);
@@ -5868,7 +5868,9 @@ ServerInfoEntryCC::LastParsedFolder ServerInfoEntryCC::ms_lastParsed;
 
 static inline bool Folder2NETMBX(const MFolder *folder, NETMBX *netmbx)
 {
-   if ( !mail_valid_net_parse((char *)GetImapSpec(folder).c_str(), netmbx) )
+   const String spec = MailFolder::GetImapSpec(folder);
+
+   if ( !mail_valid_net_parse((char *)spec.c_str(), netmbx) )
    {
       FAIL_MSG( _T("invalid remote folder spec in ServerInfoEntryCC?") );
 

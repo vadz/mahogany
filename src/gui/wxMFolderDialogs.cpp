@@ -113,6 +113,8 @@ extern const MOption MP_LAST_CREATED_FOLDER_TYPE;
 extern const MOption MP_NNTPHOST;
 extern const MOption MP_POPHOST;
 extern const MOption MP_USERNAME;
+extern const MOption MP_USE_SSL;
+extern const MOption MP_USE_SSL_UNSIGNED;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -321,7 +323,7 @@ public:
    void OnChange(wxKeyEvent& event);
    void OnRadioBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnComboBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
-   void OnChoice(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
+   void OnChoice(wxCommandEvent& event);
 
    void OnCheckBox(wxCommandEvent& event)
    {
@@ -330,12 +332,6 @@ public:
          m_login->Enable( !m_isAnonymous->GetValue() );
          m_password->Enable( !m_isAnonymous->GetValue() );
       }
-#ifdef USE_SSL
-      if ( event.GetEventObject() == m_useSSL )
-      {
-         m_acceptUnsignedSSL->Enable( m_useSSL->GetValue() );
-      }
-#endif // USE_SSL
 
       OnEvent();
    }
@@ -411,6 +407,18 @@ protected:
 
    void WriteEntryIfChanged(FolderProperty entry, const wxString& value);
 
+#ifdef USE_SSL
+   // same as above but for int properties
+   enum FolderIntProperty
+   {
+      SSL,              // SSL support
+      AcceptUnsigned,   // accept unsigned SSL certs?
+      MaxIntProperty
+   };
+
+   void WriteEntryIfChanged(FolderIntProperty entry, int value);
+#endif // USE_SSL
+
    // fills the subtype combobox with the available values for the
    // given radiobox selection
    void FillSubtypeCombo(RadioIndex sel);
@@ -470,8 +478,8 @@ protected:
    /// Use anonymous access for this folder?
    wxCheckBox *m_isAnonymous;
 #ifdef USE_SSL
-   /// Use SSL authentication for this folder?
-   wxCheckBox *m_useSSL;
+   /// degree of SSL support for this folder
+   wxChoice *m_useSSL;
    /// Accept unsigned certificates?
    wxCheckBox *m_acceptUnsignedSSL;
 #endif // USE_SSL
@@ -498,17 +506,16 @@ protected:
    /// the array with the initial values of the settings for this folder
    wxString m_originalValues[MaxProperty];
 
+#ifdef USE_SSL
+   /// and another one with the integer values (currently ionly used for SSL)
+   int m_originalIntValues[MaxIntProperty];
+#endif // USE_SSL
+
    /// the original folder type for file-based folders
    FileMailboxFormat m_originalMboxFormat;
 
    /// the initial value of the "anonymous" flag
    bool m_originalIsAnonymous;
-#ifdef USE_SSL
-   /// the initial value of the "use SSL" flag
-   bool m_originalUseSSL;
-   /// the initial value of the "accept unsigned certificates" flag
-   bool m_originalAcceptUnsignedSSL;
-#endif // USE_SSL
 #ifdef USE_LOCAL_CHECKBOX
    /// the initial value of the "is local" flag
    bool m_originalIsLocalValue;
@@ -1024,12 +1031,12 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_Mailboxname,
       Label_Newsgroup,
       Label_Comment,
-      Label_KeepOpen,
-      Label_IsAnonymous,
 #ifdef USE_SSL
       Label_UseSSL,
       Label_AcceptUnsignedSSL,
 #endif // USE_SSL
+      Label_KeepOpen,
+      Label_IsAnonymous,
 #ifdef USE_LOCAL_CHECKBOX
       Label_IsLocal,
 #endif // USE_LOCAL_CHECKBOX
@@ -1052,12 +1059,12 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Mailbox"),
       gettext_noop("&Newsgroup"),
       gettext_noop("&Comment"),
-      gettext_noop("&Keep server connection when idle"),
-      gettext_noop("Anon&ymous access"),
 #ifdef USE_SSL
-      gettext_noop("Use Secure Sockets Layer (SS&L)"),
+      gettext_noop("SS&L/TLS usage"),
       gettext_noop("Accept &unsigned (self-signed) certificates"),
 #endif // USE_SSL
+      gettext_noop("&Keep server connection when idle"),
+      gettext_noop("Anon&ymous access"),
 #ifdef USE_LOCAL_CHECKBOX
       gettext_noop("Folder can be accessed &without network"),
 #endif // USE_LOCAL_CHECKBOX
@@ -1089,15 +1096,23 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                  TRUE,    // open
                                  FALSE);  // allow non existing files
 
-   m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_path);
-   m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_keepOpen);
-   wxControl *lastCtrl = m_isAnonymous;
+   wxControl *lastCtrl = m_path;
+
 #ifdef USE_SSL
-   m_useSSL = CreateCheckBox(labels[Label_UseSSL], widthMax, lastCtrl);
+   m_useSSL = CreateChoice(labels[Label_UseSSL] +
+                           _(":Don't use SSL at all"
+                             ":Use TLS if available"
+                             ":Use TLS only"
+                             ":Use SSL only"),
+                           widthMax, lastCtrl);
    m_acceptUnsignedSSL = CreateCheckBox(labels[Label_AcceptUnsignedSSL], widthMax, m_useSSL);
    lastCtrl = m_acceptUnsignedSSL;
 #endif // USE_SSL
 
+   m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, lastCtrl);
+   m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_keepOpen);
+
+   lastCtrl = m_isAnonymous;
 #ifdef USE_LOCAL_CHECKBOX
    m_isLocal = CreateCheckBox(labels[Label_IsLocal], widthMax, lastCtrl);
    lastCtrl = m_isLocal;
@@ -1119,9 +1134,9 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                "on the server settings."));
 
 #ifdef USE_SSL
-   m_useSSL->SetToolTip(_("This will use SSL authentication and encryption\n"
+   m_useSSL->SetToolTip(_("Choose degree of SSL/TLS support\n"
                           "for communication with the server."));
-   m_acceptUnsignedSSL->SetToolTip(_("This will accept unsigned (self-signed) SSL certificates"));
+   m_acceptUnsignedSSL->SetToolTip(_("Accept unsigned (self-signed) SSL certificates?"));
 #endif // USE_SSL
 
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
@@ -1144,6 +1159,21 @@ wxFolderPropertiesPage::SetFolderName(const wxString& name)
    CHECK_RET( dlg, _T("SetFolderName() can be only called when creating") );
 
    dlg->SetFolderName(name);
+}
+
+void
+wxFolderPropertiesPage::OnChoice(wxCommandEvent& event)
+{
+#ifdef USE_SSL
+   if ( event.GetEventObject() == m_useSSL )
+   {
+      m_acceptUnsignedSSL->Enable(m_useSSL->GetSelection() != SSLSupport_None);
+   }
+   else
+#endif // USE_SSL
+   {
+      OnEvent();
+   }
 }
 
 void
@@ -1571,6 +1601,8 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 
 #ifdef USE_SSL
    m_useSSL->Enable(enableSSL);
+   if ( !enableSSL )
+      m_acceptUnsignedSSL->Disable();
 #endif // USE_SSL
 
    m_keepOpen->Enable(TRUE);
@@ -1919,6 +1951,40 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
    //else: it didn't change, don't write it back
 }
 
+#ifdef USE_SSL
+
+void
+wxFolderPropertiesPage::WriteEntryIfChanged(FolderIntProperty property,
+                                            int value)
+{
+   static const char *profileKeys[MaxIntProperty] =
+   {
+      MP_USE_SSL,
+      MP_USE_SSL_UNSIGNED,
+   };
+
+   if ( value != m_originalIntValues[property] )
+   {
+      if ( !m_profile->writeEntry(profileKeys[property], value) )
+         return;
+
+      if ( !IsCreating() )
+      {
+         // this function has a side effect: it also sets the "modified" flag
+         // so that the other functions know that the folder settings have
+         // been changed and so the "unaccessible" flag may be not valid any
+         // longer
+         MFolder_obj folder(m_folderPath);
+
+         folder->AddFlags(MF_FLAGS_MODIFIED);
+      }
+      //else: this flag is unnecessary for just created folder
+   }
+   //else: it didn't change, don't write it back
+}
+
+#endif // USE_SSL
+
 void
 wxFolderPropertiesPage::ClearInvalidFields(RadioIndex sel)
 {
@@ -2149,11 +2215,12 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_isAnonymous->SetValue(m_originalIsAnonymous);
 
 #ifdef USE_SSL
-   m_originalUseSSL = ((flags & MF_FLAGS_SSLAUTH) != 0);
-   m_useSSL->SetValue(m_originalUseSSL);
-   m_originalAcceptUnsignedSSL = ((flags & MF_FLAGS_SSLUNSIGNED) != 0);
-   m_acceptUnsignedSSL->SetValue(m_originalAcceptUnsignedSSL);
-   m_acceptUnsignedSSL->Enable(m_originalUseSSL);
+   m_originalIntValues[SSL] = READ_CONFIG(profile, MP_USE_SSL);
+   m_useSSL->SetSelection(m_originalIntValues[SSL]);
+
+   m_originalIntValues[AcceptUnsigned] = READ_CONFIG(profile,
+                                                     MP_USE_SSL_UNSIGNED);
+   m_acceptUnsignedSSL->SetValue(m_originalIntValues[AcceptUnsigned] != 0);
 #endif // USE_SSL
 
    // update the folder icon
@@ -2346,14 +2413,6 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       {
          // anonymous access?
          bool anonymous = m_isAnonymous->GetValue() || loginName == "anonymous";
-#ifdef USE_SSL
-         if(m_useSSL->GetValue() != 0)
-         {
-            flags |= MF_FLAGS_SSLAUTH;
-            if(m_acceptUnsignedSSL->GetValue() != 0)
-               flags |= MF_FLAGS_SSLUNSIGNED;
-         }
-#endif // USE_SSL
          if ( anonymous )
             flags |= MF_FLAGS_ANON;
          else
@@ -2598,23 +2657,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    }
 
 #ifdef USE_SSL
-   bool useSSL = m_useSSL->GetValue();
-   if ( useSSL != m_originalUseSSL )
-   {
-      if ( useSSL )
-         folder->AddFlags(MF_FLAGS_SSLAUTH);
-      else
-         folder->ResetFlags(MF_FLAGS_SSLAUTH);
-   }
-
-   bool acceptUnsignedSSL = m_acceptUnsignedSSL->GetValue();
-   if ( acceptUnsignedSSL != m_originalAcceptUnsignedSSL )
-   {
-      if ( acceptUnsignedSSL )
-         folder->AddFlags(MF_FLAGS_SSLUNSIGNED);
-      else
-         folder->ResetFlags(MF_FLAGS_SSLUNSIGNED);
-   }
+   WriteEntryIfChanged(SSL, m_useSSL->GetSelection());
+   WriteEntryIfChanged(AcceptUnsigned, m_acceptUnsignedSSL->GetValue());
 #endif // USE_SSL
 
    if ( canBeOpened != m_originalCanBeOpened )

@@ -930,12 +930,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Try to guess SMTP sender header"), Field_Bool | Field_Advanced, ConfigField_MailServerLogin,           },
    { gettext_noop("SMTP sender header"), Field_Text | Field_Advanced, -ConfigField_GuessSender,           },
 #ifdef USE_SSL
-   { gettext_noop("Mahogany can attempt to use SSL (secure sockets layer) to send\n"
-                  "mail or news. Tick the following boxes to activate this.\n"
+   { gettext_noop("\nMahogany can attempt to use either SSL or TLS to send\n"
+                  "mail or news. TLS is used by default if available but\n"
+                  "you may disable it if you experience problems because\n"
+                  "of this.\n"
                   "You may also have to tell Mahogany to accept unsigned (or\n"
                   "self-signed) certificates if your organization uses them."),
                                                    Field_Message, -1 },
-   { gettext_noop("SMTP server uses SS&L"),        Field_Bool,
+   { gettext_noop("SS&L/TLS for SMTP server"
+                  ":Don't use SSL at all"
+                  ":Use TLS if available"
+                  ":Use TLS only"
+                  ":Use SSL only"),                Field_Combo,
 #ifdef USE_SENDMAIL
                                                   -ConfigField_UseSendmail,
 #else
@@ -943,7 +949,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif
    },
    { gettext_noop("&Accept unsigned certificates for SMTP"), Field_Bool, ConfigField_SmtpServerSSL,     },
-   { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
+   { gettext_noop("SSL/TLS for NNTP s&erver"
+                  ":Don't use SSL at all"
+                  ":Use TLS if available"
+                  ":Use TLS only"
+                  ":Use SSL only"),                Field_Combo, -1 },
    { gettext_noop("A&ccept unsigned certificates for NNTP"), Field_Bool, ConfigField_NntpServerSSL,     },
 #endif // USE_SSL
 
@@ -2340,10 +2350,18 @@ void wxOptionsPage::UpdateUI()
             }
             else if ( GetFieldType(nCheck) == Field_Radio )
             {
-               // only enable if the radiobox selection is 0 (meaning "yes")
+               // disable if the radiobox selection is 0 (meaning "yes")
                wxRadioBox *radiobox = wxStaticCast(controlDep, wxRadioBox);
 
-               if ( radiobox->GetSelection() == 0 ) // FIXME hardcoded!
+               if ( radiobox && radiobox->GetSelection() == 0 )
+                  bEnable = false;
+            }
+            else if ( GetFieldType(nCheck) == Field_Combo )
+            {
+               // disable if the combobox selection is 0
+               wxChoice *choice = wxStaticCast(controlDep, wxChoice);
+
+               if ( choice && choice->GetSelection() == 0 )
                   bEnable = false;
             }
             else
@@ -3268,6 +3286,7 @@ wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
 bool wxOptionsPageNetwork::TransferDataToWindow()
 {
    bool bRc = wxOptionsPage::TransferDataToWindow();
+
 #ifdef USE_DIALUP
    if ( bRc )
    {

@@ -250,8 +250,10 @@ SendMessageCC::SendMessageCC(Profile *profile,
          m_UserName = READ_CONFIG_TEXT(profile, MP_SMTPHOST_LOGIN);
          m_Password = READ_CONFIG_TEXT(profile, MP_SMTPHOST_PASSWORD);
 #ifdef USE_SSL
-         m_UseSSLforSMTP = READ_CONFIG_BOOL(profile, MP_SMTPHOST_USE_SSL);
-         m_UseSSLUnsignedforSMTP = READ_CONFIG_BOOL(profile, MP_SMTPHOST_USE_SSL_UNSIGNED);
+         m_UseSSLforSMTP = (SSLSupport)(long)
+            READ_CONFIG(profile, MP_SMTPHOST_USE_SSL);
+         m_UseSSLUnsignedforSMTP = (SSLCert)
+            READ_CONFIG_BOOL(profile, MP_SMTPHOST_USE_SSL_UNSIGNED);
 #endif // USE_SSL
          break;
 
@@ -266,8 +268,10 @@ SendMessageCC::SendMessageCC(Profile *profile,
          m_UserName = READ_CONFIG_TEXT(profile,MP_NNTPHOST_LOGIN);
          m_Password = READ_CONFIG_TEXT(profile,MP_NNTPHOST_PASSWORD);
 #ifdef USE_SSL
-         m_UseSSLforNNTP = READ_CONFIG_BOOL(profile, MP_NNTPHOST_USE_SSL);
-         m_UseSSLUnsignedforNNTP = READ_CONFIG_BOOL(profile, MP_NNTPHOST_USE_SSL_UNSIGNED);
+         m_UseSSLforNNTP = (SSLSupport)(long)
+            READ_CONFIG(profile, MP_NNTPHOST_USE_SSL);
+         m_UseSSLUnsignedforNNTP = (SSLCert)
+            READ_CONFIG_BOOL(profile, MP_NNTPHOST_USE_SSL_UNSIGNED);
 #endif // USE_SSL
    }
 
@@ -1538,22 +1542,66 @@ SendMessageCC::Send(int flags)
 
    // do we use SSL for SMTP/NNTP?
 #ifdef USE_SSL
+   bool supportsSSL = true;
+   SSLSupport useSSL = SSLSupport_None; // just to suppress warnings
+   SSLCert acceptUnsigned = SSLCert_SignedOnly;
    if ( m_Protocol == Prot_SMTP )
    {
-      if ( m_UseSSLforSMTP && InitSSL() )
-      {
-         server << "/ssl";
-         if ( m_UseSSLUnsignedforSMTP )
-            server << "/novalidate-cert";
-      }
+      useSSL = m_UseSSLforSMTP;
+      acceptUnsigned = m_UseSSLUnsignedforSMTP;
    }
    else if ( m_Protocol == Prot_NNTP )
    {
-      if ( m_UseSSLforNNTP && InitSSL() )
+      useSSL = m_UseSSLforNNTP;
+      acceptUnsigned = m_UseSSLUnsignedforNNTP;
+   }
+   else // SSL doesn't make sense
+   {
+      supportsSSL = false;
+   }
+
+   if ( supportsSSL )
+   {
+      if ( useSSL == SSLSupport_None )
       {
-         server << "/ssl";
-         if ( m_UseSSLUnsignedforNNTP )
-            server << "/novalidate-cert";
+         server << _T("/notls");
+      }
+      else // do use SSL/TLS
+      {
+         if ( !InitSSL() )
+         {
+            if ( useSSL != SSLSupport_TLSIfAvailable )
+            {
+               ERRORMESSAGE(("SSL support is unavailable; try disabling SSL/TLS."));
+
+               return false;
+            }
+            //else: not a fatal error, fall back to unencrypted
+         }
+
+         switch ( useSSL )
+         {
+            case SSLSupport_SSL:
+               server << _T("/ssl");
+               break;
+
+            case SSLSupport_TLS:
+               server << _T("/tls");
+               break;
+
+            default:
+               FAIL_MSG( _T("unknown value of SSLSupport") );
+               // fall through
+
+            case SSLSupport_TLSIfAvailable:
+               // nothing to do -- this is the default
+               break;
+         }
+
+         if ( acceptUnsigned )
+         {
+            server << _T("/novalidate-cert");
+         }
       }
    }
    //else: other protocols don't use SSL

@@ -117,6 +117,8 @@ extern const MOption MP_NET_ON_COMMAND;
 extern const MOption MP_NEWMAIL_FOLDER;
 extern const MOption MP_NEWMAIL_PLAY_SOUND;
 extern const MOption MP_NNTPHOST;
+extern const MOption MP_NNTPHOST_USE_SSL;
+extern const MOption MP_NNTPHOST_USE_SSL_UNSIGNED;
 extern const MOption MP_ORGANIZATION;
 extern const MOption MP_OUTBOX_NAME;
 extern const MOption MP_OUTGOINGFOLDER;
@@ -126,6 +128,8 @@ extern const MOption MP_PROFILE_TYPE;
 extern const MOption MP_SHOWTIPS;
 extern const MOption MP_SHOW_NEWMAILMSG;
 extern const MOption MP_SMTPHOST;
+extern const MOption MP_SMTPHOST_USE_SSL;
+extern const MOption MP_SMTPHOST_USE_SSL_UNSIGNED;
 extern const MOption MP_SYNC_FILTERS;
 extern const MOption MP_SYNC_FOLDER;
 extern const MOption MP_SYNC_FOLDERGROUP;
@@ -2557,6 +2561,8 @@ public:
          MFolder_obj folder(folderName);
          CHECK( folder, false, _T("traversed folder which doesn't exist?") );
 
+         Profile_obj profile(folder->GetProfile());
+
          const int flags = folder->GetFlags();
 
          int flagsNew = flags;
@@ -2564,8 +2570,6 @@ public:
          // replace the SSL flags with SSL profile entries
          if ( flags & MF_FLAGS_SSLAUTH )
          {
-            Profile_obj profile(folder->GetProfile());
-
             if ( !profile->writeEntryIfNeeded
                            (
                               GetOptionName(MP_USE_SSL),
@@ -2602,6 +2606,36 @@ public:
          if ( flagsNew != flags )
          {
             folder->SetFlags(flagsNew);
+         }
+
+
+         // also check SMTP/NNTP server flags: need to replace bools with
+         // SSLSupport_XXX values
+
+         // we should avoid using READ_CONFIG() because it uses the new default
+         // value as fallback and we need the old one
+         const char *key = GetOptionName(MP_SMTPHOST_USE_SSL);
+         if ( !profile->writeEntryIfNeeded
+                        (
+                           key,
+                           profile->readEntry(key, 0)
+                              ? SSLSupport_SSL : SSLSupport_TLSIfAvailable,
+                           GetNumericDefault(MP_SMTPHOST_USE_SSL)
+                        ) )
+         {
+            return false;
+         }
+
+         key = GetOptionName(MP_NNTPHOST_USE_SSL);
+         if ( !profile->writeEntryIfNeeded
+                        (
+                           key,
+                           profile->readEntry(key, 0)
+                              ? SSLSupport_SSL : SSLSupport_TLSIfAvailable,
+                           GetNumericDefault(MP_NNTPHOST_USE_SSL)
+                        ) )
+         {
+            return false;
          }
 
          return true;

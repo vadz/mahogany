@@ -192,11 +192,12 @@ private:
 
 #ifdef USE_SSL
    /// use SSL ?
-   bool m_UseSSLforSMTP, m_UseSSLforNNTP;
+   SSLSupport m_UseSSLforSMTP,
+              m_UseSSLforNNTP;
 
    /// check validity of ssl-cert? <-> self-signed certs
-   bool m_UseSSLUnsignedforSMTP,
-        m_UseSSLUnsignedforNNTP;
+   SSLCert m_UseSSLUnsignedforSMTP,
+           m_UseSSLUnsignedforNNTP;
 #endif // USE_SSL
 
    /// has the message been properly created (set by Build())?

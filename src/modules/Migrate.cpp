@@ -870,7 +870,7 @@ void IMAPServerPanel::OnText(wxCommandEvent& event)
          m_textPass->SetValue(m_folder->GetPassword());
 
 #ifdef USE_SSL
-         m_chkSSL->SetValue((m_folder->GetFlags() & MF_FLAGS_SSLAUTH) != 0);
+         m_chkSSL->SetValue(m_folder->GetSSL() == SSLSupport_SSL);
 #endif // USE_SSL
       }
    }
@@ -1353,7 +1353,7 @@ MigrateWizardProgressPage::OpenSource(const MigrateImapServer& imapData,
 #ifdef USE_SSL
    if ( imapData.useSSL )
    {
-      folderSrc->AddFlags(MF_FLAGS_SSLAUTH | MF_FLAGS_SSLUNSIGNED);
+      folderSrc->SetSSL(SSLSupport_SSL, SSLCert_AcceptUnsigned);
    }
 #endif // USE_SSL
 
@@ -1814,7 +1814,7 @@ wxWizardPage *MigrateWizard::GetNextPage(Page page)
             // certs because of lack of space in the dialog but we do accept
             // them here because always accepting them is better than never
             // doing it
-            folderSrc->AddFlags(MF_FLAGS_SSLAUTH | MF_FLAGS_SSLUNSIGNED);
+            folderSrc->SetSSL(SSLSupport_SSL, SSLCert_AcceptUnsigned);
          }
 #endif // USE_SSL
 
