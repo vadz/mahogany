@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sat Aug 15 15:40:29 1998
+#This file was created by <karsten> Sat Aug 15 15:12:04 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -29,7 +29,7 @@
 \shape slanted 
 M
 \shape default 
- - README
+ - Introduction
 \layout Author
 
 Karsten Ballüder
@@ -47,9 +47,15 @@ Ballueder@usa.net, http://Ballueder.home.ml.org
 )
 \layout Abstract
 
+This is a first attempt at some form of documentation for M.
+ At present there is no proper help system, so we haven't gotten around
+ to write any real documentation yet.
+ M is beginning to get usable and so this should help you to set it up and
+ start using it.
+ It also contains some information on what we plan for the future.
 \layout Abstract
 
-Some more up to date information can be found in the ReleaseNotes files.
+Some more up to date information can be found in the README files.
 \layout Standard
 
 

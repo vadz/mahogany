@@ -42,10 +42,11 @@
 #include "MDialogs.h"
 #include "gui/wxlwindow.h"
 
+#include   <wx/dynarray.h>
+#include   <wx/radiobox.h>
+
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
-
-#include <wx/dynarray.h>
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -432,4 +433,93 @@ MDialog_AboutDialog( MWindow *parent)
 
    frame->Show(TRUE);
    frame->Fit();
+}
+
+
+
+/** A base class for dialog panels */
+class wxProfileEditPanel : public wxPanel
+{
+public:
+   wxProfileEditPanel(wxWindow *parent)
+      : wxPanel(parent, -1, wxPoint(0,0), wxSize(400, 400))
+      {}
+   /// transfer settings from panel to profile
+   virtual void    UpdateProfile(void) = 0;
+   /// transfer settings from profile to panel
+   virtual void    UpdatePanel(void) = 0;
+   /// virtual destructor
+   virtual ~wxProfileEditPanel() {}
+protected:
+   Profile  *m_Profile;
+   wxWindow *m_Parent;
+};
+
+class wxPEP_Folder : public wxProfileEditPanel
+{
+public:
+   wxPEP_Folder(Profile *profile, wxWindow *parent);
+   /// transfer settings from panel to profile
+   void    UpdateProfile(void);
+   /// transfer settings from profile to panel
+   void    UpdatePanel(void);
+private:
+   // profile settings:
+   int    m_FolderType;
+   String m_FolderPath;
+   int    m_UpdateInterval;
+   String m_UserId;
+   String m_Password;
+   
+   wxRadioBox *m_FolderTypeRadioBox;
+   wxTextCtrl *m_FolderPathTextCtrl;
+   wxTextCtrl *m_UpdateIntervalTextCtrl;
+   wxTextCtrl *m_UserIdTextCtrl;
+   wxTextCtrl *m_PasswordTextCtrl;
+
+   wxString choices[5];
+};
+
+wxPEP_Folder::wxPEP_Folder(Profile *profile, wxWindow *parent)
+   : wxProfileEditPanel(parent)
+{
+   m_Profile = profile;
+   m_Parent = parent;
+   wxASSERT(m_Profile);
+   wxASSERT(m_Parent);
+
+   choices[0] = _("INBOX");
+   choices[1] = _("Message box file");
+   choices[2] = _("POP3");
+   choices[3] = _("IMAP");
+   choices[4] = _("NNTP/News");
+   m_FolderTypeRadioBox = new wxRadioBox( this, -1, _("Folder Type"),
+                                          wxDefaultPosition,
+                                          wxSize(-1,-1),
+                                          5, choices,
+                                          1, wxRA_VERTICAL );
+
+   m_FolderPathTextCtrl = new wxTextCtrl(this,-1);
+   m_UpdateIntervalTextCtrl = new wxTextCtrl(this,-1);
+   m_UserIdTextCtrl = new wxTextCtrl(this,-1);
+   m_PasswordTextCtrl = new wxTextCtrl(this,-1);
+
+}
+
+void
+wxPEP_Folder::UpdateProfile(void)
+{
+}
+
+void
+wxPEP_Folder::UpdatePanel(void)
+{
+}
+
+
+
+void
+MDialog_FolderProfile(MWindow *parent)
+{
+   
 }

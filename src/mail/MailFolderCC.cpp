@@ -342,7 +342,7 @@ MailFolderCC::Debug(void) const
 
    CBDEBUG();
    VAR(numOfMessages);
-   VAR(realName);
+   VAR(realName.c_str());
    DBGLOG("--list of streams and objects--");
 
    StreamConnectionList::iterator

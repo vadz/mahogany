@@ -1211,7 +1211,7 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     ConfigName_LastSearch,
     ConfigName_LastPage,
     ConfigName_LastLookup,
-    ConfigName_FindOptions,
+    ConfigName_FindOptions
   };
 
   static const char *aszConfigNames[] =
@@ -2175,7 +2175,9 @@ void wxAdbEditFrame::SetMinSize()
   m_btnCancel->GetClientSize(&widthBtn, &heightBtn);
 
   // @@ this is completely arbitrary
+#ifndef __WXGTK__
   SetSizeHints(7*widthBtn, 22*heightBtn);
+#endif
 }
 
 bool wxAdbEditFrame::SaveExpandedBranches(AdbTreeNode *group)

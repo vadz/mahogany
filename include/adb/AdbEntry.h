@@ -93,7 +93,7 @@ enum
 enum
 {
   AdbLookup_CaseSensitive = 0x0001,
-  AdbLookup_Substring     = 0x0002, // match "foo" as "*foo*"
+  AdbLookup_Substring     = 0x0002 // match "foo" as "*foo*"
 };
 
 // ============================================================================

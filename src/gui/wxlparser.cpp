@@ -46,13 +46,14 @@ void wxLayoutImportText(wxLayoutList &list, String const &str)
 
       // check if it's the end of this line
 #ifdef OS_WIN
-      if ( backup == '\r' && *(cptr + 1) == '\n' ) {
+      if ( backup == '\r' && *(cptr + 1) == '\n' )
+      {
          cptr++;  // skip '\r'
+      }
 #else //Unix
       if ( backup == '\n' )
 #endif
          list.LineBreak();
-      }
       else if(backup == '\0') // reached end of string
          break;
       cptr++;

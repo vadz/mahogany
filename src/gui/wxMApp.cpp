@@ -149,10 +149,12 @@ int wxMApp::OnExit()
  
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
+//FIXME
+#ifdef __WXMSW__
    free(sysinbox());
    free(myhomedir());
    free(myusername());
-
+#endif
    return 0;
 }
 

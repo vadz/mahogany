@@ -53,10 +53,11 @@
 #include "gui/wxlparser.h"
 #include "gui/wxComposeView.h"
 
-#include "adb/AdbEntry.h"
-#include "adb/AdbManager.h"
 
 #include <wx/textfile.h>
+
+#include "adb/AdbEntry.h"
+#include "adb/AdbManager.h"
 
 // ----------------------------------------------------------------------------
 // constants
