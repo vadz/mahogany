@@ -1390,13 +1390,6 @@ bool wxMApp::InitHelp()
 
    m_HelpController->SetFrameParameters("Mahogany : %s", size, pos);
 
-#ifdef OS_UNIX
-   if ( !helpBrowserIsExternal )
-   {
-      m_HelpController->DisplayContents();
-   }
-#endif // OS_UNIX
-
    // remember the dir where we found the files
    if ( helpdir != GetHelpDir() )
    {
