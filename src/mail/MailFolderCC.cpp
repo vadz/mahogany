@@ -437,11 +437,14 @@ MailFolderCC::~MailFolderCC()
     // can cause references to this folder, cannot be allowd:
    //ProcessEventQueue();
    CCQuiet(true); // disable all callbacks!
-   mail_check(m_MailStream); // update flags, etc, .newsrc
    // We cannot run ProcessEventQueue() here as we must not allow any
    // Message to be created from this stream. If we miss an event -
    // that's a pity.
-   if( m_MailStream ) mail_close(m_MailStream);
+   if( m_MailStream )
+   {
+       mail_check(m_MailStream); // update flags, etc, .newsrc
+       mail_close(m_MailStream);
+   }
    CCVerbose();
    if( m_Listing ) delete [] m_Listing;
 
@@ -828,7 +831,7 @@ MailFolderCC::BuildListing(void)
 
       delete [] messageIDs;
    }
-//   if(m_UpdateMsgCount) // this will suppress more new mail events
+   if(m_UpdateMsgCount) // this will suppress more new mail events
       m_OldNumOfMessages = m_NumOfMessages;
    m_UpdateNeeded = false;
    m_FirstListing = false;
