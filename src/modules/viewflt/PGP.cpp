@@ -168,16 +168,25 @@ PGPFilter::DoProcess(String& text,
    {
       // is the message just signed or encrypted?
       const char *tail = start + strlen(PGP_BEGIN_PREFIX);
+      bool isKey = false;
       bool isSigned = strncmp(tail, "SIGNED ", 7 /* strlen("SIGNED ") */) == 0;
       if ( isSigned )
       {
          tail += 7;
+      } 
+      else
+      {
+         isKey = strncmp(tail, "PUBLIC KEY ", 11 /* strlen("PUBLIC KEY ") */) == 0;
       }
 
       // this flag tells us if everything is ok so far -- as soon as it becomes
       // false, we skip all subsequent steps
-      bool ok = true;
-      if ( strncmp(tail, PGP_BEGIN_SUFFIX, strlen(PGP_BEGIN_SUFFIX)) != 0 )
+      // We do not know (yet) what to do with public key blocks, so let's consider
+      // that they're not ok.
+      // TODO: propose to import it into the keyring?
+      bool ok = !isKey;
+
+      if ( ok && strncmp(tail, PGP_BEGIN_SUFFIX, strlen(PGP_BEGIN_SUFFIX)) != 0 )
       {
          wxLogWarning(_("The BEGIN line doesn't end with expected suffix."));
 
@@ -328,9 +337,12 @@ PGPFilter::DoProcess(String& text,
          return;
       }
 
-      // give a warning and display the message normally
-      wxLogWarning(_("This message seems to be PGP signed or encrypted "
-                     "but in fact is not."));
+      // give a warning (unless this is a KEY blok and display the message normally
+      if ( !isKey )
+      {
+         wxLogWarning(_("This message seems to be PGP signed or encrypted "
+                        "but in fact is not."));
+      }
    }
 
    m_next->Process(text, viewer, style);
