@@ -1166,22 +1166,26 @@ strutil_ftime(time_t time, const String & format, bool gmtflag)
 
 /* Read and remove the next number from string. */
 long
-strutil_readNumber(String &string, bool *success)
+strutil_readNumber(String& string, bool *success)
 {
    strutil_delwhitespace(string);
+
    String newstr;
    const char *cptr;
-   for(cptr = string.c_str();
-       *cptr &&
-          (isdigit(*cptr)
-           || *cptr == '+' || *cptr == '-');
-       cptr++)
+   for ( cptr = string.c_str();
+         *cptr && (isdigit(*cptr) || *cptr == '+' || *cptr == '-');
+         cptr++ )
+   {
       newstr << *cptr;
-   string = cptr;
+   }
+
+   string.erase(0, cptr - string.c_str());
+
    long num = -123456;
-   int count = sscanf(newstr.c_str(),"%ld", &num);
-   if(success)
-      *success = (count == 1);
+   bool ok = newstr.ToLong(&num);
+   if ( success )
+      *success = ok;
+
    return num;
 }
 
@@ -1192,10 +1196,12 @@ strutil_readString(String &string, bool *success)
    strutil_delwhitespace(string);
 
    String newstr;
+   newstr.reserve(string.length());
+
    bool ok;
 
    const char *cptr = string.c_str();
-   if(*cptr != '"')
+   if ( *cptr != '"' )
    {
       ok = false;
    }
@@ -1217,7 +1223,7 @@ strutil_readString(String &string, bool *success)
 
       if ( ok )
       {
-         string = ++cptr;
+         string.erase(0, cptr + 1 - string.c_str());
       }
    }
 
