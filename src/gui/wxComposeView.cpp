@@ -103,6 +103,25 @@ static inline bool IsAddressField(size_t field)
    return field != wxComposeView::Field_Subject;
 }
 
+static wxString GetMimeTypeFromFilename(const wxString& filename)
+{
+   wxString strExt;
+   wxSplitPath(filename, NULL, NULL, &strExt);
+
+   wxString strMimeType;
+   wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
+   wxFileType *fileType = mimeManager.GetFileTypeFromExtension(strExt);
+   if ( (fileType == NULL) || !fileType->GetMimeType(&strMimeType) )
+   {
+      // can't find MIME type from file extension, set some default one
+      strMimeType = "APPLICATION/OCTET-STREAM";
+   }
+
+   delete fileType;  // may be NULL, ok
+
+   return strMimeType;
+}
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -902,6 +921,11 @@ wxComposeView::InitText(Message *msg)
          InsertText(_("--- Please choose evaluate template from ---\n"
                       "--- the menu after filling the headers.  ---"));
          ResetDirty();
+      }
+      else
+      {
+         // this will only insert the sig
+         DoInitText(NULL);
       }
    }
    else
@@ -1813,15 +1837,7 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
    String strMimeType;
    if ( strutil_isempty(mimetype) )
    {
-      wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
-      wxFileType *fileType = mimeManager.GetFileTypeFromExtension(strExt);
-      if ( (fileType == NULL) || !fileType->GetMimeType(&strMimeType) )
-      {
-         // can't find MIME type from file extension, set some default one
-         strMimeType = "APPLICATION/OCTET-STREAM";
-      }
-
-      delete fileType;  // may be NULL, ok
+      strMimeType = GetMimeTypeFromFilename(filename);
    }
    else
    {
@@ -2745,10 +2761,13 @@ VarExpander::ExpandAttach(const String& name,
          return FALSE;
       }
 
-      // FIXME where to take MIME type from? From extension?
+      // guess MIME type from extension
       m_sink.InsertAttachment(strutil_strdup(value->c_str()),
                               value->length(),
-                              "APPLICATION/OCTET-STREAM");
+                              GetMimeTypeFromFilename(filename));
+
+      // avoid inserting file as text additionally
+      value->Empty();
    }
    //else: no file, nothing to attach
 
