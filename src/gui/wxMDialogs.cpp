@@ -1460,7 +1460,7 @@ bool wxMessageSearchDialog::TransferDataToWindow()
 {
    m_Criterium = READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_CRIT);
    m_Choices->SetSelection(m_Criterium & SEARCH_CRIT_MASK);
-   m_Invert->SetValue(m_Criterium & SEARCH_CRIT_INVERT_FLAG);
+   m_Invert->SetValue((m_Criterium & SEARCH_CRIT_INVERT_FLAG) != 0);
    m_Keyword->SetValue(READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_ARG));
    UpdateCritStruct();
    return TRUE;

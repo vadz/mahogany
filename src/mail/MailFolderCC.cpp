@@ -516,7 +516,9 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                 "Do you want to try and open folder '%s' anyway?"), mf->GetName().c_str());
    if(mf->NeedsNetwork()
       && ! mApplication->IsOnline()
-      && ! MDialog_YesNoDialog(msg,NULL, MDIALOG_YESNOTITLE,mf->GetName()+"/NetDownOpenAnyway"))
+      && ! MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
+                               FALSE /* [No] default */,
+                               mf->GetName()+"/NetDownOpenAnyway"))
       {
          mf->DecRef();
          return NULL;

@@ -262,7 +262,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Initialised = false;
 
    m_PreviewOnSingleClick = READ_CONFIG(fv->GetProfile(),
-                                        MP_PREVIEW_ON_SELECT);
+                                        MP_PREVIEW_ON_SELECT) != 0;
    
    if(m_PreviewOnSingleClick)
       EnableSelectionCallbacks(true);

@@ -962,7 +962,7 @@ void
 wxMApp::SetupOnlineManager(void)
 {
    ASSERT(m_OnlineManager);
-   m_DialupSupport = READ_APPCONFIG(MP_DIALUP_SUPPORT);
+   m_DialupSupport = READ_APPCONFIG(MP_DIALUP_SUPPORT) != 0;
    m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, m_DialupSupport);
    m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, m_DialupSupport);
 //   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
