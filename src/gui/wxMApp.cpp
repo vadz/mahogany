@@ -789,6 +789,12 @@ wxMApp::OnInit()
                break;
 
             default:
+               const wxLanguageInfo *info = wxLocale::GetLanguageInfo(lang);
+               if ( info )
+                  locale = info->Description;
+               else
+                  locale.Printf(_("unknown language (%d)"), lang);
+
                m_Locale = new wxLocale(lang);
          }
       }
