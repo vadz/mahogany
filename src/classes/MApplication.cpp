@@ -218,7 +218,11 @@ MAppBase::OnStartup()
 #endif // Win/Unix
 
    m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
+
+   // FIXME where is MC_USERDIR defined?
+#ifdef OS_UNIX
    m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
+#endif
 
    // show the splash screen (do it as soon as we have profile to read
    // MC_SHOWSPLASH from)

@@ -585,10 +585,7 @@ wxCheckBox *wxOptionsPage::CreateCheckBox(const char *label,
   static size_t widthCheck = 0;
   if ( widthCheck == 0 ) {
     // calculate it only once, it's almost a constant
-    widthCheck = GetCharHeight();
-#   ifdef __WXMSW__
-      widthCheck -= 2; // @@ looks better like this
-#   endif
+    widthCheck = AdjustCharHeight(GetCharHeight()) + 1;
   }
 
   wxCheckBox *checkbox = new wxCheckBox(this, -1, label,
@@ -1157,10 +1154,7 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
 
   // basic unit is the height of a char, from this we fix the sizes of all 
   // other controls
-  size_t heightLabel = GetCharHeight();
-# ifdef __WXMSW__
-    heightLabel -= 3; // @@ -3 is purely empiric, but it looks better with it
-# endif
+  size_t heightLabel = AdjustCharHeight(GetCharHeight());
   int hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
       wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
 

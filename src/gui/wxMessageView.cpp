@@ -217,7 +217,10 @@ MailMessageParamaters::GetParamValue(const wxString& name) const
    }
 
    // if all else failed, call the base class
-   return wxFileType::MessageParameters::GetParamValue(name);
+
+   // typedef is needed for VC++ 5.0 - otherwise you get a compile error!
+   typedef wxFileType::MessageParameters BaseMessageParameters;
+   return BaseMessageParameters::GetParamValue(name);
 }
 
 void

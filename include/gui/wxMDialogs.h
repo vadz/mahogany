@@ -24,6 +24,7 @@ class ProfileBase;
 class ArrayAdbEntries;
 class wxString;
 class MWindow;
+class MFolder;
 
 /**
    Dialog Boxes
@@ -160,7 +161,7 @@ int MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
 void
 MDialog_AboutDialog( MWindow *parent, bool bCloseOnTimeout = true);
 
-// @@@@ FIXME it is the only way I see right now...
+// @@@@ it is the only way I see right now...
 extern class MFrame *g_pSplashScreen;
 
 /// function which will close the splash screen if it's (still) opened
@@ -174,11 +175,28 @@ MDialog_FolderCreate(MWindow *parent);
 void
 MDialog_FolderProfile(MWindow *parent, ProfileBase *profile);
 
+/// choose a folder from the list of all folders, returns NULL if cancelled
+// TODO store the last folder in config
+MFolder *
+MDialog_FolderChoose(MWindow *parent);
+
 /// test
 void MDialog_FolderOpen(class wxMFrame *parent);
 
+// these soefficients are used to calculate the size of the controls in
+// character height units (which we retrieve with wxGetCharHeight).
 // @@@ the coeffecients are purely empirical...
-#define TEXT_HEIGHT_FROM_LABEL(h)   (23*(h)/13)
-#define BUTTON_WIDTH_FROM_HEIGHT(w) (75*(w)/23)
+
+inline long AdjustCharHeight(long h)
+{
+#  ifdef OS_WIN
+      return h - 3;
+#  else  // !Win
+      return h;
+#  endif // OS_WIN
+}
+
+#define TEXT_HEIGHT_FROM_LABEL(h)      (23*(h)/13)
+#define BUTTON_WIDTH_FROM_HEIGHT(w)    (75*(w)/23)
 
 #endif  //WXMDIALOGS_H

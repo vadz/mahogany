@@ -848,7 +848,7 @@ void SaveArray(ProfileBase& conf, const wxArrayString& astr, const String & key)
 // restores array saved by SaveArray
 void RestoreArray(ProfileBase& conf, wxArrayString& astr, const String & key)
 {
-   wxASSERT( strutil_isempty(astr) ); // should be called in the very beginning
+   wxASSERT( astr.IsEmpty() ); // should be called in the very beginning
 
    conf.SetPath(key);
 

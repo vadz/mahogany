@@ -168,7 +168,7 @@ wxFolderView::InternalCreate(MailFolder *mf, MWindow *iparent)
 {
    wxCHECK_RET(iparent, "NULL parent frame in wxFolderView ctor");
    wxCHECK_RET(mf,"NULL mail folder in wxFolderView ctor");
-   
+
    m_MailFolder = mf;
    m_Parent = iparent;
    m_NumOfMessages = 0; // At the beginning there was nothing.
@@ -218,7 +218,7 @@ wxFolderView::Create(String const & folderName, MWindow *iparent)
       ERRORMESSAGE((_("Can't open folder '%s'."), folderName.c_str()));
       return NULL;
    }
-   
+
    wxFolderView *fv = new wxFolderView();
    fv->InternalCreate(mf, iparent);
    return fv;
@@ -625,7 +625,7 @@ wxFolderViewFrame::Create(MailFolder *mf, wxMFrame *parent)
 {
    if(! mf)
       return NULL;
-   
+
    wxFolderViewFrame *f = new wxFolderViewFrame(mf->GetName(),parent);
    wxFolderView *fv = wxFolderView::Create(mf,f);
    if(! fv)

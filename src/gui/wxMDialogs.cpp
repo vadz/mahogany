@@ -51,7 +51,8 @@
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 
-#include   "gui/wxFolderView.h"
+#include "gui/wxFolderTree.h"
+#include "gui/wxFolderView.h"
 
 #ifdef    OS_WIN
 #  define M_32x32         "Micon"
@@ -103,13 +104,31 @@ private:
   wxPTextEntry *m_text;
 };
 
+// a dialog showing all folders
+class MFolderDialog : public wxDialog
+{
+public:
+   MFolderDialog(wxWindow *parent);
+
+   // accessors
+   MFolder *GetFolder() const { return m_folder; }
+
+   // base class virtuals implemented
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
+private:
+   MFolder      *m_folder;
+   wxFolderTree *m_tree;
+};
+
 // ----------------------------------------------------------------------------
 // functions
 // ----------------------------------------------------------------------------
 
 // under Windows we don't use wxCENTRE style which uses the generic message box
 // instead of the native one (and thus it doesn't have icons, for example)
-inline long Style(long style)
+static inline long Style(long style)
 {
 # ifdef OS_WIN
     return style;
@@ -119,7 +138,7 @@ inline long Style(long style)
 }
 
 // returns the argument if it's !NULL of the top-level application frame
-inline MWindow *GetParent(MWindow *parent)
+static inline MWindow *GetParent(MWindow *parent)
 {
   return parent == NULL ? mApplication->TopLevelFrame() : parent;
 }
@@ -157,7 +176,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
      // too short text zone looks ugly
      widthText = widthLabel;
   }
-  
+
   long widthDlg = widthLabel + widthText + 3*LAYOUT_X_MARGIN,
        heightDlg = heightText + heightBtn + 3*LAYOUT_Y_MARGIN;
 
@@ -173,8 +192,8 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                             wxSize(widthText, heightText));
 
   // buttons
-  wxButton *btnOk = new 
-    wxButton(this, wxID_OK, _("OK"), 
+  wxButton *btnOk = new
+    wxButton(this, wxID_OK, _("OK"),
              wxPoint(widthDlg - 2*LAYOUT_X_MARGIN - 2*widthBtn,
                      heightDlg - LAYOUT_Y_MARGIN - heightBtn),
              wxSize(widthBtn, heightBtn));
@@ -240,7 +259,7 @@ bool MInputBox(wxString *pstr,
 // ----------------------------------------------------------------------------
 // other functions
 // ----------------------------------------------------------------------------
-void  
+void
 MDialog_ErrorMessage(const char *msg,
                      MWindow *parent,
                      const char *title,
@@ -265,14 +284,14 @@ MDialog_SystemErrorMessage(const char *message,
 {
    String
       msg;
-   
+
    msg = String(message) + String(("\nSystem error: "))
       + String(strerror(errno));
 
    MDialog_ErrorMessage(msg.c_str(), parent, wxString(title), modal);
 }
 
-   
+
 /** display error message and exit application
        @param message the text to display
        @param title  title for message box window
@@ -289,7 +308,7 @@ MDialog_FatalErrorMessage(const char *message,
    mApplication->Exit(true);
 }
 
-   
+
 /** display normal message:
        @param message the text to display
        @param parent the parent frame
@@ -349,7 +368,7 @@ MDialog_FileRequester(String const & message,
 {
    if(! profile)
       profile = mApplication->GetProfile();
-   
+
    if(! path)
       path = save ?
     profile->readEntry(MP_DEFAULT_SAVE_PATH,MP_DEFAULT_SAVE_PATH_D)
@@ -369,7 +388,7 @@ MDialog_FileRequester(String const & message,
 
    if(parent == NULL)
       parent = mApplication->TopLevelFrame();
-   
+
    return wxFileSelector(
       message, path, filename, extension, wildcard, 0, parent);
 }
@@ -457,7 +476,7 @@ private:
   private:
     wxAboutWindow *m_window;
   } *m_pTimer;
-  
+
   DECLARE_EVENT_TABLE();
 };
 
@@ -473,7 +492,7 @@ BEGIN_EVENT_TABLE(wxAboutWindow, wxLayoutWindow)
   EVT_MIDDLE_DOWN(OnClick)
   EVT_RIGHT_DOWN(OnClick)
 END_EVENT_TABLE()
-  
+
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
@@ -582,7 +601,7 @@ private:
    int    m_UpdateInterval;
    String m_UserId;
    String m_Password;
-   
+
    wxRadioBox *m_FolderTypeRadioBox;
    wxTextCtrl *m_FolderPathTextCtrl;
    wxTextCtrl *m_UpdateIntervalTextCtrl;
@@ -642,7 +661,7 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    wxPoint  pos = wxPoint(2*LAYOUT_X_MARGIN, 2*LAYOUT_Y_MARGIN);
    long labelWidth, labelHeight;
    long inputWidth;
-   
+
    // first determine the longest button caption
    const char *label = "Update interval in seconds";
    wxClientDC dc(this);
@@ -655,13 +674,13 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    labelWidth += 10;
    inputWidth = labelWidth;
    inputWidth += 10;
-   
+
    pos.y += LAYOUT_Y_MARGIN;
    MkTextCtrlAndLabel(m_FolderPathTextCtrl, m_PathStaticText, "",-1);
    MkTextCtrl(m_UpdateIntervalTextCtrl, label,-1);
    MkTextCtrl(m_UserIdTextCtrl, "User ID",-1);
    MkTextCtrl(m_PasswordTextCtrl, "Password",-1);
-   
+
    m_choices[MFolder::Inbox] = _("INBOX");
    m_choices[MFolder::File]  = _("Message box file");
    m_choices[MFolder::POP]   = _("POP3");
@@ -725,13 +744,13 @@ wxPEP_Folder::TransferDataFromWindow(void)
    m_Profile->writeEntry(MP_FOLDER_TYPE,type = m_FolderTypeRadioBox->GetSelection());
    m_Profile->writeEntry(MP_FOLDER_PATH,m_FolderPathTextCtrl->GetValue());
    m_Profile->writeEntry(MP_UPDATEINTERVAL,atoi(m_UpdateIntervalTextCtrl->GetValue()));
-   
+
    if ( type == MFolder::POP || type == MFolder::IMAP )
    {
       m_Profile->writeEntry(MP_POP_LOGIN,m_UserIdTextCtrl->GetValue());
       m_Profile->writeEntry(MP_POP_PASSWORD,m_PasswordTextCtrl->GetValue());
    }
-   
+
    // if we return FALSE, it means that entered data is invalid and the dialog
    // wouldn't be closed
    return true;
@@ -741,10 +760,10 @@ bool
 wxPEP_Folder::TransferDataToWindow(void)
 {
    int type = READ_CONFIG(m_Profile, MP_FOLDER_TYPE);
-   
+
    // the trouble is that if INBOX.profile doesn't exist (yet), we get the
    // wrong value here (FIXME: this is not the right solution neither!)
-   if ( type == MP_FOLDER_TYPE_D && 
+   if ( type == MP_FOLDER_TYPE_D &&
         ((ProfileBase *)m_Profile)->GetProfileName() == "INBOX" ) { // yuck (FIXME)
       type = MFolder::Inbox;
    }
@@ -776,7 +795,7 @@ void
 MDialog_FolderCreate(MWindow *parent)
 {
    wxString name = "NewFolder";
-   
+
    if(! MInputBox(&name,
                   _("M - New Folder"),
                   _("Symbolic name for the new folder"),
@@ -792,9 +811,115 @@ MDialog_FolderCreate(MWindow *parent)
    delete profile;
 }
 
-#include   "wx/resource.h"
-#include   "wxr/FODialog.wxr"
+#if 0   // there is already Karstens version...
+void
+MDialog_FolderOpen(MWindow *parent)
+{
+   MFolder *folder = MDialog_FolderChoose(parent);
+   if ( folder != NULL )
+   {
+      // open a view on this folder
+      (void)new wxFolderViewFrame(folder->GetName(),
+                                  mApplication->TopLevelFrame());
+   }
+   //else: cancelled
+}
+#endif // 0
 
+// ----------------------------------------------------------------------------
+// folder dialog stuff
+// ----------------------------------------------------------------------------
+
+MFolderDialog::MFolderDialog(wxWindow *parent)
+             : wxDialog(parent, -1, _("Choose folder"),
+                        wxDefaultPosition, wxDefaultSize,
+                        wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+{
+   // determine the controls sizes
+   long heightChar = AdjustCharHeight(GetCharHeight());
+
+   long heightBtn = TEXT_HEIGHT_FROM_LABEL(heightChar),
+        widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
+
+   long widthTree = 3*widthBtn,
+        heightTree = 5*heightBtn;
+
+   long widthDlg = widthTree + 2*LAYOUT_X_MARGIN,
+        heightDlg = heightTree + heightBtn + 3*LAYOUT_Y_MARGIN;
+
+   long x = LAYOUT_X_MARGIN,
+        y = LAYOUT_X_MARGIN;
+
+   // create the folder tree control
+   m_tree = new wxFolderTree
+                (
+                 this,
+                 -1,
+                 wxPoint(x, y),
+                 wxSize(widthTree, heightTree)
+                );
+
+   y += heightTree + LAYOUT_Y_MARGIN;
+
+   // create 2 buttons
+   x = widthDlg - 2*LAYOUT_X_MARGIN - 2*widthBtn;
+
+   wxButton *btnOk = new wxButton
+                         (
+                          this,
+                          wxID_OK,
+                          _("OK"),
+                          wxPoint(x, y),
+                          wxSize(widthBtn, heightBtn)
+                         );
+   x += widthBtn + LAYOUT_X_MARGIN;
+
+   btnOk->SetDefault();
+
+   (void)new wxButton
+             (
+              this,
+              wxID_CANCEL,
+              _("Cancel"),
+              wxPoint(x, y),
+              wxSize(widthBtn, heightBtn)
+             );
+
+   // set position and size
+   SetClientSize(widthDlg, heightDlg);
+   Centre(wxCENTER_FRAME | wxBOTH);
+}
+
+bool MFolderDialog::TransferDataToWindow()
+{
+   // restore last folder from config
+   return true;
+}
+
+bool MFolderDialog::TransferDataFromWindow()
+{
+   m_folder = m_tree->GetSelection();
+   if ( m_folder != NULL )
+   {
+      // save the folder to config
+   }
+
+   return true;
+}
+
+MFolder *
+MDialog_FolderChoose(MWindow *parent)
+{
+   MFolderDialog dlg(parent);
+   if ( dlg.ShowModal() == wxID_OK )
+      return dlg.GetFolder();
+   else
+      return NULL;
+}
+
+// ----------------------------------------------------------------------------
+// Ressource dialogs
+// ----------------------------------------------------------------------------
 class wxMRDialog : public wxDialog
 {
 public:
@@ -838,14 +963,13 @@ bool wxMRDialog::TransferDataFromWindow(void)
    return true;
 }
 
-
 class wxMROpenFolderDialog : public wxMRDialog
 {
 public:
    virtual bool TransferDataFromWindow(void);
    void OnRadio(wxCommandEvent &event);
    void UpdateRadioBox(void);
-   
+
    int m_Type;
    wxString m_UserID, m_Password, m_Hostname;
 
@@ -867,11 +991,11 @@ wxMROpenFolderDialog::OnRadio(wxCommandEvent &event)
 void wxMROpenFolderDialog::UpdateRadioBox(void)
 {
    ProfileBase *profile;
-   
+
    wxRadioBox * win = (wxRadioBox *)wxFindWindowByName("FolderType",
                                                        this);
    wxASSERT(win);
-   
+
    wxStaticText *UidLabel = (wxStaticText *)wxFindWindowByName("UIDLABEL",this);
    wxStaticText *HostLabel = (wxStaticText *)wxFindWindowByName("HOSTLABEL",this);
    wxTextCtrl   *UserID = (wxTextCtrl *)wxFindWindowByName("UserID",this);
@@ -908,14 +1032,14 @@ void wxMROpenFolderDialog::UpdateRadioBox(void)
       Password->Enable(false);
       Hostname->Enable(true);
       break;
-      
+
    default:
       /* nothing, keep compiler happy */
       ;
    }
-          
+
 }
-   
+
 bool
 wxMROpenFolderDialog::TransferDataFromWindow(void)
 {
@@ -930,14 +1054,16 @@ wxMROpenFolderDialog::TransferDataFromWindow(void)
    return true;
 }
 
+#include   "wx/resource.h"
+#include   "wxr/FODialog.wxr"
 
 void
 MDialog_FolderOpen(wxMFrame *parent)
 {
-   int rc = 0; 
-   wxResourceParseData(OpenFolderDialog); 
+   int rc = 0;
+   wxResourceParseData(OpenFolderDialog);
    wxMROpenFolderDialog *dialog = new wxMROpenFolderDialog;
-   if (dialog->LoadFromResource(parent, "OpenFolderDialog")) 
+   if (dialog->LoadFromResource(parent, "OpenFolderDialog"))
    {
       dialog->UpdateRadioBox();
       rc = dialog->ShowModal();
@@ -946,7 +1072,7 @@ MDialog_FolderOpen(wxMFrame *parent)
          MailFolder *mf =
             MailFolder::OpenFolder((MailFolder::Type)dialog->m_Type,
                                    dialog->m_Hostname, NULL,
-                                   dialog->m_UserID, dialog->m_Password); 
+                                   dialog->m_UserID, dialog->m_Password);
          if(mf)
             if(wxFolderViewFrame::Create(mf, parent))
                mf->DecRef(); // now the folder view has increfed the folder
