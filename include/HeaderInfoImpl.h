@@ -208,6 +208,9 @@ private:
    /// should we reverse the order of messages in the folder?
    bool m_reverseOrder;
 
+   /// Were the tables built with a reversed criterion
+   bool m_reversedTables;
+
    /// the threading data, NULL if not threading
    ThreadData *m_thrData;
 

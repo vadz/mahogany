@@ -427,6 +427,7 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    m_dontFreeMsgnos = false;
 
    m_reverseOrder = false;
+   m_reversedTables = false;
 }
 
 void HeaderInfoListImpl::CleanUp()
@@ -1562,6 +1563,8 @@ void HeaderInfoListImpl::Sort()
             // SetSortOrder() has expected result when it is called later
             m_sortParams.sortOrder = sortOrderOld;
          }
+
+         m_reversedTables = IsSortCritReversed(m_sortParams.sortOrder);
    }
 }
 
@@ -1623,9 +1626,14 @@ bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
 
    if ( canReverseOnly )
    {
-      // don't use !m_reverseOrder in the RHS because it is always set to false
-      // if we're threading messages
-      m_reverseOrder = IsSortCritReversed(m_sortParams.sortOrder);
+      if ( IsThreading() )
+      {
+         // don't use !m_reverseOrder in the RHS because it is always set to false
+         // if we're threading messages
+         m_reverseOrder = (IsSortCritReversed(m_sortParams.sortOrder) != m_reversedTables);
+      } else {
+         m_reverseOrder = ! m_reverseOrder;
+      }
    }
    else
    {
