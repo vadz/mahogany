@@ -167,8 +167,7 @@ public:
    void SetDirty()
    {
       m_bDirty = TRUE;
-      if ( m_btnApply )
-        m_btnApply->Enable(TRUE);
+      EnableButtons(TRUE);
    }
 
    // get/set the dialog data

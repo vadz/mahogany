@@ -8,8 +8,6 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-		make depend must first create MInterface.h
-
 6		implement temporary/fake Profile mode
 		--> add Suspend()/Discard()/Commit() methods to normal 
 		    profile which work with a temporary subgroup
@@ -27,11 +25,6 @@ $Id$
 		XFace dialog complains *twice* about non-existing
 		file, test for it!
 
-	KB	 > Nachvollziehbarer Absturz: Nach dem Starten Preferences aufrufen,
-		 > Register Message Viewer und dann "Configure Format for displaying dates"
-		 > und sofort OK drücken führt zu einem Segmentation fault. 
-
-
 		MessageView should show cursor only on demand
 		properties/access shows wrong help
 		properties/custom headers/more shows corrupted title
@@ -39,7 +32,6 @@ $Id$
 
 	VZ	templates need "First Name" field
 	VZ	icons in icons-dialog are scaled --> ugly
-	VZ	Properties dialog: OK disabled
 
 	KB	msg sorting dialog needs to be higher
 
