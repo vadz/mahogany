@@ -3252,7 +3252,13 @@ MailFolderCC::BuildListing(void)
       // than we had aske for
       if ( m_BuildNextEntry < m_nMessages )
       {
-         m_Listing->SetCount(m_BuildNextEntry);
+         // the listing could be deleted if we got another mm_exists() while
+         // rebuilding it!
+         if ( m_Listing )
+         {
+            m_Listing->SetCount(m_BuildNextEntry);
+         }
+
          m_nMessages = m_BuildNextEntry;
       }
       else

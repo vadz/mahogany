@@ -2098,30 +2098,18 @@ wxFolderView::Update(HeaderInfoList *listing)
    // preserve the previously focused item and, if possible, the selection
    long selOld = m_FolderCtrl->GetUniqueSelection();
 
-   // should we clear the preview window or keep it?
-   bool keepPreview;
-   long focusedIndex = m_FolderCtrl->GetFocusedItem();
+   // which message should be focused after update? notice that we can *not*
+   // keep the old index because the position of the message might have changed
+   // because of sorting/threading
+   //
+   // if focusedIndex == -1 it means that the previously focused message has
+   // disappeared
+   long focusedIndex = -1;
 
-   // if the messages have been deleted, we need to start over
-   if ( nMessagesNew < (size_t) m_NumOfMessages )
-   {
-      m_FolderCtrl->Clear();
-      m_NumOfMessages =
-      m_nDeleted = 0;
-
-      keepPreview = false; // it might have disappeared
-
-      // if we deleted the last message, the focus should really stay on the
-      // new last one and not be reset completely
-      if ( (focusedIndex != -1) && ((size_t)focusedIndex >= nMessagesNew) )
-      {
-         focusedIndex = nMessagesNew - 1;
-      }
-   }
-   else // new messages were added
-   {
-      keepPreview = focusedIndex != -1;
-   }
+   // when the messages are deleted we don't call Update() any longer but delete
+   // them directly from OnFolderExpungeEvent()
+   ASSERT_MSG( nMessagesNew >= (size_t)m_NumOfMessages,
+               "Update() shouldn't be called" );
 
    // fill the list control
    HeaderInfo const *hi;
@@ -2129,13 +2117,13 @@ wxFolderView::Update(HeaderInfoList *listing)
    {
       hi = (*listing)[i];
       SetEntry(hi, i);
+
+      // if haven't found it yet ...
       if ( focusedIndex == -1 )
       {
-         // try to find the previously focused item if still don't have it
+         // ... try to find the previously focused item
          if ( hi->GetUId() == m_FocusedUId )
          {
-            keepPreview = true;
-
             focusedIndex = i;
          }
       }
@@ -2168,8 +2156,8 @@ wxFolderView::Update(HeaderInfoList *listing)
    m_NumOfMessages = nMessagesNew;
    listing->DecRef();
 
-   // clear the preview window if the focused message changed
-   if ( !keepPreview )
+   // clear the preview window if the focused message disappeared
+   if ( focusedIndex == -1 )
    {
       m_MessagePreview->Clear();
       m_previewUId = UID_ILLEGAL;

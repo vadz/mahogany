@@ -2616,11 +2616,11 @@ bool wxOptionsPageFolders::TransferDataToWindow()
          {
             listbox->Append(strMain);
          }
-
-         m_nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
-         m_nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
       }
       //else: the listbox is not created in this dialog at all
+
+      m_nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
+      m_nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
    }
 
    return bRc;
@@ -2650,14 +2650,14 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
 
       if ( nIncomingDelay != m_nIncomingDelay )
       {
-         wxLogDebug("Restarting timer for polling incoming folders");
+         wxLogTrace("timer", "Restarting timer for polling incoming folders");
 
          rc = mApplication->RestartTimer(MAppBase::Timer_PollIncoming);
       }
 
       if ( rc && (nPingDelay != m_nPingDelay) )
       {
-         wxLogDebug("Restarting timer for pinging folders");
+         wxLogTrace("timer", "Restarting timer for pinging folders");
 
          rc = mApplication->RestartTimer(MAppBase::Timer_PingFolder);
       }

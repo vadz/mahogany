@@ -70,12 +70,18 @@ protected:
    // save cache file
    bool Save(const String& filename);
 
+   // do we need to be saved at all?
+   bool IsDirty() const { return m_isDirty; }
+
 private:
    // the names of the folders we have cached status for
    wxArrayString m_folderNames;
 
    // the data for the folders above
    MfStatusArray m_folderData;
+
+   // the dirty flag, i.e. has anything changed since we were last saved?
+   bool m_isDirty;
 };
 
 #endif // _MFCACHE_H_

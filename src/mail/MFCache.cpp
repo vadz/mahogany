@@ -93,6 +93,9 @@ MfStatusCache::MfStatusCache()
              : m_folderNames(TRUE /* auto sorted array */)
 {
    Load(GetFileName());
+
+   // no changes yet
+   m_isDirty = false;
 }
 
 MfStatusCache::~MfStatusCache()
@@ -145,6 +148,7 @@ void MfStatusCache::UpdateStatus(const String& folderName,
 
    // update
    *m_folderData[(size_t)n] = status;
+   m_isDirty = true;
 
    // and tell everyone about it
    MEventManager::Send(new MEventFolderStatusData(folderName));
@@ -294,7 +298,11 @@ bool MfStatusCache::Save(const String& filename)
    // avoid doing anything if we don't have anything to cache
    size_t count = m_folderNames.GetCount();
    if ( !count )
+   {
+      m_isDirty = false;
+
       return true;
+   }
 
    // create the directory for the file if needed
    String dirname;
@@ -342,13 +350,16 @@ bool MfStatusCache::Save(const String& filename)
          // new and recent messages because they won't be new nor recent the
          // next time we run anyhow nor the number of messages matching the
          // search criteria as this is hardly ever useful
+         //
+         // however we do need to add the number of new and unseen messages
+         // together!
          str.Printf("%s" CACHE_DELIMITER
                     "%lu" CACHE_DELIMITER
                     "%lu" CACHE_DELIMITER
                     "%lu\n",
                     name.c_str(),
                     status->total,
-                    status->unseen,
+                    status->unseen + status->newmsgs,
                     status->flagged);
 
          ok = file.Write(str);
@@ -368,13 +379,16 @@ bool MfStatusCache::Save(const String& filename)
       return false;
    }
 
+   // reset the dirty flag - we're saved now
+   m_isDirty = false;
+
    return true;
 }
 
 /* static */
 void MfStatusCache::Flush()
 {
-   if ( gs_mfStatusCache )
+   if ( gs_mfStatusCache && gs_mfStatusCache->IsDirty() )
    {
       (void)gs_mfStatusCache->Save(gs_mfStatusCache->GetFileName());
    }

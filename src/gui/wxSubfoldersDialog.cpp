@@ -284,6 +284,9 @@ private:
    // the folder whose children we enum
    MFolder *m_folder;
 
+   // the (cached) flags of this folder
+   int m_flagsParent;
+
    // the full spec of the folder whose children we're currently listing
    wxString m_reference;
 };
@@ -1032,6 +1035,8 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       MFolder *parent = m_folder;
       parent->IncRef();
 
+      int flagsParent = parent->GetFlags();
+
       wxString fullpath = m_folder->GetPath();
       for ( int level = levelMax - 1; level >= 0; level-- )
       {
@@ -1069,7 +1074,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
             // they have children, they obviously _are_ groups), but for the
             // last one it should only be set if it is a group as detected
             // above
-            int flags = parent->GetFlags();
+            int flags = flagsParent;
             if ( !level && !isGroup )
             {
                flags &= ~MF_FLAGS_GROUP;
@@ -1125,6 +1130,7 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
 {
    m_folder = folder;
    m_folder->IncRef();
+   m_flagsParent = m_folder->GetFlags();
 
    m_reference = mailFolder->GetImapSpec();
    m_nFoldersRetrieved = 0u;
@@ -1238,7 +1244,7 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
          {
             folderNew = m_folder->CreateSubfolder(name, m_folder->GetType());
 
-            long flags = folderNew->GetFlags();
+            int flags = m_flagsParent;
             long attr = result->GetAttributes();
             if ( attr & ASMailFolder::ATT_NOINFERIORS )
             {
@@ -1291,7 +1297,7 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
 // public interface
 // ----------------------------------------------------------------------------
 
-// show the dialog allowing the user to choose the subfoldersto add to the
+// show the dialog allowing the user to choose the subfolders to add to the
 // tree
 bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
 {

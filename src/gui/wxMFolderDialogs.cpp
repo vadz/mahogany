@@ -1017,11 +1017,13 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 #ifdef USE_SSL
    m_useSSL = CreateCheckBox(labels[Label_UseSSL], widthMax, lastCtrl);
    lastCtrl = m_useSSL;
-#endif
+#endif // USE_SSL
+
 #ifdef USE_LOCAL_CHECKBOX
    m_isLocal = CreateCheckBox(labels[Label_IsLocal], widthMax, lastCtrl);
    lastCtrl = m_isLocal;
-#endif // USE_LOCAL_CHECKBOX/!USE_LOCAL_CHECKBOX
+#endif // USE_LOCAL_CHECKBOX
+
    m_isHidden = CreateCheckBox(labels[Label_IsHidden], widthMax, lastCtrl);
    m_canBeOpened = CreateCheckBox(labels[Label_CanBeOpened], widthMax, m_isHidden);
    m_isGroup = CreateCheckBox(labels[Label_IsGroup], widthMax, m_canBeOpened);
@@ -1040,7 +1042,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 #ifdef USE_SSL
    m_useSSL->SetToolTip(_("This will use SSL authentication and encryption\n"
                           "for communication with the server."));
-#endif
+#endif // USE_SSL
 
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
    ASSERT_MSG( dlgParent, "should have a parent dialog!" );
@@ -1375,17 +1377,21 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
    bool enableAnonymous, enableLogin;
 #ifdef USE_SSL
    bool enableSSL;
-#endif
+#endif // USE_SSL
 
    if ( m_folderType == MF_GROUP )
    {
-      // enable all fields for these folders (see the message above)
-      enableAnonymous = enableLogin = true;
+      // enable all fields for these folders because, as a group can contain
+      // anything at all, it may make sense to set them to be inherited by the
+      // subfolders
+      enableAnonymous =
+      enableLogin = true;
+
 #ifdef USE_SSL
-      enableSSL = false;
-#endif
+      enableSSL = true;
+#endif // USE_SSL
    }
-   else
+   else // !group
    {
       // if it has user name, it has password as well
       bool hasPassword = FolderTypeHasUserName(m_folderType);
@@ -1399,13 +1405,13 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 
 #ifdef USE_SSL
       enableSSL = FolderTypeSupportsSSL(m_folderType);
-#endif
-
+#endif // USE_SSL
    }
 
 #ifdef USE_SSL
    m_useSSL->Enable(enableSSL);
-#endif
+#endif // USE_SSL
+
    m_isAnonymous->Enable(enableAnonymous);
    EnableTextWithLabel(m_password, enableLogin);
    EnableTextWithLabel(m_login, enableLogin);
@@ -1735,7 +1741,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    Profile_obj profile("");
    profile->SetPath(m_folderPath);
 
-   wxLogDebug("Reading the folder settings from '%s'...", m_folderPath.c_str());
+   //wxLogDebug("Reading the folder settings from '%s'...", m_folderPath.c_str());
 
    RadioIndex selRadio = (RadioIndex)m_radio->GetSelection();
    FolderType folderType = GetCurrentFolderType(selRadio);
@@ -1879,6 +1885,7 @@ wxFolderPropertiesPage::SetDefaultValues()
       // use the current value
       m_originalCanBeOpened = (flags & MF_FLAGS_NOSELECT) == 0;
    }
+
    m_originalIsGroup = (flags & MF_FLAGS_GROUP) != 0;
 
    m_canBeOpened->SetValue(m_originalCanBeOpened);
@@ -1894,7 +1901,7 @@ wxFolderPropertiesPage::SetDefaultValues()
 #ifdef USE_SSL
    m_originalUseSSL = ((flags & MF_FLAGS_SSLAUTH) != 0);
    m_useSSL->SetValue(m_originalUseSSL);
-#endif
+#endif // USE_SSL
 
    // update the folder icon
    if ( m_isCreating )

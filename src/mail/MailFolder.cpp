@@ -429,7 +429,7 @@ bool
 MailFolder::CloseFolder(const MFolder *mfolder)
 {
    // don't try to close the folder which can't be opened
-   if ( mfolder->CanOpen() )
+   if ( !mfolder->CanOpen() )
    {
       return true;
    }
