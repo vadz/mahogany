@@ -544,6 +544,9 @@ MAppBase::IsOkToClose(const wxMFrame *frame) const
 void
 MAppBase::Exit()
 {
+   // attempt to close splash screen first:
+   CloseSplash();
+   
    if ( m_topLevelFrame )
    {
       if ( m_topLevelFrame->Close() )
@@ -552,6 +555,8 @@ MAppBase::Exit()
 
    if ( m_framesOkToClose )
    {
+      for(size_t i = 0; i < m_framesOkToClose->Count(); i++)
+         delete (*m_framesOkToClose)[i];
       delete m_framesOkToClose;
       m_framesOkToClose = NULL;
    }

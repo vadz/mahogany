@@ -244,6 +244,7 @@ wxMApp::OnInit()
       localePath << M_BASEDIR << "/locale";
       m_Locale->AddCatalogLookupPathPrefix(localePath);
       m_Locale->AddCatalog(M_APPLICATIONNAME);
+      m_Locale->AddCatalog("wxstd");
    }
    else
       m_Locale = NULL;

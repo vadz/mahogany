@@ -14,21 +14,26 @@ FILES_MO:=$(FILES_PO:.po=.mo)
 
 include ../makeopts
 
+all:
+	$(MAKE) mo-files wxstd-mo-files
+
 mo-files: $(FILES_MO)
 
+wxstd-mo-files:
+	(cd wxstd && $(MAKE) )
+
 clean:
-	$(RM) $(FILES_MO)
+	$(RM) $(FILES_MO) wxstd/*.mo
 
 dep depend: 
 
-all:
-	$(MAKE) mo-files
 
 
 install: 
 	$(MAKE) all
 	$(INSTALL) -d $(DATADIR)/locale
 	for i in $(FILES_MO); do $(INSTALL) -d $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES; $(INSTALL_DATA) $$i $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES/M.mo; done
+	for i in wxstd/*.mo; do $(INSTALL) -d $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES; $(INSTALL_DATA) $$i $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES/wxstd.mo; done
 
 msgcat:
 	$(MAKE) -C .. msgcat
@@ -38,7 +43,7 @@ mergecat:
 	cat messages_po extra_po | sed "1,$$ s/^\\#\\~ //g" > tmp && mv tmp messages_po
 	for i in $(FILES_PO); do msgmerge $$i messages_po -o tmp.po && mv tmp.po $$i; done
 
-.PHONY: all dep clean doc semistatic static allclean install msgcat mergecat mo-files 
+.PHONY: all dep clean doc semistatic static allclean install msgcat mergecat mo-files  wxstd-mo-files
 
 %.mo: %.po
 	$(MSGFMT) -o $@ $<

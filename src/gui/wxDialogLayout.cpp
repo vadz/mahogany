@@ -514,7 +514,7 @@ wxListBox *wxNotebookPageBase::CreateListbox(const char *label,
 // enable/disable the text control and its label
 void wxNotebookPageBase::EnableTextWithButton(wxTextCtrl *control, bool bEnable)
 {
-   // NB: we assume that the control ids are consecutif
+   // NB: we assume that the control ids are consecutive
    long id = control->GetId() + 1;
    wxWindow *win = FindWindow(id);
 
@@ -763,17 +763,16 @@ void wxNotebookDialog::OnApply(wxCommandEvent& /* event */)
 {
    ASSERT_MSG( m_bDirty, "'Apply' should be disabled!" );
 
-   TransferDataFromWindow();
-
-   if ( OnSettingsChange() )
+   if(TransferDataFromWindow())
    {
-      m_bDirty = FALSE;
-      m_btnApply->Enable(FALSE);
+      if ( OnSettingsChange() )
+      {
+         m_bDirty = FALSE;
+         m_btnApply->Enable(FALSE);
+      }
    }
-   else
-   {
-      // don't reset the m_bDirty flag so that OnOk() will know we failed
-   }
+   // If OnSettingsChange() or the Transfer function failed, we
+   // don't reset the m_bDirty flag so that OnOk() will know we failed
 }
 
 void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)

@@ -1,14 +1,14 @@
-Summary: M email and news client
-Name: M
-Version: 0.01
+Summary: Mahogany email and news client
+Name: mahogany
+Version: 0.22a
 Release: 0
-Copyright: M Artistic License
+Copyright: Mahogany Artistic License
 Group: Applications/Email
-Source: ftp://sunsite.unc.edu/pub/Linux/apps/X11/M-0.01.tar.gz
-URL: http://Ballueder.home.ml.org/M/
+Source: ftp://ronnie.phy.hw.ac.uk/pub/Mahogany/mahogany-0.22a.tar.gz
+URL: http://mahogany.home.dhs.org/
 
 %description
-This package contains M, a powerful, scriptable mail and news client for X11.
+This package contains Mahogany, a powerful, scriptable mail and news client for X11.
 
 %prep
 %setup
