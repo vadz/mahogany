@@ -2004,7 +2004,7 @@ wxXFaceDialog::wxXFaceDialog(ProfileBase *profile,
 
    m_Changed = FALSE;
 
-   SetDefaultSize(280, 220, FALSE /* not minimal */);
+   SetDefaultSize(325, 288, TRUE /* minimal */);
    TransferDataToWindow();
    m_OldXFace = m_Button->GetFile();
    m_OldUseXFace = m_Checkbox->GetValue();
