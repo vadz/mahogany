@@ -96,6 +96,7 @@ enum ConfigFields
    ConfigField_IdentFirst = -1,
    ConfigField_PersonalName,
    ConfigField_ReturnAddress,
+   ConfigField_ReplyAddress,
    ConfigField_HostnameHelp,
    ConfigField_AddDefaultHostname,
    ConfigField_Hostname,
@@ -626,12 +627,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    // network config and identity
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
    { gettext_noop("&E-mail address"),              Field_Text | Field_Vital,   -1, },
+   { gettext_noop("&Reply address"),               Field_Text | Field_Advanced,   -1, },
    { gettext_noop("The following host name can be used as a default host "
                   "name for local mail addresses."),
                                                    Field_Message, -1 },
    { gettext_noop("&Add this hostname if none specified"), Field_Bool, -1 },
    { gettext_noop("&Hostname"),                    Field_Text | Field_Vital,   ConfigField_AddDefaultHostname, },
-   { gettext_noop("Reply return address from &To: field"), Field_Bool, -1, },
+   { gettext_noop("Reply return address from &To: field"), Field_Bool | Field_Advanced, -1, },
    { gettext_noop(
       "You may want to attach your personal information card (vCard)\n"
       "to all outoing messages. In this case you will need to specify\n"
@@ -936,7 +938,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 {
    // identity
    CONFIG_ENTRY(MP_PERSONALNAME),
-   CONFIG_ENTRY(MP_RETURN_ADDRESS),
+   CONFIG_ENTRY(MP_FROM_ADDRESS),
+   CONFIG_ENTRY(MP_REPLY_ADDRESS),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_ADD_DEFAULT_HOSTNAME),
    CONFIG_ENTRY(MP_HOSTNAME),
@@ -2015,7 +2018,7 @@ bool wxOptionsPageFolderView::TransferDataToWindow()
       wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
       if ( !listbox->GetCount() )
       {
-         listbox->Append(READ_CONFIG(m_Profile, MP_RETURN_ADDRESS));
+         listbox->Append(READ_CONFIG(m_Profile, MP_FROM_ADDRESS)); //FIXME or MP_REPLY_ADDRESS?
       }
    }
 
@@ -2032,7 +2035,7 @@ bool wxOptionsPageFolderView::TransferDataFromWindow()
       // default anyhow
       wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
       if ( listbox->GetCount() == 1 &&
-           listbox->GetString(0) == READ_CONFIG(m_Profile, MP_RETURN_ADDRESS) )
+           listbox->GetString(0) == READ_CONFIG(m_Profile, MP_FROM_ADDRESS) ) //FIXME or MP_REPLY_ADDRESS?
       {
          listbox->Clear();
       }

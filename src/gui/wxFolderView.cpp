@@ -1220,7 +1220,7 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
       if ( returnAddrs == MP_FROM_REPLACE_ADDRESSES_D )
       {
          // the default for this option is just the return address
-         returnAddrs = READ_CONFIG(m_Profile, MP_RETURN_ADDRESS);
+         returnAddrs = READ_CONFIG(m_Profile, MP_FROM_ADDRESS);
       }
 
       settings->returnAddresses = strutil_restore_array(':', returnAddrs);

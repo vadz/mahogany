@@ -454,8 +454,7 @@ extern String miscutil_GetFromAddress(Profile *p,
    else
       mbox << '@' << host;  // FIXME incorrect - FROM always=USER@HOST
 
-   mbox = READ_CONFIG(p, MP_RETURN_ADDRESS); //FIXME, there is no MP_ADDRESS
-					    //or MP_FROM_ADDRESS
+   mbox = READ_CONFIG(p, MP_FROM_ADDRESS);
    strutil_delwhitespace(mbox);
 
    if(pers) *pers = personal;
@@ -464,14 +463,14 @@ extern String miscutil_GetFromAddress(Profile *p,
 }
 
 /// Get the user's reply address from a profile
-extern String miscutil_GetReplyAddress(Profile *p,
-                                       String *pers,
-                                       String *email)
+extern String miscutil_GetReplyAddress(Profile *p)
+                                       //String *pers,
+                                       //String *email)
 {
    ASSERT(p);
-   String replyTo = READ_CONFIG(p, MP_RETURN_ADDRESS);
+   String replyTo = READ_CONFIG(p, MP_REPLY_ADDRESS);
    strutil_delwhitespace(replyTo);
-   if(replyTo.Length() == 0)
+/*   if(replyTo.Length() == 0)
       return miscutil_GetFromAddress(p, pers, email);
    //else:
    String personal, mbox;
@@ -487,6 +486,8 @@ extern String miscutil_GetReplyAddress(Profile *p,
    if(pers) *pers = personal;
    if(email) *email = mbox;
    return strutil_makeMailAddress(personal, mbox);
+*/
+   return replyTo;
 }
 
 extern String miscutil_GetDefaultHost(Profile *p)
@@ -496,8 +497,8 @@ extern String miscutil_GetDefaultHost(Profile *p)
    String hostname = READ_CONFIG(p, MP_HOSTNAME);
    if(hostname.Length() == 0)
    {
-      // get it from reply-to address:
-      (void) miscutil_GetReplyAddress(p, NULL, &hostname);
+      // get it from (reply-to) From address:
+      (void) miscutil_GetFromAddress(p, NULL, &hostname);
       hostname = hostname.AfterLast('@');
    }
    return hostname;

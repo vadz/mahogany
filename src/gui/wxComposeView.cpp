@@ -2298,7 +2298,7 @@ wxComposeView::SetFrom()
 {
    if ( m_txtFields[Field_From] )
    {
-      m_from = miscutil_GetReplyAddress(m_Profile);
+      m_from = miscutil_GetFromAddress(m_Profile);
       m_txtFields[Field_From]->SetValue(m_from);
    }
 }

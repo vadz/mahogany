@@ -343,8 +343,10 @@
 #define   MP_HOSTNAME         "HostName"
 /// Add this hostname for addresses without hostname?
 #define   MP_ADD_DEFAULT_HOSTNAME   "AddDefaultHostName"
-/// the username for returned mail
-#define   MP_RETURN_ADDRESS      "ReturnAddress"
+/// (the username for returned mail) E-mail address
+#define   MP_FROM_ADDRESS      "ReturnAddress"
+/// Reply address
+#define   MP_REPLY_ADDRESS      "ReplyAddress"
 /// the default POP3 host
 #define   MP_POPHOST          "Pop3Host"
 /// the default IMAP4 host
@@ -963,8 +965,10 @@
 
 /// the news server fallback
 #define   MP_NNTPHOST_FB        "news"
-/// the username for returned mail
-#define   MP_RETURN_ADDRESS_D      M_EMPTYSTRING
+/// (the username for returned mail) E-mail address
+#define   MP_FROM_ADDRESS_D      M_EMPTYSTRING
+/// Reply address
+#define   MP_REPLY_ADDRESS_D      M_EMPTYSTRING
 /// show CC field in message composition?
 #define   MP_SHOWCC_D         1
 /// show BCC field in message composition?

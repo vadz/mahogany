@@ -240,7 +240,7 @@ public:
          gs_installWizardData.name = READ_APPCONFIG(MP_PERSONALNAME);
 
       if ( !gs_installWizardData.email )
-         gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
+         gs_installWizardData.email = READ_APPCONFIG(MP_FROM_ADDRESS);
 
       if ( !gs_installWizardData.email )
       {
@@ -1263,7 +1263,7 @@ bool RunInstallWizard()
    }
 
    // transfer the wizard settings from InstallWizardData
-   profile->writeEntry(MP_RETURN_ADDRESS, gs_installWizardData.email);
+   profile->writeEntry(MP_FROM_ADDRESS, gs_installWizardData.email);
    profile->writeEntry(MP_PERSONALNAME, gs_installWizardData.name);
 
    // write the values even if they're empty as otherwise we'd try to create

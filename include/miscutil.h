@@ -83,9 +83,9 @@ extern String miscutil_GetFromAddress(Profile *p,
                                       String * personal = NULL,
                                       String * email = NULL);
 /// Get the user's reply address from a profile
-extern String miscutil_GetReplyAddress(Profile *p,
-                                       String * personal = NULL,
-                                       String * email = NULL);
+extern String miscutil_GetReplyAddress(Profile *p);
+                                       //String * personal = NULL,
+                                       //String * email = NULL);
 /// Expand a local (user-only) mail address
 extern String miscutil_ExpandLocalAddress(Profile *p, const String &mbox);
 

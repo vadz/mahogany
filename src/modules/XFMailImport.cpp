@@ -129,7 +129,7 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
    }
    else if ( var == "replyexand" )
    {
-      profile->writeEntry(MP_RETURN_ADDRESS, value);
+      profile->writeEntry(MP_FROM_ADDRESS, value);
       wxLogMessage(_("Imported return address setting from %s: %s."),
                    "XFMail", value.c_str());
    }

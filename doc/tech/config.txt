@@ -90,6 +90,7 @@ MP_FOLDER_PASSWORD	Password	M_EMPTYSTRING
 MP_FOLDER_PATH	Path	((const char *)NULL) // don't change this!
 MP_FOLDER_TYPE	Type	(int)(0x00ff)  // MF_ILLEGAL
 MP_FORWARD_PREFIX	ForwardPrefix	"Forwarded message: "
+MP_FROM_ADDRESS	ReturnAddress	M_EMPTYSTRING	E-mail address
 MP_FROM_REPLACE_ADDRESSES	ReplaceFromAdr	""
 MP_FVIEW_BGCOLOUR	FViewBgColour	"white"
 MP_FVIEW_DELETEDCOLOUR	FViewDeletedColour	"grey"
@@ -200,7 +201,7 @@ MP_REPLY_MSGPREFIX	ReplyQuote	"> "
 MP_REPLY_MSGPREFIX_FROM_SENDER	ReplyQuoteUseSender	0l
 MP_REPLY_PREFIX	ReplyPrefix	"Re: "
 MP_REPLY_QUOTE_EMPTY	ReplyQuoteEmpty	1l
-MP_RETURN_ADDRESS	ReturnAddress	M_EMPTYSTRING
+MP_REPLY_ADDRESS	ReplyAddress	M_EMPTYSTRING	Reply address
 MP_RFC822_IS_TEXT	Rfc822IsText	0l
 MP_ROOTDIRNAME	RootDirectoryName	"Mahogany"
 MP_RSH_PATH	RshPath	"rsh"

@@ -562,7 +562,7 @@ SendMessageCC::Build(void)
    {
       if(! HasHeaderEntry("Reply-To"))
       {
-         //always add reply-to header:
+         //(always add reply-to header) add only if not empty:
          if(m_ReplyTo.Length() > 0)
          {
             tmpstr = m_ReplyTo;
