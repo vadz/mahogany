@@ -856,15 +856,23 @@ SendMessageCC::SendOrQueue(void)
       send_directly = FALSE;
    else if(! mApplication->IsOnline())
    {
-
+/*
+  This cannot work at present as we have no Outbox setting that we
+  could use. We need to make a difference between Outbox and the
+  "send_directly" configuration settings.
+  
       MDialog_Message(
          _("No network connection available at present.\n"
            "Message will be queued in outbox."),
          NULL, MDIALOG_MSGTITLE,"MailNoNetQueuedMessage");
-      send_directly = FALSE;
-
+*/
+      MDialog_Message(
+         _("No network connection available at present.\n"
+           "Message cannot be sent."),
+         NULL, MDIALOG_MSGTITLE);
+      return FALSE;
    }
-   
+ 
    kbStringList::iterator i;
    for(i = m_FccList.begin(); i != m_FccList.end(); i++)
       WriteToFolder(**i);

@@ -1810,7 +1810,6 @@ MailFolderCC::GetHeaders(void) const
    /* Now we are done with rebuilding the listing and internal folder
       data and can safely tell the application to use this
       information. */
-
    that->m_ListingFrozen = FALSE;
    
    /* Some event processing might have been delayed because the
@@ -2714,13 +2713,12 @@ MailFolderCC::UpdateStatus(void)
       m_nRecent = m_MailStream->recent;
       // Little sanity check, needed as c-client is insane:
       if(m_nMessages < m_nRecent)
-      {
          m_nRecent = m_nMessages;
-         MailFolderCC::Event *evptr = new
-            MailFolderCC::Event(m_MailStream,
-                                MailFolderCC::Status,__LINE__);
-         MailFolderCC::QueueEvent(evptr);
-      }
+      // Tell program that number of messages has changed:
+      MailFolderCC::Event *evptr = new
+         MailFolderCC::Event(m_MailStream,
+                             MailFolderCC::Status,__LINE__);
+      MailFolderCC::QueueEvent(evptr);
    }
    m_LastUId = m_MailStream->uid_last;
    // and another sanity check:
@@ -3242,8 +3240,12 @@ MailFolderCC::ProcessEventQueue(void)
             break;
          }
       }
-      case Exists: 
+      case Exists:
       case Status:
+         /* I believe these two events can safely be
+            ignored. Previously, they did the same as "Expunged:".
+            If I should be wrong, just remove the "break;". (KB) */
+         break;
       case Expunged: // invalidate our header listing:
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
@@ -3302,6 +3304,16 @@ MailFolderCC::ProcessEventQueue(void)
 void
 MailFolderCC::RequestUpdate(bool sendEvent)
 {
+   // no need to do anything if the listing is frozen, as it will have
+   // to be regenerated after unfreezing it anyway
+   if(m_ListingFrozen)
+   {
+      DBGMESSAGE((
+         "Ignoring RequestUpdate() for frozen folder '%s'",
+         GetName().c_str() ));
+      return;
+   }
+   
    // invalidate current folder listing and queue at least one folder
    // update event.
    m_NeedFreshListing = true;
