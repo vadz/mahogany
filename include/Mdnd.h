@@ -72,6 +72,8 @@ private:
 
    Data *GetMData() const { return ((Data *)GetData()); }
    UIdType *GetUIDs(Data *data) const { return (UIdType *)(data + 1); }
+
+   DECLARE_NO_COPY_CLASS(MMessagesDataObject)
 };
 
 /** MMessagesDropWhere is a helper class for MMessagesDropTarget, it has only
@@ -113,6 +115,8 @@ protected:
 
 private:
    wxFrame *m_frame;
+
+   DECLARE_NO_COPY_CLASS(MMessagesDropTargetBase)
 };
 
 /** MMessagesDropTarget is the drop target object to work with
@@ -138,6 +142,8 @@ protected:
 
 private:
    MMessagesDropWhere *m_where;
+
+   DECLARE_NO_COPY_CLASS(MMessagesDropTarget)
 };
 
 #endif // _MDND_H_

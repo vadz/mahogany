@@ -448,6 +448,8 @@ public:
 
 private:
    bool m_done;
+
+   DECLARE_NO_COPY_CLASS(PGPProcess)
 };
 
 PGPEngine::Status
@@ -876,11 +878,11 @@ PGPEngine::Decrypt(const String& messageIn,
 
 
 PGPEngine::Status
-PGPEngine::Encrypt(const String& recipient,
-                   const String& messageIn,
-                   String &messageOut,
-                   const String& user,
-                   MCryptoEngineOutputLog *log)
+PGPEngine::Encrypt(const String& /* recipient */,
+                   const String& /* messageIn */,
+                   String & /* messageOut */,
+                   const String& /* user */,
+                   MCryptoEngineOutputLog * /* log */)
 {
    FAIL_MSG( _T("TODO") );
 
@@ -892,10 +894,10 @@ PGPEngine::Encrypt(const String& recipient,
 // ----------------------------------------------------------------------------
 
 PGPEngine::Status
-PGPEngine::Sign(const String& user,
-                const String& messageIn,
-                String& messageOut,
-                MCryptoEngineOutputLog *log)
+PGPEngine::Sign(const String& /* user */,
+                const String& /* messageIn */,
+                String& /* messageOut */,
+                MCryptoEngineOutputLog * /* log */)
 {
    FAIL_MSG( _T("TODO") );
 

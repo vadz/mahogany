@@ -80,6 +80,8 @@ private:
    wxRadioBox *m_radioDisposition;
 
    wxCheckBox *m_chkDontShowAgain;
+
+   DECLARE_NO_COPY_CLASS(wxAttachmentDialog)
 };
 
 // ============================================================================

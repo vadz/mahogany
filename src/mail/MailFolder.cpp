@@ -416,7 +416,7 @@ MailFolder::ClearFolder(const MFolder *folder)
 }
 
 /* static */
-bool MailFolder::CanExit(String *which)
+bool MailFolder::CanExit(String * /* which */)
 {
    bool rc = true;
 
@@ -864,7 +864,7 @@ Composer *
 MailFolder::ReplyMessage(Message *msg,
                          const MailFolder::Params& params,
                          Profile *profile,
-                         wxWindow *parent,
+                         wxWindow * /* parent */,
                          Composer *cv)
 {
    CHECK( msg, NULL, _T("no message to reply to") );
@@ -1066,7 +1066,7 @@ Composer *
 MailFolder::ForwardMessage(Message *msg,
                            const MailFolder::Params& params,
                            Profile *profile,
-                           wxWindow *parent,
+                           wxWindow * /* parent */,
                            Composer *cv)
 {
    CHECK(msg, NULL, _T("no message to forward"));

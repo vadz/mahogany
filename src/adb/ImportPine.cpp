@@ -46,6 +46,8 @@ extern void WXDLLEXPORT wxSplitPath(wxArrayString&, const wxChar *);
 class AdbPineImporter : public AdbImporter
 {
 public:
+   AdbPineImporter() { }
+
    // implement base class pure virtuals
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);
@@ -117,6 +119,8 @@ protected:
 
    // the data
    wxTextFile m_textfile;
+
+   DECLARE_NO_COPY_CLASS(AdbPineImporter)
 };
 
 // ============================================================================

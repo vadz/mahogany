@@ -336,7 +336,7 @@ wxLayoutObjectText::GetOffsetScreen(wxDC &dc, CoordType xpos) const
 }
 
 void
-wxLayoutObjectText::Layout(wxDC &dc, class wxLayoutList *llist)
+wxLayoutObjectText::Layout(wxDC &dc, class wxLayoutList * /* llist */)
 {
    long descent = 0l;
 
@@ -465,8 +465,8 @@ wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap *icon)
 
 void
 wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint const &coords,
-                         wxLayoutList *wxllist,
-                         CoordType begin, CoordType /* len */)
+                         wxLayoutList * /* wxllist */,
+                         CoordType /* begin */, CoordType /* len */)
 {
    dc.DrawBitmap(*m_Icon, coords.x, coords.y-m_Icon->GetHeight(),
                  (m_Icon->GetMask() == NULL) ? FALSE : TRUE);
@@ -699,7 +699,7 @@ wxLayoutObjectCmd::GetStyle(void) const
 void
 wxLayoutObjectCmd::Draw(wxDC &dc, wxPoint const & /* coords */,
                         wxLayoutList *wxllist,
-                        CoordType begin, CoordType /* len */)
+                        CoordType /* begin */, CoordType /* len */)
 {
    wxASSERT(m_StyleInfo);
    wxllist->ApplyStyle(*m_StyleInfo, dc);
@@ -1171,7 +1171,7 @@ wxLayoutLine::Layout(wxDC &dc,
                      wxPoint *cursorSize,
                      wxLayoutStyleInfo *cursorStyle,
                      int cx,
-                     bool suppressSIupdate)
+                     bool /* suppressSIupdate */)
 {
    wxLayoutObjectList::iterator i;
 
@@ -2748,6 +2748,9 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
 
 #ifdef WXLAYOUT_USE_CARET
    m_caret->Move(coords);
+
+   dc;
+   active;
 #else // !WXLAYOUT_USE_CARET
 
    wxASSERT(m_CursorSize.x >= WXLO_MINIMUM_CURSOR_WIDTH);
@@ -3234,6 +3237,8 @@ public:
 
 private:
    Profile *m_profile;
+
+   DECLARE_NO_COPY_CLASS(wxMVPreview)
 };
 
 

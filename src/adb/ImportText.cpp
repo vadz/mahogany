@@ -90,6 +90,7 @@ private:
    bool m_lastTestResult;
 
    DECLARE_ADB_IMPORTER();
+   DECLARE_NO_COPY_CLASS(AdbTextImporter)
 };
 
 // ============================================================================
@@ -282,8 +283,8 @@ size_t AdbTextImporter::GetEntryNames(const String& path,
    return entries.GetCount();
 }
 
-size_t AdbTextImporter::GetGroupNames(const String& path,
-                                      wxArrayString& groups) const
+size_t AdbTextImporter::GetGroupNames(const String& /* path */,
+                                      wxArrayString& /* groups */) const
 {
    // the "mailing list" info is lost when exporting into CSV format, there are
    // no groups left - the file is flat
@@ -291,7 +292,7 @@ size_t AdbTextImporter::GetGroupNames(const String& path,
    return 0;
 }
 
-bool AdbTextImporter::ImportEntry(const String& path,
+bool AdbTextImporter::ImportEntry(const String& /* path */,
                                   size_t index,
                                   AdbEntry *entry)
 {

@@ -436,6 +436,9 @@ private:
    // (e.g. because the message was deleted)
    bool m_abort;
 
+   // not needed nor implemented for now
+   Value& operator=(const Value&);
+
    MOBJECT_NAME(Value)
 };
 
@@ -562,6 +565,7 @@ public:
 private:
    const String m_String;
    MOBJECT_NAME(StringConstant)
+   DECLARE_NO_COPY_CLASS(StringConstant)
 };
 
 class Negation : public SyntaxNode
@@ -2435,7 +2439,7 @@ static Value func_containsi(ArgList *args, FilterRuleImpl *p)
    return haystack.Find(needle) != -1;
 }
 
-static Value func_contains(ArgList *args, FilterRuleImpl *p)
+static Value func_contains(ArgList *args, FilterRuleImpl *)
 {
    ASSERT(args);
    if(args->Count() != 2)
@@ -2447,7 +2451,7 @@ static Value func_contains(ArgList *args, FilterRuleImpl *p)
    return haystack.Find(needle) != -1;
 }
 
-static Value func_match(ArgList *args, FilterRuleImpl *p)
+static Value func_match(ArgList *args, FilterRuleImpl *)
 {
    ASSERT(args);
    if(args->Count() != 2)
@@ -2527,7 +2531,7 @@ static Value func_python(ArgList *args, FilterRuleImpl *p)
 #endif
 }
 #else // !USE_PYTHON
-static Value func_python(ArgList *args, FilterRuleImpl *p)
+static Value func_python(ArgList *, FilterRuleImpl *p)
 {
    p->Error(_("Python support for filters is not available."));
    return false;
@@ -2801,7 +2805,7 @@ static Value func_date(ArgList *args, FilterRuleImpl *p)
    return Value(today);
 }
 
-static Value func_now(ArgList *args, FilterRuleImpl *p)
+static Value func_now(ArgList *args, FilterRuleImpl *)
 {
    if(args->Count() != 0)
       return Value(-1);
@@ -2819,7 +2823,7 @@ static Value func_size(ArgList *args, FilterRuleImpl *p)
    return Value(size / 1024); // return KiloBytes
 }
 
-static Value func_score(ArgList *args, FilterRuleImpl *p)
+static Value func_score(ArgList *args, FilterRuleImpl *)
 {
    if(args->Count() != 0)
       return Value(0);
@@ -2844,7 +2848,7 @@ static Value func_score(ArgList *args, FilterRuleImpl *p)
    return Value(score);
 }
 
-static Value func_setscore(ArgList *args, FilterRuleImpl *p)
+static Value func_setscore(ArgList *args, FilterRuleImpl *)
 {
    if(args->Count() != 1)
       return Value(-1);
@@ -2873,7 +2877,7 @@ static Value func_setscore(ArgList *args, FilterRuleImpl *p)
    return Value(0);
 }
 
-static Value func_addscore(ArgList *args, FilterRuleImpl *p)
+static Value func_addscore(ArgList *args, FilterRuleImpl *)
 {
    if(args->Count() != 1)
       return Value(-1);
@@ -2899,7 +2903,7 @@ static Value func_addscore(ArgList *args, FilterRuleImpl *p)
    return Value(0);
 }
 
-static Value func_setcolour(ArgList *args, FilterRuleImpl *p)
+static Value func_setcolour(ArgList *args, FilterRuleImpl *)
 {
    if(args->Count() != 1)
       return Value(-1);
@@ -3507,7 +3511,7 @@ MModule_FiltersImpl::GetFilter(const String &filterrule) const
 /* static */
 MModule *
 MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
-                      MInterface *minterface, int *errorCode)
+                          MInterface * /* minterface */, int *errorCode)
 {
    if(! MMODULE_SAME_VERSION(vmajor, vminor, vrelease))
    {

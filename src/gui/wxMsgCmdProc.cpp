@@ -324,6 +324,8 @@ public:
 
 private:
    void InitImageLists();
+
+   DECLARE_NO_COPY_CLASS(wxMIMETreeCtrl)
 };
 
 class wxMIMETreeData : public wxTreeItemData
@@ -363,6 +365,7 @@ private:
    MessageView *m_msgView;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxMIMETreeDialog)
 };
 
 BEGIN_EVENT_TABLE(wxMIMETreeDialog, wxManuallyLaidOutDialog)
@@ -1107,7 +1110,8 @@ MsgCmdProcImpl::ResendMessages(const UIdArray& messages)
 }
 
 void
-MsgCmdProcImpl::PrintOrPreviewMessages(const UIdArray& selections, bool view)
+MsgCmdProcImpl::PrintOrPreviewMessages(const UIdArray& /* selections */,
+                                       bool view)
 {
    // this doesn't work because ShowMessage() is async and so the message is not
    // shown yet when Print() or PrintPreview() is called - we'd need to do

@@ -107,6 +107,8 @@ protected:
    bool         m_ReSortOnChange,
                 m_UseServerSort;
    long         m_SortOrder;
+
+   DECLARE_NO_COPY_CLASS(wxMessageSortingDialog)
 };
 
 // ============================================================================

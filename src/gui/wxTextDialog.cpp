@@ -98,6 +98,7 @@ private:
    const wxChar *m_configPath;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MTextDialog)
 };
 
 BEGIN_EVENT_TABLE(MTextDialog, wxDialog)

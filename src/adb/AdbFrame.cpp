@@ -423,6 +423,8 @@ private:
   wxArrayString& m_astrProviders; // and the names of providers for them
 
   AdbManager *m_pManager;   // we keep it during all our lifetime
+
+  DECLARE_NO_COPY_CLASS(AdbTreeRoot)
 };
 
 // an ADB entry
@@ -567,9 +569,13 @@ private:
       AppendSeparator();
       Append(WXMENU_ADBBOOK_PROP, _("Properties..."));
     }
+
+  private:
+    DECLARE_NO_COPY_CLASS(AdbTreeMenu)
   } *m_menu;
 
   DECLARE_EVENT_TABLE()
+  DECLARE_NO_COPY_CLASS(wxAdbTree)
 };
 
 // ----------------------------------------------------------------------------
@@ -603,6 +609,8 @@ private:
              *m_checkCase,
              *m_checkSub;
   wxTextCtrl *m_textWhat;
+
+  DECLARE_NO_COPY_CLASS(wxADBFindDialog)
 };
 
 // ask the user the kind (entry or group) and the name of the object to create
@@ -625,6 +633,8 @@ private:
 
   wxTextCtrl *m_textName;
   wxCheckBox *m_checkGroup;
+
+  DECLARE_NO_COPY_CLASS(wxADBCreateDialog)
 };
 
 // a simple dialog to show/let the user modify ADB properties
@@ -644,6 +654,8 @@ private:
   wxTextCtrl   *m_textName,
                *m_textFileName,
                *m_textDescription;
+
+  DECLARE_NO_COPY_CLASS(wxADBPropertiesDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -867,6 +879,7 @@ private:
   static size_t ms_nAdbFrames;  // number of the editor frames currently shown
 
   DECLARE_EVENT_TABLE()
+  DECLARE_NO_COPY_CLASS(wxAdbEditFrame)
 };
 
 size_t wxAdbEditFrame::ms_nAdbFrames = 0;
@@ -915,6 +928,8 @@ private:
   AdbEntry     *m_pAdbEntry;  // associated data (may be NULL)
   bool          m_bDirty;     // has the currently selected entry been changed?
   bool          m_bReadOnly;  // is the current entry read-only?
+
+  DECLARE_NO_COPY_CLASS(wxAdbNotebook)
 };
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
@@ -964,6 +979,7 @@ protected:
   size_t m_nFirstField, m_nLastField;
 
   DECLARE_EVENT_TABLE()
+  DECLARE_NO_COPY_CLASS(wxAdbPage)
 };
 
 // name and general information page
@@ -973,6 +989,9 @@ public:
   wxAdbNamePage(wxNotebook *notebook)
     : wxAdbPage(notebook, _T("General"), wxAdbNotebook::General,
                 AdbField_NamePageFirst, AdbField_NamePageLast) { }
+
+private:
+  DECLARE_NO_COPY_CLASS(wxAdbNamePage)
 };
 
 // e-mail address & related things page
@@ -1003,6 +1022,7 @@ private:
   bool m_bListboxModified;  // any new/deleted/modified entries?
 
   DECLARE_EVENT_TABLE()
+  DECLARE_NO_COPY_CLASS(wxAdbEMailPage)
 };
 
 // address page (common base for office address and home address pages)
@@ -1011,6 +1031,9 @@ class wxAdbAddrPage : public wxAdbPage
 public:
   wxAdbAddrPage(wxNotebook *notebook, const wxChar *title,
                 int idImage, bool bOffice);
+
+private:
+  DECLARE_NO_COPY_CLASS(wxAdbAddrPage)
 };
 
 // office address
@@ -1019,6 +1042,9 @@ class wxAdbOfficeAddrPage : public wxAdbAddrPage
 public:
   wxAdbOfficeAddrPage(wxNotebook *notebook)
     : wxAdbAddrPage(notebook, _T("Office"), wxAdbNotebook::Work, TRUE) { }
+
+private:
+  DECLARE_NO_COPY_CLASS(wxAdbOfficeAddrPage)
 };
 
 // home address
@@ -1027,6 +1053,9 @@ class wxAdbHomeAddrPage : public wxAdbAddrPage
 public:
   wxAdbHomeAddrPage(wxNotebook *notebook)
     : wxAdbAddrPage(notebook, _T("Home"), wxAdbNotebook::Home, FALSE) { }
+
+private:
+  DECLARE_NO_COPY_CLASS(wxAdbHomeAddrPage)
 };
 
 // -----------------------------------------------------------------------------

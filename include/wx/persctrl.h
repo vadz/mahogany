@@ -132,6 +132,7 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
+    DECLARE_NO_COPY_CLASS(wxPNotebook)
 };
 
 // ----------------------------------------------------------------------------
@@ -188,6 +189,8 @@ protected:
     size_t m_countSaveMax;              // max number of strings to save
 
     wxPHelper *m_persist;
+
+    DECLARE_NO_COPY_CLASS(wxPTextEntry)
 };
 
 // ----------------------------------------------------------------------------
@@ -250,6 +253,7 @@ private:
     static const char *ms_path;
 
     DECLARE_EVENT_TABLE()
+    DECLARE_NO_COPY_CLASS(wxPChoice)
 };
 
 // ----------------------------------------------------------------------------
@@ -311,6 +315,8 @@ protected:
 private:
     // the config key where we store the sash position
     static const char *ms_path;
+
+    DECLARE_NO_COPY_CLASS(wxPSplitterWindow)
 };
 
 // ----------------------------------------------------------------------------
@@ -371,6 +377,7 @@ private:
     static const char *ms_path;
 
     DECLARE_EVENT_TABLE()
+    DECLARE_NO_COPY_CLASS(wxPListCtrl)
 };
 
 // ----------------------------------------------------------------------------
@@ -422,6 +429,8 @@ protected:
 
 private:
     static const char *ms_path;
+
+    DECLARE_NO_COPY_CLASS(wxPCheckBox)
 };
 
 // ----------------------------------------------------------------------------
@@ -484,6 +493,7 @@ private:
     static const char *ms_path;
 
     DECLARE_EVENT_TABLE()
+    DECLARE_NO_COPY_CLASS(wxPListBox)
 };
 
 // ----------------------------------------------------------------------------
@@ -550,6 +560,7 @@ private:
     static const char *ms_path;
 
     DECLARE_EVENT_TABLE()
+    DECLARE_NO_COPY_CLASS(wxPRadioBox)
 };
 
 // ----------------------------------------------------------------------------
@@ -620,6 +631,7 @@ private:
     static const char *ms_path;
 
     DECLARE_EVENT_TABLE()
+    DECLARE_NO_COPY_CLASS(wxPTreeCtrl)
 };
 
 // ----------------------------------------------------------------------------

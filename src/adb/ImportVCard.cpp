@@ -173,8 +173,8 @@ size_t AdbVCardImporter::GetEntryNames(const String& path,
    return countImported;
 }
 
-size_t AdbVCardImporter::GetGroupNames(const String& path,
-                                       wxArrayString& groups) const
+size_t AdbVCardImporter::GetGroupNames(const String& /* path */,
+                                       wxArrayString& /* groups */) const
 {
    // there are no groups in a vCard
 

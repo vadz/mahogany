@@ -108,6 +108,7 @@ private:
    wxMenu *m_menu;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(TemplateEditor)
 };
 
 // the dialog for editing the templates for the given folder (profile): it
@@ -142,6 +143,7 @@ private:
    bool                m_wasChanged;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxFolderTemplatesDialog)
 };
 
 // the dialog for choosing/editing all templates of the given kind
@@ -201,6 +203,7 @@ private:
    wxTextCtrl *m_textctrl;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxAllTemplatesDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -770,14 +773,14 @@ void wxAllTemplatesDialog::OnComboBoxChange(wxCommandEvent& event)
    UpdateText();
 }
 
-void wxAllTemplatesDialog::OnListboxSelection(wxCommandEvent& event)
+void wxAllTemplatesDialog::OnListboxSelection(wxCommandEvent& /* event */)
 {
    CheckForChanges();
 
    UpdateText();
 }
 
-void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& event)
+void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& /* event */)
 {
    wxASSERT_MSG( !!m_name, _T("shouldn't try to delete") );
 
@@ -797,7 +800,7 @@ void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& event)
    }
 }
 
-void wxAllTemplatesDialog::OnAddTemplate(wxCommandEvent& event)
+void wxAllTemplatesDialog::OnAddTemplate(wxCommandEvent& /* event */)
 {
    // get the name for the new template
    wxString name;

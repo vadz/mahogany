@@ -70,7 +70,9 @@ protected:
    wxCheckListBox *m_checklistBox;
    wxTextCtrl     *m_textCtrl;
    kbStringList::iterator FindInList(const wxString &module) const;
+
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxModulesDialog)
 };
 
 BEGIN_EVENT_TABLE(wxModulesDialog, wxDialog)

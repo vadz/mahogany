@@ -13,7 +13,7 @@ Title=Mahogany User Manual
 Manual.html
 
 [MAP]
-#include ..\..\include\mhelp.h
+#include ../../include/MHelp.h
 
 [INFOTYPES]
 

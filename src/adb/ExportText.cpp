@@ -122,6 +122,7 @@ private:
    wxStaticText *m_labelCustomSep;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxAdbTextExporterConfigDialog)
 };
 
 BEGIN_EVENT_TABLE(wxAdbTextExporterConfigDialog, wxManuallyLaidOutDialog)
@@ -278,7 +279,8 @@ bool AdbTextExporter::Export(const AdbEntryGroup& group, const String& dest)
    return FALSE;
 }
 
-bool AdbTextExporter::Export(const AdbEntry& entry, const String& dest)
+bool AdbTextExporter::Export(const AdbEntry& /* entry */,
+                             const String& /* dest */)
 {
    // TODO
    return FALSE;

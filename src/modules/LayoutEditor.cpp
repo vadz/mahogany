@@ -127,6 +127,7 @@ private:
         m_firstTimeFocus;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxComposerLayoutWindow)
 };
 
 // ----------------------------------------------------------------------------

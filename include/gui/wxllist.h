@@ -164,9 +164,9 @@ public:
    */
    virtual void Draw(wxDC & /* dc */,
                      wxPoint const & /* coords */,
-                     wxLayoutList *wxllist,
-                     CoordType begin = -1,
-                     CoordType end = -1)  { }
+                     wxLayoutList * /* wxllist */,
+                     CoordType /* begin */ = -1,
+                     CoordType /* end */ = -1)  { }
 
    /** Calculates and returns the size of the object.
        @param top where to store height above baseline
@@ -186,7 +186,9 @@ public:
        @param xpos relative x position from head of object
        @return cursor coordinate offset
    */
-   virtual CoordType GetOffsetScreen(wxDC &dc, CoordType xpos) const { return 0; }
+   virtual CoordType GetOffsetScreen(wxDC& /* dc */,
+                                     CoordType /* xpos */) const
+      { return 0; }
 
    /// constructor
    wxLayoutObject() { m_UserData = NULL; }
@@ -758,7 +760,7 @@ private:
        dirty.
        @param height new height
    */
-   void SetHeight(CoordType height, wxLayoutList *llist)
+   void SetHeight(CoordType height, wxLayoutList * /* llist */)
       { m_Height = height; MarkDirty(); }
 
    /** Updates the line numbers. */
@@ -884,9 +886,9 @@ public:
    size_t GetNumLines() const { return m_numLines; }
 
    /// Returns current cursor position.
-   const wxPoint &GetCursorPos(wxDC &dc) const { return m_CursorPos; }
-   const wxPoint &GetCursorPos() const { return m_CursorPos; }
-   wxLayoutLine * GetCursorLine(void) { return m_CursorLine; }
+   const wxPoint& GetCursorPos(wxDC& /* dc */) const { return m_CursorPos; }
+   const wxPoint& GetCursorPos() const { return m_CursorPos; }
+   wxLayoutLine *GetCursorLine(void) { return m_CursorLine; }
    
    /// move cursor to the end of text
    void MoveCursorToEnd(void)
@@ -1326,6 +1328,8 @@ public:
    void SetLayoutData(const wxString& text)
       { SetData(text.length() + 1, text.c_str()); }
    const char *GetLayoutData() const { return (const char *)GetData(); }
+
+   DECLARE_NO_COPY_CLASS(wxLayoutDataObject)
 };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1409,6 +1413,8 @@ private:
    int           m_PrintoutHeight;
    /// How many pages we need to print.
    int           m_NumOfPages;
+
+   DECLARE_NO_COPY_CLASS(wxLayoutPrintout)
 };
 
 

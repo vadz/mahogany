@@ -40,19 +40,19 @@ public:
    // implementation only from now on
 
    // check list box event handler
-   void OnCheckLstBoxToggle(wxCommandEvent& event) { m_hasChanges = TRUE; }
+   void OnCheckLstBoxToggle(wxCommandEvent&) { m_hasChanges = TRUE; }
 
    // update UI here: disable the buttons when they don't do anything
    void OnCheckLstBoxSelChanged(wxCommandEvent& event);
 
    // up/down buttons notifications
-   void OnButtonUp(wxCommandEvent& event) { OnButtonMove(TRUE); }
-   void OnButtonDown(wxCommandEvent& event) { OnButtonMove(FALSE); }
+   void OnButtonUp(wxCommandEvent&) { OnButtonMove(TRUE); }
+   void OnButtonDown(wxCommandEvent&) { OnButtonMove(FALSE); }
 
 protected:
    // can be overridden if the derived class wants to know when the 2 items in
    // the check list box are exchanged (after this has happened)
-   virtual void OnItemSwap(size_t item1, size_t item2) { }
+   virtual void OnItemSwap(size_t /* item1 */, size_t /* item2 */) { }
 
    // real button events handler
    void OnButtonMove(bool up);
@@ -74,6 +74,7 @@ protected:
    bool m_hasChanges;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxSelectionsOrderDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -103,6 +104,8 @@ public:
 protected:
    wxArrayString *m_choices;
    wxArrayInt    *m_status;
+
+   DECLARE_NO_COPY_CLASS(wxSelectionsOrderDialogSimple)
 };
 
 #endif // _GUI_WXSELECTIONDLG_H

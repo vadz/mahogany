@@ -186,7 +186,8 @@ public:
      Return true if this server can be used to connect to the given folder
      (by default: no connection caching)
     */
-   virtual bool CanBeUsedFor(const MFolder *folder) const { return false; }
+   virtual bool CanBeUsedFor(const MFolder * /* folder */) const
+      { return false; }
 
    //@}
 

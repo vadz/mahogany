@@ -199,6 +199,8 @@ public:
 
 private:
    bool m_hasWindow;
+
+   DECLARE_NO_COPY_CLASS(wxMLogWindow)
 };
 
 // a wxLogStderr version which closes the file it logs to
@@ -208,6 +210,9 @@ public:
    MLogFile(FILE *fp) : wxLogStderr(fp) { }
 
    virtual ~MLogFile() { fclose(m_fp); }
+
+private:
+   DECLARE_NO_COPY_CLASS(MLogFile)
 };
 
 // a timer used to periodically autosave profile settings
@@ -231,13 +236,21 @@ public:
 
 public:
     bool m_started;
+
+private:
+    DECLARE_NO_COPY_CLASS(AutoSaveTimer)
 };
 
 // a timer used to periodically check for new mail
 class MailCollectionTimer : public wxTimer
 {
 public:
+   MailCollectionTimer() { }
+
    virtual void Notify();
+
+private:
+   DECLARE_NO_COPY_CLASS(MailCollectionTimer)
 };
 
 // a timer used to wake up idle loop to force generation of the idle events
@@ -248,18 +261,26 @@ public:
    IdleTimer() : wxTimer() { Start(100); }
 
    virtual void Notify() { wxWakeUpIdle(); }
+
+private:
+   DECLARE_NO_COPY_CLASS(IdleTimer)
 };
 
 // and yet another timer for the away mode
 class AwayTimer : public wxTimer
 {
 public:
+   AwayTimer() { }
+
    virtual void Notify()
    {
       wxLogTrace(TRACE_TIMER, _T("Going away on timer"));
 
       mApplication->SetAwayMode(TRUE);
    }
+
+private:
+   DECLARE_NO_COPY_CLASS(AwayTimer)
 };
 
 // ----------------------------------------------------------------------------
@@ -1375,6 +1396,9 @@ wxMApp::Help(int id, wxWindow *parent)
 #ifdef OS_WIN
    // under Windows only help contents can be currently shown
    m_HelpController->DisplayContents();
+
+   id;
+   parent;
 #else // !OS_WIN
    switch(id)
    {
@@ -1652,6 +1676,7 @@ wxWindow *wxMApp::GetTopWindow() const
 wxIcon
 wxMApp::GetStdIcon(int which) const
 {
+#ifndef OS_WIN
    // this function may be (and is) called from the persistent controls code
    // which uses the global config object for its own needs, so avoid changing
    // its path here - or rather restore it on funciton exit
@@ -1677,10 +1702,6 @@ wxMApp::GetStdIcon(int which) const
    } storeConfigPath;
 
    // Set our icons for the dialogs.
-
-   // this ugly "#ifdefs" are needed to silent warning about "switch without
-   // any case" warning under Windows
-#ifndef OS_WIN
    switch(which)
    {
    case wxICON_HAND:
@@ -1692,6 +1713,8 @@ wxMApp::GetStdIcon(int which) const
    case wxICON_INFORMATION:
       return ICON("msg_info"); break;
    }
+#else
+   which;
 #endif
 
    return wxNullIcon;
@@ -1750,7 +1773,7 @@ wxIconManager *wxMApp::GetIconManager(void) const
 #ifdef USE_DIALUP
 
 void
-wxMApp::OnConnected(wxDialUpEvent &event)
+wxMApp::OnConnected(wxDialUpEvent&)
 {
    if(! m_DialupSupport)
       return;
@@ -1763,7 +1786,7 @@ wxMApp::OnConnected(wxDialUpEvent &event)
 }
 
 void
-wxMApp::OnDisconnected(wxDialUpEvent &event)
+wxMApp::OnDisconnected(wxDialUpEvent&)
 {
    if(! m_DialupSupport)
       return;
@@ -1903,7 +1926,7 @@ wxMApp::UpdateOnlineDisplay(void)
 // ----------------------------------------------------------------------------
 
 void
-wxMApp::FatalError(const char *message)
+wxMApp::FatalError(const char * /* message */)
 {
    OnAbnormalTermination();
 }
@@ -2334,6 +2357,8 @@ public:
 
 private:
    char m_buffer[4096];
+
+   DECLARE_NO_COPY_CLASS(MAppIPCConnection)
 };
 
 class MAppIPCServer : public wxServer

@@ -247,6 +247,8 @@ protected:
    MailFolder::SequenceKind m_Kind;
    int m_Flag;
    bool m_Set;
+
+   DECLARE_NO_COPY_CLASS(MT_SetSequenceFlag)
 };
 
 class MT_SetFlagForAll : public MailThread
@@ -904,7 +906,7 @@ public:
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual Ticket UnDeleteMessages(const UIdArray *messages, UserData ud)
+   virtual Ticket UnDeleteMessages(const UIdArray *messages, UserData /* ud */)
       {
          return SetFlag(messages, MailFolder::MSG_STAT_DELETED, false);
       }

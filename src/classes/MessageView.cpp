@@ -224,6 +224,7 @@ private:
    MessageView *m_msgView;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(ProcessEvtHandler) 
 };
 
 // the message parameters for the MIME type manager

@@ -43,6 +43,8 @@
 class AdbXFMailImporter : public AdbImporter
 {
 public:
+   AdbXFMailImporter() { }
+
    // implement base class pure virtuals
    virtual String GetDefaultFilename() const;
    virtual bool CanImport(const String& filename);
@@ -60,6 +62,8 @@ public:
 protected:
    wxArrayInt m_lineNumbers;
    wxTextFile m_textfile;
+
+   DECLARE_NO_COPY_CLASS(AdbXFMailImporter)
 };
 
 // ============================================================================
@@ -202,7 +206,7 @@ size_t AdbXFMailImporter::GetEntryNames(const String& path,
 }
 
 size_t AdbXFMailImporter::GetGroupNames(const String& path,
-                                        wxArrayString& groups) const
+                                        wxArrayString& /* groups */) const
 {
    ASSERT_MSG( !path, _T("where did this path come from?") );
 
@@ -210,7 +214,7 @@ size_t AdbXFMailImporter::GetGroupNames(const String& path,
    return 0;
 }
 
-bool AdbXFMailImporter::ImportEntry(const String& path,
+bool AdbXFMailImporter::ImportEntry(const String& /* path */,
                                     size_t index,
                                     AdbEntry *entry)
 {

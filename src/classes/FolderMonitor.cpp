@@ -219,6 +219,8 @@ private:
    MMutex m_inNewMailCheck;
 
    FolderMonitorFolderList& m_list;
+
+   DECLARE_NO_COPY_CLASS(FolderMonitorTraversal)
 };
 
 // ----------------------------------------------------------------------------

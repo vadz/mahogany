@@ -111,6 +111,8 @@ private:
    // this flag is set if our Save() failed and is used to prevent calling it
    // again, and again, and again...
    bool m_hasFailedToSave;
+
+   DECLARE_NO_COPY_CLASS(MfStatusCache)
 };
 
 #endif // _MFCACHE_H_

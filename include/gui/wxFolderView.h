@@ -383,7 +383,7 @@ private:
    /// the associated folder view
    wxFolderView *m_FolderView;
 
-   DECLARE_DYNAMIC_CLASS(wxFolderViewFrame)
+   DECLARE_DYNAMIC_CLASS_NO_COPY(wxFolderViewFrame)
    DECLARE_EVENT_TABLE()
 };
 

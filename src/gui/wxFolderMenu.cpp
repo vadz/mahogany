@@ -82,7 +82,7 @@ public:
 #endif // __WXGTK__
 
    // base class generic event handler
-   virtual bool OnMEvent(MEventData& data)
+   virtual bool OnMEvent(MEventData& /* data */)
    {
       OnFolderTreeChangeEvent();
 

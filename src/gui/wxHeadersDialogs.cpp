@@ -162,6 +162,7 @@ private:
    static void InitStaticArrays();
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxComposeHeadersDialog)
 };
 
 // dialog to configure headers shown in the message view
@@ -178,6 +179,8 @@ public:
 
 private:
    Profile *m_profile;
+
+   DECLARE_NO_COPY_CLASS(wxMsgViewHeadersDialog)
 };
 
 // dialog allowing editing one custom header
@@ -229,6 +232,7 @@ private:
    wxRadioBox *m_radioboxType;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxCustomHeaderDialog)
 };
 
 // dialog allowing editing all custom headers for the given profil
@@ -297,6 +301,7 @@ private:
    wxListCtrl *m_listctrl;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxCustomHeadersDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -439,7 +444,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
    SetDefaultSize(4*wBtn, 8*hBtn);
 }
 
-void wxComposeHeadersDialog::OnEditCustomHeaders(wxCommandEvent& event)
+void wxComposeHeadersDialog::OnEditCustomHeaders(wxCommandEvent& /* event */)
 {
    wxCustomHeadersDialog dlg(m_profile, GetParent());
 

@@ -377,6 +377,7 @@ private:
    InstallWizardPageId m_id;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(InstallWizardPage)
 };
 
 // first page: welcome the user, explain what goes on
@@ -396,6 +397,7 @@ private:
    bool        m_useWizard;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(InstallWizardWelcomePage)
 };
 
 // second page: ask the basic info about the user (name, e-mail)
@@ -412,6 +414,8 @@ private:
               *m_login,
               *m_organization,
               *m_email;
+
+   DECLARE_NO_COPY_CLASS(InstallWizardIdentityPage)
 };
 
 class InstallWizardServersPage : public InstallWizardPage
@@ -436,6 +440,7 @@ private:
    wxCheckBox *m_leaveOnServer;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(InstallWizardServersPage)
 };
 
 #ifdef USE_DIALUP
@@ -456,6 +461,8 @@ private:
    wxTextCtrl *m_connect,
               *m_disconnect;
 #endif // platform
+
+   DECLARE_NO_COPY_CLASS(InstallWizardDialUpPage)
 };
 
 #endif // USE_DIALUP
@@ -546,6 +553,8 @@ private:
              , *m_UsePythonCheckbox
 #endif
              ;
+
+   DECLARE_NO_COPY_CLASS(InstallWizardOperationsPage)
 };
 
 #ifdef USE_HELPERS_PAGE
@@ -562,6 +571,9 @@ class InstallWizardMiscPage : public InstallWizardPage
 {
 public:
    InstallWizardMiscPage(wxWizard *wizard);
+
+private:
+   DECLARE_NO_COPY_CLASS(InstallWizardMiscPage)
 };
 
 class InstallWizardImportPage : public InstallWizardPage
@@ -573,6 +585,7 @@ public:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(InstallWizardImportPage)
 };
 
 class InstallWizardFinalPage : public InstallWizardPage
@@ -585,6 +598,8 @@ public:
 
 private:
    wxCheckBox *m_checkboxSendTestMsg;
+
+   DECLARE_NO_COPY_CLASS(InstallWizardFinalPage)
 };
 
 // ----------------------------------------------------------------------------
@@ -837,7 +852,7 @@ InstallWizardPageId InstallWizardWelcomePage::GetNextPageId() const
    }
 }
 
-void InstallWizardWelcomePage::OnUseWizardCheckBox(wxCommandEvent& event)
+void InstallWizardWelcomePage::OnUseWizardCheckBox(wxCommandEvent&)
 {
    m_useWizard = !m_checkbox->GetValue();
 
@@ -885,7 +900,7 @@ InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
 #endif
 }
 
-void InstallWizardImportPage::OnImportButton(wxCommandEvent& event)
+void InstallWizardImportPage::OnImportButton(wxCommandEvent&)
 {
    ShowImportDialog(this);
 }

@@ -71,6 +71,8 @@ public:
 
 private:
    MMutex& m_mutex;
+
+   DECLARE_NO_COPY_CLASS(MLocker)
 };
 
 #endif // _MTHREAD_H_

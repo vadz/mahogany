@@ -199,6 +199,7 @@ private:
 #include "wx/html/htmlcell.h"
 
 TAG_HANDLER_BEGIN(META, "META" )
+    TAG_HANDLER_CONSTR(META) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -267,6 +268,8 @@ private:
 
    // the end tag (or empty if none)
    String m_end;
+
+   DECLARE_NO_COPY_CLASS(AttributeChanger)
 };
 
 // ----------------------------------------------------------------------------
@@ -301,6 +304,8 @@ private:
         << charset << "\">";
       return s;
    }
+
+   DECLARE_NO_COPY_CLASS(EncodingChanger)
 };
 
 // ----------------------------------------------------------------------------
@@ -321,6 +326,9 @@ public:
          DoChange(start, "</font>");
       }
    }
+
+private:
+   DECLARE_NO_COPY_CLASS(FontColourChanger)
 };
 
 // ----------------------------------------------------------------------------
@@ -350,6 +358,8 @@ public:
 private:
    AttributeChanger m_changerWeight,
                     m_changerSlant;
+
+   DECLARE_NO_COPY_CLASS(FontStyleChanger)
 };
 
 // ----------------------------------------------------------------------------
@@ -387,6 +397,8 @@ private:
    ArrayClickInfo m_clickables;
 
    HtmlViewer *m_viewer;
+
+   DECLARE_NO_COPY_CLASS(HtmlViewerWindow)
 };
 
 // ----------------------------------------------------------------------------
@@ -457,16 +469,17 @@ ClickableInfo *HtmlViewerWindow::GetClickable(const String& url) const
    return index == wxNOT_FOUND ? NULL : m_clickables[(size_t)index];
 }
 
-void HtmlViewerWindow::OnSetTitle(const wxString& title)
+void HtmlViewerWindow::OnSetTitle(const wxString& /* title */)
 {
    // don't do anything, we don't want to show the title at all
 }
 
-void HtmlViewerWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
+void HtmlViewerWindow::OnLinkClicked(const wxHtmlLinkInfo& /* link */)
 {
 }
 
-void HtmlViewerWindow::OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y)
+void HtmlViewerWindow::OnCellMouseHover(wxHtmlCell *cell,
+                                        wxCoord /* x */, wxCoord /* y */)
 {
    wxHtmlLinkInfo *link = cell->GetLink();
    wxFrame *frame = GetFrame(this);
@@ -603,7 +616,7 @@ void HtmlViewer::UpdateOptions()
 // HtmlViewer operations
 // ----------------------------------------------------------------------------
 
-bool HtmlViewer::Find(const String& text)
+bool HtmlViewer::Find(const String& /* text */)
 {
    return FindAgain();
 }
@@ -938,7 +951,7 @@ void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 
 void HtmlViewer::InsertClickable(const wxBitmap& icon,
                                  ClickableInfo *ci,
-                                 const wxColour& col)
+                                 const wxColour& /* col */)
 {
    InsertAttachment(icon, ci);
 }

@@ -108,6 +108,8 @@ public:
 private:
    wxString m_profileKey;
    bool     m_didRestoreSize;
+
+   DECLARE_NO_COPY_CLASS(wxPDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -168,7 +170,7 @@ private:
    // the helpId or -1
    int    m_helpId;
 
-   DECLARE_DYNAMIC_CLASS(wxManuallyLaidOutDialog)
+   DECLARE_DYNAMIC_CLASS_NO_COPY(wxManuallyLaidOutDialog)
    DECLARE_EVENT_TABLE()
 };
 
@@ -188,8 +190,8 @@ class wxOptionsEditDialog : public wxManuallyLaidOutDialog
 public:
    // ctor
    wxOptionsEditDialog(wxFrame *parent,
-                    const wxString& title,
-                    const wxString& profileKey = _T(""));
+                       const wxString& title,
+                       const wxString& profileKey = _T(""));
 
    // populate the dialog
       // create the controls above the main notebook, return the last control
@@ -283,7 +285,7 @@ private:
    // Ok/Cancel/Apply depending on the last button pressed
    MEventOptionsChangeData::ChangeKind m_lastBtn;
 
-   DECLARE_ABSTRACT_CLASS(wxOptionsEditDialog)
+   DECLARE_DYNAMIC_CLASS_NO_COPY(wxOptionsEditDialog)
    DECLARE_EVENT_TABLE()
 };
 
@@ -319,6 +321,8 @@ public:
 protected:
    Profile *m_profile;
    bool         m_hasChanges;
+
+   DECLARE_NO_COPY_CLASS(wxProfileSettingsEditDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -340,6 +344,7 @@ public:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxOptionsPageSubdialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -592,6 +597,7 @@ private:
    wxSize m_sizeMin;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxEnhancedPanel)
 };
 
 // ----------------------------------------------------------------------------
@@ -613,6 +619,7 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxNotebookPageBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -629,6 +636,9 @@ public:
                         const wxChar *aszImages[]);
 
    virtual ~wxNotebookWithImages();
+
+private:
+   DECLARE_NO_COPY_CLASS(wxNotebookWithImages)
 };
 
 // =============================================================================

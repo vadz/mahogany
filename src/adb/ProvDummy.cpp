@@ -268,7 +268,9 @@ void DummyEntry::ClearExtraEMails()
 {
 }
 
-int DummyEntry::Matches(const wxChar *what, int where, int how) const
+int DummyEntry::Matches(const wxChar * /* what */,
+                        int /* where */,
+                        int /* how */) const
 {
   return 0;
 }
@@ -301,7 +303,7 @@ size_t DummyEntryGroup::GetGroupNames(wxArrayString& aNames) const
   return aNames.Count();
 }
 
-AdbEntry *DummyEntryGroup::GetEntry(const String& name) const
+AdbEntry *DummyEntryGroup::GetEntry(const String& /* name */) const
 {
   return new DummyEntry((DummyEntryGroup *)this, _T("Dummy entry"));
 }
@@ -311,7 +313,7 @@ bool DummyEntryGroup::Exists(const String& path) const
   return path == _T("Dummy entry");
 }
 
-AdbEntryGroup *DummyEntryGroup::GetGroup(const String& name) const
+AdbEntryGroup *DummyEntryGroup::GetGroup(const String& /* name */) const
 {
   return NULL;
 }
@@ -326,17 +328,17 @@ AdbEntryGroup *DummyEntryGroup::CreateGroup(const String& strName)
   return GetGroup(strName);
 }
 
-void DummyEntryGroup::DeleteEntry(const String& strName)
+void DummyEntryGroup::DeleteEntry(const String& /* strName */)
 {
   wxFAIL_MSG(_T("Not implemented"));
 }
 
-void DummyEntryGroup::DeleteGroup(const String& strName)
+void DummyEntryGroup::DeleteGroup(const String& /* strName */)
 {
   wxFAIL_MSG(_T("Not implemented"));
 }
 
-AdbEntry *DummyEntryGroup::FindEntry(const wxChar *szName)
+AdbEntry *DummyEntryGroup::FindEntry(const wxChar * /* szName */)
 {
   return NULL;
 }
@@ -406,7 +408,7 @@ AdbBook *DummyDataProvider::CreateBook(const String& name)
   return new DummyBook(name);
 }
 
-bool DummyDataProvider::EnumBooks(wxArrayString& aNames)
+bool DummyDataProvider::EnumBooks(wxArrayString& /* aNames */)
 {
   return FALSE;
 }
@@ -420,11 +422,14 @@ bool DummyDataProvider::TestBookAccess(const String& name, AdbTests test)
              test, name.c_str());
   return MDialog_YesNoDialog(str);
 #else
+  name;
+  test;
+
   return FALSE;
 #endif
 }
 
-bool DummyDataProvider::DeleteBook(AdbBook *book)
+bool DummyDataProvider::DeleteBook(AdbBook * /* book */)
 {
   return FALSE;
 }

@@ -274,6 +274,7 @@ private:
    ArrayBool m_aDirtyFlags;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxOptionsPage)
 };
 
 // ----------------------------------------------------------------------------
@@ -307,6 +308,9 @@ public:
 
    // and of their default values
    static const ConfigValueDefault ms_aConfigDefaults[];
+
+private:
+   DECLARE_NO_COPY_CLASS(wxOptionsPageStandard)
 };
 
 // ----------------------------------------------------------------------------
@@ -327,6 +331,9 @@ public:
                         size_t nOffset = 0,
                         int helpID = -1,
                         int image = -1);
+
+private:
+   DECLARE_NO_COPY_CLASS(wxOptionsPageDynamic)
 };
 
 // the data from which wxOptionsPageDynamic may be created by the notebook -
@@ -378,8 +385,10 @@ public:
    wxOptionsPageIdent(wxNotebook *parent, Profile *profile);
 
    void OnButton(wxCommandEvent&);
+
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxOptionsPageIdent)
 };
 
 // network configuration page
@@ -393,6 +402,8 @@ public:
 
 private:
    wxString m_oldAuthsDisabled;
+
+   DECLARE_NO_COPY_CLASS(wxOptionsPageNetwork)
 };
 
 // new mail handling options
@@ -422,6 +433,7 @@ private:
    MFolder *m_folder;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxOptionsPageNewMail)
 };
 
 // settings concerning the compose window
@@ -434,6 +446,7 @@ public:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxOptionsPageCompose)
 };
 
 // settings concerning the message view window
@@ -455,6 +468,7 @@ private:
    int m_currentViewer;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxOptionsPageMessageView)
 };
 
 // settings concerning the folder view window
@@ -471,6 +485,7 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxOptionsPageFolderView)
 };
 
 // settings concerning the folder tree
@@ -484,6 +499,8 @@ public:
 
 private:
    bool m_isHomeOrig;
+
+   DECLARE_NO_COPY_CLASS(wxOptionsPageFolderTree)
 };
 
 // global folder settings (each folder has its own settings which are changed
@@ -502,6 +519,7 @@ public:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxOptionsPageFolders)
 };
 
 #ifdef USE_PYTHON
@@ -521,6 +539,9 @@ public:
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
+
+private:
+   DECLARE_NO_COPY_CLASS(wxOptionsPageAdb)
 };
 
 
@@ -529,6 +550,9 @@ class wxOptionsPageHelpers : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageHelpers(wxNotebook *parent, Profile *profile);
+
+private:
+   DECLARE_NO_COPY_CLASS(wxOptionsPageHelpers)
 };
 
 // sync settings page
@@ -548,6 +572,7 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxOptionsPageSync)
 };
 
 // miscellaneous settings
@@ -570,6 +595,7 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxOptionsPageOthers)
 };
 
 #endif // _GUI_WXOPTIONSPAGE_H

@@ -53,6 +53,8 @@ private:
 
    // it accesses both m_adr and m_addrNext
    friend class AddressListCC;
+
+   DECLARE_NO_COPY_CLASS(AddressCC)
 };
 
 // ----------------------------------------------------------------------------
@@ -90,6 +92,7 @@ private:
    friend AddressList *AddressList::CreateFromAddress(Profile *profile);
 
    MOBJECT_DEBUG(AddressListCC)
+   DECLARE_NO_COPY_CLASS(AddressListCC)
 };
 
 // wrapper around rfc822_parse_adrlist() c-client function

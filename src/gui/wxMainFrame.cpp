@@ -182,7 +182,7 @@ public:
       m_mainFrame = mainFrame;
    }
 
-   virtual bool MoveToNextUnread(bool takeNextIfNoUnread = true)
+   virtual bool MoveToNextUnread(bool /* takeNextIfNoUnread */ = true)
    {
       if ( wxFolderView::MoveToNextUnread(false /* don't take next */) )
       {

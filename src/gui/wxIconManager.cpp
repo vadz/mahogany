@@ -635,6 +635,8 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
          wxIconLocation iconLoc;
          if ( fileType->GetIcon(&iconLoc) )
          {
+            wxLogNull noLog;
+
             icon = wxIcon(iconLoc);
          }
 #else // wx 2.4.x or very early 2.5.0
@@ -667,6 +669,8 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
          wxIconLocation iconLoc;
          if ( fileType->GetIcon(&iconLoc) )
          {
+            wxLogNull noLog;
+
             icon = wxIcon(iconLoc);
          }
 #else // wx 2.4.x or very early 2.5.0

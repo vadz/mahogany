@@ -586,6 +586,9 @@ public:
 
    // the profile we use - just the global one here
    Profile *GetProfile() const { return Profile::CreateProfile(""); }
+
+private:
+   DECLARE_NO_COPY_CLASS(wxOptionsNotebook)
 };
 
 // notebook for the given options page
@@ -606,6 +609,8 @@ private:
 
    // the images names and NULL
    const char **m_aImages;
+
+   DECLARE_NO_COPY_CLASS(wxCustomOptionsNotebook)
 };
 
 // -----------------------------------------------------------------------------
@@ -638,7 +643,7 @@ protected:
    }
 
 private:
-   DECLARE_DYNAMIC_CLASS(wxGlobalOptionsDialog)
+   DECLARE_DYNAMIC_CLASS_NO_COPY(wxGlobalOptionsDialog)
 };
 
 // just like wxGlobalOptionsDialog but uses the given wxOptionsPage and not the
@@ -713,6 +718,8 @@ private:
 
    // the config key where notebook will remember its last page
    wxString m_configForNotebook;
+
+   DECLARE_NO_COPY_CLASS(wxCustomOptionsDialog)
 };
 
 // an identity edit dialog: works with settings in an identity profile, same as
@@ -762,6 +769,8 @@ private:
    // the array of descriptions of our pages
    size_t m_nPages;
    wxOptionsPageDesc *m_aPages;
+
+   DECLARE_NO_COPY_CLASS(wxIdentityOptionsDialog)
 };
 
 // another dialog (not for options this one) which allows to restore the
@@ -776,6 +785,8 @@ public:
 
 private:
    wxCheckListBox *m_checklistBox;
+
+   DECLARE_NO_COPY_CLASS(wxRestoreDefaultsDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -2907,7 +2918,7 @@ bool wxOptionsPage::OnListBoxModify(wxListBox *lbox, const LboxData& lboxData)
 }
 
 bool
-wxOptionsPage::OnListBoxDelete(wxListBox *lbox, const LboxData& lboxData)
+wxOptionsPage::OnListBoxDelete(wxListBox *lbox, const LboxData& /* lboxData */)
 {
    int nSel = lbox->GetSelection();
 

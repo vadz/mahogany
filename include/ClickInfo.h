@@ -67,6 +67,8 @@ public:
 
 protected:
    MessageView * const m_msgView;
+
+   DECLARE_NO_COPY_CLASS(ClickableInfo)
 };
 
 #endif // _M_CLICKINFO_H_

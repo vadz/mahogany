@@ -108,7 +108,7 @@ private:
 // note that GetName() and GetDescription() declarations are inside
 // MMODULE_DEFINE macro
 #define DECLARE_ADB_MODULE()                                               \
-   virtual const wxChar *GetFormatDesc() const;                              \
+   virtual const wxChar *GetFormatDesc() const;                            \
    DEFAULT_ENTRY_FUNC                                                      \
    MMODULE_DEFINE()
 
@@ -123,13 +123,15 @@ private:
       MMODULE_PROP("author", Author)                                       \
       MMODULE_PROP("adbformat", format)                                    \
    MMODULE_END_IMPLEMENT(cname)                                            \
-   const wxChar *cname::GetFormatDesc() const                                \
+   const wxChar *cname::GetFormatDesc() const                              \
    {                                                                       \
       return GetMModuleProperty(ms_properties, "adbformat");               \
    }                                                                       \
-   MModule *cname::Init(int version_major, int version_minor,              \
-                        int version_release, MInterface *minterface,       \
-                        int *errorCode)                                    \
+   MModule *cname::Init(int /* version_major */,                           \
+                        int /* version_minor */,                           \
+                        int /* version_release */,                         \
+                        MInterface * /* minterface */,                     \
+                        int * /* errorCode */)                             \
    {                                                                       \
       return new cname();                                                  \
    }
@@ -137,15 +139,15 @@ private:
 #else // !USE_ADB_MODULES
 
 #define DECLARE_ADB_MODULE()                                               \
-   const wxChar *GetName() const;                                            \
-   const wxChar *GetFormatDesc() const;                                      \
-   const wxChar *GetDescription() const;                                     \
+   const wxChar *GetName() const;                                          \
+   const wxChar *GetFormatDesc() const;                                    \
+   const wxChar *GetDescription() const;                                   \
    static AdbModuleInfo ms_info
 
 #define IMPLEMENT_ADB_MODULE(modint, name, desc, format, author)           \
-   const wxChar *name::GetName() const { return #name; }                     \
-   const wxChar *name::GetFormatDesc() const { return _(format); }           \
-   const wxChar *name::GetDescription() const { return _(desc); }            \
+   const wxChar *name::GetName() const { return #name; }                   \
+   const wxChar *name::GetFormatDesc() const { return _(format); }         \
+   const wxChar *name::GetDescription() const { return _(desc); }          \
    AdbModule *ConstructorFor##name() { return new name; }                  \
    AdbModule::AdbModuleInfo                                                \
       name::ms_info(#name, ConstructorFor##name, desc)

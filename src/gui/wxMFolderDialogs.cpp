@@ -235,7 +235,7 @@ protected:
    bool m_mayEnableOk;
 
 private:
-   DECLARE_DYNAMIC_CLASS(wxFolderBaseDialog)
+   DECLARE_DYNAMIC_CLASS_NO_COPY(wxFolderBaseDialog)
 };
 
 // folder properties dialog
@@ -252,7 +252,7 @@ public:
    wxFolderPropertiesDialog() { wxFAIL_MSG(_T("not reached")); }
 
 private:
-   DECLARE_DYNAMIC_CLASS(wxFolderPropertiesDialog)
+   DECLARE_DYNAMIC_CLASS_NO_COPY(wxFolderPropertiesDialog)
 };
 
 // folder creation dialog
@@ -283,7 +283,7 @@ private:
    // if we're changing it programmatically
    int m_nameModifiedByUser;
 
-   DECLARE_DYNAMIC_CLASS(wxFolderCreateDialog)
+   DECLARE_DYNAMIC_CLASS_NO_COPY(wxFolderCreateDialog)
    DECLARE_EVENT_TABLE()
 };
 
@@ -539,6 +539,7 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxFolderPropertiesPage)
 };
 
 // notebook for folder properties/creation: if the wxFolderCreateDialog pointer
@@ -552,6 +553,9 @@ public:
    static const char *s_aszImagesAdvanced[];
 
    wxFolderCreateNotebook(wxWindow *parent, wxFolderCreateDialog *dlg = NULL);
+
+private:
+   DECLARE_NO_COPY_CLASS(wxFolderCreateNotebook)
 };
 
 // ----------------------------------------------------------------------------
@@ -571,6 +575,8 @@ private:
    virtual void OnIconChange() { m_dlg->SetDirty(); }
 
    wxFolderBaseDialog *m_dlg;
+
+   DECLARE_NO_COPY_CLASS(wxFolderIconBrowseButtonInDialog)
 };
 
 // ============================================================================
@@ -1474,7 +1480,7 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
 }
 
 void
-wxFolderPropertiesPage::EnableControlsForFileFolder(MFolderType folderType)
+wxFolderPropertiesPage::EnableControlsForFileFolder(MFolderType /* type */)
 {
    EnableTextWithLabel(m_mailboxname, FALSE);
    EnableTextWithLabel(m_server, FALSE);

@@ -101,6 +101,9 @@ public:
       }
 
    virtual bool Layout() { return wxScrolledWindow::Layout(); }
+
+private:
+   DECLARE_NO_COPY_CLASS(wxEnhScrolledWindow)
 };
 
 // ============================================================================
@@ -1037,7 +1040,7 @@ void wxEnhancedPanel::EnableListBox(wxListBox *control, bool bEnable)
 // wxNotebookPageBase
 // ----------------------------------------------------------------------------
 
-void wxNotebookPageBase::OnChange(wxEvent& event)
+void wxNotebookPageBase::OnChange(wxEvent& /* event */)
 {
    wxOptionsEditDialog *dlg = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
    if ( dlg )

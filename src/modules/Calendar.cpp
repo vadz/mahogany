@@ -186,6 +186,8 @@ public:
 public:
    class CalendarModule *m_Module;
    bool m_started;
+
+   DECLARE_NO_COPY_CLASS(DayCheckTimer)
 };
 
 ///------------------------------
@@ -362,6 +364,7 @@ protected:
    wxCalendarCtrl *m_CalCtrlEnd;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxDateDialog)
 };
 
 BEGIN_EVENT_TABLE(wxDateDialog, wxManuallyLaidOutDialog)
@@ -541,6 +544,8 @@ private:
    CalendarModule *m_Module;
    wxCalendarCtrl *m_CalCtrl;
    wxListCtrl     *m_ListCtrl;
+
+   DECLARE_NO_COPY_CLASS(CalendarFrame)
 };
 
 // ----------------------------------------------------------------------------
@@ -556,7 +561,7 @@ public:
       : MMessagesDropTargetBase(frame) { m_Frame = frame; }
 
    // overridden base class pure virtual
-   virtual wxDragResult OnMsgDrop(wxCoord x, wxCoord y,
+   virtual wxDragResult OnMsgDrop(wxCoord /* x */, wxCoord /* y */,
                                   MMessagesDataObject *data,
                                   wxDragResult def)
    {
@@ -581,6 +586,8 @@ public:
    }
 private:
    CalendarFrame *m_Frame;
+
+   DECLARE_NO_COPY_CLASS(MMessagesCalDropTarget)
 };
 
 #endif // wxUSE_DRAG_AND_DROP
@@ -1252,7 +1259,7 @@ CalendarModule::CreateFrame(void)
 }
 
 bool
-CalendarModule::OnASFolderResultEvent(MEventASFolderResultData & ev )
+CalendarModule::OnASFolderResultEvent(MEventASFolderResultData &)
 {
    return TRUE;
 }

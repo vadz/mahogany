@@ -414,6 +414,7 @@ private:
    static const wxChar *ms_addrTypes[wxComposeView::Recipient_Max];
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxRcptTypeChoice)
 };
 
 // ----------------------------------------------------------------------------
@@ -439,6 +440,7 @@ protected:
    void OnEnter(wxCommandEvent& event);
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxTextCtrlProcessingEnter)
 };
 
 // ----------------------------------------------------------------------------
@@ -449,6 +451,9 @@ class wxSubjectTextCtrl : public wxTextCtrlProcessingEnter
 {
 public:
    wxSubjectTextCtrl(wxWindow *parent) : wxTextCtrlProcessingEnter(parent) { }
+
+private:
+   DECLARE_NO_COPY_CLASS(wxSubjectTextCtrl)
 };
 
 // ----------------------------------------------------------------------------
@@ -483,6 +488,7 @@ private:
    wxRcptControl *m_rcptControl;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxAddressTextCtrl)
 };
 
 // ----------------------------------------------------------------------------
@@ -504,6 +510,7 @@ public:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxMainAddressTextCtrl)
 };
 
 // ----------------------------------------------------------------------------
@@ -523,6 +530,7 @@ public:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxExtraAddressTextCtrl)
 };
 
 // ----------------------------------------------------------------------------
@@ -551,6 +559,7 @@ private:
    wxRcptControl *m_rcptControl;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxRcptExpandButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -581,6 +590,7 @@ private:
    wxRcptMainControl *m_rcptControl;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxRcptAddButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -612,6 +622,7 @@ private:
    wxRcptExtraControl *m_rcptControl;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxRcptRemoveButton)
 };
 
 // ----------------------------------------------------------------------------

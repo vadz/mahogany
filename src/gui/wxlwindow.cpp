@@ -918,7 +918,7 @@ wxLayoutWindow::OnScroll(wxScrollWinEvent& event)
 #endif // __WXMSW__
 
 void
-wxLayoutWindow::RequestUpdate(const wxRect *updateRect)
+wxLayoutWindow::RequestUpdate(const wxRect * /* updateRect */)
 {
    m_needsRedraw = true;
 }
@@ -1366,7 +1366,7 @@ wxLayoutWindow::Cut(bool privateFormat, bool usePrimary)
 bool
 wxLayoutWindow::Find(const wxString &needle,
                      wxPoint * fromWhere,
-                     const wxString &configPath)
+                     const wxString& /* configPath */)
 {
    m_FindString = needle;
    CHECK( !m_FindString.empty(), false, _T("can't search for empty string") );

@@ -11,6 +11,7 @@ $Id$
 bad bugs:
 
 1. filtering msg into a folder opening which is cancelled LOSES the msg!!
+2. error messages from VFS when using HTML?
 
 ************ Small features before release
 

@@ -49,6 +49,7 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxBrowseButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -90,6 +91,8 @@ public:
 
 private:
    wxTextCtrl *m_text;
+
+   DECLARE_NO_COPY_CLASS(wxTextBrowseButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -124,6 +127,8 @@ public:
 private:
    bool m_open,
         m_existingOnly;
+
+   DECLARE_NO_COPY_CLASS(wxFileBrowseButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -147,6 +152,8 @@ private:
    // a hack for wxFileOrDirBrowseButton convenience
    friend class wxFileOrDirBrowseButton;
    static void DoBrowseHelper(wxTextBrowseButton *browseBtn);
+
+   DECLARE_NO_COPY_CLASS(wxDirBrowseButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -181,6 +188,8 @@ private:
    void UpdateTooltip();
 
    bool m_browseForFile;
+
+   DECLARE_NO_COPY_CLASS(wxFileOrDirBrowseButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -207,6 +216,8 @@ public:
 
 private:
    MFolder *m_folder;
+
+   DECLARE_NO_COPY_CLASS(wxFolderBrowseButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -255,6 +266,7 @@ private:
 
    // abstract because we have no default ctor
    DECLARE_ABSTRACT_CLASS(wxColorBrowseButton)
+   DECLARE_NO_COPY_CLASS(wxColorBrowseButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -275,6 +287,9 @@ public:
    // the user in the text control
    static String FontDescToUser(const String& desc);
    static String FontDescFromUser(const String& desc);
+
+private:
+   DECLARE_NO_COPY_CLASS(wxFontBrowseButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -348,6 +363,8 @@ private:
    wxArrayString m_iconNames;
    int           m_nIcon;
    wxStaticBitmap *m_staticBitmap;
+
+   DECLARE_NO_COPY_CLASS(wxIconBrowseButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -359,6 +376,9 @@ class wxFolderIconBrowseButton : public wxIconBrowseButton
 {
 public:
    wxFolderIconBrowseButton(wxWindow *parent, const wxString& tooltip);
+
+private:
+   DECLARE_NO_COPY_CLASS(wxFolderIconBrowseButton)
 };
 
 #endif // _GUI_WXBROWSEBUTTON_H_

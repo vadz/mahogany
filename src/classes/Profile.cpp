@@ -198,41 +198,42 @@ public:
          return defaultvalue;
       }
 
-   virtual int readEntryFromHere(const String& key, int defvalue) const
+   virtual int readEntryFromHere(const String& /* key */, int defvalue) const
    {
       return defvalue;
    }
 
    /// Write back the character value.
-   virtual bool writeEntry(const String & key, const String & Value)
+   virtual bool writeEntry(const String& /* key */, const String& /* value */)
       { return false ; }
    /// Write back the int value.
-   virtual bool writeEntry(const String & key, long Value)
+   virtual bool writeEntry(const String& /* key */, long /* value */)
       { return false; }
 
-   virtual bool writeEntryIfNeeded(const String& key,
-                                   long value,
-                                   long defvalue)
+   virtual bool writeEntryIfNeeded(const String& /* key */,
+                                   long /* value */,
+                                   long /* defvalue */)
       { return false; }
    //@}
 
    /// return true if the entry is defined
-   virtual bool HasEntry(const String & key) const
+   virtual bool HasEntry(const String & /* key */) const
       { return false; }
    /// return the type of entry
-   virtual wxConfigBase::EntryType GetEntryType(const String & key) const
+   virtual wxConfigBase::EntryType GetEntryType(const String & /* key */) const
       { return wxConfigBase::Type_Unknown; }
    /// return true if the group exists
-   virtual bool HasGroup(const String & name) const
+   virtual bool HasGroup(const String & /* name */) const
       { return false; }
    /// delete the entry specified by path
-   virtual bool DeleteEntry(const String& key)
+   virtual bool DeleteEntry(const String& /* key */)
       { return false; }
    /// delete the entry group specified by path
-   virtual bool DeleteGroup(const String & path)
+   virtual bool DeleteGroup(const String & /* path */)
       { return false; }
    /// rename a group
-   virtual bool Rename(const String& oldName, const String& newName)
+   virtual bool Rename(const String& /* oldName */,
+                       const String& /* newName */)
       { return false; }
    /// return the name of the profile
    virtual const String GetName(void) const
@@ -242,13 +243,17 @@ public:
        again, this is just directly forwarded to wxConfig
    */
    /// see wxConfig docs
-   virtual bool GetFirstGroup(String& s, long& l) const{ return false; }
+   virtual bool GetFirstGroup(String& /* s */, long& /* l */) const
+      { return false; }
    /// see wxConfig docs
-   virtual bool GetNextGroup(String& s, long& l) const{ return false; }
+   virtual bool GetNextGroup(String& /* s */, long& /* l */) const
+      { return false; }
    /// see wxConfig docs
-   virtual bool GetFirstEntry(String& s, long& l) const{ return false; }
+   virtual bool GetFirstEntry(String& /* s */, long& /* l */) const
+      { return false; }
    /// see wxConfig docs
-   virtual bool GetNextEntry(String& s, long& l) const{ return false; }
+   virtual bool GetNextEntry(String& /* s */, long& /* l */) const
+      { return false; }
 
    /// Returns a unique, not yet existing sub-group name: //MT!!
    virtual String GetUniqueGroupName(void) const
@@ -306,6 +311,8 @@ private:
       {
          if(m_Parent) m_Parent->DecRef();
       }
+
+   DECLARE_NO_COPY_CLASS(EmptyProfile)
 
    GCC_DTOR_WARN_OFF
 };
@@ -494,6 +501,8 @@ private:
 
    MOBJECT_DEBUG(ProfileImpl)
 
+   DECLARE_NO_COPY_CLASS(ProfileImpl)
+
    GCC_DTOR_WARN_OFF
 };
 
@@ -537,7 +546,10 @@ private:
          m_ProfileName = GetRootPath();
          m_ProfileName << '/' << name;
       }
+
+   DECLARE_NO_COPY_CLASS(Identity)
 };
+
 /**
    Filter profile class which is a Profile representing a single
    filter rule.
@@ -569,6 +581,8 @@ private:
          m_ProfileName = GetRootPath();
          m_ProfileName << '/' << name;
       }
+
+   DECLARE_NO_COPY_CLASS(FilterProfile)
 };
 
 
@@ -737,7 +751,7 @@ wxConfigBase * Profile::ms_GlobalConfig;
     to all profiles directly after creation.
 */
 static inline
-void EnforcePolicy(Profile *p)
+void EnforcePolicy(Profile * /* p */)
 {
    // currently we don't do anything here
 }

@@ -55,6 +55,7 @@ private:
    const ClickablePGPInfo * const m_pgpInfo;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(PGPMenu)
 };
 
 // ============================================================================

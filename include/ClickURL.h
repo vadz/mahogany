@@ -85,6 +85,8 @@ private:
       No,
       Yes
    } m_isMail;
+
+   DECLARE_NO_COPY_CLASS(ClickableURL)
 };
 
 #endif // _M_CLICKURL_H_

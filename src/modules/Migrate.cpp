@@ -244,6 +244,7 @@ private:
    bool m_isDirty;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(IMAPServerPanel)
 };
 
 // ----------------------------------------------------------------------------
@@ -266,6 +267,8 @@ private:
    wxChoice *m_choiceFormat;
 
    MigrateLocal *m_localData;
+
+   DECLARE_NO_COPY_CLASS(LocalPanel)
 };
 
 // ----------------------------------------------------------------------------
@@ -334,6 +337,8 @@ private:
 
    // false while we're waiting for the events from ListFolders()
    bool m_doneWithList;
+
+   DECLARE_NO_COPY_CLASS(MigrateWizard)
 };
 
 // ----------------------------------------------------------------------------
@@ -369,6 +374,8 @@ public:
 private:
    MigrateWizard *m_wizard;
    MigrateWizard::Page m_id;
+
+   DECLARE_NO_COPY_CLASS(MigrateWizardPage)
 };
 
 // ----------------------------------------------------------------------------
@@ -385,6 +392,9 @@ public:
    {
       new wxStaticText(this, -1, msg);
    }
+
+
+   DECLARE_NO_COPY_CLASS(MigrateWizardMsgOnlyPage)
 };
 
 // ----------------------------------------------------------------------------
@@ -401,6 +411,8 @@ public:
 
 private:
    IMAPServerPanel *m_panel;
+
+   DECLARE_NO_COPY_CLASS(MigrateWizardSourcePage)
 };
 
 // ----------------------------------------------------------------------------
@@ -425,6 +437,9 @@ public:
         )
    {
    }
+
+private:
+   DECLARE_NO_COPY_CLASS(MigrateWizardCantAccessPage)
 };
 
 // ----------------------------------------------------------------------------
@@ -451,6 +466,9 @@ public:
         )
    {
    }
+
+private:
+   DECLARE_NO_COPY_CLASS(MigrateWizardNothingToDoPage)
 };
 
 // ----------------------------------------------------------------------------
@@ -489,6 +507,7 @@ private:
    LocalPanel *m_panelLocal;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MigrateWizardDstPage)
 };
 
 // ----------------------------------------------------------------------------
@@ -502,6 +521,8 @@ public:
 
 private:
    String BuildMsg(MigrateWizard *parent) const;
+
+   DECLARE_NO_COPY_CLASS(MigrateWizardConfirmPage)
 };
 
 // ----------------------------------------------------------------------------
@@ -590,6 +611,7 @@ private:
    wxButton     *m_btnAbort;        // the cancel button
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MigrateWizardProgressPage)
 };
 
 // ============================================================================

@@ -312,6 +312,7 @@ private:
 //@}
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxLayoutWindow)
 };
 
 #endif

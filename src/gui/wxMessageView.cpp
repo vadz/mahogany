@@ -93,7 +93,7 @@ public:
 
    virtual bool Expand(const String& category,
                        const String& Name,
-                       const wxArrayString& arguments,
+                       const wxArrayString& /* arguments */,
                        String *value) const
    {
       if ( !m_msg )
@@ -136,7 +136,7 @@ public:
    // creation
    DummyViewer() { }
 
-   virtual void Create(MessageView *msgView, wxWindow *parent)
+   virtual void Create(MessageView * /* msgView */, wxWindow *parent)
    {
       m_window = new wxStaticText(parent, -1, _("\n\nNo message"),
                                   wxDefaultPosition, wxDefaultSize,
@@ -149,7 +149,7 @@ public:
    virtual void UpdateOptions() { }
    virtual wxWindow *GetWindow() const { return m_window; }
 
-   virtual bool Find(const String& text) { return false; }
+   virtual bool Find(const String& /* text */) { return false; }
    virtual bool FindAgain() { return false; }
    virtual String GetSelection() const { return ""; }
    virtual void Copy() { }
@@ -158,27 +158,31 @@ public:
 
    // header showing
    virtual void StartHeaders() { }
-   virtual void ShowRawHeaders(const String& header) { }
-   virtual void ShowHeaderName(const String& name) { }
-   virtual void ShowHeaderValue(const String& value,
-                                wxFontEncoding encoding) { }
-   virtual void ShowHeaderURL(const String& text,
-                              const String& url) { }
+   virtual void ShowRawHeaders(const String& /* header */) { }
+   virtual void ShowHeaderName(const String& /* name */) { }
+   virtual void ShowHeaderValue(const String& /* value */,
+                                wxFontEncoding /* encoding */) { }
+   virtual void ShowHeaderURL(const String& /* text */,
+                              const String& /* url */) { }
    virtual void EndHeader() { }
-   virtual void ShowXFace(const wxBitmap& bitmap) { }
+   virtual void ShowXFace(const wxBitmap& /* bitmap */) { }
    virtual void EndHeaders() { }
 
    // body showing
    virtual void StartBody() { }
    virtual void StartPart() { }
-   virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) { }
-   virtual void InsertClickable(const wxBitmap& icon,
-                                ClickableInfo *ci,
-                                const wxColour& col) { }
-   virtual void InsertImage(const wxImage& image, ClickableInfo *ci) { }
-   virtual void InsertRawContents(const String& data) { }
-   virtual void InsertText(const String& text, const MTextStyle& style) { }
-   virtual void InsertURL(const String& text, const String& url) { }
+   virtual void InsertAttachment(const wxBitmap& /* icon */,
+                                 ClickableInfo * /* ci */) { }
+   virtual void InsertClickable(const wxBitmap& /* icon */,
+                                ClickableInfo * /* ci */,
+                                const wxColour& /* col */) { }
+   virtual void InsertImage(const wxImage& /* image */,
+                            ClickableInfo * /* ci */) { }
+   virtual void InsertRawContents(const String& /* data */) { }
+   virtual void InsertText(const String& /* text */,
+                           const MTextStyle& /* style */) { }
+   virtual void InsertURL(const String& /* text */,
+                          const String& /* url */) { }
    virtual void EndText() { }
    virtual void EndPart() { }
    virtual void EndBody() { }
@@ -191,7 +195,7 @@ public:
 
    // capabilities querying
    virtual bool CanInlineImages() const { return false; }
-   virtual bool CanProcess(const String& mimetype) const { return false; }
+   virtual bool CanProcess(const String& /* mimetype */) const { return false; }
 
 private:
    wxWindow *m_window;

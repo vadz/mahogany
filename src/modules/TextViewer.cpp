@@ -206,6 +206,7 @@ private:
    ArrayClickables m_clickables;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(TextViewerWindow)
 };
 
 // ============================================================================
@@ -545,7 +546,7 @@ void TextViewer::EndHeader()
    InsertText("\n", MTextStyle());
 }
 
-void TextViewer::ShowXFace(const wxBitmap& bitmap)
+void TextViewer::ShowXFace(const wxBitmap& /* bitmap */)
 {
    // we don't show XFaces
 }
@@ -569,7 +570,7 @@ void TextViewer::StartPart()
    m_window->AppendText("\n");
 }
 
-void TextViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
+void TextViewer::InsertAttachment(const wxBitmap& /* icon */, ClickableInfo *ci)
 {
    String str;
    str << _("[Attachment: ") << ci->GetLabel() << _T(']');
@@ -577,7 +578,7 @@ void TextViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
    m_window->InsertClickable(str, ci, GetOptions().AttCol);
 }
 
-void TextViewer::InsertClickable(const wxBitmap& icon,
+void TextViewer::InsertClickable(const wxBitmap& /* icon */,
                                  ClickableInfo *ci,
                                  const wxColour& col)
 {
@@ -587,14 +588,15 @@ void TextViewer::InsertClickable(const wxBitmap& icon,
    m_window->InsertClickable(str, ci, col);
 }
 
-void TextViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
+void
+TextViewer::InsertImage(const wxImage& /* image */, ClickableInfo * /* ci */)
 {
    // as we return false from CanInlineImages() this is not supposed to be
    // called
    FAIL_MSG( _T("unexpected call to TextViewer::InsertImage") );
 }
 
-void TextViewer::InsertRawContents(const String& data)
+void TextViewer::InsertRawContents(const String& /* data */)
 {
    // as we return false from our CanProcess(), MessageView is not supposed to
    // ask us to process any raw data
@@ -670,7 +672,7 @@ bool TextViewer::CanInlineImages() const
    return false;
 }
 
-bool TextViewer::CanProcess(const String& mimetype) const
+bool TextViewer::CanProcess(const String& /* mimetype */) const
 {
    // we don't have any special processing for any MIME types
    return false;

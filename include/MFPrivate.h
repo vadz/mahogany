@@ -168,6 +168,8 @@ private:
 
    InitFunction m_init;
    CleanupFunction m_cleanup;
+
+   DECLARE_NO_COPY_CLASS(MFSubSystem)
 };
 
 

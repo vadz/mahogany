@@ -48,6 +48,8 @@ static const size_t lenAlias = 5;   // strlen("alias")
 class AdbMailrcImporter : public AdbImporter
 {
 public:
+   AdbMailrcImporter() { }
+
    // implement base class pure virtuals
    virtual String GetDefaultFilename() const;
    virtual bool CanImport(const String& filename);
@@ -79,6 +81,8 @@ protected:
 
    // the first "interesting" (i.e. non blank, non comment) line in the file
    size_t m_nLineStart;
+
+   DECLARE_NO_COPY_CLASS(AdbMailrcImporter)
 };
 
 // ============================================================================
@@ -323,14 +327,17 @@ size_t AdbMailrcImporter::GetEntryNames(const String& path,
 }
 
 size_t AdbMailrcImporter::GetGroupNames(const String& path,
-                                        wxArrayString& groups) const
+                                        wxArrayString& /* groups */) const
 {
-   ASSERT_MSG( !path, _T("where did this path come from?") );
+   if ( !path.empty() )
+   {
+       FAIL_MSG( _T("where did this path come from?") );
+   }
 
    return 0;
 }
 
-bool AdbMailrcImporter::ImportEntry(const String& path,
+bool AdbMailrcImporter::ImportEntry(const String& /* path */,
                                     size_t index,
                                     AdbEntry *entry)
 {

@@ -508,6 +508,9 @@ private:
 
          Append(Properties, _("&Properties"));
       }
+
+   private:
+      DECLARE_NO_COPY_CLASS(FolderMenu)
    } *m_menuRoot,                 // popup menu for the root folder
      *m_menu;                     // popup menu for all folders
 
@@ -577,6 +580,7 @@ private:
 #endif // USE_TREE_ACTIVATE_BUGFIX
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxFolderTreeImpl)
 };
 
 #if wxUSE_DRAG_AND_DROP
@@ -681,6 +685,8 @@ public:
 
 private:
    MFolder *m_folderLast;
+
+   DECLARE_NO_COPY_CLASS(TreeDropTarget)
 };
 
 #endif // wxUSE_DRAG_AND_DROP

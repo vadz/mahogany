@@ -150,6 +150,7 @@ private:
    LayoutViewer *m_viewer;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(LayoutViewerWindow)
 };
 
 // ----------------------------------------------------------------------------
@@ -517,7 +518,7 @@ void LayoutViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 
 void LayoutViewer::InsertClickable(const wxBitmap& icon,
                                    ClickableInfo *ci,
-                                   const wxColour& col)
+                                   const wxColour& /* col */)
 {
    InsertAttachment(icon, ci);
 }
@@ -527,7 +528,7 @@ void LayoutViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
    InsertAttachment(wxBitmap(image), ci);
 }
 
-void LayoutViewer::InsertRawContents(const String& data)
+void LayoutViewer::InsertRawContents(const String& /* data */)
 {
    // as we return false from our CanProcess(), MessageView is not supposed to
    // ask us to process any raw data
@@ -721,7 +722,7 @@ bool LayoutViewer::CanInlineImages() const
    return true;
 }
 
-bool LayoutViewer::CanProcess(const String& mimetype) const
+bool LayoutViewer::CanProcess(const String& /* mimetype */) const
 {
    // we don't have any special processing for any MIME types
    return false;

@@ -174,6 +174,8 @@ private:
    MWizardType m_Type;
    class MWizardPage * m_WizardPages[MWizard_PagesMax];
    MWizardPageId m_First, m_Last;
+
+   DECLARE_NO_COPY_CLASS(MWizard)
 };
 
 
@@ -228,6 +230,7 @@ private:
    MWizard *m_Wizard;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MWizardPage)
 };
 
 BEGIN_EVENT_TABLE(MWizardPage, wxWizardPage)
@@ -326,6 +329,8 @@ public:
 
 private:
    Params m_params;
+
+   DECLARE_NO_COPY_CLASS(ImportFoldersWizard)
 };
 
 // MWizard_ImportFolders_ChoicePage
@@ -346,6 +351,7 @@ private:
    wxCheckBox *m_checkMH;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MWizard_ImportFolders_ChoicePage)
 };
 
 BEGIN_EVENT_TABLE(MWizard_ImportFolders_ChoicePage, MWizardPage)
@@ -411,7 +417,7 @@ MWizardPageId MWizard_ImportFolders_ChoicePage::GetNextPageId() const
    return MWizard_PageNone;
 }
 
-void MWizard_ImportFolders_ChoicePage::OnCheckBox(wxCommandEvent& event)
+void MWizard_ImportFolders_ChoicePage::OnCheckBox(wxCommandEvent&)
 {
    SetNextButtonLabel(GetNextPageId() == MWizard_PageNone);
 }
@@ -435,6 +441,8 @@ public:
 private:
    wxTextCtrl *m_textTop;
    wxCheckBox *m_checkAll;
+
+   DECLARE_NO_COPY_CLASS(MWizard_ImportFolders_MHPage)
 };
 
 MWizard_ImportFolders_MHPage::MWizard_ImportFolders_MHPage(MWizard *wizard)
@@ -570,6 +578,8 @@ protected:
 
    // does the user want to use dialog instead of wizard?
    bool m_wantsDialog;
+
+   DECLARE_NO_COPY_CLASS(CreateFolderWizard)
 };
 
 
@@ -602,6 +612,7 @@ private:
               *m_checkNeverWizard;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MWizard_CreateFolder_WelcomePage)
 };
 
 BEGIN_EVENT_TABLE(MWizard_CreateFolder_WelcomePage, MWizardPage)
@@ -651,7 +662,7 @@ MWizardPageId MWizard_CreateFolder_WelcomePage::GetNextPageId() const
    return MWizardPage::GetNextPageId();
 }
 
-void MWizard_CreateFolder_WelcomePage::OnCheckbox(wxCommandEvent& event)
+void MWizard_CreateFolder_WelcomePage::OnCheckbox(wxCommandEvent&)
 {
    // if any of our checkboxes if checked, we close the wizard right after this
    // page so change the label to reflect it
@@ -708,9 +719,13 @@ class MWizard_CreateFolder_TypePage : public MWizardPage
 {
 public:
    MWizard_CreateFolder_TypePage(MWizard *wizard);
+
    virtual MWizardPageId GetNextPageId() const;
+
 private:
    wxChoice *m_TypeCtrl;
+
+   DECLARE_NO_COPY_CLASS(MWizard_CreateFolder_TypePage)
 };
 
 
@@ -820,6 +835,8 @@ private:
    wxFileOrDirBrowseButton *m_browsePath;
 
    FolderEntryType m_Type;
+
+   DECLARE_NO_COPY_CLASS(MWizard_CreateFolder_ServerPage)
 };
 
 // keep this enum in sync with the labels array in the function below
@@ -1245,6 +1262,9 @@ public: \
                                         MWizard_CreateFolder_##type,\
                                         FOLDERTYPE_##type2)\
  { } \
+ \
+private: \
+   DECLARE_NO_COPY_CLASS(MWizard_CreateFolder_##type##Page) \
 }
 
 DEFINE_TYPEPAGE(File,FILE);
@@ -1285,6 +1305,7 @@ private:
               *m_checkOnStartup;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MWizard_CreateFolder_NewMailPage)
 };
 
 BEGIN_EVENT_TABLE(MWizard_CreateFolder_NewMailPage, MWizardPage)
@@ -1356,8 +1377,12 @@ class MWizard_CreateFolder_FinalPage : public MWizardPage
 {
 public:
    MWizard_CreateFolder_FinalPage(MWizard *wizard);
+
    virtual MWizardPageId GetPreviousPageId() const;
    virtual MWizardPageId GetNextPageId() const { return MWizard_PageNone; }
+
+private:
+   DECLARE_NO_COPY_CLASS(MWizard_CreateFolder_FinalPage)
 };
 
 

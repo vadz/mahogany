@@ -116,10 +116,10 @@ void MailFolderVirt::Cleanup()
 /* static */
 MailFolder *
 MailFolderVirt::OpenFolder(const MFolder *folder,
-                           const String& login,
-                           const String& password,
+                           const String& /* login */,
+                           const String& /* password */,
                            OpenMode openmode,
-                           wxFrame *frame)
+                           wxFrame * /* frame */)
 {
    CHECK( folder, NULL, _T("NULL folder in MailFolderVirt::OpenFolder") );
 
@@ -129,7 +129,7 @@ MailFolderVirt::OpenFolder(const MFolder *folder,
 }
 
 /* static */
-bool MailFolderVirt::CheckStatus(const MFolder *folder)
+bool MailFolderVirt::CheckStatus(const MFolder * /* folder */)
 {
    // the status of a virtual folder never changes from outside so this is a
    // NOOP too
@@ -137,7 +137,7 @@ bool MailFolderVirt::CheckStatus(const MFolder *folder)
 }
 
 /* static */
-bool MailFolderVirt::DeleteFolder(const MFolder *folder)
+bool MailFolderVirt::DeleteFolder(const MFolder * /* folder */)
 {
    FAIL_MSG( _T("TODO") );
 
@@ -145,7 +145,8 @@ bool MailFolderVirt::DeleteFolder(const MFolder *folder)
 }
 
 /* static */
-bool MailFolderVirt::RenameFolder(const MFolder *folder, const String& name)
+bool MailFolderVirt::RenameFolder(const MFolder * /* folder */,
+                                  const String& /* name */)
 {
    FAIL_MSG( _T("TODO") );
 
@@ -153,7 +154,7 @@ bool MailFolderVirt::RenameFolder(const MFolder *folder, const String& name)
 }
 
 /* static */
-long MailFolderVirt::ClearFolder(const MFolder *folder)
+long MailFolderVirt::ClearFolder(const MFolder * /* folder */)
 {
    FAIL_MSG( _T("TODO") );
 
@@ -162,7 +163,8 @@ long MailFolderVirt::ClearFolder(const MFolder *folder)
 
 /* static */
 String
-MailFolderVirt::GetFullImapSpec(const MFolder *folder, const String& login)
+MailFolderVirt::GetFullImapSpec(const MFolder *folder,
+                                const String& /* login */)
 {
    CHECK( folder, "", _T("NULL folder in MailFolderVirt::GetFullImapSpec") );
 
@@ -187,7 +189,7 @@ bool MailFolderVirt::IsReadOnly() const
     return m_openMode == ReadOnly;
 }
 
-bool MailFolderVirt::CanSetFlag(int flags) const
+bool MailFolderVirt::CanSetFlag(int /* flags */) const
 {
     // all flags can be set even though not all of them make sense for us
     return true;
@@ -640,7 +642,7 @@ bool MailFolderVirt::AppendMessage(const Message& msg)
    return true;
 }
 
-bool MailFolderVirt::AppendMessage(const String& msg)
+bool MailFolderVirt::AppendMessage(const String& /* msg */)
 {
    FAIL_MSG( _T("AppendMessage(string) can't be used with virtual folder") );
 
@@ -699,12 +701,12 @@ MailFolderVirt::SearchByFlag(MessageStatus flag,
 }
 
 void
-MailFolderVirt::ListFolders(class ASMailFolder *asmf,
-                            const String &pattern,
-                            bool subscribed_only,
-                            const String &reference,
-                            UserData ud,
-                            Ticket ticket)
+MailFolderVirt::ListFolders(class ASMailFolder * /* asmf */,
+                            const String& /* pattern */,
+                            bool /* subscribed_only */,
+                            const String& /* reference */,
+                            UserData /* ud */,
+                            Ticket /* ticket */)
 {
    // we never have any subfolders
 }

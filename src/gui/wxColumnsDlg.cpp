@@ -113,6 +113,7 @@ private:
               *m_chkReset;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxFolderViewColumnsDialog)
 };
 
 // ============================================================================
@@ -348,7 +349,7 @@ void wxFolderViewColumnsDialog::OnMakeDefault(wxCommandEvent& WXUNUSED(event))
    m_chkReset->Enable( !m_chkMakeDef->IsChecked() );
 }
 
-void wxFolderViewColumnsDialog::OnReset(wxCommandEvent& event)
+void wxFolderViewColumnsDialog::OnReset(wxCommandEvent& WXUNUSED(event))
 {
    // neither does it make sense to set as default the widths if we want to
    // reset them to, precisely, the default values

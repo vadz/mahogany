@@ -110,6 +110,7 @@ private:
                        m_importerDescs;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxAdbImportDialog)
 };
 
 // the dialog allowing the user to choose from possibly many ADB expansions
@@ -163,6 +164,7 @@ private:
    size_t m_nGroups;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxAdbExpandDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -487,7 +489,7 @@ bool wxAdbExpandDialog::TransferDataToWindow()
    return true;
 }
 
-void wxAdbExpandDialog::OnBtnMore(wxCommandEvent& event)
+void wxAdbExpandDialog::OnBtnMore(wxCommandEvent&)
 {
    size_t nEntryCount = m_aMoreEntries.GetCount();
    for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )

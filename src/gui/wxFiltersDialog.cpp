@@ -367,8 +367,8 @@ public:
    void OnProgramTextUpdate(wxCommandEvent& event);
 
    void OnText(wxCommandEvent& event);
-   void OnChoice(wxCommandEvent& event) { UpdateProgram(); }
-   void OnCheckBox(wxCommandEvent& event) { UpdateProgram(); }
+   void OnChoice(wxCommandEvent&) { UpdateProgram(); }
+   void OnCheckBox(wxCommandEvent&) { UpdateProgram(); }
 
 protected:
    void DoUpdateUI();
@@ -411,7 +411,7 @@ protected:
    wxEnhancedPanel *m_Panel;
 
 private:
-   DECLARE_DYNAMIC_CLASS(wxOneFilterDialog)
+   DECLARE_DYNAMIC_CLASS_NO_COPY(wxOneFilterDialog)
    DECLARE_EVENT_TABLE()
 };
 
@@ -452,6 +452,7 @@ private:
    OneCritControl *m_ctrl;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(CritDetailsButton)
 };
 
 BEGIN_EVENT_TABLE(CritDetailsButton, wxButton)
@@ -926,7 +927,7 @@ static const wxOptionsPageDesc gs_SpamPageDesc =
 
 
 void
-OneCritControl::InitSpamOptions(const String& rule)
+OneCritControl::InitSpamOptions(const String& /* rule */)
 {
    CHECK_RET( m_Argument, _T("no argument control in the spam test?") );
 
@@ -1557,7 +1558,7 @@ wxOneFilterDialog::DoUpdateUI()
 }
 
 void
-wxOneFilterDialog::OnProgramTextUpdate(wxCommandEvent& event)
+wxOneFilterDialog::OnProgramTextUpdate(wxCommandEvent& /* event */)
 {
    // catches the case of SetValue() from TransferDataToWindow()
    if ( m_initializing )
@@ -1762,6 +1763,7 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxAllFiltersDialog)
 };
 
 BEGIN_EVENT_TABLE(wxAllFiltersDialog, wxManuallyLaidOutDialog)
@@ -1876,7 +1878,7 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
 // ----------------------------------------------------------------------------
 
 void
-wxAllFiltersDialog::OnAddFiter(wxCommandEvent &event)
+wxAllFiltersDialog::OnAddFiter(wxCommandEvent& /* event */)
 {
    String name = CreateNewFilter(this);
    if ( !name )
@@ -1924,7 +1926,7 @@ wxAllFiltersDialog::OnAddFiter(wxCommandEvent &event)
 }
 
 void
-wxAllFiltersDialog::OnCopyFiter(wxCommandEvent &event)
+wxAllFiltersDialog::OnCopyFiter(wxCommandEvent& /* event */)
 {
    wxString name = m_lboxFilters->GetStringSelection();
    CHECK_RET( !!name, _T("must have selection in the listbox") );
@@ -1954,7 +1956,7 @@ wxAllFiltersDialog::OnCopyFiter(wxCommandEvent &event)
 }
 
 void
-wxAllFiltersDialog::OnEditFiter(wxCommandEvent &event)
+wxAllFiltersDialog::OnEditFiter(wxCommandEvent& /* event */)
 {
    String name = m_lboxFilters->GetStringSelection();
    CHECK_RET( !!name, _T("must have selection in the listbox") );
@@ -2005,7 +2007,7 @@ public:
 #endif
 
 void
-wxAllFiltersDialog::OnRenameFiter(wxCommandEvent &event)
+wxAllFiltersDialog::OnRenameFiter(wxCommandEvent& /* event */)
 {
    wxString name = m_lboxFilters->GetStringSelection();
    CHECK_RET( !!name, _T("must have selection in the listbox") );
@@ -2046,7 +2048,7 @@ wxAllFiltersDialog::OnRenameFiter(wxCommandEvent &event)
 }
 
 void
-wxAllFiltersDialog::OnDeleteFiter(wxCommandEvent &event)
+wxAllFiltersDialog::OnDeleteFiter(wxCommandEvent& /* event */)
 {
    String name = m_lboxFilters->GetStringSelection();
    CHECK_RET( !!name, _T("must have selection in the listbox") );
@@ -2198,6 +2200,7 @@ private:
             *m_btnDelete;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxFolderFiltersDialog)
 };
 
 BEGIN_EVENT_TABLE(wxFolderFiltersDialog, wxSelectionsOrderDialog)
@@ -2461,6 +2464,7 @@ private:
    MFolder *m_folder;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxQuickFilterDialog)
 };
 
 BEGIN_EVENT_TABLE(wxQuickFilterDialog, wxManuallyLaidOutDialog)

@@ -40,6 +40,8 @@ public:
 private:
    // the MIME part we're associated with
    const MimePart * const m_mimepart;
+
+   DECLARE_NO_COPY_CLASS(ClickableAttachment)
 };
 
 #endif // _M_CLICKATT_H_

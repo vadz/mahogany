@@ -122,6 +122,7 @@ private:
    void InitSearchData();
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxMainFrame)
 };
 
 #endif // _GUI_MAINFRAME_H_

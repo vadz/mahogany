@@ -263,7 +263,7 @@ public:
 
    virtual bool Expand(const String& category,
                        const String& Name,
-                       const wxArrayString& arguments,
+                       const wxArrayString& /* arguments */,
                        String *value) const
    {
       if ( !m_hi )
@@ -371,6 +371,7 @@ private:
    };
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxFolderMsgWindow)
 };
 
 // ----------------------------------------------------------------------------
@@ -391,6 +392,7 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxFolderMsgViewerEvtHandler)
 };
 
 // ----------------------------------------------------------------------------
@@ -751,6 +753,7 @@ private:
    friend class wxFolderListCtrlBlockOnSelect;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxFolderListCtrl)
 };
 
 /// an object of this class blocks OnSelected() handling during its lifetime
@@ -787,7 +790,7 @@ public:
       m_folderView = view;
    }
 
-   virtual MFolder *GetFolder(wxCoord x, wxCoord y) const
+   virtual MFolder *GetFolder(wxCoord /* x */, wxCoord /* y */) const
    {
       // we don't even use the position of the drop
       return MFolder::Get(m_folderView->GetFullName());
@@ -817,6 +820,9 @@ public:
                           wxSP_3D | wxSP_BORDER)
    {
    }
+
+private:
+   DECLARE_NO_COPY_CLASS(wxFolderSplitterWindow)
 };
 
 // ----------------------------------------------------------------------------
@@ -1269,7 +1275,7 @@ void wxFolderMsgWindow::UpdateOptions()
 // wxFolderMsgWindow event handlers
 // ----------------------------------------------------------------------------
 
-void wxFolderMsgWindow::OnSize(wxSizeEvent& event)
+void wxFolderMsgWindow::OnSize(wxSizeEvent& /* event */)
 {
    if ( m_winViewer )
    {
@@ -1277,7 +1283,7 @@ void wxFolderMsgWindow::OnSize(wxSizeEvent& event)
    }
 }
 
-void wxFolderMsgWindow::OnButton(wxCommandEvent& event)
+void wxFolderMsgWindow::OnButton(wxCommandEvent& /* event */)
 {
    MDialog_Message
    (
@@ -2066,7 +2072,7 @@ void wxFolderListCtrl::PreviewItem(long idx, UIdType uid)
    }
 }
 
-void wxFolderListCtrl::OnPreviewTimer(wxTimerEvent& event)
+void wxFolderListCtrl::OnPreviewTimer(wxTimerEvent& /* event */)
 {
    // preview timer expirer, do we still have the message we wanted to preview
    // selected?
@@ -2942,7 +2948,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
    return text;
 }
 
-int wxFolderListCtrl::OnGetItemImage(long item) const
+int wxFolderListCtrl::OnGetItemImage(long /* item */) const
 {
    return -1;
 }
@@ -3515,7 +3521,7 @@ wxFolderView::ApplyOptions()
 }
 
 void
-wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
+wxFolderView::OnOptionsChange(MEventOptionsChangeData& /* event */)
 {
    AllProfileSettings settings;
    ReadProfileSettings(&settings);

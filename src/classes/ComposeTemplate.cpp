@@ -396,6 +396,8 @@ private:
    // map to the headers of the original message (there are other variables in
    // this category as well)
    static const wxChar *ms_templateOriginalVars[OriginalHeader_Max];
+
+   DECLARE_NO_COPY_CLASS(VarExpander)
 };
 
 // ----------------------------------------------------------------------------
@@ -745,7 +747,7 @@ VarExpander::Expand(const String& category,
 
 bool
 VarExpander::ExpandMisc(const String& name,
-                        const wxArrayString& arguments,
+                        const wxArrayString& /* arguments */,
                         String *value) const
 {
    // deal with all special cases

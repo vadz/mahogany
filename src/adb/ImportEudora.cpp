@@ -76,6 +76,8 @@
 class AdbEudoraImporter : public AdbImporter
 {
 public:
+   AdbEudoraImporter() { }
+
    // implement base class pure virtuals
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);
@@ -102,6 +104,8 @@ protected:
 
    wxArrayInt m_lineNumbers;
    wxTextFile m_textfile;
+
+   DECLARE_NO_COPY_CLASS(AdbEudoraImporter)
 };
 
 // ============================================================================
@@ -357,14 +361,17 @@ size_t AdbEudoraImporter::GetEntryNames(const String& path,
 // TODO: we might fetch the other address books when asked for the groups at
 //       top level
 size_t AdbEudoraImporter::GetGroupNames(const String& path,
-                                        wxArrayString& groups) const
+                                        wxArrayString& /* groups */) const
 {
-   ASSERT_MSG( !path, _T("where did this path come from?") );
+   if ( !path.empty() )
+   {
+       FAIL_MSG( _T("where did this path come from?") );
+   }
 
    return 0;
 }
 
-bool AdbEudoraImporter::ImportEntry(const String& path,
+bool AdbEudoraImporter::ImportEntry(const String& /* path */,
                                     size_t index,
                                     AdbEntry *entry)
 {

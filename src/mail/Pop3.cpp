@@ -81,6 +81,8 @@ private:
    MAILSTREAM    *m_stream;
 
    const wxArrayString *m_uidls;
+
+   DECLARE_NO_COPY_CLASS(PopFlagsCacheFile)
 };
 
 // ============================================================================
@@ -137,7 +139,7 @@ int PopFlagsCacheFile::GetFormatVersion() const
    return BuildVersion(1, 0);
 }
 
-bool PopFlagsCacheFile::DoLoad(const wxTextFile& file, int version)
+bool PopFlagsCacheFile::DoLoad(const wxTextFile& file, int /* version */)
 {
    String uidl;
 

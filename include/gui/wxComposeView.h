@@ -503,7 +503,7 @@ private:
 
    // wxWindows macros
    DECLARE_EVENT_TABLE()
-   DECLARE_CLASS(wxComposeView)
+   DECLARE_DYNAMIC_CLASS_NO_COPY(wxComposeView)
 };
 
 // ----------------------------------------------------------------------------

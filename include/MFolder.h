@@ -192,7 +192,7 @@ public:
       /// a folder may have a fixed position (by default it doesn't have any)
    virtual int GetTreeIndex() const { return -1; }
       /// set the position in the tree (used by wxFolderTree only)
-   virtual void SetTreeIndex(int pos) { }
+   virtual void SetTreeIndex(int /* pos */) { }
 
    /**
      Get the profile associated with this folder: it will never be NULL (as

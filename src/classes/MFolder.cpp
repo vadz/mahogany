@@ -780,7 +780,7 @@ String MFolderFromProfile::GetServer() const
    return server;
 }
 
-void MFolderFromProfile::SetServer(const String& server)
+void MFolderFromProfile::SetServer(const String& /* server */)
 {
    // it's not used now...
    FAIL_MSG( "not implemented" );

@@ -88,6 +88,8 @@ private:
    MessageView *m_MessageView;
 
    MsgCmdProc *m_msgCmdProc;
+
+   DECLARE_NO_COPY_CLASS(wxMessageViewFrame)
 };
 
 #endif // WXMESSAGEVIEW_H

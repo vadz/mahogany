@@ -526,7 +526,7 @@ static inline bool NeedsEncodingInHeader(unsigned char c)
 }
 
 String
-SendMessageCC::EncodeHeaderString(const String& header, bool isaddr)
+SendMessageCC::EncodeHeaderString(const String& header, bool /* isaddr */)
 {
    // if a header contains "=?", encode it anyhow to avoid generating invalid
    // encoded words

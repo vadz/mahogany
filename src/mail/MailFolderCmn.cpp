@@ -190,6 +190,8 @@ public:
 
 private:
    MfCloser *m_mfCloser;
+
+   DECLARE_NO_COPY_CLASS(MfCloseTimer)
 };
 
 // the class which keeps alive all "closed" folders until next timeout
@@ -229,6 +231,8 @@ private:
 
    // the interval of this timer (in seconds)
    int m_interval;
+
+   DECLARE_NO_COPY_CLASS(MfCloser)
 };
 
 // ----------------------------------------------------------------------------
@@ -272,6 +276,8 @@ public:
 protected:
    /// the mailfolder to update
    MailFolderCmn *m_mf;
+
+   DECLARE_NO_COPY_CLASS(MailFolderTimer)
 };
 
 // ----------------------------------------------------------------------------
@@ -1376,7 +1382,7 @@ bool MailFolderCmn::MFCmnOptions::operator!=(const MFCmnOptions& other) const
 // ----------------------------------------------------------------------------
 
 void
-MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
+MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind /* kind */)
 {
    MFCmnOptions config;
    ReadConfig(config);

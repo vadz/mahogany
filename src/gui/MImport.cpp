@@ -78,6 +78,8 @@ public:
 
 private:
    wxArrayImporters& m_importers;
+
+   DECLARE_NO_COPY_CLASS(ImportersArrayFree)
 };
 
 // ----------------------------------------------------------------------------
@@ -119,6 +121,7 @@ private:
    bool m_done, m_ok;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxImportDialog)
 };
 
 // ----------------------------------------------------------------------------

@@ -64,6 +64,9 @@ public:
    wxIconView(wxDialog *parent,
               const BitmapArray& icons,
               int selection);
+
+private:
+   DECLARE_NO_COPY_CLASS(wxIconView)
 };
 
 class wxIconSelectionDialog : public wxManuallyLaidOutDialog
@@ -85,6 +88,7 @@ private:
    int m_selection;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxIconSelectionDialog)
 };
 
 // notify the wxColorBrowseButton about changes to its associated text
@@ -117,6 +121,7 @@ private:
    wxColorBrowseButton *m_btn;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxColorTextEvtHandler)
 };
 
 // ============================================================================

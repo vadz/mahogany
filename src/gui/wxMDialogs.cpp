@@ -250,7 +250,9 @@ private:
    wxString      m_strText;
    wxPTextEntry *m_text;
    wxTextCtrl   *m_passwd; // used if we ask for a password, NULL otherwise
+
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MTextInputDialog)
 };
 
 BEGIN_EVENT_TABLE(MTextInputDialog, wxDialog)
@@ -290,6 +292,7 @@ private:
    int m_flags;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MFolderDialog)
 };
 
 BEGIN_EVENT_TABLE(MFolderDialog, wxMDialog)
@@ -946,6 +949,8 @@ public:
 
 private:
    wxAboutWindow *m_window;
+
+   DECLARE_NO_COPY_CLASS(SplashCloseTimer)
 };
 
 #include "wx/html/htmlwin.h"
@@ -984,6 +989,8 @@ public:
 
 private:
   SplashCloseTimer  *m_pTimer;
+
+  DECLARE_NO_COPY_CLASS(wxAboutWindow)
 };
 
 void
@@ -1011,6 +1018,7 @@ private:
    wxLog *m_logSplash;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxAboutFrame)
 };
 
 BEGIN_EVENT_TABLE(wxAboutFrame, wxFrame)
@@ -1043,7 +1051,9 @@ public:
       }
 private:
    wxAboutWindow *m_window;
+
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MyHtmlWindow)
 };
 
 BEGIN_EVENT_TABLE(MyHtmlWindow, wxHtmlWindow)
@@ -1594,6 +1604,7 @@ protected:
    wxMenu *m_menu;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxDateTextCtrl)
 };
 
 BEGIN_EVENT_TABLE(wxDateTextCtrl, wxTextCtrl)
@@ -1619,7 +1630,7 @@ public:
    void UpdateExample();
 
    // event handlers
-   void OnUpdate(wxCommandEvent& event) { UpdateExample(); }
+   void OnUpdate(wxCommandEvent& /* event */) { UpdateExample(); }
 
 protected:
    // update timer
@@ -1635,6 +1646,8 @@ protected:
 
    private:
       wxDateFmtDialog *m_dialog;
+
+      DECLARE_NO_COPY_CLASS(ExampleUpdateTimer)
    } *m_timer;
 
    // data
@@ -1648,6 +1661,7 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxDateFmtDialog)
 };
 
 BEGIN_EVENT_TABLE(wxDateFmtDialog, wxOptionsPageSubdialog)
@@ -1834,7 +1848,9 @@ protected:
    wxXFaceButton *m_Button;
    wxCheckBox    *m_Checkbox;
    bool m_Changed;
+
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxXFaceDialog)
 };
 
 BEGIN_EVENT_TABLE(wxXFaceDialog, wxOptionsPageSubdialog)
@@ -2032,13 +2048,14 @@ protected:
                 *m_text2;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxGlobalPasswdDialog)
 };
 
 BEGIN_EVENT_TABLE(wxGlobalPasswdDialog, wxOptionsPageSubdialog)
    EVT_UPDATE_UI(-1, wxGlobalPasswdDialog::OnUpdateUI)
 END_EVENT_TABLE()
 
-void wxGlobalPasswdDialog::OnUpdateUI(wxUpdateUIEvent& event)
+void wxGlobalPasswdDialog::OnUpdateUI(wxUpdateUIEvent& /* event */)
 {
    DoUpdateUI();
 }
@@ -2308,6 +2325,8 @@ public:
 private:
    wxArrayInt  m_selections;
    wxListCtrl *m_listctrl;
+
+   DECLARE_NO_COPY_CLASS(ReenableDialog)
 };
 
 ReenableDialog::ReenableDialog(wxWindow *parent)
@@ -2554,6 +2573,9 @@ class wxLicenseDialog : public wxOptionsPageSubdialog
 {
 public:
    wxLicenseDialog(Profile *profile, wxWindow *parent);
+
+private:
+   DECLARE_NO_COPY_CLASS(wxLicenseDialog)
 };
 
 wxLicenseDialog::wxLicenseDialog(Profile *profile, wxWindow *parent)
@@ -2645,6 +2667,8 @@ private:
    wxArrayInt *m_selections;
 
    wxCheckListBox *m_checklstbox;
+
+   DECLARE_NO_COPY_CLASS(wxMultipleChoiceDialog)
 };
 
 wxMultipleChoiceDialog::wxMultipleChoiceDialog(wxWindow *parent,
@@ -3038,6 +3062,8 @@ private:
 
    // the index of the control on which Append() was called in the array above
    static int ms_indexOfAppend;
+
+   DECLARE_NO_COPY_CLASS(wxIdentCombo)
 };
 
 wxIdentComboArray wxIdentCombo::ms_allIdentCombos;
@@ -3180,6 +3206,8 @@ protected:
 
    wxString *m_value1,
             *m_value2;
+
+   DECLARE_NO_COPY_CLASS(MText2Dialog)
 };
 
 MText2Dialog::MText2Dialog(wxWindow *parent,
@@ -3318,6 +3346,7 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MPasswordDialog)
 };
 
 BEGIN_EVENT_TABLE(MPasswordDialog, wxMDialog)
@@ -3360,6 +3389,9 @@ public:
                        )
    {
    }
+
+private:
+   DECLARE_NO_COPY_CLASS(MFolderPasswordDialog)
 };
 
 bool MDialog_GetPassword(const wxString& folderName,
@@ -3396,6 +3428,9 @@ public:
                        )
    {
    }
+
+private:
+   DECLARE_NO_COPY_CLASS(MSendPasswordDialog)
 };
 
 bool MDialog_GetPassword(Protocol protocol,

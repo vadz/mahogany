@@ -168,6 +168,7 @@ private:
    wxTreeItemId m_idParent;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxSubfoldersTree)
 };
 
 class wxSubscriptionDialog : public wxManuallyLaidOutDialog
@@ -232,6 +233,7 @@ private:
    }
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxSubscriptionDialog)
 };
 
 // helper wxTextCtrl class which forwards to us TABs it gets
@@ -254,6 +256,7 @@ private:
    wxSubscriptionDialog *m_dialog;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxFolderNameTextCtrl)
 };
 
 // event receiver for the list events

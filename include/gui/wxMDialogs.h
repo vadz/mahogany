@@ -98,6 +98,8 @@ public:
       )
    {
    }
+
+   DECLARE_NO_COPY_CLASS(MProgressDialog)
 };
 
 /// use this instead of MProgressDialog when maximum is unknown
@@ -534,6 +536,8 @@ public:
 
    virtual int ShowModal();
    virtual void EndModal(int rc);
+
+   DECLARE_NO_COPY_CLASS(wxMDialog)
 };
 
 class wxXFaceButton : public wxBitmapButton
@@ -552,6 +556,8 @@ public:
 private:
    wxString m_XFace;
    wxWindow *m_Parent;
+
+   DECLARE_NO_COPY_CLASS(wxXFaceButton)
 };
 
 /// returns the argument if it's !NULL of the top-level application frame

@@ -1168,6 +1168,8 @@ class strutil_RegEx : public wxRegEx
 public:
    strutil_RegEx(const String &pattern, int flags)
       : wxRegEx(pattern, flags) { }
+
+   DECLARE_NO_COPY_CLASS(strutil_RegEx)
 };
 
 

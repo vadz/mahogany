@@ -1479,6 +1479,7 @@ private:
     long        m_dialogStyle;
 
     DECLARE_EVENT_TABLE()
+    DECLARE_NO_COPY_CLASS(wxPMessageDialog)
 };
 
 BEGIN_EVENT_TABLE(wxPMessageDialog, wxDialog)

@@ -51,6 +51,7 @@ private:
    const MimePart * const m_mimepart;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(MimePopup)
 };
 
 // ============================================================================
@@ -173,7 +174,7 @@ void ClickableAttachment::OnLeftClick(const wxPoint& pt) const
    OnDoubleClick(pt);
 }
 
-void ClickableAttachment::OnDoubleClick(const wxPoint& pt) const
+void ClickableAttachment::OnDoubleClick(const wxPoint& /* pt */) const
 {
    // open the attachment
    m_msgView->MimeHandle(m_mimepart);

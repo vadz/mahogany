@@ -75,6 +75,9 @@ private:
 
    // the log output (we own this object and will delete it)
    MCryptoEngineOutputLog *m_log;
+
+
+   DECLARE_NO_COPY_CLASS(ClickablePGPInfo)
 };
 
 // ----------------------------------------------------------------------------
@@ -98,6 +101,8 @@ protected:
          s.Printf(_T(" from \"%s\"") , from.c_str());
       return s;
    }
+
+   DECLARE_NO_COPY_CLASS(PGPSignatureInfo)
 };
 
 // ----------------------------------------------------------------------------
@@ -113,6 +118,9 @@ public:
                                           GetFromString(from).c_str()),
                          _T("pgpsig_good"),
                          *wxGREEN) { }
+
+private:
+   DECLARE_NO_COPY_CLASS(PGPInfoGoodSig)
 };
 
 class PGPInfoExpiredSig : public PGPSignatureInfo
@@ -124,6 +132,9 @@ public:
                                           GetFromString(from).c_str()),
                          _T("pgpsig_exp"),
                          wxColour(0, 255, 255)) { }
+
+private:
+   DECLARE_NO_COPY_CLASS(PGPInfoExpiredSig)
 };
 
 class PGPInfoUntrustedSig : public PGPSignatureInfo
@@ -135,6 +146,9 @@ public:
                                           from.c_str()),
                          _T("pgpsig_untrust"),
                          wxColour(255, 128, 0)) { }
+
+private:
+    DECLARE_NO_COPY_CLASS(PGPInfoUntrustedSig)
 };
 
 class PGPInfoBadSig : public PGPSignatureInfo
@@ -146,6 +160,9 @@ public:
                                           GetFromString(from).c_str()),
                          _T("pgpsig_bad"),
                          *wxRED) { }
+
+private:
+   DECLARE_NO_COPY_CLASS(PGPInfoBadSig)
 };
 
 
@@ -158,6 +175,9 @@ public:
                                           GetFromString(from).c_str()),
                          _T("pgpsig_bad"),
                          wxColour(145, 145, 145)) { }
+
+private:
+   DECLARE_NO_COPY_CLASS(PGPInfoKeyNotFoundSig)
 };
 
 class PGPInfoGoodMsg : public PGPSignatureInfo
@@ -168,6 +188,9 @@ public:
                          _("Decrypted PGP message"),
                          _T("pgpmsg_ok"),
                          *wxGREEN) { }
+
+private:
+   DECLARE_NO_COPY_CLASS(PGPInfoGoodMsg)
 };
 
 class PGPInfoBadMsg : public PGPSignatureInfo
@@ -178,6 +201,9 @@ public:
                          _("Encrypted PGP message"),
                          _T("pgpmsg_bad"),
                          *wxRED) { }
+
+private:
+   DECLARE_NO_COPY_CLASS(PGPInfoBadMsg)
 };
 
 #endif // _M_PGPCLICKINFO_H_

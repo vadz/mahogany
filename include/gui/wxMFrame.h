@@ -132,7 +132,7 @@ private:
 #endif // USE_PYTHON
 
    DECLARE_EVENT_TABLE()
-   DECLARE_DYNAMIC_CLASS(wxMFrame)
+   DECLARE_DYNAMIC_CLASS_NO_COPY(wxMFrame)
 };
 
 #endif

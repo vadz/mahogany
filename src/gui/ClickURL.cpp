@@ -71,6 +71,7 @@ private:
    const ClickableURL * const m_clickableURL;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(UrlPopup)
 };
 
 // ----------------------------------------------------------------------------
@@ -445,7 +446,7 @@ void ClickableURL::AddToAddressBook() const
 // ClickableURL click handlers
 // ----------------------------------------------------------------------------
 
-void ClickableURL::OnLeftClick(const wxPoint& pt) const
+void ClickableURL::OnLeftClick(const wxPoint& /* pt */) const
 {
    if ( IsMail() )
    {

@@ -157,6 +157,7 @@ protected:
 #endif // USE_EXTRA_THREADING_OPTIONS
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxMessageThreadingDialog)
 };
 
 // ============================================================================

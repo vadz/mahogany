@@ -396,7 +396,12 @@ private:
    static class ConnCloseTimer : public wxTimer
    {
    public:
+      ConnCloseTimer() { }
+
       virtual void Notify() { ServerInfoEntryCC::CheckTimeoutAll(); }
+
+   private:
+      DECLARE_NO_COPY_CLASS(ConnCloseTimer)
    } *ms_connCloseTimer;
 
    // it creates us in CreateServerInfo
@@ -715,6 +720,9 @@ private:
 
    // the base label of the progress dialog
    String m_msgProgress;
+
+
+   DECLARE_NO_COPY_CLASS(OverviewData)
 };
 
 // ----------------------------------------------------------------------------
@@ -1709,7 +1717,7 @@ MailFolderCC::MailFolderCC(const MFolder *mfolder, wxFrame *frame)
 }
 
 void
-MailFolderCC::Create(MFolderType type, int flags)
+MailFolderCC::Create(MFolderType /* type */, int /* flags */)
 {
    m_MailStream = NIL;
    m_nMessages = 0;
@@ -4924,9 +4932,9 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
        */
 void
 MailFolderCC::mm_lsub(MAILSTREAM * stream,
-                      char delim ,
-                      String  name,
-                      long  attrib)
+                      char /* delim */,
+                      String  /* name */,
+                      long /* attrib */)
 {
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf, _T("NULL mailfolder"));
@@ -5138,7 +5146,7 @@ MailFolderCC::mm_nocritical(MAILSTREAM *stream)
        @return abort flag: if serious error and abort non-zero: abort, else retry
        */
 long
-MailFolderCC::mm_diskerror(MAILSTREAM *stream,
+MailFolderCC::mm_diskerror(MAILSTREAM * /* stream */,
                            long /* errcode */,
                            long /* serious */)
 {
@@ -5256,10 +5264,10 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 
 static char gs_delimiter = '\0';
 
-static void GetDelimiterMMList(MAILSTREAM *stream,
+static void GetDelimiterMMList(MAILSTREAM * /* stream */,
                                char delim,
-                               String name,
-                               long attrib)
+                               String /* name */,
+                               long /* attrib */)
 {
    if ( delim )
       gs_delimiter = delim;
@@ -5866,7 +5874,7 @@ void *mahogany_block_notify(int reason, void *data)
 
 #ifdef USE_READ_PROGRESS
 
-void mahogany_read_progress(GETS_DATA *md, unsigned long count)
+void mahogany_read_progress(GETS_DATA * /* md */, unsigned long count)
 {
    if ( gs_readProgressInfo )
       gs_readProgressInfo->OnProgress(count);

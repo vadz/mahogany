@@ -46,6 +46,8 @@ struct MEventReceiverInfo
 
    MEventReceiver& receiver;
    MEventId        id;
+
+   DECLARE_NO_COPY_CLASS(MEventReceiverInfo)
 };
 
 // array of all registered receivers

@@ -109,6 +109,7 @@ protected:
    wxListBox    *m_lboxFolders;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxMessageSearchDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -329,7 +330,7 @@ void wxMessageSearchDialog::OnUpdateUIRemove(wxUpdateUIEvent& event)
    event.Enable( m_lboxFolders->GetSelection() != -1 );
 }
 
-void wxMessageSearchDialog::OnButtonAdd(wxCommandEvent& event)
+void wxMessageSearchDialog::OnButtonAdd(wxCommandEvent& /* event */)
 {
    MFolder_obj folder = MDialog_FolderChoose(this, NULL, MDlg_Folder_NoFiles);
    if ( folder )
@@ -338,7 +339,7 @@ void wxMessageSearchDialog::OnButtonAdd(wxCommandEvent& event)
    }
 }
 
-void wxMessageSearchDialog::OnButtonRemove(wxCommandEvent& event)
+void wxMessageSearchDialog::OnButtonRemove(wxCommandEvent& /* event */)
 {
    int sel = m_lboxFolders->GetSelection();
    if ( sel == -1 )

@@ -252,11 +252,11 @@ public:
                            CRYPTO_ENGINE_INTERFACE, desc, _T("1.00"))         \
       MMODULE_PROP(_T("author"), cpyright)                                    \
    MMODULE_END_IMPLEMENT(cname ## Factory)                                    \
-   MModule *cname ## Factory::Init(int version_major,                         \
-                                   int version_minor,                         \
-                                   int version_release,                       \
-                                   MInterface *minterface,                    \
-                                   int *errorCode)                            \
+   MModule *cname ## Factory::Init(int /* version_major */,                   \
+                                   int /* version_minor */,                   \
+                                   int /* version_release */,                 \
+                                   MInterface * /* minterface */,             \
+                                   int * /* errorCode */)                     \
    {                                                                          \
       return new cname ## Factory();                                          \
    }

@@ -213,6 +213,8 @@ private:
    const Finish m_finish;
 
    //@}
+
+   DECLARE_NO_COPY_CLASS(MFDriver)
 };
 
 #endif // _MAIL_DRIVER_H_
