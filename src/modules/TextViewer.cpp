@@ -394,7 +394,11 @@ void TextViewer::ShowHeader(const String& headerName,
 
    InsertText(headerName + ": ", wxTextAttr(profileValues.HeaderNameCol));
 
-   wxTextAttr attr(profileValues.HeaderValueCol);
+   wxColour col = profileValues.HeaderValueCol;
+   if ( !col.Ok() )
+      col = profileValues.FgCol;
+
+   wxTextAttr attr(col);
    if ( encHeader != wxFONTENCODING_SYSTEM )
    {
       wxFont font = m_window->GetFont();
