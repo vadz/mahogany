@@ -480,6 +480,8 @@ wxLayoutObjectIcon::Layout(wxDC & /* dc */, class wxLayoutList * )
 wxPoint
 wxLayoutObjectIcon::GetSize(CoordType *top, CoordType *bottom) const
 {
+   CHECK( m_Icon, wxPoint(0, 0), _T("invalid wxLayoutObjectIcon") );
+
    *top = m_Icon->GetHeight();
    *bottom = 0;
    return wxPoint(m_Icon->GetWidth(), m_Icon->GetHeight());
