@@ -90,6 +90,7 @@ extern const MOption MP_SHOWSPLASH;
 extern const MOption MP_SPLASHDELAY;
 extern const MOption MP_AUTOSAVEDELAY;
 extern const MOption MP_POLLINCOMINGDELAY;
+extern const MOption MP_POLL_OPENED_ONLY;
 extern const MOption MP_COLLECTATSTARTUP;
 extern const MOption MP_CONFIRMEXIT;
 extern const MOption MP_OPEN_ON_CLICK;
@@ -519,6 +520,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_AUTOSAVEDELAY_NAME       "AutoSaveDelay"
 /// how often should we check for incoming mail (secs, 0 to disable)?
 #define   MP_POLLINCOMINGDELAY_NAME       "PollIncomingDelay"
+/// poll folder only if it is opened
+#define   MP_POLL_OPENED_ONLY_NAME "PollOpenedOnly"
 /// collect all new mail at startup?
 #define   MP_COLLECTATSTARTUP_NAME "CollectAtStartup"
 /// ask user if he really wants to exit?
@@ -1262,6 +1265,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_AUTOSAVEDELAY_DEFVAL       60
 /// how often should we check for incoming mail (secs, 0 to disable)?
 #define   MP_POLLINCOMINGDELAY_DEFVAL       300
+/// poll folder only if it is opened
+#define   MP_POLL_OPENED_ONLY_DEFVAL 0l
 /// collect all new mail at startup?
 #define   MP_COLLECTATSTARTUP_DEFVAL 0l
 /// ask user if he really wants to exit?

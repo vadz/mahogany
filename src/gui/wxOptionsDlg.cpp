@@ -211,6 +211,7 @@ enum ConfigFields
    ConfigField_NewMailMonitorHelp,
    ConfigField_NewMailMonitor,
    ConfigField_NewMailMonitorInterval,
+   ConfigField_NewMailMonitorOpenedOnly,
    ConfigField_NewMailPingOnStartupHelp,
    ConfigField_NewMailPingOnStartup,
    ConfigField_NewMailLast = ConfigField_NewMailPingOnStartup,
@@ -976,6 +977,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Permanently &monitor this folder"), Field_Bool | Field_NotApp, -1},
    { gettext_noop("Polling &interval in seconds"), Field_Number | Field_NotApp,
                                                    ConfigField_NewMailMonitor },
+   { gettext_noop("Poll only if &opened"),         Field_Bool | Field_NotApp,
+                                                   ConfigField_NewMailMonitor },
    { gettext_noop("Checking the checkbox below will result in checking the folder\n"
                   "for the new mail immediately after starting up instead of\n"
                   "waiting until the interval above expires."),
@@ -1498,6 +1501,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // monitor help
    CONFIG_NONE(), // monitor folder (MF_FLAGS_MONITOR)
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
+   CONFIG_ENTRY(MP_POLL_OPENED_ONLY),
    CONFIG_NONE(), // poll at startup help
    CONFIG_ENTRY(MP_COLLECTATSTARTUP),
 

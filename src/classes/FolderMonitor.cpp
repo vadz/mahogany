@@ -46,6 +46,7 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_COLLECTATSTARTUP;
+extern const MOption MP_POLL_OPENED_ONLY;
 extern const MOption MP_POLLINCOMINGDELAY;
 
 // ----------------------------------------------------------------------------
@@ -486,6 +487,22 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
       case Folder_Ok:
          // nothing to do
          ;
+   }
+
+   // the user may want to start checking this folder only after it had been
+   // opened for the first time, check for this
+   Profile_obj profile(folder->GetProfile());
+   if ( READ_CONFIG_BOOL(profile, MP_POLL_OPENED_ONLY) )
+   {
+      MailFolder *mf = MailFolder::GetOpenedFolderFor(folder);
+      if ( !mf )
+      {
+         wxLogTrace(TRACE_MONITOR, "Skipping not opened folder %s",
+                    folder->GetFullName().c_str());
+         return true;
+      }
+
+      mf->DecRef();
    }
 
    if ( folder->NeedsNetwork() && !mApplication->IsOnline() )

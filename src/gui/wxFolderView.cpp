@@ -2475,20 +2475,45 @@ long wxFolderListCtrl::GetUniqueSelection() const
 UIdArray
 wxFolderListCtrl::GetSelectionsOrFocus() const
 {
-   UIdArray uids;
+   // instead of calling GetUIdFromIndex() for each item inside the loop,
+   // construct the sequence first and call CachePositions() below to minimize
+   // the number of trips to the server - this can make huge performance
+   // difference when there are a lot of items selected
+   Sequence seq;
 
    long item = GetFirstSelected();
    while ( item != -1 )
    {
-      uids.Add(GetUIdFromIndex(item));
+      seq.Add(item);
 
       item = GetNextSelected(item);
    }
 
-   // if no selection, use the focused item
-   if ( uids.IsEmpty() )
+   // now get the UIDs for all sequence elements
+   UIdArray uids;
+   size_t cookie;
+   switch ( seq.GetCount() )
    {
-      uids.Add(GetFocusedUId());
+      case 0:
+         // if no selection, use the focused item
+         uids.Add(GetFocusedUId());
+         break;
+
+      case 1:
+         // no need to cache anything
+         uids.Add(GetUIdFromIndex(seq.GetFirst(cookie)));
+         break;
+
+      default:
+         // 2 items or more - cache them first
+         m_headers->CachePositions(seq);
+
+         for ( UIdType idx = seq.GetFirst(cookie);
+               idx != UID_ILLEGAL;
+               idx = seq.GetNext(idx, cookie) )
+         {
+            uids.Add(GetUIdFromIndex(idx));
+         }
    }
 
    return uids;
