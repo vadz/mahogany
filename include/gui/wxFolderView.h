@@ -166,8 +166,6 @@ public:
    virtual void OnFolderDeleteEvent(const String& folderName);
    /// update the folderview
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
-   /// update the frame title
-   virtual void OnFolderStatusEvent(MEventFolderStatusData &event);
    /// update the folderview
    virtual void OnMsgStatusEvent(MEventMsgStatusData &event);
    /// the derived class should react to the result to an asynch operation

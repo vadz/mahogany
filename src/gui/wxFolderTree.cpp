@@ -317,7 +317,7 @@ private:
    // event registration handles
    void *m_eventFolderChange;    // for folder creatio/destruction
    void *m_eventOptionsChange;   // options change (update icons)
-   void *m_eventFolderStatus;    // when a folder's status changes
+   void *m_eventFolderUpdate;    // when a folder's status changes
    // the full names of the folder currently opened in the main frame and
    // of the current selection in the tree ctrl (empty if none)
    String m_openFolderName,
@@ -945,10 +945,10 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
                                                  MEventId_FolderTreeChange);
    m_eventOptionsChange = MEventManager::Register(*this,
                                                   MEventId_OptionsChange);
-   m_eventFolderStatus = MEventManager::Register(*this,
-                                                  MEventId_FolderStatus);
+   m_eventFolderUpdate = MEventManager::Register(*this,
+                                                  MEventId_FolderUpdate);
 
-   ASSERT_MSG( m_eventFolderChange && m_eventOptionsChange && m_eventFolderStatus,
+   ASSERT_MSG( m_eventFolderChange && m_eventOptionsChange && m_eventFolderUpdate,
                "folder tree failed to register with event manager" );
 }
 
@@ -1616,16 +1616,16 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          }
       }
    }
-   else if ( ev.GetId() == MEventId_FolderStatus )
+   else if ( ev.GetId() == MEventId_FolderUpdate )
    {
-      MEventFolderStatusData& event = (MEventFolderStatusData &)ev;
+      MEventFolderUpdateData& event = (MEventFolderUpdateData &)ev;
       MailFolder *folder = event.GetFolder();
 
       wxString folderName = folder->GetName();
       wxTreeItemId item = GetTreeItemFromName(folderName);
 
       // it's not an error: MTempFolder objects are not in the tree, yet they
-      // generate MEventId_FolderStatus events as well
+      // generate MEventId_FolderUpdate events as well
       if ( !item.IsOk() )
       {
          return true;
@@ -1723,7 +1723,7 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
 {
    MEventManager::Deregister(m_eventFolderChange);
    MEventManager::Deregister(m_eventOptionsChange);
-   MEventManager::Deregister(m_eventFolderStatus);
+   MEventManager::Deregister(m_eventFolderUpdate);
 
    delete GetImageList();
 

@@ -183,8 +183,9 @@ enum ConfigFields
    ConfigField_FoldersFirst = ConfigField_ComposeLast,
    ConfigField_OpenFolders,
    ConfigField_MainFolder,
-// ConfigField_NewMailFolder,
+   ConfigField_NewMailFolder,
    ConfigField_PollIncomingDelay,
+   ConfigField_CollectAtStartup,
    ConfigField_UpdateInterval,
    ConfigField_CloseDelay,
    ConfigField_FolderProgressThreshold,
@@ -241,6 +242,7 @@ enum ConfigFields
 #ifdef OS_UNIX
    ConfigField_MessageViewFaxSupport,
    ConfigField_MessageViewFaxDomains,
+   ConfigField_MessageViewFaxConverter,
 #endif // Unix
    ConfigField_MessageViewMaxHelpText,
    ConfigField_MessageViewMaxMsgSize,
@@ -667,8 +669,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,
    },
-   { gettext_noop("Some SMTP or NNTP servers require a user Id or login.\n"
-                  "Leave these fields empty unless told to set it up by your ISP."),
+   { gettext_noop(
+      "Some SMTP or NNTP servers require a user Id or login.\n"
+      "You might need to enter the e-mail address provided by\n"
+      "your ISP here. Only enter a password if told to do so\n"
+      "by your ISP as it is not usually required."),
      Field_Message, -1,                        },
    { gettext_noop("SMTP server &user ID"),         Field_Text,
 #ifdef OS_UNIX
@@ -754,9 +759,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    // folders
    { gettext_noop("Folders to open on &startup"),  Field_List |
                                                    Field_Restart, -1,           },
-   { gettext_noop("Folder opened in &main frame"), Field_Text,    -1,                        },
-// { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
+   { gettext_noop("Folder opened in &main frame"), Field_Folder,    -1,                        },
+   { gettext_noop("Folder where to collect &new mail"), Field_Folder, -1},
    { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
+   { gettext_noop("Poll for new mail at s&tartup"), Field_Bool, -1},
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("&Keep folder open after close for this many seconds"), Field_Number, -1},
    { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
@@ -816,6 +822,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #ifdef OS_UNIX
    { gettext_noop("Support special &fax mailers"), Field_Bool,    -1 },
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
+   { gettext_noop("Conversion program for fa&xes"), Field_File,    ConfigField_MessageViewFaxSupport},
 #endif // unix
    { gettext_noop("The following settings allow to limit the amount of data\n"
                   "retrieved from remote server: if the message size or\n"
@@ -1034,8 +1041,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    // folders
    CONFIG_ENTRY(MP_OPENFOLDERS),
    CONFIG_ENTRY(MP_MAINFOLDER),
-// CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
+   CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
+   CONFIG_ENTRY(MP_COLLECTATSTARTUP),
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
@@ -1086,6 +1094,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_INCFAX_SUPPORT),
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),
+   CONFIG_ENTRY(MP_TIFF2PS),
 #endif
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),

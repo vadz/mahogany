@@ -297,7 +297,6 @@ wxMFrame::OnMenuCommand(int id)
          }
 
       case WXMENU_FILE_COLLECT:
-         //MEventManager::Send( new MEventPingData );
          mApplication->GetMailCollector()->Collect();
          break;
 

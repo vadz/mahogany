@@ -46,6 +46,11 @@
 
 #ifdef USE_PISOCK
 
+#if HAVE_PI_ACCEPT_TO
+#   include <wx/minifram.h>
+#endif
+
+
 #ifdef HAVE_LIBMAL
 extern "C"
 {
@@ -699,8 +704,6 @@ PalmOSModule::Connect(void)
          if(! m_Lock->Lock())
             return false;
 
-      StatusMessage(_("Please press HotSync button and click on OK!"));
-      Message(_("Please press HotSync button and click on OK."));
       if (!(m_PiSocket = pi_socket(PI_AF_SLP, PI_SOCK_STREAM, PI_PF_PADP)))
       {
          ErrorMessage(_("Failed to connect to PalmOS device:\nCould not open socket."));
@@ -739,9 +742,20 @@ PalmOSModule::Connect(void)
 
          return false;
       }
+      
+      StatusMessage(_("Please press HotSync button and click on OK!"));
 #if HAVE_PI_ACCEPT_TO
+      wxMiniFrame *mini = new wxMiniFrame(NULL,-1, "Mahogany");
+      wxPanel *p = new wxPanel(mini, -1);
+      wxStaticText *t = new wxStaticText(
+         p,-1, _("Please press the HotSync button..."));
+      p->Fit(); mini->Fit();
+      mini->Show(TRUE);
+      wxSafeYield(mini);
       m_PiSocket = pi_accept_to(m_PiSocket, 0, 0, 5000);
+      delete mini;
 #else
+      Message(_("Please press HotSync button and click on OK."));
       // horrible old interface, hangs if fails:
       m_PiSocket = pi_accept(m_PiSocket, 0, 0);
 #endif
@@ -843,29 +857,34 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
       confirmation. If pBook != NULL, we check before trying to sync
       as we are called from adb code. */
    if(pBook == NULL ||
-      m_MInterface->YesNoDialog(_("Do you want synchronise with your PalmOS device?")))
+      m_MInterface->YesNoDialog(
+         _("Do you want synchronise with your PalmOS device?")))
    {
       PiConnection conn(this);
       if(! IsConnected())
          return;
 
-      if(m_SyncMail)
-         SyncMail();
-
-      if(m_SyncAddr)
+      if(pBook != NULL)
+         // only asked to synchronise the addressbook
          SyncAddresses(pBook);
-
-      if(m_Backup)
-         Backup();
-
-      if(m_AutoInstall)
-         AutoInstall();
-
+      else
+      {
+         if(m_SyncMail)
+            SyncMail();
+         if(m_SyncAddr)
+            SyncAddresses(pBook);
+         if(m_Backup)
+            Backup();
+         if(m_AutoInstall)
+            AutoInstall();
 #ifdef HAVE_LIBMAL
-      if(m_SyncMAL)
-         SyncMAL();
+      // we do this last as there is most potential for something to
+      // go wrong and the error handling in libmal is _very_
+      // dodgy... (KB) 
+         if(m_SyncMAL)
+            SyncMAL();
 #endif
-      
+      }
       m_Profile->DecRef();
       m_Profile=NULL;
    }

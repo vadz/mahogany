@@ -235,15 +235,8 @@ extern String miscutil_GetFromAddress(Profile *p,
 {
    ASSERT(p);
    String personal = READ_CONFIG(p, MP_PERSONALNAME);
-   String mbox = READ_CONFIG(p, MP_USERNAME);
-   String host = READ_CONFIG(p, MP_HOSTNAME);
-   strutil_delwhitespace(host);
-   if(host.Length() == 0)
-      mbox = miscutil_ExpandLocalAddress(p, mbox);
-   else
-      mbox << '@' << host;  // FIXME incorrect - FROM always=USER@HOST
+   String mbox = READ_CONFIG(p, MP_FROM_ADDRESS);
 
-   mbox = READ_CONFIG(p, MP_FROM_ADDRESS);
    strutil_delwhitespace(mbox);
 
    if(pers) *pers = personal;
@@ -259,23 +252,6 @@ extern String miscutil_GetReplyAddress(Profile *p)
    ASSERT(p);
    String replyTo = READ_CONFIG(p, MP_REPLY_ADDRESS);
    strutil_delwhitespace(replyTo);
-/*   if(replyTo.Length() == 0)
-      return miscutil_GetFromAddress(p, pers, email);
-   //else:
-   String personal, mbox;
-   personal = Message::GetNameFromAddress(replyTo);
-   if(personal == replyTo)
-   {  // there was no personal name
-      personal = "";
-      miscutil_GetFromAddress(p, &personal);
-   }
-   mbox = Message::GetEMailFromAddress(replyTo);
-   if(mbox.Length() == 0)
-      return miscutil_GetFromAddress(p, &personal, &mbox);
-   if(pers) *pers = personal;
-   if(email) *email = mbox;
-   return strutil_makeMailAddress(personal, mbox);
-*/
    return replyTo;
 }
 

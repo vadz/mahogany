@@ -2313,13 +2313,11 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          if ( isIncoming )
          {
             collector->AddIncomingFolder(fullname);
-
             folder->AddFlags(MF_FLAGS_INCOMING);
          }
          else
          {
             collector->RemoveIncomingFolder(fullname);
-
             folder->ResetFlags(MF_FLAGS_INCOMING);
          }
       }

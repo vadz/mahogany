@@ -205,6 +205,11 @@ public:
    virtual void Checkpoint(void) = 0;
 
 protected:
+   /** Checks for new mail and filters if necessary.
+       @return TRUE if the folder might have been changed
+   */
+   virtual bool FilterNewMail(HeaderInfoList *);
+   
    /// Is the mailfolder still connected to a server or file?
    virtual bool IsAlive(void) const = 0;
    /**@name Config information used */

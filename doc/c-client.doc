@@ -442,7 +442,7 @@ ADDRESS *reply_to;		reply address list
 char *subject;			message subject string
 ADDRESS *to;			primary recipient list
 ADDRESS *cc;			secondary recipient list
-xbADDRESS *bcc;			blind secondary recipient list
+ADDRESS *bcc;			blind secondary recipient list
 char *in_reply_to;		replied message ID
 char *message_id;		message ID
 char *newsgroups;		USENET newsgroups

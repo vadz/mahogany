@@ -227,7 +227,10 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
    }while(*cptr && *cptr != '\012');
 
    if(send)
+   {
+      sendMsg.Build();
       return sendMsg.Send();
+   }
    else
       return sendMsg.SendOrQueue();
 }
@@ -446,25 +449,25 @@ String
 MessageCC::FetchText(void)
 {
    CHECK_DEAD_RC("");
-   if(folder && folder->Lock())
+   if(folder)
    {
-      mailText = mail_fetchtext_full(folder->Stream(), m_uid,
-                                     &m_MailTextLen, FT_UID);
-      folder->UnLock();
-      ASSERT_MSG(strlen(mailText) == m_MailTextLen,
-                 "DEBUG: Mailfolder corruption detected");
-      MailFolderCC::ProcessEventQueue();
-#if 0
-      String str; 
-      str.reserve(m_MailTextLen);
-      const char *cptr = mailText;
-      for(size_t i = 0; i < m_MailTextLen; i++)
-         str[i] += *cptr++;
-      str[m_MailTextLen] = '\0';
-      return str;
-#else
-	return mailText;
-#endif
+      if(folder->Lock())
+      {
+         mailText = mail_fetchtext_full(folder->Stream(), m_uid,
+                                        &m_MailTextLen, FT_UID);
+         folder->UnLock();
+         ASSERT_MSG(strlen(mailText) == m_MailTextLen,
+                    "DEBUG: Mailfolder corruption detected");
+         ASSERT_MSG(m_MailTextLen > 0,
+                    "DEBUG: Retrieved zero length message contents");
+         MailFolderCC::ProcessEventQueue();
+         return mailText;
+      }
+      else
+      {
+         ERRORMESSAGE(("Cannot get lock for obtaining message text."));
+         return "";
+      }
    }
    else // from a text
       return text;
@@ -616,8 +619,9 @@ MessageCC::GetBody(void)
       {
          if(folder->Stream() && folder->Lock())
          {
-            m_Envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &m_Body,
-                                                  FT_UID);
+            m_Envelope =
+               mail_fetchstructure_full(folder->Stream(),m_uid,
+                                        &m_Body, FT_UID);
             folder->UnLock();
          }
          else
@@ -632,7 +636,6 @@ MessageCC::GetBody(void)
    MailFolderCC::ProcessEventQueue();
 
    CHECK(m_Body && m_Envelope, NULL, _("Non-existent message data."));
-
    return m_Body;
 }
 
@@ -891,12 +894,13 @@ MessageCC::GetReferences(void) const
       return "";
 }
 
-void
+bool
 MessageCC::WriteToString(String &str, bool headerFlag) const
 {
    if(! headerFlag)
    {
       str = ((MessageCC*)this)->FetchText();
+      return str.Length() > 0;
    }
    else
    {
@@ -906,7 +910,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
 
       if(folder && folder->Lock())
       {
-         CHECK_DEAD();
+         CHECK_DEAD_RC(FALSE);
          char *headerPart =
             mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID); 
          folder->UnLock();
@@ -929,6 +933,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
          str = text;
       }
    }
+   return (m_Body != NULL);
 }
 
 

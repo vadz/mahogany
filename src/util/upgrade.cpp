@@ -2098,22 +2098,6 @@ VerifyInbox(void)
     * Is the newmail folder properly configured?
     */
    MFolder_obj folderRoot("");
-#ifndef EXPERIMENTAL_newnewmail
-   NewMailFolderTraversal traverse(folderRoot);
-   traverse.Traverse(true); // ignore result
-   String foldername = traverse.GetNewMailFolder();
-   if(foldername.Length() == 0) // shouldn't happen unless run for the first time
-      foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
-   /* We need to keep the old "New Mail" name for now, to keep it
-      backwards compatible. */
-   if(foldername.IsEmpty()) // this must not be
-      foldername = "New Mail";
-   mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, foldername);
-   strutil_delwhitespace(foldername);
-
-   static const long flagsNewMail = MF_FLAGS_NEWMAILFOLDER |
-                                    MF_FLAGS_DONTDELETE;
-#else
    String foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
    if(foldername.IsEmpty()) // this must not be
    {
@@ -2121,7 +2105,6 @@ VerifyInbox(void)
       mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, foldername);
    }
    static const long flagsNewMail = MF_FLAGS_DEFAULT|MF_FLAGS_NEWMAILFOLDER;
-#endif
    // Do we need to create the NewMailFolder?
    Profile *ibp = Profile::CreateProfile(foldername);
    if (!  parent->HasEntry(foldername) )

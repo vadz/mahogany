@@ -1,0 +1,133 @@
+#!/bin/sh
+#
+# $Id$
+#
+# Script to test building in various configurations
+#
+#
+# Which configure schemes to use:
+#
+CONFIGS="debug nodebug"
+#
+# Which source directories to use for building:
+# (These might contain different CVS branches for example.)
+SRCDIRS="mahogany-0.60 mahogany-0.61"
+#
+# List of configure options for each of the configs above:
+#
+CONFIG_debug="--with-debug --with-wxdebug --with-modules=static"
+CONFIG_nodebug="--without-debug --without-wxdebug --with-modules=dynamic"
+#
+#
+# List of common configure options:
+#
+CONFIG_COMMON="--prefix=/usr/local"
+#
+#
+# Ignore compilation errors and keep going?
+#
+IGNORE_ERRORS= #yes
+#
+##########################################################################
+#
+# Where to build for testing:
+#
+TESTTOP="/tmp/testbuild"
+#
+# Where is the source?
+#
+SRCTOP=`pwd`
+#
+# Clean up afterwards?
+#
+MAKECLEAN=yes
+#
+#
+# make command
+#
+MAKE=make
+rm -r $TESTTOP >/dev/null 2>&1 
+mkdir $TESTTOP || exit 1
+#
+#
+#
+# Function to configure and make a single configuration:
+testbuild_confandmake()
+{
+        success=no
+	CFG="CONFIG_$2"
+	echo "		$SRCTOP/$1/configure $CONFIG_COMMON ${!CFG}"
+	$SRCTOP/$1/configure $CONFIG_COMMON ${!CFG} >STDOUT 2>STDERR
+	if [ $? == 0 ] ; then
+		echo "		configure successful"
+		echo "		make clean && make all"
+		(make clean && make all) >>STDOUT 2>>STDERR
+		if [ $? == 0 ] ; then
+			success=yes
+			echo "			make successful"
+		else
+			echo "			make failed"
+		fi
+		if [ "$MAKECLEAN" = "yes" ] ; then
+			echo "		make clean"
+			make clean >>STDOUT 2>>STDERR
+			if [ $? = 0 ] ; then
+				echo "		make clean successful"
+			else
+				echo "		make clean failed"
+				success=no
+			fi
+		fi
+	else
+		echo "		configure failed"	
+	fi
+	if [ $success = yes ] ; then
+		echo "	$1 $2" >>$TESTTOP/SUCCESSFUL
+	else
+		echo "	$1 $2" >>$TESTTOP/FAILED
+		if [ "$IGNORE_ERRORS" != yes ] ; then
+			exit 1
+		fi	
+	fi
+}
+#
+# Function for building a single source version:
+#
+testbuild_srcdir()
+{
+	echo $1:
+	cd $TESTTOP && mkdir $1 && \
+	cd $1 && \
+	( 
+		for cfg in $CONFIGS
+		do
+			echo "	$cfg:"
+			(cd $SRCTOP/$1 && autoconf)
+			if [ $? != 0 ]; then
+				echo "		autoconf failed"
+			else
+				echo "		autoconf succeeded"
+			fi
+			mkdir $cfg && \
+			 ( cd $cfg && testbuild_confandmake $1 $cfg )
+		done
+	)
+}
+
+#
+#
+#
+echo >$TESTTOP/FAILED
+echo >$TESTTOP/SUCCESSFUL
+#
+for srcdir in $SRCDIRS
+do
+	testbuild_srcdir $srcdir
+done
+
+echo
+echo
+echo "Successful builds:"
+cat $TESTTOP/SUCCESSFUL
+echo "Failed builds:"
+cat $TESTTOP/FAILED

@@ -134,7 +134,7 @@ MAppBase::MAppBase()
 {
    m_eventNewMailReg = NULL;
    m_eventOptChangeReg = NULL;
-   m_eventFolderStatusReg = NULL;
+   m_eventFolderUpdateReg = NULL;
 
    m_topLevelFrame = NULL;
    m_framesOkToClose = NULL;
@@ -484,8 +484,8 @@ MAppBase::OnStartup()
    // ----------------------------------------------
    // only do it if we are using the NewMail folder at all
    m_MailCollector = MailCollector::Create();
-   m_MailCollector->Collect(); // empty all at beginning
-
+   if( READ_CONFIG(m_profile, MP_COLLECTATSTARTUP) != 0)
+      m_MailCollector->Collect();
 
    // show the ADB editor if it had been shown the last time when we ran
    // ------------------------------------------------------------------
@@ -501,11 +501,13 @@ MAppBase::OnStartup()
    // should never fail...
    CHECK( m_eventNewMailReg, FALSE,
           "failed to register event handler for new mail event " );
-   m_eventOptChangeReg = MEventManager::Register(*this, MEventId_OptionsChange);
+   m_eventOptChangeReg = MEventManager::Register(*this,
+                                                 MEventId_OptionsChange); 
    CHECK( m_eventOptChangeReg, FALSE,
           "failed to register event handler for options change event " );
-   m_eventFolderStatusReg = MEventManager::Register(*this, MEventId_FolderStatus);
-   CHECK( m_eventFolderStatusReg, FALSE,
+   m_eventFolderUpdateReg = MEventManager::Register(*this,
+                                                    MEventId_FolderUpdate); 
+   CHECK( m_eventFolderUpdateReg, FALSE,
           "failed to register event handler for folder status event " );
 
    return TRUE;
@@ -570,13 +572,13 @@ MAppBase::OnShutDown()
       MEventManager::Deregister(m_eventOptChangeReg);
       m_eventOptChangeReg = NULL;
    }
-   if ( m_eventFolderStatusReg )
+   if ( m_eventFolderUpdateReg )
    {
-      MEventManager::Deregister(m_eventFolderStatusReg);
-      m_eventFolderStatusReg = NULL;
+      MEventManager::Deregister(m_eventFolderUpdateReg);
+      m_eventFolderUpdateReg = NULL;
    }
 
-   if (m_MailCollector)
+    if (m_MailCollector)
       m_MailCollector->DecRef();
    delete m_KeepOpenFolders;
 
@@ -705,19 +707,6 @@ MAppBase::OnMEvent(MEventData& event)
       MEventNewMailData& mailevent = (MEventNewMailData &)event;
       MailFolder *folder = mailevent.GetFolder();
 
-      /* First, we need to check whether it is one of our incoming mail
-      folders and if so, move it to the global new mail folder and
-      ignore the event. */
-      if( m_MailCollector && m_MailCollector->IsIncoming(folder) )
-      {
-         if(m_MailCollector->IsLocked())
-            return false;
-         if(! m_MailCollector->Collect(folder))
-            wxLogError(_("Could not collect mail from incoming folder '%s'."),
-                       folder->GetName().c_str());
-         return false;
-      }
-
       // step 1: execute external command if it's configured
       Profile *profile = folder->GetProfile();
       if ( READ_CONFIG(profile, MP_USE_NEWMAILCOMMAND) )
@@ -799,9 +788,9 @@ MAppBase::OnMEvent(MEventData& event)
      // re-generate the mailcollector object
      m_MailCollector->RequestReInit();
    }
-   else if (event.GetId() == MEventId_FolderStatus)
+   else if (event.GetId() == MEventId_FolderUpdate)
    {
-      MEventFolderStatusData& ev = (MEventFolderStatusData &)event;
+      MEventFolderUpdateData& ev = (MEventFolderUpdateData &)event;
       MailFolder *folder = ev.GetFolder();
       String folderName = folder->GetName();
       String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
@@ -884,40 +873,32 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
       }
    }
 
-   if(mfi == NULL) // just trigger events on it, we will be called again
+   if(mf->CountMessages() > 0)
    {
-      mf->Ping();
-      mf->DecRef();
-      return FALSE;
-   }
-   else
-   {
-      if(mf->CountMessages() > 0)
+      HeaderInfoList *hil = mf->GetHeaders();
+      if( hil )
       {
-         HeaderInfoList *hil = mf->GetHeaders();
-         if( hil )
+         const HeaderInfo *hi;
+         Message *msg;
+         for(UIdType i = 0; i < hil->Count(); i++)
          {
-            const HeaderInfo *hi;
-            Message *msg;
-            for(UIdType i = 0; i < hil->Count(); i++)
-            {
-               hi = (*hil)[i];
-               ASSERT(hi);
-               msg = mf->GetMessage(hi->GetUId());
-               ASSERT(msg);
-               String newsgroups;
-               msg->GetHeaderLine("Newsgroups", newsgroups);
-               if(newsgroups.Length() > 0)
-                  nntp++;
-               else
-                  smtp++;
-               SafeDecRef(msg);
-            }
-            SafeDecRef(hil);
+            hi = (*hil)[i];
+            ASSERT(hi);
+            msg = mf->GetMessage(hi->GetUId());
+            ASSERT(msg);
+            String newsgroups;
+            msg->GetHeaderLine("Newsgroups", newsgroups);
+            if(newsgroups.Length() > 0)
+               nntp++;
+            else
+               smtp++;
+            SafeDecRef(msg);
          }
+         SafeDecRef(hil);
       }
-      mf->DecRef();
    }
+   mf->DecRef();
+   
    if(nSMTP) *nSMTP = smtp;
    if(nNNTP) *nNNTP = nntp;
    return smtp != 0 || nntp != 0;
@@ -957,6 +938,11 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
          STATUSMESSAGE((_("Going online...")));
          GoOnline();
       }
+      else
+      {
+         mf->DecRef();
+         return;
+      }
    }
 
    HeaderInfoList *hil = mf->GetHeaders();
@@ -967,7 +953,6 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
    }
 
    const HeaderInfo *hi;
-
    Message *msg;
    for(UIdType i = 0; i < hil->Count(); i++)
    {
@@ -975,54 +960,57 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
       ASSERT(hi);
       msg = mf->GetMessage(hi->GetUId());
       ASSERT(msg);
-      String msgText;
-      String target;
-      bool alreadyCounted = false;
-      msg->GetHeaderLine("To", target);
-      protocol = Prot_Illegal;
-      if(target.Length() > 0)
+      if(msg)
       {
-         protocol = READ_APPCONFIG(MP_USE_SENDMAIL) ?
-            Prot_Sendmail : Prot_SMTP;
-         STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
-                         (unsigned long)(i+1),
-                         (unsigned long)(hil->Count()),
-                         msg->Subject().c_str()));
-         wxYield();
-         if(msg->SendOrQueue(protocol, TRUE))
+         String msgText;
+         String target;
+         bool alreadyCounted = false;
+         msg->GetHeaderLine("To", target);
+         protocol = Prot_Illegal;
+         if(target.Length() > 0)
          {
-            count++; alreadyCounted = true;
-            mf->DeleteMessage(hi->GetUId());
+            protocol = READ_APPCONFIG(MP_USE_SENDMAIL) ?
+               Prot_Sendmail : Prot_SMTP;
+            STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
+                            (unsigned long)(i+1),
+                            (unsigned long)(hil->Count()),
+                            msg->Subject().c_str()));
+            wxYield();
+            if(msg->SendOrQueue(protocol, TRUE))
+            {
+               count++; alreadyCounted = true;
+               mf->DeleteMessage(hi->GetUId());
+            }
+            else
+            {
+               String msg;
+               msg.Printf(_("Cannot send message ´%s´."),
+                          hi->GetSubject().c_str());
+               ERRORMESSAGE((msg));
+            }
          }
-         else
+         msg->GetHeaderLine("Newsgroups", target);
+         protocol = Prot_NNTP; // default
+         if(target.Length() > 0)
          {
-            String msg;
-            msg.Printf(_("Cannot send message ´%s´."),
-                       hi->GetSubject().c_str());
-            ERRORMESSAGE((msg));
-         }
-      }
-      msg->GetHeaderLine("Newsgroups", target);
-      protocol = Prot_NNTP; // default
-      if(target.Length() > 0)
-      {
-         protocol = Prot_NNTP;
-         STATUSMESSAGE(( _("Posting article %lu/%lu: %s"),
-                         (unsigned long)(i+1),
-                         (unsigned long)(hil->Count()),
-                         msg->Subject().c_str()));
-         wxYield();
-         if(msg->SendOrQueue(protocol, TRUE))
-         {
-            if(! alreadyCounted) count++;
-            mf->DeleteMessage(hi->GetUId());
-         }
-         else
-         {
-            String msg;
-            msg.Printf(_("Cannot post article ´%s´."),
-                       hi->GetSubject().c_str());
-            ERRORMESSAGE((msg));
+            protocol = Prot_NNTP;
+            STATUSMESSAGE(( _("Posting article %lu/%lu: %s"),
+                            (unsigned long)(i+1),
+                            (unsigned long)(hil->Count()),
+                            msg->Subject().c_str()));
+            wxYield();
+            if(msg->SendOrQueue(protocol, TRUE))
+            {
+               if(! alreadyCounted) count++;
+               mf->DeleteMessage(hi->GetUId());
+            }
+            else
+            {
+               String msg;
+               msg.Printf(_("Cannot post article ´%s´."),
+                          hi->GetSubject().c_str());
+               ERRORMESSAGE((msg));
+            }
          }
       }
       //ASSERT(0); //TODO: static SendMessageCC::Send(String)!!!

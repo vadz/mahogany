@@ -78,10 +78,11 @@ static void sigpipe_handler(int)
 #define CHECK_DEAD(msg)   if(m_MailStream == NIL && ! PingReopen()) { ERRORMESSAGE((_(msg), GetName().c_str())); return; }
 #define CHECK_DEAD_RC(msg, rc)   if(m_MailStream == NIL && ! PingReopen()) {   ERRORMESSAGE((_(msg), GetName().c_str())); return rc; }
 
-#ifdef DEBUG
-   #define CHECK_STREAM_LIST() DebugStreams()
+// enable this as needed as it produces *lots* of outputrun
+#ifdef DEBUG_STREAMS
+#   define CHECK_STREAM_LIST() MailFolderCC::DebugStreams()
 #else // !DEBUG
-   #define CHECK_STREAM_LIST()
+#   define CHECK_STREAM_LIST()
 #endif // DEBUG/!DEBUG
 
 // ----------------------------------------------------------------------------
@@ -750,6 +751,7 @@ MailFolderCC::Create(int typeAndFlags)
    m_Listing = NULL;
    m_NeedFreshListing = true;
    m_ListingFrozen = false;
+   m_ExpungeRequested = FALSE;
    m_FirstListing = true;
    m_UpdateNeeded = true;
    m_PingReopenSemaphore = false;
@@ -1210,12 +1212,7 @@ MailFolderCC::Open(void)
    else // folder really opened
    {
       STATUSMESSAGE((_("Mailbox %s opened."), GetName().c_str()));
-
-      // apply filter rules to all new messages
-      ApplyFilterRules(true);
-
       PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
-
       return true;   // success
    }
 }
@@ -1351,17 +1348,6 @@ MailFolderCC::PingReopenAll(bool fullPing)
 
       rc &= fullPing ? mf->PingReopen() : mf->Ping();
    }
-
-#if 0
-   // KB: told the list not to own the entries -- IS THIS OK?
-   // we have put copies of pointers from ms_StreamList into streamListCopy so
-   // we must clear the list to prevent it from deleting these pointers in its
-   // dtor!
-   while ( !streamListCopy.empty() )
-   {
-      streamListCopy.remove(streamListCopy.begin());
-   }
-#endif
    return rc;
 }
 
@@ -1371,6 +1357,15 @@ MailFolderCC::Ping(void)
    if ( gs_lockCclient ) // FIXME: MT
       return FALSE;
 
+   /* We do not want to do anything funny while autocollecting mail
+      and such. Ping might be called from the Ping timer while we are
+      autocollecting. This isn't a real problem, but causes
+      unnecessary delays and confusion, so we just ignore the
+      request. */
+   if( m_ListingFrozen )
+      return FALSE;
+
+   
    if(NeedsNetwork() && ! mApplication->IsOnline())
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
@@ -1415,46 +1410,13 @@ MailFolderCC::Ping(void)
       UnLock();
       ProcessEventQueue();
       
-#ifdef EXPERIMENTAL_newnewmail
       // Check if we want to collect all mail from this folder:
       if( (GetFlags() & MF_FLAGS_INCOMING) != 0)
       {
-         // build listing of all mails:
-         const HeaderInfo *hi;
-         size_t i;
-         UIdArray selections;
+         // this triggers the mail collection code
          HeaderInfoList *hil = GetHeaders();
-         if( hil )
-         {
-            if( hil->Count() > 0 )
-            {
-               for(i = 0; i < hil->Count(); i++)
-               {
-                  hi=(*hil)[i];
-                  selections.Add(hi->GetUId());
-               }
-            }
-         }
          hil->DecRef();
-         // do we have any messages to move?
-         if(selections.Count() > 0)
-         {
-            // where to we move the mails?
-            String newMailFolder = READ_CONFIG(m_Profile,
-                                               MP_NEWMAIL_FOLDER);
-            if(SaveMessages(&selections,
-                            newMailFolder,
-                            true /* isProfile */,
-                            false /* update count */))
-            {
-               DeleteMessages(&selections);
-               ExpungeMessages();
-            }
-            else
-               ERRORMESSAGE((_("Cannot move newly arrived messages.")));
-         }
       }
-#endif
    }
    else
    {
@@ -1570,19 +1532,11 @@ MailFolderCC::AppendMessage(String const &msg, bool update)
          m_LastNewMsgUId = m_MailStream->uid_last+1;
       }
       // triggers asserts:
-#if 0
-      /// apply filter rules to the new message, it might be moved
-      /// somewhere straightaway
-      UIdArray uidarr;
-      uidarr.Add(m_MailStream->uid_last+1);
-      ProcessEventQueue();
-      (void) ApplyFilterRules(uidarr);
-#endif
    }
    if(update)
    {
      ProcessEventQueue();
-     ApplyFilterRules(TRUE);
+     FilterNewMail(m_Listing);
    }
    return rc;
 }
@@ -1638,14 +1592,18 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
       }
       // different folders, so we actually copy the message around:
       String tmp;
-      msg.WriteToString(tmp);
-      STRING str;
-      INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
-      rc =  mail_append_full(m_MailStream,
-                             (char *)m_ImapSpec.c_str(),
-                             (char *)flags.c_str(),
-                             (char *)dateptr,
-                             &str);
+      if(msg.WriteToString(tmp))
+      {
+         STRING str;
+         INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
+         rc =  mail_append_full(m_MailStream,
+                                (char *)m_ImapSpec.c_str(),
+                                (char *)flags.c_str(),
+                                (char *)dateptr,
+                                &str);
+      }
+      else
+         rc = 0;
    }
    if(rc == 0)
    {
@@ -1747,19 +1705,43 @@ MailFolderCC::CountNewMessages(void) const
 
 /* FIXME-MT: we must add some clever locking to this function! */
 
+/*
+  This function looks much more complicated than it is. All it does is
+  to return a folder listing.
+  Before doing so it checks if the listing must be rebuild, if so it
+  does that.
+
+  In addition, a listing can be marked as "frozen". This means it
+  should not yet be rebuild, no matter whether it is out of date or
+  not. This is to avoid recursion and unnecessary intermediate
+  updates, e.g. when filtering messages.
+ */
 class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
+   /* A listing can be frozen if we want to suppress updates at
+      present to avoid recursion. */
    if(m_ListingFrozen)
    {
-      ASSERT_MSG(m_Listing,"Debug assert - should be harmless");
+      ASSERT_MSG(m_Listing,
+                 "GetHeaders() returning frozen listing - "
+                 "should be harmless"); 
       if(m_Listing) m_Listing->IncRef();
+      ASSERT_MSG(m_Listing, "GetHeaders() returning NULL listing - dubious");
       return m_Listing;
    }
 
    // remove const from this:
    MailFolderCC *that = (MailFolderCC *)this;
 
+   // Listing is not frozen, check if we still need to expunge some
+   // messages:
+   if( m_ExpungeRequested == TRUE )
+   {
+      that->ExpungeMessages();
+      that->m_ExpungeRequested = FALSE;
+   }
+   
    // check if we are still alive:
    if(m_MailStream == NIL)
    {
@@ -1772,52 +1754,57 @@ MailFolderCC::GetHeaders(void) const
       that->m_NeedFreshListing = true; // re-build it!
    }
 
-   if(m_NeedFreshListing)
+   // if nothing needs to be done, just return current listing
+   if( m_NeedFreshListing == FALSE )
    {
-      UIdType old_nNewMessages = that->CountNewMessages();
+      m_Listing->IncRef();
+      return m_Listing;
+   }
 
-      that->UpdateStatus();
+   
+   /*
+     OK, we need to rebuild the current folder listing.
+     This involves retrieving it, filtering it and re-retrieving it if
+     the filters caused any change. */
 
-      // we need to re-generate the listing:
+   /* What we are about to do might calls GetHeaders(), so we must
+      freeze the listing. We leave it frozen until we are done. */
+   that-> m_ListingFrozen = TRUE;
+
+   // we need to re-generate the listing:
+   that->BuildListing();
+
+   /* The filter code returns a TRUE if there is a chance that the
+      folder has been changed. */
+   bool changed = that->FilterNewMail(m_Listing);
+
+   if(changed)
       that->BuildListing();
 
+   // sort/thread listing:
+   that->ProcessHeaderListing(m_Listing);
 
-      /// filter the newly arrived messages
-      if(old_nNewMessages < that->CountNewMessages())
-      {
-         /* Suppress recursion from changes caused by filter code. */
-         that->m_ListingFrozen = TRUE;
-         bool changed = that->ApplyFilterRules(true) != 0;
-         if(changed)
-         {
-            that->m_ListingFrozen = FALSE;
-            // we need to re-generate the listing:
-            that->BuildListing();
-         }
-         else
-            that->m_ListingFrozen = FALSE;
-      }
-
-      // sort/thread listing:
-      that->ProcessHeaderListing(m_Listing);
-
-      // enforce consistency:
-      that->m_nMessages = m_Listing->Count();
-
-      // check if we need to update our data structures or send new
-      // mail events:
-      that->CheckForNewMail(m_Listing);
-
-      UIdType new_nNewMessages = that->CountNewMessages();
-      if(new_nNewMessages != old_nNewMessages)
-      {
-         MEventManager::Send( new MEventFolderStatusData
-                              ((MailFolderCC*)this) );
-      }
-   }
    // enforce consistency:
+   ASSERT_MSG(m_nMessages == m_Listing->Count(),
+              "(DEBUG, harmless): Inconsistend message counts");
    that->m_nMessages = m_Listing->Count();
 
+   // check if we need to update our data structures or send new
+   // mail events:
+   that->CheckForNewMail(m_Listing);
+   that->UpdateStatus();
+
+   /* Now we are done with rebuilding the listing and internal folder
+      data and can safely tell the application to use this
+      information. */
+
+   that->m_ListingFrozen = FALSE;
+
+   /* Some event processing might have been delayed because the
+      listing was frozen. So now that it's thawed, we can flush the
+      queue again to make sure everything is updated.
+   */
+   ProcessEventQueue();
    m_Listing->IncRef(); // for the caller who uses it
    return m_Listing;
 }
@@ -1867,6 +1854,20 @@ void
 MailFolderCC::ExpungeMessages(void)
 {
    CHECK_DEAD("Cannot access closed folder\n'%s'.");
+   /* We must not expunge messages while the listing is
+      frozen. Otherwise it can happen that a message disappears and
+      thus c-client bombs when we try to retrieve that message. So we
+      simply set a flag which causes ExpungeMessages() to be called
+      when the listing is no longer frozen.
+   */
+   if(m_ListingFrozen)
+   {
+      //set a flag to tell the next update to run an expunge first
+      m_ExpungeRequested = TRUE;
+      return;
+   }
+
+   m_ExpungeRequested = FALSE;
    if(PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()))
       mail_expunge (m_MailStream);
    RequestUpdate();
@@ -2166,6 +2167,9 @@ MailFolderCC::BuildListing(void)
    String tmp;
    tmp.Printf("Building listing for folder '%s'...", GetName().c_str());
    LOGMESSAGE((M_LOG_DEBUG, tmp));
+
+   // make sure our message counts are up to date
+   UpdateStatus();
 
    // we don't want MEvents to be handled while we are in here, as
    // they might query this folder:
@@ -3121,8 +3125,11 @@ void
 MailFolderCC::UpdateMessageStatus(unsigned long seqno)
 {
    /* If a new listing is required, we don't need to do anything to
-      update the old one.: */
-   if(m_NeedFreshListing || m_Listing == NULL)
+      update the old one. Only exception is if the listing is frozen,
+      in that case we try to update it but don't sent a status change
+      event. */
+   if( (m_NeedFreshListing && ! m_ListingFrozen )
+       || m_Listing == NULL )
       return; // will be regenerated anyway
 
    // Otherwise: update the current listing information:
@@ -3136,10 +3143,15 @@ MailFolderCC::UpdateMessageStatus(unsigned long seqno)
 
    MESSAGECACHE *elt = mail_elt (m_MailStream,seqno);
    ((HeaderInfoImpl *)(*m_Listing)[i])->m_Status = GetMsgStatus(elt);
+   
+   if(m_NeedFreshListing || m_Listing == NULL)
+      return; // will be regenerated anyway
 
-   // tell all interested that status changed
-   MEventManager::Send( new MEventMsgStatusData (this, i, m_Listing) );
-   MEventManager::Send( new MEventFolderStatusData (this) );
+   MailFolderCC::Event *evptr = new
+      MailFolderCC::Event(m_MailStream,
+                          MailFolderCC::MsgStatus, __LINE__);
+   evptr->m_args[0].m_ulong = i;
+   MailFolderCC::QueueEvent(evptr);
 }
 
 /* static */
@@ -3164,7 +3176,6 @@ MailFolderCC::ProcessEventQueue(void)
       evptr = ms_EventQueue.pop_front();
       switch(evptr->m_type)
       {
-         /* The following events don't have much meaning yet. */
       case Notify:
          MailFolderCC::mm_notify(evptr->m_stream,
                                  *(evptr->m_args[0].m_str),
@@ -3195,24 +3206,31 @@ MailFolderCC::ProcessEventQueue(void)
          MailFolderCC::mm_dlog(*(evptr->m_args[0].m_str));
          delete evptr->m_args[0].m_str;
          break;
-      case Exists:
-      case Status:
+      case MsgStatus:
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
-         ASSERT_MSG(mf,"DEBUG (harmless): got status/exists event for unknown folder");
-         // tell all interested that the folder status has changed:
-         if(mf) MEventManager::Send( new MEventFolderStatusData (mf) );
-         break;
+         ASSERT_MSG(mf,"got msg status event for unknown folder");
+         if(mf && ! mf->m_UpdateNeeded && ! mf->m_ListingFrozen)
+         {
+            // tell all interested that status changed
+            DBGMESSAGE(("Sending MsgStatusData event for folder '%s'",
+                        mf->GetName().c_str()));
+            ASSERT_MSG(mf->m_Listing, "FATAL bug: m_Listing == NULL");
+            MEventManager::Send( new MEventMsgStatusData (
+               mf, evptr->m_args[0].m_ulong, mf->m_Listing) );
+            break;
+         }
       }
+      case Exists:
+      case Status:
       case Expunged: // invalidate our header listing:
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT_MSG(mf,"DEBUG (harmless): got expunge event for unknown folder");
          if(mf)
          {
-            mf->UpdateStatus();
+            //causes recursion mf->UpdateStatus();
             mf->RequestUpdate();
-            mf->m_UpdateNeeded = true;
          }
          break;
       }
@@ -3233,15 +3251,31 @@ MailFolderCC::ProcessEventQueue(void)
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
    {
       mf = (*i)->folder;
-      if( mf && mf->m_UpdateNeeded)
+      if(
+         // do we need to send an update event for this folder?
+         mf && mf->m_UpdateNeeded)
       {
-         // tell all interested that an update might be required
-         MEventManager::Send( new MEventFolderUpdateData (mf) );
-         mf->m_UpdateNeeded = false;
+         /* If our current listing is frozen we postpone the processing of
+            events until it no longer is. Repeatedly sending events about a
+            folder without the listing having been updated hardly makes any
+            sense. */
+          if(! mf->m_ListingFrozen)
+          {
+             DBGMESSAGE((
+                "Sending update event for folder '%s'",
+                mf->GetName().c_str() ));
+             // tell all interested that an update might be required
+             MEventManager::Send( new MEventFolderUpdateData (mf) );
+             mf->m_UpdateNeeded = false;
+          }
+          else
+          {
+             DBGMESSAGE((
+                "Postponing event processing for frozen folder '%s'",
+                mf->GetName().c_str() ));
+          }
       }
    }
-   // If we don't call this, we have to wait for wxMApp::OnIdle().
-//   MEventManager::DispatchPending();
 }
 
 void
@@ -3260,9 +3294,7 @@ MailFolderCC::OverviewHeader(MAILSTREAM *stream,
                              unsigned long uid,
                              OVERVIEW_X *ov)
 {
-#ifdef DEBUG
-   MailFolderCC::DebugStreams();
-#endif
+   CHECK_STREAM_LIST();
    MailFolderCC *mf = MailFolderCC::LookupObject(stream);
    CHECK(mf, 0, "trying to build overview for non-existent");
    return mf->OverviewHeaderEntry(uid, ov);

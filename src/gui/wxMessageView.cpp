@@ -1241,19 +1241,20 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          wxLogDebug("Detected image/tiff fax content.");
          // use TIFF2PS command to create a postscript file, open that
          // one with the usual ps viewer
-         filename2 = filename + ".ps";
+         filename2 = filename.BeforeLast('.') + ".ps";
          String command;
          command.Printf(READ_CONFIG(m_Profile,MP_TIFF2PS),
                         filename.c_str(), filename2.c_str());
          // we ignore the return code, because next viewer will fail
          // or succeed depending on this:
          //system(command);  // this produces a postscript file on  success
-         wxExecute(command);
+         RunProcess(command);
          // We cannot use launch process, as it doesn't wait for the
          // program to finish.
          //wxString msg;
          //msg.Printf(_("Running '%s' to create Postscript file failed."), command.c_str());
          //(void)LaunchProcess(command, msg );
+
          wxRemoveFile(filename);
          filename = filename2;
          mimetype = "application/postscript";

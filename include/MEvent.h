@@ -31,8 +31,6 @@ enum MEventId
    MEventId_FolderTreeChange = 200,
    /// MEventFolderUpdateData -- there's a new folder listing
    MEventId_FolderUpdate = 400,
-   /// MEventFolderStatusData -- folder status (e.g. no of new msgs) has changed
-   MEventId_FolderStatus = 401,
    /// MEventMsgStatusData
    MEventId_MsgStatus = 402,
    /// MEventASFolderResult
@@ -178,18 +176,6 @@ public:
       { }
 private:
    MailFolder           *m_folder;
-};
-// ----------------------------------------------------------------------------
-/** MEventFolderStatus Data - Does not carry any data apart from pointer to
- * mailfolder.*/
-class MEventFolderStatusData : public MEventWithFolderData
-{
-public:
-   /** Constructor.
-   */
-   MEventFolderStatusData(MailFolder *folder)
-      : MEventWithFolderData(MEventId_FolderStatus, folder)
-      {}
 };
 // ----------------------------------------------------------------------------
 /** MEventMsgStatus Data - Carries folder pointer and index

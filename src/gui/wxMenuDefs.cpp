@@ -209,7 +209,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_COMPOSE_WITH_TEMPLATE,
                            gettext_noop("Compose with &template...\tShift-Ctrl-N"),  gettext_noop("Compose a new message using after choosing a temple for it")      , FALSE },
    { WXMENU_FILE_POST,     gettext_noop("Post News &Article\tCtrl-A"),   gettext_noop("Write a news article and post it")      , FALSE },
-   { WXMENU_FILE_COLLECT,  gettext_noop("&Check mail\tCtrl-C"), gettext_noop("Check all incoming folder for new mail and download it now") , FALSE },
+   { WXMENU_FILE_COLLECT,  gettext_noop("&Check mail\tShift-Ctrl-C"), gettext_noop("Check all incoming folder for new mail and download it now") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_PRINT_SETUP,    gettext_noop("P&rint Setup"),     gettext_noop("Configure printing")  , FALSE },
    { WXMENU_FILE_PAGE_SETUP,    gettext_noop("P&age Setup"),     gettext_noop("Configure page setup")  , FALSE },

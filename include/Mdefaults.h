@@ -261,6 +261,8 @@
 #define   MP_AUTOSAVEDELAY       "AutoSaveDelay"
 /// how often should we check for incoming mail (secs, 0 to disable)?
 #define   MP_POLLINCOMINGDELAY       "PollIncomingDelay"
+/// collect all new mail at startup?
+#define   MP_COLLECTATSTARTUP "CollectAtStartup"
 /// ask user if he really wants to exit?
 #define   MP_CONFIRMEXIT       "ConfirmExit"
 /// open folders when they're clicked (otherwise - double clicked)
@@ -759,7 +761,7 @@
 /// the news spool directory
 #define MP_NEWS_SPOOL_DIR_D M_EMPTYSTRING
 /// command to convert tiff faxes to postscript
-#define   MP_TIFF2PS_D         "tiff2ps -ap %s -O %s"
+#define   MP_TIFF2PS_D         "convert %s %s"
 /// preferred intermediary image format in conversions
 #define MP_TMPGFXFORMAT_D      2
 /// expand folder tree control?
@@ -848,6 +850,8 @@
 #define   MP_AUTOSAVEDELAY_D       60
 /// how often should we check for incoming mail (secs, 0 to disable)?
 #define   MP_POLLINCOMINGDELAY_D       300
+/// collect all new mail at startup?
+#define   MP_COLLECTATSTARTUP_D 0l
 /// ask user if he really wants to exit?
 #define   MP_CONFIRMEXIT_D      1l
 /// open folders when they're clicked (otherwise - double clicked)

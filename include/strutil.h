@@ -358,6 +358,9 @@ strutil_getMailAddress(const String &inputline,
                        String * hostname = NULL);
 //@}
 
+/// Check if text is 7bit only:
+bool strutil_is7bit(const char *text);
+
 /** @name regular expression matching */
 //@{
 /// compile a string into a regular expression

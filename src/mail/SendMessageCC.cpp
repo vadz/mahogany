@@ -102,8 +102,18 @@ SendMessageCC::Create(Protocol protocol,
 
    (void) miscutil_GetFromAddress(prof, &m_FromPersonal, &m_FromAddress);
    m_ReplyTo = miscutil_GetReplyAddress(prof);
-
    m_ReturnAddress = m_FromAddress;
+
+   /*
+     Sender:/From: magic:
+      If the Sender setting is not empty *and* differs from From:,
+      then set it, otherwise leave it empty.
+   */
+   m_Sender = READ_CONFIG(prof, MP_SMTPHOST_LOGIN);
+   m_Sender.Trim().Trim(FALSE); // remove all spaces on begin/end
+   if( m_Sender.Length() == 0
+       || Message::CompareAddresses(m_FromAddress, m_Sender) == TRUE )
+      m_Sender = ""; // leave Sender empty
 
    if(READ_CONFIG(prof,MP_COMPOSE_USE_XFACE) != 0)
       m_XFaceFile = prof->readEntry(MP_COMPOSE_XFACE_FILE,"");
@@ -300,7 +310,8 @@ SendMessageCC::SetSubject(const String &subject)
 void
 SendMessageCC::SetFrom(const String & from,
                        const String & ipersonal,
-                       const String & replyaddress)
+                       const String & replyaddress,
+                       const String & sender)
 {
    if(from.Length())
       m_FromAddress = EncodeAddress(from);
@@ -308,6 +319,8 @@ SendMessageCC::SetFrom(const String & from,
       m_FromPersonal = ipersonal;
    if(replyaddress.Length())
       m_ReplyTo = EncodeAddress(replyaddress);
+   if(sender.Length())
+      m_Sender = EncodeAddress(sender);
 }
 
 void
@@ -332,6 +345,16 @@ SendMessageCC::SetupAddresses(void)
    m_Envelope->from->mailbox = CPYSTR(mailbox);
    m_Envelope->from->host = CPYSTR(mailhost);
 
+   if(m_Sender.Length() > 0)
+   {
+      m_Envelope->sender = mail_newaddr();
+      String email = Message::GetEMailFromAddress(m_Sender);
+      mailbox = strutil_before(email, '@');
+      mailhost = strutil_after(email,'@');
+      m_Envelope->sender->personal = CPYSTR(Message::GetNameFromAddress(m_Sender));
+      m_Envelope->sender->mailbox = CPYSTR(mailbox);
+      m_Envelope->sender->host = CPYSTR(mailhost);
+   }
    m_Envelope->return_path->mailbox = CPYSTR(mailbox);
    m_Envelope->return_path->host = CPYSTR(mailhost);
 }
@@ -378,6 +401,7 @@ SendMessageCC::SetAddresses(const String &to,
    }
    if(bcc.Length())
    {
+      m_Bcc = bcc; // in case we send later, we need this
       ASSERT(m_Envelope->bcc == NIL);
       tmpstr = bcc;
       ExtractFccFolders(tmpstr);
@@ -445,6 +469,19 @@ SendMessageCC::HasHeaderEntry(const String &entry)
          return true;
    return false;
 }
+String 
+SendMessageCC::GetHeaderEntry(const String &key)
+{
+   kbStringList::iterator i;
+   kbStringList::iterator j;
+   for(
+      i = m_ExtraHeaderLinesNames.begin(),j = m_ExtraHeaderLinesValues.begin();
+       i != m_ExtraHeaderLinesNames.end();
+       i++, j++)
+      if(**i == key)
+         return **j ;
+   return "";
+}
 
 /** Adds an extra header line.
     @param entry name of header entry
@@ -498,7 +535,7 @@ SendMessageCC::AddHeaderEntry(String const &entry, String const
 
 
 void
-SendMessageCC::Build(void)
+SendMessageCC::Build(bool forStorage)
 {
    int
       h = 0;
@@ -515,24 +552,40 @@ SendMessageCC::Build(void)
 
    bool replyToSet = false;
 
+   /* Is the message supposed to be sent later? In that case, we need
+      to store the BCC header as an X-BCC or it will disappear when
+      the message is saved to the outbox. */
+   if(forStorage)
+   {
+      // The X-BCC will be converted back to BCC by Send()
+      if(m_Envelope->bcc)
+         AddHeaderEntry("X-BCC", m_Bcc);
+   }
+   else
+   /* If sending directly, we need to do the opposite: this message
+      might have come from the Outbox queue, so we translate X-BCC
+      back to a proper bcc setting: */
+   {
+      if(HasHeaderEntry("X-BCC"))
+      {
+         if(m_Envelope->bcc)
+            mail_free_address(&(m_Envelope->bcc));
+         String tmpstr = GetHeaderEntry("X-BCC");
+         ExtractFccFolders(tmpstr);
+         char *tmp = strutil_strdup(tmpstr);
+         char *tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
+         rfc822_parse_adrlist (&m_Envelope->bcc,tmp,tmp2);
+         delete [] tmp;
+         delete [] tmp2;
+         EncodeAddressList(m_Envelope->bcc);
+      }
+   }
+
    // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
    // last NULL entry
    size_t n = m_headerList.size() + m_ExtraHeaderLinesNames.size() + 4;
    m_headerNames = new const char*[n];
    m_headerValues = new const char*[n];
-
-#if 0  // obsolete
-   /* Add the extra headers as defined in list of extra headers in
-      m_Profile (backward compatibility): */
-   for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, h++)
-   {
-      m_headerNames[h] = strutil_strdup(**i);
-      if(strcmp(m_headerNames[h], "Reply-To") == 0)
-         replyToSet = true;
-      // this is clever: read header value from m_Profile:
-      m_headerValues[h] = strutil_strdup(m_Profile->readEntry(**i,""));
-   }
-#endif
 
    /* Add directly added additional header lines: */
    i = m_ExtraHeaderLinesNames.begin();
@@ -712,8 +765,11 @@ SendMessageCC::AddPart(Message::ContentType type,
       strcpy(bdy->subtype,(char *)subtype.c_str());
       bdy->contents.text.data = data;
       bdy->contents.text.size = len;
-      bdy->encoding = (type == TYPETEXT) ? ENC8BIT : ENC7BIT;
-      /* ENC8BIT for text is auto-converted to quoted pritable */
+      bdy->encoding = (type == TYPETEXT) ?
+         ( strutil_is7bit((char *)data) ? ENC7BIT : ENC8BIT) // encode text as
+                                                     // 8 bit if needed
+         : ENC7BIT; // all other parts are 7bit encoded
+      /* ENC8BIT for text is auto-converted to quoted printable */
       break;
 
    default:
@@ -805,14 +861,23 @@ SendMessageCC::SendOrQueue(void)
       send_directly = FALSE;
 
    }
+   
+   kbStringList::iterator i;
+   for(i = m_FccList.begin(); i != m_FccList.end(); i++)
+      WriteToFolder(**i);
+
    if( send_directly )
+   {
+      Build();
       success = Send();
+   }
    else // store in outbox
    {
       if( m_OutboxName.Length() == 0)
          success = FALSE;
       else
       {
+         Build(TRUE); // build for sending later
          WriteToFolder(m_OutboxName);
          // increment counter in statusbar immediately
          mApplication->UpdateOutboxStatus();
@@ -843,8 +908,8 @@ SendMessageCC::SendOrQueue(void)
 bool
 SendMessageCC::Send(void)
 {
-   Build();
-
+   // Built() must have been called!
+   ASSERT(m_headerNames != NULL);
 
    MCclientLocker locker();
 
@@ -857,11 +922,6 @@ SendMessageCC::Send(void)
       success = true;
    String
       reply;
-
-   kbStringList::iterator i;
-   for(i = m_FccList.begin(); i != m_FccList.end(); i++)
-      WriteToFolder(**i);
-
 
    hostlist[1] = NIL;
    String service;

@@ -332,7 +332,7 @@ protected:
    /// registration seed for EventManager
    void *m_eventNewMailReg;
    void *m_eventOptChangeReg;
-   void *m_eventFolderStatusReg;
+   void *m_eventFolderUpdateReg;
    /// do we support dialup networking
    bool m_DialupSupport;
    /// do we use an Outbox?

@@ -514,8 +514,12 @@ protected:
    /// Is the mailfolder still connected to a server or file?
    bool IsAlive(void) const
       { return m_MailStream != NULL; }
-   /// Request update
-   virtual void RequestUpdate(bool sendEvents = false);
+   /** Request update.
+       @param sendEvents If this is true, the next call to
+       ProcessEvents() will send an event out to the application. This
+       can be set to FALSE to suppress updates.
+   */
+   virtual void RequestUpdate(bool sendEvents = TRUE);
    /// Update the folder status, number of messages, etc
    virtual void UpdateStatus(void);
    /// Update the timeout values from a profile
@@ -557,7 +561,7 @@ public:
    enum EventType
    {
       Searched, Exists, Expunged, Flags, Notify, List,
-      LSub, Status, Log, DLog, Update
+      LSub, Status, Log, DLog, Update, MsgStatus
    };
    /// A structure for passing arguments.
    union EventArgument
@@ -733,6 +737,8 @@ private:
    bool m_NeedFreshListing;
    /// do we suppress listing udpates?
    bool m_ListingFrozen;
+   /// do we need to run ExpungeMessages() on this folder?
+   bool m_ExpungeRequested;
    /// Is this folder in a critical c-client section?
    bool m_InCritical;
    /** We remember the last folder to enter a critical section, helps

@@ -1,0 +1,24 @@
+$Id$
+
+This directory contains various scripts related to Mahogany.
+
+
+testbuild:
+
+	Small script that can be used to build sources from a variety
+	of source directories and with various configure options and
+	reports on the success/failure of the various builds.
+	Typical example: 
+		Build sources from e.g. two directories 
+		"mahogany-0.60 mahogany-testbranch"
+		in the configuration "debug nodebug". 
+	The options for each configuration and the various other i
+	parameters can be configured in the script.
+		
+scancvs:
+
+	Checks the current directory tree for files which are not in the
+	cvs. If called as "scancvs remove" it will delete these files.
+	This works *OFFLINE* and can be used to check if you forgot to 
+	add/commit any files and to re-create a clean tree as of the cvs.
+

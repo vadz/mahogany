@@ -1676,9 +1676,9 @@ MailFolderCmn::DoUpdate()
    if ( interval != m_Timer->GetInterval() )
    {
       m_Timer->Stop();
-      m_Timer->Start(interval);
+      if(interval > 0) // interval of zero == disable ping timer
+         m_Timer->Start(interval);
    }
-
    RequestUpdate(true);
    MailFolder::ProcessEventQueue();
 }
@@ -1816,10 +1816,113 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
    else
    {
       wxLogVerbose("Filter module couldn't be loaded.");
-
       return 0; // no filter module
    }
 }
+
+/** Checks for new mail and filters if necessary.
+    Return TRUE if folder was changed.
+*/
+bool
+MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
+{
+   if(hil == NULL)
+   {
+      hil = GetHeaders();
+      CHECK(hil, FALSE, "NULL HeaderInfoList");
+   }
+   else
+      hil->IncRef();
+   
+   // Maybe we are lucky and have nothing to do?
+   if(hil->Count() == 0)
+   {
+      hil->DecRef();
+      return FALSE;
+   }
+
+   bool changed = FALSE;
+   UIdType nRecent = CountRecentMessages();
+   if(nRecent > 0 )
+   {
+      // Obtain pointer to the filtering module:
+      MModule_Filters *filterModule = MModule_Filters::GetModule();
+      if(filterModule)
+      {
+         // Build an array of NEW message UIds to apply the filters to:
+         UIdArray messages;
+         CHECK(hil, FALSE, "no header listing?");
+         for(UIdType idx = 0; idx < hil->Count(); idx++)
+            // the first two condidions: only take NEW=RECENT&&!SEEN messages
+            if( ( (*hil)[idx]->GetStatus() &  MSG_STAT_RECENT )
+                && (((*hil)[idx]->GetStatus() &  MSG_STAT_SEEN ) == 0)
+                // ignore all deleted messages to avoid duplicate filtering:
+                && (((*hil)[idx]->GetStatus() &  MSG_STAT_DELETED ) == 0)
+               )
+               messages.Add( (*hil)[idx]->GetUId() );
+      
+         // build a single program from all filter rules:
+         String filterString;
+         MFolder_obj folder(GetName());
+         wxArrayString filters = folder->GetFilters();
+         size_t count = filters.GetCount();
+         for ( size_t n = 0; n < count; n++ )
+         {
+            MFilter_obj filter(filters[n]);
+            MFilterDesc fd = filter->GetDesc();
+            filterString += fd.GetRule();
+         }
+         if(filterString[0]) // not empty
+         {
+            // translate filter program:
+            FilterRule * filterRule = filterModule->GetFilter(filterString);
+            // apply it:
+            if ( filterRule )
+               (void) filterRule->Apply(this, messages,
+                                        TRUE, /* ignore deleted */
+                                        &changed);
+            SafeDecRef(filterRule);
+         }
+         SafeDecRef(filterModule);
+      }
+      else
+         wxLogVerbose("Filter module couldn't be loaded.");
+   }
+
+   // do we have any messages to move?
+   if( (GetFlags() & MF_FLAGS_INCOMING) != 0)
+   {
+      // where to we move the mails?
+      String newMailFolder = READ_CONFIG(GetProfile(),
+                                         MP_NEWMAIL_FOLDER);
+      if(newMailFolder == GetName())
+      {
+         ERRORMESSAGE((
+            _("Cannot collect mail from folder '%s' into itself."),
+            GetName().c_str()));
+      }
+      else
+      {
+         UIdArray messages;
+         for(UIdType idx = 0; idx < hil->Count(); idx++)
+            messages.Add( (*hil)[idx]->GetUId() );
+         if(SaveMessages(&messages,
+                         newMailFolder,
+                         true /* isProfile */,
+                         false /* update count */))
+         {
+            DeleteMessages(&messages);
+            ExpungeMessages();
+         }
+         else
+            ERRORMESSAGE((_("Cannot move newly arrived messages.")));
+         changed = TRUE;
+      }
+   }
+   hil->DecRef();
+   return changed;
+}
+   
 
 // ----------------------------------------------------------------------------
 // sort order conversions

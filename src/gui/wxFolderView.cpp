@@ -1976,14 +1976,6 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
    if(event.GetFolder() == m_MailFolder)
    {
       Update();
-   }
-}
-
-void
-wxFolderView::OnFolderStatusEvent(MEventFolderStatusData &event)
-{
-   if(event.GetFolder() == m_MailFolder)
-   {
       UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
    }
 }

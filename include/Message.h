@@ -312,8 +312,9 @@ public:
    /** Write the message to a String.
        @param str the string to write message text to
        @param headerFlag if true, include header
+       @return FALSE on error
    */
-   virtual void WriteToString(String &str, bool headerFlag = true) const = 0;
+   virtual bool WriteToString(String &str, bool headerFlag = true) const = 0;
 
    /** Takes this message and tries to send it. Only useful for
        messages in some kind of Outbox folder.

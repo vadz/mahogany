@@ -51,10 +51,12 @@ public:
        @param from sender address
        @param personal personal name
        @param returnaddress address for Reply-To
+       @param sender setting if needed
    */
    virtual void SetFrom(const String &from,
                         const String &personal = "",
-                        const String &replyaddress = "");
+                        const String &replyaddress = "",
+                        const String &sender = "");
 
    virtual void SetNewsgroups(const String &groups);
 
@@ -120,11 +122,15 @@ protected:
    void SetupAddresses(void);
    friend class MessageCC; // allowed to call Send() directly
 
-   /** Builds the message, i.e. prepare to send it. */
-   void Build(void);
+   /** Builds the message, i.e. prepare to send it.
+    @param forStorage if this is TRUE, store some extra information
+    that is not supposed to be send, like BCC header. */
+   void Build(bool forStorage = FALSE);
    /// Checks for existence of a header entry
    bool HasHeaderEntry(const String &entry);
-
+   /// Get a header entry:
+   String GetHeaderEntry(const String &key);
+   
    /// translate the (wxWin) encoding to (MIME) charset
    String EncodingToCharset(wxFontEncoding enc);
 
@@ -155,7 +161,8 @@ private:
    String m_FromAddress, m_FromPersonal;
    String m_ReturnAddress;
    String m_ReplyTo;
-
+   String m_Sender;
+   String m_Bcc;
    /// if not empty, name of xface file
    String m_XFaceFile;
    /// Outgoing folder name or empty

@@ -172,8 +172,9 @@ public:
    /** Write the message to a String.
        @param str the string to write message text to
        @param headerFlag if true, include header
+       @return FALSE on error
    */
-   void WriteToString(String &str, bool headerFlag = true) const;
+   virtual bool WriteToString(String &str, bool headerFlag = true) const;
 
 
    /** Takes this message and tries to send it. Only useful for

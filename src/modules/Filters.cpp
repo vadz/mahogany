@@ -66,20 +66,14 @@ extern "C" {
 class FilterRuleImpl : public FilterRule
 {
 public:
-   /** Apply the filter to a single message, returns 0 on success. */
-   virtual int Apply(class MailFolder *mf, UIdType uid) const;
-   /** Apply the filter to the messages in a folder.
-       @param folder - the MailFolder object
-       @param NewOnly - if true, apply it only to new messages
-       @return 0 on success
-   */
-   virtual int Apply(class MailFolder *folder, bool NewOnly = true) const;
-   /** Apply the filter to the messages in a folder.
-       @param folder - the MailFolder object
-       @param msgs - the list of messages to apply to
-       @return 0 on success
-   */
-   virtual int Apply(class MailFolder *folder, UIdArray msgs) const;
+   virtual int Apply(class MailFolder *mf, UIdType uid,
+                     bool *changeflag) const;
+   virtual int Apply(class MailFolder *folder, bool NewOnly,
+                     bool *changeflag) const;
+   virtual int Apply(class MailFolder *folder,
+                     UIdArray msgs,
+                     bool ignoreDeleted,
+                     bool *changeflag) const;
    static FilterRule * Create(const String &filterrule,
                               MInterface *minterface, MModule_Filters *mod)
       { return new FilterRuleImpl(filterrule, minterface, mod); }
@@ -95,7 +89,9 @@ protected:
    /// common code for the two Apply() functions
    int ApplyCommonCode(class MailFolder *folder,
                        UIdArray *msgs,
-                       bool newOnly) const;
+                       bool newOnly,
+                       bool ignoreDeleted,
+                       bool *changeflag) const;
 private:
    class Parser     *m_Parser;
    class SyntaxNode *m_Program;
@@ -264,12 +260,15 @@ public:
    /// Set the message and folder to operate on:
    virtual void SetMessage(class MailFolder *folder,
                            UIdType uid = UID_ILLEGAL) = 0;
+   virtual bool GetChanged(void) const = 0;
    /// Obtain the mailfolder to operate on:
    virtual class MailFolder * GetFolder(void) = 0;
    /// Obtain the message UId to operate on:
    virtual UIdType GetMessageUId(void) = 0;
    /// Obtain the message itself:
    virtual class Message * GetMessage(void) = 0;
+   /// tell parser that msg or folder got changed
+   virtual void SetChanged(void) = 0;
    //@}
 
    /// virtual destructor
@@ -421,6 +420,13 @@ public:
          m_MailFolder = folder;
          SafeIncRef(m_MailFolder);
          m_MessageUId = uid;
+         m_MfWasChanged = FALSE;
+      }
+   /// Has filter rule caused a change to the folder/message?
+   virtual bool GetChanged(void) const
+      {
+         ASSERT(m_MailFolder);
+         return m_MfWasChanged;
       }
    /// Obtain the mailfolder to operate on:
    virtual class MailFolder * GetFolder(void) { SafeIncRef(m_MailFolder); return m_MailFolder; }
@@ -435,7 +441,8 @@ public:
    }
    //@}
    virtual MInterface * GetInterface(void) { return m_MInterface; }
-
+   /// tell parser that msg or folder got changed
+   virtual void SetChanged(void) { m_MfWasChanged = TRUE; }
 protected:
    inline void EatWhiteSpace(void)
       { while(isspace(m_Input[m_Position])) m_Position++; }
@@ -456,7 +463,8 @@ private:
 
    UIdType m_MessageUId;
    MailFolder *m_MailFolder;
-
+   bool m_MfWasChanged;
+   
    GCC_DTOR_WARN_OFF
 };
 
@@ -2003,6 +2011,7 @@ extern "C"
                                  "%d", &result,
                                  NULL);
       msg->DecRef();
+      p->SetChanged(); // worst case guess
       return rc ? (result != 0) : false;
    }
 #else
@@ -2164,6 +2173,7 @@ extern "C"
       UIdType uid = p->GetMessageUId();
       int rc = mf->DeleteMessage(uid);
       mf->DecRef();
+      p->SetChanged();
       return Value(rc);
    }
 
@@ -2175,6 +2185,7 @@ extern "C"
       if(! mf) return Value(0);
       UIdType rc = mf->DeleteDuplicates();
       mf->DecRef();
+      if(rc != UID_ILLEGAL) p->SetChanged();
       return Value( (int)(rc != UID_ILLEGAL) ); // success if 0 or
       // more deleted
    }
@@ -2313,6 +2324,7 @@ extern "C"
       MailFolder *mf = p->GetFolder();
       mf->ExpungeMessages();
       mf->DecRef();
+      p->SetChanged();
       return 1;
    }
 #ifndef _MSC_VER
@@ -2364,7 +2376,8 @@ ParserImpl::AddBuiltinFunctions(void)
  * FilterRuleImpl - the class representing a program
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid) const
+int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid,
+                          bool *changeflag) const
 {
    if(! m_Program || ! m_Parser)
       return 0;
@@ -2375,62 +2388,92 @@ int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid) const
    mf->IncRef();
    m_Parser->SetMessage(mf, uid);
    Value rc = m_Program->Evaluate();
+   if(changeflag) *changeflag = m_Parser->GetChanged();
    m_Parser->SetMessage(NULL);
    mf->DecRef();
    return (int) rc.GetNumber();
 }
 
 int
-FilterRuleImpl::Apply(class MailFolder *mf, bool NewOnly) const
+FilterRuleImpl::Apply(class MailFolder *mf, bool NewOnly,
+                      bool *changeflag) const
 {
-   return ApplyCommonCode(mf, NULL, NewOnly);
+   return ApplyCommonCode(mf, NULL, NewOnly, NewOnly, changeflag);
 }
 
 int
-FilterRuleImpl::Apply(class MailFolder *folder, UIdArray msgs) const
+FilterRuleImpl::Apply(class MailFolder *folder,
+                      UIdArray msgs,
+                      bool ignoreDeleted,
+                      bool *changeflag) const
 {
-   return ApplyCommonCode(folder, &msgs, FALSE);
+   return ApplyCommonCode(folder, &msgs, FALSE, ignoreDeleted, changeflag);
+}
+
+/* Common logic to test if we want to filter a message of this status
+   or not: */
+static inline bool
+CheckStatusMatch(int status, bool newOnly, bool ignoreDeleted)
+{
+   return
+      /* Do we want all messages or new ones only? If so, check
+         that the message is RECENT and not SEEN: */
+      ( ! newOnly ||
+        ( (status & MailFolder::MSG_STAT_RECENT)
+          && ! (status & MailFolder::MSG_STAT_SEEN) ) )
+      /* Check if we need to ignore this message: */
+      && (ignoreDeleted
+          || (status & MailFolder::MSG_STAT_DELETED) == 0 )
+      ;
 }
 
 int
 FilterRuleImpl::ApplyCommonCode(class MailFolder *mf,
                                 UIdArray *msgs,
-                                bool newOnly) const
+                                bool newOnly,
+                                bool ignoreDeleted,
+                                bool *changeflag) const
 {
    if(! m_Program || ! m_Parser)
       return 0;
    int rc = 1; // no error yet
-   ASSERT(mf);
+   CHECK(mf, 0, "no folder for filtering");
    mf->IncRef();
 
+   bool changed = FALSE;
+   bool changedtemp;
+   HeaderInfoList *hil = mf->GetHeaders();
+   CHECK(hil,0,"Cannot get header info list");
+   
    if(msgs) // apply to all messages in list
    {
       for(size_t idx = 0; idx < msgs->Count(); idx++)
-         rc &= Apply(mf, (*msgs)[idx]);
+      {
+         const HeaderInfo * hi = hil->GetEntryUId((*msgs)[idx]);
+         ASSERT(hi);
+         if(hi && CheckStatusMatch(hi->GetStatus(),
+                                   newOnly, ignoreDeleted))
+            rc &= Apply(mf, (*msgs)[idx], &changedtemp);
+         changed |= changedtemp;
+      }
    }
    else // apply to all or all recent messages
    {
-      HeaderInfoList *hil = mf->GetHeaders();
-      if(hil)
+      for(size_t i = 0; i < hil->Count(); i++)
       {
-         for(size_t i = 0; i < hil->Count(); i++)
+         const HeaderInfo * hi = (*hil)[i];
+         ASSERT(hi);
+         if(hi && CheckStatusMatch(hi->GetStatus(),
+                                   newOnly, ignoreDeleted))
          {
-            const HeaderInfo * hi = (*hil)[i];
-            if( (! newOnly) || // handle all or only new ones:
-                (
-                   (hi->GetStatus() & MailFolder::MSG_STAT_RECENT)
-                   && ! (hi->GetStatus() & MailFolder::MSG_STAT_SEEN)
-                   && ! (hi->GetStatus() & MailFolder::MSG_STAT_DELETED)
-                   ) // new == recent and not seen
-               )
-            {
-               rc &= Apply(mf, hi->GetUId());
-            }
+            rc &= Apply(mf, hi->GetUId(), &changedtemp);
+            changed |= changedtemp;
          }
       }
-      hil->DecRef();
    }
+   hil->DecRef();
    mf->DecRef();
+   if(changeflag) *changeflag = changed;
    return rc;
 }
 

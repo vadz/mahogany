@@ -30,10 +30,6 @@ public:
        @return true on success
    */
    virtual bool Collect(MailFolder *mf = NULL) = 0;
-   /** Tells the object about a new new mail folder.
-       @param name use this folder as the new mail folder
-   */
-   virtual void SetNewMailFolder(const String &name) = 0;
    /** Adds a new incoming folder to the list.
        @param name folder to collect from
        @return true on success, false if folder was not found
@@ -44,16 +40,6 @@ public:
        @return true on success, false if folder was not found
    */
    virtual bool RemoveIncomingFolder(const String &name) = 0;
-   /** Returns true if the collector is locked.
-       @return true if collecting
-   */
-   virtual bool IsLocked(void) const = 0;
-   /** Locks or unlocks the mail collector. If it is locked, it simly
-       does nothing.
-       @param lock true=lock, false=unlock
-       @return the old state
-   */
-   virtual bool Lock(bool lock = true) = 0;
    /** Ask the MailCollector to re-initialise on next collection.
     */
    virtual void RequestReInit(void) = 0;
