@@ -3489,7 +3489,7 @@ MText2Dialog::MText2Dialog(wxWindow *parent,
    c->height.AsIs();
    m_text2->SetConstraints(c);
 
-   SetDefaultSize(5*wBtn, 7*hBtn);
+   SetDefaultSize(5*wBtn, 10*hBtn);
 }
 
 bool MText2Dialog::TransferDataToWindow()
