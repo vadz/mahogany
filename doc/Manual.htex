@@ -323,7 +323,7 @@ the GPL or LGPL\footnote{
 which we recently felt victim of - due to some strong demand, we have decided
 to allow alternatively licensing Mahogany under GPL
 }. We do not want to get involved in this highly emotional and political discussion.
-Our intent is to alllow everyone to use and modify Mahogany while preserving
+Our intent is to allow everyone to use and modify Mahogany while preserving
 some form of control over its development. That is why we chose a modified version
 of Perl's Artistic License. It is both more and less restrictive than the GPL
 in certain ways. We do not believe that there is one right license for everything.
