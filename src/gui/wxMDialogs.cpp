@@ -344,8 +344,10 @@ public:
        m_text->SetFont(wxFont(12, wxFONTFAMILY_TELETYPE,
                               wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
-       wxButton *btnClose = new wxButton(this, wxID_CANCEL, _("Close")),
-                *btnSave = new wxButton(this, wxID_SAVE, _("&Save..."));
+       // in TAB order we want "Save" to get focus before "Close", so create
+       // them in order
+       wxButton *btnSave = new wxButton(this, wxID_SAVE, _("&Save...")),
+                *btnClose = new wxButton(this, wxID_CANCEL, _("Close"));
 
 
        // layout them
