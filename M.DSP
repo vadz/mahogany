@@ -1863,6 +1863,10 @@ SOURCE=.\src\modules\TextViewer.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\src\util\matchurl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\util\miscutil.cpp
 # End Source File
 # Begin Source File
@@ -1872,20 +1876,6 @@ SOURCE=.\src\util\ssl.cpp
 # Begin Source File
 
 SOURCE=.\src\util\strutil.cpp
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-# ADD CPP /O2
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-!ENDIF 
 
 # End Source File
 # Begin Source File
