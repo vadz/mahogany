@@ -196,7 +196,8 @@ public:
 
    virtual MsgnoArray *SearchByFlag(MessageStatus flag,
                                     int flags = SEARCH_SET |
-                                                SEARCH_UNDELETED) const;
+                                                SEARCH_UNDELETED,
+                                    MsgnoType last = 0) const;
 
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
 
@@ -540,8 +541,11 @@ private:
    /// the number of messages as we know it
    MsgnoType m_nMessages;
 
-   /// last seen UID, all messages above this one are new
-   UIdType m_LastUId;
+   /// last seen UID
+   UIdType m_uidLast;
+
+   /// last seen UID of a new message
+   UIdType m_uidLastNew;
 
    //@}
 

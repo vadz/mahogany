@@ -1438,7 +1438,8 @@ MailFolderCC::Create(FolderType type, int flags)
 
 void MailFolderCC::Init()
 {
-   m_LastUId = UID_ILLEGAL;
+   m_uidLast =
+   m_uidLastNew = UID_ILLEGAL;
 
    m_expungedMsgnos =
    m_expungedPositions =
@@ -2214,7 +2215,8 @@ MailFolderCC::Close()
    }
 
    // normally the folder won't be reused any more but reset them just in case
-   m_LastUId = UID_ILLEGAL;
+   m_uidLast =
+   m_uidLastNew = UID_ILLEGAL;
    m_nMessages = 0;
 }
 
@@ -3253,7 +3255,9 @@ MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
    return count;
 }
 
-MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag, int flags) const
+MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
+                                       int flags,
+                                       MsgnoType last) const
 {
    CHECK( m_MailStream, 0, "SearchByFlag: folder is closed" );
 
@@ -3262,6 +3266,7 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag, int flags) const
    // do we look for messages with this flag or without?
    bool set = !(flags & SEARCH_UNSET);
 
+   // construct the corresponding search program
    switch ( flag )
    {
       case MSG_STAT_SEEN:
@@ -3330,6 +3335,19 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag, int flags) const
    if ( flags & SEARCH_UNDELETED )
    {
       pgm->undeleted = 1;
+   }
+
+   if ( last )
+   {
+      // only search among the messages after this one
+      SEARCHSET *set = mail_newsearchset();
+      set->first = last + 1;
+      set->last = LONG_MAX - 1; // bug in c-client? it uses "%ld", not "%lu"!
+
+      if ( flags & SEARCH_UID )
+         pgm->uid = set;
+      else
+         pgm->msgno = set;
    }
 
    return DoSearch(pgm, SE_FREE | (flags & SEARCH_UID ? SE_UID : 0));
@@ -4367,10 +4385,8 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
 
    // special case: when we get the first mm_exists() for an empty folder,
    // msgnoMax will be equal to m_nMessages (both will be 0), so catch this
-   // with an additional check for m_LastUId
-   //
-   // TODO: would it be enough to just check if m_LastUId has changed?
-   if ( msgnoMax != m_nMessages || m_LastUId == UID_ILLEGAL )
+   // with an additional check for m_uidLast
+   if ( msgnoMax != m_nMessages || m_uidLast == UID_ILLEGAL )
    {
       ASSERT_MSG( msgnoMax >= m_nMessages, "where have they gone?" );
 
@@ -4441,7 +4457,7 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
 
    // update it so that it won't be UID_ILLEGAL the next time and the test
    // above works as expected
-   m_LastUId = stream->uid_last;
+   m_uidLast = stream->uid_last;
 }
 
 void MailFolderCC::OnMailExpunge(MsgnoType msgno)
@@ -4531,10 +4547,18 @@ void MailFolderCC::OnNewMail()
       // don't allow changing the folder while we're filtering it
       MLocker filterLock(m_mutexNewMail);
 
-      UIdArray *uidsNew = SearchByFlag(MSG_STAT_NEW,
-                                       SEARCH_SET |
-                                       SEARCH_UNDELETED |
-                                       SEARCH_UID);
+      // only find the new new messages, i.e. the ones which we hadn't reported
+      // yet
+      UIdArray *uidsNew = SearchByFlag
+                          (
+                           MSG_STAT_NEW,
+                           SEARCH_SET | SEARCH_UNDELETED | SEARCH_UID,
+                           m_uidLastNew == UID_ILLEGAL ? 0 : m_uidLastNew
+                          );
+
+      // update m_uidLastNew to avoid finding the same messages again the next
+      // time
+      m_uidLastNew = m_uidLast;
 
       if ( uidsNew )
       {
@@ -4551,6 +4575,10 @@ void MailFolderCC::OnNewMail()
                   hil->CacheMsgnos(m_nMessages - count + 1, m_nMessages);
                }
 
+               // TODO: update the status using SearchByFlag() to look only at
+               //       the messages in uidsNew instead of discarding it!
+               MfStatusCache::Get()->InvalidateStatus(GetName());
+
                // process the new mail, whatever it means (collecting,
                // filtering, just reporting, ...)
                if ( ProcessNewMail(*uidsNew) && !uidsNew->IsEmpty() )
@@ -4558,7 +4586,8 @@ void MailFolderCC::OnNewMail()
                   // ProcessNewMail() removes the messages removed by filters
                   // or whatever else it does from uidsNew - if something is
                   // left there after it finished, we have some new mail to
-                  // notoify the GUI about
+                  // notify the GUI about (this has nothing to do with
+                  // notifying the user about new mail!)
                   shouldNotify = true;
                }
                //else: nothing changed for this folder
@@ -4576,13 +4605,6 @@ void MailFolderCC::OnNewMail()
 
    // no more
    m_gotUnprocessedNewMail = false;
-
-   // update the status of the folder as we've got some new messages
-   MailFolderStatus status;
-   if ( DoCountMessages(&status) )
-   {
-      MfStatusCache::Get()->UpdateStatus(GetName(), status);
-   }
 
    // we delayed sending the update notification in OnMailExists() because we
    // wanted to filter the new messages first - now it is done and we can notify

@@ -674,16 +674,20 @@ public:
 
    /**
      Find messages with given flags. It returns either msgnos (default) or
-     UIDs if flags has SEARCH_UID bit set.
+     UIDs if flags has SEARCH_UID bit set. If the parameter last is not 0
+     (default value), then the search is restricted to the messages after this
+     one. It is interpreted as either msgno or UID depending on the presence of
+     SEARCH_UID flag.
 
      @param status one of MSG_STAT_xxx constants
      @param flags the combination of SEARCH_XXX bits
-     @param return array with msgnos or UIDs of messages found
-              (to be freed by caller)
+     @param last only return the matches after this UID/msgno
+     @return array with msgnos or UIDs of messages found (to be freed by caller)
    */
    virtual MsgnoArray *SearchByFlag(MessageStatus flag,
                                     int flags = SEARCH_SET |
-                                                SEARCH_UNDELETED) const = 0;
+                                                SEARCH_UNDELETED,
+                                    MsgnoType last = 0) const = 0;
 
    /** Search messages for certain criteria.
        @return UIdArray with UIds of matching messages, caller must

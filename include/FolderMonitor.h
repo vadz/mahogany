@@ -53,7 +53,7 @@ public:
      @param flags determine the options
      @return true if we got any new mail, false otherwise
     */
-   virtual bool CheckNewMail(int flags = Opened) = 0;
+   virtual bool CheckNewMail(int flags = 0) = 0;
 
    /**
      Adds or removes this folder to/from the list of folders to monitor.

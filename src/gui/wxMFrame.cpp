@@ -557,6 +557,8 @@ wxMFrame::OnMenuCommand(int id)
             FolderMonitor *mailCollector = mApplication->GetFolderMonitor();
             if ( mailCollector )
             {
+               // when the user explicitly checks for the new mail, also update
+               // the currently opened folder(s) and give the verbose messages
                mailCollector->CheckNewMail(FolderMonitor::Interactive |
                                            FolderMonitor::Opened);
             }

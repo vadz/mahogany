@@ -410,8 +410,10 @@ protected:
    }
 
    // process the event which can result in changing of a tree item colour due
-   // to change in new/recent messages and also update the number of messages
-   // shown in the tree
+   // to change in new/recent messages
+   void ProcessMsgNumberChange(MailFolder *folder);
+
+   // new version which will replace the one above eventually
    void ProcessMsgNumberChange(const wxString& folderName);
 
    // process the folder tree change event
@@ -481,8 +483,9 @@ private:
    wxFolderTreeNode  *m_current;  // current selection (NULL if none)
 
    // event registration handles
-   void *m_eventFolderChange;    // for folder creation/destruction
+   void *m_eventFolderChange;    // for folder creatio/destruction
    void *m_eventOptionsChange;   // options change (update icons)
+   void *m_eventFolderUpdate;    // folder status (including msg status) change
    void *m_eventFolderStatus;    // number of messages changed
 
    // the full names of the folder currently opened in the main frame and
@@ -1587,6 +1590,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
             this,
             MEventId_FolderTreeChange, &m_eventFolderChange,
             MEventId_OptionsChange, &m_eventOptionsChange,
+            MEventId_FolderUpdate, &m_eventFolderUpdate,
             MEventId_FolderStatus, &m_eventFolderStatus,
             MEventId_Null
          ) )
@@ -2584,6 +2588,12 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          }
       }
    }
+   else if ( ev.GetId() == MEventId_FolderUpdate )
+   {
+      MEventWithFolderData& event = (MEventWithFolderData &)ev;
+
+      ProcessMsgNumberChange(event.GetFolder());
+   }
    else if ( ev.GetId() == MEventId_FolderStatus )
    {
       MEventFolderStatusData& event = (MEventFolderStatusData &)ev;
@@ -2754,6 +2764,25 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
    node->SetStatus(this, status);
 }
 
+void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *mf)
+{
+   if ( READ_CONFIG_TEXT(mf->GetProfile(), MP_FTREE_FORMAT).empty() )
+   {
+      // don't bother counting the messages - it may be time consuming, so
+      // don't do it just to throw away the result later anyhow
+      return;
+   }
+
+   String folderName = mf->GetName();
+   if ( !folderName.empty() )
+   {
+      ProcessMsgNumberChange(folderName);
+   }
+   //else: this may happen for folders not in the folder tree (i.e. created
+   //      with MFolder::CreateTemp() - but we're not interested in them anyhow
+   //      so just don't do anything)
+}
+
 // ----------------------------------------------------------------------------
 // folder icons
 // ----------------------------------------------------------------------------
@@ -2863,6 +2892,7 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
 {
    MEventManager::DeregisterAll(&m_eventFolderChange,
                                 &m_eventOptionsChange,
+                                &m_eventFolderUpdate,
                                 &m_eventFolderStatus,
                                 NULL);
 

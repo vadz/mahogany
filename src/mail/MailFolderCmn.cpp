@@ -1588,6 +1588,15 @@ MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
    return true;
 }
 
+/*
+   The parameters have the following meaning:
+
+   folder is the folder where the new mail has arrived, never NULL
+   uidsNew are the UIDs of the new messages in the folder mf (may be NULL)
+   countNew is the number of new messages if (and only if) uidsNew == NULL
+   mf is the opened folder where new mail is or NULL (then uidsNew is too)
+ */
+
 /* static */
 void
 MailFolderCmn::ReportNewMail(const MFolder *folder,
@@ -1722,7 +1731,6 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
             LOGMESSAGE((M_LOG_WINONLY, message));
          }
       }
-
    //else: new mail reported by the Python code
 }
 
