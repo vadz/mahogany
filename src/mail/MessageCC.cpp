@@ -1033,10 +1033,81 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
    // free old text
    fs_give(&m_partContentPtr);
 
+   // the size of possible extra non Base64 encoded text following a Base64
+   // encoded part
+   const unsigned char *startSlack = NULL;
+   size_t sizeSlack = 0;
+
+   // just for convenience...
+   unsigned char *text = (unsigned char *)cptr;
+
    switch ( mimepart.GetTransferEncoding() )
    {
       case ENCBASE64:      // base-64 encoded data
-         m_partContentPtr = rfc822_base64((unsigned char *)cptr, size, lenptr);
+         // there is a frequent problem with mail list software appending the
+         // mailing list footer (i.e. a standard signature containing the
+         // instructions about how to [un]subscribe) to the top level part of a
+         // Base64-encoded message thus making it invalid - worse c-client code
+         // doesn't complain about it but simply returns some garbage in this
+         // case
+         //
+         // we try to detect this case and correct for it: note that neither
+         // '-' nor '_' which typically start the signature are valid
+         // characters in base64 so the logic below should work for all common
+         // cases
+
+         // only check the top level part
+         if ( !mimepart.GetParent() )
+         {
+            const unsigned char *p;
+            for ( p = text; *p; p++ )
+            {
+               // we do *not* want to use the locale-specific settings here,
+               // hence don't use isalpha()
+               unsigned char ch = *p;
+               if ( (ch >= 'A' && ch <= 'Z') ||
+                     (ch >= 'a' && ch <= 'z') ||
+                      (ch >= '0' && ch <= '9') ||
+                       (ch == '+' || ch == '/' || ch == '\r' || ch == '\n') )
+               {
+                  // valid Base64 char
+                  continue;
+               }
+
+               if ( ch == '=' )
+               {
+                  // valid, but can only occur at the end as padding, so still
+                  // break below
+                  p++;
+               }
+
+               // what (if anything) follows can't appear in a valid Base64
+               // message
+               break;
+            }
+
+            size_t sizeValid = p - text;
+            if ( sizeValid != size )
+            {
+               ASSERT_MSG( sizeValid < size,
+                           "logic error in base64 validity check" );
+
+               // take all the rest verbatim below
+               startSlack = p;
+               sizeSlack = size - sizeValid;
+
+               // and decode just the (at least potentially) valid part
+               size = sizeValid;
+            }
+         }
+
+         m_partContentPtr = rfc822_base64(text, size, lenptr);
+
+         if ( sizeSlack )
+         {
+            fs_resize(&m_partContentPtr, *lenptr + sizeSlack);
+            memcpy((char *)m_partContentPtr + *lenptr, startSlack, sizeSlack);
+         }
          break;
 
       case  ENCBINARY:     // 8 bit binary data
@@ -1047,7 +1118,7 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
          break;
 
       case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
-         m_partContentPtr = rfc822_qprint((unsigned char *)cptr, size, lenptr);
+         m_partContentPtr = rfc822_qprint(text, size, lenptr);
 
          // some broken mailers sent messages with QP specified as the content
          // transfer encoding in the headers but don't encode the message
