@@ -1,3 +1,7 @@
+*.plg
+*.ncb
+*.opt
+*.bce
 aclocal.m4
 M.spec
 config.cache
@@ -25,3 +29,9 @@ imessages.po
 messages.po
 CVSROOT
 log
+test.rc
+test.aps
+resource.h
+mconfig
+user
+M.001
