@@ -1593,7 +1593,9 @@ public:
                String templateValue = profile->readEntry(entry, "");
 
                String entryNew;
-               entryNew << entry << '/' << folderName;
+               entryNew << M_TEMPLATES_SECTION
+                        << templateKinds[n] << '/'
+                        << folderName;
                ProfileBase *profileApp = mApplication->GetProfile();
                if ( profileApp->HasEntry(entryNew) )
                {

@@ -69,6 +69,7 @@
 
 /// the subgroup for message templates (should have the trailing slash)
 #define M_TEMPLATE_SECTION "Template/"
+#define M_TEMPLATES_SECTION "Templates/"
 
 /** @name Keys where the template for messages of given type is stored */
 //@{
