@@ -391,7 +391,7 @@ if test "$USE_OPT" != 1; then
 fi
 
 if test "$USE_PROFILER" = 1; then
-	OPT="-pg"
+	OPT="$OPT -pg"
 fi
 
 dnl experimental code (unstable!)
