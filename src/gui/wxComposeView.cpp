@@ -2475,6 +2475,10 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
    delete m_procExtEdit;
    m_procExtEdit = NULL;
 
+   // the text could have been scrolled down but it might have become shorter
+   // after editing, so reset the scrollbars to ensure that it is visible
+   m_LayoutWindow->Scroll(0, 0);
+
    // show the frame which might had been obscured by the other windows
    Raise();
 }
