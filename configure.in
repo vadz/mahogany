@@ -315,6 +315,21 @@ esac
 
 dnl set debug/optimisation flags
 
+case "$USE_DEBUG" in
+1)	AC_DEFINE(DEBUG)
+	CPPFLAGS="$CPPFLAGS -DDEBUG"
+	if test -z "$DEBUGUSER" ; then DEBUGUSER="$USER"; fi
+	for i in $DEBUGUSER
+	do
+		CPPFLAGS="$CPPFLAGS -DDEBUG_$i"
+	done  
+	USE_DEBUG_INFO=1
+        USE_WXDEBUG=1
+	MAKE_DEBUG="DEBUG=yes" ;;
+*)	MAKE_DEBUG='' ;;
+esac
+AC_SUBST(MAKE_DEBUG)
+
 case "$USE_WXDEBUG" in
 1)	# AC_DEFINE(__WXDEBUG__)
 	USE_OPT=0
@@ -331,19 +346,6 @@ case "$USE_OPT" in
 *)	MYFLAGS="-O0" ;;
 esac
 
-case "$USE_DEBUG" in
-1)	AC_DEFINE(DEBUG)
-	CPPFLAGS="$CPPFLAGS -DDEBUG"
-	if test -z "$DEBUGUSER" ; then DEBUGUSER="$USER"; fi
-	for i in $DEBUGUSER
-	do
-		CPPFLAGS="$CPPFLAGS -DDEBUG_$i"
-	done  
-	USE_DEBUG_INFO=1
-	MAKE_DEBUG="DEBUG=yes" ;;
-*)	MAKE_DEBUG='' ;;
-esac
-AC_SUBST(MAKE_DEBUG)
 
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
 1.yes.*)	MYFLAGS="$MYFLAGS -g3" ;;
