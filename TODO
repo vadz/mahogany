@@ -26,6 +26,11 @@ $Id$
   - update rectangle
   - fix(simplify) cursor size calculation
   - font optimisations(?)
+  - composeview: after inserting text (reply), update scrollbars
+  - cut&paste (paste is there but broken in wxGTK)
+  - copy/cut/selections
+  - DragNDrop (waiting for GNOME 1.0 / Debian Slink)
+  - occasionally wraps lines wongly (twice)
 
 - IMAP progress updates don't appear because there is too much to be
   done in wxYield()?
@@ -36,12 +41,12 @@ $Id$
   own handler for that.)
   EFAX now sends image/tiff!
   Configurable! Options for tiff2ps!
-  >>> Finish this
+  >>> Finish this: have share/M/mime.types with tiff2ps/gv combo
 
 - check in new options panels
   - add help button in notebook, linked to help ids in panels
 
-- once this works, make mailfolders collectable:
+- make mailfolders collectable:
   - have a "collect" flag
   - have a global "NewMail" folder setting and ensure its existence
     (and the one of SentFolder) in VerifySettings()
@@ -60,23 +65,33 @@ $Id$
 - modify wxIconManager to recycle last found path for icons first, to
   avoid unnecessary filesystem traversals
 
----> simplify Profiles on separate branch
-**************** end of KB priorities :-) *********************
+- implement Compose/Reply templates
 
 - do not redraw messageview if the message is the one currently being
   shown
   -- option to keep wxLayoutList around for reuse?
 - show status dialog while importing graphics into messageview
+ - save and restore printer settings in profile
+
+---> simplify Profiles on separate branch
+**************** end of KB priorities :-) *********************
+
 - fix occasional segfault/memory corruption in MailfolderCC.cpp
+   + this might have been caused by the bug with rfc822_extraheaders
+     and be fixed now -- wait and see
+
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
 - cannot select only message in a folder or first message without
   chosing a different one first
-- IMPROVE HEADER SUPPORT
 
-- add "double click to open" profile option support to folder list ctrl
+- improve header support
+
+- add "double click to open" profile option support to folder list
+ctrl
+
 - Things like CopyMessagesToFolder need a return code indicating
-  whether they were successful or not, otherwise MoveMessagesToFolde r
+  whether they were successful or not, otherwise MoveMessagesToFolder
   deletes them in any case. Trivial to add.
 - allow angle brackets and full name <> in reply-to field.
 - folder set message flag update hook takes too long for really large folders
@@ -84,23 +99,16 @@ $Id$
 
  - merge many Re: into one, optionally Re[n]:
  - easy to implement but useful features:
-  - "check for new mail now"
+ - "check for new mail now"
+
 - use mm_critical() and delay application exit if necessary
-- don't use XPM as intermediary format, but e.g. PNG and builtin wxWin 
-  PNG loader, specify image formats to convert "png:Mtempxxx"
-  Try: conversion to png if available and loading, otherwise
-  conversion to xpm and use of builtin code
 - delete temporary files (esp. from image conversion!)
   - easy: add support for email-to-fax gateway at www.tpc.int and
     their coverpage
  
-- save and restore printer settings in profile
- - M takes ages to send a message
- - add a wxASSERT() for the correct path in READ_APPCONFIG()
- - add some progress messages when opening folders (looks like it's
-   hung when accessing POP folders)
- - Memory leaks whenever using wxMessageView (there are some from cclient)
- - add remaining translation strings from include files
+ - Memory leaks whenever using wxMessageView (there are some from
+  cclient) still there?
+
  - handle "truncated mailfolder" more gracefully (i.e. close and re-open folder)
    VZ: when 2 mail clients are running simultaneously and the message is deleted
        from the spool M crashes with meaningless backtrace.
@@ -108,12 +116,6 @@ $Id$
        the mail stream.
 
  - document scripts in extra/scripts
-
- - move some functionality from wxFolderView to MailFolder?
- - Profile fixes/rewrite:
-   - Current wxFolderView::SaveMessages() relies on
-     MailFolder::OpenFolder() profile/file behaviour 
-
 
  - somehow allow different configs for different hosts, maybe a
    [M/HOSTNAME/Profiles] section overriding [M/Profiles]?
@@ -131,13 +133,13 @@ $Id$
 
  - GUI problems:
   - configuration panels way too large!
-  - log window occasionally doesn't layout menu correctly (here too, no idea)
+  - log window occasionally doesn't layout menu correctly (here too, no
+    idea) wxGTK bug
+
   - replace the ugly "Insert File" icon with one looking more like the 
     other icons
   - folder tree control should (configurable on a per-folder basis)
     highlight and count the number of new messages
-  - trying to exit M when wxMessageViews are open doesn't work, message 
-    view remains there
   - add "Inline" option for MIME popup on graphics
   - The "Specify global M directory" dialog doesn't save its value.
   - typing keys while M starts up can cause segfault (startup-splash
@@ -208,9 +210,6 @@ $Id$
 
 - configurable ReplyString
 
-- wxLayout:
-  + cut&paste, different cursor for focus/no focus
-  + DragNDrop (waiting for GNOME 1.0 / Debian Slink)
 
 - integrate new IMAP c-client library CAREFUL: rfc822.c has changed, old patch no longer
   valid:
