@@ -755,7 +755,7 @@ static wxArrayString BuildListOfModulesDirs()
    // program/bundle directory elsewhere (not that it mattered anyhow as
    // dynamic modules are not supported neither under Windows nor under Mac
    // right now...)
-   const String globalDir = mApplication->GetGlobalDir();
+   const String globalDir = M_PREFIX;
    if ( globalDir != localDir )
    {
       String pathSystem;
@@ -788,6 +788,13 @@ static wxArrayString BuildListOfModulesDirs()
                << DIR_SEPARATOR << _T("src")
                << DIR_SEPARATOR << _T("modules")
                << DIR_SEPARATOR << _T("crypt") << DIR_SEPARATOR;
+   dirs.Add(pathSrcTree);
+
+   pathSrcTree.clear();
+   pathSrcTree << M_TOP_BUILDDIR
+               << DIR_SEPARATOR << _T("src")
+               << DIR_SEPARATOR << _T("modules")
+               << DIR_SEPARATOR << _T("spam") << DIR_SEPARATOR;
    dirs.Add(pathSrcTree);
 
    pathSrcTree.clear();
