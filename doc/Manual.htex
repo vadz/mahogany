@@ -923,11 +923,11 @@ is previewed.
 \subsection{Migrating from another mail client}
 
 \label{Import}\emph{Mahogany} supports importing the settings from
-a few other popular mail clients. The current list includes Pine,
-XFMail and Eudora. Depending on the mail client only part of its settings
-may be imported but in the best case Mahogany can import the address
-books, the configuration settings, the filter rules and the list of
-folders to use. To use this feature, choose \noun{{}``Mail|Import...{}''}
+a few other popular mail clients. The current list includes Netscape,
+Pine, XFMail and Eudora. Depending on the mail client only part of
+its settings may be imported but in the best case Mahogany can import
+the address books, the configuration settings, the filter rules and
+the list of folders to use. To use this feature, choose \noun{{}``Mail|Import...{}''}
 command and follow the dialogs.
 
 Even if you don't find your email client in the list proposed in the
@@ -1277,8 +1277,8 @@ This is the default server for your POP3 mail folders.
 This is the default server for your IMAP mail folders.
 \item \textbf{SMTP server}\\
 This is the server used for sending outgoing mail, please ask your
-system administrator if you don't know its name. If you don't configure
-this setting, you will not be able to send any e-mail!
+system administrator if you don't know its name. This option is disabled
+if {}``Use local mail transfer agent{}'' is checked.
 \item \textbf{NNTP server}\\
 This is the server used for reading USENET newsgroups and posting
 news articles.
