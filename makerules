@@ -43,6 +43,8 @@ endif
 %.ps: %.dvi
 	$(DVIPS) $< -o $@
 
+%.pdf: %.ps
+	$(PSTOPDF) $< $@
 
 ifdef HAVE_SGMLTOOLS
 %.html: %.sgml

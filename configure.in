@@ -621,6 +621,7 @@ dnl check for latex/dvips
 AC_PATH_PROG(LATEX,latex)
 AC_PATH_PROG(MAKEINDEX,makeindex)
 AC_PATH_PROG(DVIPS,dvips)
+AC_PATH_PROG(PSTOPDF,ps2pdf)
 if test "x$LATEX" = x -o "x$DVIPS" = x -o "x$MAKEINDEX" = x
 then
 	LATEX="echo \"No latex available.\""

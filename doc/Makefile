@@ -6,7 +6,7 @@ CWD = doc
 FILES_TXT=*.txt
 #FILES_TEX=$(wildcard *.tex)
 FILES_TEX=HackersGuide.htex Manual.htex 
-FILES_PS=$(FILES_TEX:.htex=.ps) #classes.ps
+FILES_PDF=$(FILES_TEX:.htex=.pdf) #classes.ps
 SUB_DIRS=$(FILES_TEX:.htex=)
 
 include ../makeopts
@@ -15,7 +15,7 @@ all: test
 	if [ ! -f Mdoc.tar.gz ] ; then $(MAKE) all2 ; fi
 
 all2:
-	$(MAKE) -k ps
+	$(MAKE) -k pdf
 	$(MAKE) -k makemap
 
 doc:	all
@@ -28,8 +28,8 @@ subdirs:
 
 install2: 
 	$(INSTALL) -d $(DOCDIR)
-	$(INSTALL) -d $(DOCDIR)/Postscript
-	$(INSTALL_DATA) $(FILES_PS) $(DOCDIR)/Postscript
+	$(INSTALL) -d $(DOCDIR)/Pdf
+	$(INSTALL_DATA) $(FILES_PDF) $(DOCDIR)/Pdf
 	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i install ; done
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
 	$(INSTALL) -d $(DESTDIR)/doc
@@ -39,7 +39,7 @@ install_classdoc:
 	$(INSTALL) -d $(DOCDIR) $(DOCDIR)/Postscript $(DOCDIR)/classes $(DOCDIR)/classes/images
 	$(INSTALL_DATA) classes/* $(DOCDIR)/classes
 
-ps:
+pdf:
 	for i in $(FILES_PS); do $(MAKE) -k $$i; done   # one after another
 
 install:
@@ -57,7 +57,7 @@ makemap: subdirs
 	cat wxhelp.tmp | sort -n > wxhelp.map
 
 clean:
-	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab wxhelp.tmp *.ps *.toc
+	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab wxhelp.tmp *.ps *.toc *.pdf
 	set -e; for i in $(SUB_DIRS); do $(RM) -r $$i; done
 	$(RM) -r classes classes.tex wxhelp.map
 
@@ -71,7 +71,7 @@ test:
 	exit 1; \
 	fi 
 
-.PHONY: all install ps clean subdirs makemap install2 test classdoc install_classdoc all2
+.PHONY: all install ps clean subdirs makemap install2 test classdoc install_classdoc all2 pdf
 
 include ../makerules
 
