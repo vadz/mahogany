@@ -724,7 +724,7 @@
 /// default window height
 #define   MP_HEIGHT_D   400
 /// window iconisation status
-#define   MP_ICONISED_D	0l
+#define   MP_ICONISED_D 0l
 /// show log window?
 #define   MP_SHOWLOG_D  1
 /// debug protocols and folder access?

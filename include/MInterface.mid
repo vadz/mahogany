@@ -160,6 +160,9 @@ FUNCTION(RemoveModule, void, (ARG(MModuleCommon *, module)),
 FUNCTION(miscutil_GetReplyAddress, String, (
 ARG(Profile *,p)), `return ::miscutil_GetReplyAddress(p);')
 
+FUNCTION(miscutil_GetFromAddress, String, (
+ARG(Profile *,p)), `return ::miscutil_GetFromAddress(p);')
+
 /* The following line is the end of the MInterface interface definition. */
 ')
 
