@@ -9,7 +9,7 @@ FILES = makeopts makerules Makefile makeopts.in configure.in configure
 EXTRA = extra
 
 # FIXME: VZ where can I take the version from?
-M = mahogany-0.23a
+M = mahogany-0.50
 
 include makeopts
 
