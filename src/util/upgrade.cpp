@@ -168,26 +168,30 @@ CopyEntries(wxConfigBase *_this,
       wxString
          *groups;
    
-      groups = new wxString[_this->GetNumberOfGroups(FALSE)];
       size_t
-         idx;
-      index = 0;
-      for ( ok = _this->GetFirstGroup(entry, index);
-            ok ;
-            ok = _this->GetNextGroup(entry, index))
+         idx = 0,
+         n = _this->GetNumberOfGroups(FALSE);
+      if(n > 0)
       {
-         wxASSERT(idx < _this->GetNumberOfEntries(FALSE));
-         groups[idx++] = entry;
+         groups = new wxString[n];
+         index = 0;
+         for ( ok = _this->GetFirstGroup(entry, index);
+               ok ;
+               ok = _this->GetNextGroup(entry, index))
+         {
+            wxASSERT(idx < n);
+            groups[idx++] = entry;
+         }
+         for(idx = 0; idx < n; idx++)
+         {
+            fromgroup = from;
+            fromgroup << '/' << groups[idx];
+            togroup = to;
+            togroup << '/' << groups[idx];
+            rc &= CopyEntries(_this, fromgroup, togroup, recursive, dest);
+         }
+         delete [] groups;
       }
-      for(idx = 0; idx < _this->GetNumberOfGroups(FALSE); idx++)
-      {
-         fromgroup = from;
-         fromgroup << '/' << groups[idx];
-         togroup = to;
-         togroup << '/' << groups[idx];
-         CopyEntries(_this, fromgroup, togroup, recursive, dest);
-      }
-      delete [] groups;
    }
    
    _this->SetPath(oldPath);
@@ -206,18 +210,76 @@ UpgradeFrom010()
       algorithms. Totally unsafe but better than cleartext.
     */
 
+   bool rc = true;
+   
+   //FIXME paths need adjustment for windows?
+   rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
+                     "/M/Profiles/Folders","/M/Profiles", true);
 
-   CopyEntries(mApplication->GetProfile()->GetConfig(),
-               "/M/Profiles/Folders","/M/Profiles", true);
+   rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
+                     "/AdbEditor","/M/Profiles/AdbEditor", true);
 
-   CopyEntries(mApplication->GetProfile()->GetConfig(),
-               "/AdbEditor","/M/Profiles/AdbEditor", true);
+   // encrypt passwords in new location:
+   ProfileBase
+      *p = ProfileBase::CreateProfile("Folders"),
+      *p2;
+   kbStringList
+      folders;
+   String
+      group, pw;
+   long
+      index = 0;
+   for ( bool ok = p->GetFirstGroup(group, index);
+         ok ;
+         ok = p->GetNextGroup(group, index))
+      folders.push_back(new String(group));
+   for(kbStringList::iterator i = folders.begin(); i != folders.end();i++)
+   {
+      group = **i;
+      p->SetPath(group);
+      p2 = ProfileBase::CreateProfile(group);
+      pw = p2->readEntry(MP_POP_PASSWORD, MP_POP_PASSWORD_D);
+      if(pw.Length()) // only if we have a password
+         p2->writeEntry(MP_POP_PASSWORD, strutil_encrypt(pw));
+      p2->DecRef();
+      p->ResetPath();
+   }
+   p->DecRef();
+   //FIXME check returncodes!
 
-   //FIXME: still need to encrypt all passwords!
-   //       and rewrite version number, testing!   
+   p = ProfileBase::CreateProfile("");
+   // We need to rename the old mainfolder, to remove its leading
+   // slash:
+   String
+      mainFolder = p->readEntry(MP_MAINFOLDER,MP_MAINFOLDER_D);
+   if(mainFolder.Length())
+   {
+      if(mainFolder[0u] == '/')
+      {
+         wxString tmp = mainFolder.Mid(1);
+         mainFolder = tmp;
+         p->writeEntry(MP_MAINFOLDER, mainFolder);
+      }
+   }
+   p->DecRef();
+
+   // Delete obsolete groups:
+#if 0
+   //FIXME broken wxFileConfig
+   //FIXME paths need adjustment for windows?
+   wxConfigBase *c = mApplication->GetProfile()->GetConfig();
+   c->DeleteGroup("M/Profiles/Folders");
+   c->DeleteGroup("/AdbEditor");
+#endif
+   return rc;
+
+
+
+
+
+
 #if 0
    // The old Folders section appears as a profile now:
-   ProfileBase *p = ProfileBase::CreateProfile("Folders");
    ProfileBase *p2;
 
    long
@@ -325,8 +387,8 @@ UpgradeFrom010()
    cf->SetPath(path);
    //FIXME: broken!! cf->DeleteGroup(adbGroup);
    p->DecRef();
-#endif
    return true;
+#endif
 }
 
 // ----------------------------------------------------------------------------
