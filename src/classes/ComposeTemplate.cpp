@@ -1035,7 +1035,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
 			{
             		   if ( READ_CONFIG(m_profile, MP_REPLY_DETECT_SIG) )
 			   {
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
                               String sigSeparator = READ_CONFIG(m_profile, MP_REPLY_SIG_SEPARATOR);
                               if (!sigSeparator.IsEmpty())
                               {

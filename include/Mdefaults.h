@@ -481,7 +481,7 @@ enum MFolderIndex
 #define   MP_COMPOSE_SIGNATURE      "SignatureFile"
 /// detect and remove signature when replying?
 #define MP_REPLY_DETECT_SIG "DetectSig"
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
 /// a regex to detect signature
 #define MP_REPLY_SIG_SEPARATOR "SigSeparator"
 #endif
@@ -667,7 +667,7 @@ enum MFolderIndex
 /// Indent messages when common ancestor is missing
 #define MP_MSGS_INDENT_IF_DUMMY "IndentIfDummy"
 
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
 #   define MP_MSGS_SIMPLIFYING_REGEX "SimplifyingRegex"
 #   define MP_MSGS_REPLACEMENT_STRING "ReplacementString"
 #else // wxUSE_REGEX
@@ -1180,7 +1180,7 @@ enum MFolderIndex
 #endif
 /// detect and remove signature when replying?
 #define MP_REPLY_DETECT_SIG_D   1
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
 /// a regex to detect signature
 #define MP_REPLY_SIG_SEPARATOR_D "^((_____*)|(-- ?))"
 #endif
@@ -1478,7 +1478,7 @@ enum MFolderIndex
 /// Indent messages when common ancestor is missing
 #define MP_MSGS_INDENT_IF_DUMMY_D 0l
 
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
 #  define MP_MSGS_SIMPLIFYING_REGEX_D "^ *(R[Ee](\\[[0-9]+\\])?: +)*(\\[[^][]+\\] +)?(R[Ee](\\[[0-9]+\\])?: +)*"
 #  define MP_MSGS_REPLACEMENT_STRING_D "\\3"
 #else // wxUSE_REGEX

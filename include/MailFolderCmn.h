@@ -199,13 +199,13 @@ protected:
                 m_UpdateInterval != other.m_UpdateInterval ||
                 m_UseThreading != other.m_UseThreading ||
 #if defined(EXPERIMENTAL_JWZ_THREADING)
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
                 m_SimplifyingRegex != other.m_SimplifyingRegex ||
                 m_ReplacementString != other.m_ReplacementString ||
 #endif
                 m_GatherSubjects != other.m_GatherSubjects ||
                 m_BreakThread != other.m_BreakThread ||
-#if !defined(wxUSE_REGEX)
+#if !wxUSE_REGEX
                 m_RemoveListPrefixGathering != other.m_RemoveListPrefixGathering ||
                 m_RemoveListPrefixBreaking != other.m_RemoveListPrefixBreaking ||
 #endif
@@ -229,7 +229,7 @@ protected:
       /// do we want to thread messages?
       bool m_UseThreading;
 #if defined(EXPERIMENTAL_JWZ_THREADING)
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
       String m_SimplifyingRegex;
       String m_ReplacementString;
 #endif
@@ -237,7 +237,7 @@ protected:
       bool m_GatherSubjects;
       /// Should we break thread when subject changes
       bool m_BreakThread;
-#if !defined(wxUSE_REGEX)
+#if !wxUSE_REGEX
       /// Should we remove list prefix when comparing subjects to gather them
       bool m_RemoveListPrefixGathering;
       /// Should we remove list prefix when comparing subjects to break threads

@@ -1131,7 +1131,7 @@ public:
    String messageThreadID() const;
    kbStringList *messageThreadReferences() const;
    
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
    String getSimplifiedSubject(wxRegEx *replyRemover,
                                const String &replacementString) const;
    bool subjectIsReply(wxRegEx *replyRemover,
@@ -1442,7 +1442,7 @@ strutil_removeAllReplyPrefixes(const String &isubject,
 }
 #endif // WX_HAVE_REGEX
 
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
 String Threadable::getSimplifiedSubject(wxRegEx *replyRemover,
                                         const String &replacementString) const
 #else
@@ -1473,7 +1473,7 @@ String Threadable::getSimplifiedSubject(bool removeListPrefix) const
    if (that->m_simplifiedSubject != 0)
       return *that->m_simplifiedSubject;
    that->m_simplifiedSubject = new String;
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
    *(that->m_simplifiedSubject) = m_hi->GetSubject();
    if (!replyRemover)
    {
@@ -1496,7 +1496,7 @@ String Threadable::getSimplifiedSubject(bool removeListPrefix) const
 }
 
 
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
 bool Threadable::subjectIsReply(wxRegEx *replyRemover, 
                                 const String &replacementString) const
 #else
@@ -2238,7 +2238,7 @@ void Threader::gatherSubjects()
           ASSERT(th != NULL);
       }
       
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
       String subject = th->getSimplifiedSubject(m_replyRemover,
                                                 m_replacementString);
 #else
@@ -2305,7 +2305,7 @@ void Threader::gatherSubjects()
       }
       else if (old->getThreadable() == 0 ||               // old is empty, or
                (c->getThreadable() != 0 &&
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
                c->getThreadable()->subjectIsReply(m_replyRemover,
                                                   m_replacementString) &&   // c has "Re:"
                 !old->getThreadable()->subjectIsReply(m_replyRemover,
@@ -2393,7 +2393,7 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
       }
       ASSERT(th != 0);
       
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
       String subject = th->getSimplifiedSubject(m_replyRemover,
                                                 m_replacementString);
 #else
@@ -2415,14 +2415,14 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
       if (old == 0 ||
           (cTh == 0 && old->getThreadable() != 0) ||
           (old->getThreadable() != 0 &&  
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
            old->getThreadable()->subjectIsReply(m_replyRemover,
                                                 m_replacementString) &&
 #else
            old->getThreadable()->subjectIsReply(m_removeListPrefixGathering) &&
 #endif
            cTh != 0 && 
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
            !cTh->subjectIsReply(m_replyRemover, m_replacementString)))
 #else
            !cTh->subjectIsReply(m_removeListPrefixGathering)))
@@ -2468,7 +2468,7 @@ void Threader::breakThreads(ThreadContainer* c)
 
       ThreadContainer *parent = c->getParent();
 
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
       if (c->getThreadable()->getSimplifiedSubject(m_replyRemover,
                                                    m_replacementString) !=
           parent->getThreadable()->getSimplifiedSubject(m_replyRemover,
@@ -2602,7 +2602,7 @@ static void ComputeThreadedIndicesWithJWZ(MailFolder *mf,
    {
       gatherSubjects = (READ_CONFIG(profile, MP_MSGS_GATHER_SUBJECTS) == 1);
       breakThreadsOnSubjectChange = (READ_CONFIG(profile, MP_MSGS_BREAK_THREAD) == 1);
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
       simplifyingRegex = READ_CONFIG(profile, MP_MSGS_SIMPLIFYING_REGEX);
       replacementString = READ_CONFIG(profile, MP_MSGS_REPLACEMENT_STRING);
 #else
@@ -3012,7 +3012,7 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 #if defined(EXPERIMENTAL_JWZ_THREADING)
    config.m_GatherSubjects = READ_CONFIG(profile, MP_MSGS_GATHER_SUBJECTS) != 0;
    config.m_BreakThread = READ_CONFIG(profile, MP_MSGS_BREAK_THREAD) != 0;
-#if defined(wxUSE_REGEX)
+#if wxUSE_REGEX
    config.m_SimplifyingRegex = READ_CONFIG(profile, MP_MSGS_SIMPLIFYING_REGEX);
    config.m_ReplacementString = READ_CONFIG(profile, MP_MSGS_REPLACEMENT_STRING);
 #else
