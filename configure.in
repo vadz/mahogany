@@ -213,7 +213,6 @@ then
 	else
 		AC_MSG_RESULT(no)
 	fi
-	CXXFLAGS_PYCODE="$CXXFLAGS -DCC_GCC -Wall"
 	CXXFLAGS="$CXXFLAGS -Werror"
 fi
 
@@ -725,8 +724,8 @@ CXXFLAGS="$CXXFLAGS $DBGFLAGS $OPT"
 CFLAGS="$CFLAGS $DBGFLAGS $OPT"
 
 dnl Python code produces warnings at present, so don't break compilation:
-CXXFLAGS_PYCODE=`echo $CXXFLAGS | sed 's/-Werror//g'`
-AC_SUBST(CXXFLAGS_PYCODE)
+CXXFLAGS_RELAXED=`echo $CXXFLAGS | sed 's/-Werror//g'`
+AC_SUBST(CXXFLAGS_RELAXED)
 
 dnl Make sure, we get statically linked against wxGTK:
 LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk/-Wl,-Bstatic & -Wl,-Bdynamic/g'`

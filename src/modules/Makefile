@@ -43,6 +43,10 @@ endif
 endif
 
 
+# I hate doing this, but for now it's necessary as the pi-sock headers
+# aren't fully C++ compliant on RH6.1
+CXXFLAGS:=$(CXXFLAGS_RELAXED)
+
 INTERFACE = ../../include/MInterface.h ../../include/MInterface.cpp
 
 all: $(TARGETS)
@@ -60,6 +64,7 @@ ifeq ($(USE_MODULES),dynamic)
 	$(INSTALL) -d $(MODULEDIR)
 	for i in $(TARGETS); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
 endif
+
 
 .PHONY: clean
 

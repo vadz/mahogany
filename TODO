@@ -23,7 +23,8 @@ $Id$
                 b) ...
  
 9		disabling "collect mail" in properties has no effect!
-
+8		new mail handling in MApplication should use
+		headerinfo for consistency (different from/reply-to lines)
 9	KB	finish filters dialog / up/down arrows, error messages
 9	KB	debug filters, does '|' really work?
 

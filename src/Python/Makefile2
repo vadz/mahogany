@@ -28,7 +28,7 @@ include .depend
 
 CPPFLAGS:=$(CPPFLAGS) -DSWIG_GLOBAL
 
-CXXFLAGS:=$(CXXFLAGS_PYCODE)
+CXXFLAGS:=$(CXXFLAGS_RELAXED)
 
 ifdef USE_SWIG
 swiglib.cpp: swiglib.i
