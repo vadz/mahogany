@@ -127,9 +127,11 @@ public:
            const wxBitmap * bitmap = NULL,
            wxWindow *parent = NULL)
       : wxWizard( parent, -1, title,
-                  bitmap ? wxBitmap(*bitmap)
-                         : mApplication->GetIconManager()
-                              ->GetBitmap("install_welcome"))
+                  // using bitmap before '?' results in a compile error with
+                  // Borland C++ - go figure
+                  !bitmap ? mApplication->GetIconManager()->
+                              GetBitmap("install_welcome")
+                          : *bitmap)
       {
          m_Type = type;
          m_First = first;
