@@ -5061,7 +5061,6 @@ wxFolderViewFrame::Create(MFolder *folder,
 
    if ( !fv->OpenFolder(folder, openmode == MailFolder::ReadOnly) )
    {
-      delete fv;
       delete frame;
       return NULL;
    }
