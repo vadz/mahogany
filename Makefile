@@ -27,10 +27,15 @@ allclean: clean
 	find . -name \*.bak -exec rm -f {} \;
 	find . -name \*~ -exec rm -f {} \; 
 	find . -name .\\\#* -exec rm -f {} \;
+	find . -name \*.mo -exec rm -f {} \;
 	find . -name .libs -exec rm -rf {} \;
-	$(RM) config.status *cache* makeopts *.po config.log src/M
 	find . -name .xvpics -exec rm -r -f {} \; 
-	$(RM) -r debian/tmp
+	$(RM) -r debian/tmp *.po config.log src/M
+realclean: allclean
+	$(RM) config.* makeopts makeversion include/config.h
+	find . -type l -name .src -exec rm -f {} \;
+	find . -type l -name Makefile -exec rm -f {} \;
+clobber: realclean
 
 depend:
 	@echo "-------------------------------------------------------------"
