@@ -1029,7 +1029,7 @@ public:
    void OnClick(wxMouseEvent&) { m_window->DoClose(); }
    void OnChar(wxKeyEvent& ev)
       {
-         switch(ev.KeyCode())
+         switch(ev.GetKeyCode())
          {
          case WXK_UP:
          case WXK_DOWN:
