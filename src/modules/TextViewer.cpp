@@ -33,7 +33,7 @@
 
 #include <wx/textbuf.h>
 
-class TextViewerWindow;
+#include <wx/html/htmprint.h>   // for wxHtmlEasyPrinting
 
 #ifdef __WXMSW__
    #include <wx/msw/private.h>
@@ -45,6 +45,25 @@ class TextViewerWindow;
 // don't define it any longer because we do it now better than the native
 // control
 //#define USE_AUTO_URL_DETECTION
+
+class TextViewerWindow;
+
+// ----------------------------------------------------------------------------
+// wxTextEasyPrinting: easy way to print text (TODO: move to wxWindows)
+// ----------------------------------------------------------------------------
+
+class wxTextEasyPrinting : public wxHtmlEasyPrinting
+{
+public:
+   wxTextEasyPrinting(const wxString& name, wxWindow *parent = NULL)
+      : wxHtmlEasyPrinting(name, parent) { }
+
+   bool Print(wxTextCtrl *text) { return PrintText(ControlToHtml(text)); }
+   bool Preview(wxTextCtrl *text) { return PreviewText(ControlToHtml(text)); }
+
+private:
+   static wxString ControlToHtml(wxTextCtrl *text);
+};
 
 // ----------------------------------------------------------------------------
 // TextViewer: a wxTextCtrl-based MessageViewer implementation
@@ -115,8 +134,15 @@ public:
    }
 
 private:
+   // create m_printText if necessary
+   void InitPrinting();
+
+
    // the viewer window
    TextViewerWindow *m_window;
+
+   // the object which does the printing
+   wxTextEasyPrinting *m_printText;
 
    // the position of the last match used by Find() and FindAgain()
    long m_posFind;
@@ -202,6 +228,102 @@ private:
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(TextViewerWindow)
 };
+
+// ============================================================================
+// wxTextEasyPrinting implementation
+// ============================================================================
+
+/* static */
+wxString wxTextEasyPrinting::ControlToHtml(wxTextCtrl *text)
+{
+   wxCHECK_MSG( text, wxEmptyString, _T("NULL control in wxTextEasyPrinting") );
+
+   const long posEnd = text->GetLastPosition();
+
+   wxString s;
+   s.reserve(posEnd + 100);
+
+   s << _T("<html><body><tt>");
+
+   wxString ch;
+   wxTextAttr attr, attrNew;
+   for ( long pos = 0; pos < posEnd; pos++ )
+   {
+      ch = text->GetRange(pos, pos + 1);
+
+      // this is not implemented in wxGTK and doesn't want to work under MSW
+      // for some reason (TODO: debug it)
+#if 0
+      if ( text->GetStyle(pos, attrNew) )
+      {
+         bool changed = false;
+         if ( attrNew.GetTextColour() != attr.GetTextColour() )
+         {
+            if ( attrNew.HasTextColour() )
+            {
+               s << _T("<font color=\"#")
+                 << Col2Html(attrNew.GetTextColour())
+                 << _T("\">");
+            }
+            else
+            {
+               s << _T("</font>");
+            }
+
+            changed = true;
+         }
+
+         if ( changed )
+         {
+            attr = attrNew;
+         }
+      }
+#endif // 0
+
+      switch ( ch[0u] )
+      {
+         case '<':
+            s += "&lt;";
+            break;
+
+         case '>':
+            s += "&gt;";
+            break;
+
+         case '&':
+            s += "&amp;";
+            break;
+
+         case '"':
+            s += "&quot;";
+            break;
+
+         case '\t':
+            // we hardcode the tab width to 8 spaces
+            s += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+            break;
+
+         case '\r':
+            // ignore, we process '\n' below
+            break;
+
+         case '\n':
+            s += "<br>\n";
+            break;
+
+         case ' ':
+            s += "&nbsp;";
+            break;
+
+         default:
+            s += ch[0u];
+      }
+   }
+
+   s << _T("</tt></body></html>");
+
+   return s;
+}
 
 // ============================================================================
 // TextViewerWindow implementation
@@ -371,6 +493,7 @@ IMPLEMENT_MESSAGE_VIEWER(TextViewer,
 TextViewer::TextViewer()
 {
    m_window = NULL;
+   m_printText = NULL;
    m_posFind = -1;
 }
 
@@ -462,18 +585,32 @@ String TextViewer::GetSelection() const
 // TextViewer printing
 // ----------------------------------------------------------------------------
 
+void TextViewer::InitPrinting()
+{
+   if ( !m_printText )
+   {
+      m_printText = new wxTextEasyPrinting(_("Mahogany Printing"),
+                                           GetFrame(m_window));
+   }
+
+   wxMApp *app = (wxMApp *)mApplication;
+
+   *m_printText->GetPrintData() = *app->GetPrintData();
+   *m_printText->GetPageSetupData() = *app->GetPageSetupData();
+}
+
 bool TextViewer::Print()
 {
-   // just to give the error message...
-   PrintPreview();
+   InitPrinting();
 
-   return false;
+   return m_printText->Print(m_window);
 }
 
 void TextViewer::PrintPreview()
 {
-   wxLogError(_("Sorry, printing is not supported by the text viewer.\n"
-                "Please change to another viewer to print this message."));
+   InitPrinting();
+
+   (void)m_printText->Preview(m_window);
 }
 
 wxWindow *TextViewer::GetWindow() const
