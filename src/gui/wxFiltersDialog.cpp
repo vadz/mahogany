@@ -592,13 +592,6 @@ OneActionControl::LayoutControls(wxWindow **last,
 
 */
 
-static const char * wxOneFButtonLabels[] =
-{
-   gettext_noop("More"),
-   gettext_noop("Less"),
-   NULL
-};
-
 // ----------------------------------------------------------------------------
 // wxOneFilterDialog
 // ----------------------------------------------------------------------------
@@ -669,8 +662,10 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_ActionControl = new OneActionControl(canvas);
    m_IfMessage = new wxStaticText(canvas, -1, _("If message..."));
    m_DoThis = new wxStaticText(canvas, -1, _("Then do this:"));
-   m_ButtonMore = new wxButton(canvas, -1, _(wxOneFButtonLabels[0]));
-   m_ButtonLess = new wxButton(canvas, -1, _(wxOneFButtonLabels[1]));
+   m_ButtonMore = new wxButton(canvas, -1, _("&More"));
+   m_ButtonLess = new wxButton(canvas, -1, _("&Less"));
+   m_ButtonMore->SetToolTip(_("Add another condition"));
+   m_ButtonLess->SetToolTip(_("Remove the last condition"));
 
    SetDefaultSize(8*wBtn, 5*hBtn);
 }
@@ -698,29 +693,30 @@ wxOneFilterDialog::LayoutControls()
          m_CritControl[idx]->LayoutControls(&last);
       }
 
-      c = new wxLayoutConstraints();
-      c->left.SameAs(canvas, wxLeft, 2*LAYOUT_X_MARGIN);
-      c->top.Below(last, 2*LAYOUT_Y_MARGIN);
-      c->width.AsIs();
-      c->height.AsIs();
-      m_DoThis->SetConstraints(c);
-
-      last = m_DoThis;
-      m_ActionControl->LayoutControls(&last);
-
       c = new wxLayoutConstraints;
-      c->left.SameAs(canvas, wxLeft, 2*LAYOUT_X_MARGIN);
-      c->top.Below(last, 2*LAYOUT_Y_MARGIN);
+      c->right.SameAs(canvas, wxCentreX, -LAYOUT_X_MARGIN);
+      c->top.Below(last, 3*LAYOUT_Y_MARGIN);
       c->width.Absolute(wBtn);
       c->height.AsIs();
       m_ButtonMore->SetConstraints(c);
 
       c = new wxLayoutConstraints;
       c->left.RightOf(m_ButtonMore, 2*LAYOUT_X_MARGIN);
-      c->top.Below(last, 2*LAYOUT_Y_MARGIN);
+      c->top.Below(last, 3*LAYOUT_Y_MARGIN);
       c->width.Absolute(wBtn);
       c->height.AsIs();
       m_ButtonLess->SetConstraints(c);
+
+      last = m_ButtonLess;
+      c = new wxLayoutConstraints();
+      c->left.SameAs(canvas, wxLeft, 2*LAYOUT_X_MARGIN);
+      c->top.Below(last, 4*LAYOUT_Y_MARGIN);
+      c->width.AsIs();
+      c->height.AsIs();
+      m_DoThis->SetConstraints(c);
+
+      last = m_DoThis;
+      m_ActionControl->LayoutControls(&last);
 
       m_Panel->ForceLayout();
       Layout();
