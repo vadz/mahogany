@@ -808,6 +808,11 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
    c->bottom.SameAs(box, wxBottom, LAYOUT_Y_MARGIN);
    listbox->SetConstraints(c);
 
+   // make it possible to retrieve it later
+   buttonNew->SetClientData(listbox);
+   buttonModify->SetClientData(listbox);
+   buttonDelete->SetClientData(listbox);
+
    return listbox;
 }
 

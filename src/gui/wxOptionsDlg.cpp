@@ -1552,7 +1552,8 @@ wxOptionsPage::wxOptionsPage(FieldInfoArray aFields,
                              int image)
              : wxNotebookPageBase(notebook)
 {
-   m_idListbox = -1; // no listbox by default
+   // no listbox by default
+   m_lboxData = NULL;
 
    m_aFields = aFields;
    m_aDefaults = aDefaults;
@@ -1568,6 +1569,19 @@ wxOptionsPage::wxOptionsPage(FieldInfoArray aFields,
    m_nLast = nLast;
 
    CreateControls();
+}
+
+wxOptionsPage::~wxOptionsPage()
+{
+   while ( m_lboxData )
+   {
+      LboxData *data = m_lboxData;
+      m_lboxData = data->m_next;
+
+      delete data;
+   }
+
+   SafeDecRef(m_Profile);
 }
 
 void wxOptionsPage::CreateControls()
@@ -2122,11 +2136,43 @@ bool wxOptionsPage::TransferDataFromWindow()
    return TRUE;
 }
 
+// ----------------------------------------------------------------------------
 // wxOptionsPage listbox handling
+// ----------------------------------------------------------------------------
+
+bool wxOptionsPage::GetListboxFromButtonEvent(const wxEvent& event,
+                                              wxListBox **pLbox,
+                                              LboxData **pData) const
+{
+   // find the listbox associated with the button which generated this event
+   wxButton *btn = wxStaticCast(event.GetEventObject(), wxButton);
+   CHECK( btn, false, "button event from non-button?" );
+
+   wxListBox *lbox = wxStaticCast((wxObject *)btn->GetClientData(), wxListBox);
+   CHECK( lbox, false, "lbox button event without lbox?" );
+
+   // find which one of our listboxes this one is
+   LboxData *data;
+   for ( data = m_lboxData; data; data = data->m_next )
+   {
+      if ( lbox == GetControl(data->m_idListbox) )
+         break;
+   }
+
+   CHECK( data, false, "button even from foreign lbox?" );
+
+   if ( pLbox )
+      *pLbox = lbox;
+
+   if ( pData )
+      *pData = data;
+
+   return true;
+}
 
 void wxOptionsPage::OnListBoxButton(wxCommandEvent& event)
 {
-   if ( m_idListbox == -1 )
+   if ( !m_lboxData )
    {
       // see comment in OnUpdateUIListboxBtns()
       event.Skip();
@@ -2134,39 +2180,54 @@ void wxOptionsPage::OnListBoxButton(wxCommandEvent& event)
       return;
    }
 
-   switch ( event.GetId() )
+   int id = event.GetId();
+   if ( id < wxOptionsPage_BtnNew || id > wxOptionsPage_BtnDelete )
+   {
+      event.Skip();
+
+      return;
+   }
+
+   wxListBox *lbox;
+   LboxData *data;
+   if ( !GetListboxFromButtonEvent(event, &lbox, &data) )
+   {
+      return;
+   }
+
+   switch ( id )
    {
       case wxOptionsPage_BtnNew:
-         OnListBoxAdd();
+         OnListBoxAdd(lbox, *data);
          break;
 
       case wxOptionsPage_BtnModify:
-         OnListBoxModify();
+         OnListBoxModify(lbox, *data);
          break;
 
       case wxOptionsPage_BtnDelete:
-         OnListBoxDelete();
+         OnListBoxDelete(lbox, *data);
          break;
 
       default:
-         ;
+         FAIL_MSG( "can't get here" );
    }
 }
 
-bool wxOptionsPage::OnListBoxAdd()
+bool wxOptionsPage::OnListBoxAdd(wxListBox *lbox, const LboxData& lboxData)
 {
    // get the string from user
    wxString str;
-   if ( !MInputBox(&str, m_lboxDlgTitle, m_lboxDlgPrompt,
-                   GET_PARENT_OF_CLASS(this, wxDialog), m_lboxDlgPers) ) {
+   if ( !MInputBox(&str,
+                   lboxData.m_lboxDlgTitle,
+                   lboxData.m_lboxDlgPrompt,
+                   GET_PARENT_OF_CLASS(this, wxDialog),
+                   lboxData.m_lboxDlgPers) ) {
       return FALSE;
    }
 
-   wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
-   wxCHECK_MSG( listbox, FALSE, "expected a listbox" );
-
    // check that it's not already there
-   if ( listbox->FindString(str) != -1 ) {
+   if ( lbox->FindString(str) != -1 ) {
       // it is, don't add it twice
       wxLogError(_("String '%s' is already present in the list, not added."),
                  str.c_str());
@@ -2175,56 +2236,58 @@ bool wxOptionsPage::OnListBoxAdd()
    }
    else {
       // ok, do add it
-      listbox->Append(str);
+      lbox->Append(str);
 
-      wxOptionsPage::OnChangeCommon(listbox);
+      wxOptionsPage::OnChangeCommon(lbox);
 
       return TRUE;
    }
 }
 
-bool wxOptionsPage::OnListBoxModify()
+bool wxOptionsPage::OnListBoxModify(wxListBox *lbox, const LboxData& lboxData)
 {
-   wxListBox *l = wxStaticCast(GetControl(m_idListbox), wxListBox);
-   wxCHECK_MSG( l, FALSE, "expected a listbox" );
-   int nSel = l->GetSelection();
+   int nSel = lbox->GetSelection();
 
    wxCHECK_MSG( nSel != -1, FALSE, "should be disabled" );
 
-   wxString val = wxGetTextFromUser(m_lboxDlgPrompt,
-                                    m_lboxDlgTitle,
-                                    l->GetString(nSel),
-                                    GET_PARENT_OF_CLASS(this, wxDialog));
-   if ( !val || val == l->GetString(nSel) )
+   wxString val = wxGetTextFromUser
+                  (
+                     lboxData.m_lboxDlgPrompt,
+                     lboxData.m_lboxDlgTitle,
+                     lbox->GetString(nSel),
+                     GET_PARENT_OF_CLASS(this, wxDialog)
+                  );
+
+   if ( !val || val == lbox->GetString(nSel) )
    {
       // cancelled or unchanged
       return FALSE;
    }
 
-   l->SetString(nSel, val);
+   lbox->SetString(nSel, val);
 
-   wxOptionsPage::OnChangeCommon(l);
+   wxOptionsPage::OnChangeCommon(lbox);
 
    return TRUE;
 }
 
-bool wxOptionsPage::OnListBoxDelete()
+bool
+wxOptionsPage::OnListBoxDelete(wxListBox *lbox, const LboxData& lboxData)
 {
-   wxListBox *l = wxStaticCast(GetControl(m_idListbox), wxListBox);
-   wxCHECK_MSG( l, FALSE, "expected a listbox" );
-   int nSel = l->GetSelection();
+   int nSel = lbox->GetSelection();
 
    wxCHECK_MSG( nSel != -1, FALSE, "should be disabled" );
 
-   l->Delete(nSel);
-   wxOptionsPage::OnChangeCommon(l);
+   lbox->Delete(nSel);
+
+   wxOptionsPage::OnChangeCommon(lbox);
 
    return TRUE;
 }
 
 void wxOptionsPage::OnUpdateUIListboxBtns(wxUpdateUIEvent& event)
 {
-   if ( m_idListbox == -1 )
+   if ( !m_lboxData )
    {
       // unfortunately this does happen sometimes: I discovered it when the
       // program crashed trying to process UpdateUI event from a popup menu in
@@ -2236,10 +2299,11 @@ void wxOptionsPage::OnUpdateUIListboxBtns(wxUpdateUIEvent& event)
    }
    else
    {
-      wxListBox *lbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
-      wxCHECK_RET( lbox, "expected a listbox here" );
-
-      event.Enable(lbox->GetSelection() != -1);
+      wxListBox *lbox;
+      if ( GetListboxFromButtonEvent(event, &lbox) )
+      {
+         event.Enable(lbox->GetSelection() != -1);
+      }
    }
 }
 
@@ -2632,10 +2696,19 @@ wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
                                 ConfigField_AdbLast,
                                 MH_OPAGE_ADB)
 {
-   m_idListbox = ConfigField_OwnAddresses;
-   m_lboxDlgTitle = _("My own addresses");
-   m_lboxDlgPrompt = _("Address");
-   m_lboxDlgPers = "LastMyAddress";
+   m_lboxData = new LboxData;
+   m_lboxData->m_idListbox = ConfigField_OwnAddresses;
+   m_lboxData->m_lboxDlgTitle = _("My own addresses");
+   m_lboxData->m_lboxDlgPrompt = _("Address");
+   m_lboxData->m_lboxDlgPers = "LastMyAddress";
+
+   LboxData *lboxData2 = new LboxData;
+   lboxData2->m_idListbox = ConfigField_MLAddresses;
+   lboxData2->m_lboxDlgTitle = _("Mailing list addresses");
+   lboxData2->m_lboxDlgPrompt = _("Address");
+   lboxData2->m_lboxDlgPers = "LastMLAddress";
+
+   m_lboxData->m_next = lboxData2;
 }
 
 bool wxOptionsPageAdb::TransferDataToWindow()
@@ -2645,7 +2718,8 @@ bool wxOptionsPageAdb::TransferDataToWindow()
    if ( bRc )
    {
       // if the listbox is empty, add the reply-to address to it
-      wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
+      wxListBox *listbox = wxStaticCast(GetControl(ConfigField_OwnAddresses),
+                                        wxListBox);
       if ( !listbox->GetCount() )
       {
          listbox->Append(READ_CONFIG(m_Profile, MP_FROM_ADDRESS));
@@ -2659,7 +2733,8 @@ bool wxOptionsPageAdb::TransferDataFromWindow()
 {
    // if the listbox contains just the return address, empty it: it is the
    // default anyhow and this avoids remembering it in config
-   wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
+   wxListBox *listbox = wxStaticCast(GetControl(ConfigField_OwnAddresses),
+                                     wxListBox);
    if ( listbox->GetCount() == 1 &&
         listbox->GetString(0) == READ_CONFIG(m_Profile, MP_FROM_ADDRESS) )
    {
@@ -2905,10 +2980,11 @@ wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
    m_nIncomingDelay =
    m_nPingDelay = -1;
 
-   m_idListbox = ConfigField_OpenFolders;
-   m_lboxDlgTitle = _("Folders to open on startup");
-   m_lboxDlgPrompt = _("Folder name");
-   m_lboxDlgPers = "LastStartupFolder";
+   m_lboxData = new LboxData;
+   m_lboxData->m_idListbox = ConfigField_OpenFolders;
+   m_lboxData->m_lboxDlgTitle = _("Folders to open on startup");
+   m_lboxData->m_lboxDlgPrompt = _("Folder name");
+   m_lboxData->m_lboxDlgPers = "LastStartupFolder";
 }
 
 bool wxOptionsPageFolders::TransferDataToWindow()
@@ -2919,7 +2995,7 @@ bool wxOptionsPageFolders::TransferDataToWindow()
    {
       // we add the folder opened in the main frame to the list of folders
       // opened on startup if it's not yet among them
-      wxControl *control = GetControl(m_idListbox);
+      wxControl *control = GetControl(ConfigField_OpenFolders);
       if ( control )
       {
          wxListBox *listbox = wxStaticCast(control, wxListBox);
