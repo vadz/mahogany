@@ -2351,12 +2351,12 @@ static bool CheckWhiteList(const Message *msg)
          if( book->Matches(String(_T("*@"))+candidate->GetDomain(),
                AdbLookup_EMail,AdbLookup_Match) )
          {
-            return true;
+            return false;
          }
       }
    }
 
-   return false;
+   return true;
 }
 
 // check if we have a message with "suspicious" MIME structure
