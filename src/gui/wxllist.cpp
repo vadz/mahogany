@@ -463,8 +463,6 @@ wxLayoutObjectIcon::Copy(void)
 wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap *icon)
 {
    m_Icon = icon;
-   if(! m_Icon)
-      m_Icon = new wxBitmap;
 }
 
 void
@@ -472,8 +470,11 @@ wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint const &coords,
                          wxLayoutList * /* wxllist */,
                          CoordType /* begin */, CoordType /* len */)
 {
-   dc.DrawBitmap(*m_Icon, coords.x, coords.y-m_Icon->GetHeight(),
-                 (m_Icon->GetMask() == NULL) ? FALSE : TRUE);
+   if ( m_Icon )
+   {
+      dc.DrawBitmap(*m_Icon, coords.x, coords.y-m_Icon->GetHeight(),
+                    (m_Icon->GetMask() == NULL) ? FALSE : TRUE);
+   }
 }
 
 void
