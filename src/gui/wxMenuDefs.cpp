@@ -474,7 +474,8 @@ static inline const MenuItemInfo& GetMenuItem(int n)
 {
    n -= WXMENU_BEGIN;
 
-   ASSERT_MSG( 0 <= n && n < WXSIZEOF(g_aMenuItems), "bad menu item index" );
+   ASSERT_MSG( 0 <= n && (size_t)n < WXSIZEOF(g_aMenuItems),
+               "bad menu item index" );
 
    return g_aMenuItems[n];
 }
