@@ -945,9 +945,14 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
          m_partContentPtr = rfc822_base64(text, size, lenptr);
          if ( !m_partContentPtr )
          {
-            FAIL_MSG( _T("rfc822_base64() failed") );
+            wxLogDebug(_T("rfc822_base64() failed"));
 
+            // use original text: this is better than nothing and can be
+            // exactly what we need in case of messages generated with base64
+            // encoding in the headers but then sent as 8 it binary (old (circa
+            // 2003) versions of Thunderbird did this!)
             m_partContentPtr = text;
+            *lenptr = size;
          }
          else // ok
          {
