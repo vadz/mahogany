@@ -29,7 +29,7 @@ install:
 	$(INSTALL_DATA) *.py $(DATADIR)/scripts
 	$(INSTALL_DATA) Scripts/*.py $(DATADIR)/scripts
 	$(INSTALL) -d $(DOCDIR)/Python
-	$(INSTALL_DATA) *.doc $(DOCDIR)/Python
+	$(INSTALL_DATA) *.doc *.html $(DOCDIR)/Python
 
 clean:
 	$(RM) *.o *.so *.pyc *.py *.doc $(CPPTARGETS)
