@@ -2449,7 +2449,7 @@ wxFolderListCtrl::SelectNextUnreadAfter(long idxFocused,
 
    size_t idx = m_headers->FindHeaderByFlagWrap(status, isSet, idxFocused);
 
-   if ( idx -= INDEX_ILLEGAL )
+   if ( idx == INDEX_ILLEGAL )
    {
       // no such messages
       return false;
