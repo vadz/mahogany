@@ -354,7 +354,7 @@ dnl what is the C++-preprocessor
 AC_PROG_CXXCPP
 dnl   defines CXXCPP with the C++-preprocessor
 
-CXXFLAGS=`echo "$CXXFLAGS" | sed 's/-g//g'`
+CXXFLAGS=`echo "$CXXFLAGS" | sed 's/-g./ /g'`
 CXXFLAGS="$CXXFLAGS $MYCXXFLAGS"
 
 AC_LANG_RESTORE
