@@ -37,6 +37,7 @@
 // fwd decl
 class PalmEntry;
 class PalmEntryGroup;
+class PalmGroupList;
 class PalmBook;
 class PalmDataProvider;
 
@@ -81,6 +82,7 @@ public:
                bool bNew = FALSE);
     // this one is only used for the root group
   PalmEntryGroup(void);
+  virtual ~PalmEntryGroup();
 
   // implement interface methods
     // AdbEntryGroup
@@ -107,13 +109,15 @@ public:
   MOBJECT_DEBUG(PalmEntry)
 
 private:
-  virtual ~PalmEntryGroup();
-
   wxString        m_strName;      // our name
   PalmEntryGroup *m_pParent;      // the parent group (never NULL)
   PalmEntryList  *m_entries;      // a list of all entries
+  PalmGroupList  *m_groups;       // a list of the subgroups
+  
   GCC_DTOR_WARN_OFF
 };
+
+KBLIST_DEFINE(PalmGroupList, PalmEntryGroup);
 
 // our AdbBook implementation
 class PalmBook : public AdbBook
