@@ -861,7 +861,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
          char *headerPart =
             mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID); 
          folder->UnLock();
-         ASSERT_MSG(strlen(headerPart == len),
+         ASSERT_MSG(strlen(headerPart) == len,
                     "DEBUG: Mailfolder corruption detected");
          str += String(headerPart, (size_t)len);
          str += ((MessageCC*)this)->FetchText();

@@ -113,7 +113,7 @@ public:
        @param  n part number
        @return content type ID
    */
-   virtual int GetPartEncoding(int n = 0);
+   virtual int GetTextPartEncoding(int n = 0);
 
    /** Query the size of the content, either in lines (TYPETEXT/TYPEMESSAGE) or bytes.
        @param  n part number

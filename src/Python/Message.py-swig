@@ -86,8 +86,8 @@ class MessagePtr :
     def GetPartType(self,*args):
         val = apply(Messagec.Message_GetPartType,(self.this,)+args)
         return val
-    def GetPartEncoding(self,*args):
-        val = apply(Messagec.Message_GetPartEncoding,(self.this,)+args)
+    def GetTextPartEncoding(self,*args):
+        val = apply(Messagec.Message_GetTextPartEncoding,(self.this,)+args)
         return val
     def GetPartSize(self,*args):
         val = apply(Messagec.Message_GetPartSize,(self.this,)+args)
