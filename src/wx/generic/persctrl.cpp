@@ -44,6 +44,7 @@
 #   include  "wx/statbox.h"
 #   include  "wx/filedlg.h"
 #   include  "wx/app.h"
+#   include  "wx/msgdlg.h"
 #endif //WX_PRECOMP
 
 #include "wx/log.h"
@@ -1168,14 +1169,8 @@ int wxPMessageBox(const wxString& configPath,
    }
    else
    {
-#ifdef __WXMSW__
       // use the system standard message box
       wxMessageDialog dlg(parent, message, caption, style);
-#else
-      // if no config path specified, we just work as a normal message
-      // dialog, but with nicer layout
-      wxPMessageDialog dlg(parent, message, caption, style, false);
-#endif
 
       return TranslateBtnIdToMsgBox(dlg.ShowModal());
    }
