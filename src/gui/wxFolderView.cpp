@@ -257,31 +257,33 @@ wxFolderView::SetFolder(MailFolder *mf)
    m_MailFolder = mf;
    m_Profile = NULL;
    m_timer = NULL;
-   m_Profile = ProfileBase::CreateProfile("FolderView",
-                                          m_MailFolder ?
-                                          m_MailFolder->GetProfile() :
-                                          NULL);
-   m_MessagePreview->SetParentProfile(m_Profile);
-   m_MessagePreview->Clear(); // again, to reflect profile changes
 
    if(m_MailFolder)
    {
+      m_Profile = ProfileBase::CreateProfile("FolderView",
+                                             m_MailFolder ?
+                                             m_MailFolder->GetProfile() :
+                                             NULL);
+      m_MessagePreview->SetParentProfile(m_Profile);
+      m_MessagePreview->Clear(); // again, to reflect profile changes
+
       m_MailFolder->IncRef();  // make sure it doesn't go away
       m_folderName = m_MailFolder->GetName();
       m_timer = new wxFVTimer(m_MailFolder);
       m_MailFolder->RegisterView(this);
-   }
 
-   wxWindow *oldfolderctrl = m_FolderCtrl;
-   m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
-   m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
-   delete oldfolderctrl;
-   Update();
+      wxWindow *oldfolderctrl = m_FolderCtrl;
+      m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
+      m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
+      delete oldfolderctrl;
 
-   if(m_NumOfMessages > 0)
-   {
-      m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
-      // the callback will preview the (just) selected message
+      Update();
+
+      if(m_NumOfMessages > 0)
+      {
+         m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
+         // the callback will preview the (just) selected message
+      }
    }
 }
 
