@@ -3994,6 +3994,11 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
             }
             break;
 
+         case ASMailFolder::Op_ApplyFilterRules:
+            // we get this one when applying newly created Quick Filter rule
+            // from the code above
+            break;
+
          default:
             FAIL_MSG( "unexpected async operation result" );
       }
