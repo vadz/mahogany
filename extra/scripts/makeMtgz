@@ -8,7 +8,8 @@
 ###############################################################################
 
 # change the configuration by editing these vars
-CVSROOT=:pserver:anonymous@cvs.sourceforge.net:/cvsroot/mahogany
+#CVSROOT=:pserver:anonymous@cvs.sourceforge.net:/cvsroot/mahogany
+CVSROOT=vadz@cvs.sourceforge.net:/cvsroot/mahogany
 TMPDIR=/tmp/makeMtgz-$$
 
 # no need to edit anything below
@@ -40,7 +41,8 @@ if ! cvs -z3 -Q -d $CVSROOT co M; then
 fi
 
 # extract version info from the source tree
-eval `grep "M_VERSION_M\(AJ\|IN\)OR=" M/makeversion.in`
+eval `grep "^#define M_VERSION_[MR]" $src/include/Mversion.h | \
+	    sed 's/^#define \+\(\w\+\) \+\([0-9]\+\)/\1=\2/'`
 
 # and create the approproately named output file
 M_FULLNAME="mahogany-$M_VERSION_MAJOR.$M_VERSION_MINOR"

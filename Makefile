@@ -1,10 +1,24 @@
-# Makefile for M root directory
-# $Id$
+###############################################################################
+# Project:     M
+# File name:   Makefile
+# Purpose:     the top level Makefile for Mahogany
+# Author:      Mahogany Dev-Team
+# Modified by:
+# Created:     1998
+# CVS-ID:      $Id$
+# Copyright:   (c) 1997-2003 M-Team
+# Licence:     M license
+###############################################################################
+
+# define it first to avoid building secondary targets by default accidentally
+all_real: all
 
 include makeopts
 
-makeversion: .src/makeversion.in
-	sh -e .src/makeversion.in
+# extract the version information from the central version file
+makeversion: .src/include/Mversion.h
+	grep "^#define M_VERSION_[MR]" $< | \
+         sed 's/^#define \+\(\w\+\) \+\([0-9]\+\)/\1=\2/' > $@
 
 include makeversion
 
@@ -128,5 +142,5 @@ install_rpm:
 	@$(PERL) -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
 
 
-.PHONY: all clean bak backup config program doc install install_doc \
-	locales scandoc install_locale install_rpm classdoc
+.PHONY: all all_real clean bak backup config program doc install install_doc \
+        locales scandoc install_locale install_rpm classdoc

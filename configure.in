@@ -83,6 +83,7 @@ case "$USE_DEBUG" in
     0|'')
 	M_OVERRIDES(optimize,optimization,USE_OPT,1,
 	--disable-optimize      disable optimization (automatic if debugging))
+	debug_option="no"
 	;;
 
     dnl options which only make sense if debug was given
@@ -98,6 +99,8 @@ case "$USE_DEBUG" in
 
 	M_OVERRIDES(efence,ElectricFence,USE_EFENCE,0,
 	--with-efence           use ElectricFence for debugging)
+
+	debug_option="yes"
 esac
 
 M_OVERRIDES(profile,profiling,USE_PROFILER,0,
@@ -1351,12 +1354,27 @@ AC_OUTPUT_COMMANDS(
 		done
 		;;
 	esac
+
+	grep "^#define M_VERSION_[MR]" $src/include/Mversion.h | \
+	    sed 's/^#define \+\(\w\+\) \+\([0-9]\+\)/\1=\2/' > makeversion
 ],
 src="$srcdir" SRC="$SOURCEDIR" OBJ="$BUILDDIR"
 DIR="$DIR"
 COPY="$COPY")
 
 AC_OUTPUT($OUTPUT)
+
+dnl show the configuration used
+. ./makeversion
+
+echo
+echo "Configured Mahogany " \
+     "${M_VERSION_MAJOR}.${M_VERSION_MINOR}.${M_VERSION_RELEASE} for ${host}."
+echo ""
+echo "	wxWindows version used:			${WX_VERSION}"
+echo "	Debug mode:				${debug_option}"
+echo "	SSL support:				${ssl_option}"
+echo "	Modules support:			${m_cv_USE_MODULES}"
 exit 0
 
 dnl vi: set noet ts=8 sw=4 nolist sta:
