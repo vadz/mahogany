@@ -795,7 +795,6 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
         if ( fp != NULL )
         {
           char buf[1024];
-          bool bOk = FALSE;
           while ( fgets(buf, WXSIZEOF(buf), fp) ) {
             const char *pc = buf;
             while ( isspace(*pc) )
@@ -817,11 +816,20 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
     case Test_Create:
       {
         // it's the only portable way to test for it I can think of
-        FILE *fp = fopen(name, "a");
-        if ( fp != NULL )
+        wxFile file;
+        if ( file.Create(name, FALSE /* !overwrite */, wxFile::write) )
         {
+          // either it already exists or we don't have permission to create
+          // it there. Check whether it exists now.
+          ok = file.Open(name, wxFile::write_append, wxFile::write);
+        }
+        else
+        {
+          // it hadn't existed an we managed to create it - so we do have
+          // permissions. Don't forget to remove it now.
           ok = TRUE;
-          fclose(fp);
+
+          file.Close();
           remove(name);
         }
       }
