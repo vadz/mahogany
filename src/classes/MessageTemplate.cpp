@@ -28,6 +28,10 @@
    #include <wx/log.h>
 #endif // USE_PCH
 
+#include <wx/textfile.h>
+
+#include "Mdefaults.h"
+
 #include "MessageTemplate.h"
 
 // ============================================================================
@@ -63,7 +67,11 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
    // only generate something if we can
    bool doOutput = m_expander != NULL;
 
-   const char *pc = m_templateText.c_str();
+   // the template text may be coming from various sources, so make sure that
+   // it doesn't have some weird newline convention
+   wxString templateText = wxTextFile::Translate(m_templateText,
+                                                 wxTextFileType_Unix);
+   const char *pc = templateText.c_str();
    const char *pStartOfLine = pc;
    while ( *pc )
    {
@@ -152,7 +160,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       String word;
       while ( *pc && (*pc != '\n') &&
               ((quoted && *pc && *pc != '"') ||
-              (!strchr("-+=: \t", *pc) && *pc != bracketClose && *pc)) )
+              (isalnum(*pc) && *pc != bracketClose && *pc)) )
       {
          word += *pc++;
       }
@@ -385,3 +393,82 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
 
    return TRUE;
 }
+
+// ----------------------------------------------------------------------------
+// global functions
+// ----------------------------------------------------------------------------
+
+// the helper for Get/SetMessageTemplate
+static String GetMessageTemplateProfilePath(MessageTemplateKind kind)
+{
+   String templateKey = M_TEMPLATE_SECTION;
+
+   switch ( kind )
+   {
+      case MessageTemplate_NewMessage:
+         templateKey += MP_TEMPLATE_NEWMESSAGE;
+         break;
+
+      case MessageTemplate_NewArticle:
+         templateKey += MP_TEMPLATE_NEWARTICLE;
+         break;
+
+      case MessageTemplate_Reply:
+         templateKey += MP_TEMPLATE_REPLY;
+         break;
+
+      case MessageTemplate_Followup:
+         templateKey += MP_TEMPLATE_FOLLOWUP;
+         break;
+
+      case MessageTemplate_Forward:
+         templateKey += MP_TEMPLATE_FORWARD;
+         break;
+
+      default:
+         FAIL_MSG("unknown template kind");
+   }
+
+   return templateKey;
+}
+
+// get the value of the message template for the given profile (inherits value
+// from the parent profile)
+extern String
+GetMessageTemplate(MessageTemplateKind kind, ProfileBase *profile)
+{
+   // the templates contain '$'s so disable variable expansion for now
+   ProfileEnvVarSave noEnvVarExpansion(profile);
+
+   String value = profile->readEntry(GetMessageTemplateProfilePath(kind), "");
+   if ( !value )
+   {
+      // we have the default templates for reply, follow-up and forward
+      switch ( kind )
+      {
+         case MessageTemplate_Reply:
+            value = _("On $(ORIGINAL:DATE) you wrote:\n\n$QUOTE\n$CURSOR");
+            break;
+
+         case MessageTemplate_Forward:
+            value = "$CURSOR\n$QUOTE822";
+            break;
+
+         case MessageTemplate_Followup:
+            value = _("On $(ORIGINAL:DATE) $SENDER wrote in "
+                      "$(ORIGINAL:NEWSGROUPS)\n\n$QUOTE\n$CURSOR");
+            break;
+      }
+   }
+
+   return value;
+}
+
+extern void
+SetMessageTemplate(const String& value,
+                   MessageTemplateKind kind,
+                   ProfileBase *profile)
+{
+   (void)profile->writeEntry(GetMessageTemplateProfilePath(kind), value);
+}
+

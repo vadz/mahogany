@@ -203,7 +203,8 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// template expansion classes
+// the classes which are used together with compose view - a derivation of
+// variable expander and expansion sink
 // ----------------------------------------------------------------------------
 
 // this struct and array are used by ExpansionSink only - they contain the
@@ -219,8 +220,6 @@ struct AttachmentInfo
 };
 
 WX_DECLARE_OBJARRAY(AttachmentInfo, ArrayAttachmentInfo);
-#include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(ArrayAttachmentInfo);
 
 class ExpansionSink : public MessageTemplateSink
 {
@@ -260,8 +259,7 @@ private:
    ArrayAttachmentInfo m_attachments;
 };
 
-// VarExpander is the implementation of
-// MessageTemplateVarExpander used here.
+// VarExpander is the implementation of MessageTemplateVarExpander used here.
 class VarExpander : public MessageTemplateVarExpander
 {
 public:
@@ -287,11 +285,44 @@ public:
       Var_Date,            // insert the date in the default format
       Var_Cursor,          // position the cursor here after template expansion
       Var_To,              // the recepient name
-      Var_Subject,         // the message subject
+      Var_Subject,         // the message subject (without any "Re"s)
+
+      // all entries from here only apply to the reply/forward/followup
+      // templates because they work with the original message
       Var_Quote,           // quote the original text
-      Var_Quote822,        // attach the original text
+      Var_Quote822,        // include the original msg as a RFC822 attachment
+      Var_Sender,          // the fullname of the sender
+
       Var_Invalid,
       Var_Max = Var_Invalid
+   };
+
+   // the variables in "message" category
+   //
+   // NB: the values should be identical to wxComposeView::AddressField enum
+   //     (or the code in ExpandMessage should be changed)
+   enum MessageHeader
+   {
+      MessageHeader_To,
+      MessageHeader_Subject,
+      MessageHeader_Cc,
+      MessageHeader_Bcc,
+      MessageHeader_Invalid,
+      MessageHeader_Max = MessageHeader_Invalid
+   };
+
+   // the variables from "original" category which map to headers
+   enum OriginalHeader
+   {
+      OriginalHeader_Date,
+      OriginalHeader_From,
+      OriginalHeader_Subject,
+      OriginalHeader_PersonalName,
+      OriginalHeader_To,
+      OriginalHeader_ReplyTo,
+      OriginalHeader_Newsgroups,
+      OriginalHeader_Invalid,
+      OriginalHeader_Max = OriginalHeader_Invalid
    };
 
    // get the category from the category string (may return Category_Invalid)
@@ -301,21 +332,44 @@ public:
                                          Category_Max, category);
    }
 
-   // get the variable id from the string (may return Var_Invalid)
+   // get the variable id from the string (works for misc variables only, will
+   // return Var_Invalid if variable is unknown)
    static Variable GetVariable(const String& variable)
    {
       return (Variable)FindStringInArray(ms_templateVarNames,
                                          Var_Max, variable);
    }
 
+   // get the header corresponding to the variable of "message" category
+   static MessageHeader GetMessageHeader(const String& variable)
+   {
+      return (MessageHeader)FindStringInArray(ms_templateMessageVars,
+                                              MessageHeader_Max, variable);
+   }
+
+   // get the header corresponding to the variable of "original" category
+   // (will return OriginalHeader_Invalid if there is no corresponding header -
+   // note that this doesn't mean that the variable is invalid because, for
+   // example, "quote" doesn't correspond to any header, yet $(original:quote)
+   // is perfectly valid)
+   static OriginalHeader GetOriginalHeader(const String& variable)
+   {
+      return (OriginalHeader)FindStringInArray(ms_templateOriginalVars,
+                                               OriginalHeader_Max, variable);
+   }
+
    // ctor takes the sink (we need it to implement some pseudo macros such as
    // "$CURSOR") and also a pointer to message for things like $QUOTE - this
    // may (and in fact should) be NULL for new messages, in this case using the
-   // macros which require it will result in an error
+   // macros which require it will result in an error.
+   //
+   // And we also need the compose view to expand the macros in the "message"
+   // category.
    VarExpander(ExpansionSink& sink,
+               wxComposeView& cv,
                ProfileBase *profile = NULL,
                Message *msg = NULL)
-      : m_sink(sink)
+      : m_cv(cv), m_sink(sink)
    {
       m_profile = profile ? profile : mApplication->GetProfile();
       m_profile->IncRef();
@@ -360,8 +414,12 @@ private:
    // the sink we use when expanding pseudo variables
    ExpansionSink& m_sink;
 
+   // the compose view is used for expansion of the variables in "message"
+   // category
+   wxComposeView& m_cv;
+
    // the message used for expansion of variables pertaining to the original
-   // message
+   // message (may be NULL for new messages)
    Message *m_msg;
 
    // the profile to use for everything (global one by default)
@@ -372,6 +430,14 @@ private:
 
    // this array contains the list of all variables without category
    static const char *ms_templateVarNames[Var_Max];
+
+   // this array contains the variable names from "message" category
+   static const char *ms_templateMessageVars[MessageHeader_Max];
+
+   // this array contains all the variables in the "original" category which
+   // map to the headers of the original message (there are other variables in
+   // this category as well)
+   static const char *ms_templateOriginalVars[OriginalHeader_Max];
 };
 
 // ----------------------------------------------------------------------------
@@ -683,7 +749,7 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
    if ( file.IsOpened() && file.ReadAll(&text) )
    {
       ExpansionSink sink;
-      VarExpander expander(sink);
+      VarExpander expander(sink, *cv);
       MessageTemplateParser parser(text, filename, &expander);
       if ( parser.Parse(sink) )
       {
@@ -746,16 +812,18 @@ wxComposeView::InitText(Message *msg)
               "no message in InitText" );
 
    // choose the template
-   String templateKey = "Template/";
+   MessageTemplateKind kind;
    switch ( m_kind )
    {
       case Message_Reply:
-         templateKey += m_mode == Mode_SMTP ? "Reply" : "Followup";
+         kind = m_mode == Mode_SMTP ? MessageTemplate_Reply
+                                    : MessageTemplate_Followup;
          break;
 
       case Message_Forward:
          ASSERT_MSG( m_mode == Mode_SMTP, "can't forward article in news" );
-         templateKey += "Forward";
+
+         kind = MessageTemplate_Forward;
          break;
 
       default:
@@ -763,44 +831,32 @@ wxComposeView::InitText(Message *msg)
          // still fall through
 
       case Message_New:
-         templateKey += m_mode == Mode_SMTP ? "NewMessage" : "NewArticle";
+         kind = m_mode == Mode_SMTP ? MessageTemplate_NewMessage
+                                    : MessageTemplate_NewArticle;
          break;
    }
 
    // loop until the template is correct or the user abandons the idea to fix
    // it
-   bool templateChanged = FALSE;
+   bool templateChanged;
    do
    {
       // get the template value
-      String templateValue = m_Profile->readEntry(templateKey, "");
+      String templateValue = GetMessageTemplate(kind, m_Profile);
 
       if ( !templateValue )
       {
-         // we have the default templates for reply and forward
-         if ( m_kind == Message_Reply )
-         {
-            templateValue = _("On $DATE you wrote:\n"
-                              "\n"
-                              "$QUOTE"
-                              "\n"
-                              "$CURSOR");
-         }
-         else if ( m_kind == Message_Forward )
-         {
-            templateValue = "$CURSOR\n$QUOTE822";
-         }
+         // if there is no templat just don't do anything
+         break;
       }
 
-      if ( !templateValue )
-      {
-         // still nothing - so just don't do anything
-         return;
-      }
+      // we will only run this loop once unless there are erros in the template
+      // and the user changed it
+      templateChanged = FALSE;
 
       // do parse the template
       ExpansionSink sink;
-      VarExpander expander(sink, m_Profile, msg);
+      VarExpander expander(sink, *this, m_Profile, msg);
       MessageTemplateParser parser(templateValue, _("template"), &expander);
       if ( parser.Parse(sink) )
       {
@@ -1756,26 +1812,24 @@ wxComposeView::Send(void)
       msg->AddHeaderEntry(headerNames[nHeader], headerValues[nHeader]);
    }
 
-   msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
+   msg->SetSubject(GetHeaderValue(Field_Subject));
    switch(m_mode)
    {
       case Mode_SMTP:
       {
          // although 'To' field is always present, the others may not be shown
-         // (nor created) at all
-         String to = m_txtFields[Field_To]->GetValue();
-         String cc, bcc;
-         if ( m_txtFields[Field_Cc] )
-            cc = m_txtFields[Field_Cc]->GetValue();
-         if ( m_txtFields[Field_Bcc] )
-            bcc = m_txtFields[Field_Bcc]->GetValue();
+         // (nor created) at all (but now this is checked in GetHeaderValue
+         // which will return empty value for them then)
+         String to = GetHeaderValue(Field_To);
+         String cc = GetHeaderValue(Field_Cc);
+         String bcc = GetHeaderValue(Field_Bcc);
 
          msg->SetAddresses(to, cc, bcc);
       }
       break;
 
       case Mode_NNTP:
-         msg->SetNewsgroups(m_txtFields[Field_To]->GetValue());
+         msg->SetNewsgroups(GetHeaderValue(Field_To));
          break;
    }
 
@@ -1945,7 +1999,7 @@ wxComposeView::IsReadyToSend() const
    }
 
    // did we forget the recipients?
-   if ( m_txtFields[Field_To]->GetValue().IsEmpty() )
+   if ( !GetHeaderValue(Field_To) )
    {
       wxLogError(_("Please specify at least one recipient in the \"To:\" "
                    "field!"));
@@ -1954,7 +2008,7 @@ wxComposeView::IsReadyToSend() const
    }
 
    // did we forget the subject?
-   if ( m_txtFields[Field_Subject]->GetValue().IsEmpty() )
+   if ( !GetHeaderValue(Field_Subject) )
    {
       // this one is not strictly speaking mandatory, so just ask the user
       // about it (giving him a chance to get rid of annoying msg box)
@@ -2095,8 +2149,11 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
 }
 
 // ----------------------------------------------------------------------------
-// ExpansionSink
+// ExpansionSink - the sink used with wxComposeView
 // ----------------------------------------------------------------------------
+
+#include <wx/arrimpl.cpp>
+WX_DEFINE_OBJARRAY(ArrayAttachmentInfo);
 
 bool
 ExpansionSink::Output(const String& text)
@@ -2181,7 +2238,7 @@ ExpansionSink::InsertTextInto(wxComposeView& cv) const
 }
 
 // ----------------------------------------------------------------------------
-// VarExpander
+// VarExpander - used by wxComposeView
 // ----------------------------------------------------------------------------
 
 const char *VarExpander::ms_templateVarCategories[] =
@@ -2194,7 +2251,7 @@ const char *VarExpander::ms_templateVarCategories[] =
    "python",
 #endif // USE_PYTHON
    "message",
-   "original"
+   "original",
 };
 
 const char *VarExpander::ms_templateVarNames[] =
@@ -2204,7 +2261,27 @@ const char *VarExpander::ms_templateVarNames[] =
    "to",
    "subject",
    "quote",
-   "quote822"
+   "quote822",
+   "sender",
+};
+
+const char *VarExpander::ms_templateMessageVars[] =
+{
+   "to",
+   "subject",
+   "cc",
+   "bcc",
+};
+
+const char *VarExpander::ms_templateOriginalVars[] =
+{
+   "date",
+   "from",
+   "subject",
+   "fullname",
+   "to",
+   "replyto",
+   "newsgroups",
 };
 
 int
@@ -2337,7 +2414,10 @@ VarExpander::ExpandMisc(const String& name, String *value) const
 
       case Var_To:
          // just the shorthand for "message:to"
-         return ExpandMessage(name, value);
+         return ExpandMessage("to", value);
+
+      case Var_Subject:
+         return ExpandMessage("subject", value);
 
       case Var_Quote:
          return ExpandOriginal("quote", value);
@@ -2431,12 +2511,22 @@ VarExpander::ExpandPython(const String& name, String *value) const
 bool
 VarExpander::ExpandMessage(const String& name, String *value) const
 {
-   // TODO
-   return FALSE;
+   MessageHeader header = GetMessageHeader(name.Lower());
+   if ( header == MessageHeader_Invalid )
+   {
+      // unknown variable
+      return FALSE;
+   }
+
+   // the MessageHeader enum values are the same as AddressField ones, so no
+   // translation is needed
+   *value = m_cv.GetHeaderValue((wxComposeView::AddressField)header);
+
+   return TRUE;
 }
 
 bool
-VarExpander::ExpandOriginal(const String& name, String *value) const
+VarExpander::ExpandOriginal(const String& Name, String *value) const
 {
    // insert the quoted text of the original message - of course, this
    // only works if we have this original message
@@ -2449,52 +2539,92 @@ VarExpander::ExpandOriginal(const String& name, String *value) const
    }
    else
    {
-      if ( name == "text" )
+      String name = Name.Lower();
+      switch ( GetOriginalHeader(name) )
       {
-         // just insert the original text
-      }
-      else if ( name == "quote" )
-      {
-         // insert the original text prefixed by reply string
-         String prefix = READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX);
-         int nParts = m_msg->CountParts();
-         for ( int nPart = 0; nPart < nParts; nPart++ )
-         {
-            if ( m_msg->GetPartType(nPart) == Message::MSG_TYPETEXT )
-            {
-               String str = m_msg->GetPartContent(nPart);
-               const char *cptr = str.c_str();
-               String str2 = prefix;
-               while ( *cptr )
-               {
-                  if ( *cptr == '\r' )
-                  {
-                     cptr++;
-                     continue;
-                  }
+         case OriginalHeader_Date:
+            *value = m_msg->Date();
+            break;
 
-                  str2 += *cptr;
-                  if( *cptr++ == '\n' && *cptr )
+         case OriginalHeader_From:
+            *value = m_msg->From();
+            break;
+
+         case OriginalHeader_Subject:
+            *value = m_msg->Subject();
+            break;
+
+         case OriginalHeader_ReplyTo:
+            {
+               String dummy;
+               *value = m_msg->Address(dummy, MAT_REPLYTO);
+            }
+            break;
+
+         case OriginalHeader_To:
+            {
+               String dummy;
+               *value = m_msg->Address(dummy, MAT_SENDER);
+            }
+            break;
+
+         case OriginalHeader_PersonalName:
+            m_msg->Address(*value);
+            break;
+
+         case OriginalHeader_Newsgroups:
+            m_msg->GetHeaderLine("Newsgroups", *value);
+            break;
+
+         default:
+            // it isn't a variable which maps directly onto header, check the
+            // others
+            if ( name == "text" || name == "quote" )
+            {
+               // insert the original text (optionally prefixed by reply
+               // string)
+               String prefix = name == "text" ? ""
+                                              : READ_CONFIG(m_profile,
+                                                            MP_REPLY_MSGPREFIX);
+               int nParts = m_msg->CountParts();
+               for ( int nPart = 0; nPart < nParts; nPart++ )
+               {
+                  if ( m_msg->GetPartType(nPart) == Message::MSG_TYPETEXT )
                   {
-                     str2 += prefix;
+                     String str = m_msg->GetPartContent(nPart);
+                     const char *cptr = str.c_str();
+                     String str2 = prefix;
+                     while ( *cptr )
+                     {
+                        if ( *cptr == '\r' )
+                        {
+                           cptr++;
+                           continue;
+                        }
+
+                        str2 += *cptr;
+                        if( *cptr++ == '\n' && *cptr )
+                        {
+                           str2 += prefix;
+                        }
+                     }
+
+                     *value += str2;
                   }
                }
-
-               *value += str2;
             }
-         }
-      }
-      else if ( name == "quote822" )
-      {
-         // insert the original message as RFC822 attachment
-         String str;
-         m_msg->WriteToString(str);
-         m_sink.InsertAttachment(strutil_strdup(str), str.Length(),
-                                 "MESSAGE/RFC822");
-      }
-      else
-      {
-         return FALSE;
+            else if ( name == "quote822" )
+            {
+               // insert the original message as RFC822 attachment
+               String str;
+               m_msg->WriteToString(str);
+               m_sink.InsertAttachment(strutil_strdup(str), str.Length(),
+                     "MESSAGE/RFC822");
+            }
+            else
+            {
+               return FALSE;
+            }
       }
    }
 

@@ -223,7 +223,8 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       HeaderInfoList *hil = mf->GetHeaders();
       const HeaderInfo *hi;
       m_Message << _("From folder '") << mf->GetName() << "':\n";
-      for(size_t i = 0; i < hil->Count(); i++)
+      size_t i;
+      for(i = 0; i < hil->Count(); i++)
       {
          hi=(*hil)[i];
          selections.Add(hi->GetUId());
@@ -243,12 +244,12 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       }
       else
          rc = false;
-      size_t i = 0;
+      i = 0;
       String seq;
       hil = m_NewMailFolder->GetHeaders();
       for(i = 0; i < hil->Count(); i++)
       {
-         if(i >= oldcount)
+         if(i >= (size_t)oldcount)
          {
             if(seq.Length()) seq << ',';
             seq << strutil_ultoa((*hil)[i]->GetUId());

@@ -190,6 +190,13 @@ public:
    /// sets Subject field
    void SetSubject(const String &subj);
 
+   /// get the current value of a header field
+   String GetHeaderValue(AddressField which) const
+   {
+      wxTextCtrl *text = m_txtFields[which];
+      return text ? text->GetValue() : "";
+   }
+
    /// inserts a text
    void InsertText(const String &txt);
 
@@ -220,7 +227,7 @@ public:
    // for wxAddressTextCtrl usage
    void SetLastAddressEntry(AddressField field) { m_fieldLast = field; }
 
-   /// for wxAddressTextCtrl usage:
+   // for wxAddressTextCtrl usage:
    ProfileBase *GetProfile(void) const { return m_Profile; }
 
    /** Adds an extra header line.

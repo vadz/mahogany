@@ -310,13 +310,14 @@ public:
 protected:
    HeaderInfoListCC(size_t n)
       {
-         m_Listing = new HeaderInfoCC[n];
+         m_Listing = n == 0 ? NULL : new HeaderInfoCC[n];
          m_NumEntries = n;
       }
    ~HeaderInfoListCC()
       {
          MOcheck();
-         delete [] m_Listing;
+         if ( m_NumEntries )
+            delete [] m_Listing;
       }
    /// The current listing of the folder
    class HeaderInfoCC *m_Listing;

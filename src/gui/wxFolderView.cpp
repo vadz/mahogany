@@ -830,7 +830,7 @@ wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
    bool rc;
 
    rc = m_ASMailFolder->SaveMessagesToFile(&selections,
-                                 GetFrame(m_Parent), this);
+                                 GetFrame(m_Parent), this) != 0;
    if(rc)
      msg.Printf(_("%d messages saved"), selections.Count());
    else

@@ -296,10 +296,12 @@ protected:
    MModuleListingImpl(size_t n)
       {
          m_count = n;
-         m_entries = new MModuleListingEntryImpl[m_count];
+
+         // avoid allocating 0 sized array
+         m_entries = m_count > 0 ? new MModuleListingEntryImpl[m_count] : NULL;
       }
    ~MModuleListingImpl()
-      { delete [] m_entries; }
+      { if ( m_count ) delete [] m_entries; }
 private:
    MModuleListingEntryImpl *m_entries;
    size_t m_count;

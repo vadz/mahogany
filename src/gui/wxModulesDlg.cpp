@@ -9,6 +9,7 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "Mpch.h"
 
 #ifndef USE_PCH
@@ -19,6 +20,8 @@
 #   include "gui/wxMIds.h"
 #   include "strutil.h"
 #endif
+
+#include "Mdefaults.h"
 
 #include "MModule.h"
 #include "gui/wxMDialogs.h"

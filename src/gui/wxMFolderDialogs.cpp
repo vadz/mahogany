@@ -422,7 +422,8 @@ END_EVENT_TABLE()
 wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
                                        const wxString& title)
                   : wxNotebookDialog(GET_PARENT_OF_CLASS(parent, wxFrame),
-                                     title)
+                                     title,
+                                     "FolderProperties")
 {
    m_parentFolder = NULL;
    m_newFolder = NULL;

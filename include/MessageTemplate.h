@@ -119,4 +119,30 @@ private:
    String m_templateText, m_filename;
 };
 
+// ----------------------------------------------------------------------------
+// global functions
+// ----------------------------------------------------------------------------
+
+/// the different templates for different kinds of articles
+enum MessageTemplateKind
+{
+   MessageTemplate_NewMessage,
+   MessageTemplate_NewArticle,
+   MessageTemplate_Reply,
+   MessageTemplate_Followup,
+   MessageTemplate_Forward,
+   MessageTemplate_Max
+};
+
+// get the value of the message template for the given profile (inherits value
+// from the parent profile)
+extern String
+GetMessageTemplate(MessageTemplateKind kind, ProfileBase *profile);
+
+// save the value as the template for the given profile
+extern void
+SetMessageTemplate(const String& value,
+                   MessageTemplateKind kind,
+                   ProfileBase *profile);
+
 #endif // _MESSAGETEMPLATE_H_
