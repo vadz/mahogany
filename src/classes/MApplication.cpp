@@ -22,15 +22,16 @@
 #include "Mpch.h"
 
 #ifndef   USE_PCH
-#  include   "Mcommon.h"
-#  include   "strutil.h"
-#  include   "Profile.h"
-#  include   "MimeList.h"
-#  include   "MimeTypes.h"
-#  include   "kbList.h"
-#  include   "Mdefaults.h"
-#  include   "MApplication.h"
-#  include   "MPython.h"
+#  include "Mcommon.h"
+#  include "strutil.h"
+#  include "Profile.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "kbList.h"
+#  include "Mdefaults.h"
+#  include "MApplication.h"
+#  include "MPython.h"
+#  include "Mpers.h"
 #  include   <wx/dynarray.h>
 #endif   // USE_PCH
 
@@ -195,16 +196,17 @@ MAppBase::OnStartup()
    mApplication = this;
 
 #ifdef OS_UNIX
-#if 0
    // First, check our user ID: mahogany does not like being run as root.
    if(geteuid() == 0)
    {
-      wxLogError(_("You are trying to run Mahogany as the super-user (root).\n"
-                   "For security reasons this is not possible, please log in\n"
-                   "as an ordinary user and try again."));
-      return false;
+      if(! MDialog_YesNoDialog(
+         _("You have started Mahogany as the super-user (root).\n"
+           "For security reasons this is not a good idea.\n\n"
+           "Are you sure you want to continue?"),
+         NULL,_("Run as root?"), FALSE,
+         GetPersMsgBoxName(M_MSGBOX_ASK_RUNASROOT)))
+         return false;
    }
-#endif
 #endif // Unix
 
    // initialise the profile(s)

@@ -52,7 +52,7 @@ enum FolderType
    MF_MFILE = 7,                 // the Mahogany file type
    MF_MDIR = 8,                  // the Mahogany dir type
 
-   MF_PROFILE_OR_FILE,           // profile, if it doesn't work, file
+// no longer used   MF_PROFILE_OR_FILE,           // profile, if it doesn't work, file
    MF_PROFILE = 10,              // read type etc from profile
 
    // real folder types
@@ -165,7 +165,6 @@ inline bool FolderTypeHasUserName(FolderType type)
       // a new type to the FolderType enum and forget to add it here
    case MF_ROOT:
    case MF_ILLEGAL:
-   case MF_PROFILE_OR_FILE:
    case MF_PROFILE:
       FAIL_MSG("this is not supposed to be called for this type");
       // fall through nevertheless
@@ -302,7 +301,6 @@ inline bool CanCreateMessagesInFolder(FolderType folderType)
          return false;
 
       case MF_ILLEGAL:
-      case MF_PROFILE_OR_FILE:
       case MF_PROFILE:
          FAIL_MSG("this is not supposed to be called for this type");
          // fall through nevertheless

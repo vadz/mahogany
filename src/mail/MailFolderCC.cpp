@@ -165,8 +165,6 @@ extern void CC_Cleanup(void)
    }
 }
 
-
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -2463,6 +2461,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
 void
 MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 {
+   GetLogCircle().Add(str);
    String  msg;
    if(mf)
       msg.Printf(_("Folder '%s' : "), mf->GetName().c_str());
@@ -2484,10 +2483,7 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 void
 MailFolderCC::mm_dlog(String str)
 {
-   if(mm_show_debug == false)
-      return;
-   
-   String msg = _("Mail-debug: ");
+   String msg;
    // check for PASS
    if ( str[0u] == 'P' && str[1u] == 'A' && str[2u] == 'S' && str[3u] == 'S' )
    {
@@ -2510,8 +2506,12 @@ MailFolderCC::mm_dlog(String str)
    {
       msg += str;
    }
-
-   STATUSMESSAGE((Str(msg)));
+   GetLogCircle().Add(str);
+   if(mm_show_debug)
+   {
+      msg = _("Mail-debug: ") + msg;
+      STATUSMESSAGE((Str(msg)));
+   }
 }
 
 /** get user name and password
@@ -2587,6 +2587,7 @@ MailFolderCC::mm_diskerror(MAILSTREAM *stream,
 void
 MailFolderCC::mm_fatal(char *str)
 {
+   GetLogCircle().Add(str);
    String   msg = (String) "Fatal Error:" + (String) str;
    LOGMESSAGE((M_LOG_ERROR, Str(msg)));
 

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Profile - managing configuration options on a per class basis    *
  *                                                                  *
- * (C) 1998,1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1998-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *
@@ -95,10 +95,12 @@
 class Profile : public ProfileBase
 {
 public:
-   /// like the constructor, but reuses existing objects
+   /// creates a normal Profile
    static ProfileBase * CreateProfile(const String & ipathname,
-                                      ProfileBase const *Parent);
-   /// like the constructor, but reuses existing objects
+                                      ProfileBase const *Parent,
+                                      const String & root);
+   
+   /// creates an empty profile, not linked to a configuration entry
    static ProfileBase * CreateEmptyProfile(const ProfileBase *Parent);
 
    /**@name Reading and writing entries.
@@ -171,6 +173,12 @@ public:
    /// Discard changes from suspended mode.
    virtual void Discard(void);
 
+   /** This temporarily overloads this profile with another Identity,
+       i.e. the name of an Identity profile. */
+   virtual void SetIdentity(const String & idName);
+   virtual void ClearIdentity(void);
+   virtual String GetIdentity(void) const;
+   
    MOBJECT_DEBUG(Profile)
 
    virtual bool IsAncestor(ProfileBase *profile) const;
@@ -184,7 +192,8 @@ private:
        by GetAppConfig()->readEntry(MP_PROFILEPATH).
 
    */
-   Profile(const String & iClassName, ProfileBase const *Parent);
+   Profile(const String & iClassName, ProfileBase const *Parent,
+           const String &root);
    /// Name of this profile == path in wxConfig
    String   m_ProfileName;
    /// If not empty, temporarily modified path for this profile.
@@ -196,6 +205,8 @@ private:
    bool     m_IsEmpty;
    /// Is the profile operating in suspended mode?
    bool m_Suspended;
+   /// Is this profile using a different Identity at present?
+   ProfileBase * m_Identity;
 };
 //@}
 
@@ -224,6 +235,15 @@ void ProfileBase::SetExpandEnvVars(bool bDoIt)
 {
    PCHECK();
    ms_GlobalConfig->SetExpandEnvVars(bDoIt);
+}
+
+/// does a profile/config group with this name exist?
+/* static */
+bool
+ProfileBase::ProfileExists(const String &name)
+{
+   ms_GlobalConfig->SetPath("");
+   return ms_GlobalConfig->HasGroup(name);
 }
 
 /** List all profiles of a given type or all profiles in total.
@@ -335,6 +355,29 @@ bool Profile::GetNextEntry(String& s, long& l) const
    return ms_GlobalConfig->GetNextEntry(s, l);
 }
 
+
+void
+Profile::SetIdentity(const String & idName)
+{
+   PCHECK();
+   if(m_Identity) ClearIdentity();
+   m_Identity = ProfileBase::CreateIdentity(idName);
+}
+void
+Profile::ClearIdentity(void)
+{
+   PCHECK();
+   if(m_Identity) m_Identity->DecRef();
+}
+
+String
+Profile::GetIdentity(void) const
+{
+   PCHECK();
+   return m_Identity ? m_Identity->GetName() : String("");
+}
+
+
 // ----------------------------------------------------------------------------
 // ProfileBase
 // ----------------------------------------------------------------------------
@@ -351,11 +394,25 @@ void EnforcePolicy(ProfileBase *p)
 }
 
 ProfileBase *
-ProfileBase::CreateProfile(const String & classname, ProfileBase const *parent)
+ProfileBase::CreateProfile(const String & classname,
+                           ProfileBase const *parent)
 {
    ASSERT(classname.Length() == 0 ||  // only relative paths allowed
           (classname[0u] != '.' && classname[0u] != '/'));
-   ProfileBase *p =  Profile::CreateProfile(classname, parent);
+   ProfileBase *p =  Profile::CreateProfile(classname, parent,
+                                            M_PROFILE_CONFIG_SECTION);
+   
+   EnforcePolicy(p);
+   return p;
+}
+
+ProfileBase *
+ProfileBase::CreateIdentity(const String & idName)
+{
+   ASSERT(idName.Length() == 0 ||  // only relative paths allowed
+          (idName[0u] != '.' && idName[0u] != '/'));
+   ProfileBase *p =  Profile::CreateProfile(idName, NULL,
+                                            M_IDENTITY_CONFIG_SECTION);  
    EnforcePolicy(p);
    return p;
 }
@@ -366,7 +423,9 @@ ProfileBase::CreateModuleProfile(const String & classname, ProfileBase const *pa
    ASSERT(classname.Length() == 0 ||  // only relative paths allowed
           (classname[0u] != '.' && classname[0u] != '/'));
    String newName = "Modules/" + classname;
-   ProfileBase *p =  Profile::CreateProfile(newName, parent);
+   ProfileBase *p =  Profile::CreateProfile(newName, parent,
+                                            M_PROFILE_CONFIG_SECTION);
+   
    EnforcePolicy(p);
    return p;
 }
@@ -409,7 +468,7 @@ ProfileBase::CreateGlobalConfig(const String & filename)
    // among other things, the passwords
    ((wxFileConfig *)ms_GlobalConfig)->SetUmask(0077);
 #  endif // Unix/Windows
-   ProfileBase *p = Profile::CreateProfile("",NULL);
+   ProfileBase *p = Profile::CreateProfile("",NULL,M_PROFILE_CONFIG_SECTION);
    EnforcePolicy(p);
    return p;
 }
@@ -444,44 +503,54 @@ ProfileBase::readEntry(const String & key,
    file. If an entry is not found, it tries to get it from its parent
    profile. Thus, an inheriting profile structure is created.
 */
-Profile::Profile(const String & iName, ProfileBase const *Parent)
+Profile::Profile(const String & iName, ProfileBase const *Parent,
+                 const String & root)
 {
    m_ProfileName = ( Parent && Parent->GetName().Length()) ?
-      ( Parent->GetName() + '/' ) :
-      String(M_PROFILE_CONFIG_SECTION);
+      ( Parent->GetName() + '/' ) : root ;
    if(iName.Length())
       m_ProfileName << '/' << iName;
    m_IsEmpty = false;
    m_Suspended = false;
+   m_Identity = NULL;
+
+   String id = readEntry(MP_PROFILE_IDENTITY, MP_PROFILE_IDENTITY_D);
+   if(id[0])
+      SetIdentity(id);
 }
 
 
 ProfileBase *
-Profile::CreateProfile(const String & iClassName, ProfileBase const *parent)
+Profile::CreateProfile(const String & iClassName,
+                       ProfileBase const *parent,
+                       const String & root)
 {
-   return new Profile(iClassName, parent);
+   return new Profile(iClassName, parent, root);
 }
 
 ProfileBase *
 Profile::CreateEmptyProfile(ProfileBase const *parent)
 {
-   Profile * p = new Profile("", parent);
+   Profile * p = new Profile("", parent, M_PROFILE_CONFIG_SECTION);
    p->m_IsEmpty = true;
    return p;
 }
 
 Profile::~Profile()
 {
+   PCHECK();
    ASSERT(this != mApplication->GetProfile());
-
    ASSERT(! m_Suspended); // probably an application error, flag it
    if(m_Suspended) Discard(); // but we tidy up, no big deal
+   if(m_Identity) m_Identity->DecRef();
 }
 
 ProfileBase *
 Profile::GetParent(void) const
 {
-   return CreateProfile(GetName().BeforeLast('/'), NULL);
+   return CreateProfile(GetName().BeforeLast('/'), NULL,
+                        /* not an error as root doesn't matter */
+                        "");
 }
 
 bool
@@ -562,6 +631,22 @@ Profile::readEntry(const String & key, const String & def, bool * found) const
    keySuspended << SUSPEND_PATH << '/' << key;
 
    String str;
+
+   // First, check if we are being redirected:
+   if(m_Identity)
+   {
+      // try suspended path first:
+      bool idFound = FALSE;
+      str = m_Identity->readEntry(keySuspended, def, &idFound);
+      if(! found)
+         str = m_Identity->readEntry(key, def, &idFound);
+      if(idFound)
+      {
+         if(found) *found = FALSE;
+         return str;
+      }
+   }
+   
    bool foundHere = FALSE;
    if ( m_Suspended )
    {
@@ -577,6 +662,7 @@ Profile::readEntry(const String & key, const String & def, bool * found) const
            (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
    {
       ms_GlobalConfig->SetPath("..");
+      // try suspended global profile first:
       foundAnywhere = ms_GlobalConfig->Read(keySuspended, &str, def);
       if ( !foundAnywhere )
       {
@@ -606,6 +692,22 @@ Profile::readEntry(const String & key, long def, bool * found) const
    keySuspended << SUSPEND_PATH << '/' << key;
 
    long val;
+
+   // First, check if we are being redirected:
+   if(m_Identity)
+   {
+      // try suspended path first:
+      bool idFound = FALSE;
+      val = m_Identity->readEntry(keySuspended, def, &idFound);
+      if(! found)
+         val = m_Identity->readEntry(key, def, &idFound);
+      if(idFound)
+      {
+         if(found) *found = FALSE;
+         return val;
+      }
+   }
+
    bool foundHere = FALSE;
    if ( m_Suspended )
    {

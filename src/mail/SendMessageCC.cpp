@@ -620,8 +620,7 @@ SendMessageCC::Send(void)
       *stream = NIL;
    const char
       *hostlist[2];
-   char
-      tmpbuf[MAILTMPLEN];
+   String tmpbuf;
    bool
       success = true;
    String
@@ -710,15 +709,22 @@ SendMessageCC::Send(void)
       }
       else
       {
-         sprintf (tmpbuf, _("Failed to send - %s"),
-                  (reply.Length() > 0) ? reply.c_str() :_("unknown error"));
+         tmpbuf = MailFolder::GetLogCircle().GuessError();
+         if(tmpbuf[0])
+            ERRORMESSAGE((tmpbuf));
+         tmpbuf.Printf(_("Failed to send - %s\n"),
+                       (reply.Length() > 0) ? reply.c_str()
+                       :_("unknown error"));
          ERRORMESSAGE((tmpbuf));
          success = false;
       }
    }
    else
    {
-      ERRORMESSAGE ((_("Cannot open connection to any server")));
+      tmpbuf = MailFolder::GetLogCircle().GuessError();
+      if(tmpbuf[0])
+         ERRORMESSAGE((tmpbuf));
+      ERRORMESSAGE((_("Cannot open connection to any server.\n")));
       success = false;
    }
    return success;

@@ -1,5 +1,6 @@
 (next release) on (date of next release)
-
+05.06.00 KB: added Identity redirection support to Profile classes
+             added MLogCircle and error guessing to folder and network operations
 04.06.00 KB: added configuration option for file folder format on creation
              added upgrade message about changed server settings
              Fixes and autoconf support for new wxMessageView code.

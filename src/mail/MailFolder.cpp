@@ -20,6 +20,7 @@
 #   include "MEvent.h"
 #   include "MModule.h"
 #   include <stdlib.h>
+#   include <errno.h>
 #endif
 
 #include "modules/Scoring.h"
@@ -74,29 +75,132 @@ protected:
 };
 
 
+MLogCircle
+MailFolder::ms_LogCircle(MF_LOGCIRCLE_SIZE);
+
+MLogCircle::MLogCircle(int n)
+{
+   m_N = n;
+   m_Messages = new String[m_N];
+   m_Next = 0;
+}
+MLogCircle::   ~MLogCircle()
+{
+   delete [] m_Messages;
+}
+void
+MLogCircle:: Add(const String &txt)
+{
+   m_Messages[m_Next++] = txt;
+   if(m_Next == m_N)
+      m_Next = 0;
+}
+bool
+MLogCircle:: Find(const String needle, String *store) const
+{
+   // searches backwards (most relevant first)
+   // search from m_Next-1 to 0
+   if(m_Next > 0)
+      for(int i = m_Next-1; i >= 0 ; i--)
+         if(m_Messages[i].Contains(needle))
+         {
+            if(store) *store = m_Messages[i];
+            return true;
+         }
+   // search from m_N-1 down to m_Next:
+   for(int i = m_N-1; i >= m_Next; i--)
+      if(m_Messages[i].Contains(needle))
+      {
+         if(store) *store = m_Messages[i];
+         return true;
+      }
+   // last attempt:
+   String tmp = strerror(errno);
+   if(tmp.Contains(needle))
+   {
+      if(store) *store = tmp;
+      return true;
+   }
+   return false;
+}
+String
+MLogCircle::GetLog(void) const
+{
+   String log;
+   // search from m_Next to m_N
+   for(int i = m_Next; i < m_N ; i++)
+      log << m_Messages[i] << '\n';
+         // search from 0 to m_Next-1:
+   for(int i = 0; i < m_Next; i++)
+      log << m_Messages[i] << '\n';
+   return log;
+}
+
+/* statuc */
+String
+MLogCircle::GuessError(void) const
+{
+   String guess, err;
+   bool addLog = false;
+   bool addErr = false;
+   
+   if(Find("No such host"), &err)
+   {
+      guess = _("The server name could not be resolved.\n"
+                "Maybe the network connection or the DNS servers are down?");
+      addErr = true;
+   }
+   
+   if(addErr)
+   {
+      guess += _("\nThe exact error message was:\n");
+      guess += err;
+   }
+   if(addLog) // we have an idea
+   {
+      guess += _("\nThe last few log messages were:\n");
+      guess += GetLog();
+   }
+   return guess;
+}
+
+void
+MLogCircle::Clear(void)
+{
+   for(int i = 0; i < m_N; i++)
+      m_Messages[i] = "";
+}
 
 /*-------------------------------------------------------------------*
  * static member functions of MailFolder.h
  *-------------------------------------------------------------------*/
 
 
+/*
+ * This function guesses: it checks if such a profile exists,
+ * otherwise it tries a file with that name.
+ */
+ 
 /* static */
 MailFolder *
 MailFolder::OpenFolder(const String &name, ProfileBase *parentProfile)
 {
-   String pname = (name[0] == '/') ? String(name.c_str()+1) : name;
-
-   MFolder *mf = MFolder::Get(pname);
-   if(mf )
+   if(1) //FIXME: broken//if(ProfileBase::ProfileExists(name))
    {
-      MailFolder *m = OpenFolder(mf);
-      mf->DecRef();
-      return m;
+      MFolder *mf = MFolder::Get(name);
+      if(mf )
+      {
+         MailFolder *m = OpenFolder(mf);
+         mf->DecRef();
+         return m;
+      }
+      else
+         return NULL; // profile failed
    }
-   else
+   else // attempt to open file
    {
       // profile entry does not exist
-      ProfileBase *profile = ProfileBase::CreateProfile(pname, parentProfile);
+      ProfileBase *profile = ProfileBase::CreateEmptyProfile(parentProfile);
       MailFolder *m = OpenFolder( MF_FILE, name, profile);
       profile->DecRef();
       return m;
@@ -174,7 +278,7 @@ MailFolder::OpenFolder(int folderType,
    if(strutil_isempty(symbolicName))
       symbolicName = i_path;
       
-   if ( type == MF_PROFILE || type == MF_PROFILE_OR_FILE )
+   if ( type == MF_PROFILE )
    {
       if(type == MF_PROFILE)
          profile = ProfileBase::CreateProfile(i_path, parentProfile);

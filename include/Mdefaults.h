@@ -31,8 +31,10 @@
 #ifndef M_PROFILE_CONFIG_SECTION
 #  ifdef OS_WIN
 #     define   M_PROFILE_CONFIG_SECTION   "/Profiles"
+#     define   M_IDENTITY_CONFIG_SECTION   "/Ids"
 #  else  // Unix
 #     define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
+#     define   M_IDENTITY_CONFIG_SECTION   "/M/Ids"
 #  endif // Unix/Win
 #endif
 
@@ -40,7 +42,7 @@
     folder profiles (trailing '/' required).
 */
 #ifndef M_FOLDER_CONFIG_SECTION
-#  define   M_FOLDER_CONFIG_SECTION   M_PROFILE_CONFIG_SECTION M_PROFILE_CONFIG_SECTION
+#  define   M_FOLDER_CONFIG_SECTION   M_PROFILE_CONFIG_SECTION
 #endif
 
 /** The section in the global configuration file used for storing
@@ -212,6 +214,8 @@
 #define   MP_PROFILE_PATH         "ProfilePath"
 /// the extension to use for profile files
 #define   MP_PROFILE_EXTENSION      "ProfileExtension"
+/// the key for identity redirection
+#define MP_PROFILE_IDENTITY "ProfileId"
 /// the name of the mailcap file
 #define   MP_MAILCAP         "MailCap"
 /// the name of the mime types file
@@ -710,6 +714,8 @@
 #define   MP_PROFILE_PATH_D      "."
 /// the extension to use for profile files
 #define   MP_PROFILE_EXTENSION_D      ".profile"
+/// the key for identity redirection
+#define MP_PROFILE_IDENTITY_D  ""
 /// the name of the mailcap file
 #define   MP_MAILCAP_D         "mailcap"
 /// the name of the mime types file

@@ -75,9 +75,14 @@ public:
    /// Create a dummy Profile just inheriting from the top level
    static ProfileBase * CreateEmptyProfile(const ProfileBase *parent = NULL);
 
+   /// creates an Identity entry in the configuration
+   static ProfileBase * CreateIdentity(const String &name);
+
    /// Delete the global config object
    static void DeleteGlobalConfig();
 
+   /// does a profile/config group with this name exist?
+   static bool ProfileExists(const String &name);
    /** List all profiles of a given type or all profiles in total.
        @param type Type of profile to list or -1 for all.
        @return a pointer to kbStringList of profile names to be freed by caller.

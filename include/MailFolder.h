@@ -38,6 +38,25 @@ class MWindow;
 class Message;
 
 
+#define MF_LOGCIRCLE_SIZE   10
+/** A small class to hold the last N log messages for analysis.
+ */
+class MLogCircle
+{
+public:
+   MLogCircle(int n);
+   ~MLogCircle();
+   void Add(const String &txt);
+   bool Find(const String needle, String *store = NULL) const;
+   String GetLog(void) const;
+   void Clear(void);
+   /// Looks at log data and guesses what went wrong.
+   String GuessError(void) const;
+private:
+   int m_N, m_Next;
+   String *m_Messages;
+};
+
 /**
    MailFolder base class, represents anything containig mails.
 
@@ -239,6 +258,11 @@ public:
    //@}
    //@}
 
+   /// Returns the shared logcircle object
+   static MLogCircle & GetLogCircle(void)
+      {
+         return ms_LogCircle;
+      }
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
    */
@@ -516,6 +540,7 @@ public:
    /// Request update
    virtual void RequestUpdate(void) = 0;
 protected:
+   static MLogCircle ms_LogCircle;
 };
 
 /** This class temporarily locks a mailfolder */
