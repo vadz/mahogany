@@ -64,14 +64,14 @@ public:
       }
    
 
-    /// call this function on program termination to check for memory leaks
-    /// (of course, you shouldn't allocate memory in static object's: otherwise
-    /// it will be reported as leaked)
+    /// call this function on program termination to check for memory
+    /// leaks (of course, you shouldn't allocate memory in static
+    /// objects: otherwise it will be reported as leaked)
     static void CheckLeaks();
 
-    /// override this function (see also MOBJECT_DEBUG macro) to provide some
-    /// rich information about your object (MObjectRC::Dump() prints the base
-    /// information such as name, pointer and ref count only)
+    /// override this function (see also MOBJECT_DEBUG macro) to provide
+    /// some rich information about your object (MObjectRC::Dump() prints
+    /// the base information such as name, pointer and ref count only)
     virtual String DebugDump() const;
 
     /// this function just returns the class name (also overriden by
@@ -119,14 +119,14 @@ protected:
   Of course, "objects of this class" also applies for objects of all classes
   derived from MObjectRC.
 
-  Debugging: in the debug mode only (when DEBUG is defined) all MObjectRC-derived
-  objects are added to the global list. Calling MObjectRC::CheckLeaks() on program
-  termination will print a detailed report about leaked objects, including their
-  number and their description for all of them. CheckLeaks() does nothing in the
-  release build. You can also insert MOBJECT_DEBUG(classname) macro into the
-  declaration of the class classname to provide some more interesting
+  Debugging: in the debug mode only (when DEBUG is defined) all MObjectRC-
+  derived objects are added to the global list. Calling MObjectRC::CheckLeaks()
+  on program termination will print a detailed report about leaked objects,
+  including their number and their description. CheckLeaks() does nothing in
+  the release build. You can also insert the MOBJECT_DEBUG(classname) macro
+  into the declaration of the class classname to provide some more interesting
   information about the instance of this class for debugging purposes (it will
-  also put the write classname in the leaked object report then)
+  also put the right classname in the leaked object report then)
 */
 class MObjectRC : public MObject
 {
@@ -140,14 +140,14 @@ public:
 
   /// debugging support
 #ifdef   DEBUG
-    /// call this function on program termination to check for memory leaks
-    /// (of course, you shouldn't allocate memory in static object's: otherwise
-    /// it will be reported as leaked)
+    /// call this function on program termination to check for memory
+    /// leaks (of course, you shouldn't allocate memory in static objects:
+    /// otherwise it will be reported as leaked)
     static void CheckLeaks();
 
-    /// override this function (see also MOBJECT_DEBUG macro) to provide some
-    /// rich information about your object (MObjectRC::Dump() prints the base
-    /// information such as name, pointer and ref count only)
+    /// override this function (see also MOBJECT_DEBUG macro) to provide
+    /// some rich information about your object (MObjectRC::Dump() prints
+    /// the base information such as name, pointer and ref count only)
     virtual String DebugDump() const;
 
     /// this function just returns the class name (also overriden by
