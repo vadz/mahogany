@@ -206,9 +206,7 @@ END_EVENT_TABLE()
 
 DspamFilter::DspamFilter()
 {
-#ifdef __WINDOWS__
    dspam_set_home(mApplication->GetLocalDir());
-#endif // __WINDOWS__
 
    dspam_init_driver();
 }
