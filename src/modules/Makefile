@@ -34,7 +34,14 @@ DEP = $(SRC:.cpp=.d)
 
 TARGETS = $(SRC:.cpp=.so) $(SRC:.cpp=.mmd)
 
+INTERFACE = ../../include/MInterface.h ../../include/MInterface.cpp
+
 all: $(TARGETS)
+
+$(TARGETS): $(INTERFACE)
+
+$(INTERFACE): ../../include/MInterface.mid
+	$(MAKE) -C ../../include MInterface.h
 
 clean: 
 	$(RM) *.o *.so *.lo
