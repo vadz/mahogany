@@ -24,6 +24,7 @@ AC_CONFIG_AUX_DIR($CWD/extra/scripts)
 dnl --------------------------------------------------------------------------
 dnl overrides, all --with/--without options
 dnl --------------------------------------------------------------------------
+
 M_OVERRIDES_PREPARE
 
 DEFAULT_USE_EFENCE=0
@@ -68,6 +69,8 @@ USE_WXCONFIG)
 M_OVERRIDES(experimental,experimental,
 --with-experimental    use experimental code,
 USE_EXPERIMENTAL)
+
+M_OVERRIDES_DONE
 
 dnl --------------------------------------------------------------------------
 dnl testing operating system and compilers
