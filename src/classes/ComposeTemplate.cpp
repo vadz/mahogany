@@ -1272,7 +1272,7 @@ String VarExpander::GetSignature() const
          // insert separator optionally
          if ( READ_CONFIG(m_profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
          {
-            signature += "--\n";
+            signature += "-- \n";
          }
 
          // read the whole file
