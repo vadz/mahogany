@@ -523,12 +523,19 @@ private:
 };
 
 #ifdef USE_PYTHON
+
 // all python-related settings
 class wxOptionsPagePython : public wxOptionsPageStandard
 {
 public:
    wxOptionsPagePython(wxNotebook *parent, Profile *profile);
+
+   virtual bool TransferDataFromWindow();
+
+private:
+   DECLARE_NO_COPY_CLASS(wxOptionsPagePython)
 };
+
 #endif // USE_PYTHON
 
 // all bbdb-related settings
