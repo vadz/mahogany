@@ -254,6 +254,8 @@ public:
    // store the clickable info for this URL (we take ownership of it)
    void StoreClickable(ClickableInfo *ci, const String& url);
 
+   // override some base class virtuals
+   virtual void OnSetTitle(const wxString& title);
    virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
 
 private:
@@ -303,6 +305,9 @@ HtmlViewerWindow::HtmlViewerWindow(HtmlViewer *viewer, wxWindow *parent)
                 : wxHtmlWindow(parent)
 {
    m_viewer = viewer;
+
+   SetRelatedFrame(GetFrame(parent), "");
+   SetRelatedStatusBar(0);
 }
 
 HtmlViewerWindow::~HtmlViewerWindow()
@@ -322,6 +327,11 @@ ClickableInfo *HtmlViewerWindow::GetClickable(const String& url) const
    return index == wxNOT_FOUND ? NULL : m_clickables[(size_t)index];
 }
 
+void HtmlViewerWindow::OnSetTitle(const wxString& title)
+{
+   // don't do anything, we don't want to show the title at all
+}
+
 void HtmlViewerWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
    String url = link.GetHref();
@@ -333,7 +343,11 @@ void HtmlViewerWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
       StoreClickable(ci, url);
    }
 
-   m_viewer->DoMouseCommand(WXMENU_LAYOUT_DBLCLICK,
+   // left click becomes double click as we want to open the URLs on simple
+   // click
+   m_viewer->DoMouseCommand(link.GetEvent()->LeftDown()
+                              ? WXMENU_LAYOUT_DBLCLICK
+                              : WXMENU_LAYOUT_RCLICK,
                             ci,
                             link.GetEvent()->GetPosition());
 }
