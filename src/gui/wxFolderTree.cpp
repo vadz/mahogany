@@ -881,6 +881,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       DeleteChildren(parent);
       ((wxFolderTreeNode *)GetItemData(parent))->ResetExpandedFlag();
       SetItemHasChildren(parent, TRUE);
+
       Expand(parent);
 
       if ( event.GetChangeKind() == MEventFolderTreeChangeData::Delete )

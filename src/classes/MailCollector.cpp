@@ -301,7 +301,9 @@ MailCollector::RemoveIncomingFolder(const String &name)
       }
    }
 
-   wxASSERT_MSG(0,"Cannot remove non-existing incoming folder from list.");
+   // it's not an error - may be the folder couldn't be opened during this
+   // even though it does have "autocollect" flag set
+
    return false;
 }
 
