@@ -27,7 +27,7 @@
 
    Variable expansion has the following syntax (pseudo BN notation ahead):
 
-      $([category:]name[(arguments)][{+|-|=}<number>[!]])
+      $([category:]name[?arguments][{+|-|=}<number>[!]])
 
    (the parentheses around all this may be replaced with accolades). For the
    simplest cases (no category, no arguments, no justficiation tail) the
@@ -36,6 +36,11 @@
    The "category" is one of the elements of gs_templateVarCategories elements.
    The "name"s are in gs_templateVarNames array. Both of them are "words", i.e.
    are sequences of alphabetic characters.
+
+   The arguments are optional and if they are present are a comma-separated
+   list of words (i.e. alphabetic characters only are allowed). For example,
+   the following will insert the quoted contents of the file after asking the
+   user for a file name default to foo.bar: $(file:foo.bar?ASK,QUOTE)
 
    The optional tail {+|-|=}<number> may be used to justify the value: + aligns
    it to the right, - (default) to the left and = centers it in the text field
@@ -121,6 +126,7 @@ public:
    //     instead.
    virtual bool Expand(const String& category,
                        const String& name,
+                       const wxArrayString& arguments,
                        String *value) const = 0;
 
    // virtual dtor in any base class

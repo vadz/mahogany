@@ -61,7 +61,7 @@
 // macros
 // ----------------------------------------------------------------------------
 
-#ifdef DEBUG
+#ifdef WXLAYOUT_DEBUG
 #  define   WXLO_DEBUG(x)      wxLogDebug x
 #else
 #  define WXLO_DEBUG(x)

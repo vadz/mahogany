@@ -40,7 +40,7 @@
 
 // do not enable debug mode within Mahogany unless in debug mode
 #if defined(__WXDEBUG__) && (( ! defined(M_BASEDIR) )|| defined(DEBUG))
-#   define   WXLAYOUT_DEBUG
+//#   define   WXLAYOUT_DEBUG
 #endif
 
 #ifdef WXLAYOUT_DEBUG

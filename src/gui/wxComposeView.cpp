@@ -310,6 +310,9 @@ public:
       MessageHeader_Subject,
       MessageHeader_Cc,
       MessageHeader_Bcc,
+      MessageHeader_LastControl = MessageHeader_Bcc,
+      MessageHeader_FirstName,
+      MessageHeader_LastName,
       MessageHeader_Invalid,
       MessageHeader_Max = MessageHeader_Invalid
    };
@@ -391,6 +394,7 @@ public:
    // implement base class pure virtual function
    virtual bool Expand(const String& category,
                        const String& name,
+                       const wxArrayString& arguments,
                        String *value) const;
 
 protected:
@@ -403,8 +407,12 @@ protected:
 
    // Expand determines the category and then calls one of these functions
    bool ExpandMisc(const String& name, String *value) const;
-   bool ExpandFile(const String& name, String *value) const;
-   bool ExpandAttach(const String& name, String *value) const;
+   bool ExpandFile(const String& name, 
+                   const wxArrayString& arguments,
+                   String *value) const;
+   bool ExpandAttach(const String& name,
+                     const wxArrayString& arguments,
+                     String *value) const;
    bool ExpandCommand(const String& name, String *value) const;
 #ifdef USE_PYTHON
    bool ExpandPython(const String& name, String *value) const;
@@ -461,10 +469,21 @@ static TemplatePopupMenuItem gs_popupSubmenuMisc[] =
    TemplatePopupMenuItem(_("&Attach original text"), "$quote822"),
 };
 
+// the file insert/attach sub menu
+static TemplatePopupMenuItem gs_popupSubmenuFile[] =
+{
+   TemplatePopupMenuItem(_("&Insert file..."), "${file:%s}", TRUE),
+   TemplatePopupMenuItem(_("Insert &any file..."), "${file:%s?ask", TRUE),
+   TemplatePopupMenuItem(_("Insert &quoted file..."), "${file:%s?quote}", TRUE),
+   TemplatePopupMenuItem(_("&Attach file..."), "${attach:%s}", TRUE),
+};
+
 // the message submenu
 static TemplatePopupMenuItem gs_popupSubmenuMessage[] =
 {
    TemplatePopupMenuItem(_("&To"), "${message:to}"),
+   TemplatePopupMenuItem(_("&First name"), "${message:firstname}"),
+   TemplatePopupMenuItem(_("&Last name"), "${message:lastname}"),
    TemplatePopupMenuItem(_("&Subject"), "${message:subject}"),
    TemplatePopupMenuItem(_("&CC"), "${message:cc}"),
    TemplatePopupMenuItem(_("&BCC"), "${message:bcc}"),
@@ -476,7 +495,9 @@ static TemplatePopupMenuItem gs_popupSubmenuOriginal[] =
    TemplatePopupMenuItem(_("&Date"), "${original:date}"),
    TemplatePopupMenuItem(_("&From"), "${original:from}"),
    TemplatePopupMenuItem(_("&Subject"), "${original:subject}"),
-   TemplatePopupMenuItem(_("&Full name"), "${original:fullname}"),
+   TemplatePopupMenuItem(_("Full &name"), "${original:fullname}"),
+   TemplatePopupMenuItem(_("F&irst name"), "${original:firstname}"),
+   TemplatePopupMenuItem(_("&Last name"), "${original:lastname}"),
    TemplatePopupMenuItem(_("&To"), "${original:to}"),
    TemplatePopupMenuItem(_("&Reply to"), "${original:replyto}"),
    TemplatePopupMenuItem(_("&Newsgroups"), "${original:newsgroups}"),
@@ -494,8 +515,10 @@ static TemplatePopupMenuItem gs_popupMenu[] =
    TemplatePopupMenuItem(_("&Original message"),
                          gs_popupSubmenuOriginal,
                          WXSIZEOF(gs_popupSubmenuOriginal)),
-   TemplatePopupMenuItem(_("&Insert file..."), "${file:%s}", TRUE),
-   TemplatePopupMenuItem(_("&Attach file..."), "${attach:%s}", TRUE),
+   TemplatePopupMenuItem(_("Insert or attach a &file"),
+                         gs_popupSubmenuFile,
+                         WXSIZEOF(gs_popupSubmenuFile)),
+   TemplatePopupMenuItem(),
    TemplatePopupMenuItem(_("&Execute command..."), "${cmd:%s}", FALSE),
 };
 
@@ -505,6 +528,7 @@ const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =
 // ----------------------------------------------------------------------------
 // event tables &c
 // ----------------------------------------------------------------------------
+
 IMPLEMENT_CLASS(wxComposeView, wxMFrame)
 
 BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
@@ -2467,10 +2491,13 @@ const char *VarExpander::ms_templateVarNames[] =
 
 const char *VarExpander::ms_templateMessageVars[] =
 {
+   // the order must be the same as for the text controls in compose view!
    "to",
    "subject",
    "cc",
    "bcc",
+   "firstname",
+   "lastname",
 };
 
 const char *VarExpander::ms_templateOriginalVars[] =
@@ -2555,6 +2582,7 @@ VarExpander::GetAbsFilename(const String& name)
 bool
 VarExpander::Expand(const String& category,
                     const String& name,
+                    const wxArrayString& arguments,
                     String *value) const
 {
    value->Empty();
@@ -2563,10 +2591,10 @@ VarExpander::Expand(const String& category,
    switch ( GetCategory(category.Lower()) )
    {
       case Category_File:
-         return ExpandFile(name, value);
+         return ExpandFile(name, arguments, value);
 
       case Category_Attach:
-         return ExpandAttach(name, value);
+         return ExpandAttach(name, arguments, value);
 
       case Category_Command:
          return ExpandCommand(name, value);
@@ -2638,38 +2666,91 @@ VarExpander::ExpandMisc(const String& name, String *value) const
 }
 
 bool
-VarExpander::ExpandFile(const String& name, String *value) const
+VarExpander::ExpandFile(const String& name,
+                        const wxArrayString& arguments,
+                        String *value) const
 {
+   // first check if we don't want to ask user
    String filename = GetAbsFilename(name);
-
-   // insert the contents of a file
-   if ( !SlurpFile(filename, value) )
+   if ( arguments.Index("ask", FALSE /* no case */) != wxNOT_FOUND )
    {
-      wxLogError(_("Failed to insert file '%s' into the message."),
-                 name.c_str());
-
-      return FALSE;
+      filename = MDialog_FileRequester(_("Select the file to insert"),
+                                       GetFrame(&m_cv),
+                                       filename);
    }
+
+   if ( !!filename )
+   {
+      // insert the contents of a file
+      if ( !SlurpFile(filename, value) )
+      {
+         wxLogError(_("Failed to insert file '%s' into the message."),
+                    name.c_str());
+
+         return FALSE;
+      }
+
+      // do we want to quote the files contents before inserting?
+      if ( arguments.Index("quote", FALSE /* no case */) != wxNOT_FOUND )
+      {
+         String prefix = READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX);
+         String quotedValue;
+         quotedValue.Alloc(value->length());
+
+         const char *cptr = value->c_str();
+         quotedValue = prefix;
+         while ( *cptr )
+         {
+            if ( *cptr == '\r' )
+            {
+               cptr++;
+               continue;
+            }
+
+            quotedValue += *cptr;
+            if( *cptr++ == '\n' && *cptr )
+            {
+               quotedValue += prefix;
+            }
+         }
+
+         *value = quotedValue;
+      }
+   }
+   //else: no file, nothing to insert
 
    return TRUE;
 }
 
 bool
-VarExpander::ExpandAttach(const String& name, String *value) const
+VarExpander::ExpandAttach(const String& name,
+                          const wxArrayString& arguments,
+                          String *value) const
 {
    String filename = GetAbsFilename(name);
-   if ( !SlurpFile(filename, value) )
+   if ( arguments.Index("ask", FALSE /* no case */) != wxNOT_FOUND )
    {
-      wxLogError(_("Failed to attach file '%s' to the message."),
-                 name.c_str());
-
-      return FALSE;
+      filename = MDialog_FileRequester(_("Select the file to attach"),
+                                       GetFrame(&m_cv),
+                                       filename);
    }
 
-   // FIXME where to take MIME type from?
-   m_sink.InsertAttachment(strutil_strdup(value->c_str()),
-                           value->length(),
-                           "APPLICATION/OCTET-STREAM");
+   if ( !!filename )
+   {
+      if ( !SlurpFile(filename, value) )
+      {
+         wxLogError(_("Failed to attach file '%s' to the message."),
+                    name.c_str());
+
+         return FALSE;
+      }
+
+      // FIXME where to take MIME type from? From extension?
+      m_sink.InsertAttachment(strutil_strdup(value->c_str()),
+                              value->length(),
+                              "APPLICATION/OCTET-STREAM");
+   }
+   //else: no file, nothing to attach
 
    return TRUE;
 }
@@ -2722,9 +2803,27 @@ VarExpander::ExpandMessage(const String& name, String *value) const
       return FALSE;
    }
 
-   // the MessageHeader enum values are the same as AddressField ones, so no
-   // translation is needed
-   *value = m_cv.GetHeaderValue((wxComposeView::AddressField)header);
+   switch ( header )
+   {
+      case MessageHeader_FirstName:
+      case MessageHeader_LastName:
+         {
+            wxString to = m_cv.GetHeaderValue(wxComposeView::Field_To);
+            if ( header == MessageHeader_FirstName )
+               *value = Message::GetFirstNameFromAddress(to);
+            else
+               *value = Message::GetLastNameFromAddress(to);
+         }
+         break;
+
+      default:
+         CHECK( header <= MessageHeader_LastControl, FALSE, 
+                "unexpected macro in message category" );
+
+         // the MessageHeader enum values are the same as AddressField ones, so no
+         // translation is needed
+         *value = m_cv.GetHeaderValue((wxComposeView::AddressField)header);
+   }
 
    return TRUE;
 }

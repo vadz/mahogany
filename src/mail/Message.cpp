@@ -106,15 +106,28 @@ static void SplitAddress(const String& addr,
       *lastName = last;
 }
 
+/* static */ String Message::GetFirstNameFromAddress(const String& address)
+{
+   String first;
+   SplitAddress(address, &first, NULL);
+
+   return first;
+}
+
+/* static */ String Message::GetLastNameFromAddress(const String& address)
+{
+   String last;
+   SplitAddress(address, NULL, &last);
+
+   return last;
+}
+
 String Message::GetAddressFirstName(MessageAddressType type) const
 {
    String addr;
    Address(addr, type);
 
-   String first;
-   SplitAddress(addr, &first, NULL);
-
-   return first;
+   return GetFirstNameFromAddress(addr);
 }
 
 String Message::GetAddressLastName(MessageAddressType type) const
@@ -122,10 +135,7 @@ String Message::GetAddressLastName(MessageAddressType type) const
    String addr;
    Address(addr, type);
 
-   String last;
-   SplitAddress(addr, NULL, &last);
-
-   return last;
+   return GetLastNameFromAddress(addr);
 }
 
 // ----------------------------------------------------------------------------

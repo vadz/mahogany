@@ -99,6 +99,12 @@ public:
       UIdType uid = UID_ILLEGAL,
       class ProfileBase *iprofile = NULL);
    
+   // used by GetAddressFirstName()
+   static String GetFirstNameFromAddress(const String& address);
+
+   // used by GetAddressLastName()
+   static String GetLastNameFromAddress(const String& address);
+
    /** get any header line
        @line name of header line
        @value string where result will be stored, or empty string

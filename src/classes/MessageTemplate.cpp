@@ -48,7 +48,9 @@
 // private functions
 // ----------------------------------------------------------------------------
 
-// parser helper
+// parser helper: return the word (sequence of alnum characters until
+// endOfWordMarker) from ppc and adjust ppc pointer to point to the char after
+// the end of word
 static String ExtractWord(const char **ppc, char endOfWordMarker);
 
 // ============================================================================
@@ -183,6 +185,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       unsigned int alignWidth = 0;
       bool truncate = FALSE;
       String name;
+      wxArrayString arguments;
 
       if ( !bracketClose )
       {
@@ -219,6 +222,26 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
                                   m_filename.c_str());
 
                      return FALSE;
+                  }
+                  break;
+
+               case '?':
+                  // list of arguments ahead
+                  {
+                     wxString arg;
+                     do
+                     {
+                        pc++; // skip '?' (first time) or ',' (subsequent ones)
+
+                        arg.clear();
+                        while ( isalnum(*pc) )
+                        {
+                           arg += *pc++;
+                        }
+
+                        arguments.Add(arg);
+                     }
+                     while ( *pc == ',' );
                   }
                   break;
 
@@ -313,7 +336,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
          continue;
 
       String value;
-      if ( !m_expander->Expand(category, name, &value) )
+      if ( !m_expander->Expand(category, name, arguments, &value) )
       {
          // don't log the message if the value is not empty - this means that
          // the variable *is* known, but that the expansion, for some reason,
@@ -435,6 +458,7 @@ String ExtractWord(const char **ppc, char endOfWordMarker)
 
    return word;
 }
+
 // returns the name of profile subgroup for the templates of the given kind
 static String GetTemplateKindPath(MessageTemplateKind kind)
 {
