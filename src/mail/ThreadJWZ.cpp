@@ -1536,7 +1536,7 @@ static void FlushThreadable(Threadable *t,
       size_t threadedIndex = t->getThreadedIndex();
       size_t index = t->getIndex();
       indices[threadedIndex] = index;
-      indents[threadedIndex] = t->getIndent();
+      indents[index] = t->getIndent();
 #if defined(DEBUG)
       seen[index] = true;
 #endif
