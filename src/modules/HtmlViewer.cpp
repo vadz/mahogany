@@ -194,30 +194,34 @@ TAG_HANDLER_BEGIN(META, "META" )
     {
         if ( tag.GetParam(_T("HTTP-EQUIV")).CmpNoCase(_T("Content-Type")) == 0 )
         {
-            // strlen("text/html; charset=")
-            static const int CHARSET_STRING_LEN = 19;
-
-            wxString content = tag.GetParam(_T("CONTENT"));
-            if ( content.Left(CHARSET_STRING_LEN) == _T("text/html; charset=") )
+            wxString content = tag.GetParam(_T("CONTENT")).Lower(),
+                     rest;
+            if ( content.StartsWith(_T("text/html;"), &rest) )
             {
-                wxFontEncoding enc =
-                    wxFontMapper::Get()->CharsetToEncoding(
-                              content.Mid(CHARSET_STRING_LEN));
+                // there can be some leading white space
+                rest.Trim(false /* from left */);
 
-                if ( enc == wxFONTENCODING_SYSTEM
-#if !wxUSE_UNICODE
-                     || enc == m_WParser->GetInputEncoding()
-#endif
-                   )
+                wxString charset;
+                if ( rest.StartsWith(_T("charset="), &charset) )
                 {
-                   return false;
-                }
+                    wxFontEncoding
+                        enc = wxFontMapper::Get()->CharsetToEncoding( charset);
+
+                    if ( enc == wxFONTENCODING_SYSTEM
+#if !wxUSE_UNICODE
+                         || enc == m_WParser->GetInputEncoding()
+#endif
+                       )
+                    {
+                       return false;
+                    }
 
 #if !wxUSE_UNICODE
-                m_WParser->SetInputEncoding(enc);
+                    m_WParser->SetInputEncoding(enc);
 #endif
-                m_WParser->GetContainer()->InsertCell(
-                    new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+                    m_WParser->GetContainer()->InsertCell(
+                        new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+                }
             }
         }
 
