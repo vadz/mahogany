@@ -60,7 +60,7 @@ class PalmBook;
 #define MP_MOD_PALMOS_BACKUP     "Backup"       // experimental
 #define MP_MOD_PALMOS_BACKUP_D   0l             // experimental
 #define MP_MOD_PALMOS_BACKUPDIR     "BackupDir"       // experimental
-#define MP_MOD_PALMOS_BACKUPDIR_D   0l             // experimental
+#define MP_MOD_PALMOS_BACKUPDIR_D   ""             // experimental
 #define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
 #define MP_MOD_PALMOS_PILOTDEV_D "/dev/pilot"
 #define MP_MOD_PALMOS_SPEED      "Speed"
