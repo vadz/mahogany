@@ -126,7 +126,7 @@ private:
    bool DoProcess(const Message& msg, ContextHandler& handler);
 
 
-   DECLARE_SPAM_FILTER("dspam");
+   DECLARE_SPAM_FILTER("dspam", 100);
 };
 
 IMPLEMENT_SPAM_FILTER(DspamFilter,

@@ -83,12 +83,14 @@ SpamFilter::CheckIfSpam(const Message& msg,
    const size_t count = params.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      const wxString& param = params[n];
+      wxString param = params[n];
       int pos = param.Find(_T('='));
       if ( pos == wxNOT_FOUND )
       {
-         wxLogDebug(_T("Invalid spam filter parameter \"%s\""), param.c_str());
-         continue;
+         // hack: for backwards compatibility with older versions when there
+         // was only one spam filter
+         param = _T("headers=") + param;
+         pos = 7;
       }
 
       // insert the value in the same position in values array as name is going
@@ -151,10 +153,26 @@ void SpamFilter::DoLoadAll()
       SpamFilterFactory * const
          factory = static_cast<SpamFilterFactory *>(module);
 
-      // create the filter and insert it into the linked list
-      SpamFilter *next = ms_first;
-      ms_first = factory->Create();
-      ms_first->m_next = next;
+      // create the filter and insert it into the linked list ordered by cost
+      SpamFilter * const filterNew = factory->Create();
+
+      const unsigned int cost = filterNew->GetCost();
+      SpamFilter **next = &ms_first;
+      for ( SpamFilter *filter = ms_first; ; filter = filter->m_next )
+      {
+         // insert it here?
+         if ( !filter || cost < filter->GetCost() )
+         {
+            // yes, adjust the links
+            *next = filterNew;
+
+            filterNew->m_next = filter;
+
+            break;
+         }
+
+         next = &filter->m_next;
+      }
 
       factory->DecRef();
    }

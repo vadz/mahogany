@@ -170,6 +170,16 @@ protected:
     */
    virtual const wxChar *GetName() const = 0;
 
+   /**
+      Return the computational/speed cost of using this filter.
+
+      Cheaper filters are applied first, i.e. those which run the fastest are
+      applied before the slower ones.
+
+      This method is implemented by DECLARE_SPAM_FILTER() macro below.
+    */
+   virtual unsigned int GetCost() const = 0;
+
    //@}
 
 private:
@@ -207,12 +217,17 @@ public:
 /**
   This macro must be used in SpamFilter-derived class declaration.
 
-  It defines GetName() which returns the parameter of the macro.
+  It defines GetName() and GetCost() methods.
 
   There should be no semicolon after this macro.
+
+  @param name short name of the filter
+  @param cost performance cost of using this filter, from 0 to +infinity
+              (cheaper filters are applied first)
  */
-#define DECLARE_SPAM_FILTER(name)                                             \
+#define DECLARE_SPAM_FILTER(name, cost)                                       \
    public:                                                                    \
+      virtual unsigned int GetCost() const { return cost; }                   \
       virtual const wxChar *GetName() const { return _T(name); }
 
 /**
@@ -223,7 +238,7 @@ public:
   @param desc     the short description (shown to the user)
   @param cpyright the module author/copyright string
  */
-#define IMPLEMENT_SPAM_FILTER(cname, desc, cpyright)                          \
+#define IMPLEMENT_SPAM_FILTER(cname, cost, desc, cpyright)                    \
    class cname##Factory : public SpamFilterFactory                            \
    {                                                                          \
    public:                                                                    \

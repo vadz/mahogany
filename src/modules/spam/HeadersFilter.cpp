@@ -61,7 +61,7 @@ protected:
                               String *result);
 
 
-   DECLARE_SPAM_FILTER("headers");
+   DECLARE_SPAM_FILTER("headers", 30);
 };
 
 IMPLEMENT_SPAM_FILTER(HeadersFilter,
