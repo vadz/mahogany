@@ -1472,12 +1472,12 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
   }
 
   // remove from the parent group
-  long lId = m_current->GetId();
+  wxTreeItemId id = m_current->GetId();
   parent->DeleteChild(m_current);
   m_current = parent;
 
   // remove from the tree
-  m_treeAdb->Delete(lId);
+  m_treeAdb->Delete(id);
 
   strWhat[0u] = toupper(strWhat[0u]);
   wxLogStatus(this, _("%s '%s' deleted."), strWhat.c_str(), strName.c_str());
@@ -1843,7 +1843,7 @@ void wxAdbEditFrame::OnHelp(wxCommandEvent&)
 void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
 {
   wxTreeItemId id = event.GetItem();
-  AdbTreeNode *m_current = (AdbTreeNode *)m_treeAdb->GetItemData(id);
+  m_current = (AdbTreeNode *)m_treeAdb->GetItemData(id);
 
   if ( m_current->IsGroup() ) {
     SetStatusText("", 1);
@@ -1860,11 +1860,11 @@ void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
 void wxAdbEditFrame::SetTreeItemIcon(const wxTreeItemId& id,
                                      wxAdbTree::ImageListImage icon)
 {
-  AdbTreeNode *parent = (AdbTreeNode *)m_treeAdb->GetItemData(id);
-  wxASSERT( parent->IsGroup() ); // items can't be expanded/collapsed
+  AdbTreeNode *item = (AdbTreeNode *)m_treeAdb->GetItemData(id);
+  wxASSERT( item->IsGroup() ); // items can't be expanded/collapsed
 
   // don't change icons for the root entry and address books
-  if ( parent->IsRoot() || parent->GetParent()->IsRoot() )
+  if ( item->IsRoot() || item->GetParent()->IsRoot() )
     return;
 
   m_treeAdb->SetItemImage(id, icon);
@@ -2098,7 +2098,9 @@ wxAdbEditFrame::~wxAdbEditFrame()
   delete m_clipboard;
 
   // and now delete all ADB entries
+#if DELETE_TREE_CHILDREN
   delete m_root;
+#endif
 
   // and the imagelist we were using
   delete m_pImageList;
@@ -3165,9 +3167,20 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
   else {
     // we want to have all the groups before all the items
     if ( IsGroup() ) {
-      SetId(tree.InsertItem(m_parent->GetId(), m_parent->GetLastGroupId(),
-                            GetName(), image, image, this));
-      m_parent->SetLastGroupId(GetId());
+      wxTreeItemId newItemId;
+      const wxTreeItemId& lastGroupId = m_parent->GetLastGroupId();
+      if ( lastGroupId.IsOk() ) {
+        newItemId = tree.InsertItem(m_parent->GetId(), lastGroupId,
+                                    GetName(), image, image, this);
+      }
+      else {
+        // no last group, this is the first one
+        newItemId = tree.AppendItem(m_parent->GetId(), GetName(),
+                                    image, image, this);
+      }
+
+      SetId(newItemId);
+      m_parent->SetLastGroupId(newItemId);
     }
     else {
       // it's an item, insert it in the end
@@ -3363,7 +3376,7 @@ bool AdbTreeNode::ExpandFirstTime(wxTreeCtrl& tree)
   wxCHECK( !m_bWasExpanded, TRUE );  // must be only called once
 
   m_bWasExpanded = TRUE;
-  m_idLastGroup = wxTREE_INSERT_FIRST;
+  m_idLastGroup = 0l;
 
   LoadChildren();
 
@@ -3391,11 +3404,13 @@ wxString AdbTreeNode::GetWhere() const
 
 AdbTreeNode::~AdbTreeNode()
 {
+#if DELETE_TREE_CHILDREN
   size_t nCount = m_children.Count();
   for ( size_t n = 0; n < nCount; n++ ) {
     AdbTreeElement *child = m_children[n];
     delete child;
   }
+#endif // 0
 
   SafeDecRef(m_pGroup);
 }
