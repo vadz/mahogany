@@ -1295,7 +1295,14 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
             }
             //else: same level as the previous line, just continue
 
-            lineNext = strchr(lineNext + 1, '\n');
+            if (*lineNext) 
+            {
+               lineNext = strchr(lineNext + 1, '\n');
+            }
+            else
+            {
+               lineNext = 0;
+            }
          }
 
          if ( lineCur )
