@@ -2990,9 +2990,11 @@ wxComposeView::Send(bool schedule)
    // first the standard ones
    msg->SetSubject(GetSubject());
 
-   msg->SetAddresses(GetRecipients(Recipient_To),
-                     GetRecipients(Recipient_Cc),
-                     GetRecipients(Recipient_Bcc));
+   // recipients
+   String rcptTo = GetRecipients(Recipient_To),
+          rcptCC = GetRecipients(Recipient_Cc),
+          rcptBCC = GetRecipients(Recipient_Bcc);
+   msg->SetAddresses(rcptTo, rcptCC, rcptBCC);
 
    String newsgroups = GetRecipients(Recipient_Newsgroup);
    if ( !newsgroups.empty() )
@@ -3067,7 +3069,24 @@ wxComposeView::Send(bool schedule)
 
       ResetDirty();
       mApplication->UpdateOutboxStatus();
-      wxLogStatus(this, _("Message has been sent."));
+
+      // show the recipients of the message
+      //
+      // NB: don't show BCC as the message might be saved in the log file
+      String msg;
+      msg.Printf(_("Message has been sent to %s"), rcptTo.c_str());
+      if ( !rcptCC.empty() )
+      {
+         msg += String::Format(_(" (with courtesy copy sent to %s)"),
+                               rcptCC.c_str());
+      }
+      else // no CC
+      {
+         msg += '.';
+      }
+
+      // avoid crashes if the msg has any stray '%'s
+      wxLogStatus(this, "%s", msg.c_str());
    }
    else // message not sent
    {
