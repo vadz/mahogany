@@ -1,4 +1,6 @@
 (next release) on (date of next release)
+
+07.07.99 VZ: importing of address books added (CSV and TAB formats)
 06.07.99 KB: fixed New Mail dialog showing empty lines 
 06.07.99 KB: icons in messages appear correctly now
 05.07.99 VZ: "folder already exists" bug when creating POP3 folder fixed

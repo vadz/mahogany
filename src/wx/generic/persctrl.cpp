@@ -1165,7 +1165,12 @@ wxString wxPFileSelector(const wxString& configPath,
     // use the stored value for the default name/path and fall back to the
     // given one if there is none
     wxString defaultName, defaultPath, defName;
-    defName << defname << '.' << defext;
+    if ( !defname || !defext )
+    {
+        // only do it if either name of extension are given
+        defName << defname << '.' << defext;
+    }
+
     if ( config ) {
         defaultName = config->Read(configValueFile, defName);
         defaultPath = config->Read(configValuePath, defpath);

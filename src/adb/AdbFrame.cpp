@@ -1387,7 +1387,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
   wxString strProv = szProvName;
   AdbTreeBook *adb = new AdbTreeBook(m_root, strPath, pProvider, &strProv);
 
-  m_astrAdb.Add(strPath);
+  m_astrAdb.Add(adb->GetFileName());
   m_astrProviders.Add(strProv);
 
   if ( m_root->WasExpanded() )
@@ -1399,6 +1399,9 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
     // had no children before and might have had m_children = 0
     m_treeAdb->SetItemHasChildren(m_root->GetId());
   }
+
+  // and do expand it!
+  m_treeAdb->Expand(m_root->GetId());
 
   // currently, we always succeed because even if the file doesn't exist
   // we create it -- should it be changed?

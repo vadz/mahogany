@@ -35,6 +35,14 @@
 #   define   AScheck()
 #endif
 
+#if !wxUSE_THREADS
+    class wxMutex
+    {
+    public:
+        void Lock() { }
+        void Unlock() { }
+    };
+#endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

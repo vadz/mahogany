@@ -233,7 +233,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections,
    {
       String msg;
       msg.Printf(_("Saving %d messages..."), n);
-      pd = new MProgressDialog(mf->GetName(),
+      pd = new MProgressDialog(GetName(),
                                msg,
                                2*n, NULL);// open a status window:
    }
@@ -268,7 +268,6 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections,
          msg->DecRef();
       }
    }
-   mf->DecRef();
    if(pd) delete pd;
    return rc;
    

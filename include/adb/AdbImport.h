@@ -87,6 +87,10 @@ public:
    // test address book in the filename - can we import it?
    virtual bool CanImport(const String& filename) = 0;
 
+   // start importing the file: GetEntry/GroupNames and ImportEntry can only be
+   // called after a call to this function
+   virtual bool StartImport(const String& filename) = 0;
+
    // we have a concept of a path which is needed to work with tree-like ADB
    // structures: it's just the sequence of the "nodes" separated by '/'. The
    // root node corresponds to the empty path (or also to the path "/")
@@ -99,9 +103,10 @@ public:
    virtual size_t GetGroupNames(const String& path,
                                 wxArrayString& groups) const = 0;
 
-   // copy data from one entry named entryName under the given path to AdbEntry
+   // copy data from one entry under the given path to AdbEntry (the index
+   // corresponds to the entry index in the array returned by GetEntryNames)
    virtual bool ImportEntry(const String& path,
-                            const String& entryName,
+                            size_t index,
                             AdbEntry *entry) = 0;
 
    // get the description (shown to the user) of the format imported by this
@@ -114,9 +119,9 @@ public:
 // dynamic object creation macros
 // ----------------------------------------------------------------------------
 
-#define DECLARE_ADB_IMPORTER(name)                                         \
+#define DECLARE_ADB_IMPORTER()                                             \
    String GetDescription() const;                                          \
-   static AdbProviderInfo ms_info
+   static AdbImporterInfo ms_info
 #define IMPLEMENT_ADB_IMPORTER(name, desc)                                 \
    String name::GetDescription() const { return _(desc); }                 \
    AdbImporter *ConstructorFor##name() { return new name; }                \

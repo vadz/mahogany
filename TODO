@@ -23,6 +23,10 @@ $Id$
 6	VZ	All Folder create dialog pages have no HelpIDs set.
 5	KB	for NNTP only count unread/new messages
 5	KB	make MailFolder timer react to options change
+5	KB	(optionally, but on by default) expunge deleted messages when
+		the folder is closed - as noticed in 32bitonline comparison,
+		otherwise it's a nuisance.
+
 3		foldername in password prompt seems wrong
 3		URL highlighting in headers is missing (e.g. X-Url)
 ? win	VZ	lock files are sometimes left
@@ -100,6 +104,7 @@ $Id$
 		page probably?
 2		different icon for activity log frame
 2	VZ?	make activity log frame appear on demand only
+
 *********************************************************************
 *** TESTS
 *********************************************************************
@@ -116,6 +121,8 @@ $Id$
 5	KB	if message is quoted-printable unquote it before
                 saving to file (how stupid!) same for encbinary
 				.... working on it right now
+
+4	VZ	test ADB importing more
 
 *********************************************************************
 *** GENERAL TODO
