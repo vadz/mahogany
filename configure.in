@@ -219,7 +219,7 @@ then
 		AC_MSG_RESULT(no)
 	fi
 	if test "$USE_STRICT" = 1; then
-		CXXFLAGS="$CXXFLAGS -Werror"
+		CXXFLAGS="$CXXFLAGS -Werror -pedantic"
 	fi
 fi
 
