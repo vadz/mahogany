@@ -38,6 +38,9 @@
 #   include  "wx/button.h"
 #   include  "wx/stattext.h"
 #   include  "wx/intl.h"
+#   include  "wx/dcclient.h"
+#   include  "wx/settings.h"
+#   include  "wx/statbox.h"
 #endif //WX_PRECOMP
 
 #include "wx/log.h"
@@ -51,6 +54,12 @@
 BEGIN_EVENT_TABLE(wxPNotebook, wxNotebook)
     EVT_SIZE(wxPNotebook::OnSize)
 END_EVENT_TABLE()
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+#define LAYOUT_X_MARGIN       5
+#define LAYOUT_Y_MARGIN       5
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -428,7 +437,6 @@ BEGIN_EVENT_TABLE(wxPMessageDialog, wxDialog)
     EVT_BUTTON(wxID_CANCEL, wxPMessageDialog::OnButton)
 END_EVENT_TABLE()
 
-// the code below shamelessly copied from wxGenericMessageDialog class
 wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
                                    const wxString& message,
                                    const wxString& caption,
@@ -439,22 +447,23 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 {
     m_dialogStyle = style;  // we need it in OnButton
 
-    wxBeginBusyCursor();
+    wxLayoutConstraints *c;
+    SetAutoLayout(TRUE);
 
-    wxSizer *topSizer = new wxSizer(this, wxSizerShrink);
-    topSizer->SetBorder(10, 10);
+    // split the message in lines
+    // --------------------------
+    wxClientDC dc(this);
+    dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
 
-    // split the message in several lines at '\n's
-    wxRowColSizer *messageSizer = new wxRowColSizer(topSizer,
-                                                    wxSIZER_COLS,
-                                                    100);
-    messageSizer->SetName("messageSizer");
-
+    wxArrayString lines;
     wxString curLine;
+    long width, widthTextMax = 0;
     for ( const char *pc = message; ; pc++ ) {
         if ( *pc == '\n' || *pc == '\0' ) {
-            wxStaticText *textLine = new wxStaticText(this, -1, curLine);
-            messageSizer->AddSizerChild(textLine);
+            dc.GetTextExtent(curLine, &width, NULL);
+            if ( width > widthTextMax )
+                widthTextMax = width;
+
             if ( *pc == '\n' ) {
                curLine.Empty();
             }
@@ -468,70 +477,126 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         }
     }
 
-    // now create buttons
-    wxSpacingSizer *spacingSizer = new wxSpacingSizer(topSizer,
-                                                      wxBelow,
-                                                      messageSizer,
-                                                      20);
+    // calculate the total dialog size
+    enum
+    {
+        Btn_Ok,
+        Btn_Yes,
+        Btn_No,
+        Btn_Cancel,
+        Btn_Max
+    };
+    wxButton *buttons[Btn_Max] = { NULL, NULL, NULL, NULL };
+    int nDefaultBtn = -1;
 
-    wxRowColSizer *buttonSizer = new wxRowColSizer(topSizer, wxSIZER_ROWS);
-    buttonSizer->SetName("buttonSizer");
+    // some checks are in order...
+    wxASSERT_MSG( !(style & wxOK) || !(style & wxYES_NO),
+                  "don't create dialog with both Yes/No and Ok buttons!" );
 
-    // Specify constraints for the button sizer
-    wxLayoutConstraints *c = new wxLayoutConstraints;
-    c->width.AsIs();
-    c->height.AsIs();
-    c->top.Below(spacingSizer);
-    c->centreX.SameAs(spacingSizer, wxCentreX);
-    buttonSizer->SetConstraints(c);
+    wxASSERT_MSG( (style & wxOK ) || (style & wxYES_NO),
+                  "don't create dialog with only the Cancel button!" );
 
-    wxButton *ok = (wxButton *) NULL;
-    wxButton *cancel = (wxButton *) NULL;
-    wxButton *yes = (wxButton *) NULL;
-    wxButton *no = (wxButton *) NULL;
+    if ( style & wxYES_NO ) {
+       buttons[Btn_Yes] = new wxButton(this, wxID_YES, _("Yes"));
+       buttons[Btn_No] = new wxButton(this, wxID_NO, _("No"));
 
-    if (style & wxYES_NO) {
-       yes = new wxButton(this, wxID_YES, _("Yes"));
-       no = new wxButton(this, wxID_NO, _("No"));
-
-       buttonSizer->AddSizerChild(yes);
-       buttonSizer->AddSizerChild(no);
+       nDefaultBtn = Btn_Yes;
     }
 
     if (style & wxOK) {
-        ok = new wxButton(this, wxID_OK, _("OK"));
-        buttonSizer->AddSizerChild(ok);
+        buttons[Btn_Ok] = new wxButton(this, wxID_OK, _("OK"));
+
+        if ( nDefaultBtn == -1 )
+            nDefaultBtn = Btn_Yes;
     }
 
     if (style & wxCANCEL) {
-        cancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
-        buttonSizer->AddSizerChild(cancel);
+        buttons[Btn_Cancel] = new wxButton(this, wxID_CANCEL, _("Cancel"));
     }
 
-    if (ok) {
-      ok->SetDefault();
-      ok->SetFocus();
+    // get the longest caption and also calc the number of buttons
+    size_t nBtn, nButtons = 0;
+    long widthBtnMax = 0;
+    for ( nBtn = 0; nBtn < Btn_Max; nBtn++ ) {
+        if ( buttons[nBtn] ) {
+            nButtons++;
+            dc.GetTextExtent(buttons[nBtn]->GetLabel(), &width, NULL);
+            if ( width > widthBtnMax )
+                widthBtnMax = width;
+        }
     }
-    else if (yes) {
-      yes->SetDefault();
-      yes->SetFocus();
+
+    // now we can place the buttons
+    long widthButtonsTotal = nButtons * (widthBtnMax + LAYOUT_X_MARGIN) +
+                             LAYOUT_X_MARGIN;
+    if ( widthTextMax < widthButtonsTotal ) {
+        // make the text as least as wide as the buttons
+        widthTextMax = widthButtonsTotal;
     }
+
+    // set default button
+    if ( nDefaultBtn != -1 ) {
+        buttons[nDefaultBtn]->SetDefault();
+        buttons[nDefaultBtn]->SetFocus();
+    }
+    else {
+        wxFAIL_MSG( "can't find default button for this dialog." );
+    }
+
+    // create the controls
+    // -------------------
+    wxStaticText *text = NULL;
+    size_t nCount = lines.Count();
+    for ( size_t nLine = 0; nLine < nCount; nLine++ ) {
+        c = new wxLayoutConstraints;
+        if ( text == NULL )
+            c->top.SameAs(this, wxTop, 3*LAYOUT_Y_MARGIN);
+        else
+            c->top.Below(text, LAYOUT_Y_MARGIN);
+        c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
+        c->width.Absolute(widthTextMax);
+        c->height.AsIs();
+        text = new wxStaticText(this, -1, lines[nLine]);
+        text->SetConstraints(c);
+    }
+
+    // create the buttons
+    wxButton *btnPrevious = (wxButton *)NULL;
+    for ( nBtn = 0; nBtn < Btn_Max; nBtn++ ) {
+        if ( buttons[nBtn] ) {
+            c = new wxLayoutConstraints;
+            if ( btnPrevious )
+                c->left.RightOf(btnPrevious, LAYOUT_X_MARGIN);
+            else
+                c->left.SameAs(this, wxLeft, 3*LAYOUT_X_MARGIN);
+            c->width.Absolute(widthTextMax);
+            c->top.Below(text, 2*LAYOUT_Y_MARGIN);
+            c->height.AsIs();
+            buttons[nBtn]->SetConstraints(c);
+            btnPrevious = buttons[nBtn];
+        }
+    }
+
+    // a line (a small box, in fact) separating the controls
+    wxStaticBox *box = new wxStaticBox(this, -1, "");
+    c = new wxLayoutConstraints;
+    c->width.SameAs(this, wxWidth);
+    c->height.Absolute(2);
+    c->top.Below(btnPrevious, LAYOUT_Y_MARGIN);
+    c->centreX.SameAs(this, wxCentreX);
 
     // and finally create the check box
-    wxRowColSizer *checkboxSizer = new wxRowColSizer(topSizer, wxSIZER_ROWS);
     c = new wxLayoutConstraints;
     c->width.AsIs();
     c->height.AsIs();
-    c->bottom.Below(buttonSizer);
-    c->centreX.SameAs(buttonSizer, wxCentreX);
+    c->top.Below(box, LAYOUT_Y_MARGIN);
+    c->centreX.SameAs(this, wxCentreX);
     m_checkBox = new wxCheckBox(this, -1, _("Don't show this message again"));
-    checkboxSizer->SetConstraints(c);
-    checkboxSizer->AddSizerChild(m_checkBox);
+    m_checkBox->SetConstraints(c);
 
+    // it's almost done...
     Layout();
     Centre(wxBOTH);
-
-    wxEndBusyCursor();
 }
 
 void wxPMessageDialog::OnButton(wxCommandEvent& event)
