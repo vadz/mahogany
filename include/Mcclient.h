@@ -27,7 +27,7 @@ extern "C"
 #  include <smtp.h>
 #  include <nntp.h>
 #  include <misc.h>
-#  undef private   
+#  undef private
 
 #  ifdef    M_LOGICAL_OP_NAMES
 #     undef or
@@ -36,6 +36,9 @@ extern "C"
 
    // stupid c-client lib redefines utime() in an incompatible way
 #  undef utime
+
+   // and it also thinks it's ok to redefine a symbol as common as "write"!
+#  undef write
 
    // windows.h included from osdep.h under Windows #defines all these
 #  undef   CreateDialog
