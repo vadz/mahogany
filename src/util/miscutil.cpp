@@ -88,6 +88,7 @@ AutoCollectAddresses(const String &email,
             // found: add another e-mail (it can't already have it, otherwise
             // our previous search would have succeeded)
             AdbEntry *entry = matches[0];
+            entry->IncRef();
             entry->AddEMail(email);
 
             wxString name;
