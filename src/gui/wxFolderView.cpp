@@ -268,6 +268,9 @@ public:
    /// save the widths of the columns in profile if needed
    void SaveColWidths();
 
+   /// update the info about focused item if it changed
+   void UpdateFocus();
+
    // for wxFolderView
    wxMenu *GetFolderMenu() const { return m_menuFolders; }
 
@@ -291,6 +294,9 @@ protected:
 
    /// the currently focused item
    long m_itemFocus;
+
+   /// this is true as long as we have exactly one selection
+   bool m_selIsUnique;
 
    /// the profile used for storing columns widths
    Profile *m_profile;
@@ -628,8 +634,6 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          // remains the same:
          if ( READ_CONFIG(m_FolderView->m_Profile, MP_USE_TRASH_FOLDER) )
          {
-            m_FolderView->UpdateSelectionInfo();
-
             // don't move focus
             newFocus = -1;
          }
@@ -751,18 +755,18 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    {
       // move focus
       Focus(newFocus);
-      m_FolderView->UpdateSelectionInfo();
+      UpdateFocus();
    }
 }
 
 void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
 {
-   // this is a workaround for focus handling under GTK but it should not be
-   // enabled under other platforms
-#ifndef OS_WIN
-   if(m_FolderView->GetFocusFollowMode() && (FindFocus() != this))
+   // a workaround for focus handling - otherwise, the listctrl keeps losing
+   // focus
+   if ( m_FolderView->GetFocusFollowMode() && (FindFocus() != this) )
+   {
       SetFocus();
-#endif // wxGTK
+   }
 
    // start the drag and drop operation
    if ( event.Dragging() )
@@ -866,6 +870,9 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
+   // update our "unique selection" flag
+   m_selIsUnique = GetUniqueSelection() != -1;
+
    if ( m_enableOnSelect )
    {
       // update it as it is normally only updated in OnIdle() which wasn't
@@ -875,7 +882,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
       // only preview the message when it is the first one we select,
       // selecting subsequent messages just extends the selection but doesn't
       // show them
-      if ( GetUniqueSelection() != -1 && (event.m_itemIndex == m_itemFocus) )
+      if ( m_selIsUnique && (event.m_itemIndex == m_itemFocus) )
       {
          // the current message is selected - view it if we don't yet
          m_FolderView->PreviewMessage(GetFocusedUId());
@@ -988,16 +995,52 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
                            ));
 }
 
-void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
+void wxFolderListCtrl::UpdateFocus()
 {
    long itemFocus = GetFocusedItem();
 
-   if ( itemFocus != m_itemFocus )
-   {
-      m_itemFocus = itemFocus;
+   if ( itemFocus == m_itemFocus )
+      return;
 
-      m_FolderView->UpdateSelectionInfo();
+   // What we do here is to automatically preview the currently focused message
+   // if and only if there is exactly one item currently selected.
+   //
+   // Rationale: if there are no items selected, the user is just moving
+   // through the headers list and doesn't want to preview anything at all, so
+   // don't do anything. If there are 2 or more items selected, we shouldn't
+   // deselect them as it would cancel the users work which he did to select
+   // the messages in the first place. But if he just moved to the next
+   // message after previewing the previous one, he does want to preview it
+   // (unless "preview on select" option is off) but to do this he has to
+   // manually unselect the previously selected message and only then select
+   // this one (as selecting this one now won't preview it because it is not
+   // the first selected message, see OnSelected()!)
+
+   // we have to use tmp var as Select() will reset m_selIsUnique
+   bool selIsUnique = m_selIsUnique;
+   if ( selIsUnique && (m_itemFocus != -1) )
+   {
+      Select(m_itemFocus, false);
    }
+
+   m_itemFocus = itemFocus;
+
+   m_FolderView->OnFocusChange();
+
+   if ( selIsUnique )
+   {
+      // will set m_selIsUnique to true back again
+      Select(m_itemFocus, true);
+   }
+}
+
+void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
+{
+   // wxGTK buggy wxListCtrl doesn't send unselect event so we have to update
+   // m_selIsUnique "manually"
+   m_selIsUnique = GetUniqueSelection() != -1;
+
+   UpdateFocus();
 
    event.Skip();
 }
@@ -1018,6 +1061,9 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    // no item focused yet
    m_itemFocus = -1;
+
+   // no selection at all
+   m_selIsUnique = false;
 
    // do create the control
    Create(parent, M_WXID_FOLDERVIEW_LISTCTRL,
@@ -1113,7 +1159,6 @@ wxFolderListCtrl::GetSelections(UIdArray &selections, bool nofocused) const
 
 void wxFolderListCtrl::Focus(long index)
 {
-   m_itemFocus = index;
    SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
 
    // this doesn't work well with wxWin <= 2.2.5 in debug mode as calling
@@ -1127,7 +1172,7 @@ void wxFolderListCtrl::Focus(long index)
 
       EnsureVisible(index);
    }
-#endif
+#endif // wxWin >= 2.2.6
 }
 
 long wxFolderListCtrl::GetFocusedItem() const
@@ -1326,7 +1371,7 @@ wxFolderListCtrl::SelectNextUnread()
       // we really want to see it regardless of m_PreviewOnSingleClick
       // setting
       m_FolderView->PreviewMessage(uid);
-      m_FolderView->UpdateSelectionInfo();
+      m_FolderView->OnFocusChange();
 
       return true;
    }
@@ -1397,7 +1442,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    m_SetFolderSemaphore = true;
 
    m_FocusedUId = UID_ILLEGAL;
-   m_SelectedUIds.Empty();
 
    // this shows what's happening:
    m_MessagePreview->Clear();
@@ -1567,11 +1611,9 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          }
       }
 
-#ifndef OS_WIN
       m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE);
       if(m_FocusFollowMode && wxWindow::FindFocus() != m_FolderCtrl)
          m_FolderCtrl->SetFocus(); // so we can react to keyboard events
-#endif // OS_WIN
    }
    //else: no new folder
 
@@ -1856,12 +1898,6 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
       m_nDeleted++;
    }
 
-   m_FolderCtrl->SetItemState
-                 (
-                  index,
-                  wxLIST_STATE_FOCUSED,
-                  hi->GetUId() == m_FocusedUId ? wxLIST_STATE_FOCUSED : 0
-                 );
    wxListItem info;
    info.m_itemId = index;
    m_FolderCtrl->GetItem(info);
@@ -1946,6 +1982,9 @@ wxFolderView::Update(HeaderInfoList *listing)
 #endif
    }
 
+   // preserve the previously focused item and, if possible, the selection
+   long selOld = m_FolderCtrl->GetUniqueSelection();
+
    // should we clear the preview window or keep it?
    bool keepPreview;
    long focusedIndex = m_FolderCtrl->GetFocusedItem();
@@ -1994,6 +2033,12 @@ wxFolderView::Update(HeaderInfoList *listing)
       ASSERT_MSG( (size_t)focusedIndex < nMessagesNew, "invalid focused index" );
 
       m_FolderCtrl->Focus(focusedIndex);
+
+      if ( selOld != -1 )
+      {
+         // select focused item, not selOld, as items were shifted
+         m_FolderCtrl->SelectFocused();
+      }
    }
 
    UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
@@ -2200,11 +2245,8 @@ wxFolderView::SearchMessages(void)
 }
 
 void
-wxFolderView::UpdateSelectionInfo(void)
+wxFolderView::OnFocusChange(void)
 {
-   // record this for the later Update:
-   m_FolderCtrl->GetSelections(m_SelectedUIds, true);
-
    long idx;
    UIdType uid = m_FolderCtrl->GetFocusedUId(&idx);
    if ( uid != m_FocusedUId )
@@ -2230,33 +2272,6 @@ wxFolderView::UpdateSelectionInfo(void)
          wxLogStatus(m_Frame, msg);
       }
       //else: no status message
-   }
-
-   // What we do here is to automatically preview the currently focused message
-   // if and only if there is exactly one item currently selected.
-   //
-   // Rationale: if there are no items selected, the user is just moving
-   // through the headers list and doesn't want to preview anything at all, so
-   // don't do anything. If there are 2 or more items selected, we shouldn't
-   // deselect them as it would cancel the users work which he did to select
-   // the messages in the first place. But if he just moved to the next
-   // message after previewing the previous one, he does want to preview it
-   // (unless "preview on select" option is off) but to do this he has to
-   // manually unselect the previously selected message and only then select
-   // this one (as selecting this one now won't preview it because it is not
-   // the first selected message, see OnSelected()!)
-   long curSel = m_FolderCtrl->GetUniqueSelection();
-   if ( curSel != -1 )
-   {
-      m_FolderCtrl->Select(curSel);
-
-      // do preview the message if we had another one previewed before (like
-      // this we don't have to press <space> after deleting a message or
-      // moving down in !previewOnSingleClick mode)
-      if ( m_previewUId != UID_ILLEGAL || m_settings.previewOnSingleClick )
-      {
-         PreviewMessage(m_FocusedUId);
-      }
    }
 }
 
@@ -2304,8 +2319,6 @@ void
 wxFolderView::OnCommandEvent(wxCommandEvent &event)
 {
    UIdArray selections;
-
-   UpdateSelectionInfo();
 
    int cmd = event.GetId();
 

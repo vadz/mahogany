@@ -197,8 +197,8 @@ public:
    /// select all unread messages
    void SelectAllUnread();
 
-   /// Update the idea of which messages are selected.
-   void UpdateSelectionInfo(void);
+   /// called when the focused (== current) item in the listctrl changes
+   void OnFocusChange(void);
 
    /// called by wxFolderListCtrl to drag abd drop messages
    bool DragAndDropMessages();
@@ -209,9 +209,6 @@ protected:
        @param file filename
    */
    void SaveMessages(UIdArray const &messages, String const &file);
-
-   /// The UIds of the last selected messages.
-   UIdArray m_SelectedUIds;
 
    /// The last focused UId.
    UIdType  m_FocusedUId;
