@@ -125,7 +125,7 @@ Mahogany is a real native (Carbon) application and doesn't require GTK+ or X11.
 
 This time the most important changes have happened to the already
 existing features many of which were dramatically improved. Support
-for both IMAP4 andP OP3 has got better, many UI improvements were done
+for both IMAP4 and POP3 has got better, many UI improvements were done
 and too many bugs to mention here were fixed.
 
 The main change without doubt is the complete reorganisation of the
