@@ -6545,40 +6545,6 @@ make
 \end_inset 
 
 .
-\layout Subsubsection
-
-make fails
-\layout Standard
-
-If Mahogany's own make process fails after configuring it, this is likely
- caused by the 
-\begin_inset Quotes eld
-\end_inset 
-
-make depend
-\begin_inset Quotes erd
-\end_inset 
-
- stage.
- Simply run 
-\begin_inset Quotes eld
-\end_inset 
-
-make -i depend
-\begin_inset Quotes erd
-\end_inset 
-
- from the toplevel (mahogany-0.50) directory and it will run through, ignoring
- all errors.
- After that, a normal 
-\begin_inset Quotes eld
-\end_inset 
-
-make
-\begin_inset Quotes erd
-\end_inset 
-
- will succeed.
 \layout Subsection
 
 How can I get it to compile on Caldera Linux?
@@ -6614,8 +6580,8 @@ This *should* find wx/wx.h if all of the above worked, if not, look at the
 \layout Enumerate
 
 If it does not find the wxWindows library, you need to add /usr/local/lib
- to either your LD_LIBRARY_PATH or to /etc/ld.conf (and run ldconfig as root),
- then remove *cache* and try again.
+ to either your LD_LIBRARY_PATH or to /etc/ld.so.conf (and run /sbin/ldconfig
+ as root), then remove *cache* and try again.
  Again, if something fails, look at config.log.
 \layout Section
 
@@ -6770,7 +6736,8 @@ IMAP folder
  Then enter the name of your IMAP server, your username and password (or
  leave it empty to be asked later) for that server and, optionally, the
  path to the folder on the IMAP server.
- You can leave the path empty, and it will use the default folder (INBOX).
+ You can leave the path empty, and it will use the default folder (usually
+ INBOX).
 \layout Standard
 
 If you want to access many IMAP folders on the same server, or a directory

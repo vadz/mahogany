@@ -670,11 +670,12 @@ folder in a folder view (see \ref{FolderView}).
 
 \label{FolderTreeCtrl}The folder tree shows a hierarchical view of
 all folders managed by \emph{Mahogany}, this includes both mail folders
-and newsgroups. Folders can be grouped hierarchically and inherit settings
-from their parent folders (e.g. the server host). Clicking the right
-mouse button on any tree node will pop up a menu with some options.
-To open a folder or connection to a server for the first time, choose
-{}``Create New Folder{}'' which will show you a dialog (\ref{CreateNewFolderDialog}).
+and newsgroups. Folders can be grouped hierarchically and inherit
+settings from their parent folders (e.g. the server host). Clicking
+the right mouse button on any tree node will pop up a menu with some
+options. To open a folder or connection to a server for the first
+time, choose {}``Create New Folder{}'' which will show you a dialog
+(\ref{CreateNewFolderDialog}).
 
 
 \subsection{Create New Folder Dialog}
@@ -2473,15 +2474,6 @@ by this. On non-Linux/GNU systems, you need to use the GNU linker,
 i.e. {}``gmake{}'' rather than the default {}``make{}''.
 
 
-\subsubsection{make fails}
-
-If Mahogany's own make process fails after configuring it, this is
-likely caused by the {}``make depend{}'' stage. Simply run {}``make
--i depend{}'' from the toplevel (mahogany-0.50) directory and it
-will run through, ignoring all errors. After that, a normal {}``make{}''
-will succeed.
-
-
 \subsection{How can I get it to compile on Caldera Linux?}
 
 You will need to install a libcrypt library with a working crypt()
@@ -2506,7 +2498,7 @@ to remove old configuration info and run ./configure
 \item This {*}should{*} find wx/wx.h if all of the above worked, if not,
 look at the end of config.log to see what went wrong.
 \item If it does not find the wxWindows library, you need to add /usr/local/lib
-to either your LD\_LIBRARY\_PATH or to /etc/ld.conf (and run ldconfig
+to either your LD\_LIBRARY\_PATH or to /etc/ld.so.conf (and run /sbin/ldconfig
 as root), then remove {*}cache{*} and try again. Again, if something
 fails, look at config.log.
 \end{enumerate}
@@ -2604,7 +2596,7 @@ folder type to be {}``IMAP folder{}''. Then enter the name of your
 IMAP server, your username and password (or leave it empty to be asked
 later) for that server and, optionally, the path to the folder on
 the IMAP server. You can leave the path empty, and it will use the
-default folder (INBOX).
+default folder (usually INBOX).
 
 If you want to access many IMAP folders on the same server, or a directory
 there, you can create foldertree entries representing the IMAP server
