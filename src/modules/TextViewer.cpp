@@ -175,6 +175,8 @@ void TextViewer::Create(MessageView *msgView, wxWindow *parent)
 
 void TextViewer::Clear()
 {
+   m_window->Freeze();
+
    m_window->Clear();
 
    const ProfileValues& profileValues = GetOptions();
@@ -190,7 +192,7 @@ void TextViewer::Clear()
 
 void TextViewer::Update()
 {
-   // we don't need artificial updates
+   m_window->Thaw();
 }
 
 void TextViewer::UpdateOptions()
@@ -346,6 +348,8 @@ void TextViewer::EndBody()
 {
    m_window->SetInsertionPoint(0);
    m_window->SetEditable(false);
+
+   m_window->Thaw();
 }
 
 // ----------------------------------------------------------------------------
