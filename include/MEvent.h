@@ -35,6 +35,8 @@ enum MEventId
    MEventId_FolderExpunge,
    /// MEventMsgStatusData - message status changed
    MEventId_MsgStatus,
+   /// MEventFolderStatusData - folder status changed
+   MEventId_FolderStatus,
    /// MEventASFolderResult - async operation terminated
    MEventId_ASFolderResult = 800,
    /// MEventOptionsChangeData - the program options changed
@@ -231,6 +233,28 @@ public:
 private:
    size_t      m_index;
    HeaderInfo *m_hi;
+};
+
+/**
+   MEventFolderStatusData is sent when the number of messages in folder
+   (or the number of new, unread or other interesting categories of messages)
+   changes. It is processed by the folder tree. When this event is received,
+   you can query MfStatusCache for the number of messages in the folder.
+ */
+class MEventFolderStatusData : public MEventData
+{
+public:
+   MEventFolderStatusData(const String& folderName)
+      : MEventData(MEventId_FolderStatus),
+        m_folderName(folderName)
+      {
+      }
+
+   // get the full name of the folder which was updated
+   const String& GetFolderName() const { return m_folderName; }
+
+private:
+   String m_folderName;
 };
 
 /**

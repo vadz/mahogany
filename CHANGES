@@ -3,9 +3,12 @@
       Please refer to the cvs update list archives for the detailed list of
       all changes.
 
-Release 0.63 '?'
+Release 0.63 'Saugus'
 -------------------------------------------------------------------------------
 
+04.04.01 VZ: huge speed up in messages copying between IMAP folders
+03.04.01 VZ: folder status is now persistent
+30.03.01 VZ: [WIN] fixed crash when showing preferences dialog
 29.03.01 VZ: fixed bug with broken "Identity Add/Edit" dialog
 27.03.01 VZ: printing bug (page was offset and page breaks were wrong) fixed
 26.03.01 VZ: fixed search bug (wrong messages were highlighted)

@@ -331,6 +331,9 @@ protected:
    // to change in new/recent messages
    void ProcessMsgNumberChange(MailFolder *folder);
 
+   // new version which will replace the one above eventually
+   void ProcessMsgNumberChange(const wxString& folderName);
+
 private:
    class FolderMenu : public wxMenu
    {
@@ -389,6 +392,7 @@ private:
    void *m_eventOptionsChange;   // options change (update icons)
    void *m_eventFolderUpdate;    // when a folder's status changes
    void *m_eventMsgStatusChange; // or even a status of a message in it
+   void *m_eventFolderStatus;    // when a folder status changes
 
    // the full names of the folder currently opened in the main frame and
    // of the current selection in the tree ctrl (empty if none)
@@ -901,14 +905,11 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    }
 
    // restore cached status
-   MfStatusCache *mfStatusCache = MfStatusCache::Get();
    MailFolderStatus status;
-   if ( mfStatusCache->GetStatus(folder->GetFullName(), &status) )
+   if ( MfStatusCache_obj()->GetStatus(folder->GetFullName(), &status) )
    {
       SetStatus(tree, GetTreeStatusFromMf(status));
    }
-
-   mfStatusCache->DecRef();
 }
 
 /* static */
@@ -1130,6 +1131,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
             MEventId_OptionsChange, &m_eventOptionsChange,
             MEventId_FolderUpdate, &m_eventFolderUpdate,
             MEventId_MsgStatus, &m_eventMsgStatusChange,
+            MEventId_FolderStatus, &m_eventFolderStatus,
             MEventId_Null
          ) )
     {
@@ -1836,6 +1838,12 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
       ProcessMsgNumberChange(event.GetFolder());
    }
+   else if ( ev.GetId() == MEventId_FolderStatus )
+   {
+      MEventFolderStatusData& event = (MEventFolderStatusData &)ev;
+
+      ProcessMsgNumberChange(event.GetFolderName());
+   }
 
    return true;
 }
@@ -1843,6 +1851,33 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 // ----------------------------------------------------------------------------
 // folder status stuff
 // ----------------------------------------------------------------------------
+
+void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
+{
+   wxTreeItemId item = GetTreeItemFromName(folderName);
+
+   // it's not an error: MTempFolder objects are not in the tree, yet they
+   // generate MEventId_FolderUpdate events as well
+   if ( !item.IsOk() )
+   {
+      return;
+   }
+
+   // get the status of the folder
+   MailFolderStatus status;
+   if ( !MfStatusCache_obj()->GetStatus(folderName, &status) )
+   {
+      // this is not supposed to happen - when MEventFolderStatusData is sent,
+      // the status of the folder it is sent for should be cached
+      wxLogDebug("Impossible to get number of messages in folder '%s'.",
+                 folderName.c_str());
+      return;
+   }
+
+   // update the status of the item in the tree
+   wxFolderTreeNode *node = GetFolderTreeNode(item);
+   node->SetStatus(this, wxFolderTreeNode::GetTreeStatusFromMf(status));
+}
 
 void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
 {
@@ -1985,6 +2020,7 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
                                 &m_eventOptionsChange,
                                 &m_eventFolderUpdate,
                                 &m_eventMsgStatusChange,
+                                &m_eventFolderStatus,
                                 NULL);
 
    delete GetImageList();

@@ -638,6 +638,16 @@ String MailFolder::GetImapSpec(int typeOrig,
    return mboxpath;
 }
 
+static
+wxString GetImapSpecFromFolder(MFolder *folder)
+{
+   return MailFolder::GetImapSpec(folder->GetType(),
+                                  folder->GetFlags(),
+                                  folder->GetPath(),
+                                  folder->GetServer(),
+                                  folder->GetLogin());
+}
+
 bool MailFolder::SpecToFolderName(const String& specification,
                                   FolderType folderType,
                                   String *pName)
@@ -1991,128 +2001,154 @@ MailFolderCC::AppendMessage(const String& msg, bool update)
 }
 
 bool
+MailFolderCC::SaveMessages(const UIdArray *selections,
+                           MFolder *folder,
+                           bool updateCount)
+{
+   CHECK( folder, false, "SaveMessages() needs a valid folder pointer" );
+
+   size_t count = selections->Count();
+   CHECK( count, true, "SaveMessages(): nothing to save" );
+
+   /*
+      This is an optimisation: if both mailfolders are IMAP and on the same
+      server, we ask the server to copy the message, which is more efficient
+      (think of a modem!).
+
+      If that is not the case, or it fails, then we fall back to the base class
+      version which simply retrieves the message and appends it to the second
+      folder.
+   */
+   bool didServerSideCopy = false;
+   if ( GetType() == MF_IMAP && folder->GetType() == MF_IMAP )
+   {
+      // they're both IMAP but do they live on the same server?
+      // check if host, protocol, user all identical:
+      String specDst = GetImapSpecFromFolder(folder);
+      String serverSrc = GetFirstPartFromImapSpec(specDst);
+      String serverDst = GetFirstPartFromImapSpec(GetImapSpec());
+
+      if ( serverSrc == serverDst )
+      {
+         String sequence = BuildSequence(*selections);
+         String pathDst = GetPathFromImapSpec(specDst);
+         if ( mail_copy_full(m_MailStream,
+                             (char *)sequence.c_str(),
+                             (char *)pathDst.c_str(),
+                             CP_UID) )
+         {
+            didServerSideCopy = true;
+         }
+      }
+   }
+
+   if ( !didServerSideCopy )
+   {
+      // use the inefficient retrieve-append way
+      return MailFolderCmn::SaveMessages(selections, folder, updateCount);
+   }
+
+   // update status of the target folder
+   MfStatusCache *mfStatusCache = GetStatusCache();
+   MailFolderStatus status;
+   String nameDst = folder->GetFullName();
+   if ( !mfStatusCache->GetStatus(nameDst, &status) )
+   {
+      // assume it was empty... this is, of course, false, but it allows us to
+      // show the folder as having unseen/new/... messages in the tree without
+      // having to open it (slow!) and so this hack is well worth it
+      status.total = 0;
+   }
+
+   // examine flags of all messages we copied
+   for ( size_t n = 0; n < count; n++ )
+   {
+      Message *msg = GetMessage((*selections)[n]);
+      if ( !msg )
+      {
+         FAIL_MSG("inexistent message was copied??");
+
+         continue;
+      }
+
+      int flags = msg->GetStatus();
+      msg->DecRef();
+
+      // deleted messages don't count, except for the total number
+      if ( !(flags & MailFolder::MSG_STAT_DELETED) )
+      {
+         bool isRecent = (flags & MailFolder::MSG_STAT_RECENT) != 0;
+
+         if ( !(flags & MailFolder::MSG_STAT_SEEN) )
+         {
+            if ( isRecent )
+               status.newmsgs++;
+            else
+               status.unseen++;
+         }
+         else if ( isRecent )
+         {
+            status.recent++;
+         }
+
+         if ( flags & MailFolder::MSG_STAT_FLAGGED )
+            status.flagged++;
+         if ( flags & MailFolder::MSG_STAT_SEARCHED )
+            status.searched++;
+      }
+
+      status.total++;
+   }
+
+   mfStatusCache->UpdateStatus(nameDst, status);
+
+   return true;
+}
+
+bool
 MailFolderCC::AppendMessage(const Message& msg, bool update)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
-   // the target folder
-   MailFolder *mf = msg.GetFolder();
-
-   // we didn't append the message yet
-   long rc = 0;
-
-   /* This is an optimisation: if both mailfolders are IMAP and on the
-      same server, we ask the server to copy the message, which is
-      more efficient (think of a modem!).
-      If that is not the case, or it fails, then it simply retrieves
-      the message and appends it to the second folder.
-   */
-   if( GetType() == MF_IMAP )
+   String flags = GetImapFlags(msg.GetStatus());
+   String date;
+   msg.GetHeaderLine("Date", date);
+   MESSAGECACHE mc;
+   const char *dateptr = NULL;
+   char datebuf[128];
+   if ( mail_parse_date(&mc, (char *) date.c_str()) == T )
    {
-      if ( mf && mf->GetType() == MF_IMAP )
-      {
-         // Now we know mf is MailFolderCC:
-         MAILSTREAM *ms = ((MailFolderCC *)mf)->m_MailStream;
-         String tmp1 = GetFirstPartFromImapSpec(mf->GetImapSpec());
-         String tmp2 = GetFirstPartFromImapSpec(GetImapSpec());
-         // Host, protocol, user all identical:
-         if(tmp1 == tmp2)
-         {
-            String sequence;
-            sequence.Printf("%lu", msg.GetUId());
-            String path = GetPathFromImapSpec(GetImapSpec());
-            rc = mail_copy_full(ms,
-                               (char *)sequence.c_str(),
-                               (char *)path.c_str(),
-                               CP_UID);
-            // if failed, we try to append normally below
-         }
-      }
+     mail_date(datebuf, &mc);
+     dateptr = datebuf;
    }
 
-   // either we didn't try anything at all or copying on IMAP side failed
-   if ( rc == 0 )
+   // append message text to folder
+   String tmp;
+   if ( msg.WriteToString(tmp) )
    {
-      String flags = GetImapFlags(msg.GetStatus());
-      String date;
-      msg.GetHeaderLine("Date", date);
-      MESSAGECACHE mc;
-      const char *dateptr = NULL;
-      char datebuf[128];
-      if(mail_parse_date(&mc, (char *) date.c_str()) == T)
+      STRING str;
+      INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
+      if ( !mail_append_full(m_MailStream,
+                            (char *)m_ImapSpec.c_str(),
+                            (char *)flags.c_str(),
+                            (char *)dateptr,
+                            &str) )
       {
-        mail_date(datebuf, &mc);
-        dateptr = datebuf;
-      }
+         // useful to know which message exactly we failed to copy
+         wxLogError(_("Message details: subject '%s', from '%s'"),
+                    msg.Subject().c_str(), msg.From().c_str());
 
-      // different folders, so we actually copy the message around:
-      String tmp;
-      if( msg.WriteToString(tmp) )
-      {
-         STRING str;
-         INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
-         rc =  mail_append_full(m_MailStream,
-                                (char *)m_ImapSpec.c_str(),
-                                (char *)flags.c_str(),
-                                (char *)dateptr,
-                                &str);
-      }
-      else // failed to write message to string?
-      {
-         wxLogError(_("Failed to retrieve the message text."));
+         wxLogError(_("Failed to save message to the folder '%s'"),
+                    GetName().c_str());
 
-         rc = 0;
+         return false;
       }
    }
-
-   if ( !rc )
+   else // failed to write message to string?
    {
-      // useful to know which message exactly we failed to copy
-      wxLogError(_("Message details: subject '%s', from '%s'"),
-                 msg.Subject().c_str(), msg.From().c_str());
-
-      wxLogError(_("Failed to save message to the folder '%s'"),
-                 GetName().c_str());
+      wxLogError(_("Failed to retrieve the message text."));
 
       return false;
-   }
-
-   // update status of the target folder
-   if ( mf )
-   {
-      MfStatusCache *mfStatusCache = GetStatusCache();
-      MailFolderStatus status;
-      if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
-      {
-         int flags = msg.GetStatus();
-
-         // deleted messages don't count, except for the total number
-         if ( !(flags & MailFolder::MSG_STAT_DELETED) )
-         {
-            bool isRecent = (flags & MailFolder::MSG_STAT_RECENT) != 0;
-
-            if ( !(flags & MailFolder::MSG_STAT_SEEN) )
-            {
-               if ( isRecent )
-                  status.newmsgs++;
-               else
-                  status.unseen++;
-            }
-            else if ( isRecent )
-            {
-               status.recent++;
-            }
-
-            if ( flags & MailFolder::MSG_STAT_FLAGGED )
-               status.flagged++;
-            if ( flags & MailFolder::MSG_STAT_SEARCHED )
-               status.searched++;
-         }
-
-         status.total++;
-
-         mfStatusCache->UpdateStatus(mf->GetName(), status);
-      }
    }
 
    return true;
@@ -2931,6 +2967,7 @@ MailFolderCC::BuildListing(void)
 
    // remember the status of the new messages
    m_statusNew = new MailFolderStatus;
+   m_statusNew->total = 0;
 
    // do we have any messages to get?
    if ( m_nMessages )
@@ -3492,22 +3529,22 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
 
       mf->m_nMessages--;
       mf->m_msgnoMax--;
-
-      // it is not necessary to update the other status fields because they
-      // were already updated when the message was deleted, but this one must
-      // be kept in sync manually as it wasn't updated before
-      MailFolderStatus status;
-      MfStatusCache *mfStatusCache = mf->GetStatusCache();
-      if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
-      {
-         ASSERT_MSG( status.total--, "total number of messages miscached" );
-
-         status.total--;
-
-         mfStatusCache->UpdateStatus(mf->GetName(), status);
-      }
    }
    //else: no need to do anything right now
+
+   // it is not necessary to update the other status fields because they
+   // were already updated when the message was deleted, but this one must
+   // be kept in sync manually as it wasn't updated before
+   MailFolderStatus status;
+   MfStatusCache *mfStatusCache = mf->GetStatusCache();
+   if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
+   {
+      ASSERT_MSG( status.total, "total number of messages miscached" );
+
+      status.total--;
+
+      mfStatusCache->UpdateStatus(mf->GetName(), status);
+   }
 }
 
 /// this message matches a search

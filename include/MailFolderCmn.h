@@ -274,8 +274,6 @@ protected:
 
    /// Have we not build a listing before?
    bool m_FirstListing;
-   /// Number of messages in last listing:
-   UIdType m_OldMessageCount;
    /// The last seen new UID, to check for new mails:
    UIdType  m_LastNewMsgUId;
    /// The current update flags

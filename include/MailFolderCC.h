@@ -165,7 +165,7 @@ public:
        @param uid mesage uid
        @return message header information class
    */
-   class Message *GetMessage(unsigned long uid);
+   virtual Message *GetMessage(unsigned long uid);
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence
@@ -185,6 +185,10 @@ public:
    virtual bool SetFlag(const UIdArray *sequence,
                         int flag,
                         bool set = true);
+
+   virtual bool SaveMessages(const UIdArray *selections,
+                             MFolder *folder,
+                             bool updateCount);
 
    /** Appends the message to this folder.
        @param msg the message to append

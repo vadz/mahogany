@@ -26,6 +26,7 @@
 
 #ifndef USE_PCH
    #include "MApplication.h"
+   #include "MEvent.h"
 #endif // USE_PCH
 
 #include <wx/log.h>           // for wxLogNull
@@ -128,8 +129,21 @@ void MfStatusCache::UpdateStatus(const String& folderName,
       n = m_folderNames.Add(folderName);
       m_folderData.Insert(new MailFolderStatus, (size_t)n);
    }
+   else // already have it
+   {
+      // did it really change?
+      if ( *m_folderData[(size_t)n] == status )
+      {
+         // no, avoid sending the event below
+         return;
+      }
+   }
 
+   // update
    *m_folderData[(size_t)n] = status;
+
+   // and tell everyone about it
+   MEventManager::Send(new MEventFolderStatusData(folderName));
 }
 
 // ----------------------------------------------------------------------------
@@ -254,7 +268,9 @@ bool MfStatusCache::Load(const String& filename)
          }
 
          // do add the entry to the cache
-         UpdateStatus(name, status);
+         size_t entry = m_folderNames.Add(name);
+         m_folderData.Insert(new MailFolderStatus, entry);
+         *m_folderData[entry] = status;
       }
    }
 

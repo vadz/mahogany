@@ -87,6 +87,16 @@ struct MailFolderStatus
 
    bool IsValid() const { return total != UID_ILLEGAL; }
 
+   bool operator==(const MailFolderStatus& status)
+   {
+      return total == status.total &&
+             newmsgs == status.newmsgs &&
+             recent == status.recent &&
+             unseen == status.unseen &&
+             flagged == status.flagged &&
+             searched == status.searched;
+   }
+
    // the total number of messages and the number of new, recent, unseen,
    // important (== flagged) and searched (== results of search) messages in
    // this folder

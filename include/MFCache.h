@@ -69,4 +69,28 @@ private:
    MfStatusArray m_folderData;
 };
 
+// ----------------------------------------------------------------------------
+// MfStatusCache_obj: a smart reference to MfStatusCache
+// ----------------------------------------------------------------------------
+
+class MfStatusCache_obj
+{
+public:
+   // ctor & dtor
+   MfStatusCache_obj() { m_cache = MfStatusCache::Get(); }
+  ~MfStatusCache_obj() { m_cache->DecRef(); }
+
+   // provide access to the real thing via operator->
+   MfStatusCache *operator->() const { return m_cache; }
+
+private:
+#if 1 // ndef __GNUG__ -- if this doesn't compile, restore ifndef
+   // no copy ctor/assignment operator
+   MfStatusCache_obj(const MfStatusCache_obj&);
+   MfStatusCache_obj& operator=(const MfStatusCache_obj&);
+#endif // __GNUG__
+
+   MfStatusCache *m_cache;
+};
+
 #endif // _MFCACHE_H_
