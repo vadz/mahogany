@@ -110,8 +110,12 @@ public:
     */
    //@{
 
-   /// save contents of all opened composer windows
-   static bool SaveAll();
+   /**
+     Save contents of all opened composer windows
+
+     @return the number of the windows closed or -1 on error
+   */
+   static int SaveAll();
 
    /// restore any previously saved window
    static bool RestoreAll();

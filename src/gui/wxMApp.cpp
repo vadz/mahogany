@@ -132,6 +132,24 @@ extern const MPersMsgBox *M_MSGBOX_SHOWLOGWINHINT;
 #define TRACE_TIMER "timer"
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+/**
+  Tries to save all unsaved stuff which the user wouldn't like to lose
+ */
+static int SaveAll()
+{
+   int rc = Composer::SaveAll();
+
+   Profile::FlushAll();
+
+   MfStatusCache::Flush();
+
+   return rc;
+}
+
+// ----------------------------------------------------------------------------
 // classes
 // ----------------------------------------------------------------------------
 
@@ -180,14 +198,10 @@ public:
    {
       wxLogTrace(TRACE_TIMER, "Autosaving options and folder status.");
 
-      Composer::SaveAll();
-
-      Profile::FlushAll();
-
-      MfStatusCache::Flush();
+      (void)SaveAll();
    }
 
-    virtual void Stop()
+   virtual void Stop()
       { if ( m_started ) wxTimer::Stop(); }
 
 public:
@@ -502,7 +516,27 @@ wxMApp::OnAbnormalTermination()
 {
    MAppBase::OnAbnormalTermination();
 
-   static const char *msg =
+   // try to save the unsaved messages and options
+   int nSaved = SaveAll();
+
+   wxString msg;
+   switch ( nSaved )
+   {
+      case -1:
+         msg = _("Not all composer windows could be saved.");
+         break;
+
+      case 0:
+         // leave empty
+         break;
+
+      default:
+         msg.Printf(_("%d unsaved messages were saved,\n"
+                      "they will be restored on the next program startup."),
+                    nSaved);
+   }
+
+   static const char *msgCrash =
       gettext_noop("The application is terminating abnormally.\n"
                    "\n"
                    "Please report the bug via our bugtracker at\n"
@@ -513,6 +547,13 @@ wxMApp::OnAbnormalTermination()
                    "\n"
                    "Thank you!");
    static const char *title = gettext_noop("Fatal application error");
+
+   if ( !msg.empty() )
+   {
+      msg += "\n\n";
+   }
+
+   msg += msgCrash;
 
    // using a plain message box is safer in this situation, but under Unix we
    // have no such choice

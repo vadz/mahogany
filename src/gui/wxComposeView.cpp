@@ -3635,14 +3635,17 @@ wxComposeView::AutoSave()
    return true;
 }
 
-bool Composer::SaveAll()
+int Composer::SaveAll()
 {
-   bool rc = true;
+   int rc = 0;
    for ( ComposerList::iterator i = gs_listOfAllComposers.begin();
          i != gs_listOfAllComposers.end();
          ++i )
    {
-      rc &= (*i)->AutoSave();
+      if ( (*i)->AutoSave() )
+         rc++;
+      else
+         rc = -1;
    }
 
    return rc;
