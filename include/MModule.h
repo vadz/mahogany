@@ -148,7 +148,7 @@ public:
    virtual size_t Count(void) const = 0;
    /// returns the n-th entry
    virtual const MModuleListingEntry & operator[] (size_t n) const = 0;
-   MOBJECT_NAME(MModuleListing);
+   MOBJECT_NAME(MModuleListing)
 };
 
 // ----------------------------------------------------------------------------
