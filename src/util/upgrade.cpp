@@ -40,9 +40,8 @@
 #include "MFolder.h"
 #include "Message.h"
 
-#include <wx/version.h>               // for wxCHECK_VERSION
-#include <wx/file.h>                    // for wxFile
-#include <wx/confbase.h>        // Dumb fileconf.h doesn't pull dependencies
+#include <wx/version.h>                // for wxCHECK_VERSION
+#include <wx/file.h>                   // for wxFile
 #include <wx/fileconf.h>
 
 // use wizard and not the old (and probably broken) dialog-based code
