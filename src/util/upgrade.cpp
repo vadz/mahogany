@@ -2814,7 +2814,15 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    }
 
    String foldername = READ_APPCONFIG(MP_SYNC_FOLDER);
-   MailFolder *mf = MailFolder::OpenFolder(foldername);
+   MFolder_obj folder(foldername);
+   if ( !folder )
+   {
+      wxLogError(_("Folder '%s' for storing remote configuration "
+                   "doesn't exist."), foldername.c_str());
+      return FALSE;
+   }
+
+   MailFolder *mf = MailFolder::OpenFolder(folder);
 
    if(! mf)
    {
@@ -2956,8 +2964,11 @@ bool SaveRemoteConfigSettings(bool confirm)
            return TRUE;
    }
 
-   MailFolder *mf =
-      MailFolder::OpenFolder(READ_APPCONFIG(MP_SYNC_FOLDER));
+   MFolder_obj folderSync(READ_APPCONFIG(MP_SYNC_FOLDER));
+   if ( !folderSync )
+      return FALSE;
+
+   MailFolder *mf = MailFolder::OpenFolder(folderSync);
 
    if(! mf)
       return FALSE;

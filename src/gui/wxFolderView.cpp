@@ -2960,7 +2960,7 @@ wxFolderView::SetFolder(MailFolder *mf)
 }
 
 bool
-wxFolderView::OpenFolder(MFolder *folder)
+wxFolderView::OpenFolder(MFolder *folder, bool readonly)
 {
    CHECK( folder, false, "NULL folder in wxFolderView::OpenFolder" );
 
@@ -3003,7 +3003,7 @@ wxFolderView::OpenFolder(MFolder *folder)
            ) )
       {
          // create all folders under the IMAP server
-         ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folder, NULL);
+         ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folder);
          if ( !asmf )
          {
             wxLogError(_("Impossible to add IMAP folders to the folder tree."));
@@ -3075,7 +3075,9 @@ wxFolderView::OpenFolder(MFolder *folder)
    wxBeginBusyCursor();
    MailFolder::SetInteractive(m_Frame, m_fullname);
 
-   MailFolder *mf = MailFolder::OpenFolder(folder);
+   MailFolder *mf = MailFolder::OpenFolder(folder,
+                                           readonly ? MailFolder::ReadOnly
+                                                    : MailFolder::Normal);
    SetFolder(mf);
    SafeDecRef(mf);
 
@@ -4017,7 +4019,9 @@ wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
 }
 
 wxFolderViewFrame *
-wxFolderViewFrame::Create(MFolder *folder, wxMFrame *parent)
+wxFolderViewFrame::Create(MFolder *folder,
+                          wxMFrame *parent,
+                          MailFolder::OpenMode openmode)
 {
    if ( !parent )
    {
@@ -4028,7 +4032,7 @@ wxFolderViewFrame::Create(MFolder *folder, wxMFrame *parent)
       frame = new wxFolderViewFrame(folder->GetFullName(), parent);
 
    wxFolderView *fv = wxFolderView::Create(frame);
-   if ( !fv->OpenFolder(folder) )
+   if ( !fv->OpenFolder(folder, openmode) )
    {
       delete fv;
       delete frame;
@@ -4115,10 +4119,13 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 // other public functions (from include/FolderView.h)
 // ----------------------------------------------------------------------------
 
-bool OpenFolderViewFrame(MFolder *folder, wxWindow *parent)
+bool OpenFolderViewFrame(MFolder *folder,
+                         wxWindow *parent,
+                         MailFolder::OpenMode openmode)
 {
-   return wxFolderViewFrame::Create(folder, (wxMFrame *)GetFrame(parent))
-            != NULL;
+   return wxFolderViewFrame::Create(folder,
+                                    (wxMFrame *)GetFrame(parent),
+                                    openmode) != NULL;
 }
 
 // TODO: this code probably should be updated to avoid writing columns width

@@ -242,6 +242,14 @@ public:
       REPLY_FOLLOWUP
    };
 
+   /// flags for OpenFolder()
+   enum OpenMode
+   {
+      Normal,
+      ReadOnly,
+      HalfOpen
+   };
+
    /**
      The structure containing the parameters for Forward/ReplyMessage(s)
      methods.
@@ -286,7 +294,7 @@ public:
       @param server hostname
       @param login only used for POP,IMAP and NNTP (as the newsgroup name)
       @param password only used for POP, IMAP
-      @param halfopen to only half open the folder
+      @param openmode specifies how to open the folder (RW/RO/...)
    */
    static MailFolder * OpenFolder(int typeAndFlags,
                                   const String &path,
@@ -295,22 +303,17 @@ public:
                                   const String &login = NULLstring,
                                   const String &password = NULLstring,
                                   const String &symbolicname = NULLstring,
-                                  bool halfopen = FALSE);
+                                  OpenMode openmode = Normal);
 
    /** The same OpenFolder function, but taking all arguments from a
-       MFolder object. */
-   static MailFolder * OpenFolder(const MFolder *mfolder);
-
-   /** This opens a mailfolder from either a profile of that name, or,
-       if it is an absolute path, from a file of that name.
-       Profile parameter is only used when name is a filename.
-   */
-   static MailFolder * OpenFolder(const String &name,
-                                  Profile *profile = NULL);
+       MFolder object.
+    */
+   static MailFolder * OpenFolder(const MFolder *mfolder,
+                                  OpenMode openmode = Normal);
 
    /** Half open the folder using paremeters from MFolder object. */
-   static MailFolder * HalfOpenFolder(const MFolder *mfolder,
-                                      Profile *profile = NULL);
+   static MailFolder * HalfOpenFolder(const MFolder *mfolder)
+      { return OpenFolder(mfolder, HalfOpen); }
 
    /**
       Closes the folder: this is always safe to call, even if this folder is

@@ -96,7 +96,7 @@ public:
       @param server server host
       @param login only used for POP,IMAP and NNTP (as the newsgroup name)
       @param password only used for POP, IMAP
-      @param halfopen to only half open the folder
+      @param openmode specifies how top open the folder (RW/RO/...)
 
    */
    static MailFolderCC * OpenFolder(int typeAndFlags,
@@ -106,7 +106,7 @@ public:
                                     String const &login,
                                     String const &password,
                                     String const &symname,
-                                    bool halfopen);
+                                    OpenMode openmode);
 
    static bool CloseFolder(const MFolder *mfolder);
    static int CloseAll();
@@ -400,16 +400,17 @@ private:
    /** Try to open the mailstream for this folder.
        @return true on success
    */
-   bool Open(void);
-
-   /// half open the folder
-   bool HalfOpen(void);
+   bool Open(OpenMode openmode = Normal);
 
    /// physically create the file (MF_FILE or MF_MH) folder
    void CreateFileFolder();
 
+   /// check (and delete if requested) for the lock on this file folder
+   bool CheckForFileLock();
+
    /// Close the folder
    virtual void Close(void);
+
    //@}
 
    /// called to notify everybody that its listing changed
@@ -477,8 +478,9 @@ private:
                                    String *password,
                                    bool *didAsk = NULL);
 
-   /** Try to create folder if it hadn't been created yet, returns false only
-       if it needed to be created and the creation failed
+   /**
+      Try to create folder if it hadn't been created yet, returns true if the
+      folder could be created and opened successfully or NULL if it failed.
    */
    static bool CreateIfNeeded(Profile *profile);
 

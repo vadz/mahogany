@@ -119,14 +119,14 @@ FUNCTION(OpenMailFolder, MailFolder *, (
 ARG(STRING , path)
 ),
 `
- return MailFolder::OpenFolder(path);
+ return MailFolder::OpenFolder(MFolder_obj(path));
 ')
 
 FUNCTION(OpenASMailFolder, ASMailFolder *, (
 ARG(STRING , path)
 ),
 `
- return ASMailFolder::OpenFolder(path);
+ return ASMailFolder::OpenFolder(MFolder_obj(path));
 ')
 
 FUNCTION(CreateMailFolder, bool, (

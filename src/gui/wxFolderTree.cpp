@@ -372,6 +372,9 @@ protected:
    // always opens the folder in a separate view
    void DoFolderOpen();
 
+   // open folder read only in the same view
+   void DoFolderView();
+
    void DoFolderCreate();
    void DoFolderRename();
    void DoFolderDelete(bool removeOnly = true);
@@ -423,6 +426,7 @@ private:
       enum
       {
          Open,
+         View,
          New,
          Remove = WXMENU_FOLDER_REMOVE,
          Delete = WXMENU_FOLDER_DELETE,
@@ -438,6 +442,7 @@ private:
          if ( !isRoot )
          {
             Append(Open, _("&Open"));
+            Append(View, _("Open read onl&y"));
 
             AppendSeparator();
          }
@@ -846,6 +851,13 @@ void wxFolderTree::OnOpenHere(MFolder *folder)
    {
       m_tree->SetOpenFolderName("");
    }
+}
+
+// view folder (always in the same view for now)
+void wxFolderTree::OnView(MFolder *folder)
+{
+   // just update the folder name
+   wxFolderTree::OnOpenHere(folder);
 }
 
 // open a new folder view on this folder
@@ -1708,6 +1720,11 @@ void wxFolderTreeImpl::DoFolderOpen()
    m_sink->OnOpen(m_sink->GetSelection());
 }
 
+void wxFolderTreeImpl::DoFolderView()
+{
+   m_sink->OnView(m_sink->GetSelection());
+}
+
 void wxFolderTreeImpl::DoFolderCreate()
 {
    MFolder *folderNew = m_sink->OnCreate(m_sink->GetSelection());
@@ -2301,6 +2318,10 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
    {
       case FolderMenu::Open:
          DoFolderOpen();
+         break;
+
+      case FolderMenu::View:
+         DoFolderView();
          break;
 
       case FolderMenu::New:

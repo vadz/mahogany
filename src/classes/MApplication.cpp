@@ -148,30 +148,6 @@ WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
 
 MAppBase *mApplication = NULL;
 
-/** Each entry of this class keeps one mail folder open all the time
-    it exists. */
-class MailFolderEntry
-{
-public:
-   MailFolderEntry(const String name)
-      {
-         m_name = name;
-         m_folder = MailFolder::OpenFolder(m_name);
-      }
-   ~MailFolderEntry()
-      {
-         if(m_folder) m_folder->DecRef();
-      }
-   MailFolder *GetMailFolder(void) const { return m_folder; }
-   const String GetName(void) const { return m_name; }
-private:
-   String      m_name;
-   MailFolder *m_folder;
-
-};
-
-KBLIST_DEFINE(MailFolderList, MailFolderEntry);
-
 // ----------------------------------------------------------------------------
 // MAppBase - the class which defines the "application object" interface
 // ----------------------------------------------------------------------------
@@ -707,15 +683,19 @@ MAppBase::CanClose() const
       // don´t ask twice
       if ( trashName != ((wxMainFrame *)m_topLevelFrame)->GetFolderName() )
       {
-         ASMailFolder *mf = ASMailFolder::OpenFolder(trashName);
-         if( mf )
+         MFolder_obj folderTrash(trashName);
+         if ( folderTrash )
          {
-            // make sure they are all marked as deleted:
-            mf->SetFlagForAll(MailFolder::MSG_STAT_DELETED);
+            ASMailFolder *mf = ASMailFolder::OpenFolder(folderTrash);
+            if( mf )
+            {
+               // make sure they are all marked as deleted:
+               mf->SetFlagForAll(MailFolder::MSG_STAT_DELETED);
 
-            // And now, we can ask if we want to expunge them:
-            CheckExpungeDialog(mf);
-            mf->DecRef();
+               // And now, we can ask if we want to expunge them:
+               CheckExpungeDialog(mf);
+               mf->DecRef();
+            }
          }
       }
    }
@@ -1017,12 +997,21 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
    }
    else
    {
-      mf = MailFolder::OpenFolder(outbox);
-      if(mf == NULL)
+      MFolder_obj folderOutbox(outbox);
+      if ( folderOutbox )
       {
-         String msg;
-         msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
-         ERRORMESSAGE((msg));
+         mf = MailFolder::OpenFolder(folderOutbox);
+         if(mf == NULL)
+         {
+            String msg;
+            msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
+            ERRORMESSAGE((msg));
+            return FALSE;
+         }
+      }
+      else
+      {
+         ERRORMESSAGE((_("Outbox folder '%s' doesn't exist"), outbox.c_str()));
          return FALSE;
       }
    }
@@ -1064,7 +1053,15 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
    CHECK_RET( outbox.length(), "missing outbox folder name" );
 
    UIdType count = 0;
-   MailFolder *mf = MailFolder::OpenFolder(outbox);
+
+   MFolder_obj folderOutbox(outbox);
+   if ( !folderOutbox )
+   {
+      ERRORMESSAGE((_("Outbox folder '%s' doesn't exist"), outbox.c_str()));
+      return;
+   }
+
+   MailFolder *mf = MailFolder::OpenFolder(folderOutbox);
    if(! mf)
    {
       String msg;

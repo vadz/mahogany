@@ -112,6 +112,14 @@ public:
       m_frame->OpenFolder(folder);
    }
 
+   virtual void OnView(MFolder *folder)
+   {
+      SafeIncRef(folder);
+      wxFolderTree::OnView(folder);
+
+      m_frame->OpenFolder(folder, true /* RO */);
+   }
+
    virtual bool OnClose(MFolder *folder)
    {
       m_frame->CloseFolder(folder);
@@ -310,7 +318,7 @@ wxMainFrame::CloseFolder(MFolder *folder)
 }
 
 void
-wxMainFrame::OpenFolder(MFolder *pFolder)
+wxMainFrame::OpenFolder(MFolder *pFolder, bool readonly)
 {
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
    static bool s_hasMsgMenu = false;
@@ -338,7 +346,7 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
       // we want save the full folder name in m_folderName
       ASSERT( folder->GetFullName() == m_folderName );
 
-      if ( !m_FolderView->OpenFolder(folder) )
+      if ( !m_FolderView->OpenFolder(folder, readonly) )
       {
          if ( mApplication->GetLastError() == M_ERROR_CANCEL )
          {
@@ -472,8 +480,26 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       switch ( id )
       {
          case WXMENU_FOLDER_OPEN:
-            MDialog_FolderOpen(this);
-            break;
+         case WXMENU_FOLDER_OPEN_RO:
+            {
+               MFolder_obj folder = MDialog_FolderChoose
+                                    (
+                                       this, // parent window
+                                       NULL, // parent folder
+                                       true  // open
+                                    );
+               if ( folder )
+               {
+                  OpenFolderViewFrame
+                  (
+                     folder,
+                     this,
+                     id == WXMENU_FOLDER_OPEN_RO ? MailFolder::ReadOnly
+                                                 : MailFolder::Normal
+                  );
+               }
+            }
+
 
          case WXMENU_FOLDER_CREATE:
             {

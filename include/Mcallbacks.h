@@ -8,10 +8,8 @@
  *
  *******************************************************************/
 
-
-
-#ifndef MCALLBACKS_H
-#define   MCALLBACKS_H
+#ifndef _MCALLBACKS_H_
+#define _MCALLBACKS_H_
 
 /** @name Names of callback function entries in profiles. */
 //@{
@@ -29,7 +27,7 @@
 #define   MCB_FOLDER_NEWMAIL "FolderNewMailHook"
 /// called when mApplication gets notified of new mail arrival
 #define   MCB_MAPPLICATION_NEWMAIL "GlobalNewMailHook"
-//@}                                           
+//@}
 
 /** @name Default values for callback function entries in profiles. */
 //@{
@@ -47,5 +45,7 @@
 #define   MCB_FOLDER_NEWMAIL_D M_EMPTYSTRING
 /// called when mApplication gets notified of new mail arrival
 #define   MCB_MAPPLICATION_NEWMAIL_D M_EMPTYSTRING
-//@}                                           
-#endif
+//@}
+
+#endif // _MCALLBACKS_H_
+

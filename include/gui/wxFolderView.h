@@ -79,7 +79,7 @@ public:
        @param folder the folder to open
        @return true if opened ok, false otherwise
     */
-   bool OpenFolder(MFolder *folder);
+   virtual bool OpenFolder(MFolder *folder, bool readonly = false);
 
    /// called on Menu selection
    void OnCommandEvent(wxCommandEvent &event);
@@ -314,7 +314,9 @@ public:
       @return pointer to FolderViewFrame or NULL
    */
    static wxFolderViewFrame *Create(MFolder *folder,
-                                    wxMFrame *parent = NULL);
+                                    wxMFrame *parent = NULL,
+                                    MailFolder::OpenMode openmode =
+                                       MailFolder::Normal);
 
    /// dtor
    ~wxFolderViewFrame();

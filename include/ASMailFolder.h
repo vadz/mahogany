@@ -265,38 +265,24 @@ public:
 
    static ASMailFolder * Create(MailFolder *mf);
 
-   static ASMailFolder * OpenFolder(const String &path)
+   /** Open a folder
+    */
+   static
+   ASMailFolder *OpenFolder(const MFolder *mfolder,
+                            MailFolder::OpenMode openmode = MailFolder::Normal)
       {
-         MailFolder *mf = MailFolder::OpenFolder(path);
-         if ( !mf ) return NULL;
-         ASMailFolder *asmf = Create(mf);
-         mf->DecRef();
-         return asmf;
-      }
+         MailFolder *mf = MailFolder::OpenFolder(mfolder, openmode);
+         if ( !mf )
+            return NULL;
 
-   /** The same OpenFolder function, but taking all arguments from a
-       MFolder object. */
-   static ASMailFolder * OpenFolder(const class MFolder *mfolder)
-      {
-         MailFolder *mf = MailFolder::OpenFolder(mfolder);
-         if ( !mf ) return NULL;
          ASMailFolder *asmf = Create(mf);
          mf->DecRef();
          return asmf;
       }
 
    /// and a function to create a half opened folder
-   static ASMailFolder *HalfOpenFolder(const MFolder *mfolder,
-                                       Profile *profile)
-   {
-      MailFolder *mf = MailFolder::HalfOpenFolder(mfolder, profile);
-      if ( !mf )
-         return NULL;
-
-      ASMailFolder *asmf = Create(mf);
-      mf->DecRef();
-      return asmf;
-   }
+   static ASMailFolder *HalfOpenFolder(const MFolder *mfolder)
+      { return OpenFolder(mfolder, MailFolder::HalfOpen); }
 
    /** Used to obtain the next Ticked id for events.
        Only for use by ASMailFolder.cpp and MailFolderCC.cpp internally.

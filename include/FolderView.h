@@ -37,6 +37,9 @@ public:
    /** @name Operations */
    //@{
 
+   /// open the folder in the folder view
+   virtual bool OpenFolder(MFolder *folder, bool readonly = false) = 0;
+
    /// open this folder in the folder view
    virtual void SetFolder(MailFolder *mf) = 0;
 
@@ -125,7 +128,10 @@ private:
 };
 
 /// open a new frame containing the folder view of this folder
-extern bool OpenFolderViewFrame(MFolder *folder, wxWindow *parent);
+extern bool
+OpenFolderViewFrame(MFolder *folder,
+                    wxWindow *parent,
+                    MailFolder::OpenMode openmode = MailFolder::Normal);
 
 /// show a dialog allowing to choose the order of headers in the folder view
 extern bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent);

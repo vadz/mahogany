@@ -50,13 +50,13 @@
 #  include "strutil.h"
 #  include "strings.h"
 #  include "guidef.h"
-#  include <strings.h>
 #endif // USE_PCH
 
 #include "Mdefaults.h"
 #include "MApplication.h"
 #include "Message.h"
 #include "MailFolderCC.h"
+#include "MFolder.h"
 
 #include "MThread.h"
 
@@ -1345,7 +1345,15 @@ SendMessageCC::WriteToFile(const String &filename, bool append)
 void
 SendMessageCC::WriteToFolder(String const &name)
 {
-   MailFolder *mf = MailFolder::OpenFolder(name);
+   MFolder_obj folder(name);
+   if ( !folder )
+   {
+      ERRORMESSAGE((_("Can't save sent message in the folder '%s' "
+                      "which doesn't exist."), name.c_str()));
+      return;
+   }
+
+   MailFolder *mf = MailFolder::OpenFolder(folder);
    if ( !mf )
    {
       ERRORMESSAGE((_("Can't open folder '%s' to save the message to."),

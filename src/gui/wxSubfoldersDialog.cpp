@@ -1318,7 +1318,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
 
    // The folder must be half opened because we don't really want to read any
    // messages in it, just enum subfolders
-   ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folder, NULL);
+   ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folder);
 
    if ( !asmf )
    {

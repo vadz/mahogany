@@ -338,12 +338,19 @@ MailCollectorImpl::AddIncomingFolder(const String &name)
 {
    ReCreate();
    MOcheck();
-   MailFolder *mf = MailFolder::OpenFolder(name);
+
+   MFolder_obj folder(name);
+   if ( !folder )
+      return false;
+
+   MailFolder *mf = MailFolder::OpenFolder(folder);
    if(mf == NULL)
       return false;
+
    MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
    e->m_name = name;
    m_list->push_back(e);
+
    return true;
 }
 

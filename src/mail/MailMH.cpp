@@ -333,7 +333,7 @@ bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
    if ( ok && allUnder )
    {
       // enum all MH folders and import them
-      ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folderMH, NULL);
+      ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folderMH);
       if ( !asmf )
       {
          ok = FALSE;

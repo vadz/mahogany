@@ -76,10 +76,12 @@ public:
    // high level events (should be implemented in derived classes)
       // parameters are the previously selected folder and the new selection
    virtual void OnSelectionChange(MFolder *oldsel, MFolder *newsel);
-      // folder single clicked (or double click and !MP_OPEN_ON_CLICK)
+      // open folder in the same view
    virtual void OnOpenHere(MFolder *folder);
-      // folder double clicked/enter pressed or open chosen from menu
+      // open folder in a new view
    virtual void OnOpen(MFolder *folder);
+      // view folder (always in the same view for now)
+   virtual void OnView(MFolder *folder);
       // "browse subfolders" selected from the popup menu
    virtual void OnBrowseSubfolders(MFolder *folder);
       // folder properties requested

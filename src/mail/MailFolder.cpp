@@ -208,57 +208,14 @@ MLogCircle::Clear(void)
 // MailFolder opening
 // ----------------------------------------------------------------------------
 
-/*
- * This function guesses: it checks if such a profile exists,
- * otherwise it tries a file with that name.
- */
-
 /* static */
 MailFolder *
-MailFolder::OpenFolder(const String &name, Profile *parentProfile)
-{
-   if ( !Init() )
-   {
-      return NULL;
-   }
-
-   if(Profile::ProfileExists(name))
-   {
-      MFolder *mf = MFolder::Get(name);
-      if(mf )
-      {
-         MailFolder *m = OpenFolder(mf);
-         mf->DecRef();
-         return m;
-      }
-      else
-         return NULL; // profile failed
-   }
-   else // attempt to open file
-   {
-      // profile entry does not exist
-      Profile *profile = Profile::CreateEmptyProfile(parentProfile);
-      MailFolder *m = OpenFolder( MF_FILE, name, profile);
-      profile->DecRef();
-      return m;
-   }
-}
-
-/* static */
-MailFolder *
-MailFolder::OpenFolder(const MFolder *mfolder)
+MailFolder::OpenFolder(const MFolder *mfolder, OpenMode openmode)
 {
    if ( !Init() )
       return NULL;
 
    CHECK( mfolder, NULL, "NULL MFolder in OpenFolder()" );
-
-   // VZ: this doesn't do anything yet anyhow...
-#if 0 //def EXPERIMENTAL
-   if( mfolder->GetType() == MF_MFILE
-       || mfolder->GetType() == MF_MDIR )
-      return MMailFolder::OpenFolder(mfolder);
-#endif
 
    int typeAndFlags = CombineFolderTypeAndFlags(mfolder->GetType(),
                                                 mfolder->GetFlags());
@@ -269,30 +226,9 @@ MailFolder::OpenFolder(const MFolder *mfolder)
                                 mfolder->GetServer(),
                                 mfolder->GetLogin(),
                                 mfolder->GetPassword(),
-                                mfolder->GetFullName());
+                                mfolder->GetFullName(),
+                                openmode);
    return mf;
-}
-
-/* static */
-MailFolder *
-MailFolder::HalfOpenFolder(const MFolder *mfolder, Profile *profile)
-{
-   if ( !Init() )
-      return NULL;
-
-   CHECK( mfolder, NULL, "NULL MFolder in OpenFolder()" );
-
-   int typeAndFlags = CombineFolderTypeAndFlags(mfolder->GetType(),
-                                                mfolder->GetFlags());
-
-   return OpenFolder( typeAndFlags,
-                      mfolder->GetPath(),
-                      profile,
-                      mfolder->GetServer(),
-                      mfolder->GetLogin(),
-                      mfolder->GetPassword(),
-                      mfolder->GetName(),
-                      true );
 }
 
 /* static */
@@ -304,7 +240,7 @@ MailFolder::OpenFolder(int folderType,
                        String const &i_login,
                        String const &i_passwd,
                        String const &i_name,
-                       bool halfopen)
+                       OpenMode openmode)
 {
    if ( !Init() )
       return NULL;
@@ -442,7 +378,7 @@ MailFolder::OpenFolder(int folderType,
    folderType = CombineFolderTypeAndFlags(type, flags);
    mf = MailFolderCC::OpenFolder(folderType, name, profile,
                                  server, login, passwd,
-                                 symbolicName, halfopen);
+                                 symbolicName, openmode);
    profile->DecRef();
    return mf;
 }

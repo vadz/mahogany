@@ -1467,7 +1467,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                          String const &loginGiven,
                          String const &passwordGiven,
                          String const &symname,
-                         bool halfopen)
+                         OpenMode openmode)
 {
    CHECK( profile, NULL, "no profile in OpenFolder" );
 
@@ -1545,7 +1545,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       // reset the last error
       mApplication->SetLastError(M_ERROR_OK);
 
-      ok = halfopen ? mf->HalfOpen() : mf->Open();
+      ok = mf->Open(openmode);
 
       if ( !ok && !mApplication->GetLastError() )
       {
@@ -1579,36 +1579,6 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    }
 
    return mf;
-}
-
-bool MailFolderCC::HalfOpen()
-{
-   wxLogTrace(TRACE_MF_CALLS, "Half opening '%s'", GetName().c_str());
-
-   MFrame *frame = GetInteractiveFrame();
-   if ( frame )
-   {
-      // well, we're not going to tell the user we're half opening it...
-      STATUSMESSAGE((frame, _("Opening mailbox %s..."), GetName().c_str()));
-   }
-
-   if( FolderTypeHasUserName(GetType()) )
-      SetLoginData(m_Login, m_Password);
-
-   MCclientLocker lock;
-
-   {
-      CCDefaultFolder def(this);
-      m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(),
-                               (mm_show_debug ? OP_DEBUG : NIL)|OP_HALFOPEN);
-   }
-
-   if ( !m_MailStream )
-      return false;
-
-   AddToMap(m_MailStream);
-
-   return true;
 }
 
 void MailFolderCC::CreateFileFolder()
@@ -1677,15 +1647,103 @@ void MailFolderCC::CreateFileFolder()
    }
 }
 
-bool
-MailFolderCC::Open(void)
+static String
+GetOperationName(MailFolder::OpenMode openmode)
 {
-   wxLogTrace(TRACE_MF_CALLS, "Opening '%s'", GetName().c_str());
+   String name;
+   switch ( openmode )
+   {
+      case MailFolder::Normal:
+         name = _("Opening");
+         break;
+
+      case MailFolder::ReadOnly:
+         name = _("Opening in read only mode");
+         break;
+
+      case MailFolder::HalfOpen:
+         name = _("Connecting to");
+         break;
+
+      default:
+         FAIL_MSG( "unknown open mode" );
+         name = "???";
+   }
+
+   return name;
+}
+
+bool
+MailFolderCC::CheckForFileLock()
+{
+   String lockfile;
+
+   FolderType folderType = GetType();
+   if( folderType == MF_FILE )
+      lockfile = m_ImapSpec;
+#ifdef OS_UNIX
+   else if ( folderType == MF_INBOX )
+   {
+      // get INBOX path name
+      MCclientLocker lock;
+      lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
+      if(lockfile.empty()) // another c-client stupidity
+         lockfile = (char *) sysinbox();
+   }
+#endif // OS_UNIX
+   else
+   {
+      FAIL_MSG( "shouldn't be called for not file based folders!" );
+      return true;
+   }
+
+   lockfile << ".lock*"; //FIXME: is this fine for MS-Win? (NO!)
+   lockfile = wxFindFirstFile(lockfile, wxFILE);
+   while ( !lockfile.empty() )
+   {
+      FILE *fp = fopen(lockfile,"r");
+      if(fp) // outch, someone has a lock
+      {
+         fclose(fp);
+         String msg;
+         msg.Printf(_("Found lock-file:\n"
+                    "'%s'\n"
+                    "Some other process may be using the folder.\n"
+                    "Shall I forcefully override the lock?"),
+                    lockfile.c_str());
+         if(MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, true))
+         {
+            int success = remove(lockfile);
+            if(success != 0) // error!
+               wxLogWarning(_("Could not remove lock-file.\n"
+                              "Other process may have terminated.\n"
+                              "Will try to continue as normal."));
+         }
+         else
+         {
+            wxLogError(_("Cannot open the folder while lock-file exists."));
+            wxLogError(_("Could not open mailbox %s."), GetName().c_str());
+
+            return false;
+         }
+      }
+      lockfile = wxFindNextFile();
+   }
+
+   return true;
+}
+
+bool
+MailFolderCC::Open(OpenMode openmode)
+{
+   wxLogTrace(TRACE_MF_CALLS, "%s '%s'",
+              GetOperationName(openmode).c_str(), GetName().c_str());
 
    MFrame *frame = GetInteractiveFrame();
    if ( frame )
    {
-      STATUSMESSAGE((frame, _("Opening mailbox %s..."), GetName().c_str()));
+      STATUSMESSAGE((frame, _("%s mailbox %s..."),
+                     GetOperationName(openmode).c_str(), GetName().c_str()));
    }
 
    // Now, we apply the very latest c-client timeout values, in case they have
@@ -1700,57 +1758,19 @@ MailFolderCC::Open(void)
 
    // for files, check whether mailbox is locked, c-client library is
    // to dumb to handle this properly
-   if ( folderType == MF_FILE
+   if ( openmode == Normal &&
+        (
+         folderType == MF_FILE
 #ifdef OS_UNIX
          || folderType == MF_INBOX
+        )
 #endif
       )
+   {
+      if ( !CheckForFileLock() )
       {
-         String lockfile;
-         if(folderType == MF_FILE)
-            lockfile = m_ImapSpec;
-#ifdef OS_UNIX
-         else // INBOX
-         {
-            // get INBOX path name
-            MCclientLocker lock;
-            lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
-            if(lockfile.empty()) // another c-client stupidity
-               lockfile = (char *) sysinbox();
-      }
-#endif // OS_UNIX
-
-      lockfile << ".lock*"; //FIXME: is this fine for MS-Win? (NO!)
-      lockfile = wxFindFirstFile(lockfile, wxFILE);
-      while ( !lockfile.empty() )
-      {
-         FILE *fp = fopen(lockfile,"r");
-         if(fp) // outch, someone has a lock
-         {
-            fclose(fp);
-            String msg;
-            msg.Printf(_("Found lock-file:\n"
-                       "'%s'\n"
-                       "Some other process may be using the folder.\n"
-                       "Shall I forcefully override the lock?"),
-                       lockfile.c_str());
-            if(MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, true))
-            {
-               int success = remove(lockfile);
-               if(success != 0) // error!
-                  wxLogWarning(_("Could not remove lock-file.\n"
-                                 "Other process may have terminated.\n"
-                                 "Will try to continue as normal."));
-            }
-            else
-            {
-               wxLogError(_("Cannot open the folder while lock-file exists."));
-               wxLogError(_("Could not open mailbox %s."), GetName().c_str());
-
-               return false;
-            }
-         }
-         lockfile = wxFindNextFile();
+         // folder is locked, can't open
+         return false;
       }
    }
    //else: not a file based folder, no locking problems
@@ -1762,30 +1782,50 @@ MailFolderCC::Open(void)
       // Make sure that all events to unknown folder go to us
       CCDefaultFolder def(this);
 
-      // create the mailbox if it doesn't exist yet: this must be done
-      // separately for the file folders to specify the format we want this
-      // mailbox to be in
-      bool alreadyTriedToCreate = FALSE;
-      if ( folderType == MF_FILE || folderType == MF_MH )
+      long ccOptions = mm_show_debug ? OP_DEBUG : 0;
+      bool tryOpen = true;
+      switch ( openmode )
       {
-         CreateFileFolder();
-         alreadyTriedToCreate = TRUE;
+         case Normal:
+            // create the mailbox if it doesn't exist yet: this must be done
+            // separately for the file folders to specify the format we want
+            // this mailbox to be in
+            if ( folderType == MF_FILE || folderType == MF_MH )
+            {
+               CreateFileFolder();
+            }
+            else // and for all the others
+            {
+               // check if this is the first time we're opening this folder: in
+               // this case, try creating it first
+               if ( !CreateIfNeeded(m_Profile) )
+               {
+                  // CreateIfNeeded() returns false only if the folder couldn't
+                  // be opened at all, no need to retry again
+                  tryOpen = false;
+               }
+            }
+            break;
+
+         case ReadOnly:
+            ccOptions |= OP_READONLY;
+            break;
+
+         case HalfOpen:
+            ccOptions |= OP_HALFOPEN;
+            break;
       }
 
-      // check if this is the first time we're opening this folder: in this
-      // case, try creating it first
-      if ( alreadyTriedToCreate || CreateIfNeeded(m_Profile) )
+      if ( tryOpen )
       {
-         // try to open the folder
-         m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(),
-                                  mm_show_debug ? OP_DEBUG : NIL);
+         m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(), ccOptions);
       }
    } // end of cclient lock block
 
    // for some folders (notably the IMAP ones), mail_open() will return a not
    // NULL pointer but set halfopen flag if it couldn't be SELECTed - as we
    // really want to open it here and not halfopen, this is an error for us
-   if ( m_MailStream && m_MailStream->halfopen )
+   if ( m_MailStream && m_MailStream->halfopen && openmode != HalfOpen )
    {
       // unfortunately, at least the IMAP folder will have halfopen flag
       // set even in some situations when the folder can't be opened at all -
@@ -1841,7 +1881,30 @@ MailFolderCC::Open(void)
 
    if ( frame )
    {
-      STATUSMESSAGE((frame, _("Mailbox %s opened."), GetName().c_str()));
+      String msg;
+      switch ( openmode )
+      {
+         case Normal:
+            msg = _("Mailbox %s opened.");
+            break;
+
+         case ReadOnly:
+            msg = _("Mailbox %s opened in read only mode.");
+            break;
+
+         case HalfOpen:
+            msg = _("Successfully connected to %s");
+            break;
+
+         default:
+            FAIL_MSG( "unknown open mode" );
+            break;
+      }
+
+      if ( !msg.empty() )
+      {
+         STATUSMESSAGE((frame, msg, GetName().c_str()));
+      }
    }
 
    PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
