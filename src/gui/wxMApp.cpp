@@ -221,7 +221,16 @@ wxMApp::wxMApp(void)
 wxMApp::~wxMApp()
 {
    if(m_HelpController)
+   {
+      wxSize size;
+      wxPoint pos;
+      m_HelpController->GetFrameParameters(&size, &pos);
+      m_profile->writeEntry(MP_HELPFRAME_WIDTH, size.x),
+      m_profile->writeEntry(MP_HELPFRAME_HEIGHT, size.y);
+      m_profile->writeEntry(MP_HELPFRAME_XPOS, pos.x);
+      m_profile->writeEntry(MP_HELPFRAME_YPOS, pos.y);
       delete m_HelpController;
+   }
 }
 
 void
@@ -637,7 +646,7 @@ wxMApp::Help(int id, wxWindow *parent)
       m_HelpController = new wxHelpController;
       wxString helpfile;
 #ifdef OS_UNIX
-#if !wxUSE_HTML
+#if ! wxUSE_HTML
       ((wxExtHelpController *)m_HelpController)->SetBrowser(
          READ_APPCONFIG(MP_HELPBROWSER),
          READ_APPCONFIG(MP_HELPBROWSER_ISNS));
@@ -655,6 +664,13 @@ wxMApp::Help(int id, wxWindow *parent)
          wxLogError(msg);
          return ;
       }
+      wxSize size = wxSize(
+         READ_APPCONFIG(MP_HELPFRAME_WIDTH),
+         READ_APPCONFIG(MP_HELPFRAME_HEIGHT));
+      wxPoint pos = wxPoint(
+         READ_APPCONFIG(MP_HELPFRAME_XPOS),
+         READ_APPCONFIG(MP_HELPFRAME_YPOS));
+      m_HelpController->SetFrameParameters("Mahogany : %s", size, pos);
    }
    switch(id)
    {

@@ -95,22 +95,6 @@ typedef long int lcoord_t;
 #  include "Mwin.h"
 #endif
 
-#define  ABOUTMESSAGE \
-"M Copyright (C) 1998 by \n"\
-"  Karsten Ballüder\n"\
-"  11 (2F3) Yeaman Place\n" \
-"  Edinburgh EH11 1BR, Scotland\n" \
-"  (Ballueder@usa.net)\n"\
-"\n"\
-"For the latest news on M see\n"\
-"http://Ballueder.home.ml.org/M/\n"\
-"M has been written using the cross-platform\n"\
-"class library wxWindows which is freely\n"\
-"available under the GNU Library Public\n"\
-"License. Plase see http://www.wxwindows.org/\n"\
-"for more information."\
-"\n"
-
 /// for convenience, get an icon:
 #define   ICON(name) (mApplication->GetIconManager()->GetIcon(name))
 

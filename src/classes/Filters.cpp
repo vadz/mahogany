@@ -728,7 +728,7 @@ ParserImpl::ParseRestExpression(LeftOfRest *parent)
       Error(_("Expecting an operator in expression."));
       return NULL;
    }
-   else if( t.GetChar() != '+' || t.GetChar() != '-')
+   else if( t.GetChar() != '+' && t.GetChar() != '-')
       return new RestExpression(parent,NULL,NULL,NULL);
    
    Operator *op = NULL;
@@ -747,8 +747,10 @@ ParserImpl::ParseRestExpression(LeftOfRest *parent)
    switch(token)
    {
    case '+':
+      GetToken();
       op = new OperatorPlus;break;
    case '-':
+      GetToken();
       op = new OperatorMinus;break;
    default:
       ;
@@ -783,7 +785,7 @@ ParserImpl::ParseRestTerm(LeftOfRest *parent)
       Error(_("Expecting an operator in expression."));
       return NULL;
    }
-   else if(t.GetChar() != '/' || t.GetChar() != '*')
+   else if(t.GetChar() != '/' && t.GetChar() != '*')
       return new RestExpression(parent,NULL,NULL,NULL);
    
    Operator *op = NULL;
@@ -803,8 +805,10 @@ ParserImpl::ParseRestTerm(LeftOfRest *parent)
    switch(token)
    {
    case '*':
+      GetToken();
       op = new OperatorTimes;break;
    case '-':
+      GetToken();
       op = new OperatorDivide;break;
    default:
       return new RestExpression(parent, NULL,NULL,NULL);
@@ -938,11 +942,18 @@ void FilterTest(const String &program)
 {
    Parser *p = Parser::Create(program);
    SyntaxNode *sn = p->Parse();
-   String str = sn->Debug();
-   INFOMESSAGE((str.c_str()));
-   str.Printf("Evaluated '%s' = %ld",
-              program.c_str(), sn->Evaluate());
-   INFOMESSAGE((str.c_str()));
-   p->DecRef();
-   delete sn;
+   if(sn)
+   {
+      String str = sn->Debug();
+      INFOMESSAGE((str.c_str()));
+      str.Printf("Evaluated '%s' = %ld",
+                 program.c_str(), sn->Evaluate());
+      INFOMESSAGE((str.c_str()));
+      p->DecRef();
+      delete sn;
+   }
+   else
+   {
+      ERRORMESSAGE(("Parsing '%s' failed.", program.c_str()));
+   }
 }

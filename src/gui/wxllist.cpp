@@ -634,6 +634,7 @@ wxLayoutLine::wxLayoutLine(wxLayoutLine *prev, wxLayoutList *llist)
    m_LineNumber = 0;
    RecalculatePosition(llist);
 
+   MarkDirty();
    if(m_Previous)
    {
       m_LineNumber = m_Previous->GetLineNumber() + 1;
@@ -1161,6 +1162,9 @@ wxLayoutLine::Layout(wxDC &dc,
 
    bool cursorFound = false;
 
+
+   RecalculatePosition(llist);
+   
    if(cursorPos)
    {
       *cursorPos = m_Position;
@@ -2290,8 +2294,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
    {
       if(! wasDirty)
          ApplyStyle(line->GetStyleInfo(), dc);
-      if(forceAll || line->IsDirty()
-         || (cpos && line->GetLineNumber() == cpos->y))
+      if(forceAll || line->IsDirty() || (cpos && line->GetLineNumber() == cpos->y))
       {
          // The following Layout() calls will update our
          // m_CurrentStyleInfo if needed.
@@ -2369,6 +2372,11 @@ wxLayoutList::Draw(wxDC &dc,
 
    /* We need to re-layout all dirty lines to update styleinfos
       etc. However, somehow we don't find all dirty lines... */
+
+   /*
+     This should not really be needed in the future, we just need to
+     re-layout lines on the fly as done in Layout() at the moment. */
+   
    Layout(dc); //,-1,true); //FIXME
    ApplyStyle(m_DefaultStyleInfo, dc);
    wxBrush brush(m_CurrentStyleInfo.m_bg, wxSOLID);

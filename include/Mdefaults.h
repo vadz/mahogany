@@ -152,6 +152,14 @@
 #define   MP_HELPBROWSER   "HelpBrowser"
 /// is help browser of netscape type?
 #define   MP_HELPBROWSER_ISNS   "HelpBrowserIsNetscape"
+/// width of help frame
+#define MP_HELPFRAME_WIDTH   "HelpFrameWidth"
+/// height of help frame
+#define MP_HELPFRAME_HEIGHT  "HelpFrameHeight"
+/// xpos of help frame
+#define MP_HELPFRAME_XPOS   "HelpFrameXpos"
+/// ypos of help frame
+#define MP_HELPFRAME_YPOS   "HelpFrameYpos"
 /// the directory for mbox folders
 #define   MP_MBOXDIR         "FolderDir"
 /// command to convert tiff faxes to postscript
@@ -544,6 +552,14 @@
 #define   MP_HELPBROWSER_D   "netscape"
 /// is help browser of netscape type?
 #define   MP_HELPBROWSER_ISNS_D   1
+/// width of help frame
+#define MP_HELPFRAME_WIDTH_D 560l
+/// height of help frame
+#define MP_HELPFRAME_HEIGHT_D    500l
+/// xpos of help frame
+#define MP_HELPFRAME_XPOS_D 40l
+/// ypos of help frame
+#define MP_HELPFRAME_YPOS_D  40l
 /// the directory for mbox folders
 #define   MP_MBOXDIR_D         M_EMPTYSTRING
 /// command to convert tiff faxes to postscript
