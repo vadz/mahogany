@@ -369,7 +369,7 @@ MailFolderVirt::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
    size_t cookie;
    for ( UIdType n = seq.GetFirst(cookie);
          n != UID_ILLEGAL;
-         n = seq.GetNext(n, cookie), count )
+         n = seq.GetNext(n, cookie), count++ )
    {
       const Msg *msg = GetMsgFromMsgno(n);
       if ( !msg )
@@ -377,7 +377,13 @@ MailFolderVirt::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
 
       HeaderInfoList_obj hil = msg->mf->GetHeaders();
 
-      HeaderInfo * const hiDst = headers[count++];
+      HeaderInfo * const hiDst = headers[n - 1]; // -1 to make index from msgno
+      if ( !hiDst )
+      {
+         FAIL_MSG( "NULL pointer in array passed to GetHeaderInfo()? ");
+         break;
+      }
+
       const HeaderInfo * const hiSrc = hil->GetEntryUId(msg->uidPhys);
       if ( !hiSrc )
       {
