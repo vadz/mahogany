@@ -582,7 +582,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
          {
          case 'c':
             // this should work even in read-only mode
-            Copy(TRUE, TRUE);
+            Copy(WXLO_COPY_FORMAT, FALSE);
             break;
          case 's': // search
             Find("");
@@ -605,7 +605,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
             switch(keyCode)
             {
             case WXK_INSERT:
-               Copy();
+               Copy(WXLO_COPY_FORMAT, FALSE);
                break;
             case WXK_DELETE :
                if(! deletedSelection)
