@@ -2252,7 +2252,7 @@ wxFolderView::SearchMessages(void)
 {
    SearchCriterium criterium;
 
-   if( ConfigureSearchMessages(&criterium,GetProfile(),NULL) )
+   if ( ConfigureSearchMessages(&criterium,GetProfile(),NULL) )
    {
       Ticket t = m_ASMailFolder->SearchMessages(&criterium, this);
       m_TicketList->Add(t);
@@ -3152,20 +3152,37 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          ASSERT(result->GetSequence());
          if( value )
          {
-            UIdArray *ia = result->GetSequence();
-            unsigned long count = ia->Count();
+            UIdArray *uidsMatching = result->GetSequence();
+            if ( !uidsMatching )
+            {
+               FAIL_MSG( "searched ok but no search results??" );
+               break;
+            }
+
+            unsigned long count = uidsMatching->Count();
 
             wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
 
-            /* The returned message numbers are UIds which we must map
+            /*
+               The returned message numbers are UIds which we must map
                to our listctrl indices via the current HeaderInfo
-               structure. */
+               structure.
+
+               VZ: I wonder why do we jump through all these hops - we might
+                   return msgnos from search directly...
+             */
             HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-            for ( unsigned long n = 0; n < ia->Count(); n++ )
+            for ( unsigned long n = 0; n < uidsMatching->Count(); n++ )
             {
-               UIdType idx = hil->GetIdxFromUId((*ia)[n]);
+               UIdType idx = hil->GetIdxFromUId((*uidsMatching)[n]);
                if ( idx != UID_ILLEGAL )
-                  m_FolderCtrl->Select(idx);
+               {
+                  m_FolderCtrl->Select(hil->GetPosFromIdx(idx));
+               }
+               else
+               {
+                  FAIL_MSG( "found inexistent message??" );
+               }
             }
 
             msg.Printf(_("Found %lu messages."), count);

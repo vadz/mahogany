@@ -66,6 +66,10 @@
 // event tables
 // ----------------------------------------------------------------------------
 
+BEGIN_EVENT_TABLE(wxPChoice, wxChoice)
+    EVT_SIZE(wxPChoice::OnSize)
+END_EVENT_TABLE()
+
 BEGIN_EVENT_TABLE(wxPNotebook, wxNotebook)
     EVT_SIZE(wxPNotebook::OnSize)
 END_EVENT_TABLE()
@@ -954,6 +958,126 @@ void wxPListBox::RestoreSelection()
 
 // save the selection to config
 void wxPListBox::SaveSelection()
+{
+    if ( m_persist->ChangePath() ) {
+        wxConfigBase *config = m_persist->GetConfig();
+        config->Write(m_persist->GetKey(), (long)GetSelection());
+
+        m_persist->RestorePath();
+    }
+}
+
+// ----------------------------------------------------------------------------
+// wxPChoice
+// ----------------------------------------------------------------------------
+
+const char *wxPChoice::ms_path = "ChoiceSelection";
+
+// default ctor
+wxPChoice::wxPChoice()
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper;
+}
+
+// standard ctor
+wxPChoice::wxPChoice(const wxString& configPath,
+                     wxWindow *parent,
+                     wxWindowID id,
+                     const wxPoint &pos,
+                     const wxSize &size,
+                     int n,
+                     const wxString *items,
+                     long style,
+                     const wxValidator& validator,
+                     wxConfigBase *config)
+           : wxChoice(parent, id, pos, size, n, items, style, validator)
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper(configPath, ms_path, config);
+}
+
+// pseudo ctor
+bool wxPChoice::Create(const wxString& configPath,
+                        wxWindow *parent,
+                        wxWindowID id,
+                        const wxPoint &pos,
+                        const wxSize &size,
+                        int n,
+                        const wxString *items,
+                        long style,
+                        const wxValidator& validator,
+                        wxConfigBase *config)
+{
+   m_persist->SetConfig(config);
+   m_persist->SetPath(configPath, ms_path);
+
+   return wxChoice::Create(parent, id, pos, size, n, items, style, validator);
+}
+
+// dtor saves the settings
+wxPChoice::~wxPChoice()
+{
+    SaveSelection();
+
+    delete m_persist;
+}
+
+// set the config object to use (must be !NULL)
+void wxPChoice::SetConfigObject(wxConfigBase *config)
+{
+    m_persist->SetConfig(config);
+}
+
+// set the path to use (either absolute or relative)
+void wxPChoice::SetConfigPath(const wxString& path)
+{
+    m_persist->SetPath(path, ms_path);
+}
+
+// first time our OnSize() is called we restore the seection: we can't do it
+// before because we don't know when all the items will be added to the listbox
+// (surely they may be added after ctor call)
+void wxPChoice::OnSize(wxSizeEvent& event)
+{
+    if ( m_bFirstTime ) {
+        RestoreSelection();
+
+        m_bFirstTime = FALSE;
+    }
+
+    // important things may be done in the base class version!
+    event.Skip();
+}
+
+// retrieve the selection from config
+void wxPChoice::RestoreSelection()
+{
+    if ( m_persist->ChangePath() ) {
+        long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
+
+        if ( (sel != -1) && (sel < Number()) ) {
+            SetSelection(sel);
+
+            // emulate the event which would have resulted if the user selected
+            // the string from the choice
+            wxCommandEvent event(wxEVT_COMMAND_CHOICE_SELECTED, GetId());
+            event.m_commandInt = sel;
+            if ( HasClientUntypedData() )
+                event.m_clientData = GetClientData(sel);
+            else if ( HasClientObjectData() )
+                event.m_clientData = GetClientObject(sel);
+            event.m_commandString = GetString(sel);
+            event.SetEventObject( this );
+            (void)ProcessEvent(event);
+        }
+
+        m_persist->RestorePath();
+    }
+}
+
+// save the selection to config
+void wxPChoice::SaveSelection()
 {
     if ( m_persist->ChangePath() ) {
         wxConfigBase *config = m_persist->GetConfig();

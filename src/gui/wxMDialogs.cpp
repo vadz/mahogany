@@ -1732,17 +1732,18 @@ protected:
    void UpdateCritStruct(void)
       {
          m_CritStruct->m_What = (SearchCriterium::Type)
-            (m_Choices->GetSelection()&SEARCH_CRIT_MASK);
+            m_Choices->GetSelection();
          m_CritStruct->m_Invert = m_Invert->GetValue();
          m_CritStruct->m_Key = m_Keyword->GetValue();
       }
    SearchCriterium *m_CritStruct;
-   wxChoice    *m_Choices;
-   wxCheckBox  *m_Invert;
-   wxTextCtrl  *m_Keyword;
-   int         m_OldCriterium;
-   int         m_Criterium;
-   String      m_Arg, m_OldArg;
+   wxChoice     *m_Choices;
+   wxCheckBox   *m_Invert;
+   wxPTextEntry *m_Keyword;
+   int           m_OldCriterium;
+   int           m_Criterium;
+   String        m_Arg,
+                 m_OldArg;
 };
 
 wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
@@ -1762,26 +1763,25 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
 
    wxLayoutConstraints *c;
 
-   wxStaticText *critlabel = new
-      wxStaticText(this, -1,_("Search for text in"));
+   wxStaticText *critlabel = new wxStaticText(this, -1, _("Search for text in"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.AsIs();
-   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->top.SameAs(box, wxTop, 5*LAYOUT_Y_MARGIN);
    c->height.AsIs();
    critlabel->SetConstraints(c);
 
-   m_Choices = new wxChoice(this, -1, wxDefaultPosition,
-                            wxDefaultSize, NUM_SEARCHCRITERIA,
-                            searchCriteria);
+   m_Choices = new wxChoice("SearchWhere", this, -1, wxDefaultPosition,
+                             wxDefaultSize, NUM_SEARCHCRITERIA,
+                             searchCriteria);
    c = new wxLayoutConstraints;
    c->left.RightOf(critlabel, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->centreY.SameAs(critlabel, wxCentreY);
    c->height.AsIs();
    m_Choices->SetConstraints(c);
 
-   wxStaticText *keylabel = new wxStaticText(this, -1,_("Search for"));
+   wxStaticText *keylabel = new wxStaticText(this, -1, _("Search for:"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.AsIs();
@@ -1789,7 +1789,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    c->height.AsIs();
    keylabel->SetConstraints(c);
 
-   m_Keyword = new wxTextCtrl(this, -1);
+   m_Keyword = new wxPTextEntry("SearchFor", this, -1);
    c = new wxLayoutConstraints;
    c->left.RightOf(keylabel, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -1805,7 +1805,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    c->height.AsIs();
    m_Invert->SetConstraints(c);
 
-   SetDefaultSize(380,310);
+   SetDefaultSize(380, 310);
 
    TransferDataToWindow();
    m_OldCriterium = m_Criterium;
@@ -1831,9 +1831,15 @@ bool wxMessageSearchDialog::TransferDataToWindow()
 {
    m_Criterium = READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_CRIT);
    m_Arg = READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_ARG);
-   m_Choices->SetSelection(m_Criterium & SEARCH_CRIT_MASK);
+
+   if ( m_Criterium & SEARCH_CRIT_MASK )
+      m_Choices->SetSelection(m_Criterium & SEARCH_CRIT_MASK);
+
    m_Invert->SetValue((m_Criterium & SEARCH_CRIT_INVERT_FLAG) != 0);
-   m_Keyword->SetValue(m_Arg);
+
+   if ( !m_Arg.empty() )
+      m_Keyword->SetValue(m_Arg);
+
    UpdateCritStruct();
    return TRUE;
 }
@@ -1844,7 +1850,7 @@ bool ConfigureSearchMessages(class SearchCriterium *crit,
                              Profile *profile, wxWindow *parent)
 {
    wxMessageSearchDialog dlg(crit, profile, parent);
-   return ( dlg.ShowModal() == wxID_OK );
+   return dlg.ShowModal() == wxID_OK;
 }
 
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
+/////////////////////////////////////////////////////////////////////////////
 // Name:        wx/persctrl.h
 // Purpose:     persistent classes declarations
 // Author:      Vadim Zeitlin
@@ -7,7 +7,7 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows license (part of wxExtra library)
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
+/////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _WX_PWINDOW_H_
 #define   _WX_PWINDOW_H_
@@ -15,7 +15,6 @@
 #ifdef    __GNUG__
 #   pragma interface "persctrl.h"
 #endif
-
 
 // forward declarations
 class wxConfigBase;
@@ -25,6 +24,7 @@ class wxPHelper;
 #include <wx/defs.h>
 #include <wx/notebook.h>
 #include <wx/checkbox.h>
+#include <wx/choice.h>
 #include <wx/control.h>
 #include <wx/combobox.h>
 #include <wx/splitter.h>
@@ -188,6 +188,68 @@ protected:
     size_t m_countSaveMax;              // max number of strings to save
 
     wxPHelper *m_persist;
+};
+
+// ----------------------------------------------------------------------------
+// A persistent choice control: remembers the last string choosen
+// ----------------------------------------------------------------------------
+
+class WXDLLMAYEXP wxPChoice : public wxChoice
+{
+public:
+    // ctors
+        // default, use Create() after it
+    wxPChoice();
+        // standard ctor
+    wxPChoice(const wxString& configPath,
+              wxWindow *parent,
+              wxWindowID id = -1,
+              const wxPoint &pos = wxDefaultPosition,
+              const wxSize &size = wxDefaultSize,
+              int n = 0,
+              const wxString *items = NULL,
+              long style = 0,
+              const wxValidator& validator = wxDefaultValidator,
+              wxConfigBase *config = NULL);
+        // pseudo ctor
+    bool Create(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxPoint &pos = wxDefaultPosition,
+                const wxSize &size = wxDefaultSize,
+                int n = 0,
+                const wxString *items = NULL,
+                long style = 0,
+                const wxValidator& validator = wxDefaultValidator,
+                wxConfigBase *config = NULL);
+
+    // dtor saves the settings
+    virtual ~wxPChoice();
+
+    // accessors
+        // set the config object to use (must be !NULL)
+    void SetConfigObject(wxConfigBase *config);
+        // set the path to use (either absolute or relative)
+    void SetConfigPath(const wxString& path);
+
+    // callbacks
+        // when we're resized the first time we restore our page
+    void OnSize(wxSizeEvent& event);
+
+protected:
+    bool       m_bFirstTime;  // FIXME hack used in OnSize()
+    wxPHelper *m_persist;
+
+    // do remember/restore the selection
+       // retrieve the column widths from config
+    void RestoreSelection();
+       // save the column widths to config
+    void SaveSelection();
+
+private:
+    static const char *ms_path;
+
+    DECLARE_EVENT_TABLE()
 };
 
 // ----------------------------------------------------------------------------
