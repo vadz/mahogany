@@ -193,18 +193,13 @@ public:
    // callbacks
    void OnChar(wxKeyEvent&);
 
-   void OnDoubleClickHandler(wxMouseEvent& event)
-   {
-      OnDoubleClick();
-
-      event.Skip();
-   }
    void OnRightDown(wxMouseEvent& event);
 
    void OnMenuCommand(wxCommandEvent&);
 
    void OnTreeExpanding(wxTreeEvent&);
    void OnTreeSelect(wxTreeEvent&);
+   void OnTreeActivate(wxTreeEvent& event) { OnDoubleClick(); }
    void OnBeginLabelEdit(wxTreeEvent&);
    void OnEndLabelEdit(wxTreeEvent&);
 
@@ -408,10 +403,10 @@ BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxPTreeCtrl)
    // (except our owns) anyhow
    EVT_TREE_SEL_CHANGED(-1,      wxFolderTreeImpl::OnTreeSelect)
    EVT_TREE_ITEM_EXPANDING(-1,   wxFolderTreeImpl::OnTreeExpanding)
+   EVT_TREE_ITEM_ACTIVATED(-1, wxFolderTreeImpl::OnTreeActivate)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, wxFolderTreeImpl::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1,   wxFolderTreeImpl::OnEndLabelEdit)
 
-   EVT_LEFT_DCLICK(wxFolderTreeImpl::OnDoubleClickHandler)
    EVT_RIGHT_DOWN(wxFolderTreeImpl::OnRightDown)
 
    EVT_CHAR(wxFolderTreeImpl::OnChar)
