@@ -2183,6 +2183,11 @@ MailFolderCC::Open(OpenMode openmode)
          case HalfOpen:
             ccOptions |= OP_HALFOPEN;
             break;
+
+         case Silent:
+         default:
+            FAIL_MSG( "Silent open mode is not valid here" );
+            break;
       }
 
       // the stream could have been already opened by CreateIfNeeded(), but if
