@@ -506,7 +506,7 @@ public:
 
    String GetRootPath(void) const
    {
-      return GetSectionPath(GetProfileSection());
+      return GetProfileSection();
    }
 
    virtual String GetFolderName() const;
@@ -1808,30 +1808,3 @@ String ProfileImpl::GetFolderName() const
 
    return folderName;
 }
-
-/* static */
-String Profile::GetSectionPath(const String& section)
-{
-   String path = section;
-
-   // we don't use "/M" prefix when working with wxRegConfig as it would be
-   // superfluous: our config key is already Mahogany-Team/M
-   //
-   // but for the file based config formats (both local and remote) we do use
-   // it for mostly historical reasons - even though if it probably would be
-   // better to never use it, it's simply too much trouble to write the upgrade
-   // code to deal with the existing config files
-#ifdef OS_WIN
-   if ( ProfileImpl::ms_usingRegConfig )
-   {
-      // remove "/M" prefix
-      ASSERT_MSG( path[0u] == _T('/') && path[1u] == _T('M'),
-                  _T("all profile sections must start with \"/M\"") );
-
-      path.erase(0, 2);
-   }
-#endif // Windows
-
-   return path;
-}
-

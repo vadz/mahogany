@@ -325,32 +325,29 @@ public:
 
    /// return the path used for the normal config info (folders options &c)
    static String GetProfilePath()
-      { return GetSectionPath(M_PROFILE_CONFIG_SECTION); }
+      { return M_PROFILE_CONFIG_SECTION; }
 
    /// return the path under which the identities are stored
    static String GetIdentityPath() 
-      { return GetSectionPath(M_IDENTITY_CONFIG_SECTION); }
+      { return M_IDENTITY_CONFIG_SECTION; }
 
    /// return the path under which the filters are stored
    static String GetFiltersPath() 
-      { return GetSectionPath(M_FILTERS_CONFIG_SECTION); }
+      { return M_FILTERS_CONFIG_SECTION; }
 
    /// return the path under which the frame options are stored
    static String GetFramesPath() 
-      { return GetSectionPath(M_FRAMES_CONFIG_SECTION); }
+      { return M_FRAMES_CONFIG_SECTION; }
 
    /// return the path under which the templates are stored
    static String GetTemplatesPath() 
-      { return GetSectionPath(M_TEMPLATES_CONFIG_SECTION); }
+      { return M_TEMPLATES_CONFIG_SECTION; }
 
    //@}
 
 protected:
    // egcs wants this
    Profile() { }
-
-   /// helper of all GetXXXPath() functions
-   static String GetSectionPath(const String& section);
 
    /// provide access to ProfileEnumDataImpl for the derived classes
    ProfileEnumDataImpl& GetEnumData(EnumData& cookie) const

@@ -34,10 +34,11 @@
    #endif
 
    #include <wx/config.h>
-   #include <wx/fileconf.h>
    #include <wx/dir.h>
    #include <wx/utils.h>
 #endif
+
+#include <wx/fileconf.h>
 
 #ifdef OS_UNIX
    #include <sys/types.h>
@@ -247,9 +248,6 @@ ConfigSourceFactory::Find(const String& type)
 
 ConfigSourceLocal::ConfigSourceLocal(const String& filename, const String& name)
                  : ConfigSource(name), m_config(NULL)
-#ifdef OS_WIN
-                   , m_usingRegConfig(false)
-#endif // OS_WIN
 {
    String localFilePath, globalFilePath;
 
@@ -425,8 +423,6 @@ ConfigSourceLocal::ConfigSourceLocal(const String& filename, const String& name)
                         _T(""),
                         wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE
                      );
-
-      m_usingRegConfig = true;
 
       // skip wxFileConfig creation below
       return;
