@@ -35,6 +35,13 @@ $Id$
 - DND with gmc (dead easy, see dnd example :-) )
 
 
+- Alpha:
+  + editing after reply/signature in wrong place
+  + doesn't terminate
+  + wxList asserts
+
+- announce M and bbdb2adb on bbdb mailing list
+
 KB: Vadim, could you check the following ADB-wxOptionsDlg please?
 
 - ADB:
