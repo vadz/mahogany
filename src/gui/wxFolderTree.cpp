@@ -1617,11 +1617,7 @@ wxString wxFolderTreeNode::GetName() const
             text7->data = (unsigned char *) nameutf7.c_str();
             text7->size = nameutf7.Length();
 
-            // cclient doesn't use the table parameter in utf8_text_utf7
-            // function but still has it (for future extensions? or just
-            // because other conversion functions have it?)
-            void *tab = NULL;
-            utf8_text_utf7 ( text7, text8, tab );
+            utf8_text_utf7 (text7, text8);
 
             //we cannot use "nameutf8 << text8->data" here as utf8_text_utf7()
             //returns text8->data which is longer than text8->size:

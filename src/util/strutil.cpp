@@ -1339,10 +1339,7 @@ ConvertUnicodeToSystem(wxString *strUtf, wxFontEncoding enc)
          text7.data = (unsigned char *) strUtf->c_str();
          text7.size = strUtf->Length();
 
-         // cclient doesn't use the table parameter in utf8_text_utf7
-         // function but still has it (for future extensions? or just
-         // because other conversion functions have it?)
-         utf8_text_utf7 ( &text7, &text8, NULL /* table */ );
+         utf8_text_utf7 (&text7, &text8);
 
          strUtf->clear();
          for ( unsigned long k = 0; k < text8.size; k++ )

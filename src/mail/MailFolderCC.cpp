@@ -3956,8 +3956,8 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
 {
    IMAPLOCAL *imapLocal = (IMAPLOCAL *)stream->local;
    THREADER *thr;
-   for ( thr = imapLocal->threader;
-         thr && mail_compare_cstring(thr->name, (char *)thrName);
+   for ( thr = imapLocal->cap.threader;
+         thr && compare_cstring(thr->name, (char *)thrName);
          thr = thr->next )
       ;
 
@@ -4011,7 +4011,7 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
                // threading support in its CAPABILITY reply, so just use the
                // first threading method available
                IMAPLOCAL *imapLocal = (IMAPLOCAL *)m_MailStream->local;
-               threadingAlgo = imapLocal->threader->name;
+               threadingAlgo = imapLocal->cap.threader->name;
             }
          }
       }
