@@ -39,9 +39,9 @@ enum FolderCreatePage
 // macros
 // -----------------------------------------------------------------------------
 
+// get the notebook page by index and cast it to the right type
 #define GET_FOLDER_PAGE(nbook)   ((wxFolderPropertiesPage *)nbook->GetPage(FolderCreatePage_Folder))
-#define GET_COMPOSE_PAGE(nbook)  ((wxOptionsPage *)nbook->GetPage(FolderCreatePage_Compose))
-#define GET_MSGVIEW_PAGE(nbook)  ((wxOptionsPage *)nbook->GetPage(FolderCreatePage_MsgView))
+#define GET_OPTIONS_PAGE(nbook, n)  ((wxOptionsPage *)nbook->GetPage(n))
 
 // -----------------------------------------------------------------------------
 // functions

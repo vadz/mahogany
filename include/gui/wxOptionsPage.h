@@ -187,11 +187,18 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-// user identity and network configuration page
+// user identity
 class wxOptionsPageIdent : public wxOptionsPage
 {
 public:
    wxOptionsPageIdent(wxNotebook *parent, ProfileBase *profile);
+};
+
+// network configuration page
+class wxOptionsPageNetwork : public wxOptionsPage
+{
+public:
+   wxOptionsPageNetwork(wxNotebook *parent, ProfileBase *profile);
 };
 
 // global folder settings (each folder has its own settings which are changed

@@ -48,8 +48,12 @@
 #include "gui/wxBrowseButton.h"
 #include "gui/wxFolderTree.h"
 
-// -----------------------------------------------------------------------------
+// ============================================================================
 // private classes
+// ============================================================================
+
+// -----------------------------------------------------------------------------
+// dialog classes
 // -----------------------------------------------------------------------------
 
 // base class for folder creation and properties dialog
@@ -111,6 +115,10 @@ protected:
                          : (ProfileBase *)NULL;
    }
 
+   // tell all notebook pages (except the first one) which profile we're
+   // working with
+   void SetProfile(ProfileBase *profile);
+
    wxTextCtrl  *m_folderName,
                *m_parentName;
 
@@ -126,39 +134,6 @@ protected:
 
 private:
    DECLARE_DYNAMIC_CLASS(wxFolderBaseDialog)
-};
-
-// folder creation dialog
-//
-// FIXME this dialog is also used for showing the folder properties, hence the
-//       ugly hack with the 3rd parameter to the ctor (and which is passed
-//       further to the pages too) - instead we should have a common base
-//       class to the both kinds of notebooks and separate properties/creation
-//       functionality for moving into derived classes
-class wxFolderCreateDialog : public wxFolderBaseDialog
-{
-public:
-   wxFolderCreateDialog(wxWindow *parent,
-                        MFolder *parentFolder);
-
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
-
-   // called by the page to create the new folder
-   MFolder *DoCreateFolder(FolderType typeFolder);
-
-   // callbacks
-   void OnFolderNameChange(wxEvent&);
-
-   // override control creation functions
-   virtual void CreateNotebook(wxPanel *panel);
-
-   // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxFolderCreateDialog() { wxFAIL_MSG("not reached"); }
-
-private:
-   DECLARE_DYNAMIC_CLASS(wxFolderCreateDialog)
-   DECLARE_EVENT_TABLE()
 };
 
 // folder properties dialog
@@ -178,7 +153,37 @@ private:
    DECLARE_DYNAMIC_CLASS(wxFolderPropertiesDialog)
 };
 
-// A panel for defining a new Folder
+// folder creation dialog
+class wxFolderCreateDialog : public wxFolderBaseDialog
+{
+public:
+   wxFolderCreateDialog(wxWindow *parent,
+                        MFolder *parentFolder);
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
+   // called by the page to create the new folder
+   MFolder *DoCreateFolder(FolderType typeFolder);
+
+   // callbacks
+   void OnFolderNameChange(wxEvent&);
+
+   // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
+   wxFolderCreateDialog() { wxFAIL_MSG("not reached"); }
+
+private:
+   DECLARE_DYNAMIC_CLASS(wxFolderCreateDialog)
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// A notebook page containing the folder properties (access)
+// ----------------------------------------------------------------------------
+
+// HACK: the 3rd argument to the ctor tells us whether we're creating a new
+//       folder (if it's !NULL) or just showing properties of an existing one.
+//       Our UI behaves slightly differently in these 2 cases.
 class wxFolderPropertiesPage : public wxNotebookPageBase
 {
 public:
@@ -279,20 +284,25 @@ protected:
    DECLARE_EVENT_TABLE()
 };
 
-// notebook for folder properties/creation
-// FIXME should it be used for showing folder properties too? Or is it for
-//       creation only? Karsten, I'm lost...
+// notebook for folder properties/creation: if the wxFolderCreateDialog pointer
+// is NULL in the ctor, assume we're showing properties. Otherwise, we're
+// creating a new folder.
 class wxFolderCreateNotebook : public wxNotebookWithImages
 {
 public:
    // icon names
    static const char *s_aszImages[];
+   static const char *s_aszImagesAdvanced[];
 
-   wxFolderCreateNotebook(wxWindow *parent,
+   wxFolderCreateNotebook(bool isAdvancedUser,
+                          wxWindow *parent,
                           wxFolderCreateDialog *dlg = NULL);
 };
 
+// ----------------------------------------------------------------------------
 // folder selection dialog: contains the folder tree inside it
+// ----------------------------------------------------------------------------
+
 class wxFolderSelectionDialog : public wxDialog
 {
 public:
@@ -453,7 +463,32 @@ wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
 
 void wxFolderBaseDialog::CreateNotebook(wxPanel *panel)
 {
-   m_notebook = new wxFolderCreateNotebook(panel);
+   // TODO let the user select himself which pages he wants to see... It's not
+   //      as simple as it seems because currently the image list must be known
+   //      statically, so it involves changing wxOptionsPage code (currently,
+   //      it adds itself with the icon corresponding to the position of the
+   //      page in the notebook instead of the fixed number)
+   bool isAdvancedUser = READ_APPCONFIG(MP_USERLEVEL) == 1;
+
+   m_notebook = new wxFolderCreateNotebook
+                    (
+                     isAdvancedUser,
+                     panel,
+                     wxDynamicCast(this, wxFolderCreateDialog)
+                    );
+}
+
+void wxFolderBaseDialog::SetProfile(ProfileBase *profile)
+{
+   // we assume that the first page is the "Access" one which is a bit special,
+   // this is why we start from the second one
+   wxASSERT_MSG( FolderCreatePage_Folder == 0, "this code must be fixed" );
+
+   size_t nPageCount = m_notebook->GetPageCount();
+   for ( size_t nPage = 1; nPage < nPageCount; nPage++ )
+   {
+      GET_OPTIONS_PAGE(m_notebook, nPage)->SetProfile(profile);
+   }
 }
 
 // -----------------------------------------------------------------------------
@@ -487,9 +522,10 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType typeFolder)
    if ( m_newFolder )
    {
       // tell the other pages that we now have a folder (and hence a profile)
-      ProfileBase *profile = ProfileBase::CreateProfile(m_newFolder->GetFullName());
-      GET_COMPOSE_PAGE(m_notebook)->SetProfile(profile);
-      GET_MSGVIEW_PAGE(m_notebook)->SetProfile(profile);
+      String folderName = m_newFolder->GetFullName();
+      ProfileBase *profile = ProfileBase::CreateProfile(folderName);
+
+      SetProfile(profile);
 
       profile->DecRef();
    }
@@ -509,6 +545,14 @@ void wxFolderCreateDialog::OnFolderNameChange(wxEvent& event)
 bool wxFolderCreateDialog::TransferDataToWindow()
 {
    EnableButtons(FALSE);   // initially, we have no folder name
+
+   // this is one of rare cases where persistent controls are more painful than
+   // useful - when we create the folder, we always want to start with the
+   // "Access" page, but the persistent notebook restores thep age we used the
+   // last time. We still do use it, because it's nice that "Properties" dialog
+   // will open on the page where we were last when it's opened the next time -
+   // just override this behaviour here by setting selection explicitly.
+   m_notebook->SetSelection(FolderCreatePage_Folder);
 
    // initialize our pages
    wxFolderPropertiesPage *page = GET_FOLDER_PAGE(m_notebook);
@@ -550,11 +594,6 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
    return ok;
 }
 
-void wxFolderCreateDialog::CreateNotebook(wxPanel *panel)
-{
-   m_notebook = new wxFolderCreateNotebook(panel, this);
-}
-
 // -----------------------------------------------------------------------------
 // wxFolderPropertiesDialog
 // -----------------------------------------------------------------------------
@@ -573,11 +612,11 @@ bool wxFolderPropertiesDialog::TransferDataToWindow()
    wxString folderName = m_newFolder->GetFullName();
    ProfileBase *profile = GetProfile();
 
-   // lame hack: use SetFolderPath() so the page will read its data from the
-   // profile section corresponding to our folder
+   // use SetFolderPath() so the page will read its data from the profile
+   // section corresponding to our folder
    GET_FOLDER_PAGE(m_notebook)->SetFolderPath(folderName);
-   GET_COMPOSE_PAGE(m_notebook)->SetProfile(profile);
-   GET_MSGVIEW_PAGE(m_notebook)->SetProfile(profile);
+
+   SetProfile(profile);
 
    profile->DecRef();
 
@@ -601,7 +640,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                       : wxNotebookPageBase(notebook)
 {
    // add us to the notebook
-   int image = notebook->GetPageCount();
+   int image = FolderCreatePage_Folder;
    notebook->AddPage(this, _("Access"), FALSE /* don't select */, image);
 
    m_dlgCreate = dlg;
@@ -934,22 +973,27 @@ wxFolderPropertiesPage::SetDefaultValues()
       value = profile->readEntry(MP_FOLDER_HOST, "");
       if ( !value )
       {
-         if ( typeFolder == Nntp )
+         // take the global server setting for this protocol
+         switch ( typeFolder )
          {
-            // take the global NNTP server setting for this
-            value = READ_CONFIG(profile, MP_NNTPHOST);
-         }
-         else
-         {
-            // this host by default
-            value = READ_CONFIG(profile, MP_HOSTNAME);
+            case Nntp:
+               value = READ_CONFIG(profile, MP_NNTPHOST);
+               break;
+
+            case POP:
+               value = READ_CONFIG(profile, MP_POPHOST);
+               break;
+
+            case IMAP:
+               value = READ_CONFIG(profile, MP_IMAPHOST);
+               break;
          }
       }
 
       if ( !value )
       {
-          // set to the localhost in despair...
-          value = MP_FOLDER_HOST_D;
+         // set to this host by default
+         value = READ_CONFIG(profile, MP_HOSTNAME);
       }
 
       m_server->SetValue(value);
@@ -967,7 +1011,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    }
    else if (typeFolder == IMAP)
       m_mailboxname->SetValue(value);
-   
+
    m_originalValues[Path] = value;
 
    if ( !m_isCreating )
@@ -1218,7 +1262,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       // created
       MEventManager::Send(
          new MEventFolderTreeChangeData(fullname,
-                                              MEventFolderTreeChangeData::Create)
+                                        MEventFolderTreeChangeData::Create)
          );
    }
 
@@ -1245,22 +1289,48 @@ const char *wxFolderCreateNotebook::s_aszImages[] =
    NULL
 };
 
+const char *wxFolderCreateNotebook::s_aszImagesAdvanced[] =
+{
+   "access",
+   "ident",
+   "network",
+   "compose",
+   "msgview",
+   "helpers",
+   NULL
+};
+
 // create the control and add pages too
-wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
+wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
+                                               wxWindow *parent,
                                                wxFolderCreateDialog *dlg)
-   : wxNotebookWithImages("FolderCreateNotebook",
-                          parent,
-                          s_aszImages)
+                      : wxNotebookWithImages
+                        (
+                         "FolderCreateNotebook",
+                         parent,
+                         isAdvancedUser ? s_aszImagesAdvanced : s_aszImages
+                        )
 {
    // don't forget to update both the array above and the enum!
    wxASSERT( WXSIZEOF(s_aszImages) == FolderCreatePage_Max + 1 );
 
    ProfileBase *profile = ProfileBase::CreateProfile("");
 
-   // create and add the pages
+   // create and add the pages: some are always present, others are only shown
+   // to "advanced" users (because they're not generally useful and may confuse
+   // the novices)
    (void)new wxFolderPropertiesPage(this, profile, dlg);
+   if ( isAdvancedUser )
+   {
+      (void)new wxOptionsPageIdent(this, profile);
+      (void)new wxOptionsPageNetwork(this, profile);
+   }
    (void)new wxOptionsPageCompose(this, profile);
    (void)new wxOptionsPageMessageView(this, profile);
+   if ( isAdvancedUser )
+   {
+      (void)new wxOptionsPageHelpers(this, profile);
+   }
 
    profile->DecRef();
 }

@@ -1,6 +1,8 @@
-Please consult files in the doc subdirectory and the help file
-for further details. We also hope that Mahogany interface is simple
-enough that you may start using it right now.
+Please consult files in the doc subdirectory (in particular, the list
+of known bugs in bugs.txt) and the help file for further details.
+
+We also hope that Mahogany interface is simple enough that you may
+start using it right now.
 
 And don't forget that the most up-to-date documentation is always
 available online at M home page: please see

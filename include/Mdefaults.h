@@ -249,6 +249,10 @@
 #define   MP_ADD_DEFAULT_HOSTNAME   "AddDefaultHostName"
 /// the username for returned mail
 #define   MP_RETURN_ADDRESS      "ReturnAddress"
+/// the default POP3 host
+#define   MP_POPHOST          "Pop3Host"
+/// the default IMAP4 host
+#define   MP_IMAPHOST          "Imap4Host"
 /// the mail host
 #define   MP_SMTPHOST         "MailHost"
 /// the news server
@@ -618,6 +622,10 @@
 #define   MP_HOSTNAME_D         M_EMPTYSTRING
 /// Add this hostname for addresses without hostname?
 #define   MP_ADD_DEFAULT_HOSTNAME_D 1L
+/// the default POP3 host
+#define   MP_POPHOST_D          ""
+/// the default IMAP4 host
+#define   MP_IMAPHOST_D          ""
 /// the mail host
 #define   MP_SMTPHOST_D         ""
 /// tyhe mail server fallback

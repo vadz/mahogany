@@ -46,6 +46,7 @@
 #define MH_OPAGE_OTHERS      4105
 #define MH_OPAGE_HELPERS     4106
 #define MH_OPAGE_FOLDERS     4107
+#define MH_OPAGE_NETWORK     4108
 #define MH_OPTIONSNOTEBOOK   4120
 
 #define MH_PYTHON            5000

@@ -47,7 +47,7 @@ MailFolder::OpenFolder(int typeAndFlags,
    int flags = GetFolderFlags(typeAndFlags);
 
    String symbolicName = i_name;
-   
+
    if ( type == MF_PROFILE || type == MF_PROFILE_OR_FILE )
    {
       if(type == MF_PROFILE)
@@ -108,6 +108,13 @@ MailFolder::OpenFolder(int typeAndFlags,
       case MF_IMAP:
          if(strutil_isempty(server))
             server = READ_CONFIG(profile, MP_FOLDER_HOST);
+         if(strutil_isempty(server))
+         {
+            if ( type == MF_POP )
+               server = READ_CONFIG(profile, MP_POPHOST);
+            else
+               server = READ_CONFIG(profile, MP_IMAPHOST);
+         }
          if(strutil_isempty(login))
             login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
          if(strutil_isempty(passwd))

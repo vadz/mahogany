@@ -72,7 +72,7 @@
 // DONT_FORGET_TO_MODIFY to find it)
 enum ConfigFields
 {
-   // network & identity
+   // identity
    ConfigField_IdentFirst = -1,
    ConfigField_UsernameHelp,
    ConfigField_Username,
@@ -81,20 +81,27 @@ enum ConfigFields
    ConfigField_AddDefaultHostname,
    ConfigField_ReturnAddress,
    ConfigField_SetReplyFromTo,
-   ConfigField_MailServer,
-   ConfigField_NewsServer,
    ConfigField_PersonalName,
    ConfigField_UserLevel,
+   ConfigField_IdentLast = ConfigField_UserLevel,
+
+   // network
+   ConfigField_NetworkFirst = ConfigField_IdentLast,
+   ConfigField_ServersHelp,
+   ConfigField_PopServer,
+   ConfigField_ImapServer,
+   ConfigField_MailServer,
+   ConfigField_NewsServer,
    ConfigField_TimeoutInfo,
    ConfigField_OpenTimeout,
    ConfigField_ReadTimeout,
    ConfigField_WriteTimeout,
    ConfigField_CloseTimeout,
    ConfigField_RshTimeout,
-   ConfigField_IdentLast = ConfigField_RshTimeout,
+   ConfigField_NetworkLast = ConfigField_RshTimeout,
 
    // compose
-   ConfigField_ComposeFirst = ConfigField_IdentLast,
+   ConfigField_ComposeFirst = ConfigField_NetworkLast,
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
@@ -373,10 +380,18 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Add this hostname if none specified"), Field_Bool, -1 },
    { gettext_noop("&Return/Reply address"),        Field_Text | Field_Vital,   -1, },
    { gettext_noop("Reply return address from &To: field"), Field_Bool, -1, },
-   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -1, },
-   { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,                        },
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
    { gettext_noop("User &level:novice:advanced"),  Field_Combo,   -1,                        },
+
+   // network
+   { gettext_noop("The following fields are used as default values for the\n"
+                  "corresponding server names. You may set them independently\n"
+                  "for each folder as well, overriding the values specified "
+                  "here"),                         Field_Message, -1.                        },
+   { gettext_noop("&POP server"),                  Field_Text,    -1,                        },
+   { gettext_noop("&IMAP server"),                 Field_Text,    -1,                        },
+   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -1,           },
+   { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,                        },
    { gettext_noop("The following timeout values are used for TCP connections to\n"
                   "remote mail or news servers. Their scope is global, but they\n"
                   "will get set from the folder that has been opened last.\n")
@@ -417,7 +432,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Folders to open on &startup"),  Field_List |
                                                    Field_Restart, -1,           },
    { gettext_noop("Folder opened in &main frame"), Field_Text,    -1,                        },
-//   { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
+// { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
    { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
@@ -520,7 +535,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 // there too
 static const ConfigValueDefault gs_aConfigDefaults[] =
 {
-   // network and identity
+   // identity
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_USERNAME),
    CONFIG_NONE(),
@@ -528,10 +543,15 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_ADD_DEFAULT_HOSTNAME),
    CONFIG_ENTRY(MP_RETURN_ADDRESS),
    CONFIG_ENTRY(MP_SET_REPLY_FROM_TO),
-   CONFIG_ENTRY(MP_SMTPHOST),
-   CONFIG_ENTRY(MP_NNTPHOST),
    CONFIG_ENTRY(MP_PERSONALNAME),
    CONFIG_ENTRY(MP_USERLEVEL),
+
+   // network
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_POPHOST),
+   CONFIG_ENTRY(MP_IMAPHOST),
+   CONFIG_ENTRY(MP_SMTPHOST),
+   CONFIG_ENTRY(MP_NNTPHOST),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_TCP_OPENTIMEOUT),
    CONFIG_ENTRY(MP_TCP_READTIMEOUT),
@@ -1154,6 +1174,21 @@ wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
 }
 
 // ----------------------------------------------------------------------------
+// wxOptionsPageNetwork
+// ----------------------------------------------------------------------------
+
+wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
+                                           ProfileBase *profile)
+                    : wxOptionsPage(parent,
+                                    _("Network"),
+                                    profile,
+                                    ConfigField_NetworkFirst,
+                                    ConfigField_NetworkLast,
+                                    MH_OPAGE_NETWORK)
+{
+}
+
+// ----------------------------------------------------------------------------
 // wxOptionsPagePython
 // ----------------------------------------------------------------------------
 
@@ -1439,6 +1474,7 @@ wxOptionsDialog::~wxOptionsDialog()
 const char *wxOptionsNotebook::s_aszImages[] =
 {
    "ident",
+   "network",
    "compose",
    "folders",
 #ifdef USE_PYTHON
@@ -1462,6 +1498,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 
    // create and add the pages
    (void)new wxOptionsPageIdent(this, profile);
+   (void)new wxOptionsPageNetwork(this, profile);
    (void)new wxOptionsPageCompose(this, profile);
    (void)new wxOptionsPageFolders(this, profile);
 #ifdef USE_PYTHON

@@ -21,14 +21,14 @@
     puts $f "Telephone:     "
     puts $f "Facsimile:    +$recipient(country) $recipient(local) $recipient(num
 ber)"
-    puts $f "Email:        $recipient(email)" 
+    puts $f "Email:        $recipient(email)"
     puts $f ""
     puts $f "Originator:   $user(name)"
     puts $f "Organization: $user(organisation)"
     puts $f "Telephone:    $user(tel)"
     puts $f "Facsimile:    $user(fax)"
-    puts $f "Email:        $user(email)" 
- 
+    puts $f "Email:        $user(email)"
+
 
 
 
@@ -66,7 +66,7 @@ ber)"
 extern "C"
 {
 #  include <misc.h>
-   
+
    void rfc822_setextraheaders(const char **names, const char **values);
 }
 
@@ -86,7 +86,7 @@ SendMessageCC::Create(Protocol protocol,
                       ProfileBase *iprof)
 {
    String tmpstr;
-   
+
    profile = iprof;
    profile->IncRef(); // make sure it doesn't go away
    m_headerNames = NULL;
@@ -139,7 +139,7 @@ SendMessageCC::SetSubject(const String &subject)
    if(env->subject) delete [] env->subject;
    env->subject = CPYSTR(subject.c_str());
 }
-   
+
 void
 SendMessageCC::SetAddresses(const String &to,
                             const String &cc,
@@ -151,7 +151,7 @@ SendMessageCC::SetAddresses(const String &to,
       * tmp,
       * tmp2;
 
-   // If Build() has already been called, then it's too late to change 
+   // If Build() has already been called, then it's too late to change
    // anything.
    ASSERT(m_headerNames == NULL);
    ASSERT(m_protocol == Prot_SMTP);
@@ -160,7 +160,7 @@ SendMessageCC::SetAddresses(const String &to,
       defaulthost;
    if(READ_CONFIG(profile, MP_ADD_DEFAULT_HOSTNAME))
         defaulthost = profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
-   
+
    if(to.Length())
    {
       ASSERT(env->to == NIL);
@@ -193,7 +193,7 @@ SendMessageCC::SetAddresses(const String &to,
 void
 SendMessageCC::SetNewsgroups(const String &groups)
 {
-   // If Build() has already been called, then it's too late to change 
+   // If Build() has already been called, then it's too late to change
    // anything.
    ASSERT(m_headerNames == NULL);
    ASSERT(m_protocol == Prot_NNTP);
@@ -205,13 +205,13 @@ SendMessageCC::SetNewsgroups(const String &groups)
    }
 
 }
-   
+
 void
 SendMessageCC::ExtractFccFolders(String &addresses)
 {
    kbStringList addrList;
    kbStringList::iterator i;
-   
+
    char *buf = strutil_strdup(addresses);
    // addresses are comma separated:
    strutil_tokenise(buf, ",", addrList);
@@ -264,13 +264,13 @@ SendMessageCC::Build(void)
 
    if(m_headerNames != NULL) // message was already build
       return;
-   
+
    headers = strutil_strdup(READ_CONFIG(profile, MP_EXTRAHEADERS));
    strutil_tokenise(headers,";",m_headerList);
    delete [] headers;
 
    bool replyToSet = false;
-   
+
    // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
    // last NULL entry
    size_t n = m_headerList.size() + m_ExtraHeaderLinesNames.size() + 4;
@@ -328,7 +328,7 @@ SendMessageCC::Build(void)
    {
       xpmarray =
          wxIconManager::LoadImageXpm(profile->readEntry(
-               MP_COMPOSE_XFACE_FILE,MP_COMPOSE_XFACE_FILE_D)); 
+               MP_COMPOSE_XFACE_FILE,MP_COMPOSE_XFACE_FILE_D));
       if(! xpmarray)
       {
          bool found;
@@ -379,7 +379,7 @@ SendMessageCC::Build(void)
       oldbody->nested.part = NULL;
       mail_free_body(&oldbody);
    }
-   
+
    rfc822_date (tmpbuf);
    env->date = (char *) fs_get (1+strlen (tmpbuf));
    strcpy (env->date,tmpbuf);
@@ -388,7 +388,7 @@ SendMessageCC::Build(void)
 void
 SendMessageCC::AddPart(Message::ContentType type,
                        const char *buf, size_t len,
-                       String const &subtype,
+                       String const &subtype_given,
                        String const &disposition,
                        MessageParameterList const *dlist,
                        MessageParameterList const *plist)
@@ -401,9 +401,23 @@ SendMessageCC::AddPart(Message::ContentType type,
    data = (unsigned char *) fs_get (len);
    memcpy(data,buf,len);
 
-   if(subtype.length() == 0) subtype = (const char *) "PLAIN";
+   String subtype(subtype_given);
+   if( subtype.length() == 0 )
+   {
+      if ( type == TYPETEXT )
+         subtype = "PLAIN";
+      else if ( type == TYPEAPPLICATION )
+         subtype = "OCTET-STREAM";
+      else
+      {
+         // shouldn't send message without MIME subtype, but we don't have any
+         // and can't find the default!
+         FAIL_MSG("No subtype and no default subtype for this type!");
+      }
+   }
+
    bdy = &(nextpart->body);
-   
+
    switch(type)
    {
    case TYPEMESSAGE:
@@ -437,7 +451,7 @@ SendMessageCC::AddPart(Message::ContentType type,
    {
       MessageParameterList::iterator i;
       PARAMETER *lastpar = NULL, *par;
-      
+
       for(i=plist->begin(); i != plist->end(); i++)
       {
          par = mail_newbody_parameter();
@@ -456,7 +470,7 @@ SendMessageCC::AddPart(Message::ContentType type,
    {
       MessageParameterList::iterator i;
       PARAMETER *lastpar = NULL, *par;
-      
+
       for(i=dlist->begin(); i != dlist->end(); i++)
       {
          par = mail_newbody_parameter();
@@ -484,7 +498,7 @@ SendMessageCC::Send(void)
       tmpbuf[MAILTMPLEN];
    bool
       success = true;
-   
+
    kbStringList::iterator i;
    for(i = m_FccList.begin(); i != m_FccList.end(); i++)
       WriteToFolder(**i);
@@ -538,7 +552,7 @@ SendMessageCC::Send(void)
       }
    }
    else
-   {   
+   {
       ERRORMESSAGE ((_("Cannot open connection to any server")));
       success = false;
    }
@@ -566,7 +580,7 @@ void
 SendMessageCC::WriteToString(String  &output)
 {
    Build();
-   
+
    char *buffer = new char[HEADERBUFFERSIZE];
 
    if(! rfc822_output(buffer, env, body, write_str_output,&output,NIL))
@@ -585,7 +599,7 @@ SendMessageCC::WriteToFile(String const &filename, bool append)
    // buffer for message header, be generous:
    char *buffer = new char[HEADERBUFFERSIZE];
    ofstream  *ostr = new ofstream(filename.c_str(), ios::out | (append ? 0 : ios::trunc));
-      
+
    if(! rfc822_output(buffer, env, body, write_output,ostr,NIL))
       ERRORMESSAGE (("[Can't write message to file %s]",
                      filename.c_str()));

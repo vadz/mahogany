@@ -39,6 +39,8 @@
 #include "MHelp.h"
 #include "MFolder.h"
 
+#include "MailCollector.h"
+
 #include "FolderView.h"
 #include "MDialogs.h"
 
@@ -228,6 +230,22 @@ wxMFrame::OnMenuCommand(int id)
       {
          wxComposeView *composeView = wxComposeView::CreateNewArticle(this);
          composeView->Show();
+      }
+      break;
+
+   case WXMENU_FILE_COLLECT:
+      {
+         MailCollector *collector = mApplication->GetMailCollector();
+         if ( collector )
+         {
+            wxLogStatus(this, _("Checking for new mail..."));
+            collector->Collect();
+            wxLogStatus(this, _("Checking for new mail... done."));
+         }
+         else
+         {
+            wxFAIL_MSG("no mail collector??");
+         }
       }
       break;
 

@@ -1,27 +1,40 @@
-Known issues with release 0.01 (pre-alpha)
-==========================================
+Known issues with release 0.23a (pre-alpha)
+===========================================
 
-Missing/badly implemented features:
+(see also readme_win.txt for Windows-specific problems)
+
+Missing/not fully implemented features:
 -----------------------------------
 
-1. Windows python support doesn't work well, unless you have complete Python distribution
-   installed (and perhaps even then), especially with Windows 95 (not NT)
+1. Many "standard" features are still lacking in this pre-alpha release, such
+   as sorting. threading, scoring of messages; filters; newsgroup subscription
+   support &c. Almost all of them are scheduled for implementation in the next
+   release.
 
-2. NNTP support is not really usable
+2. Some of the settings are not yet configurable on per-folder basis - this
+   will be changed a.s.a.p.
 
 Bugs:
 -----
 
-1. Problems with using non-english characters have been reported (but I couldn't
-   reproduce them yet)
+1. Choosing "Cancel" from the options dialog sometimes doesn't remember the
+   old values, i.e., although it seems to work, the settings will be wrong the
+   next time the program is run.
+
+2. When retrieving messages from a newsgroup which has more than the
+   specified threshold of messages in total, but less of unread/new messages
+   than the threshold, you will still be asked about retrieving only the last
+   <N> messages (this question is unnecessary in this case)
 
 UI glitches:
 ------------
 
-1. Keyboard interface in compose view is half working (and half broken)
+1. No keyboard accelerators - yet.
 
-2. In general, compose screen lacks many features, such as positioning the cursor,
-   selecting (either with the mouse or keyboard), clipboard support &c -- all this
-   will be implemented in near future
+2. Compose screen sometimes doesn't refresh (especially when scrolling fast),
+   clicking it with a mouse usually corrects the problem.
 
-3. Keyboard bindings in menus are missing as wxGTK doesn't support them yet.
+3. Windows icons are ugly.
+
+4. [Expand] button in "Post newsgroup article" window does nothing and
+   shouldn't be there at all.
