@@ -10,10 +10,6 @@
 #ifndef   KBLIST_H
 #   define   KBLIST_H
 
-#ifdef __GNUG__
-#   pragma interface "kbList.h"
-#endif
-
 #include "lists.h"
 
 /* backward compatibility; derive kbList from M_LIST */
