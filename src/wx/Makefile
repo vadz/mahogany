@@ -20,6 +20,11 @@ clean:
 msgcat:
 	for i in $(SUBDIRS); do $(MAKE) -C $$i $@ ; done
 
+dep: depend
+
+depend:
+	for i in $(SUBDIRS); do $(MAKE) -C $$i $@ ; done
+
 %: force
 	$(MAKE) -f Makefile2 $@ 
 force: ;
