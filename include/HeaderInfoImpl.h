@@ -39,19 +39,12 @@ WX_DEFINE_ARRAY(HeaderInfo *, ArrayHeaderInfo);
   sorting/threading them though?).
 
   TODO:
-   1. sorting/threading support, obviously: this involves using
-      MailFolder::CanSort/Thread() and server-side threading if it can and
-      falling back to the existing sorting/threading code otherwise. We also
-      should handle the "smart sorting" option, i.e. sort the messages only if
-      there are reasonably few of them (as we have to retrieve all of them to
-      sort!) and leave them unsorted otherwise.
-
-   2. although there is nothing wrong with preallocating all the memory we need
+   1. although there is nothing wrong with preallocating all the memory we need
       (even for 100000 message we take just 400Kb), it would still be nice to
       have some smart way of storing HeaderInfo objects as using array is less
       than ideal because adding/removing messages is a common operation.
 
-   3. batch processing of OnRemove() calls: instead of removing the item
+   2. batch processing of OnRemove() calls: instead of removing the item
       immediately, remember the range of items to be removed. If the new
       item to remove is not contiguous to the existing range, DoRemove()
       immediately and start new range. Also call DoRemove() in the beginning
@@ -186,14 +179,21 @@ private:
 
      Finally, we also keep m_reverseOrder flag which allows us to flip the
      order of messages in the folder quickly. Note that it may be set even if
-     m_tableMsgno == m_tablePos == NULL!
+     m_tableSort == m_tablePos == NULL!
     */
    //@{
 
-   /// the translation table allowing to get msgno (index) from position
-   MsgnoType *m_tableMsgno;
+   /// the translation table containing the msgnos in sorted order
+   MsgnoType *m_tableSort;
 
-   /// the translation table allowing to get position from msgno (index)
+   /// the translation table containing the msgnos in threaded order
+   MsgnoType *m_tableThread;
+
+   /**
+      The translation table allowing to get position from msgno (index). It is
+      calculated when needed from m_tableSort and m_tableThread and may be NULL
+      even if we do sort/thread messages.
+    */
    MsgnoType *m_tablePos;
 
    /// table containing the message indent in the thread, NULL if !threading

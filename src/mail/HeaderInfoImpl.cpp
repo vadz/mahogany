@@ -48,11 +48,11 @@
 #define DEBUG_SORTING
 
 #ifdef DEBUG_SORTING
-   #define CHECK_TABLES() VerifyTables(m_count, m_tableMsgno, m_tablePos)
+   #define CHECK_TABLES() VerifyTables(m_count, m_tableSort, m_tablePos)
    #define DUMP_TABLES(msg) \
       printf("Translation tables (count = %ld) state ", m_count); \
       printf msg ; \
-      DumpTables(m_count, m_tableMsgno, m_tablePos)
+      DumpTables(m_count, m_tableSort, m_tablePos)
 #else
    #define CHECK_TABLES()
    #define DUMP_TABLES(msg)
@@ -220,7 +220,7 @@ HeaderInfo::GetFromOrTo(const HeaderInfo *hi,
 
 inline bool HeaderInfoListImpl::IsSorting() const
 {
-   return m_tableMsgno != NULL || m_reverseOrder;
+   return m_tableSort != NULL || m_reverseOrder;
 }
 
 inline bool HeaderInfoListImpl::IsHeaderValid(MsgnoType n) const
@@ -230,7 +230,7 @@ inline bool HeaderInfoListImpl::IsHeaderValid(MsgnoType n) const
 
 inline bool HeaderInfoListImpl::HasTransTable() const
 {
-   return m_tableMsgno != NULL;
+   return m_tableSort != NULL;
 }
 
 inline bool HeaderInfoListImpl::NeedsSort() const
@@ -266,7 +266,7 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    m_headers.Alloc(m_count);
 
    // no sorting/threading yet
-   m_tableMsgno =
+   m_tableSort =
    m_tablePos = NULL;
 
    m_indents = NULL;
@@ -347,10 +347,10 @@ MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
 {
    if ( m_reverseOrder )
    {
-      if ( m_tableMsgno )
+      if ( m_tableSort )
       {
          // flip the table (which always corresponds to the direct ordering)
-         return m_tableMsgno[m_count - 1 - pos];
+         return m_tableSort[m_count - 1 - pos];
       }
       else // no table, reverse the natural message order
       {
@@ -359,15 +359,15 @@ MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
    }
    else // just use the table
    {
-      CHECK( m_tableMsgno, 0, "should only be called if IsSorting()" );
+      CHECK( m_tableSort, 0, "should only be called if IsSorting()" );
 
-      return m_tableMsgno[pos];
+      return m_tableSort[pos];
    }
 }
 
 MsgnoType HeaderInfoListImpl::GetIdxFromPos(MsgnoType pos) const
 {
-   // we have to resort before using m_tableMsgno!
+   // we have to resort before using m_tableSort!
    ASSERT_MSG( !NeedsSort(), "can't be called now" );
 
    CHECK( pos < m_count, INDEX_ILLEGAL, "invalid position in GetIdxFromPos" );
@@ -438,7 +438,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       DUMP_TABLES(("before removing element %ld", n));
 
       // we will determine the index of the message being expunged (in
-      // m_tableMsgno) below
+      // m_tableSort) below
       MsgnoType idxRemovedInMsgnos = INDEX_ILLEGAL;
 
       MsgnoType posRemoved;
@@ -451,7 +451,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       for ( MsgnoType i = 0; i < m_count; i++ )
       {
          // first work with msgnos table
-         MsgnoType msgno = m_tableMsgno[i];
+         MsgnoType msgno = m_tableSort[i];
          if ( msgno == n + 1 ) // +1 because n is an index, not msgno
          {
             // found the position of msgno which was expunged, store it
@@ -460,7 +460,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
          else if ( msgno > n )
          {
             // indices are shifted
-            m_tableMsgno[i]--;
+            m_tableSort[i]--;
          }
          //else: leave it as is
 
@@ -479,12 +479,12 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       // delete the removed element from the translation tables
 
       ASSERT_MSG( idxRemovedInMsgnos != INDEX_ILLEGAL,
-                  "expunged item not found in m_tableMsgno?" );
+                  "expunged item not found in m_tableSort?" );
 
       if ( idxRemovedInMsgnos < m_count - 1 )
       {
          // shift everything
-         MsgnoType *p = m_tableMsgno + idxRemovedInMsgnos;
+         MsgnoType *p = m_tableSort + idxRemovedInMsgnos;
          memmove(p, p + 1,
                  sizeof(MsgnoType)*(m_count - idxRemovedInMsgnos - 1));
       }
@@ -657,10 +657,10 @@ void HeaderInfoListImpl::FreeIndentTable()
 
 void HeaderInfoListImpl::FreeSortTables()
 {
-   if ( m_tableMsgno )
+   if ( m_tableSort )
    {
-      free(m_tableMsgno);
-      m_tableMsgno = NULL;
+      free(m_tableSort);
+      m_tableSort = NULL;
    }
 
    if ( m_tablePos )
@@ -673,7 +673,7 @@ void HeaderInfoListImpl::FreeSortTables()
 void HeaderInfoListImpl::UpdateInverseTable()
 {
    // if there is no direct table, then there is no inverse table neither
-   if ( !m_tableMsgno )
+   if ( !m_tableSort )
    {
       ASSERT_MSG( !m_tablePos, "have inverse table but not direct one?" );
 
@@ -683,7 +683,7 @@ void HeaderInfoListImpl::UpdateInverseTable()
    // it can be NULL as we delay calculating the inverse mapping until we
    // really need it: this way we may save extra calculation if the listing is
    // first sorted and then threaded as we'll only do it once, after both
-   // operations even if m_tableMsgno changes twice
+   // operations even if m_tableSort changes twice
    if ( !m_tablePos )
    {
       m_tablePos = AllocTable();
@@ -692,7 +692,7 @@ void HeaderInfoListImpl::UpdateInverseTable()
    // build the inverse table from the direct one
    for ( MsgnoType n = 0; n < m_count; n++ )
    {
-      m_tablePos[m_tableMsgno[n] - 1] = n;
+      m_tablePos[m_tableSort[n] - 1] = n;
    }
 }
 
@@ -715,9 +715,9 @@ void HeaderInfoListImpl::Sort()
    {
       FreeSortTables();
 
-      m_tableMsgno = AllocTable();
+      m_tableSort = AllocTable();
 
-      if ( m_mf->SortMessages((MsgnoType *)m_tableMsgno, m_sortParams) )
+      if ( m_mf->SortMessages((MsgnoType *)m_tableSort, m_sortParams) )
       {
 #ifdef DEBUG_SORTING
          UpdateInverseTable();
@@ -863,22 +863,22 @@ void HeaderInfoListImpl::Thread()
             for ( size_t n = 0; n < m_count; n++ )
             {
                // don't forget to subtract 1 as tableThr contains msgnos
-               tableMsgnoNew[n] = m_tableMsgno[tableThr[n] - 1];
+               tableMsgnoNew[n] = m_tableSort[tableThr[n] - 1];
             }
 
             FreeSortTables();
-            m_tableMsgno = tableMsgnoNew;
+            m_tableSort = tableMsgnoNew;
 
             free(tableThr);
          }
          else
          {
             // it will be just the one we have built
-            m_tableMsgno = tableThr;
+            m_tableSort = tableThr;
          }
 #else // 1
          FreeSortTables();
-         m_tableMsgno = tableThr;
+         m_tableSort = tableThr;
 #endif // 0/1
 
 #ifdef DEBUG_SORTING
