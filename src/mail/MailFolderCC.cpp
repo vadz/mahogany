@@ -5339,6 +5339,20 @@ void MailFolderCC::OnNewMail()
       }
       //else: this can possibly happen if they were deleted by another client
    }
+   else // no recent messages
+   {
+      // although normally any new message appearing in the folder must be
+      // recent, there are a few exceptions to this rule:
+      //
+      // 1. if another session has this folder opened, only it might see the
+      //    message as recent whereas we won't
+      //
+      // 2. the IMAP server I use is horribly broken for the moment and the
+      //    new messages don't have the recent flag _at_all_ which is, of
+      //    course, clearly a server bug but Mahogany should still be ready to
+      //    handle such madness
+      shouldNotify = true;
+   }
 
    // no more
    m_gotUnprocessedNewMail = false;
