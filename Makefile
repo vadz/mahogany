@@ -23,9 +23,16 @@ allclean:
 	find . -name .depend -exec rm {} \;
 
 dep depend: 
+	@echo "The first time \"make depend\" will print lots of warnings"
+	@echo "about missing header files - these can be safely ignored."
+	@echo "They should disappear if you run it again."
+	@echo "----------------------------------------------------------"
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
 config.status: 
+	@echo "You should really run ./configure with appropriate arguments."
+	@echo "Type ./configure --help to find out more about it."
+	@echo "Running ./configure with default setup now..."
 	$(MAKE) config
 
 config: configure makeopts.in
