@@ -103,7 +103,7 @@ wxIconManager::LoadImage(String filename)
       tempfile = tempfile + ".xpm";
       // strip leading path
       i = tempfile.length();
-      while(i && tempfile[i] != '/')
+      while(i && tempfile.c_str()[i] != '/')
          i--;
       tempfile.assign(tempfile,i,tempfile.length()-1);
       tempfile << (getenv("TMP") ? getenv("TMP") : "/tmp")
