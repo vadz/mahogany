@@ -1,0 +1,9 @@
+m-mail (0.10a) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Karsten Ballüder <m-developers@egroups.com>  Sat,  6 Feb 1999 22:05:03 +0000
+
+Local variables:
+mode: debian-changelog
+End:

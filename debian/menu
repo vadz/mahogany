@@ -1,0 +1,2 @@
+?package(m_mail):needs=X11 section=Apps/Mail\
+  title="M" command="/usr/bin/M"

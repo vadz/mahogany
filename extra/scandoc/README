@@ -1,0 +1,28 @@
+ScanDoc: A C/C++ Embedded Documentation Analyser, Version 0.9
+(c) 1997-1998 Talin
+
+Contact: Talin@ACM.org [http://www.sylvantech.com/~talin]
+
+ScanDoc scans C and C++ program for embedded documentation, and formats it into
+HTML or other formats. It also analyses code structure and uses this information
+to enhance the generated documentation. It has been inspired by JavaDoc, as well
+as the Amiga "autodoc" utility.
+
+See scandoc.html for complete documentation.
+
+This archive contains the following:
+
+README          This file.
+COPYING		License terms. (The "Artistic License")
+scandoc.pl	The ScanDoc program.
+template.html	A starter template for generating HTML output
+scandoc.html	The ScanDoc documentation.
+sample.h	An example C++ include file showing how to write ScanDoc comment tags.
+sample/         A more extensive example of some documentation that was created with
+		ScanDoc. You'll need a frames browser to view it correctly.
+images/		Various images which are referenced by the ScanDoc documentation and
+		the the supplied template.html.
+
+Version History:
+
+0.9 First public release.

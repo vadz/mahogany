@@ -1,0 +1,1026 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.05 [en] (X11; I; Linux 2.0.35 i586) [Netscape]">
+   <TITLE>ScanDoc -- Automatic Documentation Utility</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#D0D0D0" LINK="#0000EF" VLINK="#51188E" ALINK="#FF0000" BACKGROUND="images/greytile.jpg" NOSAVE>
+<IMG SRC="images/sylvanlogo.gif" HEIGHT=82 WIDTH=751>
+<H1>ScanDoc</H1>
+<A HREF="#intro">Introduction</A>
+<BR><A HREF="#features">ScanDoc features</A>
+<BR><A HREF="#running">Running ScanDoc</A>
+<BR><A HREF="#writing">Writing ScanDoc Comments</A>
+<BR><A HREF="#tags">Document Tags</A>
+<UL>
+<LI><A HREF="#package">The @package tag</A></LI>
+<LI><A HREF="#author">The @author tag</A></LI>
+<LI><A HREF="#version">The @version tag</A></LI>
+<LI><A HREF="#keyword">The @keyword tag</A></LI>
+<LI><A HREF="#see">The @see tag</A></LI>
+<LI><A HREF="#param">The @param tag</A></LI>
+<LI><A HREF="#return">The @return tag</A></LI>
+<LI><A HREF="#exception">The @exception tag</A></LI>
+<LI><A HREF="#heading">The @heading tag</A></LI>
+<LI><A HREF="#deffunc">The @deffunc tag</A></LI>
+<LI><A HREF="#defvar">The @defvar tag</A></LI>
+<LI><A HREF="#caution">The @caution, @warning, @tip, and @bug tags</A></LI>
+<LI><A HREF="#ttodo">The @todo tag</A></LI>
+</UL>
+<A HREF="#template">The Template File</A>
+<BR><A HREF="#todo">To-Do List</A>
+<BR><A HREF="#credits">Credits</A>
+<BR>
+<HR WIDTH="100%"><A NAME="intro"></A>
+<H2>
+Introduction</H2>
+ScanDoc is a Perl script which scans C++ source code for specially-formatted
+comments and produces attractive, organized, indexed documentation.
+
+<P>&nbsp;ScanDoc is designed to generate the highest-quality documentation
+with as little effort as possible on the part of the programmer writing
+the code to be documented. To this end, ScanDoc not only uses the documentation
+supplied by the programmer, but supplements it by parsing the actual C++
+data structure declarations.
+
+<P>&nbsp;ScanDoc was written by <A HREF="http://www.sylvantech.com/~talin">Talin</A>
+and is Copyright &copy;1997-1998.
+
+<A NAME="features"></A>
+<H2>
+ScanDoc features</H2>
+
+<UL>
+<LI>
+<B>Portability</B> -- because ScanDoc is written in Perl, it can be executed
+on any platform.</LI>
+
+<LI>
+<B>Ease of Use</B> -- Once ScanDoc is set up it is very easy to use. There
+are only a few command-line switches, all of which are optional.</LI>
+
+<LI>
+<B>Convenient</B> -- ScanDoc's comments are a superset of <B>javadoc</B>
+and are very easy to write.</LI>
+
+<LI>
+<B>Customizable</B> -- ScanDoc uses a user-modifiable template file as
+the source of all output text. You can give your documentation a unique
+style without modifying the ScanDoc script itself.&nbsp; Scandoc has been
+designed primarily to support HTML output, however templates can readily
+be modified to support other output file types such as postscript, TeX,
+.info, ASCII, etc.</LI>
+
+<LI>
+<B>Comprehensive</B> -- ScanDoc understands a wide range of C++ syntax,
+including operator overloads, templates and template arguments, nested
+classes, and friend functions.</LI>
+
+<LI>
+<B>Fast</B> -- a typical header file takes 1-2 seconds to process.</LI>
+
+<LI>
+<B>Flexible</B> -- functions can be grouped in any way you like. You decide
+which functions go into which .HTML files.</LI>
+</UL>
+<A NAME="running"></A>
+<H2>
+Runnng Scandoc</H2>
+Scandoc takes several command line switches (all of which are optional)
+and a list of input source files (which can include wildcards). Here is
+the command line syntax:
+<PRE>&nbsp;&nbsp;&nbsp; perl ScanDoc.pl -i <I>document-template</I> -p <I>output-path</I> -t <I>tabsize</I> -d <I>sym</I>=<I>value input-files</I> ...</PRE>
+The <I>document-template</I> argument specifies which file to use for the
+template file. This template file is used to define the format of the output
+text. You can edit this file to customize the "look" of your documentation.
+The default is "template.html".
+
+<P>&nbsp;The <I>output-path</I> argument specifies the directory where
+the resulting documentation should be written to. This should include a
+directory seperator character ("\" for PC, ":" for Mac using MPW, and "/"
+for unix) as the last character. The default is the current directory.
+
+<P>&nbsp;The <I>tabsize</I> argument specifies how many spaces tabs should
+be expanded to. The default is 4.
+
+<P>The <I>sym=value </I>argument can be used to define a symbol. This symbol
+will be defined within the scope of the expanded template, and can be used
+as part of the output text.
+
+<P>&nbsp;It does not matter if there are whitespace characters between
+the switches and their arguments.
+
+<P>&nbsp;Example:
+<PRE>&nbsp;&nbsp;&nbsp; perl ScanDoc.pl -itemplate.html -p./test/ -t4 *.h</PRE>
+<A NAME="writing"></A>
+<H2>
+Writing ScanDoc Comments</H2>
+In order to use ScanDoc, you must embed special comments within your C++
+source files. ScanDoc recognizes two forms of comments, those beginning
+with "<TT>/**</TT>" and those beginning with "<TT>//*</TT>". The first
+form are C-style multi-line comments. The second style are C++ single-line
+comments. There must be a space after the "<TT>/**</TT>" and "<TT>//*</TT>"
+tokens -- ScanDoc does not recognize comments of the form "<TT>/************</TT>"
+and such. (However, if ScanDoc detects a row of asterisks, equals signs,
+or dashes on the first or last line of a C-style comment, it will remove
+them from the documentation. So you can say "<TT>/** ===============</TT>"
+if you want a big, bold banner.)
+
+<P>Whenever ScanDoc sees a special comment, it knows that the next C++
+declaration (class, function, or variable) should be documented. Any declaration
+which is not preceded by a special comment will be omitted from the output
+file. The purpose for this is to allow you to have private functions or
+classes which are not present in the ScanDoc documentation. You can use
+ordinary C and C++ style comments to document these declarations within the
+source code, since ScanDoc ignores such comments.
+
+<P>&nbsp;The simplest way to use the special comments is to simply write
+a description of the item within the comments:
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /** Documentation for class Foo */
+
+&nbsp;&nbsp;&nbsp; class Foo : private class Bar {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int Baz( void );
+&nbsp;&nbsp;&nbsp; };</PRE>
+<A NAME="tags"></A>
+<H2>
+Document Tags</H2>
+Document tags are special code which can be inserted within a ScanDoc comment.
+They allow you to control many aspects of the generated documentation.
+All document tags begin with an '@' character.
+
+<P>All tags must come at the beginning of a line of text (before any non-blank
+characters). All of the text on that line is considered part of the tag.
+
+<P>Many of the tags described are <I>persistent</I>, in the sense that
+they remain in effect until the next tag of the same type. A persistent
+tag affects all documented items which come after it, in other words it's
+effect can last for longer than a single documentation comment block.
+
+<P>Some of the tags described are <I>continuable</I>, which means that
+they can be continued on the next line. There is no need to repeat the
+tag. Continuable tags last until the end of the comment block, or until
+they are overridden by another tag.
+
+<P>Text which occurs before the first tag is considered "description" text,
+in other words it's the actual explanation of the declaration which follows
+the comment. This is also true of any lines of text which do not begin
+with a tag, and are not a continuation of a previous continuable tag. A
+blank line within the description text is converted into an HTML paragraph
+tag. Note that you are allowed to insert HTML tags into the description
+text, however if you are outputting the text to a format other than HTML,
+the output template file may or may not be smart enough to translate the
+tag into an appropriate textual entity.
+
+<P>Example description:
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /** This function adds two vectors together.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @param&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; inVector1&nbsp;&nbsp; The first vector
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @param&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; inVector2&nbsp;&nbsp; This is the
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; second vector
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @return&nbsp;&nbsp;&nbsp;&nbsp; The vector sum of the two vectors
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @see&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #VectorSubtract
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @keywords&nbsp;&nbsp; Vector addition subtraction math
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp; const Vector &amp;VectorAdd( const Vector &amp;inVector1, const Vector &amp;inVector2 );</PRE>
+<A NAME="package"></A>
+<H3>
+The @package tag</H3>
+Often times C++ functions and classes fall into natural groups. In Java,
+these are called "packages", however in C++ there is no such construct,
+so the @package tag can be used to group C++ declarations into a package.
+ScanDoc writes the output documentation for each package as a seperate
+.HTML file containing all of the documentation for that package named "<I>packagename</I>.HTML".
+(Of course, that's only the default behavior. You can change it by editing
+the document template file, as well as changing the names of the two index
+files that ScanDoc creates.)
+
+<P>You can have classes from several different header files be grouped
+into the same package, or you can have several classes from a single source
+file go into several different packages. There is no one-to-one mapping.
+
+<P>&nbsp;The syntax for @package is:
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @package <I>package-name</I></PRE>
+The @package tag is persistent -- it remains in effect until the end of
+the file, unless superceded by another @package tag. If no package tag is
+specified, the default package named "General" is used.
+&nbsp;<A NAME="author"></A>
+<H3>
+The @author tag</H3>
+The @author is used to specify the author of the subsequent declarations.
+The entire line after @author is taken as the name of the author(s). Like
+the @package tag, it is persistent -- it remains in effect until the end
+of the file, unless superceded by another @author tag.&nbsp;<A NAME="version"></A>
+<H3>
+The @version tag</H3>
+The @version is used to specify the version of the subsequent declarations.
+The entire line after @version is taken as the version string. Like the
+@package tag, it is persistent -- it remains in effect until the end of
+the file, unless superceded by another @version tag.&nbsp;<A NAME="keyword"></A>
+<H3>
+The @keyword tag</H3>
+The @keyword tag is primarily designed for use with HTML search engines.
+The rest of the line after the @keyword tag is taken as a series of search
+keywords. The keywords will not actually appear in the documentation, instead
+they are placed into an HTML comment just before the documentation appears.&nbsp;<A NAME="see"></A>
+<H3>
+The @see tag</H3>
+Each documentation entry can have a "See also" section, which is a list
+of hypertext references to other relevant documentation. Each occurance
+of an @see tag defines a hyperlink. (You can also embed normal HTML hyperlinks
+within the class description and other places).
+
+<P>Immediately following the @see tag is the name of the class, class member,
+or global being referenced. A single name with no special seperator characters
+is taken to be the name of a class. The package name can be specified by
+giving the name of the package, followed by '#', followed by the name of
+the class or function. If the package name is omitted, it assumes that
+the item being referred to is in the current package. Class members can
+be referenced by appending '::' and the member name to the class name.
+A '::' with no class name indicates a global function or member. Member
+functions and global functions should not have argument lists or parenthesis
+(Currently there is no way to indicate which one of a set of overloaded
+functions is being referred to)
+
+<P>You can also include hyperlinks to other documentation that was not
+created by ScanDoc by using a normal HTML hyperlink, which ScanDoc will
+insert verbatim into the output file.
+
+<P>&nbsp;Here are all of the supported forms:
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @see&nbsp; classname
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @see&nbsp; package#classname
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @see&nbsp; classname::member
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @see&nbsp; package#classname::member
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @see&nbsp; ::function
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @see&nbsp; package#::function
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @see&nbsp; &lt;a href="ref"&gt;Description&lt;/a></PRE>
+<A NAME="param"></A>
+<H3>
+The @param tag</H3>
+The param tag is used for documenting function parameters. Following the
+@param keyword is the name of the parameter, and then the description.
+The @param tag is continuable, which means you can continue the description
+on the next line. Blank lines within the parameter descriptsion are converted
+into HTML paragraph tags.
+
+<P>&nbsp;Example:
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @param&nbsp; inRect&nbsp;&nbsp; The input rectangle to process. This will be
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; scaled and copied to outRect.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @param&nbsp; outRect&nbsp; Where to place the scaled rectangle</PRE>
+<A NAME="return"></A>
+<H3>
+The @return tag</H3>
+The @return tag is used to describe the function return. If the function
+returns nothing, this tag can be omitted. The tag is continuable, which
+means you can continue the description on the next line without repeating
+the @return tag.&nbsp;<A NAME="exception"></A>
+<H3>
+The @exception tag</H3>
+The @exception tag is used to document any exceptions that may be thrown
+by this function. Note that unlike Java, it is difficult in C++ to determine
+what exceptions might potentially be thrown by subroutines of the functions
+being documented, so it is questionable whether programmers will be able
+to easily maintain a list of every exception that could be thrown from
+the function. Ultimately, the decision of how to handle this will depend
+on local coding standards and practices.
+
+<P>The format of this section is exactly the same as @param.&nbsp;<A NAME="heading"></A>
+<H3>
+The @heading tag</H3>
+The @heading tag is used to insert a heading into your description text.
+The remainder of the line after @heading is taken as the heading text (the
+@heading tag is not continuable). When processed using the example template
+file, ScanDoc converts the heading text to a level two heading.<A NAME="deffunc"></A>
+<H3>
+The @deffunc tag</H3>
+Occasionally, a function will have a syntax so strange that ScanDoc cannot
+parse it. This is mainly due to the fact that ScanDoc does not have a complete
+C++ parser within it. Also, ScanDoc ignores all preprocessor directives,
+so it is difficult to add documentation entries for C macro functions.
+The @@deffunc tag overcomes this limitation by allowing the programmer
+to manually insert a "fake" function declaration.
+
+<P>The @deffunc tag is short for "define function". The effect of this
+tag is exactly the same as if ScanDoc had actually parsed the function
+declaration. Note that this means that the @deffunc must be the last tag
+in the comment block, since any text or tags which come after it will be
+applied to the <I>next</I> declaration.
+
+<P>&nbsp;The format of @deffunc is:
+<PRE>&nbsp;&nbsp;&nbsp; @deffunc <I>short-name declaration</I></PRE>
+The "short-name" is the version that will appear in the index, i.e. just
+a name with no argument list or return type. The declaration part is optional,
+and should be the complete prototype.
+
+<P>Here is an example (Note that unlike normal declarations, you can use
+HTML formatting within the actual prototype declaration):
+<PRE>&nbsp;&nbsp;&nbsp; /** Assert that a condition is TRUE, or print a message and exit.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @param expression The condition to test.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @deffunc ASSERT ASSERT( &lt;i>expression&lt;/i> );
+&nbsp;&nbsp;&nbsp; */
+#define ASSERT( expr ) _assert( expr, __FILE__, __LINE__ )<A NAME="defvar"></A></PRE>
+
+<H3>
+The @defvar tag</H3>
+The @defvar tag is exactly like @deffunc except it defines a variable
+instead of a function.&nbsp;
+<A NAME="warning"></A><H3>
+The @caution, @warning, @tip and @bug tags</H3>
+Each of these tags inserts a small icon into the text at the point where
+the tag occurs. For example, in the supplied example template, the "caution"
+tag inserts a paragraph break followed by a triangular yellow "caution"
+sign. These icons can be used to highlight a particular aspect of the text.&nbsp;
+It should be noted that none of these three tags is in fact recognized
+by ScanDoc itself -- the substitution of icons for tags is done in the
+template file, and as such the template file creator is free to define
+any new tags that they wish.
+<BR>
+<A NAME="ttodo"></A>
+<H3>The @todo tag</H3>
+The @todo tag records the name of the current source file and the text of the
+tag (which is continuable) into a special "todo" table. This table is then written
+out as a seperate file, allowing a conveniently summarized "To-Do" list for
+the project. Note that a special comment with only an "@todo" entry in it and no
+other description text or tags will be included in the generated To-Do list, but not in
+any other generated documentation;
+The reason for this is that you might not want to document everything that
+also has a To-Do entry associated with it, so the scanner does not consider
+a documentation entry valid unless it has at least <i>some</i> descriptive text or tags.
+<BR><A NAME="template"></A>
+<H2>
+The Template File</H2>
+The template file tells ScanDoc how to format the output files. There is
+virtually no knowledge of HTML within ScanDoc itself, all of the rest is
+supplied by the template file. (Actually, there are some functions that
+make generating HTML easier, but templates don't have to use them.)
+
+<P>ScanDoc comes with an example template file called "template.html".
+If all you want to do is change the name of the project or insert your
+company logo, you need read no further; Simply edit the "template.html"
+file and insert your project name or logo in the appropriate fields
+at the top of the file.
+
+<P>If you want to do more detailed customization, however, you'll need to
+understand how a template file is actually intepreted, which requires
+some understanding of ScanDoc's overall order of operations. You'll also
+need a basic understanding of the Perl language.
+
+<P>When ScanDoc scans source files, it builds a large data structure which
+stores all of the packages, classes, member functions, parameters, documentation
+and other entities that it finds. These are stored using nested Perl hash
+tables.
+
+<P>After parsing is complete, the template file is parsed and executed. The template
+file consists mostly
+of output text, with occasional parameter substitutions and embedded program code.
+ScanDoc translates the template file into a long string which is a Perl
+program, and then executes that string. So, you can embed Perl code directly
+into the template, allowing you to open output files, iterate using "for"
+loops, create comma-seperated lists, etc. This embedded code has access
+to all of the data structures built during the parsing phase.
+
+<P>Any text which is not embedded code will be written directly to the
+current output file. This text can have parameter substitutions in it.
+There are two primary types of substitions. The first type is the normal
+Perl interpolation sequence, i.e. $<I>variable</I>. This means that the
+value of the variable will be inserted into the output text at that point.
+The other type of substitution is the sequence $(object.fieldname). This
+retrieves the named field from the given object, and inserts the value
+of that field into the output text at that point. (Note: The way this is
+implemented is that ScanDoc translates the $(object.fieldname) pattern
+into the sequence:&nbsp; "print $object->fieldname()").
+
+<P>Embedded code is indicated by using double angle brackets, i.e. &lt;&lt;code>>.
+Any code which is within the angle brackets will be executed at that point.
+For loops can be written as seperate pieces, i.e.
+<PRE>&lt;&lt;foreach $a (@list) {>>
+&nbsp;&nbsp;&nbsp; &lt;h2>$(a.name)&lt;/h2>
+&nbsp;&nbsp;&nbsp; $(a.description)&lt;p>
+&lt;&lt;}>></PRE>
+Access to the parse tables and other data is done through global functions,
+which are as follows:
+<BR>&nbsp;
+<CENTER><TABLE BORDER=2 WIDTH="80%" >
+<CAPTION>
+<CENTER>&nbsp;ScanDoc Global Functions</CENTER>
+</CAPTION>
+
+<TR>
+<TH>Function</TH>
+
+<TH>Meaning</TH>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>file( "filename.txt" )</TT></TD>
+<TD>Open a new output file and make it the current output file</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>packages</TT></TD>
+<TD>Return a list of references to all packages, in order by name.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>todolist_files()</TT></TD>
+<TD>Returns a list of all source files which had "to-do" entries.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>todolist_entries( file )</TT></TD>
+<TD>Returns a list of all "to-do" entries for a given file.
+</TR>
+
+</TABLE></CENTER>
+&nbsp;
+<BR>Each package is a reference to a Perl object of type "PackageRecord".
+Access to the classes and globals within the package is done via the member
+functions of the package.
+<BR>&nbsp;
+<CENTER><TABLE BORDER=2 WIDTH="80%" >
+<CAPTION>
+<CENTER>"PackageRecord" Member functions</CENTER>
+</CAPTION>
+
+<TR>
+<TH>Function</TH>
+
+<TH>Meaning</TH>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>classes</TT></TD>
+
+<TD>Returns a list of references to all classes in the package, in order
+by name.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>globals</TT></TD>
+
+<TD>Returns a list of all global functions and variables in the package,
+in order by name.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>globalvars</TT></TD>
+
+<TD>Returns a list of references for all global variables in the package.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>globalfuncs</TT></TD>
+
+<TD>Returns a list of references for all global functions in the package.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>name</TT></TD>
+
+<TD>Returns a string containg the name of the package</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>url</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns the suggested HTML url of the package documentation.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>anchor</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns the suggested HTML anchor of the package documentation.</CENTER>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+
+<P>Each class returned by the classes() member function is a reference
+to a Perl object of type ClassRecord. This class has the following member
+functions.
+<BR>&nbsp;
+<CENTER><TABLE BORDER=2 WIDTH="80%" >
+<CAPTION>
+<CENTER>"ClassRecord" Member functions</CENTER>
+</CAPTION>
+
+<TR>
+<TH>Function</TH>
+
+<TH>Meaning</TH>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>keywords</TT></TD>
+
+<TD>Returns a string the list of keywords associated with this class.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>author</TT></TD>
+
+<TD>Returns the name of the author of the class.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>version</TT></TD>
+
+<TD>Returns a string containing the version information for the class.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>name</TT></TD>
+
+<TD>Returns a string containing the "short" name of the class, i.e. without
+"class" or "struct", and without any template params or scoping information.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>longname</TT></TD>
+
+<TD>Similar to "name" but includes the "class" or "struct" tag.</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>fullname</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Includes the "class" or "struct" tag and the template arguments.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>scopename</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>The complete class name including scoping information for embedded
+classes.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>source file</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>The name of the source file where the class was defined.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>description</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>The description text of the class documentation.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>seealso</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>The list of "see also" tags. This is a list of references to "DocReference"
+objects.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>url</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns the suggested HTML URL of the class documentation.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>anchor</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns the suggested HTML anchor of the class documentation.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>members</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns a list of references to all class members.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>membervars</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns a list of references to all class member variables.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>memberfuncs</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns a list of references to all class member functrions.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>baseclasses</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns a list of references to all base classes.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>subclasses</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns a list of references to all subclasses.</CENTER>
+</TD>
+</TR>
+</TABLE></CENTER>
+&nbsp;
+<BR>Each member function record returned by the members() function (as
+well as the membervars() and memberfuncs()) function is a reference to
+a Perl object of type MemberRecord. MemberRecord is also used for the references
+returned by globals(), globalvars(), and globalfuncs() which are returned
+at the package level.
+<BR>&nbsp;
+<CENTER><TABLE BORDER=2 WIDTH="80%" >
+<CAPTION>
+<CENTER>"MemberRecord" Member functions</CENTER>
+</CAPTION>
+
+<TR>
+<TH>Function</TH>
+
+<TH>Meaning</TH>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>keywords</TT></TD>
+
+<TD>Returns a string the list of keywords associated with this member.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>author</TT></TD>
+
+<TD>Returns the name of the author of the member.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>version</TT></TD>
+
+<TD>Returns a string containing the version information for the member.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>name</TT></TD>
+
+<TD>Returns a string containing the "short" name of the class, i.e. without
+the type or argument list.</TD>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>longname</TT></TD>
+
+<TD>Similar to "name" but includes '()' at the end if it's a function.</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>fullname</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Includes the type of the variable and the arguments if any.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>scopename</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>The complete member name including scoping information.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>source file</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>The name of the source file where the member was defined.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>description</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>The description text of the member documentation.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>seealso</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>The list of "see also" tags. This is a list of references to "DocReference"
+objects.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>url</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns the suggested HTML URL of the member documentation.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>anchor</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns the suggested HTML anchor of the member documentation.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>type</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>'func' if it's a function, else 'var' if it's a variable.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>params</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns a list of parameters (as defined by the @param tags) for
+this item.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>exceptions</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns a list of exceptions (as defined by the @exception tags)
+for this item.</CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>returnval</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns the text of the @return tag.</CENTER>
+</TD>
+</TR>
+</TABLE></CENTER>
+&nbsp;
+<BR>Parameters and exceptions are Perl objects of type "ArgRecord", which
+has the following members:
+<BR>&nbsp;
+<CENTER><TABLE BORDER=2 WIDTH="80%" >
+<CAPTION>
+<CENTER>"ArgRecord" Member functions</CENTER>
+</CAPTION>
+
+<TR>
+<TH>Function</TH>
+
+<TH>Meaning</TH>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>name</TT></TD>
+
+<TD>Returns a string containg the name of the argument</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>description</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>Returns the description text for the argument.</CENTER>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+
+<P>Finally, the list of references returned by the "seealso" function are
+references to Perl objects of type "DocReference":
+<BR>&nbsp;
+<CENTER><TABLE BORDER=2 WIDTH="80%" >
+<CAPTION>
+<CENTER>"DocReference" Member functions</CENTER>
+</CAPTION>
+
+<TR>
+<TH>Function</TH>
+
+<TH>Meaning</TH>
+</TR>
+
+<TR ALIGN=CENTER>
+<TD><TT>name</TT></TD>
+
+<TD>Returns a string containg the name of the reference</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><TT>url</TT></CENTER>
+</TD>
+
+<TD>
+<CENTER>If ScanDoc knows about this reference, it will return the URL string
+that it suggested; If the item is not recognized, it will return 0.</CENTER>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+
+<P><b>Base classes:</b> In some cases, a base class mentioned in another class's
+"baseclasses" list will be a class that ScanDoc does not know about. Because
+ScanDoc does not parse #include directives, it's possible for a class to
+inherit from a base class that is defined outside the set of files being
+parsed by ScanDoc. In this case, ScanDoc will create a "partial" class record,
+consisting of only the name, longname, fullname, and scopename fields.
+In particular, the "url()" member function will return 0, since ScanDoc
+does not know from where this class originates. In such a case, the output
+template should detect that there is no URL and not attempt to create a
+hyperlink for the class reference.
+
+<P><b>Description Filtering:</b> The description text returned by the "description()"
+function returns the bare text as found within the source code. The only filtering that
+ScanDoc does on this text is to expand all tabs to spaces. The template
+code is responsible for any other filtering, such as converting blank lines
+to paragraphs, converting @heading tags to the appropriate style, and inserting
+the caution, warning and bug icons. Note that the template is free to define
+new icons or tags which can be filtered at this time.
+
+<A NAME="todo"></A>
+<H2>To-do list</H2>
+This is a list of enhancements that are needed for ScanDoc.
+
+<P><b>Templates for formats other than HTML:</b> Currently, HTML is the only output
+format supported because it's the only one that I am familiar with. However, it
+seems that a lot of documentation these days is in TeX format, which is then
+used to generate .info, .dvi. etc.
+It would be nice to have template files for these formats. Note also that
+there is no reason why ScanDoc could not be modified to support multiple
+templates in a single execution, which would be relatively fast since
+parsing the input classes is what takes 95% of the execution time.
+
+<P><b>Other HTML templates:</b> It would be nice to have a selection of
+HTML templates for different styles. For example, the current template file
+generates documentation which takes advantage of the "frames" feature which
+is not supported by all browsers, although the documentation can still be viewed
+with a browser that does not support frames. However, it might be nice to
+provide templates which don't generate any frames information. Similarly,
+there is much that can be done in terms of improving the overall attractiveness
+and organization of the documents, especially by taking better advantage of
+tables.
+
+<P><b>Include files:</b> Currently, ScanDoc does not attempt to parse "#include"
+statements. (As much as I like Perl, it's not a great language for writing
+recursive descent parsers in my opinion.) Unfortunately, this means that ScanDoc has
+to "guess" which identifiers represent types as opposed to function and
+variable names. The current heuristic handles all of the cases I've found so
+far, but it would be nice to be able to know for sure. Of course, doing
+a complete job would also require that we recognize and expand C macros.
+Having a complete set of type information and better parsing would also
+allow individual function arguments and return values to be hyperlinks.
+
+<P><b>Hyperlinks on arguments and return values:</b> 
+Even without a more complete parser, it would be possible to modify the current
+HTML template file to break up argument lists into a sequence of bare words
+and see if any of those bare words match up with any of the current classes
+that ScanDoc knows about. Hyperlinks could then be created to those classes.
+This wouldn't work every time (for example, implicit references to classes
+defined within the current class's scope would have problems), but it would cover
+most of the common cases.
+
+<P><b>More images:</b> I'd like to have an icon representing each platform. It is
+often the case that when porting to a different architecture, there are semantic
+differences that occur, and it would be nice to highlight these in the documentation.
+Currently, I have icons for Mac and Windows given to me by Robert McNally, but
+they are too big, and should be no bigger than 24x24 I think. I would also like
+icons for Linux, various Unices, Amiga, and BeOS.
+
+<P>In fact, what I would like to eventually have is different directories of
+"appearance sets", complete with both template file and associated images,
+to be distributed along with ScanDoc. For example, the current icons would probably
+look cooler if they were 3D rendered with drop-shadows.
+
+<P><b>Improved description filtering:</b> Currently, the "processDescription" function
+in the HTML template does not handle the case of '&lt;' and '&gt;' symbols embedded in
+the description text. This means that attempts to mention template arguments within
+documentation generally don't look right. Greater-than and Less-than signs should
+usually be transformed into &amp;lt; and &amp;gt; sequences, unless they are part of
+a valid HTML tag that has been deliberately inserted into the documentation text. I
+would need to come up with a look-ahead regex that would match all of the HTML tags
+that might reasonably occur inside a documentation entry.
+
+<P><b>Persistent Scan Info:</b> Several people have suggested that they would like to
+keep their documentation files always up to date, in other words running ScanDoc
+whenever they do a make. Unfortunately, because ScanDoc scans every file in the
+project, this is far too slow for realistically-sized projects. One idea would be
+to create a persistent database of documentation, which could be updated
+incrementally, allowing ScanDoc to only scan those files that have actually
+changed. This would also allow the code analyzer to be written in a different
+language than the templates. For example, we could use a real parser generator, and make a C analyser that would do a much more complete job of parsing, as well as
+being much faster. This would also have the benefit of making the parser somewhat
+readable, which it certainly isn't now.
+
+<P>Because ScanDoc can pretty much ignore anything
+that's inside a code block, a C parser could potentially parse much faster than an actual
+compiler. This means that scanning just a few files and updating a database would add an
+unnoticeable amount of delay to the build process. The only question is how to
+maintain the database in a way that's portable.
+
+<P>This idea of a persistent database of documentation could be taken even further. For
+example, rather than generating static pages, the documentation pages could be
+served up directly from the database, using something like PHP to create HTML
+pages of documentation on the fly as needed. This would also allow more intelligent
+queries, for example "give me documentation for all classes that call member function
+'foo' in class 'bar'." Of course, we would have to parse things a lot more deeply
+than we do now for this to work. And one problem with dynamic pages is that they
+are hard to distribute in an archive.
+
+<P><b>New Logo:</b> I need to come up with a new logo for Sylvan Technical Arts.
+The current one was a quick hack in Photoshop using KPT, and it's kind of generic.
+
+<A NAME="credits"></A>
+<H2>History and credits</H2>
+<P>The current version of ScanDoc is actually the sixth generation. The first one was
+written in C, sometime in the early 1993-1994 range, and was inspired by
+(and functionally similarly to) the "autodoc" utility on the Commodore Amiga.
+Later versions were inspired by Sun's JavaDoc utility. I've also read about Don Knuth's
+"Literate Programming" efforts, but I wanted something that was much lighter weight
+and easier to integrate into existing environments.
+
+<p>Robert McNally of Dangerous Games came up suggested to me the idea of having
+embedded icons in the documentation to signify important paragraphs.
+
+<P>
+<HR size=4>&copy; 1997-1998 Talin.
+<BR>Last Updated: 26 June 1998
+</BODY>
+</HTML>
