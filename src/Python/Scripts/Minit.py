@@ -1,17 +1,16 @@
-####################################################################
-# Minit.py : initialisation of the embedded Python interpreter     #
-#                                                                  #
-# (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 #
-#                                                                  #
-# $Id$                 #
-####################################################################
+###############################################################################
+# Project:     M - cross platform e-mail GUI client
+# File name:   src/Python/Scripts/Minit.py
+# Purpose:     example of a Python module read by Mahogany on startup
+# Author:      Karsten Ballüder, Vadim Zeitlin
+# Modified by:
+# Created:     1998
+# CVS-ID:      $Id$
+# Copyright:   (c) 1998-2004 M-Team
+# Licence:     M license
+###############################################################################
 
-####################################################################
-#                                                                  #
-# import the classes  which are part of M:                         #
-#                                                                  #
-####################################################################
-
+# import the classes defined by M
 import MDialogs
 import MailFolder
 
@@ -37,12 +36,7 @@ def GetUserName():
 
     return username
 
-####################################################################
-#                                                                  #
-# define the global initialisation callback Minit():               #
-#                                                                  #
-####################################################################
-
+# define the global initialisation callback Minit():
 def Minit():
     msg = "Welcome, " + GetUserName() + \
           ", to the wonderful world of M/Python integration!\n" + \
@@ -52,19 +46,11 @@ def Minit():
           "callback when you get tired of seeing this message."
     MDialogs.Message(msg)
 
-####################################################################
-#                                                                  #
-# define any other functions used as callbacks:                    #
-#                                                                  #
-####################################################################
-    
-def callback_func(arg):
-    msg = "This is a Python Callback Function!\nThe argument is: " + arg
-    MDialogs.Message(msg);
-    
-def OpenFolderCallback(name, arg):
-    msg = "This is the Python OpenFolderCallback function!\n" + "  called on the hook: " +  name 
-    mf = MailFolder.MailFolder(arg)
-    msg = msg + "\n  from the mailfolder called:" + mf.GetName().c_str()
-    msg = msg + "\n  The folder contains " + mf.CountMessages() + " messages."
-    MDialogs.Message(msg);
+
+# example of a callback being called when a folder is opened (you need to
+# configure it by entering the function name in "Folder open callback" field
+# in the Python page of the folder properties dialog):
+def OpenFolderCallback(mf):
+    MDialogs.Message("Opening folder %s (with %d messages)" % (mf.GetName(), mf.GetMessageCount()))
+    return 1
+
