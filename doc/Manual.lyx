@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sun Jun 20 21:10:35 1999
+#This file was created by <zeitlin> Mon Jun 21 15:11:04 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -71,13 +71,18 @@ Using Mahogany
 Release Notes_1001_
 \layout Standard
 
-This is the third public release of Mahogany.
+This is the fourth public release of Mahogany.
  As with the previous release we make binaries available for Linux-x86,
  Linux-alpha and Solaris-sparc.
- A Windows version will be released four to six weeks later, probably together
- with an updated unix release.
- Mahogany is also reported to compile and run on FreeBSD and should generally
+ The main change since the previous release is that we now provide a Win32
+ (requires Windows 95/98/NT) version of Mahogany.
+\layout Standard
+
+Mahogany is also reported to compile and run on FreeBSD and should generally
  work on any Unix flavour.
+ We didn't try it on Win32s platform and we're not going to support it (nor
+ Win16).
+ Finally, work on making Mahogany available for Mac is in progress.
 \layout Standard
 
 Due to the fact that it is a cross-platform effort, the compilation and
@@ -89,6 +94,34 @@ Due to the fact that it is a cross-platform effort, the compilation and
 \layout Subsection
 
 Changes against the previous version
+\layout Subsubsection
+
+0.23a against 0.22a
+\layout Standard
+
+The main news is, of course, the long-waited for availability of Win32 version.
+ Also:
+\layout Itemize
+
+Several bugs in message composer (including a few fatal ones) were fixed.
+ Only minor problems still persist.
+\layout Itemize
+
+The 
+\family typewriter 
+[Apply]
+\family default 
+and
+\family typewriter 
+[Cancel]
+\family default 
+buttons in the options and folder properties dialogs work now
+\layout Itemize
+
+Message boxes now have icons in them
+\layout Itemize
+
+And, of course, updated translations
 \layout Subsubsection
 
 0.22a against 0.21a
@@ -570,7 +603,9 @@ e that clearly documents how it differs from the Standard Version.
 \layout Enumerate
 
 use the modified Package only within your corporation or organization.
- c.make other distribution arrangements with the Copyright Holder.
+\layout Enumerate
+
+make other distribution arrangements with the Copyright Holder.
  
 \end_deeper 
 \layout Enumerate
