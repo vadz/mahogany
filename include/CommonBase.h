@@ -1,0 +1,109 @@
+/*-*- c++ -*-********************************************************
+ * CommonBase: common base class                                    *
+ *                                                                  *
+ * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ *                                                                  *
+ * $Id$                                                             *
+ ********************************************************************
+ * $Log$
+ * Revision 1.1  1998/03/14 12:21:10  karsten
+ * first try at a complete archive
+ *
+ *******************************************************************/
+
+#ifndef COMMONBASE_H
+#define	COMMONBASE_H
+
+#include	<iostream.h>
+#include	<strstream.h>
+
+#include	<Mconfig.h>
+#include	<Mcommon.h>
+
+#if	USE_MEMDEBUG
+#	include	<magic.h>
+#else
+#	define	DEFINE_MAGIC(classname,magic)	/**/
+#     	define	SET_MAGIC(magic)		/**/
+#endif
+
+#if USE_COMMONBASE
+#if !	USE_CLASSINFO
+#	define	CB_IMPLEMENT_CLASS(newclass, parent)	
+#	define	CB_DECLARE_CLASS(newclass, parent)	
+#else
+#	if	USE_WXOBJECT
+#		define	CB_IMPLEMENT_CLASS(newclass, parent) IMPLEMENT_CLASS(newclass, parent)	
+#		define CB_DECLARE_CLASS(newclass) DECLARE_CLASS(newclass,  parent)
+#	else
+#		define	CB_IMPLEMENT_CLASS(newclass, parent)	
+#		define CB_DECLARE_CLASS(newclass,parent) virtual const char *GetClassName(void)const { return #newclass; }
+#	endif
+#endif
+
+/**
+   CommonBase: common base class for debugging purposes.
+   This class contains lots of debugging information which can be
+   queried at run time. It also defines a minimal set of virtual
+   methods to be implemented by all other classes. Furtheron it
+   provides an interface for debugging and error message output.
+   */
+#if USE_WXOBJECT
+class	CommonBase : public class wxObject
+#else
+class	CommonBase
+#endif
+{
+#if	USE_MEMDEBUG
+   unsigned long		cb_magic;
+   static	unsigned long	cb_class_magic;
+#endif
+   
+#if	USE_WXOBJECT
+   DECLARE_CLASS(CommonBase)
+#endif
+
+public:
+   /// constructor
+   CommonBase() { SET_MAGIC(MAGIC_COMMONBASE); }
+   
+   /// virtual destructor to get deallocation right
+   virtual ~CommonBase() { Validate(); }
+
+   // /check wether object is initialised
+   //   virtual bool		IsInitialised(void) const = 0;
+
+   // / return ClassName structure
+   //static const ClassName &GetClassName(void) = 0;
+
+   CB_DECLARE_CLASS(CommonBase, CommonBase)
+
+#ifndef NDEBUG
+   /// prints some debugging information
+   virtual void Debug(void) const; 
+#endif
+#if USE_MEMDEBUG
+   void Validate(void);
+#else
+   void Validate(void) {}
+#endif
+};
+
+/// macro to call common base class debugging function
+#	define	CBDEBUG()	CommonBase::Debug()
+#	ifndef NDEBUG
+#		define	VAR(x)		cerr << #x << " = " << x << endl;
+#	endif
+#else
+// empty definition
+class CommonBase
+{
+};
+
+#	define	CLASSINIT(name)
+#	define	CBDEBUG()
+#	define	VAR(x)
+#endif // NCOMMONBASE
+
+
+#endif	// COMMONBASE_H

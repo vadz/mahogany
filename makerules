@@ -1,0 +1,26 @@
+# rules to create object files:
+%.o: %.cc
+	$(CXX) $(CXXFLAGS) -c -o $(ODIR)/$@ $<
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $(ODIR)/$@ $<
+%.o: %.c
+	$(CC) $(CXXFLAGS) -c -o $(ODIR)/$@ $<
+
+dep depend:
+	$(CXX) -M $(CXXFLAGS) $(SRC) >.depend
+
+.depend:
+	touch .depend ; $(MAKE) dep
+
+.PHONY: clean doc dep depend
+
+clean:
+	$(RM) $(ODIR)/*.o 
+
+doc:
+	mkdir $(DOCDIR)/$(CWD)
+	$(DXX) $(DXXHFLAGS) docxx.h #$(HDR)
+	$(DXX) $(DXXTFLAGS) docxx.h #$(HDR)
+
+doc2:
+	for i in *.h ; do $(DXX) -f -k -u -k $(DXXTBL) -H -t -o $(DOCDIR)/$$i.tex $$i ; done

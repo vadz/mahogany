@@ -1,0 +1,26 @@
+111a112,132
+> static char **rfc822_extraheaders_names = NULL;
+> static char **rfc822_extraheaders_values = NULL;
+> 
+> void rfc822_setextraheaders(char **names, char **values)
+> {
+>    rfc822_extraheaders_names = names;
+>    rfc822_extraheaders_values = values;
+> }
+> 
+> void rfc822_extraheader_lines (char **header,ENVELOPE *env)
+> {
+>    while(rfc822_extraheaders_names && *rfc822_extraheaders_names)
+>    {
+>       if (rfc822_extraheaders_values) sprintf ((*header += strlen (*header)),"%s%s: %s\015\012",
+> 			 env->remail ? "ReSent-" : "",
+> 			 *(rfc822_extraheaders_names++),
+> 			 *(rfc822_extraheaders_values++)
+> 			 );
+>    }
+> }
+> 
+137a159,161
+> 
+>   rfc822_extraheader_lines (&header,env);
+>   

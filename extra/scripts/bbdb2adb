@@ -1,0 +1,26 @@
+#!/bin/sh
+sed "1,$ s/\[//g
+     1,$ s/\]//g
+     1,$ s/nil/\"\"/g
+     1,$ s/\" \"/;/g
+     1,$ s/^\"//g
+     1,$ s/\".*(\"//g
+     1,$ s/\").*$//g"\
+    |    \
+	gawk '
+BEGIN { FS=";" }
+    { 
+	firstname = $1; lastname = $2; email = $6;
+	    if(length(firstname) || length(lastname))
+	    {
+        print "BEGIN"
+	printf ("FN:%s %s\n", firstname, lastname);
+	printf ("N:%s;%s;;;\n", lastname, firstname);
+	printf ("EMAIL:%s\n", email);
+	print "END"
+	    }
+    }'
+
+
+
+
