@@ -2122,8 +2122,8 @@ static bool CheckForHTMLOnly(const Message *msg)
       return false;
    }
 
-   // we accept the multipart/alternative messages with a text/plain and
-   // a text/html part but not the top level text/html messages
+   // we accept the multipart/alternative messages with a text/plain (but see
+   // below) and a text/html part but not the top level text/html messages
    //
    // the things are further complicated by the fact that some spammers send
    // HTML messages without MIME-Version header which results in them
@@ -2131,30 +2131,61 @@ static bool CheckForHTMLOnly(const Message *msg)
    // have the default type of text/plain and we have to check for this
    // (common) case specially
    const MimeType type = part->GetType();
-   if ( type.GetPrimary() == MimeType::TEXT )
+   switch ( type.GetPrimary() )
    {
-      String subtype = type.GetSubType();
-
-      if ( subtype == "PLAIN" )
-      {
-         // check if it was really in the message or returned by c-client in
-         // absence of MIME-Version
-         String value;
-         if ( !msg->GetHeaderLine("MIME-Version", value) )
+      case MimeType::TEXT:
          {
-            if ( msg->GetHeaderLine("Content-Type", value) )
+            String subtype = type.GetSubType();
+
+            if ( subtype == "PLAIN" )
             {
-               if ( strstr(value.MakeLower(), "text/html") )
-                  return true;
+               // check if it was really in the message or returned by c-client in
+               // absence of MIME-Version
+               String value;
+               if ( !msg->GetHeaderLine("MIME-Version", value) )
+               {
+                  if ( msg->GetHeaderLine("Content-Type", value) )
+                  {
+                     if ( strstr(value.MakeLower(), "text/html") )
+                        return true;
+                  }
+               }
+            }
+            else if ( subtype == "HTML" )
+            {
+               return true;
             }
          }
-      }
-      else if ( subtype == "HTML" )
-      {
-         return true;
-      }
+         break;
+
+      case MimeType::MULTIPART:
+         if ( type.GetSubType() == _T("ALTERNATIVE") )
+         {
+            // although multipart/alternative messages with a text/plain and a
+            // text/html type are legal, spammers sometimes send them with an
+            // empty text part -- which is not
+            const MimePart *subpart1 = part->GetNested();
+            if ( subpart1 &&
+                     subpart1->GetType() == _T("TEXT/PLAIN") &&
+                        !subpart1->GetSize() )
+            {
+               const MimePart *subpart2 = subpart1->GetNext();
+               if ( subpart2 &&
+                     !subpart2->GetNext() &&
+                        subpart2->GetType() == _T("TEXT/HTML") )
+               {
+                  // multipart/alternative message with text/plain and html
+                  // subparts [only] and the text part is empty -- junk
+                  return true;
+               }
+            }
+         }
+         break;
+
+      default:
+         // it's a MIME message but of non TEXT type
+         ;
    }
-   //else: it's a MIME message but of non TEXT type
 
    return false;
 }

@@ -133,6 +133,9 @@ public:
    /// is this MimeType the same as or specialization of the other?
    bool Matches(const MimeType& wildcard) const;
 
+   /// this allows to write tests like mimeType == "TEXT/PLAIN"
+   bool operator==(const String& wildcard) const { return Matches(wildcard); }
+
    //@}
 
 private:
