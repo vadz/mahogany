@@ -36,7 +36,7 @@ public:
    MimeList * GetMimeList(void) ;
    MimeTypes * GetMimeTypes(void) ;
    ProfileBase *GetProfile(void) ;
-   Adb *GetAdb(void) ;
+//   Adb *GetAdb(void) ;
 };
 
 MAppBase &wxGetApp();
@@ -80,6 +80,8 @@ char *MDialog_FileRequester(String  &message,
                             ProfileBase *profile = NULL
    );
 
-AdbEntry *
+/*
+  AdbEntry *
 MDialog_AdbLookupList(AdbExpandListType *adblist,
 		      MFrame *parent = NULL);
+*/

@@ -47,11 +47,6 @@
 #  include "guidef.h"
 #endif //USE_PCH
 
-#include "adb/AdbManager.h"
-#include "adb/AdbEntry.h"
-#include "adb/AdbBook.h"
-#include "adb/AdbDataProvider.h"
-
 // wxWindows
 #include "wx/string.h"
 #include "wx/log.h"
@@ -61,6 +56,13 @@
 #include "wx/file.h"
 #include "wx/textfile.h"
 #include "wx/fileconf.h"
+
+
+#include "adb/AdbManager.h"
+#include "adb/AdbEntry.h"
+#include "adb/AdbBook.h"
+#include "adb/AdbDataProvider.h"
+
 
 // ----------------------------------------------------------------------------
 // constants

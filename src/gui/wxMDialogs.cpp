@@ -39,7 +39,6 @@
 #include "MApplication.h"
 #include "gui/wxMApp.h"
 
-#include "Adb.h"
 #include "MDialogs.h"
 #include "gui/wxlwindow.h"
 
@@ -105,11 +104,11 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                    const wxString& strText,
                                    const wxString& strCaption,
                                    const wxString& strPrompt)
-                 : m_strText(strText),
-                   wxDialog(parent, -1, strCaption,
-                            wxDefaultPosition,
-                            wxDefaultSize,
-                            wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+   : wxDialog(parent, -1, strCaption,
+              wxDefaultPosition,
+              wxDefaultSize,
+              wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
+     m_strText(strText)
 {
   // layout
   long widthLabel, heightLabel;
@@ -365,6 +364,7 @@ MDialog_YesNoDialog(String const &message,
                        GetParent(parent)) == wxYES;
 }
 
+#if 0
 AdbEntry *
 MDialog_AdbLookupList(AdbExpandListType *adblist, MWindow *parent)
 {
@@ -426,7 +426,7 @@ MDialog_AdbLookupList(AdbExpandListType *adblist, MWindow *parent)
   
    return result;
 }
-
+#endif
 // simple AboutDialog to be displayed at startup
 void
 MDialog_AboutDialog( MWindow *parent)

@@ -19,22 +19,38 @@
 // ----------------------------------------------------------------------------
 
 // M
+// dirty hack
 #include "Mpch.h"
 
 #ifndef  USE_PCH
-#  include "Mcommon.h"
-#  include "guidef.h"
+#include  "kbList.h"
+
+#include  "guidef.h"
+#include  "strutil.h"
+#include  <ctype.h>
+
+#ifdef   USE_WXCONFIG
+#  include "wx/config.h"
+#else  //standalone appconf
+#  include "appconf.h"
+#endif
+
+#   include "Mcommon.h"
+
+#   include "MFrame.h"
+#   include "gui/wxMFrame.h"
+
+#   include "MApplication.h"
+#   include "gui/wxMApp.h"
+#   include "gui/wxMFrame.h"
+#   include   "kbList.h"
 #endif //USE_PCH
 
-#include "MDialogs.h"
-#include "gui/wxMenuDefs.h"
+#include   "MDialogs.h"
+#include   "gui/wxMenuDefs.h"
+#include   "gui/wxIconManager.h"
 
 #undef   CreateListBox
-
-#include "adb/AdbManager.h"
-#include "adb/AdbEntry.h"
-#include "adb/AdbBook.h"
-#include "adb/AdbDataProvider.h"
 
 // wxWindows
 #include "wx/wx.h"
@@ -45,6 +61,12 @@
 #include "wx/treectrl.h"
 #include "wx/toolbar.h"
 #include "wx/file.h"
+
+#include "adb/AdbManager.h"
+#include "adb/AdbEntry.h"
+#include "adb/AdbBook.h"
+#include "adb/AdbDataProvider.h"
+
 
 // our public interface
 #include "adb/AdbFrame.h"
@@ -399,7 +421,7 @@ public:
     Book,
     Address,
     Opened,
-    Closed,
+    Closed
   };
 
 private:
@@ -1107,7 +1129,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // caption and icon
   // ----------------
   SetTitle(_("Address Book Editor"));
-  SetIcon(wxIcon("adbedit"));
+  SetIcon(ICON("adbedit"));
 
   // final initializations
   // ---------------------
@@ -1442,7 +1464,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
     item.m_itemId = m_root->GetId();
     item.m_mask = wxTREE_MASK_CHILDREN;
     item.m_children = 1;
-    m_treeAdb->SetItem(item);
+//FIXME    m_treeAdb->SetItem(item);
   }
 
   // currently, we always succeed because even if the file doesn't exist
@@ -1472,7 +1494,7 @@ void wxAdbEditFrame::AddNewTreeElement(AdbTreeElement *element)
     item.m_itemId = parent->GetId();
     item.m_mask = wxTREE_MASK_CHILDREN;
     item.m_children = 1;
-    m_treeAdb->SetItem(item);
+//FIXME    m_treeAdb->SetItem(item);
   }
 }
 
@@ -1881,7 +1903,7 @@ void wxAdbEditFrame::DoShowAdbProperties()
     item.m_itemId = book->GetId();
     item.m_mask = wxTREE_MASK_TEXT;
     item.m_text = book->GetAdbName();
-    m_treeAdb->SetItem(item);
+//FIXME    m_treeAdb->SetItem(item);
   }
 }
 
@@ -1980,7 +2002,7 @@ void wxAdbEditFrame::SetTreeItemIcon(const wxTreeItem& item,
   if ( parent->IsRoot() || parent->GetParent()->IsRoot() )
     return;
 
-  m_treeAdb->SetItemImage(item.m_itemId, icon, icon);
+//FIXME  m_treeAdb->SetItemImage(item.m_itemId, icon, icon);
 }
 
 void wxAdbEditFrame::OnTreeCollapse(wxTreeEvent& event)
@@ -2006,7 +2028,7 @@ void wxAdbEditFrame::OnTreeExpanding(wxTreeEvent& event)
     // if this group has no entries don't put [+] near it
     item.m_mask = wxTREE_MASK_CHILDREN;
     item.m_children = 0;
-    m_treeAdb->SetItem(item);
+//FIXME    m_treeAdb->SetItem(item);
 
     wxLogStatus(_("This group doesn't have any entries"));
   }
@@ -2132,7 +2154,7 @@ bool wxAdbEditFrame::MoveSelection(const wxString& strEntry)
   AdbTreeElement *current = ExpandBranch(strEntry);
   if ( current != NULL ) {
     m_treeAdb->SetFocus();
-    m_treeAdb->SelectItem(current->GetId());
+//FIXME    m_treeAdb->SelectItem(current->GetId());
     return TRUE;
   }
   else
@@ -2151,7 +2173,7 @@ void wxAdbEditFrame::SetMinSize()
 
   // width: leave enough place for 3 buttons and the tree control
   // height: @@
-  SetSizeHints(7*widthBtn, 20*heightBtn);
+//FIXME  SetSizeHints(7*widthBtn, 20*heightBtn);
 }
 
 bool wxAdbEditFrame::SaveExpandedBranches(AdbTreeNode *group)
@@ -2206,11 +2228,11 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
                                  int where,
                                  bool bCase,
                                  bool bWild)
-               : m_strWhat(strWhat),
-                 wxDialog(parent, -1, _("Find address book entry"),
-                          wxDefaultPosition,
-                          wxDefaultSize,
-                          wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+   : wxDialog(parent, -1, _("Find address book entry"),
+              wxDefaultPosition,
+              wxDefaultSize,
+              wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
+     m_strWhat(strWhat)
 {
   // init member vars
   // ----------------
@@ -2372,11 +2394,11 @@ bool wxADBFindDialog::TransferDataFromWindow()
 wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
                                      const wxString& strName,
                                      bool bGroup)
-                 : m_strName(strName), m_bGroup(bGroup),
-                   wxDialog(parent, -1, _("Create a new entry/group"),
-                            wxDefaultPosition,
-                            wxDefaultSize,
-                            wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+   : wxDialog(parent, -1, _("Create a new entry/group"),
+              wxDefaultPosition,
+              wxDefaultSize,
+              wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
+     m_strName(strName), m_bGroup(bGroup)
 {
   const char *label = _("&New entry/group name:");
 
@@ -3233,15 +3255,18 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
                 wxTREE_MASK_DATA          |
                 wxTREE_MASK_IMAGE         |
                 wxTREE_MASK_SELECTED_IMAGE;
-  item.m_text = IsRoot() ? _("Address Books") : GetName();
+  item.m_text = IsRoot() ? wxString(_("Address Books")) : GetName();
   item.m_children = IsGroup();
   item.m_data = (long)this;
 
-  switch ( m_kind ) {
-    case TreeElement_Entry: item.m_image = wxAdbTree::Address; break;
-    case TreeElement_Group: item.m_image = wxAdbTree::Closed; break;
-    case TreeElement_Book:  item.m_image = wxAdbTree::Book; break;
-    case TreeElement_Root:  item.m_image = wxAdbTree::Library; break;
+  switch ( m_kind )
+  {
+  case TreeElement_Entry: item.m_image = wxAdbTree::Address; break;
+  case TreeElement_Group: item.m_image = wxAdbTree::Closed; break;
+  case TreeElement_Book:  item.m_image = wxAdbTree::Book; break;
+  case TreeElement_Root:  item.m_image = wxAdbTree::Library; break;
+  default:
+     ;
   }
   item.m_selectedImage = item.m_image;
   

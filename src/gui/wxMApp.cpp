@@ -145,9 +145,11 @@ int wxMApp::OnExit()
  
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
+#ifdef OS_WIN
    free(myusername());
    free(myhomedir());
-
+#endif
+   
    return 0;
 }
 

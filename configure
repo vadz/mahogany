@@ -590,7 +590,7 @@ DEFAULT_USE_LIBINTL=0
 MAKE_USE_WXTAB="USE_WXTAB=1"
 
 
-PYTHON_PATH="/usr/local/src/Python-1.5"
+PYTHON_PATH="/usr/local/src/Python-1.5.1"
 PYTHON_LIB="python1.5"
 MYCXXFLAGS="-pedantic -Wall"
 

@@ -35,7 +35,6 @@
 #include "MailFolder.h"
 #include "MailFolderCC.h"
 
-#include "Adb.h"
 #include "MDialogs.h"
 
 #include "MessageView.h"

@@ -19,6 +19,7 @@
 // ----------------------------------------------------------------------------
 #include "Mpch.h"
 
+#include "Mcommon.h"
 #include <wx/log.h>
 #include <wx/dynarray.h>
  

@@ -32,9 +32,6 @@ class MAppBasePtr :
     def GetProfile(self):
         val = MAppBasec.MAppBase_GetProfile(self.this)
         return val
-    def GetAdb(self):
-        val = MAppBasec.MAppBase_GetAdb(self.this)
-        return val
     def __repr__(self):
         return "<C MAppBase instance>"
 class MAppBase(MAppBasePtr):
@@ -76,8 +73,6 @@ def MDialog_FileRequester(arg0,*args):
     args = tuple(argl)
     val = apply(MAppBasec.MDialog_FileRequester,(arg0.this,)+args)
     return val
-
-MDialog_AdbLookupList = MAppBasec.MDialog_AdbLookupList
 
 
 

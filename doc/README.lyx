@@ -1,4 +1,4 @@
-#This file was created by <karsten> Tue Aug 11 19:28:47 1998
+#This file was created by <karsten> Fri Aug 14 20:28:49 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -85,9 +85,178 @@ it should interact with other programs intuitively, sending MIME mails should
 \layout Itemize
 
 it should run on a wide variety of systems 
+\layout Subsection
+
+Current Status
+\layout Standard
+
+As of the time of writing this document, M is under active development.
+ A first public alpha release has been made.
+\layout Subsection
+
+Features already implemented
+\layout Standard
+
+Many of the features planned are already available and new ones are added
+ all the time.
+ This list will change constantly.
+\layout Itemize
+
+Cross-platform.
+ M compiles on a variety of Unix systems and on Microsoft Windows.
+ Use one mail client, no matter what system you use.
+\layout Itemize
+
+Based on the c-client library from the University of Washington, therefore
+ full access to a wide range of protocols and file formats, including SMTP,
+ MAP, POP3, NNTP and several mailbox formats.
+\layout Itemize
+
+Wide (extreme?) user configurability.
+ Whatever makes sense to override or change, can be changed by the user.
+ Configuration supports several configuration files on Unix, with special
+ administrator support for making entries immutable, and the registry on
+ Windows.
+\layout Itemize
+
+Scriptable and extendable.
+ M includes an embedded Python interpreter with full access to its object
+ hierarchy.
+ Write object-oriented scripts to extend and control M.
+\layout Itemize
+
+Easy MIME support.
+ Text and other content can be freely mixed and different filetypes are
+ represented by icons.
+\layout Itemize
+
+Inline displaying of images.
+\layout Itemize
+
+Clickable URLs.
+\layout Itemize
+
+XFace support.
+\layout Itemize
+
+Multiple mail folders.
+\layout Itemize
+
+Powerful address database and contact manager with automated collection
+ of data from mails.
+\layout Itemize
+
+Printing of nicely formatted messages.
+\layout Itemize
+
+Full internationalisation support, M speaks multiple languages.
+\layout Subsection
+
+Features still missing
+\layout Standard
+
+This is a list of features on our TODO list that we are currently working
+ on.
+\layout Itemize
+
+Full Drag and Drop interaction with filemanagers of Windows and Gnome (will
+ be added real soon, easy).
+\layout Itemize
+
+Easy to use filtering system for mails.
+\layout Itemize
+
+Support for V-cards.
+\layout Itemize
+
+Nested mail folder hierarchy.
+\layout Itemize
+
+Spam-Ex spam fighting/auto-complaint function.
+\layout Itemize
+
+Richt-text editing and HTML mail support
+\layout Itemize
+
+Support for PGP and GNU Privacy Guard to encrypt mails.
+\layout Itemize
+
+Threading of messages and proper usenet news support.
+\layout Itemize
+
+Compression of mail folders.
+\layout Itemize
+
+Delay-Folder to keep mails and re-present them at a later date.
+\layout Itemize
+
+Context sensitive help system (HTML based).
+\layout Itemize
+
+Translations to German, French and Italian.
+\layout Itemize
+
+Wide character (Unicode) support and other character sets.
+\layout Itemize
+
+Import, export and synchronisation with other programs' address databases.
+\layout Itemize
+
+Voice mail.
+\layout Itemize
+
+More Python support through wxPython.
+\layout Itemize
+
+Support for Drag and Drop interaction with KDE, once that wxQt is available.
+\layout Itemize
+
+CORBA support, possible cooperation with PINN project.
+\layout Subsection
+
+Help Needed
+\layout Standard
+
+As you can see, we have big plans for M.
+ To achieve all this, we need some help.
+ Areas where we would use some help are
+\layout Itemize
+
+The Python support could be improved (We are absolute beginners in Python,
+ so help is very welcome.).
+ 
+\layout Itemize
+
+Also, if you want to add support for further mail protocols, please get
+ in touch with us.
+ 
+\layout Itemize
+
+The wxQt project, a port of wxWindows to the Qt toolkit, will also be happy
+ for any help.
+ We are not directly involved in this, but being involved with wxWindows,
+ we are happy to support that port.
+\layout Itemize
+
+If you have access to other systems apart from Linux/Solaris/Windows, you
+ are very welcome to help us port M to those platforms, or to other hardware
+ than Intel.
+\layout Itemize
+
+If you have anything that you would like to change, improve or add to M,
+ please get in touch with us.
+ We want M to be the best and if you miss a feature, we can always add it.
 \layout Section
 
 Compilation notes
+\layout Standard
+
+These compilation notes are probably a bit outdated.
+ The best start is to use the 
+\family typewriter 
+--help
+\family default 
+ option of configure to see which options it supports.
 \layout Subsection
 
 Operating systems specific
@@ -425,6 +594,65 @@ MailHost
 \family default 
  setting to tell it where to send the mail.
  
+\layout Section
+
+Configuration Settings
+\layout Standard
+
+Configuration settings are stored in configuration files under Unix and
+ in the Registry under Windows.
+ There are two types of configuration entries, global settings and profile
+ settings.
+ Global settings are all top-level configuration entries.
+\layout Standard
+
+To get a list of all default entries under Unix, create an empty configuration
+ file 
+\family typewriter 
+$HOME/.M/config
+\family default 
+ with the content
+\layout Standard
+
+
+\family typewriter 
+[M]
+\layout Standard
+
+
+\family typewriter 
+RecordDefaults=1
+\layout Subsection
+
+Profile Settings
+\layout Standard
+
+M uses a system of inheriting configurations for most of its settings.
+ Each profile is represented by one entry in the configuration hierarchy.
+ For example, the settings for a standard message window (MessageView) are
+ stored in an entry 
+\family typewriter 
+[M/Profiles/MessageView]
+\family default 
+.
+\layout Standard
+
+As the message window is opened from within a mail folder, it also inherits
+ the profile from the mail folder, which might be 
+\family typewriter 
+[M/Profiles/INBOX]
+\family default 
+or 
+\family typewriter 
+[M/Profiles/ReallyInterestingMail]
+\family default 
+, depending on which folder you are using at the moment.
+ The mail folder setup itself might inherit from some other profile and
+ eventually all profiles inherit from 
+\family typewriter 
+[M/Profiles]
+\family default 
+.
 \layout Section
 
 Scripting and Python integration

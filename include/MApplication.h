@@ -16,8 +16,8 @@
 #ifndef   USE_PCH
 #   include   "Mcommon.h"
 #   include   "Mdefaults.h"
-#   include   "Adb.h"
 #   include   "MFrame.h"
+#   include   "gui/wxMFrame.h"
 #   include   "PathFinder.h"
 #   include   "MimeList.h"
 #   include   "MimeTypes.h"
@@ -26,8 +26,6 @@
 #   include   "MLogFrame.h"
 #   include   "kbList.h"
 #endif
-
-class Adb;
 
 /**
    Application class, doing all non-GUI application specific stuff

@@ -17,7 +17,7 @@
 #   include	<MApplication.h>
 #   include	<MFrame.h>
 #   include	<MDialogs.h>
-#   include	<Adb.h>
+class AdbEntry;
 #else
   // fwd decl
   class ProfileBase;
@@ -167,11 +167,11 @@ bool MInputBox(wxString *pstr,
                wxWindow *parent = NULL,
                const char *key = NULL,
                const char *def = NULL);
-
+#if 0
 AdbEntry *
 MDialog_AdbLookupList(AdbExpandListType *adblist,
 		      MWindow *parent = NULL);
-
+#endif
 /// simple AboutDialog to be displayed at startup
 void
 MDialog_AboutDialog( MWindow *parent);

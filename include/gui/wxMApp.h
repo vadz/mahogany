@@ -52,14 +52,9 @@ private:
 // ----------------------------------------------------------------------------
 // global application object
 // ----------------------------------------------------------------------------
-#ifdef  USE_WXWINDOWS2
-   // created dynamically by wxWindows
-   DECLARE_APP(wxMApp);
+// created dynamically by wxWindows
+DECLARE_APP(wxMApp);
 
-#  define mApplication (wxGetApp())
-#else
-   // global variable
-   extern MApplication mApplication;
-#endif
+#define mApplication (wxGetApp())
 
 #endif

@@ -42,7 +42,7 @@
 #include "MessageCC.h"
 #include "SendMessageCC.h"
 
-#include "Adb.h"
+
 #include "MDialogs.h"
 
 #include "gui/wxFontManager.h"

@@ -23,21 +23,22 @@
 
 #ifndef USE_PCH
 #  include "strutil.h"
-#  include "MFrame.h"
-#  include "MLogFrame.h"
-
 #  include "PathFinder.h"
+
 #  include "MimeList.h"
 #  include "MimeTypes.h"
-#  include "Profile.h"
 
 #  include "kbList.h"
+
+#   include "MFrame.h"
+#   include "gui/wxMFrame.h"
+
+#   include "Profile.h"
+#   include "Mdefaults.h"
+
+#   include "MApplication.h"
+#   include "gui/wxMApp.h"
 #endif
-
-#include "Mdefaults.h"
-
-#include "MApplication.h"
-#include "gui/wxMApp.h"
 
 #ifdef  USE_WXCONFIG
 #  include "wx/file.h"
