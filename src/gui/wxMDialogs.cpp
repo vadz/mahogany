@@ -20,8 +20,6 @@
 
 #include "Mpch.h"
 
-#include <errno.h>
-
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "Mdefaults.h"
@@ -59,6 +57,9 @@
 #include <wx/statbmp.h>
 #include <wx/choice.h>
 #include <wx/textdlg.h>
+#include <wx/treectrl.h>
+
+#include <wx/generic/helpwxht.h>
 
 #include "MFolderDialogs.h"
 
@@ -69,6 +70,8 @@
 #include "gui/wxFolderTree.h"
 #include "gui/wxFolderView.h"
 #include "gui/wxDialogLayout.h"
+
+#include <errno.h>
 
 #ifdef    OS_WIN
 #  define mahogany   "mahogany"
@@ -111,8 +114,7 @@ wxSMDialog::ShowModal()
       one. */
    
    wxFrame *hf = NULL;
-   wxHelpController *hc = ((wxMApp
-                            *)mApplication)->GetHelpController();
+   wxHelpController *hc = ((wxMApp *)mApplication)->GetHelpController();
    if(hc && hc->IsKindOf(CLASSINFO(wxHelpControllerHtml)))
       hf = ((wxHelpControllerHtml *)hc)->GetFrameParameters();
 
@@ -194,11 +196,13 @@ public:
 
    void OnButton(wxCommandEvent &ev);
    void OnTree(wxTreeEvent &ev);
-   DECLARE_EVENT_TABLE()
+
 private:
    wxString     m_FileName;
    MFolder      *m_folder;
    wxFolderTree *m_tree;
+
+   DECLARE_EVENT_TABLE();
 };
 
 BEGIN_EVENT_TABLE(MFolderDialog, wxSMDialog)

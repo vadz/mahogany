@@ -167,7 +167,7 @@ public:
    virtual bool TransferDataFromWindow();
 
    // called by the page to create the new folder
-   MFolder *DoCreateFolder(FolderType typeFolder);
+   MFolder *DoCreateFolder(FolderType folderType);
 
    // callbacks
    void OnFolderNameChange(wxEvent&);
@@ -207,11 +207,18 @@ public:
    virtual bool TransferDataFromWindow(void);
 
    /// update controls
-   void UpdateUI(int selection = -1);
+   void UpdateUI(FolderType folderType = MF_ILLEGAL);
    void OnEvent(wxCommandEvent& event);
    void OnChange(wxKeyEvent& event);
 
 protected:
+   // the indices of folder subtype combobox
+   enum
+   {
+      FileFolderSubtype_Mbox,
+      FileFolderSubtype_MH,
+   };
+
    // fill the fields with the default value for the given folder type (the
    // current value of the type radiobox) when the type of the folder chosen
    // changes (which happens when the page is created too)
@@ -233,6 +240,10 @@ protected:
       MaxProperty
    };
    void WriteEntryIfChanged(FolderProperty entry, const wxString& value);
+
+   // fills the subtype combobox with the available values for the current
+   // (m_folderType) type of folder
+   void FillSubtypeCombo(FolderType folderType);
 
    // get the type of the folder chosen from the current radiobox value or from
    // the given one (which is supposed to be the radiobox selection)
@@ -270,7 +281,7 @@ protected:
    /// folder path
    wxTextCtrl *m_path;
    /// and a browse button for it
-   wxFileBrowseButton *m_browsePath;
+   wxFileOrDirBrowseButton *m_browsePath;
    /// server name
    wxTextCtrl *m_server;
    /// newsgroup name
@@ -316,6 +327,7 @@ protected:
    /// the current folder type or -1 if none
    int m_folderType;
 
+private:
    DECLARE_EVENT_TABLE()
 };
 
@@ -420,6 +432,7 @@ END_EVENT_TABLE()
 BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
    EVT_RADIOBOX(-1, wxFolderPropertiesPage::OnEvent)
    EVT_CHECKBOX(-1, wxFolderPropertiesPage::OnEvent)
+   EVT_COMBOBOX(-1, wxFolderPropertiesPage::OnEvent)
    EVT_TEXT    (-1, wxFolderPropertiesPage::OnChange)
 END_EVENT_TABLE()
 
@@ -605,7 +618,7 @@ wxFolderCreateDialog::wxFolderCreateDialog(wxWindow *parent,
    SetParentFolder(parentFolder);
 }
 
-MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType typeFolder)
+MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType folderType)
 {
    if ( !m_parentFolder )
    {
@@ -619,7 +632,7 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType typeFolder)
    }
 
    m_newFolder = m_parentFolder->CreateSubfolder(m_folderName->GetValue(),
-                                                 typeFolder);
+                                                 folderType);
 
 
    if ( m_newFolder )
@@ -851,7 +864,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_mailboxname = CreateTextWithLabel(labels[Label_Mailboxname], widthMax, m_server);
    m_newsgroup = CreateTextWithLabel(labels[Label_Newsgroup], widthMax, m_mailboxname);
    m_comment = CreateTextWithLabel(labels[Label_Comment], widthMax, m_newsgroup);
-   m_path = CreateFileEntry(labels[Label_Path], widthMax, m_comment, &m_browsePath);
+   m_path = CreateFileOrDirEntry(labels[Label_Path], widthMax, m_comment, &m_browsePath);
    m_isIncoming = CreateCheckBox(labels[Label_IsIncoming], widthMax, m_path);
    m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
    m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_keepOpen);
@@ -862,7 +875,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                "problems updating the folder listing.\n"
                                "This is needed for some broken POP3 servers.\n"
                                "Normally this is not needed."));
-   
+
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
    ASSERT_MSG( dlgParent, "should have a parent dialog!" );
 
@@ -901,14 +914,7 @@ wxFolderPropertiesPage::OnEvent(wxCommandEvent& event)
 
    dlg->SetDirty();
 
-   int sel = -1;
-   if ( event.GetEventObject() == m_radio )
-   {
-      // tell UpdateUI() about the new selection
-      sel = event.GetInt();
-   }
-
-   UpdateUI(sel);
+   UpdateUI();
 }
 
 void
@@ -931,7 +937,8 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
    {
       switch ( GetCurrentFolderType() )
       {
-         case File:
+         case MF_FILE:
+         case MF_MH:
             // set the file name as the default folder name
             {
                wxString name;
@@ -941,8 +948,8 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
             }
             break;
 
-         case News:
-         case Nntp:
+         case MF_NEWS:
+         case MF_NNTP:
             // set the newsgroup name as the default folder name
             SetFolderName(m_newsgroup->GetValue());
             break;
@@ -954,14 +961,25 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
    }
 }
 
-// our argument here is the radiobox selection
+// our argument here is the current exact folder type, not the radiobox
+// selection, but if it's MF_ILLEGAL we will get the current folder type
+// ourself from the dialog controls
 void
-wxFolderPropertiesPage::UpdateUI(int sel)
+wxFolderPropertiesPage::UpdateUI(FolderType folderType)
 {
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
    CHECK_RET( dlg, "wxFolderPropertiesPage without parent dialog?" );
 
-   FolderType folderType = GetCurrentFolderType(sel);
+   if ( folderType == MF_ILLEGAL )
+   {
+      // get the current folder type from dialog controls
+      folderType = GetExactFolderType(GetCurrentFolderType());
+   }
+   else
+   {
+      // set the control type
+      m_radio->SetSelection(GetRadioIndexFromFolderType(folderType));
+   }
 
    if ( folderType != m_folderType )
    {
@@ -1056,6 +1074,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
          break;
 
       case MF_FILE:
+      case MF_MH:
          EnableTextWithLabel(m_mailboxname, FALSE);
          EnableTextWithLabel(m_server, FALSE);
          EnableTextWithLabel(m_newsgroup, FALSE);
@@ -1065,8 +1084,20 @@ wxFolderPropertiesPage::UpdateUI(int sel)
          m_forceReOpen->Enable(FALSE);
 
          // file folders come in 2 flavours
-         m_folderSubtype->Append(_("MBOX folder"));
-         m_folderSubtype->Append(_("MH folder"));
+         FillSubtypeCombo(folderType);
+
+         if ( folderType == MF_FILE )
+         {
+            m_browsePath->BrowseForFiles();
+            m_folderSubtype->SetSelection(FileFolderSubtype_Mbox);
+         }
+         else
+         {
+            ASSERT_MSG( folderType == MF_MH, "new file folder type?" );
+
+            m_browsePath->BrowseForDirectories();
+            m_folderSubtype->SetSelection(FileFolderSubtype_MH);
+         }
          break;
 
       case MF_INBOX:
@@ -1102,6 +1133,22 @@ wxFolderPropertiesPage::UpdateUI(int sel)
    dlg->SetMayEnableOk(TRUE);
 }
 
+void
+wxFolderPropertiesPage::FillSubtypeCombo(FolderType folderType)
+{
+   switch ( folderType )
+   {
+      case MF_FILE:
+      case MF_MH:
+         m_folderSubtype->Append(_("MBOX folder"));
+         m_folderSubtype->Append(_("MH folder"));
+         break;
+
+      default:
+         m_folderSubtype->Clear();
+   }
+}
+
 FolderType
 wxFolderPropertiesPage::GetCurrentFolderType(int sel) const
 {
@@ -1118,8 +1165,12 @@ wxFolderPropertiesPage::GetCurrentFolderType(int sel) const
 
    switch ( sel )
    {
-      case Inbox:
       case File:
+          // return MBOX if no selection too
+          return m_folderSubtype->GetSelection() == FileFolderSubtype_MH
+                 ? MF_MH : MF_FILE;
+
+      case Inbox:
       case POP:
       case IMAP:
       case Nntp:
@@ -1145,17 +1196,17 @@ wxFolderPropertiesPage::GetExactFolderType(FolderType type) const
             case -1:
                // no selection - use the default (first) value, fall through
 
-            case 0:
+            case FileFolderSubtype_Mbox:
                return MF_FILE;
 
-            case 1:
+            case FileFolderSubtype_MH:
                return MF_MH;
          }
          /* NOTREACHED */
 
       case FolderGroup:
          // TODO
-         
+
       default:
          // any other selection maps directly onto folder types
          return type;
@@ -1246,10 +1297,10 @@ wxFolderPropertiesPage::SetDefaultValues()
 
    wxLogDebug("Reading the folder settings from '%s'...", m_folderPath.c_str());
 
-   FolderType typeFolder = GetCurrentFolderType();
+   FolderType folderType = GetCurrentFolderType();
 
    String value;
-   if ( FolderTypeHasUserName(typeFolder) )
+   if ( FolderTypeHasUserName(folderType) )
    {
       value = READ_CONFIG(profile, MP_FOLDER_LOGIN);
       if ( !value )
@@ -1262,13 +1313,13 @@ wxFolderPropertiesPage::SetDefaultValues()
       m_originalValues[Password] = pwd;
    }
 
-   if ( FolderTypeHasServer(typeFolder) )
+   if ( FolderTypeHasServer(folderType) )
    {
       value = profile->readEntry(MP_FOLDER_HOST, "");
       if ( !value )
       {
          // take the global server setting for this protocol
-         switch ( typeFolder )
+         switch ( folderType )
          {
             case Nntp:
                value = READ_CONFIG(profile, MP_NNTPHOST);
@@ -1297,15 +1348,15 @@ wxFolderPropertiesPage::SetDefaultValues()
    }
 
    value = READ_CONFIG(profile, MP_FOLDER_PATH);
-   if ( typeFolder == File && !m_isCreating )
+   if ( folderType == File && !m_isCreating )
    {
       m_path->SetValue(value);
    }
-   else if ( typeFolder == News || typeFolder == Nntp )
+   else if ( folderType == News || folderType == Nntp )
    {
       m_newsgroup->SetValue(value);
    }
-   else if (typeFolder == IMAP)
+   else if (folderType == IMAP)
       m_mailboxname->SetValue(value);
 
    m_originalValues[Path] = value;
@@ -1325,7 +1376,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_keepOpen->SetValue(m_originalKeepOpenValue);
    m_originalForceReOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
    m_forceReOpen->SetValue(m_originalForceReOpenValue);
-   
+
    // and the same for the anon flag
    m_originalIsAnonymous = (flags & MF_FLAGS_ANON) != 0;
    m_isAnonymous->SetValue(m_originalIsAnonymous);
@@ -1334,7 +1385,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    if ( m_isCreating )
    {
       // use default icon for the chosen folder type
-      m_originalFolderIcon = GetDefaultFolderTypeIcon(typeFolder);
+      m_originalFolderIcon = GetDefaultFolderTypeIcon(folderType);
    }
    else
    {
@@ -1375,23 +1426,21 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
    if ( m_folderPath )
       profile->SetPath(m_folderPath);
 
-   FolderType typeFolder = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
-   if ( typeFolder == FolderInvalid )
+   FolderType folderType = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
+   if ( folderType == FolderInvalid )
    {
       // get the last used value from the profile
-      typeFolder = (FolderType)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
+      folderType = (FolderType)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
    }
 
-   if ( (typeFolder == Inbox) && m_isCreating )
+   if ( (folderType == Inbox) && m_isCreating )
    {
       FAIL_MSG("how did we manage to create an INBOX folder?");
 
-      typeFolder = (FolderType)MP_LAST_CREATED_FOLDER_TYPE_D;
+      folderType = (FolderType)MP_LAST_CREATED_FOLDER_TYPE_D;
    }
 
-   // this will also call SetDefaultValues()
-   m_radio->SetSelection(GetRadioIndexFromFolderType(typeFolder));
-
+   // init the dialog controls
    if ( m_folderPath )
    {
       // set incoming checkbox to right value
@@ -1402,7 +1451,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       m_forceReOpen->SetValue( (folder->GetFlags() & MF_FLAGS_REOPENONPING) != 0 );
    }
 
-   UpdateUI(m_radio->GetSelection());
+   UpdateUI(folderType);
 
    return TRUE;
 }
@@ -1410,10 +1459,10 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 bool
 wxFolderPropertiesPage::TransferDataFromWindow(void)
 {
-   FolderType typeFolder = GetExactFolderType(GetCurrentFolderType());
+   FolderType folderType = GetExactFolderType(GetCurrentFolderType());
 
    // it's impossible to create INBOX folder
-   CHECK( !m_dlgCreate || typeFolder != Inbox, false,
+   CHECK( !m_dlgCreate || folderType != Inbox, false,
           "Ok button should be disabled" );
 
    // 0th step: verify if the settings are self-consistent
@@ -1432,7 +1481,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // check that we have the username/password
    String loginName = m_login->GetValue(),
           password = m_password->GetValue();
-   bool hasUsername = FolderTypeHasUserName(typeFolder);
+   bool hasUsername = FolderTypeHasUserName(folderType);
    if ( hasUsername )
    {
       // anonymous access?
@@ -1493,7 +1542,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    {
       ASSERT_MSG( m_dlgCreate == dlg, "GET_PARENT_OF_CLASS broken?" );
 
-      folder = m_dlgCreate->DoCreateFolder(typeFolder);
+      folder = m_dlgCreate->DoCreateFolder(folderType);
       if ( !folder )
       {
          return false;
@@ -1519,20 +1568,20 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // common for all folders: remember the login info for the folders for which
    // it makes sense or for folder groups (for which we always remember
    // everything)
-   if ( (hasUsername && !(flags & MF_FLAGS_ANON)) || typeFolder == FolderGroup )
+   if ( (hasUsername && !(flags & MF_FLAGS_ANON)) || folderType == FolderGroup )
    {
       WriteEntryIfChanged(Username, loginName);
       WriteEntryIfChanged(Password, strutil_encrypt(password));
    }
 
-   m_profile->writeEntry(MP_FOLDER_TYPE, typeFolder | flags);
+   m_profile->writeEntry(MP_FOLDER_TYPE, folderType | flags);
 
    String server = m_server->GetValue();
-   if ( FolderTypeHasServer(typeFolder) )
+   if ( FolderTypeHasServer(folderType) )
    {
-      WriteEntryIfChanged(typeFolder == Nntp ? ServerNews : Server, server);
+      WriteEntryIfChanged(folderType == Nntp ? ServerNews : Server, server);
    }
-   else if ( typeFolder == FolderGroup )
+   else if ( folderType == FolderGroup )
    {
       // the right thing to do is to write the server value into both profile
       // entries: for POP/IMAP server and for NNTP one because like this
@@ -1541,7 +1590,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       WriteEntryIfChanged(Server, server);
    }
 
-   switch ( typeFolder )
+   switch ( folderType )
    {
       case POP:
       case IMAP:
@@ -1643,7 +1692,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // remember the type of the last created folder - it will be the default
    // type the next time (TODO we don't have persistent radioboxes yet)
    mApplication->GetProfile()->writeEntry(MP_LAST_CREATED_FOLDER_TYPE,
-                                          typeFolder);
+                                          folderType);
 
    return true;
 }

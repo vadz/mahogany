@@ -140,6 +140,53 @@ void wxFileBrowseButton::DoBrowse()
 }
 
 // ----------------------------------------------------------------------------
+// wxDirBrowseButton
+// ----------------------------------------------------------------------------
+
+void wxDirBrowseButton::DoBrowse()
+{
+   DoBrowseHelper(this);
+}
+
+void wxDirBrowseButton::DoBrowseHelper(wxTextBrowseButton *browseBtn)
+{
+   wxDirDialog dialog(browseBtn,
+                      _("Please choose a directory"),
+                      browseBtn->GetText());
+
+   if ( dialog.ShowModal() == wxID_OK )
+   {
+      browseBtn->SetText(dialog.GetPath());
+   }
+}
+
+// ----------------------------------------------------------------------------
+// wxFileOrDirBrowseButton
+// ----------------------------------------------------------------------------
+
+void wxFileOrDirBrowseButton::DoBrowse()
+{
+   if ( m_browseForFile )
+   {
+      wxFileBrowseButton::DoBrowse();
+   }
+   else
+   {
+      // unfortuanately we don't derive from wxDirBrowseButton and so we can't
+      // write wxDirBrowseButton::DoBrowse()...
+      wxDirBrowseButton::DoBrowseHelper(this);
+   }
+}
+
+void wxFileOrDirBrowseButton::UpdateTooltip()
+{
+   wxString msg;
+   msg.Printf(_("Browse for a %s"), IsBrowsingForFiles() ? _("file")
+                                                         : _("directory"));
+   SetToolTip(msg);
+}
+
+// ----------------------------------------------------------------------------
 // wxFolderBrowseButton
 // ----------------------------------------------------------------------------
 

@@ -314,6 +314,10 @@ wxEnhancedPanel::CreateEntryWithButton(const char *label,
          btn = new wxFileBrowseButton(text, m_canvas);
          break;
 
+      case FileOrDirBtn:
+         btn = new wxFileOrDirBrowseButton(text, m_canvas);
+         break;
+
       case ColorBtn:
          btn = new wxColorBrowseButton(text, m_canvas);
          break;

@@ -81,8 +81,7 @@ public:
       return wxButton::Enable(enable);
    }
 
-protected:
-   // for derived class usage
+   // direct access to the text controls contents
    wxString GetText() const { return m_text->GetValue(); }
    void SetText(const wxString& text) { m_text->SetValue(text); }
 
@@ -104,6 +103,59 @@ public:
    // show the file selection dialog and fill the associated text control with
    // the name of the selected file
    virtual void DoBrowse();
+};
+
+// ----------------------------------------------------------------------------
+// this button is used to browse for directories: it shows the file selection
+// dialog and fills the associated text control with the directory path
+// (without trailing backslash - except for the root directory when it's also
+// the initial one)
+// ----------------------------------------------------------------------------
+
+class wxDirBrowseButton : public wxTextBrowseButton
+{
+public:
+   wxDirBrowseButton(wxTextCtrl *text, wxWindow *parent)
+      : wxTextBrowseButton(text, parent, _("Browse for a directory")) { }
+
+   // show the file selection dialog and fill the associated text control with
+   // the name of the selected directory
+   virtual void DoBrowse();
+
+private:
+   // a hack for wxFileOrDirBrowseButton convenience
+   friend class wxFileOrDirBrowseButton;
+   static void DoBrowseHelper(wxTextBrowseButton *browseBtn);
+};
+
+// ----------------------------------------------------------------------------
+// a hybrid of wxFileBrowseButton and wxDirBrowseButton: the user can choose
+// either file or directory with this button depending on its current mode
+// (which is "File" by default, but can be changed as often as needed)
+// ----------------------------------------------------------------------------
+
+class wxFileOrDirBrowseButton : public wxFileBrowseButton
+{
+public:
+   wxFileOrDirBrowseButton(wxTextCtrl *text, wxWindow *parent)
+      : wxFileBrowseButton(text, parent) { m_browseForFile = TRUE; }
+
+   // get or change the current browsing mode
+      // returns TRUE if in "file" mode, FALSE if in "directory" one
+   bool IsBrowsingForFiles() const { return m_browseForFile; }
+      // change the current mode
+   void BrowseForFiles() { m_browseForFile = TRUE; UpdateTooltip(); }
+   void BrowseForDirectories() { m_browseForFile = FALSE; UpdateTooltip(); }
+
+   // show the file selection dialog and fill the associated text control with
+   // the name of the selected file or directory
+   virtual void DoBrowse();
+
+private:
+   // set the tooltip corresponding to our current browse mode
+   void UpdateTooltip();
+
+   bool m_browseForFile;
 };
 
 // ----------------------------------------------------------------------------

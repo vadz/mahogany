@@ -29,6 +29,7 @@ class wxControl;
 class wxListBox;
 class wxCheckBox;
 class wxFileBrowseButton;
+class wxFileOrDirBrowseButton;
 class wxIconBrowseButton;
 class wxTextBrowseButton;
 class wxStaticText;
@@ -324,13 +325,24 @@ public:
    wxButton *CreateButton(const wxString& label, wxControl *last);
 
       // if ppButton != NULL, it's filled with the pointer to the ">>" browse
-      // button created by this function
+      // button created by this function (it will be a wxFileBrowseButton)
    wxTextCtrl *CreateFileEntry(const char *label,
                                long widthMax,
                                wxControl *last,
                                wxFileBrowseButton **ppButton = NULL)
    {
       return CreateEntryWithButton(label, widthMax, last, FileBtn,
+                                   (wxTextBrowseButton **)ppButton);
+   }
+
+      // if ppButton != NULL, it's filled with the pointer to the ">>" browse
+      // button created by this function (it will be wxFileOrDirBrowseButton)
+   wxTextCtrl *CreateFileOrDirEntry(const char *label,
+                                    long widthMax,
+                                    wxControl *last,
+                                    wxFileOrDirBrowseButton **ppButton = NULL)
+   {
+      return CreateEntryWithButton(label, widthMax, last, FileOrDirBtn,
                                    (wxTextBrowseButton **)ppButton);
    }
 
@@ -373,7 +385,7 @@ private:
                          size_t extraSpace = 0);
 
    // create an entry with a browse button
-   enum BtnKind { FileBtn, ColorBtn };
+   enum BtnKind { FileBtn, FileOrDirBtn, ColorBtn };
    wxTextCtrl *CreateEntryWithButton(const char *label,
                                      long widthMax,
                                      wxControl *last,

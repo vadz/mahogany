@@ -579,7 +579,7 @@ wxFolderView::Update(HeaderInfoList *listing)
    
    n = listing->Count();
    dateFormat = READ_APPCONFIG(MP_DATE_FMT);
-   dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT);
+   dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT) != 0;
    
    if(n < m_NumOfMessages)  // messages have been deleted, start over
    {
