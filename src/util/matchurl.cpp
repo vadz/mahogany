@@ -402,12 +402,15 @@ URLDetector::URLDetector()
 
 int URLDetector::FindURL(const char *text, int& len)
 {
+   int offset = 0;
+
+match:
    int pos = scan(text, len);
    if ( !len )
       return -1;
 
-   // there are 2 different cases: a mailto: URL or a mail address and anything
-   // else which we need to treat differently
+   // there are 2 different cases: a mailto: URL or a mail address and
+   // anything else which we need to treat differently
    const char *start = text + pos;
    const char *p = start + len;
 
@@ -422,8 +425,12 @@ int URLDetector::FindURL(const char *text, int& len)
       bool hasAngleBracket = *start == '<';
       if ( !hasAngleBracket )
       {
-         // we went too far backwards
-         start++;
+         if ( !IsLocalPartChar(*start) )
+         {
+            // we went too far backwards
+            start++;
+         }
+         //else: we stopped at the start of the text
       }
       //else: keep '<' as part of the URL
 
@@ -433,8 +440,8 @@ int URLDetector::FindURL(const char *text, int& len)
          p++;
       }
 
-      // finally we should either have the brackets from both sides or none at
-      // all
+      // finally we should either have the brackets from both sides or none
+      // at all
       if ( hasAngleBracket )
       {
          if ( *p == '>' )
@@ -464,7 +471,8 @@ int URLDetector::FindURL(const char *text, int& len)
             break;
          }
 
-         // continue on the next line and no need to test the first character
+         // continue on the next line and no need to test the first
+         // character
          p += 3;
       }
    }
@@ -475,7 +483,25 @@ int URLDetector::FindURL(const char *text, int& len)
 
    len = p - start;
 
-   return start - text;
+   // '@' matches may result in false positives, as not every '@' character is
+   // inside a mailto URL so try to weed them out by requiring that the mail
+   // address has a reasonable minimal length ("ab@foo.com" is probably the
+   // shortest we can have, hence 10) which at least avoids matching the bare
+   // '@'s
+   //
+   // NB: we do it here and not inside "if ( '@' )" branch as we want to do it
+   //     after removing trailing punctuation
+   if ( len < 10 )
+   {
+      int offDiff = pos + len + 1;
+      offset += offDiff;
+      text += offDiff;
+
+      // slightly more efficient than recursion...
+      goto match;
+   }
+
+   return start - text + offset;
 }
 
 // ============================================================================
