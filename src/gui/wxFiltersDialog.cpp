@@ -116,16 +116,11 @@ bool ConfigureOneFilter(const wxString &name,
 
 
 
-class OneRuleControls
+class OneCritControls
 {
 public:
-   OneRuleControls(wxWindow *parent)
-      {
-         m_Parent = parent;
-         m_Not = new wxCheckBox(m_Parent, -1, _("Not"));
-//         m_Type = new wxChoice(m_Parent, -1, wxDefaultPosition, 
-//	                       wxDefaultSize,n,strings);
-      }
+   OneCritControls(wxWindow *parent, wxLayoutConstraints *c);
+   
 private:
    wxCheckBox *m_Not; // Not
    wxChoice   *m_Type; // "Match", "Match substring", "Match RegExp",
@@ -134,6 +129,105 @@ private:
    wxChoice   *m_Where; // "In Header", "In Subject", "In From..."
    wxWindow   *m_Parent;
 };
+
+static
+wxString ORC_Types[] =
+{ gettext_noop("Match"), gettext_noop("Match substring"),
+  gettext_noop("Match RegExp"), gettext_noop("Larger than"),
+  gettext_noop("Smaller than"), gettext_noop("Older than"),
+  gettext_noop("Is SPAM")
+};
+static
+size_t ORC_TypesCount = WXSIZEOF(ORC_Types);
+
+static
+wxString ORC_Where[] =
+{
+   gettext_noop("in Subject"),
+   gettext_noop("in header"),
+   gettext_noop("in From"),
+   gettext_noop("in body"),
+   gettext_noop("in message"),
+   gettext_noop("in To")
+};
+static
+size_t ORC_WhereCount = WXSIZEOF(ORC_Where);
+
+#define CRIT_CTRLCONST(oldctrl,newctrl) \
+   c = new wxLayoutConstraints;\
+   c->left.RightOf(oldctrl, LAYOUT_X_MARGIN);\
+   c->width.PercentOf(m_Parent, wxWidth, 25);\
+   c->top.SameAs(m_Not, wxTop, 0);\
+   c->height.AsIs();\
+   newctrl->SetConstraints(c);
+
+
+OneCritControls::OneCritControls(wxWindow *parent, wxLayoutConstraints *c)
+{
+   m_Parent = parent;
+   m_Not = new wxCheckBox(m_Parent, -1, _("Not"));
+   m_Not->SetConstraints(c);
+
+   m_Type = new wxChoice(m_Parent, -1, wxDefaultPosition,
+                         wxDefaultSize, ORC_TypesCount, ORC_Types);
+   CRIT_CTRLCONST(m_Not, m_Type);
+   
+   m_Argument = new wxTextCtrl(m_Parent,-1,"", wxDefaultPosition);
+   CRIT_CTRLCONST(m_Type, m_Argument);
+   
+   m_Where = new wxChoice(m_Parent, -1, wxDefaultPosition,
+                          wxDefaultSize, ORC_WhereCount, ORC_Where);
+   CRIT_CTRLCONST(m_Argument, m_Where);
+}
+
+
+class OneActionControls
+{
+public:
+   OneActionControls(wxWindow *parent, wxLayoutConstraints *c);
+   
+private:
+   /// Which action to perform
+   wxChoice   *m_Type;
+   wxTextCtrl  *m_Argument; // string, number of days or bytes
+   wxChoice   *m_Where; // "In Header", "In Subject", "In From..."
+   wxWindow   *m_Parent;
+};
+
+static
+wxString OAC_Types[] =
+{ gettext_noop("Delete"),
+  gettext_noop("Copy to"),
+  gettext_noop("Move to"),
+  gettext_noop("Expunge"),
+  gettext_noop("MessageBox"),
+  gettext_noop("Log Entry"),
+};
+static
+size_t OAC_TypesCount = WXSIZEOF(OAC_Types);
+
+
+OneActionControls::OneActionControls(wxWindow *parent, wxLayoutConstraints *c)
+{
+   m_Parent = parent;
+
+   m_Type = new wxChoice(m_Parent, -1, wxDefaultPosition,
+                         wxDefaultSize, OAC_TypesCount, OAC_Types);
+   c->width.PercentOf(m_Parent, wxWidth, 30);
+   m_Type->SetConstraints(c);
+
+   m_Argument = new wxTextCtrl(m_Parent,-1,"", wxDefaultPosition);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_Type, LAYOUT_X_MARGIN);
+   c->width.PercentOf(m_Parent, wxWidth, 60);
+   c->top.SameAs(m_Type, wxTop, 0);
+   c->height.AsIs();
+   m_Argument->SetConstraints(c);
+}
+
+/*
+  Contains several lines of "OneCritControls" and "OneActionControls":
+*/
 
 wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
                                      wxWindow *parent)
@@ -170,7 +264,7 @@ wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
   Add a scrolled window with
    [test to apply] [where to apply] [match what]
    [logical operator] [test] [where] [what]
-   ...
+   ...T
    [more rules] [less rules]
 
    E.g.
@@ -187,6 +281,20 @@ wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
    c->bottom.SameAs(box, wxBottom, 4*LAYOUT_Y_MARGIN);
    actions->SetConstraints(c);
 
+   c = new wxLayoutConstraints;
+   c->left.SameAs(criteria, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(criteria, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   OneCritControls * orc = new OneCritControls(this, c);
+
+   c = new wxLayoutConstraints;
+   c->left.SameAs(actions, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(actions, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   OneActionControls * oac = new OneActionControls(this, c);
+   
    TransferDataToWindow();
    m_OldFilter = m_Filter;
 }

@@ -946,9 +946,10 @@ static void PreProcessInput(String *input)
          fseek(fp,0, SEEK_SET);
          if(len > 0)
          {
-            char *cp = new char [ len ];
+            char *cp = new char [ len + 1];
             if(fread(cp, 1, len, fp) > 0)
             {
+               cp[len] = '\0';
                output << cp;
                modified = true;
             }
@@ -1894,7 +1895,7 @@ extern "C"
    static Value func_delete(ArgList *args, Parser *p)
    {
       if(args->Count() != 0)
-         return Value("");
+         return 0;
       MailFolder *mf = p->GetFolder();
       if(! mf) return Value(0);
       UIdType uid = p->GetMessageUId();
@@ -1906,7 +1907,7 @@ extern "C"
    static Value func_copytofolder(ArgList *args, Parser *p)
    {
       if(args->Count() != 1)
-         return Value("");
+         return 0;
       Value fn = args->GetArg(0)->Evaluate();
       MailFolder *mf = p->GetFolder();
       UIdType uid = p->GetMessageUId();
@@ -1921,7 +1922,10 @@ extern "C"
    {
       Value rc = func_copytofolder(args, p);
       if(rc.ToNumber()) // successful
-         return func_delete(args, p);
+      {
+         ArgList emptyArgs;
+         return func_delete(&emptyArgs, p);
+      }
       else
          return 0;
    }
@@ -1969,7 +1973,24 @@ extern "C"
       msg->DecRef();
       return Value(size);
    }
+
+/* * * * * * * * * * * * * * *
+ *
+ * Folder functionality
+ *
+ * * * * * * * * * * * * * */
+   static Value func_expunge(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value(0);
+      MailFolder *mf = p->GetFolder();
+      mf->ExpungeMessages();
+      mf->DecRef();
+      return 1;
+   }
 };
+
+
 
 void
 ParserImpl::AddBuiltinFunctions(void)
@@ -1990,6 +2011,7 @@ ParserImpl::AddBuiltinFunctions(void)
    DefineFunction("size", func_size);
    DefineFunction("now", func_now);
    DefineFunction("isspam", func_checkSpam);
+   DefineFunction("expunge", func_expunge);
 }
 
 

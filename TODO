@@ -9,11 +9,10 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 9	KB	finish filters dialog
+
 9	KB	wxLayout:
 		- delete in empty line
 		- undo
-		- dead accents dont work
-		- editing leaks MObjects
 		- write editor plugin translating keysyms to actions
 		- ctrl keys not recognised when CAPSLOCK is down
 		- add blinking cursor
@@ -172,6 +171,8 @@ KB		add python hook for filters
 2		adb addressbook extension appears twice when new book
 		is created
 5	VZ	custom headers are not inherited
+
+
 
 
 

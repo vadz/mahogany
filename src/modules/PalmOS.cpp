@@ -30,6 +30,9 @@
 
 #include "SendMessageCC.h"
 
+#include "gui/wxDialogLayout.h"
+#include "gui/wxOptionsDlg.h"
+#include "gui/wxOptionsPage.h"
 
 #define MODULE_NAME   "PalmOS"
 
@@ -962,13 +965,44 @@ wxPalmOSDialog::TransferDataFromWindow()
    return TRUE;
 }
 
+
+
+static ConfigValueDefault gs_ConfigValues [] =
+{
+   ConfigValueDefault(MP_MOD_PALMOS_SYNCMAIL, MP_MOD_PALMOS_SYNCMAIL_D)
+};
+
+static wxOptionsPage::FieldInfo gs_FieldInfos[] =
+{
+   { gettext_noop("Synchronise Mail"), wxOptionsPage::Field_Bool,    -1 }
+};
+
+static
+struct wxOptionsPageDesc  gs_OptionsPageDesc = 
+{
+   gettext_noop("PalmOS module preferences"),
+      "",// image
+      MH_MODULES_PALMOS_CONFIG,
+      // the fields description
+      gs_FieldInfos,
+      gs_ConfigValues,
+      WXSIZEOF(gs_FieldInfos)
+};
+
 void
 PalmOSModule::Configure(void)
 {
    ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
+
+   ShowCustomOptionsDialog(gs_OptionsPageDesc, NULL);
+
+
+#if 0
    wxPalmOSDialog dlg(p);
-   p->DecRef();
    (void) dlg.ShowModal();
+#endif
+   p->DecRef();
+   
 }
 
 

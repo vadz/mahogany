@@ -1031,7 +1031,7 @@ MailFolderCmn::UpdateListing(void)
                 !(status & MSG_STAT_SEEN))
                messageIDs[nextIdx++] = (*hilp)[i]->GetUId();
          }
-         ASSERT(nextIdx == n);
+         ASSERT(nextIdx <= n);
 
          MEventManager::Send( new MEventNewMailData (this, n, messageIDs) );
          delete [] messageIDs;
