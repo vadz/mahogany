@@ -143,13 +143,20 @@ export DESTDIR
 
 USESTABLE=no
 
+if [ `hostname -d` = "compile.sourceforge.net" ]
+then
+	CVSSERVER="cvs1"
+else
+	CVSSERVER="cvs.mahogany.sourceforge.net"
+fi
+
 FTPLOCATION="ballueder@mahogany.sourceforge.net:FTP/daily/"
 LIBMALLOCATION="ballueder@mahogany.sourceforge.net:FTP/Libraries/libmal.tar.gz"
 WWWDOCLOCATION="ballueder@mahogany.sourceforge.net:WWW/doc/"
 #WXCVSROOT=":pserver:KB@cvs.wxwindows.org:/var/cvs/wxWindows"
 #MCVSROOT="ballueder@cvs.mahogany.sourceforge.net:/cvsroot/mahogany"
 WXCVSROOT=":pserver:anoncvs@cvs.wxwindows.org:/var/cvs/wxWindows"
-MCVSROOT=":pserver:anoncvs@cvs.mahogany.sourceforge.net:/cvsroot/mahogany"
+MCVSROOT=":pserver:anoncvs@${CVSSERVER}:/cvsroot/mahogany"
 
 # Need to hardwire this as we run it as root for rpm/deb generation:
 #if [ "$UID" = 0 ]
