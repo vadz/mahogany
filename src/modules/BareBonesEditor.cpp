@@ -284,13 +284,17 @@ IMPLEMENT_MESSAGE_EDITOR(BareBonesEditor,
 
 #if wxUSE_WCHAR_T && defined(OS_WIN)
 
-// this very simple minded function tries to determine the encoding we shoudl
-// use from the given Unicode character code
+// this very simple minded function tries to determine the encoding we should
+// use from the given Unicode character code (http://www.unicode.org/charts/)
 static wxFontEncoding GetEncoding(wchar_t wch)
 {
    // basic latin
    if ( wch < 0x7f )
       return wxFONTENCODING_SYSTEM;
+
+   // latin-1 supplement
+   if ( wch < 0x100 )
+      return wxFONTENCODING_CP1252;
 
    // greek
    if ( wch >= 0x370 && wch < 0x400 )
