@@ -34,6 +34,7 @@
 #include  <wx/fontenc.h>
 
 // fwd decls
+class HeaderInfoList;
 class MailFolderCC;
 class MMutex;
 struct mail_address;
@@ -303,7 +304,7 @@ public:
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /** Returns a listing of the folder. Must be DecRef'd by caller. */
-   virtual class HeaderInfoList *GetHeaders(void) const;
+   virtual HeaderInfoList *GetHeaders(void) const;
    //@}
    /** Sets a maximum number of messages to retrieve from server.
        @param nmax maximum number of messages to retrieve, 0 for no limit
@@ -465,13 +466,20 @@ protected:
    /// PingReopen() protection against recursion
    MMutex *m_PingReopenSemaphore;
 
-   /// set to true while we're building new listing
+   /// Locked while we're building new listing
    MMutex *m_InListingRebuild;
+
+   /// Locked while we're applying filter rules
+   MMutex *m_InFilterCode;
 
    /// Updates the status of a single message.
    void UpdateMessageStatus(unsigned long seqno);
    /// Gets a complete folder listing from the stream.
    void BuildListing(void);
+
+   /// Apply filters to the new messages if needed
+   void FilterNewMailIfNeeded();
+
    /** The index of the next entry in list to fill. Only used for
        BuildListing()/OverviewHeader() interaction. */
    unsigned long m_BuildNextEntry;
@@ -593,14 +601,12 @@ private:
 
    /// a profile
    Profile *m_Profile;
+
    /// The current listing of the folder
-   class HeaderInfoList *m_Listing;
+   HeaderInfoList *m_Listing;
 
    /// Have any new messages arrived?
    bool m_GotNewMessages;
-
-   /// do we suppress listing udpates?
-   bool m_ListingFrozen;
 
    /// Is this folder in a critical c-client section?
    bool m_InCritical;

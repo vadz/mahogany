@@ -123,10 +123,12 @@ extern "C"
 // check that the folder is not in busy state - if it is, no external calls
 // are allowed
 #define CHECK_NOT_BUSY() \
-   CHECK_RET( !m_InListingRebuild->IsLocked(), "folder is busy" )
+   CHECK_RET( !m_InListingRebuild->IsLocked() && !m_InFilterCode->IsLocked(), \
+              "folder is busy" )
 
 #define CHECK_NOT_BUSY_RC(rc) \
-   CHECK( !m_InListingRebuild->IsLocked(), rc, "folder is busy" )
+   CHECK( !m_InListingRebuild->IsLocked() && !m_InFilterCode->IsLocked(), \
+          rc, "folder is busy" )
 
 // check if the folder is still available
 #define CHECK_DEAD(msg) \
@@ -162,6 +164,23 @@ static const char * cclient_drivers[] =
 #define CCLIENT_MAX_DRIVER (sizeof(cclient_drivers)/sizeof(cclient_drivers[0]))
 
 #define NO_PROGRESS_DLG ((MProgressDialog *)1)
+
+// ----------------------------------------------------------------------------
+// trace masks used (you have to wxLog::AddTraceMask() to enable the
+// correpsonding kind of messages)
+// ----------------------------------------------------------------------------
+
+// turn on to get messages about using the mail folder cache (ms_StreamList)
+#define TRACE_MF_CACHE  "mfcache"
+
+// turn on to log [almost] all cclient callbacks
+#define TRACE_MF_CALLBACK "cccback"
+
+// turn on logging of MailFolderCC operations
+#define TRACE_MF_CALLS "mfcall"
+
+// turn on logging of events sent by MailFolderCC
+#define TRACE_MF_EVENTS "mfevent"
 
 // ----------------------------------------------------------------------------
 // private types
@@ -896,7 +915,6 @@ MailFolderCC::Create(int typeAndFlags)
    m_Listing = NULL;
 
    // currently not used, but might be in the future
-   m_ListingFrozen = false;
    m_GotNewMessages = false;
    m_FirstListing = true;
 
@@ -915,6 +933,7 @@ MailFolderCC::Create(int typeAndFlags)
    m_Mutex = new MMutex;
    m_PingReopenSemaphore = new MMutex;
    m_InListingRebuild = new MMutex;
+   m_InFilterCode = new MMutex;
 }
 
 MailFolderCC::~MailFolderCC()
@@ -934,6 +953,7 @@ MailFolderCC::~MailFolderCC()
    delete m_Mutex;
    delete m_PingReopenSemaphore;
    delete m_InListingRebuild;
+   delete m_InFilterCode;
 
    SafeDecRef(m_Listing);
    SafeDecRef(m_Profile);
@@ -1359,7 +1379,8 @@ MailFolderCC *MailFolderCC::ms_StreamListDefaultObj = NULL;
 void
 MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 {
-   DBGMESSAGE(("MailFolderCC::RemoveFromMap() for folder %s", GetName().c_str()));
+   wxLogTrace(TRACE_MF_CACHE, "MailFolderCC::RemoveFromMap() for folder %s",
+              GetName().c_str());
    CHECK_STREAM_LIST();
 
    StreamConnection  *conn = new StreamConnection;
@@ -1445,20 +1466,21 @@ MailFolderCC::FindFolder(String const &path, String const &login)
    CHECK_STREAM_LIST();
 
    StreamConnectionList::iterator i;
-   DBGMESSAGE(("Looking for folder to re-use: '%s',login '%s'",
-               path.c_str(), login.c_str()));
+   wxLogTrace(TRACE_MF_CACHE, "Looking for folder to re-use: '%s',login '%s'",
+              path.c_str(), login.c_str());
 
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
    {
       StreamConnection *conn = *i;
       if( conn->name == path && conn->login == login)
       {
-         DBGMESSAGE(("  Re-using entry: '%s',login '%s'",
-                     conn->name.c_str(), conn->login.c_str()));
+         wxLogTrace(TRACE_MF_CACHE, "  Re-using entry: '%s',login '%s'",
+                    conn->name.c_str(), conn->login.c_str());
          return conn->folder;
       }
    }
-   DBGMESSAGE(("  No matching entry found."));
+
+   wxLogTrace(TRACE_MF_CACHE, "  No matching entry found.");
    return NULL;
 }
 
@@ -1466,7 +1488,8 @@ MailFolderCC::FindFolder(String const &path, String const &login)
 void
 MailFolderCC::RemoveFromMap(void) const
 {
-   DBGMESSAGE(("MailFolderCC::RemoveFromMap() for folder %s", GetName().c_str()));
+   wxLogTrace(TRACE_MF_CACHE, "MailFolderCC::RemoveFromMap() for folder %s",
+              GetName().c_str());
    CHECK_STREAM_LIST();
 
    StreamConnectionList::iterator i;
@@ -1514,9 +1537,9 @@ MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
    CHECK_STREAM_LIST();
 
    ASSERT( i != ms_StreamList.end());
-   DBGMESSAGE(( i.Debug() ));
+   wxLogTrace(TRACE_MF_CACHE, "%s", i.Debug().c_str());
    i++;
-   DBGMESSAGE(( i.Debug() ));
+   wxLogTrace(TRACE_MF_CACHE, "%s", i.Debug().c_str());
    if( i != ms_StreamList.end())
       return (**i).folder;
    else
@@ -1550,7 +1573,8 @@ MailFolderCC::Checkpoint(void)
       }
    }
 
-   DBGMESSAGE(("MailFolderCC::Checkpoint() on %s.", GetName().c_str()));
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Checkpoint() on %s.",
+              GetName().c_str());
    if ( NeedsNetwork() && ! mApplication->IsOnline() )
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"),
@@ -1568,7 +1592,8 @@ MailFolderCC::Checkpoint(void)
 bool
 MailFolderCC::PingReopen(void)
 {
-   DBGMESSAGE(("MailFolderCC::PingReopen() on Folder %s.", GetName().c_str()));
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::PingReopen() on Folder %s.",
+              GetName().c_str());
 
    bool rc = false;
 
@@ -1676,23 +1701,14 @@ MailFolderCC::Ping(void)
    if ( gs_lockCclient ) // FIXME: MT
       return FALSE;
 
-   /* We do not want to do anything funny while autocollecting mail
-      and such. Ping might be called from the Ping timer while we are
-      autocollecting. This isn't a real problem, but causes
-      unnecessary delays and confusion, so we just ignore the
-      request. */
-   if( m_ListingFrozen )
-      return FALSE;
-
-
    if(NeedsNetwork() && ! mApplication->IsOnline())
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
       return FALSE;
    }
    UIdType count = CountMessages();
-   DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.",
-               GetName().c_str()));
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Ping() on Folder %s.",
+              GetName().c_str());
 
    bool rc = FALSE;
 
@@ -1884,17 +1900,12 @@ MailFolderCC::ExpungeMessages(void)
 {
    CHECK_DEAD("Cannot access closed folder\n'%s'.");
 
-   /* We must not expunge messages while the listing is
-      frozen. Otherwise it can happen that a message disappears and
-      thus c-client bombs when we try to retrieve that message. So we
-      simply set a flag which causes ExpungeMessages() to be called
-      when the listing is no longer frozen.
-   */
+   // don't try to modify the listing while it's being built!
    CHECK_NOT_BUSY()
 
    if ( PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()) )
    {
-      mail_expunge (m_MailStream);
+      mail_expunge(m_MailStream);
    }
 }
 
@@ -1912,8 +1923,6 @@ static bool WantRecent(int mask, int value)
 unsigned long
 MailFolderCC::CountMessages(int mask, int value) const
 {
-   CHECK_NOT_BUSY_RC(UID_ILLEGAL);
-
    // we need to rebuild listing if we don't have it because either we use it
    // anyhow or we need to ensure that m_nMessages and m_nRecent have correct
    // values
@@ -1950,8 +1959,6 @@ bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
    CHECK( status, false, "NULL pointer in CountInterestingMessages" );
 
    status->Init();
-
-   CHECK_NOT_BUSY_RC(false);
 
    HeaderInfoList_obj hil(GetHeaders());
    CHECK( hil, false, "no listing in CountInterestingMessages" );
@@ -2286,7 +2293,7 @@ MailFolderCC::IsNewMessage(const HeaderInfo *hi)
 
 StreamConnection::~StreamConnection()
 {
-    wxLogDebug("deleting %s from stream list", name.c_str());
+    wxLogTrace(TRACE_MF_CACHE, "deleting %s from stream list", name.c_str());
 }
 
 void
@@ -2341,13 +2348,7 @@ MailFolderCC::DebugDump() const
 HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
-   /* A listing can be frozen if we want to suppress updates temporarily,
-      like, for example, when moving a few messages at once */
-   if ( m_ListingFrozen )
-   {
-      CHECK( m_Listing, NULL, "NULL listing can't be frozen" );
-   }
-   else if ( !m_Listing )
+   if ( !m_Listing )
    {
       // remove const from this:
       MailFolderCC *that = (MailFolderCC *)this;
@@ -2368,20 +2369,10 @@ MailFolderCC::GetHeaders(void) const
 
       CHECK(m_Listing, NULL, "failed to build folder listing");
 
-      // TODO: find a way to make filters work safely: the problem is that
-      //       they can both delete messages from the folder *and* show
-      //       message boxes which can send requests from GUI
-#if 0
       // if we have any new messages, reapply filters to them
-      if ( m_GotNewMessages )
-      {
-         // filter code returns true if something might have changed
-         if ( that->FilterNewMail(m_Listing) )
-            that->BuildListing();
-      }
-#endif // 0
+      that->FilterNewMailIfNeeded();
 
-      // sort/thread listing:
+      // sort/thread listing
       that->ProcessHeaderListing(m_Listing);
 
       // enforce consistency:
@@ -2389,11 +2380,14 @@ MailFolderCC::GetHeaders(void) const
 
       if ( m_GotNewMessages )
       {
-         // check if we need to update our data structures or send new
-         // mail events:
-         that->CheckForNewMail(m_Listing);
-
+         // do it right now to prevent any possible recursion
          that->m_GotNewMessages = false;
+
+         // check if we need to update our data structures or send new
+         // mail events: notice that we do it after applying the filters above
+         // so as to not show new mail notification for folder if all new
+         // messages were moved elsewhere by the filters
+         that->CheckForNewMail(m_Listing);
       }
    }
    //else: we already have the listing
@@ -2401,6 +2395,38 @@ MailFolderCC::GetHeaders(void) const
    m_Listing->IncRef(); // for the caller who uses it
 
    return m_Listing;
+}
+
+void MailFolderCC::FilterNewMailIfNeeded()
+{
+   CHECK_RET( m_Listing, "can't filter new mail without valid listing" );
+
+   // the problem with filters is that they can both delete messages from
+   // the folder *and* show message boxes which can send requests from GUI,
+   // so we have to block sending events to the GUI while processing them
+   // (this is not stictly necessary as we already have a listing, so there
+   // is no reentrancy problem: if GetHeaders() is called once again, it
+   // will just return immediately, but this is quite inefficient as the
+   // folder views don't have to be updated to reflect any intermidiate
+   // states)
+   if ( m_GotNewMessages )
+   {
+      MLocker lockFilters(m_InFilterCode);
+
+      // filter code returns true if something might have changed
+      m_Listing->IncRef();
+      if ( FilterNewMail(m_Listing) )
+      {
+         // rebuild the listing again
+         m_Listing->DecRef();
+         m_Listing = NULL;
+
+         // TODO: expunge all messages deleted by filters - but how to do it
+         //       without expunging the messages previously deleted by user?
+
+         BuildListing();
+      }
+   }
 }
 
 // rebuild the folder listing completely
@@ -2724,7 +2750,9 @@ MailFolderCC::CClientInit(void)
       return;
 
    // TODO: remove this
-   wxLog::AddTraceMask("cccallback");
+   wxLog::AddTraceMask(TRACE_MF_CALLBACK);
+   wxLog::AddTraceMask(TRACE_MF_CALLS);
+   wxLog::AddTraceMask(TRACE_MF_EVENTS);
 
    // do further initialisation
 #include <linkage.c>
@@ -3116,14 +3144,23 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf, "mm_expunged for non existent folder");
 
+   // don't do anything while executing the filter code, the listing is going
+   // to be rebuilt anyhow
+   if ( mf->m_InFilterCode->IsLocked() )
+   {
+      DBGMESSAGE(("Ignoring mm_expunged() while executing filter code "
+                  "for folder '%s'", mf->GetName().c_str()));
+      return;
+   }
+
    if ( mf->HaveListing() )
    {
       // message numbers are counted from 1
       mf->m_Listing->Remove(msgno - 1);
 
       // tell all interested that the listing changed
-      DBGMESSAGE(("Sending FolderUpdate event for folder '%s'",
-                  mf->GetName().c_str()));
+      wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
+                 mf->GetName().c_str());
 
       MEventManager::Send(new MEventFolderUpdateData(mf));
    }
@@ -3241,7 +3278,8 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
       ((HeaderInfoImpl *)hi)->m_Status = status;
 
       // tell all interested that status changed
-      DBGMESSAGE(("Sending MsgStatus event for folder '%s'", GetName().c_str()));
+      wxLogTrace(TRACE_MF_EVENTS, "Sending MsgStatus event for folder '%s'",
+                 GetName().c_str());
 
       MEventManager::Send(new MEventMsgStatusData(this, i, hi->Clone()));
    }
@@ -3257,6 +3295,15 @@ MailFolderCC::UpdateStatus(void)
 void
 MailFolderCC::RequestUpdate()
 {
+   // don't do anything while executing the filter code, the listing is going
+   // to be rebuilt anyhow
+   if ( m_InFilterCode->IsLocked() )
+   {
+      DBGMESSAGE(("Ignoring mm_exists() while executing filter code "
+                  "for folder '%s'", GetName().c_str()));
+      return;
+   }
+
    if ( m_Listing )
    {
       m_Listing->DecRef();
@@ -3264,8 +3311,8 @@ MailFolderCC::RequestUpdate()
    }
 
    // tell all interested that the listing changed
-   DBGMESSAGE(("Sending FolderUpdate event for folder '%s'",
-               GetName().c_str()));
+   wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
+              GetName().c_str());
 
    MEventManager::Send(new MEventFolderUpdateData(this));
 }
@@ -3578,31 +3625,31 @@ void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t of
 // define a macro TRACE_CALLBACKn() for tracing a callback with n + 1 params
 #if 1 // def EXPERIMENTAL_log_callbacks
    #define TRACE_CALLBACK0(name) \
-      wxLogTrace("cccallback", "%s(%s)", \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s)", \
                  #name, stream ? stream->mailbox : "<no stream>")
 
    #define TRACE_CALLBACK1(name, fmt, parm) \
-      wxLogTrace("cccallback", "%s(%s, " fmt ")", \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")", \
                  #name, stream->mailbox, parm)
 
    #define TRACE_CALLBACK2(name, fmt, parm1, parm2) \
-      wxLogTrace("cccallback", "%s(%s, " fmt ")", \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")", \
                  #name, stream->mailbox, parm1, parm2)
 
    #define TRACE_CALLBACK3(name, fmt, parm1, parm2, parm3) \
-      wxLogTrace("cccallback", "%s(%s, " fmt ")", \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")", \
                  #name, stream->mailbox, parm1, parm2, parm3)
 
    #define TRACE_CALLBACK_NOSTREAM_1(name, fmt, parm1) \
-      wxLogTrace("cccallback", "%s(" fmt ")", \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")", \
                  #name, parm1)
 
    #define TRACE_CALLBACK_NOSTREAM_2(name, fmt, parm1, parm2) \
-      wxLogTrace("cccallback", "%s(" fmt ")", \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")", \
                  #name, parm1, parm2)
 
    #define TRACE_CALLBACK_NOSTREAM_5(name, fmt, parm1, parm2, parm3, parm4, parm5) \
-      wxLogTrace("cccallback", "%s(" fmt ")", \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")", \
                  #name, parm1, parm2, parm3, parm4, parm5)
 
    static const char *GetErrorLevel(long errflg)

@@ -2081,10 +2081,12 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
                          false /* update count */))
          {
             DeleteMessages(&messages);
-            ExpungeMessages();
          }
          else
+         {
             ERRORMESSAGE((_("Cannot move newly arrived messages.")));
+         }
+
          changed = TRUE;
       }
    }
