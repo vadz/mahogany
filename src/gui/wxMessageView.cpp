@@ -445,6 +445,7 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
             }
             else
             {
+               wxTheClipboard->UsePrimarySelection();
                wxTheClipboard->SetData(new wxTextDataObject(m_url));
             }
          }
