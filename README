@@ -110,7 +110,10 @@ NOTE: there are unfortunately a few bugs in wxGTK 2.3.2 directly
 
 The recommended switches for wxWindows compilation are:
 
-      ./configure --disable-threads --no-recursion --with-gtk
+      ./configure --disable-threads --disable-joystick \
+                  --no-recursion --with-gtk
+
+(you may also use the usual --prefix switch, of course)
 
 After running configure, do "make" (or "gmake" if your make is not the GNU
 make) and "make install".
