@@ -2739,14 +2739,13 @@ bool wxOptionsPage::OnListBoxAdd(wxListBox *lbox, const LboxData& lboxData)
 
       return FALSE;
    }
-   else {
-      // ok, do add it
-      lbox->Append(str);
 
-      wxOptionsPage::OnChangeCommon(lbox);
+   // ok, do add it
+   lbox->Append(str);
 
-      return TRUE;
-   }
+   wxOptionsPage::OnChangeCommon(lbox);
+
+   return TRUE;
 }
 
 bool wxOptionsPage::OnListBoxModify(wxListBox *lbox, const LboxData& lboxData)
@@ -3160,7 +3159,11 @@ bool wxOptionsPageFolderTree::TransferDataToWindow()
    if ( control )
    {
       wxCheckBox *check = wxStaticCast(control, wxCheckBox);
-      CHECK( check, true, _T("folder tree is home control is not a checkbox?") );
+
+      // don't use CHECK here as in release builds check == control anyhow and
+      // checking that it's not NULL simply results in a "unreachable code"
+      // warnings from the compiler
+      ASSERT_MSG( check, _T("folder tree is home control is not a checkbox?") );
 
       String folderHome = READ_APPCONFIG_TEXT(MP_FTREE_HOME);
       m_isHomeOrig = !folderHome.empty() && folderHome == GetFolderName();
@@ -3181,7 +3184,9 @@ bool wxOptionsPageFolderTree::TransferDataFromWindow()
    if ( control )
    {
       wxCheckBox *check = wxStaticCast(control, wxCheckBox);
-      CHECK( check, true, _T("folder tree is home control is not a checkbox?") );
+
+      // don't use CHECK here -- see above for the reason
+      ASSERT_MSG( check, _T("folder tree is home control is not a checkbox?") );
 
       // only do something if the value really changed
       if ( check->GetValue() != m_isHomeOrig )

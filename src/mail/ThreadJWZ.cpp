@@ -775,7 +775,7 @@ size_t ThreadContainer::getIndex() const
    return 0;
 #else
    const size_t foolish = 1000000000;
-   static size_t depth = 0;
+   static int depth = 0;
    CHECK(depth < MAX_THREAD_DEPTH, foolish,
       _T("Deep recursion in ThreadContainer::getIndex()"));
    Threadable *th = getThreadable();
@@ -841,7 +841,7 @@ void ThreadContainer::addAsChild(ThreadContainer *c)
 
 bool ThreadContainer::findChild(ThreadContainer *target, bool withNexts) const
 {
-   static size_t depth = 0;
+   static int depth = 0;
    CHECK(depth < MAX_THREAD_DEPTH, true, _T("Deep recursion in ThreadContainer::findChild()"));
    if (m_child == target)
       return true;

@@ -1055,24 +1055,7 @@ bool MFolderFromProfile::Rename(const String& newName)
 
    Profile_obj profile(path);
    CHECK( profile, false, _T("panic in MFolder: no profile") );
-   if ( profile->Rename(name, newName) )
-   {
-      String oldName = m_folderName;
-      m_folderName = newFullName;
-
-      // TODO: MFolderCache should just subscribe to "Rename" events...
-      MFolderCache::RenameAll(oldName, newFullName);
-
-      // notify everybody about the change of the folder name
-      MEventManager::Send(
-         new MEventFolderTreeChangeData(oldName,
-                                        MEventFolderTreeChangeData::Rename,
-                                        newFullName)
-         );
-
-      return true;
-   }
-   else
+   if ( !profile->Rename(name, newName) )
    {
       wxLogError(_("Cannot rename folder '%s' to '%s': the folder with "
                    "the new name already exists."),
@@ -1080,6 +1063,21 @@ bool MFolderFromProfile::Rename(const String& newName)
 
       return false;
    }
+
+   String oldName = m_folderName;
+   m_folderName = newFullName;
+
+   // TODO: MFolderCache should just subscribe to "Rename" events...
+   MFolderCache::RenameAll(oldName, newFullName);
+
+   // notify everybody about the change of the folder name
+   MEventManager::Send(
+     new MEventFolderTreeChangeData(oldName,
+                                    MEventFolderTreeChangeData::Rename,
+                                    newFullName)
+     );
+
+   return true;
 }
 
 bool MFolderFromProfile::Move(MFolder *newParent)

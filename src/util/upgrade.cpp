@@ -3007,24 +3007,22 @@ VerifyEMailSendingWorks(MProgressInfo *proginfo)
    // the message dialogs we pop up below
    delete proginfo;
 
-   if ( ok )
-   {
-      mApplication->SendOutbox();
-      msg.Empty();
-      msg << _("Sent email message to:\n")
-          << me
-          << _("\n\nPlease check whether it arrives.");
-      MDialog_Message(msg, NULL, _("Testing your configuration"), "TestMailSent");
-
-      return true; // till we know something better
-   }
-   else
+   if ( !ok )
    {
       MDialog_ErrorMessage(_("Sending the test message failed, please recheck "
                              "your configuration settings"));
 
       return false;
    }
+
+   mApplication->SendOutbox();
+   msg.Empty();
+   msg << _("Sent email message to:\n")
+       << me
+       << _("\n\nPlease check whether it arrives.");
+   MDialog_Message(msg, NULL, _("Testing your configuration"), "TestMailSent");
+
+   return true; // till we know something better
 }
 
 /**

@@ -1302,7 +1302,7 @@ MWizard_CreateFolder_FinalPage::MWizard_CreateFolder_FinalPage(MWizard *wizard)
       "entry in the tree and choose \"Properties\"."
    ), params->m_Name.c_str());
 
-   MFolderType ftype;
+   MFolderType ftype = MF_ILLEGAL; // init it to suppress compiler warnings
    if ( CanHaveSubfolders(params->m_FolderType, params->m_FolderFlags, &ftype)
         && ftype != MF_ILLEGAL )
    {

@@ -866,8 +866,8 @@ public:
          Value lv = m_Left->Evaluate();
          if(lv.ToNumber())
             return lv && m_Right->Evaluate();
-         else
-            return lv;
+
+         return lv;
       }
 #ifdef DEBUG
    virtual const char *OperName(void) const { return "&&"; }
@@ -887,8 +887,8 @@ public:
          Value lv = m_Left->Evaluate();
          if(! lv.ToNumber())
             return lv || m_Right->Evaluate();
-         else
-            return lv;
+
+         return lv;
       }
 #ifdef DEBUG
    virtual const char *OperName(void) const { return "||"; }
@@ -922,10 +922,10 @@ public:
          const Value rc = m_Condition->Evaluate();
          if(rc.ToNumber())
             return m_IfBlock->Evaluate();
-         else if(m_ElseBlock)
+         if(m_ElseBlock)
             return m_ElseBlock->Evaluate();
-         else
-            return rc;
+
+         return rc;
       }
 #ifdef DEBUG
    virtual String Debug(void) const
@@ -1563,8 +1563,8 @@ RelOp(Token t)
       OPERATOR_VALUE(Geq);
       OPERATOR_VALUE(Equal);
       OPERATOR_VALUE(Neq);
-      default: return NULL;
    }
+   return NULL;
 }
 // Relationals are a special case; they don't associate.
 const SyntaxNode *
@@ -1596,8 +1596,9 @@ AddOp(Token t)
    {
       OPERATOR_VALUE(Plus);
       OPERATOR_VALUE(Minus);
-      default: return NULL;
    }
+
+   return NULL;
 }
 LeftAssoc(Term,AddOp,Factor,_("Expected term after plus/minus operator"))
 
@@ -1611,8 +1612,8 @@ MulOp(Token t)
       OPERATOR_VALUE(Times);
       OPERATOR_VALUE(Divide);
       OPERATOR_VALUE(Mod);
-      default: return NULL;
    }
+   return NULL;
 }
 LeftAssoc(Factor,MulOp,Unary,
           _("Expected factor after multiply/divide/modulus operator"))
@@ -1961,7 +1962,7 @@ static bool CheckXAuthWarning(const String& value)
       return false;
 
    const char *pc2 = strstr(pc + 1, CLAIMED_STRING);
-   if ( !pc )
+   if ( !pc2 )
       return false;
 
    // there seems to be a few common misconfiguration problems which
@@ -2650,8 +2651,8 @@ static Value func_movetofolder(ArgList *args, FilterRuleImpl *p)
       ArgList emptyArgs;
       return func_delete(&emptyArgs, p);
    }
-   else
-      return 0;
+
+   return 0;
 }
 
 static Value func_date(ArgList *args, FilterRuleImpl *p)

@@ -2199,7 +2199,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       // if we're creating a folder under a parent with some defined
       // hierarchical type (i.e. not root or group but IMAP or NNTP, for
       // example), default to the parents type initially
-      MFolderType typeOfParentChildren;
+      MFolderType typeOfParentChildren = MF_ILLEGAL; // suppress warning
       MFolder_obj folderParent(m_dlgCreate->GetParentFolder());
       if ( folderParent &&
             CanHaveSubfolders(folderParent->GetType(),
@@ -2756,10 +2756,8 @@ bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
 
       return TRUE;
    }
-   else
-   {
-      // dialog was cancelled
-      return FALSE;
-   }
+
+   // dialog was cancelled
+   return FALSE;
 }
 

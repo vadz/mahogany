@@ -648,11 +648,9 @@ bool MTextInputDialog::TransferDataFromWindow()
     EndModal(wxID_CANCEL);
     return FALSE;
   }
-  else
-  {
-    m_strText = strText;
-    return TRUE;
-  }
+
+  m_strText = strText;
+  return TRUE;
 }
 
 // a wxConfig-aware function which asks user for a string

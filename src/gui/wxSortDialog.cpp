@@ -348,13 +348,7 @@ extern
 bool ConfigureSorting(Profile *profile, wxWindow *parent)
 {
    wxMessageSortingDialog dlg(profile, parent);
-   if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
-   {
-      return TRUE;
-   }
-   else
-   {
-      return FALSE;
-   }
+
+   return dlg.ShowModal() == wxID_OK && dlg.WasChanged();
 }
 

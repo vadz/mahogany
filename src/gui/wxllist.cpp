@@ -205,9 +205,9 @@ wxLayoutObject::Read(wxString &istr)
       return wxLayoutObjectCmd::Read(istr);
    case WXLO_TYPE_ICON:
       return wxLayoutObjectIcon::Read(istr);
-   default:
-      return NULL;
    }
+
+   return NULL;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -443,8 +443,8 @@ wxLayoutObjectIcon::Read(wxString &istr)
       delete obj;
       return NULL;
    }
-   else
-      return obj;
+
+   return obj;
 }
 
 wxLayoutObject *

@@ -865,85 +865,7 @@ wxMApp::OnInit()
    gs_timerAutoSave = new AutoSaveTimer;
    gs_timerMailCollection = new MailCollectionTimer;
 
-   if ( OnStartup() )
-   {
-#ifdef USE_I18N
-      // only now we can use profiles
-      if ( failedToSetLocale || failedToLoadMsgs )
-      {
-         // if we can't load the msg catalog for the given locale once, don't
-         // try it again next time - the flag is stored in the profile in this
-         // key
-         wxString configPath;
-         configPath << "UseLocale_" << locale;
-
-         Profile *profile = GetProfile();
-         if ( profile->readEntry(configPath, 1l) != 0l )
-         {
-            CloseSplash();
-
-            // the strings here are intentionally not translated
-            wxString msg;
-            if ( failedToSetLocale )
-            {
-               msg.Printf("Locale '%s' couldn't be set, do you want to "
-                          "retry setting it the next time?",
-                          locale.c_str());
-            }
-            else // failedToLoadMsgs
-            {
-               msg.Printf("Impossible to load message catalog(s) for the "
-                          "locale '%s', do you want to retry next time?",
-                          locale.c_str());
-            }
-
-            if ( wxMessageBox(msg, "Error",
-                              wxICON_STOP | wxYES_NO) != wxYES )
-            {
-               profile->writeEntry(configPath, 0l);
-            }
-         }
-         //else: the user had previously answered "no" to the question above,
-         //      don't complain any more about missing catalogs
-      }
-#endif // USE_I18N
-
-      // at this moment we're fully initialized, i.e. profile and log
-      // subsystems are working and the main window is created
-
-      // start a timer to autosave the profile entries
-      StartTimer(Timer_Autosave);
-
-      // the timer to poll for new mail will be started when/if FolderMonitor
-      // is created
-      //StartTimer(Timer_PollIncoming);
-
-      // start away timer if necessary
-      StartTimer(Timer_Away);
-
-      // another timer to do MEvent handling:
-      m_IdleTimer = new IdleTimer;
-
-      // restore the normal behaviour (see the comments above)
-      SetExitOnFrameDelete(TRUE);
-
-#ifdef USE_DIALUP
-      // reflect settings in menu and statusbar:
-      UpdateOnlineDisplay();
-#endif // USE_DIALUP
-
-      // make sure this is displayed correctly:
-      UpdateOutboxStatus();
-
-      // show tip dialog unless disabled
-      if ( READ_APPCONFIG(MP_SHOWTIPS) )
-      {
-         MDialog_ShowTip(GetTopWindow());
-      }
-
-      return true;
-   }
-   else
+   if ( !OnStartup() )
    {
       if ( GetLastError() != M_ERROR_CANCEL )
       {
@@ -953,6 +875,82 @@ wxMApp::OnInit()
 
       return false;
    }
+
+#ifdef USE_I18N
+   // only now we can use profiles
+   if ( failedToSetLocale || failedToLoadMsgs )
+   {
+      // if we can't load the msg catalog for the given locale once, don't
+      // try it again next time - the flag is stored in the profile in this
+      // key
+      wxString configPath;
+      configPath << "UseLocale_" << locale;
+
+      Profile *profile = GetProfile();
+      if ( profile->readEntry(configPath, 1l) != 0l )
+      {
+         CloseSplash();
+
+         // the strings here are intentionally not translated
+         wxString msg;
+         if ( failedToSetLocale )
+         {
+            msg.Printf("Locale '%s' couldn't be set, do you want to "
+                       "retry setting it the next time?",
+                       locale.c_str());
+         }
+         else // failedToLoadMsgs
+         {
+            msg.Printf("Impossible to load message catalog(s) for the "
+                       "locale '%s', do you want to retry next time?",
+                       locale.c_str());
+         }
+
+         if ( wxMessageBox(msg, "Error",
+                           wxICON_STOP | wxYES_NO) != wxYES )
+         {
+            profile->writeEntry(configPath, 0l);
+         }
+      }
+      //else: the user had previously answered "no" to the question above,
+      //      don't complain any more about missing catalogs
+   }
+#endif // USE_I18N
+
+   // at this moment we're fully initialized, i.e. profile and log
+   // subsystems are working and the main window is created
+
+   // start a timer to autosave the profile entries
+   StartTimer(Timer_Autosave);
+
+   // the timer to poll for new mail will be started when/if FolderMonitor
+   // is created
+   //StartTimer(Timer_PollIncoming);
+
+   // start away timer if necessary
+   StartTimer(Timer_Away);
+
+   // another timer to do MEvent handling:
+   m_IdleTimer = new IdleTimer;
+
+   // restore the normal behaviour (see the comments above)
+   SetExitOnFrameDelete(TRUE);
+
+#ifdef USE_DIALUP
+   // reflect settings in menu and statusbar:
+   UpdateOnlineDisplay();
+#endif // USE_DIALUP
+
+   // make sure this is displayed correctly:
+   UpdateOutboxStatus();
+
+   // show tip dialog unless disabled
+   if ( READ_APPCONFIG(MP_SHOWTIPS) )
+   {
+      MDialog_ShowTip(GetTopWindow());
+   }
+
+   return true;
 }
 
 wxMFrame *wxMApp::CreateTopLevelFrame()

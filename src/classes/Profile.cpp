@@ -625,16 +625,13 @@ String ProfileImpl::GetUniqueGroupName(void) const
    PCHECK();
    String name; // We use hex numbers
    unsigned long number = 0;
-   for(;;)
+   do
    {
-      name.Printf("%lX", number);
-      if(HasGroup(name))
-         number++;
-      else
-         return name;
+      name.Printf("%lX", number++);
    }
-   wxASSERT(0); // must not happen!
-   return "--outOfBounds--";
+   while ( HasGroup(name) );
+
+   return name;
 }
 
 

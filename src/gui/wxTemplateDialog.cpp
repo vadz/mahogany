@@ -848,14 +848,8 @@ bool ConfigureTemplates(Profile *profile,
                         const TemplatePopupMenuItem& menu)
 {
    wxFolderTemplatesDialog dlg(menu, profile, parent);
-   if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
-   {
-      return TRUE;
-   }
-   else
-   {
-      return FALSE;
-   }
+
+   return dlg.ShowModal() == wxID_OK && dlg.WasChanged();
 }
 
 // select a template from all existing ones

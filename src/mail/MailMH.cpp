@@ -297,11 +297,9 @@ bool MailFolder::ExistsMH()
       // we have something, assume it's a valid MH folder
       return TRUE;
    }
-   else
-   {
-      // empty directory
-      return FALSE;
-   }
+
+   // empty directory
+   return FALSE;
 }
 
 bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)

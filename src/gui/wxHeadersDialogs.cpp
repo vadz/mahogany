@@ -1086,7 +1086,7 @@ void wxCustomHeadersDialog::OnUpdateUI(wxUpdateUIEvent& event)
 
 void wxCustomHeadersDialog::OnEdit(wxCommandEvent& WXUNUSED(event))
 {
-   size_t sel;
+   size_t sel = 0; // inititialize it to fix compiler warnings
    CHECK_RET( GetSelection(&sel), _T("button should be disabled") );
 
    wxCustomHeaderDialog dlg(m_profile, GetParent(), TRUE);
@@ -1130,7 +1130,7 @@ void wxCustomHeadersDialog::OnAdd(wxCommandEvent& WXUNUSED(event))
 
 void wxCustomHeadersDialog::OnDelete(wxCommandEvent& WXUNUSED(event))
 {
-   size_t sel;
+   size_t sel = 0; // inititialize it to fix compiler warnings
    CHECK_RET( GetSelection(&sel), _T("button should be disabled") );
 
    m_listctrl->DeleteItem(sel);
@@ -1166,48 +1166,46 @@ bool ConfigureCustomHeader(Profile *profile,
 
    if ( dlg.ShowModal() == wxID_OK )
    {
-      // get data from the dialog
-      *headerName = dlg.GetHeaderName();
-      *headerValue = dlg.GetHeaderValue();
-      if ( letUserChooseType )
-      {
-         type = dlg.GetHeaderType();
-      }
-
-      bool remember = letUserChooseType ? TRUE : dlg.RememberHeader();
-
-      if ( storedInProfile )
-         *storedInProfile = remember;
-
-      if ( remember )
-      {
-         // update the value of this headers
-         String path;
-         path << CUSTOM_HEADERS_PREFIX << ':' << *headerName << ':'
-               << gs_customHeaderSubgroups[type];
-
-         profile->writeEntry(path, *headerValue);
-
-         // and add this header to thel ist of headers to use
-         path.clear();
-         path << CUSTOM_HEADERS_PREFIX << gs_customHeaderSubgroups[type];
-         wxArrayString
-            headerNames = strutil_restore_array(profile->readEntry(path, ""));
-         if ( headerNames.Index(*headerName) == wxNOT_FOUND )
-         {
-            headerNames.Add(*headerName);
-            profile->writeEntry(path, strutil_flatten_array(headerNames));
-         }
-         //else: it's already there
-      }
-
-      return true;
-   }
-   else
-   {
       // cancelled
       return false;
    }
+
+   // get data from the dialog
+   *headerName = dlg.GetHeaderName();
+   *headerValue = dlg.GetHeaderValue();
+   if ( letUserChooseType )
+   {
+      type = dlg.GetHeaderType();
+   }
+
+   bool remember = letUserChooseType ? TRUE : dlg.RememberHeader();
+
+   if ( storedInProfile )
+      *storedInProfile = remember;
+
+   if ( remember )
+   {
+      // update the value of this headers
+      String path;
+      path << CUSTOM_HEADERS_PREFIX << ':' << *headerName << ':'
+            << gs_customHeaderSubgroups[type];
+
+      profile->writeEntry(path, *headerValue);
+
+      // and add this header to thel ist of headers to use
+      path.clear();
+      path << CUSTOM_HEADERS_PREFIX << gs_customHeaderSubgroups[type];
+      wxArrayString
+         headerNames = strutil_restore_array(profile->readEntry(path, ""));
+      if ( headerNames.Index(*headerName) == wxNOT_FOUND )
+      {
+         headerNames.Add(*headerName);
+         profile->writeEntry(path, strutil_flatten_array(headerNames));
+      }
+      //else: it's already there
+   }
+
+   return true;
 }
 
 bool ConfigureCustomHeaders(Profile *profile, wxWindow *parent)
