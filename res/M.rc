@@ -27,8 +27,11 @@ pythonopower	BITMAP	"pythonpower.bmp"
 background	BITMAP	"background.bmp"
 
 // frame icons (32x32)
-MFrame		ICON	"mframe.ico"
-MainFrame	ICON	"mainframe.ico"
+MFrame		ICON	"Mframe.ico"
+MainFrame	ICON	"Mframe.ico"
+MFrameNewMail	ICON	"frame_new.ico"
+MainFrameNewMail ICON	"frame_new.ico"
+//ComposeFrame	ICON	"compose.ico"
 Adbedit 	ICON	"adbedit.ico"
 
 // MIME icons (32x32)
