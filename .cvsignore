@@ -10,6 +10,7 @@ Linux.system.cache
 Linux.system.cache.tmp
 makeopts
 makeopts.in.Solaris
+makeversion
 nohup.out
 out
 solaris2.5.system.cache
