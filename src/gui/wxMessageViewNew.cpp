@@ -664,83 +664,9 @@ wxMessageView::Update(void)
 void
 wxMessageView::SetEncoding(wxFontEncoding enc)
 {
-   SetFontForEncoding(enc);
-
+   //FIXME!!!
    Update();
 }
-
-void
-wxMessageView::SetFontForEncoding(wxFontEncoding enc)
-{
-   wxCHECK_RET( m_mailMessage, "shouldn't be called without message" );
-
-   if ( enc == wxFONTENCODING_SYSTEM )
-   {
-      // find charset name from the headers
-      wxString charsetName;
-      if ( m_mailMessage->GetHeaderLine("Content-Type", charsetName) )
-      {
-         // TODO we don't check that we have "text/..." MIME type here as for
-         //      now this code is used for the entire message, not for each
-         //      part - this will be changed
-         charsetName.MakeUpper();
-         int charsetStart = charsetName.Find("CHARSET=");
-         if ( charsetStart != wxNOT_FOUND )
-         {
-            // strlen("charset=") == 8
-            wxString cs;
-            for ( const char *p = charsetName.c_str() + charsetStart + 8;
-                  isalnum(*p) || *p == '_' || *p == '-';
-                  p++ )
-            {
-               cs += *p;
-            }
-
-            charsetName = cs;
-         }
-         else
-         {
-            charsetName = "";
-         }
-      }
-
-      // convert it to encoding
-      if ( !!charsetName )
-      {
-         enc = wxTheFontMapper->CharsetToEncoding(charsetName);
-         if ( enc == wxFONTENCODING_SYSTEM )
-         {
-            wxLogStatus(GetFrame(this),
-                        _("Unsupport charset '%s', message may be shown incorrectly."));
-
-            CheckLanguageInMenu(this, wxFONTENCODING_DEFAULT);
-         }
-         else
-         {
-            // remember it
-            m_encoding = enc;
-         }
-      }
-   }
-
-   if ( enc != wxFONTENCODING_SYSTEM )
-   {
-      // before setting the font for the layout list, make sure that we can
-      // create fonts with such encodings - otherwise, we would pop up a
-      // message box asking for replacement from wxLayoutWindow::OnPaint()
-      // which is a recipe for disaster (infinite loop in this case)
-      wxFont font(12, wxDEFAULT, wxNORMAL, wxNORMAL, FALSE, "", enc);
-      wxClientDC dc(this);
-      dc.SetFont(font);
-      dc.GetTextExtent("foo", (wxCoord *)NULL, (wxCoord *)NULL);
-
-      // and update the menu to reflect the current charset
-      CheckLanguageInMenu(this, enc);
-
-      GetLayoutList()->SetFontEncoding(enc);
-   }
-}
-
 
 String
 wxMessageView::HighLightURLs(const char *input)
