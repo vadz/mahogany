@@ -705,7 +705,7 @@ int
 wxFolderView::GetSelections(wxArrayInt& selections)
 {
    // in case there is an event pending:
-   if(m_FolderCtrl->GetItemCount() != m_MailFolder->CountMessages())
+   if(m_FolderCtrl->GetItemCount() != (int)m_MailFolder->CountMessages())
    {
       Update();
       return 0; // ignore current selection, so user has to re-issue command

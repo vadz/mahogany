@@ -18,8 +18,10 @@
 #endif
 
 #include "MDialogs.h"
+
 #include <wx/icon.h>
 #include <wx/frame.h>
+#include <wx/progdlg.h>
 
 // fwd decl
 class ProfileBase;
@@ -36,7 +38,7 @@ class wxCloseEvent;
 
 /** Progress dialog which shows a moving progress bar. */
 
-class MProgressDialog : public wxFrame
+class MProgressDialog : public wxProgressDialog
 {
 public:
    /** Creates and displays dialog, disables event handling for other
@@ -53,50 +55,14 @@ public:
                    int maximum = 100,
                    wxWindow *parent = NULL,
                    bool disableParentOnly = false,
-                   bool abortButton = false);
-   /** Destructor.
-       Re-enables event handling for other windows.
-   */
-   ~MProgressDialog() { EnableDisableEvents(true); }
-
-   /** Update the status bar to the new value.
-       @param value new value
-       @param newmsg if used, new message to display
-       @returns true if ABORT button has not been pressed
-   */
-   bool Update(int value = -1, const char *newmsg = NULL);
-
-   /** Can be called to continue after the cancel button has been pressed, but
-       the program decided to continue the operation (e.g., user didn't
-       configrm it)
-   */
-   void Resume() { m_state = Continue; }
-
-   /// Callback for optional abort button
-   void OnCancel(wxButtonEvent& WXUNUSED(event)) { m_state = Canceled; }
-
-   /// callback to disable "hard" window closing
-   void OnClose(wxCloseEvent& event);
-
-private:
-   /// used to enable/disable envent handling
-   void EnableDisableEvents(bool enable);
-
-   /// the status bar
-   class wxGauge *m_gauge;
-   /// the message displayed
-   class wxStaticText *m_msg;
-   /// disable all or parent window only
-   bool m_disableParentOnly;
-   /// continue processing or not (return value for Update())
-   enum
+                   bool abortButton = false)
+   : wxProgressDialog(title, message, maximum, parent,
+                      (disableParentOnly ? 0 : wxPD_APP_MODAL) |
+                      (abortButton ? wxPD_CAN_ABORT : 0) |
+                      wxPD_AUTO_HIDE
+                      )
    {
-      Uncancelable = -1,   // dialog can't be canceled
-      Canceled,            // can be cancelled and, in fact, was
-      Continue             // can be cancelled but wasn't
-   } m_state;
-
-   DECLARE_EVENT_TABLE()
+   }
 };
 
 /** display error message:

@@ -46,12 +46,12 @@
 #include "gui/wxIconManager.h"
 
 #include <wx/dynarray.h>
+#include <wx/window.h>
 #include <wx/radiobox.h>
 #include <wx/confbase.h>
 #include <wx/persctrl.h>
 #include <wx/gauge.h>
 #include <wx/stattext.h>
-#include <wx/window.h>
 
 #include "MFolderDialogs.h"
 
@@ -146,129 +146,6 @@ private:
    wxFolderTree *m_tree;
 };
 
-
-// ----------------------------------------------------------------------------
-// MProgressDialog: a progress bar dialog box with an optional "Cancel" button
-// ----------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(MProgressDialog, wxFrame)
-   EVT_BUTTON(-1, MProgressDialog::OnCancel)
-   EVT_CLOSE(MProgressDialog::OnClose)
-END_EVENT_TABLE()
-
-
-MProgressDialog::MProgressDialog(wxString const &title,
-                                 wxString const &message,
-                                 int maximum,
-                                 wxWindow *parent,
-                                 bool parentOnly,
-                                 bool abortButton)
-{
-// dangerous: startup window gets deleted while this is running!
-//   if( !parent )
-//      parent = wxTheApp->GetTopWindow();
-
-   m_state = abortButton ? Continue : Uncancelable;
-   m_disableParentOnly = parentOnly;
-
-   int height = 70;     // FIXME arbitrary numbers
-   if ( abortButton )
-      height += 35;
-   wxFrame::Create(parent, -1, wxString("Mahogany : ")+title,
-                   wxPoint(0, 0), wxSize(220, height),
-                   wxCAPTION | wxSTAY_ON_TOP | wxTHICK_FRAME);
-
-   wxLayoutConstraints *c;
-
-   m_msg = new wxStaticText(this, -1, message);
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxLeft, 10);
-   c->top.SameAs(this, wxTop, 10);
-   c->width.AsIs();
-   c->height.AsIs();
-   m_msg->SetConstraints(c);
-
-   if(maximum > 0)
-   {
-      m_gauge = new wxGauge(this, -1, maximum);
-      c = new wxLayoutConstraints;
-      c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN);
-      c->top.Below(m_msg, 2*LAYOUT_Y_MARGIN);
-      c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
-      c->height.AsIs();
-      m_gauge->SetConstraints(c);
-      m_gauge->SetValue(0);
-   }
-   else
-      m_gauge = NULL;
-   
-   if ( abortButton )
-   {
-      wxControl *ctrl = new wxButton(this, -1, _("Cancel"));
-      c = new wxLayoutConstraints;
-      c->centreX.SameAs(this, wxCentreX);
-      if(m_gauge)
-         c->top.Below(m_gauge, 2*LAYOUT_Y_MARGIN);
-      else
-         c->top.Below(ctrl, 2*LAYOUT_Y_MARGIN);
-      c->width.AsIs();
-      c->height.AsIs();
-      ctrl->SetConstraints(c);
-   }
-
-   SetAutoLayout(TRUE);
-   Show(TRUE);
-   Centre(wxCENTER_FRAME | wxBOTH);
-
-   EnableDisableEvents(false);
-   wxYield();
-}
-
-
-void
-MProgressDialog::EnableDisableEvents(bool enable)
-{
-   wxWindow *parent = GetParent();
-   if ( m_disableParentOnly && parent != NULL )
-   {
-      parent->Enable(enable);
-   }
-   else
-   {
-      wxWindowList::Node *node;
-      for ( node = wxTopLevelWindows.GetFirst();
-            node;
-            node = node->GetNext() )
-      {
-         wxWindow *win = node->GetData();
-         win->Enable(enable);
-      }
-   }
-
-   // always enable ourselves
-   Enable(true);
-}
-
-bool
-MProgressDialog::Update(int value, const char *newmsg)
-{
-   ASSERT(value == -1 || m_gauge);
-   if(m_gauge)
-      m_gauge->SetValue(value);
-   if(newmsg)
-      m_msg->SetLabel(newmsg);
-   wxYield();
-
-   return m_state != Canceled;
-}
-
-void MProgressDialog::OnClose(wxCloseEvent& event)
-{
-   if ( m_state == Uncancelable )
-      event.Veto(TRUE);
-   else
-      m_state = Canceled;
-}
 
 // ----------------------------------------------------------------------------
 // MTextDialog - a dialog containing a multi-line text control (used to show
