@@ -51,16 +51,10 @@
 
 #include "gui/wxIconManager.h"
 
-#include <wx/utils.h> // wxGetFullHostName()
+#include <wx/utils.h>            // wxGetFullHostName(), wxGetProcessId()
 #include <wx/file.h>
-#include <wx/fontmap.h> // for GetEncodingName()
+#include <wx/fontmap.h>          // for GetEncodingName()
 #include <wx/datetime.h>
-
-#ifdef OS_WIN
-   #include <wx/msw/private.h>  // for GetCurrentProcessId()
-#elif defined(OS_UNIX)
-   #include <unistd.h>  // for getpid()
-#endif
 
 extern bool InitSSL(); // from src/util/ssl.cpp
 
@@ -987,18 +981,12 @@ SendMessageCC::RemoveHeaderEntry(const String& name)
 static
 String BuildMessageId(const char *hostname)
 {
-   // get the PID from OS (TODO: should have a wxWin function for this)
+   // get the PID from OS only once as it doesn't change while we run
    static unsigned long s_pid = 0;
 
    if ( !s_pid )
    {
-#ifdef OS_WIN
-      s_pid = (unsigned long)GetCurrentProcessId();
-#elif defined(OS_UNIX)
-      s_pid = (unsigned long)getpid();
-#else
-      #error "Don't know how to getpid() on this platform"
-#endif
+      s_pid = wxGetProcessId();
    }
 
    // get the time to make the message-id unique and use s_numInSec to make the
