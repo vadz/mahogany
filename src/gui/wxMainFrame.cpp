@@ -53,6 +53,32 @@ END_EVENT_TABLE()
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    : wxMFrame(iname,parent)
 {
+<<<<<<< wxMainFrame.cc
+   int width, height;
+   
+   GetClientSize(&width,&height);
+   SetIcon(GLOBAL_NEW wxIcon(MainFrame_xpm));
+
+   AddFileMenu();
+   AddEditMenu();
+   AddHelpMenu();
+   SetMenuBar(menuBar);
+
+#ifdef USE_WXWINDOWS2
+   m_ToolBar = new wxMToolBar( this, /*id*/-1, wxPoint(2,60), wxSize(width-4,26) );
+   m_ToolBar->SetMargins( 2, 2 );
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, tb_open, WXMENU_FILE_OPEN, "Open Folder");
+   TB_AddTool(m_ToolBar, tb_mail_compose, WXMENU_FILE_COMPOSE, "Compose Message");
+   TB_AddTool(m_ToolBar, tb_book_open, WXMENU_EDIT_ADB, "Edit Database");
+   TB_AddTool(m_ToolBar, tb_preferences, WXMENU_EDIT_PREFERENCES, "Edit Preferences");
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, tb_help, WXMENU_HELP_ABOUT, "Help");
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, tb_exit, WXMENU_FILE_EXIT, "Exit M");
+#endif
+   
+=======
    int width, height;
    
    GetClientSize(&width,&height);
@@ -81,6 +107,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #	endif // Windows
 #endif // wxWin 2
    
+>>>>>>> 1.9
 #ifndef  USE_WXWINDOWS2
    CreateStatusLine(1);
    return;

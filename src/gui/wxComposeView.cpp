@@ -48,8 +48,9 @@
 
 #include "gui/wxFontManager.h"
 #include "gui/wxIconManager.h"
-#include "gui/wxFText.h"
-#include "gui/wxFTCanvas.h"
+//#include "gui/wxFText.h"
+//#include "gui/wxFTCanvas.h"
+#include   "gui/wxlwindow.h"
 #include "gui/wxComposeView.h"
 #include "gui/wxAdbEdit.h"
 
@@ -98,7 +99,7 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
 {
   CHECK_RET( !initialised, "wxComposeView created twice" );
 
-  ftCanvas = NULL;
+  m_LayoutWindow = NULL;
   nextFileID = 0;
 
   if(!parentProfile)
@@ -345,16 +346,19 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
       istr.seekg(0,ios::end);
       size = istr.tellg();
       buffer = new char [size+1];
-      if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
-        ftCanvas->AddFormattedText("--\n");
+     if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
+     {
+        m_LayoutWindow->GetLayoutList().Insert("--");
+        m_LayoutWindow->GetLayoutList().LineBreak();;
+     }
       istr.seekg(0,ios::beg);
       istr.read(buffer, size);
       buffer[size] = '\0';
       if(! istr.fail())
-        ftCanvas->AddText(buffer);
+        m_LayoutWindow->GetLayoutList().Insert(buffer);
       delete [] buffer;
       istr.close();
-      ftCanvas->MoveCursorTo(0,0);
+      m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
     }
    }
 
@@ -369,17 +373,16 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
 void
 wxComposeView::CreateFTCanvas(void)
 {
-   // Canvas
-   ftCanvas = new wxFTCanvas(panel, -1,-1,-1,-1, 0, profile);
+   m_LayoutWindow = new wxLayoutWindow(panel);
    // Canvas
    wxLayoutConstraints *c = new wxLayoutConstraints;
    c->left.SameAs  (panel, wxLeft);
    c->top.SameAs   (txtSubjectLabel, wxBottom, LAYOUT_MARGIN);
    c->right.SameAs (panel, wxRight);
    c->bottom.SameAs(panel, wxBottom);
-   ftCanvas->SetConstraints(c);
-   ftCanvas->AllowEditing(true);
-   ftCanvas->SetWrapMargin(READ_CONFIG(profile, MP_COMPOSE_WRAPMARGIN));
+   m_LayoutWindow->SetConstraints(c);
+   m_LayoutWindow->GetLayoutList().SetEditable(true);
+   //FIXMEm_LayoutWindow->SetWrapMargin(READ_CONFIG(profile, MP_COMPOSE_WRAPMARGIN));
 }
 
 #ifdef USE_WXWINDOWS2
@@ -414,7 +417,7 @@ wxComposeView::~wxComposeView()
 {
    if(! initialised)
       return;
-   delete ftCanvas;
+   delete m_LayoutWindow;
 }
 
 
@@ -496,7 +499,7 @@ wxComposeView::OnMenuCommand(int id)
       Print();
       break;
    case WXMENU_COMPOSE_CLEAR:
-      delete ftCanvas;
+      delete m_LayoutWindow;
       CreateFTCanvas();
       Layout();
 #ifdef  USE_WXWINDOWS2
@@ -541,9 +544,9 @@ wxComposeView::InsertFile(void)
 
    nextFileID ++;
    
-   ftCanvas->InsertText(tmp,true);
-   ftCanvas->MoveCursor(1,0);
-   ftCanvas->SetFocus();   
+   m_LayoutWindow->GetLayoutList().Insert(tmp);
+   m_LayoutWindow->GetLayoutList().MoveCursor(1,0);
+   m_LayoutWindow->SetFocus();   
 }
 
 // little helper function to turn kbList into a map:
@@ -564,8 +567,10 @@ wxComposeView::Send(void)
       * tmp;
    String
       tmp2, mimeType, mimeSubType;
-   FTObjectType
-      ftoType;
+//FIXME
+   int ftoType = 0;
+//   FTObjectType
+   //    ftoType;
    const char
       *filename = NULL;
    char
@@ -588,7 +593,8 @@ wxComposeView::Send(void)
        READ_CONFIG(profile, MP_SHOWBCC) ? txtBCC->GetValue().c_str() 
                                         : (const char *)NULL
       );
-   tmp = ftCanvas->GetContent(&ftoType, true);
+//FIXME   tmp = m_LayoutWindow->GetContent(&ftoType, true);
+#if 0
    while(ftoType != LI_ILLEGAL)
    {
       switch(ftoType)
@@ -636,8 +642,9 @@ wxComposeView::Send(void)
       default:
          break;
       }
-      tmp = ftCanvas->GetContent(&ftoType, false);
+//FIXME      tmp = m_LayoutWindow->GetContent(&ftoType, false);
    }
+#endif
    sm.Send();
 }
 
@@ -666,14 +673,14 @@ wxComposeView::SetSubject(const String &subj)
 void
 wxComposeView::InsertText(const String &txt)
 {
-   ftCanvas->MoveCursorTo(0,0);
-   ftCanvas->InsertText(txt);
-   ftCanvas->MoveCursorTo(0,0);
+   m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
+   m_LayoutWindow->GetLayoutList().Insert(txt);
+   m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
 }
 
 
 void
 wxComposeView::Print(void)
 {
-   ftCanvas->Print();
+   m_LayoutWindow->Print();
 }

@@ -4,7 +4,7 @@ CWD = gui
 SRC = wxMApp.cc wxMFrame.cc wxFolderView.cc wxMessageView.cc \
 wxComposeView.cc wxMainFrame.cc wxFText.cc wxFTCanvas.cc \
 wxIconManager.cc wxFontManager.cc wxMDialogs.cc wxMLogFrame.cc \
-wxAdbEdit.cc
+wxAdbEdit.cc wxlwindow.cc wxllist.cc
 
 ifdef USE_WXTAB
 SRC += wxtab.cc
