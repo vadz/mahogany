@@ -632,7 +632,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
             c->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
          if ( n == Field_To ) {
             // the [Expand] button
-            wxButton *btnExpand = new wxButton(m_panel, IDB_EXPAND, "Expand");
+            wxButton *btnExpand = new wxButton(m_panel, IDB_EXPAND, _("Expand"));
             wxLayoutConstraints *c2 = new wxLayoutConstraints;
             c2->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
             c2->right.SameAs(box, wxRight, LAYOUT_MARGIN);

@@ -37,6 +37,7 @@
 #   include  "wx/layout.h"
 #   include  "wx/button.h"
 #   include  "wx/stattext.h"
+#   include  "wx/statbmp.h"
 #   include  "wx/intl.h"
 #   include  "wx/dcclient.h"
 #   include  "wx/settings.h"
@@ -54,9 +55,7 @@
 #endif
 
 // use icon in msg box? 
-#ifdef __WXMSW__
 #define USE_ICON
-#endif
 
 // ----------------------------------------------------------------------------
 // icons
@@ -811,10 +810,9 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     else
         which = Icon_Information;
 
-    static const int iconSize = 32; // x32 pixels
-
 #ifdef USE_ICON
     wxStaticBitmap *icon = new wxStaticBitmap(this, -1, wxIcon(icons[which]));
+    const int iconSize = icon->GetBitmap().GetWidth();
 #endif // use icon
     
     // split the message in lines
