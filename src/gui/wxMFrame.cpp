@@ -63,13 +63,21 @@ IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
 #ifdef  USE_WXWINDOWS2
    BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
-      EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnCommandEvent)
-      EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnCommandEvent)
-      EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnCommandEvent)
-      EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCommandEvent)
-      EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnCommandEvent)
-      EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnCommandEvent)
+      EVT_MENU(-1,    wxMFrame::OnCommandEvent)
+      EVT_TOOL(-1,    wxMFrame::OnCommandEvent)
    END_EVENT_TABLE()
+
+
+void
+wxMFrame::OnSize( wxSizeEvent &WXUNUSED(event) )
+   
+{
+  int x,y;
+  GetClientSize( &x, &y );
+  if(m_ToolBar)
+     m_ToolBar->SetSize( 1, 0, x-2, 30 );
+};
+
 #endif
 
 wxMFrame::wxMFrame(const String &iname, wxWindow *parent)
@@ -115,8 +123,10 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
 #else
    SetIcon(new wxIcon(MFrame_xpm));
 #endif
+  
    initialised = true;
    menuBar = new wxMenuBar;
+   m_ToolBar = NULL;
    SetMenuBar(menuBar);
 }
 
@@ -135,11 +145,24 @@ wxMFrame::AddFileMenu(void)
 
    if(parent != NULL)
       fileMenu->Append(WXMENU_FILE_CLOSE,(char *)_("&Close Window"));
-   fileMenu->Append(WXMENU_FILE_ADBEDIT, (char *)_("Edit &Database"));
    fileMenu->AppendSeparator();
    fileMenu->Append(WXMENU_FILE_EXIT,(char *)_("&Exit"));
 
    menuBar->Append(fileMenu, (char *)_("&File"));
+}
+
+void
+wxMFrame::AddEditMenu(void)
+{
+   m_EditMenu = new wxMenu;
+
+   m_EditMenu->Append(WXMENU_EDIT_ADB,_("&Database"));
+   m_EditMenu->Append(WXMENU_EDIT_PREFERENCES,(char
+                                               *)_("&Preferences"));
+   m_EditMenu->AppendSeparator();
+   m_EditMenu->Append(WXMENU_EDIT_SAVE_PREFERENCES,(char *)_("&Save Preferences"));
+
+   menuBar->Append(m_EditMenu, _("&Edit"));
 }
 
 void
@@ -243,9 +266,6 @@ wxMFrame::OnMenuCommand(int id)
          new wxFolderView(name,this);
       break;
    }
-   case WXMENU_FILE_ADBEDIT:
-      (void) new wxAdbEditFrame(this);
-      break;
    case WXMENU_FILE_CLOSE:
    {
       if(OnClose())
@@ -259,6 +279,13 @@ wxMFrame::OnMenuCommand(int id)
    }
    case WXMENU_FILE_EXIT:
       mApplication.Exit();
+      break;
+   case WXMENU_EDIT_ADB:
+      (void) new wxAdbEditFrame(this);
+      break;
+   case WXMENU_EDIT_PREFERENCES:
+   case WXMENU_EDIT_SAVE_PREFERENCES:
+      MDialog_Message(_("Not implemented yet."),this,_("Sorry"));
       break;
    case WXMENU_HELP_ABOUT:
       MDialog_Message(_(ABOUTMESSAGE),this,_("About M"));

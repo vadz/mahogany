@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/06/19 08:05:08  KB
+ * restructured FolderView, menu handling and added toolbars
+ *
  * Revision 1.3  1998/06/14 21:33:42  KB
  * fixed the menu/callback problem, wxFolderView is now a panel
  *
@@ -36,8 +39,12 @@ enum
    WXMENU_FILE_TEST,
    WXMENU_FILE_CLOSE,
    WXMENU_FILE_EXIT,
-   WXMENU_FILE_ADBEDIT,
    WXMENU_FILE_END,
+   WXMENU_EDIT_BEGIN,
+   WXMENU_EDIT_ADB,
+   WXMENU_EDIT_PREFERENCES,
+   WXMENU_EDIT_SAVE_PREFERENCES,
+   WXMENU_EDIT_END,
    WXMENU_MSG_BEGIN,
    WXMENU_MSG_PRINT,
    WXMENU_MSG_DELETE,

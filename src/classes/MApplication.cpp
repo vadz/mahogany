@@ -6,6 +6,9 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.21  1998/06/19 08:05:15  KB
+ * restructured FolderView, menu handling and added toolbars
+ *
  * Revision 1.20  1998/06/14 12:24:18  KB
  * started to move wxFolderView to be a panel, Python improvements
  *
@@ -274,7 +277,7 @@ MAppBase::OnStartup()
    {
       if((*i)->length() == 0) // empty token
          continue;
-      
+      //VAR((*i)->c_str());
       wxLogDebug("Opening folder '%s'...", (*i)->c_str());
       new wxFolderViewFrame((**i),topLevelFrame);
    }
@@ -303,7 +306,8 @@ MAppBase::Exit(bool force)
 
       // FIXME @@@@ this doesn't terminate the application in wxWin2
       // (other frames are still left on screen)
-      if ( topLevelFrame != NULL ) {
+      if ( topLevelFrame != NULL )
+      {
          GLOBAL_DELETE topLevelFrame;
          topLevelFrame = NULL;
       }

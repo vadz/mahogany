@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/06/19 08:05:00  KB
+ * restructured FolderView, menu handling and added toolbars
+ *
  * Revision 1.6  1998/06/14 12:24:02  KB
  * started to move wxFolderView to be a panel, Python improvements
  *
@@ -80,10 +83,16 @@
 #   include   <wx/splitter.h>
 #   include   <wx/treectrl.h>
 #   include   "gui/wxMenuDefs.h"
+#   include   <wx/toolbar.h>
 /// how much space to leave in frame around other items
 #   define   WXFRAME_WIDTH_DELTA   16
 /// how much space to leave in frame around other items
 #   define   WXFRAME_HEIGHT_DELTA   64
+
+/// convenience macro to add a button to a toolbar
+#define   TB_AddTool(tb,xpm,id,helptext) \
+    tb->AddTool( id, new wxBitmap(xpm), wxNullBitmap, FALSE, -1, -1, \
+                  NULL, _(helptext) );
 
 #endif
 

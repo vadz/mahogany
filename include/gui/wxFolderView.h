@@ -78,12 +78,6 @@ public:
    /// update it
    void  Update(void);
 
-   /** called from OnSize(), rebuilds listbox
-       @param x new width
-       @param y new height
-       */
-   void  Build(int x, int y);
-   
    /// return true if initialised
    bool  IsInitialised(void) const { return initialised; }
 
@@ -153,9 +147,11 @@ class wxFolderViewFrame : public wxMFrame
 public:
    wxFolderViewFrame(const String &iname, wxFrame *parent = NULL);
    void OnCommandEvent(wxCommandEvent &event);
+#ifdef   USE_WXWINDOWS2
+      void OnSize( wxSizeEvent &WXUNUSED(event) );
+#endif
 private:
    wxFolderView *m_FolderView;
-
    DECLARE_EVENT_TABLE() 
 };
 

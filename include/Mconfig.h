@@ -57,6 +57,11 @@
 #ifdef  USE_WXWINDOWS2
 #	define wxTextWindow  wxTextCtrl
 #	define wxText        wxTextCtrl
+#   ifdef   USE_WXGTK
+#      define   wxMToolBar   wxToolBarGTK
+#   else
+#      define   wxMToolBar   wxToolBar95
+#   endif
 #endif  // wxWin 2
 
 /// use one common base class

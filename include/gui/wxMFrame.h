@@ -55,12 +55,14 @@ public:
 
    /// add a menu to the bar
    void AddMenu(wxMenu *menu, String const & title);
+   void AddEditMenu(void);
    void AddFileMenu(void);
    void AddHelpMenu(void);
    void AddMessageMenu(void);
    /// handle menu events
-   void OnMenuCommand(int id);
+   virtual void OnMenuCommand(int id);
 #ifdef     USE_WXWINDOWS2
+   void OnSize( wxSizeEvent &WXUNUSED(event) );
    /// wxWin2 event system
    void OnCommandEvent(wxCommandEvent & event);
    DECLARE_EVENT_TABLE()
@@ -72,9 +74,14 @@ protected:
    wxMenuBar   *menuBar;
    /// the File menu:
    wxMenu   *fileMenu;
+   // the Edit menu
+   wxMenu   *m_EditMenu;
    /// the Help menu:
    wxMenu   *helpMenu;
-
+#ifdef   USE_WXWINDOWS2
+   /// toolbar:
+   wxMToolBar *m_ToolBar;
+#endif
 private:
    /// is it initialised?
    bool  initialised;
