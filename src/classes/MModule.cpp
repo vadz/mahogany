@@ -86,22 +86,38 @@ MModuleList *GetMModuleList(void)
    return gs_MModuleList;
 }
 
+typedef MModule *MModulePtr;
+KBLIST_DEFINE(MModulePtrList, MModulePtr);
+
 extern
 void MModule_Cleanup(void)
 {
    if(gs_MModuleList)
    {
+      MModulePtrList modules;
       /* For statically linked modules, we must decrement them here to 
          avoid memory leaks. The refcount gets raised to 1 before
          anyone uses them, so it should be back to 1 now so that
-         DecRef() causes them to be freed. */
+         DecRef() causes them to be freed.
+
+         We cannot decref them straight from the list, as this would
+         remove them from the list and the iterator would get
+         corrupted. Ugly, but we need to remember them and clean them
+         outside the loop.
+      */
       MModuleList::iterator i;
       for(i = gs_MModuleList->begin();
           i != gs_MModuleList->end();
           i++)
          if( (**i).m_Module )
-            (**i).m_Module->DecRef(); 
-         delete gs_MModuleList;
+            modules.push_back( new MModulePtr((**i).m_Module) );
+      
+      for(MModulePtrList::iterator j = modules.begin();
+          j != modules.end();
+          j++)
+         (**j)->DecRef();
+
+      delete gs_MModuleList;
       gs_MModuleList = NULL;
    }
 }

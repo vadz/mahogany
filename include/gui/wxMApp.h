@@ -94,6 +94,7 @@ public:
    void OnDisconnected(wxDialUpEvent &event);
    /// updates display of outbox status
    virtual void UpdateOutboxStatus(void) const;
+   wxStatusBar *CreateStatusBar(wxWindow *parent);
 protected:
    /// makes sure the status bar has enough fields
    virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) const;

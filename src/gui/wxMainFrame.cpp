@@ -235,10 +235,22 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_ModulePopup = NULL;
    SetIcon(ICON("MainFrame"));
    SetTitle(M_TOPLEVELFRAME_TITLE);
-   static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging
-   CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
-   GetStatusBar()->SetFieldsCount(3, widths);
 
+
+
+   {
+      wxStatusBar *sbar = ((wxMApp *)mApplication)->CreateStatusBar(this);
+      // copied from wxWindows framecmn.cpp:
+      // Set the height according to the font and the border size
+      wxClientDC dc(sbar);
+      dc.SetFont(sbar->GetFont());
+      long y; dc.GetTextExtent( "X", NULL, &y );
+      int height = (int)( (11*y)/10 + 2*sbar->GetBorderY());
+      sbar->SetSize( -1, -1, 100, height );
+      SetStatusBar(sbar);
+      PositionStatusBar();
+   }
+   
    AddFileMenu();
    AddEditMenu();
 
@@ -302,6 +314,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    }
 #endif // GTK
 }
+
 
 void
 wxMainFrame::UpdateToolBar(void)

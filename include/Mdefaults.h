@@ -444,13 +444,21 @@
 /**@name  Font settings for folder view */
 //@{
 /// which font to use
-#define   MP_FVIEW_FONT         "MFiewFont"
+#define   MP_FVIEW_FONT         "FViewFont"
 /// which font size
-#define   MP_FVIEW_FONT_SIZE         "MFiewFontSize"
+#define   MP_FVIEW_FONT_SIZE         "FViewFontSize"
 // which foreground colour for the font
-#define   MP_FVIEW_FGCOLOUR      "MFiewFgColour"
+#define   MP_FVIEW_FGCOLOUR      "FViewFgColour"
 // which background colour for the font
-#define   MP_FVIEW_BGCOLOUR      "MFiewBgColour"
+#define   MP_FVIEW_BGCOLOUR      "FViewBgColour"
+// which for deleted messages
+#define   MP_FVIEW_DELETEDCOLOUR      "FViewDeletedColour"
+// which for new messages
+#define   MP_FVIEW_NEWCOLOUR      "FViewNewColour"
+// which for recent messages
+#define   MP_FVIEW_RECENTCOLOUR      "FViewRecentColour"
+// which for unread messages
+#define   MP_FVIEW_UNREADCOLOUR      "FViewRecentColour"
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -905,6 +913,14 @@
 #define   MP_FVIEW_FGCOLOUR_D      "black"
 // which background colour for the font
 #define   MP_FVIEW_BGCOLOUR_D      "white"
+// which for deleted messages
+#define   MP_FVIEW_DELETEDCOLOUR_D      "grey"
+// which for new messages
+#define   MP_FVIEW_NEWCOLOUR_D      "orange"
+// which for recent messages
+#define   MP_FVIEW_RECENTCOLOUR_D      "red"
+// which for unread messages
+#define   MP_FVIEW_UNREADCOLOUR_D      "blue"
 //@}
 /**@name Font settings for compose view */
 //@{

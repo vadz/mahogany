@@ -222,10 +222,12 @@ private:
       String dateFormat;
       /// TRUE => display time/date in GMT
       bool dateGMT;
-      /// Background and foreground colours, colours for URLs and headers
-      wxColour BgCol, FgCol;
+      /// Background and foreground colours
+      wxColour BgCol, FgCol, NewCol, RecentCol, DeletedCol, UnreadCol;
       /// font attributes
       int font, size;
+      /// do we want to preview messages when activated?
+      bool previewOnSingleClick;
    } m_settingsCurrent;
 
    /// read the values from the profile into AllProfileSettings structure

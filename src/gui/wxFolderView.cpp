@@ -121,12 +121,23 @@ public:
          // leave it as it is SetForegroundColour( fg );
          // we want to use fg as the default item colour
          SetBackgroundColour( bg );
+         SetTextColour( fg );
          // I hate wxWindows using references! :-( KB
          wxFont * font = new wxFont( fontSize, fontFamily,
                                 wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
          SetFont( *font  );
          delete font;
       }
+   /// set m_PreviewOnSingleClick flag
+   void SetPreviewOnSingleClick(bool flag)
+      {
+         m_PreviewOnSingleClick = flag;
+         if(m_PreviewOnSingleClick)
+            EnableSelectionCallbacks(true);
+         else
+            EnableSelectionCallbacks(false);
+      }
+
 protected:
    long m_Style;
    long m_NextIndex;
@@ -352,9 +363,6 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Style = wxLC_REPORT;
    m_SelectionCallbacks = true;
    m_Initialised = false;
-
-   m_PreviewOnSingleClick = READ_CONFIG(fv->GetProfile(),
-                                        MP_PREVIEW_ON_SELECT) != 0;
 
    if(m_PreviewOnSingleClick)
       EnableSelectionCallbacks(true);
@@ -745,9 +753,21 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    GetColourByName(&settings->FgCol, READ_CONFIG(m_Profile,
                                                  MP_FVIEW_FGCOLOUR),
                    MP_FVIEW_FGCOLOUR_D);
-   GetColourByName(&settings->BgCol, READ_CONFIG(m_Profile,
-                                                 MP_FVIEW_BGCOLOUR),
+   GetColourByName(&settings->BgCol,
+                   READ_CONFIG(m_Profile, MP_FVIEW_BGCOLOUR),
                    MP_FVIEW_BGCOLOUR_D);
+   GetColourByName(&settings->NewCol,
+                   READ_CONFIG(m_Profile, MP_FVIEW_NEWCOLOUR),
+                   MP_FVIEW_NEWCOLOUR_D);
+   GetColourByName(&settings->RecentCol,
+                   READ_CONFIG(m_Profile, MP_FVIEW_RECENTCOLOUR),
+                   MP_FVIEW_RECENTCOLOUR_D);
+   GetColourByName(&settings->DeletedCol,
+                   READ_CONFIG(m_Profile, MP_FVIEW_DELETEDCOLOUR),
+                   MP_FVIEW_DELETEDCOLOUR_D);
+   GetColourByName(&settings->UnreadCol,
+                   READ_CONFIG(m_Profile, MP_FVIEW_UNREADCOLOUR),
+                   MP_FVIEW_UNREADCOLOUR_D);
    settings->font = READ_CONFIG(m_Profile,MP_FVIEW_FONT);
    ASSERT(settings->font >= 0 && settings->font <= NUM_FONTS);
    settings->font = wxFonts[settings->font];
@@ -794,6 +814,11 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
       default:
          FAIL_MSG("unknown options change event");
    }
+
+   bool   previewOnSingleClick = READ_CONFIG(GetProfile(),
+                                             MP_PREVIEW_ON_SELECT) != 0;
+
+   m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
 }
 
 void
@@ -861,14 +886,23 @@ wxFolderView::Update(HeaderInfoList *listing)
       m_FolderCtrl->SetItemState(i, wxLIST_STATE_FOCUSED,
                                  (hi->GetUId() == m_FocusedUId)?
                                  wxLIST_STATE_FOCUSED : 0);
-#if 0
       // this only affects the first column, why?
       wxListItem info;
       info.m_itemId = i;
       m_FolderCtrl->GetItem(info);
-      info.m_colour = & m_settingsCurrent.FgCol;
+      int status = hi->GetStatus();
+      info.SetTextColour(
+         ((status & MailFolder::MSG_STAT_DELETED) != 0 ) ? m_settingsCurrent.DeletedCol
+         : ( ( (status & MailFolder::MSG_STAT_RECENT) != 0 ) ?
+             ( ( (status & MailFolder::MSG_STAT_SEEN) != 0 ) ? m_settingsCurrent.RecentCol
+               : m_settingsCurrent.NewCol )
+             : ( ((status & MailFolder::MSG_STAT_SEEN) != 0 ) ?
+                 m_settingsCurrent.FgCol :
+                 m_settingsCurrent.UnreadCol)
+             )
+         );
       m_FolderCtrl->SetItem(info);
-#endif
+
       if(hi->GetUId() == m_FocusedUId)
          foundFocus = true;
    }

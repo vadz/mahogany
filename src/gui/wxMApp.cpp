@@ -222,6 +222,58 @@ void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 }
 
 // ----------------------------------------------------------------------------
+// wxMStatusBar
+// ----------------------------------------------------------------------------
+class wxMStatusBar : public wxStatusBar
+{
+public:
+   wxMStatusBar(wxWindow *parent) : wxStatusBar(parent, -1)
+      {
+         m_show = false;
+         m_OnlineIcon = new wxIcon;
+         m_OfflineIcon = new wxIcon;
+         *m_OnlineIcon = ICON( "online");
+         *m_OfflineIcon = ICON( "offline");
+      }
+
+   ~wxMStatusBar()
+      {
+         delete m_OnlineIcon;
+         delete m_OfflineIcon;
+      }
+   void UpdateOnlineStatus(bool show, bool isOnline)
+      {
+         m_show = show; m_isOnline = isOnline;
+//         Refresh();
+      }
+   virtual void DrawField(wxDC &dc, int i)
+      {
+         wxStatusBar::DrawField(dc, i);
+         if(m_show)
+         {
+            int field = mApplication->GetStatusField(MAppBase::SF_ONLINE);
+            if(i == field)
+            {
+               wxRect r;
+               GetFieldRect(i, r);
+               dc.DrawIcon(m_isOnline ?
+                           *m_OnlineIcon
+                           : *m_OfflineIcon,
+                           r.x, r.y+2); // +2: small vertical offset
+            }
+         }
+      }
+private:
+   wxIcon *m_OnlineIcon;
+   wxIcon *m_OfflineIcon;
+   /// show online status?
+   bool m_show;
+   /// are we online?
+   bool m_isOnline;
+};
+
+
+// ----------------------------------------------------------------------------
 // wxMApp
 // ----------------------------------------------------------------------------
 
@@ -902,6 +954,12 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what)
 }
 #endif
 
+wxStatusBar *
+wxMApp::CreateStatusBar(wxWindow *parent)
+{
+   return new wxMStatusBar(parent); //3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
+}
+
 wxIcon
 wxMApp::GetStdIcon(int which) const
 {
@@ -962,9 +1020,8 @@ wxMApp::UpdateOnlineDisplay(void)
    // nothing:
    if(! m_topLevelFrame)
       return;
-   wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
+   
    wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
-   ASSERT(sbar);
    ASSERT(mbar);
 
    if(! m_DialupSupport)
@@ -987,9 +1044,8 @@ wxMApp::UpdateOnlineDisplay(void)
          mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
 //    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
       }
-      int field = GetStatusField(SF_ONLINE);
-      UpdateStatusBar(field+1, TRUE);
-      sbar->SetStatusText(online ? _("Online"):_("Offline"), field);
+      wxMStatusBar *sbar = (wxMStatusBar *) m_topLevelFrame->GetStatusBar();
+      sbar->UpdateOnlineStatus(true, online);
    }
 }
 
@@ -1001,6 +1057,10 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
    ASSERT(m_topLevelFrame);
    ASSERT(m_topLevelFrame->GetStatusBar());
    int n = nfields;
+
+   // ugly, but effective:
+   static int statusIconWidth = -1;
+      
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
    if(isminimum && sbar->GetFieldsCount() > nfields)
       n = sbar->GetFieldsCount();
@@ -1008,10 +1068,18 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
    int widths[SF_MAXIMUM];
    widths[0] = -1; //flexible
    if(m_DialupSupport)
-      widths[GetStatusField(SF_ONLINE)] = 70;
+   {
+      if(statusIconWidth == -1)
+      {
+         const wxIcon & icon = ICON("online");
+         // make field 1.5 times as wide as icon and add border:
+         statusIconWidth = (3*icon.GetWidth())/2 + 2*sbar->GetBorderX();
+      }
+      widths[GetStatusField(SF_ONLINE)] = statusIconWidth;
+   }
    if(m_UseOutbox)
       widths[GetStatusField(SF_OUTBOX)] = 100;
-//FIXME: causes crash after a while   sbar->SetFieldsCount(n, widths);
+   sbar->SetFieldsCount(n, widths);
 }
 
 void
@@ -1040,6 +1108,7 @@ wxMApp::UpdateOutboxStatus(void) const
 
    int field = GetStatusField(SF_OUTBOX);
    UpdateStatusBar(field+1, TRUE);
+   ASSERT(m_topLevelFrame->GetStatusBar());
    m_topLevelFrame->GetStatusBar()->SetStatusText(msg, field);
 }
 

@@ -172,9 +172,6 @@ private:
    // id of this page
    InstallWizardPageId m_id;
 
-   // true/false as usual, -1 if not tested for it yet
-   static int ms_isUsingDialUp;
-
    DECLARE_EVENT_TABLE()
 };
 
@@ -262,8 +259,21 @@ public:
 
    virtual bool TransferDataFromWindow()
    {
+      gs_installWizardData.dialCommand = m_connect->GetValue();
+      gs_installWizardData.hangupCommand = m_disconnect->GetValue();
       return TRUE;
    }
+   
+   virtual bool TransferDataToWindow()
+   {
+      m_connect->SetValue(gs_installWizardData.dialCommand);
+      m_disconnect->SetValue(gs_installWizardData.hangupCommand);
+      return TRUE;
+   }
+
+private:
+   wxTextCtrl *m_connect,
+              *m_disconnect;
 };
 
 class InstallWizardOperationsPage : public InstallWizardPage
@@ -272,22 +282,29 @@ public:
    InstallWizardOperationsPage(wxWizard *wizard);
 
    virtual bool TransferDataToWindow()
-   {
-      m_UseDialUpCheckbox->SetValue(gs_installWizardData.useDialUp != 0);
-      m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox);
-      m_TrashCheckbox->SetValue(gs_installWizardData.useTrash);
-      m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail);
-      return TRUE;
-   }
+      {
+         if(gs_installWizardData.useDialUp == -1) // no setting yet
+         {
+            wxDialUpManager *man = wxDialUpManager::Create();
+            // if we have a LAN connection, then we don't need to configure dial-up
+            // networking, but if we don't, then we probably do
+            gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
+         }
+         m_UseDialUpCheckbox->SetValue(gs_installWizardData.useDialUp != 0);
+         m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox);
+         m_TrashCheckbox->SetValue(gs_installWizardData.useTrash);
+         m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail);
+         return TRUE;
+      }
 
    virtual bool TransferDataFromWindow()
-   {
-      gs_installWizardData.useDialUp  = m_UseDialUpCheckbox->GetValue();
-      gs_installWizardData.useOutbox  = m_UseOutboxCheckbox->GetValue();
-      gs_installWizardData.useTrash   = m_TrashCheckbox->GetValue();
-      gs_installWizardData.collectAllMail = m_CollectCheckbox->GetValue();
-      return TRUE;
-   }
+      {
+         gs_installWizardData.useDialUp  = m_UseDialUpCheckbox->GetValue();
+         gs_installWizardData.useOutbox  = m_UseOutboxCheckbox->GetValue();
+         gs_installWizardData.useTrash   = m_TrashCheckbox->GetValue();
+         gs_installWizardData.collectAllMail = m_CollectCheckbox->GetValue();
+         return TRUE;
+      }
 private:
    wxCheckBox *m_CollectCheckbox, *m_TrashCheckbox,
       *m_UseOutboxCheckbox, *m_UseDialUpCheckbox;
@@ -364,24 +381,7 @@ END_EVENT_TABLE()
 
 bool InstallWizardPage::ShouldShowDialUpPage()
 {
-
-   return true;
-#if 0
-//FIXME: replace with user selection
-   
-   if ( gs_installWizardData.useDialUp == -1 )
-   {
-      wxDialUpManager *man = wxDialUpManager::Create();
-
-      // if we have a LAN connection, then we don't need to configure dial-up
-      // netowrking, but if we don't, then we probably do
-      gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
-
-      delete man;
-   }
-
    return gs_installWizardData.useDialUp != 0;
-#endif
 }
 
 InstallWizardPageId InstallWizardPage::GetPrevPageId() const
@@ -591,8 +591,32 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
 InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
                        : InstallWizardPage(wizard, InstallWizard_DialUpPage)
 {
-   // TODO ask for the connection name under Windows and commands for Unix
+   
+#ifdef OS_UNIX
+   wxStaticText *text = new wxStaticText(this, -1, _(
+      "Mahogany can automatically detect if your network\n"
+      "connection is online or offline.\n"
+      "It can also connect and disconnect you to the\n"
+      "network, but for this it needs to know which\n"
+      "commands to execute to go online or offline."));
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(text);
+
+   wxArrayString labels;
+   labels.Add(_("Command to &connect:"));
+   labels.Add(_("Command to &disconnect:"));
+
+   long widthMax = GetMaxLabelWidth(labels, panel);
+
+   m_connect = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
+   m_disconnect = panel->CreateTextWithLabel(labels[1], widthMax, m_connect);
+
+   panel->Layout();
+   
+#else
+#   pragma warning TODO ask for the connection name under
    new wxStaticText(this, -1, "This page is under construction");
+#endif   
 }
 
 // InstallWizardOperationsPage
@@ -615,7 +639,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    labels.Add(_("&Collect new mail:"));
    labels.Add(_("Use &Trash mailbox:"));
    labels.Add(_("Use &Outbox queues:"));
-   labels.Add(_("Use dial-up network or remote mail servers:"));
+   labels.Add(_("Use dial-up network:"));
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
@@ -730,6 +754,9 @@ bool RunInstallWizard()
    // first, set up the default values for the wizard:
 
    gs_installWizardData.useDialUp = -1;
+   gs_installWizardData.dialCommand = READ_APPCONFIG(MP_NET_ON_COMMAND);
+   gs_installWizardData.hangupCommand = READ_APPCONFIG(MP_NET_OFF_COMMAND);
+   
    gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
    if(gs_installWizardData.email.Length() == 0)
    {
@@ -853,6 +880,15 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    {
       profile->writeEntry(MP_USE_TRASH_FOLDER, 1l);
       // the rest is done in Update()
+   }
+
+   // Dial-Up network:
+   profile->writeEntry(MP_DIALUP_SUPPORT,
+                       gs_installWizardData.useDialUp);
+   if(gs_installWizardData.useDialUp)
+   {
+      profile->writeEntry(MP_NET_ON_COMMAND,gs_installWizardData.dialCommand);
+      profile->writeEntry(MP_NET_OFF_COMMAND,gs_installWizardData.hangupCommand);
    }
 }
 

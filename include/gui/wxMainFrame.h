@@ -40,7 +40,7 @@ public:
    // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
-
+   
    /// called by wxMApp after initialisation to deactivate some button 
    /// if needed
    void UpdateToolBar(void);
