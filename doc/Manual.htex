@@ -2011,9 +2011,8 @@ The name of a python script which will be executed at program startup.
 \paragraph{Callbacks}
 
 Callbacks are python functions that can be called from different parts
-of Mahogany's code. See the Scripting and Extending chapter (\ref{Scripting})
-and the Hacker's guide (\ref{HackersGuide}) for more information
-on this.
+of Mahogany's code. See the section \ref{pythonhooks} for more information on
+this.
 
 \begin{itemize}
 \item \textbf{Folder open callback}
@@ -2554,24 +2553,24 @@ not (zero). Both test and action functions receive as their single parameter
 the \texttt{Message} object which corresponds to the message currently being
 filtered.
 
+Please have a look at \texttt{spam.py} example included in Mahogany
+distribution (in \texttt{Python} directory under Windows and in
+\texttt{/usr/share/mahogany/scripts} under Unix) to see a real life example of
+using Python for writing non trivial filters.
 
-\subsection{Callback Functions (Hooks)}
+
+\subsection{Callback Functions (Hooks)}\label{pythonhooks}
 
 There are a number of callbacks available which will be called from
 different places within \textsl{Mahogany}. These are defined in the
 header file \texttt{Mcallbacks.h}. There is no documentation for these
 callbacks yet, but don't hesitate to ask us if you need more information
 about this. All of these callbacks are called with at least one arguments
-which is a pointer to the object from which it was called. E.g. for \texttt{FolderOpenHook},
-this would be a pointer to a \texttt{MailFolder} object. This object
-does not carry a useable type with it and needs to be converted in
-the callback, e.g. if the argument is called \texttt{arg} and the
-object is a \texttt{MailFolder}, the object must either be used as
-\texttt{MailFolder.MailFolderPtr(arg)} or be converted as
-\texttt{mf = MailFolder.MailFolderPtr(arg)}.
+which is a pointer to the object from which it was called. E.g. for
+\texttt{FolderOpenHook}, this would be a \texttt{MailFolder} object.
 
-Some callbacks have a third argument. This is either a single value
-or a tuple holding several values.
+The callback return value is usually a boolean and indicates whether Mahogany
+should proceed normally ($1$) or cancel the operation ($0$).
 
 \subsection{Namespaces}
 
