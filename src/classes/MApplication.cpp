@@ -104,7 +104,6 @@ MAppBase::VerifySettings(void)
       m_profile->writeEntry(MP_PERSONALNAME, buffer);
    }
 
-#  ifdef OS_UNIX
    if( strutil_isempty(READ_APPCONFIG(MC_USERDIR)) )
    {
       wxString strHome;
@@ -113,7 +112,6 @@ MAppBase::VerifySettings(void)
       strHome << DIR_SEPARATOR << READ_APPCONFIG(MC_USER_MDIR);
       m_profile->writeEntry(MC_USERDIR, strHome);
    }
-#  endif // Unix
 
    if( strutil_isempty(READ_APPCONFIG(MP_HOSTNAME)) )
    {
