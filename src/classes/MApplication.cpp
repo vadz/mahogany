@@ -714,22 +714,34 @@ MAppBase::CanClose() const
    if ( READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
    {
       String trashName = READ_APPCONFIG(MP_TRASH_FOLDER);
-
-      if ( MDialog_YesNoDialog
-           (
-            String::Format(_("Would you like to purge all messages from "
-                             "the trash mailbox (%s)?"), trashName.c_str()),
-            NULL,
-            _("Empty trash?"),
-            M_DLG_NO_DEFAULT,
-            M_MSGBOX_EMPTY_TRASH_ON_EXIT
-           ) )
+      if ( !trashName.empty() )
       {
          MFolder_obj folderTrash(trashName);
-         if ( !folderTrash ||
-               (MailFolder::ClearFolder(folderTrash) < 0) )
+         if ( folderTrash.IsOk() )
          {
-            ERRORMESSAGE((_("Failed to empty the trash folder.")));
+            MailFolder_obj mf(MailFolder::OpenFolder(folderTrash));
+            if ( !!mf && mf->GetMessageCount() )
+            {
+               if ( MDialog_YesNoDialog
+                    (
+                     String::Format
+                     (
+                        _("Would you like to purge all messages from "
+                          "the trash mailbox (%s)?"),
+                        trashName.c_str()
+                     ),
+                     NULL,
+                     _("Empty trash?"),
+                     M_DLG_NO_DEFAULT,
+                     M_MSGBOX_EMPTY_TRASH_ON_EXIT
+                    ) )
+               {
+                  if ( MailFolder::ClearFolder(folderTrash) < 0 )
+                  {
+                     ERRORMESSAGE((_("Failed to empty the trash folder.")));
+                  }
+               }
+            }
          }
       }
    }
