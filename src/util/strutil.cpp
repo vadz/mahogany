@@ -37,10 +37,16 @@
 
 #include <wx/textfile.h>  // just for strutil_enforceNativeCRLF()
 #include <wx/regex.h>
+#include <wx/fontmap.h>
 
 extern "C"
 {
    #include "utf8.h"  // for utf8_text_utf7()
+
+   // arrays used by GuessUnicodeCharset()
+   #include "charset/iso_8859.c"
+   #include "charset/windows.c"
+   #include "charset/koi8_r.c"
 }
 
 class MOption;
@@ -1373,20 +1379,107 @@ wxArrayString strutil_uniq_array(const wxSortedArrayString& addrSorted)
    return addresses;
 }
 
-// convert a string in UTF-8 or 7 into the string in the current encoding: of
-// course, this doesn't work in general as Unicode is not representable as an 8
-// bit charset but it works in some common cases and is better than no UTF-8
-// support at all
+// guess the charset of the given Unicode text
+static wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
+{
+   typedef const unsigned short *codepage;
+   struct CodePageInfo
+   {
+      codepage cp;
+      wxFontEncoding enc;
+   };
+   static const CodePageInfo s_codepages[] =
+   {
+      { iso8859_2tab,         wxFONTENCODING_ISO8859_2 },
+      { iso8859_3tab,         wxFONTENCODING_ISO8859_3 },
+      { iso8859_4tab,         wxFONTENCODING_ISO8859_4 },
+      { iso8859_5tab,         wxFONTENCODING_ISO8859_5 },
+      { iso8859_6tab,         wxFONTENCODING_ISO8859_6 },
+      { iso8859_7tab,         wxFONTENCODING_ISO8859_7 },
+      { iso8859_8tab,         wxFONTENCODING_ISO8859_8 },
+      { iso8859_9tab,         wxFONTENCODING_ISO8859_9 },
+      { iso8859_10tab,        wxFONTENCODING_ISO8859_10 },
+      { iso8859_13tab,        wxFONTENCODING_ISO8859_13 },
+      { iso8859_14tab,        wxFONTENCODING_ISO8859_14 },
+      { iso8859_15tab,        wxFONTENCODING_ISO8859_15 },
+      { windows_1250tab,      wxFONTENCODING_CP1250 },
+      { windows_1251tab,      wxFONTENCODING_CP1251 },
+      { windows_1252tab,      wxFONTENCODING_CP1252 },
+      { windows_1253tab,      wxFONTENCODING_CP1253 },
+      { windows_1254tab,      wxFONTENCODING_CP1254 },
+      { windows_1255tab,      wxFONTENCODING_CP1255 },
+      { windows_1256tab,      wxFONTENCODING_CP1256 },
+      { windows_1257tab,      wxFONTENCODING_CP1257 },
+      { koi8rtab,             wxFONTENCODING_KOI8 },
+   };
+
+   // default value: use system default font
+   wxFontEncoding enc = wxFONTENCODING_SYSTEM;
+
+   // first find a non ASCII character as ASCII ones are present in all (well,
+   // many) code pages
+   while ( *pwz && *pwz < 0x80 )
+      pwz++;
+
+   const wchar_t wch = *pwz;
+
+   if ( !wch )
+      return enc;
+
+   // build the array of encodings in which the character appears
+   wxFontEncoding encodings[WXSIZEOF(s_codepages)];
+   size_t numEncodings = 0;
+
+   // special test for iso8859-1 which is identical to first 256 Unicode
+   // characters
+   if ( wch < 0xff )
+   {
+      encodings[numEncodings++] = wxFONTENCODING_ISO8859_1;
+   }
+
+   for ( size_t nPage = 0; nPage < WXSIZEOF(s_codepages); nPage++ )
+   {
+      codepage cp = s_codepages[nPage].cp;
+      for ( size_t i = 0; i < 0x80; i++ )
+      {
+         if ( wch == cp[i] )
+         {
+            ASSERT_MSG( numEncodings < WXSIZEOF(encodings),
+                           _T("encodings array index out of bounds") );
+
+            encodings[numEncodings++] = s_codepages[nPage].enc;
+            break;
+         }
+      }
+   }
+
+   // now find an encoding which is available on this system
+   for ( size_t nEnc = 0; nEnc < numEncodings; nEnc++ )
+   {
+      if ( wxFontMapper::Get()->IsEncodingAvailable(encodings[nEnc]) )
+      {
+         enc = encodings[nEnc];
+         break;
+      }
+   }
+
+   return enc;
+}
+
+// convert a string in UTF-8 or 7 into the string in some multibyte encoding:
+// of course, this doesn't work in general as Unicode is not representable as
+// an 8 bit charset but it works in some common cases and is better than no
+// UTF-8 support at all
 //
 // FIXME this won't be needed when full Unicode support is available
 wxFontEncoding
-ConvertUnicodeToSystem(wxString *strUtf, wxFontEncoding enc)
+ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
 {
-   CHECK( strUtf, wxFONTENCODING_SYSTEM,
-          _T("NULL string in ConvertUnicodeToSystem") );
+   CHECK( strUtf, wxFONTENCODING_SYSTEM, _T("NULL string in ConvertUTFToMB") );
 
    if ( !strUtf->empty() )
    {
+      // first convert to UTF-8
       if ( enc == wxFONTENCODING_UTF7 )
       {
          // wxWindows does not support UTF-7 yet, so we first convert
@@ -1394,11 +1487,12 @@ ConvertUnicodeToSystem(wxString *strUtf, wxFontEncoding enc)
          // UTF-8 to current environment's encoding.
          SIZEDTEXT text7, text8;
          text7.data = (unsigned char *) strUtf->c_str();
-         text7.size = strUtf->Length();
+         text7.size = strUtf->length();
 
          utf8_text_utf7 (&text7, &text8);
 
          strUtf->clear();
+         strUtf->reserve(text8.size);
          for ( unsigned long k = 0; k < text8.size; k++ )
          {
             *strUtf << wxChar(text8.data[k]);
@@ -1409,7 +1503,22 @@ ConvertUnicodeToSystem(wxString *strUtf, wxFontEncoding enc)
          ASSERT_MSG( enc == wxFONTENCODING_UTF8, _T("unknown Unicode encoding") );
       }
 
-      wxString str(strUtf->wc_str(wxConvUTF8), wxConvLocal);
+      // try to determine which multibyte encoding is best suited for this
+      // Unicode string
+      wxWCharBuffer wbuf(strUtf->wc_str(wxConvUTF8));
+      enc = GuessUnicodeCharset(wbuf);
+
+      // finally convert to multibyte
+      wxString str;
+      if ( enc == wxFONTENCODING_SYSTEM )
+      {
+         str = wxString(wbuf);
+      }
+      else
+      {
+         wxCSConv conv(enc);
+         str = wxString(wbuf, conv);
+      }
       if ( str.empty() )
       {
          // conversion failed - use original text (and display incorrectly,
@@ -1421,12 +1530,12 @@ ConvertUnicodeToSystem(wxString *strUtf, wxFontEncoding enc)
          *strUtf = str;
       }
    }
+   else // doesn't really matter what we return from here
+   {
+      enc = wxFONTENCODING_SYSTEM;
+   }
 
-#if wxUSE_INTL
-   return wxLocale::GetSystemEncoding();
-#else // !wxUSE_INTL
-   return wxFONTENCODING_ISO8859_1;
-#endif // wxUSE_INTL/!wxUSE_INTL
+   return enc;
 }
 
 // return the length of the line terminator if we're at the end of line or 0

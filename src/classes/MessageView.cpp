@@ -1583,7 +1583,7 @@ MessageView::ShowHeaders()
             if ( encHeader == wxFONTENCODING_UTF8 ||
                   encHeader == wxFONTENCODING_UTF7 )
             {
-               encHeader = ConvertUnicodeToSystem(&value, encHeader);
+               encHeader = ConvertUTFToMB(&value, encHeader);
             }
          }
 
@@ -1650,7 +1650,7 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
          m_encodingAuto = encPart;
 
          // convert from UTF-8|7 to environment's default encoding
-         encPart = ConvertUnicodeToSystem(&textPart, encPart);
+         encPart = ConvertUTFToMB(&textPart, encPart);
       }
       else if ( encPart == wxFONTENCODING_SYSTEM ||
                 encPart == wxFONTENCODING_DEFAULT )

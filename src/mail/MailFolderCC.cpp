@@ -1719,7 +1719,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          if ( encoding == wxFONTENCODING_UTF7 ||
                   encoding == wxFONTENCODING_UTF8 )
          {
-            encoding = ConvertUnicodeToSystem(&textDecoded, encoding);
+            encoding = ConvertUTFToMB(&textDecoded, encoding);
          }
 #endif // !wxUSE_UNICODE
 

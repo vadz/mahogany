@@ -341,16 +341,23 @@ extern String strutil_flatten_array(const wxArrayString& array, wxChar ch = _T('
 extern wxArrayString strutil_uniq_array(const wxSortedArrayString& arrSorted);
 
 /**
-  Try to convert text in UTF-8 or 7 to the current encoding (the conversion is
-  done in place)
+  Try to convert text in UTF-8 or 7 to a multibye encoding.
 
-  @param strUtf string containing UTF text on input, ASCII text on output
+  The conversion is done in place, i.e. the str parameter is read and written
+  by the function.
+
+  We try to detect the output encoding automatically by analysing the Unicode
+  text and selecting a code page which contains the first non ASCII character
+  in it. Of course, this does mean that Unicode characters from any other code
+  page are not going to be represented correctly, but this is still better than
+  no Unicode support at all.
+
+  @param str string containing UTF text on input, ASCII text on output
   @param utfEnc specifies if it is in UTF-7 or UTF-8
   @return the encoding of the returned string
  */
 extern wxFontEncoding
-ConvertUnicodeToSystem(wxString *strUtf,
-                       wxFontEncoding utfEnc = wxFONTENCODING_UTF8);
+ConvertUTFToMB(wxString *str, wxFontEncoding utfEnc = wxFONTENCODING_UTF8);
 
 // return the length of the line terminator if we're at the end of line or 0
 // otherwise

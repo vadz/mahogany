@@ -3085,7 +3085,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
       // FIXME it won't be needed when full Unicode support is available
       if ( encoding == wxFONTENCODING_UTF8 || encoding == wxFONTENCODING_UTF7 )
       {
-         encoding = ConvertUnicodeToSystem(&text, encoding);
+         encoding = ConvertUTFToMB(&text, encoding);
       }
 
       // we might have to convert it if we can't show this encoding directly
