@@ -251,7 +251,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       case 'S':
          m_FolderView->SaveMessagesToFile(selections);
          break;
-      case 'v': // moVe
+      case 'V': // moVe
          m_FolderView->SaveMessagesToFolder(selections, true);
          break;
       case 'G':
@@ -277,8 +277,10 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
       case ' ': // space:
          m_FolderView->PreviewMessage(focused_uid);
+         return; // we don not want the default space behaviour from
+         // the listctrl
          break;
-      case 'm': // mark:
+      case 'M': // mark:
          // If shift is not used, deselect all items before having
          // wxListCtrl selects this one.
          if(!event.ShiftDown())
@@ -292,6 +294,10 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
                //new wxGTK semantics idx++;
             }
          }
+         // Our 'm' is supposed to behave like the normal space in a
+         // listctrl, so we modify the event for the listctrl to
+         // process it:
+         event.m_keyCode = ' ';
          break;
       default:
          ;
