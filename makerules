@@ -8,7 +8,7 @@ MODULES =
 MODOBJS = $(MOD:.cpp=.o)
 else
 ifeq ($(USE_MODULES),dynamic)
-MODULES = $(MOD:.cpp=.so) $(MOD:.cpp=.mmd)
+MODULES = $(MOD:.cpp=.so)
 MODSOS = $(MOD:.cpp=.so)
 MODOBJS =
 else
