@@ -64,11 +64,11 @@ extern const MOption MP_PROFILE_TYPE;
 
 /// a name for the empty profile, like this it is invalid for wxConfig, so it
 ///  will never conflict with a real profile name
-#define   PROFILE_EMPTY_NAME "EMPTYPROFILE?(*[]{}"
+#define   PROFILE_EMPTY_NAME _T("EMPTYPROFILE?(*[]{}")
 
 /** Name for the subgroup level used for suspended profiles. Must
     never appear as part of a profile path name. */
-#define SUSPEND_PATH "__suspended__"
+#define SUSPEND_PATH _T("__suspended__")
 
 /// flags for readEntry
 enum
@@ -435,7 +435,7 @@ public:
    //@{
       /// Read a character entry.
    String readEntry(const String & key,
-                    const String & defaultvalue = (const char *)NULL,
+                    const String & defaultvalue = (const wxChar *)NULL,
                     ReadResult * found = NULL) const;
    /// Read an integer value.
    long readEntry(const String & key,
@@ -523,7 +523,7 @@ protected:
    /// Destructor, writes back those entries that got changed.
    ~ProfileImpl();
 
-   virtual const char * GetProfileSection(void) const
+   virtual const wxChar * GetProfileSection(void) const
       {
          return M_PROFILE_CONFIG_SECTION;
       }
@@ -591,7 +591,7 @@ public:
    static Identity * Create(const String &name)
       { return new Identity(name); }
 
-   virtual const char * GetProfileSection(void) const
+   virtual const wxChar * GetProfileSection(void) const
       {
          return M_IDENTITY_CONFIG_SECTION;
       }
@@ -625,7 +625,7 @@ public:
    static FilterProfile * CreateFilterProfile(const String &name)
       { return new FilterProfile(name); }
 
-   virtual const char * GetProfileSection(void) const
+   virtual const wxChar * GetProfileSection(void) const
       {
          return M_FILTERS_CONFIG_SECTION;
       }
@@ -1175,8 +1175,8 @@ Profile *
 Profile::CreateModuleProfile(const String & classname, Profile const *parent)
 {
    ASSERT(classname.Length() == 0 ||  // only relative paths allowed
-          (classname[0u] != '.' && classname[0u] != '/'));
-   String newName = "Modules/" + classname;
+          (classname[0u] != '.' && classname[0u] != _T('/')));
+   String newName = _T("Modules/") + classname;
    Profile *p =  ProfileImpl::CreateProfile(newName, parent);
 
    EnforcePolicy(p);
@@ -1202,7 +1202,7 @@ Profile::CreateGlobalConfig(const String& filename)
 
    gs_allConfigSources = new AllConfigSources(filename);
 
-   Profile *p = ProfileImpl::CreateProfile("",NULL);
+   Profile *p = ProfileImpl::CreateProfile(_T(""),NULL);
    EnforcePolicy(p);
    return p;
 }
@@ -1269,7 +1269,7 @@ String Profile::ExpandEnvVarsIfNeeded(const String& val) const
 
 String
 Profile::readEntry(const String& key,
-                   const char *defaultvalue,
+                   const wxChar *defaultvalue,
                    ReadResult *found) const
 {
    PCHECK();
@@ -1300,10 +1300,10 @@ ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent)
    SetExpandEnvVars(true);
 
    m_ProfileName = ( Parent && Parent->GetName().Length())
-                     ? ( Parent->GetName() + '/' )
+                     ? ( Parent->GetName() + _T('/') )
                      : String(GetRootPath());
    if(iName.Length())
-      m_ProfileName << '/' << iName;
+      m_ProfileName << _T('/') << iName;
    m_Suspended = 0;
    m_Identity = NULL;
 
@@ -1326,7 +1326,7 @@ ProfileImpl::CreateProfile(const String & iClassName,
 Profile *
 ProfileImpl::GetParent(void) const
 {
-   return CreateProfile(GetName().BeforeLast('/'), NULL);
+   return CreateProfile(GetName().BeforeLast(_T('/')), NULL);
 }
 
 ProfileImpl::~ProfileImpl()
@@ -1435,7 +1435,7 @@ ProfileImpl::GetIdentity(void) const
 {
    PCHECK();
 
-   return m_Identity ? m_Identity->GetName() : String("");
+   return m_Identity ? m_Identity->GetName() : String(_T(""));
 }
 
 // ----------------------------------------------------------------------------
@@ -1740,12 +1740,12 @@ void SaveArray(wxConfigBase *conf,
    conf->DeleteGroup(key);    // remove all old entries
 
    String path;
-   path << key << '/';
+   path << key << _T('/');
 
    size_t nCount = astr.Count();
    String strkey;
    for ( size_t n = 0; n < nCount; n++ ) {
-      strkey.Printf("%lu", (unsigned long)n);
+      strkey.Printf(_T("%lu"), (unsigned long)n);
       conf->Write(path + strkey, astr[n]);
    }
 }
@@ -1756,15 +1756,15 @@ void RestoreArray(wxConfigBase *conf, wxArrayString& astr, const String& key)
    wxASSERT( astr.IsEmpty() ); // should be called in the very beginning
 
    String path;
-   path << key << '/';
+   path << key << _T('/');
 
    String strkey, strVal;
    for ( size_t n = 0; ; n++ ) {
-      strkey.Printf("%lu", (unsigned long)n);
+      strkey.Printf(_T("%lu"), (unsigned long)n);
       if ( !conf->HasEntry(path+strkey) )
          break;
 
-      strVal = conf->Read(path+strkey, "");
+      strVal = conf->Read(path+strkey, _T(""));
       astr.Add(strVal);
    }
 }
@@ -1799,22 +1799,22 @@ Profile::FilterProfileName(const String& profileName)
 {
    // the list of characters which are allowed in the profile names (all other
    // non alphanumeric chars are not)
-   static const char *aValidChars = "_-.";   // NOT '/' and '\\'!
+   static const wxChar *aValidChars = _T("_-.");   // NOT '/' and '\\'!
 
    String filteredName;
    size_t len = profileName.Len();
    filteredName.Alloc(len);
    for ( size_t n = 0; n < len; n++ )
    {
-      char ch = profileName[n];
-      if ( isalnum(ch) || strchr(aValidChars, ch) )
+      wxChar ch = profileName[n];
+      if ( isalnum(ch) || wxStrchr(aValidChars, ch) )
       {
          filteredName << ch;
       }
       else
       {
          // replace it -- hopefully the name will stay unique (FIXME)
-         filteredName << '_';
+         filteredName << _T('_');
       }
    }
 
@@ -1849,7 +1849,7 @@ String ProfileImpl::GetFolderName() const
    String folderName;
    if ( GetName().StartsWith(GetProfilePath(), &folderName) )
    {
-      const char *p = folderName.c_str();
+      const wxChar *p = folderName.c_str();
 
       if ( *p )
       {

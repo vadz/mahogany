@@ -64,7 +64,7 @@ class XFace
        @param filename obvious
        @return true on success
    */
-   bool CreateFromFile(const char *filename);
+   bool CreateFromFile(const wxChar *filename);
 
    static class wxImage GetXFaceImg(const String &filename,
                                     bool *hasimg = NULL,
@@ -76,7 +76,7 @@ class XFace
       @param xfacedata buffer containing the xface line
       @return true on success
    */
-   bool	CreateFromXFace(const wxChar *xfacedata);
+   bool	CreateFromXFace(const char *xfacedata);
 
    /**
       Create an Xpm from an XFace, including all the declaration

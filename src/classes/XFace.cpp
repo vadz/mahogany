@@ -74,7 +74,7 @@ XFace::CreateFromData(const char *idata)
       return false;
    }
    //convert it:
-   String out = strutil_enforceCRLF(xface);
+   String out = strutil_enforceCRLF(wxConvertMB2WX(xface));
    delete [] xface;
    xface = strutil_strdup(out);
    initialised = true;
@@ -115,14 +115,14 @@ XFace::CreateFromXpm(const char *xpmdata)
       if(zero == 0 || one == 0)
       {
          strncpy(buffer,token+4,8);
-         tstr = buffer;
+         tstr = wxConvertMB2WX(buffer);
          strutil_tolower(tstr);
 
-   if(tstr == "#000000" || tstr == "gray0")
+   if(tstr == _T("#000000") || tstr == _T("gray0"))
             zero = token[0];
-   else if(tstr == "#ffffff"
-                 || tstr >= "gray100"
-                 || tstr >= "white")
+   else if(tstr == _T("#ffffff")
+                 || tstr >= _T("gray100")
+                 || tstr >= _T("white"))
       one = token[0];
       }
       else  // now the data will follow
@@ -149,10 +149,10 @@ XFace::CreateFromXpm(const char *xpmdata)
    }
          value = value ^ 0xffff;
    sprintf(buffer,"0x%04lX", value);
-   dataString += buffer;
-         dataString += ',';
+   dataString += wxConvertMB2WX(buffer);
+         dataString += _T(',');
       }
-      dataString += '\n';
+      dataString += _T('\n');
       token = strsep(&ptr, "\n\r");
       if(l < 47 && ! token)
       {
@@ -161,7 +161,7 @@ XFace::CreateFromXpm(const char *xpmdata)
       }
    }
    delete [] buf;
-   return CreateFromData(dataString);
+   return CreateFromData(wxConvertWX2MB(dataString));
 #endif
 }
 
@@ -208,9 +208,9 @@ XFace::GetXFaceImg(const String& filename,
    else
    {
       PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
-      pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
-      pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
-      String name = pf.FindFile("xface.xpm", &success);
+      pf.AddPaths(mApplication->GetLocalDir() + DIR_SEPARATOR + _T("icons"), true);
+      pf.AddPaths(mApplication->GetGlobalDir() + DIR_SEPARATOR + _T("icons"), true);
+      String name = pf.FindFile(_T("xface.xpm"), &success);
       if(success)
          img = wxIconManager::LoadImage(name, &success);
       if(hasimg) *hasimg = success;
@@ -243,22 +243,22 @@ XFace::ConvertImgToXFaceData(wxImage &img)
                value <<= 1;
    }
          value = value ^ 0xffff;
-   tmp.Printf("0x%04lX", (unsigned long)value);
+   tmp.Printf(_T("0x%04lX"), (unsigned long)value);
    dataString += tmp;
-         dataString += ',';
+         dataString += _T(',');
       }
-      dataString += '\n';
+      dataString += _T('\n');
    }
    return dataString;
 }
 
 
 bool
-XFace::CreateFromFile(const char *filename)
+XFace::CreateFromFile(const wxChar *filename)
 {
    wxImage img = GetXFaceImg(filename );
    String datastring = ConvertImgToXFaceData(img);
-   return CreateFromData(datastring);
+   return CreateFromData(wxConvertWX2MB(datastring));
 }
 
 
@@ -277,7 +277,7 @@ XFace::CreateFromImage(wxImage *image)
    if(data)
       delete [] data;
 
-   char
+   wxChar
       buffer[20];
    int
       n,i,y;
@@ -303,9 +303,9 @@ XFace::CreateFromImage(wxImage *image)
          value = value ^ 0xffff;
    sprintf(buffer,"0x%04lX", value);
    dataString += buffer;
-         dataString += ',';
+         dataString += _T(',');
       }
-      dataString += '\n';
+      dataString += _T('\n');
    }
    return CreateFromData(dataString);
 #endif
@@ -335,7 +335,7 @@ XFace::CreateFromXFace(const char *xfacedata)
       data = xface = NULL;
       return false;
    }
-   String out = strutil_enforceCRLF(xface);
+   String out = strutil_enforceCRLF(wxConvertMB2WX(xface));
    delete [] xface;
    xface = strutil_strdup(out);
    initialised = true;
@@ -357,15 +357,15 @@ XFace::CreateXpm(String &xpm)
    buf = strutil_strdup(data);
    ptr = buf;
 
-   xpm = "";
+   xpm = _T("");
    xpm +=
-      "/* XPM */\n"
+      _T("/* XPM */\n"
       "static char *xface[] = {\n"
       "/* width height num_colors chars_per_pixel */\n"
       "\"    48    48        2            1\",\n"
       "/* colors */\n"
       "\"# c #000000\",\n"
-      "\". c #ffffff\",\n";
+      "\". c #ffffff\",\n");
    for(l = 0; l < 48; l++)
    {
       xpm += '"';
@@ -382,37 +382,37 @@ XFace::CreateXpm(String &xpm)
          switch(token[q])
          {
          case '0':
-      xpm += "...."; break;
+      xpm += _T("...."); break;
          case '1':
-      xpm += "...#"; break;
+      xpm += _T("...#"); break;
          case '2':
-      xpm += "..#."; break;
+      xpm += _T("..#."); break;
          case '3':
-      xpm += "..##"; break;
+      xpm += _T("..##"); break;
          case '4':
-      xpm += ".#.."; break;
+      xpm += _T(".#.."); break;
          case '5':
-      xpm += ".#.#"; break;
+      xpm += _T(".#.#"); break;
          case '6':
-      xpm += ".##."; break;
+      xpm += _T(".##."); break;
          case '7':
-      xpm += ".###"; break;
+      xpm += _T(".###"); break;
          case '8':
-      xpm += "#..."; break;
+      xpm += _T("#..."); break;
          case '9':
-      xpm += "#..#"; break;
+      xpm += _T("#..#"); break;
          case 'a': case 'A':
-      xpm += "#.#."; break;
+      xpm += _T("#.#."); break;
          case 'b': case 'B':
-      xpm += "#.##"; break;
+      xpm += _T("#.##"); break;
          case 'c': case 'C':
-      xpm += "##.."; break;
+      xpm += _T("##.."); break;
          case 'd': case 'D':
-      xpm += "##.#"; break;
+      xpm += _T("##.#"); break;
          case 'e': case 'E':
-      xpm += "###."; break;
+      xpm += _T("###."); break;
          case 'f': case 'F':
-      xpm += "####"; break;
+      xpm += _T("####"); break;
          default:
       break;
          }
@@ -420,11 +420,11 @@ XFace::CreateXpm(String &xpm)
 
    }
       }
-      xpm += '"';
+      xpm += _T('"');
       if(l < 47)
-   xpm += ",\n";
+   xpm += _T(",\n");
       else
-   xpm += "\n};\n";
+   xpm += _T("\n};\n");
    }
    return true;
 #endif
@@ -455,7 +455,7 @@ XFace::CreateXpm(char ***xpm)
    (*xpm)[line++] = strutil_strdup(". c #ffffff");
    for(l = 0; l < 48; l++)
    {
-      tmp = "";
+      tmp = _T("");
       for(c = 0; c < 3; c++)
       {
    token = strsep(&ptr,",\n\r");
@@ -469,37 +469,37 @@ XFace::CreateXpm(char ***xpm)
          switch(token[q])
          {
          case '0':
-      tmp += "...."; break;
+      tmp += _T("...."); break;
          case '1':
-      tmp += "...#"; break;
+      tmp += _T("...#"); break;
          case '2':
-      tmp += "..#."; break;
+      tmp += _T("..#."); break;
          case '3':
-      tmp += "..##"; break;
+      tmp += _T("..##"); break;
          case '4':
-      tmp += ".#.."; break;
+      tmp += _T(".#.."); break;
          case '5':
-      tmp += ".#.#"; break;
+      tmp += _T(".#.#"); break;
          case '6':
-      tmp += ".##."; break;
+      tmp += _T(".##."); break;
          case '7':
-      tmp += ".###"; break;
+      tmp += _T(".###"); break;
          case '8':
-      tmp += "#..."; break;
+      tmp += _T("#..."); break;
          case '9':
-      tmp += "#..#"; break;
+      tmp += _T("#..#"); break;
          case 'a': case 'A':
-      tmp += "#.#."; break;
+      tmp += _T("#.#."); break;
          case 'b': case 'B':
-      tmp += "#.##"; break;
+      tmp += _T("#.##"); break;
          case 'c': case 'C':
-      tmp += "##.."; break;
+      tmp += _T("##.."); break;
          case 'd': case 'D':
-      tmp += "##.#"; break;
+      tmp += _T("##.#"); break;
          case 'e': case 'E':
-      tmp += "###."; break;
+      tmp += _T("###."); break;
          case 'f': case 'F':
-      tmp += "####"; break;
+      tmp += _T("####"); break;
          default:
       break;
          }
@@ -519,9 +519,9 @@ String
 XFace::GetHeaderLine(void) const
 {
    if(xface)
-      return xface;
+      return wxConvertMB2WX(xface);
    else
-      return "";
+      return _T("");
 }
 
 XFace::~XFace()

@@ -1365,7 +1365,7 @@ MessageView::ShowHeaders()
       // for "X-Face: nope" some nonsense was displayed. So we use 20 for now.
       {
          XFace *xface = new XFace;
-         xface->CreateFromXFace(xfaceString.c_str());
+         xface->CreateFromXFace(wxConvertWX2MB(xfaceString));
 
          char **xfaceXpm;
          if ( xface->CreateXpm(&xfaceXpm) )

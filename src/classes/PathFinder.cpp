@@ -47,13 +47,13 @@ void
 PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
 {
    wxChar *work = new wxChar[ipathlist.length()+1];
-   wxChar   *found;
+   wxChar   *found, *save_ptr;
    String   tmp;
    String   subdirList = _T("");
 
    MOcheck();
    wxStrcpy(work,ipathlist.c_str());
-   found = wxStrtok(work, PATHFINDER_DELIMITER);
+   found = wxStrtok(work, PATHFINDER_DELIMITER, &save_ptr);
 
    while(found)
    {
@@ -76,7 +76,7 @@ PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
             nextfile = wxFindNextFile();
          }
       }
-      found = wxStrtok(NULL, PATHFINDER_DELIMITER);
+      found = wxStrtok(NULL, PATHFINDER_DELIMITER, &save_ptr);
    }
    delete[] work;
    if(subdirList.length() > 0)
@@ -95,7 +95,7 @@ PathFinder::Find(const String & filename, bool *found,
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
       work = *(*i) + DIR_SEPARATOR + filename;
-      result = access(work.c_str(),mode);
+      result = wxAccess(work.c_str(),mode);
       if(result == 0)
       {
          if(found)   *found = true;
@@ -104,7 +104,7 @@ PathFinder::Find(const String & filename, bool *found,
    }
    if(found)
       *found = false;
-   return "";
+   return _T("");
 }
 
 String
@@ -119,7 +119,7 @@ PathFinder::FindFile(const String & filename, bool *found,
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
       work = *(*i) + DIR_SEPARATOR + filename;
-      result = access(work.c_str(),mode);
+      result = wxAccess(work.c_str(),mode);
       if(result == 0 && IsFile(work))
       {
          if(found)   *found = true;
@@ -128,7 +128,7 @@ PathFinder::FindFile(const String & filename, bool *found,
    }
    if(found)
       *found = false;
-   return "";
+   return _T("");
 }
 
 String
@@ -143,7 +143,7 @@ PathFinder::FindDir(const String & filename, bool *found,
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
       work = *(*i) + DIR_SEPARATOR + filename;
-      result = access(work.c_str(),mode);
+      result = wxAccess(work.c_str(),mode);
       if(result == 0 && IsDir(work))
       {
          if(found)   *found = true;
@@ -152,7 +152,7 @@ PathFinder::FindDir(const String & filename, bool *found,
    }
    if(found)
       *found = false;
-   return "";
+   return _T("");
 }
 
 String
@@ -167,7 +167,7 @@ PathFinder::FindDirFile(const String & filename, bool *found,
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
       work = *(*i) + DIR_SEPARATOR + filename;
-      result = access(work.c_str(),mode);
+      result = wxAccess(work.c_str(),mode);
       if(result == 0 && IsFile(work) && IsDir(*(*i)))
       {
          if(found)   *found = true;
@@ -176,7 +176,7 @@ PathFinder::FindDirFile(const String & filename, bool *found,
    }
    if(found)
       *found = false;
-   return "";
+   return _T("");
 }
 
 // static
