@@ -708,7 +708,7 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
          errorflag = true;
 
          wxDllType dll = wxDllLoader::LoadLibrary(filename);
-         if( dll )
+         if ( dll )
          {
             MModule_GetModulePropFuncType getProps =
                (MModule_GetModulePropFuncType)
@@ -719,28 +719,41 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
                const ModuleProperty *props = (*getProps)();
 
                // does it have the right interface?
-               String interfaceModule = GetMModuleProperty(props,
-                                                           MMODULE_INTERFACE_PROP);
-               if ( !interfaceName || interfaceName == interfaceModule )
-               {
-                  // check if it is loadable if necessary
-                  String desc = GetMModuleProperty(props, MMODULE_DESC_PROP);
-                  if ( !loadableOnly || !desc.empty() )
-                  {
-                     String name;
-                     wxSplitPath(filename, NULL, &name, NULL);
-                     MModuleListingEntryImpl entry(
-                        name,
-                        interfaceModule,
-                        desc,
-                        GetMModuleProperty(props, MMODULE_DESCRIPTION_PROP),
-                        GetMModuleProperty(props, MMODULE_VERSION_PROP),
-                        GetMModuleProperty(props, MMODULE_AUTHOR_PROP));
-                     (*listing)[count++] = entry;
-                  }
-               }
+               String interfaceModule;
 
-               errorflag = false;
+               if ( props )
+               {
+                  interfaceModule = GetMModuleProperty(props,
+                                                       MMODULE_INTERFACE_PROP);
+
+                  if ( !interfaceName || interfaceName == interfaceModule )
+                  {
+                     // check if it is loadable if necessary
+                     String desc = GetMModuleProperty(props, MMODULE_DESC_PROP);
+                     if ( !loadableOnly || !desc.empty() )
+                     {
+                        String name;
+                        wxSplitPath(filename, NULL, &name, NULL);
+                        MModuleListingEntryImpl entry(
+                           name,
+                           interfaceModule,
+                           desc,
+                           GetMModuleProperty(props, MMODULE_DESCRIPTION_PROP),
+                           GetMModuleProperty(props, MMODULE_VERSION_PROP),
+                           GetMModuleProperty(props, MMODULE_AUTHOR_PROP));
+                        (*listing)[count++] = entry;
+                     }
+                  }
+
+                  errorflag = false;
+               }
+               else // no properties in this module??
+               {
+                  wxLogWarning(_("Mahogany module '%s' is probably corrupted"),
+                               filename.c_str());
+
+                  errorflag = true;
+               }
             }
 
             wxDllLoader::UnloadLibrary(dll);

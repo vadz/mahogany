@@ -455,7 +455,8 @@ AC_SUBST(MAKE_DEBUG)
 
 if test "$USE_WXDEBUG" = 1; then
    USE_OPT=0
-   WX_CONFIG="wxgtkd-2.3-config"
+   dnl FIXME: shouldn't hard code wxWin version here!
+   WX_CONFIG_NAME="wxgtkd-2.3-config"
 fi
 
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
@@ -972,16 +973,27 @@ AC_SUBST(MAKE_HAVE_LIBMAL)
 dnl --------------------------------------------------------------------------
 dnl How do we want to use modules?
 dnl --------------------------------------------------------------------------
-dnl must be done after configuring wxWin
+
+dnl must be done after configuring wxWin for auto detection to work
+MODULELDFLAGS=
 case "$USE_MODULES" in
 none|None|NONE|0|'')
 	m_cv_USE_MODULES=none
 	MAKE_USE_MODULES=
+	AC_MSG_WARN(The program will be hardly usable without modules.)
 	;;
 dynamic|Dynamic|DYNAMIC)
 	m_cv_USE_MODULES=dynamic
 	AC_DEFINE(USE_MODULES)
 	MAKE_USE_MODULES="USE_MODULES=dynamic"
+
+	dnl under some systems we have to use -Wl,-export-dynamic or the
+	dnl modules don't find symbols in M
+	case "$OSTYPE" in
+	    linux* | Linux* | freebsd* | FreeBSD*)
+		    MODULELDFLAGS="-export-dynamic"
+		    ;;
+	esac
 	;;
 static|Static|STATIC)
 	m_cv_USE_MODULES=static
@@ -1009,6 +1021,7 @@ auto|Auto|AUTO|1)
 	AC_MSG_ERROR(Set --with-modules= to one of static/dynamic/none)
 esac
 AC_SUBST(MAKE_USE_MODULES)
+AC_SUBST(MODULELDFLAGS)
 
 dnl --------------------------------------------------------------------------
 dnl set up generators for class documentation

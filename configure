@@ -561,7 +561,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.246 2001/11/06 14:16:52 vadz Exp 
+# From configure.in Id: configure.in,v 1.247 2001/11/23 17:05:35 vadz Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -2729,7 +2729,7 @@ esac
 
 if test "$USE_WXDEBUG" = 1; then
    USE_OPT=0
-   WX_CONFIG="wxgtkd-2.3-config"
+      WX_CONFIG_NAME="wxgtkd-2.3-config"
 fi
 
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
@@ -4881,10 +4881,13 @@ echo "configure:4873: checking for libmal in extra/src" >&5
 esac
 
 
+
+MODULELDFLAGS=
 case "$USE_MODULES" in
 none|None|NONE|0|'')
 	m_cv_USE_MODULES=none
 	MAKE_USE_MODULES=
+	echo "configure: warning: The program will be hardly usable without modules." 1>&2
 	;;
 dynamic|Dynamic|DYNAMIC)
 	m_cv_USE_MODULES=dynamic
@@ -4893,6 +4896,12 @@ dynamic|Dynamic|DYNAMIC)
 EOF
 
 	MAKE_USE_MODULES="USE_MODULES=dynamic"
+
+			case "$OSTYPE" in
+	    linux* | Linux* | freebsd* | FreeBSD*)
+		    MODULELDFLAGS="-export-dynamic"
+		    ;;
+	esac
 	;;
 static|Static|STATIC)
 	m_cv_USE_MODULES=static
@@ -4933,6 +4942,7 @@ esac
 
 
 
+
 DOCHTML="\$(SCANDOCHTML)"	
 DOCTEX="\$(SCANDOCTEX)"		
 
@@ -4941,7 +4951,7 @@ MAKE_HAVE_DOCTOOLS='HAVE_DOCTOOLS=yes'
 # Extract the first word of "perl", so it can be a program name with args.
 set dummy perl; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4945: checking for $ac_word" >&5
+echo "configure:4955: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PERL'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4976,7 +4986,7 @@ case "$PERL" in '') MAKE_HAVE_DOCTOOLS='' PERL='false "No perl available"';; esa
 # Extract the first word of "latex", so it can be a program name with args.
 set dummy latex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4980: checking for $ac_word" >&5
+echo "configure:4990: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5011,7 +5021,7 @@ case "$LATEX" in '') MAKE_HAVE_DOCTOOLS='' LATEX='false "No latex available"';; 
 # Extract the first word of "makeindex", so it can be a program name with args.
 set dummy makeindex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5015: checking for $ac_word" >&5
+echo "configure:5025: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MAKEINDEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5046,7 +5056,7 @@ case "$MAKEINDEX" in '') MAKE_HAVE_DOCTOOLS='' MAKEINDEX='false "No makeindex av
 # Extract the first word of "dvips", so it can be a program name with args.
 set dummy dvips; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5050: checking for $ac_word" >&5
+echo "configure:5060: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DVIPS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5081,7 +5091,7 @@ case "$DVIPS" in '') MAKE_HAVE_DOCTOOLS='' DVIPS='false "No dvips available"';; 
 # Extract the first word of "ps2pdf", so it can be a program name with args.
 set dummy ps2pdf; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5085: checking for $ac_word" >&5
+echo "configure:5095: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PSTOPDF'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5116,7 +5126,7 @@ case "$PSTOPDF" in '') MAKE_HAVE_DOCTOOLS='' PSTOPDF='false "No ps2pdf available
 # Extract the first word of "latex2html", so it can be a program name with args.
 set dummy latex2html; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5120: checking for $ac_word" >&5
+echo "configure:5130: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX2HTML'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5420,6 +5430,7 @@ s%@CCOSTYPE@%$CCOSTYPE%g
 s%@MAKE_PISOCKLIB@%$MAKE_PISOCKLIB%g
 s%@MAKE_HAVE_LIBMAL@%$MAKE_HAVE_LIBMAL%g
 s%@MAKE_USE_MODULES@%$MAKE_USE_MODULES%g
+s%@MODULELDFLAGS@%$MODULELDFLAGS%g
 s%@DOCHTML@%$DOCHTML%g
 s%@DOCTEX@%$DOCTEX%g
 s%@PERL@%$PERL%g

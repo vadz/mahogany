@@ -1,9 +1,35 @@
 dnl ---------------------------------------------------------------------------
-dnl AM_PATH_WXCONFIG(VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+dnl Macros for wxWindows detection. Typically used in configure.in as:
 dnl
-dnl Test for wxWindows, and define WX_CFLAGS and WX_LIBS. Set WX_CONFIG
-dnl environment variable to override the default name of the wx-config script
-dnl to use.
+dnl 	AC_ARG_ENABLE(...)
+dnl 	AC_ARG_WITH(...)
+dnl	...
+dnl	AM_OPTIONS_WXCONFIG
+dnl	...
+dnl	...
+dnl	AM_PATH_WXCONFIG(2.3.2, wxWin=1)
+dnl     if test "$wxWin" != 1; then
+dnl        AC_MSG_ERROR([
+dnl     	   wxWindows must be installed on your system
+dnl     	   but wx-config script couldn't be found.
+dnl     
+dnl     	   Please check that wx-config is in path, the directory
+dnl     	   where wxWindows libraries are installed (returned by
+dnl     	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
+dnl     	   equivalent variable and wxWindows version is 2.3.2 or above.
+dnl        ])
+dnl     fi
+dnl     CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
+dnl     CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
+dnl     CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
+dnl     
+dnl     LDFLAGS="$LDFLAGS $WX_LIBS"
+dnl ---------------------------------------------------------------------------
+
+dnl ---------------------------------------------------------------------------
+dnl AM_OPTIONS_WXCONFIG
+dnl
+dnl adds support for --wx-prefix and --wx-exec-prefix command line options
 dnl ---------------------------------------------------------------------------
 
 AC_DEFUN(AM_OPTIONS_WXCONFIG,
@@ -13,6 +39,15 @@ AC_DEFUN(AM_OPTIONS_WXCONFIG,
    AC_ARG_WITH(wx-exec-prefix,[  --with-wx-exec-prefix=PREFIX Exec prefix where wxWindows is installed (optional)],
                wx_config_exec_prefix="$withval", wx_config_exec_prefix="")
 ])
+
+dnl ---------------------------------------------------------------------------
+dnl AM_PATH_WXCONFIG(VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+dnl
+dnl Test for wxWindows, and define WX_C*FLAGS and WX_LIBS. Set WX_CONFIG_NAME
+dnl environment variable to override the default name of the wx-config script
+dnl to use. Set WX_CONFIG_PATH to specify the full path to wx-config - in this
+dnl case the macro won't even waste time on tests for its existence.
+dnl ---------------------------------------------------------------------------
 
 dnl
 dnl Get the cflags and libraries from the wx-config script
