@@ -104,7 +104,9 @@ String AddressCC::GetEMail() const
    String email;
 
    // FIXME: again, c-client doesn't check size of the buffer!
-   rfc822_address(email.GetWriteBuf(2048), m_adr);
+   char *buf = email.GetWriteBuf(2048);
+   *buf = '\0';
+   rfc822_address(buf, m_adr);
    email.UngetWriteBuf();
    email.Shrink();
 
