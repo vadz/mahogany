@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxMessageView.cc : a wxWindows look at a message                 *
  *                                                                  *
- * (C) 1998-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1998-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -685,10 +685,11 @@ wxMessageView::Update(void)
       */
       if (
          ((fileName.Length() == 0) && (disposition != "attachment"))
-         &&
-         ( (mimeType == "text/plain" || (mimeType == "text/html") 
-            || (t == Message::MSG_TYPEMESSAGE && m_ProfileValues.rfc822isText))
-         ) )
+         && ( (mimeType == "text/plain" || (mimeType == "text/html") 
+               || (t == Message::MSG_TYPEMESSAGE
+                   && (m_ProfileValues.rfc822isText != 0)))
+            )
+         )
       {
          unsigned long len;
          cptr = m_mailMessage->GetPartContent(i, &len);

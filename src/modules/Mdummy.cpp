@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Mdummy - a dummy module for Mahogany                             *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/

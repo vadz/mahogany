@@ -1,13 +1,10 @@
 /*-*- c++ -*-********************************************************
  * MModule - a pluggable module architecture for Mahogany           *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
-
-
-
 #ifndef MMODULE_H
 #define MMODULE_H
 
@@ -141,7 +138,7 @@ public:
    virtual void GetMVersion(int *version_major, int *version_minor,
                             int *version_release) const = 0;
    /// Set arg to a function number and call the function if it exists.
-   virtual int Entry(int arg ) = 0;
+   virtual int Entry(int arg, ... ) = 0;
    //@}
    
    /** These static functions handle the loading of modules. */
@@ -226,7 +223,7 @@ virtual void GetMVersion(int *version_major, \
                          int *version_release) const; \
 static  MModule *Init(int, int, int, MInterface *, int *); 
 
-#define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */) { return 0; }
+#define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */, ...) { return 0; }
 
 #ifdef DEBUG
 #   define MMODULE_DEFINE(ClassName) \

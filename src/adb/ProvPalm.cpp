@@ -143,6 +143,8 @@ public:
 
   virtual AdbEntry *FindEntry(const char *szName);
 
+  MOBJECT_DEBUG(PalmEntry)
+
 private:
   virtual ~PalmEntryGroup();
 
@@ -376,8 +378,8 @@ AdbEntryGroup *PalmEntryGroup::GetGroup(const String& name) const
 
 void PalmEntryGroup::AddEntry(PalmEntry* p_Entry) 
 {
-  CHECK (!!m_entries, NULL, "AddEntry: non-initialized m_entries" );
-  CHECK (!!p_Entry, NULL, "AddEntry: non-initialized p_Entry" );
+  ASSERT_MSG (!!m_entries, "AddEntry: non-initialized m_entries" );
+  ASSERT_MSG (!!p_Entry, "AddEntry: non-initialized p_Entry" );
 //  m_entries->push_back(p_Entry);
 }
 
@@ -497,12 +499,15 @@ AdbBook *PalmDataProvider::CreateBook(const String& name)
   PalmBook *p_Book = new PalmBook(name);
 
   MModule *palmModule = MModule::GetProvider("HandheldSynchronise");
-  if(palmModule) {
-    ((PalmOSModule*)palmModule)->Synchronise(p_Book);
-
+  if(palmModule)
+  {
+     // calling MMOD_FUNC_USER function in PalmOSModule synchronises
+     // the addressbook:
+    palmModule->Entry(MMOD_FUNC_USER, p_Book);
     palmModule->DecRef();
     return p_Book;
-  } else
+  }
+  else
     return NULL;
 }
 
@@ -550,7 +555,7 @@ String PalmEntry::DebugDump() const
 String PalmEntryGroup::DebugDump() const
 {
   String str = MObjectRC::DebugDump();
-  str << "path = '" << GetPath() << '\'';
+//  str << "path = '" << GetPath() << '\'';
 
   return str;
 }
@@ -558,7 +563,7 @@ String PalmEntryGroup::DebugDump() const
 String PalmBook::DebugDump() const
 {
   String str = MObjectRC::DebugDump();
-  str << "file = '" << m_strFile << '\'';
+//  str << "file = '" << m_strFile << '\'';
 
   return str;
 }

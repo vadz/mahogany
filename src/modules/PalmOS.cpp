@@ -174,7 +174,7 @@ class PalmOSModule : public MModule
 
    /** Override the Entry() function to allow Main() and Config()
        functions. */
-   virtual int Entry(int arg);
+   virtual int Entry(int arg, ...);
    void Synchronise(PalmBook *p_Book);
    void Configure(void);
    MMODULE_DEFINE(PalmOSModule)
@@ -238,21 +238,34 @@ private:
 
 
 int
-PalmOSModule::Entry(int arg)
+PalmOSModule::Entry(int arg, ...)
 {
    switch(arg)
    {
       // GetFlags():
-      case 0: return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
-      
+   case 0:
+      return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
       // Main():
-      case 1: Synchronise(NULL); return 0;
-
+   case 1:
+      Synchronise(NULL);
+      return 0;
       // Configure():
-      case 2: Configure(); return 0;
-
-      default:
-         return 0;
+   case 2:
+      Configure();
+      return 0;
+      // module specific functions:
+      // MMOD_FUNC_USER : Synchronise ADB
+   case MMOD_FUNC_USER:
+   {
+      va_list ap;
+      va_start(ap, arg);
+      PalmBook *pbp = va_arg(ap, PalmBook *);
+      va_end(ap);
+      Synchronise(pbp);
+      return 0;
+   }      
+   default:
+      return 0;
    }
 }
 
