@@ -34,9 +34,18 @@ e) redhat/M.spec
 
 f) extra/setup/M.iss and extra/setup/{post|pre}read.txt
 
-g) "cvs rtag" the files
+g) po files: make -C locale mergecat
 
-3. Preparing the release
+h) "cvs rtag" the files
+
+3. Testing
+------------------------
+
+a) test wizard with empty config
+
+b) test novice mode
+
+4. Preparing the release
 ------------------------
 
 a) tarball
@@ -52,14 +61,14 @@ c) DEB
 
 d) Win32 binaries
 
-4. Uploading the files
+5. Uploading the files
 ----------------------
 
 To upload.sourceforge.net, then create the release from SF project admin page.
 Use doc/relnotes.txt for the release notes and the "Changes" part of
 doc/Mannounce.txt for the change log.
 
-5. Announcing the release
+6. Announcing the release
 -------------------------
 
 a) mailing lists and newsgroups
