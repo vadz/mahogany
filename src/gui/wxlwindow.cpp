@@ -165,9 +165,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    m_ViewStartX = 0; m_ViewStartY = 0;
    m_DoPopupMenu = true;
    m_PopupMenu = MakeFormatMenu();
-   m_memDC = new wxMemoryDC;
-   m_bitmap = new wxBitmap(4,4);
-   m_bitmapSize = wxPoint(4,4);
+   m_bitmap = NULL;
    m_llist = new wxLayoutList();
    m_BGbitmap = NULL;
    m_ScrollToCursor = false;
@@ -204,7 +202,6 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
 
 wxLayoutWindow::~wxLayoutWindow()
 {
-   delete m_memDC; // deletes bitmap automatically (?)
    delete m_bitmap;
    delete m_llist;
    delete m_PopupMenu;
@@ -936,7 +933,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    GetClientSize(&x1,&y1);
    
    // can happen when the window size is too small
-   if ( x1 < 0 || y1 < 0 )
+   if ( x1 <= 0 || y1 <= 0 )
    {
       return;
    }
@@ -952,26 +949,38 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    ResizeScrollbars(true);
 
    WXLO_TIMER_START(TmpTimer);
+
    /* Check whether the window has grown, if so, we need to reallocate
       the bitmap to be larger. */
-   if(x1 > m_bitmapSize.x || y1 > m_bitmapSize.y)
+   bool recreateBitmap;
+   if ( !m_bitmap )
    {
-      wxASSERT(m_bitmapSize.x > 0);
-      wxASSERT(m_bitmapSize.y > 0);
-
-      m_memDC->SelectObject(wxNullBitmap);
+      recreateBitmap = true;
+   }
+   else if ( x1 > m_bitmap->GetWidth() || y1 > m_bitmap->GetHeight() )
+   {
       delete m_bitmap;
-      m_bitmapSize = wxPoint(x1,y1);
-      m_bitmap = new wxBitmap(x1,y1);
-      m_memDC->SelectObject(*m_bitmap);
+      recreateBitmap = true;
+   }
+   else
+   {
+      recreateBitmap = false;
    }
 
-   m_memDC->SetDeviceOrigin(0,0);
-   m_memDC->SetBackground(wxBrush(m_llist->GetDefaultStyleInfo().GetBGColour(),wxSOLID));
-   m_memDC->SetPen(wxPen(m_llist->GetDefaultStyleInfo().GetBGColour(),
+   if ( recreateBitmap )
+   {
+      // create the new backing store bitmap
+      m_bitmap = new wxBitmap(x1, y1);
+   }
+
+   wxMemoryDC dcMem;
+   dcMem.SelectObject(*m_bitmap);
+   dcMem.SetDeviceOrigin(0,0);
+   dcMem.SetBackground(wxBrush(m_llist->GetDefaultStyleInfo().GetBGColour(),wxSOLID));
+   dcMem.SetPen(wxPen(m_llist->GetDefaultStyleInfo().GetBGColour(),
                          0,wxTRANSPARENT));
-   m_memDC->SetLogicalFunction(wxCOPY);
-   m_memDC->Clear();
+   dcMem.SetLogicalFunction(wxCOPY);
+   dcMem.Clear();
    WXLO_TIMER_STOP(TmpTimer);
 
    // fill the background with the background bitmap
@@ -983,8 +992,8 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
          h = m_BGbitmap->GetHeight();
       for(y = 0; y < y1; y+=h)
          for(x = 0; x < x1; x+=w)
-            m_memDC->DrawBitmap(*m_BGbitmap, x, y);
-      m_memDC->SetBackgroundMode(wxTRANSPARENT);
+            dcMem.DrawBitmap(*m_BGbitmap, x, y);
+      dcMem.SetBackgroundMode(wxTRANSPARENT);
    }
 
    // This is the important bit: we tell the list to draw itself
@@ -1001,7 +1010,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    // Device origins on the memDC are suspect, we translate manually
    // with the translate parameter of Draw().
    wxPoint offset(-x0+WXLO_XOFFSET,-y0+WXLO_YOFFSET);
-   m_llist->Draw(*m_memDC,offset, y0, y0+y1);
+   m_llist->Draw(dcMem, offset, y0, y0+y1);
 
    // We start calculating a new update rect before drawing the
    // cursor, so that the cursor coordinates get included in the next
@@ -1011,7 +1020,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    if(m_CursorVisibility == 1)
    {
       // draw a thick cursor for editable windows with focus
-      m_llist->DrawCursor(*m_memDC,
+      m_llist->DrawCursor(dcMem,
                           m_HaveFocus && IsEditable(),
                           offset);
    }
@@ -1032,7 +1041,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
          WXLO_DEBUG(("UpdateRegion: %ld,%ld, %ld,%ld",
                      ri.GetX(),ri.GetY(),ri.GetW(),ri.GetH()));
          dc.Blit(x0+ri.GetX(),y0+ri.GetY(),ri.GetW(),ri.GetH(),
-                 m_memDC,ri.GetX(),ri.GetY(),wxCOPY,FALSE);
+                 dcMem,ri.GetX(),ri.GetY(),wxCOPY,FALSE);
          ri++;
       }
    else
@@ -1044,7 +1053,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 //      if(updateRect->height < y1)
 //         y1 = updateRect->height;
 //      y1 += WXLO_YOFFSET; //FIXME might not be needed
-      dc.Blit(x0,y0,x1,y1,m_memDC,0,0,wxCOPY,FALSE);
+      dc.Blit(x0, y0, x1, y1, &dcMem, 0, 0, wxCOPY, FALSE);
    }
    WXLO_TIMER_STOP(BlitTimer);
 

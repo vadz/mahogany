@@ -278,9 +278,8 @@ private:
    bool m_Dirty;
    /// Has the list ever been modified?
    bool m_Modified;
-   wxMemoryDC  *m_memDC;
+   /// The back store bitmap
    wxBitmap    *m_bitmap;
-   wxPoint      m_bitmapSize;
    /// A frame's statusbar to update
    class wxStatusBar *m_StatusBar;
    /// statusbar field for labels
