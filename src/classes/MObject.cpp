@@ -68,7 +68,7 @@ String MObjectRC::DebugDump() const
 {
    MOcheck();
    String str;
-   str.Printf("%s at 0x%p m_nRef = %d: ", DebugGetClassName(), this, m_nRef);
+   str.Printf("%s at 0x%08x m_nRef = %d: ", DebugGetClassName(), this, m_nRef);
 
    return str;
 }

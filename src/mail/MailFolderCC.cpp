@@ -2004,6 +2004,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    // and send it
    MEventManager::Send(new MEventASFolderResultData (result) );
 
+   result->DecRef();
    m_ASMailFolder->DecRef();
    m_ASMailFolder = NULL;
 }

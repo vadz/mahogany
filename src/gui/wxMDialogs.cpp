@@ -96,7 +96,7 @@
 // private classes
 // ----------------------------------------------------------------------------
 
-#if 1 // def OS_WIN
+#ifdef OS_WIN
 #  undef USE_SEMIMODAL
 #else
 #  define USE_SEMIMODAL

@@ -193,6 +193,8 @@ $Id$
 2	VZ	printing from ADB
 3	VZ	"GoTo"  the entry should expand the branch which contains it
 3	VZ	LDIF format import
+3	VZ	UseCount field and sorting using it when there is more than one
+		match in AdbExpand()
 
 3		a useful feature: change POP/IMAP password for the folder.
 

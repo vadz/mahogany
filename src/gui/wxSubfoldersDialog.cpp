@@ -69,6 +69,8 @@ private:
    // to find out under which item to add a new folder we maintain a stack
    // which contains the current branch. This stack is implemented using 2
    // arrays (not terribly clever or fast, but simple)
+   // --------------------------------------------------------------------
+
    void PushFolder(const String& name, wxTreeItemId id)
    {
       m_folderNames.Add(name);
@@ -100,9 +102,19 @@ private:
    wxArrayString m_folderNames;
    wxArrayTreeItemIds m_folderIds;
 
+   // helper function used to populate the tree with folders
+   // ------------------------------------------------------
+
    // get the tree item under which we should insert this folder (modifies the
    // folder name to contain only the last path component)
    wxTreeItemId GetParentForFolder(String *name);
+
+   // called when a new folder must be added
+   void OnNewFolder(String& name);
+
+   // called when the last folder is received - will expand the top branches
+   // of the tree
+   void OnNoMoreFolders();
 
    // MEventReceiver cookie for the event manager
    void *m_regCookie;
@@ -215,6 +227,32 @@ wxTreeItemId wxSubscriptionDialog::GetParentForFolder(String *name)
    return root;
 }
 
+void wxSubscriptionDialog::OnNewFolder(String& name)
+{
+   String nameFull(name);
+   wxTreeItemId parent = GetParentForFolder(&name);
+   wxTreeItemId itemId = m_treectrl->AppendItem(parent, name);
+
+   PushFolder(nameFull, itemId);
+}
+
+void wxSubscriptionDialog::OnNoMoreFolders()
+{
+   // expand the root or add it if it's not there
+   wxTreeItemId root = m_treectrl->GetRootItem();
+   if ( root.IsOk() )
+   {
+      m_treectrl->Expand(root);
+   }
+   else
+   {
+      m_treectrl->AddRoot(_("No subfolders"));
+      m_treectrl->Disable();
+   }
+
+   EmptyStack();
+}
+
 bool wxSubscriptionDialog::OnMEvent(MEventData& event)
 {
    // we're only subscribed to the ASFolder events
@@ -238,24 +276,31 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
    {
       FAIL_MSG( "unexpected operation notification" );
 
+      // eat the event - it was for us but we didn't process it...
       return FALSE;
    }
 
-   // we're passed a folder specification - extract the folder name from it
-   // (it's better to show this to the user rather than cryptic cclient string)
-   wxString name,
-            spec = result->GetName();
-   if ( MailFolderCC::SpecToFolderName(spec, m_folderType, &name) )
+   // is it the special event which signals that there will be no more of
+   // folders?
+   if ( !result->GetDelimiter() )
    {
-      String nameFull(name);
-      wxTreeItemId parent = GetParentForFolder(&name);
-      wxTreeItemId itemId = m_treectrl->AppendItem(parent, name);
-
-      PushFolder(nameFull, itemId);
+      OnNoMoreFolders();
    }
    else
    {
-      wxLogDebug("Folder specification '%s' unexpected.", spec.c_str());
+      // we're passed a folder specification - extract the folder name from it
+      // (it's better to show this to the user rather than cryptic cclient
+      // string)
+      wxString name,
+               spec = result->GetName();
+      if ( MailFolderCC::SpecToFolderName(spec, m_folderType, &name) )
+      {
+         OnNewFolder(name);
+      }
+      else
+      {
+         wxLogDebug("Folder specification '%s' unexpected.", spec.c_str());
+      }
    }
 
    // we don't want anyone else to receive this message - it was for us only
@@ -272,7 +317,8 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
    CHECK( profile, FALSE, "can't create profile" );
 
    wxString name = folder->GetPath();
-   if ( !name || name.Last() != '/' )
+
+   if ( folder->GetType() == MF_MH && (!name || name.Last() != '/') )
    {
       // we don't want to get this folder itself (because it isn't returned
       // anyhow if we enumerate _all_ MH folders, but is returned in the other
@@ -302,10 +348,6 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
                 );
 
    asmf->DecRef();
-
-#ifdef __WXGTK__
-   wxTheApp->ProcessIdle();
-#endif
 
    dlg.ShowModal();
 
