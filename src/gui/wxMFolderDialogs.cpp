@@ -534,8 +534,8 @@ class wxFolderCreateNotebook : public wxNotebookWithImages
 {
 public:
    // icon names
-   static const char *s_aszImages[];
-   static const char *s_aszImagesAdvanced[];
+   static const wxChar *s_aszImages[];
+   static const wxChar *s_aszImagesAdvanced[];
 
    wxFolderCreateNotebook(wxWindow *parent, wxFolderCreateDialog *dlg = NULL);
 
@@ -599,7 +599,7 @@ wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
                                        const wxString& title)
                   : wxOptionsEditDialog(GET_PARENT_OF_CLASS(parent, wxFrame),
                                      title,
-                                     "FolderProperties")
+                                     _T("FolderProperties"))
 {
    m_notebook = NULL;
    m_parentFolder = NULL;
@@ -645,7 +645,7 @@ wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
    else
    {
       // no folder specified, it can be changed
-      m_folderName = new wxTextCtrl(panel, Folder_Name, "");
+      m_folderName = new wxTextCtrl(panel, Folder_Name, _T(""));
    }
 
    c = new wxLayoutConstraints;
@@ -668,7 +668,7 @@ wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
                              wxALIGN_RIGHT);
    pLabel->SetConstraints(c);
 
-   m_parentName = new wxTextCtrl(panel, -1, "");
+   m_parentName = new wxTextCtrl(panel, -1, _T(""));
    if ( m_parentFolder )
    {
       m_parentName->SetValue(m_parentFolder->GetFullName());
@@ -768,7 +768,7 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(MFolderType folderType)
    if ( !m_parentFolder )
    {
       // take the root by default
-      m_parentFolder = MFolder::Get("");
+      m_parentFolder = MFolder::Get(_T(""));
    }
 
    m_newFolder = m_parentFolder->CreateSubfolder(m_folderName->GetValue(),
@@ -1041,7 +1041,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 
    // the remaining unused accel letters (remove one if you add new label):
    //    ADGJQVXZ
-   static const char *szLabels[Label_Max] =
+   static const wxChar *szLabels[Label_Max] =
    {
       gettext_noop("&User name"),
       gettext_noop("&Password"),
@@ -1069,7 +1069,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    wxArrayString labels;
    for ( size_t n = 0; n < Label_Max; n++ )
    {
-      labels.Add(_(szLabels[n]));
+      labels.Add(wxGetTranslation(szLabels[n]));
    }
 
    // determine the longest label
@@ -1246,9 +1246,9 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
             // this is completely bogus as IMAP folders can have _any_ symbol
             // as separator, but these two are the only ones in common use
             wxString name, path = m_mailboxname->GetValue();
-            if ( strchr(path, '/') )
+            if ( wxStrchr(path, '/') )
                name = path.AfterLast('/');
-            else if ( strchr(path, '.') )
+            else if ( wxStrchr(path, '.') )
                name = path.AfterLast('.');
             else
                name = path;
@@ -1337,13 +1337,13 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
 
                if ( folderType == MF_IMAP )
                {
-                  if ( strchr(folderName, '/') )
+                  if ( wxStrchr(folderName, '/') )
                   {
                      // if it already has a slash, chances are that it is
                      // used as the path separator
                      chDelim = '/';
                   }
-                  else if ( strchr(folderName, '.') )
+                  else if ( wxStrchr(folderName, '.') )
                   {
                      // same as above
                      chDelim = '.';
@@ -1538,7 +1538,7 @@ wxFolderPropertiesPage::DoUpdateUI()
             "contain any mail messages at all, but only other folders) these\n"
             "values will be used as defaults for all folders created under\n"
             "this group folder."),
-                         this, _("Group folders hint"), "FolderGroupHint");
+                         this, _("Group folders hint"), _T("FolderGroupHint"));
       }
 
       // set the defaults for this kind of folder
@@ -1907,7 +1907,7 @@ void
 wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
                                             const wxString& value)
 {
-   static const char *profileKeys[MaxProperty] =
+   static const wxChar *profileKeys[MaxProperty] =
    {
       MP_FOLDER_LOGIN,
       MP_FOLDER_PASSWORD,
@@ -1946,7 +1946,7 @@ void
 wxFolderPropertiesPage::WriteEntryIfChanged(FolderIntProperty property,
                                             int value)
 {
-   static const char *profileKeys[MaxIntProperty] =
+   static const wxChar *profileKeys[MaxIntProperty] =
    {
       MP_USE_SSL,
       MP_USE_SSL_UNSIGNED,
@@ -1986,27 +1986,27 @@ wxFolderPropertiesPage::ClearInvalidFields(RadioIndex sel)
    if ( sel != Radio_News )
    {
       // this is only for news
-      m_newsgroup->SetValue("");
+      m_newsgroup->SetValue(_T(""));
    }
 
    if ( sel != Radio_File )
    {
       // this is only for files
-      m_path->SetValue("");
+      m_path->SetValue(_T(""));
    }
 
    if ( sel == Radio_File )
    {
       // this is for everything except local folders
-      m_server->SetValue("");
-      m_login->SetValue("");
-      m_password->SetValue("");
+      m_server->SetValue(_T(""));
+      m_login->SetValue(_T(""));
+      m_password->SetValue(_T(""));
    }
 
    if ( sel != Radio_Imap )
    {
       // this is only for IMAP
-      m_mailboxname->SetValue("");
+      m_mailboxname->SetValue(_T(""));
    }
 
 }
@@ -2333,7 +2333,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // 0th step: verify if the settings are self-consistent
    {
        wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
-       if (folderType == MF_FILE && dlg->GetFolderName() == "INBOX")
+       if (folderType == MF_FILE && dlg->GetFolderName() == _T("INBOX"))
            folderType = MF_INBOX;
    }
 
@@ -2396,7 +2396,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       if ( hasUsername )
       {
          // anonymous access?
-         bool anonymous = m_isAnonymous->GetValue() || loginName == "anonymous";
+         bool anonymous = m_isAnonymous->GetValue() || loginName == _T("anonymous");
          if ( anonymous )
             flags |= MF_FLAGS_ANON;
          else
@@ -2711,19 +2711,19 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 // ----------------------------------------------------------------------------
 
 // should be in sync with the enum FolderCreatePage!
-const char *wxFolderCreateNotebook::s_aszImages[] =
+const wxChar *wxFolderCreateNotebook::s_aszImages[] =
 {
-   "access",
-   "ident",
-   "network",
-   "newmail",
-   "compose",
-   "folders",
-   "msgview",
-   "folderview",
-   "foldertree",
-   "adrbook",
-   "helpers",
+   _T("access"),
+   _T("ident"),
+   _T("network"),
+   _T("newmail"),
+   _T("compose"),
+   _T("folders"),
+   _T("msgview"),
+   _T("folderview"),
+   _T("foldertree"),
+   _T("adrbook"),
+   _T("helpers"),
    NULL
 };
 
@@ -2732,13 +2732,13 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
                                                wxFolderCreateDialog *dlg)
                       : wxNotebookWithImages
                         (
-                         "FolderCreateNotebook",
+                         _T("FolderCreateNotebook"),
                          parent,
                          s_aszImages
                         )
 {
    // use the parent profile for the default values if we have any
-   Profile_obj profile(dlg ? dlg->GetParentFolderName() : String(""));
+   Profile_obj profile(dlg ? dlg->GetParentFolderName() : _T(""));
    CHECK_RET( profile, _T("failed to create profile in wxFolderCreateNotebook") );
 
    // create and add the pages

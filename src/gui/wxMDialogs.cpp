@@ -494,7 +494,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                          wxSize(widthLabel, heightLabel));
   if(passwordflag)
   {
-     m_passwd = new wxTextCtrl(this, -1, "",
+     m_passwd = new wxTextCtrl(this, -1, _T(""),
                                wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                                wxSize(widthText, heightText),
                                wxTE_PASSWORD|wxTE_PROCESS_ENTER);
@@ -502,7 +502,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
   }
   else
   {
-     m_text = new wxPTextEntry(strConfigPath, this, -1, "",
+     m_text = new wxPTextEntry(strConfigPath, this, -1, _T(""),
                                wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                                wxSize(widthText, heightText));
      m_text->SetFocus();
@@ -572,12 +572,12 @@ bool MInputBox(wxString *pstr,
                const wxString& strCaption,
                const wxString& strPrompt,
                const wxWindow *parent,
-               const char *szKey,
-               const char *def,
+               const wxChar *szKey,
+               const wxChar *def,
                bool passwordflag)
 {
   wxString strConfigPath;
-  strConfigPath << "/Prompts/" << szKey;
+  strConfigPath << _T("/Prompts/") << szKey;
 
   MTextInputDialog dlg(GetDialogParent(parent), *pstr,
                        strCaption, strPrompt, strConfigPath, def, passwordflag);
@@ -598,9 +598,9 @@ bool MInputBox(wxString *pstr,
 // other functions
 // ----------------------------------------------------------------------------
 void
-MDialog_ErrorMessage(const char *msg,
+MDialog_ErrorMessage(const wxChar *msg,
                      const wxWindow *parent,
-                     const char *title,
+                     const wxChar *title,
                      bool /* modal */)
 {
    //MGuiLocker lock;
@@ -619,16 +619,16 @@ MDialog_ErrorMessage(const char *msg,
     @param modal  true to make messagebox modal
    */
 void
-MDialog_SystemErrorMessage(const char *message,
+MDialog_SystemErrorMessage(const wxChar *message,
                const wxWindow *parent,
-               const char *title,
+               const wxChar *title,
                bool modal)
 {
    String
       msg;
 
-   msg = String(message) + String(_("\nSystem error: "))
-      + String(strerror(errno));
+   msg = String(message) + _("\nSystem error: ")
+      + wxConvertMB2WX(strerror(errno));
 
    MDialog_ErrorMessage(msg.c_str(), parent, wxString(M_TITLE_PREFIX)+title, modal);
 }
@@ -640,9 +640,9 @@ MDialog_SystemErrorMessage(const char *message,
        @param parent the parent frame
    */
 void
-MDialog_FatalErrorMessage(const char *message,
+MDialog_FatalErrorMessage(const wxChar *message,
               const wxWindow *parent,
-              const char *title)
+              const wxChar *title)
 {
    String msg = String(message) + _("\nExiting application...");
 
@@ -658,10 +658,10 @@ MDialog_FatalErrorMessage(const char *message,
        @param modal  true to make messagebox modal
    */
 bool
-MDialog_Message(const char *message,
+MDialog_Message(const wxChar *message,
                 const wxWindow *parent,
-                const char *title,
-                const char *configPath,
+                const wxChar *title,
+                const wxChar *configPath,
                 int flags)
 {
    // if the msg box is disabled, don't make the splash disappear, return
@@ -692,11 +692,11 @@ MDialog_Message(const char *message,
           ) != wxCANCEL;
 }
 
-bool MDialog_Message(char const *message,
+bool MDialog_Message(wxChar const *message,
                      const wxWindow *parent,
                      const MPersMsgBox *persMsg,
                      int flags,
-                     char const *title)
+                     wxChar const *title)
 {
    String configPath;
    if ( persMsg )
@@ -706,9 +706,9 @@ bool MDialog_Message(char const *message,
                           persMsg ? configPath.c_str() : NULL, flags);
 }
 
-MDlgResult MDialog_YesNoCancel(char const *message,
+MDlgResult MDialog_YesNoCancel(wxChar const *message,
                                const wxWindow *parent,
-                               char const *title,
+                               wxChar const *title,
                                int flags,
                                const MPersMsgBox *persMsg)
 {
@@ -758,12 +758,12 @@ MDlgResult MDialog_YesNoCancel(char const *message,
     @return true if Yes was selected
 */
 bool
-MDialog_YesNoDialog(const char *message,
+MDialog_YesNoDialog(const wxChar *message,
                     const wxWindow *parent,
-                    const char *title,
+                    const wxChar *title,
                     int flags,
                     const MPersMsgBox *msgBox,
-                    const char *folderName)
+                    const wxChar *folderName)
 {
    String pathGlobal,
           pathLocal;
@@ -883,7 +883,7 @@ MDialog_FileRequester(String const & message,
    // TODO we save only one file name for all "open file" dialogs and one for
    //      all "save file" dialogs - may be should be more specific (add
    //      configPath parameter to MDialog_FileRequester?)
-   return wxPFileSelector(save ? "save" : "load",
+   return wxPFileSelector(save ? _T("save") : _T("load"),
                           message, path, filename, extension,
                           wildcard, 0, (wxWindow *)parent);
 }
@@ -891,7 +891,7 @@ MDialog_FileRequester(String const & message,
 String MDialog_DirRequester(const String& message,
                             const String& pathOrig,
                             wxWindow *parent,
-                            const char *confpath)
+                            const wxChar *confpath)
 {
    return wxPDirSelector(confpath, message, pathOrig, parent);
 }
@@ -1041,22 +1041,22 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    //        size of HTML page
    sp->SplitHorizontally(top, bottom, 260);
 
-   wxMemoryFSHandler::AddFile("splash" MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
+   wxMemoryFSHandler::AddFile(_T("splash") MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
 
-   wxMemoryFSHandler::AddFile("wxlogo" MEMORY_FS_FILE_EXT, wxBITMAP(wxlogo), MEMORY_FS_FILE_FMT);
+   wxMemoryFSHandler::AddFile(_T("wxlogo") MEMORY_FS_FILE_EXT, wxBITMAP(wxlogo), MEMORY_FS_FILE_FMT);
 
 #ifdef USE_SSL
-   wxMemoryFSHandler::AddFile("ssllogo" MEMORY_FS_FILE_EXT, wxBITMAP(ssllogo), MEMORY_FS_FILE_FMT);
+   wxMemoryFSHandler::AddFile(_T("ssllogo") MEMORY_FS_FILE_EXT, wxBITMAP(ssllogo), MEMORY_FS_FILE_FMT);
 #endif // USE_SSL
 
 #ifdef USE_PYTHON
-   wxMemoryFSHandler::AddFile("pythonpowered" MEMORY_FS_FILE_EXT, wxBITMAP(PythonPowered), MEMORY_FS_FILE_FMT);
+   wxMemoryFSHandler::AddFile(_T("pythonpowered") MEMORY_FS_FILE_EXT, wxBITMAP(PythonPowered), MEMORY_FS_FILE_FMT);
 #endif // USE_PYTHON
 
 #define HTML_IMAGE(name) \
    "<center><img src=\"memory:" #name MEMORY_FS_FILE_EXT "\"></center><br>"
 
-   top->SetPage("<body text=#000000 bgcolor=#ffffff>" HTML_IMAGE(splash));
+   top->SetPage(_T("<body text=#000000 bgcolor=#ffffff>") HTML_IMAGE(splash));
 
 #define HTML_WARNING "<font color=#ff0000><b>WARNING: </b></font>"
 
@@ -1065,9 +1065,9 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
 #ifdef USE_I18N
    // make special provision for the translators name
-   static const char *TRANSLATOR_NAME =
+   static const wxChar *TRANSLATOR_NAME =
       gettext_noop("Translate this into your name (for About dialog)");
-   wxString translator = _(TRANSLATOR_NAME);
+   wxString translator = wxGetTranslation(TRANSLATOR_NAME);
    if ( translator == TRANSLATOR_NAME )
    {
       // not translated, don't show
@@ -1076,42 +1076,45 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    else
    {
       wxString tmp;
-      tmp << " (" << _("translations by ") << translator << ')';
+      tmp << _T(" (") << _("translations by ") << translator << _T(')');
       translator = tmp;
    }
 #endif // USE_I18N
 
    wxString pageHtmlText;
 
-   pageHtmlText << "<body text=#000000 bgcolor=#ffffff>"
+   pageHtmlText << _T("<body text=#000000 bgcolor=#ffffff>"
                    "<font face=\"Times New Roman,times\">"
 
-                   "<h4>" << _("Mahogany information") << "</h4>"
+                   "<h4>") << _("Mahogany information") << _T("</h4>")
                 << _("Version ") << M_VERSION_STRING
-                << _("  built with ") << wxVERSION_STRING "<br>"
+                << _("  built with ") << wxVERSION_STRING << _T("<br>")
 #ifdef DEBUG
-                   HTML_WARNING << _("This is a debug build") << "<br>"
+                   HTML_WARNING << _("This is a debug build") << _T("<br>")
 #else
                 << _("Release build ")
+#endif
+#if wxUSE_UNICODE
+                << _("Unicode build ")
 #endif
                 << _("(compiled at ") << __DATE__ ", " __TIME__ ")<br>"
 
 #if defined(USE_SSL) || defined(USE_THREADS) || defined(USE_PYTHON)
-                   "<h4>" << _("Extra features:") << "</h4>"
+                   _T("<h4>") << _("Extra features:") << _T("</h4>")
 #ifdef USE_SSL
-                << _("SSL support") << _("<br>")
+                << _("SSL support") << _T("<br>")
 #endif
 #ifdef USE_THREADS
-                << _("Threads") << _("<br>")
+                << _("Threads") << _T("<br>")
 #endif
 #ifdef USE_PYTHON
-                << _("Python") << _("<br>")
+                << _("Python") << _T("<br>")
 #endif
 #ifdef USE_DIALUP
-                << _("Dial-up support") << _("<br>")
+                << _("Dial-up support") << _T("<br>")
 #endif
 #ifdef USE_I18N
-                << _("Internationalization") << translator << _("<br>")
+                << _("Internationalization") << translator << _T("<br>")
 #endif
 #endif // USE_XXX
 
@@ -1121,14 +1124,14 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #endif
 
                 << "<p>"
-                   "<h4>" << _("List of contributors:") << "</h4>"
+                   _T("<h4>") << _("List of contributors:") << _T("</h4>")
                    "<p>"
                    "Karsten Ball&uuml;der, Vadim Zeitlin,<br> "
                    "Greg Noel, Nerijus Bali&#363;nas, Xavier Nodet,<br>"
                    "Vaclav Slavik, Daniel Seifert, Michele Ravani,<br>"
                    "Michael A Chase, Robert Vazan " << _("and many others") << "<br>"
                    "<br>"
-                   "<i>" << _("The Mahogany team") << "</i><br>"
+                   _T("<i>") << _("The Mahogany team") << _T("</i><br>")
                    "<font size=2>"
                    "(<tt>mahogany-developers@lists.sourceforge.net</tt>)"
                    "</font>"
@@ -1136,12 +1139,12 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    HTML_IMAGE(wxlogo)
                 << _("Mahogany is built on the cross-platform C++ framework "
                      "wxWindows (http://www.wxwindows.org/).")
-                << "<p>"
+                << _T("<p>")
                 << _("This product includes software developed and copyright "
                      "by the University of Washington written by Mark Crispin.")
                 <<
 #ifdef USE_SSL
-                   "<p>"
+                   _T("<p>")
                    HTML_IMAGE(ssllogo)
                 << _("This product includes software developed by the OpenSSL Project "
                      "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
@@ -1151,24 +1154,24 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #endif // USE_SSL
 
 #ifdef USE_PYTHON
-                   "<p>"
+                   _T("<p>")
                    HTML_IMAGE(pythonpowered)
                 << _("This program contains an embedded Python interpreter.")
                 <<
 #endif // USE_PYTHON
-                   "<hr>"
+                   _T("<hr>")
                 << _("Special thanks to Daniel Lord for hardware donations.")
-                << "<p>"
+                << _T("<p>")
                 << _("The Mahogany Team would also like to acknowledge "
                      "the support of ")
-                << "Anthemion Software, "
+                << _("Anthemion Software, "
                    "Heriot-Watt University, "
                    "SourceForge.net, "
                    "SourceGear.com, "
                    "GDev.net, "
                    "Simon Shapiro, "
                    "VA Linux, "
-                   "and SuSE GmbH."
+                   "and SuSE GmbH.")
                   ;
 
 #undef HTML_IMAGE
@@ -1176,13 +1179,13 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
    bottom->SetPage(pageHtmlText);
 
-   wxMemoryFSHandler::RemoveFile("splash" MEMORY_FS_FILE_EXT);
-   wxMemoryFSHandler::RemoveFile("wxlogo" MEMORY_FS_FILE_EXT);
+   wxMemoryFSHandler::RemoveFile(_T("splash") MEMORY_FS_FILE_EXT);
+   wxMemoryFSHandler::RemoveFile(_T("wxlogo") MEMORY_FS_FILE_EXT);
 #ifdef USE_SSL
-   wxMemoryFSHandler::RemoveFile("ssllogo" MEMORY_FS_FILE_EXT);
+   wxMemoryFSHandler::RemoveFile(_T("ssllogo") MEMORY_FS_FILE_EXT);
 #endif // USE_SSL
 #ifdef USE_PYTHON
-   wxMemoryFSHandler::RemoveFile("pythonpowered" MEMORY_FS_FILE_EXT);
+   wxMemoryFSHandler::RemoveFile(_T("pythonpowered") MEMORY_FS_FILE_EXT);
 #endif
 
    bottom->SetFocus();
@@ -1326,7 +1329,7 @@ MDialog_FolderOpen(const wxWindow *parent)
 MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder, int flags)
              : wxManuallyLaidOutDialog(parent,
                                        _("Choose folder"),
-                                       "FolderSelDlg")
+                                       _T("FolderSelDlg"))
 {
    m_flags = flags;
    m_userChoseFolder = false;
@@ -1395,7 +1398,7 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
    switch ( ev.GetId() )
    {
       case wxID_OPEN:
-         m_FileName = wxPFileSelector("FolderDialogFile",
+         m_FileName = wxPFileSelector(_T("FolderDialogFile"),
                                       _("Mahogany: Please choose a folder file"),
                                       NULL, NULL, NULL, NULL,
                                       m_flags & MDlg_Folder_Open
@@ -1424,7 +1427,7 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
 wxString MFolderDialog::GetConfigPath()
 {
    wxString path;
-   path << '/' << M_SETTINGS_CONFIG_SECTION << "/LastPickedFolder";
+   path << _T('/') << M_SETTINGS_CONFIG_SECTION << _T("/LastPickedFolder");
    return path;
 }
 
@@ -1435,7 +1438,7 @@ bool MFolderDialog::TransferDataToWindow()
    wxConfigBase *config = wxConfigBase::Get();
    if ( config )
    {
-      wxString folderName = config->Read(GetConfigPath(), "");
+      wxString folderName = config->Read(GetConfigPath(), _T(""));
       if ( !folderName.empty() )
       {
          // select folder in the tree
@@ -1525,22 +1528,22 @@ static wxString DateFormatsLabels[] =
 
 static wxString DateFormats[] =
 {
-   "%d",
-   "%a",
-   "%A",
-   "%m",
-   "%b",
-   "%B",
-   "%y",
-   "%Y",
-   "%H",
-   "%I",
-   "%p",
-   "%M",
-   "%S",
-   "%Z",
-   "%c",
-   "%x"
+   _T("%d"),
+   _T("%a"),
+   _T("%A"),
+   _T("%m"),
+   _T("%b"),
+   _T("%B"),
+   _T("%y"),
+   _T("%Y"),
+   _T("%H"),
+   _T("%I"),
+   _T("%p"),
+   _T("%M"),
+   _T("%S"),
+   _T("%Z"),
+   _T("%c"),
+   _T("%x")
 };
 
 static const int NUM_DATE_FMTS  = WXSIZEOF(DateFormats);
@@ -1553,10 +1556,10 @@ class wxDateTextCtrl : public wxTextCtrl
 public:
    wxDateTextCtrl(wxWindow *parent) : wxTextCtrl(parent,-1)
       {
-         m_menu = new wxMenu("", wxMENU_TEAROFF);
+         m_menu = new wxMenu(_T(""), wxMENU_TEAROFF);
          m_menu->SetTitle(_("Format Specifiers:"));
          for ( int n = 0; n < NUM_DATE_FMTS;n++ )
-            m_menu->Append(n, _(DateFormatsLabels[n]));
+            m_menu->Append(n, wxGetTranslation(DateFormatsLabels[n]));
       }
    ~wxDateTextCtrl()
       { delete m_menu; }
@@ -1646,7 +1649,7 @@ wxDateFmtDialog::wxDateFmtDialog(Profile *profile, wxWindow *parent)
                : wxOptionsPageSubdialog(profile,
                                         parent,
                                         _("Date Format"),
-                                        "DateFormatDialog")
+                                        _T("DateFormatDialog"))
 {
    wxASSERT(NUM_DATE_FMTS == NUM_DATE_FMTS_LABELS);
 
@@ -1691,7 +1694,7 @@ wxDateFmtDialog::wxDateFmtDialog(Profile *profile, wxWindow *parent)
    c->height.AsIs();
    stattext->SetConstraints(c);
 
-   m_statExample = new wxStaticText(this, -1, "");
+   m_statExample = new wxStaticText(this, -1, _T(""));
    c = new wxLayoutConstraints;
    c->left.RightOf(stattext);
    c->top.Below(m_textctrl, 2*LAYOUT_Y_MARGIN);
@@ -1789,13 +1792,13 @@ wxXFaceButton::SetFile(const wxString &filename)
       if(! success)
       {
          bmp = wxBitmap(((wxMApp *)mApplication)->GetStdIcon(wxICON_HAND));
-         m_XFace = "";
+         m_XFace = _T("");
       }
       else
          m_XFace = filename;
    }
    else
-      bmp = mApplication->GetIconManager()->wxIconManager::GetBitmap("noxface");
+      bmp = mApplication->GetIconManager()->wxIconManager::GetBitmap(_T("noxface"));
    SetBitmapLabel(bmp);
    SetBitmapFocus(bmp);
    SetBitmapSelected(bmp);
@@ -1840,7 +1843,7 @@ wxXFaceDialog::wxXFaceDialog(Profile *profile,
                              wxWindow *parent)
    : wxOptionsPageSubdialog(profile,parent,
                             _("Choose a XFace"),
-                            "XFaceChooser")
+                            _T("XFaceChooser"))
 {
    wxStaticBox *box = CreateStdButtonsAndBox(_("XFace"), FALSE,
                                              MH_DIALOG_XFACE);
@@ -1862,7 +1865,7 @@ wxXFaceDialog::wxXFaceDialog(Profile *profile,
    stattext->SetConstraints(c);
 
 
-   m_Button = new wxXFaceButton(this, -1, "");
+   m_Button = new wxXFaceButton(this, -1, _T(""));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.Below(stattext, 2*LAYOUT_Y_MARGIN);
@@ -1904,7 +1907,7 @@ wxXFaceDialog::OnButton(wxCommandEvent & event )
       xface = m_Button->GetFile();
       path = xface.BeforeLast('/');
       file = xface.AfterLast('/');
-      newface = wxPFileSelector(GetProfile()->GetName()+"/xfacefilerequester",
+      newface = wxPFileSelector(GetProfile()->GetName() + _T("/xfacefilerequester"),
                                 _("Please pick an image file"),
                                 path, file, NULL,
                                 NULL, 0, this);
@@ -1957,7 +1960,7 @@ public:
 
    virtual bool OnVisitFolder(const wxString& folderName)
       {
-         static const char * keys[] =
+         static const wxChar * keys[] =
          {
             MP_FOLDER_PASSWORD,
             MP_SMTPHOST_PASSWORD,
@@ -1970,8 +1973,8 @@ public:
             Profile_obj profile(folderName);
             if(profile->HasEntry(keys[idx])) // don't work on inherited ones
             {
-               wxString val = profile->readEntry(keys[idx], "");
-               if(val != "")
+               wxString val = profile->readEntry(keys[idx], _T(""));
+               if(val != _T(""))
                {
                   p->writeEntry(MP_CRYPTALGO, m_OldUC);
                   strutil_setpasswd(m_OldPw);
@@ -1986,8 +1989,8 @@ public:
       }
    ~ChangePasswdTraversal()
       {
-         m_OldPw = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-         m_NewPw = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+         m_OldPw = _T("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+         m_NewPw = _T("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
       }
 private:
    wxString m_OldPw, m_NewPw;
@@ -2050,7 +2053,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
                                            wxWindow *parent)
    : wxOptionsPageSubdialog(profile,parent,
                             _("Choose a global password"),
-                            "GlobalPasswdChooser")
+                            _T("GlobalPasswdChooser"))
 {
    wxStaticBox *box = CreateStdButtonsAndBox(_("Global Password Settings"), FALSE,
                                              MH_DIALOG_GLOBALPASSWD);
@@ -2109,7 +2112,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
       c->height.AsIs();
       label->SetConstraints(c);
 
-      m_oPassword = new wxTextCtrl(this, -1, "",
+      m_oPassword = new wxTextCtrl(this, -1, _T(""),
                                    wxDefaultPosition, wxDefaultSize,
                                    wxTE_PASSWORD);
       c = new wxLayoutConstraints;
@@ -2134,7 +2137,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    c->height.AsIs();
    m_text1->SetConstraints(c);
 
-   m_nPassword = new wxTextCtrl(this, -1, "",
+   m_nPassword = new wxTextCtrl(this, -1, _T(""),
                                 wxDefaultPosition, wxDefaultSize,
                                 wxTE_PASSWORD);
    c = new wxLayoutConstraints;
@@ -2152,7 +2155,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    c->height.AsIs();
    m_text2->SetConstraints(c);
 
-   m_nPassword2 = new wxTextCtrl(this, -1, "",
+   m_nPassword2 = new wxTextCtrl(this, -1, _T(""),
                                  wxDefaultPosition, wxDefaultSize,
                                  wxTE_PASSWORD);
    c = new wxLayoutConstraints;
@@ -2222,7 +2225,7 @@ wxGlobalPasswdDialog::TransferDataFromWindow()
    // reencrypt all existing passwords with the new one
    if(oldPw != newPw || oldUseCrypt != newUseCrypt)
    {
-      MFolder_obj folderRoot("");
+      MFolder_obj folderRoot(_T(""));
       ChangePasswdTraversal traverse(folderRoot,
                                      oldUseCrypt, oldPw,
                                      newUseCrypt, newPw);
@@ -2309,7 +2312,7 @@ private:
 ReenableDialog::ReenableDialog(wxWindow *parent)
               : wxManuallyLaidOutDialog(parent,
                                         _("Mahogany"),
-                                        "ReenableDialog")
+                                        _T("ReenableDialog"))
 {
    // layout the controls
    // -------------------
@@ -2329,7 +2332,7 @@ ReenableDialog::ReenableDialog(wxWindow *parent)
    text->SetConstraints(c);
 
    // and a listctrl
-   m_listctrl = new wxPListCtrl("PMsgBoxList", this, -1,
+   m_listctrl = new wxPListCtrl(_T("PMsgBoxList"), this, -1,
                                 wxDefaultPosition, wxDefaultSize,
                                 wxLC_REPORT);
    c = new wxLayoutConstraints;
@@ -2407,7 +2410,7 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
          // "M_Profiles_", the current version of Profile::FilterProfileName()
          // doesn't do it any more but we still have to deal with the old
          // config files
-         if ( !folder.StartsWith("M_Profiles_", &folderName) )
+         if ( !folder.StartsWith(_T("M_Profiles_"), &folderName) )
          {
             folderName = folder;
          }
@@ -2417,7 +2420,7 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
          //
          // FIXME: this won't work correctly for the folder names with '_'s in
          //        them - not critical but annoying
-         folderName.Replace("_", "/");
+         folderName.Replace(_T("_"), _T("/"));
       }
 
       m_listctrl->SetItem(index, 2, folderName);
@@ -2425,7 +2428,7 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
       // and remember the config path in case we'll delete it later
       if ( !!folder )
       {
-         name.Prepend(folder + '/');
+         name.Prepend(folder + _T('/'));
       }
       entries.Add(name);
    }
@@ -2466,11 +2469,11 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
    CHECK( config, FALSE, _T("no app config?") );
 
    wxString root;
-   root << '/' << M_SETTINGS_CONFIG_SECTION << "/MessageBox";
+   root << '/' << M_SETTINGS_CONFIG_SECTION << _T("/MessageBox");
    config->SetPath(root);
 
    wxArrayString entries;
-   dlg.AddAllEntries(config, "", entries);
+   dlg.AddAllEntries(config, _T(""), entries);
 
    long dummy;
    String name;
@@ -2481,7 +2484,7 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
 
       dlg.AddAllEntries(config, name, entries);
 
-      config->SetPath("..");
+      config->SetPath(_T(".."));
 
       cont = config->GetNextGroup(name, dummy);
    }
@@ -2527,8 +2530,8 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
 /// Accept or reject certificate
 extern "C"
 {
-   int AcceptCertificateDialog(const char *subject, const char *issuer,
-                               const char *fingerprint)
+   int AcceptCertificateDialog(const wxChar *subject, const wxChar *issuer,
+                               const wxChar *fingerprint)
    {
       wxString info;
       info << _("The server presents the following certificate:\n")
@@ -2562,20 +2565,20 @@ wxLicenseDialog::wxLicenseDialog(Profile *profile, wxWindow *parent)
                : wxOptionsPageSubdialog(profile,
                                         parent,
                                         _("Mahogany Licensing Conditions"),
-                                        "LicensingDialog")
+                                        _T("LicensingDialog"))
 {
    wxStaticBox *box = CreateStdButtonsAndBox(_("Licensing Conditions"), FALSE,
                                              MH_DIALOG_LICENSE);
    wxHtmlWindow *license = new wxHtmlWindow(this);
 
-   wxMemoryFSHandler::AddFile("splash" MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
+   wxMemoryFSHandler::AddFile(_T("splash") MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
 
    license->SetPage("<body text=#000000 bgcolor=#ffffff>"
                     "<center><img src=\"memory:splash" MEMORY_FS_FILE_EXT "\"><br>"
                     "</center>"
 #include "license.html"
                    );
-   wxMemoryFSHandler::RemoveFile("splash" MEMORY_FS_FILE_EXT);
+   wxMemoryFSHandler::RemoveFile(_T("splash") MEMORY_FS_FILE_EXT);
 
 
    wxLayoutConstraints *c = new wxLayoutConstraints;
@@ -2753,7 +2756,7 @@ size_t MDialog_GetSelections(const wxString& message,
    if ( confpath.empty() )
    {
       // use default
-      confpath = "MultiSelect";
+      confpath = _T("MultiSelect");
    }
 
    int x, y, w, h;
@@ -3126,7 +3129,7 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
    sizer->SetSizeHints(m_frame);
 
    // and then remove it
-   m_labelValue->SetLabel("");
+   m_labelValue->SetLabel(_T(""));
 
    m_frame->CentreOnParent();
    m_frame->Show();
@@ -3236,7 +3239,7 @@ MText2Dialog::MText2Dialog(wxWindow *parent,
    label = new wxStaticText(this, -1, labels[0]);
    label->SetConstraints(c);
 
-   m_text1 = new wxTextCtrl(this, -1, "");
+   m_text1 = new wxTextCtrl(this, -1, _T(""));
    c = new wxLayoutConstraints;
    c->left.RightOf(label, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -3252,7 +3255,7 @@ MText2Dialog::MText2Dialog(wxWindow *parent,
    c->top.Below(m_text1, 2*LAYOUT_Y_MARGIN);
    label->SetConstraints(c);
 
-   m_text2 = new wxTextCtrl(this, -1, "",
+   m_text2 = new wxTextCtrl(this, -1, _T(""),
                             wxDefaultPosition, wxDefaultSize,
                             textStyle);
    c = new wxLayoutConstraints;
@@ -3289,7 +3292,7 @@ bool MDialog_GetText2FromUser(const wxString& message,
                               String *value2,
                               wxWindow *parent)
 {
-   MText2Dialog dlg(parent, "Text2Dialog", message, caption, "",
+   MText2Dialog dlg(parent, _T("Text2Dialog"), message, caption, _T(""),
                     prompt1, value1, prompt2, value2);
 
    return dlg.ShowModal() == wxID_OK;
@@ -3308,7 +3311,7 @@ public:
                    wxString *username,
                    wxString *password)
       : MText2Dialog(parent,
-                     "PasswordDialog",
+                     _T("PasswordDialog"),
                      message,
                      _("Password required"), // caption
                      label,

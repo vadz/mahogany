@@ -98,7 +98,7 @@ extern const MPersMsgBox *M_MSGBOX_GO_OFFLINE_SEND_FIRST;
 inline MOptionValue GetOptionValue(wxConfigBase *config, const MOption opt)
 {
    MOptionValue value;
-   const char *name = GetOptionName(opt);
+   const wxChar *name = GetOptionName(opt);
    if ( IsNumeric(opt) )
       value.Set(config->Read(name, GetNumericDefault(opt)));
    else
@@ -277,7 +277,7 @@ wxMFrame::Create(const String &name, wxWindow *parent)
       return;
    }
 
-   SetIcon(ICON("MFrame"));
+   SetIcon(ICON(_T("MFrame")));
 
    // no "else": a frame can be maximized and iconized, meaning that it will
    // become maximized when restored
@@ -310,7 +310,7 @@ wxMFrame::AddFileMenu(void)
    // FIXME WXWIN-COMPATIBILITY
    wxMenu *fileMenu = new wxMenu();
 #else
-   wxMenu *fileMenu = new wxMenu("", wxMENU_TEAROFF);
+   wxMenu *fileMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
 #endif
 
    AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE - 1);
@@ -386,7 +386,7 @@ wxMFrame::AddLanguageMenu(void)
 // saving and restoring frame position
 // ----------------------------------------------------------------------------
 
-bool wxMFrame::RestorePosition(const char *name,
+bool wxMFrame::RestorePosition(const wxChar *name,
                                int *x, int *y, int *w, int *h,
                                bool *i, bool *m)
 {
@@ -430,19 +430,19 @@ bool wxMFrame::RestorePosition(const char *name,
 }
 
 void
-wxMFrame::SavePosition(const char *name, wxWindow *frame)
+wxMFrame::SavePosition(const wxChar *name, wxWindow *frame)
 {
    SavePositionInternal(name, frame, FALSE);
 }
 
 void
-wxMFrame::SavePosition(const char *name, wxFrame *frame)
+wxMFrame::SavePosition(const wxChar *name, wxFrame *frame)
 {
    SavePositionInternal(name, frame, TRUE);
 }
 
 void
-wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
+wxMFrame::SavePositionInternal(const wxChar *name, wxWindow *frame, bool isFrame)
 {
    wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
    if ( pConf != NULL )
@@ -674,7 +674,7 @@ wxMFrame::OnMenuCommand(int id)
                               doExport ? _("Choose file to export settings to")
                                        : _("Choose file to import settings from"),
                               this,
-                              "", "", "", "",
+                              _T(""), _T(""), _T(""), _T(""),
                               doExport    // true => save, false => load
                           );
             if ( path.empty() )
@@ -805,7 +805,7 @@ wxMFrame::OnMenuCommand(int id)
                            _("Mahogany: Create new identity"),
                            _("Enter the identity name:"),
                            this,
-                           "NewIdentity") )
+                           _T("NewIdentity")) )
             {
                ShowIdentityDialog(ident, this);
 
@@ -965,7 +965,7 @@ wxMFrame::OnMenuCommand(int id)
                if ( ident == READ_APPCONFIG(MP_CURRENT_IDENTITY) )
                {
                   // can't keep this one
-                  profile->writeEntry(MP_CURRENT_IDENTITY, "");
+                  profile->writeEntry(MP_CURRENT_IDENTITY, _T(""));
                }
 
                // FIXME: will this really work? if there are objects which

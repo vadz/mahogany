@@ -29,11 +29,11 @@ class wxRegEx;
 #ifdef USE_WXSTRING // use std::string
    inline bool strutil_isempty(const String &s) { return IsEmpty(s); }
 #else
-   inline bool strutil_isempty(const String &s) { return *s.c_str() == '\0'; }
+   inline bool strutil_isempty(const String &s) { return *s.c_str() == _T('\0'); }
 #endif
 
 /// return true if string is empty
-inline bool strutil_isempty(const char *s) { return s == NULL || *s == '\0'; }
+inline bool strutil_isempty(const wxChar *s) { return s == NULL || *s == _T('\0'); }
 
 /** Read a NL terminated line into a string.
 
@@ -56,14 +56,14 @@ void strutil_getfoldedline(istream &istr, String &str);
     @param str reference to the string to split
     @param delim the delimiter character
 */
-String strutil_before(const String &str, const char delim);
+String strutil_before(const String &str, const wxChar delim);
 
 /** Get the part of a string after the delimiter.
 
     @param str reference to the string to split
     @param delim the delimiter character
 */
-String strutil_after(const String &str, const char delim);
+String strutil_after(const String &str, const wxChar delim);
 
 /** Delete whitespace from the beginning of a string.
 
@@ -128,6 +128,7 @@ String strutil_ultoa(unsigned long i);
     @param the string to duplicate
     @return the newly allocated string, must be deleted[] by caller
 */
+wxChar * strutil_strdup(const wxChar *in);
 char * strutil_strdup(const char *in);
 
 /** Duplicate a string.
@@ -135,7 +136,7 @@ char * strutil_strdup(const char *in);
     @param the string to duplicate
     @return the newly allocated string, must be deleted[] by caller
 */
-char *strutil_strdup(String const &in);
+wxChar *strutil_strdup(String const &in);
 
 /**
    This takes the string and splits it into tokens delimited by the
@@ -145,7 +146,7 @@ char *strutil_strdup(String const &in);
    @param delim          character array holding the delimiters
    @param tlist          reference to an STL String list to append the tokens to
   */
-void strutil_tokenise(char *string, const char *delim, kbStringList &tlist);
+void strutil_tokenise(wxChar *string, const wxChar *delim, kbStringList &tlist);
 
 /** Find a next URL in the string.
 
@@ -215,7 +216,7 @@ strutil_expandfoldername(const String &name, MFolderType ftype = MF_FILE);
     @return the parent directory to the one specified
 */
 String
-strutil_path_parent(String const &path, char separator = STRUTIL_PATH_SEPARATOR);
+strutil_path_parent(String const &path, wxChar separator = STRUTIL_PATH_SEPARATOR);
 
 /** Cut off last name from path and return string that (filename).
 
@@ -224,7 +225,7 @@ strutil_path_parent(String const &path, char separator = STRUTIL_PATH_SEPARATOR)
     @return the parent directory to the one specified
 */
 String
-strutil_path_filename(String const &path, char separator = STRUTIL_PATH_SEPARATOR);
+strutil_path_filename(String const &path, wxChar separator = STRUTIL_PATH_SEPARATOR);
 
 /** Compare 2 filenames and return true if they refer to the same file. Notice
     that the files don't have to exist when this function is called.

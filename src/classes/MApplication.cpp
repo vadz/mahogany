@@ -280,9 +280,9 @@ MAppBase::ContinueStartup()
 
    if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
    {
-      char *folders = strutil_strdup(READ_APPCONFIG(MP_OPENFOLDERS));
+      wxChar *folders = strutil_strdup(READ_APPCONFIG(MP_OPENFOLDERS));
       kbStringList openFoldersList;
-      strutil_tokenise(folders,";",openFoldersList);
+      strutil_tokenise(folders, _T(";"), openFoldersList);
       delete [] folders;
 
       bool ok = true;
@@ -517,14 +517,14 @@ MAppBase::OnStartup()
       // show the error messages generated before first
       wxLog::FlushActive();
 
-      static const char *msg =
-       "Detected a possible problem with your Python installation.\n"
+      static const wxChar *msg =
+       _T("Detected a possible problem with your Python installation.\n"
        "A properly installed Python system is required for using\n"
        "M's scripting capabilities. Some minor functionality might\n"
        "be missing without it, however the core functions will be\n"
        "unaffected.\n"
        "Would you like to disable Python support for now?\n"
-       "(You can re-enable it later from the options dialog)";
+       "(You can re-enable it later from the options dialog)");
       if ( MDialog_YesNoDialog(_(msg)) )
       {
          // disable it

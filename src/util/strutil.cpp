@@ -199,6 +199,14 @@ strutil_ultoa(unsigned long i)
    return String(buffer);
 }
 
+wxChar *
+strutil_strdup(const wxChar *in)
+{
+   wxChar *cptr = new wxChar[strlen(in)+1];
+   wxStrcpy(cptr,in);
+   return cptr;
+}
+
 char *
 strutil_strdup(const char *in)
 {
@@ -207,7 +215,7 @@ strutil_strdup(const char *in)
    return cptr;
 }
 
-char *
+wxChar *
 strutil_strdup(String const &in)
 {
    return strutil_strdup(in.c_str());

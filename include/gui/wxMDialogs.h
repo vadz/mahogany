@@ -412,8 +412,8 @@ extern void RunImportFoldersWizard(void);
 /// Accept or reject certificate
 extern "C"
 {
-   int AcceptCertificateDialog(const char *subject, const char *issuer,
-                               const char *fingerprint);
+   int AcceptCertificateDialog(const wxChar *subject, const wxChar *issuer,
+                               const wxChar *fingerprint);
 }
 #endif
 

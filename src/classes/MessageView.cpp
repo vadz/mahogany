@@ -2503,9 +2503,9 @@ MessageView::MimeHandle(const MimePart *mimepart)
          || wxMimeTypesManager::IsOfType(mimetype, _T("APPLICATION/OCTET-STREAM"))))
    {
       kbStringList faxdomains;
-      char *faxlisting = strutil_strdup(READ_CONFIG(profile,
+      wxChar *faxlisting = strutil_strdup(READ_CONFIG(profile,
                                                     MP_INCFAX_DOMAINS));
-      strutil_tokenise(faxlisting, ":;,", faxdomains);
+      strutil_tokenise(faxlisting, _T(":;,"), faxdomains);
       delete [] faxlisting;
       bool isfax = false;
       wxString domain;

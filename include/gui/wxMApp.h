@@ -166,10 +166,10 @@ public:
    virtual bool CallAnother();
    virtual bool SetupRemoteCallServer();
 
-   bool OnRemoteRequest(const char *request);
+   bool OnRemoteRequest(const wxChar *request);
 
    /// Report a fatal error:
-   virtual void FatalError(const char *message);
+   virtual void FatalError(const wxChar *message);
 
 #ifdef __WXDEBUG__
    virtual void OnAssert(const wxChar *file, int line,

@@ -21,7 +21,7 @@
 #define M_VERSION_MAJOR   0
 #define M_VERSION_MINOR   66
 #define M_VERSION_RELEASE 0
-#define M_VERSION_STATUS  "" // "a"=alpha
+#define M_VERSION_STATUS  _T("") // "a"=alpha
 
 /// the macros to build the version string from the components
 #define M_VER_STR(x) #x
@@ -32,6 +32,6 @@
    M_MAKE_VERSION(M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE)
 
 /// full version string
-#define M_VERSION_STRING  M_VERSION " 'Clio'"
+#define M_VERSION_STRING  M_VERSION _T(" 'Clio'")
 
 #endif  //_M_VERSION_H

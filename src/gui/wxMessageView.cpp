@@ -80,11 +80,11 @@ public:
          return false;
 
       String name = Name.Lower();
-      if ( name == "from" )
+      if ( name == _T("from") )
          *value = m_msg->From();
-      else if ( name == "subject" )
+      else if ( name == _T("subject") )
          *value = m_msg->Subject();
-      else if ( name == "date" )
+      else if ( name == _T("date") )
          *value = m_msg->Date();
       else
          return false;
@@ -127,7 +127,7 @@ public:
 
    virtual bool Find(const String& /* text */) { return false; }
    virtual bool FindAgain() { return false; }
-   virtual String GetSelection() const { return ""; }
+   virtual String GetSelection() const { return _T(""); }
    virtual void Copy() { }
    virtual bool Print() { return false; }
    virtual void PrintPreview() { }
@@ -478,7 +478,7 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
       WXMENU_MSG_SHOWMIME,
    };
 
-   wxMenu *menu = new wxMenu("", wxMENU_TEAROFF);
+   wxMenu *menu = new wxMenu(_T(""), wxMENU_TEAROFF);
    for ( size_t n = 0; n < WXSIZEOF(menuCommands); n++ )
    {
       int cmd = menuCommands[n];

@@ -76,7 +76,7 @@ XFace::CreateFromData(const char *idata)
    //convert it:
    String out = strutil_enforceCRLF(wxConvertMB2WX(xface));
    delete [] xface;
-   xface = strutil_strdup(out);
+   xface = strutil_strdup(wxConvertWX2MB(out));
    initialised = true;
    return true;
 #endif
@@ -337,7 +337,7 @@ XFace::CreateFromXFace(const char *xfacedata)
    }
    String out = strutil_enforceCRLF(wxConvertMB2WX(xface));
    delete [] xface;
-   xface = strutil_strdup(out);
+   xface = strutil_strdup(wxConvertWX2MB(out));
    initialised = true;
    return true;
 #endif
@@ -507,7 +507,7 @@ XFace::CreateXpm(char ***xpm)
 
    }
       }
-      (*xpm)[line++] = strutil_strdup(tmp);
+      (*xpm)[line++] = strutil_strdup(wxConvertWX2MB(tmp));
    }
    delete [] buf;
    (*xpm)[line++] = NULL;

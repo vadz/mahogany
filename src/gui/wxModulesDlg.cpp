@@ -71,7 +71,7 @@ END_EVENT_TABLE()
 wxModulesDialog::wxModulesDialog(wxWindow *parent)
    : wxManuallyLaidOutDialog( parent,
                               _("Extension Modules Configuration"),
-                              "ModulesDialog")
+                              _T("ModulesDialog"))
 {
    // we only show the modules which can be loaded at starup and not, for
    // example, different importers as it doesn't make sense to select them in
@@ -110,7 +110,7 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    m_checklistBox->SetConstraints(c);
 
 
-   m_textCtrl = new wxTextCtrl(this, -1, "", wxDefaultPosition,
+   m_textCtrl = new wxTextCtrl(this, -1, _T(""), wxDefaultPosition,
                                wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -156,8 +156,8 @@ bool wxModulesDialog::TransferDataToWindow()
 {
    // get list of configured modules
    wxString modules = READ_APPCONFIG(MP_MODULES);
-   char *tmp = strutil_strdup(modules);
-   strutil_tokenise(tmp, ":", m_Modules);
+   wxChar *tmp = strutil_strdup(modules);
+   strutil_tokenise(tmp, _T(":"), m_Modules);
 
    size_t count = m_Listing ? m_Listing->Count() : 0;
 
