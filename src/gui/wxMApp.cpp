@@ -1279,18 +1279,20 @@ wxMApp::GetStdIcon(int which) const
    public:
       ConfigPathRestorer()
          {
-            if(mApplication->GetProfile())
-               m_path = mApplication->GetProfile()->GetConfig()->GetPath();
+            m_profile = mApplication ? mApplication->GetProfile() : NULL;
+            if ( m_profile )
+               m_path = m_profile->GetConfig()->GetPath();
          }
 
       ~ConfigPathRestorer()
          {
-            if(mApplication->GetProfile())
-               mApplication->GetProfile()->GetConfig()->SetPath(m_path);
+            if ( m_profile )
+               m_profile->GetConfig()->SetPath(m_path);
          }
 
    private:
       wxString m_path;
+      Profile *m_profile;
    } storeConfigPath;
 
    // Set our icons for the dialogs.
