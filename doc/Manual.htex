@@ -1797,7 +1797,7 @@ your reply will carry that as a return address, so that person will
 never know about your \texttt{mycompany.com} office address. Notice that for
 this option to work correctly, you should enter all addresses you usually
 receive mail from in the "Addresses" options page (\ref{AddressesPage}).
-\item \textbf{And add personal &name if needed}\\
+\item \textbf{And add personal name if needed}\\
 This option only makes sense if the above one is true and if it is set, then
 your personal name will be used if the recipient address didn't contain it.
 \end{itemize}
