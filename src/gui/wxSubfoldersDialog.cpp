@@ -475,9 +475,15 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
    event.Skip();
 }
 
+#ifdef DEBUG
+   #define UNUSED_UNLESS_DEBUG(x) x
+#else
+   #define UNUSED_UNLESS_DEBUG(x)
+#endif
+
 void
 wxSubfoldersTree::OnListFolder(const String& spec,
-                               wxChar WXUNUSED_UNLESS_DEBUG(delim),
+                               wxChar UNUSED_UNLESS_DEBUG(delim),
                                long attr)
 {
    // usually, all folders will have a non NUL delimiter ('.' for news, '/'
