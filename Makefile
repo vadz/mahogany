@@ -52,6 +52,7 @@ allclean: clean
 	$(RM) config.* makeopts include/config.h
 	find . -type l -name .src -exec rm -f {} \;
 	find . -type l -name Makefile -exec rm -f {} \;
+	$(RM) -f makeversion
 
 realclean: allclean
 clobber: realclean
