@@ -208,14 +208,14 @@ public:
        @param update update mailbox status
        @return true on success
    */
-   virtual bool AppendMessage(Message const &msg, bool update = TRUE);
+   virtual bool AppendMessage(const Message & msg);
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
        @param update update mailbox status
        @return true on success
    */
-   virtual bool AppendMessage(String const &msg, bool update = TRUE);
+   virtual bool AppendMessage(const String& msg);
 
    /** Expunge messages.
      */
@@ -557,6 +557,9 @@ protected:
    /// Apply filters to the new messages and rebuild the listing
    void FilterNewMailAndUpdate();
 
+   /// update the folder after appending messages to it
+   void UpdateAfterAppend();
+
    /** The index of the next entry in list to fill. Only used for
        BuildListing()/OverviewHeader() interaction. */
    unsigned long m_BuildNextEntry;
@@ -565,7 +568,6 @@ protected:
    unsigned long m_RetrievalLimitHard;
    /// The maximum number of messages to retrive or 0
    unsigned long m_RetrievalLimit;
-   //@}
 
    /// do we have a listing?
    bool HaveListing() const { return m_Listing != NULL; }
@@ -666,14 +668,13 @@ public:
 
    /// gets called when flags for a message have changed
    static void mm_flags(MAILSTREAM *stream, unsigned long number);
+   //@}
 
-   /* Handles the mm_overview_header callback on a per folder basis. */
+   /// Handles the mm_overview_header callback on a per folder basis
    static int OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW_X *ov);
 
    /// helper of OverviewHeader
    static String ParseAddress(struct mail_address *adr);
-
-//@}
 
 private:
    /// destructor

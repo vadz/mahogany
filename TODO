@@ -27,6 +27,23 @@ $Id$
    called and with which args, so have to test it first, but it might be a
    good place to show the busy cursor and such...)
 
+************ architecture changes
+
+Very high priority:
+
+1. decouple wxLayoutWindow from wxMessageView -> use MessageViewWindow
+   interface to separate them and allow using wxHTML instead of the
+   current viewer
+
+High priority:
+
+1. processing of commands in "Message" menu in wxFolderView and wxMessageView
+   must use the same code!
+
+Low priority:
+
+1. add support for hooks instead of/expanding Python callbacks
+
 ************ THREADING PROBLEMS:
 
 (I am keeping a list of threading problems here, which I will use for

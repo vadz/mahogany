@@ -161,9 +161,15 @@ public:
    /// VZ: adding this decl as it doesn't compile otherwise
    virtual void Checkpoint(void) = 0;
 
+   virtual void SuspendUpdates() { m_suspendUpdates++; }
+   virtual void ResumeUpdates() { if ( !--m_suspendUpdates ) RequestUpdate(); }
+
 protected:
    /// remove the folder from our "closer" list
    virtual void Close(void);
+
+   /// is updating currently suspended?
+   bool IsUpdateSuspended() const { return m_suspendUpdates != 0; }
 
    /** Checks for new mail and filters if necessary.
        @return FilterRule flags combination
@@ -263,6 +269,9 @@ protected:
 private:
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;
+
+   /// suspend update count (updating is suspended if it is > 0)
+   size_t m_suspendUpdates;
 
    /** gcc 2.7.2.1 on FreeBSD 2.8.8-stable is reported to need this to
        link correctly: */

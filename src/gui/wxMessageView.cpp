@@ -2139,104 +2139,141 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
 bool
 wxMessageView::DoMenuCommand(int id)
 {
+   if ( m_uid == UID_ILLEGAL )
+      return false;
+
+   CHECK( GetFolder(), false, "no folder in message view?" );
+
    UIdArray msgs;
-   if( m_uid != UID_ILLEGAL )
-      msgs.Add(m_uid);
+   msgs.Add(m_uid);
 
    switch ( id )
    {
-   case WXMENU_MSG_FIND:
-      if(m_uid != UID_ILLEGAL)
+      case WXMENU_MSG_FIND:
          Find("");
-      break;
+         break;
 
-   case WXMENU_MSG_REPLY:
-      if(m_uid != UID_ILLEGAL)
+      case WXMENU_MSG_REPLY:
          MailFolder::ReplyMessage(m_mailMessage,
                                   MailFolder::Params(),
                                   m_Profile,
                                   GetFrame(this));
-      break;
-   case WXMENU_MSG_FOLLOWUP:
-      if(m_uid != UID_ILLEGAL)
+         break;
+
+      case WXMENU_MSG_FOLLOWUP:
          MailFolder::ReplyMessage(m_mailMessage,
                                   MailFolder::Params(MailFolder::REPLY_FOLLOWUP),
                                   m_Profile,
                                   GetFrame(this));
-      break;
-   case WXMENU_MSG_FORWARD:
-      if(m_uid != UID_ILLEGAL)
+         break;
+      case WXMENU_MSG_FORWARD:
          MailFolder::ForwardMessage(m_mailMessage,
                                     MailFolder::Params(),
                                     m_Profile,
                                     GetFrame(this));
-      break;
+         break;
 
-   case WXMENU_MSG_SAVE_TO_FOLDER:
-      if(m_uid != UID_ILLEGAL && GetFolder())
+      case WXMENU_MSG_SAVE_TO_FOLDER:
          GetFolder()->SaveMessagesToFolder(&msgs, GetFrame(this));
-      break;
-   case WXMENU_MSG_SAVE_TO_FILE:
-      if(m_uid != UID_ILLEGAL && GetFolder())
+         break;
+
+      case WXMENU_MSG_SAVE_TO_FILE:
          GetFolder()->SaveMessagesToFile(&msgs, GetFrame(this));
-      break;
+         break;
 
-   case WXMENU_MSG_DELETE:
-      if(m_uid != UID_ILLEGAL && GetFolder())
+      case WXMENU_MSG_DELETE:
          GetFolder()->DeleteMessages(&msgs);
-      break;
+         break;
 
-   case WXMENU_MSG_UNDELETE:
-      if(m_uid != UID_ILLEGAL && GetFolder())
+      case WXMENU_MSG_UNDELETE:
          GetFolder()->UnDeleteMessages(&msgs);
-      break;
+         break;
 
-   case WXMENU_MSG_PRINT:
-      Print();
-      break;
-   case WXMENU_MSG_PRINT_PREVIEW:
-      PrintPreview();
-      break;
+      case WXMENU_MSG_PRINT:
+         Print();
+         break;
+
+      case WXMENU_MSG_PRINT_PREVIEW:
+         PrintPreview();
+         break;
+
 #ifdef USE_PS_PRINTING
-   case WXMENU_MSG_PRINT_PS:
-      break;
+      case WXMENU_MSG_PRINT_PS:
+         break;
 #endif
 
-   case WXMENU_HELP_CONTEXT:
-      mApplication->Help(MH_MESSAGE_VIEW,this);
-      break;
+      case WXMENU_HELP_CONTEXT:
+         mApplication->Help(MH_MESSAGE_VIEW,this);
+         break;
 
-   case WXMENU_MSG_TOGGLEHEADERS:
-      {
+      case WXMENU_MSG_TOGGLEHEADERS:
          m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;
          m_Profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
          UpdateShowHeadersInMenu();
          Update();
-      }
-      break;
-
-   case WXMENU_EDIT_PASTE:
-      Paste();
-      Refresh();
-      break;
-   case WXMENU_EDIT_COPY:
-      Copy();
-      Refresh();
-      break;
-   case WXMENU_EDIT_CUT:
-      Cut();
-      Refresh();
-      break;
-
-   default:
-      if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
-      {
-         SetLanguage(id);
          break;
-      }
 
-      // not handled
-      return false;
+      case WXMENU_MSG_SAVEADDRESSES:
+         {
+            MailFolder *mf = GetFolder()->GetMailFolder();
+            CHECK( mf, false, "message preview without folder?" );
+
+            Message *msg = mf->GetMessage(m_uid);
+            if ( !msg )
+            {
+               FAIL_MSG( "no message in message view?" );
+            }
+            else
+            {
+               wxSortedArrayString addressesSorted;
+               if ( !msg->ExtractAddressesFromHeader(addressesSorted) )
+               {
+                  // very strange
+                  wxLogWarning(_("Selected message doesn't contain any valid addresses."));
+               }
+
+               wxArrayString addresses = strutil_uniq_array(addressesSorted);
+               if ( !addresses.IsEmpty() )
+               {
+                  InteractivelyCollectAddresses
+                  (
+                     addresses,
+                     READ_APPCONFIG(MP_AUTOCOLLECT_ADB),
+                     mf->GetName(),
+                     (MFrame *)GetFrame(this)
+                  );
+               }
+
+               msg->DecRef();
+            }
+
+            mf->DecRef();
+         }
+         break;
+
+      case WXMENU_EDIT_PASTE:
+         Paste();
+         Refresh();
+         break;
+
+      case WXMENU_EDIT_COPY:
+         Copy();
+         break;
+
+      case WXMENU_EDIT_CUT:
+         Cut();
+         Refresh();
+         break;
+
+      default:
+         if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
+         {
+            SetLanguage(id);
+            break;
+         }
+
+         // not handled
+         return false;
    }
 
    // message handled

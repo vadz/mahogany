@@ -489,17 +489,15 @@ public:
                                 bool set = true) = 0;
    /** Appends the message to this folder.
        @param msg the message to append
-       @param update update mailbox status
        @return true on success
    */
-   virtual bool AppendMessage(const Message &msg, bool update = TRUE) = 0;
+   virtual bool AppendMessage(const Message& msg) = 0;
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
-       @param update update mailbox status
        @return true on success
    */
-   virtual bool AppendMessage(const String &msg, bool update = TRUE) = 0;
+   virtual bool AppendMessage(const String& msg) = 0;
 
    /** Expunge messages.
      */
@@ -770,6 +768,20 @@ public:
       Get the frame to use for interactive messages. May return NULL.
    */
    MFrame *GetInteractiveFrame() const;
+   //@}
+
+   /** @name Update control
+
+       The folder view(s) updating can be suspended temporarily which is
+       useful for batch operations. Resume must be called the same number
+       of times as Suspend()!
+    */
+   //@{
+   /// Suspend folder updates (call ResumeUpdates() soon!)
+   virtual void SuspendUpdates() = 0;
+
+   /// Resume updates (updates everybody if suspend count becomes 0)
+   virtual void ResumeUpdates() = 0;
    //@}
 
 protected:

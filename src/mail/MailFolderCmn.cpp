@@ -419,8 +419,6 @@ void MailFolderCmn::Close(void)
       }
       //else: it is not an error if this folder is not in the list
    }
-
-   return true;
 }
 
 bool
@@ -532,11 +530,16 @@ MailFolderCmn::MailFolderCmn()
    m_Timer = new MailFolderTimer(this);
    m_LastNewMsgUId = UID_ILLEGAL;
 
+   m_suspendUpdates = 0;
+
    m_MEventReceiver = new MfCmnEventReceiver(this);
 }
 
 MailFolderCmn::~MailFolderCmn()
 {
+   ASSERT_MSG( !m_suspendUpdates,
+               "mismatch between Suspend/ResumeUpdates()" );
+
 #ifdef DEBUG_FOLDER_CLOSE
    ASSERT(m_PreCloseCalled == true);
 #endif // DEBUG_FOLDER_CLOSE
@@ -720,26 +723,55 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       msg.Printf(_("Saving %d messages to the folder '%s'..."),
                  n, folder->GetName().c_str());
 
-      pd = new MProgressDialog(mf->GetName(), msg, 2*n, NULL);
+      pd = new MProgressDialog(
+                               mf->GetName(),   // title
+                               msg,             // label message
+                               2*n,             // range
+                               NULL,            // parent
+                               false,           // disable parent only
+                               true             // allow aborting
+                              );
+   }
+
+   if ( n > 1 )
+   {
+      // minimize the number of updates by only doing it once
+      mf->SuspendUpdates();
    }
 
    bool rc = true;
    for ( int i = 0; i < n; i++ )
    {
-      Message *msg = GetMessage((*selections)[i]);
-      if(msg)
+      if ( pd && !pd->Update(2*i + 1) )
       {
-         if(pd)
-            pd->Update( 2*i + 1 );
-         rc &= mf->AppendMessage(*msg, FALSE);
-         if(pd)
-            pd->Update( 2*i + 2);
+         // cancelled
+         break;
+      }
 
+      Message *msg = GetMessage((*selections)[i]);
+      if ( msg )
+      {
+         rc &= mf->AppendMessage(*msg);
          msg->DecRef();
+
+         if ( pd && !pd->Update(2*i + 2) )
+         {
+            // cancelled
+            break;
+         }
+      }
+      else
+      {
+         FAIL_MSG( "copying inexistent message?" );
       }
    }
 
-   mf->Ping(); // with our flags
+   if ( n > 1 )
+   {
+      // make it notice new messages as we disabled them above
+      mf->ResumeUpdates();
+   }
+
    mf->DecRef();
 
    delete pd;

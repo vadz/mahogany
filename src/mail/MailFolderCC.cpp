@@ -2320,35 +2320,92 @@ MailFolderCC::UnLock(void) const
 // Adding and removing (expunging) messages
 // ----------------------------------------------------------------------------
 
+// this is the common part of both AppendMessage() functions
+void
+MailFolderCC::UpdateAfterAppend()
+{
+   // this mail will be stored as uid_last+1 which isn't updated
+   // yet at this point
+   m_LastNewMsgUId = m_MailStream->uid_last + 1;
+
+   // don't update if we don't have listing - it will be rebuilt the next time
+   // it is needed
+   if ( !IsUpdateSuspended() )
+   {
+      RequestUpdate();
+   }
+}
+
 bool
-MailFolderCC::AppendMessage(const String& msg, bool update)
+MailFolderCC::AppendMessage(const String& msg)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    STRING str;
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
 
-   bool rc = mail_append(m_MailStream, (char *)m_ImapSpec.c_str(), &str) != 0;
-   if ( !rc )
+   if ( !mail_append(m_MailStream, (char *)m_ImapSpec.c_str(), &str) )
    {
       wxLogError(_("Failed to save message to the folder '%s'"),
                  GetName().c_str());
+
+      return false;
    }
-   else
+
+   UpdateAfterAppend();
+
+   return true;
+}
+
+bool
+MailFolderCC::AppendMessage(const Message& msg)
+{
+   CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
+
+   String date;
+   msg.GetHeaderLine("Date", date);
+
+   char *dateptr = NULL;
+   char datebuf[128];
+   MESSAGECACHE mc;
+   if ( mail_parse_date(&mc, (char *) date.c_str()) == T )
    {
-      // this mail will be stored as uid_last+1 which isn't updated
-      // yet at this point
-      m_LastNewMsgUId = m_MailStream->uid_last+1;
-
-      // if we don't have the listing yet, don't update - we will notice the
-      // new messages anyhow when we build it
-      if ( update && m_Listing )
-      {
-         FilterNewMailAndUpdate();
-      }
+     mail_date(datebuf, &mc);
+     dateptr = datebuf;
    }
 
-   return rc;
+   // append message text to folder
+   String tmp;
+   if ( !msg.WriteToString(tmp) )
+   {
+      wxLogError(_("Failed to retrieve the message text."));
+
+      return false;
+   }
+
+   String flags = GetImapFlags(msg.GetStatus());
+
+   STRING str;
+   INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
+   if ( !mail_append_full(m_MailStream,
+                          (char *)m_ImapSpec.c_str(),
+                          (char *)flags.c_str(),
+                          dateptr,
+                          &str) )
+   {
+      // useful to know which message exactly we failed to copy
+      wxLogError(_("Message details: subject '%s', from '%s'"),
+                 msg.Subject().c_str(), msg.From().c_str());
+
+      wxLogError(_("Failed to save message to the folder '%s'"),
+                 GetName().c_str());
+
+      return false;
+   }
+
+   UpdateAfterAppend();
+
+   return true;
 }
 
 bool
@@ -2393,11 +2450,28 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
             {
                didServerSideCopy = true;
             }
+            else
+            {
+               // don't give an error as it is not fatal and there is no way to
+               // disable it, but still log it
+               wxLogMessage(_("Server side copy from '%s' to '%s' failed, "
+                              "trying inefficient append now."),
+                            GetName().c_str(),
+                            folder->GetName().c_str());
+            }
          }
       }
    }
 
-   if ( !didServerSideCopy )
+   // do we need to update the destination folder?
+   bool needsUpdate;
+   if ( didServerSideCopy )
+   {
+      // yes because it might not get the mm_exists until later and we want to
+      // refresh it immediately if it's opened
+      needsUpdate = true;
+   }
+   else // didn't do server side copy
    {
       // use the inefficient retrieve-append way
       if ( !MailFolderCmn::SaveMessages(selections, folder) )
@@ -2405,6 +2479,10 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
          // oops, this failed too
          return false;
       }
+
+      // no need to update the destination folder as the base class version
+      // uses AppendMessage() and so the folder is already updated
+      needsUpdate = false;
    }
 
    // update status of the target folder
@@ -2462,67 +2540,23 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    // always send this one to update the number of messages in the tree
    mfStatusCache->UpdateStatus(nameDst, status);
 
-   // if the folder is opened, we must also update the display
-   MailFolder *mfDst = FindFolder(folder);
-   if ( mfDst )
+   // if the folder is opened, we must also update the display - if not done
+   // yet
+   if ( needsUpdate )
    {
-      wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate for dst folder '%s'",
-                 mfDst->GetName().c_str());
-
-      MEventManager::Send(new MEventFolderUpdateData(mfDst));
-
-      mfDst->DecRef();
-   }
-   //else: not opened
-
-   return true;
-}
-
-bool
-MailFolderCC::AppendMessage(const Message& msg, bool update)
-{
-   CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
-
-   String flags = GetImapFlags(msg.GetStatus());
-   String date;
-   msg.GetHeaderLine("Date", date);
-   MESSAGECACHE mc;
-   const char *dateptr = NULL;
-   char datebuf[128];
-   if ( mail_parse_date(&mc, (char *) date.c_str()) == T )
-   {
-     mail_date(datebuf, &mc);
-     dateptr = datebuf;
-   }
-
-   // append message text to folder
-   String tmp;
-   if ( msg.WriteToString(tmp) )
-   {
-      STRING str;
-      INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
-      if ( !mail_append_full(m_MailStream,
-                            (char *)m_ImapSpec.c_str(),
-                            (char *)flags.c_str(),
-                            (char *)dateptr,
-                            &str) )
+      MailFolder *mfDst = FindFolder(folder);
+      if ( mfDst )
       {
-         // useful to know which message exactly we failed to copy
-         wxLogError(_("Message details: subject '%s', from '%s'"),
-                    msg.Subject().c_str(), msg.From().c_str());
+         wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate for dst folder '%s'",
+                    mfDst->GetName().c_str());
 
-         wxLogError(_("Failed to save message to the folder '%s'"),
-                    GetName().c_str());
+         MEventManager::Send(new MEventFolderUpdateData(mfDst));
 
-         return false;
+         mfDst->DecRef();
       }
+      //else: not opened
    }
-   else // failed to write message to string?
-   {
-      wxLogError(_("Failed to retrieve the message text."));
-
-      return false;
-   }
+   //else already updated
 
    return true;
 }
