@@ -636,7 +636,7 @@ SendMessageCC::Send(void)
       {
          STATUSMESSAGE(("Sending message via SSL..."));
          stream = smtp_open_full
-            (NIL,hostlist,"smtp/ssl",SMTPTCPPORT,NIL);
+            (NIL,(char **)hostlist,"smtp/ssl",SMTPTCPPORT,NIL);
       }
       else
 #endif
@@ -651,7 +651,7 @@ SendMessageCC::Send(void)
       {
          STATUSMESSAGE(("Posting message via SSL..."));
          stream = nntp_open_full
-            (NIL,hostlist,"nntp/ssl",SMTPTCPPORT,NIL);
+            (NIL,(char **)hostlist,"nntp/ssl",SMTPTCPPORT,NIL);
       }
       else
 #endif
